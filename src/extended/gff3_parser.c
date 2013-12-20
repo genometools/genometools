@@ -43,6 +43,7 @@
 #include "extended/mapping.h"
 #include "extended/orphanage.h"
 #include "extended/region_node.h"
+#include "extended/xrf_checker_api.h"
 
 struct GtGFF3Parser {
   GtFeatureInfo *feature_info;
@@ -61,6 +62,7 @@ struct GtGFF3Parser {
   GtMapping *offset_mapping;
   GtOrphanage *orphanage;
   GtTypeChecker *type_checker;
+  GtXRFChecker *xrf_checker;
   unsigned int last_terminator; /* line number of the last terminator */
 };
 
@@ -104,7 +106,16 @@ GtGFF3Parser* gt_gff3_parser_new(GtTypeChecker *type_checker)
   parser->orphanage = gt_orphanage_new();
   parser->type_checker = type_checker ? gt_type_checker_ref(type_checker)
                                       : NULL;
+  parser->xrf_checker = NULL;
   return parser;
+}
+
+void gt_gff3_parser_set_xrf_checker(GtGFF3Parser *parser, 
+                                    GtXRFChecker *xrf_checker)
+{
+  gt_assert(parser && xrf_checker);
+  gt_xrf_checker_delete(parser->xrf_checker);
+  parser->xrf_checker = gt_xrf_checker_ref(xrf_checker);  
 }
 
 void gt_gff3_parser_check_id_attributes(GtGFF3Parser *parser)
@@ -1350,6 +1361,14 @@ static int parse_attributes(char *attributes, GtGenomeNode *feature_node,
           gt_str_array_delete(target_ids);
         }
       }
+      else if (!strcmp(attr_tag, GT_GFF_DBXREF) 
+                 || !strcmp(attr_tag, GT_GFF_ONTOLOGY_TERM)) {
+        if (parser->xrf_checker) {
+          if (!gt_xrf_checker_is_valid(parser->xrf_checker, attr_value, err)) {
+            had_err = -1;
+          }
+        }
+      }
     }
   }
 
@@ -2122,5 +2141,6 @@ void gt_gff3_parser_delete(GtGFF3Parser *parser)
   gt_mapping_delete(parser->offset_mapping);
   gt_orphanage_delete(parser->orphanage);
   gt_type_checker_delete(parser->type_checker);
+  gt_xrf_checker_delete(parser->xrf_checker);
   gt_free(parser);
 }

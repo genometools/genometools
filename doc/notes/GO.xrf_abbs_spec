@@ -1,0 +1,241 @@
+!version: $Revision: 1.11 $
+!date: $Date: 2009/10/06 00:14:54 $
+!
+!Gene Ontology
+!Specification of abbreviations for cross-referenced databases.
+!
+INTRODUCTION
+
+The file GO.xrf_abbs contains metadata about the organizations which 
+contribute to the GO.  There is a one to one relationship between 
+abbreviations and urls where data can be retrieved.  From here on, a 
+single url which can be queried using database ids, will be referred 
+to as a datasource.  Each organization may have mutliple datasources.
+Each abbreviation identifies one section of the file which provides the 
+abbreviation and full name of that data source, the object type which is 
+retrieved, an example database id, the generic url which identifies that data 
+source uniquely and globally and the syntax of an actual query request with 
+parameters filled in.  The url syntax may be repeated in the case of mirrors.
+
+
+PAGE LAYOUT
+
+The page begins with comments denoted by an exclamation point (!) at 
+the beginning of the line.  The comments contain the revision and date 
+of the file.  The comments are followed by a blank line and then the 
+first data source.  
+
+Datasources are separated by a blank line (two consecutive newlines).
+
+COMMENTS
+
+Comments may be added if you desire.  A comment corresponding to a 
+section should be above that section.  A block of comments should 
+be separated by consecutive newlines on either side, just as a data 
+section is separated by consecutive newlines.
+
+Correct use of comments:
+
+data_section
+
+! I am commenting on the following datasource
+
+data_section
+
+Incorrect use of comments:
+
+data_section
+
+! I am commenting on the following datasource
+data_section
+
+
+SECTION SYNTAX
+
+Each section is composed of a series of lines with the syntax:
+
+<label><colon><whitespace><value>
+
+e.g.:
+
+abbreviation: CGEN
+
+The allowed labels are:
+
+abbreviation
+shorthand_name
+database
+object
+synonym
+example_id
+local_id_syntax
+generic_url
+url_syntax
+url_example
+is_obsolete
+consider
+replaced_by
+
+DISCUSSION OF VALUES
+
+abbreviation
+
+An abbreviated name for the datasource, e.g. SGD.  Each abbreviation 
+must be unique within GO.xref_abbs.  Each abbreviation must 
+correspond to exactly one datasource.  The convention is that if 
+multiple datasources are controlled by one organization, they should 
+all share one prefix followed by an underscore and
+postfix, e.g. SGD and SGD_REF  This allows datasources to be grouped by 
+organization.
+
+shorthand_name
+
+OPTIONAL.  A name of less than 10 characters you'd like processing
+applications to display to the public when display space is 
+limited.  If this line is not included the abbreviation
+will be used.  Capitalization should be maintained by any
+processing applications.
+
+database
+
+The full name of the data source,  e.g. Saccharomyces Genome Database.
+
+object
+
+the type of data returned from this data source.  e.g.: gene product.  
+Currently the values  for this are ad hoc but this should be 
+standardized in the future.
+
+synonym
+
+An alternate name or abbreviation for the data source.
+
+example_id
+
+An example database ID, e.g.:   SGD:S0006169
+
+This is the full (global) ID formed by concatenating the abbreviation with the local ID
+
+local_id_syntax
+
+A regular expression that all IDs for the data source will match
+
+generic_url
+
+The root or representative URL for this datasource.  ALL GENERIC_URLS 
+SHOULD BE UNIQUE.  The generic_url may be used as a global identifier 
+for this datasource in much the same way the abbreviation is used as 
+an identifier within this file.
+e.g.: http://www.yeastgenome.org/
+
+NOTE: The trailing hash is a semi-standard syntax for using urls as 
+identifiers.  It does not affect linking. 
+
+url_sytax
+
+A string to which one can append a database ID and get a valid URL 
+query for the object referenced by that id.  The string [example_id]
+should be replaced with the local ID.
+e.g. the abbreviation SGD has the url_syntax of http://db.yeastgenome.org/cgi-bin/locus.pl?dbid=[example_id]
+so a global ID of SGD:S0006169 would be translated to a URL o
+http://db.yeastgenome.org/cgi-bin/locus.pl?dbid=S0006169
+
+(note the use of [example_id] here as the string to be replaced is
+inconsistent with the example_id tag, which is the full global ID)
+
+
+NOTE:  In the case of mirrors, the url_syntax field may be repeated.
+
+url_example
+
+An example of a complete, working URL including an example ID.
+
+NOTE:  In the case of mirrors, the url_example field may be repeated.
+
+is_obsolete
+
+[new tag, not currently in use]
+
+Entries should not be deleted from GO.xrf_abbs; instead they should be
+marked as obsolete, like this:
+
+        is_obsolete: true
+
+"false" is also a valid value; however, any entry without an
+is_obsolete tag is considered non-obsolete by default
+
+obsolete entries may optionally be accompanied by consider or replaced_by tags
+
+consider
+
+[new tag, not currently in use]
+
+Should only be used with obsolete entries (above). If the abbreviation
+has been retired and there is another suggested abbrev to use, use
+this tag. The meaning of this tag is the same as in obo-format.
+
+        consider: OTHER_ID
+
+replaced_by
+
+[new tag, not currently in use]
+
+Should only be used with obsolete entries (above). If the abbreviation
+has been retired and there is another replacement abbrev, use this
+tag. The meaning of this tag is the same as in obo-format.
+
+        replaced_by: NEW_ID
+
+################################################################################
+EXAMPLE FILE - comments are preceded by !
+################################################################################
+!version: $Revision: 1.11 $
+!date: $Date: 2009/10/06 00:14:54 $
+!
+!Gene Ontology
+!Abbreviations for cross-referenced databases.
+!
+!Note that url's are not necessarily stable entities and that some
+!databases may have many other access routes or mirror sites.
+!
+! NOTE:  a newline follows before the first entry
+
+! Here's the root SGD database where we get gene products.
+! Note that there is no shorthand name, since we want any
+! applications to use 'SGD' as the shorthand name.
+! Also note the trailing # on the generic_url.  This is a 
+! somewhat standard way of referencing a url when being used
+! as an identifier.  It doesn't interfere with linking.
+
+abbreviation: SGD
+database: Saccharomyces Genome Database.
+object: gene product
+example_id: S0004660
+generic_url: http://www.yeastgenome.org/
+url_syntax: http://db.yeastgenome.org/cgi-bin/SGD/locus.pl?locus=
+
+! Here are the SGD references.  Note that References has been added to 
+! the generic_url to make it unique.  This is a good convention to follow.
+
+abbreviation: SGD_REF
+shorthand_name: SGD
+database: Saccharomyces Genome Database.
+object: Reference Citation.
+example_id: 12031
+generic_url: http://www.yeastgenome.org/
+url_syntax: 
+http://db.yeastgenome.org/cgi-bin/SGD/reference/reference.pl?refNo=
+
+! Here's one from flybase.  Note that the generic_url field has been
+! repeated since there is a mirror.  Also, the shorthand_name has been
+! filled in as FlyBase, since this is less than 10 characters.
+
+abbreviation: FB
+shorthand_name: FlyBase
+database: FlyBase.
+object: gene product
+example_id: FBgn0000024
+generic_url: http://flybase.bio.indiana.edu#
+url_syntax: http://fly.ebi.ac.uk:7081/.bin/fbidq.html?
+url_syntax: http://flybase.bio.indiana.edu/.bin/fbidq.html?
+

@@ -93,6 +93,15 @@ void gt_gff3_in_stream_set_type_checker(GtNodeStream *ns,
                                            type_checker);
 }
 
+void gt_gff3_in_stream_set_xrf_checker(GtNodeStream *ns,
+                                       GtXRFChecker *xrf_checker)
+{
+  GtGFF3InStream *is = gff3_in_stream_cast(ns);
+  gt_assert(is);
+  gt_gff3_in_stream_plain_set_xrf_checker(is->gff3_in_stream_plain,
+                                          xrf_checker);
+}
+
 GtStrArray* gt_gff3_in_stream_get_used_types(GtNodeStream *ns)
 {
   GtGFF3InStream *is = gff3_in_stream_cast(ns);
