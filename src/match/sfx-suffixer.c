@@ -1259,7 +1259,6 @@ static GtSuftabparts **gt_partitions_for_threads_new(
                                const GtSuftabparts *suftabparts,
                                const GtBcktab *bcktab,
                                GtSfxmappedrangelist *sfxmrlist,
-                               GtUword numofsuffixestosort,
                                GtUword specialcharacters,
                                GtLogger *logger)
 {
@@ -1267,23 +1266,24 @@ static GtSuftabparts **gt_partitions_for_threads_new(
   {
     const unsigned int parts = gt_suftabparts_numofparts(suftabparts);
     unsigned int part;
-    GtSuftabparts **partitions_for_threads
-      = gt_malloc(sizeof *partitions_for_threads * parts);
+    GtSuftabparts **partitions_for_threads;
+
+    gt_assert(parts > 0);
+    partitions_for_threads = gt_malloc(sizeof *partitions_for_threads * parts);
     for (part = 0; part < parts; part++)
     {
       GtCodetype mincode = gt_suftabparts_minindex(part,suftabparts);
       GtCodetype maxcode = gt_suftabparts_maxindex(part,suftabparts);
+      GtUword widthofpart = gt_suftabparts_widthofpart(part,suftabparts);
 
       partitions_for_threads[part]
         = gt_suftabparts_new(GT_SFX_THREADS_JOBS,
                              bcktab,
                              mincode,
                              maxcode,
-                             /*1U,
-                             0,*/
                              NULL,
                              sfxmrlist,
-                             numofsuffixestosort,
+                             widthofpart,
                              specialcharacters + 1,
                              logger);
     }
@@ -1777,7 +1777,6 @@ Sfxiterator *gt_Sfxiterator_new_withadditionalvalues(
        = gt_partitions_for_threads_new(sfi->suftabparts,
                                        sfi->bcktab,
                                        sfxmrlist,
-                                       numofsuffixestosort,
                                        specialcharacters,
                                        logger);
 #endif

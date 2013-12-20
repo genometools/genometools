@@ -1320,35 +1320,45 @@ GtCodetype gt_bcktab_findfirstlarger(const GtBcktab *bcktab,
                                      GtCodetype maxcode,
                                      GtUword suftaboffset)
 {
-  GtCodetype left, mid, right, found;
-  GtUword midval;
+  GtCodetype left, right, found;
+  bool found_defined = false;
 
-  if (mincode > maxcode)
+  if (mincode <= maxcode)
   {
-    left = 0;
-    right = found = bcktab->numofallcodes;
+    gt_assert(mincode < maxcode);
+    left = mincode;
+    right = maxcode;
   } else
   {
-    left = mincode;
-    right = found = maxcode + 1;
+    left = 0;
+    right = bcktab->numofallcodes - 1;
   }
-  while (left+1 < right)
+  found = right + 1; /* undefined */
+  while (left <= right)
   {
-    mid = GT_DIV2(left+right);
-    midval = gt_bcktab_get_leftborder(bcktab,mid);
-    if (suftaboffset == midval)
-    {
-      return mid;
-    }
-    if (suftaboffset < midval)
+    GtCodetype mid = GT_DIV2(left+right);
+    GtCodetype midval = gt_bcktab_get_leftborder(bcktab,mid);
+    if (suftaboffset <= midval)
     {
       found = mid;
-      right = mid - 1;
+      found_defined = true;
+      if (suftaboffset < midval)
+      {
+        if (right == 0)
+        {
+          break;
+        }
+        right = mid - 1;
+      } else
+      {
+        break;
+      }
     } else
     {
       left = mid + 1;
     }
   }
+  gt_assert(found_defined);
   return found;
 }
 

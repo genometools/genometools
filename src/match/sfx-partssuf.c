@@ -50,39 +50,40 @@ struct GtSuftabparts
 void gt_suftabparts_showallrecords(const GtSuftabparts *suftabparts,
                                    bool withminmaxindex)
 {
-  unsigned int part;
-  GtUword totalwidth;
-
   gt_assert(suftabparts != NULL);
-  gt_assert(suftabparts->numofparts >= 1U);
-  totalwidth = suftabparts->components[suftabparts->numofparts - 1].sumofwidth;
-  for (part = 0; part < suftabparts->numofparts; part++)
+  if (suftabparts->numofparts >= 1U)
   {
-    if (withminmaxindex)
+    unsigned int part;
+    GtUword totalwidth
+      = suftabparts->components[suftabparts->numofparts - 1].sumofwidth;
+    for (part = 0; part < suftabparts->numofparts; part++)
     {
-      gt_log_log("part %u: width="GT_WU" (%.2f%%) offset="GT_WU" nextidx="
-                 GT_WU" minindex="GT_WU" maxindex="GT_WU" ",
-                 part,
-                 suftabparts->components[part].widthofpart,
-                 100.00 * (double) suftabparts->components[part].widthofpart/
-                                   totalwidth,
-                 suftabparts->components[part].suftaboffset,
-                 suftabparts->components[part].nextidx,
-                 gt_suftabparts_minindex(part,suftabparts),
-                 gt_suftabparts_maxindex(part,suftabparts));
-    } else
-    {
-      gt_log_log("part %u: width="GT_WU" (%.2f%%) offset="GT_WU" nextidx="
-                 GT_WU,
-                 part,
-                 suftabparts->components[part].widthofpart,
-                 100.00 * (double) suftabparts->components[part].widthofpart/
-                                   totalwidth,
-                 suftabparts->components[part].nextidx,
-                 suftabparts->components[part].suftaboffset);
+      if (withminmaxindex)
+      {
+        gt_log_log("part %u: width="GT_WU" (%.2f%%) offset="GT_WU" nextidx="
+                   GT_WU" minindex="GT_WU" maxindex="GT_WU" ",
+                   part,
+                   suftabparts->components[part].widthofpart,
+                   100.00 * (double) suftabparts->components[part].widthofpart/
+                                     totalwidth,
+                   suftabparts->components[part].suftaboffset,
+                   suftabparts->components[part].nextidx,
+                   gt_suftabparts_minindex(part,suftabparts),
+                   gt_suftabparts_maxindex(part,suftabparts));
+      } else
+      {
+        gt_log_log("part %u: width="GT_WU" (%.2f%%) offset="GT_WU" nextidx="
+                   GT_WU,
+                   part,
+                   suftabparts->components[part].widthofpart,
+                   100.00 * (double) suftabparts->components[part].widthofpart/
+                                     totalwidth,
+                   suftabparts->components[part].nextidx,
+                   suftabparts->components[part].suftaboffset);
+      }
     }
+    gt_log_log("variance %.0f",gt_suftabparts_variance(suftabparts));
   }
-  gt_log_log("variance %.0f",gt_suftabparts_variance(suftabparts));
 }
 
 static GtCodetype gt_suftabparts_minindex_raw(unsigned int part,
