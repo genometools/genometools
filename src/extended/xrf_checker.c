@@ -20,6 +20,7 @@
 #include "core/hashmap_api.h"
 #include "core/ma.h"
 #include "core/splitter_api.h"
+#include "core/unused_api.h"
 #include "extended/xrf_abbr_entry.h"
 #include "extended/xrf_abbr_parse_tree.h"
 #include "extended/xrf_checker_api.h"
@@ -83,7 +84,7 @@ bool gt_xrf_checker_is_valid(GtXRFChecker *xrc, const char *value, GtError *err)
       gt_assert(e);
       if ((regex = gt_xrf_abbr_entry_get_value(e, "local_id_syntax"))) {
         bool match = false;
-        int rval;
+        GT_UNUSED int rval;
         rval = gt_grep(&match, regex, localid, NULL);
         gt_assert(rval == 0); /* regex format has been checked before */
         if (!match) {

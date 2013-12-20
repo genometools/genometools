@@ -41,12 +41,12 @@ static void gt_parsexrf_arguments_delete(void *tool_arguments)
   }
 }
 
-static GtOptionParser* gt_parsexrf_option_parser_new(void *tool_arguments)
+static GtOptionParser* gt_parsexrf_option_parser_new(GT_UNUSED
+                                                           void *tool_arguments)
 {
-  GtParsexrfArguments *arguments = tool_arguments;
   GtOptionParser *op;
   /* GtOption *option; */
-  gt_assert(arguments);
+  gt_assert(tool_arguments);
 
   /* init */
   op = gt_option_parser_new("[option ...] [file]",
@@ -56,10 +56,9 @@ static GtOptionParser* gt_parsexrf_option_parser_new(void *tool_arguments)
 }
 
 static int gt_parsexrf_runner(GT_UNUSED int argc, const char **argv,
-                              int parsed_args, void *tool_arguments,
+                              int parsed_args, GT_UNUSED void *tool_arguments,
                               GtError *err)
 {
-  GtParsexrfArguments *arguments = tool_arguments;
   GtXRFAbbrParseTree *xpt;
   int had_err = 0;
   GtUword i;
@@ -77,7 +76,6 @@ static int gt_parsexrf_runner(GT_UNUSED int argc, const char **argv,
   }
 
   gt_xrf_abbr_parse_tree_delete(xpt);
-  gt_assert(arguments);
 
   return had_err;
 }
