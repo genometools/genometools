@@ -20,21 +20,21 @@
 #include "extended/genome_node.h"
 #include "extended/gff3_in_stream.h"
 #include "extended/typecheck_info.h"
+#include "extended/xrfcheck_info.h"
 #include "extended/xrf_checker_api.h"
 #include "tools/gt_gff3validator.h"
 
 typedef struct {
   GtTypecheckInfo *tci;
+  GtXRFCheckInfo *xci;
   bool strict;
-  GtOption *xrfoption;
-  GtStr *xrffile;
 } GFF3ValidatorArguments;
 
 static void* gt_gff3validator_arguments_new(void)
 {
   GFF3ValidatorArguments *arguments = gt_calloc(1, sizeof *arguments);
   arguments->tci = gt_typecheck_info_new();
-  arguments->xrffile = gt_str_new();
+  arguments->xci = gt_xrfcheck_info_new();
   return arguments;
 }
 
@@ -43,7 +43,7 @@ static void gt_gff3validator_arguments_delete(void *tool_arguments)
   GFF3ValidatorArguments *arguments = tool_arguments;
   if (!arguments) return;
   gt_typecheck_info_delete(arguments->tci);
-  gt_str_delete(arguments->xrffile);
+  gt_xrfcheck_info_delete(arguments->xci);
   gt_free(arguments);
 }
 
@@ -61,18 +61,15 @@ static GtOptionParser* gt_gff3validator_option_parser_new(void *tool_arguments)
   /* typecheck options */
   gt_typecheck_info_register_options(arguments->tci, op);
 
+  /* xrfcheck options */
+  gt_xrfcheck_info_register_options(arguments->xci, op);
+
   /* -strict */
   option = gt_option_new_bool("strict", "be very strict during GFF3 parsing "
                               "(stricter than the specification requires)",
                               &arguments->strict, false);
   gt_option_is_development_option(option);
   gt_option_parser_add_option(op, option);
-
-  /* -xrfcheck */
-  option = gt_option_new_string("xrfcheck", "check XRF abbreviations",
-                                arguments->xrffile, NULL);
-  gt_option_parser_add_option(op, option);
-  arguments->xrfoption = option;
 
   return op;
 }
@@ -82,7 +79,7 @@ static int gt_gff3validator_runner(int argc, const char **argv, int parsed_args,
 {
   GFF3ValidatorArguments *arguments = tool_arguments;
   GtTypeChecker *type_checker = NULL;
-  GtXRFChecker *xc = NULL;
+  GtXRFChecker *xrf_checker = NULL;
   GtNodeStream *gff3_in_stream;
   int had_err = 0;
 
@@ -103,13 +100,13 @@ static int gt_gff3validator_runner(int argc, const char **argv, int parsed_args,
       gt_gff3_in_stream_set_type_checker(gff3_in_stream, type_checker);
   }
 
-  /* set XRF checker (TODO: implement this similar to typechecker) */
-  if (gt_option_is_set(arguments->xrfoption)) {
-    xc = gt_xrf_checker_new(gt_str_get(arguments->xrffile), err);
-    if (!xc)
+  /* set XRF checker */
+  if (gt_xrfcheck_info_option_used(arguments->xci)) {
+    xrf_checker = gt_xrfcheck_info_create_xrf_checker(arguments->xci, err);
+    if (!xrf_checker)
       had_err = -1;
-    else
-      gt_gff3_in_stream_set_xrf_checker(gff3_in_stream, xc);
+    if (!had_err)
+      gt_gff3_in_stream_set_xrf_checker(gff3_in_stream, xrf_checker);
   }
   /* enable strict mode (if necessary) */
   if (!had_err && arguments->strict)
@@ -125,7 +122,7 @@ static int gt_gff3validator_runner(int argc, const char **argv, int parsed_args,
   /* free */
   gt_node_stream_delete(gff3_in_stream);
   gt_type_checker_delete(type_checker);
-  gt_xrf_checker_delete(xc);
+  gt_xrf_checker_delete(xrf_checker);
 
   return had_err;
 }

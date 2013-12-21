@@ -17,7 +17,6 @@ url_syntax: http://www.agbase.msstate.edu/cgi-bin/getEntry.pl?db_pick=[ChickGO/M
 
 abbreviation: AGI_LocusCode
 database: Arabidopsis Genome Initiative
-description: Comprises TAIR, TIGR and MIPS
 object: Locus identifier
 example_id: AGI_LocusCode:At2g17950
 local_id_syntax: ^AT[MC0-5]G[0-9]{5}(\.[0-9]{1})?$
@@ -28,7 +27,6 @@ url_example: http://arabidopsis.org/servlets/TairObject?type=locus&name=At2g1795
 !url_example: http://mips.gsf.de/cgi-bin/proj/thal/search_gene?code=At2g17950
 !url_syntax: http://www.tigr.org/tigr-scripts/euk_manatee/shared/ORF_infopage.cgi?db=ath1&orf=[example_id]
 !url_example: http://www.tigr.org/tigr-scripts/euk_manatee/shared/ORF_infopage.cgi?db=ath1&orf=At2g17950
-entity_type: SO:0000704 ! gene
 
 abbreviation: AGRICOLA_ID
 database: AGRICultural OnLine Access
@@ -74,7 +72,6 @@ example_id: AspGD:ASPL0000067538
 generic_url: http://www.aspergillusgenome.org/
 url_syntax: http://www.aspergillusgenome.org/cgi-bin/locus.pl?dbid=[example_id]
 url_example: http://www.aspergillusgenome.org/cgi-bin/locus.pl?dbid=ASPL0000067538
-entity_type: SO:0000704 ! gene
 
 abbreviation: AspGD_LOCUS
 database: Aspergillus Genome Database
@@ -94,7 +91,6 @@ url_example: http://www.aspergillusgenome.org/cgi-bin/reference/reference.pl?dbi
 
 abbreviation: BFO
 database: Basic Formal Ontology
-description: An upper ontology used by Open Bio Ontologies (OBO) Foundry. BFO contains upper-level classes as well as core relations such as part_of (BFO_0000050)
 example_id: BFO:0000066
 generic_url: http://purl.obolibrary.org/obo/bfo
 url_syntax: http://purl.obolibrary.org/obo/BFO_[example_id]
@@ -102,7 +98,6 @@ url_example: http://purl.obolibrary.org/obo/BFO_0000066
 
 abbreviation: BHF-UCL
 database: Cardiovascular Gene Ontology Annotation Initiative
-description: The Cardiovascular Gene Ontology Annotation Initiative is supported by the British Heart Foundation (BHF) and located at University College London (UCL).
 generic_url: http://www.ucl.ac.uk/cardiovasculargeneontology/
 
 abbreviation: BioCyc
@@ -147,7 +142,6 @@ generic_url: http://www.broad.mit.edu/
 
 abbreviation: Broad_MGG
 database: Magnaporthe grisea Database
-description: Magnaporthe grisea Database at the Broad Institute
 object: Locus
 example_id: Broad_MGG:MGG_05132.5
 generic_url: http://www.broad.mit.edu/annotation/genome/magnaporthe_grisea/Home.html
@@ -156,7 +150,6 @@ url_example: http://www.broad.mit.edu/annotation/genome/magnaporthe_grisea/GeneL
 
 abbreviation: Broad_NEUROSPORA
 database: Neurospora crassa Database
-description: Neurospora crassa database at the Broad Institute
 object: Identifier for Broad_Ncrassa Loci
 example_id: BROAD_NEUROSPORA:7000007580576824
 generic_url: http://www.broadinstitute.org/annotation/genome/neurospora/MultiHome.html
@@ -165,7 +158,6 @@ url_example: http://www.broadinstitute.org/annotation/genome/neurospora/GeneDeta
 
 abbreviation: CACAO
 database: Community Assessment of Community Annotation with Ontologies
-description: The Community Assessment of Community Annotation with Ontologies (CACAO) is a project to do large-scale manual community annotation of gene function using the Gene Ontology as a multi-institution student competition. 
 object: accession
 example_id: MYCS2:A0QNF5
 generic_url: http://gowiki.tamu.edu/wiki/index.php/Category:CACAO
@@ -174,7 +166,6 @@ url_example: http://gowiki.tamu.edu/wiki/index.php/MYCS2:A0QNF5
 
 abbreviation: CAS
 database: CAS Chemical Registry
-description: CAS REGISTRY is the most authoritative collection of disclosed chemical substance information, containing more than 54 million organic and inorganic substances and 62 million sequences. CAS REGISTRY covers substances identified from the scientific literature from 1957 to the present, with additional substances going back to the early 1900s.
 object: Identifier
 example_id: CAS:58-08-2
 generic_url: http://www.cas.org/expertise/cascontent/registry/index.html
@@ -206,7 +197,6 @@ url_syntax: http://research.calacademy.org/research/ichthyology/catalog/getname.
 
 abbreviation: CAZY
 database: Carbohydrate Active EnZYmes
-description: The CAZy database describes the families of structurally-related catalytic and carbohydrate-binding modules (or functional domains) of enzymes that degrade, modify, or create glycosidic bonds.
 object: Identifier
 example_id: CAZY:PL11
 local_id_syntax: ^(CE|GH|GT|PL)\d+$
@@ -242,7 +232,6 @@ local_id_syntax: ^(CAL|CAF)[0-9]{7}$
 generic_url: http://www.candidagenome.org/
 url_syntax: http://www.candidagenome.org/cgi-bin/locus.pl?dbid=[example_id]
 url_example: http://www.candidagenome.org/cgi-bin/locus.pl?dbid=CAL0005516
-entity_type: SO:0000704 ! gene
 
 ! note: The CGD object also includes the orf19 assembly names, eg. orf19.2475
 
@@ -286,7 +275,6 @@ local_id_syntax: ^[0-9]{1,6}$
 generic_url: http://www.ebi.ac.uk/chebi/
 url_syntax: http://www.ebi.ac.uk/chebi/searchId.do?chebiId=CHEBI:[example_id]
 url_example: http://www.ebi.ac.uk/chebi/searchId.do?chebiId=CHEBI:17234
-entity_type: CHEBI:24431 ! chemical entity 
 
 abbreviation: CL
 database: Cell Type Ontology
@@ -296,7 +284,6 @@ local_id_syntax: ^[0-9]{7}$
 generic_url: http://cellontology.org
 url_syntax: http://purl.obolibrary.org/obo/CL_[example_id]
 url_example: http://purl.obolibrary.org/obo/CL_0000041
-entity_type: CL:0000000 ! cell 
 
 abbreviation: COG
 database: NCBI Clusters of Orthologous Groups
@@ -328,7 +315,6 @@ url_example: http://www.ncbi.nlm.nih.gov/COG/new/release/coglist.cgi?pathw=14
 
 abbreviation: CORIELL
 database: Coriell Institute for Medical Research
-description: The Coriell Cell Repositories provide essential research reagents to the scientific community by establishing, verifying, maintaining, and distributing cell cultures and DNA derived from cell cultures. These collections, supported by funds from the National Institutes of Health (NIH) and several foundations, are extensively utilized by research scientists around the world. 
 object: Identifier
 example_id: GM07892
 generic_url: http://ccr.coriell.org/
@@ -358,7 +344,6 @@ object: Identifier
 example_id: DDANAT:0000068
 local_id_syntax: [0-9]{7}
 generic_url: http://dictybase.org/Dicty_Info/dicty_anatomy_ontology.html
-entity_type: UBERON:0001062 ! anatomical entity
 
 abbreviation: DDBJ
 database: DNA Databank of Japan
@@ -378,7 +363,6 @@ local_id_syntax: ^DDB_G[0-9]{7}$
 generic_url: http://dictybase.org
 url_syntax: http://dictybase.org/gene/[example_id]
 url_example: http://dictybase.org/gene/DDB_G0277859
-entity_type: SO:0000704 ! gene
 
 abbreviation: dictyBase_gene_name
 database: dictyBase
@@ -426,7 +410,6 @@ local_id_syntax: ^EB[0-9]{4}$
 generic_url: http://www.ecoli-york.org/
 url_syntax: http://www.biolws1.york.ac.uk/echobase/Gene.cfm?recordID=[example_id]
 url_example: http://www.biolws1.york.ac.uk/echobase/Gene.cfm?recordID=EB0231
-entity_type: SO:0000704 ! gene
 
 abbreviation: ECK
 database: EcoGene Database of Escherichia coli Sequence and Function
@@ -436,7 +419,6 @@ local_id_syntax: ^ECK[0-9]{4}$
 generic_url: http://www.ecogene.org/
 url_syntax: http://www.ecogene.org/geneInfo.php?eck_id=[example_id]
 url_example: http://www.ecogene.org/geneInfo.php?eck_id=ECK3746
-entity_type: SO:0000704 ! gene
 
 abbreviation: ECO
 database: Evidence Code ontology
@@ -471,7 +453,6 @@ local_id_syntax: ^EG[0-9]{5}$
 generic_url: http://www.ecogene.org/
 url_syntax: http://www.ecogene.org/geneInfo.php?eg_id=[example_id]
 url_example: http://www.ecogene.org/geneInfo.php?eg_id=EG10818
-entity_type: SO:0000704 ! gene
 
 ! note: to construct URLs, use EcoGene accessions or ECK accessions
 
@@ -483,24 +464,20 @@ generic_url: http://www.ecogene.org/
 
 abbreviation: EcoliWiki
 database: EcoliWiki from EcoliHub
-description: EcoliHub's subsystem for community annotation of E. coli K-12
 generic_url: http://ecoliwiki.net/
 local_id_syntax: ^[A-Za-z]{3,4}$
 
 abbreviation: EMBL
 database: EMBL Nucleotide Sequence Database
-description: International nucleotide sequence database collaboration, comprising EMBL-EBI nucleotide sequence data library (EMBL-Bank), DNA DataBank of Japan (DDBJ), and NCBI GenBank
 object: Sequence accession
 example_id: EMBL:AA816246
 local_id_syntax: ^([A-Z]{1}[0-9]{5})|([A-Z]{2}[0-9]{6})|([A-Z]{4}[0-9]{8,9})$
 generic_url: http://www.ebi.ac.uk/embl/
 url_syntax: http://www.ebi.ac.uk/cgi-bin/emblfetch?style=html&Submit=Go&id=[example_id]
 url_example: http://www.ebi.ac.uk/cgi-bin/emblfetch?style=html&Submit=Go&id=AA816246
-entity_type: SO:0000704 ! gene
 
 abbreviation: ENA
 database: European Nucleotide Archive
-description: ENA is made up of a number of distinct databases that includes EMBL-Bank, the newly established Sequence Read Archive (SRA) and the Trace Archive. International nucleotide sequence database collaboration, comprising ENA-EBI nucleotide sequence data library (EMBL-Bank), DNA DataBank of Japan (DDBJ), and NCBI GenBank
 object: Sequence accession
 example_id: ENA:AA816246
 local_id_syntax: ^([A-Z]{1}[0-9]{5})|([A-Z]{2}[0-9]{6})|([A-Z]{4}[0-9]{8,9})$
@@ -517,9 +494,6 @@ local_id_syntax: ^ENS[A-Z0-9]{10,17}$
 generic_url: http://www.ensembl.org/
 url_syntax: http://www.ensembl.org/id/[example_id]
 url_example: http://www.ensembl.org/id/ENSP00000265949
-entity_type: SO:0000704 ! gene
-entity_type: PR:000000001 ! protein
-entity_type: SO:0000673 ! transcript
 
 abbreviation: ENSEMBL_GeneID
 database: Ensembl database of automatically annotated genomic data
@@ -589,7 +563,6 @@ local_id_syntax: ^FBgn[0-9]{7}$
 generic_url: http://flybase.org/
 url_syntax: http://flybase.org/reports/[example_id].html
 url_example: http://flybase.org/reports/FBgn0000024.html
-entity_type: SO:0000704 ! gene
 
 ! abbreviation: FLYBASE
 ! database: FlyBase
@@ -631,7 +604,6 @@ url_example: http://www.gdb.org/gdb-bin/genera/accno?accessionNum=GDB:306600
 
 abbreviation: GenBank
 database: GenBank
-description: The NIH genetic sequence database, an annotated collection of all publicly available DNA sequences.
 object: Sequence accession
 synonym: GB
 example_id: GB:AA816246
@@ -639,8 +611,6 @@ local_id_syntax: ^[A-Z]{2}[0-9]{6}$
 generic_url: http://www.ncbi.nlm.nih.gov/Genbank/
 url_syntax: http://www.ncbi.nlm.nih.gov/entrez/viewer.fcgi?db=nucleotide&val=[example_id]
 url_example: http://www.ncbi.nlm.nih.gov/entrez/viewer.fcgi?db=nucleotide&val=AA816246
-entity_type: SO:0000704 ! gene
-entity_type: PR:000000001 ! protein 
 
 abbreviation: Gene3D
 database: Domain Architecture Classification
@@ -660,7 +630,6 @@ local_id_syntax: ^Tb\d+\.[A-Za-z0-9]+\.\d+$
 generic_url: http://www.genedb.org/gene/
 url_syntax: http://www.genedb.org/gene/[example_id]
 url_example: http://www.genedb.org/gene/PF3D7_1467300
-entity_type: SO:0000704 ! gene
 
 abbreviation: GeneDB_Gmorsitans
 shorthand_name: Tsetse
@@ -708,7 +677,6 @@ local_id_syntax: ^SP[A-Z0-9]+\.[A-Za-z0-9]+$
 generic_url: http://old.genedb.org/genedb/pombe/index.jsp
 url_syntax: http://old.genedb.org/genedb/Search?organism=pombe&name=[example_id]
 url_example: http://old.genedb.org/genedb/Search?organism=pombe&name=SPAC890.04C
-entity_type: SO:0000704 ! gene 
 is_obsolete: true
 replaced_by: PomBase
 
@@ -747,10 +715,6 @@ local_id_syntax: ^\d{7}$
 generic_url: http://amigo.geneontology.org/
 url_syntax: http://amigo.geneontology.org/cgi-bin/amigo/term-details.cgi?term=GO:[example_id]
 url_example: http://amigo.geneontology.org/cgi-bin/amigo/term-details.cgi?term=GO:0004352
-entity_type: GO:0003674 ! molecular function
-entity_type: GO:0008150 ! biological process
-entity_type: GO:0005575 ! cellular component
-entity_type: GO:0032991 ! macromolecular complex
 
 abbreviation: GO_REF
 database: Gene Ontology Database references
@@ -780,7 +744,6 @@ generic_url: http://www.geneontology.org/
 abbreviation: GONUTS
 database: Gene Ontology Normal Usage Tracking System (GONUTS)
 object: Identifier (for gene or gene product)
-description: Third party documentation for GO and community annotation system.
 example_id: GONUTS:MOUSE:CD28
 generic_url: http://gowiki.tamu.edu
 url_syntax: http://gowiki.tamu.edu/wiki/index.php/[example_id]
@@ -793,7 +756,6 @@ example_id: GR:sd1
 generic_url: http://www.gramene.org/
 url_syntax: http://www.gramene.org/db/searches/browser?search_type=All&RGN=on&query=[example_id]
 url_example: http://www.gramene.org/db/searches/browser?search_type=All&RGN=on&query=sd1
-entity_type: PR:000000001 ! protein
 
 abbreviation: GR_GENE
 database: Gramene: A Comparative Mapping Resource for Grains
@@ -813,7 +775,6 @@ local_id_syntax: ^[A-Z][0-9][A-Z0-9]{3}[0-9]$
 generic_url: http://www.gramene.org/
 url_syntax: http://www.gramene.org/db/protein/protein_search?acc=[example_id]
 url_example: http://www.gramene.org/db/protein/protein_search?acc=Q6VSV0
-entity_type: PR:000000001 ! protein
 
 abbreviation: GR_QTL
 database: Gramene: A Comparative Mapping Resource for Grains
@@ -917,7 +878,6 @@ generic_url: http://www.ebi.ac.uk/imgt/hla
 
 abbreviation: IMGT_LIGM
 database: ImMunoGeneTics database covering immunoglobulins and T-cell receptors
-description: Database of immunoglobulins and T cell receptors from human and other vertebrates, with translation for fully annotated sequences.
 example_id: IMGT_LIGM:U03895
 generic_url: http://imgt.cines.fr
 
@@ -929,9 +889,6 @@ generic_url: http://www.ebi.ac.uk/intact/
 url_syntax: http://www.ebi.ac.uk/intact/search/do/search?searchString=[example_id]
 url_example: http://www.ebi.ac.uk/intact/search/do/search?searchString=EBI-17086
 local_id_syntax: ^[0-9]+$
-entity_type:  MI:0000 ! molecular interaction
-entity_type:  GO:0043234 ! protein complex
-entity_type: MI:0315 ! protein complex 
 
 abbreviation: InterPro
 database: InterPro database of protein domains and motifs
@@ -1118,7 +1075,6 @@ url_example: http://www.genome.jp/dbget-bin/www_bget?rn:R02328
 
 abbreviation: LIFEdb
 database: LifeDB
-description: LifeDB is a database for information on protein localization, interaction, functional assays and expression.
 object: cDNA clone identifier
 example_id: LIFEdb:DKFZp564O1716
 generic_url: http://www.lifedb.de/
@@ -1127,12 +1083,10 @@ url_example: http://www.dkfz.de/LIFEdb/LIFEdb.aspx?ID=DKFZp564O1716
 
 abbreviation: LOCSVMpsi
 database: LOCSVMPSI
-description: Subcellular localization for eukayotic proteins based on SVM and PSI-BLAST
 generic_url: http://bioinformatics.ustc.edu.cn/locsvmpsi/locsvmpsi.php
 
 abbreviation: MA
 database: Adult Mouse Anatomical Dictionary
-description: Adult Mouse Anatomical Dictionary; part of Gene Expression Database
 object: Identifier
 example_id: MA:0000003
 generic_url: http://www.informatics.jax.org/
@@ -1218,7 +1172,6 @@ local_id_syntax: ^MGI:[0-9]{5,}$
 generic_url: http://www.informatics.jax.org/
 url_syntax: http://www.informatics.jax.org/accession/[example_id]
 url_example: http://www.informatics.jax.org/accession/MGI:80863
-entity_type: SO:0000704 ! gene
 
 abbreviation: MIPS_funcat
 database: MIPS Functional Catalogue
@@ -1290,7 +1243,6 @@ local_id_syntax: ^\d+$
 generic_url: http://www.ncbi.nlm.nih.gov/
 url_syntax: http://www.ncbi.nlm.nih.gov/sites/entrez?cmd=Retrieve&db=gene&list_uids=[example_id]
 url_example: http://www.ncbi.nlm.nih.gov/sites/entrez?cmd=Retrieve&db=gene&list_uids=4771
-entity_type: SO:0000704 ! gene
 
 abbreviation: NCBI_gi
 database: NCBI databases
@@ -1300,7 +1252,6 @@ local_id_syntax: ^[0-9]{6,}$
 generic_url: http://www.ncbi.nlm.nih.gov/
 url_syntax: http://www.ncbi.nlm.nih.gov/entrez/viewer.fcgi?val=[example_id]
 url_example: http://www.ncbi.nlm.nih.gov/entrez/viewer.fcgi?val=113194944
-entity_type: SO:0000704 ! gene
 
 abbreviation: NCBI_GP
 database: NCBI GenPept
@@ -1310,7 +1261,6 @@ local_id_syntax: ^[A-Z]{3}[0-9]{5}(\.[0-9]+)?$
 generic_url: http://www.ncbi.nlm.nih.gov/
 url_syntax: http://www.ncbi.nlm.nih.gov/entrez/viewer.fcgi?db=protein&val=[example_id]
 url_example: http://www.ncbi.nlm.nih.gov/entrez/viewer.fcgi?db=protein&val=EAL72968
-entity_type: PR:000000001 ! protein
 
 ! An NCBI locus tag includes an organism-specific prefix and a tag value, separated by an underscore; see http://www.ncbi.nlm.nih.gov/genomes/lltp.cgi
 
@@ -1408,7 +1358,6 @@ url_example: http://agro.vbi.vt.edu/public/servlet/GeneEdit?&Search=Search&level
 
 abbreviation: PAMGO_MGG
 database: Magnaporthe grisea database
-description: Magnaporthe grisea database at North Carolina State University; member of PAMGO Interest Group
 object: Locus
 example_id: PAMGO_MGG:MGG_05132
 generic_url: http://scotland.fgl.ncsu.edu/smeng/GoAnnotationMagnaporthegrisea.html
@@ -1417,7 +1366,6 @@ url_example: http://scotland.fgl.ncsu.edu/cgi-bin/adHocQuery.cgi?adHocQuery_dbNa
 
 abbreviation: PAMGO_VMD
 database: Virginia Bioinformatics Institute Microbial Database
-description: Virginia Bioinformatics Institute Microbial Database; member of PAMGO Interest Group
 object: Gene identifier
 example_id: PAMGO_VMD:109198
 generic_url: http://phytophthora.vbi.vt.edu
@@ -1448,7 +1396,6 @@ generic_url: http://www.bioontology.org/wiki/index.php/PATO:Main_Page
 
 abbreviation: PATRIC
 database: PathoSystems Resource Integration Center
-description: PathoSystems Resource Integration Center at the Virginia Bioinformatics Institute
 object: Feature identifieer
 example_id: PATRIC:cds.000002.436951
 generic_url: http://patric.vbi.vt.edu
@@ -1466,7 +1413,6 @@ url_example: http://www.rcsb.org/pdb/cgi/explore.cgi?pdbId=1A4U
 
 abbreviation: Pfam
 database: Pfam database of protein families
-description: Pfam is a collection of protein families represented by sequence alignments and hidden Markov models (HMMs)
 object: Accession
 example_id: Pfam:PF00046
 generic_url: http://www.sanger.ac.uk/Software/Pfam/
@@ -1492,7 +1438,6 @@ generic_url: http://phenoscape.org/
 
 abbreviation: PINC
 database: Proteome Inc.
-description: represents GO annotations created in 2001 for NCBI and extracted into UniProtKB-GOA from EntrezGene
 generic_url: http://www.proteome.com/
 
 abbreviation: PIR
@@ -1503,7 +1448,6 @@ local_id_syntax: ^[A-Z]{1}[0-9]{5}$
 generic_url: http://pir.georgetown.edu/
 url_syntax: http://pir.georgetown.edu/cgi-bin/pirwww/nbrfget?uid=[example_id]
 url_example: http://pir.georgetown.edu/cgi-bin/pirwww/nbrfget?uid=I49499
-entity_type: PR:000000001 ! protein
 
 abbreviation: PIRSF
 database: PIR Superfamily Classification System
@@ -1543,8 +1487,6 @@ local_id_syntax: ^[0-9]{7}$
 generic_url: http://www.plantontology.org/
 url_syntax: http://www.plantontology.org/amigo/go.cgi?action=query&view=query&search_constraint=terms&query=PO:[example_id]
 url_example: http://www.plantontology.org/amigo/go.cgi?action=query&view=query&search_constraint=terms&query=PO:0009004
-entity_type: PO:0025131 ! plant anatomical entity
-entity_type: PO:0009012 ! plant structure development stage 
 
 abbreviation: PO_REF
 database: Plant Ontology custom references
@@ -1566,7 +1508,6 @@ generic_url: http://www.pombase.org/
 local_id_syntax: ^S\w+(\.)?\w+(\.)?$
 url_syntax: http://www.pombase.org/spombe/result/[example_id]
 url_example: http://www.pombase.org/spombe/result/SPBC11B10.09
-entity_type: SO:0000704 ! gene 
 
 abbreviation: Pompep
 database: Schizosaccharomyces pombe protein data
@@ -1587,7 +1528,6 @@ local_id_syntax: ^[0-9]{9}$
 generic_url: http://www.proconsortium.org/pro/pro.shtml
 url_syntax: http://www.proconsortium.org/cgi-bin/pro/entry_pro?id=PR:[example_id]
 url_example: http://www.proconsortium.org/cgi-bin/pro/entry_pro?id=PR:000025380
-entity_type: PR:000000001 ! protein 
 
 abbreviation: PRINTS
 database: PRINTS compendium of protein fingerprints
@@ -1599,7 +1539,6 @@ url_example: http://www.bioinf.manchester.ac.uk/cgi-bin/dbbrowser/sprint/searchp
 
 abbreviation: ProDom
 database: ProDom protein domain families
-description: ProDom protein domain families automatically generated from UniProtKB
 object: Accession
 example_id: ProDom:PD000001
 generic_url: http://prodom.prabi.fr/prodom/current/html/home.php
@@ -1616,14 +1555,12 @@ url_example: http://www.expasy.ch/cgi-bin/prosite-search-ac?PS00365
 
 abbreviation: protein_id
 database: DDBJ / EMBL-Bank / GenBank
-description: protein identifier shared by DDBJ/EMBL-bank/GenBank nucleotide sequence databases
 generic_url: http://www.ddbj.nig.ac.jp/
 generic_url: http://www.ebi.ac.uk/embl/
 generic_url: http://www.ncbi.nlm.nih.gov/Genbank/
 object: Identifier
 example_id: protein_id:CAA71991
 local_id_syntax: ^[A-Z]{3}[0-9]{5}(\.[0-9]+)?$
-entity_type: PR:000000001 ! protein
 
 abbreviation: PROW
 database: Protein Reviews on the Web
@@ -1717,8 +1654,6 @@ example_id: RefSeq:XP_001068954
 local_id_syntax: ^(NC|AC|NG|NT|NW|NZ|NM|NR|XM|XR|NP|AP|XP|ZP)_\d+$
 url_syntax: http://www.ncbi.nlm.nih.gov/entrez/viewer.fcgi?val=[example_id]
 url_example: http://www.ncbi.nlm.nih.gov/entrez/viewer.fcgi?val=XP_001068954
-entity_type: SO:0000704 ! gene
-entity_type: PR:000000001 ! protein
 
 abbreviation: RefSeq_NA
 database: RefSeq (Nucleic Acid)
@@ -1763,11 +1698,9 @@ local_id_syntax: ^[0-9]{4,7}$
 generic_url: http://rgd.mcw.edu/
 url_syntax: http://rgd.mcw.edu/generalSearch/RgdSearch.jsp?quickSearch=1&searchKeyword=[example_id]
 url_example: http://rgd.mcw.edu/generalSearch/RgdSearch.jsp?quickSearch=1&searchKeyword=2004
-entity_type: SO:0000704 ! gene
 
 abbreviation: RHEA
 database: Rhea, the Annotated Reactions Database
-description: Rhea is a freely available, manually annotated database of chemical reactions created in collaboration with the Swiss Institute of Bioinformatics (SIB).
 object: Accession
 example_id: RHEA:25811
 generic_url: http://www.ebi.ac.uk/rhea/
@@ -1792,7 +1725,6 @@ generic_url: http://www.roslin.ac.uk/
 
 abbreviation: RO
 database: OBO Relation Ontology Ontology
-description: A collection of relations used across OBO ontologies
 generic_url: http://purl.obolibrary.org/obo/ro
 example_id: RO:0002211
 url_syntax: http://purl.obolibrary.org/obo/RO_[example_id]
@@ -1800,7 +1732,6 @@ url_example: http://purl.obolibrary.org/obo/RO_0002211
 
 abbreviation: SABIO-RK
 database: SABIO Reaction Kinetics
-description: The SABIO-RK (System for the Analysis of Biochemical Pathways - Reaction Kinetics) is a web-based application based on the SABIO relational database that contains information about biochemical reactions, their kinetic equations with their parameters, and the experimental conditions under which these parameters were measured.
 generic_url: http://sabio.villa-bosch.de/
 object: reaction
 example_id: SABIO-RK:1858
@@ -1813,7 +1744,6 @@ generic_url: http://www.sanger.ac.uk/
 
 abbreviation: SEED
 database: The SEED;
-description: Project to annotate the first 1000 sequenced genomes, develop detailed metabolic reconstructions, and construct the corresponding stoichiometric matrices
 object: identifier
 example_id: SEED:fig|83331.1.peg.1
 generic_url: http://www.theseed.org
@@ -1831,7 +1761,6 @@ local_id_syntax: ^S[0-9]{9}$
 generic_url: http://www.yeastgenome.org/
 url_syntax: http://db.yeastgenome.org/cgi-bin/locus.pl?dbid=[example_id]
 url_example: http://db.yeastgenome.org/cgi-bin/locus.pl?dbid=S000006169
-entity_type: SO:0000704 ! gene
 
 ! note: The SGD_LOCUS object also includes the systematic S. cerevisiae ORF names, eg. YEL001C
 
@@ -1887,7 +1816,6 @@ local_id_syntax: ^\d{7}$
 generic_url: http://sequenceontology.org/
 url_syntax: http://song.sourceforge.net/SOterm_tables.html#SO:[example_id]
 url_example: http://song.sourceforge.net/SOterm_tables.html#SO:0000195
-entity_type: SO:0000400 ! sequence attribute 
 
 abbreviation: SPD
 database: Schizosaccharomyces pombe Postgenome Database at RIKEN; includes Orfeome Localisation data
@@ -1912,7 +1840,6 @@ generic_url: http://genolist.pasteur.fr/SubtiList/
 
 abbreviation: SUPERFAMILY
 database: SUPERFAMILY protein annotation database
-description: A database of structural and functional protein annotations for completely sequenced genomes
 object: Accession
 example_id: SUPERFAMILY:51905
 generic_url: http://supfam.cs.bris.ac.uk/SUPERFAMILY/index.html
@@ -1921,7 +1848,6 @@ url_example: http://supfam.cs.bris.ac.uk/SUPERFAMILY/cgi-bin/scop.cgi?ipid=SSF51
 
 abbreviation: Swiss-Prot
 database: UniProtKB/Swiss-Prot
-description: A curated protein sequence database which provides a high level of annotation and a minimal level of redundancy
 object: Accession
 synonym: UniProtKB/Swiss-Prot
 example_id: Swiss-Prot:P51587
@@ -1942,7 +1868,6 @@ generic_url: http://www.arabidopsis.org/
 url_syntax: http://arabidopsis.org/servlets/TairObject?accession=[example_id]
 url_example: http://arabidopsis.org/servlets/TairObject?accession=gene:2062713
 url_example: http://arabidopsis.org/servlets/TairObject?accession=locus:2146653
-entity_type: SO:0000704 ! gene
 
 abbreviation: taxon
 database: NCBI Taxonomy
@@ -1996,7 +1921,6 @@ url_example: http://db.ciliate.org/cgi-bin/reference/reference.pl?dbid=T00000581
 
 abbreviation: TRAIT
 database: TRAnscript Integrated Table
-description: an integrated database of transcripts expressed in human skeletal muscle
 synonym: MuscleTRAIT
 generic_url: http://muscle.cribi.unipd.it/
 
@@ -2006,7 +1930,6 @@ generic_url: http://www.gene-regulation.com/pub/databases.html#transfac
 
 abbreviation: TrEMBL
 database: UniProtKB-TrEMBL protein sequence database
-description: UniProtKB-TrEMBL, a computer-annotated protein sequence database supplementing UniProtKB and containing the translations of all coding sequences (CDS) present in the EMBL Nucleotide Sequence Database but not yet integrated in UniProtKB/Swiss-Prot
 object: Accession
 synonym: UniProtKB/TrEMBL
 example_id: TrEMBL:O31124
@@ -2018,14 +1941,12 @@ replaced_by: UniProtKB
 
 abbreviation: UBERON
 database: Uber-anatomy ontology
-description: A multi-species anatomy ontology
 object: Identifier
 example_id: URBERON:0002398
 local_id_syntax: ^[0-9]{7}$
 generic_url: http://uberon.org
 url_syntax: http://purl.obolibrary.org/obo/UBERON_[example_id]
 url_example: http://purl.obolibrary.org/obo/UBERON_0002398
-entity_type: UBERON:0001062 ! anatomical entity
 
 abbreviation: UM-BBD
 database: University of Minnesota Biocatalysis/Biodegradation Database
@@ -2069,7 +1990,6 @@ url_example: http://umbbd.msi.umn.edu/servlets/rule.jsp?rule=bt0330
 abbreviation: UniGene
 database: UniGene
 object: Identifier (for transcript cluster)
-description: NCBI transcript cluster database, organized by transcriptome. Each UniGene entry is a set of transcript sequences that appear to come from the same transcription locus (gene or expressed pseudogene).
 example_id: UniGene:Hs.212293
 generic_url: http://www.ncbi.nlm.nih.gov/UniGene
 url_syntax: http://www.ncbi.nlm.nih.gov/UniGene/clust.cgi?ORG=[organism_abbreviation]&CID=[cluster_id]
@@ -2078,7 +1998,6 @@ url_example: http://www.ncbi.nlm.nih.gov/UniGene/clust.cgi?ORG=Hs&CID=212293
 abbreviation: UniMod
 database: UniMod
 object: Identifier
-description: protein modifications for mass spectrometry
 example_id: UniMod:1287
 generic_url: http://www.unimod.org/
 url_syntax: http://www.unimod.org/modifications_view.php?editid1=[example_id]
@@ -2088,7 +2007,6 @@ url_example: http://www.unimod.org/modifications_view.php?editid1=1287
 
 abbreviation: UniParc
 database: UniProt Archive
-description: A non-redundant archive of protein sequences extracted from Swiss-Prot, TrEMBL, PIR-PSD, EMBL, Ensembl, IPI, PDB, RefSeq, FlyBase, WormBase, European Patent Office, United States Patent and Trademark Office, and Japanese Patent Office
 object: Accession
 example_id: UniParc:UPI000000000A
 generic_url: http://www.uniprot.org/uniparc/
@@ -2097,7 +2015,6 @@ url_example: http://www.uniprot.org/uniparc/UPI000000000A
 
 abbreviation: UniPathway
 database: UniPathway
-description: UniPathway is a a metabolic door to UniProtKB/Swiss-Prot, a curated resource of metabolic pathways for the UniProtKB/Swiss-Prot knowledgebase.
 object: Identifier
 example_id: UniPathway:UPA00155
 generic_url: http://www.grenoble.prabi.fr/obiwarehouse/unipathway
@@ -2106,7 +2023,6 @@ url_example: http://www.grenoble.prabi.fr/obiwarehouse/unipathway/upa?upid=UPA00
 
 abbreviation: UniProtKB
 database: Universal Protein Knowledgebase
-description: A central repository of protein sequence and function created by joining the information contained in Swiss-Prot, TrEMBL, and PIR database
 object: Accession
 synonym: UniProt
 example_id: UniProtKB:P51587
@@ -2114,7 +2030,6 @@ local_id_syntax: ^([OPQ][0-9][A-Z0-9]{3}[0-9]|[A-NR-Z]([0-9][A-Z][A-Z0-9]{2}){1,
 generic_url: http://www.uniprot.org
 url_syntax: http://www.uniprot.org/uniprot/[example_id]
 url_example: http://www.uniprot.org/uniprot/P51587
-entity_type: PR:000000001 ! protein 
 
 abbreviation: UniProtKB-KW
 synonym: SP_KW
@@ -2189,7 +2104,6 @@ local_id_syntax: ^WB(Gene|Var|RNAi|Transgene)[0-9]{8}$
 generic_url: http://www.wormbase.org/
 url_syntax: http://www.wormbase.org/db/gene/gene?name=[example_id]
 url_example: http://www.wormbase.org/db/get?class=Gene;name=WBGene00003001
-entity_type: SO:0000704 ! gene 
 
 abbreviation: WBbt
 database: C. elegans gross anatomy
@@ -2197,8 +2111,6 @@ object: Identifier
 example_id: WBbt:0005733
 local_id_syntax: [0-9]{7}
 generic_url: http://www.wormbase.org/
-entity_type: WBbt:0004017 ! cell
-entity_type: WBbt:0005766 ! anatomy
 
 abbreviation: WBls
 database: C. elegans development
@@ -2206,7 +2118,6 @@ object: Identifier
 example_id: WBls:0000010
 local_id_syntax: [0-9]{7}
 generic_url: http://www.wormbase.org/
-entity_type: WBls:0000075 ! nematoda Life Stage
 
 abbreviation: WBPhenotype
 database: WormBase phenotype ontology
@@ -2216,7 +2127,6 @@ local_id_syntax: ^[0-9]{7}$
 generic_url: http://www.wormbase.org/
 url_syntax: http://www.wormbase.org/species/c_elegans/phenotype/WBPhenotype:[example_id]
 url_example: http://www.wormbase.org/species/c_elegans/phenotype/WBPhenotype:0000154
-entity_type: UBERON:0001062 ! anatomical entity
 
 ! abbreviation: WB_GENE
 ! database: WormBase database of nematode biology
@@ -2265,4 +2175,3 @@ local_id_syntax: ^ZDB-(GENE|GENO|MRPHLNO)-[0-9]{6}-[0-9]+$
 generic_url: http://zfin.org/
 url_syntax: http://zfin.org/cgi-bin/ZFIN_jump?record=[example_id]
 url_example: http://zfin.org/cgi-bin/ZFIN_jump?record=ZDB-GENE-990415-103
-entity_type: SO:0000704 ! gene

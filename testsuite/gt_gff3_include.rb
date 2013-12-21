@@ -634,6 +634,73 @@ Test do
   run_test "#{$bin}gt gff3 -typecheck so-xp #{obo_gff3_file}"
 end
 
+Name "gt gff3 -xrfcheck (short)"
+Keywords "gt_gff3 xrfcheck"
+Test do
+  run_test "#{$bin}gt gff3 -xrfcheck GO #{$testdata}dbxref.gff3"
+end
+
+Name "gt gff3 -xrfcheck (full filename)"
+Keywords "gt_gff3 xrfcheck"
+Test do
+  run_test "#{$bin}gt gff3 -xrfcheck #{$cur}/gtdata/xrf_abbr/GO.xrf_abbr #{$testdata}dbxref.gff3"
+end
+
+Name "gt gff3 -xrfcheck (no argument)"
+Keywords "gt_gff3 xrfcheck"
+Test do
+  run_test "#{$bin}gt gff3 -xrfcheck < #{$testdata}dbxref.gff3"
+end
+
+Name "gt gff3 -xrfcheck failure (invalid database)"
+Keywords "gt_gff3 xrfcheck"
+Test do
+  run_test("#{$bin}gt gff3 -xrfcheck GO #{$testdata}dbxref_invalid2.gff3", :retval => 1)
+  grep last_stderr, "unknown database abbreviation"
+end
+
+Name "gt gff3 -xrfcheck failure (invalid local ID)"
+Keywords "gt_gff3 xrfcheck"
+Test do
+  run_test("#{$bin}gt gff3 -xrfcheck GO #{$testdata}dbxref_invalid.gff3", :retval => 1)
+  grep last_stderr, "local ID"
+end
+
+Name "gt gff3 -xrfcheck failure (missing abbrev)"
+Keywords "gt_gff3 xrfcheck"
+Test do
+  run_test("#{$bin}gt gff3 -xrfcheck #{$testdata}missingabbr.XRF_abbr #{$testdata}dbxref.gff3", :retval => 1)
+  grep last_stderr, "required label"
+end
+
+Name "gt gff3 -xrfcheck failure (duplicate abbrev)"
+Keywords "gt_gff3 xrfcheck"
+Test do
+  run_test("#{$bin}gt gff3 -xrfcheck #{$testdata}duplicate.XRF_abbr #{$testdata}dbxref.gff3", :retval => 1)
+  grep last_stderr, "duplicate abbreviation"
+end
+
+Name "gt gff3 -xrfcheck failure (invalid regex)"
+Keywords "gt_gff3 xrfcheck"
+Test do
+  run_test("#{$bin}gt gff3 -xrfcheck #{$testdata}invalidregex.XRF_abbr #{$testdata}dbxref.gff3", :retval => 1)
+  grep last_stderr, "invalid regular"
+end
+
+Name "gt gff3 -xrfcheck failure (unknown label)"
+Keywords "gt_gff3 xrfcheck"
+Test do
+  run_test("#{$bin}gt gff3 -xrfcheck #{$testdata}invalidtag.XRF_abbr #{$testdata}dbxref.gff3", :retval => 0)
+  grep last_stderr, "unknown label"
+end
+
+Name "gt gff3 -xrfcheck failure (shorthand too long)"
+Keywords "gt_gff3 xrfcheck"
+Test do
+  run_test("#{$bin}gt gff3 -xrfcheck #{$testdata}shorthand.XRF_abbr #{$testdata}dbxref.gff3", :retval => 1)
+  grep last_stderr, "is not less than 10"
+end
+
 Name "gt gff3 blank attributes"
 Keywords "gt_gff3"
 Test do
