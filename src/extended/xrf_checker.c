@@ -43,7 +43,7 @@ bool gt_xrf_checker_is_valid(GtXRFChecker *xrc, const char *value, GtError *err)
 {
   bool valid = true;
   char *myvalue = gt_cstr_dup(value),
-       *dbid = myvalue,
+       *dbid = NULL,
        *localid = NULL;
   GtXRFAbbrEntry *e;
   GtUword nof_tokens, i;
