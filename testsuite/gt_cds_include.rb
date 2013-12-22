@@ -52,7 +52,7 @@ Test do
   run_test("#{$bin}gt cds -usedesc -seqfile " +
            "#{$testdata}gt_cds_descrange_multi_fail_1.fas " +
            "#{$testdata}gt_cds_test_descrange.in", :retval => 1)
-  grep last_stderr, "does contain multiple sequences with ID"
+  grep last_stderr, "contain multiple sequences with ID"
 end
 
 Name "gt cds test (multi description fail 2)"
@@ -61,7 +61,7 @@ Test do
   run_test("#{$bin}gt cds -usedesc -seqfile " +
            "#{$testdata}gt_cds_descrange_multi_fail_2.fas " +
            "#{$testdata}gt_cds_test_descrange.in", :retval => 1)
-  grep last_stderr, "does contain multiple sequences with ID"
+  grep last_stderr, "contain multiple sequences with ID"
 end
 
 Name "gt cds test (wrong ID)"
@@ -70,7 +70,7 @@ Test do
   run_test("#{$bin}gt cds -usedesc -seqfile " +
            "#{$testdata}gt_cds_descrange_wrong_id.fas " +
            "#{$testdata}gt_cds_test_descrange.in", :retval => 1)
-  grep last_stderr, "does not contain a sequence with ID"
+  grep last_stderr, "sequence with ID"
 end
 
 Name "gt cds test (wrong range)"
@@ -79,7 +79,7 @@ Test do
   run_test("#{$bin}gt cds -usedesc -seqfile " +
            "#{$testdata}gt_cds_descrange_wrong_range.fas " +
            "#{$testdata}gt_cds_test_descrange.in", :retval => 1)
-  grep last_stderr, "cannot find sequence ID"
+  grep last_stderr, "sequence with ID"
 end
 
 Name "gt cds test (-startcodon no -finalstopcodon no)"
