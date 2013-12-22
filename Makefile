@@ -417,6 +417,9 @@ LIBGENOMETOOLS_PRESRC:=$(filter-out $(SQLITE_FILTER_OUT),\
                          $(LIBGENOMETOOLS_PRESRC))
 
 ifeq ($(amalgamation),yes)
+  # SQLite does not need to go into the amalgamation
+  LIBGENOMETOOLS_PRESRC:=$(filter-out $(SQLITE3_SRC),\
+                         $(LIBGENOMETOOLS_PRESRC))
   LIBGENOMETOOLS_SRC:=obj/amalgamation.c
 else
   LIBGENOMETOOLS_SRC:=$(LIBGENOMETOOLS_PRESRC)
@@ -542,7 +545,7 @@ $(1): $(2)
 	@test -d $$(@D) || mkdir -p $$(@D)
 	@$$(CC) $$(EXP_LDFLAGS) $$(GT_LDFLAGS) $$(filter-out $$(OVERRIDELIBS),$$^) \
 	  $$(filter-out $$(patsubst lib%.a,-l%,$$(notdir $$(OVERRIDELIBS))),\
-	  $$(EXP_LDLIBS)) $$(OVERRIDELIBS) -o $$@
+	  $$(EXP_LDLIBS)) $$(OVERRIDELIBS) $$(EXP_LDLIBS) -o $$@
 endef
 
 $(eval $(call PROGRAM_template, bin/gt, $(GTMAIN_OBJ) $(TOOLS_OBJ) \
