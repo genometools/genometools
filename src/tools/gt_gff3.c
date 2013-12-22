@@ -34,6 +34,7 @@
 #include "extended/sort_stream_api.h"
 #include "extended/typecheck_info.h"
 #include "extended/visitor_stream_api.h"
+#include "extended/xrfcheck_info.h"
 #include "tools/gt_gff3.h"
 
 typedef struct {
@@ -53,6 +54,7 @@ typedef struct {
   GtStr *offsetfile, *newsource;
   GtUword width;
   GtTypecheckInfo *tci;
+  GtXRFCheckInfo *xci;
   GtOutputFileInfo *ofi;
   GtFile *outfp;
 } GFF3Arguments;
@@ -63,6 +65,7 @@ static void* gt_gff3_arguments_new(void)
   arguments->newsource = gt_str_new();
   arguments->offsetfile = gt_str_new();
   arguments->tci = gt_typecheck_info_new();
+  arguments->xci = gt_xrfcheck_info_new();
   arguments->ofi = gt_output_file_info_new();
   return arguments;
 }
@@ -75,6 +78,7 @@ static void gt_gff3_arguments_delete(void *tool_arguments)
   gt_str_delete(arguments->newsource);
   gt_output_file_info_delete(arguments->ofi);
   gt_typecheck_info_delete(arguments->tci);
+  gt_xrfcheck_info_delete(arguments->xci);
   gt_str_delete(arguments->offsetfile);
   gt_free(arguments);
 }
@@ -189,6 +193,9 @@ static GtOptionParser* gt_gff3_option_parser_new(void *tool_arguments)
   /* typecheck options */
   gt_typecheck_info_register_options(arguments->tci, op);
 
+  /* xrfcheck options */
+  gt_xrfcheck_info_register_options(arguments->xci, op);
+
   /* -show */
   option = gt_option_new_bool("show", "show GFF3 output", &arguments->show,
                               true);
@@ -216,6 +223,7 @@ static int gt_gff3_runner(int argc, const char **argv, int parsed_args,
 {
   GFF3Arguments *arguments = tool_arguments;
   GtTypeChecker *type_checker = NULL;
+  GtXRFChecker *xrf_checker = NULL;
   GtNodeStream *gff3_in_stream,
                *sort_stream = NULL,
                *load_stream = NULL,
@@ -248,6 +256,15 @@ static int gt_gff3_runner(int argc, const char **argv, int parsed_args,
       had_err = -1;
     if (!had_err)
       gt_gff3_in_stream_set_type_checker(gff3_in_stream, type_checker);
+  }
+
+  /* set XRF checker if necessary */
+  if (gt_xrfcheck_info_option_used(arguments->xci)) {
+    xrf_checker = gt_xrfcheck_info_create_xrf_checker(arguments->xci, err);
+    if (!xrf_checker)
+      had_err = -1;
+    if (!had_err)
+      gt_gff3_in_stream_set_xrf_checker(gff3_in_stream, xrf_checker);
   }
 
   /* set offset (if necessary) */
@@ -327,6 +344,7 @@ static int gt_gff3_runner(int argc, const char **argv, int parsed_args,
   gt_node_stream_delete(set_source_stream);
   gt_node_stream_delete(gff3_in_stream);
   gt_type_checker_delete(type_checker);
+  gt_xrf_checker_delete(xrf_checker);
 
   return had_err;
 }

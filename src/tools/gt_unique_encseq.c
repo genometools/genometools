@@ -215,7 +215,7 @@ gt_unique_encseq_kmerinfo_new(const char *inputfile,
   int had_err = 0;
   GtEncseq *encseq;
   GtEncseqLoader *encseq_loader;
-  GtUniqueEncseqInfo *ueinfo = gt_malloc(sizeof(GtUniqueEncseqInfo));
+  GtUniqueEncseqInfo *ueinfo = gt_malloc(sizeof (GtUniqueEncseqInfo));
   GtHashmap *hashmap;
   unsigned int kmersize;
 
@@ -256,7 +256,7 @@ gt_unique_encseq_kmerinfo_new(const char *inputfile,
     ueinfo->alignmentcount = 0;
     ueinfo->arguments = arguments;
     ueinfo->currentposition = 0;
-    ueinfo->arbitscores = gt_malloc(sizeof(GtXdropArbitraryscores));
+    ueinfo->arbitscores = gt_malloc(sizeof (GtXdropArbitraryscores));
     ueinfo->arbitscores->mat = arguments->arbitscores_mat_option;
     ueinfo->arbitscores->mis = arguments->arbitscores_mis_option;
     ueinfo->arbitscores->ins = arguments->arbitscores_ins_option;

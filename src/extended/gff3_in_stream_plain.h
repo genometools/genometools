@@ -22,6 +22,7 @@
 #include "extended/gff3_in_stream_plain.h"
 #include "extended/node_stream_api.h"
 #include "extended/type_checker_api.h"
+#include "extended/xrf_checker_api.h"
 
 /* Implements the <GtNodeStream> interface. */
 typedef struct GtGFF3InStreamPlain GtGFF3InStreamPlain;
@@ -41,6 +42,8 @@ void          gt_gff3_in_stream_plain_enable_strict_mode(GtNodeStream*);
 void          gt_gff3_in_stream_plain_show_progress_bar(GtGFF3InStreamPlain*);
 void          gt_gff3_in_stream_plain_set_type_checker(GtNodeStream*,
                                                        GtTypeChecker*);
+void          gt_gff3_in_stream_plain_set_xrf_checker(GtNodeStream*,
+                                                      GtXRFChecker*);
 GtStrArray*   gt_gff3_in_stream_plain_get_used_types(GtNodeStream*);
 void          gt_gff3_in_stream_plain_set_offset(GtNodeStream*, GtWord);
 int           gt_gff3_in_stream_plain_set_offsetfile(GtNodeStream*, GtStr*,

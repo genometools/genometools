@@ -1,0 +1,51 @@
+!version: $Revision: 1.11 $
+!date: $Date: 2009/10/06 00:14:54 $
+!
+!Gene Ontology
+!Abbreviations for cross-referenced databases.
+!
+!Note that url's are not necessarily stable entities and that some
+!databases may have many other access routes or mirror sites.
+!
+! NOTE:  a newline follows before the first entry
+
+! Here's the root SGD database where we get gene products.
+! Note that there is no shorthand name, since we want any
+! applications to use 'SGD' as the shorthand name.
+! Also note the trailing # on the generic_url.  This is a 
+! somewhat standard way of referencing a url when being used
+! as an identifier.  It doesn't interfere with linking.
+
+abbreviation: SGD
+database: Saccharomyces Genome Database.
+object: gene product
+example_id: S0004660
+generic_url: http://www.yeastgenome.org/
+url_syntax: http://db.yeastgenome.org/cgi-bin/SGD/locus.pl?locus=
+
+! Here are the SGD references.  Note that References has been added to 
+! the generic_url to make it unique.  This is a good convention to follow.
+
+abbreviation: SGD
+shorthand_name: SGD
+database: Saccharomyces Genome Database.
+object: Reference Citation.
+example_id: 12031
+generic_url: http://www.yeastgenome.org/
+url_syntax: http://db.yeastgenome.org/cgi-bin/SGD/reference/reference.pl?refNo=
+!url_syntax: http://db.yeastgenome.org/cgi-bin/SGD/reference/reference.pl?refNo=
+url_syntax: http://db.yeastgenome.org/cgi-bin/SGD/reference/reference.pl?refNo=
+
+! Here's one from flybase.  Note that the generic_url field has been
+! repeated since there is a mirror.  Also, the shorthand_name has been
+! filled in as FlyBase, since this is less than 10 characters.
+
+abbreviation: FB
+shorthand_name: FlyBase
+database: FlyBase.
+object: gene product
+example_id: FBgn0000024
+generic_url: http://flybase.bio.indiana.edu#
+url_syntax: http://fly.ebi.ac.uk:7081/.bin/fbidq.html?
+url_syntax: http://flybase.bio.indiana.edu/.bin/fbidq.html?
+

@@ -361,7 +361,7 @@ static int gt_simreads_runner(GT_UNUSED int argc,
           gt_str_get(arguments->distlen_filename));
       nofvalues = gt_file_size(gt_str_get(arguments->distlen_filename)) /
                        (off_t) (sizeof (GtUword) << 1);
-      input_distlen = gt_malloc(sizeof(GtSimreadsDistvalue) * nofvalues);
+      input_distlen = gt_malloc(sizeof (GtSimreadsDistvalue) * nofvalues);
       for (j = 0; j < nofvalues; j++)
       {
         (void)gt_xfread(&(input_distlen[j].length), sizeof (GtUword),

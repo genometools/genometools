@@ -36,6 +36,7 @@
 #include "tools/gt_magicmatch.h"
 #include "tools/gt_mergeesa.h"
 #include "tools/gt_paircmp.h"
+#include "tools/gt_parsexrf.h"
 #include "tools/gt_patternmatch.h"
 #include "tools/gt_readreads.h"
 #include "tools/gt_regioncov.h"
@@ -71,6 +72,7 @@ static void* gt_dev_arguments_new(void)
   gt_toolbox_add_tool(dev_toolbox, "gdiffcalc", gt_gdiffcalc());
   gt_toolbox_add_tool(dev_toolbox, "idxlocali", gt_idxlocali());
   gt_toolbox_add_tool(dev_toolbox, "magicmatch", gt_magicmatch());
+  gt_toolbox_add_tool(dev_toolbox, "parsexrf", gt_parsexrf());
   gt_toolbox_add_tool(dev_toolbox, "readreads", gt_readreads());
   gt_toolbox_add_tool(dev_toolbox, "sain", gt_sain());
   gt_toolbox_add_tool(dev_toolbox, "sambam", gt_sam_interface());

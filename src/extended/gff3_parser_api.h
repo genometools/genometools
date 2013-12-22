@@ -25,6 +25,7 @@
 #include "core/strand_api.h"
 #include "core/types_api.h"
 #include "extended/type_checker_api.h"
+#include "extended/xrf_checker_api.h"
 
 /* A <GtGFF3Parser> can be used to parse GFF3 files and convert them into
    <GtGenomeNode> objects. If the GFF3 files do not contain the encouraged
@@ -55,6 +56,9 @@ void          gt_gff3_parser_set_offset(GtGFF3Parser *gff3_parser,
 /* Set <type_checker> used by <gff3_parser>. */
 void          gt_gff3_parser_set_type_checker(GtGFF3Parser *gff3_parser,
                                               GtTypeChecker *type_checker);
+/* Set <xrf_checker> used by <gff3_parser>. */
+void          gt_gff3_parser_set_xrf_checker(GtGFF3Parser *gff3_parser,
+                                             GtXRFChecker *xrf_checker);
 /* Enable the tidy mode in <gff3_parser>. In tidy mode the <gff3_parser> parser
    tries to tidy up features which would normally lead to a parse error. */
 void          gt_gff3_parser_enable_tidy_mode(GtGFF3Parser *gff3_parser);
