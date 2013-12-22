@@ -345,7 +345,7 @@ static GtOptionParser* gt_ltrdigest_option_parser_new(void *tool_arguments)
                           &arguments->nthreads,
                           0);
   gt_option_parser_add_option(op, o);
-  gt_option_is_extended_option(o);
+  gt_option_is_development_option(o);
 
   /* Extended PBS options */
 
