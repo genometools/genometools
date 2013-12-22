@@ -54,7 +54,8 @@ static void seqid_info_delete(SeqidInfo *seqid_info)
 
 static int seqid_info_add(SeqidInfo *seqid_info, GtUword seqnum,
                           GtUword filenum, const GtRange *range,
-                          const char *filename, const char *seqid, GtError *err)
+                          GT_UNUSED const char *filename,
+                          const char *seqid, GtError *err)
 {
   SeqidInfoElem *seqid_info_elem_ptr, seqid_info_elem;
   gt_error_check(err);
@@ -62,9 +63,9 @@ static int seqid_info_add(SeqidInfo *seqid_info, GtUword seqnum,
   seqid_info_elem_ptr = gt_array_get_first(seqid_info);
   if (range->end == GT_UNDEF_UWORD ||
       seqid_info_elem_ptr->descrange.end == GT_UNDEF_UWORD) {
-    gt_error_set(err, "sequence file \"%s\" does contain multiple sequences "
-                  "with ID \"%s\" and not all of them have description ranges",
-                  filename, seqid);
+    gt_error_set(err, "input sequence(s) contain multiple sequences "
+                 "with ID \"%s\" and not all of them have description ranges",
+                 seqid);
     return -1;
   }
   seqid_info_elem.seqnum = seqnum;
@@ -76,7 +77,8 @@ static int seqid_info_add(SeqidInfo *seqid_info, GtUword seqnum,
 
 static int seqid_info_get(SeqidInfo *seqid_info, GtUword *seqnum,
                           GtUword *filenum, GtRange *outrange,
-                          const GtRange *inrange, const char *filename,
+                          const GtRange *inrange,
+                          GT_UNUSED const char *filename,
                           const char *seqid, GtError *err)
 {
   SeqidInfoElem *seqid_info_elem;
@@ -94,9 +96,9 @@ static int seqid_info_get(SeqidInfo *seqid_info, GtUword *seqnum,
     }
   }
   gt_error_set(err,
-               "cannot find sequence ID \"%s\" (with range " GT_WU "," GT_WU
-               ") in " "sequence file \"%s\"",
-               seqid, inrange->start, inrange->end, filename);
+               "cannot find a sequence with ID \"%s\" "
+               "{range " GT_WU "," GT_WU ")",
+               seqid, inrange->start, inrange->end);
   return -1;
 }
 
@@ -250,8 +252,8 @@ int gt_seqid2seqnum_mapping_map(GtSeqid2SeqnumMapping *mapping,
   }
   /* cache miss -> regular mapping */
   if (!(seqid_info = gt_hashmap_get(mapping->map, seqid))) {
-    gt_error_set(err, "sequence file \"%s\" does not contain a sequence with "
-                      "ID \"%s\"", mapping->filename, seqid);
+    gt_error_set(err, "no sequence with ID \"%s\" found in input sequence(s)",
+                 seqid);
     return -1;
   }
   /* get results from seqid info */
