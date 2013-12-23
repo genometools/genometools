@@ -1,0 +1,3 @@
+##gff-version	3
+ctg123	.	match	1200	9000	.	.	.	ID=cDNA00001
+ctg123	.	match_part	1200	3200	2.2e-30	+	.	ID=match00002;Parent=cDNA00001;Target=mjm1123.5 5 506;Gap=M301 D

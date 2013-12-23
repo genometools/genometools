@@ -1,0 +1,2 @@
+##gff-version	3
+ctg123	.	protein_match	100	129	.	+	.	ID=match008;Target=p101 1 10;Gap=M3 I1 M2 D1 F1 M4

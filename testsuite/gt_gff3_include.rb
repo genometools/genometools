@@ -707,6 +707,60 @@ Test do
   run_test "#{$bin}gt gff3 #{$testdata}blank_attributes.gff3"
 end
 
+Name "gt gff3 Gap attribute"
+Keywords "gt_gff3 gap"
+Test do
+  run_test "#{$bin}gt gff3 -typecheck so #{$testdata}match_part_gap.gff3"
+end
+
+Name "gt gff3 Gap attribute failure (eop too short)"
+Keywords "gt_gff3 gap"
+Test do
+  run_test("#{$bin}gt gff3 -typecheck so #{$testdata}gap_fail1.gff3", :retval => 1)
+  grep last_stderr, "too short"
+end
+
+Name "gt gff3 Gap attribute failure (invalid eop code)"
+Keywords "gt_gff3 gap"
+Test do
+  run_test("#{$bin}gt gff3 -typecheck so #{$testdata}gap_fail2.gff3", :retval => 1)
+  grep last_stderr, "invalid edit operation code"
+end
+
+Name "gt gff3 Gap attribute failure (inconsistent length)"
+Keywords "gt_gff3 gap"
+Test do
+  run_test("#{$bin}gt gff3 -typecheck so #{$testdata}gap_fail3.gff3", :retval => 1)
+  grep last_stderr, "does not match the length of its"
+end
+
+Name "gt gff3 Gap attribute failure (eop length not numeric)"
+Keywords "gt_gff3 gap"
+Test do
+  run_test("#{$bin}gt gff3 -typecheck so #{$testdata}gap_fail4.gff3", :retval => 1)
+  grep last_stderr, "cannot parse edit length"
+end
+
+Name "gt gff3 Gap attribute failure (protein length)"
+Keywords "gt_gff3 gap"
+Test do
+  run_test("#{$bin}gt gff3 -typecheck so #{$testdata}gap_fail5.gff3", :retval => 0)
+end
+
+Name "gt gff3 Gap attribute failure (protein match length)"
+Keywords "gt_gff3 gap"
+Test do
+  run_test("#{$bin}gt gff3 -typecheck so #{$testdata}gap_fail6.gff3", :retval => 1)
+  grep last_stderr, "does not match the length of its"
+end
+
+Name "gt gff3 Gap attribute failure (frameshifts in nucl match)"
+Keywords "gt_gff3 gap"
+Test do
+  run_test("#{$bin}gt gff3 -typecheck so #{$testdata}gap_fail7.gff3", :retval => 1)
+  grep last_stderr, "only allowed in nucleotide"
+end
+
 Name "gt gff3 minimal fasta file"
 Keywords "gt_gff3 fasta"
 Test do
