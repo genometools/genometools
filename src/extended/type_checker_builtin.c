@@ -93,6 +93,14 @@ static bool gt_type_checker_builtin_is_partof(GT_UNUSED GtTypeChecker *tc,
   return true;
 }
 
+static bool gt_type_checker_builtin_is_a(GT_UNUSED GtTypeChecker *tc,
+                                         GT_UNUSED const char *parent_type,
+                                         GT_UNUSED const char *child_type)
+{
+  gt_assert(tc && parent_type && child_type);
+  return true;
+}
+
 const GtTypeCheckerClass* gt_type_checker_builtin_class(void)
 {
   static const GtTypeCheckerClass gt_type_checker_class =
@@ -100,6 +108,7 @@ const GtTypeCheckerClass* gt_type_checker_builtin_class(void)
       gt_type_checker_builtin_description,
       gt_type_checker_builtin_is_valid,
       gt_type_checker_builtin_is_partof,
+      gt_type_checker_builtin_is_a,
       NULL };
   return &gt_type_checker_class;
 }

@@ -178,3 +178,27 @@ bool gt_type_graph_is_partof(GtTypeGraph *type_graph, const char *parent_type,
                                  type_graph->part_of_in_edges,
                                  type_graph->nodes);
 }
+
+bool gt_type_graph_is_a(GtTypeGraph *type_graph, const char *parent_type,
+                        const char *child_type)
+{
+  const char *parent_id, *child_id;
+  GtTypeNode *child_node;
+  gt_assert(type_graph && parent_type && child_type);
+  /* make sure graph is built */
+  if (!type_graph->ready) {
+    create_vertices(type_graph);
+    type_graph->ready = true;
+  }
+  /* get parent ID, if the type is not mappable to an ID, assume it is the ID */
+  if (!(parent_id = gt_hashmap_get(type_graph->name2id, parent_type)))
+    parent_id = parent_type;
+  /* get child ID, if the type is not mappable to an ID, assume it is the ID */
+  if (!(child_id = gt_hashmap_get(type_graph->name2id, child_type)))
+    child_id = child_type;
+  /* get child node */
+  child_node = gt_hashmap_get(type_graph->nodemap, child_id);
+  gt_assert(child_node);
+  /* check for parent */
+  return gt_type_node_is_a(child_node, parent_id);
+}

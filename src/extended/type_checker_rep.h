@@ -29,6 +29,8 @@ struct GtTypeCheckerClass {
   bool        (*is_valid)(GtTypeChecker*, const char *type);
   bool        (*is_partof)(GtTypeChecker*, const char *parent_type,
                            const char *child_type);
+  bool        (*is_a)(GtTypeChecker*, const char *parent_type,
+                      const char *child_type);
   void        (*free)(GtTypeChecker*);
 };
 

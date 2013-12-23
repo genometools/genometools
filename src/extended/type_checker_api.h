@@ -34,6 +34,10 @@ bool           gt_type_checker_is_valid(GtTypeChecker *type_checker,
 bool           gt_type_checker_is_partof(GtTypeChecker *type_checker,
                                          const char *parent_type,
                                          const char *child_type);
+/* Return <true> if <child_type> is a <parent_type>, <false> otherwise. */
+bool           gt_type_checker_is_a(GtTypeChecker *type_checker,
+                                    const char *parent_type,
+                                    const char *child_type);
 /* Decrease the reference count for <type_checker> or delete it, if this was the
    last reference. */
 void           gt_type_checker_delete(GtTypeChecker *type_checker);

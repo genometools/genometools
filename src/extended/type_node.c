@@ -193,3 +193,20 @@ bool gt_type_node_has_parent(GtTypeNode *node, const char *id,
   gt_hashmap_add(node->cache, (char*) id, result);
   return false;
 }
+
+bool gt_type_node_is_a(GtTypeNode *child_node, const char *parent_id)
+{
+  GtUword i;
+  gt_assert(child_node && parent_id);
+
+  /* XXX: do path compression */
+  if (!strcmp(child_node->id, parent_id))
+    return true;
+  for (i = 0; i < gt_array_size(child_node->is_a_out_edges); i++) {
+    GtTypeNode *node = *(GtTypeNode**) gt_array_get(child_node->is_a_out_edges,
+                                                    i);
+    if (gt_type_node_is_a(node, parent_id))
+      return true;
+  }
+  return false;
+}

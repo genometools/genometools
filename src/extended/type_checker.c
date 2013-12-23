@@ -60,6 +60,15 @@ bool gt_type_checker_is_partof(GtTypeChecker *type_checker,
                                           child_type);
 }
 
+bool gt_type_checker_is_a(GtTypeChecker *type_checker,
+                          const char *parent_type, const char *child_type)
+{
+  gt_assert(type_checker && type_checker->c_class &&
+            type_checker->c_class->is_a);
+  return type_checker->c_class->is_a(type_checker, parent_type,
+                                     child_type);
+}
+
 void gt_type_checker_delete(GtTypeChecker *type_checker)
 {
   if (!type_checker) return;

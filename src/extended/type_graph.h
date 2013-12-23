@@ -28,5 +28,8 @@ void         gt_type_graph_add_stanza(GtTypeGraph *type_graph,
 bool         gt_type_graph_is_partof(GtTypeGraph *type_graph,
                                      const char *parent_type,
                                      const char *child_type);
+bool         gt_type_graph_is_a(GtTypeGraph *type_graph,
+                                const char *parent_type,
+                                const char *child_type);
 
 #endif
