@@ -68,6 +68,16 @@ static bool gt_type_checker_obo_is_partof(GtTypeChecker *tc,
   return gt_type_graph_is_partof(tco->type_graph, parent_type, child_type);
 }
 
+static bool gt_type_checker_obo_is_a(GtTypeChecker *tc,
+                                          const char *parent_type,
+                                          const char *child_type)
+{
+  GtTypeCheckerOBO *tco;
+  gt_assert(tc && parent_type && child_type);
+  tco = gt_type_checker_obo_cast(tc);
+  return gt_type_graph_is_a(tco->type_graph, parent_type, child_type);
+}
+
 const GtTypeCheckerClass* gt_type_checker_obo_class(void)
 {
   static const GtTypeCheckerClass gt_type_checker_class =
@@ -75,6 +85,7 @@ const GtTypeCheckerClass* gt_type_checker_obo_class(void)
       gt_type_checker_obo_description,
       gt_type_checker_obo_is_valid,
       gt_type_checker_obo_is_partof,
+      gt_type_checker_obo_is_a,
       gt_type_checker_obo_free };
   return &gt_type_checker_class;
 }

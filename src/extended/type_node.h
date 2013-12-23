@@ -23,18 +23,20 @@ typedef struct GtTypeNode GtTypeNode;
 
 GtTypeNode*   gt_type_node_new(GtUword num, const char *id);
 void          gt_type_node_delete(GtTypeNode*);
-GtUword gt_type_node_num(const GtTypeNode*);
+GtUword       gt_type_node_num(const GtTypeNode*);
 void          gt_type_node_is_a_add(GtTypeNode*, const char*);
 const char*   gt_type_node_is_a_get(const GtTypeNode*, GtUword);
-GtUword gt_type_node_is_a_size(const GtTypeNode*);
+GtUword       gt_type_node_is_a_size(const GtTypeNode*);
 void          gt_type_node_part_of_add(GtTypeNode*, const char*);
 const char*   gt_type_node_part_of_get(const GtTypeNode*, GtUword);
-GtUword gt_type_node_part_of_size(const GtTypeNode*);
+GtUword       gt_type_node_part_of_size(const GtTypeNode*);
 void          gt_type_node_add_is_a_vertex(GtTypeNode *src,
                                            const GtTypeNode *dst);
 bool          gt_type_node_has_parent(GtTypeNode*, const char *id,
                                       GtBoolMatrix *part_of_out_edges,
                                       GtBoolMatrix *part_of_in_edges,
                                       GtArray *node_list);
+bool          gt_type_node_is_a(GtTypeNode *child_node,
+                                const char *parent_id);
 
 #endif

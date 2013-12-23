@@ -29,6 +29,7 @@
 #include "core/parseutils.h"
 #include "core/queue.h"
 #include "core/splitter.h"
+#include "core/symbol_api.h"
 #include "core/undef_api.h"
 #include "core/unused_api.h"
 #include "core/warning_api.h"
@@ -36,6 +37,8 @@
 #include "extended/feature_info.h"
 #include "extended/feature_node.h"
 #include "extended/feature_node_iterator_api.h"
+#include "extended/feature_type.h"
+#include "extended/gap_str.h"
 #include "extended/genome_node.h"
 #include "extended/gff3_defines.h"
 #include "extended/gff3_escaping.h"
@@ -1368,6 +1371,36 @@ static int parse_attributes(char *attributes, GtGenomeNode *feature_node,
             had_err = -1;
           }
         }
+      }
+      else if (parser->type_checker && !strcmp(attr_tag, GT_GFF_GAP)) {
+        GtGapStr *gs = NULL;
+        GtRange rng = gt_genome_node_get_range(feature_node);
+        if (gt_type_checker_is_a(parser->type_checker,
+                                 gt_symbol("protein_match"),
+                                 gt_feature_node_get_type((GtFeatureNode*)
+                                                          feature_node))) {
+          gs = gt_gap_str_new_protein(attr_value, err);
+        } else {
+          gs = gt_gap_str_new_nucleotide(attr_value, err);
+        }
+        if (!gs) {
+          gt_assert(gt_error_is_set(err));
+          had_err = -1;
+        }
+        if (!had_err) {
+          if (gt_range_length(&rng) != gt_gap_str_length_reference(gs)) {
+            gt_error_set(err, "length of aligned reference in %s attribute on "
+                              "line %u in file \"%s\" (" GT_WU ") does not "
+                              "match the length of its %s feature (" GT_WU ")",
+                         GT_GFF_GAP, line_number, filename,
+                         gt_gap_str_length_reference(gs),
+                         gt_feature_node_get_type((GtFeatureNode*)
+                                                  feature_node),
+                         gt_range_length(&rng));
+            had_err = -1;
+          }
+        }
+        gt_gap_str_delete(gs);
       }
     }
   }
