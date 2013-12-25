@@ -1702,7 +1702,7 @@ void gt_threaded_sortallbuckets(GtSuffixsortspace *suffixsortspace,
   GtSuffixsortspace **sssp_tab;
 
   gt_assert(partition_for_threads != NULL);
-  gt_suftabparts_showallrecords(partition_for_threads,false);
+  /*gt_suftabparts_showallrecords(partition_for_threads,true);*/
   thread_parts = gt_suftabparts_numofparts(partition_for_threads);
   gt_assert(thread_parts > 1U);
   th_tab = gt_malloc(sizeof *th_tab * thread_parts);

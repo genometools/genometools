@@ -29,12 +29,12 @@
 
 typedef struct
 {
-  GtUword nextidx,
-                widthofpart,
-                suftaboffset,
-                sumofwidth,
-                minindex,
-                maxindex;
+  GtUword widthofpart,
+          suftaboffset,
+          sumofwidth,
+          minindex,
+          nextidx,
+          maxindex;
 } GtSuftabpartcomponent;
 
 struct GtSuftabparts
@@ -60,25 +60,22 @@ void gt_suftabparts_showallrecords(const GtSuftabparts *suftabparts,
     {
       if (withminmaxindex)
       {
-        gt_log_log("part %u: width="GT_WU" (%.2f%%) offset="GT_WU" nextidx="
-                   GT_WU" minindex="GT_WU" maxindex="GT_WU" ",
+        gt_log_log("part %u: width="GT_WU" (%.2f%%) offset="GT_WU
+                   "minindex="GT_WU" maxindex="GT_WU" ",
                    part,
                    suftabparts->components[part].widthofpart,
                    100.00 * (double) suftabparts->components[part].widthofpart/
                                      totalwidth,
                    suftabparts->components[part].suftaboffset,
-                   suftabparts->components[part].nextidx,
                    gt_suftabparts_minindex(part,suftabparts),
                    gt_suftabparts_maxindex(part,suftabparts));
       } else
       {
-        gt_log_log("part %u: width="GT_WU" (%.2f%%) offset="GT_WU" nextidx="
-                   GT_WU,
+        gt_log_log("part %u: width="GT_WU" (%.2f%%) offset="GT_WU" ",
                    part,
                    suftabparts->components[part].widthofpart,
                    100.00 * (double) suftabparts->components[part].widthofpart/
                                      totalwidth,
-                   suftabparts->components[part].nextidx,
                    suftabparts->components[part].suftaboffset);
       }
     }
@@ -103,18 +100,15 @@ static GtCodetype gt_suftabparts_minindex_raw(unsigned int part,
 static GtCodetype gt_suftabparts_maxindex_raw(unsigned int part,
                                               const GtSuftabparts *suftabparts)
 {
-  GtCodetype maxindex;
+  GtCodetype nextidx;
 
   gt_assert(suftabparts != NULL && part < suftabparts->numofparts);
+  nextidx = suftabparts->components[part].nextidx;
   if (suftabparts->fct != NULL)
   {
-    maxindex = suftabparts->components[part].nextidx;
-    return gt_firstcodes_sample2full(suftabparts->fct,maxindex);
+    return gt_firstcodes_sample2full(suftabparts->fct,nextidx);
   }
-  maxindex = (part == suftabparts->numofparts - 1)
-               ? suftabparts->components[part].nextidx - 1
-               : suftabparts->components[part].nextidx;
-  return maxindex;
+  return nextidx;
 }
 
 static void gt_suftabparts_removeemptyparts(GtSuftabparts *suftabparts,
@@ -211,10 +205,14 @@ GtSuftabparts *gt_suftabparts_new(unsigned int numofparts,
   } else
   {
     unsigned int remainder;
-    GtUword secondidx, firstbound = 0, secondbound,
-                  suftaboffset = 0, sumofwidth = 0;
+    GtUword firstbound = 0, secondbound, suftaboffset = 0, sumofwidth = 0;
     const GtUword widthofsuftabpart
       = numofsuffixestoinsert/suftabparts->numofparts;
+
+    /*printf("%s: parts = "GT_WUT", mincode = "GT_WU", maxcode = "GT_WU"\n",
+             __func__,
+             suftabparts->numofparts,
+             mincode,maxcode);*/
 
     suftabparts->components
       = gt_malloc(sizeof (*suftabparts->components) * suftabparts->numofparts);
@@ -223,6 +221,7 @@ GtSuftabparts *gt_suftabparts_new(unsigned int numofparts,
     suftabparts->largestsuftabwidth = 0;
     for (part=0; part < suftabparts->numofparts; part++)
     {
+      GtUword secondidx;
       if (remainder > 0)
       {
         suftaboffset += widthofsuftabpart + 1;
@@ -237,10 +236,10 @@ GtSuftabparts *gt_suftabparts_new(unsigned int numofparts,
         {
           if (mincode <= maxcode)
           {
-            secondidx = maxcode + 1;
+            secondidx = maxcode;
           } else
           {
-            secondidx = gt_bcktab_numofallcodes(bcktab);
+            secondidx = gt_bcktab_numofallcodes(bcktab) - 1;
           }
         } else
         {
@@ -248,6 +247,13 @@ GtSuftabparts *gt_suftabparts_new(unsigned int numofparts,
                                                 suftaboffset);
         }
         secondbound = gt_bcktab_get_leftborder(bcktab,secondidx);
+        if (mincode <= maxcode && mincode > 0)
+        {
+          GtUword offset = gt_bcktab_get_leftborder(bcktab,mincode-1);
+
+          gt_assert(secondbound >= offset);
+          secondbound -= offset;
+        }
       } else
       {
         gt_assert(fct != NULL && mincode > maxcode);
@@ -280,6 +286,11 @@ GtSuftabparts *gt_suftabparts_new(unsigned int numofparts,
       sumofwidth += suftabparts->components[part].widthofpart;
       suftabparts->components[part].sumofwidth = sumofwidth;
       firstbound = secondbound;
+    }
+    if (sumofwidth != numofsuffixestoinsert)
+    {
+      printf("sumofwidth = " GT_WU " != " GT_WU "= numofsuffixestosort\n",
+              sumofwidth,numofsuffixestoinsert);
     }
     gt_assert(sumofwidth == numofsuffixestoinsert);
   }

@@ -1270,6 +1270,8 @@ static GtSuftabparts **gt_partitions_for_threads_new(
 
     gt_assert(parts > 0);
     partitions_for_threads = gt_malloc(sizeof *partitions_for_threads * parts);
+    /*gt_bcktab_leftborder_show(bcktab);*/
+    /*gt_suftabparts_showallrecords(suftabparts,true);*/
     for (part = 0; part < parts; part++)
     {
       GtCodetype mincode = gt_suftabparts_minindex(part,suftabparts);

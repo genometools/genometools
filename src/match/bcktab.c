@@ -754,8 +754,14 @@ void gt_bcktab_leftborder_show(const GtBcktab *bcktab)
 
   for (idx=0; idx<bcktab->numofallcodes; idx++)
   {
-    printf("leftborder[" FormatGtCodetype "]="GT_WU"\n",idx,
+    printf("leftborder[" FormatGtCodetype "]="GT_WU,idx,
                                     gt_bcktab_get_leftborder(bcktab,idx));
+    if (idx > 0)
+    {
+      printf(" size " GT_WU,gt_bcktab_get_leftborder(bcktab,idx) -
+                            gt_bcktab_get_leftborder(bcktab,idx-1));
+    }
+    printf("\n");
   }
 }
 
@@ -1320,7 +1326,7 @@ GtCodetype gt_bcktab_findfirstlarger(const GtBcktab *bcktab,
                                      GtCodetype maxcode,
                                      GtUword suftaboffset)
 {
-  GtCodetype left, right, found;
+  GtCodetype left, right, found, offset;
   bool found_defined = false;
 
   if (mincode <= maxcode)
@@ -1328,16 +1334,26 @@ GtCodetype gt_bcktab_findfirstlarger(const GtBcktab *bcktab,
     gt_assert(mincode < maxcode);
     left = mincode;
     right = maxcode;
+    if (mincode > 0)
+    {
+      offset = gt_bcktab_get_leftborder(bcktab,mincode - 1);
+    } else
+    {
+      offset = 0;
+    }
   } else
   {
     left = 0;
     right = bcktab->numofallcodes - 1;
+    offset = 0;
   }
   found = right + 1; /* undefined */
   while (left <= right)
   {
-    GtCodetype mid = GT_DIV2(left+right);
-    GtCodetype midval = gt_bcktab_get_leftborder(bcktab,mid);
+    GtCodetype midval, mid = GT_DIV2(left+right);
+
+    gt_assert(mincode > maxcode || left <= mid);
+    midval = gt_bcktab_get_leftborder(bcktab,mid) - offset;
     if (suftaboffset <= midval)
     {
       found = mid;

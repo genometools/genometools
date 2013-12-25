@@ -87,7 +87,7 @@ static void gt_suffixsortspace_overflow_abort(GT_UNUSED const char *f,
   exit(GT_EXIT_PROGRAMMING_ERROR);
 }
 
-GtSuffixsortspace *gt_suffixsortspace_new_generic(GtUword numofentries,
+static GtSuffixsortspace *gt_suffixsortspace_new_generic(GtUword numofentries,
                                                   GtUword maxvalue,
                                                   bool useuint,
                                                   void *tab2clone,
@@ -108,8 +108,9 @@ GtSuffixsortspace *gt_suffixsortspace_new_generic(GtUword numofentries,
   suffixsortspace->bucketleftidx = 0;
   suffixsortspace->widthrelative2bucketleftidx = 0;
 #if defined (_LP64) || defined (_WIN64)
-  gt_logger_log(logger,"suftab uses %dbit values: "
+  gt_logger_log(logger,"%s suffix_sort_space: suftab uses %dbit values: "
                        "maxvalue="GT_WU",numofentries="GT_WU,
+                       tab2clone == NULL ? "create" : "clone",
                        gt_decide_to_use_uint(useuint,maxvalue) ? 32 : 64,
                        maxvalue,numofentries);
 #endif
@@ -214,7 +215,12 @@ void gt_suffixsortspace_nooffsets(GT_UNUSED const GtSuffixsortspace *sssp)
 
 GtUword gt_suffixsortspace_getdirect(const GtSuffixsortspace *sssp,GtUword idx)
 {
-  gt_assert(sssp != NULL && idx <= sssp->maxindex);
+  gt_assert(sssp != NULL);
+  if (idx > sssp->maxindex)
+  {
+    printf("idx = " GT_WU " > " GT_WU " = maxindex\n",idx,sssp->maxindex);
+  }
+  gt_assert(idx <= sssp->maxindex);
   if (sssp->ulongtab != NULL)
   {
     return sssp->ulongtab[idx];
