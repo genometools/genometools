@@ -1271,9 +1271,10 @@ static GtSuftabparts **gt_partitions_for_threads_new(
     gt_assert(parts > 0);
     partitions_for_threads = gt_malloc(sizeof *partitions_for_threads * parts);
     /*gt_bcktab_leftborder_show(bcktab);*/
-    /*gt_suftabparts_showallrecords(suftabparts,true);*/
+    gt_suftabparts_showallrecords(suftabparts,true);
     for (part = 0; part < parts; part++)
     {
+      unsigned int parts_sub;
       GtCodetype mincode = gt_suftabparts_minindex(part,suftabparts);
       GtCodetype maxcode = gt_suftabparts_maxindex(part,suftabparts);
       GtUword widthofpart = gt_suftabparts_widthofpart(part,suftabparts);
@@ -1288,6 +1289,29 @@ static GtSuftabparts **gt_partitions_for_threads_new(
                              widthofpart,
                              specialcharacters + 1,
                              logger);
+      gt_suftabparts_showallrecords(partitions_for_threads[part],true);
+      parts_sub = gt_suftabparts_numofparts(partitions_for_threads[part]);
+      gt_assert(parts_sub > 0);
+      if (mincode != gt_suftabparts_minindex(0,partitions_for_threads[part]))
+      {
+        fprintf(stderr,"part %u: mincode = %lu != %lu = minindex[0]\n",
+                        part,
+                        mincode,
+                        gt_suftabparts_minindex(0,partitions_for_threads[part]))
+                        ;
+        exit(EXIT_FAILURE);
+      }
+      if (maxcode != gt_suftabparts_maxindex(parts_sub - 1,
+                                             partitions_for_threads[part]))
+      {
+        fprintf(stderr,"part %u: maxcode = %lu != %lu = maxindex[%u]\n",
+                        part,
+                        maxcode,
+                        gt_suftabparts_maxindex(parts_sub-1,
+                                                partitions_for_threads[part]),
+                        parts_sub-1);
+        exit(EXIT_FAILURE);
+      }
     }
     return partitions_for_threads;
   } else

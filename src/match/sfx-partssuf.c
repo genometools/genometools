@@ -32,8 +32,8 @@ typedef struct
   GtUword widthofpart,
           suftaboffset,
           sumofwidth,
-          minindex,
           nextidx,
+          minindex,
           maxindex;
 } GtSuftabpartcomponent;
 
@@ -42,8 +42,9 @@ struct GtSuftabparts
   GtSuftabpartcomponent *components;
   bool indexrange_available;
   unsigned int numofparts;
-  GtUword largestsizemappedpartwise,
-                largestsuftabwidth;
+  GtUword codeoffset,
+          largestsizemappedpartwise,
+          largestsuftabwidth;
   const GtFirstcodestab *fct;
 };
 
@@ -54,19 +55,23 @@ void gt_suftabparts_showallrecords(const GtSuftabparts *suftabparts,
   if (suftabparts->numofparts >= 1U)
   {
     unsigned int part;
-    GtUword totalwidth
+    GtUword totalwidth;
+
+    gt_assert(suftabparts->components != NULL);
+    totalwidth
       = suftabparts->components[suftabparts->numofparts - 1].sumofwidth;
     for (part = 0; part < suftabparts->numofparts; part++)
     {
       if (withminmaxindex)
       {
         gt_log_log("part %u: width="GT_WU" (%.2f%%) offset="GT_WU
-                   "minindex="GT_WU" maxindex="GT_WU" ",
+                   ", codeoffset=" GT_WU ", minindex="GT_WU" maxindex="GT_WU" ",
                    part,
                    suftabparts->components[part].widthofpart,
                    100.00 * (double) suftabparts->components[part].widthofpart/
                                      totalwidth,
                    suftabparts->components[part].suftaboffset,
+                   suftabparts->codeoffset,
                    gt_suftabparts_minindex(part,suftabparts),
                    gt_suftabparts_maxindex(part,suftabparts));
       } else
@@ -86,15 +91,15 @@ void gt_suftabparts_showallrecords(const GtSuftabparts *suftabparts,
 static GtCodetype gt_suftabparts_minindex_raw(unsigned int part,
                                               const GtSuftabparts *suftabparts)
 {
-  GtCodetype minindex;
-  gt_assert(suftabparts != NULL && part < suftabparts->numofparts);
+  GtCodetype nextidx;
 
-  minindex = (part == 0) ? 0 : suftabparts->components[part-1].nextidx + 1;
+  gt_assert(suftabparts != NULL && part < suftabparts->numofparts);
+  nextidx = (part == 0) ? 0 : suftabparts->components[part-1].nextidx + 1;
   if (suftabparts->fct != NULL)
   {
-    return gt_firstcodes_sample2full(suftabparts->fct,minindex);
+    return gt_firstcodes_sample2full(suftabparts->fct,nextidx);
   }
-  return minindex;
+  return nextidx + suftabparts->codeoffset;
 }
 
 static GtCodetype gt_suftabparts_maxindex_raw(unsigned int part,
@@ -108,7 +113,7 @@ static GtCodetype gt_suftabparts_maxindex_raw(unsigned int part,
   {
     return gt_firstcodes_sample2full(suftabparts->fct,nextidx);
   }
-  return nextidx;
+  return nextidx + suftabparts->codeoffset;
 }
 
 static void gt_suftabparts_removeemptyparts(GtSuftabparts *suftabparts,
@@ -179,8 +184,14 @@ GtSuftabparts *gt_suftabparts_new(unsigned int numofparts,
             (bcktab != NULL && fct == NULL));
   suftabparts = gt_malloc(sizeof *suftabparts);
   suftabparts->largestsizemappedpartwise = 0;
+  if (mincode <= maxcode && fct == NULL)
+  {
+    suftabparts->codeoffset = mincode;
+  } else
+  {
+    suftabparts->codeoffset = 0;
+  }
   suftabparts->fct = fct;
-  gt_assert(suftabparts != NULL);
   if (numofsuffixestoinsert == 0)
   {
     suftabparts->numofparts = 0;
@@ -365,12 +376,16 @@ void gt_suftabparts_delete(GtSuftabparts *suftabparts)
 GtCodetype gt_suftabparts_minindex(unsigned int part,
                                    const GtSuftabparts *suftabparts)
 {
+  gt_assert(suftabparts != NULL && suftabparts->components != NULL &&
+            part < suftabparts->numofparts);
   return suftabparts->components[part].minindex;
 }
 
 GtCodetype gt_suftabparts_maxindex(unsigned int part,
                                    const GtSuftabparts *suftabparts)
 {
+  gt_assert(suftabparts != NULL && suftabparts->components != NULL &&
+            part < suftabparts->numofparts);
   return suftabparts->components[part].maxindex;
 }
 
@@ -381,21 +396,21 @@ GtCodetype gt_suftabparts_maxindex_last(const GtSuftabparts *suftabparts)
 }
 
 GtUword gt_suftabparts_offset(unsigned int part,
-                                    const GtSuftabparts *suftabparts)
+                              const GtSuftabparts *suftabparts)
 {
   gt_assert(suftabparts != NULL && part < suftabparts->numofparts);
   return suftabparts->components[part].suftaboffset;
 }
 
 GtUword gt_suftabparts_sumofwidth(unsigned int part,
-                                        const GtSuftabparts *suftabparts)
+                                  const GtSuftabparts *suftabparts)
 {
   gt_assert(suftabparts != NULL && part < suftabparts->numofparts);
   return suftabparts->components[part].sumofwidth;
 }
 
 GtUword gt_suftabparts_widthofpart(unsigned int part,
-                                         const GtSuftabparts *suftabparts)
+                                   const GtSuftabparts *suftabparts)
 {
   gt_assert(suftabparts != NULL && part < suftabparts->numofparts);
   return suftabparts->components[part].widthofpart;
