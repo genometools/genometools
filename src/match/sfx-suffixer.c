@@ -557,6 +557,7 @@ int gt_Sfxiterator_delete(Sfxiterator *sfi,GtError *err)
       gt_suftabparts_numofparts(sfi->suftabparts) > 1U &&
       sfi->outfpbcktab != NULL)
   {
+    gt_suftabparts_showallrecords(sfi->suftabparts,true);
     if (gt_bcktab_remap_all(sfi->bcktab,err) != 0)
     {
       haserr = true;
@@ -1294,7 +1295,7 @@ static GtSuftabparts **gt_partitions_for_threads_new(
       gt_assert(parts_sub > 0);
       if (mincode != gt_suftabparts_minindex(0,partitions_for_threads[part]))
       {
-        fprintf(stderr,"part %u: mincode = %lu != %lu = minindex[0]\n",
+        fprintf(stderr,"part %u: mincode=" GT_WU "!=" GT_WU "=minindex[0]\n",
                         part,
                         mincode,
                         gt_suftabparts_minindex(0,partitions_for_threads[part]))
@@ -1304,7 +1305,7 @@ static GtSuftabparts **gt_partitions_for_threads_new(
       if (maxcode != gt_suftabparts_maxindex(parts_sub - 1,
                                              partitions_for_threads[part]))
       {
-        fprintf(stderr,"part %u: maxcode = %lu != %lu = maxindex[%u]\n",
+        fprintf(stderr,"part %u: maxcode=" GT_WU " != " GT_WU "maxindex[%u]\n",
                         part,
                         maxcode,
                         gt_suftabparts_maxindex(parts_sub-1,
