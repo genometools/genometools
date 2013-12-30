@@ -186,6 +186,7 @@ GtSuffixsortspace *gt_suffixsortspace_clone(GtSuffixsortspace *sssp,
                                                logger);
   gt_assert(clonenumber > 0);
   cloned_sssp->clonenumber = clonenumber;
+  cloned_sssp->partoffset = sssp->partoffset;
   return cloned_sssp;
 }
 
@@ -434,10 +435,11 @@ void gt_suffixsortspace_delete_cloned(GtSuffixsortspace **sssp_tab,
     gt_assert(sssp->clonenumber == p);
     if (!found && sssp->longestidx.defined)
     {
-      if ((sssp->ulongtab != NULL &&
-          sssp->ulongtab[sssp->longestidx.valueunsignedlong] == 0) ||
-          (sssp->uinttab != NULL &&
-          sssp->uinttab[sssp->longestidx.valueunsignedlong] == 0))
+      GtUword zerotest;
+      gt_assert(sssp->longestidx.valueunsignedlong >= sssp->partoffset);
+      zerotest = sssp->longestidx.valueunsignedlong - sssp->partoffset;
+      if ((sssp->ulongtab != NULL && sssp->ulongtab[zerotest] == 0) ||
+          (sssp->uinttab != NULL && sssp->uinttab[zerotest] == 0))
       {
         sssp_tab[0]->longestidx.defined = true;
         sssp_tab[0]->longestidx.valueunsignedlong
@@ -446,6 +448,7 @@ void gt_suffixsortspace_delete_cloned(GtSuffixsortspace **sssp_tab,
       }
     }
     gt_suffixsortspace_delete(sssp_tab[p],false);
+    sssp_tab[p] = NULL;
   }
 }
 

@@ -1800,12 +1800,15 @@ Sfxiterator *gt_Sfxiterator_new_withadditionalvalues(
                                          logger);
     gt_assert(sfi->suftabparts != NULL);
 #ifdef GT_THREADS_ENABLED
-    sfi->partitions_for_threads
-       = gt_partitions_for_threads_new(sfi->suftabparts,
-                                       sfi->bcktab,
-                                       sfxmrlist,
-                                       specialcharacters,
-                                       logger);
+    if (gt_suftabparts_numofparts(sfi->suftabparts) > 0)
+    {
+      sfi->partitions_for_threads
+         = gt_partitions_for_threads_new(sfi->suftabparts,
+                                         sfi->bcktab,
+                                         sfxmrlist,
+                                         specialcharacters,
+                                         logger);
+    }
 #endif
     if (gt_suftabparts_numofparts(sfi->suftabparts) > 1U)
     {
@@ -2044,6 +2047,7 @@ static void gt_sfxiterator_preparethispart(Sfxiterator *sfi)
                                sfi->currentmaxcode,sumofwidthforpart);
 #ifdef GT_THREADS_ENABLED
     if (GT_SFX_THREADS_JOBS > 1U &&
+        sfi->partitions_for_threads != NULL &&
         gt_suftabparts_numofparts(sfi->partitions_for_threads[sfi->part]) > 1U)
     {
       gt_threaded_sortallbuckets(sfi->suffixsortspace,

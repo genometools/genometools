@@ -1331,6 +1331,10 @@ GtCodetype gt_bcktab_findfirstlarger(const GtBcktab *bcktab,
 
   if (mincode <= maxcode)
   {
+    if (mincode == maxcode)
+    {
+      return mincode;
+    }
     gt_assert(mincode < maxcode);
     left = mincode;
     right = maxcode;
@@ -1360,7 +1364,7 @@ GtCodetype gt_bcktab_findfirstlarger(const GtBcktab *bcktab,
       found_defined = true;
       if (suftaboffset < midval)
       {
-        if (right == 0)
+        if (mid == 0)
         {
           break;
         }

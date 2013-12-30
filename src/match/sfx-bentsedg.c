@@ -1654,6 +1654,7 @@ typedef struct
              maxcode;
   GtUword totalwidth;
   GtBentsedgresources *bsr;
+  unsigned int thread_num;
   GtThread *thread;
 } GtBentsedge_thread_info;
 
@@ -1708,6 +1709,7 @@ void gt_threaded_sortallbuckets(GtSuffixsortspace *suffixsortspace,
   sssp_tab = gt_malloc(sizeof *sssp_tab * thread_parts);
   for (tp = 0; !haserr && tp < thread_parts; tp++)
   {
+    th_tab[tp].thread_num = tp;
     th_tab[tp].numofchars = numofchars;
     th_tab[tp].prefixlength = prefixlength;
     th_tab[tp].bcktab = bcktab;
