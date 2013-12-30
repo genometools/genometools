@@ -237,7 +237,8 @@ GtSuftabparts_rc *gt_suftabparts_rc_new(unsigned int numofparts,
       } else
       {
         secondidx = bcktab != NULL
-                      ? gt_bcktab_findfirstlarger(bcktab,suftaboffset)
+                      ? gt_bcktab_findfirstlarger(bcktab,(GtCodetype) 1,
+                                                  (GtCodetype) 0,suftaboffset)
                       : gt_randomcodes_findfirstsamplelarger(fct,suftaboffset);
       }
       suftabparts_rc->components[part].nextidx = secondidx;

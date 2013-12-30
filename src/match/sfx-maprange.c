@@ -438,10 +438,9 @@ void gt_Sfxmappedrangelist_add(GtSfxmappedrangelist *sfxmrlist,
   sfxmrlist->arr[sfxmrlist->nextfree++] = sfxmappedrange;
 }
 
-GtUword gt_Sfxmappedrangelist_size_mapped(
-                                         const GtSfxmappedrangelist *sfxmrlist,
-                                         GtUword minindex,
-                                         GtUword maxindex)
+GtUword gt_Sfxmappedrangelist_size_mapped(const GtSfxmappedrangelist *sfxmrlist,
+                                          GtUword minindex,
+                                          GtUword maxindex)
 {
   if (sfxmrlist == NULL)
   {
@@ -470,8 +469,7 @@ GtUword gt_Sfxmappedrangelist_size_mapped(
   }
 }
 
-GtUword gt_Sfxmappedrangelist_size_entire(
-                                         const GtSfxmappedrangelist *sfxmrlist)
+GtUword gt_Sfxmappedrangelist_size_entire(const GtSfxmappedrangelist *sfxmrlist)
 {
   if (sfxmrlist == NULL)
   {

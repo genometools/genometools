@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2007-2009 Stefan Kurtz <kurtz@zbh.uni-hamburg.de>
-  Copyright (c) 2007-2009 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2007-2013 Stefan Kurtz <kurtz@zbh.uni-hamburg.de>
+  Copyright (c) 2007-2013 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -20,6 +20,7 @@
 
 #include "core/error_api.h"
 #include "core/encseq.h"
+#include "core/logger_api.h"
 #include "esa-seqread.h"
 #include "bare-encseq.h"
 #include "sfx-sain.h"
@@ -52,5 +53,13 @@ int gt_enumeratemaxpairs_sain(GtSainSufLcpIterator *suflcpiterator,
                               GtProcessmaxpairs processmaxpairs,
                               void *processmaxpairsinfo,
                               GtError *err);
+
+int gt_callenummaxpairs(const char *indexname,
+                        unsigned int userdefinedleastlength,
+                        bool scanfile,
+                        GtProcessmaxpairs processmaxpairs,
+                        void *processmaxpairsinfo,
+                        GtLogger *logger,
+                        GtError *err);
 
 #endif

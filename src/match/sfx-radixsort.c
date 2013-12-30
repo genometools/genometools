@@ -32,7 +32,7 @@ void gt_sfx_radixsort_str(GtRadixsortstringinfo *rsi,
 {
   GtUword idx, *suffixes;
   GtSuffixsortspace_exportptr *exportptr
-    = gt_suffixsortspace_exportptr(subbucketleft, sssp);
+    = gt_suffixsortspace_exportptr(sssp, subbucketleft);
   bool allocated = false;
 
   if (exportptr->ulongtabsectionptr != NULL)

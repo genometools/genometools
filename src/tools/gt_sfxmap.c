@@ -1294,6 +1294,7 @@ typedef struct
 } Checkunsortedrangeinfo;
 
 static void gt_sfxmap_sortmaxdepth_processunsortedrange(void *voiddcov,
+                                              GT_UNUSED GtSuffixsortspace *sssp,
                                               GtUword subbucketleft,
                                               GtUword width,
                                               GT_UNUSED GtUword depth)
@@ -1341,14 +1342,10 @@ static int gt_sfxmap_performsortmaxdepth(const Sfxmapoptions *arguments,
   }
   if (!haserr)
   {
-    GtUword idx, totallength = gt_encseq_total_length(curi.encseq);
+    GtUword totallength = gt_encseq_total_length(curi.encseq);
 
-    curi.sssp = gt_suffixsortspace_new(totallength+1, totallength, true,
-                                       logger);
-    for (idx=0; idx<=totallength; idx++)
-    {
-      gt_suffixsortspace_setdirect(curi.sssp,idx,idx);
-    }
+    curi.sssp = gt_suffixsortspace_new(totallength+1,totallength, true, logger);
+    gt_suffixsortspace_init_identity(curi.sssp,totallength+1);
     curi.readmode = GT_READMODE_FORWARD;
     curi.sortmaxdepth = arguments->sortmaxdepth;
     gt_sortallsuffixesfromstart(curi.sssp,
