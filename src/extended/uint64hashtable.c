@@ -205,7 +205,8 @@ bool gt_uint64hashtable_search(GtUint64hashtable *table, uint64_t key,
     }
     fprintf(stderr, "function %s, file %s, line %d.\n"
                     "Cannot find empty slot in hashtable: "
-                    "This is probably a bug, please report it.\n",
+                    "This is probably a bug, please report it at "
+                    "https://github.com/genometools/genometools/issues.\n",
                     __func__, __FILE__, __LINE__);
     exit(GT_EXIT_PROGRAMMING_ERROR);
   } else
