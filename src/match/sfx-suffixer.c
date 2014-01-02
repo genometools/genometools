@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2007-2011 Stefan Kurtz <kurtz@zbh.uni-hamburg.de>
-  Copyright (c) 2007-2011 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2007-2013 Stefan Kurtz <kurtz@zbh.uni-hamburg.de>
+  Copyright (c) 2007-2013 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -59,12 +59,6 @@
 #include "sfx-suffixgetset.h"
 #include "sfx-maprange.h"
 
-typedef struct
-{
-  GtUword allocatedSuffixptr, nextfreeSuffixptr;
-  GtSuffixsortspace *sssp;
-} GtSuffixposbuffer;
-
 struct Sfxiterator
 {
   /* globally constant */
@@ -91,12 +85,11 @@ struct Sfxiterator
   GtUword widthofpart;
   unsigned int part;
   GtOutlcpinfo *outlcpinfo;
-  GtSuffixposbuffer fusp;
-  GtRange overhang;
   bool exhausted;
   GtUint64 bucketiterstep; /* for progressbar */
   GtLogger *logger;
   GtTimer *sfxprogress;
+  GtSSSPbuf *sssp_buf;
   GtSpecialrangeiterator *sri; /* refers to space used in each part */
 
   /* use for generating k-mer codes */
@@ -116,6 +109,9 @@ struct Sfxiterator
   GtUword spmopt_numofallprefixcodes,
                 spmopt_numofallsuffixcodes;
   GtSfxmappedrange *mappedmarkprefixbuckets;
+#ifdef GT_THREADS_ENABLED
+  GtSuftabparts **partitions_for_threads;
+#endif
 };
 
 #ifdef SKDEBUG
@@ -517,6 +513,23 @@ static void sfx_derivespecialcodesonthefly(Sfxiterator *sfi)
   }
 }
 
+#ifdef GT_THREADS_ENABLED
+static void gt_suftabparts_multi_delete(GtSuftabparts **suftabparts_tab,
+                                        unsigned int parts)
+{
+  if (suftabparts_tab != NULL)
+  {
+    unsigned int part;
+
+    for (part = 0; part < parts; part++)
+    {
+      gt_suftabparts_delete(suftabparts_tab[part]);
+    }
+    gt_free(suftabparts_tab);
+  }
+}
+#endif
+
 int gt_Sfxiterator_delete(Sfxiterator *sfi,GtError *err)
 {
   bool haserr = false;
@@ -544,6 +557,7 @@ int gt_Sfxiterator_delete(Sfxiterator *sfi,GtError *err)
       gt_suftabparts_numofparts(sfi->suftabparts) > 1U &&
       sfi->outfpbcktab != NULL)
   {
+    gt_suftabparts_showallrecords(sfi->suftabparts,true);
     if (gt_bcktab_remap_all(sfi->bcktab,err) != 0)
     {
       haserr = true;
@@ -558,6 +572,10 @@ int gt_Sfxiterator_delete(Sfxiterator *sfi,GtError *err)
     }
   }
   gt_bcktab_delete(sfi->bcktab);
+#ifdef GT_THREADS_ENABLED
+  gt_suftabparts_multi_delete(sfi->partitions_for_threads,
+                              gt_suftabparts_numofparts(sfi->suftabparts));
+#endif
   gt_suftabparts_delete(sfi->suftabparts);
   gt_Outlcpinfo_delete(sfi->outlcpinfoforsample);
   if (sfi->mappedmarkprefixbuckets == NULL)
@@ -568,6 +586,7 @@ int gt_Sfxiterator_delete(Sfxiterator *sfi,GtError *err)
   sfi->mappedmarkprefixbuckets = NULL;
   gt_free(sfi->marksuffixbuckets);
   gt_differencecover_delete(sfi->dcov);
+  gt_SSSPbuf_delete(sfi->sssp_buf);
   gt_free(sfi);
   return haserr ? -1 : 0;
 }
@@ -1235,6 +1254,76 @@ static void gt_bcktab_code_to_minmax_prefix_index(GtUword *mincode,
   *maxcode = gt_bcktab_code_to_prefix_index(*maxcode,data);
 }
 
+#ifdef GT_THREADS_ENABLED
+#define GT_SFX_THREADS_JOBS gt_jobs
+static GtSuftabparts **gt_partitions_for_threads_new(
+                               const GtSuftabparts *suftabparts,
+                               const GtBcktab *bcktab,
+                               GtSfxmappedrangelist *sfxmrlist,
+                               GtUword specialcharacters,
+                               GtLogger *logger)
+{
+  if (GT_SFX_THREADS_JOBS > 1U)
+  {
+    const unsigned int parts = gt_suftabparts_numofparts(suftabparts);
+    unsigned int part;
+    GtSuftabparts **partitions_for_threads;
+
+    gt_assert(parts > 0);
+    partitions_for_threads = gt_malloc(sizeof *partitions_for_threads * parts);
+    /*gt_bcktab_leftborder_show(bcktab);*/
+    gt_suftabparts_showallrecords(suftabparts,true);
+    for (part = 0; part < parts; part++)
+    {
+      unsigned int parts_sub;
+      GtCodetype mincode = gt_suftabparts_minindex(part,suftabparts);
+      GtCodetype maxcode = gt_suftabparts_maxindex(part,suftabparts);
+      GtUword widthofpart = gt_suftabparts_widthofpart(part,suftabparts);
+
+      partitions_for_threads[part]
+        = gt_suftabparts_new(GT_SFX_THREADS_JOBS,
+                             bcktab,
+                             mincode,
+                             maxcode,
+                             NULL,
+                             sfxmrlist,
+                             widthofpart,
+                             specialcharacters + 1,
+                             logger);
+      gt_suftabparts_showallrecords(partitions_for_threads[part],true);
+      parts_sub = gt_suftabparts_numofparts(partitions_for_threads[part]);
+      gt_assert(parts_sub > 0);
+      if (mincode != gt_suftabparts_minindex(0,partitions_for_threads[part]))
+      {
+        fprintf(stderr,"part %u: mincode=" GT_WU "!=" GT_WU "=minindex[0]\n",
+                        part,
+                        mincode,
+                        gt_suftabparts_minindex(0,partitions_for_threads[part]))
+                        ;
+        exit(EXIT_FAILURE);
+      }
+      if (maxcode != gt_suftabparts_maxindex(parts_sub - 1,
+                                             partitions_for_threads[part]))
+      {
+        fprintf(stderr,"part %u: maxcode=" GT_WU " != " GT_WU "maxindex[%u]\n",
+                        part,
+                        maxcode,
+                        gt_suftabparts_maxindex(parts_sub-1,
+                                                partitions_for_threads[part]),
+                        parts_sub-1);
+        exit(EXIT_FAILURE);
+      }
+    }
+    return partitions_for_threads;
+  } else
+  {
+    return NULL;
+  }
+}
+#else
+#define GT_SFX_THREADS_JOBS 1U
+#endif
+
 Sfxiterator *gt_Sfxiterator_new_withadditionalvalues(
                                 const GtEncseq *encseq,
                                 GtReadmode readmode,
@@ -1308,6 +1397,9 @@ Sfxiterator *gt_Sfxiterator_new_withadditionalvalues(
     sfi->nextfreeCodeatposition = 0;
     sfi->suffixsortspace = NULL;
     sfi->suftabparts = NULL;
+#ifdef GT_THREADS_ENABLED
+    sfi->partitions_for_threads = NULL;
+#endif
     sfi->encseq = encseq;
     sfi->readmode = readmode;
     sfi->numofchars = gt_encseq_alphabetnumofchars(encseq);
@@ -1361,6 +1453,7 @@ Sfxiterator *gt_Sfxiterator_new_withadditionalvalues(
     sfi->exhausted = false;
     sfi->bucketiterstep = 0;
     sfi->logger = logger;
+    sfi->sssp_buf = NULL;
     sfi->sfxprogress = sfxprogress;
     if (sfi->sfxstrategy.differencecover > 0 &&
         specialcharacters < sfi->totallength)
@@ -1542,14 +1635,12 @@ Sfxiterator *gt_Sfxiterator_new_withadditionalvalues(
   SHOWCURRENTSPACE;
   if (!haserr)
   {
-    GtUword largestbucketsize,
-                  saved_bucketswithoutwholeleaf;
+    GtUword largestbucketsize, saved_bucketswithoutwholeleaf;
     gt_assert(sfi != NULL);
     sfi->storespecials = true;
     if (sfxprogress != NULL)
     {
-      gt_timer_show_progress(sfxprogress, "counting prefix distribution",
-                             stdout);
+      gt_timer_show_progress(sfxprogress,"counting prefix distribution",stdout);
     }
     if (prefixlength == 1U)
     {
@@ -1557,9 +1648,9 @@ Sfxiterator *gt_Sfxiterator_new_withadditionalvalues(
 
       for (charidx=0; charidx<sfi->numofchars; charidx++)
       {
-        unsigned int updateindex = GT_ISDIRCOMPLEMENT(readmode) ?
-                                        GT_COMPLEMENTBASE(charidx) :
-                                        charidx;
+        unsigned int updateindex = GT_ISDIRCOMPLEMENT(readmode)
+                                     ? GT_COMPLEMENTBASE(charidx)
+                                     : charidx;
         gt_bcktab_leftborder_assign(sfi->leftborder,(GtCodetype) updateindex,
                                     gt_encseq_charcount(encseq,
                                                         (GtUchar) charidx));
@@ -1700,12 +1791,25 @@ Sfxiterator *gt_Sfxiterator_new_withadditionalvalues(
     gt_assert(sfi != NULL);
     sfi->suftabparts = gt_suftabparts_new(numofparts,
                                          sfi->bcktab,
+                                         (GtCodetype) 1,
+                                         (GtCodetype) 0,
                                          NULL,
                                          sfxmrlist,
                                          numofsuffixestosort,
                                          specialcharacters + 1,
                                          logger);
     gt_assert(sfi->suftabparts != NULL);
+#ifdef GT_THREADS_ENABLED
+    if (gt_suftabparts_numofparts(sfi->suftabparts) > 0)
+    {
+      sfi->partitions_for_threads
+         = gt_partitions_for_threads_new(sfi->suftabparts,
+                                         sfi->bcktab,
+                                         sfxmrlist,
+                                         specialcharacters,
+                                         logger);
+    }
+#endif
     if (gt_suftabparts_numofparts(sfi->suftabparts) > 1U)
     {
       gt_bcktab_storetmp(sfi->bcktab);
@@ -1731,12 +1835,6 @@ Sfxiterator *gt_Sfxiterator_new_withadditionalvalues(
   if (!haserr)
   {
     gt_assert(sfi != NULL);
-    sfi->suffixsortspace
-      = gt_suffixsortspace_new(gt_suftabparts_largest_width(sfi->suftabparts),
-                               sfi->totallength,
-                               sfi->sfxstrategy.suftabuint,
-                               logger);
-    gt_assert(sfi->suffixsortspace);
     if (gt_encseq_has_specialranges(sfi->encseq))
     {
       sfi->sri = gt_specialrangeiterator_new(sfi->encseq,
@@ -1746,10 +1844,14 @@ Sfxiterator *gt_Sfxiterator_new_withadditionalvalues(
     {
       sfi->sri = NULL;
     }
-    sfi->fusp.sssp = sfi->suffixsortspace;
-    sfi->fusp.allocatedSuffixptr
-      = gt_suftabparts_largest_width(sfi->suftabparts);
-    sfi->overhang.start = sfi->overhang.end = 0;
+    sfi->suffixsortspace
+      = gt_suffixsortspace_new(gt_suftabparts_largest_width(sfi->suftabparts),
+                               sfi->totallength,
+                               sfi->sfxstrategy.suftabuint,
+                               logger);
+    gt_assert(sfi->suffixsortspace != NULL);
+    sfi->sssp_buf
+      = gt_SSSPbuf_new(gt_suftabparts_largest_width(sfi->suftabparts));
   }
   SHOWACTUALSPACE;
   gt_Sfxmappedrangelist_delete(sfxmrlist);
@@ -1787,11 +1889,20 @@ Sfxiterator *gt_Sfxiterator_new(const GtEncseq *encseq,
                                 err);
 }
 
-#ifdef GT_THREADS_ENABLED
-#define GT_SFX_THREADS_JOBS gt_jobs
-#else
-#define GT_SFX_THREADS_JOBS 1U
-#endif
+static void gt_suffixer_sort_with_dcov(void *voidsfi,
+                                       GtSuffixsortspace *sssp,
+                                       GtUword blisbl,
+                                       GtUword width,
+                                       GtUword depth)
+{
+  Sfxiterator *sfi = (Sfxiterator *) voidsfi;
+
+  gt_assert(sfi != NULL);
+  gt_differencecover_sortunsortedbucket(sssp,
+                                        gt_Outlcpinfo_lcpvalues_ref(
+                                               sfi->outlcpinfo),
+                                        sfi->dcov, blisbl, width,depth);
+}
 
 static void gt_sfxiterator_preparethispart(Sfxiterator *sfi)
 {
@@ -1838,7 +1949,7 @@ static void gt_sfxiterator_preparethispart(Sfxiterator *sfi)
   SHOWACTUALSPACE;
   gt_suffixsortspace_partoffset_set(sfi->suffixsortspace,
                                     gt_suftabparts_offset(sfi->part,
-                                                             sfi->suftabparts));
+                                                          sfi->suftabparts));
   if (sfi->sfxstrategy.spmopt_minlength == 0)
   {
     if (sfi->sfxstrategy.storespecialcodes)
@@ -1853,7 +1964,7 @@ static void gt_sfxiterator_preparethispart(Sfxiterator *sfi)
     }
   }
   SHOWACTUALSPACE;
-  sfi->exportptr = gt_suffixsortspace_exportptr(0,sfi->suffixsortspace);
+  sfi->exportptr = gt_suffixsortspace_exportptr(sfi->suffixsortspace, 0);
   if (sfi->prefixlength > 1U
       && gt_encseq_has_twobitencoding(sfi->encseq)
       && !sfi->sfxstrategy.kmerswithencseqreader)
@@ -1902,11 +2013,6 @@ static void gt_sfxiterator_preparethispart(Sfxiterator *sfi)
                                   sumofwidthforpart,sfi->numofchars);
   }
   SHOWACTUALSPACE;
-  if (sfi->sfxstrategy.differencecover > 0 && sfi->dcov != NULL)
-  {
-    gt_differencecover_set_sssp_lcp(sfi->dcov,sfi->suffixsortspace,
-                                    sfi->outlcpinfo);
-  }
   if (sfi->part == 0)
   {
     gt_logger_log(sfi->logger,"used workspace for sorting: %.2f MB",
@@ -1916,6 +2022,7 @@ static void gt_sfxiterator_preparethispart(Sfxiterator *sfi)
   {
     unsigned int sortmaxdepth;
     GtProcessunsortedsuffixrange processunsortedsuffixrange;
+    void *processunsortedsuffixrangeinfo;
 
     if (sfi->dcov == NULL)
     {
@@ -1927,15 +2034,37 @@ static void gt_sfxiterator_preparethispart(Sfxiterator *sfi)
         sortmaxdepth = sfi->sfxstrategy.userdefinedsortmaxdepth;
       }
       processunsortedsuffixrange = NULL;
+      processunsortedsuffixrangeinfo = NULL;
     } else
     {
       gt_assert(sfi->sfxstrategy.userdefinedsortmaxdepth == 0);
       sortmaxdepth = sfi->sfxstrategy.differencecover;
-      processunsortedsuffixrange = gt_differencecover_sortunsortedbucket;
+      processunsortedsuffixrange = gt_suffixer_sort_with_dcov;
+      processunsortedsuffixrangeinfo = sfi;
     }
     gt_assert(sortmaxdepth != 0 || processunsortedsuffixrange == NULL);
     gt_bcktab_determinemaxsize(sfi->bcktab, sfi->currentmincode,
                                sfi->currentmaxcode,sumofwidthforpart);
+#ifdef GT_THREADS_ENABLED
+    if (GT_SFX_THREADS_JOBS > 1U &&
+        sfi->partitions_for_threads != NULL &&
+        gt_suftabparts_numofparts(sfi->partitions_for_threads[sfi->part]) > 1U)
+    {
+      gt_threaded_sortallbuckets(sfi->suffixsortspace,
+                                 sfi->partitions_for_threads[sfi->part],
+                                 sfi->encseq,
+                                 sfi->readmode,
+                                 sfi->bcktab,
+                                 sfi->numofchars,
+                                 sfi->prefixlength,
+                                 sortmaxdepth,
+                                 &sfi->sfxstrategy,
+                                 processunsortedsuffixrange,
+                                 processunsortedsuffixrangeinfo,
+                                 sfi->logger);
+    } else
+    {
+#endif
     gt_sortallbuckets(sfi->suffixsortspace,
                       sumofwidthforpart,
                       bucketspec2,
@@ -1950,9 +2079,12 @@ static void gt_sfxiterator_preparethispart(Sfxiterator *sfi)
                       sortmaxdepth,
                       &sfi->sfxstrategy,
                       processunsortedsuffixrange,
-                      (void *) sfi->dcov,
+                      processunsortedsuffixrangeinfo,
                       &sfi->bucketiterstep,
                       sfi->logger);
+#ifdef GT_THREADS_ENABLED
+    }
+#endif
   }
   if (bucketspec2 != NULL)
   {
@@ -1962,134 +2094,6 @@ static void gt_sfxiterator_preparethispart(Sfxiterator *sfi)
   }
   SHOWACTUALSPACE;
   sfi->part++;
-}
-
-static void insertfullspecialrange(Sfxiterator *sfi,
-                                   GtUword leftpos,
-                                   GtUword rightpos)
-{
-  GtUword pos;
-
-  gt_assert(leftpos < rightpos);
-  if (GT_ISDIRREVERSE(sfi->readmode))
-  {
-    pos = rightpos - 1;
-  } else
-  {
-    pos = leftpos;
-  }
-  while (true)
-  {
-    if (GT_ISDIRREVERSE(sfi->readmode))
-    {
-      gt_assert(pos < sfi->totallength);
-      gt_suffixsortspace_setdirect(sfi->fusp.sssp,
-                                   sfi->fusp.nextfreeSuffixptr,
-                                   GT_REVERSEPOS(sfi->totallength,pos));
-      sfi->fusp.nextfreeSuffixptr++;
-      if (pos == leftpos)
-      {
-        break;
-      }
-      pos--;
-    } else
-    {
-      gt_suffixsortspace_setdirect(sfi->fusp.sssp,
-                                   sfi->fusp.nextfreeSuffixptr,
-                                   pos);
-      sfi->fusp.nextfreeSuffixptr++;
-      if (pos == rightpos-1)
-      {
-        break;
-      }
-      pos++;
-    }
-  }
-}
-
-static void fillspecialnextpage(Sfxiterator *sfi)
-{
-  GtRange range;
-  GtUword width;
-
-  while (true)
-  {
-    if (sfi->overhang.start < sfi->overhang.end)
-    {
-      width = sfi->overhang.end - sfi->overhang.start;
-      if (sfi->fusp.nextfreeSuffixptr + width > sfi->fusp.allocatedSuffixptr)
-      {
-        /* does not fit into the buffer, so only output a part */
-        GtUword rest = sfi->fusp.nextfreeSuffixptr +
-                             width - sfi->fusp.allocatedSuffixptr;
-        gt_assert(rest > 0);
-        if (GT_ISDIRREVERSE(sfi->readmode))
-        {
-          insertfullspecialrange(sfi,sfi->overhang.start + rest,
-                                 sfi->overhang.end);
-          sfi->overhang.end = sfi->overhang.start + rest;
-        } else
-        {
-          insertfullspecialrange(sfi,sfi->overhang.start,
-                                 sfi->overhang.end - rest);
-          sfi->overhang.start = sfi->overhang.end - rest;
-        }
-        break;
-      }
-      if (sfi->fusp.nextfreeSuffixptr + width == sfi->fusp.allocatedSuffixptr)
-      { /* overhang fits into the buffer and buffer is full */
-        insertfullspecialrange(sfi,sfi->overhang.start,sfi->overhang.end);
-        sfi->overhang.start = sfi->overhang.end = 0;
-        break;
-      }
-      /* overhang fits into the buffer and buffer is not full */
-      insertfullspecialrange(sfi,sfi->overhang.start,sfi->overhang.end);
-      sfi->overhang.start = sfi->overhang.end = 0;
-    } else
-    {
-      if (sfi->sri != NULL && gt_specialrangeiterator_next(sfi->sri,&range))
-      {
-        width = range.end - range.start;
-        gt_assert(width > 0);
-        if (sfi->fusp.nextfreeSuffixptr + width > sfi->fusp.allocatedSuffixptr)
-        { /* does not fit into the buffer, so only output a part */
-          GtUword rest = sfi->fusp.nextfreeSuffixptr +
-                               width - sfi->fusp.allocatedSuffixptr;
-          if (GT_ISDIRREVERSE(sfi->readmode))
-          {
-            insertfullspecialrange(sfi,range.start + rest, range.end);
-            sfi->overhang.start = range.start;
-            sfi->overhang.end = range.start + rest;
-          } else
-          {
-            insertfullspecialrange(sfi,range.start,range.end - rest);
-            sfi->overhang.start = range.end - rest;
-            sfi->overhang.end = range.end;
-          }
-          break;
-        }
-        if (sfi->fusp.nextfreeSuffixptr + width == sfi->fusp.allocatedSuffixptr)
-        { /* overhang fits into the buffer and buffer is full */
-          insertfullspecialrange(sfi,range.start,range.end);
-          sfi->overhang.start = sfi->overhang.end = 0;
-          break;
-        }
-        insertfullspecialrange(sfi,range.start,range.end);
-        sfi->overhang.start = sfi->overhang.end = 0;
-      } else
-      {
-        if (sfi->fusp.nextfreeSuffixptr < sfi->fusp.allocatedSuffixptr)
-        {
-          gt_suffixsortspace_setdirect(sfi->fusp.sssp,
-                                       sfi->fusp.nextfreeSuffixptr,
-                                       sfi->totallength);
-          sfi->fusp.nextfreeSuffixptr++;
-          sfi->exhausted = true;
-        }
-        break;
-      }
-    }
-  }
 }
 
 const GtSuffixsortspace *gt_Sfxiterator_next(GtUword *numberofsuffixes,
@@ -2114,18 +2118,21 @@ const GtSuffixsortspace *gt_Sfxiterator_next(GtUword *numberofsuffixes,
     }
     return NULL;
   }
-  sfi->fusp.nextfreeSuffixptr = 0;
   if (sfi->sfxstrategy.spmopt_minlength == 0)
   {
     gt_suffixsortspace_partoffset_set(sfi->suffixsortspace,
                                       sfi->totallength-sfi->specialcharacters);
-    fillspecialnextpage(sfi);
-    gt_assert(sfi->fusp.nextfreeSuffixptr > 0);
+    sfi->exhausted = gt_SSSPbuf_fillspecialnextpage(sfi->suffixsortspace,
+                                                    sfi->readmode,
+                                                    sfi->sri,
+                                                    sfi->totallength,
+                                                    sfi->sssp_buf);
+    *numberofsuffixes = gt_SSSPbuf_filled(sfi->sssp_buf);
   } else
   {
     sfi->exhausted = true;
+    *numberofsuffixes = 0;
   }
-  *numberofsuffixes = sfi->fusp.nextfreeSuffixptr;
   if (specialsuffixes != NULL)
   {
     *specialsuffixes = true;

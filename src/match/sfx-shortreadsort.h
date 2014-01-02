@@ -77,6 +77,7 @@ void gt_shortreadsort_sssp_add_unsorted(const GtShortreadsortworkinfo *srsw,
                                         GtUword subbucketleft,
                                         GtUword width,
                                         GtUword maxdepth,
+                                        GtSuffixsortspace *sssp,
                                         GtProcessunsortedsuffixrange
                                           processunsortedsuffixrange,
                                         void *processunsortedsuffixrangeinfo);

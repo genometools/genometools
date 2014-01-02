@@ -362,46 +362,6 @@ static int gt_simplesuffixprefixmatchoutput(GT_UNUSED void *info,
   return 0;
 }
 
-static int callenummaxpairs(const char *indexname,
-                            unsigned int userdefinedleastlength,
-                            bool scanfile,
-                            GtProcessmaxpairs processmaxpairs,
-                            void *processmaxpairsinfo,
-                            GtLogger *logger,
-                            GtError *err)
-{
-  bool haserr = false;
-  Sequentialsuffixarrayreader *ssar;
-
-  gt_error_check(err);
-  ssar = gt_newSequentialsuffixarrayreaderfromfile(indexname,
-                                                   SARR_LCPTAB |
-                                                   SARR_SUFTAB |
-                                                   SARR_ESQTAB |
-                                                   SARR_SSPTAB,
-                                                   scanfile,
-                                                   logger,
-                                                   err);
-  if (ssar == NULL)
-  {
-    haserr = true;
-  }
-  if (!haserr &&
-      gt_enumeratemaxpairs(ssar,
-                           userdefinedleastlength,
-                           processmaxpairs,
-                           processmaxpairsinfo,
-                           err) != 0)
-  {
-    haserr = true;
-  }
-  if (ssar != NULL)
-  {
-    gt_freeSequentialsuffixarrayreader(&ssar);
-  }
-  return haserr ? -1 : 0;
-}
-
 static void *gt_repfind_arguments_new(void)
 {
   Maxpairsoptions *arguments;
@@ -575,13 +535,13 @@ static int gt_repfind_runner(GT_UNUSED int argc,
               processmaxpairsdata = (void *) querymatchspaceptr;
             }
           }
-          if (callenummaxpairs(gt_str_get(arguments->indexname),
-                               arguments->userdefinedleastlength,
-                               arguments->scanfile,
-                               processmaxpairs,
-                               processmaxpairsdata,
-                               logger,
-                               err) != 0)
+          if (gt_callenummaxpairs(gt_str_get(arguments->indexname),
+                                  arguments->userdefinedleastlength,
+                                  arguments->scanfile,
+                                  processmaxpairs,
+                                  processmaxpairsdata,
+                                  logger,
+                                  err) != 0)
           {
             haserr = true;
           }

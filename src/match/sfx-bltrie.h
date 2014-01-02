@@ -48,9 +48,9 @@ void gt_blindtrie_suffixsort(GtBlindtrie *blindtrie,
                              GtUword numberofsuffixes,
                              GtUword offset,
                              GtUword sortmaxdepth,
-                             void *voiddcov,
                              GtProcessunsortedsuffixrange
-                               processunsortedsuffixrange);
+                               processunsortedsuffixrange,
+                             void *processunsortedsuffixrangeinfo);
 
 void gt_blindtrie_delete(GtBlindtrie *blindtrie);
 

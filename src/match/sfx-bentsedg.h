@@ -28,6 +28,7 @@
 #include "sfx-strategy.h"
 #include "sfx-copysort.h"
 #include "sfx-lcpvalues.h"
+#include "sfx-partssuf.h"
 #include "sfx-suffixgetset.h"
 
 typedef void (*GtCompletelargelcpvalues) (void *,
@@ -67,5 +68,20 @@ void gt_sortallsuffixesfromstart(GtSuffixsortspace *suffixsortspace,
                                  GtLogger *logger);
 
 size_t gt_size_of_sort_workspace (const Sfxstrategy *sfxstrategy);
+
+#ifdef GT_THREADS_ENABLED
+void gt_threaded_sortallbuckets(GtSuffixsortspace *suffixsortspace,
+                       const GtSuftabparts *partition_for_threads,
+                       const GtEncseq *encseq,
+                       GtReadmode readmode,
+                       const GtBcktab *bcktab,
+                       unsigned int numofchars,
+                       unsigned int prefixlength,
+                       unsigned int sortmaxdepth,
+                       const Sfxstrategy *sfxstrategy,
+                       GtProcessunsortedsuffixrange processunsortedsuffixrange,
+                       void *processunsortedsuffixrangeinfo,
+                       GtLogger *logger);
+#endif
 
 #endif
