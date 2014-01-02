@@ -1327,7 +1327,7 @@ GtCodetype gt_bcktab_findfirstlarger(const GtBcktab *bcktab,
                                      GtUword suftaboffset)
 {
   GtCodetype left, right, found, offset;
-  bool found_defined = false;
+  GT_UNUSED bool found_defined = false;
 
   if (mincode <= maxcode)
   {
