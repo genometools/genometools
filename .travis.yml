@@ -3,18 +3,18 @@ compiler:
   - clang
 env:
   matrix:
-    - default=yes      testrange=1..1000
-    - assert=no        testrange=1..1000
-    - amalgamation=yes testrange=1..1000
-    - opt=no cairo=no  testrange=1..1000
-    - default=yes      testrange=1001..2000
-    - assert=no        testrange=1001..2000
-    - amalgamation=yes testrange=1001..2000
-    - opt=no cairo=no  testrange=1001..2000
-    - default=yes      testrange=2001..3000
-    - assert=no        testrange=2001..3000
-    - amalgamation=yes testrange=2001..3000
-    - opt=no cairo=no  testrange=2001..3000
+    - default=yes      testrange=1..1150
+    - assert=no        testrange=1..1150
+    - amalgamation=yes testrange=1..1150
+    - opt=no cairo=no  testrange=1..1150
+    - default=yes      testrange=1151..1750
+    - assert=no        testrange=1151..1750
+    - amalgamation=yes testrange=1151..1750
+    - opt=no cairo=no  testrange=1151..1750
+    - default=yes      testrange=1751..3000
+    - assert=no        testrange=1751..3000
+    - amalgamation=yes testrange=1751..3000
+    - opt=no cairo=no  testrange=1751..3000
 matrix:
   include:
     - compiler: gcc
