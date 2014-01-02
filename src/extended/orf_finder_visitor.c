@@ -148,7 +148,7 @@ static int run_orffinder(GtRegionMapping *rmap,
   GtORFIterator* orfi = NULL;
   GtORFIteratorStatus state;
   GtRange orf_rng, tmp_orf_rng[3];
-  GtStr *seq;
+  GtStr *seq = NULL;
   unsigned int orf_frame;
 
   /* forward strand */
@@ -157,35 +157,36 @@ static int run_orffinder(GtRegionMapping *rmap,
                                         (GtGenomeNode*) gf,
                                         gt_feature_node_get_type(gf),
                                         false, NULL, NULL, rmap, err);
+  if (!had_err) {
+    ci = gt_codon_iterator_simple_new(gt_str_get(seq), gt_str_length(seq), err);
+    gt_assert(ci);
+    translator = gt_translator_new(ci);
+    gt_assert(translator);
 
-  ci = gt_codon_iterator_simple_new(gt_str_get(seq), gt_str_length(seq), err);
-  gt_assert(ci);
-  translator = gt_translator_new(ci);
-  gt_assert(translator);
+    orfi = gt_orf_iterator_new(ci, translator);
+    gt_assert(orfi);
 
-  orfi = gt_orf_iterator_new(ci, translator);
-  gt_assert(orfi);
+    for (i = 0; i < 3; i++) {
+      tmp_orf_rng[i].start = GT_UNDEF_UWORD;
+      tmp_orf_rng[i].end = GT_UNDEF_UWORD;
+    }
 
-  for (i = 0; i < 3; i++) {
-    tmp_orf_rng[i].start = GT_UNDEF_UWORD;
-    tmp_orf_rng[i].end = GT_UNDEF_UWORD;
-  }
-
-  while ((state = gt_orf_iterator_next(orfi, &orf_rng, &orf_frame,
-                                              err)) == GT_ORF_ITERATOR_OK) {
-      if (all) {
-        process_orf(orf_rng, orf_frame, GT_STRAND_FORWARD, gf,
-                    start, min, max, err);
-      } else {
-        if (gt_range_length(&orf_rng) >
-            gt_range_length(&tmp_orf_rng[orf_frame])) {
-          tmp_orf_rng[orf_frame].start = orf_rng.start;
-          tmp_orf_rng[orf_frame].end = orf_rng.end;
+    while ((state = gt_orf_iterator_next(orfi, &orf_rng, &orf_frame,
+                                                err)) == GT_ORF_ITERATOR_OK) {
+        if (all) {
+          process_orf(orf_rng, orf_frame, GT_STRAND_FORWARD, gf,
+                      start, min, max, err);
+        } else {
+          if (gt_range_length(&orf_rng) >
+              gt_range_length(&tmp_orf_rng[orf_frame])) {
+            tmp_orf_rng[orf_frame].start = orf_rng.start;
+            tmp_orf_rng[orf_frame].end = orf_rng.end;
+          }
         }
-      }
+    }
+    if (state == GT_ORF_ITERATOR_ERROR)
+      had_err = -1;
   }
-  if (state == GT_ORF_ITERATOR_ERROR)
-    had_err = -1;
 
   if (!had_err) {
     if (!all) {
@@ -251,11 +252,11 @@ static int run_orffinder(GtRegionMapping *rmap,
         }
       }
     }
-    gt_str_delete(seq);
     gt_codon_iterator_delete(ci);
     gt_translator_delete(translator);
     gt_orf_iterator_delete(orfi);
   }
+  gt_str_delete(seq);
   return had_err;
 }
 
@@ -286,6 +287,8 @@ static int gt_orf_finder_visitor_feature_node(GtNodeVisitor *gv,
         rng = gt_genome_node_get_range((GtGenomeNode*) curnode);
         had_err = run_orffinder(lv->rmap, curnode, rng.start - 1, rng.end - 1,
                                 lv->min, lv->max, lv->all, err);
+      }
+      if (!had_err) {
         if (gt_hashmap_get(lv->types,
                            (void*) "all") == (void*) 1) {
           break;
