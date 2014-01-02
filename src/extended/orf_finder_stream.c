@@ -51,7 +51,7 @@ static int gt_orf_finder_stream_next(GtNodeStream *gs, GtGenomeNode **gn,
 
   had_err = gt_node_stream_next(ls->in_stream, gn, err);
   if (!had_err && *gn) {
-    (void) gt_genome_node_accept(*gn, (GtNodeVisitor*) ls->lv, err);
+    had_err = gt_genome_node_accept(*gn, (GtNodeVisitor*) ls->lv, err);
   }
   if (had_err) {
     gt_genome_node_delete(*gn);
