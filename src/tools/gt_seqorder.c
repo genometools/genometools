@@ -107,15 +107,12 @@ static int gt_seqorder_arguments_check(GT_UNUSED int rest_argc,
 }
 
 static void gt_seqorder_sort(GtSuffixsortspace *suffixsortspace,
-    GtEncseq *encseq)
+                             const GtEncseq *encseq)
 {
-  GtUword i;
   Sfxstrategy sfxstrategy;
 
   defaultsfxstrategy(&sfxstrategy, false);
-  for (i = 0; i < gt_encseq_num_of_sequences(encseq); i++)
-    gt_suffixsortspace_setdirect(suffixsortspace, i,
-        gt_encseq_seqstartpos(encseq, i));
+  gt_suffixsortspace_init_seqstartpos(suffixsortspace,encseq);
   gt_sortallsuffixesfromstart(suffixsortspace,
       gt_encseq_num_of_sequences(encseq), encseq, GT_READMODE_FORWARD, NULL, 0,
       &sfxstrategy, NULL, NULL, NULL);

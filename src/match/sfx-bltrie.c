@@ -781,9 +781,9 @@ static GtUword blindtrie_enumeratetrieleaves (
                            GtUword offset,
                            GtUword sortmaxdepth,
                            GtLcpvalues *tableoflcpvalues,
-                           void *voiddcov,
                            GtProcessunsortedsuffixrange
-                             processunsortedsuffixrange)
+                             processunsortedsuffixrange,
+                           void *processunsortedsuffixrangeinfo)
 {
   bool readyforpop = false, currentnodeisleaf;
   GtBlindtriesnodeptr currentnode, siblval, lcpnode = GT_BLINDTRIE_ROOTIDX;
@@ -822,7 +822,8 @@ static GtUword blindtrie_enumeratetrieleaves (
               if (processunsortedsuffixrange != NULL)
               {
                 processunsortedsuffixrange(
-                               voiddcov,
+                               processunsortedsuffixrangeinfo,
+                               blindtrie->sssp,
                                bucketleftidxplussubbucketleft
                                  + nextfree - 1 - equalsrangewidth,
                                equalsrangewidth + 1,
@@ -878,7 +879,8 @@ static GtUword blindtrie_enumeratetrieleaves (
   if (nextfree > 0 && equalsrangewidth > 0 &&
       processunsortedsuffixrange != NULL)
   {
-    processunsortedsuffixrange(voiddcov,
+    processunsortedsuffixrange(processunsortedsuffixrangeinfo,
+                               blindtrie->sssp,
                                bucketleftidxplussubbucketleft
                                  + nextfree - 1 - equalsrangewidth,
                                equalsrangewidth + 1,
@@ -1193,16 +1195,15 @@ static void gt_blindtrie2sorting(GtBlindtrie *blindtrie,
                                  GtLcpvalues *tableoflcpvalues,
                                  GtUword offset,
                                  GtUword sortmaxdepth,
-                                 void *voiddcov,
                                  GtProcessunsortedsuffixrange
-                                   processunsortedsuffixrange)
+                                   processunsortedsuffixrange,
+                                 void *processunsortedsuffixrangeinfo)
 {
-  GtUword nextsuffixtosort;
-
-  nextsuffixtosort
+  GtUword nextsuffixtosort
     = blindtrie_enumeratetrieleaves (blindtrie,subbucketleft,offset,
                                      sortmaxdepth,tableoflcpvalues,
-                                     voiddcov,processunsortedsuffixrange);
+                                     processunsortedsuffixrange,
+                                     processunsortedsuffixrangeinfo);
   processoverflowsuffixes(blindtrie,
                           offset,
                           tableoflcpvalues,
@@ -1216,9 +1217,9 @@ void gt_blindtrie_suffixsort(GtBlindtrie *blindtrie,
                              GtUword numberofsuffixes,
                              GtUword offset,
                              GtUword sortmaxdepth,
-                             void *voiddcov,
                              GtProcessunsortedsuffixrange
-                               processunsortedsuffixrange)
+                               processunsortedsuffixrange,
+                             void *processunsortedsuffixrangeinfo)
 {
   GtUword idx, currentstartpos;
 
@@ -1242,8 +1243,8 @@ void gt_blindtrie_suffixsort(GtBlindtrie *blindtrie,
                        tableoflcpvalues,
                        offset,
                        sortmaxdepth,
-                       voiddcov,
-                       processunsortedsuffixrange);
+                       processunsortedsuffixrange,
+                       processunsortedsuffixrangeinfo);
 }
 
 bool gt_blindtrie_retrieve(GtBlindtrie *blindtrie,

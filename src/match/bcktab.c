@@ -754,8 +754,14 @@ void gt_bcktab_leftborder_show(const GtBcktab *bcktab)
 
   for (idx=0; idx<bcktab->numofallcodes; idx++)
   {
-    printf("leftborder[" FormatGtCodetype "]="GT_WU"\n",idx,
+    printf("leftborder[" FormatGtCodetype "]="GT_WU,idx,
                                     gt_bcktab_get_leftborder(bcktab,idx));
+    if (idx > 0)
+    {
+      printf(" size " GT_WU,gt_bcktab_get_leftborder(bcktab,idx) -
+                            gt_bcktab_get_leftborder(bcktab,idx-1));
+    }
+    printf("\n");
   }
 }
 
@@ -1316,29 +1322,63 @@ GtUword gt_bcktab_maxbucketsize(const GtBcktab *bcktab)
 }
 
 GtCodetype gt_bcktab_findfirstlarger(const GtBcktab *bcktab,
+                                     GtCodetype mincode,
+                                     GtCodetype maxcode,
                                      GtUword suftaboffset)
 {
-  GtCodetype left = 0, right = bcktab->numofallcodes, mid,
-             found = bcktab->numofallcodes;
-  GtUword midval;
+  GtCodetype left, right, found, offset;
+  GT_UNUSED bool found_defined = false;
 
-  while (left+1 < right)
+  if (mincode <= maxcode)
   {
-    mid = GT_DIV2(left+right);
-    midval = gt_bcktab_get_leftborder(bcktab,mid);
-    if (suftaboffset == midval)
+    if (mincode == maxcode)
     {
-      return mid;
+      return mincode;
     }
-    if (suftaboffset < midval)
+    gt_assert(mincode < maxcode);
+    left = mincode;
+    right = maxcode;
+    if (mincode > 0)
+    {
+      offset = gt_bcktab_get_leftborder(bcktab,mincode - 1);
+    } else
+    {
+      offset = 0;
+    }
+  } else
+  {
+    left = 0;
+    right = bcktab->numofallcodes - 1;
+    offset = 0;
+  }
+  found = right + 1; /* undefined */
+  while (left <= right)
+  {
+    GtCodetype midval, mid = GT_DIV2(left+right);
+
+    gt_assert(mincode > maxcode || left <= mid);
+    midval = gt_bcktab_get_leftborder(bcktab,mid) - offset;
+    if (suftaboffset <= midval)
     {
       found = mid;
-      right = mid - 1;
+      found_defined = true;
+      if (suftaboffset < midval)
+      {
+        if (mid == 0)
+        {
+          break;
+        }
+        right = mid - 1;
+      } else
+      {
+        break;
+      }
     } else
     {
       left = mid + 1;
     }
   }
+  gt_assert(found_defined);
   return found;
 }
 

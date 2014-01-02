@@ -1398,6 +1398,8 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
     gt_assert(numofparts > 0);
     suftabparts = gt_suftabparts_new(numofparts,
                                      NULL,
+                                     (GtCodetype) 1,
+                                     (GtCodetype) 0,
                                      &fci.tab,
                                      sfxmrlist,
                                      suftabentries,

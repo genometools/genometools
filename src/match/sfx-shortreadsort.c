@@ -64,8 +64,7 @@ static double gt_shortreadsort_encoding_factor(GtUword maxremain)
 static GtUword gt_shortreadsort_encoding_size(GtUword bucketsize,
                                                     GtUword maxremain)
 {
-  return (GtUword) (bucketsize *
-                          gt_shortreadsort_encoding_factor(maxremain));
+  return (GtUword) (bucketsize * gt_shortreadsort_encoding_factor(maxremain));
 }
 
 static size_t gt_shortreadsort_size_perbucketentry(bool firstcodes,
@@ -85,8 +84,8 @@ size_t gt_shortreadsort_size(bool firstcodes,GtUword bucketsize,
 }
 
 GtUword gt_shortreadsort_maxwidth(bool firstcodes,
-                                        GtUword maxremain,
-                                        size_t sizeofworkspace)
+                                  GtUword maxremain,
+                                  size_t sizeofworkspace)
 {
   return (GtUword) sizeofworkspace/
          gt_shortreadsort_size_perbucketentry(firstcodes,maxremain);
@@ -158,8 +157,7 @@ GtShortreadsortworkinfo *gt_shortreadsort_new(GtUword maxwidth,
   return srsw;
 }
 
-GtUword gt_shortreadsort_sumofstoredvalues(const GtShortreadsortworkinfo
-                                                       *srsw)
+GtUword gt_shortreadsort_sumofstoredvalues(const GtShortreadsortworkinfo *srsw)
 {
   return srsw->sumofstoredvalues;
 }
@@ -575,7 +573,7 @@ void gt_shortreadsort_sssp_sort(GtShortreadsortworkinfo *srsw,
   GtSuffixsortspace_exportptr *exportptr;
 
   gt_shortreadsort_resize(srsw, false, width, maxremain);
-  exportptr = gt_suffixsortspace_exportptr(subbucketleft, sssp);
+  exportptr = gt_suffixsortspace_exportptr(sssp, subbucketleft);
   srsw->tbereservoir.nextfreeGtTwobitencoding = 0;
   if (exportptr->ulongtabsectionptr != NULL)
   {
@@ -645,6 +643,7 @@ void gt_shortreadsort_sssp_add_unsorted(const GtShortreadsortworkinfo *srsw,
                                         GtUword subbucketleft,
                                         GtUword width,
                                         GtUword maxdepth,
+                                        GtSuffixsortspace *sssp,
                                         GtProcessunsortedsuffixrange
                                           processunsortedsuffixrange,
                                         void *processunsortedsuffixrangeinfo)
@@ -664,6 +663,7 @@ void gt_shortreadsort_sssp_add_unsorted(const GtShortreadsortworkinfo *srsw,
         if (processunsortedsuffixrange != NULL)
         {
           processunsortedsuffixrange(processunsortedsuffixrangeinfo,
+                                     sssp,
                                      bucketleftidx + subbucketleft + laststart,
                                      idx - laststart,maxdepth);
         }
@@ -676,6 +676,7 @@ void gt_shortreadsort_sssp_add_unsorted(const GtShortreadsortworkinfo *srsw,
     if (processunsortedsuffixrange != NULL)
     {
       processunsortedsuffixrange(processunsortedsuffixrangeinfo,
+                                 sssp,
                                  bucketleftidx + subbucketleft + laststart,
                                  width - laststart,maxdepth);
     }

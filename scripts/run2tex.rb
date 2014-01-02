@@ -114,7 +114,7 @@ datestring=''
 parms=''
 filename=''
 f.each_line do |line|
-  m = line.match(/# RUN ([a-zA-Z0-9]*) (.*)/)
+  m = line.match(/# RUN ([a-zA-Z0-9\.:]*) (.*)/)
   if m
     filename = m[1]
     filenametab[filename] = true

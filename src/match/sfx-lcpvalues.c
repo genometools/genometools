@@ -841,7 +841,10 @@ GtLcpvalues *gt_Outlcpinfo_resizereservoir(GtOutlcpinfo *outlcpinfo,
 
 GtLcpvalues *gt_Outlcpinfo_lcpvalues_ref(GtOutlcpinfo *outlcpinfo)
 {
-  gt_assert(outlcpinfo != NULL);
+  if (outlcpinfo == NULL)
+  {
+    return NULL;
+  }
   return &outlcpinfo->lcpsubtab.tableoflcpvalues;
 }
 

@@ -17,7 +17,6 @@
 */
 
 #include <limits.h>
-/* #include <math.h> */
 #include <stdlib.h>
 #include <string.h>
 #include "core/assert_api.h"
@@ -68,7 +67,7 @@ struct GtRMQ {
 /* because M just stores offsets (rel. to start of block), this method */
 /* re-calculates the true index: */
 static inline GtUword gt_rmq_trueindex(const GtRMQ *rmq, GtUword k,
-                                             GtUword block)
+                                       GtUword block)
 {
   return rmq->M[k][block] + GT_RMQ_MUL_blocksize(block);
 }
@@ -193,9 +192,8 @@ static unsigned char gt_rmq_clearbits(unsigned char n, GtUword x)
   return n & (unsigned char) (255 << x);
 }
 
-static GtUword gt_rmq_find_min_index_fast(const GtRMQ *rmq,
-                                                GtUword start,
-                                                GtUword end)
+static GtUword gt_rmq_find_min_index_fast(const GtRMQ *rmq, GtUword start,
+                                          GtUword end)
 {
   GtUword i = start,
                 j = end,
@@ -318,9 +316,7 @@ static GtUword gt_rmq_find_min_index_fast(const GtRMQ *rmq,
   return min;
 }
 
-GtUword gt_rmq_find_min_index(const GtRMQ *rmq,
-                                    GtUword start,
-                                    GtUword end)
+GtUword gt_rmq_find_min_index(const GtRMQ *rmq, GtUword start, GtUword end)
 {
   gt_assert(rmq->arr_ptr != NULL && start <= end && end < rmq->n);
   if (start == end)
@@ -349,8 +345,7 @@ GtUword gt_rmq_find_min_index(const GtRMQ *rmq,
   }
 }
 
-GtRMQvaluetype gt_rmq_find_min_value(const GtRMQ *rmq,
-                                     GtUword start,
+GtRMQvaluetype gt_rmq_find_min_value(const GtRMQ *rmq, GtUword start,
                                      GtUword end)
 {
   return rmq->arr_ptr[gt_rmq_find_min_index(rmq,start,end)];
@@ -603,8 +598,8 @@ void gt_rmq_delete(GtRMQ *rmq)
 
 /* O(size) */
 static GtUword gt_rmq_naive(const GtRMQvaluetype *data,
-                                  GT_UNUSED GtUword size,
-                                  GtUword start, GtUword end)
+                            GT_UNUSED GtUword size,
+                            GtUword start, GtUword end)
 {
   GtRMQvaluetype minval;
   GtUword idx, ret = 0UL;
