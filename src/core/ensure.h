@@ -28,7 +28,8 @@
     if (!had_err) {                                                      \
       if (!(expr)) {                                                     \
         gt_error_set(err, "gt_ensure(%s) failed: function %s, file %s, " \
-                     "line %d.\nThis is probably a bug, please report.", \
+                     "line %d.\nThis is probably a bug, please report "  \
+                "at https://github.com/genometools/genometools/issues.", \
                      #expr, __func__, __FILE__, __LINE__);               \
         had_err = -1;                                                    \
       }                                                                  \
