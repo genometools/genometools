@@ -25,7 +25,7 @@
 #include "match/sfx-lwcheck.h"
 
 #ifdef _WIN32
-#define GEN_ESASUFFIXPTRGET(TAB,IDX) ((unsigned int *) TAB)[IDX]
+#define GEN_ESASUFFIXPTRGET(TAB,IDX) ((GtUword*) TAB)[IDX]
 #else
 #define GEN_ESASUFFIXPTRGET(TAB,IDX) (unitsize == (size_t) 4\
                                        ? (GtUword) ((unsigned int *) TAB)[IDX] \
@@ -33,7 +33,7 @@
 #endif
 
 static GtUword gt_check_for_range_occurrence(const void *suftab,
-                                             size_t unitsize,
+                                             GT_UNUSED size_t unitsize,
                                              GtUword suffix,
                                              GtUword start,
                                              GtUword end)
@@ -86,7 +86,7 @@ static void gt_suftab_bk_suffixorder(LW_accesschar accesschar,
                                      GtUword totallength,
                                      unsigned int numofchars,
                                      const void  *suftab,
-                                     size_t unitsize,
+                                     GT_UNUSED size_t unitsize,
                                      const GtRangewithchar *rangestore,
                                      unsigned int numofranges)
 {

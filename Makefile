@@ -63,8 +63,7 @@ EXP_LDLIBS:=$(LIBS) -lm
 GT_CFLAGS:=-g -Wall -Wunused-parameter -pipe $(FPIC) -Wpointer-arith
 # expat needs -DHAVE_MEMMOVE
 # zlib needs -D_LARGEFILE64_SOURCE=1 -DHAVE_HIDDEN
-EXT_FLAGS:= -DHAVE_MEMMOVE -D_LARGEFILE64_SOURCE=1 -DHAVE_HIDDEN \
-	          -DLUA_USE_MKSTEMP
+EXT_FLAGS:= -DHAVE_MEMMOVE -D_LARGEFILE64_SOURCE=1 -DHAVE_HIDDEN
 EXP_CPPFLAGS+=-D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 $(EXT_FLAGS)
 GT_CPPFLAGS:=$(INCLUDEOPT)
 GT_CXXFLAGS:=-g -pipe
@@ -281,6 +280,10 @@ else
     EXP_LDLIBS += -ldl
   endif
   endif
+endif
+
+ifneq ($(SYSTEM), Windows)
+  EXT_FLAGS += -DLUA_USE_MKSTEMP
 endif
 
 ifeq ($(64bit),yes)
