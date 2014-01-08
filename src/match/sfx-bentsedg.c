@@ -1643,6 +1643,7 @@ void gt_sortallsuffixesfromstart(GtSuffixsortspace *suffixsortspace,
 }
 
 #ifdef GT_THREADS_ENABLED
+#ifdef GT_THREADS_PARTITION
 typedef struct
 {
   unsigned int numofchars,
@@ -1761,6 +1762,7 @@ void gt_threaded_partition_sortallbuckets(GtSuffixsortspace *suffixsortspace,
   gt_free(th_tab);
   gt_assert(!haserr);
 }
+#else
 
 typedef struct
 {
@@ -1856,4 +1858,5 @@ void gt_threaded_stream_sortallbuckets(GtSuffixsortspace *suffixsortspace,
   gt_BentsedgIterator_delete(bs_it);
   bentsedgresources_delete(bsr, logger);
 }
+#endif
 #endif

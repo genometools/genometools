@@ -70,6 +70,8 @@ void gt_sortallsuffixesfromstart(GtSuffixsortspace *suffixsortspace,
 size_t gt_size_of_sort_workspace (const Sfxstrategy *sfxstrategy);
 
 #ifdef GT_THREADS_ENABLED
+#undef GT_THREADS_PARTITION
+#ifdef GT_THREADS_PARTITION
 void gt_threaded_partition_sortallbuckets(GtSuffixsortspace *suffixsortspace,
                        const GtSuftabparts *partition_for_threads,
                        const GtEncseq *encseq,
@@ -82,7 +84,7 @@ void gt_threaded_partition_sortallbuckets(GtSuffixsortspace *suffixsortspace,
                        GtProcessunsortedsuffixrange processunsortedsuffixrange,
                        void *processunsortedsuffixrangeinfo,
                        GtLogger *logger);
-
+#else
 void gt_threaded_stream_sortallbuckets(GtSuffixsortspace *suffixsortspace,
                        const GtEncseq *encseq,
                        GtReadmode readmode,
@@ -97,6 +99,7 @@ void gt_threaded_stream_sortallbuckets(GtSuffixsortspace *suffixsortspace,
                        GtProcessunsortedsuffixrange processunsortedsuffixrange,
                        void *processunsortedsuffixrangeinfo,
                        GtLogger *logger);
+#endif
 #endif
 
 #endif
