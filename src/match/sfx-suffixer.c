@@ -2050,7 +2050,9 @@ static void gt_sfxiterator_preparethispart(Sfxiterator *sfi)
         sfi->partitions_for_threads != NULL &&
         gt_suftabparts_numofparts(sfi->partitions_for_threads[sfi->part]) > 1U)
     {
-      gt_threaded_sortallbuckets(sfi->suffixsortspace,
+#ifdef GT_THREADS_PARTITION
+      gt_threaded_partition_sortallbuckets
+                                 (sfi->suffixsortspace,
                                  sfi->partitions_for_threads[sfi->part],
                                  sfi->encseq,
                                  sfi->readmode,
@@ -2062,6 +2064,23 @@ static void gt_sfxiterator_preparethispart(Sfxiterator *sfi)
                                  processunsortedsuffixrange,
                                  processunsortedsuffixrangeinfo,
                                  sfi->logger);
+#else
+      gt_threaded_stream_sortallbuckets
+                                 (sfi->suffixsortspace,
+                                 sfi->encseq,
+                                 sfi->readmode,
+                                 sfi->bcktab,
+                                 sfi->currentmincode,
+                                 sfi->currentmaxcode,
+                                 sumofwidthforpart,
+                                 sfi->numofchars,
+                                 sfi->prefixlength,
+                                 sortmaxdepth,
+                                 &sfi->sfxstrategy,
+                                 processunsortedsuffixrange,
+                                 processunsortedsuffixrangeinfo,
+                                 sfi->logger);
+#endif
     } else
     {
 #endif

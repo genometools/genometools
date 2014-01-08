@@ -1656,12 +1656,12 @@ typedef struct
   GtBentsedgresources *bsr;
   unsigned int thread_num;
   GtThread *thread;
-} GtBentsedge_thread_info;
+} GtBentsedg_thread_info;
 
 static void *gt_bentsedg_thread_caller(void *data)
 {
   GtCodetype code;
-  GtBentsedge_thread_info *thinfo = (GtBentsedge_thread_info *) data;
+  GtBentsedg_thread_info *thinfo = (GtBentsedg_thread_info *) data;
   unsigned int rightchar;
 
   rightchar = (unsigned int) (thinfo->mincode % thinfo->numofchars);
@@ -1684,7 +1684,7 @@ static void *gt_bentsedg_thread_caller(void *data)
   return NULL;
 }
 
-void gt_threaded_sortallbuckets(GtSuffixsortspace *suffixsortspace,
+void gt_threaded_partition_sortallbuckets(GtSuffixsortspace *suffixsortspace,
                        const GtSuftabparts *partition_for_threads,
                        const GtEncseq *encseq,
                        GtReadmode readmode,
@@ -1699,7 +1699,7 @@ void gt_threaded_sortallbuckets(GtSuffixsortspace *suffixsortspace,
 {
   unsigned int tp, thread_parts;
   bool haserr = false;
-  GtBentsedge_thread_info *th_tab;
+  GtBentsedg_thread_info *th_tab;
   GtSuffixsortspace **sssp_tab;
 
   gt_assert(partition_for_threads != NULL);
@@ -1760,5 +1760,100 @@ void gt_threaded_sortallbuckets(GtSuffixsortspace *suffixsortspace,
   gt_free(sssp_tab);
   gt_free(th_tab);
   gt_assert(!haserr);
+}
+
+typedef struct
+{
+  GtUword totalwidth;
+  const GtBcktab *bcktab;
+  GtCodetype code, maxcode;
+  unsigned int rightchar;
+} GtBentsedgIterator;
+
+static GtBentsedgIterator *gt_BentsedgIterator_new(GtCodetype mincode,
+                                                   GtCodetype maxcode,
+                                                   GtUword totalwidth,
+                                                   unsigned int numofchars,
+                                                   const GtBcktab *bcktab)
+{
+  GtBentsedgIterator *bentsedg_iterator = gt_malloc(sizeof *bentsedg_iterator);
+
+  bentsedg_iterator->code = mincode;
+  bentsedg_iterator->maxcode = maxcode;
+  bentsedg_iterator->totalwidth = totalwidth;
+  bentsedg_iterator->rightchar = (unsigned int) (mincode % numofchars);
+  bentsedg_iterator->bcktab = bcktab;
+  return bentsedg_iterator;
+}
+
+static bool gt_BentsedgIterator_next(GtBucketspecification *bucketspec,
+                                     GtBentsedgIterator *bs_it)
+{
+  if (bs_it->code <= bs_it->maxcode)
+  {
+    bs_it->rightchar = gt_bcktab_calcboundsparts(bucketspec,
+                                                 bs_it->bcktab,
+                                                 bs_it->code,
+                                                 bs_it->maxcode,
+                                                 bs_it->totalwidth,
+                                                 bs_it->rightchar);
+    bs_it->code++;
+    return true;
+  } else
+  {
+    return false;
+  }
+}
+static void gt_BentsedgIterator_delete(GtBentsedgIterator *bs_it)
+{
+  gt_free(bs_it);
+}
+
+void gt_threaded_stream_sortallbuckets(GtSuffixsortspace *suffixsortspace,
+                       const GtEncseq *encseq,
+                       GtReadmode readmode,
+                       const GtBcktab *bcktab,
+                       GtCodetype mincode,
+                       GtCodetype maxcode,
+                       GtUword sumofwidth,
+                       unsigned int numofchars,
+                       unsigned int prefixlength,
+                       unsigned int sortmaxdepth,
+                       const Sfxstrategy *sfxstrategy,
+                       GtProcessunsortedsuffixrange processunsortedsuffixrange,
+                       void *processunsortedsuffixrangeinfo,
+                       GtLogger *logger)
+{
+  GtBentsedgIterator *bs_it = gt_BentsedgIterator_new(mincode,
+                                                      maxcode,
+                                                      sumofwidth,
+                                                      numofchars,
+                                                      bcktab);
+  GtBentsedgresources *bsr = bentsedgresources_new(suffixsortspace,
+                                                   encseq,
+                                                   readmode,
+                                                   prefixlength,
+                                                   bcktab,
+                                                   sortmaxdepth,
+                                                   sfxstrategy,
+                                                   false);
+  bsr->processunsortedsuffixrange = processunsortedsuffixrange;
+  bsr->processunsortedsuffixrangeinfo = processunsortedsuffixrangeinfo;
+  while (true)
+  {
+    GtBucketspecification bucketspec;
+    if (!gt_BentsedgIterator_next(&bucketspec,bs_it))
+    {
+      break;
+    }
+    if (bucketspec.nonspecialsinbucket > 1UL)
+    {
+      gt_sort_bentleysedgewick(bsr,bucketspec.left,
+                               bucketspec.nonspecialsinbucket,
+                               (GtUword) prefixlength);
+    }
+  }
+  gt_BentsedgIterator_delete(bs_it);
+  bentsedgresources_delete(bsr, logger);
 }
 #endif
