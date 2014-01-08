@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2013 Daniel S. Standage <daniel.standage@gmail.com>
+  Copyright (c) 2013-2014 Daniel S. Standage <daniel.standage@gmail.com>
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
