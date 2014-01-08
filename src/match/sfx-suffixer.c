@@ -110,7 +110,9 @@ struct Sfxiterator
                 spmopt_numofallsuffixcodes;
   GtSfxmappedrange *mappedmarkprefixbuckets;
 #ifdef GT_THREADS_ENABLED
+#ifdef GT_THREADS_PARTITION
   GtSuftabparts **partitions_for_threads;
+#endif
 #endif
 };
 
@@ -514,6 +516,7 @@ static void sfx_derivespecialcodesonthefly(Sfxiterator *sfi)
 }
 
 #ifdef GT_THREADS_ENABLED
+#ifdef GT_THREADS_PARTITION
 static void gt_suftabparts_multi_delete(GtSuftabparts **suftabparts_tab,
                                         unsigned int parts)
 {
@@ -528,6 +531,7 @@ static void gt_suftabparts_multi_delete(GtSuftabparts **suftabparts_tab,
     gt_free(suftabparts_tab);
   }
 }
+#endif
 #endif
 
 int gt_Sfxiterator_delete(Sfxiterator *sfi,GtError *err)
@@ -573,8 +577,10 @@ int gt_Sfxiterator_delete(Sfxiterator *sfi,GtError *err)
   }
   gt_bcktab_delete(sfi->bcktab);
 #ifdef GT_THREADS_ENABLED
+#ifdef GT_THREADS_PARTITION
   gt_suftabparts_multi_delete(sfi->partitions_for_threads,
                               gt_suftabparts_numofparts(sfi->suftabparts));
+#endif
 #endif
   gt_suftabparts_delete(sfi->suftabparts);
   gt_Outlcpinfo_delete(sfi->outlcpinfoforsample);
@@ -1256,6 +1262,7 @@ static void gt_bcktab_code_to_minmax_prefix_index(GtUword *mincode,
 
 #ifdef GT_THREADS_ENABLED
 #define GT_SFX_THREADS_JOBS gt_jobs
+#ifdef GT_THREADS_PARTITION
 static GtSuftabparts **gt_partitions_for_threads_new(
                                const GtSuftabparts *suftabparts,
                                const GtBcktab *bcktab,
@@ -1320,6 +1327,7 @@ static GtSuftabparts **gt_partitions_for_threads_new(
     return NULL;
   }
 }
+#endif
 #else
 #define GT_SFX_THREADS_JOBS 1U
 #endif
@@ -1398,7 +1406,9 @@ Sfxiterator *gt_Sfxiterator_new_withadditionalvalues(
     sfi->suffixsortspace = NULL;
     sfi->suftabparts = NULL;
 #ifdef GT_THREADS_ENABLED
+#ifdef GT_THREADS_PARTITION
     sfi->partitions_for_threads = NULL;
+#endif
 #endif
     sfi->encseq = encseq;
     sfi->readmode = readmode;
@@ -1800,6 +1810,7 @@ Sfxiterator *gt_Sfxiterator_new_withadditionalvalues(
                                          logger);
     gt_assert(sfi->suftabparts != NULL);
 #ifdef GT_THREADS_ENABLED
+#ifdef GT_THREADS_PARTITION
     if (gt_suftabparts_numofparts(sfi->suftabparts) > 0)
     {
       sfi->partitions_for_threads
@@ -1809,6 +1820,7 @@ Sfxiterator *gt_Sfxiterator_new_withadditionalvalues(
                                          specialcharacters,
                                          logger);
     }
+#endif
 #endif
     if (gt_suftabparts_numofparts(sfi->suftabparts) > 1U)
     {
@@ -2046,9 +2058,13 @@ static void gt_sfxiterator_preparethispart(Sfxiterator *sfi)
     gt_bcktab_determinemaxsize(sfi->bcktab, sfi->currentmincode,
                                sfi->currentmaxcode,sumofwidthforpart);
 #ifdef GT_THREADS_ENABLED
-    if (GT_SFX_THREADS_JOBS > 1U &&
+    if (GT_SFX_THREADS_JOBS > 1U
+#ifdef GT_THREADS_PARTITION
+        &&
         sfi->partitions_for_threads != NULL &&
-        gt_suftabparts_numofparts(sfi->partitions_for_threads[sfi->part]) > 1U)
+        gt_suftabparts_numofparts(sfi->partitions_for_threads[sfi->part]) > 1U
+#endif
+        )
     {
 #ifdef GT_THREADS_PARTITION
       gt_threaded_partition_sortallbuckets
