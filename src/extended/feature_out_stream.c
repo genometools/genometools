@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2013 Daniel S. Standage <daniel.standage@gmail.com>
+  Copyright (c) 2013-2014 Daniel S. Standage <daniel.standage@gmail.com>
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -15,6 +15,7 @@
 */
 
 #include "core/class_alloc_lock.h"
+#include "core/queue_api.h"
 #include "extended/feature_index.h"
 #include "extended/feature_out_stream.h"
 #include "extended/feature_visitor.h"
@@ -26,10 +27,9 @@ struct GtFeatureOutStream
   const GtNodeStream parent_instance;
   GtFeatureIndex *fi;
   GtStrArray *seqids;
-  GtArray *regioncache,
-          *featurecache;
-  GtUword regindex,
-                seqindex;
+  GtQueue *regioncache;
+  GtArray *featurecache;
+  GtUword seqindex;
 };
 
 #define feature_out_stream_cast(GS)\
@@ -41,11 +41,10 @@ static int feature_out_stream_next(GtNodeStream *ns, GtGenomeNode **gn,
   GtFeatureOutStream *stream = feature_out_stream_cast(ns);
   gt_error_check(error);
 
-  if (stream->regindex < gt_array_size(stream->regioncache))
+  if (gt_queue_size(stream->regioncache) > 0)
   {
-    GtGenomeNode **region = gt_array_get(stream->regioncache, stream->regindex);
-    stream->regindex++;
-    *gn = *region;
+    GtGenomeNode *region = gt_queue_get(stream->regioncache);
+    *gn = region;
     return 0;
   }
 
@@ -79,13 +78,13 @@ static int feature_out_stream_next(GtNodeStream *ns, GtGenomeNode **gn,
 static void feature_out_stream_free(GtNodeStream *ns)
 {
   GtFeatureOutStream *stream = feature_out_stream_cast(ns);
-  while (gt_array_size(stream->regioncache) > 0)
-  {
-    GtGenomeNode **gn = gt_array_pop(stream->regioncache);
-    gt_genome_node_delete(*gn);
-  }
-  gt_array_delete(stream->regioncache);
   gt_str_array_delete(stream->seqids);
+  while (gt_queue_size(stream->regioncache) > 0)
+  {
+    GtGenomeNode *gn = gt_queue_get(stream->regioncache);
+    gt_genome_node_delete(gn);
+  }
+  gt_queue_delete(stream->regioncache);
 }
 
 const GtNodeStreamClass *gt_feature_out_stream_class(void)
@@ -107,10 +106,7 @@ void feature_out_stream_init(GtFeatureOutStream *stream)
   GtUword i;
   GtError *error = gt_error_new();
 
-  stream->featurecache = NULL;
-  stream->regioncache = gt_array_new(sizeof (GtRegionNode *));
   stream->seqids = gt_feature_index_get_seqids(stream->fi, error);
-  stream->regindex = 0;
   stream->seqindex = 0;
   for (i = 0; i < gt_str_array_size(stream->seqids); i++)
   {
@@ -119,9 +115,9 @@ void feature_out_stream_init(GtFeatureOutStream *stream)
     gt_feature_index_get_range_for_seqid(stream->fi, &seqrange, seqid, error);
     GtStr *seqstr = gt_str_new_cstr(seqid);
     GtGenomeNode *rn = gt_region_node_new(seqstr, seqrange.start, seqrange.end);
-    gt_array_add(stream->regioncache, rn);
+    gt_queue_add(stream->regioncache, rn);
+    gt_str_delete(seqstr);
   }
-  gt_array_reverse(stream->regioncache);
   gt_error_delete(error);
 }
 
@@ -132,6 +128,8 @@ GtNodeStream* gt_feature_out_stream_new(GtFeatureIndex *fi)
   ns = gt_node_stream_create(gt_feature_out_stream_class(), true);
   stream = feature_out_stream_cast(ns);
   stream->fi = fi;
+  stream->regioncache = gt_queue_new();
+  stream->featurecache = NULL;
   feature_out_stream_init(stream);
   return ns;
 }
