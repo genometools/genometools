@@ -36,6 +36,7 @@
 #include "sfx-suffixgetset.h"
 #include "sfx-shortreadsort.h"
 #ifdef GT_THREADS_ENABLED
+#include "extended/priority_queue.h"
 #include "core/thread_api.h"
 #endif
 
@@ -1764,11 +1765,76 @@ void gt_threaded_partition_sortallbuckets(GtSuffixsortspace *suffixsortspace,
 
 typedef struct
 {
-  GtUword totalwidth;
+  GtUword totalwidth, intervalnum;
   const GtBcktab *bcktab;
   GtCodetype code, maxcode;
   unsigned int rightchar;
 } GtBentsedgIterator;
+
+typedef struct
+{
+  GtPriorityQueue *queue;
+  GtUword nextrequest;
+} GtBentsedgSynchronizer;
+
+static int gt_cmp_sync(const void *a,const void *b)
+{
+  if (*((GtUword *) a) < *((GtUword *) b))
+  {
+    return -1;
+  }
+  if (*((GtUword *) a) > *((GtUword *) b))
+  {
+    return 1;
+  }
+  return 0;
+}
+
+GtBentsedgSynchronizer *gt_bendsedgSynchronizer_new(void)
+{
+  GtBentsedgSynchronizer *bs_sync = gt_malloc(sizeof *bs_sync);
+
+  bs_sync->queue = gt_priority_queue_new(gt_cmp_sync,gt_jobs * gt_jobs);
+  bs_sync->nextrequest = 0;
+  return bs_sync;
+}
+
+void gt_bendsedgSynchronizer_process(GtBentsedgSynchronizer *bs_sync,
+                                     GtUword elem)
+{
+  if (bs_sync->nextrequest == elem)
+  {
+    printf("finish %lu\n",elem);
+    bs_sync->nextrequest++;
+    while (true)
+    {
+      const void *v_min_elem = gt_priority_queue_find_min(bs_sync->queue);
+      if (*((GtUword *) v_min_elem) == bs_sync->nextrequest)
+      {
+        (void) gt_priority_queue_extract_min(bs_sync->queue);
+        printf("finish %lu\n",bs_sync->nextrequest);
+        bs_sync->nextrequest++;
+      } else
+      {
+        break;
+      }
+    }
+  } else
+  {
+    gt_assert(bs_sync->nextrequest < elem);
+    gt_priority_queue_add(bs_sync->queue,(void *) elem);
+  }
+}
+
+void gt_bendsedgSynchronizer_delete(GtBentsedgSynchronizer *bs_sync)
+{
+  if (bs_sync != NULL)
+  {
+    gt_assert(gt_priority_queue_is_empty(bs_sync->queue));
+    gt_priority_queue_delete(bs_sync->queue);
+    gt_free(bs_sync);
+  } 
+}
 
 static GtBentsedgIterator *gt_BentsedgIterator_new(GtCodetype mincode,
                                                    GtCodetype maxcode,
@@ -1783,6 +1849,7 @@ static GtBentsedgIterator *gt_BentsedgIterator_new(GtCodetype mincode,
   bentsedg_iterator->totalwidth = totalwidth;
   bentsedg_iterator->rightchar = (unsigned int) (mincode % numofchars);
   bentsedg_iterator->bcktab = bcktab;
+  bentsedg_iterator->intervalnum = 0;
   return bentsedg_iterator;
 }
 
@@ -1798,6 +1865,7 @@ static bool gt_BentsedgIterator_next(GtBucketspecification *bucketspec,
                                                  bs_it->totalwidth,
                                                  bs_it->rightchar);
     bs_it->code++;
+    bs_it->intervalnum++;
     return true;
   } else
   {
@@ -1820,6 +1888,7 @@ typedef struct
 
 static void *gt_bentsedg_stream_thread_caller(void *data)
 {
+  GtUword intervalnum;
   GtBentsedg_stream_thread_info *thinfo
     = (GtBentsedg_stream_thread_info *) data;
 
@@ -1832,12 +1901,14 @@ static void *gt_bentsedg_stream_thread_caller(void *data)
       gt_mutex_unlock(thinfo->bs_it_mutex);
       break;
     }
+    intervalnum = thinfo->bs_it->intervalnum;
     gt_mutex_unlock(thinfo->bs_it_mutex);
     if (bucketspec.nonspecialsinbucket > 1UL)
     {
       gt_sort_bentleysedgewick(thinfo->bsr,bucketspec.left,
                                bucketspec.nonspecialsinbucket,
                                (GtUword) thinfo->prefixlength);
+      printf("finish %lu\n",intervalnum);
     }
   }
   return NULL;
