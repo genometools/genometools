@@ -1766,8 +1766,9 @@ typedef struct
 {
   GtUword totalwidth, bucketnumber;
   const GtBcktab *bcktab;
-  GtCodetype code, maxcode;
+  GtCodetype code, mincode, maxcode;
   unsigned int rightchar;
+  GtMutex *mutex;
 } GtBentsedgIterator;
 
 static GtBentsedgIterator *gt_BentsedgIterator_new(GtCodetype mincode,
@@ -1779,11 +1780,13 @@ static GtBentsedgIterator *gt_BentsedgIterator_new(GtCodetype mincode,
   GtBentsedgIterator *bentsedg_iterator = gt_malloc(sizeof *bentsedg_iterator);
 
   bentsedg_iterator->code = mincode;
+  bentsedg_iterator->mincode = mincode;
   bentsedg_iterator->maxcode = maxcode;
   bentsedg_iterator->totalwidth = totalwidth;
   bentsedg_iterator->rightchar = (unsigned int) (mincode % numofchars);
   bentsedg_iterator->bcktab = bcktab;
   bentsedg_iterator->bucketnumber = 0;
+  bentsedg_iterator->mutex = gt_mutex_new();
   return bentsedg_iterator;
 }
 
@@ -1807,7 +1810,12 @@ static bool gt_BentsedgIterator_next(GtBucketspecification *bucketspec,
 }
 static void gt_BentsedgIterator_delete(GtBentsedgIterator *bs_it)
 {
-  gt_free(bs_it);
+  if (bs_it != NULL)
+  {
+    gt_assert(bs_it->bucketnumber == bs_it->maxcode - bs_it->mincode + 1);
+    gt_mutex_delete(bs_it->mutex);
+    gt_free(bs_it);
+  }
 }
 
 typedef struct
@@ -1888,6 +1896,7 @@ typedef struct
 {
   GtBentsedgePrioqueue *queue;
   GtUword nextrequest;
+  GtMutex *mutex;
 } GtBentsedgSynchronizer;
 
 static GtBentsedgSynchronizer *gt_bendsedgSynchronizer_new(void)
@@ -1896,6 +1905,7 @@ static GtBentsedgSynchronizer *gt_bendsedgSynchronizer_new(void)
 
   bs_sync->queue = gt_bs_priority_queue_new(gt_jobs);
   bs_sync->nextrequest = 0;
+  bs_sync->mutex = gt_mutex_new();
   return bs_sync;
 }
 
@@ -1927,6 +1937,7 @@ static void gt_bendsedgSynchronizer_delete(GtBentsedgSynchronizer *bs_sync)
   if (bs_sync != NULL)
   {
     gt_assert(gt_bs_priority_queue_is_empty(bs_sync->queue));
+    gt_mutex_delete(bs_sync->mutex);
     gt_bs_priority_queue_delete(bs_sync->queue);
     gt_free(bs_sync);
   }
@@ -1938,7 +1949,6 @@ typedef struct
   unsigned int prefixlength, thread_num;
   GtBentsedgIterator *bs_it; /* shared, _next-function needs a mutex */
   GtBentsedgSynchronizer *bs_sync; /* shared _process-function needs a mutex */
-  GtMutex *bs_it_mutex, *bs_sync_mutex;
   GtThread *thread;
 } GtBentsedg_stream_thread_info;
 
@@ -1952,23 +1962,23 @@ static void *gt_bentsedg_stream_thread_caller(void *data)
     GtBucketspecification bucketspec;
     GtUword bucketnumber;
 
-    gt_mutex_lock(thinfo->bs_it_mutex);
+    gt_mutex_lock(thinfo->bs_it->mutex);
     if (!gt_BentsedgIterator_next(&bucketspec,thinfo->bs_it))
     {
-      gt_mutex_unlock(thinfo->bs_it_mutex);
+      gt_mutex_unlock(thinfo->bs_it->mutex);
       break;
     }
     bucketnumber = thinfo->bs_it->bucketnumber++;
-    gt_mutex_unlock(thinfo->bs_it_mutex);
+    gt_mutex_unlock(thinfo->bs_it->mutex);
     if (bucketspec.nonspecialsinbucket > 1UL)
     {
       gt_sort_bentleysedgewick(thinfo->bsr,bucketspec.left,
                                bucketspec.nonspecialsinbucket,
                                (GtUword) thinfo->prefixlength);
     }
-    gt_mutex_lock(thinfo->bs_sync_mutex);
+    gt_mutex_lock(thinfo->bs_sync->mutex);
     gt_bendsedgSynchronizer_process(thinfo->bs_sync,bucketnumber);
-    gt_mutex_unlock(thinfo->bs_sync_mutex);
+    gt_mutex_unlock(thinfo->bs_sync->mutex);
   }
   return NULL;
 }
@@ -1994,15 +2004,12 @@ void gt_threaded_stream_sortallbuckets(GtSuffixsortspace *suffixsortspace,
   bool haserr = false;
   GtBentsedg_stream_thread_info *th_tab;
   GtSuffixsortspace **sssp_tab;
-  GtMutex *bs_it_mutex, *bs_sync_mutex;
 
   gt_assert(gt_jobs > 1U);
   th_tab = gt_malloc(sizeof *th_tab * gt_jobs);
   sssp_tab = gt_malloc(sizeof *sssp_tab * gt_jobs);
   bs_it = gt_BentsedgIterator_new(mincode,maxcode,sumofwidth,numofchars,bcktab);
   bs_sync = gt_bendsedgSynchronizer_new();
-  bs_it_mutex = gt_mutex_new();
-  bs_sync_mutex = gt_mutex_new();
   for (tp = 0; !haserr && tp < gt_jobs; tp++)
   {
     th_tab[tp].thread_num = tp;
@@ -2028,8 +2035,6 @@ void gt_threaded_stream_sortallbuckets(GtSuffixsortspace *suffixsortspace,
       = processunsortedsuffixrangeinfo;
     th_tab[tp].bs_it = bs_it;
     th_tab[tp].bs_sync = bs_sync;
-    th_tab[tp].bs_it_mutex = bs_it_mutex;
-    th_tab[tp].bs_sync_mutex = bs_sync_mutex;
     th_tab[tp].thread
       = gt_thread_new (gt_bentsedg_stream_thread_caller,th_tab + tp,NULL);
     if (th_tab[tp].thread == NULL)
@@ -2052,8 +2057,6 @@ void gt_threaded_stream_sortallbuckets(GtSuffixsortspace *suffixsortspace,
   gt_suffixsortspace_delete_cloned(sssp_tab,gt_jobs);
   gt_BentsedgIterator_delete(bs_it);
   gt_bendsedgSynchronizer_delete(bs_sync);
-  gt_mutex_delete(bs_it_mutex);
-  gt_mutex_delete(bs_sync_mutex);
   gt_free(sssp_tab);
   gt_free(th_tab);
   gt_assert(!haserr);
