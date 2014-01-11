@@ -125,6 +125,10 @@ static int gt_sequence_buffer_fasta_advance(GtSequenceBuffer *sb, GtError *err)
           }
         } else
         {
+          if (currentchar == NEWLINESYMBOL)
+          {
+            pvt->linenum++;
+          }
           if (!isspace((int) currentchar))
           {
             if (currentchar == FASTASEPARATOR)
