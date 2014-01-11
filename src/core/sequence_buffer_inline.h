@@ -39,7 +39,7 @@
                         gt_str_array_get(pvt->filenametab,
                                          (GtUword) pvt->filenum),
                         (GtUint64) pvt->linenum);
-      return -1;
+      return -2;
     }
     if (ISSPECIAL((GtUchar) charcode)) {
       pvt->lastspeciallength++;

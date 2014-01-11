@@ -91,7 +91,7 @@ parse_next_line(GtSequenceBuffer *sb, GtEMBLParserLineCode *lc,
   (*currentfileread)++;
   if (currentchar == NEWLINESYMBOL) {
     gt_error_set(err, "2-character line code not found in line "GT_WU"",
-                 (GtUword) pvt->linenum - 1);
+                 (GtUword) pvt->linenum);
     return -2;
   }
   linecode[1] = currentchar;
@@ -118,7 +118,7 @@ parse_next_line(GtSequenceBuffer *sb, GtEMBLParserLineCode *lc,
       if (!isspace(currentchar)) {
         gt_error_set(err, "3 blanks expected between line code and content "
                           "in line "GT_WU"",
-                     (GtUword) pvt->linenum - 1);
+                     (GtUword) pvt->linenum);
         return -2;
       }
     }
@@ -183,7 +183,7 @@ static int gt_sequence_buffer_embl_advance(GtSequenceBuffer *sb, GtError *err)
   if (!pvt->inputstream) {
     sbe->firstentryinfile = true;
     sbe->state = EMBL_UNDEFINED;
-    pvt->linenum = (uint64_t) 1;
+    pvt->linenum = (uint64_t) 0;
     pvt->inputstream = gt_file_xopen(gt_str_array_get(pvt->filenametab,
                                                   (GtUword) pvt->filenum),
                                          "rb");
@@ -287,7 +287,7 @@ static int gt_sequence_buffer_embl_advance(GtSequenceBuffer *sb, GtError *err)
         /* still files left, open next one */
         gt_file_delete(pvt->inputstream);
         sbe->state = EMBL_UNDEFINED;
-        pvt->linenum = (uint64_t) 1;
+        pvt->linenum = (uint64_t) 0;
         pvt->inputstream = gt_file_xopen(gt_str_array_get(pvt->filenametab,
                                                 (GtUword) pvt->filenum),
                                             "rb");
@@ -356,6 +356,7 @@ GtSequenceBuffer* gt_sequence_buffer_embl_new(const GtStrArray *sequences)
   sbe->headerbuffer = gt_str_new();
   sbe->overflowbuffer = gt_str_new();
   sb->pvt->filenum = 0;
+  sb->pvt->linenum = 0;
   sbe->firstoverallentry = true;
   sbe->firstentryinfile = true;
   sbe->nextfile = true;

@@ -296,7 +296,7 @@ static int gt_sequence_buffer_gb_advance(GtSequenceBuffer *sb, GtError *err)
                    GB_ORIGIN_STRING) == 0) {
           gt_warning("sequence started without prior DEFINITION line in entry "
                      "in line "GT_WU" of file %s",
-                     (GtUword) pvt->linenum-1,
+                     (GtUword) pvt->linenum,
                      gt_str_array_get(pvt->filenametab,
                                      (GtUword) pvt->filenum));
           had_err = eat_line(sb, &currentfileread);
@@ -318,7 +318,7 @@ static int gt_sequence_buffer_gb_advance(GtSequenceBuffer *sb, GtError *err)
                      GB_DEFINITION_STRING) == 0) {
             gt_error_set(err, "encountered another DEFINITION line within one "
                               "entry in line "GT_WU" of file %s",
-                              (GtUword) pvt->linenum-1,
+                              (GtUword) pvt->linenum,
                               gt_str_array_get(pvt->filenametab,
                                                 (GtUword) pvt->filenum));
             return -1;
@@ -353,7 +353,7 @@ static int gt_sequence_buffer_gb_advance(GtSequenceBuffer *sb, GtError *err)
                             "sequence section, but found '%s' instead "
                             "in line "GT_WU" of file %s",
                             gt_str_get(sbe->keywordbuffer),
-                            (GtUword) pvt->linenum-1,
+                            (GtUword) pvt->linenum,
                             gt_str_array_get(pvt->filenametab,
                                                 (GtUword) pvt->filenum));
           return -1;
@@ -382,7 +382,7 @@ static int gt_sequence_buffer_gb_advance(GtSequenceBuffer *sb, GtError *err)
         /* still files left, open next one */
         gt_file_delete(pvt->inputstream);
         sbe->state = GB_OUT_OF_ENTRY;
-        pvt->linenum = (uint64_t) 1;
+        pvt->linenum = (uint64_t) 0;
         pvt->inputstream = gt_file_xopen(gt_str_array_get(pvt->filenametab,
                                                   (GtUword) pvt->filenum),
                                             "rb");
@@ -453,6 +453,7 @@ GtSequenceBuffer* gt_sequence_buffer_gb_new(const GtStrArray *sequences)
   sb = gt_sequence_buffer_create(gt_sequence_buffer_gb_class());
   sb->pvt->filenametab = sequences;
   sb->pvt->filenum = 0;
+  sb->pvt->linenum = 0;
   sb->pvt->nextread = sb->pvt->nextfree = 0;
   sb->pvt->lastspeciallength = 0;
   sbe = gt_sequence_buffer_gb_cast(sb);

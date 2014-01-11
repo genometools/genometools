@@ -310,3 +310,37 @@ Keywords "gt_convertseq sequencebuffer fastq"
 Test do
   run_test "#{$bin}gt convertseq #{$testdata}test10_multiline.fastq"
 end
+
+Name "sequence buffer: invalid characters linenum (single)"
+Keywords "gt_encseq_encode sequencebuffer linenumbers"
+Test do
+  run_test "#{$bin}gt encseq encode -dna -indexname foo " + \
+           "#{$testdata}TTT-small-wrongchar.fna", \
+           :retval => 1
+  grep(last_stderr, /illegal.*line 4/)
+  run_test "#{$bin}gt encseq encode -dna -indexname foo " + \
+           "#{$testdata}TTT-small-wrongchar.gbk", \
+           :retval => 1
+  grep(last_stderr, /illegal.*line 9/)
+  run_test "#{$bin}gt encseq encode -dna -indexname foo " + \
+           "#{$testdata}TTT-small-wrongchar.embl", \
+           :retval => 1
+  grep(last_stderr, /illegal.*line 14/)
+end
+
+Name "sequence buffer: invalid characters linenum (multifile)"
+Keywords "gt_encseq_encode sequencebuffer linenumbers"
+Test do
+  run_test "#{$bin}gt encseq encode -dna -indexname foo " + \
+           "#{$testdata}TTT-small.fna #{$testdata}TTT-small-wrongchar.fna", \
+           :retval => 1
+  grep(last_stderr, /illegal.*line 4/)
+  run_test "#{$bin}gt encseq encode -dna -indexname foo " + \
+           "#{$testdata}TTT-small.gbk #{$testdata}TTT-small-wrongchar.gbk", \
+           :retval => 1
+  grep(last_stderr, /illegal.*line 9/)
+  run_test "#{$bin}gt encseq encode -dna -indexname foo " + \
+           "#{$testdata}TTT-small.embl #{$testdata}TTT-small-wrongchar.embl", \
+           :retval => 1
+  grep(last_stderr, /illegal.*line 14/)
+end
