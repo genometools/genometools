@@ -36,7 +36,6 @@
 #include "sfx-suffixgetset.h"
 #include "sfx-shortreadsort.h"
 #ifdef GT_THREADS_ENABLED
-#include "extended/priority_queue.h"
 #include "core/thread_api.h"
 #endif
 
@@ -1765,76 +1764,11 @@ void gt_threaded_partition_sortallbuckets(GtSuffixsortspace *suffixsortspace,
 
 typedef struct
 {
-  GtUword totalwidth, intervalnum;
+  GtUword totalwidth, bucketnumber;
   const GtBcktab *bcktab;
   GtCodetype code, maxcode;
   unsigned int rightchar;
 } GtBentsedgIterator;
-
-typedef struct
-{
-  GtPriorityQueue *queue;
-  GtUword nextrequest;
-} GtBentsedgSynchronizer;
-
-static int gt_cmp_sync(const void *a,const void *b)
-{
-  if (*((GtUword *) a) < *((GtUword *) b))
-  {
-    return -1;
-  }
-  if (*((GtUword *) a) > *((GtUword *) b))
-  {
-    return 1;
-  }
-  return 0;
-}
-
-GtBentsedgSynchronizer *gt_bendsedgSynchronizer_new(void)
-{
-  GtBentsedgSynchronizer *bs_sync = gt_malloc(sizeof *bs_sync);
-
-  bs_sync->queue = gt_priority_queue_new(gt_cmp_sync,gt_jobs * gt_jobs);
-  bs_sync->nextrequest = 0;
-  return bs_sync;
-}
-
-void gt_bendsedgSynchronizer_process(GtBentsedgSynchronizer *bs_sync,
-                                     GtUword elem)
-{
-  if (bs_sync->nextrequest == elem)
-  {
-    printf("finish %lu\n",elem);
-    bs_sync->nextrequest++;
-    while (true)
-    {
-      const void *v_min_elem = gt_priority_queue_find_min(bs_sync->queue);
-      if (*((GtUword *) v_min_elem) == bs_sync->nextrequest)
-      {
-        (void) gt_priority_queue_extract_min(bs_sync->queue);
-        printf("finish %lu\n",bs_sync->nextrequest);
-        bs_sync->nextrequest++;
-      } else
-      {
-        break;
-      }
-    }
-  } else
-  {
-    gt_assert(bs_sync->nextrequest < elem);
-    gt_priority_queue_add(bs_sync->queue,(void *) elem);
-  }
-}
-
-void gt_bendsedgSynchronizer_delete(GtBentsedgSynchronizer *bs_sync)
-{
-  if (bs_sync != NULL)
-  {
-    gt_assert(gt_priority_queue_is_empty(bs_sync->queue));
-    gt_priority_queue_delete(bs_sync->queue);
-    gt_free(bs_sync);
-  } 
-}
 
 static GtBentsedgIterator *gt_BentsedgIterator_new(GtCodetype mincode,
                                                    GtCodetype maxcode,
@@ -1849,7 +1783,7 @@ static GtBentsedgIterator *gt_BentsedgIterator_new(GtCodetype mincode,
   bentsedg_iterator->totalwidth = totalwidth;
   bentsedg_iterator->rightchar = (unsigned int) (mincode % numofchars);
   bentsedg_iterator->bcktab = bcktab;
-  bentsedg_iterator->intervalnum = 0;
+  bentsedg_iterator->bucketnumber = 0;
   return bentsedg_iterator;
 }
 
@@ -1865,7 +1799,6 @@ static bool gt_BentsedgIterator_next(GtBucketspecification *bucketspec,
                                                  bs_it->totalwidth,
                                                  bs_it->rightchar);
     bs_it->code++;
-    bs_it->intervalnum++;
     return true;
   } else
   {
@@ -1879,37 +1812,163 @@ static void gt_BentsedgIterator_delete(GtBentsedgIterator *bs_it)
 
 typedef struct
 {
+  GtUword bucketnumber;
+} GtPriorecord;
+
+typedef struct
+{
+  GtUword capacity, numofelements;
+  GtPriorecord *elements;
+} GtBentsedgePrioqueue;
+
+static GtBentsedgePrioqueue *gt_bs_priority_queue_new(GtUword numofelements)
+{
+  GtBentsedgePrioqueue *pq = gt_malloc(sizeof *pq);
+
+  pq->elements = gt_malloc(sizeof (*pq->elements) * numofelements);
+  pq->capacity = numofelements;
+  pq->numofelements = 0;
+  return pq;
+}
+
+static bool gt_bs_priority_queue_is_empty(const GtBentsedgePrioqueue *pq)
+{
+  gt_assert(pq != NULL);
+  return pq->numofelements == 0 ? true : false;
+}
+
+static void gt_bs_priority_queue_add(GtBentsedgePrioqueue *pq,
+                                     GtPriorecord priorecord)
+{
+  GtPriorecord *ptr;
+
+  gt_assert(pq != NULL);
+  if (pq->numofelements >= pq->capacity)
+  {
+    pq->capacity *= 2;
+    pq->elements = gt_realloc(pq->elements,sizeof *pq->elements * pq->capacity);
+  }
+  /* store elements in reverse order, i.e.\ with the minimum element
+     at the last index; shift elements to the right until an element larger
+     or equal than the key is found. */
+  for (ptr = pq->elements + pq->numofelements;
+       ptr > pq->elements && (ptr-1)->bucketnumber < priorecord.bucketnumber;
+       ptr--)
+  {
+    *ptr = *(ptr-1);
+  }
+  pq->numofelements++;
+  gt_assert(ptr >= pq->elements && ptr < pq->elements + pq->numofelements);
+  *ptr = priorecord;
+}
+
+static void gt_bs_priority_queue_delete_min(GtBentsedgePrioqueue *pq)
+{
+  gt_assert(pq != NULL && !gt_bs_priority_queue_is_empty(pq));
+  pq->numofelements--;
+}
+
+const GtUword gt_bs_priority_queue_min_bucketnumber(
+                                              const GtBentsedgePrioqueue *pq)
+{
+  gt_assert(pq != NULL && !gt_bs_priority_queue_is_empty(pq));
+  return pq->elements[pq->numofelements-1].bucketnumber;
+}
+
+static void gt_bs_priority_queue_delete(GtBentsedgePrioqueue *pq)
+{
+  if (pq != NULL)
+  {
+    gt_free(pq->elements);
+    gt_free(pq);
+  }
+}
+
+typedef struct
+{
+  GtBentsedgePrioqueue *queue;
+  GtUword nextrequest;
+} GtBentsedgSynchronizer;
+
+static GtBentsedgSynchronizer *gt_bendsedgSynchronizer_new(void)
+{
+  GtBentsedgSynchronizer *bs_sync = gt_malloc(sizeof *bs_sync);
+
+  bs_sync->queue = gt_bs_priority_queue_new(gt_jobs);
+  bs_sync->nextrequest = 0;
+  return bs_sync;
+}
+
+static void gt_bendsedgSynchronizer_process(GtBentsedgSynchronizer *bs_sync,
+                                            GtUword bucketnumber)
+{
+  gt_assert(bs_sync != NULL);
+  if (bs_sync->nextrequest == bucketnumber)
+  {
+    bs_sync->nextrequest++;
+    while (!gt_bs_priority_queue_is_empty(bs_sync->queue) &&
+           gt_bs_priority_queue_min_bucketnumber(bs_sync->queue) ==
+           bs_sync->nextrequest)
+    {
+      gt_bs_priority_queue_delete_min(bs_sync->queue);
+      bs_sync->nextrequest++;
+    }
+  } else
+  {
+    GtPriorecord priorecord;
+    gt_assert(bs_sync->nextrequest < bucketnumber);
+    priorecord.bucketnumber = bucketnumber;
+    gt_bs_priority_queue_add(bs_sync->queue,priorecord);
+  }
+}
+
+static void gt_bendsedgSynchronizer_delete(GtBentsedgSynchronizer *bs_sync)
+{
+  if (bs_sync != NULL)
+  {
+    gt_assert(gt_bs_priority_queue_is_empty(bs_sync->queue));
+    gt_bs_priority_queue_delete(bs_sync->queue);
+    gt_free(bs_sync);
+  }
+}
+
+typedef struct
+{
   GtBentsedgresources *bsr;
   unsigned int prefixlength, thread_num;
   GtBentsedgIterator *bs_it; /* shared, _next-function needs a mutex */
-  GtMutex *bs_it_mutex;
+  GtBentsedgSynchronizer *bs_sync; /* shared _process-function needs a mutex */
+  GtMutex *bs_it_mutex, *bs_sync_mutex;
   GtThread *thread;
 } GtBentsedg_stream_thread_info;
 
 static void *gt_bentsedg_stream_thread_caller(void *data)
 {
-  GtUword intervalnum;
   GtBentsedg_stream_thread_info *thinfo
     = (GtBentsedg_stream_thread_info *) data;
 
   while (true)
   {
     GtBucketspecification bucketspec;
+    GtUword bucketnumber;
+
     gt_mutex_lock(thinfo->bs_it_mutex);
     if (!gt_BentsedgIterator_next(&bucketspec,thinfo->bs_it))
     {
       gt_mutex_unlock(thinfo->bs_it_mutex);
       break;
     }
-    intervalnum = thinfo->bs_it->intervalnum;
+    bucketnumber = thinfo->bs_it->bucketnumber++;
     gt_mutex_unlock(thinfo->bs_it_mutex);
     if (bucketspec.nonspecialsinbucket > 1UL)
     {
       gt_sort_bentleysedgewick(thinfo->bsr,bucketspec.left,
                                bucketspec.nonspecialsinbucket,
                                (GtUword) thinfo->prefixlength);
-      printf("finish %lu\n",intervalnum);
     }
+    gt_mutex_lock(thinfo->bs_sync_mutex);
+    gt_bendsedgSynchronizer_process(thinfo->bs_sync,bucketnumber);
+    gt_mutex_unlock(thinfo->bs_sync_mutex);
   }
   return NULL;
 }
@@ -1930,17 +1989,20 @@ void gt_threaded_stream_sortallbuckets(GtSuffixsortspace *suffixsortspace,
                        GtLogger *logger)
 {
   GtBentsedgIterator *bs_it;
+  GtBentsedgSynchronizer *bs_sync;
   unsigned int tp;
   bool haserr = false;
   GtBentsedg_stream_thread_info *th_tab;
   GtSuffixsortspace **sssp_tab;
-  GtMutex *bs_it_mutex;
+  GtMutex *bs_it_mutex, *bs_sync_mutex;
 
   gt_assert(gt_jobs > 1U);
   th_tab = gt_malloc(sizeof *th_tab * gt_jobs);
   sssp_tab = gt_malloc(sizeof *sssp_tab * gt_jobs);
   bs_it = gt_BentsedgIterator_new(mincode,maxcode,sumofwidth,numofchars,bcktab);
+  bs_sync = gt_bendsedgSynchronizer_new();
   bs_it_mutex = gt_mutex_new();
+  bs_sync_mutex = gt_mutex_new();
   for (tp = 0; !haserr && tp < gt_jobs; tp++)
   {
     th_tab[tp].thread_num = tp;
@@ -1965,7 +2027,9 @@ void gt_threaded_stream_sortallbuckets(GtSuffixsortspace *suffixsortspace,
     th_tab[tp].bsr->processunsortedsuffixrangeinfo
       = processunsortedsuffixrangeinfo;
     th_tab[tp].bs_it = bs_it;
+    th_tab[tp].bs_sync = bs_sync;
     th_tab[tp].bs_it_mutex = bs_it_mutex;
+    th_tab[tp].bs_sync_mutex = bs_sync_mutex;
     th_tab[tp].thread
       = gt_thread_new (gt_bentsedg_stream_thread_caller,th_tab + tp,NULL);
     if (th_tab[tp].thread == NULL)
@@ -1987,7 +2051,9 @@ void gt_threaded_stream_sortallbuckets(GtSuffixsortspace *suffixsortspace,
   }
   gt_suffixsortspace_delete_cloned(sssp_tab,gt_jobs);
   gt_BentsedgIterator_delete(bs_it);
+  gt_bendsedgSynchronizer_delete(bs_sync);
   gt_mutex_delete(bs_it_mutex);
+  gt_mutex_delete(bs_sync_mutex);
   gt_free(sssp_tab);
   gt_free(th_tab);
   gt_assert(!haserr);
