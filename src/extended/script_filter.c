@@ -41,6 +41,17 @@ static const luaL_Reg script_filter_luasecurelibs[] = {
   {NULL, NULL}
 };
 
+static const luaL_Reg script_filter_luainsecurelibs[] = {
+  /* These are functions affecting the system outside the Lua sandbox!
+     They should only be loaded in environments where unwanted code execution
+     is not a security issue! */
+  {LUA_OSLIBNAME, luaopen_os},
+  {LUA_IOLIBNAME, luaopen_io},
+  {LUA_LOADLIBNAME, luaopen_package},
+  {NULL, NULL}
+};
+
+
 static void script_filter_luaL_opencustomlibs(lua_State *L,
                                               const luaL_Reg *lib)
 {
@@ -51,7 +62,9 @@ static void script_filter_luaL_opencustomlibs(lua_State *L,
   }
 }
 
-GtScriptFilter *gt_script_filter_new(const char *file, GtError *err)
+static GtScriptFilter* gt_script_filter_new_generic(const char *file,
+                                                    bool unsafe,
+                                                    GtError *err)
 {
   GtScriptFilter *script_filter;
   gt_assert(file);
@@ -66,6 +79,9 @@ GtScriptFilter *gt_script_filter_new(const char *file, GtError *err)
   }
   script_filter_luaL_opencustomlibs(script_filter->L,
                                      script_filter_luasecurelibs);
+  if (unsafe)
+    script_filter_luaL_opencustomlibs(script_filter->L,
+                                      script_filter_luainsecurelibs);
   if (luaL_loadfile(script_filter->L, file) ||
                                lua_pcall(script_filter->L, 0, 0, 0)) {
     gt_error_set(err, "cannot run file: %s",
@@ -77,6 +93,16 @@ GtScriptFilter *gt_script_filter_new(const char *file, GtError *err)
     return NULL;
   }
   return script_filter;
+}
+
+GtScriptFilter* gt_script_filter_new_unsafe(const char *file, GtError *err)
+{
+  return gt_script_filter_new_generic(file, true, err);
+}
+
+GtScriptFilter* gt_script_filter_new(const char *file, GtError *err)
+{
+  return gt_script_filter_new_generic(file, false, err);
 }
 
 GtScriptFilter *gt_script_filter_new_from_string(const char *script_string,
