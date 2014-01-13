@@ -39,7 +39,8 @@
 typedef struct {
   bool verbose,
        has_CDS,
-       targetbest;
+       targetbest,
+       retainids;
   GtStr *seqid,
         *source,
         *gt_strand_char,
@@ -112,6 +113,15 @@ static GtOptionParser* gt_select_option_parser_new(void *tool_arguments)
   op = gt_option_parser_new("[option ...] [GFF3_file ...]",
                             "Select certain features (specified by the used "
                             "options) from given GFF3 file(s).");
+
+  /* -retainids */
+  option = gt_option_new_bool("retainids",
+                              "when available, use the original IDs provided "
+                              "in the source file\n"
+                              "(memory consumption is proportional to the "
+                              "input file size(s))", &arguments->retainids,
+                              false);
+  gt_option_parser_add_option(op, option);
 
   /* -seqid */
   option = gt_option_new_string("seqid", "select feature with the given "
@@ -375,6 +385,10 @@ static int gt_select_runner(int argc, const char **argv, int parsed_args,
                                              ? targetbest_select_stream
                                              : select_stream,
                                              arguments->outfp);
+
+    if (arguments->retainids)
+      gt_gff3_out_stream_retain_id_attributes((GtGFF3OutStream*)
+                                                               gff3_out_stream);
 
     /* pull the features through the stream and free them afterwards */
     had_err = gt_node_stream_pull(gff3_out_stream, err);
