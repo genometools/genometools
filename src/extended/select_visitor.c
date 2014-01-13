@@ -421,8 +421,9 @@ GtNodeVisitor* gt_select_visitor_new(GtStr *seqid,
     select_visitor->script_filters = gt_array_new(sizeof (GtScriptFilter*));
     for (i = 0; i < gt_str_array_size(select_visitor->select_files); i++) {
       GtScriptFilter *sf;
-      sf = gt_script_filter_new(gt_str_array_get(select_visitor->select_files,
-                                                 i),
+      sf = gt_script_filter_new_unsafe(
+                                  gt_str_array_get(select_visitor->select_files,
+                                                   i),
                                 err);
       if (!sf) {
         gt_node_visitor_delete(nv);

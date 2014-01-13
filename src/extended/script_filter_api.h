@@ -24,6 +24,7 @@
 typedef struct GtScriptFilter GtScriptFilter;
 
 GtScriptFilter* gt_script_filter_new(const char *file, GtError *err);
+GtScriptFilter* gt_script_filter_new_unsafe(const char *file, GtError *err);
 GtScriptFilter* gt_script_filter_new_from_string(const char *script_string,
                                                  GtError *err);
 GtScriptFilter* gt_script_filter_ref(GtScriptFilter *script_filter);
