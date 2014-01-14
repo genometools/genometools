@@ -21,9 +21,9 @@
 void gt_versionfunc(const char *progname)
 {
   printf("%s (GenomeTools) %s (%s)\n", progname, GT_VERSION, GT_BUILT);
-  printf("Copyright (c) 2003-2013 G. Gremme, S. Steinbiss, S. Kurtz, and "
+  printf("Copyright (c) 2003-2014 G. Gremme, S. Steinbiss, S. Kurtz, and "
          "CONTRIBUTORS\n");
-  printf("Copyright (c) 2003-2013 Center for Bioinformatics, University of "
+  printf("Copyright (c) 2003-2014 Center for Bioinformatics, University of "
          "Hamburg\n");
   printf("See LICENSE file or http://genometools.org/license.html for license "
          "details.\n\n");
