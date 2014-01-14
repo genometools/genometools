@@ -59,23 +59,36 @@ module GT
     end
 
     def initialize()
-      @feature_node_cb = DL.callback("IPP") do |fn_ptr, err_ptr|
-        self.visitor_func_generic(GT::FeatureNode, fn_ptr, err_ptr, "feature")
+      # try to save callbacks by registering them only for implemented handlers
+      if self.respond_to?("visit_feature_node") then
+        @feature_node_cb = DL.callback("IPP") do |fn_ptr, err_ptr|
+          self.visitor_func_generic(GT::FeatureNode, fn_ptr, err_ptr, "feature")
+        end
       end
-      @comment_node_cb = DL.callback("IPP") do |cn_ptr, err_ptr|
-        self.visitor_func_generic(GT::CommentNode, cn_ptr, err_ptr, "comment")
+      if self.respond_to?("visit_comment_node") then
+        @comment_node_cb = DL.callback("IPP") do |cn_ptr, err_ptr|
+          self.visitor_func_generic(GT::CommentNode, cn_ptr, err_ptr, "comment")
+        end
       end
-      @region_node_cb = DL.callback("IPP") do |rn_ptr, err_ptr|
-        self.visitor_func_generic(GT::RegionNode, rn_ptr, err_ptr, "region")
+      if self.respond_to?("visit_region_node") then
+        @region_node_cb = DL.callback("IPP") do |rn_ptr, err_ptr|
+          self.visitor_func_generic(GT::RegionNode, rn_ptr, err_ptr, "region")
+        end
       end
-      @sequence_node_cb = DL.callback("IPP") do |sn_ptr, err_ptr|
-        self.visitor_func_generic(GT::SequenceNode, sn_ptr, err_ptr, "sequence")
+      if self.respond_to?("visit_sequence_node") then
+        @sequence_node_cb = DL.callback("IPP") do |sn_ptr, err_ptr|
+          self.visitor_func_generic(GT::SequenceNode, sn_ptr, err_ptr, "sequence")
+        end
       end
-      @meta_node_cb = DL.callback("IPP") do |mn_ptr, err_ptr|
-        self.visitor_func_generic(GT::MetaNode, mn_ptr, err_ptr, "meta")
+      if self.respond_to?("visit_meta_node") then
+        @meta_node_cb = DL.callback("IPP") do |mn_ptr, err_ptr|
+          self.visitor_func_generic(GT::MetaNode, mn_ptr, err_ptr, "meta")
+        end
       end
-      @eof_node_cb = DL.callback("IPP") do |en_ptr, err_ptr|
-        self.visitor_func_generic(GT::EOFNode, en_ptr, err_ptr, "eof")
+      if self.respond_to?("visit_eof_node") then
+        @eof_node_cb = DL.callback("IPP") do |en_ptr, err_ptr|
+          self.visitor_func_generic(GT::EOFNode, en_ptr, err_ptr, "eof")
+        end
       end
       @genome_visitor = GT.gt_script_wrapper_visitor_new(@comment_node_cb,
                                                          @feature_node_cb,
