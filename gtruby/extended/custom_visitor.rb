@@ -69,7 +69,7 @@ module GT
         self.visitor_func_generic(GT::RegionNode, rn_ptr, err_ptr, "region")
       end
       @sequence_node_cb = DL.callback("IPP") do |sn_ptr, err_ptr|
-        self.visitor_func_generic(GT::CommentNode, sn_ptr, err_ptr, "sequence")
+        self.visitor_func_generic(GT::SequenceNode, sn_ptr, err_ptr, "sequence")
       end
       @meta_node_cb = DL.callback("IPP") do |mn_ptr, err_ptr|
         self.visitor_func_generic(GT::MetaNode, mn_ptr, err_ptr, "meta")
