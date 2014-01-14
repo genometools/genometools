@@ -1131,39 +1131,41 @@ void gt_gff3_parser_build_target_str(GtStr *target, GtStrArray *target_ids,
 
 static bool invalid_uppercase_gff3_attribute(const char *attr_tag)
 {
-return (strcmp(attr_tag, GT_GFF_ID) &&
-        strcmp(attr_tag, GT_GFF_NAME) &&
-        strcmp(attr_tag, GT_GFF_ALIAS) &&
-        strcmp(attr_tag, GT_GFF_PARENT) &&
-        strcmp(attr_tag, GT_GFF_TARGET) &&
-        strcmp(attr_tag, GT_GFF_GAP) &&
-        strcmp(attr_tag, GT_GFF_DERIVES_FROM) &&
-        strcmp(attr_tag, GT_GFF_NOTE) &&
-        strcmp(attr_tag, GT_GFF_DBXREF) &&
-        strcmp(attr_tag, GT_GFF_ONTOLOGY_TERM) &&
-        strcmp(attr_tag, GT_GFF_IS_CIRCULAR));
+  return (strcmp(attr_tag, GT_GFF_ID) &&
+          strcmp(attr_tag, GT_GFF_NAME) &&
+          strcmp(attr_tag, GT_GFF_ALIAS) &&
+          strcmp(attr_tag, GT_GFF_PARENT) &&
+          strcmp(attr_tag, GT_GFF_TARGET) &&
+          strcmp(attr_tag, GT_GFF_GAP) &&
+          strcmp(attr_tag, GT_GFF_DERIVES_FROM) &&
+          strcmp(attr_tag, GT_GFF_NOTE) &&
+          strcmp(attr_tag, GT_GFF_DBXREF) &&
+          strcmp(attr_tag, GT_GFF_ONTOLOGY_TERM) &&
+          strcmp(attr_tag, GT_GFF_START_RANGE) &&
+          strcmp(attr_tag, GT_GFF_END_RANGE) &&
+          strcmp(attr_tag, GT_GFF_IS_CIRCULAR));
 }
 
 static bool invalid_uppercase_gvf_attribute(const char *attr_tag)
 {
-return (strcmp(attr_tag, GT_GVF_GENOTYPE) &&
-        strcmp(attr_tag, GT_GVF_REFERENCE_SEQ) &&
-        strcmp(attr_tag, GT_GVF_VARIANT_SEQ) &&
-        strcmp(attr_tag, GT_GVF_VARIANT_FREQ) &&
-        strcmp(attr_tag, GT_GVF_VARIANT_EFFECT) &&
-        strcmp(attr_tag, GT_GVF_VARIANT_READS) &&
-        strcmp(attr_tag, GT_GVF_TOTAL_READS) &&
-        strcmp(attr_tag, GT_GVF_PHASED) &&
-        strcmp(attr_tag, GT_GVF_START_RANGE) &&
-        strcmp(attr_tag, GT_GVF_END_RANGE) &&
-        strcmp(attr_tag, GT_GVF_INDIVIDUAL) &&
-        strcmp(attr_tag, GT_GVF_REFERENCE_CODON) &&
-        strcmp(attr_tag, GT_GVF_VARIANT_CODON) &&
-        strcmp(attr_tag, GT_GVF_REFERENCE_AA) &&
-        strcmp(attr_tag, GT_GVF_VARIANT_AA) &&
-        strcmp(attr_tag, GT_GVF_BREAKPOINT_DETAIL) &&
-        strcmp(attr_tag, GT_GVF_SEQUENCE_CONTEXT) &&
-        strcmp(attr_tag, GT_GVF_ZYGOSITY));
+  return (strcmp(attr_tag, GT_GVF_GENOTYPE) &&
+          strcmp(attr_tag, GT_GVF_REFERENCE_SEQ) &&
+          strcmp(attr_tag, GT_GVF_VARIANT_SEQ) &&
+          strcmp(attr_tag, GT_GVF_VARIANT_FREQ) &&
+          strcmp(attr_tag, GT_GVF_VARIANT_EFFECT) &&
+          strcmp(attr_tag, GT_GVF_VARIANT_READS) &&
+          strcmp(attr_tag, GT_GVF_TOTAL_READS) &&
+          strcmp(attr_tag, GT_GVF_PHASED) &&
+          strcmp(attr_tag, GT_GVF_START_RANGE) &&
+          strcmp(attr_tag, GT_GVF_END_RANGE) &&
+          strcmp(attr_tag, GT_GVF_INDIVIDUAL) &&
+          strcmp(attr_tag, GT_GVF_REFERENCE_CODON) &&
+          strcmp(attr_tag, GT_GVF_VARIANT_CODON) &&
+          strcmp(attr_tag, GT_GVF_REFERENCE_AA) &&
+          strcmp(attr_tag, GT_GVF_VARIANT_AA) &&
+          strcmp(attr_tag, GT_GVF_BREAKPOINT_DETAIL) &&
+          strcmp(attr_tag, GT_GVF_SEQUENCE_CONTEXT) &&
+          strcmp(attr_tag, GT_GVF_ZYGOSITY));
 }
 
 static int parse_attributes(char *attributes, GtGenomeNode *feature_node,

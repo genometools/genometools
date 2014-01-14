@@ -92,6 +92,8 @@
 #define GT_GFF_DBXREF             "Dbxref"
 #define GT_GFF_ONTOLOGY_TERM      "Ontology_term"
 #define GT_GFF_IS_CIRCULAR        "Is_circular"
+#define GT_GFF_START_RANGE        "Start_range"
+#define GT_GFF_END_RANGE          "End_range"
 #define GT_GVF_GENOTYPE           "Genotype"
 #define GT_GVF_REFERENCE_SEQ      "Reference_seq"
 #define GT_GVF_VARIANT_SEQ        "Variant_seq"
