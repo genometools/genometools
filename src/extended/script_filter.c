@@ -51,7 +51,6 @@ static const luaL_Reg script_filter_luainsecurelibs[] = {
   {NULL, NULL}
 };
 
-
 static void script_filter_luaL_opencustomlibs(lua_State *L,
                                               const luaL_Reg *lib)
 {
