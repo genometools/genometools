@@ -270,15 +270,11 @@ ifeq ($(SYSTEM),Darwin)
   endif
 endif
 
-ifeq ($(SYSTEM),Darwin)
-  EXP_CPPFLAGS += -DLUA_DL_DYLD
-else
-  ifneq ($(SYSTEM),Windows)
-    EXP_CPPFLAGS += -DLUA_DL_DLOPEN
-    ifneq ($(SYSTEM),FreeBSD)
-      LUA_LDLIB:=-ldl
-      EXP_LDLIBS += -ldl
-    endif
+ifneq ($(SYSTEM),Windows)
+  EXP_CPPFLAGS += -DLUA_DL_DLOPEN
+  ifneq ($(SYSTEM),FreeBSD)
+    LUA_LDLIB:=-ldl
+    EXP_LDLIBS += -ldl
   endif
 endif
 
