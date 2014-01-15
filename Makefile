@@ -271,19 +271,19 @@ ifeq ($(SYSTEM),Darwin)
 endif
 
 ifeq ($(SYSTEM),Darwin)
-  EXT_FLAGS += -DLUA_DL_DYLD
+  EXP_CPPFLAGS += -DLUA_DL_DYLD
 else
-  EXT_FLAGS += -DLUA_DL_DLOPEN
-  ifneq ($(SYSTEM),FreeBSD)
   ifneq ($(SYSTEM),Windows)
-    LUA_LDLIB:=-ldl
-    EXP_LDLIBS += -ldl
-  endif
+    EXP_CPPFLAGS += -DLUA_DL_DLOPEN
+    ifneq ($(SYSTEM),FreeBSD)
+      LUA_LDLIB:=-ldl
+      EXP_LDLIBS += -ldl
+    endif
   endif
 endif
 
-ifneq ($(SYSTEM), Windows)
-  EXT_FLAGS += -DLUA_USE_MKSTEMP
+ifneq ($(SYSTEM),Windows)
+  EXP_CPPFLAGS += -DLUA_USE_MKSTEMP
 endif
 
 ifeq ($(64bit),yes)
