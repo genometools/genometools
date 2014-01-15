@@ -128,7 +128,7 @@ module GT
     end
 
     def get_strand
-      GT.gt_feature_node_get_strand(@genome_node)
+      GT::STRANDCHARS[GT.gt_feature_node_get_strand(@genome_node)]
     end
 
     def set_strand
