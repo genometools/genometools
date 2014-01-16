@@ -273,6 +273,8 @@ interfaces.
 
   <li><a href="#GtVisitorStream">GtVisitorStream</a>
 
+  <li><a href="#GtXRFChecker">GtXRFChecker</a>
+
 </ul>
 <h2>Modules</h2>
 <ul>
@@ -350,6 +352,15 @@ Retrieves all features contained in <code>gfi</code> into <code>results</code>. 
    accordingly.
 </p>
 <hr>
+<a name="GtTrackSelectorFunc"></a>
+
+<code>void  GtTrackSelectorFunc(GtBlock*, GtStr*, void*)</code>
+<p>
+A <code>GtTrackSelectorFunc</code> is a callback function which sets a <code>GtStr</code> to a
+   string to be used as a track identifier for assignment of a <code>GtBlock</code>
+   to a given track.
+</p>
+<hr>
 <a name="GtTrackOrderingFunc"></a>
 
 <code>int  GtTrackOrderingFunc(const char *s1, const char *s2, void *data)</code>
@@ -359,15 +370,6 @@ A function describing the order of tracks based on their track identifier
    should appear before the track with ID <code>s2</code> and a positive value if <code>s1</code>
    should appear after <code>s2</code>. Returning a value of 0 will result in an undefined
    ordering of <code>s1</code> and <code>s2</code>.
-</p>
-<hr>
-<a name="GtTrackSelectorFunc"></a>
-
-<code>void  GtTrackSelectorFunc(GtBlock*, GtStr*, void*)</code>
-<p>
-A <code>GtTrackSelectorFunc</code> is a callback function which sets a <code>GtStr</code> to a
-   string to be used as a track identifier for assignment of a <code>GtBlock</code>
-   to a given track.
 </p>
 <hr>
 <a name="GtAddIntronsStream"></a>
@@ -2457,8 +2459,8 @@ Adds a sequence given as a GtStr <code>str</code> to the encoded sequence to be 
 <p>
 Adds a sequence given as a pre-encoded string  <code>str</code> of length <code>strlen</code> to
    the encoded sequence to be built by <code>eb</code>. <code>str</code> must be encoded using the
-   alphabet set at the construction time of <code>eb</code>.
-   Does not take ownership of <code>str</code>.
+   alphabet set at the construction time of <code>eb</code>. <code>str</code> is not allowed to
+   include sequence separators. Does not take ownership of <code>str</code>.
    Additionally, a description <code>desc</code> can be given. If description support
    is enabled, this must not be <code>NULL</code>.
 </p>
@@ -2477,6 +2479,18 @@ Adds a sequence given as a pre-encoded string  <code>str</code> of length <code>
    freed immediately after adding.
    Additionally, a description <code>desc</code> can be given. If description support
    is enabled, this must not be <code>NULL</code>.
+</p>
+<hr>
+<a name="gt_encseq_builder_add_multiple_encoded"></a>
+
+<code>void  gt_encseq_builder_add_multiple_encoded(GtEncseqBuilder *eb,
+                                            const GtUchar *str,
+                                            GtUword strlen)</code>
+<p>
+Adds a sequence given as a pre-encoded string  <code>str</code> of length <code>strlen</code> to
+   the encoded sequence to be built by <code>eb</code>. <code>str</code> must be encoded using the
+   alphabet set at the construction time of <code>eb</code>. <code>str</code> may include
+   sequence separators. Does not take ownership of <code>str</code>.
 </p>
 <hr>
 <a name="gt_encseq_builder_set_logger"></a>
@@ -3221,10 +3235,10 @@ Create a <code>GtExtractFeatureStream*</code> which extracts the corresponding s
 <h2>Class GtFeatureInStream</h2>
 <a name="gt_feature_in_stream_new"></a>
 
-<code>GtNodeStream*  gt_feature_in_stream_new(GtNodeStream*, GtFeatureIndex *fi)</code>
+<code>GtNodeStream*  gt_feature_in_stream_new(GtFeatureIndex *fi)</code>
 <p>
-Create a new <code>GtFeatureInStream</code> which writes all passed nodes to
-   <code>GtFeatureIndex</code> <code>fi</code>.
+Create a new <code>GtFeatureInStream</code> using the given <code>GtFeatureIndex</code> as the
+   source of a node stream.
 </p>
 <hr>
 <a name="GtFeatureIndex"></a>
@@ -3813,10 +3827,10 @@ Delete <code>feature_node_iterator</code>.
 <h2>Class GtFeatureOutStream</h2>
 <a name="gt_feature_out_stream_new"></a>
 
-<code>GtNodeStream*  gt_feature_out_stream_new(GtFeatureIndex *fi)</code>
+<code>GtNodeStream*  gt_feature_out_stream_new(GtNodeStream*, GtFeatureIndex *fi)</code>
 <p>
-Create a new <code>GtFeatureOutStream</code> using the given <code>GtFeatureIndex</code> as the
-   source of an output stream.
+Create a new <code>GtFeatureOutStream</code> which writes all passed nodes to
+   <code>GtFeatureIndex</code> <code>fi</code>.
 </p>
 <hr>
 <a name="GtFeatureStream"></a>
@@ -3827,7 +3841,7 @@ Create a new <code>GtFeatureOutStream</code> using the given <code>GtFeatureInde
 <p>
 Create a new <code>GtFeatureStream</code> which writes all passed nodes to
    <code>GtFeatureIndex</code> <code>fi</code>. Note: The <code>GtFeatureStream</code> class is now deprecated.
-   Please use the <code>GtFeatureInStream</code> class instead.
+   Please use the <code>GtFeatureOutStream</code> class instead.
 </p>
 <hr>
 <a name="GtFile"></a>
@@ -4075,6 +4089,14 @@ Transform all features parsed by <code>gff3_parser</code> by the given <code>off
                                               GtTypeChecker *type_checker)</code>
 <p>
 Set <code>type_checker</code> used by <code>gff3_parser</code>.
+</p>
+<hr>
+<a name="gt_gff3_parser_set_xrf_checker"></a>
+
+<code>void           gt_gff3_parser_set_xrf_checker(GtGFF3Parser *gff3_parser,
+                                             GtXRFChecker *xrf_checker)</code>
+<p>
+Set <code>xrf_checker</code> used by <code>gff3_parser</code>.
 </p>
 <hr>
 <a name="gt_gff3_parser_enable_tidy_mode"></a>
@@ -8513,6 +8535,15 @@ Return <code>true</code> if <code>type</code> is a valid type for the given <cod
 Return <code>true</code> if <code>child_type</code> is partof <code>parent_type</code>, <code>false</code> otherwise.
 </p>
 <hr>
+<a name="gt_type_checker_is_a"></a>
+
+<code>bool            gt_type_checker_is_a(GtTypeChecker *type_checker,
+                                    const char *parent_type,
+                                    const char *child_type)</code>
+<p>
+Return <code>true</code> if <code>child_type</code> is a <code>parent_type</code>, <code>false</code> otherwise.
+</p>
+<hr>
 <a name="gt_type_checker_delete"></a>
 
 <code>void            gt_type_checker_delete(GtTypeChecker *type_checker)</code>
@@ -8571,6 +8602,45 @@ Create a <code>GtUniqStream</code> object which filters out repeated feature nod
 Create a new <code>GtVisitorStream*</code>, takes ownership of <code>node_visitor</code>.
    This stream applies <code>node_visitor</code> to each node which passes through it.
    Can be used to implement all streams with such a functionality.
+</p>
+<hr>
+<a name="GtXRFChecker"></a>
+<h2>Class GtXRFChecker</h2>
+
+<p> The <code>GtXRFChecker</code> interface, allows one to check the validity of
+   Dbxref and Ontology_type attributes. </p>
+
+<hr>
+<a name="gt_xrf_checker_new"></a>
+
+<code>GtXRFChecker*  gt_xrf_checker_new(const char *file_path, GtError *err)</code>
+<p>
+Create a new <code>GtXRFChecker</code> from the definitions found in <code>file_path</code>.
+   Returns NULL on error, and <code>err</code> is set accordingly.
+</p>
+<hr>
+<a name="gt_xrf_checker_ref"></a>
+
+<code>GtXRFChecker*  gt_xrf_checker_ref(GtXRFChecker *xrf_checker)</code>
+<p>
+Increase reference count for <code>xrf_checker</code>
+</p>
+<hr>
+<a name="gt_xrf_checker_is_valid"></a>
+
+<code>bool           gt_xrf_checker_is_valid(GtXRFChecker *xrf_checker,
+                                      const char *value, GtError *err)</code>
+<p>
+Return <code>true</code> if <code>value</code> is valid for the given <code>xrf_checker</code>,
+   <code>false</code> otherwise. In case of <code>value</code> being invalid, <code>err</code> is
+   set accordingly.
+</p>
+<hr>
+<a name="gt_xrf_checker_delete"></a>
+
+<code>void           gt_xrf_checker_delete(GtXRFChecker *xrf_checker)</code>
+<p>
+Decrease the reference count for <code>xrf_checker</code> or delete it.
 </p>
 <hr>
 <a name="Array2dim"></a>
@@ -10029,6 +10099,8 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
 
   <a href="#gt_encseq_builder_add_encoded_own"><code>gt_encseq_builder_add_encoded_own</code></a><br>
 
+  <a href="#gt_encseq_builder_add_multiple_encoded"><code>gt_encseq_builder_add_multiple_encoded</code></a><br>
+
   <a href="#gt_encseq_builder_add_str"><code>gt_encseq_builder_add_str</code></a><br>
 
   <a href="#gt_encseq_builder_build"><code>gt_encseq_builder_build</code></a><br>
@@ -10532,6 +10604,8 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
   <a href="#gt_gff3_parser_set_offset"><code>gt_gff3_parser_set_offset</code></a><br>
 
   <a href="#gt_gff3_parser_set_type_checker"><code>gt_gff3_parser_set_type_checker</code></a><br>
+
+  <a href="#gt_gff3_parser_set_xrf_checker"><code>gt_gff3_parser_set_xrf_checker</code></a><br>
 
   <a href="#gt_gff3_visitor_new"><code>gt_gff3_visitor_new</code></a><br>
 
@@ -11383,6 +11457,8 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
 
   <a href="#gt_type_checker_description"><code>gt_type_checker_description</code></a><br>
 
+  <a href="#gt_type_checker_is_a"><code>gt_type_checker_is_a</code></a><br>
+
   <a href="#gt_type_checker_is_partof"><code>gt_type_checker_is_partof</code></a><br>
 
   <a href="#gt_type_checker_is_valid"><code>gt_type_checker_is_valid</code></a><br>
@@ -11447,6 +11523,14 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
 
   <a href="#gt_xremove"><code>gt_xremove</code></a><br>
 
+  <a href="#gt_xrf_checker_delete"><code>gt_xrf_checker_delete</code></a><br>
+
+  <a href="#gt_xrf_checker_is_valid"><code>gt_xrf_checker_is_valid</code></a><br>
+
+  <a href="#gt_xrf_checker_new"><code>gt_xrf_checker_new</code></a><br>
+
+  <a href="#gt_xrf_checker_ref"><code>gt_xrf_checker_ref</code></a><br>
+
   <a href="#gt_xungetc"><code>gt_xungetc</code></a><br>
 
   <a href="#gt_xvfprintf"><code>gt_xvfprintf</code></a><br>
@@ -11456,7 +11540,7 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
 <div id="footer">
 Copyright &copy; 2008-2013
 The <i>GenomeTools</i> authors.
-Last update: 2013-09-13
+Last update: 2014-01-16
 </div>
 </div>
 <!-- Piwik -->
