@@ -1,6 +1,5 @@
 /*
-  Copyright (c) 2006-2010 Gordon Gremme <gordon@gremme.org>
-  Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2013 Daniel S. Standage <daniel.standage@gmail.com>
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -18,12 +17,13 @@
 #ifndef FEATURE_IN_STREAM_API_H
 #define FEATURE_IN_STREAM_API_H
 
-#include "extended/feature_stream_api.h"
+#include "extended/feature_index_api.h"
+#include "extended/node_stream_api.h"
 
-typedef struct GtFeatureStream GtFeatureInStream;
+typedef struct GtFeatureInStream GtFeatureInStream;
 
-/* Create a new <GtFeatureInStream> which writes all passed nodes to
-   <GtFeatureIndex> <fi>. */
-GtNodeStream* gt_feature_in_stream_new(GtNodeStream*, GtFeatureIndex *fi);
+/* Create a new <GtFeatureInStream> using the given <GtFeatureIndex> as the
+   source of a node stream. */
+GtNodeStream* gt_feature_in_stream_new(GtFeatureIndex *fi);
 
 #endif

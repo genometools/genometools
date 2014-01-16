@@ -14,11 +14,11 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef FEATURE_OUT_STREAM_H
-#define FEATURE_OUT_STREAM_H
+#ifndef FEATURE_IN_STREAM_H
+#define FEATURE_IN_STREAM_H
 
-#include "extended/feature_out_stream_api.h"
+#include "extended/feature_in_stream_api.h"
 
-const GtNodeStreamClass *gt_feature_out_stream_class(void);
+const GtNodeStreamClass *gt_feature_in_stream_class(void);
 
 #endif
