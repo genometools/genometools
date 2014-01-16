@@ -28,6 +28,7 @@
 #include "tools/gt_encseq_info.h"
 #include "tools/gt_encseq_md5.h"
 #include "tools/gt_encseq_bench.h"
+#include "tools/gt_encseq_sample.h"
 
 static void* gt_encseq_arguments_new(void)
 {
@@ -39,6 +40,7 @@ static void* gt_encseq_arguments_new(void)
   gt_toolbox_add_tool(encseq_toolbox, "decode", gt_encseq_decode());
   gt_toolbox_add_tool(encseq_toolbox, "encode", gt_encseq_encode());
   gt_toolbox_add_tool(encseq_toolbox, "bench", gt_encseq_bench());
+  gt_toolbox_add_tool(encseq_toolbox, "sample", gt_encseq_sample());
   return encseq_toolbox;
 }
 
