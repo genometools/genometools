@@ -17,6 +17,7 @@
 
 require 'extended/add_introns_stream'
 require 'extended/anno_db'
+require 'extended/check_boundaries_visitor'
 require 'extended/comment_node'
 require 'extended/custom_stream'
 require 'extended/custom_visitor'
