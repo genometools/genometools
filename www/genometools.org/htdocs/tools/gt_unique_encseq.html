@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta http-equiv="Content-Type" content="application/xhtml+xml; charset=UTF-8" />
-<title>GenomeTools - manual page for GT-GFF3VALIDATOR(1)</title>
+<title>GenomeTools - manual page for GT-UNIQUE_ENCSEQ(1)</title>
 <link rel="stylesheet" type="text/css" href="style.css">
 <link rel="stylesheet" href="..//style.css" type="text/css" />
 </head>
@@ -32,13 +32,13 @@
 <div class="sect1">
 <h2 id="_name">NAME</h2>
 <div class="sectionbody">
-<div class="paragraph"><p>gt-gff3validator - Strictly validate given GFF3 files.</p></div>
+<div class="paragraph"><p>gt-unique_encseq - Compresses a GtEncseq to a UniqueEncseq.</p></div>
 </div>
 </div>
 <div class="sect1">
 <h2 id="_synopsis">SYNOPSIS</h2>
 <div class="sectionbody">
-<div class="paragraph"><p><strong>gt gff3validator</strong> [option &#8230;] [GFF3_file &#8230;]</p></div>
+<div class="paragraph"><p><strong>gt unique_encseq</strong> [options] INPUTFILE</p></div>
 </div>
 </div>
 <div class="sect1">
@@ -46,25 +46,107 @@
 <div class="sectionbody">
 <div class="dlist"><dl>
 <dt class="hdlist1">
-<strong>-typecheck</strong> [<em>string</em>]
+<strong>-kmersize</strong> [<em>value</em>]
 </dt>
 <dd>
 <p>
-check GFF3 types against "id" and "name" tags in given OBO file and validate parent (part-of) relationships.
-If no argument is given, the sofa.obo file from the gtdata/obo_files directory is used.
-If an argument is given, it is used as an OBO filename.
-In the case that such a file does not exist <em>.obo</em> is added to the argument and loading the resulting filename from the gtdata/obo_files directory is attempted. (default: undefined)
+kmer-size used for the seeds (default: 14)
 </p>
 </dd>
 <dt class="hdlist1">
-<strong>-xrfcheck</strong> [<em>string</em>]
+<strong>-indexname</strong> [<em>string</em>]
 </dt>
 <dd>
 <p>
-check Dbxref and Ontology_term attributes for correct syntax according to a abbreviation definition file.
-If no argument is given, the GO.xrf_abbs file from the gtdata/xrf_abbr directory is used.
-If an argument is given, it is used as an specific filename for an abbreviation file.
-In the case that such a file does not exist, <em>.xrf_abbr</em> is added to the argument and loading the resulting filename from the gtdata/xrf_abbr directory is attempted. (default: undefined)
+path and name of the output structure (default: undefined)
+</p>
+</dd>
+<dt class="hdlist1">
+<strong>-debug</strong> [<em>yes|no</em>]
+</dt>
+<dd>
+<p>
+enables debug messages (default: no)
+</p>
+</dd>
+<dt class="hdlist1">
+<strong>-windowsize</strong> [<em>value</em>]
+</dt>
+<dd>
+<p>
+windowsize for non-overlapping seed-extension (default: 42)
+</p>
+</dd>
+<dt class="hdlist1">
+<strong>-nhits</strong> [<em>value</em>]
+</dt>
+<dd>
+<p>
+number of non-overlapping kmer-hits required for the x-drop extension (default: 3)
+</p>
+</dd>
+<dt class="hdlist1">
+<strong>-nkmers</strong> [<em>value</em>]
+</dt>
+<dd>
+<p>
+maximal number of positions stored per kmer (default: 400)
+</p>
+</dd>
+<dt class="hdlist1">
+<strong>-alignlength</strong> [<em>value</em>]
+</dt>
+<dd>
+<p>
+required minimal length of an xdrop-alignment (default: 300)
+</p>
+</dd>
+<dt class="hdlist1">
+<strong>-mat</strong> [<em>value</em>]
+</dt>
+<dd>
+<p>
+matchscore for extension-alignment (default: 2)
+</p>
+</dd>
+<dt class="hdlist1">
+<strong>-mis</strong> [<em>value</em>]
+</dt>
+<dd>
+<p>
+mismatchscore for extension-alignment (default: -1)
+</p>
+</dd>
+<dt class="hdlist1">
+<strong>-ins</strong> [<em>value</em>]
+</dt>
+<dd>
+<p>
+insertionscore for extension-alignment (default: -2)
+</p>
+</dd>
+<dt class="hdlist1">
+<strong>-del</strong> [<em>value</em>]
+</dt>
+<dd>
+<p>
+deletionscore for extension-alignment (default: -2)
+</p>
+</dd>
+<dt class="hdlist1">
+<strong>-xdrop</strong> [<em>value</em>]
+</dt>
+<dd>
+<p>
+xdrop score for extension-alignment
+</p>
+</dd>
+<dt class="hdlist1">
+<strong>-udbsize</strong> [<em>value</em>]
+</dt>
+<dd>
+<p>
+length of inital unique database (default: 5000)
 </p>
 </dd>
 <dt class="hdlist1">

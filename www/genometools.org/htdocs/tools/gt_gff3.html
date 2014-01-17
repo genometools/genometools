@@ -139,6 +139,17 @@ In the case that such a file does not exist <em>.obo</em> is added to the argume
 </p>
 </dd>
 <dt class="hdlist1">
+<strong>-xrfcheck</strong> [<em>string</em>]
+</dt>
+<dd>
+<p>
+check Dbxref and Ontology_term attributes for correct syntax according to a abbreviation definition file.
+If no argument is given, the GO.xrf_abbs file from the gtdata/xrf_abbr directory is used.
+If an argument is given, it is used as an specific filename for an abbreviation file.
+In the case that such a file does not exist, <em>.xrf_abbr</em> is added to the argument and loading the resulting filename from the gtdata/xrf_abbr directory is attempted. (default: undefined)
+</p>
+</dd>
+<dt class="hdlist1">
 <strong>-show</strong> [<em>yes|no</em>]
 </dt>
 <dd>
