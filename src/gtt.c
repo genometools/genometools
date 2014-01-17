@@ -115,6 +115,7 @@
 #include "tools/gt_hop.h"
 #include "tools/gt_id_to_md5.h"
 #include "tools/gt_interfeat.h"
+#include "tools/gt_loccheck.h"
 #include "tools/gt_matchtool.h"
 #include "tools/gt_matstat.h"
 #include "tools/gt_md5_to_id.h"
@@ -213,6 +214,7 @@ GtToolbox* gtt_tools(void)
   gt_toolbox_add_tool(tools, "hop", gt_hop());
   gt_toolbox_add_tool(tools, "id_to_md5", gt_id_to_md5());
   gt_toolbox_add_tool(tools, "interfeat", gt_interfeat());
+  gt_toolbox_add_tool(tools, "loccheck", gt_loccheck());
   gt_toolbox_add_tool(tools, "ltrclustering", gt_ltrclustering());
   gt_toolbox_add_tool(tools, "ltrdigest", gt_ltrdigest());
   gt_toolbox_add_tool(tools, "ltrharvest", gt_ltrharvest());
