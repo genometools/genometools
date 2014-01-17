@@ -30,6 +30,7 @@ struct GtFeatureInStream
   GtQueue *regioncache;
   GtArray *featurecache;
   GtUword seqindex;
+  bool useorig;
 };
 
 #define feature_in_stream_cast(GS)\
@@ -112,13 +113,23 @@ void feature_in_stream_init(GtFeatureInStream *stream)
   {
     const char *seqid = gt_str_array_get(stream->seqids, i);
     GtRange seqrange;
-    gt_feature_index_get_range_for_seqid(stream->fi, &seqrange, seqid, error);
+    if (stream->useorig)
+      gt_feature_index_get_orig_range_for_seqid(stream->fi, &seqrange, seqid,
+                                                error);
+    else
+      gt_feature_index_get_range_for_seqid(stream->fi, &seqrange, seqid, error);
     GtStr *seqstr = gt_str_new_cstr(seqid);
     GtGenomeNode *rn = gt_region_node_new(seqstr, seqrange.start, seqrange.end);
     gt_queue_add(stream->regioncache, rn);
     gt_str_delete(seqstr);
   }
   gt_error_delete(error);
+}
+
+void gt_feature_in_stream_use_orig_ranges(GtFeatureOutStream *stream)
+{
+  GtFeatureInStream *stream = feature_in_stream_cast(ns);
+  stream->useorig = true;
 }
 
 GtNodeStream* gt_feature_in_stream_new(GtFeatureIndex *fi)
@@ -130,6 +141,7 @@ GtNodeStream* gt_feature_in_stream_new(GtFeatureIndex *fi)
   stream->fi = fi;
   stream->regioncache = gt_queue_new();
   stream->featurecache = NULL;
+  stream->useorig = false;
   feature_in_stream_init(stream);
   return ns;
 }

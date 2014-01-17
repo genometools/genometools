@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2013 Daniel S. Standage <daniel.standage@gmail.com>
+  Copyright (c) 2013-2014 Daniel S. Standage <daniel.standage@gmail.com>
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -25,5 +25,12 @@ typedef struct GtFeatureInStream GtFeatureInStream;
 /* Create a new <GtFeatureInStream> using the given <GtFeatureIndex> as the
    source of a node stream. */
 GtNodeStream* gt_feature_in_stream_new(GtFeatureIndex *fi);
+
+/* Instruct <stream> to deliver GtRegionNode objects whose ranges are
+   specified such as with <##sequence-region> pragmas, rather than those
+   inferred from the features. Specifically, use
+   <gt_feature_index_get_orig_range_for_seqid> on the underlying feature
+   index rather than the default <gt_feature_index_get_range_for_seqid>. */
+void gt_feature_in_stream_use_orig_ranges(GtFeatureOutStream *stream);
 
 #endif
