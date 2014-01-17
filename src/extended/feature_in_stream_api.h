@@ -31,6 +31,6 @@ GtNodeStream* gt_feature_in_stream_new(GtFeatureIndex *fi);
    inferred from the features. Specifically, use
    <gt_feature_index_get_orig_range_for_seqid> on the underlying feature
    index rather than the default <gt_feature_index_get_range_for_seqid>. */
-void gt_feature_in_stream_use_orig_ranges(GtFeatureOutStream *stream);
+void gt_feature_in_stream_use_orig_ranges(GtFeatureInStream *stream);
 
 #endif

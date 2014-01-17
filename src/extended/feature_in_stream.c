@@ -126,9 +126,8 @@ void feature_in_stream_init(GtFeatureInStream *stream)
   gt_error_delete(error);
 }
 
-void gt_feature_in_stream_use_orig_ranges(GtFeatureOutStream *stream)
+void gt_feature_in_stream_use_orig_ranges(GtFeatureInStream *stream)
 {
-  GtFeatureInStream *stream = feature_in_stream_cast(ns);
   stream->useorig = true;
 }
 
