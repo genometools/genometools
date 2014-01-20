@@ -216,7 +216,7 @@ int gt_feature_in_stream_unit_test(GtError *error)
   if (gt_str_array_size(seqids) != 2)
   {
     gt_error_set(error, "error in feature_in_stream unit test 1: expected 2 "
-                 "seqids, found %GT_WU", gt_str_array_size(seqids));
+                 "seqids, found "GT_WU"", gt_str_array_size(seqids));
     return -1;
   }
   gt_str_array_delete(seqids);
