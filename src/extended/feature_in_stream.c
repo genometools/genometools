@@ -209,14 +209,14 @@ int gt_feature_in_stream_unit_test(GtError *error)
   src = gt_feature_in_stream_new(prefeat);
   dest = gt_feature_out_stream_new(src, postfeat);
   int result = gt_node_stream_pull(dest, error);
-  if(result == -1)
+  if (result == -1)
     return -1;
 
   GtStrArray *seqids = gt_feature_index_get_seqids(postfeat, error);
-  if(gt_str_array_size(seqids) != 2)
+  if (gt_str_array_size(seqids) != 2)
   {
     gt_error_set(error, "error in feature_in_stream unit test 1: expected 2 "
-                 "seqids, found %lu", gt_str_array_size(seqids));
+                 "seqids, found %GT_WU", gt_str_array_size(seqids));
     return -1;
   }
   gt_str_array_delete(seqids);
@@ -225,8 +225,8 @@ int gt_feature_in_stream_unit_test(GtError *error)
   range2test.start = 4000; range2test.end = 9500;
   gt_feature_index_get_range_for_seqid(postfeat, &range1, "chr1", error);
   gt_feature_index_get_range_for_seqid(postfeat, &range2, "scf0001",error);
-  if(gt_range_compare(&range1, &range1test) ||
-     gt_range_compare(&range2, &range2test))
+  if (gt_range_compare(&range1, &range1test) ||
+      gt_range_compare(&range2, &range2test))
   {
     gt_error_set(error, "error in feature_in_stream unit test 1: incorrect "
                  "sequence regions");
@@ -234,8 +234,8 @@ int gt_feature_in_stream_unit_test(GtError *error)
   }
   gt_feature_index_get_orig_range_for_seqid(postfeat, &range1, "chr1", error);
   gt_feature_index_get_orig_range_for_seqid(postfeat, &range2, "scf0001",error);
-  if(gt_range_compare(&range1, &range1test) ||
-     gt_range_compare(&range2, &range2test))
+  if (gt_range_compare(&range1, &range1test) ||
+      gt_range_compare(&range2, &range2test))
   {
     gt_error_set(error, "error in feature_in_stream unit test 1: incorrect "
                  "sequence regions");
@@ -246,22 +246,21 @@ int gt_feature_in_stream_unit_test(GtError *error)
   gt_node_stream_delete(src);
   gt_node_stream_delete(dest);
 
-
   prefeat = in_stream_test_data(error);
   postfeat = gt_feature_index_memory_new();
   src = gt_feature_in_stream_new(prefeat);
   dest = gt_feature_out_stream_new(src, postfeat);
   gt_feature_in_stream_use_orig_ranges((GtFeatureInStream *)src);
   result = gt_node_stream_pull(dest, error);
-  if(result == -1)
+  if (result == -1)
     return -1;
 
   range1test.start = 500;  range1test.end = 75000;
   range2test.start = 4000; range2test.end = 9500;
   gt_feature_index_get_range_for_seqid(postfeat, &range1, "chr1", error);
   gt_feature_index_get_range_for_seqid(postfeat, &range2, "scf0001",error);
-  if(gt_range_compare(&range1, &range1test) ||
-     gt_range_compare(&range2, &range2test))
+  if (gt_range_compare(&range1, &range1test) ||
+      gt_range_compare(&range2, &range2test))
   {
     gt_error_set(error, "error in feature_in_stream unit test 1: incorrect "
                  "sequence regions");
@@ -271,8 +270,8 @@ int gt_feature_in_stream_unit_test(GtError *error)
   range2test.start = 1; range2test.end = 10000;
   gt_feature_index_get_orig_range_for_seqid(postfeat, &range1, "chr1", error);
   gt_feature_index_get_orig_range_for_seqid(postfeat, &range2, "scf0001",error);
-  if(gt_range_compare(&range1, &range1test) ||
-     gt_range_compare(&range2, &range2test))
+  if (gt_range_compare(&range1, &range1test) ||
+      gt_range_compare(&range2, &range2test))
   {
     gt_error_set(error, "error in feature_in_stream unit test 1: incorrect "
                  "sequence regions");
