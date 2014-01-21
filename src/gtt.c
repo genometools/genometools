@@ -61,6 +61,7 @@
 #include "extended/evaluator.h"
 #include "extended/feature_index.h"
 #include "extended/feature_index_memory.h"
+#include "extended/feature_in_stream.h"
 #include "extended/feature_node.h"
 #include "extended/feature_node_iterator_api.h"
 #include "extended/genome_node.h"
@@ -312,6 +313,8 @@ GtHashmap* gtt_unit_tests(void)
   gt_hashmap_add(unit_tests, "feature node iterator example",
                                              gt_feature_node_iterator_example);
   gt_hashmap_add(unit_tests, "feature node class", gt_feature_node_unit_test);
+  gt_hashmap_add(unit_tests, "feature in stream class",
+                                                gt_feature_in_stream_unit_test);
   gt_hashmap_add(unit_tests, "genome node class", gt_genome_node_unit_test);
   gt_hashmap_add(unit_tests, "gff3 escaping module",
                                                     gt_gff3_escaping_unit_test);

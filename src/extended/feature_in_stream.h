@@ -21,4 +21,6 @@
 
 const GtNodeStreamClass *gt_feature_in_stream_class(void);
 
+int gt_feature_in_stream_unit_test(GtError *error);
+
 #endif
