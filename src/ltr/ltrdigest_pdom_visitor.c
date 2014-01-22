@@ -866,8 +866,10 @@ static int gt_ltrdigest_pdom_visitor_feature_node(GtNodeVisitor *nv,
           rval = dup(cp[1]);  /* make stdout go to write end of pipe. */
           (void) close(0);    /* close current stdin. */
           rval = dup(pc[0]);  /* make stdin come from read end of pipe. */
+          (void) close(pc[0]);
           (void) close(pc[1]);
           (void) close(cp[0]);
+          (void) close(cp[1]);
           (void) execvp("hmmscan", lv->args); /* XXX: read path from env */
           perror("couldn't execute hmmscan!");
           exit(1);
@@ -886,6 +888,7 @@ static int gt_ltrdigest_pdom_visitor_feature_node(GtNodeVisitor *nv,
                             (size_t) gt_str_length(lv->rev[i]) * sizeof (char));
             written = write(pc[1], "\n", 1 * sizeof (char));
           }
+          (void) close(pc[0]);
           (void) close(pc[1]);
           (void) close(cp[1]);
           instream = fdopen(cp[0], "r");
