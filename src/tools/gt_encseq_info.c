@@ -15,6 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#include <stdlib.h>
 #include "core/encseq.h"
 #include "core/encseq_metadata.h"
 #include "core/ma.h"
@@ -93,9 +94,9 @@ static GtOptionParser* gt_encseq_info_option_parser_new(void *tool_arguments)
   return op;
 }
 
-int compare (const void *a, const void *b) {
-  int elem_a = *((int*)a);
-  int elem_b = *((int*)b);
+static int gt_encseq_info_compare (const void *a, const void *b) {
+  GtUword elem_a = *((GtUword*)a);
+  GtUword elem_b = *((GtUword*)b);
   if (elem_a < elem_b)
     return -1;
   else if (elem_a > elem_b)
@@ -245,6 +246,7 @@ static int gt_encseq_info_runner(GT_UNUSED int argc, const char **argv,
 
       filenames = gt_encseq_filenames(encseq);
       gt_file_xprintf(arguments->outfp, "original filenames:\n");
+      /* compute maximum number of sequences per file */
       for (i = 0; i < gt_str_array_size(filenames); i++) {
         GtUword num_sequences;
         if (i+1 < gt_str_array_size(filenames))
@@ -255,7 +257,9 @@ static int gt_encseq_info_runner(GT_UNUSED int argc, const char **argv,
                           gt_encseq_filenum_first_seqnum(encseq, i);
         GT_UPDATE_MAX(max_num_seq_per_file, num_sequences);
       }
+      /* vector for lengths in current file */
       lengths = gt_calloc(max_num_seq_per_file, sizeof (GtUword));
+      /* vector for all lengths in encseq */
       all_lengths = gt_calloc(gt_encseq_num_of_sequences(encseq),
                               sizeof (GtUword));
       for (i = 0; i < gt_str_array_size(filenames); i++) {
@@ -265,6 +269,7 @@ static int gt_encseq_info_runner(GT_UNUSED int argc, const char **argv,
         gt_file_xprintf(arguments->outfp, "\t%s ("GT_WU" characters",
                         gt_str_array_get(filenames, i),
                         (GtUword) gt_encseq_effective_filelength(encseq, i));
+        /* get number of sequences in current file and print */
         if (i+1 < gt_str_array_size(filenames))
           seq_number_diff = gt_encseq_filenum_first_seqnum(encseq, i+1) -
                             seq_number_first;
@@ -276,25 +281,29 @@ static int gt_encseq_info_runner(GT_UNUSED int argc, const char **argv,
           gt_file_xprintf(arguments->outfp, ", "GT_WU" sequences)\n",
               seq_number_diff);
 
+        /* compute n50 for current file */
         if (arguments->show_n50) {
           GtUword n50_count = 0;
           GtUword current_sum = 0;
           GtUword seqnum;
-          /* total_len = eff filelength - number of separators */
+          /* total_len = eff filelength - number of separators,
+           * n50_sum = total_len/2 */
           const GtUword n50_sum = (GtUword)(gt_encseq_effective_filelength
                                   (encseq, i)-seq_number_diff+1)/2;
-
+          /* fill length arrays and sort asc. */
           for (seqnum = 0; seqnum < seq_number_diff; seqnum++) {
             lengths[seqnum] = gt_encseq_seqlength(encseq,
                                                   seqnum+seq_number_first);
             all_lengths[all_seqnum] = lengths[seqnum];
             all_seqnum ++;
           }
-          qsort(lengths, seq_number_diff, sizeof (GtUword), compare);
+          qsort(lengths, seq_number_diff, sizeof (GtUword),
+                gt_encseq_info_compare);
           gt_file_xprintf(arguments->outfp, "\t\t- minimum length: "GT_WU"\n",
                           lengths[0]);
           gt_file_xprintf(arguments->outfp, "\t\t- maximum length: "GT_WU"\n",
                           lengths[seq_number_diff-1]);
+          /* count n50 and print */
           for (seqnum = seq_number_diff-1; current_sum < n50_sum; seqnum--) {
             current_sum += lengths[seqnum];
             n50_count++;
@@ -304,13 +313,15 @@ static int gt_encseq_info_runner(GT_UNUSED int argc, const char **argv,
         }
       }
       free(lengths);
+
+      /* compute n50 for whole encseq */
       if (arguments->show_n50) {
         GtUword n50_count = 0;
         GtUword current_sum = 0;
         const GtUword n50_sum = gt_encseq_total_length(encseq)/2;
         const GtUword num_of_sequences = gt_encseq_num_of_sequences(encseq);
         qsort(all_lengths, num_of_sequences, sizeof (GtUword),
-              compare);
+              gt_encseq_info_compare);
         for (i = num_of_sequences-1; current_sum < n50_sum; i--) {
           current_sum += all_lengths[i];
           n50_count++;
