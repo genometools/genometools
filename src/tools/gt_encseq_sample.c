@@ -46,6 +46,11 @@ typedef struct {
   GtUword len;
 } GtEncseqSampleArguments;
 
+typedef struct {
+  GtUword offset;
+  GtBittab *sample;
+} GtEncseqSampleOutputInfo;
+
 static void* gt_encseq_sample_arguments_new(void)
 {
   GtEncseqSampleArguments *arguments = gt_calloc((size_t) 1, sizeof *arguments);
@@ -157,24 +162,96 @@ static int gt_encseq_sample_arguments_check(GT_UNUSED int rest_argc,
   return had_err;
 }
 
-static int output_sequence(GtEncseq *encseq, GtEncseqSampleArguments *args,
-                           const char *filename, GtError *err) {
-  GtUword i, j, sfrom, sto, stop;
-  int had_err = 0;
-  bool has_desc;
+static int gt_encseq_sample_output(GtEncseq *encseq,
+                                   GtEncseqSampleArguments *args,
+                                   GtEncseqSampleOutputInfo *output)
+{
+  GtUword i, j, stop;
   GtEncseqReader *esr;
-  GtBittab *sample;
+  const bool is_concat = (strcmp(gt_str_get(args->mode), "concat") == 0);
+  const bool is_reverse = GT_ISDIRREVERSE(args->rm);
+  int had_err = 0;
+
+  /* extract selected sequences */
+  i = gt_bittab_get_first_bitnum(output->sample) + output->offset;
+  stop = gt_bittab_get_last_bitnum(output->sample) + output->offset;
+  while (i < stop) {
+    GtUword startpos, len;
+
+    if (is_reverse) {
+      len = gt_encseq_seqlength(encseq,
+                                gt_encseq_num_of_sequences(encseq) - 1 - i);
+      startpos = gt_encseq_total_length(encseq) - (gt_encseq_seqstartpos(encseq,
+                 gt_encseq_num_of_sequences(encseq) - 1 - i) + len);
+    } else {
+      startpos = gt_encseq_seqstartpos(encseq, i);
+      len = gt_encseq_seqlength(encseq, i);
+    }
+    /* prepare description */
+    if (!is_concat) {
+      GtUword desclen;
+      const char *desc = NULL;
+      if (gt_encseq_has_description_support(encseq)) {
+        if (is_reverse) {
+          desc = gt_encseq_description(encseq, &desclen,
+                                       gt_encseq_num_of_sequences(encseq)-1-i);
+        } else {
+          desc = gt_encseq_description(encseq, &desclen, i);
+        }
+      } else {
+        char buf[BUFSIZ];
+        (void) snprintf(buf, BUFSIZ, "sequence "GT_WU"", i);
+        desclen = strlen(buf);
+        desc = buf;
+      }
+      gt_assert(desc);
+      /* output description */
+      gt_xfputc(GT_FASTA_SEPARATOR, stdout);
+      gt_xfwrite(desc, 1, desclen, stdout);
+      gt_xfputc('\n', stdout);
+    }
+
+    if (args->singlechars) {
+      for (j = 0; j < len; j++) {
+        gt_xfputc(gt_encseq_get_decoded_char(encseq, startpos + j, args->rm),
+                  stdout);
+      }
+    } else {
+      esr = gt_encseq_create_reader_with_readmode(encseq, args->rm, startpos);
+      for (j = 0; j < len; j++) {
+        gt_xfputc(gt_encseq_reader_next_decoded_char(esr), stdout);
+      }
+      gt_encseq_reader_delete(esr);
+    }
+    i = gt_bittab_get_next_bitnum(output->sample, i - output->offset)
+        + output->offset;
+
+    /* insert separator between sequences */
+    if (is_concat && i < stop) {
+      gt_xfputc(gt_str_get(args->sepchar)[0], stdout);
+    } else {
+      gt_xfputc('\n', stdout);
+    }
+  }
+  gt_bittab_delete(output->sample);
+  return had_err;
+}
+
+static int gt_encseq_sample_choose_sequences(GtEncseq *encseq,
+                                             GtEncseqSampleArguments *args,
+                                             GtError *err,
+                                             GtEncseqSampleOutputInfo *output)
+{
+  GtUword i, sfrom, sto;
   GtUword num_sequences, count;
   GtUword sequence_length;
   GtUword total_num_seq;
-  const bool is_concat = (strcmp(gt_str_get(args->mode), "concat") == 0);
+  int had_err = 0;
 
   gt_assert(encseq);
   sequence_length = gt_encseq_min_seq_length(encseq);
   total_num_seq = gt_encseq_num_of_sequences(encseq);
 
-  if (!(has_desc = gt_encseq_has_description_support(encseq)))
-    gt_warning("Missing description support for file %s", filename);
   if (sequence_length != gt_encseq_max_seq_length(encseq)) {
     gt_error_set(err, "sequences do not have the same length");
     return -1;
@@ -203,6 +280,7 @@ static int output_sequence(GtEncseq *encseq, GtEncseqSampleArguments *args,
     sfrom = 0;
     sto = total_num_seq-1;
   }
+  output->offset = sfrom;
   if (args->len > total_num_seq * sequence_length) {
     gt_error_set(err, "requested length "GT_WU" exceeds length of sequences"
     " ("GT_WU")", args->len, total_num_seq*sequence_length);
@@ -210,7 +288,7 @@ static int output_sequence(GtEncseq *encseq, GtEncseqSampleArguments *args,
   }
 
   /* fill bit vector randomly */
-  sample = gt_bittab_new(total_num_seq);
+  output->sample = gt_bittab_new(total_num_seq);
   num_sequences = ceil(args->len / (double)sequence_length);
   if (total_num_seq != 1) {
     count = 0;
@@ -218,83 +296,21 @@ static int output_sequence(GtEncseq *encseq, GtEncseqSampleArguments *args,
     while (count < num_sequences) {
       /* probability = num_sequences/total_num_seq */
       if (gt_rand_max(total_num_seq-1) < num_sequences &&
-        !gt_bittab_bit_is_set(sample, i)) {
-        gt_bittab_set_bit(sample, i);
+        !gt_bittab_bit_is_set(output->sample, i)) {
+        gt_bittab_set_bit(output->sample, i);
       count ++;
         }
         i = (i+1) % total_num_seq;
     }
   } else {
-    gt_bittab_set_bit(sample, 0);
+    gt_bittab_set_bit(output->sample, 0);
   }
-
-  /* extract selected sequences */
-  i = gt_bittab_get_first_bitnum(sample) + sfrom;
-  stop = gt_bittab_get_last_bitnum(sample) + sfrom;
-  while (i < stop) {
-    GtUword startpos, len;
-    GtUword desclen;
-
-    if (!GT_ISDIRREVERSE(args->rm)) {
-      startpos = gt_encseq_seqstartpos(encseq, i);
-      len = gt_encseq_seqlength(encseq, i);
-    } else {
-      len = gt_encseq_seqlength(encseq,
-                                gt_encseq_num_of_sequences(encseq)-1-i);
-      startpos = gt_encseq_total_length(encseq) - (gt_encseq_seqstartpos(encseq,
-                 gt_encseq_num_of_sequences(encseq)-1-i) + len);
-    }
-    /* prepare description */
-    if (!is_concat) {
-      const char *desc = NULL;
-      if (has_desc) {
-        if (!GT_ISDIRREVERSE(args->rm)) {
-          desc = gt_encseq_description(encseq, &desclen, i);
-        } else {
-          desc = gt_encseq_description(encseq, &desclen,
-                                       gt_encseq_num_of_sequences(encseq)-1-i);
-        }
-      } else {
-        char buf[BUFSIZ];
-        (void) snprintf(buf, BUFSIZ, "sequence "GT_WU"", i);
-        desclen = strlen(buf);
-        desc = buf;
-      }
-      gt_assert(desc);
-      /* output description */
-      gt_xfputc(GT_FASTA_SEPARATOR, stdout);
-      gt_xfwrite(desc, 1, desclen, stdout);
-      gt_xfputc('\n', stdout);
-    }
-
-    if (args->singlechars) {
-      for (j = 0; j < len; j++) {
-        gt_xfputc(gt_encseq_get_decoded_char(encseq, startpos + j, args->rm),
-                  stdout);
-      }
-    } else {
-      esr = gt_encseq_create_reader_with_readmode(encseq, args->rm, startpos);
-      for (j = 0; j < len; j++) {
-        gt_xfputc(gt_encseq_reader_next_decoded_char(esr), stdout);
-      }
-      gt_encseq_reader_delete(esr);
-    }
-    i = gt_bittab_get_next_bitnum(sample, i-sfrom) + sfrom;
-
-    /* insert separator between sequences */
-    if (is_concat && i < stop) {
-      gt_xfputc(gt_str_get(args->sepchar)[0], stdout);
-    } else {
-      gt_xfputc('\n', stdout);
-    }
-  }
-  gt_bittab_delete(sample);
   return had_err;
 }
 
-static int decode_sequence_file(const char *seqfile,
-                                GtEncseqSampleArguments *args,
-                                GtError *err)
+static GtEncseq *gt_encseq_sample_get_encseq(const char *seqfile,
+                                             GtEncseqSampleArguments *args,
+                                             GtError *err)
 {
   GtEncseqLoader *encseq_loader;
   GtEncseq *encseq;
@@ -315,21 +331,33 @@ static int decode_sequence_file(const char *seqfile,
     if (!had_err)
       had_err = gt_encseq_mirror(encseq, err);
   }
-  if (!had_err)
-    had_err = output_sequence(encseq, args, seqfile, err);
-  gt_encseq_delete(encseq);
   gt_encseq_loader_delete(encseq_loader);
-  return had_err;
+  if (!had_err) {
+    if (!gt_encseq_has_description_support(encseq))
+      gt_warning("Missing description support for file %s", seqfile);
+    return encseq;
+  } else {
+    return NULL;
+  }
 }
 
 static int gt_encseq_sample_runner(GT_UNUSED int argc, const char **argv,
                                    int parsed_args, void *tool_arguments,
                                    GT_UNUSED GtError *err)
 {
+  GtEncseq *encseq;
+  GtEncseqSampleOutputInfo output;
   int had_err = 0;
   gt_error_check(err);
-  had_err = decode_sequence_file(argv[parsed_args], tool_arguments, err);
-
+  encseq = gt_encseq_sample_get_encseq(argv[parsed_args], tool_arguments, err);
+  if (encseq != NULL)
+    had_err = gt_encseq_sample_choose_sequences(encseq, tool_arguments, err,
+                                                &output);
+  else
+    had_err = -1;
+  if (!had_err)
+    had_err = gt_encseq_sample_output(encseq, tool_arguments, &output);
+  gt_encseq_delete(encseq);
   return had_err;
 }
 
