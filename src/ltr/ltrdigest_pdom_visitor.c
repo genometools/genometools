@@ -204,12 +204,22 @@ static void gt_hmmer_model_hit_delete(GtHMMERModelHit *mh)
 {
   GtUword i;
   if (!mh) return;
-  for (i = 0; i < gt_array_size(mh->fwd_hits); i++)
-    gt_free(*(GtHMMERSingleHit**) gt_array_get(mh->fwd_hits, i));
+  for (i = 0; i < gt_array_size(mh->fwd_hits); i++) {
+    GtHMMERSingleHit *h = *(GtHMMERSingleHit**)  gt_array_get(mh->fwd_hits, i);
+    gt_str_delete(h->alignment);
+    gt_str_delete(h->aastring);
+    gt_array_delete(h->chains);
+    gt_free(h);
+  }
   gt_array_delete(mh->fwd_hits);
-  for (i = 0; i < gt_array_size(mh->rev_hits); i++)
-    gt_free(*(GtHMMERSingleHit**) gt_array_get(mh->rev_hits, i));
-   gt_array_delete(mh->rev_hits);
+  for (i = 0; i < gt_array_size(mh->rev_hits); i++) {
+    GtHMMERSingleHit *h = *(GtHMMERSingleHit**)  gt_array_get(mh->rev_hits, i);
+    gt_str_delete(h->alignment);
+    gt_str_delete(h->aastring);
+    gt_array_delete(h->chains);
+    gt_free(h);
+  }
+  gt_array_delete(mh->rev_hits);
   gt_free(mh);
 }
 #endif
@@ -586,9 +596,11 @@ static int gt_ltrdigest_pdom_visitor_attach_hit(GtLTRdigestPdomVisitor *lv,
                              rrng.end,
                              singlehit->strand);
     gt_genome_node_add_user_data((GtGenomeNode*) gf, "pdom_alignment",
-                                 singlehit->alignment, (GtFree) gt_str_delete);
+                                 gt_str_ref(singlehit->alignment),
+                                 (GtFree) gt_str_delete);
     gt_genome_node_add_user_data((GtGenomeNode*) gf, "pdom_aaseq",
-                                 singlehit->aastring, (GtFree) gt_str_delete);
+                                 gt_str_ref(singlehit->aastring),
+                                 (GtFree) gt_str_delete);
     gt_feature_node_set_source((GtFeatureNode*) gf, lv->tag);
     gt_feature_node_set_score((GtFeatureNode*) gf, (float) singlehit->evalue);
     (void) snprintf(buf, (size_t) 32, "%d", (int) singlehit->frame);
@@ -616,9 +628,10 @@ static int gt_ltrdigest_pdom_visitor_attach_hit(GtLTRdigestPdomVisitor *lv,
                                     gt_str_get(buffer));
       gt_str_delete(buffer);
     }
-    gt_array_delete(singlehit->chains);
     gt_feature_node_add_child(lv->ltr_retrotrans, (GtFeatureNode*) gf);
   }
+  gt_array_delete(singlehit->chains);
+  singlehit->chains = NULL;
   return had_err;
 }
 #endif
