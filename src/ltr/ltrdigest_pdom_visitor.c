@@ -204,12 +204,22 @@ static void gt_hmmer_model_hit_delete(GtHMMERModelHit *mh)
 {
   GtUword i;
   if (!mh) return;
-  for (i = 0; i < gt_array_size(mh->fwd_hits); i++)
-    gt_free(*(GtHMMERSingleHit**) gt_array_get(mh->fwd_hits, i));
+  for (i = 0; i < gt_array_size(mh->fwd_hits); i++) {
+    GtHMMERSingleHit *h = *(GtHMMERSingleHit**)  gt_array_get(mh->fwd_hits, i);
+    gt_str_delete(h->alignment);
+    gt_str_delete(h->aastring);
+    gt_array_delete(h->chains);
+    gt_free(h);
+  }
   gt_array_delete(mh->fwd_hits);
-  for (i = 0; i < gt_array_size(mh->rev_hits); i++)
-    gt_free(*(GtHMMERSingleHit**) gt_array_get(mh->rev_hits, i));
-   gt_array_delete(mh->rev_hits);
+  for (i = 0; i < gt_array_size(mh->rev_hits); i++) {
+    GtHMMERSingleHit *h = *(GtHMMERSingleHit**)  gt_array_get(mh->rev_hits, i);
+    gt_str_delete(h->alignment);
+    gt_str_delete(h->aastring);
+    gt_array_delete(h->chains);
+    gt_free(h);
+  }
+  gt_array_delete(mh->rev_hits);
   gt_free(mh);
 }
 #endif
@@ -586,9 +596,11 @@ static int gt_ltrdigest_pdom_visitor_attach_hit(GtLTRdigestPdomVisitor *lv,
                              rrng.end,
                              singlehit->strand);
     gt_genome_node_add_user_data((GtGenomeNode*) gf, "pdom_alignment",
-                                 singlehit->alignment, (GtFree) gt_str_delete);
+                                 gt_str_ref(singlehit->alignment),
+                                 (GtFree) gt_str_delete);
     gt_genome_node_add_user_data((GtGenomeNode*) gf, "pdom_aaseq",
-                                 singlehit->aastring, (GtFree) gt_str_delete);
+                                 gt_str_ref(singlehit->aastring),
+                                 (GtFree) gt_str_delete);
     gt_feature_node_set_source((GtFeatureNode*) gf, lv->tag);
     gt_feature_node_set_score((GtFeatureNode*) gf, (float) singlehit->evalue);
     (void) snprintf(buf, (size_t) 32, "%d", (int) singlehit->frame);
@@ -616,9 +628,10 @@ static int gt_ltrdigest_pdom_visitor_attach_hit(GtLTRdigestPdomVisitor *lv,
                                     gt_str_get(buffer));
       gt_str_delete(buffer);
     }
-    gt_array_delete(singlehit->chains);
     gt_feature_node_add_child(lv->ltr_retrotrans, (GtFeatureNode*) gf);
   }
+  gt_array_delete(singlehit->chains);
+  singlehit->chains = NULL;
   return had_err;
 }
 #endif
@@ -866,8 +879,10 @@ static int gt_ltrdigest_pdom_visitor_feature_node(GtNodeVisitor *nv,
           rval = dup(cp[1]);  /* make stdout go to write end of pipe. */
           (void) close(0);    /* close current stdin. */
           rval = dup(pc[0]);  /* make stdin come from read end of pipe. */
+          (void) close(pc[0]);
           (void) close(pc[1]);
           (void) close(cp[0]);
+          (void) close(cp[1]);
           (void) execvp("hmmscan", lv->args); /* XXX: read path from env */
           perror("couldn't execute hmmscan!");
           exit(1);
@@ -886,6 +901,7 @@ static int gt_ltrdigest_pdom_visitor_feature_node(GtNodeVisitor *nv,
                             (size_t) gt_str_length(lv->rev[i]) * sizeof (char));
             written = write(pc[1], "\n", 1 * sizeof (char));
           }
+          (void) close(pc[0]);
           (void) close(pc[1]);
           (void) close(cp[1]);
           instream = fdopen(cp[0], "r");
