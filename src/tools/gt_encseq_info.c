@@ -312,7 +312,7 @@ static int gt_encseq_info_runner(GT_UNUSED int argc, const char **argv,
                           n50_count);
         }
       }
-      free(lengths);
+      gt_free(lengths);
 
       /* compute n50 for whole encseq */
       if (arguments->show_n50) {
@@ -329,7 +329,7 @@ static int gt_encseq_info_runner(GT_UNUSED int argc, const char **argv,
         gt_file_xprintf(arguments->outfp, "total n50-value: "GT_WU"\n",
                         n50_count);
       }
-      free(all_lengths);
+      gt_free(all_lengths);
 
       alpha = gt_encseq_alphabet(encseq);
       chars = gt_alphabet_characters(alpha);
