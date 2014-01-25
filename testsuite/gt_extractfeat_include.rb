@@ -1,49 +1,49 @@
 Name "gt extractfeat -seqfile test 1"
 Keywords "gt_extractfeat"
 Test do
-  run_test "#{$bin}gt extractfeat -type gene -seqfile #{$testdata}gt_extractfeat_succ_1.fas #{$testdata}gt_extractfeat_succ_1.gff3"
+  run_test "#{$bin}gt extractfeat -type gene -seqfile #{$testdata}gt_extractfeat_succ_1.fas -matchdesc #{$testdata}gt_extractfeat_succ_1.gff3"
   run "diff #{last_stdout} #{$testdata}gt_extractfeat_succ_1.out"
 end
 
 Name "gt extractfeat -seqfile test 1 (compressed)"
 Keywords "gt_extractfeat"
 Test do
-  run_test "#{$bin}gt extractfeat -type gene -seqfile #{$testdata}gt_extractfeat_succ_1.fas.gz  #{$testdata}gt_extractfeat_succ_1.gff3"
+  run_test "#{$bin}gt extractfeat -type gene -seqfile #{$testdata}gt_extractfeat_succ_1.fas.gz -matchdesc  #{$testdata}gt_extractfeat_succ_1.gff3"
   run "diff #{last_stdout} #{$testdata}gt_extractfeat_succ_1.out"
 end
 
 Name "gt extractfeat -seqfile test 1 (with -o)"
 Keywords "gt_extractfeat"
 Test do
-  run_test "#{$bin}gt extractfeat -o test.fas -type gene -seqfile #{$testdata}gt_extractfeat_succ_1.fas.gz  #{$testdata}gt_extractfeat_succ_1.gff3"
+  run_test "#{$bin}gt extractfeat -o test.fas -type gene -seqfile #{$testdata}gt_extractfeat_succ_1.fas.gz -matchdesc  #{$testdata}gt_extractfeat_succ_1.gff3"
   run "diff test.fas #{$testdata}gt_extractfeat_succ_1.out"
 end
 
 Name "gt extractfeat -seqfile test 2"
 Keywords "gt_extractfeat"
 Test do
-  run_test "#{$bin}gt extractfeat -type gene -seqfile #{$testdata}gt_extractfeat_succ_2.fas #{$testdata}gt_extractfeat_succ_2.gff3"
+  run_test "#{$bin}gt extractfeat -type gene -seqfile #{$testdata}gt_extractfeat_succ_2.fas -matchdesc #{$testdata}gt_extractfeat_succ_2.gff3"
   run "diff #{last_stdout} #{$testdata}gt_extractfeat_succ_2.out1"
 end
 
 Name "gt extractfeat -seqfile test 3"
 Keywords "gt_extractfeat"
 Test do
-  run_test "#{$bin}gt extractfeat -type exon -seqfile #{$testdata}gt_extractfeat_succ_2.fas #{$testdata}gt_extractfeat_succ_2.gff3"
+  run_test "#{$bin}gt extractfeat -type exon -seqfile #{$testdata}gt_extractfeat_succ_2.fas -matchdesc #{$testdata}gt_extractfeat_succ_2.gff3"
   run "diff #{last_stdout} #{$testdata}gt_extractfeat_succ_2.out2"
 end
 
 Name "gt extractfeat -seqfile test 4"
 Keywords "gt_extractfeat"
 Test do
-  run_test "#{$bin}gt extractfeat -type exon -join -seqfile #{$testdata}gt_extractfeat_succ_2.fas #{$testdata}gt_extractfeat_succ_2.gff3"
+  run_test "#{$bin}gt extractfeat -type exon -join -seqfile #{$testdata}gt_extractfeat_succ_2.fas -matchdesc #{$testdata}gt_extractfeat_succ_2.gff3"
   run "diff #{last_stdout} #{$testdata}gt_extractfeat_succ_2.out3"
 end
 
 Name "gt extractfeat -seqfile test 5"
 Keywords "gt_extractfeat"
 Test do
-  run_test "#{$bin}gt extractfeat -type exon -join -seqfile #{$testdata}gt_extractfeat_succ_3.fas #{$testdata}gt_extractfeat_succ_3.gff3"
+  run_test "#{$bin}gt extractfeat -type exon -join -seqfile #{$testdata}gt_extractfeat_succ_3.fas -matchdesc #{$testdata}gt_extractfeat_succ_3.gff3"
   run "diff #{last_stdout} #{$testdata}gt_extractfeat_succ_3.out"
 end
 
@@ -107,7 +107,7 @@ Keywords "gt_extractfeat"
 Test do
   run "#{$bin}gt gff3 -offset 1000 #{$testdata}gt_extractfeat_succ_1.gff3 | " +
       "#{$bin}gt extractfeat -type gene -seqfile " +
-      "#{$testdata}gt_extractfeat_succ_1.fas -", :retval => 1
+      "#{$testdata}gt_extractfeat_succ_1.fas -matchdesc -", :retval => 1
   grep last_stderr, "Has the sequence-region to sequence mapping been defined correctly"
 end
 
@@ -115,7 +115,7 @@ Name "gt extractfeat -translate"
 Keywords "gt_extractfeat"
 Test do
   run "#{$bin}gt extractfeat -seqfile #{$testdata}U89959_genomic.fas " +
-      "-type CDS -join -translate #{$testdata}U89959_cds.gff3"
+      "-matchdesc -type CDS -join -translate #{$testdata}U89959_cds.gff3"
   run "diff #{last_stdout} #{$testdata}U89959_cds.fas"
 end
 

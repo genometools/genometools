@@ -1,6 +1,6 @@
 /*
   Copyright (c) 2007-2012 Gordon Gremme <gordon@gremme.org>
-  Copyright (c) 2012-2013 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
+  Copyright (c) 2012-2014 Sascha Steinbiss <sascha@steinbiss.name>
   Copyright (c) 2007-2013 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -304,8 +304,7 @@ int gt_region_mapping_get_sequence(GtRegionMapping *rm, char **seq,
       gt_assert(!rm->seqid2seqnum_mapping);
       *seq = gt_calloc(end - start + 1, sizeof (char));
       strncpy(*seq, rm->rawseq + start - 1, (end - start + 1) * sizeof (char));
-    } else {
-      gt_assert(rm->seq_col);
+    } else if (rm->mapping) {
       if (!had_err) {
         GtUword seqlength = gt_seq_col_get_sequence_length(rm->seq_col,
                                                                  0, 0);
@@ -323,6 +322,12 @@ int gt_region_mapping_get_sequence(GtRegionMapping *rm, char **seq,
                                          end - offset);
         }
       }
+    } else {
+      gt_assert(!rm->usedesc && !rm->matchdesc);
+      gt_error_set(err, "no mapping rule given and no MD5 tags "
+                        "present in the query seqid \"%s\" -- no mapping can "
+                        "be defined", gt_str_get(seqid));
+      had_err = -1;
     }
   }
   return had_err;
@@ -377,9 +382,15 @@ int gt_region_mapping_get_sequence_length(GtRegionMapping *rm,
       if (!had_err) {
         *length = gt_encseq_seqlength(rm->encseq, seqno);
       }
-    }
-    else
+    } else if (rm->mapping) {
       *length = gt_seq_col_get_sequence_length(rm->seq_col, 0, 0);
+    } else {
+      gt_assert(!rm->usedesc && !rm->matchdesc);
+      gt_error_set(err, "no mapping rule given and no MD5 tags "
+                        "present in the query seqid \"%s\" -- no mapping can "
+                        "be defined", gt_str_get(seqid));
+      had_err = -1;
+    }
   }
   return had_err;
 }
@@ -449,13 +460,19 @@ int gt_region_mapping_get_description(GtRegionMapping *rm, GtStr *desc,
                                                 err);
         gt_str_delete(md5_seqid);
       }
+    } else if (rm->mapping) {
+      char *cdesc;
+      cdesc = gt_seq_col_get_description(rm->seq_col, 0, 0);
+      gt_assert(cdesc);
+      gt_str_append_cstr(desc, cdesc);
+      gt_free(cdesc);
     } else {
+      gt_assert(!rm->usedesc && !rm->matchdesc);
       if (!had_err) {
-        char *cdesc;
-        cdesc = gt_seq_col_get_description(rm->seq_col, 0, 0);
-        gt_assert(cdesc);
-        gt_str_append_cstr(desc, cdesc);
-        gt_free(cdesc);
+        gt_error_set(err, "no mapping rule given and no MD5 tags "
+                          "present in the query seqid \"%s\" -- no mapping can "
+                          "be defined", gt_str_get(seqid));
+        had_err = -1;
       }
     }
   }
@@ -526,11 +543,18 @@ const char* gt_region_mapping_get_md5_fingerprint(GtRegionMapping *rm,
         return gt_md5_tab_get(tab, seqno);
       else
         return NULL;
-    }
-    else {
+    } else if (rm->mapping) {
       if (!had_err)
         md5 = gt_seq_col_get_md5_fingerprint(rm->seq_col, 0, 0);
       *offset = 1;
+    } else {
+      if (!had_err) {
+        gt_assert(!rm->usedesc && !rm->matchdesc);
+        gt_error_set(err, "no mapping rule given and no MD5 tags "
+                          "present in the query seqid \"%s\" -- no mapping can "
+                          "be defined", gt_str_get(seqid));
+        had_err = -1;
+      }
     }
   }
   return md5;
