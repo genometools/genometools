@@ -88,7 +88,7 @@ static GtMatchIteratorStatus gt_match_iterator_blast_next(GtMatchIterator *gm,
       fseek(m->pvt->matchfilep, -1, SEEK_CUR);
     readvalues = fscanf(m->pvt->matchfilep,
                         "%s %s %f " GT_WD " %*d %*d " GT_WD " " GT_WD " " GT_WD
-                        " " GT_WD " " "%lg %f\n", query_seq, db_seq, &identity,
+                        " " GT_WD " %lg %f\n", query_seq, db_seq, &identity,
                         &storeinteger[0],
                         &storeinteger[1], &storeinteger[2], &storeinteger[3],
                         &storeinteger[4], &e_value, &bitscore);
