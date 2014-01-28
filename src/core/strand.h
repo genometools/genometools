@@ -21,5 +21,6 @@
 #include "core/strand_api.h"
 
 GtStrand gt_strand_join(GtStrand, GtStrand);
+GtStrand gt_strand_invert(GtStrand);
 
 #endif
