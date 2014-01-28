@@ -41,6 +41,7 @@ GtStrand gt_strand_invert(GtStrand s) {
       return GT_STRAND_UNKNOWN;
     default: gt_assert(0);
   }
+  return GT_NUM_OF_STRAND_TYPES; /* should not happen */
 }
 
 GtStrand gt_strand_join(GtStrand strand_a, GtStrand strand_b)
