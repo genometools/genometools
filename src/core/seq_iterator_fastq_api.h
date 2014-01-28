@@ -24,7 +24,7 @@
 
 typedef struct GtSeqIteratorFastQ GtSeqIteratorFastQ;
 
-/* Create a new <GtSeqIteratorQual> for all sequence files in <filenametab>. */
+/* Create a new <GtSeqIteratorFastQ> for all sequence files in <filenametab>. */
 GtSeqIterator* gt_seq_iterator_fastq_new(const GtStrArray *filenametab,
                                          GtError *err);
 
