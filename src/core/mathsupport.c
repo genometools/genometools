@@ -16,14 +16,16 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include <math.h>
-#include <stdio.h>
 #include <inttypes.h>
 #include <limits.h>
+#include <math.h>
+#include <stdio.h>
+
+#include "core/byte_select_api.h"
 #include "core/ensure.h"
+#include "core/intbits.h"
 #include "core/mathsupport.h"
 #include "core/yarandom.h" /* necessary to define random() correctly */
-#include "core/byte_select_api.h"
 
 #define GT_DBL_MAX_ABS_ERROR 1.0E-100
 #define GT_DBL_MAX_REL_ERROR 1.0E-8
@@ -115,7 +117,7 @@ char gt_rand_char(void)
   return c;
 }
 
-#define GT_MAXLOG2VALUE 63
+#define GT_MAXLOG2VALUE (GT_INTWORDSIZE - 1)
 /* Find the log base 2 of an integer in O(wordsize/CHAR_BIT) operations. where N
    is the number of bits. There are faster methods, see
    \url{http://graphics.stanford.edu/~seander/bithacks.html#IntegerLogObvious}
