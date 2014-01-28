@@ -3,7 +3,7 @@
   Keywords "gt_cds"
   Test do
     run_test "#{$bin}gt cds -minorflen 1 -startcodon yes " +
-             "-seqfile #{$testdata}gt_cds_test_#{i}.fas " +
+             "-seqfile #{$testdata}gt_cds_test_#{i}.fas -matchdesc " +
              "#{$testdata}gt_cds_test_#{i}.in"
     run "diff #{last_stdout} #{$testdata}gt_cds_test_#{i}.out"
   end
@@ -13,7 +13,7 @@ Name "gt cds error message"
 Keywords "gt_cds"
 Test do
   run "#{$bin}gt gff3 -offset 1000 #{$testdata}gt_cds_test_1.in | " +
-      "#{$bin}gt cds -seqfile #{$testdata}gt_cds_test_1.fas -", :retval => 1
+      "#{$bin}gt cds -matchdesc -seqfile #{$testdata}gt_cds_test_1.fas -", :retval => 1
   grep last_stderr, "Has the sequence-region to sequence mapping been defined correctly"
 end
 
@@ -86,7 +86,7 @@ Name "gt cds test (-startcodon no -finalstopcodon no)"
 Keywords "gt_cds"
 Test do
   run_test "#{$bin}gt cds -startcodon no -finalstopcodon no -seqfile " +
-           "#{$testdata}U89959_genomic.fas " +
+           "#{$testdata}U89959_genomic.fas -matchdesc " +
            "#{$testdata}gt_cds_nostartcodon_nofinalstopcodon.in"
   run "diff #{last_stdout} " +
       "#{$testdata}gt_cds_nostartcodon_nofinalstopcodon.out"
@@ -105,7 +105,7 @@ Name "gt cds test (U89959)"
 Keywords "gt_cds"
 Test do
   run_test "#{$bin}gt cds -seqfile #{$testdata}U89959_genomic.fas " +
-           "#{$testdata}U89959_csas.gff3"
+           "-matchdesc #{$testdata}U89959_csas.gff3"
   run      "diff #{last_stdout} #{$testdata}U89959_cds.gff3"
 end
 
