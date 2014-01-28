@@ -31,7 +31,7 @@
 #include "core/translator.h"
 #include "core/codon_iterator_api.h"
 #include "core/codon_iterator_simple_api.h"
-#include "core/strand_api.h"
+#include "core/strand.h"
 #include "core/trans_table.h"
 #include "core/encseq_api.h"
 #include "extended/extract_feature_sequence.h"
@@ -69,6 +69,8 @@ static void orf_attach_results_to_gff3(GtFeatureNode *gf,
   GtGenomeNode *child;
   GtStr *tag;
   tag = gt_str_new_cstr(GT_ORF_FINDER_TAG);
+  if (gt_feature_node_get_strand(gf) == GT_STRAND_REVERSE)
+    strand = gt_strand_invert(strand);
 
   orf_rng.start++; orf_rng.end++;
 

@@ -29,6 +29,21 @@ GtStrand gt_strand_get(char strand_char)
   }
 }
 
+GtStrand gt_strand_invert(GtStrand s) {
+  switch (s) {
+    case GT_STRAND_FORWARD:
+      return GT_STRAND_REVERSE;
+    case GT_STRAND_REVERSE:
+      return GT_STRAND_FORWARD;
+    case GT_STRAND_BOTH:
+      return GT_STRAND_BOTH;
+    case GT_STRAND_UNKNOWN:
+      return GT_STRAND_UNKNOWN;
+    default: gt_assert(0);
+  }
+  return GT_NUM_OF_STRAND_TYPES; /* should not happen */
+}
+
 GtStrand gt_strand_join(GtStrand strand_a, GtStrand strand_b)
 {
   switch (strand_b) {
