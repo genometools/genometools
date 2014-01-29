@@ -84,6 +84,6 @@ Keywords "gt_tirvish"
 Test do
   run_test "#{$bin}gt suffixerator -db #{$testdata}Random159.fna -dna -ssp -sds -tis -des -lcp"
   run_test "#{$bin}gt tirvish -index Random159.fna", :retval => 1
-  grep(last_stderr, "cannot open file descriptor 'Random159.fna.suf'")
+  grep(last_stderr, "cannot open file 'Random159.fna.suf'")
 end
 

@@ -99,7 +99,7 @@ int gt_xopen(const char *path, int flags, mode_t mode)
   int fd;
 
   if ((fd = open(path, flags, mode)) == -1) {
-    fprintf(stderr, "open(): cannot open file descriptor '%s': %s\n", path,
+    fprintf(stderr, "open(): cannot open file '%s': %s\n", path,
             strerror(errno));
     exit(EXIT_FAILURE);
   }

@@ -124,7 +124,7 @@ static GtMatchIteratorStatus gt_match_iterator_blast_next(GtMatchIterator *gm,
     }
   }
 
-  for (columncount = 0; columncount < (GtUword) (READNUMS);
+  for (columncount = 0; !had_err && columncount < (GtUword) (READNUMS);
        columncount++) {
     if (storeinteger[columncount] < 0) {
          GT_MATCHER_BLAST_CANNOTPARSECOLUMN("non-negative integer expected");
