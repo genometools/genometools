@@ -366,6 +366,17 @@ Test do
   grep last_stderr, /please use correct index for this platform/
 end
 
+Name "gt encseq info n50"
+Keywords "encseq gt_encseq info n50"
+Test do
+  run_test "#{$bin}gt encseq info -n50 -noindexname #{$testdata}U89959_ests.fas"
+  grep last_stdout, /n50-value: 81/
+  run_test "#{$bin}gt encseq info -n50 -noindexname #{$testdata}foofoofoo.fas"
+  grep last_stdout, /n50-value: 2/
+  run_test "#{$bin}gt encseq info -n50 -noindexname #{$testdata}tRNA.dos.fas"
+  grep last_stdout, /n50-value: 5/
+end
+
 Name "gt encseq incompatible file format version"
 Keywords "encseq encseq_file_format"
 Test do
