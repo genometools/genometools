@@ -25,24 +25,23 @@
 
 typedef struct GtEncseqMetadata GtEncseqMetadata;
 
-GtEncseqMetadata*    gt_encseq_metadata_new(const char *indexname,
-                                            GtError *err);
-GtAlphabet*          gt_encseq_metadata_alphabet(GtEncseqMetadata *emd);
-GtUword        gt_encseq_metadata_version(GtEncseqMetadata *emd);
-bool                 gt_encseq_metadata_is64bit(GtEncseqMetadata *emd);
-GtUword        gt_encseq_metadata_total_length(GtEncseqMetadata *emd);
-GtUword        gt_encseq_metadata_num_of_sequences(GtEncseqMetadata *emd);
-GtUword        gt_encseq_metadata_num_of_files(GtEncseqMetadata *emd);
-GtUword        gt_encseq_metadata_min_seq_length(GtEncseqMetadata *emd);
-GtUword        gt_encseq_metadata_max_seq_length(GtEncseqMetadata *emd);
-GtUword        gt_encseq_metadata_length_of_filenames(
+GtEncseqMetadata*  gt_encseq_metadata_new(const char *indexname,
+                                          GtError *err);
+GtAlphabet*        gt_encseq_metadata_alphabet(GtEncseqMetadata *emd);
+GtUword            gt_encseq_metadata_version(GtEncseqMetadata *emd);
+bool               gt_encseq_metadata_is64bit(GtEncseqMetadata *emd);
+GtUword            gt_encseq_metadata_total_length(GtEncseqMetadata *emd);
+GtUword            gt_encseq_metadata_num_of_sequences(GtEncseqMetadata *emd);
+GtUword            gt_encseq_metadata_num_of_files(GtEncseqMetadata *emd);
+GtUword            gt_encseq_metadata_min_seq_length(GtEncseqMetadata *emd);
+GtUword            gt_encseq_metadata_max_seq_length(GtEncseqMetadata *emd);
+GtUword            gt_encseq_metadata_length_of_filenames(
                                                          GtEncseqMetadata *emd);
-bool                 gt_encseq_metadata_has_custom_alphabet(
+bool               gt_encseq_metadata_has_custom_alphabet(
                                                          GtEncseqMetadata *emd);
-GtUword        gt_encseq_metadata_length_of_alphadef(
-                                                         GtEncseqMetadata *emd);
-GtEncseqAccessType   gt_encseq_metadata_accesstype(GtEncseqMetadata *emd);
-GtSpecialcharinfo    gt_encseq_metadata_specialcharinfo(GtEncseqMetadata *emd);
-void                 gt_encseq_metadata_delete(GtEncseqMetadata *emd);
+GtUword            gt_encseq_metadata_length_of_alphadef(GtEncseqMetadata *emd);
+GtEncseqAccessType gt_encseq_metadata_accesstype(GtEncseqMetadata *emd);
+GtSpecialcharinfo  gt_encseq_metadata_specialcharinfo(GtEncseqMetadata *emd);
+void               gt_encseq_metadata_delete(GtEncseqMetadata *emd);
 
 #endif
