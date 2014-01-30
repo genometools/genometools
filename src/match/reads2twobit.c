@@ -32,6 +32,7 @@
 #include "core/parseutils_api.h"
 #include "core/qsort_r_api.h"
 #include "core/splitter_api.h"
+#include "core/desc_buffer.h"
 #include "core/xansi_api.h"
 #include "core/undef_api.h"
 #include "match/hplstore.h"
@@ -68,6 +69,8 @@ struct GtReads2Twobit
   GtUword maxlow;
   bool has_paired;
   bool use_rle;
+  GtDescBuffer *descs;
+  GtUword n_descs;
   GtHplstore *hplengths;
   double approx_avhlen;
 };
@@ -95,6 +98,8 @@ GtReads2Twobit* gt_reads2twobit_new(GtStr *indexname)
   r2t->use_rle = false;
   r2t->hplengths = NULL;
   r2t->approx_avhlen = 0.0;
+  r2t->descs = NULL;
+  r2t->n_descs = 0;
   return r2t;
 }
 
@@ -119,6 +124,7 @@ void gt_reads2twobit_delete(GtReads2Twobit *r2t)
         gt_str_delete(rli->filename2);
     }
     gt_array_delete(r2t->collection);
+    gt_desc_buffer_delete(r2t->descs);
     gt_hplstore_delete(r2t->hplengths);
     gt_free(r2t->twobitencoding);
     gt_free(r2t->seppos);
@@ -284,12 +290,15 @@ typedef struct {
   GtUword seppos_alloc;
   char phredbase, *qbuf, *qbuf2, lowqual;
   size_t qbuf_size, qbuf2_size;
+  GtStr *dbuf, *dbuf2;
   GtUword maxlow;
   bool use_rle;
   GtTwobitencoding prevcode;
   GtHplstore *hplengths;
   uint8_t hplength;
   GtUword hsum, nofh;
+  GtDescBuffer *descs;
+  GtUword *n_descs;
 } GtReads2TwobitEncodeState;
 
 static int gt_reads2twobit_rli_cmp(const void *a, const void *b)
@@ -347,6 +356,10 @@ static void gt_reads2twobit_init_encode(GtReads2Twobit *r2t,
       state->inputfiles_totallength + 2UL) : NULL;
   state->nofh = 0;
   state->hsum = 0;
+  state->descs = r2t->descs;
+  state->n_descs = &(r2t->n_descs);
+  state->dbuf = gt_str_new();
+  state->dbuf2 = gt_str_new();
 }
 
 #define GT_READS2TWOBIT_READBUFFER_SIZE ((size_t)256)
@@ -479,7 +492,17 @@ static inline void gt_reads2twobit_prepare_for_new_sequence(
   state->hplength = 0;
 }
 
-#define GT_READS2TWOBIT_SKIP_TO_DESCRIPTION_END(LINE, FILEPTR, FGETSRETVAL)\
+static inline void gt_reads2twobit_process_desc_line(
+    GtReads2TwobitEncodeState *state, char *line, bool second_in_pair,
+    bool long_line)
+{
+  GtStr *dbuf = second_in_pair ? state->dbuf2 : state->dbuf;
+  gt_str_append_cstr(dbuf, long_line ? line : line + 1UL);
+}
+
+#define GT_READS2TWOBIT_HANDLE_LONG_DESCRIPTIONS(LINE, FILEPTR, FGETSRETVAL,\
+                                                 PROCESS_DESCS, STATE,\
+                                                 SECOND_IN_PAIR)\
   /* handle the case in which a description is longer than the line buffer: */\
   while (strlen(LINE) == GT_READS2TWOBIT_READBUFFER_SIZE - (size_t) 1 \
       && (LINE)[GT_READS2TWOBIT_READBUFFER_SIZE - 2] != '\n' \
@@ -487,6 +510,11 @@ static inline void gt_reads2twobit_prepare_for_new_sequence(
   {\
     (FGETSRETVAL) = \
       fgets((LINE), (int)GT_READS2TWOBIT_READBUFFER_SIZE, (FILEPTR));\
+    if ((PROCESS_DESCS) && (STATE)->descs != NULL && (FGETSRETVAL) != NULL)\
+    {\
+      gt_reads2twobit_process_desc_line((STATE), (LINE),\
+                                        (SECOND_IN_PAIR), true);\
+    }\
   }
 
 static void gt_reads2twobit_switch_to_invalid_mode(
@@ -607,6 +635,34 @@ static int gt_reads2twobit_close_file(FILE *file, GtStr *filename, GtError *err)
   return had_err;
 }
 
+static void gt_reads2twobit_finalize_descriptions(
+    GtReads2TwobitEncodeState *state)
+{
+  GtUword i;
+  if (!state->descs)
+    return;
+  if (!state->invalid_mode)
+  {
+    for (i = 0; i < gt_str_length(state->dbuf); i++)
+    {
+      gt_desc_buffer_append_char(state->descs, gt_str_get(state->dbuf)[i]);
+    }
+    gt_desc_buffer_finish(state->descs);
+    (*state->n_descs)++;
+    if (gt_str_length(state->dbuf2) > 0)
+    {
+      for (i = 0; i < gt_str_length(state->dbuf2); i++)
+      {
+        gt_desc_buffer_append_char(state->descs, gt_str_get(state->dbuf2)[i]);
+      }
+      gt_desc_buffer_finish(state->descs);
+      (*state->n_descs)++;
+    }
+  }
+  gt_str_reset(state->dbuf);
+  gt_str_reset(state->dbuf2);
+}
+
 static int gt_reads2twobit_encode_unpaired_fastq_library(
     GtReads2TwobitEncodeState *state, GtReadsLibraryInfo *rli, FILE *file,
     char *line)
@@ -622,16 +678,22 @@ static int gt_reads2twobit_encode_unpaired_fastq_library(
     {
       if (line[0] == '@')
       {
-        if (state->current.nofseqs > rli->first_seqnum && !state->invalid_mode)
+        if (state->current.nofseqs > rli->first_seqnum)
         {
-          gt_reads2twobit_process_sequence_end(state);
+          if (!state->invalid_mode)
+            gt_reads2twobit_process_sequence_end(state);
+          gt_reads2twobit_finalize_descriptions(state);
         }
-        GT_READS2TWOBIT_SKIP_TO_DESCRIPTION_END(line, file, fgetsretval);
+        if (state->descs)
+          gt_reads2twobit_process_desc_line(state, line, false, false);
+        GT_READS2TWOBIT_HANDLE_LONG_DESCRIPTIONS(line, file, fgetsretval,
+            true, state, false);
         gt_reads2twobit_prepare_for_new_sequence(state);
       }
       else if (line[0] == '+')
       {
-        GT_READS2TWOBIT_SKIP_TO_DESCRIPTION_END(line, file, fgetsretval);
+        GT_READS2TWOBIT_HANDLE_LONG_DESCRIPTIONS(line, file, fgetsretval,
+            false, state, false);
         if (state->exp_qlen + 1UL > (GtUword)(state->qbuf_size))
         {
           state->qbuf_size = (size_t)state->exp_qlen + 1;
@@ -658,6 +720,7 @@ static int gt_reads2twobit_encode_unpaired_fastq_library(
     }
   } while ((fgetsretval = fgets(line, (int)GT_READS2TWOBIT_READBUFFER_SIZE,
             file)) == line && !had_err);
+  gt_reads2twobit_finalize_descriptions(state);
   return had_err;
 }
 
@@ -669,11 +732,16 @@ static void gt_reads2twobit_encode_unpaired_fasta_library(
   do {
     if (line[0] == '>')
     {
-      if (state->current.nofseqs > rli->first_seqnum && !state->invalid_mode)
+      if (state->current.nofseqs > rli->first_seqnum)
       {
-        gt_reads2twobit_process_sequence_end(state);
+        if (!state->invalid_mode)
+          gt_reads2twobit_process_sequence_end(state);
+        gt_reads2twobit_finalize_descriptions(state);
       }
-      GT_READS2TWOBIT_SKIP_TO_DESCRIPTION_END(line, file, fgetsretval);
+      if (state->descs)
+        gt_reads2twobit_process_desc_line(state, line, false, false);
+      GT_READS2TWOBIT_HANDLE_LONG_DESCRIPTIONS(line, file, fgetsretval,
+          true, state, false);
       gt_reads2twobit_prepare_for_new_sequence(state);
     }
     else if (!state->invalid_mode)
@@ -682,6 +750,7 @@ static void gt_reads2twobit_encode_unpaired_fasta_library(
     }
   } while ((fgetsretval = fgets(line, (int)GT_READS2TWOBIT_READBUFFER_SIZE,
             file)) == line);
+  gt_reads2twobit_finalize_descriptions(state);
 }
 
 static int gt_reads2twobit_encode_unpaired_library(
@@ -758,7 +827,10 @@ static inline int gt_reads2twobit_process_fastq_mate_pair(
     gt_assert(fgetsretval == line2);
     *file2new = false;
   }
-  GT_READS2TWOBIT_SKIP_TO_DESCRIPTION_END(line2, file2, fgetsretval);
+  /* at this point one line2 is always the (beginnning of the) @ description */
+  gt_reads2twobit_process_desc_line(state, line2, true, false);
+  GT_READS2TWOBIT_HANDLE_LONG_DESCRIPTIONS(line2, file2, fgetsretval, true,
+      state, true);
   state->seqlen_mate = state->seqlen;
   state->seqlen = 0;
   state->exp_qlen = 0;
@@ -777,7 +849,8 @@ static inline int gt_reads2twobit_process_fastq_mate_pair(
         break;
       else if (line2[0] == '+')
       {
-        GT_READS2TWOBIT_SKIP_TO_DESCRIPTION_END(line2, file2, fgetsretval);
+        GT_READS2TWOBIT_HANDLE_LONG_DESCRIPTIONS(line2, file2, fgetsretval,
+            false, state, true);
         if (state->exp_qlen + 1UL > (GtUword)(state->qbuf2_size))
         {
           state->qbuf2_size = (size_t)state->exp_qlen + 1;
@@ -812,6 +885,8 @@ static inline int gt_reads2twobit_process_fastq_mate_pair(
     state->invalid_sequences++;
     state->invalid_total_length += (prev_seqlen - 1UL);
   }
+  if (!had_err)
+    gt_reads2twobit_finalize_descriptions(state);
   return had_err;
 }
 
@@ -831,12 +906,17 @@ static int gt_reads2twobit_encode_interleaved_paired_fastq_library(
     {
       if (line[0] == '@')
       {
-        if (state->current.nofseqs > rli->first_seqnum && !state->invalid_mode)
-        {
-          gt_reads2twobit_process_sequence_end(state);
-        }
-        GT_READS2TWOBIT_SKIP_TO_DESCRIPTION_END(line, file, fgetsretval);
         processing_mate = !processing_mate;
+        if (state->current.nofseqs > rli->first_seqnum)
+        {
+          if (!state->invalid_mode)
+            gt_reads2twobit_process_sequence_end(state);
+        }
+        if (state->descs != NULL)
+          gt_reads2twobit_process_desc_line(state, line, processing_mate,
+              false);
+        GT_READS2TWOBIT_HANDLE_LONG_DESCRIPTIONS(line, file, fgetsretval,
+            true, state, processing_mate);
         if (processing_mate)
         {
           if (!state->invalid_mode)
@@ -847,12 +927,15 @@ static int gt_reads2twobit_encode_interleaved_paired_fastq_library(
         }
         else
         {
+          if (state->current.nofseqs > rli->first_seqnum)
+            gt_reads2twobit_finalize_descriptions(state);
           gt_reads2twobit_prepare_for_new_sequence(state);
         }
       }
       else if (line[0] == '+')
       {
-        GT_READS2TWOBIT_SKIP_TO_DESCRIPTION_END(line, file, fgetsretval);
+        GT_READS2TWOBIT_HANDLE_LONG_DESCRIPTIONS(line, file, fgetsretval,
+            false, state, processing_mate);
         if (state->exp_qlen + 1UL > (GtUword)(state->qbuf_size))
         {
           state->qbuf_size = (size_t)state->exp_qlen + 1;
@@ -881,6 +964,8 @@ static int gt_reads2twobit_encode_interleaved_paired_fastq_library(
             file)) == line && !had_err);
   if (!had_err && !state->invalid_mode)
     gt_reads2twobit_process_sequence_end(state);
+  if (state->current.nofseqs > rli->first_seqnum)
+    gt_reads2twobit_finalize_descriptions(state);
   return had_err;
 }
 
@@ -902,6 +987,10 @@ static int gt_reads2twobit_encode_twofile_paired_fastq_library(
     {
       if (line1[0] == '@')
       {
+        if (state->descs != NULL)
+          gt_reads2twobit_process_desc_line(state, line1, false, false);
+        GT_READS2TWOBIT_HANDLE_LONG_DESCRIPTIONS(line1, file1, fgetsretval,
+            true, state, false);
         if (state->current.nofseqs > rli->first_seqnum)
         {
           if (!state->invalid_mode)
@@ -915,12 +1004,12 @@ static int gt_reads2twobit_encode_twofile_paired_fastq_library(
             had_err = gt_reads2twobit_process_fastq_mate_pair(state, line2,
                 file2, &file2new);
         }
-        GT_READS2TWOBIT_SKIP_TO_DESCRIPTION_END(line1, file1, fgetsretval);
         gt_reads2twobit_prepare_for_new_sequence(state);
       }
       else if (line1[0] == '+')
       {
-        GT_READS2TWOBIT_SKIP_TO_DESCRIPTION_END(line1, file1, fgetsretval);
+        GT_READS2TWOBIT_HANDLE_LONG_DESCRIPTIONS(line1, file1, fgetsretval,
+            false, state, false);
         if (state->exp_qlen + 1UL > (GtUword)(state->qbuf_size))
         {
           state->qbuf_size = (size_t)state->exp_qlen + 1;
@@ -968,7 +1057,10 @@ static inline void gt_reads2twobit_process_fasta_mate_pair(
     gt_assert(fgetsretval == line2);
   }
   gt_assert(line2[0] == '>');
-  GT_READS2TWOBIT_SKIP_TO_DESCRIPTION_END(line2, file2, fgetsretval);
+  if (state->descs)
+    gt_reads2twobit_process_desc_line(state, line2, true, false);
+  GT_READS2TWOBIT_HANDLE_LONG_DESCRIPTIONS(line2, file2, fgetsretval, true,
+      state, true);
   state->seqlen = 0;
   state->exp_qlen = 0;
   state->seqlen_mate = state->seqlen;
@@ -990,6 +1082,7 @@ static inline void gt_reads2twobit_process_fasta_mate_pair(
     state->invalid_sequences++;
     state->invalid_total_length += (prev_seqlen - 1UL);
   }
+  gt_reads2twobit_finalize_descriptions(state);
 }
 
 static void gt_reads2twobit_encode_interleaved_paired_fasta_library(
@@ -1001,12 +1094,18 @@ static void gt_reads2twobit_encode_interleaved_paired_fasta_library(
   do {
     if (line[0] == '>')
     {
-      if (state->current.nofseqs > rli->first_seqnum && !state->invalid_mode)
-      {
-        gt_reads2twobit_process_sequence_end(state);
-      }
-      GT_READS2TWOBIT_SKIP_TO_DESCRIPTION_END(line, file, fgetsretval);
       processing_mate = !processing_mate;
+      if (state->current.nofseqs > rli->first_seqnum)
+      {
+        if (!state->invalid_mode)
+          gt_reads2twobit_process_sequence_end(state);
+        if (!processing_mate)
+          gt_reads2twobit_finalize_descriptions(state);
+      }
+      if (state->descs)
+        gt_reads2twobit_process_desc_line(state, line, processing_mate, false);
+      GT_READS2TWOBIT_HANDLE_LONG_DESCRIPTIONS(line, file, fgetsretval, true,
+          state, processing_mate);
       if (processing_mate)
       {
         if (!state->invalid_mode)
@@ -1028,6 +1127,7 @@ static void gt_reads2twobit_encode_interleaved_paired_fasta_library(
             file)) == line);
   if (!state->invalid_mode)
     gt_reads2twobit_process_sequence_end(state);
+  gt_reads2twobit_finalize_descriptions(state);
 }
 
 static void gt_reads2twobit_encode_twofile_paired_fasta_library(
@@ -1045,13 +1145,20 @@ static void gt_reads2twobit_encode_twofile_paired_fasta_library(
         if (!state->invalid_mode)
           gt_reads2twobit_process_sequence_end(state);
         gt_reads2twobit_process_fasta_mate_pair(state, line2, file2);
+        if (state->descs)
+          gt_reads2twobit_process_desc_line(state, line1, false, false);
       }
       else
       {
+        if (state->descs)
+          gt_reads2twobit_process_desc_line(state, line1, false, false);
         if (state->invalid_mode)
+        {
           gt_reads2twobit_process_fasta_mate_pair(state, line2, file2);
+        }
       }
-      GT_READS2TWOBIT_SKIP_TO_DESCRIPTION_END(line1, file1, fgetsretval);
+      GT_READS2TWOBIT_HANDLE_LONG_DESCRIPTIONS(line1, file1, fgetsretval,
+          true, state, false);
       gt_reads2twobit_prepare_for_new_sequence(state);
     }
     else if (!state->invalid_mode)
@@ -1229,6 +1336,8 @@ static void gt_reads2twobit_finalize_encode(GtReads2Twobit *r2t,
     gt_free(state->qbuf);
   if (state->qbuf2_size > 0)
     gt_free(state->qbuf2);
+  gt_str_delete(state->dbuf);
+  gt_str_delete(state->dbuf2);
   gt_reads2twobit_tbe_flush_and_realloc(r2t, state);
 }
 
@@ -1781,6 +1890,52 @@ static void gt_reads2twobit_set_separators_to_less_frequent_char(
   }
 }
 
+int gt_reads2twobit_write_descriptions(GtReads2Twobit *r2t,
+    GtBitsequence *skip, GtError *err)
+{
+  FILE *desfp, *sdsfp;
+  int had_err = 0;
+  GtUword i, startpos = 0;
+  gt_assert(r2t);
+  gt_error_check(err);
+  gt_assert(r2t->descs != NULL);
+  desfp = gt_fa_fopen_with_suffix(gt_str_get(r2t->indexname),
+      GT_DESTABFILESUFFIX, "wb", err);
+  if (desfp == NULL)
+      had_err = -1;
+  if (!had_err) {
+    sdsfp = gt_fa_fopen_with_suffix(gt_str_get(r2t->indexname),
+        GT_SDSTABFILESUFFIX, "wb", err);
+    if (sdsfp == NULL)
+        had_err = -1;
+  }
+  if (!had_err) {
+    char *desc;
+    GtUword longestdesc, fin = ~0UL;
+    for (i = 0; i < r2t->n_descs; i++)
+    {
+      desc = (char*) gt_desc_buffer_get_next(r2t->descs);
+      if (skip && GT_ISIBITSET(skip, i))
+        continue;
+      if (startpos > 0)
+      {
+        startpos--;
+        gt_xfwrite(&startpos, sizeof(startpos), 1, sdsfp);
+        startpos++;
+      }
+      gt_xfputs(desc, desfp);
+      gt_xfputc((int) '\n', desfp);
+      startpos += (strlen(desc) + 1);
+    }
+    longestdesc = gt_desc_buffer_max_length(r2t->descs) - 1;
+    gt_xfwrite_one(&longestdesc, desfp);
+    gt_xfwrite_one(&fin, desfp);
+  }
+  gt_fa_fclose(desfp);
+  gt_fa_fclose(sdsfp);
+  return had_err;
+}
+
 static int gt_reads2twobit_write_encseq_eqlen(GtReads2Twobit *r2t,
     GtError *err)
 {
@@ -2043,4 +2198,12 @@ void gt_reads2twobit_write_hplengths(const GtReads2Twobit *r2t, FILE *out_fp)
 double gt_reads2twobit_approx_average_hplength(const GtReads2Twobit *r2t)
 {
   return r2t->approx_avhlen;
+}
+
+void gt_reads2twobit_enable_descs(GtReads2Twobit *r2t, bool clipped)
+{
+  gt_assert(r2t != NULL);
+  r2t->descs = gt_desc_buffer_new();
+  if (clipped)
+    gt_desc_buffer_set_clip_at_whitespace(r2t->descs);
 }

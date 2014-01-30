@@ -182,6 +182,19 @@ void              gt_reads2twobit_write_hplengths(const GtReads2Twobit *r2t,
 double            gt_reads2twobit_approx_average_hplength(
                                             const GtReads2Twobit *r2t);
 
+/* enable storing of original descriptions;
+   if <clipped>, then only the FastaID (up to first space) is stored;
+   warning: this increases the memory requirement */
+void              gt_reads2twobit_enable_descs(GtReads2Twobit *r2t,
+                                               bool clipped);
+
+/* write descriptions to des+sds files;
+   if <skip> is provided, the descriptions at the positions where the bits
+   are set are skipped (necessary for containments) */
+int               gt_reads2twobit_write_descriptions(GtReads2Twobit *r2t,
+                                                     GtBitsequence *skip,
+                                                     GtError *err);
+
 #define GT_READS2TWOBIT_LIBSPEC_HELPMSG \
   "specify a list of input libraries (Fasta/FastQ); for single-end " \
   "libraries use the filename (which is not allowed to contain ':' " \

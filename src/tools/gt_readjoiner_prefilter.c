@@ -34,7 +34,7 @@
 typedef struct {
   bool verbose, quiet;
   bool singlestrand, encodeonly, cntlist, encseq, seqnums, fasta, copynum,
-       libtable, phred64;
+       libtable, phred64, des, clipdes;
   GtStr *readset;
   GtStrArray *db;
   /* rdj-radixsort test */
@@ -71,7 +71,7 @@ static GtOptionParser* gt_readjoiner_prefilter_option_parser_new(
            *v_option, *q_option, *db_option, *copynum_option, *libtable_option,
            *testrs_option, *testrs_depth_option, *testrs_print_option,
            *testrs_maxdepth_option, *phred64_option, *maxlow_option,
-           *lowqual_option;
+           *lowqual_option, *des_option, *clipdes_option;
 
   gt_assert(arguments);
 
@@ -104,6 +104,23 @@ static GtOptionParser* gt_readjoiner_prefilter_option_parser_new(
       &arguments->quiet, false);
   gt_option_exclude(q_option, v_option);
   gt_option_parser_add_option(op, q_option);
+
+  /* -des */
+  des_option = gt_option_new_bool("des",
+      "store Fasta IDs (or entire descriptions"
+      "if used together with -clipdes no)\n"
+      "warning: increases the memory requirement",
+      &arguments->des, false);
+  gt_option_is_extended_option(des_option);
+  gt_option_parser_add_option(op, des_option);
+
+  /* -clipdes */
+  clipdes_option = gt_option_new_bool("clipdes",
+      "clip Fasta descriptions after first space\n"
+      "set to false if you need entire descriptions",
+      &arguments->clipdes, true);
+  gt_option_is_extended_option(clipdes_option);
+  gt_option_parser_add_option(op, clipdes_option);
 
   /* -maxlow */
   maxlow_option = gt_option_new_uword("maxlow",
@@ -287,6 +304,9 @@ static int gt_readjoiner_prefilter_runner(GT_UNUSED int argc,
     gt_reads2twobit_set_quality_filter(r2t, arguments->maxlow,
         (char)arguments->lowqual);
 
+  if (arguments->des)
+    gt_reads2twobit_enable_descs(r2t, arguments->clipdes);
+
   for (i = 0; i < gt_str_array_size(arguments->db) && !had_err; i++)
   {
     GtStr *dbentry = gt_str_array_get_str(arguments->db, i);
@@ -343,6 +363,13 @@ static int gt_readjoiner_prefilter_runner(GT_UNUSED int argc,
         had_err = gt_reads2twobit_write_encseq(r2t, err);
         gt_logger_log(verbose_logger, "readset saved: %s.%s",
             gt_str_get(arguments->readset), varlen ? "(esq|ssp)" : "esq");
+        if (!had_err && arguments->des)
+        {
+          had_err = gt_reads2twobit_write_descriptions(r2t, NULL, err);
+          gt_logger_log(verbose_logger,
+              "descriptions saved: %s.(des|sds)",
+              gt_str_get(arguments->readset));
+        }
       }
       gt_logger_log(default_logger,
                     "number of reads in output readset = "GT_WU"",
@@ -424,6 +451,14 @@ static int gt_readjoiner_prefilter_runner(GT_UNUSED int argc,
               "suffix-prefix-free readset saved: %s.%s",
               gt_str_get(arguments->readset),
               varlen ? "(esq|ssp)" : "esq");
+          if (!had_err && arguments->des)
+          {
+            had_err = gt_reads2twobit_write_descriptions(r2t,
+                gt_contfinder_contained(contfinder), err);
+            gt_logger_log(verbose_logger,
+                "descriptions saved: %s.(des|sds)",
+                gt_str_get(arguments->readset));
+          }
         }
         else
         {
