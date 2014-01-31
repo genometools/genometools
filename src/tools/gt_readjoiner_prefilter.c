@@ -34,7 +34,7 @@
 typedef struct {
   bool verbose, quiet;
   bool singlestrand, encodeonly, cntlist, encseq, seqnums, fasta, copynum,
-       libtable, phred64, des, clipdes;
+       libtable, phred64, des, clipdes, memdes;
   GtStr *readset;
   GtStrArray *db;
   /* rdj-radixsort test */
@@ -71,7 +71,7 @@ static GtOptionParser* gt_readjoiner_prefilter_option_parser_new(
            *v_option, *q_option, *db_option, *copynum_option, *libtable_option,
            *testrs_option, *testrs_depth_option, *testrs_print_option,
            *testrs_maxdepth_option, *phred64_option, *maxlow_option,
-           *lowqual_option, *des_option, *clipdes_option;
+           *lowqual_option, *des_option, *clipdes_option, *memdes_option;
 
   gt_assert(arguments);
 
@@ -118,9 +118,18 @@ static GtOptionParser* gt_readjoiner_prefilter_option_parser_new(
   clipdes_option = gt_option_new_bool("clipdes",
       "clip Fasta descriptions after first space\n"
       "set to false if you need entire descriptions",
-      &arguments->clipdes, true);
+      &arguments->clipdes, false);
   gt_option_is_extended_option(clipdes_option);
   gt_option_parser_add_option(op, clipdes_option);
+
+  /* -memdes */
+  memdes_option = gt_option_new_bool("memdes",
+      "use memory storage for descriptions\n"
+      "(default: use temporary disk storage)",
+      &arguments->memdes, false);
+  gt_option_is_extended_option(memdes_option);
+  gt_option_hide_default(memdes_option);
+  gt_option_parser_add_option(op, memdes_option);
 
   /* -maxlow */
   maxlow_option = gt_option_new_uword("maxlow",
@@ -305,7 +314,7 @@ static int gt_readjoiner_prefilter_runner(GT_UNUSED int argc,
         (char)arguments->lowqual);
 
   if (arguments->des)
-    gt_reads2twobit_enable_descs(r2t, arguments->clipdes);
+    gt_reads2twobit_enable_descs(r2t, arguments->clipdes, arguments->memdes);
 
   for (i = 0; i < gt_str_array_size(arguments->db) && !had_err; i++)
   {

@@ -184,9 +184,12 @@ double            gt_reads2twobit_approx_average_hplength(
 
 /* enable storing of original descriptions;
    if <clipped>, then only the FastaID (up to first space) is stored;
-   warning: this increases the memory requirement */
-void              gt_reads2twobit_enable_descs(GtReads2Twobit *r2t,
-                                               bool clipped);
+   if <membased> the descriptions are stored in memory
+   [warning: this increases the memory consumption];
+   otherwise the description are stored in a temporary file
+   [warning: this increases the running time] */
+void gt_reads2twobit_enable_descs(GtReads2Twobit *r2t, bool clipped,
+                                  bool membased);
 
 /* write descriptions to des+sds files;
    if <skip> is provided, the descriptions at the positions where the bits
