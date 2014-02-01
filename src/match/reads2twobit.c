@@ -1983,7 +1983,7 @@ static void gt_reads2twobit_set_separators_to_less_frequent_char(
 int gt_reads2twobit_write_descriptions(GtReads2Twobit *r2t,
     GtBitsequence *skip, GtError *err)
 {
-  FILE *desfp, *sdsfp;
+  FILE *desfp = NULL, *sdsfp = NULL;
   int had_err = 0;
   bool with_newline = (r2t->descsfp || (r2t->descs && (!r2t->clipdes)));
   GtUword i, startpos = 0;
