@@ -509,9 +509,10 @@ static inline void gt_reads2twobit_process_desc_line(
     GtReads2TwobitEncodeState *state, char *line, bool second_in_pair,
     bool long_line)
 {
+  GtStr *dbuf;
   if (state->descs == NULL && state->descsfp == NULL)
     return;
-  GtStr *dbuf = second_in_pair ? state->dbuf2 : state->dbuf;
+  dbuf = second_in_pair ? state->dbuf2 : state->dbuf;
   gt_str_append_cstr(dbuf, long_line ? line : line + 1UL);
 }
 
@@ -2002,27 +2003,27 @@ int gt_reads2twobit_write_descriptions(GtReads2Twobit *r2t,
   if (!had_err) {
     char *desc = NULL;
     GtUword len = 0, longestdesc = 0, fin = ~0UL, posbuf;
-    if (r2t->descsfp)
+    if (r2t->descsfp != NULL)
     {
       rewind(r2t->descsfp);
-      desc = gt_malloc(r2t->longestdesc+(size_t)1);
+      desc = gt_malloc((size_t)r2t->longestdesc+(size_t)1);
     }
     for (i = 0; i < r2t->n_descs; i++)
     {
-      if (r2t->descs)
+      if (r2t->descs != NULL)
       {
         desc = (char*) gt_desc_buffer_get_next(r2t->descs);
       }
       else
       {
-        (void)gt_xfgets(desc, r2t->longestdesc+(size_t)1, r2t->descsfp);
+        (void)gt_xfgets(desc, (int)r2t->longestdesc+(size_t)1, r2t->descsfp);
       }
       if (skip && GT_ISIBITSET(skip, i))
         continue;
       /* note: do not use longestdesc = r2t->longestdesc (for diskbased)
          or the value stored in the desc_buffer (for membased), as these
          values are not up to date when <skip> is applied */
-      len = strlen(desc);
+      len = (GtUword)strlen(desc);
       if (with_newline)
       {
         gt_assert(len > 0);
@@ -2042,7 +2043,7 @@ int gt_reads2twobit_write_descriptions(GtReads2Twobit *r2t,
     }
     gt_xfwrite_one(&longestdesc, desfp);
     gt_xfwrite_one(&fin, desfp);
-    if (r2t->descsfp)
+    if (r2t->descsfp != NULL)
     {
       gt_free(desc);
     }
