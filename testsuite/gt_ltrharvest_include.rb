@@ -281,7 +281,7 @@ Keywords "gt_ltrharvest"
 Test do
   run_test "#{$bin}gt suffixerator -db #{$testdata}Random159.fna -dna -ssp -sds -tis -des -lcp"
   run_test "#{$bin}gt ltrharvest -index Random159.fna", :retval => 1
-  grep(last_stderr, "cannot open file descriptor 'Random159.fna.suf'")
+  grep(last_stderr, "cannot open file 'Random159.fna.suf'")
 end
 
 # test all combinations of options, test only some of them
