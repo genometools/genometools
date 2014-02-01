@@ -1092,7 +1092,7 @@ gtkviewer:
   src/examples/gtkviewer.c  -lcairo `pkg-config --cflags --libs gtk+-2.0` \
   -lgenometools
 
-cleanup: clean cleangenerated
+cleanup: clean cleangenerated cleanindexes
 	rm -rf bin
 	rm -rf gtpython/build
 	$(MAKE) -s -C $(CURDIR)/doc/manuals cleanup
