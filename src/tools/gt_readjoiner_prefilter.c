@@ -118,7 +118,7 @@ static GtOptionParser* gt_readjoiner_prefilter_option_parser_new(
   clipdes_option = gt_option_new_bool("clipdes",
       "clip Fasta descriptions after first space\n"
       "set to false if you need entire descriptions",
-      &arguments->clipdes, false);
+      &arguments->clipdes, true);
   gt_option_is_extended_option(clipdes_option);
   gt_option_parser_add_option(op, clipdes_option);
 
@@ -188,6 +188,7 @@ static GtOptionParser* gt_readjoiner_prefilter_option_parser_new(
       "output reads in MultiFasta format",
       &arguments->fasta, false);
   gt_option_is_development_option(fasta_option);
+  gt_option_exclude(fasta_option, des_option);
   gt_option_parser_add_option(op, fasta_option);
 
   /* -cnt */
