@@ -202,74 +202,75 @@ Test do
            :maxtime => 600
 end
 
-Name "sketch_constructed (Python)"
-Keywords "gt_sketch gt_python annotationsketch"
-Test do
-  run_python "#{$cur}/gtpython/sketch_constructed.py " + \
-             "#{$cur}/gtdata/sketch/default.style sketch_constructed.png", \
-             :maxtime => 600
-end
-
-Name "sketch_parsed (Python)"
-Keywords "gt_sketch gt_python annotationsketch"
-Test do
-  run_python "#{$cur}/gtpython/sketch_parsed.py " + \
-             "#{$cur}/gtdata/sketch/default.style sketch_parsed.png " + \
-             "#{$testdata}standard_gene_with_introns_as_tree.gff3", \
-             :maxtime => 600
-end
-
-Name "sketch_parsed reverse order (Python)"
-Keywords "gt_sketch gt_python annotationsketch"
-Test do
-  run_python "#{$testdata}gtpython/sketch_parsed_with_ordering.py " + \
-             "#{$cur}/gtdata/sketch/default.style sketch_parsed.png " + \
-             "#{$testdata}standard_gene_with_introns_as_tree.gff3", \
-             :maxtime => 600
-end
-
-Name "sketch_parsed invalid order (Python, string != int)"
-Keywords "gt_sketch gt_python annotationsketch"
-Test do
-  run_python "#{$testdata}gtpython/sketch_parsed_with_invalid_ordering.py " + \
-             "#{$cur}/gtdata/sketch/default.style sketch_parsed.png " + \
-             "#{$testdata}standard_gene_with_introns_as_tree.gff3", \
-             :maxtime => 600
-  grep(last_stderr, /Track ordering function must return a number/)
-end
-
-Name "sketch_parsed invalid order (Python, None)"
-Keywords "gt_sketch gt_python annotationsketch"
-Test do
-  run_python "#{$testdata}gtpython/sketch_parsed_with_invalid_ordering_2.py " + \
-             "#{$cur}/gtdata/sketch/default.style sketch_parsed.png " + \
-             "#{$testdata}standard_gene_with_introns_as_tree.gff3", \
-             :maxtime => 600
-  grep(last_stderr, /Track ordering function must return a number/)
-end
-
-Name "Python runtime style failures"
+if python_tests_runnable? and not $arguments["nocairo"] then
+  Name "sketch_constructed (Python)"
   Keywords "gt_sketch gt_python annotationsketch"
   Test do
-  Dir.glob("#{$testdata}fail*style") do |file|
-    run_python "#{$cur}/gtpython/sketch_parsed.py " + \
-               "#{file} sketch_parsed.png " + \
-               "#{$testdata}eden.gff3", \
-               :maxtime => 600, :retval => 1
-    grep(last_stderr, 'attempt to call global \'fail\'')
-
     run_python "#{$cur}/gtpython/sketch_constructed.py " + \
-               "#{file} sketch_constructed.png", \
-               :maxtime => 600, :retval => 1
-    grep(last_stderr, 'attempt to call global \'fail\'')
+               "#{$cur}/gtdata/sketch/default.style sketch_constructed.png", \
+               :maxtime => 600
+  end
 
-    run_python "#{$testdata}gtpython/style_serialize.py #{file}", :retval => 1
-    grep(last_stderr, 'expected boolean, number, or string')
+  Name "sketch_parsed (Python)"
+  Keywords "gt_sketch gt_python annotationsketch"
+  Test do
+    run_python "#{$cur}/gtpython/sketch_parsed.py " + \
+               "#{$cur}/gtdata/sketch/default.style sketch_parsed.png " + \
+               "#{$testdata}standard_gene_with_introns_as_tree.gff3", \
+               :maxtime => 600
+  end
+
+  Name "sketch_parsed reverse order (Python)"
+  Keywords "gt_sketch gt_python annotationsketch"
+  Test do
+    run_python "#{$testdata}gtpython/sketch_parsed_with_ordering.py " + \
+               "#{$cur}/gtdata/sketch/default.style sketch_parsed.png " + \
+               "#{$testdata}standard_gene_with_introns_as_tree.gff3", \
+               :maxtime => 600
+  end
+
+  Name "sketch_parsed invalid order (Python, string != int)"
+  Keywords "gt_sketch gt_python annotationsketch"
+  Test do
+    run_python "#{$testdata}gtpython/sketch_parsed_with_invalid_ordering.py " + \
+               "#{$cur}/gtdata/sketch/default.style sketch_parsed.png " + \
+               "#{$testdata}standard_gene_with_introns_as_tree.gff3", \
+               :maxtime => 600
+    grep(last_stderr, /Track ordering function must return a number/)
+  end
+
+  Name "sketch_parsed invalid order (Python, None)"
+  Keywords "gt_sketch gt_python annotationsketch"
+  Test do
+    run_python "#{$testdata}gtpython/sketch_parsed_with_invalid_ordering_2.py " + \
+               "#{$cur}/gtdata/sketch/default.style sketch_parsed.png " + \
+               "#{$testdata}standard_gene_with_introns_as_tree.gff3", \
+               :maxtime => 600
+    grep(last_stderr, /Track ordering function must return a number/)
+  end
+
+  Name "Python runtime style failures"
+    Keywords "gt_sketch gt_python annotationsketch"
+    Test do
+    Dir.glob("#{$testdata}fail*style") do |file|
+      run_python "#{$cur}/gtpython/sketch_parsed.py " + \
+                 "#{file} sketch_parsed.png " + \
+                 "#{$testdata}eden.gff3", \
+                 :maxtime => 600, :retval => 1
+      grep(last_stderr, 'attempt to call global \'fail\'')
+
+      run_python "#{$cur}/gtpython/sketch_constructed.py " + \
+                 "#{file} sketch_constructed.png", \
+                 :maxtime => 600, :retval => 1
+      grep(last_stderr, 'attempt to call global \'fail\'')
+
+      run_python "#{$testdata}gtpython/style_serialize.py #{file}", :retval => 1
+      grep(last_stderr, 'expected boolean, number, or string')
+    end
   end
 end
 
-rv = RUBY_VERSION.match(/^(\d+\.\d+)/)
-if (!rv.nil? && rv[1].to_f < 1.9) and not $arguments["nocairo"] then
+if ruby_tests_runnable? and not $arguments["nocairo"] then
   Name "sketch_constructed (Ruby)"
   Keywords "gt_sketch gt_ruby annotationsketch"
   Test do

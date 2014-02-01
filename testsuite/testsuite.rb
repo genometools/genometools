@@ -100,13 +100,63 @@ end
 
 def run_ruby(str, opts = {})
   run("env G_DEBUG=gc-friendly G_SLICE=always-malloc " + \
-      "LD_LIBRARY_PATH=#{$cur}/lib ruby -I #{$gtruby} #{$path}#{str}", opts)
+      "DYLD_LIBRARY_PATH=#{$cur}/lib LD_LIBRARY_PATH=#{$cur}/lib " + \
+      "ruby -I #{$gtruby} #{$path}#{str}", opts)
 end
 
 def run_python(str, opts = {})
   run("env G_DEBUG=gc-friendly G_SLICE=always-malloc " + \
-      "PYTHONPATH=#{$gtpython} LD_LIBRARY_PATH=#{$cur}/lib python " + \
+      "PYTHONPATH=#{$gtpython} DYLD_LIBRARY_PATH=#{$cur}/lib " + \
+      "LD_LIBRARY_PATH=#{$cur}/lib python " + \
       "#{$path}#{str}", opts)
+end
+
+def with_environment(variables={})
+  if block_given?
+    old_values = variables.map{ |k,v| [k,ENV[k]] }
+    begin
+       variables.each{ |k,v| ENV[k] = v }
+       result = yield
+    ensure
+      old_values.each{ |k,v| ENV[k] = v }
+    end
+    result
+  else
+    variables.each{ |k,v| ENV[k] = v }
+  end
+end
+
+def python_tests_runnable?
+  if `which python`.empty? then
+    return false
+  end
+  require "open3"
+  runline = "python #{$gtpython}/gt/dlload.py"
+  with_environment({"PYTHONPATH" => $gtpython, \
+                    "DYLD_LIBRARY_PATH" => "#{$cur}/lib", \
+                    "LD_LIBRARY_PATH" => "#{$cur}/lib"}) do
+    stdin, stdout, stderr = Open3.popen3(runline)
+    result = stderr.read.match(/OSError/).nil?
+    puts "P: #{result}"
+    result
+  end
+end
+
+def ruby_tests_runnable?
+  rv = RUBY_VERSION.match(/^(\d+\.\d+)/)
+  if rv.nil? or rv[1].to_f >= 1.9 then
+    return false
+  end
+  require "open3"
+  runline = "ruby -I #{$gtruby} #{$gtruby}/gtdlload.rb"
+  with_environment({"GTRUBY" => $gtruby, \
+                    "DYLD_LIBRARY_PATH" => "#{$cur}/lib", \
+                    "LD_LIBRARY_PATH" => "#{$cur}/lib"}) do
+    stdin, stdout, stderr = Open3.popen3(runline)
+    result = stderr.read.match(/RuntimeError/).nil?
+    puts "R: #{result}"
+    result
+  end
 end
 
 # include the actual test modules
@@ -141,11 +191,15 @@ require 'gt_mergefeat_include'
 require 'gt_mgth_include'
 require 'gt_mmapandread_include'
 require 'gt_orffinder_include'
-require 'gt_python_include'
+if python_tests_runnable? then
+  require 'gt_python_include'
+end
 require 'gt_readjoiner_include'
 require 'gt_readreads_include'
 require 'gt_regioncov_include'
-require 'gt_ruby_include'
+if ruby_tests_runnable? then
+  require 'gt_ruby_include'
+end
 require 'gt_sambam_include'
 require 'gt_script_filter_include'
 require 'gt_scripts_include'
