@@ -137,7 +137,6 @@ def python_tests_runnable?
                     "LD_LIBRARY_PATH" => "#{$cur}/lib"}) do
     stdin, stdout, stderr = Open3.popen3(runline)
     result = stderr.read.match(/OSError/).nil?
-    puts "P: #{result}"
     result
   end
 end
@@ -154,7 +153,6 @@ def ruby_tests_runnable?
                     "LD_LIBRARY_PATH" => "#{$cur}/lib"}) do
     stdin, stdout, stderr = Open3.popen3(runline)
     result = stderr.read.match(/RuntimeError/).nil?
-    puts "R: #{result}"
     result
   end
 end
