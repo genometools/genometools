@@ -18,6 +18,8 @@
 require 'dl/import'
 
 module GT
+  extend DL::Importable
+
   # XXX: Does anybody have a better idea for this mess?
   def GT.gtdlload(basename)
     if not $GT_SYSTEM then
@@ -32,4 +34,8 @@ module GT
 
   # a NULL pointer
   NULL = DL::PtrData.new(0)
+end
+
+if __FILE__ == $0
+  GT.gtdlload "libgenometools"
 end

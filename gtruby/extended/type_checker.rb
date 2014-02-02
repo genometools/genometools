@@ -24,7 +24,7 @@ module GT
   gtdlload "libgenometools"
 
   extern "GtTypeChecker* gt_type_checker_ref(GtTypeChecker*)"
-  extern "bool gt_type_checker_is_valid(GtTypeChecker*, const char*)"
+  extern "ibool gt_type_checker_is_valid(GtTypeChecker*, const char*)"
   extern "void gt_type_checker_delete(GtTypeChecker*)"
   extern "GtTypeChecker* gt_type_checker_obo_new(const char*, GtError*)"
   extern "GtTypeChecker* gt_type_checker_builtin_new()"

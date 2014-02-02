@@ -1081,13 +1081,18 @@ cleangenerated:
 	rm -f www/genometools.org/htdocs/examples.html
 	rm -rf doc/manpages
 
+cleanindexes:
+	find testdata \( -name '*.esq' -o -name '*.sds' -o -name '*.ssp' \
+		 -o -name '*.ois' -o -name '*.al1' \)  \
+	   -a ! \( -name 'foo.[36][24].*' \) -delete
+
 gtkviewer:
 	@echo "[compile $(notdir $@)]"
 	@$(CC) -o bin/examples/gtkviewer $(GT_CPPFLAGS) $(GT_LDFLAGS) \
   src/examples/gtkviewer.c  -lcairo `pkg-config --cflags --libs gtk+-2.0` \
   -lgenometools
 
-cleanup: clean cleangenerated
+cleanup: clean cleangenerated cleanindexes
 	rm -rf bin
 	rm -rf gtpython/build
 	$(MAKE) -s -C $(CURDIR)/doc/manuals cleanup
