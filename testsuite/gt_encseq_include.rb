@@ -370,11 +370,14 @@ Name "gt encseq info n50"
 Keywords "encseq gt_encseq info n50"
 Test do
   run_test "#{$bin}gt encseq info -n50 -noindexname #{$testdata}U89959_ests.fas"
-  grep last_stdout, /n50-value: 81/
+  grep last_stdout, /minimum\/maximum length: 93\/749/
+  grep last_stdout, /n50-length: 445 \(l50-count: 81\)/
   run_test "#{$bin}gt encseq info -n50 -noindexname #{$testdata}foofoofoo.fas"
-  grep last_stdout, /n50-value: 2/
+  grep last_stdout, /minimum\/maximum length: 8\/8/
+  grep last_stdout, /n50-length: 8 \(l50-count: 2\)/
   run_test "#{$bin}gt encseq info -n50 -noindexname #{$testdata}tRNA.dos.fas"
-  grep last_stdout, /n50-value: 5/
+  grep last_stdout, /minimum\/maximum length: 71\/73/
+  grep last_stdout, /n50-length: 73 \(l50-count: 5\)/
 end
 
 Name "gt encseq incompatible file format version"
