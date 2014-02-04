@@ -319,7 +319,6 @@ static int gt_encseq_info_runner(GT_UNUSED int argc, const char **argv,
       /* compute n50 for whole encseq */
       if (arguments->show_n50) {
         GtUword n50_sum;
-        GtUword n50_count = 0;
         GtUword current_sum = 0;
         const GtUword num_of_sequences = gt_encseq_num_of_sequences(encseq);
 
@@ -331,7 +330,6 @@ static int gt_encseq_info_runner(GT_UNUSED int argc, const char **argv,
               gt_encseq_info_compare);
         for (i = num_of_sequences-1; current_sum < n50_sum; i--) {
           current_sum += all_lengths[i];
-          n50_count++;
         }
         gt_file_xprintf(arguments->outfp, "total n50-length: "GT_WU
                         " (l50-count: "GT_WU")\n",
