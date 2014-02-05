@@ -23,6 +23,7 @@
 #include "core/array_api.h"
 #include "core/output_file_api.h"
 #include "core/unused_api.h"
+#include "core/divmodmul.h"
 #include "tools/gt_encseq_info.h"
 
 typedef struct {
@@ -82,8 +83,9 @@ static GtOptionParser* gt_encseq_info_option_parser_new(void *tool_arguments)
                               &arguments->show_alphabet, false);
   gt_option_parser_add_option(op, option);
 
-  option = gt_option_new_bool("n50", "show N50 values and smallest/largest "
-                              "sequence per file",
+  option = gt_option_new_bool("n50", "show N50 values (minimum length of "
+                              "largest sequences for covering at least 50% of "
+                              "total sequence length)",
                               &arguments->show_n50, false);
   gt_option_parser_add_option(op, option);
 
@@ -283,13 +285,14 @@ static int gt_encseq_info_runner(GT_UNUSED int argc, const char **argv,
 
         /* compute n50 for current file */
         if (arguments->show_n50) {
-          GtUword n50_count = 0;
+          GtUword n50_sum, seqnum;
           GtUword current_sum = 0;
-          GtUword seqnum;
-          /* total_len = eff filelength - number of separators,
-           * n50_sum = total_len/2 */
-          const GtUword n50_sum = (GtUword)(gt_encseq_effective_filelength
-                                  (encseq, i)-seq_number_diff+1)/2;
+
+          n50_sum = (GtUword)(gt_encseq_effective_filelength(encseq, i) -
+                    seq_number_diff + 1); /* subtract number of separators */
+          /* divide by 2 and round up to next Integer */
+          n50_sum = GT_DIV2(n50_sum) + GT_MOD2(n50_sum);
+
           /* fill length arrays and sort asc. */
           for (seqnum = 0; seqnum < seq_number_diff; seqnum++) {
             lengths[seqnum] = gt_encseq_seqlength(encseq,
@@ -299,35 +302,38 @@ static int gt_encseq_info_runner(GT_UNUSED int argc, const char **argv,
           }
           qsort(lengths, seq_number_diff, sizeof (GtUword),
                 gt_encseq_info_compare);
-          gt_file_xprintf(arguments->outfp, "\t\t- minimum length: "GT_WU"\n",
-                          lengths[0]);
-          gt_file_xprintf(arguments->outfp, "\t\t- maximum length: "GT_WU"\n",
+          gt_file_xprintf(arguments->outfp, "\t\t- minimum/maximum length: "
+                          GT_WU"/"GT_WU"\n", lengths[0],
                           lengths[seq_number_diff-1]);
           /* count n50 and print */
           for (seqnum = seq_number_diff-1; current_sum < n50_sum; seqnum--) {
             current_sum += lengths[seqnum];
-            n50_count++;
           }
-          gt_file_xprintf(arguments->outfp, "\t\t- n50-value: "GT_WU"\n",
-                          n50_count);
+          gt_file_xprintf(arguments->outfp, "\t\t- n50-length: "GT_WU
+                          " (l50-count: "GT_WU")\n",
+                          lengths[seqnum+1], seq_number_diff-seqnum-1);
         }
       }
       gt_free(lengths);
 
       /* compute n50 for whole encseq */
       if (arguments->show_n50) {
-        GtUword n50_count = 0;
+        GtUword n50_sum;
         GtUword current_sum = 0;
-        const GtUword n50_sum = gt_encseq_total_length(encseq)/2;
         const GtUword num_of_sequences = gt_encseq_num_of_sequences(encseq);
+
+        /* calc n50 sum: total length minus number of separators */
+        n50_sum = (gt_encseq_total_length(encseq) - num_of_sequences + 1);
+        /* divide by 2 and round up to next Integer */
+        n50_sum = GT_DIV2(n50_sum) + GT_MOD2(n50_sum);
         qsort(all_lengths, num_of_sequences, sizeof (GtUword),
               gt_encseq_info_compare);
         for (i = num_of_sequences-1; current_sum < n50_sum; i--) {
           current_sum += all_lengths[i];
-          n50_count++;
         }
-        gt_file_xprintf(arguments->outfp, "total n50-value: "GT_WU"\n",
-                        n50_count);
+        gt_file_xprintf(arguments->outfp, "total n50-length: "GT_WU
+                        " (l50-count: "GT_WU")\n",
+                        all_lengths[i+1], num_of_sequences-i-1);
       }
       gt_free(all_lengths);
 
