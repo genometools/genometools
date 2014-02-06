@@ -18,6 +18,8 @@
 #ifndef GT_REPFIND_H
 #define GT_REPFIND_H
 
+#include "core/tool_api.h"
+
 /* the repfind tool */
 GtTool* gt_repfind(void);
 

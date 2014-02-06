@@ -21,48 +21,55 @@
 #include "core/types_api.h"
 #include "core/encseq_api.h"
 
+/* Class <GtSeqabstract> represents short substrings of either <GtEncseq> or
+   <GtUchar>-Arrays.
+   All indices given in the methods of this class ar relative to <offset>. */
 typedef struct GtSeqabstract GtSeqabstract;
 
 GtSeqabstract* gt_seqabstract_new_empty(void);
 
-/* Creates new <GtSeqabstract> object from <string> of length <len> starting at
-   <offset>. That is the abstract sequence will be of length <len> - <offset>!
- */
+/* Creates new <GtSeqabstract> object from <string>, starting at <offset> with
+   length <len>, <string> should be long enough and <offset> within <string>.
+   Ownership of <string> stays with the caller. */
 GtSeqabstract* gt_seqabstract_new_gtuchar(const GtUchar *string,
                                           GtUword len,
                                           GtUword offset);
 
-/* Creates new <GtSeqabstract> object from <encseq> of length <len> starting at
-   <offset>. That is the abstract sequence will be of length <len> - <offset>!
+/* Creates new <GtSeqabstract> object from <encseq>, starting at <offset> with
+   length <len>, fails if <offset> is out of bounds, or <offset> + <len> extends
+   <encseq>.
  */
 GtSeqabstract* gt_seqabstract_new_encseq(const GtEncseq *encseq,
                                          GtUword len,
                                          GtUword offset);
 
-/* reinitialize <sa> with <string> of length <len> starting at <offset> */
+/* reinitialize <sa> with <string> starting at <offset> with length <len> */
 void           gt_seqabstract_reinit_gtuchar(GtSeqabstract *sa,
                                              const GtUchar *string,
                                              GtUword len,
                                              GtUword offset);
 
-/* reinitialize <sa> with <encseq> of length <len> starting at <offset> */
+/* reinitialize <sa> with <encseq> starting at <offset> with length <len> */
 void           gt_seqabstract_reinit_encseq(GtSeqabstract *sa,
                                             const GtEncseq *encseq,
                                             GtUword len,
                                             GtUword offset);
 
-GtUword  gt_seqabstract_length(const GtSeqabstract *sa);
+/* return the length of <sa> */
+GtUword        gt_seqabstract_length(const GtSeqabstract *sa);
 
+/* return character at positon <idx> (relative to <offset>) of <sa> */
 GtUchar        gt_seqabstract_encoded_char(const GtSeqabstract *sa,
                                            GtUword idx);
 
-void           gt_seqabstract_delete(GtSeqabstract *sa);
+/* calculate longest common prefix for suffixes <ustart> and <vstart> of <useq>
+   and <vseq>. */
+GtUword        gt_seqabstract_lcp(bool forward,
+                                  const GtSeqabstract *useq,
+                                  const GtSeqabstract *vseq,
+                                  GtUword ustart,
+                                  GtUword vstart);
 
-GtUword gt_seqabstract_lcp(bool forward,
-                                 const GtSeqabstract *useq,
-                                 const GtSeqabstract *vseq,
-                                 GtUword leftstart,
-                                 GtUword rightstart,
-                                 GtUword minlen);
+void           gt_seqabstract_delete(GtSeqabstract *sa);
 
 #endif

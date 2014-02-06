@@ -1,8 +1,8 @@
 /*
-  Copyright (c) 2007 David Ellinghaus <d.ellinghaus@ikmb.uni-kiel.de>
+  Copyright (c) 2007      David Ellinghaus <d.ellinghaus@ikmb.uni-kiel.de>
   Copyright (c) 2012-2013 Stefan Kurtz <kurtz@zbh.uni-hamburg.de>
-  Copyright (c)      2013 Dirk Willrodt <willrodt@zbh.uni-hamburg.de>
-  Copyright (c) 2007-2013 Center for Bioinformatics, University of Hamburg
+  Copyright (c)      2014 Dirk Willrodt <willrodt@zbh.uni-hamburg.de>
+  Copyright (c) 2007-2014 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -222,40 +222,38 @@ void gt_evalxdroparbitscoresextend(bool forward,
                                    GtXdropresources *res,
                                    const GtSeqabstract *useq,
                                    const GtSeqabstract *vseq,
-                                   GtUword uoffset,
-                                   GtUword voffset,
                                    GtXdropscore xdropbelowscore)
 {
   const GtWord ulen = (GtWord) gt_seqabstract_length(useq),
-             vlen = (GtWord) gt_seqabstract_length(vseq),
-             end_k = ulen - vlen, /* diagonal of endpoint (ulen, vlen) */
-             integermax = MAX(ulen, vlen),
-             integermin = -integermax,
-             dback = GT_XDROP_SETDBACK(xdropbelowscore);
+               vlen = (GtWord) gt_seqabstract_length(vseq),
+               end_k =
+                 (GtWord) ulen - vlen, /* diagonal of endpoint (ulen, vlen) */
+               integermax = (GtWord) MAX(ulen, vlen),
+               integermin = -integermax,
+               dback = GT_XDROP_SETDBACK(xdropbelowscore);
   GtWord idx,
-       lbound,    /* diagonal lower bound */
-       ubound,    /* diagonal upper bound */
-       currd = 0, /* distance */
-       k;         /* lbound - 1 <= k <= ubound + 1*/
+         lbound,    /* diagonal lower bound */
+         ubound,    /* diagonal upper bound */
+         currd = 0, /* distance */
+         k;         /* lbound - 1 <= k <= ubound + 1*/
   /*The following function calculates the maximal allowed number of
     generations with all front values equal minus infinity.*/
-  const int allowedMININFINITYINTgenerations
-              = MAX(MAX(res->arbitdistances.mis,res->arbitdistances.ins),
-                    res->arbitdistances.del) - 1;
+  const int allowedMININFINITYINTgenerations = MAX(MAX(res->arbitdistances.mis,
+                                                       res->arbitdistances.ins),
+                                                   res->arbitdistances.del) - 1;
   int currentMININFINITYINTgeneration = 0;
   GtXdropfrontvalue tmpfront;
   GtXdropscore bigt_tmp;        /* best score T' seen already */
   bool alwaysMININFINITYINT = true;
 
+  gt_assert(ulen != 0 && vlen != 0);
+
   res->big_t.nextfreeGtXdropscore = 0;
   res->fronts.nextfreeGtXdropfrontvalue = 0;
   /* phase 0 */
-  idx = (GtWord) gt_seqabstract_lcp(forward,
-                                  useq,
-                                  vseq,
-                                  forward ? uoffset : uoffset - 1,
-                                  forward ? voffset : voffset - 1,
-                                  (GtUword) MIN(ulen,vlen));
+  idx =  (GtWord) gt_seqabstract_lcp(forward, useq, vseq,
+                                     forward ? 0 : (GtUword) ulen - 1,
+                                     forward ? 0 : (GtUword) vlen - 1);
   /* alignment already finished */
   if (idx >= ulen || idx >= vlen) {
     lbound =  1L;
@@ -265,7 +263,7 @@ void gt_evalxdroparbitscoresextend(bool forward,
     lbound = 0;
     ubound = 0;
   }
-  tmpfront.row = idx;
+  tmpfront.row = (GtWord) idx;
   tmpfront.direction = (GtUchar) 0;   /* no predecessor */
   gt_xdrop_frontvalue_set(res,0,0,tmpfront);
   xdropbest->score = bigt_tmp = GT_XDROP_EVAL(idx + idx, 0);
@@ -341,12 +339,11 @@ void gt_evalxdroparbitscoresextend(bool forward,
                i <= MIN(ulen, vlen + k))) {
             if (ulen > i && vlen > j) {
               GtUword lcp;
-              gt_assert(forward || (uoffset > (GtUword) i &&
-                                    voffset > (GtUword) j));
+              gt_assert(forward || (ulen - 1 > (GtWord) i &&
+                                    vlen - 1 > (GtWord) j));
               lcp = gt_seqabstract_lcp(forward, useq, vseq,
-                                       forward ? uoffset + i : uoffset - i - 1,
-                                       forward ? voffset + j : voffset - j - 1,
-                                       (GtUword) MIN(ulen - i,vlen - j));
+                                       (GtUword) (forward ? i : ulen - i - 1),
+                                       (GtUword) (forward ? j : vlen - j - 1));
               i += lcp;
               j += lcp;
             }
@@ -444,6 +441,7 @@ GtMultieoplist * gt_xdrop_backtrack(GtXdropresources *res,
        old_row = (GtWord) best->ivalue;
   GtXdropfrontvalue *fronts = res->fronts.spaceGtXdropfrontvalue,
                     currfront;
+  gt_assert(best->ivalue && best->jvalue);
 
   idx = GT_XDROP_FRONTIDX(d, k);
   currfront = fronts[idx];
@@ -505,81 +503,81 @@ int gt_xdrop_unit_test(GT_UNUSED GtError *err)
      (const GtUchar*) "TTTTTTTTTTTTTTTAAACAGATCACCCGCTTTTTTTTTTTTTTTT",
      (const GtUchar*) "TTTTTTTTTTTTTTTAAACGGGTTTCTCAAAGGGTTCCCTTTTTTTTTTTTTTT"};
   GtUword lengths[GT_XDROP_NUM_OF_TESTS] =
-                  {54UL, 46UL, 50UL, 54UL, 54UL, 54UL, 46UL, 54UL},
-                eval_scores[GT_XDROP_NUM_OF_TESTS *
-                            GT_XDROP_NUM_OF_TESTS *
-                            GT_XDROP_NUM_OF_TESTS] =
-                                   {0, 13UL, 0, 1UL, 4UL, 1UL, 0, 7UL,
-                                    13UL, 0, 0, 14UL, 15UL, 14UL, 0, 15UL,
-                                    0, 0, 0, 0, 0, 0, 0, 0,
-                                    1UL, 14UL, 0, 0, 1UL, 2UL, 0, 1UL,
-                                    4UL, 15UL, 0, 1UL, 0, 8UL, 0, 1UL,
-                                    1UL, 14UL, 0, 2UL, 8UL, 0, 0, 4UL,
-                                    0, 0, 0, 0, 0, 0, 0, 0,
-                                    7UL, 15UL, 0, 1UL, 1UL, 4UL, 0, 0,
+  {54UL, 46UL, 50UL, 54UL, 54UL, 54UL, 46UL, 54UL},
+    eval_scores[GT_XDROP_NUM_OF_TESTS *
+      GT_XDROP_NUM_OF_TESTS *
+      GT_XDROP_NUM_OF_TESTS] =
+      {0, 13UL, 0, 1UL, 4UL, 1UL, 0, 7UL,
+        13UL, 0, 0, 14UL, 15UL, 14UL, 0, 15UL,
+        0, 0, 0, 0, 0, 0, 0, 0,
+        1UL, 14UL, 0, 0, 1UL, 2UL, 0, 1UL,
+        4UL, 15UL, 0, 1UL, 0, 8UL, 0, 1UL,
+        1UL, 14UL, 0, 2UL, 8UL, 0, 0, 4UL,
+        0, 0, 0, 0, 0, 0, 0, 0,
+        7UL, 15UL, 0, 1UL, 1UL, 4UL, 0, 0,
 
-                                    0, 13UL, 0, 1UL, 4UL, 5UL, 14UL, 7UL,
-                                    13UL, 0, 0, 14UL, 15UL, 14UL, 12UL, 15UL,
-                                    0, 0, 0, 20UL, 0, 19UL, 17UL, 0,
-                                    1UL, 14UL, 20UL, 0, 5UL, 6UL, 15UL, 8UL,
-                                    4UL, 15UL, 0, 5UL, 0, 8UL, 15UL, 10UL,
-                                    5UL, 14UL, 19UL, 6UL, 8UL, 0, 14UL, 4UL,
-                                    14UL, 12UL, 17UL, 15UL, 15UL, 14UL, 0, 14UL,
-                                    7UL, 15UL, 0, 8UL, 10UL, 4UL, 14UL, 0,
+        0, 13UL, 0, 1UL, 4UL, 5UL, 14UL, 7UL,
+        13UL, 0, 0, 14UL, 15UL, 14UL, 12UL, 15UL,
+        0, 0, 0, 20UL, 0, 19UL, 17UL, 0,
+        1UL, 14UL, 20UL, 0, 5UL, 6UL, 15UL, 8UL,
+        4UL, 15UL, 0, 5UL, 0, 8UL, 15UL, 10UL,
+        5UL, 14UL, 19UL, 6UL, 8UL, 0, 14UL, 4UL,
+        14UL, 12UL, 17UL, 15UL, 15UL, 14UL, 0, 14UL,
+        7UL, 15UL, 0, 8UL, 10UL, 4UL, 14UL, 0,
 
-                                    0, 13UL, 19UL, 1UL, 2UL, 2UL, 13UL, 3UL,
-                                    13UL, 0, 9UL, 14UL, 14UL, 13UL, 12UL, 14UL,
-                                    17UL, 4UL, 0, 18UL, 19UL, 16UL, 16UL, 18UL,
-                                    1UL, 14UL, 18UL, 0, 2UL, 3UL, 13UL, 3UL,
-                                    2UL, 14UL, 18UL, 2UL, 0, 4UL, 13UL, 4UL,
-                                    2UL, 13UL, 19UL, 3UL, 4UL, 0, 13UL, 3UL,
-                                    14UL, 12UL, 17UL, 13UL, 13UL, 14UL, 0, 14UL,
-                                    3UL, 14UL, 18UL, 3UL, 4UL, 3UL, 13UL, 0,
+        0, 13UL, 19UL, 1UL, 2UL, 2UL, 13UL, 3UL,
+        13UL, 0, 9UL, 14UL, 14UL, 13UL, 12UL, 14UL,
+        17UL, 4UL, 0, 18UL, 19UL, 16UL, 16UL, 18UL,
+        1UL, 14UL, 18UL, 0, 2UL, 3UL, 13UL, 3UL,
+        2UL, 14UL, 18UL, 2UL, 0, 4UL, 13UL, 4UL,
+        2UL, 13UL, 19UL, 3UL, 4UL, 0, 13UL, 3UL,
+        14UL, 12UL, 17UL, 13UL, 13UL, 14UL, 0, 14UL,
+        3UL, 14UL, 18UL, 3UL, 4UL, 3UL, 13UL, 0,
 
-                                    0, 13UL, 17UL, 1UL, 2UL, 2UL, 14UL, 3UL,
-                                    13UL, 0, 4UL, 14UL, 15UL, 13UL, 12UL, 14UL,
-                                    19UL, 9UL, 0, 18UL, 18UL, 19UL, 17UL, 18UL,
-                                    1UL, 14UL, 18UL, 0, 2UL, 3UL, 13UL, 3UL,
-                                    2UL, 14UL, 19UL, 2UL, 0, 4UL, 13UL, 4UL,
-                                    2UL, 13UL, 16UL, 3UL, 4UL, 0, 14UL, 3UL,
-                                    13UL, 12UL, 16UL, 13UL, 13UL, 13UL, 0, 13UL,
-                                    3UL, 14UL, 18UL, 3UL, 4UL, 3UL, 14UL, 0,
+        0, 13UL, 17UL, 1UL, 2UL, 2UL, 14UL, 3UL,
+        13UL, 0, 4UL, 14UL, 15UL, 13UL, 12UL, 14UL,
+        19UL, 9UL, 0, 18UL, 18UL, 19UL, 17UL, 18UL,
+        1UL, 14UL, 18UL, 0, 2UL, 3UL, 13UL, 3UL,
+        2UL, 14UL, 19UL, 2UL, 0, 4UL, 13UL, 4UL,
+        2UL, 13UL, 16UL, 3UL, 4UL, 0, 14UL, 3UL,
+        13UL, 12UL, 16UL, 13UL, 13UL, 13UL, 0, 13UL,
+        3UL, 14UL, 18UL, 3UL, 4UL, 3UL, 14UL, 0,
 
-                                    0, 0, 0, 1UL, 1UL, 1UL, 0, 1UL,
-                                    0, 0, 0, 0, 0, 0, 0, 0,
-                                    0, 0, 0, 0, 0, 0, 0, 0,
-                                    1UL, 0, 0, 0, 1UL, 0, 0, 1UL,
-                                    1UL, 0, 0, 1UL, 0, 0, 0, 1UL,
-                                    1UL, 0, 0, 0, 0, 0, 0, 1UL,
-                                    0, 0, 0, 0, 0, 0, 0, 0,
-                                    1UL, 0, 0, 1UL, 1UL, 1UL, 0, 0,
+        0, 0, 0, 1UL, 1UL, 1UL, 0, 1UL,
+        0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0,
+        1UL, 0, 0, 0, 1UL, 0, 0, 1UL,
+        1UL, 0, 0, 1UL, 0, 0, 0, 1UL,
+        1UL, 0, 0, 0, 0, 0, 0, 1UL,
+        0, 0, 0, 0, 0, 0, 0, 0,
+        1UL, 0, 0, 1UL, 1UL, 1UL, 0, 0,
 
-                                    0, 0, 0, 1UL, 1UL, 1UL, 0, 1UL,
-                                    0, 0, 0, 0, 0, 0, 0, 0,
-                                    0, 0, 0, 0, 0, 0, 0, 0,
-                                    1UL, 0, 0, 0, 1UL, 2UL, 0, 1UL,
-                                    1UL, 0, 0, 1UL, 0, 0, 0, 1UL,
-                                    1UL, 0, 0, 2UL, 0, 0, 0, 1UL,
-                                    0, 0, 0, 0, 0, 0, 0, 0,
-                                    1UL, 0, 0, 1UL, 1UL, 1UL, 0, 0,
+        0, 0, 0, 1UL, 1UL, 1UL, 0, 1UL,
+        0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0,
+        1UL, 0, 0, 0, 1UL, 2UL, 0, 1UL,
+        1UL, 0, 0, 1UL, 0, 0, 0, 1UL,
+        1UL, 0, 0, 2UL, 0, 0, 0, 1UL,
+        0, 0, 0, 0, 0, 0, 0, 0,
+        1UL, 0, 0, 1UL, 1UL, 1UL, 0, 0,
 
-                                    0, 13UL, 17UL, 1UL, 2UL, 2UL, 13UL, 3UL,
-                                    13UL, 0, 4UL, 14UL, 14UL, 13UL, 12UL, 14UL,
-                                    17UL, 4UL, 0, 18UL, 19UL, 16UL, 16UL, 19UL,
-                                    1UL, 14UL, 18UL, 0, 2UL, 3UL, 13UL, 3UL,
-                                    2UL, 14UL, 19UL, 2UL, 0, 4UL, 13UL, 4UL,
-                                    2UL, 13UL, 16UL, 3UL, 4UL, 0, 13UL, 3UL,
-                                    13UL, 12UL, 16UL, 13UL, 13UL, 13UL, 0, 13UL,
-                                    3UL, 14UL, 19UL, 3UL, 4UL, 3UL, 13UL, 0,
+        0, 13UL, 17UL, 1UL, 2UL, 2UL, 13UL, 3UL,
+        13UL, 0, 4UL, 14UL, 14UL, 13UL, 12UL, 14UL,
+        17UL, 4UL, 0, 18UL, 19UL, 16UL, 16UL, 19UL,
+        1UL, 14UL, 18UL, 0, 2UL, 3UL, 13UL, 3UL,
+        2UL, 14UL, 19UL, 2UL, 0, 4UL, 13UL, 4UL,
+        2UL, 13UL, 16UL, 3UL, 4UL, 0, 13UL, 3UL,
+        13UL, 12UL, 16UL, 13UL, 13UL, 13UL, 0, 13UL,
+        3UL, 14UL, 19UL, 3UL, 4UL, 3UL, 13UL, 0,
 
-                                    0, 13UL, 0, 1UL, 2UL, 2UL, 5UL, 3UL,
-                                    13UL, 0, 0, 14UL, 15UL, 13UL, 0, 14UL,
-                                    0, 0, 0, 0, 0, 0, 0, 0,
-                                    1UL, 14UL, 0, 0, 2UL, 3UL, 5UL, 3UL,
-                                    2UL, 15UL, 0, 2UL, 0, 4UL, 5UL, 4UL,
-                                    2UL, 13UL, 0, 3UL, 4UL, 0, 6UL, 3UL,
-                                    5UL, 0, 0, 5UL, 5UL, 6UL, 0, 5UL,
-                                    3UL, 14UL, 0, 3UL, 4UL, 3UL, 5UL, 0};
+        0, 13UL, 0, 1UL, 2UL, 2UL, 5UL, 3UL,
+        13UL, 0, 0, 14UL, 15UL, 13UL, 0, 14UL,
+        0, 0, 0, 0, 0, 0, 0, 0,
+        1UL, 14UL, 0, 0, 2UL, 3UL, 5UL, 3UL,
+        2UL, 15UL, 0, 2UL, 0, 4UL, 5UL, 4UL,
+        2UL, 13UL, 0, 3UL, 4UL, 0, 6UL, 3UL,
+        5UL, 0, 0, 5UL, 5UL, 6UL, 0, 5UL,
+        3UL, 14UL, 0, 3UL, 4UL, 3UL, 5UL, 0};
   GtSeqabstract *useq, *vseq;
 
   GtXdropArbitraryscores score[GT_XDROP_NUM_OF_TESTS] = {{2, -2, -2, -2},
@@ -604,7 +602,7 @@ int gt_xdrop_unit_test(GT_UNUSED GtError *err)
       for (j = 0; j < GT_XDROP_NUM_OF_TESTS; ++j) {
         useq = gt_seqabstract_new_gtuchar(strings[i], lengths[i], 0);
         vseq = gt_seqabstract_new_gtuchar(strings[j], lengths[j], 0);
-        gt_evalxdroparbitscoresextend(true, &best, resources, useq, vseq, 0, 0,
+        gt_evalxdroparbitscoresextend(true, &best, resources, useq, vseq,
                                       dropscore);
 
         edit_ops = gt_xdrop_backtrack(resources, &best);
@@ -612,8 +610,7 @@ int gt_xdrop_unit_test(GT_UNUSED GtError *err)
         alignment = gt_alignment_new_with_seqs(strings[i], best.ivalue,
                                                strings[j], best.jvalue);
         gt_alignment_set_multieop_list(alignment, edit_ops);
-        gt_ensure(
-                  eval_scores[s*64+i*8+j] == gt_alignment_eval(alignment));
+        gt_ensure(eval_scores[s*64+i*8+j] == gt_alignment_eval(alignment));
 
         gt_multieoplist_delete(edit_ops);
         gt_seqabstract_delete(useq);

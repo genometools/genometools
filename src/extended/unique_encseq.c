@@ -962,16 +962,14 @@ static void gt_unique_encseq_xdrop_extension(GtUniqueEncseqInfo *ueinfo,
   len = kmerhitinfo->maxalignlength;
   gt_assert(pos1 > pos2);
 
-  gt_seqabstract_reinit_encseq(ueinfo->useq, encseq, len, 0);
-  gt_seqabstract_reinit_encseq(ueinfo->vseq, encseq, len, 0);
+  gt_seqabstract_reinit_encseq(ueinfo->useq, encseq, len, pos2);
+  gt_seqabstract_reinit_encseq(ueinfo->vseq, encseq, len, pos1);
 
   gt_evalxdroparbitscoresextend(true,
                                 kmerhitinfo->xdropbest,
                                 ueinfo->res,
                                 ueinfo->useq,
                                 ueinfo->vseq,
-                                pos2,
-                                pos1,
                                 ueinfo->xdropbelowscore);
 
   gt_logger_log(ueinfo->debug_logger,
