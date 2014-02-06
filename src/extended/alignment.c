@@ -84,7 +84,7 @@ void gt_alignment_set_multieop_list(GtAlignment *alignment,
   gt_assert(alignment != NULL && eoplist != NULL);
   gt_multieoplist_delete(alignment->eops);
   alignment->eops = gt_multieoplist_ref(eoplist);
-  alignment->alilen = gt_multieoplist_get_length(eoplist);
+  alignment->alilen = gt_multieoplist_get_num_entries(eoplist);
 }
 
 GtRange gt_alignment_get_urange(const GtAlignment *alignment)
@@ -93,10 +93,15 @@ GtRange gt_alignment_get_urange(const GtAlignment *alignment)
   return alignment->aligned_range_u;
 }
 
-GtUword gt_alignment_get_length(const GtAlignment *alignment)
+GtUword gt_alignment_get_num_entries(const GtAlignment *alignment)
 {
   gt_assert(alignment);
   return alignment->alilen;
+}
+
+GtUword gt_alignment_get_length(const GtAlignment *alignment)
+{
+  return gt_multieoplist_get_length(alignment->eops);
 }
 
 void gt_alignment_set_urange(GtAlignment *alignment, GtRange range)
@@ -179,7 +184,7 @@ GtUword gt_alignment_eval(const GtAlignment *alignment)
   gt_assert(gt_alignment_is_valid(alignment));
 #endif
 
-  meoplen = gt_multieoplist_get_length(alignment->eops);
+  meoplen = gt_multieoplist_get_num_entries(alignment->eops);
   for (i = meoplen; i > 0; i--) {
     meop = gt_multieoplist_get_entry(alignment->eops, i - 1);
     switch (meop.type) {
@@ -228,7 +233,7 @@ GtWord gt_alignment_eval_with_score(const GtAlignment *alignment,
   gt_assert(gt_alignment_is_valid(alignment));
 #endif
 
-  meoplen = gt_multieoplist_get_length(alignment->eops);
+  meoplen = gt_multieoplist_get_num_entries(alignment->eops);
 
   for (i = meoplen; i > 0; i--) {
     meop = gt_multieoplist_get_entry(alignment->eops, i - 1);
@@ -272,7 +277,7 @@ void gt_alignment_show(const GtAlignment *alignment, FILE *fp)
   gt_assert(gt_alignment_is_valid(alignment));
 #endif
 
-  meoplen = gt_multieoplist_get_length(alignment->eops);
+  meoplen = gt_multieoplist_get_num_entries(alignment->eops);
   /* output first line */
   idx_u = 0;
   for (i = meoplen; i > 0; i--) {
@@ -355,7 +360,7 @@ void gt_alignment_show_with_mapped_chars(const GtAlignment *alignment,
   gt_assert(alignment);
   gt_assert(gt_alignment_is_valid(alignment));
 
-  meoplen = gt_multieoplist_get_length(alignment->eops);
+  meoplen = gt_multieoplist_get_num_entries(alignment->eops);
   /* output first line */
   idx_u = 0;
   for (i = meoplen; i > 0; i--)

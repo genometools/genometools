@@ -346,7 +346,7 @@ GtEditscript *gt_editscript_new_with_sequences(const GtEncseq *encseq,
   es = gt_editscript_new(gt_encseq_alphabet(encseq));
 
   vlen = gt_multieoplist_get_repins_length(multieops);
-  meoplen = gt_multieoplist_get_length(multieops);
+  meoplen = gt_multieoplist_get_num_entries(multieops);
 
   for (idx = 0; idx < meoplen; idx++) {
     meop = gt_multieoplist_get_entry(multieops, idx);
