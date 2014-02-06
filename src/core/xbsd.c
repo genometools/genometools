@@ -23,11 +23,13 @@
 static void gt_xflock_with_op(int fd, short l_type)
 {
   struct flock f;
-  memset(&f, 0, sizeof (f));
-  f.l_type = l_type;
-  if (fcntl(fd, F_SETLKW, &f)) {
-    perror("cannot flock");
-    exit(EXIT_FAILURE);
+  if (!getenv("GT_NO_FLOCK")) {
+    memset(&f, 0, sizeof (f));
+    f.l_type = l_type;
+    if (fcntl(fd, F_SETLKW, &f)) {
+      perror("cannot flock");
+      exit(EXIT_FAILURE);
+    }
   }
 }
 #endif
