@@ -174,12 +174,14 @@ static GtFeatureIndex *in_stream_test_data(GtError *error)
   gn = gt_feature_node_new(seqid, "region", 500, 5000, GT_STRAND_BOTH);
   fn = gt_feature_node_cast(gn);
   gt_feature_index_add_feature_node(fi, fn, error);
+  gt_genome_node_delete(gn);
 
   gn = gt_feature_node_new(seqid, "region", 50000, 75000, GT_STRAND_BOTH);
   fn = gt_feature_node_cast(gn);
   gt_feature_index_add_feature_node(fi, fn, error);
-  gt_str_delete(seqid);
+  gt_genome_node_delete(gn);
 
+  gt_str_delete(seqid);
   seqid = gt_str_new_cstr("scf0001");
   gn = gt_region_node_new(seqid, 1, 10000);
   rn = gt_region_node_cast(gn);
@@ -189,10 +191,13 @@ static GtFeatureIndex *in_stream_test_data(GtError *error)
   gn = gt_feature_node_new(seqid, "mRNA", 4000, 6000, GT_STRAND_REVERSE);
   fn = gt_feature_node_cast(gn);
   gt_feature_index_add_feature_node(fi, fn, error);
+  gt_genome_node_delete(gn);
 
   gn = gt_feature_node_new(seqid, "mRNA", 7000, 9500, GT_STRAND_FORWARD);
   fn = gt_feature_node_cast(gn);
   gt_feature_index_add_feature_node(fi, fn, error);
+  gt_genome_node_delete(gn);
+
   gt_str_delete(seqid);
 
   return fi;
