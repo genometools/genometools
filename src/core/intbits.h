@@ -95,7 +95,6 @@ typedef GtBitsequence GtTwobitencoding;
 /*
   The following defines the number of integers for a bitvector with N bits.
 */
-
 #define GT_NUMOFINTSFORBITS(N)\
         ((GT_DIVWORDSIZE(N) == 0)\
            ? (size_t) 1 \
@@ -105,7 +104,6 @@ typedef GtBitsequence GtTwobitencoding;
   The following macro allocates a bitarray of \texttt{N} bits. All bits
   are off.
 */
-
 #define GT_INITBITTABGENERIC(TAB,OLDTAB,NUMOFBITS)\
         {\
           size_t tabsize = GT_NUMOFINTSFORBITS(NUMOFBITS);\
@@ -119,7 +117,6 @@ typedef GtBitsequence GtTwobitencoding;
   The following macro inititalizes a bitarray such that all bits
   are off.
 */
-
 #define GT_CLEARBITTAB(TAB,N)\
         (void) memset(TAB,0,sizeof (GtBitsequence) * GT_NUMOFINTSFORBITS(N))
 
@@ -127,7 +124,6 @@ typedef GtBitsequence GtTwobitencoding;
   \texttt{SETIBIT(TAB,I)} sets the \texttt{I}-th bit in bitarray
   \texttt{TAB} to 1.
 */
-
 #define GT_SETIBIT(TAB,I)    (TAB)[GT_DIVWORDSIZE(I)] |= \
                                     GT_ITHBIT(GT_MODWORDSIZE(I))
 
@@ -135,7 +131,6 @@ typedef GtBitsequence GtTwobitencoding;
   \texttt{UNSSETIBIT(TAB,I)} sets the \texttt{I}-th bit in bitarray
   \texttt{TAB} to 0.
 */
-
 #define GT_UNSETIBIT(TAB,I)  (TAB)[GT_DIVWORDSIZE(I)] &= \
                                      ~(GT_ITHBIT(GT_MODWORDSIZE(I)))
 
@@ -143,7 +138,6 @@ typedef GtBitsequence GtTwobitencoding;
   \texttt{ISIBITSET(TAB,I)} checks if the \texttt{I}-th bit in bitarray
   \texttt{TAB} is 1.
 */
-
 #define GT_ISIBITSET(TAB,I)  ((TAB)[GT_DIVWORDSIZE(I)] & \
                                     GT_ITHBIT(GT_MODWORDSIZE(I)))
 
@@ -151,7 +145,6 @@ typedef GtBitsequence GtTwobitencoding;
   \texttt{BITNUM2WORD(TAB,I)} delivers the integer containing
   the \texttt{I}-th bit.
 */
-
 #define GT_BITNUM2WORD(TAB,I)  (TAB)[GT_DIVWORDSIZE(I)]
 
 /*@unused@*/ static inline void gt_byte2string(char *buffer, unsigned char bs)

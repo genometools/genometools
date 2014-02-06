@@ -30,14 +30,15 @@ typedef struct GtOutputFileInfo GtOutputFileInfo;
 GtOutputFileInfo* gt_output_file_info_new(void);
 /* Registers the options `-o', `-gzip', `-bzip2' and `-force' in
    <option_parser>. Options chosen during option parsing will be stored in
-   <output_file_info> and the output file will be accessible using <*outfp>. */
-void              gt_output_file_info_register_options(GtOutputFileInfo
-                                                       *output_file_info,
-                                                       GtOptionParser
-                                                       *option_parser,
-                                                       GtFile **outfp);
+   <output_file_info> and the output file will be accessible using <*outfp>.
+   If no option is given, default <*outfp> will use stdout.
+   Caller retains ownership of <*outfp>. */
+void              gt_output_file_info_register_options(
+                                            GtOutputFileInfo *output_file_info,
+                                            GtOptionParser *option_parser,
+                                            GtFile **outfp);
 /* Deletes <output_file_info> and frees all associated memory. */
-void              gt_output_file_info_delete(GtOutputFileInfo
-                                             *output_file_info);
+void              gt_output_file_info_delete(
+                                            GtOutputFileInfo *output_file_info);
 
 #endif

@@ -82,9 +82,9 @@ typedef struct GtEncseqReader GtEncseqReader;
 const char*       gt_encseq_indexname(const GtEncseq *encseq);
 /* Returns the total number of characters in all sequences of <encseq>,
    including separators and wildcards. */
-GtUword     gt_encseq_total_length(const GtEncseq *encseq);
+GtUword           gt_encseq_total_length(const GtEncseq *encseq);
 /* Returns the total number of sequences contained in <encseq>. */
-GtUword     gt_encseq_num_of_sequences(const GtEncseq *encseq);
+GtUword           gt_encseq_num_of_sequences(const GtEncseq *encseq);
 /* Returns the encoded representation of the character at position <pos> of
    <encseq> read in the direction as indicated by <readmode>. */
 GtUchar           gt_encseq_get_encoded_char(const GtEncseq *encseq,
@@ -114,9 +114,9 @@ GtEncseqReader*   gt_encseq_create_reader_with_readmode(const GtEncseq *encseq,
    to position <topos> of <encseq>. The result is written to the location
    pointed to by <buffer>, which must be large enough to hold the result. */
 void              gt_encseq_extract_encoded(const GtEncseq *encseq,
-                                              GtUchar *buffer,
-                                              GtUword frompos,
-                                              GtUword topos);
+                                            GtUchar *buffer,
+                                            GtUword frompos,
+                                            GtUword topos);
 /* Returns the decoded version of the substring from position <frompos>
    to position <topos> of <encseq>. The result is written to the location
    pointed to by <buffer>, which must be large enough to hold the result. */
@@ -126,12 +126,12 @@ void              gt_encseq_extract_decoded(const GtEncseq *encseq,
                                             GtUword topos);
 /* Returns the length of the <seqnum>-th sequence in the <encseq>.
    Requires multiple sequence support enabled in <encseq>. */
-GtUword     gt_encseq_seqlength(const GtEncseq *encseq,
+GtUword           gt_encseq_seqlength(const GtEncseq *encseq,
                                       GtUword seqnum);
 /* Returns the length of the shortest sequence in the <encseq>. */
-GtUword     gt_encseq_min_seq_length(const GtEncseq *encseq);
+GtUword           gt_encseq_min_seq_length(const GtEncseq *encseq);
 /* Returns the length of the longest sequence in the <encseq>. */
-GtUword     gt_encseq_max_seq_length(const GtEncseq *encseq);
+GtUword           gt_encseq_max_seq_length(const GtEncseq *encseq);
 /* Returns <true> if <encseq> has multiple sequence support. */
 bool              gt_encseq_has_multiseq_support(const GtEncseq *encseq);
 /* Returns <true> if <encseq> has description support. */
@@ -140,11 +140,11 @@ bool              gt_encseq_has_description_support(const GtEncseq *encseq);
 bool              gt_encseq_has_md5_support(const GtEncseq *encseq);
 /* Returns the start position of the <seqnum>-th sequence in the <encseq>.
    Requires multiple sequence support enabled in <encseq>. */
-GtUword     gt_encseq_seqstartpos(const GtEncseq *encseq,
+GtUword           gt_encseq_seqstartpos(const GtEncseq *encseq,
                                         GtUword seqnum);
 /* Returns the sequence number from the given <position> for a given
    GtEncseq <encseq>. */
-GtUword     gt_encseq_seqnum(const GtEncseq *encseq,
+GtUword           gt_encseq_seqnum(const GtEncseq *encseq,
                                    GtUword position);
 /* Returns a pointer to the description of the <seqnum>-th sequence in the
    <encseq>. The length of the returned string is written to the
@@ -158,22 +158,22 @@ const char*       gt_encseq_description(const GtEncseq *encseq,
    contained in <encseq>. */
 const GtStrArray* gt_encseq_filenames(const GtEncseq *encseq);
 /* Returns the number of files contained in <encseq>. */
-GtUword     gt_encseq_num_of_files(const GtEncseq *encseq);
+GtUword           gt_encseq_num_of_files(const GtEncseq *encseq);
 /* Returns the effective length (sum of sequence lengths and separators
    between them) of the <filenum>-th file contained in <encseq>. */
 GtUint64          gt_encseq_effective_filelength(const GtEncseq *encseq,
                                                  GtUword filenum);
 /* Returns the start position of the sequences of the  <filenum>-th file in the
    <encseq>. Requires multiple file support enabled in <encseq>. */
-GtUword     gt_encseq_filestartpos(const GtEncseq *encseq,
+GtUword           gt_encseq_filestartpos(const GtEncseq *encseq,
                                          GtUword filenum);
 /* Returns the file number from the given <position> for a given
    GtEncseq <encseq>. */
-GtUword     gt_encseq_filenum(const GtEncseq *encseq,
+GtUword           gt_encseq_filenum(const GtEncseq *encseq,
                                     GtUword position);
 /* Returns the first sequence number of the sequences in file <filenum> for a
    given GtEncseq <encseq>. */
-GtUword     gt_encseq_filenum_first_seqnum(const GtEncseq *encseq,
+GtUword           gt_encseq_filenum_first_seqnum(const GtEncseq *encseq,
                                                  GtUword filenum);
 /* Returns the <GtAlphabet> associated with <encseq>. */
 GtAlphabet*       gt_encseq_alphabet(const GtEncseq *encseq);
@@ -189,7 +189,7 @@ void              gt_encseq_unmirror(GtEncseq *encseq);
 bool              gt_encseq_is_mirrored(const GtEncseq *encseq);
 /* Returns the version number of the file representation of <encseq> if it
    exists, or 0 if it was not mapped from a file. */
-GtUword     gt_encseq_version(const GtEncseq *encseq);
+GtUword           gt_encseq_version(const GtEncseq *encseq);
 /* Returns TRUE if <encseq> was created on a 64-bit system. */
 bool              gt_encseq_is_64_bit(const GtEncseq *encseq);
 /* Deletes <encseq> and frees all associated space. */
@@ -460,7 +460,8 @@ void              gt_encseq_builder_disable_description_support(
 /* Enables support for random access to multiple sequences in the encoded
    sequence to be built by <eb>. Requires additional memory for an index of
    starting positions. Activated by default. */
-void             gt_encseq_builder_enable_multiseq_support(GtEncseqBuilder *eb);
+void              gt_encseq_builder_enable_multiseq_support(
+                                                           GtEncseqBuilder *eb);
 /* Disables support for random access to multiple sequences in the encoded
    sequence to be built by <eb>. Disabling this support will result in an
    error when trying to call the method <gt_encseq_seqlength()> or
@@ -529,9 +530,9 @@ void              gt_encseq_builder_add_encoded_own(GtEncseqBuilder *eb,
    the encoded sequence to be built by <eb>. <str> must be encoded using the
    alphabet set at the construction time of <eb>. <str> may include
    sequence separators. Does not take ownership of <str>.*/
-void gt_encseq_builder_add_multiple_encoded(GtEncseqBuilder *eb,
-                                            const GtUchar *str,
-                                            GtUword strlen);
+void              gt_encseq_builder_add_multiple_encoded(GtEncseqBuilder *eb,
+                                                         const GtUchar *str,
+                                                         GtUword strlen);
 /* Sets the logger to use by <ee> during encoding to <l>. Default is <NULL> (no
    logging). */
 void              gt_encseq_builder_set_logger(GtEncseqBuilder*, GtLogger *l);
