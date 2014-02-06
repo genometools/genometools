@@ -17,10 +17,11 @@
 */
 
 #include <stdbool.h>
+#include <string.h>
 
 #include "core/arraydef.h"
 #include "core/chardef.h"
-#include "core/chardef.h"
+#include "core/encseq_api.h"
 #include "core/ensure.h"
 #include "core/intbits.h"
 #include "core/log_api.h"
@@ -32,28 +33,33 @@
 #include "core/unused_api.h"
 #include "core/xansi_api.h"
 #include "extended/editscript.h"
+#include "match/xdrop.h"
+
+#define GT_EDITSCRIPT_SHOW_BITS(es)                 \
+do {                                                \
+  char bitbuffer[65] = {0};                         \
+  gt_bitsequence_tostring(bitbuffer, elem);         \
+  gt_log_log("%s", bitbuffer/*  + (64-es->entry_size) */);\
+} while (false)
 
 typedef struct GtEditscriptPos {
-  GtUword      cur_word;
-  unsigned int bitsleft;
+  unsigned int cur_word,
+               bitsleft;
 }GtEditscriptPos;
 
 struct GtEditscript {
-  GtEditscriptPos fillpos;
-  GtBitsequence  *space;
-  GtBitsequence   firstmask,
-                  fullmask,
-                  del,
-                  misdel,
-                  ins,
-                  last;
-  size_t          size;
-  GtUword         op_count,
-                  space_elems,
-                  trailing_matches,
-                  ulen,
-                  vlen;
-  unsigned int    entry_size;
+  GtBitsequence      *space;
+  unsigned int        size,
+                      num_elems;
+  unsigned short int  trailing_matches;
+  unsigned char       del,
+                      entry_size;
+};
+
+struct GtEditscriptBuilder {
+  GtEditscript    *es;
+  GtEditscriptPos  fillpos;
+  unsigned char    last_op;
 };
 
 static inline void gt_editscript_pos_reset(GtEditscriptPos *pos)
@@ -61,6 +67,14 @@ static inline void gt_editscript_pos_reset(GtEditscriptPos *pos)
   pos->cur_word = 0;
   pos->bitsleft = (unsigned int) GT_INTWORDSIZE;
 }
+
+#define GT_EDITSCRIPT_FULLMASK(es) ((GtBitsequence) \
+                                ((GtUword) 1 << es->entry_size) - (GtUword) 1)
+#define GT_EDITSCRIPT_FIRSTMASK(es) ((GtBitsequence) \
+                                 ((GtUword) 1 << (es->entry_size - \
+                                                  (GtUword) 1)))
+#define GT_EDITSCRIPT_MISDEL_SYM(es) ((GtBitsequence) es->del + 1)
+#define GT_EDITSCRIPT_INS_SYM(es) ((GtBitsequence) es->del + 2)
 
 GtEditscript *gt_editscript_new(GtAlphabet *alphabet)
 {
@@ -70,19 +84,11 @@ GtEditscript *gt_editscript_new(GtAlphabet *alphabet)
   alphabet_size = gt_alphabet_size(alphabet);
   es->entry_size =
     gt_determinebitspervalue((GtUword) alphabet_size + 3);
-  es->size = (size_t) ((GtUword) 1 +
-                     ((GtUword) 10 / (GT_INTWORDSIZE / es->entry_size)));
-  gt_editscript_pos_reset(&es->fillpos);
-  es->space = gt_calloc(es->size, sizeof (*(es->space)));
-  es->fullmask = (GtBitsequence) ((GtUword) 1 << es->entry_size) - (GtUword) 1;
-  es->firstmask = (GtBitsequence) ((GtUword) 1 <<
-                                   (es->entry_size - (GtUword) 1));
-  es->del = (GtBitsequence) alphabet_size;
-  es->misdel = (GtBitsequence) alphabet_size + 1;
-  es->ins = (GtBitsequence) alphabet_size + 2;
-  es->op_count = 0;
-  es->ulen = 0;
-  es->space_elems = 0;
+  gt_assert(es->entry_size <= (unsigned char) (sizeof (unsigned char) * 8));
+  es->size = 0U;
+  es->space = NULL;
+  es->del = (unsigned char) alphabet_size;
+  es->num_elems = 0;
   return es;
 }
 
@@ -95,72 +101,71 @@ void gt_editscript_delete(GtEditscript *editscript)
 }
 
 static inline void gt_editscript_space_add_next(GtEditscript *es,
-                                                GtBitsequence value)
+                                                GtEditscriptPos *fillpos,
+                                                GtBitsequence elem)
 {
-  GtUword cur_word = es->fillpos.cur_word;
-  GtBitsequence remaining = (GtBitsequence) es->fillpos.bitsleft,
-                bits2store = (GtBitsequence) es->entry_size;
-  gt_assert(value <= es->fullmask);
-  es->space_elems++;
-  if (remaining == 0) {
-    if (cur_word == (GtUword) es->size - 1) {
-      es->size = GT_MULT2(es->size);
-      es->space = gt_realloc(es->space, es->size * sizeof (*(es->space)));
-    }
-    cur_word++;
-    es->space[cur_word] = 0;
-    remaining = (GtBitsequence) GT_INTWORDSIZE;
+  unsigned int cur_word = fillpos->cur_word,
+               remaining = fillpos->bitsleft,
+               bits2store = (unsigned int) es->entry_size;
+  gt_assert(elem <= GT_EDITSCRIPT_FULLMASK(es));
+  if (es->size == 0) {
+    es->size = 1U;
+    es->space = gt_malloc(es->size * sizeof (*es->space));
+    es->space[0] = 0;
   }
-  if (remaining >= bits2store) {
-    es->space[cur_word] |= value << (remaining - bits2store);
+  es->num_elems++;
+  if (remaining > bits2store) {
+    es->space[cur_word] |= elem << (remaining - bits2store);
     remaining -= bits2store;
   }
   else {
-    es->space[cur_word] |= value >> (bits2store - remaining);
-    if (cur_word == (GtUword) es->size - 1) {
+    if (cur_word + 1 >= es->size) {
       es->size = GT_MULT2(es->size);
       es->space = gt_realloc(es->space, es->size * sizeof (*(es->space)));
     }
+    es->space[cur_word] |= elem >> (bits2store - remaining);
     cur_word++;
     es->space[cur_word] = 0;
     bits2store -= remaining;
-    remaining = (GtBitsequence) GT_INTWORDSIZE;
-    es->space[cur_word] |= value << (remaining - bits2store);
-    remaining -= bits2store;
+    remaining = (unsigned int) GT_INTWORDSIZE;
+    /* this has to be checked because (uint64_t << 64) is not defined */
+    if (bits2store != 0) {
+      es->space[cur_word] |= elem << (remaining - bits2store);
+      remaining -= bits2store;
+    }
   }
-  es->fillpos.cur_word = cur_word;
-  es->fillpos.bitsleft = (unsigned int) remaining;
+  fillpos->cur_word = cur_word;
+  fillpos->bitsleft = remaining;
 }
 
 static inline GtBitsequence gt_editscript_space_get_next(const GtEditscript *es,
                                                          GtEditscriptPos *pos)
 {
-  GtBitsequence ret = 0;
+  GtBitsequence elem = 0;
   unsigned int shift;
 
+  gt_assert(es->size != 0);
   if (pos->bitsleft == 0) {
-    gt_assert(pos->cur_word < es->fillpos.cur_word);
     pos->cur_word++;
     pos->bitsleft = (unsigned int) GT_INTWORDSIZE;
   }
   shift = pos->bitsleft;
 
-  ret = es->space[pos->cur_word] << (GT_INTWORDSIZE - shift);
+  elem = es->space[pos->cur_word] << (GT_INTWORDSIZE - shift);
   if (shift < es->entry_size) {
-    gt_assert(pos->cur_word < es->fillpos.cur_word);
     pos->cur_word++;
-    ret |= es->space[pos->cur_word] >> (es->entry_size - shift);
-    pos->bitsleft = (unsigned int) GT_INTWORDSIZE -
-                          (es->entry_size - shift);
+    elem |= es->space[pos->cur_word] >> (GtBitsequence) shift;
+    pos->bitsleft = (unsigned int) (GT_INTWORDSIZE - (es->entry_size - shift));
   }
   else {
     pos->bitsleft -= es->entry_size;
   }
-  ret >>= GT_INTWORDSIZE - es->entry_size;
-  return ret;
+  elem >>= GT_INTWORDSIZE - es->entry_size;
+  return elem;
 }
 
 static inline void gt_editscript_space_add_length(GtEditscript *es,
+                                                  GtEditscriptPos *fillpos,
                                                   GtBitsequence value)
 {
   /* scheme: [1111][x][x][x][x] first store consecutive ones for each element
@@ -170,8 +175,8 @@ static inline void gt_editscript_space_add_length(GtEditscript *es,
   GtBitsequence tmp = value;
 
   /* needs just one element not starting with 1, store it */
-  if (tmp <= es->firstmask - 1) {
-    gt_editscript_space_add_next(es, tmp);
+  if (tmp <= GT_EDITSCRIPT_FIRSTMASK(es) - 1) {
+    gt_editscript_space_add_next(es, fillpos, tmp);
   }
   else {
     while (tmp != 0) {
@@ -180,28 +185,28 @@ static inline void gt_editscript_space_add_length(GtEditscript *es,
     }
     /* number of one bits corresponds to num of elements needed */
     tmp = (GtBitsequence) (1 << num_elems) - 1;
-    while ((tmp & es->firstmask) != 0) {
+    while ((tmp & GT_EDITSCRIPT_FIRSTMASK(es)) != 0) {
       /* add ~0 elements */
-      gt_editscript_space_add_next(es, es->fullmask);
+      gt_editscript_space_add_next(es, fillpos, GT_EDITSCRIPT_FULLMASK(es));
       tmp >>= es->entry_size;
     }
     if (tmp != 0) {
       /* move bits to front */
-      while ((tmp & es->firstmask) == 0) {
+      while ((tmp & GT_EDITSCRIPT_FIRSTMASK(es)) == 0) {
         tmp <<= 1;
       }
     }
     /* either add remaining bits or one zero element to seperated */
-    gt_editscript_space_add_next(es, tmp);
+    gt_editscript_space_add_next(es, fillpos, tmp);
 
     /* store actual value */
     shift = (num_elems * es->entry_size);
     while (num_elems != 0) {
       num_elems--;
       shift -= es->entry_size;
-      gt_editscript_space_add_next(es,
+      gt_editscript_space_add_next(es, fillpos,
                                    (value >> (GtBitsequence) shift) &
-                                     es->fullmask);
+                                     GT_EDITSCRIPT_FULLMASK(es));
     }
   }
 }
@@ -209,9 +214,8 @@ static inline void gt_editscript_space_add_length(GtEditscript *es,
 static inline GtBitsequence
 gt_editscript_space_get_length(const GtEditscript *es,
                                GtEditscriptPos *pos,
-                               GtUword *elems_used)
+                               unsigned int *elems_used)
 {
-
   GtBitsequence ret = 0,
                 elem = 0,
                 num_elems = 0;
@@ -222,10 +226,10 @@ gt_editscript_space_get_length(const GtEditscript *es,
   num_elems = elem = gt_editscript_space_get_next(es, pos);
   (*elems_used)++;
   /* first bit not set, the value itself. */
-  if ((elem & es->firstmask) == 0) {
+  if ((elem & GT_EDITSCRIPT_FIRSTMASK(es)) == 0) {
     return elem;
   }
-  while (elem == es->fullmask) {
+  while (elem == GT_EDITSCRIPT_FULLMASK(es)) {
     elem = gt_editscript_space_get_next(es, pos);
     (*elems_used)++;
     if (elem != 0) {
@@ -247,88 +251,13 @@ gt_editscript_space_get_length(const GtEditscript *es,
   return ret;
 }
 
-void gt_editscript_add_match(GtEditscript *editscript)
-{
-  gt_assert(editscript);
-  editscript->last = 0;
-  editscript->trailing_matches++;
-  editscript->ulen++;
-  editscript->vlen++;
-}
-
-void gt_editscript_add_mismatch(GtEditscript *editscript, GtUchar c)
-{
-  gt_assert(editscript != NULL);
-  gt_assert(c < (GtUchar) editscript->del || c == (GtUchar) WILDCARD);
-  if (c == (GtUchar) WILDCARD) {
-    c = (GtUchar) editscript->del - 1;
-  }
-  if (editscript->last != editscript->misdel) {
-    editscript->op_count += 1;
-    editscript->last = editscript->misdel;
-    gt_editscript_space_add_next(editscript, editscript->misdel);
-    gt_assert(editscript->vlen >= editscript->trailing_matches);
-    gt_assert(editscript->ulen >= editscript->trailing_matches);
-    gt_editscript_space_add_length(
-                                  editscript,
-                                  (GtBitsequence) editscript->trailing_matches);
-    editscript->trailing_matches = 0;
-  }
-  editscript->ulen++;
-  editscript->vlen++;
-  gt_editscript_space_add_next(editscript, (GtBitsequence) c);
-}
-
-void gt_editscript_add_deletion(GtEditscript *editscript)
-{
-  gt_assert(editscript);
-  if (editscript->last != editscript->misdel) {
-    editscript->op_count += 1;
-    editscript->last = editscript->misdel;
-    gt_editscript_space_add_next(editscript, editscript->misdel);
-    gt_assert(editscript->vlen >= editscript->trailing_matches);
-    gt_assert(editscript->ulen >= editscript->trailing_matches);
-    gt_editscript_space_add_length(
-                                  editscript,
-                                  (GtBitsequence) editscript->trailing_matches);
-    editscript->trailing_matches = 0;
-  }
-  editscript->ulen++;
-  gt_editscript_space_add_next(editscript, editscript->del);
-}
-
-void gt_editscript_add_insertion(GtEditscript *editscript, GtUchar c)
-{
-  gt_assert(editscript);
-  gt_assert(c < (GtUchar) editscript->del || c == (GtUchar) WILDCARD);
-  if (c == (GtUchar) WILDCARD) {
-  c = (GtUchar) editscript->del - 1;
-  }
-  if (editscript->last != editscript->ins) {
-    editscript->op_count += 1;
-    editscript->last = editscript->ins;
-    gt_editscript_space_add_next(editscript, editscript->ins);
-    gt_assert(editscript->vlen >= editscript->trailing_matches);
-    gt_assert(editscript->ulen >= editscript->trailing_matches);
-    gt_editscript_space_add_length(
-                                  editscript,
-                                  (GtBitsequence) editscript->trailing_matches);
-    editscript->trailing_matches = 0;
-  }
-  editscript->vlen++;
-  gt_editscript_space_add_next(editscript, (GtBitsequence) c);
-}
-
 void gt_editscript_reset(GtEditscript *editscript)
 {
-  GtUword i;
   gt_assert(editscript);
-  for (i = 0; i <= editscript->fillpos.cur_word; ++i) {
-    editscript->space[i] = 0;
+  if (editscript->space != NULL) {
+    editscript->space[0] = 0;
   }
-  editscript->space_elems = 0;
-  editscript->op_count = 0;
-  gt_editscript_pos_reset(&(editscript->fillpos));
+  editscript->num_elems = 0;
 }
 
 GtEditscript *gt_editscript_new_with_sequences(const GtEncseq *encseq,
@@ -338,51 +267,57 @@ GtEditscript *gt_editscript_new_with_sequences(const GtEncseq *encseq,
 {
   GtUword vlen, idx, meopidx, meoplen;
   GtEditscript *es;
+  GtEditscriptBuilder es_b;
   GtMultieop meop;
   GtUchar cchar;
 
   gt_assert(encseq != NULL && multieops != NULL);
-
   es = gt_editscript_new(gt_encseq_alphabet(encseq));
+  gt_editscript_builder_reset(&es_b, es);
 
-  vlen = gt_multieoplist_get_repins_length(multieops);
+  vlen = 0;
+
   meoplen = gt_multieoplist_get_num_entries(multieops);
 
-  for (idx = 0; idx < meoplen; idx++) {
-    meop = gt_multieoplist_get_entry(multieops, idx);
+  for (idx = meoplen; idx != 0; idx--) {
+    meop = gt_multieoplist_get_entry(multieops, idx - 1);
     for (meopidx = 0; meopidx < meop.steps; meopidx++) {
       switch (meop.type) {
         case Match:
-          vlen--;
-          gt_editscript_add_match(es);
+          vlen++;
+          gt_editscript_builder_add_match(&es_b);
           break;
         case Replacement:
         case Mismatch:
-          cchar = gt_encseq_get_encoded_char(encseq, start + vlen - 1, dir);
-          vlen--;
-          gt_editscript_add_mismatch(es, cchar);
+          cchar = gt_encseq_get_encoded_char(encseq, start + vlen, dir);
+          vlen++;
+          gt_editscript_builder_add_mismatch(&es_b, cchar);
           break;
         case Insertion:
-          cchar = gt_encseq_get_encoded_char(encseq, start + vlen - 1, dir);
-          vlen--;
-          gt_editscript_add_insertion(es, cchar);
+          cchar = gt_encseq_get_encoded_char(encseq, start + vlen, dir);
+          vlen++;
+          gt_editscript_builder_add_insertion(&es_b, cchar);
           break;
         case Deletion:
-          gt_editscript_add_deletion(es);
+          gt_editscript_builder_add_deletion(&es_b);
           break;
         default:
           break;
       }
     }
   }
-  gt_assert(vlen == 0);
-  gt_assert(es->ulen == gt_multieoplist_get_repdel_length(multieops));
-  gt_assert(es->vlen == gt_multieoplist_get_repins_length(multieops));
-  gt_assert(es->trailing_matches <= es->vlen);
-  gt_assert(es->trailing_matches <= es->ulen);
-  es->space = gt_realloc(es->space,
-                         sizeof (*(es->space)) * (es->fillpos.cur_word + 1));
-  es->size = (size_t) es->fillpos.cur_word + (size_t) 1;
+  gt_assert(vlen == gt_multieoplist_get_repins_length(multieops));
+  gt_assert(vlen <= gt_encseq_total_length(encseq));
+  if (es->num_elems != 0) {
+    es->space = gt_realloc(es->space,
+                           sizeof (*(es->space)) * (es_b.fillpos.cur_word + 1));
+    es->size = es_b.fillpos.cur_word + 1;
+  }
+  else {
+    es->size = 0;
+    gt_free(es->space);
+    es->space = NULL;
+  }
   return(es);
 }
 
@@ -392,7 +327,7 @@ void gt_editscript_get_stats(const GtEditscript *editscript,
                              GtUword *insertion,
                              GtUword *deletion)
 {
-  GtUword elems_served = 0;
+  unsigned int elems_served = 0;
   bool misdel = true; /* shut up scan-build */
   GtBitsequence elem;
   GtEditscriptPos getpos;
@@ -401,31 +336,29 @@ void gt_editscript_get_stats(const GtEditscript *editscript,
 
   gt_editscript_pos_reset(&getpos);
   *match = *mismatch = *insertion = *deletion = 0;
-  if (editscript->op_count != 0) {
+  if (editscript->num_elems != 0) {
     elem = gt_editscript_space_get_next(editscript, &getpos);
-    gt_assert(elem > editscript->del);
+    gt_assert(editscript->del < (unsigned char) elem);
     elems_served++;
-    if (elem == editscript->misdel) {
+    if (elem == GT_EDITSCRIPT_MISDEL_SYM(editscript)) {
       misdel = true;
     }
-    else if (elem == editscript->ins) {
+    else if (elem == GT_EDITSCRIPT_INS_SYM(editscript)) {
       misdel = false;
     }
     (*match) += gt_editscript_space_get_length(editscript,
-                                             &getpos,
-                                             &elems_served);
-    while (elems_served < editscript->space_elems) {
-      gt_assert(editscript->vlen > *match + *mismatch + *insertion);
-      gt_assert(editscript->ulen > *match + *mismatch + *deletion);
+                                               &getpos,
+                                               &elems_served);
+    while (elems_served < editscript->num_elems) {
       elem = gt_editscript_space_get_next(editscript, &getpos);
       elems_served++;
-      if (elem == editscript->misdel) {
+      if (elem == GT_EDITSCRIPT_MISDEL_SYM(editscript)) {
         misdel = true;
         (*match) += gt_editscript_space_get_length(editscript,
                                                    &getpos,
                                                    &elems_served);
       }
-      else if (elem == editscript->ins) {
+      else if (elem == GT_EDITSCRIPT_INS_SYM(editscript)) {
         misdel = false;
         (*match) += gt_editscript_space_get_length(editscript,
                                                    &getpos,
@@ -433,7 +366,7 @@ void gt_editscript_get_stats(const GtEditscript *editscript,
       }
       else {
         if (misdel) {
-          if (elem == editscript->del)
+          if (elem == (GtBitsequence) editscript->del)
             (*deletion)++;
           else
             (*mismatch)++;
@@ -442,21 +375,47 @@ void gt_editscript_get_stats(const GtEditscript *editscript,
           (*insertion)++;
       }
     }
-    gt_assert(elems_served == editscript->space_elems);
+    gt_assert(elems_served == editscript->num_elems);
   }
   (*match) += editscript->trailing_matches;
 }
 
-GtUword gt_editscript_get_ref_len(const GtEditscript *editscript)
-{
-  gt_assert(editscript != NULL);
-  return editscript->ulen;
-}
-
 GtUword gt_editscript_get_target_len(const GtEditscript *editscript)
 {
+  GtEditscriptPos pos;
+  GtBitsequence elem;
+  GtUword length = 0;
+  unsigned int served = 0;
+
   gt_assert(editscript != NULL);
-  return editscript->vlen;
+  gt_editscript_pos_reset(&pos);
+  if (editscript->num_elems) {
+    elem = gt_editscript_space_get_next(editscript, &pos);
+    served++;
+  }
+  while (served < editscript->num_elems) {
+    length += gt_editscript_space_get_length(editscript, &pos, &served);
+    if (elem == GT_EDITSCRIPT_INS_SYM(editscript)) {
+      while (served < editscript->num_elems) {
+        elem = gt_editscript_space_get_next(editscript, &pos);
+        served++;
+        if (elem > (GtBitsequence) editscript->del)
+          break;
+        length++;
+      }
+    }
+    else {
+      while (served < editscript->num_elems) {
+        elem = gt_editscript_space_get_next(editscript, &pos);
+        served++;
+        if (elem > (GtBitsequence) editscript->del)
+          break;
+        if (elem < (GtBitsequence) editscript->del)
+          length++;
+      }
+    }
+  }
+  return length + editscript->trailing_matches;
 }
 
 GtUword gt_editscript_get_sequence(const GtEditscript *editscript,
@@ -465,86 +424,78 @@ GtUword gt_editscript_get_sequence(const GtEditscript *editscript,
                                    GtReadmode dir,
                                    GtUchar *buffer)
 {
-  GtUword i, j,
-          vlen = 0,
-          matchcount,
-          elems_served = 0,
-          uidx;
-  GtBitsequence elem;
   GtEditscriptPos pos;
+  GtBitsequence elem = 0;
+  GtUword vidx = 0,
+          uidx;
+  unsigned int j,elems_served = 0,
+               matchcount;
 
   gt_editscript_pos_reset(&pos);
 
   gt_assert(encseq != NULL && editscript != NULL);
 
-  vlen = editscript->vlen;
-  uidx = start + editscript->ulen;
+  uidx = start;
 
-  elem = gt_editscript_space_get_next(editscript, &pos);
-  elems_served++;
-  for (i = 0; i < editscript->op_count; ++i) {
+  if (editscript->num_elems) {
+    elem = gt_editscript_space_get_next(editscript, &pos);
+    elems_served++;
+  }
+  while (elems_served < editscript->num_elems) {
+    gt_assert(elem <= GT_EDITSCRIPT_INS_SYM(editscript));
     matchcount =
-      (GtUword) gt_editscript_space_get_length(editscript, &pos,
-                                                     &elems_served);
-    gt_log_log("elem: "GT_WU", matches: "GT_WU,
-               (GtUword) elem, matchcount);
-    gt_log_log("current word: (" GT_WU ":%u " GT_WU,
-               pos.cur_word,
-               pos.bitsleft,
-               (GtUword) editscript->space[pos.cur_word]);
+      (unsigned int) gt_editscript_space_get_length(editscript, &pos,
+                                                    &elems_served);
     for (j = 0; j < matchcount; ++j) {
-      buffer[vlen - 1] = gt_encseq_get_encoded_char(encseq, uidx - 1, dir);
-      vlen--;
-      uidx--;
+      buffer[vidx] = gt_encseq_get_encoded_char(encseq, uidx, dir);
+      vidx++;
+      uidx++;
     }
-    if (elem == editscript->ins) {
-      while (elems_served < editscript->space_elems) {
+    if (elem == GT_EDITSCRIPT_INS_SYM(editscript)) {
+      while (elems_served < editscript->num_elems) {
         elem = gt_editscript_space_get_next(editscript, &pos);
         elems_served++;
-        gt_assert(elem != editscript->del);
-        if (elem > editscript->del) {
+        gt_assert(elem != (GtBitsequence) editscript->del);
+        if (elem > (GtBitsequence) editscript->del) {
           break;
         }
-        buffer[vlen - 1] = elem == editscript->del - 1 ?
-                           (GtUchar) WILDCARD :
-                           (GtUchar) elem;
-        vlen--;
+        buffer[vidx] = (elem == (GtBitsequence) editscript->del - 1) ?
+          (GtUchar) WILDCARD :
+          (GtUchar) elem;
+        vidx++;
       }
     }
     else {
-      gt_assert(elem == editscript->misdel);
-      while (elems_served < editscript->space_elems) {
+      gt_assert(elem == GT_EDITSCRIPT_MISDEL_SYM(editscript));
+      while (elems_served < editscript->num_elems) {
         elem = gt_editscript_space_get_next(editscript, &pos);
         elems_served++;
-        if (elem > editscript->del) {
+        if (elem > (GtBitsequence) editscript->del) {
           break;
         }
-        if (elem < editscript->del) {
-          buffer[vlen - 1] = elem == editscript->del - 1 ?
-                             (GtUchar) WILDCARD :
-                             (GtUchar) elem;
-          vlen--;
+        if (elem < (GtBitsequence) editscript->del) {
+          buffer[vidx] = (elem == (GtBitsequence) editscript->del - 1) ?
+            (GtUchar) WILDCARD :
+            (GtUchar) elem;
+          vidx++;
         }
-        uidx--;
+        uidx++;
       }
     }
   }
-  for (j = 0; j < editscript->trailing_matches; ++j) {
-    gt_assert(vlen != 0);
-    buffer[vlen - 1] = gt_encseq_get_encoded_char(encseq, uidx - 1, dir);
-    vlen--;
-    uidx--;
+  for (j = 0; j < (unsigned int) editscript->trailing_matches; ++j) {
+    buffer[vidx] = gt_encseq_get_encoded_char(encseq, uidx, dir);
+    vidx++;
+    uidx++;
   }
-  gt_assert(uidx == start);
-  gt_assert(vlen == 0);
-  return(editscript->vlen);
+  return(vidx);
 }
 
 size_t gt_editscript_size(GtEditscript *editscript)
 {
   gt_assert(editscript != NULL);
   return sizeof (*editscript) +
-         sizeof (*(editscript->space)) * editscript->size;
+    sizeof (*(editscript->space)) * editscript->size;
 }
 
 #define EDITSCRIPT_IO_ONE(elemptr, fp) \
@@ -553,106 +504,245 @@ size_t gt_editscript_size(GtEditscript *editscript)
 GtEditscript *gt_editscript_io(GtEditscript *editscript, FILE *fp,
                                EditscriptIOFunc io_func)
 {
+  GtUword bits;
   if (editscript == NULL) {
     editscript = gt_calloc((size_t) 1, sizeof (GtEditscript));
-    gt_editscript_pos_reset(&editscript->fillpos);
   }
 
   EDITSCRIPT_IO_ONE(&editscript->entry_size, fp);
-  editscript->fullmask = (GtBitsequence) (1UL << editscript->entry_size) - 1UL;
-  editscript->firstmask =
-    (GtBitsequence) (1UL << (editscript->entry_size - 1UL));
-  EDITSCRIPT_IO_ONE(&editscript->op_count, fp);
   EDITSCRIPT_IO_ONE(&editscript->trailing_matches, fp);
-  EDITSCRIPT_IO_ONE(&editscript->ulen, fp);
-  EDITSCRIPT_IO_ONE(&editscript->vlen, fp);
   EDITSCRIPT_IO_ONE(&editscript->del, fp);
-  editscript->misdel = editscript->del + 1;
-  editscript->ins = editscript->misdel + 1;
-  EDITSCRIPT_IO_ONE(&editscript->space_elems, fp);
+  EDITSCRIPT_IO_ONE(&editscript->num_elems, fp);
+  if (editscript->num_elems != 0) {
+    bits = (GtUword) editscript->num_elems * (GtUword) editscript->entry_size;
+    editscript->size = (unsigned int) (bits / (GT_INTWORDSIZE));
+    if (bits % GT_INTWORDSIZE) {
+      editscript->size++;
+    }
 
-  EDITSCRIPT_IO_ONE(&editscript->fillpos.cur_word, fp);
-  if (editscript->space == NULL) {
-    editscript->size = (size_t) editscript->fillpos.cur_word + 1;
-    editscript->space =
-      gt_malloc(editscript->size * sizeof (*(editscript->space)));
+    if (editscript->space == NULL) {
+      editscript->space =
+        gt_malloc(editscript->size * sizeof (*(editscript->space)));
+    }
+    io_func(editscript->space,
+            sizeof (*(editscript->space)),
+            (size_t) (editscript->size),
+            fp);
   }
-  io_func(editscript->space,
-          sizeof (*(editscript->space)),
-          (size_t) (editscript->fillpos.cur_word + 1),
-          fp);
 
   return(editscript);
 }
 
-#define EDITSCRIPT_TEST_SEQLEN 20UL
-#define gt_editscript_t_add_m()     \
-  gt_multieoplist_add_match(meops); \
-  gt_editscript_add_match(es)
-#define gt_editscript_t_add_mm(POS)                             \
-  gt_multieoplist_add_mismatch(meops);                          \
-  gt_editscript_add_mismatch(es,                                \
-                             gt_encseq_get_encoded_char(v, POS, \
-                                                        GT_READMODE_FORWARD))
-#define gt_editscript_t_add_d()        \
-  gt_multieoplist_add_deletion(meops); \
-  gt_editscript_add_deletion(es)
-#define gt_editscript_t_add_i(POS)                               \
-  gt_multieoplist_add_insertion(meops);                          \
-  gt_editscript_add_insertion(es,                                \
-                              gt_encseq_get_encoded_char(v, POS, \
-                                                         GT_READMODE_FORWARD))
+void gt_editscript_show(GtEditscript *editscript, GtAlphabet *alphabet)
+{
+  GtEditscriptPos pos;
+  GtBitsequence elem;
+  unsigned int matchcount,
+               elems_served = 0;
+
+  gt_editscript_pos_reset(&pos);
+
+  if (editscript->num_elems != 0) {
+    elem = gt_editscript_space_get_next(editscript, &pos);
+    elems_served++;
+    while (elems_served < editscript->num_elems) {
+      gt_assert(elem <= GT_EDITSCRIPT_INS_SYM(editscript));
+      matchcount =
+        (unsigned int) gt_editscript_space_get_length(editscript, &pos,
+                                                      &elems_served);
+      if (elem == GT_EDITSCRIPT_INS_SYM(editscript)) {
+        printf("M(%u)|Ins:|", matchcount);
+        while (elems_served < editscript->num_elems) {
+          elem = gt_editscript_space_get_next(editscript, &pos);
+          elems_served++;
+          gt_assert(elem != (GtBitsequence) editscript->del);
+          elem = (elem == (GtBitsequence) editscript->del - 1) ?
+            (GtBitsequence) WILDCARD :
+            elem;
+          if (elem > (GtBitsequence) editscript->del) {
+            break;
+          }
+          printf("%c|", (int) gt_alphabet_pretty_symbol(alphabet,
+                                                        (unsigned int) elem));
+        }
+      }
+      else {
+        gt_assert(elem == GT_EDITSCRIPT_MISDEL_SYM(editscript));
+        printf("M(%u)|Misdel:|", matchcount);
+        while (elems_served < editscript->num_elems) {
+          elem = gt_editscript_space_get_next(editscript, &pos);
+          elems_served++;
+          if (elem > (GtBitsequence) editscript->del) {
+            break;
+          }
+          if (elem < (GtBitsequence) editscript->del) {
+            elem = (elem == (GtBitsequence) editscript->del - 1) ?
+              (GtBitsequence) WILDCARD :
+              elem;
+            printf("%c|", (int) gt_alphabet_pretty_symbol(alphabet,
+                                                          (unsigned int) elem));
+          }
+          else
+            printf("-|");
+        }
+      }
+    }
+  }
+  printf("M(%hu)|\n", editscript->trailing_matches);
+}
+
+GtEditscriptBuilder *gt_editscript_builder_new(GtEditscript *editscript)
+{
+  GtEditscriptBuilder *es_b = gt_malloc(sizeof (*es_b));
+  gt_editscript_pos_reset(&es_b->fillpos);
+  es_b->es = editscript;
+  es_b->last_op = 0;
+  return es_b;
+}
+
+void gt_editscript_builder_reset(GtEditscriptBuilder *es_builder,
+                                 GtEditscript *editscript)
+{
+  gt_assert(es_builder);
+  gt_assert(editscript);
+  gt_editscript_reset(editscript);
+  gt_editscript_pos_reset(&es_builder->fillpos);
+  es_builder->es = editscript;
+  es_builder->last_op = 0;
+}
+
+void gt_editscript_builder_add_match(GtEditscriptBuilder *es_builder)
+{
+  gt_assert(es_builder);
+  es_builder->last_op = 0;
+  es_builder->es->trailing_matches++;
+}
+
+void gt_editscript_builder_add_mismatch(GtEditscriptBuilder *es_builder,
+                                        GtUchar c)
+{
+  GtEditscript *es;
+  gt_assert(es_builder != NULL);
+  es = es_builder->es;
+  gt_assert(c < (GtUchar) es->del || c == (GtUchar) WILDCARD);
+  if (c == (GtUchar) WILDCARD) {
+    c = (GtUchar) es->del - 1;
+  }
+  if (es_builder->last_op != (unsigned char) GT_EDITSCRIPT_MISDEL_SYM(es)) {
+    es_builder->last_op = (unsigned char) GT_EDITSCRIPT_MISDEL_SYM(es);
+    gt_editscript_space_add_next(es, &es_builder->fillpos,
+                                 GT_EDITSCRIPT_MISDEL_SYM(es));
+    gt_editscript_space_add_length(es, &es_builder->fillpos,
+                                   (GtBitsequence) es->trailing_matches);
+    es->trailing_matches = 0;
+  }
+  gt_editscript_space_add_next(es, &es_builder->fillpos, (GtBitsequence) c);
+}
+
+void gt_editscript_builder_add_deletion(GtEditscriptBuilder *es_builder)
+{
+  GtEditscript *es;
+  gt_assert(es_builder);
+  es = es_builder->es;
+
+  if (es_builder->last_op != (unsigned char) GT_EDITSCRIPT_MISDEL_SYM(es)) {
+    es_builder->last_op = (unsigned char) GT_EDITSCRIPT_MISDEL_SYM(es);
+    gt_editscript_space_add_next(es, &es_builder->fillpos,
+                                 GT_EDITSCRIPT_MISDEL_SYM(es));
+    gt_editscript_space_add_length(es, &es_builder->fillpos,
+                                   (GtBitsequence) es->trailing_matches);
+    es->trailing_matches = 0;
+  }
+  gt_editscript_space_add_next(es, &es_builder->fillpos,
+                               (GtBitsequence) es->del);
+}
+
+void gt_editscript_builder_add_insertion(GtEditscriptBuilder *es_builder,
+                                         GtUchar c)
+{
+  GtEditscript *es;
+  gt_assert(es_builder);
+  es = es_builder->es;
+
+  gt_assert(c < (GtUchar) es->del || c == (GtUchar) WILDCARD);
+  if (c == (GtUchar) WILDCARD) {
+    c = (GtUchar) es->del - 1;
+  }
+  if (es_builder->last_op != (unsigned char) GT_EDITSCRIPT_INS_SYM(es)) {
+    es_builder->last_op = (unsigned char) GT_EDITSCRIPT_INS_SYM(es);
+    gt_editscript_space_add_next(es, &es_builder->fillpos,
+                                 GT_EDITSCRIPT_INS_SYM(es));
+    gt_editscript_space_add_length(es, &es_builder->fillpos,
+                                   (GtBitsequence) es->trailing_matches);
+    es->trailing_matches = 0;
+  }
+  gt_editscript_space_add_next(es, &es_builder->fillpos, (GtBitsequence) c);
+}
+
+#define EDITSCRIPT_TEST_SEQLEN 24UL
+#define EDITSCRIPT_2_TIMES(X)\
+  X;                         \
+  X
+#define EDITSCRIPT_3_TIMES(X)\
+  EDITSCRIPT_2_TIMES(X);     \
+  X
 
 int gt_editscript_unit_test(GT_UNUSED GtError *err)
 {
-  int had_err = 0;
-  GtUword length, i, max;
+  GtEditscriptBuilder es_b;
+  GtEditscriptPos get_pos, fill_pos;
+  GtUchar buffer[EDITSCRIPT_TEST_SEQLEN] = {0};
   GtMultieoplist *meops = gt_multieoplist_new();
   GtEncseq *v = NULL, *u = NULL;
   GtAlphabet *dna = gt_alphabet_new_dna();
   GtEncseqBuilder *esb = gt_encseq_builder_new(dna);
-  GtUchar buffer[EDITSCRIPT_TEST_SEQLEN] = {0};
-  GtEditscriptPos get_pos;
   GtBitsequence soll, ist;
+  GtUword length, i, max;
+  int had_err = 0;
+  GtUchar csoll;
   /*
-    u: aaacccg-ggttt--acgtacga
-       || | || ||| |  |  |  ||
-    v: aatc-cggggtatcga--tgtga
-    meops(reverse): MmMMMIMMDMmMM
-   */
-  const char *seq1 = "AAACCCGGGTTTACGTACGA",
-             *seq2 = "AATCCGGGGTATCGATGTGA";
+u: aaacccg-ggttt--acgtacgnang-a
+   || | || ||| |  |  |  | | | |
+v: aatc-cggggtatcga--tgtgna-gna
+meops(reverse) MIMDMmMmmMDDMIIMmMMMIMMDMmMM
+*/
+  const char *seq1 = "AAACCCGGGTTTACGTACGNANGA",
+             *seq2 = "AATCCGGGGTATCGATGTGNAGNA";
   GtEditscript *es = gt_editscript_new(dna);
+  gt_log_log("size of empty: " GT_WU, (GtUword) gt_editscript_size(es));
 
   gt_error_check(err);
 
   gt_editscript_pos_reset(&get_pos);
+  gt_editscript_pos_reset(&fill_pos);
   max = (GtUword) ((1 << es->entry_size) - 1);
   for (i = 0; !had_err && i <= max; ++i) {
-    gt_editscript_space_add_next(es, (GtBitsequence) i);
+    gt_editscript_space_add_next(es, &fill_pos, (GtBitsequence) i);
     ist = gt_editscript_space_get_next(es, &get_pos);
+    gt_log_log("soll: " GT_WU, i);
+    gt_log_log(" ist: " GT_WU, ist);
     gt_ensure(i == (GtUword) ist);
   }
   if (!had_err) {
-    GtUword elements = 0;
+    unsigned int served = 0;
     gt_editscript_pos_reset(&get_pos);
+    gt_editscript_pos_reset(&fill_pos);
     gt_editscript_reset(es);
     soll = (GtBitsequence) ((1 << es->entry_size) - 1);
-    gt_editscript_space_add_length(es, soll);
-    ist = gt_editscript_space_get_length(es, &get_pos, &elements);
+    gt_editscript_space_add_length(es, &fill_pos, soll);
+    ist = gt_editscript_space_get_length(es, &get_pos, &served);
     gt_ensure(soll == ist);
     for (i = 0; !had_err && i <= max; ++i) {
       soll = (GtBitsequence) (i | (i << es->entry_size));
-      gt_editscript_space_add_length(es, soll);
-      ist = gt_editscript_space_get_length(es, &get_pos, &elements);
+      gt_editscript_space_add_length(es, &fill_pos, soll);
+      ist = gt_editscript_space_get_length(es, &get_pos, &served);
       gt_ensure(soll == ist);
     }
-    gt_ensure(elements == es->space_elems);
-    gt_editscript_pos_reset(&es->fillpos);
+    gt_ensure(served == es->num_elems);
+    gt_editscript_pos_reset(&fill_pos);
   }
 
   if (!had_err) {
-    gt_editscript_reset(es);
     gt_encseq_builder_add_cstr(esb, seq1, EDITSCRIPT_TEST_SEQLEN, "u");
     u = gt_encseq_builder_build(esb, err);
     gt_encseq_builder_reset(esb);
@@ -660,43 +750,100 @@ int gt_editscript_unit_test(GT_UNUSED GtError *err)
     v = gt_encseq_builder_build(esb, err);
     gt_encseq_builder_delete(esb);
 
-    gt_editscript_t_add_m();
-    gt_editscript_t_add_m();
-    gt_editscript_t_add_mm(17UL);
-    gt_editscript_t_add_mm(16UL);
-    gt_editscript_t_add_m();
-    gt_editscript_t_add_d();
-    gt_editscript_t_add_d();
-    gt_editscript_t_add_m();
-    gt_editscript_t_add_i(13UL);
-    gt_editscript_t_add_i(12UL);
-    gt_editscript_t_add_m();
-    gt_editscript_t_add_mm(10UL);
-    gt_editscript_t_add_m();
-    gt_editscript_t_add_m();
-    gt_editscript_t_add_m();
-    gt_editscript_t_add_i(6UL);
-    gt_editscript_t_add_m();
-    gt_editscript_t_add_m();
-    gt_editscript_t_add_d();
-    gt_editscript_t_add_m();
-    gt_editscript_t_add_mm(2UL);
-    gt_editscript_t_add_m();
-    gt_editscript_t_add_m();
+    gt_editscript_builder_reset(&es_b, es);
+    gt_multieoplist_add_match(meops);
+    gt_multieoplist_add_insertion(meops);
+    gt_multieoplist_add_match(meops);
+    gt_multieoplist_add_deletion(meops);
+    EDITSCRIPT_2_TIMES(gt_multieoplist_add_match(meops);
+                       gt_multieoplist_add_mismatch(meops));
+    gt_multieoplist_add_mismatch(meops);
+    gt_multieoplist_add_match(meops);
+    EDITSCRIPT_2_TIMES(gt_multieoplist_add_deletion(meops));
+    gt_multieoplist_add_match(meops);
+    EDITSCRIPT_2_TIMES(gt_multieoplist_add_insertion(meops));
+    gt_multieoplist_add_match(meops);
+    gt_multieoplist_add_mismatch(meops);
+    EDITSCRIPT_3_TIMES(gt_multieoplist_add_match(meops));
+    gt_multieoplist_add_insertion(meops);
+    EDITSCRIPT_2_TIMES(gt_multieoplist_add_match(meops));
+    gt_multieoplist_add_deletion(meops);
+    gt_multieoplist_add_match(meops);
+    gt_multieoplist_add_mismatch(meops);
+    EDITSCRIPT_2_TIMES(gt_multieoplist_add_match(meops));
+
+    EDITSCRIPT_2_TIMES(gt_editscript_builder_add_match(&es_b));
+    csoll = gt_encseq_get_encoded_char(v, 2UL, GT_READMODE_FORWARD);
+    gt_log_log("add mmchar: %c", gt_alphabet_decode(dna, csoll));
+    gt_editscript_builder_add_mismatch(&es_b, csoll);
+    gt_editscript_builder_add_match(&es_b);
+    gt_editscript_builder_add_deletion(&es_b);
+    EDITSCRIPT_2_TIMES(gt_editscript_builder_add_match(&es_b));
+    csoll = gt_encseq_get_encoded_char(v, 6UL, GT_READMODE_FORWARD);
+    gt_log_log("add inschar: %c", gt_alphabet_decode(dna, csoll));
+    gt_editscript_builder_add_insertion(&es_b, csoll);
+    EDITSCRIPT_3_TIMES(gt_editscript_builder_add_match(&es_b));
+    csoll = gt_encseq_get_encoded_char(v, 10UL, GT_READMODE_FORWARD);
+    gt_log_log("add mmchar: %c", gt_alphabet_decode(dna, csoll));
+    gt_editscript_builder_add_mismatch(&es_b, csoll);
+    gt_editscript_builder_add_match(&es_b);
+    csoll = gt_encseq_get_encoded_char(v, 12UL, GT_READMODE_FORWARD);
+    gt_log_log("add inschar: %c", gt_alphabet_decode(dna, csoll));
+    gt_editscript_builder_add_insertion(&es_b, csoll);
+    csoll = gt_encseq_get_encoded_char(v, 13UL, GT_READMODE_FORWARD);
+    gt_log_log("add inschar: %c", gt_alphabet_decode(dna, csoll));
+    gt_editscript_builder_add_insertion(&es_b, csoll);
+    gt_editscript_builder_add_match(&es_b);
+    EDITSCRIPT_2_TIMES(gt_editscript_builder_add_deletion(&es_b));
+    gt_editscript_builder_add_match(&es_b);
+    csoll = gt_encseq_get_encoded_char(v, 16UL, GT_READMODE_FORWARD);
+    gt_log_log("add mmchar: %c", gt_alphabet_decode(dna, csoll));
+    gt_editscript_builder_add_mismatch(&es_b, csoll);
+    csoll = gt_encseq_get_encoded_char(v, 17UL, GT_READMODE_FORWARD);
+    gt_log_log("add mmchar: %c", gt_alphabet_decode(dna, csoll));
+    gt_editscript_builder_add_mismatch(&es_b, csoll);
+    gt_editscript_builder_add_match(&es_b);
+    csoll = gt_encseq_get_encoded_char(v, 19UL, GT_READMODE_FORWARD);
+    gt_log_log("add mmchar: %c", gt_alphabet_decode(dna, csoll));
+    gt_editscript_builder_add_mismatch(&es_b, csoll);
+    gt_editscript_builder_add_match(&es_b);
+    gt_editscript_builder_add_deletion(&es_b);
+    gt_editscript_builder_add_match(&es_b);
+    csoll = gt_encseq_get_encoded_char(v, 22UL, GT_READMODE_FORWARD);
+    gt_log_log("add inschar: %c", gt_alphabet_decode(dna, csoll));
+    gt_editscript_builder_add_insertion(&es_b, csoll);
+    gt_editscript_builder_add_match(&es_b);
 
     length = gt_editscript_get_sequence(es, u, 0, GT_READMODE_FORWARD, buffer);
     gt_ensure(length == EDITSCRIPT_TEST_SEQLEN);
+    gt_ensure(gt_editscript_get_target_len(es) == length);
+    if (gt_log_enabled()) {
+      gt_editscript_show(es, dna);
+    }
   }
   for (i = 0; !had_err && i < EDITSCRIPT_TEST_SEQLEN; ++i) {
-    gt_ensure(buffer[i] == gt_encseq_get_encoded_char(v, (GtUword) i,
-                                                      GT_READMODE_FORWARD));
+    csoll = gt_encseq_get_encoded_char(v, (GtUword) i,
+                                       GT_READMODE_FORWARD);
+    gt_log_log("i: "GT_WU " ist: %c, csoll: %c", i,
+               gt_alphabet_decode(dna, buffer[i]),
+               gt_alphabet_decode(dna, csoll));
+    gt_ensure(buffer[i] == csoll);
   }
-  gt_editscript_delete(es);
   if (!had_err) {
+    gt_editscript_delete(es);
     es = gt_editscript_new_with_sequences(v, meops, 0, GT_READMODE_FORWARD);
     length = gt_editscript_get_sequence(es, u, 0, GT_READMODE_FORWARD, buffer);
     gt_ensure(length == EDITSCRIPT_TEST_SEQLEN);
+    gt_ensure(gt_editscript_get_target_len(es) == length);
+    if (gt_log_enabled()) {
+      gt_editscript_show(es, dna);
+    }
     for (i = 0; !had_err && i < EDITSCRIPT_TEST_SEQLEN; ++i) {
+      csoll = gt_encseq_get_encoded_char(v, (GtUword) i,
+                                         GT_READMODE_FORWARD);
+      gt_log_log("i: "GT_WU " ist: %c, csoll: %c", i,
+                 gt_alphabet_decode(dna, buffer[i]),
+                 gt_alphabet_decode(dna, csoll));
       gt_ensure(buffer[i] == gt_encseq_get_encoded_char(v, (GtUword) i,
                                                         GT_READMODE_FORWARD));
     }
@@ -704,15 +851,16 @@ int gt_editscript_unit_test(GT_UNUSED GtError *err)
   if (!had_err) {
     GtUword match, mismatch, del, ins;
     gt_editscript_get_stats(es, &match, &mismatch, &ins, &del);
-    gt_ensure(match == 13UL);
-    gt_ensure(mismatch == 4UL);
-    gt_ensure(ins == 3UL);
-    gt_ensure(del == 3UL);
+    gt_ensure(match == 15UL);
+    gt_ensure(mismatch == 5UL);
+    gt_ensure(ins == 4UL);
+    gt_ensure(del == 4UL);
   }
   gt_editscript_delete(es);
   gt_alphabet_delete(dna);
   gt_encseq_delete(u);
   gt_encseq_delete(v);
   gt_multieoplist_delete(meops);
+
   return had_err;
 }
