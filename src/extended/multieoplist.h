@@ -82,6 +82,8 @@ void            gt_multieoplist_reset(GtMultieoplist *multieops);
    <steps>) */
 void            gt_multieoplist_remove_last(GtMultieoplist *multieops);
 
+/* TODO add function to add a <GtMultieop> */
+
 /* Returns pointer to a copy of contents from <GtMultieoplist> <source> to
    <GtMultieoplist> <copy>. <copy> may be NULL, returns new <GtMultieoplist>
    object in that case. <source> may not be NULL!
@@ -90,9 +92,9 @@ GtMultieoplist* gt_multieoplist_clone(GtMultieoplist *copy,
                                       GtMultieoplist *source);
 
 /* Returns the number of <GtMultieop> elements in <multieops>, each of which
-   can have <steps> > 1, therefor this represents not the length of the
+   can have <steps> >= 1, therefor this represents not the length of the
    alignment. */
-GtUword         gt_multieoplist_get_length(GtMultieoplist *multieops);
+GtUword         gt_multieoplist_get_num_entries(GtMultieoplist *multieops);
 
 /* Returns <GtMultieop> number <index>. */
 GtMultieop      gt_multieoplist_get_entry(GtMultieoplist *multieops,
@@ -105,6 +107,11 @@ GtUword         gt_multieoplist_get_repdel_length(GtMultieoplist *multieops);
 /* Returns sum of <Replacement>, <Match>, <Mismatch> and <Insertion> including
    their <steps>. This corresponds to the length of the second sequence. */
 GtUword         gt_multieoplist_get_repins_length(GtMultieoplist *multieops);
+
+/* Returns sum of <Replacement>, <Match>, <Mismatch>, <Deletion> and
+   <Insertion> including their <steps>. This corresponds to the length of the
+   whole alignment. */
+GtUword         gt_multieoplist_get_length(GtMultieoplist *multieops);
 
 /* Print a string representation of <multieops> to <fp> ending with a newline.
    For example: [M5,R2,M3,I1,M6] R is equivalent for <Mismatch> and

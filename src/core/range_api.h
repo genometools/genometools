@@ -33,30 +33,30 @@ struct GtRange {
 /* Compare <range_a> and <range_b>. Returns 0 if <range_a> equals <range_b>, -1
    if <range_a> starts before <range_b> or (for equal starts) <range_a> ends
    before <range_b>, and 1 else. */
-int           gt_range_compare(const GtRange *range_a, const GtRange *range_b);
+int     gt_range_compare(const GtRange *range_a, const GtRange *range_b);
 /* Compare <range_a> and <range_b> with given <delta>.
    Returns 0 if <range_a> equals <range_b> modulo <delta> (i.e., the start and
    end points of <range_a> and <range_b> are at most <delta> bases apart), -1
    if <range_a> starts before <range_b> or (for equal starts) <range_a> ends
    before <range_b>, and 1 else. */
-int           gt_range_compare_with_delta(const GtRange *range_a,
-                                          const GtRange *range_b,
-                                          GtUword delta);
+int     gt_range_compare_with_delta(const GtRange *range_a,
+                                    const GtRange *range_b,
+                                    GtUword delta);
 /* Returns <true> if <range_a> and <range_b> overlap, <false> otherwise. */
-bool          gt_range_overlap(const GtRange *range_a, const GtRange *range_b);
+bool    gt_range_overlap(const GtRange *range_a, const GtRange *range_b);
 /* Returns <true> if <range_a> and <range_b> overlap ___at least___ <delta> many
    positions, <false> otherwise. */
-bool          gt_range_overlap_delta(const GtRange *range_a,
-                                     const GtRange *range_b,
-                                     GtUword delta);
+bool    gt_range_overlap_delta(const GtRange *range_a,
+                               const GtRange *range_b,
+                               GtUword delta);
 /* Returns <true> if <range_b> is contained in <range_a>, <false> otherwise. */
-bool          gt_range_contains(const GtRange *range_a, const GtRange *range_b);
+bool    gt_range_contains(const GtRange *range_a, const GtRange *range_b);
 /* Returns <true> if <point> lies within <range>, <false> otherwise. */
-bool          gt_range_within(const GtRange *range, GtUword point);
+bool    gt_range_within(const GtRange *range, GtUword point);
 /* Join <range_a> and <range_b> and return the result. */
-GtRange       gt_range_join(const GtRange *range_a, const GtRange *range_b);
+GtRange gt_range_join(const GtRange *range_a, const GtRange *range_b);
 /* Transform start and end of <range> by <offset> and return the result. */
-GtRange       gt_range_offset(const GtRange *range, GtWord offset);
+GtRange gt_range_offset(const GtRange *range, GtWord offset);
 /* Returns the length of the given <range>. */
 GtUword gt_range_length(const GtRange *range);
 

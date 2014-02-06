@@ -45,7 +45,7 @@ static int determine_outfp(void *data, GtError *err)
   gt_error_check(err);
   gt_assert(ofi);
   if (!gt_str_length(ofi->output_filename))
-    *ofi->outfp = NULL; /* no output file given -> use stdin */
+    *ofi->outfp = NULL; /* no output file given -> use stdout */
   else { /* outputfile given -> create generic file pointer */
     gt_assert(!(ofi->gzip && ofi->bzip2));
     if (ofi->gzip)

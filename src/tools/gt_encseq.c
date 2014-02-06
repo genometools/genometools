@@ -65,7 +65,7 @@ static GtOptionParser* gt_encseq_option_parser_new(void *tool_arguments)
 }
 
 static int gt_encseq_runner(int argc, const char **argv, int parsed_args,
-                         void *tool_arguments, GtError *err)
+                            void *tool_arguments, GtError *err)
 {
   GtToolbox *encseq_toolbox = tool_arguments;
   GtTool *tool = NULL;

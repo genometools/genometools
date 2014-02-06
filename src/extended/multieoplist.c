@@ -239,6 +239,18 @@ GtUword gt_multieoplist_get_repins_length(GtMultieoplist *multieops)
 
 GtUword gt_multieoplist_get_length(GtMultieoplist *multieops)
 {
+  GtUword len = 0, i;
+  Eop *space;
+  gt_assert(multieops);
+  space = multieops->meoplist.spaceEop;
+  for (i = 0; i < multieops->meoplist.nextfreeEop ; i++) {
+    len += space[i] & GT_MEOPS_STEPS_MASK;
+  }
+  return len;
+}
+
+GtUword gt_multieoplist_get_num_entries(GtMultieoplist *multieops)
+{
   return(multieops->meoplist.nextfreeEop);
 }
 
