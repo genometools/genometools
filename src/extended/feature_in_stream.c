@@ -104,7 +104,7 @@ static int feature_in_stream_next(GtNodeStream *ns, GtGenomeNode **gn,
   }
 
   GtGenomeNode *feat = *(GtGenomeNode **)gt_array_pop(stream->featurecache);
-  *gn = feat;
+  *gn = gt_genome_node_ref(feat);
   return 0;
 }
 
