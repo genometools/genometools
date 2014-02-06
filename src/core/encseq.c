@@ -712,6 +712,7 @@ void gt_encseq_extract_decoded(const GtEncseq *encseq,
 
   gt_assert(frompos <= topos && encseq != NULL &&
             topos < encseq->logicaltotallength);
+  gt_assert(buffer != NULL);
   esr = gt_encseq_create_reader_with_readmode(encseq,
                                               GT_READMODE_FORWARD,
                                               frompos);
@@ -6036,7 +6037,7 @@ static GtUword revextract2bitenc(GtEndofTwobitencoding *ptbe,
 }
 
 GtUword gt_getnexttwobitencodingstoppos(GT_UNUSED bool fwd,
-                                              GtEncseqReader *esr)
+                                        GtEncseqReader *esr)
 {
   GtUword rawstoppos;
 
