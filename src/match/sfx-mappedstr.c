@@ -524,17 +524,11 @@ void gt_kmercodeiterator_reset(GtKmercodeiterator *kmercodeiterator,
   return kmercodeiterator;
 }
 
+/* TODO: remove this. Outside world should handle this on its own. */
 GtUword
 gt_kmercodeiterator_encseq_get_currentpos(GtKmercodeiterator *kmercodeiterator)
 {
   return kmercodeiterator->currentposition;
-}
-
-void
-gt_kmercodeiterator_encseq_set_currentpos(GtKmercodeiterator *kmercodeiterator,
-                                          GtUword position)
-{
-  kmercodeiterator->currentposition = position;
 }
 
 void

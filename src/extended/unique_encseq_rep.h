@@ -31,21 +31,22 @@
 
 typedef struct
 {
-  unsigned int kmersize_option;
-  bool debug_logger_option;
-  unsigned int windowsize_option;
-  unsigned int nhits_option;
-  GtUword minalignlength_option;
-  int arbitscores_mat_option;
-  int arbitscores_mis_option;
-  int arbitscores_ins_option;
-  int arbitscores_del_option;
-  GtWord xdrop_option;
-  GtUword udbsize_option;
-  GtStr *indexname_option;
-  GtUword nkmers_option;
+  GtStr       *indexname_option;
+  GtUword      minalignlength_option,
+               nkmers_option,
+               udbsize_option;
+  GtWord       xdrop_option;
+  unsigned int kmersize_option,
+               nhits_option,
+               windowsize_option;
+  int          arbitscores_del_option,
+               arbitscores_ins_option,
+               arbitscores_mat_option,
+               arbitscores_mis_option;
+  bool         debug_logger_option;
 } GtUniqueEncseqArguments;
 
+/* TODO do not use a pointer to this in the union, use the value itself */
 typedef struct
 {
   GtUword compressed_start;
@@ -58,70 +59,74 @@ typedef enum {
 
 typedef struct {
   GtEditscript *editscript;
-  GtUword offset;
-  GtUword aligned_seq_idx;
+  GtUword       aligned_seq_idx,
+                offset;
 } GtUniqueEncseqLinkEntry;
 
 typedef struct {
-  GtUword orig_startpos;
-  GtUword orig_endpos;
-  GtUniqueEncseqEntrytype type;
   union {
     GtUniqueEncseqUniqueEntry *unique;
     GtUniqueEncseqLinkEntry *link;
   } entry;
+  GtUword orig_endpos,
+          orig_startpos;
+  GtUniqueEncseqEntrytype type;
+/* TODO do not use a pointer to entry in the union, use the value itself */
 } GtUniqueEncseqDBentry;
 
 typedef struct {
-  GtUword nelems;
-  GtUword maxelems;
-  GtUword cumulength;
-  GtUword nseq;
-  GtUword *ssp;
-  GtUword *sde;
-  char *desc;
   GtUniqueEncseqDBentry *fragmentdb;
+  GtUword               *sde,
+                        *ssp;
+  char                  *desc;
+  GtUword                cumulength,
+                         maxelems,
+                         nelems,
+                         nseq;
 } GtUniqueEncseqDB;
 
 typedef struct
 {
-  const GtEncseq * encseq;
-  unsigned int kmersize;
-  GtUword nSequences;
-  GtUword seqnum;
-  GtUword seqlen;
-  GtUword seqstartpos;
-  GtUword totallength;
-  unsigned int numofchars;
-  const GtUchar * characters;
-  GtUword maxlen;
-  GtHashmap * hashmap;
-  GtLogger * debug_logger;
-  GtUword kmercount;
-  GtUword kmerhitcount;
-  GtUword minkmerhits;
-  GtUword maxkmerhits;
-  GtUword alignmentcount;
-  GtUniqueEncseqArguments * arguments;
-  GtUword currentposition;
-  GtXdropArbitraryscores * arbitscores;
-  GtXdropscore xdropbelowscore;
-  char *buffer;
-  GtSeqabstract *useq;
-  GtSeqabstract *vseq;
-  GtXdropresources *res;
-  GtUword nextUniqueStartpos;
-  GtUword initUniqueDBsize;
-  GtUword initKmerCounter;
-  GtUniqueEncseqDB *uniqueencseqdb;
-  GtKmercodeiterator *kmercodeitMain;
-  GtKmercodeiterator *kmercodeitAdd;
-  const GtKmercode *kmercodeMain;
-  const GtKmercode *kmercodeExt;
-  const GtKmercode *kmercodeAdd;
-  GtAlphabet *alphabet;
-  GtUword unique_cumulen;
-  GtUword nPosSinceInsert;
+  GtAlphabet              *alphabet;
+  GtHashmap               *hashmap;
+  GtKmercodeiterator      *kmercodeitAdd,
+                          *kmercodeitMain;
+  GtLogger                *logger;
+  GtSeqabstract           *useq,
+                          *vseq;
+  GtStr                   *indexname;
+  GtUniqueEncseqDB        *uniqueencseqdb;
+  GtXdropArbitraryscores  *arbitscores;
+  GtXdropresources        *res;
+  char                    *buffer;
+  const GtEncseq          *encseq;
+  const GtKmercode        *kmercodeAdd,
+                          *kmercodeExt,
+                          *kmercodeMain;
+  const GtUchar           *characters;
+  GtXdropscore             xdropbelowscore;
+  unsigned int             kmersize,
+                           maxkmerhits,
+                           minkmerhits,
+                           numofchars,
+                           windowsize;
+  GtUword                  alignmentcount,
+                           currentposition,
+                           initKmerCounter,
+                           initUniqueDBsize,
+                           kmercount,
+                           kmerhitcount,
+                           maxlen,
+                           minalignlength,
+                           nkmers,
+                           nPosSinceInsert,
+                           nSequences,
+                           nextUniqueStartpos,
+                           seqlen,
+                           seqnum,
+                           seqstartpos,
+                           totallength,
+                           unique_cumulen;
 } GtUniqueEncseqInfo;
 
 #endif
