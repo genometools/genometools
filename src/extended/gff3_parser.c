@@ -911,14 +911,17 @@ static int check_missing_attributes(GtGenomeNode *this_feature,
   gt_error_check(err);
   gt_assert(this_feature && this_attributes && other_feature);
   for (i = 0; !had_err && i < gt_str_array_size(this_attributes); i++) {
-    if (!gt_feature_node_get_attribute(other_feature,
-                                      gt_str_array_get(this_attributes, i))) {
+    const char *attrkey = gt_str_array_get(this_attributes, i);
+    if (strcmp(attrkey, "ID") != 0 && strcmp(attrkey, "Parent"))
+      continue;
+
+    if (!gt_feature_node_get_attribute(other_feature, attrkey)) {
       gt_error_set(err, "the multi-feature with %s \"%s\" on line %u in file "
                    "\"%s\" does not have a '%s' attribute which is present in "
                    "its counterpart on line %u", GT_GFF_ID, id,
                    gt_genome_node_get_line_number((GtGenomeNode*)
                                                   other_feature),
-                   filename, gt_str_array_get(this_attributes, i),
+                   filename, attrkey,
                    gt_genome_node_get_line_number(this_feature));
       had_err = -1;
       break;
@@ -1080,8 +1083,6 @@ static int check_multi_feature_constrains(GtGenomeNode *new_gf,
     }
     if (!had_err) {
       GtUword i;
-      gt_assert(gt_str_array_size(new_attributes) ==
-             gt_str_array_size(old_attributes));
       for (i = 0; !had_err && i < gt_str_array_size(new_attributes); i++) {
         const char *attr_name = gt_str_array_get(new_attributes, i);
         if (!strcmp(attr_name, GT_GFF_TARGET)) {
