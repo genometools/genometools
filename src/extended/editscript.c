@@ -389,22 +389,11 @@ GtUword gt_editscript_get_target_len(const GtEditscript *editscript)
 
   gt_assert(editscript != NULL);
   gt_editscript_pos_reset(&pos);
-  if (editscript->num_elems) {
-    elem = gt_editscript_space_get_next(editscript, &pos);
+  if (editscript->num_elems != 0) {
+    (void) gt_editscript_space_get_next(editscript, &pos);
     served++;
-  }
-  while (served < editscript->num_elems) {
-    length += gt_editscript_space_get_length(editscript, &pos, &served);
-    if (elem == GT_EDITSCRIPT_INS_SYM(editscript)) {
-      while (served < editscript->num_elems) {
-        elem = gt_editscript_space_get_next(editscript, &pos);
-        served++;
-        if (elem > (GtBitsequence) editscript->del)
-          break;
-        length++;
-      }
-    }
-    else {
+    while (served < editscript->num_elems) {
+      length += gt_editscript_space_get_length(editscript, &pos, &served);
       while (served < editscript->num_elems) {
         elem = gt_editscript_space_get_next(editscript, &pos);
         served++;
@@ -437,36 +426,21 @@ GtUword gt_editscript_get_sequence(const GtEditscript *editscript,
 
   uidx = start;
 
-  if (editscript->num_elems) {
+  if (editscript->num_elems != 0) {
+    bool mismatch_or_deletion;
     elem = gt_editscript_space_get_next(editscript, &pos);
     elems_served++;
-  }
-  while (elems_served < editscript->num_elems) {
-    gt_assert(elem <= GT_EDITSCRIPT_INS_SYM(editscript));
-    matchcount =
-      (unsigned int) gt_editscript_space_get_length(editscript, &pos,
-                                                    &elems_served);
-    for (j = 0; j < matchcount; ++j) {
-      buffer[vidx] = gt_encseq_get_encoded_char(encseq, uidx, dir);
-      vidx++;
-      uidx++;
-    }
-    if (elem == GT_EDITSCRIPT_INS_SYM(editscript)) {
-      while (elems_served < editscript->num_elems) {
-        elem = gt_editscript_space_get_next(editscript, &pos);
-        elems_served++;
-        gt_assert(elem != (GtBitsequence) editscript->del);
-        if (elem > (GtBitsequence) editscript->del) {
-          break;
-        }
-        buffer[vidx] = (elem == (GtBitsequence) editscript->del - 1) ?
-          (GtUchar) WILDCARD :
-          (GtUchar) elem;
+    while (elems_served < editscript->num_elems) {
+      gt_assert(elem <= GT_EDITSCRIPT_INS_SYM(editscript));
+      matchcount =
+        (unsigned int) gt_editscript_space_get_length(editscript, &pos,
+                                                      &elems_served);
+      for (j = 0; j < matchcount; ++j) {
+        buffer[vidx] = gt_encseq_get_encoded_char(encseq, uidx, dir);
         vidx++;
+        uidx++;
       }
-    }
-    else {
-      gt_assert(elem == GT_EDITSCRIPT_MISDEL_SYM(editscript));
+      mismatch_or_deletion = elem == GT_EDITSCRIPT_MISDEL_SYM(editscript);
       while (elems_served < editscript->num_elems) {
         elem = gt_editscript_space_get_next(editscript, &pos);
         elems_served++;
@@ -479,7 +453,7 @@ GtUword gt_editscript_get_sequence(const GtEditscript *editscript,
             (GtUchar) elem;
           vidx++;
         }
-        uidx++;
+        if (mismatch_or_deletion) uidx++;
       }
     }
   }
