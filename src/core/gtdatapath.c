@@ -31,6 +31,7 @@
 
 /* XXX: how to define the default path on Windows? */
 static const char* GTDATA_DEFAULT_PATHS[]={ "/usr/share/genometools" GTDATADIR,
+                                            "/usr/local/share/genometools" GTDATADIR,
                                             NULL };
 
 GtStr* gt_get_gtdata_path(const char *prog, GtError *err)
