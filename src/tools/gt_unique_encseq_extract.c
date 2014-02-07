@@ -176,6 +176,7 @@ static int gt_unique_encseq_extract_runner(GT_UNUSED int argc,
     unique_encseq = gt_encseq_loader_load(el, argv[parsed_args], err);
     if (unique_encseq == NULL)
       had_err = -1;
+    gt_encseq_loader_delete(el);
   }
   if (!had_err)
     had_err = gt_unique_encseq_check_db(uedb, logger, err);
