@@ -157,7 +157,7 @@ static int gt_unique_encseq_extract_runner(GT_UNUSED int argc,
   GtUniqueEncseqExtractArguments *arguments = tool_arguments;
   GtUniqueEncseqDB *uedb;
   GtEncseqLoader *el;
-  GtEncseq *unique_encseq;
+  GtEncseq *unique_encseq = NULL;
   GtLogger *logger = gt_logger_new(
       arguments->debug_logger_option,
       GT_LOGGER_DEFLT_PREFIX, stdout);
