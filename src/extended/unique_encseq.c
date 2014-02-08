@@ -15,9 +15,13 @@
  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+#include <string.h>
+
 #include "core/array_api.h"
 #include "core/ensure.h"
 #include "core/error_api.h"
+#include "core/fa.h"
+#include "core/fileutils_api.h"
 #include "core/log_api.h"
 #include "core/logger_api.h"
 #include "core/ma_api.h"
@@ -36,19 +40,20 @@ struct GtUniqueEncseq {
 };
 
 typedef struct {
-  GtUword position1;
-  GtUword position2;
-  GtXdropbest *xdropbest;
+  GtXdropbest      *xdropbest;
   GtXdropresources *res;
+  GtUword           position1,
+                    position2,
+                    seed_seqidx;
 } GtBestAlignment;
 
 typedef struct {
-  GtUword position1;
-  GtUword position2;
-  GtXdropbest *xdropbest;
+  GtBestAlignment    *bestAlignment;
   GtKmercodeiterator *kmercodeit1;
-  GtUword maxalignlength;
-  GtBestAlignment *bestAlignment;
+  GtXdropbest        *xdropbest;
+  GtUword             maxalignlength,
+                      position1,
+                      position2;
 } GtKmerhitInfo;
 
 GtUniqueEncseq *gt_unique_encseq_new(void)
@@ -157,7 +162,7 @@ static bool gt_unique_encseq_ssp_binsearch(GtUword *ssp,
 
 /* prints coarse stats about the unique encseq database*/
 void gt_unique_encseq_database_stats_coarse(GtUniqueEncseqDB *uedb,
-                                            FILE *fp)
+                                            GtFile *outfp)
 {
   GtUword idx, nuniques = 0, nlinks = 0, cumulen_uniq = 0,
       cumulen_link = 0, len;
@@ -174,40 +179,50 @@ void gt_unique_encseq_database_stats_coarse(GtUniqueEncseqDB *uedb,
       nuniques++;
     }
   }
-  fprintf(fp, "ORIGINAL DATABASE STATS\n");
-  fprintf(fp, "Number of sequences in original DB: " GT_WU "\n", uedb->nseq);
-  fprintf(fp,
-          "Total length of database sequences: " GT_WU "\n",
-          uedb->fragmentdb[uedb->nelems - 1].orig_endpos);
-  fprintf(fp,
-          "Size of stored descriptions: " GT_WU " bytes\n",
-          uedb->sde[uedb->nseq - 1]);
+  gt_file_xprintf(outfp, "ORIGINAL DATABASE STATS\n");
+  gt_file_xprintf(outfp, "Number of sequences in original DB: " GT_WU "\n",
+                  uedb->nseq);
+  gt_file_xprintf(outfp,
+                  "Total length of database sequences: " GT_WU "\n",
+                  uedb->fragmentdb[uedb->nelems - 1].orig_endpos);
+  gt_file_xprintf(outfp, "Size of stored descriptions: " GT_WU " bytes\n",
+                  uedb->sde[uedb->nseq - 1]);
 
-  fprintf(fp, "\nCOMPRESSED DATABASE STATS\n");
-  fprintf(fp, "Number of entries in compressed db: " GT_WU "\n", uedb->nelems);
-  fprintf(fp, "Number of unique entries in compressed db: " GT_WU "\n",
-          nuniques);
-  fprintf(fp, "Number of linked entries in compressed db: " GT_WU "\n",
-          nlinks);
+  gt_file_xprintf(outfp, "\nCOMPRESSED DATABASE STATS\n");
+  gt_file_xprintf(outfp, "Number of entries in compressed db: " GT_WU "\n",
+                  uedb->nelems);
+  gt_file_xprintf(outfp, "Number of unique entries in compressed db: " GT_WU
+                  "\n", nuniques);
+  gt_file_xprintf(outfp, "Number of linked entries in compressed db: " GT_WU
+                  "\n", nlinks);
 }
 
-/* prints statistics (start, end, number of links, ...) about the unique
- encseq database entries. */
 void gt_unique_encseq_database_stats_fine(GtUniqueEncseqDB *uedb,
-                                          FILE *fp)
+                                          GtFile *outfp)
 {
-  GtUword idx, tmplen, seqnum = 0, *len, *nlinksperunique,
-      *nmatchperlink, *nmmperlink, *ninsperlink, *ndelperlink, *linkedidx,
-      *linkoffset;
+  GtUword *len,
+          *linkedidx,
+          *linkoffset,
+          *ndelperlink,
+          *ninsperlink,
+          *nlinksperunique,
+          *nmatchperlink,
+          *nmmperlink,
+          *scriptsize,
+          idx,
+          seqnum = 0,
+          tmplen;
   GtUniqueEncseqDBentry entry;
-  len = gt_calloc((size_t) uedb->nelems, sizeof (GtUword));
-  nlinksperunique = gt_calloc((size_t) uedb->nelems, sizeof (GtUword));
-  nmatchperlink = gt_calloc((size_t) uedb->nelems, sizeof (GtUword));
-  nmmperlink = gt_calloc((size_t) uedb->nelems, sizeof (GtUword));
-  ninsperlink = gt_calloc((size_t) uedb->nelems, sizeof (GtUword));
-  ndelperlink = gt_calloc((size_t) uedb->nelems, sizeof (GtUword));
-  linkedidx = gt_calloc((size_t) uedb->nelems, sizeof (GtUword));
-  linkoffset = gt_calloc((size_t) uedb->nelems, sizeof (GtUword));
+
+  len = gt_calloc((size_t) uedb->nelems * 9, sizeof (GtUword));
+  linkedidx = len + uedb->nelems;
+  linkoffset = linkedidx + uedb->nelems;
+  ndelperlink = linkoffset + uedb->nelems;
+  ninsperlink = ndelperlink + uedb->nelems;
+  nlinksperunique = ninsperlink + uedb->nelems;
+  nmatchperlink = nlinksperunique + uedb->nelems;
+  nmmperlink = nmatchperlink + uedb->nelems;
+  scriptsize = nmmperlink + uedb->nelems;
 
   for (idx = 0; idx < uedb->nelems; idx++) {
     entry = uedb->fragmentdb[idx];
@@ -224,27 +239,30 @@ void gt_unique_encseq_database_stats_fine(GtUniqueEncseqDB *uedb,
       nlinksperunique[entry.entry.link->aligned_seq_idx]++;
       linkedidx[idx] = entry.entry.link->aligned_seq_idx;
       linkoffset[idx] = entry.entry.link->offset;
+      scriptsize[idx] =
+        (GtUword) gt_editscript_size(entry.entry.link->editscript);
     }
     len[idx] = tmplen;
   }
 
-  fprintf(fp, "idx\ttype\tstart\tend\tlength\tnlinks\t"
-          "nmatch\tnmismatch\tnins\tndel\tseqidx\tlinkedidx\tlinkoffset\n");
+  gt_file_xprintf(outfp, "idx\ttype\tstart\tend\tlength\tnlinks\t"
+                  "nmatch\tnmismatch\tnins\tndel\tseqidx\tlinkedidx\t"
+                  "linkoffset\tscriptsize\n");
   for (idx = 0; idx < uedb->nelems; idx++) {
     entry = uedb->fragmentdb[idx];
     if (entry.type == Link) {
-      printf("" GT_WU "\tlink\t", idx);
+      gt_file_xprintf(outfp, GT_WU "\tlink\t", idx);
     }
     else if (entry.type == Unique) {
-      printf("" GT_WU "\tunique\t", idx);
+      gt_file_xprintf(outfp, GT_WU "\tunique\t", idx);
     }
     if ((seqnum < (uedb->nseq - 1))
         && entry.orig_startpos >= uedb->ssp[seqnum + 1]) {
       seqnum++;
     }
-    fprintf(fp,
+    gt_file_xprintf(outfp,
             GT_WU "\t" GT_WU "\t" GT_WU "\t" GT_WU "\t" GT_WU "\t" GT_WU "\t"
-            GT_WU "\t" GT_WU "\t" GT_WU "\t" GT_WU "\t" GT_WU "\n",
+            GT_WU "\t" GT_WU "\t" GT_WU "\t" GT_WU "\t" GT_WU "\t" GT_WU "\n",
             entry.orig_startpos,
             entry.orig_endpos,
             len[idx],
@@ -255,17 +273,11 @@ void gt_unique_encseq_database_stats_fine(GtUniqueEncseqDB *uedb,
             ndelperlink[idx],
             seqnum,
             linkedidx[idx],
-            linkoffset[idx]);
+            linkoffset[idx],
+            scriptsize[idx]);
   }
 
   gt_free(len);
-  gt_free(nlinksperunique);
-  gt_free(nmatchperlink);
-  gt_free(nmmperlink);
-  gt_free(ninsperlink);
-  gt_free(ndelperlink);
-  gt_free(linkedidx);
-  gt_free(linkoffset);
 }
 
 /* given a genomic range, the sequence is printed to a file pointer.
@@ -279,10 +291,21 @@ int gt_unique_encseq_get_sequence_from_range(GtRange *range,
 {
   char c;
   int had_err = 0;
-  GtUword aligned_seq_idx, buffer_len = 0, comp_start, decode_end,
-      decode_end2, decode_start, end_offset, endidx, fragment_len, i, j, offset,
-      start_offset, startidx, unique_len;
-  GtUword GT_UNUSED editscript_seqlen;
+  GtUword aligned_seq_idx,
+          buffer_len = 0,
+          comp_start,
+          decode_end,
+          decode_end2,
+          decode_start,
+          end_offset,
+          endidx = 0,
+          fragment_len,
+          i, j,
+          offset,
+          start_offset,
+          startidx = 0,
+          unique_len;
+  GtUword editscript_seqlen;
   GtAlphabet *alphabet = gt_encseq_alphabet(unique_encseq);
   GtEncseqReader *esr =
       gt_encseq_create_reader_with_readmode(unique_encseq,
@@ -293,17 +316,25 @@ int gt_unique_encseq_get_sequence_from_range(GtRange *range,
   GtUniqueEncseqUniqueEntry *unique_entry;
   GtUniqueEncseqLinkEntry *link_entry;
 
-  startidx = gt_unique_encseq_uniquedb_binsearch(uedb,
-                                                 range->start,
+  if (range->start < uedb->fragmentdb[0].orig_startpos ||
+      range->end > uedb->fragmentdb[uedb->nelems - 1].orig_endpos) {
+    had_err = -1;
+    gt_error_set(err, "range query is out of bounds");
+  }
+
+  if (!had_err) {
+    startidx = gt_unique_encseq_uniquedb_binsearch(uedb,
+                                                   range->start,
+                                                   0,
+                                                   uedb->nelems - 1);
+    endidx = gt_unique_encseq_uniquedb_binsearch(uedb,
+                                                 range->end,
                                                  0,
                                                  uedb->nelems - 1);
-  endidx = gt_unique_encseq_uniquedb_binsearch(uedb,
-                                               range->end,
-                                               0,
-                                               uedb->nelems - 1);
-  start_offset = range->start - uedb->fragmentdb[startidx].orig_startpos;
-  end_offset = range->end - uedb->fragmentdb[endidx].orig_startpos;
-  for (i = startidx; i <= endidx; i++) {
+    start_offset = range->start - uedb->fragmentdb[startidx].orig_startpos;
+    end_offset = range->end - uedb->fragmentdb[endidx].orig_startpos;
+  }
+  for (i = startidx; i <= endidx && !had_err; i++) {
     entry = uedb->fragmentdb[i];
     fragment_len = entry.orig_endpos - entry.orig_startpos + 1;
     if (startidx == endidx) {
@@ -411,19 +442,25 @@ int gt_unique_encseq_get_sequence_from_idx(GtUword idx,
 {
   GtRange range;
   int had_err = 0;
-  range.start = uedb->ssp[idx];
-  if (idx == uedb->nseq - 1) {
-    range.end = uedb->cumulength - 1;
+  if (idx >= uedb->nseq) {
+    gt_error_set(err,"range end is out of bounds");
+    had_err = -1;
   }
-  else {
-    range.end = uedb->ssp[idx + 1] - 2;
+  if (!had_err) {
+    range.start = uedb->ssp[idx];
+    if (idx == uedb->nseq - 1) {
+      range.end = uedb->cumulength - 1;
+    }
+    else {
+      range.end = uedb->ssp[idx + 1] - 2;
+    }
+    gt_unique_encseq_print_seq_desc(uedb, idx, fp);
+    had_err = gt_unique_encseq_get_sequence_from_range(&range,
+                                                       unique_encseq,
+                                                       uedb,
+                                                       fp,
+                                                       err);
   }
-  gt_unique_encseq_print_seq_desc(uedb, idx, fp);
-  had_err = gt_unique_encseq_get_sequence_from_range(&range,
-                                                     unique_encseq,
-                                                     uedb,
-                                                     fp,
-                                                     err);
   return (had_err);
 }
 
@@ -461,8 +498,19 @@ static void gt_unique_encseq_udb2fasta(GtUniqueEncseqDB *uedb,
                                        const GtEncseq *encseq,
                                        FILE *fp)
 {
-  GtUword i, len, unique_count = 0, endpoint, seqnum;
-  char desc[4];
+  char *desc = NULL;
+  GtUword i,
+          len,
+          unique_count = 0,
+          endpoint,
+          seqnum,
+          max = GT_UWORD_MAX;
+  short max_desc_len = 0;
+  while (max > (GtUword) 9) {
+    max_desc_len++;
+    max /= 10;
+  }
+  desc = gt_calloc((size_t)(max_desc_len + 1), sizeof (*desc));
   for (i = 0; i < uedb->nelems; i++) {
     if (uedb->fragmentdb[i].type == Unique) {
       sprintf(desc, GT_WU, unique_count);
@@ -490,6 +538,7 @@ static void gt_unique_encseq_udb2fasta(GtUniqueEncseqDB *uedb,
       unique_count++;
     }
   }
+  gt_free(desc);
 }
 
 /* function definition for xfwrite, so that it fits the function pointer*/
@@ -618,12 +667,19 @@ static void gt_unique_encseq_uedb_write(GtUniqueEncseqDB *uedb,
   gt_unique_encseq_uedb_io(uedb, fp, uniqueencseq_gt_xfwrite);
 }
 
-/* function to read a unique encseq data structure from a file*/
-GtUniqueEncseqDB *gt_unique_encseq_uedb_read(FILE *fp)
+GtUniqueEncseqDB *gt_unique_encseq_uedb_read(const char *basename, GtError *err)
 {
-  GtUniqueEncseqDB *uedb = gt_calloc((size_t) 1, sizeof (GtUniqueEncseqDB));
-  gt_assert(fp != NULL);
+  FILE *fp;
+  GtUniqueEncseqDB *uedb = NULL;
+
+  uedb = gt_calloc((size_t) 1, sizeof (GtUniqueEncseqDB));
+  fp = gt_fa_fopen_with_suffix(basename, GT_UNIQUE_ENCSEQ_FILE_SUFFIX, "rb",
+                               err);
+  if (fp == NULL) {
+    return uedb;
+  }
   gt_unique_encseq_uedb_io(uedb, fp, uniqueencseq_gt_xfread);
+  gt_fa_fclose(fp);
   return (uedb);
 }
 
@@ -678,9 +734,11 @@ int gt_unique_encseq_encseq2uniqueencseq(GtUniqueEncseqDB *uedb,
     gt_unique_encseq_uedb_write(uedb, fp2);
     (void) fclose(fp2);
 
-    had_err = remove("TMP.FASTA");
-    if (had_err != 0) {
-      gt_error_set(err, "TMP file could not be deleted successfully");
+    if (!gt_log_enabled()) {
+      had_err = remove("TMP.FASTA");
+      if (had_err != 0) {
+        gt_error_set(err, "TMP file could not be deleted successfully");
+      }
     }
   }
   gt_str_delete(tmp);
@@ -731,24 +789,24 @@ void gt_unique_encseq_print_editscripts(GtUniqueEncseqDB *uedb,
 /* function to check whether all sequence positions are covered by entries
  of the unique encseq */
 int gt_unique_encseq_check_db(GtUniqueEncseqDB *uedb,
-                              GtLogger *debug_logger,
+                              GtLogger *logger,
                               GtError *err)
 {
   GtUword i, cumulen = 0;
   int had_err = 0;
-  bool dbcheck = true;
-  for (i = 0; i < uedb->nelems; i++) {
-    if (uedb->fragmentdb[i].orig_startpos == cumulen) {
-      cumulen += uedb->fragmentdb[i].orig_endpos
-                 - uedb->fragmentdb[i].orig_startpos
-                 + 1;
+  GtUniqueEncseqDBentry entry;
+  for (i = 0; i < uedb->nelems && !had_err; i++) {
+    entry = uedb->fragmentdb[i];
+    if (entry.orig_startpos == cumulen) {
+      cumulen += entry.orig_endpos - entry.orig_startpos + 1;
     }
     else {
-      dbcheck = false;
+      had_err = -1;
+      gt_error_set(err, "cumulative database length is wrong!");
     }
   }
-  if (dbcheck && cumulen == uedb->cumulength) {
-    gt_logger_log(debug_logger,
+  if (!had_err && cumulen == uedb->cumulength) {
+    gt_logger_log(logger,
                   "database has covered all sequence positions!\n");
   }
   else {
@@ -792,7 +850,7 @@ static void gt_unique_encseq_reset_kmeriterator(GtUniqueEncseqInfo *ueinfo,
   }
 }
 
-/* inserts a the boundaries of a unique sequence into the unique encseq*/
+/* inserts the boundaries of a unique sequence into the unique encseq */
 static void gt_unique_encseq_uniquedb_insert(GtUniqueEncseqInfo *ueinfo,
                                              GtUword startpos,
                                              GtUword endpos,
@@ -849,6 +907,7 @@ static void gt_unique_encseq_alignment_insert(GtUniqueEncseqInfo *ueinfo,
   startpos = kmerhitinfo->position1;
   endpos = kmerhitinfo->position1
            + kmerhitinfo->bestAlignment->xdropbest->jvalue;
+  aligned_seqidx = kmerhitinfo->bestAlignment->seed_seqidx;
   if ((endpos == ueinfo->totallength)
       || !(endpos == ueinfo->seqstartpos + ueinfo->seqlen)) {
     endpos--;
@@ -864,11 +923,7 @@ static void gt_unique_encseq_alignment_insert(GtUniqueEncseqInfo *ueinfo,
   uedb->fragmentdb[uedb->nelems].type = Link;
   uedb->fragmentdb[uedb->nelems].entry.link =
       gt_calloc((size_t) 1, sizeof (GtUniqueEncseqLinkEntry));
-  aligned_seqidx =
-      gt_unique_encseq_uniquedb_binsearch(uedb,
-                                          kmerhitinfo->bestAlignment->position2,
-                                          0,
-                                          uedb->nelems - 1);
+
   uedb->fragmentdb[uedb->nelems].entry.link->aligned_seq_idx = aligned_seqidx;
   uedb->fragmentdb[uedb->nelems].entry.link->offset =
       kmerhitinfo->bestAlignment->position2 -
@@ -894,41 +949,7 @@ static void gt_unique_encseq_alignment_insert(GtUniqueEncseqInfo *ueinfo,
   }
 }
 
-/* calculates the endpoint of a fragment in the uniqueDB given a query position.
- this is needed to calculate the maximal possible alignment length.
- position1 is the current position and position2 is the query position.
- a binary search through the uniqueDB is performed. if the query position is
- in the fragment right before the current position, position1 - 1 is returned.
- otherwise, the endpoint of the sequence corresponding to the query position is
- returned. */
-static GtUword gt_unique_encseq_seqend(GtUniqueEncseqDB *uedb,
-                                             GtUword position1,
-                                             GtUword position2,
-                                             GtUword idxmin,
-                                             GtUword idxmax)
-{
-  GtUword idx;
-  gt_assert(uedb->nelems > 0);
-  if (idxmin > idxmax)
-    return position1 - 1;
-  idx = idxmin + (idxmax - idxmin + 1) / 2;
-  if (position2 < uedb->fragmentdb[idx].orig_startpos) {
-    return gt_unique_encseq_seqend(uedb, position1, position2, idxmin, idx - 1);
-  }
-  else if (position2 > uedb->fragmentdb[idx].orig_endpos) {
-    return gt_unique_encseq_seqend(uedb, position1, position2, idx + 1, idxmax);
-  }
-  else if (uedb->fragmentdb[idx].type == Unique) {
-    return uedb->fragmentdb[idx].orig_endpos;
-  }
-  else {
-    printf("\n\nSEQUENCE END COMPUTATION FAILED!!!\n\n\n");
-    return 0;
-  }
-}
-
-/* searches the kmer-hash for the position of a given kmer. the position is
- allowed to be +-2, so that small indels are allowed. */
+/* searches the kmer-hash for the position of a given kmer. */
 static bool gt_unique_encseq_array_binsearch(GtArray *arr,
                                              GtUword querypos,
                                              GtUword idxmin,
@@ -962,24 +983,23 @@ static void gt_unique_encseq_xdrop_extension(GtUniqueEncseqInfo *ueinfo,
   len = kmerhitinfo->maxalignlength;
   gt_assert(pos1 > pos2);
 
-  gt_seqabstract_reinit_encseq(ueinfo->useq, encseq, len, 0);
-  gt_seqabstract_reinit_encseq(ueinfo->vseq, encseq, len, 0);
+  gt_seqabstract_reinit_encseq(ueinfo->useq, encseq, len, pos2);
+  gt_seqabstract_reinit_encseq(ueinfo->vseq, encseq, len, pos1);
 
   gt_evalxdroparbitscoresextend(true,
                                 kmerhitinfo->xdropbest,
                                 ueinfo->res,
                                 ueinfo->useq,
                                 ueinfo->vseq,
-                                pos2,
-                                pos1,
                                 ueinfo->xdropbelowscore);
 
-  gt_logger_log(ueinfo->debug_logger,
-                "xdrop alignment score: " GT_WD ", ival: "
-                GT_WU ", jval " GT_WU,
+  gt_logger_log(ueinfo->logger,
+                "xdrop alignment score: " GT_WD ", ival: " GT_WU ", jval "
+                GT_WU " at: " GT_WU " and " GT_WU,
                 (GtWord) kmerhitinfo->xdropbest->score,
                 kmerhitinfo->xdropbest->ivalue,
-                kmerhitinfo->xdropbest->jvalue);
+                kmerhitinfo->xdropbest->jvalue,
+                pos2, pos1);
 }
 
 /* performs the non-overlapping kmer extension and calls the xdrop extension
@@ -988,8 +1008,8 @@ static void gt_unique_encseq_process_kmer_hit(GtUniqueEncseqInfo *ueinfo,
                                               GtKmerhitInfo *kmerhitinfo)
 {
   unsigned int kmersize = ueinfo->kmersize,
-      windowsize = ueinfo->arguments->windowsize_option, i;
-  GtUword hitcount = 1UL, nohitcount = 0;
+      windowsize = ueinfo->windowsize, i,
+      hitcount = 1U, nohitcount = 0;
   bool hitfound;
   GtArray *arr;
   kmerhitinfo->xdropbest->score = 0;
@@ -1000,25 +1020,18 @@ static void gt_unique_encseq_process_kmer_hit(GtUniqueEncseqInfo *ueinfo,
                             GT_READMODE_FORWARD,
                             kmerhitinfo->position1 + kmersize);
 
-  gt_logger_log(ueinfo->debug_logger,
-                "processing hit! pos1: " GT_WU ", pos2: " GT_WU,
-                kmerhitinfo->position1,
-                kmerhitinfo->position2);
   for (i = 0; i < windowsize - kmersize; i++) {
     ueinfo->kmercodeExt =
-        (GtKmercode *) gt_kmercodeiterator_encseq_next(
-            kmerhitinfo->kmercodeit1);
+      gt_kmercodeiterator_encseq_next(kmerhitinfo->kmercodeit1);
     if (i % kmersize == 0) {
       if (ueinfo->kmercodeExt->definedspecialposition) {
         nohitcount++;
-        gt_logger_log(ueinfo->debug_logger, "special kmer in extension");
       }
       else {
         arr = gt_hashmap_get(ueinfo->hashmap,
                              (const void *) ueinfo->kmercodeExt->code);
         if (arr == NULL || gt_array_size(arr) == 0) {
           nohitcount++;
-          gt_logger_log(ueinfo->debug_logger, "kmer not seen yet");
         }
         else {
           gt_assert(gt_array_size(arr) > 0);
@@ -1030,15 +1043,11 @@ static void gt_unique_encseq_process_kmer_hit(GtUniqueEncseqInfo *ueinfo,
                                                       gt_array_size(arr) - 1);
           if (!hitfound) {
             nohitcount++;
-            gt_logger_log(ueinfo->debug_logger, "kmer not found in extension");
           }
           else {
             hitcount++;
-            gt_logger_log(ueinfo->debug_logger,
-                          "extending hit, position " GT_WU,
-                          kmerhitinfo->position1 + i + kmersize);
             if (hitcount == ueinfo->minkmerhits) {
-              gt_logger_log(ueinfo->debug_logger,
+              gt_logger_log(ueinfo->logger,
                             "kmer extension qualifies for xdrop extension");
               ueinfo->kmerhitcount++;
               break;
@@ -1047,7 +1056,6 @@ static void gt_unique_encseq_process_kmer_hit(GtUniqueEncseqInfo *ueinfo,
         }
       }
       if (nohitcount > (ueinfo->maxkmerhits - ueinfo->minkmerhits)) {
-        gt_logger_log(ueinfo->debug_logger, "kmer extension not successful");
         return;
       }
     }
@@ -1068,7 +1076,7 @@ static void gt_unique_encseq_add_kmer_to_kmerhash(GtUniqueEncseqInfo *ueinfo,
       (GtArray *) gt_hashmap_get(ueinfo->hashmap,
                                  (void *) kmercode);
   if (arr != NULL ) {
-    if (gt_array_size(arr) < ueinfo->arguments->nkmers_option) {
+    if (gt_array_size(arr) < ueinfo->nkmers) {
       gt_array_add(arr, position);
     }
     ueinfo->kmercount++;
@@ -1092,7 +1100,7 @@ static void gt_unique_encseq_insert_kmer_block(GtUniqueEncseqInfo *ueinfo)
   gt_kmercodeiterator_reset(ueinfo->kmercodeitAdd,
                             GT_READMODE_FORWARD,
                             ueinfo->nextUniqueStartpos);
- for (idx = 0; idx < ueinfo->arguments->minalignlength_option;
+ for (idx = 0; idx < ueinfo->minalignlength;
       idx++) {
    ueinfo->kmercodeAdd = gt_kmercodeiterator_encseq_next(ueinfo->kmercodeitAdd);
    gt_unique_encseq_add_kmer_to_kmerhash(ueinfo,
@@ -1116,22 +1124,32 @@ static void gt_unique_encseq_process_kmer_seed(GtUniqueEncseqInfo *ueinfo,
                                                const GtKmercode *kmercode,
                                                GtKmerhitInfo *kmerhitinfo)
 {
-  GtUword position2, offset, seqend2, maxlen2, minalignlen, matchlen,
-      maxlen1, i, maxlen;
+  GtUword i,
+          matchlen,
+          maxlen1,
+          maxlen2,
+          maxlen,
+          minalignlen,
+          offset,
+          position2,
+          seqend2,
+          seed_seqidx;
   bool foundalignment = false;
-  GtLogger *debug_logger = ueinfo->debug_logger;
+  GtLogger *logger = ueinfo->logger;
   GtArray * arr = (GtArray *) gt_hashmap_get(ueinfo->hashmap,
                                              (void *) kmercode->code);
   GtXdropresources *res_tmp = NULL;
   GtMultieoplist *multieops = NULL;
   GtEditscript *editscript = NULL;
-  minalignlen = ueinfo->arguments->minalignlength_option;
+  GtUniqueEncseqDB *uedb = ueinfo->uniqueencseqdb;
+
+  char *buffer = NULL;
+  GtUword buflen = 0;
+
+  minalignlen = ueinfo->minalignlength;
+
   gt_assert(ueinfo->currentposition == position);
   if (arr != NULL ) {
-    gt_logger_log(debug_logger,
-                  "seed found at position: " GT_WU " , kmercode: " GT_WU,
-                  position,
-                  kmercode->code);
 
     kmerhitinfo->bestAlignment->xdropbest->score = 0;
     kmerhitinfo->bestAlignment->xdropbest->best_d = GT_UNDEF_LONG;
@@ -1141,78 +1159,76 @@ static void gt_unique_encseq_process_kmer_seed(GtUniqueEncseqInfo *ueinfo,
     /* TODO compute possible seed alignments in parallel*/
     for (i = 0; i < gt_array_size(arr); i++) {
       position2 = *(GtUword *) gt_array_get(arr, i);
-      /* TODO check once for each kmer, store seedable bool */
-      seqend2 = gt_unique_encseq_seqend(ueinfo->uniqueencseqdb,
-                                        position,
-                                        position2,
-                                        0,
-                                        ueinfo->uniqueencseqdb->nelems - 1);
+      if ((uedb->nelems == 0) ||
+          position2 > uedb->fragmentdb[uedb->nelems - 1].orig_endpos) {
+        seqend2 = position - 1;
+        seed_seqidx = uedb->nelems;
+      }
+      else {
+        seed_seqidx = gt_unique_encseq_uniquedb_binsearch(
+                                            ueinfo->uniqueencseqdb,
+                                            position2,
+                                            0,
+                                            ueinfo->uniqueencseqdb->nelems - 1);
+        seqend2 = uedb->fragmentdb[seed_seqidx].orig_endpos;
+      }
       maxlen2 = seqend2 - position2;
       maxlen1 = MIN(ueinfo->seqstartpos + ueinfo->seqlen - position,
           ueinfo->totallength - position);
       offset = position - position2;
-      gt_logger_log(debug_logger,
-                    "offset: " GT_WU ", maxlen1: " GT_WU ", maxlen2: " GT_WU
-                    ", pos1: " GT_WU ", pos2: " GT_WU,
-                    offset,
-                    maxlen1,
-                    maxlen2,
-                    position,
-                    position2);
       kmerhitinfo->maxalignlength = MIN(maxlen1, maxlen2);
       if (offset < minalignlen || kmerhitinfo->maxalignlength < minalignlen) {
-        gt_logger_log(debug_logger,
-                      "wont evaluate match, matching kmers are too close or "
-                      "remaining sequences are too short");
-        if (maxlen2 < minalignlen) {
+        if (maxlen2 <
+            (minalignlen - ueinfo->windowsize + ueinfo->kmersize - 1)) {
           gt_array_rem(arr, i--);
         }
         continue;
       }
+       /* XXX to much redundancies why do we have all of these variables in 3
+          places? */
       kmerhitinfo->position1 = position;
       kmerhitinfo->position2 = position2;
       gt_unique_encseq_process_kmer_hit(ueinfo, kmerhitinfo);
       matchlen = kmerhitinfo->xdropbest->jvalue;
-      if (matchlen >= ueinfo->arguments->minalignlength_option
+      if (matchlen >= ueinfo->minalignlength
           && kmerhitinfo->xdropbest->score
              > kmerhitinfo->bestAlignment->xdropbest->score) {
         /*store the best alignment*/
         kmerhitinfo->bestAlignment->position1 = position;
         kmerhitinfo->bestAlignment->position2 = kmerhitinfo->position2;
-        kmerhitinfo->bestAlignment->xdropbest->score =
-            kmerhitinfo->xdropbest->score;
+        kmerhitinfo->bestAlignment->seed_seqidx = seed_seqidx;
         kmerhitinfo->bestAlignment->xdropbest->best_d =
-            kmerhitinfo->xdropbest->best_d;
+          kmerhitinfo->xdropbest->best_d;
         kmerhitinfo->bestAlignment->xdropbest->best_k =
-            kmerhitinfo->xdropbest->best_k;
+          kmerhitinfo->xdropbest->best_k;
         kmerhitinfo->bestAlignment->xdropbest->ivalue =
-            kmerhitinfo->xdropbest->ivalue;
+          kmerhitinfo->xdropbest->ivalue;
         kmerhitinfo->bestAlignment->xdropbest->jvalue =
-            kmerhitinfo->xdropbest->jvalue;
+          kmerhitinfo->xdropbest->jvalue;
+        kmerhitinfo->bestAlignment->xdropbest->score =
+          kmerhitinfo->xdropbest->score;
         res_tmp = kmerhitinfo->bestAlignment->res;
         kmerhitinfo->bestAlignment->res = ueinfo->res;
         ueinfo->res = res_tmp;
         foundalignment = true;
       }
-      else {
-        continue;
-      }
     }
     if (!foundalignment) {
       if (ueinfo->nPosSinceInsert ==
-          ueinfo->arguments->minalignlength_option) {
+          ueinfo->minalignlength) {
         gt_unique_encseq_insert_kmer_block(ueinfo);
       }
       else if (ueinfo->nPosSinceInsert >
-               ueinfo->arguments->minalignlength_option) {
+               ueinfo->minalignlength) {
         gt_unique_encseq_add_kmer_to_kmerhash(ueinfo,
                                               ueinfo->kmercodeMain->code,
                                               ueinfo->currentposition);
       }
     }
     else {
+      GtBestAlignment *ba = kmerhitinfo->bestAlignment;
       /*store best alignment in links table and maybe update the unique db*/
-      gt_logger_log(debug_logger, "match against unique db found!");
+      gt_logger_log(logger, "match against unique db found!");
 
       gt_unique_encseq_uniquedb_insert(
                                   ueinfo,
@@ -1221,18 +1237,38 @@ static void gt_unique_encseq_process_kmer_seed(GtUniqueEncseqInfo *ueinfo,
                                   gt_encseq_seqnum(ueinfo->encseq,
                                                    ueinfo->nextUniqueStartpos));
 
-      maxlen = MAX(kmerhitinfo->bestAlignment->xdropbest->ivalue,
-          kmerhitinfo->bestAlignment->xdropbest->jvalue);
-      gt_seqabstract_reinit_encseq(ueinfo->useq, ueinfo->encseq, maxlen, 0);
-      gt_seqabstract_reinit_encseq(ueinfo->vseq, ueinfo->encseq, maxlen, 0);
-      multieops = gt_xdrop_backtrack(kmerhitinfo->bestAlignment->res,
-                                     kmerhitinfo->bestAlignment->xdropbest);
-      /*gt_multieoplist_show(multieops, stdout);*/
+      maxlen = MAX(ba->xdropbest->ivalue,
+          ba->xdropbest->jvalue);
+      if (buflen < maxlen) {
+        buffer = gt_realloc(buffer, (size_t) (maxlen + 1));
+      }
+      gt_log_log("from: " GT_WU " to: " GT_WU,
+                 ba->position2,
+                 ba->position2 +
+                   ba->xdropbest->ivalue - 1);
+      gt_encseq_extract_decoded(ueinfo->encseq, buffer,
+                                ba->position2,
+                                ba->position2 +
+                                  ba->xdropbest->ivalue - 1);
+      gt_log_log("U: %.*s", (int) ba->xdropbest->ivalue, buffer);
+      gt_log_log("from: " GT_WU " to: " GT_WU,
+                 ba->position1,
+                 ba->position1 +
+                   ba->xdropbest->jvalue - 1);
+      gt_encseq_extract_decoded(ueinfo->encseq, buffer,
+                                ba->position1,
+                                ba->position1 +
+                                  ba->xdropbest->jvalue - 1);
+      gt_log_log("V: %.*s", (int) ba->xdropbest->jvalue, buffer);
+      multieops = gt_xdrop_backtrack(ba->res,
+                                     ba->xdropbest);
+      gt_multieoplist_show(multieops, stdout);
       editscript = gt_editscript_new_with_sequences(
                                           ueinfo->encseq,
                                           multieops,
-                                          kmerhitinfo->bestAlignment->position1,
+                                          ba->position1,
                                           GT_READMODE_FORWARD);
+      gt_editscript_show(editscript, ueinfo->alphabet);
       gt_multieoplist_delete(multieops);
       multieops = NULL;
       gt_unique_encseq_alignment_insert(ueinfo, kmerhitinfo, editscript);
@@ -1244,13 +1280,14 @@ static void gt_unique_encseq_process_kmer_seed(GtUniqueEncseqInfo *ueinfo,
                                           kmercode->code,
                                           ueinfo->currentposition);
   }
+  gt_free(buffer);
 }
 
 /*adds the kmer to the kmer-hash of the uniqueDB. inserts an entry into the
  uniqueDB, if the end of a sequence or the end of the init-phase is reached.*/
 static void gt_unique_encseq_init_uniquedb(GtUniqueEncseqInfo *ueinfo)
 {
-  gt_logger_log(ueinfo->debug_logger, "initializing unique DB");
+  gt_logger_log(ueinfo->logger, "initializing unique DB");
   gt_unique_encseq_add_kmer_to_kmerhash(ueinfo,
                                         ueinfo->kmercodeMain->code,
                                         ueinfo->currentposition);
@@ -1298,15 +1335,15 @@ static void gt_unique_encseq_processkmercode(GtUniqueEncseqInfo *ueinfo,
 {
   GtUword position;
   const GtKmercode *kmercode = ueinfo->kmercodeMain;
-  GtLogger * debug_logger = ueinfo->debug_logger;
+  GtLogger * logger = ueinfo->logger;
   unsigned int kmersize = ueinfo->kmersize;
   ueinfo->currentposition =
     position = gt_kmercodeiterator_encseq_get_currentpos(ueinfo->kmercodeitMain)
       - ueinfo->kmersize;
   ueinfo->nPosSinceInsert++;
 
-  if (ueinfo->kmercodeMain->definedspecialposition) {
-    gt_logger_log(ueinfo->debug_logger,
+  if (kmercode->definedspecialposition) {
+    gt_logger_log(ueinfo->logger,
                   "special found at position " GT_WU,
                   position);
     gt_unique_encseq_process_special_kmer(ueinfo);
@@ -1319,8 +1356,8 @@ static void gt_unique_encseq_processkmercode(GtUniqueEncseqInfo *ueinfo,
       gt_unique_encseq_init_uniquedb(ueinfo);
     }
     else if ((ueinfo->maxlen <
-        ueinfo->arguments->minalignlength_option)) {
-      gt_logger_log(debug_logger,
+        ueinfo->minalignlength)) {
+      gt_logger_log(logger,
                     "wont proceed matching, remaining sequence is "
                     "shorter than windowsize (or min alignment length)");
       if (position == ueinfo->seqstartpos + ueinfo->seqlen - kmersize) {
@@ -1372,7 +1409,7 @@ static void gt_unique_encseq_kmerhitinfo_delete(GtKmerhitInfo *kmerhitinfo)
 }
 
 /*function to iterate over all kmers of an encseq*/
-void getencseqkmers_only_regular_kmers2(GtUniqueEncseqInfo *ueinfo)
+void gt_unique_encseq_process_all_kmers(GtUniqueEncseqInfo *ueinfo)
 {
   GtKmerhitInfo *kmerhitinfo = gt_unique_encseq_kmerhitinfo_new(ueinfo);
 

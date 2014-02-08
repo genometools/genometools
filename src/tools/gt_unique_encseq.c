@@ -98,7 +98,7 @@ static GtOptionParser* gt_unique_encseq_option_parser_new(void *tool_arguments)
   gt_option_parser_add_option(op, nhits);
 
   /* -nkmers */
-  nkmers = gt_option_new_ulong_min("nkmers",
+  nkmers = gt_option_new_uword_min("nkmers",
                                  "maximal number of positions stored per kmer",
                                  &arguments->nkmers_option,
                                  400,
@@ -106,7 +106,7 @@ static GtOptionParser* gt_unique_encseq_option_parser_new(void *tool_arguments)
   gt_option_parser_add_option(op, nkmers);
 
   /* -alignlength */
-  alignlength = gt_option_new_ulong(
+  alignlength = gt_option_new_uword(
       "alignlength",
       "required minimal length of an xdrop-alignment",
       &arguments->minalignlength_option,
@@ -146,14 +146,14 @@ static GtOptionParser* gt_unique_encseq_option_parser_new(void *tool_arguments)
   gt_option_parser_add_option(op, del);
 
   /* -xdrop */
-  xdrop = gt_option_new_long("xdrop",
+  xdrop = gt_option_new_word("xdrop",
                              "xdrop score for extension-alignment",
                              &arguments->xdrop_option,
                              3);
   gt_option_parser_add_option(op, xdrop);
 
   /* -uniquedbinitsize */
-  udbsize = gt_option_new_ulong("udbsize",
+  udbsize = gt_option_new_uword("udbsize",
                                 "length of inital unique database",
                                 &arguments->udbsize_option,
                                 5000);
@@ -162,7 +162,7 @@ static GtOptionParser* gt_unique_encseq_option_parser_new(void *tool_arguments)
   return op;
 }
 
-static int gt_unique_encseq_arguments_check(GT_UNUSED int rest_argc,
+static int gt_unique_encseq_arguments_check(int rest_argc,
                                             void *tool_arguments,
                                             GT_UNUSED GtError *err)
 {
@@ -177,29 +177,34 @@ static int gt_unique_encseq_arguments_check(GT_UNUSED int rest_argc,
 
   if (!had_err
       && arguments->udbsize_option < arguments->minalignlength_option) {
-    gt_error_set(err, "udbsize must be at least minalignlength!\n");
+    gt_error_set(err, "udbsize must be at least minalignlength!");
     had_err = -1;
   }
 
   if (!had_err
       && arguments->windowsize_option < (2 * arguments->kmersize_option)) {
-    gt_error_set(err, "windowsize must be at least twice kmersize!\n");
+    gt_error_set(err, "windowsize must be at least twice kmersize!");
     had_err = -1;
   }
 
   if (!had_err
       && arguments->minalignlength_option < arguments->windowsize_option) {
-    gt_error_set(err, "minalignlength must be at least windowsize!\n");
+    gt_error_set(err, "minalignlength must be at least windowsize!");
     had_err = -1;
   }
 
   if (!had_err && modKmersPerWindow != 0) {
-    gt_error_set(err, "windowsize modulo kmersize must be 0!\n");
+    gt_error_set(err, "windowsize modulo kmersize must be 0!");
     had_err = -1;
   }
 
   if (!had_err && arguments->nhits_option > maxKmersPerWindow) {
-    gt_error_set(err, "nhits must not be greater than windowsize/kmersize!\n");
+    gt_error_set(err, "nhits must not be greater than windowsize/kmersize!");
+    had_err = -1;
+  }
+
+  if (!had_err && rest_argc != 1) {
+    gt_error_set(err, "please specify exactly one input data structure!");
     had_err = -1;
   }
 
@@ -209,15 +214,13 @@ static int gt_unique_encseq_arguments_check(GT_UNUSED int rest_argc,
 static GtUniqueEncseqInfo *
 gt_unique_encseq_kmerinfo_new(const char *inputfile,
                               GtUniqueEncseqArguments *arguments,
-                              GtLogger *debug_logger,
+                              GtLogger *logger,
                               GT_UNUSED GtError *err)
 {
   int had_err = 0;
   GtEncseq *encseq;
   GtEncseqLoader *encseq_loader;
-  GtUniqueEncseqInfo *ueinfo = gt_malloc(sizeof (GtUniqueEncseqInfo));
-  GtHashmap *hashmap;
-  unsigned int kmersize;
+  GtUniqueEncseqInfo *ueinfo = gt_malloc(sizeof(GtUniqueEncseqInfo));
 
   encseq_loader = gt_encseq_loader_new();
   encseq = gt_encseq_loader_load(encseq_loader, inputfile, err);
@@ -225,52 +228,53 @@ gt_unique_encseq_kmerinfo_new(const char *inputfile,
     had_err = -1;
 
   if (!had_err) {
-    kmersize = arguments->kmersize_option;
-    hashmap = gt_hashmap_new(GT_HASH_DIRECT, NULL, (GtFree) gt_array_delete);
-    ueinfo->encseq = encseq;
-    ueinfo->kmersize = kmersize;
-    ueinfo->alphabet = gt_encseq_alphabet(encseq);
-    ueinfo->nSequences = gt_encseq_num_of_sequences(encseq);
-    ueinfo->numofchars = gt_alphabet_num_of_chars(ueinfo->alphabet);
-    ueinfo->characters = gt_alphabet_characters(ueinfo->alphabet);
-    ueinfo->seqnum = 0;
-    ueinfo->seqstartpos = 0;
-    ueinfo->seqlen = gt_encseq_seqlength(encseq, ueinfo->seqnum);
-    ueinfo->totallength = gt_encseq_total_length(encseq);
-    ueinfo->kmercodeitMain = gt_kmercodeiterator_encseq_new(encseq,
-                                                            GT_READMODE_FORWARD,
-                                                            kmersize,
-                                                            0);
-    ueinfo->kmercodeitAdd = gt_kmercodeiterator_encseq_new(encseq,
-                                                            GT_READMODE_FORWARD,
-                                                            kmersize,
-                                                            0);
-    ueinfo->maxlen = 0;
-    ueinfo->hashmap = hashmap;
-    ueinfo->debug_logger = debug_logger;
-    ueinfo->kmercount = 0;
-    ueinfo->kmerhitcount = 0;
-    ueinfo->maxkmerhits = arguments->windowsize_option / kmersize;
-    ueinfo->minkmerhits = MIN(arguments->nhits_option,
-        arguments->windowsize_option / kmersize);
+    unsigned int kmersize = arguments->kmersize_option;
     ueinfo->alignmentcount = 0;
-    ueinfo->arguments = arguments;
-    ueinfo->currentposition = 0;
-    ueinfo->arbitscores = gt_malloc(sizeof (GtXdropArbitraryscores));
+    ueinfo->alphabet = gt_encseq_alphabet(encseq);
+    ueinfo->arbitscores = gt_malloc(sizeof(GtXdropArbitraryscores));
+    ueinfo->arbitscores->del = arguments->arbitscores_del_option;
+    ueinfo->arbitscores->ins = arguments->arbitscores_ins_option;
     ueinfo->arbitscores->mat = arguments->arbitscores_mat_option;
     ueinfo->arbitscores->mis = arguments->arbitscores_mis_option;
-    ueinfo->arbitscores->ins = arguments->arbitscores_ins_option;
-    ueinfo->arbitscores->del = arguments->arbitscores_del_option;
+    ueinfo->characters = gt_alphabet_characters(ueinfo->alphabet);
+    ueinfo->currentposition = 0;
+    ueinfo->encseq = encseq;
+    ueinfo->hashmap = gt_hashmap_new(GT_HASH_DIRECT, NULL, (GtFree)
+                                     gt_array_delete);
+    ueinfo->indexname = gt_str_ref(arguments->indexname_option);
+    ueinfo->initKmerCounter = 0;
+    ueinfo->initUniqueDBsize = arguments->udbsize_option;
+    ueinfo->kmercodeitAdd = gt_kmercodeiterator_encseq_new(encseq,
+                                                           GT_READMODE_FORWARD,
+                                                           kmersize, 0);
+    ueinfo->kmercodeitMain = gt_kmercodeiterator_encseq_new(encseq,
+                                                            GT_READMODE_FORWARD,
+                                                            kmersize, 0);
+    ueinfo->kmercount = 0;
+    ueinfo->kmerhitcount = 0;
+    ueinfo->kmersize = kmersize;
+    ueinfo->logger = logger;
+    ueinfo->maxkmerhits = arguments->windowsize_option / kmersize;
+    ueinfo->maxlen = 0;
+    ueinfo->minalignlength = arguments->minalignlength_option;
+    ueinfo->minkmerhits = MIN(arguments->nhits_option,
+                              arguments->windowsize_option / kmersize);
+    ueinfo->nkmers = arguments->nkmers_option;
+    ueinfo->nPosSinceInsert = 0;
+    ueinfo->nSequences = gt_encseq_num_of_sequences(encseq);
+    ueinfo->nextUniqueStartpos = 0;
+    ueinfo->numofchars = gt_alphabet_num_of_chars(ueinfo->alphabet);
+    ueinfo->res = gt_xdrop_resources_new(ueinfo->arbitscores);
+    ueinfo->seqlen = gt_encseq_seqlength(encseq, 0);
+    ueinfo->seqnum = 0;
+    ueinfo->seqstartpos = 0;
+    ueinfo->totallength = gt_encseq_total_length(encseq);
+    ueinfo->unique_cumulen = 0;
+    ueinfo->uniqueencseqdb = gt_unique_encseq_new_db(encseq);
     ueinfo->useq = gt_seqabstract_new_empty();
     ueinfo->vseq = gt_seqabstract_new_empty();
-    ueinfo->res = gt_xdrop_resources_new(ueinfo->arbitscores);
+    ueinfo->windowsize = arguments->windowsize_option;
     ueinfo->xdropbelowscore = arguments->xdrop_option;
-    ueinfo->nextUniqueStartpos = 0;
-    ueinfo->initUniqueDBsize = arguments->udbsize_option;
-    ueinfo->initKmerCounter = 0;
-    ueinfo->uniqueencseqdb = gt_unique_encseq_new_db(encseq);
-    ueinfo->unique_cumulen = 0;
-    ueinfo->nPosSinceInsert = 0;
 
     gt_assert(ueinfo->initUniqueDBsize > ueinfo->kmersize);
   }
@@ -286,15 +290,16 @@ gt_unique_encseq_kmerinfo_new(const char *inputfile,
 void gt_unique_encseq_kmerinfo_delete(GtUniqueEncseqInfo *ueinfo)
 {
   if (ueinfo != NULL ) {
-    gt_kmercodeiterator_delete(ueinfo->kmercodeitMain);
-    gt_kmercodeiterator_delete(ueinfo->kmercodeitAdd);
-    gt_free(ueinfo->arbitscores);
     gt_encseq_delete((GtEncseq *) ueinfo->encseq);
+    gt_free(ueinfo->arbitscores);
     gt_hashmap_delete(ueinfo->hashmap);
+    gt_kmercodeiterator_delete(ueinfo->kmercodeitAdd);
+    gt_kmercodeiterator_delete(ueinfo->kmercodeitMain);
+    gt_str_delete(ueinfo->indexname);
     gt_seqabstract_delete(ueinfo->useq);
     gt_seqabstract_delete(ueinfo->vseq);
-    gt_xdrop_resources_delete(ueinfo->res);
     gt_unique_encseq_delete_db(ueinfo->uniqueencseqdb);
+    gt_xdrop_resources_delete(ueinfo->res);
     gt_free(ueinfo);
   }
   return;
@@ -308,13 +313,13 @@ static int gt_unique_encseq_compress_encseq(GtUniqueEncseqInfo *ueinfo,
   gt_error_check(err);
   gt_assert(ueinfo);
 
-  getencseqkmers_only_regular_kmers2(ueinfo);
+  gt_unique_encseq_process_all_kmers(ueinfo);
 
   had_err =
       gt_unique_encseq_encseq2uniqueencseq(
           ueinfo->uniqueencseqdb,
           ueinfo->encseq,
-          gt_str_get(ueinfo->arguments->indexname_option),
+          gt_str_get(ueinfo->indexname),
           err);
   return (had_err);
 }
@@ -327,21 +332,20 @@ static int gt_unique_encseq_runner(GT_UNUSED int argc,
 {
   GtUniqueEncseqInfo *ueinfo;
   GtUniqueEncseqArguments *arguments = tool_arguments;
-  GtLogger *debug_logger;
+  GtLogger *logger;
   int had_err = 0;
 
-  gt_assert(parsed_args == argc - 1);
   gt_error_check(err);
   gt_assert(arguments);
 
-  debug_logger = gt_logger_new(arguments->debug_logger_option,
+  logger = gt_logger_new(arguments->debug_logger_option,
                                GT_LOGGER_DEFLT_PREFIX,
                                stdout);
-  gt_logger_log(debug_logger, "DEBUG OUTPUT ACTIVATED");
+  gt_logger_log(logger, "DEBUG OUTPUT ACTIVATED");
 
   ueinfo = gt_unique_encseq_kmerinfo_new(argv[parsed_args],
                                          arguments,
-                                         debug_logger,
+                                         logger,
                                          err);
 
   if (ueinfo != NULL ) {
@@ -352,11 +356,11 @@ static int gt_unique_encseq_runner(GT_UNUSED int argc,
   }
   if (!had_err) {
     had_err = gt_unique_encseq_check_db(ueinfo->uniqueencseqdb,
-                                        ueinfo->debug_logger,
+                                        ueinfo->logger,
                                         err);
   }
 
-  gt_logger_delete(debug_logger);
+  gt_logger_delete(logger);
   gt_unique_encseq_kmerinfo_delete(ueinfo);
   return had_err;
 }

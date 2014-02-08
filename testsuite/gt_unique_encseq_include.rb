@@ -14,14 +14,14 @@ Test do
   files.each do |file|
     run_test "#{$bin}gt encseq encode -indexname encseq_encode_test " +
              "#{file}"
-    run_test "#{$bin}gt unique_encseq -indexname unique_encseq_test " +
+    run_test "#{$bin}gt dev unique_encseq -indexname unique_encseq_test " +
              "-kmersize 4 -udbsize 10 -windowsize 8 -nhits 2 " +
              "-alignlength 10 encseq_encode_test"
     run_test "#{$bin}gt encseq decode -output fasta " +
              "encseq_encode_test > encseq_test_decode.fas"
-    run_test "#{$bin}gt unique_encseq_extract -all " +
+    run_test "#{$bin}gt dev unique_encseq_extract -all " +
              "unique_encseq_test > unique_encseq_test_decode.fas"
-    run_test "#{$bin}gt unique_encseq_extract -dbstats -dbstats_fine " +
+    run_test "#{$bin}gt dev unique_encseq_extract -dbstats -dbstats_fine " +
              "unique_encseq_test > unique_encseq_test.stats"
     run "diff encseq_test_decode.fas unique_encseq_test_decode.fas"
   end
@@ -33,14 +33,14 @@ Test do
   files.each_with_index do |file, i|
     run_test "#{$bin}gt encseq encode -indexname encseq_encode_test " +
              "#{file}"
-    run_test "#{$bin}gt unique_encseq -indexname unique_encseq_test " +
+    run_test "#{$bin}gt dev unique_encseq -indexname unique_encseq_test " +
              "-kmersize 4 -udbsize 10 -windowsize 8 -nhits 2 " +
              "-alignlength 10 encseq_encode_test"
     run_test "#{$bin}gt encseq decode -output fasta " +
              "-seqrange #{seqranges[i][0]} #{seqranges[i][1]} " +
              "encseq_encode_test > " +
              "encseq_test_decode_#{seqranges[i][0]}_#{seqranges[i][1]}.fas"
-    run_test "#{$bin}gt unique_encseq_extract " +
+    run_test "#{$bin}gt dev unique_encseq_extract " +
              "-seqrange #{seqranges[i][0]} #{seqranges[i][1]} " +
              "unique_encseq_test > " +
              "unique_encseq_test_decode_" +
@@ -56,14 +56,14 @@ Test do
   files.each_with_index do |file, i|
     run_test "#{$bin}gt encseq encode -indexname encseq_encode_test " +
              "#{file}"
-    run_test "#{$bin}gt unique_encseq -indexname unique_encseq_test " +
+    run_test "#{$bin}gt dev unique_encseq -indexname unique_encseq_test " +
              "-kmersize 4 -udbsize 10 -windowsize 8 -nhits 2 " +
              "-alignlength 10 encseq_encode_test"
     run_test "#{$bin}gt encseq decode -output concat " +
              "-range #{posranges[i][0]} #{posranges[i][1]} " +
              "encseq_encode_test > " +
              "encseq_test_decode_#{posranges[i][0]}_#{posranges[i][1]}.fas"
-    run_test "#{$bin}gt unique_encseq_extract " +
+    run_test "#{$bin}gt dev unique_encseq_extract " +
              "-range #{posranges[i][0]} #{posranges[i][1]} " +
              "unique_encseq_test > " +
              "unique_encseq_test_decode_" +

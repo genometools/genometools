@@ -182,14 +182,12 @@ static void evalentryforward(const GtSeqabstract *useq,
     if (ftres->ulen != 0 && ftres->vlen != 0 &&
         t < ftres->ulen && t + k < ftres->vlen)
     {
-      GtUword lcp, minlen
-        = (GtUword) MIN(ftres->ulen - t,ftres->vlen - (t + k));
+      GtUword lcp;
       lcp = gt_seqabstract_lcp(true,
                                useq,
                                vseq,
                                (GtUword) t,
-                               (GtUword) (t + k),
-                               minlen);
+                               (GtUword) (t + k));
       t += lcp;
     }
     if (t > ftres->ulen || t + k > ftres->vlen)
@@ -268,12 +266,10 @@ static void firstfrontforward(const GtSeqabstract *useq,
   } else
   {
     GtUword lcp = gt_seqabstract_lcp(true,
-                                           useq,
-                                           vseq,
-                                           0,
-                                           0,
-                                           (GtUword)
-                                           MIN(ftres->ulen,ftres->vlen));
+                                     useq,
+                                     vseq,
+                                     0,
+                                     0);
     GT_FRONT_STORE(ftres,GT_FRONT_ROWVALUE(&ftres->frontspace[0]),(GtWord) lcp);
   }
 #ifdef SKDEBUG

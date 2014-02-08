@@ -36,6 +36,12 @@ typedef struct
 /* This is the type for the xdrop scores. */
 typedef GtWord GtXdropscore;
 
+/* stores the results of an xdrop-run, <ivalue> and <jvalue> store the length of
+ the prefixes of sequence <useq> and <vseq> that could be matched.
+ <score> is the score of that match, <best_d> is the d-value that lead to that
+ match and <best_k> the index of the diagonal of that match (needed for
+ backtracking). */
+/* TODO: check if best_k is ivalue - jvalue and therefore obsolete */
 typedef struct
 {
   GtUword ivalue, jvalue;
@@ -57,18 +63,18 @@ GtXdropresources* gt_xdrop_resources_new(const GtXdropArbitraryscores *scores);
    and to the left (forward = false),
    respectively. GtXdropbest stores information about the best match
    found. useq is the first sequence position and vseq is the
-   second sequence position. ulen and vlen are the
-   remaining sequence length to align. If an alignment has score smaller than
-   xdropbelowscore, then this alignment is not extended
-   any more.
+   second sequence position.
+   if <forward> is true, <uoffset> and <voffset> are included in the extension,
+   if <forward> is false, they are excluded!
+   ulen and vlen are the remaining sequence length to align.
+   If an alignment has score smaller than xdropbelowscore, then this alignment
+   is not extended any more.
 */
 void              gt_evalxdroparbitscoresextend(bool forward,
                                                 GtXdropbest *xdropbest,
                                                 GtXdropresources *res,
                                                 const GtSeqabstract *useq,
                                                 const GtSeqabstract *vseq,
-                                                GtUword uoffset,
-                                                GtUword voffset,
                                                 GtXdropscore xdropbelowscore);
 
 void              gt_xdrop_resources_delete(GtXdropresources *);

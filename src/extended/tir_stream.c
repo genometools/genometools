@@ -496,22 +496,20 @@ static int gt_tir_searchforTIRs(GtTIRStream *tir_stream,
       if (alilen <= seedptr->pos1 - seqstart1
             && alilen <= seedptr->pos2 - seqstart2)
       {
-        gt_seqabstract_reinit_encseq(sa_useq, encseq, alilen, 0);
-        gt_seqabstract_reinit_encseq(sa_vseq, encseq, alilen, 0);
+        gt_seqabstract_reinit_encseq(sa_useq, encseq, alilen, seedptr->pos1);
+        gt_seqabstract_reinit_encseq(sa_vseq, encseq, alilen, seedptr->pos2);
       } else
       {
         GtUword maxleft = MIN(seedptr->pos1 - seqstart1,
                                     seedptr->pos2 - seqstart2);
-        gt_seqabstract_reinit_encseq(sa_useq, encseq, maxleft, 0);
-        gt_seqabstract_reinit_encseq(sa_vseq, encseq, maxleft, 0);
+        gt_seqabstract_reinit_encseq(sa_useq, encseq, maxleft, seedptr->pos1);
+        gt_seqabstract_reinit_encseq(sa_vseq, encseq, maxleft, seedptr->pos2);
       }
       gt_evalxdroparbitscoresextend(false,
                                     &xdropbest_left,
                                     xdropresources,
                                     sa_useq,
                                     sa_vseq,
-                                    seedptr->pos1,
-                                    seedptr->pos2 + seedptr->offset,
                                    (GtXdropscore) tir_stream->xdrop_belowscore);
     } else
     {
@@ -527,22 +525,24 @@ static int gt_tir_searchforTIRs(GtTIRStream *tir_stream,
       if (alilen <= seqend1 - (seedptr->pos1 + seedptr->len)
             && alilen <= seqend2 - (seedptr->pos2 + seedptr->len))
       {
-        gt_seqabstract_reinit_encseq(sa_useq, encseq, alilen, 0);
-        gt_seqabstract_reinit_encseq(sa_vseq, encseq, alilen, 0);
+        gt_seqabstract_reinit_encseq(sa_useq, encseq, alilen,
+                                     seedptr->pos1 + seedptr->len);
+        gt_seqabstract_reinit_encseq(sa_vseq, encseq, alilen,
+                                     seedptr->pos2 + seedptr->len);
       } else
       {
         GtUword maxright = MIN(seqend1 - (seedptr->pos1 + seedptr->len),
                                      seqend2 - (seedptr->pos2 + seedptr->len));
-        gt_seqabstract_reinit_encseq(sa_useq, encseq, maxright, 0);
-        gt_seqabstract_reinit_encseq(sa_vseq, encseq, maxright, 0);
+        gt_seqabstract_reinit_encseq(sa_useq, encseq, maxright,
+                                     seedptr->pos1 + seedptr->len);
+        gt_seqabstract_reinit_encseq(sa_vseq, encseq, maxright,
+                                     seedptr->pos2 + seedptr->len);
       }
       gt_evalxdroparbitscoresextend(true,
                                     &xdropbest_right,
                                     xdropresources,
                                     sa_useq,
                                     sa_vseq,
-                                    seedptr->pos1 + seedptr->len,
-                                    seedptr->pos2 + seedptr->len,
                                    (GtXdropscore) tir_stream->xdrop_belowscore);
     } else
     {

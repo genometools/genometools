@@ -138,16 +138,14 @@ static int gt_simplexdropselfmatchoutput(void *info,
   {
     gt_assert(pos1 >= dbseqstartpos && pos2 >= queryseqstartpos);
     gt_seqabstract_reinit_encseq(xdropmatchinfo->useq,encseq,
-                                 pos1 - dbseqstartpos,0);
+                                 pos1 - dbseqstartpos, pos1);
     gt_seqabstract_reinit_encseq(xdropmatchinfo->vseq,encseq,
-                                 pos2 - queryseqstartpos,0);
+                                 pos2 - queryseqstartpos, pos2);
     gt_evalxdroparbitscoresextend(false,
                                   &xdropmatchinfo->best_left,
                                   xdropmatchinfo->res,
                                   xdropmatchinfo->useq,
                                   xdropmatchinfo->vseq,
-                                  pos1,
-                                  pos2,
                                   xdropmatchinfo->belowscore);
   } else
   {
@@ -162,16 +160,16 @@ static int gt_simplexdropselfmatchoutput(void *info,
 
     gt_assert(seqend1 >= pos1 + len && seqend2 >= pos2 + len);
     gt_seqabstract_reinit_encseq(xdropmatchinfo->useq,
-                                 encseq,seqend1 - (pos1 + len),0);
+                                 encseq,seqend1 - (pos1 + len),
+                                 pos1 + len);
     gt_seqabstract_reinit_encseq(xdropmatchinfo->vseq,
-                                 encseq,seqend2 - (pos2 + len),0);
+                                 encseq,seqend2 - (pos2 + len),
+                                 pos2 + len);
     gt_evalxdroparbitscoresextend(true,
                                   &xdropmatchinfo->best_right,
                                   xdropmatchinfo->res,
                                   xdropmatchinfo->useq,
                                   xdropmatchinfo->vseq,
-                                  pos1 + len,
-                                  pos2 + len,
                                   xdropmatchinfo->belowscore);
   } else
   {
@@ -240,15 +238,15 @@ static int gt_processxdropquerymatches(void *info,
   {
     gt_assert(dbseqstartpos < pos1);
     gt_seqabstract_reinit_encseq(xdropmatchinfo->useq,encseq,
-                                 pos1 - dbseqstartpos,0);
-    gt_seqabstract_reinit_gtuchar(xdropmatchinfo->vseq, query, pos2, 0);
+                                 pos1 - dbseqstartpos,
+                                 pos1);
+    gt_seqabstract_reinit_gtuchar(xdropmatchinfo->vseq, query,
+                                  pos2 + 1, pos2);
     gt_evalxdroparbitscoresextend(false,
                                   &xdropmatchinfo->best_left,
                                   xdropmatchinfo->res,
                                   xdropmatchinfo->useq,
                                   xdropmatchinfo->vseq,
-                                  pos1,
-                                  pos2,
                                   xdropmatchinfo->belowscore);
   } else
   {
@@ -258,18 +256,17 @@ static int gt_processxdropquerymatches(void *info,
   }
   if (pos1 + len < dbtotallength && pos2 + len < query_totallength)
   {
-    gt_seqabstract_reinit_encseq(xdropmatchinfo->useq,
-                                 encseq,dbseqstartpos + dbseqlength -
-                                        (pos1 + len),0);
-    gt_seqabstract_reinit_gtuchar(xdropmatchinfo->vseq,
-                                  query,query_totallength - (pos2 + len), 0);
+    gt_seqabstract_reinit_encseq(xdropmatchinfo->useq, encseq,
+                                 dbseqstartpos + dbseqlength - (pos1 + len),
+                                 pos1 + len);
+    gt_seqabstract_reinit_gtuchar(xdropmatchinfo->vseq, query,
+                                  query_totallength - (pos2 + len),
+                                  pos2 + len);
     gt_evalxdroparbitscoresextend(true,
                                   &xdropmatchinfo->best_right,
                                   xdropmatchinfo->res,
                                   xdropmatchinfo->useq,
                                   xdropmatchinfo->vseq,
-                                  pos1 + len,
-                                  pos2 + len,
                                   xdropmatchinfo->belowscore);
   } else
   {
