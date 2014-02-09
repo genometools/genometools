@@ -693,8 +693,8 @@ meops(reverse) MIMDMmMmmMDDMIIMmMMMIMMDMmMM
   for (i = 0; !had_err && i <= max; ++i) {
     gt_editscript_space_add_next(es, &fill_pos, (GtBitsequence) i);
     ist = gt_editscript_space_get_next(es, &get_pos);
-    gt_log_log("soll: " GT_WU, i);
-    gt_log_log(" ist: " GT_WU, ist);
+    gt_log_log("expected: " GT_WU, i);
+    gt_log_log(" reality: " GT_WU, (GtUword) ist);
     gt_ensure(i == (GtUword) ist);
   }
   if (!had_err) {
