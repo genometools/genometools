@@ -1643,25 +1643,26 @@ void gt_sortallsuffixesfromstart(GtSuffixsortspace *suffixsortspace,
 }
 
 #ifdef GT_THREADS_ENABLED
+#ifdef GT_THREADS_PARTITION
 typedef struct
 {
   unsigned int numofchars,
                prefixlength;
   const GtBcktab *bcktab;
 
-  GtSuffixsortspace *suffixsortspace;
   GtCodetype mincode,
              maxcode;
   GtUword totalwidth;
   GtBentsedgresources *bsr;
   unsigned int thread_num;
   GtThread *thread;
-} GtBentsedge_thread_info;
+} GtBentsedg_partition_thread_info;
 
-static void *gt_bentsedg_thread_caller(void *data)
+static void *gt_bentsedg_partition_thread_caller(void *data)
 {
   GtCodetype code;
-  GtBentsedge_thread_info *thinfo = (GtBentsedge_thread_info *) data;
+  GtBentsedg_partition_thread_info *thinfo
+    = (GtBentsedg_partition_thread_info *) data;
   unsigned int rightchar;
 
   rightchar = (unsigned int) (thinfo->mincode % thinfo->numofchars);
@@ -1684,7 +1685,7 @@ static void *gt_bentsedg_thread_caller(void *data)
   return NULL;
 }
 
-void gt_threaded_sortallbuckets(GtSuffixsortspace *suffixsortspace,
+void gt_threaded_partition_sortallbuckets(GtSuffixsortspace *suffixsortspace,
                        const GtSuftabparts *partition_for_threads,
                        const GtEncseq *encseq,
                        GtReadmode readmode,
@@ -1699,7 +1700,7 @@ void gt_threaded_sortallbuckets(GtSuffixsortspace *suffixsortspace,
 {
   unsigned int tp, thread_parts;
   bool haserr = false;
-  GtBentsedge_thread_info *th_tab;
+  GtBentsedg_partition_thread_info *th_tab;
   GtSuffixsortspace **sssp_tab;
 
   gt_assert(partition_for_threads != NULL);
@@ -1718,14 +1719,12 @@ void gt_threaded_sortallbuckets(GtSuffixsortspace *suffixsortspace,
     th_tab[tp].totalwidth = gt_suftabparts_sumofwidth(tp,partition_for_threads);
     if (tp == 0)
     {
-      th_tab[tp].suffixsortspace = suffixsortspace;
+      sssp_tab[tp] = suffixsortspace;
     } else
     {
-      th_tab[tp].suffixsortspace
-        = gt_suffixsortspace_clone(suffixsortspace,tp,logger);
+      sssp_tab[tp] = gt_suffixsortspace_clone(suffixsortspace,tp,logger);
     }
-    sssp_tab[tp] = th_tab[tp].suffixsortspace;
-    th_tab[tp].bsr = bentsedgresources_new(th_tab[tp].suffixsortspace,
+    th_tab[tp].bsr = bentsedgresources_new(sssp_tab[tp],
                                            encseq,
                                            readmode,
                                            prefixlength,
@@ -1738,7 +1737,7 @@ void gt_threaded_sortallbuckets(GtSuffixsortspace *suffixsortspace,
     th_tab[tp].bsr->processunsortedsuffixrangeinfo
       = processunsortedsuffixrangeinfo;
     th_tab[tp].thread
-      = gt_thread_new (gt_bentsedg_thread_caller,th_tab + tp,NULL);
+      = gt_thread_new (gt_bentsedg_partition_thread_caller,th_tab + tp,NULL);
     if (th_tab[tp].thread == NULL)
     {
       haserr = true;
@@ -1761,4 +1760,306 @@ void gt_threaded_sortallbuckets(GtSuffixsortspace *suffixsortspace,
   gt_free(th_tab);
   gt_assert(!haserr);
 }
+#else
+
+typedef struct
+{
+  GtUword totalwidth, bucketnumber;
+  const GtBcktab *bcktab;
+  GtCodetype code, mincode, maxcode;
+  unsigned int rightchar;
+  GtMutex *mutex;
+} GtBentsedgIterator;
+
+static GtBentsedgIterator *gt_BentsedgIterator_new(GtCodetype mincode,
+                                                   GtCodetype maxcode,
+                                                   GtUword totalwidth,
+                                                   unsigned int numofchars,
+                                                   const GtBcktab *bcktab)
+{
+  GtBentsedgIterator *bentsedg_iterator = gt_malloc(sizeof *bentsedg_iterator);
+
+  bentsedg_iterator->code = mincode;
+  bentsedg_iterator->mincode = mincode;
+  bentsedg_iterator->maxcode = maxcode;
+  bentsedg_iterator->totalwidth = totalwidth;
+  bentsedg_iterator->rightchar = (unsigned int) (mincode % numofchars);
+  bentsedg_iterator->bcktab = bcktab;
+  bentsedg_iterator->bucketnumber = 0;
+  bentsedg_iterator->mutex = gt_mutex_new();
+  return bentsedg_iterator;
+}
+
+static bool gt_BentsedgIterator_next(GtBucketspecification *bucketspec,
+                                     GtBentsedgIterator *bs_it)
+{
+  if (bs_it->code <= bs_it->maxcode)
+  {
+    bs_it->rightchar = gt_bcktab_calcboundsparts(bucketspec,
+                                                 bs_it->bcktab,
+                                                 bs_it->code,
+                                                 bs_it->maxcode,
+                                                 bs_it->totalwidth,
+                                                 bs_it->rightchar);
+    bs_it->code++;
+    return true;
+  } else
+  {
+    return false;
+  }
+}
+static void gt_BentsedgIterator_delete(GtBentsedgIterator *bs_it)
+{
+  if (bs_it != NULL)
+  {
+    gt_assert(bs_it->bucketnumber == bs_it->maxcode - bs_it->mincode + 1);
+    gt_mutex_delete(bs_it->mutex);
+    gt_free(bs_it);
+  }
+}
+
+typedef struct
+{
+  GtUword bucketnumber;
+} GtPriorecord;
+
+typedef struct
+{
+  GtUword capacity, numofelements;
+  GtPriorecord *elements;
+} GtBentsedgePrioqueue;
+
+static GtBentsedgePrioqueue *gt_bs_priority_queue_new(GtUword numofelements)
+{
+  GtBentsedgePrioqueue *pq = gt_malloc(sizeof *pq);
+
+  pq->elements = gt_malloc(sizeof (*pq->elements) * numofelements);
+  pq->capacity = numofelements;
+  pq->numofelements = 0;
+  return pq;
+}
+
+static bool gt_bs_priority_queue_is_empty(const GtBentsedgePrioqueue *pq)
+{
+  gt_assert(pq != NULL);
+  return pq->numofelements == 0 ? true : false;
+}
+
+static void gt_bs_priority_queue_add(GtBentsedgePrioqueue *pq,
+                                     GtPriorecord priorecord)
+{
+  GtPriorecord *ptr;
+
+  gt_assert(pq != NULL);
+  if (pq->numofelements >= pq->capacity)
+  {
+    pq->capacity *= 2;
+    pq->elements = gt_realloc(pq->elements,sizeof *pq->elements * pq->capacity);
+  }
+  /* store elements in reverse order, i.e.\ with the minimum element
+     at the last index; shift elements to the right until an element larger
+     or equal than the key is found. */
+  for (ptr = pq->elements + pq->numofelements;
+       ptr > pq->elements && (ptr-1)->bucketnumber < priorecord.bucketnumber;
+       ptr--)
+  {
+    *ptr = *(ptr-1);
+  }
+  pq->numofelements++;
+  gt_assert(ptr >= pq->elements && ptr < pq->elements + pq->numofelements);
+  *ptr = priorecord;
+}
+
+static void gt_bs_priority_queue_delete_min(GtBentsedgePrioqueue *pq)
+{
+  gt_assert(pq != NULL && !gt_bs_priority_queue_is_empty(pq));
+  pq->numofelements--;
+}
+
+const GtUword gt_bs_priority_queue_min_bucketnumber(
+                                              const GtBentsedgePrioqueue *pq)
+{
+  gt_assert(pq != NULL && !gt_bs_priority_queue_is_empty(pq));
+  return pq->elements[pq->numofelements-1].bucketnumber;
+}
+
+static void gt_bs_priority_queue_delete(GtBentsedgePrioqueue *pq)
+{
+  if (pq != NULL)
+  {
+    gt_free(pq->elements);
+    gt_free(pq);
+  }
+}
+
+typedef struct
+{
+  GtBentsedgePrioqueue *queue;
+  GtUword nextrequest;
+  GtMutex *mutex;
+} GtBentsedgSynchronizer;
+
+static GtBentsedgSynchronizer *gt_bendsedgSynchronizer_new(void)
+{
+  GtBentsedgSynchronizer *bs_sync = gt_malloc(sizeof *bs_sync);
+
+  bs_sync->queue = gt_bs_priority_queue_new(gt_jobs);
+  bs_sync->nextrequest = 0;
+  bs_sync->mutex = gt_mutex_new();
+  return bs_sync;
+}
+
+static void gt_bendsedgSynchronizer_process(GtBentsedgSynchronizer *bs_sync,
+                                            GtUword bucketnumber)
+{
+  gt_assert(bs_sync != NULL);
+  if (bs_sync->nextrequest == bucketnumber)
+  {
+    bs_sync->nextrequest++;
+    while (!gt_bs_priority_queue_is_empty(bs_sync->queue) &&
+           gt_bs_priority_queue_min_bucketnumber(bs_sync->queue) ==
+           bs_sync->nextrequest)
+    {
+      gt_bs_priority_queue_delete_min(bs_sync->queue);
+      bs_sync->nextrequest++;
+    }
+  } else
+  {
+    GtPriorecord priorecord;
+    gt_assert(bs_sync->nextrequest < bucketnumber);
+    priorecord.bucketnumber = bucketnumber;
+    gt_bs_priority_queue_add(bs_sync->queue,priorecord);
+  }
+}
+
+static void gt_bendsedgSynchronizer_delete(GtBentsedgSynchronizer *bs_sync)
+{
+  if (bs_sync != NULL)
+  {
+    gt_assert(gt_bs_priority_queue_is_empty(bs_sync->queue));
+    gt_mutex_delete(bs_sync->mutex);
+    gt_bs_priority_queue_delete(bs_sync->queue);
+    gt_free(bs_sync);
+  }
+}
+
+typedef struct
+{
+  GtBentsedgresources *bsr;
+  unsigned int prefixlength, thread_num;
+  GtBentsedgIterator *bs_it; /* shared, _next-function needs a mutex */
+  GtBentsedgSynchronizer *bs_sync; /* shared _process-function needs a mutex */
+  GtThread *thread;
+} GtBentsedg_stream_thread_info;
+
+static void *gt_bentsedg_stream_thread_caller(void *data)
+{
+  GtBentsedg_stream_thread_info *thinfo
+    = (GtBentsedg_stream_thread_info *) data;
+
+  while (true)
+  {
+    GtBucketspecification bucketspec;
+    GtUword bucketnumber;
+
+    gt_mutex_lock(thinfo->bs_it->mutex);
+    if (!gt_BentsedgIterator_next(&bucketspec,thinfo->bs_it))
+    {
+      gt_mutex_unlock(thinfo->bs_it->mutex);
+      break;
+    }
+    bucketnumber = thinfo->bs_it->bucketnumber++;
+    gt_mutex_unlock(thinfo->bs_it->mutex);
+    if (bucketspec.nonspecialsinbucket > 1UL)
+    {
+      gt_sort_bentleysedgewick(thinfo->bsr,bucketspec.left,
+                               bucketspec.nonspecialsinbucket,
+                               (GtUword) thinfo->prefixlength);
+    }
+    gt_mutex_lock(thinfo->bs_sync->mutex);
+    gt_bendsedgSynchronizer_process(thinfo->bs_sync,bucketnumber);
+    gt_mutex_unlock(thinfo->bs_sync->mutex);
+  }
+  return NULL;
+}
+
+void gt_threaded_stream_sortallbuckets(GtSuffixsortspace *suffixsortspace,
+                       const GtEncseq *encseq,
+                       GtReadmode readmode,
+                       const GtBcktab *bcktab,
+                       GtCodetype mincode,
+                       GtCodetype maxcode,
+                       GtUword sumofwidth,
+                       unsigned int numofchars,
+                       unsigned int prefixlength,
+                       unsigned int sortmaxdepth,
+                       const Sfxstrategy *sfxstrategy,
+                       GtProcessunsortedsuffixrange processunsortedsuffixrange,
+                       void *processunsortedsuffixrangeinfo,
+                       GtLogger *logger)
+{
+  GtBentsedgIterator *bs_it;
+  GtBentsedgSynchronizer *bs_sync;
+  unsigned int tp;
+  bool haserr = false;
+  GtBentsedg_stream_thread_info *th_tab;
+  GtSuffixsortspace **sssp_tab;
+
+  gt_assert(gt_jobs > 1U);
+  th_tab = gt_malloc(sizeof *th_tab * gt_jobs);
+  sssp_tab = gt_malloc(sizeof *sssp_tab * gt_jobs);
+  bs_it = gt_BentsedgIterator_new(mincode,maxcode,sumofwidth,numofchars,bcktab);
+  bs_sync = gt_bendsedgSynchronizer_new();
+  for (tp = 0; !haserr && tp < gt_jobs; tp++)
+  {
+    th_tab[tp].thread_num = tp;
+    th_tab[tp].prefixlength = prefixlength;
+    if (tp == 0)
+    {
+      sssp_tab[tp] = suffixsortspace;
+    } else
+    {
+      sssp_tab[tp] = gt_suffixsortspace_clone(suffixsortspace,tp,logger);
+    }
+    th_tab[tp].bsr = bentsedgresources_new(sssp_tab[tp],
+                                           encseq,
+                                           readmode,
+                                           prefixlength,
+                                           bcktab,
+                                           sortmaxdepth,
+                                           sfxstrategy,
+                                           false);
+    th_tab[tp].bsr->processunsortedsuffixrange
+      = processunsortedsuffixrange;
+    th_tab[tp].bsr->processunsortedsuffixrangeinfo
+      = processunsortedsuffixrangeinfo;
+    th_tab[tp].bs_it = bs_it;
+    th_tab[tp].bs_sync = bs_sync;
+    th_tab[tp].thread
+      = gt_thread_new (gt_bentsedg_stream_thread_caller,th_tab + tp,NULL);
+    if (th_tab[tp].thread == NULL)
+    {
+      haserr = true;
+    }
+  }
+  for (tp = 0; tp < gt_jobs; tp++)
+  {
+    if (!haserr)
+    {
+      gt_thread_join(th_tab[tp].thread);
+    }
+    gt_thread_delete(th_tab[tp].thread);
+  }
+  for (tp = 0; tp < gt_jobs; tp++)
+  {
+    bentsedgresources_delete(th_tab[tp].bsr, logger);
+  }
+  gt_suffixsortspace_delete_cloned(sssp_tab,gt_jobs);
+  gt_BentsedgIterator_delete(bs_it);
+  gt_bendsedgSynchronizer_delete(bs_sync);
+  gt_free(sssp_tab);
+  gt_free(th_tab);
+  gt_assert(!haserr);
+}
+#endif
 #endif
