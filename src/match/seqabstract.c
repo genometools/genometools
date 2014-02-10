@@ -69,7 +69,6 @@ void gt_seqabstract_reinit_gtuchar(GtSeqabstract *sa,
                                    GtUword offset)
 {
   gt_assert(sa != NULL);
-  gt_assert(len != 0);
   if (sa->esr != NULL)
   {
     gt_encseq_reader_delete(sa->esr);
@@ -100,7 +99,6 @@ void gt_seqabstract_reinit_encseq(GtSeqabstract *sa,
                                   GtUword offset)
 {
   gt_assert(sa != NULL);
-  gt_assert(len != 0);
   if (sa->esr != NULL)
   {
     if (encseq != sa->seq.encseq)

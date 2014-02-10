@@ -496,14 +496,18 @@ static int gt_tir_searchforTIRs(GtTIRStream *tir_stream,
       if (alilen <= seedptr->pos1 - seqstart1
             && alilen <= seedptr->pos2 - seqstart2)
       {
-        gt_seqabstract_reinit_encseq(sa_useq, encseq, alilen, seedptr->pos1);
-        gt_seqabstract_reinit_encseq(sa_vseq, encseq, alilen, seedptr->pos2);
+        gt_seqabstract_reinit_encseq(sa_useq, encseq, alilen,
+                                     seedptr->pos1 - alilen);
+        gt_seqabstract_reinit_encseq(sa_vseq, encseq, alilen,
+                                     seedptr->pos2 - alilen);
       } else
       {
         GtUword maxleft = MIN(seedptr->pos1 - seqstart1,
                                     seedptr->pos2 - seqstart2);
-        gt_seqabstract_reinit_encseq(sa_useq, encseq, maxleft, seedptr->pos1);
-        gt_seqabstract_reinit_encseq(sa_vseq, encseq, maxleft, seedptr->pos2);
+        gt_seqabstract_reinit_encseq(sa_useq, encseq, maxleft,
+                                     seedptr->pos1 - maxleft);
+        gt_seqabstract_reinit_encseq(sa_vseq, encseq, maxleft,
+                                     seedptr->pos2 - maxleft);
       }
       gt_evalxdroparbitscoresextend(false,
                                     &xdropbest_left,
