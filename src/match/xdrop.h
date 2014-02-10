@@ -59,16 +59,10 @@ GT_DECLAREARRAYSTRUCT(GtXdropscore);
 GtXdropresources* gt_xdrop_resources_new(const GtXdropArbitraryscores *scores);
 
 /*
-   The following functions extend seeds to the right (forward = true)
-   and to the left (forward = false),
-   respectively. GtXdropbest stores information about the best match
-   found. useq is the first sequence position and vseq is the
-   second sequence position.
-   if <forward> is true, <uoffset> and <voffset> are included in the extension,
-   if <forward> is false, they are excluded!
-   ulen and vlen are the remaining sequence length to align.
-   If an alignment has score smaller than xdropbelowscore, then this alignment
-   is not extended any more.
+   The following performs an xdrop extension on <useq> and <vseq>. If forward is
+   true, it starts with the first symbols in those <GtSeqabstract> objects. If
+   forward is false, it will perform the xdrop in reverse order starting with
+   the last symbols in <useq> and <vseq>.
 */
 void              gt_evalxdroparbitscoresextend(bool forward,
                                                 GtXdropbest *xdropbest,
