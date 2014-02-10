@@ -352,15 +352,6 @@ Retrieves all features contained in <code>gfi</code> into <code>results</code>. 
    accordingly.
 </p>
 <hr>
-<a name="GtTrackSelectorFunc"></a>
-
-<code>void  GtTrackSelectorFunc(GtBlock*, GtStr*, void*)</code>
-<p>
-A <code>GtTrackSelectorFunc</code> is a callback function which sets a <code>GtStr</code> to a
-   string to be used as a track identifier for assignment of a <code>GtBlock</code>
-   to a given track.
-</p>
-<hr>
 <a name="GtTrackOrderingFunc"></a>
 
 <code>int  GtTrackOrderingFunc(const char *s1, const char *s2, void *data)</code>
@@ -370,6 +361,15 @@ A function describing the order of tracks based on their track identifier
    should appear before the track with ID <code>s2</code> and a positive value if <code>s1</code>
    should appear after <code>s2</code>. Returning a value of 0 will result in an undefined
    ordering of <code>s1</code> and <code>s2</code>.
+</p>
+<hr>
+<a name="GtTrackSelectorFunc"></a>
+
+<code>void  GtTrackSelectorFunc(GtBlock*, GtStr*, void*)</code>
+<p>
+A <code>GtTrackSelectorFunc</code> is a callback function which sets a <code>GtStr</code> to a
+   string to be used as a track identifier for assignment of a <code>GtBlock</code>
+   to a given track.
 </p>
 <hr>
 <a name="GtAddIntronsStream"></a>
@@ -2040,7 +2040,7 @@ Returns the indexname (as given at loading time) of <code>encseq</code>
 <hr>
 <a name="gt_encseq_total_length"></a>
 
-<code>GtUword      gt_encseq_total_length(const GtEncseq *encseq)</code>
+<code>GtUword            gt_encseq_total_length(const GtEncseq *encseq)</code>
 <p>
 Returns the total number of characters in all sequences of <code>encseq</code>,
    including separators and wildcards.
@@ -2048,7 +2048,7 @@ Returns the total number of characters in all sequences of <code>encseq</code>,
 <hr>
 <a name="gt_encseq_num_of_sequences"></a>
 
-<code>GtUword      gt_encseq_num_of_sequences(const GtEncseq *encseq)</code>
+<code>GtUword            gt_encseq_num_of_sequences(const GtEncseq *encseq)</code>
 <p>
 Returns the total number of sequences contained in <code>encseq</code>.
 </p>
@@ -2106,9 +2106,9 @@ Returns a new <code>GtEncseqReader</code> for <code>encseq</code>, starting from
 <a name="gt_encseq_extract_encoded"></a>
 
 <code>void               gt_encseq_extract_encoded(const GtEncseq *encseq,
-                                              GtUchar *buffer,
-                                              GtUword frompos,
-                                              GtUword topos)</code>
+                                            GtUchar *buffer,
+                                            GtUword frompos,
+                                            GtUword topos)</code>
 <p>
 Returns the encoded representation of the substring from position <code>frompos</code>
    to position <code>topos</code> of <code>encseq</code>. The result is written to the location
@@ -2129,7 +2129,7 @@ Returns the decoded version of the substring from position <code>frompos</code>
 <hr>
 <a name="gt_encseq_seqlength"></a>
 
-<code>GtUword      gt_encseq_seqlength(const GtEncseq *encseq,
+<code>GtUword            gt_encseq_seqlength(const GtEncseq *encseq,
                                       GtUword seqnum)</code>
 <p>
 Returns the length of the <code>seqnum</code>-th sequence in the <code>encseq</code>.
@@ -2138,14 +2138,14 @@ Returns the length of the <code>seqnum</code>-th sequence in the <code>encseq</c
 <hr>
 <a name="gt_encseq_min_seq_length"></a>
 
-<code>GtUword      gt_encseq_min_seq_length(const GtEncseq *encseq)</code>
+<code>GtUword            gt_encseq_min_seq_length(const GtEncseq *encseq)</code>
 <p>
 Returns the length of the shortest sequence in the <code>encseq</code>.
 </p>
 <hr>
 <a name="gt_encseq_max_seq_length"></a>
 
-<code>GtUword      gt_encseq_max_seq_length(const GtEncseq *encseq)</code>
+<code>GtUword            gt_encseq_max_seq_length(const GtEncseq *encseq)</code>
 <p>
 Returns the length of the longest sequence in the <code>encseq</code>.
 </p>
@@ -2173,7 +2173,7 @@ Returns <code>true</code> if <code>encseq</code> has MD5 support.
 <hr>
 <a name="gt_encseq_seqstartpos"></a>
 
-<code>GtUword      gt_encseq_seqstartpos(const GtEncseq *encseq,
+<code>GtUword            gt_encseq_seqstartpos(const GtEncseq *encseq,
                                         GtUword seqnum)</code>
 <p>
 Returns the start position of the <code>seqnum</code>-th sequence in the <code>encseq</code>.
@@ -2182,7 +2182,7 @@ Returns the start position of the <code>seqnum</code>-th sequence in the <code>e
 <hr>
 <a name="gt_encseq_seqnum"></a>
 
-<code>GtUword      gt_encseq_seqnum(const GtEncseq *encseq,
+<code>GtUword            gt_encseq_seqnum(const GtEncseq *encseq,
                                    GtUword position)</code>
 <p>
 Returns the sequence number from the given <code>position</code> for a given
@@ -2212,7 +2212,7 @@ Returns a <code>GtStrArray</code> of the names of the original sequence files
 <hr>
 <a name="gt_encseq_num_of_files"></a>
 
-<code>GtUword      gt_encseq_num_of_files(const GtEncseq *encseq)</code>
+<code>GtUword            gt_encseq_num_of_files(const GtEncseq *encseq)</code>
 <p>
 Returns the number of files contained in <code>encseq</code>.
 </p>
@@ -2228,7 +2228,7 @@ Returns the effective length (sum of sequence lengths and separators
 <hr>
 <a name="gt_encseq_filestartpos"></a>
 
-<code>GtUword      gt_encseq_filestartpos(const GtEncseq *encseq,
+<code>GtUword            gt_encseq_filestartpos(const GtEncseq *encseq,
                                          GtUword filenum)</code>
 <p>
 Returns the start position of the sequences of the  <code>filenum</code>-th file in the
@@ -2237,7 +2237,7 @@ Returns the start position of the sequences of the  <code>filenum</code>-th file
 <hr>
 <a name="gt_encseq_filenum"></a>
 
-<code>GtUword      gt_encseq_filenum(const GtEncseq *encseq,
+<code>GtUword            gt_encseq_filenum(const GtEncseq *encseq,
                                     GtUword position)</code>
 <p>
 Returns the file number from the given <code>position</code> for a given
@@ -2246,7 +2246,7 @@ Returns the file number from the given <code>position</code> for a given
 <hr>
 <a name="gt_encseq_filenum_first_seqnum"></a>
 
-<code>GtUword      gt_encseq_filenum_first_seqnum(const GtEncseq *encseq,
+<code>GtUword            gt_encseq_filenum_first_seqnum(const GtEncseq *encseq,
                                                  GtUword filenum)</code>
 <p>
 Returns the first sequence number of the sequences in file <code>filenum</code> for a
@@ -2287,7 +2287,7 @@ Returns <code>true</code> if <code>encseq</code> contains virtual reverse comple
 <hr>
 <a name="gt_encseq_version"></a>
 
-<code>GtUword      gt_encseq_version(const GtEncseq *encseq)</code>
+<code>GtUword            gt_encseq_version(const GtEncseq *encseq)</code>
 <p>
 Returns the version number of the file representation of <code>encseq</code> if it
    exists, or 0 if it was not mapped from a file.
@@ -2346,7 +2346,8 @@ Disables support for retrieving descriptions from the encoded sequence
 <hr>
 <a name="gt_encseq_builder_enable_multiseq_support"></a>
 
-<code>void              gt_encseq_builder_enable_multiseq_support(GtEncseqBuilder *eb)</code>
+<code>void               gt_encseq_builder_enable_multiseq_support(
+                                                           GtEncseqBuilder *eb)</code>
 <p>
 Enables support for random access to multiple sequences in the encoded
    sequence to be built by <code>eb</code>. Requires additional memory for an index of
@@ -2483,9 +2484,9 @@ Adds a sequence given as a pre-encoded string  <code>str</code> of length <code>
 <hr>
 <a name="gt_encseq_builder_add_multiple_encoded"></a>
 
-<code>void  gt_encseq_builder_add_multiple_encoded(GtEncseqBuilder *eb,
-                                            const GtUchar *str,
-                                            GtUword strlen)</code>
+<code>void               gt_encseq_builder_add_multiple_encoded(GtEncseqBuilder *eb,
+                                                         const GtUchar *str,
+                                                         GtUword strlen)</code>
 <p>
 Adds a sequence given as a pre-encoded string  <code>str</code> of length <code>strlen</code> to
    the encoded sequence to be built by <code>eb</code>. <code>str</code> must be encoded using the
@@ -3239,6 +3240,17 @@ Create a <code>GtExtractFeatureStream*</code> which extracts the corresponding s
 <p>
 Create a new <code>GtFeatureInStream</code> using the given <code>GtFeatureIndex</code> as the
    source of a node stream.
+</p>
+<hr>
+<a name="gt_feature_in_stream_use_orig_ranges"></a>
+
+<code>void  gt_feature_in_stream_use_orig_ranges(GtFeatureInStream *stream)</code>
+<p>
+Instruct <code>stream</code> to deliver GtRegionNode objects whose ranges are
+   specified such as with <code>##sequence-region</code> pragmas, rather than those
+   inferred from the features. Specifically, use
+   <code>gt_feature_index_get_orig_range_for_seqid</code> on the underlying feature
+   index rather than the default <code>gt_feature_index_get_range_for_seqid</code>.
 </p>
 <hr>
 <a name="GtFeatureIndex"></a>
@@ -6546,21 +6558,22 @@ Create a new <code>GtOutputFileInfo</code> object.
 <hr>
 <a name="gt_output_file_info_register_options"></a>
 
-<code>void               gt_output_file_info_register_options(GtOutputFileInfo
-                                                       *output_file_info,
-                                                       GtOptionParser
-                                                       *option_parser,
-                                                       GtFile **outfp)</code>
+<code>void               gt_output_file_info_register_options(
+                                            GtOutputFileInfo *output_file_info,
+                                            GtOptionParser *option_parser,
+                                            GtFile **outfp)</code>
 <p>
 Registers the options `-o', `-gzip', `-bzip2' and `-force' in
    <code>option_parser</code>. Options chosen during option parsing will be stored in
    <code>output_file_info</code> and the output file will be accessible using <code>*outfp</code>.
+   If no option is given, default <code>*outfp</code> will use stdout.
+   Caller retains ownership of <code>*outfp</code>.
 </p>
 <hr>
 <a name="gt_output_file_info_delete"></a>
 
-<code>void               gt_output_file_info_delete(GtOutputFileInfo
-                                             *output_file_info)</code>
+<code>void               gt_output_file_info_delete(
+                                            GtOutputFileInfo *output_file_info)</code>
 <p>
 Deletes <code>output_file_info</code> and frees all associated memory.
 </p>
@@ -6764,7 +6777,7 @@ Unlock the given <code>rwlock</code>.
 <hr>
 <a name="gt_range_compare"></a>
 
-<code>int            gt_range_compare(const GtRange *range_a, const GtRange *range_b)</code>
+<code>int      gt_range_compare(const GtRange *range_a, const GtRange *range_b)</code>
 <p>
 Compare <code>range_a</code> and <code>range_b</code>. Returns 0 if <code>range_a</code> equals <code>range_b</code>, -1
    if <code>range_a</code> starts before <code>range_b</code> or (for equal starts) <code>range_a</code> ends
@@ -6773,9 +6786,9 @@ Compare <code>range_a</code> and <code>range_b</code>. Returns 0 if <code>range_
 <hr>
 <a name="gt_range_compare_with_delta"></a>
 
-<code>int            gt_range_compare_with_delta(const GtRange *range_a,
-                                          const GtRange *range_b,
-                                          GtUword delta)</code>
+<code>int      gt_range_compare_with_delta(const GtRange *range_a,
+                                    const GtRange *range_b,
+                                    GtUword delta)</code>
 <p>
 Compare <code>range_a</code> and <code>range_b</code> with given <code>delta</code>.
    Returns 0 if <code>range_a</code> equals <code>range_b</code> modulo <code>delta</code> (i.e., the start and
@@ -6786,16 +6799,16 @@ Compare <code>range_a</code> and <code>range_b</code> with given <code>delta</co
 <hr>
 <a name="gt_range_overlap"></a>
 
-<code>bool           gt_range_overlap(const GtRange *range_a, const GtRange *range_b)</code>
+<code>bool     gt_range_overlap(const GtRange *range_a, const GtRange *range_b)</code>
 <p>
 Returns <code>true</code> if <code>range_a</code> and <code>range_b</code> overlap, <code>false</code> otherwise.
 </p>
 <hr>
 <a name="gt_range_overlap_delta"></a>
 
-<code>bool           gt_range_overlap_delta(const GtRange *range_a,
-                                     const GtRange *range_b,
-                                     GtUword delta)</code>
+<code>bool     gt_range_overlap_delta(const GtRange *range_a,
+                               const GtRange *range_b,
+                               GtUword delta)</code>
 <p>
 Returns <code>true</code> if <code>range_a</code> and <code>range_b</code> overlap <strong>at least</strong> <code>delta</code> many
    positions, <code>false</code> otherwise.
@@ -6803,28 +6816,28 @@ Returns <code>true</code> if <code>range_a</code> and <code>range_b</code> overl
 <hr>
 <a name="gt_range_contains"></a>
 
-<code>bool           gt_range_contains(const GtRange *range_a, const GtRange *range_b)</code>
+<code>bool     gt_range_contains(const GtRange *range_a, const GtRange *range_b)</code>
 <p>
 Returns <code>true</code> if <code>range_b</code> is contained in <code>range_a</code>, <code>false</code> otherwise.
 </p>
 <hr>
 <a name="gt_range_within"></a>
 
-<code>bool           gt_range_within(const GtRange *range, GtUword point)</code>
+<code>bool     gt_range_within(const GtRange *range, GtUword point)</code>
 <p>
 Returns <code>true</code> if <code>point</code> lies within <code>range</code>, <code>false</code> otherwise.
 </p>
 <hr>
 <a name="gt_range_join"></a>
 
-<code>GtRange        gt_range_join(const GtRange *range_a, const GtRange *range_b)</code>
+<code>GtRange  gt_range_join(const GtRange *range_a, const GtRange *range_b)</code>
 <p>
 Join <code>range_a</code> and <code>range_b</code> and return the result.
 </p>
 <hr>
 <a name="gt_range_offset"></a>
 
-<code>GtRange        gt_range_offset(const GtRange *range, GtWord offset)</code>
+<code>GtRange  gt_range_offset(const GtRange *range, GtWord offset)</code>
 <p>
 Transform start and end of <code>range</code> by <code>offset</code> and return the result.
 </p>
@@ -7218,7 +7231,7 @@ Deletes <code>seqit</code> and frees associated memory.
 <code>GtSeqIterator*  gt_seq_iterator_fastq_new(const GtStrArray *filenametab,
                                          GtError *err)</code>
 <p>
-Create a new <code>GtSeqIteratorQual</code> for all sequence files in <code>filenametab</code>.
+Create a new <code>GtSeqIteratorFastQ</code> for all sequence files in <code>filenametab</code>.
 </p>
 <hr>
 <a name="gt_seq_iterator_fastq_new_colorspace"></a>
@@ -10357,6 +10370,8 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
 
   <a href="#gt_feature_in_stream_new"><code>gt_feature_in_stream_new</code></a><br>
 
+  <a href="#gt_feature_in_stream_use_orig_ranges"><code>gt_feature_in_stream_use_orig_ranges</code></a><br>
+
   <a href="#gt_feature_index_add_feature_node"><code>gt_feature_index_add_feature_node</code></a><br>
 
   <a href="#gt_feature_index_add_gff3file"><code>gt_feature_index_add_gff3file</code></a><br>
@@ -11540,7 +11555,7 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
 <div id="footer">
 Copyright &copy; 2008-2013
 The <i>GenomeTools</i> authors.
-Last update: 2014-01-16
+Last update: 2014-02-10
 </div>
 </div>
 <!-- Piwik -->
