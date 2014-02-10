@@ -340,8 +340,8 @@ void gt_evalxdroparbitscoresextend(bool forward,
                i <= MIN(ulen, vlen + k))) {
             if (ulen > i && vlen > j) {
               GtUword lcp;
-              gt_assert(forward || (ulen - 1 > (GtWord) i &&
-                                    vlen - 1 > (GtWord) j));
+              gt_assert(forward || (ulen - 1 >= (GtWord) i &&
+                                    vlen - 1 >= (GtWord) j));
               lcp = gt_seqabstract_lcp(forward, useq, vseq,
                                        (GtUword) (forward ? i : ulen - i - 1),
                                        (GtUword) (forward ? j : vlen - j - 1));
