@@ -126,9 +126,13 @@ static int compare_genome_node_type(GtGenomeNode *gn_a, GtGenomeNode *gn_b)
   en_a = gt_eof_node_try_cast(gn_a);
   en_b = gt_eof_node_try_cast(gn_b);
 
-  if ((sn_a && !sn_b) || (en_a && !en_b))
+  if (sn_a && !sn_b)
+    return en_b ? -1 : 1;
+  if (!sn_a && sn_b)
+    return en_a ? 1 : -1;
+  if (en_a && !en_b)
     return 1;
-  if ((!sn_a && sn_b) || (!en_a && en_b))
+  if (!en_a && en_b)
     return -1;
 
   return 0;

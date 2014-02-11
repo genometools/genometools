@@ -30,3 +30,10 @@ Test do
   run_test("#{$bin}gt merge #{$testdata}unsorted_gff3_file.txt", :retval => 1)
   grep(last_stderr, "is not sorted")
 end
+
+Name "gt merge with sequence"
+Keywords "gt_merge"
+Test do
+  run_test "#{$bin}gt merge #{$testdata}minimal_fasta.gff3 #{$testdata}two_fasta_seqs.gff3"
+  run "diff #{last_stdout} #{$testdata}merge_with_seq.gff3"
+end
