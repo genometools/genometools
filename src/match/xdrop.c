@@ -18,17 +18,18 @@
 */
 
 #include <string.h>
+
 #include "core/chardef.h"
 #include "core/divmodmul.h"
 #include "core/ensure.h"
+#include "core/log_api.h"
 #include "core/mathsupport.h"
 #include "core/minmax.h"
-#include "core/unused_api.h"
 #include "core/types_api.h"
+#include "core/unused_api.h"
 #include "extended/alignment.h"
 #include "match/seqabstract.h"
-
-#include "xdrop.h"
+#include "match/xdrop.h"
 
 typedef struct
 {
@@ -339,8 +340,8 @@ void gt_evalxdroparbitscoresextend(bool forward,
                i <= MIN(ulen, vlen + k))) {
             if (ulen > i && vlen > j) {
               GtUword lcp;
-              gt_assert(forward || (ulen - 1 > (GtWord) i &&
-                                    vlen - 1 > (GtWord) j));
+              gt_assert(forward || (ulen - 1 >= (GtWord) i &&
+                                    vlen - 1 >= (GtWord) j));
               lcp = gt_seqabstract_lcp(forward, useq, vseq,
                                        (GtUword) (forward ? i : ulen - i - 1),
                                        (GtUword) (forward ? j : vlen - j - 1));
@@ -613,9 +614,21 @@ int gt_xdrop_unit_test(GT_UNUSED GtError *err)
         gt_ensure(eval_scores[s*64+i*8+j] == gt_alignment_eval(alignment));
 
         gt_multieoplist_delete(edit_ops);
+        gt_alignment_delete(alignment);
+        if (i == j) {
+          gt_evalxdroparbitscoresextend(false, &best, resources, useq, vseq,
+                                        dropscore);
+
+          edit_ops = gt_xdrop_backtrack(resources, &best);
+          alignment = gt_alignment_new_with_seqs(strings[i], best.ivalue,
+                                                 strings[j], best.jvalue);
+          gt_alignment_set_multieop_list(alignment, edit_ops);
+          gt_ensure(eval_scores[s*64+i*8+j] == gt_alignment_eval(alignment));
+          gt_multieoplist_delete(edit_ops);
+          gt_alignment_delete(alignment);
+        }
         gt_seqabstract_delete(useq);
         gt_seqabstract_delete(vseq);
-        gt_alignment_delete(alignment);
       }
     }
     gt_xdrop_resources_delete(resources);

@@ -106,12 +106,11 @@ static int gt_simplexdropselfmatchoutput(void *info,
   GtXdropscore score;
   GtUword dbseqnum, dbseqstartpos, dbseqlength, dbstart, dblen,
                 querystart, queryseqnum, querylen, queryseqlength,
-                queryseqstartpos, dbtotallength;
+                queryseqstartpos;
   const GtEncseq *encseq;
 
   gt_assert(genericencseq != NULL && genericencseq->hasencseq);
   encseq = genericencseq->seqptr.encseq;
-  dbtotallength = gt_encseq_total_length(encseq);
   if (pos1 > pos2)
   {
     GtUword tmp = pos1;
@@ -134,13 +133,14 @@ static int gt_simplexdropselfmatchoutput(void *info,
     queryseqstartpos = gt_encseq_seqstartpos(encseq,queryseqnum);
     queryseqlength = gt_encseq_seqlength(encseq,queryseqnum);
   }
-  if (pos1 > 0 && pos2 > 0)
+  if (pos1 > dbseqstartpos && pos2 > queryseqstartpos)
   {
-    gt_assert(pos1 >= dbseqstartpos && pos2 >= queryseqstartpos);
     gt_seqabstract_reinit_encseq(xdropmatchinfo->useq,encseq,
-                                 pos1 - dbseqstartpos, pos1);
+                                 pos1 - dbseqstartpos,
+                                 dbseqstartpos);
     gt_seqabstract_reinit_encseq(xdropmatchinfo->vseq,encseq,
-                                 pos2 - queryseqstartpos, pos2);
+                                 pos2 - queryseqstartpos,
+                                 queryseqstartpos);
     gt_evalxdroparbitscoresextend(false,
                                   &xdropmatchinfo->best_left,
                                   xdropmatchinfo->res,
@@ -153,12 +153,12 @@ static int gt_simplexdropselfmatchoutput(void *info,
     xdropmatchinfo->best_left.jvalue = 0;
     xdropmatchinfo->best_left.score = 0;
   }
-  if (pos1 + len < dbtotallength && pos2 + len < dbtotallength)
+  if (pos1 + len < dbseqstartpos + dbseqlength &&
+      pos2 + len < queryseqstartpos + queryseqlength)
   {
     const GtUword seqend1 = dbseqstartpos + dbseqlength;
     const GtUword seqend2 = queryseqstartpos + queryseqlength;
 
-    gt_assert(seqend1 >= pos1 + len && seqend2 >= pos2 + len);
     gt_seqabstract_reinit_encseq(xdropmatchinfo->useq,
                                  encseq,seqend1 - (pos1 + len),
                                  pos1 + len);
@@ -227,21 +227,19 @@ static int gt_processxdropquerymatches(void *info,
   GtUword pos1 = gt_querymatch_dbstart(querymatch);
   GtUword pos2 = gt_querymatch_querystart(querymatch);
   GtUword len = gt_querymatch_querylen(querymatch);
-  const GtUword dbtotallength = gt_encseq_total_length(encseq);
   uint64_t queryseqnum;
   GtUword dbseqnum, dbseqstartpos, dbseqlength;
 
   dbseqnum = gt_encseq_seqnum(encseq,pos1);
   dbseqstartpos = gt_encseq_seqstartpos(encseq,dbseqnum);
   dbseqlength = gt_encseq_seqlength(encseq,dbseqnum);
-  if (pos1 > 0 && pos2 > 0)
+  if (pos1 > dbseqstartpos && pos2 > 0)
   {
-    gt_assert(dbseqstartpos < pos1);
     gt_seqabstract_reinit_encseq(xdropmatchinfo->useq,encseq,
                                  pos1 - dbseqstartpos,
-                                 pos1);
+                                 dbseqstartpos);
     gt_seqabstract_reinit_gtuchar(xdropmatchinfo->vseq, query,
-                                  pos2 + 1, pos2);
+                                  pos2 + 1, 0);
     gt_evalxdroparbitscoresextend(false,
                                   &xdropmatchinfo->best_left,
                                   xdropmatchinfo->res,
@@ -254,7 +252,7 @@ static int gt_processxdropquerymatches(void *info,
     xdropmatchinfo->best_left.jvalue = 0;
     xdropmatchinfo->best_left.score = 0;
   }
-  if (pos1 + len < dbtotallength && pos2 + len < query_totallength)
+  if (pos1 + len < dbseqlength && pos2 + len < query_totallength)
   {
     gt_seqabstract_reinit_encseq(xdropmatchinfo->useq, encseq,
                                  dbseqstartpos + dbseqlength - (pos1 + len),
