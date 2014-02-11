@@ -24,7 +24,7 @@ module GT
   gtdlload "libgenometools"
 
   extern "GtTypeChecker* gt_type_checker_ref(GtTypeChecker*)"
-  extern "ibool gt_type_checker_is_valid(GtTypeChecker*, const char*)"
+  extern "void gt_type_checker_is_valid_p(GtTypeChecker*, const char*, void*)"
   extern "void gt_type_checker_delete(GtTypeChecker*)"
   extern "GtTypeChecker* gt_type_checker_obo_new(const char*, GtError*)"
   extern "GtTypeChecker* gt_type_checker_builtin_new()"
@@ -36,7 +36,9 @@ module GT
     end
 
     def is_valid?(type)
-      rval = GT.gt_type_checker_is_valid(@checker, type)
+      n = DL::malloc(GT::NATIVEINTSIZE)
+      GT.gt_type_checker_is_valid_p(@checker, type, n)
+      rval = (n[0, n.size].unpack("i")[0] == 1)
       return rval
     end
 

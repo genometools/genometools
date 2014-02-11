@@ -37,8 +37,9 @@ module GT
   extern "const char*   gt_feature_node_get_type(GtFeatureNode*)"
   extern "bool          gt_feature_node_has_type(GtFeatureNode*, const char*)"
   extern "bool          gt_feature_node_score_is_defined(const GtFeatureNode*)"
-  extern "float         gt_feature_node_get_score(const GtFeatureNode*)"
-  extern "void          gt_feature_node_set_score(GtFeatureNode*, float)"
+  extern "void          gt_feature_node_get_score_p(const GtFeatureNode*,
+                                                    void*)"
+  extern "void          gt_feature_node_set_score_p(GtFeatureNode*, float*)"
   extern "void          gt_feature_node_unset_score(GtFeatureNode*)"
   extern "GtStrand      gt_feature_node_get_strand(GtFeatureNode*)"
   extern "void          gt_feature_node_set_strand(GtFeatureNode*, GtStrand)"
@@ -113,14 +114,16 @@ module GT
 
     def get_score
       if GT.gt_feature_node_score_is_defined(@genome_node) then
-        GT.gt_feature_node_get_score(@genome_node)
+        n = DL::malloc(GT::NATIVEFLTSIZE)
+        GT.gt_feature_node_get_score_p(@genome_node, n)
+        return n[0, n.size].unpack("F")[0]
       else
         nil
       end
     end
 
     def set_score(score)
-      GT.gt_feature_node_set_score(@genome_node, score.to_f)
+      GT.gt_feature_node_set_score_p(@genome_node, [score.to_f].pack("F").to_ptr)
     end
 
     def unset_score
