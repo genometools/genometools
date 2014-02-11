@@ -499,7 +499,6 @@ void gt_feature_node_get_score_p(const GtFeatureNode *fn, float *val)
 {
   gt_assert(fn);
   gt_assert(gt_feature_node_score_is_defined(fn));
-  printf("score: %f\n", fn->score);
   *val = fn->score;
 }
 
