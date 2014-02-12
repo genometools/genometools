@@ -1843,8 +1843,9 @@ tre_ast_to_tnfa(tre_ast_node_t *node, tre_tnfa_transition_t *transitions,
 
 #define ERROR_EXIT(err)		  \
   do				  \
-    {				  \
-      errcode = err;		  \
+    {	 \
+      reg_errcode_t my_errcode = err;			  \
+      errcode = my_errcode;		  \
       if (/*CONSTCOND*/(void)1,1)	  \
       	goto error_exit;	  \
     }				  \
