@@ -95,16 +95,32 @@ static int feature_in_stream_next(GtNodeStream *ns, GtGenomeNode **gn,
       return 0;
     }
 
-    const char *seqid = gt_str_array_get(stream->seqids, stream->seqindex++);
-    stream->featurecache = gt_feature_index_get_features_for_seqid(stream->fi,
-                                                                   seqid,
-                                                                   error);
-    gt_array_sort(stream->featurecache, (GtCompare)gt_genome_node_compare);
-    gt_array_reverse(stream->featurecache);
+    GtUword numfeats = 0;
+    do
+    {
+      const char *seqid = gt_str_array_get(stream->seqids, stream->seqindex++);
+      stream->featurecache = gt_feature_index_get_features_for_seqid(stream->fi,
+                                                                     seqid,
+                                                                     error);
+      numfeats = gt_array_size(stream->featurecache);
+    } while (numfeats == 0 &&
+             stream->seqindex < gt_str_array_size(stream->seqids));
+    if (numfeats > 0)
+    {
+      gt_array_sort(stream->featurecache, (GtCompare)gt_genome_node_compare);
+      gt_array_reverse(stream->featurecache);
+    }
   }
 
-  GtGenomeNode *feat = *(GtGenomeNode **)gt_array_pop(stream->featurecache);
-  *gn = gt_genome_node_ref(feat);
+  if (gt_array_size(stream->featurecache) == 0)
+  {
+    *gn = NULL;
+  }
+  else
+  {
+    GtGenomeNode *feat = *(GtGenomeNode **)gt_array_pop(stream->featurecache);
+    *gn = gt_genome_node_ref(feat);
+  }
   return 0;
 }
 
