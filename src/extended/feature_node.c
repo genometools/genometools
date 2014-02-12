@@ -495,6 +495,13 @@ float gt_feature_node_get_score(const GtFeatureNode *fn)
   return fn->score;
 }
 
+void gt_feature_node_get_score_p(const GtFeatureNode *fn, float *val)
+{
+  gt_assert(fn);
+  gt_assert(gt_feature_node_score_is_defined(fn));
+  *val = fn->score;
+}
+
 GtStrand gt_feature_node_get_strand(const GtFeatureNode *fn)
 {
   gt_assert(fn);
@@ -637,6 +644,15 @@ void gt_feature_node_set_score(GtFeatureNode *fn, float score)
   fn->score = score;
   if (fn->observer && fn->observer->score_changed)
     fn->observer->score_changed(fn, score, fn->observer->data);
+}
+
+void gt_feature_node_set_score_p(GtFeatureNode *fn, float* score)
+{
+  gt_assert(fn);
+  fn->bit_field |= 1 << SCORE_IS_DEFINED_OFFSET;
+  fn->score = *score;
+  if (fn->observer && fn->observer->score_changed)
+    fn->observer->score_changed(fn, *score, fn->observer->data);
 }
 
 void gt_feature_node_unset_score(GtFeatureNode *fn)

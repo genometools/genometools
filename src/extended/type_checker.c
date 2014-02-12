@@ -51,6 +51,14 @@ bool gt_type_checker_is_valid(GtTypeChecker *type_checker, const char *type)
   return type_checker->c_class->is_valid(type_checker, type);
 }
 
+void gt_type_checker_is_valid_p(GtTypeChecker *type_checker, const char *type,
+                                int *val)
+{
+  gt_assert(type_checker && type_checker->c_class &&
+            type_checker->c_class->is_valid);
+  *val = type_checker->c_class->is_valid(type_checker, type) ? 1 : 0;
+}
+
 bool gt_type_checker_is_partof(GtTypeChecker *type_checker,
                                const char *parent_type, const char *child_type)
 {

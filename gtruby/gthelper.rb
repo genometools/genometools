@@ -21,8 +21,10 @@ module GT
   class GTError < RuntimeError
   end
 
-  # this is needed because DL is unaware of the native ulong size
+  # this is needed because DL is unaware of the native sizes
   NATIVEULONGSIZE = [0].pack('L!').size
+  NATIVEFLTSIZE = [0].pack('F').size
+  NATIVEINTSIZE = [0].pack('i').size
 
   def GT.gterror(err)
     if err.class == GT::Error then
