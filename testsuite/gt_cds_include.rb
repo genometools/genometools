@@ -113,7 +113,7 @@ Name "gt cds test (not sorted)"
 Keywords "gt_cds"
 Test do
   run_test "#{$bin}gt cds -seqfile #{$testdata}U89959_genomic.fas " +
-           "#{$testdata}not_sorted.gff3", :retval => 1
+           "-matchdesc #{$testdata}not_sorted.gff3", :retval => 1
   grep last_stderr, "is not sorted"
 end
 
@@ -123,7 +123,7 @@ if $gttestdata then
   Test do
     run_test "#{$bin}gt cds -startcodon yes -minorflen 1 " +
              "-seqfile #{$gttestdata}cds/marker_region.fas " +
-             "#{$gttestdata}cds/marker_bug.gff3"
+             "-matchdesc #{$gttestdata}cds/marker_bug.gff3"
     run "diff #{last_stdout} #{$gttestdata}cds/marker_bug.out"
   end
 end
