@@ -228,7 +228,8 @@ static int gt_genomediff_arguments_check(int rest_argc,
     had_err = -1;
   }
   if (!had_err && rest_argc > 1 && gt_str_length(arguments->indexname) == 0) {
-    gt_error_set(err, "use -indexname for basename of encseq");
+    gt_error_set(err, "more than one input file given, please use -indexname "
+                 "for basename of indices created during run.");
     had_err = -1;
   }
 
