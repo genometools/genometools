@@ -83,6 +83,7 @@ static int feature_in_stream_next(GtNodeStream *ns, GtGenomeNode **gn,
 
   if (stream->featurecache == NULL || gt_array_size(stream->featurecache) == 0)
   {
+    GtUword numfeats = 0;
     if (stream->featurecache != NULL)
     {
       gt_array_delete(stream->featurecache);
@@ -95,7 +96,6 @@ static int feature_in_stream_next(GtNodeStream *ns, GtGenomeNode **gn,
       return 0;
     }
 
-    GtUword numfeats = 0;
     do
     {
       const char *seqid = gt_str_array_get(stream->seqids, stream->seqindex++);
