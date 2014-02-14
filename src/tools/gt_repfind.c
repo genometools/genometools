@@ -16,21 +16,23 @@
 */
 
 #include <inttypes.h>
+
 #include "core/error_api.h"
-#include "core/str_api.h"
+#include "core/format64.h"
+#include "core/log_api.h"
 #include "core/logger.h"
 #include "core/ma_api.h"
-#include "core/unused_api.h"
 #include "core/option_api.h"
+#include "core/str_api.h"
 #include "core/tool_api.h"
+#include "core/unused_api.h"
 #include "core/versionfunc.h"
-#include "core/format64.h"
-#include "match/esa-seqread.h"
-#include "match/esa-mmsearch.h"
 #include "match/esa-maxpairs.h"
-#include "match/test-maxpairs.h"
-#include "match/querymatch.h"
+#include "match/esa-mmsearch.h"
+#include "match/esa-seqread.h"
 #include "match/greedyedist.h"
+#include "match/querymatch.h"
+#include "match/test-maxpairs.h"
 #include "match/xdrop.h"
 #include "tools/gt_repfind.h"
 
@@ -133,7 +135,8 @@ static int gt_simplexdropselfmatchoutput(void *info,
     queryseqstartpos = gt_encseq_seqstartpos(encseq,queryseqnum);
     queryseqlength = gt_encseq_seqlength(encseq,queryseqnum);
   }
-  if (pos1 > dbseqstartpos && pos2 > queryseqstartpos)
+  if (pos1 > dbseqstartpos &&
+      pos2 > queryseqstartpos)
   {
     gt_seqabstract_reinit_encseq(xdropmatchinfo->useq,encseq,
                                  pos1 - dbseqstartpos,
@@ -233,13 +236,22 @@ static int gt_processxdropquerymatches(void *info,
   dbseqnum = gt_encseq_seqnum(encseq,pos1);
   dbseqstartpos = gt_encseq_seqstartpos(encseq,dbseqnum);
   dbseqlength = gt_encseq_seqlength(encseq,dbseqnum);
-  if (pos1 > dbseqstartpos && pos2 > 0)
+  /* xdrop left of seed, only if length > 0 excluding pos1 and pos2 */
+  if (pos1 > dbseqstartpos &&
+      pos2 > 0)
   {
-    gt_seqabstract_reinit_encseq(xdropmatchinfo->useq,encseq,
+    gt_log_log("leftextend: " GT_WU " to " GT_WU " and "
+               GT_WU " to " GT_WU,
+               dbseqstartpos, pos1,
+               (GtUword) 0, pos2);
+    gt_seqabstract_reinit_encseq(xdropmatchinfo->useq,
+                                 encseq,
                                  pos1 - dbseqstartpos,
                                  dbseqstartpos);
-    gt_seqabstract_reinit_gtuchar(xdropmatchinfo->vseq, query,
-                                  pos2 + 1, 0);
+    gt_seqabstract_reinit_gtuchar(xdropmatchinfo->vseq,
+                                  query,
+                                  pos2,
+                                  0);
     gt_evalxdroparbitscoresextend(false,
                                   &xdropmatchinfo->best_left,
                                   xdropmatchinfo->res,
@@ -252,12 +264,20 @@ static int gt_processxdropquerymatches(void *info,
     xdropmatchinfo->best_left.jvalue = 0;
     xdropmatchinfo->best_left.score = 0;
   }
-  if (pos1 + len < dbseqlength && pos2 + len < query_totallength)
+  /* xdrop right of seed, only if length > 0 including pos1+len and pos2+len */
+  if (pos1 + len < dbseqstartpos + dbseqlength &&
+      pos2 + len < query_totallength)
   {
-    gt_seqabstract_reinit_encseq(xdropmatchinfo->useq, encseq,
+    gt_log_log("rightextend: " GT_WU " to " GT_WU " and "
+               GT_WU " to " GT_WU,
+               pos1 + len, dbseqstartpos + dbseqlength,
+               pos2 + len, query_totallength - 1);
+    gt_seqabstract_reinit_encseq(xdropmatchinfo->useq,
+                                 encseq,
                                  dbseqstartpos + dbseqlength - (pos1 + len),
                                  pos1 + len);
-    gt_seqabstract_reinit_gtuchar(xdropmatchinfo->vseq, query,
+    gt_seqabstract_reinit_gtuchar(xdropmatchinfo->vseq,
+                                  query,
                                   query_totallength - (pos2 + len),
                                   pos2 + len);
     gt_evalxdroparbitscoresextend(true,
