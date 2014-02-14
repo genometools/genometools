@@ -123,6 +123,7 @@ static inline void gt_editscript_space_add_next(GtEditscript *es,
       es->size = GT_MULT2(es->size);
       es->space = gt_realloc(es->space, es->size * sizeof (*(es->space)));
     }
+    gt_assert(es->space != NULL);
     es->space[cur_word] |= elem >> (bits2store - remaining);
     cur_word++;
     es->space[cur_word] = 0;

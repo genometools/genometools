@@ -278,8 +278,8 @@ static void firstfrontforward(const GtSeqabstract *useq,
 }
 
 GtUword greedyunitedist(GtFrontResource *ftres,
-                              const GtSeqabstract *useq,
-                              const GtSeqabstract *vseq)
+                        const GtSeqabstract *useq,
+                        const GtSeqabstract *vseq)
 {
   GtUword realdistance, kval;
   GtWord r;
