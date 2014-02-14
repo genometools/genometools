@@ -16,6 +16,7 @@
 
 #include "core/class_alloc_lock.h"
 #include "core/queue_api.h"
+#include "core/unused_api.h"
 #include "extended/feature_index_memory_api.h"
 #include "extended/feature_in_stream.h"
 #include "extended/feature_out_stream_api.h"
@@ -27,10 +28,7 @@ struct GtFeatureInStream
 {
   const GtNodeStream parent_instance;
   GtFeatureIndex *fi;
-  GtStrArray *seqids;
-  GtQueue *regioncache;
-  GtArray *featurecache;
-  GtUword seqindex;
+  GtQueue *cache;
   bool useorig;
   bool init;
 };
@@ -40,30 +38,65 @@ struct GtFeatureInStream
 
 void feature_in_stream_init(GtFeatureInStream *stream)
 {
+  GtError *error;
+  GtStrArray *seqids;
   GtUword i;
-  GtError *error = gt_error_new();
 
-  stream->seqids = gt_feature_index_get_seqids(stream->fi, error);
-  stream->seqindex = 0;
-  for (i = 0; i < gt_str_array_size(stream->seqids); i++)
+  error = gt_error_new();
+  seqids = gt_feature_index_get_seqids(stream->fi, error);
+
+  /* Load all region nodes into the cache */
+  for (i = 0; i < gt_str_array_size(seqids); i++)
   {
-    const char *seqid = gt_str_array_get(stream->seqids, i);
     GtRange seqrange;
+    GtGenomeNode *rn;
+    GtStr *seqstr;
+    const char *seqid;
+
+    seqid = gt_str_array_get(seqids, i);
     if (stream->useorig)
+    {
       gt_feature_index_get_orig_range_for_seqid(stream->fi, &seqrange, seqid,
                                                 error);
+    }
     else
+    {
       gt_feature_index_get_range_for_seqid(stream->fi, &seqrange, seqid, error);
-    GtStr *seqstr = gt_str_new_cstr(seqid);
-    GtGenomeNode *rn = gt_region_node_new(seqstr, seqrange.start, seqrange.end);
-    gt_queue_add(stream->regioncache, rn);
+    }
+
+    seqstr = gt_str_new_cstr(seqid);
+    rn = gt_region_node_new(seqstr, seqrange.start, seqrange.end);
+    gt_queue_add(stream->cache, rn);
     gt_str_delete(seqstr);
   }
+
+  /* Load all feature nodes into the cache */
+  for (i = 0; i < gt_str_array_size(seqids); i++)
+  {
+    GtArray *features;
+    const char *seqid;
+
+    seqid = gt_str_array_get(seqids, i);
+    features = gt_feature_index_get_features_for_seqid(stream->fi, seqid,error);
+    if (gt_array_size(features) > 0)
+    {
+      gt_array_sort(features, (GtCompare)gt_genome_node_compare);
+      gt_array_reverse(features);
+      while (gt_array_size(features) > 0)
+      {
+        GtGenomeNode **fn = gt_array_pop(features);
+        gt_queue_add(stream->cache, *fn);
+      }
+    }
+    gt_array_delete(features);
+  }
+
   gt_error_delete(error);
+  gt_str_array_delete(seqids);
 }
 
 static int feature_in_stream_next(GtNodeStream *ns, GtGenomeNode **gn,
-                                   GtError *error)
+                                  GT_UNUSED GtError *error)
 {
   GtFeatureInStream *stream = feature_in_stream_cast(ns);
   gt_error_check(error);
@@ -74,66 +107,29 @@ static int feature_in_stream_next(GtNodeStream *ns, GtGenomeNode **gn,
     stream->init = true;
   }
 
-  if (gt_queue_size(stream->regioncache) > 0)
+  if (gt_queue_size(stream->cache) > 0)
   {
-    GtGenomeNode *region = gt_queue_get(stream->regioncache);
-    *gn = region;
+    GtGenomeNode *node = gt_queue_get(stream->cache);
+    GtFeatureNode *fn = gt_feature_node_try_cast(node);
+    if (fn)
+      gt_genome_node_ref(node);
+    *gn = node;
     return 0;
   }
 
-  if (stream->featurecache == NULL || gt_array_size(stream->featurecache) == 0)
-  {
-    GtUword numfeats = 0;
-    if (stream->featurecache != NULL)
-    {
-      gt_array_delete(stream->featurecache);
-      stream->featurecache = NULL;
-    }
-
-    if (stream->seqindex == gt_str_array_size(stream->seqids))
-    {
-      *gn = NULL;
-      return 0;
-    }
-
-    do
-    {
-      const char *seqid = gt_str_array_get(stream->seqids, stream->seqindex++);
-      stream->featurecache = gt_feature_index_get_features_for_seqid(stream->fi,
-                                                                     seqid,
-                                                                     error);
-      numfeats = gt_array_size(stream->featurecache);
-    } while (numfeats == 0 &&
-             stream->seqindex < gt_str_array_size(stream->seqids));
-    if (numfeats > 0)
-    {
-      gt_array_sort(stream->featurecache, (GtCompare)gt_genome_node_compare);
-      gt_array_reverse(stream->featurecache);
-    }
-  }
-
-  if (gt_array_size(stream->featurecache) == 0)
-  {
-    *gn = NULL;
-  }
-  else
-  {
-    GtGenomeNode *feat = *(GtGenomeNode **)gt_array_pop(stream->featurecache);
-    *gn = gt_genome_node_ref(feat);
-  }
+  *gn = NULL;
   return 0;
 }
 
 static void feature_in_stream_free(GtNodeStream *ns)
 {
   GtFeatureInStream *stream = feature_in_stream_cast(ns);
-  gt_str_array_delete(stream->seqids);
-  while (gt_queue_size(stream->regioncache) > 0)
+  while (gt_queue_size(stream->cache) > 0)
   {
-    GtGenomeNode *gn = gt_queue_get(stream->regioncache);
+    GtGenomeNode *gn = gt_queue_get(stream->cache);
     gt_genome_node_delete(gn);
   }
-  gt_queue_delete(stream->regioncache);
+  gt_queue_delete(stream->cache);
 }
 
 const GtNodeStreamClass *gt_feature_in_stream_class(void)
@@ -164,8 +160,7 @@ GtNodeStream* gt_feature_in_stream_new(GtFeatureIndex *fi)
   ns = gt_node_stream_create(gt_feature_in_stream_class(), true);
   stream = feature_in_stream_cast(ns);
   stream->fi = fi;
-  stream->regioncache = gt_queue_new();
-  stream->featurecache = NULL;
+  stream->cache = gt_queue_new();
   stream->useorig = false;
   stream->init = false;
   return ns;
@@ -215,6 +210,13 @@ static GtFeatureIndex *in_stream_test_data(GtError *error)
   gt_genome_node_delete(gn);
 
   gt_str_delete(seqid);
+  seqid = gt_str_new_cstr("ChrM");
+  gn = gt_region_node_new(seqid, 1, 25000);
+  rn = gt_region_node_cast(gn);
+  gt_feature_index_add_region_node(fi, rn, error);
+  gt_genome_node_delete(gn);
+
+  gt_str_delete(seqid);
 
   return fi;
 }
@@ -223,7 +225,8 @@ int gt_feature_in_stream_unit_test(GtError *error)
 {
   GtNodeStream *src, *dest;
   GtFeatureIndex *prefeat, *postfeat;
-  GtRange range1, range1test, range2, range2test;
+  GtRange range1, range1test, range2, range2test, range3, range3test;
+  GtStrArray *seqids;
 
   prefeat = in_stream_test_data(error);
   postfeat = gt_feature_index_memory_new();
@@ -233,10 +236,10 @@ int gt_feature_in_stream_unit_test(GtError *error)
   if (result == -1)
     return -1;
 
-  GtStrArray *seqids = gt_feature_index_get_seqids(postfeat, error);
-  if (gt_str_array_size(seqids) != 2)
+  seqids = gt_feature_index_get_seqids(postfeat, error);
+  if (gt_str_array_size(seqids) != 3)
   {
-    gt_error_set(error, "error in feature_in_stream unit test 1: expected 2 "
+    gt_error_set(error, "error in feature_in_stream unit test 1: expected 3 "
                  "seqids, found "GT_WU"", gt_str_array_size(seqids));
     return -1;
   }
@@ -245,7 +248,7 @@ int gt_feature_in_stream_unit_test(GtError *error)
   range1test.start = 500;  range1test.end = 75000;
   range2test.start = 4000; range2test.end = 9500;
   gt_feature_index_get_range_for_seqid(postfeat, &range1, "chr1", error);
-  gt_feature_index_get_range_for_seqid(postfeat, &range2, "scf0001",error);
+  gt_feature_index_get_range_for_seqid(postfeat, &range2, "scf0001", error);
   if (gt_range_compare(&range1, &range1test) ||
       gt_range_compare(&range2, &range2test))
   {
@@ -253,6 +256,7 @@ int gt_feature_in_stream_unit_test(GtError *error)
                  "sequence regions");
     return -1;
   }
+
   gt_feature_index_get_orig_range_for_seqid(postfeat, &range1, "chr1", error);
   gt_feature_index_get_orig_range_for_seqid(postfeat, &range2, "scf0001",error);
   if (gt_range_compare(&range1, &range1test) ||
@@ -289,10 +293,13 @@ int gt_feature_in_stream_unit_test(GtError *error)
   }
   range1test.start = 1; range1test.end = 100000;
   range2test.start = 1; range2test.end = 10000;
+  range3test.start = 1; range3test.end = 25000;
   gt_feature_index_get_orig_range_for_seqid(postfeat, &range1, "chr1", error);
   gt_feature_index_get_orig_range_for_seqid(postfeat, &range2, "scf0001",error);
+  gt_feature_index_get_orig_range_for_seqid(postfeat, &range3, "ChrM", error);
   if (gt_range_compare(&range1, &range1test) ||
-      gt_range_compare(&range2, &range2test))
+      gt_range_compare(&range2, &range2test) ||
+      gt_range_compare(&range3, &range3test))
   {
     gt_error_set(error, "error in feature_in_stream unit test 1: incorrect "
                  "sequence regions");
