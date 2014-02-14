@@ -24,6 +24,7 @@
 #include "core/splitter.h"
 #include "core/strand.h"
 #include "core/strcmp.h"
+#include "core/symbol.h"
 #include "core/undef_api.h"
 #include "core/unused_api.h"
 #include "core/warning_api.h"
@@ -33,10 +34,12 @@
 #include "extended/gtf_parser.h"
 #include "extended/region_node_builder.h"
 
-#define GENE_ID_ATTRIBUTE         "gene_id"
-#define GENE_NAME_ATTRIBUTE       "gene_name"
-#define TRANSCRIPT_ID_ATTRIBUTE   "transcript_id"
-#define TRANSCRIPT_NAME_ATTRIBUTE "transcript_name"
+#define GENE_ID_ATTRIBUTE          "gene_id"
+#define GENE_NAME_ATTRIBUTE        "gene_name"
+#define TRANSCRIPT_ID_ATTRIBUTE    "transcript_id"
+#define TRANSCRIPT_NAME_ATTRIBUTE  "transcript_name"
+
+#define GTF_PARSER_STOP_CODON_FLAG "stop_codon"
 
 struct GtGTFParser {
   GtHashmap *gene_id_hash, /* map from gene_id to transcript_id hash */
@@ -53,16 +56,19 @@ typedef struct {
   GtArray *mRNAs;
   GtHashmap *gene_id_to_name_mapping,
             *transcript_id_to_name_mapping;
+  bool tidy;
 } ConstructionInfo;
 
 typedef enum {
   GTF_CDS,
   GTF_exon,
+  GTF_start_codon,
   GTF_stop_codon
 } GTF_feature_type;
 
 static const char *GTF_feature_type_strings[] = { "CDS",
                                                   "exon",
+                                                  "start_codon",
                                                   "stop_codon" };
 
 static int GTF_feature_type_get(GTF_feature_type *type, char *feature_string)
@@ -130,7 +136,72 @@ static int construct_mRNAs(GT_UNUSED void *key, void *value, void *data,
   mRNA_range = gt_genome_node_get_range(first_node);
   mRNA_strand = gt_feature_node_get_strand((GtFeatureNode*) first_node);
   mRNA_seqid = gt_genome_node_get_seqid(first_node);
-  for (i = 1; i < gt_array_size(gt_genome_node_array); i++) {
+
+  for (i = 0; !had_err && i < gt_array_size(gt_genome_node_array); i++) {
+    gn = *(GtGenomeNode**) gt_array_get(gt_genome_node_array, i);
+    if (gt_feature_node_get_attribute((GtFeatureNode*) gn,
+        GTF_PARSER_STOP_CODON_FLAG)) {
+      GtUword j;
+      GtRange stop_codon_rng = gt_genome_node_get_range(gn);
+      bool found_cds = false;
+      for (j = 0; !had_err && j < gt_array_size(gt_genome_node_array); j++) {
+        GtGenomeNode* gn2;
+        GtRange this_rng;
+        const char *this_type;
+        gn2 = *(GtGenomeNode**) gt_array_get(gt_genome_node_array, j);
+        if (gn == gn2) continue;
+        this_rng = gt_genome_node_get_range(gn2);
+        this_type = gt_feature_node_get_type((GtFeatureNode*) gn2);
+        if (this_type == gt_symbol(gt_ft_CDS)) {
+          if (gt_range_contains(&this_rng, &stop_codon_rng)) {
+            if (cinfo->tidy) {
+              gt_warning("stop codon on line %u in file %s is contained in "
+                         "CDS in line %u",
+                         gt_genome_node_get_line_number(gn),
+                         gt_genome_node_get_filename(gn),
+                         gt_genome_node_get_line_number(gn2));
+              found_cds = true;
+            } else {
+              gt_error_set(err, "stop codon on line %u in file %s is "
+                                "contained in CDS in line %u",
+                           gt_genome_node_get_line_number(gn),
+                           gt_genome_node_get_filename(gn),
+                           gt_genome_node_get_line_number(gn2));
+              had_err = -1;
+            }
+            break;
+          }
+          if (this_rng.end + 1 == stop_codon_rng.start) {
+            this_rng.end = stop_codon_rng.end;
+            gt_genome_node_set_range(gn2, &this_rng);
+            found_cds = true;
+            break;
+          }
+          if (this_rng.start == stop_codon_rng.end + 1) {
+            this_rng.start = stop_codon_rng.start;
+            gt_genome_node_set_range(gn2, &this_rng);
+            found_cds = true;
+            break;
+          }
+        }
+      }
+      if (!found_cds) {
+        if (!had_err) {
+          gt_error_set(err, "found stop codon on line %u in file %s with no "
+                            "flanking CDS",
+                       gt_genome_node_get_line_number(gn),
+                       gt_genome_node_get_filename(gn));
+          had_err = -1;
+        }
+        break;
+      } else {
+        gt_array_rem(gt_genome_node_array, i);
+        gt_genome_node_delete(gn);
+      }
+    }
+  }
+
+  for (i = 1; !had_err && i < gt_array_size(gt_genome_node_array); i++) {
     GtRange range;
     gn = *(GtGenomeNode**) gt_array_get(gt_genome_node_array, i);
     range = gt_genome_node_get_range(gn);
@@ -155,7 +226,7 @@ static int construct_mRNAs(GT_UNUSED void *key, void *value, void *data,
                                     mRNA_range.end, mRNA_strand);
 
     if ((tname = gt_hashmap_get(cinfo->transcript_id_to_name_mapping,
-                              (const char*) key))) {
+                              (const char*) key)) && strlen(tname) > 0) {
       gt_feature_node_add_attribute((GtFeatureNode*) mRNA_node, GT_GFF_NAME,
                                       tname);
     }
@@ -164,7 +235,7 @@ static int construct_mRNAs(GT_UNUSED void *key, void *value, void *data,
     for (i = 0; i < gt_array_size(gt_genome_node_array); i++) {
       gn = *(GtGenomeNode**) gt_array_get(gt_genome_node_array, i);
       gt_feature_node_add_child((GtFeatureNode*) mRNA_node,
-                                (GtFeatureNode*) gn);
+                                (GtFeatureNode*) gt_genome_node_ref(gn));
     }
 
     /* store the mRNA */
@@ -172,6 +243,21 @@ static int construct_mRNAs(GT_UNUSED void *key, void *value, void *data,
   }
 
   return had_err;
+}
+
+static int delete_mRNAs(GT_UNUSED void *key, void *value,
+                        GT_UNUSED void *data, GT_UNUSED GtError *err)
+{
+  GtArray *gt_genome_node_array = (GtArray*) value;
+  unsigned long i;
+
+  gt_assert(key && value);
+  for (i = 0; i < gt_array_size(gt_genome_node_array); i++) {
+    GtGenomeNode *gn = *(GtGenomeNode**) gt_array_get(gt_genome_node_array, i);
+    gt_genome_node_delete(gn);
+  }
+
+  return 0;
 }
 
 static int construct_genes(GT_UNUSED void *key, void *value, void *data,
@@ -215,7 +301,7 @@ static int construct_genes(GT_UNUSED void *key, void *value, void *data,
                                     gene_range.end, gene_strand);
 
     if ((gname = gt_hashmap_get(cinfo->gene_id_to_name_mapping,
-                              (const char*) key))) {
+                              (const char*) key)) && strlen(gname) > 0) {
       gt_feature_node_add_attribute((GtFeatureNode*) gene_node, GT_GFF_NAME,
                                       gname);
     }
@@ -229,11 +315,22 @@ static int construct_genes(GT_UNUSED void *key, void *value, void *data,
 
     /* store the gene */
     gt_queue_add(genome_nodes, gene_node);
-
-    /* free */
-    gt_array_delete(mRNAs);
   }
 
+  /* free */
+  gt_array_delete(mRNAs);
+
+  return had_err;
+}
+
+static int delete_genes(GT_UNUSED void *key, void *value, GT_UNUSED void *data,
+                        GT_UNUSED GtError *err)
+{
+  GtHashmap *transcript_id_hash = (GtHashmap*) value;
+  GT_UNUSED int had_err = 0;
+  gt_assert(key && value);
+  had_err = gt_hashmap_foreach(transcript_id_hash, delete_mRNAs, NULL, err);
+  gt_assert(!had_err);
   return had_err;
 }
 
@@ -322,6 +419,8 @@ int gt_gtf_parser_parse(GtGTFParser *parser, GtQueue *genome_nodes,
       gt_queue_add(genome_nodes, gn);
     }
     else {
+      bool stop_codon = false;
+
       /* process tab delimited GTF line */
       gt_splitter_reset(splitter);
       gt_splitter_split(splitter, line, line_length, '\t');
@@ -355,8 +454,9 @@ int gt_gtf_parser_parse(GtGTFParser *parser, GtQueue *genome_nodes,
 
       /* translate into GFF3 feature type */
       switch (gtf_feature_type) {
-        case GTF_CDS:
         case GTF_stop_codon:
+          stop_codon = true;
+        case GTF_CDS:
           gff_type_is_valid = gt_type_checker_is_valid(parser->type_checker,
                                                        gt_ft_CDS);
           type = gt_ft_CDS;
@@ -365,6 +465,11 @@ int gt_gtf_parser_parse(GtGTFParser *parser, GtQueue *genome_nodes,
           gff_type_is_valid = gt_type_checker_is_valid(parser->type_checker,
                                                        gt_ft_exon);
           type = gt_ft_exon;
+          break;
+        case GTF_start_codon:
+          /* we can skip the start codons, they are part of the CDS anyway */
+          gt_str_reset(line_buffer);
+          continue;
       }
       gt_assert(gff_type_is_valid);
 
@@ -492,14 +597,15 @@ int gt_gtf_parser_parse(GtGTFParser *parser, GtQueue *genome_nodes,
       gt_assert(gt_genome_node_array);
 
       /* save optional gene_name and transcript_name attributes */
-      if (transcript_name
+      if (transcript_name && strlen(transcript_name) > 0
             && !gt_hashmap_get(parser->transcript_id_to_name_mapping,
                              transcript_id)) {
         gt_hashmap_add(parser->transcript_id_to_name_mapping,
                     gt_cstr_dup(transcript_id),
                     gt_cstr_dup(transcript_name));
       }
-      if (gene_name && !gt_hashmap_get(parser->gene_id_to_name_mapping,
+      if (gene_name && strlen(gene_name) > 0
+            && !gt_hashmap_get(parser->gene_id_to_name_mapping,
                                     gene_id)) {
         gt_hashmap_add(parser->gene_id_to_name_mapping,
                     gt_cstr_dup(gene_id),
@@ -519,6 +625,10 @@ int gt_gtf_parser_parse(GtGTFParser *parser, GtQueue *genome_nodes,
       gn = gt_feature_node_new(seqid_str, type, range.start, range.end,
                                  gt_strand_value);
       gt_genome_node_set_origin(gn, filenamestr, line_number);
+      if (stop_codon) {
+        gt_feature_node_add_attribute((GtFeatureNode*) gn,
+                                      GTF_PARSER_STOP_CODON_FLAG, "true");
+      }
 
       /* set source */
       source_str = gt_hashmap_get(parser->source_to_str_mapping, source);
@@ -546,12 +656,14 @@ int gt_gtf_parser_parse(GtGTFParser *parser, GtQueue *genome_nodes,
 
   /* process all feature nodes */
   cinfo.genome_nodes = genome_nodes;
+  cinfo.tidy = be_tolerant;
   cinfo.gene_id_to_name_mapping = parser->gene_id_to_name_mapping;
   cinfo.transcript_id_to_name_mapping = parser->transcript_id_to_name_mapping;
   if (!had_err) {
     had_err = gt_hashmap_foreach(parser->gene_id_hash, construct_genes,
-                              &cinfo, err);
+                                 &cinfo, err);
   }
+  gt_hashmap_foreach(parser->gene_id_hash, delete_genes, NULL, err);
 
   /* free */
   gt_splitter_delete(splitter);
