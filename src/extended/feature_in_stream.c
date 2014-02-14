@@ -44,7 +44,7 @@ void feature_in_stream_init(GtFeatureInStream *stream)
   error = gt_error_new();
   seqids = gt_feature_index_get_seqids(stream->fi, error);
 
-  // Load all region nodes into the cache
+  /* Load all region nodes into the cache */
   for (i = 0; i < gt_str_array_size(seqids); i++)
   {
     GtRange seqrange;
@@ -69,7 +69,7 @@ void feature_in_stream_init(GtFeatureInStream *stream)
     gt_str_delete(seqstr);
   }
 
-  // Load all feature nodes into the cache
+  /* Load all feature nodes into the cache */
   for (i = 0; i < gt_str_array_size(seqids); i++)
   {
     GtArray *features;
