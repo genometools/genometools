@@ -16,6 +16,7 @@
 
 #include "core/class_alloc_lock.h"
 #include "core/queue_api.h"
+#include "core/unused_api.h"
 #include "extended/feature_index_memory_api.h"
 #include "extended/feature_in_stream.h"
 #include "extended/feature_out_stream_api.h"
@@ -95,7 +96,7 @@ void feature_in_stream_init(GtFeatureInStream *stream)
 }
 
 static int feature_in_stream_next(GtNodeStream *ns, GtGenomeNode **gn,
-                                   GtError *error)
+                                  GT_UNUSED GtError *error)
 {
   GtFeatureInStream *stream = feature_in_stream_cast(ns);
   gt_error_check(error);
