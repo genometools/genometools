@@ -352,6 +352,15 @@ Retrieves all features contained in <code>gfi</code> into <code>results</code>. 
    accordingly.
 </p>
 <hr>
+<a name="GtTrackSelectorFunc"></a>
+
+<code>void  GtTrackSelectorFunc(GtBlock*, GtStr*, void*)</code>
+<p>
+A <code>GtTrackSelectorFunc</code> is a callback function which sets a <code>GtStr</code> to a
+   string to be used as a track identifier for assignment of a <code>GtBlock</code>
+   to a given track.
+</p>
+<hr>
 <a name="GtTrackOrderingFunc"></a>
 
 <code>int  GtTrackOrderingFunc(const char *s1, const char *s2, void *data)</code>
@@ -361,15 +370,6 @@ A function describing the order of tracks based on their track identifier
    should appear before the track with ID <code>s2</code> and a positive value if <code>s1</code>
    should appear after <code>s2</code>. Returning a value of 0 will result in an undefined
    ordering of <code>s1</code> and <code>s2</code>.
-</p>
-<hr>
-<a name="GtTrackSelectorFunc"></a>
-
-<code>void  GtTrackSelectorFunc(GtBlock*, GtStr*, void*)</code>
-<p>
-A <code>GtTrackSelectorFunc</code> is a callback function which sets a <code>GtStr</code> to a
-   string to be used as a track identifier for assignment of a <code>GtBlock</code>
-   to a given track.
 </p>
 <hr>
 <a name="GtAddIntronsStream"></a>
@@ -7338,18 +7338,17 @@ Test whether the given genome node is a sequence node. If so, a pointer to
 <a name="GtSetSourceVisitor"></a>
 <h2>Class GtSetSourceVisitor</h2>
 
-<p>*
- * Implements the <code>GtNodeVisitor</code> interface. Used with the <code>GtVisitorStream</code>
- * class, a <code>GtSetSourceVisitor</code> resets the 'source' value for <code>GtFeatureNode</code>
- * objects.
- </p>
+<p> Implements the <code>GtNodeVisitor</code> interface. Used with the <code>GtVisitorStream</code>
+   class, a <code>GtSetSourceVisitor</code> resets the source value for <code>GtFeatureNode</code>
+   objects. </p>
 
 <hr>
 <a name="gt_set_source_visitor_new"></a>
 
 <code>GtNodeVisitor*  gt_set_source_visitor_new(GtStr *newsource)</code>
 <p>
-constructor
+Create a node visitor object which will reset the source value of all
+   <code>GtFeatureNode</code> objects it processes to <code>newsource</code>.
 </p>
 <hr>
 <a name="GtSortStream"></a>
@@ -11555,7 +11554,7 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
 <div id="footer">
 Copyright &copy; 2008-2013
 The <i>GenomeTools</i> authors.
-Last update: 2014-02-10
+Last update: 2014-02-15
 </div>
 </div>
 <!-- Piwik -->

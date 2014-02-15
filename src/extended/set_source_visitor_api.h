@@ -20,14 +20,13 @@
 #include "core/str_api.h"
 #include "extended/node_visitor_api.h"
 
-/**
- * Implements the <GtNodeVisitor> interface. Used with the <GtVisitorStream>
- * class, a <GtSetSourceVisitor> resets the 'source' value for <GtFeatureNode>
- * objects.
- */
+/* Implements the <GtNodeVisitor> interface. Used with the <GtVisitorStream>
+   class, a <GtSetSourceVisitor> resets the source value for <GtFeatureNode>
+   objects. */
 typedef struct GtSetSourceVisitor GtSetSourceVisitor;
 
-/* constructor */
+/* Create a node visitor object which will reset the source value of all
+   <GtFeatureNode> objects it processes to <newsource>. */
 GtNodeVisitor* gt_set_source_visitor_new(GtStr *newsource);
 
 #endif
