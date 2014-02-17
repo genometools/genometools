@@ -95,6 +95,8 @@ ifeq ($(SYSTEM),Darwin)
     GT_CFLAGS+=-arch ppc -arch_errors_fatal
     GT_LDFLAGS+=-arch ppc -arch_errors_fatal
   endif
+  # these tests are disabled for now on Mac
+  TEST_KEYWORDS:=-keywords 'not gt_python and not gt_ruby and not gt_sketch'
 else
   SHARED_OBJ_NAME_EXT:=.so
   SHARED:=-shared
@@ -1068,7 +1070,8 @@ test: all
           $(RUBY) -I. testsuite.rb \
           -testdata $(CURDIR)/testdata -bin $(CURDIR)/bin -cur $(CURDIR) \
           -gtruby $(CURDIR)/gtruby $(STEST_FLAGS) \
-          -select $(testrange)
+          -select $(testrange) \
+          $(TEST_KEYWORDS)
 
 clean:
 	rm -rf obj lib
