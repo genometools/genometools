@@ -28,7 +28,8 @@
 typedef struct {
   GtOutputFileInfo *ofi;
   GtFile *outfp;
-  bool retainids;
+  bool retainids,
+       tidy;
 } MergeArguments;
 
 static void* gt_merge_arguments_new(void)
@@ -65,6 +66,11 @@ static GtOptionParser* gt_merge_option_parser_new(void *tool_arguments)
                               false);
   gt_option_parser_add_option(op, option);
 
+  /* -tidy */
+  option = gt_option_new_bool("tidy", "try to tidy the GFF3 files up "
+                              "during parsing", &arguments->tidy, false);
+  gt_option_parser_add_option(op, option);
+
   gt_output_file_info_register_options(arguments->ofi, op, &arguments->outfp);
   return op;
 }
@@ -93,6 +99,8 @@ static int gt_merge_runner(int argc, const char **argv, int parsed_args,
     /* we got files to open */
     for (i = parsed_args; i < argc; i++) {
       gff3_in_stream = gt_gff3_in_stream_new_sorted(argv[i]);
+      if (arguments->tidy)
+        gt_gff3_in_stream_enable_tidy_mode((GtGFF3InStream*) gff3_in_stream);
       gt_array_add(genome_streams, gff3_in_stream);
     }
    }
