@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta http-equiv="Content-Type" content="application/xhtml+xml; charset=UTF-8" />
-<title>GenomeTools - manual page for GT-UNIQUE_ENCSEQ_EXTRACT(1)</title>
+<title>GenomeTools - manual page for GT-ENCSEQ-SAMPLE(1)</title>
 <link rel="stylesheet" type="text/css" href="style.css">
 <link rel="stylesheet" href="..//style.css" type="text/css" />
 </head>
@@ -32,13 +32,13 @@
 <div class="sect1">
 <h2 id="_name">NAME</h2>
 <div class="sectionbody">
-<div class="paragraph"><p>gt-unique_encseq_extract - Decompresses a UniqueEncseq to FASTA format or prints statistics about a given UniqueEncseq, output is written to stdout.</p></div>
+<div class="paragraph"><p>gt-encseq-sample - Decode/extract encoded sequences by random choice.</p></div>
 </div>
 </div>
 <div class="sect1">
 <h2 id="_synopsis">SYNOPSIS</h2>
 <div class="sectionbody">
-<div class="paragraph"><p><strong>gt unique_encseq_extract</strong> [options] INPUTFILE</p></div>
+<div class="paragraph"><p><strong>gt encseq sample</strong> (sequence_file|indexname)</p></div>
 </div>
 </div>
 <div class="sect1">
@@ -46,11 +46,43 @@
 <div class="sectionbody">
 <div class="dlist"><dl>
 <dt class="hdlist1">
-<strong>-all</strong> [<em>yes|no</em>]
+<strong>-mirrored</strong> [<em>yes|no</em>]
 </dt>
 <dd>
 <p>
-decompression of the complete database (default: no)
+virtually append the reverse complement of each sequence (default: no)
+</p>
+</dd>
+<dt class="hdlist1">
+<strong>-lossless</strong> [<em>yes|no</em>]
+</dt>
+<dd>
+<p>
+allow lossless original sequence retrieval (default: no)
+</p>
+</dd>
+<dt class="hdlist1">
+<strong>-dir</strong> [<em>string</em>]
+</dt>
+<dd>
+<p>
+specify reading direction (fwd, cpl, rev, rcl) (default: fwd)
+</p>
+</dd>
+<dt class="hdlist1">
+<strong>-singlechars</strong> [<em>yes|no</em>]
+</dt>
+<dd>
+<p>
+do not use a GtEncseqReader but access each sequence character separately (default: no)
+</p>
+</dd>
+<dt class="hdlist1">
+<strong>-length</strong> [<em>value</em>]
+</dt>
+<dd>
+<p>
+minimum length to be extracted (default: undefined)
 </p>
 </dd>
 <dt class="hdlist1">
@@ -58,47 +90,23 @@ decompression of the complete database (default: no)
 </dt>
 <dd>
 <p>
-range of sequence indices to decompress (default: undefined)
+extract multiple consecutive sequences (default: undefined)
 </p>
 </dd>
 <dt class="hdlist1">
-<strong>-range</strong> [<em>start</em> <em>end</em>]
+<strong>-output</strong> [<em>&#8230;</em>]
 </dt>
 <dd>
 <p>
-range of sequence positions to decompress (default: undefined)
+specify output format (choose from fasta|concat) (default: fasta)
 </p>
 </dd>
 <dt class="hdlist1">
-<strong>-dbstats</strong> [<em>yes|no</em>]
+<strong>-sepchar</strong> [<em>string</em>]
 </dt>
 <dd>
 <p>
-returns UniqueEncseq statistics, please specify further if fine (-dbstats_fine) or coarse (-dbstats_coarse) should be returned (default: yes)
-</p>
-</dd>
-<dt class="hdlist1">
-<strong>-dbstats_coarse</strong> [<em>yes|no</em>]
-</dt>
-<dd>
-<p>
-returns coarse stats of the UniqueEncseq (number of links, number of unique sequences, &#8230;), option -dbstats is also required (default: no)
-</p>
-</dd>
-<dt class="hdlist1">
-<strong>-dbstats_fine</strong> [<em>yes|no</em>]
-</dt>
-<dd>
-<p>
-returns fine stats of the UniqueEncseq (number of matches,mismatches,etcper linked sequence, to which sequence is it linked, &#8230;), option -dbstats is also required (default: no)
-</p>
-</dd>
-<dt class="hdlist1">
-<strong>-debug</strong> [<em>yes|no</em>]
-</dt>
-<dd>
-<p>
-debug messages are printed (default: no)
+specify character to print as SEPARATOR (default: |)
 </p>
 </dd>
 <dt class="hdlist1">
@@ -106,7 +114,15 @@ debug messages are printed (default: no)
 </dt>
 <dd>
 <p>
-display help and exit
+display help for basic options and exit
+</p>
+</dd>
+<dt class="hdlist1">
+<strong>-help+</strong> 
+</dt>
+<dd>
+<p>
+display help for all options and exit
 </p>
 </dd>
 <dt class="hdlist1">
