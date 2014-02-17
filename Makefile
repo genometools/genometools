@@ -96,7 +96,8 @@ ifeq ($(SYSTEM),Darwin)
     GT_LDFLAGS+=-arch ppc -arch_errors_fatal
   endif
   # these tests are disabled for now on Mac
-  TEST_KEYWORDS:=-keywords 'not gt_python and not gt_ruby and not gt_sketch'
+  TEST_KEYWORDS:=-keywords \
+		'not gt_python and not gt_ruby and not gt_sketch and not gt_seqlensort'
 else
   SHARED_OBJ_NAME_EXT:=.so
   SHARED:=-shared
