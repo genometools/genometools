@@ -1,6 +1,6 @@
-changes in version 1.5.2 (2013-XX-XX)
+changes in version 1.5.2 (2014-02-XX)
 
-- bugfixes and cleanups
+- many bugfixes and cleanups
 - options `-j' and GT_MEM_BOOKKEEPING now usable together in a multithreaded
   environment
 - automatic man page building (`gt -createman') implemented
@@ -21,6 +21,7 @@ changes in version 1.5.2 (2013-XX-XX)
 - LTRdigest code refactored for reusability
 - added GtCompressedBitsequence, abstract GtWTree and implementation thereof
   GtWtreeEncseq
+- further work towards native Windows compatibility
 - C API: replace 'unsigned long long' by 'GtUint64'
 - C API: replace 'uint64_t ' by 'GtUint64'
 - C API: replace 'unsigned long' by 'GtUword'
@@ -28,6 +29,17 @@ changes in version 1.5.2 (2013-XX-XX)
 - C API: replace 'uint8_t ' by 'unsigned char'
 - C API: replace 'long double' by 'double'
 - the dependency on ncurses has been removed
+- SQLite updated to 3.8.2 and removed from Gt amalgamation
+- syntax checking for GFF3 Ontology_term, Dbxref and gap attributes has been
+  extended
+- testsuite now accepts an external randomization seed
+- GtCheckBoundariesVisitor added
+- GT_NO_FLOCK introduced to disable file locking
+- formatted alignment output added
+- support for Start_range and End_range GFF attributes added (v1.22)
+- sortedness constraint for custom streams removed
+- libtre now used for regular expressions
+- GtFeature{In,Out}Stream added
 
 
 changes in version 1.5.1 (2013-03-07)
