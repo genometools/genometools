@@ -17,12 +17,12 @@
 #
 
 make cleanup
-make -j3 64bit=no cairo=no curses=no
+make -j3 64bit=no cairo=no
 bin/gt encseq encode -indexname testdata/foo.32 testdata/foobar.fas
 bin/gt encseq info -noindexname testdata/foo.32 > testdata/foo.32.info_map
 bin/gt encseq info -noindexname -nomap testdata/foo.32 > testdata/foo.32.info_nomap
 make cleanup
-make -j3 64bit=yes cairo=no curses=no
+make -j3 64bit=yes cairo=no
 bin/gt encseq encode -indexname testdata/foo.64 testdata/foobar.fas
 bin/gt encseq info -noindexname testdata/foo.64 > testdata/foo.64.info_map
 bin/gt encseq info -noindexname -nomap testdata/foo.64 > testdata/foo.64.info_nomap
