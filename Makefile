@@ -448,7 +448,7 @@ endif
 
 ifneq ($(with-sqlite),no)
   ifneq ($(useshared),yes)
-    LIBGENOMETOOLS_OBJ := $(LIBGENOMETOOLS_OBJ) lib/libsqlite.a
+    LIBGENOMETOOLS_OBJ += lib/libsqlite.a
   endif
 endif
 
