@@ -39,7 +39,7 @@ In many cases (e.g. on a 64-bit Linux system) something like
 $ make -j4 64bit=yes
 ```
 should suffice. On 32-bit systems, omit the `64bit=yes` option. Add `cairo=no`
-or `curses=no` if you do not have the Cairo or Curses libraries and their
+if you do not have the Cairo libraries and their
 development headers installed. This will, however, remove *AnnotationSketch*
 support from the resulting binary. When your binary is built, use the `install`
 target and `prefix` option to install the compiled binary on your system. Make
