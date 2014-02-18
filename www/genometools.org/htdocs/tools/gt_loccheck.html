@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta http-equiv="Content-Type" content="application/xhtml+xml; charset=UTF-8" />
-<title>GenomeTools - manual page for GT-UNIQUE_ENCSEQ(1)</title>
+<title>GenomeTools - manual page for GT-LOCCHECK(1)</title>
 <link rel="stylesheet" type="text/css" href="style.css">
 <link rel="stylesheet" href="..//style.css" type="text/css" />
 </head>
@@ -32,123 +32,19 @@
 <div class="sect1">
 <h2 id="_name">NAME</h2>
 <div class="sectionbody">
-<div class="paragraph"><p>gt-unique_encseq - Compresses a GtEncseq to a UniqueEncseq.</p></div>
+<div class="paragraph"><p>gt-loccheck - Checks parent-child containment in GFF3 input.</p></div>
 </div>
 </div>
 <div class="sect1">
 <h2 id="_synopsis">SYNOPSIS</h2>
 <div class="sectionbody">
-<div class="paragraph"><p><strong>gt unique_encseq</strong> [options] INPUTFILE</p></div>
+<div class="paragraph"><p><strong>gt loccheck</strong> [GFF3_file &#8230;]</p></div>
 </div>
 </div>
 <div class="sect1">
 <h2 id="_description">DESCRIPTION</h2>
 <div class="sectionbody">
 <div class="dlist"><dl>
-<dt class="hdlist1">
-<strong>-kmersize</strong> [<em>value</em>]
-</dt>
-<dd>
-<p>
-kmer-size used for the seeds (default: 14)
-</p>
-</dd>
-<dt class="hdlist1">
-<strong>-indexname</strong> [<em>string</em>]
-</dt>
-<dd>
-<p>
-path and name of the output structure (default: undefined)
-</p>
-</dd>
-<dt class="hdlist1">
-<strong>-debug</strong> [<em>yes|no</em>]
-</dt>
-<dd>
-<p>
-enables debug messages (default: no)
-</p>
-</dd>
-<dt class="hdlist1">
-<strong>-windowsize</strong> [<em>value</em>]
-</dt>
-<dd>
-<p>
-windowsize for non-overlapping seed-extension (default: 42)
-</p>
-</dd>
-<dt class="hdlist1">
-<strong>-nhits</strong> [<em>value</em>]
-</dt>
-<dd>
-<p>
-number of non-overlapping kmer-hits required for the x-drop extension (default: 3)
-</p>
-</dd>
-<dt class="hdlist1">
-<strong>-nkmers</strong> [<em>value</em>]
-</dt>
-<dd>
-<p>
-maximal number of positions stored per kmer (default: 400)
-</p>
-</dd>
-<dt class="hdlist1">
-<strong>-alignlength</strong> [<em>value</em>]
-</dt>
-<dd>
-<p>
-required minimal length of an xdrop-alignment (default: 300)
-</p>
-</dd>
-<dt class="hdlist1">
-<strong>-mat</strong> [<em>value</em>]
-</dt>
-<dd>
-<p>
-matchscore for extension-alignment (default: 2)
-</p>
-</dd>
-<dt class="hdlist1">
-<strong>-mis</strong> [<em>value</em>]
-</dt>
-<dd>
-<p>
-mismatchscore for extension-alignment (default: -1)
-</p>
-</dd>
-<dt class="hdlist1">
-<strong>-ins</strong> [<em>value</em>]
-</dt>
-<dd>
-<p>
-insertionscore for extension-alignment (default: -2)
-</p>
-</dd>
-<dt class="hdlist1">
-<strong>-del</strong> [<em>value</em>]
-</dt>
-<dd>
-<p>
-deletionscore for extension-alignment (default: -2)
-</p>
-</dd>
-<dt class="hdlist1">
-<strong>-xdrop</strong> [<em>value</em>]
-</dt>
-<dd>
-<p>
-xdrop score for extension-alignment
-</p>
-</dd>
-<dt class="hdlist1">
-<strong>-udbsize</strong> [<em>value</em>]
-</dt>
-<dd>
-<p>
-length of inital unique database (default: 5000)
-</p>
-</dd>
 <dt class="hdlist1">
 <strong>-help</strong> 
 </dt>
