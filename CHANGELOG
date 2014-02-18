@@ -1,4 +1,4 @@
-changes in version 1.5.2 (2014-02-XX)
+changes in version 1.5.2 (2014-02-18)
 
 - many bugfixes and cleanups
 - options `-j' and GT_MEM_BOOKKEEPING now usable together in a multithreaded
