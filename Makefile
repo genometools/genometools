@@ -560,7 +560,6 @@ endef
 
 $(eval $(call PROGRAM_template, bin/gt, $(GTMAIN_OBJ) $(TOOLS_OBJ) \
                                         lib/libgenometools.a \
-                                        $(GTLIBS) \
                                         $(ADDITIONAL_ZLIBS)))
 
 $(eval $(call PROGRAM_template, bin/examples/custom_stream, \
