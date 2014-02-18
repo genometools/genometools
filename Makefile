@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2006-2013 Gordon Gremme <gordon@gremme.org>
+# Copyright (c) 2006-2014 Gordon Gremme <gordon@gremme.org>
 # Copyright (c) 2008-2014 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
 # Copyright (c) 2006-2013 Center for Bioinformatics, University of Hamburg
 #
@@ -448,8 +448,14 @@ endif
 
 ifneq ($(with-sqlite),no)
   ifneq ($(useshared),yes)
-    LIBGENOMETOOLS_OBJ := $(LIBGENOMETOOLS_OBJ) lib/libsqlite.a
+    LIBGENOMETOOLS_OBJ += lib/libsqlite.a
   endif
+endif
+
+ifeq ($(wrapmemcpy),yes)
+  GT_LDFLAGS += -Wl,--wrap=memcpy
+  LIBGENOMETOOLS_OBJ += obj/src/memcpy.o
+  LUAMAIN_OBJ += obj/src/memcpy.o
 endif
 
 GT_CFLAGS_NO_WERROR:=$(GT_CFLAGS) -w
@@ -554,7 +560,6 @@ endef
 
 $(eval $(call PROGRAM_template, bin/gt, $(GTMAIN_OBJ) $(TOOLS_OBJ) \
                                         lib/libgenometools.a \
-                                        $(GTLIBS) \
                                         $(ADDITIONAL_ZLIBS)))
 
 $(eval $(call PROGRAM_template, bin/examples/custom_stream, \
