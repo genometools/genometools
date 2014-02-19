@@ -767,13 +767,6 @@ endif
 	@cp $(CURDIR)/LICENSE $(GTDISTDIR)
 	@cp $(CURDIR)/CONTRIBUTORS $(GTDISTDIR)
 	@cp $(CURDIR)/CHANGELOG $(GTDISTDIR)
-ifeq ($(SYSTEM),Windows)
-	@cp $(CURDIR)/bin/gt $(GTDISTDIR)/bin/gt.exe
-	@$(STRIP) $(GTDISTDIR)/bin/gt.exe
-else
-	@cp $(CURDIR)/bin/gt $(GTDISTDIR)/bin
-	@$(STRIP) $(GTDISTDIR)/bin/gt
-endif
 	@cp $(CURDIR)/doc/manuals/*.pdf $(GTDISTDIR)/doc
 	@cp -r $(CURDIR)/gtdata $(GTDISTDIR)
 	@cp -r $(CURDIR)/gtpython $(GTDISTDIR)
@@ -862,7 +855,13 @@ gt: bin/gt
 
 install: all
 	test -d $(prefix)/bin || mkdir -p $(prefix)/bin
+ifeq ($(SYSTEM),Windows)
+	cp bin/gt $(prefix)/bin/gt.exe
+	$(STRIP) $(prefix)/bin/gt.exe
+else
 	cp bin/gt $(prefix)/bin
+	$(STRIP) $(prefix)/bin/gt
+endif
 	cp -r gtdata $(prefix)/bin
 	test -d $(prefix)/include/genometools/core \
 	  || mkdir -p $(prefix)/include/genometools/core
