@@ -105,6 +105,7 @@
 #include "tools/gt_eval.h"
 #include "tools/gt_extractfeat.h"
 #include "tools/gt_extractseq.h"
+#include "tools/gt_fastq_sample.h"
 #include "tools/gt_featureindex.h"
 #include "tools/gt_fingerprint.h"
 #include "tools/gt_genomediff.h"
@@ -205,6 +206,7 @@ GtToolbox* gtt_tools(void)
   gt_toolbox_add_tool(tools, "eval", gt_eval());
   gt_toolbox_add_tool(tools, "extractfeat", gt_extractfeat());
   gt_toolbox_add_tool(tools, "extractseq", gt_extractseq());
+  gt_toolbox_add_tool(tools, "fastq_sample", gt_fastq_sample());
   gt_toolbox_add_tool(tools, "fingerprint", gt_fingerprint());
   gt_toolbox_add_tool(tools, "genomediff", gt_genomediff());
   gt_toolbox_add_tool(tools, "gff3", gt_gff3());
