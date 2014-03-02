@@ -15,21 +15,21 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "tools/gt_fastq_sample.h"
-#include "core/ma.h"
-#include "core/unused_api.h"
-#include "core/array_api.h"
-#include "core/undef_api.h"
-#include "core/str_array_api.h"
-#include "core/seq_iterator_fastq_api.h"
-#include "core/seq_iterator_api.h"
-#include "core/bittab_api.h"
-#include "core/mathsupport.h"
-#include "core/fastq.h"
-#include "core/fasta_api.h"
-#include "core/types_api.h"
-#include "core/assert_api.h"
 #include <stdlib.h>
+#include "core/array_api.h"
+#include "core/assert_api.h"
+#include "core/bittab_api.h"
+#include "core/fasta_api.h"
+#include "core/fastq.h"
+#include "core/ma.h"
+#include "core/mathsupport.h"
+#include "core/seq_iterator_api.h"
+#include "core/seq_iterator_fastq_api.h"
+#include "core/str_array_api.h"
+#include "core/types_api.h"
+#include "core/undef_api.h"
+#include "core/unused_api.h"
+#include "tools/gt_fastq_sample.h"
 
 typedef struct {
   GtUword length;
@@ -57,7 +57,8 @@ static GtOptionParser* gt_fastq_sample_option_parser_new(void *tool_arguments)
   gt_assert(arguments);
 
   /* init */
-  op = gt_option_parser_new("[option ...] -length <n> fastq_files",
+  op = gt_option_parser_new("[option ...] -length <n> <fastq_file> "
+                            "[<fastq_file>...]",
                             "Print samples by random choice from given FASTQ "\
                             "files using at least n sequence-chars.\n"\
                             "Output is fastq/fasta format depending on "\
@@ -68,25 +69,24 @@ static GtOptionParser* gt_fastq_sample_option_parser_new(void *tool_arguments)
                                      "minimum number of chars to be chosen",
                                      &arguments->length,
                                      GT_UNDEF_UWORD);
+  gt_option_is_mandatory(optionlength);
   gt_option_parser_add_option(op, optionlength);
+
   gt_option_parser_set_min_args(op, 1);
+
   return op;
 }
 
 static int gt_fastq_sample_arguments_check(GT_UNUSED int rest_argc,
-                                       void *tool_arguments,
-                                       GT_UNUSED GtError *err)
+                                           void *tool_arguments,
+                                           GtError *err)
 {
   GtFastqSampleArguments *arguments = tool_arguments;
   int had_err = 0;
   gt_error_check(err);
   gt_assert(arguments);
 
-  /* length ist a mandatory parameter */
-  if (arguments->length == GT_UNDEF_UWORD) {
-    gt_error_set(err, "length must be specified");
-    had_err = -1;
-  } else if (arguments->length < 1) {
+  if (arguments->length < 1) {
     gt_error_set(err, "length must be a positive integer");
     had_err = -1;
   }

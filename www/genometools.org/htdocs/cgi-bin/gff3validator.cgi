@@ -1,4 +1,4 @@
-#!/usr/bin/env ruby
+#!/usr/bin/env ruby1.8
 #
 # Copyright (c) 2012 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
 # Copyright (c) 2012 Center for Bioinformatics, University of Hamburg
