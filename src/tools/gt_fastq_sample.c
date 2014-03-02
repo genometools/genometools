@@ -15,21 +15,21 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "tools/gt_fastq_sample.h"
-#include "core/ma.h"
-#include "core/unused_api.h"
-#include "core/array_api.h"
-#include "core/undef_api.h"
-#include "core/str_array_api.h"
-#include "core/seq_iterator_fastq_api.h"
-#include "core/seq_iterator_api.h"
-#include "core/bittab_api.h"
-#include "core/mathsupport.h"
-#include "core/fastq.h"
-#include "core/fasta_api.h"
-#include "core/types_api.h"
-#include "core/assert_api.h"
 #include <stdlib.h>
+#include "core/array_api.h"
+#include "core/assert_api.h"
+#include "core/bittab_api.h"
+#include "core/fasta_api.h"
+#include "core/fastq.h"
+#include "core/ma.h"
+#include "core/mathsupport.h"
+#include "core/seq_iterator_api.h"
+#include "core/seq_iterator_fastq_api.h"
+#include "core/str_array_api.h"
+#include "core/types_api.h"
+#include "core/undef_api.h"
+#include "core/unused_api.h"
+#include "tools/gt_fastq_sample.h"
 
 typedef struct {
   GtUword length;
