@@ -1,0 +1,15 @@
+##gff-version   3
+##sequence-region   md5:063b1024d68e26716b7f38caf958316f 1 106973
+md5:063b1024d68e26716b7f38caf958316f	gth	gene	1074	1540	.	+	.	ID=gene1
+md5:063b1024d68e26716b7f38caf958316f	gth	mRNA	1074	1540	.	+	.	ID=barmRNA1;Parent=gene1;Target=md5:14c0ff5e76ef8ac009fdcc923f701356 1 303 +
+md5:063b1024d68e26716b7f38caf958316f	gth	exon	1074	1171	1	+	.	Parent=barmRNA1
+md5:063b1024d68e26716b7f38caf958316f	gth	CDS	1076	1171	.	+	0	ID=fooCDS1;Parent=barmRNA1
+md5:063b1024d68e26716b7f38caf958316f	md5:063b1024d68e26716b7f38caf958316f	five_prime_cis_splice_site	1172	1173	0.866	+	.	Parent=barmRNA1
+md5:063b1024d68e26716b7f38caf958316f	md5:063b1024d68e26716b7f38caf958316f	three_prime_cis_splice_site	1257	1258	0.994	+	.	Parent=barmRNA1
+md5:063b1024d68e26716b7f38caf958316f	gth	exon	1259	1354	1	+	.	Parent=barmRNA1
+md5:063b1024d68e26716b7f38caf958316f	gth	CDS	1259	1354	.	+	0	ID=fooCDS1;Parent=barmRNA1
+md5:063b1024d68e26716b7f38caf958316f	md5:063b1024d68e26716b7f38caf958316f	five_prime_cis_splice_site	1355	1356	5e-05	+	.	Parent=barmRNA1
+md5:063b1024d68e26716b7f38caf958316f	md5:063b1024d68e26716b7f38caf958316f	three_prime_cis_splice_site	1430	1431	0.745	+	.	Parent=barmRNA1
+md5:063b1024d68e26716b7f38caf958316f	gth	CDS	1432	1539	.	+	0	ID=fooCDS1;Parent=barmRNA1
+md5:063b1024d68e26716b7f38caf958316f	gth	exon	1432	1540	1	+	.	Parent=barmRNA1
+###

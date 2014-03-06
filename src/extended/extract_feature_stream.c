@@ -18,7 +18,7 @@
 #include "core/assert_api.h"
 #include "extended/extract_feature_stream_api.h"
 #include "extended/extract_feature_visitor.h"
-#include "extended/visitor_stream_api.h"
+#include "extended/visitor_stream.h"
 
 GtNodeStream* gt_extract_feature_stream_new(GtNodeStream *in_stream,
                                             GtRegionMapping *rm,
@@ -31,4 +31,11 @@ GtNodeStream* gt_extract_feature_stream_new(GtNodeStream *in_stream,
                                                      seqid, target, width,
                                                      outfp);
   return gt_visitor_stream_new(in_stream, nv);
+}
+
+void gt_extract_feature_stream_retain_id_attributes(GtExtractFeatureStream *es)
+{
+  gt_assert(es);
+  gt_extract_feature_visitor_retain_id_attributes((GtExtractFeatureVisitor*)
+                         gt_visitor_stream_get_visitor((GtVisitorStream*) es));
 }

@@ -36,4 +36,7 @@ GtNodeVisitor*            gt_extract_feature_visitor_new(GtRegionMapping *rm,
                                                          GtUword width,
                                                          GtFile *outfp);
 
+void                      gt_extract_feature_visitor_retain_id_attributes(
+                                                GtExtractFeatureVisitor *efv);
+
 #endif

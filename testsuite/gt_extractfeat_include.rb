@@ -153,6 +153,19 @@ Test do
   run "diff #{last_stdout} #{$testdata}gt_extractfeat_seqid_target.fas"
 end
 
+Name "gt extractfeat -retainids"
+Keywords "gt_extractfeat"
+Test do
+  run "#{$bin}gt extractfeat -seqfile #{$testdata}U89959_genomic.fas " +
+      "-type CDS -retainids -join -translate " +
+      "#{$testdata}gt_extractfeat_retainids.gff3"
+  run "diff #{last_stdout} #{$testdata}gt_extractfeat_retainids_join.fas"
+  run "#{$bin}gt extractfeat -seqfile #{$testdata}U89959_genomic.fas " +
+      "-type CDS -retainids -translate " +
+      "#{$testdata}gt_extractfeat_retainids.gff3"
+  run "diff #{last_stdout} #{$testdata}gt_extractfeat_retainids.fas"
+end
+
 Name "gt extractfeat compare query method combinations"
 Keywords "gt_extractfeat query_methods"
 Test do

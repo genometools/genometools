@@ -31,7 +31,8 @@ typedef struct {
        translate,
        seqid,
        target,
-       verbose;
+       verbose,
+       retainids;
   GtStr *type;
   GtSeqid2FileInfo *s2fi;
   GtUword width;
@@ -100,6 +101,12 @@ static GtOptionParser* gt_extractfeat_option_parser_new(void *tool_arguments)
                               &arguments->target, false);
   gt_option_parser_add_option(op, option);
 
+  /* -retainids */
+  option = gt_option_new_bool("retainids", "use ID attributes of extracted "
+                              "features as FASTA descriptions",
+                              &arguments->retainids, false);
+  gt_option_parser_add_option(op, option);
+
   /* -seqfile, -matchdesc, -usedesc and -regionmapping */
   gt_seqid2file_register_options(op, arguments->s2fi);
 
@@ -156,6 +163,10 @@ static int gt_extractfeat_runner(GT_UNUSED int argc, const char **argv,
                                     arguments->target,
                                     arguments->width,
                                     arguments->outfp);
+
+    if (arguments->retainids)
+      gt_extract_feature_stream_retain_id_attributes((GtExtractFeatureStream*)
+                                                       extract_feature_stream);
 
     /* pull the features through the stream and free them afterwards */
     had_err = gt_node_stream_pull(extract_feature_stream, err);
