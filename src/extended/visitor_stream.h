@@ -17,8 +17,11 @@
 #ifndef VISITOR_STREAM_H
 #define VISITOR_STREAM_H
 
+#include "extended/node_visitor_api.h"
 #include "extended/visitor_stream_api.h"
 
 const GtNodeStreamClass* gt_visitor_stream_class(void);
+
+const GtNodeVisitor*     gt_visitor_stream_get_visitor(GtVisitorStream* vs);
 
 #endif

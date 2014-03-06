@@ -32,7 +32,8 @@ struct GtExtractFeatureVisitor {
   bool join,
        translate,
        seqid,
-       target;
+       target,
+       retain_ids;
   GtUword fastaseq_counter,
                 width;
   GtRegionMapping *region_mapping;
@@ -54,10 +55,11 @@ static void construct_description(GtStr *description, const char *type,
                                   bool translate, GtStr *seqid,
                                   GtStrArray *target_ids)
 {
-  gt_assert(!gt_str_length(description));
-  gt_str_append_cstr(description, type);
-  gt_str_append_char(description, '_');
-  gt_str_append_ulong(description, counter);
+  if (!gt_str_length(description)) {
+    gt_str_append_cstr(description, type);
+    gt_str_append_char(description, '_');
+    gt_str_append_ulong(description, counter);
+  }
   if (join)
     gt_str_append_cstr(description, " (joined)");
   if (translate)
@@ -149,6 +151,11 @@ static int extract_feature_visitor_feature_node(GtNodeVisitor *nv,
 
     if (!had_err && gt_str_length(sequence)) {
       efv->fastaseq_counter++;
+      if (efv->retain_ids && gt_feature_node_get_attribute(child, "ID")) {
+        gt_assert(!gt_str_length(description));
+        gt_str_append_cstr(description, gt_feature_node_get_attribute(child,
+                                                                      "ID"));
+      }
       construct_description(description, efv->type, efv->fastaseq_counter,
                             efv->join, efv->translate, seqid, target_ids);
       had_err = show_entry(description, sequence, efv->translate, efv->width,
@@ -203,5 +210,14 @@ GtNodeVisitor* gt_extract_feature_visitor_new(GtRegionMapping *rm,
   efv->region_mapping = rm;
   efv->width = width;
   efv->outfp = outfp;
+  /* XXX */
+  efv->retain_ids = getenv("GT_RETAINIDS") ? true : false;
   return nv;
+}
+
+void gt_extract_feature_visitor_retain_id_attributes(GtExtractFeatureVisitor
+                                                                          *efv)
+{
+  gt_assert(efv);
+  efv->retain_ids = true;
 }

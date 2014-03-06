@@ -82,3 +82,4 @@ testdata/genomediff
 gmon.out
 gprof_analysis.txt
 *.uedb
+._*

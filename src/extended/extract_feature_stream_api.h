@@ -43,4 +43,7 @@ GtNodeStream* gt_extract_feature_stream_new(GtNodeStream *in_stream,
                                             bool target, GtUword width,
                                             GtFile *outfp);
 
+void          gt_extract_feature_stream_retain_id_attributes(
+                                                       GtExtractFeatureStream*);
+
 #endif
