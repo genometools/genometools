@@ -78,3 +78,9 @@ GtNodeStream* gt_visitor_stream_new(GtNodeStream *in_stream,
   visitor_stream->visitor = visitor;
   return ns;
 }
+
+const GtNodeVisitor* gt_visitor_stream_get_visitor(GtVisitorStream* vs)
+{
+  gt_assert(vs && vs->visitor);
+  return vs->visitor;
+}
