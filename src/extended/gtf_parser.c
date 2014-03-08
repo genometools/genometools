@@ -137,6 +137,7 @@ static int construct_mRNAs(GT_UNUSED void *key, void *value, void *data,
   mRNA_strand = gt_feature_node_get_strand((GtFeatureNode*) first_node);
   mRNA_seqid = gt_genome_node_get_seqid(first_node);
 
+  /* TODO: support discontinuous start/stop codons */
   for (i = 0; !had_err && i < gt_array_size(gt_genome_node_array); i++) {
     gn = *(GtGenomeNode**) gt_array_get(gt_genome_node_array, i);
     if (gt_feature_node_get_attribute((GtFeatureNode*) gn,
@@ -187,13 +188,20 @@ static int construct_mRNAs(GT_UNUSED void *key, void *value, void *data,
       }
       if (!found_cds) {
         if (!had_err) {
-          gt_error_set(err, "found stop codon on line %u in file %s with no "
-                            "flanking CDS",
+          if (cinfo->tidy) {
+            gt_warning("found stop codon on line %u in file %s with no "
+                       "flanking CDS, ignoring it",
                        gt_genome_node_get_line_number(gn),
                        gt_genome_node_get_filename(gn));
-          had_err = -1;
+          } else {
+            gt_error_set(err, "found stop codon on line %u in file %s with no "
+                              "flanking CDS",
+                         gt_genome_node_get_line_number(gn),
+                         gt_genome_node_get_filename(gn));
+            had_err = -1;
+            break;
+          }
         }
-        break;
       } else {
         gt_array_rem(gt_genome_node_array, i);
         gt_genome_node_delete(gn);

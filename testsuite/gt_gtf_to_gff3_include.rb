@@ -43,7 +43,7 @@ if $gttestdata then
   Name "gt gtf_to_gff3 test (GENCODE)"
   Keywords "gt_gtf_to_gff3 large_gtf"
   Test do
-    run_test "#{$bin}gt gtf_to_gff3 " +
+    run_test "#{$bin}gt gtf_to_gff3 -tidy " +
              "#{$gttestdata}gtf/gencode.v11.annotation.gtf.gz " +
              "| #{$bin}gt gff3 -sort -tidy", :maxtime => 3600
     run "diff #{last_stdout} #{$gttestdata}gff3/gencode.v11.annotation.gff3"
