@@ -193,6 +193,19 @@ void           gt_feature_node_set_attribute(GtFeatureNode* feature_node,
    attributes. */
 void           gt_feature_node_remove_attribute(GtFeatureNode* feature_node,
                                                 const char *tag);
+/* Delivers the key (in <attr_name>)and value (in <attr_value>) of an
+   attribute. The <data> parameter carries over arbitrary user data from the
+   <gt_feature_node_foreach_attribute> call. */
+
+typedef void (*GtFeatureNodeAttributeIterFunc)(const char *attr_name,
+                                               const char *attr_value,
+                                               void *data);
+
+/* Calls <func> for each attribute in <feature_node>. Use <data> to forward
+   arbitrary data during traversal. */
+void           gt_feature_node_foreach_attribute(GtFeatureNode *feature_node,
+                                            GtFeatureNodeAttributeIterFunc func,
+                                            void *data);
 
 /* Return <true> if <feature_node> is a multi-feature, <false> otherwise. */
 bool           gt_feature_node_is_multi(const GtFeatureNode *feature_node);

@@ -28,8 +28,6 @@
 #include "extended/genome_node.h"
 #include "extended/transcript_feature_type.h"
 
-typedef void (*AttributeIterFunc)(const char *attr_name, const char *attr_value,
-                                  void *data);
 typedef int (*GtFeatureNodeTraverseFunc)(GtFeatureNode*, void*, GtError*);
 
 const GtGenomeNodeClass* gt_feature_node_class(void);
@@ -41,8 +39,6 @@ void           gt_feature_node_determine_transcripttypes(GtFeatureNode*);
 GtTranscriptFeatureType
                gt_feature_node_get_transcriptfeaturetype(GtFeatureNode*);
 void           gt_feature_node_set_end(GtFeatureNode*, GtUword);
-void           gt_feature_node_foreach_attribute(GtFeatureNode*,
-                                                 AttributeIterFunc, void *data);
 bool           gt_feature_node_has_CDS(const GtFeatureNode*);
 bool           gt_feature_node_has_splice_site(const GtFeatureNode*);
 double         gt_feature_node_average_splice_site_prob(const GtFeatureNode*,

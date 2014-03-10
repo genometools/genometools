@@ -445,12 +445,6 @@ void gt_encseq_showatstartpos(FILE *fp,
                               const GtEncseq *encseq,
                               GtUword startpos);
 
-/* Writes the result of gt_encseq_effective_filelength() into the
-   location pointed to by <result>. Needed for the Ruby bindings. */
-void gt_encseq_effective_filelength_ptr(const GtEncseq *encseq,
-                                        uint64_t *result,
-                                        GtUword filenum);
-
 /* The following function shows the encoded sequence at position <startpos> up
    to the first <depth> characters or 30 positions, whichever is the minimum.
    If <depth> is 0, then the entire suffix is shown.

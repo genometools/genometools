@@ -25,7 +25,7 @@
 #include "core/undef_api.h"
 #include "core/unused_api.h"
 #include "core/warning_api.h"
-#include "extended/check_boundaries_visitor.h"
+#include "extended/check_boundaries_visitor_api.h"
 #include "extended/feature_node_iterator_api.h"
 #include "extended/node_visitor_api.h"
 

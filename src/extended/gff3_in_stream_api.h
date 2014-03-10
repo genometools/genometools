@@ -19,7 +19,9 @@
 #define GFF3_IN_STREAM_API_H
 
 #include <stdio.h>
+#include "core/str_array_api.h"
 #include "extended/node_stream_api.h"
+#include "extended/type_checker_api.h"
 
 /* Implements the <GtNodeStream> interface. A <GtGFF3InStream> parses GFF3 files
    and returns them as a stream of <GtGenomeNode> objects. */
@@ -43,9 +45,23 @@ void                     gt_gff3_in_stream_check_id_attributes(GtGFF3InStream
    up features which would normally lead to an error. */
 void                     gt_gff3_in_stream_enable_tidy_mode(GtGFF3InStream
                                                             *gff3_in_stream);
+/* Enable strict mode for <gff3_in_stream>. */
+void                     gt_gff3_in_stream_enable_strict_mode(GtGFF3InStream
+                                                              *gff3_in_stream);
 /* Show progress bar on <stdout> to convey the progress of parsing the GFF3
    files underlying <gff3_in_stream>. */
 void                     gt_gff3_in_stream_show_progress_bar(GtGFF3InStream
                                                              *gff3_in_stream);
+/* Returns a <GtStrArray*> which contains all type names in alphabetical order
+   which have been parsed by <gff3_in_stream>.
+   The caller is responsible to free it! */
+GtStrArray*              gt_gff3_in_stream_get_used_types(GtNodeStream
+                                                          *gff3_in_stream);
+/* Sets <type_checker> to be the type checker used in <gff3_in_stream>. That
+   is, it will be queried when the validity of SO types is to be determined. */
+void                     gt_gff3_in_stream_set_type_checker(GtNodeStream
+                                                            *gff3_in_stream,
+                                                            GtTypeChecker
+                                                            *type_checker);
 
 #endif

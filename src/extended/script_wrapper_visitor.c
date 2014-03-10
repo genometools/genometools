@@ -17,7 +17,7 @@
 
 #include "core/assert_api.h"
 #include "core/class_alloc_lock.h"
-#include "extended/script_wrapper_visitor.h"
+#include "extended/script_wrapper_visitor_api.h"
 #include "extended/node_visitor_api.h"
 
 struct GtScriptWrapperVisitor {
@@ -30,6 +30,8 @@ struct GtScriptWrapperVisitor {
   GtScriptWrapperVisitorEOFNodeFunc eof_node_func;
   GtScriptWrapperVisitorFreeFunc free_func;
 };
+
+const GtNodeVisitorClass* gt_script_wrapper_visitor_class(void);
 
 #define gt_script_wrapper_visitor_cast(GV)\
         gt_node_visitor_cast(gt_script_wrapper_visitor_class(), GV)

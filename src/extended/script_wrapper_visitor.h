@@ -18,33 +18,6 @@
 #ifndef SCRIPT_WRAPPER_VISITOR_H
 #define SCRIPT_WRAPPER_VISITOR_H
 
-/* Implements the <GtNodeVisitor> interface. */
-typedef struct GtScriptWrapperVisitor GtScriptWrapperVisitor;
-
-#include "extended/node_visitor.h"
-
-typedef void (*GtScriptWrapperVisitorFreeFunc)(GtNodeVisitor*);
-typedef int  (*GtScriptWrapperVisitorCommentNodeFunc)(GtCommentNode*,
-                                                      GtError*);
-typedef int  (*GtScriptWrapperVisitorFeatureNodeFunc)(GtFeatureNode*,
-                                                      GtError*);
-typedef int  (*GtScriptWrapperVisitorRegionNodeFunc)(GtRegionNode*,
-                                                     GtError*);
-typedef int  (*GtScriptWrapperVisitorSequenceNodeFunc)(GtSequenceNode*,
-                                                       GtError*);
-typedef int  (*GtScriptWrapperVisitorMetaNodeFunc)(GtMetaNode*,
-                                                   GtError*);
-typedef int  (*GtScriptWrapperVisitorEOFNodeFunc)(GtEOFNode*,
-                                                  GtError*);
-
-const GtNodeVisitorClass* gt_script_wrapper_visitor_class(void);
-GtNodeVisitor*            gt_script_wrapper_visitor_new(
-                                        GtScriptWrapperVisitorCommentNodeFunc,
-                                        GtScriptWrapperVisitorFeatureNodeFunc,
-                                        GtScriptWrapperVisitorRegionNodeFunc,
-                                        GtScriptWrapperVisitorSequenceNodeFunc,
-                                        GtScriptWrapperVisitorMetaNodeFunc,
-                                        GtScriptWrapperVisitorEOFNodeFunc,
-                                        GtScriptWrapperVisitorFreeFunc);
+#include "extended/script_wrapper_visitor_api.h"
 
 #endif

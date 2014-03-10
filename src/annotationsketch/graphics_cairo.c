@@ -30,7 +30,7 @@
 
 #include <math.h>
 #include "annotationsketch/default_formats.h"
-#include "annotationsketch/graphics_cairo.h"
+#include "annotationsketch/graphics_cairo_api.h"
 #include "annotationsketch/graphics_rep.h"
 #include "core/file.h"
 #include "core/fileutils_api.h"
@@ -53,6 +53,8 @@ struct GtGraphicsCairo {
   PangoFontDescription *desc;
   int font_height;
 };
+
+const GtGraphicsClass* gt_graphics_cairo_class(void);
 
 #define gt_graphics_cairo_cast(G)\
         gt_graphics_cast(gt_graphics_cairo_class(), G)

@@ -16,7 +16,7 @@
 
 #include "core/ma_api.h"
 #include "core/output_file_api.h"
-#include "extended/dup_feature_stream.h"
+#include "extended/dup_feature_stream_api.h"
 #include "extended/gff3_in_stream.h"
 #include "extended/gff3_out_stream_api.h"
 #include "tools/gt_interfeat.h"

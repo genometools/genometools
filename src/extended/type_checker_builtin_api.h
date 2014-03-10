@@ -15,15 +15,15 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef TYPE_CHECKER_BUILTIN_H
-#define TYPE_CHECKER_BUILTIN_H
+#ifndef TYPE_CHECKER_BUILTIN_API_H
+#define TYPE_CHECKER_BUILTIN_API_H
 
-#include "extended/type_checker.h"
+#include "extended/type_checker_api.h"
 
 /* Implements the GtTypeChecker interface with built-in types. */
 typedef struct GtTypeCheckerBuiltin GtTypeCheckerBuiltin;
 
-const GtTypeCheckerClass* gt_type_checker_builtin_class(void);
-GtTypeChecker*            gt_type_checker_builtin_new();
+/* Creates a new <GtTypeCheckerBuiltin>. */
+GtTypeChecker* gt_type_checker_builtin_new();
 
 #endif

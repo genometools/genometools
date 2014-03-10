@@ -320,6 +320,15 @@ ifeq ($(findstring clang,$(CC)),clang)
   GT_CPPFLAGS += -Qunused-arguments -Wno-parentheses
 endif
 
+# check whether version scripts can be used
+ifeq ($(shell ld -V | grep GNU > /dev/null; echo $$?),0)
+  HAS_GNU_LD:=yes
+  VERSION_SCRIPT:=obj/public_symbols.lst
+  VERSION_SCRIPT_PARAM:=-Wl,--version-script=$(VERSION_SCRIPT)
+else
+  HAS_GNU_LD:=no
+endif
+
 ifneq ($(sharedlib),no)
   SHARED_LIBGENOMETOOLS := lib/libgenometools$(SHARED_OBJ_NAME_EXT)
 endif
@@ -541,11 +550,13 @@ endif
 lib/libgenometools$(SHARED_OBJ_NAME_EXT): obj/gt_config.h \
                                           $(LIBGENOMETOOLS_OBJ) \
                                           $(ADDITIONAL_SO_DEPS) \
-                                          $(ADDITIONAL_ZLIBS)
+                                          $(ADDITIONAL_ZLIBS) \
+                                          $(VERSION_SCRIPT)
 	@echo "[link $(@F)]"
 	@test -d $(@D) || mkdir -p $(@D)
-	@$(CC) $(EXP_LDFLAGS) $(GT_LDFLAGS) $(ADDITIONAL_SO_DEPS) $(SHARED) $(LIBGENOMETOOLS_OBJ) \
-	-o $@ $(GTSHAREDLIB_LIBDEP)
+	@$(CC) $(EXP_LDFLAGS) $(VERSION_SCRIPT_PARAM) \
+	  $(GT_LDFLAGS) $(ADDITIONAL_SO_DEPS) $(SHARED) $(LIBGENOMETOOLS_OBJ) \
+	  -o $@ $(GTSHAREDLIB_LIBDEP)
 
 define PROGRAM_template
 $(1): $(2)
@@ -604,6 +615,24 @@ bin/lua: $(LUAMAIN_OBJ)
 	@echo "[link $(@F)]"
 	@test -d $(@D) || mkdir -p $(@D)
 	@$(CC) $(EXP_LDFLAGS) $(GT_LDFLAGS) $^ -lm $(LUA_LDLIB) -o $@
+
+API_HEADERS=$(foreach DIR,$(LIBGENOMETOOLS_DIRS),$(wildcard $(DIR)/*_api.h))
+
+obj/public_symbols.lst: $(API_HEADERS) $(LIBGENOMETOOLS_SRC)
+	@echo '[gathering public API symbols to $@]'
+	@echo "VERSION {\n\tglobal:" > $@
+	@cat $(API_HEADERS) | tr ' ' '\n' \
+	 | grep -E '^(gt_[0-9a-zA-Z_]+)(\[|\()' \
+	 | cut -d'[' -f1 | cut -d'(' -f1 | sort | uniq > $@.src
+	@cat $(LIBGENOMETOOLS_PRESRC) | tr ' ' '\n' \
+	 | grep -E '(gt_[0-9a-zA-Z_]+_p)(\[|\()' \
+	 | cut -d'(' -f1 >> $@.src
+	@for L in `cat $@.src`; do \
+	  echo "\t\t$$L;" >> $@; \
+	done;
+	@echo "\t\tgt_array_add_ptr;" >> $@
+	@echo "\t\tgt_str_get_mem;" >> $@
+	@echo '\tlocal: *;\n\t};' >> $@
 
 obj/gt_config.h: VERSION
 	@echo '[create $@]'
