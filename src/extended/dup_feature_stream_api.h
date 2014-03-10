@@ -14,8 +14,8 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef DUP_FEATURE_STREAM_H
-#define DUP_FEATURE_STREAM_H
+#ifndef DUP_FEATURE_STREAM_API_H
+#define DUP_FEATURE_STREAM_API_H
 
 #include <stdio.h>
 #include "extended/node_stream_api.h"
