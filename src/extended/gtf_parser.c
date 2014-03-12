@@ -257,7 +257,7 @@ static int delete_mRNAs(GT_UNUSED void *key, void *value,
                         GT_UNUSED void *data, GT_UNUSED GtError *err)
 {
   GtArray *gt_genome_node_array = (GtArray*) value;
-  unsigned long i;
+  GtUword i;
 
   gt_assert(key && value);
   for (i = 0; i < gt_array_size(gt_genome_node_array); i++) {
