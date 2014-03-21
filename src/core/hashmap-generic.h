@@ -85,7 +85,7 @@
   (*keytag##_##valuetag##_gt_hashmap_KeyCmpWithData)(         \
     const keytype a, const keytype b, const void *data);      \
                                                               \
-  /*@unused@*/ static inline                                  \
+  /*@unused@*/ GT_UNUSED static inline                        \
   GtHashtable * keytag##_##valuetag##_gt_hashmap_new(void)    \
   {                                                           \
     return gt_hashtable_new(keytag##_##valuetag##_hashtype);  \
