@@ -358,17 +358,3 @@ seqReaderSetMove2Backlog(void *backlogState, const void *seqData,
     }
   }
 }
-
-static inline int
-seqReaderSetGetConsumerTag(struct seqReaderState *state)
-{
-  gt_assert(state);
-  return state->tag;
-}
-
-static inline void
-seqReaderSetAdvanceConsumer(struct seqReaderState *state, size_t len)
-{
-  gt_assert(state);
-  state->nextReadPos += len;
-}

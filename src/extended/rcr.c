@@ -32,7 +32,6 @@
 #include "core/chardef.h"
 #include "core/compat.h"
 #include "core/disc_distri_api.h"
-#include "core/hashmap-generic.h"
 #include "core/log_api.h"
 #include "core/ma.h"
 #include "core/mathsupport.h"
@@ -78,11 +77,6 @@
 
 #define DEFAULTMQUAL 0
 #define DEFAULTQUAL '-'
-
-DECLARE_HASHMAP(GtWord, rcr_li, GtUint64, ull, static, inline)
-DEFINE_HASHMAP(GtWord, rcr_li, GtUint64, ull, gt_ht_ul_elem_hash,
-               gt_ht_ul_elem_cmp, NULL_DESTRUCTOR, NULL_DESTRUCTOR, static,
-               inline)
 
 /* TODO: use ONE struct for both, this is duplicating code and stupid */
 struct GtRcrEncoder {
