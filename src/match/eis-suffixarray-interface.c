@@ -45,13 +45,6 @@ SAIBaseGetRot0Pos(const SASeqSrc *baseClass)
   return gt_SAIGetRot0Pos(constSASS2SAI(baseClass));
 }
 
-static inline size_t
-SAIBaseGetOrigSeq(const SASeqSrc *baseClass, Symbol *dest, GtUword pos,
-                  size_t len)
-{
-  return gt_SAIGetOrigSeq(constSASS2SAI(baseClass), dest, pos, len);
-}
-
 MRAEnc *
 gt_SAIBaseNewMRAEnc(const SASeqSrc *baseClass)
 {

@@ -138,19 +138,6 @@ static int encseq_lua_get_decoded_char(lua_State *L)
   return 1;
 }
 
-static inline void push_values_as_table(lua_State *L, unsigned char *buf,
-                                        GtUword length)
-{
-  GtUword i;
-  gt_assert(buf && length > 0);
-  lua_newtable(L);
-  for (i = 0; i < length; i++) {
-    /* lua_pushinteger(L, i+1); */ /* in Lua we index from 1 on */
-    lua_pushinteger(L, buf[i]);
-    lua_rawseti(L, -2, i+1);
-  }
-}
-
 static int encseq_lua_push_buffer(lua_State *L, unsigned char *arr,
                                   GtUword len)
 {

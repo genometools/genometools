@@ -136,26 +136,12 @@ encIdxSeq2blockCompositionSeq(struct encIdxSeq *seq)
     - offsetof(struct blockCompositionSeq, baseClass));
 }
 
-static inline struct encIdxSeq *
-blockCompositionSeq2encIdxSeq(struct blockCompositionSeq *seq)
-{
-  gt_assert(seq);
-  return &(seq->baseClass);
-}
-
 static inline const struct blockCompositionSeq *
 constEncIdxSeq2blockCompositionSeq(const struct encIdxSeq *seq)
 {
   gt_assert(seq && seq->classInfo == &blockCompositionSeqClass);
   return (struct blockCompositionSeq *)((char *)seq
     - offsetof(struct blockCompositionSeq, baseClass));
-}
-
-static inline const struct encIdxSeq *
-constBlockCompositionSeq2encIdxSeq(const struct blockCompositionSeq *seq)
-{
-  gt_assert(seq);
-  return &(seq->baseClass);
 }
 
 struct appendState
@@ -879,15 +865,6 @@ sBlockGetcbOffset(const struct superBlock *sBlock,
 {
   BitOffset offset = sBlockGetcbOffsetOffset(sBlock, seqIdx);
   return gt_bsGetUInt64(sBlock->cwData, offset, seqIdx->callBackDataOffsetBits);
-}
-
-static inline PermCompIndex
-sBlockGetCompIdx(const struct superBlock *sBlock, unsigned compIdxNum,
-                 const struct blockCompositionSeq *seqIdx)
-{
-  BitOffset offset = sBlockGetCompIdxOffset(sBlock, seqIdx, compIdxNum);
-  unsigned bitsPerCompositionIdx = seqIdx->compositionTable.compositionIdxBits;
-  return gt_bsGetPermCompIndex(sBlock->cwData, offset, bitsPerCompositionIdx);
 }
 
 static inline GtUword

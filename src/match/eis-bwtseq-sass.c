@@ -59,18 +59,6 @@ constSASS2BWTSASS(const SASeqSrc *baseClass)
     ((const char *)baseClass - offsetof(BWTSASeqSrc, baseClass));
 }
 
-static inline SASeqSrc *
-BWTSASS2SASS(BWTSASeqSrc *bwtSASS)
-{
-  return &bwtSASS->baseClass;
-}
-
-static inline const SASeqSrc *
-constBWTSASS2SASS(const BWTSASeqSrc *bwtSASS)
-{
-  return &bwtSASS->baseClass;
-}
-
 static Definedunsignedlong
 BWTSASSGetRot0Pos(const struct SASeqSrc *baseClass)
 {
