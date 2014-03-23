@@ -53,13 +53,14 @@ GtStrand gt_strand_join(GtStrand strand_a, GtStrand strand_b)
     case GT_STRAND_REVERSE:
       gt_assert(strand_a != GT_STRAND_FORWARD);
       return GT_STRAND_REVERSE;
-    case GT_STRAND_BOTH:
+    case GT_STRAND_BOTH: break;
     case GT_STRAND_UNKNOWN:
       /* strand_a == GT_STRAND_FORWARD -> stays the same */
       /* strand_a == GT_STRAND_REVERSE -> stays the same */
       /* strand_a == GT_STRAND_UNKNOWN -> stays the same */
       if (strand_a == GT_STRAND_BOTH)
         return GT_STRAND_UNKNOWN;
+      break;
     default: gt_assert(0);
   }
   return strand_a;
