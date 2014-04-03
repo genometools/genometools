@@ -64,3 +64,7 @@ technical guidelines).
 
 To report a bug, ask a question, or suggest new features, use the
 [GenomeTools issue tracker](https://github.com/genometools/genometools/issues).
+
+If you only have a small question and a gitter.im account you can check
+[![Gitter chat](https://badges.gitter.im/genometools/genometools.png)]
+(https://gitter.im/genometools/genometools) if one of the developers is online.
