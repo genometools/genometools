@@ -1,0 +1,203 @@
+/*
+  Copyright (c) 2014 Dirk Willrodt <willrodt@zbh.uni-hamburg.de>
+  Copyright (c) 2014 Center for Bioinformatics, University of Hamburg
+
+  Permission to use, copy, modify, and distribute this software for any
+  purpose with or without fee is hereby granted, provided that the above
+  copyright notice and this permission notice appear in all copies.
+
+  THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+  WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+  MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+  ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+  WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+  ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+*/
+
+#include <inttypes.h>
+#include <limits.h>
+
+#include "core/ma.h"
+#include "core/assert_api.h"
+#include "core/intbits.h"
+#include "core/unused_api.h"
+
+GT_UNUSED static size_t
+GT_INTSET_APPEND_S(gt_intset_size_)(GtUword maxelement, GtUword num_of_elems)
+{
+  size_t logsectionsize = (sizeof (GT_IS_E_TYPE)) + CHAR_BIT;
+  return sizeof (GT_IS_E_TYPE) * num_of_elems +
+    sizeof (GtUword) * (ELEM2SECTION(logsectionsize, maxelement) + 1);
+}
+
+struct GT_IS_TYPE
+{
+  GT_IS_E_TYPE *elements;
+  GtUword      *sectionstart;
+  size_t        logsectionsize;
+  GtUword       nextfree,
+                maxelement,
+                currentsectionnum,
+                numofsections,
+                num_of_elems,
+                previouselem;
+};
+
+GT_UNUSED static GT_IS_TYPE *
+GT_INTSET_APPEND_S(gt_intset_new_)(GtUword max_elem, GtUword num_of_elems)
+{
+  GT_IS_TYPE *intset = gt_malloc(sizeof (*intset));
+  GtUword idx;
+
+  intset->elements =
+    gt_malloc(sizeof (*intset->elements) * num_of_elems);
+  intset->logsectionsize = sizeof (GT_IS_E_TYPE) * CHAR_BIT;
+  intset->nextfree = 0;
+  intset->numofsections = ELEM2SECTION(intset->logsectionsize, max_elem) + 1;
+  intset->sectionstart = gt_malloc(sizeof (*intset->sectionstart) *
+                                   (intset->numofsections + 1));
+  intset->sectionstart[0] = 0;
+  for (idx = (GtUword) 1; idx <= intset->numofsections; idx++) {
+    intset->sectionstart[idx] = num_of_elems;
+  }
+  intset->maxelement = max_elem;
+  intset->currentsectionnum = 0;
+  intset->num_of_elems = num_of_elems;
+  intset->previouselem = ULONG_MAX;
+  return intset;
+}
+
+GT_UNUSED static void
+GT_INTSET_APPEND_S(gt_intset_delete_)(GT_IS_TYPE *intset)
+{
+  if (intset != NULL) {
+    gt_free(intset->elements);
+    gt_free(intset->sectionstart);
+    gt_free(intset);
+  }
+}
+
+GT_UNUSED static void
+GT_INTSET_APPEND_S(gt_intset_add_)(GT_IS_TYPE *intset, GtUword elem)
+{
+  GtUword *secstart = intset->sectionstart;
+  gt_assert(intset->nextfree < intset->num_of_elems &&
+            elem <= intset->maxelement &&
+            (intset->previouselem == ULONG_MAX || intset->previouselem < elem));
+  while (elem >= SECTIONMINELEM(intset->currentsectionnum + 1)) {
+    gt_assert(intset->currentsectionnum < intset->numofsections);
+    secstart[intset->currentsectionnum + 1] = intset->nextfree;
+    intset->currentsectionnum++;
+  }
+  gt_assert(SECTIONMINELEM(intset->currentsectionnum) <= elem &&
+            elem < SECTIONMINELEM(intset->currentsectionnum+1) &&
+            ELEM2SECTION(intset->logsectionsize,elem) ==
+            intset->currentsectionnum);
+  intset->elements[intset->nextfree++] = (GT_IS_E_TYPE) elem;
+  intset->previouselem = elem;
+}
+
+static bool GT_INTSET_APPEND_S(gt_intset_binarysearch_is_member)(
+                                                   const GT_IS_E_TYPE *leftptr,
+                                                   const GT_IS_E_TYPE *rightptr,
+                                                   GT_IS_E_TYPE elem)
+{
+  const GT_IS_E_TYPE *midptr;
+    while (leftptr <= rightptr) {
+      midptr = leftptr + (((GtUword) (rightptr-leftptr)) >> 1);
+      if (elem < *midptr) {
+        rightptr = midptr-1;
+      }
+      else {
+        if (elem > *midptr)
+          leftptr = midptr + 1;
+        else
+          return true;
+      }
+    }
+  return false;
+}
+
+GT_UNUSED static bool
+GT_INTSET_APPEND_S(gt_intset_is_member_)(const GT_IS_TYPE *intset, GtUword elem)
+{
+  GtUword *secstart = intset->sectionstart;
+  if (elem <= intset->maxelement)
+  {
+    const GtUword sectionnum = ELEM2SECTION(intset->logsectionsize, elem);
+
+    if (secstart[sectionnum] < secstart[sectionnum+1]) {
+      return GT_INTSET_APPEND_S(gt_intset_binarysearch_is_member)(
+                              intset->elements + secstart[sectionnum],
+                              intset->elements + secstart[sectionnum+1] - 1,
+                              (uint64_t) elem);
+    }
+  }
+  return false;
+}
+
+GT_UNUSED static bool
+GT_INTSET_APPEND_S(gt_intset_is_member_fp_)(const void *set, GtUword elem)
+{
+  return GT_INTSET_APPEND_S(gt_intset_is_member_)((const GT_IS_TYPE*) set, elem);
+}
+
+static GtUword GT_INTSET_APPEND_S(gt_intset_binarysearch_pos2seqnum)(
+                                                   const GT_IS_E_TYPE *leftptr,
+                                                   const GT_IS_E_TYPE *rightptr,
+                                                   GT_IS_E_TYPE pos)
+{
+  const GT_IS_E_TYPE *midptr,
+                   *found = NULL,
+                   *leftorig = leftptr;
+
+  gt_assert(leftptr <= rightptr);
+  if (pos < *leftptr)
+    return 0;
+
+  if (pos > *rightptr)
+    return 1UL + (GtUword) (rightptr - leftptr);
+
+  gt_assert(pos > *leftptr && pos < *rightptr);
+  while (leftptr <= rightptr) {
+    midptr = leftptr + ((GtUword) (rightptr - leftptr) >> 1);
+    if (pos < *midptr)
+      rightptr = midptr - 1;
+    else {
+      found = midptr;
+      if (pos > *midptr)
+        leftptr = midptr + 1;
+      else
+        break;
+    }
+  }
+  gt_assert(found != NULL && found >= leftorig);
+  return 1UL + (GtUword) (found - leftorig);
+}
+
+GT_UNUSED static GtUword
+GT_INTSET_APPEND_S(gt_intset_pos2seqnum_)(const GT_IS_TYPE *intset,
+                                          GtUword pos)
+{
+  GtUword sectionnum = ELEM2SECTION(intset->logsectionsize,pos);
+
+  gt_assert(pos <= intset->maxelement);
+  if (intset->sectionstart[sectionnum] < intset->sectionstart[sectionnum+1]) {
+    return intset->sectionstart[sectionnum] +
+           GT_INTSET_APPEND_S(gt_intset_binarysearch_pos2seqnum)(
+                     intset->elements + intset->sectionstart[sectionnum],
+                     intset->elements + intset->sectionstart[sectionnum+1] - 1,
+                     (GT_IS_E_TYPE) pos);
+  }
+  return intset->sectionstart[sectionnum];
+}
+
+GT_UNUSED static GtUword
+GT_INTSET_APPEND_S(gt_intset_pos2seqnum_fp_)(const void *set, GtUword pos)
+{
+  return GT_INTSET_APPEND_S(gt_intset_pos2seqnum_)((const GT_IS_TYPE*) set,
+                                                   pos);
+}
+/* vim: ft=c
+ */
