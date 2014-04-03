@@ -44,7 +44,7 @@ static inline GtUword gt_combinatorics_factorial(unsigned n)
 
 /*@unused@*/
 static inline GtUint64 gt_combinatorics_i_pow(GtUint64 x,
-                                                        unsigned int i)
+                                              unsigned int i)
 {
    GtUint64 result = 1ULL;
    if (x == 2ULL)
@@ -59,10 +59,9 @@ static inline GtUint64 gt_combinatorics_i_pow(GtUint64 x,
 }
 
 /*@unused@*/
-static inline GtUword gt_combinatorics_multinomial(
-                                                      unsigned n,
-                                                      size_t numBins,
-                                                      const unsigned binSizes[])
+static inline GtUword gt_combinatorics_multinomial(unsigned n,
+                                                   size_t numBins,
+                                                   const unsigned binSizes[])
 {
   GtUword accum = 1UL, nfac;
   size_t i, maxBin = 0, maxBinSize = 0;

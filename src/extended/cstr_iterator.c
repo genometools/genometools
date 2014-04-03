@@ -23,7 +23,7 @@
 #include "extended/cstr_iterator_rep.h"
 
 int gt_cstr_iterator_reset(GtCstrIterator *cstr_iterator,
-                         GtError *err)
+                           GtError *err)
 {
   gt_error_check(err);
   gt_assert(cstr_iterator && cstr_iterator->c_class);
@@ -33,15 +33,15 @@ int gt_cstr_iterator_reset(GtCstrIterator *cstr_iterator,
 }
 
 int gt_cstr_iterator_next(GtCstrIterator *cstr_iterator,
-                        const char **string,
-                        GtError *err)
+                          const char **string,
+                          GtError *err)
 {
   gt_error_check(err);
   gt_assert(cstr_iterator && cstr_iterator->c_class);
   if (cstr_iterator->c_class->next_func != NULL)
     return cstr_iterator->c_class->next_func(cstr_iterator,
-                                           string,
-                                           err);
+                                             string,
+                                             err);
   return 0;
 }
 
