@@ -32,6 +32,7 @@
 #include "core/parseutils.h"
 #include "core/undef_api.h"
 #include "core/unused_api.h"
+#include "core/warning_api.h"
 #include "core/xansi_api.h"
 #include "core/xposix.h"
 
@@ -957,6 +958,22 @@ void gt_option_parser_set_min_max_args(GtOptionParser *op,
   op->max_additional_arguments = max_additional_arguments;
 }
 
+static void gt_option_parser_warn_on_nonascii(const char *str)
+{
+  GtUword j = 1;
+  while (*str != '\0') {
+    if (!isprint(*str)) {
+      gt_warning("option '%s' contains non-ASCII character at "
+                 "offset "GT_WU" -- possible copy&paste from "
+                 "non-ASCII context?",
+                 str, j);
+      break;
+    }
+    str++;
+    j++;
+  }
+}
+
 GtOPrval gt_option_parser_parse(GtOptionParser *op, int *parsed_args, int argc,
                                 const char **argv,
                                 GtShowVersionFunc version_func, GtError *err)
@@ -986,6 +1003,10 @@ GtOPrval gt_option_parser_parse(GtOptionParser *op, int *parsed_args, int argc,
   if (op->progname)
     gt_free(op->progname);
   op->progname = gt_cstr_dup(argv[0]);
+
+  for (argnum = 1; argnum < argc; argnum++) {
+    gt_option_parser_warn_on_nonascii(argv[argnum]);
+  }
 
   for (argnum = 1; argnum < argc; argnum++) {
     if (!(argv[argnum] && argv[argnum][0] == '-' && strlen(argv[argnum]) > 1) ||

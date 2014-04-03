@@ -411,6 +411,7 @@ int gt_gtf_parser_parse(GtGTFParser *parser, GtQueue *genome_nodes,
     line = gt_str_get(line_buffer);
     line_length = gt_str_length(line_buffer);
     line_number++;
+    gene_name = gene_id = transcript_id = transcript_name = NULL;
     had_err = 0;
 
     if (line_length == 0) {

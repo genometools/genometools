@@ -2127,8 +2127,12 @@ int gt_gff3_parser_parse_genome_nodes(GtGFF3Parser *parser, int *status_code,
   }
 
   if (!had_err && rval == EOF && *line_number == 0) {
-    gt_error_set(err, "GFF3 file \"%s\" is empty", gt_str_get(filenamestr));
-    had_err = -1;
+    if (parser->tidy) {
+      gt_warning("GFF3 file \"%s\" is empty", gt_str_get(filenamestr));
+    } else {
+      gt_error_set(err, "GFF3 file \"%s\" is empty", gt_str_get(filenamestr));
+      had_err = -1;
+    }
   }
 
   if (!had_err && !parser->strict) {

@@ -28,6 +28,8 @@
 typedef struct {
   GtOutputFileInfo *ofi;
   GtFile *outfp;
+  bool retainids,
+       tidy;
 } MergeArguments;
 
 static void* gt_merge_arguments_new(void)
@@ -50,9 +52,25 @@ static GtOptionParser* gt_merge_option_parser_new(void *tool_arguments)
 {
   MergeArguments *arguments = tool_arguments;
   GtOptionParser *op;
+  GtOption *option;
   gt_assert(arguments);
   op = gt_option_parser_new("[option ...] [GFF3_file ...]",
                          "Merge sorted GFF3 files in sorted fashion.");
+
+  /* -retainids */
+  option = gt_option_new_bool("retainids",
+                              "when available, use the original IDs provided "
+                              "in the source file\n"
+                              "(memory consumption is proportional to the "
+                              "input file size(s))", &arguments->retainids,
+                              false);
+  gt_option_parser_add_option(op, option);
+
+  /* -tidy */
+  option = gt_option_new_bool("tidy", "try to tidy the GFF3 files up "
+                              "during parsing", &arguments->tidy, false);
+  gt_option_parser_add_option(op, option);
+
   gt_output_file_info_register_options(arguments->ofi, op, &arguments->outfp);
   return op;
 }
@@ -81,6 +99,8 @@ static int gt_merge_runner(int argc, const char **argv, int parsed_args,
     /* we got files to open */
     for (i = parsed_args; i < argc; i++) {
       gff3_in_stream = gt_gff3_in_stream_new_sorted(argv[i]);
+      if (arguments->tidy)
+        gt_gff3_in_stream_enable_tidy_mode((GtGFF3InStream*) gff3_in_stream);
       gt_array_add(genome_streams, gff3_in_stream);
     }
    }
@@ -92,9 +112,12 @@ static int gt_merge_runner(int argc, const char **argv, int parsed_args,
 
   /* create a merge stream */
   merge_stream = gt_merge_stream_new(genome_streams);
+  gt_assert(merge_stream);
 
   /* create a gff3 output stream */
   gff3_out_stream = gt_gff3_out_stream_new(merge_stream, arguments->outfp);
+  if (arguments->retainids)
+    gt_gff3_out_stream_retain_id_attributes((GtGFF3OutStream*) gff3_out_stream);
 
   /* pull the features through the stream and free them afterwards */
   had_err = gt_node_stream_pull(gff3_out_stream, err);

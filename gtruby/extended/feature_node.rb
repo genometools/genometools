@@ -87,7 +87,8 @@ module GT
     end
 
     def set_source(source)
-      GT.gt_feature_node_set_source(@genome_node, source.to_s)
+      s = GT::Str.new(source.to_s)
+      GT.gt_feature_node_set_source(@genome_node, s)
     end
 
     def update_attribs
