@@ -95,7 +95,7 @@ module ClassGenOpts
 
     opts.parse!(args)
     if (args.length != 2)
-      CodeGen.perror "wrong number of arguments\n" + opts
+      CodeGen.perror "wrong number of arguments\n" + opts.to_s
     end
     options.subdir = args[0]
     options.dirname = File.join "src", options.subdir
