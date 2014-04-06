@@ -51,7 +51,10 @@ class Error:
     from_param = classmethod(from_param)
 
     def get(self):
-        return gtlib.gt_error_get(self.error)
+        if self.is_set():
+            return gtlib.gt_error_get(self.error)
+        else:
+            return "undefined error -- please report this as a bug!"
 
     def set(self, errmsg):
         return gtlib.gt_error_set_nonvariadic(self.error, str(errmsg))

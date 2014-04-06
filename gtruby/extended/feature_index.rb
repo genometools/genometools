@@ -98,7 +98,9 @@ module GT
     def get_first_seqid
       err = Error.new()
       val = GT.gt_feature_index_get_first_seqid(@feature_index, err.to_ptr)
-      if val.nil? then GT.gterror(err) end
+      if val.nil? then
+        GT.gterror(err) if err.is_set?
+      end
       val
     end
 

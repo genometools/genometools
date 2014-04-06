@@ -81,7 +81,8 @@ class FeatureIndex:
         err = Error()
         str = gtlib.gt_feature_index_get_first_seqid(self.fi, err)
         if str == None:
-            gterror(err)
+            if err.is_set():
+                gterror(err)
         return str
 
     def get_seqids(self):
