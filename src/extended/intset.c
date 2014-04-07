@@ -35,11 +35,11 @@ GtIntsetType gt_intset_best_type(GtUword maxelement,
 {
   GtIntsetType best = GT_INTSET_8;
   size_t min, tmp;
-  min = gt_intset_size_8(maxelement, num_of_elems);
-  tmp = gt_intset_size_16(maxelement, num_of_elems);
+  min = gt_intset_8_size(maxelement, num_of_elems);
+  tmp = gt_intset_16_size(maxelement, num_of_elems);
   best = min < tmp ? best : GT_INTSET_16;
   min = min < tmp ? min : tmp;
-  tmp = gt_intset_size_32(maxelement, num_of_elems);
+  tmp = gt_intset_32_size(maxelement, num_of_elems);
   return min < tmp ? best : GT_INTSET_32;
 }
 
@@ -53,13 +53,13 @@ int gt_intset_unit_test_notinset(const void *intset, GtUword start, GtUword end,
   in_set_func callback = NULL;
   switch (type) {
     case GT_INTSET_8:
-      callback = gt_intset_is_member_fp_8;
+      callback = gt_intset_8_is_member_fp;
       break;
     case GT_INTSET_16:
-      callback = gt_intset_is_member_fp_16;
+      callback = gt_intset_16_is_member_fp;
       break;
     case GT_INTSET_32:
-      callback = gt_intset_is_member_fp_32;
+      callback = gt_intset_32_is_member_fp;
       break;
   }
   for (test = start; test <= end; ++test) {
@@ -79,13 +79,13 @@ int gt_intset_unit_test_check_seqnum(const void *intset, GtUword start,
   seqnum_func callback = NULL;
   switch (type) {
     case GT_INTSET_8:
-      callback = gt_intset_pos2seqnum_fp_8;
+      callback = gt_intset_8_pos2seqnum_fp;
       break;
     case GT_INTSET_16:
-      callback = gt_intset_pos2seqnum_fp_16;
+      callback = gt_intset_16_pos2seqnum_fp;
       break;
     case GT_INTSET_32:
-      callback = gt_intset_pos2seqnum_fp_32;
+      callback = gt_intset_32_pos2seqnum_fp;
       break;
   }
   for (test = start; test <= end; ++test) {
@@ -113,9 +113,9 @@ int gt_intset_unit_test(GT_UNUSED GtError *err) {
     arr[idx] = arr[idx - 1] + gt_rand_max(stepsize) + 1;
   }
 
-  is8size = gt_intset_size_8(arr[num_of_elems - 1], num_of_elems);
-  is16size = gt_intset_size_16(arr[num_of_elems - 1], num_of_elems);
-  is32size = gt_intset_size_32(arr[num_of_elems - 1], num_of_elems);
+  is8size = gt_intset_8_size(arr[num_of_elems - 1], num_of_elems);
+  is16size = gt_intset_16_size(arr[num_of_elems - 1], num_of_elems);
+  is32size = gt_intset_32_size(arr[num_of_elems - 1], num_of_elems);
   type = gt_intset_best_type(arr[num_of_elems - 1], num_of_elems);
   switch (type) {
     case GT_INTSET_8:
@@ -131,9 +131,9 @@ int gt_intset_unit_test(GT_UNUSED GtError *err) {
 
   if (!had_err) {
     if (is8size < (size_t) UINT_MAX) {
-      is8 = gt_intset_new_8(arr[num_of_elems - 1], num_of_elems);
+      is8 = gt_intset_8_new(arr[num_of_elems - 1], num_of_elems);
       for (idx = 0; idx < num_of_elems; idx++) {
-        gt_intset_add_8(is8, arr[idx]);
+        gt_intset_8_add(is8, arr[idx]);
       }
       had_err = gt_intset_unit_test_notinset(is8, 0, arr[0] - 1,
                                              GT_INTSET_8, err);
@@ -148,13 +148,13 @@ int gt_intset_unit_test(GT_UNUSED GtError *err) {
                                                      arr[idx] - 1, idx,
                                                      GT_INTSET_8, err);
       }
-      gt_intset_delete_8(is8);
+      gt_intset_8_delete(is8);
     }
 
     if (!had_err && is16size < (size_t) UINT_MAX) {
-      is16 = gt_intset_new_16(arr[num_of_elems - 1], num_of_elems);
+      is16 = gt_intset_16_new(arr[num_of_elems - 1], num_of_elems);
       for (idx = 0; idx < num_of_elems; idx++) {
-        gt_intset_add_16(is16, arr[idx]);
+        gt_intset_16_add(is16, arr[idx]);
       }
       had_err = gt_intset_unit_test_notinset(is16, 0, arr[0] - 1,
                                              GT_INTSET_16, err);
@@ -169,12 +169,12 @@ int gt_intset_unit_test(GT_UNUSED GtError *err) {
                                                      arr[idx] - 1, idx,
                                                      GT_INTSET_16, err);
       }
-      gt_intset_delete_16(is16);
+      gt_intset_16_delete(is16);
     }
     if (!had_err && is32size < (size_t) UINT_MAX) {
-      is32 = gt_intset_new_32(arr[num_of_elems - 1], num_of_elems);
+      is32 = gt_intset_32_new(arr[num_of_elems - 1], num_of_elems);
       for (idx = 0; idx < num_of_elems; idx++) {
-        gt_intset_add_32(is32, arr[idx]);
+        gt_intset_32_add(is32, arr[idx]);
       }
       had_err = gt_intset_unit_test_notinset(is32, 0, arr[0] - 1,
                                              GT_INTSET_32, err);
@@ -189,7 +189,7 @@ int gt_intset_unit_test(GT_UNUSED GtError *err) {
                                                      arr[idx] - 1, idx,
                                                      GT_INTSET_32, err);
       }
-      gt_intset_delete_32(is32);
+      gt_intset_32_delete(is32);
     }
   }
   gt_free(arr);
