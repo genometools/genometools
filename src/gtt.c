@@ -59,9 +59,9 @@
 #include "extended/elias_gamma.h"
 #include "extended/encdesc.h"
 #include "extended/evaluator.h"
+#include "extended/feature_in_stream.h"
 #include "extended/feature_index.h"
 #include "extended/feature_index_memory.h"
-#include "extended/feature_in_stream.h"
 #include "extended/feature_node.h"
 #include "extended/feature_node_iterator_api.h"
 #include "extended/genome_node.h"
@@ -69,6 +69,7 @@
 #include "extended/golomb.h"
 #include "extended/hmm.h"
 #include "extended/huffcode.h"
+#include "extended/intset.h"
 #include "extended/luaserialize.h"
 #include "extended/popcount_tab.h"
 #include "extended/priority_queue.h"
@@ -323,6 +324,7 @@ GtHashmap* gtt_unit_tests(void)
   gt_hashmap_add(unit_tests, "hmm class", gt_hmm_unit_test);
   gt_hashmap_add(unit_tests, "huffman coding class", gt_huffman_unit_test);
   gt_hashmap_add(unit_tests, "interval tree class", gt_interval_tree_unit_test);
+  gt_hashmap_add(unit_tests, "intset classes", gt_intset_unit_test);
   gt_hashmap_add(unit_tests, "Lua serializer module",
                                                    gt_lua_serializer_unit_test);
   gt_hashmap_add(unit_tests, "mathsupport module", gt_mathsupport_unit_test);
