@@ -32,16 +32,16 @@
 #include "core/intbits.h"
 #include "core/unused_api.h"
 
-#define BITS_FOR_SIZE(SIZE)     ((SIZE) * CHAR_BIT)
-#define ELEM2SECTION(LOGVAL,X)  ((X) >> (LOGVAL))
-#define SECTIONMINELEM(S)       ((S) << intset->logsectionsize)
+#define GT_BITS_FOR_SIZE(SIZE)     ((SIZE) * CHAR_BIT)
+#define GT_ELEM2SECTION(LOGVAL,X)  ((X) >> (LOGVAL))
+#define GT_SECTIONMINELEM(S)       ((S) << intset->logsectionsize)
 
 GT_UNUSED static size_t
 gt_intset_8_size(GtUword maxelement, GtUword num_of_elems)
 {
   size_t logsectionsize = (sizeof (uint8_t)) + CHAR_BIT;
   return sizeof (uint8_t) * num_of_elems +
-    sizeof (GtUword) * (ELEM2SECTION(logsectionsize, maxelement) + 1);
+    sizeof (GtUword) * (GT_ELEM2SECTION(logsectionsize, maxelement) + 1);
 }
 
 struct GtIntset8
@@ -67,7 +67,7 @@ gt_intset_8_new(GtUword max_elem, GtUword num_of_elems)
     gt_malloc(sizeof (*intset->elements) * num_of_elems);
   intset->logsectionsize = sizeof (uint8_t) * CHAR_BIT;
   intset->nextfree = 0;
-  intset->numofsections = ELEM2SECTION(intset->logsectionsize, max_elem) + 1;
+  intset->numofsections = GT_ELEM2SECTION(intset->logsectionsize, max_elem) + 1;
   intset->sectionstart = gt_malloc(sizeof (*intset->sectionstart) *
                                    (intset->numofsections + 1));
   intset->sectionstart[0] = 0;
@@ -98,14 +98,14 @@ gt_intset_8_add(GtIntset8 *intset, GtUword elem)
   gt_assert(intset->nextfree < intset->num_of_elems &&
             elem <= intset->maxelement &&
             (intset->previouselem == ULONG_MAX || intset->previouselem < elem));
-  while (elem >= SECTIONMINELEM(intset->currentsectionnum + 1)) {
+  while (elem >= GT_SECTIONMINELEM(intset->currentsectionnum + 1)) {
     gt_assert(intset->currentsectionnum < intset->numofsections);
     secstart[intset->currentsectionnum + 1] = intset->nextfree;
     intset->currentsectionnum++;
   }
-  gt_assert(SECTIONMINELEM(intset->currentsectionnum) <= elem &&
-            elem < SECTIONMINELEM(intset->currentsectionnum+1) &&
-            ELEM2SECTION(intset->logsectionsize,elem) ==
+  gt_assert(GT_SECTIONMINELEM(intset->currentsectionnum) <= elem &&
+            elem < GT_SECTIONMINELEM(intset->currentsectionnum+1) &&
+            GT_ELEM2SECTION(intset->logsectionsize,elem) ==
             intset->currentsectionnum);
   intset->elements[intset->nextfree++] = (uint8_t) elem;
   intset->previouselem = elem;
@@ -138,7 +138,7 @@ gt_intset_8_is_member(const GtIntset8 *intset, GtUword elem)
   GtUword *secstart = intset->sectionstart;
   if (elem <= intset->maxelement)
   {
-    const GtUword sectionnum = ELEM2SECTION(intset->logsectionsize, elem);
+    const GtUword sectionnum = GT_ELEM2SECTION(intset->logsectionsize, elem);
 
     if (secstart[sectionnum] < secstart[sectionnum+1]) {
       return gt_intset_8_binarysearch_is_member(
@@ -192,7 +192,7 @@ static GtUword gt_intset_8_binarysearch_pos2seqnum(
 GT_UNUSED static GtUword
 gt_intset_8_pos2seqnum(const GtIntset8 *intset, GtUword pos)
 {
-  GtUword sectionnum = ELEM2SECTION(intset->logsectionsize,pos);
+  GtUword sectionnum = GT_ELEM2SECTION(intset->logsectionsize,pos);
 
   gt_assert(pos <= intset->maxelement);
   if (intset->sectionstart[sectionnum] < intset->sectionstart[sectionnum+1]) {
@@ -216,7 +216,7 @@ gt_intset_16_size(GtUword maxelement, GtUword num_of_elems)
 {
   size_t logsectionsize = (sizeof (uint16_t)) + CHAR_BIT;
   return sizeof (uint16_t) * num_of_elems +
-    sizeof (GtUword) * (ELEM2SECTION(logsectionsize, maxelement) + 1);
+    sizeof (GtUword) * (GT_ELEM2SECTION(logsectionsize, maxelement) + 1);
 }
 
 struct GtIntset16
@@ -242,7 +242,7 @@ gt_intset_16_new(GtUword max_elem, GtUword num_of_elems)
     gt_malloc(sizeof (*intset->elements) * num_of_elems);
   intset->logsectionsize = sizeof (uint16_t) * CHAR_BIT;
   intset->nextfree = 0;
-  intset->numofsections = ELEM2SECTION(intset->logsectionsize, max_elem) + 1;
+  intset->numofsections = GT_ELEM2SECTION(intset->logsectionsize, max_elem) + 1;
   intset->sectionstart = gt_malloc(sizeof (*intset->sectionstart) *
                                    (intset->numofsections + 1));
   intset->sectionstart[0] = 0;
@@ -273,14 +273,14 @@ gt_intset_16_add(GtIntset16 *intset, GtUword elem)
   gt_assert(intset->nextfree < intset->num_of_elems &&
             elem <= intset->maxelement &&
             (intset->previouselem == ULONG_MAX || intset->previouselem < elem));
-  while (elem >= SECTIONMINELEM(intset->currentsectionnum + 1)) {
+  while (elem >= GT_SECTIONMINELEM(intset->currentsectionnum + 1)) {
     gt_assert(intset->currentsectionnum < intset->numofsections);
     secstart[intset->currentsectionnum + 1] = intset->nextfree;
     intset->currentsectionnum++;
   }
-  gt_assert(SECTIONMINELEM(intset->currentsectionnum) <= elem &&
-            elem < SECTIONMINELEM(intset->currentsectionnum+1) &&
-            ELEM2SECTION(intset->logsectionsize,elem) ==
+  gt_assert(GT_SECTIONMINELEM(intset->currentsectionnum) <= elem &&
+            elem < GT_SECTIONMINELEM(intset->currentsectionnum+1) &&
+            GT_ELEM2SECTION(intset->logsectionsize,elem) ==
             intset->currentsectionnum);
   intset->elements[intset->nextfree++] = (uint16_t) elem;
   intset->previouselem = elem;
@@ -313,7 +313,7 @@ gt_intset_16_is_member(const GtIntset16 *intset, GtUword elem)
   GtUword *secstart = intset->sectionstart;
   if (elem <= intset->maxelement)
   {
-    const GtUword sectionnum = ELEM2SECTION(intset->logsectionsize, elem);
+    const GtUword sectionnum = GT_ELEM2SECTION(intset->logsectionsize, elem);
 
     if (secstart[sectionnum] < secstart[sectionnum+1]) {
       return gt_intset_16_binarysearch_is_member(
@@ -367,7 +367,7 @@ static GtUword gt_intset_16_binarysearch_pos2seqnum(
 GT_UNUSED static GtUword
 gt_intset_16_pos2seqnum(const GtIntset16 *intset, GtUword pos)
 {
-  GtUword sectionnum = ELEM2SECTION(intset->logsectionsize,pos);
+  GtUword sectionnum = GT_ELEM2SECTION(intset->logsectionsize,pos);
 
   gt_assert(pos <= intset->maxelement);
   if (intset->sectionstart[sectionnum] < intset->sectionstart[sectionnum+1]) {
@@ -391,7 +391,7 @@ gt_intset_32_size(GtUword maxelement, GtUword num_of_elems)
 {
   size_t logsectionsize = (sizeof (uint32_t)) + CHAR_BIT;
   return sizeof (uint32_t) * num_of_elems +
-    sizeof (GtUword) * (ELEM2SECTION(logsectionsize, maxelement) + 1);
+    sizeof (GtUword) * (GT_ELEM2SECTION(logsectionsize, maxelement) + 1);
 }
 
 struct GtIntset32
@@ -417,7 +417,7 @@ gt_intset_32_new(GtUword max_elem, GtUword num_of_elems)
     gt_malloc(sizeof (*intset->elements) * num_of_elems);
   intset->logsectionsize = sizeof (uint32_t) * CHAR_BIT;
   intset->nextfree = 0;
-  intset->numofsections = ELEM2SECTION(intset->logsectionsize, max_elem) + 1;
+  intset->numofsections = GT_ELEM2SECTION(intset->logsectionsize, max_elem) + 1;
   intset->sectionstart = gt_malloc(sizeof (*intset->sectionstart) *
                                    (intset->numofsections + 1));
   intset->sectionstart[0] = 0;
@@ -448,14 +448,14 @@ gt_intset_32_add(GtIntset32 *intset, GtUword elem)
   gt_assert(intset->nextfree < intset->num_of_elems &&
             elem <= intset->maxelement &&
             (intset->previouselem == ULONG_MAX || intset->previouselem < elem));
-  while (elem >= SECTIONMINELEM(intset->currentsectionnum + 1)) {
+  while (elem >= GT_SECTIONMINELEM(intset->currentsectionnum + 1)) {
     gt_assert(intset->currentsectionnum < intset->numofsections);
     secstart[intset->currentsectionnum + 1] = intset->nextfree;
     intset->currentsectionnum++;
   }
-  gt_assert(SECTIONMINELEM(intset->currentsectionnum) <= elem &&
-            elem < SECTIONMINELEM(intset->currentsectionnum+1) &&
-            ELEM2SECTION(intset->logsectionsize,elem) ==
+  gt_assert(GT_SECTIONMINELEM(intset->currentsectionnum) <= elem &&
+            elem < GT_SECTIONMINELEM(intset->currentsectionnum+1) &&
+            GT_ELEM2SECTION(intset->logsectionsize,elem) ==
             intset->currentsectionnum);
   intset->elements[intset->nextfree++] = (uint32_t) elem;
   intset->previouselem = elem;
@@ -488,7 +488,7 @@ gt_intset_32_is_member(const GtIntset32 *intset, GtUword elem)
   GtUword *secstart = intset->sectionstart;
   if (elem <= intset->maxelement)
   {
-    const GtUword sectionnum = ELEM2SECTION(intset->logsectionsize, elem);
+    const GtUword sectionnum = GT_ELEM2SECTION(intset->logsectionsize, elem);
 
     if (secstart[sectionnum] < secstart[sectionnum+1]) {
       return gt_intset_32_binarysearch_is_member(
@@ -542,7 +542,7 @@ static GtUword gt_intset_32_binarysearch_pos2seqnum(
 GT_UNUSED static GtUword
 gt_intset_32_pos2seqnum(const GtIntset32 *intset, GtUword pos)
 {
-  GtUword sectionnum = ELEM2SECTION(intset->logsectionsize,pos);
+  GtUword sectionnum = GT_ELEM2SECTION(intset->logsectionsize,pos);
 
   gt_assert(pos <= intset->maxelement);
   if (intset->sectionstart[sectionnum] < intset->sectionstart[sectionnum+1]) {

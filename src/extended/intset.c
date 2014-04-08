@@ -27,8 +27,8 @@
 #include "core/types_api.h"
 #include "extended/intset.h"
 
-#define BITS_FOR_SIZE(SIZE)     ((SIZE) * CHAR_BIT)
-#define ELEM2SECTION(LOGVAL,X)  ((X) >> (LOGVAL))
+#define GT_BITS_FOR_SIZE(SIZE)     ((SIZE) * CHAR_BIT)
+#define GT_ELEM2SECTION(LOGVAL,X)  ((X) >> (LOGVAL))
 
 GtIntsetType gt_intset_best_type(GtUword maxelement,
                                  GtUword num_of_elems)
