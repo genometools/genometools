@@ -59,7 +59,7 @@ static int feature_node_lua_new(lua_State *L)
   return 1;
 }
 
-static int sequence_region_lua_new(lua_State *L)
+static int region_node_lua_new(lua_State *L)
 {
   GtGenomeNode **rn;
   GtUword startpos, endpos;
@@ -334,7 +334,7 @@ static int genome_node_lua_delete(lua_State *L)
 
 static const struct luaL_Reg genome_node_lib_f [] = {
   { "feature_node_new", feature_node_lua_new },
-  { "region_node_new", sequence_region_lua_new },
+  { "region_node_new", region_node_lua_new },
   { NULL, NULL }
 };
 
