@@ -159,11 +159,11 @@ bool gt_intset_<%=bits%>_is_member(GtIntset *intset, GtUword elem)
 
     if (secstart[sectionnum] < secstart[sectionnum+1]) {
       return gt_intset_<%=bits%>_binarysearch_is_member(
-                              intset_<%=bits%>->elements + \
-secstart[sectionnum],
-                              intset_<%=bits%>->elements + \
-secstart[sectionnum+1] - 1,
-                              (uint64_t) elem);
+<% if bits == 8 %> <% end %>                               \
+intset_<%=bits%>->elements + secstart[sectionnum],
+<% if bits == 8 %> <% end %>                               \
+intset_<%=bits%>->elements + secstart[sectionnum+1] - 1,
+<% if bits == 8 %> <% end %>                               (uint64_t) elem);
     }
   }
   return false;

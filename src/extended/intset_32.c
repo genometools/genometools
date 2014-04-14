@@ -125,9 +125,9 @@ bool gt_intset_32_is_member(GtIntset *intset, GtUword elem)
 
     if (secstart[sectionnum] < secstart[sectionnum+1]) {
       return gt_intset_32_binarysearch_is_member(
-                              intset_32->elements + secstart[sectionnum],
-                              intset_32->elements + secstart[sectionnum+1] - 1,
-                              (uint64_t) elem);
+                               intset_32->elements + secstart[sectionnum],
+                               intset_32->elements + secstart[sectionnum+1] - 1,
+                               (uint64_t) elem);
     }
   }
   return false;
