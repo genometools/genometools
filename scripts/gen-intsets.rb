@@ -21,11 +21,13 @@ require 'erb'
 $:.unshift File.join(File.dirname(__FILE__), ".")
 require 'codegen_module'
 
-HEADER = <<-HEADER
+CRIGHT = <<-CRIGHT
 /*
-  Copyright (c) 2014 Dirk Willrodt <willrodt@zbh.uni-hamburg.de><% if name!="Dirk Willrodt" %>
+  Copyright (c) 2014 Dirk Willrodt <willrodt@zbh.uni-hamburg.de>\
+<% if name!="Dirk Willrodt" %>
   Copyright (c) <%=year%> <%=name%> <<%=email%>><% end %>
-  Copyright (c) 2014<% if not year==2014 %>-<%=year%><% end %> Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2014<% if not year==2014 %>-<%=year%><% end %> Center for \
+Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -45,103 +47,33 @@ HEADER = <<-HEADER
   DO NOT EDIT.
 */
 
-#ifndef INTSET_IMPL_H
-#define INTSET_IMPL_H
-
+CRIGHT
+IMPL = <<-IMPL
 #include <inttypes.h>
 #include <limits.h>
 
-#include "core/ma.h"
 #include "core/assert_api.h"
 #include "core/intbits.h"
+#include "core/ma.h"
+#include "core/mathsupport.h"
 #include "core/unused_api.h"
+#include "extended/intset_rep.h"
+#include "extended/intset_<%=bits%>.h"
 
-#define GT_BITS_FOR_SIZE(SIZE)     ((SIZE) * CHAR_BIT)
-#define GT_ELEM2SECTION(LOGVAL,X)  ((X) >> (LOGVAL))
-#define GT_SECTIONMINELEM(S)       ((S) << intset->logsectionsize)
-HEADER
+#define gt_intset_<%=bits%>_cast(cvar) \\
+        gt_intset_cast(gt_intset_<%=bits%>_class(), cvar)
 
-CODE = <<-CODE
-
-GT_UNUSED static size_t
-gt_intset_<%=bits%>_size(GtUword maxelement, GtUword num_of_elems)
-{
-  size_t logsectionsize = (sizeof (uint<%=bits%>_t)) + CHAR_BIT;
-  return sizeof (uint<%=bits%>_t) * num_of_elems +
-    sizeof (GtUword) * (GT_ELEM2SECTION(logsectionsize, maxelement) + 1);
-}
-
-struct GtIntset<%=bits%>
-{
+struct GtIntset<%=bits%> {
+  GtIntset parent_instance;
   uint<%=bits%>_t *elements;
-  GtUword      *sectionstart;
-  size_t        logsectionsize;
-  GtUword       nextfree,
-                maxelement,
-                currentsectionnum,
-                numofsections,
-                num_of_elems,
-                previouselem;
 };
 
-GT_UNUSED static GtIntset<%=bits%> *
-gt_intset_<%=bits%>_new(GtUword max_elem, GtUword num_of_elems)
-{
-  GtIntset<%=bits%> *intset = gt_malloc(sizeof (*intset));
-  GtUword idx;
-
-  intset->elements =
-    gt_malloc(sizeof (*intset->elements) * num_of_elems);
-  intset->logsectionsize = sizeof (uint<%=bits%>_t) * CHAR_BIT;
-  intset->nextfree = 0;
-  intset->numofsections = GT_ELEM2SECTION(intset->logsectionsize, max_elem) + 1;
-  intset->sectionstart = gt_malloc(sizeof (*intset->sectionstart) *
-                                   (intset->numofsections + 1));
-  intset->sectionstart[0] = 0;
-  for (idx = (GtUword) 1; idx <= intset->numofsections; idx++) {
-    intset->sectionstart[idx] = num_of_elems;
-  }
-  intset->maxelement = max_elem;
-  intset->currentsectionnum = 0;
-  intset->num_of_elems = num_of_elems;
-  intset->previouselem = ULONG_MAX;
-  return intset;
-}
-
-GT_UNUSED static void
-gt_intset_<%=bits%>_delete(GtIntset<%=bits%> *intset)
-{
-  if (intset != NULL) {
-    gt_free(intset->elements);
-    gt_free(intset->sectionstart);
-    gt_free(intset);
-  }
-}
-
-GT_UNUSED static void
-gt_intset_<%=bits%>_add(GtIntset<%=bits%> *intset, GtUword elem)
-{
-  GtUword *secstart = intset->sectionstart;
-  gt_assert(intset->nextfree < intset->num_of_elems &&
-            elem <= intset->maxelement &&
-            (intset->previouselem == ULONG_MAX || intset->previouselem < elem));
-  while (elem >= GT_SECTIONMINELEM(intset->currentsectionnum + 1)) {
-    gt_assert(intset->currentsectionnum < intset->numofsections);
-    secstart[intset->currentsectionnum + 1] = intset->nextfree;
-    intset->currentsectionnum++;
-  }
-  gt_assert(GT_SECTIONMINELEM(intset->currentsectionnum) <= elem &&
-            elem < GT_SECTIONMINELEM(intset->currentsectionnum+1) &&
-            GT_ELEM2SECTION(intset->logsectionsize,elem) ==
-            intset->currentsectionnum);
-  intset->elements[intset->nextfree++] = (uint<%=bits%>_t) elem;
-  intset->previouselem = elem;
-}
-
-static bool gt_intset_<%=bits%>_binarysearch_is_member(
-                                                   const uint<%=bits%>_t *leftptr,
-                                                   const uint<%=bits%>_t *rightptr,
-                                                   uint<%=bits%>_t elem)
+static bool gt_intset_<%=bits%>_binarysearch_is_member(\
+const uint<%=bits%>_t *leftptr,
+<% if bits != 8 %> <%end%>                                               \
+const uint<%=bits%>_t *rightptr,
+<% if bits != 8 %> <%end%>                                               \
+uint<%=bits%>_t elem)
 {
   const uint<%=bits%>_t *midptr;
     while (leftptr <= rightptr) {
@@ -159,34 +91,12 @@ static bool gt_intset_<%=bits%>_binarysearch_is_member(
   return false;
 }
 
-GT_UNUSED static bool
-gt_intset_<%=bits%>_is_member(const GtIntset<%=bits%> *intset, GtUword elem)
-{
-  GtUword *secstart = intset->sectionstart;
-  if (elem <= intset->maxelement)
-  {
-    const GtUword sectionnum = GT_ELEM2SECTION(intset->logsectionsize, elem);
-
-    if (secstart[sectionnum] < secstart[sectionnum+1]) {
-      return gt_intset_<%=bits%>_binarysearch_is_member(
-                              intset->elements + secstart[sectionnum],
-                              intset->elements + secstart[sectionnum+1] - 1,
-                              (uint64_t) elem);
-    }
-  }
-  return false;
-}
-
-GT_UNUSED static bool
-gt_intset_<%=bits%>_is_member_fp(const void *set, GtUword elem)
-{
-  return gt_intset_<%=bits%>_is_member((const GtIntset<%=bits%>*) set, elem);
-}
-
-static GtUword gt_intset_<%=bits%>_binarysearch_pos2seqnum(
-                                                   const uint<%=bits%>_t *leftptr,
-                                                   const uint<%=bits%>_t *rightptr,
-                                                   uint<%=bits%>_t pos)
+static GtUword gt_intset_<%=bits%>_binarysearch_pos2seqnum(\
+const uint<%=bits%>_t *leftptr,
+<% if bits != 8 %> <%end%>                                                   \
+const uint<%=bits%>_t *rightptr,
+<% if bits != 8 %> <%end%>                                                   \
+uint<%=bits%>_t pos)
 {
   const uint<%=bits%>_t *midptr,
                    *found = NULL,
@@ -216,37 +126,225 @@ static GtUword gt_intset_<%=bits%>_binarysearch_pos2seqnum(
   return 1UL + (GtUword) (found - leftorig);
 }
 
-GT_UNUSED static GtUword
-gt_intset_<%=bits%>_pos2seqnum(const GtIntset<%=bits%> *intset, GtUword pos)
+void gt_intset_<%=bits%>_add(GtIntset *intset, GtUword elem)
 {
-  GtUword sectionnum = GT_ELEM2SECTION(intset->logsectionsize,pos);
-
-  gt_assert(pos <= intset->maxelement);
-  if (intset->sectionstart[sectionnum] < intset->sectionstart[sectionnum+1]) {
-    return intset->sectionstart[sectionnum] +
-           gt_intset_<%=bits%>_binarysearch_pos2seqnum(
-                     intset->elements + intset->sectionstart[sectionnum],
-                     intset->elements + intset->sectionstart[sectionnum+1] - 1,
-                     (uint<%=bits%>_t) pos);
+  GtIntset<%=bits%> *intset_<%=bits%> = gt_intset_<%=bits%>_cast(intset);
+  GtIntsetMembers *members = intset->members;
+  GtUword *secstart = members->sectionstart;
+  gt_assert(members->nextfree < members->num_of_elems &&
+            elem <= members->maxelement &&
+            (members->previouselem == ULONG_MAX ||
+                                      members->previouselem < elem));
+  while (elem >= GT_SECTIONMINELEM(members->currentsectionnum + 1)) {
+    gt_assert(members->currentsectionnum < members->numofsections);
+    secstart[members->currentsectionnum + 1] = members->nextfree;
+    members->currentsectionnum++;
   }
-  return intset->sectionstart[sectionnum];
+  gt_assert(GT_SECTIONMINELEM(members->currentsectionnum) <= elem &&
+            elem < GT_SECTIONMINELEM(members->currentsectionnum+1) &&
+            GT_ELEM2SECTION(members->logsectionsize,elem) ==
+            members->currentsectionnum);
+  intset_<%=bits%>->elements[members->nextfree++] = (uint<%=bits%>_t) elem;
+  members->previouselem = elem;
 }
 
-GT_UNUSED static GtUword
-gt_intset_<%=bits%>_pos2seqnum_fp(const void *set, GtUword pos)
+bool gt_intset_<%=bits%>_is_member(GtIntset *intset, GtUword elem)
 {
-  return gt_intset_<%=bits%>_pos2seqnum((const GtIntset<%=bits%>*) set, pos);
+  GtIntset<%=bits%> *intset_<%=bits%> = gt_intset_<%=bits%>_cast(intset);
+  GtIntsetMembers *members = intset->members;
+  GtUword *secstart = members->sectionstart;
+  if (elem <= members->maxelement)
+  {
+    const GtUword sectionnum = GT_ELEM2SECTION(members->logsectionsize, elem);
+
+    if (secstart[sectionnum] < secstart[sectionnum+1]) {
+      return gt_intset_<%=bits%>_binarysearch_is_member(
+                              intset_<%=bits%>->elements + \
+secstart[sectionnum],
+                              intset_<%=bits%>->elements + \
+secstart[sectionnum+1] - 1,
+                              (uint64_t) elem);
+    }
+  }
+  return false;
 }
-CODE
+
+GtUword gt_intset_<%=bits%>_pos2seqnum(GtIntset *intset, GtUword pos)
+{
+  GtIntset<%=bits%> *intset_<%=bits%> = gt_intset_<%=bits%>_cast(intset);
+  GtIntsetMembers *members = intset->members;
+
+  GtUword sectionnum = GT_ELEM2SECTION(members->logsectionsize,pos);
+
+  gt_assert(pos <= members->maxelement);
+  if (members->sectionstart[sectionnum] < members->sectionstart[sectionnum+1]) {
+    return members->sectionstart[sectionnum] +
+           gt_intset_<%=bits%>_binarysearch_pos2seqnum(
+<% if bits == 8 %> <% end %>                  intset_<%=bits%>->elements + \
+members->sectionstart[sectionnum],
+<% if bits == 8 %> <% end %>                  intset_<%=bits%>->elements + \
+members->sectionstart[sectionnum+1] - 1,
+<% if bits == 8 %> <% end %>                  (uint<%=bits%>_t) pos);
+  }
+  return members->sectionstart[sectionnum];
+}
+
+size_t gt_intset_<%=bits%>_size(GtUword maxelement, GtUword num_of_elems)
+{
+  size_t logsectionsize = (sizeof (uint<%=bits%>_t)) + CHAR_BIT;
+  return sizeof (uint<%=bits%>_t) * num_of_elems +
+    sizeof (GtUword) * (GT_ELEM2SECTION(logsectionsize, maxelement) + 1);
+}
+
+void gt_intset_<%=bits%>_delete(GtIntset *intset)
+{
+  GtIntset<%=bits%> *intset_<%=bits%> = gt_intset_<%=bits%>_cast(intset);
+  if (intset_<%=bits%> != NULL) {
+    gt_free(intset_<%=bits%>->elements);
+  }
+}
+
+/* map static local methods to interface */
+const GtIntsetClass* gt_intset_<%=bits%>_class(void)
+{
+  static const GtIntsetClass *this_c = NULL;
+  if (this_c == NULL) {
+    this_c = gt_intset_class_new(sizeof (GtIntset<%=bits%>),
+                                 gt_intset_<%=bits%>_add,
+                                 gt_intset_<%=bits%>_is_member,
+                                 gt_intset_<%=bits%>_pos2seqnum,
+                                 gt_intset_<%=bits%>_delete);
+  }
+  return this_c;
+}
+
+GtIntset* gt_intset_<%=bits%>_new(GtUword maxelement, GtUword num_of_elems)
+{
+  GtIntset *intset;
+  GtIntset<%=bits%> *intset_<%=bits%>;
+  GtIntsetMembers *members;
+  GtUword idx;
+
+  intset = gt_intset_create(gt_intset_<%=bits%>_class());
+  intset_<%=bits%> = gt_intset_<%=bits%>_cast(intset);
+  members = intset->members;
+
+  intset_<%=bits%>->elements =
+    gt_malloc(sizeof (*intset_<%=bits%>->elements) * num_of_elems);
+  members->logsectionsize = sizeof (uint<%=bits%>_t) * CHAR_BIT;
+  members->nextfree = 0;
+  members->numofsections = GT_ELEM2SECTION(members->logsectionsize,
+                                           maxelement) + 1;
+  members->sectionstart = gt_malloc(sizeof (*members->sectionstart) *
+                                    (members->numofsections + 1));
+  members->sectionstart[0] = 0;
+  for (idx = (GtUword) 1; idx <= members->numofsections; idx++) {
+    members->sectionstart[idx] = num_of_elems;
+  }
+  members->maxelement = maxelement;
+  members->currentsectionnum = 0;
+  members->num_of_elems = num_of_elems;
+  members->previouselem = ULONG_MAX;
+  return intset;
+}
+
+int gt_intset_<%=bits%>_unit_test(GtError *err) {
+  int had_err = 0;
+  GtIntset *is;
+  GtUword num_of_elems = gt_rand_max(((GtUword) 1) << 10) + 1,
+          *arr = gt_malloc(sizeof (*arr) * num_of_elems),
+          stepsize = (num_of_elems <<4 / num_of_elems) >> 1,
+          idx;
+  size_t is_size;
+
+  gt_error_check(err);
+
+  arr[0] = gt_rand_max(stepsize) + 1;
+  for (idx = (GtUword) 1; idx < num_of_elems; ++idx) {
+    arr[idx] = arr[idx - 1] + gt_rand_max(stepsize) + 1;
+  }
+
+  is_size = gt_intset_<%=bits%>_size(arr[num_of_elems - 1], num_of_elems);
+
+  if (!had_err) {
+    if (is_size < (size_t) UINT_MAX) {
+      is = gt_intset_<%=bits%>_new(arr[num_of_elems - 1], num_of_elems);
+      for (idx = 0; idx < num_of_elems; idx++) {
+        gt_intset_<%=bits%>_add(is, arr[idx]);
+      }
+      had_err = gt_intset_unit_test_notinset(is, 0, arr[0] - 1, err);
+      if (!had_err)
+        had_err = gt_intset_unit_test_check_seqnum(is, 0, arr[0] - 1, 0, err);
+      for (idx = (GtUword) 1; !had_err && idx < num_of_elems; idx++) {
+        had_err = gt_intset_unit_test_notinset(is, arr[idx - 1] + 1,
+                                               arr[idx] - 1, err);
+        if (!had_err)
+          had_err = gt_intset_unit_test_check_seqnum(is, arr[idx - 1] + 1,
+                                                     arr[idx] - 1, idx, err);
+      }
+      gt_intset_<%=bits%>_delete(is);
+    }
+  }
+  gt_free(arr);
+  return had_err;
+}
+IMPL
+
+HEADER = <<-HEADER
+#ifndef INTSET_<%=bits%>_H
+#define INTSET_<%=bits%>_H
+
+#include "core/types_api.h"
+#include "extended/intset_rep.h"
+
+/* The <GtIntset<%=bits%>> class implements the <GtIntset> interface.
+   TODO: add documentation */
+typedef struct GtIntset<%=bits%> GtIntset<%=bits%>;
+
+/* map static local methods to interface */
+const GtIntsetClass* gt_intset_<%=bits%>_class(void);
+
+/* Return a new <GtIntset> object, the implementation beeing of type
+   <GtIntset<%=bits%>>. */
+GtIntset* gt_intset_<%=bits%>_new(GtUword maxelement, GtUword num_of_elems);
+
+/* Add <elem> to <intset>. <elem> has to be larger than the previous <elem>
+   added. */
+void gt_intset_<%=bits%>_add(GtIntset *intset, GtUword elem);
+
+/* Returns <true> if <elem> is a member of the set <intset>. */
+bool gt_intset_<%=bits%>_is_member(GtIntset *intset, GtUword elem);
+
+/* Returns the number of the element in <intset> that is the smallest element
+   larger than <pos>.
+   This is used for sets representing the separator positions in a set of
+   sequences, to determine the sequence number corresponding to any position in
+   the concatenated string of the sequence set. */
+GtUword gt_intset_<%=bits%>_pos2seqnum(GtIntset *intset, GtUword pos);
+
+/* Returns the size of an intset with given number of elements
+   <num_of_elems> and maximum value <maxelement>. */
+size_t gt_intset_<%=bits%>_size(GtUword maxelement,
+<% if bits != 8 %> <% end %>                              GtUword num_of_elems);
+
+void gt_intset_<%=bits%>_delete(GtIntset *intset);
+
+int gt_intset_<%=bits%>_unit_test(GtError *err);
+#endif
+HEADER
 
 name, email = CodeGen.find_user_data()
 year = Time.now.year
+all_bits = [8, 16, 32]
 
-ERB.new(HEADER).run(binding)
-bits = '8'
-ERB.new(CODE).run(binding)
-bits = '16'
-ERB.new(CODE).run(binding)
-bits = '32'
-ERB.new(CODE).run(binding)
-puts '#endif'
+all_bits.each do |bits|
+  fn = "src/extended/intset_#{bits}"
+  code = File.open(fn + '.c', 'w')
+  code.puts ERB.new(CRIGHT).result(binding)
+  code.puts ERB.new(IMPL).result(binding)
+  code.close
+  header = File.open(fn + '.h', 'w')
+  header.puts ERB.new(CRIGHT).result(binding)
+  header.puts ERB.new(HEADER).result(binding)
+  header.close
+end

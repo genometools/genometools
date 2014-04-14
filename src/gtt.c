@@ -69,7 +69,7 @@
 #include "extended/golomb.h"
 #include "extended/hmm.h"
 #include "extended/huffcode.h"
-#include "extended/intset.h"
+#include "extended/intset_choose.h"
 #include "extended/luaserialize.h"
 #include "extended/popcount_tab.h"
 #include "extended/priority_queue.h"
