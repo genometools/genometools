@@ -1,0 +1,100 @@
+/*
+  Copyright (c) 2014 Sascha Steinbiss <ss34@sanger.ac.uk>
+
+  Permission to use, copy, modify, and distribute this software for any
+  purpose with or without fee is hereby granted, provided that the above
+  copyright notice and this permission notice appear in all copies.
+
+  THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+  WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+  MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+  ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+  WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+  ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+*/
+
+#include "core/ma.h"
+#include "core/unused_api.h"
+#include "extended/spec_visitor.h"
+#include "extended/gff3_in_stream.h"
+#include "extended/visitor_stream.h"
+#include "tools/gt_speccheck.h"
+
+typedef struct {
+  GtStr *specfile;
+} SpeccheckArguments;
+
+static void *gt_speccheck_arguments_new(void)
+{
+  SpeccheckArguments *arguments = gt_calloc(1, sizeof *arguments);
+  arguments->specfile = gt_str_new();
+  return arguments;
+}
+
+static void gt_speccheck_arguments_delete(void *tool_arguments)
+{
+  SpeccheckArguments *arguments = tool_arguments;
+  if (!arguments) return;
+  gt_str_delete(arguments->specfile);
+  gt_free(arguments);
+}
+
+static GtOptionParser* gt_speccheck_option_parser_new(void *tool_arguments)
+{
+  GtOptionParser *op;
+  GtOption *option;
+  SpeccheckArguments *arguments = tool_arguments;
+
+  /* init */
+  op = gt_option_parser_new("[GFF3_file ...]",
+                            "Checks spec definition compliance in GFF3 input.");
+
+  option = gt_option_new_filename("specfile",
+                                  "file with specification definition",
+                                  arguments->specfile);
+  gt_option_parser_add_option(op, option);
+  gt_option_is_mandatory(option);
+
+  return op;
+}
+
+static int gt_speccheck_runner(int argc, const char **argv, int parsed_args,
+                               void *tool_arguments, GtError *err)
+{
+  GtNodeStream *gff3_in_stream = NULL, *checker_stream = NULL;
+  GtNodeVisitor *spec_visitor = NULL;
+  SpeccheckArguments *arguments = tool_arguments;
+
+  int had_err = 0;
+  gt_error_check(err);
+
+  spec_visitor = gt_spec_visitor_new(gt_str_get(arguments->specfile), err);
+  if (!spec_visitor)
+    return -1;
+
+  gff3_in_stream = gt_gff3_in_stream_new_unsorted(argc - parsed_args,
+                                                  argv + parsed_args);
+
+  checker_stream = gt_visitor_stream_new(gff3_in_stream, spec_visitor);
+  gt_assert(checker_stream);
+
+  /* pull the features through the stream and free them afterwards */
+  if (!had_err)
+    had_err = gt_node_stream_pull(checker_stream, err);
+
+  /* free */
+  gt_node_stream_delete(gff3_in_stream);
+  gt_node_stream_delete(checker_stream);
+
+  return had_err;
+}
+
+GtTool* gt_speccheck(void)
+{
+  return gt_tool_new(gt_speccheck_arguments_new,
+                     gt_speccheck_arguments_delete,
+                     gt_speccheck_option_parser_new,
+                     NULL,
+                     gt_speccheck_runner);
+}
