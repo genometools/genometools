@@ -19,7 +19,11 @@
 #include "core/assert_api.h"
 #include "core/symbol_api.h"
 #include "extended/extract_feature_sequence.h"
+#include "extended/feature_node.h"
 #include "extended/genome_node.h"
+#include "extended/region_node.h"
+#include "extended/sequence_node_api.h"
+#include "extended/meta_node_api.h"
 #include "extended/gff3_output.h"
 #include "extended/luahelper.h"
 #include "gtlua/genome_node_lua.h"
@@ -80,6 +84,23 @@ static int region_node_lua_new(lua_State *L)
   *rn = gt_region_node_new(seqid_str, startpos, endpos);
   gt_str_delete(seqid_str);
   gt_assert(*rn);
+  luaL_getmetatable(L, GENOME_NODE_METATABLE);
+  lua_setmetatable(L, -2);
+  return 1;
+}
+
+static int meta_node_lua_new(lua_State *L)
+{
+  GtGenomeNode **mn;
+  const char *directive, *data;
+  gt_assert(L);
+  /* get_check parameters */
+  directive = luaL_checkstring(L, 1);
+  data = luaL_checkstring(L, 2);
+  /* construct object */
+  mn = lua_newuserdata(L, sizeof (GtGenomeNode*));
+  *mn = gt_meta_node_new(directive, data);
+  gt_assert(*mn);
   luaL_getmetatable(L, GENOME_NODE_METATABLE);
   lua_setmetatable(L, -2);
   return 1;
@@ -279,6 +300,30 @@ static int feature_node_lua_get_type(lua_State *L)
   return 1;
 }
 
+static int meta_node_lua_get_directive(lua_State *L)
+{
+  GtGenomeNode **gn;
+  GtMetaNode *mn;
+  gn = check_genome_node(L, 1);
+  /* make sure we get a meta node */
+  mn = gt_meta_node_try_cast(*gn);
+  luaL_argcheck(L, mn, 1, "not a meta node");
+  lua_pushstring(L, gt_meta_node_get_directive(mn));
+  return 1;
+}
+
+static int meta_node_lua_get_data(lua_State *L)
+{
+  GtGenomeNode **gn;
+  GtMetaNode *mn;
+  gn = check_genome_node(L, 1);
+  /* make sure we get a meta node */
+  mn = gt_meta_node_try_cast(*gn);
+  luaL_argcheck(L, mn, 1, "not a meta node");
+  lua_pushstring(L, gt_meta_node_get_data(mn));
+  return 1;
+}
+
 static int feature_node_lua_extract_sequence(lua_State *L)
 {
   GtGenomeNode **gn;
@@ -336,6 +381,7 @@ static int genome_node_lua_delete(lua_State *L)
 static const struct luaL_Reg genome_node_lib_f [] = {
   { "feature_node_new", feature_node_lua_new },
   { "region_node_new", region_node_lua_new },
+  { "meta_node_new", meta_node_lua_new },
   { NULL, NULL }
 };
 
@@ -358,6 +404,8 @@ static const struct luaL_Reg genome_node_lib_m [] = {
   { "get_type", feature_node_lua_get_type },
   { "extract_sequence", feature_node_lua_extract_sequence },
   { "remove_leaf", feature_node_lua_remove_leaf },
+  { "get_data", meta_node_lua_get_data },
+  { "get_directive", meta_node_lua_get_directive },
   { NULL, NULL }
 };
 

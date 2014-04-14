@@ -88,3 +88,12 @@ assert(not rval)
 rval, err = pcall(gt.region_node_new, "chr1", "test")
 assert(not rval)
 gn = gt.region_node_new("chr1", range:get_start(), range:get_end())
+
+-- testing gt.meta_node_new
+rval, err = pcall(gt.meta_node_new, nil, "test")
+assert(not rval)
+rval, err = pcall(gt.region_node_new, "foo", nil)
+assert(not rval)
+gn = gt.meta_node_new("foo","bar")
+assert(gn:get_directive() == "foo")
+assert(gn:get_data() == "bar")
