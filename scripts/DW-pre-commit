@@ -6,7 +6,7 @@
 FILES=`git diff --cached --name-status HEAD | \
   awk '$1 != "R" && $1 != "D" { print $2 }' | \
   grep -v -e 'src/external'                 | \
-  grep -e '.*\.c$' -e '.*\.h$'`
+  grep -e '.*\.c$' -e '.*\.h$' -e '.*\.gen$' -e '.*\.rb$'`
 
 make -j8 cairo=no CFLAGS+=-fstrict-aliasing opt=no 64bit=yes CC='ccache gcc'
 
