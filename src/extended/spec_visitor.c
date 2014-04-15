@@ -48,6 +48,7 @@ struct GtSpecVisitor {
   GtGenomeNode *current_node;
   const char *current_aspect,
              *matcher_name;
+  GtSpecResults *res;
 };
 
 const GtNodeVisitorClass* gt_spec_visitor_class();
@@ -97,7 +98,7 @@ static int spec_visitor_feature_node(GtNodeVisitor *nv, GtFeatureNode *fn,
   while (!had_err && (node = gt_feature_node_iterator_next(fni))) {
     const char *type = gt_feature_node_get_type(node);
     if ((ref = gt_hashmap_get(sv->type_specs, type))) {
-      sv->current_node = (GtGenomeNode*) fn;
+      sv->current_node = (GtGenomeNode*) node;
       lua_rawgeti(sv->L, LUA_REGISTRYINDEX, *ref);
       gt_lua_genome_node_push(sv->L, gt_genome_node_ref((GtGenomeNode*) node));
       if (lua_pcall(sv->L, 1, 0, 0)) {
@@ -108,7 +109,6 @@ static int spec_visitor_feature_node(GtNodeVisitor *nv, GtFeatureNode *fn,
     }
   }
   gt_feature_node_iterator_delete(fni);
-
   return had_err;
 }
 
@@ -331,8 +331,9 @@ static int spec_expect_matchdispatch(lua_State *L)
   if (!success) {
     gt_assert(lua_isstring(L, 2));
     msg = lua_tostring(L, 2);
-    printf("%s: error: %s\n", sv->current_aspect, msg);
   }
+  gt_spec_results_add_result(sv->res, sv->current_aspect, sv->current_node,
+                             success, msg);
 
   return 0;
 }
@@ -410,7 +411,7 @@ static int spec_feature_node_lua_has_child_of_type(lua_State *L)
   return 1;
 }
 
-int spec_init_lua_env(GtSpecVisitor *sv, const char *progname)
+static int spec_init_lua_env(GtSpecVisitor *sv, const char *progname)
 {
   int had_err = 0;
   GtStr *prog, *speclib;
@@ -476,7 +477,8 @@ int spec_init_lua_env(GtSpecVisitor *sv, const char *progname)
   return had_err;
 }
 
-GtNodeVisitor* gt_spec_visitor_new(const char *specfile, GtError *err)
+GtNodeVisitor* gt_spec_visitor_new(const char *specfile, GtSpecResults *res,
+                                   GtError *err)
 {
   GtNodeVisitor *nv;
   GtSpecVisitor *sv;
@@ -492,11 +494,10 @@ GtNodeVisitor* gt_spec_visitor_new(const char *specfile, GtError *err)
   spec_luaL_opencustomlibs(sv->L, spec_luasecurelibs);
   spec_luaL_opencustomlibs(sv->L, spec_luainsecurelibs);
   sv->filename = gt_str_new_cstr(specfile);
-
+  sv->res = res;
   sv->type_specs = gt_hashmap_new(GT_HASH_STRING, gt_free_func, gt_free_func);
 
   (void) spec_init_lua_env(sv, gt_error_get_progname(err));
-
   if (luaL_loadfile(sv->L, specfile) || lua_pcall(sv->L, 0, 0, 0)) {
     gt_error_set(err, "%s", lua_tostring(sv->L, -1));
     gt_node_visitor_delete(nv);

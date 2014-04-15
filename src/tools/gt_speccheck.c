@@ -64,12 +64,15 @@ static int gt_speccheck_runner(int argc, const char **argv, int parsed_args,
 {
   GtNodeStream *gff3_in_stream = NULL, *checker_stream = NULL;
   GtNodeVisitor *spec_visitor = NULL;
+  GtSpecResults *res;
   SpeccheckArguments *arguments = tool_arguments;
 
   int had_err = 0;
   gt_error_check(err);
 
-  spec_visitor = gt_spec_visitor_new(gt_str_get(arguments->specfile), err);
+  res = gt_spec_results_new();
+  spec_visitor = gt_spec_visitor_new(gt_str_get(arguments->specfile), res,
+                                     err);
   if (!spec_visitor)
     return -1;
 
@@ -83,9 +86,13 @@ static int gt_speccheck_runner(int argc, const char **argv, int parsed_args,
   if (!had_err)
     had_err = gt_node_stream_pull(checker_stream, err);
 
+  if (!had_err)
+    gt_spec_results_report(res, NULL);
+
   /* free */
   gt_node_stream_delete(gff3_in_stream);
   gt_node_stream_delete(checker_stream);
+  gt_spec_results_delete(res);
 
   return had_err;
 }

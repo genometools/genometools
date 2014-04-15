@@ -22,7 +22,9 @@ typedef struct GtSpecVisitor GtSpecVisitor;
 
 #include "core/error_api.h"
 #include "extended/node_visitor.h"
+#include "extended/spec_results.h"
 
-GtNodeVisitor* gt_spec_visitor_new(const char *specfile, GtError *err);
+GtNodeVisitor* gt_spec_visitor_new(const char *specfile, GtSpecResults *res,
+                                   GtError *err);
 
 #endif
