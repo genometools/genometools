@@ -46,6 +46,11 @@ typedef struct {
           failures;
 } GtSpecAspect;
 
+typedef struct {
+  GtFile *outfile;
+  bool details;
+} GtSpecResultsReportInfo;
+
 struct GtSpecResults
 {
   GtHashmap *feature_aspects,
@@ -69,7 +74,7 @@ static GtSpecAspect* gt_spec_aspect_new(const char *name)
   return sa;
 }
 
-void gt_spec_aspect_report(GtSpecAspect *sa, GtFile *outfile)
+void gt_spec_aspect_report(GtSpecAspect *sa, GtFile *outfile, bool details)
 {
   GtUword i;
   gt_assert(sa);
@@ -79,8 +84,32 @@ void gt_spec_aspect_report(GtSpecAspect *sa, GtFile *outfile)
                            GT_SPEC_ANSI_COLOR_RESET
                            "\n", gt_str_get(sa->name),
                            gt_array_size(sa->failed_nodes));
-    for (i = 0; i < gt_array_size(sa->failed_nodes); i++) {
-
+    if (details) {
+      for (i = 0; i < gt_array_size(sa->failed_nodes); i++) {
+        char tmpbuf[BUFSIZ];
+        bool has_id = false;
+        GtGenomeNode *gn = *(GtGenomeNode**) gt_array_get(sa->failed_nodes, i);
+        if (gt_feature_node_try_cast(gn)) {
+          const char *tmp;
+          if ((tmp = gt_feature_node_get_attribute((GtFeatureNode*) gn,
+                                                   "ID"))) {
+            has_id = true;
+          }
+          if (has_id)
+            (void) snprintf(tmpbuf, BUFSIZ, "%s, ", tmp);
+        }
+        GtStr *errmsg = *(GtStr**) gt_array_get(sa->failure_messages, i);
+        gt_file_xprintf(outfile,
+                       GT_SPEC_ANSI_COLOR_RED
+                       "      offending node #" GT_WU " (%sfrom %s, line %u):\n"
+                       "         %s\n"
+                       GT_SPEC_ANSI_COLOR_RESET,
+                       i + 1,
+                       (has_id ? tmpbuf : ""),
+                       gt_genome_node_get_filename(gn),
+                       gt_genome_node_get_line_number(gn),
+                       gt_str_get(errmsg));
+      }
     }
   } else {
     gt_file_xprintf(outfile, GT_SPEC_ANSI_COLOR_GREEN
@@ -181,8 +210,8 @@ void gt_spec_results_add_result(GtSpecResults *sr,
 static int gt_spec_results_report_single(GT_UNUSED void *key, void *value,
                                          void *data, GT_UNUSED GtError *err)
 {
-  GtFile *outfile = (GtFile*) data;
-  gt_spec_aspect_report((GtSpecAspect*) value, outfile);
+  GtSpecResultsReportInfo *info = (GtSpecResultsReportInfo*) data;
+  gt_spec_aspect_report((GtSpecAspect*) value, info->outfile, info->details);
   return 0;
 }
 
@@ -190,20 +219,23 @@ static int gt_spec_results_report_features(void *key, void *value, void *data,
                                            GT_UNUSED GtError *err)
 {
   const char *type = (const char*) key;
-  GtFile *outfile = (GtFile*) data;
-  gt_file_xprintf(outfile, "Features of type " GT_SPEC_ANSI_COLOR_YELLOW
+  GtSpecResultsReportInfo *info = (GtSpecResultsReportInfo*) data;
+  gt_file_xprintf(info->outfile, "Features of type " GT_SPEC_ANSI_COLOR_YELLOW
                            "%s" GT_SPEC_ANSI_COLOR_RESET "\n", type);
   gt_hashmap_foreach((GtHashmap*) value, gt_spec_results_report_single,
-                     outfile, NULL);
+                     info, NULL);
   return 0;
 }
 
-void gt_spec_results_report(GtSpecResults *sr, GtFile *outfile)
+void gt_spec_results_report(GtSpecResults *sr, GtFile *outfile, bool details)
 {
+  GtSpecResultsReportInfo info;
   gt_assert(sr);
+  info.outfile = outfile;
+  info.details = details;
   gt_hashmap_foreach_in_key_order(sr->feature_aspects,
                                   gt_spec_results_report_features,
-                                  outfile, NULL);
+                                  &info, NULL);
 }
 
 void gt_spec_results_delete(GtSpecResults *spec_results)

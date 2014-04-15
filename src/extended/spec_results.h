@@ -27,7 +27,8 @@ void           gt_spec_results_add_result(GtSpecResults *sr,
                                           GtGenomeNode *node,
                                           bool success,
                                           const char *error_string);
-void           gt_spec_results_report(GtSpecResults *sr, GtFile *outfile);
+void           gt_spec_results_report(GtSpecResults *sr, GtFile *outfile,
+                                      bool details);
 void           gt_spec_results_delete(GtSpecResults *spec_results);
 
 #endif

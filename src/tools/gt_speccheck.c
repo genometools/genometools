@@ -23,6 +23,7 @@
 
 typedef struct {
   GtStr *specfile;
+  bool verbose;
 } SpeccheckArguments;
 
 static void *gt_speccheck_arguments_new(void)
@@ -56,6 +57,9 @@ static GtOptionParser* gt_speccheck_option_parser_new(void *tool_arguments)
   gt_option_parser_add_option(op, option);
   gt_option_is_mandatory(option);
 
+  option = gt_option_new_verbose(&arguments->verbose);
+  gt_option_parser_add_option(op, option);
+
   return op;
 }
 
@@ -87,7 +91,7 @@ static int gt_speccheck_runner(int argc, const char **argv, int parsed_args,
     had_err = gt_node_stream_pull(checker_stream, err);
 
   if (!had_err)
-    gt_spec_results_report(res, NULL);
+    gt_spec_results_report(res, NULL, arguments->verbose);
 
   /* free */
   gt_node_stream_delete(gff3_in_stream);
