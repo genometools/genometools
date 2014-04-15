@@ -31,9 +31,6 @@ struct GtCommentNode
   GtStr *comment_str; /* used in gt_comment_node_get_idstr() */
 };
 
-#define gt_comment_node_cast(comment_node) \
-        gt_genome_node_cast(gt_comment_node_class(), comment_node)
-
 static void comment_node_free(GtGenomeNode *gn)
 {
   GtCommentNode *c = gt_comment_node_cast(gn);
@@ -99,4 +96,14 @@ const char* gt_comment_node_get_comment(const GtCommentNode *c)
 {
   gt_assert(c && c->comment);
   return c->comment;
+}
+
+GtCommentNode* gt_comment_node_try_cast(GtGenomeNode *gn)
+{
+  return gt_genome_node_try_cast(gt_comment_node_class(), gn);
+}
+
+GtCommentNode* gt_comment_node_cast(GtGenomeNode *gn)
+{
+  return gt_genome_node_cast(gt_comment_node_class(), gn);
 }

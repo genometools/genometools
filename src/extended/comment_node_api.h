@@ -37,4 +37,15 @@ GtGenomeNode*            gt_comment_node_new(const char *comment);
 const char*              gt_comment_node_get_comment(const GtCommentNode
                                                      *comment_node);
 
+/* Test whether the given genome node is a comment node. If so, a pointer to the
+   meta node is returned. If not, NULL is returned. Note that in most cases,
+   one should implement a GtNodeVisitor to handle processing of different
+   GtGenomeNode types. */
+GtCommentNode*           gt_comment_node_try_cast(GtGenomeNode *gn);
+
+/* Test whether the given genome node is a comment node. If so, a pointer to the
+   meta node is returned. If not, an assertion fails. */
+GtCommentNode*           gt_comment_node_cast(GtGenomeNode *gn);
+
+
 #endif
