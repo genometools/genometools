@@ -47,5 +47,4 @@ GtCommentNode*           gt_comment_node_try_cast(GtGenomeNode *gn);
    meta node is returned. If not, an assertion fails. */
 GtCommentNode*           gt_comment_node_cast(GtGenomeNode *gn);
 
-
 #endif
