@@ -282,7 +282,7 @@ int gt_intset_<%=bits%>_unit_test(GtError *err) {
           had_err = gt_intset_unit_test_check_seqnum(is, arr[idx - 1] + 1,
                                                      arr[idx] - 1, idx, err);
       }
-      gt_intset_<%=bits%>_delete(is);
+      gt_intset_delete(is);
     }
   }
   gt_free(arr);

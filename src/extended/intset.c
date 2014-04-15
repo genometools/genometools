@@ -17,6 +17,7 @@
 #include "extended/intset_rep.h"
 
 #include "core/assert_api.h"
+#include "core/class_alloc.h"
 #include "core/ensure.h"
 #include "core/ma.h"
 #include "core/types_api.h"
@@ -79,7 +80,7 @@ const GtIntsetClass *gt_intset_class_new(size_t size,
                                          GtIntsetPos2SeqnumFunc pos2seqnum_func,
                                          GtIntsetDeleteFunc delete_func)
 {
-  GtIntsetClass *intset_c = gt_malloc(sizeof (*intset_c));
+  GtIntsetClass *intset_c = gt_class_alloc(sizeof (*intset_c));
   intset_c->size = size;
   intset_c->add_func = add_func;
   intset_c->is_member_func = is_member_func;

@@ -257,7 +257,7 @@ const <%=classN%>Class *gt_<%=fkt_pref%>_class_new(size_t size\
 end%>\
 <%end %>)
 {
-  <%=classN%>Class *<%=fkt_pref%>_c = gt_malloc(sizeof (*<%=fkt_pref%>_c));
+  <%=classN%>Class *<%=fkt_pref%>_c = gt_class_alloc(sizeof (*<%=fkt_pref%>_c));
   <%=fkt_pref%>_c->size = size;
 <%functions.each do |func, paras| %>\
 <% name = func.gsub(/(^|.)([A-Z])/) do
@@ -275,6 +275,7 @@ $interface_file = <<-INTERFACE_CODE
 #include "<%=subdir%>/<%=fkt_pref%>_rep.h"
 
 #include "core/assert_api.h"
+#include "core/class_alloc.h"
 #include "core/ma.h"
 #include "core/unused_api.h"
 
