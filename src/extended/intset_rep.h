@@ -32,7 +32,7 @@ typedef struct GtIntsetMembers GtIntsetMembers;
 
 typedef void (*GtIntsetAddFunc)(GtIntset*, GtUword);
 typedef bool (*GtIntsetIsMemberFunc)(GtIntset*, GtUword);
-typedef GtUword (*GtIntsetPos2SeqnumFunc)(GtIntset*, GtUword);
+typedef GtUword (*GtIntsetIdxSmGeqFunc)(GtIntset*, GtUword);
 typedef void (*GtIntsetDeleteFunc)(GtIntset*);
 
 struct GtIntset {
@@ -44,7 +44,7 @@ struct GtIntsetClass {
   size_t size;
   GtIntsetAddFunc add_func;
   GtIntsetIsMemberFunc is_member_func;
-  GtIntsetPos2SeqnumFunc pos2seqnum_func;
+  GtIntsetIdxSmGeqFunc idx_sm_geq_func;
   GtIntsetDeleteFunc delete_func;
 };
 
@@ -63,7 +63,7 @@ struct GtIntsetMembers {
 const GtIntsetClass* gt_intset_class_new(size_t size,
                                          GtIntsetAddFunc,
                                          GtIntsetIsMemberFunc,
-                                         GtIntsetPos2SeqnumFunc,
+                                         GtIntsetIdxSmGeqFunc,
                                          GtIntsetDeleteFunc);
 
 GtIntset*            gt_intset_create(const GtIntsetClass*);

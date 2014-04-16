@@ -50,7 +50,7 @@ bool gt_intset_16_is_member(GtIntset *intset, GtUword elem);
    This is used for sets representing the separator positions in a set of
    sequences, to determine the sequence number corresponding to any position in
    the concatenated string of the sequence set. */
-GtUword gt_intset_16_pos2seqnum(GtIntset *intset, GtUword pos);
+GtUword gt_intset_16_get_idx_smallest_geq(GtIntset *intset, GtUword pos);
 
 /* Returns the size of an intset with given number of elements
    <num_of_elems> and maximum value <maxelement>. */

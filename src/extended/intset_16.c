@@ -60,7 +60,7 @@ static bool gt_intset_16_binarysearch_is_member(const uint16_t *leftptr,
   return false;
 }
 
-static GtUword gt_intset_16_binarysearch_pos2seqnum(const uint16_t *leftptr,
+static GtUword gt_intset_16_binarysearch_idx_sm_geq(const uint16_t *leftptr,
                                                     const uint16_t *rightptr,
                                                     uint16_t pos)
 {
@@ -133,7 +133,7 @@ bool gt_intset_16_is_member(GtIntset *intset, GtUword elem)
   return false;
 }
 
-GtUword gt_intset_16_pos2seqnum(GtIntset *intset, GtUword pos)
+GtUword gt_intset_16_get_idx_smallest_geq(GtIntset *intset, GtUword pos)
 {
   GtIntset16 *intset_16 = gt_intset_16_cast(intset);
   GtIntsetMembers *members = intset->members;
@@ -143,7 +143,7 @@ GtUword gt_intset_16_pos2seqnum(GtIntset *intset, GtUword pos)
   gt_assert(pos <= members->maxelement);
   if (members->sectionstart[sectionnum] < members->sectionstart[sectionnum+1]) {
     return members->sectionstart[sectionnum] +
-           gt_intset_16_binarysearch_pos2seqnum(
+           gt_intset_16_binarysearch_idx_sm_geq(
                   intset_16->elements + members->sectionstart[sectionnum],
                   intset_16->elements + members->sectionstart[sectionnum+1] - 1,
                   (uint16_t) pos);
@@ -174,7 +174,7 @@ const GtIntsetClass* gt_intset_16_class(void)
     this_c = gt_intset_class_new(sizeof (GtIntset16),
                                  gt_intset_16_add,
                                  gt_intset_16_is_member,
-                                 gt_intset_16_pos2seqnum,
+                                 gt_intset_16_get_idx_smallest_geq,
                                  gt_intset_16_delete);
   }
   return this_c;

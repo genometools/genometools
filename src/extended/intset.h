@@ -40,10 +40,10 @@ bool         gt_intset_is_member(GtIntset *intset, GtUword elem);
 
 /* Returns the number of the element in <intset> that is the smallest element
    larger than <pos>.
-   This is used for sets representing the separator positions in a set of
+   This can be used for sets representing the separator positions in a set of
    sequences, to determine the sequence number corresponding to any position in
    the concatenated string of the sequence set. */
-GtUword      gt_intset_pos2seqnum(GtIntset *intset, GtUword pos);
+GtUword      gt_intset_get_idx_smaller_geq(GtIntset *intset, GtUword pos);
 
 /* Free the memory of <intset>. */
 void         gt_intset_delete(GtIntset *intset);
@@ -60,8 +60,8 @@ int gt_intset_unit_test_notinset(GtIntset *intset, GtUword start,
                                  GtUword end, GtError *err);
 
 /* Function for unit tests within implementations of this class. Fails if
-   <gt_intset_pos2seqnum()> called with any number between and including <start>
-   and <end> returns any number different than <num>. */
+   <gt_intset_get_idx_smaller_geq()> called with any number between and
+   including <start> and <end> returns any number different than <num>. */
 int gt_intset_unit_test_check_seqnum(GtIntset *intset, GtUword start,
                                      GtUword end, GtUword num, GtError *err);
 

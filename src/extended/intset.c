@@ -65,26 +65,26 @@ bool gt_intset_is_member(GtIntset *intset, GtUword elem)
   return false;
 }
 
-GtUword gt_intset_pos2seqnum(GtIntset *intset, GtUword pos)
+GtUword gt_intset_get_idx_smaller_geq(GtIntset *intset, GtUword pos)
 {
   gt_assert(intset != NULL);
   gt_assert(intset->c_class != NULL);
-  if (intset->c_class->pos2seqnum_func != NULL)
-    return intset->c_class->pos2seqnum_func(intset, pos);
+  if (intset->c_class->idx_sm_geq_func != NULL)
+    return intset->c_class->idx_sm_geq_func(intset, pos);
   return GT_UWORD_MAX;
 }
 
 const GtIntsetClass *gt_intset_class_new(size_t size,
                                          GtIntsetAddFunc add_func,
                                          GtIntsetIsMemberFunc is_member_func,
-                                         GtIntsetPos2SeqnumFunc pos2seqnum_func,
+                                         GtIntsetIdxSmGeqFunc idx_sm_geq_func,
                                          GtIntsetDeleteFunc delete_func)
 {
   GtIntsetClass *intset_c = gt_class_alloc(sizeof (*intset_c));
   intset_c->size = size;
   intset_c->add_func = add_func;
   intset_c->is_member_func = is_member_func;
-  intset_c->pos2seqnum_func = pos2seqnum_func;
+  intset_c->idx_sm_geq_func = idx_sm_geq_func;
   intset_c->delete_func = delete_func;
   return intset_c;
 }
@@ -122,7 +122,7 @@ int gt_intset_unit_test_check_seqnum(GtIntset *intset, GtUword start,
   int had_err = 0;
   GtUword test;
   for (test = start; test <= end; ++test) {
-    gt_ensure(gt_intset_pos2seqnum(intset, test) == num);
+    gt_ensure(gt_intset_get_idx_smaller_geq(intset, test) == num);
   }
   return had_err;
 }

@@ -91,7 +91,7 @@ uint<%=bits%>_t elem)
   return false;
 }
 
-static GtUword gt_intset_<%=bits%>_binarysearch_pos2seqnum(\
+static GtUword gt_intset_<%=bits%>_binarysearch_idx_sm_geq(\
 const uint<%=bits%>_t *leftptr,
 <% if bits != 8 %> <%end%>                                                   \
 const uint<%=bits%>_t *rightptr,
@@ -169,7 +169,7 @@ intset_<%=bits%>->elements + secstart[sectionnum+1] - 1,
   return false;
 }
 
-GtUword gt_intset_<%=bits%>_pos2seqnum(GtIntset *intset, GtUword pos)
+GtUword gt_intset_<%=bits%>_get_idx_smallest_geq(GtIntset *intset, GtUword pos)
 {
   GtIntset<%=bits%> *intset_<%=bits%> = gt_intset_<%=bits%>_cast(intset);
   GtIntsetMembers *members = intset->members;
@@ -179,7 +179,7 @@ GtUword gt_intset_<%=bits%>_pos2seqnum(GtIntset *intset, GtUword pos)
   gt_assert(pos <= members->maxelement);
   if (members->sectionstart[sectionnum] < members->sectionstart[sectionnum+1]) {
     return members->sectionstart[sectionnum] +
-           gt_intset_<%=bits%>_binarysearch_pos2seqnum(
+           gt_intset_<%=bits%>_binarysearch_idx_sm_geq(
 <% if bits == 8 %> <% end %>                  intset_<%=bits%>->elements + \
 members->sectionstart[sectionnum],
 <% if bits == 8 %> <% end %>                  intset_<%=bits%>->elements + \
@@ -212,7 +212,7 @@ const GtIntsetClass* gt_intset_<%=bits%>_class(void)
     this_c = gt_intset_class_new(sizeof (GtIntset<%=bits%>),
                                  gt_intset_<%=bits%>_add,
                                  gt_intset_<%=bits%>_is_member,
-                                 gt_intset_<%=bits%>_pos2seqnum,
+                                 gt_intset_<%=bits%>_get_idx_smallest_geq,
                                  gt_intset_<%=bits%>_delete);
   }
   return this_c;
@@ -320,7 +320,7 @@ bool gt_intset_<%=bits%>_is_member(GtIntset *intset, GtUword elem);
    This is used for sets representing the separator positions in a set of
    sequences, to determine the sequence number corresponding to any position in
    the concatenated string of the sequence set. */
-GtUword gt_intset_<%=bits%>_pos2seqnum(GtIntset *intset, GtUword pos);
+GtUword gt_intset_<%=bits%>_get_idx_smallest_geq(GtIntset *intset, GtUword pos);
 
 /* Returns the size of an intset with given number of elements
    <num_of_elems> and maximum value <maxelement>. */
