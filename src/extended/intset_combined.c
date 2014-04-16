@@ -15,8 +15,11 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "extended/intset_choose.h"
 #include "core/error_api.h"
+#include "extended/intset.h"
+#include "extended/intset_16.h"
+#include "extended/intset_32.h"
+#include "extended/intset_8.h"
 
 GtIntset *gt_intset_best_new(GtUword maxelement, GtUword num_of_elems)
 {

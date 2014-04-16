@@ -28,13 +28,6 @@
    with reduced space. (Mathematical set, no duplicates allowed) */
 typedef struct GtIntset GtIntset;
 
-/* Type and size of elements used to represent the intset. */
-typedef enum {
-  GT_INTSET_8  = sizeof (uint8_t),
-  GT_INTSET_16 = sizeof (uint16_t),
-  GT_INTSET_32 = sizeof (uint32_t)
-} GtIntsetType;
-
 /* Increases the reference count of the <GtIntset>. */
 GtIntset*    gt_intset_ref(GtIntset *intset);
 
@@ -52,11 +45,12 @@ bool         gt_intset_is_member(GtIntset *intset, GtUword elem);
    the concatenated string of the sequence set. */
 GtUword      gt_intset_pos2seqnum(GtIntset *intset, GtUword pos);
 
-/* Return the optimal type of intset for your set. */
-GtIntsetType gt_intset_best_type(GtUword maxelement, GtUword num_of_elems);
-
 /* Free the memory of <intset>. */
 void         gt_intset_delete(GtIntset *intset);
+
+/* Return <GtIntset> of optimal size, choosing one of the available
+   implementations of this class. */
+GtIntset    *gt_intset_best_new(GtUword maxelement, GtUword num_of_elems);
 
 /* Function for unit tests within implementations of this class. Fails if
    <gt_intset_is_member()> called with any number between and including <start>
@@ -71,4 +65,5 @@ int gt_intset_unit_test_notinset(GtIntset *intset, GtUword start,
 int gt_intset_unit_test_check_seqnum(GtIntset *intset, GtUword start,
                                      GtUword end, GtUword num, GtError *err);
 
+int gt_intset_unit_test(GtError *err);
 #endif
