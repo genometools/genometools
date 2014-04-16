@@ -19,6 +19,8 @@
 #ifndef TYPES_API_H
 #define TYPES_API_H
 
+#include <limits.h>
+
 /* Define the conversion string for '%lld' in platform independent fashion. */
 #ifndef _WIN32
 #define GT_LLD "%lld"

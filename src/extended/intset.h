@@ -14,110 +14,56 @@
   ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
-
 #ifndef INTSET_H
 #define INTSET_H
 
-#include <stdlib.h>
-#include <stdbool.h>
 #include <inttypes.h>
+#include <stdbool.h>
+#include <stdlib.h>
 
+#include "core/error_api.h"
 #include "core/types_api.h"
 
-/* Type and size of elements used to represent the intset. */
-typedef enum {
-  GT_INTSET_8  = sizeof (uint8_t),
-  GT_INTSET_16 = sizeof (uint16_t),
-  GT_INTSET_32 = sizeof (uint32_t)
-} GtIntsetType;
+/* The GtIntset interface used to store a fixed set of sorted 64bit integers
+   with reduced space. (Mathematical set, no duplicates allowed) */
+typedef struct GtIntset GtIntset;
 
-/* Return the optimal type of intset for your set. */
-GtIntsetType gt_intset_best_type(GtUword maxelement, GtUword num_of_elems);
+/* Increases the reference count of the <GtIntset>. */
+GtIntset*    gt_intset_ref(GtIntset *intset);
 
-/* The <GtIntset8> class. Used to store a fixed number of sorted 64bit integers
-   with reduced space using 8bit elements. */
-typedef struct GtIntset8 GtIntset8;
-/* The <GtIntset16> class. Used to store a fixed number of sorted 64bit integers
-   with reduced space using 16bit elements. */
-typedef struct GtIntset16 GtIntset16;
-/* The <GtIntset32> class. Used to store a fixed number of sorted 64bit integers
-   with reduced space using 32bit elements. */
-typedef struct GtIntset32 GtIntset32;
+/* Add <elem> to <intset>, <elem> has to be larger than the previous added
+   element. */
+void         gt_intset_add(GtIntset *intset, GtUword elem);
 
-/* Return a new <GtIntset8> object with space for <num_of_elems> <GtUword>
-   integers, where the largest number is <max_elem>. */
-static GtIntset8  *gt_intset_8_new(GtUword max_elem, GtUword num_of_elems);
-/* Return a new <GtIntset16> object with space for <num_of_elems> <GtUword>
-   integers, where the largest number is <max_elem>. */
-static GtIntset16 *gt_intset_16_new(GtUword max_elem, GtUword num_of_elems);
-/* Return a new <GtIntset32> object with space for <num_of_elems> <GtUword>
-   integers, where the largest number is <max_elem>. */
-static GtIntset32 *gt_intset_32_new(GtUword max_elem, GtUword num_of_elems);
-
-/* Free the memory of <intset>. */
-static void        gt_intset_8_delete(GtIntset8 *intset);
-/* Free the memory of <intset>. */
-static void        gt_intset_16_delete(GtIntset16 *intset);
-/* Free the memory of <intset>. */
-static void        gt_intset_32_delete(GtIntset32 *intset);
-
-/* Add <elem> to <intset>. <elem> has to be larger than the previous <elem>
-   added. */
-static void        gt_intset_8_add(GtIntset8 *intset, GtUword elem);
-/* Add <elem> to <intset>. <elem> has to be larger than the previous <elem>
-   added. */
-static void        gt_intset_16_add(GtIntset16 *intset, GtUword elem);
-/* Add <elem> to <intset>. <elem> has to be larger than the previous <elem>
-   added. */
-static void        gt_intset_32_add(GtIntset32 *intset, GtUword elem);
-
-/* Returns <true> if <elem> is a member of the set <intset>. */
-static bool        gt_intset_8_is_member(const GtIntset8 *intset,
-                                         GtUword elem);
-/* Returns <true> if <elem> is a member of the set <intset>. */
-static bool        gt_intset_16_is_member(const GtIntset16 *intset,
-                                          GtUword elem);
-/* Returns <true> if <elem> is a member of the set <intset>. */
-static bool        gt_intset_32_is_member(const GtIntset32 *intset,
-                                          GtUword elem);
+/* Returns true if <elem> is a member of set <intset>. */
+bool         gt_intset_is_member(GtIntset *intset, GtUword elem);
 
 /* Returns the number of the element in <intset> that is the smallest element
    larger than <pos>.
-   This is used for sets representing the separator positions in a set of
+   This can be used for sets representing the separator positions in a set of
    sequences, to determine the sequence number corresponding to any position in
    the concatenated string of the sequence set. */
-static GtUword     gt_intset_8_pos2seqnum(const GtIntset8 *intset,
-                                          GtUword pos);
-/* Returns the number of the element in <intset> that is the smallest element
-   larger than <pos>.
-   This is used for sets representing the separator positions in a set of
-   sequences, to determine the sequence number corresponding to any position in
-   the concatenated string of the sequence set. */
-static GtUword     gt_intset_16_pos2seqnum(const GtIntset16 *intset,
-                                           GtUword pos);
-/* Returns the number of the element in <intset> that is the smallest element
-   larger than <pos>.
-   This is used for sets representing the separator positions in a set of
-   sequences, to determine the sequence number corresponding to any position in
-   the concatenated string of the sequence set. */
-static GtUword     gt_intset_32_pos2seqnum(const GtIntset32 *intset,
-                                           GtUword pos);
+GtUword      gt_intset_get_idx_smaller_geq(GtIntset *intset, GtUword pos);
 
-/* Returns the size of an intset with given number of elements
-   <num_of_elems> and maximum value <maxelement>.
- */
-static size_t      gt_intset_8_size(GtUword maxelement, GtUword num_of_elems);
-/* Returns the size of an intset with given number of elements
-   <num_of_elems> and maximum value <maxelement>.
- */
-static size_t      gt_intset_16_size(GtUword maxelement, GtUword num_of_elems);
-/* Returns the size of an intset with given number of elements
-   <num_of_elems> and maximum value <maxelement>.
- */
-static size_t      gt_intset_32_size(GtUword maxelement, GtUword num_of_elems);
+/* Free the memory of <intset>. */
+void         gt_intset_delete(GtIntset *intset);
 
-#include "extended/intset_impl.h"
+/* Return <GtIntset> of optimal size, choosing one of the available
+   implementations of this class. */
+GtIntset    *gt_intset_best_new(GtUword maxelement, GtUword num_of_elems);
+
+/* Function for unit tests within implementations of this class. Fails if
+   <gt_intset_is_member()> called with any number between and including <start>
+   and <end> returns true.
+   */
+int gt_intset_unit_test_notinset(GtIntset *intset, GtUword start,
+                                 GtUword end, GtError *err);
+
+/* Function for unit tests within implementations of this class. Fails if
+   <gt_intset_get_idx_smaller_geq()> called with any number between and
+   including <start> and <end> returns any number different than <num>. */
+int gt_intset_unit_test_check_seqnum(GtIntset *intset, GtUword start,
+                                     GtUword end, GtUword num, GtError *err);
 
 int gt_intset_unit_test(GtError *err);
-
 #endif

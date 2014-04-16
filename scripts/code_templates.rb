@@ -1,4 +1,3 @@
-
 $license = <<-END_LICENSE
 /*
   Copyright (c) <%=year%> <%=name%> <<%=email%>>
@@ -44,7 +43,8 @@ struct <%=classN%>Class {
   /* XXfunctionNamesXX do not change will be replaced by function names */
 };
 
-struct <%=classN%>Members {<% if options.refcount %>\n  GtUword refcount;<% end %>
+struct <%=classN%>Members {\
+<% if options.refcount %>\n  GtUword refcount;<% end %>
 };
 
 const <%=classN%>Class* gt_<%=fkt_pref%>_class_new(size_t size,
@@ -131,7 +131,7 @@ gt_<%=fkt_pref%>_ref(<%=classN%> *<%=fkt_pref%>);\
 <%    if parameter.match /^\#{classN}\\*$/ %>\
 <%=     fkt_pref %>\
 <%    else %>\
-para<%=idx%> /*TODO: name*/\
+ para<%=idx%> /*TODO: name*/\
 <%    end %>\
 <%  end %>);\
 <%end %>
@@ -257,7 +257,7 @@ const <%=classN%>Class *gt_<%=fkt_pref%>_class_new(size_t size\
 end%>\
 <%end %>)
 {
-  <%=classN%>Class *<%=fkt_pref%>_c = gt_malloc(sizeof (*<%=fkt_pref%>_c);
+  <%=classN%>Class *<%=fkt_pref%>_c = gt_class_alloc(sizeof (*<%=fkt_pref%>_c));
   <%=fkt_pref%>_c->size = size;
 <%functions.each do |func, paras| %>\
 <% name = func.gsub(/(^|.)([A-Z])/) do
@@ -275,6 +275,7 @@ $interface_file = <<-INTERFACE_CODE
 #include "<%=subdir%>/<%=fkt_pref%>_rep.h"
 
 #include "core/assert_api.h"
+#include "core/class_alloc.h"
 #include "core/ma.h"
 #include "core/unused_api.h"
 
@@ -315,6 +316,9 @@ struct <%=iclassN%> {
   /* TODO: add implementation members */
 };
 
+#define <%=ifkt_pref%>_cast(cvar) \\
+        <%=fkt_pref%>_cast(<%=ifkt_pref%>_class(), cvar)
+
 <%functions.each do |func, parameters| %>\
 <%  type = parameters[0] %>\
 <%  funcnames << ifkt_pref + '_' +
@@ -335,13 +339,17 @@ static <%=funcname%>\
 <%    else %>\
 <%=     parameter%>\
 <%    end %>\
-<%    if parameter.match /^\#{classN}\\*$/ %>\
+<%    if parameter.match /\#{classN}\\*$/ %>\
 <%=     icvar %>\
 <%    else %>\
  para<%=idx%> /*TODO: name*/\
 <%    end %>\
 <%  end %>)
 {
+<% if parameters[1].match classN %>\
+<%=  iclassN%> <%=iclassN.gsub(/^Gt/,'').gsub(/[a-z_]/,'').downcase%>\
+= <%=ifkt_pref%>_cast(<%=icvar%>);
+<% end %>\
   /* TODO: add functionality */
   return\
 <%  if type.match /[*]/ %>\
@@ -363,17 +371,13 @@ const <%=classN%>Class* <%=ifkt_pref%>_class(void)
   if (this_c == NULL) {
     this_c = <%=fkt_pref%>_class_new(sizeof (<%=iclassN%>),
 <%funcnames.each_with_index do |name,idx| %>\
-<%  if idx > 0 %>\
-,
+<%  if idx > 0 %>,
 <%  end %>\
 <%= ' ' * (fkt_pref.length + 24) %><%=name%>\
 <%end %>);
   }
   return this_c;
 }
-
-#define <%=ifkt_pref%>_cast(cvar) \\
-        <%=fkt_pref%>_cast(<%=ifkt_pref%>_class(), cvar)
 
 <%=classN%>* <%=ifkt_pref%>_new(void /* TODO: add parameters */)
 {

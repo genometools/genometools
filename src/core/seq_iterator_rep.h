@@ -42,11 +42,11 @@ GtSeqIterator*            gt_seq_iterator_create(const GtSeqIteratorClass*);
 void*                     gt_seq_iterator_cast(const GtSeqIteratorClass*,
                                               GtSeqIterator*);
 const GtSeqIteratorClass* gt_seq_iterator_class_new(size_t size,
-                         GtSeqIteratorSetSymbolmapFunc set_symbolmap,
-                         GtSeqIteratorSetSequenceOutFunc set_seqout,
-                         GtSeqIteratorNextFunc next_func,
-                         GtSeqIteratorGetCurrCounterFunc get_curr_counter_func,
-                         GtSeqIteratorSetQualBufferFunc set_qual_buffer_func,
-                         GtSeqIteratorFreeFunc free_func);
+                          GtSeqIteratorSetSymbolmapFunc set_symbolmap,
+                          GtSeqIteratorSetSequenceOutFunc set_seqout,
+                          GtSeqIteratorNextFunc next_func,
+                          GtSeqIteratorGetCurrCounterFunc get_curr_counter_func,
+                          GtSeqIteratorSetQualBufferFunc set_qual_buffer_func,
+                          GtSeqIteratorFreeFunc free_func);
 
 #endif
