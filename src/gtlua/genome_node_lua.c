@@ -331,6 +331,18 @@ static int meta_node_lua_get_data(lua_State *L)
   return 1;
 }
 
+static int comment_node_lua_get_comment(lua_State *L)
+{
+  GtGenomeNode **gn;
+  GtCommentNode *cn;
+  gn = check_genome_node(L, 1);
+  /* make sure we get a meta node */
+  cn = gt_comment_node_try_cast(*gn);
+  luaL_argcheck(L, cn, 1, "not a comment node");
+  lua_pushstring(L, gt_comment_node_get_comment(cn));
+  return 1;
+}
+
 static int feature_node_lua_extract_sequence(lua_State *L)
 {
   GtGenomeNode **gn;
@@ -414,6 +426,7 @@ static const struct luaL_Reg genome_node_lib_m [] = {
   { "remove_leaf", feature_node_lua_remove_leaf },
   { "get_data", meta_node_lua_get_data },
   { "get_directive", meta_node_lua_get_directive },
+  { "get_comment", comment_node_lua_get_comment },
   { NULL, NULL }
 };
 

@@ -152,6 +152,27 @@ static int spec_visitor_region_node(GtNodeVisitor *nv, GtRegionNode *rn,
   return had_err;
 }
 
+static int spec_visitor_comment_node(GtNodeVisitor *nv, GtCommentNode *cn,
+                                     GtError *err)
+{
+  int had_err = 0;
+  GtSpecVisitor *sv;
+  gt_error_check(err);
+
+  sv = spec_visitor_cast(nv);
+  if (sv->comment_ref != GT_UNDEF_INT) {
+    sv->current_node = (GtGenomeNode*) cn;
+    lua_rawgeti(sv->L, LUA_REGISTRYINDEX, sv->comment_ref);
+    gt_lua_genome_node_push(sv->L, gt_genome_node_ref((GtGenomeNode*) cn));
+    if (lua_pcall(sv->L, 1, 0, 0)) {
+      const char *error = lua_tostring(sv->L, -1);
+      gt_error_set(err, "%s", error);
+      had_err = -1;
+    }
+  }
+  return had_err;
+}
+
 static void spec_visitor_free(GtNodeVisitor* nv)
 {
   GtSpecVisitor *sv;
@@ -160,6 +181,7 @@ static void spec_visitor_free(GtNodeVisitor* nv)
   gt_str_delete(sv->filename);
   lua_close(sv->L);
   gt_hashmap_delete(sv->type_specs);
+  gt_array_delete(sv->graph_context);
 }
 
 const GtNodeVisitorClass* gt_spec_visitor_class()
@@ -169,7 +191,7 @@ const GtNodeVisitorClass* gt_spec_visitor_class()
   if (!nvc) {
     nvc = gt_node_visitor_class_new(sizeof (GtSpecVisitor),
                                     spec_visitor_free,
-                                    NULL,
+                                    spec_visitor_comment_node,
                                     spec_visitor_feature_node,
                                     spec_visitor_region_node,
                                     NULL,
@@ -257,6 +279,31 @@ static int spec_register_region_callback(lua_State *L)
   } else {
     luaL_where(L, 1);
     lua_pushstring(L, "duplicate definition of spec for region nodes");
+    lua_concat(L, 2);
+    return lua_error(L);
+  }
+  return 0;
+}
+
+static int spec_register_comment_callback(lua_State *L)
+{
+  int ref;
+  GtSpecVisitor *sv;
+
+  /* get parameters from stack */
+  ref = luaL_ref(L, LUA_REGISTRYINDEX);
+  /* get visitor from registry */
+  lua_pushlightuserdata(L, (void *) &spec_defuserdata);
+  lua_gettable(L, LUA_REGISTRYINDEX);
+  sv = lua_touserdata(L, -1);
+  /* register Lua callback */
+  if (sv->comment_ref == GT_UNDEF_INT) {
+    sv->comment_ref = ref;
+    gt_log_log("registering comment specs at ref %d", ref);
+    gt_assert(sv->comment_ref != GT_UNDEF_INT);
+  } else {
+    luaL_where(L, 1);
+    lua_pushstring(L, "duplicate definition of spec for comment nodes");
     lua_concat(L, 2);
     return lua_error(L);
   }
@@ -434,6 +481,9 @@ static int spec_init_lua_env(GtSpecVisitor *sv, const char *progname)
   lua_rawset(sv->L, -3);
   lua_pushstring(sv->L, "meta");
   lua_pushcfunction(sv->L, spec_register_meta_callback);
+  lua_rawset(sv->L, -3);
+  lua_pushstring(sv->L, "comment");
+  lua_pushcfunction(sv->L, spec_register_comment_callback);
   lua_rawset(sv->L, -3);
   /* XXX: do the same for sequence and comment nodes */
   /* ... */
