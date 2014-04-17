@@ -80,7 +80,7 @@ void gt_spec_aspect_report(GtSpecAspect *sa, GtFile *outfile, bool details)
   gt_assert(sa);
   if (gt_array_size(sa->failed_nodes) > 0) {
     gt_file_xprintf(outfile, GT_SPEC_ANSI_COLOR_RED
-                           " - %s (" GT_WU " failed)"
+                           "  - %s (" GT_WU " failed)"
                            GT_SPEC_ANSI_COLOR_RESET
                            "\n", gt_str_get(sa->name),
                            gt_array_size(sa->failed_nodes));
@@ -113,7 +113,7 @@ void gt_spec_aspect_report(GtSpecAspect *sa, GtFile *outfile, bool details)
     }
   } else {
     gt_file_xprintf(outfile, GT_SPEC_ANSI_COLOR_GREEN
-                           " - %s"
+                           "  - %s"
                            GT_SPEC_ANSI_COLOR_RESET
                            "\n", gt_str_get(sa->name));
   }
@@ -235,6 +235,23 @@ void gt_spec_results_report(GtSpecResults *sr, GtFile *outfile, bool details)
   info.details = details;
   gt_hashmap_foreach_in_key_order(sr->feature_aspects,
                                   gt_spec_results_report_features,
+                                  &info, NULL);
+  gt_file_xprintf(outfile, GT_SPEC_ANSI_COLOR_YELLOW
+                                 "Meta" GT_SPEC_ANSI_COLOR_RESET " nodes\n");
+  gt_hashmap_foreach_in_key_order(sr->meta_aspects,
+                                  gt_spec_results_report_single,
+                                  &info, NULL);
+  gt_file_xprintf(outfile, GT_SPEC_ANSI_COLOR_YELLOW
+                           "Region" GT_SPEC_ANSI_COLOR_RESET
+                           " nodes\n");
+  gt_hashmap_foreach_in_key_order(sr->region_aspects,
+                                  gt_spec_results_report_single,
+                                  &info, NULL);
+  gt_file_xprintf(outfile, GT_SPEC_ANSI_COLOR_YELLOW
+                           "Comment" GT_SPEC_ANSI_COLOR_RESET
+                           " nodes\n");
+  gt_hashmap_foreach_in_key_order(sr->comment_aspects,
+                                  gt_spec_results_report_single,
                                   &info, NULL);
 }
 
