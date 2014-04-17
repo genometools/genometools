@@ -14,6 +14,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#include "core/array_api.h"
 #include "core/assert_api.h"
 #include "core/class_alloc_lock.h"
 #include "core/cstr_api.h"
@@ -26,6 +27,7 @@
 #include "core/symbol_api.h"
 #include "core/undef_api.h"
 #include "core/unused_api.h"
+#include "extended/feature_node.h"
 #include "extended/feature_node_iterator_api.h"
 #include "extended/node_visitor_api.h"
 #include "extended/spec_visitor.h"
@@ -48,13 +50,33 @@ struct GtSpecVisitor {
   GtGenomeNode *current_node;
   const char *current_aspect,
              *matcher_name;
+  GtArray *graph_context;
   GtSpecResults *res;
 };
+
+typedef struct {
+  GtFeatureNode *parent;
+  GtError *err;
+  GtSpecVisitor *sv;
+} GtSpecVisitorNodeTraverseInfo;
 
 const GtNodeVisitorClass* gt_spec_visitor_class();
 
 #define spec_visitor_cast(GV)\
         gt_node_visitor_cast(gt_spec_visitor_class(), GV)
+
+GT_UNUSED static void spec_print_context(GtSpecVisitor *sv)
+{
+  GtUword i;
+  GtFeatureNode *fn2;
+  if (!gt_array_size(sv->graph_context)) return;
+  for (i = gt_array_size(sv->graph_context); i != 0; i--) {
+    fn2 = *(GtFeatureNode**) gt_array_get(sv->graph_context, i-1);
+    if (!fn2) {
+      continue;
+    }
+  }
+}
 
 static const luaL_Reg spec_luasecurelibs[] = {
   {"", luaopen_base},
@@ -84,31 +106,72 @@ static void spec_luaL_opencustomlibs(lua_State *L, const luaL_Reg *lib)
   }
 }
 
+static int spec_visitor_process_node(GtSpecVisitor *sv, GtFeatureNode *node,
+                                     GT_UNUSED GtFeatureNode *parent,
+                                     GtError *err)
+{
+  int had_err = 0, *ref;
+  const char *type = gt_feature_node_get_type(node);
+  if ((ref = gt_hashmap_get(sv->type_specs, type))) {
+    sv->current_node = (GtGenomeNode*) node;
+    lua_rawgeti(sv->L, LUA_REGISTRYINDEX, *ref);
+    gt_lua_genome_node_push(sv->L, gt_genome_node_ref((GtGenomeNode*) node));
+    if (lua_pcall(sv->L, 1, 0, 0)) {
+      const char *error = lua_tostring(sv->L, -1);
+      gt_error_set(err, "%s", error);
+      had_err = -1;
+    }
+  }
+
+  return had_err;
+}
+
+static int spec_visitor_visit_child(GtFeatureNode* fn, void *nti, GtError *err)
+{
+  int had_err = 0;
+  GtSpecVisitorNodeTraverseInfo* info = (GtSpecVisitorNodeTraverseInfo*) nti;
+
+  if (gt_feature_node_has_children(fn)) {
+    GtFeatureNode *oldparent = info->parent;
+
+    had_err = spec_visitor_process_node(info->sv, fn, info->parent, err);
+    if (!had_err) {
+      gt_array_add(info->sv->graph_context, info->parent);
+      info->parent = fn;
+      had_err = gt_feature_node_traverse_direct_children(fn, info,
+                                                       spec_visitor_visit_child,
+                                                       err);
+    }
+    if (!had_err) {
+      info->parent = oldparent;
+    }
+  } else {
+    gt_array_add(info->sv->graph_context, info->parent);
+    had_err = spec_visitor_process_node(info->sv, fn, info->parent, err);
+  }
+  (void) gt_array_pop(info->sv->graph_context);
+  return had_err;
+}
+
 static int spec_visitor_feature_node(GtNodeVisitor *nv, GtFeatureNode *fn,
                                      GtError *err)
 {
-  GtFeatureNodeIterator *fni;
-  GtFeatureNode *node;
-  int had_err = 0,
-      *ref;
+  int had_err = 0;
   GtSpecVisitor *sv;
+  GtSpecVisitorNodeTraverseInfo info;
+  gt_error_check(err);
 
   sv = spec_visitor_cast(nv);
-  fni = gt_feature_node_iterator_new(fn);
-  while (!had_err && (node = gt_feature_node_iterator_next(fni))) {
-    const char *type = gt_feature_node_get_type(node);
-    if ((ref = gt_hashmap_get(sv->type_specs, type))) {
-      sv->current_node = (GtGenomeNode*) node;
-      lua_rawgeti(sv->L, LUA_REGISTRYINDEX, *ref);
-      gt_lua_genome_node_push(sv->L, gt_genome_node_ref((GtGenomeNode*) node));
-      if (lua_pcall(sv->L, 1, 0, 0)) {
-        const char *error = lua_tostring(sv->L, -1);
-        gt_error_set(err, "%s", error);
-        had_err = -1;
-      }
-    }
+  had_err = spec_visitor_process_node(sv, fn, NULL, err);
+  if (!had_err && gt_feature_node_has_children(fn)) {
+    info.sv = sv;
+    info.parent = fn;
+    info.err = err;
+    had_err = gt_feature_node_traverse_direct_children(fn, &info,
+                                                       spec_visitor_visit_child,
+                                                       err);
   }
-  gt_feature_node_iterator_delete(fni);
+
   return had_err;
 }
 
@@ -117,6 +180,7 @@ static int spec_visitor_meta_node(GtNodeVisitor *nv, GtMetaNode *mn,
 {
   int had_err = 0;
   GtSpecVisitor *sv;
+  gt_error_check(err);
 
   sv = spec_visitor_cast(nv);
   if (sv->meta_ref != GT_UNDEF_INT) {
@@ -137,6 +201,7 @@ static int spec_visitor_region_node(GtNodeVisitor *nv, GtRegionNode *rn,
 {
   int had_err = 0;
   GtSpecVisitor *sv;
+  gt_error_check(err);
 
   sv = spec_visitor_cast(nv);
   if (sv->region_ref != GT_UNDEF_INT) {
@@ -458,6 +523,36 @@ static int spec_feature_node_lua_has_child_of_type(lua_State *L)
   return 1;
 }
 
+static int spec_feature_node_lua_appears_as_child_of_type(lua_State *L)
+{
+  GtGenomeNode **gn;
+  GtFeatureNode *fn, *fn2;
+  bool found = false;
+  GtSpecVisitor *sv;
+  const char *type;
+  GtUword i;
+  gn = check_genome_node(L, 1);
+  /* make sure we get a feature node */
+  fn = gt_feature_node_try_cast(*gn);
+  luaL_argcheck(L, fn, 1, "not a feature node");
+  type = gt_symbol(luaL_checkstring(L, 2));
+
+  lua_pushlightuserdata(L, (void *) &spec_defuserdata);
+  lua_gettable(L, LUA_REGISTRYINDEX);
+  sv = lua_touserdata(L, -1);
+
+  gt_assert(sv && sv->graph_context);
+  if (gt_array_size(sv->graph_context) > 0) {
+    for (i = gt_array_size(sv->graph_context) - 1; i != 0; i--) {
+      fn2 = *(GtFeatureNode**) gt_array_get(sv->graph_context, i);
+      if (!fn2) continue;
+      found = (gt_feature_node_get_type(fn2) == type);
+    }
+  }
+  lua_pushboolean(L, found);
+  return 1;
+}
+
 static int spec_init_lua_env(GtSpecVisitor *sv, const char *progname)
 {
   int had_err = 0;
@@ -468,6 +563,9 @@ static int spec_init_lua_env(GtSpecVisitor *sv, const char *progname)
   luaL_getmetatable(sv->L, GENOME_NODE_METATABLE);
   lua_pushstring(sv->L, "has_child_of_type");
   lua_pushcfunction(sv->L, spec_feature_node_lua_has_child_of_type);
+  lua_rawset(sv->L, -3);
+  lua_pushstring(sv->L, "appears_as_child_of_type");
+  lua_pushcfunction(sv->L, spec_feature_node_lua_appears_as_child_of_type);
   lua_rawset(sv->L, -3);
   /* ...add more if required later */
 
@@ -546,6 +644,7 @@ GtNodeVisitor* gt_spec_visitor_new(const char *specfile, GtSpecResults *res,
   sv->filename = gt_str_new_cstr(specfile);
   sv->res = res;
   sv->type_specs = gt_hashmap_new(GT_HASH_STRING, gt_free_func, gt_free_func);
+  sv->graph_context = gt_array_new(sizeof (GtFeatureNode*));
 
   (void) spec_init_lua_env(sv, gt_error_get_progname(err));
   if (luaL_loadfile(sv->L, specfile) || lua_pcall(sv->L, 0, 0, 0)) {
