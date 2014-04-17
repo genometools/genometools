@@ -171,7 +171,7 @@ static int spec_visitor_feature_node(GtNodeVisitor *nv, GtFeatureNode *fn,
                                                        spec_visitor_visit_child,
                                                        err);
   }
-
+  gt_spec_results_add_cc(sv->res);
   return had_err;
 }
 
@@ -193,6 +193,7 @@ static int spec_visitor_meta_node(GtNodeVisitor *nv, GtMetaNode *mn,
       had_err = -1;
     }
   }
+  gt_spec_results_add_cc(sv->res);
   return had_err;
 }
 
@@ -214,6 +215,7 @@ static int spec_visitor_region_node(GtNodeVisitor *nv, GtRegionNode *rn,
       had_err = -1;
     }
   }
+  gt_spec_results_add_cc(sv->res);
   return had_err;
 }
 
@@ -235,6 +237,29 @@ static int spec_visitor_comment_node(GtNodeVisitor *nv, GtCommentNode *cn,
       had_err = -1;
     }
   }
+  gt_spec_results_add_cc(sv->res);
+  return had_err;
+}
+
+static int spec_visitor_sequence_node(GtNodeVisitor *nv, GtSequenceNode *sn,
+                                      GtError *err)
+{
+  int had_err = 0;
+  GtSpecVisitor *sv;
+  gt_error_check(err);
+
+  sv = spec_visitor_cast(nv);
+  if (sv->sequence_ref != GT_UNDEF_INT) {
+    sv->current_node = (GtGenomeNode*) sn;
+    lua_rawgeti(sv->L, LUA_REGISTRYINDEX, sv->sequence_ref);
+    gt_lua_genome_node_push(sv->L, gt_genome_node_ref((GtGenomeNode*) sn));
+    if (lua_pcall(sv->L, 1, 0, 0)) {
+      const char *error = lua_tostring(sv->L, -1);
+      gt_error_set(err, "%s", error);
+      had_err = -1;
+    }
+  }
+  gt_spec_results_add_cc(sv->res);
   return had_err;
 }
 
@@ -259,7 +284,7 @@ const GtNodeVisitorClass* gt_spec_visitor_class()
                                     spec_visitor_comment_node,
                                     spec_visitor_feature_node,
                                     spec_visitor_region_node,
-                                    NULL,
+                                    spec_visitor_sequence_node,
                                     NULL);
     gt_node_visitor_class_set_meta_node_func(nvc, spec_visitor_meta_node);
   }
@@ -369,6 +394,31 @@ static int spec_register_comment_callback(lua_State *L)
   } else {
     luaL_where(L, 1);
     lua_pushstring(L, "duplicate definition of spec for comment nodes");
+    lua_concat(L, 2);
+    return lua_error(L);
+  }
+  return 0;
+}
+
+static int spec_register_sequence_callback(lua_State *L)
+{
+  int ref;
+  GtSpecVisitor *sv;
+
+  /* get parameters from stack */
+  ref = luaL_ref(L, LUA_REGISTRYINDEX);
+  /* get visitor from registry */
+  lua_pushlightuserdata(L, (void *) &spec_defuserdata);
+  lua_gettable(L, LUA_REGISTRYINDEX);
+  sv = lua_touserdata(L, -1);
+  /* register Lua callback */
+  if (sv->sequence_ref == GT_UNDEF_INT) {
+    sv->sequence_ref = ref;
+    gt_log_log("registering sequence specs at ref %d", ref);
+    gt_assert(sv->sequence_ref != GT_UNDEF_INT);
+  } else {
+    luaL_where(L, 1);
+    lua_pushstring(L, "duplicate definition of spec for sequence nodes");
     lua_concat(L, 2);
     return lua_error(L);
   }
@@ -496,7 +546,7 @@ static int spec_expect(lua_State *L)
 
   /* return new object with __index metamethod set */
   lua_newtable(L);
-  luaL_getmetatable(L, "gt_specexpect");
+  luaL_getmetatable(L, "GenomeTools.specexpect");
   lua_setmetatable(L, -2);
 
   return 1;
@@ -509,6 +559,7 @@ static int spec_feature_node_lua_has_child_of_type(lua_State *L)
   GtFeatureNodeIterator *it;
   bool found = false;
   const char *type;
+
   gn = check_genome_node(L, 1);
   /* make sure we get a feature node */
   fn = gt_feature_node_try_cast(*gn);
@@ -553,6 +604,43 @@ static int spec_feature_node_lua_appears_as_child_of_type(lua_State *L)
   return 1;
 }
 
+static int spec_feature_node_lua_get_children_iter(lua_State *L) {
+  GtFeatureNodeIterator *it;
+  GtFeatureNode *fn;
+  it = *(GtFeatureNodeIterator**) lua_touserdata(L, lua_upvalueindex(1));
+  if ((fn = gt_feature_node_iterator_next(it))) {
+    gt_lua_genome_node_push(L, gt_genome_node_ref((GtGenomeNode*) fn));
+    return 1;
+  } else
+    return 0;
+}
+
+static int spec_feature_node_lua_get_children_gc (lua_State *L) {
+  GtFeatureNodeIterator *it;
+  it = *(GtFeatureNodeIterator**) lua_touserdata(L, 1);
+  if (it)
+    gt_feature_node_iterator_delete(it);
+  return 0;
+}
+
+static int spec_feature_node_lua_get_children(lua_State *L) {
+  GtGenomeNode **gn;
+  GtFeatureNode *fn;
+  GtFeatureNodeIterator **it;
+  gn = check_genome_node(L, 1);
+  /* make sure we get a feature node */
+  fn = gt_feature_node_try_cast(*gn);
+  luaL_argcheck(L, fn, 1, "not a feature node");
+  it = (GtFeatureNodeIterator**) lua_newuserdata(L,
+                                              sizeof (GtFeatureNodeIterator *));
+  luaL_getmetatable(L, "GenomeTools.get_children");
+  lua_setmetatable(L, -2);
+  *it = gt_feature_node_iterator_new(fn);
+  gt_assert(*it);
+  lua_pushcclosure(L, spec_feature_node_lua_get_children_iter, 1);
+  return 1;
+}
+
 static int spec_init_lua_env(GtSpecVisitor *sv, const char *progname)
 {
   int had_err = 0;
@@ -566,6 +654,9 @@ static int spec_init_lua_env(GtSpecVisitor *sv, const char *progname)
   lua_rawset(sv->L, -3);
   lua_pushstring(sv->L, "appears_as_child_of_type");
   lua_pushcfunction(sv->L, spec_feature_node_lua_appears_as_child_of_type);
+  lua_rawset(sv->L, -3);
+  lua_pushstring(sv->L, "get_children");
+  lua_pushcfunction(sv->L, spec_feature_node_lua_get_children);
   lua_rawset(sv->L, -3);
   /* ...add more if required later */
 
@@ -583,8 +674,9 @@ static int spec_init_lua_env(GtSpecVisitor *sv, const char *progname)
   lua_pushstring(sv->L, "comment");
   lua_pushcfunction(sv->L, spec_register_comment_callback);
   lua_rawset(sv->L, -3);
-  /* XXX: do the same for sequence and comment nodes */
-  /* ... */
+  lua_pushstring(sv->L, "sequence");
+  lua_pushcfunction(sv->L, spec_register_sequence_callback);
+  lua_rawset(sv->L, -3);
   lua_setglobal(sv->L, "describe");
 
   /* setup DSL: aspect definition 'it' */
@@ -596,9 +688,15 @@ static int spec_init_lua_env(GtSpecVisitor *sv, const char *progname)
   lua_setglobal(sv->L, "expect");
 
   /* setup DSL: dispatcher metatable for Lua-based expectation matchers */
-  luaL_newmetatable(sv->L, "gt_specexpect");
+  luaL_newmetatable(sv->L, "GenomeTools.specexpect");
   lua_pushstring(sv->L, "__index");
   lua_pushcfunction(sv->L, spec_expect_index);
+  lua_settable(sv->L, -3);
+
+  /* setup DSL: child node iterator upvalue needs custom gc callback */
+  luaL_newmetatable(sv->L, "GenomeTools.get_children");
+  lua_pushstring(sv->L, "__gc");
+  lua_pushcfunction(sv->L, spec_feature_node_lua_get_children_gc);
   lua_settable(sv->L, -3);
 
   /* load matcher funcs written in Lua (for extensibility) */

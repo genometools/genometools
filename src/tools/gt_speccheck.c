@@ -15,6 +15,7 @@
 */
 
 #include "core/ma.h"
+#include "core/timer_api.h"
 #include "core/unused_api.h"
 #include "extended/spec_visitor.h"
 #include "extended/gff3_in_stream.h"
@@ -23,7 +24,8 @@
 
 typedef struct {
   GtStr *specfile;
-  bool verbose;
+  bool verbose,
+       colored;
 } SpeccheckArguments;
 
 static void *gt_speccheck_arguments_new(void)
@@ -57,6 +59,10 @@ static GtOptionParser* gt_speccheck_option_parser_new(void *tool_arguments)
   gt_option_parser_add_option(op, option);
   gt_option_is_mandatory(option);
 
+  option = gt_option_new_bool("colored", "show colored output",
+                              &arguments->colored, true);
+  gt_option_parser_add_option(op, option);
+
   option = gt_option_new_verbose(&arguments->verbose);
   gt_option_parser_add_option(op, option);
 
@@ -68,7 +74,8 @@ static int gt_speccheck_runner(int argc, const char **argv, int parsed_args,
 {
   GtNodeStream *gff3_in_stream = NULL, *checker_stream = NULL;
   GtNodeVisitor *spec_visitor = NULL;
-  GtSpecResults *res;
+  GtSpecResults *res = NULL;
+  GtTimer *t = NULL;
   SpeccheckArguments *arguments = tool_arguments;
 
   int had_err = 0;
@@ -82,21 +89,29 @@ static int gt_speccheck_runner(int argc, const char **argv, int parsed_args,
 
   gff3_in_stream = gt_gff3_in_stream_new_unsorted(argc - parsed_args,
                                                   argv + parsed_args);
+  gt_assert(gff3_in_stream);
 
   checker_stream = gt_visitor_stream_new(gff3_in_stream, spec_visitor);
   gt_assert(checker_stream);
 
+  t = gt_timer_new();
+  gt_timer_start(t);
   /* pull the features through the stream and free them afterwards */
   if (!had_err)
     had_err = gt_node_stream_pull(checker_stream, err);
+  gt_timer_stop(t);
 
   if (!had_err)
-    gt_spec_results_report(res, NULL, arguments->verbose);
+    gt_spec_results_report(res, NULL, arguments->verbose, arguments->colored);
+
+  if (!had_err)
+    gt_timer_show_formatted(t, "Finished in " GT_WD ".%06ld s.\n", stdout);
 
   /* free */
   gt_node_stream_delete(gff3_in_stream);
   gt_node_stream_delete(checker_stream);
   gt_spec_results_delete(res);
+  gt_timer_delete(t);
 
   return had_err;
 }
