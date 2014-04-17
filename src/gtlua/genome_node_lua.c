@@ -106,6 +106,39 @@ static int meta_node_lua_new(lua_State *L)
   return 1;
 }
 
+static int comment_node_lua_new(lua_State *L)
+{
+  GtGenomeNode **cn;
+  const char *comment;
+  gt_assert(L);
+  /* get_check parameters */
+  comment = luaL_checkstring(L, 1);
+  /* construct object */
+  cn = lua_newuserdata(L, sizeof (GtGenomeNode*));
+  *cn = gt_comment_node_new(comment);
+  gt_assert(*cn);
+  luaL_getmetatable(L, GENOME_NODE_METATABLE);
+  lua_setmetatable(L, -2);
+  return 1;
+}
+
+static int sequence_node_lua_new(lua_State *L)
+{
+  GtGenomeNode **sn;
+  const char *desc, *seq;
+  gt_assert(L);
+  /* get_check parameters */
+  desc = luaL_checkstring(L, 1);
+  seq = luaL_checkstring(L, 2);
+  /* construct object */
+  sn = lua_newuserdata(L, sizeof (GtGenomeNode*));
+  *sn = gt_sequence_node_new(desc, gt_str_new_cstr(seq));
+  gt_assert(*sn);
+  luaL_getmetatable(L, GENOME_NODE_METATABLE);
+  lua_setmetatable(L, -2);
+  return 1;
+}
+
 static int genome_node_lua_get_filename(lua_State *L)
 {
   GtGenomeNode **gn = check_genome_node(L, 1);
@@ -343,6 +376,42 @@ static int comment_node_lua_get_comment(lua_State *L)
   return 1;
 }
 
+static int sequence_node_lua_get_description(lua_State *L)
+{
+  GtGenomeNode **gn;
+  GtSequenceNode *sn;
+  gn = check_genome_node(L, 1);
+  /* make sure we get a sequence node */
+  sn = gt_sequence_node_try_cast(*gn);
+  luaL_argcheck(L, sn, 1, "not a sequence node");
+  lua_pushstring(L, gt_sequence_node_get_description(sn));
+  return 1;
+}
+
+static int sequence_node_lua_get_sequence(lua_State *L)
+{
+  GtGenomeNode **gn;
+  GtSequenceNode *sn;
+  gn = check_genome_node(L, 1);
+  /* make sure we get a sequence node */
+  sn = gt_sequence_node_try_cast(*gn);
+  luaL_argcheck(L, sn, 1, "not a sequence node");
+  lua_pushstring(L, gt_sequence_node_get_sequence(sn));
+  return 1;
+}
+
+static int sequence_node_lua_get_sequence_length(lua_State *L)
+{
+  GtGenomeNode **gn;
+  GtSequenceNode *sn;
+  gn = check_genome_node(L, 1);
+  /* make sure we get a sequence node */
+  sn = gt_sequence_node_try_cast(*gn);
+  luaL_argcheck(L, sn, 1, "not a sequence node");
+  lua_pushnumber(L, gt_sequence_node_get_sequence_length(sn));
+  return 1;
+}
+
 static int feature_node_lua_extract_sequence(lua_State *L)
 {
   GtGenomeNode **gn;
@@ -401,6 +470,8 @@ static const struct luaL_Reg genome_node_lib_f [] = {
   { "feature_node_new", feature_node_lua_new },
   { "region_node_new", region_node_lua_new },
   { "meta_node_new", meta_node_lua_new },
+  { "comment_node_new", comment_node_lua_new },
+  { "sequence_node_new", sequence_node_lua_new },
   { NULL, NULL }
 };
 
@@ -427,6 +498,9 @@ static const struct luaL_Reg genome_node_lib_m [] = {
   { "get_data", meta_node_lua_get_data },
   { "get_directive", meta_node_lua_get_directive },
   { "get_comment", comment_node_lua_get_comment },
+  { "get_description", sequence_node_lua_get_description },
+  { "get_sequence", sequence_node_lua_get_sequence },
+  { "get_sequence_length", sequence_node_lua_get_sequence_length },
   { NULL, NULL }
 };
 

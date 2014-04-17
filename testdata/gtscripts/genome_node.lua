@@ -1,5 +1,6 @@
 --[[
   Copyright (c) 2007-2008 Gordon Gremme <gordon@gremme.org>
+  Copyright (c) 2014      Sascha Steinbiss <sascha@steinbiss.name>
   Copyright (c) 2007-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -97,3 +98,27 @@ assert(not rval)
 gn = gt.meta_node_new("foo","bar")
 assert(gn:get_directive() == "foo")
 assert(gn:get_data() == "bar")
+
+-- testing gt.comment_node_new
+rval, err = pcall(gt.comment_node_new, nil)
+assert(not rval)
+cn = gt.comment_node_new("bar")
+assert(cn:get_comment() == "bar")
+cn = gt.comment_node_new(42)
+assert(cn:get_comment() == "42")
+
+-- testing gt.sequence_node_new
+rval, err = pcall(gt.sequence_node_new, nil)
+assert(not rval)
+rval, err = pcall(gt.sequence_node_new, nil, "foo")
+assert(not rval)
+rval, err = pcall(gt.sequence_node_new, "foo", nil)
+assert(not rval)
+sn = gt.sequence_node_new("bar", "CTGA")
+assert(sn:get_sequence() == "CTGA")
+assert(sn:get_sequence_length() == 4)
+assert(sn:get_description() == "bar")
+sn = gt.sequence_node_new("bar", "")
+assert(sn:get_sequence() == "")
+assert(sn:get_sequence_length() == 0)
+assert(sn:get_description() == "bar")
