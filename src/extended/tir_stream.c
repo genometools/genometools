@@ -491,7 +491,8 @@ static int gt_tir_searchforTIRs(GtTIRStream *tir_stream,
     seqend2 = GT_REVERSEPOS(total_length, seqstart1);
 
     /* left (reverse) xdrop */
-    if (seedptr->pos1 > seqstart1 &&
+    if (alilen != 0 &&
+        seedptr->pos1 > seqstart1 &&
         seedptr->pos2 > seqstart2)
     {
       if (alilen <= seedptr->pos1 - seqstart1
@@ -524,11 +525,12 @@ static int gt_tir_searchforTIRs(GtTIRStream *tir_stream,
     }
 
     /* right (forward) xdrop */
-    if (seedptr->pos1 + seedptr->len < seqend1 &&
+    if (alilen != 0 &&
+        seedptr->pos1 + seedptr->len < seqend1 &&
         seedptr->pos2 + seedptr->len < seqend2)
     {
-      if (alilen <= seqend1 - (seedptr->pos1 + seedptr->len)
-            && alilen <= seqend2 - (seedptr->pos2 + seedptr->len))
+      if (alilen <= seqend1 - (seedptr->pos1 + seedptr->len) &&
+          alilen <= seqend2 - (seedptr->pos2 + seedptr->len))
       {
         gt_seqabstract_reinit_encseq(sa_useq, encseq, alilen,
                                      seedptr->pos1 + seedptr->len);
