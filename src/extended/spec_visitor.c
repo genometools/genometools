@@ -522,7 +522,7 @@ static int spec_init_lua_env(GtSpecVisitor *sv, const char *progname)
 
   /* no meta and region specs at the beginning */
   sv->meta_ref = sv->region_ref =
-  sv->sequence_ref = sv->comment_ref =GT_UNDEF_INT;
+    sv->sequence_ref = sv->comment_ref = GT_UNDEF_INT;
 
   return had_err;
 }
