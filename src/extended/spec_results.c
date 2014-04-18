@@ -251,7 +251,7 @@ static int gt_spec_results_report_features(void *key, void *value, void *data,
 {
   const char *type = (const char*) key;
   GtSpecResultsReportInfo *info = (GtSpecResultsReportInfo*) data;
-  gt_file_xprintf(info->outfile, "Features of type %s%s%s\n",
+  gt_file_xprintf(info->outfile, "a %s%s%s feature\n",
                            info->colored ? GT_SPEC_ANSI_COLOR_YELLOW : "",
                            type,
                            info->colored ? GT_SPEC_ANSI_COLOR_RESET : "");
@@ -260,21 +260,28 @@ static int gt_spec_results_report_features(void *key, void *value, void *data,
   return 0;
 }
 
-void gt_spec_results_report(GtSpecResults *sr, GtFile *outfile, bool details,
-                            bool colored)
+void gt_spec_results_report(GtSpecResults *sr, GtFile *outfile,
+                            const char *specfile, bool details, bool colored)
 {
   GtSpecResultsReportInfo info;
   gt_assert(sr);
   info.outfile = outfile;
   info.details = details;
   info.colored = colored;
+  if (sr->seen_feature || sr->seen_meta || sr->seen_region || sr->seen_comment
+        || sr->seen_sequence) {
+    gt_file_xprintf(outfile, "According to the specification in %s%s%s,\n\n",
+                               colored ? GT_SPEC_ANSI_COLOR_YELLOW : "",
+                               specfile,
+                               colored ? GT_SPEC_ANSI_COLOR_RESET : "");
+  }
   if (sr->seen_feature) {
     gt_hashmap_foreach_in_key_order(sr->feature_aspects,
                                     gt_spec_results_report_features,
                                     &info, NULL);
   }
   if (sr->seen_meta) {
-    gt_file_xprintf(outfile, "%sMeta%s nodes\n",
+    gt_file_xprintf(outfile, "a %smeta%s node\n",
                              colored ? GT_SPEC_ANSI_COLOR_YELLOW : "",
                              colored ? GT_SPEC_ANSI_COLOR_RESET : "");
     gt_hashmap_foreach_in_key_order(sr->meta_aspects,
@@ -282,7 +289,7 @@ void gt_spec_results_report(GtSpecResults *sr, GtFile *outfile, bool details,
                                     &info, NULL);
   }
   if (sr->seen_region) {
-    gt_file_xprintf(outfile, "%sRegion%s nodes\n",
+    gt_file_xprintf(outfile, "a %sregion%s\n",
                              colored ? GT_SPEC_ANSI_COLOR_YELLOW : "",
                              colored ? GT_SPEC_ANSI_COLOR_RESET : "");
     gt_hashmap_foreach_in_key_order(sr->region_aspects,
@@ -290,7 +297,7 @@ void gt_spec_results_report(GtSpecResults *sr, GtFile *outfile, bool details,
                                     &info, NULL);
   }
   if (sr->seen_comment) {
-    gt_file_xprintf(outfile, "%sComment%s nodes\n",
+    gt_file_xprintf(outfile, "a %scomment%s node\n",
                              colored ? GT_SPEC_ANSI_COLOR_YELLOW : "",
                              colored ? GT_SPEC_ANSI_COLOR_RESET : "");
     gt_hashmap_foreach_in_key_order(sr->comment_aspects,
@@ -298,7 +305,7 @@ void gt_spec_results_report(GtSpecResults *sr, GtFile *outfile, bool details,
                                     &info, NULL);
   }
   if (sr->seen_sequence) {
-    gt_file_xprintf(outfile, "%sSequence%s nodes\n",
+    gt_file_xprintf(outfile, "a %ssequence%s node\n",
                              colored ? GT_SPEC_ANSI_COLOR_YELLOW : "",
                              colored ? GT_SPEC_ANSI_COLOR_RESET : "");
     gt_hashmap_foreach_in_key_order(sr->sequence_aspects,

@@ -29,7 +29,8 @@ void           gt_spec_results_add_result(GtSpecResults *sr,
                                           const char *error_string);
 void           gt_spec_results_add_cc(GtSpecResults *sr);
 void           gt_spec_results_report(GtSpecResults *sr, GtFile *outfile,
-                                      bool details, bool colored);
+                                      const char *specfile, bool details,
+                                      bool colored);
 void           gt_spec_results_delete(GtSpecResults *spec_results);
 
 #endif

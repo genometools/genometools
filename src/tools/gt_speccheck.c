@@ -102,7 +102,8 @@ static int gt_speccheck_runner(int argc, const char **argv, int parsed_args,
   gt_timer_stop(t);
 
   if (!had_err)
-    gt_spec_results_report(res, NULL, arguments->verbose, arguments->colored);
+    gt_spec_results_report(res, NULL, gt_str_get(arguments->specfile),
+                           arguments->verbose, arguments->colored);
 
   if (!had_err)
     gt_timer_show_formatted(t, "Finished in " GT_WD ".%06ld s.\n", stdout);
