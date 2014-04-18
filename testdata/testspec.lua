@@ -13,7 +13,7 @@ describe.feature("gene", function(gene)
              or gene:has_child_of_type("ncRNA")).should_be(true)
   end)
 
-  it("contains all child features within gene coordinates", function()
+  it("contains all child features within its coordinates", function()
     for child in gene:get_children() do
       local gene_rng = gene:get_range()
       local child_rng = child:get_range()
