@@ -289,7 +289,7 @@ void gt_spec_results_report(GtSpecResults *sr, GtFile *outfile,
                                     &info, NULL);
   }
   if (sr->seen_region) {
-    gt_file_xprintf(outfile, "a %sregion%s\n",
+    gt_file_xprintf(outfile, "a %sregion%s node\n",
                              colored ? GT_SPEC_ANSI_COLOR_YELLOW : "",
                              colored ? GT_SPEC_ANSI_COLOR_RESET : "");
     gt_hashmap_foreach_in_key_order(sr->region_aspects,
