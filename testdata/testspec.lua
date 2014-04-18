@@ -73,6 +73,13 @@ describe.feature("polypeptide", function(pp)
     expect(derives_from).should_not_have_key(dfrom)
     derives_from[dfrom] = true
   end)
+
+  it("has a product name associated with it", function()
+    expect(pp:get_attribute("product")).should_not_be(nil)
+    if (pp:get_attribute("product") ~= nil) then
+      expect(string.len(pp:get_attribute("product"))).should_be_larger_than(0)
+    end
+  end)
 end)
 
 describe.meta(function(meta)

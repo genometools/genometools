@@ -493,6 +493,10 @@ static int spec_expect_matchdispatch(lua_State *L)
   if (!success) {
     gt_assert(lua_isstring(L, 2));
     msg = lua_tostring(L, 2);
+    luaL_where(L, 1);
+    lua_pushstring(L, msg);
+    lua_concat(L, 2);
+    msg = lua_tostring(L, -1);
   }
   gt_spec_results_add_result(sv->res, sv->current_aspect, sv->current_node,
                              success, msg);
