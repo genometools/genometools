@@ -953,7 +953,7 @@ static int gt_searchforLTRs(GtLTRharvestStream *lo,
     alilen = lo->repeatinfo.lmax - repeatptr->len;
 
     /**** left (reverse) xdrop alignment ****/
-    if (seqstart < repeatptr->pos1)
+    if (alilen != 0 && seqstart < repeatptr->pos1)
     {
       /* excluding pos1 and pos1+offset from the alignment */
       gt_assert(seqstart <= repeatptr->pos1);
@@ -995,7 +995,8 @@ static int gt_searchforLTRs(GtLTRharvestStream *lo,
       xdropbest_left.score = 0;
     }
     /**** right (forward) xdrop alignment ****/
-    if (repeatptr->pos1 + repeatptr->offset + repeatptr->len < seqend)
+    if (alilen != 0 &&
+        repeatptr->pos1 + repeatptr->offset + repeatptr->len < seqend)
     {
       if (alilen <= seqend - (repeatptr->pos1 +
                               repeatptr->offset +
