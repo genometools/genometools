@@ -21,6 +21,7 @@ require 'erb'
 $:.unshift File.join(File.dirname(__FILE__), ".")
 require 'codegen_module'
 
+#begin=c
 CRIGHT = <<-CRIGHT
 /*
   Copyright (c) 2014 Dirk Willrodt <willrodt@zbh.uni-hamburg.de>\
@@ -48,83 +49,30 @@ Bioinformatics, University of Hamburg
 */
 
 CRIGHT
+#end=c
+#begin=c
 IMPL = <<-IMPL
 #include <inttypes.h>
 #include <limits.h>
 
 #include "core/assert_api.h"
+#include "core/ensure.h"
 #include "core/intbits.h"
 #include "core/ma.h"
 #include "core/mathsupport.h"
 #include "core/unused_api.h"
-#include "extended/intset_rep.h"
 #include "extended/intset_<%=bits%>.h"
+#include "extended/intset_rep.h"
 
 #define gt_intset_<%=bits%>_cast(cvar) \\
         gt_intset_cast(gt_intset_<%=bits%>_class(), cvar)
+
+#define GT_ELEM2SECTION_M(X) GT_ELEM2SECTION(X, members->logsectionsize)
 
 struct GtIntset<%=bits%> {
   GtIntset parent_instance;
   uint<%=bits%>_t *elements;
 };
-
-static bool gt_intset_<%=bits%>_binarysearch_is_member(\
-const uint<%=bits%>_t *leftptr,
-<% if bits != 8 %> <%end%>                                               \
-const uint<%=bits%>_t *rightptr,
-<% if bits != 8 %> <%end%>                                               \
-uint<%=bits%>_t elem)
-{
-  const uint<%=bits%>_t *midptr;
-    while (leftptr <= rightptr) {
-      midptr = leftptr + (((GtUword) (rightptr-leftptr)) >> 1);
-      if (elem < *midptr) {
-        rightptr = midptr-1;
-      }
-      else {
-        if (elem > *midptr)
-          leftptr = midptr + 1;
-        else
-          return true;
-      }
-    }
-  return false;
-}
-
-static GtUword gt_intset_<%=bits%>_binarysearch_idx_sm_geq(\
-const uint<%=bits%>_t *leftptr,
-<% if bits != 8 %> <%end%>                                                   \
-const uint<%=bits%>_t *rightptr,
-<% if bits != 8 %> <%end%>                                                   \
-uint<%=bits%>_t pos)
-{
-  const uint<%=bits%>_t *midptr,
-                   *found = NULL,
-                   *leftorig = leftptr;
-
-  gt_assert(leftptr <= rightptr);
-  if (pos < *leftptr)
-    return 0;
-
-  if (pos > *rightptr)
-    return 1UL + (GtUword) (rightptr - leftptr);
-
-  gt_assert(pos > *leftptr && pos < *rightptr);
-  while (leftptr <= rightptr) {
-    midptr = leftptr + ((GtUword) (rightptr - leftptr) >> 1);
-    if (pos < *midptr)
-      rightptr = midptr - 1;
-    else {
-      found = midptr;
-      if (pos > *midptr)
-        leftptr = midptr + 1;
-      else
-        break;
-    }
-  }
-  gt_assert(found != NULL && found >= leftorig);
-  return 1UL + (GtUword) (found - leftorig);
-}
 
 void gt_intset_<%=bits%>_add(GtIntset *intset, GtUword elem)
 {
@@ -142,10 +90,99 @@ void gt_intset_<%=bits%>_add(GtIntset *intset, GtUword elem)
   }
   gt_assert(GT_SECTIONMINELEM(members->currentsectionnum) <= elem &&
             elem < GT_SECTIONMINELEM(members->currentsectionnum+1) &&
-            GT_ELEM2SECTION(members->logsectionsize,elem) ==
-            members->currentsectionnum);
+            GT_ELEM2SECTION_M(elem) == members->currentsectionnum);
   intset_<%=bits%>->elements[members->nextfree++] = (uint<%=bits%>_t) elem;
   members->previouselem = elem;
+}
+
+static GtUword gt_intset_<%=bits%>_sec_idx_largest_seq(GtUword *sectionstart,
+                                               \
+<% if bits != 8 %> <% end %>GtUword idx)
+{
+  GtUword result = 0;
+  while (sectionstart[result] <= idx)
+    result++;
+  return result - 1;
+}
+
+static GtUword gt_intset_<%=bits%>_binarysearch_sec_idx_largest_seq(\
+GtUword *secstart,
+                                                            \
+<% if bits != 8 %> <% end %>GtUword *secend,
+                                                            \
+<% if bits != 8 %> <% end %>GtUword idx)
+{
+  GtUword *midptr = NULL, *found = NULL,
+          *startorig = secstart;
+  if (*secstart <= idx)
+    found = secstart;
+  while (secstart < secend) {
+    midptr = secstart + ((GtUword) (secend - secstart) >> 1);
+    if (*midptr < idx) {
+      found = midptr;
+      if (*midptr == idx) {
+        break;
+      }
+      secstart = midptr + 1;
+    }
+    else {
+      secend = midptr - 1;
+    }
+  }
+  gt_assert(found != NULL);
+  while (found[1] <= idx)
+    found++;
+  return (GtUword) (found - startorig);
+}
+
+static GtUword gt_intset_<%=bits%>_get_test(GtIntset *intset, GtUword idx)
+{
+  GtIntset<%=bits%> *intset_<%=bits%> = gt_intset_<%=bits%>_cast(intset);
+  GtIntsetMembers *members = intset->members;
+  GtUword *secstart = members->sectionstart;
+  gt_assert(idx < members->nextfree);
+
+  return (gt_intset_<%=bits%>_sec_idx_largest_seq(secstart, idx) <<
+         members->logsectionsize) + intset_<%=bits%>->elements[idx];
+}
+
+GtUword gt_intset_<%=bits%>_get(GtIntset *intset, GtUword idx)
+{
+  GtUword quotient;
+  GtIntset<%=bits%> *intset_<%=bits%> = gt_intset_<%=bits%>_cast(intset);
+  GtIntsetMembers *members = intset->members;
+  GtUword *secstart = members->sectionstart;
+  gt_assert(idx < members->nextfree);
+
+  quotient = gt_intset_<%=bits%>_binarysearch_sec_idx_largest_seq(
+                                          secstart,
+                                          secstart + members->numofsections - 1,
+                                          idx);
+  return (quotient << members->logsectionsize) +
+         intset_<%=bits%>->elements[idx];
+}
+
+static bool gt_intset_<%=bits%>_binarysearch_is_member(\
+const uint<%=bits%>_t *leftptr,
+<% if bits != 8 %> <%end%>                                               \
+const uint<%=bits%>_t *rightptr,
+<% if bits != 8 %> <%end%>                                               \
+uint<%=bits%>_t elem)
+{
+  const uint<%=bits%>_t *midptr;
+    while (leftptr <= rightptr) {
+      midptr = leftptr + (((GtUword) (rightptr-leftptr)) >> 1);
+      if (elem < *midptr) {
+        rightptr = midptr - 1;
+      }
+      else {
+        if (elem > *midptr)
+          leftptr = midptr + 1;
+        else
+          return true;
+      }
+    }
+  return false;
 }
 
 bool gt_intset_<%=bits%>_is_member(GtIntset *intset, GtUword elem)
@@ -155,7 +192,7 @@ bool gt_intset_<%=bits%>_is_member(GtIntset *intset, GtUword elem)
   GtUword *secstart = members->sectionstart;
   if (elem <= members->maxelement)
   {
-    const GtUword sectionnum = GT_ELEM2SECTION(members->logsectionsize, elem);
+    const GtUword sectionnum = GT_ELEM2SECTION_M(elem);
 
     if (secstart[sectionnum] < secstart[sectionnum+1]) {
       return gt_intset_<%=bits%>_binarysearch_is_member(
@@ -169,12 +206,78 @@ intset_<%=bits%>->elements + secstart[sectionnum+1] - 1,
   return false;
 }
 
+static GtUword gt_intset_<%=bits%>_idx_sm_geq(\
+const uint<%=bits%>_t *leftptr,
+<% if bits != 8 %> <%end%>                                      \
+const uint<%=bits%>_t *rightptr,
+<% if bits != 8 %> <%end%>                                      \
+uint<%=bits%>_t pos)
+{
+  const uint<%=bits%>_t *leftorig = leftptr;
+  if (pos < *leftptr)
+    return 0;
+  if (pos > *rightptr)
+    return 1UL + (GtUword) (rightptr - leftptr);
+  gt_assert(pos <= *rightptr);
+  while (*leftptr < pos)
+    leftptr++;
+  return (GtUword) (leftptr - leftorig);
+}
+
+static GtUword gt_intset_<%=bits%>_binarysearch_idx_sm_geq(\
+const uint<%=bits%>_t *leftptr,
+<% if bits != 8 %> <%end%>                                                   \
+const uint<%=bits%>_t *rightptr,
+<% if bits != 8 %> <%end%>                                                   \
+uint<%=bits%>_t pos)
+{
+  const uint<%=bits%>_t *midptr = NULL,
+        *leftorig = leftptr;
+
+  gt_assert(leftptr <= rightptr);
+  if (pos <= *leftptr)
+    return 0;
+  if (pos > *rightptr)
+    return 1UL + (GtUword) (rightptr - leftptr);
+  while (leftptr < rightptr) {
+    midptr = leftptr + ((GtUword) (rightptr - leftptr) >> 1);
+    if (pos <= *midptr)
+      rightptr = midptr;
+    else {
+      leftptr = midptr + 1;
+    }
+  }
+  return (GtUword) (leftptr - leftorig);
+}
+
+static GtUword gt_intset_<%=bits%>_get_idx_smallest_geq_test(GtIntset *intset,
+<% if bits == 8 %> <% end %>                                                   \
+  GtUword pos)
+{
+  GtIntset<%=bits%> *intset_<%=bits%> = gt_intset_<%=bits%>_cast(intset);
+  GtIntsetMembers *members = intset->members;
+
+  GtUword sectionnum = GT_ELEM2SECTION_M(pos);
+
+  gt_assert(pos <= members->maxelement);
+  if (members->sectionstart[sectionnum] < members->sectionstart[sectionnum+1]) {
+    return members->sectionstart[sectionnum] +
+           gt_intset_<%=bits%>_idx_sm_geq(
+<% if bits == 8 %> <% end %>                  intset_<%=bits%>->elements + \
+members->sectionstart[sectionnum],
+<% if bits == 8 %> <% end %>                  intset_<%=bits%>->elements + \
+members->sectionstart[sectionnum+1] - 1,
+<% if bits == 8 %> <% end %>                  (uint<%=bits%>_t) pos);
+  }
+  return members->sectionstart[sectionnum];
+}
+
 GtUword gt_intset_<%=bits%>_get_idx_smallest_geq(GtIntset *intset, GtUword pos)
 {
   GtIntset<%=bits%> *intset_<%=bits%> = gt_intset_<%=bits%>_cast(intset);
   GtIntsetMembers *members = intset->members;
 
-  GtUword sectionnum = GT_ELEM2SECTION(members->logsectionsize,pos);
+  GtUword sectionnum = GT_ELEM2SECTION_M(pos);
 
   gt_assert(pos <= members->maxelement);
   if (members->sectionstart[sectionnum] < members->sectionstart[sectionnum+1]) {
@@ -193,7 +296,7 @@ size_t gt_intset_<%=bits%>_size(GtUword maxelement, GtUword num_of_elems)
 {
   size_t logsectionsize = (sizeof (uint<%=bits%>_t)) + CHAR_BIT;
   return sizeof (uint<%=bits%>_t) * num_of_elems +
-    sizeof (GtUword) * (GT_ELEM2SECTION(logsectionsize, maxelement) + 1);
+    sizeof (GtUword) * (GT_ELEM2SECTION(maxelement, logsectionsize) + 1);
 }
 
 void gt_intset_<%=bits%>_delete(GtIntset *intset)
@@ -211,8 +314,9 @@ const GtIntsetClass* gt_intset_<%=bits%>_class(void)
   if (this_c == NULL) {
     this_c = gt_intset_class_new(sizeof (GtIntset<%=bits%>),
                                  gt_intset_<%=bits%>_add,
-                                 gt_intset_<%=bits%>_is_member,
+                                 gt_intset_<%=bits%>_get,
                                  gt_intset_<%=bits%>_get_idx_smallest_geq,
+                                 gt_intset_<%=bits%>_is_member,
                                  gt_intset_<%=bits%>_delete);
   }
   return this_c;
@@ -233,8 +337,7 @@ GtIntset* gt_intset_<%=bits%>_new(GtUword maxelement, GtUword num_of_elems)
     gt_malloc(sizeof (*intset_<%=bits%>->elements) * num_of_elems);
   members->logsectionsize = sizeof (uint<%=bits%>_t) * CHAR_BIT;
   members->nextfree = 0;
-  members->numofsections = GT_ELEM2SECTION(members->logsectionsize,
-                                           maxelement) + 1;
+  members->numofsections = GT_ELEM2SECTION_M(maxelement) + 1;
   members->sectionstart = gt_malloc(sizeof (*members->sectionstart) *
                                     (members->numofsections + 1));
   members->sectionstart[0] = 0;
@@ -272,7 +375,28 @@ int gt_intset_<%=bits%>_unit_test(GtError *err) {
       for (idx = 0; idx < num_of_elems; idx++) {
         gt_intset_<%=bits%>_add(is, arr[idx]);
       }
-      had_err = gt_intset_unit_test_notinset(is, 0, arr[0] - 1, err);
+      for (idx = 0; !had_err && idx < num_of_elems; idx++) {
+        if (arr[idx] != 0 && arr[idx - 1] != (arr[idx] - 1)) {
+          gt_ensure(
+            gt_intset_<%=bits%>_get_idx_smallest_geq_test(is, arr[idx] - 1) ==
+            idx);
+          gt_ensure(
+            gt_intset_<%=bits%>_get_idx_smallest_geq(is, arr[idx] - 1) ==
+            idx);
+        }
+        gt_ensure(gt_intset_<%=bits%>_get_test(is, idx) == arr[idx]);
+        gt_ensure(gt_intset_<%=bits%>_get(is, idx) == arr[idx]);
+        if (idx < num_of_elems - 1) {
+          gt_ensure(
+            gt_intset_<%=bits%>_get_idx_smallest_geq_test(is, arr[idx] + 1) ==
+            idx + 1);
+          gt_ensure(
+            gt_intset_<%=bits%>_get_idx_smallest_geq(is, arr[idx] + 1) ==
+            idx + 1);
+        }
+      }
+      if (!had_err)
+        had_err = gt_intset_unit_test_notinset(is, 0, arr[0] - 1, err);
       if (!had_err)
         had_err = gt_intset_unit_test_check_seqnum(is, 0, arr[0] - 1, 0, err);
       for (idx = (GtUword) 1; !had_err && idx < num_of_elems; idx++) {
@@ -289,7 +413,9 @@ int gt_intset_<%=bits%>_unit_test(GtError *err) {
   return had_err;
 }
 IMPL
+#end=c
 
+#begin=c
 HEADER = <<-HEADER
 #ifndef INTSET_<%=bits%>_H
 #define INTSET_<%=bits%>_H
@@ -302,7 +428,7 @@ HEADER = <<-HEADER
 typedef struct GtIntset<%=bits%> GtIntset<%=bits%>;
 
 /* map static local methods to interface */
-const GtIntsetClass* gt_intset_<%=bits%>_class(void);
+const     GtIntsetClass* gt_intset_<%=bits%>_class(void);
 
 /* Return a new <GtIntset> object, the implementation beeing of type
    <GtIntset<%=bits%>>. */
@@ -310,28 +436,32 @@ GtIntset* gt_intset_<%=bits%>_new(GtUword maxelement, GtUword num_of_elems);
 
 /* Add <elem> to <intset>. <elem> has to be larger than the previous <elem>
    added. */
-void gt_intset_<%=bits%>_add(GtIntset *intset, GtUword elem);
+void      gt_intset_<%=bits%>_add(GtIntset *intset, GtUword elem);
+
+/* Returns the element at index <idx> in the sorted set <intset>. */
+GtUword   gt_intset_<%=bits%>_get(GtIntset *intset, GtUword idx);
 
 /* Returns <true> if <elem> is a member of the set <intset>. */
-bool gt_intset_<%=bits%>_is_member(GtIntset *intset, GtUword elem);
+bool      gt_intset_<%=bits%>_is_member(GtIntset *intset, GtUword elem);
 
 /* Returns the number of the element in <intset> that is the smallest element
    larger than <pos>.
    This is used for sets representing the separator positions in a set of
    sequences, to determine the sequence number corresponding to any position in
    the concatenated string of the sequence set. */
-GtUword gt_intset_<%=bits%>_get_idx_smallest_geq(GtIntset *intset, GtUword pos);
+GtUword   gt_intset_<%=bits%>_get_idx_smallest_geq(GtIntset *intset, \
+GtUword pos);
 
 /* Returns the size of an intset with given number of elements
    <num_of_elems> and maximum value <maxelement>. */
-size_t gt_intset_<%=bits%>_size(GtUword maxelement,
-<% if bits != 8 %> <% end %>                              GtUword num_of_elems);
+size_t    gt_intset_<%=bits%>_size(GtUword maxelement, GtUword num_of_elems);
 
-void gt_intset_<%=bits%>_delete(GtIntset *intset);
+void      gt_intset_<%=bits%>_delete(GtIntset *intset);
 
-int gt_intset_<%=bits%>_unit_test(GtError *err);
+int       gt_intset_<%=bits%>_unit_test(GtError *err);
 #endif
 HEADER
+#end=c
 
 name, email = CodeGen.find_user_data()
 year = Time.now.year
@@ -348,3 +478,4 @@ all_bits.each do |bits|
   header.puts ERB.new(HEADER).result(binding)
   header.close
 end
+# call SyntaxRange#Include('^#begin=c', '^#end=c', 'c', 'NonText')
