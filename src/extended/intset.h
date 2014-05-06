@@ -35,6 +35,9 @@ GtIntset*    gt_intset_ref(GtIntset *intset);
    element. */
 void         gt_intset_add(GtIntset *intset, GtUword elem);
 
+/* Returns the element at index <idx> in the sorted set <intset>. */
+GtUword      gt_intset_get(GtIntset *intset, GtUword idx);
+
 /* Returns true if <elem> is a member of set <intset>. */
 bool         gt_intset_is_member(GtIntset *intset, GtUword elem);
 

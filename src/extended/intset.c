@@ -56,6 +56,15 @@ void gt_intset_add(GtIntset *intset, GtUword elem)
     intset->c_class->add_func(intset, elem);
 }
 
+GtUword gt_intset_get(GtIntset *intset, GtUword idx)
+{
+  gt_assert(intset != NULL);
+  gt_assert(intset->c_class != NULL);
+  if (intset->c_class->get_func != NULL)
+    return intset->c_class->get_func(intset, idx);
+  return intset->members->num_of_elems;
+}
+
 bool gt_intset_is_member(GtIntset *intset, GtUword elem)
 {
   gt_assert(intset != NULL);
@@ -76,13 +85,15 @@ GtUword gt_intset_get_idx_smaller_geq(GtIntset *intset, GtUword pos)
 
 const GtIntsetClass *gt_intset_class_new(size_t size,
                                          GtIntsetAddFunc add_func,
-                                         GtIntsetIsMemberFunc is_member_func,
+                                         GtIntsetGetFunc get_func,
                                          GtIntsetIdxSmGeqFunc idx_sm_geq_func,
+                                         GtIntsetIsMemberFunc is_member_func,
                                          GtIntsetDeleteFunc delete_func)
 {
   GtIntsetClass *intset_c = gt_class_alloc(sizeof (*intset_c));
   intset_c->size = size;
   intset_c->add_func = add_func;
+  intset_c->get_func = get_func;
   intset_c->is_member_func = is_member_func;
   intset_c->idx_sm_geq_func = idx_sm_geq_func;
   intset_c->delete_func = delete_func;

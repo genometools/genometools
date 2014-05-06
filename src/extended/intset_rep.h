@@ -24,15 +24,16 @@
 #include "core/types_api.h"
 
 #define GT_BITS_FOR_SIZE(SIZE)     ((SIZE) * CHAR_BIT)
-#define GT_ELEM2SECTION(LOGVAL,X)  ((X) >> (LOGVAL))
+#define GT_ELEM2SECTION(X, LOGVAL)  ((X) >> (LOGVAL))
 #define GT_SECTIONMINELEM(S)       ((S) << members->logsectionsize)
 
 typedef struct GtIntsetClass GtIntsetClass;
 typedef struct GtIntsetMembers GtIntsetMembers;
 
-typedef void (*GtIntsetAddFunc)(GtIntset*, GtUword);
-typedef bool (*GtIntsetIsMemberFunc)(GtIntset*, GtUword);
+typedef GtUword (*GtIntsetGetFunc)(GtIntset*, GtUword);
 typedef GtUword (*GtIntsetIdxSmGeqFunc)(GtIntset*, GtUword);
+typedef bool (*GtIntsetIsMemberFunc)(GtIntset*, GtUword);
+typedef void (*GtIntsetAddFunc)(GtIntset*, GtUword);
 typedef void (*GtIntsetDeleteFunc)(GtIntset*);
 
 struct GtIntset {
@@ -43,8 +44,9 @@ struct GtIntset {
 struct GtIntsetClass {
   size_t size;
   GtIntsetAddFunc add_func;
-  GtIntsetIsMemberFunc is_member_func;
+  GtIntsetGetFunc get_func;
   GtIntsetIdxSmGeqFunc idx_sm_geq_func;
+  GtIntsetIsMemberFunc is_member_func;
   GtIntsetDeleteFunc delete_func;
 };
 
@@ -62,8 +64,9 @@ struct GtIntsetMembers {
 
 const GtIntsetClass* gt_intset_class_new(size_t size,
                                          GtIntsetAddFunc,
-                                         GtIntsetIsMemberFunc,
+                                         GtIntsetGetFunc,
                                          GtIntsetIdxSmGeqFunc,
+                                         GtIntsetIsMemberFunc,
                                          GtIntsetDeleteFunc);
 
 GtIntset*            gt_intset_create(const GtIntsetClass*);
