@@ -693,7 +693,7 @@ $(1): $(2)
 	@test -d $$(@D) || mkdir -p $$(@D)
 	@$$(CC) -c $$< -o $$@ $$(EXP_CPPFLAGS) $$(GT_CPPFLAGS) $$(EXP_CFLAGS) \
 	  $$(GT_CFLAGS) $(3)
-	@$$(CC) -c $$< -o $$(@:.o=.d) $$(EXP_CPPFLAGS) $$(GT_CPPFLAGS) \
+	@$$(CC) -c $$< -o $$(@:.o=.d) $$(EXP_CPPFLAGS) $$(GT_CPPFLAGS) $$(EXP_CFLAGS) \
         $(3) -MM -MP -MT $$@
 endef
 
