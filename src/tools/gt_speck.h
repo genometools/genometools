@@ -20,6 +20,6 @@
 #include "core/tool_api.h"
 
 /* the annotation spec checker tool */
-GtTool* gt_speccheck(void);
+GtTool* gt_speck(void);
 
 #endif

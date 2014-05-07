@@ -147,6 +147,7 @@
 #include "tools/gt_shulen.h"
 #include "tools/gt_simreads.h"
 #include "tools/gt_snpper.h"
+#include "tools/gt_speck.h"
 #include "tools/gt_splicesiteinfo.h"
 #include "tools/gt_splitfasta.h"
 #include "tools/gt_stat.h"
@@ -242,6 +243,7 @@ GtToolbox* gtt_tools(void)
   gt_toolbox_add_tool(tools, "shulengthdist", gt_shulengthdist());
   gt_toolbox_add_tool(tools, "simreads", gt_simreads());
   gt_toolbox_add_tool(tools, "snpper", gt_snpper());
+  gt_toolbox_add_tool(tools, "speck", gt_speck());
   gt_toolbox_add_tool(tools, "splicesiteinfo", gt_splicesiteinfo());
   gt_toolbox_add_tool(tools, "splitfasta", gt_splitfasta());
   gt_toolbox_add_tool(tools, "stat", gt_stat());

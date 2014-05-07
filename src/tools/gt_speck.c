@@ -20,7 +20,7 @@
 #include "extended/spec_visitor.h"
 #include "extended/gff3_in_stream.h"
 #include "extended/visitor_stream.h"
-#include "tools/gt_speccheck.h"
+#include "tools/gt_speck.h"
 
 typedef struct {
   GtStr *specfile;
@@ -28,14 +28,14 @@ typedef struct {
        colored;
 } SpeccheckArguments;
 
-static void *gt_speccheck_arguments_new(void)
+static void *gt_speck_arguments_new(void)
 {
   SpeccheckArguments *arguments = gt_calloc(1, sizeof *arguments);
   arguments->specfile = gt_str_new();
   return arguments;
 }
 
-static void gt_speccheck_arguments_delete(void *tool_arguments)
+static void gt_speck_arguments_delete(void *tool_arguments)
 {
   SpeccheckArguments *arguments = tool_arguments;
   if (!arguments) return;
@@ -43,7 +43,7 @@ static void gt_speccheck_arguments_delete(void *tool_arguments)
   gt_free(arguments);
 }
 
-static GtOptionParser* gt_speccheck_option_parser_new(void *tool_arguments)
+static GtOptionParser* gt_speck_option_parser_new(void *tool_arguments)
 {
   GtOptionParser *op;
   GtOption *option;
@@ -69,7 +69,7 @@ static GtOptionParser* gt_speccheck_option_parser_new(void *tool_arguments)
   return op;
 }
 
-static int gt_speccheck_runner(int argc, const char **argv, int parsed_args,
+static int gt_speck_runner(int argc, const char **argv, int parsed_args,
                                void *tool_arguments, GtError *err)
 {
   GtNodeStream *gff3_in_stream = NULL, *checker_stream = NULL;
@@ -117,11 +117,11 @@ static int gt_speccheck_runner(int argc, const char **argv, int parsed_args,
   return had_err;
 }
 
-GtTool* gt_speccheck(void)
+GtTool* gt_speck(void)
 {
-  return gt_tool_new(gt_speccheck_arguments_new,
-                     gt_speccheck_arguments_delete,
-                     gt_speccheck_option_parser_new,
+  return gt_tool_new(gt_speck_arguments_new,
+                     gt_speck_arguments_delete,
+                     gt_speck_option_parser_new,
                      NULL,
-                     gt_speccheck_runner);
+                     gt_speck_runner);
 }

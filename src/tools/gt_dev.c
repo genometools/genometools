@@ -46,7 +46,6 @@
 #include "tools/gt_seqlensort.h"
 #include "tools/gt_sfxmap.h"
 #include "tools/gt_skproto.h"
-#include "tools/gt_speccheck.h"
 #include "tools/gt_sortbench.h"
 #include "tools/gt_trieins.h"
 #include "tools/gt_unique_encseq.h"
@@ -83,7 +82,6 @@ static void* gt_dev_arguments_new(void)
   gt_toolbox_add_tool(dev_toolbox, "seqlensort", gt_seqlensort());
   gt_toolbox_add_tool(dev_toolbox, "sfxmap", gt_sfxmap());
   gt_toolbox_add_tool(dev_toolbox, "skproto", gt_skproto());
-  gt_toolbox_add_tool(dev_toolbox, "spec", gt_speccheck());
   gt_toolbox_add_tool(dev_toolbox, "sortbench", gt_sortbench());
   gt_toolbox_add_tool(dev_toolbox, "unique_encseq", gt_unique_encseq());
   gt_toolbox_add_tool(dev_toolbox, "unique_encseq_extract",
