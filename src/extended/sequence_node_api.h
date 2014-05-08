@@ -39,7 +39,7 @@ const char*              gt_sequence_node_get_description(const
 const char*              gt_sequence_node_get_sequence(const GtSequenceNode
                                                        *sequence_node);
 /* Return the sequence length of <sequence_node>. */
-GtUword            gt_sequence_node_get_sequence_length(const
+GtUword                  gt_sequence_node_get_sequence_length(const
                                                               GtSequenceNode
                                                               *sequence_node);
 

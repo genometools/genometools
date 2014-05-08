@@ -97,6 +97,18 @@
    function region_node_new(seqid, range)
 */
 
+/* exports the MetaNode class to Lua:
+
+   -- Returns a new region node with key <directive> and data string <data>.
+   function meta_node_new(directive, data)
+
+   -- Return directive of <meta_node> as string.
+   function meta_node:get_directive()
+
+   -- Return data of <meta_node> as string.
+   function meta_node:get_data()
+*/
+
 int gt_lua_open_genome_node(lua_State*);
 
 /* Push a <GtGenomeNode*> to Lua, takes ownership! */

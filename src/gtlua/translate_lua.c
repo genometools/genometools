@@ -17,29 +17,46 @@
 
 #include <string.h>
 #include "lauxlib.h"
+#include "core/error_api.h"
 #include "core/codon_iterator_simple_api.h"
 #include "core/translator.h"
+#include "extended/luahelper.h"
 #include "gtlua/translate_lua.h"
 
 static int translate_dna_lua(lua_State *L)
 {
+  int had_err = 0;
   GtStr *protein;
   GtTranslator *tr;
-  int rval;
+  GtTranslatorStatus status;
   char translated;
+  GtError *err;
   unsigned int frame;
   const char *dna = luaL_checkstring(L, 1);
   protein = gt_str_new();
 
+  err = gt_error_new();
   GtCodonIterator *ci = gt_codon_iterator_simple_new(dna,
                                                      strlen(dna),
-                                                     NULL);
-  tr = gt_translator_new(ci);
-  rval = gt_translator_next(tr, &translated, &frame, NULL);
-  while (!rval && translated) {
-    gt_str_append_char(protein, translated);
-    rval = gt_translator_next(tr, &translated, &frame, NULL);
+                                                     err);
+  if (!ci) {
+    gt_str_delete(protein);
+     return gt_lua_error(L, err);
   }
+  tr = gt_translator_new(ci);
+  status = gt_translator_next(tr, &translated, &frame, err);
+  while (status == GT_TRANSLATOR_OK) {
+    if (frame == 0)
+      gt_str_append_char(protein, translated);
+    status = gt_translator_next(tr, &translated, &frame, err);
+  }
+  if (status == GT_TRANSLATOR_ERROR)
+    had_err = -1;
+
+  if (had_err)
+    return gt_lua_error(L, err);
+  gt_error_delete(err);
+
   lua_pushstring(L, gt_str_get(protein));
   gt_str_delete(protein);
   gt_translator_delete(tr);
