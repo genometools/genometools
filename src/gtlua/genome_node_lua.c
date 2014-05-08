@@ -125,6 +125,7 @@ static int comment_node_lua_new(lua_State *L)
 static int sequence_node_lua_new(lua_State *L)
 {
   GtGenomeNode **sn;
+  GtStr *seq_str;
   const char *desc, *seq;
   gt_assert(L);
   /* get_check parameters */
@@ -132,8 +133,10 @@ static int sequence_node_lua_new(lua_State *L)
   seq = luaL_checkstring(L, 2);
   /* construct object */
   sn = lua_newuserdata(L, sizeof (GtGenomeNode*));
-  *sn = gt_sequence_node_new(desc, gt_str_new_cstr(seq));
+  seq_str = gt_str_new_cstr(seq);
+  *sn = gt_sequence_node_new(desc, seq_str);
   gt_assert(*sn);
+  gt_str_delete(seq_str);
   luaL_getmetatable(L, GENOME_NODE_METATABLE);
   lua_setmetatable(L, -2);
   return 1;
