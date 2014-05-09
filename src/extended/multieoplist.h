@@ -115,8 +115,27 @@ GtUword         gt_multieoplist_get_length(GtMultieoplist *multieops);
 
 /* Print a string representation of <multieops> to <fp> ending with a newline.
    For example: [M5,R2,M3,I1,M6] R is equivalent for <Mismatch> and
-   <Replacement> */
+   <Replacement>.
+   Assumes reverse ordered <GtMultieoplist>. */
 void            gt_multieoplist_show(GtMultieoplist *multieops, FILE *fp);
+
+/* combine two <GtMultieoplist>s. Adds <multieops_to_add> to the end of
+   <multieops> (which is usualy the start of the alignment). <forward> defines
+   if <multieops_to_add> should be read in forward or reverse direction.
+   If <multieops_to_add> and <multieops> are from consequtive alignments:
+   [...<-...][...<-...] or [...->...][...->...]
+   use true
+   if they ar from alignments with the same startpoint:
+   [...->...][...<-...]
+   use false
+   and add the one that is at the end of the other.
+   if the layout is like this:
+   [...<-...][...->...]
+   none of them can be added to the end of the other without reversing one
+   beforehand. */
+void            gt_multieoplist_combine(GtMultieoplist *multieops,
+                             GtMultieoplist *multieops_to_add,
+                             bool forward);
 
 /* Function type, used for reading and writing <GtMultieoplist> to/from a file,
    similar to fread() and fwrite(). Should contain the errorhandling for file IO
