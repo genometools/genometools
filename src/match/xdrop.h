@@ -58,6 +58,9 @@ GT_DECLAREARRAYSTRUCT(GtXdropscore);
    mat >= 2*del */
 GtXdropresources* gt_xdrop_resources_new(const GtXdropArbitraryscores *scores);
 
+/* reset <res>, keeping the scores */
+void              gt_xdrop_resources_reset(GtXdropresources *res);
+
 /*
    The following performs an xdrop extension on <useq> and <vseq>. If forward is
    true, it starts with the first symbols in those <GtSeqabstract> objects. If
@@ -73,7 +76,8 @@ void              gt_evalxdroparbitscoresextend(bool forward,
 
 void              gt_xdrop_resources_delete(GtXdropresources *);
 
-/* Creates a <GtMultieoplist> by backtrack algorythm. */
+/* Creates a <GtMultieoplist> by backtrack algorythm. The <GtMultieoplist> is in
+   reverse orientation to the alignment! */
 GtMultieoplist*   gt_xdrop_backtrack(GtXdropresources *res, GtXdropbest *best);
 
 int               gt_xdrop_unit_test(GtError *err);
