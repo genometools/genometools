@@ -415,10 +415,12 @@ static void kmerstream_shiftrightwithchar(GtKmerstream *spwp, GtUchar charcode)
 
 static void kmerstream_delete(GtKmerstream *spwp)
 {
-  gt_free(spwp->filltable);
-  gt_multimappower_delete(spwp->multimappower);
-  special_queue_delete(&spwp->specialqueue);
-  gt_free(spwp);
+  if (spwp != NULL) {
+    gt_free(spwp->filltable);
+    gt_multimappower_delete(spwp->multimappower);
+    special_queue_delete(&spwp->specialqueue);
+    gt_free(spwp);
+  }
 }
 
 struct GtKmercodeiterator
@@ -720,14 +722,13 @@ bool gt_kmercodeiterator_inputexhausted(
 
 void gt_kmercodeiterator_delete(GtKmercodeiterator *kmercodeiterator)
 {
-  if (kmercodeiterator == NULL)
+  if (kmercodeiterator != NULL)
   {
-    return;
+    gt_encseq_reader_delete(kmercodeiterator->esr);
+    kmerstream_delete(kmercodeiterator->spwp);
+    gt_sequence_buffer_delete(kmercodeiterator->fb);
+    gt_free(kmercodeiterator);
   }
-  gt_encseq_reader_delete(kmercodeiterator->esr);
-  kmerstream_delete(kmercodeiterator->spwp);
-  gt_sequence_buffer_delete(kmercodeiterator->fb);
-  gt_free(kmercodeiterator);
 }
 
 void getencseqkmers(const GtEncseq *encseq,

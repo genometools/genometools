@@ -43,11 +43,12 @@
 #include "core/unused_api.h"
 #include "core/xansi_api.h"
 #include "extended/bitoutstream.h"
+#include "extended/cstr_iterator.h"
 #include "extended/encdesc.h"
 #include "extended/fasta_header_iterator.h"
 #include "extended/hcr.h"
 #include "extended/rbtree.h"
-#include "extended/cstr_iterator.h"
+#include "extended/sampling.h"
 
 #define HCR_LOWESTQUALVALUE 0
 #define HCR_HIGHESTQUALVALUE 127U
