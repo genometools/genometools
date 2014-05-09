@@ -23,6 +23,7 @@
 *.md5
 *.mem
 *.mer
+*.nre
 *.ois
 *.orig
 *.pbt
@@ -37,10 +38,14 @@
 *.swp
 *.tags*
 *.tis
+*.uedb
 *~
+._*
 .ccache
 .clang_complete
+.cproject
 .gdb_history
+.project
 .ycm_extra_conf.py
 /*.log
 /bin
@@ -64,6 +69,8 @@ LocalMakefile*
 TAGS
 cscope.*
 debug
+gmon.out
+gprof_analysis.txt
 gthlicense.aux
 gthlicense.log
 gthlicense.pdf
@@ -77,9 +84,3 @@ src/external/hmmer-2.3.2/squid/squidconf.h
 src/external/hmmer-2.3.2/src/config.h
 tags
 testdata/genomediff
-.project
-.cproject
-gmon.out
-gprof_analysis.txt
-*.uedb
-._*
