@@ -71,6 +71,7 @@
 #include "extended/huffcode.h"
 #include "extended/intset.h"
 #include "extended/luaserialize.h"
+#include "extended/n_r_encseq.h"
 #include "extended/popcount_tab.h"
 #include "extended/priority_queue.h"
 #include "extended/ranked_list.h"
@@ -95,6 +96,7 @@
 #include "tools/gt_clean.h"
 #include "tools/gt_compreads.h"
 #include "tools/gt_compressedbits.h"
+#include "tools/gt_condenser.h"
 #include "tools/gt_congruence.h"
 #include "tools/gt_convertseq.h"
 #include "tools/gt_csa.h"
@@ -159,8 +161,6 @@
 #include "tools/gt_uniq.h"
 #include "tools/gt_uniquesub.h"
 #include "tools/gt_wtree.h"
-#include "tools/gt_unique_encseq.h"
-#include "tools/gt_unique_encseq_extract.h"
 #ifndef WITHOUT_CAIRO
 #include "annotationsketch/block.h"
 #include "annotationsketch/diagram.h"
@@ -177,18 +177,9 @@ GtToolbox* gtt_tools(void)
   GtToolbox *tools = gt_toolbox_new();
 
   /* add tools */
-  gt_toolbox_add_tool(tools, "orffinder", gt_orffinder());
-  gt_toolbox_add_tool(tools, "chseqids", gt_chseqids());
-  gt_toolbox_add_tool(tools, "clean", gt_clean());
-  gt_toolbox_add_tool(tools, "convertseq", gt_convertseq());
-  gt_toolbox_add_tool(tools, "matstat", gt_matstat());
-  gt_toolbox_add_tool(tools, "merge", gt_merge());
   gt_toolbox_add(tools, "mgth", gt_mgth);
   gt_toolbox_add(tools, "mkfmindex", gt_mkfmindex);
-  gt_toolbox_add_tool(tools, "mmapandread", gt_mmapandread());
-  gt_toolbox_add_tool(tools, "seqstat", gt_seqstat());
   gt_toolbox_add(tools, "suffixerator", gt_suffixerator);
-  gt_toolbox_add_tool(tools, "uniquesub", gt_uniquesub());
   gt_toolbox_add_hidden_tool(tools, "dev", gt_dev());
   gt_toolbox_add_hidden_tool(tools, "filter", gt_select());
   /* hidden "link from the mutate to the seqmutate tool for backward
@@ -198,8 +189,12 @@ GtToolbox* gtt_tools(void)
   gt_toolbox_add_tool(tools, "bed_to_gff3", gt_bed_to_gff3());
   gt_toolbox_add_tool(tools, "cds", gt_cds());
   gt_toolbox_add_tool(tools, "chain2dim", gt_chain2dim());
+  gt_toolbox_add_tool(tools, "chseqids", gt_chseqids());
+  gt_toolbox_add_tool(tools, "clean", gt_clean());
   gt_toolbox_add_tool(tools, "compreads", gt_compreads());
+  gt_toolbox_add_tool(tools, "condenser", gt_condenser());
   gt_toolbox_add_tool(tools, "congruence", gt_congruence());
+  gt_toolbox_add_tool(tools, "convertseq", gt_convertseq());
   gt_toolbox_add_tool(tools, "csa", gt_csa());
   gt_toolbox_add_tool(tools, "dot", gt_dot());
   gt_toolbox_add_tool(tools, "dupfeat", gt_dupfeat());
@@ -223,8 +218,12 @@ GtToolbox* gtt_tools(void)
   gt_toolbox_add_tool(tools, "ltrdigest", gt_ltrdigest());
   gt_toolbox_add_tool(tools, "ltrharvest", gt_ltrharvest());
   gt_toolbox_add_tool(tools, "matchtool", gt_matchtool());
+  gt_toolbox_add_tool(tools, "matstat", gt_matstat());
   gt_toolbox_add_tool(tools, "md5_to_id", gt_md5_to_id());
+  gt_toolbox_add_tool(tools, "merge", gt_merge());
   gt_toolbox_add_tool(tools, "mergefeat", gt_mergefeat());
+  gt_toolbox_add_tool(tools, "mmapandread", gt_mmapandread());
+  gt_toolbox_add_tool(tools, "orffinder", gt_orffinder());
   gt_toolbox_add_tool(tools, "packedindex", gt_packedindex());
   gt_toolbox_add_tool(tools, "prebwt", gt_prebwt());
   gt_toolbox_add_tool(tools, "readjoiner", gt_readjoiner());
@@ -236,6 +235,7 @@ GtToolbox* gtt_tools(void)
   gt_toolbox_add_tool(tools, "seqids", gt_seqids());
   gt_toolbox_add_tool(tools, "seqmutate", gt_seqmutate());
   gt_toolbox_add_tool(tools, "seqorder", gt_seqorder());
+  gt_toolbox_add_tool(tools, "seqstat", gt_seqstat());
   gt_toolbox_add_tool(tools, "seqtransform", gt_seqtransform());
   gt_toolbox_add_tool(tools, "seqtranslate", gt_seqtranslate());
   gt_toolbox_add_tool(tools, "sequniq", gt_sequniq());
@@ -251,6 +251,7 @@ GtToolbox* gtt_tools(void)
   gt_toolbox_add_tool(tools, "tallymer", gt_tallymer());
   gt_toolbox_add_tool(tools, "tirvish", gt_tir());
   gt_toolbox_add_tool(tools, "uniq", gt_uniq());
+  gt_toolbox_add_tool(tools, "uniquesub", gt_uniquesub());
   gt_toolbox_add_tool(tools, "wtree", gt_wtree());
 #ifndef WITHOUT_CAIRO
   gt_toolbox_add_tool(tools, "sketch", gt_sketch());
@@ -332,6 +333,7 @@ GtHashmap* gtt_unit_tests(void)
   gt_hashmap_add(unit_tests, "mathsupport module", gt_mathsupport_unit_test);
   gt_hashmap_add(unit_tests, "memory allocator module", gt_ma_unit_test);
   gt_hashmap_add(unit_tests, "MD5 seqid module", gt_md5_seqid_unit_test);
+  gt_hashmap_add(unit_tests, "n_r_encseq", gt_n_r_encseq_unit_test);
   gt_hashmap_add(unit_tests, "rdj: suffix-prefix matches list module",
                                                           gt_spmlist_unit_test);
   gt_hashmap_add(unit_tests, "PBS finder module",

@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2013 Ole Eigenbrod <ole.eigenbrod@gmx.de>
+  Copyright (c) 2013 Dirk Willrodt <willrodt@zbh.uni-hamburg.de>
   Copyright (c) 2013 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -15,12 +15,12 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef GT_UNIQUE_ENCSEQ_H
-#define GT_UNIQUE_ENCSEQ_H
+#ifndef GT_CONDENSER_COMPRESS_H
+#define GT_CONDENSER_COMPRESS_H
 
 #include "core/tool_api.h"
 
-/* the unique_encseq tool */
-GtTool* gt_unique_encseq(void);
+/* the condenser_compress tool */
+GtTool* gt_condenser_compress(void);
 
 #endif
