@@ -227,6 +227,8 @@ static void get_pagewise_page(GtSampling *sampling,
          end, middle;
 
   gt_assert(sampling->numofsamples != 0);
+  /* should not overflow, because this is a small table indexing into a larger
+     one. */
   gt_safe_assign(end, sampling->numofsamples);
   middle = GT_DIV2(end);
   while (end - start > (GtWord) 1) {
@@ -236,7 +238,7 @@ static void get_pagewise_page(GtSampling *sampling,
     else {
       end = middle;
     }
-    middle = GT_DIV2(start + end);
+    middle = start + GT_DIV2(end - start);
   }
   if (middle < 0) {
     middle = 0;
