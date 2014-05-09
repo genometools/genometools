@@ -303,8 +303,9 @@ GtOption*       gt_option_new_choice(const char *option_string,
                                      const char *description, GtStr *value,
                                      const char *default_value,
                                      const char **domain);
-/* Return a new <GtOption> with the given <option_string>, <description>, and
-   <default_value>. The result of the option parsing are stored in <value>. */
+/* Return a new <GtOption> with the given <option_string>, <description>. The
+   result of the option parsing is stored in the <GtStr> object <filename>.
+   <filename> may not be NULL! */
 GtOption*       gt_option_new_filename(const char *option_string,
                                        const char *description,
                                        GtStr *filename);
