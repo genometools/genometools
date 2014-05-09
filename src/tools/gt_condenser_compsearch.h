@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2013 Ole Eigenbrod <ole.eigenbrod@gmx.de>
-  Copyright (c) 2013 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2014 Florian Markowsky <moltenboron@web.de>
+  Copyright (c) 2014 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -15,12 +15,12 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef GT_UNIQUE_ENCSEQ_EXTRACT_H
-#define GT_UNIQUE_ENCSEQ_EXTRACT_H
+#ifndef GT_CONDENSER_COMPSEARCH_H
+#define GT_CONDENSER_COMPSEARCH_H
 
 #include "core/tool_api.h"
 
-/* the unique_encseq_extract tool */
-GtTool* gt_unique_encseq_extract(void);
+/* the condenser_compsearch tool */
+GtTool* gt_condenser_compsearch(void);
 
 #endif

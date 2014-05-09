@@ -19,11 +19,12 @@
 #ifndef S_SPLINT_S
 #include <ctype.h>
 #endif
+#include "core/arraydef.h"
+#include "core/chardef.h"
+#include "core/divmodmul.h"
+#include "core/ma.h"
 #include "core/xansi_api.h"
 #include "extended/multieoplist.h"
-#include "core/ma.h"
-#include "core/chardef.h"
-#include "core/arraydef.h"
 
 typedef uint8_t Eop;
 
@@ -95,92 +96,106 @@ void gt_multieoplist_delete(GtMultieoplist *multieops)
   }
 }
 
-#define GT_MEOPS_MATCH (Eop) 0
-#define GT_MEOPS_MIS (Eop) 1
-#define GT_MEOPS_DEL (Eop) 2
-#define GT_MEOPS_INS (Eop) 3
+#define GT_MEOPS_MATCH ((Eop) 0)
+#define GT_MEOPS_MIS ((Eop) 1)
+#define GT_MEOPS_DEL ((Eop) 2)
+#define GT_MEOPS_INS ((Eop) 3)
 #define GT_MEOPS_STEPS_BITS ((sizeof (Eop) * CHAR_BIT) - 2)
 #define GT_MEOPS_STEPS_MASK ((((Eop) 1) << GT_MEOPS_STEPS_BITS) - 1)
 
-static void gt_multieoplist_add_eop(GtMultieoplist *multieops,
-                                    AlignmentEoptype type)
+static void gt_multieoplist_add_eops(GtMultieoplist *multieops,
+                                      AlignmentEoptype type,
+                                      GtUword steps)
 {
-  Eop *space, tmp = (Eop) 1;
+  Eop *space,
+      tmp,
+      type_bits = 0;
   gt_assert(multieops != NULL);
+
   space = multieops->meoplist.spaceEop;
   if (multieops->meoplist.nextfreeEop != 0) {
     GtUword current = multieops->meoplist.nextfreeEop - 1;
     switch (type) {
       case Match:
       case Replacement:
-        if (space[current] >> GT_MEOPS_STEPS_BITS == GT_MEOPS_MATCH &&
-            (space[current] & GT_MEOPS_STEPS_MASK) < GT_MEOPS_STEPS_MASK) {
-          space[current]++;
-          return;
-        }
+        type_bits = GT_MEOPS_MATCH;
         break;
       case Mismatch:
-        if (space[current] >> GT_MEOPS_STEPS_BITS == GT_MEOPS_MIS &&
-            (space[current] & GT_MEOPS_STEPS_MASK) < GT_MEOPS_STEPS_MASK) {
-          space[current]++;
-          return;
-        }
+        type_bits = GT_MEOPS_MIS;
         break;
       case Deletion:
-        if (space[current] >> GT_MEOPS_STEPS_BITS == GT_MEOPS_DEL &&
-            (space[current] & GT_MEOPS_STEPS_MASK) < GT_MEOPS_STEPS_MASK) {
-          space[current]++;
-          return;
-        }
+        type_bits = GT_MEOPS_DEL;;;
         break;
       case Insertion:
-        if (space[current] >> GT_MEOPS_STEPS_BITS == GT_MEOPS_INS &&
-            (space[current] & GT_MEOPS_STEPS_MASK) < GT_MEOPS_STEPS_MASK) {
-          space[current]++;
-          return;
-        }
+        type_bits = GT_MEOPS_INS;;;
         break;
+      default:
+        gt_assert(false);
+    }
+    if (space[current] >> GT_MEOPS_STEPS_BITS == type_bits) {
+      while (steps != 0 &&
+             (space[current] & GT_MEOPS_STEPS_MASK) < GT_MEOPS_STEPS_MASK) {
+        space[current]++;
+        steps--;
+      }
     }
   }
-  switch (type) {
-    case Mismatch:
-      tmp |= GT_MEOPS_MIS << GT_MEOPS_STEPS_BITS;
-      break;
-    case Deletion:
-      tmp |= GT_MEOPS_DEL << GT_MEOPS_STEPS_BITS;
-      break;
-    case Insertion:
-      tmp |= GT_MEOPS_INS << GT_MEOPS_STEPS_BITS;
-      break;
-    default:
-      ;
+  if (steps != 0) {
+    switch (type) {
+      case Mismatch:
+        type_bits = GT_MEOPS_MIS;
+        break;
+      case Deletion:
+        type_bits = GT_MEOPS_DEL;
+        break;
+      case Insertion:
+        type_bits = GT_MEOPS_INS;
+        break;
+      case Replacement:
+      case Match:
+        type_bits = GT_MEOPS_MATCH;
+        break;
+      default:
+        gt_assert(false);
+    }
+    while (steps != 0) {
+      tmp = type_bits << GT_MEOPS_STEPS_BITS;
+      if (steps < (GtUword) GT_MEOPS_STEPS_MASK) {
+        tmp += steps;
+        steps = 0;
+      }
+      else {
+        tmp |= GT_MEOPS_STEPS_BITS;
+        steps -= GT_MEOPS_STEPS_BITS;
+      }
+      GT_STOREINARRAY(&multieops->meoplist, Eop, 64<<2, tmp);
+    }
   }
-  GT_STOREINARRAY(&multieops->meoplist, Eop, 64<<2, tmp);
 }
 
 void gt_multieoplist_add_replacement(GtMultieoplist *multieops)
 {
-  gt_multieoplist_add_eop(multieops, Replacement);
+  gt_multieoplist_add_eops(multieops, Replacement, (GtUword) 1);
 }
 
 void gt_multieoplist_add_insertion(GtMultieoplist *multieops)
 {
-  gt_multieoplist_add_eop(multieops, Insertion);
+  gt_multieoplist_add_eops(multieops, Insertion, (GtUword) 1);
 }
 
 void gt_multieoplist_add_deletion(GtMultieoplist *multieops)
 {
-  gt_multieoplist_add_eop(multieops, Deletion);
+  gt_multieoplist_add_eops(multieops, Deletion, (GtUword) 1);
 }
 
 void gt_multieoplist_add_mismatch(GtMultieoplist *multieops)
 {
-  gt_multieoplist_add_eop(multieops, Mismatch);
+  gt_multieoplist_add_eops(multieops, Mismatch, (GtUword) 1);
 }
 
 void gt_multieoplist_add_match(GtMultieoplist *multieops)
 {
-  gt_multieoplist_add_eop(multieops, Match);
+  gt_multieoplist_add_eops(multieops, Match, (GtUword) 1);
 }
 
 void gt_multieoplist_reset(GtMultieoplist *multieops)
@@ -310,6 +325,22 @@ void gt_multieoplist_show(GtMultieoplist *multieops, FILE *fp)
       fprintf(fp, " %u", (unsigned int) (space[i - 1] & GT_MEOPS_STEPS_MASK));
   }
   gt_xfputs("]\n", fp);
+}
+
+void gt_multieoplist_combine(GtMultieoplist *multieops,
+                             GtMultieoplist *multieops_to_add,
+                             bool forward) {
+  GtUword idx,
+          nelems = multieops_to_add->meoplist.nextfreeEop;
+  GtMultieop mop;
+
+  for (idx = 0; idx < nelems; ++idx) {
+    mop = gt_multieoplist_get_entry(multieops_to_add,
+                                    forward ?
+                                    idx :
+                                    nelems - idx - 1);
+    gt_multieoplist_add_eops(multieops, mop.type, mop.steps);
+  }
 }
 
 GtMultieoplist *gt_meoplist_io(GtMultieoplist *multieops,

@@ -163,8 +163,13 @@ struct GtXdropresources
   GtXdropArbitrarydistances arbitdistances;
   GtArrayGtXdropfrontvalue fronts;
   GtArrayGtXdropscore big_t;
-  GtWord currd;
 };
+
+void gt_xdrop_resources_reset(GtXdropresources *res)
+{
+  res->fronts.nextfreeGtXdropfrontvalue = 0;
+  res->big_t.nextfreeGtXdropscore = 0;
+}
 
 GtXdropresources *gt_xdrop_resources_new(const GtXdropArbitraryscores *scores)
 {
@@ -429,7 +434,6 @@ void gt_evalxdroparbitscoresextend(bool forward,
       }
     }
   }
-  res->currd = currd;
 }
 
 GtMultieoplist * gt_xdrop_backtrack(GtXdropresources *res,

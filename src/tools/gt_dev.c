@@ -48,8 +48,6 @@
 #include "tools/gt_skproto.h"
 #include "tools/gt_sortbench.h"
 #include "tools/gt_trieins.h"
-#include "tools/gt_unique_encseq.h"
-#include "tools/gt_unique_encseq_extract.h"
 
 static void* gt_dev_arguments_new(void)
 {
@@ -83,9 +81,6 @@ static void* gt_dev_arguments_new(void)
   gt_toolbox_add_tool(dev_toolbox, "sfxmap", gt_sfxmap());
   gt_toolbox_add_tool(dev_toolbox, "skproto", gt_skproto());
   gt_toolbox_add_tool(dev_toolbox, "sortbench", gt_sortbench());
-  gt_toolbox_add_tool(dev_toolbox, "unique_encseq", gt_unique_encseq());
-  gt_toolbox_add_tool(dev_toolbox, "unique_encseq_extract",
-                      gt_unique_encseq_extract());
   return dev_toolbox;
 }
 
