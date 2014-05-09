@@ -96,10 +96,10 @@ void gt_multieoplist_delete(GtMultieoplist *multieops)
   }
 }
 
-#define GT_MEOPS_MATCH (Eop) 0
-#define GT_MEOPS_MIS (Eop) 1
-#define GT_MEOPS_DEL (Eop) 2
-#define GT_MEOPS_INS (Eop) 3
+#define GT_MEOPS_MATCH ((Eop) 0)
+#define GT_MEOPS_MIS ((Eop) 1)
+#define GT_MEOPS_DEL ((Eop) 2)
+#define GT_MEOPS_INS ((Eop) 3)
 #define GT_MEOPS_STEPS_BITS ((sizeof (Eop) * CHAR_BIT) - 2)
 #define GT_MEOPS_STEPS_MASK ((((Eop) 1) << GT_MEOPS_STEPS_BITS) - 1)
 
@@ -109,7 +109,7 @@ static void gt_multieoplist_add_eops(GtMultieoplist *multieops,
 {
   Eop *space,
       tmp,
-      type_bits;
+      type_bits = 0;
   gt_assert(multieops != NULL);
 
   space = multieops->meoplist.spaceEop;
