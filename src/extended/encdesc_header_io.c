@@ -73,8 +73,8 @@ static inline void encdesc_header_io_basics(GtEncdesc *encdesc,
 }
 
 static void io_field_sep_and_is_cons(DescField *field,
-                           FILE *fp,
-                           EncdescIOFunc io_func)
+                                     FILE *fp,
+                                     EncdescIOFunc io_func)
 {
   GT_ENCDESC_IO_ONE(field->sep, fp);
   GT_ENCDESC_IO_ONE(field->is_cons, fp);
@@ -89,7 +89,7 @@ static void write_cons_field_header(DescField *field,
 }
 
 static void read_cons_field_header(DescField *field,
-                            FILE *fp)
+                                   FILE *fp)
 {
   GT_ENCDESC_READ_ONE(field->len, fp);
   field->data = gt_calloc((size_t) (field->len + 1), sizeof (char));

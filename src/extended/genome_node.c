@@ -194,7 +194,7 @@ GtGenomeNode* gt_genome_node_create(const GtGenomeNodeClass *gnc)
   gn->userdata           = NULL;
   gn->userdata_nof_items = 0;
 #ifdef GT_THREADS_ENABLED
-  gn-> lock              = gt_rwlock_new();
+  gn->lock              = gt_rwlock_new();
 #endif
   return gn;
 }

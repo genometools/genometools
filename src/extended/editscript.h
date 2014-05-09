@@ -59,9 +59,10 @@ void            gt_editscript_get_stats(const GtEditscript *editscript,
 /* Returns the length of the target sequence v. */
 GtUword         gt_editscript_get_target_len(const GtEditscript *editscript);
 
-/* Transform sequence u represeted by <encseq> using the edit operations in
-   <editscript> and stores the result in <buffer> which has to be large enough
-   to hold v. Returns the number of <GtUchar>s written to buffer. */
+/* Transform sequence u starting at <start> in  <encseq> using the edit
+   operations in <editscript> and stores the result in <buffer> which has to be
+   large enough to hold v. Returns the number of <GtUchar>s written to buffer.
+   */
 GtUword         gt_editscript_get_sequence(const GtEditscript *editscript,
                                            const GtEncseq *encseq,
                                            GtUword start,
