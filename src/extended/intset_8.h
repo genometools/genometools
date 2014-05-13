@@ -49,10 +49,11 @@ GtUword   gt_intset_8_get(GtIntset *intset, GtUword idx);
 bool      gt_intset_8_is_member(GtIntset *intset, GtUword elem);
 
 /* Returns the number of the element in <intset> that is the smallest element
-   larger than <pos>.
-   This is used for sets representing the separator positions in a set of
+   larger than or equal <pos> or <num_of_elems> if there is no such <element>.
+   This can be used for sets representing the separator positions in a set of
    sequences, to determine the sequence number corresponding to any position in
-   the concatenated string of the sequence set. */
+   the concatenated string of the sequence set.
+   Fails for <pos> > <maxelement>! */
 GtUword   gt_intset_8_get_idx_smallest_geq(GtIntset *intset, GtUword pos);
 
 /* Returns the size of an intset with given number of elements

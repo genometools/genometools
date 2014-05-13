@@ -280,6 +280,10 @@ GtUword gt_intset_<%=bits%>_get_idx_smallest_geq(GtIntset *intset, GtUword pos)
   GtUword sectionnum = GT_ELEM2SECTION_M(pos);
 
   gt_assert(pos <= members->maxelement);
+
+  if (pos > members->previouselem)
+    return members->num_of_elems;
+
   if (members->sectionstart[sectionnum] < members->sectionstart[sectionnum+1]) {
     return members->sectionstart[sectionnum] +
            gt_intset_<%=bits%>_binarysearch_idx_sm_geq(
@@ -374,6 +378,11 @@ int gt_intset_<%=bits%>_unit_test(GtError *err) {
       is = gt_intset_<%=bits%>_new(arr[num_of_elems - 1], num_of_elems);
       for (idx = 0; idx < num_of_elems; idx++) {
         gt_intset_<%=bits%>_add(is, arr[idx]);
+        if (idx < num_of_elems - 1)
+          gt_ensure(gt_intset_<%=bits%>_get_idx_smallest_geq(is,
+                                                     \
+<% if bits != 8 %> <% end %>arr[idx] + 1) ==
+                    num_of_elems);
       }
       for (idx = 0; !had_err && idx < num_of_elems; idx++) {
         if (arr[idx] != 0 && arr[idx - 1] != (arr[idx] - 1)) {
@@ -445,10 +454,11 @@ GtUword   gt_intset_<%=bits%>_get(GtIntset *intset, GtUword idx);
 bool      gt_intset_<%=bits%>_is_member(GtIntset *intset, GtUword elem);
 
 /* Returns the number of the element in <intset> that is the smallest element
-   larger than <pos>.
-   This is used for sets representing the separator positions in a set of
+   larger than or equal <pos> or <num_of_elems> if there is no such <element>.
+   This can be used for sets representing the separator positions in a set of
    sequences, to determine the sequence number corresponding to any position in
-   the concatenated string of the sequence set. */
+   the concatenated string of the sequence set.
+   Fails for <pos> > <maxelement>! */
 GtUword   gt_intset_<%=bits%>_get_idx_smallest_geq(GtIntset *intset, \
 GtUword pos);
 

@@ -231,6 +231,10 @@ GtUword gt_intset_8_get_idx_smallest_geq(GtIntset *intset, GtUword pos)
   GtUword sectionnum = GT_ELEM2SECTION_M(pos);
 
   gt_assert(pos <= members->maxelement);
+
+  if (pos > members->previouselem)
+    return members->num_of_elems;
+
   if (members->sectionstart[sectionnum] < members->sectionstart[sectionnum+1]) {
     return members->sectionstart[sectionnum] +
            gt_intset_8_binarysearch_idx_sm_geq(
@@ -323,6 +327,10 @@ int gt_intset_8_unit_test(GtError *err) {
       is = gt_intset_8_new(arr[num_of_elems - 1], num_of_elems);
       for (idx = 0; idx < num_of_elems; idx++) {
         gt_intset_8_add(is, arr[idx]);
+        if (idx < num_of_elems - 1)
+          gt_ensure(gt_intset_8_get_idx_smallest_geq(is,
+                                                     arr[idx] + 1) ==
+                    num_of_elems);
       }
       for (idx = 0; !had_err && idx < num_of_elems; idx++) {
         if (arr[idx] != 0 && arr[idx - 1] != (arr[idx] - 1)) {

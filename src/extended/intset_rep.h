@@ -51,15 +51,15 @@ struct GtIntsetClass {
 };
 
 struct GtIntsetMembers {
-  GtUword      *sectionstart;
-  size_t        logsectionsize;
-  GtUword       currentsectionnum,
-                maxelement,
-                nextfree,
-                num_of_elems,
-                numofsections,
-                previouselem,
-                refcount;
+  GtUword *sectionstart;
+  size_t   logsectionsize;
+  GtUword  currentsectionnum,
+           maxelement,
+           nextfree,
+           num_of_elems,
+           numofsections,
+           previouselem,
+           refcount;
 };
 
 const GtIntsetClass* gt_intset_class_new(size_t size,
