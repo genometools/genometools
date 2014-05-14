@@ -321,10 +321,14 @@ ifeq ($(findstring clang,$(CC)),clang)
 endif
 
 # check whether version scripts can be used
-ifeq ($(shell ld -V | grep GNU > /dev/null; echo $$?),0)
-  HAS_GNU_LD:=yes
-  VERSION_SCRIPT:=obj/public_symbols.lst
-  VERSION_SCRIPT_PARAM:=-Wl,--version-script=$(VERSION_SCRIPT)
+ifneq ($(SYSTEM),Darwin)
+  ifeq ($(shell ld -V | grep GNU > /dev/null; echo $$?),0)
+    HAS_GNU_LD:=yes
+    VERSION_SCRIPT:=obj/public_symbols.lst
+    VERSION_SCRIPT_PARAM:=-Wl,--version-script=$(VERSION_SCRIPT)
+  else
+    HAS_GNU_LD:=no
+  endif
 else
   HAS_GNU_LD:=no
 endif
