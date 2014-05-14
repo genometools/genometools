@@ -31,37 +31,34 @@ typedef struct GtGFF3InStream GtGFF3InStream;
    many GFF3 files denoted in <filenames>. The GFF3 files do not have to be
    sorted. If <num_of_files> is 0 or a file name is "-", it is read from
    <stdin>. The memory footprint is O(file size) in the worst-case. */
-GtNodeStream*            gt_gff3_in_stream_new_unsorted(int num_of_files,
-                                                        const char **filenames);
+GtNodeStream* gt_gff3_in_stream_new_unsorted(int num_of_files,
+                                             const char **filenames);
 /* Create a <GtGFF3InStream*> which reads the sorted GFF3 file denoted by
    <filename>. If filename is <NULL>, it is read from <stdin>.
    The memory footprint is O(1) on average. */
-GtNodeStream*            gt_gff3_in_stream_new_sorted(const char *filename);
+GtNodeStream* gt_gff3_in_stream_new_sorted(const char *filename);
 /* Make sure all ID attributes which are parsed by <gff3_in_stream> are correct.
    Increases the memory footprint to O(file size). */
-void                     gt_gff3_in_stream_check_id_attributes(GtGFF3InStream
+void          gt_gff3_in_stream_check_id_attributes(GtGFF3InStream
                                                                *gff3_in_stream);
 /* Enable tidy mode for <gff3_in_stream>. That is, the GFF3 parser tries to tidy
    up features which would normally lead to an error. */
-void                     gt_gff3_in_stream_enable_tidy_mode(GtGFF3InStream
-                                                            *gff3_in_stream);
+void          gt_gff3_in_stream_enable_tidy_mode(GtGFF3InStream
+                                                               *gff3_in_stream);
 /* Enable strict mode for <gff3_in_stream>. */
-void                     gt_gff3_in_stream_enable_strict_mode(GtGFF3InStream
-                                                              *gff3_in_stream);
+void          gt_gff3_in_stream_enable_strict_mode(GtGFF3InStream
+                                                               *gff3_in_stream);
 /* Show progress bar on <stdout> to convey the progress of parsing the GFF3
    files underlying <gff3_in_stream>. */
-void                     gt_gff3_in_stream_show_progress_bar(GtGFF3InStream
-                                                             *gff3_in_stream);
+void          gt_gff3_in_stream_show_progress_bar(GtGFF3InStream
+                                                               *gff3_in_stream);
 /* Returns a <GtStrArray*> which contains all type names in alphabetical order
-   which have been parsed by <gff3_in_stream>.
-   The caller is responsible to free it! */
-GtStrArray*              gt_gff3_in_stream_get_used_types(GtNodeStream
-                                                          *gff3_in_stream);
+   which have been parsed by <gff3_in_stream>. The caller is responsible to
+   free it! */
+GtStrArray*   gt_gff3_in_stream_get_used_types(GtNodeStream *gff3_in_stream);
 /* Sets <type_checker> to be the type checker used in <gff3_in_stream>. That
    is, it will be queried when the validity of SO types is to be determined. */
-void                     gt_gff3_in_stream_set_type_checker(GtNodeStream
-                                                            *gff3_in_stream,
-                                                            GtTypeChecker
-                                                            *type_checker);
+void          gt_gff3_in_stream_set_type_checker(GtNodeStream *gff3_in_stream,
+                                                 GtTypeChecker *type_checker);
 
 #endif

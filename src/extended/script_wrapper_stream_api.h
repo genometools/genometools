@@ -31,7 +31,7 @@ typedef int (*GtScriptWrapperStreamNextFunc)(GtGenomeNode **gn,
 typedef int (*GtScriptWrapperStreamFreeFunc)(void*);
 
 /* Creates a new <GtScriptWrapperStream> given a next and a free function. */
-GtNodeStream*       gt_script_wrapper_stream_new(GtScriptWrapperStreamNextFunc,
-                                                 GtScriptWrapperStreamFreeFunc);
+GtNodeStream* gt_script_wrapper_stream_new(GtScriptWrapperStreamNextFunc,
+                                           GtScriptWrapperStreamFreeFunc);
 
 #endif

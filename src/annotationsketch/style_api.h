@@ -39,32 +39,32 @@ typedef enum {
 typedef struct GtStyle GtStyle;
 
 /* Creates a new <GtStyle> object. */
-GtStyle* gt_style_new(GtError*);
+GtStyle*           gt_style_new(GtError*);
 /* Increments the reference count of the given <GtStyle>. */
-GtStyle* gt_style_ref(GtStyle*);
+GtStyle*           gt_style_ref(GtStyle*);
 /* Enables unsafe mode (``io'' and ``os'' libraries loaded). */
-void     gt_style_unsafe_mode(GtStyle*);
+void               gt_style_unsafe_mode(GtStyle*);
 /* Enables safe mode (``io'' and ``os'' libraries not accessible). */
-void     gt_style_safe_mode(GtStyle*);
+void               gt_style_safe_mode(GtStyle*);
 /* Returns true if <sty> is in unsafe mode. */
-bool     gt_style_is_unsafe(GtStyle *sty);
+bool               gt_style_is_unsafe(GtStyle *sty);
 /* Creates a independent (``deep'') copy of the given <GtStyle> object. */
-GtStyle* gt_style_clone(const GtStyle*, GtError*);
+GtStyle*           gt_style_clone(const GtStyle*, GtError*);
 /* Loads and executes Lua style file with given <filename>.
    This file must define a global table called __style__. */
-int      gt_style_load_file(GtStyle*, const char *filename, GtError*);
+int                gt_style_load_file(GtStyle*, const char *filename, GtError*);
 /* Loads and executes Lua style code from the given <GtStr> <instr>.
    This code must define a global table called __style__. */
-int      gt_style_load_str(GtStyle*, GtStr *instr, GtError*);
+int                gt_style_load_str(GtStyle*, GtStr *instr, GtError*);
 /* Generates Lua code which represents the given <GtStyle> object and
    writes it into the <GtStr> object <outstr>.*/
-int      gt_style_to_str(const GtStyle*, GtStr *outstr, GtError*);
+int                gt_style_to_str(const GtStyle*, GtStr *outstr, GtError*);
 /* Reloads the Lua style file. */
-void     gt_style_reload(GtStyle*);
+void               gt_style_reload(GtStyle*);
 /* Sets a color value in the <GtStyle> for section <section> and <key> to a
    certain <color>. */
-void     gt_style_set_color(GtStyle*, const char *section, const char *key,
-                            const GtColor *color);
+void               gt_style_set_color(GtStyle*, const char *section,
+                                      const char *key, const GtColor *color);
 /* Retrieves a color value from <style> for key <key> in section <section>.
    The color is written to the location pointed to by <result>. Optionally, a
    feature node pointer <fn> can be specified for handling in node-specific
@@ -90,8 +90,8 @@ GtStyleQueryStatus gt_style_get_color_with_track(const GtStyle *style,
                                                  const GtStr *track_id,
                                                  GtError *err);
 /* Set string with key <key> in <section> to <value>. */
-void     gt_style_set_str(GtStyle*, const char *section, const char *key,
-                          GtStr *value);
+void               gt_style_set_str(GtStyle*, const char *section,
+                                    const char *key, GtStr *value);
 /* Retrieves a string value from <style> for key <key> in section <section>.
    The string is written to the <GtStr> object <result>, overwriting its prior
    contents. Optionally, a feature node pointer <fn> can be specified for
@@ -116,8 +116,8 @@ GtStyleQueryStatus gt_style_get_str_with_track(const GtStyle *style,
                                                const GtStr *track_id,
                                                GtError *err);
 /* Set numeric value of key <key> in <section> to <number>. */
-void     gt_style_set_num(GtStyle*, const char *section, const char *key,
-                          double number);
+void               gt_style_set_num(GtStyle*, const char *section,
+                                    const char *key, double number);
 /* Retrieves a numeric value from <style> for key <key> in section <section>.
    The value is written to the location pointed to by <result>. Optionally, a
    feature node pointer <fn> can be specified for handling in node-specific
@@ -142,8 +142,8 @@ GtStyleQueryStatus gt_style_get_num_with_track(const GtStyle *style,
                                                const GtStr *track_id,
                                                GtError *err);
 /* Set boolean value of key <key> in <section> to <val>. */
-void     gt_style_set_bool(GtStyle*, const char *section, const char *key,
-                           bool val);
+void               gt_style_set_bool(GtStyle*, const char *section,
+                                     const char *key, bool val);
 /* Retrieves a boolean value from <style> for key <key> in section <section>.
    The value is written to the location pointed to by <result>. Optionally, a
    feature node pointer <fn> can be specified for handling in node-specific
@@ -168,8 +168,9 @@ GtStyleQueryStatus gt_style_get_bool_with_track(const GtStyle *style,
                                                 const GtStr *track_id,
                                                 GtError *err);
 /* Unset value of key <key> in <section>. */
-void     gt_style_unset(GtStyle*, const char *section, const char *key);
+void               gt_style_unset(GtStyle*, const char *section,
+                                  const char *key);
 /* Deletes this <style>. */
-void     gt_style_delete(GtStyle *style);
+void               gt_style_delete(GtStyle *style);
 
 #endif

@@ -38,13 +38,13 @@ typedef int  (*GtScriptWrapperVisitorEOFNodeFunc)(GtEOFNode*,
                                                   GtError*);
 
 /* Creates a new <GtScriptWrapperVisitor> for a number of callback functions. */
-GtNodeVisitor*            gt_script_wrapper_visitor_new(
-                                        GtScriptWrapperVisitorCommentNodeFunc,
-                                        GtScriptWrapperVisitorFeatureNodeFunc,
-                                        GtScriptWrapperVisitorRegionNodeFunc,
-                                        GtScriptWrapperVisitorSequenceNodeFunc,
-                                        GtScriptWrapperVisitorMetaNodeFunc,
-                                        GtScriptWrapperVisitorEOFNodeFunc,
-                                        GtScriptWrapperVisitorFreeFunc);
+GtNodeVisitor* gt_script_wrapper_visitor_new(
+                                         GtScriptWrapperVisitorCommentNodeFunc,
+                                         GtScriptWrapperVisitorFeatureNodeFunc,
+                                         GtScriptWrapperVisitorRegionNodeFunc,
+                                         GtScriptWrapperVisitorSequenceNodeFunc,
+                                         GtScriptWrapperVisitorMetaNodeFunc,
+                                         GtScriptWrapperVisitorEOFNodeFunc,
+                                         GtScriptWrapperVisitorFreeFunc);
 
 #endif

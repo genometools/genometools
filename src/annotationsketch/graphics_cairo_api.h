@@ -21,22 +21,29 @@
 #include <cairo.h>
 #include "annotationsketch/graphics_api.h"
 
-/* Implements the GtGraphics interface.
+/* Implements the <GtGraphics> interface.
    This implementation uses the Cairo 2D vector graphics library as a
    drawing back-end. */
 typedef struct GtGraphicsCairo GtGraphicsCairo;
 
-GtGraphics*            gt_graphics_cairo_new(GtGraphicsOutType type,
-                                             unsigned int width,
-                                             unsigned int height);
-GtGraphics*            gt_graphics_cairo_new_from_context(cairo_t *context,
-                                                          unsigned int width,
-                                                          unsigned int height);
-void                   gt_graphics_cairo_draw_curve_data(GtGraphics *gg,
-                                                         double x, double y,
-                                                         GtColor color,
-                                                         double data[],
-                                                         GtUword ndata,
-                                                         GtRange valrange,
-                                                         GtUword height);
+/* Creates a new <GtGraphics> object using the Cairo backend. The object
+   is meant for writing a new image of width <width> and height <height>
+   to a file or stream. Use <type> to define the output format.  */
+GtGraphics*  gt_graphics_cairo_new(GtGraphicsOutType type, unsigned int width,
+                                   unsigned int height);
+/* Creates a new <GtGraphics> object using the Cairo backend. The object
+   is meant for writing on an existing cairo_t <context> within the boundaries
+   of width <width> and height <height>.  */
+GtGraphics*  gt_graphics_cairo_new_from_context(cairo_t *context,
+                                                unsigned int width,
+                                                unsigned int height);
+/* Draws a curve in <gg> at the position <x>,<y> for <ndata> data points as
+   given in <data>. The data points must be in the range <valrange> and the
+   resulting graph has the height <height> in type-dependent units
+   (e.g. pixels). */
+void         gt_graphics_cairo_draw_curve_data(GtGraphics *gg,
+                                               double x, double y,
+                                               GtColor color, double data[],
+                                               GtUword ndata, GtRange valrange,
+                                               GtUword height);
 #endif

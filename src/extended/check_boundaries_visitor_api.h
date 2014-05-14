@@ -23,6 +23,7 @@ typedef struct GtCheckBoundariesVisitor GtCheckBoundariesVisitor;
 
 #include "extended/node_visitor_api.h"
 
-GtNodeVisitor*            gt_check_boundaries_visitor_new(void);
+/* Creates a new <GtCheckBoundariesVisitor> object. */
+GtNodeVisitor* gt_check_boundaries_visitor_new(void);
 
 #endif
