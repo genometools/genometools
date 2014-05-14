@@ -21,12 +21,14 @@
 #include "core/hashtable.h"
 #include "core/ma.h"
 #include "core/strcmp.h"
-#include "extended/type_checker_builtin.h"
+#include "extended/type_checker_builtin_api.h"
 #include "extended/type_checker_rep.h"
 
 struct GtTypeCheckerBuiltin {
   const GtTypeChecker parent_instance;
 };
+
+const GtTypeCheckerClass* gt_type_checker_builtin_class(void);
 
 #define gt_type_checker_builtin_cast(FTF)\
         gt_type_checker_cast(gt_type_checker_builtin_class(), FTF)

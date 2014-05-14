@@ -20,7 +20,7 @@
 #include "core/gtdatapath.h"
 #include "core/ma_api.h"
 #include "extended/typecheck_info.h"
-#include "extended/type_checker_builtin.h"
+#include "extended/type_checker_builtin_api.h"
 #include "extended/type_checker_obo.h"
 
 struct GtTypecheckInfo {

@@ -18,20 +18,6 @@
 #ifndef SCRIPT_WRAPPER_STREAM_H
 #define SCRIPT_WRAPPER_STREAM_H
 
-#include "extended/node_stream_api.h"
-
-/* Implements the <GtScriptWrapperStream> interface. This stream is
-   only used to store pointers to external callbacks, e.g. written in a
-   scripting language. This class does not store any state or logic, relying
-   on the developer of the external custom stream class to do so.  */
-typedef struct GtScriptWrapperStream GtScriptWrapperStream;
-
-typedef int (*GtScriptWrapperStreamNextFunc)(GtGenomeNode **gn,
-                                             GtError *err);
-typedef int (*GtScriptWrapperStreamFreeFunc)(void*);
-
-const GtNodeStreamClass* gt_script_wrapper_stream_class(void);
-GtNodeStream*       gt_script_wrapper_stream_new(GtScriptWrapperStreamNextFunc,
-                                                 GtScriptWrapperStreamFreeFunc);
+#include "extended/script_wrapper_stream.h"
 
 #endif

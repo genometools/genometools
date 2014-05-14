@@ -711,7 +711,8 @@ void gt_feature_node_remove_attribute(GtFeatureNode *fn,
 }
 
 void gt_feature_node_foreach_attribute(GtFeatureNode *fn,
-                                      AttributeIterFunc iterfunc, void *data)
+                                       GtFeatureNodeAttributeIterFunc iterfunc,
+                                       void *data)
 {
   gt_assert(fn && iterfunc);
   if (fn->attributes) {

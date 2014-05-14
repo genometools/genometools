@@ -31,7 +31,7 @@
 #include "annotationsketch/canvas_rep.h"
 #include "annotationsketch/cliptype.h"
 #include "annotationsketch/coords.h"
-#include "annotationsketch/graphics_cairo.h"
+#include "annotationsketch/graphics_cairo_api.h"
 #include "annotationsketch/style.h"
 
 /* this is a Cairo-based implementation of the GtCanvas interface hooks */

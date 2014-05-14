@@ -18,26 +18,6 @@
 #ifndef GRAPHICS_CAIRO_H
 #define GRAPHICS_CAIRO_H
 
-#include <cairo.h>
-#include "annotationsketch/graphics.h"
+#include "annotationsketch/graphics_cairo_api.h"
 
-/* Implements the GtGraphics interface.
-   This implementation uses the Cairo 2D vector graphics library as a
-   drawing back-end. */
-typedef struct GtGraphicsCairo GtGraphicsCairo;
-
-const GtGraphicsClass* gt_graphics_cairo_class(void);
-GtGraphics*            gt_graphics_cairo_new(GtGraphicsOutType type,
-                                             unsigned int width,
-                                             unsigned int height);
-GtGraphics*            gt_graphics_cairo_new_from_context(cairo_t *context,
-                                                          unsigned int width,
-                                                          unsigned int height);
-void                   gt_graphics_cairo_draw_curve_data(GtGraphics *gg,
-                                                         double x, double y,
-                                                         GtColor color,
-                                                         double data[],
-                                                         GtUword ndata,
-                                                         GtRange valrange,
-                                                         GtUword height);
 #endif

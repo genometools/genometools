@@ -15,14 +15,15 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef CHECK_BOUNDARIES_VISITOR_H
-#define CHECK_BOUNDARIES_VISITOR_H
+#ifndef CHECK_BOUNDARIES_VISITOR_API_H
+#define CHECK_BOUNDARIES_VISITOR_API_H
 
 /* Implements the <GtNodeVisitor> interface. */
 typedef struct GtCheckBoundariesVisitor GtCheckBoundariesVisitor;
 
-#include "extended/node_visitor.h"
+#include "extended/node_visitor_api.h"
 
-GtNodeVisitor*            gt_check_boundaries_visitor_new(void);
+/* Creates a new <GtCheckBoundariesVisitor> object. */
+GtNodeVisitor* gt_check_boundaries_visitor_new(void);
 
 #endif

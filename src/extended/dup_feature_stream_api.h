@@ -1,6 +1,5 @@
 /*
-  Copyright (c) 2008 Gordon Gremme <gordon@gremme.org>
-  Copyright (c) 2008 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2009-2010 Gordon Gremme <gordon@gremme.org>
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -15,15 +14,15 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef TYPE_CHECKER_BUILTIN_H
-#define TYPE_CHECKER_BUILTIN_H
+#ifndef DUP_FEATURE_STREAM_API_H
+#define DUP_FEATURE_STREAM_API_H
 
-#include "extended/type_checker.h"
+#include <stdio.h>
+#include "extended/node_stream_api.h"
 
-/* Implements the GtTypeChecker interface with built-in types. */
-typedef struct GtTypeCheckerBuiltin GtTypeCheckerBuiltin;
-
-const GtTypeCheckerClass* gt_type_checker_builtin_class(void);
-GtTypeChecker*            gt_type_checker_builtin_new();
+/* Duplicate internal feature nodes of type <source_type> as features with type
+   <dest_type>. The duplicated features does not inherit the children. */
+GtNodeStream* gt_dup_feature_stream_new(GtNodeStream*, const char *dest_type,
+                                        const char *source_type);
 
 #endif

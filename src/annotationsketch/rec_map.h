@@ -20,12 +20,8 @@
 
 #include "annotationsketch/rec_map_api.h"
 
-GtRecMap* gt_rec_map_new(double nw_x, double nw_y, double se_x, double se_y,
-                         GtFeatureNode*);
-GtRecMap* gt_rec_map_ref(GtRecMap *rm);
 void      gt_rec_map_set_omitted_children(GtRecMap *rm, bool status);
 int       gt_rec_map_format_html_imagemap_coords(const GtRecMap*, char*,
                                                  size_t);
-void      gt_rec_map_delete(GtRecMap*);
 
 #endif

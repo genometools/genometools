@@ -24,7 +24,7 @@
 #include "extended/gtf_in_stream.h"
 #include "extended/gtf_parser.h"
 #include "extended/node_stream_api.h"
-#include "extended/type_checker_builtin.h"
+#include "extended/type_checker_builtin_api.h"
 
 struct GtGTFInStream {
   const GtNodeStream parent_instance;

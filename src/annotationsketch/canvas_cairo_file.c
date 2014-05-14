@@ -31,7 +31,7 @@
 #include "annotationsketch/canvas_rep.h"
 #include "annotationsketch/default_formats.h"
 #include "annotationsketch/cliptype.h"
-#include "annotationsketch/graphics_cairo.h"
+#include "annotationsketch/graphics_cairo_api.h"
 #include "annotationsketch/style.h"
 
 struct GtCanvasCairoFile {

@@ -29,7 +29,7 @@
 #include "annotationsketch/canvas_cairo.h"
 #include "annotationsketch/canvas_cairo_context.h"
 #include "annotationsketch/default_formats.h"
-#include "annotationsketch/graphics_cairo.h"
+#include "annotationsketch/graphics_cairo_api.h"
 #include "annotationsketch/style.h"
 
 struct GtCanvasCairoContext {

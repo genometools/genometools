@@ -15,9 +15,23 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef SCRIPT_WRAPPER_VISITOR_H
-#define SCRIPT_WRAPPER_VISITOR_H
+#ifndef SCRIPT_WRAPPER_STREAM_API_H
+#define SCRIPT_WRAPPER_STREAM_API_H
 
-#include "extended/script_wrapper_visitor_api.h"
+#include "extended/node_stream_api.h"
+
+/* Implements the <GtScriptWrapperStream> interface. This stream is
+   only used to store pointers to external callbacks, e.g. written in a
+   scripting language. This class does not store any state or logic, relying
+   on the developer of the external custom stream class to do so.  */
+typedef struct GtScriptWrapperStream GtScriptWrapperStream;
+
+typedef int (*GtScriptWrapperStreamNextFunc)(GtGenomeNode **gn,
+                                             GtError *err);
+typedef int (*GtScriptWrapperStreamFreeFunc)(void*);
+
+/* Creates a new <GtScriptWrapperStream> given a next and a free function. */
+GtNodeStream* gt_script_wrapper_stream_new(GtScriptWrapperStreamNextFunc,
+                                           GtScriptWrapperStreamFreeFunc);
 
 #endif

@@ -19,13 +19,15 @@
 #include "core/class_alloc_lock.h"
 #include "core/unused_api.h"
 #include "extended/node_stream_api.h"
-#include "extended/script_wrapper_stream.h"
+#include "extended/script_wrapper_stream_api.h"
 
 struct GtScriptWrapperStream {
   const GtNodeStream parent_instance;
   GtScriptWrapperStreamNextFunc next_func;
   GtScriptWrapperStreamFreeFunc free_func;
 };
+
+const GtNodeStreamClass* gt_script_wrapper_stream_class(void);
 
 #define script_wrapper_stream_cast(GS)\
         gt_node_stream_cast(gt_script_wrapper_stream_class(), GS)

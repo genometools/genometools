@@ -16,7 +16,7 @@
 
 #include "core/ma.h"
 #include "core/unused_api.h"
-#include "extended/check_boundaries_visitor.h"
+#include "extended/check_boundaries_visitor_api.h"
 #include "extended/gff3_in_stream.h"
 #include "extended/visitor_stream.h"
 #include "tools/gt_loccheck.h"
