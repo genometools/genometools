@@ -27,6 +27,8 @@
 #include "gth/gt_gthbssmtrain.h"
 #include "gth/gt_gthmkbssmfiles.h"
 #include "tools/gt_compressedbits.h"
+#include "tools/gt_codonusage_collect.h"
+#include "tools/gt_codonusage_scan.h"
 #include "tools/gt_consensus_sa.h"
 #include "tools/gt_dev.h"
 #include "tools/gt_extracttarget.h"
@@ -70,6 +72,9 @@ static void* gt_dev_arguments_new(void)
   gt_toolbox_add(dev_toolbox, "trieins", gt_trieins);
   gt_toolbox_add_tool(dev_toolbox, "compbits", gt_compressedbits());
   gt_toolbox_add_tool(dev_toolbox, "consensus_sa", gt_consensus_sa_tool());
+  gt_toolbox_add_tool(dev_toolbox, "codonusage_collect",
+                                                       gt_codonusage_collect());
+  gt_toolbox_add_tool(dev_toolbox, "codonusage_scan", gt_codonusage_scan());
   gt_toolbox_add_tool(dev_toolbox, "extracttarget", gt_extracttarget());
   gt_toolbox_add_tool(dev_toolbox, "gdiffcalc", gt_gdiffcalc());
   gt_toolbox_add_tool(dev_toolbox, "gthbssmrmsd", gt_gthbssmrmsd());
