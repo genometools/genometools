@@ -50,7 +50,8 @@ static void gt_codonusage_collect_arguments_delete(void *tool_arguments)
   gt_free(arguments);
 }
 
-static GtOptionParser* gt_codonusage_collect_option_parser_new(void *tool_arguments)
+static GtOptionParser* gt_codonusage_collect_option_parser_new(void
+                                                                *tool_arguments)
 {
   GtCodonusageCollectArguments *arguments = tool_arguments;
   GtOptionParser *op;

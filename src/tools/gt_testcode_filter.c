@@ -55,7 +55,8 @@ static void gt_testcode_filter_arguments_delete(void *tool_arguments)
   gt_free(arguments);
 }
 
-static GtOptionParser* gt_testcode_filter_option_parser_new(void *tool_arguments)
+static GtOptionParser* gt_testcode_filter_option_parser_new(void
+                                                                *tool_arguments)
 {
   GtTcodeFilterArguments *arguments = tool_arguments;
   GtOptionParser *op;
@@ -64,7 +65,7 @@ static GtOptionParser* gt_testcode_filter_option_parser_new(void *tool_arguments
 
   op = gt_option_parser_new("[option ...] [GFF3_file]",
                             "Annotates CDS sequences with their mean "
-                            "TESTCODE scores.");
+                            "TESTCODE scores and filters out non-coding ones.");
 
   /* -seqfile, -matchdesc, -usedesc and -regionmapping */
   gt_seqid2file_register_options(op, arguments->s2fi);
@@ -76,7 +77,7 @@ static GtOptionParser* gt_testcode_filter_option_parser_new(void *tool_arguments
   gt_option_parser_add_option(op, option);
 
   /* -threshold */
-  option = gt_option_new_double("thresold",
+  option = gt_option_new_double("threshold",
                                 "threshold for coding classification",
                                 &arguments->threshold, 0.95);
   gt_option_parser_add_option(op, option);

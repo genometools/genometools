@@ -1,7 +1,6 @@
   /*
-  Copyright (c) 2010      Sascha Kastens <mail@skastens.de>
-  Copyright (c) 2011-2013 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
-  Copyright (c) 2010-2013 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2014 Sascha Steinbiss <ss34@sanger.ac.uk>
+  Copyright (c) 2014 Genome Research Ltd.
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -162,7 +161,8 @@ static int gt_orfgenerator_runner(int argc, const char **argv,
   if (!had_err) {
     gt_orf_finder_stream_set_type((GtORFFinderStream*) orfgenerator_stream,
                                   gt_str_get(arguments->type));
-    gff3_out_stream = gt_gff3_out_stream_new(orfgenerator_stream, arguments->outfp);
+    gff3_out_stream = gt_gff3_out_stream_new(orfgenerator_stream,
+                                             arguments->outfp);
   }
 
   if (!had_err)

@@ -1,5 +1,6 @@
 /*
   Copyright (c) 2014 Sascha Steinbiss <ss34@sanger.ac.uk>
+  Copyright (c) 2014 Genome Research Ltd.
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -58,7 +59,8 @@ static void gt_codonusage_scan_arguments_delete(void *tool_arguments)
   gt_free(arguments);
 }
 
-static GtOptionParser* gt_codonusage_scan_option_parser_new(void *tool_arguments)
+static GtOptionParser* gt_codonusage_scan_option_parser_new(void
+                                                                *tool_arguments)
 {
   GtCodonusageScanArguments *arguments = tool_arguments;
   GtOptionParser *op;
@@ -118,7 +120,8 @@ static int gt_codonusage_scan_runner(GT_UNUSED int argc, const char **argv,
 
   if (!had_err) {
     /* create gff3 input stream */
-    last_stream = gff3_in_stream = gt_gff3_in_stream_new_sorted(argv[parsed_args]);
+    last_stream = gff3_in_stream =
+                                gt_gff3_in_stream_new_sorted(argv[parsed_args]);
 
     /* create region mapping */
     region_mapping = gt_seqid2file_region_mapping_new(arguments->s2fi, err);
@@ -136,9 +139,11 @@ static int gt_codonusage_scan_runner(GT_UNUSED int argc, const char **argv,
       had_err = -1;
   }
   if (!had_err) {
-    last_stream = codonusage_scan_stream1 = gt_visitor_stream_new(last_stream, nv);
+    last_stream = codonusage_scan_stream1 = gt_visitor_stream_new(last_stream,
+                                                                  nv);
     if (!arguments->all)
-      last_stream = codonusage_scan_stream2 = gt_codon_usage_scan_stream_new(last_stream);
+      last_stream = codonusage_scan_stream2 =
+                                    gt_codon_usage_scan_stream_new(last_stream);
 
     last_stream = gff3_out_stream = gt_gff3_out_stream_new(last_stream,
                                                            arguments->outfp);
