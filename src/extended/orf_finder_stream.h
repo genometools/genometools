@@ -22,6 +22,7 @@
 #include "core/encseq_api.h"
 #include "core/error_api.h"
 #include "core/hashmap_api.h"
+#include "core/seq_iterator_api.h"
 #include "extended/node_stream_api.h"
 #include "extended/orf_iterator_api.h"
 #include "extended/region_mapping_api.h"
@@ -38,5 +39,14 @@ GtNodeStream* gt_orf_finder_stream_new(GtNodeStream *in_stream,
                                        unsigned int max,
                                        bool all,
                                        GtError *err);
+
+GtNodeStream* gt_orf_finder_stream_new_from_seq(GtSeqIterator *seqit,
+                                                unsigned int min,
+                                                unsigned int max,
+                                                bool all,
+                                                GtError *err);
+
+void          gt_orf_finder_stream_set_type(GtORFFinderStream *orfs,
+                                            const char *type);
 
 #endif
