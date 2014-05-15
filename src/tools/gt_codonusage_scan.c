@@ -109,10 +109,10 @@ static int gt_codonusage_scan_runner(GT_UNUSED int argc, const char **argv,
                *codonusage_scan_stream1 = NULL,
                *codonusage_scan_stream2 = NULL,
                *gff3_out_stream = NULL,
-               *last_stream;
+               *last_stream = NULL;
   GtCodonusageScanArguments *arguments = tool_arguments;
-  GtRegionMapping *region_mapping;
-  GtNodeVisitor *nv;
+  GtRegionMapping *region_mapping = NULL;
+  GtNodeVisitor *nv = NULL;
   int had_err = 0;
 
   gt_error_check(err);

@@ -78,8 +78,8 @@ static int gt_codonusage_collect_runner(GT_UNUSED int argc, const char **argv,
 {
   GtNodeStream *gff3_in_stream = NULL, *codonusage_collect_stream = NULL;
   GtCodonusageCollectArguments *arguments = tool_arguments;
-  GtRegionMapping *region_mapping;
-  GtNodeVisitor *nv;
+  GtRegionMapping *region_mapping = NULL;
+  GtNodeVisitor *nv = NULL;
   int had_err = 0;
 
   gt_error_check(err);
