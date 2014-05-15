@@ -69,6 +69,8 @@ interfaces.
 
   <li><a href="#GtCanvasCairoFile">GtCanvasCairoFile</a>
 
+  <li><a href="#GtCheckBoundariesVisitor">GtCheckBoundariesVisitor</a>
+
   <li><a href="#GtCodonIterator">GtCodonIterator</a>
 
   <li><a href="#GtCodonIteratorEncseq">GtCodonIteratorEncseq</a>
@@ -142,6 +144,8 @@ interfaces.
   <li><a href="#GtGenomeNode">GtGenomeNode</a>
 
   <li><a href="#GtGraphics">GtGraphics</a>
+
+  <li><a href="#GtGraphicsCairo">GtGraphicsCairo</a>
 
   <li><a href="#GtHashmap">GtHashmap</a>
 
@@ -220,6 +224,10 @@ interfaces.
   <li><a href="#GtRegionMapping">GtRegionMapping</a>
 
   <li><a href="#GtRegionNode">GtRegionNode</a>
+
+  <li><a href="#GtScriptWrapperStream">GtScriptWrapperStream</a>
+
+  <li><a href="#GtScriptWrapperVisitor">GtScriptWrapperVisitor</a>
 
   <li><a href="#GtSelectStream">GtSelectStream</a>
 
@@ -341,15 +349,6 @@ interfaces.
 
 </ul>
 <h2>Sole functions</h2>
-<a name="GtTrackSelectorFunc"></a>
-
-<code>void  GtTrackSelectorFunc(GtBlock*, GtStr*, void*)</code>
-<p>
-A <code>GtTrackSelectorFunc</code> is a callback function which sets a <code>GtStr</code> to a
-   string to be used as a track identifier for assignment of a <code>GtBlock</code>
-   to a given track.
-</p>
-<hr>
 <a name="GtTrackOrderingFunc"></a>
 
 <code>int  GtTrackOrderingFunc(const char *s1, const char *s2, void *data)</code>
@@ -359,6 +358,15 @@ A function describing the order of tracks based on their track identifier
    should appear before the track with ID <code>s2</code> and a positive value if <code>s1</code>
    should appear after <code>s2</code>. Returning a value of 0 will result in an undefined
    ordering of <code>s1</code> and <code>s2</code>.
+</p>
+<hr>
+<a name="GtTrackSelectorFunc"></a>
+
+<code>void  GtTrackSelectorFunc(GtBlock*, GtStr*, void*)</code>
+<p>
+A <code>GtTrackSelectorFunc</code> is a callback function which sets a <code>GtStr</code> to a
+   string to be used as a track identifier for assignment of a <code>GtBlock</code>
+   to a given track.
 </p>
 <hr>
 <a name="GtAddIntronsStream"></a>
@@ -1427,6 +1435,19 @@ Write rendered <code>canvas</code> to the file with name <code>filename</code>. 
 Append rendered <code>canvas</code> image data to given <code>stream</code>.
 </p>
 <hr>
+<a name="GtCheckBoundariesVisitor"></a>
+<h2>Class GtCheckBoundariesVisitor</h2>
+
+<p> Implements the <code>GtNodeVisitor</code> interface. </p>
+
+<hr>
+<a name="gt_check_boundaries_visitor_new"></a>
+
+<code>GtNodeVisitor*  gt_check_boundaries_visitor_new(void)</code>
+<p>
+Creates a new <code>GtCheckBoundariesVisitor</code> object.
+</p>
+<hr>
 <a name="GtCodonIterator"></a>
 <h2>Class GtCodonIterator</h2>
 
@@ -1588,6 +1609,24 @@ Return a new <code>GtCommentNode</code> object representing a <code>comment</cod
                                                      *comment_node)</code>
 <p>
 Return the comment stored in <code>comment_node</code>.
+</p>
+<hr>
+<a name="gt_comment_node_try_cast"></a>
+
+<code>GtCommentNode*            gt_comment_node_try_cast(GtGenomeNode *gn)</code>
+<p>
+Test whether the given genome node is a comment node. If so, a pointer to the
+   meta node is returned. If not, NULL is returned. Note that in most cases,
+   one should implement a GtNodeVisitor to handle processing of different
+   GtGenomeNode types.
+</p>
+<hr>
+<a name="gt_comment_node_cast"></a>
+
+<code>GtCommentNode*            gt_comment_node_cast(GtGenomeNode *gn)</code>
+<p>
+Test whether the given genome node is a comment node. If so, a pointer to the
+   meta node is returned. If not, an assertion fails.
 </p>
 <hr>
 <a name="GtCstrTable"></a>
@@ -3679,6 +3718,27 @@ Remove attribute <code>tag</code> from <code>feature_node</code>. <code>feature_
    attributes.
 </p>
 <hr>
+<a name="GtFeatureNodeAttributeIterFunc"></a>
+
+<code>void  GtFeatureNodeAttributeIterFunc(const char *attr_name,
+                                               const char *attr_value,
+                                               void *data)</code>
+<p>
+Delivers the key (in <code>attr_name</code>)and value (in <code>attr_value</code>) of an
+   attribute. The <code>data</code> parameter carries over arbitrary user data from the
+   <code>gt_feature_node_foreach_attribute</code> call.
+</p>
+<hr>
+<a name="gt_feature_node_foreach_attribute"></a>
+
+<code>void            gt_feature_node_foreach_attribute(GtFeatureNode *feature_node,
+                                            GtFeatureNodeAttributeIterFunc func,
+                                            void *data)</code>
+<p>
+Calls <code>func</code> for each attribute in <code>feature_node</code>. Use <code>data</code> to forward
+   arbitrary data during traversal.
+</p>
+<hr>
 <a name="gt_feature_node_is_multi"></a>
 
 <code>bool            gt_feature_node_is_multi(const GtFeatureNode *feature_node)</code>
@@ -3957,8 +4017,8 @@ Destroy the file handle object, but do not close the underlying handle.
 <hr>
 <a name="gt_gff3_in_stream_new_unsorted"></a>
 
-<code>GtNodeStream*             gt_gff3_in_stream_new_unsorted(int num_of_files,
-                                                        const char **filenames)</code>
+<code>GtNodeStream*  gt_gff3_in_stream_new_unsorted(int num_of_files,
+                                             const char **filenames)</code>
 <p>
 Return a <code>GtGFF3InStream</code> object which subsequently reads the <code>num_of_files</code>
    many GFF3 files denoted in <code>filenames</code>. The GFF3 files do not have to be
@@ -3968,7 +4028,7 @@ Return a <code>GtGFF3InStream</code> object which subsequently reads the <code>n
 <hr>
 <a name="gt_gff3_in_stream_new_sorted"></a>
 
-<code>GtNodeStream*             gt_gff3_in_stream_new_sorted(const char *filename)</code>
+<code>GtNodeStream*  gt_gff3_in_stream_new_sorted(const char *filename)</code>
 <p>
 Create a <code>GtGFF3InStream*</code> which reads the sorted GFF3 file denoted by
    <code>filename</code>. If filename is <code>NULL</code>, it is read from <code>stdin</code>.
@@ -3977,7 +4037,7 @@ Create a <code>GtGFF3InStream*</code> which reads the sorted GFF3 file denoted b
 <hr>
 <a name="gt_gff3_in_stream_check_id_attributes"></a>
 
-<code>void                      gt_gff3_in_stream_check_id_attributes(GtGFF3InStream
+<code>void           gt_gff3_in_stream_check_id_attributes(GtGFF3InStream
                                                                *gff3_in_stream)</code>
 <p>
 Make sure all ID attributes which are parsed by <code>gff3_in_stream</code> are correct.
@@ -3986,20 +4046,46 @@ Make sure all ID attributes which are parsed by <code>gff3_in_stream</code> are 
 <hr>
 <a name="gt_gff3_in_stream_enable_tidy_mode"></a>
 
-<code>void                      gt_gff3_in_stream_enable_tidy_mode(GtGFF3InStream
-                                                            *gff3_in_stream)</code>
+<code>void           gt_gff3_in_stream_enable_tidy_mode(GtGFF3InStream
+                                                               *gff3_in_stream)</code>
 <p>
 Enable tidy mode for <code>gff3_in_stream</code>. That is, the GFF3 parser tries to tidy
    up features which would normally lead to an error.
 </p>
 <hr>
+<a name="gt_gff3_in_stream_enable_strict_mode"></a>
+
+<code>void           gt_gff3_in_stream_enable_strict_mode(GtGFF3InStream
+                                                               *gff3_in_stream)</code>
+<p>
+Enable strict mode for <code>gff3_in_stream</code>.
+</p>
+<hr>
 <a name="gt_gff3_in_stream_show_progress_bar"></a>
 
-<code>void                      gt_gff3_in_stream_show_progress_bar(GtGFF3InStream
-                                                             *gff3_in_stream)</code>
+<code>void           gt_gff3_in_stream_show_progress_bar(GtGFF3InStream
+                                                               *gff3_in_stream)</code>
 <p>
 Show progress bar on <code>stdout</code> to convey the progress of parsing the GFF3
    files underlying <code>gff3_in_stream</code>.
+</p>
+<hr>
+<a name="gt_gff3_in_stream_get_used_types"></a>
+
+<code>GtStrArray*    gt_gff3_in_stream_get_used_types(GtNodeStream *gff3_in_stream)</code>
+<p>
+Returns a <code>GtStrArray*</code> which contains all type names in alphabetical order
+   which have been parsed by <code>gff3_in_stream</code>. The caller is responsible to
+   free it!
+</p>
+<hr>
+<a name="gt_gff3_in_stream_set_type_checker"></a>
+
+<code>void           gt_gff3_in_stream_set_type_checker(GtNodeStream *gff3_in_stream,
+                                                 GtTypeChecker *type_checker)</code>
+<p>
+Sets <code>type_checker</code> to be the type checker used in <code>gff3_in_stream</code>. That
+   is, it will be queried when the validity of SO types is to be determined.
 </p>
 <hr>
 <a name="GtGFF3OutStream"></a>
@@ -4645,6 +4731,49 @@ Write out the <code>GtGraphics</code> object to the given <code>stream</code>.
 <code>void    gt_graphics_delete(GtGraphics*)</code>
 <p>
 Deletes the the <code>GtGraphics</code> object.
+</p>
+<hr>
+<a name="GtGraphicsCairo"></a>
+<h2>Class GtGraphicsCairo</h2>
+
+<p> Implements the <code>GtGraphics</code> interface.
+   This implementation uses the Cairo 2D vector graphics library as a
+   drawing back-end. </p>
+
+<hr>
+<a name="gt_graphics_cairo_new"></a>
+
+<code>GtGraphics*   gt_graphics_cairo_new(GtGraphicsOutType type, unsigned int width,
+                                   unsigned int height)</code>
+<p>
+Creates a new <code>GtGraphics</code> object using the Cairo backend. The object
+   is meant for writing a new image of width <code>width</code> and height <code>height</code>
+   to a file or stream. Use <code>type</code> to define the output format.
+</p>
+<hr>
+<a name="gt_graphics_cairo_new_from_context"></a>
+
+<code>GtGraphics*   gt_graphics_cairo_new_from_context(cairo_t *context,
+                                                unsigned int width,
+                                                unsigned int height)</code>
+<p>
+Creates a new <code>GtGraphics</code> object using the Cairo backend. The object
+   is meant for writing on an existing cairo_t <code>context</code> within the boundaries
+   of width <code>width</code> and height <code>height</code>.
+</p>
+<hr>
+<a name="gt_graphics_cairo_draw_curve_data"></a>
+
+<code>void          gt_graphics_cairo_draw_curve_data(GtGraphics *gg,
+                                               double x, double y,
+                                               GtColor color, double data[],
+                                               GtUword ndata, GtRange valrange,
+                                               GtUword height)</code>
+<p>
+Draws a curve in <code>gg</code> at the position <code>x</code>,<code>y</code> for <code>ndata</code> data points as
+   given in <code>data</code>. The data points must be in the range <code>valrange</code> and the
+   resulting graph has the height <code>height</code> in type-dependent units
+   (e.g. pixels).
 </p>
 <hr>
 <a name="GtHashmap"></a>
@@ -5532,9 +5661,9 @@ Returns the edit distance of the match <code>ms</code>.
 <a name="GtMatchVisitor"></a>
 <h2>Class GtMatchVisitor</h2>
 
-<p> The <code>GtMatchVisitor</code> class allows to distinguish a <code>GtMatch</code> implementation,
-   e.g. BLAST or OpenMatch, and to call different code for each
-   implementation. </p>
+<p> The <code>GtMatchVisitor</code> class allows one to distinguish a <code>GtMatch</code>
+   implementation, e.g. BLAST or OpenMatch, and to call different
+   code for each implementation. </p>
 
 <hr>
 <a name="gt_match_visitor_visit_match_blast"></a>
@@ -6882,47 +7011,69 @@ Returns the <code>GtReadmode</code> for the description <code>string</code>, whi
   during the generation of an image by <em>AnnotationSketch</em>. </p>
 
 <hr>
+<a name="gt_rec_map_new"></a>
+
+<code>GtRecMap*             gt_rec_map_new(double nw_x, double nw_y, double se_x,
+                                    double se_y, GtFeatureNode *f)</code>
+<p>
+Creates a new <code>GtRecMap</code> for feature <code>f</code> with the given coordinates.
+</p>
+<hr>
+<a name="gt_rec_map_ref"></a>
+
+<code>GtRecMap*             gt_rec_map_ref(GtRecMap *rm)</code>
+<p>
+Increases the reference count of <code>rm</code>.
+</p>
+<hr>
 <a name="gt_rec_map_get_northwest_x"></a>
 
-<code>double                   gt_rec_map_get_northwest_x(const GtRecMap*)</code>
+<code>double                gt_rec_map_get_northwest_x(const GtRecMap*)</code>
 <p>
 Retrieve <em>x</em> value of the the upper left point of the rectangle.
 </p>
 <hr>
 <a name="gt_rec_map_get_northwest_y"></a>
 
-<code>double                   gt_rec_map_get_northwest_y(const GtRecMap*)</code>
+<code>double                gt_rec_map_get_northwest_y(const GtRecMap*)</code>
 <p>
 Retrieve <em>y</em> value of the the upper left point of the rectangle.
 </p>
 <hr>
 <a name="gt_rec_map_get_southeast_x"></a>
 
-<code>double                   gt_rec_map_get_southeast_x(const GtRecMap*)</code>
+<code>double                gt_rec_map_get_southeast_x(const GtRecMap*)</code>
 <p>
 Retrieve <em>x</em> value of the the lower right point of the rectangle.
 </p>
 <hr>
 <a name="gt_rec_map_get_southeast_y"></a>
 
-<code>double                   gt_rec_map_get_southeast_y(const GtRecMap*)</code>
+<code>double                gt_rec_map_get_southeast_y(const GtRecMap*)</code>
 <p>
 Retrieve <em>y</em> value of the the lower right point of the rectangle.
 </p>
 <hr>
 <a name="gt_rec_map_get_genome_feature"></a>
 
-<code>const GtFeatureNode*     gt_rec_map_get_genome_feature(const GtRecMap*)</code>
+<code>const GtFeatureNode*  gt_rec_map_get_genome_feature(const GtRecMap*)</code>
 <p>
 Retrieve <code>GtFeatureNode</code> associated with this rectangle.
 </p>
 <hr>
 <a name="gt_rec_map_has_omitted_children"></a>
 
-<code>bool                     gt_rec_map_has_omitted_children(const GtRecMap*)</code>
+<code>bool                  gt_rec_map_has_omitted_children(const GtRecMap*)</code>
 <p>
 Returns <code>true</code> if the rectangle represents a block root whose elements
    have not been drawn due to size restrictions.
+</p>
+<hr>
+<a name="gt_rec_map_delete"></a>
+
+<code>void                  gt_rec_map_delete(GtRecMap*)</code>
+<p>
+Deletes a <code>GtRecMap</code> and frees all associated memory.
 </p>
 <hr>
 <a name="GtRegionMapping"></a>
@@ -7082,6 +7233,43 @@ Test whether the given genome node is a region node. If so, a pointer to the
 <p>
 Test whether the given genome node is a region node. If so, a pointer to the
    region node is returned. If not, an assertion fails.
+</p>
+<hr>
+<a name="GtScriptWrapperStream"></a>
+<h2>Class GtScriptWrapperStream</h2>
+
+<p> Implements the <code>GtScriptWrapperStream</code> interface. This stream is
+   only used to store pointers to external callbacks, e.g. written in a
+   scripting language. This class does not store any state or logic, relying
+   on the developer of the external custom stream class to do so.  </p>
+
+<hr>
+<a name="gt_script_wrapper_stream_new"></a>
+
+<code>GtNodeStream*  gt_script_wrapper_stream_new(GtScriptWrapperStreamNextFunc,
+                                           GtScriptWrapperStreamFreeFunc)</code>
+<p>
+Creates a new <code>GtScriptWrapperStream</code> given a next and a free function.
+</p>
+<hr>
+<a name="GtScriptWrapperVisitor"></a>
+<h2>Class GtScriptWrapperVisitor</h2>
+
+<p> Implements the <code>GtNodeVisitor</code> interface. </p>
+
+<hr>
+<a name="gt_script_wrapper_visitor_new"></a>
+
+<code>GtNodeVisitor*  gt_script_wrapper_visitor_new(
+                                         GtScriptWrapperVisitorCommentNodeFunc,
+                                         GtScriptWrapperVisitorFeatureNodeFunc,
+                                         GtScriptWrapperVisitorRegionNodeFunc,
+                                         GtScriptWrapperVisitorSequenceNodeFunc,
+                                         GtScriptWrapperVisitorMetaNodeFunc,
+                                         GtScriptWrapperVisitorEOFNodeFunc,
+                                         GtScriptWrapperVisitorFreeFunc)</code>
+<p>
+Creates a new <code>GtScriptWrapperVisitor</code> for a number of callback functions.
 </p>
 <hr>
 <a name="GtSelectStream"></a>
@@ -7310,7 +7498,7 @@ Return the sequence of <code>sequence_node</code>.
 <hr>
 <a name="gt_sequence_node_get_sequence_length"></a>
 
-<code>GtUword             gt_sequence_node_get_sequence_length(const
+<code>GtUword                   gt_sequence_node_get_sequence_length(const
                                                               GtSequenceNode
                                                               *sequence_node)</code>
 <p>
@@ -7741,49 +7929,49 @@ Map <code>strand_char</code> to the corresponding strand enum type.
 <hr>
 <a name="gt_style_new"></a>
 
-<code>GtStyle*  gt_style_new(GtError*)</code>
+<code>GtStyle*            gt_style_new(GtError*)</code>
 <p>
 Creates a new <code>GtStyle</code> object.
 </p>
 <hr>
 <a name="gt_style_ref"></a>
 
-<code>GtStyle*  gt_style_ref(GtStyle*)</code>
+<code>GtStyle*            gt_style_ref(GtStyle*)</code>
 <p>
 Increments the reference count of the given <code>GtStyle</code>.
 </p>
 <hr>
 <a name="gt_style_unsafe_mode"></a>
 
-<code>void      gt_style_unsafe_mode(GtStyle*)</code>
+<code>void                gt_style_unsafe_mode(GtStyle*)</code>
 <p>
 Enables unsafe mode (``io'' and ``os'' libraries loaded).
 </p>
 <hr>
 <a name="gt_style_safe_mode"></a>
 
-<code>void      gt_style_safe_mode(GtStyle*)</code>
+<code>void                gt_style_safe_mode(GtStyle*)</code>
 <p>
 Enables safe mode (``io'' and ``os'' libraries not accessible).
 </p>
 <hr>
 <a name="gt_style_is_unsafe"></a>
 
-<code>bool      gt_style_is_unsafe(GtStyle *sty)</code>
+<code>bool                gt_style_is_unsafe(GtStyle *sty)</code>
 <p>
 Returns true if <code>sty</code> is in unsafe mode.
 </p>
 <hr>
 <a name="gt_style_clone"></a>
 
-<code>GtStyle*  gt_style_clone(const GtStyle*, GtError*)</code>
+<code>GtStyle*            gt_style_clone(const GtStyle*, GtError*)</code>
 <p>
 Creates a independent (``deep'') copy of the given <code>GtStyle</code> object.
 </p>
 <hr>
 <a name="gt_style_load_file"></a>
 
-<code>int       gt_style_load_file(GtStyle*, const char *filename, GtError*)</code>
+<code>int                 gt_style_load_file(GtStyle*, const char *filename, GtError*)</code>
 <p>
 Loads and executes Lua style file with given <code>filename</code>.
    This file must define a global table called <em>style</em>.
@@ -7791,7 +7979,7 @@ Loads and executes Lua style file with given <code>filename</code>.
 <hr>
 <a name="gt_style_load_str"></a>
 
-<code>int       gt_style_load_str(GtStyle*, GtStr *instr, GtError*)</code>
+<code>int                 gt_style_load_str(GtStyle*, GtStr *instr, GtError*)</code>
 <p>
 Loads and executes Lua style code from the given <code>GtStr</code> <code>instr</code>.
    This code must define a global table called <em>style</em>.
@@ -7799,7 +7987,7 @@ Loads and executes Lua style code from the given <code>GtStr</code> <code>instr<
 <hr>
 <a name="gt_style_to_str"></a>
 
-<code>int       gt_style_to_str(const GtStyle*, GtStr *outstr, GtError*)</code>
+<code>int                 gt_style_to_str(const GtStyle*, GtStr *outstr, GtError*)</code>
 <p>
 Generates Lua code which represents the given <code>GtStyle</code> object and
    writes it into the <code>GtStr</code> object <code>outstr</code>.
@@ -7807,15 +7995,15 @@ Generates Lua code which represents the given <code>GtStyle</code> object and
 <hr>
 <a name="gt_style_reload"></a>
 
-<code>void      gt_style_reload(GtStyle*)</code>
+<code>void                gt_style_reload(GtStyle*)</code>
 <p>
 Reloads the Lua style file.
 </p>
 <hr>
 <a name="gt_style_set_color"></a>
 
-<code>void      gt_style_set_color(GtStyle*, const char *section, const char *key,
-                            const GtColor *color)</code>
+<code>void                gt_style_set_color(GtStyle*, const char *section,
+                                      const char *key, const GtColor *color)</code>
 <p>
 Sets a color value in the <code>GtStyle</code> for section <code>section</code> and <code>key</code> to a
    certain <code>color</code>.
@@ -7841,40 +8029,154 @@ Retrieves a color value from <code>style</code> for key <code>key</code> in sect
    is returned.
 </p>
 <hr>
+<a name="gt_style_get_color_with_track"></a>
+
+<code>GtStyleQueryStatus  gt_style_get_color_with_track(const GtStyle *style,
+                                                 const char *section,
+                                                 const char *key,
+                                                 GtColor *result,
+                                                 GtFeatureNode *fn,
+                                                 const GtStr *track_id,
+                                                 GtError *err)</code>
+<p>
+Identical to <code>gt_style_get_color()</code>, except that it also takes a <code>track_id</code>
+   which is passed to a potential callback function in the style file.
+</p>
+<hr>
 <a name="gt_style_set_str"></a>
 
-<code>void      gt_style_set_str(GtStyle*, const char *section, const char *key,
-                          GtStr *value)</code>
+<code>void                gt_style_set_str(GtStyle*, const char *section,
+                                    const char *key, GtStr *value)</code>
 <p>
 Set string with key <code>key</code> in <code>section</code> to <code>value</code>.
 </p>
 <hr>
+<a name="gt_style_get_str"></a>
+
+<code>GtStyleQueryStatus  gt_style_get_str(const GtStyle *style, const char *section,
+                                    const char *key, GtStr *result,
+                                    GtFeatureNode *fn, GtError *err)</code>
+<p>
+Retrieves a string value from <code>style</code> for key <code>key</code> in section <code>section</code>.
+   The string is written to the <code>GtStr</code> object <code>result</code>, overwriting its prior
+   contents. Optionally, a feature node pointer <code>fn</code> can be specified for
+   handling in node-specific callbacks.
+   Because color definitions can be functions, <code>gt_style_get_str()</code> can fail at
+   runtime. In this case, this function returns GT_STYLE_QUERY_ERROR and <code>err</code>
+   is set accordingly.
+   If the string was not specified in <code>style</code>, <code>result</code> is left untouched and
+   GT_STYLE_QUERY_NOT_SET is returned so the caller can handle this case.
+   In case of successful retrieval of an existing string, GT_STYLE_QUERY_OK
+   is returned.
+</p>
+<hr>
+<a name="gt_style_get_str_with_track"></a>
+
+<code>GtStyleQueryStatus  gt_style_get_str_with_track(const GtStyle *style,
+                                               const char *section,
+                                               const char *key,
+                                               GtStr *result,
+                                               GtFeatureNode *fn,
+                                               const GtStr *track_id,
+                                               GtError *err)</code>
+<p>
+Identical to <code>gt_style_get_str()</code>, except that it also takes a <code>track_id</code>
+   which is passed to a potential callback function in the style file.
+</p>
+<hr>
 <a name="gt_style_set_num"></a>
 
-<code>void      gt_style_set_num(GtStyle*, const char *section, const char *key,
-                          double number)</code>
+<code>void                gt_style_set_num(GtStyle*, const char *section,
+                                    const char *key, double number)</code>
 <p>
 Set numeric value of key <code>key</code> in <code>section</code> to <code>number</code>.
 </p>
 <hr>
+<a name="gt_style_get_num"></a>
+
+<code>GtStyleQueryStatus  gt_style_get_num(const GtStyle *style, const char *section,
+                                    const char *key, double *result,
+                                    GtFeatureNode *fn, GtError *err)</code>
+<p>
+Retrieves a numeric value from <code>style</code> for key <code>key</code> in section <code>section</code>.
+   The value is written to the location pointed to by <code>result</code>. Optionally, a
+   feature node pointer <code>fn</code> can be specified for handling in node-specific
+   callbacks.
+   Because the definitions can be functions, <code>gt_style_get_num()</code> can fail at
+   runtime. In this case, this function returns GT_STYLE_QUERY_ERROR and <code>err</code>
+   is set accordingly.
+   If the number was not specified in <code>style</code>, <code>result</code> is left untouched and
+   GT_STYLE_QUERY_NOT_SET is returned so the caller can handle this case.
+   In case of successful retrieval of an existing number, GT_STYLE_QUERY_OK
+   is returned.
+</p>
+<hr>
+<a name="gt_style_get_num_with_track"></a>
+
+<code>GtStyleQueryStatus  gt_style_get_num_with_track(const GtStyle *style,
+                                               const char *section,
+                                               const char *key,
+                                               double *result,
+                                               GtFeatureNode *fn,
+                                               const GtStr *track_id,
+                                               GtError *err)</code>
+<p>
+Identical to <code>gt_style_get_num()</code>, except that it also takes a <code>track_id</code>
+   which is passed to a potential callback function in the style file.
+</p>
+<hr>
 <a name="gt_style_set_bool"></a>
 
-<code>void      gt_style_set_bool(GtStyle*, const char *section, const char *key,
-                           bool val)</code>
+<code>void                gt_style_set_bool(GtStyle*, const char *section,
+                                     const char *key, bool val)</code>
 <p>
 Set boolean value of key <code>key</code> in <code>section</code> to <code>val</code>.
 </p>
 <hr>
+<a name="gt_style_get_bool"></a>
+
+<code>GtStyleQueryStatus  gt_style_get_bool(const GtStyle *style, const char *section,
+                                     const char *key, bool *result,
+                                     GtFeatureNode *fn, GtError *err)</code>
+<p>
+Retrieves a boolean value from <code>style</code> for key <code>key</code> in section <code>section</code>.
+   The value is written to the location pointed to by <code>result</code>. Optionally, a
+   feature node pointer <code>fn</code> can be specified for handling in node-specific
+   callbacks.
+   Because the definitions can be functions, <code>gt_style_get_bool()</code> can fail at
+   runtime. In this case, this function returns GT_STYLE_QUERY_ERROR and <code>err</code>
+   is set accordingly.
+   If the value was not specified in <code>style</code>, <code>result</code> is left untouched and
+   GT_STYLE_QUERY_NOT_SET is returned so the caller can handle this case.
+   In case of successful retrieval of an existing boolean, GT_STYLE_QUERY_OK
+   is returned.
+</p>
+<hr>
+<a name="gt_style_get_bool_with_track"></a>
+
+<code>GtStyleQueryStatus  gt_style_get_bool_with_track(const GtStyle *style,
+                                                const char *section,
+                                                const char *key,
+                                                bool *result,
+                                                GtFeatureNode *fn,
+                                                const GtStr *track_id,
+                                                GtError *err)</code>
+<p>
+Identical to <code>gt_style_get_bool()</code>, except that it also takes a <code>track_id</code>
+   which is passed to a potential callback function in the style file.
+</p>
+<hr>
 <a name="gt_style_unset"></a>
 
-<code>void      gt_style_unset(GtStyle*, const char *section, const char *key)</code>
+<code>void                gt_style_unset(GtStyle*, const char *section,
+                                  const char *key)</code>
 <p>
 Unset value of key <code>key</code> in <code>section</code>.
 </p>
 <hr>
 <a name="gt_style_delete"></a>
 
-<code>void      gt_style_delete(GtStyle *style)</code>
+<code>void                gt_style_delete(GtStyle *style)</code>
 <p>
 Deletes this <code>style</code>.
 </p>
@@ -8133,7 +8435,7 @@ Output the current state of <code>timer</code> on <code>fp</code> since the last
 <code>void      gt_timer_show_progress_formatted(GtTimer *timer, FILE *fp,
                                           const char *desc, ...)</code>
 <p>
-Like <code>gt_timer_show_progress()</code>, but allows to format the description in a
+Like <code>gt_timer_show_progress()</code>, but allows one to format the description in a
    <code>printf()</code>-like fashion.
 </p>
 <hr>
@@ -8142,7 +8444,7 @@ Like <code>gt_timer_show_progress()</code>, but allows to format the description
 <code>void      gt_timer_show_progress_va(GtTimer *timer, FILE *fp, const char *desc,
                                    va_list ap)</code>
 <p>
-Like <code>gt_timer_show_progress()</code>, but allows to format the description in a
+Like <code>gt_timer_show_progress()</code>, but allows one to format the description in a
    <code>vprintf()</code>-like fashion using a va_list argument <code>ap</code>.
 </p>
 <hr>
@@ -9152,6 +9454,15 @@ Free the space pointed to by <code>ptr</code>. If <code>ptr</code> equals <code>
 Analog to <code>gt_free()</code>, but usable as a function pointer.
 </p>
 <hr>
+<a name="gt_dup_feature_stream_new"></a>
+
+<code>GtNodeStream*  gt_dup_feature_stream_new(GtNodeStream*, const char *dest_type,
+                                        const char *source_type)</code>
+<p>
+Duplicate internal feature nodes of type <code>source_type</code> as features with type
+   <code>dest_type</code>. The duplicated features does not inherit the children.
+</p>
+<hr>
 <a name="Msort"></a>
 <h2>Module Msort</h2>
 <a name="gt_msort"></a>
@@ -9693,6 +10004,8 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
 
   <a href="#GtDiscDistriIterFunc"><code>GtDiscDistriIterFunc</code></a><br>
 
+  <a href="#GtFeatureNodeAttributeIterFunc"><code>GtFeatureNodeAttributeIterFunc</code></a><br>
+
   <a href="#GtFree"><code>GtFree</code></a><br>
 
   <a href="#GtHashmapVisitFunc"><code>GtHashmapVisitFunc</code></a><br>
@@ -9979,6 +10292,8 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
 
   <a href="#gt_cds_stream_new"><code>gt_cds_stream_new</code></a><br>
 
+  <a href="#gt_check_boundaries_visitor_new"><code>gt_check_boundaries_visitor_new</code></a><br>
+
   <a href="#gt_codon_iterator_current_position"><code>gt_codon_iterator_current_position</code></a><br>
 
   <a href="#gt_codon_iterator_delete"><code>gt_codon_iterator_delete</code></a><br>
@@ -10003,9 +10318,13 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
 
   <a href="#gt_color_set"><code>gt_color_set</code></a><br>
 
+  <a href="#gt_comment_node_cast"><code>gt_comment_node_cast</code></a><br>
+
   <a href="#gt_comment_node_get_comment"><code>gt_comment_node_get_comment</code></a><br>
 
   <a href="#gt_comment_node_new"><code>gt_comment_node_new</code></a><br>
+
+  <a href="#gt_comment_node_try_cast"><code>gt_comment_node_try_cast</code></a><br>
 
   <a href="#gt_countingsort"><code>gt_countingsort</code></a><br>
 
@@ -10102,6 +10421,8 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
   <a href="#gt_dlistelem_next"><code>gt_dlistelem_next</code></a><br>
 
   <a href="#gt_dlistelem_previous"><code>gt_dlistelem_previous</code></a><br>
+
+  <a href="#gt_dup_feature_stream_new"><code>gt_dup_feature_stream_new</code></a><br>
 
   <a href="#gt_encseq_alphabet"><code>gt_encseq_alphabet</code></a><br>
 
@@ -10411,6 +10732,8 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
 
   <a href="#gt_feature_node_contains_marked"><code>gt_feature_node_contains_marked</code></a><br>
 
+  <a href="#gt_feature_node_foreach_attribute"><code>gt_feature_node_foreach_attribute</code></a><br>
+
   <a href="#gt_feature_node_get_attribute"><code>gt_feature_node_get_attribute</code></a><br>
 
   <a href="#gt_feature_node_get_attribute_list"><code>gt_feature_node_get_attribute_list</code></a><br>
@@ -10585,11 +10908,17 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
 
   <a href="#gt_gff3_in_stream_check_id_attributes"><code>gt_gff3_in_stream_check_id_attributes</code></a><br>
 
+  <a href="#gt_gff3_in_stream_enable_strict_mode"><code>gt_gff3_in_stream_enable_strict_mode</code></a><br>
+
   <a href="#gt_gff3_in_stream_enable_tidy_mode"><code>gt_gff3_in_stream_enable_tidy_mode</code></a><br>
+
+  <a href="#gt_gff3_in_stream_get_used_types"><code>gt_gff3_in_stream_get_used_types</code></a><br>
 
   <a href="#gt_gff3_in_stream_new_sorted"><code>gt_gff3_in_stream_new_sorted</code></a><br>
 
   <a href="#gt_gff3_in_stream_new_unsorted"><code>gt_gff3_in_stream_new_unsorted</code></a><br>
+
+  <a href="#gt_gff3_in_stream_set_type_checker"><code>gt_gff3_in_stream_set_type_checker</code></a><br>
 
   <a href="#gt_gff3_in_stream_show_progress_bar"><code>gt_gff3_in_stream_show_progress_bar</code></a><br>
 
@@ -10626,6 +10955,12 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
   <a href="#gt_gff3_visitor_retain_id_attributes"><code>gt_gff3_visitor_retain_id_attributes</code></a><br>
 
   <a href="#gt_gff3_visitor_set_fasta_width"><code>gt_gff3_visitor_set_fasta_width</code></a><br>
+
+  <a href="#gt_graphics_cairo_draw_curve_data"><code>gt_graphics_cairo_draw_curve_data</code></a><br>
+
+  <a href="#gt_graphics_cairo_new"><code>gt_graphics_cairo_new</code></a><br>
+
+  <a href="#gt_graphics_cairo_new_from_context"><code>gt_graphics_cairo_new_from_context</code></a><br>
 
   <a href="#gt_graphics_delete"><code>gt_graphics_delete</code></a><br>
 
@@ -11149,6 +11484,8 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
 
   <a href="#gt_realloc"><code>gt_realloc</code></a><br>
 
+  <a href="#gt_rec_map_delete"><code>gt_rec_map_delete</code></a><br>
+
   <a href="#gt_rec_map_get_genome_feature"><code>gt_rec_map_get_genome_feature</code></a><br>
 
   <a href="#gt_rec_map_get_northwest_x"><code>gt_rec_map_get_northwest_x</code></a><br>
@@ -11160,6 +11497,10 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
   <a href="#gt_rec_map_get_southeast_y"><code>gt_rec_map_get_southeast_y</code></a><br>
 
   <a href="#gt_rec_map_has_omitted_children"><code>gt_rec_map_has_omitted_children</code></a><br>
+
+  <a href="#gt_rec_map_new"><code>gt_rec_map_new</code></a><br>
+
+  <a href="#gt_rec_map_ref"><code>gt_rec_map_ref</code></a><br>
 
   <a href="#gt_region_mapping_delete"><code>gt_region_mapping_delete</code></a><br>
 
@@ -11198,6 +11539,10 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
   <a href="#gt_rwlock_unlock"><code>gt_rwlock_unlock</code></a><br>
 
   <a href="#gt_rwlock_wrlock"><code>gt_rwlock_wrlock</code></a><br>
+
+  <a href="#gt_script_wrapper_stream_new"><code>gt_script_wrapper_stream_new</code></a><br>
+
+  <a href="#gt_script_wrapper_visitor_new"><code>gt_script_wrapper_visitor_new</code></a><br>
 
   <a href="#gt_select_stream_new"><code>gt_select_stream_new</code></a><br>
 
@@ -11331,7 +11676,21 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
 
   <a href="#gt_style_delete"><code>gt_style_delete</code></a><br>
 
+  <a href="#gt_style_get_bool"><code>gt_style_get_bool</code></a><br>
+
+  <a href="#gt_style_get_bool_with_track"><code>gt_style_get_bool_with_track</code></a><br>
+
   <a href="#gt_style_get_color"><code>gt_style_get_color</code></a><br>
+
+  <a href="#gt_style_get_color_with_track"><code>gt_style_get_color_with_track</code></a><br>
+
+  <a href="#gt_style_get_num"><code>gt_style_get_num</code></a><br>
+
+  <a href="#gt_style_get_num_with_track"><code>gt_style_get_num_with_track</code></a><br>
+
+  <a href="#gt_style_get_str"><code>gt_style_get_str</code></a><br>
+
+  <a href="#gt_style_get_str_with_track"><code>gt_style_get_str_with_track</code></a><br>
 
   <a href="#gt_style_is_unsafe"><code>gt_style_is_unsafe</code></a><br>
 
@@ -11554,7 +11913,7 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
 <div id="footer">
 Copyright &copy; 2008-2013
 The <i>GenomeTools</i> authors.
-Last update: 2014-02-18
+Last update: 2014-05-15
 </div>
 </div>
 <!-- Piwik -->

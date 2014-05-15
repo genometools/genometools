@@ -103,6 +103,8 @@ href="http://www.lua.org/manual/5.1/manual.html#pdf-ipairs"><code>ipairs()</code
 
   <li><a href="#Layout">Layout</a>
 
+  <li><a href="#MetaNode">MetaNode</a>
+
   <li><a href="#Range">Range</a>
 
   <li><a href="#RegionMapping">RegionMapping</a>
@@ -133,41 +135,6 @@ Returns a random number between 0 and <code>val</code>.
 <code> reload()</code>
 <p>
 Reload <code>gt</code> module.
-</p>
-<hr>
-<a name="export"></a>
-
-<code> export()</code>
-<p>
-Export the content of <code>gt</code> table to the global environment.
-</p>
-<hr>
-<a name="display"></a>
-
-<code> display(filename)</code>
-<p>
-Call external 'display' program for file <code>filename</code>.
-</p>
-<hr>
-<a name="show_table"></a>
-
-<code> show_table(tbl)</code>
-<p>
-Show all keys and values of table <code>tbl</code>.
-</p>
-<hr>
-<a name="show"></a>
-
-<code> show(all)</code>
-<p>
-Show content of the <code>gt</code> table.
-</p>
-<hr>
-<a name="re"></a>
-
-<code> re()</code>
-<p>
-Reload the <code>gt</code> module and export its content to the global environment.
 </p>
 <hr>
 <a name="features_contain_marked"></a>
@@ -210,6 +177,41 @@ Return an array of genome features which contains a separate gene feature for ea
 <code> features_extract_sequences(features, type, join, region_mapping)</code>
 <p>
 Return an array with the sequences of the given features.
+</p>
+<hr>
+<a name="export"></a>
+
+<code> export()</code>
+<p>
+Export the content of <code>gt</code> table to the global environment.
+</p>
+<hr>
+<a name="display"></a>
+
+<code> display(filename)</code>
+<p>
+Call external 'display' program for file <code>filename</code>.
+</p>
+<hr>
+<a name="show_table"></a>
+
+<code> show_table(tbl)</code>
+<p>
+Show all keys and values of table <code>tbl</code>.
+</p>
+<hr>
+<a name="show"></a>
+
+<code> show(all)</code>
+<p>
+Show content of the <code>gt</code> table.
+</p>
+<hr>
+<a name="re"></a>
+
+<code> re()</code>
+<p>
+Reload the <code>gt</code> module and export its content to the global environment.
 </p>
 <hr>
 <a name="Alphabet"></a>
@@ -743,6 +745,29 @@ Return the height of the resulting <code>layout</code>.
 Draw the content of the <code>layout</code> on a given <code>canvas</code>.
 </p>
 <hr>
+<a name="MetaNode"></a>
+<h2>Class MetaNode</h2>
+<a name="meta_node_new"></a>
+
+<code> meta_node_new(directive, data)</code>
+<p>
+Returns a new region node with key <code>directive</code> and data string <code>data</code>.
+</p>
+<hr>
+<a name="meta_node:get_directive"></a>
+
+<code> meta_node:get_directive()</code>
+<p>
+Return directive of <code>meta_node</code> as string.
+</p>
+<hr>
+<a name="meta_node:get_data"></a>
+
+<code> meta_node:get_data()</code>
+<p>
+Return data of <code>meta_node</code> as string.
+</p>
+<hr>
 <a name="Range"></a>
 <h2>Class Range</h2>
 <a name="range_new"></a>
@@ -1042,6 +1067,12 @@ Returns translated <code>dna</code>.
 
   <a href="#layout_new"><code>layout_new</code></a><br>
 
+  <a href="#meta_node:get_data"><code>meta_node:get_data</code></a><br>
+
+  <a href="#meta_node:get_directive"><code>meta_node:get_directive</code></a><br>
+
+  <a href="#meta_node_new"><code>meta_node_new</code></a><br>
+
   <a href="#rand_max"><code>rand_max</code></a><br>
 
   <a href="#range:get_end"><code>range:get_end</code></a><br>
@@ -1091,7 +1122,7 @@ Returns translated <code>dna</code>.
 <div id="footer">
 Copyright &copy; 2008-2013
 The <i>GenomeTools</i> authors.
-Last update: 2014-02-18
+Last update: 2014-05-15
 </div>
 </div>
 <!-- Piwik -->
