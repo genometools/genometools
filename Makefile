@@ -624,7 +624,7 @@ API_HEADERS=$(foreach DIR,$(LIBGENOMETOOLS_DIRS),$(wildcard $(DIR)/*_api.h))
 
 obj/public_symbols.lst: $(API_HEADERS) $(LIBGENOMETOOLS_SRC)
 	@echo '[gathering public API symbols to $@]'
-	@echo "VERSION {\n\tglobal:" > $@
+	@printf "VERSION {\n\tglobal:\n" > $@
 	@cat $(API_HEADERS) | tr ' ' '\n' \
 	 | grep -E '^(gt_[0-9a-zA-Z_]+)(\[|\()' \
 	 | cut -d'[' -f1 | cut -d'(' -f1 | sort | uniq > $@.src
@@ -632,11 +632,11 @@ obj/public_symbols.lst: $(API_HEADERS) $(LIBGENOMETOOLS_SRC)
 	 | grep -E '(gt_[0-9a-zA-Z_]+_p)(\[|\()' \
 	 | cut -d'(' -f1 >> $@.src
 	@for L in `cat $@.src`; do \
-	  echo "\t\t$$L;" >> $@; \
+	  printf "\t\t$$L;\n" >> $@; \
 	done;
-	@echo "\t\tgt_array_add_ptr;" >> $@
-	@echo "\t\tgt_str_get_mem;" >> $@
-	@echo '\tlocal: *;\n\t};' >> $@
+	@printf "\t\tgt_array_add_ptr;\n" >> $@
+	@printf "\t\tgt_str_get_mem;\n" >> $@
+	@printf '\tlocal: *;\n\t};\n' >> $@
 
 obj/gt_config.h: VERSION
 	@echo '[create $@]'
