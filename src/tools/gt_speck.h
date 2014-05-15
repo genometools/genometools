@@ -1,5 +1,6 @@
 /*
   Copyright (c) 2014 Sascha Steinbiss <ss34@sanger.ac.uk>
+  Copyright (c) 2014 Genome Research Ltd.
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -14,8 +15,8 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef GT_SPECCHECK_H
-#define GT_SPECCHECK_H
+#ifndef GT_SPECK_H
+#define GT_SPECK_H
 
 #include "core/tool_api.h"
 

@@ -3,6 +3,6 @@
 for FILE in $1/*.mansrc;
 do
   echo -n '.'
-  a2x --doctype manpage --format manpage -D $2 $FILE
+  a2x --no-xmllint --doctype manpage --format manpage -D $2 $FILE
 done
 echo ''
