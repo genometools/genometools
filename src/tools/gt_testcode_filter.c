@@ -97,7 +97,7 @@ static int gt_testcode_filter_runner(GT_UNUSED int argc, const char **argv,
                *testcode_filter_stream = NULL,
                *gff3_out_stream = NULL;
   GtTcodeFilterArguments *arguments = tool_arguments;
-  GtRegionMapping *region_mapping;
+  GtRegionMapping *region_mapping = NULL;
   int had_err = 0;
 
   gt_error_check(err);
