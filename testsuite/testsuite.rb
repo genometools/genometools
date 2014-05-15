@@ -190,6 +190,7 @@ require 'gt_mergefeat_include'
 require 'gt_mgth_include'
 require 'gt_mmapandread_include'
 require 'gt_orffinder_include'
+require 'gt_orfgenerator_include'
 if python_tests_runnable? then
   require 'gt_python_include'
 end

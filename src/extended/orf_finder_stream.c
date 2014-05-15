@@ -248,15 +248,31 @@ GtNodeStream* gt_orf_finder_stream_new_from_seq(GtSeqIterator *seqit,
   ls->all = all;
   ls->type = "open_reading_frame";
   ls->desc_str = gt_str_new();
-  rval = gt_seq_iterator_next(ls->seqit, &ls->seq, &ls->seqlen,
-                              &ls->desc, err);
-  if (rval < 0) {
+  while (true) {
+    rval = gt_seq_iterator_next(ls->seqit, &ls->seq, &ls->seqlen,
+                                &ls->desc, err);
+    if (rval < 0) {
+      gt_node_stream_delete(gs);
+      return NULL;
+    }
+    if (rval == 0)
+      break;
+    if (ls->desc) {
+      gt_str_reset(ls->desc_str);
+      gt_str_append_cstr(ls->desc_str, ls->desc);
+    }
+    if (rval == 1) {
+      if (ls->seqlen < 3) {
+        continue;
+      } else {
+        break;
+      }
+    }
+  }
+  if (rval == 0) {
+    gt_error_set(err, "no translatable sequence given");
     gt_node_stream_delete(gs);
     return NULL;
-  }
-  if (ls->desc) {
-    gt_str_reset(ls->desc_str);
-    gt_str_append_cstr(ls->desc_str, ls->desc);
   }
   ls->ci = gt_codon_iterator_simple_new((char*) ls->seq, ls->seqlen, err);
   gt_assert(ls->ci);
