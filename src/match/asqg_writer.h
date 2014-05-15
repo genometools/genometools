@@ -22,7 +22,7 @@
 #include "core/encseq.h"
 #include "core/error.h"
 
-/* The <GtAsqgWriter> class allows to write string graph information in
+/* The <GtAsqgWriter> class allows one to write string graph information in
    the ASQG format of SGA (Simpsons and Durbin, 2012). */
 typedef struct GtAsqgWriter GtAsqgWriter;
 

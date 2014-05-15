@@ -1035,7 +1035,7 @@ int gt_randomcodes_hpcorrect_process_bucket(void *data,
 }
 
 /*
-  skip_hmer_ends allows to avoid wrong corrections like:
+  skip_hmer_ends allows one to avoid wrong corrections like:
      read1    : GAAAaAAAT <- has a mismatch
      consensus: GAAACAAAT
      false corrections: read1 -> GAAAT...

@@ -544,7 +544,7 @@ void gt_encseq_check_specialranges(const GtEncseq *encseq);
 
 /* Checks whether the information given by gt_encseq_seqstartpos() agrees
    with the actual positions of separators in the encoded sequence.
-   A logger allows to report the state of the computation. */
+   A logger allows one to report the state of the computation. */
 void gt_encseq_check_startpositions(const GtEncseq *encseq,GtLogger *logger);
 
 /* Checks whether the minima/maxima given by gt_encseq_(min,max)_seq_length()

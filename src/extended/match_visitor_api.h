@@ -18,7 +18,7 @@
 #ifndef MATCH_VISITOR_API_H
 #define MATCH_VISITOR_API_H
 
-/* The <GtMatchVisitor> class allows to distinguish a <GtMatch> implementation,
+/* The <GtMatchVisitor> class allows one to distinguish a <GtMatch> implementation,
    e.g. BLAST or OpenMatch, and to call different code for each
    implementation. */
 typedef struct GtMatchVisitor GtMatchVisitor;
