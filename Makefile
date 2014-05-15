@@ -191,7 +191,7 @@ SAMTOOLS_DEP:=$(SAMTOOLS_SRC:%.c=obj/%.d)
 # add necessary shared lib dependencies then not building them ourselves
 ifeq ($(useshared),yes)
   DEPLIBS:=-lbz2 -lz -lexpat -llua5.1-lpeg -llua5.1 -llua5.1-md5 \
-           -llua5.1-filesystem -llua5.1-des56 -lbam -ltre
+           -llua5.1-filesystem -llua5.1-des56 -lbam -ltre -lm -lpthread
 else
   DEPLIBS:=
 endif
@@ -391,19 +391,19 @@ ifneq ($(with-sqlite),no)
     LIBGENOMETOOLS_DIRS := $(SQLITE3_DIR) $(LIBGENOMETOOLS_DIRS)
     GT_CPPFLAGS +=  -I$(CURDIR)/$(SQLITE3_DIR)
     OVERRIDELIBS += lib/libsqlite.a
-  endif
-  EXP_CPPFLAGS += -DHAVE_SQLITE
-  ifeq ($(threads),yes)
-    EXP_CPPFLAGS += -DSQLITE_THREADSAFE=1
-  else
-    EXP_CPPFLAGS += -DSQLITE_THREADSAFE=0
-  endif
-  ifneq ($(SYSTEM),Windows)
-    EXP_LDLIBS += -lpthread
-    ifneq ($(SYSTEM),FreeBSD)
-      EXP_LDLIBS += -ldl
+    ifeq ($(threads),yes)
+      EXP_CPPFLAGS += -DSQLITE_THREADSAFE=1
+    else
+      EXP_CPPFLAGS += -DSQLITE_THREADSAFE=0
+    endif
+    ifneq ($(SYSTEM),Windows)
+      EXP_LDLIBS += -lpthread
+      ifneq ($(SYSTEM),FreeBSD)
+        EXP_LDLIBS += -ldl
+      endif
     endif
   endif
+  EXP_CPPFLAGS += -DHAVE_SQLITE
 else
   SQLITE_FILTER_OUT:=src/extended/rdb_sqlite.c
 endif
