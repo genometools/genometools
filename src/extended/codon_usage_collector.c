@@ -158,6 +158,7 @@ static int codon_usage_collector_feature_node(GtNodeVisitor *nv,
   int had_err = 0;
 
   fni = gt_feature_node_iterator_new(fn);
+  /* XXX: Currently only supports one CDS per transcript.  */
   while (!had_err && (node = gt_feature_node_iterator_next(fni))) {
     gt_str_reset(cuc->seq);
     if (gt_feature_node_get_type(node) != gt_symbol("CDS"))
