@@ -28,14 +28,15 @@
 #include "extended/intset_rep.h"
 
 /* The <GtIntset16> class implements the <GtIntset> interface.
-   TODO: add documentation */
+   This class only works if <GtUword> is larger than 16 bits! */
 typedef struct GtIntset16 GtIntset16;
 
 /* map static local methods to interface */
 const     GtIntsetClass* gt_intset_16_class(void);
 
 /* Return a new <GtIntset> object, the implementation beeing of type
-   <GtIntset16>. */
+   <GtIntset16>.
+   Fails if 16 >= bits for (GtUword). */
 GtIntset* gt_intset_16_new(GtUword maxelement, GtUword num_of_elems);
 
 /* Add <elem> to <intset>. <elem> has to be larger than the previous <elem>
@@ -57,7 +58,8 @@ bool      gt_intset_16_is_member(GtIntset *intset, GtUword elem);
 GtUword   gt_intset_16_get_idx_smallest_geq(GtIntset *intset, GtUword pos);
 
 /* Returns the size of an intset with given number of elements
-   <num_of_elems> and maximum value <maxelement>. */
+   <num_of_elems> and maximum value <maxelement>.
+   Fails if 16 >= bits for (GtUword). */
 size_t    gt_intset_16_size(GtUword maxelement, GtUword num_of_elems);
 
 void      gt_intset_16_delete(GtIntset *intset);

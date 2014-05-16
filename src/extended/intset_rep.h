@@ -23,8 +23,8 @@
 #include "extended/intset.h"
 #include "core/types_api.h"
 
-#define GT_BITS_FOR_SIZE(SIZE)     ((SIZE) * CHAR_BIT)
-#define GT_ELEM2SECTION(X, LOGVAL)  ((X) >> (LOGVAL))
+#define GT_BITS_FOR_TYPE(TYPE)     ((sizeof (TYPE)) * ((size_t) CHAR_BIT))
+#define GT_ELEM2SECTION(X, LOGVAL) ((X) >> (LOGVAL))
 #define GT_SECTIONMINELEM(S)       ((S) << members->logsectionsize)
 
 typedef struct GtIntsetClass GtIntsetClass;

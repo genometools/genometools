@@ -247,7 +247,8 @@ GtUword gt_intset_16_get_idx_smallest_geq(GtIntset *intset, GtUword pos)
 
 size_t gt_intset_16_size(GtUword maxelement, GtUword num_of_elems)
 {
-  size_t logsectionsize = (sizeof (uint16_t)) + CHAR_BIT;
+  size_t logsectionsize = GT_BITS_FOR_TYPE(uint16_t);
+  gt_assert(GT_BITS_FOR_TYPE(GtUword) > logsectionsize);
   return sizeof (uint16_t) * num_of_elems +
     sizeof (GtUword) * (GT_ELEM2SECTION(maxelement, logsectionsize) + 1);
 }
@@ -282,13 +283,14 @@ GtIntset* gt_intset_16_new(GtUword maxelement, GtUword num_of_elems)
   GtIntsetMembers *members;
   GtUword idx;
 
+  gt_assert(GT_BITS_FOR_TYPE(GtUword) > ((size_t) 16));
   intset = gt_intset_create(gt_intset_16_class());
   intset_16 = gt_intset_16_cast(intset);
   members = intset->members;
 
   intset_16->elements =
     gt_malloc(sizeof (*intset_16->elements) * num_of_elems);
-  members->logsectionsize = sizeof (uint16_t) * CHAR_BIT;
+  members->logsectionsize = GT_BITS_FOR_TYPE(uint16_t);
   members->nextfree = 0;
   members->numofsections = GT_ELEM2SECTION_M(maxelement) + 1;
   members->sectionstart = gt_malloc(sizeof (*members->sectionstart) *

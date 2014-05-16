@@ -298,7 +298,8 @@ members->sectionstart[sectionnum+1] - 1,
 
 size_t gt_intset_<%=bits%>_size(GtUword maxelement, GtUword num_of_elems)
 {
-  size_t logsectionsize = (sizeof (uint<%=bits%>_t)) + CHAR_BIT;
+  size_t logsectionsize = GT_BITS_FOR_TYPE(uint<%=bits%>_t);
+  gt_assert(GT_BITS_FOR_TYPE(GtUword) > logsectionsize);
   return sizeof (uint<%=bits%>_t) * num_of_elems +
     sizeof (GtUword) * (GT_ELEM2SECTION(maxelement, logsectionsize) + 1);
 }
@@ -333,13 +334,14 @@ GtIntset* gt_intset_<%=bits%>_new(GtUword maxelement, GtUword num_of_elems)
   GtIntsetMembers *members;
   GtUword idx;
 
+  gt_assert(GT_BITS_FOR_TYPE(GtUword) > ((size_t) <%=bits%>));
   intset = gt_intset_create(gt_intset_<%=bits%>_class());
   intset_<%=bits%> = gt_intset_<%=bits%>_cast(intset);
   members = intset->members;
 
   intset_<%=bits%>->elements =
     gt_malloc(sizeof (*intset_<%=bits%>->elements) * num_of_elems);
-  members->logsectionsize = sizeof (uint<%=bits%>_t) * CHAR_BIT;
+  members->logsectionsize = GT_BITS_FOR_TYPE(uint<%=bits%>_t);
   members->nextfree = 0;
   members->numofsections = GT_ELEM2SECTION_M(maxelement) + 1;
   members->sectionstart = gt_malloc(sizeof (*members->sectionstart) *
@@ -433,14 +435,15 @@ HEADER = <<-HEADER
 #include "extended/intset_rep.h"
 
 /* The <GtIntset<%=bits%>> class implements the <GtIntset> interface.
-   TODO: add documentation */
+   This class only works if <GtUword> is larger than <%=bits%> bits! */
 typedef struct GtIntset<%=bits%> GtIntset<%=bits%>;
 
 /* map static local methods to interface */
 const     GtIntsetClass* gt_intset_<%=bits%>_class(void);
 
 /* Return a new <GtIntset> object, the implementation beeing of type
-   <GtIntset<%=bits%>>. */
+   <GtIntset<%=bits%>>.
+   Fails if <%=bits%> >= bits for (GtUword). */
 GtIntset* gt_intset_<%=bits%>_new(GtUword maxelement, GtUword num_of_elems);
 
 /* Add <elem> to <intset>. <elem> has to be larger than the previous <elem>
@@ -463,7 +466,8 @@ GtUword   gt_intset_<%=bits%>_get_idx_smallest_geq(GtIntset *intset, \
 GtUword pos);
 
 /* Returns the size of an intset with given number of elements
-   <num_of_elems> and maximum value <maxelement>. */
+   <num_of_elems> and maximum value <maxelement>.
+   Fails if <%=bits%> >= bits for (GtUword). */
 size_t    gt_intset_<%=bits%>_size(GtUword maxelement, GtUword num_of_elems);
 
 void      gt_intset_<%=bits%>_delete(GtIntset *intset);
