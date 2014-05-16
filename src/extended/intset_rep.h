@@ -23,8 +23,8 @@
 #include "extended/intset.h"
 #include "core/types_api.h"
 
-#define GT_BITS_FOR_SIZE(SIZE)     ((SIZE) * CHAR_BIT)
-#define GT_ELEM2SECTION(X, LOGVAL)  ((X) >> (LOGVAL))
+#define GT_BITS_FOR_TYPE(TYPE)     ((sizeof (TYPE)) * ((size_t) CHAR_BIT))
+#define GT_ELEM2SECTION(X, LOGVAL) ((X) >> (LOGVAL))
 #define GT_SECTIONMINELEM(S)       ((S) << members->logsectionsize)
 
 typedef struct GtIntsetClass GtIntsetClass;
@@ -51,15 +51,15 @@ struct GtIntsetClass {
 };
 
 struct GtIntsetMembers {
-  GtUword      *sectionstart;
-  size_t        logsectionsize;
-  GtUword       currentsectionnum,
-                maxelement,
-                nextfree,
-                num_of_elems,
-                numofsections,
-                previouselem,
-                refcount;
+  GtUword *sectionstart;
+  size_t   logsectionsize;
+  GtUword  currentsectionnum,
+           maxelement,
+           nextfree,
+           num_of_elems,
+           numofsections,
+           previouselem,
+           refcount;
 };
 
 const GtIntsetClass* gt_intset_class_new(size_t size,

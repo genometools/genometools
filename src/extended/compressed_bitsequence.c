@@ -81,19 +81,19 @@ typedef struct
 
 typedef struct
 {
-  GtUword *c_offsets_size,
-                *classes_size,
-                *num_of_bits,
-                *num_of_blocks,
-                *num_of_superblocks,
-                *superblockoffsets_size,
-                *superblockranks_size;
-  unsigned int  *blocksize,
-                *class_bits,
-                *last_block_len,
-                *superblockoffsets_bits,
-                *superblockranks_bits,
-                *superblocksize;
+  GtUword      *c_offsets_size,
+               *classes_size,
+               *num_of_bits,
+               *num_of_blocks,
+               *num_of_superblocks,
+               *superblockoffsets_size,
+               *superblockranks_size;
+  unsigned int *blocksize,
+               *class_bits,
+               *last_block_len,
+               *superblockoffsets_bits,
+               *superblockranks_bits,
+               *superblocksize;
 }GtCompressedBitsequenceHeaderPtr;
 
 struct GtCompressedBitsequence
@@ -106,7 +106,7 @@ struct GtCompressedBitsequence
                                    *superblockranks;
   GtCompressedBitsequenceBlockInfo *cbs_bi;
   void                             *mmapped;
-  GtUword                     c_offsets_size,
+  GtUword                           c_offsets_size,
                                     classes_size,
                                     num_of_bits,
                                     num_of_blocks,
@@ -437,9 +437,9 @@ gt_compressed_bitsequence_new(GtBitsequence *bitseq,
   cbs->from_file = false;
   gt_log_log("new cbs:\n"
              "blzise: %u\n"
-             "offsize: "GT_WU"\n"
+             "offsize: " GT_WU "\n"
              "cbits: %u\n"
-             "csize: "GT_WU"\n"
+             "csize: " GT_WU "\n"
              "lastblen: %u\n",
              cbs->blocksize,
              cbs->c_offsets_size,
@@ -954,15 +954,15 @@ int gt_compressed_bitsequence_write(GtCompressedBitsequence *cbs,
   }
   if (!had_err) {
     gt_log_log("blocksize: %u\n"
-           "class_offsets_size: "GT_WU"\n"
+           "class_offsets_size: " GT_WU "\n"
            "class_bits: %u\n"
-           "classes_size: "GT_WU"\n"
+           "classes_size: " GT_WU "\n"
            "last_block_len: %u\n"
-           "num_of_bits: "GT_WU"\n"
-           "num_of_blocks: "GT_WU"\n"
-           "num_of_superblocks: "GT_WU"\n"
+           "num_of_bits: " GT_WU "\n"
+           "num_of_blocks: " GT_WU "\n"
+           "num_of_superblocks: " GT_WU "\n"
            "superblocksize: %u\n"
-           "size: "GT_WU"\n",
+           "size: " GT_WU "\n",
            cbs->blocksize,
            cbs->c_offsets_size,
            cbs->class_bits,
@@ -989,11 +989,10 @@ gt_compressed_bitsequence_new_from_file(const char *filename,
   gt_assert(filename != NULL);
   if (gt_file_exists(filename)) {
     expectedsize = (GtUword) gt_compressed_bitsequence_header_size(cbs);
-    had_err =
-      gt_mapspec_read_header(
-                     gt_compressed_bitsequence_header_setup_mapspec,
-                     cbs, filename, expectedsize,
-                     &(cbs->mmapped), err);
+    had_err = gt_mapspec_read_header(
+                                 gt_compressed_bitsequence_header_setup_mapspec,
+                                 cbs, filename, expectedsize,
+                                 &(cbs->mmapped), err);
     cbs->c_offsets_size = cbs->header.c_offsets_size[0];
     cbs->classes_size = cbs->header.classes_size[0];
     cbs->num_of_bits = cbs->header.num_of_bits[0];
@@ -1012,57 +1011,33 @@ gt_compressed_bitsequence_new_from_file(const char *filename,
     gt_fa_xmunmap(cbs->mmapped);
     cbs->mmapped = NULL;
     if (!had_err) {
-      gt_log_log("blocksize: %u\n"
-             "class_offsets_size: "GT_WU"\n"
-             "class_bits: %u\n"
-             "classes_size: "GT_WU"\n"
-             "last_block_len: %u\n"
-             "num_of_bits: "GT_WU"\n"
-             "num_of_blocks: "GT_WU"\n"
-             "num_of_superblocks: "GT_WU"\n"
-             "superblocksize: %u\n"
-             "size: "GT_WU"\n",
-             cbs->blocksize,
-             cbs->c_offsets_size,
-             cbs->class_bits,
-             cbs->classes_size,
-             cbs->last_block_len,
-             cbs->num_of_bits,
-             cbs->num_of_blocks,
-             cbs->num_of_superblocks,
-             cbs->superblocksize,
-             expectedsize);
-    }
-    if (!had_err) {
       expectedsize = (GtUword) gt_compressed_bitsequence_file_size(cbs);
-      gt_log_log("new expected: "GT_WU"\n", expectedsize);
-      had_err =
-        gt_mapspec_read(
-                       gt_compressed_bitsequence_data_setup_mapspec,
-                       cbs, filename, expectedsize,
-                       &(cbs->mmapped), err);
+      gt_log_log("new expected: " GT_WU "\n", expectedsize);
+      had_err = gt_mapspec_read(gt_compressed_bitsequence_data_setup_mapspec,
+                                cbs, filename, expectedsize,
+                                &(cbs->mmapped), err);
     }
     if (!had_err) {
       gt_log_log("blocksize: %u\n"
-             "class_offsets_size: "GT_WU"\n"
-             "class_bits: %u\n"
-             "classes_size: "GT_WU"\n"
-             "last_block_len: %u\n"
-             "num_of_bits: "GT_WU"\n"
-             "num_of_blocks: "GT_WU"\n"
-             "num_of_superblocks: "GT_WU"\n"
-             "superblocksize: %u\n"
-             "size: "GT_WU"\n",
-             cbs->blocksize,
-             cbs->c_offsets_size,
-             cbs->class_bits,
-             cbs->classes_size,
-             cbs->last_block_len,
-             cbs->num_of_bits,
-             cbs->num_of_blocks,
-             cbs->num_of_superblocks,
-             cbs->superblocksize,
-             expectedsize);
+                 "class_offsets_size: " GT_WU "\n"
+                 "class_bits: %u\n"
+                 "classes_size: " GT_WU "\n"
+                 "last_block_len: %u\n"
+                 "num_of_bits: " GT_WU "\n"
+                 "num_of_blocks: " GT_WU "\n"
+                 "num_of_superblocks: " GT_WU "\n"
+                 "superblocksize: %u\n"
+                 "size: " GT_WU "\n",
+                 cbs->blocksize,
+                 cbs->c_offsets_size,
+                 cbs->class_bits,
+                 cbs->classes_size,
+                 cbs->last_block_len,
+                 cbs->num_of_bits,
+                 cbs->num_of_blocks,
+                 cbs->num_of_superblocks,
+                 cbs->superblocksize,
+                 expectedsize);
     }
   }
   else {

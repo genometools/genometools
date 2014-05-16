@@ -517,6 +517,7 @@ void gt_editscript_show(GtEditscript *editscript, GtAlphabet *alphabet)
 
   gt_editscript_pos_reset(&pos);
 
+  printf("|");
   if (editscript->num_elems != 0) {
     elem = gt_editscript_space_get_next(editscript, &pos);
     elems_served++;
@@ -526,7 +527,12 @@ void gt_editscript_show(GtEditscript *editscript, GtAlphabet *alphabet)
         (unsigned int) gt_editscript_space_get_length(editscript, &pos,
                                                       &elems_served);
       if (elem == GT_EDITSCRIPT_INS_SYM(editscript)) {
-        printf("M(%u)|Ins:|", matchcount);
+        if (matchcount != 0) {
+          printf("M(%u)|Ins:|", matchcount);
+        }
+        else {
+          printf("Ins:|");
+        }
         while (elems_served < editscript->num_elems) {
           elem = gt_editscript_space_get_next(editscript, &pos);
           elems_served++;
@@ -543,7 +549,12 @@ void gt_editscript_show(GtEditscript *editscript, GtAlphabet *alphabet)
       }
       else {
         gt_assert(elem == GT_EDITSCRIPT_MISDEL_SYM(editscript));
-        printf("M(%u)|Misdel:|", matchcount);
+        if (matchcount != 0) {
+          printf("M(%u)|Misdel:|", matchcount);
+        }
+        else {
+          printf("Misdel:|");
+        }
         while (elems_served < editscript->num_elems) {
           elem = gt_editscript_space_get_next(editscript, &pos);
           elems_served++;
@@ -563,7 +574,11 @@ void gt_editscript_show(GtEditscript *editscript, GtAlphabet *alphabet)
       }
     }
   }
-  printf("M(%hu)|\n", editscript->trailing_matches);
+  if (editscript->trailing_matches != 0) {
+    printf("M(%hu)|\n", editscript->trailing_matches);
+  }
+  else
+    printf("\n");
 }
 
 GtEditscriptBuilder *gt_editscript_builder_new(GtEditscript *editscript)

@@ -27,42 +27,24 @@ end
 
 def parseargs(argv)
   options = OpenStruct.new
-  options.m64 = false
-  options.speed = false
-  options.prof = false
-  options.gprof = false
-  options.ddd = false
-  options.threads = false
-  options.clang = true
+  options.amalgamate = false
   options.ccache = true
   options.check = true
+  options.clang = true
+  options.ddd = false
+  options.gprof = false
+  options.m64 = false
+  options.prof = false
+  options.speed = false
+  options.makethreads = false
+  options.threds = false
   opts = OptionParser.new
+  opts.on("-a", "--amalgamation",
+          "Combine code into one file for optimisation") do |x|
+    options.amalgamate = true
+  end
   opts.on("-c", "--[no-]clang", "use [no] clang, defaults to using it") do |x|
     options.clang = x
-  end
-  opts.on("--[no-]ccache", "use [no] ccache, defaults to using it") do |x|
-    options.ccache = x
-  end
-  opts.on("-m","--m64","compile 64 bit binary") do |x|
-    options.m64 = true
-  end
-  opts.on("-s","--speed","optimize for speed") do |x|
-    if options.ddd
-      usage(opts,"-d and -s exclusive")
-    end
-    options.speed = true
-  end
-  opts.on("-p","--prof","compile for profiling") do |x|
-    options.prof = true
-    if options.gprof
-      usage(opts,"-p and -g are exclusive")
-    end
-  end
-  opts.on("-g","--gprof","compile for google-proftool") do |x|
-    options.gprof = true
-    if options.prof
-      usage(opts,"-p and -g are exclusive")
-    end
   end
   opts.on("-d","--ddd","compile for debugging (no opt)") do |x|
     if options.speed
@@ -70,12 +52,39 @@ def parseargs(argv)
     end
     options.ddd = true
   end
-  opts.on("-j [n]", Integer, "number of processes for make") do |x|
-    options.threads = true
-    options.j = x || ""
-  end
   opts.on("-f", "--force", "do not check if make is the same as last") do |x|
     options.check = false
+  end
+  opts.on("-g","--gprof","compile for google-proftool") do |x|
+    options.gprof = true
+    if options.prof
+      usage(opts,"-p and -g are exclusive")
+    end
+  end
+  opts.on("-j [n]", Integer, "number of processes for make") do |x|
+    options.makethreads = true
+    options.j = x || ""
+  end
+  opts.on("-m","--m64","compile 64 bit binary") do |x|
+    options.m64 = true
+  end
+  opts.on("-p","--prof","compile for profiling") do |x|
+    options.prof = true
+    if options.gprof
+      usage(opts,"-p and -g are exclusive")
+    end
+  end
+  opts.on("-s","--speed","optimize for speed, implies -a") do |x|
+    if options.ddd
+      usage(opts,"-d and -s exclusive")
+    end
+    options.speed = true
+  end
+  opts.on("-t", "--threads", "compile with threading enabled") do |x|
+    options.check = false
+  end
+  opts.on("--[no-]ccache", "use [no] ccache, defaults to using it") do |x|
+    options.ccache = x
   end
   rest = opts.parse(argv)
   if not rest.empty?
@@ -94,6 +103,8 @@ def makecompilerflags(fp,options)
   end
   if options.speed
     fp.print " assert=no amalgamation=yes"
+  elsif options.amalgamate
+    fp.print " amalgamation=yes"
   end
   if options.m64
     fp.print " 64bit=yes"
@@ -119,6 +130,9 @@ def makecompilerflags(fp,options)
     fp.print " LIBS='-Wl,--no-as-needed -lprofiler -Wl,--as-needed'"
   end
   if options.threads
+    fp.print " threads=yes"
+  end
+  if options.makethreads
     fp.print " -j#{options.j}"
   end
   fp.puts

@@ -22,12 +22,13 @@
 
 #include "core/assert_api.h"
 #include "core/compat.h"
+#include "core/divmodmul.h"
 #include "core/log_api.h"
 #include "core/ma_api.h"
 #include "core/safearith.h"
 #include "core/undef_api.h"
-#include "core/xansi_api.h"
 #include "core/unused_api.h"
+#include "core/xansi_api.h"
 #include "extended/sampling.h"
 
 typedef enum {
@@ -222,36 +223,31 @@ static void get_pagewise_page(GtSampling *sampling,
                               GtUword *sampled_element,
                               size_t *position)
 {
-  GtUword start = 0,
-                end, middle;
+  GtWord start = (GtWord) -1,
+         end, middle;
 
   gt_assert(sampling->numofsamples != 0);
-  end = sampling->numofsamples - 1;
-  middle = end >> 1;
-  while (start < end) {
-    if (sampling->page_sampling[middle] == element_num)
-      break;
-    else {
-      if (sampling->page_sampling[middle] > element_num) {
-        end = middle - 1;
-        middle = start + ((end - start) >> 1);
-      }
-      else {
-        if (sampling->page_sampling[middle + 1] > element_num)
-          break;
-        else {
-          start = middle + 1;
-          middle = start + ((end - start) >> 1);
-        }
-      }
+  /* should not overflow, because this is a small table indexing into a larger
+     one. */
+  gt_safe_assign(end, sampling->numofsamples);
+  middle = GT_DIV2(end);
+  while (end - start > (GtWord) 1) {
+    if (element_num < sampling->page_sampling[middle]) {
+      start = middle;
     }
+    else {
+      end = middle;
+    }
+    middle = start + GT_DIV2(end - start);
   }
-
+  if (middle < 0) {
+    middle = 0;
+  }
   *sampled_element =
     sampling->current_sample_elementnum =
     sampling->page_sampling[middle];
 
-  sampling->current_sample_num = middle;
+  sampling->current_sample_num = (GtUword) middle;
 
   *position = sampling->samplingtab[middle];
 }

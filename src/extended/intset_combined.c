@@ -15,6 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#include "core/assert_api.h"
 #include "core/error_api.h"
 #include "extended/intset.h"
 #include "extended/intset_16.h"
@@ -24,15 +25,20 @@
 GtIntset *gt_intset_best_new(GtUword maxelement, GtUword num_of_elems)
 {
   size_t s8, s16, s32;
+  gt_assert(GT_BITS_FOR_TYPE(GtUword) > GT_BITS_FOR_TYPE(uint8_t));
   s8 = gt_intset_8_size(maxelement, num_of_elems);
-  s16 = gt_intset_16_size(maxelement, num_of_elems);
-  s32 = gt_intset_32_size(maxelement, num_of_elems);
-  if (s8 < s16) {
-    if (s8 < s32)
+  s16 = GT_BITS_FOR_TYPE(GtUword) > GT_BITS_FOR_TYPE(uint16_t) ?
+    gt_intset_16_size(maxelement, num_of_elems) :
+    s8;
+  s32 = GT_BITS_FOR_TYPE(GtUword) > GT_BITS_FOR_TYPE(uint32_t) ?
+    gt_intset_32_size(maxelement, num_of_elems) :
+    s8;
+  if (s8 <= s16) {
+    if (s8 <= s32)
       return gt_intset_8_new(maxelement, num_of_elems);
   }
   else {
-    if (s16 < s32)
+    if (s16 <= s32)
       return gt_intset_16_new(maxelement, num_of_elems);
   }
   return gt_intset_32_new(maxelement, num_of_elems);
@@ -42,10 +48,11 @@ int gt_intset_unit_test(GtError *err)
 {
   int had_err = 0;
   gt_error_check(err);
-  had_err = gt_intset_8_unit_test(err);
-  if (!had_err)
+  if (GT_BITS_FOR_TYPE(GtUword) > GT_BITS_FOR_TYPE(uint8_t))
+    had_err = gt_intset_8_unit_test(err);
+  if (!had_err && GT_BITS_FOR_TYPE(GtUword) > GT_BITS_FOR_TYPE(uint16_t))
     had_err = gt_intset_16_unit_test(err);
-  if (!had_err)
+  if (!had_err && GT_BITS_FOR_TYPE(GtUword) > GT_BITS_FOR_TYPE(uint32_t))
     had_err = gt_intset_32_unit_test(err);
   return had_err;
 }

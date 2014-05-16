@@ -158,8 +158,8 @@ static int assigncorrecttype(GtMapspecification *mapspec,
       ASSIGNPTR2STARTPTR(unsigned int);
       break;
     default:
-      gt_error_set(err,"no assignment specification for size "GT_WU"",
-                    (GtUword) mapspec->sizeofunit);
+      gt_error_set(err, "no assignment specification for size " GT_WU,
+                   (GtUword) mapspec->sizeofunit);
       had_err = -1;
   }
   return had_err;
@@ -288,11 +288,11 @@ int  gt_mapspec_read(GtMapspecSetupFunc setup, void *data,
                                detexpectedaccordingtomapspec(&ms->mapspectable);
     if (expectedaccordingtomapspec != (uint64_t) numofbytes)
     {
-      gt_error_set(err,""GT_WU" bytes read from %s, but " Formatuint64_t
-                         " expected",
-                         (GtUword) numofbytes,
-                         filename,
-                         PRINTuint64_tcast(expectedaccordingtomapspec));
+      gt_error_set(err, GT_WU " bytes read from %s, but " Formatuint64_t
+                   " expected",
+                   (GtUword) numofbytes,
+                   filename,
+                   PRINTuint64_tcast(expectedaccordingtomapspec));
       had_err = -1;
     }
   }
@@ -435,8 +435,8 @@ int gt_mapspec_write(GtMapspecSetupFunc setup, FILE *fp,
           WRITEACTIONWITHTYPE(unsigned int);
           break;
         default:
-           gt_error_set(err,"no map specification for size "GT_WU"",
-                         (GtUword) mapspecptr->sizeofunit);
+           gt_error_set(err, "no map specification for size " GT_WU,
+                        (GtUword) mapspecptr->sizeofunit);
            had_err = -1;
       }
     }
@@ -459,10 +459,9 @@ int gt_mapspec_write(GtMapspecSetupFunc setup, FILE *fp,
   {
     if (expectedsize + totalpadunits != byteoffset)
     {
-      gt_error_set(err,"expected file size is "GT_WU" bytes, "
-                       "but file has "GT_WU" bytes",
-                       expectedsize,
-                       byteoffset);
+      gt_error_set(err, "expected file size is " GT_WU " bytes, "
+                   "but file has " GT_WU " bytes",
+                   expectedsize, byteoffset);
       had_err = -1;
     }
   }
