@@ -280,6 +280,10 @@ GtUword gt_intset_<%=bits%>_get_idx_smallest_geq(GtIntset *intset, GtUword pos)
   GtUword sectionnum = GT_ELEM2SECTION_M(pos);
 
   gt_assert(pos <= members->maxelement);
+
+  if (pos > members->previouselem)
+    return members->num_of_elems;
+
   if (members->sectionstart[sectionnum] < members->sectionstart[sectionnum+1]) {
     return members->sectionstart[sectionnum] +
            gt_intset_<%=bits%>_binarysearch_idx_sm_geq(
@@ -294,7 +298,8 @@ members->sectionstart[sectionnum+1] - 1,
 
 size_t gt_intset_<%=bits%>_size(GtUword maxelement, GtUword num_of_elems)
 {
-  size_t logsectionsize = (sizeof (uint<%=bits%>_t)) + CHAR_BIT;
+  size_t logsectionsize = GT_BITS_FOR_TYPE(uint<%=bits%>_t);
+  gt_assert(GT_BITS_FOR_TYPE(GtUword) > logsectionsize);
   return sizeof (uint<%=bits%>_t) * num_of_elems +
     sizeof (GtUword) * (GT_ELEM2SECTION(maxelement, logsectionsize) + 1);
 }
@@ -329,13 +334,14 @@ GtIntset* gt_intset_<%=bits%>_new(GtUword maxelement, GtUword num_of_elems)
   GtIntsetMembers *members;
   GtUword idx;
 
+  gt_assert(GT_BITS_FOR_TYPE(GtUword) > ((size_t) <%=bits%>));
   intset = gt_intset_create(gt_intset_<%=bits%>_class());
   intset_<%=bits%> = gt_intset_<%=bits%>_cast(intset);
   members = intset->members;
 
   intset_<%=bits%>->elements =
     gt_malloc(sizeof (*intset_<%=bits%>->elements) * num_of_elems);
-  members->logsectionsize = sizeof (uint<%=bits%>_t) * CHAR_BIT;
+  members->logsectionsize = GT_BITS_FOR_TYPE(uint<%=bits%>_t);
   members->nextfree = 0;
   members->numofsections = GT_ELEM2SECTION_M(maxelement) + 1;
   members->sectionstart = gt_malloc(sizeof (*members->sectionstart) *
@@ -374,6 +380,11 @@ int gt_intset_<%=bits%>_unit_test(GtError *err) {
       is = gt_intset_<%=bits%>_new(arr[num_of_elems - 1], num_of_elems);
       for (idx = 0; idx < num_of_elems; idx++) {
         gt_intset_<%=bits%>_add(is, arr[idx]);
+        if (idx < num_of_elems - 1)
+          gt_ensure(gt_intset_<%=bits%>_get_idx_smallest_geq(is,
+                                                     \
+<% if bits != 8 %> <% end %>arr[idx] + 1) ==
+                    num_of_elems);
       }
       for (idx = 0; !had_err && idx < num_of_elems; idx++) {
         if (arr[idx] != 0 && arr[idx - 1] != (arr[idx] - 1)) {
@@ -424,14 +435,15 @@ HEADER = <<-HEADER
 #include "extended/intset_rep.h"
 
 /* The <GtIntset<%=bits%>> class implements the <GtIntset> interface.
-   TODO: add documentation */
+   This class only works if <GtUword> is larger than <%=bits%> bits! */
 typedef struct GtIntset<%=bits%> GtIntset<%=bits%>;
 
 /* map static local methods to interface */
 const     GtIntsetClass* gt_intset_<%=bits%>_class(void);
 
 /* Return a new <GtIntset> object, the implementation beeing of type
-   <GtIntset<%=bits%>>. */
+   <GtIntset<%=bits%>>.
+   Fails if <%=bits%> >= bits for (GtUword). */
 GtIntset* gt_intset_<%=bits%>_new(GtUword maxelement, GtUword num_of_elems);
 
 /* Add <elem> to <intset>. <elem> has to be larger than the previous <elem>
@@ -445,15 +457,17 @@ GtUword   gt_intset_<%=bits%>_get(GtIntset *intset, GtUword idx);
 bool      gt_intset_<%=bits%>_is_member(GtIntset *intset, GtUword elem);
 
 /* Returns the number of the element in <intset> that is the smallest element
-   larger than <pos>.
-   This is used for sets representing the separator positions in a set of
+   larger than or equal <pos> or <num_of_elems> if there is no such <element>.
+   This can be used for sets representing the separator positions in a set of
    sequences, to determine the sequence number corresponding to any position in
-   the concatenated string of the sequence set. */
+   the concatenated string of the sequence set.
+   Fails for <pos> > <maxelement>! */
 GtUword   gt_intset_<%=bits%>_get_idx_smallest_geq(GtIntset *intset, \
 GtUword pos);
 
 /* Returns the size of an intset with given number of elements
-   <num_of_elems> and maximum value <maxelement>. */
+   <num_of_elems> and maximum value <maxelement>.
+   Fails if <%=bits%> >= bits for (GtUword). */
 size_t    gt_intset_<%=bits%>_size(GtUword maxelement, GtUword num_of_elems);
 
 void      gt_intset_<%=bits%>_delete(GtIntset *intset);
