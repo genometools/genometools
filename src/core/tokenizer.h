@@ -33,7 +33,7 @@ GtStr*        gt_tokenizer_get_token(GtTokenizer*);
 bool          gt_tokenizer_has_token(GtTokenizer*);
 bool          gt_tokenizer_line_start(const GtTokenizer*);
 void          gt_tokenizer_next_token(GtTokenizer*); /* go to the next token */
-GtUword gt_tokenizer_get_line_number(const GtTokenizer*);
+GtUword       gt_tokenizer_get_line_number(const GtTokenizer*);
 const char*   gt_tokenizer_get_filename(const GtTokenizer*);
 int           gt_tokenizer_unit_test(GtError*);
 void          gt_tokenizer_delete(GtTokenizer*);
