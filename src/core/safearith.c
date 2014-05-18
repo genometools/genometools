@@ -182,8 +182,10 @@ int gt_safearith_unit_test(GtError *err)
   gt_error_check(err);
 
   {
+    /* This is not always true, e.g. on PPC and ARM!
+       cf. http://www.network-theory.co.uk/docs/gccintro/gccintro_71.html
     gt_ensure(__MIN(char) == -128);
-    gt_ensure(__MAX(char) == 127);
+    gt_ensure(__MAX(char) == 127); */
     gt_ensure(__MIN(unsigned char) == 0);
     gt_ensure(__MAX(unsigned char) == 255);
 
