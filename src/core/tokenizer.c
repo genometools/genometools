@@ -45,7 +45,9 @@ void gt_tokenizer_skip_comment_lines(GtTokenizer *t)
 
 GtStr* gt_tokenizer_get_token(GtTokenizer *t)
 {
-  char c = EOF;
+  char c;
+  bool has_eof = true;
+  int rval = 0;
   gt_assert(t);
 
   /* if we have no current token, get it if possible */
@@ -53,32 +55,44 @@ GtStr* gt_tokenizer_get_token(GtTokenizer *t)
     if (t->skip_comment_lines && gt_io_line_start(t->io)) {
       for (;;) {
         gt_assert(gt_io_line_start(t->io));
-        if ((gt_io_get_char(t->io, &c) != -1)) {
-          if (c == '#') {
+        if ((gt_io_get_char(t->io, (char*) &c) != -1)) {
+          if ((char) c == '#') {
             /* skip line */
             while ((gt_io_get_char(t->io, &c) != -1) && c != '\n');
-            c = EOF;
+            has_eof = true;
           }
           else {
             gt_io_unget_char(t->io, c);
+            has_eof = false;
             break;
           }
         }
-        else
+        else {
+          c = EOF;
           break;
+        }
       }
-    }
-    while ((gt_io_get_char(t->io, &c) != -1) && c == ' '); /* skip blanks */
+    } /* skip blanks */
+    while (((rval = gt_io_get_char(t->io, &c)) != -1) && c == ' ');
+    if (rval == -1)
+      has_eof = true;
+    else
+      has_eof = false;
     do {
-      if (c != EOF) {
+      if (!has_eof) {
         if (!t->token)
           t->token = gt_str_new();
         if (c == '\n')
           break;
         gt_str_append_char(t->token, c);
       }
-    } while ((gt_io_get_char(t->io, &c) != -1) && c != ' ' && c != '\n');
-    if (c == '\n' && c != EOF) {
+    } while (((rval = gt_io_get_char(t->io, &c)) != -1)
+              && c != ' ' && c != '\n');
+    if (rval == -1)
+      has_eof = true;
+    else
+      has_eof = false;
+    if (c == '\n' && !has_eof) {
       gt_assert(t->token);
       gt_str_append_char(t->token, c);
     }

@@ -21,7 +21,7 @@
 #include "core/ma.h"
 #include "core/trans_table.h"
 
-#define GT_AMINOACIDFAIL            -1
+#define GT_AMINOACIDFAIL ((char) 0)
 
 /* The integer which a T is encoded to. */
 #define GT_T_CODE  0

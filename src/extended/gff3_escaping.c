@@ -64,7 +64,8 @@ static int gt_gff3_escape_hex2prnchar(const char* str, char *out)
   unsigned char d;
   gt_assert(str && out);
   if (!(GtIsHexChar[(int) *(str+1)] & 2)
-        || !(GtIsHexChar[(int) *(str+2)] & 1)) {
+        || !(GtIsHexChar[(int) *(str+2)] & 1)
+        || !strncmp(str, "%7F", 3 * (sizeof (char)))) {
     return -1;
   }
   d = (GtHexToDec[(int) *(str+1)] << 4) | (GtHexToDec[(int) *(str+2)]);
