@@ -58,6 +58,8 @@ static int gt_encseq_col_do_grep_desc(GtEncseqCol *esc, GtUword *filenum,
   int had_err = 0;
   gt_error_check(err);
 
+  gt_assert(esc->encseq && gt_encseq_has_description_support(esc->encseq));
+
   gt_assert(esc && filenum && seqnum && seqid);
   /* create cache */
   if (!esc->grep_cache)
@@ -71,13 +73,10 @@ static int gt_encseq_col_do_grep_desc(GtEncseqCol *esc, GtUword *filenum,
   }
   for (j = 0; !had_err && j < gt_encseq_num_of_sequences(esc->encseq); j++) {
     const char *desc;
-    char *buf;
     GtUword desc_len;
     desc = gt_encseq_description(esc->encseq, &desc_len, j);
-    buf = gt_calloc(desc_len + 1, sizeof (char));
-    memcpy(buf, desc, desc_len * sizeof (char));
-    had_err = gt_grep(&match, gt_str_get(seqid), buf, err);
-    gt_free(buf);
+    gt_assert(desc);
+    had_err = gt_grep_nt(&match, gt_str_get(seqid), desc, desc_len, err);
     if (!had_err && match) {
       *filenum = seq_info.filenum =
                        gt_encseq_filenum(esc->encseq,
