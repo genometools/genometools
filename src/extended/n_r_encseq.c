@@ -37,6 +37,7 @@
 #include "core/unused_api.h"
 #include "core/xansi_api.h"
 #include "extended/editscript.h"
+#include "extended/intset.h"
 #include "extended/n_r_encseq.h"
 #include "extended/io_function_pointers.h"
 #include "match/seqabstract.h"
@@ -70,34 +71,92 @@ struct GtNREncseq
   GtNREncseqLink   *links;
   GtNREncseqUnique *uniques;
   GtAlphabet       *alphabet;
+  GtIntset         *ssptab;
   GtUword           ldb_allocated,
                     ldb_nelems,
                     udb_allocated,
                     udb_nelems,
-                    orig_length;
+                    orig_length,
+                    orig_num_seq;
 };
 
-static GtNREncseq *gt_n_r_encseq_new_empty(const GtEncseq *orig_es)
+static inline
+GtUword gt_n_r_encseq_ssp_pos2seqnum(const GtNREncseq *nre, GtUword pos)
+{
+  GtUword ret = gt_intset_get_idx_smaller_geq(nre->ssptab, pos);
+  gt_assert(ret == gt_encseq_seqnum(nre->orig_es, pos));
+  return ret;
+}
+
+static inline GtUword gt_n_r_encseq_ssp_seqstartpos(const GtNREncseq *nre,
+                                                    GtUword seqnum)
+{
+  GtUword ret;
+  if (seqnum == 0)
+    ret = 0;
+  else
+    ret = gt_intset_get(nre->ssptab, seqnum - 1) + 1;
+  gt_assert(ret == gt_encseq_seqstartpos(nre->orig_es, seqnum));
+  return ret;
+}
+
+static inline GtUword gt_n_r_encseq_ssp_seqlength(const GtNREncseq *nre,
+                                                  GtUword seqnum)
+{
+  GtUword start = 0, end = nre->orig_length, ret;
+  if (seqnum != 0)
+    start = gt_intset_get(nre->ssptab, seqnum - 1) + 1;
+  if (seqnum < nre->orig_num_seq - 1)
+    end = gt_intset_get(nre->ssptab, seqnum);
+  ret = end - start;
+  gt_log_log(GT_WU, seqnum);
+  gt_log_log(GT_WU ", " GT_WU, ret,
+             gt_encseq_seqlength(nre->orig_es, seqnum));
+  gt_assert(ret == gt_encseq_seqlength(nre->orig_es, seqnum));
+  return ret;
+}
+
+static GtIntset *gt_n_r_encseq_fill_ssp_tab(GtNREncseq *nre,
+                                            const GtEncseq *orig_es)
+{
+  GtIntset *ssptab;
+  GtUword max, idx;
+  max = gt_encseq_seqstartpos(orig_es, nre->orig_num_seq - 1);
+  /* we store the internal separators, the end is explicit */
+  ssptab = gt_intset_best_new(max, nre->orig_num_seq - 1);
+  for (idx = (GtUword) 1; idx < nre->orig_num_seq; ++idx) {
+    GtUword pos = gt_encseq_seqstartpos(orig_es, idx) - 1;
+    gt_assert(pos != 0);
+    gt_intset_add(ssptab, pos);
+  }
+  return ssptab;
+}
+
+static GtNREncseq *gt_n_r_encseq_new_empty(const GtAlphabet *alph)
 {
   GtNREncseq *n_r_encseq;
   n_r_encseq = gt_malloc(sizeof (*n_r_encseq));
-  n_r_encseq->alphabet = gt_alphabet_ref(gt_encseq_alphabet(orig_es));
+  n_r_encseq->alphabet = gt_alphabet_ref((GtAlphabet *) alph);
   n_r_encseq->ldb_allocated = n_r_encseq->udb_allocated = 0;
   n_r_encseq->ldb_nelems = n_r_encseq->udb_nelems = 0;
   n_r_encseq->links = NULL;
-  n_r_encseq->orig_es = orig_es;
   n_r_encseq->unique_es = NULL;
   n_r_encseq->uniques = NULL;
+  n_r_encseq->ssptab = NULL;
   return n_r_encseq;
 }
 
 static GtNREncseq *gt_n_r_encseq_new(const GtEncseq *orig_es)
 {
   GtNREncseq *n_r_encseq;
-  n_r_encseq = gt_n_r_encseq_new_empty(orig_es);
+  n_r_encseq = gt_n_r_encseq_new_empty(gt_encseq_alphabet(orig_es));
   n_r_encseq->uniques = NULL;
   n_r_encseq->links = NULL;
   n_r_encseq->ldb_allocated = n_r_encseq->udb_allocated = 0;
+  n_r_encseq->orig_num_seq = gt_encseq_num_of_sequences(orig_es);
+  n_r_encseq->ssptab = gt_n_r_encseq_fill_ssp_tab(n_r_encseq, orig_es);
+  n_r_encseq->orig_length = gt_encseq_total_length(orig_es);
+  n_r_encseq->orig_es = orig_es;
   return n_r_encseq;
 }
 
@@ -129,9 +188,8 @@ void gt_n_r_encseq_print_info(const GtNREncseq *n_r_encseq)
   if (n_r_encseq->unique_es != NULL)
     printf("total udb length:" GT_WU "\n",
            gt_encseq_total_length(n_r_encseq->unique_es));
-  if (n_r_encseq->orig_es != NULL)
-    printf("original db length:" GT_WU "\n",
-           gt_encseq_total_length(n_r_encseq->orig_es));
+  printf("original db length:" GT_WU "\n",
+         n_r_encseq->orig_length);
 }
 
 GtUword gt_n_r_encseq_get_orig_length(GtNREncseq *n_r_encseq) {
@@ -142,7 +200,8 @@ GtUword gt_n_r_encseq_get_unique_length(GtNREncseq *n_r_encseq) {
   return gt_encseq_total_length(n_r_encseq->unique_es);
 }
 
-GtUword gt_n_r_encseq_resize(GtUword allocated) {
+GtUword gt_n_r_encseq_resize(GtUword allocated)
+{
   if (allocated != 0) {
     allocated += (allocated) > (GtUword) 128 ?
       (GtUword) 128 :
@@ -199,8 +258,7 @@ static void gt_n_r_encseq_add_link_to_db(GtNREncseq *nre,
                                          GtNREncseqLink link)
 {
   gt_n_r_encseq_check_ldb_size(nre);
-  gt_assert(nre->links != NULL); /* why does scan build need this here, but not
-                                    in udb? */
+  gt_assert(nre->links != NULL);
   gt_assert(nre->ldb_nelems == 0 ||
             nre->links[nre->ldb_nelems - 1].orig_startpos < link.orig_startpos);
   nre->links[nre->ldb_nelems].editscript    = link.editscript;
@@ -223,6 +281,7 @@ void gt_n_r_encseq_delete(GtNREncseq *n_r_encseq)
     }
     gt_alphabet_delete(n_r_encseq->alphabet);
     gt_encseq_delete(n_r_encseq->unique_es);
+    gt_intset_delete(n_r_encseq->ssptab);
     gt_free(n_r_encseq->links);
     gt_free(n_r_encseq->uniques);
     gt_free(n_r_encseq);
@@ -280,32 +339,40 @@ static int gt_n_r_encseq_io(GtNREncseq *nre,
   GtUword idx;
   had_err = gt_n_r_encseq_io_one(nre->orig_length);
   if (!had_err)
-    had_err = gt_n_r_encseq_io_one(nre->ldb_allocated);
+    had_err = gt_n_r_encseq_io_one(nre->orig_num_seq);
   if (!had_err)
     had_err = gt_n_r_encseq_io_one(nre->ldb_nelems);
-  if (!had_err)
-    had_err = gt_n_r_encseq_io_one(nre->udb_allocated);
   if (!had_err) {
-    gt_assert(nre->udb_allocated > 0);
+    gt_assert(nre->ldb_nelems > 0);
+    if (nre->links == NULL) {
+      nre->links = gt_calloc((size_t) nre->ldb_nelems, sizeof (*nre->links));
+      nre->ldb_allocated = nre->ldb_nelems;
+    }
+
     had_err = gt_n_r_encseq_io_one(nre->udb_nelems);
   }
 
   if (!had_err) {
     gt_assert(nre->udb_nelems > 0);
 
-    if (nre->links == NULL) {
-      nre->links = gt_calloc((size_t) nre->ldb_nelems, sizeof (*nre->links));
+    if (nre->uniques == NULL) {
+      nre->uniques = gt_malloc(sizeof (*nre->uniques) * nre->udb_nelems );
+      nre->udb_allocated = nre->udb_nelems;
     }
   }
+
   for (idx = 0; !had_err && idx < nre->ldb_nelems; idx++) {
     had_err = gt_n_r_encseq_linkentry_io(&nre->links[idx], fp, io_func, err);
   }
-  if (!had_err && nre->uniques == NULL) {
-    nre->uniques = gt_malloc(sizeof (*nre->uniques) * nre->udb_nelems );
-  }
+
   for (idx = 0; !had_err && idx < nre->udb_nelems; idx++) {
     had_err = gt_n_r_encseq_uniqueentry_io(&nre->uniques[idx], fp, io_func,
                                            err);
+  }
+  if (!had_err) {
+    nre->ssptab = gt_intset_io(nre->ssptab, fp, err);
+    if (nre->ssptab == NULL)
+      had_err = 1;
   }
   return had_err;
 }
@@ -316,28 +383,13 @@ int gt_n_r_encseq_write_nre(GtNREncseq* nre, FILE* fp, GtError *err)
   return gt_n_r_encseq_io(nre, fp, gt_io_error_fwrite, err);
 }
 
-void gt_n_r_encseq_write_unique_fasta(GtNREncseq *nre,
-                                      FILE *fp)
+/* static void gt_n_r_encseq_log_ssptab(GtNREncseq *nre)
 {
   GtUword idx;
-  char *buffer = NULL;
-  unsigned int buffsize = 0;
-  GtNREncseqUnique current;
-  for (idx = 0; idx < nre->udb_nelems; ++idx) {
-    current = nre->uniques[idx];
-    gt_assert(current.len != 0);
-    fprintf(fp, ">unique" GT_WU ", start: " GT_WU ", len: " GT_WU "\n",
-            idx, current.orig_startpos, current.len);
-    if (buffsize < (unsigned int) current.len) {
-      gt_safe_assign(buffsize, current.len + 1);
-      buffer = gt_realloc(buffer, buffsize * sizeof (*buffer));
-    }
-    gt_encseq_extract_decoded(nre->orig_es, buffer, current.orig_startpos,
-                              current.orig_startpos + current.len - 1);
-    fprintf(fp, "%.*s\n", (int) current.len, buffer);
+  for (idx = 0; gt_log_enabled() && idx < nre->orig_num_seq - 1; ++idx) {
+    gt_log_log(GT_WU, gt_intset_get(nre->ssptab, idx));
   }
-  gt_free(buffer);
-}
+} */
 
 /*read n_r_encseq data structure from file*/
 GtNREncseq *gt_n_r_encseq_new_from_file(const char *basename_nre,
@@ -349,7 +401,8 @@ GtNREncseq *gt_n_r_encseq_new_from_file(const char *basename_nre,
   FILE* fp;
   GtEncseqLoader *esl;
   GtEncseq *unique_es;
-  GtNREncseq *nre = gt_n_r_encseq_new_empty(orig_es);
+  GtNREncseq *nre = gt_n_r_encseq_new_empty(gt_encseq_alphabet(orig_es));
+  nre->orig_es = orig_es;
   /*load unique_es*/
   esl = gt_encseq_loader_new();
   unique_es = gt_encseq_loader_load(esl, basename_nre, err);
@@ -480,17 +533,15 @@ struct GtNREncseqCompressor
   gt_n_r_e_compressor_extend_fkt extend;
   GtNRECXdrop                    xdrop;
   GtNRECWindow                   window;
-  GtUword                        current_seq_len,
+  GtUword                        current_orig_start,
+                                 current_seq_len,
                                  current_seq_pos,
                                  current_seq_start,
-                                 current_orig_start,
                                  initsize,
-                                 input_len,
                                  main_pos,
                                  main_seqnum,
                                  max_kmer_poss,
-                                 minalignlen,
-                                 input_num_seq;
+                                 minalignlen;
   unsigned int                   kmersize,
                                  windowsize;
 };
@@ -551,7 +602,6 @@ GtNREncseqCompressor *gt_n_r_encseq_compressor_new(
   n_r_e_compressor->max_kmer_poss = max_kmer_poss;
   n_r_e_compressor->minalignlen = minalignlength;
   n_r_e_compressor->nre = NULL;
-  n_r_e_compressor->input_num_seq = 0;
   n_r_e_compressor->windowsize = windowsize;
   gt_n_r_encseq_compressor_xdrop_init(scores, xdropscore,
                                       &n_r_e_compressor->xdrop);
@@ -631,7 +681,7 @@ static GtNRECState gt_n_r_e_compressor_reset_pos_and_main_iter_to_pos(
                                                      GtNREncseqCompressor *nrec,
                                                      GtUword pos)
 {
-  if (pos >= nrec->input_len) {
+  if (pos >= nrec->nre->orig_length) {
     return GT_NREC_EOD;
   }
   nrec->current_orig_start =
@@ -646,11 +696,11 @@ static GtNRECState gt_n_r_e_compressor_reset_pos_and_main_iter_to_pos(
 static GtNRECState gt_n_r_e_compressor_reset_pos_and_main_iter_to_current_seq(
                                                      GtNREncseqCompressor *nrec)
 {
-  if (nrec->main_seqnum >= nrec->input_num_seq) {
+  if (nrec->main_seqnum >= nrec->nre->orig_num_seq) {
     return GT_NREC_EOD;
   }
-  nrec->current_seq_start = gt_encseq_seqstartpos(nrec->input_es,
-                                                  nrec->main_seqnum);
+  nrec->current_seq_start = gt_n_r_encseq_ssp_seqstartpos(nrec->nre,
+                                                          nrec->main_seqnum);
   return gt_n_r_e_compressor_reset_pos_and_main_iter_to_pos(
                                                        nrec,
                                                        nrec->current_seq_start);
@@ -661,15 +711,16 @@ gt_n_r_e_compressor_skip_short_seqs(GtNREncseqCompressor *nrec)
 {
   GtUword start;
 
-  while (nrec->main_seqnum < nrec->input_num_seq &&
-         (nrec->current_seq_len = gt_encseq_seqlength(nrec->input_es,
-                                                      nrec->main_seqnum)) <
+  while (nrec->main_seqnum < nrec->nre->orig_num_seq &&
+         (nrec->current_seq_len =
+            gt_n_r_encseq_ssp_seqlength(nrec->nre, nrec->main_seqnum)) <
          nrec->minalignlen) {
-    start = gt_encseq_seqstartpos(nrec->input_es, nrec->main_seqnum);
+    start = gt_n_r_encseq_ssp_seqstartpos(nrec->nre, nrec->main_seqnum);
     gt_n_r_encseq_add_unique_to_db(nrec->nre, start, nrec->current_seq_len);
     nrec->main_seqnum++;
   }
-  return nrec->main_seqnum >= nrec->input_num_seq ? GT_NREC_EOD : GT_NREC_CONT;
+  return nrec->main_seqnum >= nrec->nre->orig_num_seq ?
+         GT_NREC_EOD : GT_NREC_CONT;
 }
 
 static GtNRECState gt_n_r_e_compressor_handle_seqend(GtNREncseqCompressor *nrec)
@@ -838,9 +889,9 @@ gt_n_r_e_compressor_extend_seeds(GtNREncseqCompressor *nrec)
 
   /* get bounds for current */
   current_bounds.start = nrec->current_orig_start;
-  current_bounds.end = gt_encseq_seqstartpos(nrec->input_es,
-                                             nrec->main_seqnum) +
-    nrec->current_seq_len;
+  current_bounds.end = gt_n_r_encseq_ssp_seqstartpos(nrec->nre,
+                                                     nrec->main_seqnum) +
+                       nrec->current_seq_len;
   gt_assert(nrec->current_seq_start + nrec->current_seq_len ==
             current_bounds.end);
   gt_assert(current_bounds.start <= xdropstart);
@@ -953,9 +1004,9 @@ gt_n_r_e_compressor_extend_seeds_old(GtNREncseqCompressor *nrec)
 
   /* get bounds for current */
   current_bounds.start = nrec->current_orig_start;
-  current_bounds.end = gt_encseq_seqstartpos(nrec->input_es,
-                                             nrec->main_seqnum) +
-    nrec->current_seq_len;
+  current_bounds.end = gt_n_r_encseq_ssp_seqstartpos(nrec->nre,
+                                                     nrec->main_seqnum) +
+                       nrec->current_seq_len;
   gt_assert(nrec->current_seq_start + nrec->current_seq_len ==
             current_bounds.end);
   gt_assert(current_bounds.start <= xdropstart);
@@ -1105,8 +1156,9 @@ gt_n_r_e_compressor_process_init_kmer_position(GtNREncseqCompressor *nrec,
     state = gt_n_r_e_compressor_handle_seqend(nrec);
     if (state == GT_NREC_RESET) {
       gt_assert(nrec->main_pos == nrec->current_orig_start);
-      gt_assert(nrec->main_pos == gt_encseq_seqstartpos(nrec->input_es,
-                                                        nrec->main_seqnum));
+      gt_assert(nrec->main_pos ==
+                gt_n_r_encseq_ssp_seqstartpos(nrec->nre,
+                                              nrec->main_seqnum));
       gt_assert(nrec->current_seq_pos == 0);
     }
   }
@@ -1250,6 +1302,30 @@ static int gt_n_r_e_compressor_analyse(GtNREncseqCompressor *n_r_e_compressor,
   return had_err;
 }
 
+static void
+gt_n_r_encseq_compressor_write_unique_fasta(GtNREncseqCompressor *nrec,
+                                            FILE *fp)
+{
+  GtUword idx;
+  char *buffer = NULL;
+  unsigned int buffsize = 0;
+  GtNREncseqUnique current;
+  for (idx = 0; idx < nrec->nre->udb_nelems; ++idx) {
+    current = nrec->nre->uniques[idx];
+    gt_assert(current.len != 0);
+    fprintf(fp, ">unique" GT_WU ", start: " GT_WU ", len: " GT_WU "\n",
+            idx, current.orig_startpos, current.len);
+    if (buffsize < (unsigned int) current.len) {
+      gt_safe_assign(buffsize, current.len + 1);
+      buffer = gt_realloc(buffer, buffsize * sizeof (*buffer));
+    }
+    gt_encseq_extract_decoded(nrec->input_es, buffer, current.orig_startpos,
+                              current.orig_startpos + current.len - 1);
+    fprintf(fp, "%.*s\n", (int) current.len, buffer);
+  }
+  gt_free(buffer);
+}
+
 int gt_n_r_encseq_compressor_compress(GtNREncseqCompressor *n_r_e_compressor,
                                       GtStr *basename,
                                       GtEncseq *encseq,
@@ -1261,10 +1337,7 @@ int gt_n_r_encseq_compressor_compress(GtNREncseqCompressor *n_r_e_compressor,
   gt_assert(n_r_e_compressor != NULL);
   gt_assert(encseq != NULL);
   n_r_e_compressor->input_es = encseq;
-  n_r_e_compressor->input_len = gt_encseq_total_length(encseq);
-  n_r_e_compressor->input_num_seq = gt_encseq_num_of_sequences(encseq);
   nre = gt_n_r_encseq_new(encseq);
-  nre->orig_length = gt_encseq_total_length(encseq);
   n_r_e_compressor->nre = nre;
 
   had_err = gt_n_r_e_compressor_analyse(n_r_e_compressor, err);
@@ -1292,7 +1365,7 @@ int gt_n_r_encseq_compressor_compress(GtNREncseqCompressor *n_r_e_compressor,
   if (!had_err) {
     GtEncseqEncoder *esenc;
     GtStrArray *toencode;
-    gt_n_r_encseq_write_unique_fasta(n_r_e_compressor->nre, fp);
+    gt_n_r_encseq_compressor_write_unique_fasta(n_r_e_compressor, fp);
     gt_fa_xfclose(fp);
     /*encoding of unique_es*/
     esenc = gt_encseq_encoder_new();
@@ -1445,31 +1518,30 @@ static void gt_n_r_encseq_check_separator(const GtNREncseq *nre,
    if (printstate->num_printed_chars == 0 && printstate->fas_header) {
       const char* desc;
       GtUword desclen;
-      GtUword seqnum = gt_encseq_seqnum(nre->orig_es, position);
+      GtUword seqnum = gt_n_r_encseq_ssp_pos2seqnum(nre, position);
       gt_xfwrite_one(">",printstate->fp);
       desc = gt_encseq_description(nre->orig_es,
                                    &desclen,
                                    seqnum);
       gt_xfwrite(desc, sizeof (char), (size_t) desclen, printstate->fp);
       gt_xfwrite_one("\n",printstate->fp);
-   } else if (gt_encseq_position_is_separator(nre->orig_es, position,
-                                      GT_READMODE_FORWARD)) {
-    if (printstate->fas_header) {
-      const char* desc;
-      GtUword desclen;
-      GtUword seqnum = gt_encseq_seqnum(nre->orig_es, position + 1);
-      gt_xfwrite("\n>", sizeof (char), (size_t) 2, printstate->fp);
-      printstate->num_printed_chars++;
-      desc = gt_encseq_description(nre->orig_es,
-                                 &desclen,
-                                 seqnum);
-      gt_xfwrite(desc, sizeof (char), (size_t) desclen, printstate->fp);
-      gt_xfwrite_one("\n",printstate->fp);
-    } else {
-      gt_xfwrite_one("|",printstate->fp);
-      printstate->num_printed_chars++;
-    }
-  }
+   } else if (gt_intset_is_member(nre->ssptab, position)) {
+     if (printstate->fas_header) {
+       const char* desc;
+       GtUword desclen;
+       GtUword seqnum = gt_n_r_encseq_ssp_pos2seqnum(nre, position + 1);
+       gt_xfwrite("\n>", sizeof (char), (size_t) 2, printstate->fp);
+       printstate->num_printed_chars++;
+       desc = gt_encseq_description(nre->orig_es,
+                                    &desclen,
+                                    seqnum);
+       gt_xfwrite(desc, sizeof (char), (size_t) desclen, printstate->fp);
+       gt_xfwrite_one("\n",printstate->fp);
+     } else {
+       gt_xfwrite_one("|",printstate->fp);
+       printstate->num_printed_chars++;
+     }
+   }
 }
 
 /*sets offset and length according to <printstate>->extraction_range and
@@ -1666,20 +1738,19 @@ static int gt_n_r_encseq_print_complete_unique_origin_prot(
                                             GtError *err)
 {
   int had_err = 0;
-  GtUword seqnum = gt_encseq_seqnum(nred->nre->orig_es,
-                            printstate->unique.orig_startpos);
+  GtUword seqnum = gt_n_r_encseq_ssp_pos2seqnum(nred->nre,
+                                         printstate->unique.orig_startpos);
+  GtUword seqlength = gt_n_r_encseq_ssp_seqlength(nred->nre, seqnum);
   GtRange *range = gt_malloc( sizeof (*range));
-  range->start = gt_encseq_seqstartpos(nred->nre->orig_es, seqnum);
-  range->end = range->start + gt_encseq_seqlength(nred->nre->orig_es, seqnum)
-                            - 1;
+  range->start = gt_n_r_encseq_ssp_seqstartpos(nred->nre, seqnum);
+  range->end = range->start + seqlength - 1;
   had_err = gt_n_r_encseq_decompressor_extract_originrange(printstate->fp,
                                                     nred,
                                                     range,
                                                     true,
                                                     err);
   gt_free(range);
-  printstate->num_printed_chars += gt_encseq_seqlength(nred->nre->orig_es,
-                                                       seqnum);
+  printstate->num_printed_chars += seqlength;
   return had_err;
 }
 
@@ -1690,20 +1761,19 @@ static int gt_n_r_encseq_print_complete_link_origin_prot(
                                             GtError *err)
 {
   int had_err = 0;
-  GtUword seqnum = gt_encseq_seqnum(nred->nre->orig_es,
-                            printstate->link.orig_startpos);
+  GtUword seqnum = gt_n_r_encseq_ssp_pos2seqnum(nred->nre,
+                                         printstate->unique.orig_startpos);
+  GtUword seqlength = gt_n_r_encseq_ssp_seqlength(nred->nre, seqnum);
   GtRange *range = gt_malloc( sizeof (*range));
-  range->start = gt_encseq_seqstartpos(nred->nre->orig_es, seqnum);
-  range->end = range->start + gt_encseq_seqlength(nred->nre->orig_es, seqnum)
-                            - 1;
+  range->start = gt_n_r_encseq_ssp_seqstartpos(nred->nre, seqnum);
+  range->end = range->start + seqlength - 1;
   had_err = gt_n_r_encseq_decompressor_extract_originrange(printstate->fp,
                                                     nred,
                                                     range,
                                                     true,
                                                     err);
   gt_free(range);
-  printstate->num_printed_chars += gt_encseq_seqlength(nred->nre->orig_es,
-                                                       seqnum);
+  printstate->num_printed_chars += seqlength;
   return had_err;
 }
 
@@ -1731,8 +1801,9 @@ static GtUword gt_n_r_encseq_decompressor_extract_from_uniqueid(
   printstate->buffer = gt_malloc(sizeof (*printstate->buffer) *
                                           printstate->buffsize);
   printstate->num_printed_chars = 0;
-  seqnum = gt_encseq_seqnum(nred->nre->orig_es,
-                            nred->nre->uniques[uentry_id].orig_startpos);
+  seqnum = gt_n_r_encseq_ssp_pos2seqnum(
+                                   nred->nre,
+                                   nred->nre->uniques[uentry_id].orig_startpos);
   if (!*visited) {
     *visited = binary_tree_new_node(seqnum);
   } else if (!binary_tree_search(*visited, seqnum)) {
@@ -1748,8 +1819,8 @@ static GtUword gt_n_r_encseq_decompressor_extract_from_uniqueid(
   {
     cur_link_id = (GtUword) uniques[uentry_id].links.spaceuint32_t[i];
     printstate->link = links[cur_link_id];
-    seqnum = gt_encseq_seqnum(nred->nre->orig_es,
-                                     printstate->link.orig_startpos);
+    seqnum = gt_n_r_encseq_ssp_pos2seqnum(nred->nre,
+                                          printstate->link.orig_startpos);
      if (!binary_tree_search(*visited, seqnum)) {
       binary_tree_insert(*visited, seqnum);
         (void) gt_n_r_encseq_print_complete_link_origin_prot(nred,
