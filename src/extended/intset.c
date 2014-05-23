@@ -14,7 +14,6 @@
   ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
-#include "extended/intset_rep.h"
 
 #include "core/assert_api.h"
 #include "core/class_alloc.h"
@@ -22,6 +21,7 @@
 #include "core/ma.h"
 #include "core/types_api.h"
 #include "core/unused_api.h"
+#include "extended/intset_rep.h"
 
 GtIntset *gt_intset_create(const GtIntsetClass *intset_c)
 {
@@ -83,19 +83,47 @@ GtUword gt_intset_get_idx_smaller_geq(GtIntset *intset, GtUword pos)
   return GT_UWORD_MAX;
 }
 
-const GtIntsetClass *gt_intset_class_new(size_t size,
-                                         GtIntsetAddFunc add_func,
-                                         GtIntsetGetFunc get_func,
-                                         GtIntsetIdxSmGeqFunc idx_sm_geq_func,
-                                         GtIntsetIsMemberFunc is_member_func,
-                                         GtIntsetDeleteFunc delete_func)
+size_t gt_intset_size(GtIntset *intset)
+{
+  gt_assert(intset != NULL);
+  gt_assert(intset->c_class != NULL);
+  if (intset->c_class->size_func != NULL)
+    return intset->c_class->size_func(intset->members->maxelement,
+                                      intset->members->num_of_elems);
+  return 0;
+}
+
+GtIntset *gt_intset_write(GtIntset *intset, FILE *fp, GtError *err)
+{
+  gt_assert(intset != NULL);
+  gt_assert(intset->c_class != NULL);
+  if (intset->c_class->size_func != NULL)
+    return intset->c_class->write_func(intset, fp, err);
+  return intset;
+}
+
+const GtIntsetClass *gt_intset_class_new(
+                                       size_t size,
+                                       GtIntsetAddFunc add_func,
+                                       GtIntsetFileIsTypeFunc file_is_type_func,
+                                       GtIntsetGetFunc get_func,
+                                       GtIntsetIOFunc io_func,
+                                       GtIntsetIdxSmGeqFunc idx_sm_geq_func,
+                                       GtIntsetIsMemberFunc is_member_func,
+                                       GtIntsetSizeFunc size_func,
+                                       GtIntsetWriteFunc write_func,
+                                       GtIntsetDeleteFunc delete_func)
 {
   GtIntsetClass *intset_c = gt_class_alloc(sizeof (*intset_c));
   intset_c->size = size;
   intset_c->add_func = add_func;
+  intset_c->file_is_type_func = file_is_type_func;
   intset_c->get_func = get_func;
-  intset_c->is_member_func = is_member_func;
+  intset_c->io_func = io_func;
   intset_c->idx_sm_geq_func = idx_sm_geq_func;
+  intset_c->is_member_func = is_member_func;
+  intset_c->size_func = size_func;
+  intset_c->write_func = write_func;
   intset_c->delete_func = delete_func;
   return intset_c;
 }

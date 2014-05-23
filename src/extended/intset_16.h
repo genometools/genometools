@@ -26,6 +26,7 @@
 
 #include "core/types_api.h"
 #include "extended/intset_rep.h"
+#include "extended/xansi_io.h"
 
 /* The <GtIntset16> class implements the <GtIntset> interface.
    This class only works if <GtUword> is larger than 16 bits! */
@@ -38,6 +39,13 @@ const     GtIntsetClass* gt_intset_16_class(void);
    <GtIntset16>.
    Fails if 16 >= bits for (GtUword). */
 GtIntset* gt_intset_16_new(GtUword maxelement, GtUword num_of_elems);
+
+/* Returns true, if the <type> read from a file storing a <GtIntset> indicatest
+   the type of this implementation. */
+bool      gt_intset_16_file_is_type(GtUword type);
+
+/* Return a new <GtIntset> object, with data read from <fp> */
+GtIntset* gt_intset_16_new_from_file(FILE *fp, GtError *err);
 
 /* Add <elem> to <intset>. <elem> has to be larger than the previous <elem>
    added. */
@@ -57,12 +65,22 @@ bool      gt_intset_16_is_member(GtIntset *intset, GtUword elem);
    Fails for <pos> > <maxelement>! */
 GtUword   gt_intset_16_get_idx_smallest_geq(GtIntset *intset, GtUword pos);
 
+/* Write <intset> to file <fp>. Returns <NULL> on error and <intset> will be
+   freed. */
+GtIntset* gt_intset_16_write(GtIntset *intset, FILE *fp, GtError *err);
+
+/* Read or write, depending on <io_func>. When reading, <intset> should be NULL
+   or will be overwritten!
+   Returns <NULL> on error. */
+GtIntset* gt_intset_16_io(GtIntset *intset, FILE *fp, GtError *err,
+                          GtXansiIOFunc io_func);
+
+void      gt_intset_16_delete(GtIntset *intset);
+
 /* Returns the size of an intset with given number of elements
    <num_of_elems> and maximum value <maxelement>.
    Fails if 16 >= bits for (GtUword). */
 size_t    gt_intset_16_size(GtUword maxelement, GtUword num_of_elems);
 
-void      gt_intset_16_delete(GtIntset *intset);
-
-int       gt_intset_16_unit_test(GtError *err);
+int gt_intset_16_unit_test(GtError *err);
 #endif

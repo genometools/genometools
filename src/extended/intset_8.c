@@ -31,30 +31,186 @@
 #include "core/mathsupport.h"
 #include "core/unused_api.h"
 #include "extended/intset_8.h"
-#include "extended/intset_rep.h"
+#include "extended/xansi_io.h"
 
 #define gt_intset_8_cast(cvar) \
         gt_intset_cast(gt_intset_8_class(), cvar)
 
 #define GT_ELEM2SECTION_M(X) GT_ELEM2SECTION(X, members->logsectionsize)
 
+#define GT_INTSET_8_TYPE ((GtUword) 8)
+
 struct GtIntset8 {
   GtIntset parent_instance;
   uint8_t *elements;
 };
 
+GtIntset* gt_intset_8_new(GtUword maxelement, GtUword num_of_elems)
+{
+  GtIntset *intset;
+  GtIntset8 *intset_8;
+  GtIntsetMembers *members;
+  GtUword idx;
+
+  intset = gt_intset_create(gt_intset_8_class());
+  intset_8 = gt_intset_8_cast(intset);
+  members = intset->members;
+
+  members->currentsectionnum = 0;
+  members->maxelement = maxelement;
+  members->nextfree = 0;
+  members->num_of_elems = num_of_elems;
+  members->previouselem = ULONG_MAX;
+  members->refcount = 0;
+
+  members->logsectionsize = GT_BITS_FOR_TYPE(uint8_t);
+  members->numofsections = GT_ELEM2SECTION_M(maxelement) + 1;
+
+  intset_8->elements =
+    gt_malloc(sizeof (*intset_8->elements) * num_of_elems);
+
+  members->sectionstart = gt_malloc(sizeof (*members->sectionstart) *
+                                    (members->numofsections + 1));
+
+  members->sectionstart[0] = 0;
+  for (idx = (GtUword) 1; idx <= members->numofsections; idx++) {
+    members->sectionstart[idx] = num_of_elems;
+  }
+  return intset;
+}
+
+static bool gt_intset_8_elems_is_valid(GtIntset *intset)
+{
+  GtUword idx, sec_idx = 0;
+  GtIntset8 *intset_8;
+  GtIntsetMembers *members;
+  intset_8 = gt_intset_8_cast(intset);
+  members = intset->members;
+
+  for (idx = (GtUword) 1; idx < members->num_of_elems; idx++) {
+    while (idx > members->sectionstart[sec_idx])
+      sec_idx++;
+
+    if (idx != members->sectionstart[sec_idx] &&
+        intset_8->elements[idx] <= intset_8->elements[idx - 1])
+      return false;
+  }
+  return true;
+}
+
+static bool gt_intset_8_secstart_is_valid(GtIntset *intset)
+{
+  GtUword idx;
+  GtIntsetMembers *members;
+  members = intset->members;
+
+  for (idx = (GtUword) 1; idx <= members->numofsections; idx++) {
+    if (members->sectionstart[idx] < members->sectionstart[idx - 1])
+      return false;
+  }
+  return true;
+}
+
+GtIntset *gt_intset_8_io(GtIntset *intset, FILE *fp, GtError *err,
+                         GtXansiIOFunc io_func)
+{
+  int had_err = 0;
+  GtUword type = (GtUword) GT_INTSET_8_TYPE;
+  GtIntset8 *intset_8;
+  GtIntsetMembers *members;
+
+  gt_error_check(err);
+  gt_intset_io_one(type, fp);
+  if (type != GT_INTSET_8_TYPE) {
+    /* only applies to reading */
+    had_err = 1;
+    gt_error_set(err, "Trying to read <GtIntset8 from file,"
+                 " type does not match!");
+  }
+  if (!had_err) {
+    if (intset == NULL) {
+      intset = gt_intset_create(gt_intset_8_class());
+      intset->members->sectionstart = NULL;
+      intset->members->refcount = 0;
+      intset_8 = gt_intset_8_cast(intset);
+      intset_8->elements = NULL;
+    }
+    else {
+      intset_8 = gt_intset_8_cast(intset);
+    }
+    members = intset->members;
+    gt_intset_io_one(members->currentsectionnum, fp);
+    gt_intset_io_one(members->maxelement, fp);
+    gt_intset_io_one(members->nextfree, fp);
+    gt_intset_io_one(members->num_of_elems, fp);
+    gt_intset_io_one(members->previouselem, fp);
+    members->logsectionsize = GT_BITS_FOR_TYPE(uint8_t);
+    members->numofsections = GT_ELEM2SECTION_M(members->maxelement) + 1;
+    members->sectionstart = gt_realloc(members->sectionstart,
+                sizeof (*members->sectionstart) * (members->numofsections + 1));
+    io_func(members->sectionstart, sizeof (*members->sectionstart),
+            (size_t) (members->numofsections + 1), fp);
+    if (members->sectionstart[0] != 0) {
+      had_err = 1;
+      gt_error_set(err, "Unexpected value in sectionstart[0]: "
+                   GT_WU " expected 0!", members->sectionstart[0]);
+    }
+  }
+  if (!had_err) {
+    if (!gt_intset_8_secstart_is_valid(intset)) {
+      had_err = 1;
+      gt_error_set(err, "Section starts in GtIntset are not valid");
+    }
+  }
+  if (!had_err) {
+    intset_8->elements = gt_realloc(intset_8->elements,
+                  sizeof (*intset_8->elements) * members->num_of_elems);
+    io_func(intset_8->elements, sizeof (*intset_8->elements),
+            (size_t) members->num_of_elems, fp);
+    if (!gt_intset_8_elems_is_valid(intset)) {
+      had_err = 1;
+      gt_error_set(err, "Elements in GtIntset are not valid");
+    }
+  }
+  if (had_err) {
+    /* TODO: think about this, if we are trying to write, this might not be the
+       best solution. On the other hand the Intset is invalid and any program
+       should crash. */
+    gt_intset_8_delete(intset);
+    intset = NULL;
+  }
+  return intset;
+}
+
+GtIntset *gt_intset_8_new_from_file(FILE *fp, GtError *err)
+{
+  GtIntset *intset = NULL;
+  gt_assert(fp != NULL);
+  gt_error_check(err);
+  intset = gt_intset_8_io(intset, fp, err, gt_xansi_io_xfread);
+  return intset;
+}
+
+GtIntset *gt_intset_8_write(GtIntset *intset, FILE *fp, GtError *err)
+{
+  gt_assert(intset != NULL);
+  gt_assert(fp != NULL);
+  gt_error_check(err);
+  return gt_intset_8_io(intset, fp, err, gt_xansi_io_xfwrite);
+}
+
 void gt_intset_8_add(GtIntset *intset, GtUword elem)
 {
   GtIntset8 *intset_8 = gt_intset_8_cast(intset);
   GtIntsetMembers *members = intset->members;
-  GtUword *secstart = members->sectionstart;
+  GtUword *sectionstart = members->sectionstart;
   gt_assert(members->nextfree < members->num_of_elems &&
             elem <= members->maxelement &&
             (members->previouselem == ULONG_MAX ||
                                       members->previouselem < elem));
   while (elem >= GT_SECTIONMINELEM(members->currentsectionnum + 1)) {
     gt_assert(members->currentsectionnum < members->numofsections);
-    secstart[members->currentsectionnum + 1] = members->nextfree;
+    sectionstart[members->currentsectionnum + 1] = members->nextfree;
     members->currentsectionnum++;
   }
   gt_assert(GT_SECTIONMINELEM(members->currentsectionnum) <= elem &&
@@ -73,22 +229,23 @@ static GtUword gt_intset_8_sec_idx_largest_seq(GtUword *sectionstart,
   return result - 1;
 }
 
-static GtUword gt_intset_8_binarysearch_sec_idx_largest_seq(GtUword *secstart,
-                                                            GtUword *secend,
-                                                            GtUword idx)
+static GtUword
+gt_intset_8_binarysearch_sec_idx_largest_seq(GtUword *sectionstart,
+                                             GtUword *secend,
+                                             GtUword idx)
 {
   GtUword *midptr = NULL, *found = NULL,
-          *startorig = secstart;
-  if (*secstart <= idx)
-    found = secstart;
-  while (secstart < secend) {
-    midptr = secstart + ((GtUword) (secend - secstart) >> 1);
+          *startorig = sectionstart;
+  if (*sectionstart <= idx)
+    found = sectionstart;
+  while (sectionstart < secend) {
+    midptr = sectionstart + ((GtUword) (secend - sectionstart) >> 1);
     if (*midptr < idx) {
       found = midptr;
       if (*midptr == idx) {
         break;
       }
-      secstart = midptr + 1;
+      sectionstart = midptr + 1;
     }
     else {
       secend = midptr - 1;
@@ -104,10 +261,10 @@ static GtUword gt_intset_8_get_test(GtIntset *intset, GtUword idx)
 {
   GtIntset8 *intset_8 = gt_intset_8_cast(intset);
   GtIntsetMembers *members = intset->members;
-  GtUword *secstart = members->sectionstart;
+  GtUword *sectionstart = members->sectionstart;
   gt_assert(idx < members->nextfree);
 
-  return (gt_intset_8_sec_idx_largest_seq(secstart, idx) <<
+  return (gt_intset_8_sec_idx_largest_seq(sectionstart, idx) <<
          members->logsectionsize) + intset_8->elements[idx];
 }
 
@@ -116,13 +273,13 @@ GtUword gt_intset_8_get(GtIntset *intset, GtUword idx)
   GtUword quotient;
   GtIntset8 *intset_8 = gt_intset_8_cast(intset);
   GtIntsetMembers *members = intset->members;
-  GtUword *secstart = members->sectionstart;
+  GtUword *sectionstart = members->sectionstart;
   gt_assert(idx < members->nextfree);
 
   quotient = gt_intset_8_binarysearch_sec_idx_largest_seq(
-                                          secstart,
-                                          secstart + members->numofsections - 1,
-                                          idx);
+                                      sectionstart,
+                                      sectionstart + members->numofsections - 1,
+                                      idx);
   return (quotient << members->logsectionsize) +
          intset_8->elements[idx];
 }
@@ -151,16 +308,16 @@ bool gt_intset_8_is_member(GtIntset *intset, GtUword elem)
 {
   GtIntset8 *intset_8 = gt_intset_8_cast(intset);
   GtIntsetMembers *members = intset->members;
-  GtUword *secstart = members->sectionstart;
+  GtUword *sectionstart = members->sectionstart;
   if (elem <= members->maxelement)
   {
     const GtUword sectionnum = GT_ELEM2SECTION_M(elem);
 
-    if (secstart[sectionnum] < secstart[sectionnum+1]) {
+    if (sectionstart[sectionnum] < sectionstart[sectionnum+1]) {
       return gt_intset_8_binarysearch_is_member(
-                                intset_8->elements + secstart[sectionnum],
-                                intset_8->elements + secstart[sectionnum+1] - 1,
-                                (uint64_t) elem);
+                            intset_8->elements + sectionstart[sectionnum],
+                            intset_8->elements + sectionstart[sectionnum+1] - 1,
+                            (uint64_t) elem);
     }
   }
   return false;
@@ -245,6 +402,14 @@ GtUword gt_intset_8_get_idx_smallest_geq(GtIntset *intset, GtUword pos)
   return members->sectionstart[sectionnum];
 }
 
+void gt_intset_8_delete(GtIntset *intset)
+{
+  GtIntset8 *intset_8 = gt_intset_8_cast(intset);
+  if (intset_8 != NULL) {
+    gt_free(intset_8->elements);
+  }
+}
+
 size_t gt_intset_8_size(GtUword maxelement, GtUword num_of_elems)
 {
   size_t logsectionsize = GT_BITS_FOR_TYPE(uint8_t);
@@ -253,12 +418,9 @@ size_t gt_intset_8_size(GtUword maxelement, GtUword num_of_elems)
     sizeof (GtUword) * (GT_ELEM2SECTION(maxelement, logsectionsize) + 1);
 }
 
-void gt_intset_8_delete(GtIntset *intset)
+bool gt_intset_8_file_is_type(GtUword type)
 {
-  GtIntset8 *intset_8 = gt_intset_8_cast(intset);
-  if (intset_8 != NULL) {
-    gt_free(intset_8->elements);
-  }
+  return type == GT_INTSET_8_TYPE;
 }
 
 /* map static local methods to interface */
@@ -268,45 +430,20 @@ const GtIntsetClass* gt_intset_8_class(void)
   if (this_c == NULL) {
     this_c = gt_intset_class_new(sizeof (GtIntset8),
                                  gt_intset_8_add,
+                                 gt_intset_8_file_is_type,
                                  gt_intset_8_get,
+                                 gt_intset_8_io,
                                  gt_intset_8_get_idx_smallest_geq,
                                  gt_intset_8_is_member,
+                                 gt_intset_8_size,
+                                 gt_intset_8_write,
                                  gt_intset_8_delete);
   }
   return this_c;
 }
 
-GtIntset* gt_intset_8_new(GtUword maxelement, GtUword num_of_elems)
+int gt_intset_8_unit_test(GtError *err)
 {
-  GtIntset *intset;
-  GtIntset8 *intset_8;
-  GtIntsetMembers *members;
-  GtUword idx;
-
-  gt_assert(GT_BITS_FOR_TYPE(GtUword) > ((size_t) 8));
-  intset = gt_intset_create(gt_intset_8_class());
-  intset_8 = gt_intset_8_cast(intset);
-  members = intset->members;
-
-  intset_8->elements =
-    gt_malloc(sizeof (*intset_8->elements) * num_of_elems);
-  members->logsectionsize = GT_BITS_FOR_TYPE(uint8_t);
-  members->nextfree = 0;
-  members->numofsections = GT_ELEM2SECTION_M(maxelement) + 1;
-  members->sectionstart = gt_malloc(sizeof (*members->sectionstart) *
-                                    (members->numofsections + 1));
-  members->sectionstart[0] = 0;
-  for (idx = (GtUword) 1; idx <= members->numofsections; idx++) {
-    members->sectionstart[idx] = num_of_elems;
-  }
-  members->maxelement = maxelement;
-  members->currentsectionnum = 0;
-  members->num_of_elems = num_of_elems;
-  members->previouselem = ULONG_MAX;
-  return intset;
-}
-
-int gt_intset_8_unit_test(GtError *err) {
   int had_err = 0;
   GtIntset *is;
   GtUword num_of_elems = gt_rand_max(((GtUword) 1) << 10) + 1,
@@ -334,6 +471,10 @@ int gt_intset_8_unit_test(GtError *err) {
                                                      arr[idx] + 1) ==
                     num_of_elems);
       }
+
+      gt_ensure(gt_intset_8_elems_is_valid(is));
+      gt_ensure(gt_intset_8_secstart_is_valid(is));
+
       for (idx = 0; !had_err && idx < num_of_elems; idx++) {
         if (arr[idx] != 0 && arr[idx - 1] != (arr[idx] - 1)) {
           gt_ensure(

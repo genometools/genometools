@@ -17,24 +17,33 @@
 #ifndef INTSET_REP_H
 #define INTSET_REP_H
 
-#include <stdlib.h>
 #include <stdbool.h>
+#include <stdlib.h>
 
-#include "extended/intset.h"
+#include "core/error_api.h"
 #include "core/types_api.h"
+#include "extended/intset.h"
+#include "extended/xansi_io.h"
 
 #define GT_BITS_FOR_TYPE(TYPE)     ((sizeof (TYPE)) * ((size_t) CHAR_BIT))
 #define GT_ELEM2SECTION(X, LOGVAL) ((X) >> (LOGVAL))
 #define GT_SECTIONMINELEM(S)       ((S) << members->logsectionsize)
+#define gt_intset_io_one(element, fp) \
+  io_func(&element, sizeof (element), (size_t) 1, fp)
 
 typedef struct GtIntsetClass GtIntsetClass;
 typedef struct GtIntsetMembers GtIntsetMembers;
 
-typedef GtUword (*GtIntsetGetFunc)(GtIntset*, GtUword);
-typedef GtUword (*GtIntsetIdxSmGeqFunc)(GtIntset*, GtUword);
-typedef bool (*GtIntsetIsMemberFunc)(GtIntset*, GtUword);
-typedef void (*GtIntsetAddFunc)(GtIntset*, GtUword);
-typedef void (*GtIntsetDeleteFunc)(GtIntset*);
+typedef void      (*GtIntsetAddFunc)       (GtIntset*, GtUword);
+typedef bool      (*GtIntsetFileIsTypeFunc)(GtUword);
+typedef GtUword   (*GtIntsetGetFunc)       (GtIntset*, GtUword);
+typedef GtIntset* (*GtIntsetIOFunc)        (GtIntset*, FILE*, GtError*,
+                                            GtXansiIOFunc);
+typedef GtUword   (*GtIntsetIdxSmGeqFunc)  (GtIntset*, GtUword);
+typedef bool      (*GtIntsetIsMemberFunc)  (GtIntset*, GtUword);
+typedef size_t    (*GtIntsetSizeFunc)      (GtUword, GtUword);
+typedef GtIntset* (*GtIntsetWriteFunc)     (GtIntset*, FILE*, GtError*);
+typedef void      (*GtIntsetDeleteFunc)    (GtIntset*);
 
 struct GtIntset {
   const GtIntsetClass *c_class;
@@ -42,12 +51,16 @@ struct GtIntset {
 };
 
 struct GtIntsetClass {
-  size_t size;
-  GtIntsetAddFunc add_func;
-  GtIntsetGetFunc get_func;
-  GtIntsetIdxSmGeqFunc idx_sm_geq_func;
-  GtIntsetIsMemberFunc is_member_func;
-  GtIntsetDeleteFunc delete_func;
+  size_t                 size;
+  GtIntsetAddFunc        add_func;
+  GtIntsetFileIsTypeFunc file_is_type_func;
+  GtIntsetGetFunc        get_func;
+  GtIntsetIOFunc         io_func;
+  GtIntsetIdxSmGeqFunc   idx_sm_geq_func;
+  GtIntsetIsMemberFunc   is_member_func;
+  GtIntsetSizeFunc       size_func;
+  GtIntsetWriteFunc      write_func;
+  GtIntsetDeleteFunc     delete_func;
 };
 
 struct GtIntsetMembers {
@@ -64,9 +77,13 @@ struct GtIntsetMembers {
 
 const GtIntsetClass* gt_intset_class_new(size_t size,
                                          GtIntsetAddFunc,
+                                         GtIntsetFileIsTypeFunc,
                                          GtIntsetGetFunc,
+                                         GtIntsetIOFunc,
                                          GtIntsetIdxSmGeqFunc,
                                          GtIntsetIsMemberFunc,
+                                         GtIntsetSizeFunc,
+                                         GtIntsetWriteFunc,
                                          GtIntsetDeleteFunc);
 
 GtIntset*            gt_intset_create(const GtIntsetClass*);
