@@ -18,11 +18,13 @@
 #include "core/ma.h"
 #include "core/unused_api.h"
 #include "extended/seqid2file.h"
+#include "extended/region_mapping.h"
 
 struct GtSeqid2FileInfo {
   GtStrArray *seqfiles;
   bool matchdesc,
-       usedesc;
+       usedesc,
+       matchdescstart;
   GtStr *seqfile,
         *encseq,
         *region_mapping;
@@ -65,7 +67,7 @@ void gt_seqid2file_register_options_ext(GtOptionParser *op,
                                         bool mandatory, bool debug)
 {
   GtOption *seqfile_option, *encseq_option, *seqfiles_option, *matchdesc_option,
-           *usedesc_option, *region_mapping_option;
+           *matchdescstart_option, *usedesc_option, *region_mapping_option;
   gt_assert(op && s2fi);
 
   /* -seqfile */
@@ -97,13 +99,25 @@ void gt_seqid2file_register_options_ext(GtOptionParser *op,
   gt_option_parser_add_option(op, seqfiles_option);
 
   /* -matchdesc */
-  matchdesc_option = gt_option_new_bool("matchdesc", "match the sequence "
+  matchdesc_option = gt_option_new_bool("matchdesc", "search the sequence "
                                         "descriptions from the input files for "
-                                        "the desired sequence IDs (in GFF3)",
+                                        "the desired sequence IDs (in GFF3), "
+                                        "reporting the first match",
                                         &s2fi->matchdesc, false);
   if (debug)
     gt_option_is_development_option(matchdesc_option);
   gt_option_parser_add_option(op, matchdesc_option);
+
+  /* -matchdescstart */
+  matchdescstart_option = gt_option_new_bool("matchdescstart",
+                                        "exactly match the sequence "
+                                        "descriptions from the input files "
+                                        "for the desired sequence IDs "
+                                        "(in GFF3), reporting the first match",
+                                        &s2fi->matchdescstart, false);
+  if (debug)
+    gt_option_is_development_option(matchdescstart_option);
+  gt_option_parser_add_option(op, matchdescstart_option);
 
   /* -usedesc */
   usedesc_option = gt_option_new_bool("usedesc", "use sequence descriptions to "
@@ -185,10 +199,12 @@ GtRegionMapping* gt_seqid2file_region_mapping_new(GtSeqid2FileInfo *s2fi,
   GtRegionMapping *rm = NULL;
   gt_error_check(err);
   gt_assert(s2fi);
+
+  s2fi->matchdesc = s2fi->matchdesc || s2fi->matchdescstart;
   /* create region mapping */
   if (gt_str_array_size(s2fi->seqfiles)) {
     rm = gt_region_mapping_new_seqfiles(s2fi->seqfiles, s2fi->matchdesc,
-                                          s2fi->usedesc);
+                                        s2fi->usedesc);
   } else if (gt_str_length(s2fi->encseq)) {
     GtEncseqLoader *el;
     GtEncseq *encseq;
@@ -209,6 +225,8 @@ GtRegionMapping* gt_seqid2file_region_mapping_new(GtSeqid2FileInfo *s2fi,
   } else {
     rm = gt_region_mapping_new_mapping(s2fi->region_mapping, err);
   }
+  if (s2fi->matchdescstart)
+    gt_region_mapping_enable_match_desc_start(rm);
   gt_assert(rm || gt_error_is_set(err));
   return rm;
 }

@@ -38,6 +38,7 @@ struct GtRegionMapping {
         *sequence_name;  /* the (current) sequence name */
   bool matchdesc,
        usedesc,
+       matchdescstart,
        userawseq,
        useseqno;
   GtMapping *mapping;
@@ -76,6 +77,7 @@ GtRegionMapping* gt_region_mapping_new_seqfiles(GtStrArray *sequence_filenames,
   rm = gt_calloc(1, sizeof (GtRegionMapping));
   rm->sequence_filenames = gt_str_array_ref(sequence_filenames);
   rm->matchdesc = matchdesc;
+  rm->matchdescstart = false;
   rm->usedesc = usedesc;
   return rm;
 }
@@ -90,6 +92,7 @@ GtRegionMapping* gt_region_mapping_new_encseq(GtEncseq *encseq, bool matchdesc,
   rm->encseq = gt_encseq_ref(encseq);
   rm->matchdesc = matchdesc;
   rm->usedesc = usedesc;
+  rm->matchdescstart = false;
   return rm;
 }
 
@@ -112,7 +115,14 @@ GtRegionMapping* gt_region_mapping_new_rawseq(const char *rawseq,
   rm->rawseq = rawseq;
   rm->rawlength = length;
   rm->rawoffset = offset;
+  rm->matchdescstart = false;
   return rm;
+}
+
+void gt_region_mapping_enable_match_desc_start(GtRegionMapping *rm)
+{
+  gt_assert(rm);
+  rm->matchdescstart = true;
 }
 
 GtRegionMapping* gt_region_mapping_ref(GtRegionMapping *rm)
@@ -192,6 +202,8 @@ static int update_seq_col_if_necessary(GtRegionMapping *rm, GtStr *seqid,
         had_err = -1;
       }
     }
+    if (rm->seq_col && rm->matchdescstart)
+      gt_seq_col_enable_match_desc_start(rm->seq_col);
   }
   return had_err;
 }

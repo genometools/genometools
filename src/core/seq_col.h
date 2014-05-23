@@ -24,6 +24,7 @@
 typedef struct GtSeqCol GtSeqCol;
 
 void        gt_seq_col_delete(GtSeqCol*);
+void        gt_seq_col_enable_match_desc_start(GtSeqCol*);
 int         gt_seq_col_grep_desc(GtSeqCol*, char **seq,
                                  GtUword start, GtUword end,
                                  GtStr *seqid, GtError*);

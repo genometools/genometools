@@ -31,6 +31,7 @@ struct GtBioseqCol {
   GtBioseq **bioseqs;
   GtUword num_of_seqfiles;
   GtSeqInfoCache *grep_cache;
+  bool matchdescstart;
 };
 
 const GtSeqColClass* gt_bioseq_col_class(void);
@@ -52,9 +53,10 @@ static void gt_bioseq_col_delete(GtSeqCol *sc)
 static int grep_desc(GtBioseqCol *bsc, GtUword *filenum,
                      GtUword *seqnum, GtStr *seqid, GtError *err)
 {
-  GtUword i, j;
+  GtUword i, j, num_matches = 0;
   const GtSeqInfo *seq_info_ptr;
   GtSeqInfo seq_info;
+  GtStr *pattern;
   bool match = false;
   int had_err = 0;
   gt_error_check(err);
@@ -69,30 +71,51 @@ static int grep_desc(GtBioseqCol *bsc, GtUword *filenum,
     *seqnum = seq_info_ptr->seqnum;
     return 0;
   }
+  pattern = gt_str_new();
+  if (bsc->matchdescstart)
+    gt_str_append_cstr(pattern, "^");
+  gt_str_append_str(pattern, seqid);
+  if (bsc->matchdescstart)
+    gt_str_append_cstr(pattern, "[[:space:]]");
   for (i = 0; !had_err && i < bsc->num_of_seqfiles; i++) {
     GtBioseq *bioseq = bsc->bioseqs[i];
     for (j = 0; !had_err && j < gt_bioseq_number_of_sequences(bioseq); j++) {
       const char *desc = gt_bioseq_get_description(bioseq, j);
-      had_err = gt_grep(&match, gt_str_get(seqid), desc, err);
+      had_err = gt_grep(&match, gt_str_get(pattern), desc, err);
       if (!had_err && match) {
+        num_matches++;
+        if (num_matches > 1) {
+          gt_error_set(err, "query seqid '%s' could match more than one "
+                            "sequence description", gt_str_get(seqid));
+          had_err = -1;
+          break;
+        }
         *filenum = i;
         *seqnum = j;
         /* cache results */
         seq_info.filenum = i;
         seq_info.seqnum = j;
         gt_seq_info_cache_add(bsc->grep_cache, gt_str_get(seqid), &seq_info);
-        break;
       }
     }
     if (match)
       break;
   }
-  if (!had_err && !match) {
+  gt_str_delete(pattern);
+  if (!had_err && num_matches == 0) {
     gt_error_set(err, "no description matched sequence ID '%s'",
                  gt_str_get(seqid));
     had_err = -1;
   }
   return had_err;
+}
+
+static void gt_bioseq_col_enable_match_desc_start(GtSeqCol *sc)
+{
+  GtBioseqCol *bsc;
+  gt_assert(sc);
+  bsc = gt_bioseq_col_cast(sc);
+  bsc->matchdescstart = true;
 }
 
 static int gt_bioseq_col_grep_desc(GtSeqCol *sc, char **seq,
@@ -111,7 +134,7 @@ static int gt_bioseq_col_grep_desc(GtSeqCol *sc, char **seq,
     if (start > seqlength - 1 || end > seqlength - 1) {
       had_err = -1;
       gt_error_set(err, "trying to extract range "GT_WU"-"GT_WU" on sequence "
-                         "``%s''which is not covered by that sequence (only "
+                         "``%s'' which is not covered by that sequence (only "
                          ""GT_WU" characters in size). Has the sequence-region "
                          "to sequence mapping been defined correctly?",
                          start, end, gt_str_get(seqid), seqlength);
@@ -316,6 +339,7 @@ const GtSeqColClass* gt_bioseq_col_class(void)
   if (!bsc_class) {
       bsc_class = gt_seq_col_class_new(sizeof (GtBioseqCol),
                                        gt_bioseq_col_delete,
+                                       gt_bioseq_col_enable_match_desc_start,
                                        gt_bioseq_col_grep_desc,
                                        gt_bioseq_col_grep_desc_md5,
                                        gt_bioseq_col_grep_desc_sequence_length,
@@ -355,5 +379,6 @@ GtSeqCol* gt_bioseq_col_new(GtStrArray *sequence_files, GtError *err)
     gt_bioseq_col_delete(sc);
     return NULL;
   }
+  bsc->matchdescstart = false;
   return sc;
 }

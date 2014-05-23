@@ -31,6 +31,7 @@ struct GtEncseqCol {
   GtEncseq *encseq;
   GtMD5Tab *md5_tab;
   GtSeqInfoCache *grep_cache;
+  bool matchstart;
 };
 
 const GtSeqColClass* gt_encseq_col_class(void);
@@ -51,16 +52,17 @@ static int gt_encseq_col_do_grep_desc(GtEncseqCol *esc, GtUword *filenum,
                                       GtUword *seqnum, GtStr *seqid,
                                       GtError *err)
 {
-  GtUword j;
+  GtUword j, num_matches = 0;
   const GtSeqInfo *seq_info_ptr;
   GtSeqInfo seq_info;
+  GtStr *pattern;
   bool match = false;
   int had_err = 0;
   gt_error_check(err);
 
+  gt_assert(esc && filenum && seqnum && seqid);
   gt_assert(esc->encseq && gt_encseq_has_description_support(esc->encseq));
 
-  gt_assert(esc && filenum && seqnum && seqid);
   /* create cache */
   if (!esc->grep_cache)
     esc->grep_cache = gt_seq_info_cache_new();
@@ -71,23 +73,36 @@ static int gt_encseq_col_do_grep_desc(GtEncseqCol *esc, GtUword *filenum,
     *seqnum = seq_info_ptr->seqnum;
     return 0;
   }
+  pattern = gt_str_new();
+  if (esc->matchstart)
+    gt_str_append_cstr(pattern, "^");
+  gt_str_append_str(pattern, seqid);
+  if (esc->matchstart)
+    gt_str_append_cstr(pattern, "[[:space:]]");
   for (j = 0; !had_err && j < gt_encseq_num_of_sequences(esc->encseq); j++) {
     const char *desc;
     GtUword desc_len;
     desc = gt_encseq_description(esc->encseq, &desc_len, j);
     gt_assert(desc);
-    had_err = gt_grep_nt(&match, gt_str_get(seqid), desc, desc_len, err);
+    had_err = gt_grep_nt(&match, gt_str_get(pattern), desc, desc_len, err);
     if (!had_err && match) {
+      num_matches++;
+      if (num_matches > 1) {
+        gt_error_set(err, "query seqid '%s' could match more than one "
+                          "sequence description", gt_str_get(seqid));
+        had_err = -1;
+        break;
+      }
       *filenum = seq_info.filenum =
                        gt_encseq_filenum(esc->encseq,
                                          gt_encseq_seqstartpos(esc->encseq, j));
       *seqnum = seq_info.seqnum =
                       j - gt_encseq_filenum_first_seqnum(esc->encseq, *filenum);
       gt_seq_info_cache_add(esc->grep_cache, gt_str_get(seqid), &seq_info);
-      break;
     }
   }
-  if (!had_err && !match) {
+  gt_str_delete(pattern);
+  if (!had_err && num_matches == 0) {
     gt_error_set(err, "no description matched sequence ID '%s'",
                  gt_str_get(seqid));
     had_err = -1;
@@ -95,17 +110,40 @@ static int gt_encseq_col_do_grep_desc(GtEncseqCol *esc, GtUword *filenum,
   return had_err;
 }
 
+static void gt_encseq_col_enable_match_desc_start(GtSeqCol *sc)
+{
+  GtEncseqCol *esc;
+  gt_assert(sc);
+  esc = gt_encseq_col_cast(sc);
+  esc->matchstart = true;
+}
+
+static GtUword gt_encseq_col_get_sequence_length(const GtSeqCol *sc,
+                                                 GtUword filenum,
+                                                 GtUword seqnum);
+
 static int gt_encseq_col_grep_desc(GtSeqCol *sc, char **seq,
                                    GtUword start, GtUword end,
                                    GtStr *seqid, GtError *err)
 {
-  GtUword filenum = 0, seqnum = 0;
+  GtUword filenum = 0, seqnum = 0, seqlength;
   int had_err;
   GtEncseqCol *esc;
   esc = gt_encseq_col_cast(sc);
   gt_error_check(err);
   gt_assert(esc && seq && seqid);
   had_err = gt_encseq_col_do_grep_desc(esc, &filenum, &seqnum, seqid, err);
+  if (!had_err) {
+    seqlength = gt_encseq_col_get_sequence_length(sc, filenum, seqnum);
+    if (start > seqlength - 1 || end > seqlength - 1) {
+      had_err = -1;
+      gt_error_set(err, "trying to extract range "GT_WU"-"GT_WU" on sequence "
+                         "``%s'' which is not covered by that sequence (only "
+                         ""GT_WU" characters in size). Has the sequence-region "
+                         "to sequence mapping been defined correctly?",
+                         start, end, gt_str_get(seqid), seqlength);
+    }
+  }
   if (!had_err) {
     *seq = gt_seq_col_get_sequence(sc, filenum, seqnum, start, end);
   }
@@ -340,6 +378,7 @@ const GtSeqColClass* gt_encseq_col_class(void)
   if (!esc_class) {
       esc_class = gt_seq_col_class_new(sizeof (GtEncseqCol),
                                        gt_encseq_col_delete,
+                                       gt_encseq_col_enable_match_desc_start,
                                        gt_encseq_col_grep_desc,
                                        gt_encseq_col_grep_desc_md5,
                                        gt_encseq_col_grep_desc_sequence_length,
@@ -372,5 +411,6 @@ GtSeqCol* gt_encseq_col_new(GtEncseq *encseq, GtError *err)
   esc->md5_tab = gt_encseq_get_md5_tab(encseq, err);
   gt_assert(esc->md5_tab);
   esc->encseq = gt_encseq_ref(encseq);
+  esc->matchstart = false;
   return sc;
 }

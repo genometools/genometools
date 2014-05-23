@@ -46,6 +46,8 @@ GtRegionMapping* gt_region_mapping_new_mapping(GtStr *mapping_filename,
 GtRegionMapping* gt_region_mapping_new_seqfiles(GtStrArray *sequence_filenames,
                                                 bool matchdesc, bool usedesc);
 
+void             gt_region_mapping_match_start(GtRegionMapping *region_mapping);
+
 /* Like <gt_region_mapping_new_seqfiles()>, but using <encseq> as a sequence
    source. */
 GtRegionMapping* gt_region_mapping_new_encseq(GtEncseq *encseq, bool matchdesc,
@@ -54,8 +56,7 @@ GtRegionMapping* gt_region_mapping_new_encseq(GtEncseq *encseq, bool matchdesc,
 /* Return a new <GtRegionMapping> object which maps to the given sequence
    <rawseq> with the corresponding <length> and <offset>. */
 GtRegionMapping* gt_region_mapping_new_rawseq(const char *rawseq,
-                                              GtUword length,
-                                              GtUword offset);
+                                              GtUword length, GtUword offset);
 
 /* Increase the reference count for <region_mapping> and return it. */
 GtRegionMapping* gt_region_mapping_ref(GtRegionMapping *region_mapping);
