@@ -80,8 +80,10 @@ static int encseq_reader_lua_reinit_with_readmode(lua_State *L)
   GtReadmode readmode;
   reader = check_encseq_reader(L, 1);
   encseq = check_encseq(L, 2);
-  readmode = luaL_checknumber(L, 3);
-  startpos = luaL_checknumber(L, 4);
+  readmode = luaL_checklong(L, 3);
+  startpos = luaL_checklong(L, 4);
+  luaL_argcheck(L, readmode <= 3, 3,
+                "invalid readmode value, must be <= 3");
   luaL_argcheck(L, startpos < gt_encseq_total_length(*encseq), 4,
                 "cannot exceed total length of encoded sequence");
   gt_encseq_reader_reinit_with_readmode(*reader, *encseq, readmode, startpos);
@@ -113,10 +115,12 @@ static int encseq_lua_get_encoded_char(lua_State *L)
   int readmode;
   unsigned char cc;
   encseq = check_encseq(L, 1);
-  pos = luaL_checknumber(L, 2);
-  readmode = luaL_checknumber(L, 3);
+  pos = luaL_checklong(L, 2);
+  readmode = luaL_checklong(L, 3);
   luaL_argcheck(L, pos < gt_encseq_total_length(*encseq), 2,
                 "cannot exceed total length of encoded sequence");
+  luaL_argcheck(L, readmode <= 3, 3,
+                "invalid readmode value, must be <= 3");
   cc = gt_encseq_get_encoded_char(*encseq, pos, readmode);
   lua_pushnumber(L, cc);
   return 1;
@@ -129,10 +133,12 @@ static int encseq_lua_get_decoded_char(lua_State *L)
   int readmode;
   char cc;
   encseq = check_encseq(L, 1);
-  pos = luaL_checknumber(L, 2);
-  readmode = luaL_checknumber(L, 3);
+  pos = luaL_checklong(L, 2);
+  readmode = luaL_checklong(L, 3);
   luaL_argcheck(L, pos < gt_encseq_total_length(*encseq), 2,
                 "cannot exceed total length of encoded sequence");
+  luaL_argcheck(L, readmode <= 3, 3,
+                "invalid readmode value, must be <= 3");
   cc = gt_encseq_get_decoded_char(*encseq, pos, readmode);
   lua_pushlstring(L, &cc, sizeof (char));
   return 1;
@@ -179,8 +185,8 @@ static int encseq_lua_extract_encoded(lua_State *L)
   GtUword from, to;
   unsigned char *string;
   encseq = check_encseq(L, 1);
-  from = luaL_checknumber(L, 2);
-  to = luaL_checknumber(L, 3);
+  from = luaL_checklong(L, 2);
+  to = luaL_checklong(L, 3);
   luaL_argcheck(L, from <= to, 2, "must be <= range endposition");
   luaL_argcheck(L, to < gt_encseq_total_length(*encseq), 3,
                 "cannot exceed total length of encoded sequence");
@@ -196,8 +202,8 @@ static int encseq_lua_extract_decoded(lua_State *L)
   GtUword from, to;
   char *string;
   encseq = check_encseq(L, 1);
-  from = luaL_checknumber(L, 2);
-  to = luaL_checknumber(L, 3);
+  from = luaL_checklong(L, 2);
+  to = luaL_checklong(L, 3);
   luaL_argcheck(L, from <= to, 2, "must be <= range endposition");
   luaL_argcheck(L, to < gt_encseq_total_length(*encseq), 3,
                 "cannot exceed total length of encoded sequence");
@@ -213,7 +219,7 @@ static int encseq_lua_seqlength(lua_State *L)
   GtEncseq **encseq;
   GtUword pos;
   encseq = check_encseq(L, 1);
-  pos = luaL_checknumber(L, 2);
+  pos = luaL_checklong(L, 2);
   luaL_argcheck(L, pos < gt_encseq_num_of_sequences(*encseq), 2,
                 "cannot exceed number of sequences");
   lua_pushnumber(L, gt_encseq_seqlength(*encseq, pos));
@@ -225,7 +231,7 @@ static int encseq_lua_seqstartpos(lua_State *L)
   GtEncseq **encseq;
   GtUword pos;
   encseq = check_encseq(L, 1);
-  pos = luaL_checknumber(L, 2);
+  pos = luaL_checklong(L, 2);
   luaL_argcheck(L, pos < gt_encseq_num_of_sequences(*encseq), 2,
                 "cannot exceed number of sequences");
   lua_pushnumber(L, gt_encseq_seqstartpos(*encseq, pos));
@@ -237,7 +243,7 @@ static int encseq_lua_seqnum(lua_State *L)
   GtEncseq **encseq;
   GtUword pos;
   encseq = check_encseq(L, 1);
-  pos = luaL_checknumber(L, 2);
+  pos = luaL_checklong(L, 2);
   luaL_argcheck(L, pos < gt_encseq_total_length(*encseq), 2,
                 "cannot exceed total length of encoded sequence");
   lua_pushnumber(L, gt_encseq_seqnum(*encseq, pos));
@@ -266,7 +272,7 @@ static int encseq_lua_description(lua_State *L)
   GtUword seqno, desclen;
   const char *string;
   encseq = check_encseq(L, 1);
-  seqno = luaL_checknumber(L, 2);
+  seqno = luaL_checklong(L, 2);
   luaL_argcheck(L, seqno < gt_encseq_num_of_sequences(*encseq), 2,
                 "cannot exceed number of sequences");
   string = gt_encseq_description(*encseq, &desclen, seqno);
@@ -287,7 +293,7 @@ static int encseq_lua_effective_filelength(lua_State *L)
   GtEncseq **encseq;
   GtUword fileno;
   encseq = check_encseq(L, 1);
-  fileno = luaL_checknumber(L, 2);
+  fileno = luaL_checklong(L, 2);
   luaL_argcheck(L, fileno < gt_encseq_num_of_files(*encseq), 2,
                 "cannot exceed number of files");
   lua_pushnumber(L, gt_encseq_effective_filelength(*encseq, fileno));
@@ -299,7 +305,7 @@ static int encseq_lua_filestartpos(lua_State *L)
   GtEncseq **encseq;
   GtUword fileno;
   encseq = check_encseq(L, 1);
-  fileno = luaL_checknumber(L, 2);
+  fileno = luaL_checklong(L, 2);
   luaL_argcheck(L, fileno < gt_encseq_num_of_files(*encseq), 2,
                 "cannot exceed number of files");
   lua_pushnumber(L, gt_encseq_filestartpos(*encseq, fileno));
@@ -311,7 +317,7 @@ static int encseq_lua_filenum(lua_State *L)
   GtEncseq **encseq;
   GtUword pos;
   encseq = check_encseq(L, 1);
-  pos = luaL_checknumber(L, 2);
+  pos = luaL_checklong(L, 2);
   luaL_argcheck(L, pos < gt_encseq_total_length(*encseq), 2,
                 "cannot exceed total length of encoded sequence");
   lua_pushnumber(L, gt_encseq_filenum(*encseq, pos));
@@ -384,8 +390,10 @@ static int encseq_lua_create_reader_with_readmode(lua_State *L)
   GtUword startpos;
   GtReadmode readmode;
   encseq = check_encseq(L, 1);
-  readmode = luaL_checknumber(L, 2);
-  startpos = luaL_checknumber(L, 3);
+  readmode = luaL_checklong(L, 2);
+  startpos = luaL_checklong(L, 3);
+  luaL_argcheck(L, readmode <= 3, 2,
+                "invalid readmode value, must be <= 3");
   luaL_argcheck(L, startpos < gt_encseq_total_length(*encseq), 3,
                 "cannot exceed total length of encoded sequence");
   reader = gt_encseq_create_reader_with_readmode(*encseq, readmode, startpos);
