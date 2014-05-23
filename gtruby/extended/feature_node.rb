@@ -49,6 +49,10 @@ module GT
                                                       const char*)"
   extern "void          gt_feature_node_add_attribute(GtFeatureNode*,
                                                       const char*, const char*)"
+  extern "void          gt_feature_node_set_attribute(GtFeatureNode*,
+                                                      const char*, const char*)"
+  extern "void          gt_feature_node_remove_attribute(GtFeatureNode*,
+                                                         const char*)"
   extern "void          gt_feature_node_foreach_attribute(GtFeatureNode*,
                                                           void*, void*)"
 
@@ -165,6 +169,22 @@ module GT
         gterror("Attribute keys or values must not be empty!")
       end
       GT.gt_feature_node_add_attribute(@genome_node, tag.to_s, val.to_s)
+      self.update_attribs
+    end
+
+    def set_attribute(tag, val)
+      if tag.to_s == "" or val.to_s == "" then
+        gterror("Attribute keys or values must not be empty!")
+      end
+      GT.gt_feature_node_set_attribute(@genome_node, tag.to_s, val.to_s)
+      self.update_attribs
+    end
+
+    def remove_attribute(tag)
+      if tag.to_s == "" then
+        gterror("Attribute key must not be empty!")
+      end
+      GT.gt_feature_node_remove_attribute(@genome_node, tag.to_s)
       self.update_attribs
     end
 
