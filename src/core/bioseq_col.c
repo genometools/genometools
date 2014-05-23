@@ -25,6 +25,7 @@
 #include "core/seq_col_rep.h"
 #include "core/seq_info_cache.h"
 #include "core/undef_api.h"
+#include "core/warning_api.h"
 
 struct GtBioseqCol {
   GtSeqCol parent_instance;
