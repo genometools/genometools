@@ -23,6 +23,7 @@
 #include "core/encseq_api.h"
 #include "core/error_api.h"
 #include "extended/multieoplist.h"
+#include "extended/xansi_io.h"
 
 /* Class <GtEditscript> stores everything from an alignment of two sequences
    that is needed to reproduce sequence 2 (usualy called v) from sequence one
@@ -69,16 +70,9 @@ GtUword         gt_editscript_get_sequence(const GtEditscript *editscript,
                                            GtReadmode dir,
                                            GtUchar *buffer);
 
-/* Function Pointer to read or write to/from file. Only wrappers around fread
-   und fwrite to have similar signatures. */
-typedef void (*EditscriptIOFunc)(void *ptr,
-                                 size_t size,
-                                 size_t nmemb,
-                                 FILE *stream);
-
 /* Write or read to <fp> depending on what <io_func> is given. */
 GtEditscript*   gt_editscript_io(GtEditscript *editscript, FILE *fp,
-                                 EditscriptIOFunc io_func);
+                                 GtXansiIOFunc io_func);
 
 size_t          gt_editscript_size(GtEditscript *editscript);
 void            gt_editscript_delete(GtEditscript *editscript);

@@ -33,6 +33,7 @@
 #include "extended/editscript.h"
 #include "extended/unique_encseq.h"
 #include "extended/unique_encseq_rep.h"
+#include "extended/xansi_io.h"
 #include "match/echoseq.h"
 #include "match/kmer2string.h"
 
@@ -568,7 +569,7 @@ typedef void (*UniqueEncseqIOFunc)(void *ptr,
 static GtUniqueEncseqUniqueEntry *gt_unique_encseq_unique_io(
     GtUniqueEncseqUniqueEntry *unique,
     FILE *fp,
-    EditscriptIOFunc io_func)
+    GtXansiIOFunc io_func)
 {
   if (unique == NULL ) {
     unique = gt_calloc((size_t) 1, sizeof (*unique));
@@ -584,7 +585,7 @@ static GtUniqueEncseqUniqueEntry *gt_unique_encseq_unique_io(
 static GtUniqueEncseqLinkEntry *gt_unique_encseq_link_io(
     GtUniqueEncseqLinkEntry *link,
     FILE *fp,
-    EditscriptIOFunc io_func)
+    GtXansiIOFunc io_func)
 {
   if (link == NULL ) {
     link = gt_calloc((size_t) 1, sizeof (*link));
@@ -601,7 +602,7 @@ static GtUniqueEncseqLinkEntry *gt_unique_encseq_link_io(
 /* generic IO function for an unique encseq database entry */
 static void gt_unique_encseq_uedbentry_io(GtUniqueEncseqDBentry *entry,
                                           FILE *fp,
-                                          EditscriptIOFunc io_func)
+                                          GtXansiIOFunc io_func)
 {
   io_func(&entry->orig_startpos, sizeof (entry->orig_startpos), (size_t) 1, fp);
   io_func(&entry->orig_endpos, sizeof (entry->orig_endpos), (size_t) 1, fp);

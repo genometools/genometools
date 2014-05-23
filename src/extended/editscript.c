@@ -477,7 +477,7 @@ size_t gt_editscript_size(GtEditscript *editscript)
   io_func(elemptr, sizeof (*(elemptr)), (size_t) 1, fp)
 
 GtEditscript *gt_editscript_io(GtEditscript *editscript, FILE *fp,
-                               EditscriptIOFunc io_func)
+                               GtXansiIOFunc io_func)
 {
   GtUword bits;
   if (editscript == NULL) {

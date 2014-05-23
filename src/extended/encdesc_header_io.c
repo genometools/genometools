@@ -23,48 +23,14 @@
 #include "core/log_api.h"
 #include "extended/encdesc_header_io.h"
 #include "extended/encdesc_rep.h"
-
-static inline void encdesc_xfwrite(void *ptr,
-                                   size_t size,
-                                   size_t nmemb,
-                                   FILE *stream)
-{
-  if (nmemb != fwrite((const void*) ptr, size, nmemb, stream)) {
-    perror("gt_sampling_xfwrite could not write to file");
-    exit(EXIT_FAILURE);
-  }
-}
-
-static inline void encdesc_xfread(void *ptr,
-                                  size_t size,
-                                  size_t nmemb,
-                                  FILE *stream)
-{
-  if (nmemb != fread(ptr, size, nmemb, stream)) {
-    gt_assert(feof(stream) == 0);
-    if (ferror(stream) != 0)
-      perror("gt_sampling_xfread could not read from file");
-    exit(EXIT_FAILURE);
-  };
-}
+#include "extended/xansi_io.h"
 
 #define GT_ENCDESC_IO_ONE(element, fp)                  \
     io_func(&element, sizeof (element), (size_t) 1, fp)
 
-#define GT_ENCDESC_WRITE_ONE(element, fp)               \
-    encdesc_xfwrite(&element, sizeof (element), (size_t) 1, fp)
-
-#define GT_ENCDESC_READ_ONE(element, fp)                \
-    encdesc_xfread(&element, sizeof (element), (size_t) 1, fp)
-
-typedef void (*EncdescIOFunc)(void *ptr,
-                              size_t size,
-                              size_t nmemb,
-                              FILE *stream);
-
 static inline void encdesc_header_io_basics(GtEncdesc *encdesc,
                                             FILE *fp,
-                                            EncdescIOFunc io_func)
+                                            GtXansiIOFunc io_func)
 {
   GT_ENCDESC_IO_ONE((encdesc->num_of_descs), fp);
   GT_ENCDESC_IO_ONE((encdesc->num_of_fields), fp);
@@ -74,7 +40,7 @@ static inline void encdesc_header_io_basics(GtEncdesc *encdesc,
 
 static void io_field_sep_and_is_cons(DescField *field,
                                      FILE *fp,
-                                     EncdescIOFunc io_func)
+                                     GtXansiIOFunc io_func)
 {
   GT_ENCDESC_IO_ONE(field->sep, fp);
   GT_ENCDESC_IO_ONE(field->is_cons, fp);
@@ -83,22 +49,22 @@ static void io_field_sep_and_is_cons(DescField *field,
 static void write_cons_field_header(DescField *field,
                                     FILE *fp)
 {
-  GT_ENCDESC_WRITE_ONE(field->len, fp);
+  gt_xansi_io_xfwrite_one(field->len, fp);
 
-  encdesc_xfwrite(field->data, sizeof (char), (size_t) field->len, fp);
+  gt_xansi_io_xfwrite(field->data, sizeof (char), (size_t) field->len, fp);
 }
 
 static void read_cons_field_header(DescField *field,
                                    FILE *fp)
 {
-  GT_ENCDESC_READ_ONE(field->len, fp);
+  gt_xansi_io_xfread_one(field->len, fp);
   field->data = gt_calloc((size_t) (field->len + 1), sizeof (char));
-  encdesc_xfread(field->data, sizeof (char), (size_t) field->len, fp);
+  gt_xansi_io_xfread(field->data, sizeof (char), (size_t) field->len, fp);
 }
 
 static bool io_zero_padding_needs_dist(DescField *field,
                                        FILE *fp,
-                                       EncdescIOFunc io_func)
+                                       GtXansiIOFunc io_func)
 {
   GT_ENCDESC_IO_ONE(field->has_zero_padding, fp);
   if (field->has_zero_padding) {
@@ -133,14 +99,14 @@ static void encdesc_distri_iter_write(GtUword symbol,
 {
   EncsecDistriData *this_data = (EncsecDistriData*) data;
   this_data->written_elems++;
-  GT_ENCDESC_WRITE_ONE(symbol, this_data->fp);
-  GT_ENCDESC_WRITE_ONE(freq, this_data->fp);
+  gt_xansi_io_xfwrite_one(symbol, this_data->fp);
+  gt_xansi_io_xfwrite_one(freq, this_data->fp);
 
 }
 
 static void io_min_max_calc_ranges(DescField *field,
                        FILE *fp,
-                       EncdescIOFunc io_func)
+                       GtXansiIOFunc io_func)
 {
   GT_ENCDESC_IO_ONE(field->min_value, fp);
   GT_ENCDESC_IO_ONE(field->max_value, fp);
@@ -225,8 +191,8 @@ static enum iterator_op encdesc_li_ull_hashmap_iter_write(
 {
   EncsecDistriData *this_data = (EncsecDistriData*) data;
   this_data->written_elems++;
-  GT_ENCDESC_WRITE_ONE(key, this_data->fp);
-  GT_ENCDESC_WRITE_ONE(value, this_data->fp);
+  gt_xansi_io_xfwrite_one(key, this_data->fp);
+  gt_xansi_io_xfwrite_one(value, this_data->fp);
   /* always continue since we exit on write error anyway */
   return CONTINUE_ITERATION;
 }
@@ -256,8 +222,8 @@ static void read_hashmap_distri(GtUword size,
 
   gt_assert(h_table != NULL);
   for (idx = 0; idx < size; idx++) {
-    GT_ENCDESC_READ_ONE(symbol, fp);
-    GT_ENCDESC_READ_ONE(freq, fp);
+    gt_xansi_io_xfread_one(symbol, fp);
+    gt_xansi_io_xfread_one(freq, fp);
     gt_assert(li_ull_gt_hashmap_get(h_table, symbol) == 0);
     (void) li_ull_gt_hashmap_add(h_table, symbol, freq);
   }
@@ -270,14 +236,13 @@ static void read_numeric_field_header(DescField *field,
        needs_delta_dist = false,
        needs_value_dist = false;
   GtUword num_of_zero_leaves;
-  /* EncdescHuffDist huffdist; */
 
   needs_zero_dist = io_zero_padding_needs_dist(field,
                                                fp,
-                                               encdesc_xfread);
+                                               gt_xansi_io_xfread);
   io_min_max_calc_ranges(field,
                          fp,
-                         encdesc_xfread);
+                         gt_xansi_io_xfread);
 
   numeric_field_check_distri_dependence(field,
                                         &needs_delta_dist,
@@ -288,12 +253,6 @@ static void read_numeric_field_header(DescField *field,
     read_hashmap_distri(field->delta_values_size,
                         field->delta_values,
                         fp);
-    /* huffdist.li_ull_hashmap = field->delta_values;
-    huffdist.correction_base = field->min_delta;
-    field->huffman_num = gt_huffman_new(&huffdist,
-                                        encdesc_hashmap_distr_get_corrected,
-                                        labs(field->max_delta -
-                                          field->min_delta) + 1); */
   }
 
   if (needs_value_dist) {
@@ -301,12 +260,6 @@ static void read_numeric_field_header(DescField *field,
     read_hashmap_distri(field->num_values_size,
                         field->num_values,
                         fp);
-    /* huffdist.li_ull_hashmap = field->num_values;
-    huffdist.correction_base = field->min_value;
-    field->huffman_num = gt_huffman_new(huffdist,
-                                        encdesc_hashmap_distr_get_corrected,
-                                        labs(field->max_value -
-                                          field->min_value) + 1); */
   }
 
   if (needs_zero_dist) {
@@ -314,16 +267,12 @@ static void read_numeric_field_header(DescField *field,
                   symbol;
     GtUint64 freq;
     field->zero_count = gt_disc_distri_new();
-    GT_ENCDESC_READ_ONE(num_of_zero_leaves, fp);
+    gt_xansi_io_xfread_one(num_of_zero_leaves, fp);
     for (idx = 0; idx < num_of_zero_leaves; idx++) {
-      GT_ENCDESC_READ_ONE(symbol, fp);
-      GT_ENCDESC_READ_ONE(freq, fp);
+      gt_xansi_io_xfread_one(symbol, fp);
+      gt_xansi_io_xfread_one(freq, fp);
       gt_disc_distri_add_multi(field->zero_count, symbol, freq);
     }
-    /* field->huffman_zero_count =
-      gt_huffman_new(field->zero_count,
-                     encdesc_distri_get_symbol_freq,
-                     &field->max_zero + 1); */
   }
 }
 
@@ -340,10 +289,10 @@ static void write_numeric_field_header(DescField *field,
 
   needs_zero_dist = io_zero_padding_needs_dist(field,
                                                fp,
-                                               encdesc_xfwrite);
+                                               gt_xansi_io_xfwrite);
   io_min_max_calc_ranges(field,
                          fp,
-                         encdesc_xfwrite);
+                         gt_xansi_io_xfwrite);
 
   numeric_field_check_distri_dependence(field,
                                         &needs_delta_dist,
@@ -369,7 +318,7 @@ static void write_numeric_field_header(DescField *field,
                            encdesc_distri_iter_count,
                            &data);
     num_of_zero_leaves = data.written_elems;
-    GT_ENCDESC_WRITE_ONE(num_of_zero_leaves, fp);
+    gt_xansi_io_xfwrite_one(num_of_zero_leaves, fp);
     data.written_elems = 0;
     gt_disc_distri_foreach(field->zero_count,
                            encdesc_distri_iter_write,
@@ -380,7 +329,7 @@ static void write_numeric_field_header(DescField *field,
 
 static void io_field_len_header(DescField *field,
                                 FILE *fp,
-                                EncdescIOFunc io_func)
+                                GtXansiIOFunc io_func)
 {
   GT_ENCDESC_IO_ONE(field->fieldlen_is_const, fp);
   GT_ENCDESC_IO_ONE(field->len, fp);
@@ -401,7 +350,7 @@ static void read_field_header_bittab(DescField *field,
     num_of_chars++;
 
   for (char_idx = 0; char_idx < num_of_chars; char_idx++) {
-    GT_ENCDESC_READ_ONE(cc, fp);
+    gt_xansi_io_xfread_one(cc, fp);
     for (bit_idx = 0; bit_idx < sizeof (char); bit_idx++) {
       if (cc & (1 << bit_idx))
         gt_bittab_set_bit(field->bittab,
@@ -428,7 +377,7 @@ static void write_field_header_bittab(DescField *field, FILE *fp)
                                                 bit_idx)))
         cc |= 1 << bit_idx;
     }
-    GT_ENCDESC_WRITE_ONE(cc, fp);
+    gt_xansi_io_xfwrite_one(cc, fp);
     cc = 0;
   }
 }
@@ -449,7 +398,7 @@ static void write_field_char_dists(DescField *field,
         !gt_bittab_bit_is_set(field->bittab, char_idx)) {
 
       distr_len = get_hashmap_distri_size(field->chars[char_idx]);
-      GT_ENCDESC_WRITE_ONE(distr_len, fp);
+      gt_xansi_io_xfwrite_one(distr_len, fp);
       write_hashmap_distri(&data,
                            field->chars[char_idx],
                            distr_len);
@@ -467,7 +416,7 @@ static void read_field_char_dists(DescField *field,
     if (char_idx >= field->len ||
         !gt_bittab_bit_is_set(field->bittab, char_idx)) {
 
-      GT_ENCDESC_READ_ONE(distr_len, fp);
+      gt_xansi_io_xfread_one(distr_len, fp);
       field->chars[char_idx] = li_ull_gt_hashmap_new();
       read_hashmap_distri(distr_len,
                           field->chars[char_idx],
@@ -481,28 +430,28 @@ void encdesc_write_header(GtEncdesc *encdesc, FILE *fp)
   GtUword cur_field_num;
   DescField *cur_field;
 
-  encdesc_header_io_basics(encdesc, fp, encdesc_xfwrite);
+  encdesc_header_io_basics(encdesc, fp, gt_xansi_io_xfwrite);
 
   for (cur_field_num = 0;
        cur_field_num < encdesc->num_of_fields;
        cur_field_num++) {
     cur_field = &encdesc->fields[cur_field_num];
-    io_field_sep_and_is_cons(cur_field, fp, encdesc_xfwrite);
+    io_field_sep_and_is_cons(cur_field, fp, gt_xansi_io_xfwrite);
 
     if (cur_field->is_cons) {
       write_cons_field_header(cur_field, fp);
     }
     else {
-      GT_ENCDESC_WRITE_ONE(cur_field->is_numeric, fp);
+      gt_xansi_io_xfwrite_one(cur_field->is_numeric, fp);
       if (cur_field->is_numeric) {
         write_numeric_field_header(cur_field, fp);
       }
       else {
 
-        io_field_len_header(cur_field, fp, encdesc_xfwrite);
+        io_field_len_header(cur_field, fp, gt_xansi_io_xfwrite);
 
-        encdesc_xfwrite(cur_field->data, sizeof (char),
-                        (size_t) cur_field->len, fp);
+        gt_xansi_io_xfwrite(cur_field->data, sizeof (char),
+                            (size_t) cur_field->len, fp);
 
         write_field_header_bittab(cur_field, fp);
 
@@ -517,7 +466,7 @@ void encdesc_read_header(GtEncdesc *encdesc, FILE *fp)
   GtUword cur_field_num;
   DescField *cur_field;
 
-  encdesc_header_io_basics(encdesc, fp, encdesc_xfread);
+  encdesc_header_io_basics(encdesc, fp, gt_xansi_io_xfread);
 
   encdesc->fields = gt_calloc((size_t) encdesc->num_of_fields,
                               sizeof (DescField));
@@ -528,25 +477,25 @@ void encdesc_read_header(GtEncdesc *encdesc, FILE *fp)
     cur_field = &encdesc->fields[cur_field_num];
     cur_field->bits_per_num = 0;
     cur_field->prev_value = 0;
-    io_field_sep_and_is_cons(cur_field, fp, encdesc_xfread);
+    io_field_sep_and_is_cons(cur_field, fp, gt_xansi_io_xfread);
 
     if (cur_field->is_cons) {
       read_cons_field_header(cur_field, fp);
     }
     else {
-      GT_ENCDESC_READ_ONE(cur_field->is_numeric, fp);
+      gt_xansi_io_xfread_one(cur_field->is_numeric, fp);
       if (cur_field->is_numeric) {
         read_numeric_field_header(cur_field, fp);
       }
       else {
-        io_field_len_header(cur_field, fp, encdesc_xfread);
+        io_field_len_header(cur_field, fp, gt_xansi_io_xfread);
 
         cur_field->bittab = gt_bittab_new(cur_field->len);
 
         cur_field->data = gt_calloc((size_t) (cur_field->len + 1),
                                     sizeof (char));
-        encdesc_xfread(cur_field->data, sizeof (char),
-                       (size_t) cur_field->len, fp);
+        gt_xansi_io_xfread(cur_field->data, sizeof (char),
+                           (size_t) cur_field->len, fp);
 
         read_field_header_bittab(cur_field, fp);
 

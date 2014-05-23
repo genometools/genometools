@@ -344,7 +344,7 @@ void gt_multieoplist_combine(GtMultieoplist *multieops,
 }
 
 GtMultieoplist *gt_meoplist_io(GtMultieoplist *multieops,
-                               MeoplistIOFunc io_func,
+                               GtXansiIOFunc io_func,
                                FILE *fp)
 {
   gt_assert(io_func != NULL);
