@@ -50,7 +50,7 @@ matchers = {
 
   should_match = function(value, pattern)
     if not string.find(value, pattern) then
-      return false, value .. " doesn't match pattern "..pattern
+      return false, value .. " does not match pattern "..pattern
     end
     return true
   end;
