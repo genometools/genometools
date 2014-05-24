@@ -154,7 +154,8 @@ static int spec_visitor_visit_child(GtFeatureNode* fn, void *nti, GtError *err)
     gt_array_add(info->sv->graph_context, info->parent);
     had_err = spec_visitor_process_node(info->sv, fn, info->parent, err);
   }
-  (void) gt_array_pop(info->sv->graph_context);
+  if (!had_err)
+    (void) gt_array_pop(info->sv->graph_context);
   return had_err;
 }
 
