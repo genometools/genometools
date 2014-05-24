@@ -111,15 +111,20 @@ static int spec_visitor_process_node(GtSpecVisitor *sv, GtFeatureNode *node,
                                      GtError *err)
 {
   int had_err = 0, *ref;
-  const char *type = gt_feature_node_get_type(node);
-  if ((ref = gt_hashmap_get(sv->type_specs, type))) {
-    sv->current_node = (GtGenomeNode*) node;
-    lua_rawgeti(sv->L, LUA_REGISTRYINDEX, *ref);
-    gt_lua_genome_node_push(sv->L, gt_genome_node_ref((GtGenomeNode*) node));
-    if (lua_pcall(sv->L, 1, 0, 0)) {
-      const char *error = lua_tostring(sv->L, -1);
-      gt_error_set(err, "%s", error);
-      had_err = -1;
+  const char *type;
+
+  if (!gt_feature_node_is_pseudo(node)) {
+    type = gt_feature_node_get_type(node);
+    gt_assert(type);
+    if ((ref = gt_hashmap_get(sv->type_specs, type))) {
+      sv->current_node = (GtGenomeNode*) node;
+      lua_rawgeti(sv->L, LUA_REGISTRYINDEX, *ref);
+      gt_lua_genome_node_push(sv->L, gt_genome_node_ref((GtGenomeNode*) node));
+      if (lua_pcall(sv->L, 1, 0, 0)) {
+        const char *error = lua_tostring(sv->L, -1);
+        gt_error_set(err, "%s", error);
+        had_err = -1;
+      }
     }
   }
 
