@@ -347,8 +347,9 @@ void gt_spec_results_report(GtSpecResults *sr, GtFile *outfile,
                                     gt_spec_results_report_single,
                                     &info, NULL);
   }
-  gt_file_xprintf(outfile, "\nChecked " GT_WU " CCs (" GT_WU " feature types), "
-                           GT_WU " nodes, " GT_WU " aspects.\n",
+  gt_file_xprintf(outfile, "\nTraversed " GT_WU " CCs "
+                           "(" GT_WU " feature types), "
+                           "checked " GT_WU " nodes for " GT_WU " aspects.\n",
                            sr->checked_ccs, sr->checked_types,
                            sr->checked_nodes, sr->checked_aspects);
 }
