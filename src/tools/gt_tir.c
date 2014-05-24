@@ -394,9 +394,9 @@ static int gt_tir_runner(GT_UNUSED int argc, GT_UNUSED const char **argv,
     GtNodeVisitor *pdom_v;
     ms = gt_pdom_model_set_new(arguments->hmm_files, err);
     if (ms != NULL) {
-      pdom_v = gt_ltrdigest_pdom_visitor_new(ms, arguments->cutoff,
+      pdom_v = gt_ltrdigest_pdom_visitor_new(ms, arguments->evalue_cutoff,
                                              arguments->chain_max_gap_length,
-                                             arguments->evalue_cutoff, rmap,
+                                             arguments->cutoff, rmap,
                                              err);
       if (pdom_v == NULL)
         had_err = -1;
