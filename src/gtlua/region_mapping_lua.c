@@ -17,7 +17,7 @@
 
 #include "lauxlib.h"
 #include "extended/luahelper.h"
-#include "extended/region_mapping_api.h"
+#include "extended/region_mapping.h"
 #include "gtlua/region_mapping_lua.h"
 #include "gtlua/gtcore_lua.h"
 
@@ -34,6 +34,26 @@ static int region_mapping_lua_new_seqfile_matchdesc(lua_State *L)
   gt_str_array_add_cstr(seqfile, seqfilename);
   /* XXX: make second and third parameter available */
   *region_mapping = gt_region_mapping_new_seqfiles(seqfile, true, false);
+  gt_str_array_delete(seqfile);
+  luaL_getmetatable(L, REGION_MAPPING_METATABLE);
+  lua_setmetatable(L, -2);
+  return 1;
+}
+
+static int region_mapping_lua_new_seqfile_matchdescstart(lua_State *L)
+{
+  const char *seqfilename;
+  GtStrArray *seqfile;
+  GtRegionMapping **region_mapping;
+  gt_assert(L);
+  seqfilename = luaL_checkstring(L, 1);
+  region_mapping = lua_newuserdata(L, sizeof (GtRegionMapping*));
+  gt_assert(region_mapping);
+  seqfile = gt_str_array_new();
+  gt_str_array_add_cstr(seqfile, seqfilename);
+  /* XXX: make second and third parameter available */
+  *region_mapping = gt_region_mapping_new_seqfiles(seqfile, true, false);
+  gt_region_mapping_enable_match_desc_start(*region_mapping);
   gt_str_array_delete(seqfile);
   luaL_getmetatable(L, REGION_MAPPING_METATABLE);
   lua_setmetatable(L, -2);
@@ -76,6 +96,8 @@ static const struct luaL_Reg region_mapping_lib_f [] = {
   { "region_mapping_new_seqfile", region_mapping_lua_new_seqfile },
   { "region_mapping_new_seqfile_matchdesc",
                                      region_mapping_lua_new_seqfile_matchdesc },
+  { "region_mapping_new_seqfile_matchdescstart",
+                                region_mapping_lua_new_seqfile_matchdescstart },
   { "region_mapping_new_seqfile_usedesc",
                                        region_mapping_lua_new_seqfile_usedesc },
   { NULL, NULL }
