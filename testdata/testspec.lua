@@ -46,24 +46,16 @@ describe.feature("mRNA", function(mrna)
   it("has a coding sequence", function()
     expect(mrna:has_child_of_type("CDS")).should_be(true)
   end)
-end)
 
-describe.feature("CDS", function(cds)
-  if not (cds:appears_as_child_of_type("ncRNA")
-            or cds:appears_as_child_of_type("snRNA")
-            or cds:appears_as_child_of_type("snoRNA")
-            or cds:appears_as_child_of_type("tRNA")
-            or cds:appears_as_child_of_type("rRNA")) then
-    it("does not contain internal stop codons", function()
-      local seq = cds:extract_sequence("CDS", false, rm)
-      expect(gt.translate_dna(string.sub(seq, 1, -3))).should_not_match("\*")
-    end)
+  it("has CDS with no internal stop codons", function()
+    local seq = mrna:extract_sequence("CDS", true, rm)
+    expect(gt.translate_dna(string.sub(seq, 1, -3))).should_not_match("\*")
+  end)
 
-    it("ends on a stop codon", function()
-      local seq = cds:extract_sequence("CDS", false, rm)
-      expect(gt.translate_dna(string.sub(seq, -3, -1))).should_match("\*")
-    end)
-  end
+  it("has CDS ending on a stop codon", function()
+    local seq = mrna:extract_sequence("CDS", true, rm)
+    expect(gt.translate_dna(string.sub(seq, -3, -1))).should_match("\*")
+  end)
 end)
 
 describe.feature("polypeptide", function(pp)
@@ -85,7 +77,9 @@ end)
 describe.meta(function(meta)
   it("only uses valid URLs in the feature-ontology directive", function()
     if meta:get_directive() == "feature-ontology" then
-      expect(meta:get_data()).should_match("https?://[%w-_%.%?%.:/%+=&]+")
+      url = meta:get_data()
+      expect(string.find(url, "https?://[%w-_%.%?%.:/%+=&]+") or
+             string.find(url, "ftp://[%w-_%.%?%.:/%+=&]+")).should_be_truthy()
     end
   end)
 end)
