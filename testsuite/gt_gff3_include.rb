@@ -1390,6 +1390,13 @@ Test do
   grep last_stderr, "wrong separator"
 end
 
+Name "gt gff3 blank after seqid"
+Keywords "gt_gff3"
+Test do
+  run_test "#{$bin}gt gff3 #{$testdata}gt_gff3_whitespace_problem.gff3"
+  grep last_stderr, "ends with a blank, removing"
+end
+
 def large_gff3_test(name, file)
   Name "gt gff3 #{name}"
   Keywords "gt_gff3 large_gff3"

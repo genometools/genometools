@@ -1449,6 +1449,20 @@ static void set_source(GtFeatureNode *feature_node, const char *source,
   gt_feature_node_set_source(feature_node, source_str);
 }
 
+void chomp_seqid(char *seqid, const char *filename, unsigned int line_number)
+{
+  GtUword len;
+  if (!seqid) return;
+  len = strlen(seqid);
+  if (len > 0) {
+    if (seqid[len-1] == ' ') {
+      gt_warning("seqid \"%s\" on line %u in file \"%s\" ends with a blank, "
+                 "removing it", seqid, line_number, filename);
+      (void) gt_cstr_rtrim(seqid, ' ');
+    }
+  }
+}
+
 static int parse_gff3_feature_line(GtGFF3Parser *parser,
                                    GtQueue *genome_nodes,
                                    GtCstrTable *used_types, char *line,
@@ -1560,6 +1574,9 @@ static int parse_gff3_feature_line(GtGFF3Parser *parser,
   /* parse the phase */
   if (!had_err)
     had_err = gt_parse_phase(&phase_value, phase, line_number, filename, err);
+
+  if (!had_err)
+    chomp_seqid(seqid, filename, line_number);
 
   /* get seqid */
   if (!had_err) {
