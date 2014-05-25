@@ -52,6 +52,7 @@ struct GtSpecVisitor {
              *matcher_name;
   GtArray *graph_context;
   GtSpecResults *res;
+  bool runtime_fail_hard;
 };
 
 typedef struct {
@@ -447,8 +448,15 @@ static int spec_it(lua_State *L)
 
   /* handle aspect */
   sv->current_aspect = name;
+
   if (lua_pcall(L, 0, 0, 0)) {
-    return lua_error(L);
+    if (sv->runtime_fail_hard) {
+      return lua_error(L);
+    } else {
+      const char *error = lua_tostring(sv->L, -1);
+      gt_spec_results_add_result(sv->res, sv->current_aspect, sv->current_node,
+                                 GT_SPEC_RUNTIME_ERROR, error);
+    }
   }
 
   return 0;
@@ -505,7 +513,7 @@ static int spec_expect_matchdispatch(lua_State *L)
     msg = lua_tostring(L, -1);
   }
   gt_spec_results_add_result(sv->res, sv->current_aspect, sv->current_node,
-                             success, msg);
+                             success ? GT_SPEC_SUCCESS : GT_SPEC_FAILURE, msg);
 
   return 0;
 }
@@ -625,7 +633,7 @@ static int spec_feature_node_lua_get_children_iter(lua_State *L) {
     return 0;
 }
 
-static int spec_feature_node_lua_get_children_gc (lua_State *L) {
+static int spec_feature_node_lua_get_children_gc(lua_State *L) {
   GtFeatureNodeIterator *it;
   it = *(GtFeatureNodeIterator**) lua_touserdata(L, 1);
   if (it)
@@ -733,6 +741,18 @@ static int spec_init_lua_env(GtSpecVisitor *sv, const char *progname)
   return had_err;
 }
 
+void gt_spec_visitor_report_runtime_errors(GtSpecVisitor *sv)
+{
+  gt_assert(sv);
+  sv->runtime_fail_hard = false;
+}
+
+void gt_spec_visitor_fail_on_runtime_error(GtSpecVisitor *sv)
+{
+  gt_assert(sv);
+  sv->runtime_fail_hard = true;
+}
+
 GtNodeVisitor* gt_spec_visitor_new(const char *specfile, GtSpecResults *res,
                                    GtError *err)
 {
@@ -753,6 +773,7 @@ GtNodeVisitor* gt_spec_visitor_new(const char *specfile, GtSpecResults *res,
   sv->res = res;
   sv->type_specs = gt_hashmap_new(GT_HASH_STRING, gt_free_func, gt_free_func);
   sv->graph_context = gt_array_new(sizeof (GtFeatureNode*));
+  sv->runtime_fail_hard = false;
 
   (void) spec_init_lua_env(sv, gt_error_get_progname(err));
   if (luaL_loadfile(sv->L, specfile) || lua_pcall(sv->L, 0, 0, 0)) {

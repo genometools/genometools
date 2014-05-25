@@ -41,13 +41,15 @@
 
 typedef struct {
   GtStrArray *failure_messages;
+  GtStrArray *runtime_error_messages;
 } GtSpecAspectNodeResult;
 
 typedef struct {
   GtHashmap *aspect_node_results;
   GtStr *name;
   GtUword successes,
-          failures;
+          failures,
+          runtime_errors;
 } GtSpecAspect;
 
 typedef struct {
@@ -81,7 +83,7 @@ static GtSpecAspectNodeResult* gt_spec_aspect_node_result_new()
 
   sanr = gt_calloc(1, sizeof (*sanr));
   sanr->failure_messages = gt_str_array_new();
-
+  sanr->runtime_error_messages = gt_str_array_new();
   return sanr;
 }
 
@@ -89,6 +91,7 @@ static void gt_spec_aspect_node_result_delete(GtSpecAspectNodeResult *sanr)
 {
   if (!sanr) return;
   gt_str_array_delete(sanr->failure_messages);
+  gt_str_array_delete(sanr->runtime_error_messages);
   gt_free(sanr);
 }
 
@@ -125,21 +128,28 @@ static int gt_spec_aspect_report_node(void *key, void *value, void *data,
     }
   }
   gt_file_xprintf(info->outfile,
-                   "%s      offending node #" GT_WU " "
-                   "(%sfrom %s, line %u):%s\n",
-                   info->colored ? GT_SPEC_ANSI_COLOR_RED : "",
-                   info->node_i++,
-                   (has_id ? tmpbuf : ""),
-                   gt_genome_node_get_filename(gn),
-                   gt_genome_node_get_line_number(gn),
-                   info->colored ? GT_SPEC_ANSI_COLOR_RESET : "");
+                  "%s      offending node #" GT_WU " "
+                  "(%sfrom %s, line %u):%s\n",
+                  info->colored ? GT_SPEC_ANSI_COLOR_RED : "",
+                  info->node_i++,
+                  (has_id ? tmpbuf : ""),
+                  gt_genome_node_get_filename(gn),
+                  gt_genome_node_get_line_number(gn),
+                  info->colored ? GT_SPEC_ANSI_COLOR_RESET : "");
 
   for (i = 0; i < gt_str_array_size(sanr->failure_messages); i++) {
     gt_file_xprintf(info->outfile,
-                   "%s         %s%s\n",
-                   info->colored ? GT_SPEC_ANSI_COLOR_RED : "",
-                   gt_str_array_get(sanr->failure_messages, i),
-                   info->colored ? GT_SPEC_ANSI_COLOR_RESET : "");
+                    "%s         %s%s\n",
+                    info->colored ? GT_SPEC_ANSI_COLOR_RED : "",
+                    gt_str_array_get(sanr->failure_messages, i),
+                    info->colored ? GT_SPEC_ANSI_COLOR_RESET : "");
+  }
+  for (i = 0; i < gt_str_array_size(sanr->runtime_error_messages); i++) {
+    gt_file_xprintf(info->outfile,
+                    "%s         %s%s\n",
+                    info->colored ? GT_SPEC_ANSI_COLOR_MAGENTA : "",
+                    gt_str_array_get(sanr->runtime_error_messages, i),
+                    info->colored ? GT_SPEC_ANSI_COLOR_RESET : "");
   }
 
   return 0;
@@ -151,23 +161,51 @@ static void gt_spec_aspect_report(GtSpecAspect *sa, GtFile *outfile,
   gt_assert(sa && info);
 
   info->node_i = 1;
+  GtStr *outbuf = gt_str_new_cstr("  - ");
+  gt_str_append_str(outbuf, sa->name);
+  gt_str_append_cstr(outbuf, " (");
+  if (sa->successes > 0) {
+    if (info->colored)
+      gt_str_append_cstr(outbuf, GT_SPEC_ANSI_COLOR_GREEN);
+    gt_str_append_ulong(outbuf, sa->successes);
+    gt_str_append_cstr(outbuf, " success");
+    if (sa->successes > 1)
+      gt_str_append_cstr(outbuf, "es");
+    if (info->colored)
+      gt_str_append_cstr(outbuf, GT_SPEC_ANSI_COLOR_RESET);
+  }
   if (sa->failures > 0) {
-    gt_file_xprintf(outfile, "%s  - %s (" GT_WU " failed)%s\n",
-                             info->colored ? GT_SPEC_ANSI_COLOR_RED : "",
-                             gt_str_get(sa->name),
-                             sa->failures,
-                             info->colored ? GT_SPEC_ANSI_COLOR_RESET : "");
-    if (info->details) {
-      GT_UNUSED int rval = 0;
-      rval = gt_hashmap_foreach(sa->aspect_node_results,
-                                gt_spec_aspect_report_node, info, NULL);
-      gt_assert(rval == 0);
-    }
-  } else {
-    gt_file_xprintf(outfile, "%s  - %s%s\n",
-                    info->colored ? GT_SPEC_ANSI_COLOR_GREEN : "",
-                    gt_str_get(sa->name),
-                    info->colored ? GT_SPEC_ANSI_COLOR_RESET : "");
+    if (sa->successes > 0)
+      gt_str_append_cstr(outbuf, ", ");
+    if (info->colored)
+      gt_str_append_cstr(outbuf, GT_SPEC_ANSI_COLOR_RED);
+    gt_str_append_ulong(outbuf, sa->failures);
+    gt_str_append_cstr(outbuf, " failure");
+    if (sa->failures > 1)
+      gt_str_append_cstr(outbuf, "s");
+    if (info->colored)
+      gt_str_append_cstr(outbuf, GT_SPEC_ANSI_COLOR_RESET);
+  }
+  if (sa->runtime_errors > 0) {
+    if (sa->successes > 0 || sa->failures > 0)
+      gt_str_append_cstr(outbuf, ", ");
+    if (info->colored)
+      gt_str_append_cstr(outbuf, GT_SPEC_ANSI_COLOR_MAGENTA);
+    gt_str_append_ulong(outbuf, sa->runtime_errors);
+    gt_str_append_cstr(outbuf, " runtime error");
+    if (sa->runtime_errors > 1)
+      gt_str_append_cstr(outbuf, "s");
+    if (info->colored)
+      gt_str_append_cstr(outbuf, GT_SPEC_ANSI_COLOR_RESET);
+  }
+  gt_str_append_cstr(outbuf, ")\n");
+  gt_file_xprintf(outfile, "%s", gt_str_get(outbuf));
+  gt_str_delete(outbuf);
+  if (info->details) {
+    GT_UNUSED int rval = 0;
+    rval = gt_hashmap_foreach(sa->aspect_node_results,
+                              gt_spec_aspect_report_node, info, NULL);
+    gt_assert(rval == 0);
   }
 }
 
@@ -205,7 +243,7 @@ void gt_spec_results_add_cc(GtSpecResults *sr)
 void gt_spec_results_add_result(GtSpecResults *sr,
                                 const char *aspect,
                                 GtGenomeNode *node,
-                                bool success,
+                                GtSpecResultStatus status,
                                 const char *error_string)
 {
   GtSpecAspect *sa = NULL;
@@ -257,18 +295,36 @@ void gt_spec_results_add_result(GtSpecResults *sr,
     }
   }
   gt_assert(sa);
-  if (success)
-    sa->successes++;
-  else {
-    GtSpecAspectNodeResult *sanr = NULL;
-    sa->failures++;
-    if (!(sanr = gt_hashmap_get(sa->aspect_node_results, node))) {
-      sanr = gt_spec_aspect_node_result_new();
-      node = gt_genome_node_ref(node);
-      gt_hashmap_add(sa->aspect_node_results, node, sanr);
-    }
-    gt_assert(sanr);
-    gt_str_array_add_cstr(sanr->failure_messages, error_string);
+  switch (status) {
+    case GT_SPEC_SUCCESS:
+      sa->successes++;
+      break;
+    case GT_SPEC_FAILURE:
+      {
+        GtSpecAspectNodeResult *sanr = NULL;
+        sa->failures++;
+        if (!(sanr = gt_hashmap_get(sa->aspect_node_results, node))) {
+          sanr = gt_spec_aspect_node_result_new();
+          node = gt_genome_node_ref(node);
+          gt_hashmap_add(sa->aspect_node_results, node, sanr);
+        }
+        gt_assert(sanr);
+        gt_str_array_add_cstr(sanr->failure_messages, error_string);
+      }
+      break;
+    case GT_SPEC_RUNTIME_ERROR:
+      {
+        GtSpecAspectNodeResult *sanr = NULL;
+        sa->runtime_errors++;
+        if (!(sanr = gt_hashmap_get(sa->aspect_node_results, node))) {
+          sanr = gt_spec_aspect_node_result_new();
+          node = gt_genome_node_ref(node);
+          gt_hashmap_add(sa->aspect_node_results, node, sanr);
+        }
+        gt_assert(sanr);
+        gt_str_array_add_cstr(sanr->runtime_error_messages, error_string);
+      }
+      break;
   }
   sr->checked_nodes++;
 }

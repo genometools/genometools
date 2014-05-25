@@ -26,5 +26,7 @@ typedef struct GtSpecVisitor GtSpecVisitor;
 
 GtNodeVisitor* gt_spec_visitor_new(const char *specfile, GtSpecResults *res,
                                    GtError *err);
+void           gt_spec_visitor_report_runtime_errors(GtSpecVisitor *sv);
+void           gt_spec_visitor_fail_on_runtime_error(GtSpecVisitor *sv);
 
 #endif
