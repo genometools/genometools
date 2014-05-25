@@ -27,8 +27,6 @@
 #include "extended/comment_node_api.h"
 #include "extended/feature_node_api.h"
 #include "extended/genome_node.h"
-#include "extended/genome_node.h"
-#include "extended/genome_node.h"
 #include "extended/spec_results.h"
 
 #define GT_SPEC_ANSI_COLOR_RED     "\x1b[31m"
