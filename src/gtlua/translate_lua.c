@@ -33,6 +33,8 @@ static int translate_dna_lua(lua_State *L)
   GtError *err;
   unsigned int frame;
   const char *dna = luaL_checkstring(L, 1);
+  luaL_argcheck(L, strlen(dna) >= 3, 1,
+                "string to translate must at least be one codon");
   protein = gt_str_new();
 
   err = gt_error_new();

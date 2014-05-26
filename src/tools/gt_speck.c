@@ -26,7 +26,8 @@
 typedef struct {
   GtStr *specfile;
   bool verbose,
-       colored;
+       colored,
+       fail_hard;
 } SpeccheckArguments;
 
 static void *gt_speck_arguments_new(void)
@@ -64,6 +65,11 @@ static GtOptionParser* gt_speck_option_parser_new(void *tool_arguments)
                               &arguments->colored, true);
   gt_option_parser_add_option(op, option);
 
+  option = gt_option_new_bool("failhard", "stop processing and report runtime "
+                              "errors instead of recording them in the results",
+                              &arguments->fail_hard, false);
+  gt_option_parser_add_option(op, option);
+
   option = gt_option_new_verbose(&arguments->verbose);
   gt_option_parser_add_option(op, option);
 
@@ -88,6 +94,11 @@ static int gt_speck_runner(int argc, const char **argv, int parsed_args,
   if (!spec_visitor)
     return -1;
 
+  if (arguments->fail_hard)
+    gt_spec_visitor_fail_on_runtime_error((GtSpecVisitor*) spec_visitor);
+  else
+    gt_spec_visitor_report_runtime_errors((GtSpecVisitor*) spec_visitor);
+
   gff3_in_stream = gt_gff3_in_stream_new_unsorted(argc - parsed_args,
                                                   argv + parsed_args);
   gt_assert(gff3_in_stream);
@@ -107,7 +118,7 @@ static int gt_speck_runner(int argc, const char **argv, int parsed_args,
                            arguments->verbose, arguments->colored);
 
   if (!had_err)
-    gt_timer_show_formatted(t, "Finished in " GT_WD ".%06ld s.\n", stdout);
+    gt_timer_show_formatted(t, "Finished in " GT_WD ".%06ld s.\n", stderr);
 
   /* free */
   gt_node_stream_delete(gff3_in_stream);

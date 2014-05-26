@@ -6,6 +6,20 @@ matchers = {
     return true
   end;
 
+  should_be_truthy = function(value)
+    if not value then
+      return false, tostring(value) .. " is not truthy"
+    end
+    return true
+  end;
+
+  should_be_falsy = function(value)
+    if value then
+      return false, tostring(value) .. " is not falsy"
+    end
+    return true
+  end;
+
   should_be_smaller_than = function(value, expected)
     if value >= expected then
       return false, tostring(value).." is larger than ".. tostring(expected)
@@ -22,7 +36,7 @@ matchers = {
 
   should_not_be = function(value, expected)
     if value == expected then
-      return false, "should not be "..tostring(value)
+      return false, "should not be "..tostring(expected) .." but is ".. tostring(value)
     end
     return true
   end;
@@ -50,7 +64,7 @@ matchers = {
 
   should_match = function(value, pattern)
     if not string.find(value, pattern) then
-      return false, value .. " doesn't match pattern "..pattern
+      return false, value .. " does not match pattern "..pattern
     end
     return true
   end;

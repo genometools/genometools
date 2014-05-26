@@ -19,13 +19,19 @@
 
 typedef struct GtSpecResults GtSpecResults;
 
+typedef enum {
+  GT_SPEC_SUCCESS,
+  GT_SPEC_FAILURE,
+  GT_SPEC_RUNTIME_ERROR
+} GtSpecResultStatus;
+
 #include "core/file_api.h"
 
 GtSpecResults* gt_spec_results_new(void);
 void           gt_spec_results_add_result(GtSpecResults *sr,
                                           const char *aspect,
                                           GtGenomeNode *node,
-                                          bool success,
+                                          GtSpecResultStatus status,
                                           const char *error_string);
 void           gt_spec_results_add_cc(GtSpecResults *sr);
 void           gt_spec_results_report(GtSpecResults *sr, GtFile *outfile,
