@@ -60,6 +60,9 @@ function run_test_get_encoded_char(es, seq1, seq2)
   rval, err = pcall(GenomeTools_encseq.get_encoded_char, es, 100, 0)
   assert(not rval)
   assert(string.find(err, "cannot exceed"))
+  rval, err = pcall(GenomeTools_encseq.get_encoded_char, es, 10, 6)
+  assert(not rval)
+  assert(string.find(err, "invalid readmode"))
 end
 
 function run_test_seq_startpos(es)
@@ -99,6 +102,9 @@ function run_test_file_length(es)
   rval, err = pcall(GenomeTools_encseq.seqlength, es, 2)
   assert(not rval)
   assert(string.find(err, "cannot exceed"))
+  rval, err = pcall(GenomeTools_encseq.get_encoded_char, es, 10, 6)
+  assert(not rval)
+  assert(string.find(err, "invalid readmode"))
 end
 
 function run_test_file_length_protein(es)
@@ -128,7 +134,7 @@ function run_test_seq_substr_encoded(es, seq1, seq2)
   rval, err = pcall(GenomeTools_encseq.extract_encoded, es, 300, 500)
   assert(not rval)
   assert(string.find(err, "cannot exceed"))
-  
+
 end
 
 function run_test_seq_substr_decoded(es, seq1, seq2)
@@ -168,7 +174,10 @@ function run_test_seq_substr_sequential(es, seq1, seq2)
   rval, err = pcall(GenomeTools_encseq.create_reader_with_readmode, es, 0, 300)
   assert(not rval)
   assert(string.find(err, "cannot exceed"))
-end    
+  rval, err = pcall(GenomeTools_encseq.create_reader_with_readmode, es, 7, 3)
+  assert(not rval)
+  assert(string.find(err, "invalid readmode"))
+end
 
 ee = gt.encseq_encoder_new()
 ee:encode({dnaseqfile}, "dnaseqfile")

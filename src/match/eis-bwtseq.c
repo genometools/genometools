@@ -473,7 +473,7 @@ enum
   CONTEXT_INTERVAL = 128,
 };
 
-int
+enum verifyBWTSeqErrCode
 gt_BWTSeqVerifyIntegrity(BWTSeq *bwtSeq, const char *projectName,
                       int checkFlags,
                       GtUword tickPrint, FILE *fp,
