@@ -1396,7 +1396,8 @@ typedef struct simpleBinaryTreeNode {
                               *right;
 } simpleBinaryTreeNode;
 
-static simpleBinaryTreeNode* binary_tree_new_node(GtUword elem) {
+static simpleBinaryTreeNode* binary_tree_new_node(GtUword elem)
+{
   simpleBinaryTreeNode *bt = gt_malloc(sizeof(*bt));
   bt->value = elem;
   bt->left = NULL;
@@ -1404,7 +1405,8 @@ static simpleBinaryTreeNode* binary_tree_new_node(GtUword elem) {
   return bt;
 }
 
-static void binary_tree_insert(simpleBinaryTreeNode *bt, GtUword elem) {
+static void binary_tree_insert(simpleBinaryTreeNode *bt, GtUword elem)
+{
   simpleBinaryTreeNode *current = bt;
   while (true) {
     if (elem < current->value) {
@@ -1425,7 +1427,8 @@ static void binary_tree_insert(simpleBinaryTreeNode *bt, GtUword elem) {
   }
 }
 
-static int binary_tree_search(simpleBinaryTreeNode *bt, GtUword elem) {
+static int binary_tree_search(simpleBinaryTreeNode *bt, GtUword elem)
+{
   simpleBinaryTreeNode *current = bt;
   while (current != NULL) {
     if (elem < current->value) {
@@ -1439,7 +1442,8 @@ static int binary_tree_search(simpleBinaryTreeNode *bt, GtUword elem) {
   return 0;
 }
 
-static void binary_tree_delete(simpleBinaryTreeNode *bt) {
+static void binary_tree_delete(simpleBinaryTreeNode *bt)
+{
   if (bt != NULL) {
     binary_tree_delete(bt->left);
     binary_tree_delete(bt->right);
@@ -1838,11 +1842,10 @@ static GtUword gt_n_r_encseq_decompressor_extract_from_uniqueid(
   return chars_printed;
 }
 
-/*decompresses all sequences pointing to given absolute unique ranges of the non
-  redundant database.*/
-GtUword gt_n_r_encseq_decompressor_start_unique_extraction(FILE *fp,
-                                                  GtNREncseqDecompressor *nred,
-                                                  GtError *err)
+GtUword gt_n_r_encseq_decompressor_start_unique_extraction(
+                                                   FILE *fp,
+                                                   GtNREncseqDecompressor *nred,
+                                                   GtError *err)
 {
   GtUword uentry_id, i, chars_printed = 0;
   simpleBinaryTreeNode *visited = NULL;

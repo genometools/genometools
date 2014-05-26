@@ -1,5 +1,6 @@
 /*
   Copyright (c) 2014 Dirk Willrodt <willrodt@zbh.uni-hamburg.de>
+  Copyright (c) 2014 Florian Markowsky <1markows@informatik.uni-hamburg.de>
   Copyright (c) 2014 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -28,10 +29,12 @@
 #define GT_NRENCSEQ_MIN_KMER_POS 5
 #define GT_NRENCSEQ_FILE_SUFFIX ".nre"
 
-/* The <GtNREncseq> class stores redundand */
+/* The <GtNREncseq> class efficiently stores Sequences, either DNA or protein by
+   finding redundancies and storing only references with editscripts of those.
+   */
 typedef struct GtNREncseq GtNREncseq;
 
-/* Return new <GtNREncseq> object filed with data read from file with name
+/* Return new <GtNREncseq> object filled with data read from file with name
    <basename_nre>.
    Returns <NULL> on error, or fails if read/file access failes. */
 GtNREncseq* gt_n_r_encseq_new_from_file(const char *basename_nre,
@@ -42,23 +45,28 @@ GtNREncseq* gt_n_r_encseq_new_from_file(const char *basename_nre,
    sets <err> accordingly on data errors. */
 int         gt_n_r_encseq_write_nre(GtNREncseq *nre, FILE* fp, GtError *err);
 
-/*prints statistical info of <n_r_encseq>*/
+/* Prints statistical info of <n_r_encseq> to stdout.
+   TODO: refine this, and maybe split it up to get the different values
+   seperately without printing. */
 void        gt_n_r_encseq_print_info(const GtNREncseq *n_r_encseq);
 
-/*get length of original sequence collection*/
+/* Return the total length of the original sequence collection, including
+   seperators (like <GtEncseq>). */
 GtUword     gt_n_r_encseq_get_orig_length(GtNREncseq *n_r_encseq);
 
-/*get length of unique db*/
+/* Return the length of unique db, that is the non-redundand sequences stored as
+   is with seperators, representing the referece for all redundand sequences. */
 GtUword     gt_n_r_encseq_get_unique_length(GtNREncseq *n_r_encseq);
 
-/* free space for <n_r_encseq> */
+/* Free space for <n_r_encseq> */
 void        gt_n_r_encseq_delete(GtNREncseq *n_r_encseq);
 
 /* The <GtNREncseqCompressor> class is used to compress an encoded sequence
-   further by compressing similar sequences. */
+   further by compressing similar sequences. It is used to create <GtNREncseq>
+   objects and store them to disk. */
 typedef struct GtNREncseqCompressor GtNREncseqCompressor;
 
-/* Returns a new <GtNREncseqCompressor> object */
+/* Returns a new <GtNREncseqCompressor> object. */
 GtNREncseqCompressor* gt_n_r_encseq_compressor_new(
                                                  GtUword initsize,
                                                  GtUword minalignlength,
@@ -69,32 +77,40 @@ GtNREncseqCompressor* gt_n_r_encseq_compressor_new(
                                                  unsigned int windowsize,
                                                  GtLogger *logger);
 
-/* use non optimized seed extension. every seed is used for xdrop without
-   filtering */
-void                  gt_n_r_encseq_compressor_disable_opt(
-                                        GtNREncseqCompressor *n_r_e_compressor);
-
-/* Free memory of <n_r_e_compressor> */
+/* Free memory of <n_r_e_compressor>. */
 void                  gt_n_r_encseq_compressor_delete(
                                         GtNREncseqCompressor *n_r_e_compressor);
 
-/* Start the compression of <encseq> and store the results on disk to files with
-   <basename> as basename. */
+/* Analyze and compress <encseq>, stores resulting <GtNREncseq> to disk, using
+   <basename> and <GT_NRENCSEQ_FILE_SUFFIX> as filename. */
 int                   gt_n_r_encseq_compressor_compress(
                                          GtNREncseqCompressor *n_r_e_compressor,
                                          GtStr *basename,
                                          GtEncseq *encseq,
                                          GtError *err);
 
+/* This option turns of optimized seed extension. Every seed is used for xdrop
+   without filtering.
+   Consider this to be a development option for benchmarking purpose. */
+void                  gt_n_r_encseq_compressor_disable_opt(
+                                        GtNREncseqCompressor *n_r_e_compressor);
+
+/* The <GtNREncseqDecompressor> class is used to decompress parts of or whole
+   <GtEncseq> objects.
+   TODO: integrate this directly into <GtNREncseq>. */
 typedef struct GtNREncseqDecompressor GtNREncseqDecompressor;
 
+/* Return new <GtNREncseqCompressor> object ready to decompress <nre>. */
 GtNREncseqDecompressor *gt_n_r_encseq_decompressor_new(GtNREncseq *nre);
+
+/* Free memory of <n_r_e_decompressor>. */
 void                    gt_n_r_encseq_decompressor_delete(
                                     GtNREncseqDecompressor *n_r_e_decompressor);
 
-/*Given a <range> in the original sequence database, this function writes the
-  sequence fragments in the requested <range> to the file pointed to by <fp>,
-  either as raw sequence or, if <fasta> is TRUE, as valid fasta entries*/
+/* Write positions defined by <range> (positions correspond to uncompressed
+   coordinates) to <fp>, either raw sequence (seperated by '|') either as raw
+   sequence or, if <fasta> is TRUE, as valid fasta entries.
+   TODO: split to two functions. */
 int                     gt_n_r_encseq_decompressor_extract_originrange(
                                                    FILE* fp,
                                                    GtNREncseqDecompressor *nred,
@@ -102,22 +118,24 @@ int                     gt_n_r_encseq_decompressor_extract_originrange(
                                                    bool fasta,
                                                    GtError *err);
 
-/*calls gt_n_r_encseq_decompressor_extract_originrange with range of whole
-  original sequence*/
+/* Write complete uncompressed sequence to <fp>. Writes valid fasta if <fasta>
+   is true, raw sequences seperated by '|' otherwise.
+   TODO: split to two functions. */
 int                     gt_n_r_encseq_decompressor_extract_origin_complete(
                                                    FILE* fp,
                                                    GtNREncseqDecompressor *nred,
                                                    bool fasta,
                                                    GtError *err);
-/*adds the index of the unique entry <uentry_id> to sequences
-  that are to be extracted*/
+
+/* Adds the index of the unique entry <uentry_id> to sequences that are to be
+   extracted. */
 void                    gt_n_r_encseq_decompressor_add_unique_idx_to_extract(
                                                    GtNREncseqDecompressor *nred,
                                                    GtUword uentry_id);
 
-/*starts extraction of all sequences added by
-  gt_n_r_decompressor_add_unique_range_to_extract and returns number of
-  extracted symbols excluding header descriptions*/
+/* Starts extraction of all sequences added by
+   <gt_n_r_decompressor_add_unique_range_to_extract()> and returns number of
+   extracted symbols excluding header descriptions. */
 GtUword                 gt_n_r_encseq_decompressor_start_unique_extraction(
                                                    FILE *fp,
                                                    GtNREncseqDecompressor *nred,
