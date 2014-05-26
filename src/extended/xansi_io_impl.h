@@ -24,10 +24,10 @@
 #include "core/assert_api.h"
 #include "core/unused_api.h"
 
-GT_UNUSED static inline void gt_xansi_io_xfwrite(void *ptr,
-                                       size_t size,
-                                       size_t nmemb,
-                                       FILE *stream)
+GT_UNUSED static void gt_xansi_io_xfwrite(void *ptr,
+                                          size_t size,
+                                          size_t nmemb,
+                                          FILE *stream)
 {
   if (nmemb != fwrite((const void*) ptr, size, nmemb, stream)) {
     perror("gt_xansi_io_xfwrite failed to write to file");
@@ -35,10 +35,10 @@ GT_UNUSED static inline void gt_xansi_io_xfwrite(void *ptr,
   }
 }
 
-GT_UNUSED static inline void gt_xansi_io_xfread(void *ptr,
-                                      size_t size,
-                                      size_t nmemb,
-                                      FILE *stream)
+GT_UNUSED static void gt_xansi_io_xfread(void *ptr,
+                                         size_t size,
+                                         size_t nmemb,
+                                         FILE *stream)
 {
   if (nmemb != fread(ptr, size, nmemb, stream)) {
     gt_assert(feof(stream) == 0);
