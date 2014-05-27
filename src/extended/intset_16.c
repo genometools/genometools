@@ -124,7 +124,7 @@ GtIntset *gt_intset_16_io(GtIntset *intset, FILE *fp, GtError *err,
   if (type != GT_INTSET_16_TYPE) {
     /* only applies to reading */
     had_err = 1;
-    gt_error_set(err, "Trying to read <GtIntset16 from file,"
+    gt_error_set(err, "Trying to read GtIntset16 from file,"
                  " type does not match!");
   }
   if (!had_err) {

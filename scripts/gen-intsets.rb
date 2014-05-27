@@ -157,7 +157,7 @@ GtXansiIOFunc io_func)
   if (type != GT_INTSET_<%=bits%>_TYPE) {
     /* only applies to reading */
     had_err = 1;
-    gt_error_set(err, "Trying to read <GtIntset<%=bits%> from file,"
+    gt_error_set(err, "Trying to read GtIntset<%=bits%> from file,"
                  " type does not match!");
   }
   if (!had_err) {
