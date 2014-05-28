@@ -18,13 +18,16 @@
 */
 
 #include <stdio.h>
+
 #include "core/assert_api.h"
-#include "core/disc_distri_api.h"
 #include "core/compat.h"
 #include "core/ensure.h"
 #include "core/hashmap-generic.h"
 #include "core/ma.h"
 #include "core/unused_api.h"
+
+#include "core/disc_distri_api.h"
+#include "core/disc_distri.h"
 
 struct GtDiscDistri {
   GtHashtable *hashdist;

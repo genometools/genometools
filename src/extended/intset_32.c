@@ -31,7 +31,7 @@
 #include "core/mathsupport.h"
 #include "core/unused_api.h"
 #include "extended/intset_32.h"
-#include "extended/xansi_io.h"
+#include "extended/io_function_pointers.h"
 
 #define gt_intset_32_cast(cvar) \
         gt_intset_cast(gt_intset_32_class(), cvar)
@@ -39,6 +39,9 @@
 #define GT_ELEM2SECTION_M(X) GT_ELEM2SECTION(X, members->logsectionsize)
 
 #define GT_INTSET_32_TYPE ((GtUword) 32)
+
+#define gt_intset_32_io_one(element) \
+        io_func(&element, sizeof (element), (size_t) 1, fp, err)
 
 struct GtIntset32 {
   GtIntset parent_instance;
@@ -111,8 +114,8 @@ static bool gt_intset_32_secstart_is_valid(GtIntset *intset)
   return true;
 }
 
-GtIntset *gt_intset_32_io(GtIntset *intset, FILE *fp, GtError *err,
-                          GtXansiIOFunc io_func)
+GtIntset *gt_intset_32_io_fp(GtIntset *intset, FILE *fp, GtError *err,
+                                    GtIOFunc io_func)
 {
   int had_err = 0;
   GtUword type = (GtUword) GT_INTSET_32_TYPE;
@@ -120,75 +123,78 @@ GtIntset *gt_intset_32_io(GtIntset *intset, FILE *fp, GtError *err,
   GtIntsetMembers *members;
 
   gt_error_check(err);
-  gt_intset_io_one(type, fp);
-  if (type != GT_INTSET_32_TYPE) {
+
+  intset_32 = gt_intset_32_cast(intset);
+
+  had_err = gt_intset_32_io_one(type);
+  if (!had_err && type != GT_INTSET_32_TYPE) {
     /* only applies to reading */
     had_err = 1;
     gt_error_set(err, "Trying to read GtIntset32 from file,"
                  " type does not match!");
   }
   if (!had_err) {
-    if (intset == NULL) {
-      intset = gt_intset_create(gt_intset_32_class());
-      intset->members->sectionstart = NULL;
-      intset->members->refcount = 0;
-      intset_32 = gt_intset_32_cast(intset);
-      intset_32->elements = NULL;
-    }
-    else {
-      intset_32 = gt_intset_32_cast(intset);
-    }
     members = intset->members;
-    gt_intset_io_one(members->currentsectionnum, fp);
-    gt_intset_io_one(members->maxelement, fp);
-    gt_intset_io_one(members->nextfree, fp);
-    gt_intset_io_one(members->num_of_elems, fp);
-    gt_intset_io_one(members->previouselem, fp);
-    members->logsectionsize = GT_BITS_FOR_TYPE(uint32_t);
-    members->numofsections = GT_ELEM2SECTION_M(members->maxelement) + 1;
-    members->sectionstart = gt_realloc(members->sectionstart,
+    had_err = gt_intset_32_io_one(members->currentsectionnum);
+    if (!had_err)
+      had_err = gt_intset_32_io_one(members->maxelement);
+    if (!had_err)
+      had_err = gt_intset_32_io_one(members->nextfree);
+    if (!had_err)
+      had_err = gt_intset_32_io_one(members->num_of_elems);
+    if (!had_err)
+      had_err = gt_intset_32_io_one(members->previouselem);
+    if (!had_err) {
+      members->logsectionsize = GT_BITS_FOR_TYPE(uint32_t);
+      members->numofsections = GT_ELEM2SECTION_M(members->maxelement) + 1;
+      members->sectionstart = gt_realloc(members->sectionstart,
                 sizeof (*members->sectionstart) * (members->numofsections + 1));
-    io_func(members->sectionstart, sizeof (*members->sectionstart),
-            (size_t) (members->numofsections + 1), fp);
-    if (members->sectionstart[0] != 0) {
+    }
+    had_err = io_func(members->sectionstart, sizeof (*members->sectionstart),
+                      (size_t) (members->numofsections + 1), fp, err);
+    if (!had_err && members->sectionstart[0] != 0) {
       had_err = 1;
       gt_error_set(err, "Unexpected value in sectionstart[0]: "
                    GT_WU " expected 0!", members->sectionstart[0]);
     }
   }
   if (!had_err) {
-    if (!gt_intset_32_secstart_is_valid(intset)) {
-      had_err = 1;
-      gt_error_set(err, "Section starts in GtIntset are not valid");
-    }
-  }
-  if (!had_err) {
     intset_32->elements = gt_realloc(intset_32->elements,
                   sizeof (*intset_32->elements) * members->num_of_elems);
-    io_func(intset_32->elements, sizeof (*intset_32->elements),
-            (size_t) members->num_of_elems, fp);
-    if (!gt_intset_32_elems_is_valid(intset)) {
-      had_err = 1;
-      gt_error_set(err, "Elements in GtIntset are not valid");
-    }
+    had_err = io_func(intset_32->elements,
+                      sizeof (*intset_32->elements),
+                      (size_t) members->num_of_elems, fp, err);
   }
   if (had_err) {
-    /* TODO: think about this, if we are trying to write, this might not be the
-       best solution. On the other hand the Intset is invalid and any program
-       should crash. */
     gt_intset_32_delete(intset);
     intset = NULL;
+  }
+  return intset;
+
+}
+
+GtIntset *gt_intset_32_io(GtIntset *intset, FILE *fp, GtError *err)
+{
+  GtIntset32 *intset_32;
+  if (intset == NULL) {
+    intset = gt_intset_create(gt_intset_32_class());
+    intset->members->sectionstart = NULL;
+    intset->members->refcount = 0;
+    intset_32 = gt_intset_32_cast(intset);
+    intset_32->elements = NULL;
+    intset = gt_intset_32_io_fp(intset, fp, err, gt_io_error_fread);
+  }
+  else {
+    intset = gt_intset_32_io_fp(intset, fp, err, gt_io_error_fwrite);
   }
   return intset;
 }
 
 GtIntset *gt_intset_32_new_from_file(FILE *fp, GtError *err)
 {
-  GtIntset *intset = NULL;
   gt_assert(fp != NULL);
   gt_error_check(err);
-  intset = gt_intset_32_io(intset, fp, err, gt_xansi_io_xfread);
-  return intset;
+  return gt_intset_32_io(NULL, fp, err);
 }
 
 GtIntset *gt_intset_32_write(GtIntset *intset, FILE *fp, GtError *err)
@@ -196,7 +202,7 @@ GtIntset *gt_intset_32_write(GtIntset *intset, FILE *fp, GtError *err)
   gt_assert(intset != NULL);
   gt_assert(fp != NULL);
   gt_error_check(err);
-  return gt_intset_32_io(intset, fp, err, gt_xansi_io_xfwrite);
+  return gt_intset_32_io(intset, fp, err);
 }
 
 void gt_intset_32_add(GtIntset *intset, GtUword elem)
@@ -284,6 +290,13 @@ GtUword gt_intset_32_get(GtIntset *intset, GtUword idx)
          intset_32->elements[idx];
 }
 
+GtUword gt_intset_32_size(GtIntset *intset)
+{
+  GT_UNUSED GtIntset32 *intset_32 = gt_intset_32_cast(intset);
+  GtIntsetMembers *members = intset->members;
+  return members->nextfree;
+}
+
 static bool gt_intset_32_binarysearch_is_member(const uint32_t *leftptr,
                                                 const uint32_t *rightptr,
                                                 uint32_t elem)
@@ -325,34 +338,34 @@ bool gt_intset_32_is_member(GtIntset *intset, GtUword elem)
 
 static GtUword gt_intset_32_idx_sm_geq(const uint32_t *leftptr,
                                        const uint32_t *rightptr,
-                                       uint32_t pos)
+                                       uint32_t value)
 {
   const uint32_t *leftorig = leftptr;
-  if (pos < *leftptr)
+  if (value < *leftptr)
     return 0;
-  if (pos > *rightptr)
+  if (value > *rightptr)
     return 1UL + (GtUword) (rightptr - leftptr);
-  gt_assert(pos <= *rightptr);
-  while (*leftptr < pos)
+  gt_assert(value <= *rightptr);
+  while (*leftptr < value)
     leftptr++;
   return (GtUword) (leftptr - leftorig);
 }
 
 static GtUword gt_intset_32_binarysearch_idx_sm_geq(const uint32_t *leftptr,
                                                     const uint32_t *rightptr,
-                                                    uint32_t pos)
+                                                    uint32_t value)
 {
   const uint32_t *midptr = NULL,
         *leftorig = leftptr;
 
   gt_assert(leftptr <= rightptr);
-  if (pos <= *leftptr)
+  if (value <= *leftptr)
     return 0;
-  if (pos > *rightptr)
+  if (value > *rightptr)
     return 1UL + (GtUword) (rightptr - leftptr);
   while (leftptr < rightptr) {
     midptr = leftptr + ((GtUword) (rightptr - leftptr) >> 1);
-    if (pos <= *midptr)
+    if (value <= *midptr)
       rightptr = midptr;
     else {
       leftptr = midptr + 1;
@@ -362,34 +375,34 @@ static GtUword gt_intset_32_binarysearch_idx_sm_geq(const uint32_t *leftptr,
 }
 
 static GtUword gt_intset_32_get_idx_smallest_geq_test(GtIntset *intset,
-                                                     GtUword pos)
+                                                     GtUword value)
 {
   GtIntset32 *intset_32 = gt_intset_32_cast(intset);
   GtIntsetMembers *members = intset->members;
 
-  GtUword sectionnum = GT_ELEM2SECTION_M(pos);
+  GtUword sectionnum = GT_ELEM2SECTION_M(value);
 
-  gt_assert(pos <= members->maxelement);
+  gt_assert(value <= members->maxelement);
   if (members->sectionstart[sectionnum] < members->sectionstart[sectionnum+1]) {
     return members->sectionstart[sectionnum] +
            gt_intset_32_idx_sm_geq(
                   intset_32->elements + members->sectionstart[sectionnum],
                   intset_32->elements + members->sectionstart[sectionnum+1] - 1,
-                  (uint32_t) pos);
+                  (uint32_t) value);
   }
   return members->sectionstart[sectionnum];
 }
 
-GtUword gt_intset_32_get_idx_smallest_geq(GtIntset *intset, GtUword pos)
+GtUword gt_intset_32_get_idx_smallest_geq(GtIntset *intset, GtUword value)
 {
   GtIntset32 *intset_32 = gt_intset_32_cast(intset);
   GtIntsetMembers *members = intset->members;
 
-  GtUword sectionnum = GT_ELEM2SECTION_M(pos);
+  GtUword sectionnum = GT_ELEM2SECTION_M(value);
 
-  gt_assert(pos <= members->maxelement);
+  gt_assert(value <= members->maxelement);
 
-  if (pos > members->previouselem)
+  if (value > members->previouselem)
     return members->num_of_elems;
 
   if (members->sectionstart[sectionnum] < members->sectionstart[sectionnum+1]) {
@@ -397,7 +410,7 @@ GtUword gt_intset_32_get_idx_smallest_geq(GtIntset *intset, GtUword pos)
            gt_intset_32_binarysearch_idx_sm_geq(
                   intset_32->elements + members->sectionstart[sectionnum],
                   intset_32->elements + members->sectionstart[sectionnum+1] - 1,
-                  (uint32_t) pos);
+                  (uint32_t) value);
   }
   return members->sectionstart[sectionnum];
 }
@@ -410,12 +423,19 @@ void gt_intset_32_delete(GtIntset *intset)
   }
 }
 
-size_t gt_intset_32_size(GtUword maxelement, GtUword num_of_elems)
+size_t gt_intset_32_size_of_rep(GtUword maxelement, GtUword num_of_elems)
 {
   size_t logsectionsize = GT_BITS_FOR_TYPE(uint32_t);
   gt_assert(GT_BITS_FOR_TYPE(GtUword) > logsectionsize);
   return sizeof (uint32_t) * num_of_elems +
     sizeof (GtUword) * (GT_ELEM2SECTION(maxelement, logsectionsize) + 1);
+}
+
+size_t gt_intset_32_size_of_struct(void)
+{
+  return sizeof (GtIntset32) +
+         sizeof (struct GtIntsetClass) +
+         sizeof (struct GtIntsetMembers);
 }
 
 bool gt_intset_32_file_is_type(GtUword type)
@@ -435,7 +455,9 @@ const GtIntsetClass* gt_intset_32_class(void)
                                  gt_intset_32_io,
                                  gt_intset_32_get_idx_smallest_geq,
                                  gt_intset_32_is_member,
+                                 gt_intset_32_size_of_rep,
                                  gt_intset_32_size,
+                                 gt_intset_32_size_of_struct,
                                  gt_intset_32_write,
                                  gt_intset_32_delete);
   }
@@ -459,13 +481,14 @@ int gt_intset_32_unit_test(GtError *err)
     arr[idx] = arr[idx - 1] + gt_rand_max(stepsize) + 1;
   }
 
-  is_size = gt_intset_32_size(arr[num_of_elems - 1], num_of_elems);
+  is_size =     gt_intset_32_size_of_rep(arr[num_of_elems - 1], num_of_elems);
 
   if (!had_err) {
     if (is_size < (size_t) UINT_MAX) {
       is = gt_intset_32_new(arr[num_of_elems - 1], num_of_elems);
       for (idx = 0; idx < num_of_elems; idx++) {
         gt_intset_32_add(is, arr[idx]);
+        gt_ensure(idx + 1 == gt_intset_32_size(is));
         if (idx < num_of_elems - 1)
           gt_ensure(gt_intset_32_get_idx_smallest_geq(is,
                                                       arr[idx] + 1) ==

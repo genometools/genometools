@@ -63,7 +63,7 @@ IMPL = <<-IMPL
 #include "core/mathsupport.h"
 #include "core/unused_api.h"
 #include "extended/intset_<%=bits%>.h"
-#include "extended/xansi_io.h"
+#include "extended/io_function_pointers.h"
 
 #define gt_intset_<%=bits%>_cast(cvar) \\
         gt_intset_cast(gt_intset_<%=bits%>_class(), cvar)
@@ -71,6 +71,9 @@ IMPL = <<-IMPL
 #define GT_ELEM2SECTION_M(X) GT_ELEM2SECTION(X, members->logsectionsize)
 
 #define GT_INTSET_<%=bits%>_TYPE ((GtUword) <%=bits%>)
+
+#define gt_intset_<%=bits%>_io_one(element) \\
+        io_func(&element, sizeof (element), (size_t) 1, fp, err)
 
 struct GtIntset<%=bits%> {
   GtIntset parent_instance;
@@ -143,9 +146,8 @@ static bool gt_intset_<%=bits%>_secstart_is_valid(GtIntset *intset)
   return true;
 }
 
-GtIntset *gt_intset_<%=bits%>_io(GtIntset *intset, FILE *fp, GtError *err,
-<% if bits != 8 %> <% end %>                         \
-GtXansiIOFunc io_func)
+GtIntset *gt_intset_<%=bits%>_io_fp(GtIntset *intset, FILE *fp, GtError *err,
+                                    GtIOFunc io_func)
 {
   int had_err = 0;
   GtUword type = (GtUword) GT_INTSET_<%=bits%>_TYPE;
@@ -153,75 +155,78 @@ GtXansiIOFunc io_func)
   GtIntsetMembers *members;
 
   gt_error_check(err);
-  gt_intset_io_one(type, fp);
-  if (type != GT_INTSET_<%=bits%>_TYPE) {
+
+  intset_<%=bits%> = gt_intset_<%=bits%>_cast(intset);
+
+  had_err = gt_intset_<%=bits%>_io_one(type);
+  if (!had_err && type != GT_INTSET_<%=bits%>_TYPE) {
     /* only applies to reading */
     had_err = 1;
     gt_error_set(err, "Trying to read GtIntset<%=bits%> from file,"
                  " type does not match!");
   }
   if (!had_err) {
-    if (intset == NULL) {
-      intset = gt_intset_create(gt_intset_<%=bits%>_class());
-      intset->members->sectionstart = NULL;
-      intset->members->refcount = 0;
-      intset_<%=bits%> = gt_intset_<%=bits%>_cast(intset);
-      intset_<%=bits%>->elements = NULL;
-    }
-    else {
-      intset_<%=bits%> = gt_intset_<%=bits%>_cast(intset);
-    }
     members = intset->members;
-    gt_intset_io_one(members->currentsectionnum, fp);
-    gt_intset_io_one(members->maxelement, fp);
-    gt_intset_io_one(members->nextfree, fp);
-    gt_intset_io_one(members->num_of_elems, fp);
-    gt_intset_io_one(members->previouselem, fp);
-    members->logsectionsize = GT_BITS_FOR_TYPE(uint<%=bits%>_t);
-    members->numofsections = GT_ELEM2SECTION_M(members->maxelement) + 1;
-    members->sectionstart = gt_realloc(members->sectionstart,
+    had_err = gt_intset_<%=bits%>_io_one(members->currentsectionnum);
+    if (!had_err)
+      had_err = gt_intset_<%=bits%>_io_one(members->maxelement);
+    if (!had_err)
+      had_err = gt_intset_<%=bits%>_io_one(members->nextfree);
+    if (!had_err)
+      had_err = gt_intset_<%=bits%>_io_one(members->num_of_elems);
+    if (!had_err)
+      had_err = gt_intset_<%=bits%>_io_one(members->previouselem);
+    if (!had_err) {
+      members->logsectionsize = GT_BITS_FOR_TYPE(uint<%=bits%>_t);
+      members->numofsections = GT_ELEM2SECTION_M(members->maxelement) + 1;
+      members->sectionstart = gt_realloc(members->sectionstart,
                 sizeof (*members->sectionstart) * (members->numofsections + 1));
-    io_func(members->sectionstart, sizeof (*members->sectionstart),
-            (size_t) (members->numofsections + 1), fp);
-    if (members->sectionstart[0] != 0) {
+    }
+    had_err = io_func(members->sectionstart, sizeof (*members->sectionstart),
+                      (size_t) (members->numofsections + 1), fp, err);
+    if (!had_err && members->sectionstart[0] != 0) {
       had_err = 1;
       gt_error_set(err, "Unexpected value in sectionstart[0]: "
                    GT_WU " expected 0!", members->sectionstart[0]);
     }
   }
   if (!had_err) {
-    if (!gt_intset_<%=bits%>_secstart_is_valid(intset)) {
-      had_err = 1;
-      gt_error_set(err, "Section starts in GtIntset are not valid");
-    }
-  }
-  if (!had_err) {
     intset_<%=bits%>->elements = gt_realloc(intset_<%=bits%>->elements,
                   sizeof (*intset_<%=bits%>->elements) * members->num_of_elems);
-    io_func(intset_<%=bits%>->elements, sizeof (*intset_<%=bits%>->elements),
-            (size_t) members->num_of_elems, fp);
-    if (!gt_intset_<%=bits%>_elems_is_valid(intset)) {
-      had_err = 1;
-      gt_error_set(err, "Elements in GtIntset are not valid");
-    }
+    had_err = io_func(intset_<%=bits%>->elements,
+                      sizeof (*intset_<%=bits%>->elements),
+                      (size_t) members->num_of_elems, fp, err);
   }
   if (had_err) {
-    /* TODO: think about this, if we are trying to write, this might not be the
-       best solution. On the other hand the Intset is invalid and any program
-       should crash. */
     gt_intset_<%=bits%>_delete(intset);
     intset = NULL;
+  }
+  return intset;
+
+}
+
+GtIntset *gt_intset_<%=bits%>_io(GtIntset *intset, FILE *fp, GtError *err)
+{
+  GtIntset<%=bits%> *intset_<%=bits%>;
+  if (intset == NULL) {
+    intset = gt_intset_create(gt_intset_<%=bits%>_class());
+    intset->members->sectionstart = NULL;
+    intset->members->refcount = 0;
+    intset_<%=bits%> = gt_intset_<%=bits%>_cast(intset);
+    intset_<%=bits%>->elements = NULL;
+    intset = gt_intset_<%=bits%>_io_fp(intset, fp, err, gt_io_error_fread);
+  }
+  else {
+    intset = gt_intset_<%=bits%>_io_fp(intset, fp, err, gt_io_error_fwrite);
   }
   return intset;
 }
 
 GtIntset *gt_intset_<%=bits%>_new_from_file(FILE *fp, GtError *err)
 {
-  GtIntset *intset = NULL;
   gt_assert(fp != NULL);
   gt_error_check(err);
-  intset = gt_intset_<%=bits%>_io(intset, fp, err, gt_xansi_io_xfread);
-  return intset;
+  return gt_intset_<%=bits%>_io(NULL, fp, err);
 }
 
 GtIntset *gt_intset_<%=bits%>_write(GtIntset *intset, FILE *fp, GtError *err)
@@ -229,7 +234,7 @@ GtIntset *gt_intset_<%=bits%>_write(GtIntset *intset, FILE *fp, GtError *err)
   gt_assert(intset != NULL);
   gt_assert(fp != NULL);
   gt_error_check(err);
-  return gt_intset_<%=bits%>_io(intset, fp, err, gt_xansi_io_xfwrite);
+  return gt_intset_<%=bits%>_io(intset, fp, err);
 }
 
 void gt_intset_<%=bits%>_add(GtIntset *intset, GtUword elem)
@@ -320,6 +325,14 @@ GtUword gt_intset_<%=bits%>_get(GtIntset *intset, GtUword idx)
          intset_<%=bits%>->elements[idx];
 }
 
+GtUword gt_intset_<%=bits%>_size(GtIntset *intset)
+{
+  GT_UNUSED GtIntset<%=bits%> *intset_<%=bits%> = \
+gt_intset_<%=bits%>_cast(intset);
+  GtIntsetMembers *members = intset->members;
+  return members->nextfree;
+}
+
 static bool gt_intset_<%=bits%>_binarysearch_is_member(\
 const uint<%=bits%>_t *leftptr,
 <% if bits != 8 %> <%end%>                                               \
@@ -369,15 +382,15 @@ const uint<%=bits%>_t *leftptr,
 <% if bits != 8 %> <%end%>                                      \
 const uint<%=bits%>_t *rightptr,
 <% if bits != 8 %> <%end%>                                      \
-uint<%=bits%>_t pos)
+uint<%=bits%>_t value)
 {
   const uint<%=bits%>_t *leftorig = leftptr;
-  if (pos < *leftptr)
+  if (value < *leftptr)
     return 0;
-  if (pos > *rightptr)
+  if (value > *rightptr)
     return 1UL + (GtUword) (rightptr - leftptr);
-  gt_assert(pos <= *rightptr);
-  while (*leftptr < pos)
+  gt_assert(value <= *rightptr);
+  while (*leftptr < value)
     leftptr++;
   return (GtUword) (leftptr - leftorig);
 }
@@ -387,19 +400,19 @@ const uint<%=bits%>_t *leftptr,
 <% if bits != 8 %> <%end%>                                                   \
 const uint<%=bits%>_t *rightptr,
 <% if bits != 8 %> <%end%>                                                   \
-uint<%=bits%>_t pos)
+uint<%=bits%>_t value)
 {
   const uint<%=bits%>_t *midptr = NULL,
         *leftorig = leftptr;
 
   gt_assert(leftptr <= rightptr);
-  if (pos <= *leftptr)
+  if (value <= *leftptr)
     return 0;
-  if (pos > *rightptr)
+  if (value > *rightptr)
     return 1UL + (GtUword) (rightptr - leftptr);
   while (leftptr < rightptr) {
     midptr = leftptr + ((GtUword) (rightptr - leftptr) >> 1);
-    if (pos <= *midptr)
+    if (value <= *midptr)
       rightptr = midptr;
     else {
       leftptr = midptr + 1;
@@ -410,14 +423,14 @@ uint<%=bits%>_t pos)
 
 static GtUword gt_intset_<%=bits%>_get_idx_smallest_geq_test(GtIntset *intset,
 <% if bits == 8 %> <% end %>                                                   \
-  GtUword pos)
+  GtUword value)
 {
   GtIntset<%=bits%> *intset_<%=bits%> = gt_intset_<%=bits%>_cast(intset);
   GtIntsetMembers *members = intset->members;
 
-  GtUword sectionnum = GT_ELEM2SECTION_M(pos);
+  GtUword sectionnum = GT_ELEM2SECTION_M(value);
 
-  gt_assert(pos <= members->maxelement);
+  gt_assert(value <= members->maxelement);
   if (members->sectionstart[sectionnum] < members->sectionstart[sectionnum+1]) {
     return members->sectionstart[sectionnum] +
            gt_intset_<%=bits%>_idx_sm_geq(
@@ -425,21 +438,22 @@ static GtUword gt_intset_<%=bits%>_get_idx_smallest_geq_test(GtIntset *intset,
 members->sectionstart[sectionnum],
 <% if bits == 8 %> <% end %>                  intset_<%=bits%>->elements + \
 members->sectionstart[sectionnum+1] - 1,
-<% if bits == 8 %> <% end %>                  (uint<%=bits%>_t) pos);
+<% if bits == 8 %> <% end %>                  (uint<%=bits%>_t) value);
   }
   return members->sectionstart[sectionnum];
 }
 
-GtUword gt_intset_<%=bits%>_get_idx_smallest_geq(GtIntset *intset, GtUword pos)
+GtUword gt_intset_<%=bits%>_get_idx_smallest_geq(GtIntset *intset, \
+GtUword value)
 {
   GtIntset<%=bits%> *intset_<%=bits%> = gt_intset_<%=bits%>_cast(intset);
   GtIntsetMembers *members = intset->members;
 
-  GtUword sectionnum = GT_ELEM2SECTION_M(pos);
+  GtUword sectionnum = GT_ELEM2SECTION_M(value);
 
-  gt_assert(pos <= members->maxelement);
+  gt_assert(value <= members->maxelement);
 
-  if (pos > members->previouselem)
+  if (value > members->previouselem)
     return members->num_of_elems;
 
   if (members->sectionstart[sectionnum] < members->sectionstart[sectionnum+1]) {
@@ -449,7 +463,7 @@ GtUword gt_intset_<%=bits%>_get_idx_smallest_geq(GtIntset *intset, GtUword pos)
 members->sectionstart[sectionnum],
 <% if bits == 8 %> <% end %>                  intset_<%=bits%>->elements + \
 members->sectionstart[sectionnum+1] - 1,
-<% if bits == 8 %> <% end %>                  (uint<%=bits%>_t) pos);
+<% if bits == 8 %> <% end %>                  (uint<%=bits%>_t) value);
   }
   return members->sectionstart[sectionnum];
 }
@@ -462,12 +476,19 @@ void gt_intset_<%=bits%>_delete(GtIntset *intset)
   }
 }
 
-size_t gt_intset_<%=bits%>_size(GtUword maxelement, GtUword num_of_elems)
+size_t gt_intset_<%=bits%>_size_of_rep(GtUword maxelement, GtUword num_of_elems)
 {
   size_t logsectionsize = GT_BITS_FOR_TYPE(uint<%=bits%>_t);
   gt_assert(GT_BITS_FOR_TYPE(GtUword) > logsectionsize);
   return sizeof (uint<%=bits%>_t) * num_of_elems +
     sizeof (GtUword) * (GT_ELEM2SECTION(maxelement, logsectionsize) + 1);
+}
+
+size_t gt_intset_<%=bits%>_size_of_struct(void)
+{
+  return sizeof (GtIntset<%=bits%>) +
+         sizeof (struct GtIntsetClass) +
+         sizeof (struct GtIntsetMembers);
 }
 
 bool gt_intset_<%=bits%>_file_is_type(GtUword type)
@@ -487,7 +508,9 @@ const GtIntsetClass* gt_intset_<%=bits%>_class(void)
                                  gt_intset_<%=bits%>_io,
                                  gt_intset_<%=bits%>_get_idx_smallest_geq,
                                  gt_intset_<%=bits%>_is_member,
+                                 gt_intset_<%=bits%>_size_of_rep,
                                  gt_intset_<%=bits%>_size,
+                                 gt_intset_<%=bits%>_size_of_struct,
                                  gt_intset_<%=bits%>_write,
                                  gt_intset_<%=bits%>_delete);
   }
@@ -511,13 +534,15 @@ int gt_intset_<%=bits%>_unit_test(GtError *err)
     arr[idx] = arr[idx - 1] + gt_rand_max(stepsize) + 1;
   }
 
-  is_size = gt_intset_<%=bits%>_size(arr[num_of_elems - 1], num_of_elems);
+  is_size = \
+    gt_intset_<%=bits%>_size_of_rep(arr[num_of_elems - 1], num_of_elems);
 
   if (!had_err) {
     if (is_size < (size_t) UINT_MAX) {
       is = gt_intset_<%=bits%>_new(arr[num_of_elems - 1], num_of_elems);
       for (idx = 0; idx < num_of_elems; idx++) {
         gt_intset_<%=bits%>_add(is, arr[idx]);
+        gt_ensure(idx + 1 == gt_intset_<%=bits%>_size(is));
         if (idx < num_of_elems - 1)
           gt_ensure(gt_intset_<%=bits%>_get_idx_smallest_geq(is,
                                                      \
@@ -575,13 +600,12 @@ HEADER = <<-HEADER
 
 #include "core/types_api.h"
 #include "extended/intset_rep.h"
-#include "extended/xansi_io.h"
 
 /* The <GtIntset<%=bits%>> class implements the <GtIntset> interface.
    This class only works if <GtUword> is larger than <%=bits%> bits! */
 typedef struct GtIntset<%=bits%> GtIntset<%=bits%>;
 
-/* map static local methods to interface */
+/* Map static local methods to interface */
 const     GtIntsetClass* gt_intset_<%=bits%>_class(void);
 
 /* Return a new <GtIntset> object, the implementation beeing of type
@@ -589,7 +613,7 @@ const     GtIntsetClass* gt_intset_<%=bits%>_class(void);
    Fails if <%=bits%> >= bits for (GtUword). */
 GtIntset* gt_intset_<%=bits%>_new(GtUword maxelement, GtUword num_of_elems);
 
-/* Returns true, if the <type> read from a file storing a <GtIntset> indicatest
+/* Returns true, if the <type> read from a file storing a <GtIntset> indicates
    the type of this implementation. */
 bool      gt_intset_<%=bits%>_file_is_type(GtUword type);
 
@@ -603,35 +627,41 @@ void      gt_intset_<%=bits%>_add(GtIntset *intset, GtUword elem);
 /* Returns the element at index <idx> in the sorted set <intset>. */
 GtUword   gt_intset_<%=bits%>_get(GtIntset *intset, GtUword idx);
 
+/* Returns actual number of stored elements */
+GtUword   gt_intset_<%=bits%>_size(GtIntset *intset);
+
 /* Returns <true> if <elem> is a member of the set <intset>. */
 bool      gt_intset_<%=bits%>_is_member(GtIntset *intset, GtUword elem);
 
 /* Returns the number of the element in <intset> that is the smallest element
-   larger than or equal <pos> or <num_of_elems> if there is no such <element>.
-   This can be used for sets representing the separator positions in a set of
-   sequences, to determine the sequence number corresponding to any position in
-   the concatenated string of the sequence set.
-   Fails for <pos> > <maxelement>! */
+   larger than or equal <value> or <num_of_elems> if there is no such <element>.
+   Fails for <value> > <maxelement>! */
 GtUword   gt_intset_<%=bits%>_get_idx_smallest_geq(GtIntset *intset, \
-GtUword pos);
+GtUword value);
 
-/* Write <intset> to file <fp>. Returns <NULL> on error and <intset> will be
-   freed. */
+/* Write <intset> to file <fp>. Returns <NULL> on error (<intset> will be
+   freed). */
 GtIntset* gt_intset_<%=bits%>_write(GtIntset *intset, FILE *fp, GtError *err);
 
-/* Read or write, depending on <io_func>. When reading, <intset> should be NULL
-   or will be overwritten!
-   Returns <NULL> on error. */
-GtIntset* gt_intset_<%=bits%>_io(GtIntset *intset, FILE *fp, GtError *err,
-<% if bits != 8 %> <% end %>                         \
-GtXansiIOFunc io_func);
+/* IO-function to be used if <intset> is part of a larger structure. If <intset>
+   is NULL, will attempt to allocate memory and fill a new <GtIntset<%=bits%>>
+   object by reading from <fp>. If <intset> is not NULL, will attempt to write
+   its content to <fp>.
+   Returns <NULL> on error (<intset> will be freed) and sets <err>. */
+GtIntset* gt_intset_<%=bits%>_io(GtIntset *intset, FILE *fp, GtError *err);
 
+/* Deletes <intset> and frees all associated space. */
 void      gt_intset_<%=bits%>_delete(GtIntset *intset);
 
-/* Returns the size of an intset with given number of elements
-   <num_of_elems> and maximum value <maxelement>.
+/* Returns the size of the representation of an intset with given number of
+   elements <num_of_elems> and maximum value <maxelement>, in bytes. This does
+   not include the size of the structure.
    Fails if <%=bits%> >= bits for (GtUword). */
-size_t    gt_intset_<%=bits%>_size(GtUword maxelement, GtUword num_of_elems);
+size_t    gt_intset_<%=bits%>_size_of_rep(GtUword maxelement, \
+GtUword num_of_elems);
+
+/* Returns the size in bytes of the <GtIntset<%=bits%>>-structure. */
+size_t    gt_intset_<%=bits%>_size_of_struct(void);
 
 int gt_intset_<%=bits%>_unit_test(GtError *err);
 #endif

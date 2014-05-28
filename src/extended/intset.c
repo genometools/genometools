@@ -65,6 +65,15 @@ GtUword gt_intset_get(GtIntset *intset, GtUword idx)
   return intset->members->num_of_elems;
 }
 
+GtUword gt_intset_size(GtIntset *intset)
+{
+  gt_assert(intset != NULL);
+  gt_assert(intset->c_class != NULL);
+  if (intset->c_class->size_func != NULL)
+    return intset->c_class->size_func(intset);
+  return 0;
+}
+
 bool gt_intset_is_member(GtIntset *intset, GtUword elem)
 {
   gt_assert(intset != NULL);
@@ -83,16 +92,6 @@ GtUword gt_intset_get_idx_smaller_geq(GtIntset *intset, GtUword pos)
   return GT_UWORD_MAX;
 }
 
-size_t gt_intset_size(GtIntset *intset)
-{
-  gt_assert(intset != NULL);
-  gt_assert(intset->c_class != NULL);
-  if (intset->c_class->size_func != NULL)
-    return intset->c_class->size_func(intset->members->maxelement,
-                                      intset->members->num_of_elems);
-  return 0;
-}
-
 GtIntset *gt_intset_write(GtIntset *intset, FILE *fp, GtError *err)
 {
   gt_assert(intset != NULL);
@@ -100,6 +99,25 @@ GtIntset *gt_intset_write(GtIntset *intset, FILE *fp, GtError *err)
   if (intset->c_class->size_func != NULL)
     return intset->c_class->write_func(intset, fp, err);
   return intset;
+}
+
+size_t gt_intset_size_of_rep(GtIntset *intset,
+                             GtUword maxelement, GtUword num_of_elems)
+{
+  gt_assert(intset != NULL);
+  gt_assert(intset->c_class != NULL);
+  if (intset->c_class->rep_size_func != NULL)
+    return intset->c_class->rep_size_func(maxelement, num_of_elems);
+  return 0;
+}
+
+size_t    gt_intset_size_of_struct(GtIntset *intset)
+{
+  gt_assert(intset != NULL);
+  gt_assert(intset->c_class != NULL);
+  if (intset->c_class->rep_size_func != NULL)
+    return intset->c_class->struct_size_func();
+  return 0;
 }
 
 const GtIntsetClass *gt_intset_class_new(
@@ -110,7 +128,9 @@ const GtIntsetClass *gt_intset_class_new(
                                        GtIntsetIOFunc io_func,
                                        GtIntsetIdxSmGeqFunc idx_sm_geq_func,
                                        GtIntsetIsMemberFunc is_member_func,
+                                       GtIntsetRepSizeFunc rep_size_func,
                                        GtIntsetSizeFunc size_func,
+                                       GtIntsetStructSizeFunc struct_size_func,
                                        GtIntsetWriteFunc write_func,
                                        GtIntsetDeleteFunc delete_func)
 {
@@ -119,10 +139,12 @@ const GtIntsetClass *gt_intset_class_new(
   intset_c->add_func = add_func;
   intset_c->file_is_type_func = file_is_type_func;
   intset_c->get_func = get_func;
-  intset_c->io_func = io_func;
   intset_c->idx_sm_geq_func = idx_sm_geq_func;
+  intset_c->io_func = io_func;
   intset_c->is_member_func = is_member_func;
+  intset_c->rep_size_func = rep_size_func;
   intset_c->size_func = size_func;
+  intset_c->struct_size_func = struct_size_func;
   intset_c->write_func = write_func;
   intset_c->delete_func = delete_func;
   return intset_c;

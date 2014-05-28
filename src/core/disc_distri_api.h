@@ -34,30 +34,28 @@ typedef void (*GtDiscDistriIterFunc)(GtUword key,
                                      void *data);
 
 /* Creates a new, empty <GtDiscDistri>. */
-GtDiscDistri*      gt_disc_distri_new(void);
+GtDiscDistri* gt_disc_distri_new(void);
 /* Adds one count of <key> to <d>. */
-void               gt_disc_distri_add(GtDiscDistri *d, GtUword key);
+void          gt_disc_distri_add(GtDiscDistri *d, GtUword key);
 /* Adds <occurrences> counts of <key> to <d>. */
-void               gt_disc_distri_add_multi(GtDiscDistri *d, GtUword key,
-                                            GtUint64 occurrences);
+void          gt_disc_distri_add_multi(GtDiscDistri *d, GtUword key,
+                                       GtUint64 occurrences);
 /* Return the current count of <key> as stored in <d>. */
-GtUint64 gt_disc_distri_get(const GtDiscDistri *d, GtUword key);
+GtUint64      gt_disc_distri_get(const GtDiscDistri *d, GtUword key);
 /* Prints the current state of <d> to <outfile>. If <outfp> is NULL,
    stdout will be used for output. */
-void               gt_disc_distri_show(const GtDiscDistri *d, GtFile *outfp);
+void          gt_disc_distri_show(const GtDiscDistri *d, GtFile *outfp);
 /* Iterate over all non-empty entries in <d>, calling <func> for each one,
    from the smallest to the largest key. The <data> pointer can be used to pass
    arbitrary data to <func>. */
-void               gt_disc_distri_foreach(const GtDiscDistri *d,
-                                          GtDiscDistriIterFunc func,
-                                          void *data);
+void          gt_disc_distri_foreach(const GtDiscDistri *d,
+                                     GtDiscDistriIterFunc func,
+                                     void *data);
 /* Same as foreach, but from the longest to the smallest key. */
-void               gt_disc_distri_foreach_in_reverse_order(const
-                                                                GtDiscDistri *d,
-                                                           GtDiscDistriIterFunc
-                                                                           func,
-                                                           void *data);
-int                gt_disc_distri_unit_test(GtError*);
-void               gt_disc_distri_delete(GtDiscDistri*);
+void          gt_disc_distri_foreach_in_reverse_order(const GtDiscDistri *d,
+                                                      GtDiscDistriIterFunc func,
+                                                      void *data);
+int           gt_disc_distri_unit_test(GtError*);
+void          gt_disc_distri_delete(GtDiscDistri*);
 
 #endif

@@ -23,13 +23,10 @@
 #include "core/error_api.h"
 #include "core/types_api.h"
 #include "extended/intset.h"
-#include "extended/xansi_io.h"
 
 #define GT_BITS_FOR_TYPE(TYPE)     ((sizeof (TYPE)) * ((size_t) CHAR_BIT))
 #define GT_ELEM2SECTION(X, LOGVAL) ((X) >> (LOGVAL))
 #define GT_SECTIONMINELEM(S)       ((S) << members->logsectionsize)
-#define gt_intset_io_one(element, fp) \
-  io_func(&element, sizeof (element), (size_t) 1, fp)
 
 typedef struct GtIntsetClass GtIntsetClass;
 typedef struct GtIntsetMembers GtIntsetMembers;
@@ -37,11 +34,12 @@ typedef struct GtIntsetMembers GtIntsetMembers;
 typedef void      (*GtIntsetAddFunc)       (GtIntset*, GtUword);
 typedef bool      (*GtIntsetFileIsTypeFunc)(GtUword);
 typedef GtUword   (*GtIntsetGetFunc)       (GtIntset*, GtUword);
-typedef GtIntset* (*GtIntsetIOFunc)        (GtIntset*, FILE*, GtError*,
-                                            GtXansiIOFunc);
+typedef GtIntset* (*GtIntsetIOFunc)        (GtIntset*, FILE*, GtError*);
 typedef GtUword   (*GtIntsetIdxSmGeqFunc)  (GtIntset*, GtUword);
 typedef bool      (*GtIntsetIsMemberFunc)  (GtIntset*, GtUword);
-typedef size_t    (*GtIntsetSizeFunc)      (GtUword, GtUword);
+typedef size_t    (*GtIntsetRepSizeFunc)   (GtUword, GtUword);
+typedef GtUword   (*GtIntsetSizeFunc)      (GtIntset*);
+typedef size_t    (*GtIntsetStructSizeFunc)(void);
 typedef GtIntset* (*GtIntsetWriteFunc)     (GtIntset*, FILE*, GtError*);
 typedef void      (*GtIntsetDeleteFunc)    (GtIntset*);
 
@@ -58,7 +56,9 @@ struct GtIntsetClass {
   GtIntsetIOFunc         io_func;
   GtIntsetIdxSmGeqFunc   idx_sm_geq_func;
   GtIntsetIsMemberFunc   is_member_func;
+  GtIntsetRepSizeFunc    rep_size_func;
   GtIntsetSizeFunc       size_func;
+  GtIntsetStructSizeFunc struct_size_func;
   GtIntsetWriteFunc      write_func;
   GtIntsetDeleteFunc     delete_func;
 };
@@ -82,12 +82,27 @@ const GtIntsetClass* gt_intset_class_new(size_t size,
                                          GtIntsetIOFunc,
                                          GtIntsetIdxSmGeqFunc,
                                          GtIntsetIsMemberFunc,
+                                         GtIntsetRepSizeFunc,
                                          GtIntsetSizeFunc,
+                                         GtIntsetStructSizeFunc,
                                          GtIntsetWriteFunc,
                                          GtIntsetDeleteFunc);
 
 GtIntset*            gt_intset_create(const GtIntsetClass*);
 
 void*                gt_intset_cast(const GtIntsetClass*, GtIntset*);
+
+/* Function for unit tests within implementations of this class. Fails if
+   <gt_intset_is_member()> called with any number between and including <start>
+   and <end> returns true.
+   */
+int gt_intset_unit_test_notinset(GtIntset *intset, GtUword start,
+                                 GtUword end, GtError *err);
+
+/* Function for unit tests within implementations of this class. Fails if
+   <gt_intset_get_idx_smaller_geq()> called with any number between and
+   including <start> and <end> returns any number different than <num>. */
+int gt_intset_unit_test_check_seqnum(GtIntset *intset, GtUword start,
+                                     GtUword end, GtUword num, GtError *err);
 
 #endif

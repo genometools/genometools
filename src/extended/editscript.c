@@ -473,39 +473,55 @@ size_t gt_editscript_size(GtEditscript *editscript)
     sizeof (*(editscript->space)) * editscript->size;
 }
 
-#define EDITSCRIPT_IO_ONE(elemptr, fp) \
-  io_func(elemptr, sizeof (*(elemptr)), (size_t) 1, fp)
+#define EDITSCRIPT_IO_ONE(elemptr) \
+  io_func(elemptr, sizeof (*(elemptr)), (size_t) 1, fp, err)
 
-GtEditscript *gt_editscript_io(GtEditscript *editscript, FILE *fp,
-                               GtXansiIOFunc io_func)
+static GtEditscript *gt_editscript_io_fp(GtEditscript *editscript, FILE *fp,
+                                         GtError *err, GtIOFunc io_func)
 {
+  int had_err = 0;
   GtUword bits;
-  if (editscript == NULL) {
-    editscript = gt_calloc((size_t) 1, sizeof (GtEditscript));
-  }
 
-  EDITSCRIPT_IO_ONE(&editscript->entry_size, fp);
-  EDITSCRIPT_IO_ONE(&editscript->trailing_matches, fp);
-  EDITSCRIPT_IO_ONE(&editscript->del, fp);
-  EDITSCRIPT_IO_ONE(&editscript->num_elems, fp);
-  if (editscript->num_elems != 0) {
+  had_err = EDITSCRIPT_IO_ONE(&editscript->entry_size);
+  if (!had_err)
+    had_err = EDITSCRIPT_IO_ONE(&editscript->trailing_matches);
+  if (!had_err)
+    had_err = EDITSCRIPT_IO_ONE(&editscript->del);
+  if (!had_err)
+    had_err = EDITSCRIPT_IO_ONE(&editscript->num_elems);
+  if (!had_err && editscript->num_elems != 0) {
     bits = (GtUword) editscript->num_elems * (GtUword) editscript->entry_size;
     editscript->size = (unsigned int) (bits / (GT_INTWORDSIZE));
     if (bits % GT_INTWORDSIZE) {
       editscript->size++;
     }
 
-    if (editscript->space == NULL) {
-      editscript->space =
-        gt_malloc(editscript->size * sizeof (*(editscript->space)));
-    }
-    io_func(editscript->space,
-            sizeof (*(editscript->space)),
-            (size_t) (editscript->size),
-            fp);
+    editscript->space =
+      gt_realloc(editscript->space,
+                 editscript->size * sizeof (*(editscript->space)));
+    had_err = io_func(editscript->space,
+                      sizeof (*(editscript->space)),
+                      (size_t) (editscript->size),
+                      fp, err);
   }
 
+  if (!had_err) {
+    gt_editscript_delete(editscript);
+    editscript = NULL;
+  }
   return(editscript);
+}
+
+GtEditscript *gt_editscript_io(GtEditscript *editscript, FILE *fp, GtError *err)
+{
+  if (editscript == NULL) {
+    editscript = gt_calloc((size_t) 1, sizeof (GtEditscript));
+    editscript = gt_editscript_io_fp(editscript, fp, err, gt_io_error_fread);
+  }
+  else {
+    editscript = gt_editscript_io_fp(editscript, fp, err, gt_io_error_fwrite);
+  }
+  return editscript;
 }
 
 void gt_editscript_show(GtEditscript *editscript, GtAlphabet *alphabet)

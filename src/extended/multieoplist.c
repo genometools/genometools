@@ -343,29 +343,42 @@ void gt_multieoplist_combine(GtMultieoplist *multieops,
   }
 }
 
-GtMultieoplist *gt_meoplist_io(GtMultieoplist *multieops,
-                               GtXansiIOFunc io_func,
-                               FILE *fp)
+static GtMultieoplist *gt_meoplist_io_fp(GtMultieoplist *multieops, FILE *fp,
+                                         GtIOFunc io_func, GtError *err)
 {
-  gt_assert(io_func != NULL);
+  int had_err = 0;
+  had_err = io_func(&multieops->meoplist.nextfreeEop,
+                    sizeof (multieops->meoplist.nextfreeEop),
+                    (size_t) 1, fp, err);
+  if (!had_err) {
+    gt_assert(multieops->meoplist.nextfreeEop != 0);
+    if (multieops->meoplist.spaceEop == NULL) {
+      multieops->meoplist.allocatedEop = multieops->meoplist.nextfreeEop;
+      multieops->meoplist.spaceEop =
+        gt_malloc((size_t) multieops->meoplist.nextfreeEop *
+                  sizeof (*(multieops->meoplist.spaceEop)));
+    }
+  }
+  had_err = io_func(multieops->meoplist.spaceEop,
+                    sizeof (*(multieops->meoplist.spaceEop)),
+                    (size_t) multieops->meoplist.nextfreeEop,
+                    fp, err);
+  if (had_err) {
+    gt_multieoplist_delete(multieops);
+    multieops = NULL;
+  }
+  return(multieops);
+}
+
+GtMultieoplist *gt_meoplist_io(GtMultieoplist *multieops, FILE *fp,
+                               GtError *err)
+{
   if (multieops == NULL) {
     multieops = gt_calloc((size_t) 1, sizeof (GtMultieoplist));
     GT_INITARRAY(&multieops->meoplist, Eop);
+    multieops = gt_meoplist_io_fp(multieops, fp, gt_io_error_fread, err);
   }
-  io_func(&multieops->meoplist.nextfreeEop,
-          sizeof (multieops->meoplist.nextfreeEop),
-          (size_t) 1,
-          fp);
-  gt_assert(multieops->meoplist.nextfreeEop != 0);
-  if (multieops->meoplist.spaceEop == NULL) {
-    multieops->meoplist.allocatedEop = multieops->meoplist.nextfreeEop;
-    multieops->meoplist.spaceEop =
-      gt_malloc((size_t) multieops->meoplist.nextfreeEop *
-                sizeof (*(multieops->meoplist.spaceEop)));
-  }
-  io_func(multieops->meoplist.spaceEop,
-          sizeof (*(multieops->meoplist.spaceEop)),
-          (size_t) multieops->meoplist.nextfreeEop,
-          fp);
-  return(multieops);
+  else
+    multieops = gt_meoplist_io_fp(multieops, fp, gt_io_error_fwrite, err);
+  return multieops;
 }

@@ -15,36 +15,40 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef XANSI_IO_IMPL_H
-#define XANSI_IO_IMPL_H
-
-#include <stdio.h>
-#include <stdlib.h>
-
 #include "core/assert_api.h"
-#include "core/unused_api.h"
+#include "core/types_api.h"
 
-GT_UNUSED static void gt_xansi_io_xfwrite(void *ptr,
-                                          size_t size,
-                                          size_t nmemb,
-                                          FILE *stream)
+#include "extended/io_function_pointers.h"
+
+int gt_io_error_fwrite(void *ptr, size_t size, size_t nmemb, FILE *stream,
+                       GtError *err)
 {
+  int had_err = 0;
   if (nmemb != fwrite((const void*) ptr, size, nmemb, stream)) {
-    perror("gt_xansi_io_xfwrite failed to write to file");
-    exit(EXIT_FAILURE);
+    gt_error_set(err,
+                 "fwrite failed to write " GT_WU " elements of "
+                 "size " GT_WU, (GtUword) nmemb, (GtUword) size);
+    had_err = 1;
   }
+  return had_err;
 }
 
-GT_UNUSED static void gt_xansi_io_xfread(void *ptr,
-                                         size_t size,
-                                         size_t nmemb,
-                                         FILE *stream)
+int gt_io_error_fread(void *ptr, size_t size, size_t nmemb, FILE *stream,
+                       GtError *err)
 {
+  int had_err = 0;
   if (nmemb != fread(ptr, size, nmemb, stream)) {
-    gt_assert(feof(stream) == 0);
-    if (ferror(stream) != 0)
-      perror("gt_xansi_io_xfread failed to read from file");
-    exit(EXIT_FAILURE);
-  };
+    had_err = 1;
+    if (feof(stream) != 0) {
+      gt_error_set(err,
+                   "fread reached eof trying to read " GT_WU " elements of "
+                   "size " GT_WU, (GtUword) nmemb, (GtUword) size);
+    }
+    else {
+      gt_error_set(err,
+                   "fwread failed to read " GT_WU " elements of "
+                   "size " GT_WU, (GtUword) nmemb, (GtUword) size);
+    }
+  }
+  return had_err;
 }
-#endif

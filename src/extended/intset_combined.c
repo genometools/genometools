@@ -23,18 +23,18 @@
 #include "extended/intset_16.h"
 #include "extended/intset_32.h"
 #include "extended/intset_8.h"
-#include "extended/xansi_io.h"
+#include "extended/io_function_pointers.h"
 
 GtIntset *gt_intset_best_new(GtUword maxelement, GtUword num_of_elems)
 {
   size_t s8, s16, s32;
   gt_assert(GT_BITS_FOR_TYPE(GtUword) > GT_BITS_FOR_TYPE(uint8_t));
-  s8 = gt_intset_8_size(maxelement, num_of_elems);
+  s8 = gt_intset_8_size_of_rep(maxelement, num_of_elems);
   s16 = GT_BITS_FOR_TYPE(GtUword) > GT_BITS_FOR_TYPE(uint16_t) ?
-    gt_intset_16_size(maxelement, num_of_elems) :
+    gt_intset_16_size_of_rep(maxelement, num_of_elems) :
     s8;
   s32 = GT_BITS_FOR_TYPE(GtUword) > GT_BITS_FOR_TYPE(uint32_t) ?
-    gt_intset_32_size(maxelement, num_of_elems) :
+    gt_intset_32_size_of_rep(maxelement, num_of_elems) :
     s8;
   if (s8 <= s16) {
     if (s8 <= s32)
@@ -47,60 +47,45 @@ GtIntset *gt_intset_best_new(GtUword maxelement, GtUword num_of_elems)
   return gt_intset_32_new(maxelement, num_of_elems);
 }
 
-static GtUword gt_intset_read_type_rewind(FILE *fp)
+static int gt_intset_read_type_rewind(FILE *fp, GtUword *type, GtError *err)
 {
+  int had_err = 0;
   fpos_t pos;
-  GtUword type;
   if (fgetpos(fp, &pos) != 0) {
-    perror("fgetpos failed");
-    exit(EXIT_FAILURE);
+    gt_error_set(err, "fgetpos failed");
+    had_err = 1;
   }
-  gt_xansi_io_xfread_one(type, fp);
-  if (fsetpos(fp, &pos) != 0) {
-    perror("fsetpos failed");
-    exit(EXIT_FAILURE);
+  if (!had_err)
+    had_err = gt_io_error_fread(type, sizeof (*type), (size_t) 1, fp, err);
+  if (!had_err && fsetpos(fp, &pos) != 0) {
+    gt_error_set(err, "fsetpos failed");
+    had_err = 1;
   }
-  return type;
+  return had_err;
 }
 
 GtIntset *gt_intset_new_from_file(FILE *fp, GtError *err)
 {
-  GtUword type;
   GtIntset *intset = NULL;
-  type = gt_intset_read_type_rewind(fp);
-  if (gt_intset_8_file_is_type(type))
-    intset = gt_intset_8_new_from_file(fp, err);
-  else {
-    if (gt_intset_16_file_is_type(type))
-      intset = gt_intset_16_new_from_file(fp, err);
-    else {
-      if (gt_intset_32_file_is_type(type))
-        intset = gt_intset_32_new_from_file(fp, err);
-      else
-        gt_error_set(err, "could not identify intset type from file");
-    }
-  }
-  return intset;
+  return gt_intset_io(intset, fp, err);
 }
 
-GtIntset *gt_intset_io(GtIntset *intset, FILE *fp, GtError *err,
-                       GtXansiIOFunc io_func)
+GtIntset *gt_intset_io(GtIntset *intset, FILE *fp, GtError *err)
 {
-  GtIntsetIOFunc intset_io;
+  int had_err = 0;
   GtUword type;
   if (intset == NULL) {
-    type = gt_intset_read_type_rewind(fp);
-    if (gt_intset_8_file_is_type(type))
-      intset_io = gt_intset_8_io;
+    had_err = gt_intset_read_type_rewind(fp, &type, err);
+    if (!had_err && gt_intset_8_file_is_type(type))
+      intset = gt_intset_8_io(intset, fp, err);
     else {
-      if (gt_intset_16_file_is_type(type))
-        intset_io = gt_intset_16_io;
+      if (!had_err && gt_intset_16_file_is_type(type))
+        intset = gt_intset_16_io(intset, fp, err);
       else {
-        if (gt_intset_32_file_is_type(type))
-          intset_io = gt_intset_32_io;
+        if (!had_err && gt_intset_32_file_is_type(type))
+          intset = gt_intset_32_io(intset, fp, err);
         else {
           gt_error_set(err, "could not identify intset type from file");
-          return NULL;
         }
       }
     }
@@ -108,9 +93,9 @@ GtIntset *gt_intset_io(GtIntset *intset, FILE *fp, GtError *err,
   else {
     gt_assert(intset->c_class != NULL);
     gt_assert(intset->c_class->io_func != NULL);
-    intset_io = intset->c_class->io_func;
+    intset = intset->c_class->io_func(intset, fp, err);
   }
-  return intset_io(intset, fp, err, io_func);
+  return intset;
 }
 
 int gt_intset_unit_test(GtError *err)

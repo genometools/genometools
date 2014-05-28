@@ -22,8 +22,8 @@
 #include "core/alphabet_api.h"
 #include "core/encseq_api.h"
 #include "core/error_api.h"
+#include "extended/io_function_pointers.h"
 #include "extended/multieoplist.h"
-#include "extended/xansi_io.h"
 
 /* Class <GtEditscript> stores everything from an alignment of two sequences
    that is needed to reproduce sequence 2 (usualy called v) from sequence one
@@ -70,9 +70,13 @@ GtUword         gt_editscript_get_sequence(const GtEditscript *editscript,
                                            GtReadmode dir,
                                            GtUchar *buffer);
 
-/* Write or read to <fp> depending on what <io_func> is given. */
+/* Read or write to/from File, depending on <editscript>. If <NULL>, it
+   allocates memory for a new <GtEditscript> object and tries to fill it from
+   file <fp>. If not <NULL> it writs the content of <editscript> to <fp>.
+   Returns <NULL> on error, in which case <editscript> will be deleted and <err>
+   will be set. */
 GtEditscript*   gt_editscript_io(GtEditscript *editscript, FILE *fp,
-                                 GtXansiIOFunc io_func);
+                                 GtError *err);
 
 size_t          gt_editscript_size(GtEditscript *editscript);
 void            gt_editscript_delete(GtEditscript *editscript);

@@ -1043,8 +1043,9 @@ int gt_encdesc_encoder_encode(GtEncdescEncoder *ee,
       had_err = -1;
   }
 
+  if (!had_err)
+    had_err = encdesc_write_header(ee->encdesc, fp, err);
   if (!had_err) {
-    encdesc_write_header(ee->encdesc, fp);
     if (ee->timer != NULL) {
       gt_timer_show_progress(ee->timer, "calculate huffmans", stdout);
     }
@@ -1152,6 +1153,7 @@ static void encdesc_read_samplingtab(GtEncdesc *encdesc,
 GtEncdesc* gt_encdesc_load(const char *name,
                            GtError *err)
 {
+  int had_err = 0;
   GtEncdesc *encdesc = NULL;
   FILE *fp;
   GtStr *filename;
@@ -1166,27 +1168,36 @@ GtEncdesc* gt_encdesc_load(const char *name,
   fp = gt_fa_fopen_with_suffix(name, GT_ENCDESC_FILESUFFIX, "rb", err);
   if (fp == NULL) {
     gt_assert(gt_error_is_set(err));
-    return NULL;
+    had_err = 1;
   }
 
-  fd = open(gt_str_get(filename), O_RDONLY);
-  if (fd == -1) {
-    gt_error_set(err, "open(): cannot read file %s, error: %s",
-                 gt_str_get(filename), strerror(errno));
-    return NULL;
+  if (!had_err) {
+    fd = open(gt_str_get(filename), O_RDONLY);
+    if (fd == -1) {
+      gt_error_set(err, "open(): cannot read file %s, error: %s",
+                   gt_str_get(filename), strerror(errno));
+      had_err = 1;
+    }
   }
-  encdesc_read_header(encdesc, fp);
+  if (!had_err)
+    had_err = encdesc_read_header(encdesc, fp, err);
 
-  encdesc_init_huffman(encdesc);
+  if (!had_err) {
+    encdesc_init_huffman(encdesc);
 
-  encdesc_read_samplingtab(encdesc, fp);
-  gt_fa_fclose(fp);
+    encdesc_read_samplingtab(encdesc, fp);
+    gt_fa_fclose(fp);
 
-  encdesc->bitinstream = gt_bitinstream_new(gt_str_get(filename),
-                                            (size_t) encdesc->start_of_encoding,
-                                            pages_to_map);
-  gt_str_delete(filename);
+    encdesc->bitinstream =
+      gt_bitinstream_new(gt_str_get(filename),
+                         (size_t) encdesc->start_of_encoding, pages_to_map);
+    gt_str_delete(filename);
 
+  }
+  else {
+    gt_encdesc_delete(encdesc);
+    encdesc = NULL;
+  }
   return encdesc;
 }
 
