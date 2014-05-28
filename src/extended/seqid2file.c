@@ -113,7 +113,8 @@ void gt_seqid2file_register_options_ext(GtOptionParser *op,
                                         "exactly match the sequence "
                                         "descriptions from the input files "
                                         "for the desired sequence IDs "
-                                        "(in GFF3), reporting the first match",
+                                        "(in GFF3) from the beginning to the "
+                                        "first whitespace",
                                         &s2fi->matchdescstart, false);
   if (debug)
     gt_option_is_development_option(matchdescstart_option);
