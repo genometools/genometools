@@ -166,7 +166,7 @@ module GT
 
     def add_attribute(tag, val)
       if tag.to_s == "" or val.to_s == "" then
-        gterror("Attribute keys or values must not be empty!")
+        GT::gterror("Attribute keys or values must not be empty!")
       end
       GT.gt_feature_node_add_attribute(@genome_node, tag.to_s, val.to_s)
       self.update_attribs
@@ -174,7 +174,7 @@ module GT
 
     def set_attribute(tag, val)
       if tag.to_s == "" or val.to_s == "" then
-        gterror("Attribute keys or values must not be empty!")
+        GT::gterror("Attribute keys or values must not be empty!")
       end
       GT.gt_feature_node_set_attribute(@genome_node, tag.to_s, val.to_s)
       self.update_attribs
@@ -182,7 +182,7 @@ module GT
 
     def remove_attribute(tag)
       if tag.to_s == "" then
-        gterror("Attribute key must not be empty!")
+        GT::gterror("Attribute key must not be empty!")
       end
       GT.gt_feature_node_remove_attribute(@genome_node, tag.to_s)
       self.update_attribs
