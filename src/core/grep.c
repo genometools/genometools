@@ -19,6 +19,7 @@
 #include <sys/types.h>
 #endif
 #include <stdlib.h>
+#include <string.h>
 #include "core/ensure.h"
 #include "core/grep_api.h"
 #include "core/ma.h"
@@ -38,8 +39,8 @@ static void grep_error(int errcode, regex_t *matcher, GtError *err)
   gt_free(buf);
 }
 
-int gt_grep(GT_UNUSED bool *match, GT_UNUSED const char *pattern,
-            GT_UNUSED const char *line, GtError *err)
+int gt_grep_nt(GT_UNUSED bool *match, GT_UNUSED const char *pattern,
+               GT_UNUSED const char *line, size_t len, GtError *err)
 {
   regex_t matcher;
   int rval, had_err = 0;
@@ -50,7 +51,7 @@ int gt_grep(GT_UNUSED bool *match, GT_UNUSED const char *pattern,
     had_err = -1;
   }
   if (!had_err) {
-    rval = tre_regexec(&matcher, line, 0, NULL, 0);
+    rval = tre_regnexec(&matcher, line, len, 0, NULL, 0);
     if (rval && rval != REG_NOMATCH) {
       grep_error(rval, &matcher, err);
       had_err = -1;
@@ -66,6 +67,12 @@ int gt_grep(GT_UNUSED bool *match, GT_UNUSED const char *pattern,
   return had_err;
 }
 
+int gt_grep(GT_UNUSED bool *match, GT_UNUSED const char *pattern,
+            GT_UNUSED const char *line, GtError *err)
+{
+  return gt_grep_nt(match, pattern, line, strlen(line), err);
+}
+
 int gt_grep_unit_test(GtError *err)
 {
   bool match;
@@ -75,8 +82,27 @@ int gt_grep_unit_test(GtError *err)
   grep_err = gt_grep(&match, "a", "a", NULL);
   gt_ensure(!grep_err);
   gt_ensure(match);
+  grep_err = gt_grep_nt(&match, "a", "abb", 1, NULL);
+  gt_ensure(!grep_err);
+  gt_ensure(match);
+  grep_err = gt_grep_nt(&match, "b", "abb", 2, NULL);
+  gt_ensure(!grep_err);
+  gt_ensure(match);
 
   grep_err = gt_grep(&match, "b", "a", NULL);
+  gt_ensure(!grep_err);
+  gt_ensure(!match);
+  grep_err = gt_grep_nt(&match, "b", "ab", 1, NULL);
+  gt_ensure(!grep_err);
+  gt_ensure(!match);
+  grep_err = gt_grep_nt(&match, "b", "b", 0, NULL);
+  gt_ensure(!grep_err);
+  gt_ensure(!match);
+
+  grep_err =  gt_grep(&match, "^foo ", "foo bar", NULL);
+  gt_ensure(!grep_err);
+  gt_ensure(match);
+  grep_err =  gt_grep(&match, "^foo ", "baz foo bar", NULL);
   gt_ensure(!grep_err);
   gt_ensure(!match);
 

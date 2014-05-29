@@ -24,5 +24,8 @@
    as sequence <n> in <encseq>. Used as an access method for legacy LTRharvest
    output files. */
 GtRegionMapping* gt_region_mapping_new_encseq_seqno(GtEncseq *encseq);
+/* Enables matching only at the beginning of sequence descriptions up to the
+   first whitespace */
+void             gt_region_mapping_enable_match_desc_start(GtRegionMapping *rm);
 
 #endif

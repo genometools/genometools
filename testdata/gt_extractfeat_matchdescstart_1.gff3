@@ -1,0 +1,4 @@
+##gff-version	3
+##sequence-region foo 1 192
+##sequence-region foobar 1 57
+foo	.	gene	100	150	.	+	.	ID=foo

@@ -192,3 +192,36 @@ Test do
     run "diff #{last_stdout} #{$testdata}gt_extractfeat_mappings_ref#{md5}.fas"
   end
 end
+
+Name "gt extractfeat -matchdescstart"
+Keywords "gt_extractfeat matchdescstart"
+Test do
+  ["-seqfiles","-seqfile"].each do |method|
+    run "#{$bin}gt extractfeat #{method} #{$testdata}gt_extractfeat_matchdescstart_1.fas " +
+        "-type gene -matchdesc #{$testdata}gt_extractfeat_matchdescstart_1.gff3", \
+        :retval => 1
+    grep(last_stderr, "could match more than one sequence")
+    run "#{$bin}gt extractfeat #{method} #{$testdata}gt_extractfeat_matchdescstart_1.fas " +
+        "-type gene -matchdescstart #{$testdata}gt_extractfeat_matchdescstart_1.gff3"
+    run "diff #{last_stdout} #{$testdata}gt_extractfeat_matchdescstart_1.out"
+    run "#{$bin}gt extractfeat #{method} #{$testdata}gt_extractfeat_matchdescstart_2.fas " +
+        "-type gene -matchdescstart #{$testdata}gt_extractfeat_matchdescstart_1.gff3", \
+        :retval => 1
+    grep(last_stderr, "could match more than one sequence")
+  end
+  run "#{$bin}gt encseq encode -lossless -indexname foo " +
+      "#{$testdata}gt_extractfeat_matchdescstart_1.fas"
+  run "#{$bin}gt extractfeat -encseq foo " +
+      "-type gene -matchdesc #{$testdata}gt_extractfeat_matchdescstart_1.gff3", \
+      :retval => 1
+  grep(last_stderr, "could match more than one sequence")
+  run "#{$bin}gt extractfeat -encseq foo " +
+      "-type gene -matchdescstart #{$testdata}gt_extractfeat_matchdescstart_1.gff3"
+  run "diff #{last_stdout} #{$testdata}gt_extractfeat_matchdescstart_1.out"
+  run "#{$bin}gt encseq encode -lossless -indexname foo " +
+      "#{$testdata}gt_extractfeat_matchdescstart_2.fas"
+  run "#{$bin}gt extractfeat -encseq foo " +
+      "-type gene -matchdescstart #{$testdata}gt_extractfeat_matchdescstart_1.gff3", \
+      :retval => 1
+  grep(last_stderr, "could match more than one sequence")
+end
