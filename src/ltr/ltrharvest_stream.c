@@ -945,97 +945,91 @@ static int gt_searchforLTRs(GtLTRharvestStream *lo,
       break;
     }
     gt_mutex_unlock(rmutex);
-
     repeatptr = &(lo->repeatinfo.repeats.spaceRepeat[my_seed]);
+
+    /* check whether max LTR length is exceeded by seed alone */
+    if (lo->repeatinfo.lmax < repeatptr->len)
+      continue;
+
     seqstart = gt_encseq_seqstartpos(lo->encseq, repeatptr->contignumber);
-    seqend = seqstart + gt_encseq_seqlength(lo->encseq,repeatptr->contignumber);
+    seqend = seqstart + gt_encseq_seqlength(lo->encseq,repeatptr->contignumber)
+               - 1;
     gt_assert(lo->repeatinfo.lmax >= repeatptr->len);
     alilen = lo->repeatinfo.lmax - repeatptr->len;
 
-    /**** left (reverse) xdrop alignment ****/
-    if (alilen != 0 && seqstart < repeatptr->pos1)
-    {
-      /* excluding pos1 and pos1+offset from the alignment */
-      gt_assert(seqstart <= repeatptr->pos1);
-      if (alilen <= repeatptr->pos1 - seqstart)
-      {
-        gt_seqabstract_reinit_encseq(sa_useq,
-                                     lo->encseq,
-                                     alilen,
-                                     repeatptr->pos1 - (alilen));
-        gt_seqabstract_reinit_encseq(sa_vseq,
-                                     lo->encseq,
-                                     alilen,
-                                     (repeatptr->pos1 +
-                                      repeatptr->offset) -
-                                       alilen);
-      } else
-      {
-        gt_seqabstract_reinit_encseq(sa_useq,
-                                     lo->encseq,
-                                     repeatptr->pos1 - seqstart,
-                                     seqstart);
-        gt_seqabstract_reinit_encseq(sa_vseq,
-                                     lo->encseq,
-                                     (repeatptr->pos1 +
-                                       repeatptr->offset) -
-                                       seqstart,
-                                     seqstart + repeatptr->offset);
+    /**** left (reverse) xdrop alignment
+          ============================== ****/
+    /* perform no left extension if seed starts at beginning of sequence */
+    if (alilen != 0 && seqstart < repeatptr->pos1) {
+      GtUword substrstart_u, substrstart_v;
+      /* trim maximal alignment length if we are too close to sequence start */
+      if (alilen > repeatptr->pos1 - seqstart) {
+        alilen = repeatptr->pos1 - seqstart;
+        substrstart_u = seqstart;
+        substrstart_v = (repeatptr->pos1 + repeatptr->offset) - alilen;
+      } else {
+        substrstart_u = repeatptr->pos1 - alilen;
+        substrstart_v = (repeatptr->pos1 + repeatptr->offset) - alilen;
       }
+      gt_assert(substrstart_u >= seqstart);
+      gt_assert(substrstart_v >= seqstart && substrstart_v >= substrstart_u);
+
+      gt_seqabstract_reinit_encseq(sa_useq,
+                                   lo->encseq,
+                                   alilen,
+                                   substrstart_u);
+      gt_seqabstract_reinit_encseq(sa_vseq,
+                                   lo->encseq,
+                                   alilen,
+                                   substrstart_v);
+
       gt_evalxdroparbitscoresextend(false,
                                     &xdropbest_left,
                                     xdropresources,
                                     sa_useq,
                                     sa_vseq,
                                     (GtXdropscore) lo->xdropbelowscore);
-    } else
-    {
+    } else {
       xdropbest_left.ivalue = 0;
       xdropbest_left.jvalue = 0;
       xdropbest_left.score = 0;
     }
-    /**** right (forward) xdrop alignment ****/
+
+    /* re-initialize maximal alignment length to the left */
+    alilen = lo->repeatinfo.lmax - repeatptr->len;
+
+    /**** right (forward) xdrop alignment
+          =============================== ****/
+    /* perform no right extension if seed ends at end of sequence */
     if (alilen != 0 &&
-        repeatptr->pos1 + repeatptr->offset + repeatptr->len < seqend)
-    {
-      if (alilen <= seqend - (repeatptr->pos1 +
-                              repeatptr->offset +
-                              repeatptr->len))
-      {
-        gt_seqabstract_reinit_encseq(sa_useq,
-                                     lo->encseq,
-                                     alilen,
-                                     repeatptr->pos1 +
-                                       repeatptr->len);
-        gt_seqabstract_reinit_encseq(sa_vseq,
-                                     lo->encseq,
-                                     alilen,
-                                     repeatptr->pos1 +
-                                       repeatptr->offset +
-                                       repeatptr->len);
-      } else
-      {
-        gt_seqabstract_reinit_encseq(sa_useq,lo->encseq,
-                                     seqend - (repeatptr->pos1 +
-                                               repeatptr->offset +
-                                               repeatptr->len),
-                                     repeatptr->pos1 + repeatptr->len);
-        gt_seqabstract_reinit_encseq(sa_vseq,lo->encseq,
-                                     seqend - (repeatptr->pos1 +
-                                               repeatptr->offset +
-                                               repeatptr->len),
-                                     repeatptr->pos1 +
-                                       repeatptr->offset +
-                                       repeatptr->len);
+                repeatptr->pos1 + repeatptr->offset + repeatptr->len < seqend) {
+      GtUword substrstart_u, substrstart_v;
+
+      /* trim maximal alignment length if we are too close to sequence end */
+      if (alilen > seqend - (repeatptr->pos1 + repeatptr->offset
+            + repeatptr->len)) {
+        alilen = seqend - (repeatptr->pos1 + repeatptr->offset
+            + repeatptr->len);
       }
+      substrstart_u = repeatptr->pos1 + repeatptr->len;
+      substrstart_v = repeatptr->pos1 + repeatptr->offset + repeatptr->len;
+
+      gt_seqabstract_reinit_encseq(sa_useq,
+                                   lo->encseq,
+                                   alilen,
+                                   substrstart_u);
+      gt_seqabstract_reinit_encseq(sa_vseq,
+                                   lo->encseq,
+                                   alilen,
+                                   substrstart_v);
+
       gt_evalxdroparbitscoresextend(true,
                                     &xdropbest_right,
                                     xdropresources,
                                     sa_useq,
                                     sa_vseq,
                                     (GtXdropscore) lo->xdropbelowscore);
-    } else
-    {
+    } else {
       xdropbest_right.ivalue = 0;
       xdropbest_right.jvalue = 0;
       xdropbest_right.score = 0;
