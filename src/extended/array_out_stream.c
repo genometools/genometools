@@ -27,6 +27,7 @@ struct GtArrayOutStream {
   const GtNodeStream parent_instance;
   GtNodeStream *in_stream;
   GtArray *nodes;
+  bool store_all;
 };
 
 #define gt_array_out_stream_cast(GS)\
@@ -36,7 +37,7 @@ static int gt_array_out_stream_next(GtNodeStream *gs, GtGenomeNode **gn,
                                     GtError *err)
 {
   GtArrayOutStream *aos;
-  GtFeatureNode *node;
+  GT_UNUSED GtFeatureNode *node;
   GtGenomeNode  *gn_ref;
   int had_err = 0;
 
@@ -45,7 +46,7 @@ static int gt_array_out_stream_next(GtNodeStream *gs, GtGenomeNode **gn,
   had_err = gt_node_stream_next(aos->in_stream, gn, err);
 
   if (!had_err && *gn) {
-    if ((node = gt_feature_node_try_cast(*gn))) {
+    if (aos->store_all || (node = gt_feature_node_try_cast(*gn))) {
       gn_ref = gt_genome_node_ref(*gn);
       gt_array_add(aos->nodes, gn_ref);
     }
@@ -73,9 +74,10 @@ const GtNodeStreamClass* gt_array_out_stream_class(void)
   return gsc;
 }
 
-GtNodeStream* gt_array_out_stream_new(GtNodeStream *in_stream,
-                                      GtArray *nodes,
-                                      GT_UNUSED GtError *err)
+static GtNodeStream* gt_array_out_stream_new_generic(GtNodeStream *in_stream,
+                                                     GtArray *nodes,
+                                                     bool store_all,
+                                                     GT_UNUSED GtError *err)
 {
   GtNodeStream *gs;
   GtArrayOutStream *aos;
@@ -84,6 +86,18 @@ GtNodeStream* gt_array_out_stream_new(GtNodeStream *in_stream,
   aos = gt_array_out_stream_cast(gs);
   aos->in_stream = gt_node_stream_ref(in_stream);
   aos->nodes = nodes;
-
+  aos->store_all = store_all;
   return gs;
+}
+
+GtNodeStream* gt_array_out_stream_new(GtNodeStream *in_stream,
+                                      GtArray *nodes, GtError *err)
+{
+  return gt_array_out_stream_new_generic(in_stream, nodes, false, err);
+}
+
+GtNodeStream* gt_array_out_stream_all_new(GtNodeStream *in_stream,
+                                          GtArray *nodes, GtError *err)
+{
+  return gt_array_out_stream_new_generic(in_stream, nodes, true, err);
 }
