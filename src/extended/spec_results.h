@@ -35,6 +35,7 @@ void           gt_spec_results_add_result(GtSpecResults *sr,
                                           GtSpecResultStatus status,
                                           const char *error_string);
 void           gt_spec_results_add_cc(GtSpecResults *sr);
+void           gt_spec_results_record_warning(GtSpecResults *sr, const char *w);
 void           gt_spec_results_report(GtSpecResults *sr, GtFile *outfile,
                                       const char *specfile, bool details,
                                       bool colored);

@@ -18,6 +18,7 @@
 #include "core/ma.h"
 #include "core/timer_api.h"
 #include "core/unused_api.h"
+#include "core/warning_api.h"
 #include "extended/array_in_stream_api.h"
 #include "extended/array_out_stream_api.h"
 #include "extended/feature_stream_api.h"
@@ -95,6 +96,14 @@ static GtOptionParser* gt_speck_option_parser_new(void *tool_arguments)
   return op;
 }
 
+static void gt_speck_record_warning(void *data, const char *format, va_list ap)
+{
+  char buf[BUFSIZ];
+  gt_assert(data && format);
+  (void) vsnprintf(buf, (BUFSIZ * sizeof (char)), format, ap);
+  gt_spec_results_record_warning((GtSpecResults*) data, buf);
+}
+
 static int gt_speck_runner(int argc, const char **argv, int parsed_args,
                                void *tool_arguments, GtError *err)
 {
@@ -113,6 +122,8 @@ static int gt_speck_runner(int argc, const char **argv, int parsed_args,
   gt_error_check(err);
 
   res = gt_spec_results_new();
+  gt_assert(res);
+
   spec_visitor = gt_spec_visitor_new(gt_str_get(arguments->specfile), res,
                                      err);
   if (!spec_visitor)
@@ -122,6 +133,8 @@ static int gt_speck_runner(int argc, const char **argv, int parsed_args,
     gt_spec_visitor_fail_on_runtime_error((GtSpecVisitor*) spec_visitor);
   else
     gt_spec_visitor_report_runtime_errors((GtSpecVisitor*) spec_visitor);
+
+  gt_warning_set_handler(gt_speck_record_warning, res);
 
   last_stream = gff3_in_stream = gt_gff3_in_stream_new_unsorted(
                                                             argc - parsed_args,
@@ -165,7 +178,10 @@ static int gt_speck_runner(int argc, const char **argv, int parsed_args,
   /* pull the features through the stream and free them afterwards */
   if (!had_err)
     had_err = gt_node_stream_pull(checker_stream, err);
+
   gt_timer_stop(t);
+
+  gt_warning_set_handler(gt_warning_default_handler, NULL);
 
   if (!had_err)
     gt_spec_results_report(res, NULL, gt_str_get(arguments->specfile),

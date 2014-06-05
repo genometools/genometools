@@ -74,6 +74,7 @@ struct GtSpecResults
           checked_aspects,
           checked_ccs,
           checked_nodes;
+  GtStrArray *warnings;
 };
 
 static GtSpecAspectNodeResult* gt_spec_aspect_node_result_new()
@@ -230,6 +231,7 @@ GtSpecResults *gt_spec_results_new(void)
                                                (GtFree) gt_spec_aspect_delete);
   spec_results->comment_aspects = gt_hashmap_new(GT_HASH_STRING, gt_free_func,
                                                (GtFree) gt_spec_aspect_delete);
+  spec_results->warnings = gt_str_array_new();
   return spec_results;
 }
 
@@ -237,6 +239,12 @@ void gt_spec_results_add_cc(GtSpecResults *sr)
 {
   gt_assert(sr);
   sr->checked_ccs++;
+}
+
+void gt_spec_results_record_warning(GtSpecResults *sr, const char *w)
+{
+  gt_assert(sr && w);
+  gt_str_array_add_cstr(sr->warnings, w);
 }
 
 void gt_spec_results_add_result(GtSpecResults *sr,
@@ -402,6 +410,21 @@ void gt_spec_results_report(GtSpecResults *sr, GtFile *outfile,
                                     gt_spec_results_report_single,
                                     &info, NULL);
   }
+  if (gt_str_array_size(sr->warnings) > 0) {
+    gt_file_xprintf(outfile, "\nThere ha%s been %s"GT_WU"%s parser warning%s\n",
+                             gt_str_array_size(sr->warnings) > 1 ? "ve" : "s",
+                             colored ? GT_SPEC_ANSI_COLOR_YELLOW : "",
+                             gt_str_array_size(sr->warnings),
+                             colored ? GT_SPEC_ANSI_COLOR_RESET : "",
+                             gt_str_array_size(sr->warnings) > 1 ? "s." : ".");
+    if (details) {
+      GtUword i;
+      for (i = 0; i < gt_str_array_size(sr->warnings); i++) {
+        gt_file_xprintf(outfile, "  - %s\n", gt_str_array_get(sr->warnings, i));
+      }
+
+    }
+  }
   gt_file_xprintf(outfile, "\nTraversed " GT_WU " CCs "
                            "(" GT_WU " feature types), "
                            "checked " GT_WU " nodes for " GT_WU " aspects.\n",
@@ -417,5 +440,6 @@ void gt_spec_results_delete(GtSpecResults *spec_results)
   gt_hashmap_delete(spec_results->comment_aspects);
   gt_hashmap_delete(spec_results->sequence_aspects);
   gt_hashmap_delete(spec_results->region_aspects);
+  gt_str_array_delete(spec_results->warnings);
   gt_free(spec_results);
 }
