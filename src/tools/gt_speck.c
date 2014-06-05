@@ -16,6 +16,7 @@
 */
 
 #include "core/ma.h"
+#include "core/output_file_api.h"
 #include "core/timer_api.h"
 #include "core/unused_api.h"
 #include "core/warning_api.h"
@@ -37,12 +38,16 @@ typedef struct {
        fail_hard,
        provideindex,
        sort;
+  GtOutputFileInfo *ofi;
+  GtFile *outfp;
 } SpeccheckArguments;
 
 static void *gt_speck_arguments_new(void)
 {
   SpeccheckArguments *arguments = gt_calloc(1, sizeof *arguments);
   arguments->specfile = gt_str_new();
+  arguments->ofi = gt_output_file_info_new();
+  arguments->outfp = NULL;
   return arguments;
 }
 
@@ -51,6 +56,8 @@ static void gt_speck_arguments_delete(void *tool_arguments)
   SpeccheckArguments *arguments = tool_arguments;
   if (!arguments) return;
   gt_str_delete(arguments->specfile);
+  gt_file_delete(arguments->outfp);
+  gt_output_file_info_delete(arguments->ofi);
   gt_free(arguments);
 }
 
@@ -93,7 +100,26 @@ static GtOptionParser* gt_speck_option_parser_new(void *tool_arguments)
   option = gt_option_new_verbose(&arguments->verbose);
   gt_option_parser_add_option(op, option);
 
+  gt_output_file_info_register_options(arguments->ofi, op, &arguments->outfp);
+
   return op;
+}
+
+static int gt_speck_arguments_check(GT_UNUSED int rest_argc,
+                                    void *tool_arguments,
+                                    GT_UNUSED GtError *err)
+{
+  SpeccheckArguments *arguments = tool_arguments;
+  int had_err = 0;
+  gt_error_check(err);
+  gt_assert(arguments);
+
+  if (arguments->outfp && arguments->colored) {
+    gt_warning("file output requested ('-o'), disabling colored output");
+    arguments->colored = false;
+  }
+
+  return had_err = 0;
 }
 
 static void gt_speck_record_warning(void *data, const char *format, va_list ap)
@@ -184,7 +210,8 @@ static int gt_speck_runner(int argc, const char **argv, int parsed_args,
   gt_warning_set_handler(gt_warning_default_handler, NULL);
 
   if (!had_err)
-    gt_spec_results_report(res, NULL, gt_str_get(arguments->specfile),
+    gt_spec_results_report(res, arguments->outfp,
+                           gt_str_get(arguments->specfile),
                            arguments->verbose, arguments->colored);
 
   if (!had_err)
@@ -210,6 +237,6 @@ GtTool* gt_speck(void)
   return gt_tool_new(gt_speck_arguments_new,
                      gt_speck_arguments_delete,
                      gt_speck_option_parser_new,
-                     NULL,
+                     gt_speck_arguments_check,
                      gt_speck_runner);
 }
