@@ -24,6 +24,7 @@
 #include "extended/feature_index_api.h"
 #include "extended/feature_index_memory.h"
 #include "extended/gff3_in_stream.h"
+#include "extended/sort_stream_api.h"
 #include "extended/spec_visitor.h"
 #include "extended/visitor_stream.h"
 #include "tools/gt_speck.h"
@@ -33,7 +34,8 @@ typedef struct {
   bool verbose,
        colored,
        fail_hard,
-       provideindex;
+       provideindex,
+       sort;
 } SpeccheckArguments;
 
 static void *gt_speck_arguments_new(void)
@@ -77,6 +79,11 @@ static GtOptionParser* gt_speck_option_parser_new(void *tool_arguments)
                               &arguments->provideindex, false);
   gt_option_parser_add_option(op, option);
 
+  option = gt_option_new_bool("sort", "sort input before checking (requires "
+                              "O(n) memory for n input features)",
+                              &arguments->sort, false);
+  gt_option_parser_add_option(op, option);
+
   option = gt_option_new_bool("failhard", "stop processing and report runtime "
                               "errors instead of recording them in the results",
                               &arguments->fail_hard, false);
@@ -93,7 +100,8 @@ static int gt_speck_runner(int argc, const char **argv, int parsed_args,
 {
   GtNodeStream *gff3_in_stream = NULL, *checker_stream = NULL,
                *a_in_stream = NULL, *a_out_stream = NULL,
-               *feature_stream = NULL, *last_stream = NULL;
+               *feature_stream = NULL, *sort_stream = NULL,
+               *last_stream = NULL;
   GtNodeVisitor *spec_visitor = NULL;
   GtSpecResults *res = NULL;
   GtFeatureIndex *fi = NULL;
@@ -119,6 +127,10 @@ static int gt_speck_runner(int argc, const char **argv, int parsed_args,
                                                             argc - parsed_args,
                                                             argv + parsed_args);
   gt_assert(gff3_in_stream);
+
+  if (arguments->sort) {
+    last_stream = sort_stream = gt_sort_stream_new(last_stream);
+  }
 
   if (arguments->provideindex) {
     fi = gt_feature_index_memory_new();
@@ -168,6 +180,7 @@ static int gt_speck_runner(int argc, const char **argv, int parsed_args,
   gt_node_stream_delete(a_out_stream);
   gt_node_stream_delete(checker_stream);
   gt_node_stream_delete(feature_stream);
+  gt_node_stream_delete(sort_stream);
   gt_spec_results_delete(res);
   gt_feature_index_delete(fi);
   gt_timer_delete(t);
