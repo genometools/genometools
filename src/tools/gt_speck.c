@@ -18,8 +18,13 @@
 #include "core/ma.h"
 #include "core/timer_api.h"
 #include "core/unused_api.h"
-#include "extended/spec_visitor.h"
+#include "extended/array_in_stream_api.h"
+#include "extended/array_out_stream_api.h"
+#include "extended/feature_stream_api.h"
+#include "extended/feature_index_api.h"
+#include "extended/feature_index_memory.h"
 #include "extended/gff3_in_stream.h"
+#include "extended/spec_visitor.h"
 #include "extended/visitor_stream.h"
 #include "tools/gt_speck.h"
 
@@ -27,7 +32,8 @@ typedef struct {
   GtStr *specfile;
   bool verbose,
        colored,
-       fail_hard;
+       fail_hard,
+       provideindex;
 } SpeccheckArguments;
 
 static void *gt_speck_arguments_new(void)
@@ -65,6 +71,12 @@ static GtOptionParser* gt_speck_option_parser_new(void *tool_arguments)
                               &arguments->colored, true);
   gt_option_parser_add_option(op, option);
 
+  option = gt_option_new_bool("provideindex", "provide feature index in "
+                              "specfile namespace (requires O(n) memory for n "
+                              "input features)",
+                              &arguments->provideindex, false);
+  gt_option_parser_add_option(op, option);
+
   option = gt_option_new_bool("failhard", "stop processing and report runtime "
                               "errors instead of recording them in the results",
                               &arguments->fail_hard, false);
@@ -79,10 +91,14 @@ static GtOptionParser* gt_speck_option_parser_new(void *tool_arguments)
 static int gt_speck_runner(int argc, const char **argv, int parsed_args,
                                void *tool_arguments, GtError *err)
 {
-  GtNodeStream *gff3_in_stream = NULL, *checker_stream = NULL;
+  GtNodeStream *gff3_in_stream = NULL, *checker_stream = NULL,
+               *a_in_stream = NULL, *a_out_stream = NULL,
+               *feature_stream = NULL, *last_stream = NULL;
   GtNodeVisitor *spec_visitor = NULL;
   GtSpecResults *res = NULL;
+  GtFeatureIndex *fi = NULL;
   GtTimer *t = NULL;
+  GtArray *arr = gt_array_new(sizeof (GtFeatureNode*));
   SpeccheckArguments *arguments = tool_arguments;
 
   int had_err = 0;
@@ -99,15 +115,41 @@ static int gt_speck_runner(int argc, const char **argv, int parsed_args,
   else
     gt_spec_visitor_report_runtime_errors((GtSpecVisitor*) spec_visitor);
 
-  gff3_in_stream = gt_gff3_in_stream_new_unsorted(argc - parsed_args,
-                                                  argv + parsed_args);
+  last_stream = gff3_in_stream = gt_gff3_in_stream_new_unsorted(
+                                                            argc - parsed_args,
+                                                            argv + parsed_args);
   gt_assert(gff3_in_stream);
 
-  checker_stream = gt_visitor_stream_new(gff3_in_stream, spec_visitor);
-  gt_assert(checker_stream);
+  if (arguments->provideindex) {
+    fi = gt_feature_index_memory_new();
+    gt_assert(fi);
+
+    last_stream = feature_stream = gt_feature_stream_new(last_stream, fi);
+    gt_assert(feature_stream);
+
+    last_stream = a_out_stream = gt_array_out_stream_all_new(last_stream, arr,
+                                                             err);
+    if (!a_out_stream)
+      had_err = -1;
+
+    if (!had_err)
+      had_err = gt_node_stream_pull(last_stream, err);
+
+    if (!had_err) {
+      last_stream = a_in_stream = gt_array_in_stream_new(arr, NULL, err);
+      if (!a_in_stream)
+        had_err = -1;
+    }
+  }
+
+  if (!had_err) {
+    checker_stream = gt_visitor_stream_new(last_stream, spec_visitor);
+    gt_assert(checker_stream);
+  }
 
   t = gt_timer_new();
   gt_timer_start(t);
+
   /* pull the features through the stream and free them afterwards */
   if (!had_err)
     had_err = gt_node_stream_pull(checker_stream, err);
@@ -122,9 +164,14 @@ static int gt_speck_runner(int argc, const char **argv, int parsed_args,
 
   /* free */
   gt_node_stream_delete(gff3_in_stream);
+  gt_node_stream_delete(a_in_stream);
+  gt_node_stream_delete(a_out_stream);
   gt_node_stream_delete(checker_stream);
+  gt_node_stream_delete(feature_stream);
   gt_spec_results_delete(res);
+  gt_feature_index_delete(fi);
   gt_timer_delete(t);
+  gt_array_delete(arr);
 
   return had_err;
 }
