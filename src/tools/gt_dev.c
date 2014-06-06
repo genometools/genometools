@@ -27,6 +27,8 @@
 #include "gth/gt_gthbssmtrain.h"
 #include "gth/gt_gthmkbssmfiles.h"
 #include "tools/gt_compressedbits.h"
+#include "tools/gt_codonusage_collect.h"
+#include "tools/gt_codonusage_scan.h"
 #include "tools/gt_consensus_sa.h"
 #include "tools/gt_dev.h"
 #include "tools/gt_extracttarget.h"
@@ -35,6 +37,7 @@
 #include "tools/gt_idxlocali.h"
 #include "tools/gt_magicmatch.h"
 #include "tools/gt_mergeesa.h"
+#include "tools/gt_orfgenerator.h"
 #include "tools/gt_paircmp.h"
 #include "tools/gt_parsexrf.h"
 #include "tools/gt_patternmatch.h"
@@ -48,6 +51,7 @@
 #include "tools/gt_skproto.h"
 #include "tools/gt_sortbench.h"
 #include "tools/gt_trieins.h"
+#include "tools/gt_testcode_filter.h"
 #include "tools/gt_unique_encseq.h"
 #include "tools/gt_unique_encseq_extract.h"
 
@@ -68,12 +72,16 @@ static void* gt_dev_arguments_new(void)
   gt_toolbox_add(dev_toolbox, "trieins", gt_trieins);
   gt_toolbox_add_tool(dev_toolbox, "compbits", gt_compressedbits());
   gt_toolbox_add_tool(dev_toolbox, "consensus_sa", gt_consensus_sa_tool());
+  gt_toolbox_add_tool(dev_toolbox, "codonusage_collect",
+                                                       gt_codonusage_collect());
+  gt_toolbox_add_tool(dev_toolbox, "codonusage_scan", gt_codonusage_scan());
   gt_toolbox_add_tool(dev_toolbox, "extracttarget", gt_extracttarget());
   gt_toolbox_add_tool(dev_toolbox, "gdiffcalc", gt_gdiffcalc());
   gt_toolbox_add_tool(dev_toolbox, "gthbssmrmsd", gt_gthbssmrmsd());
   gt_toolbox_add_tool(dev_toolbox, "gthbssmtrain", gt_gthbssmtrain());
   gt_toolbox_add_tool(dev_toolbox, "idxlocali", gt_idxlocali());
   gt_toolbox_add_tool(dev_toolbox, "magicmatch", gt_magicmatch());
+  gt_toolbox_add_tool(dev_toolbox, "orfgenerator", gt_orfgenerator());
   gt_toolbox_add_tool(dev_toolbox, "parsexrf", gt_parsexrf());
   gt_toolbox_add_tool(dev_toolbox, "readreads", gt_readreads());
   gt_toolbox_add_tool(dev_toolbox, "sain", gt_sain());
@@ -83,6 +91,7 @@ static void* gt_dev_arguments_new(void)
   gt_toolbox_add_tool(dev_toolbox, "sfxmap", gt_sfxmap());
   gt_toolbox_add_tool(dev_toolbox, "skproto", gt_skproto());
   gt_toolbox_add_tool(dev_toolbox, "sortbench", gt_sortbench());
+  gt_toolbox_add_tool(dev_toolbox, "testcode_filter", gt_testcode_filter());
   gt_toolbox_add_tool(dev_toolbox, "unique_encseq", gt_unique_encseq());
   gt_toolbox_add_tool(dev_toolbox, "unique_encseq_extract",
                       gt_unique_encseq_extract());

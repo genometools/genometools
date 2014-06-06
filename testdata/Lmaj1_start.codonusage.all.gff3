@@ -1,0 +1,7 @@
+##gff-version   3
+##sequence-region   LmjF.01 113 17900
+LmjF.01	.	CDS	784	912	7.05	-	.	frame=0;results=p0 7.053331 p1 -7.090286 p2 -9.251519
+LmjF.01	.	CDS	9064	9270	11.6	-	.	frame=0;results=p0 11.637857 p1 -13.174768 p2 -11.737236
+LmjF.01	.	CDS	12076	12252	7.07	-	.	frame=0;results=p0 7.065154 p1 -7.065984 p2 -12.926180
+LmjF.01	.	CDS	14593	14718	4.78	+	.	frame=0;results=p0 4.781633 p1 -4.919004 p2 -5.649350
+LmjF.01	.	CDS	15028	15510	11.8	-	.	frame=0;results=p0 11.832517 p1 -13.912809 p2 -13.238668

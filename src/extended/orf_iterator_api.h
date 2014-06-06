@@ -40,6 +40,16 @@ typedef struct GtORFIterator GtORFIterator;
 GtORFIterator*      gt_orf_iterator_new(GtCodonIterator *ci,
                                         GtTranslator *translator);
 
+/* Makes the <orfi> return all ORFs for a stop codon, not only the longest
+   one. That is, multiple alternative start codons in a frame will be
+   considered. */
+void gt_orf_iterator_find_all(GtORFIterator *orfi);
+
+/* Makes the <orfi> return only the longest ORF in a set of possible
+   alternatives . That is, multiple alternative start codons in a
+   frame will not be considered, only the first one. */
+void gt_orf_iterator_find_longest(GtORFIterator *orfi);
+
 /* Sets the values of <orf_rng.start>, <orf_rng.end> and <orf_frame> to the
    current reading position of <ci> if a START/STOP codon is found. The frame
    in which the ORF is located is written to the position pointed to by
