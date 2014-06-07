@@ -149,6 +149,8 @@ static int gt_speck_runner(int argc, const char **argv, int parsed_args,
 
   res = gt_spec_results_new();
   gt_assert(res);
+  t = gt_timer_new();
+  gt_assert(t);
 
   spec_visitor = gt_spec_visitor_new(gt_str_get(arguments->specfile), res,
                                      err);
@@ -183,25 +185,26 @@ static int gt_speck_runner(int argc, const char **argv, int parsed_args,
     if (!a_out_stream)
       had_err = -1;
 
+    gt_timer_start(t);
+
     if (!had_err)
       had_err = gt_node_stream_pull(last_stream, err);
 
     if (!had_err) {
-      gt_spec_visitor_add_feature_index((GtSpecVisitor*) spec_visitor, fi);
+      gt_spec_visitor_add_feature_index((GtSpecVisitor*) spec_visitor,
+                                        gt_feature_index_ref(fi));
       last_stream = a_in_stream = gt_array_in_stream_new(arr, NULL, err);
       if (!a_in_stream)
         had_err = -1;
     }
-
+  } else {
+    gt_timer_start(t);
   }
 
   if (!had_err) {
     checker_stream = gt_visitor_stream_new(last_stream, spec_visitor);
     gt_assert(checker_stream);
   }
-
-  t = gt_timer_new();
-  gt_timer_start(t);
 
   /* pull the features through the stream and free them afterwards */
   if (!had_err)
