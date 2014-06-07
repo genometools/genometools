@@ -28,10 +28,12 @@
 #include "core/symbol_api.h"
 #include "core/undef_api.h"
 #include "core/unused_api.h"
+#include "extended/feature_index_api.h"
 #include "extended/feature_node.h"
 #include "extended/feature_node_iterator_api.h"
 #include "extended/node_visitor_api.h"
 #include "extended/spec_visitor.h"
+#include "gtlua/feature_index_lua.h"
 #include "gtlua/genome_node_lua.h"
 #include "gtlua/gt_lua.h"
 #include "lua.h"
@@ -752,6 +754,13 @@ void gt_spec_visitor_fail_on_runtime_error(GtSpecVisitor *sv)
 {
   gt_assert(sv);
   sv->runtime_fail_hard = true;
+}
+
+void gt_spec_visitor_add_feature_index(GtSpecVisitor *sv, GtFeatureIndex *fi)
+{
+  gt_assert(sv && sv->L && fi);
+  gt_lua_feature_index_push(sv->L, fi);
+  lua_setglobal(sv->L, "featureidx");
 }
 
 GtNodeVisitor* gt_spec_visitor_new(const char *specfile, GtSpecResults *res,

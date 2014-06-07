@@ -22,12 +22,15 @@
 typedef struct GtSpecVisitor GtSpecVisitor;
 
 #include "core/error_api.h"
-#include "extended/node_visitor.h"
+#include "extended/feature_index_api.h"
+#include "extended/node_visitor_api.h"
 #include "extended/spec_results.h"
 
 GtNodeVisitor* gt_spec_visitor_new(const char *specfile, GtSpecResults *res,
                                    GtError *err);
 void           gt_spec_visitor_report_runtime_errors(GtSpecVisitor *sv);
 void           gt_spec_visitor_fail_on_runtime_error(GtSpecVisitor *sv);
+void           gt_spec_visitor_add_feature_index(GtSpecVisitor *sv,
+                                                 GtFeatureIndex *fi);
 
 #endif
