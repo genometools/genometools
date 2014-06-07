@@ -19,7 +19,7 @@
 #define GENOME_NODE_LUA_H
 
 #include "lua.h"
-#include "extended/genome_node.h"
+#include "extended/genome_node_api.h"
 
 /* exports the GenomeNode interface and its implementors to Lua:
 
