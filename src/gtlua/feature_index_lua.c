@@ -18,6 +18,7 @@
 #include "lauxlib.h"
 #include "core/unused_api.h"
 #include "core/ma.h"
+#include "extended/feature_index_api.h"
 #include "extended/feature_index_memory_api.h"
 #include "extended/feature_node.h"
 #include "extended/luahelper.h"
@@ -220,6 +221,16 @@ static int feature_index_lua_get_range_for_seqid(lua_State *L)
     return gt_lua_error(L, err);
   gt_error_delete(err);
   return gt_lua_range_push(L, range);
+}
+
+void gt_lua_feature_index_push(lua_State *L, GtFeatureIndex *fi)
+{
+  GtFeatureIndex **fi_lua;
+  gt_assert(L && fi);
+  fi_lua = lua_newuserdata(L, sizeof (GtFeatureIndex**));
+  *fi_lua = fi;
+  luaL_getmetatable(L, FEATURE_INDEX_METATABLE);
+  lua_setmetatable(L, -2);
 }
 
 static int feature_index_lua_delete(lua_State *L)

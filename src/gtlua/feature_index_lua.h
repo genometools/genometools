@@ -19,6 +19,7 @@
 #define FEATURE_INDEX_LUA_H
 
 #include "lua.h"
+#include "extended/feature_index_api.h"
 
 /* exports the FeatureIndex class to Lua:
 
@@ -54,6 +55,9 @@
    function feature_index:get_range_for_seqid(seqid)
 */
 int gt_lua_open_feature_index(lua_State*);
+
+/* Push a <GtFeatureIndex*> to Lua, takes ownership! */
+void gt_lua_feature_index_push(lua_State *L, GtFeatureIndex *fi);
 
 #define FEATURE_INDEX_METATABLE  "GenomeTools.feature_index"
 #define check_feature_index(L, POS) \
