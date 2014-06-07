@@ -182,6 +182,7 @@ static int gt_speck_runner(int argc, const char **argv, int parsed_args,
                                                             argc - parsed_args,
                                                             argv + parsed_args);
   gt_assert(gff3_in_stream);
+  gt_gff3_in_stream_enable_tidy_mode((GtGFF3InStream*) gff3_in_stream);
 
   if (arguments->sort) {
     last_stream = sort_stream = gt_sort_stream_new(last_stream);
