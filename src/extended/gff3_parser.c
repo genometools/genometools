@@ -1877,7 +1877,7 @@ static int parse_meta_gff3_line(GtGFF3Parser *parser, GtQueue *genome_nodes,
     tmplineend = line + line_length - 1;
 
     /* skip blanks */
-    while (tmpline[0] == ' ')
+    while (tmpline[0] == ' ' || tmpline[0] == '\t')
       tmpline++;
     if (tmpline > tmplineend) {
       gt_error_set(err, "missing sequence region name on line %u in file "
