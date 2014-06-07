@@ -26,6 +26,7 @@
 #include "extended/feature_index_api.h"
 #include "extended/feature_index_memory.h"
 #include "extended/gff3_in_stream.h"
+#include "extended/seqid2file.h"
 #include "extended/sort_stream_api.h"
 #include "extended/spec_visitor.h"
 #include "extended/visitor_stream.h"
@@ -38,6 +39,7 @@ typedef struct {
        fail_hard,
        provideindex,
        sort;
+  GtSeqid2FileInfo *s2fi;
   GtOutputFileInfo *ofi;
   GtFile *outfp;
 } SpeccheckArguments;
@@ -46,6 +48,7 @@ static void *gt_speck_arguments_new(void)
 {
   SpeccheckArguments *arguments = gt_calloc(1, sizeof *arguments);
   arguments->specfile = gt_str_new();
+  arguments->s2fi = gt_seqid2file_info_new();
   arguments->ofi = gt_output_file_info_new();
   arguments->outfp = NULL;
   return arguments;
@@ -57,6 +60,7 @@ static void gt_speck_arguments_delete(void *tool_arguments)
   if (!arguments) return;
   gt_str_delete(arguments->specfile);
   gt_file_delete(arguments->outfp);
+  gt_seqid2file_info_delete(arguments->s2fi);
   gt_output_file_info_delete(arguments->ofi);
   gt_free(arguments);
 }
@@ -100,6 +104,7 @@ static GtOptionParser* gt_speck_option_parser_new(void *tool_arguments)
   option = gt_option_new_verbose(&arguments->verbose);
   gt_option_parser_add_option(op, option);
 
+  gt_seqid2file_register_options(op, arguments->s2fi);
   gt_output_file_info_register_options(arguments->ofi, op, &arguments->outfp);
 
   return op;
@@ -141,6 +146,7 @@ static int gt_speck_runner(int argc, const char **argv, int parsed_args,
   GtSpecResults *res = NULL;
   GtFeatureIndex *fi = NULL;
   GtTimer *t = NULL;
+  GtRegionMapping *rm = NULL;
   GtArray *arr = gt_array_new(sizeof (GtFeatureNode*));
   SpeccheckArguments *arguments = tool_arguments;
 
@@ -156,6 +162,14 @@ static int gt_speck_runner(int argc, const char **argv, int parsed_args,
                                      err);
   if (!spec_visitor)
     return -1;
+
+  if (gt_seqid2file_option_used(arguments->s2fi)) {
+    rm = gt_seqid2file_region_mapping_new(arguments->s2fi, err);
+    if (!rm)
+      had_err = -1;
+    if (!had_err)
+      gt_spec_visitor_add_region_mapping((GtSpecVisitor*) spec_visitor, rm);
+  }
 
   if (arguments->fail_hard)
     gt_spec_visitor_fail_on_runtime_error((GtSpecVisitor*) spec_visitor);

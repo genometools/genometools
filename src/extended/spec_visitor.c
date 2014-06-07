@@ -32,8 +32,10 @@
 #include "extended/feature_node.h"
 #include "extended/feature_node_iterator_api.h"
 #include "extended/node_visitor_api.h"
+#include "extended/region_mapping.h"
 #include "extended/spec_visitor.h"
 #include "gtlua/feature_index_lua.h"
+#include "gtlua/region_mapping_lua.h"
 #include "gtlua/genome_node_lua.h"
 #include "gtlua/gt_lua.h"
 #include "lua.h"
@@ -760,7 +762,14 @@ void gt_spec_visitor_add_feature_index(GtSpecVisitor *sv, GtFeatureIndex *fi)
 {
   gt_assert(sv && sv->L && fi);
   gt_lua_feature_index_push(sv->L, fi);
-  lua_setglobal(sv->L, "featureidx");
+  lua_setglobal(sv->L, "feature_index");
+}
+
+void gt_spec_visitor_add_region_mapping(GtSpecVisitor *sv, GtRegionMapping *rm)
+{
+  gt_assert(sv && sv->L && rm);
+  gt_lua_region_mapping_push(sv->L, rm);
+  lua_setglobal(sv->L, "region_mapping");
 }
 
 GtNodeVisitor* gt_spec_visitor_new(const char *specfile, GtSpecResults *res,
