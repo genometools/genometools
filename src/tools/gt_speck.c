@@ -187,10 +187,12 @@ static int gt_speck_runner(int argc, const char **argv, int parsed_args,
       had_err = gt_node_stream_pull(last_stream, err);
 
     if (!had_err) {
+      gt_spec_visitor_add_feature_index((GtSpecVisitor*) spec_visitor, fi);
       last_stream = a_in_stream = gt_array_in_stream_new(arr, NULL, err);
       if (!a_in_stream)
         had_err = -1;
     }
+
   }
 
   if (!had_err) {
