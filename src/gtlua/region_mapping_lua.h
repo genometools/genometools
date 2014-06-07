@@ -19,6 +19,7 @@
 #define REGION_MAPPING_LUA_H
 
 #include "lua.h"
+#include "extended/region_mapping_api.h"
 
 /* exports the RegionMapping class to Lua:
 
@@ -27,6 +28,9 @@
    function region_mapping_new_seqfile(seqfile)
 */
 int gt_lua_open_region_mapping(lua_State*);
+
+/* Push a <GtRegionMapping*> to Lua, takes ownership! */
+void gt_lua_region_mapping_push(lua_State *L, GtRegionMapping *fi);
 
 #define REGION_MAPPING_METATABLE  "GenomeTools.region_mapping"
 #define check_region_mapping(L, POS) \
