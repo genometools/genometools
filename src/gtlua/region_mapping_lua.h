@@ -30,7 +30,7 @@
 int gt_lua_open_region_mapping(lua_State*);
 
 /* Push a <GtRegionMapping*> to Lua, takes ownership! */
-void gt_lua_region_mapping_push(lua_State *L, GtRegionMapping *fi);
+void gt_lua_region_mapping_push(lua_State *L, GtRegionMapping *rm);
 
 #define REGION_MAPPING_METATABLE  "GenomeTools.region_mapping"
 #define check_region_mapping(L, POS) \
