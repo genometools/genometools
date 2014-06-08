@@ -18,6 +18,8 @@
 #ifndef SPEC_RESULTS_H
 #define SPEC_RESULTS_H
 
+#include "core/file_api.h"
+
 typedef struct GtSpecResults GtSpecResults;
 
 typedef enum {
@@ -25,8 +27,6 @@ typedef enum {
   GT_SPEC_FAILURE,
   GT_SPEC_RUNTIME_ERROR
 } GtSpecResultStatus;
-
-#include "core/file_api.h"
 
 GtSpecResults* gt_spec_results_new(void);
 void           gt_spec_results_add_result(GtSpecResults *sr,
@@ -36,9 +36,10 @@ void           gt_spec_results_add_result(GtSpecResults *sr,
                                           const char *error_string);
 void           gt_spec_results_add_cc(GtSpecResults *sr);
 void           gt_spec_results_record_warning(GtSpecResults *sr, const char *w);
+/* TODO: replace by visitor later */
 void           gt_spec_results_report(GtSpecResults *sr, GtFile *outfile,
                                       const char *specfile, bool details,
-                                      bool colored);
+                                      bool colored, bool show_per_node);
 void           gt_spec_results_delete(GtSpecResults *spec_results);
 
 #endif

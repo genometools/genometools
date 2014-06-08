@@ -20,6 +20,7 @@
 #include "core/cstr_api.h"
 #include "core/file.h"
 #include "core/hashmap_api.h"
+#include "core/log_api.h"
 #include "core/ma.h"
 #include "core/str.h"
 #include "core/str_array_api.h"
@@ -44,9 +45,16 @@ typedef struct {
 } GtSpecAspectNodeResult;
 
 typedef struct {
+  GtUword *succ, *fail, *err;
+} GtSpecAspectCountInfo;
+
+typedef struct {
   GtHashmap *aspect_node_results;
   GtStr *name;
-  GtUword successes,
+  GtUword node_successes,
+          node_failures,
+          node_runtime_errors,
+          successes,
           failures,
           runtime_errors;
 } GtSpecAspect;
@@ -54,7 +62,8 @@ typedef struct {
 typedef struct {
   GtFile *outfile;
   bool details,
-       colored;
+       colored,
+       show_per_node;
   GtUword node_i;
 } GtSpecResultsReportInfo;
 
@@ -105,7 +114,6 @@ static GtSpecAspect* gt_spec_aspect_new(const char *name)
   sa->aspect_node_results= gt_hashmap_new(GT_HASH_DIRECT,
                                     (GtFree) gt_genome_node_delete,
                                     (GtFree) gt_spec_aspect_node_result_delete);
-  sa->successes = sa->failures = 0;
 
   return sa;
 }
@@ -155,11 +163,44 @@ static int gt_spec_aspect_report_node(void *key, void *value, void *data,
   return 0;
 }
 
+static int gt_spec_aspect_count_stats(GT_UNUSED void *key, void *value,
+                                      void *data, GT_UNUSED GtError *err)
+{
+  GtSpecAspectNodeResult *sanr = (GtSpecAspectNodeResult*) value;
+  GtSpecAspectCountInfo *info = (GtSpecAspectCountInfo*) data;
+
+  if (gt_str_array_size(sanr->runtime_error_messages) > 0) {
+    (*info->err)++;
+  } else if (gt_str_array_size(sanr->failure_messages) > 0) {
+    (*info->fail)++;
+  } else {
+    (*info->succ)++;
+  }
+  return 0;
+}
+
 static void gt_spec_aspect_report(GtSpecAspect *sa, GtFile *outfile,
                                   GtSpecResultsReportInfo *info)
 {
+  GtSpecAspectCountInfo cinfo;
+  GT_UNUSED int rval;
   gt_assert(sa && info);
 
+  /* count per-node results */
+  cinfo.succ = &(sa->node_successes);
+  cinfo.fail = &(sa->node_failures);
+  cinfo.err = &(sa->node_runtime_errors);
+  rval = gt_hashmap_foreach(sa->aspect_node_results, gt_spec_aspect_count_stats,
+                            &cinfo, NULL);
+  gt_assert(rval == 0);
+
+  if (info->show_per_node) {
+    sa->successes = sa->node_successes;
+    sa->failures = sa->node_failures;
+    sa->runtime_errors = sa->node_runtime_errors;
+  }
+
+  /* output stats */
   info->node_i = 1;
   GtStr *outbuf = gt_str_new_cstr("  - ");
   gt_str_append_str(outbuf, sa->name);
@@ -202,7 +243,6 @@ static void gt_spec_aspect_report(GtSpecAspect *sa, GtFile *outfile,
   gt_file_xprintf(outfile, "%s", gt_str_get(outbuf));
   gt_str_delete(outbuf);
   if (info->details) {
-    GT_UNUSED int rval = 0;
     rval = gt_hashmap_foreach(sa->aspect_node_results,
                               gt_spec_aspect_report_node, info, NULL);
     gt_assert(rval == 0);
@@ -254,6 +294,7 @@ void gt_spec_results_add_result(GtSpecResults *sr,
                                 const char *error_string)
 {
   GtSpecAspect *sa = NULL;
+  GtSpecAspectNodeResult *sanr = NULL;
   gt_assert(aspect && node && error_string);
 
   if (gt_feature_node_try_cast(node)) {
@@ -302,35 +343,24 @@ void gt_spec_results_add_result(GtSpecResults *sr,
     }
   }
   gt_assert(sa);
+  if (!(sanr = gt_hashmap_get(sa->aspect_node_results, node))) {
+    sanr = gt_spec_aspect_node_result_new();
+    node = gt_genome_node_ref(node);
+    gt_hashmap_add(sa->aspect_node_results, node, sanr);
+  }
   switch (status) {
     case GT_SPEC_SUCCESS:
       sa->successes++;
       break;
     case GT_SPEC_FAILURE:
-      {
-        GtSpecAspectNodeResult *sanr = NULL;
-        sa->failures++;
-        if (!(sanr = gt_hashmap_get(sa->aspect_node_results, node))) {
-          sanr = gt_spec_aspect_node_result_new();
-          node = gt_genome_node_ref(node);
-          gt_hashmap_add(sa->aspect_node_results, node, sanr);
-        }
-        gt_assert(sanr);
-        gt_str_array_add_cstr(sanr->failure_messages, error_string);
-      }
+      sa->failures++;
+      gt_assert(sanr);
+      gt_str_array_add_cstr(sanr->failure_messages, error_string);
       break;
     case GT_SPEC_RUNTIME_ERROR:
-      {
-        GtSpecAspectNodeResult *sanr = NULL;
-        sa->runtime_errors++;
-        if (!(sanr = gt_hashmap_get(sa->aspect_node_results, node))) {
-          sanr = gt_spec_aspect_node_result_new();
-          node = gt_genome_node_ref(node);
-          gt_hashmap_add(sa->aspect_node_results, node, sanr);
-        }
-        gt_assert(sanr);
-        gt_str_array_add_cstr(sanr->runtime_error_messages, error_string);
-      }
+      sa->runtime_errors++;
+      gt_assert(sanr);
+      gt_str_array_add_cstr(sanr->runtime_error_messages, error_string);
       break;
   }
   sr->checked_nodes++;
@@ -359,13 +389,17 @@ static int gt_spec_results_report_features(void *key, void *value, void *data,
 }
 
 void gt_spec_results_report(GtSpecResults *sr, GtFile *outfile,
-                            const char *specfile, bool details, bool colored)
+                            const char *specfile, bool details,bool colored,
+                            bool show_per_node)
 {
   GtSpecResultsReportInfo info;
   gt_assert(sr);
+
   info.outfile = outfile;
   info.details = details;
   info.colored = colored;
+  info.show_per_node = show_per_node;
+
   if (sr->seen_feature || sr->seen_meta || sr->seen_region || sr->seen_comment
         || sr->seen_sequence) {
     gt_file_xprintf(outfile, "According to the specification in %s%s%s,\n\n",
