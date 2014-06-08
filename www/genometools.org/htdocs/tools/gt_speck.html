@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta http-equiv="Content-Type" content="application/xhtml+xml; charset=UTF-8" />
-<title>GenomeTools - manual page for GT-ORFFINDER(1)</title>
+<title>GenomeTools - manual page for GT-SPECK(1)</title>
 <link rel="stylesheet" type="text/css" href="style.css">
 <link rel="stylesheet" href="..//style.css" type="text/css" />
 </head>
@@ -32,13 +32,13 @@
 <div class="sect1">
 <h2 id="_name">NAME</h2>
 <div class="sectionbody">
-<div class="paragraph"><p>gt-orffinder - Identifies ORFs (open reading frames) in sequences.</p></div>
+<div class="paragraph"><p>gt-speck - Checks spec definition compliance in GFF3 input.</p></div>
 </div>
 </div>
 <div class="sect1">
 <h2 id="_synopsis">SYNOPSIS</h2>
 <div class="sectionbody">
-<div class="paragraph"><p><strong>gt orffinder</strong> [option &#8230;] [indexname] [GFF3_file &#8230;]</p></div>
+<div class="paragraph"><p><strong>gt speck</strong> [GFF3_file &#8230;]</p></div>
 </div>
 </div>
 <div class="sect1">
@@ -46,36 +46,43 @@
 <div class="sectionbody">
 <div class="dlist"><dl>
 <dt class="hdlist1">
-<strong>-types</strong> 
+<strong>-specfile</strong> [<em>filename</em>]
 </dt>
 <dd>
 <p>
-Specify regions which should be searched for open reading frames,
-e.g. <em>LTR_retrotransposon</em>
+file with specification definition (default: undefined)
 </p>
 </dd>
 <dt class="hdlist1">
-<strong>-allorfs</strong> [<em>yes|no</em>]
+<strong>-colored</strong> [<em>yes|no</em>]
 </dt>
 <dd>
 <p>
-search for all ORFs instead of only the longest (default: no)
+show colored output (default: yes)
 </p>
 </dd>
 <dt class="hdlist1">
-<strong>-min</strong> [<em>value</em>]
+<strong>-provideindex</strong> [<em>yes|no</em>]
 </dt>
 <dd>
 <p>
-minimum length of ORF (default: 30)
+provide feature index in specfile namespace (requires O(n) memory for n input features) (default: no)
 </p>
 </dd>
 <dt class="hdlist1">
-<strong>-max</strong> [<em>value</em>]
+<strong>-sort</strong> [<em>yes|no</em>]
 </dt>
 <dd>
 <p>
-maximum length of ORF (default: 10000)
+sort input before checking (requires O(n) memory for n input features) (default: no)
+</p>
+</dd>
+<dt class="hdlist1">
+<strong>-failhard</strong> [<em>yes|no</em>]
+</dt>
+<dd>
+<p>
+stop processing and report runtime errors instead of recording them in the results (default: no)
 </p>
 </dd>
 <dt class="hdlist1">
@@ -84,38 +91,6 @@ maximum length of ORF (default: 10000)
 <dd>
 <p>
 be verbose (default: no)
-</p>
-</dd>
-<dt class="hdlist1">
-<strong>-o</strong> [<em>filename</em>]
-</dt>
-<dd>
-<p>
-redirect output to specified file (default: undefined)
-</p>
-</dd>
-<dt class="hdlist1">
-<strong>-gzip</strong> [<em>yes|no</em>]
-</dt>
-<dd>
-<p>
-write gzip compressed output file (default: no)
-</p>
-</dd>
-<dt class="hdlist1">
-<strong>-bzip2</strong> [<em>yes|no</em>]
-</dt>
-<dd>
-<p>
-write bzip2 compressed output file (default: no)
-</p>
-</dd>
-<dt class="hdlist1">
-<strong>-force</strong> [<em>yes|no</em>]
-</dt>
-<dd>
-<p>
-force writing to output file (default: no)
 </p>
 </dd>
 <dt class="hdlist1">
@@ -174,6 +149,38 @@ If a description contains a sequence range (e.g., III:1000001..2000000), the fir
 <dd>
 <p>
 set file containing sequence-region to sequence file mapping (default: undefined)
+</p>
+</dd>
+<dt class="hdlist1">
+<strong>-o</strong> [<em>filename</em>]
+</dt>
+<dd>
+<p>
+redirect output to specified file (default: undefined)
+</p>
+</dd>
+<dt class="hdlist1">
+<strong>-gzip</strong> [<em>yes|no</em>]
+</dt>
+<dd>
+<p>
+write gzip compressed output file (default: no)
+</p>
+</dd>
+<dt class="hdlist1">
+<strong>-bzip2</strong> [<em>yes|no</em>]
+</dt>
+<dd>
+<p>
+write bzip2 compressed output file (default: no)
+</p>
+</dd>
+<dt class="hdlist1">
+<strong>-force</strong> [<em>yes|no</em>]
+</dt>
+<dd>
+<p>
+force writing to output file (default: no)
 </p>
 </dd>
 <dt class="hdlist1">
