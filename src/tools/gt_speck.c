@@ -163,6 +163,7 @@ static int gt_speck_runner(int argc, const char **argv, int parsed_args,
   if (!spec_visitor)
     return -1;
 
+  /* add region mapping if given */
   if (gt_seqid2file_option_used(arguments->s2fi)) {
     rm = gt_seqid2file_region_mapping_new(arguments->s2fi, err);
     if (!rm)
@@ -171,11 +172,13 @@ static int gt_speck_runner(int argc, const char **argv, int parsed_args,
       gt_spec_visitor_add_region_mapping((GtSpecVisitor*) spec_visitor, rm);
   }
 
+  /* set runtime error behaviour */
   if (arguments->fail_hard)
     gt_spec_visitor_fail_on_runtime_error((GtSpecVisitor*) spec_visitor);
   else
     gt_spec_visitor_report_runtime_errors((GtSpecVisitor*) spec_visitor);
 
+  /* redirect warnings */
   gt_warning_set_handler(gt_speck_record_warning, res);
 
   last_stream = gff3_in_stream = gt_gff3_in_stream_new_unsorted(
@@ -184,10 +187,12 @@ static int gt_speck_runner(int argc, const char **argv, int parsed_args,
   gt_assert(gff3_in_stream);
   gt_gff3_in_stream_enable_tidy_mode((GtGFF3InStream*) gff3_in_stream);
 
+  /* insert sort stream if requested */
   if (arguments->sort) {
     last_stream = sort_stream = gt_sort_stream_new(last_stream);
   }
 
+  /* if -provideindex is given, collect input features and index them first */
   if (arguments->provideindex) {
     fi = gt_feature_index_memory_new();
     gt_assert(fi);
@@ -221,14 +226,16 @@ static int gt_speck_runner(int argc, const char **argv, int parsed_args,
     gt_assert(checker_stream);
   }
 
-  /* pull the features through the stream and free them afterwards */
+  /* perform checking  */
   if (!had_err)
     had_err = gt_node_stream_pull(checker_stream, err);
 
   gt_timer_stop(t);
 
+  /* reset warnings output */
   gt_warning_set_handler(gt_warning_default_handler, NULL);
 
+  /* output results */
   if (!had_err)
     gt_spec_results_report(res, arguments->outfp,
                            gt_str_get(arguments->specfile),
