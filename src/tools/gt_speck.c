@@ -72,7 +72,7 @@ static GtOptionParser* gt_speck_option_parser_new(void *tool_arguments)
   SpeccheckArguments *arguments = tool_arguments;
 
   /* init */
-  op = gt_option_parser_new("[GFF3_file ...]",
+  op = gt_option_parser_new("[options] [GFF3_file ...]",
                             "Checks spec definition compliance in GFF3 input.");
 
   option = gt_option_new_filename("specfile",
