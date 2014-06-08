@@ -1,3 +1,19 @@
+function table.contains(tab, element)
+  for _, value in pairs(tab) do
+    if value == element then
+      return true
+    end
+  end
+  return false
+end
+
+function table.pretty_array(tab)
+  str = "["
+  str = str .. (table.concat(tab, ", "))
+  str = str .. "]"
+  return str
+end
+
 matchers = {
   should_be = function(value, expected)
     if value ~= expected then
@@ -72,6 +88,20 @@ matchers = {
   should_not_match = function(value, pattern)
     if string.find(value, pattern) then
       return false, value .. " matches pattern "..pattern
+    end
+    return true
+  end;
+
+  should_contain = function(value, expected)
+    if not table.contains(value, expected) then
+      return false, table.pretty_array(value) .. " does not contain value ".. tostring(expected)
+    end
+    return true
+  end;
+
+  should_not_contain = function(value, expected)
+    if table.contains(value, expected) then
+      return false, table.pretty_array(value) .. " contains value ".. tostring(expected)
     end
     return true
   end;
