@@ -135,16 +135,18 @@ static int gt_spec_aspect_report_node(void *key, void *value, void *data,
       (void) snprintf(tmpbuf, BUFSIZ, "%s, ", tmp);
     }
   }
-  gt_file_xprintf(info->outfile,
-                  "%s      offending node #" GT_WU " "
-                  "(%sfrom %s, line %u):%s\n",
-                  info->colored ? GT_SPEC_ANSI_COLOR_RED : "",
-                  info->node_i++,
-                  (has_id ? tmpbuf : ""),
-                  gt_genome_node_get_filename(gn),
-                  gt_genome_node_get_line_number(gn),
-                  info->colored ? GT_SPEC_ANSI_COLOR_RESET : "");
-
+  if (gt_str_array_size(sanr->failure_messages) > 0
+        || gt_str_array_size(sanr->runtime_error_messages) > 0) {
+    gt_file_xprintf(info->outfile,
+                    "%s      offending node #" GT_WU " "
+                    "(%sfrom %s, line %u):%s\n",
+                    info->colored ? GT_SPEC_ANSI_COLOR_RED : "",
+                    info->node_i++,
+                    (has_id ? tmpbuf : ""),
+                    gt_genome_node_get_filename(gn),
+                    gt_genome_node_get_line_number(gn),
+                    info->colored ? GT_SPEC_ANSI_COLOR_RESET : "");
+  }
   for (i = 0; i < gt_str_array_size(sanr->failure_messages); i++) {
     gt_file_xprintf(info->outfile,
                     "%s         %s%s\n",
