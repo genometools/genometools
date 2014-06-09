@@ -438,10 +438,7 @@ static int feature_node_lua_extract_sequence(lua_State *L)
     gt_str_delete(sequence);
     return gt_lua_error(L, err);
   }
-  if (gt_str_length(sequence))
-    lua_pushstring(L, gt_str_get(sequence));
-  else
-    lua_pushnil(L);
+  lua_pushstring(L, gt_str_get(sequence));
   gt_str_delete(sequence);
   gt_error_delete(err);
   return 1;
