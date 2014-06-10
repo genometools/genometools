@@ -1,5 +1,3 @@
-rm = gt.region_mapping_new_seqfile("LmjF_v6.1_all_20131105.fa")
-
 derives_from = {}
 
 describe.feature("gene", function(gene)
@@ -22,6 +20,12 @@ describe.feature("gene", function(gene)
     end
   end)
 
+  it("does not overlap an unrelated feature", function()
+    fs = feature_index:get_features_for_range(gene:get_seqid(), gene:get_range())
+    -- expect the gene and the polypeptide in this region
+    expect(#fs).should_be_smaller_than(3)
+  end)
+
   it("adheres to a ID naming scheme, if coding", function()
     if gene:has_child_of_type("mRNA") then
       expect(gene:get_attribute("ID")).should_match("^"..gene:get_seqid()
@@ -37,7 +41,7 @@ describe.feature("gene", function(gene)
   end)
 
   it("does not span a contig separator sequence (100 Ns)", function()
-    local seq = string.lower(gene:extract_sequence("gene", false, rm))
+    local seq = string.lower(gene:extract_sequence("gene", false, region_mapping))
     expect(seq).should_not_match(string.rep("n", 100))
   end)
 end)
@@ -48,12 +52,12 @@ describe.feature("mRNA", function(mrna)
   end)
 
   it("has CDS with no internal stop codons", function()
-    local seq = mrna:extract_sequence("CDS", true, rm)
+    local seq = mrna:extract_sequence("CDS", true, region_mapping)
     expect(gt.translate_dna(string.sub(seq, 1, -3))).should_not_match("\*")
   end)
 
   it("has CDS ending on a stop codon", function()
-    local seq = mrna:extract_sequence("CDS", true, rm)
+    local seq = mrna:extract_sequence("CDS", true, region_mapping)
     expect(gt.translate_dna(string.sub(seq, -3, -1))).should_match("\*")
   end)
 end)

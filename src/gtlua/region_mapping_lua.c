@@ -92,6 +92,16 @@ static int region_mapping_lua_delete(lua_State *L)
   return 0;
 }
 
+void gt_lua_region_mapping_push(lua_State *L, GtRegionMapping *rm)
+{
+  GtRegionMapping **rm_lua;
+  gt_assert(L && rm);
+  rm_lua = lua_newuserdata(L, sizeof (GtRegionMapping**));
+  *rm_lua = rm;
+  luaL_getmetatable(L, REGION_MAPPING_METATABLE);
+  lua_setmetatable(L, -2);
+}
+
 static const struct luaL_Reg region_mapping_lib_f [] = {
   { "region_mapping_new_seqfile", region_mapping_lua_new_seqfile },
   { "region_mapping_new_seqfile_matchdesc",

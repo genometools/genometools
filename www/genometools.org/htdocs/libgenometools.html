@@ -934,9 +934,9 @@ Creates a new <code>GtArrayInStream</code>, delivering nodes from <code>nodes</c
 <h2>Class GtArrayOutStream</h2>
 
 <p> The <code>GtArrayOutStream</code> class implements the <code>GtNodeStream</code> interface.
-   <code>GtArrayOutStream</code> takes <code>GtGenomeNodes</code> of type <code>GtFeatureNode</code> from
-   <code>in_stream</code> and adds them to <code>nodes</code>. This stream can be used to obtain
-   nodes for processing outside of the usual stream flow. </p>
+   <code>GtArrayOutStream</code> takes nodes from an input stream and adds them to a
+   <code>GtArray</code>. This stream can be used to obtain nodes for processing outside
+   of the usual stream flow. </p>
 
 <hr>
 <a name="gt_array_out_stream_new"></a>
@@ -944,9 +944,17 @@ Creates a new <code>GtArrayInStream</code>, delivering nodes from <code>nodes</c
 <code>GtNodeStream*  gt_array_out_stream_new(GtNodeStream *in_stream,
                                       GtArray *nodes, GtError *err)</code>
 <p>
-Creates a new <code>GtArrayInStream</code>, storing new references to nodes from
-   <code>in_stream</code> into <code>nodes</code>. Note that the array must be set up to contain
+Creates a new <code>GtArrayInStream</code>, storing new references to <code>GtFeatureNode</code>s
+   from <code>in_stream</code> in <code>nodes</code>. Note that the array must be set up to contain
    pointers to <code>GtGenomeNode</code>s!
+</p>
+<hr>
+<a name="gt_array_out_stream_all_new"></a>
+
+<code>GtNodeStream*  gt_array_out_stream_all_new(GtNodeStream *in_stream,
+                                          GtArray *nodes, GtError *err)</code>
+<p>
+Like <code>gt_array_out_stream_new()</code>, but not restricted to feature nodes.
 </p>
 <hr>
 <a name="GtBEDInStream"></a>
@@ -6345,8 +6353,9 @@ Return a <code>GtOption</code> with the given <code>option_string</code>, <code>
                                        const char *description,
                                        GtStr *filename)</code>
 <p>
-Return a new <code>GtOption</code> with the given <code>option_string</code>, <code>description</code>, and
-   <code>default_value</code>. The result of the option parsing are stored in <code>value</code>.
+Return a new <code>GtOption</code> with the given <code>option_string</code>, <code>description</code>. The
+   result of the option parsing is stored in the <code>GtStr</code> object <code>filename</code>.
+   <code>filename</code> may not be NULL!
 </p>
 <hr>
 <a name="gt_option_new_filename_array"></a>
@@ -7122,8 +7131,7 @@ Like <code>gt_region_mapping_new_seqfiles()</code>, but using <code>encseq</code
 <a name="gt_region_mapping_new_rawseq"></a>
 
 <code>GtRegionMapping*  gt_region_mapping_new_rawseq(const char *rawseq,
-                                              GtUword length,
-                                              GtUword offset)</code>
+                                              GtUword length, GtUword offset)</code>
 <p>
 Return a new <code>GtRegionMapping</code> object which maps to the given sequence
    <code>rawseq</code> with the corresponding <code>length</code> and <code>offset</code>.
@@ -9320,9 +9328,18 @@ The generic free function pointer type.
 <h2>Module Grep</h2>
 <a name="gt_grep"></a>
 
-<code>int   gt_grep(bool *match, const char *pattern, const char *line, GtError*)</code>
+<code>int  gt_grep(bool *match, const char *pattern, const char *line, GtError*)</code>
 <p>
 Set <code>match</code> to <code>true</code> if <code>pattern</code> matches <code>line</code>, to <code>false</code> otherwise.
+</p>
+<hr>
+<a name="gt_grep_nt"></a>
+
+<code>int  gt_grep_nt(bool *match, const char *pattern, const char *line, size_t len,
+               GtError *err)</code>
+<p>
+Set <code>match</code> to <code>true</code> if <code>pattern</code> matches <code>line</code> up to <code>len</code>, to <code>false</code>
+   otherwise.
 </p>
 <hr>
 <a name="Init"></a>
@@ -10145,6 +10162,8 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
   <a href="#gt_array_in_stream_new"><code>gt_array_in_stream_new</code></a><br>
 
   <a href="#gt_array_new"><code>gt_array_new</code></a><br>
+
+  <a href="#gt_array_out_stream_all_new"><code>gt_array_out_stream_all_new</code></a><br>
 
   <a href="#gt_array_out_stream_new"><code>gt_array_out_stream_new</code></a><br>
 
@@ -11017,6 +11036,8 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
   <a href="#gt_graphics_set_margins"><code>gt_graphics_set_margins</code></a><br>
 
   <a href="#gt_grep"><code>gt_grep</code></a><br>
+
+  <a href="#gt_grep_nt"><code>gt_grep_nt</code></a><br>
 
   <a href="#gt_gtf_in_stream_new"><code>gt_gtf_in_stream_new</code></a><br>
 
@@ -11913,7 +11934,7 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
 <div id="footer">
 Copyright &copy; 2008-2013
 The <i>GenomeTools</i> authors.
-Last update: 2014-05-15
+Last update: 2014-06-08
 </div>
 </div>
 <!-- Piwik -->

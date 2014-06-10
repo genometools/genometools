@@ -18,6 +18,7 @@
 #include "lauxlib.h"
 #include "core/unused_api.h"
 #include "core/ma.h"
+#include "extended/feature_index_api.h"
 #include "extended/feature_index_memory_api.h"
 #include "extended/feature_node.h"
 #include "extended/luahelper.h"
@@ -200,6 +201,24 @@ static int feature_index_lua_get_seqids(lua_State *L)
   return 1;
 }
 
+static int feature_index_lua_has_seqid(lua_State *L)
+{
+  GtFeatureIndex **feature_index;
+  bool has_seqid;
+  const char *seqid;
+  GtError *err;
+  int had_err = 0;
+  feature_index = check_feature_index(L, 1);
+  seqid = luaL_checkstring(L, 2);
+  err = gt_error_new();
+  had_err = gt_feature_index_has_seqid(*feature_index, &has_seqid, seqid, err);
+  if (had_err)
+    return gt_lua_error(L, err);
+  gt_error_delete(err);
+  lua_pushboolean(L, has_seqid);
+  return 1;
+}
+
 static int feature_index_lua_get_range_for_seqid(lua_State *L)
 {
   GtFeatureIndex **feature_index;
@@ -220,6 +239,16 @@ static int feature_index_lua_get_range_for_seqid(lua_State *L)
     return gt_lua_error(L, err);
   gt_error_delete(err);
   return gt_lua_range_push(L, range);
+}
+
+void gt_lua_feature_index_push(lua_State *L, GtFeatureIndex *fi)
+{
+  GtFeatureIndex **fi_lua;
+  gt_assert(L && fi);
+  fi_lua = lua_newuserdata(L, sizeof (GtFeatureIndex**));
+  *fi_lua = fi;
+  luaL_getmetatable(L, FEATURE_INDEX_METATABLE);
+  lua_setmetatable(L, -2);
 }
 
 static int feature_index_lua_delete(lua_State *L)
@@ -243,6 +272,7 @@ static const struct luaL_Reg feature_index_lib_m [] = {
   { "get_first_seqid", feature_index_lua_get_first_seqid },
   { "get_seqids", feature_index_lua_get_seqids },
   { "get_range_for_seqid", feature_index_lua_get_range_for_seqid },
+  { "has_seqid", feature_index_lua_has_seqid },
   { NULL, NULL }
 };
 
