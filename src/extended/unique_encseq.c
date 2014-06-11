@@ -91,21 +91,25 @@ GtUniqueEncseqDB *gt_unique_encseq_new_db(GtEncseq *encseq)
 
 void gt_unique_encseq_delete_db(GtUniqueEncseqDB *uedb)
 {
-  GtUword i;
-  for (i = 0; i < uedb->nelems; i++) {
-    if (uedb->fragmentdb[i].type == Unique) {
-      gt_free(uedb->fragmentdb[i].entry.unique);
+  if (uedb != NULL) {
+    GtUword i;
+    for (i = 0; i < uedb->nelems; i++) {
+      if (uedb->fragmentdb[i].type == Unique) {
+        gt_free(uedb->fragmentdb[i].entry.unique);
+      }
+      else if (uedb->fragmentdb[i].type == Link) {
+        /* gt_assert(uedb->fragmentdb[i].entry.link != NULL); */
+        /* gt_assert(uedb->fragmentdb[i].entry.link->editscript != NULL); */
+        gt_editscript_delete(uedb->fragmentdb[i].entry.link->editscript);
+        gt_free(uedb->fragmentdb[i].entry.link);
+      }
     }
-    else if (uedb->fragmentdb[i].type == Link) {
-      gt_editscript_delete(uedb->fragmentdb[i].entry.link->editscript);
-      gt_free(uedb->fragmentdb[i].entry.link);
-    }
+    gt_free(uedb->sde);
+    gt_free(uedb->desc);
+    gt_free(uedb->fragmentdb);
+    gt_free(uedb->ssp);
+    gt_free(uedb);
   }
-  gt_free(uedb->sde);
-  gt_free(uedb->desc);
-  gt_free(uedb->fragmentdb);
-  gt_free(uedb->ssp);
-  gt_free(uedb);
 }
 
 /* finds the unique encseq database entry index given a query position */
@@ -585,8 +589,10 @@ static GtUniqueEncseqLinkEntry *gt_unique_encseq_link_io(
                       fp, err);
   if (!had_err) {
     link->editscript = gt_editscript_io(link->editscript, fp, err);
-    if (link->editscript == NULL)
+    if (link->editscript == NULL) {
       had_err = 1;
+      gt_assert(gt_error_is_set(err));
+    }
   }
   if (had_err) {
     gt_free(link);
@@ -617,15 +623,20 @@ static int gt_unique_encseq_uedbentry_io(GtUniqueEncseqDBentry *entry,
       entry->entry.link = gt_unique_encseq_link_io(entry->entry.link,
                                                    fp,
                                                    io_func, err);
-      if (entry->entry.link == NULL)
+      if (entry->entry.link == NULL) {
         had_err = 1;
+        gt_assert(gt_error_is_set(err));
+      }
+
     }
     else if (entry->type == Unique) {
       entry->entry.unique = gt_unique_encseq_unique_io(entry->entry.unique,
                                                        fp,
                                                        io_func, err);
-      if (entry->entry.unique == NULL)
+      if (entry->entry.unique == NULL) {
         had_err = 1;
+        gt_assert(gt_error_is_set(err));
+      }
     }
   }
   return had_err;
@@ -687,6 +698,8 @@ static int gt_unique_encseq_uedb_io(GtUniqueEncseqDB *uedb,
     for (idx = 0; !had_err && idx < uedb->nelems; idx++) {
       had_err = gt_unique_encseq_uedbentry_io(&uedb->fragmentdb[idx], fp,
                                               io_func, err);
+      if (had_err)
+        gt_assert(gt_error_is_set(err));
     }
   }
   return had_err;
@@ -713,8 +726,8 @@ GtUniqueEncseqDB *gt_unique_encseq_uedb_read(const char *basename, GtError *err)
     return uedb;
   }
   had_err = gt_unique_encseq_uedb_io(uedb, fp, gt_io_error_fread, err);
-  if (!had_err) {
-    gt_free(uedb);
+  if (had_err) {
+    gt_unique_encseq_delete_db(uedb);
     uedb = NULL;
   }
   gt_fa_fclose(fp);
@@ -763,6 +776,8 @@ int gt_unique_encseq_encseq2uniqueencseq(GtUniqueEncseqDB *uedb,
   encoder = gt_encseq_encoder_new();
   gt_encseq_encoder_disable_description_support(encoder);
   had_err = gt_encseq_encoder_encode(encoder, seqfiles, indexname, err);
+  if (had_err)
+    gt_assert(gt_error_is_set(err));
   if (!had_err) {
     gt_unique_encseq_copy_desc(uedb, encseq);
     filename = gt_calloc(strlen(indexname) + 6, sizeof (char));
@@ -770,6 +785,8 @@ int gt_unique_encseq_encseq2uniqueencseq(GtUniqueEncseqDB *uedb,
     gt_assert(nchars == (int) (strlen(indexname) + 5));
     fp2 = fopen(filename, "wb");
     had_err = gt_unique_encseq_uedb_write(uedb, fp2, err);
+    if (had_err)
+      gt_assert(gt_error_is_set(err));
     (void) fclose(fp2);
 
     if (!had_err && !gt_log_enabled()) {

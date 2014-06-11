@@ -842,10 +842,11 @@ static GtEncdesc *encdesc_new(void)
   GtEncdesc *encdesc;
   encdesc = gt_calloc((size_t) 1, sizeof (GtEncdesc));
   encdesc->bitinstream = NULL;
+  encdesc->fields = NULL;
   encdesc->num_of_descs = 0;
-  encdesc->total_num_of_chars = 0;
-  encdesc->sampling = NULL;
   encdesc->pagesize = gt_pagesize();
+  encdesc->sampling = NULL;
+  encdesc->total_num_of_chars = 0;
   return encdesc;
 }
 
@@ -1211,12 +1212,12 @@ static int encdesc_next_desc(GtEncdesc *encdesc, GtStr *desc, GtError *err)
            bits_to_read;
   GtWord tmp = 0;
   GtUword cur_field_num,
-                fieldlen = 0,
-                idx,
-                numoffields,
-                nearestsample,
-                zero_count = 0,
-                tmp_symbol = 0;
+          fieldlen = 0,
+          idx,
+          numoffields,
+          nearestsample,
+          zero_count = 0,
+          tmp_symbol = 0;
   size_t startofnearestsample;
   GtBitsequence bitseq;
   GtHuffmanBitwiseDecoder *huff_bitwise_decoder;
@@ -1231,11 +1232,10 @@ static int encdesc_next_desc(GtEncdesc *encdesc, GtStr *desc, GtError *err)
       encdesc->cur_desc == gt_sampling_get_next_elementnum(encdesc->sampling)) {
     int sample_status;
     sample_status = gt_sampling_get_next_sample(encdesc->sampling,
-                                    &nearestsample,
-                                    &startofnearestsample);
+                                                &nearestsample,
+                                                &startofnearestsample);
     if (sample_status == 1) {
-      gt_bitinstream_reinit(encdesc->bitinstream,
-                            startofnearestsample);
+      gt_bitinstream_reinit(encdesc->bitinstream, startofnearestsample);
       sampled = true;
     }
     else
@@ -1270,6 +1270,7 @@ static int encdesc_next_desc(GtEncdesc *encdesc, GtStr *desc, GtError *err)
     DescField *cur_field = &encdesc->fields[cur_field_num];
     if (cur_field->is_cons) {
       if (desc != NULL) {
+        gt_assert(cur_field->data != NULL);
         gt_str_append_cstr(desc, cur_field->data);
         gt_str_append_char(desc, cur_field->sep);
       }
@@ -1278,7 +1279,7 @@ static int encdesc_next_desc(GtEncdesc *encdesc, GtStr *desc, GtError *err)
     if (cur_field->is_numeric) {
       if (cur_field->has_zero_padding && !cur_field->fieldlen_is_const) {
         huff_bitwise_decoder = gt_huffman_bitwise_decoder_new(
-                                           cur_field->huffman_zero_count, err);
+                                            cur_field->huffman_zero_count, err);
         stat = -1;
         while (!had_err && stat != 0) {
           if (gt_bitinstream_get_next_bit(encdesc->bitinstream, &bit) != 1) {
@@ -1326,7 +1327,7 @@ static int encdesc_next_desc(GtEncdesc *encdesc, GtStr *desc, GtError *err)
           if (cur_field->bits_per_num) {
             if (cur_field->use_hc) {
               huff_bitwise_decoder = gt_huffman_bitwise_decoder_new(
-                                                  cur_field->huffman_num, err);
+                                                   cur_field->huffman_num, err);
               stat = 1;
               while (!had_err && stat != 0) {
                 if (gt_bitinstream_get_next_bit(encdesc->bitinstream,
@@ -1384,7 +1385,7 @@ static int encdesc_next_desc(GtEncdesc *encdesc, GtStr *desc, GtError *err)
         cur_field->prev_value = tmp;
         if (cur_field->has_zero_padding && cur_field->fieldlen_is_const) {
           zero_count = cur_field->len -
-                       encdesc_digits_per_value((GtUword) tmp, 10UL);
+            encdesc_digits_per_value((GtUword) tmp, 10UL);
           for (idx = 0;
                desc != NULL && idx < zero_count;
                idx++)
@@ -1427,7 +1428,7 @@ static int encdesc_next_desc(GtEncdesc *encdesc, GtStr *desc, GtError *err)
       }
       else {
         huff_bitwise_decoder = gt_huffman_bitwise_decoder_new(
-                                           cur_field->huffman_chars[idx], err);
+                                            cur_field->huffman_chars[idx], err);
         stat = -1;
         while (!had_err && stat != 0) {
           if (gt_bitinstream_get_next_bit(encdesc->bitinstream, &bit) != 1) {
@@ -1479,8 +1480,8 @@ int gt_encdesc_decode(GtEncdesc *encdesc,
 {
   int had_err = 0;
   GtUword descs2read = 0,
-                nearestsample = 0,
-                idx;
+          nearestsample = 0,
+          idx;
   size_t startofnearestsample = 0;
 
   gt_assert(encdesc);

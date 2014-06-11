@@ -505,7 +505,7 @@ static GtEditscript *gt_editscript_io_fp(GtEditscript *editscript, FILE *fp,
                       fp, err);
   }
 
-  if (!had_err) {
+  if (had_err) {
     gt_editscript_delete(editscript);
     editscript = NULL;
   }

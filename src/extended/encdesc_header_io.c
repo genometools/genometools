@@ -66,7 +66,8 @@ static int io_cons_field_header(DescField *field,
 
   if (!had_err) {
     field->data = gt_realloc(field->data,
-                           (size_t) (field->len + 1) * sizeof (char));
+                             (size_t) (field->len + 1) * sizeof (char));
+    field->data[field->len] = '\0';
     had_err = io_func(field->data, sizeof (char), (size_t) field->len, fp, err);
   }
   return had_err;
@@ -707,8 +708,8 @@ int encdesc_read_header(GtEncdesc *encdesc, FILE *fp, GtError *err)
        !had_err && cur_field_num < encdesc->num_of_fields;
        cur_field_num++) {
     cur_field = &encdesc->fields[cur_field_num];
-    cur_field->bits_per_num = 0;
-    cur_field->prev_value = 0;
+    /* cur_field->bits_per_num = 0; */
+    /* cur_field->prev_value = 0; */
     had_err = io_field_sep_and_is_cons(cur_field, fp, gt_io_error_fread, err);
 
     if (!had_err && cur_field->is_cons) {

@@ -1009,7 +1009,7 @@ int gt_hcr_decoder_decode(GtHcrDecoder *hcr_dec, GtUword readnum,
 
   if (hcr_dec->encdesc != NULL) {
     if (gt_encdesc_decode(hcr_dec->encdesc, readnum, desc, err) == -1) {
-      gt_error_set(err, "cannot retrieve description with number "GT_WU"."
+      gt_error_set(err, "cannot retrieve description with number " GT_WU "."
                    "(%d)", readnum, __LINE__);
       return -1;
     }
