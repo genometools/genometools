@@ -18,7 +18,7 @@
 #include "core/class_alloc_lock.h"
 #include "core/cstr_api.h"
 #include "core/encseq_col.h"
-#include "core/grep_api.h"
+#include "core/grep.h"
 #include "core/encseq.h"
 #include "core/ma.h"
 #include "core/md5_seqid.h"
@@ -55,7 +55,7 @@ static int gt_encseq_col_do_grep_desc(GtEncseqCol *esc, GtUword *filenum,
   GtUword j, num_matches = 0;
   const GtSeqInfo *seq_info_ptr;
   GtSeqInfo seq_info;
-  GtStr *pattern;
+  GtStr *pattern, *escaped;
   bool match = false;
   int had_err = 0;
   gt_error_check(err);
@@ -74,11 +74,13 @@ static int gt_encseq_col_do_grep_desc(GtEncseqCol *esc, GtUword *filenum,
     return 0;
   }
   pattern = gt_str_new();
+  escaped = gt_str_new();
+  gt_grep_escape_extended(escaped, gt_str_get(seqid), gt_str_length(seqid));
   if (esc->matchstart)
     gt_str_append_cstr(pattern, "^");
-  gt_str_append_str(pattern, seqid);
+  gt_str_append_str(pattern, escaped);
   if (esc->matchstart)
-    gt_str_append_cstr(pattern, "[[:space:]]");
+    gt_str_append_cstr(pattern, "([[:space:]]|$)");
   for (j = 0; !had_err && j < gt_encseq_num_of_sequences(esc->encseq); j++) {
     const char *desc;
     GtUword desc_len;
@@ -102,6 +104,7 @@ static int gt_encseq_col_do_grep_desc(GtEncseqCol *esc, GtUword *filenum,
     }
   }
   gt_str_delete(pattern);
+  gt_str_delete(escaped);
   if (!had_err && num_matches == 0) {
     gt_error_set(err, "no description matched sequence ID '%s'",
                  gt_str_get(seqid));

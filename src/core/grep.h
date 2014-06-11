@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2006-2008 Gordon Gremme <gordon@gremme.org>
-  Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2014 Sascha Steinbiss <ss34@sanger.ac.uk>
+  Copyright (c) 2014 Genome Research Ltd.
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -15,21 +15,19 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef GREP_API_H
-#define GREP_API_H
+#ifndef GREP_H
+#define GREP_H
 
 #include <stdbool.h>
 #include "core/error_api.h"
+#include "core/grep_api.h"
+#include "core/str_api.h"
 
-/* Grep module */
-
-/* Set <match> to <true> if <pattern> matches <line>, to <false> otherwise. */
-int gt_grep(bool *match, const char *pattern, const char *line, GtError*);
-/* Set <match> to <true> if <pattern> matches <line> up to <len>, to <false>
-   otherwise. */
-int gt_grep_nt(bool *match, const char *pattern, const char *line, size_t len,
-               GtError *err);
-
-int gt_grep_unit_test(GtError*);
+/* Escapes the POSIX extended regular expression special characters
+   (.^$*+?()[{\|) in <str> of length <len> and writes the escaped string
+   to <dest>, which is truncated first.
+   Any special characters appearing in <str> will be treated as literals when
+   passing <dest> as a pattern to <gt_grep_*()>. */
+void gt_grep_escape_extended(GtStr *dest, const char *str, size_t len);
 
 #endif
