@@ -18,7 +18,7 @@
 #include "core/bioseq_col.h"
 #include "core/class_alloc_lock.h"
 #include "core/cstr_api.h"
-#include "core/grep_api.h"
+#include "core/grep.h"
 #include "core/hashmap_api.h"
 #include "core/ma.h"
 #include "core/md5_seqid.h"
@@ -57,7 +57,7 @@ static int grep_desc(GtBioseqCol *bsc, GtUword *filenum,
   GtUword i, j, num_matches = 0;
   const GtSeqInfo *seq_info_ptr;
   GtSeqInfo seq_info;
-  GtStr *pattern;
+  GtStr *pattern, *escaped;
   bool match = false;
   int had_err = 0;
   gt_error_check(err);
@@ -73,11 +73,13 @@ static int grep_desc(GtBioseqCol *bsc, GtUword *filenum,
     return 0;
   }
   pattern = gt_str_new();
+  escaped = gt_str_new();
+  gt_grep_escape_extended(escaped, gt_str_get(seqid), gt_str_length(seqid));
   if (bsc->matchdescstart)
     gt_str_append_cstr(pattern, "^");
-  gt_str_append_str(pattern, seqid);
+  gt_str_append_str(pattern, escaped);
   if (bsc->matchdescstart)
-    gt_str_append_cstr(pattern, "[[:space:]]");
+    gt_str_append_cstr(pattern, "([[:space:]]|$)");
   for (i = 0; !had_err && i < bsc->num_of_seqfiles; i++) {
     GtBioseq *bioseq = bsc->bioseqs[i];
     for (j = 0; !had_err && j < gt_bioseq_number_of_sequences(bioseq); j++) {
@@ -103,6 +105,7 @@ static int grep_desc(GtBioseqCol *bsc, GtUword *filenum,
       break;
   }
   gt_str_delete(pattern);
+  gt_str_delete(escaped);
   if (!had_err && num_matches == 0) {
     gt_error_set(err, "no description matched sequence ID '%s'",
                  gt_str_get(seqid));
