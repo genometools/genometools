@@ -51,12 +51,64 @@ static int range_lua_get_end(lua_State *L)
   return 1;
 }
 
+static int range_lua_length(lua_State *L)
+{
+  GtRange *range = check_range(L, 1);
+  lua_pushinteger(L, gt_range_length(range));
+  return 1;
+}
+
 static int range_lua_overlap(lua_State *L)
 {
   GtRange *range_a, *range_b;
   range_a = check_range(L, 1);
   range_b = check_range(L, 2);
   lua_pushboolean(L, gt_range_overlap(range_a, range_b));
+  return 1;
+}
+
+static int range_lua_contains(lua_State *L)
+{
+  GtRange *range_a, *range_b;
+  range_a = check_range(L, 1);
+  range_b = check_range(L, 2);
+  lua_pushboolean(L, gt_range_contains(range_a, range_b));
+  return 1;
+}
+
+static int range_lua_within(lua_State *L)
+{
+  GtRange *range;
+  long point;
+  range = check_range(L, 1);
+  point = luaL_checklong(L, 2);
+  luaL_argcheck(L, point > 0, 2, "must be > 0");
+  lua_pushboolean(L, gt_range_within(range, point));
+  return 1;
+}
+
+static int range_lua_join(lua_State *L)
+{
+  GtRange *final_range, tmp_rng, *range_a, *range_b;
+  range_a = check_range(L, 1);
+  range_b = check_range(L, 2);
+  final_range = lua_newuserdata(L, sizeof (GtRange));
+  tmp_rng = gt_range_join(range_a, range_b);
+  final_range->start = tmp_rng.start;
+  final_range->end   = tmp_rng.end;
+  luaL_getmetatable(L, RANGE_METATABLE);
+  lua_setmetatable(L, -2);
+  return 1;
+}
+
+static int range_lua_overlap_delta(lua_State *L)
+{
+  GtRange *range_a, *range_b;
+  GtUword delta;
+  range_a = check_range(L, 1);
+  range_b = check_range(L, 2);
+  delta = luaL_checklong(L, 3);
+  lua_pushboolean(L, gt_range_overlap_delta(range_a, range_b, delta));
   return 1;
 }
 
@@ -149,6 +201,11 @@ static const struct luaL_Reg range_lib_m [] = {
   { "get_start", range_lua_get_start},
   { "get_end", range_lua_get_end},
   { "overlap", range_lua_overlap},
+  { "overlap_delta", range_lua_overlap_delta},
+  { "length", range_lua_length},
+  { "join", range_lua_join},
+  { "contains", range_lua_contains},
+  { "within", range_lua_within},
   { NULL, NULL }
 };
 
