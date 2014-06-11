@@ -101,13 +101,13 @@ GtIntset *gt_intset_write(GtIntset *intset, FILE *fp, GtError *err)
   return intset;
 }
 
-size_t gt_intset_size_of_rep(GtIntset *intset,
-                             GtUword maxelement, GtUword num_of_elems)
+size_t gt_intset_size_of_rep(GtIntset *intset)
 {
   gt_assert(intset != NULL);
   gt_assert(intset->c_class != NULL);
   if (intset->c_class->rep_size_func != NULL)
-    return intset->c_class->rep_size_func(maxelement, num_of_elems);
+    return intset->c_class->rep_size_func(intset->members->maxelement,
+                                          intset->members->num_of_elems);
   return 0;
 }
 

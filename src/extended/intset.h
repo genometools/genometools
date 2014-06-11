@@ -65,12 +65,10 @@ GtUword   gt_intset_get_idx_smaller_geq(GtIntset *intset, GtUword pos);
 /* Returns the size in bytes of the <GtIntset>-structure. */
 size_t    gt_intset_size_of_struct(GtIntset *intset);
 
-/* Returns the size of the representation of an <intset> with given number of
-   elements <num_of_elems> and maximum value <maxelement>, in bytes. This does
-   not include the size of the structure.
-   Fails if <%=bits%> >= bits for (GtUword). */
-size_t    gt_intset_size_of_rep(GtIntset *intset,
-                                GtUword maxelement, GtUword num_of_elems);
+/* Returns the size of the representation of an <intset> with its given number
+   of elements <num_of_elems> and maximum value <maxelement>, in bytes. This
+   does not include the size of the structure. */
+size_t    gt_intset_size_of_rep(GtIntset *intset);
 
 /* Write <intset> to file <fp>. Fails with exit on IO-error. Returns NULL if
    data error occures and writes it to <err>, <intset> will be deleted at that
