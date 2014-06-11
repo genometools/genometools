@@ -31,6 +31,7 @@
 #include "core/unused_api.h"
 #include "core/xansi_api.h"
 #include "extended/editscript.h"
+#include "extended/io_function_pointers.h"
 #include "extended/unique_encseq.h"
 #include "extended/unique_encseq_rep.h"
 #include "match/echoseq.h"
@@ -90,21 +91,25 @@ GtUniqueEncseqDB *gt_unique_encseq_new_db(GtEncseq *encseq)
 
 void gt_unique_encseq_delete_db(GtUniqueEncseqDB *uedb)
 {
-  GtUword i;
-  for (i = 0; i < uedb->nelems; i++) {
-    if (uedb->fragmentdb[i].type == Unique) {
-      gt_free(uedb->fragmentdb[i].entry.unique);
+  if (uedb != NULL) {
+    GtUword i;
+    for (i = 0; i < uedb->nelems; i++) {
+      if (uedb->fragmentdb[i].type == Unique) {
+        gt_free(uedb->fragmentdb[i].entry.unique);
+      }
+      else if (uedb->fragmentdb[i].type == Link) {
+        /* gt_assert(uedb->fragmentdb[i].entry.link != NULL); */
+        /* gt_assert(uedb->fragmentdb[i].entry.link->editscript != NULL); */
+        gt_editscript_delete(uedb->fragmentdb[i].entry.link->editscript);
+        gt_free(uedb->fragmentdb[i].entry.link);
+      }
     }
-    else if (uedb->fragmentdb[i].type == Link) {
-      gt_editscript_delete(uedb->fragmentdb[i].entry.link->editscript);
-      gt_free(uedb->fragmentdb[i].entry.link);
-    }
+    gt_free(uedb->sde);
+    gt_free(uedb->desc);
+    gt_free(uedb->fragmentdb);
+    gt_free(uedb->ssp);
+    gt_free(uedb);
   }
-  gt_free(uedb->sde);
-  gt_free(uedb->desc);
-  gt_free(uedb->fragmentdb);
-  gt_free(uedb->ssp);
-  gt_free(uedb);
 }
 
 /* finds the unique encseq database entry index given a query position */
@@ -541,24 +546,6 @@ static void gt_unique_encseq_udb2fasta(GtUniqueEncseqDB *uedb,
   gt_free(desc);
 }
 
-/* function definition for xfwrite, so that it fits the function pointer*/
-static inline void uniqueencseq_gt_xfwrite(void *ptr,
-                                           size_t size,
-                                           size_t nmemb,
-                                           FILE *stream)
-{
-  gt_xfwrite((const void*) ptr, size, nmemb, stream);
-}
-
-/* function definition for xfread, so that it fits the function pointer*/
-static inline void uniqueencseq_gt_xfread(void *ptr,
-                                          size_t size,
-                                          size_t nmemb,
-                                          FILE *stream)
-{
-  (void) gt_xfread(ptr, size, nmemb, stream);
-}
-
 typedef void (*UniqueEncseqIOFunc)(void *ptr,
                                    size_t size,
                                    size_t nmemb,
@@ -566,109 +553,169 @@ typedef void (*UniqueEncseqIOFunc)(void *ptr,
 
 /* generic IO function for an unique encseq unique entry*/
 static GtUniqueEncseqUniqueEntry *gt_unique_encseq_unique_io(
-    GtUniqueEncseqUniqueEntry *unique,
-    FILE *fp,
-    EditscriptIOFunc io_func)
+                                              GtUniqueEncseqUniqueEntry *unique,
+                                              FILE *fp,
+                                              GtIOFunc io_func,
+                                              GtError *err)
 {
   if (unique == NULL ) {
     unique = gt_calloc((size_t) 1, sizeof (*unique));
   }
-  io_func(&unique->compressed_start,
-          sizeof (unique->compressed_start),
-          (size_t) 1,
-          fp);
+  if (io_func(&unique->compressed_start,
+              sizeof (unique->compressed_start),
+              (size_t) 1,
+              fp, err)) {
+    gt_free(unique);
+    unique = NULL;
+  }
   return (unique);
 }
 
 /* generic IO function for an unique encseq link entry */
 static GtUniqueEncseqLinkEntry *gt_unique_encseq_link_io(
-    GtUniqueEncseqLinkEntry *link,
-    FILE *fp,
-    EditscriptIOFunc io_func)
+                                                  GtUniqueEncseqLinkEntry *link,
+                                                  FILE *fp,
+                                                  GtIOFunc io_func,
+                                                  GtError *err)
 {
+  int had_err = 0;
   if (link == NULL ) {
     link = gt_calloc((size_t) 1, sizeof (*link));
   }
-  io_func(&link->aligned_seq_idx,
-          sizeof (link->aligned_seq_idx),
-          (size_t) 1,
-          fp);
-  io_func(&link->offset, sizeof (link->offset), (size_t) 1, fp);
-  link->editscript = gt_editscript_io(link->editscript, fp, io_func);
+  had_err = io_func(&link->aligned_seq_idx, sizeof (link->aligned_seq_idx),
+                    (size_t) 1, fp, err);
+  if (!had_err)
+    had_err = io_func(&link->offset, sizeof (link->offset), (size_t) 1,
+                      fp, err);
+  if (!had_err) {
+    link->editscript = gt_editscript_io(link->editscript, fp, err);
+    if (link->editscript == NULL) {
+      had_err = 1;
+      gt_assert(gt_error_is_set(err));
+    }
+  }
+  if (had_err) {
+    gt_free(link);
+    link = NULL;
+  }
   return (link);
 }
 
 /* generic IO function for an unique encseq database entry */
-static void gt_unique_encseq_uedbentry_io(GtUniqueEncseqDBentry *entry,
-                                          FILE *fp,
-                                          EditscriptIOFunc io_func)
+static int gt_unique_encseq_uedbentry_io(GtUniqueEncseqDBentry *entry,
+                                         FILE *fp,
+                                         GtIOFunc io_func,
+                                         GtError *err)
 {
-  io_func(&entry->orig_startpos, sizeof (entry->orig_startpos), (size_t) 1, fp);
-  io_func(&entry->orig_endpos, sizeof (entry->orig_endpos), (size_t) 1, fp);
-  gt_assert(entry->orig_endpos >= entry->orig_startpos);
-  io_func(&entry->type, sizeof (entry->type), (size_t) 1, fp);
-  gt_assert(entry->type == Unique || entry->type == Link);
-  if (entry->type == Link) {
-    entry->entry.link = gt_unique_encseq_link_io(entry->entry.link,
-                                                 fp,
-                                                 io_func);
+  int had_err = 0;
+  had_err = io_func(&entry->orig_startpos, sizeof (entry->orig_startpos),
+                    (size_t) 1, fp, err);
+  if (!had_err)
+    had_err = io_func(&entry->orig_endpos, sizeof (entry->orig_endpos),
+                      (size_t) 1, fp, err);
+  if (!had_err) {
+    gt_assert(entry->orig_endpos >= entry->orig_startpos);
+    had_err = io_func(&entry->type, sizeof (entry->type), (size_t) 1, fp, err);
   }
-  else if (entry->type == Unique) {
-    entry->entry.unique = gt_unique_encseq_unique_io(entry->entry.unique,
-                                                     fp,
-                                                     io_func);
+  if (!had_err) {
+    gt_assert(entry->type == Unique || entry->type == Link);
+    if (entry->type == Link) {
+      entry->entry.link = gt_unique_encseq_link_io(entry->entry.link,
+                                                   fp,
+                                                   io_func, err);
+      if (entry->entry.link == NULL) {
+        had_err = 1;
+        gt_assert(gt_error_is_set(err));
+      }
+
+    }
+    else if (entry->type == Unique) {
+      entry->entry.unique = gt_unique_encseq_unique_io(entry->entry.unique,
+                                                       fp,
+                                                       io_func, err);
+      if (entry->entry.unique == NULL) {
+        had_err = 1;
+        gt_assert(gt_error_is_set(err));
+      }
+    }
   }
+  return had_err;
 }
 
 /* generic IO function for the unique encseq data structure */
-static void gt_unique_encseq_uedb_io(GtUniqueEncseqDB *uedb,
-                                     FILE *fp,
-                                     UniqueEncseqIOFunc io_func)
+static int gt_unique_encseq_uedb_io(GtUniqueEncseqDB *uedb,
+                                    FILE *fp,
+                                    GtIOFunc io_func,
+                                    GtError *err)
 {
+  int had_err = 0;
   GtUword idx;
-  io_func(&uedb->nelems, sizeof (uedb->nelems), (size_t) 1, fp);
-  gt_assert(uedb->nelems > 0);
-  io_func(&uedb->maxelems, sizeof (uedb->maxelems), (size_t) 1, fp);
-  gt_assert(uedb->maxelems >= uedb->nelems);
-  io_func(&uedb->cumulength, sizeof (uedb->cumulength), (size_t) 1, fp);
-  gt_assert(uedb->cumulength > 0);
-  io_func(&uedb->nseq, sizeof (uedb->nseq), (size_t) 1, fp);
-  gt_assert(uedb->nseq > 0);
-  if (uedb->ssp == NULL ) {
-    uedb->ssp = gt_calloc((size_t) uedb->nseq ,sizeof (*uedb->ssp));
+  had_err = io_func(&uedb->nelems, sizeof (uedb->nelems), (size_t) 1, fp, err);
+  if (!had_err) {
+    gt_assert(uedb->nelems > 0);
+    had_err = io_func(&uedb->maxelems, sizeof (uedb->maxelems), (size_t) 1, fp,
+                      err);
   }
-  io_func(uedb->ssp, sizeof (*uedb->ssp), (size_t) uedb->nseq, fp);
-  if (uedb->sde == NULL ) {
-    uedb->sde = gt_calloc((size_t) uedb->nseq ,sizeof (*uedb->sde));
+  if (!had_err) {
+    gt_assert(uedb->maxelems >= uedb->nelems);
+    had_err = io_func(&uedb->cumulength, sizeof (uedb->cumulength), (size_t) 1,
+                      fp, err);
   }
-  io_func(uedb->sde, sizeof (*uedb->sde), (size_t) uedb->nseq, fp);
-  if (uedb->desc == NULL ) {
-    uedb->desc = gt_calloc((size_t) uedb->sde[uedb->nseq - 1] + 1,
-        sizeof (*uedb->desc));
+  if (!had_err) {
+    gt_assert(uedb->cumulength > 0);
+    had_err = io_func(&uedb->nseq, sizeof (uedb->nseq), (size_t) 1, fp, err);
   }
-  io_func(uedb->desc,
-          sizeof (*uedb->desc),
-          (size_t) uedb->sde[uedb->nseq - 1],
-          fp);
-  if (uedb->fragmentdb == NULL ) {
-    uedb->fragmentdb = gt_calloc((size_t) uedb->nelems ,
-        sizeof (*uedb->fragmentdb));
+  if (!had_err) {
+    gt_assert(uedb->nseq > 0);
+    if (uedb->ssp == NULL ) {
+      uedb->ssp = gt_calloc((size_t) uedb->nseq ,sizeof (*uedb->ssp));
+    }
+    had_err = io_func(uedb->ssp, sizeof (*uedb->ssp), (size_t) uedb->nseq, fp,
+                      err);
   }
-  for (idx = 0; idx < uedb->nelems; idx++) {
-    gt_unique_encseq_uedbentry_io(&uedb->fragmentdb[idx], fp, io_func);
+  if (!had_err) {
+    if (uedb->sde == NULL ) {
+      uedb->sde = gt_calloc((size_t) uedb->nseq ,sizeof (*uedb->sde));
+    }
+    had_err = io_func(uedb->sde, sizeof (*uedb->sde), (size_t) uedb->nseq, fp,
+                      err);
   }
+  if (!had_err) {
+    if (uedb->desc == NULL ) {
+      uedb->desc = gt_calloc((size_t) uedb->sde[uedb->nseq - 1] + 1,
+                             sizeof (*uedb->desc));
+    }
+    had_err = io_func(uedb->desc,
+                      sizeof (*uedb->desc),
+                      (size_t) uedb->sde[uedb->nseq - 1],
+                      fp, err);
+  }
+  if (!had_err) {
+    if (uedb->fragmentdb == NULL ) {
+      uedb->fragmentdb = gt_calloc((size_t) uedb->nelems ,
+                                   sizeof (*uedb->fragmentdb));
+    }
+    for (idx = 0; !had_err && idx < uedb->nelems; idx++) {
+      had_err = gt_unique_encseq_uedbentry_io(&uedb->fragmentdb[idx], fp,
+                                              io_func, err);
+      if (had_err)
+        gt_assert(gt_error_is_set(err));
+    }
+  }
+  return had_err;
 }
 
 /* function to write a unique encseq data structure to a file*/
-static void gt_unique_encseq_uedb_write(GtUniqueEncseqDB *uedb,
-                                        FILE *fp)
+static int gt_unique_encseq_uedb_write(GtUniqueEncseqDB *uedb,
+                                       FILE *fp, GtError *err)
 {
   gt_assert(uedb != NULL && fp != NULL);
-  gt_unique_encseq_uedb_io(uedb, fp, uniqueencseq_gt_xfwrite);
+  return gt_unique_encseq_uedb_io(uedb, fp, gt_io_error_fwrite, err);
 }
 
 GtUniqueEncseqDB *gt_unique_encseq_uedb_read(const char *basename, GtError *err)
 {
+  int had_err = 0;
   FILE *fp;
   GtUniqueEncseqDB *uedb = NULL;
 
@@ -678,7 +725,11 @@ GtUniqueEncseqDB *gt_unique_encseq_uedb_read(const char *basename, GtError *err)
   if (fp == NULL) {
     return uedb;
   }
-  gt_unique_encseq_uedb_io(uedb, fp, uniqueencseq_gt_xfread);
+  had_err = gt_unique_encseq_uedb_io(uedb, fp, gt_io_error_fread, err);
+  if (had_err) {
+    gt_unique_encseq_delete_db(uedb);
+    uedb = NULL;
+  }
   gt_fa_fclose(fp);
   return (uedb);
 }
@@ -725,16 +776,20 @@ int gt_unique_encseq_encseq2uniqueencseq(GtUniqueEncseqDB *uedb,
   encoder = gt_encseq_encoder_new();
   gt_encseq_encoder_disable_description_support(encoder);
   had_err = gt_encseq_encoder_encode(encoder, seqfiles, indexname, err);
+  if (had_err)
+    gt_assert(gt_error_is_set(err));
   if (!had_err) {
     gt_unique_encseq_copy_desc(uedb, encseq);
     filename = gt_calloc(strlen(indexname) + 6, sizeof (char));
     nchars = snprintf(filename, strlen(indexname) + 6, "%s.uedb", indexname);
     gt_assert(nchars == (int) (strlen(indexname) + 5));
     fp2 = fopen(filename, "wb");
-    gt_unique_encseq_uedb_write(uedb, fp2);
+    had_err = gt_unique_encseq_uedb_write(uedb, fp2, err);
+    if (had_err)
+      gt_assert(gt_error_is_set(err));
     (void) fclose(fp2);
 
-    if (!gt_log_enabled()) {
+    if (!had_err && !gt_log_enabled()) {
       had_err = remove("TMP.FASTA");
       if (had_err != 0) {
         gt_error_set(err, "TMP file could not be deleted successfully");

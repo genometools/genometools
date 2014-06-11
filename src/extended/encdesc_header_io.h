@@ -22,10 +22,11 @@
 #include "extended/encdesc.h"
 
 /* Write header information of <encdesc> to <FILE> <fp>.
-   Fails hard with EXIT_FAILURE if an error occurs. */
-void encdesc_write_header(GtEncdesc *encdesc, FILE *fp);
+   Returns 0 on success, 1 on error, sets <err> accordingly. */
+int encdesc_write_header(GtEncdesc *encdesc, FILE *fp, GtError *err);
 
-/* Read header information of <encdesc> from <FILE> <fp>. */
-void encdesc_read_header(GtEncdesc *encdesc, FILE *fp);
+/* Read header information of <encdesc> from <FILE> <fp>.
+   Returns 0 on success, 1 on error, sets <err> accordingly.  */
+int encdesc_read_header(GtEncdesc *encdesc, FILE *fp, GtError *err);
 
 #endif

@@ -15,20 +15,21 @@
  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include "core/ma.h"
-#include "core/unused_api.h"
-#include "core/encseq_api.h"
-#include "core/encseq.h"
-#include "tools/gt_unique_encseq.h"
-#include "core/hashmap_api.h"
 #include "core/array_api.h"
-#include "core/logger_api.h"
+#include "core/encseq.h"
+#include "core/encseq_api.h"
+#include "core/hashmap_api.h"
+#include "core/log_api.h"
 #include "core/logger.h"
+#include "core/logger_api.h"
+#include "core/ma.h"
 #include "core/minmax.h"
+#include "core/str_api.h"
+#include "core/unused_api.h"
+#include "core/xansi_api.h"
 #include "extended/unique_encseq.h"
 #include "match/kmer2string.h"
-#include "core/str_api.h"
-#include "core/xansi_api.h"
+#include "tools/gt_unique_encseq.h"
 
 static void* gt_unique_encseq_arguments_new(void)
 {
@@ -347,21 +348,35 @@ static int gt_unique_encseq_runner(GT_UNUSED int argc,
                                          arguments,
                                          logger,
                                          err);
+  if (ueinfo == NULL) {
+    had_err = 1;
+    gt_assert(gt_error_is_set(err));
+  }
 
-  if (ueinfo != NULL ) {
+  if (!had_err) {
     had_err = gt_unique_encseq_compress_encseq(ueinfo, err);
+    gt_log_log("after compress %d", had_err);
   }
-  else {
-    had_err = -1;
-  }
+  else
+    gt_assert(gt_error_is_set(err));
+
   if (!had_err) {
     had_err = gt_unique_encseq_check_db(ueinfo->uniqueencseqdb,
                                         ueinfo->logger,
                                         err);
+    gt_log_log("after check_db %d", had_err);
   }
+  else
+    gt_assert(gt_error_is_set(err));
 
-  gt_logger_delete(logger);
-  gt_unique_encseq_kmerinfo_delete(ueinfo);
+  gt_log_log("%d", had_err);
+  if (!had_err) {
+    gt_logger_delete(logger);
+    gt_unique_encseq_kmerinfo_delete(ueinfo);
+  }
+  else
+    gt_assert(gt_error_is_set(err));
+
   return had_err;
 }
 

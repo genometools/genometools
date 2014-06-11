@@ -22,6 +22,7 @@
 #include "core/alphabet_api.h"
 #include "core/encseq_api.h"
 #include "core/error_api.h"
+#include "extended/io_function_pointers.h"
 #include "extended/multieoplist.h"
 
 /* Class <GtEditscript> stores everything from an alignment of two sequences
@@ -69,16 +70,13 @@ GtUword         gt_editscript_get_sequence(const GtEditscript *editscript,
                                            GtReadmode dir,
                                            GtUchar *buffer);
 
-/* Function Pointer to read or write to/from file. Only wrappers around fread
-   und fwrite to have similar signatures. */
-typedef void (*EditscriptIOFunc)(void *ptr,
-                                 size_t size,
-                                 size_t nmemb,
-                                 FILE *stream);
-
-/* Write or read to <fp> depending on what <io_func> is given. */
+/* Read or write to/from File, depending on <editscript>. If <NULL>, it
+   allocates memory for a new <GtEditscript> object and tries to fill it from
+   file <fp>. If not <NULL> it writs the content of <editscript> to <fp>.
+   Returns <NULL> on error, in which case <editscript> will be deleted and <err>
+   will be set. */
 GtEditscript*   gt_editscript_io(GtEditscript *editscript, FILE *fp,
-                                 EditscriptIOFunc io_func);
+                                 GtError *err);
 
 size_t          gt_editscript_size(GtEditscript *editscript);
 void            gt_editscript_delete(GtEditscript *editscript);

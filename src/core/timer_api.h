@@ -50,12 +50,12 @@ void     gt_timer_show_formatted(GtTimer *timer, const char *fmt, FILE *fp);
    current description. The timer is not stopped, but updated with <desc> to be
    the next description. */
 void     gt_timer_show_progress(GtTimer *timer, const char *desc, FILE *fp);
-/* Like <gt_timer_show_progress()>, but allows one to format the description in a
-   <printf()>-like fashion. */
+/* Like <gt_timer_show_progress()>, but allows one to format the description in
+   a <printf()>-like fashion. */
 void     gt_timer_show_progress_formatted(GtTimer *timer, FILE *fp,
                                           const char *desc, ...);
-/* Like <gt_timer_show_progress()>, but allows one to format the description in a
-   <vprintf()>-like fashion using a va_list argument <ap>. */
+/* Like <gt_timer_show_progress()>, but allows one to format the description in
+   a <vprintf()>-like fashion using a va_list argument <ap>. */
 void     gt_timer_show_progress_va(GtTimer *timer, FILE *fp, const char *desc,
                                    va_list ap);
 /* Output the overall time measured with <timer> from start to now on <fp>. */

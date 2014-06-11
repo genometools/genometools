@@ -39,7 +39,7 @@ DEFINE_HASHMAP(GtWord, li, GtUint64, ull, gt_ht_ul_elem_hash,
 
 typedef struct {
   GtHashtable *li_ull_hashmap;
-  GtWord         correction_base;
+  GtWord       correction_base;
 } EncdescHuffDist;
 
 typedef struct {
@@ -53,12 +53,12 @@ typedef struct {
   /* TODO: test if this can be a GtHashtable, too */
   GtDiscDistri *zero_count;
   char         *data;
-  GtUword delta_values_size,
+  GtUword       delta_values_size,
                 len,
                 min_len,
                 num_values_size,
                 max_len;
-  GtWord          global_delta,
+  GtWord        global_delta,
                 global_value,
                 max_delta,
                 max_value,
@@ -81,27 +81,27 @@ typedef struct {
 } DescField;
 
 struct GtEncdesc {
-  GtArrayGtUlong     num_of_fields_tab;
-  DescField         *fields;
-  GtBitInStream     *bitinstream;
-  GtSampling        *sampling;
-  GtUint64 total_num_of_chars;
-  GtUword      num_of_descs,
-                     num_of_fields,
-                     cur_desc,
-                     pagesize;
-  GtWord             start_of_samplingtab,
-                     start_of_encoding;
-  unsigned int       bits_per_field;
-  bool               num_of_fields_is_cons;
+  GtArrayGtUlong  num_of_fields_tab;
+  DescField      *fields;
+  GtBitInStream  *bitinstream;
+  GtSampling     *sampling;
+  GtUint64        total_num_of_chars;
+  GtUword         num_of_descs,
+                  num_of_fields,
+                  cur_desc,
+                  pagesize;
+  GtWord          start_of_samplingtab,
+                  start_of_encoding;
+  unsigned int    bits_per_field;
+  bool            num_of_fields_is_cons;
 };
 
 struct GtEncdescEncoder {
-  GtTimer      *timer;
-  GtEncdesc    *encdesc;
-  GtUword sampling_rate;
-  bool          regular_sampling,
-                page_sampling;
+  GtTimer   *timer;
+  GtEncdesc *encdesc;
+  GtUword    sampling_rate;
+  bool       regular_sampling,
+             page_sampling;
 };
 
 typedef struct {
@@ -114,7 +114,7 @@ GT_DECLAREARRAYSTRUCT(EncdescCode);
 typedef struct {
   GtArrayEncdescCode *codes;
   char               *descbuffer;
-  GtUword       total_bits_prepared,
+  GtUword             total_bits_prepared,
                       bits_to_write,
                       cur_field_start_pos,
                       cur_field_num,

@@ -31,13 +31,20 @@
    This class only works if <GtUword> is larger than 32 bits! */
 typedef struct GtIntset32 GtIntset32;
 
-/* map static local methods to interface */
+/* Map static local methods to interface */
 const     GtIntsetClass* gt_intset_32_class(void);
 
 /* Return a new <GtIntset> object, the implementation beeing of type
    <GtIntset32>.
    Fails if 32 >= bits for (GtUword). */
 GtIntset* gt_intset_32_new(GtUword maxelement, GtUword num_of_elems);
+
+/* Returns true, if the <type> read from a file storing a <GtIntset> indicates
+   the type of this implementation. */
+bool      gt_intset_32_file_is_type(GtUword type);
+
+/* Return a new <GtIntset> object, with data read from <fp> */
+GtIntset* gt_intset_32_new_from_file(FILE *fp, GtError *err);
 
 /* Add <elem> to <intset>. <elem> has to be larger than the previous <elem>
    added. */
@@ -46,23 +53,39 @@ void      gt_intset_32_add(GtIntset *intset, GtUword elem);
 /* Returns the element at index <idx> in the sorted set <intset>. */
 GtUword   gt_intset_32_get(GtIntset *intset, GtUword idx);
 
+/* Returns actual number of stored elements */
+GtUword   gt_intset_32_size(GtIntset *intset);
+
 /* Returns <true> if <elem> is a member of the set <intset>. */
 bool      gt_intset_32_is_member(GtIntset *intset, GtUword elem);
 
 /* Returns the number of the element in <intset> that is the smallest element
-   larger than or equal <pos> or <num_of_elems> if there is no such <element>.
-   This can be used for sets representing the separator positions in a set of
-   sequences, to determine the sequence number corresponding to any position in
-   the concatenated string of the sequence set.
-   Fails for <pos> > <maxelement>! */
-GtUword   gt_intset_32_get_idx_smallest_geq(GtIntset *intset, GtUword pos);
+   larger than or equal <value> or <num_of_elems> if there is no such <element>.
+   Fails for <value> > <maxelement>! */
+GtUword   gt_intset_32_get_idx_smallest_geq(GtIntset *intset, GtUword value);
 
-/* Returns the size of an intset with given number of elements
-   <num_of_elems> and maximum value <maxelement>.
-   Fails if 32 >= bits for (GtUword). */
-size_t    gt_intset_32_size(GtUword maxelement, GtUword num_of_elems);
+/* Write <intset> to file <fp>. Returns <NULL> on error (<intset> will be
+   freed). */
+GtIntset* gt_intset_32_write(GtIntset *intset, FILE *fp, GtError *err);
 
+/* IO-function to be used if <intset> is part of a larger structure. If <intset>
+   is NULL, will attempt to allocate memory and fill a new <GtIntset32>
+   object by reading from <fp>. If <intset> is not NULL, will attempt to write
+   its content to <fp>.
+   Returns <NULL> on error (<intset> will be freed) and sets <err>. */
+GtIntset* gt_intset_32_io(GtIntset *intset, FILE *fp, GtError *err);
+
+/* Deletes <intset> and frees all associated space. */
 void      gt_intset_32_delete(GtIntset *intset);
 
-int       gt_intset_32_unit_test(GtError *err);
+/* Returns the size of the representation of an intset with given number of
+   elements <num_of_elems> and maximum value <maxelement>, in bytes. This does
+   not include the size of the structure.
+   Fails if 32 >= bits for (GtUword). */
+size_t    gt_intset_32_size_of_rep(GtUword maxelement, GtUword num_of_elems);
+
+/* Returns the size in bytes of the <GtIntset32>-structure. */
+size_t    gt_intset_32_size_of_struct(void);
+
+int gt_intset_32_unit_test(GtError *err);
 #endif

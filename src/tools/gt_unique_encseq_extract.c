@@ -168,9 +168,10 @@ static int gt_unique_encseq_extract_runner(GT_UNUSED int argc,
   gt_assert(arguments);
 
   uedb = gt_unique_encseq_uedb_read(argv[parsed_args], err);
-  if (uedb == NULL)
+  if (uedb == NULL) {
     had_err = -1;
-
+    gt_assert(gt_error_is_set(err));
+  }
   if (!had_err) {
     el = gt_encseq_loader_new();
     unique_encseq = gt_encseq_loader_load(el, argv[parsed_args], err);

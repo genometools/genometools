@@ -43,24 +43,28 @@ void              gt_encdesc_encoder_set_timer(GtEncdescEncoder *ee,
 /* Returns the <GtTimer> set in <ee>, might be NULL. */
 GtTimer*          gt_encdesc_encoder_get_timer(GtEncdescEncoder *ee);
 
-/* Set the sampling method of <ee> to either __none__, __page__wise or
-   __regular__ sampling. Sampling increases encoded size and decreases time for
-   random access. */
+/* Set the sampling method of <ee> to __none__. Sampling increases encoded size
+   and decreases time for random access. */
 void              gt_encdesc_encoder_set_sampling_none(GtEncdescEncoder *ee);
+/* Set the sampling method of <ee> to either __page__wise sampling. Sampling
+   increases encoded size and decreases time for random access. */
 void              gt_encdesc_encoder_set_sampling_page(GtEncdescEncoder *ee);
+/* Set the sampling method of <ee> to either __regular__ sampling. Sampling
+   increases encoded size and decreases time for random access. */
 void              gt_encdesc_encoder_set_sampling_regular(GtEncdescEncoder *ee);
 
-/* Returns true if __page__wise/__regular__ sampling is set in <ee>. */
+/* Returns true if __page__wise sampling is set in <ee>. */
 bool              gt_encdesc_encoder_sampling_is_page(GtEncdescEncoder *ee);
+/* Returns true if __regular__ sampling is set in <ee>. */
 bool              gt_encdesc_encoder_sampling_is_regular(GtEncdescEncoder *ee);
 
 /* Sets the sampling rate */
 void              gt_encdesc_encoder_set_sampling_rate(GtEncdescEncoder *ee,
-                                                   GtUword sampling_rate);
+                                                       GtUword sampling_rate);
 
 /* Returns the samplingrate set in <ee>. Returns GT_UNDEF_UWORD if sampling is
    disabled. */
-GtUword     gt_encdesc_encoder_get_sampling_rate(GtEncdescEncoder *ee);
+GtUword           gt_encdesc_encoder_get_sampling_rate(GtEncdescEncoder *ee);
 
 /* Uses the settings in <ee> to encode the strings provided by <cstr_iterator>
    and writes them to a file with prefix <name>. Returns 0 on success, otherwise
@@ -74,7 +78,7 @@ int               gt_encdesc_encoder_encode(GtEncdescEncoder *ee,
 GtEncdesc*        gt_encdesc_load(const char *name, GtError *err);
 
 /* Returns the number of encoded headers in <encdesc> */
-GtUword     gt_encdesc_num_of_descriptions(GtEncdesc *encdesc);
+GtUword           gt_encdesc_num_of_descriptions(GtEncdesc *encdesc);
 
 /* Decodes description with number <num> and writes it to <desc>, which will be
    reset before writing to it. Returns 1 on success, 0 on EOF and -1 on

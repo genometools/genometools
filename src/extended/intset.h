@@ -23,23 +23,36 @@
 
 #include "core/error_api.h"
 #include "core/types_api.h"
+#include "extended/io_function_pointers.h"
 
-/* The GtIntset interface used to store a fixed set of sorted 64bit integers
+/* The <GtIntset> interface used to store a fixed set of sorted 64bit integers
    with reduced space. (Mathematical set, no duplicates allowed) */
 typedef struct GtIntset GtIntset;
 
+/* Return <GtIntset> of optimal size, choosing one of the available
+   implementations of this class.
+   <maxelement> has to be larger or equal <num_of_elems>. */
+GtIntset* gt_intset_best_new(GtUword maxelement, GtUword num_of_elems);
+
+/* Allocates new memory for <GtIntset> and fills it with data read from file
+   <fp>. Exits on error reading the file. */
+GtIntset* gt_intset_new_from_file(FILE *fp, GtError *err);
+
 /* Increases the reference count of the <GtIntset>. */
-GtIntset*    gt_intset_ref(GtIntset *intset);
+GtIntset* gt_intset_ref(GtIntset *intset);
 
 /* Add <elem> to <intset>, <elem> has to be larger than the previous added
    element. */
-void         gt_intset_add(GtIntset *intset, GtUword elem);
+void      gt_intset_add(GtIntset *intset, GtUword elem);
 
 /* Returns the element at index <idx> in the sorted set <intset>. */
-GtUword      gt_intset_get(GtIntset *intset, GtUword idx);
+GtUword   gt_intset_get(GtIntset *intset, GtUword idx);
+
+/* Returns actual number of stored elements */
+GtUword   gt_intset_size(GtIntset *intset);
 
 /* Returns true if <elem> is a member of set <intset>. */
-bool         gt_intset_is_member(GtIntset *intset, GtUword elem);
+bool      gt_intset_is_member(GtIntset *intset, GtUword elem);
 
 /* Returns the number of the element in <intset> that is the smallest element
    larger than or equal <pos> or <num_of_elems> if there is no such <element>.
@@ -47,27 +60,31 @@ bool         gt_intset_is_member(GtIntset *intset, GtUword elem);
    sequences, to determine the sequence number corresponding to any position in
    the concatenated string of the sequence set.
    Fails for <pos> > <maxelement>! */
-GtUword      gt_intset_get_idx_smaller_geq(GtIntset *intset, GtUword pos);
+GtUword   gt_intset_get_idx_smaller_geq(GtIntset *intset, GtUword pos);
+
+/* Returns the size in bytes of the <GtIntset>-structure. */
+size_t    gt_intset_size_of_struct(GtIntset *intset);
+
+/* Returns the size of the representation of an <intset> with its given number
+   of elements <num_of_elems> and maximum value <maxelement>, in bytes. This
+   does not include the size of the structure. */
+size_t    gt_intset_size_of_rep(GtIntset *intset);
+
+/* Write <intset> to file <fp>. Fails with exit on IO-error. Returns NULL if
+   data error occures and writes it to <err>, <intset> will be deleted at that
+   point. */
+GtIntset* gt_intset_write(GtIntset *intset, FILE *fp, GtError *err);
+
+/* Read or write to/from File, depending on <intset>. If <NULL>, it allocates
+   memory for a new <GtIntset> object and tries to fill it from file <fp>.
+   If not <NULL> it writs the content of <intset> to <fp>.
+   Returns <NULL> on error, in which case <intset> will be deleted and <err>
+   will be set. */
+GtIntset* gt_intset_io(GtIntset *intset, FILE *fp, GtError *err);
 
 /* Free the memory of <intset>. */
-void         gt_intset_delete(GtIntset *intset);
+void      gt_intset_delete(GtIntset *intset);
 
-/* Return <GtIntset> of optimal size, choosing one of the available
-   implementations of this class. */
-GtIntset    *gt_intset_best_new(GtUword maxelement, GtUword num_of_elems);
-
-/* Function for unit tests within implementations of this class. Fails if
-   <gt_intset_is_member()> called with any number between and including <start>
-   and <end> returns true.
-   */
-int gt_intset_unit_test_notinset(GtIntset *intset, GtUword start,
-                                 GtUword end, GtError *err);
-
-/* Function for unit tests within implementations of this class. Fails if
-   <gt_intset_get_idx_smaller_geq()> called with any number between and
-   including <start> and <end> returns any number different than <num>. */
-int gt_intset_unit_test_check_seqnum(GtIntset *intset, GtUword start,
-                                     GtUword end, GtUword num, GtError *err);
-
-int gt_intset_unit_test(GtError *err);
+/* Runs unit tests for all implementations of the <GtIntset> class. */
+int       gt_intset_unit_test(GtError *err);
 #endif

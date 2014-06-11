@@ -20,8 +20,10 @@
 #define MULTIEOPLIST_H
 
 #include "core/array.h"
-#include "core/types_api.h"
 #include "core/encseq_api.h"
+#include "core/error_api.h"
+#include "core/types_api.h"
+#include "extended/io_function_pointers.h"
 
 /* Class <GtMultieoplist> stores a list of edit operations that define an
    alignment between two sequences. */
@@ -49,7 +51,7 @@ typedef struct {
 GtMultieoplist* gt_multieoplist_new(void);
 
 /* Returns new <GtMultieoplist> object of size size*/
-GtMultieoplist *gt_multieoplist_new_with_size(GtUword size);
+GtMultieoplist* gt_multieoplist_new_with_size(GtUword size);
 
 /* Returns reference to <multieops> */
 GtMultieoplist* gt_multieoplist_ref(GtMultieoplist *multieops);
@@ -137,18 +139,12 @@ void            gt_multieoplist_combine(GtMultieoplist *multieops,
                              GtMultieoplist *multieops_to_add,
                              bool forward);
 
-/* Function type, used for reading and writing <GtMultieoplist> to/from a file,
-   similar to fread() and fwrite(). Should contain the errorhandling for file IO
-   errors. */
-typedef void (*MeoplistIOFunc)(void *ptr,
-                               size_t size,
-                               size_t nmemb,
-                               FILE *stream);
-
-/* Read or write to/from File, depending on <MeoplistIOFunc> it writes to <fp>
-   or reads from it, in which case <multieops> can be NULL. */
-GtMultieoplist* gt_meoplist_io(GtMultieoplist *multieops,
-                               MeoplistIOFunc io_func,
-                               FILE *fp);
+/* Read or write to/from File, depending on <multieops>. If <NULL>, it allocates
+   memory for a new <GtMultieoplist> object and tries to fill it from file <fp>.
+   If not <NULL> it writs the content of <multieops> to <fp>.
+   Returns <NULL> on error, in which case <multieops> will be deleted and <err>
+   will be set. */
+GtMultieoplist* gt_meoplist_io(GtMultieoplist *multieops, FILE *fp,
+                               GtError *err);
 
 #endif
