@@ -226,7 +226,7 @@ GtRegionMapping* gt_seqid2file_region_mapping_new(GtSeqid2FileInfo *s2fi,
   } else {
     rm = gt_region_mapping_new_mapping(s2fi->region_mapping, err);
   }
-  if (s2fi->matchdescstart)
+  if (rm && s2fi->matchdescstart)
     gt_region_mapping_enable_match_desc_start(rm);
   gt_assert(rm || gt_error_is_set(err));
   return rm;
