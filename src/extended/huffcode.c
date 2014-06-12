@@ -792,7 +792,7 @@ int test_mem(GtError *err)
                       step_size = (GtUword) (10 + 5 * gt_rand_0_to_1());
   GtUword range = 0,
                 idx, idx_j;
-  uint64_t total_bits;
+  uint64_t total_bits = 0;
   GtUint64 *distribution = gt_malloc(sizeof (*distribution) *
                                      dist_size);
   GtBitsequence buffer = 0,
