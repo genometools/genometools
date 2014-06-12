@@ -10,7 +10,13 @@ Steps for preparing a new GenomeTools release
      $ make 64bit=yes amalgamation=yes cairo=no ... (depending on platform)
 
    Windows Cygwin builds may need 'errorcheck=no' because of some errors related
-   to -fPIC.
+   to -fPIC. All other distributions can best be build on an Ubuntu 64-bit
+   machine with:
+
+     $ scripts/build_dists.sh
+
+   Make sure you have the necessary cross-compiler and packages installed (see
+   the script itself for pointers).
 
 3. update website
 
