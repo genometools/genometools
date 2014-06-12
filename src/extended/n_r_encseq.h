@@ -43,7 +43,7 @@ GtNREncseq* gt_n_r_encseq_new_from_file(const char *basename_nre,
 
 /* Write <nre> to File <fp>, fails hard on io-error, returns error value and
    sets <err> accordingly on data errors. */
-int         gt_n_r_encseq_write_nre(GtNREncseq *nre, FILE* fp, GtError *err);
+int         gt_n_r_encseq_write(GtNREncseq *nre, FILE* fp, GtError *err);
 
 /* Prints statistical info of <n_r_encseq> to stdout.
    TODO: refine this, and maybe split it up to get the different values

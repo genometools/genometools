@@ -377,7 +377,7 @@ static int gt_n_r_encseq_io(GtNREncseq *nre,
   return had_err;
 }
 
-int gt_n_r_encseq_write_nre(GtNREncseq* nre, FILE* fp, GtError *err)
+int gt_n_r_encseq_write(GtNREncseq* nre, FILE* fp, GtError *err)
 {
   gt_assert(nre != NULL && fp != NULL);
   return gt_n_r_encseq_io(nre, fp, gt_io_error_fwrite, err);
@@ -1353,7 +1353,7 @@ int gt_n_r_encseq_compressor_compress(GtNREncseqCompressor *n_r_e_compressor,
       had_err = -1;
   }
   if (!had_err) {
-    had_err = gt_n_r_encseq_write_nre(n_r_e_compressor->nre, fp, err);
+    had_err = gt_n_r_encseq_write(n_r_e_compressor->nre, fp, err);
     gt_fa_xfclose(fp);
     fp = NULL;
   }
