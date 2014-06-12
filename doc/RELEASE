@@ -1,0 +1,40 @@
+Steps for preparing a new GenomeTools release
+---------------------------------------------
+
+1. make sure the generated documentation is up-to-date:
+
+     $  make docs
+
+2. build the release binaries
+
+     $ make 64bit=yes amalgamation=yes cairo=no ... (depending on platform)
+
+   Windows Cygwin builds may need 'errorcheck=no' because of some errors related
+   to -fPIC.
+
+3. update website
+
+     $ make installwww
+
+    A user account on the genometools.org server (anaheim) is required, as well
+    as permissions to write to the web server directory. Adjust the Makefile
+    settings SERVER (for user account to use in the 'installwww' target)
+    and WWWBASEDIR if required. This step needs rsync to work.
+
+4. tag release
+
+     $ make release
+
+   Creates a new version tag and pushes them to the git repositories.
+   Also builds source distribution and pushes it to the genometools.org server.
+   Adjust the Makefile settings SERVER and WWWBASEDIR if required.
+
+5. bump version
+
+   Increase version number in VERSION file. Also, create a new CHANGELOG
+   entry with the new version number and commit the change with the
+   message 'version bump'.
+
+6. write email to gt-users mailing list (gt-users@genometools.org)
+
+   There is a template in the doc/ subdirectory.
