@@ -1,3 +1,26 @@
+changes in version 1.5.3 (2014-06-13)
+
+- many small bugfixes and cleanups
+- Lua Range bindings extended
+= Lua bindings for all node types added
+- new option `-matchdescstart' to reduce ambiguity when matching seqids
+- mtrying to match ambiguous seqids is an error now
+- escaping of regex-relevant characters in `-matchdesc' and `-matchdescstart'
+- improved LTRharvest X-drop code to fix a common bug (#323 and others)
+- Ruby bindings extended and stability improved
+- flanking whitespace is now no longer considered as part of a seqid
+- improved support for platforms where char is unsigned
+- shared library only exports symbols in _api.h headers (only on platforms with
+  GNU ld)
+- added `gt speck' tool for specification-based annotation checking (WIP)
+- added `gt fastq_sample' tool to print samples by random choice from FastQ
+- tidy mode for GTF parser added
+- Improved robustness of GTF parser
+- GtIntset classes and GtNREncseq added
+- for more details see the GitHub issue tracker
+  (https://github.com/genometools/genometools/issues)
+
+
 changes in version 1.5.2 (2014-02-18)
 
 - many bugfixes and cleanups
