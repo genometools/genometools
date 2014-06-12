@@ -1,0 +1,25 @@
+Dear GenomeTools user,
+
+GenomeTools version <X.X.X> has been released!
+
+You can download the source distribution here:
+http://genometools.org/pub/genometools-<X.X.X>.tar.gz
+
+The Linux, Mac OS X and Windows binary releases can be found here:
+http://genometools.org/pub/binary_distributions/
+
+The Debian packages will be updated soon.
+
+<short summary of the highlight changes>
+
+See the changelog below for more detailed information.
+Please report any bugs or other requests regarding the new version using our
+GitHub issue tracker at https://github.com/genometools/genometools/issues.
+Your feedback is highly appreciated!
+
+GenomeTools <X.X.X> Changelog:
+
+  <paste CHANGELOG entry for the new version here>
+
+Best regards,
+<sender>
