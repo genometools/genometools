@@ -161,6 +161,7 @@ end
 require 'gt_bed_to_gff3_include'
 require 'gt_cds_include'
 require 'gt_chseqids_include'
+require 'gt_condenser_include'
 require 'gt_consensus_sa_include'
 require 'gt_csa_include'
 require 'gt_csr_include.rb'
@@ -220,7 +221,6 @@ require 'gt_splitfasta_include'
 require 'gt_stat_include'
 require 'gt_tirvish_include'
 require 'gt_uniq_include'
-require 'gt_unique_encseq_include'
 if not $arguments["nocairo"] then
   require 'gt_sketch_include'
 end
