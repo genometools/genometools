@@ -1855,36 +1855,36 @@ Callback function called during iteration over each item of the
 <hr>
 <a name="gt_disc_distri_new"></a>
 
-<code>GtDiscDistri*       gt_disc_distri_new(void)</code>
+<code>GtDiscDistri*  gt_disc_distri_new(void)</code>
 <p>
 Creates a new, empty <code>GtDiscDistri</code>.
 </p>
 <hr>
 <a name="gt_disc_distri_add"></a>
 
-<code>void                gt_disc_distri_add(GtDiscDistri *d, GtUword key)</code>
+<code>void           gt_disc_distri_add(GtDiscDistri *d, GtUword key)</code>
 <p>
 Adds one count of <code>key</code> to <code>d</code>.
 </p>
 <hr>
 <a name="gt_disc_distri_add_multi"></a>
 
-<code>void                gt_disc_distri_add_multi(GtDiscDistri *d, GtUword key,
-                                            GtUint64 occurrences)</code>
+<code>void           gt_disc_distri_add_multi(GtDiscDistri *d, GtUword key,
+                                       GtUint64 occurrences)</code>
 <p>
 Adds <code>occurrences</code> counts of <code>key</code> to <code>d</code>.
 </p>
 <hr>
 <a name="gt_disc_distri_get"></a>
 
-<code>GtUint64  gt_disc_distri_get(const GtDiscDistri *d, GtUword key)</code>
+<code>GtUint64       gt_disc_distri_get(const GtDiscDistri *d, GtUword key)</code>
 <p>
 Return the current count of <code>key</code> as stored in <code>d</code>.
 </p>
 <hr>
 <a name="gt_disc_distri_show"></a>
 
-<code>void                gt_disc_distri_show(const GtDiscDistri *d, GtFile *outfp)</code>
+<code>void           gt_disc_distri_show(const GtDiscDistri *d, GtFile *outfp)</code>
 <p>
 Prints the current state of <code>d</code> to <code>outfile</code>. If <code>outfp</code> is NULL,
    stdout will be used for output.
@@ -1892,9 +1892,9 @@ Prints the current state of <code>d</code> to <code>outfile</code>. If <code>out
 <hr>
 <a name="gt_disc_distri_foreach"></a>
 
-<code>void                gt_disc_distri_foreach(const GtDiscDistri *d,
-                                          GtDiscDistriIterFunc func,
-                                          void *data)</code>
+<code>void           gt_disc_distri_foreach(const GtDiscDistri *d,
+                                     GtDiscDistriIterFunc func,
+                                     void *data)</code>
 <p>
 Iterate over all non-empty entries in <code>d</code>, calling <code>func</code> for each one,
    from the smallest to the largest key. The <code>data</code> pointer can be used to pass
@@ -1903,11 +1903,9 @@ Iterate over all non-empty entries in <code>d</code>, calling <code>func</code> 
 <hr>
 <a name="gt_disc_distri_foreach_in_reverse_order"></a>
 
-<code>void                gt_disc_distri_foreach_in_reverse_order(const
-                                                                GtDiscDistri *d,
-                                                           GtDiscDistriIterFunc
-                                                                           func,
-                                                           void *data)</code>
+<code>void           gt_disc_distri_foreach_in_reverse_order(const GtDiscDistri *d,
+                                                      GtDiscDistriIterFunc func,
+                                                      void *data)</code>
 <p>
 Same as foreach, but from the longest to the smallest key.
 </p>
@@ -8443,8 +8441,8 @@ Output the current state of <code>timer</code> on <code>fp</code> since the last
 <code>void      gt_timer_show_progress_formatted(GtTimer *timer, FILE *fp,
                                           const char *desc, ...)</code>
 <p>
-Like <code>gt_timer_show_progress()</code>, but allows one to format the description in a
-   <code>printf()</code>-like fashion.
+Like <code>gt_timer_show_progress()</code>, but allows one to format the description in
+   a <code>printf()</code>-like fashion.
 </p>
 <hr>
 <a name="gt_timer_show_progress_va"></a>
@@ -8452,8 +8450,8 @@ Like <code>gt_timer_show_progress()</code>, but allows one to format the descrip
 <code>void      gt_timer_show_progress_va(GtTimer *timer, FILE *fp, const char *desc,
                                    va_list ap)</code>
 <p>
-Like <code>gt_timer_show_progress()</code>, but allows one to format the description in a
-   <code>vprintf()</code>-like fashion using a va_list argument <code>ap</code>.
+Like <code>gt_timer_show_progress()</code>, but allows one to format the description in
+   a <code>vprintf()</code>-like fashion using a va_list argument <code>ap</code>.
 </p>
 <hr>
 <a name="gt_timer_show_progress_final"></a>
@@ -11934,7 +11932,7 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
 <div id="footer">
 Copyright &copy; 2008-2013
 The <i>GenomeTools</i> authors.
-Last update: 2014-06-08
+Last update: 2014-06-12
 </div>
 </div>
 <!-- Piwik -->
