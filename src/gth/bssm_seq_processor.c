@@ -1000,7 +1000,7 @@ static int find_false_sites(GtArray *false_don_0_gt, GtArray *false_don_0_gc,
   GtUword i, j, len;
   bool don_underflow, acc_underflow;
   const char *cseq;
-  GtRange don_range, acc_range;
+  GtRange don_range = {0}, acc_range = {0};
   BSSMSeq *intron;
   GtStr *seq;
   int had_err = 0;
