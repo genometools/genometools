@@ -2,7 +2,7 @@ changes in version 1.5.3 (2014-06-13)
 
 - many small bugfixes and cleanups
 - Lua Range bindings extended
-= Lua bindings for all node types added
+- Lua bindings for all node types added
 - new option `-matchdescstart' to reduce ambiguity when matching seqids
 - mtrying to match ambiguous seqids is an error now
 - escaping of regex-relevant characters in `-matchdesc' and `-matchdescstart'
