@@ -363,7 +363,7 @@ static int gt_sketch_runner(int argc, const char **argv, int parsed_args,
     had_err = -1;
   }
   else if (!had_err)
-    seqid = gt_str_get(arguments->seqid);
+    seqid = gt_cstr_dup(gt_str_get(arguments->seqid));
 
   results = gt_array_new(sizeof (GtGenomeNode*));
   if (!had_err) {
