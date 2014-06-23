@@ -1110,7 +1110,9 @@ test: all
           $(TEST_KEYWORDS)
 
 clean:
-	rm -rf obj lib
+	rm -rf lib
+	find obj -name '*.o' |xargs rm -f
+	rm -f obj/amalgamation.c
 	rm -rf testsuite/stest_testsuite testsuite/stest_stest_tests
 	$(MAKE) -s -C $(CURDIR)/doc/devguide clean
 	$(MAKE) -s -C $(CURDIR)/doc/manuals clean
@@ -1138,7 +1140,7 @@ gtkviewer:
   -lcairo `pkg-config --silence-errors --cflags --libs gtk+-2.0` \
   -lgenometools
 
-cleanup: clean cleangenerated cleanindexes
-	rm -rf bin
+cleanup: clean cleangenerated cleanindexes splintclean headerclean sbclean
+	rm -rf bin obj
 	rm -rf gtpython/build
 	$(MAKE) -s -C $(CURDIR)/doc/manuals cleanup
