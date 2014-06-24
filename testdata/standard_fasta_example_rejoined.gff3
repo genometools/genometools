@@ -1,0 +1,18 @@
+##gff-version   3
+##sequence-region   ctg123 1 1497228
+ctg123	.	gene	1000	9000	.	+	.	ID=gene1;Name=EDEN
+ctg123	.	TF_binding_site	1000	1012	.	+	.	Parent=gene1
+ctg123	.	mRNA	1050	9000	.	+	.	ID=mRNA1;Parent=gene1;Name=EDEN.1
+ctg123	.	five_prime_UTR	1050	1200	.	+	.	Parent=mRNA1
+ctg123	.	CDS	1201	1500	.	+	0	Parent=mRNA1
+ctg123	.	CDS	3000	3902	.	+	0	Parent=mRNA1
+ctg123	.	CDS	5000	5500	.	+	0	Parent=mRNA1
+ctg123	.	CDS	7000	7600	.	+	0	Parent=mRNA1
+ctg123	.	five_prime_UTR	7601	9000	.	+	.	Parent=mRNA1
+###
+ctg123	.	cDNA_match	1050	1500	5.8e-42	+	.	Target=cdna0123 12 462
+ctg123	.	cDNA_match	5000	5500	8.1e-43	+	.	Target=cdna0123 463 963
+ctg123	.	cDNA_match	7000	9000	1.4e-40	+	.	Target=cdna0123 964 2964
+##FASTA
+>ctg123
+cttctgggcgtacccgattctcggagaacttgccgcaccattccgccttgtgttcattgctgcctgcatgttcattgtctacctcggctacgtgtggctatctttcctcggtgccctcgtgcacggagtcgagaaaccaaagaacaaaaaaagaaattaaaatatttattttgctgtggtttttgatgtgtgttttttataatgatttttgatgtgaccaattgtacttttcctttaaatgaaatgtaatcttaaatgtatttccgacgaattcgaggcctgaaaagtgtgacgccattcgtatttgatttgggtttactatcgaataatgagaattttcaggcttaggcttaggcttaggcttaggcttaggcttaggcttaggcttaggcttaggcttaggcttaggcttaggcttaggcttaggcttaggcttaggcttaggcttagaatctagctagctatccgaaattcgaggcctgaaaagtgtgacgccattc
