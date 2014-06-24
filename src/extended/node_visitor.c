@@ -94,8 +94,10 @@ int gt_node_visitor_visit_feature_node(GtNodeVisitor *nv, GtFeatureNode *fn,
                                        GtError *err)
 {
   gt_error_check(err);
-  gt_assert(nv && fn && nv->c_class && nv->c_class->feature_node);
-  return nv->c_class->feature_node(nv, fn, err);
+  gt_assert(nv && fn && nv->c_class);
+  if (nv->c_class->feature_node)
+    return nv->c_class->feature_node(nv, fn, err);
+  return 0;
 }
 
 int gt_node_visitor_visit_meta_node(GtNodeVisitor *nv, GtMetaNode *mn,
