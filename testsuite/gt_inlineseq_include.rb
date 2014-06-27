@@ -31,6 +31,15 @@ Test do
   run "diff #{last_stdout} #{$testdata}standard_fasta_example_rejoined.gff3"
 end
 
+Name "gt inlineseq_add (MD5)"
+Keywords "gt_inlineseq_add gt_inlineseq"
+Test do
+  run "#{$bin}gt gff3 -sort -tidy #{$testdata}/standard_fasta_example.gff3 > in.gff3"
+  run "#{$bin}gt inlineseq_split -seqfile tmp.fas -gff3file tmp.gff3 < in.gff3"
+  run "#{$bin}gt id_to_md5 -seqfile tmp.fas -matchdesc in.gff3 > md5.gff3"
+  run_test "#{$bin}gt inlineseq_add -seqfile tmp.fas md5.gff3"
+end
+
 Name "gt inlineseq_add (missing sequence)"
 Keywords "gt_inlineseq_add gt_inlineseq"
 Test do
