@@ -44,7 +44,7 @@ static void sequence_node_out_visitor_free(GtNodeVisitor *nv)
 
 static int sequence_node_out_visitor_sequence_node(GtNodeVisitor *nv,
                                                    GtSequenceNode *sn,
-                                                   GtError *err)
+                                                   GT_UNUSED GtError *err)
 {
   GtSequenceNodeOutVisitor *v = sequence_node_out_visitor_cast(nv);
   GT_UNUSED GtFeatureNode *node;
@@ -67,7 +67,7 @@ static int sequence_node_out_visitor_sequence_node(GtNodeVisitor *nv,
 
 static int sequence_node_out_visitor_comment_node(GtNodeVisitor *nv,
                                                    GtCommentNode *cn,
-                                                   GtError *err)
+                                                   GT_UNUSED GtError *err)
 {
   GtSequenceNodeOutVisitor *v = sequence_node_out_visitor_cast(nv);
   int had_err = 0;
@@ -81,7 +81,7 @@ static int sequence_node_out_visitor_comment_node(GtNodeVisitor *nv,
 
 static int sequence_node_out_visitor_region_node(GtNodeVisitor *nv,
                                                  GtRegionNode *rn,
-                                                 GtError *err)
+                                                 GT_UNUSED GtError *err)
 {
   GtSequenceNodeOutVisitor *v = sequence_node_out_visitor_cast(nv);
   int had_err = 0;
@@ -95,7 +95,7 @@ static int sequence_node_out_visitor_region_node(GtNodeVisitor *nv,
 
 static int sequence_node_out_visitor_eof_node(GtNodeVisitor *nv,
                                               GtEOFNode *en,
-                                              GtError *err)
+                                              GT_UNUSED GtError *err)
 {
   GtSequenceNodeOutVisitor *v = sequence_node_out_visitor_cast(nv);
   int had_err = 0;
@@ -109,7 +109,7 @@ static int sequence_node_out_visitor_eof_node(GtNodeVisitor *nv,
 
 static int sequence_node_out_visitor_feature_node(GtNodeVisitor *nv,
                                                   GtFeatureNode *fn,
-                                                  GtError *err)
+                                                  GT_UNUSED GtError *err)
 {
   GtSequenceNodeOutVisitor *v = sequence_node_out_visitor_cast(nv);
   int had_err = 0;
@@ -123,7 +123,7 @@ static int sequence_node_out_visitor_feature_node(GtNodeVisitor *nv,
 
 static int sequence_node_out_visitor_meta_node(GtNodeVisitor *nv,
                                                GtMetaNode *mn,
-                                               GtError *err)
+                                               GT_UNUSED GtError *err)
 {
   GtSequenceNodeOutVisitor *v = sequence_node_out_visitor_cast(nv);
   int had_err = 0;
