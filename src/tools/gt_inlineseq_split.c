@@ -59,8 +59,8 @@ static GtOptionParser* gt_inlineseq_split_option_parser_new(void *tool_arguments
 
   /* init */
   op = gt_option_parser_new("(-seqfile <seqfile> | -gff3file <gff3file>) "
-                            "[annotation]",
-                            "Split annotations with inline sequences into "
+                            "[GFF3_file]",
+                            "Split GFF3 annotations with inline sequences into "
                             "separate files.");
 
 
