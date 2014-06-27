@@ -1,0 +1,26 @@
+##gff-version   3
+##sequence-region   ctg123 1 1497228
+ctg123	.	gene	1000	9000	.	+	.	ID=gene1;Name=EDEN
+ctg123	.	TF_binding_site	1000	1012	.	+	.	Parent=gene1
+ctg123	.	mRNA	1050	9000	.	+	.	ID=mRNA1;Parent=gene1;Name=EDEN.1
+ctg123	.	CDS	1201	1500	.	+	0	ID=CDS1;Parent=mRNA1;Name=edenprotein.1
+ctg123	.	CDS	3000	3902	.	+	0	ID=CDS1;Parent=mRNA1;Name=edenprotein.1
+ctg123	.	CDS	5000	5500	.	+	0	ID=CDS1;Parent=mRNA1;Name=edenprotein.1
+ctg123	.	CDS	7000	7600	.	+	0	ID=CDS1;Parent=mRNA1;Name=edenprotein.1
+ctg123	.	mRNA	1050	9000	.	+	.	ID=mRNA2;Parent=gene1;Name=EDEN.2
+ctg123	.	exon	1050	1500	.	+	.	Parent=mRNA1,mRNA2
+ctg123	.	CDS	1201	1500	.	+	0	ID=CDS2;Parent=mRNA2;Name=edenprotein.2
+ctg123	.	CDS	5000	5500	.	+	0	ID=CDS2;Parent=mRNA2;Name=edenprotein.2
+ctg123	.	CDS	7000	7600	.	+	0	ID=CDS2;Parent=mRNA2;Name=edenprotein.2
+ctg123	.	mRNA	1300	9000	.	+	.	ID=mRNA3;Parent=gene1;Name=EDEN.3
+ctg123	.	exon	1300	1500	.	+	.	Parent=mRNA3
+ctg123	.	exon	3000	3902	.	+	.	Parent=mRNA1,mRNA3
+ctg123	.	CDS	3301	3902	.	+	0	ID=CDS3;Parent=mRNA3;Name=edenprotein.3
+ctg123	.	CDS	3391	3902	.	+	0	ID=CDS4;Parent=mRNA3;Name=edenprotein.4
+ctg123	.	exon	5000	5500	.	+	.	Parent=mRNA1,mRNA2,mRNA3
+ctg123	.	CDS	5000	5500	.	+	1	ID=CDS3;Parent=mRNA3;Name=edenprotein.3
+ctg123	.	CDS	5000	5500	.	+	1	ID=CDS4;Parent=mRNA3;Name=edenprotein.4
+ctg123	.	CDS	7000	7600	.	+	1	ID=CDS3;Parent=mRNA3;Name=edenprotein.3
+ctg123	.	CDS	7000	7600	.	+	1	ID=CDS4;Parent=mRNA3;Name=edenprotein.4
+ctg123	.	exon	7000	9000	.	+	.	Parent=mRNA1,mRNA2,mRNA3
+###

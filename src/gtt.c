@@ -118,6 +118,8 @@
 #include "tools/gt_gtf_to_gff3.h"
 #include "tools/gt_hop.h"
 #include "tools/gt_id_to_md5.h"
+#include "tools/gt_inlineseq_split.h"
+#include "tools/gt_inlineseq_add.h"
 #include "tools/gt_interfeat.h"
 #include "tools/gt_loccheck.h"
 #include "tools/gt_matchtool.h"
@@ -212,6 +214,8 @@ GtToolbox* gtt_tools(void)
   gt_toolbox_add_tool(tools, "gtf_to_gff3", gt_gtf_to_gff3());
   gt_toolbox_add_tool(tools, "hop", gt_hop());
   gt_toolbox_add_tool(tools, "id_to_md5", gt_id_to_md5());
+  gt_toolbox_add_tool(tools, "inlineseq_split", gt_inlineseq_split());
+  gt_toolbox_add_tool(tools, "inlineseq_add", gt_inlineseq_add());
   gt_toolbox_add_tool(tools, "interfeat", gt_interfeat());
   gt_toolbox_add_tool(tools, "loccheck", gt_loccheck());
   gt_toolbox_add_tool(tools, "ltrclustering", gt_ltrclustering());
