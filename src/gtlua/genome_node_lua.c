@@ -460,7 +460,7 @@ static int feature_node_lua_extract_and_translate_sequence(lua_State *L)
   region_mapping = check_region_mapping(L, 3);
   err = gt_error_new();
   sequence = gt_str_new();
-  if (gt_extract_and_translate_feature_sequence(fn, gt_symbol(type),
+  if (gt_extract_and_translate_feature_sequence(fn, gt_symbol(type), true,
                                                 *region_mapping, NULL,
                                                 sequence, NULL, NULL, err)) {
     gt_str_delete(sequence);

@@ -110,14 +110,15 @@ static int extract_feature_visitor_feature_node(GtNodeVisitor *nv,
       gt_str_array_reset(target_ids);
     if (efv->translate) {
       if (gt_extract_and_translate_feature_sequence(child,
-                                                    efv->type,
+                                                    efv->type, efv->join,
                                                     efv->region_mapping, NULL,
                                                     sequence, NULL, NULL,
                                                     err)) {
         had_err = -1;
       }
     } else {
-      if (gt_extract_feature_sequence(sequence, (GtGenomeNode*) child, efv->type,
+      if (gt_extract_feature_sequence(sequence, (GtGenomeNode*) child,
+                                      efv->type,
                                       efv->join, seqid, target_ids,
                                       efv->region_mapping, err)) {
         had_err = -1;

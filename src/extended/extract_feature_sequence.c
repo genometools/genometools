@@ -162,6 +162,7 @@ int gt_extract_feature_sequence(GtStr *sequence, GtGenomeNode *gn,
 
 int gt_extract_and_translate_feature_sequence(GtFeatureNode *feature_node,
                                               const char *type,
+                                              bool join,
                                               GtRegionMapping *rm,
                                               GtTransTable *ttable,
                                               GtStr *translation_fr1,
@@ -180,7 +181,7 @@ int gt_extract_and_translate_feature_sequence(GtFeatureNode *feature_node,
 
   had_err = gt_extract_feature_sequence_generic(sequence,
                                                 (GtGenomeNode*) feature_node,
-                                                type, true, NULL, NULL,
+                                                type, join, NULL, NULL,
                                                 &phase_offset, rm, err);
 
   if (!had_err && gt_str_length(sequence) > phase_offset) {

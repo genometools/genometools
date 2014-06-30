@@ -35,7 +35,7 @@ int gt_extract_feature_sequence(GtStr *sequence, GtGenomeNode*,
    corresponding reading frame. Returns 0 on success, -1 otherwise and sets
    <err> accordingly. */
 int gt_extract_and_translate_feature_sequence(GtFeatureNode *feature_node,
-                                              const char *type,
+                                              const char *type, bool join,
                                               GtRegionMapping *rm,
                                               GtTransTable *ttable,
                                               GtStr *translation_fr1,
