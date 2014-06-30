@@ -26,6 +26,9 @@
    -- Returns the filename of <genome_node>.
    function genome_node:get_filename()
 
+   -- Returns the line number of <genome_node>.
+   function genome_node:get_line_number()
+
    -- Returns the range of <genome_node>.
    function genome_node:get_range()
 
@@ -54,7 +57,7 @@
    -- Create a new feature node on sequence with ID <seqid> and type <type>
    -- which lies from <startpos> to <end> on strand <strand>.
    -- <startpos> and <endpos> always refer to the forward strand, therefore
-   -- <startpos> has to bo smaller or equal than <endpos>.
+   -- <startpos> has to be smaller or equal than <endpos>.
    function feature_node_new(seqid, type, startpos, endpos, strand)
 
    -- Returns the strand of <feature_node>.
@@ -66,20 +69,27 @@
    -- Returns the score of <feature_node>.
    function feature_node:get_score()
 
+   -- Return type of <feature_node> as string.
+   function feature_node:get_type()
+
    -- Returns the <attrib> attribute of <feature_node>.
    function feature_node:get_attribute(attrib)
 
    -- Returns an array containing the exons of <feature_node>.
    function feature_node:get_exons()
 
+   -- Adds <child> as a child node of <feature_node>.
+   function feature_node:add_child(child)
+
+   -- Removes <leaf> as a child node in the subgraph beneath <feature_node>,
+   -- if it is a leaf.
+   function feature_node:remove_leaf(leaf)
+
    -- Set the source of <feature_node> to <source>.
    function feature_node:set_source(source)
 
    -- Show leading part of GFF3 output for <feature_node>
    function feature_node:output_leading()
-
-   -- Return type of <feature_node> as string.
-   function feature_node:get_type()
 
    -- Extract the sequence of <feature_node>.
    -- If <join> is false and <feature_node> has type <type> the sequence is
@@ -88,6 +98,14 @@
    -- joined sequences are returned.
    -- If none of the above applies nil is returned.
    function feature_node:extract_sequence(type, join, region_mapping)
+
+   -- Extract the translated sequence of <feature_node>.
+   -- If <join> is false and <feature_node> has type <type> the sequence is
+   -- returned (using <region_mapping> to get it).
+   -- If <join> is true and <feature_node> has children of type <type> their
+   -- joined sequences are returned.
+   -- If none of the above applies nil is returned.
+   function feature_node:extract_and_translate_sequence(type, join, region_mapping)
 
 */
 
