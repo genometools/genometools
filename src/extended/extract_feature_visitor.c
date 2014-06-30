@@ -82,41 +82,6 @@ static void construct_description(GtStr *description, const char *type,
   }
 }
 
-static int show_entry(GtStr *description, GtStr *sequence, bool translate,
-                      GtUword width, GtFile *outfp)
-{
-  int had_err = 0;
-  if (translate) {
-    GtTranslatorStatus status;
-    unsigned int frame;
-    char translated;
-    GtStr *protein = gt_str_new();
-
-    GtCodonIterator *ci = gt_codon_iterator_simple_new(gt_str_get(sequence),
-                                                       gt_str_length(sequence),
-                                                       NULL);
-    GtTranslator* tr = gt_translator_new(ci);
-    status = gt_translator_next(tr, &translated, &frame, NULL);
-    while (status == GT_TRANSLATOR_OK) {
-      if (frame == 0)
-        gt_str_append_char(protein, translated);
-      status = gt_translator_next(tr, &translated, &frame, NULL);
-    }
-    if (status == GT_TRANSLATOR_ERROR)
-      had_err = -1;
-    gt_fasta_show_entry(gt_str_get(description), gt_str_get(protein),
-                        gt_str_length(protein), width, outfp);
-    gt_str_delete(protein);
-    gt_translator_delete(tr);
-    gt_codon_iterator_delete(ci);
-  }
-  else {
-    gt_fasta_show_entry(gt_str_get(description), gt_str_get(sequence),
-                        gt_str_length(sequence), width, outfp);
-  }
-  return had_err;
-}
-
 static int extract_feature_visitor_feature_node(GtNodeVisitor *nv,
                                                 GtFeatureNode *fn, GtError *err)
 {
@@ -143,10 +108,20 @@ static int extract_feature_visitor_feature_node(GtNodeVisitor *nv,
       gt_str_reset(seqid);
     if (target_ids)
       gt_str_array_reset(target_ids);
-    if (gt_extract_feature_sequence(sequence, (GtGenomeNode*) child, efv->type,
-                                    efv->join, seqid, target_ids,
-                                    efv->region_mapping, err)) {
-      had_err = -1;
+    if (efv->translate) {
+      if (gt_extract_and_translate_feature_sequence(child,
+                                                    efv->type,
+                                                    efv->region_mapping, NULL,
+                                                    sequence, NULL, NULL,
+                                                    err)) {
+        had_err = -1;
+      }
+    } else {
+      if (gt_extract_feature_sequence(sequence, (GtGenomeNode*) child, efv->type,
+                                      efv->join, seqid, target_ids,
+                                      efv->region_mapping, err)) {
+        had_err = -1;
+      }
     }
 
     if (!had_err && gt_str_length(sequence)) {
@@ -158,8 +133,8 @@ static int extract_feature_visitor_feature_node(GtNodeVisitor *nv,
       }
       construct_description(description, efv->type, efv->fastaseq_counter,
                             efv->join, efv->translate, seqid, target_ids);
-      had_err = show_entry(description, sequence, efv->translate, efv->width,
-                           efv->outfp);
+      gt_fasta_show_entry(gt_str_get(description), gt_str_get(sequence),
+                          gt_str_length(sequence),  efv->width,  efv->outfp);
       gt_str_reset(description);
       gt_str_reset(sequence);
     }

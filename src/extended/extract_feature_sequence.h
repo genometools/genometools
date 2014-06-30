@@ -18,12 +18,29 @@
 #ifndef EXTRACT_FEATURE_SEQUENCE_H
 #define EXTRACT_FEATURE_SEQUENCE_H
 
-#include "extended/genome_node.h"
+#include "core/trans_table_api.h"
+#include "extended/feature_node_api.h"
+#include "extended/genome_node_api.h"
 #include "extended/region_mapping_api.h"
 
 int gt_extract_feature_sequence(GtStr *sequence, GtGenomeNode*,
                                 const char *type, bool join, GtStr *seqid,
                                 GtStrArray *target_ids, GtRegionMapping*,
                                 GtError*);
+
+/* Translates the sequences of all sub-features of type <type> appearing as
+   direct children of <feature_node>. If <ttable> is not NULL, it will be used
+   as the translation table. If <translation_fr1>, <translation_fr2> or
+   <translation_fr3> are not NULL, they will contain the translation in the
+   corresponding reading frame. Returns 0 on success, -1 otherwise and sets
+   <err> accordingly. */
+int gt_extract_and_translate_feature_sequence(GtFeatureNode *feature_node,
+                                              const char *type,
+                                              GtRegionMapping *rm,
+                                              GtTransTable *ttable,
+                                              GtStr *translation_fr1,
+                                              GtStr *translation_fr2,
+                                              GtStr *translation_fr3,
+                                              GtError *err);
 
 #endif
