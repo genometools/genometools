@@ -449,6 +449,7 @@ static int feature_node_lua_extract_and_translate_sequence(lua_State *L)
   GtGenomeNode **gn;
   GtFeatureNode *fn;
   const char *type;
+  bool join;
   GtRegionMapping **region_mapping;
   GtStr *sequence;
   GtError *err;
@@ -457,7 +458,8 @@ static int feature_node_lua_extract_and_translate_sequence(lua_State *L)
   fn = gt_feature_node_try_cast(*gn);
   luaL_argcheck(L, fn, 1, "not a feature node");
   type = luaL_checkstring(L, 2);
-  region_mapping = check_region_mapping(L, 3);
+  join = lua_toboolean(L, 3);
+  region_mapping = check_region_mapping(L, 4);
   err = gt_error_new();
   sequence = gt_str_new();
   if (gt_extract_and_translate_feature_sequence(fn, gt_symbol(type), true,
