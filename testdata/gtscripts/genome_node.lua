@@ -29,6 +29,15 @@ function count_children(parent)
   return count
 end
 
+function table.contains(tab, element)
+  for _, value in pairs(tab) do
+    if value == element then
+      return true
+    end
+  end
+  return false
+end
+
 -- testing gt.feature_node_new
 range = gt.range_new(1, 100)
 rval, err = pcall(gt.feature_node_new, nil, nil, range:get_start(), range:get_end(), "+")
@@ -81,6 +90,28 @@ child:add_child(newchild)
 assert(count_children(parent) == 4)
 parent:remove_leaf(newchild)
 assert(count_children(parent) == 3)
+
+-- testing get_children
+parent = gt.feature_node_new("seqid", "gene", range:get_start(), range:get_end(), "+")
+child  = gt.feature_node_new("seqid", "exon", range:get_start(), range:get_end(), "+")
+parent:add_child(child)
+child2  = gt.feature_node_new("seqid", "exon", range:get_start()+1, range:get_end(), "+")
+parent:add_child(child2)
+out = {}
+for i in parent:get_children() do
+  table.insert(out, i)
+end
+assert(#out == 3)
+assert(out[1] == parent)
+assert(out[2] == child)
+assert(out[3] == child2)
+
+-- testing has_child_of_type
+assert(parent:has_child_of_type("exon"))
+assert(not parent:has_child_of_type("gene"))
+assert(not parent:has_child_of_type("intron"))
+assert(not child:has_child_of_type("gene"))
+assert(not child:has_child_of_type("exon"))
 
 -- testing gt.region_node_new
 range = gt.range_new(1, 100)
