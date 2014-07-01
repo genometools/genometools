@@ -119,6 +119,17 @@ Test do
   run "diff #{last_stdout} #{$testdata}U89959_cds.fas"
 end
 
+Name "gt extractfeat -translate (phases)"
+Keywords "gt_extractfeat"
+Test do
+  run "#{$bin}gt extractfeat -seqfile #{$testdata}gt_extractfeat_phase.fas " +
+      "-matchdesc -type CDS -join -translate #{$testdata}gt_extractfeat_phase_fix.gff3"
+  run "diff #{last_stdout} #{$testdata}gt_extractfeat_phase_fix.out"
+  run "#{$bin}gt extractfeat -seqfile #{$testdata}gt_extractfeat_phase.fas " +
+      "-matchdesc -type CDS -join -translate #{$testdata}gt_extractfeat_phase.gff3"
+  run "diff #{last_stdout} #{$testdata}gt_extractfeat_phase.out"
+end
+
 Name "gt extractfeat -help"
 Keywords "gt_extractfeat"
 Test do
