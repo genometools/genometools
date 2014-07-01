@@ -1,9 +1,19 @@
 ##gff-version   3
 ##sequence-region seq1 1 100
 ##sequence-region seq2 1 100
+##sequence-region seq3 1 100
+##sequence-region seq4 1 100
 seq1	.	gene	1	64	.	+	.	ID=gene1
 seq1	.	mRNA	1	64	.	+	.	Parent=gene1;ID=mRNA1
 seq1	.	CDS	1	64	.	+	0	Parent=mRNA1
 seq2	.	gene	1	64	.	-	.	ID=gene2
 seq2	.	mRNA	1	64	.	-	.	Parent=gene2;ID=mRNA2
 seq2	.	CDS	1	64	.	-	0	Parent=mRNA2
+seq3	.	gene	1	74	.	+	.	ID=gene3
+seq3	.	mRNA	1	74	.	+	.	Parent=gene3;ID=mRNA3
+seq3	.	CDS	1	37	.	+	0	Parent=mRNA3
+seq3	.	CDS	48	74	.	+	2	Parent=mRNA3
+seq4	.	gene	1	74	.	-	.	ID=gene4
+seq4	.	mRNA	1	74	.	-	.	Parent=gene4;ID=mRNA4
+seq4	.	CDS	1	27	.	-	2	Parent=mRNA4
+seq4	.	CDS	38	74	.	-	0	Parent=mRNA4
