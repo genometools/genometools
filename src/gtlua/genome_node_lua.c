@@ -466,7 +466,7 @@ static int feature_node_lua_extract_and_translate_sequence(lua_State *L)
   region_mapping = check_region_mapping(L, 4);
   err = gt_error_new();
   sequence = gt_str_new();
-  if (gt_extract_and_translate_feature_sequence(fn, gt_symbol(type), true,
+  if (gt_extract_and_translate_feature_sequence(fn, gt_symbol(type), join,
                                                 *region_mapping, NULL,
                                                 sequence, NULL, NULL, err)) {
     gt_str_delete(sequence);
@@ -571,8 +571,6 @@ static int genome_node_lua_tostring (lua_State *L)
     (void) snprintf(buf, BUFSIZ, "region: %s "GT_WU"-"GT_WU,
                     gt_str_get(gt_genome_node_get_seqid(*gn)),
                     rng.start, rng.end);
-  } else {
-    (void) snprintf(buf, BUFSIZ, "");
   }
   lua_pushfstring(L, "%s", buf);
   return 1;
