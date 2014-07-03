@@ -33,6 +33,6 @@ int gt_lua_open_genome_visitor(lua_State*);
 
 #define GENOME_VISITOR_METATABLE  "GenomeTools.genome_visitor"
 #define check_genome_visitor(L, POS) \
-          (GtNodeVisitor**) luaL_checkudata(L, POS, GENOME_VISITOR_METATABLE)
+             (GtNodeVisitor**) luaL_checkudata(L, POS, GENOME_VISITOR_METATABLE)
 
 #endif
