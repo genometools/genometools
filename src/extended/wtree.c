@@ -58,8 +58,8 @@ GtWtreeSymbol gt_wtree_access(GtWtree *wtree,
 }
 
 GtUword gt_wtree_rank(GtWtree *wtree,
-                            GtUword pos,
-                            GtWtreeSymbol symbol)
+                      GtUword pos,
+                      GtWtreeSymbol symbol)
 {
   gt_assert(wtree != NULL);
   gt_assert(wtree->c_class != NULL);
@@ -69,8 +69,8 @@ GtUword gt_wtree_rank(GtWtree *wtree,
 }
 
 GtUword gt_wtree_select(GtWtree *wtree,
-                              GtUword i,
-                              GtWtreeSymbol symbol)
+                        GtUword i,
+                        GtWtreeSymbol symbol)
 {
   gt_assert(wtree != NULL);
   gt_assert(wtree->c_class != NULL);

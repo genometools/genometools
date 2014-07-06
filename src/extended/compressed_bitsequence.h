@@ -35,38 +35,37 @@ typedef struct GtCompressedBitsequence GtCompressedBitsequence;
    number of bits to be read from <bitseq>. Words in <bitseq> are assumed to be
    filled continuously. That is, the last <GtBitsequence> in <bitseq> has its
    most significant bits filled first. */
-GtCompressedBitsequence* gt_compressed_bitsequence_new(
-                                                     GtBitsequence *bitseq,
-                                                     unsigned int samplerate,
-                                                     GtUword num_of_bits);
+GtCompressedBitsequence* gt_compressed_bitsequence_new(GtBitsequence *bitseq,
+                                                       unsigned int samplerate,
+                                                       GtUword num_of_bits);
 
 /* Returns 0 or 1 according to the bit at <position> in <cbs>. Note that
    <position> has to be smaller than the length  of <cbs>. */
 int                      gt_compressed_bitsequence_access(
-                                                  GtCompressedBitsequence *cbs,
-                                                  GtUword position);
+                                                   GtCompressedBitsequence *cbs,
+                                                   GtUword position);
 
 /* Returns the number of 1 bits in <cbs> upto and including <position>. Note
    that <position> has to be smaller than the length of <cbs>. */
-GtUword            gt_compressed_bitsequence_rank_1(
+GtUword                  gt_compressed_bitsequence_rank_1(
                                                    GtCompressedBitsequence *cbs,
                                                    GtUword position);
 
 /* Returns the number of 0 bits in <cbs> upto and including <position>. Note
    that <position> has to be smaller than the length of <cbs>. */
-GtUword            gt_compressed_bitsequence_rank_0(
+GtUword                  gt_compressed_bitsequence_rank_0(
                                                    GtCompressedBitsequence *cbs,
                                                    GtUword position);
 
 /* Returns the position of the <num>th bit set to 1 in <cbs>. Returns length of
    <cbs> if there are less than <num> bits set to 1. */
-GtUword            gt_compressed_bitsequence_select_1(
+GtUword                  gt_compressed_bitsequence_select_1(
                                                    GtCompressedBitsequence *cbs,
                                                    GtUword num);
 
 /* Returns the position of the <num>th bit set to 0 in <cbs>. Returns length of
    <cbs> if there are less than <num> bits set to 0. */
-GtUword            gt_compressed_bitsequence_select_0(
+GtUword                  gt_compressed_bitsequence_select_0(
                                                    GtCompressedBitsequence *cbs,
                                                    GtUword num);
 

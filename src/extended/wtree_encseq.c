@@ -1,19 +1,19 @@
 /*
-  Copyright (c) 2013 Dirk Willrodt <willrodt@zbh.uni-hamburg.de>
-  Copyright (c) 2013 Center for Bioinformatics, University of Hamburg
+   Copyright (c) 2013 Dirk Willrodt <willrodt@zbh.uni-hamburg.de>
+   Copyright (c) 2013 Center for Bioinformatics, University of Hamburg
 
-  Permission to use, copy, modify, and distribute this software for any
-  purpose with or without fee is hereby granted, provided that the above
-  copyright notice and this permission notice appear in all copies.
+   Permission to use, copy, modify, and distribute this software for any
+   purpose with or without fee is hereby granted, provided that the above
+   copyright notice and this permission notice appear in all copies.
 
-  THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
-  WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
-  MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
-  ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
-  WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
-  ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
-  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
-*/
+   THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+   WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+   MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+   ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+   WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+   ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+   */
 
 #include <stdbool.h>
 #ifndef S_SPLINT_S
@@ -37,7 +37,7 @@
 typedef struct GtWtreeEncseqFillOffset {
   struct GtWtreeEncseqFillOffset *left,
                                  *right;
-  GtUword                   offset,
+  GtUword                         offset,
                                   left_size;
 }GtWtreeEncseqFillOffset;
 
@@ -49,7 +49,7 @@ struct GtWtreeEncseq {
   GtWtreeEncseqFillOffset *root_fo,
                           *current_fo;
   GtCompressedBitsequence *c_bits;
-  GtUword            bits_size,
+  GtUword                  bits_size,
                            node_start,
                            num_of_bits;
   unsigned int             alpha_size,
@@ -59,7 +59,7 @@ struct GtWtreeEncseq {
 const GtWtreeClass* gt_wtree_encseq_class(void);
 
 #define gt_wtree_encseq_cast(wtree) \
-        gt_wtree_cast(gt_wtree_encseq_class(), wtree)
+  gt_wtree_cast(gt_wtree_encseq_class(), wtree)
 
 static GtWtreeSymbol gt_wtree_encseq_access_rec(GtWtreeEncseq *we,
                                                 GtUword pos,
@@ -71,8 +71,8 @@ static GtWtreeSymbol gt_wtree_encseq_access_rec(GtWtreeEncseq *we,
   unsigned int middle = GT_DIV2(alpha_start + alpha_end);
   int bit;
   GtUword zero_rank_prefix = 0,
-                one_rank_prefix = 0,
-                left_child_size;
+          one_rank_prefix = 0,
+          left_child_size;
   gt_assert(pos < node_size);
 
   if (alpha_start < alpha_end) {
@@ -86,7 +86,7 @@ static GtWtreeSymbol gt_wtree_encseq_access_rec(GtWtreeEncseq *we,
 
     if (bit == 0) {
       pos = gt_compressed_bitsequence_rank_0(we->c_bits, node_start + pos) -
-            zero_rank_prefix - 1; /*convert count (rank) to positon */
+        zero_rank_prefix - 1; /*convert count (rank) to positon */
       alpha_end = middle;
       node_start += we->parent_instance.members->length;
       node_size = left_child_size;
@@ -98,7 +98,7 @@ static GtWtreeSymbol gt_wtree_encseq_access_rec(GtWtreeEncseq *we,
         one_rank_prefix =
           gt_compressed_bitsequence_rank_1(we->c_bits, node_start - 1);
       pos = gt_compressed_bitsequence_rank_1(we->c_bits, node_start + pos) -
-            one_rank_prefix - 1; /*convert count (rank) to positon */
+        one_rank_prefix - 1; /*convert count (rank) to positon */
       alpha_start = middle + 1;
       node_size =
         gt_compressed_bitsequence_rank_1(we->c_bits,
@@ -119,7 +119,7 @@ static GtWtreeSymbol gt_wtree_encseq_access(GtWtree *wtree,
   unsigned int alpha_start = 0,
                alpha_end;
   GtUword node_start = 0,
-                node_size;
+          node_size;
   GtWtreeEncseq *we;
   gt_assert(wtree != NULL);
 
@@ -134,21 +134,21 @@ static GtWtreeSymbol gt_wtree_encseq_access(GtWtree *wtree,
 }
 
 static GtUword gt_wtree_encseq_rank_rec(GtWtreeEncseq *we,
-                                              GtUword pos,
-                                              GtWtreeSymbol sym,
-                                              GtUword node_start,
-                                              GtUword node_size,
-                                              unsigned int alpha_start,
-                                              unsigned int alpha_end)
+                                        GtUword pos,
+                                        GtWtreeSymbol sym,
+                                        GtUword node_start,
+                                        GtUword node_size,
+                                        unsigned int alpha_start,
+                                        unsigned int alpha_end)
 {
   unsigned int middle = GT_DIV2(alpha_start + alpha_end);
   int bit;
   GtUword zero_rank_prefix = 0,
-                one_rank_prefix = 0,
-                left_child_size,
-                rank;
-  gt_log_log("alphabet: %u-%u-%u, sym: "GT_WU"", alpha_start, middle, alpha_end,
-             (GtUword) sym);
+          one_rank_prefix = 0,
+          left_child_size,
+          rank;
+  gt_log_log("alphabet: %u-%u-%u, sym: " GT_WU,
+             alpha_start, middle, alpha_end, (GtUword) sym);
   gt_log_log("pos: "GT_WU"", pos);
   gt_assert(pos < node_size);
 
@@ -163,7 +163,7 @@ static GtUword gt_wtree_encseq_rank_rec(GtWtreeEncseq *we,
 
     if (bit == 0) {
       rank = gt_compressed_bitsequence_rank_0(we->c_bits, node_start + pos) -
-             zero_rank_prefix;
+        zero_rank_prefix;
       alpha_end = middle;
       node_start += we->parent_instance.members->length;
       node_size = left_child_size;
@@ -173,7 +173,7 @@ static GtUword gt_wtree_encseq_rank_rec(GtWtreeEncseq *we,
         one_rank_prefix =
           gt_compressed_bitsequence_rank_1(we->c_bits, node_start - 1);
       rank = gt_compressed_bitsequence_rank_1(we->c_bits, node_start + pos) -
-             one_rank_prefix;
+        one_rank_prefix;
       alpha_start = middle + 1;
       node_size =
         gt_compressed_bitsequence_rank_1(we->c_bits,
@@ -196,13 +196,13 @@ static GtUword gt_wtree_encseq_rank_rec(GtWtreeEncseq *we,
 }
 
 static GtUword gt_wtree_encseq_rank(GtWtree *wtree,
-                                          GtUword pos,
-                                          GtWtreeSymbol symbol)
+                                    GtUword pos,
+                                    GtWtreeSymbol symbol)
 {
   unsigned int alpha_start = 0,
                alpha_end;
   GtUword node_start = 0,
-                node_size;
+          node_size;
   GtWtreeEncseq *we;
   gt_assert(wtree != NULL);
 
@@ -217,18 +217,18 @@ static GtUword gt_wtree_encseq_rank(GtWtree *wtree,
 }
 
 static GtUword gt_wtree_encseq_select_rec(GtWtreeEncseq *we,
-                                                GtUword i,
-                                                GtWtreeSymbol sym,
-                                                GtUword node_start,
-                                                GtUword node_size,
-                                                unsigned int alpha_start,
-                                                unsigned int alpha_end)
+                                          GtUword i,
+                                          GtWtreeSymbol sym,
+                                          GtUword node_start,
+                                          GtUword node_size,
+                                          unsigned int alpha_start,
+                                          unsigned int alpha_end)
 {
   unsigned int middle = GT_DIV2(alpha_start + alpha_end);
   int bit;
   GtUword zero_rank_prefix = 0,
-                one_rank_prefix = 0,
-                left_child_size, child_start;
+          one_rank_prefix = 0,
+          left_child_size, child_start;
 
   if (alpha_start < alpha_end) {
     bit = middle < (unsigned int) sym ? 1 : 0;
@@ -261,10 +261,10 @@ static GtUword gt_wtree_encseq_select_rec(GtWtreeEncseq *we,
                                      alpha_start, alpha_end);
       if (i < node_size) {
         return (bit == 0 ?
-          gt_compressed_bitsequence_select_0(we->c_bits,
-                                             zero_rank_prefix + i + 1) :
-          gt_compressed_bitsequence_select_1(we->c_bits,
-                                             one_rank_prefix + i + 1)) -
+                gt_compressed_bitsequence_select_0(we->c_bits,
+                                                   zero_rank_prefix + i + 1) :
+                gt_compressed_bitsequence_select_1(we->c_bits,
+                                                   one_rank_prefix + i + 1)) -
           node_start;
       }
     }
@@ -276,13 +276,13 @@ static GtUword gt_wtree_encseq_select_rec(GtWtreeEncseq *we,
 }
 
 static GtUword gt_wtree_encseq_select(GtWtree *wtree,
-                                            GtUword i,
-                                            GtWtreeSymbol symbol)
+                                      GtUword i,
+                                      GtWtreeSymbol symbol)
 {
   unsigned int alpha_start = 0,
                alpha_end;
   GtUword node_start = 0,
-                node_size;
+          node_size;
   GtWtreeEncseq *we;
   gt_assert(wtree != NULL);
 
@@ -366,8 +366,8 @@ static inline GtWtreeEncseqFillOffset* gt_wtree_encseq_fill_offset_new(void)
   return fo;
 }
 
-static inline void gt_wtree_encseq_fill_offset_delete(
-                                                    GtWtreeEncseqFillOffset *fo)
+static inline void
+gt_wtree_encseq_fill_offset_delete(GtWtreeEncseqFillOffset *fo)
 {
   if (fo != NULL) {
     gt_wtree_encseq_fill_offset_delete(fo->left);
@@ -409,7 +409,7 @@ static bool gt_wtree_encseq_set_nodestart_and_current_fo(GtWtreeEncseq *we,
       /* start of right child: start of left + size of left */
       we->node_start =
         we->node_start + we->parent_instance.members->length +
-          we->current_fo->left_size;
+        we->current_fo->left_size;
       we->current_fo = we->current_fo->right;
     }
     middle = GT_DIV2(alpha_start + alpha_end);
@@ -491,10 +491,10 @@ GtWtree* gt_wtree_encseq_new(GtEncseq *encseq)
     gt_calloc((size_t) wtree_encseq->bits_size, sizeof (GtBitsequence));
   wtree_encseq->node_start = 0;
   gt_wtree_encseq_fill_bits(wtree_encseq);
-  wtree_encseq->c_bits = gt_compressed_bitsequence_new(
-                                                     wtree_encseq->bits,
-                                                     samplerate,
-                                                     wtree_encseq->num_of_bits);
+  wtree_encseq->c_bits =
+    gt_compressed_bitsequence_new(wtree_encseq->bits,
+                                  samplerate,
+                                  wtree_encseq->num_of_bits);
   gt_free(wtree_encseq->bits);
   wtree_encseq->bits = NULL;
   return wtree;
