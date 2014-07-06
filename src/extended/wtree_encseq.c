@@ -22,6 +22,7 @@
 
 #include "core/alphabet_api.h"
 #include "core/chardef.h"
+#include "core/divmodmul.h"
 #include "core/encseq_api.h"
 #include "core/intbits.h"
 #include "core/log_api.h"
@@ -67,7 +68,7 @@ static GtWtreeSymbol gt_wtree_encseq_access_rec(GtWtreeEncseq *we,
                                                 unsigned int alpha_start,
                                                 unsigned int alpha_end)
 {
-  unsigned int middle = (alpha_start + alpha_end) >> 1;
+  unsigned int middle = GT_DIV2(alpha_start + alpha_end);
   int bit;
   GtUword zero_rank_prefix = 0,
                 one_rank_prefix = 0,
@@ -140,7 +141,7 @@ static GtUword gt_wtree_encseq_rank_rec(GtWtreeEncseq *we,
                                               unsigned int alpha_start,
                                               unsigned int alpha_end)
 {
-  unsigned int middle = (alpha_start + alpha_end) >> 1;
+  unsigned int middle = GT_DIV2(alpha_start + alpha_end);
   int bit;
   GtUword zero_rank_prefix = 0,
                 one_rank_prefix = 0,
@@ -223,7 +224,7 @@ static GtUword gt_wtree_encseq_select_rec(GtWtreeEncseq *we,
                                                 unsigned int alpha_start,
                                                 unsigned int alpha_end)
 {
-  unsigned int middle = (alpha_start + alpha_end) >> 1;
+  unsigned int middle = GT_DIV2(alpha_start + alpha_end);
   int bit;
   GtUword zero_rank_prefix = 0,
                 one_rank_prefix = 0,
@@ -381,7 +382,7 @@ static bool gt_wtree_encseq_set_nodestart_and_current_fo(GtWtreeEncseq *we,
 {
   unsigned int alpha_end = we->alpha_size - 1,
                alpha_start = 0,
-               middle = alpha_end >> 1;
+               middle = GT_DIV2(alpha_end);
   unsigned int c_level = 0;
   gt_assert(sym <= (GtWtreeSymbol) alpha_end);
   we->current_fo = we->root_fo;
@@ -411,7 +412,7 @@ static bool gt_wtree_encseq_set_nodestart_and_current_fo(GtWtreeEncseq *we,
           we->current_fo->left_size;
       we->current_fo = we->current_fo->right;
     }
-    middle = (alpha_start + alpha_end) >> 1;
+    middle = GT_DIV2(alpha_start + alpha_end);
     c_level++;
   }
   return (sym <= (GtWtreeSymbol) middle);

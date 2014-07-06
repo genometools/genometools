@@ -25,6 +25,7 @@
 #include <limits.h>
 
 #include "core/assert_api.h"
+#include "core/divmodmul.h"
 #include "core/ensure.h"
 #include "core/intbits.h"
 #include "core/ma.h"
@@ -245,7 +246,7 @@ gt_intset_16_binarysearch_sec_idx_largest_seq(GtUword *sectionstart,
   if (*sectionstart <= idx)
     found = sectionstart;
   while (sectionstart < secend) {
-    midptr = sectionstart + ((GtUword) (secend - sectionstart) >> 1);
+    midptr = sectionstart + (GtUword) GT_DIV2(secend - sectionstart);
     if (*midptr < idx) {
       found = midptr;
       if (*midptr == idx) {
@@ -303,7 +304,7 @@ static bool gt_intset_16_binarysearch_is_member(const uint16_t *leftptr,
 {
   const uint16_t *midptr;
     while (leftptr <= rightptr) {
-      midptr = leftptr + (((GtUword) (rightptr-leftptr)) >> 1);
+      midptr = leftptr + (GtUword) GT_DIV2(rightptr - leftptr);
       if (elem < *midptr) {
         rightptr = midptr - 1;
       }
@@ -364,7 +365,7 @@ static GtUword gt_intset_16_binarysearch_idx_sm_geq(const uint16_t *leftptr,
   if (value > *rightptr)
     return 1UL + (GtUword) (rightptr - leftptr);
   while (leftptr < rightptr) {
-    midptr = leftptr + ((GtUword) (rightptr - leftptr) >> 1);
+    midptr = leftptr + (GtUword) GT_DIV2(rightptr - leftptr);
     if (value <= *midptr)
       rightptr = midptr;
     else {
@@ -470,7 +471,7 @@ int gt_intset_16_unit_test(GtError *err)
   GtIntset *is;
   GtUword num_of_elems = gt_rand_max(((GtUword) 1) << 10) + 1,
           *arr = gt_malloc(sizeof (*arr) * num_of_elems),
-          stepsize = (num_of_elems <<4 / num_of_elems) >> 1,
+          stepsize = GT_DIV2(num_of_elems <<4 / num_of_elems),
           idx;
   size_t is_size;
 
