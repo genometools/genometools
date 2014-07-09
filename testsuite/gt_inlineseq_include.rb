@@ -6,6 +6,29 @@ Test do
   run "diff tmp.gff3 #{$testdata}standard_fasta_example_only_annotation.gff3"
 end
 
+Name "gt inlineseq_split (nonexistant input)"
+Keywords "gt_inlineseq_split gt_inlineseq"
+Test do
+  run_test "#{$bin}gt inlineseq_split -seqfile tmp.fas -gff3file tmp.gff3 #{$testdata}/imnotthere", :retval => 1
+end
+
+Name "gt inlineseq_split (unwritable GFF)"
+Keywords "gt_inlineseq_split gt_inlineseq"
+Test do
+  run "touch unwriteable.gff"
+  run "chmod u-w unwriteable.gff"
+  run_test "#{$bin}gt inlineseq_split -seqfile tmp.fas -gff3file unwriteable.gff #{$testdata}/standard_fasta_example.gff3", :retval => 1
+  grep(last_stderr, "unwriteable.gff")
+end
+Name "gt inlineseq_split (unwritable FASTA)"
+Keywords "gt_inlineseq_split gt_inlineseq"
+Test do
+  run "touch unwriteable.fas"
+  run "chmod u-w unwriteable.fas"
+  run_test "#{$bin}gt inlineseq_split -seqfile unwriteable.fas -gff3file test.gff #{$testdata}/standard_fasta_example.gff3", :retval => 1
+  grep(last_stderr, "unwriteable.fas")
+end
+
 Name "gt inlineseq_split (no annotation)"
 Keywords "gt_inlineseq_split gt_inlineseq"
 Test do

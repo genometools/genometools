@@ -102,7 +102,7 @@ static int gt_inlineseq_split_runner(int argc, const char **argv, int parsed_arg
       had_err = -1;
   }
 
-  if (gt_str_length(arguments->gffoutfile) > 0) {
+  if (!had_err && gt_str_length(arguments->gffoutfile) > 0) {
     gff3_out_file = gt_file_new(gt_str_get(arguments->gffoutfile), "w+", err);
     if (!gff3_out_file)
       had_err = -1;
