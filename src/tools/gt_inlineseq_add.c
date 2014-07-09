@@ -86,16 +86,18 @@ static int gt_inlineseq_add_runner(int argc, const char **argv, int parsed_args,
       had_err = -1;
   }
 
-  last_stream = gff3_in_stream = gt_gff3_in_stream_new_unsorted(
+  if (!had_err) {
+    last_stream = gff3_in_stream = gt_gff3_in_stream_new_unsorted(
                                                             argc - parsed_args,
                                                             argv + parsed_args);
-  gt_assert(gff3_in_stream);
-  gt_gff3_in_stream_enable_tidy_mode((GtGFF3InStream*) gff3_in_stream);
+    gt_assert(gff3_in_stream);
+    gt_gff3_in_stream_enable_tidy_mode((GtGFF3InStream*) gff3_in_stream);
 
-  last_stream = add_stream = gt_sequence_node_add_stream_new(last_stream, rm,
-                                                             err);
-  if (!add_stream) {
-    had_err = -1;
+    last_stream = add_stream = gt_sequence_node_add_stream_new(last_stream, rm,
+                                                               err);
+    if (!add_stream) {
+      had_err = -1;
+    }
   }
 
   if (!had_err) {
