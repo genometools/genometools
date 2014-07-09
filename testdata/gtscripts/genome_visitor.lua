@@ -37,3 +37,49 @@ while (gn) do
   gn:accept(gv)
   gn = gs:next_tree()
 end
+
+cv = gt.custom_visitor_new()
+gs = gt.gff3_in_stream_new_sorted(gff3file)
+gn = gs:next_tree()
+while (gn) do
+  gn:accept(cv)
+  gn = gs:next_tree()
+end
+
+cv = gt.custom_visitor_new()
+gs = gt.gff3_in_stream_new_sorted(gff3file)
+gn = gs:next_tree()
+cv.features = 0
+cv.regions = 0
+cv.sequences = 0
+cv.metas = 0
+function cv:visit_feature(fn)
+  self.features = self.features + 1
+end
+function cv:visit_region(fn)
+  self.regions = self.regions + 1
+end
+function cv:visit_sequence(fn)
+  self.sequences = self.sequences + 1
+end
+function cv:meta(fn)
+  self.metas = self.metas + 1
+end
+while (gn) do
+  gn:accept(cv)
+  gn = gs:next_tree()
+end
+assert(cv.metas == 0)
+assert(cv.sequences == 0)
+assert(cv.features == 1)
+assert(cv.regions == 1)
+
+fn = gt.feature_node_new("test", "gene", 100, 1000, "+")
+cv = gt.custom_visitor_new()
+function cv:visit_feature(fn)
+  return 1 + nil
+end
+rval, err = pcall(fn.accept, fn, cv)
+assert(not rval)
+assert(string.find(err, "perform arithmetic on a nil"))
+
