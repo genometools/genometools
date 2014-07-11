@@ -36,6 +36,22 @@
    -- Returns true if <range> and <other_range> overlap, false otherwise.
    function range:overlap(other_range)
 
+   -- Returns true if <range> and <other_range> overlap with delta <delta>,
+   -- false otherwise.
+   function range:overlap_delta(other_range, delta)
+
+   -- Returns the length of <range>.
+   function range:length()
+
+   -- Returns true if <range> contains <other_range>, false otherwise.
+   function range:contains(other_range)
+
+   -- Returns a new range consisting of <range> and <other_range> joined.
+   function range:join(other_range)
+
+   -- Returns true if <point> lies within <range>, false otherwise.
+   function range:within(point)
+
    -- Returns an array containing the ranges from array <range_array> in sorted
    -- order.
    function ranges_sort(range_array)

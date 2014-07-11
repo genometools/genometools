@@ -123,6 +123,27 @@ href="http://www.lua.org/manual/5.1/manual.html#pdf-ipairs"><code>ipairs()</code
 
 </ul>
 <h2>Sole functions</h2>
+<a name="feature_node_iterator_new"></a>
+
+<code> feature_node_iterator_new(genome_node)</code>
+<p>
+Returns a new genome node iterator which performs a depth-first traversel of <code>genome_node</code> (including <code>genome_node</code> itself).
+</p>
+<hr>
+<a name="feature_node_iterator_new_direct"></a>
+
+<code> feature_node_iterator_new_direct(genome_node)</code>
+<p>
+Returns a noew genome node iterator wich iterates over all direct children of <code>genome_node</code> (without <code>genome_node</code> itself).
+</p>
+<hr>
+<a name="feature_node_iterator:next"></a>
+
+<code> feature_node_iterator:next()</code>
+<p>
+Returns the next genome node for <code>feature_node_iterator</code> or nil.
+</p>
+<hr>
 <a name="rand_max"></a>
 
 <code> rand_max(val)</code>
@@ -493,7 +514,7 @@ Returns all features from <code>feature_index</code>.
 
 <code> feature_node_new(seqid, type, startpos, endpos, strand)</code>
 <p>
-Create a new feature node on sequence with ID <code>seqid</code> and type <code>type</code> which lies from <code>startpos</code> to <code>end</code> on strand <code>strand</code>. <code>startpos</code> and <code>endpos</code> always refer to the forward strand, therefore <code>startpos</code> has to bo smaller or equal than <code>endpos</code>.
+Create a new feature node on sequence with ID <code>seqid</code> and type <code>type</code> which lies from <code>startpos</code> to <code>end</code> on strand <code>strand</code>. <code>startpos</code> and <code>endpos</code> always refer to the forward strand, therefore <code>startpos</code> has to be smaller or equal than <code>endpos</code>.
 </p>
 <hr>
 <a name="feature_node:get_strand"></a>
@@ -517,6 +538,13 @@ Returns the source of <code>feature_node</code>.
 Returns the score of <code>feature_node</code>.
 </p>
 <hr>
+<a name="feature_node:get_type"></a>
+
+<code> feature_node:get_type()</code>
+<p>
+Return type of <code>feature_node</code> as string.
+</p>
+<hr>
 <a name="feature_node:get_attribute"></a>
 
 <code> feature_node:get_attribute(attrib)</code>
@@ -529,6 +557,20 @@ Returns the <code>attrib</code> attribute of <code>feature_node</code>.
 <code> feature_node:get_exons()</code>
 <p>
 Returns an array containing the exons of <code>feature_node</code>.
+</p>
+<hr>
+<a name="feature_node:add_child"></a>
+
+<code> feature_node:add_child(child)</code>
+<p>
+Adds <code>child</code> as a child node of <code>feature_node</code>.
+</p>
+<hr>
+<a name="feature_node:remove_leaf"></a>
+
+<code> feature_node:remove_leaf(leaf)</code>
+<p>
+Removes <code>leaf</code> as a child node in the subgraph beneath <code>feature_node</code>, if it is a leaf.
 </p>
 <hr>
 <a name="feature_node:set_source"></a>
@@ -545,13 +587,6 @@ Set the source of <code>feature_node</code> to <code>source</code>.
 Show leading part of GFF3 output for <code>feature_node</code>
 </p>
 <hr>
-<a name="feature_node:get_type"></a>
-
-<code> feature_node:get_type()</code>
-<p>
-Return type of <code>feature_node</code> as string.
-</p>
-<hr>
 <a name="feature_node:extract_sequence"></a>
 
 <code> feature_node:extract_sequence(type, join, region_mapping)</code>
@@ -559,25 +594,11 @@ Return type of <code>feature_node</code> as string.
 Extract the sequence of <code>feature_node</code>. If <code>join</code> is false and <code>feature_node</code> has type <code>type</code> the sequence is returned (using <code>region_mapping</code> to get it). If <code>join</code> is true and <code>feature_node</code> has children of type <code>type</code> their joined sequences are returned. If none of the above applies nil is returned.
 </p>
 <hr>
-<a name="feature_node_iterator_new"></a>
+<a name="feature_node:extract_and_translate_sequence"></a>
 
-<code> feature_node_iterator_new(genome_node)</code>
+<code> feature_node:extract_and_translate_sequence(type, join, region_mapping)</code>
 <p>
-Returns a new genome node iterator which performs a depth-first traversel of <code>genome_node</code> (including <code>genome_node</code> itself).
-</p>
-<hr>
-<a name="feature_node_iterator_new_direct"></a>
-
-<code> feature_node_iterator_new_direct(genome_node)</code>
-<p>
-Returns a noew genome node iterator wich iterates over all direct children of <code>genome_node</code> (without <code>genome_node</code> itself).
-</p>
-<hr>
-<a name="feature_node_iterator:next"></a>
-
-<code> feature_node_iterator:next()</code>
-<p>
-Returns the next genome node for <code>feature_node_iterator</code> or nil.
+Extract the translated sequence of <code>feature_node</code>. If <code>join</code> is false and <code>feature_node</code> has type <code>type</code> the sequence is returned (using <code>region_mapping</code> to get it). If <code>join</code> is true and <code>feature_node</code> has children of type <code>type</code> their joined sequences are returned. If none of the above applies nil is returned.
 </p>
 <hr>
 <a name="FeatureStream"></a>
@@ -632,6 +653,13 @@ Returns a new GFF3 visitor.
 <code> genome_node:get_filename()</code>
 <p>
 Returns the filename of <code>genome_node</code>.
+</p>
+<hr>
+<a name="genome_node:get_line_number"></a>
+
+<code> genome_node:get_line_number()</code>
+<p>
+Returns the line number of <code>genome_node</code>.
 </p>
 <hr>
 <a name="genome_node:get_range"></a>
@@ -796,6 +824,41 @@ Returns end of <code>range</code>.
 <code> range:overlap(other_range)</code>
 <p>
 Returns true if <code>range</code> and <code>other_range</code> overlap, false otherwise.
+</p>
+<hr>
+<a name="range:overlap_delta"></a>
+
+<code> range:overlap_delta(other_range, delta)</code>
+<p>
+Returns true if <code>range</code> and <code>other_range</code> overlap with delta <code>delta</code>, false otherwise.
+</p>
+<hr>
+<a name="range:length"></a>
+
+<code> range:length()</code>
+<p>
+Returns the length of <code>range</code>.
+</p>
+<hr>
+<a name="range:contains"></a>
+
+<code> range:contains(other_range)</code>
+<p>
+Returns true if <code>range</code> contains <code>other_range</code>, false otherwise.
+</p>
+<hr>
+<a name="range:join"></a>
+
+<code> range:join(other_range)</code>
+<p>
+Returns a new range consisting of <code>range</code> and <code>other_range</code> joined.
+</p>
+<hr>
+<a name="range:within"></a>
+
+<code> range:within(point)</code>
+<p>
+Returns true if <code>point</code> lies within <code>range</code>, false otherwise.
 </p>
 <hr>
 <a name="ranges_sort"></a>
@@ -987,6 +1050,10 @@ Returns translated <code>dna</code>.
 
   <a href="#feature_index_memory_new"><code>feature_index_memory_new</code></a><br>
 
+  <a href="#feature_node:add_child"><code>feature_node:add_child</code></a><br>
+
+  <a href="#feature_node:extract_and_translate_sequence"><code>feature_node:extract_and_translate_sequence</code></a><br>
+
   <a href="#feature_node:extract_sequence"><code>feature_node:extract_sequence</code></a><br>
 
   <a href="#feature_node:get_attribute"><code>feature_node:get_attribute</code></a><br>
@@ -1002,6 +1069,8 @@ Returns translated <code>dna</code>.
   <a href="#feature_node:get_type"><code>feature_node:get_type</code></a><br>
 
   <a href="#feature_node:output_leading"><code>feature_node:output_leading</code></a><br>
+
+  <a href="#feature_node:remove_leaf"><code>feature_node:remove_leaf</code></a><br>
 
   <a href="#feature_node:set_source"><code>feature_node:set_source</code></a><br>
 
@@ -1034,6 +1103,8 @@ Returns translated <code>dna</code>.
   <a href="#genome_node:contains_marked"><code>genome_node:contains_marked</code></a><br>
 
   <a href="#genome_node:get_filename"><code>genome_node:get_filename</code></a><br>
+
+  <a href="#genome_node:get_line_number"><code>genome_node:get_line_number</code></a><br>
 
   <a href="#genome_node:get_range"><code>genome_node:get_range</code></a><br>
 
@@ -1075,13 +1146,23 @@ Returns translated <code>dna</code>.
 
   <a href="#rand_max"><code>rand_max</code></a><br>
 
+  <a href="#range:contains"><code>range:contains</code></a><br>
+
   <a href="#range:get_end"><code>range:get_end</code></a><br>
 
   <a href="#range:get_start"><code>range:get_start</code></a><br>
 
+  <a href="#range:join"><code>range:join</code></a><br>
+
+  <a href="#range:length"><code>range:length</code></a><br>
+
   <a href="#range:overlap"><code>range:overlap</code></a><br>
 
+  <a href="#range:overlap_delta"><code>range:overlap_delta</code></a><br>
+
   <a href="#range:show"><code>range:show</code></a><br>
+
+  <a href="#range:within"><code>range:within</code></a><br>
 
   <a href="#range_new"><code>range_new</code></a><br>
 
@@ -1122,7 +1203,7 @@ Returns translated <code>dna</code>.
 <div id="footer">
 Copyright &copy; 2008-2013
 The <i>GenomeTools</i> authors.
-Last update: 2014-06-12
+Last update: 2014-07-11
 </div>
 </div>
 <!-- Piwik -->
