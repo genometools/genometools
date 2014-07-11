@@ -349,15 +349,24 @@ interfaces.
 
 </ul>
 <h2>Sole functions</h2>
-<a name="GtTrackOrderingFunc"></a>
+<a name="gt_feature_index_gfflike_get_all_features"></a>
 
-<code>int  GtTrackOrderingFunc(const char *s1, const char *s2, void *data)</code>
+<code>int              gt_feature_index_gfflike_get_all_features(GtFeatureIndex *gfi,
+                                                          GtArray *results,
+                                                          GtError *err)</code>
 <p>
-A function describing the order of tracks based on their track identifier
-   strings <code>s1</code> and <code>s2</code>. Must return a negative value if the track with ID <code>s1</code>
-   should appear before the track with ID <code>s2</code> and a positive value if <code>s1</code>
-   should appear after <code>s2</code>. Returning a value of 0 will result in an undefined
-   ordering of <code>s1</code> and <code>s2</code>.
+Retrieves all features contained in <code>gfi</code> into <code>results</code>. Returns 0 on
+   success, a negative value otherwise. The message in <code>err</code> is set
+   accordingly.
+</p>
+<hr>
+<a name="gt_dup_feature_stream_new"></a>
+
+<code>GtNodeStream*  gt_dup_feature_stream_new(GtNodeStream*, const char *dest_type,
+                                        const char *source_type)</code>
+<p>
+Duplicate internal feature nodes of type <code>source_type</code> as features with type
+   <code>dest_type</code>. The duplicated features does not inherit the children.
 </p>
 <hr>
 <a name="GtTrackSelectorFunc"></a>
@@ -367,6 +376,17 @@ A function describing the order of tracks based on their track identifier
 A <code>GtTrackSelectorFunc</code> is a callback function which sets a <code>GtStr</code> to a
    string to be used as a track identifier for assignment of a <code>GtBlock</code>
    to a given track.
+</p>
+<hr>
+<a name="GtTrackOrderingFunc"></a>
+
+<code>int  GtTrackOrderingFunc(const char *s1, const char *s2, void *data)</code>
+<p>
+A function describing the order of tracks based on their track identifier
+   strings <code>s1</code> and <code>s2</code>. Must return a negative value if the track with ID <code>s1</code>
+   should appear before the track with ID <code>s2</code> and a positive value if <code>s1</code>
+   should appear after <code>s2</code>. Returning a value of 0 will result in an undefined
+   ordering of <code>s1</code> and <code>s2</code>.
 </p>
 <hr>
 <a name="GtAddIntronsStream"></a>
@@ -3423,17 +3443,6 @@ Calls the save function for the given <code>feature_index</code>. The save funct
 <code>void         gt_feature_index_delete(GtFeatureIndex*)</code>
 <p>
 Deletes the <code>feature_index</code> and all its referenced features.
-</p>
-<hr>
-<a name="gt_feature_index_gfflike_get_all_features"></a>
-
-<code>int              gt_feature_index_gfflike_get_all_features(GtFeatureIndex *gfi,
-                                                          GtArray *results,
-                                                          GtError *err)</code>
-<p>
-Retrieves all features contained in <code>gfi</code> into <code>results</code>. Returns 0 on
-   success, a negative value otherwise. The message in <code>err</code> is set
-   accordingly.
 </p>
 <hr>
 <a name="GtFeatureIndexMemory"></a>
@@ -9469,15 +9478,6 @@ Free the space pointed to by <code>ptr</code>. If <code>ptr</code> equals <code>
 Analog to <code>gt_free()</code>, but usable as a function pointer.
 </p>
 <hr>
-<a name="gt_dup_feature_stream_new"></a>
-
-<code>GtNodeStream*  gt_dup_feature_stream_new(GtNodeStream*, const char *dest_type,
-                                        const char *source_type)</code>
-<p>
-Duplicate internal feature nodes of type <code>source_type</code> as features with type
-   <code>dest_type</code>. The duplicated features does not inherit the children.
-</p>
-<hr>
 <a name="Msort"></a>
 <h2>Module Msort</h2>
 <a name="gt_msort"></a>
@@ -11932,7 +11932,7 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
 <div id="footer">
 Copyright &copy; 2008-2013
 The <i>GenomeTools</i> authors.
-Last update: 2014-06-12
+Last update: 2014-07-11
 </div>
 </div>
 <!-- Piwik -->
