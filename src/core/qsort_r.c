@@ -75,9 +75,9 @@ swapfunc(char *a, char *b, int n, int swaptype)
 #define swap(a, b)                                  \
   do {                                              \
     if (swaptype == 0) {                            \
-      GtWord t = *(GtWord *)(a);                        \
-      *(GtWord *)(a) = *(GtWord *)(b);                  \
-      *(GtWord *)(b) = t;                             \
+      GtWord t = *(GtWord *)(a);                    \
+      *(GtWord *)(a) = *(GtWord *)(b);              \
+      *(GtWord *)(b) = t;                           \
     } else                                          \
       swapfunc(a, b, es, swaptype);                 \
   } while (0)
