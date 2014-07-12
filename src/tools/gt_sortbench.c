@@ -22,7 +22,7 @@
 #include "core/assert_api.h"
 #include "core/ma.h"
 #include "core/mathsupport.h"
-#include "core/qsort_r.h"
+#include "core/qsort_r_api.h"
 #include "core/str.h"
 #include "core/timer_api.h"
 #include "core/radix_sort.h"
