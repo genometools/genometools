@@ -17,7 +17,7 @@
 
 #include <math.h>
 #include "core/ma_api.h"
-#include "core/qsort_r.h"
+#include "core/qsort_r_api.h"
 #include "core/array2dim_api.h"
 #include "core/mathsupport.h"
 #include "core/logger.h"

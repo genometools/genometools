@@ -25,7 +25,7 @@
 #include "core/cstr_api.h"
 #include "core/hashtable.h"
 #include "core/ma.h"
-#include "core/qsort_r.h"
+#include "core/qsort_r_api.h"
 #include "core/thread_api.h"
 #include "core/types_api.h"
 
