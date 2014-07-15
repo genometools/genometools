@@ -66,7 +66,7 @@ static void gff3_version_string(GtNodeVisitor *nv)
   GtGFF3Visitor *gff3_visitor = gff3_visitor_cast(nv);
   gt_assert(gff3_visitor);
   if (!gff3_visitor->version_string_shown) {
-    if (gff3_visitor->outfp) {
+    if (!gff3_visitor->outstr) {
       gt_file_xprintf(gff3_visitor->outfp, "%s   %u\n", GT_GFF_VERSION_PREFIX,
                       GT_GFF_VERSION);
     } else {
@@ -98,10 +98,11 @@ static int gff3_visitor_comment_node(GtNodeVisitor *nv, GtCommentNode *cn,
   gff3_visitor = gff3_visitor_cast(nv);
   gt_assert(nv && cn);
   gff3_version_string(nv);
-  if (gff3_visitor->outfp) {
+  if (!gff3_visitor->outstr) {
     gt_file_xprintf(gff3_visitor->outfp, "#%s\n",
                     gt_comment_node_get_comment(cn));
   } else  {
+    gt_str_append_char(gff3_visitor->outstr, '#');
     gt_str_append_cstr(gff3_visitor->outstr, gt_comment_node_get_comment(cn));
     gt_str_append_char(gff3_visitor->outstr, '\n');
   }
@@ -130,13 +131,13 @@ static void show_attribute(const char *attr_name, const char *attr_value,
   gt_assert(attr_name && attr_value && info);
   if (strcmp(attr_name, GT_GFF_ID) && strcmp(attr_name, GT_GFF_PARENT)) {
     if (*info->attribute_shown) {
-      if (info->outfp)
+      if (!info->outstr)
         gt_file_xfputc(';', info->outfp);
       else
         gt_str_append_char(info->outstr, ';');
     } else
       *info->attribute_shown = true;
-    if (info->outfp)
+    if (!info->outstr)
       gt_file_xprintf(info->outfp, "%s=%s", attr_name, attr_value);
     else {
       gt_str_append_cstr(info->outstr, attr_name);
@@ -160,7 +161,7 @@ static int gff3_show_feature_node(GtFeatureNode *fn, void *data,
   gt_assert(fn && gff3_visitor);
 
   /* output leading part */
-  if (gff3_visitor->outfp) {
+  if (!gff3_visitor->outstr) {
     gt_gff3_output_leading(fn, gff3_visitor->outfp);
   } else {
     gt_gff3_output_leading_str(fn, gff3_visitor->outstr);
@@ -168,7 +169,7 @@ static int gff3_show_feature_node(GtFeatureNode *fn, void *data,
 
   /* show unique id part of attributes */
   if ((id = gt_hashmap_get(gff3_visitor->feature_node_to_unique_id_str, fn))) {
-    if (gff3_visitor->outfp)
+    if (!gff3_visitor->outstr)
       gt_file_xprintf(gff3_visitor->outfp, "%s=%s", GT_GFF_ID, gt_str_get(id));
     else {
       gt_str_append_cstr(gff3_visitor->outstr, GT_GFF_ID);
@@ -182,12 +183,12 @@ static int gff3_show_feature_node(GtFeatureNode *fn, void *data,
   parent_features = gt_hashmap_get(gff3_visitor->feature_node_to_id_array, fn);
   if (gt_array_size(parent_features)) {
     if (part_shown) {
-      if (gff3_visitor->outfp)
+      if (!gff3_visitor->outstr)
         gt_file_xfputc(';', gff3_visitor->outfp);
       else
         gt_str_append_char(gff3_visitor->outstr, ';');
     }
-    if (gff3_visitor->outfp)
+    if (!gff3_visitor->outstr)
       gt_file_xprintf(gff3_visitor->outfp, "%s=", GT_GFF_PARENT);
     else {
       gt_str_append_cstr(gff3_visitor->outstr, GT_GFF_PARENT);
@@ -195,12 +196,12 @@ static int gff3_show_feature_node(GtFeatureNode *fn, void *data,
     }
     for (i = 0; i < gt_array_size(parent_features); i++) {
       if (i) {
-        if (gff3_visitor->outfp)
+        if (!gff3_visitor->outstr)
           gt_file_xfputc(',', gff3_visitor->outfp);
         else
           gt_str_append_char(gff3_visitor->outstr, ',');
       }
-      if (gff3_visitor->outfp) {
+      if (!gff3_visitor->outstr) {
         gt_file_xprintf(gff3_visitor->outfp, "%s",
                         *(char**) gt_array_get(parent_features, i));
       } else {
@@ -219,14 +220,17 @@ static int gff3_show_feature_node(GtFeatureNode *fn, void *data,
 
   /* show dot if no attributes have been shown */
   if (!part_shown) {
-    if (gff3_visitor->outfp)
+    if (!gff3_visitor->outstr)
       gt_file_xfputc('.', gff3_visitor->outfp);
     else
       gt_str_append_char(gff3_visitor->outstr, '.');
   }
 
   /* show terminal newline */
-  gt_file_xfputc('\n', gff3_visitor->outfp);
+  if (!gff3_visitor->outstr)
+    gt_file_xfputc('\n', gff3_visitor->outfp);
+  else
+    gt_str_append_char(gff3_visitor->outstr, '\n');
 
   return 0;
 }
@@ -371,7 +375,7 @@ static int gff3_visitor_feature_node(GtNodeVisitor *nv, GtFeatureNode *fn,
      the feature is complete, because no ID attribute has been shown) */
   if (gt_feature_node_has_children(fn) ||
       (gff3_visitor->retain_ids && gt_feature_node_get_attribute(fn, "ID"))) {
-    if (gff3_visitor->outfp)
+    if (!gff3_visitor->outstr)
       gt_file_xprintf(gff3_visitor->outfp, "%s\n", GT_GFF_TERMINATOR);
     else {
       gt_str_append_cstr(gff3_visitor->outstr, GT_GFF_TERMINATOR);
@@ -399,7 +403,7 @@ static int gff3_visitor_meta_node(GtNodeVisitor *nv, GtMetaNode *mn,
       gff3_version_string(nv);
     }
   }
-  if (gff3_visitor->outfp) {
+  if (!gff3_visitor->outstr) {
     gt_file_xprintf(gff3_visitor->outfp, "##%s %s\n",
                     gt_meta_node_get_directive(mn),
                     gt_meta_node_get_data(mn));
@@ -422,7 +426,7 @@ static int gff3_visitor_region_node(GtNodeVisitor *nv, GtRegionNode *rn,
   gff3_visitor = gff3_visitor_cast(nv);
   gt_assert(nv && rn);
   gff3_version_string(nv);
-  if (gff3_visitor->outfp) {
+  if (!gff3_visitor->outstr) {
     gt_file_xprintf(gff3_visitor->outfp, "%s   %s "GT_WU" "GT_WU"\n",
                     GT_GFF_SEQUENCE_REGION,
                     gt_str_get(gt_genome_node_get_seqid((GtGenomeNode*) rn)),
@@ -453,7 +457,7 @@ static int gff3_visitor_sequence_node(GtNodeVisitor *nv, GtSequenceNode *sn,
   gt_assert(nv && sn);
   gff3_version_string(nv);
   if (!gff3_visitor->fasta_directive_shown) {
-    if (gff3_visitor->outfp)
+    if (!gff3_visitor->outstr)
       gt_file_xprintf(gff3_visitor->outfp, "%s\n", GT_GFF_FASTA_DIRECTIVE);
     else {
       gt_str_append_cstr(gff3_visitor->outstr, GT_GFF_FASTA_DIRECTIVE);
@@ -461,7 +465,7 @@ static int gff3_visitor_sequence_node(GtNodeVisitor *nv, GtSequenceNode *sn,
     }
     gff3_visitor->fasta_directive_shown = true;
   }
-  if (gff3_visitor->outfp) {
+  if (!gff3_visitor->outstr) {
     gt_fasta_show_entry(gt_sequence_node_get_description(sn),
                         gt_sequence_node_get_sequence(sn),
                         gt_sequence_node_get_sequence_length(sn),

@@ -26,6 +26,7 @@
 #include "extended/gff3_defines.h"
 #include "extended/gff3_in_stream.h"
 #include "extended/gff3_out_stream_api.h"
+#include "extended/gff3_linesorted_out_stream.h"
 #include "extended/gff3_parser.h"
 #include "extended/gtdatahelp.h"
 #include "extended/load_stream.h"
@@ -39,6 +40,7 @@
 
 typedef struct {
   bool sort,
+       sortlines,
        load,
        retainids,
        checkids,
@@ -89,7 +91,7 @@ static GtOptionParser* gt_gff3_option_parser_new(void *tool_arguments)
   GtOptionParser *op;
   GtOption *sort_option, *load_option, *strict_option, *tidy_option,
            *mergefeat_option, *addintrons_option, *offset_option,
-           *offsetfile_option, *setsource_option, *option;
+           *offsetfile_option, *setsource_option, *sortlines_option, *option;
   gt_assert(arguments);
 
   /* init */
@@ -102,6 +104,14 @@ static GtOptionParser* gt_gff3_option_parser_new(void *tool_arguments)
                                    "file size(s))",
                                    &arguments->sort, false);
   gt_option_parser_add_option(op, sort_option);
+
+  /* -sortlines */
+  sortlines_option = gt_option_new_bool("sortlines", "sort the GFF3 features "
+                                        "on a strict line basis (not sorted as"
+                                        "defined by GenomeTools)",
+                                        &arguments->sortlines, false);
+  gt_option_imply(sortlines_option, sort_option);
+  gt_option_parser_add_option(op, sortlines_option);
 
   /* -strict */
   strict_option = gt_option_new_bool("strict", "be very strict during GFF3 "
@@ -323,12 +333,19 @@ static int gt_gff3_runner(int argc, const char **argv, int parsed_args,
 
   /* create gff3 output stream */
   if (!had_err && arguments->show) {
-    gff3_out_stream = gt_gff3_out_stream_new(last_stream, arguments->outfp);
+    if (arguments->sortlines) {
+      gff3_out_stream = gt_gff3_linesorted_out_stream_new(last_stream,
+                                                          arguments->outfp);
+    } else {
+      gff3_out_stream = gt_gff3_out_stream_new(last_stream, arguments->outfp);
+      gt_gff3_out_stream_set_fasta_width((GtGFF3OutStream*) gff3_out_stream,
+                                         arguments->width);
+      if (arguments->retainids)
+        gt_gff3_out_stream_retain_id_attributes((GtGFF3OutStream*)
+                                                               gff3_out_stream);
+    }
+    gt_assert(gff3_out_stream);
     last_stream = gff3_out_stream;
-    gt_gff3_out_stream_set_fasta_width((GtGFF3OutStream*) last_stream,
-                                       arguments->width);
-    if (arguments->retainids)
-      gt_gff3_out_stream_retain_id_attributes((GtGFF3OutStream*) last_stream);
   }
 
   /* pull the features through the stream and free them afterwards */

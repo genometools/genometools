@@ -22,6 +22,9 @@ file = assert(io.open(gfffile, "r"))
 i = 0
 for line in file:lines() do
   i = i + 1
+  if string.match(line, "^##FASTA") then
+    break
+  end
   if not string.match(line, "^#") then
     f = split(line, "\t")
     if #f < 5 then
