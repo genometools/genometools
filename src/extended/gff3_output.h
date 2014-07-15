@@ -18,10 +18,14 @@
 #ifndef GFF3_OUTPUT_H
 #define GFF3_OUTPUT_H
 
+#include "core/file_api.h"
+#include "core/str_api.h"
 #include "extended/feature_node.h"
 
 /* output the leading part of a genome feature in GFF3 format (i.e., the part
    up to the attributes) */
 void gt_gff3_output_leading(GtFeatureNode*, GtFile*);
+/* like <gt_gff3_output_leading()> but writing to a <GtStr> */
+void gt_gff3_output_leading_str(GtFeatureNode*, GtStr*);
 
 #endif

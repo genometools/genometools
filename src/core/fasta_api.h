@@ -19,6 +19,7 @@
 #define FASTA_API_H
 
 #include "core/file_api.h"
+#include "core/str_api.h"
 #include "core/types_api.h"
 
 /* FASTA module */
@@ -27,5 +28,11 @@
    <outfp>. If <width> is != 0 the sequence is formatted accordingly. */
 void gt_fasta_show_entry(const char *description, const char *sequence,
                          GtUword sequence_length, GtUword width, GtFile *outfp);
+
+/* Append a fasta entry with optional <description> and mandatory <sequence> to
+   <outstr>. If <width> is != 0 the sequence is formatted accordingly. */
+void gt_fasta_show_entry_str(const char *description, const char *sequence,
+                             GtUword sequence_length, GtUword width,
+                             GtStr *outstr);
 
 #endif

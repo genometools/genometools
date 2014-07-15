@@ -43,6 +43,7 @@ struct GtGFF3Visitor {
             *feature_node_to_unique_id_str;
   GtUword fasta_width;
   GtFile *outfp;
+  GtStr *outstr;
   GtCstrTable *used_ids;
 };
 
@@ -54,6 +55,7 @@ typedef struct {
 typedef struct {
   bool *attribute_shown;
   GtFile *outfp;
+  GtStr *outstr;
 } ShowAttributeInfo;
 
 #define gff3_visitor_cast(GV)\
@@ -64,8 +66,15 @@ static void gff3_version_string(GtNodeVisitor *nv)
   GtGFF3Visitor *gff3_visitor = gff3_visitor_cast(nv);
   gt_assert(gff3_visitor);
   if (!gff3_visitor->version_string_shown) {
-    gt_file_xprintf(gff3_visitor->outfp, "%s   %u\n", GT_GFF_VERSION_PREFIX,
-                    GT_GFF_VERSION);
+    if (gff3_visitor->outfp) {
+      gt_file_xprintf(gff3_visitor->outfp, "%s   %u\n", GT_GFF_VERSION_PREFIX,
+                      GT_GFF_VERSION);
+    } else {
+      gt_str_append_cstr(gff3_visitor->outstr, GT_GFF_VERSION_PREFIX);
+      gt_str_append_cstr(gff3_visitor->outstr, "   ");
+      gt_str_append_uint(gff3_visitor->outstr, GT_GFF_VERSION);
+      gt_str_append_char(gff3_visitor->outstr, '\n');
+    }
     gff3_visitor->version_string_shown = true;
   }
 }
@@ -78,6 +87,7 @@ static void gff3_visitor_free(GtNodeVisitor *nv)
   gt_hashmap_delete(gff3_visitor->feature_node_to_id_array);
   gt_hashmap_delete(gff3_visitor->feature_node_to_unique_id_str);
   gt_cstr_table_delete(gff3_visitor->used_ids);
+  gt_str_delete(gff3_visitor->outstr);
 }
 
 static int gff3_visitor_comment_node(GtNodeVisitor *nv, GtCommentNode *cn,
@@ -88,8 +98,13 @@ static int gff3_visitor_comment_node(GtNodeVisitor *nv, GtCommentNode *cn,
   gff3_visitor = gff3_visitor_cast(nv);
   gt_assert(nv && cn);
   gff3_version_string(nv);
-  gt_file_xprintf(gff3_visitor->outfp, "#%s\n",
-                  gt_comment_node_get_comment(cn));
+  if (gff3_visitor->outfp) {
+    gt_file_xprintf(gff3_visitor->outfp, "#%s\n",
+                    gt_comment_node_get_comment(cn));
+  } else  {
+    gt_str_append_cstr(gff3_visitor->outstr, gt_comment_node_get_comment(cn));
+    gt_str_append_char(gff3_visitor->outstr, '\n');
+  }
   return 0;
 }
 
@@ -114,11 +129,20 @@ static void show_attribute(const char *attr_name, const char *attr_value,
   ShowAttributeInfo *info = (ShowAttributeInfo*) data;
   gt_assert(attr_name && attr_value && info);
   if (strcmp(attr_name, GT_GFF_ID) && strcmp(attr_name, GT_GFF_PARENT)) {
-    if (*info->attribute_shown)
-      gt_file_xfputc(';', info->outfp);
-    else
+    if (*info->attribute_shown) {
+      if (info->outfp)
+        gt_file_xfputc(';', info->outfp);
+      else
+        gt_str_append_char(info->outstr, ';');
+    } else
       *info->attribute_shown = true;
-    gt_file_xprintf(info->outfp, "%s=%s", attr_name, attr_value);
+    if (info->outfp)
+      gt_file_xprintf(info->outfp, "%s=%s", attr_name, attr_value);
+    else {
+      gt_str_append_cstr(info->outstr, attr_name);
+      gt_str_append_char(info->outstr, '=');
+      gt_str_append_cstr(info->outstr, attr_value);
+    }
   }
 }
 
@@ -136,25 +160,53 @@ static int gff3_show_feature_node(GtFeatureNode *fn, void *data,
   gt_assert(fn && gff3_visitor);
 
   /* output leading part */
-  gt_gff3_output_leading(fn, gff3_visitor->outfp);
+  if (gff3_visitor->outfp) {
+    gt_gff3_output_leading(fn, gff3_visitor->outfp);
+  } else {
+    gt_gff3_output_leading_str(fn, gff3_visitor->outstr);
+  }
 
   /* show unique id part of attributes */
   if ((id = gt_hashmap_get(gff3_visitor->feature_node_to_unique_id_str, fn))) {
-    gt_file_xprintf(gff3_visitor->outfp, "%s=%s", GT_GFF_ID, gt_str_get(id));
+    if (gff3_visitor->outfp)
+      gt_file_xprintf(gff3_visitor->outfp, "%s=%s", GT_GFF_ID, gt_str_get(id));
+    else {
+      gt_str_append_cstr(gff3_visitor->outstr, GT_GFF_ID);
+      gt_str_append_char(gff3_visitor->outstr, '=');
+      gt_str_append_cstr(gff3_visitor->outstr, gt_str_get(id));
+    }
     part_shown = true;
   }
 
   /* show parent part of attributes */
   parent_features = gt_hashmap_get(gff3_visitor->feature_node_to_id_array, fn);
   if (gt_array_size(parent_features)) {
-    if (part_shown)
-      gt_file_xfputc(';', gff3_visitor->outfp);
-    gt_file_xprintf(gff3_visitor->outfp, "%s=", GT_GFF_PARENT);
+    if (part_shown) {
+      if (gff3_visitor->outfp)
+        gt_file_xfputc(';', gff3_visitor->outfp);
+      else
+        gt_str_append_char(gff3_visitor->outstr, ';');
+    }
+    if (gff3_visitor->outfp)
+      gt_file_xprintf(gff3_visitor->outfp, "%s=", GT_GFF_PARENT);
+    else {
+      gt_str_append_cstr(gff3_visitor->outstr, GT_GFF_PARENT);
+      gt_str_append_char(gff3_visitor->outstr, '=');
+    }
     for (i = 0; i < gt_array_size(parent_features); i++) {
-      if (i)
-        gt_file_xfputc(',', gff3_visitor->outfp);
-      gt_file_xprintf(gff3_visitor->outfp, "%s",
-                      *(char**) gt_array_get(parent_features, i));
+      if (i) {
+        if (gff3_visitor->outfp)
+          gt_file_xfputc(',', gff3_visitor->outfp);
+        else
+          gt_str_append_char(gff3_visitor->outstr, ',');
+      }
+      if (gff3_visitor->outfp) {
+        gt_file_xprintf(gff3_visitor->outfp, "%s",
+                        *(char**) gt_array_get(parent_features, i));
+      } else {
+        gt_str_append_cstr(gff3_visitor->outstr,
+                           *(char**) gt_array_get(parent_features, i));
+      }
     }
     part_shown = true;
   }
@@ -162,11 +214,16 @@ static int gff3_show_feature_node(GtFeatureNode *fn, void *data,
   /* show missing part of attributes */
   info.attribute_shown = &part_shown;
   info.outfp = gff3_visitor->outfp;
+  info.outstr = gff3_visitor->outstr;
   gt_feature_node_foreach_attribute(fn, show_attribute, &info);
 
   /* show dot if no attributes have been shown */
-  if (!part_shown)
-    gt_file_xfputc('.', gff3_visitor->outfp);
+  if (!part_shown) {
+    if (gff3_visitor->outfp)
+      gt_file_xfputc('.', gff3_visitor->outfp);
+    else
+      gt_str_append_char(gff3_visitor->outstr, '.');
+  }
 
   /* show terminal newline */
   gt_file_xfputc('\n', gff3_visitor->outfp);
@@ -314,7 +371,12 @@ static int gff3_visitor_feature_node(GtNodeVisitor *nv, GtFeatureNode *fn,
      the feature is complete, because no ID attribute has been shown) */
   if (gt_feature_node_has_children(fn) ||
       (gff3_visitor->retain_ids && gt_feature_node_get_attribute(fn, "ID"))) {
-    gt_file_xprintf(gff3_visitor->outfp, "%s\n", GT_GFF_TERMINATOR);
+    if (gff3_visitor->outfp)
+      gt_file_xprintf(gff3_visitor->outfp, "%s\n", GT_GFF_TERMINATOR);
+    else {
+      gt_str_append_cstr(gff3_visitor->outstr, GT_GFF_TERMINATOR);
+      gt_str_append_char(gff3_visitor->outstr, '\n');
+    }
   }
 
   return had_err;
@@ -337,9 +399,18 @@ static int gff3_visitor_meta_node(GtNodeVisitor *nv, GtMetaNode *mn,
       gff3_version_string(nv);
     }
   }
-  gt_file_xprintf(gff3_visitor->outfp, "##%s %s\n",
-                  gt_meta_node_get_directive(mn),
-                  gt_meta_node_get_data(mn));
+  if (gff3_visitor->outfp) {
+    gt_file_xprintf(gff3_visitor->outfp, "##%s %s\n",
+                    gt_meta_node_get_directive(mn),
+                    gt_meta_node_get_data(mn));
+
+  } else {
+    gt_str_append_cstr(gff3_visitor->outstr, "##");
+    gt_str_append_cstr(gff3_visitor->outstr, gt_meta_node_get_directive(mn));
+    gt_str_append_char(gff3_visitor->outstr, ' ');
+    gt_str_append_cstr(gff3_visitor->outstr, gt_meta_node_get_data(mn));
+    gt_str_append_char(gff3_visitor->outstr, '\n');
+  }
   return 0;
 }
 
@@ -351,11 +422,25 @@ static int gff3_visitor_region_node(GtNodeVisitor *nv, GtRegionNode *rn,
   gff3_visitor = gff3_visitor_cast(nv);
   gt_assert(nv && rn);
   gff3_version_string(nv);
-  gt_file_xprintf(gff3_visitor->outfp, "%s   %s "GT_WU" "GT_WU"\n",
-                  GT_GFF_SEQUENCE_REGION,
-                  gt_str_get(gt_genome_node_get_seqid((GtGenomeNode*) rn)),
-                  gt_genome_node_get_start((GtGenomeNode*) rn),
-                  gt_genome_node_get_end((GtGenomeNode*) rn));
+  if (gff3_visitor->outfp) {
+    gt_file_xprintf(gff3_visitor->outfp, "%s   %s "GT_WU" "GT_WU"\n",
+                    GT_GFF_SEQUENCE_REGION,
+                    gt_str_get(gt_genome_node_get_seqid((GtGenomeNode*) rn)),
+                    gt_genome_node_get_start((GtGenomeNode*) rn),
+                    gt_genome_node_get_end((GtGenomeNode*) rn));
+  } else {
+    gt_str_append_cstr(gff3_visitor->outstr, GT_GFF_SEQUENCE_REGION);
+    gt_str_append_cstr(gff3_visitor->outstr, "   ");
+    gt_str_append_cstr(gff3_visitor->outstr,
+                      gt_str_get(gt_genome_node_get_seqid((GtGenomeNode*) rn)));
+    gt_str_append_char(gff3_visitor->outstr, ' ');
+    gt_str_append_ulong(gff3_visitor->outstr,
+                                  gt_genome_node_get_start((GtGenomeNode*) rn));
+    gt_str_append_char(gff3_visitor->outstr, ' ');
+    gt_str_append_ulong(gff3_visitor->outstr,
+                                  gt_genome_node_get_end((GtGenomeNode*) rn));
+    gt_str_append_char(gff3_visitor->outstr, '\n');
+  }
   return 0;
 }
 
@@ -368,13 +453,25 @@ static int gff3_visitor_sequence_node(GtNodeVisitor *nv, GtSequenceNode *sn,
   gt_assert(nv && sn);
   gff3_version_string(nv);
   if (!gff3_visitor->fasta_directive_shown) {
-    gt_file_xprintf(gff3_visitor->outfp, "%s\n", GT_GFF_FASTA_DIRECTIVE);
+    if (gff3_visitor->outfp)
+      gt_file_xprintf(gff3_visitor->outfp, "%s\n", GT_GFF_FASTA_DIRECTIVE);
+    else {
+      gt_str_append_cstr(gff3_visitor->outstr, GT_GFF_FASTA_DIRECTIVE);
+      gt_str_append_char(gff3_visitor->outstr, '\n');
+    }
     gff3_visitor->fasta_directive_shown = true;
   }
-  gt_fasta_show_entry(gt_sequence_node_get_description(sn),
-                      gt_sequence_node_get_sequence(sn),
-                      gt_sequence_node_get_sequence_length(sn),
-                      gff3_visitor->fasta_width, gff3_visitor->outfp);
+  if (gff3_visitor->outfp) {
+    gt_fasta_show_entry(gt_sequence_node_get_description(sn),
+                        gt_sequence_node_get_sequence(sn),
+                        gt_sequence_node_get_sequence_length(sn),
+                        gff3_visitor->fasta_width, gff3_visitor->outfp);
+  } else {
+    gt_fasta_show_entry_str(gt_sequence_node_get_description(sn),
+                            gt_sequence_node_get_sequence(sn),
+                            gt_sequence_node_get_sequence_length(sn),
+                            gff3_visitor->fasta_width, gff3_visitor->outstr);
+  }
   return 0;
 }
 
@@ -403,10 +500,8 @@ const GtNodeVisitorClass* gt_gff3_visitor_class()
   return nvc;
 }
 
-GtNodeVisitor* gt_gff3_visitor_new(GtFile *outfp)
+static void gt_gff3_visitor_init(GtGFF3Visitor *gff3_visitor)
 {
-  GtNodeVisitor *nv = gt_node_visitor_create(gt_gff3_visitor_class());
-  GtGFF3Visitor *gff3_visitor = gff3_visitor_cast(nv);
   gff3_visitor->version_string_shown = false;
   gff3_visitor->fasta_directive_shown = false;
   gff3_visitor->id_counter = gt_string_distri_new();
@@ -415,10 +510,28 @@ GtNodeVisitor* gt_gff3_visitor_new(GtFile *outfp)
   gff3_visitor->feature_node_to_unique_id_str =
     gt_hashmap_new(GT_HASH_DIRECT, NULL, (GtFree) gt_str_delete);
   gff3_visitor->fasta_width = 0;
-  gff3_visitor->outfp = outfp;
   gff3_visitor->used_ids = gt_cstr_table_new();
   /* XXX */
   gff3_visitor->retain_ids = getenv("GT_RETAINIDS") ? true : false;
+}
+
+GtNodeVisitor* gt_gff3_visitor_new(GtFile *outfp)
+{
+  GtNodeVisitor *nv = gt_node_visitor_create(gt_gff3_visitor_class());
+  GtGFF3Visitor *gff3_visitor = gff3_visitor_cast(nv);
+  gt_gff3_visitor_init(gff3_visitor);
+  gff3_visitor->outfp = outfp;
+  gff3_visitor->outstr = NULL;
+  return nv;
+}
+
+GtNodeVisitor* gt_gff3_visitor_new_to_str(GtStr *outstr)
+{
+  GtNodeVisitor *nv = gt_node_visitor_create(gt_gff3_visitor_class());
+  GtGFF3Visitor *gff3_visitor = gff3_visitor_cast(nv);
+  gt_gff3_visitor_init(gff3_visitor);
+  gff3_visitor->outfp = NULL;
+  gff3_visitor->outstr = gt_str_ref(outstr);
   return nv;
 }
 

@@ -18,9 +18,12 @@
 #ifndef GFF3_VISITOR_H
 #define GFF3_VISITOR_H
 
+#include "core/str_api.h"
 #include "extended/gff3_visitor_api.h"
 #include "extended/node_visitor.h"
 
 const GtNodeVisitorClass* gt_gff3_visitor_class(void);
+
+GtNodeVisitor*            gt_gff3_visitor_new_to_str(GtStr *outstr);
 
 #endif
