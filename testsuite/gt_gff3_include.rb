@@ -1397,6 +1397,67 @@ Test do
   grep last_stderr, "ends with a blank, removing"
 end
 
+Name "gt gff3 -sortlines (missing -sort) "
+Keywords "gt_gff3 linesorting"
+Test do
+  run_test "#{$bin}gt gff3 -sortlines #{$testdata}eden.gff3", :retval => 1
+  grep last_stderr, "requires option \"-sort\""
+end
+
+Name "gt gff3 -sortlines (standard gene)"
+Keywords "gt_gff3 linesorting"
+Test do
+  run "#{$bin}gt #{$testdata}/gtscripts/check_linesorting.lua #{$testdata}eden.gff3", :retval => 1
+  run_test "#{$bin}gt gff3 -sort #{$testdata}eden.gff3"
+  run "#{$bin}gt #{$testdata}/gtscripts/check_linesorting.lua #{last_stdout}", :retval => 1
+  run_test "#{$bin}gt gff3 -sort -retainids -sortlines #{$testdata}eden.gff3"
+end
+
+Name "gt gff3 -sortlines (three non-overlapping genes)"
+Keywords "gt_gff3 linesorting"
+Test do
+  run "#{$bin}gt #{$testdata}/gtscripts/check_linesorting.lua #{$testdata}gt_gff3_linesort.in.gff3", :retval => 1
+  run_test "#{$bin}gt gff3 -sort -retainids #{$testdata}gt_gff3_linesort.in.gff3 > 1"
+  run "#{$bin}gt #{$testdata}/gtscripts/check_linesorting.lua 1", :retval => 1
+  run_test "#{$bin}gt gff3 -sort -retainids -sortlines #{$testdata}gt_gff3_linesort.in.gff3 > 2"
+  run "#{$bin}gt #{$testdata}/gtscripts/check_linesorting.lua 2"
+  run_test "#{$bin}gt gff3 -sort -retainids 2 > 3"
+  run "diff 1 3"
+end
+
+Name "gt gff3 -sortlines (three partially overlapping genes)"
+Keywords "gt_gff3 linesorting"
+Test do
+  run "#{$bin}gt #{$testdata}/gtscripts/check_linesorting.lua #{$testdata}gt_gff3_linesort2.in.gff3", :retval => 1
+  run_test "#{$bin}gt gff3 -sort -retainids #{$testdata}gt_gff3_linesort2.in.gff3 > 1"
+  run "#{$bin}gt #{$testdata}/gtscripts/check_linesorting.lua 1", :retval => 1
+  run_test "#{$bin}gt gff3 -sort -retainids -sortlines #{$testdata}gt_gff3_linesort2.in.gff3 > 2"
+  run "#{$bin}gt #{$testdata}/gtscripts/check_linesorting.lua 2"
+  run_test "#{$bin}gt gff3 -sort -retainids 2 > 3"
+  run "diff 1 3"
+end
+
+
+Name "gt gff3 -sortlines (empty annotation)"
+Keywords "gt_gff3 linesorting"
+Test do
+  run_test "#{$bin}gt gff3 -sort -retainids #{$testdata}empty.gff3 > 1"
+  run_test "#{$bin}gt gff3 -sort -retainids -sortlines #{$testdata}empty.gff3 > 2"
+  run "diff 1 2"
+end
+
+Name "gt gff3 -sortlines (annotation with sequence)"
+Keywords "gt_gff3 linesorting"
+Test do
+  run "#{$bin}gt #{$testdata}/gtscripts/check_linesorting.lua #{$testdata}/standard_fasta_example.gff3", :retval => 1
+  run_test "#{$bin}gt gff3 -sort -retainids #{$testdata}standard_fasta_example.gff3 > 1"
+  run "#{$bin}gt #{$testdata}/gtscripts/check_linesorting.lua 1", :retval => 1
+  run_test "#{$bin}gt gff3 -sort -retainids -sortlines #{$testdata}standard_fasta_example.gff3 > 2"
+  run "#{$bin}gt #{$testdata}/gtscripts/check_linesorting.lua 2"
+  run_test "#{$bin}gt gff3 -sort -retainids 2 > 3"
+  run "diff 1 3"
+end
+
 def large_gff3_test(name, file)
   Name "gt gff3 #{name}"
   Keywords "gt_gff3 large_gff3"
