@@ -156,8 +156,9 @@ static int gff3_linesorted_out_stream_next(GtNodeStream *ns, GtGenomeNode **gn,
     /* stop if stream is at the end */
     if (had_err || !mygn) {
       /* do not forget to finish last cluster */
-      had_err = gff3_linesorted_out_stream_process_current_cluster(lsos,
-                                                                       err);
+      if (!had_err) {
+        had_err = gff3_linesorted_out_stream_process_current_cluster(lsos, err);
+      }
       break;
     }
 
@@ -267,4 +268,21 @@ GtNodeStream* gt_gff3_linesorted_out_stream_new(GtNodeStream *in_stream,
   lsos->buf = gt_str_new();
   lsos->gff3vis = gt_gff3_visitor_new_to_str(lsos->buf);
   return ns;
+}
+
+void gt_gff3_linesorted_out_stream_set_fasta_width(GtGFF3LinesortedOutStream
+                                                               *gff3_out_stream,
+                                                   GtUword fasta_width)
+{
+  gt_assert(gff3_out_stream);
+  gt_gff3_visitor_set_fasta_width((GtGFF3Visitor*)
+                                  gff3_out_stream->gff3vis, fasta_width);
+}
+
+void gt_gff3_linesorted_out_stream_retain_id_attributes(
+                                     GtGFF3LinesortedOutStream *gff3_out_stream)
+{
+  gt_assert(gff3_out_stream);
+  gt_gff3_visitor_retain_id_attributes((GtGFF3Visitor*)
+                                       gff3_out_stream->gff3vis);
 }

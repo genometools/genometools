@@ -336,6 +336,12 @@ static int gt_gff3_runner(int argc, const char **argv, int parsed_args,
     if (arguments->sortlines) {
       gff3_out_stream = gt_gff3_linesorted_out_stream_new(last_stream,
                                                           arguments->outfp);
+      gt_gff3_linesorted_out_stream_set_fasta_width(
+                                   (GtGFF3LinesortedOutStream*) gff3_out_stream,
+                                   arguments->width);
+      if (arguments->retainids)
+        gt_gff3_linesorted_out_stream_retain_id_attributes(
+                                  (GtGFF3LinesortedOutStream*) gff3_out_stream);
     } else {
       gff3_out_stream = gt_gff3_out_stream_new(last_stream, arguments->outfp);
       gt_gff3_out_stream_set_fasta_width((GtGFF3OutStream*) gff3_out_stream,

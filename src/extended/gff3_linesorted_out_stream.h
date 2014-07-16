@@ -30,15 +30,15 @@ GtNodeStream* gt_gff3_linesorted_out_stream_new(GtNodeStream *in_stream,
 /* Set the width with which the FASTA sequences of <GtSequenceNode>s passed
    through <gff3_out_stream> are shown to <fasta_width>.
    Per default, each FASTA entry is shown on a single line. */
-void          gt_gff3_linesorted_out_stream_set_fasta_width(GtGFF3LinesortedOutStream
-                                                           *gff3_out_stream,
-                                                           GtUword fasta_width);
+void          gt_gff3_linesorted_out_stream_set_fasta_width(
+                                     GtGFF3LinesortedOutStream *gff3_out_stream,
+                                     GtUword fasta_width);
 /* If this method is called upon <gff3_out_stream>, use the original ID
    attributes provided in the input (instead of creating new ones, which
    is the default). Memory consumption for <gff3_out_stream> is raised from O(1)
    to O(<input_size>), because bookkeeping of used IDs becomes necessary to
    avoid ID collisions. */
-void          gt_gff3_linesorted_out_stream_retain_id_attributes(GtGFF3LinesortedOutStream
-                                                              *gff3_out_stream);
+void          gt_gff3_linesorted_out_stream_retain_id_attributes(
+                                    GtGFF3LinesortedOutStream *gff3_out_stream);
 
 #endif
