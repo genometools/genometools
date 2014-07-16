@@ -76,7 +76,7 @@ static int gt_linesorted_gff3_cmp(const void *val1, const void *val2,
   gt_assert(p2scanned == 2);
 
   if (p1s == p2s)
-    return 0;
+    return strcmp(s1, s2);
   if (p1s > p2s)
     return 1;
   else
