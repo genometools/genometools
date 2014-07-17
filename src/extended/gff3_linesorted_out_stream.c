@@ -23,6 +23,7 @@
 #include "core/file_api.h"
 #include "core/log.h"
 #include "core/ma.h"
+#include "core/minmax.h"
 #include "core/parseutils_api.h"
 #include "core/queue.h"
 #include "core/qsort_r_api.h"
@@ -60,13 +61,22 @@ static int gt_linesorted_gff3_cmp(const void *val1, const void *val2,
           p2s = 0, p2e = 0;
   GT_UNUSED int p1scanned = 0,
                 p2scanned = 0;
-  const char *s1 = *(const char**) val1;
-  const char *s2 = *(const char**) val2;
+  const char *s1 = *(const char**) val1,
+             *s2 = *(const char**) val2,
+             *seqidend1, *seqidend2;
+  int str_cmp_result;
 
   if (s1[0] == '#' || s2[0] == '\0')
     return 1;
   if (s2[0] == '#' || s1[0] == '\0')
     return -1;
+
+  seqidend1 = strchr(s1, '\t');
+  seqidend2 = strchr(s2, '\t');
+  str_cmp_result = strncmp(s1, s2, MIN(((size_t) (seqidend1 - s1)),
+                                       ((size_t) (seqidend2 - s2))));
+  if (str_cmp_result != 0)
+    return str_cmp_result;
 
   p1scanned = sscanf(s1, "%*s\t%*s\t%*s\t"GT_WU"\t"GT_WU, &p1s, &p1e);
   gt_assert(p1s != 0);

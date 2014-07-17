@@ -1437,6 +1437,15 @@ Test do
   run "diff 1 3"
 end
 
+Name "gt gff3 -sortlines (multiple sequences)"
+Keywords "gt_gff3 linesorting"
+Test do
+  run "#{$bin}gt #{$testdata}/gtscripts/check_linesorting.lua #{$testdata}encode_known_genes_Mar07.gff3", :retval => 1
+  run_test "#{$bin}gt gff3 -sort -retainids #{$testdata}encode_known_genes_Mar07.gff3 > 1"
+  run "#{$bin}gt #{$testdata}/gtscripts/check_linesorting.lua 1", :retval => 1
+  run_test "#{$bin}gt gff3 -sort -retainids -sortlines #{$testdata}encode_known_genes_Mar07.gff3 > 2"
+  run "#{$bin}gt #{$testdata}/gtscripts/check_linesorting.lua 2"
+end
 
 Name "gt gff3 -sortlines (empty annotation)"
 Keywords "gt_gff3 linesorting"
