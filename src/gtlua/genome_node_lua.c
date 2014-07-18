@@ -17,6 +17,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#include <string.h>
 #include "lauxlib.h"
 #include "core/assert_api.h"
 #include "core/symbol_api.h"
@@ -297,6 +298,55 @@ static int genome_node_lua_add_child(lua_State *L)
   luaL_argcheck(L, cf, 2, "not a feature node");
   gt_feature_node_add_child(pf, (GtFeatureNode*)
                                 gt_genome_node_ref((GtGenomeNode*) cf));
+  return 0;
+}
+
+static int genome_node_lua_add_attribute(lua_State *L)
+{
+  GtGenomeNode **node;
+  const char *key, *val;
+  GtFeatureNode *f;
+  node = check_genome_node(L, 1);
+  f = gt_feature_node_try_cast(*node);
+  luaL_argcheck(L, f, 1, "not a feature node");
+  key = luaL_checkstring(L, 2);
+  luaL_argcheck(L, !gt_feature_node_get_attribute(f, key), 2,
+                "attribute already present");
+  val = luaL_checkstring(L, 3);
+  gt_feature_node_add_attribute(f, key, val);
+  return 0;
+}
+
+static int genome_node_lua_remove_attribute(lua_State *L)
+{
+  GtGenomeNode **node;
+  const char *key;
+  GtFeatureNode *f;
+  node = check_genome_node(L, 1);
+  f = gt_feature_node_try_cast(*node);
+  luaL_argcheck(L, f, 1, "not a feature node");
+  key = luaL_checkstring(L, 2);
+  luaL_argcheck(L, gt_feature_node_get_attribute(f, key), 2,
+                "attribute not present in node");
+  gt_feature_node_remove_attribute(f, key);
+  return 0;
+}
+
+static int genome_node_lua_set_attribute(lua_State *L)
+{
+  GtGenomeNode **node;
+  const char *key, *val;
+  GtFeatureNode *f;
+  node = check_genome_node(L, 1);
+  f = gt_feature_node_try_cast(*node);
+  luaL_argcheck(L, f, 1, "not a feature node");
+  key = luaL_checkstring(L, 2);
+  luaL_argcheck(L, strlen(key) > 0, 2,
+                "key must have length > 0");
+  val = luaL_checkstring(L, 3);
+  luaL_argcheck(L, strlen(key) > 0, 3,
+                "value must have length > 0");
+  gt_feature_node_set_attribute(f, key, val);
   return 0;
 }
 
@@ -615,6 +665,9 @@ static const struct luaL_Reg genome_node_lib_m [] = {
   { "get_attribute", feature_node_lua_get_attribute },
   { "get_exons", feature_node_lua_get_exons },
   { "accept", genome_node_lua_accept },
+  { "add_attribute", genome_node_lua_add_attribute },
+  { "remove_attribute", genome_node_lua_remove_attribute },
+  { "set_attribute", genome_node_lua_set_attribute },
   { "add_child", genome_node_lua_add_child },
   { "mark", genome_node_lua_mark },
   { "is_marked", genome_node_lua_is_marked },
