@@ -39,3 +39,31 @@ void gt_gff3_output_leading(GtFeatureNode *fn, GtFile *outfp)
                      GT_STRAND_CHARS[gt_feature_node_get_strand(fn)],
                      GT_PHASE_CHARS[gt_feature_node_get_phase(fn)]);
 }
+
+void gt_gff3_output_leading_str(GtFeatureNode *fn, GtStr *outstr)
+{
+  GtGenomeNode *gn;
+  gt_assert(fn && outstr);
+  gn = (GtGenomeNode*) fn;
+  gt_str_append_str(outstr, gt_genome_node_get_seqid(gn));
+  gt_str_append_char(outstr, '\t');
+  gt_str_append_cstr(outstr, gt_feature_node_get_source(fn));
+  gt_str_append_char(outstr, '\t');
+  gt_str_append_cstr(outstr, gt_feature_node_get_type(fn));
+  gt_str_append_char(outstr, '\t');
+  gt_str_append_ulong(outstr, gt_genome_node_get_start(gn));
+  gt_str_append_char(outstr, '\t');
+  gt_str_append_ulong(outstr, gt_genome_node_get_end(gn));
+  gt_str_append_char(outstr, '\t');
+  if (gt_feature_node_score_is_defined(fn)) {
+    char buf[BUFSIZ];
+    (void) snprintf(buf, BUFSIZ, "%.3g", gt_feature_node_get_score(fn));
+    gt_str_append_cstr(outstr, buf);
+  } else
+    gt_str_append_char(outstr, '.');
+  gt_str_append_char(outstr, '\t');
+  gt_str_append_char(outstr, GT_STRAND_CHARS[gt_feature_node_get_strand(fn)]);
+  gt_str_append_char(outstr, '\t');
+  gt_str_append_char(outstr, GT_PHASE_CHARS[gt_feature_node_get_phase(fn)]);
+  gt_str_append_char(outstr, '\t');
+}

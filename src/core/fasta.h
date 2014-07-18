@@ -20,6 +20,7 @@
 
 #include "core/fasta_api.h"
 #include "core/file.h"
+#include "core/str_api.h"
 
 /* Print a fasta entry with optional <description> and <suffix> plus mandatory
    <sequence> to <outfp>. If <width> is != 0 the sequence is formatted
@@ -29,5 +30,14 @@ void gt_fasta_show_entry_with_suffix(const char *description,
                                      GtUword sequence_length,
                                      const char *suffix, GtUword width,
                                      GtFile *outfp);
+
+/* Print a fasta entry with optional <description> and <suffix> plus mandatory
+   <sequence> to <outfp>. If <width> is != 0 the sequence is formatted
+   accordingly. */
+void gt_fasta_show_entry_with_suffix_str(const char *description,
+                                         const char *sequence,
+                                         GtUword sequence_length,
+                                         const char *suffix, GtUword width,
+                                         GtStr *outstr);
 
 #endif

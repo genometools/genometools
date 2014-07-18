@@ -28,6 +28,14 @@ void gt_fasta_show_entry(const char *description, const char *sequence,
                                   width, outfp);
 }
 
+void gt_fasta_show_entry_str(const char *description, const char *sequence,
+                             GtUword sequence_length, GtUword width,
+                             GtStr *outstr)
+{
+  gt_fasta_show_entry_with_suffix_str(description, sequence, sequence_length,
+                                      NULL, width, outstr);
+}
+
 void gt_fasta_show_entry_with_suffix(const char *description,
                                      const char *sequence,
                                      GtUword sequence_length,
@@ -53,4 +61,31 @@ void gt_fasta_show_entry_with_suffix(const char *description,
       gt_file_xfputc(suffix[i-sequence_length], outfp);
   }
   gt_file_xfputc('\n', outfp);
+}
+
+void gt_fasta_show_entry_with_suffix_str(const char *description,
+                                         const char *sequence,
+                                         GtUword sequence_length,
+                                         const char *suffix, GtUword width,
+                                         GtStr *outstr)
+{
+  GtUword i, current_length, suffix_length;
+  gt_assert(sequence && outstr);
+  gt_str_append_char(outstr, GT_FASTA_SEPARATOR);
+  if (description)
+    gt_str_append_cstr(outstr, description);
+  gt_str_append_char(outstr, '\n');
+  suffix_length = suffix ? strlen(suffix) : 0;
+  for (i = 0, current_length = 0; i < sequence_length + suffix_length;
+       i++, current_length++) {
+    if (width && current_length == width) {
+      gt_str_append_char(outstr, '\n');
+      current_length = 0;
+    }
+    if (i < sequence_length)
+      gt_str_append_char(outstr, sequence[i]);
+    else
+      gt_str_append_char(outstr, suffix[i-sequence_length]);
+  }
+  gt_str_append_char(outstr, '\n');
 }

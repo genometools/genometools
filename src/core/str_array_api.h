@@ -51,7 +51,7 @@ void          gt_str_array_set_size(GtStrArray *str_array, GtUword size);
 /* Set the size of <str_array> to 0. */
 void          gt_str_array_reset(GtStrArray *str_array);
 /* Return the number of strings stored in <str_array>. */
-GtUword gt_str_array_size(const GtStrArray *str_array);
+GtUword       gt_str_array_size(const GtStrArray *str_array);
 /* Delete <str_array>. */
 void          gt_str_array_delete(GtStrArray *str_array);
 

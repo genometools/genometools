@@ -1,0 +1,49 @@
+##gff-version	3
+##sequence-region	seq1	1	1400000
+#comment
+seq1	.	gene	1644	11288	.	+	.	ID=feat1;
+seq1	.	mRNA	1644	11288	.	+	.	ID=feat1.1;Parent=feat1;
+seq1	.	CDS	1644	2547	.	+	0	ID=feat1.1:exon:1;Parent=feat1.1;
+seq1	.	CDS	3448	4477	.	+	2	ID=feat1.1:exon:2;Parent=feat1.1;
+seq1	.	CDS	4513	4701	.	+	1	ID=feat1.1:exon:3;Parent=feat1.1;
+seq1	.	CDS	4837	5221	.	+	1	ID=feat1.1:exon:4;Parent=feat1.1;
+seq1	.	CDS	5409	5733	.	+	0	ID=feat1.1:exon:5;Parent=feat1.1;
+seq1	.	CDS	5823	6200	.	+	2	ID=feat1.1:exon:6;Parent=feat1.1;
+seq1	.	CDS	6383	7365	.	+	2	ID=feat1.1:exon:7;Parent=feat1.1;
+seq1	.	CDS	7416	7788	.	+	0	ID=feat1.1:exon:8;Parent=feat1.1;
+seq1	.	CDS	7837	8312	.	+	2	ID=feat1.1:exon:9;Parent=feat1.1;
+seq1	.	CDS	8354	9695	.	+	0	ID=feat1.1:exon:10;Parent=feat1.1;
+seq1	.	CDS	9919	11288	.	+	2	ID=feat1.1:exon:11;Parent=feat1.1;
+seq1	.	polypeptide	1644	11288	.	+	.	Derives_from=feat1.1;
+###
+seq1	.	gene	11644	111288	.	+	.	ID=feat2;
+seq1	.	mRNA	11644	111288	.	+	.	ID=feat2.1;Parent=feat2;
+seq1	.	CDS	11644	12547	.	+	0	ID=feat2.1:exon:1;Parent=feat2.1;
+seq1	.	CDS	13448	14477	.	+	2	ID=feat2.1:exon:2;Parent=feat2.1;
+seq1	.	CDS	14513	14701	.	+	1	ID=feat2.1:exon:3;Parent=feat2.1;
+seq1	.	CDS	14837	15221	.	+	1	ID=feat2.1:exon:4;Parent=feat2.1;
+seq1	.	CDS	15409	15733	.	+	0	ID=feat2.1:exon:5;Parent=feat2.1;
+seq1	.	CDS	15823	16200	.	+	2	ID=feat2.1:exon:6;Parent=feat2.1;
+seq1	.	CDS	16383	17365	.	+	2	ID=feat2.1:exon:7;Parent=feat2.1;
+seq1	.	CDS	17416	17788	.	+	0	ID=feat2.1:exon:8;Parent=feat2.1;
+seq1	.	CDS	17837	18312	.	+	2	ID=feat2.1:exon:9;Parent=feat2.1;
+seq1	.	CDS	18354	19695	.	+	0	ID=feat2.1:exon:10;Parent=feat2.1;
+seq1	.	CDS	19919	111288	.	+	2	ID=feat2.1:exon:11;Parent=feat2.1;
+###
+seq1	.	polypeptide	11644	111288	.	+	.	Derives_from=feat2.1;
+###
+seq1	.	gene	121644	1211288	.	+	.	ID=feat3;
+seq1	.	mRNA	121644	1211288	.	+	.	ID=feat3.1;Parent=feat3;
+seq1	.	CDS	121644	122547	.	+	0	ID=feat3.1:exon:1;Parent=feat3.1;
+seq1	.	CDS	123448	124477	.	+	2	ID=feat3.1:exon:2;Parent=feat3.1;
+seq1	.	CDS	124513	124701	.	+	1	ID=feat3.1:exon:3;Parent=feat3.1;
+seq1	.	CDS	124837	125221	.	+	1	ID=feat3.1:exon:4;Parent=feat3.1;
+seq1	.	CDS	125409	125733	.	+	0	ID=feat3.1:exon:5;Parent=feat3.1;
+seq1	.	CDS	125823	126200	.	+	2	ID=feat3.1:exon:6;Parent=feat3.1;
+seq1	.	CDS	126383	127365	.	+	2	ID=feat3.1:exon:7;Parent=feat3.1;
+seq1	.	CDS	127416	127788	.	+	0	ID=feat3.1:exon:8;Parent=feat3.1;
+seq1	.	CDS	127837	128312	.	+	2	ID=feat3.1:exon:9;Parent=feat3.1;
+seq1	.	CDS	128354	129695	.	+	0	ID=feat3.1:exon:10;Parent=feat3.1;
+seq1	.	CDS	129919	1211288	.	+	2	ID=feat3.1:exon:11;Parent=feat3.1;
+###
+seq1	.	polypeptide	121644	1211288	.	+	.	Derives_from=feat3.1;
