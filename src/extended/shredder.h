@@ -32,10 +32,11 @@ void        gt_shredder_set_overlap(GtShredder*, GtUword overlap);
 /* Set the <probabilty> that a generated fragment is returned. */
 void        gt_shredder_set_sample_probability(GtShredder*, double probability);
 /* Return the next shredded fragment or NULL if no additional fragment is
-   available. The length of the fragment is stored in <fragment_length> and
-   <desc> is set to the description of the corresponding sequence.
+   available. The offset and length of the fragment is stored in
+   <fragment_offset> and <fragment_length>. <desc> is set to the description of
+   the corresponding sequence.
    The caller takes ownership of the returned sequence. */
-char*       gt_shredder_shred(GtShredder*, GtUword *fragment_length,
-                              GtStr *desc);
+char*       gt_shredder_shred(GtShredder*, GtUword *fragment_offset,
+                              GtUword *fragment_length, GtStr *desc);
 
 #endif

@@ -26,14 +26,15 @@
 #include "tools/gt_shredder.h"
 
 typedef struct {
-  GtUword coverage,
-                minlength,
-                maxlength,
-                overlap,
-                width;
-  double sample_probability;
   GtOutputFileInfo *ofi;
   GtFile *outfp;
+  GtUword coverage,
+          minlength,
+          maxlength,
+          overlap,
+          width;
+  double sample_probability;
+  bool clip_desc;
 } ShredderArguments;
 
 static void* gt_shredder_arguments_new(void)
@@ -80,6 +81,11 @@ static GtOptionParser* gt_shredder_option_parser_new(void *tool_arguments)
                                 "sequences pieces with the given probability",
                                 &arguments->sample_probability, 1.0);
   gt_option_parser_add_option(op, o);
+  o = gt_option_new_bool("clipdesc", "clip descriptions after first space "
+                         "(fooled by '\t') adds offset and length to ensure "
+                         "unique identifier",
+                         &arguments->clip_desc, false);
+  gt_option_parser_add_option(op, o);
   o = gt_option_new_width(&arguments->width);
   gt_option_parser_add_option(op, o);
   gt_output_file_info_register_options(arguments->ofi, op, &arguments->outfp);
@@ -122,15 +128,27 @@ static int gt_shredder_runner(GT_UNUSED int argc, const char **argv,
   while (!(had_err = gt_bioseq_iterator_next(bsi, &bioseq, err)) && bioseq) {
     for (i = 0; i < arguments->coverage; i++) {
       GtShredder *shredder;
-      GtUword fragment_length;
+      GtUword fragment_offset,
+              fragment_length;
       char *fragment;
       shredder = gt_shredder_new(bioseq, arguments->minlength,
                               arguments->maxlength);
       gt_shredder_set_overlap(shredder, arguments->overlap);
       gt_shredder_set_sample_probability(shredder,
                                          arguments->sample_probability);
-      while ((fragment = gt_shredder_shred(shredder, &fragment_length, desc))) {
-        gt_str_append_cstr(desc, " [shreddered fragment]");
+      while ((fragment = gt_shredder_shred(shredder, &fragment_offset,
+                                           &fragment_length, desc))) {
+        if (arguments->clip_desc) {
+          gt_str_chomp(desc, ' ');
+          gt_str_append_cstr(desc, "_");
+          gt_str_append_ulong(desc, fragment_offset);
+          gt_str_append_cstr(desc, "_");
+          gt_str_append_ulong(desc, fragment_length);
+          gt_str_append_cstr(desc, " [shreddered fragment]");
+        }
+        else {
+          gt_str_append_cstr(desc, " [shreddered fragment]");
+        }
         gt_fasta_show_entry(gt_str_get(desc), fragment, fragment_length,
                             arguments->width, arguments->outfp);
         gt_free(fragment);
