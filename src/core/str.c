@@ -189,7 +189,7 @@ void gt_str_set_length(GtStr *s, GtUword length)
   s->length = length;
 }
 
-void gt_str_chomp(GtStr *s, char c)
+void gt_str_clip_suffix(GtStr *s, char c)
 {
   char *found;
   gt_assert(s != NULL);

@@ -139,7 +139,7 @@ static int gt_shredder_runner(GT_UNUSED int argc, const char **argv,
       while ((fragment = gt_shredder_shred(shredder, &fragment_offset,
                                            &fragment_length, desc))) {
         if (arguments->clip_desc) {
-          gt_str_chomp(desc, ' ');
+          gt_str_clip_suffix(desc, ' ');
           gt_str_append_cstr(desc, "_");
           gt_str_append_ulong(desc, fragment_offset);
           gt_str_append_cstr(desc, "_");

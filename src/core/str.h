@@ -25,7 +25,7 @@
 /* never returns NULL, not always '\0' terminated */
 void*         gt_str_get_mem(const GtStr*);
 /* Gready remove end of <s> beginning with first occurrence of <c> */
-void          gt_str_chomp(GtStr *s, char c);
+void          gt_str_clip_suffix(GtStr *s, char c);
 /* Read the next line from file pointer <fpin> and store the result in <str>
    (without the terminal newline). If the end of file <fpin> is reached, <EOF>
    is returned, otherwise 0. */
