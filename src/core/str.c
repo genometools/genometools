@@ -195,7 +195,7 @@ void gt_str_clip_suffix(GtStr *s, char c)
   gt_assert(s != NULL);
   s->cstr[s->length] = '\0';
   found = strchr(s->cstr, (int) c);
-  s->length = (GtUword) (found - s->cstr);
+  s->length = (found != NULL) ? (GtUword) (found - s->cstr) : s->length;
 }
 
 void gt_str_reset(GtStr *s)
