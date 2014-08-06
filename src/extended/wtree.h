@@ -41,7 +41,7 @@ GtWtreeSymbol gt_wtree_access(GtWtree *wtree,
 /* Returns the number of symbols <symbol> in the prefix of <wtree> upto position
    <pos>. Note that <pos> < length of <wtree>.
    Returns ULONG_MAX if function is not implemented. */
-GtUword gt_wtree_rank(GtWtree *wtree,
+GtUword       gt_wtree_rank(GtWtree *wtree,
                             GtUword pos,
                             GtWtreeSymbol symbol);
 
@@ -49,16 +49,16 @@ GtUword gt_wtree_rank(GtWtree *wtree,
    <wtree> contains less than <i> symbols. Note that 0 < <i> <= length of
    <wtree>.
    Returns ULONG_MAX if function is not implemented. */
-GtUword gt_wtree_select(GtWtree *wtree,
+GtUword       gt_wtree_select(GtWtree *wtree,
                               GtUword i,
                               GtWtreeSymbol symbol);
 
 /* Returns the length of the sequence/permutation encoded by <wtree>. */
-GtUword gt_wtree_length(GtWtree *wtree);
+GtUword       gt_wtree_length(GtWtree *wtree);
 
 /* Returns the number of distinct symbols recognized by <wtree>. Corresponding
    to alphabet or set-size. */
-GtUword gt_wtree_num_of_symbols(GtWtree *wtree);
+GtUword       gt_wtree_num_of_symbols(GtWtree *wtree);
 
 /* Frees all memory associated with <wtree>. */
 void          gt_wtree_delete(GtWtree *wtree);

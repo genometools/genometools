@@ -140,19 +140,25 @@ static int bioseq_fill(GtBioseq *bs, bool recreate, GtError *err)
         *bioseq_md5_file = NULL,
         *bioseq_des_file = NULL;
   int had_err = 0;
+  GtStr *bioseq_basename;
 
   gt_assert(!bs->encseq);
 
+  if (bs->use_stdin)
+    bioseq_basename = gt_str_new_cstr("stdin");
+  else
+    bioseq_basename = bs->sequence_file;
+
   /* construct file names */
-  bioseq_index_file = gt_str_clone(bs->sequence_file);
+  bioseq_index_file = gt_str_clone(bioseq_basename);
   gt_str_append_cstr(bioseq_index_file, GT_ENCSEQFILESUFFIX);
-  bioseq_ois_file = gt_str_clone(bs->sequence_file);
+  bioseq_ois_file = gt_str_clone(bioseq_basename);
   gt_str_append_cstr(bioseq_ois_file, GT_OISTABFILESUFFIX);
-  bioseq_sds_file = gt_str_clone(bs->sequence_file);
+  bioseq_sds_file = gt_str_clone(bioseq_basename);
   gt_str_append_cstr(bioseq_sds_file, GT_SDSTABFILESUFFIX);
-  bioseq_md5_file = gt_str_clone(bs->sequence_file);
+  bioseq_md5_file = gt_str_clone(bioseq_basename);
   gt_str_append_cstr(bioseq_md5_file, GT_MD5TABFILESUFFIX);
-  bioseq_des_file = gt_str_clone(bs->sequence_file);
+  bioseq_des_file = gt_str_clone(bioseq_basename);
   gt_str_append_cstr(bioseq_des_file, GT_DESTABFILESUFFIX);
 
   /* construct the bioseq files if necessary */
@@ -164,7 +170,7 @@ static int bioseq_fill(GtBioseq *bs, bool recreate, GtError *err)
       !gt_file_exists(gt_str_get(bioseq_des_file)) ||
       gt_file_is_newer(gt_str_get(bs->sequence_file),
                        gt_str_get(bioseq_index_file))) {
-    had_err = construct_bioseq_files(bs, bs->sequence_file, err);
+    had_err = construct_bioseq_files(bs, bioseq_basename, err);
   }
 
   if (!had_err) {
@@ -174,7 +180,7 @@ static int bioseq_fill(GtBioseq *bs, bool recreate, GtError *err)
     gt_encseq_loader_require_description_support(el);
     gt_encseq_loader_require_md5_support(el);
     gt_encseq_loader_require_multiseq_support(el);
-    bs->encseq = gt_encseq_loader_load(el, gt_str_get(bs->sequence_file), err);
+    bs->encseq = gt_encseq_loader_load(el, gt_str_get(bioseq_basename), err);
     if (bs->encseq == NULL) {
       had_err = -1;
       gt_assert(gt_error_is_set(err));
@@ -186,6 +192,8 @@ static int bioseq_fill(GtBioseq *bs, bool recreate, GtError *err)
   }
 
   /* free */
+  if (bs->use_stdin)
+    gt_str_delete(bioseq_basename);
   gt_str_delete(bioseq_index_file);
   gt_str_delete(bioseq_ois_file);
   gt_str_delete(bioseq_md5_file);
