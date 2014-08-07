@@ -82,8 +82,8 @@ static GtOptionParser* gt_shredder_option_parser_new(void *tool_arguments)
                                 &arguments->sample_probability, 1.0);
   gt_option_parser_add_option(op, o);
   o = gt_option_new_bool("clipdesc", "clip descriptions after first space "
-                         "(fooled by '\t') adds offset and length to ensure "
-                         "unique identifier",
+                         "(fooled by '\\t', '\\n' etc) adds offset and length "
+                         "to ensure unique identifier",
                          &arguments->clip_desc, false);
   gt_option_parser_add_option(op, o);
   o = gt_option_new_width(&arguments->width);
