@@ -481,8 +481,6 @@ GtFeatureNode* gt_feature_node_get_multi_representative(GtFeatureNode *fn)
             !gt_feature_node_is_pseudo(fn));
   if (fn->representative) {
     gt_assert(gt_feature_node_is_multi(fn->representative));
-    gt_assert(gt_feature_node_get_multi_representative(fn->representative) ==
-              fn->representative);
     return fn->representative;
   }
   return fn; /* is itself the representative */
