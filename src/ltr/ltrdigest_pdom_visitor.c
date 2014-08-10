@@ -32,6 +32,7 @@
 #include "core/codon_iterator_simple_api.h"
 #include "core/cstr_api.h"
 #include "core/cstr_array.h"
+#include "core/grep_api.h"
 #include "core/hashmap.h"
 #include "core/log.h"
 #include "core/ma.h"
@@ -329,7 +330,6 @@ static int gt_ltrdigest_pdom_visitor_parse_alignments(GT_UNUSED
                                                      GtError *err)
 {
   int had_err = 0, cur_domain = GT_UNDEF_INT, line = GT_UNDEF_INT;
-  bool first_align_line = false;
   int mod_val = 4;
   GtHMMERSingleHit *hit = NULL;
   gt_assert(lv && instream && status);
@@ -348,26 +348,12 @@ static int gt_ltrdigest_pdom_visitor_parse_alignments(GT_UNUSED
       gt_assert(hit && !hit->alignment);
       hit->alignment = gt_str_new();
       hit->aastring = gt_str_new();
-      first_align_line = true;
       mod_val = 4;
+      line = 0;
     } else {
-      bool run = true;
-      char junkbuf[BUFSIZ];
-      if (first_align_line) {
-        /* some models contain consensus structure annotation -- in this case
-           there is an additional line in the output which must be taken
-           into account */
-        line = 0;
-        if (1 == sscanf(buf, "%*s %s", junkbuf)) {
-          if (0 == strcmp(junkbuf, "CS") || 0 == strcmp(junkbuf, "RF")) {
-            mod_val = 5;
-            line = -1;
-            run = false;
-          }
-        }
-        first_align_line = false;
-      }
-      if (run) {
+      bool junk_match = false;
+      gt_grep(&junk_match, "(CS|RF)$", buf, NULL);
+      if (!junk_match) {
         gt_assert(hit && hit->alignment);
         gt_str_append_cstr(hit->alignment, buf);
         gt_str_append_char(hit->alignment, '\n');
@@ -387,8 +373,8 @@ static int gt_ltrdigest_pdom_visitor_parse_alignments(GT_UNUSED
             }
             break;
         }
+        line++;
       }
-      line++;
     }
     had_err = pdom_parser_get_next_line(buf, instream, err);
   }
