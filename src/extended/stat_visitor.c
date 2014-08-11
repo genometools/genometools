@@ -100,7 +100,7 @@ static void compute_type_statistics(GtFeatureNode *fn, GtStatVisitor *sv)
       range = gt_genome_node_get_range((GtGenomeNode*) fn);
       gt_disc_distri_add(sv->gene_length_distribution, gt_range_length(&range));
     }
-    if (sv->gene_score_distribution) {
+    if (sv->gene_score_distribution && gt_feature_node_score_is_defined(fn)) {
       gt_disc_distri_add(sv->gene_score_distribution,
                          gt_feature_node_get_score(fn) * 100.0);
     }
