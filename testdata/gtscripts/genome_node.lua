@@ -162,6 +162,7 @@ cn = gt.comment_node_new("bar")
 assert(cn:get_comment() == "bar")
 cn = gt.comment_node_new(42)
 assert(cn:get_comment() == "42")
+cn:get_range()
 
 -- testing gt.sequence_node_new
 rval, err = pcall(gt.sequence_node_new, nil)

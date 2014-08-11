@@ -47,6 +47,12 @@ Test do
   run_test "#{$bin}gt #{$testdata}gtscripts/genome_node.lua"
 end
 
+Name "genome node required methods for all node types"
+Keywords "gt_scripts"
+Test do
+  run_test "#{$bin}gt #{$testdata}gtscripts/required_methods.lua #{$testdata}/all_node_types.gff3"
+end
+
 Name "genome_stream bindings"
 Keywords "gt_scripts"
 Test do
