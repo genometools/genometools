@@ -15,12 +15,14 @@
 */
 
 #include "core/class_alloc_lock.h"
+#include "core/unused_api.h"
 #include "extended/eof_node_api.h"
 #include "extended/genome_node_rep.h"
 #include "extended/node_visitor.h"
 
 struct GtEOFNode {
   const GtGenomeNode parent_instance;
+  GtStr *idstr;
 };
 
 #define gt_eof_node_cast(eof_node) \
@@ -34,18 +36,51 @@ static int eof_node_accept(GtGenomeNode *gn, GtNodeVisitor *nv, GtError *err)
   return gt_node_visitor_visit_eof_node(nv, eof, err);
 }
 
+static GtRange eof_node_get_range(GT_UNUSED GtGenomeNode *gn)
+{
+  GtRange range;
+  range.start = 0;
+  range.end = 0;
+  return range;
+}
+
+static void eof_node_free(GtGenomeNode *gn)
+{
+  GtEOFNode *eof;
+  eof = gt_eof_node_cast(gn);
+  if (eof->idstr)
+    gt_str_delete(eof->idstr);
+}
+
+static GtStr* eof_node_get_idstr(GT_UNUSED GtGenomeNode *gn)
+{
+  GtEOFNode *eof;
+  eof = gt_eof_node_cast(gn);
+  if (!eof->idstr) {
+    eof->idstr = gt_str_new_cstr(gt_genome_node_get_filename(gn));
+  }
+  return eof->idstr;
+}
+
+static void eof_node_change_seqid(GT_UNUSED GtGenomeNode *gn,
+                                  GT_UNUSED GtStr *seqid)
+{
+  /* do nothing */
+  return;
+}
+
 const GtGenomeNodeClass* gt_eof_node_class()
 {
   static const GtGenomeNodeClass *gnc = NULL;
   gt_class_alloc_lock_enter();
   if (!gnc) {
     gnc = gt_genome_node_class_new(sizeof (GtEOFNode),
+                                   eof_node_free,
                                    NULL,
+                                   eof_node_get_idstr,
+                                   eof_node_get_range,
                                    NULL,
-                                   NULL,
-                                   NULL,
-                                   NULL,
-                                   NULL,
+                                   eof_node_change_seqid,
                                    eof_node_accept);
   }
   gt_class_alloc_lock_leave();
@@ -54,7 +89,11 @@ const GtGenomeNodeClass* gt_eof_node_class()
 
 GtGenomeNode* gt_eof_node_new(void)
 {
-  return gt_genome_node_create(gt_eof_node_class());
+  GtEOFNode *eof;
+  GtGenomeNode *gn = gt_genome_node_create(gt_eof_node_class());
+  eof = gt_eof_node_cast(gn);
+  eof->idstr = NULL;
+  return gn;
 }
 
 GtEOFNode* gt_eof_node_try_cast(GtGenomeNode *gn)
