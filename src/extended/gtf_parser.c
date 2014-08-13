@@ -327,26 +327,30 @@ static int construct_genes(GT_UNUSED void *key, void *value, void *data,
       gt_assert(had_err || gt_str_cmp(gene_seqid,
                                       gt_genome_node_get_seqid(gn)) == 0);
     }
+  }
 
-    if (!had_err) {
-      gene_node = gt_feature_node_new(gene_seqid, gt_ft_gene, gene_range.start,
-                                      gene_range.end, gene_strand);
+  if (!had_err) {
+    gene_node = gt_feature_node_new(gene_seqid, gt_ft_gene, gene_range.start,
+                                    gene_range.end, gene_strand);
 
-      if ((gname = gt_hashmap_get(cinfo->gene_id_to_name_mapping,
-                                (const char*) key)) && strlen(gname) > 0) {
-        gt_feature_node_add_attribute((GtFeatureNode*) gene_node, GT_GFF_NAME,
-                                        gname);
-      }
+    if ((gname = gt_hashmap_get(cinfo->gene_id_to_name_mapping,
+                              (const char*) key)) && strlen(gname) > 0) {
+      gt_feature_node_add_attribute((GtFeatureNode*) gene_node, GT_GFF_NAME,
+                                      gname);
+    }
 
-      /* register children */
-      for (i = 0; i < gt_array_size(mRNAs); i++) {
-        gn = *(GtGenomeNode**) gt_array_get(mRNAs, i);
-        gt_feature_node_add_child((GtFeatureNode*) gene_node,
-                                  (GtFeatureNode*) gn);
-      }
+    /* register children */
+    for (i = 0; i < gt_array_size(mRNAs); i++) {
+      gn = *(GtGenomeNode**) gt_array_get(mRNAs, i);
+      gt_feature_node_add_child((GtFeatureNode*) gene_node,
+                                (GtFeatureNode*) gn);
+    }
 
-      /* store the gene */
-      gt_queue_add(genome_nodes, gene_node);
+    /* store the gene */
+    gt_queue_add(genome_nodes, gene_node);
+  } else {
+    for (i = 0; i < gt_array_size(mRNAs); i++) {
+      gt_genome_node_delete(*(GtGenomeNode**) gt_array_get(mRNAs, i));
     }
   }
 
