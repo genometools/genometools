@@ -211,14 +211,24 @@ static int construct_mRNAs(GT_UNUSED void *key, void *value, void *data,
 
   for (i = 1; !had_err && i < gt_array_size(gt_genome_node_array); i++) {
     GtRange range;
+    GtStrand strand;
     gn = *(GtGenomeNode**) gt_array_get(gt_genome_node_array, i);
     range = gt_genome_node_get_range(gn);
     mRNA_range = gt_range_join(&mRNA_range, &range);
-    /* XXX: an error check is necessary here, otherwise gt_strand_join() can
-       cause a failed assertion */
-    mRNA_strand = gt_strand_join(mRNA_strand,
-                          gt_feature_node_get_strand((GtFeatureNode*) gn));
-    if (gt_str_cmp(mRNA_seqid, gt_genome_node_get_seqid(gn))) {
+    strand = gt_feature_node_get_strand((GtFeatureNode*) gn);
+    if (strand != mRNA_strand) {
+      gt_error_set(err, "feature %s on line %u has strand %c, but the "
+                        "parent transcript has strand %c",
+                   (const char*) key,
+                   gt_genome_node_get_line_number(gn),
+                   GT_STRAND_CHARS[strand],
+                   GT_STRAND_CHARS[mRNA_strand]);
+      had_err = -1;
+      break;
+    } else {
+      mRNA_strand = gt_strand_join(mRNA_strand, strand);
+    }
+    if (!had_err && gt_str_cmp(mRNA_seqid, gt_genome_node_get_seqid(gn))) {
       gt_error_set(err, "The features on lines %u and %u refer to different "
                 "genomic sequences (``seqname''), although they have the same "
                 "gene IDs (``gene_id'') which must be globally unique",
@@ -297,14 +307,29 @@ static int construct_genes(GT_UNUSED void *key, void *value, void *data,
     gene_seqid = gt_genome_node_get_seqid(gn);
     for (i = 1; i < gt_array_size(mRNAs); i++) {
       GtRange range;
+      GtStrand strand;
       gn = *(GtGenomeNode**) gt_array_get(mRNAs, i);
       range = gt_genome_node_get_range(gn);
       gene_range = gt_range_join(&gene_range, &range);
-      gene_strand = gt_strand_join(gene_strand,
-                          gt_feature_node_get_strand((GtFeatureNode*) gn));
-      gt_assert(gt_str_cmp(gene_seqid, gt_genome_node_get_seqid(gn)) == 0);
+      strand = gt_feature_node_get_strand((GtFeatureNode*) gn);
+      if (strand != gene_strand) {
+        GT_UNUSED const char *transcript_name =
+                gt_feature_node_get_attribute((GtFeatureNode*) gn, GT_GFF_NAME);
+        gt_error_set(err, "transcript on strand %c encountered, but the "
+                          "parent gene %s has strand %c",
+                     GT_STRAND_CHARS[strand],
+                     (const char*) key,
+                     GT_STRAND_CHARS[gene_strand]);
+        had_err = -1;
+      } else {
+        gene_strand = gt_strand_join(gene_strand, strand);
+      }
+      gt_assert(had_err || gt_str_cmp(gene_seqid,
+                                      gt_genome_node_get_seqid(gn)) == 0);
     }
+  }
 
+  if (!had_err) {
     gene_node = gt_feature_node_new(gene_seqid, gt_ft_gene, gene_range.start,
                                     gene_range.end, gene_strand);
 
@@ -323,6 +348,10 @@ static int construct_genes(GT_UNUSED void *key, void *value, void *data,
 
     /* store the gene */
     gt_queue_add(genome_nodes, gene_node);
+  } else {
+    for (i = 0; i < gt_array_size(mRNAs); i++) {
+      gt_genome_node_delete(*(GtGenomeNode**) gt_array_get(mRNAs, i));
+    }
   }
 
   /* free */
