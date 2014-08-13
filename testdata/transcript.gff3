@@ -1,0 +1,7 @@
+##gff-version   3
+##sequence-region   transcript 1 1000
+transcript	.	gene	1	400	.	+	.	ID=gene00001;Name=AGENE
+transcript	.	mRNA	1	400	.	+	.	ID=mRNA00001;Parent=gene00001;Name=AGENE.1
+transcript	.	five_prime_UTR	1	100	.	+	.	Parent=mRNA00001
+transcript	.	CDS	101	300	.	+	0	Parent=mRNA00001
+transcript	.	three_prime_UTR	301	400	.	+	.	Parent=mRNA00001
