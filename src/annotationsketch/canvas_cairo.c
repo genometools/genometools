@@ -745,7 +745,7 @@ int gt_canvas_cairo_visit_custom_track(GtCanvas *canvas,
 int gt_canvas_cairo_draw_ruler(GtCanvas *canvas, GtRange viewrange,
                                 GtError *err)
 {
-  double step, minorstep, vmajor, vminor,
+  double step, minorstep, vmajor, vminor, offset,
          theight = gt_graphics_get_text_height(canvas->pvt->g);
   GtWord base_length, tick;
   GtColor rulercol, gridcol;
@@ -761,6 +761,13 @@ int gt_canvas_cairo_draw_ruler(GtCanvas *canvas, GtRange viewrange,
   }
   if (gt_style_get_num(canvas->pvt->sty, "format", "ruler_font_size",
                        &theight, NULL, err) == GT_STYLE_QUERY_ERROR) {
+    return -1;
+  }
+
+  /* get offset value from style, default: 0 */
+  offset = 0;
+  if (gt_style_get_num(canvas->pvt->sty, "format", "ruler_offset",
+                       &offset, NULL, err) == GT_STYLE_QUERY_ERROR) {
     return -1;
   }
 
@@ -842,7 +849,7 @@ int gt_canvas_cairo_draw_ruler(GtCanvas *canvas, GtRange viewrange,
                                    rulercol,
                                    10,
                                    1.0);
-    gt_format_ruler_label(str, tick, gt_str_get(unit), BUFSIZ);
+    gt_format_ruler_label(str, tick + (GtWord)offset, gt_str_get(unit), BUFSIZ);
     gt_graphics_draw_text_centered(canvas->pvt->g,
                                    drawtick,
                                    canvas->pvt->y + 20,

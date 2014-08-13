@@ -39,7 +39,7 @@ void*           gt_canvas_try_cast(const GtCanvasClass *cc, GtCanvas *c);
 GtUword   gt_canvas_calculate_height(GtCanvas*, GtDiagram*);
 int             gt_canvas_draw_ruler(GtCanvas*, GtRange, GtError *err);
 
-void            gt_format_ruler_label(char *txt, GtUword pos,
+void            gt_format_ruler_label(char *txt, GtWord pos,
                                       const char *unitstr, size_t buflen);
 GtStyle*        gt_canvas_get_style(GtCanvas *canvas);
 

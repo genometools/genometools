@@ -275,6 +275,7 @@ style =
     track_vspace = 15, -- space between tracks, in pixels
     ruler_font_size = 8, -- size of scale labels
     ruler_space = 20, -- space between ruler and first track
+    ruler_offset = 0, -- position offset of ruler labels
     block_caption_font_size = 8, -- size of block captions
     block_caption_space = 7, -- space between blocks and their captions
     track_caption_font_size = 8, -- size of track captions
