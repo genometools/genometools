@@ -20,6 +20,8 @@
 #include <string.h>
 #include "lauxlib.h"
 #include "core/assert_api.h"
+#include "core/ma.h"
+#include "core/str_array_api.h"
 #include "core/symbol_api.h"
 #include "core/unused_api.h"
 #include "extended/extract_feature_sequence.h"
@@ -350,6 +352,63 @@ static int genome_node_lua_set_attribute(lua_State *L)
   return 0;
 }
 
+typedef struct {
+  unsigned long cur_attr;
+  GtStrArray *attribs;
+  GtFeatureNode *fn;
+} GtFeatureNodeLuaEachAttribInfo;
+
+static int feature_node_lua_each_attribute_iter(lua_State *L) {
+  GtFeatureNodeLuaEachAttribInfo *info;
+  info = *(GtFeatureNodeLuaEachAttribInfo**) lua_touserdata(L,
+                                                           lua_upvalueindex(1));
+  if (!info->attribs) return 0;
+  if (info->cur_attr < gt_str_array_size(info->attribs)) {
+    const char *attr, *val;
+    attr = gt_str_array_get(info->attribs, info->cur_attr);
+    gt_assert(attr);
+    val = gt_feature_node_get_attribute(info->fn, attr);
+    gt_assert(val);
+    lua_pushstring(L, attr);
+    lua_pushstring(L, val);
+    info->cur_attr++;
+    return 2;
+  } else
+    return 0;
+}
+
+static int feature_node_lua_each_attribute_gc(lua_State *L) {
+  GtFeatureNodeLuaEachAttribInfo *info;
+  info = *(GtFeatureNodeLuaEachAttribInfo**) lua_touserdata(L, 1);
+  if (info) {
+    gt_str_array_delete(info->attribs);
+    gt_genome_node_delete((GtGenomeNode*) info->fn);
+    gt_free(info);
+  }
+  return 0;
+}
+
+static int feature_node_lua_each_attribute(lua_State *L) {
+  GtGenomeNode **gn;
+  GtFeatureNode *fn;
+  GtFeatureNodeLuaEachAttribInfo **info;
+  gn = check_genome_node(L, 1);
+  /* make sure we get a feature node */
+  fn = gt_feature_node_try_cast(*gn);
+  luaL_argcheck(L, fn, 1, "not a feature node");
+  info = (GtFeatureNodeLuaEachAttribInfo**) lua_newuserdata(L,
+                                     sizeof (GtFeatureNodeLuaEachAttribInfo *));
+  luaL_getmetatable(L, "GenomeTools.each_attrib");
+  lua_setmetatable(L, -2);
+  *info = gt_calloc(1, sizeof (GtFeatureNodeLuaEachAttribInfo));
+  gt_assert(*info);
+  (*info)->fn = (GtFeatureNode*) gt_genome_node_ref(*gn);
+  (*info)->cur_attr = 0;
+  (*info)->attribs = gt_feature_node_get_attribute_list(fn);
+  lua_pushcclosure(L, feature_node_lua_each_attribute_iter, 1);
+  return 1;
+}
+
 static int genome_node_lua_mark(lua_State *L)
 {
   GtGenomeNode **gn = check_genome_node(L, 1);
@@ -675,6 +734,7 @@ static const struct luaL_Reg genome_node_lib_m [] = {
   { "output_leading", feature_node_lua_output_leading },
   { "get_type", feature_node_lua_get_type },
   { "get_children", feature_node_lua_get_children },
+  { "attribute_pairs", feature_node_lua_each_attribute },
   { "has_child_of_type", feature_node_lua_has_child_of_type },
   { "extract_sequence", feature_node_lua_extract_sequence },
   { "extract_and_translate_sequence",
@@ -722,6 +782,11 @@ int gt_lua_open_genome_node(lua_State *L)
   luaL_newmetatable(L, "GenomeTools.get_children");
   lua_pushstring(L, "__gc");
   lua_pushcfunction(L, feature_node_lua_get_children_gc);
+  lua_settable(L, -3);
+  lua_pop(L, 1);
+  luaL_newmetatable(L, "GenomeTools.each_attrib");
+  lua_pushstring(L, "__gc");
+  lua_pushcfunction(L, feature_node_lua_each_attribute_gc);
   lua_settable(L, -3);
   lua_pop(L, 2);
   gt_assert(lua_gettop(L) == stack_size);
