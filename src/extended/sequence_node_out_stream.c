@@ -36,7 +36,8 @@ const GtNodeStreamClass* gt_sequence_node_out_stream_class(void);
 #define gt_sequence_node_out_stream_cast(GS)\
         gt_node_stream_cast(gt_sequence_node_out_stream_class(), GS);
 
-static int sequence_node_out_stream_next(GtNodeStream *ns, GtGenomeNode **gn, GtError *err)
+static int sequence_node_out_stream_next(GtNodeStream *ns, GtGenomeNode **gn,
+                                         GtError *err)
 {
   GtSequenceNodeOutStream *fs;
   int had_err;
@@ -44,7 +45,8 @@ static int sequence_node_out_stream_next(GtNodeStream *ns, GtGenomeNode **gn, Gt
   fs = gt_sequence_node_out_stream_cast(ns);
 
   /* we still have nodes in the buffer */
-  if (gt_sequence_node_out_visitor_node_buffer_size(fs->sequence_node_out_visitor)) {
+  if (gt_sequence_node_out_visitor_node_buffer_size(
+                                               fs->sequence_node_out_visitor)) {
     /* return one of them */
     *gn = gt_sequence_node_out_visitor_get_node(fs->sequence_node_out_visitor);
     return 0;
@@ -60,9 +62,10 @@ static int sequence_node_out_stream_next(GtNodeStream *ns, GtGenomeNode **gn, Gt
       *gn = NULL;
       break;
     }
-    if (gt_sequence_node_out_visitor_node_buffer_size(fs->sequence_node_out_visitor)) {
-      *gn = gt_sequence_node_out_visitor_get_node(fs->sequence_node_out_visitor);
-      return 0;
+    if (gt_sequence_node_out_visitor_node_buffer_size(
+                                               fs->sequence_node_out_visitor)) {
+     *gn = gt_sequence_node_out_visitor_get_node(fs->sequence_node_out_visitor);
+     return 0;
     }
   }
 

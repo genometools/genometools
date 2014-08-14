@@ -156,7 +156,8 @@ const GtNodeVisitorClass* gt_sequence_node_out_visitor_class()
 
 GtNodeVisitor* gt_sequence_node_out_visitor_new(GtFile *outfile)
 {
-  GtNodeVisitor *nv = gt_node_visitor_create(gt_sequence_node_out_visitor_class());
+  GtNodeVisitor *nv =
+                   gt_node_visitor_create(gt_sequence_node_out_visitor_class());
   GtSequenceNodeOutVisitor *v = sequence_node_out_visitor_cast(nv);
   v->outfile = outfile;
   v->width = 80;

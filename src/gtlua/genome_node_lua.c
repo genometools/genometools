@@ -353,7 +353,7 @@ static int genome_node_lua_set_attribute(lua_State *L)
 }
 
 typedef struct {
-  unsigned long cur_attr;
+  GtUword cur_attr;
   GtStrArray *attribs;
   GtFeatureNode *fn;
 } GtFeatureNodeLuaEachAttribInfo;
