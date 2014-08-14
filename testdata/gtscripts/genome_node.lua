@@ -106,12 +106,27 @@ assert(out[1] == parent)
 assert(out[2] == child)
 assert(out[3] == child2)
 
--- testing (get,add,set,remove)_attribute
+-- testing (get,add,set,remove)_attribute and attribute_pairs()
 
 node = gt.feature_node_new("seqid", "gene", range:get_start(), range:get_end(), "+")
+out = {}
+n = 0
+for k,v in node:attribute_pairs() do
+  out[k] = v
+  n = n + 1
+end
+assert(n == 0)
 assert(not node:get_attribute("test"))
 node:add_attribute("test","foo")
 assert(node:get_attribute("test") == "foo")
+out = {}
+n = 0
+for k,v in node:attribute_pairs() do
+  out[k] = v
+  n = n + 1
+end
+assert(n == 1)
+assert(out.test == "foo")
 rval, err = pcall(GenomeTools_genome_node.add_attribute, node, "test", "foo")
 assert(not rval)
 assert(string.find(err, "already present"))
@@ -121,15 +136,50 @@ node:set_attribute("test", "baz")
 assert(node:get_attribute("test") == "baz")
 node:set_attribute("bar", "baz")
 assert(node:get_attribute("bar") == "baz")
+out = {}
+n = 0
+for k,v in node:attribute_pairs() do
+  out[k] = v
+  n = n + 1
+end
+assert(n == 2)
+assert(out.test == "baz")
+assert(out.bar == "baz")
 rval, err = pcall(GenomeTools_genome_node.remove_attribute, node, "qqq")
 assert(not rval)
 assert(string.find(err, "not present"))
 node:remove_attribute("test")
 assert(node:get_attribute("test") == nil)
+out = {}
+n = 0
+for k,v in node:attribute_pairs() do
+  out[k] = v
+  n = n + 1
+end
+assert(n == 1)
+assert(out.test == nil)
+assert(out.bar == "baz")
 node:remove_attribute("bar")
 assert(node:get_attribute("bar") == nil)
+out = {}
+n = 0
+for k,v in node:attribute_pairs() do
+  out[k] = v
+  n = n + 1
+end
+assert(n == 0)
+assert(out.test == nil)
+assert(out.bar == nil)
 node:add_attribute("test","foo")
 assert(node:get_attribute("test") == "foo")
+out = {}
+n = 0
+for k,v in node:attribute_pairs() do
+  out[k] = v
+  n = n + 1
+end
+assert(n == 1)
+assert(out.test == "foo")
 
 -- testing has_child_of_type
 assert(parent:has_child_of_type("exon"))
