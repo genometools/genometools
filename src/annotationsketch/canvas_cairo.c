@@ -745,14 +745,14 @@ int gt_canvas_cairo_visit_custom_track(GtCanvas *canvas,
 int gt_canvas_cairo_draw_ruler(GtCanvas *canvas, GtRange viewrange,
                                 GtError *err)
 {
-  double step, minorstep, vmajor, vminor,
+  double step, minorstep, vmajor, vminor, offset,
          theight = gt_graphics_get_text_height(canvas->pvt->g);
   GtWord base_length, tick;
   GtColor rulercol, gridcol;
   GtStr *left_str, *right_str, *unit;
   char str[BUFSIZ];
   GtStyleQueryStatus rval;
-  bool showgrid = true;
+  bool showgrid = true, nozeropos;
   gt_assert(canvas);
 
   if (gt_style_get_bool(canvas->pvt->sty, "format", "show_grid", &showgrid,
@@ -761,6 +761,19 @@ int gt_canvas_cairo_draw_ruler(GtCanvas *canvas, GtRange viewrange,
   }
   if (gt_style_get_num(canvas->pvt->sty, "format", "ruler_font_size",
                        &theight, NULL, err) == GT_STYLE_QUERY_ERROR) {
+    return -1;
+  }
+
+  /* get offset value from style, default: 0 */
+  offset = 0;
+  if (gt_style_get_num(canvas->pvt->sty, "format", "ruler_offset",
+                       &offset, NULL, err) == GT_STYLE_QUERY_ERROR) {
+    return -1;
+  }
+
+  nozeropos = false;
+  if (gt_style_get_bool(canvas->pvt->sty, "format", "ruler_nozeropos",
+                        &nozeropos, NULL, err) == GT_STYLE_QUERY_ERROR) {
     return -1;
   }
 
@@ -835,6 +848,9 @@ int gt_canvas_cairo_draw_ruler(GtCanvas *canvas, GtRange viewrange,
     double drawtick = (gt_coords_convert_point(viewrange, tick)
                        * (canvas->pvt->width-2*canvas->pvt->margins))
                        + canvas->pvt->margins;
+    GtWord pos = tick + (GtWord)offset;
+    if (pos <= 0 && nozeropos)
+      pos--;
     if (tick < viewrange.start) continue;
     gt_graphics_draw_vertical_line(canvas->pvt->g,
                                    drawtick,
@@ -842,7 +858,7 @@ int gt_canvas_cairo_draw_ruler(GtCanvas *canvas, GtRange viewrange,
                                    rulercol,
                                    10,
                                    1.0);
-    gt_format_ruler_label(str, tick, gt_str_get(unit), BUFSIZ);
+    gt_format_ruler_label(str, pos, gt_str_get(unit), BUFSIZ);
     gt_graphics_draw_text_centered(canvas->pvt->g,
                                    drawtick,
                                    canvas->pvt->y + 20,

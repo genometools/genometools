@@ -79,23 +79,34 @@ const GtCanvasClass* gt_canvas_class_new(size_t size,
 }
 
 /* Formats a given position number for short display in the ruler. */
-void gt_format_ruler_label(char *txt,  GtUword pos,
+void gt_format_ruler_label(char *txt, GtWord pos,
                            const char *unitstr, size_t buflen)
 {
   double fpos;
   int logval;
   GtStr *formatstring;
+  GtUword upos;
   gt_assert(txt);
+  bool negative = false;
 
-  logval = (int) floor(log10(pos));
-  formatstring = gt_str_new_cstr("%.");
-
-  if (pos >= 1000000000)
+  if (pos < 0)
   {
-    fpos = (double) pos / 1000000000;
-    while (pos % 10 == 0)
+    upos = (GtUword)-pos;
+    negative = true;
+    formatstring = gt_str_new_cstr("-%.");
+  }
+  else
+  {
+    upos = (GtUword)pos;
+    formatstring = gt_str_new_cstr("%.");
+  }
+  logval = (int) floor(log10(upos));
+  if (upos >= 1000000000)
+  {
+    fpos = (double) upos / 1000000000;
+    while (upos % 10 == 0)
     {
-      pos /= 10;
+      upos /= 10;
       logval--;
     }
     /*@ignore@*/
@@ -104,12 +115,12 @@ void gt_format_ruler_label(char *txt,  GtUword pos,
     (void) snprintf(txt, buflen, gt_str_get(formatstring), fpos, unitstr);
     /*@end@*/
   }
-  else if (pos >= 1000000)
+  else if (upos >= 1000000)
   {
-    fpos = (double) pos / 1000000;
-    while (pos % 10 == 0)
+    fpos = (double) upos / 1000000;
+    while (upos % 10 == 0)
     {
-      pos /= 10;
+      upos /= 10;
       logval--;
     }
     /*@ignore@*/
@@ -118,12 +129,12 @@ void gt_format_ruler_label(char *txt,  GtUword pos,
     (void) snprintf(txt, buflen, gt_str_get(formatstring), fpos, unitstr);
     /*@end@*/
   }
-  else if (pos >= 1000)
+  else if (upos >= 1000)
   {
-    fpos = (double) pos / 1000;
-    while (pos % 10 == 0)
+    fpos = (double) upos / 1000;
+    while (upos % 10 == 0)
     {
-      pos /= 10;
+      upos /= 10;
       logval--;
     }
     /*@ignore@*/
@@ -133,7 +144,8 @@ void gt_format_ruler_label(char *txt,  GtUword pos,
     /*@end@*/
   } else {
     /*@ignore@*/
-    (void) snprintf(txt, buflen, " "GT_WU"%s", pos, unitstr);
+    (void) snprintf(txt, buflen, " %s"GT_WU"%s", negative ? "-" : "", upos,
+        unitstr);
     /*@end@*/
   }
 

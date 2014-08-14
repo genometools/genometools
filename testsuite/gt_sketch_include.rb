@@ -147,6 +147,16 @@ Test do
   run "diff #{last_stdout} #{$testdata}gt_sketch_textwidth_2.recmaps"
 end
 
+Name "gt sketch for transcript (neg. coords in ruler)"
+Keywords "gt_sketch annotationsketch neg_coords"
+Test do
+  run_test "#{$bin}gt sketch " + \
+           "-style #{$testdata}transcript.style " + \
+           "transcript.png " + \
+           "#{$testdata}transcript.gff3 ", \
+           :maxtime => 600
+end
+
 Name "gt sketch runtime Lua failures"
 Keywords "gt_sketch lua"
 Test do
