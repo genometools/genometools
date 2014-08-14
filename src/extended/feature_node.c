@@ -32,6 +32,7 @@
 #include "extended/feature_node_rep.h"
 #include "extended/feature_node_iterator_api.h"
 #include "extended/genome_node_rep.h"
+#include "extended/tag_value_map.h"
 
 #define PARENT_STATUS_OFFSET            1
 #define PARENT_STATUS_MASK              0x3
@@ -702,7 +703,11 @@ void gt_feature_node_remove_attribute(GtFeatureNode *fn,
   gt_assert(fn && attr_name);
   gt_assert(strlen(attr_name)); /* attribute name cannot be empty */
   gt_assert(fn->attributes); /* attribute list must exist already */
-  gt_tag_value_map_remove(&fn->attributes, attr_name);
+  if (gt_tag_value_map_size(fn->attributes) == 1) {
+    gt_tag_value_map_delete(fn->attributes);
+    fn->attributes = NULL;
+  } else
+    gt_tag_value_map_remove(&fn->attributes, attr_name);
   if (fn->observer && fn->observer->attribute_deleted) {
     fn->observer->attribute_deleted(fn, attr_name, fn->observer->data);
   }
