@@ -771,7 +771,7 @@ int gt_canvas_cairo_draw_ruler(GtCanvas *canvas, GtRange viewrange,
     return -1;
   }
 
-  nozeropos = true;
+  nozeropos = false;
   if (gt_style_get_bool(canvas->pvt->sty, "format", "ruler_nozeropos",
                         &nozeropos, NULL, err) == GT_STYLE_QUERY_ERROR) {
     return -1;
