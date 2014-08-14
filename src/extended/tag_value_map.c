@@ -81,6 +81,30 @@ static size_t get_map_len(const GtTagValueMap map)
   return map_ptr - map - 1;
 }
 
+static size_t get_map_nof_items(const GtTagValueMap map)
+{
+  const char *map_ptr = map;
+  GtUword nof_items = 0;
+  bool seen = false;
+  for (;;) {
+    if (*map_ptr++ == '\0') {
+      if (*(map_ptr) == '\0') {
+        if (seen) {
+          nof_items++;
+        }
+        break;
+      }
+      if (seen) {
+        nof_items++;
+        seen = false;
+      } else {
+        seen = true;
+      }
+    }
+  }
+  return nof_items;
+}
+
 void gt_tag_value_map_add(GtTagValueMap *map, const char *tag,
                           const char *value)
 {
@@ -105,8 +129,7 @@ void gt_tag_value_map_remove(GtTagValueMap *map, const char *tag)
 {
   size_t tag_len, value_len, map_len;
   char *value;
-
-  gt_assert(map && tag);
+  gt_assert(map && tag && get_map_nof_items(*map) > 1);
   tag_len = strlen(tag);
   gt_assert(tag_len);
   /* determine value for given tag */
@@ -162,6 +185,12 @@ const char* gt_tag_value_map_get(const GtTagValueMap map, const char *tag)
 {
   gt_assert(map && tag && strlen(tag));
   return get_value(map, tag, NULL);
+}
+
+GtUword gt_tag_value_map_size(const GtTagValueMap map)
+{
+  gt_assert(map);
+  return get_map_nof_items(map);
 }
 
 void gt_tag_value_map_foreach(const GtTagValueMap map,
@@ -245,6 +274,7 @@ int gt_tag_value_map_unit_test(GtError *err)
 
   /* test gt_tag_value_map_set() (new tags are shorter than old tags) */
   map = create_filled_tag_value_list();
+  gt_ensure(gt_tag_value_map_size(map) == 3);
   gt_tag_value_map_set(&map, "tag 1", "val X");
   gt_tag_value_map_set(&map, "tag 2", "val Y");
   gt_tag_value_map_set(&map, "tag 3", "val Z");
@@ -255,7 +285,7 @@ int gt_tag_value_map_unit_test(GtError *err)
   gt_tag_value_map_delete(map);
 
   /* test gt_tag_value_map_set() (new tags have same length) */
-  if (!had_err) {
+   if (!had_err) {
     map = create_filled_tag_value_list();
     gt_tag_value_map_set(&map, "tag 1", "value X");
     gt_tag_value_map_set(&map, "tag 2", "value Y");
@@ -292,6 +322,7 @@ int gt_tag_value_map_unit_test(GtError *err)
     gt_tag_value_map_set(&map, "tag 3", "value ZZZ");
     old_map_len = get_map_len(map);
     gt_tag_value_map_remove(&map, "tag 1");
+    gt_ensure(gt_tag_value_map_size(map) == 2);
     new_map_len = get_map_len(map);
     gt_ensure(!gt_tag_value_map_get(map, "unused tag"));
     gt_ensure(!(old_map_len - new_map_len - strlen("tag 1") - 1
@@ -308,6 +339,7 @@ int gt_tag_value_map_unit_test(GtError *err)
     gt_tag_value_map_set(&map, "tag 3", "value ZZZ");
     old_map_len = get_map_len(map);
     gt_tag_value_map_remove(&map, "tag 2");
+    gt_ensure(gt_tag_value_map_size(map) == 2);
     new_map_len = get_map_len(map);
     gt_ensure(!gt_tag_value_map_get(map, "unused tag"));
     gt_ensure(!(old_map_len - new_map_len - strlen("tag 2") - 1
@@ -324,6 +356,7 @@ int gt_tag_value_map_unit_test(GtError *err)
     gt_tag_value_map_set(&map, "tag 3", "value ZZZ");
     old_map_len = get_map_len(map);
     gt_tag_value_map_remove(&map, "tag 3");
+    gt_ensure(gt_tag_value_map_size(map) == 2);
     new_map_len = get_map_len(map);
     gt_ensure(!gt_tag_value_map_get(map, "unused tag"));
     gt_ensure(!(old_map_len - new_map_len - strlen("tag 3") - 1
