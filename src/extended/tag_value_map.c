@@ -285,7 +285,7 @@ int gt_tag_value_map_unit_test(GtError *err)
   gt_tag_value_map_delete(map);
 
   /* test gt_tag_value_map_set() (new tags have same length) */
-   if (!had_err) {
+  if (!had_err) {
     map = create_filled_tag_value_list();
     gt_tag_value_map_set(&map, "tag 1", "value X");
     gt_tag_value_map_set(&map, "tag 2", "value Y");
