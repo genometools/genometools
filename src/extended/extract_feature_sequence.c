@@ -57,7 +57,8 @@ static int extract_join_feature(GtGenomeNode *gn, const char *type,
   return had_err;
 }
 
-static int gt_extract_feature_sequence_generic(GtStr *sequence, GtGenomeNode *gn,
+static int gt_extract_feature_sequence_generic(GtStr *sequence,
+                                GtGenomeNode *gn,
                                 const char *type, bool join, GtStr *seqid,
                                 GtStrArray *target_ids,
                                 unsigned int *out_phase_offset,
@@ -101,7 +102,8 @@ static int gt_extract_feature_sequence_generic(GtStr *sequence, GtGenomeNode *gn
                (target = gt_feature_node_get_attribute(child, GT_GFF_TARGET))) {
             gt_str_array_reset(target_ids);
             had_err = gt_gff3_parser_parse_all_target_attributes(target, false,
-                                                                 target_ids, NULL,
+                                                                 target_ids,
+                                                                 NULL,
                                                                  NULL, "", 0,
                                                                  err);
           }

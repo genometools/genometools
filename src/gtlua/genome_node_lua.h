@@ -105,7 +105,8 @@
    -- If <join> is true and <feature_node> has children of type <type> their
    -- joined sequences are returned.
    -- If none of the above applies nil is returned.
-   function feature_node:extract_and_translate_sequence(type, join, region_mapping)
+   function feature_node:extract_and_translate_sequence(type, join,
+                                                        region_mapping)
 
 */
 

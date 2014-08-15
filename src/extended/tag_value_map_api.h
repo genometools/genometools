@@ -53,8 +53,12 @@ void          gt_tag_value_map_set(GtTagValueMap *tag_value_map,
 const char*   gt_tag_value_map_get(const GtTagValueMap tag_value_map,
                                    const char *tag);
 
+/* Return the number of tag-value pairs in <tag_value_map>. */
+GtUword       gt_tag_value_map_size(const GtTagValueMap tag_value_map);
+
 /* Removes the given <tag> from <tag_value_map>. <tag_value_map> must contain
-   the given <tag> already! */
+   the given <tag> already! Also, at least one tag-value pair must remain in
+   the map. */
 void          gt_tag_value_map_remove(GtTagValueMap *tag_value_map,
                                       const char *tag);
 
