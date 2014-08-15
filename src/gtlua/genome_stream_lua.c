@@ -58,6 +58,20 @@ static int gff3_out_stream_lua_new(lua_State *L)
   return 1;
 }
 
+static int gff3_out_stream_lua_new_retainids(lua_State *L)
+{
+  GtNodeStream **out_stream, **in_stream = check_genome_stream(L, 1);
+  gt_assert(L);
+  /* construct object */
+  out_stream = lua_newuserdata(L, sizeof (GtNodeStream*));
+  *out_stream = gt_gff3_out_stream_new(*in_stream, NULL);
+  gt_assert(*out_stream);
+  gt_gff3_out_stream_retain_id_attributes((GtGFF3OutStream*) *out_stream);
+  luaL_getmetatable(L, GENOME_STREAM_METATABLE);
+  lua_setmetatable(L, -2);
+  return 1;
+}
+
 static int gt_node_stream_lua_next_tree(lua_State *L)
 {
   GtNodeStream **gs = check_genome_stream(L, 1);
@@ -237,6 +251,7 @@ static const struct luaL_Reg gt_node_stream_lib_f [] = {
   { "custom_stream_new_sorted", lua_custom_stream_new_sorted },
   { "custom_stream_new_unsorted", lua_custom_stream_new_unsorted },
   { "gff3_out_stream_new", gff3_out_stream_lua_new },
+  { "gff3_out_stream_new_retainids", gff3_out_stream_lua_new_retainids },
   { NULL, NULL }
 };
 
