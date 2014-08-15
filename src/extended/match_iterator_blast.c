@@ -232,7 +232,7 @@ GtMatchIterator* gt_match_iterator_blastalln_process_new(const char *query,
     sprintf(blast_call, "blastall -p blastn");
   }
   if (evalue != GT_UNDEF_DOUBLE)
-    sprintf(blast_call, "%s -e %.6f", blast_call, evalue);
+    sprintf(blast_call, "%s -e %.6e", blast_call, evalue);
   if (dust)
     sprintf(blast_call, "%s -F", blast_call);
   if (word_size != GT_UNDEF_INT)
@@ -289,7 +289,7 @@ GtMatchIterator* gt_match_iterator_blastallp_process_new(const char *query,
     sprintf(blast_call, "blastall -p blastp");
   }
   if (evalue != GT_UNDEF_DOUBLE)
-    sprintf(blast_call, "%s -e %.6f", blast_call, evalue);
+    sprintf(blast_call, "%s -e %.6e", blast_call, evalue);
   if (word_size != GT_UNDEF_INT)
     sprintf(blast_call, "%s -W %d", blast_call, word_size);
   if (gapopen != GT_UNDEF_INT)
@@ -342,7 +342,7 @@ GtMatchIterator* gt_match_iterator_blastn_process_new(const char *query,
     sprintf(blast_call, "blastn");
   }
   if (evalue != GT_UNDEF_DOUBLE)
-    sprintf(blast_call, "%s -evalue %.6f", blast_call, evalue);
+    sprintf(blast_call, "%s -evalue %.6e", blast_call, evalue);
   if (dust)
     sprintf(blast_call, "%s -dust yes", blast_call);
   if (word_size != GT_UNDEF_INT)
@@ -404,7 +404,7 @@ GtMatchIterator* gt_match_iterator_blastp_process_new(const char *query,
     sprintf(blast_call, "blastp");
   }
   if (evalue != GT_UNDEF_DOUBLE)
-    sprintf(blast_call, "%s -evalue %.6f", blast_call, evalue);
+    sprintf(blast_call, "%s -evalue %.6e", blast_call, evalue);
   if (word_size != GT_UNDEF_INT)
     sprintf(blast_call, "%s -word_size %d", blast_call, word_size);
   if (gapopen != GT_UNDEF_INT)
