@@ -30,6 +30,7 @@
 #include "core/md5_seqid.h"
 #include "core/minmax.h"
 #include "core/multithread_api.h"
+#include "core/qsort_r_api.h"
 #include "core/str_api.h"
 #include "core/thread_api.h"
 #include "core/types_api.h"
@@ -146,7 +147,7 @@ struct GtLTRharvestStream
 #define gt_ltrharvest_stream_cast(GS)\
         gt_node_stream_cast(gt_ltrharvest_stream_class(), GS);
 
-static int bdcompare(const void *a, const void *b)
+static int bdcompare(const void *a, const void *b, GT_UNUSED void *data)
 {
   const LTRboundaries *bda, *bdb;
 
@@ -1288,9 +1289,9 @@ static int gt_ltrharvest_stream_next(GtNodeStream *ns,
 
     /* sort results after seed extension */
     if (!had_err && threadinfo.arrayLTRboundaries->spaceLTRboundaries) {
-      qsort(threadinfo.arrayLTRboundaries->spaceLTRboundaries,
+      gt_qsort_r(threadinfo.arrayLTRboundaries->spaceLTRboundaries,
             (size_t) threadinfo.arrayLTRboundaries->nextfreeLTRboundaries,
-             sizeof (LTRboundaries),  bdcompare);
+             sizeof (LTRboundaries), NULL, bdcompare);
     }
 
     /* remove exact duplicates */
