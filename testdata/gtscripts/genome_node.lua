@@ -105,6 +105,25 @@ assert(#out == 3)
 assert(out[1] == parent)
 assert(out[2] == child)
 assert(out[3] == child2)
+out = {}
+for i in child2:get_children() do
+  table.insert(out, i)
+end
+assert(#out == 1)
+assert(out[3] == child1)
+node = gt.sequence_node_new("foo", "acgatcgatcgcat")
+rval, err = pcall(GenomeTools_genome_node.get_children, node)
+assert(not rval)
+assert(string.find(err, "not a feature node"))
+node = gt.comment_node_new("foobar")
+rval, err = pcall(GenomeTools_genome_node.get_children, node)
+assert(not rval)
+assert(string.find(err, "not a feature node"))
+node = gt.region_node_new("foo", 1, 200)
+rval, err = pcall(GenomeTools_genome_node.get_children, node)
+assert(not rval)
+assert(string.find(err, "not a feature node"))
+
 
 -- testing get_direct_children()
 child3  = gt.feature_node_new("seqid", "foo", range:get_start()+1, range:get_end(), "+")
@@ -122,6 +141,23 @@ for i in child:get_direct_children() do
 end
 assert(#out == 1)
 assert(out[1] == child3)
+out = {}
+for i in child2:get_direct_children() do
+  table.insert(out, i)
+end
+assert(#out == 0)
+node = gt.sequence_node_new("foo", "acgatcgatcgcat")
+rval, err = pcall(GenomeTools_genome_node.get_direct_children, node)
+assert(not rval)
+assert(string.find(err, "not a feature node"))
+node = gt.comment_node_new("foobar")
+rval, err = pcall(GenomeTools_genome_node.get_direct_children, node)
+assert(not rval)
+assert(string.find(err, "not a feature node"))
+node = gt.region_node_new("foo", 1, 200)
+rval, err = pcall(GenomeTools_genome_node.get_direct_children, node)
+assert(not rval)
+assert(string.find(err, "not a feature node"))
 
 -- testing set_range()
 rng2 = gt.range_new(2, 200)
