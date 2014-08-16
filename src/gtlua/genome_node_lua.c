@@ -610,7 +610,8 @@ static int feature_node_lua_remove_leaf(lua_State *L)
   return 0;
 }
 
-static int feature_node_lua_get_children_iter(lua_State *L) {
+static int feature_node_lua_get_children_iter(lua_State *L)
+{
   GtFeatureNodeIterator *it;
   GtFeatureNode *fn;
   it = *(GtFeatureNodeIterator**) lua_touserdata(L, lua_upvalueindex(1));
@@ -621,7 +622,8 @@ static int feature_node_lua_get_children_iter(lua_State *L) {
     return 0;
 }
 
-static int feature_node_lua_get_children_gc(lua_State *L) {
+static int feature_node_lua_get_children_gc(lua_State *L)
+{
   GtFeatureNodeIterator *it;
   it = *(GtFeatureNodeIterator**) lua_touserdata(L, 1);
   if (it)
@@ -629,7 +631,8 @@ static int feature_node_lua_get_children_gc(lua_State *L) {
   return 0;
 }
 
-static int feature_node_lua_get_children(lua_State *L) {
+static int feature_node_lua_get_children_generic(lua_State *L, bool direct)
+{
   GtGenomeNode **gn;
   GtFeatureNode *fn;
   GtFeatureNodeIterator **it;
@@ -641,10 +644,23 @@ static int feature_node_lua_get_children(lua_State *L) {
                                               sizeof (GtFeatureNodeIterator *));
   luaL_getmetatable(L, "GenomeTools.get_children");
   lua_setmetatable(L, -2);
-  *it = gt_feature_node_iterator_new(fn);
+  if (direct)
+    *it = gt_feature_node_iterator_new_direct(fn);
+  else
+    *it = gt_feature_node_iterator_new(fn);
   gt_assert(*it);
   lua_pushcclosure(L, feature_node_lua_get_children_iter, 1);
   return 1;
+}
+
+static int feature_node_lua_get_children(lua_State *L)
+{
+  return feature_node_lua_get_children_generic(L, false);
+}
+
+static int feature_node_lua_get_direct_children(lua_State *L)
+{
+  return feature_node_lua_get_children_generic(L, true);
 }
 
 static int feature_node_lua_has_child_of_type(lua_State *L)
@@ -744,6 +760,9 @@ static const struct luaL_Reg genome_node_lib_m [] = {
   { "output_leading", feature_node_lua_output_leading },
   { "get_type", feature_node_lua_get_type },
   { "get_children", feature_node_lua_get_children },
+  { "get_direct_children", feature_node_lua_get_direct_children },
+  { "children", feature_node_lua_get_children },
+  { "direct_children", feature_node_lua_get_direct_children },
   { "attribute_pairs", feature_node_lua_each_attribute },
   { "has_child_of_type", feature_node_lua_has_child_of_type },
   { "extract_sequence", feature_node_lua_extract_sequence },

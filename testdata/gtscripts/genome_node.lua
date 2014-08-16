@@ -106,6 +106,23 @@ assert(out[1] == parent)
 assert(out[2] == child)
 assert(out[3] == child2)
 
+-- testing get_direct_children()
+child3  = gt.feature_node_new("seqid", "foo", range:get_start()+1, range:get_end(), "+")
+child:add_child(child3)
+out = {}
+for i in parent:get_direct_children() do
+  table.insert(out, i)
+end
+assert(#out == 2)
+assert(out[1] == child)
+assert(out[2] == child2)
+out = {}
+for i in child:get_direct_children() do
+  table.insert(out, i)
+end
+assert(#out == 1)
+assert(out[1] == child3)
+
 -- testing set_range()
 rng2 = gt.range_new(2, 200)
 node = gt.feature_node_new("seqid", "gene", range:get_start(), range:get_end(), "+")
