@@ -349,17 +349,6 @@ interfaces.
 
 </ul>
 <h2>Sole functions</h2>
-<a name="gt_feature_index_gfflike_get_all_features"></a>
-
-<code>int              gt_feature_index_gfflike_get_all_features(GtFeatureIndex *gfi,
-                                                          GtArray *results,
-                                                          GtError *err)</code>
-<p>
-Retrieves all features contained in <code>gfi</code> into <code>results</code>. Returns 0 on
-   success, a negative value otherwise. The message in <code>err</code> is set
-   accordingly.
-</p>
-<hr>
 <a name="gt_dup_feature_stream_new"></a>
 
 <code>GtNodeStream*  gt_dup_feature_stream_new(GtNodeStream*, const char *dest_type,
@@ -3443,6 +3432,17 @@ Calls the save function for the given <code>feature_index</code>. The save funct
 <code>void         gt_feature_index_delete(GtFeatureIndex*)</code>
 <p>
 Deletes the <code>feature_index</code> and all its referenced features.
+</p>
+<hr>
+<a name="gt_feature_index_gfflike_get_all_features"></a>
+
+<code>int              gt_feature_index_gfflike_get_all_features(GtFeatureIndex *gfi,
+                                                          GtArray *results,
+                                                          GtError *err)</code>
+<p>
+Retrieves all features contained in <code>gfi</code> into <code>results</code>. Returns 0 on
+   success, a negative value otherwise. The message in <code>err</code> is set
+   accordingly.
 </p>
 <hr>
 <a name="GtFeatureIndexMemory"></a>
@@ -7897,7 +7897,7 @@ Set the size of <code>str_array</code> to 0.
 <hr>
 <a name="gt_str_array_size"></a>
 
-<code>GtUword  gt_str_array_size(const GtStrArray *str_array)</code>
+<code>GtUword        gt_str_array_size(const GtStrArray *str_array)</code>
 <p>
 Return the number of strings stored in <code>str_array</code>.
 </p>
@@ -8253,13 +8253,21 @@ Return value corresponding to <code>tag</code> from <code>tag_value_map</code>. 
    does not contain such a value, <code>NULL</code> is returned.
 </p>
 <hr>
+<a name="gt_tag_value_map_size"></a>
+
+<code>GtUword        gt_tag_value_map_size(const GtTagValueMap tag_value_map)</code>
+<p>
+Return the number of tag-value pairs in <code>tag_value_map</code>.
+</p>
+<hr>
 <a name="gt_tag_value_map_remove"></a>
 
 <code>void           gt_tag_value_map_remove(GtTagValueMap *tag_value_map,
                                       const char *tag)</code>
 <p>
 Removes the given <code>tag</code> from <code>tag_value_map</code>. <code>tag_value_map</code> must contain
-   the given <code>tag</code> already!
+   the given <code>tag</code> already! Also, at least one tag-value pair must remain in
+   the map.
 </p>
 <hr>
 <a name="gt_tag_value_map_foreach"></a>
@@ -9180,6 +9188,16 @@ Returns <code>true</code> if host CPU is little-endian, <code>false</code> other
 <p>
 Print a fasta entry with optional <code>description</code> and mandatory <code>sequence</code> to
    <code>outfp</code>. If <code>width</code> is != 0 the sequence is formatted accordingly.
+</p>
+<hr>
+<a name="gt_fasta_show_entry_str"></a>
+
+<code>void  gt_fasta_show_entry_str(const char *description, const char *sequence,
+                             GtUword sequence_length, GtUword width,
+                             GtStr *outstr)</code>
+<p>
+Append a fasta entry with optional <code>description</code> and mandatory <code>sequence</code> to
+   <code>outstr</code>. If <code>width</code> is != 0 the sequence is formatted accordingly.
 </p>
 <hr>
 <a name="Fileutils"></a>
@@ -10705,6 +10723,8 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
 
   <a href="#gt_fasta_show_entry"><code>gt_fasta_show_entry</code></a><br>
 
+  <a href="#gt_fasta_show_entry_str"><code>gt_fasta_show_entry_str</code></a><br>
+
   <a href="#gt_feature_in_stream_new"><code>gt_feature_in_stream_new</code></a><br>
 
   <a href="#gt_feature_in_stream_use_orig_ranges"><code>gt_feature_in_stream_use_orig_ranges</code></a><br>
@@ -11757,6 +11777,8 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
 
   <a href="#gt_tag_value_map_set"><code>gt_tag_value_map_set</code></a><br>
 
+  <a href="#gt_tag_value_map_size"><code>gt_tag_value_map_size</code></a><br>
+
   <a href="#gt_text_width_calculator_cairo_new"><code>gt_text_width_calculator_cairo_new</code></a><br>
 
   <a href="#gt_text_width_calculator_delete"><code>gt_text_width_calculator_delete</code></a><br>
@@ -11932,7 +11954,7 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
 <div id="footer">
 Copyright &copy; 2008-2013
 The <i>GenomeTools</i> authors.
-Last update: 2014-07-11
+Last update: 2014-08-16
 </div>
 </div>
 <!-- Piwik -->
