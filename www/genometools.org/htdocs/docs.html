@@ -123,27 +123,6 @@ href="http://www.lua.org/manual/5.1/manual.html#pdf-ipairs"><code>ipairs()</code
 
 </ul>
 <h2>Sole functions</h2>
-<a name="feature_node_iterator_new"></a>
-
-<code> feature_node_iterator_new(genome_node)</code>
-<p>
-Returns a new genome node iterator which performs a depth-first traversel of <code>genome_node</code> (including <code>genome_node</code> itself).
-</p>
-<hr>
-<a name="feature_node_iterator_new_direct"></a>
-
-<code> feature_node_iterator_new_direct(genome_node)</code>
-<p>
-Returns a noew genome node iterator wich iterates over all direct children of <code>genome_node</code> (without <code>genome_node</code> itself).
-</p>
-<hr>
-<a name="feature_node_iterator:next"></a>
-
-<code> feature_node_iterator:next()</code>
-<p>
-Returns the next genome node for <code>feature_node_iterator</code> or nil.
-</p>
-<hr>
 <a name="rand_max"></a>
 
 <code> rand_max(val)</code>
@@ -156,6 +135,41 @@ Returns a random number between 0 and <code>val</code>.
 <code> reload()</code>
 <p>
 Reload <code>gt</code> module.
+</p>
+<hr>
+<a name="export"></a>
+
+<code> export()</code>
+<p>
+Export the content of <code>gt</code> table to the global environment.
+</p>
+<hr>
+<a name="display"></a>
+
+<code> display(filename)</code>
+<p>
+Call external 'display' program for file <code>filename</code>.
+</p>
+<hr>
+<a name="show_table"></a>
+
+<code> show_table(tbl)</code>
+<p>
+Show all keys and values of table <code>tbl</code>.
+</p>
+<hr>
+<a name="show"></a>
+
+<code> show(all)</code>
+<p>
+Show content of the <code>gt</code> table.
+</p>
+<hr>
+<a name="re"></a>
+
+<code> re()</code>
+<p>
+Reload the <code>gt</code> module and export its content to the global environment.
 </p>
 <hr>
 <a name="features_contain_marked"></a>
@@ -198,41 +212,6 @@ Return an array of genome features which contains a separate gene feature for ea
 <code> features_extract_sequences(features, type, join, region_mapping)</code>
 <p>
 Return an array with the sequences of the given features.
-</p>
-<hr>
-<a name="export"></a>
-
-<code> export()</code>
-<p>
-Export the content of <code>gt</code> table to the global environment.
-</p>
-<hr>
-<a name="display"></a>
-
-<code> display(filename)</code>
-<p>
-Call external 'display' program for file <code>filename</code>.
-</p>
-<hr>
-<a name="show_table"></a>
-
-<code> show_table(tbl)</code>
-<p>
-Show all keys and values of table <code>tbl</code>.
-</p>
-<hr>
-<a name="show"></a>
-
-<code> show(all)</code>
-<p>
-Show content of the <code>gt</code> table.
-</p>
-<hr>
-<a name="re"></a>
-
-<code> re()</code>
-<p>
-Reload the <code>gt</code> module and export its content to the global environment.
 </p>
 <hr>
 <a name="Alphabet"></a>
@@ -596,9 +575,31 @@ Extract the sequence of <code>feature_node</code>. If <code>join</code> is false
 <hr>
 <a name="feature_node:extract_and_translate_sequence"></a>
 
-<code> feature_node:extract_and_translate_sequence(type, join, region_mapping)</code>
+<code> feature_node:extract_and_translate_sequence(type, join,
+                                                        region_mapping)</code>
 <p>
 Extract the translated sequence of <code>feature_node</code>. If <code>join</code> is false and <code>feature_node</code> has type <code>type</code> the sequence is returned (using <code>region_mapping</code> to get it). If <code>join</code> is true and <code>feature_node</code> has children of type <code>type</code> their joined sequences are returned. If none of the above applies nil is returned.
+</p>
+<hr>
+<a name="feature_node_iterator_new"></a>
+
+<code> feature_node_iterator_new(genome_node)</code>
+<p>
+Returns a new genome node iterator which performs a depth-first traversel of <code>genome_node</code> (including <code>genome_node</code> itself).
+</p>
+<hr>
+<a name="feature_node_iterator_new_direct"></a>
+
+<code> feature_node_iterator_new_direct(genome_node)</code>
+<p>
+Returns a noew genome node iterator wich iterates over all direct children of <code>genome_node</code> (without <code>genome_node</code> itself).
+</p>
+<hr>
+<a name="feature_node_iterator:next"></a>
+
+<code> feature_node_iterator:next()</code>
+<p>
+Returns the next genome node for <code>feature_node_iterator</code> or nil.
 </p>
 <hr>
 <a name="FeatureStream"></a>
@@ -1203,7 +1204,7 @@ Returns translated <code>dna</code>.
 <div id="footer">
 Copyright &copy; 2008-2013
 The <i>GenomeTools</i> authors.
-Last update: 2014-07-11
+Last update: 2014-08-16
 </div>
 </div>
 <!-- Piwik -->

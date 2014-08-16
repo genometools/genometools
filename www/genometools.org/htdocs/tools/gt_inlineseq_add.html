@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta http-equiv="Content-Type" content="application/xhtml+xml; charset=UTF-8" />
-<title>GenomeTools - manual page for GT-SHREDDER(1)</title>
+<title>GenomeTools - manual page for GT-INLINESEQ_ADD(1)</title>
 <link rel="stylesheet" type="text/css" href="style.css">
 <link rel="stylesheet" href="..//style.css" type="text/css" />
 </head>
@@ -32,13 +32,13 @@
 <div class="sect1">
 <h2 id="_name">NAME</h2>
 <div class="sectionbody">
-<div class="paragraph"><p>gt-shredder - Shredder sequence file(s) into consecutive pieces of random length.</p></div>
+<div class="paragraph"><p>gt-inlineseq_add - Adds inline sequences from external source to GFF3 input.</p></div>
 </div>
 </div>
 <div class="sect1">
 <h2 id="_synopsis">SYNOPSIS</h2>
 <div class="sectionbody">
-<div class="paragraph"><p><strong>gt shredder</strong> [option &#8230;] [sequence_file &#8230;]</p></div>
+<div class="paragraph"><p><strong>gt inlineseq_add</strong> [options] [GFF3_file &#8230;]</p></div>
 </div>
 </div>
 <div class="sect1">
@@ -46,60 +46,61 @@
 <div class="sectionbody">
 <div class="dlist"><dl>
 <dt class="hdlist1">
-<strong>-coverage</strong> [<em>value</em>]
+<strong>-seqfile</strong> [<em>filename</em>]
 </dt>
 <dd>
 <p>
-set the number of times the sequence_file is shreddered (default: 1)
+set the sequence file from which to take the sequences (default: undefined)
 </p>
 </dd>
 <dt class="hdlist1">
-<strong>-minlength</strong> [<em>value</em>]
+<strong>-encseq</strong> [<em>filename</em>]
 </dt>
 <dd>
 <p>
-set the minimum length of the shreddered fragments (default: 300)
+set the encoded sequence indexname from which to take the sequences (default: undefined)
 </p>
 </dd>
 <dt class="hdlist1">
-<strong>-maxlength</strong> [<em>value</em>]
+<strong>-seqfiles</strong> 
 </dt>
 <dd>
 <p>
-set the maximum length of the shreddered fragments (default: 700)
+set the sequence files from which to extract the features
+use <em>--</em> to terminate the list of sequence files
 </p>
 </dd>
 <dt class="hdlist1">
-<strong>-overlap</strong> [<em>value</em>]
+<strong>-matchdesc</strong> [<em>yes|no</em>]
 </dt>
 <dd>
 <p>
-set the overlap between consecutive pieces (default: 0)
+search the sequence descriptions from the input files for the desired sequence IDs (in GFF3), reporting the first match (default: no)
 </p>
 </dd>
 <dt class="hdlist1">
-<strong>-sample</strong> [<em>value</em>]
+<strong>-matchdescstart</strong> [<em>yes|no</em>]
 </dt>
 <dd>
 <p>
-take samples of the generated sequences pieces with the given probability (default: 1.000000)
+exactly match the sequence descriptions from the input files for the desired sequence IDs (in GFF3) from the beginning to the first whitespace (default: no)
 </p>
 </dd>
 <dt class="hdlist1">
-<strong>-clipdesc</strong> [<em>yes|no</em>]
+<strong>-usedesc</strong> [<em>yes|no</em>]
 </dt>
 <dd>
 <p>
-clip descriptions after first space (fooled by <em>\t</em>, <em>\n</em> etc) adds offset and length to ensure unique identifier (default: no)
+use sequence descriptions to map the sequence IDs (in GFF3) to actual sequence entries.
+If a description contains a sequence range (e.g., III:1000001..2000000), the first  part is used as sequence ID (<em>III</em>) and the first range position as offset (<em>1000001</em>) (default: no)
 </p>
 </dd>
 <dt class="hdlist1">
-<strong>-width</strong> [<em>value</em>]
+<strong>-regionmapping</strong> [<em>string</em>]
 </dt>
 <dd>
 <p>
-set output width for FASTA sequence printing
-(0 disables formatting) (default: 0)
+set file containing sequence-region to sequence file mapping (default: undefined)
 </p>
 </dd>
 <dt class="hdlist1">
@@ -151,34 +152,6 @@ display version information and exit
 </p>
 </dd>
 </dl></div>
-<div class="paragraph"><p>Each sequence given in <em>sequence_file</em> is shreddered into consecutive pieces of
-random length (between <em>-minlength</em> and <em>-maxlength</em>) until it is consumed.
-By this means the last shreddered fragment of a given sequence can be shorter
-than the argument to option <em>-minlength</em>.
-To get rid of such fragments use <tt>gt seqfilter</tt> (see example below).</p></div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_examples">Examples:</h2>
-<div class="sectionbody">
-<div class="paragraph"><p>Shredder a given BAC:</p></div>
-<div class="literalblock">
-<div class="content">
-<pre><tt>$ gt shredder U89959_genomic.fas &gt; fragments.fas</tt></pre>
-</div></div>
-<div class="paragraph"><p>Shredder an EST collection into pieces between 50 and 100 bp and get rid of all
-(terminal) fragments shorter than 50 bp:</p></div>
-<div class="literalblock">
-<div class="content">
-<pre><tt>$ gt shredder -minlength 50 -maxlength 100 U89959_ests.fas \
-  | gt seqfilter -minlength 50 - &gt; fragments.fas
-# 130 out of 1260 sequences have been removed (10.317%)</tt></pre>
-</div></div>
-<div class="paragraph"><p>Shredder an EST collection and show only random 10% of the resulting fragments:</p></div>
-<div class="literalblock">
-<div class="content">
-<pre><tt>$ gt shredder -sample 0.1 U89959_ests.fas</tt></pre>
-</div></div>
 </div>
 </div>
 <div class="sect1">
