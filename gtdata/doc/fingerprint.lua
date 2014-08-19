@@ -3,6 +3,9 @@ print ([[
 If neither option '-check' nor option '-duplicates' is used, the fingerprints
 for all sequences are shown on stdout.
 
+Fingerprint of a sequence is case insensitive. Thus MD5 fingerprint of two
+identical sequences will be the same even if one is soft-masked.
+
 Examples
 --------
 

@@ -11,6 +11,13 @@ Test do
   run_test("#{$bin}gt fingerprint #{$testdata}nonexistent_file", :retval=> 1)
 end
 
+Name "fingerprint (case insensitive)"
+Keywords "gt_fingerprint"
+Test do
+  run_test("#{$bin}gt fingerprint #{$testdata}U89959_ests_gi_8690080_soft_masked.fas")
+  run "diff #{last_stdout} #{$testdata}U89959_ests_gi_8690080_unmasked.checklist"
+end
+
 Name "fingerprint -check (success)"
 Keywords "gt_fingerprint"
 Test do
