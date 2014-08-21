@@ -38,12 +38,12 @@ struct GtInterFeatureVisitor {
         gt_node_visitor_cast(gt_inter_feature_visitor_class(), GV)
 
 static int inter_feature_in_children(GtFeatureNode *current_feature, void *data,
-                                     GT_UNUSED GtError *err)
+                                     GtError *err)
 {
   GtInterFeatureVisitor *aiv = (GtInterFeatureVisitor*) data;
   GtFeatureNode *inter_node;
   GtRange previous_range, current_range, inter_range;
-  GtStrand previous_strand, /*current_strand, */inter_strand;
+  GtStrand previous_strand, current_strand, inter_strand;
   GtStr *parent_seqid;
   gt_error_check(err);
   gt_assert(current_feature);
@@ -76,8 +76,20 @@ static int inter_feature_in_children(GtFeatureNode *current_feature, void *data,
 
       /* determine inter strand */
       previous_strand = gt_feature_node_get_strand(aiv->previous_feature);
-      /*current_strand = gt_feature_node_get_strand(current_feature);*/
-      gt_assert(previous_strand == gt_feature_node_get_strand(current_feature));
+      current_strand = gt_feature_node_get_strand(current_feature);
+      if (previous_strand != current_strand)
+      {
+        GtUword curr_ln = gt_genome_node_get_line_number((GtGenomeNode*)
+                                                         current_feature);
+        GtUword prev_ln = gt_genome_node_get_line_number((GtGenomeNode*)
+                                                         aiv->previous_feature);
+        const char *filename = gt_genome_node_get_filename((GtGenomeNode*)
+                                                           current_feature);
+        gt_error_set(err, "feature on line " GT_WU " of '%s' has a different "
+                     "strand than the feature on line " GT_WU, curr_ln,
+                     filename, prev_ln);
+        return -1;
+      }
       inter_strand = previous_strand;
 
       /* determine sequence id */
