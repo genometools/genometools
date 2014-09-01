@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2012-2013 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
+  Copyright (c) 2012-2015 Sascha Steinbiss <sascha@steinbiss.name>
   Copyright (c) 2012      Manuela Beckert <9beckert@informatik.uni-hamburg.de>
   Copyright (c) 2012      Dorle Osterode <9osterod@informatik.uni-hamburg.de>
   Copyright (c) 2012-2013 Center for Bioinformatics, University of Hamburg
@@ -485,8 +485,8 @@ static int gt_tir_searchforTIRs(GtTIRStream *tir_stream,
     alilen = tir_stream->seedinfo.max_tir_length - seedptr->len;
     seqstart1 = gt_encseq_seqstartpos(tir_stream->encseq,
                                        seedptr->contignumber);
-    seqend1 = seqstart1
-                + gt_encseq_seqlength(tir_stream->encseq,seedptr->contignumber);
+    seqend1 = seqstart1 + gt_encseq_seqlength(tir_stream->encseq,
+                                              seedptr->contignumber);
     seqstart2 = GT_REVERSEPOS(total_length, seqend1);
     seqend2 = GT_REVERSEPOS(total_length, seqstart1);
 
@@ -498,10 +498,16 @@ static int gt_tir_searchforTIRs(GtTIRStream *tir_stream,
       if (alilen <= seedptr->pos1 - seqstart1
             && alilen <= seedptr->pos2 - seqstart2)
       {
-        gt_seqabstract_reinit_encseq(sa_useq, encseq, alilen,
+        gt_seqabstract_reinit_encseq(sa_useq, encseq, alilen-1,
                                      seedptr->pos1 - alilen);
-        gt_seqabstract_reinit_encseq(sa_vseq, encseq, alilen,
+        gt_seqabstract_reinit_encseq(sa_vseq, encseq, alilen-1,
                                      seedptr->pos2 - alilen);
+        gt_log_log("reinit "GT_WU"-"GT_WU":"GT_WU"-"GT_WU,
+                   seedptr->pos1 - alilen,
+                   seedptr->pos1 - 1,
+                   seedptr->pos2 - alilen,
+                   seedptr->pos2 - 1);
+
       } else
       {
         GtUword maxleft = MIN(seedptr->pos1 - seqstart1,
@@ -536,6 +542,11 @@ static int gt_tir_searchforTIRs(GtTIRStream *tir_stream,
                                      seedptr->pos1 + seedptr->len);
         gt_seqabstract_reinit_encseq(sa_vseq, encseq, alilen,
                                      seedptr->pos2 + seedptr->len);
+        gt_log_log("reinit "GT_WU"-"GT_WU":"GT_WU"-"GT_WU,
+                seedptr->pos1 + seedptr->len,
+                seedptr->pos1 + seedptr->len + alilen,
+                seedptr->pos2 + seedptr->len,
+                seedptr->pos2 + seedptr->len + alilen);
       } else
       {
         GtUword maxright = MIN(seqend1 - (seedptr->pos1 + seedptr->len),
@@ -559,11 +570,14 @@ static int gt_tir_searchforTIRs(GtTIRStream *tir_stream,
     }
 
     /* re-check length constraints */
-    if (seedptr->pos1 + seedptr->len - 1 + xdropbest_right.ivalue -
-        seedptr->pos2 - xdropbest_left.jvalue + 1 < tir_stream->min_TIR_length
-        || seedptr->pos1 + seedptr->len - 1 + xdropbest_right.ivalue -
-        seedptr->pos2 - xdropbest_left.jvalue + 1 < tir_stream->min_TIR_length)
+    if ((seedptr->pos1 + seedptr->len - 1 + xdropbest_right.ivalue) -
+        (seedptr->pos2 - xdropbest_left.jvalue + 1) < tir_stream->min_TIR_length
+        || (seedptr->pos1 + seedptr->len - 1 + xdropbest_right.ivalue) -
+        (seedptr->pos2 - xdropbest_left.jvalue + 1) < tir_stream->min_TIR_length)
+    {
+      gt_log_log("ext: out!");
       continue;
+    }
 
     GT_GETNEXTFREEINARRAY(pair, &tir_stream->first_pairs, TIRPair, 256);
     /* Store positions for the found TIR */
@@ -586,16 +600,24 @@ static int gt_tir_searchforTIRs(GtTIRStream *tir_stream,
     /* TSDs */
     gt_tir_search_for_TSDs(tir_stream, pair, encseq, err);
 
-    /* determine and filter by similarity */
-    ulen = pair->left_tir_end - pair->left_tir_start + 1;
-    vlen = pair->right_tir_end - pair->right_tir_start + 1;
-    gt_seqabstract_reinit_encseq(sa_useq, encseq, ulen, pair->left_tir_start);
-    gt_seqabstract_reinit_encseq(sa_vseq, encseq, vlen, pair->right_tir_start);
-    edist = greedyunitedist(frontresource, sa_useq, sa_vseq);
-    pair->similarity = 100.0 * (1.0 - (double) edist/MAX(ulen, vlen));
-    if (gt_double_smaller_double(pair->similarity,
-                                 tir_stream->similarity_threshold)) {
+    /* make sure the TIR coords are still OK */
+    if (pair->left_tir_end <= pair->left_tir_start ||
+        pair->right_tir_end <= pair->right_tir_start) {
       pair->skip = true;
+    }
+    if (!pair->skip) {
+      /* determine and filter by similarity */
+      ulen = pair->left_tir_end - pair->left_tir_start;
+      vlen = pair->right_tir_end - pair->right_tir_start;
+      gt_seqabstract_reinit_encseq(sa_useq, encseq, ulen, pair->left_tir_start);
+      gt_seqabstract_reinit_encseq(sa_vseq, encseq, vlen, pair->right_tir_start);
+      edist = greedyunitedist(frontresource, sa_useq, sa_vseq);
+      pair->similarity = 100.0 * (1.0 - (double) edist/MAX(ulen, vlen));
+      gt_log_log("edist "GT_WU", sim %f", edist, pair->similarity);
+      if (gt_double_smaller_double(pair->similarity,
+                                   tir_stream->similarity_threshold)) {
+        pair->skip = true;
+      }
     }
   }
 
