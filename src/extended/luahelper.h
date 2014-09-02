@@ -23,6 +23,7 @@
 #include "core/str_array.h"
 
 int   gt_lua_set_modules_path(lua_State*, GtError*);
+void  gt_lua_set_script_dir(lua_State *L, const char*);
 
 void  gt_lua_set_arg(lua_State*, const char *argv_0, const char **argv);
 void  gt_lua_export_metatable(lua_State*, const char *metatable_desc);

@@ -19,6 +19,7 @@
 #include "lauxlib.h"
 #include "core/assert_api.h"
 #include "core/cstr_api.h"
+#include "core/fileutils.h"
 #include "core/gtdatapath.h"
 #include "core/ma.h"
 #include "extended/luahelper.h"
@@ -57,6 +58,20 @@ int gt_lua_set_modules_path(lua_State *L, GtError *err)
   gt_str_delete(modules_path);
   gt_str_delete(external_modules_path);
   return had_err;
+}
+
+void gt_lua_set_script_dir(lua_State *L, const char *scriptpath)
+{
+  GtStr *scriptdir = gt_str_new();
+  gt_file_dirname(scriptdir, scriptpath);
+  if (gt_str_length(scriptdir) == 0)
+    gt_str_append_cstr(scriptdir, ".");
+  lua_getglobal(L, "gt");
+  gt_assert(lua_istable(L, -1));
+  lua_pushstring(L, gt_str_get(scriptdir));
+  lua_setfield(L, -2, "script_dir");
+  lua_pop(L, 1);
+  gt_str_delete(scriptdir);
 }
 
 void gt_lua_set_arg(lua_State *L, const char *argv_0, const char **argv)
