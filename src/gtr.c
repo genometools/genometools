@@ -453,6 +453,8 @@ int gtr_run(GtR *gtr, int argc, const char **argv, GtError *err)
     if (!gtr->tools || !gt_toolbox_has_tool(gtr->tools, argv[0])) {
       /* no tool found -> try to open script */
       if (gt_file_exists(argv[0])) {
+        /* export script */
+        gt_lua_set_script_dir(gtr->L, argv[0]);
         /* run script */
         nargv = gt_cstr_array_prefix_first(argv, gt_error_get_progname(err));
         gt_lua_set_arg(gtr->L, nargv[0], (const char**) nargv+1);
