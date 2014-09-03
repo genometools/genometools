@@ -21,3 +21,11 @@ Test do
            "#{$testdata}nGASP/protein_100.fas"
   run "diff #{last_stdout} #{$testdata}nGASP/protein_10.fas"
 end
+
+Name "gt seqfilter -step"
+Keywords "gt_seqfilter"
+Test do
+  run_test "#{$bin}gt seqfilter -step 10 " +
+           "#{$testdata}nGASP/protein_100.fas"
+  run "diff #{last_stdout} #{$testdata}nGASP/protein_10th.fas"
+end
