@@ -21,6 +21,7 @@
 #include "lauxlib.h"
 #include "core/assert_api.h"
 #include "core/ma.h"
+#include "core/phase_api.h"
 #include "core/str_array_api.h"
 #include "core/symbol_api.h"
 #include "core/unused_api.h"
@@ -216,6 +217,22 @@ static int feature_node_lua_get_score(lua_State *L)
     lua_pushnumber(L, gt_feature_node_get_score(fn));
   else
     lua_pushnil(L);
+  return 1;
+}
+
+static int feature_node_lua_get_phase(lua_State *L)
+{
+  GtGenomeNode **gn = check_genome_node(L, 1);
+  GtFeatureNode *fn;
+  GtPhase phase;
+  char phasebuf[2];
+  /* make sure we get a feature node */
+  fn = gt_feature_node_try_cast(*gn);
+  luaL_argcheck(L, fn, 1, "not a feature node");
+  phase = gt_feature_node_get_phase(fn);
+  phasebuf[0] = GT_PHASE_CHARS[(int) phase];
+  phasebuf[1] = '\0';
+  lua_pushstring(L, phasebuf);
   return 1;
 }
 
@@ -747,6 +764,7 @@ static const struct luaL_Reg genome_node_lib_m [] = {
   { "get_source", feature_node_lua_get_source },
   { "set_source", feature_node_lua_set_source },
   { "get_score", feature_node_lua_get_score },
+  { "get_phase", feature_node_lua_get_phase },
   { "get_attribute", feature_node_lua_get_attribute },
   { "get_exons", feature_node_lua_get_exons },
   { "accept", genome_node_lua_accept },
