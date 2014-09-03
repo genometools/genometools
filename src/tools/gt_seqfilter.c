@@ -19,18 +19,27 @@
 #include "core/bioseq_iterator.h"
 #include "core/fasta.h"
 #include "core/ma.h"
-#include "core/output_file_api.h"
+#include "core/mathsupport.h"
 #include "core/option_api.h"
+#include "core/output_file_api.h"
 #include "core/undef_api.h"
 #include "tools/gt_seqfilter.h"
 
+#define SEQFILTER_MIN_PROB 0.0
+#define SEQFILTER_MAX_PROB 1.0
+#define SEQFILTER_DEF_PROB 1.0
+#define SEQFILTER_MIN_STEP 1
+#define SEQFILTER_DEF_STEP 1
+
 typedef struct {
-  GtUword minlength,
-                maxlength,
-                maxseqnum,
-                width;
-  GtOutputFileInfo *ofi;
   GtFile *outfp;
+  GtOutputFileInfo *ofi;
+  GtUword maxlength,
+          maxseqnum,
+          minlength,
+          step,
+          width;
+  double sample_prob;
 } SeqFilterArguments;
 
 static void* gt_seqfilter_arguments_new(void)
@@ -79,6 +88,23 @@ static GtOptionParser* gt_seqfilter_option_parser_new(void *tool_arguments)
                                &arguments->maxseqnum, GT_UNDEF_UWORD);
   gt_option_parser_add_option(op, option);
 
+  /* -sample */
+  option = gt_option_new_double_min_max("sample", "set a probability for each "
+                                        "sequence to pass the filter",
+                                        &arguments->sample_prob,
+                                        SEQFILTER_DEF_PROB,
+                                        SEQFILTER_MIN_PROB,
+                                        SEQFILTER_MAX_PROB);
+  gt_option_parser_add_option(op, option);
+
+  /* -step */
+  option = gt_option_new_uword_min("step", "only every 'step'-th sequence "
+                                   "passes the filter",
+                                   &arguments->step,
+                                   SEQFILTER_DEF_STEP,
+                                   SEQFILTER_MIN_STEP);
+  gt_option_parser_add_option(op, option);
+
   /* -width */
   option = gt_option_new_width(&arguments->width);
   gt_option_parser_add_option(op, option);
@@ -94,8 +120,7 @@ static int gt_seqfilter_runner(int argc, const char **argv, int parsed_args,
   SeqFilterArguments *arguments = tool_arguments;
   GtBioseqIterator *bsi;
   GtBioseq *bioseq;
-  GtUword i;
-  GtUint64 passed = 0, filtered = 0, num_of_sequences = 0;
+  GtUint64 passed = 0, filtered = 0, num_of_sequences = 0, steps = 0;
   int had_err = 0;
 
   gt_error_check(err);
@@ -103,15 +128,24 @@ static int gt_seqfilter_runner(int argc, const char **argv, int parsed_args,
 
   bsi = gt_bioseq_iterator_new(argc - parsed_args, argv + parsed_args);
 
-  while (!(had_err = gt_bioseq_iterator_next(bsi, &bioseq, err)) && bioseq) {
-    for (i = 0; i < gt_bioseq_number_of_sequences(bioseq); i++) {
+  while (!(had_err = gt_bioseq_iterator_next(bsi, &bioseq, err)) &&
+         bioseq != NULL) {
+    GtUword i;
+    GtUint64 current_num = gt_bioseq_number_of_sequences(bioseq);
+    for (i = 0;
+         i < current_num &&
+         (arguments->maxseqnum == GT_UNDEF_UWORD ||
+          passed + 1 <= arguments->maxseqnum);
+         i++) {
       char *seq;
-      if ((arguments->minlength == GT_UNDEF_UWORD ||
+      if ((arguments->step == 1 ||
+           steps + 1 == arguments->step) &&
+          (arguments->sample_prob == 1.0 ||
+           gt_rand_0_to_1() <= arguments->sample_prob) &&
+          (arguments->minlength == GT_UNDEF_UWORD ||
            gt_bioseq_get_sequence_length(bioseq, i) >= arguments->minlength) &&
           (arguments->maxlength == GT_UNDEF_UWORD ||
-           gt_bioseq_get_sequence_length(bioseq, i) <= arguments->maxlength) &&
-          (arguments->maxseqnum == GT_UNDEF_UWORD ||
-           passed + 1 <= arguments->maxseqnum)) {
+           gt_bioseq_get_sequence_length(bioseq, i) <= arguments->maxlength)) {
         seq = gt_bioseq_get_sequence(bioseq, i);
         gt_fasta_show_entry(gt_bioseq_get_description(bioseq, i),
                             seq,
@@ -119,19 +153,24 @@ static int gt_seqfilter_runner(int argc, const char **argv, int parsed_args,
                             arguments->width, arguments->outfp);
         gt_free(seq);
         passed++;
+        steps = 0;
       }
-      else
+      else {
         filtered++;
-      num_of_sequences++;
+        steps++;
+      }
     }
+    filtered += current_num - i;
+    num_of_sequences += current_num;
     gt_bioseq_delete(bioseq);
   }
 
   /* show statistics */
   if (!had_err) {
     gt_assert(passed + filtered == num_of_sequences);
-    fprintf(stderr, "# "GT_LLU" out of "GT_LLU" sequences have been removed "
-            "(%.3f%%)\n", filtered, num_of_sequences,
+    fprintf(stderr, "# " GT_LLU " out of " GT_LLU
+            " sequences have been removed (%.3f%%)\n",
+            filtered, num_of_sequences,
             ((double) filtered / num_of_sequences) * 100.0);
   }
 
