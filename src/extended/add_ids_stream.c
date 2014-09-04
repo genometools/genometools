@@ -58,18 +58,26 @@ static int add_ids_stream_next(GtNodeStream *ns, GtGenomeNode **gn,
   }
 
   /* no nodes in the buffer -> get new nodes */
-  while (!(had_err = gt_node_stream_next(ais->in_stream, gn, err)) && *gn) {
-    gt_assert(*gn && !had_err);
-    had_err = gt_genome_node_accept(*gn, ais->add_ids_visitor, err);
-    if (had_err) {
-      /* we own the node -> delete it */
-      gt_genome_node_delete(*gn);
-      *gn = NULL;
+  for (;;) {
+    had_err = gt_node_stream_next(ais->in_stream, gn, err);
+    if (!*gn)
       break;
-    }
-    if (gt_add_ids_visitor_node_buffer_size(ais->add_ids_visitor)) {
-      *gn = gt_add_ids_visitor_get_node(ais->add_ids_visitor);
-      return 0;
+    gt_genome_node_ref(*gn);
+    if (had_err)
+      break;
+    else {
+      gt_genome_node_delete(*gn);
+      had_err = gt_genome_node_accept(*gn, ais->add_ids_visitor, err);
+      if (had_err) {
+        /* we own the node -> delete it */
+        gt_genome_node_delete(*gn);
+        *gn = NULL;
+        break;
+      }
+      if (gt_add_ids_visitor_node_buffer_size(ais->add_ids_visitor)) {
+        *gn = gt_add_ids_visitor_get_node(ais->add_ids_visitor);
+        return 0;
+      }
     }
   }
 
