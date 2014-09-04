@@ -60,12 +60,16 @@ static int add_ids_stream_next(GtNodeStream *ns, GtGenomeNode **gn,
   /* no nodes in the buffer -> get new nodes */
   for (;;) {
     had_err = gt_node_stream_next(ais->in_stream, gn, err);
+    /* end of the stream */
     if (!*gn)
       break;
+    /* to avoid a double free on error, we need to keep an extra
+       refcount on the last node; let's increase the count here... */
     gt_genome_node_ref(*gn);
     if (had_err)
       break;
     else {
+      /* ...and decrease it again if there was no error */
       gt_genome_node_delete(*gn);
       had_err = gt_genome_node_accept(*gn, ais->add_ids_visitor, err);
       if (had_err) {

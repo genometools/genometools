@@ -79,6 +79,8 @@ href="http://www.lua.org/manual/5.1/manual.html#pdf-ipairs"><code>ipairs()</code
 
   <li><a href="#Canvas">Canvas</a>
 
+  <li><a href="#CommentNode">CommentNode</a>
+
   <li><a href="#Diagram">Diagram</a>
 
   <li><a href="#FeatureIndex">FeatureIndex</a>
@@ -113,6 +115,8 @@ href="http://www.lua.org/manual/5.1/manual.html#pdf-ipairs"><code>ipairs()</code
 
   <li><a href="#ScoreMatrix">ScoreMatrix</a>
 
+  <li><a href="#SequenceNode">SequenceNode</a>
+
   <li><a href="#StreamEvaluator">StreamEvaluator</a>
 
   <li><a href="#translate">translate</a>
@@ -135,41 +139,6 @@ Returns a random number between 0 and <code>val</code>.
 <code> reload()</code>
 <p>
 Reload <code>gt</code> module.
-</p>
-<hr>
-<a name="export"></a>
-
-<code> export()</code>
-<p>
-Export the content of <code>gt</code> table to the global environment.
-</p>
-<hr>
-<a name="display"></a>
-
-<code> display(filename)</code>
-<p>
-Call external 'display' program for file <code>filename</code>.
-</p>
-<hr>
-<a name="show_table"></a>
-
-<code> show_table(tbl)</code>
-<p>
-Show all keys and values of table <code>tbl</code>.
-</p>
-<hr>
-<a name="show"></a>
-
-<code> show(all)</code>
-<p>
-Show content of the <code>gt</code> table.
-</p>
-<hr>
-<a name="re"></a>
-
-<code> re()</code>
-<p>
-Reload the <code>gt</code> module and export its content to the global environment.
 </p>
 <hr>
 <a name="features_contain_marked"></a>
@@ -212,6 +181,41 @@ Return an array of genome features which contains a separate gene feature for ea
 <code> features_extract_sequences(features, type, join, region_mapping)</code>
 <p>
 Return an array with the sequences of the given features.
+</p>
+<hr>
+<a name="export"></a>
+
+<code> export()</code>
+<p>
+Export the content of <code>gt</code> table to the global environment.
+</p>
+<hr>
+<a name="display"></a>
+
+<code> display(filename)</code>
+<p>
+Call external 'display' program for file <code>filename</code>.
+</p>
+<hr>
+<a name="show_table"></a>
+
+<code> show_table(tbl)</code>
+<p>
+Show all keys and values of table <code>tbl</code>.
+</p>
+<hr>
+<a name="show"></a>
+
+<code> show(all)</code>
+<p>
+Show content of the <code>gt</code> table.
+</p>
+<hr>
+<a name="re"></a>
+
+<code> re()</code>
+<p>
+Reload the <code>gt</code> module and export its content to the global environment.
 </p>
 <hr>
 <a name="Alphabet"></a>
@@ -371,6 +375,22 @@ Return a Canvas object which acts as a SVG drawing surface of width <code>width<
 Creates an image file with the given <code>filename</code> which contains the contents of the canvas (only for objects created with <code>canvas_cairo_file_new_*()</code>).
 </p>
 <hr>
+<a name="CommentNode"></a>
+<h2>Class CommentNode</h2>
+<a name="comment_node_new"></a>
+
+<code> comment_node_new(comment)</code>
+<p>
+Returns a new comment node with comment text <code>comment</code>.
+</p>
+<hr>
+<a name="comment_node:get_comment"></a>
+
+<code> comment_node:get_comment()</code>
+<p>
+Return comment string of <code>comment_node</code>.
+</p>
+<hr>
 <a name="Diagram"></a>
 <h2>Class Diagram</h2>
 <a name="diagram_new"></a>
@@ -510,11 +530,25 @@ Returns the strand of <code>feature_node</code>.
 Returns the source of <code>feature_node</code>.
 </p>
 <hr>
+<a name="feature_node:set_source"></a>
+
+<code> feature_node:set_source(source)</code>
+<p>
+Set the source of <code>feature_node</code> to <code>source</code>.
+</p>
+<hr>
 <a name="feature_node:get_score"></a>
 
 <code> feature_node:get_score()</code>
 <p>
 Returns the score of <code>feature_node</code>.
+</p>
+<hr>
+<a name="feature_node:get_phase"></a>
+
+<code> feature_node:get_phase()</code>
+<p>
+Returns the phase of <code>feature_node</code>.
 </p>
 <hr>
 <a name="feature_node:get_type"></a>
@@ -531,11 +565,74 @@ Return type of <code>feature_node</code> as string.
 Returns the <code>attrib</code> attribute of <code>feature_node</code>.
 </p>
 <hr>
+<a name="feature_node:set_attribute"></a>
+
+<code> feature_node:set_attribute(attrib, value)</code>
+<p>
+Sets the <code>attrib</code> attribute of <code>feature_node</code> to <code>value</code>.
+</p>
+<hr>
+<a name="feature_node:add_attribute"></a>
+
+<code> feature_node:add_attribute(attrib, value)</code>
+<p>
+Adds the new <code>attrib</code> attribute of <code>feature_node</code> with value <code>value</code>.
+</p>
+<hr>
+<a name="feature_node:remove_attribute"></a>
+
+<code> feature_node:remove_attribute(attrib)</code>
+<p>
+Removes the <code>attrib</code> attribute of <code>feature_node</code>.
+</p>
+<hr>
+<a name="feature_node:attribute_pairs"></a>
+
+<code> feature_node:attribute_pairs()</code>
+<p>
+Returns an Lua iterator over the all attributes of <code>feature_node</code>, which delivers pairs of key/value strings. Similar to the Lua <code>pairs()</code> function, applied to a table with string keys.
+</p>
+<hr>
 <a name="feature_node:get_exons"></a>
 
 <code> feature_node:get_exons()</code>
 <p>
 Returns an array containing the exons of <code>feature_node</code>.
+</p>
+<hr>
+<a name="feature_node:children"></a>
+
+<code> feature_node:children()</code>
+<p>
+Returns an depth-first Lua iterator over the all children of <code>feature_node</code> (including <code>feature_node</code> itself).
+</p>
+<hr>
+<a name="feature_node:get_children"></a>
+
+<code> feature_node:get_children()</code>
+<p>
+Returns an depth-first Lua iterator over the all children of <code>feature_node</code> (including <code>feature_node</code> itself).
+</p>
+<hr>
+<a name="feature_node:direct_children"></a>
+
+<code> feature_node:direct_children()</code>
+<p>
+Returns an Lua iterator over the all direct children of <code>feature_node</code> (not including <code>feature_node</code> itself).
+</p>
+<hr>
+<a name="feature_node:get_direct_children"></a>
+
+<code> feature_node:get_direct_children()</code>
+<p>
+Returns an Lua iterator over the all direct children of <code>feature_node</code> (not including <code>feature_node</code> itself).
+</p>
+<hr>
+<a name="feature_node:has_child_of_type"></a>
+
+<code> feature_node:has_child_of_type(type)</code>
+<p>
+Returns <code>true</code> if <code>feature_node</code> has a child node of type <code>type</code>.
 </p>
 <hr>
 <a name="feature_node:add_child"></a>
@@ -550,13 +647,6 @@ Adds <code>child</code> as a child node of <code>feature_node</code>.
 <code> feature_node:remove_leaf(leaf)</code>
 <p>
 Removes <code>leaf</code> as a child node in the subgraph beneath <code>feature_node</code>, if it is a leaf.
-</p>
-<hr>
-<a name="feature_node:set_source"></a>
-
-<code> feature_node:set_source(source)</code>
-<p>
-Set the source of <code>feature_node</code> to <code>source</code>.
 </p>
 <hr>
 <a name="feature_node:output_leading"></a>
@@ -585,14 +675,14 @@ Extract the translated sequence of <code>feature_node</code>. If <code>join</cod
 
 <code> feature_node_iterator_new(genome_node)</code>
 <p>
-Returns a new genome node iterator which performs a depth-first traversel of <code>genome_node</code> (including <code>genome_node</code> itself).
+Returns a new genome node iterator which performs a depth-first traversal of <code>genome_node</code> (including <code>genome_node</code> itself).
 </p>
 <hr>
 <a name="feature_node_iterator_new_direct"></a>
 
 <code> feature_node_iterator_new_direct(genome_node)</code>
 <p>
-Returns a noew genome node iterator wich iterates over all direct children of <code>genome_node</code> (without <code>genome_node</code> itself).
+Returns a new genome node iterator wich iterates over all direct children of <code>genome_node</code> (without <code>genome_node</code> itself).
 </p>
 <hr>
 <a name="feature_node_iterator:next"></a>
@@ -668,6 +758,13 @@ Returns the line number of <code>genome_node</code>.
 <code> genome_node:get_range()</code>
 <p>
 Returns the range of <code>genome_node</code>.
+</p>
+<hr>
+<a name="genome_node:set_range"></a>
+
+<code> genome_node:set_range(range)</code>
+<p>
+Sets the range of <code>genome_node</code> to <code>range</code>.
 </p>
 <hr>
 <a name="genome_node:get_seqid"></a>
@@ -938,6 +1035,36 @@ Returns the score for <code>idx1</code>,<code>idx2</code> as number.
 Show <code>score_matrix</code> on stdout.
 </p>
 <hr>
+<a name="SequenceNode"></a>
+<h2>Class SequenceNode</h2>
+<a name="sequence_node_new"></a>
+
+<code> sequence_node_new(desc, sequence)</code>
+<p>
+Returns a new sequence node with description <code>desc</code> and (unencoded) sequence <code>sequence</code>.
+</p>
+<hr>
+<a name="sequence_node:get_description"></a>
+
+<code> sequence_node:get_description()</code>
+<p>
+Returns description of <code>sequence_node</code>.
+</p>
+<hr>
+<a name="sequence_node:get_sequence"></a>
+
+<code> sequence_node:get_sequence()</code>
+<p>
+Returns sequence of <code>sequence_node</code>.
+</p>
+<hr>
+<a name="sequence_node:get_sequence_length"></a>
+
+<code> sequence_node:get_sequence_length()</code>
+<p>
+Returns length of the sequence of <code>sequence_node</code>.
+</p>
+<hr>
 <a name="StreamEvaluator"></a>
 <h2>Class StreamEvaluator</h2>
 <a name="stream_evaluator_new"></a>
@@ -1013,6 +1140,10 @@ Returns translated <code>dna</code>.
 
   <a href="#cds_stream_new"><code>cds_stream_new</code></a><br>
 
+  <a href="#comment_node:get_comment"><code>comment_node:get_comment</code></a><br>
+
+  <a href="#comment_node_new"><code>comment_node_new</code></a><br>
+
   <a href="#csa_stream_new"><code>csa_stream_new</code></a><br>
 
   <a href="#diagram_new"><code>diagram_new</code></a><br>
@@ -1051,7 +1182,15 @@ Returns translated <code>dna</code>.
 
   <a href="#feature_index_memory_new"><code>feature_index_memory_new</code></a><br>
 
+  <a href="#feature_node:add_attribute"><code>feature_node:add_attribute</code></a><br>
+
   <a href="#feature_node:add_child"><code>feature_node:add_child</code></a><br>
+
+  <a href="#feature_node:attribute_pairs"><code>feature_node:attribute_pairs</code></a><br>
+
+  <a href="#feature_node:children"><code>feature_node:children</code></a><br>
+
+  <a href="#feature_node:direct_children"><code>feature_node:direct_children</code></a><br>
 
   <a href="#feature_node:extract_and_translate_sequence"><code>feature_node:extract_and_translate_sequence</code></a><br>
 
@@ -1059,7 +1198,13 @@ Returns translated <code>dna</code>.
 
   <a href="#feature_node:get_attribute"><code>feature_node:get_attribute</code></a><br>
 
+  <a href="#feature_node:get_children"><code>feature_node:get_children</code></a><br>
+
+  <a href="#feature_node:get_direct_children"><code>feature_node:get_direct_children</code></a><br>
+
   <a href="#feature_node:get_exons"><code>feature_node:get_exons</code></a><br>
+
+  <a href="#feature_node:get_phase"><code>feature_node:get_phase</code></a><br>
 
   <a href="#feature_node:get_score"><code>feature_node:get_score</code></a><br>
 
@@ -1069,9 +1214,15 @@ Returns translated <code>dna</code>.
 
   <a href="#feature_node:get_type"><code>feature_node:get_type</code></a><br>
 
+  <a href="#feature_node:has_child_of_type"><code>feature_node:has_child_of_type</code></a><br>
+
   <a href="#feature_node:output_leading"><code>feature_node:output_leading</code></a><br>
 
+  <a href="#feature_node:remove_attribute"><code>feature_node:remove_attribute</code></a><br>
+
   <a href="#feature_node:remove_leaf"><code>feature_node:remove_leaf</code></a><br>
+
+  <a href="#feature_node:set_attribute"><code>feature_node:set_attribute</code></a><br>
 
   <a href="#feature_node:set_source"><code>feature_node:set_source</code></a><br>
 
@@ -1116,6 +1267,8 @@ Returns translated <code>dna</code>.
   <a href="#genome_node:is_part_of_genome_node"><code>genome_node:is_part_of_genome_node</code></a><br>
 
   <a href="#genome_node:mark"><code>genome_node:mark</code></a><br>
+
+  <a href="#genome_node:set_range"><code>genome_node:set_range</code></a><br>
 
   <a href="#genome_node:show"><code>genome_node:show</code></a><br>
 
@@ -1189,6 +1342,14 @@ Returns translated <code>dna</code>.
 
   <a href="#score_matrix_new_read_protein"><code>score_matrix_new_read_protein</code></a><br>
 
+  <a href="#sequence_node:get_description"><code>sequence_node:get_description</code></a><br>
+
+  <a href="#sequence_node:get_sequence"><code>sequence_node:get_sequence</code></a><br>
+
+  <a href="#sequence_node:get_sequence_length"><code>sequence_node:get_sequence_length</code></a><br>
+
+  <a href="#sequence_node_new"><code>sequence_node_new</code></a><br>
+
   <a href="#show"><code>show</code></a><br>
 
   <a href="#show_table"><code>show_table</code></a><br>
@@ -1204,7 +1365,7 @@ Returns translated <code>dna</code>.
 <div id="footer">
 Copyright &copy; 2008-2013
 The <i>GenomeTools</i> authors.
-Last update: 2014-08-16
+Last update: 2014-09-04
 </div>
 </div>
 <!-- Piwik -->

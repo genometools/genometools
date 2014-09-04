@@ -32,6 +32,9 @@
    -- Returns the range of <genome_node>.
    function genome_node:get_range()
 
+   -- Sets the range of <genome_node> to <range>.
+   function genome_node:set_range(range)
+
    -- Returns the sequence id of <genome_node>.
    function genome_node:get_seqid()
 
@@ -66,8 +69,14 @@
    -- Returns the source of <feature_node>.
    function feature_node:get_source()
 
+   -- Set the source of <feature_node> to <source>.
+   function feature_node:set_source(source)
+
    -- Returns the score of <feature_node>.
    function feature_node:get_score()
+
+   -- Returns the phase of <feature_node>.
+   function feature_node:get_phase()
 
    -- Return type of <feature_node> as string.
    function feature_node:get_type()
@@ -75,8 +84,41 @@
    -- Returns the <attrib> attribute of <feature_node>.
    function feature_node:get_attribute(attrib)
 
+   -- Sets the <attrib> attribute of <feature_node> to <value>.
+   function feature_node:set_attribute(attrib, value)
+
+   -- Adds the new <attrib> attribute of <feature_node> with value <value>.
+   function feature_node:add_attribute(attrib, value)
+
+   -- Removes the <attrib> attribute of <feature_node>.
+   function feature_node:remove_attribute(attrib)
+
+   -- Returns an Lua iterator over the all attributes of <feature_node>,
+   -- which delivers pairs of key/value strings. Similar to the Lua <pairs()>
+   -- function, applied to a table with string keys.
+   function feature_node:attribute_pairs()
+
    -- Returns an array containing the exons of <feature_node>.
    function feature_node:get_exons()
+
+   -- Returns an depth-first Lua iterator over the all children of
+   -- <feature_node> (including <feature_node> itself).
+   function feature_node:children()
+
+   -- Returns an depth-first Lua iterator over the all children of
+   -- <feature_node> (including <feature_node> itself).
+   function feature_node:get_children()
+
+   -- Returns an Lua iterator over the all direct children of <feature_node>
+   -- (not including <feature_node> itself).
+   function feature_node:direct_children()
+
+   -- Returns an Lua iterator over the all direct children of <feature_node>
+   -- (not including <feature_node> itself).
+   function feature_node:get_direct_children()
+
+   -- Returns <true> if <feature_node> has a child node of type <type>.
+   function feature_node:has_child_of_type(type)
 
    -- Adds <child> as a child node of <feature_node>.
    function feature_node:add_child(child)
@@ -84,9 +126,6 @@
    -- Removes <leaf> as a child node in the subgraph beneath <feature_node>,
    -- if it is a leaf.
    function feature_node:remove_leaf(leaf)
-
-   -- Set the source of <feature_node> to <source>.
-   function feature_node:set_source(source)
 
    -- Show leading part of GFF3 output for <feature_node>
    function feature_node:output_leading()
@@ -126,6 +165,31 @@
 
    -- Return data of <meta_node> as string.
    function meta_node:get_data()
+*/
+
+/* exports the SequenceNode class to Lua:
+
+   -- Returns a new sequence node with description <desc> and (unencoded)
+   -- sequence <sequence>.
+   function sequence_node_new(desc, sequence)
+
+   -- Returns description of <sequence_node>.
+   function sequence_node:get_description()
+
+   -- Returns sequence of <sequence_node>.
+   function sequence_node:get_sequence()
+
+   -- Returns length of the sequence of <sequence_node>.
+   function sequence_node:get_sequence_length()
+*/
+
+/* exports the CommentNode class to Lua:
+
+   -- Returns a new comment node with comment text <comment>.
+   function comment_node_new(comment)
+
+   -- Return comment string of <comment_node>.
+   function comment_node:get_comment()
 */
 
 int gt_lua_open_genome_node(lua_State*);
