@@ -126,10 +126,11 @@ static void gt_encseq_col_enable_match_desc_start(GtSeqCol *sc)
   GtEncseqCol *esc;
   GtUword j;
   GtSeqInfo seq_info;
+  char buf[BUFSIZ], fmt[32];
   gt_assert(sc);
   esc = gt_encseq_col_cast(sc);
   esc->matchstart = true;
-  char buf[BUFSIZ];
+  (void) sprintf(fmt, "%%%ds", BUFSIZ-1);
   /* pre-cache seqids for faster search */
   if (!esc->grep_cache)
     esc->grep_cache = gt_seq_info_cache_new();
@@ -140,7 +141,7 @@ static void gt_encseq_col_enable_match_desc_start(GtSeqCol *sc)
     gt_assert(desc);
     strncpy(buf, desc, desc_len * sizeof (char));
     buf[desc_len] = '\0';
-    sscanf(desc, "%s", buf);
+    (void) sscanf(desc, fmt, buf);
     seq_info.filenum = gt_encseq_filenum(esc->encseq,
                                          gt_encseq_seqstartpos(esc->encseq, j));
     seq_info.seqnum = j - gt_encseq_filenum_first_seqnum(esc->encseq,

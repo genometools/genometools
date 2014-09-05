@@ -126,10 +126,11 @@ static void gt_bioseq_col_enable_match_desc_start(GtSeqCol *sc)
   GtBioseqCol *bsc;
   GtSeqInfo seq_info;
   GtUword i,j;
-  char buf[BUFSIZ]; /* XXX */
+  char buf[BUFSIZ], fmt[32];
   gt_assert(sc);
   bsc = gt_bioseq_col_cast(sc);
   bsc->matchdescstart = true;
+  (void) sprintf(fmt, "%%%ds", BUFSIZ-1);
   /* pre-cache seqids for faster search */
   if (!bsc->grep_cache)
     bsc->grep_cache = gt_seq_info_cache_new();
@@ -137,7 +138,7 @@ static void gt_bioseq_col_enable_match_desc_start(GtSeqCol *sc)
     GtBioseq *bioseq = bsc->bioseqs[i];
     for (j = 0; j < gt_bioseq_number_of_sequences(bioseq); j++) {
       const char *desc = gt_bioseq_get_description(bioseq, j);
-      sscanf(desc, "%s", buf);
+      (void) sscanf(desc, fmt, buf);
       seq_info.filenum = i;
       seq_info.seqnum = j;
       if (!gt_seq_info_cache_get(bsc->grep_cache, buf))
