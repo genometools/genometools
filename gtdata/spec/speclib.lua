@@ -14,6 +14,104 @@ function table.pretty_array(tab)
   return str
 end
 
+function string.char_count(str, char)
+    if not str then return 0 end
+    local count = 0
+    local byte_char = string.byte(char)
+    for i = 1, #str do
+      if string.byte(str, i) == byte_char then
+        count = count + 1
+      end
+    end
+    return count
+end
+
+function string.split(str, pat)
+   local t = {}
+   local fpat = "(.-)" .. pat
+   local last_end = 1
+   local s, e, cap = str:find(fpat, 1)
+   while s do
+      if s ~= 1 or cap ~= "" then
+        table.insert(t,cap)
+      end
+      last_end = e+1
+      s, e, cap = str:find(fpat, last_end)
+   end
+   if last_end <= #str then
+      cap = str:sub(last_end)
+      table.insert(t, cap)
+   end
+   return t
+end
+
+function collect(iterator)
+  local t = {}
+  for v in iterator do
+    t[#t+1] = v
+  end
+  return t
+end
+
+function count(iterator)
+  local t = 0
+  for v in iterator do
+    t = t + 1
+  end
+  return t
+end
+
+function gff3_encode(s)
+  s = string.gsub(s, "[\t\n\r;=%&,]", function (c)
+        return string.format("%%%02X", string.byte(c))
+      end)
+  return s
+end
+
+function gff3_decode(s)
+  s = string.gsub(s, "%%([0-9a-fA-F][1-9a-fA-F])", function (n)
+        return string.char(tonumber("0x" .. n))
+      end)
+  return s
+end
+
+function gff3_extract_structure(str)
+  ret = {}
+  for _,v in ipairs(str:split(",")) do
+    res = {}
+    v = gff3_decode(v)
+    for _,pair in ipairs(v:split(";")) do
+      key, value = unpack(pair:split("="))
+      res[key] = value
+    end
+    table.insert(ret, res)
+  end
+  return ret
+end
+
+nodemt = debug.getregistry()["GenomeTools.genome_node"]
+function nodemt.children_of_type(node, type)
+  nit = node:children()
+  return function()
+    n = nit()
+    while n and n:get_type() ~= type do
+      n = nit()
+    end
+    return n
+  end
+end
+
+function nodemt.children_matching_type(node, type_pat)
+  nit = node:children()
+  return function()
+    n = nit()
+    while n and string.match(n:get_type(), type_pat) do
+      n = nit()
+    end
+    return n
+  end
+end
+
 matchers = {
   should_be = function(value, expected)
     if value ~= expected then

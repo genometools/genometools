@@ -186,7 +186,8 @@ int gt_extract_and_translate_feature_sequence(GtFeatureNode *feature_node,
                                                 type, join, NULL, NULL,
                                                 &phase_offset, rm, err);
 
-  if (!had_err && gt_str_length(sequence) > phase_offset) {
+  /* do translation if we have at least one codon */
+  if (!had_err && gt_str_length(sequence) > phase_offset + 2) {
     ci = gt_codon_iterator_simple_new(gt_str_get(sequence) + phase_offset,
                                       gt_str_length(sequence) - phase_offset,
                                       NULL);
