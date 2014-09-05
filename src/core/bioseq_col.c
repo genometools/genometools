@@ -32,6 +32,7 @@ struct GtBioseqCol {
   GtBioseq **bioseqs;
   GtUword num_of_seqfiles;
   GtSeqInfoCache *grep_cache;
+  GtHashmap *duplicates;
   bool matchdescstart;
 };
 
@@ -46,6 +47,7 @@ static void gt_bioseq_col_delete(GtSeqCol *sc)
   bsc = gt_bioseq_col_cast(sc);
   if (!bsc) return;
   gt_seq_info_cache_delete(bsc->grep_cache);
+  gt_hashmap_delete(bsc->duplicates);
   for (i = 0; i < bsc->num_of_seqfiles; i++)
     gt_bioseq_delete(bsc->bioseqs[i]);
   gt_free(bsc->bioseqs);
@@ -68,6 +70,11 @@ static int grep_desc(GtBioseqCol *bsc, GtUword *filenum,
   /* try to read from cache */
   seq_info_ptr = gt_seq_info_cache_get(bsc->grep_cache, gt_str_get(seqid));
   if (seq_info_ptr) {
+    if (bsc->duplicates && gt_hashmap_get(bsc->duplicates, gt_str_get(seqid))) {
+      gt_error_set(err, "query seqid '%s' could match more than one "
+                        "sequence description", gt_str_get(seqid));
+      return -1;
+    }
     *filenum = seq_info_ptr->filenum;
     *seqnum = seq_info_ptr->seqnum;
     return 0;
@@ -117,9 +124,31 @@ static int grep_desc(GtBioseqCol *bsc, GtUword *filenum,
 static void gt_bioseq_col_enable_match_desc_start(GtSeqCol *sc)
 {
   GtBioseqCol *bsc;
+  GtSeqInfo seq_info;
+  GtUword i,j;
+  char buf[BUFSIZ]; /* XXX */
   gt_assert(sc);
   bsc = gt_bioseq_col_cast(sc);
   bsc->matchdescstart = true;
+  /* pre-cache seqids for faster search */
+  if (!bsc->grep_cache)
+    bsc->grep_cache = gt_seq_info_cache_new();
+  for (i = 0; i < bsc->num_of_seqfiles; i++) {
+    GtBioseq *bioseq = bsc->bioseqs[i];
+    for (j = 0; j < gt_bioseq_number_of_sequences(bioseq); j++) {
+      const char *desc = gt_bioseq_get_description(bioseq, j);
+      sscanf(desc, "%s", buf);
+      seq_info.filenum = i;
+      seq_info.seqnum = j;
+      if (!gt_seq_info_cache_get(bsc->grep_cache, buf))
+        gt_seq_info_cache_add(bsc->grep_cache, buf, &seq_info);
+      else {
+        if (!bsc->duplicates)
+          bsc->duplicates = gt_hashmap_new(GT_HASH_STRING, NULL, NULL);
+        gt_hashmap_add(bsc->duplicates, buf, (void*) 1);
+      }
+    }
+  }
 }
 
 static int gt_bioseq_col_grep_desc(GtSeqCol *sc, char **seq,
@@ -372,6 +401,7 @@ GtSeqCol* gt_bioseq_col_new(GtStrArray *sequence_files, GtError *err)
   gt_assert(gt_str_array_size(sequence_files));
   sc = gt_seq_col_create(gt_bioseq_col_class());
   bsc = gt_bioseq_col_cast(sc);
+  bsc->duplicates = NULL;
   bsc->num_of_seqfiles = gt_str_array_size(sequence_files);
   bsc->bioseqs = gt_calloc(bsc->num_of_seqfiles, sizeof (GtBioseq*));
   for (i = 0; !had_err && i < bsc->num_of_seqfiles; i++) {
