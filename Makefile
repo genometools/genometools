@@ -307,7 +307,7 @@ ifeq ($(m32),yes)
 endif
 
 ifeq ($(m64),yes)
-  ifeq (,$(filter $(MACHINE),ia64 alpha mips64 mips64el))
+  ifeq (,$(filter $(MACHINE),ia64 alpha mips64 mips64el aarch64))
     GT_CFLAGS += -m64
     GT_LDFLAGS += -m64
     SQLITE_CFLAGS += -m64
