@@ -18,13 +18,7 @@ end
 
 describe.feature("gene", function(gene)
   it("contains a transcript", function()
-    expect(gene:has_child_of_type("mRNA")
-             or gene:has_child_of_type("tRNA")
-             or gene:has_child_of_type("snRNA")
-             or gene:has_child_of_type("snoRNA")
-             or gene:has_child_of_type("rRNA")
-             or gene:has_child_of_type("SLRNA")
-             or gene:has_child_of_type("ncRNA")).should_be(true)
+    expect(gene:has_child_of_supertype("transcript")).should_be(true)
   end)
 
   it("appears as a root node", function()
@@ -51,7 +45,6 @@ end)
 describe.feature("pseudogene", function(pseudogene)
   it("contains a pseudogenic_transcript", function()
     expect(pseudogene:has_child_of_type("pseudogenic_transcript")).should_be(true)
-    expect(pseudogene:has_child_of_type("mRNA")).should_be(false)
   end)
 
   it("appears as a root node", function()
@@ -135,13 +128,8 @@ describe.feature("mRNA", function(mrna)
 end)
 
 describe.feature("CDS", function(cds)
- it("appears as child of an mRNA/ncRNA", function()
-    expect(cds:appears_as_child_of_type("mRNA")
-        or cds:appears_as_child_of_type("tRNA")
-        or cds:appears_as_child_of_type("snRNA")
-        or cds:appears_as_child_of_type("snoRNA")
-        or cds:appears_as_child_of_type("rRNA")
-        or cds:appears_as_child_of_type("ncRNA")).should_be(true)
+ it("appears as child of a transcript", function()
+    expect(cds:appears_as_child_of_supertype("transcript")).should_be(true)
   end)
 
  it("should not have children", function()
@@ -173,20 +161,22 @@ describe.feature("polypeptide", function(pp)
         if t.GOid == "GO:005515" then
           expect(t.evidence).to_match("Physical Interaction")
         end
-        if t.evidence:match("Expression Pattern") then
-          expect(t.aspect).should_not_match("[CF]")
-        end
-        if t.evidence:match("Sequence") then
-          expect(t.with).should_not_be(nil)
-          if t.with then
-            expect(t.with:len()).should_be_larger_than(0)
+        if t.evidence then
+          if t.evidence:match("Expression Pattern") then
+            expect(t.aspect).should_not_match("[CF]")
           end
-        end
-        if t.evidence:match("Direct Assay")
-           or t.evidence:match("Statement")
-           or t.evidence:match("Experiment")
-           or t.evidence:match("No Biological") then
-          expect(t.with == nil or t.with:len() == 0).should_be(true)
+          if t.evidence:match("Sequence") then
+            expect(t.with).should_not_be(nil)
+            if t.with then
+              expect(t.with:len()).should_be_larger_than(0)
+            end
+          end
+          if t.evidence:match("Direct Assay")
+             or t.evidence:match("Statement")
+             or t.evidence:match("Experiment")
+             or t.evidence:match("No Biological") then
+            expect(t.with == nil or t.with:len() == 0).should_be(true)
+          end
         end
       end
     end
@@ -199,8 +189,7 @@ describe.feature("polypeptide", function(pp)
     expect(#overlapping).should_be_larger_than(0)
     if #overlapping > 0 then
       for _,ovl_feat in ipairs(overlapping) do
-        if ovl_feat:has_child_of_type("mRNA")
-            or ovl_feat:has_child_of_type("pseudogenic_transcript") then
+        if ovl_feat:has_child_of_supertype("transcript") then
           num_transcripts = num_transcripts + 1
         end
       end
