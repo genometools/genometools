@@ -17,9 +17,10 @@
 
 #include "core/class_alloc_lock.h"
 #include "core/cstr_api.h"
+#include "core/encseq.h"
 #include "core/encseq_col.h"
 #include "core/grep.h"
-#include "core/encseq.h"
+#include "core/hashmap_api.h"
 #include "core/ma.h"
 #include "core/md5_seqid.h"
 #include "core/seq_col_rep.h"
@@ -31,6 +32,7 @@ struct GtEncseqCol {
   GtEncseq *encseq;
   GtMD5Tab *md5_tab;
   GtSeqInfoCache *grep_cache;
+  GtHashmap *duplicates;
   bool matchstart;
 };
 
@@ -44,6 +46,7 @@ static void gt_encseq_col_delete(GtSeqCol *sc)
   esc = gt_encseq_col_cast(sc);
   if (!esc) return;
   gt_seq_info_cache_delete(esc->grep_cache);
+  gt_hashmap_delete(esc->duplicates);
   gt_md5_tab_delete(esc->md5_tab);
   gt_encseq_delete(esc->encseq);
 }
@@ -69,6 +72,11 @@ static int gt_encseq_col_do_grep_desc(GtEncseqCol *esc, GtUword *filenum,
   /* try to read from cache */
   seq_info_ptr = gt_seq_info_cache_get(esc->grep_cache, gt_str_get(seqid));
   if (seq_info_ptr) {
+    if (esc->duplicates && gt_hashmap_get(esc->duplicates, gt_str_get(seqid))) {
+      gt_error_set(err, "query seqid '%s' could match more than one "
+                        "sequence description", gt_str_get(seqid));
+      return -1;
+    }
     *filenum = seq_info_ptr->filenum;
     *seqnum = seq_info_ptr->seqnum;
     return 0;
@@ -116,9 +124,36 @@ static int gt_encseq_col_do_grep_desc(GtEncseqCol *esc, GtUword *filenum,
 static void gt_encseq_col_enable_match_desc_start(GtSeqCol *sc)
 {
   GtEncseqCol *esc;
+  GtUword j;
+  GtSeqInfo seq_info;
+  char buf[BUFSIZ], fmt[32];
   gt_assert(sc);
   esc = gt_encseq_col_cast(sc);
   esc->matchstart = true;
+  (void) sprintf(fmt, "%%%ds", BUFSIZ-1);
+  /* pre-cache seqids for faster search */
+  if (!esc->grep_cache)
+    esc->grep_cache = gt_seq_info_cache_new();
+  for (j = 0; j < gt_encseq_num_of_sequences(esc->encseq); j++) {
+    const char *desc;
+    GtUword desc_len;
+    desc = gt_encseq_description(esc->encseq, &desc_len, j);
+    gt_assert(desc);
+    strncpy(buf, desc, desc_len * sizeof (char));
+    buf[desc_len] = '\0';
+    (void) sscanf(desc, fmt, buf);
+    seq_info.filenum = gt_encseq_filenum(esc->encseq,
+                                         gt_encseq_seqstartpos(esc->encseq, j));
+    seq_info.seqnum = j - gt_encseq_filenum_first_seqnum(esc->encseq,
+                                                         seq_info.filenum);
+    if (!gt_seq_info_cache_get(esc->grep_cache, buf))
+      gt_seq_info_cache_add(esc->grep_cache, buf, &seq_info);
+    else {
+      if (!esc->duplicates)
+        esc->duplicates = gt_hashmap_new(GT_HASH_STRING, NULL, NULL);
+      gt_hashmap_add(esc->duplicates, buf, (void*) 1);
+    }
+  }
 }
 
 static GtUword gt_encseq_col_get_sequence_length(const GtSeqCol *sc,
@@ -411,6 +446,7 @@ GtSeqCol* gt_encseq_col_new(GtEncseq *encseq, GtError *err)
   }
   sc = gt_seq_col_create(gt_encseq_col_class());
   esc = gt_encseq_col_cast(sc);
+  esc->duplicates = NULL;
   esc->md5_tab = gt_encseq_get_md5_tab(encseq, err);
   gt_assert(esc->md5_tab);
   esc->encseq = gt_encseq_ref(encseq);

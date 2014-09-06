@@ -192,6 +192,9 @@ static int update_seq_col_if_necessary(GtRegionMapping *rm, GtStr *seqid,
         if (!(rm->seq_col = gt_bioseq_col_new(rm->sequence_filenames, err)))
           had_err = -1;
       }
+      /* handle -matchdescstart, i.e. load seqids into cache */
+      if (!had_err && rm->seq_col && rm->matchdescstart)
+          gt_seq_col_enable_match_desc_start(rm->seq_col);
     }
     if (!had_err && rm->usedesc) {
       if (rm->seqid2seqnum_mapping)
@@ -202,8 +205,7 @@ static int update_seq_col_if_necessary(GtRegionMapping *rm, GtStr *seqid,
         had_err = -1;
       }
     }
-    if (rm->seq_col && rm->matchdescstart)
-      gt_seq_col_enable_match_desc_start(rm->seq_col);
+
   }
   return had_err;
 }
