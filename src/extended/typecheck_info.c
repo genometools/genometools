@@ -53,9 +53,9 @@ void gt_typecheck_info_register_options(GtTypecheckInfo *tci,
 
   /* -typecheck */
   typecheck_option =
-    gt_option_new_string("typecheck", "check GFF3 types against \"id\" and "
-                         "\"name\" tags in given OBO file and validate parent "
-                         "(part-of) relationships.\nIf no argument is given, "
+    gt_option_new_string("typecheck", "use an ontology given in an OBO file "
+                         "to validate parent-child relationships.\n"
+                         "If no argument is given, "
                          "the sofa.obo file from the gtdata/obo_files "
                          "directory is used.\nIf an argument is given, it is "
                          "used as an OBO filename.\nIn the case that such a "

@@ -26,6 +26,7 @@ typedef struct GtSpecVisitor GtSpecVisitor;
 #include "extended/node_visitor_api.h"
 #include "extended/region_mapping_api.h"
 #include "extended/spec_results.h"
+#include "extended/type_checker_api.h"
 
 GtNodeVisitor* gt_spec_visitor_new(const char *specfile, GtSpecResults *res,
                                    GtError *err);
@@ -35,5 +36,8 @@ void           gt_spec_visitor_add_feature_index(GtSpecVisitor *sv,
                                                  GtFeatureIndex *fi);
 void           gt_spec_visitor_add_region_mapping(GtSpecVisitor *sv,
                                                   GtRegionMapping *rm);
+void           gt_spec_visitor_add_type_checker(GtSpecVisitor *sv,
+                                                GtTypeChecker *tc);
+
 
 #endif
