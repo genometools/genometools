@@ -34,6 +34,8 @@
 #include "extended/node_visitor_api.h"
 #include "extended/region_mapping.h"
 #include "extended/spec_visitor.h"
+#include "extended/type_checker_api.h"
+#include "extended/type_checker_obo.h"
 #include "gtlua/feature_index_lua.h"
 #include "gtlua/region_mapping_lua.h"
 #include "gtlua/genome_node_lua.h"
@@ -47,6 +49,7 @@ struct GtSpecVisitor {
   lua_State *L;
   GtStr *filename;
   GtHashmap *type_specs;
+  GtTypeChecker *type_checker;
   int meta_ref,
       region_ref,
       comment_ref,
@@ -574,7 +577,8 @@ static int spec_expect(lua_State *L)
   return 1;
 }
 
-static int spec_feature_node_lua_appears_as_child_of_type(lua_State *L)
+static int spec_feature_node_lua_appears_as_child_of_type_g(lua_State *L,
+                                                            bool supertype)
 {
   GtGenomeNode **gn;
   GtFeatureNode *fn, *fn2;
@@ -592,18 +596,47 @@ static int spec_feature_node_lua_appears_as_child_of_type(lua_State *L)
   lua_gettable(L, LUA_REGISTRYINDEX);
   sv = lua_touserdata(L, -1);
 
+  if (supertype) {
+    if (!sv->type_checker) {
+      luaL_where(L, 1);
+      lua_pushstring(L, "'feature_node.appears_as_child_of_supertype()' "
+                        "requires a type checker (-typecheck)");
+      lua_concat(L, 2);
+      return lua_error(L);
+    }
+    luaL_argcheck(L, gt_type_checker_is_valid(sv->type_checker, type),
+                  2, "not a valid SO type");
+  }
+
   gt_assert(sv && sv->graph_context);
   if (gt_array_size(sv->graph_context) > 0) {
     for (i = gt_array_size(sv->graph_context) - 1; i + 1 > 0; i--) {
       fn2 = *(GtFeatureNode**) gt_array_get(sv->graph_context, i);
       if (!fn2) continue;
-      found = (gt_feature_node_get_type(fn2) == type);
+      if (supertype && sv->type_checker) {
+        const char *fn2t = gt_feature_node_get_type(fn2);
+        if (gt_type_checker_is_valid(sv->type_checker, fn2t))
+          found = gt_type_checker_is_a(sv->type_checker, type, fn2t);
+        else
+          found = false;
+      } else
+        found = (gt_feature_node_get_type(fn2) == type);
       if (found)
         break;
     }
   }
   lua_pushboolean(L, found);
   return 1;
+}
+
+static int spec_feature_node_lua_appears_as_child_of_type(lua_State *L)
+{
+  return spec_feature_node_lua_appears_as_child_of_type_g(L, false);
+}
+
+static int spec_feature_node_lua_appears_as_child_of_supertype(lua_State *L)
+{
+  return spec_feature_node_lua_appears_as_child_of_type_g(L, true);
 }
 
 static int spec_feature_node_lua_appears_as_root_node(lua_State *L)
@@ -628,6 +661,121 @@ static int spec_feature_node_lua_appears_as_root_node(lua_State *L)
   return 1;
 }
 
+static int spec_feature_node_lua_has_child_of_supertype(lua_State *L)
+{
+  GtGenomeNode **gn;
+  GtFeatureNode *fn, GT_UNUSED *fn2 = NULL;
+  GtFeatureNodeIterator *it;
+  GtSpecVisitor *sv;
+  bool found = false;
+  const char *type;
+
+  gn = check_genome_node(L, 1);
+  /* make sure we get a feature node */
+  fn = gt_feature_node_try_cast(*gn);
+  luaL_argcheck(L, fn, 1, "not a feature node");
+  type = gt_symbol(luaL_checkstring(L, 2));
+
+  lua_pushlightuserdata(L, (void *) &spec_defuserdata);
+  lua_gettable(L, LUA_REGISTRYINDEX);
+  sv = lua_touserdata(L, -1);
+
+  if (!sv->type_checker) {
+    luaL_where(L, 1);
+    lua_pushstring(L, "'feature_node.has_child_of_supertype()' requires a type "
+                      "checker (-typecheck)");
+    lua_concat(L, 2);
+    return lua_error(L);
+  }
+
+  luaL_argcheck(L, gt_type_checker_is_valid(sv->type_checker, type),
+                2, "not a valid SO type");
+
+  it = gt_feature_node_iterator_new(fn);
+  /* skip parent node itself */
+  fn2 = gt_feature_node_iterator_next(it);
+  gt_assert(fn2);
+  while (!found && (fn2 = gt_feature_node_iterator_next(it))) {
+    if (sv->type_checker) {
+        const char *fn2t = gt_feature_node_get_type(fn2);
+        if (gt_type_checker_is_valid(sv->type_checker, fn2t))
+          found = gt_type_checker_is_a(sv->type_checker, type, fn2t);
+        else
+          found = false;
+      } else
+        found = (gt_feature_node_get_type(fn2) == type);
+  }
+  gt_feature_node_iterator_delete(it);
+  lua_pushboolean(L, found);
+  return 1;
+}
+
+static int spec_is_a(lua_State *L)
+{
+  GtSpecVisitor *sv;
+  const char *child, *parent;
+  bool result = false;
+  child = gt_symbol(luaL_checkstring(L, 1));
+  parent = gt_symbol(luaL_checkstring(L, 2));
+
+  lua_pushlightuserdata(L, (void *) &spec_defuserdata);
+  lua_gettable(L, LUA_REGISTRYINDEX);
+  sv = lua_touserdata(L, -1);
+  gt_assert(sv);
+
+  if (!sv->type_checker) {
+    luaL_where(L, 1);
+    lua_pushstring(L, "'string.is_a()' requires a type "
+                      "checker (-typecheck)");
+    lua_concat(L, 2);
+    return lua_error(L);
+  }
+
+  if (sv->type_checker) {
+    luaL_argcheck(L, gt_type_checker_is_valid(sv->type_checker, child),
+                  1, "not a valid SO type");
+    luaL_argcheck(L, gt_type_checker_is_valid(sv->type_checker, parent),
+                  2, "not a valid SO type");
+    result = gt_type_checker_is_a(sv->type_checker, parent, child);
+  } else {
+    result = (child == parent);
+  }
+  lua_pushboolean(L, result);
+
+  return 1;
+}
+
+static int spec_part_of(lua_State *L)
+{
+  GtSpecVisitor *sv;
+  const char *child, *parent;
+  bool result = false;
+  child = gt_symbol(luaL_checkstring(L, 1));
+  parent = gt_symbol(luaL_checkstring(L, 2));
+
+  lua_pushlightuserdata(L, (void *) &spec_defuserdata);
+  lua_gettable(L, LUA_REGISTRYINDEX);
+  sv = lua_touserdata(L, -1);
+  gt_assert(sv);
+
+  if (!sv->type_checker) {
+    luaL_where(L, 1);
+    lua_pushstring(L, "'string.part_of()' requires a type "
+                      "checker (-typecheck)");
+    lua_concat(L, 2);
+    return lua_error(L);
+  }
+
+  luaL_argcheck(L, gt_type_checker_is_valid(sv->type_checker, child),
+                1, "not a valid SO type");
+  luaL_argcheck(L, gt_type_checker_is_valid(sv->type_checker, parent),
+                2, "not a valid SO type");
+  result = gt_type_checker_is_partof(sv->type_checker, parent, child);
+  lua_pushboolean(L, result);
+
+  return 1;
+}
+
 static int spec_init_lua_env(GtSpecVisitor *sv, const char *progname,
                              GtError *err)
 {
@@ -635,13 +783,26 @@ static int spec_init_lua_env(GtSpecVisitor *sv, const char *progname,
   GtStr *prog, *speclib;
   gt_assert(sv);
 
-  /* add some more convenience methods not in the public API */
+  /* setup DSL: add some more convenience methods not in the public API */
   luaL_getmetatable(sv->L, GENOME_NODE_METATABLE);
   lua_pushstring(sv->L, "appears_as_child_of_type");
   lua_pushcfunction(sv->L, spec_feature_node_lua_appears_as_child_of_type);
   lua_rawset(sv->L, -3);
+  lua_pushstring(sv->L, "appears_as_child_of_supertype");
+  lua_pushcfunction(sv->L, spec_feature_node_lua_appears_as_child_of_supertype);
+  lua_rawset(sv->L, -3);
   lua_pushstring(sv->L, "appears_as_root_node");
   lua_pushcfunction(sv->L, spec_feature_node_lua_appears_as_root_node);
+  lua_rawset(sv->L, -3);
+  lua_pushstring(sv->L, "has_child_of_supertype");
+  lua_pushcfunction(sv->L, spec_feature_node_lua_has_child_of_supertype);
+  lua_rawset(sv->L, -3);
+  lua_getglobal(sv->L, "string");
+  lua_pushstring(sv->L, "is_a");
+  lua_pushcfunction(sv->L, spec_is_a);
+  lua_rawset(sv->L, -3);
+  lua_pushstring(sv->L, "part_of");
+  lua_pushcfunction(sv->L, spec_part_of);
   lua_rawset(sv->L, -3);
 
   /* setup DSL: node-type-specific 'describe' environment */
@@ -731,6 +892,12 @@ void gt_spec_visitor_add_region_mapping(GtSpecVisitor *sv, GtRegionMapping *rm)
   lua_setglobal(sv->L, "region_mapping");
 }
 
+void gt_spec_visitor_add_type_checker(GtSpecVisitor *sv, GtTypeChecker *tc)
+{
+  gt_assert(sv && tc);
+  sv->type_checker = tc;
+}
+
 GtNodeVisitor* gt_spec_visitor_new(const char *specfile, GtSpecResults *res,
                                    GtError *err)
 {
@@ -750,6 +917,7 @@ GtNodeVisitor* gt_spec_visitor_new(const char *specfile, GtSpecResults *res,
   spec_luaL_opencustomlibs(sv->L, spec_luainsecurelibs);
   sv->filename = gt_str_new_cstr(specfile);
   sv->res = res;
+  sv->type_checker = NULL;
   sv->type_specs = gt_hashmap_new(GT_HASH_STRING, gt_free_func, gt_free_func);
   sv->graph_context = gt_array_new(sizeof (GtFeatureNode*));
   sv->runtime_fail_hard = false;

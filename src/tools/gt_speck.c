@@ -29,6 +29,7 @@
 #include "extended/seqid2file.h"
 #include "extended/sort_stream_api.h"
 #include "extended/spec_visitor.h"
+#include "extended/typecheck_info.h"
 #include "extended/visitor_stream.h"
 #include "tools/gt_speck.h"
 
@@ -42,6 +43,7 @@ typedef struct {
        allexpects;
   GtSeqid2FileInfo *s2fi;
   GtOutputFileInfo *ofi;
+  GtTypecheckInfo *tci;
   GtFile *outfp;
 } SpeccheckArguments;
 
@@ -51,6 +53,7 @@ static void *gt_speck_arguments_new(void)
   arguments->specfile = gt_str_new();
   arguments->s2fi = gt_seqid2file_info_new();
   arguments->ofi = gt_output_file_info_new();
+  arguments->tci = gt_typecheck_info_new();
   arguments->outfp = NULL;
   return arguments;
 }
@@ -63,6 +66,7 @@ static void gt_speck_arguments_delete(void *tool_arguments)
   gt_file_delete(arguments->outfp);
   gt_seqid2file_info_delete(arguments->s2fi);
   gt_output_file_info_delete(arguments->ofi);
+  gt_typecheck_info_delete(arguments->tci);
   gt_free(arguments);
 }
 
@@ -107,11 +111,11 @@ static GtOptionParser* gt_speck_option_parser_new(void *tool_arguments)
                               &arguments->fail_hard, false);
   gt_option_parser_add_option(op, option);
 
-  option = gt_option_new_verbose(&arguments->verbose);
-  gt_option_parser_add_option(op, option);
-
+  gt_typecheck_info_register_options(arguments->tci, op);
   gt_seqid2file_register_options_ext(op, arguments->s2fi, false, false);
   gt_output_file_info_register_options(arguments->ofi, op, &arguments->outfp);
+  option = gt_option_new_verbose(&arguments->verbose);
+  gt_option_parser_add_option(op, option);
 
   return op;
 }
@@ -151,6 +155,7 @@ static int gt_speck_runner(int argc, const char **argv, int parsed_args,
   GtNodeVisitor *spec_visitor = NULL;
   GtSpecResults *res = NULL;
   GtFeatureIndex *fi = NULL;
+  GtTypeChecker *type_checker = NULL;
   GtTimer *t = NULL;
   GtRegionMapping *rm = NULL;
   GtArray *arr = gt_array_new(sizeof (GtFeatureNode*));
@@ -178,78 +183,91 @@ static int gt_speck_runner(int argc, const char **argv, int parsed_args,
       gt_spec_visitor_add_region_mapping((GtSpecVisitor*) spec_visitor, rm);
   }
 
-  /* set runtime error behaviour */
-  if (arguments->fail_hard)
-    gt_spec_visitor_fail_on_runtime_error((GtSpecVisitor*) spec_visitor);
-  else
-    gt_spec_visitor_report_runtime_errors((GtSpecVisitor*) spec_visitor);
-
-  /* redirect warnings */
-  gt_warning_set_handler(gt_speck_record_warning, res);
-
-  last_stream = gff3_in_stream = gt_gff3_in_stream_new_unsorted(
-                                                            argc - parsed_args,
-                                                            argv + parsed_args);
-  gt_assert(gff3_in_stream);
-  gt_gff3_in_stream_enable_tidy_mode((GtGFF3InStream*) gff3_in_stream);
-
-  /* insert sort stream if requested */
-  if (arguments->sort) {
-    last_stream = sort_stream = gt_sort_stream_new(last_stream);
-  }
-
-  /* if -provideindex is given, collect input features and index them first */
-  if (arguments->provideindex) {
-    fi = gt_feature_index_memory_new();
-    gt_assert(fi);
-
-    last_stream = feature_stream = gt_feature_stream_new(last_stream, fi);
-    gt_assert(feature_stream);
-
-    last_stream = a_out_stream = gt_array_out_stream_all_new(last_stream, arr,
-                                                             err);
-    if (!a_out_stream)
+  /* set type checker if necessary */
+  if (!had_err && gt_typecheck_info_option_used(arguments->tci)) {
+    type_checker = gt_typecheck_info_create_type_checker(arguments->tci, err);
+    if (!type_checker)
       had_err = -1;
-
-    gt_timer_start(t);
-
     if (!had_err)
-      had_err = gt_node_stream_pull(last_stream, err);
-
-    if (!had_err) {
-      gt_spec_visitor_add_feature_index((GtSpecVisitor*) spec_visitor,
-                                        gt_feature_index_ref(fi));
-      last_stream = a_in_stream = gt_array_in_stream_new(arr, NULL, err);
-      if (!a_in_stream)
-        had_err = -1;
-    }
-  } else {
-    gt_timer_start(t);
+      gt_spec_visitor_add_type_checker((GtSpecVisitor*) spec_visitor,
+                                       type_checker);
   }
 
   if (!had_err) {
-    checker_stream = gt_visitor_stream_new(last_stream, spec_visitor);
-    gt_assert(checker_stream);
+    /* set runtime error behaviour */
+    if (arguments->fail_hard)
+      gt_spec_visitor_fail_on_runtime_error((GtSpecVisitor*) spec_visitor);
+    else
+      gt_spec_visitor_report_runtime_errors((GtSpecVisitor*) spec_visitor);
+
+    /* redirect warnings */
+    gt_warning_set_handler(gt_speck_record_warning, res);
+
+    last_stream = gff3_in_stream = gt_gff3_in_stream_new_unsorted(
+                                                            argc - parsed_args,
+                                                            argv + parsed_args);
+    gt_assert(gff3_in_stream);
+    gt_gff3_in_stream_enable_tidy_mode((GtGFF3InStream*) gff3_in_stream);
+
+    /* insert sort stream if requested */
+    if (arguments->sort) {
+      last_stream = sort_stream = gt_sort_stream_new(last_stream);
+    }
+
+    /* if -provideindex is given, collect input features and index them first */
+    if (arguments->provideindex) {
+      fi = gt_feature_index_memory_new();
+      gt_assert(fi);
+
+      last_stream = feature_stream = gt_feature_stream_new(last_stream, fi);
+      gt_assert(feature_stream);
+
+      last_stream = a_out_stream = gt_array_out_stream_all_new(last_stream, arr,
+                                                               err);
+      if (!a_out_stream)
+        had_err = -1;
+
+      gt_timer_start(t);
+
+      if (!had_err)
+        had_err = gt_node_stream_pull(last_stream, err);
+
+      if (!had_err) {
+        gt_spec_visitor_add_feature_index((GtSpecVisitor*) spec_visitor,
+                                          gt_feature_index_ref(fi));
+        last_stream = a_in_stream = gt_array_in_stream_new(arr, NULL, err);
+        if (!a_in_stream)
+          had_err = -1;
+      }
+    } else {
+      gt_timer_start(t);
+    }
+
+    if (!had_err) {
+      checker_stream = gt_visitor_stream_new(last_stream, spec_visitor);
+      gt_assert(checker_stream);
+    }
+
+    /* perform checking  */
+    if (!had_err)
+      had_err = gt_node_stream_pull(checker_stream, err);
+
+    gt_timer_stop(t);
+
+
+    /* reset warnings output */
+    gt_warning_set_handler(gt_warning_default_handler, NULL);
+
+    /* output results */
+    if (!had_err)
+      gt_spec_results_report(res, arguments->outfp,
+                             gt_str_get(arguments->specfile),
+                             arguments->verbose, arguments->colored,
+                             !arguments->allexpects);
+
+    if (!had_err)
+      gt_timer_show_formatted(t, "Finished in " GT_WD ".%06ld s.\n", stdout);
   }
-
-  /* perform checking  */
-  if (!had_err)
-    had_err = gt_node_stream_pull(checker_stream, err);
-
-  gt_timer_stop(t);
-
-  /* reset warnings output */
-  gt_warning_set_handler(gt_warning_default_handler, NULL);
-
-  /* output results */
-  if (!had_err)
-    gt_spec_results_report(res, arguments->outfp,
-                           gt_str_get(arguments->specfile),
-                           arguments->verbose, arguments->colored,
-                           !arguments->allexpects);
-
-  if (!had_err)
-    gt_timer_show_formatted(t, "Finished in " GT_WD ".%06ld s.\n", stderr);
 
   /* free */
   gt_node_stream_delete(gff3_in_stream);
@@ -260,6 +278,7 @@ static int gt_speck_runner(int argc, const char **argv, int parsed_args,
   gt_node_stream_delete(sort_stream);
   gt_spec_results_delete(res);
   gt_feature_index_delete(fi);
+  gt_type_checker_delete(type_checker);
   gt_timer_delete(t);
   gt_array_delete(arr);
 
