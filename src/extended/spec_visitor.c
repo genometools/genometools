@@ -452,6 +452,8 @@ static int spec_it(lua_State *L)
     }
   }
 
+  sv->current_aspect = NULL;
+
   return 0;
 }
 
@@ -551,6 +553,15 @@ static int spec_expect(lua_State *L)
   lua_pushlightuserdata(L, (void *) &spec_defuserdata);
   lua_gettable(L, LUA_REGISTRYINDEX);
   sv = lua_touserdata(L, -1);
+
+  /* check for lone expect() calls -- currently disallowed */
+  if (!sv->current_aspect) {
+    luaL_where(L, 1);
+    lua_pushstring(L, "'expect' must be called inside an aspect "
+                      "definition ('it')");
+    lua_concat(L, 2);
+    return lua_error(L);
+  }
 
   /* we can't do closures as nicely as in Lua -- keep this around for later */
   sv->target_ref = ref;
