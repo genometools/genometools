@@ -40,6 +40,6 @@ const char*        gt_obo_parse_tree_get_stanza_value(const GtOBOParseTree*,
 const GtOBOStanza* gt_obo_parse_tree_get_stanza(const GtOBOParseTree*,
                                                 GtUword stanza_num);
 /* Return the number of stanzas. */
-GtUword      gt_obo_parse_tree_num_of_stanzas(const GtOBOParseTree*);
+GtUword            gt_obo_parse_tree_num_of_stanzas(const GtOBOParseTree*);
 
 #endif
