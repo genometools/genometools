@@ -204,8 +204,8 @@ GtMatchIterator* gt_match_iterator_blast_file_new(const char *matchfile,
   }
 }
 
-GtMatchIterator *gt_match_iterator_process_new(GtBlastProcessCall *call,
-                                               GtError *err)
+GtMatchIterator *gt_match_iterator_blast_process_new(GtBlastProcessCall *call,
+                                                     GtError *err)
 {
   GtMatchIterator *mp;
   GtMatchIteratorBlast *mpb;
@@ -265,7 +265,7 @@ GtMatchIterator* gt_match_iterator_blastalln_process_new(const char *query,
     gt_blast_process_call_set_num_threads(call, num_threads);
   if (xdrop_gap_final != GT_UNDEF_INT)
     gt_blast_process_call_set_xdrop_gap_final(call, xdrop_gap_final);
-  return gt_match_iterator_process_new(call, err);
+  return gt_match_iterator_blast_process_new(call, err);
 }
 
 GtMatchIterator* gt_match_iterator_blastallp_process_new(const char *query,
@@ -292,7 +292,7 @@ GtMatchIterator* gt_match_iterator_blastallp_process_new(const char *query,
   if (xdrop_gap_final != GT_UNDEF_INT)
     gt_blast_process_call_set_xdrop_gap_final(call, xdrop_gap_final);
 
-  return gt_match_iterator_process_new(call, err);
+  return gt_match_iterator_blast_process_new(call, err);
 }
 
 GtMatchIterator* gt_match_iterator_blastn_process_new(const char *query,
@@ -345,7 +345,7 @@ GtMatchIterator* gt_match_iterator_blastn_process_new(const char *query,
     gt_assert(ret < BUFSIZ);
     gt_blast_process_call_set_opt(call, buffer);
   }
-  return gt_match_iterator_process_new(call, err);
+  return gt_match_iterator_blast_process_new(call, err);
 }
 
 GtMatchIterator* gt_match_iterator_blastp_process_new(const char *query,
@@ -375,7 +375,7 @@ GtMatchIterator* gt_match_iterator_blastp_process_new(const char *query,
   if (xdrop_gap_final != GT_UNDEF_DOUBLE)
     gt_blast_process_call_set_xdrop_gap_final(call, xdrop_gap_final);
 
-  return gt_match_iterator_process_new(call, err);
+  return gt_match_iterator_blast_process_new(call, err);
 }
 
 static void gt_match_iterator_blast_free(GtMatchIterator *mp)

@@ -28,8 +28,8 @@ GtMatchIterator* gt_match_iterator_blast_file_new(const char *matchfile,
 
 /* Returns new <GtMatchIterator> object, by calling blast with <call> and
    parsing the output. */
-GtMatchIterator *gt_match_iterator_process_new(GtBlastProcessCall *call,
-                                               GtError *err);
+GtMatchIterator *gt_match_iterator_blast_process_new(GtBlastProcessCall *call,
+                                                     GtError *err);
 
 /* DEPRECATED, use gt_match_iterator_process_new instead. */
 GtMatchIterator* gt_match_iterator_blastalln_process_new(const char *query,
