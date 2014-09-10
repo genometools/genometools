@@ -19,12 +19,19 @@
 #define MATCH_ITERATOR_BLAST_H
 
 #include "extended/match_iterator_api.h"
+#include "extended/blast_process_call.h"
 
 typedef struct GtMatchIteratorBlast GtMatchIteratorBlast;
 
 GtMatchIterator* gt_match_iterator_blast_file_new(const char *matchfile,
                                                   GtError *err);
 
+/* Returns new <GtMatchIterator> object, by calling blast with <call> and
+   parsing the output. */
+GtMatchIterator *gt_match_iterator_process_new(GtBlastProcessCall *call,
+                                               GtError *err);
+
+/* DEPRECATED, use gt_match_iterator_process_new instead. */
 GtMatchIterator* gt_match_iterator_blastalln_process_new(const char *query,
                                                          const char *db_name,
                                                          double evalue,
@@ -39,6 +46,7 @@ GtMatchIterator* gt_match_iterator_blastalln_process_new(const char *query,
                                                          int xdrop_gap_final,
                                                          GtError *err);
 
+/* DEPRECATED, use gt_match_iterator_process_new instead. */
 GtMatchIterator* gt_match_iterator_blastallp_process_new(const char *query,
                                                          const char *db_name,
                                                          double evalue,
@@ -48,6 +56,7 @@ GtMatchIterator* gt_match_iterator_blastallp_process_new(const char *query,
                                                          int xdrop_gap_final,
                                                          GtError *err);
 
+/* DEPRECATED, use gt_match_iterator_process_new instead. */
 GtMatchIterator* gt_match_iterator_blastn_process_new(const char *query,
                                                       const char *db_name,
                                                       double evalue,
@@ -63,6 +72,7 @@ GtMatchIterator* gt_match_iterator_blastn_process_new(const char *query,
                                                       const char *moreblast,
                                                       GtError *err);
 
+/* DEPRECATED, use gt_match_iterator_process_new instead. */
 GtMatchIterator* gt_match_iterator_blastp_process_new(const char *query,
                                                       const char *db_name,
                                                       double evalue,
@@ -72,4 +82,5 @@ GtMatchIterator* gt_match_iterator_blastp_process_new(const char *query,
                                                       int num_threads,
                                                       double xdrop_gap_final,
                                                       GtError *err);
+
 #endif

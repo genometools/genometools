@@ -135,6 +135,16 @@ void gt_str_append_char(GtStr *dest, char c)
   dest->cstr[dest->length++] = c;
 }
 
+void gt_str_append_sci_double(GtStr *dest, double d, int precision)
+{
+  char buf[BUFSIZ];
+  GT_UNUSED int rval;
+  gt_assert(dest != NULL);
+  rval = snprintf(buf, BUFSIZ, "%.*e", precision, d);
+  gt_assert(rval < BUFSIZ);
+  gt_str_append_cstr(dest, buf);
+}
+
 void gt_str_append_double(GtStr *dest, double d, int precision)
 {
   char buf[BUFSIZ];
