@@ -29,7 +29,13 @@
 #include "extended/comment_node_api.h"
 #include "extended/feature_node_api.h"
 #include "extended/genome_node.h"
+#include "extended/luahelper.h"
 #include "extended/spec_results.h"
+#include "gtlua/genome_node_lua.h"
+#include "gtlua/gt_lua.h"
+#include "lua.h"
+#include "lauxlib.h"
+#include "lualib.h"
 
 #define GT_SPEC_ANSI_COLOR_RED     "\x1b[31m"
 #define GT_SPEC_ANSI_COLOR_GREEN   "\x1b[32m"
@@ -65,10 +71,10 @@ typedef struct {
        colored,
        show_per_node;
   GtUword node_i;
+  lua_State *L;
 } GtSpecResultsReportInfo;
 
-struct GtSpecResults
-{
+struct GtSpecResults {
   GtHashmap *feature_aspects,
             *meta_aspects,
             *region_aspects,
@@ -85,6 +91,26 @@ struct GtSpecResults
           checked_nodes;
   GtStrArray *warnings;
 };
+
+static const luaL_Reg spec_results_luasecurelibs[] = {
+  {"", luaopen_base},
+  {LUA_TABLIBNAME, luaopen_table},
+  {LUA_STRLIBNAME, luaopen_string},
+  {LUA_MATHLIBNAME, luaopen_math},
+  {LUA_IOLIBNAME, luaopen_io},
+  {LUA_LOADLIBNAME, luaopen_package},
+  {"gt", gt_lua_open_lib},
+  {NULL, NULL}
+};
+
+static void spec_results_luaL_opencustomlibs(lua_State *L, const luaL_Reg *lib)
+{
+  for (; lib->func; lib++) {
+    lua_pushcfunction(L, lib->func);
+    lua_pushstring(L, lib->name);
+    lua_call(L, 1, 0);
+  }
+}
 
 static GtSpecAspectNodeResult* gt_spec_aspect_node_result_new()
 {
@@ -192,7 +218,8 @@ static void gt_spec_aspect_report(GtSpecAspect *sa, GtFile *outfile,
   cinfo.succ = &(sa->node_successes);
   cinfo.fail = &(sa->node_failures);
   cinfo.err = &(sa->node_runtime_errors);
-  rval = gt_hashmap_foreach(sa->aspect_node_results, gt_spec_aspect_count_stats,
+  rval = gt_hashmap_foreach(sa->aspect_node_results,
+                            gt_spec_aspect_count_stats,
                             &cinfo, NULL);
   gt_assert(rval == 0);
 
@@ -390,6 +417,121 @@ static int gt_spec_results_report_features(void *key, void *value, void *data,
   return 0;
 }
 
+static int gt_spec_aspect_make_node_model(void *key, void *value, void *data,
+                                          GT_UNUSED GtError *err)
+{
+  GtGenomeNode *gn = (GtGenomeNode*) key;
+  GtSpecAspectNodeResult *sanr = (GtSpecAspectNodeResult*) value;
+  GtSpecResultsReportInfo *info = (GtSpecResultsReportInfo*) data;
+  const char *tmp;
+  bool has_id = false;
+  GtUword i = 0;
+
+  if (gt_feature_node_try_cast(gn)) {
+    if ((tmp = gt_feature_node_get_attribute((GtFeatureNode*) gn, "ID"))) {
+      has_id = true;
+    }
+  }
+  if (gt_str_array_size(sanr->failure_messages) > 0
+        || gt_str_array_size(sanr->runtime_error_messages) > 0) {
+    lua_pushnumber(info->L, info->node_i++);
+    lua_newtable(info->L);
+    if (has_id) {
+      lua_pushstring(info->L, "ID");
+      lua_pushstring(info->L, tmp);
+      lua_rawset(info->L, -3);
+    }
+    lua_pushstring(info->L, "filename");
+    lua_pushstring(info->L, gt_genome_node_get_filename(gn));
+    lua_rawset(info->L, -3);
+    lua_pushstring(info->L, "linenumber");
+    lua_pushnumber(info->L, gt_genome_node_get_line_number(gn));
+    lua_rawset(info->L, -3);
+    lua_pushstring(info->L, "node");
+    gt_lua_genome_node_push(info->L, gt_genome_node_ref(gn));
+    lua_rawset(info->L, -3);
+    lua_pushstring(info->L, "failure_messages");
+    lua_newtable(info->L);
+    for (i = 0; i < gt_str_array_size(sanr->failure_messages); i++) {
+      lua_pushnumber(info->L, i+1);
+      lua_pushstring(info->L, gt_str_array_get(sanr->failure_messages, i));
+      lua_rawset(info->L, -3);
+    }
+    lua_rawset(info->L, -3);
+    lua_pushstring(info->L, "runtime_error_messages");
+    lua_newtable(info->L);
+    for (i = 0; i < gt_str_array_size(sanr->runtime_error_messages); i++) {
+      lua_pushnumber(info->L, i+1);
+      lua_pushstring(info->L, gt_str_array_get(sanr->runtime_error_messages,
+                                               i));
+      lua_rawset(info->L, -3);
+    }
+    lua_rawset(info->L, -3);
+    lua_rawset(info->L, -3);
+  }
+  return 0;
+}
+
+static int gt_spec_results_make_aspect_model(GT_UNUSED void *key, void *value,
+                                         void *data, GT_UNUSED GtError *err)
+{
+  GtSpecResultsReportInfo *info = (GtSpecResultsReportInfo*) data;
+  GtSpecAspectCountInfo cinfo;
+  GtSpecAspect* sa =  (GtSpecAspect*) value;
+  GT_UNUSED int rval;
+  gt_assert(sa && info);
+
+  /* count per-node results */
+  cinfo.succ = &(sa->node_successes);
+  cinfo.fail = &(sa->node_failures);
+  cinfo.err = &(sa->node_runtime_errors);
+  rval = gt_hashmap_foreach(sa->aspect_node_results,
+                            gt_spec_aspect_count_stats,
+                            &cinfo, NULL);
+  gt_assert(rval == 0);
+
+  if (info->show_per_node) {
+    sa->successes = sa->node_successes;
+    sa->failures = sa->node_failures;
+    sa->runtime_errors = sa->node_runtime_errors;
+  }
+
+  info->node_i = 1;
+  lua_pushstring(info->L, gt_str_get(sa->name));
+  lua_newtable(info->L);
+  lua_pushstring(info->L, "successes");
+  lua_pushnumber(info->L, sa->successes);
+  lua_rawset(info->L, -3);
+  lua_pushstring(info->L, "failures");
+  lua_pushnumber(info->L, sa->failures);
+  lua_rawset(info->L, -3);
+  lua_pushstring(info->L, "runtime_errors");
+  lua_pushnumber(info->L, sa->runtime_errors);
+  lua_rawset(info->L, -3);
+  lua_pushstring(info->L, "nodes");
+  lua_newtable(info->L);
+  rval = gt_hashmap_foreach(sa->aspect_node_results,
+                              gt_spec_aspect_make_node_model, info, NULL);
+  gt_assert(rval == 0);
+  lua_rawset(info->L, -3);
+  lua_rawset(info->L, -3);
+
+  return 0;
+}
+
+static int gt_spec_results_make_feature_model(void *key, void *value, void *data,
+                                           GT_UNUSED GtError *err)
+{
+  const char *type = (const char*) key;
+  GtSpecResultsReportInfo *info = (GtSpecResultsReportInfo*) data;
+  lua_pushstring(info->L, type);
+  lua_newtable(info->L);
+  gt_hashmap_foreach((GtHashmap*) value, gt_spec_results_make_aspect_model,
+                     info, NULL);
+  lua_rawset(info->L, -3);
+  return 0;
+}
+
 void gt_spec_results_report(GtSpecResults *sr, GtFile *outfile,
                             const char *specfile, bool details,bool colored,
                             bool show_per_node)
@@ -466,6 +608,144 @@ void gt_spec_results_report(GtSpecResults *sr, GtFile *outfile,
                            "checked " GT_WU " nodes for " GT_WU " aspects.\n",
                            sr->checked_ccs, sr->checked_types,
                            sr->checked_nodes, sr->checked_aspects);
+}
+
+/* registry keys for outfile pointer */
+static const char *spec_resuserdata = "gt_spec_results_userdata";
+
+static int gt_spec_results_lua_print(lua_State* L) {
+    GtFile *outfile;
+    int i = 0;
+
+    lua_pushlightuserdata(L, (void *) &spec_resuserdata);
+    lua_gettable(L, LUA_REGISTRYINDEX);
+    outfile = lua_touserdata(L, -1);
+
+    for (i = 1; i <= lua_gettop(L); i++) {
+      if (lua_isstring(L, i)) {
+        gt_file_xprintf(outfile, "%s", lua_tostring(L, i));
+      }
+    }
+
+    return 0;
+}
+
+int gt_spec_results_render_template(GtSpecResults *sr, const char *template,
+                                    GtFile *outfile, const char *specfile,
+                                    bool details, bool colored,
+                                    bool show_per_node, GtError *err)
+{
+  lua_State *L;
+  GtSpecResultsReportInfo info;
+  int had_err = 0;
+  gt_assert(sr && specfile && template && err);
+
+  L = luaL_newstate();
+  if (!L) {
+    gt_error_set(err, "cannot create new Lua state");
+    return -1;
+  }
+  spec_results_luaL_opencustomlibs(L, spec_results_luasecurelibs);
+
+  /* fill info */
+  info.outfile = outfile;
+  info.details = details;
+  info.colored = colored;
+  info.show_per_node = show_per_node;
+  info.L = L;
+
+  /* make model for nodes/aspects */
+  lua_newtable(L);
+  gt_hashmap_foreach_in_key_order(sr->feature_aspects,
+                                  gt_spec_results_make_feature_model,
+                                  &info, NULL);
+  lua_setglobal(L, "features");
+  lua_newtable(L);
+  gt_hashmap_foreach_in_key_order(sr->region_aspects,
+                                  gt_spec_results_make_aspect_model,
+                                  &info, NULL);
+  lua_setglobal(L, "regions");
+  lua_newtable(L);
+  gt_hashmap_foreach_in_key_order(sr->meta_aspects,
+                                  gt_spec_results_make_aspect_model,
+                                  &info, NULL);
+  lua_setglobal(L, "metas");
+  lua_newtable(L);
+  gt_hashmap_foreach_in_key_order(sr->sequence_aspects,
+                                  gt_spec_results_make_aspect_model,
+                                  &info, NULL);
+  lua_setglobal(L, "sequences");
+  lua_newtable(L);
+  gt_hashmap_foreach_in_key_order(sr->comment_aspects,
+                                  gt_spec_results_make_aspect_model,
+                                  &info, NULL);
+  lua_setglobal(L, "comments");
+
+  /* add warnings */
+  lua_newtable(L);
+  if (gt_str_array_size(sr->warnings) > 0) {
+    GtUword i;
+    for (i = 0; i < gt_str_array_size(sr->warnings); i++) {
+      lua_pushnumber(L, i+1);
+      lua_pushstring(L, gt_str_array_get(sr->warnings, i));
+      lua_rawset(L, -3);
+    }
+  }
+  lua_setglobal(L, "warnings");
+
+  /* dome global settings */
+  lua_newtable(L);
+  lua_pushstring(L, "spec_filename");
+  lua_pushstring(L, specfile);
+  lua_rawset(L, -3);
+  lua_pushstring(L, "template_filename");
+  lua_pushstring(L, template);
+  lua_rawset(L, -3);
+  lua_pushstring(L, "show_details");
+  lua_pushboolean(L, details);
+  lua_rawset(L, -3);
+  lua_pushstring(L, "colored_output");
+  lua_pushboolean(L, colored);
+  lua_rawset(L, -3);
+  lua_pushstring(L, "coloured_output");
+  lua_pushboolean(L, colored);
+  lua_rawset(L, -3);
+  lua_pushstring(L, "checked_ccs");
+  lua_pushnumber(L, sr->checked_ccs);
+  lua_rawset(L, -3);
+  lua_pushstring(L, "checked_aspects");
+  lua_pushnumber(L, sr->checked_aspects);
+  lua_rawset(L, -3);
+  lua_pushstring(L, "checked_nodes");
+  lua_pushnumber(L, sr->checked_nodes);
+  lua_rawset(L, -3);
+  lua_pushstring(L, "checked_types");
+  lua_pushnumber(L, sr->checked_types);
+  lua_rawset(L, -3);
+  lua_setglobal(L, "global");
+
+  /* add own print function to support -o etc. */
+  lua_pushcfunction(L, gt_spec_results_lua_print);
+  lua_setglobal(L, "template_print");
+
+  /* gt.script_dir is useful in templates too */
+  gt_lua_set_script_dir(L, template);
+
+  lua_pushlightuserdata(L, (void*) &spec_resuserdata);
+  lua_pushlightuserdata(L, (void*) outfile);
+  lua_settable(L, LUA_REGISTRYINDEX);
+
+  /* render template */
+  had_err = (luaL_loadfile(L, template)
+               || lua_pcall(L, 0, 0, 0));
+  if (had_err) {
+    const char *error = lua_tostring(L, -1);
+    gt_error_set(err, "%s", error);
+    had_err = -1;
+  }
+
+  lua_close(L);
+  return had_err;
 }
 
 void gt_spec_results_delete(GtSpecResults *spec_results)
