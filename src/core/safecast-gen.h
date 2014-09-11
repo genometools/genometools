@@ -42,7 +42,7 @@
           {\
             if (from > (FROMTYPE) ~0U)\
             {\
-              fprintf(stderr,"%s, %d: "GT_LLU" cannot be stored in 32bit word",\
+              fprintf(stderr,"%s, %d: " GT_LLU " cannot be stored in 32bit word",\
                         filename,line,PRINTLLUcast(from));\
               exit(GT_EXIT_PROGRAMMING_ERROR);\
             }\
