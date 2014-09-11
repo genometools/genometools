@@ -72,12 +72,12 @@ explanation of option!*/
 void                gt_blast_process_call_set_gapextend(
                                                        GtBlastProcessCall *call,
                                                        int gapextend);
-/* Sets penalty option for <call> to <penalty>. See blast documentation for
-   explanation of option! */
+/* Sets penalty option for <call> to <penalty>. Nucleotide only option! See
+   blast documentation for explanation of option! */
 void                gt_blast_process_call_set_penalty(GtBlastProcessCall *call,
                                                       int penalty);
-/* Sets reward option for <call> to <reward>. See blast documentation for
-   explanation of option! */
+/* Sets reward option for <call> to <reward>. Nucleotide only option! See blast
+   documentation for explanation of option! */
 void                gt_blast_process_call_set_reward(GtBlastProcessCall *call,
                                                      int reward);
 /* Sets number of threads option for <call> to <num_threads>. See blast
@@ -90,13 +90,21 @@ void                gt_blast_process_call_set_num_threads(
 void                gt_blast_process_call_set_xdrop_gap_final(
                                                        GtBlastProcessCall *call,
                                                        double xdrop_gap_final);
+/* Sets output format option for <call> to <outfmt>. See blast documentation for
+   explanation of option! */
+void                gt_blast_process_call_set_outfmt(GtBlastProcessCall *call,
+                                                     int outfmt);
+/* Sets output format option for <call> to tabular output. See blast
+   documentation for explanation of option! */
+void                gt_blast_process_call_set_outfmt_tabular(
+                                                      GtBlastProcessCall *call);
 /* Add string <opt> to options of <call>. */
 void                gt_blast_process_call_set_opt(GtBlastProcessCall *call,
                                                   const char *opt);
 
 /* Run the constructed blast-call and return a pointer to the pipe created with
-   popen(3). Caller is responsible for freeing the FILE-pointer with pclose(3)
-   */
+   popen(3). Caller is responsible for freeing the FILE-pointer with pclose(3).
+   Asserts query and db options were set. */
 FILE*               gt_blast_process_call_run(GtBlastProcessCall *call,
                                               GtError *err);
 

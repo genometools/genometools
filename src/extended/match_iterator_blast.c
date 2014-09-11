@@ -215,6 +215,8 @@ GtMatchIterator *gt_match_iterator_blast_process_new(GtBlastProcessCall *call,
   mpb->pvt->matchfile = "stdin";
   mpb->pvt->process = true;
 
+  gt_blast_process_call_set_outfmt_tabular(call);
+
   mpb->pvt->matchfilep = gt_blast_process_call_run(call, err);
   if (mpb->pvt->matchfilep == NULL)
     return NULL;

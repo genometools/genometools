@@ -27,8 +27,19 @@
 struct GtBlastProcessCall
 {
   GtStr *str;
-  bool nucl,
-       all;
+  bool all,
+       db,
+       evalue,
+       gapextend,
+       gapopen,
+       nucl,
+       num_threads,
+       outfmt,
+       penalty,
+       query,
+       reward,
+       word_size,
+       xdrop_gap_final;
 };
 
 static
@@ -85,6 +96,8 @@ GtBlastProcessCall *gt_blast_process_call_new_prot(void)
 void gt_blast_process_call_set_query(GtBlastProcessCall *call,
                                      const char *query)
 {
+  gt_assert(!call->query);
+  call->query = true;
   if (call->all)
     gt_str_append_cstr(call->str, " -i ");
   else
@@ -94,6 +107,8 @@ void gt_blast_process_call_set_query(GtBlastProcessCall *call,
 
 void gt_blast_process_call_set_db(GtBlastProcessCall *call, const char *db)
 {
+  gt_assert(!call->db);
+  call->db = true;
   if (call->all)
     gt_str_append_cstr(call->str, " -d ");
   else
@@ -103,6 +118,8 @@ void gt_blast_process_call_set_db(GtBlastProcessCall *call, const char *db)
 
 void gt_blast_process_call_set_evalue(GtBlastProcessCall *call, double evalue)
 {
+  gt_assert(!call->evalue);
+  call->evalue = true;
   if (call->all)
     gt_str_append_cstr(call->str, " -e ");
   else
@@ -112,6 +129,8 @@ void gt_blast_process_call_set_evalue(GtBlastProcessCall *call, double evalue)
 
 void gt_blast_process_call_set_wordsize(GtBlastProcessCall *call, int word_size)
 {
+  gt_assert(!call->word_size);
+  call->word_size = true;
   if (call->all)
     gt_str_append_cstr(call->str, " -W ");
   else
@@ -121,6 +140,8 @@ void gt_blast_process_call_set_wordsize(GtBlastProcessCall *call, int word_size)
 
 void gt_blast_process_call_set_gapopen(GtBlastProcessCall *call, int gapopen)
 {
+  gt_assert(!call->gapopen);
+  call->gapopen = true;
   if (call->all)
     gt_str_append_cstr(call->str, " -G ");
   else
@@ -131,6 +152,8 @@ void gt_blast_process_call_set_gapopen(GtBlastProcessCall *call, int gapopen)
 void gt_blast_process_call_set_gapextend(GtBlastProcessCall *call,
                                          int gapextend)
 {
+  gt_assert(!call->gapextend);
+  call->gapextend = true;
   if (call->all)
     gt_str_append_cstr(call->str, " -E ");
   else
@@ -140,6 +163,8 @@ void gt_blast_process_call_set_gapextend(GtBlastProcessCall *call,
 
 void gt_blast_process_call_set_penalty(GtBlastProcessCall *call, int penalty)
 {
+  gt_assert(!call->penalty);
+  call->penalty = true;
   gt_assert(call->nucl);
   if (call->all)
     gt_str_append_cstr(call->str, " -q ");
@@ -150,6 +175,8 @@ void gt_blast_process_call_set_penalty(GtBlastProcessCall *call, int penalty)
 
 void gt_blast_process_call_set_reward(GtBlastProcessCall *call, int reward)
 {
+  gt_assert(!call->reward);
+  call->reward = true;
   gt_assert(call->nucl);
   if (call->all)
     gt_str_append_cstr(call->str, " -r ");
@@ -161,7 +188,8 @@ void gt_blast_process_call_set_reward(GtBlastProcessCall *call, int reward)
 void gt_blast_process_call_set_num_threads(GtBlastProcessCall *call,
                                            int num_threads)
 {
-  gt_assert(call->nucl);
+  gt_assert(!call->num_threads);
+  call->num_threads = true;
   if (call->all)
     gt_str_append_cstr(call->str, " -a ");
   else
@@ -172,12 +200,36 @@ void gt_blast_process_call_set_num_threads(GtBlastProcessCall *call,
 void gt_blast_process_call_set_xdrop_gap_final(GtBlastProcessCall *call,
                                                double xdrop_gap_final)
 {
+  gt_assert(!call->xdrop_gap_final);
+  call->xdrop_gap_final = true;
   gt_assert(call->nucl);
   if (call->all)
     gt_str_append_cstr(call->str, " -Z ");
   else
     gt_str_append_cstr(call->str, " -xdrop_gap_final ");
   gt_str_append_double(call->str, xdrop_gap_final, 2);
+}
+
+void gt_blast_process_call_set_outfmt(GtBlastProcessCall *call,
+                                      int outfmt)
+{
+  gt_assert(!call->outfmt);
+  call->outfmt = true;
+  if (call->all)
+    gt_str_append_cstr(call->str, " -m ");
+  else
+    gt_str_append_cstr(call->str, " -outfmt ");
+  gt_str_append_int(call->str, outfmt);
+}
+
+void gt_blast_process_call_set_outfmt_tabular(GtBlastProcessCall *call)
+{
+  gt_assert(!call->outfmt);
+  call->outfmt = true;
+  if (call->all)
+    gt_str_append_cstr(call->str, " -m 8");
+  else
+    gt_str_append_cstr(call->str, " -outfmt 6");
 }
 
 void gt_blast_process_call_set_opt(GtBlastProcessCall *call,
@@ -188,7 +240,9 @@ void gt_blast_process_call_set_opt(GtBlastProcessCall *call,
 
 FILE *gt_blast_process_call_run(GtBlastProcessCall *call, GtError *err)
 {
-  FILE *blastout = popen(gt_str_get(call->str), "r");
+  FILE *blastout;
+  gt_assert(call->query && call->db);
+  blastout = popen(gt_str_get(call->str), "r");
   if (blastout == NULL) {
     gt_error_set(err, "Could not run BLAST process: %s", strerror(errno));
     return NULL;

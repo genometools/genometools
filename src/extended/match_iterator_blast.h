@@ -27,7 +27,9 @@ GtMatchIterator* gt_match_iterator_blast_file_new(const char *matchfile,
                                                   GtError *err);
 
 /* Returns new <GtMatchIterator> object, by calling blast with <call> and
-   parsing the output. */
+   parsing the output.
+   Do NOT set outfmt-option for blast, this will be set by <GtMatchIterator> to
+   ensure parsing compatibility! */
 GtMatchIterator *gt_match_iterator_blast_process_new(GtBlastProcessCall *call,
                                                      GtError *err);
 
