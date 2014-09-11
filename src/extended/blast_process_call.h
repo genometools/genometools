@@ -72,12 +72,12 @@ explanation of option!*/
 void                gt_blast_process_call_set_gapextend(
                                                        GtBlastProcessCall *call,
                                                        int gapextend);
-/* Sets penalty option for <call> to <penalty>. See blast documentation for
-   explanation of option! */
+/* Sets penalty option for <call> to <penalty>. Nucleotide only option! See
+   blast documentation for explanation of option! */
 void                gt_blast_process_call_set_penalty(GtBlastProcessCall *call,
                                                       int penalty);
-/* Sets reward option for <call> to <reward>. See blast documentation for
-   explanation of option! */
+/* Sets reward option for <call> to <reward>. Nucleotide only option! See blast
+   documentation for explanation of option! */
 void                gt_blast_process_call_set_reward(GtBlastProcessCall *call,
                                                      int reward);
 /* Sets number of threads option for <call> to <num_threads>. See blast

@@ -190,7 +190,6 @@ void gt_blast_process_call_set_num_threads(GtBlastProcessCall *call,
 {
   gt_assert(!call->num_threads);
   call->num_threads = true;
-  gt_assert(call->nucl);
   if (call->all)
     gt_str_append_cstr(call->str, " -a ");
   else
@@ -209,6 +208,18 @@ void gt_blast_process_call_set_xdrop_gap_final(GtBlastProcessCall *call,
   else
     gt_str_append_cstr(call->str, " -xdrop_gap_final ");
   gt_str_append_double(call->str, xdrop_gap_final, 2);
+}
+
+void gt_blast_process_call_set_outfmt(GtBlastProcessCall *call,
+                                      int outfmt)
+{
+  gt_assert(!call->outfmt);
+  call->outfmt = true;
+  if (call->all)
+    gt_str_append_cstr(call->str, " -m ");
+  else
+    gt_str_append_cstr(call->str, " -outfmt ");
+  gt_str_append_int(call->str, outfmt);
 }
 
 void gt_blast_process_call_set_opt(GtBlastProcessCall *call,
