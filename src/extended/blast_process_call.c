@@ -222,6 +222,16 @@ void gt_blast_process_call_set_outfmt(GtBlastProcessCall *call,
   gt_str_append_int(call->str, outfmt);
 }
 
+void gt_blast_process_call_set_outfmt_tabular(GtBlastProcessCall *call)
+{
+  gt_assert(!call->outfmt);
+  call->outfmt = true;
+  if (call->all)
+    gt_str_append_cstr(call->str, " -m 8");
+  else
+    gt_str_append_cstr(call->str, " -outfmt 6");
+}
+
 void gt_blast_process_call_set_opt(GtBlastProcessCall *call,
                                    const char *opt)
 {

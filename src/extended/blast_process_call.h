@@ -90,6 +90,14 @@ void                gt_blast_process_call_set_num_threads(
 void                gt_blast_process_call_set_xdrop_gap_final(
                                                        GtBlastProcessCall *call,
                                                        double xdrop_gap_final);
+/* Sets output format option for <call> to <outfmt>. See blast documentation for
+   explanation of option! */
+void                gt_blast_process_call_set_outfmt(GtBlastProcessCall *call,
+                                                     int outfmt);
+/* Sets output format option for <call> to tabular output. See blast
+   documentation for explanation of option! */
+void                gt_blast_process_call_set_outfmt_tabular(
+                                                      GtBlastProcessCall *call);
 /* Add string <opt> to options of <call>. */
 void                gt_blast_process_call_set_opt(GtBlastProcessCall *call,
                                                   const char *opt);
