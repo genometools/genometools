@@ -95,8 +95,8 @@ void                gt_blast_process_call_set_opt(GtBlastProcessCall *call,
                                                   const char *opt);
 
 /* Run the constructed blast-call and return a pointer to the pipe created with
-   popen(3). Caller is responsible for freeing the FILE-pointer with pclose(3)
-   */
+   popen(3). Caller is responsible for freeing the FILE-pointer with pclose(3).
+   Asserts query and db options were set. */
 FILE*               gt_blast_process_call_run(GtBlastProcessCall *call,
                                               GtError *err);
 
