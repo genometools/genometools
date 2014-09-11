@@ -50,6 +50,9 @@ void    gt_str_append_cstr_nt(GtStr *str, const char *cstr, GtUword length);
 void    gt_str_append_char(GtStr *str, char c);
 /* Append double <d> to <str> with given <precision>. */
 void    gt_str_append_double(GtStr *str, double d, int precision);
+/* Append double <d> to <str> in scientific notation e.g. 0.52e10,
+   with given <precision>. */
+void gt_str_append_sci_double(GtStr *dest, double d, int precision);
 /* Append <ulong> to <str>. */
 void    gt_str_append_ulong(GtStr *str, GtUword ulong);
 /* Append <intval> to <str>. */

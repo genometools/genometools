@@ -18,14 +18,15 @@
 
 #include <errno.h>
 #include <stdio.h>
-#include "core/class_alloc_lock.h"
-#include "core/ma.h"
-#include "core/unused_api.h"
-#include "core/bittab_api.h"
 #include "core/array_api.h"
+#include "core/bittab_api.h"
+#include "core/class_alloc_lock.h"
 #include "core/file.h"
 #include "core/fileutils_api.h"
+#include "core/ma.h"
+#include "core/str_api.h"
 #include "core/undef_api.h"
+#include "core/unused_api.h"
 #include "extended/match.h"
 #include "extended/match_blast.h"
 #include "extended/match_iterator_api.h"
@@ -46,7 +47,8 @@
 #define gt_match_iterator_blast_cast(M)\
         gt_match_iterator_cast(gt_match_iterator_blast_class(), M)
 
-typedef struct {
+typedef struct GtMatchIteratorBlastMembers
+{
   GtUword curpos;
   FILE *matchfilep;
   GtFile *gtmatchfilep;
@@ -54,7 +56,8 @@ typedef struct {
   bool process;
 } GtMatchIteratorBlastMembers;
 
-struct GtMatchIteratorBlast {
+struct GtMatchIteratorBlast
+{
   const GtMatchIterator parent_instance;
   GtMatchIteratorBlastMembers *pvt;
 };
@@ -201,6 +204,24 @@ GtMatchIterator* gt_match_iterator_blast_file_new(const char *matchfile,
   }
 }
 
+GtMatchIterator *gt_match_iterator_blast_process_new(GtBlastProcessCall *call,
+                                                     GtError *err)
+{
+  GtMatchIterator *mp;
+  GtMatchIteratorBlast *mpb;
+  mp = gt_match_iterator_create(gt_match_iterator_blast_class());
+  mpb = gt_match_iterator_blast_cast(mp);
+  mpb->pvt = gt_calloc(1, sizeof (GtMatchIteratorBlastMembers));
+  mpb->pvt->matchfile = "stdin";
+  mpb->pvt->process = true;
+
+  mpb->pvt->matchfilep = gt_blast_process_call_run(call, err);
+  if (mpb->pvt->matchfilep == NULL)
+    return NULL;
+  mpb->pvt->gtmatchfilep = NULL;
+  return mp;
+}
+
 GtMatchIterator* gt_match_iterator_blastalln_process_new(const char *query,
                                                          const char *db_name,
                                                          double evalue,
@@ -215,52 +236,36 @@ GtMatchIterator* gt_match_iterator_blastalln_process_new(const char *query,
                                                          int xdrop_gap_final,
                                                          GtError *err)
 {
-  GtMatchIterator *mp;
-  GtMatchIteratorBlast *mpb;
-  char blast_call[BUFSIZ], *env;
+  GtBlastProcessCall *call = gt_blast_process_call_new_all_nucl();
+  char buffer[BUFSIZ];
 
-  mp = gt_match_iterator_create(gt_match_iterator_blast_class());
-  mpb = gt_match_iterator_blast_cast(mp);
-  mpb->pvt = gt_calloc(1, sizeof (GtMatchIteratorBlastMembers));
-  mpb->pvt->matchfile = query;
-  mpb->pvt->process = true;
-
-  env = getenv("GT_BLAST_PATH");
-  if (env) {
-    sprintf(blast_call, "%s/blastall -p blastn", env);
-  } else {
-    sprintf(blast_call, "blastall -p blastn");
-  }
+  gt_blast_process_call_set_query(call, query);
+  gt_blast_process_call_set_db(call, db_name);
   if (evalue != GT_UNDEF_DOUBLE)
-    sprintf(blast_call, "%s -e %.6e", blast_call, evalue);
+    gt_blast_process_call_set_evalue(call, evalue);
   if (dust)
-    sprintf(blast_call, "%s -F", blast_call);
+    gt_blast_process_call_set_opt(call, " -F");
   if (word_size != GT_UNDEF_INT)
-    sprintf(blast_call, "%s -W %d", blast_call, word_size);
+    gt_blast_process_call_set_wordsize(call, word_size);
   if (gapopen != GT_UNDEF_INT)
-    sprintf(blast_call, "%s -G %d", blast_call, gapopen);
+    gt_blast_process_call_set_gapopen(call, gapopen);
   if (gapextend != GT_UNDEF_INT)
-    sprintf(blast_call, "%s -E %d", blast_call, gapextend);
+    gt_blast_process_call_set_gapextend(call, gapextend);
   if (penalty != GT_UNDEF_INT)
-    sprintf(blast_call, "%s -q %d", blast_call, penalty);
+    gt_blast_process_call_set_penalty(call, penalty);
   if (reward != GT_UNDEF_INT)
-    sprintf(blast_call, "%s -r %d", blast_call, reward);
-  if (threshold != GT_UNDEF_DOUBLE)
-    sprintf(blast_call, "%s -f %.3f", blast_call, threshold);
-  if (num_threads != GT_UNDEF_INT)
-    sprintf(blast_call, "%s -a %d", blast_call, num_threads);
-  if (xdrop_gap_final != GT_UNDEF_INT)
-    sprintf(blast_call, "%s -Z %d", blast_call, xdrop_gap_final);
-  sprintf(blast_call, "%s -i %s -d %s -m 8", blast_call, query,
-           db_name);
-
-  mpb->pvt->matchfilep = popen(blast_call, "r");
-  if (!mpb->pvt->matchfilep) {
-    gt_error_set(err, "Could not run BLAST process: %s", strerror(errno));
-    return NULL;
+    gt_blast_process_call_set_reward(call, reward);
+  if (threshold != GT_UNDEF_DOUBLE) {
+    GT_UNUSED int ret;
+    ret = snprintf(buffer, BUFSIZ, " -f %.3f", threshold);
+    gt_assert(ret < BUFSIZ);
+    gt_blast_process_call_set_opt(call, buffer);
   }
-  mpb->pvt->gtmatchfilep = NULL;
-  return mp;
+  if (num_threads != GT_UNDEF_INT)
+    gt_blast_process_call_set_num_threads(call, num_threads);
+  if (xdrop_gap_final != GT_UNDEF_INT)
+    gt_blast_process_call_set_xdrop_gap_final(call, xdrop_gap_final);
+  return gt_match_iterator_blast_process_new(call, err);
 }
 
 GtMatchIterator* gt_match_iterator_blastallp_process_new(const char *query,
@@ -272,42 +277,22 @@ GtMatchIterator* gt_match_iterator_blastallp_process_new(const char *query,
                                                          int xdrop_gap_final,
                                                          GtError *err)
 {
-  GtMatchIterator *mp;
-  GtMatchIteratorBlast *mpb;
-  char blast_call[BUFSIZ], *env;
+  GtBlastProcessCall *call = gt_blast_process_call_new_all_prot();
 
-  mp = gt_match_iterator_create(gt_match_iterator_blast_class());
-  mpb = gt_match_iterator_blast_cast(mp);
-  mpb->pvt = gt_calloc(1, sizeof (GtMatchIteratorBlastMembers));
-  mpb->pvt->matchfile = query;
-  mpb->pvt->process = true;
-
-  env = getenv("GT_BLAST_PATH");
-  if (env) {
-    sprintf(blast_call, "%s/blastall -p blastp", env);
-  } else {
-    sprintf(blast_call, "blastall -p blastp");
-  }
+  gt_blast_process_call_set_query(call, query);
+  gt_blast_process_call_set_db(call, db_name);
   if (evalue != GT_UNDEF_DOUBLE)
-    sprintf(blast_call, "%s -e %.6e", blast_call, evalue);
+    gt_blast_process_call_set_evalue(call, evalue);
   if (word_size != GT_UNDEF_INT)
-    sprintf(blast_call, "%s -W %d", blast_call, word_size);
+    gt_blast_process_call_set_wordsize(call, word_size);
   if (gapopen != GT_UNDEF_INT)
-    sprintf(blast_call, "%s -G %d", blast_call, gapopen);
+    gt_blast_process_call_set_gapopen(call, gapopen);
   if (gapextend != GT_UNDEF_INT)
-    sprintf(blast_call, "%s -E %d", blast_call, gapextend);
+    gt_blast_process_call_set_gapextend(call, gapextend);
   if (xdrop_gap_final != GT_UNDEF_INT)
-    sprintf(blast_call, "%s -Z %d", blast_call, xdrop_gap_final);
-  sprintf(blast_call, "%s -i %s -d %s -m 8", blast_call, query,
-           db_name);
+    gt_blast_process_call_set_xdrop_gap_final(call, xdrop_gap_final);
 
-  mpb->pvt->matchfilep = popen(blast_call, "r");
-  if (!mpb->pvt->matchfilep) {
-    gt_error_set(err, "Could not run BLAST process: %s", strerror(errno));
-    return NULL;
-  }
-  mpb->pvt->gtmatchfilep = NULL;
-  return mp;
+  return gt_match_iterator_blast_process_new(call, err);
 }
 
 GtMatchIterator* gt_match_iterator_blastn_process_new(const char *query,
@@ -325,56 +310,42 @@ GtMatchIterator* gt_match_iterator_blastn_process_new(const char *query,
                                                       const char *moreblast,
                                                       GtError *err)
 {
-  GtMatchIterator *mp;
-  GtMatchIteratorBlast *mpb;
-  char blast_call[BUFSIZ], *env;
+  GtBlastProcessCall *call = gt_blast_process_call_new_all_prot();
+  char buffer[BUFSIZ];
 
-  mp = gt_match_iterator_create(gt_match_iterator_blast_class());
-  mpb = gt_match_iterator_blast_cast(mp);
-  mpb->pvt = gt_calloc(1, sizeof (GtMatchIteratorBlastMembers));
-  mpb->pvt->matchfile = query;
-  mpb->pvt->process = true;
-
-  env = getenv("GT_BLAST_PATH");
-  if (env) {
-    sprintf(blast_call, "%s/blastn", env);
-  } else {
-    sprintf(blast_call, "blastn");
-  }
+  gt_blast_process_call_set_query(call, query);
+  gt_blast_process_call_set_db(call, db_name);
   if (evalue != GT_UNDEF_DOUBLE)
-    sprintf(blast_call, "%s -evalue %.6e", blast_call, evalue);
+    gt_blast_process_call_set_evalue(call, evalue);
   if (dust)
-    sprintf(blast_call, "%s -dust yes", blast_call);
+    gt_blast_process_call_set_opt(call, " -dust yes");
   if (word_size != GT_UNDEF_INT)
-    sprintf(blast_call, "%s -word_size %d", blast_call, word_size);
+    gt_blast_process_call_set_wordsize(call, word_size);
   if (gapopen != GT_UNDEF_INT)
-    sprintf(blast_call, "%s -gapopen %d", blast_call, gapopen);
+    gt_blast_process_call_set_gapopen(call, gapopen);
   if (gapextend != GT_UNDEF_INT)
-    sprintf(blast_call, "%s -gapextend %d", blast_call, gapextend);
+    gt_blast_process_call_set_gapextend(call, gapextend);
   if (penalty != GT_UNDEF_INT)
-    sprintf(blast_call, "%s -penalty %d", blast_call, penalty);
+    gt_blast_process_call_set_penalty(call, penalty);
   if (reward != GT_UNDEF_INT)
-    sprintf(blast_call, "%s -reward %d", blast_call, reward);
-  if (perc_identity != GT_UNDEF_DOUBLE)
-    sprintf(blast_call, "%s -perc_identity %.2f", blast_call,
-            perc_identity);
-  if (num_threads != GT_UNDEF_INT)
-    sprintf(blast_call, "%s -num_threads %d", blast_call, num_threads);
-  if (xdrop_gap_final != GT_UNDEF_DOUBLE)
-    sprintf(blast_call, "%s -xdrop_gap_final %.2f", blast_call,
-            xdrop_gap_final);
-  if (moreblast)
-    sprintf(blast_call, "%s %s", blast_call, moreblast);
-  sprintf(blast_call, "%s -query %s -db %s -outfmt 6", blast_call,
-          query, db_name);
-
-  mpb->pvt->matchfilep = popen(blast_call, "r");
-  if (!mpb->pvt->matchfilep) {
-    gt_error_set(err, "Could not run BLAST process: %s", strerror(errno));
-    return NULL;
+    gt_blast_process_call_set_reward(call, reward);
+  if (perc_identity != GT_UNDEF_DOUBLE) {
+    GT_UNUSED int ret;
+    ret = snprintf(buffer, BUFSIZ, " -perc_identity %.2f", perc_identity);
+    gt_assert(ret < BUFSIZ);
+    gt_blast_process_call_set_opt(call, buffer);
   }
-  mpb->pvt->gtmatchfilep = NULL;
-  return mp;
+  if (num_threads != GT_UNDEF_INT)
+    gt_blast_process_call_set_num_threads(call, num_threads);
+  if (xdrop_gap_final != GT_UNDEF_DOUBLE)
+    gt_blast_process_call_set_xdrop_gap_final(call, xdrop_gap_final);
+  if (moreblast != NULL) {
+    GT_UNUSED int ret;
+    ret = snprintf(buffer, BUFSIZ, " %s", moreblast);
+    gt_assert(ret < BUFSIZ);
+    gt_blast_process_call_set_opt(call, buffer);
+  }
+  return gt_match_iterator_blast_process_new(call, err);
 }
 
 GtMatchIterator* gt_match_iterator_blastp_process_new(const char *query,
@@ -387,45 +358,24 @@ GtMatchIterator* gt_match_iterator_blastp_process_new(const char *query,
                                                       double xdrop_gap_final,
                                                       GtError *err)
 {
-  GtMatchIterator *mp;
-  GtMatchIteratorBlast *mpb;
-  char blast_call[BUFSIZ], *env;
+  GtBlastProcessCall *call = gt_blast_process_call_new_all_prot();
 
-  mp = gt_match_iterator_create(gt_match_iterator_blast_class());
-  mpb = gt_match_iterator_blast_cast(mp);
-  mpb->pvt = gt_calloc(1, sizeof (GtMatchIteratorBlastMembers));
-  mpb->pvt->matchfile = query;
-  mpb->pvt->process = true;
-
-  env = getenv("GT_BLAST_PATH");
-  if (env) {
-    sprintf(blast_call, "%s/blastp", env);
-  } else {
-    sprintf(blast_call, "blastp");
-  }
+  gt_blast_process_call_set_query(call, query);
+  gt_blast_process_call_set_db(call, db_name);
   if (evalue != GT_UNDEF_DOUBLE)
-    sprintf(blast_call, "%s -evalue %.6e", blast_call, evalue);
+    gt_blast_process_call_set_evalue(call, evalue);
   if (word_size != GT_UNDEF_INT)
-    sprintf(blast_call, "%s -word_size %d", blast_call, word_size);
+    gt_blast_process_call_set_wordsize(call, word_size);
   if (gapopen != GT_UNDEF_INT)
-    sprintf(blast_call, "%s -gapopen %d", blast_call, gapopen);
+    gt_blast_process_call_set_gapopen(call, gapopen);
   if (gapextend != GT_UNDEF_INT)
-    sprintf(blast_call, "%s -gapextend %d", blast_call, gapextend);
+    gt_blast_process_call_set_gapextend(call, gapextend);
   if (num_threads != GT_UNDEF_INT)
-    sprintf(blast_call, "%s -num_threads %d", blast_call, num_threads);
+    gt_blast_process_call_set_num_threads(call, num_threads);
   if (xdrop_gap_final != GT_UNDEF_DOUBLE)
-    sprintf(blast_call, "%s -xdrop_gap_final %.2f", blast_call,
-             xdrop_gap_final);
-  sprintf(blast_call, "%s -query %s -db %s -outfmt 6", blast_call,
-           query, db_name);
+    gt_blast_process_call_set_xdrop_gap_final(call, xdrop_gap_final);
 
-  mpb->pvt->matchfilep = popen(blast_call, "r");
-  if (!mpb->pvt->matchfilep) {
-    gt_error_set(err, "Could not run BLAST process: %s", strerror(errno));
-    return NULL;
-  }
-  mpb->pvt->gtmatchfilep = NULL;
-  return mp;
+  return gt_match_iterator_blast_process_new(call, err);
 }
 
 static void gt_match_iterator_blast_free(GtMatchIterator *mp)
