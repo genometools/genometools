@@ -16,9 +16,11 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#include <stdio.h>
 #include <sys/time.h>
 #include "core/cstr_api.h"
 #include "core/ma.h"
+#include "core/str_api.h"
 #include "core/timer_api.h"
 #include "core/unused_api.h"
 #include "core/xposix.h"
@@ -147,6 +149,28 @@ void gt_timer_show_formatted(GT_UNUSED GtTimer *t, GT_UNUSED const char *fmt,
 #else
   /* XXX */
   fprintf(stderr, "gt_timer_show_formatted() not implemented\n");
+  exit(EXIT_FAILURE);
+#endif
+}
+
+void gt_timer_get_formatted(GtTimer *t, const char *fmt, GtStr *str)
+{
+#ifndef _WIN32
+  struct timeval elapsed_tv;
+  char buf[BUFSIZ];
+  if (t->state == TIMER_RUNNING)
+    gt_timer_stop(t);
+  gt_assert(t->state == TIMER_STOPPED);
+  timeval_subtract(&elapsed_tv, &t->stop_tv, &t->gstart_tv);
+  (void) snprintf(buf, BUFSIZ-1, fmt,
+          (GtWord)(elapsed_tv.tv_sec),
+          (GtWord)(elapsed_tv.tv_usec),
+          (GtWord)(t->stop_ru.ru_utime.tv_sec - t->start_ru.ru_utime.tv_sec),
+          (GtWord)(t->stop_ru.ru_stime.tv_sec - t->start_ru.ru_stime.tv_sec));
+  gt_str_append_cstr(str, buf);
+#else
+  /* XXX */
+  fprintf(stderr, "gt_timer_get_formatted() not implemented\n");
   exit(EXIT_FAILURE);
 #endif
 }
