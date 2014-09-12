@@ -246,9 +246,9 @@ function print_aspects(aspects)
                              node.ID .. [[</span>, ]])
           end
           template_print([[<span style="color: grey;">file</span>
-          <span style="color: #66FF66;">]] .. node.filename .. [[</span>,
+          <span style="color: #grey;">]] .. node.filename .. [[</span>,
           <span style="color: grey;">line</span>
-          <span style="color: #FF6666;">]] .. node.linenumber .. [[</span>]])
+          <span style="color: #grey;">]] .. node.linenumber .. [[</span>]])
           template_print("<ul>\n")
           for c, msg in ipairs(node.failure_messages) do
             template_print("<li>" .. msg .. "</li>\n")
