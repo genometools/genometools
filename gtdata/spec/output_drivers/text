@@ -106,6 +106,16 @@ if nof_sequences > 0 then
   print_aspects(sequences)
 end
 
+if #warnings then
+  template_print("\nEncountered " .. ansicolors.yellow
+                 .. #warnings .. ansicolors.reset .. " parser warning/s.\n")
+  if global.show_details then
+    for _, msg in ipairs(warnings) do
+      template_print("  - " .. msg .. "\n")
+    end
+  end
+end
+
 template_print("\nTraversed " .. global.checked_ccs ..
                " CCs (" .. global.checked_types .. " feature types), checked "
                .. global.checked_nodes .. " nodes for "
