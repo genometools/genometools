@@ -120,12 +120,12 @@ header = [[
       }
       .wrapper {
         min-height: 100%;
-        height: auto !important; /* This line and the next line are not necessary unless you need IE6 support */
+        height: auto !important;
         height: 100%;
-        margin: 0 auto -55px; /* the bottom margin is the negative value of the footer's height */
+        margin: 0 auto -55px;
       }
       .footer, .push {
-        height: 55px; /* .push must be the same height as .footer */
+        height: 55px;
       }
     </style>
     <script>var runOnLoad=function(c,o,d,e){function x(){for(e=1;c.length;)c.shift()()}o[d]?(document[d]('DOMContentLoaded',x,0),o[d]('load',x,0)):o.attachEvent('onload',x);return function(t){e?o.setTimeout(t,0):c.push(t)}}([],window,'addEventListener');</script>
