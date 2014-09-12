@@ -98,6 +98,7 @@ static const luaL_Reg spec_results_luasecurelibs[] = {
   {LUA_STRLIBNAME, luaopen_string},
   {LUA_MATHLIBNAME, luaopen_math},
   {LUA_IOLIBNAME, luaopen_io},
+  {LUA_OSLIBNAME, luaopen_os},
   {LUA_LOADLIBNAME, luaopen_package},
   {"gt", gt_lua_open_lib},
   {NULL, NULL}
@@ -633,7 +634,8 @@ static int gt_spec_results_lua_print(lua_State* L) {
 int gt_spec_results_render_template(GtSpecResults *sr, const char *template,
                                     GtFile *outfile, const char *specfile,
                                     bool details, bool colored,
-                                    bool show_per_node, GtError *err)
+                                    bool show_per_node, const char *runtime_str,
+                                    GtError *err)
 {
   lua_State *L;
   GtSpecResultsReportInfo info;
@@ -695,6 +697,9 @@ int gt_spec_results_render_template(GtSpecResults *sr, const char *template,
 
   /* dome global settings */
   lua_newtable(L);
+  lua_pushstring(L, "runtime");
+  lua_pushstring(L, runtime_str);
+  lua_rawset(L, -3);
   lua_pushstring(L, "spec_filename");
   lua_pushstring(L, specfile);
   lua_rawset(L, -3);

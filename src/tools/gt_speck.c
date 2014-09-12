@@ -291,16 +291,18 @@ static int gt_speck_runner(int argc, const char **argv, int parsed_args,
     gt_warning_set_handler(gt_warning_default_handler, NULL);
 
     /* output results */
-    if (!had_err)
+    if (!had_err) {
+      GtStr *runtime = gt_str_new();
+      gt_timer_get_formatted(t, GT_WD ".%06ld", runtime);
       had_err = gt_spec_results_render_template(res, gt_str_get(speclib),
                                                 arguments->outfp,
                                                 gt_str_get(arguments->specfile),
                                                 arguments->verbose,
                                                 arguments->colored,
-                                                !arguments->allexpects, err);
-
-    if (!had_err)
-      gt_timer_show_formatted(t, "Finished in " GT_WD ".%06ld s.\n", stdout);
+                                                !arguments->allexpects,
+                                                gt_str_get(runtime), err);
+      gt_str_delete(runtime);
+    }
   }
 
   /* free */

@@ -49,6 +49,7 @@ int            gt_spec_results_render_template(GtSpecResults *sr,
                                                bool details,
                                                bool colored,
                                                bool show_per_node,
+                                               const char *runtime_str,
                                                GtError *err);
 void           gt_spec_results_delete(GtSpecResults *spec_results);
 
