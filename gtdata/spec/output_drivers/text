@@ -110,3 +110,4 @@ template_print("\nTraversed " .. global.checked_ccs ..
                " CCs (" .. global.checked_types .. " feature types), checked "
                .. global.checked_nodes .. " nodes for "
                .. global.checked_aspects .. " aspects.\n")
+template_print("Finished in " .. global.runtime .. " s.\n")
