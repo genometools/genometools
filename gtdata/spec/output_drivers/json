@@ -112,6 +112,21 @@ template_print("  },\n")
 
 template_print("  \"sequences\" : {\n")
 print_aspects(sequences)
-template_print("  }\n")
+template_print("  },\n")
+
+template_print("  \"warnings\" : [\n")
+for i, msg in ipairs(warnings) do
+  template_print("\"" .. json_encode(msg) .. "\"")
+  if i ~= #warnings then
+    template_print(", ")
+  end
+end
+template_print("  ],\n")
+
+template_print("  \"runtime\" : " .. global.runtime .. ",\n")
+template_print("  \"checked_ccs\" : " .. global.checked_ccs .. ",\n")
+template_print("  \"checked_aspects\" : " .. global.checked_aspects .. ",\n")
+template_print("  \"checked_types\" : " .. global.checked_types .. ",\n")
+template_print("  \"checked_nodes\" : " .. global.checked_nodes .. "\n")
 
 template_print("}\n")
