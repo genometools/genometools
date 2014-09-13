@@ -94,19 +94,10 @@ function nodemt.children_of_type(node, type)
   nit = node:children()
   return function()
     n = nit()
-    found = false
-    if n and n:get_type() == type then
-      found = true
-      return n
-    end
-    while n and not found do
+    while n and n:get_type() ~= type do
       n = nit()
-      if n and n:get_type() == type then
-        found = true
-        return n
-      end
     end
-    return nil
+    return n
   end
 end
 
@@ -114,19 +105,10 @@ function nodemt.children_of_supertype(node, type)
   nit = node:children()
   return function()
     n = nit()
-    found = false
-    if n and n:get_type():is_a(type) then
-      found = true
-      return n
-    end
-    while n and not found do
+    while n and not n:get_type():is_a(type) do
       n = nit()
-      if n and n:get_type():is_a(type) then
-        found = true
-        return n
-      end
     end
-    return nil
+    return n
   end
 end
 
