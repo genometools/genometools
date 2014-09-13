@@ -34,6 +34,7 @@
 #include "core/fileutils_api.h"
 #include "core/gtdatapath.h"
 #include "core/log.h"
+#include "core/warning_api.h"
 #include "core/ma.h"
 #include "core/multithread_api.h"
 #include "core/option.h"
@@ -59,6 +60,7 @@
 struct GtR {
   bool test,
        interactive,
+       quiet,
        debug,
        list,
        check64bit;
@@ -168,6 +170,9 @@ static GtOptionParser* gtr_option_parser_new(GtR *gtr)
   o = gt_option_new_bool("i",
                          "enter interactive mode after executing 'tool' or "
                          "'script'", &gtr->interactive, false);
+  gt_option_hide_default(o);
+  gt_option_parser_add_option(op, o);
+  o = gt_option_new_bool("q", "suppress warnings", &gtr->quiet, false);
   gt_option_hide_default(o);
   gt_option_parser_add_option(op, o);
   o = gt_option_new_uint_min("j", "set number of parallel threads used at once",
@@ -428,6 +433,8 @@ int gtr_run(GtR *gtr, int argc, const char **argv, GtError *err)
   gt_assert(gtr);
   if (gtr->debug)
     enable_logging(gt_str_get(gtr->debugfp), &gtr->logfp);
+  if (gtr->quiet)
+    gt_warning_disable();
   gtr->seed = gt_ya_rand_init(gtr->seed);
   gt_log_log("seed=%u", gtr->seed);
   if (gtr->list)
