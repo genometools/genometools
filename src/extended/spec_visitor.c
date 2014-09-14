@@ -480,6 +480,7 @@ static int spec_expect_matchdispatch(lua_State *L)
   /* get target */
   lua_rawgeti(L, LUA_REGISTRYINDEX, sv->target_ref);
   lua_insert(L, 2);
+  luaL_unref(L, LUA_REGISTRYINDEX, sv->target_ref);
 
   /* call matcher */
   lua_pop(L, 2);
@@ -836,6 +837,9 @@ static int spec_init_lua_env(GtSpecVisitor *sv, const char *progname,
   luaL_newmetatable(sv->L, "GenomeTools.specexpect");
   lua_pushstring(sv->L, "__index");
   lua_pushcfunction(sv->L, spec_expect_index);
+  lua_settable(sv->L, -3);
+  lua_pushstring(sv->L, "__mode");
+  lua_pushstring(sv->L, "k");
   lua_settable(sv->L, -3);
 
   /* load matcher funcs written in Lua (for extensibility) */
