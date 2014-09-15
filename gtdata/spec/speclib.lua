@@ -8,10 +8,7 @@ function table.contains(tab, element)
 end
 
 function table.pretty_array(tab)
-  str = "["
-  str = str .. (table.concat(tab, ", "))
-  str = str .. "]"
-  return str
+  return  "[" .. (table.concat(tab, ", "))  .. "]"
 end
 
 function string.char_count(str, char)
@@ -62,24 +59,22 @@ function count(iterator)
 end
 
 function gff3_encode(s)
-  s = string.gsub(s, "[\t\n\r;=%&,]", function (c)
-        return string.format("%%%02X", string.byte(c))
-      end)
-  return s
+  return string.gsub(s, "[\t\n\r;=%&,]", function (c)
+            return string.format("%%%02X", string.byte(c))
+         end)
 end
 
 function gff3_decode(s)
-  s = string.gsub(s, "%%([0-9a-fA-F][1-9a-fA-F])", function (n)
-        return string.char(tonumber("0x" .. n))
-      end)
-  return s
+  return string.gsub(s, "%%([0-9a-fA-F][1-9a-fA-F])", function (n)
+            return string.char(tonumber("0x" .. n))
+         end)
 end
 
 function gff3_extract_structure(str)
-  ret = {}
+  local ret = {}
   for _,v in ipairs(str:split(",")) do
-    res = {}
-    v = gff3_decode(v)
+    local res = {}
+    local v = gff3_decode(v)
     for _,pair in ipairs(v:split(";")) do
       key, value = unpack(pair:split("="))
       res[key] = value
@@ -91,9 +86,9 @@ end
 
 nodemt = debug.getregistry()["GenomeTools.genome_node"]
 function nodemt.children_of_type(node, type)
-  nit = node:children()
+  local nit = node:children()
   return function()
-    n = nit()
+    local n = nit()
     while n and n:get_type() ~= type do
       n = nit()
     end
@@ -101,10 +96,21 @@ function nodemt.children_of_type(node, type)
   end
 end
 
-function nodemt.children_matching_type(node, type_pat)
-  nit = node:children()
+function nodemt.children_of_supertype(node, type)
+  local nit = node:children()
   return function()
-    n = nit()
+    local n = nit()
+    while n and not n:get_type():is_a(type) do
+      n = nit()
+    end
+    return n
+  end
+end
+
+function nodemt.children_matching_type(node, type_pat)
+  local nit = node:children()
+  return function()
+    local n = nit()
     while n and string.match(n:get_type(), type_pat) do
       n = nit()
     end

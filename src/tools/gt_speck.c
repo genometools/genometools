@@ -15,6 +15,10 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#include "core/cstr_api.h"
+#include "core/error.h"
+#include "core/fileutils_api.h"
+#include "core/gtdatapath.h"
 #include "core/ma.h"
 #include "core/output_file_api.h"
 #include "core/timer_api.h"
@@ -34,7 +38,7 @@
 #include "tools/gt_speck.h"
 
 typedef struct {
-  GtStr *specfile;
+  GtStr *specfile, *format;
   bool verbose,
        colored,
        fail_hard,
@@ -51,6 +55,7 @@ static void *gt_speck_arguments_new(void)
 {
   SpeccheckArguments *arguments = gt_calloc(1, sizeof *arguments);
   arguments->specfile = gt_str_new();
+  arguments->format = gt_str_new();
   arguments->s2fi = gt_seqid2file_info_new();
   arguments->ofi = gt_output_file_info_new();
   arguments->tci = gt_typecheck_info_new();
@@ -63,6 +68,7 @@ static void gt_speck_arguments_delete(void *tool_arguments)
   SpeccheckArguments *arguments = tool_arguments;
   if (!arguments) return;
   gt_str_delete(arguments->specfile);
+  gt_str_delete(arguments->format);
   gt_file_delete(arguments->outfp);
   gt_seqid2file_info_delete(arguments->s2fi);
   gt_output_file_info_delete(arguments->ofi);
@@ -109,6 +115,12 @@ static GtOptionParser* gt_speck_option_parser_new(void *tool_arguments)
   option = gt_option_new_bool("failhard", "stop processing and report runtime "
                               "errors instead of recording them in the results",
                               &arguments->fail_hard, false);
+  gt_option_parser_add_option(op, option);
+
+  /* -format */
+  option = gt_option_new_string("output", "output format\n"
+                                "choose from: json, text, html, statsonly",
+                                arguments->format, "text");
   gt_option_parser_add_option(op, option);
 
   gt_typecheck_info_register_options(arguments->tci, op);
@@ -159,6 +171,7 @@ static int gt_speck_runner(int argc, const char **argv, int parsed_args,
   GtTimer *t = NULL;
   GtRegionMapping *rm = NULL;
   GtArray *arr = gt_array_new(sizeof (GtFeatureNode*));
+  GtStr *prog, *speclib;
   SpeccheckArguments *arguments = tool_arguments;
 
   int had_err = 0;
@@ -166,16 +179,35 @@ static int gt_speck_runner(int argc, const char **argv, int parsed_args,
 
   res = gt_spec_results_new();
   gt_assert(res);
+
+  prog = gt_str_new();
+  gt_str_append_cstr_nt(prog, gt_error_get_progname(err),
+                    gt_cstr_length_up_to_char(gt_error_get_progname(err), ' '));
+  speclib = gt_get_gtdata_path(gt_str_get(prog), NULL);
+  gt_str_delete(prog);
+  gt_str_append_cstr(speclib, "/spec/output_drivers/");
+  gt_str_append_str(speclib, arguments->format);
+
+  if (!gt_file_exists(gt_str_get(speclib))) {
+    gt_error_set(err, "output driver file \"%s\" does not exist",
+                 gt_str_get(speclib));
+    had_err = -1;
+  }
+
+  if (!had_err) {
+    spec_visitor = gt_spec_visitor_new(gt_str_get(arguments->specfile), res,
+                                       err);
+    if (!spec_visitor) {
+      gt_spec_results_delete(res);
+      return -1;
+    }
+  }
+
   t = gt_timer_new();
   gt_assert(t);
 
-  spec_visitor = gt_spec_visitor_new(gt_str_get(arguments->specfile), res,
-                                     err);
-  if (!spec_visitor)
-    return -1;
-
   /* add region mapping if given */
-  if (gt_seqid2file_option_used(arguments->s2fi)) {
+  if (!had_err && gt_seqid2file_option_used(arguments->s2fi)) {
     rm = gt_seqid2file_region_mapping_new(arguments->s2fi, err);
     if (!rm)
       had_err = -1;
@@ -259,14 +291,18 @@ static int gt_speck_runner(int argc, const char **argv, int parsed_args,
     gt_warning_set_handler(gt_warning_default_handler, NULL);
 
     /* output results */
-    if (!had_err)
-      gt_spec_results_report(res, arguments->outfp,
-                             gt_str_get(arguments->specfile),
-                             arguments->verbose, arguments->colored,
-                             !arguments->allexpects);
-
-    if (!had_err)
-      gt_timer_show_formatted(t, "Finished in " GT_WD ".%06ld s.\n", stdout);
+    if (!had_err) {
+      GtStr *runtime = gt_str_new();
+      gt_timer_get_formatted(t, GT_WD ".%06ld", runtime);
+      had_err = gt_spec_results_render_template(res, gt_str_get(speclib),
+                                                arguments->outfp,
+                                                gt_str_get(arguments->specfile),
+                                                arguments->verbose,
+                                                arguments->colored,
+                                                !arguments->allexpects,
+                                                gt_str_get(runtime), err);
+      gt_str_delete(runtime);
+    }
   }
 
   /* free */
@@ -281,6 +317,7 @@ static int gt_speck_runner(int argc, const char **argv, int parsed_args,
   gt_type_checker_delete(type_checker);
   gt_timer_delete(t);
   gt_array_delete(arr);
+  gt_str_delete(speclib);
 
   return had_err;
 }

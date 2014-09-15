@@ -18,7 +18,9 @@
 #ifndef SPEC_RESULTS_H
 #define SPEC_RESULTS_H
 
+#include "core/error_api.h"
 #include "core/file_api.h"
+#include "extended/genome_node_api.h"
 
 typedef struct GtSpecResults GtSpecResults;
 
@@ -40,6 +42,15 @@ void           gt_spec_results_record_warning(GtSpecResults *sr, const char *w);
 void           gt_spec_results_report(GtSpecResults *sr, GtFile *outfile,
                                       const char *specfile, bool details,
                                       bool colored, bool show_per_node);
+int            gt_spec_results_render_template(GtSpecResults *sr,
+                                               const char *template,
+                                               GtFile *outfile,
+                                               const char *specfile,
+                                               bool details,
+                                               bool colored,
+                                               bool show_per_node,
+                                               const char *runtime_str,
+                                               GtError *err);
 void           gt_spec_results_delete(GtSpecResults *spec_results);
 
 #endif

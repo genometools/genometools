@@ -2052,3 +2052,9 @@ const char *gt_option_parser_one_liner(const GtOptionParser *option_parser)
   gt_assert(option_parser);
   return option_parser->one_liner;
 }
+
+const char* gt_option_parser_get_progname(const GtOptionParser *option_parser)
+{
+  gt_assert(option_parser);
+  return option_parser->progname;
+}
