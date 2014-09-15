@@ -180,6 +180,9 @@ static int gt_speck_runner(int argc, const char **argv, int parsed_args,
   res = gt_spec_results_new();
   gt_assert(res);
 
+  if (!arguments->allexpects)
+    gt_spec_results_record_per_node(res);
+
   prog = gt_str_new();
   gt_str_append_cstr_nt(prog, gt_error_get_progname(err),
                     gt_cstr_length_up_to_char(gt_error_get_progname(err), ' '));
@@ -299,7 +302,6 @@ static int gt_speck_runner(int argc, const char **argv, int parsed_args,
                                                 gt_str_get(arguments->specfile),
                                                 arguments->verbose,
                                                 arguments->colored,
-                                                !arguments->allexpects,
                                                 gt_str_get(runtime), err);
       gt_str_delete(runtime);
     }
