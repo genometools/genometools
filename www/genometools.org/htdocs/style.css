@@ -137,3 +137,19 @@ ul.pubs li {
   margin-top: 10px;
   line-height: 1.2em;
 }
+
+/* Docs */
+div.sect1 {
+  font-family: monospace;
+}
+
+div.sectionbody p {
+  white-space: pre;
+}
+
+div.sect1 ul li p {
+  white-space: normal;
+}
+div.sect1 dl dd p {
+  margin-top: -24px;
+}
