@@ -38,17 +38,16 @@ void           gt_spec_results_add_result(GtSpecResults *sr,
                                           const char *error_string);
 void           gt_spec_results_add_cc(GtSpecResults *sr);
 void           gt_spec_results_record_warning(GtSpecResults *sr, const char *w);
-/* TODO: replace by visitor later */
+void           gt_spec_results_record_per_node(GtSpecResults *sr);
+
 void           gt_spec_results_report(GtSpecResults *sr, GtFile *outfile,
                                       const char *specfile, bool details,
-                                      bool colored, bool show_per_node);
+                                      bool colored);
 int            gt_spec_results_render_template(GtSpecResults *sr,
                                                const char *template,
                                                GtFile *outfile,
                                                const char *specfile,
-                                               bool details,
-                                               bool colored,
-                                               bool show_per_node,
+                                               bool details, bool colored,
                                                const char *runtime_str,
                                                GtError *err);
 void           gt_spec_results_delete(GtSpecResults *spec_results);

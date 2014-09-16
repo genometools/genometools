@@ -43,8 +43,7 @@ typedef struct {
        colored,
        fail_hard,
        provideindex,
-       sort,
-       allexpects;
+       sort;
   GtSeqid2FileInfo *s2fi;
   GtOutputFileInfo *ofi;
   GtTypecheckInfo *tci;
@@ -94,11 +93,6 @@ static GtOptionParser* gt_speck_option_parser_new(void *tool_arguments)
 
   option = gt_option_new_bool("colored", "show colored output",
                               &arguments->colored, true);
-  gt_option_parser_add_option(op, option);
-
-  option = gt_option_new_bool("allexpects", "show results counted by "
-                              "expectations instead of by nodes",
-                              &arguments->allexpects, false);
   gt_option_parser_add_option(op, option);
 
   option = gt_option_new_bool("provideindex", "provide feature index in "
@@ -299,7 +293,6 @@ static int gt_speck_runner(int argc, const char **argv, int parsed_args,
                                                 gt_str_get(arguments->specfile),
                                                 arguments->verbose,
                                                 arguments->colored,
-                                                !arguments->allexpects,
                                                 gt_str_get(runtime), err);
       gt_str_delete(runtime);
     }
