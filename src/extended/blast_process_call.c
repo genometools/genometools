@@ -56,6 +56,19 @@ GtBlastProcessCall *gt_blast_process_call_new(const char *which)
   }
   else
     call->str = gt_str_new_cstr(which);
+  call->all = false;
+  call->db = false;
+  call->evalue = false;
+  call->gapextend = false;
+  call->gapopen = false;
+  call->nucl = false;
+  call->num_threads = false;
+  call->outfmt = false;
+  call->penalty = false;
+  call->query = false;
+  call->reward = false;
+  call->word_size = false;
+  call->xdrop_gap_final = false;
   return call;
 }
 
