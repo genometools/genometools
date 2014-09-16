@@ -264,7 +264,7 @@ static int gt_spec_aspect_make_node_model(void *key, void *value, void *data,
   GtGenomeNode *gn = (GtGenomeNode*) key;
   GtSpecAspectNodeResult *sanr = (GtSpecAspectNodeResult*) value;
   GtSpecResultsReportInfo *info = (GtSpecResultsReportInfo*) data;
-  const char *tmp;
+  const char *tmp = NULL;
   bool has_id = false;
   GtUword i = 0;
 
@@ -312,7 +312,6 @@ static int gt_spec_aspect_make_node_model(void *key, void *value, void *data,
   }
   return 0;
 }
-
 
 static int gt_spec_aspect_count_stats(GT_UNUSED void *key, void *value,
                                       void *data, GT_UNUSED GtError *err)
