@@ -124,6 +124,12 @@ void gt_graphics_cairo_initialize(GtGraphics *gg, GtGraphicsOutType type,
     case GT_GRAPHICS_PNG:
     default:
       g->surf = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, width, height);
+      if (!g->surf && width > 10000)
+      {
+        fprintf(stderr, "warning: failed to create image surface; requested "
+                "image width was %u pixels, which is probably the culprit\n",
+                width);
+      }
       break;
   }
   gt_assert(g->surf && cairo_surface_status(g->surf) == CAIRO_STATUS_SUCCESS);
