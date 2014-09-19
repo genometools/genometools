@@ -39,6 +39,7 @@
 #include "core/minmax.h"
 #include "core/str.h"
 #include "core/unused_api.h"
+#include "core/warning_api.h"
 
 struct GtGraphicsCairo {
   const GtGraphics parent_instance;
@@ -126,9 +127,9 @@ void gt_graphics_cairo_initialize(GtGraphics *gg, GtGraphicsOutType type,
       g->surf = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, width, height);
       if (!g->surf && width > 10000)
       {
-        fprintf(stderr, "warning: failed to create image surface; requested "
-                "image width was %u pixels, which is probably the culprit\n",
-                width);
+        gt_warning("warning: failed to create image surface; requested image "
+                   "width was %u pixels, which is probably the culprit\n",
+                   width);
       }
       break;
   }
