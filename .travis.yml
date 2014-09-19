@@ -26,4 +26,10 @@ matrix:
     - compiler: gcc
       env: opt=no cairo=no
 
+before_install: sudo apt-get update
+install: sudo apt-get install ncbi-blast+
+before_script:
+  - blastn -version
+  - blastp -version
+  - makeblastdb -version
 script: ./scripts/travis_test.rb
