@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2010, 2012 Gordon Gremme <gordon@gremme.org>
+  Copyright (c) 2010-2014 Gordon Gremme <gordon@gremme.org>
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -47,15 +47,8 @@ static int add_ids_stream_next(GtNodeStream *ns, GtGenomeNode **gn,
   }
 
   /* handle disabled stream */
-  if (!ais->add_ids) {
-    had_err = gt_node_stream_next(ais->in_stream, gn, err);
-    if (had_err) {
-      /* we own the node -> delete it */
-      gt_genome_node_delete(*gn);
-      *gn = NULL;
-    }
-    return had_err;
-  }
+  if (!ais->add_ids)
+    return gt_node_stream_next(ais->in_stream, gn, err);
 
   /* no nodes in the buffer -> get new nodes */
   for (;;) {
