@@ -63,20 +63,19 @@ static int add_ids_stream_next(GtNodeStream *ns, GtGenomeNode **gn,
     /* end of the stream */
     if (!*gn)
       break;
-    /* to avoid a double free on error, we need to keep an extra
-       refcount on the last node; let's increase the count here... */
-    gt_genome_node_ref(*gn);
     if (had_err)
       break;
     else {
-      /* ...and decrease it again if there was no error */
-      gt_genome_node_delete(*gn);
       had_err = gt_genome_node_accept(*gn, ais->add_ids_visitor, err);
       if (had_err) {
         /* we own the node -> delete it */
         gt_genome_node_delete(*gn);
         *gn = NULL;
         break;
+      }
+      else {
+        /* the node is now in the buffer -> reset to avoid double free */
+        *gn = NULL;
       }
       if (gt_add_ids_visitor_node_buffer_size(ais->add_ids_visitor)) {
         *gn = gt_add_ids_visitor_get_node(ais->add_ids_visitor);
