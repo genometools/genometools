@@ -1467,6 +1467,12 @@ Test do
   run "diff 1 3"
 end
 
+Name "gt gff3 (double free regression)"
+Keywords "gt_gff3"
+Test do
+  run "#{$bin}gt gff3 #{$testdata}/double_free.gff3", :retval => 1
+end
+
 def large_gff3_test(name, file)
   Name "gt gff3 #{name}"
   Keywords "gt_gff3 large_gff3"

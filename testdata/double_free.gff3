@@ -1,0 +1,7 @@
+##gff-version 3
+scaffold00002	snap_masked	match	5394974	5395575	1.514	+	.	ID=scaffold00002:hit:16027:4.5.0.54;Name=snap_masked-scaffold00002-abinit-gene-54.0-mRNA-1
+###
+scaffold00002	maker	gene	5653983	5657917	.	+	.	ID=maker-scaffold00002-augustus-gene-55.46;Name=maker-scaffold00002-augustus-gene-55.46
+scaffold00002	maker	gene	5583460	5584075	.	+	.	ID=maker-scaffold00002-augustus-gene-55.43;Name=maker-scaffold00002-augustus-gene-55.43
+###
+scaffold00002	repeatmasker	match_part	1244186	1244228	274	+	.	ID=scaffold00002:hsp:1026:1.3.0.12;Parent=scaffold00002:hit:1026:1.3.0.12;Target=species:R1_DPs|genus:LINE%2FR1 650 780 +
