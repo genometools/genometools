@@ -153,12 +153,11 @@ static int gt_seqfilter_runner(int argc, const char **argv, int parsed_args,
                             arguments->width, arguments->outfp);
         gt_free(seq);
         passed++;
-        steps = 0;
       }
       else {
         filtered++;
-        steps++;
       }
+      steps = (steps + 1 == arguments->step) ? 0 : steps + 1;
     }
     filtered += current_num - i;
     num_of_sequences += current_num;
