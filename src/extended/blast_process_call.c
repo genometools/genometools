@@ -101,7 +101,7 @@ GtBlastProcessCall *gt_blast_process_call_new_all_prot(void)
 GtBlastProcessCall *gt_blast_process_call_new_prot(void)
 {
   GtBlastProcessCall *call =
-    gt_blast_process_call_new("blastall -p blastp");
+    gt_blast_process_call_new("blastp");
   call->nucl = call->all = false;
   return call;
 }
