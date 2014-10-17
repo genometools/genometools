@@ -242,6 +242,9 @@ static int construct_mRNAs(GT_UNUSED void *key, void *value, void *data,
   if (!had_err) {
     mRNA_node = gt_feature_node_new(mRNA_seqid, gt_ft_mRNA, mRNA_range.start,
                                     mRNA_range.end, mRNA_strand);
+    gt_feature_node_add_attribute(((GtFeatureNode*) mRNA_node), "ID", key);
+    gt_feature_node_add_attribute(((GtFeatureNode*) mRNA_node), "transcript_id",
+                                  key);
 
     if ((tname = gt_hashmap_get(cinfo->transcript_id_to_name_mapping,
                               (const char*) key)) && strlen(tname) > 0) {
@@ -332,6 +335,8 @@ static int construct_genes(GT_UNUSED void *key, void *value, void *data,
   if (!had_err) {
     gene_node = gt_feature_node_new(gene_seqid, gt_ft_gene, gene_range.start,
                                     gene_range.end, gene_strand);
+    gt_feature_node_add_attribute((GtFeatureNode*) gene_node, "ID", key);
+    gt_feature_node_add_attribute((GtFeatureNode*) gene_node, "gene_id", key);
 
     if ((gname = gt_hashmap_get(cinfo->gene_id_to_name_mapping,
                               (const char*) key)) && strlen(gname) > 0) {
@@ -344,6 +349,8 @@ static int construct_genes(GT_UNUSED void *key, void *value, void *data,
       gn = *(GtGenomeNode**) gt_array_get(mRNAs, i);
       gt_feature_node_add_child((GtFeatureNode*) gene_node,
                                 (GtFeatureNode*) gn);
+      gt_feature_node_add_attribute((GtFeatureNode*) gn, "Parent", key);
+      gt_feature_node_add_attribute((GtFeatureNode*) gn, "gene_id", key);
     }
 
     /* store the gene */
@@ -583,6 +590,10 @@ int gt_gtf_parser_parse(GtGTFParser *parser, GtQueue *genome_nodes,
           }
           HANDLE_ERROR;
           gene_id = token + strlen(GENE_ID_ATTRIBUTE) + 1;
+          if (*gene_id == '"')
+            gene_id++;
+          if (gene_id[strlen(gene_id)-1] == '"')
+            gene_id[strlen(gene_id)-1] = '\0';
         }
         else if (strncmp(token, TRANSCRIPT_ID_ATTRIBUTE,
                          strlen(TRANSCRIPT_ID_ATTRIBUTE)) == 0) {
@@ -594,6 +605,10 @@ int gt_gtf_parser_parse(GtGTFParser *parser, GtQueue *genome_nodes,
           }
           HANDLE_ERROR;
           transcript_id = token + strlen(TRANSCRIPT_ID_ATTRIBUTE) + 1;
+          if (*transcript_id == '"')
+            transcript_id++;
+          if (transcript_id[strlen(transcript_id)-1] == '"')
+            transcript_id[strlen(transcript_id)-1] = '\0';
         }
         else if (strncmp(token, GENE_NAME_ATTRIBUTE,
                          strlen(GENE_NAME_ATTRIBUTE)) == 0) {

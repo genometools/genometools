@@ -16,14 +16,14 @@ Name "gt gtf_to_gff3 test (inconsistent strand, gene level)"
 Keywords "gt_gtf_to_gff3"
 Test do
   run_test "#{$bin}gt gtf_to_gff3 #{$testdata}gt_gtf_to_gff3_test_inconsistent_strand2.gtf", :retval => 1
-  grep(last_stderr, /transcript on strand \+ encountered, but the parent gene .OR4F16. has strand/)
+  grep(last_stderr, /transcript on strand \+ encountered, but the parent gene OR4F29 has strand/)
 end
 
 Name "gt gtf_to_gff3 test (inconsistent strand, transcript level)"
 Keywords "gt_gtf_to_gff3"
 Test do
   run_test "#{$bin}gt gtf_to_gff3 #{$testdata}gt_gtf_to_gff3_test_inconsistent_strand1.gtf", :retval => 1
-  grep(last_stderr, /feature "NR_024540" on line 5 has strand \+, but the parent transcript has strand \-/)
+  grep(last_stderr, /feature NR_024540 on line 5 has strand \+, but the parent transcript has strand \-/)
 end
 
 Name "gt gtf_to_gff3 test (stop codon included in CDS)"
