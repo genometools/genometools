@@ -242,6 +242,9 @@ static int construct_mRNAs(GT_UNUSED void *key, void *value, void *data,
   if (!had_err) {
     mRNA_node = gt_feature_node_new(mRNA_seqid, gt_ft_mRNA, mRNA_range.start,
                                     mRNA_range.end, mRNA_strand);
+    gt_feature_node_add_attribute(((GtFeatureNode*) mRNA_node), "ID", key);
+    gt_feature_node_add_attribute(((GtFeatureNode*) mRNA_node), "transcript_id",
+                                  key);
 
     if ((tname = gt_hashmap_get(cinfo->transcript_id_to_name_mapping,
                               (const char*) key)) && strlen(tname) > 0) {
@@ -332,6 +335,8 @@ static int construct_genes(GT_UNUSED void *key, void *value, void *data,
   if (!had_err) {
     gene_node = gt_feature_node_new(gene_seqid, gt_ft_gene, gene_range.start,
                                     gene_range.end, gene_strand);
+    gt_feature_node_add_attribute((GtFeatureNode*) gene_node, "ID", key);
+    gt_feature_node_add_attribute((GtFeatureNode*) gene_node, "gene_id", key);
 
     if ((gname = gt_hashmap_get(cinfo->gene_id_to_name_mapping,
                               (const char*) key)) && strlen(gname) > 0) {
@@ -344,6 +349,8 @@ static int construct_genes(GT_UNUSED void *key, void *value, void *data,
       gn = *(GtGenomeNode**) gt_array_get(mRNAs, i);
       gt_feature_node_add_child((GtFeatureNode*) gene_node,
                                 (GtFeatureNode*) gn);
+      gt_feature_node_add_attribute((GtFeatureNode*) gn, "Parent", key);
+      gt_feature_node_add_attribute((GtFeatureNode*) gn, "gene_id", key);
     }
 
     /* store the gene */
@@ -421,19 +428,19 @@ int gt_gtf_parser_parse(GtGTFParser *parser, GtQueue *genome_nodes,
   splitter = gt_splitter_new(),
   attribute_splitter = gt_splitter_new();
 
-#define HANDLE_ERROR                                                \
-        if (had_err) {                                              \
-          if (be_tolerant) {                                        \
+#define HANDLE_ERROR                                                   \
+        if (had_err) {                                                 \
+          if (be_tolerant) {                                           \
             fprintf(stderr, "skipping line: %s\n", gt_error_get(err)); \
             gt_error_unset(err);                                       \
             gt_str_reset(line_buffer);                                 \
-            had_err = 0;                                            \
-            continue;                                               \
-          }                                                         \
-          else {                                                    \
-            had_err = -1;                                           \
-            break;                                                  \
-          }                                                         \
+            had_err = 0;                                               \
+            continue;                                                  \
+          }                                                            \
+          else {                                                       \
+            had_err = -1;                                              \
+            break;                                                     \
+          }                                                            \
         }
 
   while (gt_str_read_next_line_generic(line_buffer, fpin) != EOF) {
@@ -458,6 +465,8 @@ int gt_gtf_parser_parse(GtGTFParser *parser, GtQueue *genome_nodes,
     }
     else {
       bool stop_codon = false;
+      char *tokendup, *attrkey;
+      GtStrArray *attrkeys, *attrvals;
 
       /* process tab delimited GTF line */
       gt_splitter_reset(splitter);
@@ -534,6 +543,8 @@ int gt_gtf_parser_parse(GtGTFParser *parser, GtQueue *genome_nodes,
       HANDLE_ERROR;
 
       /* parse the attributes */
+      attrkeys = gt_str_array_new();
+      attrvals = gt_str_array_new();
       gt_splitter_reset(attribute_splitter);
       gene_id = NULL;
       transcript_id = NULL;
@@ -544,6 +555,31 @@ int gt_gtf_parser_parse(GtGTFParser *parser, GtQueue *genome_nodes,
         /* skip leading blanks */
         while (*token == ' ')
           token++;
+
+        tokendup = gt_cstr_dup(token);
+        attrkey = strtok(tokendup, " ");
+        if (attrkey) {
+          char *attrval = strtok(NULL, " ");
+          if (attrval == NULL || strcmp(attrval, "") == 0 ||
+              strcmp(attrval, "\"\"") == 0)
+          {
+            gt_error_set(err, "missing value to attribute \"%s\" on line "
+                         GT_WU " in file \"%s\"", attrkey,line_number,filename);
+            had_err = -1;
+          }
+          HANDLE_ERROR;
+
+          if (*attrval == '"')
+            attrval++;
+          if (attrval[strlen(attrval)-1] == '"')
+            attrval[strlen(attrval)-1] = '\0';
+          gt_assert(attrkey && strlen(attrkey) > 0);
+          gt_assert(attrval && strlen(attrval) > 0);
+          gt_str_array_add_cstr(attrkeys, attrkey);
+          gt_str_array_add_cstr(attrvals, attrval);
+        }
+        gt_free(tokendup);
+
         /* look for the two mandatory attributes */
         if (strncmp(token, GENE_ID_ATTRIBUTE, strlen(GENE_ID_ATTRIBUTE)) == 0) {
           if (strlen(token) + 2 < strlen(GENE_ID_ATTRIBUTE)) {
@@ -554,6 +590,10 @@ int gt_gtf_parser_parse(GtGTFParser *parser, GtQueue *genome_nodes,
           }
           HANDLE_ERROR;
           gene_id = token + strlen(GENE_ID_ATTRIBUTE) + 1;
+          if (*gene_id == '"')
+            gene_id++;
+          if (gene_id[strlen(gene_id)-1] == '"')
+            gene_id[strlen(gene_id)-1] = '\0';
         }
         else if (strncmp(token, TRANSCRIPT_ID_ATTRIBUTE,
                          strlen(TRANSCRIPT_ID_ATTRIBUTE)) == 0) {
@@ -565,6 +605,10 @@ int gt_gtf_parser_parse(GtGTFParser *parser, GtQueue *genome_nodes,
           }
           HANDLE_ERROR;
           transcript_id = token + strlen(TRANSCRIPT_ID_ATTRIBUTE) + 1;
+          if (*transcript_id == '"')
+            transcript_id++;
+          if (transcript_id[strlen(transcript_id)-1] == '"')
+            transcript_id[strlen(transcript_id)-1] = '\0';
         }
         else if (strncmp(token, GENE_NAME_ATTRIBUTE,
                          strlen(GENE_NAME_ATTRIBUTE)) == 0) {
@@ -667,6 +711,15 @@ int gt_gtf_parser_parse(GtGTFParser *parser, GtQueue *genome_nodes,
         gt_feature_node_add_attribute((GtFeatureNode*) gn,
                                       GTF_PARSER_STOP_CODON_FLAG, "true");
       }
+      for (i = 0; i < gt_str_array_size(attrkeys); i++) {
+        const char *key = gt_str_array_get(attrkeys, i);
+        const char *val = gt_str_array_get(attrvals, i);
+        if (strcmp(val, "=") == 0)
+          val = "%26";
+        gt_feature_node_add_attribute((GtFeatureNode *) gn, key, val);
+      }
+      gt_str_array_delete(attrkeys);
+      gt_str_array_delete(attrvals);
 
       /* set source */
       source_str = gt_hashmap_get(parser->source_to_str_mapping, source);
