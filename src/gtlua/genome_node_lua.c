@@ -291,6 +291,18 @@ static int feature_node_lua_set_source(lua_State *L)
   return 0;
 }
 
+static int genome_node_lua_change_seqid(lua_State *L)
+{
+  const char *seqid;
+  GtStr *seqid_str;
+  GtGenomeNode **gn = check_genome_node(L, 1);
+  seqid = luaL_checkstring(L, 2);
+  seqid_str = gt_str_new_cstr(seqid);
+  gt_genome_node_change_seqid(*gn, seqid_str);
+  gt_str_delete(seqid_str);
+  return 0;
+}
+
 static int genome_node_lua_set_range(lua_State *L)
 {
   GtRange *rng;
@@ -760,6 +772,7 @@ static const struct luaL_Reg genome_node_lib_m [] = {
   { "get_range", genome_node_lua_get_range },
   { "set_range", genome_node_lua_set_range },
   { "get_seqid", genome_node_lua_get_seqid },
+  { "change_seqid", genome_node_lua_change_seqid },
   { "get_strand", feature_node_lua_get_strand },
   { "get_source", feature_node_lua_get_source },
   { "set_source", feature_node_lua_set_source },

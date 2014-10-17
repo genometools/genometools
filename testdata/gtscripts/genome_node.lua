@@ -124,7 +124,6 @@ rval, err = pcall(GenomeTools_genome_node.get_children, node)
 assert(not rval)
 assert(string.find(err, "not a feature node"))
 
-
 -- testing get_direct_children()
 child3  = gt.feature_node_new("seqid", "foo", range:get_start()+1, range:get_end(), "+")
 child:add_child(child3)
@@ -270,6 +269,14 @@ assert(not parent:has_child_of_type("gene"))
 assert(not parent:has_child_of_type("intron"))
 assert(not child:has_child_of_type("gene"))
 assert(not child:has_child_of_type("exon"))
+
+-- testing change_seqid
+node = gt.feature_node_new("seqid", "gene", range:get_start(), range:get_end(), "+")
+assert(node:get_seqid() == "seqid")
+node:change_seqid("foo")
+assert(node:get_seqid() == "foo")
+node:change_seqid("seqid")
+assert(node:get_seqid() == "seqid")
 
 -- testing gt.region_node_new
 range = gt.range_new(1, 100)
