@@ -297,7 +297,7 @@ end
 template_print("</ul></div></li>\n")
 
 template_print([[<li>
-          <input type="radio" checked name="tabs" id="tab2">
+          <input type="radio" name="tabs" id="tab2">
           <label for="tab2">Regions</label>
           <div id="tab-content2" class="tab-content animated fadeIn">]])
 template_print("<ul class=\"collapsibleList\">\n")
@@ -306,7 +306,7 @@ template_print("</ul>\n")
 template_print("</div></li>\n")
 
 template_print([[<li>
-          <input type="radio" checked name="tabs" id="tab3">
+          <input type="radio" name="tabs" id="tab3">
           <label for="tab3">Metadata</label>
           <div id="tab-content3" class="tab-content animated fadeIn">]])
 template_print("<ul class=\"collapsibleList\">\n")
@@ -315,7 +315,7 @@ template_print("</ul>\n")
 template_print("</div></li>\n")
 
 template_print([[<li>
-          <input type="radio" checked name="tabs" id="tab4">
+          <input type="radio" name="tabs" id="tab4">
           <label for="tab4">Comments</label>
           <div id="tab-content4" class="tab-content animated fadeIn">]])
 template_print("<ul class=\"collapsibleList\">\n")
@@ -324,7 +324,7 @@ template_print("</ul>\n")
 template_print("</div></li>\n")
 
 template_print([[<li>
-          <input type="radio" checked name="tabs" id="tab5">
+          <input type="radio" name="tabs" id="tab5">
           <label for="tab5">Sequences</label>
           <div id="tab-content5" class="tab-content animated fadeIn">]])
 template_print("<ul class=\"collapsibleList\">\n")
@@ -333,7 +333,7 @@ template_print("</ul>\n")
 template_print("</div></li>\n")
 
 template_print([[<li>
-          <input type="radio" checked name="tabs" id="tab6">
+          <input type="radio" name="tabs" id="tab6">
           <label for="tab6">Warnings</label>
           <div id="tab-content6" class="tab-content animated fadeIn">]])
 template_print("<ul>\n")
