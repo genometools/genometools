@@ -36,7 +36,8 @@ typedef struct {
   unsigned int minmatchlength;
   unsigned int lengthcutoff, depthcutoff;
   GtStr  *readset, *buffersizearg;
-  bool errors, paths2seq, redtrans, save, load, vd, astat, copynum;
+  bool errors, paths2seq, redtrans, save, load, vd, astat, copynum,
+       show_contigs_info;
   unsigned int deadend, bubble, deadend_depth;
   GtOption *refoptionbuffersize;
   GtUword buffersize;
@@ -208,6 +209,13 @@ static GtOptionParser* gt_readjoiner_assembly_option_parser_new(
   /* -save */
   option = gt_option_new_bool("save", "save the string graph to file",
       &arguments->save, false);
+  gt_option_is_development_option(option);
+  gt_option_parser_add_option(op, option);
+
+  /* -show_contigs_info */
+  option = gt_option_new_bool("cinfo", "output additional files required "
+      "for contigs graph construction (eqlen only)",
+      &arguments->show_contigs_info, false);
   gt_option_is_development_option(option);
   gt_option_parser_add_option(op, option);
 
@@ -605,8 +613,8 @@ static int gt_readjoiner_assembly_runner(GT_UNUSED int argc,
       gt_readjoiner_assembly_show_current_space("(before traversal)");
       gt_strgraph_spell(strgraph, (GtUword)arguments->depthcutoff,
           (GtUword)arguments->lengthcutoff, arguments->vd, readset,
-          GT_READJOINER_SUFFIX_CONTIG_PATHS, NULL, true, false,
-          verbose_logger);
+          GT_READJOINER_SUFFIX_CONTIG_PATHS, NULL, true,
+          arguments->show_contigs_info, false, verbose_logger);
     }
 
     if (contained != NULL)
