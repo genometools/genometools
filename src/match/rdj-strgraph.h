@@ -149,7 +149,7 @@ void gt_strgraph_compact(GtStrgraph *strgraph, bool show_progressbar);
 void gt_strgraph_spell(GtStrgraph *strgraph, GtUword min_path_depth,
     GtUword min_contig_length, bool showpaths, const char *indexname,
     const char *suffix, const GtEncseq *encseq, bool delay_reads_mapping,
-    bool show_progressbar, GtLogger *logger);
+    bool show_contigs_info, bool show_progressbar, GtLogger *logger);
 
 /* --- delete --- */
 

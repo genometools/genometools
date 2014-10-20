@@ -2158,12 +2158,13 @@ static void gt_strgraph_traverse(GtStrgraph *strgraph,
 GT_DECLAREARRAYSTRUCT(GtContigpathElem);
 
 typedef struct {
-  GtUword           total_depth, current_depth, contignum,
+  GtUword                 total_depth, current_depth, contignum,
                           min_depth, jnum;
   GtStrgraphVnum          nof_v, firstnode, lastnode;
   FILE                    *p_file, *cjl_i_file, *cjl_o_file, *ji_file;
   GtArrayGtContigpathElem contig;
   GtStrgraph              *strgraph;
+  bool                    show_contigs_info;
 } GtStrgraphContigpathsData;
 
 static void gt_strgraph_show_contigpath_edge(GtStrgraphVnum v,
@@ -2234,7 +2235,8 @@ static inline void gt_strgraph_end_contigpath(GtStrgraphContigpathsData *pdata)
     pdata->p_file);
   pdata->total_depth += pdata->current_depth;
 
-  gt_strgraph_show_contiginfo(pdata);
+  if (pdata->show_contigs_info)
+    gt_strgraph_show_contiginfo(pdata);
   (pdata->contignum)++;
 }
 
@@ -2275,7 +2277,8 @@ static void gt_strgraph_show_contigpath_vertex(GtStrgraphVnum firstvertex,
 
 static void gt_strgraph_show_contigpaths(GtStrgraph *strgraph,
     GtUword min_path_depth, FILE *p_file, FILE *cjl_i_file,
-    FILE *cjl_o_file, FILE *ji_file, bool show_progressbar)
+    FILE *cjl_o_file, FILE *ji_file, bool show_contigs_info,
+    bool show_progressbar)
 {
   GtStrgraphContigpathsData pdata;
 
@@ -2287,6 +2290,7 @@ static void gt_strgraph_show_contigpaths(GtStrgraph *strgraph,
   pdata.lastnode = 0;
   GT_INITARRAY(&pdata.contig, GtContigpathElem);
   pdata.p_file = p_file;
+  pdata.show_contigs_info = show_contigs_info;
   pdata.cjl_i_file = cjl_i_file;
   pdata.cjl_o_file = cjl_o_file;
   pdata.ji_file = ji_file;
@@ -2295,9 +2299,12 @@ static void gt_strgraph_show_contigpaths(GtStrgraph *strgraph,
   pdata.strgraph = strgraph;
 
   /* leave space for header */
-  gt_xfseek(ji_file, (GtWord) sizeof (pdata.jnum), SEEK_SET);
-  gt_xfseek(cjl_i_file, (GtWord) sizeof (pdata.contignum), SEEK_SET);
-  gt_xfseek(cjl_o_file, (GtWord) sizeof (pdata.contignum), SEEK_SET);
+  if (show_contigs_info)
+  {
+    gt_xfseek(ji_file, (GtWord) sizeof (pdata.jnum), SEEK_SET);
+    gt_xfseek(cjl_i_file, (GtWord) sizeof (pdata.contignum), SEEK_SET);
+    gt_xfseek(cjl_o_file, (GtWord) sizeof (pdata.contignum), SEEK_SET);
+  }
 
   gt_strgraph_traverse(strgraph, gt_strgraph_show_contigpath_vertex,
       gt_strgraph_show_contigpath_edge, &pdata, show_progressbar);
@@ -2307,14 +2314,17 @@ static void gt_strgraph_show_contigpaths(GtStrgraph *strgraph,
     gt_strgraph_end_contigpath(&pdata);
 
   /* write header */
-  gt_xfseek(ji_file, 0, SEEK_SET);
-  (void)gt_xfwrite(&pdata.jnum, sizeof (pdata.jnum), (size_t)1, ji_file);
-  gt_xfseek(cjl_i_file, 0, SEEK_SET);
-  (void)gt_xfwrite(&pdata.contignum, sizeof (pdata.contignum),
-      (size_t)1, cjl_i_file);
-  gt_xfseek(cjl_o_file, 0, SEEK_SET);
-  (void)gt_xfwrite(&pdata.contignum, sizeof (pdata.contignum),
-      (size_t)1, cjl_o_file);
+  if (show_contigs_info)
+  {
+    gt_xfseek(ji_file, 0, SEEK_SET);
+    (void)gt_xfwrite(&pdata.jnum, sizeof (pdata.jnum), (size_t)1, ji_file);
+    gt_xfseek(cjl_i_file, 0, SEEK_SET);
+    (void)gt_xfwrite(&pdata.contignum, sizeof (pdata.contignum),
+        (size_t)1, cjl_i_file);
+    gt_xfseek(cjl_o_file, 0, SEEK_SET);
+    (void)gt_xfwrite(&pdata.contignum, sizeof (pdata.contignum),
+        (size_t)1, cjl_o_file);
+  }
 
   gt_log_log("traversed edges = "GT_WU"", pdata.total_depth);
   gt_log_log("numofcontigs = "GT_WU"", pdata.contignum);
@@ -2407,7 +2417,7 @@ static void gt_strgraph_show_contigs(GtStrgraph *strgraph,
 void gt_strgraph_spell(GtStrgraph *strgraph, GtUword min_path_depth,
     GtUword min_contig_length, bool showpaths, const char *indexname,
     const char *suffix, const GtEncseq *encseq, bool delay_reads_mapping,
-    bool show_progressbar, GtLogger *logger)
+    bool show_contigs_info, bool show_progressbar, GtLogger *logger)
 {
   FILE *main_file = NULL;
   GtStr *filename;
@@ -2425,7 +2435,7 @@ void gt_strgraph_spell(GtStrgraph *strgraph, GtUword min_path_depth,
         showpaths, gt_outfp, encseq, show_progressbar, logger);
     gt_file_delete_without_handle(gt_outfp);
   }
-  else
+  else if (show_contigs_info)
   {
     FILE *cjl_i_file, *cjl_o_file, *ji_file;
     gt_str_set(filename, indexname);
@@ -2438,10 +2448,15 @@ void gt_strgraph_spell(GtStrgraph *strgraph, GtUword min_path_depth,
     gt_str_append_cstr(filename, GT_READJOINER_SUFFIX_JUNCTIONS);
     ji_file = gt_fa_xfopen(gt_str_get(filename), "w");
     gt_strgraph_show_contigpaths(strgraph, min_path_depth, main_file,
-       cjl_i_file, cjl_o_file, ji_file, show_progressbar);
+       cjl_i_file, cjl_o_file, ji_file, true, show_progressbar);
     gt_fa_xfclose(cjl_i_file);
     gt_fa_xfclose(cjl_o_file);
     gt_fa_xfclose(ji_file);
+  }
+  else
+  {
+    gt_strgraph_show_contigpaths(strgraph, min_path_depth, main_file,
+       NULL, NULL, NULL, false, show_progressbar);
   }
 
   gt_str_delete(filename);
