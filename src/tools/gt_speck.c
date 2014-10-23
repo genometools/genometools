@@ -117,7 +117,7 @@ static GtOptionParser* gt_speck_option_parser_new(void *tool_arguments)
                                 arguments->format, "text");
   gt_option_parser_add_option(op, option);
 
-  gt_typecheck_info_register_options(arguments->tci, op);
+  gt_typecheck_info_register_options_with_default(arguments->tci, op, "so");
   gt_seqid2file_register_options_ext(op, arguments->s2fi, false, false);
   gt_output_file_info_register_options(arguments->ofi, op, &arguments->outfp);
   option = gt_option_new_verbose(&arguments->verbose);
