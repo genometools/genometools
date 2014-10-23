@@ -44,8 +44,9 @@ void gt_typecheck_info_delete(GtTypecheckInfo *tci)
   gt_free(tci);
 }
 
-void gt_typecheck_info_register_options(GtTypecheckInfo *tci,
-                                        GtOptionParser *op)
+void gt_typecheck_info_register_options_with_default(GtTypecheckInfo *tci,
+                                                     GtOptionParser *op,
+                                                     const char *default_v)
 {
   GtOption *typecheck_option, *built_in_option;
   gt_assert(tci && op);
@@ -62,7 +63,7 @@ void gt_typecheck_info_register_options(GtTypecheckInfo *tci,
                          "file does not exist '.obo' is added to the argument "
                          "and loading the resulting filename from the "
                          "gtdata/obo_files directory is attempted.",
-                         tci->typecheck, NULL);
+                         tci->typecheck, default_v);
   gt_option_argument_is_optional(typecheck_option);
   gt_option_parser_add_option(op, typecheck_option);
   tci->typecheck_option = gt_option_ref(typecheck_option);
@@ -74,6 +75,12 @@ void gt_typecheck_info_register_options(GtTypecheckInfo *tci,
   gt_option_is_development_option(built_in_option);
   gt_option_parser_add_option(op, built_in_option);
   gt_option_exclude(typecheck_option, built_in_option);
+}
+
+void gt_typecheck_info_register_options(GtTypecheckInfo *tci,
+                                        GtOptionParser *op)
+{
+  gt_typecheck_info_register_options_with_default(tci, op, NULL);
 }
 
 bool gt_typecheck_info_option_used(const GtTypecheckInfo *tci)
