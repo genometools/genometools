@@ -26,6 +26,10 @@ GtTypecheckInfo* gt_typecheck_info_new(void);
 void             gt_typecheck_info_delete(GtTypecheckInfo*);
 void             gt_typecheck_info_register_options(GtTypecheckInfo*,
                                                     GtOptionParser*);
+void             gt_typecheck_info_register_options_with_default(
+                                                    GtTypecheckInfo*,
+                                                    GtOptionParser*,
+                                                    const char*);
 bool             gt_typecheck_info_option_used(const GtTypecheckInfo*);
 GtTypeChecker*   gt_typecheck_info_create_type_checker(const GtTypecheckInfo*,
                                                        GtError *err);
