@@ -79,7 +79,7 @@ static GtOptionParser* gt_sequniq_option_parser_new(void *tool_arguments)
   gt_option_parser_add_option(op, nofseqs_option);
 
   /* -rev */
-  rev_option = gt_option_new_bool("rev", "filter out also sequences whose "
+  rev_option = gt_option_new_bool("rev", "also filter out sequences whose "
       "reverse complement is identical to a sequence already output",
       &arguments->rev, false);
   gt_option_parser_add_option(op, rev_option);
