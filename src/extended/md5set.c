@@ -265,6 +265,12 @@ GtMD5SetStatus gt_md5set_add_sequence(GtMD5Set *set, const char* seq,
     }
 
     MD5SET_HASH_STRING(set->buffer, seqlen, md5sum_rc);
+    /* if the MD5 sum of the reverse complement equals the MD5 sum of the
+       sequence itself we don't check if the reverse complement is in the set.
+       Otherwise such sequences would never be added to the set at all. */
+    if (md5sum_rc.l == md5sum.l && md5sum_rc.h == md5sum.h) {
+      return GT_MD5SET_NOT_FOUND;
+    }
     found = md5set_search(set, md5sum_rc, false);
     if (found)
       return GT_MD5SET_RC_FOUND;

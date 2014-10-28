@@ -1,0 +1,14 @@
+>seq1
+ATCGATCGATATATATATAT
+>seq2 part of seq1
+CGATCGATATATATATA
+>seq3 part of seq2
+ATCGATATATAT
+>seq4 reverse complementary of seq 2
+TATATATATATCGATCG
+>seq5 new seq
+ATCGATCGACGATCGAGCGCG
+>seq6 another new
+ATCGATCGCGCGCGCGCGCGCGC
+>seq7 psubstring of seq6
+CGCGCGCGCGCGCGCG

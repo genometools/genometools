@@ -43,3 +43,17 @@ end
     run "diff #{last_stdout} #{$testdata}foo.fas"
   end
 end
+
+Name "gt sequniq (revbug, no -rev)"
+Keywords "gt_sequniq"
+Test do
+  run_test "#{$bin}gt sequniq #{$testdata}gt_sequniq_rev_bug.fas"
+  run "diff #{last_stdout} #{$testdata}gt_sequniq_rev_bug.fas"
+end
+
+Name "gt sequniq (revbug, -rev)"
+Keywords "gt_sequniq"
+Test do
+  run_test "#{$bin}gt sequniq -rev #{$testdata}gt_sequniq_rev_bug.fas"
+  run "diff #{last_stdout} #{$testdata}gt_sequniq_rev_bug.out"
+end
