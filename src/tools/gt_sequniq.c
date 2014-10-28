@@ -170,7 +170,7 @@ static int gt_sequniq_runner(int argc, const char **argv, int parsed_args,
           break;
 
         retval = gt_md5set_add_sequence(md5set, (const char*) sequence, len,
-            arguments->rev, err);
+                                        arguments->rev, err);
         if (retval == GT_MD5SET_NOT_FOUND)
           gt_fasta_show_entry(desc, (const char*) sequence, len,
                               arguments->width, arguments->outfp);
