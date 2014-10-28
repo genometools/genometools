@@ -312,6 +312,49 @@ static int genome_node_lua_set_range(lua_State *L)
   return 0;
 }
 
+static int feature_node_lua_set_strand(lua_State *L)
+{
+  const char *str;
+  GtGenomeNode **gn = check_genome_node(L, 1);
+  GtFeatureNode *fn;
+  /* make sure we get a feature node */
+  fn = gt_feature_node_try_cast(*gn);
+  luaL_argcheck(L, fn, 1, "not a feature node");
+  str = luaL_checkstring(L, 2);
+  luaL_argcheck(L, strlen(str) == 1 && strchr(GT_STRAND_CHARS, str[0]),
+                2, "must be one of '" GT_STRAND_CHARS "'");
+  gt_feature_node_set_strand(fn, gt_strand_get(str[0]));
+  return 0;
+}
+
+static int feature_node_lua_set_score(lua_State *L)
+{
+  float sc;
+  GtGenomeNode **gn = check_genome_node(L, 1);
+  GtFeatureNode *fn;
+  /* make sure we get a feature node */
+  fn = gt_feature_node_try_cast(*gn);
+  luaL_argcheck(L, fn, 1, "not a feature node");
+  sc = luaL_checknumber(L, 2);
+  gt_feature_node_set_score(fn, sc);
+  return 0;
+}
+
+static int feature_node_lua_set_phase(lua_State *L)
+{
+  const char *p;
+  GtGenomeNode **gn = check_genome_node(L, 1);
+  GtFeatureNode *fn;
+  /* make sure we get a feature node */
+  fn = gt_feature_node_try_cast(*gn);
+  luaL_argcheck(L, fn, 1, "not a feature node");
+  p = luaL_checkstring(L, 2);
+  luaL_argcheck(L, strlen(p) == 1 && strchr(GT_PHASE_CHARS, p[0]),
+                2, "must be one of '" GT_PHASE_CHARS "'");
+  gt_feature_node_set_phase(fn, gt_phase_get(p[0]));
+  return 0;
+}
+
 static int genome_node_lua_accept(lua_State *L)
 {
   GtGenomeNode **gn;
@@ -774,10 +817,13 @@ static const struct luaL_Reg genome_node_lib_m [] = {
   { "get_seqid", genome_node_lua_get_seqid },
   { "change_seqid", genome_node_lua_change_seqid },
   { "get_strand", feature_node_lua_get_strand },
+  { "set_strand", feature_node_lua_set_strand },
   { "get_source", feature_node_lua_get_source },
   { "set_source", feature_node_lua_set_source },
   { "get_score", feature_node_lua_get_score },
+  { "set_score", feature_node_lua_set_score },
   { "get_phase", feature_node_lua_get_phase },
+  { "set_phase", feature_node_lua_set_phase },
   { "get_attribute", feature_node_lua_get_attribute },
   { "get_exons", feature_node_lua_get_exons },
   { "accept", genome_node_lua_accept },
