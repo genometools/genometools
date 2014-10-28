@@ -159,8 +159,7 @@ static int gt_sequniq_runner(int argc, const char **argv, int parsed_args,
     if (!had_err) {
       if (arguments->verbose) {
         gt_progressbar_start(gt_seq_iterator_getcurrentcounter(seqit,
-                                                            (GtUint64)
-                                                            totalsize),
+                                                          (GtUint64) totalsize),
                              (GtUint64) totalsize);
       }
       while (!had_err) {
