@@ -142,7 +142,7 @@ static inline enum GtMD5SetSearchResult gt_md5set_search_pos(GtMD5Set *set,
   (((MD5).h % ((TABLE_SIZE) - 1)) + 1)
 
 static bool gt_md5set_search(GtMD5Set *set, gt_md5_t k,
-    bool insert_if_not_found)
+                             bool insert_if_not_found)
 {
   GtUword i, c;
 #ifndef NDEBUG
@@ -171,8 +171,7 @@ static bool gt_md5set_search(GtMD5Set *set, gt_md5_t k,
   }
 }
 
-static void gt_md5set_rehash(GtMD5Set *set, gt_md5_t *oldtable,
-    GtUword oldsize)
+static void gt_md5set_rehash(GtMD5Set *set, gt_md5_t *oldtable, GtUword oldsize)
 {
   GtUword i;
   set->fill = 0;
@@ -232,13 +231,11 @@ static void gt_md5set_prepare_buffer(GtMD5Set *md5set, GtUword bufsize)
 {
   gt_assert(md5set != NULL);
 
-  if (md5set->buffer == NULL)
-  {
+  if (md5set->buffer == NULL) {
     md5set->buffer = gt_malloc(sizeof (char) * bufsize);
     md5set->bufsize = bufsize;
   }
-  else if (md5set->bufsize < bufsize)
-  {
+  else if (md5set->bufsize < bufsize) {
     md5set->buffer = gt_realloc(md5set->buffer, sizeof (char) * bufsize);
     md5set->bufsize = bufsize;
   }
@@ -268,11 +265,9 @@ GtMD5SetStatus gt_md5set_add_sequence(GtMD5Set *set, const char* seq,
   if (found)
     return GT_MD5SET_FOUND;
 
-  if (both_strands)
-  {
+  if (both_strands) {
     retval = gt_reverse_complement(set->buffer, seqlen, err);
-    if (retval != 0)
-    {
+    if (retval != 0) {
       gt_assert(retval < 0);
       return GT_MD5SET_ERROR;
     }
