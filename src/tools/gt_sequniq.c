@@ -26,6 +26,7 @@
 #include "core/seq_iterator_sequence_buffer_api.h"
 #include "core/string_distri.h"
 #include "core/unused_api.h"
+#include "extended/gtdatahelp.h"
 #include "extended/md5set.h"
 #include "tools/gt_sequniq.h"
 
@@ -97,6 +98,7 @@ static GtOptionParser* gt_sequniq_option_parser_new(void *tool_arguments)
   /* option implications */
   gt_option_imply(verbose_option, seqit_option);
 
+  gt_option_parser_set_comment_func(op, gt_gtdata_show_help, NULL);
   gt_option_parser_set_min_args(op, 1U);
   return op;
 }
