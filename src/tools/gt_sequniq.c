@@ -26,6 +26,7 @@
 #include "core/seq_iterator_sequence_buffer_api.h"
 #include "core/string_distri.h"
 #include "core/unused_api.h"
+#include "extended/gtdatahelp.h"
 #include "extended/md5set.h"
 #include "tools/gt_sequniq.h"
 
@@ -79,7 +80,7 @@ static GtOptionParser* gt_sequniq_option_parser_new(void *tool_arguments)
   gt_option_parser_add_option(op, nofseqs_option);
 
   /* -rev */
-  rev_option = gt_option_new_bool("rev", "filter out also sequences whose "
+  rev_option = gt_option_new_bool("rev", "also filter out sequences whose "
       "reverse complement is identical to a sequence already output",
       &arguments->rev, false);
   gt_option_parser_add_option(op, rev_option);
@@ -97,6 +98,7 @@ static GtOptionParser* gt_sequniq_option_parser_new(void *tool_arguments)
   /* option implications */
   gt_option_imply(verbose_option, seqit_option);
 
+  gt_option_parser_set_comment_func(op, gt_gtdata_show_help, NULL);
   gt_option_parser_set_min_args(op, 1U);
   return op;
 }
@@ -159,8 +161,7 @@ static int gt_sequniq_runner(int argc, const char **argv, int parsed_args,
     if (!had_err) {
       if (arguments->verbose) {
         gt_progressbar_start(gt_seq_iterator_getcurrentcounter(seqit,
-                                                            (GtUint64)
-                                                            totalsize),
+                                                          (GtUint64) totalsize),
                              (GtUint64) totalsize);
       }
       while (!had_err) {
