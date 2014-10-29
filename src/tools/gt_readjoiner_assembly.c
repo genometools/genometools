@@ -487,7 +487,7 @@ static int gt_readjoiner_assembly_runner(GT_UNUSED int argc,
   GtStrgraph *strgraph = NULL;
   GtBitsequence *contained = NULL;
   const char *readset = gt_str_get(arguments->readset);
-  bool eqlen;
+  bool eqlen = true;
   GtUword nreads, tlen, rlen;
   int had_err = 0;
 
@@ -515,29 +515,35 @@ static int gt_readjoiner_assembly_runner(GT_UNUSED int argc,
     gt_encseq_loader_drop_description_support(el);
     gt_encseq_loader_disable_autosupport(el);
     reads = gt_encseq_loader_load(el, readset, err);
-    gt_assert(reads != NULL);
-    eqlen = gt_encseq_accesstype_get(reads) == GT_ACCESS_TYPE_EQUALLENGTH;
-    nreads = gt_encseq_num_of_sequences(reads);
-    gt_logger_log(default_logger, "number of reads in filtered readset = "
-                  GT_WU, nreads);
-    tlen = gt_encseq_total_length(reads) - nreads + 1;
-    gt_logger_log(verbose_logger, "total length of filtered readset = " GT_WU,
-        tlen);
-
-    if (eqlen)
+    if (reads == NULL)
     {
-      rlen = gt_encseq_seqlength(reads, 0);
-      gt_logger_log(verbose_logger, "read length = " GT_WU, rlen);
-      gt_encseq_delete(reads);
-      reads = NULL;
+      had_err = -1;
     }
-    else
+    if (had_err == 0)
     {
-      had_err = gt_readjoiner_assembly_build_contained_reads_list(
-        arguments, &contained, err);
-      rlen = 0;
-      gt_logger_log(verbose_logger, "read length = variable");
-      gt_assert(reads != NULL);
+      eqlen = gt_encseq_accesstype_get(reads) == GT_ACCESS_TYPE_EQUALLENGTH;
+      nreads = gt_encseq_num_of_sequences(reads);
+      gt_logger_log(default_logger, "number of reads in filtered readset = "
+                    GT_WU, nreads);
+      tlen = gt_encseq_total_length(reads) - nreads + 1;
+      gt_logger_log(verbose_logger, "total length of filtered readset = " GT_WU,
+          tlen);
+
+      if (eqlen)
+      {
+        rlen = gt_encseq_seqlength(reads, 0);
+        gt_logger_log(verbose_logger, "read length = " GT_WU, rlen);
+        gt_encseq_delete(reads);
+        reads = NULL;
+      }
+      else
+      {
+        had_err = gt_readjoiner_assembly_build_contained_reads_list(
+          arguments, &contained, err);
+        rlen = 0;
+        gt_logger_log(verbose_logger, "read length = variable");
+        gt_assert(reads != NULL);
+      }
     }
 
     if (had_err == 0)
