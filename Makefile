@@ -266,6 +266,18 @@ ifeq ($(memcheck),yes)
   STEST_FLAGS += -memcheck
 endif
 
+ifeq ($(64bit),yes)
+  ifeq ($(32bit),yes)
+    $(error Variables set contradictory: 64bit/32bit)
+  endif
+endif
+
+ifeq ($(64bit),no)
+  ifeq ($(32bit),no)
+    $(error Variables set contradictory: 64bit/32bit)
+  endif
+endif
+
 # system specific stuff (concerning 64bit compilation)
 ifeq ($(SYSTEM),Darwin)
   ifeq ($(64bit),no)
