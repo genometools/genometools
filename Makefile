@@ -268,10 +268,14 @@ endif
 
 # system specific stuff (concerning 64bit compilation)
 ifeq ($(SYSTEM),Darwin)
-  ifeq ($(64bit),yes)
-    m64=yes
-  else
+  ifeq ($(64bit),no)
     m32=yes
+  else
+    ifeq ($(32bit),yes)
+      m32=yes
+    else
+      m64=yes
+    endif
   endif
 endif
 
@@ -287,17 +291,24 @@ ifneq ($(SYSTEM),Windows)
   EXP_CPPFLAGS += -DLUA_USE_MKSTEMP
 endif
 
-ifeq ($(64bit),yes)
-  ifneq ($(MACHINE),x86_64)
-    m64=yes
-  endif
-  BIT=64bit
-  SPLINTD:=-D_LP64
-else
+ifeq ($(64bit),no)
   ifeq ($(MACHINE),x86_64)
     m32=yes
   endif
   BIT=32bit
+else
+  ifeq ($(32bit),yes)
+    ifeq ($(MACHINE),x86_64)
+      m32=yes
+    endif
+    BIT=32bit
+  else
+    ifneq ($(MACHINE),x86_64)
+      m64=yes
+    endif
+    BIT=64bit
+    SPLINTD:=-D_LP64
+  endif
 endif
 
 ifeq ($(m32),yes)

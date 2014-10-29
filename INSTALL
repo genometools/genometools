@@ -14,7 +14,7 @@ On *BSD GNU make is often called ``gmake''.
 
 Possible arguments:
 
-- 64bit=yes        to compile a 64-bit version (not available on all platforms)
+- 64bit=no         to compile a 32-bit version
 - opt=no           to disable optimization
 - assert=no        to disable assertions
 - amalgamation=yes to compile as an amalgamation
@@ -90,9 +90,9 @@ Ruby).
 
 Please note that all make options given during the compilation must be given in
 the `make test' invocation again. For example, if you compiled GenomeTools with
-the '64bit=yes cairo=no' options, the correct installation command would be:
+the '64bit=no cairo=no' options, the correct installation command would be:
 
-# make 64bit=yes cairo=no test
+# make 64bit=no cairo=no test
 
 
 Installing GenomeTools
@@ -110,10 +110,10 @@ the prefix argument. For example, to install under /usr, invoke
 
 Please note that all make options given during the compilation must be
 given in the `make install' invocation again. For example, if you compiled
-GenomeTools with the '64bit=yes cairo=no' options, the correct installation
+GenomeTools with the '64bit=no cairo=no' options, the correct installation
 command would be:
 
-# make prefix=/usr 64bit=yes cairo=no install
+# make prefix=/usr 64bit=no cairo=no install
 
 Omitting these options is likely to lead to problems during installation.
 
