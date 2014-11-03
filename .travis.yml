@@ -20,6 +20,10 @@ matrix:
     - compiler: gcc
       env: default=yes
     - compiler: gcc
+      env: GT_BITS=32 cairo=no
+    - compiler: clang
+      env: GT_BITS=32 cairo=no
+    - compiler: gcc
       env: assert=no
     - compiler: gcc
       env: amalgamation=yes
@@ -27,7 +31,7 @@ matrix:
       env: opt=no cairo=no
 
 before_install: sudo apt-get update
-install: sudo apt-get install ncbi-blast+
+install: sudo apt-get install ncbi-blast+ gcc-multilib
 before_script:
   - blastn -version
   - blastp -version
