@@ -54,8 +54,7 @@ void          gt_sampling_write(GtSampling *sampling, FILE *fp);
 GtSampling*   gt_sampling_read(FILE *fp);
 
 /* sets <*sampled_element> to the largest sampled element <= <element_num>, and
-   sets <*position> to the offset where that sample starts. Returns -1 in case
-   of error. */
+   sets <*position> to the offset where that sample starts. */
 void          gt_sampling_get_page(GtSampling *sampling,
                                    GtUword element_num,
                                    GtUword *sampled_element,
@@ -90,7 +89,9 @@ void          gt_sampling_add_sample(GtSampling *sampling,
                                      size_t position,
                                      GtUword element_num);
 
-/* TODO: document me */
+/* Check if the next to be written element has to be sampled.
+   While writing elements to a file, this function can be used to check if a
+   new sample needs to be added for the next element to be written. */
 bool          gt_sampling_is_next_element_sample(
                                           GtSampling *sampling,
                                           GtUword pages_written,

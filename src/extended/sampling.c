@@ -156,7 +156,7 @@ static inline void gt_sampling_io_header(GtSampling *sampling,
   gt_assert(sampling->sampling_rate != 0);
 }
 
-/* TODO: add checksums for data */
+/* TODO DW add checksums for data */
 static void gt_sampling_io_header_samplingtab(GtSampling *sampling,
                                            FILE *fp,
                                            SamplingIOFunc io_func)

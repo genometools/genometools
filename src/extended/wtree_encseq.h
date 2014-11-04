@@ -24,8 +24,7 @@
    This implementation represents the sequence part of an encoded sequence */
 typedef struct GtWtreeEncseq GtWtreeEncseq;
 
-/* Return a new <GtWtree> object, representing an <encseq>.
-   TODO: add documentation */
+/* Return a new <GtWtree> object, representing an <encseq>. */
 GtWtree* gt_wtree_encseq_new(GtEncseq *encseq);
 
 /* Maps <symbol> to a decoded character symbol as defined by the original

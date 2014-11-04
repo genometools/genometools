@@ -78,94 +78,94 @@
 #define DEFAULTMQUAL 0
 #define DEFAULTQUAL '-'
 
-/* TODO: use ONE struct for both, this is duplicating code and stupid */
+/* TODO DW use ONE struct for both, this is duplicating code and stupid */
 struct GtRcrEncoder {
-  FILE               *output,
-                     *unmapped_reads_ptr;
-  GtBitOutStream     *bitstream;
-  GtCstrIterator     *cstr_iterator;
-  GtDiscDistri       *readlength_distr,
-                     *readpos_distr,
-                     *varpos_distr,
-                     *qual_distr,
-                     *qual_mapping_distr;
-  GtEncdescEncoder   *encdesc_enc;
-  GtGolomb           *readpos_golomb,
-                     *varpos_golomb;
-  GtHuffman          *readlenghts_huff,
-                     *qual_huff,
-                     *qual_mapping_huff,
-                     *cigar_ops_huff,
-                     *bases_huff;
-  GtSamfileIterator  *sam_iter;
-  bam1_t             *sam_align;
-  const GtEncseq     *encseq;
-  const char         *samfilename;
-  GtUint64 *ins_bases;
-  GtQueue            *not_exact_matches;
-  GtUint64  all_bits,
-                      dellen_bits,
-                      encodedbases,
-                      exact_match_flag_bits,
-                      ins_bases_bits,
-                      mapqual_bits,
-                      pos_bits,
-                      present_cigar_ops[ENDOFRECORD + 1],
-                      qual_bits,
-                      readlen_bits,
-                      sclip_bits,
-                      skiplen_bits,
-                      strand_bits,
-                      subs_bits,
-                      varpos_bits,
-                      vartype_bits;
-  GtUword       cur_read,
-                      cur_seq_startpos,
-                      max_read_length,
-                      numofreads,
-                      numofunmappedreads,
-                      prev_readpos,
-                      readlength;
-  bool                cons_readlength,
-                      is_num_fields_cons,
-                      is_verbose,
-                      store_all_qual,
-                      store_mapping_qual,
-                      store_unmmaped_reads,
-                      store_var_qual;
+  FILE              *output,
+                    *unmapped_reads_ptr;
+  GtBitOutStream    *bitstream;
+  GtCstrIterator    *cstr_iterator;
+  GtDiscDistri      *readlength_distr,
+                    *readpos_distr,
+                    *varpos_distr,
+                    *qual_distr,
+                    *qual_mapping_distr;
+  GtEncdescEncoder  *encdesc_enc;
+  GtGolomb          *readpos_golomb,
+                    *varpos_golomb;
+  GtHuffman         *readlenghts_huff,
+                    *qual_huff,
+                    *qual_mapping_huff,
+                    *cigar_ops_huff,
+                    *bases_huff;
+  GtSamfileIterator *sam_iter;
+  bam1_t            *sam_align;
+  const GtEncseq    *encseq;
+  const char        *samfilename;
+  GtUint64          *ins_bases;
+  GtQueue           *not_exact_matches;
+  GtUint64           all_bits,
+                     dellen_bits,
+                     encodedbases,
+                     exact_match_flag_bits,
+                     ins_bases_bits,
+                     mapqual_bits,
+                     pos_bits,
+                     present_cigar_ops[ENDOFRECORD + 1],
+                     qual_bits,
+                     readlen_bits,
+                     sclip_bits,
+                     skiplen_bits,
+                     strand_bits,
+                     subs_bits,
+                     varpos_bits,
+                     vartype_bits;
+  GtUword            cur_read,
+                     cur_seq_startpos,
+                     max_read_length,
+                     numofreads,
+                     numofunmappedreads,
+                     prev_readpos,
+                     readlength;
+  bool               cons_readlength,
+                     is_num_fields_cons,
+                     is_verbose,
+                     store_all_qual,
+                     store_mapping_qual,
+                     store_unmmaped_reads,
+                     store_var_qual;
 };
 
 struct GtRcrDecoder {
-  FILE               *fp;
-  GtEncdesc          *encdesc;
-  GtGolomb           *readpos_golomb,
-                     *varpos_golomb;
-  GtHuffman          *readlenghts_huff,
-                     *qual_huff,
-                     *qual_mapping_huff,
-                     *cigar_ops_huff,
-                     *bases_huff;
-  GtStr              *inputname;
-  const GtEncseq     *encseq;
-  const char         *basename;
-  GtUint64 *ins_bases;
-  GtUint64  present_cigar_ops[ENDOFRECORD + 1];
-  GtUword       numofreads,
-                      cur_bit,
-                      cur_bitseq,
-                      readlength,
-                      startofencoding;
-  bool                cons_readlength,
-                      store_all_qual,
-                      store_var_qual,
-                      store_mapping_qual,
-                      is_num_fields_cons;
+  FILE           *fp;
+  GtEncdesc      *encdesc;
+  GtGolomb       *readpos_golomb,
+                 *varpos_golomb;
+  GtHuffman      *readlenghts_huff,
+                 *qual_huff,
+                 *qual_mapping_huff,
+                 *cigar_ops_huff,
+                 *bases_huff;
+  GtStr          *inputname;
+  const GtEncseq *encseq;
+  const char     *basename;
+  GtUint64       *ins_bases;
+  GtUint64        present_cigar_ops[ENDOFRECORD + 1];
+  GtUword         numofreads,
+                  cur_bit,
+                  cur_bitseq,
+                  readlength,
+                  startofencoding;
+  bool            cons_readlength,
+                  store_all_qual,
+                  store_var_qual,
+                  store_mapping_qual,
+                  is_num_fields_cons;
 };
 
 typedef struct MedianData {
   GtUint64 n,
-                     x;
-  GtUword      median;
+           x;
+  GtUword  median;
 } MedianData;
 
 static inline char rcr_bambase2char(uint8_t base)
@@ -616,8 +616,8 @@ static int rcr_write_read_encoding(const bam1_t *alignment,
                 (uint8_t) bam1_seqi(seq_string, read_i + j), encseq_alpha);
 
             /* use alphabet_size - 1 as wildcard symbol */
-            /* XXX change this, it doesn't matter if wildcard is in a continuous
-               range with the rest */
+            /* TODO DW change this, it doesn't matter if wildcard is in a
+               continuous range with the rest */
             if (base == (GtUchar) WILDCARD)
               base = (GtUchar) (alpha_size - 1);
 
@@ -637,7 +637,7 @@ static int rcr_write_read_encoding(const bam1_t *alignment,
           read_i += cigar_len;
           break;
         default:
-          /* XXX gt_error nutzen */
+          /* TODO DW gt_error nutzen */
           gt_log_log("encountered funny cigar_op: "GT_WU"", cigar_op);
           return -1;
           ;
@@ -646,7 +646,7 @@ static int rcr_write_read_encoding(const bam1_t *alignment,
     /* end symbol of a record */
     rcr_encode_write_var_type(rcr_enc, (GtUword) ENDOFRECORD);
     if (readlength != read_i) {
-      /* XXX gt_error nutzen */
+      /* TODO DW gt_error nutzen */
       gt_log_log("readlength: "GT_WU", read_i: "GT_WU"", readlength, read_i);
       return -1;
     }
@@ -1608,7 +1608,7 @@ static int rcr_golomb_read(GtGolombBitwiseDecoder *gbwd,
   return had_err;
 }
 
-/* XXX struct with all strings, and struct with info */
+/* TODO DW struct with all strings, and struct with info */
 static void rcr_decode_exact_range(GtRcrDecoder *rcr_dec,
                                    RcrDecodeInfo *info,
                                    GtUword start,
@@ -1749,7 +1749,7 @@ static int rcr_decode_delete_var(RcrDecodeInfo *info,
                                  char type,
                                  GtError *err)
 {
-  /* XXX remove loop and just set in as xD */
+  /* TODO DW remove loop and just set in as xD */
   int had_err = 0;
   GtUword del_length , i;
   had_err = rcr_elias_read(info->del_len_ebwd, bitstream, &del_length, err);
@@ -1975,7 +1975,7 @@ static int rcr_write_decoding_to_file(GtRcrDecoder *rcr_dec, GtError *err)
     /* check if read was unmapped */
     if (!had_err && RCR_NEXT_BIT(bit)) {
       if (bit) {
-        /* XXX this is ugly */
+        /* TODO DW this is ugly */
         continue;
       }
     }
