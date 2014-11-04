@@ -38,7 +38,8 @@ typedef struct {
   GtWord                 xdrop;
   unsigned int           kmersize,
                          windowsize;
-  bool                   opt,
+  bool                   diags,
+                         opt,
                          verbose;
 } GtCondenserCompressArguments;
 
@@ -156,6 +157,12 @@ gt_condenser_compress_option_parser_new(void *tool_arguments)
                               &arguments->opt, true);
   gt_option_parser_add_option(op, option);
 
+  /* -diagonals */
+  option = gt_option_new_bool("diagonals", "use diagonal kmer processing",
+                              &arguments->diags, true);
+  gt_option_is_development_option(option);
+  gt_option_parser_add_option(op, option);
+
   /* -verbose */
   option = gt_option_new_bool("verbose", "enable verbose output",
                               &arguments->verbose, false);
@@ -210,30 +217,37 @@ static int gt_condenser_compress_runner(GT_UNUSED int argc, const char **argv,
   }
 
   if (!had_err) {
+    if (arguments->minalignlength == GT_UNDEF_UWORD)
+      arguments->minalignlength = arguments->initsize != GT_UNDEF_UWORD ?
+                                  arguments->initsize / (GtUword) 3UL :
+                                  GT_UNDEF_UWORD;
+    if (arguments->windowsize == GT_UNDEF_UINT)
+      arguments->windowsize = arguments->minalignlength != GT_UNDEF_UWORD ?
+                              (unsigned int) (arguments->minalignlength / 5U) :
+                              GT_UNDEF_UINT;
+    if (arguments->windowsize < 4U)
+      arguments->windowsize = 4U;
+    if (arguments->kmersize == GT_UNDEF_UINT)
+      arguments->kmersize = arguments->windowsize != GT_UNDEF_UINT ?
+                            arguments->windowsize / 5U :
+                            GT_UNDEF_UINT;
+    if (arguments->kmersize < 2U)
+      arguments->kmersize = 2U;
     if (arguments->kmersize == GT_UNDEF_UINT) {
+      /* TODO DW change these, after benchmarking with different k values. */
       unsigned int size =
         gt_alphabet_size(gt_encseq_alphabet(arguments->input_es));
-      if (size <= 5U)
-        arguments->kmersize = 10U; /* 5^10 = 9.765.625 */
-      else if (size <= 7U)
-        arguments->kmersize = 8U; /* 7^8  = 5.764.801 */
-      else if (size <= 9U)
-        arguments->kmersize = 7U; /* 8^7  = 4.782.969 */
-      else if (size <= 14U)
-        arguments->kmersize = 6U; /* 14^6 = 7.529.536 */
-      else if (size <= 25U)
-        arguments->kmersize = 5U; /* 25^5 = 9.765.625 */
-      else if (size <= 55U)
-        arguments->kmersize = 4U; /* 6^14 = 7.529.536 */
-      else
+      if (size <= 5U) /* DNA */
+        arguments->kmersize = 6U; /* 5^10 = 9.765.625 */
+      else /* Protein */
         arguments->kmersize = 3U;
     }
 
     if (arguments->windowsize == GT_UNDEF_UINT) {
-      arguments->windowsize = 3U * arguments->kmersize;
+      arguments->windowsize = 5U * arguments->kmersize;
     }
     if (arguments->minalignlength == GT_UNDEF_UWORD) {
-      arguments->minalignlength = (GtUword) (5UL * arguments->windowsize);
+      arguments->minalignlength = (GtUword) (3UL * arguments->windowsize);
     }
     if (arguments->initsize == GT_UNDEF_UWORD) {
       arguments->initsize = (GtUword) (3UL * arguments->minalignlength);
@@ -273,9 +287,14 @@ static int gt_condenser_compress_runner(GT_UNUSED int argc, const char **argv,
                                                 logger);
       if (!arguments->opt)
         gt_n_r_encseq_compressor_disable_opt(compressor);
+      if (arguments->opt && arguments->diags)
+        gt_n_r_encseq_compressor_enable_diagonal_filter(compressor);
+
       had_err = gt_n_r_encseq_compressor_compress(compressor,
                                                   arguments->indexname,
-                                                  arguments->input_es, err);
+                                                  arguments->input_es,
+                                                  logger, err);
+
       gt_n_r_encseq_compressor_delete(compressor);
     }
   }

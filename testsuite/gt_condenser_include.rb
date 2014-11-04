@@ -1,78 +1,154 @@
-files = ["#{$testdata}unique_encseq_test.fas",
-         "#{$testdata}gt_bioseq_succ_3.fas",
-         "#{$testdata}tRNA.dos.fas"]
+files = {"#{$testdata}condenser/unique_encseq_test.fas" => [14,7,41],
+         "#{$testdata}tRNA.dos.fas" => [71,100,300],
+         "#{$testdata}condenser/varlen_50.fas" => [100,3000,10000]}
+if not $arguments['memcheck']
+  files["#{$testdata}condenser/varlen_0.01_50.fas"] = [100,3000,10000]
+end
 
-posranges = [[10,100],
-             [50,300],
-             [140,600]]
+searchfiles = {"#{$testdata}condenser/varlen_0.01_50.fas" => [100,3000,10000],
+               "#{$testdata}condenser/varlen_50.fas" => [100,3000,10000]}
 
-opt_arr = ["-opt yes ", "-opt no "]
+largefiles = {}
+if $gttestdata
+  largefiles["#{$gttestdata}condenser/yeastproteomes.fas"] = [100,3000,10000]
+end
 
-Name "gt condenser compress + extract"
-Keywords "gt_condenser"
+desc_files = {"#{$testdata}condenser/varlen_200.fas" => [100,3000,10000],
+              "#{$testdata}condenser/varlen_longer_ids_200.fas" =>
+                [100,3000,10000],
+              "#{$testdata}condenser/varlen_increasing_ids_200.fas" =>
+                [100,3000,10000]}
+
+opt_arr = ["-opt no", "-diagonals no", "-diagonals yes"]
+
+Name "gt condenser description handling"
+Keywords "gt_condenser description"
 Test do
-  opt_arr.each do |opt|
-    files.each do |file|
+  desc_files.each_pair do |file, info|
+    basename = File.basename(file)
+    run_test "#{$bin}gt seqfilter -o #{basename}_10th.fas -step 10 #{file}"
+    run_test "#{$bin}gt encseq encode -indexname #{basename}_10th " +
+      "-md5 no " +
+      "#{basename}_10th.fas"
+    run_test "#{$bin}gt condenser compress " +
+      "-indexname #{basename}_nr " +
+      "-alignlength #{info[0]} #{basename}_10th ",
+      :maxtime => 240
+    run_test "#{$bin}gt encseq decode -output fasta " +
+      "#{basename}_10th | " +
+      "grep -v '>' > #{basename}_10th_ext_nohead.fas"
+    run_test "#{$bin}gt condenser extract " +
+      "#{basename}_nr | tee #{basename}_10th_nr_ext.fas | " +
+      "grep -v '>' > #{basename}_10th_nr_ext_nohead.fas"
+    run "diff #{basename}_10th_ext_nohead.fas " +
+      "#{basename}_10th_nr_ext_nohead.fas"
+    run "grep '>' #{basename}_10th_nr_ext.fas > #{basename}_10th_heads"
+    run "diff #{basename}_10th_heads #{file}_10th_heads"
+  end
+end
+
+comp_ext = Proc.new do |file, info, opt|
+  basename = File.basename(file)
+  run_test "#{$bin}gt encseq encode -clipdesc -indexname #{basename} " +
+    "-md5 no " +
+    "#{file}"
+  run_test "#{$bin}gt condenser compress #{opt} " +
+    "-indexname #{basename}_nr " +
+    "-alignlength #{info[0]} #{basename}",
+    :maxtime => 600
+  run_test "#{$bin}gt encseq decode -output fasta " +
+    "#{basename} > #{basename}.fas"
+  run_test "#{$bin}gt condenser extract " +
+    "#{basename}_nr > #{basename}_nr.fas"
+  run "diff #{basename}.fas #{basename}_nr.fas"
+end
+
+opt_arr.each do |opt|
+  Name "gt condenser compress + extract #{opt}"
+  Keywords "gt_condenser compress extract"
+  Test do
+    files.each_pair &comp_ext
+    largefiles.each_pair &comp_ext
+  end
+end
+
+opt_arr.each do |opt|
+  Name "gt condenser compress + search #{opt}"
+  Keywords "gt_condenser compress search"
+  Test do
+    searchfiles.each_pair do |file, info|
       basename = File.basename(file)
-      run_test "#{$bin}gt encseq encode -indexname #{basename} " +
+      run_test "#{$bin}gt encseq encode -clipdesc -indexname #{basename} " +
+        "-md5 no " +
         "#{file}"
-      run_test "#{$bin}gt condenser compress " + opt +
+      run_test "#{$bin}gt condenser compress " +
+        "#{opt} " +
         "-indexname #{basename}_nr " +
-        "-kmersize 4 -initsize 10 -windowsize 8 " +
-        "-alignlength 10 #{basename}"
-      run_test "#{$bin}gt encseq decode -output fasta " +
-        "#{basename} > #{basename}.fas"
-      run_test "#{$bin}gt condenser extract " +
-        "-original #{basename} " +
-        "#{basename}_nr > #{basename}_nr.fas"
-      run "diff #{basename}.fas #{basename}_nr.fas"
+        "-alignlength #{info[0]} #{basename}",
+        :maxtime => 600
+      run_test "#{$bin}gt -debug condenser search " +
+        "-blastn " +
+        "-blastthreads 1 " +
+        "-query #{File.join(File.dirname(file),
+        File.basename(file,'.fas'))}_queries_300_2x.fas " +
+        "-db #{basename}_nr -verbose",
+        :maxtime => 600
+      grep(last_stderr, /debug: [1-9]+[0-9]* hits found/)
+      run_ruby"#$scriptsdir/condenser_statistics.rb " +
+        "#{File.join(File.dirname(file), File.basename(file,'.fas'))}" +
+        "_queries_300_2x_blast?_result #{last_stdout}"
+      grep(last_stdout, /^## FP: 0$/)
+      grep(last_stdout, /^## TP: [1-9]+[0-9]*$/)
     end
   end
 end
 
-Name "gt condenser ranges"
-Keywords "gt_condenser"
-Test do
-  opt_arr.each do |opt|
-    files.each_with_index do |file, i|
-      basename = File.basename(file)
-      run_test "#{$bin}gt encseq encode -indexname #{basename} " +
-        "#{file}"
-      run_test "#{$bin}gt condenser compress -indexname #{basename}_nr " +
-        "-kmersize 4 -initsize 10 -windowsize 8 " + opt +
-        "-alignlength 10 #{basename}"
-      run_test "#{$bin}gt encseq decode -output concat " +
-        "-range #{posranges[i][0]} #{posranges[i][1]} " +
-        "#{basename} > " +
-        "#{basename}_#{posranges[i][0]}_#{posranges[i][1]}.fas"
-      run_test "#{$bin}gt condenser extract " +
-        "-original #{basename} " +
-        "-range #{posranges[i][0]} #{posranges[i][1]} " +
-        "#{basename}_nr > " +
-        "#{basename}_nr_#{posranges[i][0]}_#{posranges[i][1]}.fas"
-      run "diff #{basename}_#{posranges[i][0]}_#{posranges[i][1]}.fas " +
-        "#{basename}_nr_#{posranges[i][0]}_#{posranges[i][1]}.fas"
-    end
+range_ext = Proc.new do |file, info, opt|
+  basename = File.basename(file)
+  run_test "#{$bin}gt encseq encode -clipdesc -indexname #{basename} " +
+    "-md5 no " +
+    "#{file}"
+  run_test "#{$bin}gt condenser compress -indexname #{basename}_nr " +
+    "#{opt} -alignlength #{info[0]} #{basename}",
+    :maxtime => 600
+  run_test "#{$bin}gt encseq decode -output concat " +
+    "-range #{info[1]} #{info[2]} " +
+    "#{basename} > " +
+    "#{basename}_#{info[1]}_#{info[2]}.fas"
+  run_test "#{$bin}gt condenser extract " +
+    "-range #{info[1]} #{info[2]} " +
+    "#{basename}_nr > " +
+    "#{basename}_nr_#{info[1]}_#{info[2]}.fas"
+  run "diff #{basename}_#{info[1]}_#{info[2]}.fas " +
+    "#{basename}_nr_#{info[1]}_#{info[2]}.fas"
+end
+
+opt_arr.each do |opt|
+  Name "gt condenser ranges #{opt}"
+  Keywords "gt_condenser ranges extract"
+  Test do
+    files.each_pair &range_ext
+    largefiles.each_pair &range_ext
   end
 end
 
-Name "gt condenser range close to sep"
-Keywords "gt_condenser"
-Test do
-  input = "#{$testdata}mini_peptide_repeats.fas"
-  basename = File.basename(input)
-  opt_arr.each do |opt|
-    run_test "#{$bin}gt encseq encode -indexname #{basename} " +
+opt_arr.each do |opt|
+  Name "gt condenser range close to sep #{opt}"
+  Keywords "gt_condenser ranges extract"
+  Test do
+    input = "#{$testdata}mini_peptide_repeats.fas"
+    basename = File.basename(input)
+    run_test "#{$bin}gt encseq encode -clipdesc -indexname #{basename} " +
+      "-md5 no " +
       "#{input}"
     run_test "#{$bin}gt condenser compress -indexname #{basename}_nr " +
-      "-kmersize 3 -initsize 12 -windowsize 12 " + opt +
+      "-kmersize 3 -initsize 12 -windowsize 12 #{opt} " +
       "-alignlength 12 #{basename}"
     run_test "#{$bin}gt encseq decode -output concat " +
       "-range 16 35 " +
       "#{basename} > " +
       "#{basename}_16_35.fas"
     run_test "#{$bin}gt condenser extract " +
-      "-original #{basename} " +
       "-range 16 35 " +
       "#{basename}_nr > " +
       "#{basename}_nr_16_35.fas"
@@ -84,11 +160,13 @@ end
 Name "gt condenser option fail"
 Keywords "gt_condenser fail"
 Test do
-  file = files[0]
+  file = "#{$testdata}condenser/small_10_10b.fas"
   basename = File.basename(file)
-  run_test "#{$bin}gt encseq encode -indexname #{basename} " +
+
+  run_test "#{$bin}gt encseq encode -clipdesc -indexname #{basename} " +
+    "-md5 no " +
     "#{file}"
-  run_test("#{$bin}gt -debug condenser compress " +
+  run_test("#{$bin}gt condenser compress " +
            "-indexname foo " +
            "-kmersize 8 " +
            "-windowsize 8 " +
@@ -96,7 +174,8 @@ Test do
            :retval => 1
           )
   grep(last_stderr, /-windowsize.*larger.*-kmersize/)
-  run_test("#{$bin}gt -debug condenser compress " +
+
+  run_test("#{$bin}gt condenser compress " +
            "-indexname foo " +
            "-kmersize 8 " +
            "-windowsize 16 " +
@@ -105,7 +184,8 @@ Test do
            :retval => 1
           )
   grep(last_stderr, /-alignlength.*at least.*-windowsize/)
-  run_test("#{$bin}gt -debug condenser compress " +
+
+  run_test("#{$bin}gt condenser compress " +
            "-indexname foo " +
            "-kmersize 8 " +
            "-windowsize 16 " +
@@ -117,15 +197,16 @@ Test do
   grep(last_stderr, /-initsize.*at least.*-alignlength/)
 end
 
-Name "gt condenser init len fail"
-Keywords "gt_condenser fail"
-Test do
-  file = files[0]
-  basename = File.basename(file)
-  opt_arr.each do |opt|
-    run_test "#{$bin}gt encseq encode -indexname #{basename} " +
+opt_arr.each do |opt|
+  Name "gt condenser init len fail #{opt}"
+  Keywords "gt_condenser fail"
+  Test do
+    file = "#{$testdata}condenser/small_10_10b.fas"
+    basename = File.basename(file)
+    run_test "#{$bin}gt encseq encode -clipdesc -indexname #{basename} " +
+      "-md5 no " +
       "#{file}"
-    run_test("#{$bin}gt condenser compress " + opt +
+    run_test("#{$bin}gt condenser compress #{opt} " +
              "-indexname foo " +
              "-kmersize 5 " +
              "-windowsize 10 " +

@@ -25,6 +25,7 @@
 #include "core/range_api.h"
 #include "core/unused_api.h"
 #include "match/xdrop.h"
+#include "core/file_api.h"
 
 #define GT_NRENCSEQ_MIN_KMER_POS 5
 #define GT_NRENCSEQ_FILE_SUFFIX ".nre"
@@ -38,15 +39,14 @@ typedef struct GtNREncseq GtNREncseq;
    <basename_nre>.
    Returns <NULL> on error, or fails if read/file access failes. */
 GtNREncseq* gt_n_r_encseq_new_from_file(const char *basename_nre,
-                                        const GtEncseq *orig_es,
-                                        GtError *err);
+                                        GtLogger *logger, GtError *err);
 
 /* Write <nre> to File <fp>, fails hard on io-error, returns error value and
    sets <err> accordingly on data errors. */
 int         gt_n_r_encseq_write(GtNREncseq *nre, FILE* fp, GtError *err);
 
 /* Prints statistical info of <n_r_encseq> to stdout.
-   TODO: refine this, and maybe split it up to get the different values
+   TODO DW refine this, and maybe split it up to get the different values
    seperately without printing. */
 void        gt_n_r_encseq_print_info(const GtNREncseq *n_r_encseq);
 
@@ -54,8 +54,9 @@ void        gt_n_r_encseq_print_info(const GtNREncseq *n_r_encseq);
    seperators (like <GtEncseq>). */
 GtUword     gt_n_r_encseq_get_orig_length(GtNREncseq *n_r_encseq);
 
-/* Return the length of unique db, that is the non-redundand sequences stored as
-   is with seperators, representing the referece for all redundand sequences. */
+/* Return the length of unique db, that is the length of non-redundand sequences
+   stored concatenated with seperators, representing the reference for all
+   redundand sequences. */
 GtUword     gt_n_r_encseq_get_unique_length(GtNREncseq *n_r_encseq);
 
 /* Free space for <n_r_encseq> */
@@ -82,22 +83,33 @@ void                  gt_n_r_encseq_compressor_delete(
                                         GtNREncseqCompressor *n_r_e_compressor);
 
 /* Analyze and compress <encseq>, stores resulting <GtNREncseq> to disk, using
-   <basename> and <GT_NRENCSEQ_FILE_SUFFIX> as filename. */
+   <basename> and <GT_NRENCSEQ_FILE_SUFFIX> as filename.
+   Provide <logger> for verbose output. */
+/* Due to change soon!
+   TODO DW don't create encseq directly, call this iteratively, add finalize FKT
+   */
 int                   gt_n_r_encseq_compressor_compress(
                                          GtNREncseqCompressor *n_r_e_compressor,
                                          GtStr *basename,
                                          GtEncseq *encseq,
+                                         GtLogger *logger,
                                          GtError *err);
 
 /* This option turns of optimized seed extension. Every seed is used for xdrop
    without filtering.
-   Consider this to be a development option for benchmarking purpose. */
+   Consider this to be a development option for benchmarking purpose. Option
+   incompatible with diagonals option! */
 void                  gt_n_r_encseq_compressor_disable_opt(
+                                        GtNREncseqCompressor *n_r_e_compressor);
+
+/* Enable fast filtering for kmer hit pairs using diagonals and last hits on
+   said diagonals. Option incompatible with disable optimization option. */
+void                  gt_n_r_encseq_compressor_enable_diagonal_filter(
                                         GtNREncseqCompressor *n_r_e_compressor);
 
 /* The <GtNREncseqDecompressor> class is used to decompress parts of or whole
    <GtEncseq> objects.
-   TODO: integrate this directly into <GtNREncseq>. */
+   TODO DW integrate this directly into <GtNREncseq>. */
 typedef struct GtNREncseqDecompressor GtNREncseqDecompressor;
 
 /* Return new <GtNREncseqCompressor> object ready to decompress <nre>. */
@@ -108,11 +120,11 @@ void                    gt_n_r_encseq_decompressor_delete(
                                     GtNREncseqDecompressor *n_r_e_decompressor);
 
 /* Write positions defined by <range> (positions correspond to uncompressed
-   coordinates) to <fp>, either raw sequence (seperated by '|') either as raw
-   sequence or, if <fasta> is TRUE, as valid fasta entries.
-   TODO: split to two functions. */
+   coordinates) to <fp>, either raw sequence (seperated by '|') or, if <fasta>
+   is TRUE, as valid fasta entries.
+   TODO DW split to two functions. */
 int                     gt_n_r_encseq_decompressor_extract_originrange(
-                                                   FILE* fp,
+                                                   GtFile* fp,
                                                    GtNREncseqDecompressor *nred,
                                                    GtRange *range,
                                                    bool fasta,
@@ -120,9 +132,9 @@ int                     gt_n_r_encseq_decompressor_extract_originrange(
 
 /* Write complete uncompressed sequence to <fp>. Writes valid fasta if <fasta>
    is true, raw sequences seperated by '|' otherwise.
-   TODO: split to two functions. */
+   TODO DW split to two functions. */
 int                     gt_n_r_encseq_decompressor_extract_origin_complete(
-                                                   FILE* fp,
+                                                   GtFile* fp,
                                                    GtNREncseqDecompressor *nred,
                                                    bool fasta,
                                                    GtError *err);
@@ -134,11 +146,13 @@ void                    gt_n_r_encseq_decompressor_add_unique_idx_to_extract(
                                                    GtUword uentry_id);
 
 /* Starts extraction of all sequences added by
-   <gt_n_r_decompressor_add_unique_range_to_extract()> and returns number of
-   extracted symbols excluding header descriptions. */
-GtUword                 gt_n_r_encseq_decompressor_start_unique_extraction(
-                                                   FILE *fp,
+   <gt_n_r_decompressor_add_unique_range_to_extract()> and stores number of
+   extracted symbols excluding header descriptions in chars_printed.
+   returns != 0 on error. */
+int                     gt_n_r_encseq_decompressor_start_unique_extraction(
+                                                   GtFile *fp,
                                                    GtNREncseqDecompressor *nred,
+                                                   GtUword *chars_printed,
                                                    GtError *err);
 
 int gt_n_r_encseq_unit_test(GT_UNUSED GtError *err);

@@ -24,10 +24,12 @@
 #include "core/xansi_api.h"
 #include "extended/n_r_encseq.h"
 #include "tools/gt_condenser_extract.h"
+#include "core/output_file_api.h"
 
 typedef struct {
+  GtFile  *outfp;
+  GtOutputFileInfo *ofi;
   GtRange  range;
-  GtStr   *original;
   bool     verbose;
 } GtCondenserExtractArguments;
 
@@ -37,7 +39,7 @@ static void* gt_condenser_extract_arguments_new(void)
                                                      sizeof *arguments);
   arguments->range.start =
     arguments->range.end = GT_UNDEF_UWORD;
-  arguments->original = gt_str_new();
+  arguments->ofi = gt_output_file_info_new();
   return arguments;
 }
 
@@ -45,7 +47,8 @@ static void gt_condenser_extract_arguments_delete(void *tool_arguments)
 {
   GtCondenserExtractArguments *arguments = tool_arguments;
   if (arguments != NULL) {
-    gt_str_delete(arguments->original);
+    gt_file_delete(arguments->outfp);
+    gt_output_file_info_delete(arguments->ofi);
     gt_free(arguments);
   }
 }
@@ -59,25 +62,15 @@ gt_condenser_extract_option_parser_new(void *tool_arguments)
   gt_assert(arguments);
 
   /* init */
-  /*TODO soll das nur zu fasta sein oder kann man auch raw sequence
+  /*TODO DW soll das nur zu fasta sein oder kann man auch raw sequence
     extracten?*/
-  op = gt_option_parser_new("[option ...] [archive]",
-                            "Decompresses a condenser archive to fasta.");
-
-  /* -original */
-  option = gt_option_new_filename("original",
-                                  "uncompressed encseq, needs to be present "
-                                  "for development reasons.",
-                                  arguments->original);
-  gt_option_is_mandatory(option);
-  gt_option_parser_add_option(op, option);
+  op = gt_option_parser_new("[options] archive",
+                            "Decompresses condenser archive to fasta.");
 
   /* -range */
   option = gt_option_new_range("range",
-                               "Range of positions to extract"
-                               ". If no "
-                               "range is given, whole sequence "
-                               "collection is extracted.",
+                               "Range of positions to extract. If no range is "
+                               "given, whole sequence collection is extracted.",
                                &arguments->range, NULL);
 
   gt_option_parser_add_option(op, option);
@@ -86,6 +79,8 @@ gt_condenser_extract_option_parser_new(void *tool_arguments)
   option = gt_option_new_bool("verbose", "Print out verbose output to stderr.",
                               &arguments->verbose, false);
   gt_option_parser_add_option(op, option);
+
+  gt_output_file_info_register_options(arguments->ofi, op, &arguments->outfp);
 
   return op;
 }
@@ -101,7 +96,7 @@ static int gt_condenser_extract_arguments_check(int rest_argc,
 
   if (rest_argc != 1) {
     had_err = -1;
-    gt_error_set(err, "no file to extract from given use -help for usage");
+    gt_error_set(err, "archive parameter is mandatory, use -help for usage");
   }
   else if (arguments->range.start != GT_UNDEF_UWORD) {
     if (arguments->range.start > arguments->range.end) {
@@ -122,29 +117,21 @@ static int gt_condenser_extract_runner(GT_UNUSED int argc,
   int had_err = 0;
   GtCondenserExtractArguments *arguments = tool_arguments;
   GtNREncseq *nre = NULL;
-  GtEncseq *orig_encseq = NULL;
-  GtEncseqLoader *esl;
+  GtLogger *logger = NULL;
 
   gt_error_check(err);
   gt_assert(arguments);
 
-  /*load original encseq*/
-  esl = gt_encseq_loader_new();
-  orig_encseq = gt_encseq_loader_load(esl,
-                                      gt_str_get(arguments->original),
-                                      err);
-  if (!orig_encseq) {
-    had_err = -1;
-  }
-  gt_encseq_loader_delete(esl);
+  logger = gt_logger_new(arguments->verbose, GT_LOGGER_DEFLT_PREFIX, stderr);
+
   if (!had_err) {
-    nre = gt_n_r_encseq_new_from_file(argv[parsed_args], orig_encseq, err);
+    nre = gt_n_r_encseq_new_from_file(argv[parsed_args], logger, err);
     if (nre == NULL) {
       had_err = -1;
     }
   }
 
-  /*TODO get sequences by sequence ids: not yet implemented in n_r_encseq*/
+  /*TODO DW get sequences by sequence ids: not yet implemented in n_r_encseq*/
   /*if (!had_err && arguments->range.start == GT_UNDEF_UWORD &&
        uedb != NULL) {
     GtUword idx,
@@ -164,22 +151,24 @@ static int gt_condenser_extract_runner(GT_UNUSED int argc,
     GtNREncseqDecompressor *nred = gt_n_r_encseq_decompressor_new(nre);
     if (arguments->range.start == GT_UNDEF_ULONG &&
         arguments->range.end == GT_UNDEF_ULONG) {
-      had_err = gt_n_r_encseq_decompressor_extract_origin_complete(stdout,
-                                                                   nred,
-                                                                   true,
-                                                                   err);
+      had_err = gt_n_r_encseq_decompressor_extract_origin_complete(
+                                                               arguments->outfp,
+                                                               nred,
+                                                               true,
+                                                               err);
     } else {
-      had_err = gt_n_r_encseq_decompressor_extract_originrange(stdout,
-                                                             nred,
-                                                             &arguments->range,
-                                                             false,
-                                                             err);
+      had_err = gt_n_r_encseq_decompressor_extract_originrange(
+                                                              arguments->outfp,
+                                                              nred,
+                                                              &arguments->range,
+                                                              false,
+                                                              err);
     }
-    gt_xfwrite_one("\n",stdout); /*TODO should better be in n_r_encseq.c?*/
+    gt_xfwrite_one("\n",stdout); /*TODO DW should better be in n_r_encseq.c?*/
     gt_n_r_encseq_decompressor_delete(nred);
   }
   gt_n_r_encseq_delete(nre);
-  gt_encseq_delete(orig_encseq);
+  gt_logger_delete(logger);
   return had_err;
 }
 

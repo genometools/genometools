@@ -22,7 +22,7 @@
 #include "core/unused_api.h"
 #include "tools/gt_condenser.h"
 #include "tools/gt_condenser_compress.h"
-#include "tools/gt_condenser_compsearch.h"
+#include "tools/gt_condenser_search.h"
 #include "tools/gt_condenser_extract.h"
 #include "tools/gt_condenser_info.h"
 
@@ -33,8 +33,8 @@ static void* gt_condenser_arguments_new(void)
 {
   GtToolbox *condenser_toolbox = gt_toolbox_new();
   gt_toolbox_add_tool(condenser_toolbox, "compress", gt_condenser_compress());
-  gt_toolbox_add_tool(condenser_toolbox, "compsearch",
-                      gt_condenser_compsearch());
+  gt_toolbox_add_tool(condenser_toolbox, "search",
+                      gt_condenser_search());
   gt_toolbox_add_tool(condenser_toolbox, "extract", gt_condenser_extract());
   gt_toolbox_add_tool(condenser_toolbox, "info", gt_condenser_info());
   return condenser_toolbox;
@@ -57,7 +57,7 @@ static GtOptionParser* gt_condenser_option_parser_new(void *tool_arguments)
   /* init */
   op = gt_option_parser_new("[option ...] [file]",
                             "Call one of the CONDENSER tools to prepare "
-                            "or manipulate redundancie compressed genomic data."
+                            "or manipulate redundancy compressed genomic data."
                             );
   gt_option_parser_set_comment_func(op, gt_toolbox_show, condenser_toolbox);
   gt_option_parser_set_min_args(op, 1U);
