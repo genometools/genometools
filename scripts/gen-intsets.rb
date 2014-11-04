@@ -243,10 +243,9 @@ void gt_intset_<%=bits%>_add(GtIntset *intset, GtUword elem)
   GtIntset<%=bits%> *intset_<%=bits%> = gt_intset_<%=bits%>_cast(intset);
   GtIntsetMembers *members = intset->members;
   GtUword *sectionstart = members->sectionstart;
-  gt_assert(members->nextfree < members->num_of_elems &&
-            elem <= members->maxelement &&
-            (members->previouselem == ULONG_MAX ||
-                                      members->previouselem < elem));
+  gt_assert(members->nextfree < members->num_of_elems);
+  gt_assert(elem <= members->maxelement);
+  gt_assert(members->previouselem == ULONG_MAX || members->previouselem < elem);
   while (elem >= GT_SECTIONMINELEM(members->currentsectionnum + 1)) {
     gt_assert(members->currentsectionnum < members->numofsections);
     sectionstart[members->currentsectionnum + 1] = members->nextfree;
@@ -431,6 +430,9 @@ static GtUword gt_intset_<%=bits%>_get_idx_smallest_geq_test(GtIntset *intset,
 
   GtUword sectionnum = GT_ELEM2SECTION_M(value);
 
+  if (value > members->previouselem)
+    return members->num_of_elems;
+
   gt_assert(value <= members->maxelement);
   if (members->sectionstart[sectionnum] < members->sectionstart[sectionnum+1]) {
     return members->sectionstart[sectionnum] +
@@ -452,10 +454,10 @@ GtUword value)
 
   GtUword sectionnum = GT_ELEM2SECTION_M(value);
 
-  gt_assert(value <= members->maxelement);
-
   if (value > members->previouselem)
     return members->num_of_elems;
+
+  gt_assert(value <= members->maxelement);
 
   if (members->sectionstart[sectionnum] < members->sectionstart[sectionnum+1]) {
     return members->sectionstart[sectionnum] +
@@ -565,14 +567,12 @@ int gt_intset_<%=bits%>_unit_test(GtError *err)
         }
         gt_ensure(gt_intset_<%=bits%>_get_test(is, idx) == arr[idx]);
         gt_ensure(gt_intset_<%=bits%>_get(is, idx) == arr[idx]);
-        if (idx < num_of_elems - 1) {
-          gt_ensure(
-            gt_intset_<%=bits%>_get_idx_smallest_geq_test(is, arr[idx] + 1) ==
-            idx + 1);
-          gt_ensure(
-            gt_intset_<%=bits%>_get_idx_smallest_geq(is, arr[idx] + 1) ==
-            idx + 1);
-        }
+        gt_ensure(
+          gt_intset_<%=bits%>_get_idx_smallest_geq_test(is, arr[idx] + 1) ==
+          idx + 1);
+        gt_ensure(
+          gt_intset_<%=bits%>_get_idx_smallest_geq(is, arr[idx] + 1) ==
+          idx + 1);
       }
       if (!had_err)
         had_err = gt_intset_unit_test_notinset(is, 0, arr[0] - 1, err);
@@ -636,7 +636,7 @@ bool      gt_intset_<%=bits%>_is_member(GtIntset *intset, GtUword elem);
 
 /* Returns the number of the element in <intset> that is the smallest element
    larger than or equal <value> or <num_of_elems> if there is no such <element>.
-   Fails for <value> > <maxelement>! */
+   */
 GtUword   gt_intset_<%=bits%>_get_idx_smallest_geq(GtIntset *intset, \
 GtUword value);
 
