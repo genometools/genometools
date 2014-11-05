@@ -425,7 +425,7 @@ static int call_dna_DP(bool directmatches, GthCallInfo *call_info,
     if ((firstdp || gth_sa_is_poor(saA, call_info->minaveragessp)) &&
         !call_info->cdnaforwardonly) {
       if (firstdp) {
-        /* space for first alignment is already allocated, bu we have to
+        /* space for first alignment is already allocated, but we have to
            change the direction of the genomic and the reference strand */
         gth_sa_set_gen_strand(saA, !directmatches);
         gth_sa_set_ref_strand(saA, false);
