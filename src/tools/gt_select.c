@@ -236,8 +236,9 @@ static GtOptionParser* gt_select_option_parser_new(void *tool_arguments)
 
   /* -filter_files */
   option = gt_option_new_filename_array("rule_files",
-                                        "specify Lua files to be used "
-                                        "for selection",
+                                        "specify Lua filter rule files "
+                                        "to be used for selection "
+                                        "(terminate list with '--') ",
                                         arguments->filter_files);
   gt_option_parser_add_option(op, option);
 
