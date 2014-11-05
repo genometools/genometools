@@ -55,6 +55,8 @@
         } while (false)
 
 /* subtract <b> from <a> and assign the result to <c> or exit upon overflow */
+/* Warning: this will result in an overflow if c is signed and a and b are
+   unsigned values, as integer promotion will garble the tests. */
 #define gt_safe_sub(c, a, b)                                                 \
         do {                                                                 \
           if (sub_of(c, a, b)) {                                             \

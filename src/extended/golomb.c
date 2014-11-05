@@ -15,7 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-/* TODO write stream reader, that returns only, when complete code is read */
+/* TODO DW write stream reader, that returns only when complete code is read */
 #include <math.h>
 #include "core/divmodmul.h"
 #include "core/ensure.h"

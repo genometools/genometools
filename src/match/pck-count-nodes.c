@@ -63,7 +63,7 @@ static void visit_count_children(const FMindex *index,
     /* check if child is part of a branch */
     if (child.upper - child.lower == parent->upper - parent->lower)
     {
-      /* XXX do sth with non branching nodes */
+      /* TODO DW do sth with non branching nodes */
       child.on_branch = true;
       parent->branching--;
       GT_STACK_PUSH(stack, child);
@@ -116,8 +116,8 @@ void gt_pck_count_nodes_dfs(const FMindex *index,
   Nodecount *current;
   Mbtab *tmpmbtab;
   GtUword *rangeOccs;
-  GtUword resize = 128UL; /* XXX make this user definable, or dependable
-                                 * on input data */
+  GtUword resize = 128UL; /* TODO DW make this user definable, or dependable
+                             on input data */
 
   GT_STACK_INIT(&stack, resize);
   rangeOccs = gt_malloc(sizeof (*rangeOccs) * GT_MULT2(numofchars));
@@ -141,7 +141,7 @@ void gt_pck_count_nodes_dfs(const FMindex *index,
       current = &(GT_STACK_POP(&stack));
       if GT_STACK_ISEMPTY(&stack)
       {
-        /* XXX change to gt_loger_log */
+        /* TODO DW change to gt_loger_log */
         gt_log_log("on root:\n "GT_WU" branching nodes\n "GT_WU" leaves\n",
            current->branching, current->leaves);
       }

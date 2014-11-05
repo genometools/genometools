@@ -164,8 +164,8 @@ static int encdesc_analyze_descs(GtEncdesc *encdesc,
   GT_INITARRAY(&encdesc->num_of_fields_tab, GtUlong);
 
   /* find description with maximum number of fields */
-  /* TODO check constant number of fields here */
-  /* TODO count totalnumofchars here */
+  /* TODO DW check constant number of fields here */
+  /* TODO DW count totalnumofchars here */
   gt_error_check(err);
   status = gt_cstr_iterator_next(cstr_iterator, &descbuffer, err);
   while (status != 0) {
@@ -423,8 +423,8 @@ static int encdesc_analyze_descs(GtEncdesc *encdesc,
 
       GT_STOREINARRAY(&encdesc->num_of_fields_tab, GtUlong, 128 ,cur_field_num);
 
-      /* TODO this heuristic is bad, if the 2nd field is missing, all following
-         fields are missing too! */
+      /* TODO DW this heuristic is bad, if the 2nd field is missing, all
+         following fields are missing too! */
       /* change this so a field can be absent in a single description */
       /* absent fields are non constant */
       for (;cur_field_num < encdesc->num_of_fields;cur_field_num++) {
@@ -457,8 +457,8 @@ static int encdesc_analyze_descs(GtEncdesc *encdesc,
         }
       }
       else {
-        /* TODO range can be large, but the size of the dist is more important
-           for huffman coding */
+        /* TODO DW range can be large, but the size of the dist is more
+           important for huffman coding */
         GtWord value_range, delta_range;
         value_range = labs(cur_field->max_value - cur_field->min_value);
         delta_range = labs(cur_field->max_delta - cur_field->min_delta);

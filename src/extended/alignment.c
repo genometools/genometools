@@ -283,7 +283,6 @@ static inline unsigned int gt_alignment_show_advance(unsigned int pos,
   return pos;
 }
 
-/* XXX: add width parameter and format the GtAlignment accordingly */
 void gt_alignment_show(const GtAlignment *alignment, FILE *fp,
                        unsigned int width)
 {

@@ -111,7 +111,7 @@ size_t gt_intset_size_of_rep(GtIntset *intset)
   return 0;
 }
 
-size_t    gt_intset_size_of_struct(GtIntset *intset)
+size_t gt_intset_size_of_struct(GtIntset *intset)
 {
   gt_assert(intset != NULL);
   gt_assert(intset->c_class != NULL);

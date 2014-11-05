@@ -41,7 +41,7 @@ typedef GtWord GtXdropscore;
  <score> is the score of that match, <best_d> is the d-value that lead to that
  match and <best_k> the index of the diagonal of that match (needed for
  backtracking). */
-/* TODO: check if best_k is ivalue - jvalue and therefore obsolete */
+/* TODO DW check if best_k is ivalue - jvalue and therefore obsolete */
 typedef struct
 {
   GtUword ivalue, jvalue;

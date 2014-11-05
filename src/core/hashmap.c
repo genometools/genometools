@@ -105,13 +105,13 @@ GtHashmap* gt_hashmap_ref(GtHashmap *hm)
 void* gt_hashmap_get(GtHashmap *hm, const void *key)
 {
   struct map_entry *elem = gt_hashtable_get((GtHashtable*) hm, &key);
-  return (elem!=NULL)?elem->value:NULL;
+  return (elem != NULL) ? elem->value : NULL;
 }
 
 void* gt_hashmap_get_key(GtHashmap *hm, const void *key)
 {
   struct map_entry *elem = gt_hashtable_get((GtHashtable*) hm, &key);
-  return (elem!=NULL)?elem->key:NULL;
+  return (elem != NULL) ? elem->key : NULL;
 }
 
 void gt_hashmap_add(GtHashmap *hm, void *key, void *value)

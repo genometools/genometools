@@ -46,7 +46,7 @@ int gt_io_error_fread(void *ptr, size_t size, size_t nmemb, FILE *stream,
     }
     else {
       gt_error_set(err,
-                   "fwread failed to read " GT_WU " elements of "
+                   "fread failed to read " GT_WU " elements of "
                    "size " GT_WU, (GtUword) nmemb, (GtUword) size);
     }
   }

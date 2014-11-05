@@ -15,12 +15,12 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef GT_CONDENSER_COMPSEARCH_H
-#define GT_CONDENSER_COMPSEARCH_H
+#ifndef GT_CONDENSER_SEARCH_H
+#define GT_CONDENSER_SEARCH_H
 
 #include "core/tool_api.h"
 
-/* the condenser_compsearch tool */
-GtTool* gt_condenser_compsearch(void);
+/* the condenser_search tool */
+GtTool* gt_condenser_search(void);
 
 #endif

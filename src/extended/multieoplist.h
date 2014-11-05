@@ -84,8 +84,6 @@ void            gt_multieoplist_reset(GtMultieoplist *multieops);
    <steps>) */
 void            gt_multieoplist_remove_last(GtMultieoplist *multieops);
 
-/* TODO add function to add a <GtMultieop> */
-
 /* Returns pointer to a copy of contents from <GtMultieoplist> <source> to
    <GtMultieoplist> <copy>. <copy> may be NULL, returns new <GtMultieoplist>
    object in that case. <source> may not be NULL!
@@ -136,8 +134,8 @@ void            gt_multieoplist_show(GtMultieoplist *multieops, FILE *fp);
    none of them can be added to the end of the other without reversing one
    beforehand. */
 void            gt_multieoplist_combine(GtMultieoplist *multieops,
-                             GtMultieoplist *multieops_to_add,
-                             bool forward);
+                                        GtMultieoplist *multieops_to_add,
+                                        bool forward);
 
 /* Read or write to/from File, depending on <multieops>. If <NULL>, it allocates
    memory for a new <GtMultieoplist> object and tries to fill it from file <fp>.

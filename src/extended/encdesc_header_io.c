@@ -398,8 +398,8 @@ static int io_numeric_field_header(DescField *field, FILE *fp, GtIOFunc io_func,
                                           &data, err);
   }
 
-  /* TODO change this distribution, to hashtable like the others, this reduces
-   * functions */
+  /* TODO DW change this distribution, to hashtable like the others, this
+     reduces functions */
   if (!had_err && needs_zero_dist) {
     field->zero_count = io_zero_disc_distri(field->zero_count, &data, err);
     if (field->zero_count == NULL)
@@ -407,124 +407,6 @@ static int io_numeric_field_header(DescField *field, FILE *fp, GtIOFunc io_func,
   }
   return had_err;
 }
-
-/* static int read_numeric_field_header(DescField *field,
-   FILE *fp, GtError *err)
-   {
-   int had_err = 0;
-   bool needs_zero_dist = false,
-   needs_delta_dist = false,
-   needs_value_dist = false;
-   GtUword num_of_zero_leaves;
-   EncsecDistriData data;
-
-   data.fp = fp;
-   data.err = err;
-   data.had_err = 0;
-
-   had_err = io_zero_padding(field, fp, gt_io_error_fread, err);
-   if (!had_err) {
-   needs_zero_dist = zero_padding_needs_dist(field);
-   had_err = io_min_max_calc_ranges(field, fp, gt_io_error_fread, err);
-   }
-   if (!had_err) {
-   numeric_field_check_distri_dependence(field,
-   &needs_delta_dist,
-   &needs_value_dist);
-   }
-
-   if (!had_err && needs_delta_dist) {
-   field->delta_values = io_hashmap_distri(field->delta_values,
-   field->delta_values_size,
-   &data, err);
-   if (field->delta_values)
-   had_err = 1;
-   }
-
-   if (!had_err && needs_value_dist) {
-   field->num_values = io_hashmap_distri(field->num_values,
-   field->num_values_size,
-   &data, err);
-   if (field->num_values)
-   had_err = 1;
-   }
-
-   if (!had_err && needs_zero_dist) {
-   GtUword idx, symbol;
-   GtUint64 freq;
-   field->zero_count = gt_disc_distri_new();
-   had_err = gt_io_error_fread_one(num_of_zero_leaves, fp, err);
-   for (idx = 0; !had_err && idx < num_of_zero_leaves; idx++) {
-   had_err = gt_io_error_fread_one(symbol, fp, err);
-   if (!had_err)
-   had_err = gt_io_error_fread_one(freq, fp, err);
-   if (!had_err)
-   gt_disc_distri_add_multi(field->zero_count, symbol, freq);
-   }
-   }
-   return had_err;
-   }
-
-   static int write_numeric_field_header(DescField *field,
-   FILE *fp, GtError *err)
-   {
-   int had_err = 0;
-   bool needs_zero_dist = false,
-   needs_delta_dist = false,
-   needs_value_dist = false;
-   GtUword num_of_zero_leaves;
-   EncsecDistriData data;
-
-   data.err = err;
-   data.fp = fp;
-   data.had_err = 0;
-
-had_err = io_zero_padding(field, fp, gt_io_error_fwrite, err);
-if (!had_err) {
-  needs_zero_dist = zero_padding_needs_dist(field);
-  had_err = io_min_max_calc_ranges(field, fp, gt_io_error_fwrite, err);
-}
-
-if (!had_err) {
-  numeric_field_check_distri_dependence(field,
-                                        &needs_delta_dist,
-                                        &needs_value_dist);
-
-  if (needs_delta_dist) {
-    field->delta_values = io_hashmap_distri(field->delta_values,
-                                            field->delta_values_size,
-                                            &data, err);
-    if (field->delta_values)
-      had_err = 1;
-  }
-}
-
-if (!had_err && needs_value_dist) {
-  field->num_values = io_hashmap_distri(field->num_values,
-                                        field->num_values_size,
-                                        &data, err);
-  if (field->num_values)
-    had_err = 1;
-}
-
-if (!had_err && needs_zero_dist) {
-  [>TODO change this distribution, to hashtable like the others, this reduces
-    * functions<]
-    data.written_elems = 0;
-  gt_disc_distri_foreach(field->zero_count,
-                         encdesc_distri_iter_count,
-                         &data);
-  num_of_zero_leaves = data.written_elems;
-  had_err = gt_io_error_fwrite_one(num_of_zero_leaves, fp, err);
-  data.written_elems = 0;
-  gt_disc_distri_foreach(field->zero_count,
-                         encdesc_distri_iter_write,
-                         &data);
-  had_err = data.had_err;
-  gt_assert(data.written_elems == num_of_zero_leaves);
-}
-return had_err;
-} */
 
 static int io_field_len_header(DescField *field,
                                FILE *fp,
@@ -592,7 +474,7 @@ static int write_field_header_bittab(DescField *field, FILE *fp, GtError *err)
   return had_err;
 }
 
-/* TODO combine field_char_dist */
+/* TODO DW combine field_char_dist */
 static int write_field_char_dists(DescField *field,
                                   FILE *fp, GtError *err)
 {

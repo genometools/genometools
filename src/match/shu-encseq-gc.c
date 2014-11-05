@@ -144,6 +144,6 @@ double *gt_encseq_get_rel_gc(const GtEncseq *encseq,
 int gt_encseq_gc_unit_test(GT_UNUSED GtError *err)
 {
   int had_err = 0;
-  /* XXX write new tests for the new functions */
+  /* TODO DW write new tests for the new functions */
   return had_err;
 }

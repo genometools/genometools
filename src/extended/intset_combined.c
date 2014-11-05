@@ -47,6 +47,28 @@ GtIntset *gt_intset_best_new(GtUword maxelement, GtUword num_of_elems)
   return gt_intset_32_new(maxelement, num_of_elems);
 }
 
+size_t gt_intset_best_memory_size(GtUword maxelement, GtUword num_of_elems)
+{
+  size_t s8, s16, s32;
+  gt_assert(GT_BITS_FOR_TYPE(GtUword) > GT_BITS_FOR_TYPE(uint8_t));
+  s8 = gt_intset_8_size_of_rep(maxelement, num_of_elems);
+  s16 = GT_BITS_FOR_TYPE(GtUword) > GT_BITS_FOR_TYPE(uint16_t) ?
+    gt_intset_16_size_of_rep(maxelement, num_of_elems) :
+    s8;
+  s32 = GT_BITS_FOR_TYPE(GtUword) > GT_BITS_FOR_TYPE(uint32_t) ?
+    gt_intset_32_size_of_rep(maxelement, num_of_elems) :
+    s8;
+  if (s8 <= s16) {
+    if (s8 <= s32)
+      return s8;
+  }
+  else {
+    if (s16 <= s32)
+      return s16;
+  }
+  return s32;
+}
+
 static int gt_intset_read_type_rewind(FILE *fp, GtUword *type, GtError *err)
 {
   int had_err = 0;
@@ -85,7 +107,8 @@ GtIntset *gt_intset_io(GtIntset *intset, FILE *fp, GtError *err)
         if (!had_err && gt_intset_32_file_is_type(type))
           intset = gt_intset_32_io(intset, fp, err);
         else {
-          gt_error_set(err, "could not identify intset type from file");
+          if (!gt_error_is_set(err))
+            gt_error_set(err, "could not identify intset type from file");
         }
       }
     }

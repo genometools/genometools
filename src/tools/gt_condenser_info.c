@@ -16,20 +16,20 @@
 */
 
 #include "core/log_api.h"
+#include "core/logger.h"
 #include "core/undef_api.h"
 #include "core/unused_api.h"
 #include "extended/n_r_encseq.h"
 #include "tools/gt_condenser_info.h"
 
 typedef struct {
-  GtStr   *original;
+  bool  verbose;
 } GtCondenserInfoArguments;
 
 static void* gt_condenser_info_arguments_new(void)
 {
   GtCondenserInfoArguments *arguments = gt_calloc((size_t) 1,
                                                       sizeof *arguments);
-  arguments->original = gt_str_new();
   return arguments;
 }
 
@@ -37,7 +37,6 @@ static void gt_condenser_info_arguments_delete(void *tool_arguments)
 {
   GtCondenserInfoArguments *arguments = tool_arguments;
   if (arguments != NULL) {
-    gt_str_delete(arguments->original);
     gt_free(arguments);
   }
 }
@@ -54,12 +53,9 @@ gt_condenser_info_option_parser_new(void *tool_arguments)
   op = gt_option_parser_new("[options] INPUTNRENCSEQ",
                             "Shows statistical information of a NREncseq.");
 
-  /* -original */
-  option = gt_option_new_filename("original",
-                                  "uncompressed encseq, needs to be present "
-                                  "for development reasons.",
-                                  arguments->original);
-  gt_option_is_mandatory(option);
+  /* -verbose */
+  option = gt_option_new_bool("verbose", "verbose output", &arguments->verbose,
+                              false);
   gt_option_parser_add_option(op, option);
 
   return op;
@@ -73,29 +69,22 @@ static int gt_condenser_info_runner(GT_UNUSED int argc, const char **argv,
   GtCondenserInfoArguments *arguments = tool_arguments;
   int had_err = 0;
   GtNREncseq *nrencseq;
-  GtEncseq *encseq;
-  GtEncseqLoader *es_l;
+  GtLogger *logger = NULL;
+
   gt_error_check(err);
 
+  logger = gt_logger_new(arguments->verbose, GT_LOGGER_DEFLT_PREFIX, stderr);
+
   if (!had_err) {
-    /*load original encseq*/
-    es_l = gt_encseq_loader_new();
-    encseq = gt_encseq_loader_load(es_l, gt_str_get(arguments->original),
-                                   err);
-    if (encseq == NULL)
-      had_err = -1;
-    gt_encseq_loader_delete(es_l);
-  }
-  if (!had_err) {
-    nrencseq = gt_n_r_encseq_new_from_file(argv[parsed_args], encseq, err);
+    nrencseq = gt_n_r_encseq_new_from_file(argv[parsed_args], logger, err);
     if (nrencseq == NULL)
       had_err = -1;
   }
   if (!had_err) {
     gt_n_r_encseq_print_info(nrencseq);
     gt_n_r_encseq_delete(nrencseq);
-    gt_encseq_delete(encseq);
   }
+  gt_logger_delete(logger);
   return had_err;
 }
 

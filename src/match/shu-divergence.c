@@ -38,13 +38,8 @@ static double pmax(double M, /* M value should be explored by simulation ??? */
   double s = 0.0, ln_x_choose_k;
   double ln, ln1, m1, m, delta;
 
-  if (x > n_s) {
-    /* change this to standard GT-behaviour XXX*/
-    printf("Error: x = "GT_WU"."
-           " The maximum number of elements in the array"
-           " s1 should be increased!\n", x);
-  }
-  gt_assert(x <= n_s);
+  gt_assert(x <= n_s || " The maximum number of elements in the array s1 "
+            "should be increased!");
   if (s1[x] != 0.0)
     return s1[x];
 
