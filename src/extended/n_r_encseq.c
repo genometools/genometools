@@ -192,7 +192,7 @@ static void gt_n_r_encseq_process_ids(GtNREncseq *nre, const GtEncseq *orig_es,
     nre->ids_total_len = maxlen * nre->orig_num_seq;
   }
   else {
-    gt_logger_log(logger, "will use sdstab with size " GT_ZU ". Would have "
+    gt_logger_log(logger, "will use sdstab with size " GT_WU ". Would have "
                   "wasted " GT_WU " bytes.", sdssize, wastedmem);
     nre->sdstab = gt_intset_best_new(maxendidx, nre->orig_num_seq);
   }
