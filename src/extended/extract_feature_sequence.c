@@ -31,6 +31,7 @@
 static int extract_join_feature(GtGenomeNode *gn, const char *type,
                                 GtRegionMapping *region_mapping,
                                 GtStr *sequence, bool *reverse_strand,
+                                bool *first_child_of_type_seen, GtPhase *phase,
                                 GtError *err)
 {
   char *outsequence;
@@ -43,6 +44,15 @@ static int extract_join_feature(GtGenomeNode *gn, const char *type,
   gt_assert(fn);
 
   if (gt_feature_node_has_type(fn, type)) {
+    if (gt_feature_node_get_strand(fn) == GT_STRAND_REVERSE) {
+      *reverse_strand = true;
+      *phase = gt_feature_node_get_phase(fn);
+    } else {
+      if (!(*first_child_of_type_seen)) {
+        *first_child_of_type_seen = true;
+        *phase = gt_feature_node_get_phase(fn);
+      } else *phase = GT_PHASE_UNDEFINED;
+    }
     range = gt_genome_node_get_range(gn);
     had_err = gt_region_mapping_get_sequence(region_mapping, &outsequence,
                                              gt_genome_node_get_seqid(gn),
@@ -50,8 +60,6 @@ static int extract_join_feature(GtGenomeNode *gn, const char *type,
     if (!had_err) {
       gt_str_append_cstr_nt(sequence, outsequence, gt_range_length(&range));
       gt_free(outsequence);
-      if (gt_feature_node_get_strand(fn) == GT_STRAND_REVERSE)
-        *reverse_strand = true;
     }
   }
   return had_err;
@@ -88,15 +96,12 @@ static int gt_extract_feature_sequence_generic(GtStr *sequence,
       GtFeatureNodeIterator *fni;
       GtFeatureNode *child;
       bool reverse_strand = false,
-           first_child = true;
+           first_child = true,
+           first_child_of_type_seen = false;
+      GtPhase phase = GT_PHASE_UNDEFINED;
       /* in this case we have to traverse the children */
       fni = gt_feature_node_iterator_new_direct(gt_feature_node_cast(gn));
       while (!had_err && (child = gt_feature_node_iterator_next(fni))) {
-        GtPhase phase = gt_feature_node_get_phase(child);
-        if (gt_feature_node_get_strand(gt_feature_node_cast(gn))
-              == GT_STRAND_REVERSE  || first_child) {
-          phase_offset = (int) phase;
-        }
         if (first_child) {
           if (target_ids &&
                (target = gt_feature_node_get_attribute(child, GT_GFF_TARGET))) {
@@ -111,8 +116,13 @@ static int gt_extract_feature_sequence_generic(GtStr *sequence,
         }
         if (!had_err) {
           if (extract_join_feature((GtGenomeNode*) child, type, region_mapping,
-                                   sequence, &reverse_strand, err)) {
+                                   sequence, &reverse_strand,
+                                   &first_child_of_type_seen,
+                                   &phase, err)) {
             had_err = -1;
+          }
+          if (phase != GT_PHASE_UNDEFINED) {
+            phase_offset = (int) phase;
           }
         }
       }
@@ -130,7 +140,7 @@ static int gt_extract_feature_sequence_generic(GtStr *sequence,
       gt_assert(!had_err);
       if (phase != GT_PHASE_UNDEFINED)
         phase_offset = (unsigned int) phase;
-      /* otherwise we only have to look this feature */
+      /* otherwise we only have to look at this feature */
       range = gt_genome_node_get_range(gn);
       gt_assert(range.start); /* 1-based coordinates */
       had_err = gt_region_mapping_get_sequence(region_mapping, &outsequence,
