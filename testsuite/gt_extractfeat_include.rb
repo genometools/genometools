@@ -130,6 +130,17 @@ Test do
   run "diff #{last_stdout} #{$testdata}gt_extractfeat_phase.out"
 end
 
+Name "gt extractfeat -translate (phases example 2)"
+Keywords "gt_extractfeat"
+Test do
+  run "#{$bin}gt extractfeat -seqfile #{$testdata}Scaffold_102.fa " +
+      "-matchdesc -type CDS -translate #{$testdata}Scaffold_102.gff3"
+  run "diff #{last_stdout} #{$testdata}Scaffold_102.out"
+  run "#{$bin}gt extractfeat -seqfile #{$testdata}Scaffold_102.fa " +
+      "-matchdesc -type CDS -join -translate #{$testdata}Scaffold_102.gff3"
+  run "diff #{last_stdout} #{$testdata}Scaffold_102.joined.out"
+end
+
 Name "gt extractfeat -help"
 Keywords "gt_extractfeat"
 Test do
