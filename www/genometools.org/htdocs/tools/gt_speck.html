@@ -62,14 +62,6 @@ show colored output (default: yes)
 </p>
 </dd>
 <dt class="hdlist1">
-<strong>-allexpects</strong> [<em>yes|no</em>]
-</dt>
-<dd>
-<p>
-show results counted by expectations instead of by nodes (default: no)
-</p>
-</dd>
-<dt class="hdlist1">
 <strong>-provideindex</strong> [<em>yes|no</em>]
 </dt>
 <dd>
@@ -94,11 +86,23 @@ stop processing and report runtime errors instead of recording them in the resul
 </p>
 </dd>
 <dt class="hdlist1">
-<strong>-v</strong> [<em>yes|no</em>]
+<strong>-output</strong> [<em>string</em>]
 </dt>
 <dd>
 <p>
-be verbose (default: no)
+output format
+choose from: json, text, html, statsonly (default: text)
+</p>
+</dd>
+<dt class="hdlist1">
+<strong>-typecheck</strong> [<em>string</em>]
+</dt>
+<dd>
+<p>
+use an ontology given in an OBO file to validate parent-child relationships.
+If no argument is given, the sofa.obo file from the gtdata/obo_files directory is used.
+If an argument is given, it is used as an OBO filename.
+In the case that such a file does not exist <em>.obo</em> is added to the argument and loading the resulting filename from the gtdata/obo_files directory is attempted. (default: so)
 </p>
 </dd>
 <dt class="hdlist1">
@@ -189,6 +193,14 @@ write bzip2 compressed output file (default: no)
 <dd>
 <p>
 force writing to output file (default: no)
+</p>
+</dd>
+<dt class="hdlist1">
+<strong>-v</strong> [<em>yes|no</em>]
+</dt>
+<dd>
+<p>
+be verbose (default: no)
 </p>
 </dd>
 <dt class="hdlist1">
