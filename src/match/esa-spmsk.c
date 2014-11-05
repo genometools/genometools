@@ -38,7 +38,7 @@ struct GtBUstate_spmsk /* global information */
                 spaceforbucketprocessing;
   bool countspms,
        outputspms;
-  GtArrayGtUlong Wset, Lset;
+  GtArrayGtUword Wset, Lset;
   /* Declare the stack as void as the real type
      GtArrayGtBUItvinfo_spmsk is declared later in esa-bottomup-spmsk.inc */
   void *stack;
@@ -70,15 +70,15 @@ static int processleafedge_spmsk(bool firstedge,
     if (firstedge)
     {
       gt_assert(finfo != NULL);
-      ((GtBUinfo_spmsk *) finfo)->firstinW = state->Wset.nextfreeGtUlong;
+      ((GtBUinfo_spmsk *) finfo)->firstinW = state->Wset.nextfreeGtUword;
     }
     if (relpos == 0)
     {
-      GT_STOREINARRAY(&state->Wset,GtUlong,128,seqnum);
+      GT_STOREINARRAY(&state->Wset,GtUword,128,seqnum);
     }
     if (relpos + fd == gt_encseq_seqlength(state->encseq,seqnum))
     {
-      GT_STOREINARRAY(&state->Lset,GtUlong,128,seqnum);
+      GT_STOREINARRAY(&state->Lset,GtUword,128,seqnum);
     }
   }
   return 0;
@@ -95,30 +95,30 @@ static int processlcpinterval_spmsk(GtUword lcp,
 
     gt_assert(info != NULL);
     firstpos = ((GtBUinfo_spmsk *) info)->firstinW;
-    for (lidx = 0; lidx < state->Lset.nextfreeGtUlong; lidx++)
+    for (lidx = 0; lidx < state->Lset.nextfreeGtUword; lidx++)
     {
       if (state->outputspms)
       {
-        GtUword lpos = state->Lset.spaceGtUlong[lidx];
+        GtUword lpos = state->Lset.spaceGtUword[lidx];
 
-        for (widx = firstpos; widx < state->Wset.nextfreeGtUlong; widx++)
+        for (widx = firstpos; widx < state->Wset.nextfreeGtUword; widx++)
         {
           printf(GT_WU " " GT_WU " " GT_WU "\n",lpos,
-                 state->Wset.spaceGtUlong[widx],lcp);
+                 state->Wset.spaceGtUword[widx],lcp);
         }
       } else
       {
         gt_assert(state->countspms);
-        if (firstpos < state->Wset.nextfreeGtUlong)
+        if (firstpos < state->Wset.nextfreeGtUword)
         {
-          state->spmcounter += state->Wset.nextfreeGtUlong - firstpos;
+          state->spmcounter += state->Wset.nextfreeGtUword - firstpos;
         }
       }
     }
-    state->Lset.nextfreeGtUlong = 0;
+    state->Lset.nextfreeGtUword = 0;
   } else
   {
-    state->Wset.nextfreeGtUlong = 0;
+    state->Wset.nextfreeGtUword = 0;
   }
   return 0;
 }
@@ -142,8 +142,8 @@ GtBUstate_spmsk *gt_spmsk_inl_new(const GtEncseq *encseq,
   state->outputspms = outputspms;
   state->spmcounter = 0;
   state->stack = (void *) gt_GtArrayGtBUItvinfo_new();
-  GT_INITARRAY(&state->Wset,GtUlong);
-  GT_INITARRAY(&state->Lset,GtUlong);
+  GT_INITARRAY(&state->Wset,GtUword);
+  GT_INITARRAY(&state->Lset,GtUword);
   return state;
 }
 
@@ -153,8 +153,8 @@ GtUword gt_spmsk_inl_delete(GtBUstate_spmsk *state)
   {
     GtUword tmpcount;
 
-    GT_FREEARRAY(&state->Wset,GtUlong);
-    GT_FREEARRAY(&state->Lset,GtUlong);
+    GT_FREEARRAY(&state->Wset,GtUword);
+    GT_FREEARRAY(&state->Lset,GtUword);
     gt_GtArrayGtBUItvinfo_delete_spmsk(
                  (GtArrayGtBUItvinfo_spmsk *) state->stack,state);
     tmpcount = state->spmcounter;

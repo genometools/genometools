@@ -69,7 +69,7 @@ BWTSeqTransformedOcc(const BWTSeq *bwtSeq, Symbol tsym, GtUword pos)
   }
 }
 
-static inline GtUlongPair
+static inline GtUwordPair
 BWTSeqTransformedPosPairOcc(const BWTSeq *bwtSeq, Symbol tSym,
                             GtUword posA, GtUword posB)
 {
@@ -90,7 +90,7 @@ BWTSeqTransformedPosPairOcc(const BWTSeq *bwtSeq, Symbol tSym,
 /*       - ((pos > BWTSeqTerminatorPos(bwtSeq))?1:0); */
   else /* tSym == not flattened terminator == alphabetSize - 1 */
   {
-    GtUlongPair occ;
+    GtUwordPair occ;
     gt_assert(tSym == bwtSeq->alphabetSize - 1);
     occ.a = (posA > BWTSeqTerminatorPos(bwtSeq))?1:0;
     occ.b = (posB > BWTSeqTerminatorPos(bwtSeq))?1:0;
@@ -106,7 +106,7 @@ BWTSeqOcc(const BWTSeq *bwtSeq, Symbol sym, GtUword pos)
   return BWTSeqTransformedOcc(bwtSeq, tSym, pos);
 }
 
-static inline GtUlongPair
+static inline GtUwordPair
 BWTSeqPosPairOcc(const BWTSeq *bwtSeq, Symbol sym, GtUword posA,
                  GtUword posB)
 {

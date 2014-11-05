@@ -92,8 +92,8 @@ static int insertfirstsuffixes(Mergertrierep *trierep,
   for (idx=0; idx<numofindexes; idx++)
   {
     retval
-      = gt_readnextfromstream_GtUlong(&suftabvalue,
-                                  &suffixarraytable[idx].suftabstream_GtUlong);
+      = gt_readnextfromstream_GtUword(&suftabvalue,
+                                  &suffixarraytable[idx].suftabstream_GtUword);
     if (retval == 0)
     {
       gt_error_set(err,"file %s: line %d: unexpected end of file when "
@@ -199,9 +199,9 @@ int gt_emissionmergedesa_stepdeleteandinsertothersuffixes(
         tmplastbranchdepth = tmplcpvalue;
       }
       tmplcpnode = findlargestnodeleqlcpvalue(tmpsmallestleaf,tmplcpvalue,err);
-      retval = gt_readnextfromstream_GtUlong(&tmpsuftabvalue,
+      retval = gt_readnextfromstream_GtUword(&tmpsuftabvalue,
                                          &emmesa->suffixarraytable[tmpidx].
-                                         suftabstream_GtUlong);
+                                         suftabstream_GtUword);
       if (retval == 0)
       {
         gt_error_set(err,"file %s: line %d: unexpected end of file when "

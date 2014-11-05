@@ -203,7 +203,7 @@ struct Limdfsresources
   GtUword maxintervalwidth;
   GtUword *rangeOccs;
   const GtEncseq *encseq;
-  GtArrayGtUlong mstatspos;
+  GtArrayGtUword mstatspos;
   GtUchar *currentpathspace;
   GtUword allocatedpathspace;
   GtUword numberofmatches;
@@ -270,13 +270,13 @@ Limdfsresources *gt_newLimdfsresources(const Genericindex *genericindex,
       = gt_malloc(sizeof *limdfsresources->rangeOccs
                   * GT_MULT2(limdfsresources->alphasize));
   }
-  GT_INITARRAY(&limdfsresources->mstatspos,GtUlong);
+  GT_INITARRAY(&limdfsresources->mstatspos,GtUword);
   if (maxintervalwidth > 0)
   {
-    limdfsresources->mstatspos.spaceGtUlong
-      = gt_malloc(sizeof *limdfsresources->mstatspos.spaceGtUlong
+    limdfsresources->mstatspos.spaceGtUword
+      = gt_malloc(sizeof *limdfsresources->mstatspos.spaceGtUword
                   * maxintervalwidth);
-    limdfsresources->mstatspos.allocatedGtUlong = maxintervalwidth;
+    limdfsresources->mstatspos.allocatedGtUword = maxintervalwidth;
   }
   if (adfst->initLimdfsstackelem != NULL &&
       !limdfsresources->keepexpandedonstack)
@@ -400,7 +400,7 @@ void gt_freeLimdfsresources(Limdfsresources **ptrlimdfsresources,
   GT_FREEARRAY(&limdfsresources->stack,Lcpintervalwithinfo);
   gt_free(limdfsresources->rangeOccs);
   gt_free(limdfsresources->currentpathspace);
-  GT_FREEARRAY(&limdfsresources->mstatspos,GtUlong);
+  GT_FREEARRAY(&limdfsresources->mstatspos,GtUword);
   gt_free(*ptrlimdfsresources);
 }
 
@@ -474,9 +474,9 @@ static void pck_overinterval(Limdfsresources *limdfsresources,
 
 static void storemstatsposition(void *processinfo,const GtIdxMatch *match)
 {
-  GtArrayGtUlong *mstatspos = (GtArrayGtUlong *) processinfo;
+  GtArrayGtUword *mstatspos = (GtArrayGtUword *) processinfo;
 
-  GT_STOREINARRAY(mstatspos,GtUlong,32,match->dbstartpos);
+  GT_STOREINARRAY(mstatspos,GtUword,32,match->dbstartpos);
 }
 
 static int comparepositions(const void *a, const void *b)
@@ -488,7 +488,7 @@ static int comparepositions(const void *a, const void *b)
   return 1;
 }
 
-GtArrayGtUlong *gt_fromitv2sortedmatchpositions(
+GtArrayGtUword *gt_fromitv2sortedmatchpositions(
                                              Limdfsresources *limdfsresources,
                                              GtUword leftbound,
                                              GtUword rightbound,
@@ -499,7 +499,7 @@ GtArrayGtUlong *gt_fromitv2sortedmatchpositions(
 
   gt_assert(limdfsresources != NULL &&
             limdfsresources->genericindex != NULL);
-  limdfsresources->mstatspos.nextfreeGtUlong = 0;
+  limdfsresources->mstatspos.nextfreeGtUword = 0;
   itv.leftbound = leftbound;
   itv.rightbound = rightbound;
   itv.offset = offset;
@@ -519,8 +519,8 @@ GtArrayGtUlong *gt_fromitv2sortedmatchpositions(
      &itv,
      limdfsresources->genericindex->totallength,
      &match);
-  qsort(limdfsresources->mstatspos.spaceGtUlong,
-        (size_t) limdfsresources->mstatspos.nextfreeGtUlong,
+  qsort(limdfsresources->mstatspos.spaceGtUword,
+        (size_t) limdfsresources->mstatspos.nextfreeGtUword,
         sizeof (GtUword), comparepositions);
   if (limdfsresources->genericindex->withesa)
   {

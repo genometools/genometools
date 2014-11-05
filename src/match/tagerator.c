@@ -235,13 +235,13 @@ static void checkmstats(void *processinfo,
     GtUchar cc;
     GtUword *sptr, witnessposition;
     GtUword idx;
-    GtArrayGtUlong *mstatspos = gt_fromitv2sortedmatchpositions(
+    GtArrayGtUword *mstatspos = gt_fromitv2sortedmatchpositions(
                                   (Limdfsresources *) processinfo,
                                   leftbound,
                                   rightbound,
                                   mstatlength);
-    for (sptr = mstatspos->spaceGtUlong; sptr < mstatspos->spaceGtUlong +
-                                               mstatspos->nextfreeGtUlong;
+    for (sptr = mstatspos->spaceGtUword; sptr < mstatspos->spaceGtUword +
+                                               mstatspos->nextfreeGtUword;
          sptr++)
     {
       witnessposition = *sptr;
@@ -278,14 +278,14 @@ static void showmstats(void *processinfo,
                        rightbound))
   {
     GtUword idx;
-    GtArrayGtUlong *mstatspos = gt_fromitv2sortedmatchpositions(
+    GtArrayGtUword *mstatspos = gt_fromitv2sortedmatchpositions(
                                   (Limdfsresources *) processinfo,
                                   leftbound,
                                   rightbound,
                                   mstatlength);
-    for (idx = 0; idx<mstatspos->nextfreeGtUlong; idx++)
+    for (idx = 0; idx<mstatspos->nextfreeGtUword; idx++)
     {
-      printf(" "GT_WU"",mstatspos->spaceGtUlong[idx]);
+      printf(" "GT_WU"",mstatspos->spaceGtUword[idx]);
     }
   }
   printf("\n");

@@ -191,7 +191,7 @@ BWTSeqOcc(const BWTSeq *bwtSeq, Symbol sym, GtUword pos);
  * @return number of occurrences of symbol up to but not including
  * posA and posB respectively in fields a and b of returned struct
  */
-static inline GtUlongPair
+static inline GtUwordPair
 BWTSeqTransformedPosPairOcc(const BWTSeq *bwtSeq, Symbol tSym,
                             GtUword posA, GtUword posB);
 
@@ -205,7 +205,7 @@ BWTSeqTransformedPosPairOcc(const BWTSeq *bwtSeq, Symbol tSym,
  * @return number of occurrences of symbol up to but not including
  * posA and posB respectively in fields a and b of returned struct
  */
-static inline GtUlongPair
+static inline GtUwordPair
 BWTSeqPosPairOcc(const BWTSeq *bwtSeq, Symbol sym,
                  GtUword posA, GtUword posB);
 

@@ -110,7 +110,7 @@ typedef struct
          nofsuperblocks,     /* number of superblocks (bwtlength/superbsize+2)*/
          markdist,           /* multiple of entry num stored in suffix array */
          numofcodes;         /* number of entries in boundaries */
-  GtUlongBound *boundarray;      /* corresponding boundaries */
+  GtUwordBound *boundarray;      /* corresponding boundaries */
 } Fmindex;
 
 typedef struct

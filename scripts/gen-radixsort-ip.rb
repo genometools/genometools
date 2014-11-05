@@ -23,7 +23,7 @@ def parseargs(argv)
 end
 
 def makekey(options)
-  if options.ulong 
+  if options.ulong
     return "ulong"
   else
     return "ulongpair"
@@ -31,15 +31,15 @@ def makekey(options)
 end
 
 def maketype(options)
-  if options.ulong 
+  if options.ulong
     return "GtUword"
   else
-    return "GtUlongPair"
+    return "GtUwordPair"
   end
 end
 
 def derefptr(ptr,options)
-  if options.ulong 
+  if options.ulong
     return "*#{ptr}"
   else
     return "#{ptr}->a"
@@ -47,7 +47,7 @@ def derefptr(ptr,options)
 end
 
 def derefval(val,options)
-  if options.ulong 
+  if options.ulong
     return "#{val}"
   else
     return "#{val}.a"
@@ -57,22 +57,24 @@ end
 options = parseargs(ARGV)
 
 print <<END_OF_FILE
-static #{maketype(options)} gt_radixsort_#{makekey(options)}_bin_get(const GtRadixbuffer *rbuf,
+static #{maketype(options)} gt_radixsort_#{makekey(options)}_bin_get(
+                                            const GtRadixbuffer *rbuf,
                                             GtUword binnum)
 {
   return rbuf->values.#{makekey(options)}ptr[(binnum << rbuf->log_bufsize) +
                              (GtUword) rbuf->nextidx[binnum]];
 }
 
-static void gt_radixsort_#{makekey(options)}_bin_update(#{maketype(options)} *target,
+static void gt_radixsort_#{makekey(options)}_bin_update(
+                                    #{maketype(options)} *target,
                                     GtRadixbuffer *rbuf,
                                     GtUword binnum,
                                     #{maketype(options)} value)
 {
   GtUword binoffset = binnum << rbuf->log_bufsize;
 
-  rbuf->values.#{makekey(options)}ptr[binoffset + (GtUword) rbuf->nextidx[binnum]]
-    = value;
+  rbuf->values.#{makekey(options)}ptr[binoffset +
+                                      (GtUword) rbuf->nextidx[binnum]] = value;
   if ((GtUword) rbuf->nextidx[binnum] < rbuf->buf_size - 1)
   {
     rbuf->nextidx[binnum]++;
@@ -132,7 +134,8 @@ static void gt_radixsort_#{makekey(options)}_cached_shuffle(GtRadixbuffer *rbuf,
     }
     for (j=0; j<end; j++)
     {
-      rbuf->values.#{makekey(options)}ptr[bufoffset + j] = source[binoffset + j];
+      rbuf->values.#{makekey(options)}ptr[bufoffset + j] =
+        source[binoffset + j];
     }
   }
   previouscount = count[0];
@@ -149,10 +152,12 @@ static void gt_radixsort_#{makekey(options)}_cached_shuffle(GtRadixbuffer *rbuf,
   for (current = 0, binnum = firstnonemptybin;
        current < len; binnum = nextbin - 1)
   {
-    #{maketype(options)} currentvalue = gt_radixsort_#{makekey(options)}_bin_get(rbuf,binnum);
+    #{maketype(options)} currentvalue =
+      gt_radixsort_#{makekey(options)}_bin_get(rbuf,binnum);
     while (true)
     {
-      binnum = GT_RADIX_KEY(UINT8_MAX,rightshift,#{derefval("currentvalue",options)});
+      binnum = GT_RADIX_KEY(UINT8_MAX,rightshift,
+                            #{derefval("currentvalue",options)});
       if (current != rbuf->endofbin[binnum])
       {
         #{maketype(options)} tmp = currentvalue;
@@ -163,7 +168,8 @@ static void gt_radixsort_#{makekey(options)}_cached_shuffle(GtRadixbuffer *rbuf,
         break;
       }
     }
-    gt_radixsort_#{makekey(options)}_bin_update(source,rbuf,binnum,currentvalue);
+    gt_radixsort_#{makekey(options)}_bin_update(source,rbuf,binnum,
+                                                currentvalue);
     current++;
     /* skip over empty bins */
     while (nextbin <= UINT8_MAX && current >= rbuf->startofbin[nextbin])
@@ -190,7 +196,8 @@ static void gt_radixsort_#{makekey(options)}_cached_shuffle(GtRadixbuffer *rbuf,
       GtUword j;
       #{maketype(options)} *targetptr, *valptr;
 
-      valptr = rbuf->values.#{makekey(options)}ptr + (binnum << rbuf->log_bufsize);
+      valptr =
+        rbuf->values.#{makekey(options)}ptr + (binnum << rbuf->log_bufsize);
       targetptr = source + rbuf->startofbin[binnum+1] - bufleft;
       for (j=0; j < bufleft; j++)
       {
@@ -200,7 +207,8 @@ static void gt_radixsort_#{makekey(options)}_cached_shuffle(GtRadixbuffer *rbuf,
   }
 }
 
-static void gt_radixsort_#{makekey(options)}_uncached_shuffle(GtRadixbuffer *rbuf,
+static void gt_radixsort_#{makekey(options)}_uncached_shuffle(
+                                                GtRadixbuffer *rbuf,
                                                 #{maketype(options)} *source,
                                                 GtCountbasetype len,
                                                 size_t rightshift)
@@ -239,7 +247,8 @@ static void gt_radixsort_#{makekey(options)}_uncached_shuffle(GtRadixbuffer *rbu
     while (true)
     {
       binptr = rbuf->endofbin +
-               GT_RADIX_KEY(UINT8_MAX,rightshift,#{derefval("currentvalue",options)});
+               GT_RADIX_KEY(UINT8_MAX,rightshift,
+                            #{derefval("currentvalue",options)});
       if (current != *binptr)
       {
         #{maketype(options)} tmp = currentvalue;
@@ -282,7 +291,8 @@ static void gt_radixsort_#{makekey(options)}_shuffle(GtRadixbuffer *rbuf,
     gt_radixsort_#{makekey(options)}_cached_shuffle(rbuf,source,len,rightshift);
   } else
   {
-    gt_radixsort_#{makekey(options)}_uncached_shuffle(rbuf,source,len,rightshift);
+    gt_radixsort_#{makekey(options)}_uncached_shuffle(rbuf,source,len,
+                                                      rightshift);
   }
 }
 
@@ -299,7 +309,11 @@ gt_radixsort_#{makekey(options)}_inplace_insertionsort(#{maketype(options)} *a,
       #{maketype(options)} currentElement = *optr;
 
       *optr = *(optr-1);
-      for (iptr = optr-1; iptr > a && #{derefval("currentElement",options)} < #{derefptr("(iptr-1)",options)}; iptr--)
+      for (iptr = optr-1;
+           iptr > a &&
+             #{derefval("currentElement",options)} <
+             #{derefptr("(iptr-1)",options)};
+           iptr--)
       {
         *iptr = *(iptr-1);
       }
@@ -360,14 +374,15 @@ static void gt_radixsort_#{makekey(options)}_sub_inplace(GtRadixbuffer *rbuf,
   while (!GT_STACK_ISEMPTY(stack))
   {
     currentstackelem = GT_STACK_POP(stack);
-    gt_radixsort_#{makekey(options)}_shuffle(rbuf,currentstackelem.left.#{makekey(options)}ptr,
+    gt_radixsort_#{makekey(options)}_shuffle(rbuf,
+                         currentstackelem.left.#{makekey(options)}ptr,
                          currentstackelem.len,
                          currentstackelem.shift);
     if (currentstackelem.shift > 0)
     {
       (void) gt_radixsort_#{makekey(options)}_process_bin(stack,rbuf,
-                                            currentstackelem.left.#{makekey(options)}ptr,
-                                            currentstackelem.shift);
+                                   currentstackelem.left.#{makekey(options)}ptr,
+                                   currentstackelem.shift);
     }
   }
 }

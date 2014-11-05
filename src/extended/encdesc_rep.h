@@ -81,7 +81,7 @@ typedef struct {
 } DescField;
 
 struct GtEncdesc {
-  GtArrayGtUlong  num_of_fields_tab;
+  GtArrayGtUword  num_of_fields_tab;
   DescField      *fields;
   GtBitInStream  *bitinstream;
   GtSampling     *sampling;

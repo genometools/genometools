@@ -53,7 +53,7 @@ static void gt_firstcodes_countocc_new(GtFirstcodesspacelog *fcsl,
   fct->outfilenameleftborder = NULL;
   fct->leftborder_samples = NULL;
 #if defined (_LP64) || defined (_WIN64)
-  GT_INITARRAY(&fct->bitchangepoints,GtUlong);
+  GT_INITARRAY(&fct->bitchangepoints,GtUword);
 #endif
 }
 
@@ -478,18 +478,18 @@ GtUword gt_firstcodes_partialsums(GtFirstcodesspacelog *fcsl,
 #if defined (_LP64) || defined (_WIN64)
   if (btp <= GT_MODVALUEBITS)
   {
-    fct->bitchangepoints.allocatedGtUlong = 0;
-    fct->bitchangepoints.spaceGtUlong = NULL;
+    fct->bitchangepoints.allocatedGtUword = 0;
+    fct->bitchangepoints.spaceGtUword = NULL;
   } else
   {
-    fct->bitchangepoints.allocatedGtUlong = 1UL << (btp - GT_MODVALUEBITS);
+    fct->bitchangepoints.allocatedGtUword = 1UL << (btp - GT_MODVALUEBITS);
     gt_log_log("lastpartsum="GT_WU", bitchangepoints.allocated="GT_WU"",
-              expectedlastpartsum,fct->bitchangepoints.allocatedGtUlong);
-    fct->bitchangepoints.spaceGtUlong
-      = gt_malloc(sizeof (*fct->bitchangepoints.spaceGtUlong)
-                  * fct->bitchangepoints.allocatedGtUlong);
+              expectedlastpartsum,fct->bitchangepoints.allocatedGtUword);
+    fct->bitchangepoints.spaceGtUword
+      = gt_malloc(sizeof (*fct->bitchangepoints.spaceGtUword)
+                  * fct->bitchangepoints.allocatedGtUword);
   }
-  fct->bitchangepoints.nextfreeGtUlong = 0;
+  fct->bitchangepoints.nextfreeGtUword = 0;
 #endif
   currentcount = gt_firstcodes_countocc_get(fct,differences,0);
   partsum = (GtUword) currentcount;
@@ -531,13 +531,13 @@ GtUword gt_firstcodes_partialsums(GtFirstcodesspacelog *fcsl,
     }
     partsum += currentcount;
 #if defined (_LP64) || defined (_WIN64)
-    if (fct->bitchangepoints.allocatedGtUlong > 0 && partsum >= exceedvalue)
+    if (fct->bitchangepoints.allocatedGtUword > 0 && partsum >= exceedvalue)
     {
-      gt_assert(idx > 0 && fct->bitchangepoints.nextfreeGtUlong <
-                           fct->bitchangepoints.allocatedGtUlong);
-      gt_assert(fct->bitchangepoints.spaceGtUlong != NULL);
-      fct->bitchangepoints.spaceGtUlong
-        [fct->bitchangepoints.nextfreeGtUlong++] = idx-1;
+      gt_assert(idx > 0 && fct->bitchangepoints.nextfreeGtUword <
+                           fct->bitchangepoints.allocatedGtUword);
+      gt_assert(fct->bitchangepoints.spaceGtUword != NULL);
+      fct->bitchangepoints.spaceGtUword
+        [fct->bitchangepoints.nextfreeGtUword++] = idx-1;
       exceedvalue = (GtUword) ((exceedvalue >> GT_MODVALUEBITS) + 1)
                       << (GtUword) GT_MODVALUEBITS;
     }
@@ -688,7 +688,7 @@ void gt_firstcodes_tab_delete(GtFirstcodesspacelog *fcsl,GtFirstcodestab *fct)
   gt_str_delete(fct->outfilenameleftborder);
   fct->outfilenameleftborder = NULL;
 #if defined (_LP64) || defined (_WIN64)
-  GT_FREEARRAY(&fct->bitchangepoints,GtUlong);
+  GT_FREEARRAY(&fct->bitchangepoints,GtUword);
 #endif
 }
 
@@ -703,7 +703,7 @@ void gt_firstcodes_countocc_setnull(GtFirstcodestab *fct)
   fct->hashmap_getcount = 0;
   fct->outfilenameleftborder = NULL;
 #if defined (_LP64) || defined (_WIN64)
-  GT_INITARRAY(&fct->bitchangepoints,GtUlong);
+  GT_INITARRAY(&fct->bitchangepoints,GtUword);
 #endif
 }
 

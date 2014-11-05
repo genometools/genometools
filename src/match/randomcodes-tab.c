@@ -53,7 +53,7 @@ void gt_randomcodes_countocc_new(GtFirstcodesspacelog *fcsl,
   {
     rct->modvaluemask = (uint32_t) ((1UL << rct->modvaluebits) - 1);
   }
-  GT_INITARRAY(&rct->bitchangepoints,GtUlong);
+  GT_INITARRAY(&rct->bitchangepoints,GtUword);
 #endif
   rct->differentcodes = numofsequences;
 }
@@ -252,18 +252,18 @@ GtUword gt_randomcodes_partialsums(GtFirstcodesspacelog *fcsl,
 #if defined (_LP64) || defined (_WIN64)
   if (btp <= rct->modvaluebits)
   {
-    rct->bitchangepoints.allocatedGtUlong = 0;
-    rct->bitchangepoints.spaceGtUlong = NULL;
+    rct->bitchangepoints.allocatedGtUword = 0;
+    rct->bitchangepoints.spaceGtUword = NULL;
   } else
   {
-    rct->bitchangepoints.allocatedGtUlong = 1UL << (btp - rct->modvaluebits);
+    rct->bitchangepoints.allocatedGtUword = 1UL << (btp - rct->modvaluebits);
     gt_log_log("lastpartsum="GT_WU", bitchangepoints.allocated="GT_WU"",
-              expectedlastpartsum,rct->bitchangepoints.allocatedGtUlong);
-    rct->bitchangepoints.spaceGtUlong
-      = gt_malloc(sizeof (*rct->bitchangepoints.spaceGtUlong)
-                  * rct->bitchangepoints.allocatedGtUlong);
+              expectedlastpartsum,rct->bitchangepoints.allocatedGtUword);
+    rct->bitchangepoints.spaceGtUword
+      = gt_malloc(sizeof (*rct->bitchangepoints.spaceGtUword)
+                  * rct->bitchangepoints.allocatedGtUword);
   }
-  rct->bitchangepoints.nextfreeGtUlong = 0;
+  rct->bitchangepoints.nextfreeGtUword = 0;
 #endif
   currentcount = gt_randomcodes_countocc_get(rct,0);
   partsum = (GtUword) currentcount;
@@ -305,13 +305,13 @@ GtUword gt_randomcodes_partialsums(GtFirstcodesspacelog *fcsl,
     }
     partsum += currentcount;
 #if defined (_LP64) || defined (_WIN64)
-    if (rct->bitchangepoints.allocatedGtUlong > 0 && partsum >= exceedvalue)
+    if (rct->bitchangepoints.allocatedGtUword > 0 && partsum >= exceedvalue)
     {
-      gt_assert(idx > 0 && rct->bitchangepoints.nextfreeGtUlong <
-                           rct->bitchangepoints.allocatedGtUlong);
-      gt_assert(rct->bitchangepoints.spaceGtUlong != NULL);
-      rct->bitchangepoints.spaceGtUlong
-        [rct->bitchangepoints.nextfreeGtUlong++] = idx-1;
+      gt_assert(idx > 0 && rct->bitchangepoints.nextfreeGtUword <
+                           rct->bitchangepoints.allocatedGtUword);
+      gt_assert(rct->bitchangepoints.spaceGtUword != NULL);
+      rct->bitchangepoints.spaceGtUword
+        [rct->bitchangepoints.nextfreeGtUword++] = idx-1;
       exceedvalue = ((GtUword) (exceedvalue >> rct->modvaluebits) + 1)
                       << rct->modvaluebits;
     }
@@ -460,7 +460,7 @@ void gt_randomcodes_tab_delete(GtFirstcodesspacelog *fcsl,GtRandomcodestab *rct)
   gt_str_delete(rct->outfilenameleftborder);
   rct->outfilenameleftborder = NULL;
 #if defined (_LP64) || defined (_WIN64)
-  GT_FREEARRAY(&rct->bitchangepoints,GtUlong);
+  GT_FREEARRAY(&rct->bitchangepoints,GtUword);
 #endif
 }
 
@@ -479,7 +479,7 @@ void gt_randomcodes_countocc_setnull(GtRandomcodestab *rct)
   rct->hashmap_getcount = 0;
   rct->outfilenameleftborder = NULL;
 #if defined (_LP64) || defined (_WIN64)
-  GT_INITARRAY(&rct->bitchangepoints,GtUlong);
+  GT_INITARRAY(&rct->bitchangepoints,GtUword);
 #endif
 }
 

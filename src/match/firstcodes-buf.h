@@ -33,8 +33,8 @@ typedef struct
   Gtmarksubstring *markprefix,
                   *marksuffix;
   GtCodeposbufferflushfunction flush_function;
-  GtUlongPair *spaceGtUlongPair;
-  GtUlong *spaceGtUlong;
+  GtUwordPair *spaceGtUwordPair;
+  GtUword *spaceGtUword;
   GtSeqnumrelpos *snrp;
   void *fciptr;
   bool accum_all;

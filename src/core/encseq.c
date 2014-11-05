@@ -3712,7 +3712,7 @@ void gt_specialrangeiterator_delete(GtSpecialrangeiterator *sri)
   }
 }
 
-static void gt_addmarkpos(GtArrayGtUlong *asp,
+static void gt_addmarkpos(GtArrayGtUword *asp,
                           GtEncseqReader *esr,
                           const GtRange *seqrange)
 {
@@ -3723,24 +3723,24 @@ static void gt_addmarkpos(GtArrayGtUlong *asp,
     currentchar = gt_encseq_reader_next_encoded_char(esr);
     gt_assert(ISSPECIAL(currentchar));
     if (currentchar == (GtUchar) SEPARATOR) {
-      gt_assert(asp->nextfreeGtUlong < asp->allocatedGtUlong);
-      asp->spaceGtUlong[asp->nextfreeGtUlong++] = pos;
+      gt_assert(asp->nextfreeGtUword < asp->allocatedGtUword);
+      asp->spaceGtUword[asp->nextfreeGtUword++] = pos;
     }
   }
 }
 
 static GtUword *encseq2markpositions(const GtEncseq *encseq)
 {
-  GtArrayGtUlong asp;
+  GtArrayGtUword asp;
   GtSpecialrangeiterator *sri;
   GtRange range;
   GtEncseqReader *esr = NULL;
 
   gt_assert (encseq->numofdbsequences > 1UL);
-  asp.allocatedGtUlong = encseq->numofdbsequences-1;
-  asp.nextfreeGtUlong = 0;
-  asp.spaceGtUlong
-    = gt_malloc(sizeof (*asp.spaceGtUlong) * asp.allocatedGtUlong);
+  asp.allocatedGtUword = encseq->numofdbsequences-1;
+  asp.nextfreeGtUword = 0;
+  asp.spaceGtUword
+    = gt_malloc(sizeof (*asp.spaceGtUword) * asp.allocatedGtUword);
   sri = gt_specialrangeiterator_new(encseq, true);
   while (gt_specialrangeiterator_next(sri, &range)) {
     if (esr == NULL) {
@@ -3754,7 +3754,7 @@ static GtUword *encseq2markpositions(const GtEncseq *encseq)
   }
   gt_specialrangeiterator_delete(sri);
   gt_encseq_reader_delete(esr);
-  return asp.spaceGtUlong;
+  return asp.spaceGtUword;
 }
 
 GtUword gt_encseq_sep2seqnum(const GtUword *recordseps,
@@ -8676,7 +8676,7 @@ struct GtEncseqBuilder {
                 nof_seqs,
                 minseqlen,
                 maxseqlen;
-  GtArrayGtUlong sdstab,
+  GtArrayGtUword sdstab,
                  ssptab;
   GtStr *destab;
   size_t allocated;
@@ -8698,8 +8698,8 @@ GtEncseqBuilder* gt_encseq_builder_new(GtAlphabet *alpha)
   eb = gt_calloc((size_t) 1, sizeof (GtEncseqBuilder));
   eb->own = false;
   eb->alpha = gt_alphabet_ref(alpha);
-  GT_INITARRAY(&eb->ssptab, GtUlong);
-  GT_INITARRAY(&eb->sdstab, GtUlong);
+  GT_INITARRAY(&eb->ssptab, GtUword);
+  GT_INITARRAY(&eb->sdstab, GtUword);
   eb->destab = gt_str_new();
   eb->firstdesc = true;
   eb->firstseq = true;
@@ -8782,7 +8782,7 @@ void gt_encseq_builder_add_cstr(GtEncseqBuilder *eb, const char *str,
   }
   /* store separator position if needed */
   if (eb->wssptab && !eb->firstseq) {
-    GT_STOREINARRAY(&eb->ssptab, GtUlong, 128, eb->seqlen);
+    GT_STOREINARRAY(&eb->ssptab, GtUword, 128, eb->seqlen);
   }
   /* from the second sequence on, add a separator before adding symbols */
   if (!eb->firstseq) {
@@ -8805,7 +8805,7 @@ void gt_encseq_builder_add_cstr(GtEncseqBuilder *eb, const char *str,
     gt_str_append_char(eb->destab, '\n');
     /* store description separator position */
     if (eb->wsdstab) {
-      GT_STOREINARRAY(&eb->sdstab, GtUlong, 128,
+      GT_STOREINARRAY(&eb->sdstab, GtUword, 128,
                       gt_str_length(eb->destab)-1);
     }
     eb->firstdesc = false;
@@ -8857,7 +8857,7 @@ static void gt_encseq_builder_add_encoded_generic(GtEncseqBuilder *eb,
       gt_str_append_char(eb->destab, '\n');
       /* store description separator position, if not first description */
       if (eb->wsdstab) {
-        GT_STOREINARRAY(&eb->sdstab, GtUlong, 128,
+        GT_STOREINARRAY(&eb->sdstab, GtUword, 128,
                         gt_str_length(eb->destab)-1);
       }
       eb->firstdesc = false;
@@ -8871,7 +8871,7 @@ static void gt_encseq_builder_add_encoded_generic(GtEncseqBuilder *eb,
     }
     /* store separator position if needed */
     if (eb->wssptab && !eb->firstseq) {
-      GT_STOREINARRAY(&eb->ssptab, GtUlong, 128, eb->seqlen);
+      GT_STOREINARRAY(&eb->ssptab, GtUword, 128, eb->seqlen);
     }
     /* from the second sequence on, add a separator before adding symbols */
     if (!eb->firstseq) {
@@ -8895,7 +8895,7 @@ static void gt_encseq_builder_add_encoded_generic(GtEncseqBuilder *eb,
       eb->firstdesc = false;
       /* store description separator position, if not first description */
       if (eb->wsdstab) {
-        GT_STOREINARRAY(&eb->sdstab, GtUlong, 128,
+        GT_STOREINARRAY(&eb->sdstab, GtUword, 128,
                         gt_str_length(eb->destab)-1);
       }
 
@@ -8964,10 +8964,10 @@ void gt_encseq_builder_reset(GtEncseqBuilder *eb)
     gt_free(eb->plainseq);
   }
   if (!eb->created_encseq) {
-    GT_FREEARRAY(&eb->sdstab, GtUlong);
+    GT_FREEARRAY(&eb->sdstab, GtUword);
   }
-  GT_INITARRAY(&eb->sdstab, GtUlong);
-  GT_INITARRAY(&eb->ssptab, GtUlong);
+  GT_INITARRAY(&eb->sdstab, GtUword);
+  GT_INITARRAY(&eb->ssptab, GtUword);
   gt_str_reset(eb->destab);
   eb->own = false;
   eb->nof_seqs = 0;
@@ -9035,7 +9035,7 @@ GtEncseq* gt_encseq_builder_build(GtEncseqBuilder *eb, GT_UNUSED GtError *err)
         ssptaboutinfo_processseppos(ssptaboutinfo, i);
       ssptaboutinfo_processanyposition(ssptaboutinfo, i);
     }
-    GT_FREEARRAY(&eb->ssptab, GtUlong);
+    GT_FREEARRAY(&eb->ssptab, GtUword);
     ssptaboutinfo_finalize(ssptaboutinfo);
     ssptaboutinfo_delete(ssptaboutinfo);
   }
@@ -9063,7 +9063,7 @@ GtEncseq* gt_encseq_builder_build(GtEncseqBuilder *eb, GT_UNUSED GtError *err)
   }
   if (eb->wsdstab) {
     encseq->hasallocatedsdstab = true;
-    encseq->sdstab = eb->sdstab.spaceGtUlong;
+    encseq->sdstab = eb->sdstab.spaceGtUword;
   }
   ALLASSIGNAPPENDFUNC(sat, encseq->satsep);
   encseq->mappedptr = NULL;

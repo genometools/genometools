@@ -161,7 +161,7 @@ static int encdesc_analyze_descs(GtEncdesc *encdesc,
 
   encdesc->num_of_fields = 0;
   encdesc->num_of_fields_is_cons = true;
-  GT_INITARRAY(&encdesc->num_of_fields_tab, GtUlong);
+  GT_INITARRAY(&encdesc->num_of_fields_tab, GtUword);
 
   /* find description with maximum number of fields */
   /* TODO DW check constant number of fields here */
@@ -421,7 +421,7 @@ static int encdesc_analyze_descs(GtEncdesc *encdesc,
           (desc_char_idx != desclength))
         encdesc->num_of_fields_is_cons = false;
 
-      GT_STOREINARRAY(&encdesc->num_of_fields_tab, GtUlong, 128 ,cur_field_num);
+      GT_STOREINARRAY(&encdesc->num_of_fields_tab, GtUword, 128 ,cur_field_num);
 
       /* TODO DW this heuristic is bad, if the 2nd field is missing, all
          following fields are missing too! */
@@ -441,7 +441,7 @@ static int encdesc_analyze_descs(GtEncdesc *encdesc,
 
     encdesc->num_of_descs = cur_desc;
     if (encdesc->num_of_fields_is_cons) {
-      GT_FREEARRAY(&encdesc->num_of_fields_tab, GtUlong);
+      GT_FREEARRAY(&encdesc->num_of_fields_tab, GtUword);
     }
 
     for (cur_field_num = 0;
@@ -681,7 +681,7 @@ static inline void encdesc_prepare_num_of_fields(GtEncdesc *encdesc,
 {
   GtBitsequence code;
   code =
-    (GtBitsequence) encdesc->num_of_fields_tab.spaceGtUlong[info->cur_desc];
+    (GtBitsequence) encdesc->num_of_fields_tab.spaceGtUword[info->cur_desc];
   prepare_generic(info,
                   (unsigned) encdesc->bits_per_field,
                   code);
@@ -1572,7 +1572,7 @@ void gt_encdesc_delete(GtEncdesc *encdesc)
 {
   if (!encdesc) return;
   gt_bitinstream_delete(encdesc->bitinstream);
-  GT_FREEARRAY(&encdesc->num_of_fields_tab, GtUlong);
+  GT_FREEARRAY(&encdesc->num_of_fields_tab, GtUword);
   encdesc_delete_desc_fields(encdesc->fields, encdesc->num_of_fields);
   gt_sampling_delete(encdesc->sampling);
   gt_free(encdesc);

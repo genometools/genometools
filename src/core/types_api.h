@@ -93,11 +93,9 @@ typedef unsigned long long GtUint64;
 
 typedef unsigned char GtUchar;
 
-typedef GtUword GtUlong;
-
 typedef struct
 {
-  GtUlong a, b;
-} GtUlongPair;
+  GtUword a, b;
+} GtUwordPair;
 
 #endif

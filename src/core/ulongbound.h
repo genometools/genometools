@@ -18,9 +18,9 @@
 #ifndef ULONGBOUND_H
 #define ULONGBOUND_H
 
-typedef struct GtUlongBound GtUlongBound;
+typedef struct GtUwordBound GtUwordBound;
 
-struct GtUlongBound
+struct GtUwordBound
 {
   GtUword lbound,
                 ubound;

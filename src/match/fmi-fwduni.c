@@ -35,7 +35,7 @@ GtUword gt_skfmuniqueforward (const void *genericindex,
 {
   GtUchar cc;
   const GtUchar *qptr;
-  GtUlongBound bwtbound;
+  GtUwordBound bwtbound;
   const Fmindex *fmindex = (Fmindex *) genericindex;
 
   gt_assert(qstart < qend);
@@ -79,7 +79,7 @@ GtUword gt_skfmmstats (const void *genericindex,
   const GtUchar *qptr;
   GtUword prevlbound;
   GtUword matchlength;
-  GtUlongBound bwtbound;
+  GtUwordBound bwtbound;
   const Fmindex *fmindex = (Fmindex *) genericindex;
 
   gt_assert(qstart < qend);

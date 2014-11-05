@@ -220,8 +220,8 @@ static void initsuffixarray(Suffixarray *suffixarray)
   suffixarray->bcktab = NULL;
   suffixarray->bwttabstream.fp = NULL;
   suffixarray->bwttabstream.bufferedfilespace = NULL;
-  suffixarray->suftabstream_GtUlong.fp = NULL;
-  suffixarray->suftabstream_GtUlong.bufferedfilespace = NULL;
+  suffixarray->suftabstream_GtUword.fp = NULL;
+  suffixarray->suftabstream_GtUword.bufferedfilespace = NULL;
 #if defined (_LP64) || defined (_WIN64)
   suffixarray->suftabstream_uint32_t.fp = NULL;
   suffixarray->suftabstream_uint32_t.bufferedfilespace = NULL;
@@ -267,9 +267,9 @@ void gt_freesuffixarray(Suffixarray *suffixarray)
   suffixarray->llvtab = NULL;
   gt_fa_xmunmap((void *) suffixarray->bwttab);
   suffixarray->bwttab = NULL;
-  gt_fa_xfclose(suffixarray->suftabstream_GtUlong.fp);
-  suffixarray->suftabstream_GtUlong.fp = NULL;
-  gt_free(suffixarray->suftabstream_GtUlong.bufferedfilespace);
+  gt_fa_xfclose(suffixarray->suftabstream_GtUword.fp);
+  suffixarray->suftabstream_GtUword.fp = NULL;
+  gt_free(suffixarray->suftabstream_GtUword.bufferedfilespace);
 #if defined (_LP64) || defined (_WIN64)
   gt_fa_xfclose(suffixarray->suftabstream_uint32_t.fp);
   suffixarray->suftabstream_uint32_t.fp = NULL;
@@ -372,12 +372,12 @@ static int inputsuffixarray(bool map,
       } else
       {
         gt_logger_log(logger,"read suftab in units of 8 bytes");
-        INITBufferedfile(indexname,&suffixarray->suftabstream_GtUlong,GtUlong,
+        INITBufferedfile(indexname,&suffixarray->suftabstream_GtUword,GtUword,
                          GT_SUFTABSUFFIX);
       }
 #else
       gt_logger_log(logger,"read suftab in units of 4 bytes");
-      INITBufferedfile(indexname,&suffixarray->suftabstream_GtUlong,GtUlong,
+      INITBufferedfile(indexname,&suffixarray->suftabstream_GtUword,GtUword,
                        GT_SUFTABSUFFIX);
 #endif
     }

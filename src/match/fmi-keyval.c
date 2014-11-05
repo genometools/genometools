@@ -57,7 +57,7 @@ static GtUword determinefmindexsize (const Fmindex *fm,
   }
   if (suffixlength > 0)
   {
-    sumsize += (uint64_t) sizeof (GtUlongBound) * (uint64_t) fm->numofcodes;
+    sumsize += (uint64_t) sizeof (GtUwordBound) * (uint64_t) fm->numofcodes;
   }
   if (storeindexpos)
   {

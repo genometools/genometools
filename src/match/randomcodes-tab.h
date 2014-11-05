@@ -50,7 +50,7 @@ typedef struct
 #if defined (_LP64) || defined (_WIN64)
   uint32_t modvaluemask;
   unsigned int modvaluebits;
-  GtArrayGtUlong bitchangepoints;
+  GtArrayGtUword bitchangepoints;
 #endif
 } GtRandomcodestab;
 
@@ -101,8 +101,8 @@ static inline void gt_randomcodes_countocc_increment(GtRandomcodestab *rct,
 #if defined (_LP64) || defined (_WIN64)
 #define GT_CHANGEPOINT_GET_RCT(CP)\
         GtUword CP = 0;\
-        while (CP < rct->bitchangepoints.nextfreeGtUlong &&\
-                 idx > rct->bitchangepoints.spaceGtUlong[CP])\
+        while (CP < rct->bitchangepoints.nextfreeGtUword &&\
+                 idx > rct->bitchangepoints.spaceGtUword[CP])\
           CP++;
 #endif
 
@@ -121,7 +121,7 @@ static inline GtUword gt_randomcodes_insertionindex(GtRandomcodestab *rct,
   {
     gt_assert(changepoint > 0);
     changepoint--;
-    rct->bitchangepoints.spaceGtUlong[changepoint]++;
+    rct->bitchangepoints.spaceGtUword[changepoint]++;
     rct->leftborder[idx] = rct->modvaluemask;
     return (GtUword)
            rct->leftborder[idx] + (changepoint << rct->modvaluebits);
