@@ -963,24 +963,20 @@ EISFILES=${shell ls ${CURDIR}/src/match/*.c | grep eis-}
 
 SKTOOLS=${shell grep -l Kurtz src/tools/*.c}
 SKCORE=${shell grep -l 'Stefan Kurtz' src/core/*.c}
-DWCORE=${shell grep -l Willrodt src/core/*.c}
-DWTOOLS=${shell grep -l Willrodt src/tools/*.c}
-FMCORE=${shell grep -l Markowsky src/core/*.c}
-FMTOOLS=${shell grep -l Markowsky src/tools/*.c}
-GGTOOLS=${shell grep -l Gonnella src/tools/*.c}
 SKEXT=${shell grep -l 'Stefan Kurtz' src/extended/*.c}
+DWTOOLS=${shell grep -l Willrodt src/tools/*.c}
+DWCORE=${shell grep -l Willrodt src/core/*.c}
 DWEXT=${shell grep -l Willrodt src/extended/*.c}
-FMEXT=${shell grep -l Markowsky src/extended/*.c}
-OEEXT=${shell grep -l Eigenbrod src/extended/*.c}
+GGTOOLS=${shell grep -l Gonnella src/tools/*.c}
 GGEXT=${shell grep -l Gonnella src/extended/*.c}
+GGCORE=${shell grep -l Gonnella src/core/*.c}
 
 ALLSPLINT=${addprefix obj/,${notdir ${subst .c,.splint,\
              ${filter-out ${EISFILES},${wildcard ${CURDIR}/src/match/*.c}}\
              ${wildcard ${CURDIR}/src/ltr/*.c}\
              ${SKTOOLS} ${SKCORE} ${SKEXT} \
 						 ${DWTOOLS} ${DWCORE} ${DWEXT} \
-						 ${FMTOOLS} ${FMCORE} ${FMEXT} \
-             ${GGTOOLS} ${GGEXT} ${OEEXT} }}}
+             ${GGTOOLS} ${GGCORE} ${GGEXT} }}}
 
 ALLSCANBUILD=${subst .splint,.sb, ${ALLSPLINT}}
 
