@@ -536,15 +536,18 @@ void              gt_encseq_builder_add_multiple_encoded(GtEncseqBuilder *eb,
 /* Sets the logger to use by <ee> during encoding to <l>. Default is <NULL> (no
    logging). */
 void              gt_encseq_builder_set_logger(GtEncseqBuilder*, GtLogger *l);
+
 /* Creates a new <GtEncseq> from the sequences added to <eb>.
    Returns a <GtEncseq> instance on success, or <NULL> on error.
    If an error occurred, <err> is set accordingly.
    The state of <eb> is reset to empty after successful creation of a new
    <GtEncseq> (like having called <gt_encseq_builder_reset()>). */
 GtEncseq*         gt_encseq_builder_build(GtEncseqBuilder *eb, GtError *err);
+
 /* Clears all added sequences and descriptions, resetting <eb> to a state
    similar to the state immediately after its initial creation.  */
 void              gt_encseq_builder_reset(GtEncseqBuilder *eb);
+
 /* Deletes <eb>. */
 void              gt_encseq_builder_delete(GtEncseqBuilder *eb);
 

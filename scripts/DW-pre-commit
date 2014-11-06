@@ -3,20 +3,10 @@
 # copy this file to .git/hooks (i.e., overwrite the file .git/hooks/pre-commit)
 # to perform source checks before commits
 
-FILES=`git diff --cached --name-status HEAD | \
-  awk '$1 != "R" && $1 != "D" { print $2 }' | \
-  grep -v -e 'src/external'                 | \
-  grep -e '.*\.c$' -e '.*\.h$' -e '.*\.gen$' -e '.*\.rb$'`
+. $PWD/scripts/pre-commit
 
-make -j8 cairo=no CFLAGS+=-fstrict-aliasing opt=no 64bit=yes CC='ccache gcc'
+[ $? -eq 0 ] && make -j8 cairo=no CFLAGS+=-fstrict-aliasing opt=no 64bit=yes CC='ccache gcc'
 
 [ $? -eq 0 ] && make cairo=no CFLAGS+=-fstrict-aliasing opt=no 64bit=yes -j2 sbgt
 
 [ $? -eq 0 ] && make cairo=no CFLAGS+=-fstrict-aliasing opt=no 64bit=yes -j8 spgt
-
-[ $? -eq 0 ] && if [ ${#FILES} -gt 0 ]
-then
-  $PWD/scripts/src_check $FILES
-else
-  exit 0
-fi
