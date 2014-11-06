@@ -56,7 +56,7 @@ typedef struct {
        proteinexonpenal,             /* add short exon penalty in protein DP */
        disableclustersas,            /* disable the clustering of SAs in
                                         consensus phase */
-       cdnaforwardonly;
+       cdnaforward;                  /* align only forward strand of cDNAs */
   GthSAFilter *sa_filter;            /* the spliced alignment filter */
   GthDuplicateCheck duplicate_check; /* the modus use for duplicate checks */
   GthSpliceSiteModel *splice_site_model; /* the splice site model */

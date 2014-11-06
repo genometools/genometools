@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2003-2012 Gordon Gremme <gordon@gremme.org>
-  Copyright (c) 2003-2008 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2003-2012, 2014 Gordon Gremme <gordon@gremme.org>
+  Copyright (c) 2003-2008       Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -103,7 +103,7 @@ GtOPrval gth_parse_options(GthCallInfo *call_info, GthInput *input,
         *termcutoffsmode, *duplicatecheck;
   bool forward = false, reverse = false, verbose, mincutoffs = false,
        nou12intronmodel, exondistri, introndistri, refseqcovdistri = false,
-       matchnumdistri = false;
+       cdnaforwardonly = false, matchnumdistri = false;
   GtOptionParser *op;
   GtOutputFileInfo *ofi;
   GtOption *optgenomic = NULL,              /* mandatory input */
@@ -115,6 +115,7 @@ GtOPrval gth_parse_options(GthCallInfo *call_info, GthInput *input,
          *opttranslationtable = NULL,     /* translationtable */
          *optforward = NULL,              /* strand direction */
          *optreverse = NULL,              /* strand direction */
+         *optcdnaforward = NULL,          /* strand direction */
          *optfrompos = NULL,              /* genomic sequence positions */
          *opttopos = NULL,                /* genomic sequence positions */
          *optwidth = NULL,                /* genomic sequence positions */
@@ -337,6 +338,14 @@ GtOPrval gth_parse_options(GthCallInfo *call_info, GthInput *input,
     optreverse = gt_option_new_bool("r", "analyze only reverse strand of "
                                     "genomic sequences", &reverse, false);
     gt_option_parser_add_option(op, optreverse);
+  }
+
+  /* -cdnaforward */
+  if (!gthconsensus_parsing) {
+    optcdnaforward = gt_option_new_bool("cdnaforward", "align only forward "
+                                        "strand of cDNAs",
+                                        &call_info->cdnaforward, false);
+    gt_option_parser_add_option(op, optcdnaforward);
   }
 
   /* -frompos */
@@ -1199,11 +1208,11 @@ GtOPrval gth_parse_options(GthCallInfo *call_info, GthInput *input,
   gt_option_is_development_option(optdisableclustersas);
   gt_option_parser_add_option(op, optdisableclustersas);
 
-  /* -cdnaforwardonly */
+  /* -cdnaforwardonly (keep option for backward compatibility) */
   if (!gthconsensus_parsing) {
-    optcdnaforwardonly = gt_option_new_bool("cdnaforwardonly", "consider only "
-                                         "forward strand of cDNAs",
-                                         &call_info->cdnaforwardonly, false);
+    optcdnaforwardonly = gt_option_new_bool("cdnaforwardonly", "align only "
+                                            "forward strand of cDNAs",
+                                            &cdnaforwardonly, false);
     gt_option_is_development_option(optcdnaforwardonly);
     gt_option_parser_add_option(op, optcdnaforwardonly);
   }
@@ -1560,6 +1569,10 @@ GtOPrval gth_parse_options(GthCallInfo *call_info, GthInput *input,
         get_duplicate_check_mode_from_table(gt_str_get(duplicatecheck));
     }
   }
+
+  /* backward compatibility */
+  if (cdnaforwardonly && !gt_option_is_set(optcdnaforward))
+    call_info->cdnaforward = true;
 
   /* assertions */
 #ifndef NDEBUG
