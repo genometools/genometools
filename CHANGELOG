@@ -1,3 +1,8 @@
+changes in version 1.5.4 (2014-11-06)
+
+- SQLite updated to 3.8.7.1
+
+
 changes in version 1.5.3 (2014-06-13)
 
 - many small bugfixes and cleanups
