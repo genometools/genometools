@@ -16,9 +16,12 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#include <errno.h>
 #include <math.h>
 #include <stdio.h>
 #include <string.h>
+#include <sys/types.h>
+#include <sys/wait.h>
 
 #include "core/basename_api.h"
 #include "core/encseq_api.h"
@@ -171,14 +174,13 @@ static int gt_condenser_search_arguments_check(GT_UNUSED int rest_argc,
 
 /*call makeblastdb with given path to <dbfile>*/
 static inline int gt_condenser_search_create_blastdb(const char* dbfile,
-                                              const char *dbtype,
-                                              GtError *err) {
-  int had_err = 0;
+                                                     const char *dbtype,
+                                                     GtError *err) {
+  int had_err = 0,
+      pipe_status;
   GtStr *call = gt_str_new_cstr("makeblastdb -dbtype ");
   char *call_str;
-  char *newline = NULL;
   FILE* fpipe;
-  char line[256];
   gt_str_append_cstr(call, dbtype);
   gt_str_append_cstr(call, " -in ");
   gt_str_append_cstr(call, dbfile);
@@ -186,19 +188,35 @@ static inline int gt_condenser_search_create_blastdb(const char* dbfile,
   call_str = gt_str_get(call);
   gt_log_log("executed call: %s", call_str);
   if ((fpipe = popen(call_str, "r")) == NULL) {
-    gt_error_set(err,"Problem with pipe, calling blast");
-    had_err = 1;
-    return had_err;
+    gt_error_set(err, "Could not open pipe to call makeblastdb");
+    had_err = -1;
   }
-  while (fgets(line, (int)sizeof (line), fpipe) != NULL) {
-    if ((newline = strrchr(line, '\n')) != NULL) {
-      *newline = '\0';
-      newline = NULL;
+  if (!had_err) {
+    char *newline = NULL;
+    char line[BUFSIZ + 1];
+    line[BUFSIZ] = '\0';
+    while (fgets(line, (int) BUFSIZ, fpipe) != NULL) {
+      if ((newline = strrchr(line, '\n')) != NULL) {
+        *newline = '\0';
+        newline = NULL;
+      }
+      gt_log_log("%.*s", BUFSIZ, line);
     }
-    gt_log_log("%s", line);
   }
   gt_str_delete(call);
-  pclose(fpipe);
+  if (!had_err) {
+    pipe_status = pclose(fpipe);
+    if (pipe_status != 0) {
+      had_err = -1;
+      if (errno == ECHILD)
+        gt_error_set(err, "Error calling makeblastdb.");
+      else if (WEXITSTATUS(pipe_status) == 127)
+        gt_error_set(err, "shell returned 127, makeblastdb not installed?");
+      else
+        gt_error_set(err, "makeblastdb error, returned %d",
+                     WEXITSTATUS(pipe_status));
+    }
+  }
   return had_err;
 }
 

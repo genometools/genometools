@@ -1,3 +1,5 @@
+require 'open3'
+
 files = {"#{$testdata}condenser/unique_encseq_test.fas" => [14,7,41],
          "#{$testdata}tRNA.dos.fas" => [71,100,300],
          "#{$testdata}condenser/varlen_50.fas" => [100,3000,10000]}
@@ -72,6 +74,10 @@ opt_arr.each do |opt|
   end
 end
 
+_, makeblastdb = Open3.capture2("which makeblastdb")
+_, blastn      = Open3.capture2("which blastn")
+_, blastp      = Open3.capture2("which blastp")
+
 opt_arr.each do |opt|
   Name "gt condenser compress + search #{opt}"
   Keywords "gt_condenser compress search"
@@ -86,19 +92,31 @@ opt_arr.each do |opt|
         "-indexname #{basename}_nr " +
         "-alignlength #{info[0]} #{basename}",
         :maxtime => 600
-      run_test "#{$bin}gt -debug condenser search " +
-        "-blastn " +
-        "-blastthreads 1 " +
-        "-query #{File.join(File.dirname(file),
-        File.basename(file,'.fas'))}_queries_300_2x.fas " +
-        "-db #{basename}_nr -verbose",
-        :maxtime => 600
-      grep(last_stderr, /debug: [1-9]+[0-9]* hits found/)
-      run_ruby"#$scriptsdir/condenser_statistics.rb " +
-        "#{File.join(File.dirname(file), File.basename(file,'.fas'))}" +
-        "_queries_300_2x_blast?_result #{last_stdout}"
-      grep(last_stdout, /^## FP: 0$/)
-      grep(last_stdout, /^## TP: [1-9]+[0-9]*$/)
+      unless makeblastdb.exitstatus != 0 or
+          blastn.exitstatus != 0 or
+          blastp.exitstatus != 0
+        run_test "#{$bin}gt -debug condenser search " +
+          "-blastn " +
+          "-blastthreads 1 " +
+          "-query #{File.join(File.dirname(file),
+          File.basename(file,'.fas'))}_queries_300_2x.fas " +
+          "-db #{basename}_nr -verbose",
+          :maxtime => 600
+        grep(last_stderr, /debug: [1-9]+[0-9]* hits found/)
+        run_ruby"#$scriptsdir/condenser_statistics.rb " +
+          "#{File.join(File.dirname(file), File.basename(file,'.fas'))}" +
+          "_queries_300_2x_blast?_result #{last_stdout}"
+        grep(last_stdout, /^## FP: 0$/)
+        grep(last_stdout, /^## TP: [1-9]+[0-9]*$/)
+      else
+        run_test "#{$bin}gt -debug condenser search " +
+          "-blastn " +
+          "-blastthreads 1 " +
+          "-query #{File.join(File.dirname(file),
+          File.basename(file,'.fas'))}_queries_300_2x.fas " +
+          "-db #{basename}_nr -verbose",
+          :retval => 1
+      end
     end
   end
 end
