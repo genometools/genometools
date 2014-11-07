@@ -25,7 +25,7 @@
    which allows for keys of type <GtUword>, optionally associated
    with values of type <GtUword>. Thus the implementation can
    sort arrays referenced by pointers of type <GtUword *>,
-   or arrays referenced by pointers of type <GtUlongPair *>.
+   or arrays referenced by pointers of type <GtUwordPair *>.
    In the latter case, the component <a> is the key and <b> is the
    value.
 
@@ -60,7 +60,7 @@ void gt_radixsort_lsb_linear(GtUword *source,GtUword len);
    the auxiliary array is not exceeded. */
 GtUword gt_radixsort_max_num_of_entries_ulong(size_t memlimit);
 
-/* Determine the maximum number of entries in an array of <GtUlongPair>s such
+/* Determine the maximum number of entries in an array of <GtUwordPair>s such
    that the given memory limit <memlimit> (in bytes) for the array itself and
    the auxiliary array is not exceeded. */
 GtUword gt_radixsort_max_num_of_entries_ulongpair(size_t memlimit);
@@ -99,7 +99,7 @@ typedef struct GtRadixsortinfo GtRadixsortinfo;
 GtRadixsortinfo *gt_radixsort_new_ulong(GtUword maxlen);
 
 /* The following function is like the previous, except that the
-   created object can be used to sort arrays of <GtUlongPair> values. */
+   created object can be used to sort arrays of <GtUwordPair> values. */
 GtRadixsortinfo* gt_radixsort_new_ulongpair(GtUword maxlen);
 
 /* Return the size of the <GtRadixsortinfo> object. */
@@ -115,8 +115,8 @@ void             gt_radixsort_inplace_sort(GtRadixsortinfo *radixsortinfo,
 GtUword*   gt_radixsort_space_ulong(GtRadixsortinfo *radixsortinfo);
 
 /* The analogue function as before, but for the case that
-   arrays over type <GtUlongPair> are to be sorted. */
-GtUlongPair*     gt_radixsort_space_ulongpair(GtRadixsortinfo *radixsortinfo);
+   arrays over type <GtUwordPair> are to be sorted. */
+GtUwordPair*     gt_radixsort_space_ulongpair(GtRadixsortinfo *radixsortinfo);
 
 /* Delete a <GtRadixsortinfo> object. */
 void             gt_radixsort_delete(GtRadixsortinfo *radixsortinfo);

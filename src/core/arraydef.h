@@ -133,7 +133,6 @@
   Some declarations for the most common array types.
 */
 GT_DECLAREARRAYSTRUCT(GtUchar);
-GT_DECLAREARRAYSTRUCT(GtUlong);
 GT_DECLAREARRAYSTRUCT(GtUword);
 GT_DECLAREARRAYSTRUCT(char);
 GT_DECLAREARRAYSTRUCT(uint32_t);

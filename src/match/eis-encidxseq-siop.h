@@ -67,7 +67,7 @@ EISSymTransformedRank(EISeq *seq, Symbol tSym, GtUword pos,
   return seq->classInfo->rank(seq, tSym, pos, hint);
 }
 
-static inline GtUlongPair
+static inline GtUwordPair
 EISPosPairRank(EISeq *seq, Symbol sym, GtUword posA, GtUword posB,
                union EISHint *hint)
 {
@@ -91,7 +91,7 @@ EISPosPairRangeRank(EISeq *seq, AlphabetRangeID range, GtUword posA,
   seq->classInfo->posPairRangeRank(seq, range, posA, posB, rankCounts, hint);
 }
 
-static inline GtUlongPair
+static inline GtUwordPair
 EISSymTransformedPosPairRank(EISeq *seq, Symbol tSym, GtUword posA,
                              GtUword posB, union EISHint *hint)
 {

@@ -80,8 +80,8 @@
           return 1;\
         }
 
-DECLAREBufferedfiletype(GtUlong);
-DECLAREREADFUNCTION(GtUlong);
+DECLAREBufferedfiletype(GtUword);
+DECLAREREADFUNCTION(GtUword);
 
 #if defined (_LP64) || defined (_WIN64)
 DECLAREBufferedfiletype(uint32_t);
@@ -119,7 +119,7 @@ typedef struct
 #if defined (_LP64) || defined (_WIN64)
   GtBufferedfile_uint32_t suftabstream_uint32_t;
 #endif
-  GtBufferedfile_GtUlong suftabstream_GtUlong;
+  GtBufferedfile_GtUword suftabstream_GtUword;
   GtBufferedfile_GtUchar bwttabstream,
                          lcptabstream;
   GtBufferedfile_Largelcpvalue llvtabstream;

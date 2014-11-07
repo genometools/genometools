@@ -48,7 +48,7 @@ typedef struct
                 countmax;
   unsigned int shiftforcounts;
 #if defined (_LP64) || defined (_WIN64)
-  GtArrayGtUlong bitchangepoints;
+  GtArrayGtUword bitchangepoints;
 #endif
 } GtFirstcodestab;
 
@@ -60,8 +60,8 @@ DEFINE_HASHMAP(GtUword, ul, uint32_t, u32, gt_ht_ul_elem_hash,
 #if defined (_LP64) || defined (_WIN64)
 #define GT_CHANGEPOINT_GET(CP)\
         GtUword CP = 0;\
-        while (CP < fct->bitchangepoints.nextfreeGtUlong &&\
-                 idx > fct->bitchangepoints.spaceGtUlong[CP])\
+        while (CP < fct->bitchangepoints.nextfreeGtUword &&\
+                 idx > fct->bitchangepoints.spaceGtUword[CP])\
           CP++;
 #endif
 
@@ -83,7 +83,7 @@ static inline GtUword gt_firstcodes_insertionindex(GtFirstcodestab *fct,
   {
     gt_assert(changepoint > 0);
     changepoint--;
-    fct->bitchangepoints.spaceGtUlong[changepoint]++;
+    fct->bitchangepoints.spaceGtUword[changepoint]++;
     fct->leftborder[idx] = GT_MODVALUEMASK;
     return (GtUword)
            fct->leftborder[idx] + (changepoint << GT_MODVALUEBITS);

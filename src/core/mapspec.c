@@ -37,8 +37,8 @@ typedef enum
   Uint16Type,
   Uint32Type,
   Uint64Type,
-  GtUlongType,
-  GtUlongBoundType,
+  GtUwordType,
+  GtUwordBoundType,
   GtBitsequenceType,
   GtPairBwtidxType,
   GtTwobitencodingType,
@@ -130,7 +130,7 @@ static int assigncorrecttype(GtMapspecification *mapspec,
     case Uint32Type:
       ASSIGNPTR2STARTPTR(uint32_t);
       break;
-    case GtUlongType:
+    case GtUwordType:
       ASSIGNPTR2STARTPTR(GtUword);
       break;
     case Uint64Type:
@@ -139,8 +139,8 @@ static int assigncorrecttype(GtMapspecification *mapspec,
     case GtBitsequenceType:
       ASSIGNPTR2STARTPTR(GtBitsequence);
       break;
-    case GtUlongBoundType:
-      ASSIGNPTR2STARTPTR(GtUlongBound);
+    case GtUwordBoundType:
+      ASSIGNPTR2STARTPTR(GtUwordBound);
       break;
     case GtPairBwtidxType:
       ASSIGNPTR2STARTPTR(GtPairBwtidx);
@@ -407,8 +407,8 @@ int gt_mapspec_write(GtMapspecSetupFunc setup, FILE *fp,
         case Uint32Type:
           WRITEACTIONWITHTYPE(uint32_t);
           break;
-        case GtUlongType:
-          WRITEACTIONWITHTYPE(GtUlong);
+        case GtUwordType:
+          WRITEACTIONWITHTYPE(GtUword);
           break;
         case Uint64Type:
           WRITEACTIONWITHTYPE(uint64_t);
@@ -416,8 +416,8 @@ int gt_mapspec_write(GtMapspecSetupFunc setup, FILE *fp,
         case GtBitsequenceType:
           WRITEACTIONWITHTYPE(GtBitsequence);
           break;
-        case GtUlongBoundType:
-          WRITEACTIONWITHTYPE(GtUlongBound);
+        case GtUwordBoundType:
+          WRITEACTIONWITHTYPE(GtUwordBound);
           break;
         case GtPairBwtidxType:
           WRITEACTIONWITHTYPE(GtPairBwtidx);
@@ -507,15 +507,15 @@ void gt_mapspec_add_ulong_ptr(GtMapspec *mapspec, GtUword **ptr,
 {
   GtMapspecification *mapspecptr;
   gt_assert(mapspec && ptr);
-  NEWMAPSPEC(mapspec, ptr, GtUlongType, sizeof (GtUword), n);
+  NEWMAPSPEC(mapspec, ptr, GtUwordType, sizeof (GtUword), n);
 }
 
-void gt_mapspec_add_ulongbound_ptr(GtMapspec *mapspec, GtUlongBound **ptr,
+void gt_mapspec_add_ulongbound_ptr(GtMapspec *mapspec, GtUwordBound **ptr,
                                    GtUword n)
 {
   GtMapspecification *mapspecptr;
   gt_assert(mapspec && ptr);
-  NEWMAPSPEC(mapspec, ptr, GtUlongBoundType, sizeof (GtUlongBound), n);
+  NEWMAPSPEC(mapspec, ptr, GtUwordBoundType, sizeof (GtUwordBound), n);
 }
 
 void gt_mapspec_add_uint32_ptr(GtMapspec *mapspec, uint32_t **ptr,

@@ -302,7 +302,7 @@ static GtUword gt_randomcodes_accumulatecounts_merge(
   GtUword found = 0;
   const GtUword *query = querystream_fst,
                       *subject = subjectstream_fst,
-                      *querystream_lst = fci->buf.spaceGtUlong
+                      *querystream_lst = fci->buf.spaceGtUword
                                          + fci->buf.nextfree - 1,
                       *subjectstream_lst = fci->allrandomcodes
                                            + fci->differentcodes - 1;
@@ -334,10 +334,10 @@ static void gt_randomcodes_accumulatecounts_flush(void *data)
     gt_assert(fci->allrandomcodes != NULL);
     fci->codebuffer_total += fci->buf.nextfree;
     gt_radixsort_inplace_sort(fci->radixsort_code, fci->buf.nextfree);
-    foundindex = gt_randomcodes_find_accu(fci, fci->buf.spaceGtUlong[0]);
+    foundindex = gt_randomcodes_find_accu(fci, fci->buf.spaceGtUword[0]);
     gt_assert(foundindex != ULONG_MAX);
     fci->total_count += gt_randomcodes_accumulatecounts_merge(fci,
-        fci->buf.spaceGtUlong, fci->allrandomcodes + foundindex);
+        fci->buf.spaceGtUword, fci->allrandomcodes + foundindex);
     gt_assert(fci->total_count == fci->codebuffer_total);
     fci->flushcount++;
     fci->buf.nextfree = 0;
@@ -346,12 +346,12 @@ static void gt_randomcodes_accumulatecounts_flush(void *data)
 
 static GtUword gt_randomcodes_insertsuffixes_merge(
                                         GtRandomcodesinfo *fci,
-                                        const GtUlongPair *querystream_fst,
+                                        const GtUwordPair *querystream_fst,
                                         const GtUword *subjectstream_fst)
 {
   GtUword found = 0, idx;
-  const GtUlongPair *query = querystream_fst,
-                    *querystream_lst = fci->buf.spaceGtUlongPair +
+  const GtUwordPair *query = querystream_fst,
+                    *querystream_lst = fci->buf.spaceGtUwordPair +
                                        fci->buf.nextfree - 1;
   const GtUword *subject = subjectstream_fst,
                       *subjectstream_lst = fci->allrandomcodes +
@@ -388,10 +388,10 @@ static void gt_randomcodes_insertsuffixes_flush(void *data)
     gt_assert(fci->allrandomcodes != NULL);
     fci->codebuffer_total += fci->buf.nextfree;
     gt_radixsort_inplace_sort(fci->radixsort_codepos, fci->buf.nextfree);
-    ptr = gt_randomcodes_find_insert(fci, fci->buf.spaceGtUlongPair[0].a);
+    ptr = gt_randomcodes_find_insert(fci, fci->buf.spaceGtUwordPair[0].a);
     gt_assert(ptr != NULL);
     fci->total_inserted += gt_randomcodes_insertsuffixes_merge(fci,
-        fci->buf.spaceGtUlongPair, ptr);
+        fci->buf.spaceGtUwordPair, ptr);
     gt_assert(fci->total_inserted == fci->codebuffer_total);
     fci->flushcount++;
     fci->buf.nextfree = 0;
@@ -917,8 +917,8 @@ static int gt_randomcodes_init(GtRandomcodesinfo *fci,
   fci->spmsuftab = NULL;
   fci->radixsort_code = NULL;
   fci->radixsort_codepos = NULL;
-  fci->buf.spaceGtUlongPair = NULL;
-  fci->buf.spaceGtUlong = NULL;
+  fci->buf.spaceGtUwordPair = NULL;
+  fci->buf.spaceGtUword = NULL;
   fci->mappedallrandomcodes = NULL;
   fci->mappedleftborder = NULL;
   GT_FCI_ADDWORKSPACE(fci->fcsl, "encseq", (size_t)
@@ -1174,7 +1174,7 @@ static void gt_randomcodes_accumulatecounts_run(GtRandomcodesinfo *fci,
   }
   gt_assert(fci->buf.allocated > 0);
   fci->radixsort_code = gt_radixsort_new_ulong(fci->buf.allocated);
-  fci->buf.spaceGtUlong = gt_radixsort_space_ulong(fci->radixsort_code);
+  fci->buf.spaceGtUword = gt_radixsort_space_ulong(fci->radixsort_code);
   GT_FCI_ADDWORKSPACE(fci->fcsl, "radixsort_code",
                       gt_radixsort_size(fci->radixsort_code));
   fci->buf.fciptr = fci; /* as we need to give fci to the flush function */
@@ -1680,7 +1680,7 @@ int storerandomcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
       fci.radixsort_codepos = gt_radixsort_new_ulongpair(fci.buf.allocated);
       GT_FCI_ADDWORKSPACE(fci.fcsl, "radixsort_codepos",
                           gt_radixsort_size(fci.radixsort_codepos));
-      fci.buf.spaceGtUlongPair
+      fci.buf.spaceGtUwordPair
         = gt_radixsort_space_ulongpair(fci.radixsort_codepos);
     }
     fci.codebuffer_total = 0;
@@ -1763,7 +1763,7 @@ int storerandomcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
     gt_free(fci.allrandomcodes);
     fci.allrandomcodes = NULL;
     gt_Sfxmappedrangelist_delete(sfxmrlist);
-    fci.buf.spaceGtUlong = NULL;
+    fci.buf.spaceGtUword = NULL;
     gt_radixsort_delete(fci.radixsort_code);
   }
   gt_suftabparts_rc_delete(suftabparts_rc);

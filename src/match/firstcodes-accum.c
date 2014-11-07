@@ -36,7 +36,7 @@
               (BUF)->flush_function((BUF)->fciptr);\
             }\
             gt_assert ((BUF)->nextfree < (BUF)->allocated);\
-            (BUF)->spaceGtUlong[(BUF)->nextfree++] = CODE;\
+            (BUF)->spaceGtUword[(BUF)->nextfree++] = CODE;\
           }\
         }
 

@@ -138,7 +138,7 @@ string object (the \emph{member variables} in object orientation lingo).
 \begin{lstlisting}
 struct GtStr {
   char *cstr;           /* the actual string (always '\0' terminated) */
-  unsigned long length; /* currently used length (without trailing '\0') */
+  GtUword length; /* currently used length (without trailing '\0') */
   size_t allocated;     /* currently allocated memory */
 };
 \end{lstlisting}
@@ -176,7 +176,7 @@ Our string class implementation so far looks like this
 
 struct GtStr {
   char *cstr;           /* the actual string (always '\0' terminated) */
-  unsigned long length; /* currently used length (without trailing '\0') */
+  GtUword length; /* currently used length (without trailing '\0') */
   size_t allocated;     /* currently allocated memory */
 };
 
@@ -375,7 +375,7 @@ for an instance of the interface class at the beginning of our definition:
 \begin{lstlisting}
 struct GtExampleA {
   GtExample parent_instance;
-  unsigned long my_property;
+  GtUword my_property;
 };
 \end{lstlisting}
 
@@ -937,7 +937,7 @@ Here is an example:
 bool
 gt_array_equal(const GtArray *a, const GtArray *b, GtCompare cmpfunc)
 {
-  unsigned long idx, size_a, size_b;
+  GtUword idx, size_a, size_b;
   int cmp;
   gt_assert(gt_array_elem_size(a) == gt_array_elem_size(b));
   size_a = gt_array_size(a);
@@ -996,8 +996,8 @@ core developers!
 Use unsigned types whereever possible. We need to process large amount
 of data and we may need every bit to process it.
 \item
-Use \keyword{unsigned long} for sequence positions/lengths/offsets/\dots .
-The \keyword{unsigned long} type equals the word size on all common systems
+Use \keyword{GtUword} for sequence positions/lengths/offsets/\dots .
+The \keyword{GtUword} type equals the word size on all common systems
 (i.e., it is 32-bit wide on 32-bit systems and 64-bit wide on 64-bit systems)
 which makes it ideal for most use cases.
 \item

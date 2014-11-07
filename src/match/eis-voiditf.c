@@ -507,7 +507,7 @@ GtUword gt_pck_getShuStringLength(const FMindex *bwtSubject,
                                        const GtUchar *suffix,
                                        GtUword suffixLength)
 {
-  GtUlongPair occPair;
+  GtUwordPair occPair;
   Symbol curChar;
   const GtUchar *qptr, *qend;
   const MRAEnc *alphabet;

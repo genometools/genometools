@@ -78,10 +78,10 @@ int gt_nextSequentialsuftabvalue(GtUword *currentsuffix,
 
 #if defined (_LP64) || defined (_WIN64)
 #define SSAR_NEXTSEQUENTIALSUFTABVALUE_SEQ_scan(SUFTABVALUE,SSAR)\
-        if ((SSAR)->suffixarray->suftabstream_GtUlong.fp != NULL)\
+        if ((SSAR)->suffixarray->suftabstream_GtUword.fp != NULL)\
         {\
           SSAR_NEXTSEQUENTIALSUFTABVALUE_SEQ_scan_generic(SUFTABVALUE,SSAR,\
-                                                          GtUlong);\
+                                                          GtUword);\
         } else\
         {\
           SSAR_NEXTSEQUENTIALSUFTABVALUE_SEQ_scan_generic(SUFTABVALUE,SSAR,\
@@ -90,7 +90,7 @@ int gt_nextSequentialsuftabvalue(GtUword *currentsuffix,
 #else
 #define SSAR_NEXTSEQUENTIALSUFTABVALUE_SEQ_scan(SUFTABVALUE,SSAR)\
         SSAR_NEXTSEQUENTIALSUFTABVALUE_SEQ_scan_generic(SUFTABVALUE,SSAR,\
-                                                        GtUlong)
+                                                        GtUword)
 #endif
 
 #define SSAR_NEXTSEQUENTIALSUFTABVALUE(SUFTABVALUE,SSAR)\

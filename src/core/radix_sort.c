@@ -41,7 +41,7 @@
    workspace.
 
    5) The implementation allows one to sort an GtUword -array and an array
-   over type <GtUlongPair>, where the component <a> is the soring key.
+   over type <GtUwordPair>, where the component <a> is the soring key.
 */
 
 #include <stdio.h>
@@ -243,7 +243,7 @@ static void gt_evenly_divide_lentab(GtUword *endindexes,
 typedef union
 {
   GtUword *ulongptr;
-  GtUlongPair *ulongpairptr;
+  GtUwordPair *ulongpairptr;
 } GtRadixvalues;
 
 typedef struct
@@ -468,7 +468,7 @@ void gt_radixsort_delete(GtRadixsortinfo *radixsortinfo)
 
 static size_t gt_radixsort_elemsize(bool pair)
 {
-  return pair ? sizeof (GtUlongPair) : sizeof (GtUword);
+  return pair ? sizeof (GtUwordPair) : sizeof (GtUword);
 }
 
 GtUword gt_radixsort_max_num_of_entries_ulong(size_t memlimit)
@@ -582,7 +582,7 @@ void gt_radixsort_inplace_ulong(GtUword *source, GtUword len)
   gt_radixsort_delete(radixsortinfo);
 }
 
-void gt_radixsort_inplace_GtUlongPair(GtUlongPair *source, GtUword len)
+void gt_radixsort_inplace_GtUwordPair(GtUwordPair *source, GtUword len)
 {
   GtRadixvalues radixvalues;
   GtRadixsortinfo *radixsortinfo;
@@ -604,7 +604,7 @@ GtUword *gt_radixsort_space_ulong(GtRadixsortinfo *radixsortinfo)
   return radixsortinfo->sortspace.ulongptr;
 }
 
-GtUlongPair *gt_radixsort_space_ulongpair(GtRadixsortinfo *radixsortinfo)
+GtUwordPair *gt_radixsort_space_ulongpair(GtRadixsortinfo *radixsortinfo)
 {
   gt_assert(radixsortinfo->pairs);
   return radixsortinfo->sortspace.ulongpairptr;

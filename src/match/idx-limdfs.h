@@ -107,7 +107,7 @@ GtUchar gt_limdfs_getencodedchar(const Limdfsresources *limdfsresources,
 bool gt_intervalwidthleq(const Limdfsresources *limdfsresources,
                       GtUword leftbound,GtUword rightbound);
 
-GtArrayGtUlong *gt_fromitv2sortedmatchpositions(
+GtArrayGtUword *gt_fromitv2sortedmatchpositions(
                                           Limdfsresources *limdfsresources,
                                           GtUword leftbound,
                                           GtUword rightbound,

@@ -132,10 +132,10 @@ int gt_nextSequentialsuftabvalue(GtUword *currentsuffix,
   if (ssar->scanfile)
   {
 #if defined (_LP64) || defined (_WIN64)
-    if (ssar->suffixarray->suftabstream_GtUlong.fp != NULL)
+    if (ssar->suffixarray->suftabstream_GtUword.fp != NULL)
     {
-      return gt_readnextfromstream_GtUlong(currentsuffix,
-                                 &ssar->suffixarray->suftabstream_GtUlong);
+      return gt_readnextfromstream_GtUword(currentsuffix,
+                                 &ssar->suffixarray->suftabstream_GtUword);
     } else
     {
       uint32_t readvalue = 0;
@@ -146,8 +146,8 @@ int gt_nextSequentialsuftabvalue(GtUword *currentsuffix,
       return ret;
     }
 #else
-     return gt_readnextfromstream_GtUlong(currentsuffix,
-                                      &ssar->suffixarray->suftabstream_GtUlong);
+     return gt_readnextfromstream_GtUword(currentsuffix,
+                                      &ssar->suffixarray->suftabstream_GtUword);
 #endif
   }
   if (ssar->scanfile)

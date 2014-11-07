@@ -76,13 +76,13 @@ void gt_mapspec_add_uint16_ptr(GtMapspec *mapspec, uint16_t **ptr,
    to <ptr> to the <mapspec>. */
 void gt_mapspec_add_ulong_ptr(GtMapspec *mapspec, GtUword **ptr,
                               GtUword n);
-/* Adds a <GtUlongBound> array of length <n>, to be read from or written
+/* Adds a <GtUwordBound> array of length <n>, to be read from or written
    to <ptr> to the <mapspec>. */
 #define gt_mapspec_add_ulongbound(MAPSPEC, PTR, N)\
         gt_mapspec_add_ulongbound_ptr(MAPSPEC, &(PTR), N);
-/* Adds a <GtUlongBound> array of length <n>, to be read from or written
+/* Adds a <GtUwordBound> array of length <n>, to be read from or written
    to <ptr> to the <mapspec>. */
-void gt_mapspec_add_ulongbound_ptr(GtMapspec *mapspec, GtUlongBound **ptr,
+void gt_mapspec_add_ulongbound_ptr(GtMapspec *mapspec, GtUwordBound **ptr,
                                    GtUword n);
 /* Adds a uint32_t array of length <n>, to be read from or written
    to <ptr> to the <mapspec>. */

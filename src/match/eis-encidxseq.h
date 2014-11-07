@@ -200,7 +200,7 @@ EISSymTransformedRank(EISeq *seq, Symbol tSym, GtUword pos,
  * @return members a and b of returned struct contain Occ results for
  * posA and posB respectively
  */
-static inline GtUlongPair
+static inline GtUwordPair
 EISPosPairRank(EISeq *seq, Symbol sym, GtUword posA, GtUword posB,
                union EISHint *hint);
 
@@ -219,7 +219,7 @@ EISPosPairRank(EISeq *seq, Symbol sym, GtUword posA, GtUword posB,
  * @return members a and b of returned struct contain Occ results for
  * posA and posB respectively
  */
-static inline GtUlongPair
+static inline GtUwordPair
 EISSymTransformedPosPairRank(EISeq *seq, Symbol tSym, GtUword posA,
                              GtUword posB, union EISHint *hint);
 

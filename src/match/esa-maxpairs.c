@@ -58,7 +58,7 @@ typedef struct  /* global information */
   bool initialized;
   unsigned int searchlength,
                alphabetsize;
-  GtArrayGtUlong uniquechar,
+  GtArrayGtUword uniquechar,
               *poslist;
   GtGenericEncseq genericencseq;
   const GtUchar *sequence;
@@ -84,16 +84,16 @@ static void add2poslist_maxpairs(GtBUstate_maxpairs *state,
                                  GtBUinfo_maxpairs *ninfo,
                                  unsigned int base,GtUword leafnumber)
 {
-  GtArrayGtUlong *ptr;
+  GtArrayGtUword *ptr;
 
   if (base >= state->alphabetsize)
   {
     ninfo->uniquecharposlength++;
-    GT_STOREINARRAY(&state->uniquechar,GtUlong,4,leafnumber);
+    GT_STOREINARRAY(&state->uniquechar,GtUword,4,leafnumber);
   } else
   {
     ptr = &state->poslist[base];
-    GT_STOREINARRAY(ptr,GtUlong,4,leafnumber);
+    GT_STOREINARRAY(ptr,GtUword,4,leafnumber);
     NODEPOSLISTLENGTH(ninfo,base)++;
   }
 }
@@ -121,7 +121,7 @@ static int cartproduct1_maxpairs(GtBUstate_maxpairs *state,
   GtUword *spptr, *start;
 
   pl = &NODEPOSLISTENTRY(ninfo,base);
-  start = state->poslist[base].spaceGtUlong + pl->start;
+  start = state->poslist[base].spaceGtUword + pl->start;
   for (spptr = start; spptr < start + pl->length; spptr++)
   {
     if (state->processmaxpairs(state->processmaxpairsinfo,&state->genericencseq,
@@ -145,9 +145,9 @@ static int cartproduct2_maxpairs(GtBUstate_maxpairs *state,
   GtUword *start1, *start2, *spptr1, *spptr2;
 
   pl1 = &NODEPOSLISTENTRY(ninfo1,base1);
-  start1 = state->poslist[base1].spaceGtUlong + pl1->start;
+  start1 = state->poslist[base1].spaceGtUword + pl1->start;
   pl2 = &NODEPOSLISTENTRY(ninfo2,base2);
-  start2 = state->poslist[base2].spaceGtUlong + pl2->start;
+  start2 = state->poslist[base2].spaceGtUword + pl2->start;
   for (spptr1 = start1; spptr1 < start1 + pl1->length; spptr1++)
   {
     for (spptr2 = start2; spptr2 < start2 + pl2->length; spptr2++)
@@ -171,9 +171,9 @@ static void setpostabto0_maxpairs(GtBUstate_maxpairs *state)
   {
     for (base = 0; base < state->alphabetsize; base++)
     {
-      state->poslist[base].nextfreeGtUlong = 0;
+      state->poslist[base].nextfreeGtUword = 0;
     }
-    state->uniquechar.nextfreeGtUlong = 0;
+    state->uniquechar.nextfreeGtUword = 0;
     state->initialized = true;
   }
 }
@@ -226,10 +226,10 @@ static int processleafedge_maxpairs(bool firstsucc,
   {
     father->commonchar = leftchar;
     father->uniquecharposlength = 0;
-    father->uniquecharposstart = state->uniquechar.nextfreeGtUlong;
+    father->uniquecharposstart = state->uniquechar.nextfreeGtUword;
     for (base = 0; base < state->alphabetsize; base++)
     {
-      NODEPOSLISTSTART(father,base) = state->poslist[base].nextfreeGtUlong;
+      NODEPOSLISTSTART(father,base) = state->poslist[base].nextfreeGtUword;
       NODEPOSLISTLENGTH(father,base) = 0;
     }
     add2poslist_maxpairs(state,father,(unsigned int) leftchar,leafnumber);
@@ -252,7 +252,7 @@ static int processleafedge_maxpairs(bool firstsucc,
         }
       }
     }
-    start = state->uniquechar.spaceGtUlong +
+    start = state->uniquechar.spaceGtUword +
             father->uniquecharposstart;
     for (spptr = start; spptr < start + father->uniquecharposlength; spptr++)
     {
@@ -310,7 +310,7 @@ static int processbranchingedge_maxpairs(bool firstsucc,
   }
   if (father->commonchar == ISLEFTDIVERSE)
   {
-    start = state->uniquechar.spaceGtUlong + son->uniquecharposstart;
+    start = state->uniquechar.spaceGtUword + son->uniquecharposstart;
     for (chfather = 0; chfather < state->alphabetsize; chfather++)
     {
       for (chson = 0; chson < state->alphabetsize; chson++)
@@ -333,7 +333,7 @@ static int processbranchingedge_maxpairs(bool firstsucc,
         }
       }
     }
-    fstart = state->uniquechar.spaceGtUlong +
+    fstart = state->uniquechar.spaceGtUword +
              father->uniquecharposstart;
     for (fptr = fstart; fptr < fstart + father->uniquecharposlength; fptr++)
     {
@@ -391,7 +391,7 @@ int gt_enumeratemaxpairs_generic(Sequentialsuffixarrayreader *ssar,
                                  GtError *err)
 {
   unsigned int base;
-  GtArrayGtUlong *ptr;
+  GtArrayGtUword *ptr;
   GtBUstate_maxpairs *state;
   bool haserr = false;
 
@@ -421,22 +421,22 @@ int gt_enumeratemaxpairs_generic(Sequentialsuffixarrayreader *ssar,
     state->genericencseq.seqptr.bare_encseq = bare_encseq;
     state->sequence = gt_bare_encseq_sequence(bare_encseq);
   }
-  GT_INITARRAY(&state->uniquechar,GtUlong);
+  GT_INITARRAY(&state->uniquechar,GtUword);
   state->poslist = gt_malloc(sizeof (*state->poslist) * state->alphabetsize);
   for (base = 0; base < state->alphabetsize; base++)
   {
     ptr = &state->poslist[base];
-    GT_INITARRAY(ptr,GtUlong);
+    GT_INITARRAY(ptr,GtUword);
   }
   if (gt_esa_bottomup_maxpairs(ssar, suflcpiterator,  state, err) != 0)
   {
     haserr = true;
   }
-  GT_FREEARRAY(&state->uniquechar,GtUlong);
+  GT_FREEARRAY(&state->uniquechar,GtUword);
   for (base = 0; base < state->alphabetsize; base++)
   {
     ptr = &state->poslist[base];
-    GT_FREEARRAY(ptr,GtUlong);
+    GT_FREEARRAY(ptr,GtUword);
   }
   gt_free(state->poslist);
   gt_free(state);

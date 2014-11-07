@@ -202,7 +202,7 @@ getMatchBound(const BWTSeq *bwtSeq, const Symbol *query, size_t queryLen,
   qptr = forward ? (qptr+1) : (qptr-1);
   while (match->start < match->end && qptr != qend)
   {
-    GtUlongPair occPair;
+    GtUwordPair occPair;
 
     gt_assert(ISNOTSPECIAL(*qptr));
     cc = (unsigned int) *qptr;
@@ -229,7 +229,7 @@ GtUword gt_packedindexuniqueforward(const BWTSeq *bwtSeq,
   GtUchar cc;
   const GtUchar *qptr;
   struct matchBound bwtbound;
-  GtUlongPair seqpospair;
+  GtUwordPair seqpospair;
   Symbol curSym;
   const MRAEnc *alphabet;
 
@@ -295,7 +295,7 @@ GtUword gt_packedindexmstatsforward(const BWTSeq *bwtSeq,
   const GtUchar *qptr;
   GtUword prevlbound;
   struct matchBound bwtbound;
-  GtUlongPair seqpospair;
+  GtUwordPair seqpospair;
   Symbol curSym;
   GtUword matchlength;
   const MRAEnc *alphabet;

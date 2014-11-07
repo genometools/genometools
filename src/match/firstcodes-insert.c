@@ -36,8 +36,8 @@
               (BUF)->flush_function((BUF)->fciptr);\
             }\
             gt_assert ((BUF)->nextfree < (BUF)->allocated);\
-            (BUF)->spaceGtUlongPair[(BUF)->nextfree].a = CODE;\
-            (BUF)->spaceGtUlongPair[(BUF)->nextfree++].b\
+            (BUF)->spaceGtUwordPair[(BUF)->nextfree].a = CODE;\
+            (BUF)->spaceGtUwordPair[(BUF)->nextfree++].b\
               = gt_seqnumrelpos_encode((BUF)->snrp,SEQNUM,RELPOS);\
           }\
         }

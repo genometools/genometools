@@ -84,7 +84,7 @@ struct GtBlindtrie
                    nextfreeBlindtrienode;
   GtBlindtrienode *spaceBlindtrienode;
   GtArrayGtBlindtriesnodeptr stack;
-  GtArrayGtUlong overflowsuffixes;
+  GtArrayGtUword overflowsuffixes;
 
   /* The following needs to be supplied for each insertion */
   const GtEncseq *encseq;
@@ -926,7 +926,7 @@ GtBlindtrie *gt_blindtrie_new(GtSuffixsortspace *suffixsortspace,
                              blindtrie->allocatedBlindtrienode *
                              sizeof (GtBlindtrienode)));
   */
-  GT_INITARRAY (&blindtrie->overflowsuffixes, GtUlong);
+  GT_INITARRAY (&blindtrie->overflowsuffixes, GtUword);
   GT_INITARRAY (&blindtrie->stack, GtBlindtriesnodeptr);
   blindtrie->nextfreeBlindtrienode = 0;
   blindtrie->encseq = encseq;
@@ -995,7 +995,7 @@ void gt_blindtrie_delete(GtBlindtrie *blindtrie)
   gt_Viatwobitkeyvalues_delete(blindtrie->vtk1);
   gt_Viatwobitkeyvalues_delete(blindtrie->vtk2);
   gt_free(blindtrie->spaceBlindtrienode);
-  GT_FREEARRAY(&blindtrie->overflowsuffixes, GtUlong);
+  GT_FREEARRAY(&blindtrie->overflowsuffixes, GtUword);
   GT_FREEARRAY(&blindtrie->stack, GtBlindtriesnodeptr);
   gt_free(blindtrie);
 }
@@ -1114,7 +1114,7 @@ static void gt_blindtrie_insertsuffix(GtBlindtrie *blindtrie,
     {
       blindtrie->sortmaxdepthminusoffset = sortmaxdepth - offset;
     }
-    blindtrie->overflowsuffixes.nextfreeGtUlong = 0;
+    blindtrie->overflowsuffixes.nextfreeGtUword = 0;
     blindtrie_makeroot(blindtrie,currentstartpos,ULONG_MAX);
   } else
   {
@@ -1146,7 +1146,7 @@ static void gt_blindtrie_insertsuffix(GtBlindtrie *blindtrie,
                                   currenttwobitencodingstoppos);
     } else
     {
-      GT_STOREINARRAY(&blindtrie->overflowsuffixes,GtUlong,32,currentstartpos);
+      GT_STOREINARRAY(&blindtrie->overflowsuffixes,GtUword,32,currentstartpos);
     }
   }
 }
@@ -1165,18 +1165,18 @@ static void processoverflowsuffixes(GtBlindtrie *blindtrie,
                                     GtUword subbucketleft,
                                     GtUword nextsuffixtooutput)
 {
-  if (blindtrie->overflowsuffixes.nextfreeGtUlong > 0)
+  if (blindtrie->overflowsuffixes.nextfreeGtUword > 0)
   {
     GtUword idx;
 
-    if (blindtrie->overflowsuffixes.nextfreeGtUlong > 1UL)
+    if (blindtrie->overflowsuffixes.nextfreeGtUword > 1UL)
     {
-      qsort(blindtrie->overflowsuffixes.spaceGtUlong,
-            (size_t) blindtrie->overflowsuffixes.nextfreeGtUlong,
-            sizeof (*blindtrie->overflowsuffixes.spaceGtUlong),
+      qsort(blindtrie->overflowsuffixes.spaceGtUword,
+            (size_t) blindtrie->overflowsuffixes.nextfreeGtUword,
+            sizeof (*blindtrie->overflowsuffixes.spaceGtUword),
             blindtrie_compare_ascending);
     }
-    for (idx = 0; idx < blindtrie->overflowsuffixes.nextfreeGtUlong; idx++)
+    for (idx = 0; idx < blindtrie->overflowsuffixes.nextfreeGtUword; idx++)
     {
       if (tableoflcpvalues != NULL)
       {
@@ -1184,7 +1184,7 @@ static void processoverflowsuffixes(GtBlindtrie *blindtrie,
                          offset);
       }
       blindtrie_suffixout(blindtrie,subbucketleft,offset,nextsuffixtooutput,
-                          blindtrie->overflowsuffixes.spaceGtUlong[idx]);
+                          blindtrie->overflowsuffixes.spaceGtUword[idx]);
       nextsuffixtooutput++;
     }
   }

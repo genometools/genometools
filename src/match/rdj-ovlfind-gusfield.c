@@ -56,7 +56,7 @@ static inline
 void rdj_gusfield_processleafedge(GtUword leafnumber,
                                   const GtEncseq *encseq,
                                   GtUword nofsequences,
-                                  GtArrayGtUlong *matchlen_stacks,
+                                  GtArrayGtUword *matchlen_stacks,
                                   GtBitsequence *has_match,
                                   GtBitsequence *sspbittab,
                                   bool find_submaximal,
@@ -93,23 +93,23 @@ void rdj_gusfield_processleafedge(GtUword leafnumber,
         }
         if (!find_submaximal)
         {
-          matchlen = matchlen_stacks[suffix_seqnum].spaceGtUlong +
-                     matchlen_stacks[suffix_seqnum].nextfreeGtUlong - 1;
+          matchlen = matchlen_stacks[suffix_seqnum].spaceGtUword +
+                     matchlen_stacks[suffix_seqnum].nextfreeGtUword - 1;
           gt_assert(matchlen != NULL);
           if (suffix_seqnum == prefix_seqnum)
           {
             if (*matchlen == gt_encseq_seqlength(encseq, suffix_seqnum))
             {
               /* read overlaps with whole itself */
-              if (matchlen_stacks[suffix_seqnum].nextfreeGtUlong == 1UL)
+              if (matchlen_stacks[suffix_seqnum].nextfreeGtUword == 1UL)
               {
                 /* no other overlap */
                 continue;
               }
               else
               {
-                matchlen = matchlen_stacks[suffix_seqnum].spaceGtUlong +
-                           matchlen_stacks[suffix_seqnum].nextfreeGtUlong - 2;
+                matchlen = matchlen_stacks[suffix_seqnum].spaceGtUword +
+                           matchlen_stacks[suffix_seqnum].nextfreeGtUword - 2;
               }
             }
           }
@@ -120,10 +120,10 @@ void rdj_gusfield_processleafedge(GtUword leafnumber,
         else /* process whole stack, not only the top */
         {
           for (stack_pos = 0;
-               stack_pos < matchlen_stacks[suffix_seqnum].nextfreeGtUlong;
+               stack_pos < matchlen_stacks[suffix_seqnum].nextfreeGtUword;
                stack_pos++)
           {
-            matchlen = matchlen_stacks[suffix_seqnum].spaceGtUlong + stack_pos;
+            matchlen = matchlen_stacks[suffix_seqnum].spaceGtUword + stack_pos;
             gt_assert(matchlen != NULL);
             if (suffix_seqnum == prefix_seqnum)
             {
@@ -151,7 +151,7 @@ void processspecials(GtUword specials_leftbound,
                      const GtEncseq *encseq,
                      GtUword totallength,
                      GtUword nofsequences,
-                     GtArrayGtUlong *matchlen_stacks,
+                     GtArrayGtUword *matchlen_stacks,
                      GtBitsequence *has_match,
                      GtBitsequence *sspbittab)
 {
@@ -172,13 +172,13 @@ void processspecials(GtUword specials_leftbound,
       {
         GT_SETIBIT(has_match, seqnum);
         GT_STOREINARRAY(&(matchlen_stacks[seqnum]),
-                        GtUlong, 1, offset);
+                        GtUword, 1, offset);
       }
       else
       {
-        gt_assert(matchlen_stacks[seqnum].nextfreeGtUlong>0);
-        matchlen_stacks[seqnum].nextfreeGtUlong--;
-        if (matchlen_stacks[seqnum].nextfreeGtUlong == 0)
+        gt_assert(matchlen_stacks[seqnum].nextfreeGtUword>0);
+        matchlen_stacks[seqnum].nextfreeGtUword--;
+        if (matchlen_stacks[seqnum].nextfreeGtUword == 0)
         {
           GT_UNSETIBIT(has_match, seqnum);
         }
@@ -210,7 +210,7 @@ void gt_rdj_gusfield(Sequentialsuffixarrayreader *ssar,
   GtUword idx;
 
   /* stacks for spm determination */
-  GtArrayGtUlong *matchlen_stacks;
+  GtArrayGtUword *matchlen_stacks;
   GtBitsequence *has_match;
 
   /* progressbar */
@@ -240,7 +240,7 @@ void gt_rdj_gusfield(Sequentialsuffixarrayreader *ssar,
 
   for (idx = 0UL; idx < nofsequences; idx++)
   {
-    GT_INITARRAY(&(matchlen_stacks[idx]), GtUlong);
+    GT_INITARRAY(&(matchlen_stacks[idx]), GtUword);
   }
 
   if (show_progressbar)
@@ -355,7 +355,7 @@ void gt_rdj_gusfield(Sequentialsuffixarrayreader *ssar,
 
   for (idx = 0; idx < nofsequences; idx++)
   {
-    GT_FREEARRAY(&(matchlen_stacks[idx]), GtUlong);
+    GT_FREEARRAY(&(matchlen_stacks[idx]), GtUword);
   }
   gt_free(has_match);
   gt_free(sspbittab);

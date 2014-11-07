@@ -93,11 +93,18 @@ typedef unsigned long long GtUint64;
 
 typedef unsigned char GtUchar;
 
+/* This type is deprecated, please use GtUwordPair instead */
 typedef GtUword GtUlong;
+
+/* This type is deprecated, please use GtUwordPair instead */
+typedef struct
+{
+  GtUword a, b;
+} GtUlongPair;
 
 typedef struct
 {
-  GtUlong a, b;
-} GtUlongPair;
+  GtUword a, b;
+} GtUwordPair;
 
 #endif
