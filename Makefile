@@ -25,7 +25,7 @@ INCLUDEOPT:=-I$(CURDIR)/src -I$(CURDIR)/obj \
             -I$(CURDIR)/src/external/expat-2.0.1/lib \
             -I$(CURDIR)/src/external/bzip2-1.0.6 \
             -I$(CURDIR)/src/external/samtools-0.1.18 \
-            -I$(CURDIR)/src/external/sqlite-3.8.0.1 \
+            -I$(CURDIR)/src/external/sqlite-3.8.7.1 \
             -I$(CURDIR)/src/external/tre/include/tre
 
 ifeq ($(shell pkg-config --version > /dev/null 2> /dev/null; echo $$?),0)
@@ -151,7 +151,7 @@ LIBBZ2_SRC:=$(BZ2_DIR)/blocksort.c $(BZ2_DIR)/huffman.c $(BZ2_DIR)/crctable.c \
 LIBBZ2_OBJ:=$(LIBBZ2_SRC:%.c=obj/%.o)
 LIBBZ2_DEP:=$(LIBBZ2_SRC:%.c=obj/%.d)
 
-SQLITE3_DIR:=src/external/sqlite-3.8.2
+SQLITE3_DIR:=src/external/sqlite-3.8.7.1
 SQLITE3_SRC:=$(SQLITE3_DIR)/sqlite3.c
 SQLITE3_OBJ:=$(SQLITE3_SRC:%.c=obj/%.o)
 SQLITE3_DEP:=$(SQLITE3_SRC:%.c=obj/%.d)
