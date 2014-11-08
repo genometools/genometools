@@ -36,7 +36,7 @@ def parseargs(argv)
   options.threads = true
   options.sketch = false
   opts = OptionParser.new
-  opts.on("--sketch","compile 64 bit binary") do |x|
+  opts.on("--sketch","compile with annotation sketch") do |x|
     options.sketch = true
   end
   opts.on("--m64","compile 64 bit binary") do |x|
@@ -87,6 +87,8 @@ def makecompilerflags(fp,options)
   end
   if options.sketch
     fp.print " cairo=yes"
+  else
+    fp.print " cairo=no"
   end
   fp.print " CC='ccache " + ENV["CC"] + "'"
   if not options.fileargs.nil?
