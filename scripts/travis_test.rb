@@ -2,8 +2,14 @@
 # what to do during travis tests
 
 success = true
-if ENV["CC"] == 'gcc'
-  IO.popen([{"64bit"=>"yes"}, 'make', {:err=>[:child, :out]}]) do |io|
+if ENV['CC'] == 'gcc' or ENV['GT_BITS'] == '32'
+  env = {}
+  if ENV['GT_BITS'] == '32'
+    env['32bit' => 'yes']
+  end
+  IO.popen([ env,
+            'make',
+            {:err=>[:child, :out]}]) do |io|
     while (line = io.gets)
       print line
     end
@@ -18,7 +24,8 @@ if ENV["CC"] == 'gcc'
     success = $?.success?
   end
 else
-  IO.popen([{"64bit"=>"yes"}, 'make', 'test',  {:err=>[:child, :out]}]) do |io|
+  IO.popen(['make', 'test',
+            {:err=>[:child, :out]}]) do |io|
     while (line = io.gets)
       print line
       if m = line.match(/^\s*(\d+):\s.*: failed$/)

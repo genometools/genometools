@@ -33,7 +33,7 @@ def parseargs(argv)
   options.clang = true
   options.ddd = false
   options.gprof = false
-  options.m64 = false
+  options.m64 = true
   options.prof = false
   options.speed = false
   options.makethreads = false
@@ -65,8 +65,8 @@ def parseargs(argv)
     options.makethreads = true
     options.j = x || ""
   end
-  opts.on("-m","--m64","compile 64 bit binary") do |x|
-    options.m64 = true
+  opts.on("-m","--[no-]m64","compile 64 bit binary") do |x|
+    options.m64 = x
   end
   opts.on("-p","--prof","compile for profiling") do |x|
     options.prof = true
@@ -78,7 +78,7 @@ def parseargs(argv)
     if options.ddd
       usage(opts,"-d and -s exclusive")
     end
-    options.speed = true
+    options.speed = x
   end
   opts.on("-t", "--threads", "compile with threading enabled") do |x|
     options.check = false
@@ -108,6 +108,8 @@ def makecompilerflags(fp,options)
   end
   if options.m64
     fp.print " 64bit=yes"
+  else
+    fp.print " 64bit=no"
   end
   if options.prof
     fp.print " prof=yes"
