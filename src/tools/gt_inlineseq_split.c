@@ -34,7 +34,8 @@ typedef struct {
 
 static void* gt_inlineseq_split_arguments_new(void)
 {
-  GtInlineseqSplitArguments *arguments = gt_calloc((size_t) 1, sizeof *arguments);
+  GtInlineseqSplitArguments *arguments
+    = gt_calloc((size_t) 1, sizeof *arguments);
   arguments->seqoutfile = gt_str_new();
   arguments->gffoutfile = gt_str_new();
   return arguments;
@@ -50,7 +51,8 @@ static void gt_inlineseq_split_arguments_delete(void *tool_arguments)
   }
 }
 
-static GtOptionParser* gt_inlineseq_split_option_parser_new(void *tool_arguments)
+static GtOptionParser* gt_inlineseq_split_option_parser_new(
+                                                   void *tool_arguments)
 {
   GtInlineseqSplitArguments *arguments = tool_arguments;
   GtOptionParser *op;
@@ -62,7 +64,6 @@ static GtOptionParser* gt_inlineseq_split_option_parser_new(void *tool_arguments
                             "[GFF3_file]",
                             "Split GFF3 annotations with inline sequences into "
                             "separate files.");
-
 
   /* -seqfile */
   seqopt = gt_option_new_string("seqfile", "output file for sequences as FASTA",
@@ -80,7 +81,8 @@ static GtOptionParser* gt_inlineseq_split_option_parser_new(void *tool_arguments
   return op;
 }
 
-static int gt_inlineseq_split_runner(int argc, const char **argv, int parsed_args,
+static int gt_inlineseq_split_runner(int argc, const char **argv,
+                                     int parsed_args,
                               void *tool_arguments, GtError *err)
 {
   GtInlineseqSplitArguments *arguments = tool_arguments;
@@ -94,7 +96,6 @@ static int gt_inlineseq_split_runner(int argc, const char **argv, int parsed_arg
 
   gt_error_check(err);
   gt_assert(arguments);
-
 
   if (gt_str_length(arguments->seqoutfile) > 0) {
     seq_out_file = gt_file_new(gt_str_get(arguments->seqoutfile), "w+", err);

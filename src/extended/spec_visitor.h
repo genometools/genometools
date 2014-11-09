@@ -39,5 +39,4 @@ void           gt_spec_visitor_add_region_mapping(GtSpecVisitor *sv,
 void           gt_spec_visitor_add_type_checker(GtSpecVisitor *sv,
                                                 GtTypeChecker *tc);
 
-
 #endif
