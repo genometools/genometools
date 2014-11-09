@@ -280,7 +280,6 @@ static int gt_speck_runner(int argc, const char **argv, int parsed_args,
 
     gt_timer_stop(t);
 
-
     /* reset warnings output */
     gt_warning_set_handler(gt_warning_default_handler, NULL);
 

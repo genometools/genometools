@@ -24,7 +24,6 @@
 #include <stdarg.h>
 #include "core/str_api.h"
 
-
 /* The <GtTimer> class encapsulates a timer which can be used for run-time
    measurements. */
 typedef struct GtTimer GtTimer;

@@ -40,8 +40,8 @@
    the bins can be sorted by independet threads which have independent
    workspace.
 
-   5) The implementation allows one to sort a <GtUword>-array and a 
-      <GtUlongPair>-array. In the latter case the 
+   5) The implementation allows one to sort a <GtUword>-array and a
+      <GtUlongPair>-array. In the latter case the
       the component <a> of type <GtUlongPair> is the soring key.
 */
 
