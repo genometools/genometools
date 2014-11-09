@@ -36,7 +36,8 @@
 typedef struct {
   GtStr *impl;
   GtUword num_values,
-                maxvalue;
+          runs,
+          maxvalue;
   bool use_aqsort,
        use_permute,
        verify,
@@ -91,6 +92,11 @@ static GtOptionParser* gt_sortbench_option_parser_new(void *tool_arguments)
      radixsort implementations (make sure that higher order bits are set) */
   option = gt_option_new_uword("maxval", "maximal integer to sort",
                                &arguments->maxvalue, ULONG_MAX-1);
+  gt_option_parser_add_option(op, option);
+
+  option = gt_option_new_uword("runs",
+                           "run sort multiple times as specified by arguments",
+                           &arguments->runs, 1UL);
   gt_option_parser_add_option(op, option);
 
   option = gt_option_new_bool("aqsort", "prepare bad input array using the "
@@ -383,7 +389,12 @@ static int gt_sortbench_runner(GT_UNUSED int argc, GT_UNUSED const char **argv,
     if (strcmp(gt_str_get(arguments->impl),
                gt_sort_implementation_names[method]) == 0)
     {
-      gt_sort_implementation_funcs[method](array, arguments->num_values);
+      GtUword r;
+
+      for (r = 0; r < arguments->runs; r++)
+      {
+        gt_sort_implementation_funcs[method](array, arguments->num_values);
+      }
       break;
     }
   }
