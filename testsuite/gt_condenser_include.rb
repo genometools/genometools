@@ -29,20 +29,20 @@ Test do
   desc_files.each_pair do |file, info|
     basename = File.basename(file)
     run_test "#{$bin}gt seqfilter -o #{basename}_10th.fas -step 10 #{file}"
-    run_test "#{$bin}gt encseq encode -indexname #{basename}_10th " +
-      "-md5 no " +
+    run_test "#{$bin}gt encseq encode -indexname #{basename}_10th " \
+      "-md5 no " \
       "#{basename}_10th.fas"
-    run_test "#{$bin}gt condenser compress " +
-      "-indexname #{basename}_nr " +
+    run_test "#{$bin}gt condenser compress " \
+      "-indexname #{basename}_nr " \
       "-alignlength #{info[0]} #{basename}_10th ",
       :maxtime => 240
-    run_test "#{$bin}gt encseq decode -output fasta " +
-      "#{basename}_10th | " +
+    run_test "#{$bin}gt encseq decode -output fasta " \
+      "#{basename}_10th | " \
       "grep -v '>' > #{basename}_10th_ext_nohead.fas"
-    run_test "#{$bin}gt condenser extract " +
-      "#{basename}_nr | tee #{basename}_10th_nr_ext.fas | " +
+    run_test "#{$bin}gt condenser extract " \
+      "#{basename}_nr | tee #{basename}_10th_nr_ext.fas | " \
       "grep -v '>' > #{basename}_10th_nr_ext_nohead.fas"
-    run "diff #{basename}_10th_ext_nohead.fas " +
+    run "diff #{basename}_10th_ext_nohead.fas " \
       "#{basename}_10th_nr_ext_nohead.fas"
     run "grep '>' #{basename}_10th_nr_ext.fas > #{basename}_10th_heads"
     run "diff #{basename}_10th_heads #{file}_10th_heads"
@@ -51,16 +51,16 @@ end
 
 comp_ext = Proc.new do |file, info, opt|
   basename = File.basename(file)
-  run_test "#{$bin}gt encseq encode -clipdesc -indexname #{basename} " +
-    "-md5 no " +
+  run_test "#{$bin}gt encseq encode -clipdesc -indexname #{basename} " \
+    "-md5 no " \
     "#{file}"
-  run_test "#{$bin}gt condenser compress #{opt} " +
-    "-indexname #{basename}_nr " +
+  run_test "#{$bin}gt condenser compress #{opt} " \
+    "-indexname #{basename}_nr " \
     "-alignlength #{info[0]} #{basename}",
     :maxtime => 600
-  run_test "#{$bin}gt encseq decode -output fasta " +
+  run_test "#{$bin}gt encseq decode -output fasta " \
     "#{basename} > #{basename}.fas"
-  run_test "#{$bin}gt condenser extract " +
+  run_test "#{$bin}gt condenser extract " \
     "#{basename}_nr > #{basename}_nr.fas"
   run "diff #{basename}.fas #{basename}_nr.fas"
 end
@@ -74,9 +74,18 @@ opt_arr.each do |opt|
   end
 end
 
-_, makeblastdb = Open3.capture2("which makeblastdb")
-_, blastn      = Open3.capture2("which blastn")
-_, blastp      = Open3.capture2("which blastp")
+makeblastdb = system("which makeblastdb")
+if makeblastdb
+  makeblastdb = $?
+end
+blastn      = system("which blastn")
+if blastn
+  blastn = $?
+end
+blastp      = system("which blastp")
+if blastp
+  blastp = $?
+end
 
 opt_arr.each do |opt|
   Name "gt condenser compress + search #{opt}"
@@ -84,38 +93,37 @@ opt_arr.each do |opt|
   Test do
     searchfiles.each_pair do |file, info|
       basename = File.basename(file)
-      run_test "#{$bin}gt encseq encode -clipdesc -indexname #{basename} " +
-        "-md5 no " +
+      run_test "#{$bin}gt encseq encode -clipdesc -indexname #{basename} " \
+        "-md5 no " \
         "#{file}"
-      run_test "#{$bin}gt condenser compress " +
-        "#{opt} " +
-        "-indexname #{basename}_nr " +
+      run_test "#{$bin}gt condenser compress " \
+        "#{opt} " \
+        "-indexname #{basename}_nr " \
         "-alignlength #{info[0]} #{basename}",
         :maxtime => 600
-      unless makeblastdb.exitstatus != 0 or
-          blastn.exitstatus != 0 or
-          blastp.exitstatus != 0
-        run_test "#{$bin}gt -debug condenser search " +
-          "-blastn " +
-          "-blastthreads 1 " +
+      unless makeblastdb != 0 or blastn != 0 or blastp != 0
+        run_test "#{$bin}gt -debug condenser search " \
+          "-blastn " \
+          "-blastthreads 1 " \
           "-query #{File.join(File.dirname(file),
-          File.basename(file,'.fas'))}_queries_300_2x.fas " +
+          File.basename(file,'.fas'))}_queries_300_2x.fas " \
           "-db #{basename}_nr -verbose",
           :maxtime => 600
         grep(last_stderr, /debug: [1-9]+[0-9]* hits found/)
-        run_ruby"#$scriptsdir/condenser_statistics.rb " +
-          "#{File.join(File.dirname(file), File.basename(file,'.fas'))}" +
+        run_ruby "#$scriptsdir/condenser_statistics.rb " \
+          "#{File.join(File.dirname(file), File.basename(file,'.fas'))}" \
           "_queries_300_2x_blast?_result #{last_stdout}"
         grep(last_stdout, /^## FP: 0$/)
         grep(last_stdout, /^## TP: [1-9]+[0-9]*$/)
       else
-        run_test "#{$bin}gt -debug condenser search " +
-          "-blastn " +
-          "-blastthreads 1 " +
+        run_test "#{$bin}gt -debug condenser search " \
+          "-blastn " \
+          "-blastthreads 1 " \
           "-query #{File.join(File.dirname(file),
-          File.basename(file,'.fas'))}_queries_300_2x.fas " +
+          File.basename(file,'.fas'))}_queries_300_2x.fas " \
           "-db #{basename}_nr -verbose",
           :retval => 1
+        grep(last_stderr, /not installed?/)
       end
     end
   end
@@ -123,21 +131,21 @@ end
 
 range_ext = Proc.new do |file, info, opt|
   basename = File.basename(file)
-  run_test "#{$bin}gt encseq encode -clipdesc -indexname #{basename} " +
-    "-md5 no " +
+  run_test "#{$bin}gt encseq encode -clipdesc -indexname #{basename} " \
+    "-md5 no " \
     "#{file}"
-  run_test "#{$bin}gt condenser compress -indexname #{basename}_nr " +
+  run_test "#{$bin}gt condenser compress -indexname #{basename}_nr " \
     "#{opt} -alignlength #{info[0]} #{basename}",
     :maxtime => 600
-  run_test "#{$bin}gt encseq decode -output concat " +
-    "-range #{info[1]} #{info[2]} " +
-    "#{basename} > " +
+  run_test "#{$bin}gt encseq decode -output concat " \
+    "-range #{info[1]} #{info[2]} " \
+    "#{basename} > " \
     "#{basename}_#{info[1]}_#{info[2]}.fas"
-  run_test "#{$bin}gt condenser extract " +
-    "-range #{info[1]} #{info[2]} " +
-    "#{basename}_nr > " +
+  run_test "#{$bin}gt condenser extract " \
+    "-range #{info[1]} #{info[2]} " \
+    "#{basename}_nr > " \
     "#{basename}_nr_#{info[1]}_#{info[2]}.fas"
-  run "diff #{basename}_#{info[1]}_#{info[2]}.fas " +
+  run "diff #{basename}_#{info[1]}_#{info[2]}.fas " \
     "#{basename}_nr_#{info[1]}_#{info[2]}.fas"
 end
 
@@ -156,21 +164,21 @@ opt_arr.each do |opt|
   Test do
     input = "#{$testdata}mini_peptide_repeats.fas"
     basename = File.basename(input)
-    run_test "#{$bin}gt encseq encode -clipdesc -indexname #{basename} " +
-      "-md5 no " +
+    run_test "#{$bin}gt encseq encode -clipdesc -indexname #{basename} " \
+      "-md5 no " \
       "#{input}"
-    run_test "#{$bin}gt condenser compress -indexname #{basename}_nr " +
-      "-kmersize 3 -initsize 12 -windowsize 12 #{opt} " +
+    run_test "#{$bin}gt condenser compress -indexname #{basename}_nr " \
+      "-kmersize 3 -initsize 12 -windowsize 12 #{opt} " \
       "-alignlength 12 #{basename}"
-    run_test "#{$bin}gt encseq decode -output concat " +
-      "-range 16 35 " +
-      "#{basename} > " +
+    run_test "#{$bin}gt encseq decode -output concat " \
+      "-range 16 35 " \
+      "#{basename} > " \
       "#{basename}_16_35.fas"
-    run_test "#{$bin}gt condenser extract " +
-      "-range 16 35 " +
-      "#{basename}_nr > " +
+    run_test "#{$bin}gt condenser extract " \
+      "-range 16 35 " \
+      "#{basename}_nr > " \
       "#{basename}_nr_16_35.fas"
-    run "diff #{basename}_16_35.fas " +
+    run "diff #{basename}_16_35.fas " \
       "#{basename}_nr_16_35.fas"
   end
 end
@@ -181,33 +189,33 @@ Test do
   file = "#{$testdata}condenser/small_10_10b.fas"
   basename = File.basename(file)
 
-  run_test "#{$bin}gt encseq encode -clipdesc -indexname #{basename} " +
-    "-md5 no " +
+  run_test "#{$bin}gt encseq encode -clipdesc -indexname #{basename} " \
+    "-md5 no " \
     "#{file}"
-  run_test("#{$bin}gt condenser compress " +
-           "-indexname foo " +
-           "-kmersize 8 " +
+  run_test("#{$bin}gt condenser compress " \
+           "-indexname foo " \
+           "-kmersize 8 " \
            "-windowsize 8 " +
            basename,
            :retval => 1
           )
   grep(last_stderr, /-windowsize.*larger.*-kmersize/)
 
-  run_test("#{$bin}gt condenser compress " +
-           "-indexname foo " +
-           "-kmersize 8 " +
-           "-windowsize 16 " +
+  run_test("#{$bin}gt condenser compress " \
+           "-indexname foo " \
+           "-kmersize 8 " \
+           "-windowsize 16 " \
            "-alignlength 15 " +
            basename,
            :retval => 1
           )
   grep(last_stderr, /-alignlength.*at least.*-windowsize/)
 
-  run_test("#{$bin}gt condenser compress " +
-           "-indexname foo " +
-           "-kmersize 8 " +
-           "-windowsize 16 " +
-           "-alignlength 32 " +
+  run_test("#{$bin}gt condenser compress " \
+           "-indexname foo " \
+           "-kmersize 8 " \
+           "-windowsize 16 " \
+           "-alignlength 32 " \
            "-initsize 31 " +
            basename,
            :retval => 1
@@ -221,14 +229,14 @@ opt_arr.each do |opt|
   Test do
     file = "#{$testdata}condenser/small_10_10b.fas"
     basename = File.basename(file)
-    run_test "#{$bin}gt encseq encode -clipdesc -indexname #{basename} " +
-      "-md5 no " +
+    run_test "#{$bin}gt encseq encode -clipdesc -indexname #{basename} " \
+      "-md5 no " \
       "#{file}"
-    run_test("#{$bin}gt condenser compress #{opt} " +
-             "-indexname foo " +
-             "-kmersize 5 " +
-             "-windowsize 10 " +
-             "-alignlength 10 " +
+    run_test("#{$bin}gt condenser compress #{opt} " \
+             "-indexname foo " \
+             "-kmersize 5 " \
+             "-windowsize 10 " \
+             "-alignlength 10 " \
              "-initsize 500 " +
              basename,
              :retval => 1
