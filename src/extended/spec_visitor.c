@@ -578,6 +578,35 @@ static int spec_expect(lua_State *L)
   return 1;
 }
 
+static int spec_feature_node_get_path(lua_State *L)
+{
+  GtGenomeNode **gn;
+  GtFeatureNode *fn;
+  GtSpecVisitor *sv;
+  GtUword i, j = 0;
+  gn = check_genome_node(L, 1);
+  /* make sure we get a feature node */
+  fn = gt_feature_node_try_cast(*gn);
+  luaL_argcheck(L, fn, 1, "not a feature node");
+
+  lua_pushlightuserdata(L, (void *) &spec_defuserdata);
+  lua_gettable(L, LUA_REGISTRYINDEX);
+  sv = lua_touserdata(L, -1);
+  lua_newtable(L);
+
+  gt_assert(sv && sv->graph_context);
+  if (gt_array_size(sv->graph_context) > 0) {
+    for (i = gt_array_size(sv->graph_context) - 1; i + 1 > 0; i--) {
+      GtFeatureNode* fn2 = *(GtFeatureNode**) gt_array_get(sv->graph_context, i);
+      lua_pushinteger(L, j + 1); /* in Lua we index from 1 on */
+      gt_lua_genome_node_push(L, gt_genome_node_ref((GtGenomeNode*) fn2));
+      lua_rawset(L, -3);
+      j++;
+    }
+  }
+  return 1;
+}
+
 static int spec_feature_node_lua_appears_as_child_of_type_g(lua_State *L,
                                                             bool supertype)
 {
@@ -797,6 +826,9 @@ static int spec_init_lua_env(GtSpecVisitor *sv, const char *progname,
   lua_rawset(sv->L, -3);
   lua_pushstring(sv->L, "has_child_of_supertype");
   lua_pushcfunction(sv->L, spec_feature_node_lua_has_child_of_supertype);
+  lua_rawset(sv->L, -3);
+  lua_pushstring(sv->L, "get_path");
+  lua_pushcfunction(sv->L, spec_feature_node_get_path);
   lua_rawset(sv->L, -3);
   lua_getglobal(sv->L, "string");
   lua_pushstring(sv->L, "is_a");
