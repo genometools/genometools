@@ -4,12 +4,14 @@
 # to perform source checks before commits
 
 check_source () {
+  echo $1
   $PWD/scripts/src_check $1
   if [ $? -eq 0 ]
   then
     APIS=`echo "$1" | grep -F "_api.h"`
-    if [ ${#APIS} ]; then
+    if [ ${#APIS} -ne 0 ]; then
       echo "WARNING: you are committing API headers:"
+      echo $APIS
       git diff --cached $APIS
       exec < /dev/tty
       echo

@@ -15,18 +15,22 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#include <errno.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <string.h>
-#include <errno.h>
+#include <sys/types.h>
+#include <sys/wait.h>
 
 #include "core/ma.h"
 #include "core/str_api.h"
 #include "extended/blast_process_call.h"
+#include "core/log_api.h"
 
 struct GtBlastProcessCall
 {
   GtStr *str;
+  char *version_call;
   bool all,
        db,
        evalue,
@@ -77,6 +81,7 @@ GtBlastProcessCall *gt_blast_process_call_new_all_nucl(void)
   GtBlastProcessCall *call =
     gt_blast_process_call_new("blastall -p blastn");
   call->nucl = call->all = true;
+  call->version_call = "blastall -";
   return call;
 }
 
@@ -84,6 +89,7 @@ GtBlastProcessCall *gt_blast_process_call_new_nucl(void)
 {
   GtBlastProcessCall *call =
     gt_blast_process_call_new("blastn");
+  call->version_call = "blastn -version";
   call->nucl = true;
   call->all = false;
   return call;
@@ -93,6 +99,7 @@ GtBlastProcessCall *gt_blast_process_call_new_all_prot(void)
 {
   GtBlastProcessCall *call =
     gt_blast_process_call_new("blastall -p blastp");
+  call->version_call = "blastall -";
   call->nucl = false;
   call->all = true;
   return call;
@@ -102,6 +109,7 @@ GtBlastProcessCall *gt_blast_process_call_new_prot(void)
 {
   GtBlastProcessCall *call =
     gt_blast_process_call_new("blastp");
+  call->version_call = "blastp --version";
   call->nucl = call->all = false;
   return call;
 }
@@ -253,12 +261,53 @@ void gt_blast_process_call_set_opt(GtBlastProcessCall *call,
 
 FILE *gt_blast_process_call_run(GtBlastProcessCall *call, GtError *err)
 {
-  FILE *blastout;
+  int had_err = 0,
+      errcode;
+  FILE *blastout = NULL,
+       *installcheck = NULL;
   gt_assert(call->query && call->db);
-  blastout = popen(gt_str_get(call->str), "r");
-  if (blastout == NULL) {
-    gt_error_set(err, "Could not run BLAST process: %s", strerror(errno));
-    return NULL;
+
+  installcheck = popen(call->version_call, "r");
+  if (installcheck == NULL) {
+    gt_error_set(err, "Could not open pipe to run %s: %s",
+                 call->version_call, strerror(errno));
+    had_err = -1;
+  }
+  /* this assures that we get the output if debugging is set, and also we
+     prevent BROKEN_PIPE error if pclose(3) is called before the version call
+     exits */
+  if (!had_err) {
+    char *newline = NULL;
+    char line[BUFSIZ + 1];
+    line[BUFSIZ] = '\0';
+    while (fgets(line, (int) BUFSIZ, installcheck) != NULL) {
+      if ((newline = strrchr(line, '\n')) != NULL) {
+        *newline = '\0';
+        newline = NULL;
+      }
+      gt_log_log("%.*s", BUFSIZ, line);
+    }
+  }
+  if (!had_err) {
+    errcode = pclose(installcheck);
+    if ((call->all && WEXITSTATUS(errcode) != 1) ||
+        errcode != 0) {
+      if (errno == ECHILD)
+        gt_error_set(err, "Error calling %s.", call->version_call);
+      else if (WEXITSTATUS(errcode) == 127)
+        gt_error_set(err, "shell returned 127, BLAST not installed?");
+      else
+        gt_error_set(err, "%s error, returned %d",
+                     call->version_call, WEXITSTATUS(errcode));
+      had_err = -1;
+    }
+  }
+  if (!had_err) {
+    blastout = popen(gt_str_get(call->str), "r");
+    if (blastout == NULL) {
+      gt_error_set(err, "Could not open pipe to run BLAST process: %s",
+                   strerror(errno));
+    }
   }
   return blastout;
 }
