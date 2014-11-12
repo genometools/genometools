@@ -402,7 +402,12 @@ static int gt_sortbench_runner(GT_UNUSED int argc, GT_UNUSED const char **argv,
   gt_timer_show(timer, stdout);
   printf("# TIME %s-t%u-r" GT_WU "-n" GT_WU " overall ",
           gt_str_get(arguments->impl),
-          gt_jobs,arguments->runs,arguments->num_values);
+#ifdef GT_THREADS_ENABLED
+          gt_jobs,
+#else
+          1
+#endif
+          arguments->runs,arguments->num_values);
   gt_timer_show_formatted(timer,GT_WD ".%02ld\n",stdout);
   gt_timer_delete(timer);
   if (arguments->verify)

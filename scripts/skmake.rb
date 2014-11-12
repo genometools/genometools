@@ -34,11 +34,7 @@ def parseargs(argv)
   options.jobs = 4
   options.fileargs = nil
   options.threads = true
-  options.sketch = false
   opts = OptionParser.new
-  opts.on("--sketch","compile with annotation sketch") do |x|
-    options.sketch = true
-  end
   opts.on("--m64","compile 64 bit binary") do |x|
     options.m64 = true
   end
@@ -85,7 +81,7 @@ def makecompilerflags(fp,options)
   if options.threads
     fp.print " threads=yes"
   end
-  if options.sketch
+  if ENV.has_key?("SKETCH") and ENV["SKETCH"] == "yes"
     fp.print " cairo=yes"
   else
     fp.print " cairo=no"
