@@ -34,7 +34,11 @@ def parseargs(argv)
   options.jobs = 4
   options.fileargs = nil
   options.threads = true
+  options.sketch = false
   opts = OptionParser.new
+  opts.on("--sketch","compile with annotation sketch") do |x|
+    options.sketch = true
+  end
   opts.on("--m64","compile 64 bit binary") do |x|
     options.m64 = true
   end

@@ -597,7 +597,8 @@ static int spec_feature_node_get_path(lua_State *L)
   gt_assert(sv && sv->graph_context);
   if (gt_array_size(sv->graph_context) > 0) {
     for (i = gt_array_size(sv->graph_context) - 1; i + 1 > 0; i--) {
-      GtFeatureNode* fn2 = *(GtFeatureNode**) gt_array_get(sv->graph_context, i);
+      GtFeatureNode* fn2
+        = *(GtFeatureNode**) gt_array_get(sv->graph_context, i);
       lua_pushinteger(L, j + 1); /* in Lua we index from 1 on */
       gt_lua_genome_node_push(L, gt_genome_node_ref((GtGenomeNode*) fn2));
       lua_rawset(L, -3);
