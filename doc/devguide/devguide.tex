@@ -492,7 +492,7 @@ Modules bundle related functions which do not belong to a class. Examples:
 \begin{itemize}
 \item
 \keyword{dynalloc.h}, the low level module for dynamic allocation,
-e.g.\ used to implement arrays in \keyword{array.c} and the
+e.g.\@ used to implement arrays in \keyword{array.c} and the
 above-mentioned strings
 \item
 \keyword{sig.h}, bundles signal related functions (high level)
@@ -760,7 +760,7 @@ the \Gt source distribution.
        \item texts for the tool on-line help (in \texttt{gtdata/doc}),
        \item Lua code for documentation generation (in \texttt{gtdata/modules}),
        \item ontology definition files (in \texttt{gtdata/obo\_files}),
-       \item \emph{AnnotationSketch} default (e.g.\ a default style file, in
+       \item \emph{AnnotationSketch} default (e.g.\@ a default style file, in
               \texttt{gtdata/sketch}), and
        \item alphabet definition files for character mappings
              (in \texttt{gtdata/trans}).
@@ -929,7 +929,7 @@ a single line.
 The keyword \keyword{else} should be placed on a separate line.
 \item
 Semantic blocks (statements inside loops, function definitions, etc.) must be
-indented by exactly two spaces w.r.t.\ the enclosing block.
+indented by exactly two spaces w.r.t.\@ the enclosing block.
 This explicitly means \emph{no tabs}, configure your editor!
 
 Here is an example:
@@ -974,8 +974,8 @@ Think twice before making a function public. Its interface should be clean
 enough to be understood by someone who does not know implementation details!
 \item
 If a \Gt module or class exists for your particular need, use it instead of
-using more low-level means (e.g.\ try to use \keyword{GtFile} and friends for
-file access instead of \keyword{fopen()}/\keyword{fclose()}/\dots\ directly).
+using more low-level means (e.g.\@ try to use \keyword{GtFile} and friends for
+file access instead of \keyword{fopen()}/\keyword{fclose()}/\dots\@ directly).
 Consult the documentation and the header files!
 \end{itemize}
 
@@ -1014,7 +1014,7 @@ Class names must begin with \keyword{Gt}, e.g. \keyword{GtArray},
 \item
 Class names may use camel
 case\footnote{\url{http://en.wikipedia.org/wiki/CamelCase}} if multiple words
-are required, e.g.\ \keyword{GtNodeStream}.
+are required, e.g.\@ \keyword{GtNodeStream}.
 \item
 Source and header files for a class must start with the class name in
 lowercase, without the \keyword{Gt} prefix. If camel case is used in the class
@@ -1027,7 +1027,7 @@ Variable names and function names should use underscores to separate words
 (e.g. use the function name \keyword{get_first_five_chars} instead of
 \keyword{getfirstfivechars}).
 \item
-The names of public (i.e.\ non-static) functions must be prefixed by the string
+The names of public (i.e.\@ non-static) functions must be prefixed by the string
 `\keyword{gt_}' to avoid namespace clashes when linking the \Gt library with
 third-party code.
 \item
@@ -1109,7 +1109,7 @@ automatic generation of API documentation. The following annotations are
 supported:
 \begin{itemize}
 \item
-Each type (e.g.\ class) should be directly preceded by a comment describing the
+Each type (e.g.\@ class) should be directly preceded by a comment describing the
 purpose of the class. Example:
 
 \begin{lstlisting}
@@ -1147,7 +1147,7 @@ using two underscores (\keyword{__}\dots\keyword{__}).
 The comment line should briefly describe
 \begin{itemize}
 \item
-what the method does (e.g.\ ``Calculates and returns X\dots'',
+what the method does (e.g.\@ ``Calculates and returns X\dots'',
 ``Delivers the next element in order\dots'', ``Adds element X\dots''),
 \item
 what \emph{all} parameters are supposed to be (ideally given in the context of
@@ -1158,7 +1158,7 @@ what the return value is,
 potential side-effects, and
 \item
 if the function receives or returns a pointer, whether ownership is taken or
-retained for the accepted or returned memory (i.e.\ ``takes ownership of
+retained for the accepted or returned memory (i.e.\@ ``takes ownership of
 parameter X'' or ``X must be deleted by the caller'').
 \end{itemize}
 \item
@@ -1183,7 +1183,7 @@ subdirectory (libgenometools.html).
 \subsection{Function pointers}
 \begin{itemize}
 \item
-Function pointer declarations used in public headers (e.g.\ to be used as method
+Function pointer declarations used in public headers (e.g.\@ to be used as method
 arguments) should always be \keyword{typedef}'ed to an identifier prefixed with
 \keyword{Gt}. An example:
 \begin{lstlisting}
@@ -1240,7 +1240,7 @@ applies to both structures used to implement classes as well as structures used
 as auxiliary data structures.
 
 A notable exception are structs implementing classes which only act as
-containers, i.e.\ in which the only methods manipulating the members would be
+containers, i.e.\@ in which the only methods manipulating the members would be
 setter and getter methods (see \keyword{core/range_api.h}).
 However, even those structures should provide accessor, constructor and
 destructor methods so they can safely be created, accessed and deleted from
@@ -1251,7 +1251,7 @@ scripting language bindings lacking support for proper C structure access.
 \section{Error handling}
 We distinguish between \emph{programming errors} and \emph{run-time errors}.
 Programming errors occur when the developer uses resources in an inherently
-erroneous way, e.g.\ passing a null pointer where a valid pointer is expected,
+erroneous way, e.g.\@ passing a null pointer where a valid pointer is expected,
 passing incorrect length values to string comparison functions, or accessing
 uninitialised memory. This often happens because of incomplete documentation,
 or by running into ``corner cases'' which were overlooked. If undetected, they
@@ -1260,7 +1260,7 @@ can lead to nasty bugs that are hard to track down.
 Other special cases are expected to come up sooner or later. For example, a user
 may specify a file name for input or output which is not readable or writable,
 or which does not exist. Typically, it is not intended to terminate program
-execution at that point, but to react in a graceful way (e.g.\ by creating a new
+execution at that point, but to react in a graceful way (e.g.\@ by creating a new
 file, reporting a proper error message, or asking for a different file name).
 These are run-time errors.
 
@@ -1663,8 +1663,8 @@ repository (see~\ref{gttestdata}),
 \item
 \keyword{$bin}, the path to the \Gt \keyword{bin/} directory,
 \item
-\keyword{$cur}, the path to the current test case directory (each test is run in
-a separate directory),
+\keyword{$cur}, the path to the working directory of the testsuit, e.g.\@ the
+directory from which \keyword{testsuite/testsuite.rb} was run,
 \item
 \keyword{$transdir}, the path to the \keyword{gtdata/trans} directory,
 \item
@@ -1787,7 +1787,7 @@ Makefile:
 \begin{itemize}
 \item
 \keyword{docs}, which builds API documentation as web pages in \keyword{www} and
-as \LaTeX\ source in \keyword{doc/},
+as \LaTeX\@ source in \keyword{doc/},
 \item
 \keyword{manuals}, which, in addition to the files created by \keyword{docs},
 also creates manuals for some published tools in \Gt (see
@@ -1828,8 +1828,8 @@ compile fine when in separate files, but lead to errors in the amalgamation.
 This option is disabled by default.
 \item
 Use \keyword{errorcheck=no} to make the compilation process not stop when a
-warning is encountered. This option should only be used if necessary (e.g.\ when
-building \Gt on Windows). This option is enabled by default.
+warning is encountered. This option should only be used if necessary (e.g.\@
+when building \Gt on Windows). This option is enabled by default.
 \item
 Use \keyword{cairo=no} to disable Cairo support in the \emph{AnnotationSketch}
 component of \Gt . This is useful on systems on which there is no Cairo library
@@ -1889,7 +1889,7 @@ $ git checkout -b my_feature_branch_name
 Please set your username and email address correctly. If unconfigured, they are
 often based on the hostname of the workstation where a commit is done. This may
 not be -- and almost never is --  correct in typical development environments
-(i.e.\ \keyword{user@workstation.zbh.uni-hamburg.de} instead of
+(i.e.\@ \keyword{user@workstation.zbh.uni-hamburg.de} instead of
 \keyword{user@maildomain.org}).
 
 Use the \keyword{git config} commands while in your \Gt Git repository to set
@@ -1912,7 +1912,7 @@ if something goes wrong. Creating, merging and deleting branches is cheap in
 Git!
 \item
 Always leave your \emph{master} branch untouched so code pulled from upstream
-(e.g.\ the official \Gt repository) does not get merged by accident.
+(e.g.\@ the official \Gt repository) does not get merged by accident.
 \item
 Branch off new feature branches from the \emph{master} branch only. That makes
 it easy to chain branches later via \keyword{git rebase} in any order.
@@ -1921,7 +1921,7 @@ Try to keep commits atomic. Every commit should either add a single feature or
 fix a single bug. That makes two things easier:
 \begin{enumerate}
   \item
-  Locating the exact commit which introduces a bug, e.g.\ using
+  Locating the exact commit which introduces a bug, e.g.\@ using
   \keyword{git bisect}. If there are too many changes in one commit, bugs
   become more tedious to track down.
   \item
@@ -1937,10 +1937,10 @@ very tedious if the code has to be fixed at each stop to get it to even compile.
 \item
 In the first line of the commit message, give a short description of the
 change contained in the commit.  Please use active, present tense,
-e.g.\ ``add feature X'' or ``allow X to do Y''.
+e.g.\@ ``add feature X'' or ``allow X to do Y''.
 Commit messages for commits that touch scripting
 language bindings should be prefixed with the language in question,
-e.g.\ ``gtpython: add bindings for GtFoo class''.
+e.g.\@ ``gtpython: add bindings for GtFoo class''.
 \end{itemize}
 
 \subsection{Submission of contributions}
@@ -1973,7 +1973,7 @@ reused, for example when testing a sequence parser or the like.
 
 \subsubsection{Licensing}
 
-Note that the \Gt are free software, i.e.\ an open-source project.
+Note that the \Gt are free software, i.e.\@ an open-source project.
 All code distributed with the \Gt is published under the ICS license,
 which can be viewed at \url{http://genometools.org/license.html}. Submission of
 code for inclusion into the \Gt implies your permission to publish your code
