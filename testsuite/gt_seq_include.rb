@@ -1,3 +1,5 @@
+require "fileutils"
+
 Name "gt seq nonexistent file"
 Keywords "gt_seq"
 Test do
@@ -142,7 +144,9 @@ end
 Name "gt seq test multiple sequence files"
 Keywords "gt_seq"
 Test do
-  run_test "#{$bin}gt seq -recreate #{$testdata}gt_bioseq_succ_1.fas #{$testdata}gt_bioseq_succ_2.fas"
+  FileUtils.copy(["#{$testdata}gt_bioseq_succ_1.fas", "#{$testdata}gt_bioseq_succ_2.fas"],
+                 ".")
+  run_test "#{$bin}gt seq -recreate gt_bioseq_succ_1.fas gt_bioseq_succ_2.fas"
 end
 
 Name "gt seq test multiple sequence files (incl. stdin)"
