@@ -1,3 +1,5 @@
+require "fileutils"
+
 ["", " -rev", " -seqit", " -seqit -rev"].each do |opt|
   Name "gt sequniq#{opt} 2xfoo test"
   Keywords "gt_sequniq"
@@ -47,13 +49,15 @@ end
 Name "gt sequniq (revbug, no -rev)"
 Keywords "gt_sequniq"
 Test do
-  run_test "#{$bin}gt sequniq #{$testdata}gt_sequniq_rev_bug.fas"
+  FileUtils.copy("#{$testdata}gt_sequniq_rev_bug.fas", ".")
+  run_test "#{$bin}gt sequniq gt_sequniq_rev_bug.fas"
   run "diff #{last_stdout} #{$testdata}gt_sequniq_rev_bug.fas"
 end
 
 Name "gt sequniq (revbug, -rev)"
 Keywords "gt_sequniq"
 Test do
-  run_test "#{$bin}gt sequniq -rev #{$testdata}gt_sequniq_rev_bug.fas"
+  FileUtils.copy("#{$testdata}gt_sequniq_rev_bug.fas", ".")
+  run_test "#{$bin}gt sequniq -rev gt_sequniq_rev_bug.fas"
   run "diff #{last_stdout} #{$testdata}gt_sequniq_rev_bug.out"
 end
