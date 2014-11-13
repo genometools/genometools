@@ -213,10 +213,9 @@ gt_compressed_bitsequence_set_variable_field(GtBitsequence *bitseq,
   const GtUword word_offset = GT_DIVWORDSIZE(start);
   const unsigned int bits_left = (unsigned int) (GT_INTWORDSIZE - bit_offset);
   GtBitsequence mask;
-  gt_assert(bits_left < (unsigned int) (sizeof (GtBitsequence) * CHAR_BIT));
-  mask = ~((GtBitsequence) 0) << (GtBitsequence) bits_left;
-  if (bits_left == (unsigned int) GT_INTWORDSIZE)
-    mask = 0;
+  mask = (bits_left == (unsigned int) GT_INTWORDSIZE) ?
+    0 :
+    ~((GtBitsequence) 0) << (GtBitsequence) bits_left;
 
   if (len > bits_left) {
     unsigned int overhang = len - bits_left;
