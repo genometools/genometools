@@ -34,7 +34,11 @@ def parseargs(argv)
   options.jobs = 4
   options.fileargs = nil
   options.threads = true
+  options.sketch = false
   opts = OptionParser.new
+  opts.on("--sketch","compile with annotation sketch") do |x|
+    options.sketch = true
+  end
   opts.on("--m64","compile 64 bit binary") do |x|
     options.m64 = true
   end
@@ -64,7 +68,7 @@ def parseargs(argv)
 end
 
 def makecompilerflags(fp,options)
-  fp.print "all:\n\t\${MAKE} -j #{options.jobs} with-sqlite=no cairo=no"
+  fp.print "all:\n\t\${MAKE} -j #{options.jobs} with-sqlite=no"
   # fp.print " CFLAGS+=-fstrict-aliasing"
   if options.speed
     fp.print " assert=no amalgamation=yes"
@@ -80,6 +84,11 @@ def makecompilerflags(fp,options)
   end
   if options.threads
     fp.print " threads=yes"
+  end
+  if ENV.has_key?("SKETCH") and ENV["SKETCH"] == "yes"
+    fp.print " cairo=yes"
+  else
+    fp.print " cairo=no"
   end
   fp.print " CC='ccache " + ENV["CC"] + "'"
   if not options.fileargs.nil?

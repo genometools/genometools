@@ -36,9 +36,11 @@
 typedef struct {
   GtStr *impl;
   GtUword num_values,
-                maxvalue;
+          runs,
+          maxvalue;
   bool use_aqsort,
        use_permute,
+       verify,
        verbose;
 } QSortBenchArguments;
 
@@ -92,6 +94,11 @@ static GtOptionParser* gt_sortbench_option_parser_new(void *tool_arguments)
                                &arguments->maxvalue, ULONG_MAX-1);
   gt_option_parser_add_option(op, option);
 
+  option = gt_option_new_uword("runs",
+                           "run sort multiple times as specified by arguments",
+                           &arguments->runs, 1UL);
+  gt_option_parser_add_option(op, option);
+
   option = gt_option_new_bool("aqsort", "prepare bad input array using the "
                                         "'aqsort' anti-quicksort algorithm",
                                &arguments->use_aqsort, false);
@@ -100,6 +107,11 @@ static GtOptionParser* gt_sortbench_option_parser_new(void *tool_arguments)
   option = gt_option_new_bool("permute", "prepare bad input array by "
                                          "permutation of unique items",
                                &arguments->use_permute, false);
+  gt_option_parser_add_option(op, option);
+
+  option = gt_option_new_bool("verify", "verify result by checking order of "
+                                        "sorted array",
+                               &arguments->verify, false);
   gt_option_parser_add_option(op, option);
 
   option = gt_option_new_verbose(&arguments->verbose);
@@ -248,16 +260,14 @@ static void gt_sortbench_verify(GT_UNUSED const GtUword *arr,
 
 #include "match/qsort-array.gen"
 
-static void check_inlinedarr_qsort(GtUword *arr, GtUword len)
+static void run_inlinedarr_qsort(GtUword *arr, GtUword len)
 {
   QSORTNAME(gt_inlinedarr_qsort_r) (6UL, false, arr, len, NULL);
-  gt_sortbench_verify(arr,len);
 }
 
-static void check_direct_qsort(GtUword *arr, GtUword len)
+static void run_direct_qsort(GtUword *arr, GtUword len)
 {
   gt_direct_qsort_ulong (6UL, false, arr, len);
-  gt_sortbench_verify(arr,len);
 }
 
 static int sortcmpwithdata(const void *a,const void *b, GT_UNUSED void *data)
@@ -276,10 +286,9 @@ static int sortcmpwithdata(const void *a,const void *b, GT_UNUSED void *data)
 
 #include "match/qsort-inplace.gen"
 
-static void check_thomas_qsort(GtUword *arr, GtUword len)
+static void run_thomas_qsort(GtUword *arr, GtUword len)
 {
   gt_qsort_r(arr,(size_t) len,sizeof (Sorttype),NULL, sortcmpwithdata);
-  gt_sortbench_verify(arr,len);
 }
 
 static int sortcmpnodata(const void *a,const void *b)
@@ -296,43 +305,29 @@ static int sortcmpnodata(const void *a,const void *b)
   return 0;
 }
 
-static void check_gnu_qsort(GtUword *arr, GtUword len)
+static void run_gnu_qsort(GtUword *arr, GtUword len)
 {
   qsort(arr,(size_t) len, sizeof (Sorttype), sortcmpnodata);
-  gt_sortbench_verify(arr,len);
 }
 
-static void check_inlinedptr_qsort(GtUword *arr, GtUword len)
+static void run_inlinedptr_qsort(GtUword *arr, GtUword len)
 {
   gt_inlined_qsort_r(arr, len, NULL);
-  gt_sortbench_verify(arr,len);
-}
-
-static void check_radixsort_lsb(GtUword *arr, GtUword len)
-{
-  /* note that lsb_linear allocates extra temp space of size equal to
-     the area to be sorted */
-  gt_radixsort_lsb_linear(arr,len);
-  gt_sortbench_verify(arr,len);
-}
-
-static void check_radixsort_inplace(GtUword *arr, GtUword len)
-{
-  gt_radixsort_inplace_ulong(arr,len);
-  gt_sortbench_verify(arr,len);
 }
 
 typedef void (*GtQsortimplementationfunc)(GtUword *,GtUword);
 
 static GtQsortimplementationfunc gt_sort_implementation_funcs[] =
 {
-  check_thomas_qsort,
-  check_gnu_qsort,
-  check_inlinedptr_qsort,
-  check_inlinedarr_qsort,
-  check_direct_qsort,
-  check_radixsort_inplace,
-  check_radixsort_lsb
+  run_thomas_qsort,
+  run_gnu_qsort,
+  run_inlinedptr_qsort,
+  run_inlinedarr_qsort,
+  run_direct_qsort,
+  gt_radixsort_inplace_ulong,
+  /* note that gt_radixsort_lsb_linear allocates extra temp space of size
+     equal to the area to be sorted */
+  gt_radixsort_lsb_linear
 };
 
 #define GT_NUM_OF_SORT_IMPLEMENTATIONS\
@@ -394,12 +389,31 @@ static int gt_sortbench_runner(GT_UNUSED int argc, GT_UNUSED const char **argv,
     if (strcmp(gt_str_get(arguments->impl),
                gt_sort_implementation_names[method]) == 0)
     {
-      gt_sort_implementation_funcs[method](array, arguments->num_values);
+      GtUword r;
+
+      for (r = 0; r < arguments->runs; r++)
+      {
+        gt_sort_implementation_funcs[method](array, arguments->num_values);
+      }
       break;
     }
   }
+  gt_assert(method < GT_NUM_OF_SORT_IMPLEMENTATIONS);
   gt_timer_show(timer, stdout);
+  printf("# TIME %s-t%u-r" GT_WU "-n" GT_WU " overall ",
+          gt_str_get(arguments->impl),
+#ifdef GT_THREADS_ENABLED
+          gt_jobs,
+#else
+          1,
+#endif
+          arguments->runs,arguments->num_values);
+  gt_timer_show_formatted(timer,GT_WD ".%02ld\n",stdout);
   gt_timer_delete(timer);
+  if (arguments->verify)
+  {
+    gt_sortbench_verify(array,arguments->num_values);
+  }
   gt_free(array);
   if (cmpcount > 0)
   {

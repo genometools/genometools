@@ -10,12 +10,12 @@ methods.each do |met|
     lenlist.each do |len|
       if met.match(/^radixinplace/)
         ["","-j 4"].each do |opt|
-          run "#{$bin}gt #{opt} dev sortbench -impl #{met} -size #{len} -maxval 1000"
-          run "#{$bin}gt #{opt} dev sortbench -impl #{met} -size #{len}"
+          run "#{$bin}gt #{opt} dev sortbench -verify -impl #{met} -size #{len} -maxval 1000"
+          run "#{$bin}gt #{opt} dev sortbench -verify -impl #{met} -size #{len}"
         end
       else
-        run "#{$bin}gt dev sortbench -impl #{met} -size #{len}"
-        run "#{$bin}gt dev sortbench -impl #{met} -size #{len} -maxval 10000"
+        run "#{$bin}gt dev sortbench -verify -impl #{met} -size #{len}"
+        run "#{$bin}gt dev sortbench -verify -impl #{met} -size #{len} -maxval 10000"
       end
     end
   end

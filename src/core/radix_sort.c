@@ -40,8 +40,9 @@
    the bins can be sorted by independet threads which have independent
    workspace.
 
-   5) The implementation allows one to sort an GtUword -array and an array
-   over type <GtUwordPair>, where the component <a> is the soring key.
+   5) The implementation allows one to sort a <GtUword>-array and a
+      <GtUlongPair>-array. In the latter case the
+      the component <a> of type <GtUlongPair> is the soring key.
 */
 
 #include <stdio.h>
@@ -53,11 +54,9 @@
 #include "core/assert_api.h"
 #include "core/divmodmul.h"
 #include "core/minmax.h"
-#include "core/radix_sort.h"
-#include "core/range_api.h"
-#include "core/stack-inlined.h"
 #include "core/types_api.h"
-#include "core/unused_api.h"
+#include "core/stack-inlined.h"
+#include "core/radix_sort.h"
 #ifdef GT_THREADS_ENABLED
 #include "core/thread_api.h"
 #endif
