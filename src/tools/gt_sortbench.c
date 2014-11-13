@@ -405,7 +405,7 @@ static int gt_sortbench_runner(GT_UNUSED int argc, GT_UNUSED const char **argv,
 #ifdef GT_THREADS_ENABLED
           gt_jobs,
 #else
-          1
+          1,
 #endif
           arguments->runs,arguments->num_values);
   gt_timer_show_formatted(timer,GT_WD ".%02ld\n",stdout);
