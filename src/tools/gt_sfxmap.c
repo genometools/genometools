@@ -943,6 +943,7 @@ static int gt_sfxmap_compressedesa(const char *indexname,GtError *err)
             countentries++;
           } else
           {
+            gt_assert(remainingbits < 64U);
             bitbuffer |= (readvalue & ((((uint64_t) 1) << remainingbits) - 1))
                          << (bitsperentry-bits2add);
             readvalue >>= remainingbits;
