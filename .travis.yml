@@ -1,20 +1,24 @@
+chache: apt
 language: c
 compiler:
   - clang
 env:
   matrix:
-    - default=yes      testrange=1..1150
-    - assert=no        testrange=1..1150
-    - amalgamation=yes testrange=1..1150
-    - opt=no cairo=no  testrange=1..1150
-    - default=yes      testrange=1151..1750
-    - assert=no        testrange=1151..1750
-    - amalgamation=yes testrange=1151..1750
-    - opt=no cairo=no  testrange=1151..1750
-    - default=yes      testrange=1751..3000
-    - assert=no        testrange=1751..3000
-    - amalgamation=yes testrange=1751..3000
-    - opt=no cairo=no  testrange=1751..3000
+    - default=yes      testrange=1..1150 testthreads=2
+    - assert=no        testrange=1..1150 testthreads=2
+    - amalgamation=yes testrange=1..1150 testthreads=2
+    - opt=no cairo=no  testrange=1..1150 testthreads=2
+    - threads=yes      testrange=1..1150 testthreads=2
+    - default=yes      testrange=1151..1750 testthreads=2
+    - assert=no        testrange=1151..1750 testthreads=2
+    - amalgamation=yes testrange=1151..1750 testthreads=2
+    - opt=no cairo=no  testrange=1151..1750 testthreads=2
+    - threads=yes      testrange=1151..1750 testthreads=2
+    - default=yes      testrange=1751..3000 testthreads=2
+    - assert=no        testrange=1751..3000 testthreads=2
+    - amalgamation=yes testrange=1751..3000 testthreads=2
+    - opt=no cairo=no  testrange=1751..3000 testthreads=2
+    - threads=yes      testrange=1751..3000 testthreads=2
 matrix:
   include:
     - compiler: gcc
