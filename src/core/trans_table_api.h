@@ -18,6 +18,7 @@
 #ifndef TRANS_TABLE_API_H
 #define TRANS_TABLE_API_H
 
+#include "core/error_api.h"
 #include "core/str_array_api.h"
 
 typedef struct GtTransTable GtTransTable;
