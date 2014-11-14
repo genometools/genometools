@@ -1,3 +1,4 @@
+chache: apt
 language: c
 compiler:
   - clang
