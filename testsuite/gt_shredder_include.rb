@@ -24,7 +24,7 @@ end
 Name "gt shredder (-sample)"
 Keywords "gt_shredder"
 Test do
-  FileUtils.copy("#{$testdata}U89959_genomic.fas", ".")
+  FileUtils.copy("#{$testdata}U89959_ests.fas", ".")
   run_test "#{$bin}gt shredder -sample 0.1 U89959_ests.fas"
 end
 
@@ -46,7 +46,7 @@ end
 Name "gt shredder (minlength = maxlength)"
 Keywords "gt_shredder"
 Test do
-  FileUtils.copy("#{$testdata}Duplicate.fas", ".")
+  FileUtils.copy("#{$testdata}Duplicate.fna", ".")
   run_test "#{$bin}gt shredder -minlength 30 -maxlength 30 " \
            "Duplicate.fna"
   run "diff #{last_stdout} #{$testdata}Duplicate.shreddered"
