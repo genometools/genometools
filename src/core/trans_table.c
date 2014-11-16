@@ -20,6 +20,7 @@
 #include "core/ensure.h"
 #include "core/ma.h"
 #include "core/trans_table.h"
+#include "core/unused_api.h"
 
 #define GT_AMINOACIDFAIL ((char) 0)
 
@@ -543,6 +544,7 @@ static inline char equivalentbits(const char *aminos,
   of characters encoded by a wildcard. This set is given by the bit vector
   <bits>.
 */
+GT_UNUSED
 static inline unsigned int smallestbase(unsigned char bits)
 {
   if (bits & GT_T_BIT)
@@ -620,10 +622,10 @@ static inline char codon2amino(const char *aminos, bool forward,
         code = ((unsigned int) GT_A_CODE << 4);
       }
       break;
-    GT_CASEWILDCARD: /* delete this and the next line,
-                        to inform about wildcards */
-      code = (smallestbase(wbitsvector[(int) c0]) << 4);
-      break;
+    GT_CASEWILDCARD:
+      /* code = (smallestbase(wbitsvector[(int) c0]) << 4);
+        break; */
+      return 'X';
     default:
       GT_ILLEGALCHAR(c0);
   }
@@ -665,10 +667,10 @@ static inline char codon2amino(const char *aminos, bool forward,
         code += (GT_A_CODE << 2);
       }
       break;
-    GT_CASEWILDCARD: /* delete this and the next line,
-                        to inform about wildcards */
-      code += (smallestbase(wbitsvector[(int) c1]) << 2);
-      break;
+    GT_CASEWILDCARD:
+      /* code += (smallestbase(wbitsvector[(int) c1]) << 2);
+         break; */
+      return 'X';
     default:
       GT_ILLEGALCHAR(c1);
   }
@@ -714,9 +716,8 @@ static inline char codon2amino(const char *aminos, bool forward,
       aa = equivalentbits(aminos,code,c2);
       if (aa == GT_AMINOACIDFAIL)
       {
-        /* no unique aminoacid => choose smallest base and compute aminos
-           accordingly */
-        code += smallestbase(wbitsvector[(int) c2]);
+        /* no unique aminoacid */
+        return 'X';
       } else
       {
         if (coderet != NULL)
@@ -725,7 +726,6 @@ static inline char codon2amino(const char *aminos, bool forward,
         }
         return aa;
       }
-      break;
     default:
       GT_ILLEGALCHAR(c2);
   }
@@ -839,47 +839,60 @@ void gt_trans_table_delete(GtTransTable *tt)
 
 int gt_trans_table_unit_test(GtError *err)
 {
-  int had_err = 0;
+  int had_err = 0, test_errnum = 0, i, j, k;
   GtStrArray *schemes;
+  GtError *test_err = gt_error_new();
+  GtTransTable *tr;
+  char ret1 = ' ';
+  const char *bases = "AaCcGgTt";
   gt_error_check(err);
 
   /* check retrieval of table descriptions */
   schemes = gt_trans_table_get_scheme_descriptions();
-  gt_ensure(
-         gt_str_array_size(schemes) == (GtUword) GT_NUMOFTRANSSCHEMES);
+  gt_ensure(gt_str_array_size(schemes) == (GtUword) GT_NUMOFTRANSSCHEMES);
 
-  /* check switching translation scheme */
-  /* test_errnum = gt_translator_set_translation_scheme(tr, 3, test_err);
-  gt_ensure(!test_errnum && !gt_error_is_set(test_err)); */
-
-  /* check switching to invalid translation scheme */
-  /* test_errnum = gt_translator_set_translation_scheme(tr, 7, test_err);
-  gt_ensure(test_errnum && gt_error_is_set(test_err)); */
-
-  /* switch back to default translation scheme */
-  /* gt_error_unset(test_err);
-  test_errnum = gt_translator_set_translation_scheme(tr, 1, test_err);
-  gt_ensure(!test_errnum && !gt_error_is_set(test_err)); */
-
+  tr = gt_trans_table_new_standard(err);
   /* check single codon translation */
-  /*
-   *  char *bases = "AaCcGgTt";
-   *  gt_error_unset(test_err);
   for (i=0; i<8; i++) {
     char c1 = bases[i];
     for (j=0; j<8; j++) {
       char c2 = bases[j];
       for (k=0; k<8; k++) {
-        char c3 = bases[k], ret1, ret2;
-        test_errnum = gt_translator_codon2amino(tr, c1, c2, c3, &ret1,
+        char c3 = bases[k];
+        ret1 = ' ';
+        test_errnum = gt_trans_table_translate_codon(tr, c1, c2, c3, &ret1,
                                                 test_err);
         gt_ensure(!test_errnum && !gt_error_is_set(test_err));
-        ret2 = gt_transa(tr->scheme->aminos, true, c1, c2, c3, NULL,
-                           test_err);
-        gt_ensure(ret1 == ret2);
+        gt_ensure(ret1 != ' ');
       }
     }
-  } */
+  }
+  for (j=0; j<8; j++) {
+    char c2 = bases[j];
+    for (k=0; k<8; k++) {
+      char c3 = bases[k];
+      ret1 = ' ';
+      test_errnum = gt_trans_table_translate_codon(tr, 'n', c2, c3, &ret1,
+                                                   test_err);
+      gt_ensure(!test_errnum && !gt_error_is_set(test_err));
+      gt_ensure(ret1 == 'X');
+    }
+  }
+  for (j=0; j<8; j++) {
+    char c2 = bases[j];
+    for (k=0; k<8; k++) {
+      char c3 = bases[k];
+      ret1 = ' ';
+      test_errnum = gt_trans_table_translate_codon(tr, c2, 'n', c3, &ret1,
+                                                   test_err);
+      gt_ensure(!test_errnum && !gt_error_is_set(test_err));
+      gt_ensure(ret1 == 'X');
+    }
+  }
+
+  gt_str_array_delete(schemes);
+  gt_trans_table_delete(tr);
+  gt_error_delete(test_err);
 
   return had_err;
 }

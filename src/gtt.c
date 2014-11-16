@@ -52,6 +52,7 @@
 #include "core/symbol.h"
 #include "core/tokenizer.h"
 #include "core/translator.h"
+#include "core/trans_table.h"
 #include "extended/alignment.h"
 #include "extended/anno_db_gfflike_api.h"
 #include "extended/compressed_bitsequence.h"
@@ -366,6 +367,7 @@ GtHashmap* gtt_unit_tests(void)
   gt_hashmap_add(unit_tests, "tag value map example", gt_tag_value_map_example);
   gt_hashmap_add(unit_tests, "tokenizer class", gt_tokenizer_unit_test);
   gt_hashmap_add(unit_tests, "translator class", gt_translator_unit_test);
+  gt_hashmap_add(unit_tests, "transtable class", gt_trans_table_unit_test);
   gt_hashmap_add(unit_tests, "uint64hashtable", gt_uint64hashtable_unit_test);
   gt_hashmap_add(unit_tests, "xdrop", gt_xdrop_unit_test);
 #ifndef WITHOUT_CAIRO
