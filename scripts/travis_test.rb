@@ -8,7 +8,7 @@ if ENV['CC'] == 'gcc' or ENV['GT_BITS'] == '32'
     env['32bit' => 'yes']
   end
   IO.popen([ env,
-            'make',
+            'make', '-j2',
             {:err=>[:child, :out]}]) do |io|
     while (line = io.gets)
       print line
@@ -24,7 +24,7 @@ if ENV['CC'] == 'gcc' or ENV['GT_BITS'] == '32'
     success = $?.success?
   end
 else
-  IO.popen(['make', 'test',
+  IO.popen(['make', '-j2', 'test',
             {:err=>[:child, :out]}]) do |io|
     while (line = io.gets)
       print line
