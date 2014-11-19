@@ -18,6 +18,7 @@
 #
 
 from gt.dlload import gtlib
+from gt.core.gtstr import Str
 from gt.extended.genome_stream import GenomeStream
 
 
@@ -34,4 +35,9 @@ class GFF3OutStream(GenomeStream):
 
     from_param = classmethod(from_param)
 
+    def register(cls, gtlib):
+        from ctypes import c_void_p
+        gtlib.gt_gff3_out_stream_new.argtypes = [GenomeStream, Str]
+        gtlib.gt_gff3_out_stream_new.restype = c_void_p
 
+    register = classmethod(register)
