@@ -37,6 +37,7 @@ from dup_feature_stream import *
 from merge_feature_stream import *
 from rdb import *
 from anno_db import *
+from sort_stream import *
 
 CommentNode.register(gtlib)
 GenomeNode.register(gtlib)
@@ -59,6 +60,7 @@ InterFeatureStream.register(gtlib)
 DuplicateFeatureStream.register(gtlib)
 MergeFeatureStream.register(gtlib)
 NodeVisitor.register(gtlib)
+SortStream.register(gtlib)
 try:
     RDB.register(gtlib)
     RDBSqlite.register(gtlib)
