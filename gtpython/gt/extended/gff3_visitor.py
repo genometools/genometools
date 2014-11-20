@@ -29,6 +29,7 @@ class GFF3Visitor(NodeVisitor):
     def register(cls, gtlib):
         from ctypes import c_void_p
         gtlib.gt_gff3_visitor_new.restype = c_void_p
+        gtlib.gt_gff3_visitor_new.argtypes = [c_void_p]
 
     register = classmethod(register)
 

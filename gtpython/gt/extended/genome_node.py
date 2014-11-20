@@ -128,6 +128,10 @@ class GenomeNode(object):
         gtlib.gt_genome_node_get_filename.restype = c_char_p
         gtlib.gt_genome_node_get_line_number.argtypes = [c_void_p]
         gtlib.gt_genome_node_get_line_number.restype = c_uint
+        gtlib.gt_genome_node_delete.restype = None
+        gtlib.gt_genome_node_delete.argtypes = [c_void_p]
+        gtlib.gt_genome_node_ref.restype = c_void_p
+        gtlib.gt_genome_node_ref.argtypes = [c_void_p]
         gtlib.gt_genome_node_accept.restype = c_int
         gtlib.gt_genome_node_accept.argtypes = [c_void_p, NodeVisitor,
                 Error]
