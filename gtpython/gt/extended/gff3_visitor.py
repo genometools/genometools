@@ -26,3 +26,9 @@ class GFF3Visitor(NodeVisitor):
         self.gv = gtlib.gt_gff3_visitor_new(None)
         self._as_parameter_ = self.gv
 
+    def register(cls, gtlib):
+        from ctypes import c_void_p
+        gtlib.gt_gff3_visitor_new.restype = c_void_p
+
+    register = classmethod(register)
+
