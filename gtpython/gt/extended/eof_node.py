@@ -36,5 +36,6 @@ class EOFNode(GenomeNode):
     def register(cls, gtlib):
         from ctypes import c_void_p, c_char_p
         gtlib.gt_eof_node_new.restype = c_void_p
+        gtlib.gt_eof_node_new.argtypes = []
 
     register = classmethod(register)

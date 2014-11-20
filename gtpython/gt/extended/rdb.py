@@ -39,7 +39,13 @@ class RDB:
         return obj._as_parameter_
 
     from_param = classmethod(from_param)
-
+    
+    def register(cls, gtlib):
+        from ctypes import c_void_p
+        gtlib.gt_rdb_delete.restype = None
+        gtlib.gt_rdb_delete.argtypes = [c_void_p]
+    
+    register = classmethod(register)
 
 class RDBSqlite(RDB):
 
@@ -61,6 +67,6 @@ class RDBSqlite(RDB):
     def register(cls, gtlib):
         from ctypes import c_char_p, c_void_p
         gtlib.gt_rdb_sqlite_new.restype = c_void_p
-        gtlib.gt_rdb_sqlite_new.argtypes = [c_char_p, c_void_p]
+        gtlib.gt_rdb_sqlite_new.argtypes = [c_char_p, Error]
 
     register = classmethod(register)

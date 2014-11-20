@@ -124,20 +124,27 @@ class FeatureIndex:
 
     def register(cls, gtlib):
         from ctypes import c_char_p, c_void_p, c_int, POINTER
-        gtlib.gt_feature_index_get_features_for_seqid.restype = c_void_p
+        gtlib.gt_feature_index_get_features_for_seqid.restype = Array
+        gtlib.gt_feature_index_get_features_for_seqid.argtypes = [c_void_p,
+                c_char_p, Error]
+        gtlib.gt_feature_index_add_gff3file.restype = c_int
         gtlib.gt_feature_index_add_gff3file.argtypes = [c_void_p,
                 c_char_p, Error]
         gtlib.gt_feature_index_get_first_seqid.restype = c_char_p
         gtlib.gt_feature_index_get_first_seqid.argtypes = [c_void_p, Error]
-        gtlib.gt_feature_index_get_seqids.restype = c_int
-        gtlib.gt_feature_index_get_first_seqid.argtypes = [c_void_p, Error]
+        gtlib.gt_feature_index_get_seqids.restype = StrArray
+        gtlib.gt_feature_index_get_seqids.argtypes = [c_void_p, Error]
         gtlib.gt_feature_index_has_seqid.restype = c_int
         gtlib.gt_feature_index_has_seqid.argtypes = [c_void_p, POINTER(c_int),
                 c_char_p, Error]
+        gtlib.gt_feature_index_get_range_for_seqid.restype = c_int
         gtlib.gt_feature_index_get_range_for_seqid.argtypes = [c_void_p,
                 POINTER(Range), c_char_p]
+        gtlib.gt_feature_index_get_features_for_range.restype = c_int
         gtlib.gt_feature_index_get_features_for_range.argtypes = [c_void_p,
                 Array, c_char_p, POINTER(Range), Error]
+        gtlib.gt_feature_index_delete.restype = None
+        gtlib.gt_feature_index_delete.argtypes = [c_void_p]
 
     register = classmethod(register)
 
@@ -154,6 +161,13 @@ class FeatureIndexMemory(FeatureIndex):
         return obj._as_parameter_
 
     from_param = classmethod(from_param)
+
+    def register(cls, gtlib):
+        from ctypes import c_void_p
+        gtlib.gt_feature_index_memory_new.restype = c_void_p
+        gtlib.gt_feature_index_memory_new.argtypes = []
+
+    register = classmethod(register)
 
 
 class FeatureIndexFromPtr(FeatureIndex):

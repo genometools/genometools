@@ -53,6 +53,8 @@ class AnnoDBSchema:
         from ctypes import c_void_p
         gtlib.gt_anno_db_schema_get_feature_index.restype = c_void_p
         gtlib.gt_anno_db_schema_get_feature_index.argtypes = [c_void_p, RDB, Error]
+        gtlib.gt_anno_db_schema_delete.restype = None
+        gtlib.gt_anno_db_schema_delete.argtypes = [c_void_p]
 
     register = classmethod(register)
 
@@ -76,5 +78,6 @@ class AnnoDBGFFLike(AnnoDBSchema):
     def register(cls, gtlib):
         from ctypes import c_void_p
         gtlib.gt_anno_db_gfflike_new.restype = c_void_p
+        gtlib.gt_anno_db_gfflike_new.argtypes = []
 
     register = classmethod(register)

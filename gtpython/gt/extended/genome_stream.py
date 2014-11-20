@@ -61,12 +61,12 @@ class GenomeStream:
             gterror(err)
 
     def register(cls, gtlib):
-        from ctypes import c_int
-        gtlib.gt_node_stream_delete.argtypes = [GenomeStream]
+        from ctypes import c_int, c_void_p
+        gtlib.gt_node_stream_delete.argtypes = [c_void_p]
         gtlib.gt_node_stream_delete.restype = None
-        gtlib.gt_node_stream_next.argtypes = [GenomeStream]
+        gtlib.gt_node_stream_next.argtypes = [c_void_p]
         gtlib.gt_node_stream_next.restype = GenomeNode
-        gtlib.gt_node_stream_pull.argtypes = [GenomeStream, Error]
+        gtlib.gt_node_stream_pull.argtypes = [c_void_p, Error]
         gtlib.gt_node_stream_pull.restype = c_int
 
     register = classmethod(register)

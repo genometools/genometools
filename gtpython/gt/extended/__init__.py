@@ -19,6 +19,7 @@
 
 from comment_node import *
 from feature_node import *
+from feature_index import *
 from custom_stream import *
 from custom_stream_example import *
 from custom_visitor import *
@@ -44,7 +45,10 @@ SequenceNode.register(gtlib)
 MetaNode.register(gtlib)
 EOFNode.register(gtlib)
 CustomStream.register(gtlib)
+CustomVisitor.register(gtlib)
 FeatureNode.register(gtlib)
+FeatureIndex.register(gtlib)
+FeatureIndexMemory.register(gtlib)
 FeatureNodeIterator.register(gtlib)
 GenomeStream.register(gtlib)
 GFF3InStream.register(gtlib)
@@ -54,7 +58,9 @@ AddIntronsStream.register(gtlib)
 InterFeatureStream.register(gtlib)
 DuplicateFeatureStream.register(gtlib)
 MergeFeatureStream.register(gtlib)
+NodeVisitor.register(gtlib)
 try:
+    RDB.register(gtlib)
     RDBSqlite.register(gtlib)
     AnnoDBSchema.register(gtlib)
 except AttributeError:
