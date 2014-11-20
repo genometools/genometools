@@ -67,7 +67,7 @@ static char* mutate_seq(const char *seq, GtUword len,
   mutate_prob = (double) rate / 100.0;
   allocated = len * 2; /* XXX: possibly reduce this memory consumption */
   mutated_seq = gt_malloc(sizeof (char) * allocated);
-  for (i = 0, j = 0; i < len; i++) {
+  for (i = 0, j = 0; i < len; /* Nothing */) {
     if (isupper(seq[i]))
       was_upper = true;
     else
@@ -79,21 +79,22 @@ static char* mutate_seq(const char *seq, GtUword len,
         /* substitution (80% probability) */
         mutated_seq[j++] = random_character(alphabet, was_upper);
         substitution_events++;
+        i++;
       }
       else if (rand_prob <= 0.9) {
         /* insertion (10% probability) */
-        mutated_seq[j++] = seq[i]; /* keep orig. character */
         mutated_seq[j++] = random_character(alphabet, was_upper);
         insertion_events++;
       }
       else {
       /* deletion (10% probability) */
+        i++;
         deletion_events++;
       }
       total_events++;
     }
     else
-      mutated_seq[j++] = seq[i]; /* keep original character */
+      mutated_seq[j++] = seq[i++]; /* keep original character */
   }
   mutated_seq[j] = '\0'; /* terminate */
   gt_log_log("total number of mutation events: " GT_WU, total_events);
