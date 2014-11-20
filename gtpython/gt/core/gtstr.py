@@ -63,13 +63,21 @@ class Str:
     def register(cls, gtlib):
         from ctypes import c_void_p, c_char_p, c_ulong
         gtlib.gt_str_new.restype = c_void_p
+        gtlib.gt_str_new.argtypes = []
         gtlib.gt_str_new_cstr.restype = c_void_p
         gtlib.gt_str_new_cstr.argtypes = [c_char_p]
+        gtlib.gt_str_append_cstr.restype = None
         gtlib.gt_str_append_cstr.argtypes = [c_void_p, c_char_p]
         gtlib.gt_str_get.restype = c_char_p
+        gtlib.gt_str_get.argtypes = [c_void_p]
         gtlib.gt_str_get_mem.restype = c_void_p
+        gtlib.gt_str_get_mem.argtypes = [c_void_p]
         gtlib.gt_str_length.restype = c_ulong
+        gtlib.gt_str_length.argtypes = [c_void_p]
+        gtlib.gt_str_reset.restype = None
         gtlib.gt_str_reset.argtypes = [c_void_p]
+        gtlib.gt_str_delete.restype = None
+        gtlib.gt_str_delete.argtypes = [c_void_p]
 
     register = classmethod(register)
 
