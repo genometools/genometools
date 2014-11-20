@@ -37,7 +37,7 @@ class GFF3OutStream(GenomeStream):
 
     def register(cls, gtlib):
         from ctypes import c_void_p
-        gtlib.gt_gff3_out_stream_new.argtypes = [GenomeStream, Str]
+        gtlib.gt_gff3_out_stream_new.argtypes = [GenomeStream, c_void_p]
         gtlib.gt_gff3_out_stream_new.restype = c_void_p
 
     register = classmethod(register)
