@@ -40,7 +40,7 @@ class FeatureNode(GenomeNode):
             gterror("Invalid strand '%s' -- must be one of %s" % (strand,
                     strandchars))
         s = Str(str(seqid.encode("utf-8")))
-        fn = gtlib.gt_feature_node_new(s, type, start, end, \
+        fn = gtlib.gt_feature_node_new(s.strg, type, start, end, \
                                        strandchars.index(strand))
         n = cls.create_from_ptr(fn, True)
         n.depth_first = True
@@ -176,7 +176,7 @@ class FeatureNode(GenomeNode):
         gtlib.gt_feature_node_has_type.restype = c_int
         gtlib.gt_feature_node_has_type.argtypes = [c_void_p, c_char_p]
         gtlib.gt_feature_node_new.restype = c_void_p
-        gtlib.gt_feature_node_new.argtypes = [Str, c_char_p, c_ulong,
+        gtlib.gt_feature_node_new.argtypes = [c_void_p, c_char_p, c_ulong,
                 c_ulong, c_int]
         gtlib.gt_feature_node_score_is_defined.restype = c_int
         gtlib.gt_feature_node_score_is_defined.argtypes = [c_void_p]

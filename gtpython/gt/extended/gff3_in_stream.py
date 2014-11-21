@@ -51,7 +51,7 @@ class GFF3InStream(GenomeStream):
         from ctypes import c_char_p, c_void_p
         gtlib.gt_gff3_in_stream_get_used_types.argtypes = [c_void_p]
         gtlib.gt_gff3_in_stream_new_sorted.argtypes = [c_char_p]
-        gtlib.gt_gff3_in_stream_get_used_types.restype = StrArray
+        gtlib.gt_gff3_in_stream_get_used_types.restype = c_void_p
         gtlib.gt_gff3_in_stream_new_sorted.restype = c_void_p
 
     register = classmethod(register)

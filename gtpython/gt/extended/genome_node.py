@@ -110,7 +110,7 @@ class GenomeNode(object):
 
     def accept(self, visitor):
         err = Error()
-        rval = gtlib.gt_genome_node_accept(self.gn, visitor, err)
+        rval = gtlib.gt_genome_node_accept(self.gn, visitor._as_parameter, err.error)
         if rval != 0:
             gterror(err)
 
@@ -133,8 +133,8 @@ class GenomeNode(object):
         gtlib.gt_genome_node_ref.restype = c_void_p
         gtlib.gt_genome_node_ref.argtypes = [c_void_p]
         gtlib.gt_genome_node_accept.restype = c_int
-        gtlib.gt_genome_node_accept.argtypes = [c_void_p, NodeVisitor,
-                Error]
+        gtlib.gt_genome_node_accept.argtypes = [c_void_p, c_void_p,
+                c_void_p]
 
     register = classmethod(register)
 

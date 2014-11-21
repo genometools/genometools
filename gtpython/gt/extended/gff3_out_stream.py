@@ -25,7 +25,7 @@ from gt.extended.genome_stream import GenomeStream
 class GFF3OutStream(GenomeStream):
 
     def __init__(self, genome_stream):
-        self.gs = gtlib.gt_gff3_out_stream_new(genome_stream, None)
+        self.gs = gtlib.gt_gff3_out_stream_new(genome_stream.gs, None)
         self._as_parameter_ = self.gs
 
     def from_param(cls, obj):
@@ -37,7 +37,7 @@ class GFF3OutStream(GenomeStream):
 
     def register(cls, gtlib):
         from ctypes import c_void_p
-        gtlib.gt_gff3_out_stream_new.argtypes = [GenomeStream, c_void_p]
+        gtlib.gt_gff3_out_stream_new.argtypes = [c_void_p, c_void_p]
         gtlib.gt_gff3_out_stream_new.restype = c_void_p
 
     register = classmethod(register)

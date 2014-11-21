@@ -32,13 +32,13 @@ class RegionNode(GenomeNode):
         if start > end:
             raise "start > end"
         seq_str = Str(str(seqid))
-        fn = gtlib.gt_region_node_new(seq_str, start, end)
+        fn = gtlib.gt_region_node_new(seq_str.strng, start, end)
         n = cls.create_from_ptr(fn, True)
         return n
 
     def register(cls, gtlib):
         from ctypes import c_ulong, c_void_p
         gtlib.gt_region_node_new.restype = c_void_p
-        gtlib.gt_region_node_new.argtypes = [Str, c_ulong, c_ulong]
+        gtlib.gt_region_node_new.argtypes = [c_void_p, c_ulong, c_ulong]
 
     register = classmethod(register)
