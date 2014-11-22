@@ -65,8 +65,8 @@ class GenomeStream:
         from ctypes import c_int, c_void_p
         gtlib.gt_node_stream_delete.argtypes = [c_void_p]
         gtlib.gt_node_stream_delete.restype = None
-        gtlib.gt_node_stream_next.argtypes = [c_void_p]
-        gtlib.gt_node_stream_next.restype = c_void_p
+        gtlib.gt_node_stream_next.argtypes = [c_void_p, c_void_p, c_void_p]
+        gtlib.gt_node_stream_next.restype = c_int
         gtlib.gt_node_stream_pull.argtypes = [c_void_p, c_void_p]
         gtlib.gt_node_stream_pull.restype = c_int
 
