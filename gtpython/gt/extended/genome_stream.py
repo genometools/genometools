@@ -1,6 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 #
+# Copyright (c) 2014 Daniel Standage <daniel.standage@gmail.com>
 # Copyright (c) 2008 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
 # Copyright (c) 2008 Center for Bioinformatics, University of Hamburg
 #
@@ -46,7 +47,7 @@ class GenomeStream:
         err = Error()
         genome_node = c_void_p()
         rval = gtlib.gt_node_stream_next(self.gs, byref(genome_node),
-                err.error)
+                err.from_param())
         if rval != 0:
             gterror(err)
         if genome_node.value == None:
@@ -56,7 +57,7 @@ class GenomeStream:
 
     def pull(self):
         err = Error()
-        rval = gtlib.gt_node_stream_pull(self.gs, err.error)
+        rval = gtlib.gt_node_stream_pull(self.gs, err.from_param())
         if rval != 0:
             gterror(err)
 

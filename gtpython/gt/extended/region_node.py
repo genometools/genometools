@@ -1,6 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 #
+# Copyright (c) 2014 Daniel Standage <daniel.standage@gmail.com>
 # Copyright (c) 2009 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
 # Copyright (c) 2009 Center for Bioinformatics, University of Hamburg
 #
@@ -32,7 +33,7 @@ class RegionNode(GenomeNode):
         if start > end:
             raise "start > end"
         seq_str = Str(str(seqid))
-        fn = gtlib.gt_region_node_new(seq_str.strng, start, end)
+        fn = gtlib.gt_region_node_new(seq_str.from_param(), start, end)
         n = cls.create_from_ptr(fn, True)
         return n
 

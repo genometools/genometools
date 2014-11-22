@@ -1,6 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 #
+# Copyright (c) 2014 Daniel Standage <daniel.standage@gmail.com>
 # Copyright (c) 2012 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
 # Copyright (c) 2012 Center for Bioinformatics, University of Hamburg
 #
@@ -51,7 +52,7 @@ class RDBSqlite(RDB):
 
     def __init__(self, filename):
         err = Error()
-        rdb = gtlib.gt_rdb_sqlite_new(filename, err)
+        rdb = gtlib.gt_rdb_sqlite_new(filename, err.from_param())
         if rdb == None:
             gterror(err)
         self.rdb = rdb
@@ -67,6 +68,6 @@ class RDBSqlite(RDB):
     def register(cls, gtlib):
         from ctypes import c_char_p, c_void_p
         gtlib.gt_rdb_sqlite_new.restype = c_void_p
-        gtlib.gt_rdb_sqlite_new.argtypes = [c_char_p, Error]
+        gtlib.gt_rdb_sqlite_new.argtypes = [c_char_p, c_void_p]
 
     register = classmethod(register)

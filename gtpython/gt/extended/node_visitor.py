@@ -42,5 +42,3 @@ class NodeVisitor(object):
         gtlib.gt_node_visitor_delete.argtypes = [c_void_p]
     
     register = classmethod(register)
-
-

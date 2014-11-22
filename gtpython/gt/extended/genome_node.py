@@ -1,6 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 #
+# Copyright (c) 2014 Daniel Standage <daniel.standage@gmail.com>
 # Copyright (c) 2008-2009 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
 # Copyright (c) 2008-2009 Center for Bioinformatics, University of Hamburg
 #
@@ -31,7 +32,7 @@ class GenomeNode(object):
     @classmethod
     def create_from_ptr(cls, node_ptr, newref=False):
         if node_ptr == 0 or node_ptr == None:
-            gterror("GenomeNode pointer cannot be NULL (was: " + str(node_ptr) +
+            gterror("GenomeNode pointer cannot be NULL (was: "+ str(node_ptr) +
                     ")")
         n = cls()
         if newref:
@@ -110,7 +111,7 @@ class GenomeNode(object):
 
     def accept(self, visitor):
         err = Error()
-        rval = gtlib.gt_genome_node_accept(self.gn, visitor._as_parameter, err.error)
+        rval = gtlib.gt_genome_node_accept(self.gn, visitor._as_parameter, err.from_param())
         if rval != 0:
             gterror(err)
 
@@ -137,5 +138,3 @@ class GenomeNode(object):
                 c_void_p]
 
     register = classmethod(register)
-
-
