@@ -1,6 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 #
+# Copyright (c) 2014 Daniel Standage <daniel.standage@gmail.com>
 # Copyright (c) 2008-2012 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
 # Copyright (c) 2008-2012 Center for Bioinformatics, University of Hamburg
 #
@@ -17,54 +18,57 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #
 
+from add_introns_stream import *
 from comment_node import *
-from feature_node import *
-from feature_index import *
 from custom_stream import *
 from custom_stream_example import *
 from custom_visitor import *
+from dup_feature_stream import *
+from feature_node import *
+from feature_index import *
 from genome_node import *
 from genome_stream import *
 from gff3_in_stream import *
 from gff3_out_stream import *
 from gff3_visitor import *
+from inter_feature_stream import *
+from merge_feature_stream import *
+from meta_node import *
 from node_visitor import *
 from region_node import *
 from sequence_node import *
-from add_introns_stream import *
-from inter_feature_stream import *
-from dup_feature_stream import *
-from merge_feature_stream import *
-from rdb import *
-from anno_db import *
 from sort_stream import *
 
+from rdb import *
+from anno_db import *
+
+
+AddIntronsStream.register(gtlib)
 CommentNode.register(gtlib)
-GenomeNode.register(gtlib)
-RegionNode.register(gtlib)
-SequenceNode.register(gtlib)
-MetaNode.register(gtlib)
-EOFNode.register(gtlib)
 CustomStream.register(gtlib)
 CustomVisitor.register(gtlib)
+DuplicateFeatureStream.register(gtlib)
+EOFNode.register(gtlib)
 FeatureNode.register(gtlib)
 FeatureIndex.register(gtlib)
 FeatureIndexMemory.register(gtlib)
 FeatureNodeIterator.register(gtlib)
+GenomeNode.register(gtlib)
 GenomeStream.register(gtlib)
 GFF3InStream.register(gtlib)
 GFF3OutStream.register(gtlib)
 GFF3Visitor.register(gtlib)
-AddIntronsStream.register(gtlib)
 InterFeatureStream.register(gtlib)
-DuplicateFeatureStream.register(gtlib)
 MergeFeatureStream.register(gtlib)
+MetaNode.register(gtlib)
 NodeVisitor.register(gtlib)
+RegionNode.register(gtlib)
+SequenceNode.register(gtlib)
 SortStream.register(gtlib)
 try:
+    AnnoDBSchema.register(gtlib)
     RDB.register(gtlib)
     RDBSqlite.register(gtlib)
-    AnnoDBSchema.register(gtlib)
 except AttributeError:
     # fail gracefully when RDB symbols are not present
     pass
