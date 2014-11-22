@@ -26,6 +26,7 @@ from custom_visitor import *
 from dup_feature_stream import *
 from feature_node import *
 from feature_index import *
+from feature_stream import *
 from genome_node import *
 from genome_stream import *
 from gff3_in_stream import *
@@ -51,6 +52,7 @@ DuplicateFeatureStream.register(gtlib)
 EOFNode.register(gtlib)
 FeatureNode.register(gtlib)
 FeatureIndex.register(gtlib)
+FeatureStream.register(gtlib)
 FeatureIndexMemory.register(gtlib)
 FeatureNodeIterator.register(gtlib)
 GenomeNode.register(gtlib)
