@@ -33,7 +33,7 @@ class RegionNode(GenomeNode):
         if start > end:
             raise "start > end"
         seq_str = Str(str(seqid))
-        fn = gtlib.gt_region_node_new(seq_str.from_param(), start, end)
+        fn = gtlib.gt_region_node_new(seq_str._as_parameter_, start, end)
         n = cls.create_from_ptr(fn, True)
         return n
 

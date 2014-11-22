@@ -26,7 +26,7 @@ from gt.extended.genome_stream import GenomeStream
 class GFF3OutStream(GenomeStream):
 
     def __init__(self, genome_stream):
-        self.gs = gtlib.gt_gff3_out_stream_new(genome_stream.from_param(), None)
+        self.gs = gtlib.gt_gff3_out_stream_new(genome_stream._as_parameter_, None)
         self._as_parameter_ = self.gs
 
     def from_param(cls, obj):

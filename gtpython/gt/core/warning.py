@@ -21,11 +21,12 @@
 from gt.dlload import gtlib
 from ctypes import CFUNCTYPE, c_void_p, c_char_p, addressof
 
-defhand = CFUNCTYPE(None, c_void_p, c_char_p, c_char_p).in_dll(gtlib, "gt_warning_default_handler")
+funcdef = CFUNCTYPE(None, c_void_p, c_char_p, c_char_p)
+defhand = funcdef.in_dll(gtlib, "gt_warning_default_handler")
 gtlib.gt_warning_disable.restype = None
 gtlib.gt_warning_disable.argtypes = []
 gtlib.gt_warning_set_handler.restype = None
-gtlib.gt_warning_set_handler.argtypes = [defhand, c_void_p]
+gtlib.gt_warning_set_handler.argtypes = [funcdef, c_void_p]
 
 def warning_disable():
     gtlib.gt_warning_disable()

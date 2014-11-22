@@ -48,7 +48,7 @@ class Alphabet:
         if not os.path.exists(indexname + ".al1"):
             raise IOError, ("file not found: %s" % (indexname + ".al1"))
         e = Error()
-        a_ptr = gtlib.gt_alphabet_new_from_file(str(indexname), e.from_param())
+        a_ptr = gtlib.gt_alphabet_new_from_file(str(indexname), e._as_parameter_)
         a = Alphabet(a_ptr, True)
         if a == None:
           gterror(e)
@@ -66,8 +66,8 @@ class Alphabet:
             if not os.path.exists(f):
                 raise IOError, ("file not found: %s" % f)
             sa.add(str(f))
-        a_ptr = gtlib.gt_alphabet_new_from_sequence(sa.from_param(),
-                e.from_param())
+        a_ptr = gtlib.gt_alphabet_new_from_sequence(sa._as_parameter_,
+                e._as_parameter_)
         a = Alphabet(a_ptr, True)
         if a == None:
           gterror(e)

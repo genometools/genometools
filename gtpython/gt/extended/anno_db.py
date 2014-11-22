@@ -45,8 +45,8 @@ class AnnoDBSchema:
 
     def get_feature_index(self, rdb):
         err = Error()
-        fi = gtlib.gt_anno_db_schema_get_feature_index(self.ads, rdb.from_param(),
-                err.from_param())
+        fi = gtlib.gt_anno_db_schema_get_feature_index(self.ads, rdb._as_parameter_,
+                err._as_parameter_)
         if fi == None:
             gterror(err)
         return FeatureIndexFromPtr(fi)

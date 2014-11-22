@@ -23,7 +23,7 @@ from gt.extended.genome_stream import GenomeStream
 
 class InterFeatureStream(GenomeStream):
     def __init__(self, genome_stream, surround_type, new_type):
-        self.gs = gtlib.gt_inter_feature_stream_new(genome_stream.from_param(),
+        self.gs = gtlib.gt_inter_feature_stream_new(genome_stream._as_parameter_,
                 surround_type, new_type)
         self._as_parameter_ = self.gs
 

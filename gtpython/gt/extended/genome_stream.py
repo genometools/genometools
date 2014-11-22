@@ -47,7 +47,7 @@ class GenomeStream:
         err = Error()
         genome_node = c_void_p()
         rval = gtlib.gt_node_stream_next(self.gs, byref(genome_node),
-                err.from_param())
+                err._as_parameter_)
         if rval != 0:
             gterror(err)
         if genome_node.value == None:
@@ -57,7 +57,7 @@ class GenomeStream:
 
     def pull(self):
         err = Error()
-        rval = gtlib.gt_node_stream_pull(self.gs, err.from_param())
+        rval = gtlib.gt_node_stream_pull(self.gs, err._as_parameter_)
         if rval != 0:
             gterror(err)
 

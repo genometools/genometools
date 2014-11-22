@@ -49,7 +49,7 @@ class FeatureIndex:
         err = Error()
         result = []
         rval = gtlib.gt_feature_index_get_features_for_seqid(self.fi,
-                seqid, err.from_param())
+                seqid, err._as_parameter_)
         if rval:
             a = Array(rval, True)
             for i in range(a.size()):
@@ -63,7 +63,7 @@ class FeatureIndex:
     def add_gff3file(self, filename):
         err = Error()
         rval = gtlib.gt_feature_index_add_gff3file(self.fi, filename,
-                err.from_param())
+                err._as_parameter_)
         if rval != 0:
             gterror(err)
 
@@ -72,7 +72,7 @@ class FeatureIndex:
         val = c_int()
         err = Error()
         ret = gtlib.gt_feature_index_has_seqid(self.fi, byref(val),
-                seqid, err.from_param())
+                seqid, err._as_parameter_)
         if ret != 0:
             gterror(err)
         else:
@@ -80,7 +80,7 @@ class FeatureIndex:
 
     def get_first_seqid(self):
         err = Error()
-        str = gtlib.gt_feature_index_get_first_seqid(self.fi, err.from_param())
+        str = gtlib.gt_feature_index_get_first_seqid(self.fi, err._as_parameter_)
         if str == None:
             if err.is_set():
                 gterror(err)
@@ -89,7 +89,7 @@ class FeatureIndex:
     def get_seqids(self):
         result = []
         err = Error()
-        stra = StrArray(gtlib.gt_feature_index_get_seqids(self.fi, err.from_param()))
+        stra = StrArray(gtlib.gt_feature_index_get_seqids(self.fi, err._as_parameter_))
         if stra == None:
             gterror(err)
         for i in range(stra.size()):
@@ -114,7 +114,7 @@ class FeatureIndex:
         err = Error()
         rng = Range(start, end)
         rval = gtlib.gt_feature_index_get_features_for_range(self.fi,
-                a.from_param(), seqid, byref(rng), err.from_param())
+                a._as_parameter_, seqid, byref(rng), err._as_parameter_)
         if rval != 0:
             gterror(err)
         result = []

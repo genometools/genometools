@@ -52,7 +52,7 @@ class RDBSqlite(RDB):
 
     def __init__(self, filename):
         err = Error()
-        rdb = gtlib.gt_rdb_sqlite_new(filename, err.from_param())
+        rdb = gtlib.gt_rdb_sqlite_new(filename, err._as_parameter_)
         if rdb == None:
             gterror(err)
         self.rdb = rdb

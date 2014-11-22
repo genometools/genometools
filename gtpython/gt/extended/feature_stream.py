@@ -26,8 +26,8 @@ from gt.extended.genome_stream import GenomeStream
 class FeatureStream(GenomeStream):
 
     def __init__(self, genome_stream, feature_index):
-        self.gs = gtlib.gt_feature_stream_new(genome_stream.from_param(),
-                feature_index.from_param())
+        self.gs = gtlib.gt_feature_stream_new(genome_stream._as_parameter_,
+                feature_index._as_parameter_)
         self._as_parameter_ = self.gs
 
     def from_param(cls, obj):

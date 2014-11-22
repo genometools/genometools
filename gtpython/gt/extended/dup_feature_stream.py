@@ -23,7 +23,7 @@ from gt.extended.genome_stream import GenomeStream
 
 class DuplicateFeatureStream(GenomeStream):
     def __init__(self, genome_stream, dest_type, source_type):
-        self.gs = gtlib.gt_dup_feature_stream_new(genome_stream.from_param(), dest_type,
+        self.gs = gtlib.gt_dup_feature_stream_new(genome_stream._as_parameter_, dest_type,
                 source_type)
         self._as_parameter_ = self.gs
 

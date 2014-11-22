@@ -32,7 +32,7 @@ class SequenceNode(GenomeNode):
     @classmethod
     def create_new(cls, description, sequence):
         seq_str = Str(str(sequence.encode("utf-8")))
-        fn = gtlib.gt_sequence_node_new(description, seq_str.from_param())
+        fn = gtlib.gt_sequence_node_new(description, seq_str._as_parameter_)
         n = cls.create_from_ptr(fn, True)
         return n
 

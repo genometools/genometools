@@ -64,7 +64,7 @@ class FeatureNode(GenomeNode):
         if (ownid != newid):
             gterror("cannot add node with sequence region '%s' to node with sequence region '%s'" % (ownid, newid))
         else:
-            gtlib.gt_feature_node_add_child(self.gn, node.from_param())
+            gtlib.gt_feature_node_add_child(self.gn, node._as_parameter_)
 
     def from_param(cls, obj):
         if not isinstance(obj, FeatureNode):
@@ -78,7 +78,7 @@ class FeatureNode(GenomeNode):
 
     def set_source(self, source):
         s = Str(str(source.encode("utf-8")))
-        gtlib.gt_feature_node_set_source(self.gn, s.from_param())
+        gtlib.gt_feature_node_set_source(self.gn, s._as_parameter_)
 
     source = cachedproperty(get_source, set_source)
 
@@ -259,14 +259,14 @@ class FeatureNodeIteratorDepthFirst(FeatureNodeIterator):
 
     def __init__(self, node):
 
-        self.i = gtlib.gt_feature_node_iterator_new(node.from_param())
+        self.i = gtlib.gt_feature_node_iterator_new(node._as_parameter_)
         self._as_parameter_ = self.i
 
 
 class FeatureNodeIteratorDirect(FeatureNodeIterator):
 
     def __init__(self, node):
-        self.i = gtlib.gt_feature_node_iterator_new_direct(node.from_param())
+        self.i = gtlib.gt_feature_node_iterator_new_direct(node._as_parameter_)
         self._as_parameter_ = self.i
 
 
