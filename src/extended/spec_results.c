@@ -29,9 +29,11 @@
 #include "extended/comment_node_api.h"
 #include "extended/feature_node_api.h"
 #include "extended/genome_node.h"
+#include "extended/gff3_visitor.h"
 #include "extended/luahelper.h"
 #include "extended/spec_results.h"
 #include "gtlua/genome_node_lua.h"
+#include "gtlua/genome_visitor_lua.h"
 #include "gtlua/gt_lua.h"
 #include "lua.h"
 #include "lauxlib.h"
@@ -419,6 +421,7 @@ int gt_spec_results_render_template(GtSpecResults *sr, const char *template,
                                     const char *runtime_str, GtError *err)
 {
   lua_State *L;
+  GtNodeVisitor *vis = NULL;
   GtSpecResultsReportInfo info;
   int had_err = 0;
   gt_assert(sr && specfile && template && err);
@@ -516,6 +519,13 @@ int gt_spec_results_render_template(GtSpecResults *sr, const char *template,
 
   /* gt.script_dir is useful in templates too */
   gt_lua_set_script_dir(L, template);
+
+  /* also push a GtGFF3Visitor writing to outfile*/
+  vis = gt_gff3_visitor_new(outfile);
+  gt_gff3_visitor_retain_id_attributes((GtGFF3Visitor*) vis);
+  gt_gff3_visitor_allow_nonunique_ids((GtGFF3Visitor*) vis);
+  gt_lua_genome_visitor_push(L, vis);
+  lua_setglobal(L, "gff3_out_visitor");
 
   lua_pushlightuserdata(L, (void*) &spec_resuserdata);
   lua_pushlightuserdata(L, (void*) outfile);
