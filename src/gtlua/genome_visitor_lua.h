@@ -19,6 +19,7 @@
 #define GENOME_VISITOR_LUA_H
 
 #include "lua.h"
+#include "extended/node_visitor_api.h"
 
 /* exports the GtNodeVisitor interface and its implementors to Lua:
 
@@ -29,10 +30,12 @@
    function gff3_visitor_new()
 */
 
-int gt_lua_open_genome_visitor(lua_State*);
+int  gt_lua_open_genome_visitor(lua_State*);
+void gt_lua_genome_visitor_push(lua_State*, GtNodeVisitor*);
 
 #define GENOME_VISITOR_METATABLE  "GenomeTools.genome_visitor"
 #define check_genome_visitor(L, POS) \
              (GtNodeVisitor**) luaL_checkudata(L, POS, GENOME_VISITOR_METATABLE)
+
 
 #endif
