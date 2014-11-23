@@ -25,5 +25,6 @@
 const GtNodeVisitorClass* gt_gff3_visitor_class(void);
 
 GtNodeVisitor*            gt_gff3_visitor_new_to_str(GtStr *outstr);
+void                      gt_gff3_visitor_allow_nonunique_ids(GtGFF3Visitor*);
 
 #endif
