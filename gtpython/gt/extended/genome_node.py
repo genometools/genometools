@@ -111,7 +111,8 @@ class GenomeNode(object):
 
     def accept(self, visitor):
         err = Error()
-        rval = gtlib.gt_genome_node_accept(self.gn, visitor._as_parameter, err._as_parameter_)
+        rval = gtlib.gt_genome_node_accept(self.gn, visitor._as_parameter_,
+                 err._as_parameter_)
         if rval != 0:
             gterror(err)
 

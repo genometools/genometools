@@ -38,6 +38,7 @@ class FeatureStream(GenomeStream):
     from_param = classmethod(from_param)
 
     def register(cls, gtlib):
+        from ctypes import c_void_p
         gtlib.gt_feature_stream_new.restype = c_void_p
         gtlib.gt_feature_stream_new.argtypes = [c_void_p,
                 c_void_p]

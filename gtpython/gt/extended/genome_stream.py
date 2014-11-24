@@ -62,7 +62,7 @@ class GenomeStream:
             gterror(err)
 
     def register(cls, gtlib):
-        from ctypes import c_int, c_void_p
+        from ctypes import c_int, c_void_p, POINTER
         gtlib.gt_node_stream_delete.argtypes = [c_void_p]
         gtlib.gt_node_stream_delete.restype = None
         gtlib.gt_node_stream_next.argtypes = [c_void_p, c_void_p, c_void_p]
