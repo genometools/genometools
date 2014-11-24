@@ -38,7 +38,8 @@ struct GtPdomModelSet
         *hmmer_path;
 };
 
-GtPdomModelSet* gt_pdom_model_set_new(GtStrArray *hmmfiles, GtError *err)
+GtPdomModelSet* gt_pdom_model_set_new(GtStrArray *hmmfiles, bool force,
+                                      GtError *err)
 {
   GtStr *concat_dbnames, *cmdline, *indexfilename = NULL;
   GtUword i;
@@ -94,7 +95,7 @@ GtPdomModelSet* gt_pdom_model_set_new(GtStrArray *hmmfiles, GtError *err)
     gt_str_append_cstr(indexfilename, GT_HMM_INDEX_SUFFIX);
   }
 
-  if (!gt_file_exists(gt_str_get(indexfilename))) {
+  if (!gt_file_exists(gt_str_get(indexfilename)) || force) {
     dest = fopen(gt_str_get(pdom_model_set->filename), "w+");
     if (!dest) {
       gt_error_set(err, "could not create file %s",
@@ -111,7 +112,7 @@ GtPdomModelSet* gt_pdom_model_set_new(GtStrArray *hmmfiles, GtError *err)
           had_err = -1;
         }
         if (!had_err) {
-          while (( ch = fgetc(source)) != EOF)
+          while ((ch = fgetc(source)) != EOF)
             (void) fputc(ch, dest);
           (void) fclose(source);
         }
@@ -126,7 +127,9 @@ GtPdomModelSet* gt_pdom_model_set_new(GtStrArray *hmmfiles, GtError *err)
     rval = system(gt_str_get(cmdline));
     gt_str_delete(cmdline);
     if (rval == -1) {
-      gt_error_set(err, "error executing system(hmmpress)");
+      gt_error_set(err, "error trying to execute the hmmpress tool "
+                        " -- make sure HMMER is installed and hmmpress "
+                        "can be found in the PATH");
       return NULL;
     }
 #ifndef _WIN32
