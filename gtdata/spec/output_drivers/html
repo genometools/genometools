@@ -1,6 +1,6 @@
 --[[
   This is an output template for HTML output.
-  The HTML is self-contained so this template may look a bit unclean.
+  The HTML is self-contained so this template may look a bit full.
 ]]
 
 header = [[
@@ -26,24 +26,21 @@ header = [[
       color:red;
     }
     .err:before {
-      color:magenta;
-    }
-    li.collapsibleListOpen {
-      list-style-image:url('button-open.png');
-      cursor:pointer;
+      color: purple;
     }
     ul li.collapsibleListOpen:before {
         content: '\25BC';
         float: left;
+        cursor:pointer;
         margin: 0 0.2em;
     }
     li.collapsibleListClosed {
-      list-style-image:url('button-closed.png');
       cursor:pointer;
     }
     ul li.collapsibleListClosed:before {
         content: '\25BA';
         float: left;
+        cursor:pointer;
         margin: 0 0.2em;
     }
     ul li:before {
@@ -62,6 +59,7 @@ header = [[
       }
       .content {
         width: 80%;
+        height: 100%;
         float: none;
         list-style: none;
         padding: 0;
@@ -73,6 +71,7 @@ header = [[
         list-style: none;
         position: relative;
         padding: 0;
+        margin-bottom: 60px;
       }
       .tabs li{
         float: left;
@@ -126,6 +125,19 @@ header = [[
       }
       .footer, .push {
         height: 55px;
+      }
+      .boxx {
+        background: #FAFAFA;
+        border: 1px dotted #FAFAFA;
+        margin: 3px;
+      }
+      .subheader {
+        font-size: small;
+      }
+      .overflowed {
+        width: 100%;
+        clear: both;
+        overflow: auto;
       }
     </style>
     <script>var runOnLoad=function(c,o,d,e){function x(){for(e=1;c.length;)c.shift()()}o[d]?(document[d]('DOMContentLoaded',x,0),o[d]('load',x,0)):o.attachEvent('onload',x);return function(t){e?o.setTimeout(t,0):c.push(t)}}([],window,'addEventListener');</script>
@@ -249,13 +261,17 @@ function print_aspects(aspects)
           <span style="color: #grey;">]] .. node.filename .. [[</span>,
           <span style="color: grey;">line</span>
           <span style="color: #grey;">]] .. node.linenumber .. [[</span>]])
-          template_print("<ul>\n")
+          template_print("<ul><li><span class='subheader'>Failure messages:</span> <ul>\n")
           for c, msg in ipairs(node.failure_messages) do
-            template_print("<li>" .. msg .. "</li>\n")
+            template_print("<li><div class='overflowed'>" .. msg .. "</div></li>\n")
           end
           for c, msg in ipairs(node.runtime_error_messages) do
-            template_print("<li>" .. msg .. "</li>\n")
+            template_print("<li class='overflowed'>" .. msg .. "</li>\n")
           end
+          template_print("</ul></li>")
+          template_print("<li><span class='subheader'>GFF3 for feature:</span><div class='gffcode boxx overflowed'><pre>")
+          node.node:accept(gff3_out_visitor)
+          template_print("</pre></div></li>")
           template_print("</ul>\n")
           template_print("</li>\n")
         end

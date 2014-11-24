@@ -37,7 +37,8 @@ struct GtGFF3Visitor {
   const GtNodeVisitor parent_instance;
   bool version_string_shown,
        retain_ids,
-       fasta_directive_shown;
+       fasta_directive_shown,
+       allow_nonunique_ids;
   GtStringDistri *id_counter;
   GtHashmap *feature_node_to_id_array,
             *feature_node_to_unique_id_str;
@@ -276,16 +277,19 @@ static GtStr* make_id_unique(GtGFF3Visitor *gff3_visitor, GtFeatureNode *fn)
   GtUword i = 1;
   GtStr *id = gt_str_new_cstr(gt_feature_node_get_attribute(fn, "ID"));
 
-  if (gt_cstr_table_get(gff3_visitor->used_ids, gt_str_get(id))) {
-    GtStr *buf = gt_str_new();
-    while (!id_string_is_unique(id, buf, gff3_visitor->used_ids, i++));
-    gt_warning("feature ID \"%s\" not unique: changing to %s", gt_str_get(id),
-                                                               gt_str_get(buf));
-    gt_str_set(id, gt_str_get(buf));
-    gt_str_delete(buf);
+  if (!gff3_visitor->allow_nonunique_ids) {
+    if (gt_cstr_table_get(gff3_visitor->used_ids, gt_str_get(id))) {
+      GtStr *buf = gt_str_new();
+      while (!id_string_is_unique(id, buf, gff3_visitor->used_ids, i++));
+      gt_warning("feature ID \"%s\" not unique: changing to %s", gt_str_get(id),
+                                                                 gt_str_get(buf));
+      gt_str_set(id, gt_str_get(buf));
+      gt_str_delete(buf);
+    }
+    /* update table with the new id */
+    gt_cstr_table_add(gff3_visitor->used_ids, gt_str_get(id));
   }
-  /* update table with the new id */
-  gt_cstr_table_add(gff3_visitor->used_ids, gt_str_get(id));
+
   /* store (unique) id */
   gt_hashmap_add(gff3_visitor->feature_node_to_unique_id_str, fn, id);
 
@@ -517,6 +521,7 @@ static void gt_gff3_visitor_init(GtGFF3Visitor *gff3_visitor)
   gff3_visitor->used_ids = gt_cstr_table_new();
   /* XXX */
   gff3_visitor->retain_ids = getenv("GT_RETAINIDS") ? true : false;
+  gff3_visitor->allow_nonunique_ids = false;
 }
 
 GtNodeVisitor* gt_gff3_visitor_new(GtFile *outfp)
@@ -543,6 +548,12 @@ void gt_gff3_visitor_retain_id_attributes(GtGFF3Visitor *gff3_visitor)
 {
   gt_assert(gff3_visitor);
   gff3_visitor->retain_ids = true;
+}
+
+void gt_gff3_visitor_allow_nonunique_ids(GtGFF3Visitor *gff3_visitor)
+{
+  gt_assert(gff3_visitor);
+  gff3_visitor->allow_nonunique_ids = true;
 }
 
 void gt_gff3_visitor_set_fasta_width(GtGFF3Visitor *gff3_visitor,

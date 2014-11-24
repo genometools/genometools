@@ -242,3 +242,13 @@ int gt_lua_open_genome_visitor(lua_State *L)
   gt_assert(lua_gettop(L) == stack_size);
   return 1;
 }
+
+void gt_lua_genome_visitor_push(lua_State *L, GtNodeVisitor *gv)
+{
+  GtNodeVisitor **gv_lua;
+  gt_assert(L && gv);
+  gv_lua = lua_newuserdata(L, sizeof (GtNodeVisitor**));
+  *gv_lua = gv;
+  luaL_getmetatable(L, GENOME_VISITOR_METATABLE);
+  lua_setmetatable(L, -2);
+}
