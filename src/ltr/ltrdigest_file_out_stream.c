@@ -189,15 +189,18 @@ static int gt_ltr_visitor_feature_node(GtNodeVisitor *nv, GtFeatureNode *fn,
     }
   } else if (strcmp(fnt, gt_ft_protein_match) == 0)
   {
+    char buf[BUFSIZ];
     if (!lv->element->pdoms)
     {
       lv->element->pdoms = gt_hashmap_new(GT_HASH_STRING, gt_free_func,
                                           (GtFree) gt_array_delete);
     }
     pfamname = gt_feature_node_get_attribute(fn, "name");
-    if (!(pdomarr = (GtArray*) gt_hashmap_get(lv->element->pdoms, pfamname)))
+    (void) snprintf(buf, BUFSIZ-1, "%s", pfamname);
+    gt_cstr_rep(buf, '/', '_');
+    if (!(pdomarr = (GtArray*) gt_hashmap_get(lv->element->pdoms, buf)))
     {
-      char *pfamcpy = gt_cstr_dup(pfamname);
+      char *pfamcpy = gt_cstr_dup(buf);
       pdomarr = gt_array_new(sizeof (GtFeatureNode*));
       gt_hashmap_add(lv->element->pdoms, pfamcpy, pdomarr);
       if (lv->element->pdomorder != NULL)
@@ -644,6 +647,7 @@ int gt_ltrfileout_stream_next(GtNodeStream *ns, GtGenomeNode **gn, GtError *err)
   gt_free(ls->element.seqid);
   return had_err;
 }
+
 void gt_ltrfileout_stream_free(GtNodeStream *ns)
 {
   GtLTRdigestFileOutStream *ls = gt_ltrdigest_file_out_stream_cast(ns);
