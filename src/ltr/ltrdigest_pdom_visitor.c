@@ -348,22 +348,29 @@ static int gt_ltrdigest_pdom_visitor_parse_alignments(GT_UNUSED
       gt_assert(hit && !hit->alignment);
       hit->alignment = gt_str_new();
       hit->aastring = gt_str_new();
-      mod_val = 4;
+      mod_val = 3;
       line = 0;
     } else {
       bool junk_match = false;
-      (void) gt_grep(&junk_match, "(CS|RF)$", buf, NULL);
+      (void) gt_grep(&junk_match, "(CS|RF|PP)$", buf, NULL);
       if (!junk_match) {
         gt_assert(hit && hit->alignment);
-        gt_str_append_cstr(hit->alignment, buf);
-        gt_str_append_char(hit->alignment, '\n');
         switch (line % mod_val) {
+          case 0:
+            if (line > 0)
+              gt_str_append_char(hit->alignment, '\n');
+            gt_str_append_cstr(hit->alignment, buf);
+            gt_str_append_char(hit->alignment, '\n');
+            break;
           case 1:
+            gt_str_append_cstr(hit->alignment, buf);
             gt_str_append_char(hit->alignment, '\n');
             break;
           case 2:
             {
               GT_UNUSED char *b = buf;
+              gt_str_append_cstr(hit->alignment, buf);
+              gt_str_append_char(hit->alignment, '\n');
               b = strtok(buf, " ");
               gt_assert(strspn(b, "012+-") == (size_t) 2);
               b = strtok(NULL, " ");

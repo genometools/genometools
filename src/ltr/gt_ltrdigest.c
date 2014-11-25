@@ -51,7 +51,8 @@ typedef struct GtLTRdigestOptions {
        write_alignments,
        write_aaseqs,
        output_all_chains,
-       print_metadata;
+       print_metadata,
+       force_recreate;
   GtOutputFileInfo *ofi;
   GtFile *outfp;
   GtStrArray *hmm_files;
@@ -347,6 +348,12 @@ static GtOptionParser* gt_ltrdigest_option_parser_new(void *tool_arguments)
   gt_option_parser_add_option(op, o);
   gt_option_is_development_option(o);
 
+  o = gt_option_new_bool("force_recreate",
+                         "force recreation of hmmpressed profiles",
+                         &arguments->force_recreate,
+                         false);
+  gt_option_parser_add_option(op, o);
+
   /* Extended PBS options */
 
   o = gt_option_new_int("pbsmatchscore",
@@ -514,7 +521,8 @@ static int gt_ltrdigest_runner(GT_UNUSED int argc, const char **argv,
 
   if (!had_err && gt_str_array_size(arguments->hmm_files) > 0) {
     GtNodeVisitor *pdom_v;
-    ms = gt_pdom_model_set_new(arguments->hmm_files, err);
+    ms = gt_pdom_model_set_new(arguments->hmm_files, arguments->force_recreate,
+                               err);
     if (ms != NULL) {
       pdom_v = gt_ltrdigest_pdom_visitor_new(ms, arguments->evalue_cutoff,
                                              arguments->chain_max_gap_length,

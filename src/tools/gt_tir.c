@@ -392,7 +392,7 @@ static int gt_tir_runner(GT_UNUSED int argc, GT_UNUSED const char **argv,
 
   if (!had_err && gt_str_array_size(arguments->hmm_files) > 0) {
     GtNodeVisitor *pdom_v;
-    ms = gt_pdom_model_set_new(arguments->hmm_files, err);
+    ms = gt_pdom_model_set_new(arguments->hmm_files, false, err);
     if (ms != NULL) {
       pdom_v = gt_ltrdigest_pdom_visitor_new(ms, arguments->evalue_cutoff,
                                              arguments->chain_max_gap_length,

@@ -20,7 +20,8 @@
 
 typedef struct GtPdomModelSet GtPdomModelSet;
 
-GtPdomModelSet* gt_pdom_model_set_new(GtStrArray *hmmfiles, GtError *err);
+GtPdomModelSet* gt_pdom_model_set_new(GtStrArray *hmmfiles,bool force,
+                                      GtError *err);
 const char*     gt_pdom_model_set_get_filename(GtPdomModelSet *set);
 void            gt_pdom_model_set_delete(GtPdomModelSet *set);
 
