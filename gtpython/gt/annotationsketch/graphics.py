@@ -1,6 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 #
+# Copyright (c) 2014 Daniel Standage <daniel.standage@gmail.com>
 # Copyright (c) 2008-2010 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
 # Copyright (c) 2008-2010 Center for Bioinformatics, University of Hamburg
 #
@@ -224,13 +225,13 @@ class Graphics:
 
     def to_file(self, filename):
         err = Error()
-        if gtlib.gt_graphics_save_to_file(self.g, filename, err) < 0:
+        if gtlib.gt_graphics_save_to_file(self.g, filename, err._as_parameter_) < 0:
             gterror(err)
 
     def to_stream(self):
         from ctypes import string_at
         s = Str(None)
-        gtlib.gt_graphics_save_to_stream(self.g, s)
+        gtlib.gt_graphics_save_to_stream(self.g, s._as_parameter_)
         return string_at(s.get_mem(), s.length())
 
     def get_text_height(self):
@@ -242,6 +243,7 @@ class Graphics:
     def register(cls, gtlib):
         from ctypes import c_char_p, c_void_p, c_int, POINTER, c_double, \
             c_ulong
+        gtlib.gt_graphics_draw_text.restype = None
         gtlib.gt_graphics_draw_text.argtypes = [c_void_p, c_double,
                 c_double, c_char_p]
         gtlib.gt_graphics_draw_text_right.argtypes = [c_void_p, c_double,
@@ -323,8 +325,10 @@ class Graphics:
                 c_double, Color, c_void_p, c_ulong, Range, c_ulong]
         gtlib.gt_graphics_save_to_file.restype = c_int
         gtlib.gt_graphics_save_to_file.argtypes = [c_void_p, c_char_p,
-                Error]
-        gtlib.gt_graphics_save_to_stream.argtypes = [c_void_p, Str]
+                c_void_p]
+        gtlib.gt_graphics_save_to_stream.argtypes = [c_void_p, c_void_p]
+        gtlib.gt_graphics_delete.restype = None
+        gtlib.gt_graphics_delete.argtypes = [c_void_p]
 
     register = classmethod(register)
 
@@ -342,6 +346,13 @@ class GraphicsCairo(Graphics):
         return obj._as_parameter_
 
     from_param = classmethod(from_param)
+    
+    def register(cls, gtlib):
+        from ctypes import c_ulong, c_void_p, c_int
+        gtlib.gt_graphics_cairo_new.restype = c_void_p
+        gtlib.gt_graphics_cairo_new.argtypes = [c_int, c_ulong, c_ulong]
+    
+    register = classmethod(register)
 
 
 class GraphicsCairoPNG(GraphicsCairo):
@@ -402,5 +413,3 @@ class GraphicsCairoSVG(GraphicsCairo):
         return obj._as_parameter_
 
     from_param = classmethod(from_param)
-
-

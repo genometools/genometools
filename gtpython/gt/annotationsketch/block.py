@@ -1,6 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 #
+# Copyright (c) 2014 Daniel Standage <daniel.standage@gmail.com>
 # Copyright (c) 2008 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
 # Copyright (c) 2008 Center for Bioinformatics, University of Hamburg
 #
@@ -52,7 +53,7 @@ class Block(object):
             1
 
     def merge(self, block2):
-        gtlib.gt_block_merge(self.block, block2)
+        gtlib.gt_block_merge(self.block, block2._as_parameter_)
 
     def clone(self):
         return Block(gtlib.gt_block_clone(self.block))
@@ -88,26 +89,35 @@ class Block(object):
     from_param = classmethod(from_param)
 
     def register(cls, gtlib):
-        from ctypes import c_char_p, c_void_p, c_int
-        gtlib.gt_block_get_range.restype = Range
-        gtlib.gt_block_get_range.argtypes = [c_void_p]
-        gtlib.gt_block_get_type.restype = c_char_p
-        gtlib.gt_block_get_type.argtypes = [c_void_p]
-        gtlib.gt_block_has_only_one_fullsize_element.argtypes = [c_void_p]
-        gtlib.gt_block_merge.argtypes = [c_void_p, Block]
+        from ctypes import c_char_p, c_void_p, c_int, c_ulong
+        gtlib.gt_block_caption_is_visible.restype = c_int
+        gtlib.gt_block_caption_is_visible.argtypes = [c_void_p]
         gtlib.gt_block_clone.restype = c_void_p
         gtlib.gt_block_clone.argtypes = [c_void_p]
-        gtlib.gt_block_set_caption_visibility.argtypes = [c_void_p,
-                c_int]
-        gtlib.gt_block_caption_is_visible.argtypes = [c_void_p]
+        gtlib.gt_block_delete.restype = None
+        gtlib.gt_block_delete.argtypes = [c_void_p]
         gtlib.gt_block_get_caption.restype = c_void_p
         gtlib.gt_block_get_caption.argtypes = [c_void_p]
-        gtlib.gt_block_set_strand.argtypes = [c_void_p, c_int]
+        gtlib.gt_block_get_range.restype = Range
+        gtlib.gt_block_get_range.argtypes = [c_void_p]
+        gtlib.gt_block_get_size.restype = c_ulong
+        gtlib.gt_block_get_size.argtypes = [c_void_p]
         gtlib.gt_block_get_strand.restype = c_int
         gtlib.gt_block_get_strand.argtypes = [c_void_p]
         gtlib.gt_block_get_top_level_feature.restype = c_void_p
         gtlib.gt_block_get_top_level_feature.argtypes = [c_void_p]
+        gtlib.gt_block_get_type.restype = c_char_p
+        gtlib.gt_block_get_type.argtypes = [c_void_p]
+        gtlib.gt_block_has_only_one_fullsize_element.restype = c_int
+        gtlib.gt_block_has_only_one_fullsize_element.argtypes = [c_void_p]
+        gtlib.gt_block_merge.restype = None
+        gtlib.gt_block_merge.argtypes = [c_void_p, c_void_p]
+        gtlib.gt_block_ref.restype = c_void_p
+        gtlib.gt_block_ref.argtypes = [c_void_p]
+        gtlib.gt_block_set_caption_visibility.restype = None
+        gtlib.gt_block_set_caption_visibility.argtypes = [c_void_p,
+                c_int]
+        gtlib.gt_block_set_strand.restype = None
+        gtlib.gt_block_set_strand.argtypes = [c_void_p, c_int]
 
     register = classmethod(register)
-
-

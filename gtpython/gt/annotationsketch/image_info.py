@@ -1,6 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 #
+# Copyright (c) 2014 Daniel Standage <daniel.standage@gmail.com>
 # Copyright (c) 2008 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
 # Copyright (c) 2008 Center for Bioinformatics, University of Hamburg
 #
@@ -79,6 +80,8 @@ class ImageInfo:
 
     def register(cls, gtlib):
         from ctypes import c_void_p, c_ulong, c_uint
+        gtlib.gt_image_info_delete.restype = None
+        gtlib.gt_image_info_delete.argtypes = [c_void_p]
         gtlib.gt_image_info_get_rec_map.restype = c_void_p
         gtlib.gt_image_info_get_rec_map.argtypes = [c_void_p, c_ulong]
         gtlib.gt_image_info_num_of_rec_maps.restype = c_ulong
@@ -86,7 +89,6 @@ class ImageInfo:
         gtlib.gt_image_info_get_height.restype = c_uint
         gtlib.gt_image_info_get_height.argtypes = [c_void_p]
         gtlib.gt_image_info_new.restype = c_void_p
+        gtlib.gt_image_info_new.argtypes = []
 
     register = classmethod(register)
-
-

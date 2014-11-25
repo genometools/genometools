@@ -38,6 +38,7 @@ try:
     #DiagramFromArray.register(gtlib)
     FeatureIndex.register(gtlib)
     Graphics.register(gtlib)
+    GraphicsCairo.register(gtlib)
     ImageInfo.register(gtlib)
     Layout.register(gtlib)
     RecMap.register(gtlib)
