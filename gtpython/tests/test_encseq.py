@@ -13,33 +13,40 @@ class EncodedsequenceTest(unittest.TestCase):
 
     def setUp(self):
         self.dnaseqfile = tempfile.NamedTemporaryFile(mode="w", delete=False)
+        self.dnaseqfile.close()
+        self.dnafname = self.dnaseqfile.name
+        self.dnafile = open(self.dnafname, "w")
         self.dseq1 = "agtccagctgtcagctagcgggcccgatgatatttt"
         self.dseq2 = "gtgctgtac"
         self.dseq3 = "gtacagcac"
         self.dseq4 = "aaaatatcatcgggcccgctagctgacagctggact"
-        self.dnaseqfile.write(">seq1\n"+self.dseq1+"\n")
-        self.dnaseqfile.write(">seq2\n"+self.dseq2+"\n")
+        self.dnafile.write(">seq1\n"+self.dseq1+"\n")
+        self.dnafile.write(">seq2\n"+self.dseq2+"\n")
+
         self.aaseqfile = tempfile.NamedTemporaryFile(mode="w", delete=False)
+        self.aaseqfile.close()
+        self.aafname = self.aaseqfile.name
+        self.aafile = open(self.aafname, "w")
         self.aaseq1 = "MVHFTAEEKAAVTSLWSKMNVEEAGGEALG"
         self.aaseq2 = "KMNAVE"
-        self.aaseqfile.write(">seq1\n"+self.aaseq1+"\n")
-        self.aaseqfile.write(">seq2\n"+self.aaseq2+"\n")
-        self.dnaseqfile.close()
-        self.aaseqfile.close()
+        self.aafile.write(">seq1\n"+self.aaseq1+"\n")
+        self.aafile.write(">seq2\n"+self.aaseq2+"\n")
+        self.dnafile.close()
+        self.aafile.close()
         self.idxsuffixes = ['esq','des','ssp','sds']
 
     def tearDown(self):
-        os.unlink(self.dnaseqfile.name)
-        os.unlink(self.aaseqfile.name)
+        pass #os.unlink(self.dnafname)
+        #os.unlink(self.aafname)
 
     def create_es(self, indexname):
         ee = EncseqEncoder()
-        return ee.encode([self.dnaseqfile.name], indexname)                
+        return ee.encode([self.dnafname], indexname)
 
     def create_es_protein(self, indexname):
         ee = EncseqEncoder()
-        return ee.encode([self.aaseqfile.name], indexname)
-	        
+        return ee.encode([self.aafname], indexname)
+
     def create_mem(self):
         a = Alphabet.create_dna()
         eb = EncseqBuilder(a)
@@ -47,7 +54,7 @@ class EncodedsequenceTest(unittest.TestCase):
         eb.enable_multiseq_support()
         eb.add_string(self.dseq1, 'seq1')
         eb.add_string(self.dseq2, 'seq2')
-        return eb.build() 
+        return eb.build()
 
     def create_mem_protein(self):
         a = Alphabet.create_protein()
@@ -56,8 +63,8 @@ class EncodedsequenceTest(unittest.TestCase):
         eb.enable_multiseq_support()
         eb.add_string(self.aaseq1, 'seq1')
         eb.add_string(self.aaseq2, 'seq2')
-        return eb.build() 
-        
+        return eb.build()
+
     def delete_idx(self, indexname):
         for suf in self.idxsuffixes:
             os.unlink(indexname+"."+suf)
@@ -70,7 +77,7 @@ class EncodedsequenceTest(unittest.TestCase):
 
     def test_create_mapped(self):
         self.create_es("foo_mapped")
-        el = EncseqLoader() 
+        el = EncseqLoader()
         es = el.load("foo_mapped")
         self.assertNotEqual(es, None)
         self.delete_idx("foo_mapped")
@@ -213,7 +220,7 @@ class EncodedsequenceTest(unittest.TestCase):
 
     def run_test_file_length_protein(self, es):
         self.assertEquals(es.effective_filelength(0), 37)
-        
+
     def run_test_seq_substr_encoded(self, es, seq1, seq2, seq3, seq4):
         start = 3
         end = 13

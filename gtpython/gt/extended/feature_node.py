@@ -160,7 +160,7 @@ class FeatureNode(GenomeNode):
                 c_void_p]
         gtlib.gt_feature_node_foreach_attribute.restype = None
         gtlib.gt_feature_node_foreach_attribute.argtypes = [c_void_p,
-                AttrIterFunc, c_void_p]
+                c_void_p, c_void_p]
         gtlib.gt_feature_node_get_attribute.restype = c_char_p
         gtlib.gt_feature_node_get_attribute.argtypes = [c_void_p,
                 c_char_p]
