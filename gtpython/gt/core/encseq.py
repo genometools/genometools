@@ -108,13 +108,16 @@ class EncseqEncoder:
                 raise IOError, ("file not found: %s" % str(f))
             sa.add(str(f))
         err = Error()
-        esptr = gtlib.gt_encseq_encoder_encode(self.ee, sa, str(indexname), err)
+        esptr = gtlib.gt_encseq_encoder_encode(self.ee, sa.strarr, str(indexname), err.error)
         if esptr != 0:
             gterror(err)
 
     def register(cls, gtlib):
-        gtlib.gt_encseq_encoder_encode.argtypes = [c_void_p, StrArray, \
-                                                   c_char_p, Error]
+        gtlib.gt_encseq_encoder_new.restype = c_void_p
+        gtlib.gt_encseq_encoder_encode.argtypes = [c_void_p, c_void_p, \
+                                                   c_char_p, c_void_p]
+        gtlib.gt_encseq_encoder_encode.restype = c_void_p
+        gtlib.gt_encseq_encoder_delete.argtypes = [c_void_p]
 
     register = classmethod(register)
 
@@ -193,10 +196,19 @@ class EncseqLoader:
         if self.sdstab and not os.path.exists(indexname+".sds"):
             raise IOError, ("file not found: %s" % indexname+".sds")
         err = Error()
-        esptr = gtlib.gt_encseq_loader_load(self.el, str(indexname), err)
+        esptr = gtlib.gt_encseq_loader_load(self.el, str(indexname), err.error)
         if not esptr:
             gterror(err)
         return Encseq(esptr, True)
+
+    def register(cls, gtlib):
+        gtlib.gt_encseq_loader_new.restype = c_void_p
+        gtlib.gt_encseq_loader_load.argtypes = [c_void_p, c_char_p, \
+                                                 c_void_p]
+        gtlib.gt_encseq_loader_load.restype = c_void_p
+        gtlib.gt_encseq_loader_delete.argtypes = [c_void_p]
+
+    register = classmethod(register)
 
 class EncseqBuilder:
     def __init__(self, a):

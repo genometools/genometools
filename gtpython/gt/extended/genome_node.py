@@ -125,7 +125,7 @@ class GenomeNode(object):
         gtlib.gt_genome_node_get_end.restype = c_ulong
         gtlib.gt_genome_node_get_end.argtypes = [c_void_p]
         gtlib.gt_genome_node_get_seqid.argtypes = [c_void_p]
-        gtlib.gt_genome_node_get_seqid.restype = c_char_p
+        gtlib.gt_genome_node_get_seqid.restype = c_void_p
         gtlib.gt_genome_node_get_filename.argtypes = [c_void_p]
         gtlib.gt_genome_node_get_filename.restype = c_char_p
         gtlib.gt_genome_node_get_line_number.argtypes = [c_void_p]

@@ -140,8 +140,9 @@ class CustomVisitor(NodeVisitor):
 
     def register(cls, gtlib):
         from ctypes import c_void_p
-        gtlib.gt_script_wrapper_visitor_new.argtypes = [CommentNodeFunc,
-           FeatureNodeFunc, RegionNodeFunc, SequenceNodeFunc, MetaNodeFunc,
-           EOFNodeFunc, FreeFunc]
-    
+        gtlib.gt_script_wrapper_visitor_new.argtypes = [c_void_p,
+           c_void_p, c_void_p, c_void_p, c_void_p,
+           c_void_p, c_void_p]
+        gtlib.gt_script_wrapper_visitor_new.restype = c_void_p
+
     register = classmethod(register)

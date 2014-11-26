@@ -159,7 +159,7 @@ class FeatureNode(GenomeNode):
         gtlib.gt_feature_node_add_child.argtypes = [c_void_p,
                 c_void_p]
         gtlib.gt_feature_node_foreach_attribute.restype = None
-        gtlib.gt_feature_node_foreach_attribute.argtypes = [c_void_p, 
+        gtlib.gt_feature_node_foreach_attribute.argtypes = [c_void_p,
                 AttrIterFunc, c_void_p]
         gtlib.gt_feature_node_get_attribute.restype = c_char_p
         gtlib.gt_feature_node_get_attribute.argtypes = [c_void_p,
@@ -241,8 +241,8 @@ class FeatureNodeIterator(object):
 
     def register(cls, gtlib):
         from ctypes import c_void_p
-        gtlib.gt_feature_node_iterator_delete.restype = None
-        gtlib.gt_feature_node_iterator_delete.argtype = [c_void_p]
+        gtlib.gt_feature_node_iterator_delete.restype = c_void_p
+        gtlib.gt_feature_node_iterator_delete.argtypes = [c_void_p]
         gtlib.gt_feature_node_iterator_new.restype = c_void_p
         gtlib.gt_feature_node_iterator_new.argtypes = [c_void_p]
         gtlib.gt_feature_node_iterator_new_direct.restype = c_void_p
