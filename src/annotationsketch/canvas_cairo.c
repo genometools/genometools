@@ -67,7 +67,6 @@ int gt_canvas_cairo_visit_track_pre(GtCanvas *canvas, GtTrack *track,
   int had_err = 0;
   GtUword exceeded;
   bool show_track_captions = true;
-
   GtColor color;
 
   gt_assert(canvas && track);
@@ -91,6 +90,7 @@ int gt_canvas_cairo_visit_track_pre(GtCanvas *canvas, GtTrack *track,
   {
     double theight      = gt_graphics_get_text_height(canvas->pvt->g),
            captionspace = CAPTION_BAR_SPACE_DEFAULT;
+    GtStr *fontfam = NULL;
     if (gt_style_get_num(canvas->pvt->sty,
                           "format", "track_caption_font_size",
                           &theight, NULL, err) == GT_STYLE_QUERY_ERROR) {
@@ -101,8 +101,15 @@ int gt_canvas_cairo_visit_track_pre(GtCanvas *canvas, GtTrack *track,
                          &captionspace, NULL, err ) == GT_STYLE_QUERY_ERROR) {
       return -1;
     }
+    fontfam = gt_str_new_cstr("Sans");
+    if (gt_style_get_str(canvas->pvt->sty,
+                         "format", "track_caption_font_family",
+                         fontfam, NULL, err ) == GT_STYLE_QUERY_ERROR) {
+      gt_str_delete(fontfam);
+      return -1;
+    }
     gt_graphics_set_font(canvas->pvt->g,
-                         "Sans",
+                         gt_str_get(fontfam),
                          SLANT_NORMAL,
                          WEIGHT_NORMAL,
                          theight);
@@ -142,6 +149,7 @@ int gt_canvas_cairo_visit_track_pre(GtCanvas *canvas, GtTrack *track,
                                     buf);
     }
     canvas->pvt->y += captionspace;
+    gt_str_delete(fontfam);
   }
   return had_err;
 }
@@ -289,6 +297,7 @@ int gt_canvas_cairo_visit_block(GtCanvas *canvas, GtBlock *block,
   /* draw block caption */
   if (gt_block_caption_is_visible(block))
   {
+    GtStr *fontfam = NULL;
     caption = gt_str_get(gt_block_get_caption(block));
     if (caption)
     {
@@ -304,11 +313,19 @@ int gt_canvas_cairo_visit_block(GtCanvas *canvas, GtBlock *block,
                           &theight, NULL, err) == GT_STYLE_QUERY_ERROR) {
         return -1;
       }
+      fontfam = gt_str_new_cstr("Sans");
+      if (gt_style_get_str(canvas->pvt->sty,
+                           "format", "block_caption_font_family",
+                           fontfam, NULL, err ) == GT_STYLE_QUERY_ERROR) {
+        gt_str_delete(fontfam);
+        return -1;
+      }
       gt_graphics_set_font(canvas->pvt->g,
-                           "Sans",
+                           gt_str_get(fontfam),
                            SLANT_NORMAL,
                            WEIGHT_NORMAL,
                            theight);
+      gt_str_delete(fontfam);
       gt_graphics_draw_text_clip(canvas->pvt->g,
                                  block_start,
                                  canvas->pvt->y - bar_height/2
@@ -695,6 +712,7 @@ int gt_canvas_cairo_visit_custom_track(GtCanvas *canvas,
 
   if (show_track_captions)
   {
+    GtStr *fontfam = NULL;
     double theight = gt_graphics_get_text_height(canvas->pvt->g),
            captionspace = CAPTION_BAR_SPACE_DEFAULT;
     if (gt_style_get_num(canvas->pvt->sty,
@@ -702,9 +720,16 @@ int gt_canvas_cairo_visit_custom_track(GtCanvas *canvas,
                          &theight, NULL, err) == GT_STYLE_QUERY_ERROR) {
       return -1;
     }
+    fontfam = gt_str_new_cstr("Sans");
+    if (gt_style_get_str(canvas->pvt->sty,
+                         "format", "track_caption_font_family",
+                         fontfam, NULL, err ) == GT_STYLE_QUERY_ERROR) {
+      gt_str_delete(fontfam);
+      return -1;
+    }
     /* draw track title */
     gt_graphics_set_font(canvas->pvt->g,
-                           "Sans",
+                           gt_str_get(fontfam),
                            SLANT_NORMAL,
                            WEIGHT_NORMAL,
                            theight);
@@ -719,6 +744,7 @@ int gt_canvas_cairo_visit_custom_track(GtCanvas *canvas,
       return -1;
     }
     canvas->pvt->y += theight + captionspace;
+    gt_str_delete(fontfam);
   }
 
   /* call rendering function */
@@ -749,10 +775,10 @@ int gt_canvas_cairo_draw_ruler(GtCanvas *canvas, GtRange viewrange,
          theight = gt_graphics_get_text_height(canvas->pvt->g);
   GtWord base_length, tick;
   GtColor rulercol, gridcol;
-  GtStr *left_str, *right_str, *unit;
+  GtStr *left_str = NULL, *right_str = NULL, *unit = NULL, *fontfam = NULL;
   char str[BUFSIZ];
   GtStyleQueryStatus rval;
-  bool showgrid = true, nozeropos;
+  bool showgrid = true, nozeropos = false;
   gt_assert(canvas);
 
   if (gt_style_get_bool(canvas->pvt->sty, "format", "show_grid", &showgrid,
@@ -802,6 +828,7 @@ int gt_canvas_cairo_draw_ruler(GtCanvas *canvas, GtRange viewrange,
     default:
       break;
   }
+
   right_str = gt_str_new();
   rval = gt_style_get_str(canvas->pvt->sty, "format",
                         "ruler_right_text", right_str, NULL, err);
@@ -819,9 +846,20 @@ int gt_canvas_cairo_draw_ruler(GtCanvas *canvas, GtRange viewrange,
       break;
   }
 
+  fontfam = gt_str_new_cstr("Sans");
+  if (gt_style_get_str(canvas->pvt->sty,
+                       "format", "ruler_font_family",
+                       fontfam, NULL, err ) == GT_STYLE_QUERY_ERROR) {
+    gt_str_delete(fontfam);
+    gt_str_delete(unit);
+    gt_str_delete(left_str);
+    gt_str_delete(right_str);
+    return -1;
+  }
+
   /* reset font to default */
   gt_graphics_set_font(canvas->pvt->g,
-                       "Sans",
+                       gt_str_get(fontfam),
                        SLANT_NORMAL,
                        WEIGHT_NORMAL,
                        theight);
@@ -901,7 +939,7 @@ int gt_canvas_cairo_draw_ruler(GtCanvas *canvas, GtRange viewrange,
                                      * canvas->pvt->margins,
                                    1.25);
 
-    gt_graphics_draw_text_right(canvas->pvt->g,
+  gt_graphics_draw_text_right(canvas->pvt->g,
                               canvas->pvt->margins - 10,
                               canvas->pvt->y + 39 + (theight/2),
                               gt_str_get(left_str));
@@ -913,6 +951,7 @@ int gt_canvas_cairo_draw_ruler(GtCanvas *canvas, GtRange viewrange,
   gt_str_delete(unit);
   gt_str_delete(left_str);
   gt_str_delete(right_str);
+  gt_str_delete(fontfam);
 
   return 0;
 }
