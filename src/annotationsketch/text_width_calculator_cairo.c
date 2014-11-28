@@ -21,6 +21,7 @@
 #include "core/ensure.h"
 #include "core/ma.h"
 #include "core/mathsupport.h"
+#include "core/str_api.h"
 #include "core/unused_api.h"
 #include "annotationsketch/default_formats.h"
 #include "annotationsketch/style.h"
@@ -103,10 +104,12 @@ GtTextWidthCalculator* gt_text_width_calculator_cairo_new(cairo_t *context,
 {
   GtTextWidthCalculatorCairo *twcc;
   GtTextWidthCalculator *twc;
+  GtStr *fontfam = NULL;
   double theight = TEXT_SIZE_DEFAULT;
-  char buf[64];
+  char buf[BUFSIZ];
   twc = gt_text_width_calculator_create(gt_text_width_calculator_cairo_class());
   twcc = gt_text_width_calculator_cairo_cast(twc);
+  fontfam = gt_str_new_cstr("Sans");
   if (style)
     twcc->style = gt_style_ref(style);
   if (!context)
@@ -124,15 +127,23 @@ GtTextWidthCalculator* gt_text_width_calculator_cairo_new(cairo_t *context,
     if (gt_style_get_num(twcc->style,
                          "format", "block_caption_font_size",
                          &theight, NULL, err) == GT_STYLE_QUERY_ERROR) {
+      gt_str_delete(fontfam);
       gt_text_width_calculator_delete(twc);
+      return NULL;
+    }
+    if (gt_style_get_str(twcc->style,
+                         "format", "block_caption_font_family",
+                         fontfam, NULL, err ) == GT_STYLE_QUERY_ERROR) {
+      gt_str_delete(fontfam);
       return NULL;
     }
     cairo_save(twcc->context);
   }
   twcc->layout = pango_cairo_create_layout(twcc->context);
-  snprintf(buf, 64, "Sans %d", (int) theight);
+  snprintf(buf, BUFSIZ, "%s %d", gt_str_get(fontfam), (int) theight);
   twcc->desc = pango_font_description_from_string(buf);
   pango_layout_set_font_description(twcc->layout, twcc->desc);
   pango_font_description_free(twcc->desc);
+  gt_str_delete(fontfam);
   return twc;
 }
