@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2013 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
+  Copyright (c) 2013-2014 Sascha Steinbiss <sascha@steinbiss.name>
   Copyright (c) 2013 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -16,6 +16,7 @@
 */
 
 #include <stdlib.h>
+#include <unistd.h>
 #ifndef S_SPLINT_S
 #include <sys/types.h>
 #ifndef _WIN32
@@ -30,13 +31,35 @@
 #include "core/str_array_api.h"
 #include "ltr/pdom_model_set.h"
 
-#define GT_HMM_INDEX_SUFFIX ".h3i"
+#define GT_HMM_INDEX_SUFFIX "h3i"
+#ifdef _WIN32
+#ifndef WEXITSTATUS
+#define WEXITSTATUS(x) (x)
+#endif
+#endif
 
 struct GtPdomModelSet
 {
-  GtStr *filename,
-        *hmmer_path;
+  GtStr *filename;
 };
+
+#define PDOM_MODEL_SET_HMMER_NOT_FOUND "Please make sure that all HMMER " \
+                                       "executables are in your PATH."
+
+static void gt_pdom_model_set_delete_index(const char *idxname)
+{
+  char filename[BUFSIZ];
+  gt_assert(idxname);
+  unlink(idxname);
+  snprintf(filename, BUFSIZ, "%s.h3f", idxname);
+  unlink(filename);
+  snprintf(filename, BUFSIZ, "%s.h3i", idxname);
+  unlink(filename);
+  snprintf(filename, BUFSIZ, "%s.h3m", idxname);
+  unlink(filename);
+  snprintf(filename, BUFSIZ, "%s.h3p", idxname);
+  unlink(filename);
+}
 
 GtPdomModelSet* gt_pdom_model_set_new(GtStrArray *hmmfiles, bool force,
                                       GtError *err)
@@ -52,20 +75,17 @@ GtPdomModelSet* gt_pdom_model_set_new(GtStrArray *hmmfiles, bool force,
   gt_error_check(err);
 
   rval = system("hmmpress -h > /dev/null");
-  if (rval == -1) {
-    gt_error_set(err, "error executing system(hmmpress)");
-    return NULL;
-  }
-#ifndef _WIN32
   if (WEXITSTATUS(rval) != 0) {
-    gt_error_set(err, "cannot find the hmmpress executable in PATH");
+    gt_error_set(err, "Error running hmmpress. "
+                      PDOM_MODEL_SET_HMMER_NOT_FOUND);
     return NULL;
   }
-#else
-  /* XXX */
-  gt_error_set(err, "hmmpress for Windows not implemented");
-  return NULL;
-#endif
+  rval = system("hmmconvert -h > /dev/null");
+  if (WEXITSTATUS(rval) != 0) {
+    gt_error_set(err, "Error running hmmconvert. "
+                      PDOM_MODEL_SET_HMMER_NOT_FOUND);
+    return NULL;
+  }
 
   pdom_model_set = gt_calloc((size_t) 1, sizeof (GtPdomModelSet));
   concat_dbnames = gt_str_new();
@@ -90,7 +110,6 @@ GtPdomModelSet* gt_pdom_model_set_new(GtStrArray *hmmfiles, bool force,
                                   gt_str_length(concat_dbnames));
     gt_str_append_cstr(pdom_model_set->filename, md5_hash);
     gt_free(md5_hash);
-    gt_str_delete(concat_dbnames);
     indexfilename = gt_str_new_cstr(gt_str_get(pdom_model_set->filename));
     gt_str_append_cstr(indexfilename, GT_HMM_INDEX_SUFFIX);
   }
@@ -105,42 +124,48 @@ GtPdomModelSet* gt_pdom_model_set_new(GtStrArray *hmmfiles, bool force,
     if (!had_err) {
       for (i = 0; !had_err && i < gt_str_array_size(hmmfiles); i++) {
         FILE *source;
-        const char *filename = gt_str_array_get(hmmfiles, i);
-        source = fopen(filename, "r");
+        char cmd[BUFSIZ];
+        snprintf(cmd, BUFSIZ, "hmmconvert %s", gt_str_array_get(hmmfiles, i));
+        source = popen(cmd, "r");
         if (!source) {
-          gt_error_set(err, "could not open HMM file %s", filename);
+          gt_error_set(err, "error opening/converting HMM file %s",
+                            gt_str_array_get(hmmfiles, i));
           had_err = -1;
+          gt_pdom_model_set_delete_index(gt_str_get(pdom_model_set->filename));
         }
         if (!had_err) {
-          while ((ch = fgetc(source)) != EOF)
+          GtWord len = 0;
+          while ((ch = fgetc(source)) != EOF) {
             (void) fputc(ch, dest);
+            len++;
+          }
           (void) fclose(source);
+          if (len == 0) {
+            gt_error_set(err, "empty model was produced trying to "
+                              "convert HMM file %s",
+                              gt_str_array_get(hmmfiles, i));
+            had_err = -1;
+            gt_pdom_model_set_delete_index
+                                         (gt_str_get(pdom_model_set->filename));
+          }
         }
       }
       (void) fclose(dest);
     }
-    /* XXX: read hmmer path from env */
-    cmdline = gt_str_new_cstr("hmmpress -f ");
-    gt_str_append_str(cmdline, pdom_model_set->filename);
-    gt_str_append_cstr(cmdline, "> /dev/null");   /* XXX: portability? */
+    if (!had_err) {
+      cmdline = gt_str_new_cstr("hmmpress -f ");
+      gt_str_append_str(cmdline, pdom_model_set->filename);
+      gt_str_append_cstr(cmdline, "> /dev/null");   /* XXX: portability? */
 
-    rval = system(gt_str_get(cmdline));
-    gt_str_delete(cmdline);
-    if (rval == -1) {
-      gt_error_set(err, "error trying to execute the hmmpress tool "
-                        " -- make sure HMMER is installed and hmmpress "
-                        "can be found in the PATH");
-      return NULL;
+      rval = system(gt_str_get(cmdline));
+      gt_str_delete(cmdline);
+      if (WEXITSTATUS(rval) != 0) {
+        gt_error_set(err, "Error executing hmmpress. "
+                          "Please make sure your pHMMs are valid and"
+                          "share a common version (e.g. HMMER2 or HMMER3).");
+        had_err = -1;
+      }
     }
-#ifndef _WIN32
-    if (WEXITSTATUS(rval) != 0) {
-      gt_error_set(err, "an error occurred during HMM preprocessing");
-      had_err = -1;
-    }
-#else
-    gt_error_set(err, "WEXITSTATUS not implemented on Windows");
-    had_err = -1;
-#endif
   }
 
   if (had_err) {
@@ -148,6 +173,7 @@ GtPdomModelSet* gt_pdom_model_set_new(GtStrArray *hmmfiles, bool force,
     pdom_model_set = NULL;
   }
   gt_str_delete(indexfilename);
+  gt_str_delete(concat_dbnames);
   return pdom_model_set;
 }
 
