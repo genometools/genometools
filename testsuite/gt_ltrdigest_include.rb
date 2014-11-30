@@ -255,7 +255,7 @@ if $gttestdata then
     Test do
       run_test "#{$bin}gt suffixerator -lossless -dna -des -ssp -tis -v -db #{$gttestdata}ltrharvest/d_mel/4_genomic_dmel_RELEASE3-1.FASTA.gz"
       run_test "#{$bin}gt ltrdigest -encseq 4_genomic_dmel_RELEASE3-1.FASTA.gz -hmms #{$gttestdata}ltrdigest/corrupt.hmm -- #{$gttestdata}ltrdigest/dmel_md5_4.gff3", :retval => 1
-      grep(last_stderr, /error occurred during HMM preprocessing/)
+      grep(last_stderr, /invalid HMMER format encountered/)
     end
 
     Name "gt ltrdigest pHMM implied options"
@@ -488,7 +488,7 @@ if $gttestdata then
     Test do
       run_test "#{$bin}gt suffixerator -dna -des -ssp -tis -v -db #{$gttestdata}ltrharvest/d_mel/4_genomic_dmel_RELEASE3-1.FASTA.gz"
       run_test "#{$bin}gt ltrdigest -hmms #{$gttestdata}ltrdigest/corrupt.hmm -- #{$gttestdata}ltrdigest/dmel_test_Run9_4.gff3.sorted 4_genomic_dmel_RELEASE3-1.FASTA.gz", :retval => 1
-      grep(last_stderr, /error occurred during HMM preprocessing/)
+      grep(last_stderr, /invalid HMMER format encountered/)
     end
 
     Name "gt ltrdigest HMM list not properly closed (legacy syntax)"
