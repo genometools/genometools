@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
 # Copyright (c) 2013 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
