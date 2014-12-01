@@ -23,7 +23,7 @@ from gt.core.error import Error, gterror
 from gt.core.gtstr import Str
 from gt.core.str_array import StrArray
 from ctypes import c_ulong, c_uint, c_int, c_char_p, c_void_p, c_char, \
-                   c_ubyte, c_int, POINTER
+                   c_ubyte, c_int, c_bool, POINTER
 import os.path
 
 
@@ -151,9 +151,9 @@ class Alphabet:
                 POINTER(c_ubyte), c_ulong]
         gtlib.gt_alphabet_valid_input.restype = c_int
         gtlib.gt_alphabet_valid_input.argtypes = [c_void_p, c_char]
-        gtlib.gt_alphabet_is_dna.restype = c_int
+        gtlib.gt_alphabet_is_dna.restype = c_bool
         gtlib.gt_alphabet_is_dna.argtypes = [c_void_p]
-        gtlib.gt_alphabet_is_protein.restype = c_int
+        gtlib.gt_alphabet_is_protein.restype = c_bool
         gtlib.gt_alphabet_is_protein.argtypes = [c_void_p]
         gtlib.gt_alphabet_delete.restype = None
         gtlib.gt_alphabet_delete.argtypes = [c_void_p]
