@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
 # Copyright (c) 2008 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
@@ -38,6 +38,7 @@ try:
     #DiagramFromArray.register(gtlib)
     FeatureIndex.register(gtlib)
     Graphics.register(gtlib)
+    GraphicsCairo.register(gtlib)
     ImageInfo.register(gtlib)
     Layout.register(gtlib)
     RecMap.register(gtlib)

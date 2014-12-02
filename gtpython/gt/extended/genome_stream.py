@@ -1,6 +1,7 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
+# Copyright (c) 2014 Daniel Standage <daniel.standage@gmail.com>
 # Copyright (c) 2008 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
 # Copyright (c) 2008 Center for Bioinformatics, University of Hamburg
 #
@@ -46,7 +47,7 @@ class GenomeStream:
         err = Error()
         genome_node = c_void_p()
         rval = gtlib.gt_node_stream_next(self.gs, byref(genome_node),
-                err)
+                err._as_parameter_)
         if rval != 0:
             gterror(err)
         if genome_node.value == None:
@@ -56,8 +57,17 @@ class GenomeStream:
 
     def pull(self):
         err = Error()
-        rval = gtlib.gt_node_stream_pull(self.gs, err)
+        rval = gtlib.gt_node_stream_pull(self.gs, err._as_parameter_)
         if rval != 0:
             gterror(err)
 
+    def register(cls, gtlib):
+        from ctypes import c_int, c_void_p, POINTER
+        gtlib.gt_node_stream_delete.argtypes = [c_void_p]
+        gtlib.gt_node_stream_delete.restype = None
+        gtlib.gt_node_stream_next.argtypes = [c_void_p, c_void_p, c_void_p]
+        gtlib.gt_node_stream_next.restype = c_int
+        gtlib.gt_node_stream_pull.argtypes = [c_void_p, c_void_p]
+        gtlib.gt_node_stream_pull.restype = c_int
 
+    register = classmethod(register)

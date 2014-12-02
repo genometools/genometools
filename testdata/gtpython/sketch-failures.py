@@ -57,7 +57,7 @@ if __name__ == "__main__":
         raise TestFailedError
     try:
         diagram = Diagram.from_index(feature_index, seqid, range, 42)
-    except ArgumentError, strerr:
+    except TypeError, strerr:
         if -1 == str(strerr).find("must be a Style"):
             raise TestFailedError
     else:
@@ -71,7 +71,7 @@ if __name__ == "__main__":
         raise TestFailedError
     try:
         diagram = Diagram.from_index(42, seqid, range, style)
-    except ArgumentError, strerr:
+    except TypeError, strerr:
         if -1 == str(strerr).find("must be a FeatureIndex"):
             raise TestFailedError
     else:
@@ -94,7 +94,7 @@ if __name__ == "__main__":
 
     try:
         canvas = CanvasCairoFile(12, 700, height, None)
-    except ArgumentError, strerr:
+    except TypeError, strerr:
         if -1 == str(strerr).find("must be a Style"):
             raise TestFailedError
     else:

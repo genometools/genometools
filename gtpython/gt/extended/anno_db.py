@@ -1,6 +1,7 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
+# Copyright (c) 2014 Daniel Standage <daniel.standage@gmail.com>
 # Copyright (c) 2012 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
 # Copyright (c) 2012 Center for Bioinformatics, University of Hamburg
 #
@@ -44,7 +45,8 @@ class AnnoDBSchema:
 
     def get_feature_index(self, rdb):
         err = Error()
-        fi = gtlib.gt_anno_db_schema_get_feature_index(self.ads, rdb, err)
+        fi = gtlib.gt_anno_db_schema_get_feature_index(self.ads, rdb._as_parameter_,
+                err._as_parameter_)
         if fi == None:
             gterror(err)
         return FeatureIndexFromPtr(fi)
@@ -52,7 +54,10 @@ class AnnoDBSchema:
     def register(cls, gtlib):
         from ctypes import c_void_p
         gtlib.gt_anno_db_schema_get_feature_index.restype = c_void_p
-        gtlib.gt_anno_db_schema_get_feature_index.argtypes = [c_void_p, RDB, Error]
+        gtlib.gt_anno_db_schema_get_feature_index.argtypes = [c_void_p, c_void_p,
+                c_void_p]
+        gtlib.gt_anno_db_schema_delete.restype = None
+        gtlib.gt_anno_db_schema_delete.argtypes = [c_void_p]
 
     register = classmethod(register)
 
@@ -76,5 +81,6 @@ class AnnoDBGFFLike(AnnoDBSchema):
     def register(cls, gtlib):
         from ctypes import c_void_p
         gtlib.gt_anno_db_gfflike_new.restype = c_void_p
+        gtlib.gt_anno_db_gfflike_new.argtypes = []
 
     register = classmethod(register)

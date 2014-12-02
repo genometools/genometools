@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
 # Copyright (c) 2008 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
@@ -25,4 +25,11 @@ class GFF3Visitor(NodeVisitor):
     def __init__(self):
         self.gv = gtlib.gt_gff3_visitor_new(None)
         self._as_parameter_ = self.gv
+
+    def register(cls, gtlib):
+        from ctypes import c_void_p
+        gtlib.gt_gff3_visitor_new.restype = c_void_p
+        gtlib.gt_gff3_visitor_new.argtypes = [c_void_p]
+
+    register = classmethod(register)
 

@@ -1,6 +1,7 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
+# Copyright (c) 2014 Daniel Standage <daniel.standage@gmail.com>
 # Copyright (c) 2009 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
 # Copyright (c) 2009 Center for Bioinformatics, University of Hamburg
 #
@@ -31,7 +32,7 @@ class SequenceNode(GenomeNode):
     @classmethod
     def create_new(cls, description, sequence):
         seq_str = Str(str(sequence.encode("utf-8")))
-        fn = gtlib.gt_sequence_node_new(description, seq_str)
+        fn = gtlib.gt_sequence_node_new(description, seq_str._as_parameter_)
         n = cls.create_from_ptr(fn, True)
         return n
 
@@ -51,7 +52,7 @@ class SequenceNode(GenomeNode):
     def register(cls, gtlib):
         from ctypes import c_char_p,  c_void_p, c_ulong
         gtlib.gt_sequence_node_new.restype = c_void_p
-        gtlib.gt_sequence_node_new.argtypes = [c_char_p, Str]
+        gtlib.gt_sequence_node_new.argtypes = [c_char_p, c_void_p]
         gtlib.gt_sequence_node_get_description.restype = c_char_p
         gtlib.gt_sequence_node_get_description.argtypes = [c_void_p]
         gtlib.gt_sequence_node_get_sequence.restype = c_char_p

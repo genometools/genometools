@@ -1,6 +1,7 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
+# Copyright (c) 2014 Daniel Standage <daniel.standage@gmail.com>
 # Copyright (c) 2008 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
 # Copyright (c) 2008 Center for Bioinformatics, University of Hamburg
 #
@@ -59,11 +60,19 @@ class StrArray:
 
     def register(cls, gtlib):
         from ctypes import c_void_p, c_char_p, c_ulong
+        gtlib.gt_str_array_add_cstr.restype = None
         gtlib.gt_str_array_add_cstr.argtypes = [c_void_p, c_char_p]
         gtlib.gt_str_array_get.restype = c_char_p
         gtlib.gt_str_array_get.argtypes = [c_void_p, c_ulong]
         gtlib.gt_str_array_size.restype = c_ulong
+        gtlib.gt_str_array_size.argtypes = [c_void_p]
         gtlib.gt_str_array_add_cstr.argtypes = [c_void_p, c_char_p]
+        gtlib.gt_str_array_new.restype = c_void_p
+        gtlib.gt_str_array_new.argtypes = []
+        gtlib.gt_str_array_ref.restype = c_void_p
+        gtlib.gt_str_array_ref.argtypes = [c_void_p]
+        gtlib.gt_str_array_delete.restype = None
+        gtlib.gt_str_array_delete.argtypes = [c_void_p]
 
     register = classmethod(register)
 

@@ -1,6 +1,7 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
+# Copyright (c) 2014 Daniel Standage <daniel.standage@gmail.com>
 # Copyright (c) 2008 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
 # Copyright (c) 2008 Center for Bioinformatics, University of Hamburg
 #
@@ -43,19 +44,22 @@ class Diagram:
             if not isinstance(i, FeatureNode):
                 gterror("Diagram array must only contain FeatureNodes!")
             gtarr.add(i)
-        diagram = gtlib.gt_diagram_new_from_array(gtarr, byref(rng),
-                style)
+        diagram = gtlib.gt_diagram_new_from_array(gtarr._as_parameter_, byref(rng),
+                style._as_parameter_)
         return Diagram(diagram)
 
     from_array = staticmethod(from_array)
 
     def from_index(feature_index, seqid, rng, style):
         from ctypes import byref
+        FeatureIndex.from_param(feature_index)
+        Style.from_param(style)
+
         err = Error()
         if rng.start > rng.end:
             gterror("range.start > range.end")
-        diagram = gtlib.gt_diagram_new(feature_index, seqid, byref(rng),
-                style, err)
+        diagram = gtlib.gt_diagram_new(feature_index._as_parameter_, seqid,
+                byref(rng), style._as_parameter_, err._as_parameter_)
         if err.is_set():
             gterror(err)
         return Diagram(diagram)
@@ -87,7 +91,7 @@ class Diagram:
         gtlib.gt_diagram_set_track_selector_func(self.diagram, self.tsf_cb)
 
     def add_custom_track(self, ct):
-        gtlib.gt_diagram_add_custom_track(self.diagram, ct)
+        gtlib.gt_diagram_add_custom_track(self.diagram, ct._as_parameter_)
 
     def from_param(cls, obj):
         if not isinstance(obj, Diagram):
@@ -98,17 +102,19 @@ class Diagram:
 
     def register(cls, gtlib):
         from ctypes import c_char_p, c_void_p, POINTER
+        gtlib.gt_diagram_add_custom_track.restype = None
+        gtlib.gt_diagram_add_custom_track.argtypes = [c_void_p,
+                c_void_p]
+        gtlib.gt_diagram_delete.restype = None
+        gtlib.gt_diagram_delete.argtypes = [c_void_p]
         gtlib.gt_diagram_new.restype = c_void_p
-        gtlib.gt_diagram_new.argtypes = [FeatureIndex, c_char_p, POINTER(Range),
-                Style, Error]
+        gtlib.gt_diagram_new.argtypes = [c_void_p, c_char_p, POINTER(Range),
+                c_void_p, c_void_p]
+        gtlib.gt_diagram_new_from_array.restype = c_void_p
+        gtlib.gt_diagram_new_from_array.argtypes = [c_void_p, POINTER(Range),
+                c_void_p]
+        gtlib.gt_diagram_set_track_selector_func.restype = None
         gtlib.gt_diagram_set_track_selector_func.argtypes = [c_void_p,
                 TrackSelectorFunc]
-        gtlib.gt_diagram_add_custom_track.argtypes = [c_void_p,
-                CustomTrack]
-        gtlib.gt_diagram_new_from_array.restype = c_void_p
-        gtlib.gt_diagram_new_from_array.argtypes = [Array, POINTER(Range),
-                Style]
 
     register = classmethod(register)
-
-

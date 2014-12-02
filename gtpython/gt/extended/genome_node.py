@@ -1,6 +1,7 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
+# Copyright (c) 2014 Daniel Standage <daniel.standage@gmail.com>
 # Copyright (c) 2008-2009 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
 # Copyright (c) 2008-2009 Center for Bioinformatics, University of Hamburg
 #
@@ -31,7 +32,7 @@ class GenomeNode(object):
     @classmethod
     def create_from_ptr(cls, node_ptr, newref=False):
         if node_ptr == 0 or node_ptr == None:
-            gterror("GenomeNode pointer cannot be NULL (was: " + str(node_ptr) +
+            gterror("GenomeNode pointer cannot be NULL (was: "+ str(node_ptr) +
                     ")")
         n = cls()
         if newref:
@@ -110,7 +111,8 @@ class GenomeNode(object):
 
     def accept(self, visitor):
         err = Error()
-        rval = gtlib.gt_genome_node_accept(self.gn, visitor, err)
+        rval = gtlib.gt_genome_node_accept(self.gn, visitor._as_parameter_,
+                 err._as_parameter_)
         if rval != 0:
             gterror(err)
 
@@ -128,10 +130,12 @@ class GenomeNode(object):
         gtlib.gt_genome_node_get_filename.restype = c_char_p
         gtlib.gt_genome_node_get_line_number.argtypes = [c_void_p]
         gtlib.gt_genome_node_get_line_number.restype = c_uint
+        gtlib.gt_genome_node_delete.restype = None
+        gtlib.gt_genome_node_delete.argtypes = [c_void_p]
+        gtlib.gt_genome_node_ref.restype = c_void_p
+        gtlib.gt_genome_node_ref.argtypes = [c_void_p]
         gtlib.gt_genome_node_accept.restype = c_int
-        gtlib.gt_genome_node_accept.argtypes = [c_void_p, NodeVisitor,
-                Error]
+        gtlib.gt_genome_node_accept.argtypes = [c_void_p, c_void_p,
+                c_void_p]
 
     register = classmethod(register)
-
-

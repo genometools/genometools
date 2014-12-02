@@ -1,6 +1,7 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
+# Copyright (c) 2014 Daniel Standage <daniel.standage@gmail.com>
 # Copyright (c) 2008-2009 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
 # Copyright (c) 2008-2009 Center for Bioinformatics, University of Hamburg
 #
@@ -17,12 +18,15 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #
 
+from ctypes import CFUNCTYPE, c_char_p, c_void_p
 from gt.dlload import gtlib, CollectFunc
 from gt.core.error import Error, gterror
 from gt.core.gtstr import Str
 from gt.core.str_array import StrArray
 from gt.extended.genome_node import GenomeNode
 from gt.props import cachedproperty
+
+AttrIterFunc = CFUNCTYPE(c_char_p, c_char_p, c_void_p)
 
 class FeatureNode(GenomeNode):
 
@@ -37,7 +41,7 @@ class FeatureNode(GenomeNode):
             gterror("Invalid strand '%s' -- must be one of %s" % (strand,
                     strandchars))
         s = Str(str(seqid.encode("utf-8")))
-        fn = gtlib.gt_feature_node_new(s, type, start, end, \
+        fn = gtlib.gt_feature_node_new(s._as_parameter_, type, start, end, \
                                        strandchars.index(strand))
         n = cls.create_from_ptr(fn, True)
         n.depth_first = True
@@ -60,7 +64,7 @@ class FeatureNode(GenomeNode):
         if (ownid != newid):
             gterror("cannot add node with sequence region '%s' to node with sequence region '%s'" % (ownid, newid))
         else:
-            gtlib.gt_feature_node_add_child(self.gn, node)
+            gtlib.gt_feature_node_add_child(self.gn, node._as_parameter_)
 
     def from_param(cls, obj):
         if not isinstance(obj, FeatureNode):
@@ -74,7 +78,7 @@ class FeatureNode(GenomeNode):
 
     def set_source(self, source):
         s = Str(str(source.encode("utf-8")))
-        gtlib.gt_feature_node_set_source(self.gn, s)
+        gtlib.gt_feature_node_set_source(self.gn, s._as_parameter_)
 
     source = cachedproperty(get_source, set_source)
 
@@ -148,35 +152,47 @@ class FeatureNode(GenomeNode):
     def register(cls, gtlib):
         from ctypes import c_char_p, c_float, c_int, c_int, c_void_p, \
             c_ulong, c_float
-        gtlib.gt_feature_node_new.restype = c_void_p
-        gtlib.gt_feature_node_new.argtypes = [Str, c_char_p, c_ulong,
-                c_ulong, c_int]
+        gtlib.gt_feature_node_add_attribute.restype = None
+        gtlib.gt_feature_node_add_attribute.argtypes = [c_void_p, c_char_p,
+                c_char_p]
+        gtlib.gt_feature_node_add_child.restype = None
         gtlib.gt_feature_node_add_child.argtypes = [c_void_p,
-                FeatureNode]
-        gtlib.gt_feature_node_set_source.argtypes = [c_void_p, Str]
+                c_void_p]
+        gtlib.gt_feature_node_foreach_attribute.restype = None
+        gtlib.gt_feature_node_foreach_attribute.argtypes = [c_void_p,
+                c_void_p, c_void_p]
+        gtlib.gt_feature_node_get_attribute.restype = c_char_p
+        gtlib.gt_feature_node_get_attribute.argtypes = [c_void_p,
+                c_char_p]
+        gtlib.gt_feature_node_get_phase.restype = c_int
+        gtlib.gt_feature_node_get_phase.argtypes = [c_void_p]
+        gtlib.gt_feature_node_get_score.restype = c_float
+        gtlib.gt_feature_node_get_score.argtypes = [c_void_p]
         gtlib.gt_feature_node_get_source.restype = c_char_p
         gtlib.gt_feature_node_get_source.argtypes = [c_void_p]
+        gtlib.gt_feature_node_get_strand.restype = c_int
+        gtlib.gt_feature_node_get_strand.argtypes = [c_void_p]
         gtlib.gt_feature_node_get_type.restype = c_char_p
         gtlib.gt_feature_node_get_type.argtypes = [c_void_p]
         gtlib.gt_feature_node_has_type.restype = c_int
         gtlib.gt_feature_node_has_type.argtypes = [c_void_p, c_char_p]
-        gtlib.gt_feature_node_get_score.restype = c_float
-        gtlib.gt_feature_node_get_score.argtypes = [c_void_p]
-        gtlib.gt_feature_node_set_score.argtypes = [c_void_p, c_float]
-        gtlib.gt_feature_node_get_phase.restype = c_int
-        gtlib.gt_feature_node_get_phase.argtypes = [c_void_p]
-        gtlib.gt_feature_node_set_phase.argtypes = [c_void_p, c_int]
+        gtlib.gt_feature_node_new.restype = c_void_p
+        gtlib.gt_feature_node_new.argtypes = [c_void_p, c_char_p, c_ulong,
+                c_ulong, c_int]
         gtlib.gt_feature_node_score_is_defined.restype = c_int
         gtlib.gt_feature_node_score_is_defined.argtypes = [c_void_p]
-        gtlib.gt_feature_node_get_strand.restype = c_int
-        gtlib.gt_feature_node_get_strand.argtypes = [c_void_p]
+        gtlib.gt_feature_node_set_phase.restype = None
+        gtlib.gt_feature_node_set_phase.argtypes = [c_void_p, c_int]
+        gtlib.gt_feature_node_set_score.restype = None
+        gtlib.gt_feature_node_set_score.argtypes = [c_void_p, c_float]
+        gtlib.gt_feature_node_set_source.restype = None
+        gtlib.gt_feature_node_set_source.argtypes = [c_void_p, c_void_p]
+        gtlib.gt_feature_node_set_strand.restype = None
         gtlib.gt_feature_node_set_strand.argtypes = [c_void_p, c_int]
+        gtlib.gt_feature_node_set_type.restype = None
+        gtlib.gt_feature_node_set_type.argtypes = [c_void_p, c_char_p]
+        gtlib.gt_feature_node_unset_score.restype = None
         gtlib.gt_feature_node_unset_score.argtypes = [c_void_p]
-        gtlib.gt_feature_node_add_attribute.argtypes = [c_void_p,
-                c_char_p, c_char_p]
-        gtlib.gt_feature_node_get_attribute.restype = c_char_p
-        gtlib.gt_feature_node_get_attribute.argtypes = [c_void_p,
-                c_char_p]
 
     register = classmethod(register)
 
@@ -225,11 +241,14 @@ class FeatureNodeIterator(object):
 
     def register(cls, gtlib):
         from ctypes import c_void_p
+        gtlib.gt_feature_node_iterator_delete.restype = c_void_p
+        gtlib.gt_feature_node_iterator_delete.argtypes = [c_void_p]
         gtlib.gt_feature_node_iterator_new.restype = c_void_p
-        gtlib.gt_feature_node_iterator_new.argtypes = [FeatureNode]
+        gtlib.gt_feature_node_iterator_new.argtypes = [c_void_p]
         gtlib.gt_feature_node_iterator_new_direct.restype = c_void_p
-        gtlib.gt_feature_node_iterator_new_direct.argtypes = [FeatureNode]
+        gtlib.gt_feature_node_iterator_new_direct.argtypes = [c_void_p]
         gtlib.gt_feature_node_iterator_next.restype = c_void_p
+        gtlib.gt_feature_node_iterator_next.argtypes = [c_void_p]
 
     register = classmethod(register)
 
@@ -242,14 +261,14 @@ class FeatureNodeIteratorDepthFirst(FeatureNodeIterator):
 
     def __init__(self, node):
 
-        self.i = gtlib.gt_feature_node_iterator_new(node)
+        self.i = gtlib.gt_feature_node_iterator_new(node._as_parameter_)
         self._as_parameter_ = self.i
 
 
 class FeatureNodeIteratorDirect(FeatureNodeIterator):
 
     def __init__(self, node):
-        self.i = gtlib.gt_feature_node_iterator_new_direct(node)
+        self.i = gtlib.gt_feature_node_iterator_new_direct(node._as_parameter_)
         self._as_parameter_ = self.i
 
 

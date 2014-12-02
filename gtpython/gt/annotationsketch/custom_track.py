@@ -1,6 +1,7 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
+# Copyright (c) 2014 Daniel Standage <daniel.standage@gmail.com>
 # Copyright (c) 2008-2009 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
 # Copyright (c) 2008-2009 Center for Bioinformatics, University of Hamburg
 #
@@ -83,10 +84,10 @@ class CustomTrack(object):
 
     def register(cls, gtlib):
         from ctypes import c_char_p, c_void_p, c_int, POINTER
+        gtlib.gt_custom_track_delete.restype = None
+        gtlib.gt_custom_track_delete.argtypes = [c_void_p]
         gtlib.gt_custom_track_script_wrapper_new.restype = c_void_p
         gtlib.gt_custom_track_script_wrapper_new.argtypes = [RenderFunc,
                 HeightFunc, TitleFunc, FreeFunc]
 
     register = classmethod(register)
-
-

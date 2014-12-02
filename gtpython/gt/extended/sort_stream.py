@@ -1,8 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
-# Copyright (c) 2009 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
-# Copyright (c) 2009 Center for Bioinformatics, University of Hamburg
+# Copyright (c) 2014 Daniel Standage <daniel.standage@gmail.com>
 #
 # Permission to use, copy, modify, and distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -18,28 +17,25 @@
 #
 
 from gt.dlload import gtlib
-from gt.extended.genome_node import GenomeNode
+from gt.extended.genome_stream import GenomeStream
 
 
-class CommentNode(GenomeNode):
+class SortStream(GenomeStream):
 
-    def __init__(self):
-        pass
+    def __init__(self, genome_stream):
+        self.gs = gtlib.gt_sort_stream_new(genome_stream._as_parameter_)
+        self._as_parameter_ = self.gs
 
-    @classmethod
-    def create_new(cls, comment):
-        fn = gtlib.gt_comment_node_new(str(comment))
-        n = cls.create_from_ptr(fn, True)
-        return n
+    def from_param(cls, obj):
+        if not isinstance(obj, SortStream):
+            raise TypeError, "argument must be a SortStream"
+        return obj._as_parameter_
 
-    def get_comment(self):
-        return gtlib.gt_comment_node_get_comment(self.gn)
+    from_param = classmethod(from_param)
 
     def register(cls, gtlib):
-        from ctypes import c_char_p,  c_void_p
-        gtlib.gt_comment_node_new.restype = c_void_p
-        gtlib.gt_comment_node_new.argtypes = [c_char_p]
-        gtlib.gt_comment_node_get_comment.restype = c_char_p
-        gtlib.gt_comment_node_get_comment.argtypes = [c_void_p]
+        from ctypes import c_void_p
+        gtlib.gt_sort_stream_new.argtypes = [c_void_p]
+        gtlib.gt_sort_stream_new.restype = c_void_p
 
     register = classmethod(register)

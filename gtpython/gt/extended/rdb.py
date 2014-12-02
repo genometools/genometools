@@ -1,6 +1,7 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
+# Copyright (c) 2014 Daniel Standage <daniel.standage@gmail.com>
 # Copyright (c) 2012 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
 # Copyright (c) 2012 Center for Bioinformatics, University of Hamburg
 #
@@ -39,13 +40,19 @@ class RDB:
         return obj._as_parameter_
 
     from_param = classmethod(from_param)
-
+    
+    def register(cls, gtlib):
+        from ctypes import c_void_p
+        gtlib.gt_rdb_delete.restype = None
+        gtlib.gt_rdb_delete.argtypes = [c_void_p]
+    
+    register = classmethod(register)
 
 class RDBSqlite(RDB):
 
     def __init__(self, filename):
         err = Error()
-        rdb = gtlib.gt_rdb_sqlite_new(filename, err)
+        rdb = gtlib.gt_rdb_sqlite_new(filename, err._as_parameter_)
         if rdb == None:
             gterror(err)
         self.rdb = rdb

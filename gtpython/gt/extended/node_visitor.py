@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
 # Copyright (c) 2009 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
@@ -35,5 +35,10 @@ class NodeVisitor(object):
         return obj._as_parameter_
 
     from_param = classmethod(from_param)
-
-
+    
+    def register(cls, gtlib):
+        from ctypes import c_void_p
+        gtlib.gt_node_visitor_delete.restype = None
+        gtlib.gt_node_visitor_delete.argtypes = [c_void_p]
+    
+    register = classmethod(register)

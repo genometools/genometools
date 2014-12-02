@@ -1,6 +1,7 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
+# Copyright (c) 2014 Daniel Standage <daniel.standage@gmail.com>
 # Copyright (c) 2008 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
 # Copyright (c) 2008 Center for Bioinformatics, University of Hamburg
 #
@@ -32,7 +33,7 @@ class GFF3InStream(GenomeStream):
             p.close()
         except:
             gterror("File " + filename + " not readable!")
-        self.gs = gtlib.gt_gff3_in_stream_new_sorted(filename, 0)
+        self.gs = gtlib.gt_gff3_in_stream_new_sorted(filename)
         self._as_parameter_ = self.gs
 
     def from_param(cls, obj):
@@ -48,8 +49,9 @@ class GFF3InStream(GenomeStream):
         return used_types.to_list()
 
     def register(cls, gtlib):
-        from ctypes import c_char_p, c_int, c_void_p
-        gtlib.gt_gff3_in_stream_new_sorted.argtypes = [c_char_p, c_int]
+        from ctypes import c_char_p, c_void_p
+        gtlib.gt_gff3_in_stream_get_used_types.argtypes = [c_void_p]
+        gtlib.gt_gff3_in_stream_new_sorted.argtypes = [c_char_p]
         gtlib.gt_gff3_in_stream_get_used_types.restype = c_void_p
         gtlib.gt_gff3_in_stream_new_sorted.restype = c_void_p
 

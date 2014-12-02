@@ -1,6 +1,7 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
+# Copyright (c) 2014 Daniel Standage <daniel.standage@gmail.com>
 # Copyright (c) 2008 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
 # Copyright (c) 2008 Center for Bioinformatics, University of Hamburg
 #
@@ -65,9 +66,13 @@ class Array:
         gtlib.gt_array_ref.restype = c_void_p
         gtlib.gt_array_ref.argtypes = [c_void_p]
         gtlib.gt_array_get.restype = POINTER(c_void_p)
-        gtlib.gt_array_get.argtypes = [c_ulong]
+        gtlib.gt_array_get.argtypes = [c_void_p, c_ulong]
         gtlib.gt_array_size.restype = c_ulong
+        gtlib.gt_array_size.argtypes = [c_void_p]
+        gtlib.gt_array_add_ptr.restype = None
         gtlib.gt_array_add_ptr.argtypes = [c_void_p, c_void_p]
+        gtlib.gt_array_delete.restype = None
+        gtlib.gt_array_delete.argtypes = [c_void_p]
 
     register = classmethod(register)
 

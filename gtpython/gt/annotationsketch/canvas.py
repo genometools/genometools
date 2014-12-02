@@ -1,6 +1,7 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
+# Copyright (c) 2014 Daniel Standage <daniel.standage@gmail.com>
 # Copyright (c) 2008 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
 # Copyright (c) 2008 Center for Bioinformatics, University of Hamburg
 #
@@ -47,7 +48,6 @@ class Canvas:
 
     from_param = classmethod(from_param)
 
-
 class CanvasCairoFileBase(Canvas):
 
     def from_param(cls, obj):
@@ -60,26 +60,28 @@ class CanvasCairoFileBase(Canvas):
     def to_file(self, filename):
         err = Error()
         rval = gtlib.gt_canvas_cairo_file_to_file(self.canvas, filename,
-                err)
+                err._as_parameter_)
         if rval != 0:
             gterror(err)
 
     def to_stream(self):
         from ctypes import string_at
         str = Str(None)
-        gtlib.gt_canvas_cairo_file_to_stream(self.canvas, str)
+        gtlib.gt_canvas_cairo_file_to_stream(self.canvas, str._as_parameter_)
         return string_at(str.get_mem(), str.length())
 
     def register(cls, gtlib):
         from ctypes import c_char_p, c_void_p, c_ulong, c_int
+        gtlib.gt_canvas_delete.restype = None
+        gtlib.gt_canvas_delete.argtypes = [c_void_p]
         gtlib.gt_canvas_cairo_file_to_file.restype = c_int
         gtlib.gt_canvas_cairo_file_to_file.argtypes = [c_void_p,
-                c_char_p, Error]
+                c_char_p, c_void_p]
         gtlib.gt_canvas_cairo_file_to_stream.restype = c_char_p
-        gtlib.gt_canvas_cairo_file_to_stream.argtypes = [c_void_p, Str]
+        gtlib.gt_canvas_cairo_file_to_stream.argtypes = [c_void_p, c_void_p]
         gtlib.gt_canvas_cairo_file_new.restype = c_void_p
-        gtlib.gt_canvas_cairo_file_new.argtypes = [Style, c_int, c_ulong,
-                c_ulong, ImageInfo]
+        gtlib.gt_canvas_cairo_file_new.argtypes = [c_void_p, c_int, c_ulong,
+                c_ulong, c_void_p, c_void_p]
 
     register = classmethod(register)
 
@@ -87,9 +89,13 @@ class CanvasCairoFileBase(Canvas):
 class CanvasCairoFile(CanvasCairoFileBase):
   
     def __init__(self, style, width, height, ii=None):
+        Style.from_param(style)
         err = Error()
-        canvas = gtlib.gt_canvas_cairo_file_new(style, GRAPHICS_PNG, width,
-                height, ii, err)
+        iip = None
+        if ii:
+            iip = ii._as_parameter_
+        canvas = gtlib.gt_canvas_cairo_file_new(style._as_parameter_,
+                GRAPHICS_PNG, width, height, iip, err._as_parameter_)
         if canvas == None:
             gterror(err)
         self.canvas = canvas
@@ -100,8 +106,11 @@ class CanvasCairoFilePNG(CanvasCairoFileBase):
   
     def __init__(self, style, width, height, ii=None):
         err = Error()
-        canvas = gtlib.gt_canvas_cairo_file_new(style, GRAPHICS_PNG, width,
-                height, ii, err)
+        iip = None
+        if ii:
+            iip = ii._as_parameter_
+        canvas = gtlib.gt_canvas_cairo_file_new(style._as_parameter_,
+                GRAPHICS_PNG, width, height, iip, err._as_parameter_)
         if canvas == None:
             gterror(err)
         self.canvas = canvas
@@ -112,8 +121,11 @@ class CanvasCairoFilePDF(CanvasCairoFileBase):
   
     def __init__(self, style, width, height, ii=None):
         err = Error()
-        canvas = gtlib.gt_canvas_cairo_file_new(style, GRAPHICS_PDF, width,
-                height, ii, err)
+        iip = None
+        if ii:
+            iip = ii._as_parameter_
+        canvas = gtlib.gt_canvas_cairo_file_new(style._as_parameter_,
+                GRAPHICS_PDF, width, height, iip, err._as_parameter_)
         if canvas == None:
             gterror(err)
         self.canvas = canvas
@@ -124,8 +136,11 @@ class CanvasCairoFilePS(CanvasCairoFileBase):
   
     def __init__(self, style, width, height, ii=None):
         err = Error()
-        canvas = gtlib.gt_canvas_cairo_file_new(style, GRAPHICS_PS, width,
-                height, ii, err)
+        iip = None
+        if ii:
+            iip = ii._as_parameter_
+        canvas = gtlib.gt_canvas_cairo_file_new(style._as_parameter_,
+                GRAPHICS_PS, width, height, iip, err._as_parameter_)
         if canvas == None:
             gterror(err)
         self.canvas = canvas
@@ -136,8 +151,11 @@ class CanvasCairoFileSVG(CanvasCairoFileBase):
   
     def __init__(self, style, width, height, ii=None):
         err = Error()
-        canvas = gtlib.gt_canvas_cairo_file_new(style, GRAPHICS_SVG, width,
-                height, ii, err)
+        iip = None
+        if ii:
+            iip = ii._as_parameter_
+        canvas = gtlib.gt_canvas_cairo_file_new(style._as_parameter_,
+                GRAPHICS_SVG, width, height, iip, err._as_parameter_)
         if canvas == None:
             gterror(err)
         self.canvas = canvas

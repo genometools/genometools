@@ -1,6 +1,7 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
+# Copyright (c) 2014 Daniel Standage <daniel.standage@gmail.com>
 # Copyright (c) 2010 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
 # Copyright (c) 2010 Center for Bioinformatics, University of Hamburg
 #
@@ -22,7 +23,7 @@ from gt.core.error import Error, gterror
 from gt.core.gtstr import Str
 from gt.core.str_array import StrArray
 from ctypes import c_ulong, c_uint, c_int, c_char_p, c_void_p, c_char, \
-                   c_ubyte, c_bool
+                   c_ubyte, c_int, c_bool, POINTER
 import os.path
 
 
@@ -47,7 +48,7 @@ class Alphabet:
         if not os.path.exists(indexname + ".al1"):
             raise IOError, ("file not found: %s" % (indexname + ".al1"))
         e = Error()
-        a_ptr = gtlib.gt_alphabet_new_from_file(str(indexname), e)
+        a_ptr = gtlib.gt_alphabet_new_from_file(str(indexname), e._as_parameter_)
         a = Alphabet(a_ptr, True)
         if a == None:
           gterror(e)
@@ -65,7 +66,8 @@ class Alphabet:
             if not os.path.exists(f):
                 raise IOError, ("file not found: %s" % f)
             sa.add(str(f))
-        a_ptr = gtlib.gt_alphabet_new_from_sequence(sa, e)
+        a_ptr = gtlib.gt_alphabet_new_from_sequence(sa._as_parameter_,
+                e._as_parameter_)
         a = Alphabet(a_ptr, True)
         if a == None:
           gterror(e)
@@ -125,7 +127,7 @@ class Alphabet:
 
     def register(cls, gtlib):
         gtlib.gt_alphabet_new_from_sequence.restype = c_void_p
-        gtlib.gt_alphabet_new_from_sequence.argtypes = [StrArray, Error]
+        gtlib.gt_alphabet_new_from_sequence.argtypes = [c_void_p, c_void_p]
         gtlib.gt_alphabet_new_dna.restype = c_void_p
         gtlib.gt_alphabet_new_dna.argtypes = []
         gtlib.gt_alphabet_new_protein.restype = c_void_p
@@ -133,7 +135,7 @@ class Alphabet:
         gtlib.gt_alphabet_new_empty.restype = c_void_p
         gtlib.gt_alphabet_new_empty.argtypes = []
         gtlib.gt_alphabet_new_from_file.restype = c_void_p
-        gtlib.gt_alphabet_new_from_file.argtypes = [c_char_p, Error]
+        gtlib.gt_alphabet_new_from_file.argtypes = [c_char_p, c_void_p]
         gtlib.gt_alphabet_ref.restype = c_void_p
         gtlib.gt_alphabet_ref.argtypes = [c_void_p]
         gtlib.gt_alphabet_size.restype = c_uint
@@ -144,12 +146,19 @@ class Alphabet:
         gtlib.gt_alphabet_encode.argtypes = [c_void_p, c_char]
         gtlib.gt_alphabet_decode.restype = c_char
         gtlib.gt_alphabet_decode.argtypes = [c_void_p, c_ubyte]
-        gtlib.gt_alphabet_valid_input.restype = c_bool
+        gtlib.gt_alphabet_decode_seq_to_str.restype = c_void_p
+        gtlib.gt_alphabet_decode_seq_to_str.argtypes = [c_void_p,
+                POINTER(c_ubyte), c_ulong]
+        gtlib.gt_alphabet_valid_input.restype = c_int
         gtlib.gt_alphabet_valid_input.argtypes = [c_void_p, c_char]
         gtlib.gt_alphabet_is_dna.restype = c_bool
         gtlib.gt_alphabet_is_dna.argtypes = [c_void_p]
         gtlib.gt_alphabet_is_protein.restype = c_bool
         gtlib.gt_alphabet_is_protein.argtypes = [c_void_p]
+        gtlib.gt_alphabet_delete.restype = None
+        gtlib.gt_alphabet_delete.argtypes = [c_void_p]
+        gtlib.gt_alphabet_ref.restype = c_void_p
+        gtlib.gt_alphabet_ref.argtypes = [c_void_p]
 
     register = classmethod(register)
 

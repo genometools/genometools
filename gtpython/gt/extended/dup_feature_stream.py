@@ -1,6 +1,7 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
+# Copyright (c) 2014 Daniel Standage <daniel.standage@gmail.com>
 # Copyright (c) 2009 Brent Pedersen <bpederse@gmail.com>
 #
 # Permission to use, copy, modify, and distribute this software for any
@@ -22,7 +23,8 @@ from gt.extended.genome_stream import GenomeStream
 
 class DuplicateFeatureStream(GenomeStream):
     def __init__(self, genome_stream, dest_type, source_type):
-        self.gs = gtlib.gt_dup_feature_stream_new(genome_stream, dest_type, source_type)
+        self.gs = gtlib.gt_dup_feature_stream_new(genome_stream._as_parameter_, dest_type,
+                source_type)
         self._as_parameter_ = self.gs
 
     def from_param(cls, obj):
@@ -35,7 +37,7 @@ class DuplicateFeatureStream(GenomeStream):
     def register(cls, gtlib):
         from ctypes import c_void_p, c_char_p
         gtlib.gt_dup_feature_stream_new.restype = c_void_p
-        gtlib.gt_dup_feature_stream_new.argtypes = [GenomeStream, c_char_p, c_char_p]
+        gtlib.gt_dup_feature_stream_new.argtypes = [c_void_p, c_char_p,
+                c_char_p]
 
     register = classmethod(register)
-

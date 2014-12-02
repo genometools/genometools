@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
 # Copyright (c) 2008 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
@@ -31,6 +31,7 @@ Array.register(gtlib)
 Encseq.register(gtlib)
 EncseqEncoder.register(gtlib)
 EncseqBuilder.register(gtlib)
+EncseqLoader.register(gtlib)
 EncseqReader.register(gtlib)
 Error.register(gtlib)
 Str.register(gtlib)

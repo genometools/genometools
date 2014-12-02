@@ -1,6 +1,7 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
+# Copyright (c) 2014 Daniel Standage <daniel.standage@gmail.com>
 # Copyright (c) 2008 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
 # Copyright (c) 2008 Center for Bioinformatics, University of Hamburg
 #
@@ -24,7 +25,7 @@ from gt.extended.genome_stream import GenomeStream
 class AddIntronsStream(GenomeStream):
 
     def __init__(self, genome_stream):
-        self.gs = gtlib.gt_add_introns_stream_new(genome_stream)
+        self.gs = gtlib.gt_add_introns_stream_new(genome_stream._as_parameter_)
         self._as_parameter_ = self.gs
 
     def from_param(cls, obj):
@@ -37,8 +38,6 @@ class AddIntronsStream(GenomeStream):
     def register(cls, gtlib):
         from ctypes import c_void_p
         gtlib.gt_add_introns_stream_new.restype = c_void_p
-        gtlib.gt_add_introns_stream_new.argtypes = [GenomeStream]
+        gtlib.gt_add_introns_stream_new.argtypes = [c_void_p]
 
     register = classmethod(register)
-
-

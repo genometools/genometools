@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
 # Copyright (c) 2009-2012 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
@@ -138,3 +138,11 @@ class CustomVisitor(NodeVisitor):
                                                       None)
         self._as_parameter_ = self.gv
 
+    def register(cls, gtlib):
+        from ctypes import c_void_p
+        gtlib.gt_script_wrapper_visitor_new.argtypes = [c_void_p,
+           c_void_p, c_void_p, c_void_p, c_void_p,
+           c_void_p, c_void_p]
+        gtlib.gt_script_wrapper_visitor_new.restype = c_void_p
+
+    register = classmethod(register)

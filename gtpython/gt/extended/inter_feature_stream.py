@@ -1,6 +1,7 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
+# Copyright (c) 2014 Daniel Standage <daniel.standage@gmail.com>
 # Copyright (c) 2009 Brent Pedersen <bpederse@gmail.com>
 #
 # Permission to use, copy, modify, and distribute this software for any
@@ -22,7 +23,8 @@ from gt.extended.genome_stream import GenomeStream
 
 class InterFeatureStream(GenomeStream):
     def __init__(self, genome_stream, surround_type, new_type):
-        self.gs = gtlib.gt_inter_feature_stream_new(genome_stream, surround_type, new_type)
+        self.gs = gtlib.gt_inter_feature_stream_new(genome_stream._as_parameter_,
+                surround_type, new_type)
         self._as_parameter_ = self.gs
 
     def from_param(cls, obj):
@@ -35,6 +37,7 @@ class InterFeatureStream(GenomeStream):
     def register(cls, gtlib):
         from ctypes import c_void_p, c_char_p
         gtlib.gt_inter_feature_stream_new.restype = c_void_p
-        gtlib.gt_inter_feature_stream_new.argtypes = [GenomeStream, c_char_p, c_char_p]
+        gtlib.gt_inter_feature_stream_new.argtypes = [c_void_p, c_char_p,
+                c_char_p]
 
     register = classmethod(register)

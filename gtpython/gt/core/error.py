@@ -1,6 +1,7 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
+# Copyright (c) 2014 Daniel Standage <daniel.standage@gmail.com>
 # Copyright (c) 2008 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
 # Copyright (c) 2008 Center for Bioinformatics, University of Hamburg
 #
@@ -68,12 +69,19 @@ class Error:
     def register(cls, gtlib):
         from ctypes import c_void_p, c_char_p, c_int
         gtlib.gt_error_new.restype = c_void_p
+        gtlib.gt_error_new.argtypes = []
         gtlib.gt_error_get.restype = c_char_p
-        gtlib.gt_error_is_set.restype = c_int
         gtlib.gt_error_get.argtypes = [c_void_p]
-        gtlib.gt_error_set_nonvariadic.argtypes = [c_void_p, c_char_p]
+        gtlib.gt_error_is_set.restype = c_int
         gtlib.gt_error_is_set.argtypes = [c_void_p]
+        gtlib.gt_error_get.restype = c_char_p
+        gtlib.gt_error_get.argtypes = [c_void_p]
+        gtlib.gt_error_set_nonvariadic.restype = None
+        gtlib.gt_error_set_nonvariadic.argtypes = [c_void_p, c_char_p]
+        gtlib.gt_error_unset.restype = None
         gtlib.gt_error_unset.argtypes = [c_void_p]
+        gtlib.gt_error_delete.restype = None
+        gtlib.gt_error_delete.argtypes = [c_void_p]
 
     register = classmethod(register)
 

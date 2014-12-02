@@ -1,6 +1,7 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
+# Copyright (c) 2014 Daniel Standage <daniel.standage@gmail.com>
 # Copyright (c) 2008-2010 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
 # Copyright (c) 2008-2010 Center for Bioinformatics, University of Hamburg
 #
@@ -36,7 +37,7 @@ class Style:
             self.own = False
         else:
             e = Error()
-            self.style = gtlib.gt_style_new(e)
+            self.style = gtlib.gt_style_new(e._as_parameter_)
             if self.style == 0 or self.style == None:
                 gterror(e)
             self.own = True
@@ -58,21 +59,23 @@ class Style:
 
     def load_file(self, filename):
         err = Error()
-        rval = gtlib.gt_style_load_file(self.style, filename, err)
+        rval = gtlib.gt_style_load_file(self.style, filename, err._as_parameter_)
         if rval != 0:
             gterror(err)
 
     def load_str(self, string):
         err = Error()
         strg = Str(str(string.encode("utf-8")))
-        rval = gtlib.gt_style_load_str(self.style, strg, err)
+        rval = gtlib.gt_style_load_str(self.style, strg._as_parameter_,
+                err._as_parameter_)
         if rval != 0:
             gterror(err)
 
     def to_str(self):
         err = Error()
         string = Str()
-        if gtlib.gt_style_to_str(self.style, string, err) == 0:
+        if gtlib.gt_style_to_str(self.style, string._as_parameter_,
+                                 err._as_parameter_) == 0:
             return str(string)
         else:
             gterror(err)
@@ -87,8 +90,11 @@ class Style:
         from ctypes import byref
         color = Color()
         err = Error()
+        gnp = None
+        if gn:
+            gnp = gn._as_parameter_
         rval = gtlib.gt_style_get_color(self.style, section, key, byref(color),\
-                                        gn, err)
+                                        gnp, err._as_parameter_)
         if rval == STYLE_OK:
             return color
         elif rval == STYLE_NOT_SET:
@@ -103,7 +109,11 @@ class Style:
     def get_cstr(self, section, key, gn=None):
         string = Str()
         err = Error()
-        rval = gtlib.gt_style_get_str(self.style, section, key, string, gn, err)
+        gnp = None
+        if gn:
+            gnp = gn._as_parameter_
+        rval = gtlib.gt_style_get_str(self.style, section, key,
+                string._as_parameter_, gnp, err._as_parameter_)
         if rval == STYLE_OK:
             return str(string)
         elif rval == STYLE_NOT_SET:
@@ -113,14 +123,17 @@ class Style:
 
     def set_cstr(self, section, key, value):
         string = Str(str(value.encode("utf-8")))
-        gtlib.gt_style_set_str(self.style, section, key, string)
+        gtlib.gt_style_set_str(self.style, section, key, string._as_parameter_)
 
     def get_num(self, section, key, gn=None):
         from ctypes import c_double, byref
         double = c_double()
         err = Error()
+        gnp = None
+        if gn:
+            gnp = gn._as_parameter_
         rval = gtlib.gt_style_get_num(self.style, section, key, byref(double), \
-                                      gn, err)
+                                      gnp, err._as_parameter_)
         if rval == STYLE_OK:
             return double.value
         elif rval == STYLE_NOT_SET:
@@ -137,8 +150,11 @@ class Style:
         from ctypes import byref, c_int
         bool = c_int()
         err = Error()
+        gnp = None
+        if gn:
+            gnp = gn._as_parameter_
         rval = gtlib.gt_style_get_bool(self.style, section, key, byref(bool), \
-                                       gn, err)
+                                       gnp, err._as_parameter_)
         if rval == STYLE_OK:
             if bool.value == 1:
                 return True
@@ -161,23 +177,40 @@ class Style:
     def register(cls, gtlib):
         from ctypes import c_char_p, c_double, c_float, c_void_p, \
             POINTER, c_int
+        gtlib.gt_style_delete.restype = None
+        gtlib.gt_style_delete.argtypes = [c_void_p]
         gtlib.gt_style_get_bool.restype = c_int
         gtlib.gt_style_get_bool.argtypes = [c_void_p, c_char_p, c_char_p,
-                POINTER(c_int), c_void_p]
-        gtlib.gt_style_get_num.restype = c_int
-        gtlib.gt_style_get_num.argtypes = [c_void_p, c_char_p, c_char_p,
-                POINTER(c_double), c_void_p]
-        gtlib.gt_style_get_str.restype = c_int
-        gtlib.gt_style_get_str.argtypes = [c_void_p, c_char_p, c_char_p,
-                Str, c_void_p]
+                POINTER(c_int), c_void_p, c_void_p]
         gtlib.gt_style_get_color.restype = c_int
         gtlib.gt_style_get_color.argtypes = [c_void_p, c_char_p,
-                c_char_p, POINTER(Color), c_void_p]
-        gtlib.gt_style_load_str.argtypes = [c_void_p, Str, Error]
-        gtlib.gt_style_load_file.argtypes = [c_void_p, c_char_p, Error]
+                c_char_p, POINTER(Color), c_void_p, c_void_p]
+        gtlib.gt_style_get_num.restype = c_int
+        gtlib.gt_style_get_num.argtypes = [c_void_p, c_char_p, c_char_p,
+                POINTER(c_double), c_void_p, c_void_p]
+        gtlib.gt_style_get_str.restype = c_int
+        gtlib.gt_style_get_str.argtypes = [c_void_p, c_char_p, c_char_p,
+                c_void_p, c_void_p, c_void_p]
+        gtlib.gt_style_load_file.restype = c_int
+        gtlib.gt_style_load_file.argtypes = [c_void_p, c_char_p, c_void_p]
+        gtlib.gt_style_load_str.restype = c_int
+        gtlib.gt_style_load_str.argtypes = [c_void_p, c_void_p, c_void_p]
+        gtlib.gt_style_new.restype = c_void_p
+        gtlib.gt_style_new.argtypes = [c_void_p]
+        gtlib.gt_style_set_bool.restype = None
+        gtlib.gt_style_set_bool.argtypes = [c_void_p, c_char_p, c_char_p, c_int]
+        gtlib.gt_style_set_color.restype = None
+        gtlib.gt_style_set_color.argtypes = [c_void_p, c_char_p, c_char_p,
+                POINTER(Color)]
+        gtlib.gt_style_set_num.restype = None
+        gtlib.gt_style_set_num.argtypes = [c_void_p, c_char_p, c_char_p,
+                c_double]
+        gtlib.gt_style_set_str.restype = None
+        gtlib.gt_style_set_str.argtypes = [c_void_p, c_char_p, c_char_p,
+                c_void_p]
+        gtlib.gt_style_to_str.restype = int
+        gtlib.gt_style_to_str.argtypes = [c_void_p, c_void_p, c_void_p]
+        gtlib.gt_style_unset.restype = None        
         gtlib.gt_style_unset.argtypes = [c_void_p, c_char_p, c_char_p]
-        gtlib.gt_style_to_str.argtypes = [c_void_p, Str, Error]
 
     register = classmethod(register)
-
-
