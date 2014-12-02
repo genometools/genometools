@@ -353,7 +353,7 @@ static int gt_ltrdigest_pdom_visitor_parse_alignments(GT_UNUSED
     } else {
       bool junk_match = false;
       (void) gt_grep(&junk_match, " (CS|RF|PP)$", buf, NULL);
-      if (!junk_match) {
+      if (line % mod_val == 1 || !junk_match) {
         gt_assert(hit && hit->alignment);
         switch (line % mod_val) {
           case 0:
