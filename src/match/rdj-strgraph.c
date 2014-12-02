@@ -2282,8 +2282,8 @@ static void gt_strgraph_show_contigpaths(GtStrgraph *strgraph,
 {
   GtStrgraphContigpathsData pdata;
 
-  pdata.total_depth = 0;
-  pdata.current_depth = 0;
+  pdata.total_depth = 1UL;
+  pdata.current_depth = 1UL;
   pdata.contignum = 0;
   pdata.jnum = 0;
 
@@ -2310,7 +2310,7 @@ static void gt_strgraph_show_contigpaths(GtStrgraph *strgraph,
       gt_strgraph_show_contigpath_edge, &pdata, show_progressbar);
 
   /* show last contig path */
-  if (pdata.current_depth > pdata.min_depth)
+  if (pdata.current_depth >= pdata.min_depth)
     gt_strgraph_end_contigpath(&pdata);
 
   /* write header */
@@ -2386,8 +2386,8 @@ static void gt_strgraph_show_contigs(GtStrgraph *strgraph,
   if (showpaths)
     gt_contigs_writer_enable_complete_path_output(sdata.cw);
   sdata.strgraph = strgraph;
-  sdata.total_depth = 0;
-  sdata.current_depth = 0;
+  sdata.total_depth = 1UL;
+  sdata.current_depth = 1UL;
   sdata.current_length = 0;
   sdata.contignum = 0;
   sdata.min_depth = min_path_depth;
