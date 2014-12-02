@@ -1081,6 +1081,17 @@ Test do
   run "diff #{bf} #$testdata/readjoiner/pw-ex.spm"
 end
 
+Name "gt readjoiner assembly -depthcutoff"
+Keywords "gt_readjoiner gt_readjoiner_depthcutoff"
+Test do
+  run_prefilter("#{$testdata}/readjoiner/3_varlen_seq.fas")
+  run_overlap(5)
+  run_assembly("-depthcutoff 3 -lengthcutoff 31")
+  run "grep 'no contigs' #{last_stdout}"
+  run_assembly("-depthcutoff 2 -lengthcutoff 31")
+  run "diff reads.contigs.fas #$testdata/readjoiner/3_varlen_seq.contigs.fas"
+end
+
 # spmtest
 [true, false].each do |mirrored|
   %w{contained_eqlen contained_varlen 30x_800nt 70x_100nt}.each do |fasta|
