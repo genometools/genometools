@@ -22,6 +22,7 @@
 #include "core/assert_api.h"
 #include "core/log_api.h"
 #include "core/mathsupport.h"
+#include "core/unused_api.h"
 #include "match/shu-divergence.h"
 
 static double pmax(double M, /* M value should be explored by simulation ??? */
@@ -31,7 +32,7 @@ static double pmax(double M, /* M value should be explored by simulation ??? */
             int *thresholdReached,
             double *ln_n_fac,
             double *s1,
-            GtUword n_s)
+            GT_UNUSED GtUword n_s)
 {
 
   GtUword k;
