@@ -15,13 +15,12 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef S_SPLINT_S
-#include <math.h>
-#include <unistd.h>
-#include <sys/types.h>
 #include <errno.h>
+#include <math.h>
 #include <string.h>
-#endif
+#include <sys/types.h>
+#include <unistd.h>
+
 #include "core/chardef.h"
 #include "core/compat.h"
 #include "core/error.h"
@@ -35,12 +34,12 @@
 #include "core/str.h"
 #include "core/types_api.h"
 #include "core/unused_api.h"
-#include "bcktab.h"
-#include "esa-fileend.h"
-#include "intcode-def.h"
-#include "initbasepower.h"
-#include "sfx-maprange.h"
-#include "stamp.h"
+#include "match/bcktab.h"
+#include "match/esa-fileend.h"
+#include "match/initbasepower.h"
+#include "match/intcode-def.h"
+#include "match/sfx-maprange.h"
+#include "match/stamp.h"
 
 #define GT_FROMCODE2SPECIALCODE(CODE,NUMOFCHARS)\
                                (((NUMOFCHARS) == 4U)\

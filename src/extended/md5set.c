@@ -16,9 +16,7 @@
 */
 
 #include <string.h>
-#ifndef S_SPLINT_S
 #include <ctype.h>
-#endif
 #include "md5.h"
 #include "core/compat.h"
 #include "core/log.h"
@@ -80,7 +78,7 @@ static GtUword md5set_get_size(GtUword n)
   } while (1);
   return 0;
 }
-#endif
+#endif /* S_SPLINT_S */
 
 struct GtMD5Set
 {

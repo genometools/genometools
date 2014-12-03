@@ -211,6 +211,6 @@ void bitpackarray_store_uint64(BitPackArray *array, BitOffset index,
                                uint64_t val);
 uint32_t bitpackarray_get_uint32(const BitPackArray *array, BitOffset index);
 uint64_t bitpackarray_get_uint64(const BitPackArray *array, BitOffset index);
-#endif
+#endif /* S_SPLINT_S */
 
 #endif

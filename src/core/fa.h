@@ -176,5 +176,5 @@ GtUword gt_fa_get_space_current(void);
 void    gt_fa_show_space_peak(FILE*);
 void    gt_fa_clean(void);
 
-#endif
+#endif /* S_SPLINT_S */
 #endif

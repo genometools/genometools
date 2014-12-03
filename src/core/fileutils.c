@@ -19,9 +19,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#ifndef S_SPLINT_S
 #include <fcntl.h>
-#endif
 #include "core/compat.h"
 #include "core/cstr_api.h"
 #include "core/fileutils_api.h"

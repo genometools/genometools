@@ -15,11 +15,10 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef S_SPLINT_S
 #include <ctype.h>
-#endif
 #include <errno.h>
 #include <limits.h>
+
 #include "core/array.h"
 #include "core/basename_api.h"
 #include "core/encseq.h"

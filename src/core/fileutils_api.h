@@ -21,9 +21,7 @@
 
 #include <stdbool.h>
 #include <stdio.h>
-#ifndef S_SPLINT_S
 #include <sys/types.h>
-#endif
 #include "core/str_api.h"
 #include "core/str_array_api.h"
 

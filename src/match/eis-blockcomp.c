@@ -24,13 +24,12 @@
  * TODO:
  * - normalize use  of  seqIdx variable naming (seq, bseq etc.)
  */
-#include <stddef.h>
 #include <inttypes.h>
+#include <stddef.h>
 #include <stdlib.h>
 #include <string.h>
-#ifndef S_SPLINT_S
 #include <unistd.h>
-#endif
+
 #include "core/assert_api.h"
 #include "core/bitpackstring.h"
 #include "match/dataalign.h"

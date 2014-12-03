@@ -19,9 +19,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#ifndef S_SPLINT_S
 #include <sys/file.h>
-#endif
 
 void gt_xflock_shared(int fd);
 void gt_xflock_exclusive(int fd);

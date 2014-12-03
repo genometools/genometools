@@ -15,13 +15,12 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef S_SPLINT_S
-#include <stdio.h>
 #include <errno.h>
-#include <stdbool.h>
 #include <limits.h>
+#include <stdbool.h>
+#include <stdio.h>
 #include <string.h>
-#endif
+
 #include "core/fa.h"
 #include "core/fileutils.h"
 #include "core/array.h"

@@ -61,5 +61,5 @@ time_t gt_xtime(time_t *tloc);
 void   gt_xunlink(const char *path);
 void   gt_xwrite(int d, const void *buf, size_t nbytes);
 
-#endif
+#endif /* S_SPLINT_S */
 #endif

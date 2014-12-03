@@ -15,17 +15,16 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef S_SPLINT_S
 #include <ctype.h>
-#endif
 #include <limits.h>
 #include <string.h>
-#include "core/types_api.h"
+
 #include "core/alphabet_api.h"
-#include "core/chardef.h"
 #include "core/arraydef.h"
+#include "core/chardef.h"
 #include "core/readmode.h"
-#include "bare-encseq.h"
+#include "core/types_api.h"
+#include "match/bare-encseq.h"
 
 typedef struct
 {

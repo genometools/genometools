@@ -22,11 +22,9 @@
 #include "metagenomethreader.h"
 
 #ifdef CURLDEF
-#ifndef S_SPLINT_S
 #include <curl/curl.h>
 #include <curl/types.h>
 #include <curl/easy.h>
-#endif
 
 /* Expat Hilfs-Struktur zum Abspeichern der Hit-DNA-Sequenz und der
    Hit-DNA-Laenge */

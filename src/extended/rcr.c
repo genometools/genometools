@@ -15,23 +15,19 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef S_SPLINT_S
+#include <ctype.h>
 #include <errno.h>
+#include <fcntl.h>
 #include <math.h>
 #include <string.h>
-#include <ctype.h>
-#include <fcntl.h>
 #include <sys/stat.h>
 #include <unistd.h>
-#endif
 
-#include <sam.h>
-
-#include "core/fa.h"
 #include "core/bittab_api.h"
 #include "core/chardef.h"
 #include "core/compat.h"
 #include "core/disc_distri_api.h"
+#include "core/fa.h"
 #include "core/log_api.h"
 #include "core/ma.h"
 #include "core/mathsupport.h"
@@ -48,10 +44,11 @@
 #include "extended/encdesc.h"
 #include "extended/golomb.h"
 #include "extended/huffcode.h"
+#include "extended/rcr.h"
 #include "extended/sam_alignment.h"
 #include "extended/sam_query_name_iterator.h"
 #include "extended/samfile_iterator.h"
-#include "extended/rcr.h"
+#include "sam.h"
 
 #define BAMBASEA 1
 #define BAMBASEC 2
@@ -1317,7 +1314,7 @@ static int rcr_write_encoding_to_file(GtRcrEncoder *rcr_enc, GtError *err)
     printf("%% bits used for exact match flag: %.3f\n",
            rcr_enc->exact_match_flag_bits * 100.0 / rcr_enc->all_bits );
   }
-#endif
+#endif /* S_SPLINT_S */
 
   return 0;
 }

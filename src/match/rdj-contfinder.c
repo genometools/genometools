@@ -15,11 +15,10 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#include <ctype.h>
 #include <errno.h>
 #include <string.h>
-#ifndef S_SPLINT_S
-#include <ctype.h>
-#endif
+
 #include "core/fa.h"
 #include "core/error_api.h"
 #include "core/compact_ulong_store.h"
