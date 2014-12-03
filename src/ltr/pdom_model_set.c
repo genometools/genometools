@@ -16,8 +16,8 @@
 */
 
 #include <stdlib.h>
-#include <unistd.h>
 #ifndef S_SPLINT_S
+#include <unistd.h>
 #include <sys/types.h>
 #ifndef _WIN32
 #include <sys/wait.h>
@@ -50,15 +50,15 @@ static void gt_pdom_model_set_delete_index(const char *idxname)
 {
   char filename[BUFSIZ];
   gt_assert(idxname);
-  unlink(idxname);
-  snprintf(filename, BUFSIZ, "%s.h3f", idxname);
-  unlink(filename);
-  snprintf(filename, BUFSIZ, "%s.h3i", idxname);
-  unlink(filename);
-  snprintf(filename, BUFSIZ, "%s.h3m", idxname);
-  unlink(filename);
-  snprintf(filename, BUFSIZ, "%s.h3p", idxname);
-  unlink(filename);
+  (void) unlink(idxname);
+  (void) snprintf(filename, BUFSIZ, "%s.h3f", idxname);
+  (void) unlink(filename);
+  (void) snprintf(filename, BUFSIZ, "%s.h3i", idxname);
+  (void) unlink(filename);
+  (void) snprintf(filename, BUFSIZ, "%s.h3m", idxname);
+  (void) unlink(filename);
+  (void) snprintf(filename, BUFSIZ, "%s.h3p", idxname);
+  (void) unlink(filename);
 }
 
 GtPdomModelSet* gt_pdom_model_set_new(GtStrArray *hmmfiles, bool force,
@@ -125,7 +125,8 @@ GtPdomModelSet* gt_pdom_model_set_new(GtStrArray *hmmfiles, bool force,
       for (i = 0; !had_err && i < gt_str_array_size(hmmfiles); i++) {
         FILE *source;
         char cmd[BUFSIZ];
-        snprintf(cmd, BUFSIZ, "hmmconvert %s", gt_str_array_get(hmmfiles, i));
+        (void) snprintf(cmd, BUFSIZ, "hmmconvert %s",
+                        gt_str_array_get(hmmfiles, i));
         source = popen(cmd, "r");
         if (!source) {
           gt_error_set(err, "error opening/converting HMM file %s",

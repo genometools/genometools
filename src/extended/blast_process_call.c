@@ -19,8 +19,10 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <string.h>
+#ifndef S_SPLINT_S
 #include <sys/types.h>
 #include <sys/wait.h>
+#endif
 
 #include "core/ma.h"
 #include "core/str_api.h"

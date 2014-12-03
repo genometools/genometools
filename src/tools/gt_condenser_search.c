@@ -20,8 +20,10 @@
 #include <math.h>
 #include <stdio.h>
 #include <string.h>
+#ifndef S_SPLINT_S
 #include <sys/types.h>
 #include <sys/wait.h>
+#endif
 
 #include "core/basename_api.h"
 #include "core/encseq_api.h"
