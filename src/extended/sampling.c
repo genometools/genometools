@@ -14,11 +14,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef S_SPLINT_S
 #include <unistd.h>
-#endif
-
-#include <stdio.h>
 
 #include "core/assert_api.h"
 #include "core/compat.h"

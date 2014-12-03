@@ -440,8 +440,10 @@ typedef uLong FAR uLongf;
  * both "#undef _LARGEFILE64_SOURCE" and "#define _LARGEFILE64_SOURCE 0" as
  * equivalently requesting no 64-bit operations
  */
+#ifndef S_SPLINT_S
 #if defined(_LARGEFILE64_SOURCE) && -_LARGEFILE64_SOURCE - -1 == 1
 #  undef _LARGEFILE64_SOURCE
+#endif
 #endif
 
 #if defined(__WATCOMC__) && !defined(Z_HAVE_UNISTD_H)

@@ -58,15 +58,13 @@ static GtOptionParser* gt_readreads_option_parser_new(void *tool_arguments)
   GtReadreads *opts = tool_arguments;
   GtOptionParser *op;
   GtOption *option, *fasta;
-  gt_assert(opts);
-
-#ifndef S_SPLINT_S
   static const char *qualformats[] = {
     "phred",
     "solexa",
     NULL
   };
-#endif
+  gt_assert(opts);
+
 
   /* init */
   op = gt_option_parser_new("[option ...] file [...]",

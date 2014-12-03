@@ -16,12 +16,10 @@
 */
 
 #include <stdlib.h>
-#ifndef S_SPLINT_S
 #include <unistd.h>
 #include <sys/types.h>
 #ifndef _WIN32
 #include <sys/wait.h>
-#endif
 #endif
 #include "core/compat.h"
 #include "core/error_api.h"

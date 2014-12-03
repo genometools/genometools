@@ -20,6 +20,10 @@
 
 #define GT_STRGRAPH_EDGES_REPRESENTATION "bitfield"
 
+#include <stdbool.h>
+
+#include "core/types_api.h"
+
 typedef GtUword GtStrgraphLength;
 #define FormatGtStrgraphLength       ""GT_WU""
 #define PRINTGtStrgraphLengthcast(X) (X)

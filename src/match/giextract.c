@@ -15,13 +15,12 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#include <ctype.h>
 #include <errno.h>
 #include <stdio.h>
-#include <string.h>
 #include <stdlib.h>
-#ifndef S_SPLINT_S
-#include <ctype.h>
-#endif
+#include <string.h>
+
 #include "core/fileutils.h"
 #include "core/fa.h"
 #include "core/assert_api.h"

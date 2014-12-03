@@ -15,15 +15,9 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef S_SPLINT_S
 #include <ctype.h>
-#else
-#ifndef GT_ISUPPER_DEFINED
-#define GT_ISUPPER_DEFINED
-int isupper(int c);
-#endif
-#endif
 #include <string.h>
+
 #include "core/fileutils_api.h"
 #include "core/filelengthvalues.h"
 #include "core/ma.h"

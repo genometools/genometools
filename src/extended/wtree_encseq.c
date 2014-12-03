@@ -15,10 +15,8 @@
    OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
    */
 
-#include <stdbool.h>
-#ifndef S_SPLINT_S
 #include <ctype.h>
-#endif
+#include <stdbool.h>
 
 #include "core/alphabet_api.h"
 #include "core/chardef.h"

@@ -16,9 +16,8 @@
 */
 
 #include <errno.h>
-#ifndef S_SPLINT_S
 #include <unistd.h>
-#endif
+
 #include "core/compat.h"
 #include "core/xposix.h"
 #include "core/xansi_api.h"

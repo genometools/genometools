@@ -17,11 +17,10 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include <string.h>
 #include <limits.h>
-#ifndef S_SPLINT_S
+#include <string.h>
 #include <sys/types.h>
-#endif
+
 #include "core/compat.h"
 #include "core/fileutils_api.h"
 #include "core/xposix.h"

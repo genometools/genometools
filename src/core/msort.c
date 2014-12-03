@@ -46,9 +46,7 @@
  * (The default is pairwise merging.)
  */
 
-#ifndef S_SPLINT_S
 #include <sys/types.h>
-#endif
 #include <errno.h>
 #include <stdlib.h>
 #include <string.h>

@@ -2,6 +2,7 @@
 +charint
 +enumindex
 +posixlib
++skip-sys-headers
 -aliasunique
 -boolops
 -branchstate

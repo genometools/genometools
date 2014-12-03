@@ -15,9 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef S_SPLINT_S
 #include <sys/types.h>
-#endif
 #include <stdlib.h>
 #include <string.h>
 #include "core/ensure.h"

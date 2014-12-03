@@ -15,12 +15,10 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include <inttypes.h>
-#ifndef S_SPLINT_S
-#include <unistd.h>
-#include <sys/stat.h>
 #include <fcntl.h>
-#endif
+#include <inttypes.h>
+#include <sys/stat.h>
+#include <unistd.h>
 
 #include "core/ensure.h"
 #include "core/log_api.h"
@@ -259,8 +257,8 @@ static int print_codes(GtUword symbol,
                        unsigned int code_len,
                        GT_UNUSED void *unused)
 {
-#ifndef S_SPLINT_S
-  printf("control symbol " GT_WU ", freq "GT_LLU", codelength %u: ",
+#ifndef S_SPLINT_S /* for %llu which splint does not know */
+  printf("control symbol " GT_WU ", freq "GT_LLU ", codelength %u: ",
          symbol,
          freq,
          code_len);
@@ -269,7 +267,7 @@ static int print_codes(GtUword symbol,
          symbol,
          (GtUword) freq,
          code_len);
-#endif
+#endif /* S_SPLINT_S */
   print_huff_code(code_len, code);
 
   printf("\n");

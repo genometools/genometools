@@ -16,16 +16,15 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#include <ctype.h>
 #include <signal.h>
 #include <string.h>
-#ifndef S_SPLINT_S
-#include <ctype.h>
 #include <sys/types.h>
 #include <unistd.h>
 #ifndef _WIN32
 #include <sys/wait.h>
 #endif
-#endif
+
 #include "core/array_api.h"
 #include "core/codon_api.h"
 #include "core/codon_iterator_api.h"
@@ -45,12 +44,12 @@
 #include "core/translator_api.h"
 #include "core/undef_api.h"
 #include "core/unused_api.h"
-#include "extended/node_visitor_api.h"
 #include "extended/extract_feature_sequence.h"
 #include "extended/feature_node.h"
 #include "extended/feature_node_iterator_api.h"
 #include "extended/feature_type.h"
 #include "extended/globalchaining.h"
+#include "extended/node_visitor_api.h"
 #include "extended/reverse_api.h"
 #include "ltr/ltrdigest_def.h"
 #include "ltr/ltrdigest_pdom_visitor.h"

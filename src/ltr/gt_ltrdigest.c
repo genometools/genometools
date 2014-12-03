@@ -15,11 +15,11 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef S_SPLINT_S
 #include <ctype.h>
-#endif
 #include <string.h>
+
 #include "core/bioseq.h"
+#include "core/encseq.h"
 #include "core/fileutils_api.h"
 #include "core/log.h"
 #include "core/logger.h"
@@ -37,13 +37,12 @@
 #include "extended/visitor_stream.h"
 #include "ltr/gt_ltrdigest.h"
 #include "ltr/ltrdigest_def.h"
+#include "ltr/ltrdigest_file_out_stream.h"
 #include "ltr/ltrdigest_pbs_visitor.h"
 #include "ltr/ltrdigest_pdom_visitor.h"
 #include "ltr/ltrdigest_ppt_visitor.h"
 #include "ltr/ltrdigest_strand_assign_visitor.h"
-#include "ltr/ltrdigest_file_out_stream.h"
 #include "ltr/pdom_model_set.h"
-#include "core/encseq.h"
 
 typedef struct GtLTRdigestOptions {
   GtStr *trna_lib, *prefix, *cutoffs;

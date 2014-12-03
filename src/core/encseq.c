@@ -22,9 +22,7 @@
 #include <stdlib.h>
 #include <limits.h>
 #include <errno.h>
-#ifndef S_SPLINT_S
 #include <ctype.h>
-#endif
 #include "core/alphabet.h"
 #include "core/array.h"
 #include "core/arraydef.h"
