@@ -889,12 +889,12 @@ static int gt_ltrdigest_pdom_visitor_feature_node(GtNodeVisitor *nv,
               (void) sprintf(buf, ">"GT_WU"%c\n", i, '+');
               written = write(pc[1], buf, 4 * sizeof (char));
               written = write(pc[1], gt_str_get(lv->fwd[i]),
-                              (size_t) gt_str_length(lv->fwd[i]) * sizeof (char));
+                            (size_t) gt_str_length(lv->fwd[i]) * sizeof (char));
               written = write(pc[1], "\n", 1 * sizeof (char));
               (void) sprintf(buf, ">"GT_WU"%c\n", i, '-');
               written = write(pc[1], buf, 4 * sizeof (char));
               written = write(pc[1], gt_str_get(lv->rev[i]),
-                              (size_t) gt_str_length(lv->rev[i]) * sizeof (char));
+                            (size_t) gt_str_length(lv->rev[i]) * sizeof (char));
               written = write(pc[1], "\n", 1 * sizeof (char));
             }
             (void) close(pc[0]);
@@ -906,7 +906,8 @@ static int gt_ltrdigest_pdom_visitor_feature_node(GtNodeVisitor *nv,
                                                              instream, err);
             (void) fclose(instream);
             if (!had_err)
-              had_err = gt_ltrdigest_pdom_visitor_process_hits(lv, pstatus, err);
+              had_err = gt_ltrdigest_pdom_visitor_process_hits(lv, pstatus,
+                                                               err);
             gt_hmmer_parse_status_delete(pstatus);
         }
   #else
