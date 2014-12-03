@@ -30,6 +30,7 @@
 
 struct GtLTRInputCheckVisitor {
   const GtNodeVisitor parent_instance;
+  bool only_ltrs;
 };
 
 const GtNodeVisitorClass* gt_ltr_input_check_visitor_class(void);
@@ -72,17 +73,19 @@ static int gt_ltr_input_check_visitor_feature_node(GtNodeVisitor *nv,
   }
   gt_feature_node_iterator_delete(fni);
 
-  if (!had_err && !ltr_retrotrans) {
-    gt_error_set(err, "connected component with %s entry node (%s, line %u) "
-                      "does not contain a '%s' node, which is required",
-                 gt_feature_node_get_type(fn),
-                 gt_genome_node_get_filename((GtGenomeNode*) fn),
-                 gt_genome_node_get_line_number((GtGenomeNode*) fn),
-                 gt_ft_LTR_retrotransposon);
-    had_err = -1;
+  if (lv->only_ltrs) {
+    if (!had_err && !ltr_retrotrans) {
+      gt_error_set(err, "connected component with %s entry node (%s, line %u) "
+                        "does not contain a '%s' node, which is required",
+                   gt_feature_node_get_type(fn),
+                   gt_genome_node_get_filename((GtGenomeNode*) fn),
+                   gt_genome_node_get_line_number((GtGenomeNode*) fn),
+                   gt_ft_LTR_retrotransposon);
+      had_err = -1;
+    }
   }
 
-  if (!had_err && (!lltr || !rltr)) {
+  if (!had_err && ltr_retrotrans && (!lltr || !rltr)) {
     gt_error_set(err, "LTR_retrotransposon feature (%s, line %u) "
                       "does not contain two %s child features, both of which "
                       "are required",
@@ -110,7 +113,19 @@ const GtNodeVisitorClass* gt_ltr_input_check_visitor_class(void)
   return nvc;
 }
 
+void gt_ltr_input_check_visitor_disallow_non_ltr(GtLTRInputCheckVisitor *liv)
+{
+  gt_assert(liv);
+  liv->only_ltrs = true;
+}
+
 GtNodeVisitor* gt_ltr_input_check_visitor_new(void)
 {
-  return gt_node_visitor_create(gt_ltr_input_check_visitor_class());
+  GtNodeVisitor *nv = NULL;
+  GtLTRInputCheckVisitor *lv;
+  nv = gt_node_visitor_create(gt_ltr_input_check_visitor_class());
+  gt_assert(nv);
+  lv = gt_ltr_input_check_visitor_cast(nv);
+  lv->only_ltrs = false;
+  return nv;
 }

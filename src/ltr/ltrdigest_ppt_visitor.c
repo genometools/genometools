@@ -29,6 +29,7 @@
 #include "core/symbol_api.h"
 #include "core/undef_api.h"
 #include "core/unused_api.h"
+#include "core/warning_api.h"
 #include "extended/node_visitor_api.h"
 #include "extended/extract_feature_sequence.h"
 #include "extended/feature_node.h"
@@ -551,8 +552,19 @@ static int gt_ltrdigest_ppt_visitor_feature_node(GtNodeVisitor *nv,
     GtStrand canonical_strand = gt_feature_node_get_strand(ltr_retrotrans);
     GtPPTResults *res;
     GtUword seqlen;
-    GtStr *seq = gt_str_new();
+    GtStr *seq = NULL;
     rng = gt_genome_node_get_range((GtGenomeNode*) ltr_retrotrans);
+
+    if (gt_range_length(&rng) < 10) {
+      gt_warning("LTR_retrotransposon (%s, line %u) is too short for "
+                 "PPT detection (" GT_WU " nt), skipped this step",
+            gt_genome_node_get_filename((GtGenomeNode*) ltr_retrotrans),
+            gt_genome_node_get_line_number((GtGenomeNode*) ltr_retrotrans),
+            gt_range_length(&rng));
+      return had_err;
+    }
+
+    seq = gt_str_new();
     seqlen = gt_range_length(&rng);
 
     had_err = gt_extract_feature_sequence(seq, (GtGenomeNode*) ltr_retrotrans,
