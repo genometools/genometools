@@ -555,7 +555,7 @@ static int gt_ltrdigest_ppt_visitor_feature_node(GtNodeVisitor *nv,
     GtStr *seq = NULL;
     rng = gt_genome_node_get_range((GtGenomeNode*) ltr_retrotrans);
 
-    if (gt_range_length(&rng) < 10) {
+    if (gt_range_length(&rng) < (GtUword) 10UL) {
       gt_warning("LTR_retrotransposon (%s, line %u) is too short for "
                  "PPT detection (" GT_WU " nt), skipped this step",
             gt_genome_node_get_filename((GtGenomeNode*) ltr_retrotrans),

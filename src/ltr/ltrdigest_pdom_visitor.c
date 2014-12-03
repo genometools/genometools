@@ -817,7 +817,7 @@ static int gt_ltrdigest_pdom_visitor_feature_node(GtNodeVisitor *nv,
                                           lv->root_type,
                                           false, NULL, NULL, lv->rmap, err);
 
-    if (!had_err && gt_str_length(seq) >= GT_CODON_LENGTH) {
+    if (!had_err && gt_str_length(seq) >= (GtUword) GT_CODON_LENGTH) {
       if (!had_err) {
         for (i = 0UL; i < 3UL; i++) {
           gt_str_reset(lv->fwd[i]);
