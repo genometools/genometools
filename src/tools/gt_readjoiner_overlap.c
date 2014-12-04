@@ -255,10 +255,12 @@ static int gt_readjoiner_overlap_runner(GT_UNUSED int argc,
   gt_encseq_loader_disable_autosupport(el);
   encseq = gt_encseq_loader_load(el, gt_str_get(arguments->encseqinput),
                                  err);
-  eqlen = gt_encseq_accesstype_get(encseq) == GT_ACCESS_TYPE_EQUALLENGTH;
-
   if (encseq == NULL)
     haserr = true;
+
+  if (!haserr)
+    eqlen = gt_encseq_accesstype_get(encseq) == GT_ACCESS_TYPE_EQUALLENGTH;
+
   if (!haserr && !arguments->singlestrand)
   {
     if (gt_encseq_mirror(encseq, err) != 0)
