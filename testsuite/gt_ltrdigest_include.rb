@@ -219,6 +219,30 @@ if $gttestdata then
     grep(last_stderr, /mandatory/)
   end
 
+  Name "gt ltrdigest only one LTR in input"
+  Keywords "gt_ltrdigest incomplete_ltr"
+  Test do
+    run_test "#{$bin}gt suffixerator -lossless -dna -des -ssp -tis -v -db #{$gttestdata}ltrharvest/d_mel/4_genomic_dmel_RELEASE3-1.FASTA.gz"
+    run_test "#{$bin}gt ltrdigest -encseq 4_genomic_dmel_RELEASE3-1.FASTA.gz #{$gttestdata}ltrdigest/gt_ltrdigest_missing_ltr.gff3", :retval => 1
+    grep(last_stderr, /does not contain/)
+  end
+
+  Name "gt ltrdigest no LTRs in input"
+  Keywords "gt_ltrdigest incomplete_ltr"
+  Test do
+    run_test "#{$bin}gt suffixerator -lossless -dna -des -ssp -tis -v -db #{$gttestdata}ltrharvest/d_mel/4_genomic_dmel_RELEASE3-1.FASTA.gz"
+    run_test "#{$bin}gt ltrdigest -encseq 4_genomic_dmel_RELEASE3-1.FASTA.gz #{$gttestdata}ltrdigest/gt_ltrdigest_no_ltr_feats.gff3", :retval => 1
+    grep(last_stderr, /does not contain/)
+  end
+
+  Name "gt ltrdigest no LTRs in input"
+  Keywords "gt_ltrdigest incomplete_ltr"
+  Test do
+    run_test "#{$bin}gt suffixerator -lossless -dna -des -ssp -tis -v -db #{$gttestdata}ltrharvest/d_mel/4_genomic_dmel_RELEASE3-1.FASTA.gz"
+    run_test "#{$bin}gt ltrdigest -encseq 4_genomic_dmel_RELEASE3-1.FASTA.gz #{$gttestdata}ltrdigest/gt_ltrdigest_too_short_element.gff3"
+    grep(last_stderr, /too short/)
+  end
+
   Name "gt ltrdigest missing tRNA library but -trna given"
   Keywords "gt_ltrdigest"
   Test do

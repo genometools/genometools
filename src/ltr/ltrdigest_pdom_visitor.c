@@ -44,6 +44,8 @@
 #include "core/translator_api.h"
 #include "core/undef_api.h"
 #include "core/unused_api.h"
+#include "core/warning_api.h"
+#include "extended/node_visitor_api.h"
 #include "extended/extract_feature_sequence.h"
 #include "extended/feature_node.h"
 #include "extended/feature_node_iterator_api.h"
@@ -815,102 +817,111 @@ static int gt_ltrdigest_pdom_visitor_feature_node(GtNodeVisitor *nv,
                                           lv->root_type,
                                           false, NULL, NULL, lv->rmap, err);
 
-    if (!had_err) {
-      for (i = 0UL; i < 3UL; i++) {
-        gt_str_reset(lv->fwd[i]);
-        gt_str_reset(lv->rev[i]);
-      }
-
-      /* create translations */
-      ci = gt_codon_iterator_simple_new(gt_str_get(seq), seqlen, NULL);
-      gt_assert(ci);
-      tr = gt_translator_new(ci);
-      status = gt_translator_next(tr, &translated, &frame, err);
-      while (status == GT_TRANSLATOR_OK && translated) {
-        gt_str_append_char(lv->fwd[frame], translated);
-        status = gt_translator_next(tr, &translated, &frame, NULL);
-      }
-      if (status == GT_TRANSLATOR_ERROR) had_err = -1;
+    if (!had_err && gt_str_length(seq) >= (GtUword) (3*GT_CODON_LENGTH)) {
       if (!had_err) {
-        rev_seq = gt_malloc((size_t) seqlen * sizeof (char));
-        strncpy(rev_seq, gt_str_get(seq), (size_t) seqlen * sizeof (char));
-        (void) gt_reverse_complement(rev_seq, seqlen, NULL);
-        gt_codon_iterator_delete(ci);
-        ci = gt_codon_iterator_simple_new(rev_seq, seqlen, NULL);
-        gt_translator_set_codon_iterator(tr, ci);
+        for (i = 0UL; i < 3UL; i++) {
+          gt_str_reset(lv->fwd[i]);
+          gt_str_reset(lv->rev[i]);
+        }
+
+        /* create translations */
+        ci = gt_codon_iterator_simple_new(gt_str_get(seq), seqlen, NULL);
+        gt_assert(ci);
+        tr = gt_translator_new(ci);
         status = gt_translator_next(tr, &translated, &frame, err);
         while (status == GT_TRANSLATOR_OK && translated) {
-          gt_str_append_char(lv->rev[frame], translated);
+          gt_str_append_char(lv->fwd[frame], translated);
           status = gt_translator_next(tr, &translated, &frame, NULL);
         }
         if (status == GT_TRANSLATOR_ERROR) had_err = -1;
-        gt_free(rev_seq);
-      }
-      gt_codon_iterator_delete(ci);
-      gt_translator_delete(tr);
-    }
-
-    /* run HMMER and handle results */
-    if (!had_err) {
-#ifndef _WIN32
-      int pid, pc[2], cp[2];
-      GT_UNUSED int rval;
-
-      (void) signal(SIGCHLD, SIG_IGN); /* XXX: for now, ignore child's
-                                               exit status */
-      rval = pipe(pc);
-      gt_assert(rval == 0);
-      rval = pipe(cp);
-      gt_assert(rval == 0);
-
-      switch ((pid = (int) fork())) {
-        case -1:
-          perror("Can't fork");
-          exit(1);   /* XXX: error handling */
-        case 0:    /* child */
-          (void) close(1);    /* close current stdout. */
-          rval = dup(cp[1]);  /* make stdout go to write end of pipe. */
-          (void) close(0);    /* close current stdin. */
-          rval = dup(pc[0]);  /* make stdin come from read end of pipe. */
-          (void) close(pc[0]);
-          (void) close(pc[1]);
-          (void) close(cp[0]);
-          (void) close(cp[1]);
-          (void) execvp("hmmscan", lv->args); /* XXX: read path from env */
-          perror("couldn't execute hmmscan!");
-          exit(1);
-        default:    /* parent */
-          for (i = 0UL; i < 3UL; i++) {
-            char buf[5];
-            GT_UNUSED ssize_t written;
-            (void) sprintf(buf, ">"GT_WU"%c\n", i, '+');
-            written = write(pc[1], buf, 4 * sizeof (char));
-            written = write(pc[1], gt_str_get(lv->fwd[i]),
-                            (size_t) gt_str_length(lv->fwd[i]) * sizeof (char));
-            written = write(pc[1], "\n", 1 * sizeof (char));
-            (void) sprintf(buf, ">"GT_WU"%c\n", i, '-');
-            written = write(pc[1], buf, 4 * sizeof (char));
-            written = write(pc[1], gt_str_get(lv->rev[i]),
-                            (size_t) gt_str_length(lv->rev[i]) * sizeof (char));
-            written = write(pc[1], "\n", 1 * sizeof (char));
+        if (!had_err) {
+          rev_seq = gt_malloc((size_t) seqlen * sizeof (char));
+          strncpy(rev_seq, gt_str_get(seq), (size_t) seqlen * sizeof (char));
+          (void) gt_reverse_complement(rev_seq, seqlen, NULL);
+          gt_codon_iterator_delete(ci);
+          ci = gt_codon_iterator_simple_new(rev_seq, seqlen, NULL);
+          gt_translator_set_codon_iterator(tr, ci);
+          status = gt_translator_next(tr, &translated, &frame, err);
+          while (status == GT_TRANSLATOR_OK && translated) {
+            gt_str_append_char(lv->rev[frame], translated);
+            status = gt_translator_next(tr, &translated, &frame, NULL);
           }
-          (void) close(pc[0]);
-          (void) close(pc[1]);
-          (void) close(cp[1]);
-          instream = fdopen(cp[0], "r");
-          pstatus = gt_hmmer_parse_status_new();
-          had_err = gt_ltrdigest_pdom_visitor_parse_output(lv, pstatus,
-                                                           instream, err);
-          (void) fclose(instream);
-          if (!had_err)
-            had_err = gt_ltrdigest_pdom_visitor_process_hits(lv, pstatus, err);
-          gt_hmmer_parse_status_delete(pstatus);
+          if (status == GT_TRANSLATOR_ERROR) had_err = -1;
+          gt_free(rev_seq);
+        }
+        gt_codon_iterator_delete(ci);
+        gt_translator_delete(tr);
       }
-#else
-      /* XXX */
-      gt_error_set(err, "HMMER call not implemented on Windows\n");
-      had_err = -1;
-#endif
+
+      /* run HMMER and handle results */
+      if (!had_err) {
+  #ifndef _WIN32
+        int pid, pc[2], cp[2];
+        GT_UNUSED int rval;
+
+        (void) signal(SIGCHLD, SIG_IGN); /* XXX: for now, ignore child's
+                                                 exit status */
+        rval = pipe(pc);
+        gt_assert(rval == 0);
+        rval = pipe(cp);
+        gt_assert(rval == 0);
+
+        switch ((pid = (int) fork())) {
+          case -1:
+            perror("Can't fork");
+            exit(1);   /* XXX: error handling */
+          case 0:    /* child */
+            (void) close(1);    /* close current stdout. */
+            rval = dup(cp[1]);  /* make stdout go to write end of pipe. */
+            (void) close(0);    /* close current stdin. */
+            rval = dup(pc[0]);  /* make stdin come from read end of pipe. */
+            (void) close(pc[0]);
+            (void) close(pc[1]);
+            (void) close(cp[0]);
+            (void) close(cp[1]);
+            (void) execvp("hmmscan", lv->args); /* XXX: read path from env */
+            perror("couldn't execute hmmscan!");
+            exit(1);
+          default:    /* parent */
+            for (i = 0UL; i < 3UL; i++) {
+              char buf[5];
+              GT_UNUSED ssize_t written;
+              (void) sprintf(buf, ">"GT_WU"%c\n", i, '+');
+              written = write(pc[1], buf, 4 * sizeof (char));
+              written = write(pc[1], gt_str_get(lv->fwd[i]),
+                            (size_t) gt_str_length(lv->fwd[i]) * sizeof (char));
+              written = write(pc[1], "\n", 1 * sizeof (char));
+              (void) sprintf(buf, ">"GT_WU"%c\n", i, '-');
+              written = write(pc[1], buf, 4 * sizeof (char));
+              written = write(pc[1], gt_str_get(lv->rev[i]),
+                            (size_t) gt_str_length(lv->rev[i]) * sizeof (char));
+              written = write(pc[1], "\n", 1 * sizeof (char));
+            }
+            (void) close(pc[0]);
+            (void) close(pc[1]);
+            (void) close(cp[1]);
+            instream = fdopen(cp[0], "r");
+            pstatus = gt_hmmer_parse_status_new();
+            had_err = gt_ltrdigest_pdom_visitor_parse_output(lv, pstatus,
+                                                             instream, err);
+            (void) fclose(instream);
+            if (!had_err)
+              had_err = gt_ltrdigest_pdom_visitor_process_hits(lv, pstatus,
+                                                               err);
+            gt_hmmer_parse_status_delete(pstatus);
+        }
+  #else
+        /* XXX */
+        gt_error_set(err, "HMMER call not implemented on Windows\n");
+        had_err = -1;
+  #endif
+      }
+    } else {
+      gt_warning("LTR_retrotransposon (%s, line %u) is too short to be "
+                 "translated (" GT_WU " nt), skipped domain search",
+            gt_genome_node_get_filename((GtGenomeNode*) lv->ltr_retrotrans),
+            gt_genome_node_get_line_number((GtGenomeNode*) lv->ltr_retrotrans),
+            gt_str_length(seq));
     }
     gt_str_delete(seq);
   }

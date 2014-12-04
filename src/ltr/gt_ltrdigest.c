@@ -36,6 +36,7 @@
 #include "extended/seqid2file.h"
 #include "extended/visitor_stream.h"
 #include "ltr/gt_ltrdigest.h"
+#include "ltr/ltr_input_check_visitor.h"
 #include "ltr/ltrdigest_def.h"
 #include "ltr/ltrdigest_file_out_stream.h"
 #include "ltr/ltrdigest_pbs_visitor.h"
@@ -434,6 +435,7 @@ static int gt_ltrdigest_runner(GT_UNUSED int argc, const char **argv,
 {
   GtLTRdigestOptions *arguments = tool_arguments;
   GtNodeStream *gff3_in_stream  = NULL,
+               *check_stream    = NULL,
                *gff3_out_stream = NULL,
                *pdom_stream     = NULL,
                *ppt_stream      = NULL,
@@ -516,6 +518,12 @@ static int gt_ltrdigest_runner(GT_UNUSED int argc, const char **argv,
 
   if (!had_err) {
     last_stream = gff3_in_stream  = gt_gff3_in_stream_new_sorted(argv[arg]);
+  }
+
+  if (!had_err) {
+    GtNodeVisitor *check_v;
+    check_v = gt_ltr_input_check_visitor_new();
+    last_stream = check_stream = gt_visitor_stream_new(last_stream, check_v);
   }
 
   if (!had_err && gt_str_array_size(arguments->hmm_files) > 0) {
@@ -644,6 +652,7 @@ static int gt_ltrdigest_runner(GT_UNUSED int argc, const char **argv,
   gt_node_stream_delete(sa_stream);
   gt_node_stream_delete(pdom_stream);
   gt_node_stream_delete(tab_out_stream);
+  gt_node_stream_delete(check_stream);
   gt_node_stream_delete(gff3_in_stream);
   gt_bioseq_delete(arguments->trna_lib_bs);
   gt_region_mapping_delete(rmap);
