@@ -1,5 +1,18 @@
-changes in version 1.5.4 (2014-11-06)
+changes in version 1.5.4 (2014-12-06)
 
+- many small bugfixes and cleanups, see issue tracker on GitHub
+- added full Lua support for custom visitors/streams
+- extended feature node bindings for Lua
+- parallelization for test suite
+- improvements to GTF parser
+- merge stream performance improved for many input files
+- sequence mapping performance improved for `-matchdescstart' option
+- add `-sortlines' parameter to `gt gff3' tool
+- added template system and HTML/JSON output to `gt speck' tool
+- many performance improvements to `gt speck'
+- add SO API to `gt speck'
+- add font selection options to AnnotationSketch style files
+- Python bindings re-enabled on recent Mac OS X versions
 - SQLite updated to 3.8.7.1
 
 

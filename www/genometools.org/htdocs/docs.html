@@ -87,6 +87,8 @@ href="http://www.lua.org/manual/5.1/manual.html#pdf-ipairs"><code>ipairs()</code
 
   <li><a href="#FeatureNode">FeatureNode</a>
 
+  <li><a href="#FeatureNodeIterator">FeatureNodeIterator</a>
+
   <li><a href="#FeatureStream">FeatureStream</a>
 
   <li><a href="#FeatureVisitor">FeatureVisitor</a>
@@ -671,25 +673,27 @@ Extract the sequence of <code>feature_node</code>. If <code>join</code> is false
 Extract the translated sequence of <code>feature_node</code>. If <code>join</code> is false and <code>feature_node</code> has type <code>type</code> the sequence is returned (using <code>region_mapping</code> to get it). If <code>join</code> is true and <code>feature_node</code> has children of type <code>type</code> their joined sequences are returned. If none of the above applies nil is returned.
 </p>
 <hr>
+<a name="FeatureNodeIterator"></a>
+<h2>Class FeatureNodeIterator</h2>
 <a name="feature_node_iterator_new"></a>
 
-<code> feature_node_iterator_new(genome_node)</code>
+<code> feature_node_iterator_new(node)</code>
 <p>
-Returns a new genome node iterator which performs a depth-first traversal of <code>genome_node</code> (including <code>genome_node</code> itself).
+Returns a new feature node iterator which performs a depth-first traversal of <code>node</code> (including <code>node</code> itself).
 </p>
 <hr>
 <a name="feature_node_iterator_new_direct"></a>
 
-<code> feature_node_iterator_new_direct(genome_node)</code>
+<code> feature_node_iterator_new_direct(node)</code>
 <p>
-Returns a new genome node iterator which iterates over all direct children of <code>genome_node</code> (without <code>genome_node</code> itself).
+Returns a new feature node iterator wich iterates over all direct children of <code>node</code> (without <code>node</code> itself).
 </p>
 <hr>
 <a name="feature_node_iterator:next"></a>
 
 <code> feature_node_iterator:next()</code>
 <p>
-Returns the next genome node for <code>feature_node_iterator</code> or nil.
+Returns the next node for <code>feature_node_iterator</code> or nil.
 </p>
 <hr>
 <a name="FeatureStream"></a>
@@ -1365,7 +1369,7 @@ Returns translated <code>dna</code>.
 <div id="footer">
 Copyright &copy; 2008-2013
 The <i>GenomeTools</i> authors.
-Last update: 2014-11-05
+Last update: 2014-12-06
 </div>
 </div>
 <!-- Piwik -->

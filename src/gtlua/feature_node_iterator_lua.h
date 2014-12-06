@@ -20,17 +20,17 @@
 
 #include "lua.h"
 
-/* exports the GenomeNodeIterator class to Lua:
+/* exports the FeatureNodeIterator class to Lua:
 
-   -- Returns a new genome node iterator which performs a depth-first traversal
-   -- of <genome_node> (including <genome_node> itself).
-   function feature_node_iterator_new(genome_node)
+   -- Returns a new feature node iterator which performs a depth-first traversal
+   -- of <node> (including <node> itself).
+   function feature_node_iterator_new(node)
 
-   -- Returns a new genome node iterator wich iterates over all direct children
-   -- of <genome_node> (without <genome_node> itself).
-   function feature_node_iterator_new_direct(genome_node)
+   -- Returns a new feature node iterator wich iterates over all direct children
+   -- of <node> (without <node> itself).
+   function feature_node_iterator_new_direct(node)
 
-   -- Returns the next genome node for <feature_node_iterator> or nil.
+   -- Returns the next node for <feature_node_iterator> or nil.
    function feature_node_iterator:next()
 */
 int gt_lua_open_feature_node_iterator(lua_State*);
