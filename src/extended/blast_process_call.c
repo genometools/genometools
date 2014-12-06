@@ -21,7 +21,9 @@
 #include <string.h>
 #ifndef S_SPLINT_S
 #include <sys/types.h>
+#ifndef _WIN32
 #include <sys/wait.h>
+#endif
 #endif
 
 #include "core/ma.h"
@@ -263,8 +265,10 @@ void gt_blast_process_call_set_opt(GtBlastProcessCall *call,
 
 FILE *gt_blast_process_call_run(GtBlastProcessCall *call, GtError *err)
 {
-  int had_err = 0,
-      errcode;
+  int had_err = 0;
+#ifndef _WIN32
+  int errcode;
+#endif
   FILE *blastout = NULL,
        *installcheck = NULL;
   gt_assert(call->query && call->db);
@@ -291,6 +295,7 @@ FILE *gt_blast_process_call_run(GtBlastProcessCall *call, GtError *err)
     }
   }
   if (!had_err) {
+#ifndef _WIN32
     errcode = pclose(installcheck);
     if ((call->all && WEXITSTATUS(errcode) != 1) ||
         errcode != 0) {
@@ -303,6 +308,7 @@ FILE *gt_blast_process_call_run(GtBlastProcessCall *call, GtError *err)
                      call->version_call, WEXITSTATUS(errcode));
       had_err = -1;
     }
+#endif
   }
   if (!had_err) {
     blastout = popen(gt_str_get(call->str), "r");

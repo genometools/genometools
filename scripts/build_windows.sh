@@ -8,6 +8,7 @@ make cairo=no manuals
 make clean
 make SYSTEM=Windows                                             \
      MACHINE=i686                                               \
+     32bit=yes                                                  \
      CC=i686-w64-mingw32-gcc                                    \
      AR=i686-w64-mingw32-ar                                     \
      fpic=no                                                    \
