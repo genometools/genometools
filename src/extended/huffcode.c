@@ -257,7 +257,7 @@ static int print_codes(GtUword symbol,
                        unsigned int code_len,
                        GT_UNUSED void *unused)
 {
-#ifndef S_SPLINT_S /* for %llu which splint does not know */
+#ifndef S_SPLINT_S /* for GT_LLU which splint does not know */
   printf("control symbol " GT_WU ", freq "GT_LLU ", codelength %u: ",
          symbol,
          freq,

@@ -716,8 +716,8 @@ int gt_gtf_parser_parse(GtGTFParser *parser, GtQueue *genome_nodes,
         const char *key = gt_str_array_get(attrkeys, i);
         const char *val = gt_str_array_get(attrvals, i);
 
-        // Not a comprehensive solution to ensure correct encoding, just bare
-        // minimum required to get Cufflinks output parsed
+        /* Not a comprehensive solution to ensure correct encoding, just bare
+           minimum required to get Cufflinks output parsed */
         if (strcmp(val, "=") == 0)
           val = "%26";
 
