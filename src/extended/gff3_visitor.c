@@ -282,7 +282,7 @@ static GtStr* make_id_unique(GtGFF3Visitor *gff3_visitor, GtFeatureNode *fn)
       GtStr *buf = gt_str_new();
       while (!id_string_is_unique(id, buf, gff3_visitor->used_ids, i++));
       gt_warning("feature ID \"%s\" not unique: changing to %s", gt_str_get(id),
-                                                                 gt_str_get(buf));
+                                                               gt_str_get(buf));
       gt_str_set(id, gt_str_get(buf));
       gt_str_delete(buf);
     }

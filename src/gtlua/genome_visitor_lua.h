@@ -37,5 +37,4 @@ void gt_lua_genome_visitor_push(lua_State*, GtNodeVisitor*);
 #define check_genome_visitor(L, POS) \
              (GtNodeVisitor**) luaL_checkudata(L, POS, GENOME_VISITOR_METATABLE)
 
-
 #endif
