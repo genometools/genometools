@@ -712,11 +712,25 @@ int gt_gtf_parser_parse(GtGTFParser *parser, GtQueue *genome_nodes,
                                       GTF_PARSER_STOP_CODON_FLAG, "true");
       }
       for (i = 0; i < gt_str_array_size(attrkeys); i++) {
+        GtFeatureNode *fn = (GtFeatureNode *)gn;
         const char *key = gt_str_array_get(attrkeys, i);
         const char *val = gt_str_array_get(attrvals, i);
+
+        // Not a comprehensive solution to ensure correct encoding, just bare
+        // minimum required to get Cufflinks output parsed
         if (strcmp(val, "=") == 0)
           val = "%26";
-        gt_feature_node_add_attribute((GtFeatureNode *) gn, key, val);
+
+        if (gt_feature_node_get_attribute(fn, key) != NULL) {
+          const char *oldval = gt_feature_node_get_attribute(fn, key);
+          GtStr *newval = gt_str_new_cstr(oldval);
+          gt_str_append_char(newval, ',');
+          gt_str_append_cstr(newval, val);
+          gt_feature_node_set_attribute(fn, key, gt_str_get(newval));
+          gt_str_delete(newval);
+        }
+        else
+          gt_feature_node_add_attribute(fn, key, val);
       }
       gt_str_array_delete(attrkeys);
       gt_str_array_delete(attrvals);
