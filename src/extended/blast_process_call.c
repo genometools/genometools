@@ -19,11 +19,9 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <string.h>
-#ifndef S_SPLINT_S
 #include <sys/types.h>
 #ifndef _WIN32
 #include <sys/wait.h>
-#endif
 #endif
 
 #include "core/ma.h"
