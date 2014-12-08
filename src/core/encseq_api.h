@@ -77,8 +77,8 @@ typedef struct GtEncseqReader GtEncseqReader;
 /* The file suffix used for MD5 fingerprints. */
 #define GT_MD5TABFILESUFFIX ".md5"
 
-/* Returns the indexname (as given at loading time) of <encseq>
-   or "generated" if the GtEncseq was build in memory only. */
+/* Returns the indexname (as given at loading time) of <encseq> or the string
+   "generated" if the GtEncseq was build in memory only. */
 const char*       gt_encseq_indexname(const GtEncseq *encseq);
 /* Returns the total number of characters in all sequences of <encseq>,
    including separators and wildcards. */
@@ -110,16 +110,20 @@ GtEncseq*         gt_encseq_ref(GtEncseq *encseq);
 GtEncseqReader*   gt_encseq_create_reader_with_readmode(const GtEncseq *encseq,
                                                         GtReadmode readmode,
                                                         GtUword startpos);
-/* Returns the encoded representation of the substring from position <frompos>
-   to position <topos> of <encseq>. The result is written to the location
-   pointed to by <buffer>, which must be large enough to hold the result. */
+/* Returns the encoded representation of the substring from 0-based position
+   <frompos> to position <topos> of <encseq>. The result is written to the
+   location pointed to by <buffer>, which must be large enough to hold the
+   result. */
 void              gt_encseq_extract_encoded(const GtEncseq *encseq,
                                             GtUchar *buffer,
                                             GtUword frompos,
                                             GtUword topos);
-/* Returns the decoded version of the substring from position <frompos>
-   to position <topos> of <encseq>. The result is written to the location
-   pointed to by <buffer>, which must be large enough to hold the result. */
+/* Returns the decoded version of the substring from 0-based position <frompos>
+   to position <topos> of <encseq>. If the extracted region contains a separator
+   character, it will be represented by non-printable SEPARATOR constant.
+   The caller is responsible to handle this case. The result of the extraction
+   is written to the location pointed to by <buffer>, which must be sufficiently
+   large to hold the result. */
 void              gt_encseq_extract_decoded(const GtEncseq *encseq,
                                             char *buffer,
                                             GtUword frompos,
@@ -543,11 +547,9 @@ void              gt_encseq_builder_set_logger(GtEncseqBuilder*, GtLogger *l);
    The state of <eb> is reset to empty after successful creation of a new
    <GtEncseq> (like having called <gt_encseq_builder_reset()>). */
 GtEncseq*         gt_encseq_builder_build(GtEncseqBuilder *eb, GtError *err);
-
 /* Clears all added sequences and descriptions, resetting <eb> to a state
    similar to the state immediately after its initial creation.  */
 void              gt_encseq_builder_reset(GtEncseqBuilder *eb);
-
 /* Deletes <eb>. */
 void              gt_encseq_builder_delete(GtEncseqBuilder *eb);
 
