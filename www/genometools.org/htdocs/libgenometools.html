@@ -9195,10 +9195,11 @@ Removes all occurrences of <code>remove</code> from the right end of <code>cstr<
 <h2>Module Deprecated</h2>
 <a name="GT_DEPRECATED"></a>
 
-<code>#define GT_DEPRECATED</code>
+<code>#define GT_DEPRECATED(msg)</code>
 <p>
 Deprecated functions, typedefs and structs should be annotated with this
    macro to get warnings when the gcc compiler is used.
+   <code>msg</code> should inform about an alternative API.
 </p>
 <hr>
 <a name="Endianess"></a>

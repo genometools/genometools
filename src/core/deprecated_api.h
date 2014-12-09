@@ -20,7 +20,8 @@
 /* Deprecated module */
 
 /* Deprecated functions, typedefs and structs should be annotated with this
-   macro to get warnings when the gcc compiler is used. */
+   macro to get warnings when the gcc compiler is used.
+   <msg> should inform about an alternative API. */
 #if defined(__clang__)
 #if __has_extension(attribute_deprecated_with_message)
 #define GT_DEPRECATED(msg) \

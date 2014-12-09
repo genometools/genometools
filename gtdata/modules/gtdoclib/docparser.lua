@@ -115,7 +115,9 @@ local Variable = lpeg.Cc("variable") *
                  lpeg.C((Any - lpeg.S("();"))^0) * Semicolon
 local ExportedComment = lpeg.Cc("comment") * CCommentStart *
                         lpeg.C((Any - CCommentEnd)^0) * CCommentEnd
-local ExportedDefine = lpeg.Cc("function") * lpeg.C("#define") * Space *
+local ExportedDefine = lpeg.Cc("function") *
+                       (lpeg.P("#if") * (Any - Newline)^1 * Newline)^0 *
+                       lpeg.C("#define") * Space *
                        lpeg.C(lpeg.P(Any - lpeg.P("("))^1) * lpeg.P("(") *
                        lpeg.C((Any - lpeg.P(")"))^1) * lpeg.P(")") *
                        OptionalSpace * DefineSeparator
