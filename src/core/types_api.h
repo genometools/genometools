@@ -94,12 +94,12 @@ typedef unsigned long long GtUint64;
 
 typedef unsigned char GtUchar;
 
-/* This type is deprecated, please use GtUwordPair instead. */
-GT_DEPRECATED
+/* This type is deprecated, please use GtUword instead. */
+GT_DEPRECATED("use GtUword instead")
 typedef GtUword GtUlong;
 
 /* This type is deprecated, please use GtUwordPair instead. */
-GT_DEPRECATED
+GT_DEPRECATED("use GtUwordPair instead")
 typedef struct
 {
   GtUword a, b;
