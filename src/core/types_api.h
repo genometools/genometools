@@ -20,6 +20,7 @@
 #define TYPES_API_H
 
 #include <limits.h>
+#include "core/deprecated_api.h"
 
 /* Define the conversion string for '%lld' in platform independent fashion. */
 #ifndef _WIN32
@@ -93,10 +94,12 @@ typedef unsigned long long GtUint64;
 
 typedef unsigned char GtUchar;
 
-/* This type is deprecated, please use GtUwordPair instead */
+/* This type is deprecated, please use GtUwordPair instead. */
+GT_DEPRECATED
 typedef GtUword GtUlong;
 
-/* This type is deprecated, please use GtUwordPair instead */
+/* This type is deprecated, please use GtUwordPair instead. */
+GT_DEPRECATED
 typedef struct
 {
   GtUword a, b;
