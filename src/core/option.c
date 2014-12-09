@@ -658,11 +658,11 @@ int gt_option_parser_manpage(GtOptionParser *op, const char *toolname,
       }
       gt_str_append_cstr(outstr, "::\n");
       gt_str_append_cstr(outstr, gt_str_get(option->description));
-      if (gt_str_length(default_string) > 0) {
+      if (!option->hide_default && gt_str_length(default_string) > 0) {
         gt_str_append_cstr(outstr, " (default: ");
         gt_str_append_cstr(outstr, gt_str_get(default_string));
         gt_str_append_cstr(outstr, ")");
-        }
+      }
       gt_str_append_cstr(outstr, "\n\n");
       gt_str_reset(default_string);
     }
