@@ -25,6 +25,9 @@
 #if __has_extension(attribute_deprecated_with_message)
 #define GT_DEPRECATED(msg) \
          __attribute__((deprecated (msg)))
+#else
+#define GT_DEPRECATED(msg) \
+         __attribute__((deprecated))
 #endif
 /* not clang with messages for deprecated */
 #elif defined(__GNUC__) && ((__GNUC__ * 100 + __GNUC_MINOR__) >= 405)
