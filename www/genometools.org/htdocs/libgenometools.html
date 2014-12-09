@@ -2077,8 +2077,8 @@ Test whether the given genome node is an EOF node. If so, a pointer to the
 
 <code>const char*        gt_encseq_indexname(const GtEncseq *encseq)</code>
 <p>
-Returns the indexname (as given at loading time) of <code>encseq</code>
-   or "generated" if the GtEncseq was build in memory only.
+Returns the indexname (as given at loading time) of <code>encseq</code> or the string
+   "generated" if the GtEncseq was build in memory only.
 </p>
 <hr>
 <a name="gt_encseq_total_length"></a>
@@ -2153,9 +2153,10 @@ Returns a new <code>GtEncseqReader</code> for <code>encseq</code>, starting from
                                             GtUword frompos,
                                             GtUword topos)</code>
 <p>
-Returns the encoded representation of the substring from position <code>frompos</code>
-   to position <code>topos</code> of <code>encseq</code>. The result is written to the location
-   pointed to by <code>buffer</code>, which must be large enough to hold the result.
+Returns the encoded representation of the substring from 0-based position
+   <code>frompos</code> to position <code>topos</code> of <code>encseq</code>. The result is written to the
+   location pointed to by <code>buffer</code>, which must be large enough to hold the
+   result.
 </p>
 <hr>
 <a name="gt_encseq_extract_decoded"></a>
@@ -2165,9 +2166,12 @@ Returns the encoded representation of the substring from position <code>frompos<
                                             GtUword frompos,
                                             GtUword topos)</code>
 <p>
-Returns the decoded version of the substring from position <code>frompos</code>
-   to position <code>topos</code> of <code>encseq</code>. The result is written to the location
-   pointed to by <code>buffer</code>, which must be large enough to hold the result.
+Returns the decoded version of the substring from 0-based position <code>frompos</code>
+   to position <code>topos</code> of <code>encseq</code>. If the extracted region contains a separator
+   character, it will be represented by non-printable SEPARATOR constant.
+   The caller is responsible to handle this case. The result of the extraction
+   is written to the location pointed to by <code>buffer</code>, which must be sufficiently
+   large to hold the result.
 </p>
 <hr>
 <a name="gt_encseq_seqlength"></a>
@@ -11973,7 +11977,7 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
 <div id="footer">
 Copyright &copy; 2008-2013
 The <i>GenomeTools</i> authors.
-Last update: 2014-12-06
+Last update: 2014-12-08
 </div>
 </div>
 <!-- Piwik -->
