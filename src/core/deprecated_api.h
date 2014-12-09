@@ -21,11 +21,21 @@
 
 /* Deprecated functions, typedefs and structs should be annotated with this
    macro to get warnings when the gcc compiler is used. */
-#if defined(__GNUC__) && ((__GNUC__ * 100 + __GNUC_MINOR__) >= 301)
-#define GT_DEPRECATED \
+#if defined(__clang__)
+#if __has_extension(attribute_deprecated_with_message)
+#define GT_DEPRECATED(msg) \
+         __attribute__((deprecated (msg)))
+#endif
+/* not clang with messages for deprecated */
+#elif defined(__GNUC__) && ((__GNUC__ * 100 + __GNUC_MINOR__) >= 405)
+#define GT_DEPRECATED(msg) \
+         __attribute__((deprecated (msg)))
+/* not gcc >= 4.5 */
+#elif defined(__GNUC__) && ((__GNUC__ * 100 + __GNUC_MINOR__) >= 301)
+#define GT_DEPRECATED(msg) \
          __attribute__((deprecated))
 #else /* not gcc >= 3.1 */
-#define GT_DEPRECATED
+#define GT_DEPRECATED(msg)
 #endif
 
 #endif
