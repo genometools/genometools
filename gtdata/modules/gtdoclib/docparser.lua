@@ -119,12 +119,14 @@ local ExportedDefine = lpeg.Cc("function") * lpeg.C("#define") * Space *
                        lpeg.C(lpeg.P(Any - lpeg.P("("))^1) * lpeg.P("(") *
                        lpeg.C((Any - lpeg.P(")"))^1) * lpeg.P(")") *
                        OptionalSpace * DefineSeparator
-local ExportedPlainDefine = lpeg.Cc("function") * lpeg.C("#define") * Space *
+local ExportedPlainDefine = lpeg.Cc("function") *
+                            (lpeg.P("#if") * (Any - Newline)^1 * Newline)^0 *
+                            lpeg.C("#define") * Space *
                             lpeg.C(lpeg.P(Any - (DefineSeparator + Space))^1) *
                             OptionalSpace * DefineSeparator
 local ExportCMethod = lpeg.Ct(ExportedComment * Newline^0 * (Function + FunctionPtr + Variable))
 local ExportCDefine = lpeg.Ct(ExportedComment * Newline^0 *
-                              (ExportedDefine+ ExportedPlainDefine))
+                              (ExportedDefine + ExportedPlainDefine))
 local ModuleDef = lpeg.Ct(lpeg.Cc("module") * CCommentStart * Space *
                           lpeg.C(Character^1) * Space * lpeg.P("module") *
                           Space * CCommentEnd)
