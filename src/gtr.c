@@ -203,7 +203,7 @@ static GtOptionParser* gtr_option_parser_new(GtR *gtr)
   gt_option_parser_add_option(op, debugfp_option);
   gt_option_imply(debugfp_option, debug_option);
   o = gt_option_new_uint("seed",
-                         "set seed for random number generator manually\n"
+                         "set seed for random number generator manually.\n"
                          "0 generates a seed from current time and process id",
                          &gtr->seed, gtr->seed);
   gt_option_hide_default(o);
