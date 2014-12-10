@@ -18,6 +18,7 @@
 #ifndef TOOLBOX_H
 #define TOOLBOX_H
 
+#include "core/deprecated_api.h"
 #include "core/error.h"
 #include "core/tool_api.h"
 #include "core/toolbox_api.h"
@@ -33,6 +34,7 @@ typedef int (*GtToolfunc)(int argc, const char **argv, GtError*);
 /* deprecated */
 bool       gt_toolbox_has_tool(const GtToolbox*, const char *toolname);
 /* deprecated */
+GT_DEPRECATED("use gt_toolbox_add_tool() instead")
 void       gt_toolbox_add(GtToolbox*, const char *toolname, GtToolfunc);
 /* deprecated */
 GtToolfunc gt_toolbox_get(const GtToolbox*, const char *toolname);
