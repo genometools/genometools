@@ -16,6 +16,8 @@ changes in version 1.5.4 (2014-12-09)
 - SQLite updated to 3.8.7.1
 - `gt sequniq': do not filter out "palindromic" sequences. Before that a
   sequence which equals the reverse complement of itself was filtered out.
+- improved interface for calling external blast
+- `gt shredder': add option to have informative header for shredded elements
 
 
 changes in version 1.5.3 (2014-06-13)
