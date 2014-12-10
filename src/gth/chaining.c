@@ -256,7 +256,7 @@ static void gthinitfragments(GtFragment *fragments,
          !gth_matches_are_equal(mptr, mptr-1))) { /* or is different from last
                                                      one */
       fragmentptr->weight     = (GtWord) (fragweightfactor *
-                                        (double) abs(mptr->Storescore));
+                                        (double) labs(mptr->Storescore));
       fragmentptr->startpos1  = mptr->Storepositionreference;
       fragmentptr->endpos1    = mptr->Storepositionreference
                                 + mptr->Storelengthreference - 1;
