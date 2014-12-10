@@ -127,4 +127,6 @@ void             gt_radixsort_delete(GtRadixsortinfo *radixsortinfo);
 
 void gt_radixsort_lsb_linear(GtUword *source,GtUword len);
 
+void gt_radixsort_inplace_GtUwordPair(GtUwordPair *source, GtUword len);
+
 #endif
