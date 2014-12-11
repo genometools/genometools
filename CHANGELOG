@@ -1,4 +1,4 @@
-changes in version 1.5.4 (2014-12-09)
+changes in version 1.5.4 (2014-12-11)
 
 - many small bugfixes and cleanups, see issue tracker on GitHub
 - added full Lua support for custom visitors/streams
