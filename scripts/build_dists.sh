@@ -46,6 +46,7 @@ cp -f $DISTRIBUTION $DISTDIR
 # on Ubuntu: sudo apt-get install gcc-arm-linux-gnueabihf
 make clean
 make MACHINE=ARMv7                   \
+     64bit=no                        \
      CC=arm-linux-gnueabihf-gcc      \
      AR=arm-linux-gnueabihf-ar       \
      STRIP=arm-linux-gnueabihf-strip \
@@ -53,6 +54,7 @@ make MACHINE=ARMv7                   \
      cairo=no                        \
      $*
 make MACHINE=ARMv7                   \
+     64bit=no                        \
      CC=arm-linux-gnueabihf-gcc      \
      AR=arm-linux-gnueabihf-ar       \
      STRIP=arm-linux-gnueabihf-strip \
@@ -73,6 +75,7 @@ make MACHINE=ARMv6              \
      AR=$HOME/arm/tools/arm-bcm2708/gcc-linaro-arm-linux-gnueabihf-raspbian/bin/arm-linux-gnueabihf-ar           \
      STRIP=$HOME/arm/tools/arm-bcm2708/gcc-linaro-arm-linux-gnueabihf-raspbian/bin/arm-linux-gnueabihf-strip     \
      amalgamation=yes           \
+     64bit=no                   \
      cairo=no                   \
      $*
 make MACHINE=ARMv6              \
@@ -80,6 +83,7 @@ make MACHINE=ARMv6              \
      AR=$HOME/arm/tools/arm-bcm2708/gcc-linaro-arm-linux-gnueabihf-raspbian/bin/arm-linux-gnueabihf-ar           \
      STRIP=$HOME/arm/tools/arm-bcm2708/gcc-linaro-arm-linux-gnueabihf-raspbian/bin/arm-linux-gnueabihf-strip     \
      amalgamation=yes           \
+     64bit=no                   \
      cairo=no                   \
      dist > $TMPFILE
 DISTRIBUTION=`tail -n 1 $TMPFILE`
@@ -96,6 +100,7 @@ make SYSTEM=Darwin                     \
      RANLIB=i686-apple-darwin10-ranlib \
      STRIP=i686-apple-darwin10-strip   \
      amalgamation=yes                  \
+     64bit=no                          \
      cairo=no                          \
      $*
 make SYSTEM=Darwin                     \
@@ -105,6 +110,7 @@ make SYSTEM=Darwin                     \
      RANLIB=i686-apple-darwin10-ranlib \
      STRIP=i686-apple-darwin10-strip   \
      amalgamation=yes                  \
+     64bit=no                          \
      cairo=no                          \
      dist > $TMPFILE
 DISTRIBUTION=`tail -n 1 $TMPFILE`
