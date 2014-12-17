@@ -15,6 +15,13 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+/*
+  The code was adapted from the Java code in
+  http://algs4.cs.princeton.edu/23quicksort/QuickDualPivot.java.html
+  Can be optimized by determining better pivot elements and
+  using insertion sort for small subarrays to soet.
+*/
+
 #include "core/types_api.h"
 #include "core/assert_api.h"
 #include "core/dual-pivot-qsort.h"
