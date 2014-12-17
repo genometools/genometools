@@ -1,7 +1,25 @@
 /*
-  does not fully work, may have a look at
+  Copyright (c) 2014 Stefan Kurtz <kurtz@zbh.uni-hamburg.de>
+  Copyright (c) 2014 Center for Bioinformatics, University of Hamburg
 
-  http://permalink.gmane.org/gmane.comp.java.openjdk.core-libs.devel/2628
+  Permission to use, copy, modify, and distribute this software for any
+  purpose with or without fee is hereby granted, provided that the above
+  copyright notice and this permission notice appear in all copies.
+
+  THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+  WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+  MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+  ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+  WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+  ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+*/
+
+/*
+  The code was adapted from the Java code in
+  http://algs4.cs.princeton.edu/23quicksort/QuickDualPivot.java.html
+  Can be optimized by determining better pivot elements and
+  using insertion sort for small subarrays to soet.
 */
 
 #include "core/types_api.h"
@@ -25,14 +43,12 @@ static void gt_rec_dual_pivot_quicksort(GtUword *input,GtUword lowindex,
   {
     return;
   }
-  pivot1 = input[lowindex];
-  pivot2 = input[highindex];
-  if (pivot1 > pivot2)
+  if (input[lowindex] > input[highindex])
   {
     gt_dpqs_exchange(input, lowindex, highindex);
-    pivot1 = input[lowindex];
-    pivot2 = input[highindex];
   }
+  pivot1 = input[lowindex];
+  pivot2 = input[highindex];
   gt_assert(pivot1 <= pivot2);
   i = lowindex + 1;
   lt = lowindex + 1;
