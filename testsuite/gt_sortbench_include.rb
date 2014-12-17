@@ -1,5 +1,5 @@
 methods = ["radixinplace","radixlsb",
-           "thomas","system","inlinedptr","inlinedarr","direct"]
+           "thomas","system","inlinedptr","inlinedarr","direct","dual-pivot"]
 
 lenlist=[10,20,30,1000,2000,4000,1000000,2000000]
 
