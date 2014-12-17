@@ -23,6 +23,7 @@
 #include "core/ma.h"
 #include "core/mathsupport.h"
 #include "core/qsort_r_api.h"
+#include "core/dual-pivot-qsort.h"
 #include "core/str.h"
 #include "core/timer_api.h"
 #include "core/radix_sort.h"
@@ -60,7 +61,7 @@ static void gt_sortbench_arguments_delete(void *tool_arguments)
 }
 
 static const char *gt_sort_implementation_names[]
-    = {"thomas","system","inlinedptr","inlinedarr","direct",
+    = {"thomas","system","inlinedptr","inlinedarr","direct","dual-pivot",
        "radixinplace","radixlsb",NULL};
 
 static GtOptionParser* gt_sortbench_option_parser_new(void *tool_arguments)
@@ -78,7 +79,7 @@ static GtOptionParser* gt_sortbench_option_parser_new(void *tool_arguments)
   option = gt_option_new_choice(
                  "impl", "implementation\nchoose from "
                  "thomas|system|inlinedptr|inlinedarr|direct|\n"
-                 "radixinplace|radixlsb",
+                 "dual-pivot|radixinplace|radixlsb",
                   arguments->impl,
                   gt_sort_implementation_names[0],
                   gt_sort_implementation_names);
@@ -324,6 +325,7 @@ static GtQsortimplementationfunc gt_sort_implementation_funcs[] =
   run_inlinedptr_qsort,
   run_inlinedarr_qsort,
   run_direct_qsort,
+  gt_dual_pivot_qsort,
   gt_radixsort_inplace_ulong,
   /* note that gt_radixsort_lsb_linear allocates extra temp space of size
      equal to the area to be sorted */

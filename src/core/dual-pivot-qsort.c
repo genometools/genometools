@@ -1,5 +1,12 @@
-#include <core/types_api.h>
-#include <core/assert_api.h>
+/*
+  does not fully work, may have a look at
+
+  http://permalink.gmane.org/gmane.comp.java.openjdk.core-libs.devel/2628
+*/
+
+#include "core/types_api.h"
+#include "core/assert_api.h"
+#include "core/dual-pivot-qsort.h"
 
 static void gt_dpqs_exchange(GtUword *input, GtUword idx1,GtUword idx2)
 {
@@ -9,11 +16,15 @@ static void gt_dpqs_exchange(GtUword *input, GtUword idx1,GtUword idx2)
   input[idx2] = tmp;
 }
 
-void gt_dual_pivot_quicksort(GtUword *input,GtUword lowindex,GtUword highindex)
+static void gt_rec_dual_pivot_quicksort(GtUword *input,GtUword lowindex,
+                                        GtUword highindex)
 {
   GtUword i, lt, gt, pivot1, pivot2;
 
-  gt_assert(lowindex < highindex);
+  if (lowindex >= highindex)
+  {
+    return;
+  }
   pivot1 = input[lowindex];
   pivot2 = input[highindex];
   if (pivot1 > pivot2)
@@ -21,20 +32,11 @@ void gt_dual_pivot_quicksort(GtUword *input,GtUword lowindex,GtUword highindex)
     gt_dpqs_exchange(input, lowindex, highindex);
     pivot1 = input[lowindex];
     pivot2 = input[highindex];
-    //sort(input, lowindex, highindex);
-  } else
-  {
-    if (pivot1 == pivot2)
-    {
-      while (pivot1 == pivot2 && lowindex < highindex)
-      {
-        lowindex++;
-        pivot1 = input[lowindex];
-      }
-    }
   }
+  gt_assert(pivot1 <= pivot2);
   i = lowindex + 1;
   lt = lowindex + 1;
+  gt_assert(highindex > 0);
   gt = highindex - 1;
   while (i <= gt)
   {
@@ -55,9 +57,21 @@ void gt_dual_pivot_quicksort(GtUword *input,GtUword lowindex,GtUword highindex)
   gt_assert(lt > 0);
   gt_dpqs_exchange(input, lowindex, --lt);
   gt_dpqs_exchange(input, highindex, ++gt);
-  gt_assert(lt > 0);
-  gt_dual_pivot_quicksort(input, lowindex, lt - 1);
-  gt_assert(gt > 0);
-  gt_dual_pivot_quicksort(input, lt + 1, gt - 1);
-  gt_dual_pivot_quicksort(input, gt + 1, highindex);
+  if (lt >= 1UL)
+  {
+    gt_rec_dual_pivot_quicksort(input, lowindex, lt - 1);
+  }
+  if (gt >= 1UL && input[lt] < input[gt])
+  {
+    gt_rec_dual_pivot_quicksort(input, lt + 1, gt - 1);
+  }
+  gt_rec_dual_pivot_quicksort(input, gt + 1, highindex);
+}
+
+void gt_dual_pivot_qsort(GtUword *source,GtUword len)
+{
+  if (len >= 2UL)
+  {
+    gt_rec_dual_pivot_quicksort(source,0,len-1);
+  }
 }
