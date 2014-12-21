@@ -34,54 +34,80 @@ static void gt_dpqs_exchange(GtUword *input, GtUword idx1,GtUword idx2)
   input[idx2] = tmp;
 }
 
+static void gt_dual_insertion_sort(GtUword *input,GtUword lowindex,
+                                   GtUword highindex)
+{
+  GtUword pm;
+
+  for (pm = lowindex + 1; pm <= highindex; pm++)
+  {
+    GtUword pl;
+
+    for (pl = pm; pl > lowindex && input[pl-1] > input[pl]; pl--)
+    {
+      gt_dpqs_exchange(input, pl, pl-1);
+    }
+  }
+}
+
 static void gt_rec_dual_pivot_quicksort(GtUword *input,GtUword lowindex,
                                         GtUword highindex)
 {
-  GtUword i, lt, gt, pivot1, pivot2;
-
   if (lowindex >= highindex)
   {
     return;
-  }
-  if (input[lowindex] > input[highindex])
+  } else
   {
-    gt_dpqs_exchange(input, lowindex, highindex);
-  }
-  pivot1 = input[lowindex];
-  pivot2 = input[highindex];
-  gt_assert(pivot1 <= pivot2);
-  i = lowindex + 1;
-  lt = lowindex + 1;
-  gt_assert(highindex > 0);
-  gt = highindex - 1;
-  while (i <= gt)
-  {
-    if (input[i] < pivot1)
+    GtUword len = highindex - lowindex + 1;;
+
+    if (len < 5UL)
     {
-      gt_dpqs_exchange(input, i++, lt++);
+      gt_dual_insertion_sort(input,lowindex,highindex);
     } else
     {
-      if (pivot2 < input[i])
+      GtUword i, lt, gt, pivot1, pivot2;
+
+      if (input[lowindex] > input[highindex])
       {
-        gt_dpqs_exchange(input, i, gt--);
-      } else
-      {
-        i++;
+        gt_dpqs_exchange(input, lowindex, highindex);
       }
+      pivot1 = input[lowindex];
+      pivot2 = input[highindex];
+      gt_assert(pivot1 <= pivot2);
+      i = lowindex + 1;
+      lt = lowindex + 1;
+      gt_assert(highindex > 0);
+      gt = highindex - 1;
+      while (i <= gt)
+      {
+        if (input[i] < pivot1)
+        {
+          gt_dpqs_exchange(input, i++, lt++);
+        } else
+        {
+          if (pivot2 < input[i])
+          {
+            gt_dpqs_exchange(input, i, gt--);
+          } else
+          {
+            i++;
+          }
+        }
+      }
+      gt_assert(lt > 0);
+      gt_dpqs_exchange(input, lowindex, --lt);
+      gt_dpqs_exchange(input, highindex, ++gt);
+      if (lt >= 1UL)
+      {
+        gt_rec_dual_pivot_quicksort(input, lowindex, lt - 1);
+      }
+      if (gt >= 1UL && input[lt] < input[gt])
+      {
+        gt_rec_dual_pivot_quicksort(input, lt + 1, gt - 1);
+      }
+      gt_rec_dual_pivot_quicksort(input, gt + 1, highindex);
     }
   }
-  gt_assert(lt > 0);
-  gt_dpqs_exchange(input, lowindex, --lt);
-  gt_dpqs_exchange(input, highindex, ++gt);
-  if (lt >= 1UL)
-  {
-    gt_rec_dual_pivot_quicksort(input, lowindex, lt - 1);
-  }
-  if (gt >= 1UL && input[lt] < input[gt])
-  {
-    gt_rec_dual_pivot_quicksort(input, lt + 1, gt - 1);
-  }
-  gt_rec_dual_pivot_quicksort(input, gt + 1, highindex);
 }
 
 void gt_dual_pivot_qsort(GtUword *source,GtUword len)
