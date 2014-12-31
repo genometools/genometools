@@ -182,7 +182,7 @@ is_obsolete: true
 id: SO:0000110
 name: sequence_feature
 namespace: sequence
-def: "An extent of biological sequence." [SO:ke]
+def: "Any extent of continuous biological sequence." [LAMHDI:mb, SO:ke]
 subset: SOFA
 synonym: "located sequence feature" RELATED []
 synonym: "located_sequence_feature" EXACT []
@@ -588,6 +588,7 @@ name: rRNA_primary_transcript
 namespace: sequence
 def: "A primary transcript encoding a ribosomal RNA." [SO:ke]
 subset: SOFA
+synonym: "<new synonym>" RELATED []
 synonym: "ribosomal RNA primary transcript" EXACT []
 synonym: "rRNA primary transcript" EXACT []
 is_a: SO:0000483 ! nc_primary_transcript
@@ -709,7 +710,7 @@ relationship: derives_from SO:0000483 ! nc_primary_transcript
 id: SO:0000289
 name: microsatellite
 namespace: sequence
-def: "A repeat_region containing repeat_units (2 to 4 bp) that is repeated multiple times in tandem." [http://www.informatics.jax.org/silver/glossary.shtml]
+def: "A repeat_region containing repeat_units of 2 to 10 bp repeated in tandem." [http://www.informatics.jax.org/silver/glossary.shtml, NCBI:th]
 subset: SOFA
 synonym: "microsatellite locus" EXACT []
 synonym: "microsatellite marker" EXACT []
@@ -796,6 +797,7 @@ namespace: sequence
 def: "The first base where RNA polymerase begins to synthesize the RNA transcript." [SO:ke]
 subset: SOFA
 synonym: "transcription start site" EXACT []
+synonym: "transcription_start_site" EXACT []
 is_a: SO:0000835 ! primary_transcript_region
 
 [Term]
@@ -805,6 +807,7 @@ namespace: sequence
 def: "A contiguous sequence which begins with, and includes, a start codon and ends with, and includes, a stop codon." [SO:ma]
 subset: SOFA
 synonym: "coding sequence" EXACT []
+synonym: "coding_sequence" EXACT []
 is_a: SO:0000836 ! mRNA_region
 
 [Term]
@@ -2064,11 +2067,12 @@ is_a: SO:0001527 ! peptide_localization_signal
 id: SO:0000727
 name: CRM
 namespace: sequence
-def: "A regulatory_region where more than 1 TF_binding_site together are regulatorily active." [SO:SG]
+def: "A regulatory region where transcription factor binding sites clustered to regulate various aspects of transcription activities. (CRMs can be located a few kb to hundred kb upstream of the basal promoter, in the coding sequence, within introns, or in the downstream 3'UTR sequences, as well as on different chromosome). A single gene can be regulated by multiple CRMs to give precise control of its spatial and temporal expression. CRMs function as nodes in large, intertwined regulatory network." [PMID:19660565, SO:SG]
 comment: Requested by Stepen Grossmann Dec 2004.
 subset: SOFA
 synonym: "cis regulatory module" EXACT []
 synonym: "TF module" EXACT []
+synonym: "transcription factor module" EXACT []
 is_a: SO:0001055 ! transcriptional_cis_regulatory_region
 intersection_of: SO:0001055 ! transcriptional_cis_regulatory_region
 intersection_of: has_part SO:0000235 ! TF_binding_site
@@ -2329,8 +2333,9 @@ is_a: SO:0001037 ! mobile_genetic_element
 id: SO:0001055
 name: transcriptional_cis_regulatory_region
 namespace: sequence
-def: "A regulatory_region that modulates the transcription of a gene or genes." [SO:regcreative]
+def: "A regulatory_region that modulates the transcription of a gene or genes." [PMID:9679020, SO:regcreative]
 subset: SOFA
+synonym: "transcription-control region" EXACT []
 synonym: "transcriptional cis regulatory region" EXACT []
 is_a: SO:0001679 ! transcription_regulatory_region
 
@@ -2355,6 +2360,7 @@ subset: SOFA
 synonym: "partially characterised change in DNA sequence" NARROW []
 synonym: "partially_characterised_change_in_DNA_sequence" NARROW []
 synonym: "sequence alteration" EXACT []
+synonym: "sequence variation" RELATED []
 synonym: "uncharacterised_change_in_nucleotide_sequence" NARROW []
 is_a: SO:0000110 ! sequence_feature
 
@@ -2589,7 +2595,7 @@ is_a: SO:0001411 ! biological_region
 id: SO:0100011
 name: cleaved_peptide_region
 namespace: sequence
-def: "The cleaved_peptide_regon is the a region of peptide sequence that is cleaved during maturation." [EBIBS:GAR]
+def: "The cleaved_peptide_region is the region of a peptide sequence that is cleaved during maturation." [EBIBS:GAR]
 comment: Range.
 subset: biosapiens
 subset: SOFA
@@ -3041,7 +3047,7 @@ creation_date: 2009-08-19T12:11:53Z
 id: translation_of
 name: translation_of
 namespace: sequence
-def: "X is translation of Y if X is translated by ribosome to create Y." [http://precedings.nature.com/documents/3495/version/1]
+def: "X is translation of Y if Y is translated by ribosome to create X." [http://precedings.nature.com/documents/3495/version/1]
 comment: Example: Polypeptide translation_of CDS.
 created_by: kareneilbeck
 creation_date: 2009-08-19T12:09:59Z
