@@ -60,7 +60,7 @@ int           gt_sequence_buffer_next_with_original(GtSequenceBuffer*,
 
 /* Returns the index of the currently read sequence file in the input file
    <GtStrArray>. */
-GtUword gt_sequence_buffer_get_file_index(GtSequenceBuffer*);
+GtUword       gt_sequence_buffer_get_file_index(GtSequenceBuffer*);
 
 /* Assigns a symbol map to the sequence iterator to transform sequences with.
    Set to NULL to disable alphabet transformation (default). */
