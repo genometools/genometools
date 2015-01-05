@@ -304,6 +304,13 @@ Test do
   run "diff -i #{last_stdout} #{$testdata}fastq_problem.fasta"
 end
 
+Name "sequence buffer: FastQ huge reads 2"
+Keywords "gt_convertseq sequencebuffer fastq"
+Test do
+  run_test "#{$bin}gt convertseq #{$testdata}fastq_problem2.fastq.gz"
+  run "diff -i #{last_stdout} #{$testdata}fastq_problem2.fasta"
+end
+
 Name "sequence buffer: FastQ premature end"
 Keywords "gt_convertseq sequencebuffer fastq"
 Test do
