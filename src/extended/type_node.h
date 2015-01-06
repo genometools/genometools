@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2012-2013 Gordon Gremme <gordon@gremme.org>
+  Copyright (c) 2012-2013, 2015 Gordon Gremme <gordon@gremme.org>
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -32,10 +32,16 @@ const char*   gt_type_node_part_of_get(const GtTypeNode*, GtUword);
 GtUword       gt_type_node_part_of_size(const GtTypeNode*);
 void          gt_type_node_add_is_a_vertex(GtTypeNode *src,
                                            const GtTypeNode *dst);
-bool          gt_type_node_has_parent(GtTypeNode*, const char *id,
+/* Checks if the given <node> has a parent with the given <id>.
+   <node> and <id> have to be mapped to the SO ID already!.
+   The <id2name> mapping is optional and is only used for debugging output.
+   The <indentlevel> is also used for debugging output and is increased in every
+   recursive call. */
+bool          gt_type_node_has_parent(GtTypeNode *node, const char *id,
                                       GtBoolMatrix *part_of_out_edges,
                                       GtBoolMatrix *part_of_in_edges,
-                                      GtArray *node_list);
+                                      GtArray *node_list, GtHashmap *id2name,
+                                      unsigned int indentlevel);
 bool          gt_type_node_is_a(GtTypeNode *child_node,
                                 const char *parent_id);
 

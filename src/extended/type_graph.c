@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2012-2013 Gordon Gremme <gordon@gremme.org>
+  Copyright (c) 2012-2013, 2015 Gordon Gremme <gordon@gremme.org>
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -30,6 +30,7 @@
 
 struct GtTypeGraph {
   GtHashmap *name2id, /* maps from name to SO ID */
+            *id2name,
             *nodemap; /* maps SO ID to actual node */
   GtArray *nodes;
   GtBoolMatrix *part_of_out_edges,
@@ -41,6 +42,7 @@ GtTypeGraph* gt_type_graph_new(void)
 {
   GtTypeGraph *type_graph = gt_malloc(sizeof (GtTypeGraph));
   type_graph->name2id = gt_hashmap_new(GT_HASH_DIRECT, NULL, NULL);
+  type_graph->id2name = gt_hashmap_new(GT_HASH_DIRECT, NULL, NULL);
   type_graph->nodemap = gt_hashmap_new(GT_HASH_DIRECT, NULL, NULL);
   type_graph->nodes = gt_array_new(sizeof (GtTypeNode*));
   type_graph->part_of_out_edges = gt_bool_matrix_new();
@@ -59,6 +61,7 @@ void gt_type_graph_delete(GtTypeGraph *type_graph)
     gt_type_node_delete(*(GtTypeNode**) gt_array_get(type_graph->nodes, i));
   gt_array_delete(type_graph->nodes);
   gt_hashmap_delete(type_graph->nodemap);
+  gt_hashmap_delete(type_graph->id2name);
   gt_hashmap_delete(type_graph->name2id);
   gt_free(type_graph);
 }
@@ -80,6 +83,7 @@ void gt_type_graph_add_stanza(GtTypeGraph *type_graph,
   gt_assert(!gt_hashmap_get(type_graph->nodemap, id_value));
   node = gt_type_node_new(gt_array_size(type_graph->nodes), id_value);
   gt_hashmap_add(type_graph->name2id, (char*) name_value, (char*) id_value);
+  gt_hashmap_add(type_graph->id2name, (char*) id_value, (char*) name_value);
   gt_hashmap_add(type_graph->nodemap, (char*) id_value, node);
   gt_array_add(type_graph->nodes, node);
   buf = gt_str_new();
@@ -176,7 +180,7 @@ bool gt_type_graph_is_partof(GtTypeGraph *type_graph, const char *parent_type,
   return gt_type_node_has_parent(child_node, parent_id,
                                  type_graph->part_of_out_edges,
                                  type_graph->part_of_in_edges,
-                                 type_graph->nodes);
+                                 type_graph->nodes, type_graph->id2name, 0);
 }
 
 bool gt_type_graph_is_a(GtTypeGraph *type_graph, const char *parent_type,
