@@ -47,9 +47,7 @@ static int gt_sequence_buffer_fastq_advance(GtSequenceBuffer *sb, GtError *err)
   GtSequenceBufferFastQ *sbfq;
   const GtUchar *seq;
   char *desc;
-
   int had_err = 0;
-
   gt_error_check(err);
 
   sbfq = gt_sequence_buffer_fastq_cast(sb);
@@ -76,21 +74,35 @@ static int gt_sequence_buffer_fastq_advance(GtSequenceBuffer *sb, GtError *err)
     const char *overflowedstring;
     char cc;
     overflowedstring = gt_str_get(sbfq->overflowbuffer);
-    while (!had_err && (cc = *(overflowedstring++)) != '\0')
+    while (!had_err && currentoutpos < (GtUword) OUTBUFSIZE
+             &&(cc = *(overflowedstring)) != '\0')
     {
       if ((had_err = process_char(sb, currentoutpos, cc, err)))
           return had_err;
       currentoutpos++;
       currentfileadd++;
       currentfileread++;
+      overflowedstring++;
     }
-    pvt->outbuf[currentoutpos++] = (GtUchar) SEPARATOR;
-    currentfileread++;
-    pvt->lastspeciallength++;
-    gt_str_reset(sbfq->overflowbuffer);
-    gt_assert(gt_str_length(sbfq->overflowbuffer) == 0);
+    /* still sequence left in overflowbuffer? */
+    if (*(overflowedstring) != '\0') {
+      gt_str_set(sbfq->overflowbuffer, overflowedstring);
+    } else {
+      pvt->outbuf[currentoutpos++] = (GtUchar) SEPARATOR;
+      currentfileread++;
+      pvt->lastspeciallength++;
+      gt_str_reset(sbfq->overflowbuffer);
+      gt_assert(gt_str_length(sbfq->overflowbuffer) == 0);
+    }
   }
 
+  /* we need more than one round to deal with the overflowed sequence */
+  if (gt_str_length(sbfq->overflowbuffer) > 0) {
+    pvt->nextfree = MIN(currentoutpos, OUTBUFSIZE);
+    return had_err;
+  }
+
+  gt_assert(gt_str_length(sbfq->overflowbuffer) == 0);
   /* iterate over sequences */
   while (true) {
     had_err = gt_seq_iterator_next((GtSeqIterator*) sbfq->seqit, &seq, &seqlen,

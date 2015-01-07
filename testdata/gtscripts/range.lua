@@ -56,6 +56,19 @@ range_b = gt.range_new(1, 300)
 assert(range_a:contains(range_b))
 assert(not range_b:contains(range_a))
 
+-- equals
+
+range_a = gt.range_new(1, 1000)
+range_b = gt.range_new(1, 300)
+range_c = gt.range_new(1, 300)
+assert(range_b == range_c)
+assert(range_a ~= range_b)
+
+-- string conversion
+
+range_a = gt.range_new(1, 1000)
+assert(tostring(range_a) == "1-1000")
+
 -- within
 
 range = gt.range_new(1, 1000)

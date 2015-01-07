@@ -112,6 +112,28 @@ static int range_lua_overlap_delta(lua_State *L)
   return 1;
 }
 
+static int range_lua_eq(lua_State *L)
+{
+  GtRange *range_a, *range_b;
+  bool ret = false;
+  range_a = check_range(L, 1);
+  range_b = check_range(L, 2);
+  if (gt_range_compare(range_a, range_b) == 0)
+    ret = true;
+  lua_pushboolean(L, ret);
+  return 1;
+}
+
+static int range_lua_tostring(lua_State *L)
+{
+  GtRange *range;
+  char buf[BUFSIZ];
+  range = check_range(L, 1);
+  (void) snprintf(buf, BUFSIZ, GT_WU "-" GT_WU, range->start, range->end);
+  lua_pushstring(L, buf);
+  return 1;
+}
+
 static GtArray* range_table_to_array(lua_State *L)
 {
   lua_Integer i = 1;
@@ -222,6 +244,14 @@ int gt_lua_open_range(lua_State *L)
   /* metatable.__index = metatable */
   lua_pushvalue(L, -1); /* duplicate the metatable */
   lua_setfield(L, -2, "__index");
+  /* set its _tostring field */
+  lua_pushstring(L, "__tostring");
+  lua_pushcfunction(L, range_lua_tostring);
+  lua_settable(L, -3);
+  /* set its _eq field */
+  lua_pushstring(L, "__eq");
+  lua_pushcfunction(L, range_lua_eq);
+  lua_settable(L, -3);
   /* register functions */
   luaL_register(L, NULL, range_lib_m);
   gt_lua_export_metatable(L, RANGE_METATABLE);

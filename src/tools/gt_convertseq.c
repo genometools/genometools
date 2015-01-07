@@ -246,12 +246,12 @@ static int gt_convertseq_runner(int argc, const char **argv, int parsed_args,
                (GtUword) flv[j].effectivelength);
       }
     }
-    gt_sequence_buffer_delete(sb);
-    gt_seq_iterator_delete(seqit);
     if (arguments->verbose)
     {
       gt_progressbar_stop();
     }
+    gt_sequence_buffer_delete(sb);
+    gt_seq_iterator_delete(seqit);
   }
   gt_str_array_delete(files);
   gt_free(flv);

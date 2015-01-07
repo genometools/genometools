@@ -785,11 +785,14 @@ static int genome_node_lua_tostring (lua_State *L)
 static int genome_node_lua_eq(lua_State *L)
 {
   GtGenomeNode **gn1, **gn2;
+  bool ret = false;
   gt_assert(L);
   gn1 = check_genome_node(L, 1);
   gn2 = check_genome_node(L, 2);
-  if (*gn1 == *gn2) return true;
-  return false;
+  if (*gn1 == *gn2)
+    ret = true;
+  lua_pushboolean(L, ret);
+  return 1;
 }
 
 static int genome_node_lua_delete(lua_State *L)

@@ -1,5 +1,5 @@
 format-version: 1.2
-date: 14:11:2012 16:46
+date: 27:01:2014 16:08
 saved-by: kareneilbeck
 auto-generated-by: OBO-Edit 2.1.1-beta7
 subsetdef: biosapiens "biosapiens protein feature ontology"
@@ -875,7 +875,7 @@ is_obsolete: true
 [Term]
 id: SO:0000110
 name: sequence_feature
-def: "An extent of biological sequence." [SO:ke]
+def: "Any extent of continuous biological sequence." [LAMHDI:mb, SO:ke]
 subset: SOFA
 synonym: "located sequence feature" RELATED []
 synonym: "located_sequence_feature" EXACT []
@@ -923,6 +923,7 @@ synonym: "methylated cytosine base" EXACT []
 synonym: "methylated cytosine residue" EXACT []
 synonym: "methylated_C" EXACT []
 is_a: SO:0000306 ! methylated_DNA_base_feature
+is_a: SO:0001963 ! modified_cytosine
 
 [Term]
 id: SO:0000115
@@ -1313,6 +1314,7 @@ synonym: "methylated adenine base" EXACT []
 synonym: "methylated adenine residue" EXACT []
 synonym: "methylated_A" EXACT []
 is_a: SO:0000306 ! methylated_DNA_base_feature
+is_a: SO:0001962 ! modified_adenine
 
 [Term]
 id: SO:0000162
@@ -1748,6 +1750,7 @@ id: SO:0000209
 name: rRNA_primary_transcript
 def: "A primary transcript encoding a ribosomal RNA." [SO:ke]
 subset: SOFA
+synonym: "<new synonym>" RELATED []
 synonym: "ribosomal RNA primary transcript" EXACT []
 synonym: "rRNA primary transcript" EXACT []
 is_a: SO:0000483 ! nc_primary_transcript
@@ -2422,7 +2425,7 @@ relationship: has_quality SO:0000783 ! engineered
 [Term]
 id: SO:0000289
 name: microsatellite
-def: "A repeat_region containing repeat_units (2 to 4 bp) that is repeated multiple times in tandem." [http://www.informatics.jax.org/silver/glossary.shtml]
+def: "A repeat_region containing repeat_units of 2 to 10 bp repeated in tandem." [http://www.informatics.jax.org/silver/glossary.shtml, NCBI:th]
 subset: SOFA
 synonym: "microsatellite locus" EXACT []
 synonym: "microsatellite marker" EXACT []
@@ -2630,6 +2633,7 @@ name: TSS
 def: "The first base where RNA polymerase begins to synthesize the RNA transcript." [SO:ke]
 subset: SOFA
 synonym: "transcription start site" EXACT []
+synonym: "transcription_start_site" EXACT []
 is_a: SO:0000835 ! primary_transcript_region
 
 [Term]
@@ -2638,6 +2642,7 @@ name: CDS
 def: "A contiguous sequence which begins with, and includes, a start codon and ends with, and includes, a stop codon." [SO:ma]
 subset: SOFA
 synonym: "coding sequence" EXACT []
+synonym: "coding_sequence" EXACT []
 is_a: SO:0000836 ! mRNA_region
 
 [Term]
@@ -3479,14 +3484,10 @@ alt_id: SO:0001069
 def: "A structurally or functionally defined protein region. In proteins with multiple domains, the combination of the domains determines the function of the protein. A region which has been shown to recur throughout evolution." [EBIBS:GAR]
 comment: Range. Old definition from before biosapiens: A region of a single polypeptide chain that folds into an independent unit and exhibits biological activity. A polypeptide chain may have multiple domains.
 subset: biosapiens
-synonym: "ca_bind" RELATED BS [uniprot:feature_type]
-synonym: "DNA_bind" RELATED BS [uniprot:feature_type]
 synonym: "domain" BROAD BS [uniprot:feature_type]
-synonym: "np_bind" RELATED BS [uniprot:feature_type]
 synonym: "polypeptide domain" EXACT []
 synonym: "polypeptide_structural_domain" EXACT BS []
 synonym: "structural domain" BROAD BS []
-synonym: "zn_fing" RELATED BS [uniprot:feature_type]
 is_a: SO:0001070 ! polypeptide_structural_region
 is_a: SO:0100021 ! polypeptide_conserved_region
 
@@ -6113,11 +6114,12 @@ is_a: SO:0001411 ! biological_region
 [Term]
 id: SO:0000727
 name: CRM
-def: "A regulatory_region where more than 1 TF_binding_site together are regulatorily active." [SO:SG]
+def: "A regulatory region where transcription factor binding sites clustered to regulate various aspects of transcription activities. (CRMs can be located a few kb to hundred kb upstream of the basal promoter, in the coding sequence, within introns, or in the downstream 3'UTR sequences, as well as on different chromosome). A single gene can be regulated by multiple CRMs to give precise control of its spatial and temporal expression. CRMs function as nodes in large, intertwined regulatory network." [PMID:19660565, SO:SG]
 comment: Requested by Stepen Grossmann Dec 2004.
 subset: SOFA
 synonym: "cis regulatory module" EXACT []
 synonym: "TF module" EXACT []
+synonym: "transcription factor module" EXACT []
 is_a: SO:0001055 ! transcriptional_cis_regulatory_region
 relationship: has_part SO:0000235 ! TF_binding_site
 
@@ -8267,7 +8269,7 @@ id: SO:0001013
 name: MNP
 def: "A multiple nucleotide polymorphism with alleles of common length > 1, for example AAA/TTT." [http://www.ncbi.nlm.nih.gov/SNP/snp_ref.cgi?rs=rs2067431]
 synonym: "multiple nucleotide polymorphism" RELATED []
-is_a: SO:1000002 ! substitution
+is_a: SO:0002007 ! MNV
 
 [Term]
 id: SO:0001014
@@ -8603,8 +8605,9 @@ relationship: part_of SO:0001648 ! nested_transposon
 [Term]
 id: SO:0001055
 name: transcriptional_cis_regulatory_region
-def: "A regulatory_region that modulates the transcription of a gene or genes." [SO:regcreative]
+def: "A regulatory_region that modulates the transcription of a gene or genes." [PMID:9679020, SO:regcreative]
 subset: SOFA
+synonym: "transcription-control region" EXACT []
 synonym: "transcriptional cis regulatory region" EXACT []
 is_a: SO:0001679 ! transcription_regulatory_region
 
@@ -8639,6 +8642,7 @@ subset: SOFA
 synonym: "partially characterised change in DNA sequence" NARROW []
 synonym: "partially_characterised_change_in_DNA_sequence" NARROW []
 synonym: "sequence alteration" EXACT []
+synonym: "sequence variation" RELATED []
 synonym: "uncharacterised_change_in_nucleotide_sequence" NARROW []
 is_a: SO:0000110 ! sequence_feature
 
@@ -9010,6 +9014,7 @@ def: "A binding site that, in the polypeptide molecule, interacts selectively an
 comment: Residue involved in contact with calcium.
 subset: biosapiens
 synonym: "ca bind" RELATED []
+synonym: "ca_bind" EXACT BS [uniprot:feature_type]
 synonym: "Ca_contact_site" EXACT []
 synonym: "polypeptide calcium ion contact site" EXACT []
 is_a: SO:0001092 ! polypeptide_metal_contact
@@ -13309,6 +13314,7 @@ def: "A sequence variant causing a new (functional) splice site." [EBI:www.ebi.a
 synonym: "cryptic splice site activation" EXACT []
 xref: EBI:www.ebi.ac.uk/mutations/recommendations/mutevent.html
 is_a: SO:0001568 ! splicing_variant
+is_a: SO:0001576 ! transcript_variant
 created_by: kareneilbeck
 creation_date: 2010-03-22T02:29:41Z
 
@@ -13332,10 +13338,11 @@ creation_date: 2010-03-22T02:30:35Z
 
 [Term]
 id: SO:0001572
-name: exon_loss
+name: exon_loss_variant
 def: "A sequence variant whereby an exon is lost from the transcript." [SO:ke]
 synonym: "exon loss" EXACT []
 is_a: SO:0001568 ! splicing_variant
+is_a: SO:0001576 ! transcript_variant
 created_by: kareneilbeck
 creation_date: 2010-03-22T02:31:09Z
 
@@ -13344,8 +13351,10 @@ id: SO:0001573
 name: intron_gain
 def: "A sequence variant whereby an intron is gained by the processed transcript; usually a result of an alteration of the donor or acceptor." [EBI:www.ebi.ac.uk/mutations/recommendations/mutevent.html]
 synonym: "intron gain" EXACT []
+synonym: "intron gain variant" EXACT []
 xref: EBI:www.ebi.ac.uk/mutations/recommendations/mutevent.html
 is_a: SO:0001568 ! splicing_variant
+is_a: SO:0001576 ! transcript_variant
 created_by: kareneilbeck
 creation_date: 2010-03-22T02:31:25Z
 
@@ -13361,7 +13370,7 @@ creation_date: 2010-03-22T02:31:52Z
 [Term]
 id: SO:0001575
 name: splice_donor_variant
-def: "A splice variant that changes the2 base region at the 5' end of an intron." [SO:ke]
+def: "A splice variant that changes the 2 base pair region at the 5' end of an intron." [SO:ke]
 synonym: "splice donor variant" EXACT []
 is_a: SO:0001629 ! splice_site_variant
 created_by: kareneilbeck
@@ -13397,8 +13406,8 @@ comment: EBI term: Stop lost - In coding sequence, resulting in the loss of a st
 synonym: "stop codon lost" EXACT []
 synonym: "stop lost" EXACT ebi_variants [http://ensembl.org/info/docs/variation/index.html]
 is_a: SO:0001590 ! terminator_codon_variant
-is_a: SO:0001650 ! inframe_variant
 is_a: SO:0001907 ! feature_elongation
+is_a: SO:0001992 ! nonsynonymous_variant
 created_by: kareneilbeck
 creation_date: 2010-03-23T03:46:42Z
 
@@ -13419,6 +13428,7 @@ synonym: "codon variant" EXACT []
 synonym: "codon_variant" EXACT []
 xref: EBI:www.ebi.ac.uk/mutations/recommendations/mutevent.html
 is_a: SO:0001791 ! exon_variant
+is_a: SO:0001968 ! coding_transcript_variant
 created_by: kareneilbeck
 creation_date: 2010-03-22T02:34:36Z
 
@@ -13430,7 +13440,7 @@ synonym: "initiatior codon variant" EXACT []
 synonym: "initiator codon change" EXACT []
 xref: EBI:www.ebi.ac.uk/mutations/recommendations/mutevent.html
 xref: loinc:LA6695-6 "Initiating Methionine"
-is_a: SO:0001650 ! inframe_variant
+is_a: SO:0001992 ! nonsynonymous_variant
 created_by: kareneilbeck
 creation_date: 2010-03-22T02:35:18Z
 
@@ -13443,13 +13453,10 @@ def: "A sequence variant, that changes one or more bases, resulting in a differe
 comment: EBI term: Non-synonymous SNPs. SNPs that are located in the coding sequence and result in an amino acid change in the encoded peptide sequence. A change that causes a non_synonymous_codon can be more than 3 bases - for example 4 base substitution.
 synonym: "missense" EXACT [ftp://ftp.ncbi.nih.gov/snp/specs/docsum_3.1.xsd]
 synonym: "missense codon" EXACT []
-synonym: "non synonymous codon" EXACT []
-synonym: "non synonymous variant" EXACT []
-synonym: "non_synonymous_coding" EXACT ebi_variants [http://ensembl.org/info/docs/variation/index.html]
 xref: EBI:www.ebi.ac.uk/mutations/recommendations/mutevent.html
 xref: http://en.wikipedia.org/wiki/Missense_mutation
 xref: loinc:LA6698-0 "Missense"
-is_a: SO:0001650 ! inframe_variant
+is_a: SO:0001992 ! nonsynonymous_variant
 created_by: kareneilbeck
 creation_date: 2010-03-22T02:35:49Z
 
@@ -13487,8 +13494,8 @@ synonym: "nonsense codon" EXACT []
 synonym: "stop codon gained" RELATED []
 synonym: "stop gained" EXACT ebi_variants [http://ensembl.org/info/docs/variation/index.html]
 xref: loinc:LA6699-8 "Nonsense"
-is_a: SO:0001650 ! inframe_variant
 is_a: SO:0001906 ! feature_truncation
+is_a: SO:0001992 ! nonsynonymous_variant
 created_by: kareneilbeck
 creation_date: 2010-03-22T02:37:52Z
 
@@ -13780,7 +13787,7 @@ creation_date: 2010-03-22T03:06:14Z
 
 [Term]
 id: SO:0001619
-name: nc_transcript_variant
+name: non_coding_transcript_variant
 def: "A transcript variant of a non coding RNA gene." [SO:ke]
 comment: Within non-coding gene - Located within a gene that does not code for a protein.
 synonym: "nc transcript variant" EXACT []
@@ -13797,7 +13804,7 @@ def: "A transcript variant located with the sequence of the mature miRNA." [SO:k
 comment: EBI term: Within mature miRNA - Located within a microRNA.
 synonym: "mature miRNA variant" EXACT []
 synonym: "within_mature_miRNA" EXACT ebi_variants [http://ensembl.org/info/docs/variation/index.html]
-is_a: SO:0001619 ! nc_transcript_variant
+is_a: SO:0001619 ! non_coding_transcript_variant
 created_by: kareneilbeck
 creation_date: 2010-03-23T11:16:58Z
 
@@ -13817,7 +13824,8 @@ name: UTR_variant
 def: "A transcript variant that is located within the UTR." [SO:ke]
 synonym: "UTR variant" EXACT []
 synonym: "UTR_" EXACT ebi_variants [http://ensembl.org/info/docs/variation/index.html]
-is_a: SO:0001576 ! transcript_variant
+is_a: SO:0001791 ! exon_variant
+is_a: SO:0001968 ! coding_transcript_variant
 created_by: kareneilbeck
 creation_date: 2010-03-23T11:22:58Z
 
@@ -13889,7 +13897,8 @@ def: "A sequence variant that changes the first two or last two bases of an intr
 comment: EBI term - essential splice site - In the first 2 or the last 2 base pairs of an intron. The 5th base is on the donor (5') side of the intron. Updated to b in line with Cancer Genome Project at the Sanger.
 synonym: "essential_splice_site" EXACT ebi_variants [http://ensembl.org/info/docs/variation/index.html]
 synonym: "splice site variant" EXACT []
-is_a: SO:0001627 ! intron_variant
+is_a: SO:0001568 ! splicing_variant
+is_a: SO:0001969 ! coding_transcript_intron_variant
 created_by: kareneilbeck
 creation_date: 2010-03-24T09:42:00Z
 
@@ -13898,9 +13907,9 @@ id: SO:0001630
 name: splice_region_variant
 def: "A sequence variant in which a change has occurred within the region of the splice site, either within 1-3 bases of the exon or 3-8 bases of the intron." [http://ensembl.org/info/docs/variation/index.html]
 comment: EBI term: splice site - 1-3 bps into an exon or 3-8 bps into an intron.
-synonym: "splice region variant" EXACT []
-synonym: "splice_region_variant" EXACT ebi_variants [http://ensembl.org/info/docs/variation/index.html]
+synonym: "splice region variant" EXACT ebi_variants [http://ensembl.org/info/docs/variation/index.html]
 is_a: SO:0001568 ! splicing_variant
+is_a: SO:0001576 ! transcript_variant
 created_by: kareneilbeck
 creation_date: 2010-03-24T09:46:02Z
 
@@ -13910,7 +13919,7 @@ name: upstream_gene_variant
 def: "A sequence variant located 5' of a gene." [SO:ke]
 comment: Different groups annotate up and downstream to different lengths. The subtypes are specific and are backed up with cross references.
 synonym: "upstream gene variant" EXACT []
-is_a: SO:0001878 ! feature_variant
+is_a: SO:0001628 ! intergenic_variant
 created_by: kareneilbeck
 creation_date: 2010-03-24T09:49:13Z
 
@@ -13920,7 +13929,7 @@ name: downstream_gene_variant
 def: "A sequence variant located 3' of a gene." [SO:ke]
 comment: Different groups annotate up and downstream to different lengths. The subtypes are specific and are backed up with cross references.
 synonym: "downstream gene variant" EXACT []
-is_a: SO:0001878 ! feature_variant
+is_a: SO:0001628 ! intergenic_variant
 created_by: kareneilbeck
 creation_date: 2010-03-24T09:49:38Z
 
@@ -13971,6 +13980,7 @@ creation_date: 2010-03-24T09:51:22Z
 id: SO:0001637
 name: rRNA_gene
 def: "A gene that encodes for ribosomal RNA." [SO:ke]
+synonym: "rDNA" EXACT []
 synonym: "rRNA gene" EXACT []
 is_a: SO:0001263 ! ncRNA_gene
 created_by: kareneilbeck
@@ -14131,6 +14141,7 @@ id: SO:0001655
 name: nucleotide_binding_site
 def: "A binding site that, in the molecule, interacts selectively and non-covalently with nucleotide residues." [SO:cb]
 comment: See GO:0000166 : nucleotide binding.
+synonym: "np_bind" EXACT BS [uniprot:feature]
 synonym: "nucleotide binding site" EXACT []
 is_a: SO:0000409 ! binding_site
 created_by: kareneilbeck
@@ -14258,6 +14269,7 @@ creation_date: 2010-10-01T03:00:44Z
 [Term]
 id: SO:0001668
 name: proximal_promoter_element
+def: "DNA segment that ranges from about -250 to -40 relative to +1 of RNA transcription start site, where sequence specific DNA-binding transcription factors binds, such as Sp1, CTF (CCAAT-binding transcription factor), and CBF (CCAAT-box binding factor)." [PMID:12515390, PMID:9679020, SO:ml]
 synonym: "proximal promoter element" RELATED []
 synonym: "specific transcription factor binding site" RELATED []
 is_a: SO:0001678 ! regulatory_promoter_element
@@ -14439,7 +14451,7 @@ name: restriction_enzyme_recognition_site
 def: "The nucleotide region (usually a palindrome) that is recognized by a restriction enzyme. This may or may not be equal to the restriction enzyme binding site." [SO:ke]
 synonym: "restriction endonuclease recognition site" EXACT []
 synonym: "restriction enzyme recognition site" EXACT []
-is_a: SO:0001411 ! biological_region
+is_a: SO:0001954 ! restriction_enzyme_region
 created_by: kareneilbeck
 creation_date: 2010-10-29T12:29:57Z
 
@@ -14512,7 +14524,7 @@ name: restriction_enzyme_single_strand_overhang
 def: "A terminal region of DNA sequence where the end of the region is not blunt ended." [SO:ke]
 synonym: "single strand overhang" EXACT []
 synonym: "sticky end" RELATED []
-is_a: SO:0001411 ! biological_region
+is_a: SO:0001954 ! restriction_enzyme_region
 relationship: part_of SO:0001692 ! sticky_end_restriction_enzyme_cleavage_site
 created_by: kareneilbeck
 creation_date: 2010-10-29T12:48:35Z
@@ -14583,7 +14595,7 @@ id: SO:0001702
 name: histone_acetylation_site
 def: "A histone modification where the modification is the acylation of the residue." [SO:ke]
 synonym: "histone acetylation" EXACT []
-synonym: "histone acetylatoin site" EXACT []
+synonym: "histone acetylation site" EXACT []
 is_a: SO:0001700 ! histone_modification
 created_by: kareneilbeck
 creation_date: 2010-03-31T10:23:27Z
@@ -14594,7 +14606,7 @@ name: H3K9_acetylation_site
 def: "A kind of histone modification site, whereby the 9th residue (a lysine), from the start of the H3 histone protein is acylated." [http://en.wikipedia.org/wiki/Histone]
 synonym: "H3K9 acetylation site" EXACT []
 synonym: "H3K9Ac" RELATED []
-is_a: SO:0001702 ! histone_acetylation_site
+is_a: SO:0001973 ! histone_3_acetylation_site
 created_by: kareneilbeck
 creation_date: 2010-03-31T10:25:05Z
 
@@ -14604,7 +14616,7 @@ name: H3K14_acetylation_site
 def: "A kind of histone modification site, whereby the 14th residue (a lysine), from the start of the H3 histone protein is acylated." [http://en.wikipedia.org/wiki/Histone]
 synonym: "H3K14 acetylation site" EXACT []
 synonym: "H3K14Ac" RELATED []
-is_a: SO:0001702 ! histone_acetylation_site
+is_a: SO:0001973 ! histone_3_acetylation_site
 created_by: kareneilbeck
 creation_date: 2010-03-31T10:25:53Z
 
@@ -14691,7 +14703,7 @@ creation_date: 2010-03-31T10:35:30Z
 [Term]
 id: SO:0001713
 name: H4K20_monomethylation_site
-def: "A kind of histone modification site, whereby the 20th residue (a lysine), from the start of the H34histone protein is mono-methylated." [http://en.wikipedia.org/wiki/Histone]
+def: "A kind of histone modification site, whereby the 20th residue (a lysine), from the start of the H4histone protein is mono-methylated." [http://en.wikipedia.org/wiki/Histone]
 synonym: "H4K20 mono-methylation site" EXACT []
 synonym: "H4K20Me1" RELATED []
 is_a: SO:0001701 ! histone_methylation_site
@@ -14741,7 +14753,7 @@ name: H3K18_acetylation_site
 def: "A kind of histone modification site, whereby the 14th residue (a lysine), from the start of the H3 histone protein is acylated." [SO:ke]
 synonym: "H3K18 acetylation site" EXACT []
 synonym: "H3K18Ac" RELATED []
-is_a: SO:0001702 ! histone_acetylation_site
+is_a: SO:0001973 ! histone_3_acetylation_site
 created_by: kareneilbeck
 creation_date: 2010-04-13T10:39:35Z
 
@@ -14751,7 +14763,7 @@ name: H3K23_acylation_site
 def: "A kind of histone modification, whereby the 23rd residue (a lysine), from the start of the H3 histone protein is acylated." [SO:ke]
 synonym: "H3K23 acylation site" RELATED []
 synonym: "H3K23Ac" RELATED []
-is_a: SO:0001702 ! histone_acetylation_site
+is_a: SO:0001973 ! histone_3_acetylation_site
 created_by: kareneilbeck
 creation_date: 2010-04-13T10:42:45Z
 
@@ -14772,7 +14784,7 @@ name: H3K27_acylation_site
 def: "A kind of histone modification site, whereby the 27th residue (a lysine), from the start of the H3 histone protein is acylated." [SO:ke]
 synonym: "H3K27 acylation site" EXACT []
 synonym: "H3K27Ac" RELATED []
-is_a: SO:0001702 ! histone_acetylation_site
+is_a: SO:0001973 ! histone_3_acetylation_site
 created_by: kareneilbeck
 creation_date: 2010-04-13T10:44:09Z
 
@@ -14852,7 +14864,7 @@ name: H4K16_acylation_site
 def: "A kind of histone modification site, whereby the 16th residue (a lysine), from the start of the H4 histone protein is acylated." [SO:ke]
 synonym: "H4K16 acylation_site" RELATED []
 synonym: "H4K16Ac" RELATED []
-is_a: SO:0001702 ! histone_acetylation_site
+is_a: SO:0001972 ! histone_4_acylation_site
 created_by: kareneilbeck
 creation_date: 2010-04-13T11:09:41Z
 
@@ -14862,7 +14874,7 @@ name: H4K5_acylation_site
 def: "A kind of histone modification site, whereby the 5th residue (a lysine), from the start of the H4 histone protein is acylated." [SO:ke]
 synonym: "H4K5 acylation site" RELATED []
 synonym: "H4K5Ac" RELATED []
-is_a: SO:0001702 ! histone_acetylation_site
+is_a: SO:0001972 ! histone_4_acylation_site
 created_by: kareneilbeck
 creation_date: 2010-04-13T11:13:00Z
 
@@ -14872,7 +14884,7 @@ name: H4K8_acylation_site
 def: "A kind of histone modification site, whereby the 8th residue (a lysine), from the start of the H4 histone protein is acylated." [SO:KE]
 synonym: "H4K8 acylation site" RELATED []
 synonym: "H4K8Ac" RELATED []
-is_a: SO:0001702 ! histone_acetylation_site
+is_a: SO:0001972 ! histone_4_acylation_site
 created_by: kareneilbeck
 creation_date: 2010-04-13T11:14:24Z
 
@@ -15413,8 +15425,10 @@ creation_date: 2011-05-06T01:51:17Z
 
 [Term]
 id: SO:0001792
-name: non_coding_exon_variant
-def: "A sequence variant that changes non-coding exon sequence." [SO:ke]
+name: non_coding_transcript_exon_variant
+def: "A sequence variant that changes non-coding exon sequence in a non-coding transcript." [EBI:fc, SO:ke]
+synonym: "non coding transcript exon variant" EXACT []
+is_a: SO:0001619 ! non_coding_transcript_variant
 is_a: SO:0001791 ! exon_variant
 created_by: kareneilbeck
 creation_date: 2011-05-06T01:51:59Z
@@ -16233,7 +16247,7 @@ creation_date: 2012-02-03T04:44:53Z
 id: SO:0001875
 name: unassigned_supercontig
 def: "A supercontig that is not been assigned to any ultracontig during a genome assembly project." [GMOD:ea]
-comment: comment: Requested by Bayer Cropscience January, 2012.
+comment: Requested by Bayer Cropscience January, 2012.
 synonym: "unassigned scaffold" RELATED []
 synonym: "unassigned supercontig" EXACT []
 is_a: SO:0000148 ! supercontig
@@ -16244,7 +16258,7 @@ creation_date: 2012-02-14T05:02:20Z
 id: SO:0001876
 name: partial_genomic_sequence_assembly
 def: "A partial DNA sequence assembly of a chromosome or full genome, which contains gaps that are filled with N's." [GMOD:ea]
-comment: comment: Requested by Bayer Cropscience January, 2012.
+comment: Requested by Bayer Cropscience January, 2012.
 synonym: "partial genomic sequence assembly" EXACT []
 synonym: "pseudomolecule" BROAD []
 synonym: "sequence assembly with N-gaps" EXACT []
@@ -16489,10 +16503,10 @@ creation_date: 2012-04-06T11:50:07Z
 
 [Term]
 id: SO:0001900
-name: m26_site
+name: M26_binding_site
 def: "A promoter element that contains a core sequence TGACGT, bound by a protein complex that regulates transcription of genes encoding PKA pathway components." [PMID:15448137]
 synonym: "m26 site" EXACT []
-is_a: SO:0001659 ! promoter_element
+is_a: SO:0000713 ! DNA_motif
 created_by: kareneilbeck
 creation_date: 2012-04-06T12:02:10Z
 
@@ -16671,24 +16685,28 @@ id: SO:0001918
 name: 5_methylcytosine
 def: "A cytosine methylated at the 5 carbon." [SO:rtapella]
 synonym: "5 methylcytosine" EXACT []
-synonym: "5mC" EXACT []
-synonym: "m5C" EXACT []
+synonym: "5-mC" EXACT []
+synonym: "m-5C" EXACT []
 synonym: "m5c" EXACT []
 xref: http://www.ebi.ac.uk/embl/Documentation/FT_definitions/feature_table.html#7.4.2
+xref: http:http://www.pacificbiosciences.com/pdf/WP_Detecting_DNA_Base_Modifications_Using_SMRT_Sequencing.pdf
 is_a: SO:0000114 ! methylated_cytosine
 created_by: kareneilbeck
 creation_date: 2012-10-17T12:46:10Z
 
 [Term]
 id: SO:0001919
-name: N4_methylcytosine
+name: 4_methylcytosine
 def: "A cytosine methylated at the 4 nitrogen." [SO:rtapella]
-synonym: "4mC" EXACT []
-synonym: "m4C" EXACT []
+synonym: "4-mC" EXACT []
+synonym: "4-methylcytosine" EXACT []
+synonym: "m-4C" EXACT []
 synonym: "m4c" EXACT []
 synonym: "N4 methylcytosine" EXACT []
 synonym: "N4-methylcytosine" EXACT []
+synonym: "N4_methylcytosine" EXACT []
 xref: http://www.ebi.ac.uk/embl/Documentation/FT_definitions/feature_table.html#7.4.2
+xref: http:http://www.pacificbiosciences.com/pdf/WP_Detecting_DNA_Base_Modifications_Using_SMRT_Sequencing.pdf
 is_a: SO:0000114 ! methylated_cytosine
 created_by: kareneilbeck
 creation_date: 2012-10-17T12:50:40Z
@@ -16697,10 +16715,13 @@ creation_date: 2012-10-17T12:50:40Z
 id: SO:0001920
 name: N6_methyladenine
 def: "An adenine methylated at the 6 nitrogen." [SO:rtapella]
+synonym: "6-mA" EXACT []
+synonym: "6-methyladenine" EXACT []
 synonym: "6mA" EXACT []
-synonym: "m6A" EXACT []
+synonym: "m-6A" EXACT []
 synonym: "m6a" EXACT []
 synonym: "N6-methyladenine" EXACT []
+xref: http:http://www.pacificbiosciences.com/pdf/WP_Detecting_DNA_Base_Modifications_Using_SMRT_Sequencing.pdf
 is_a: SO:0000161 ! methylated_adenine
 created_by: kareneilbeck
 creation_date: 2012-10-17T12:54:23Z
@@ -16805,6 +16826,750 @@ is_a: SO:0000150 ! read
 relationship: has_origin SO:0001033 ! chloroplast_DNA
 created_by: kareneilbeck
 creation_date: 2012-11-14T04:43:45Z
+
+[Term]
+id: SO:0001931
+name: consensus_gDNA
+def: "Genomic DNA sequence produced from some base calling or alignment algorithm which uses aligned or assembled multiple gDNA sequences as input." [GMOD:ea]
+comment: Requested by Bayer Cropscience November, 2012.
+synonym: "consensus gDNA" EXACT []
+synonym: "consensus genomic DNA" EXACT []
+is_a: SO:0000994 ! consensus_region
+created_by: kareneilbeck
+creation_date: 2012-11-28T12:53:14Z
+
+[Term]
+id: SO:0001932
+name: restriction_enzyme_five_prime_single_strand_overhang
+def: "A terminal region of DNA sequence where the end of the region is not blunt ended and the exposed single strand terminates at the 5' end." [SO:ke]
+synonym: "restriction enzyme five prime single strand overhang" EXACT []
+is_a: SO:0001695 ! restriction_enzyme_single_strand_overhang
+created_by: kareneilbeck
+creation_date: 2013-03-06T09:50:44Z
+
+[Term]
+id: SO:0001933
+name: restriction_enzyme_three_prime_single_strand_overhang
+def: "A terminal region of DNA sequence where the end of the region is not blunt ended and the exposed single strand terminates at the 3' end." [SO:ke]
+synonym: "restriction enzyme three prime single strand overhang" EXACT []
+is_a: SO:0001695 ! restriction_enzyme_single_strand_overhang
+created_by: kareneilbeck
+creation_date: 2013-03-06T09:52:14Z
+
+[Term]
+id: SO:0001934
+name: monomeric_repeat
+def: "A repeat_region containing repeat_units of 1 bp that is repeated multiple times in tandem." [SO:ke]
+synonym: "monomeric repeat" EXACT []
+is_a: SO:0000705 ! tandem_repeat
+created_by: kareneilbeck
+creation_date: 2013-03-06T09:59:15Z
+
+[Term]
+id: SO:0001935
+name: H3K20_trimethylation_site
+def: "A kind of histone modification site, whereby the 20th residue (a lysine), from the start of the H3 protein is tri-methylated." [EBI:nj]
+synonym: "H3K20 trimethylation site" EXACT []
+is_a: SO:0001701 ! histone_methylation_site
+created_by: kareneilbeck
+creation_date: 2013-03-06T10:13:48Z
+
+[Term]
+id: SO:0001936
+name: H3K36_acetylation_site
+def: "A kind of histone modification site, whereby the 36th residue (a lysine), from the start of the H3 histone protein is acylated." [EBI:nj]
+synonym: "H3K36 acetylation site" EXACT []
+synonym: "H3K36ac" EXACT []
+is_a: SO:0001973 ! histone_3_acetylation_site
+created_by: kareneilbeck
+creation_date: 2013-03-06T10:16:55Z
+
+[Term]
+id: SO:0001937
+name: H2BK12_acetylation_site
+def: "A kind of histone modification site, whereby the 12th residue (a lysine), from the start of the H2B protein is methylated." [EBI:nj]
+synonym: "H2BK12 acetylation site" EXACT []
+synonym: "H2BK12ac" RELATED []
+is_a: SO:0001702 ! histone_acetylation_site
+created_by: kareneilbeck
+creation_date: 2013-03-06T10:19:13Z
+
+[Term]
+id: SO:0001938
+name: H2AK5_acetylation_site
+def: "A kind of histone modification site, whereby the 5th residue (a lysine), from the start of the H2A histone protein is acetylated." [EBI:nj]
+synonym: "H2AK5 acetylation site" EXACT []
+synonym: "H2AK5ac" EXACT []
+is_a: SO:0001702 ! histone_acetylation_site
+created_by: kareneilbeck
+creation_date: 2013-03-06T10:20:57Z
+
+[Term]
+id: SO:0001939
+name: H4K12_acetylation_site
+def: "A kind of histone modification site, whereby the 12th residue (a lysine), from the start of the H4 histone protein is acetylated." [EBI:nj]
+synonym: "H4K12 acetylation site" EXACT []
+synonym: "H4K12ac" EXACT []
+is_a: SO:0001972 ! histone_4_acylation_site
+created_by: kareneilbeck
+creation_date: 2013-03-06T10:26:15Z
+
+[Term]
+id: SO:0001940
+name: H2BK120_acetylation_site
+def: "A kind of histone modification site, whereby the 120th residue (a lysine), from the start of the H2B histone protein is acetylated." [EBI:nj]
+synonym: "H2BK120 acetylation site" EXACT []
+synonym: "H2BK120ac" EXACT []
+is_a: SO:0001702 ! histone_acetylation_site
+created_by: kareneilbeck
+creation_date: 2013-03-06T10:28:38Z
+
+[Term]
+id: SO:0001941
+name: H4K91_acetylation_site
+def: "A kind of histone modification site, whereby the 91st residue (a lysine), from the start of the H4 histone protein is acetylated." [EBI:nj]
+synonym: "H4K91 acetylation site" EXACT []
+is_a: SO:0001972 ! histone_4_acylation_site
+created_by: kareneilbeck
+creation_date: 2013-03-06T10:41:04Z
+
+[Term]
+id: SO:0001942
+name: H2BK20_acetylation_site
+def: "A kind of histone modification site, whereby the 20th residue (a lysine), from the start of the H2B histone protein is acetylated." [EBI:nj]
+synonym: "H2BK20 acetylation site" RELATED []
+synonym: "H2BK20ac" EXACT []
+is_a: SO:0001702 ! histone_acetylation_site
+created_by: kareneilbeck
+creation_date: 2013-03-06T10:44:31Z
+
+[Term]
+id: SO:0001943
+name: H3K4ac_acetylation_site
+def: "A kind of histone modification site, whereby the 4th residue (a lysine), from the start of the H3 histone protein is acetylated." [EBI:nj]
+synonym: "H3K4ac" EXACT []
+synonym: "H3K4ac acetylation site" EXACT []
+is_a: SO:0001973 ! histone_3_acetylation_site
+created_by: kareneilbeck
+creation_date: 2013-03-06T10:46:32Z
+
+[Term]
+id: SO:0001944
+name: H2AK9_acetylation_site
+def: "A kind of histone modification site, whereby the 9th residue (a lysine), from the start of the H2A histone protein is acetylated." [EBI:nj]
+synonym: "H2AK9 acetylation site" EXACT []
+synonym: "H2AK9ac" EXACT []
+is_a: SO:0001702 ! histone_acetylation_site
+created_by: kareneilbeck
+creation_date: 2013-03-06T10:48:11Z
+
+[Term]
+id: SO:0001945
+name: H3K56_acetylation_site
+def: "A kind of histone modification site, whereby the 56th residue (a lysine), from the start of the H3 histone protein is acetylated." [EBI:nj]
+synonym: "H3K56 acetylation site" EXACT []
+synonym: "H3K56ac" EXACT []
+is_a: SO:0001973 ! histone_3_acetylation_site
+created_by: kareneilbeck
+creation_date: 2013-03-06T10:51:14Z
+
+[Term]
+id: SO:0001946
+name: H2BK15_acetylation_site
+def: "A kind of histone modification site, whereby the 15th residue (a lysine), from the start of the H2B histone protein is acetylated." [EBI:nj]
+synonym: "H2BK15 acetylation site" EXACT []
+synonym: "H2BK15ac" EXACT []
+is_a: SO:0001702 ! histone_acetylation_site
+created_by: kareneilbeck
+creation_date: 2013-03-06T10:53:23Z
+
+[Term]
+id: SO:0001947
+name: H3R2_monomethylation_site
+def: "A kind of histone modification site, whereby the 2nd residue (an arginine), from the start of the H3 protein is mono-methylated." [EBI:nj]
+synonym: " H3R2me1" EXACT []
+synonym: "H3R2 monomethylation site" EXACT []
+is_a: SO:0001701 ! histone_methylation_site
+created_by: kareneilbeck
+creation_date: 2013-03-06T10:57:13Z
+
+[Term]
+id: SO:0001948
+name: H3R2_dimethylation_site
+def: "A kind of histone modification site, whereby the 2nd residue (an arginine), from the start of the H3 protein is di-methylated." [EBI:nj]
+synonym: "H3R2 dimethylation site" EXACT []
+synonym: "H3R2me2" EXACT []
+is_a: SO:0001701 ! histone_methylation_site
+created_by: kareneilbeck
+creation_date: 2013-03-06T10:59:17Z
+
+[Term]
+id: SO:0001949
+name: H4R3_dimethylation_site
+def: "A kind of histone modification site, whereby the 3nd residue (an arginine), from the start of the H4 protein is di-methylated." [EBI:nj]
+synonym: "H4R3 dimethylation site" EXACT []
+synonym: "H4R3me2" EXACT []
+is_a: SO:0001701 ! histone_methylation_site
+created_by: kareneilbeck
+creation_date: 2013-03-06T11:01:27Z
+
+[Term]
+id: SO:0001950
+name: H4K4_trimethylation_site
+def: "A kind of histone modification site, whereby the 4th residue (a lysine), from the start of the H4 protein is tri-methylated." [EBI:nj]
+synonym: " H4K4me3" EXACT []
+synonym: "H4K4 trimethylation site" EXACT []
+is_a: SO:0001701 ! histone_methylation_site
+created_by: kareneilbeck
+creation_date: 2013-03-06T11:03:29Z
+
+[Term]
+id: SO:0001951
+name: H3K23_dimethylation_site
+def: "A kind of histone modification site, whereby the 23rd residue (a lysine), from the start of the H3 protein is di-methylated." [EBI:nj]
+synonym: "H3K23 dimethylation site" EXACT []
+synonym: "H3K23me2" EXACT []
+is_a: SO:0001701 ! histone_methylation_site
+created_by: kareneilbeck
+creation_date: 2013-03-06T11:05:33Z
+
+[Term]
+id: SO:0001952
+name: promoter_flanking_region
+def: "A region immediately adjacent to a promoter which may or may not contain transcription factor binding sites." [EBI:nj]
+synonym: "promoter flanking region" EXACT []
+is_a: SO:0001055 ! transcriptional_cis_regulatory_region
+created_by: kareneilbeck
+creation_date: 2013-03-06T11:36:25Z
+
+[Term]
+id: SO:0001953
+name: restriction_enzyme_assembly_scar
+def: "A region of DNA sequence formed from the ligation of two sticky ends where the palindrome is broken and no longer comprises the recognition site and thus cannot be re-cut by the restriction enzymes used to create the sticky ends." [SO:ke]
+is_a: SO:0001954 ! restriction_enzyme_region
+created_by: kareneilbeck
+creation_date: 2013-03-06T03:18:11Z
+
+[Term]
+id: SO:0001954
+name: restriction_enzyme_region
+def: "A region related to restriction enzyme function." [SO:ke]
+comment: Not a great term for annotation, but used to classify the various regions related to restriction enzymes.
+synonym: "restriction enzyme region" RELATED []
+is_a: SO:0001411 ! biological_region
+created_by: kareneilbeck
+creation_date: 2013-03-06T03:23:34Z
+
+[Term]
+id: SO:0001955
+name: protein_stability_element
+def: "A polypeptide region that proves structure in a protein that affects the stability of the protein." [SO:ke]
+synonym: "protein stability element" RELATED []
+is_a: SO:0000839 ! polypeptide_region
+created_by: kareneilbeck
+creation_date: 2013-03-06T03:32:47Z
+
+[Term]
+id: SO:0001956
+name: protease_site
+def: "A polypeptide_region that  codes for a protease cleavage site." [SO:ke]
+synonym: "protease site" EXACT []
+is_a: SO:0000839 ! polypeptide_region
+created_by: kareneilbeck
+creation_date: 2013-03-06T03:36:28Z
+
+[Term]
+id: SO:0001957
+name: RNA_stability_element
+def: "RNA secondary structure that affects the stability of an RNA molecule." [SO:ke]
+synonym: "rna stability element" RELATED []
+created_by: kareneilbeck
+creation_date: 2013-03-06T03:38:35Z
+is_obsolete: true
+
+[Term]
+id: SO:0001958
+name: lariat_intron
+def: "A kind of intron whereby the excision is driven by lariat formation." [SO:ke]
+comment: Requested by PomBase 3604508.
+synonym: "lariat intron" EXACT []
+is_a: SO:0000188 ! intron
+created_by: kareneilbeck
+creation_date: 2013-03-07T10:58:40Z
+
+[Term]
+id: SO:0001959
+name: TCT_motif
+def: "A cis-regulatory element, conserved sequence YYC+1TTTYY, and spans -2 to +6 relative to +1 TSS. It is present in most ribosomal protein genes in Drosophila and mammals but not in the yeast Saccharomyces cerevisiae. Resembles the initiator (TCAKTY in Drosophila) but functionally distinct from initiator." [PMID:20801935, SO:myl]
+synonym: "polypyrimidine initiator" EXACT []
+synonym: "TCT element" EXACT []
+is_a: SO:0001660 ! core_promoter_element
+created_by: kareneilbeck
+creation_date: 2013-05-17T04:38:48Z
+
+[Term]
+id: SO:0001960
+name: 5_hydroxymethylcytosine
+def: "A modified DNA cytosine base feature, modified by a hydroxymethyl group at the 5 carbon." [SO:ke]
+synonym: "5-hmC" EXACT []
+synonym: "5-hydroxymethylcytosine" EXACT []
+xref: http:http://www.pacificbiosciences.com/pdf/WP_Detecting_DNA_Base_Modifications_Using_SMRT_Sequencing.pdf
+is_a: SO:0000114 ! methylated_cytosine
+created_by: kareneilbeck
+creation_date: 2013-05-17T05:05:31Z
+
+[Term]
+id: SO:0001961
+name: 5_formylcytosine
+def: "A modified DNA cytosine base feature, modified by a formyl group at the 5 carbon." [SO:ke]
+synonym: "5-fC" EXACT []
+synonym: "5-formylcytosine" EXACT []
+xref: http:http://www.pacificbiosciences.com/pdf/WP_Detecting_DNA_Base_Modifications_Using_SMRT_Sequencing.pdf
+is_a: SO:0001963 ! modified_cytosine
+created_by: kareneilbeck
+creation_date: 2013-05-17T05:06:13Z
+
+[Term]
+id: SO:0001962
+name: modified_adenine
+def: "A modified adenine DNA base feature." [SO:ke]
+is_a: SO:0000305 ! modified_DNA_base
+created_by: kareneilbeck
+creation_date: 2013-05-20T01:22:30Z
+
+[Term]
+id: SO:0001963
+name: modified_cytosine
+def: "A modified cytosine DNA base feature." [SO:ke]
+is_a: SO:0000305 ! modified_DNA_base
+created_by: kareneilbeck
+creation_date: 2013-05-20T01:23:47Z
+
+[Term]
+id: SO:0001964
+name: modified_guanine
+def: "A modified guanine DNA base feature." [SO:ke]
+is_a: SO:0000305 ! modified_DNA_base
+created_by: kareneilbeck
+creation_date: 2013-05-20T01:25:31Z
+
+[Term]
+id: SO:0001965
+name: 8_oxoguanine
+def: "A modified DNA guanine base,at the 8 carbon, often the product of DNA damage." [SO:ke]
+synonym: "8-oxoG" EXACT []
+synonym: "8-oxoguanine" EXACT []
+xref: http:http://www.pacificbiosciences.com/pdf/WP_Detecting_DNA_Base_Modifications_Using_SMRT_Sequencing.pdf
+is_a: SO:0001964 ! modified_guanine
+created_by: kareneilbeck
+creation_date: 2013-05-20T01:27:51Z
+
+[Term]
+id: SO:0001966
+name: 5_carboxylcytosine
+def: "A modified DNA cytosine base feature, modified by a carboxy group at the 5 carbon." [SO:ke]
+synonym: "5-caC" EXACT []
+synonym: "5-carboxycytosine" EXACT []
+xref: http:http://www.pacificbiosciences.com/pdf/WP_Detecting_DNA_Base_Modifications_Using_SMRT_Sequencing.pdf
+is_a: SO:0001963 ! modified_cytosine
+created_by: kareneilbeck
+creation_date: 2013-05-20T01:30:01Z
+
+[Term]
+id: SO:0001967
+name: 8_oxoadenine
+def: "A modified DNA adenine base,at the 8 carbon, often the product of DNA damage." [SO:ke]
+synonym: "8-oxoA" EXACT []
+synonym: "8-oxoadenine" EXACT []
+xref: http:http://www.pacificbiosciences.com/pdf/WP_Detecting_DNA_Base_Modifications_Using_SMRT_Sequencing.pdf
+is_a: SO:0001962 ! modified_adenine
+created_by: kareneilbeck
+creation_date: 2013-05-20T01:31:05Z
+
+[Term]
+id: SO:0001968
+name: coding_transcript_variant
+def: "A transcript variant of a protein coding gene." [SO:ke]
+synonym: "coding transcript variant" EXACT []
+is_a: SO:0001576 ! transcript_variant
+created_by: kareneilbeck
+creation_date: 2013-05-22T04:34:49Z
+
+[Term]
+id: SO:0001969
+name: coding_transcript_intron_variant
+def: "A transcript variant occurring within an intron of a coding transcript." [SO:ke]
+synonym: "coding sequence intron variant" EXACT []
+is_a: SO:0001627 ! intron_variant
+is_a: SO:0001968 ! coding_transcript_variant
+created_by: kareneilbeck
+creation_date: 2013-05-23T10:54:17Z
+
+[Term]
+id: SO:0001970
+name: non_coding_transcript_intron_variant
+def: "A transcript variant occurring within an intron of a non coding transcript." [SO:ke]
+synonym: "non coding transcript intron variant" EXACT []
+is_a: SO:0001619 ! non_coding_transcript_variant
+is_a: SO:0001627 ! intron_variant
+created_by: kareneilbeck
+creation_date: 2013-05-23T10:55:03Z
+
+[Term]
+id: SO:0001971
+name: zinc_finger_binding_site
+synonym: "zinc finger binding site" EXACT []
+synonym: "zinc_fing" EXACT BS [unirot:features]
+is_a: SO:0001429 ! DNA_binding_site
+created_by: kareneilbeck
+creation_date: 2013-07-29T04:41:53Z
+
+[Term]
+id: SO:0001972
+name: histone_4_acylation_site
+def: "A histone 4 modification where the modification is the acylation of the residue." [EBI:nj, SO:ke]
+synonym: "H4ac" EXACT []
+is_a: SO:0001702 ! histone_acetylation_site
+created_by: kareneilbeck
+creation_date: 2013-07-30T10:43:04Z
+
+[Term]
+id: SO:0001973
+name: histone_3_acetylation_site
+def: "A histone 3 modification where the modification is the acylation of the residue." [EBI:nj, SO:ke]
+synonym: "H3ac" EXACT []
+is_a: SO:0001702 ! histone_acetylation_site
+created_by: kareneilbeck
+creation_date: 2013-07-30T10:46:42Z
+
+[Term]
+id: SO:0001974
+name: CTCF_binding_site
+def: "A transcription factor binding site with consensus sequence CCGCGNGGNGGCAG, bound by CCCTF-binding factor." [EBI:nj]
+synonym: "CCCTF binding site" EXACT []
+synonym: "CTCF binding site" EXACT []
+is_a: SO:0001659 ! promoter_element
+created_by: kareneilbeck
+creation_date: 2013-07-30T10:59:11Z
+
+[Term]
+id: SO:0001975
+name: five_prime_sticky_end_restriction_enzyme_cleavage_site
+def: "A restriction enzyme recognition site that, when cleaved, results in 5 prime overhangs." [SO:ke]
+comment: Requested by  Jackie Quinn. The sticky restriction sites are different from junctions because they include the sequence that is cut, inclusive of the five prime junction and the three prime junction.
+synonym: "five prime sticky end restriction enzyme cleavage site" EXACT []
+is_a: SO:0001692 ! sticky_end_restriction_enzyme_cleavage_site
+created_by: kareneilbeck
+creation_date: 2013-07-30T11:32:16Z
+
+[Term]
+id: SO:0001976
+name: three_prime_sticky_end_restriction_enzyme_cleavage_site
+def: "A restriction enzyme recognition site that, when cleaved, results in 3 prime overhangs." [SO:ke]
+comment: Requested by  Jackie Quinn. The sticky restriction sites are different from junctions because they include the sequence that is cut, inclusive of the five prime junction and the three prime junction.
+synonym: "three prime sticky end restriction enzyme cleavage site" EXACT []
+is_a: SO:0001692 ! sticky_end_restriction_enzyme_cleavage_site
+created_by: kareneilbeck
+creation_date: 2013-07-30T11:37:19Z
+
+[Term]
+id: SO:0001977
+name: ribonuclease_site
+def: "A region of a transcript encoding the cleavage site for a ribonuclease enzyme." [SO:ke]
+synonym: "ribonuclease site" EXACT []
+is_a: SO:0000833 ! transcript_region
+created_by: kareneilbeck
+creation_date: 2013-07-30T11:41:06Z
+
+[Term]
+id: SO:0001978
+name: signature
+def: "A region of  sequence where developer information is encoded." [SO:ke]
+comment: Requested by JackieQuinn for use in synthetic biology.
+synonym: "DNA signature" EXACT []
+is_a: SO:0000804 ! engineered_region
+created_by: kareneilbeck
+creation_date: 2013-07-30T11:49:22Z
+
+[Term]
+id: SO:0001979
+name: RNA_stability_element
+def: "A motif that affects the stability of RNA." [PMID:22495308, SO:ke]
+synonym: "RNA stability element" EXACT []
+is_a: SO:0000715 ! RNA_motif
+created_by: kareneilbeck
+creation_date: 2013-07-30T03:33:53Z
+
+[Term]
+id: SO:0001980
+name: G_box
+def: "A regulatory promoter element identified in mutation experiments, with consensus sequence: CACGTG. Present in promoters, intergenic regions, coding regions, and introns. They are involved in gene expression responses to light and interact with G-box binding factor and I-box binding factor 1a." [PMID:19249238, PMID:8571452, SO:ml]
+comment: A plant specific region.
+synonym: "G-box" EXACT []
+synonym: "GBF binding sequence" EXACT []
+is_a: SO:0001678 ! regulatory_promoter_element
+created_by: kareneilbeck
+creation_date: 2013-07-30T04:00:50Z
+
+[Term]
+id: SO:0001981
+name: L_box
+def: "An orientation dependent  regulatory promoter element, with consensus sequence of TTGCACAN4TTGCACA, found in plants." [PMID:17381552, PMID:2902624, SO:ml]
+synonym: "L-box" EXACT []
+synonym: "L-box promoter element" EXACT []
+is_a: SO:0001678 ! regulatory_promoter_element
+created_by: kareneilbeck
+creation_date: 2013-07-30T04:12:19Z
+
+[Term]
+id: SO:0001982
+name: I-box
+def: "A plant regulatory promoter motif,  composed of a highly conserved hexamer GATAAG (I-box core)." [PMID:2347304, PMID:2902624, SO:ml]
+synonym: "I-box promoter motif" EXACT []
+is_a: SO:0001678 ! regulatory_promoter_element
+created_by: kareneilbeck
+creation_date: 2013-07-30T04:17:55Z
+
+[Term]
+id: SO:0001983
+name: 5_prime_UTR_premature_start_codon_variant
+def: "A 5' UTR variant where a premature start codon is introduced, moved or lost." [SANGER:am]
+comment: Requested by Andy Menzies at the Sanger. This isn't necessarily a protein coding change. A premature start codon can effect the production of a mature protein product by providing a competing translation start point. Some genes balance their expression this way, eg THPO requires the presence of a premature start to limit expression, its loss leads to Familial thrombocythemia.
+synonym: "5' UTR premature start codon variant" EXACT []
+is_a: SO:0001623 ! 5_prime_UTR_variant
+created_by: kareneilbeck
+creation_date: 2013-07-30T04:36:25Z
+
+[Term]
+id: SO:0001984
+name: silent_mating_type_cassette_array
+def: "A gene cassette array that corresponds to a silenced version of a mating type region." [PomBase:mah]
+synonym: "silent mating-type cassette" RELATED []
+is_a: SO:0005854 ! gene_cassette_array
+created_by: kareneilbeck
+creation_date: 2013-07-31T02:40:38Z
+
+[Term]
+id: SO:0001985
+name: Okazaki_fragment
+def: "Any of the DNA segments produced by discontinuous synthesis of the lagging strand during DNA replication." [ISBN:0805350152]
+comment: Requested by Midori Harris, 2013.
+synonym: "Okazaki fragment" EXACT []
+is_a: SO:0001411 ! biological_region
+created_by: kareneilbeck
+creation_date: 2013-07-31T02:57:55Z
+
+[Term]
+id: SO:0001986
+name: upstream_transcript_variant
+def: "A feature variant, where the alteration occurs upstream of the transcript TSS." [EBI:gr]
+comment: Requested by Graham Ritchie, EBI/Sanger.
+synonym: "upstream transcript variant" EXACT []
+is_a: SO:0001628 ! intergenic_variant
+created_by: kareneilbeck
+creation_date: 2013-07-31T03:46:14Z
+
+[Term]
+id: SO:0001987
+name: downstream_transcript_variant
+comment: Requested by Graham Ritchie, EBI/Sanger.
+synonym: "downstream transcript variant" EXACT []
+is_a: SO:0001628 ! intergenic_variant
+created_by: kareneilbeck
+creation_date: 2013-07-31T03:47:51Z
+
+[Term]
+id: SO:0001988
+name: 5_prime_UTR_premature_start_codon_gain_variant
+def: "A 5' UTR variant where a premature start codon is gained." [Sanger:am]
+synonym: "5 prime UTR premature start codon gain variant" EXACT []
+is_a: SO:0001983 ! 5_prime_UTR_premature_start_codon_variant
+created_by: kareneilbeck
+creation_date: 2013-07-31T03:53:06Z
+
+[Term]
+id: SO:0001989
+name: 5_prime_UTR_premature_start_codon_loss_variant
+def: "A 5' UTR variant where a premature start codon is lost." [SANGER:am]
+is_a: SO:0001983 ! 5_prime_UTR_premature_start_codon_variant
+created_by: kareneilbeck
+creation_date: 2013-07-31T03:56:48Z
+
+[Term]
+id: SO:0001990
+name: five_prime_UTR_premature_start_codon_location_variant
+def: "A 5' UTR variant where a premature start codon is moved." [SANGER:am]
+is_a: SO:0001983 ! 5_prime_UTR_premature_start_codon_variant
+created_by: kareneilbeck
+creation_date: 2013-07-31T03:57:47Z
+
+[Term]
+id: SO:0001991
+name: consensus_AFLP_fragment
+def: "A consensus AFLP fragment is an AFLP sequence produced from any alignment algorithm which uses assembled multiple AFLP sequences as input." [GMOD:ea]
+comment: Requested by Bayer Cropscience September, 2013.
+synonym: "consensus AFLP fragment" EXACT []
+synonym: "consensus amplified fragment length polymorphism fragment" EXACT []
+is_a: SO:0000994 ! consensus_region
+created_by: kareneilbeck
+creation_date: 2013-09-24T10:43:41Z
+
+[Term]
+id: SO:0001992
+name: nonsynonymous_variant
+def: "A non-synonymous variant is an inframe, protein altering variant, resulting in a codon change." [SO:ke]
+synonym: "non_synonymous_coding" EXACT [http://ensembl.org/info/docs/variation/index.html]
+synonym: "nonsynonymous variant" EXACT []
+is_a: SO:0001650 ! inframe_variant
+created_by: kareneilbeck
+creation_date: 2013-10-16T11:47:51Z
+
+[Term]
+id: SO:0001993
+name: extended_cis_splice_site
+def: "Intronic positions associated with cis-splicing. Contains the first and second positions immediately before the exon and the first, second and fifth positions immediately after." [SANGER:am]
+comment: Added by Andy Menzies (Sanger).
+synonym: "extended cis splice site" EXACT []
+is_a: SO:0001419 ! cis_splice_site
+created_by: kareneilbeck
+creation_date: 2014-01-04T06:20:00Z
+
+[Term]
+id: SO:0001994
+name: intron_base_5
+def: "Fifth intronic position after the intron exon boundary, close to the 5' edge of the intron." [SANGER:am]
+synonym: "intron base 5" EXACT []
+is_a: SO:0001014 ! intron_domain
+relationship: part_of SO:0001993 ! extended_cis_splice_site
+created_by: kareneilbeck
+creation_date: 2014-01-04T06:26:02Z
+
+[Term]
+id: SO:0001995
+name: extended_intronic_splice_region_variant
+def: "A sequence variant occurring in the intron, within 10 bases of exon." [sanger:am]
+comment: Added by Andy Menzies (Sanger).
+synonym: "extended intronic splice region variant" EXACT []
+is_a: SO:0001568 ! splicing_variant
+created_by: kareneilbeck
+creation_date: 2014-01-04T06:37:27Z
+
+[Term]
+id: SO:0001996
+name: extended_intronic_splice_region
+def: "Region of intronic sequence within 10 bases of an exon." [SANGER:am]
+synonym: "extended intronic splice region " EXACT []
+is_a: SO:0001014 ! intron_domain
+created_by: kareneilbeck
+creation_date: 2014-01-04T06:41:23Z
+
+[Term]
+id: SO:0001997
+name: subtelomere
+def: "A heterochromatic region of the chromosome,  adjacent to the telomere (on the centromeric side) that contains repetitive DNA and sometimes genes and it is transcribed." [POMBE:al]
+is_a: SO:0000628 ! chromosomal_structural_element
+created_by: kareneilbeck
+creation_date: 2014-01-05T07:02:01Z
+
+[Term]
+id: SO:0001998
+name: sgRNA
+def: "A small RNA oligo, typically about 20 bases, that guides the cas nuclease to a target DNA sequence in the CRISPR/cas mutagenesis method." [PMID:23934893]
+synonym: "gRNA" RELATED []
+synonym: "guide RNA" RELATED []
+synonym: "small guide RNA" EXACT []
+is_a: SO:0000696 ! oligo
+created_by: kareneilbeck
+creation_date: 2014-01-05T07:25:08Z
+
+[Term]
+id: SO:0001999
+name: mating_type_region_motif
+def: "DNA motif that is a component of a mating type region." [SO:ke]
+synonym: "mating type region motif" EXACT []
+is_a: SO:0000713 ! DNA_motif
+relationship: part_of SO:0001789 ! mating_type_region
+created_by: kareneilbeck
+creation_date: 2014-01-05T07:30:17Z
+
+[Term]
+id: SO:0002000
+name: W_region
+def: "The leftmost segment of homology in the HML and MAT mating loci,  but not present in HMR." [SGD:jd]
+comment: Requested by Janos Demeter, SGD.
+synonym: "W-region" EXACT []
+is_a: SO:0001999 ! mating_type_region_motif
+created_by: kareneilbeck
+creation_date: 2014-01-05T07:31:47Z
+
+[Term]
+id: SO:0002001
+name: Y_region
+def: "A segment of non-homology between a and alpha mating alleles, found at all three mating loci (HML, MAT, and HMR), has two forms (Ya and Yalpha)." [SGD:jd]
+comment: Requested by Janos Demeter, SGD.
+synonym: "Y-region" EXACT []
+is_a: SO:0001999 ! mating_type_region_motif
+created_by: kareneilbeck
+creation_date: 2014-01-05T07:33:30Z
+
+[Term]
+id: SO:0002002
+name: Z1_region
+def: "A mating type region motif, one of two segments of homology found at all three mating loci (HML, MAT, and HMR)." [SGD:jd]
+comment: Requested by Janos Demeter, SGD.
+synonym: "Z1-region" EXACT []
+is_a: SO:0001999 ! mating_type_region_motif
+created_by: kareneilbeck
+creation_date: 2014-01-05T07:34:59Z
+
+[Term]
+id: SO:0002003
+name: Z2_region
+def: "A mating type region motif, the rightmost segment of homology in the HML and MAT mating loci (not present in HMR)." [SGD:jd]
+comment: Requested by Janos Demeter, SGD.
+synonym: "Z2-segment" EXACT []
+is_a: SO:0001999 ! mating_type_region_motif
+created_by: kareneilbeck
+creation_date: 2014-01-05T07:36:45Z
+
+[Term]
+id: SO:0002004
+name: ARS_consensus_sequence
+def: "The ACS is an 11-bp sequence of the form 5'-WTTTAYRTTTW-3' which is at the core of every yeast ARS, and is necessary but not sufficient for recognition and binding by the origin recognition complex (ORC). Functional ARSs require an ACS, as well as other cis elements in the 5' (C domain) and 3' (B domain) flanking sequences of the ACS." [SGD:jd]
+synonym: "ACS" EXACT []
+synonym: "ARS consensus sequence" EXACT []
+is_a: SO:0000713 ! DNA_motif
+relationship: part_of SO:0000436 ! ARS
+created_by: kareneilbeck
+creation_date: 2014-01-05T07:47:48Z
+
+[Term]
+id: SO:0002005
+name: DSR_motif
+def: "The determinant of selective removal (DSR) motif consists of repeats of U(U/C)AAAC. The motif targets meiotic transcripts for removal during mitosis via the exosome." [PMID:22645662]
+comment: Requested by Antonia Locke, (Pombe).
+synonym: "DSR motif" EXACT []
+is_a: SO:0000713 ! DNA_motif
+created_by: kareneilbeck
+creation_date: 2014-01-05T07:51:27Z
+
+[Term]
+id: SO:0002006
+name: zinc_repressed_element
+def: "A promoter element that has the consensus sequence GNMGATC, and is found in promoters of genes repressed in the presence of zinc." [PMID:24003116, POMBE:mh]
+comment: This element is bound by Loz1 in S. pombe. The paper does not name the element. This term was requested by Midoris Harris, for Pombe.
+synonym: "zinc repressed element" EXACT []
+is_a: SO:0001659 ! promoter_element
+created_by: kareneilbeck
+creation_date: 2014-01-05T09:23:27Z
+
+[Term]
+id: SO:0002007
+name: MNV
+def: "A multiple nucleotide substitution in which the inserted sequence is the same length as the replaced sequence." [NCBI:th]
+is_a: SO:1000002 ! substitution
+created_by: kareneilbeck
+creation_date: 2014-01-13T03:48:40Z
 
 [Term]
 id: SO:0005836
@@ -17032,7 +17797,7 @@ is_a: SO:0000703 ! experimental_result_region
 [Term]
 id: SO:0100011
 name: cleaved_peptide_region
-def: "The cleaved_peptide_regon is the a region of peptide sequence that is cleaved during maturation." [EBIBS:GAR]
+def: "The cleaved_peptide_region is the region of a peptide sequence that is cleaved during maturation." [EBIBS:GAR]
 comment: Range.
 subset: biosapiens
 subset: SOFA
@@ -17122,6 +17887,7 @@ id: SO:0100020
 name: polypeptide_DNA_contact
 def: "A binding site that, in the polypeptide molecule, interacts selectively and non-covalently with DNA." [EBIBS:GAR, SO:ke]
 subset: biosapiens
+synonym: "DNA_bind" EXACT BS [uniprot:feature]
 synonym: "polypeptide DNA contact" EXACT []
 is_a: SO:0001429 ! DNA_binding_site
 is_a: SO:0100002 ! molecular_contact_region
@@ -17343,7 +18109,7 @@ is_a: SO:0001059 ! sequence_alteration
 [Term]
 id: SO:1000035
 name: duplication
-def: "One or more nucleotides are added between two adjacent nucleotides in the sequence; the inserted sequence derives from, or is identical in sequence to, nucleotides adjacent to insertion point." [EBI:www.ebi.ac.uk/mutations/recommendations/mutevent.html]
+def: "An insertion which derives from, or is identical in sequence to, nucleotides present at a known location in the genome." [EBI:www.ebi.ac.uk/mutations/recommendations/mutevent.html, NCBI:th]
 synonym: "nucleotide duplication" EXACT []
 synonym: "nucleotide_duplication" RELATED []
 xref: loinc:LA6686-5 "Duplication"
@@ -17891,7 +18657,7 @@ comment: OBSOLETE: This term was deleted as it conflated more than one term. The
 synonym: "mutation causing amino acid insertion" RELATED []
 synonym: "sequence variant causing amino acid insertion" EXACT []
 is_obsolete: true
-replaced_by: SO:0001603
+replaced_by: SO:0001605
 
 [Term]
 id: SO:1000097
@@ -17901,7 +18667,7 @@ comment: OBSOLETE: This term was deleted as it conflated more than one term. The
 synonym: "mutation causing amino acid deletion" RELATED []
 synonym: "sequence variant causing amino acid deletion" EXACT []
 is_obsolete: true
-consider: SO:0001583
+consider: SO:0001825
 
 [Term]
 id: SO:1000098
@@ -17911,7 +18677,7 @@ comment: OBSOLETE: This term was deleted as it conflated more than one term. The
 synonym: "mutation causing polypeptide truncation" RELATED []
 synonym: "sequence variant causing polypeptide truncation" EXACT []
 is_obsolete: true
-replaced_by: SO:0001167
+replaced_by: SO:0001587
 
 [Term]
 id: SO:1000099
@@ -17959,6 +18725,7 @@ comment: OBSOLETE: This term was deleted as it conflated more than one term. The
 synonym: "mutationdecreasing level of translation product" RELATED []
 synonym: "sequence variant decreasing level of translation product" EXACT []
 is_obsolete: true
+replaced_by: SO:0001555
 
 [Term]
 id: SO:1000104
@@ -19186,7 +19953,7 @@ creation_date: 2009-08-19T12:11:53Z
 [Typedef]
 id: translation_of
 name: translation_of
-def: "X is translation of Y if X is translated by ribosome to create Y." [http://precedings.nature.com/documents/3495/version/1]
+def: "X is translation of Y if Y is translated by ribosome to create X." [http://precedings.nature.com/documents/3495/version/1]
 comment: Example: Polypeptide translation_of CDS.
 created_by: kareneilbeck
 creation_date: 2009-08-19T12:09:59Z
