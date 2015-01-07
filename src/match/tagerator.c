@@ -695,7 +695,6 @@ int gt_runtagerator(const TageratorOptions *tageratoroptions,GtError *err)
                            err) != 0)
         {
           haserr = true;
-          gt_free(desc);
           break;
         }
         gt_copy_reversecomplement(twl.rctransformedtag,twl.transformedtag,
@@ -734,7 +733,6 @@ int gt_runtagerator(const TageratorOptions *tageratoroptions,GtError *err)
                        twl.taglen,
                        tageratoroptions->userdefinedmaxdistance);
           haserr = true;
-          gt_free(desc);
           break;
         }
         gt_assert(tageratoroptions->userdefinedmaxdistance < 0 ||
