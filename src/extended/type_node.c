@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2012-2013 Gordon Gremme <gordon@gremme.org>
+  Copyright (c) 2012-2013, 2015 Gordon Gremme <gordon@gremme.org>
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -84,7 +84,7 @@ void gt_type_node_part_of_add(GtTypeNode *type_node, const char *id)
 }
 
 const char* gt_type_node_part_of_get(const GtTypeNode *type_node,
-                                  GtUword idx)
+                                     GtUword idx)
 {
   gt_assert(type_node && idx < gt_type_node_part_of_size(type_node));
   return *(const char**) gt_array_get(type_node->part_of_list, idx);
@@ -133,19 +133,25 @@ static void create_transitive_part_of_edges(GtTypeNode *node,
 bool gt_type_node_has_parent(GtTypeNode *node, const char *id,
                              GtBoolMatrix *part_of_out_edges,
                              GtBoolMatrix *part_of_in_edges,
-                             GtArray *node_list)
+                             GtArray *node_list, GtHashmap *id2name,
+                             unsigned int indentlevel)
 {
   GtArray *node_stack;
   GtTypeNode *parent;
   GtUword i;
   bool *result;
   gt_assert(node && id);
-  gt_log_log("check if node %s has parent %s", node->id, id);
+  gt_log_log("%*scheck if node %s has parent %s", indentlevel * 2, "",
+             (const char*) gt_hashmap_get(id2name, node->id),
+             (const char*) gt_hashmap_get(id2name, id));
 
   /* try cache */
   if (node->cache) {
-    if ((result = gt_hashmap_get(node->cache, id)))
+    if ((result = gt_hashmap_get(node->cache, id))) {
+      gt_log_log("%*sreturn %s (cache hit)", indentlevel * 2, "",
+                 *result ?  "true" : "false");
       return *result;
+    }
   }
   else
     node->cache = gt_hashmap_new(GT_HASH_DIRECT, NULL, gt_free_func);
@@ -155,7 +161,7 @@ bool gt_type_node_has_parent(GtTypeNode *node, const char *id,
   if (node->id == id) {
     *result = true;
     gt_hashmap_add(node->cache, (char*) id, result);
-    gt_log_log("return true");
+    gt_log_log("%*sreturn true", indentlevel * 2, "");
     return true;
   }
   /* create transitive part_of edges */
@@ -170,10 +176,10 @@ bool gt_type_node_has_parent(GtTypeNode *node, const char *id,
        i  = gt_bool_matrix_get_next_column(part_of_out_edges, node->num, i)) {
     parent = *(GtTypeNode**) gt_array_get(node_list, i);
     if (gt_type_node_has_parent(parent, id, part_of_out_edges, part_of_in_edges,
-                                node_list)) {
+                                node_list, id2name, indentlevel + 1)) {
       *result = true;
       gt_hashmap_add(node->cache, (char*) id, result);
-      gt_log_log("return true");
+      gt_log_log("%*sreturn true", indentlevel * 2, "");
       return true;
     }
   }
@@ -181,16 +187,17 @@ bool gt_type_node_has_parent(GtTypeNode *node, const char *id,
   for (i = 0; i < gt_array_size(node->is_a_out_edges); i++) {
     parent = *(GtTypeNode**) gt_array_get(node->is_a_out_edges, i);
     if (gt_type_node_has_parent(parent, id, part_of_out_edges, part_of_in_edges,
-                                node_list)) {
+                                node_list, id2name, indentlevel + 1)) {
       *result = true;
       gt_hashmap_add(node->cache, (char*) id, result);
-      gt_log_log("return true");
+      gt_log_log("%*sreturn true", indentlevel * 2, "");
       return true;
     }
   }
   /* no result found */
   *result = false;
   gt_hashmap_add(node->cache, (char*) id, result);
+  gt_log_log("%*sreturn false", indentlevel * 2, "");
   return false;
 }
 
