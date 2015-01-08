@@ -401,7 +401,6 @@ static int gt_sortbench_runner(GT_UNUSED int argc, GT_UNUSED const char **argv,
     }
   }
   gt_assert(method < GT_NUM_OF_SORT_IMPLEMENTATIONS);
-  gt_timer_show(timer, stdout);
   printf("# TIME %s-t%u-r" GT_WU "-n" GT_WU " overall ",
           gt_str_get(arguments->impl),
 #ifdef GT_THREADS_ENABLED
