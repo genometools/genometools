@@ -229,3 +229,11 @@
    fun:g_type_register_static
    ...
 }
+{
+   pixman_leak
+   Memcheck:Leak
+   fun:*alloc
+   ...
+   obj:*libpixman*
+   ...
+}
