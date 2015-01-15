@@ -45,6 +45,18 @@ void gt_fasta_show_entry_nt(const char *description, GtUword description_length,
                                      NULL, width, outfp);
 }
 
+void gt_fasta_show_entry_nt_str(const char *description,
+                                GtUword description_length,
+                                const char *sequence,
+                                GtUword sequence_length,
+                                GtUword width,
+                                GtStr *outstr)
+{
+  gt_fasta_show_entry_nt_with_suffix_str(description, description_length,
+                                         sequence, sequence_length,
+                                         NULL, width, outstr);
+}
+
 void gt_fasta_show_entry_with_suffix(const char *description,
                                      const char *sequence,
                                      GtUword sequence_length,
