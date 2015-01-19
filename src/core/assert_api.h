@@ -36,8 +36,12 @@
         do {                                                                 \
           if (!(expression)) {                                               \
             fprintf(stderr, "Assertion failed: (%s), function %s, file %s, " \
-                    "line %d.\nThis is a bug, please report it at "          \
-                    "https://github.com/genometools/genometools/issues.\n",  \
+                    "line %d.\nThis is a bug, please report it at\n"         \
+                    "https://github.com/genometools/genometools/issues\n"    \
+                    "Please make sure you are running the latest release "   \
+                    "which can be found at\nhttp://genometools.org/pub/\n"   \
+                    "You can check your version number with "                \
+                    "`gt -version`.\n",                                      \
                     #expression, __func__, __FILE__, __LINE__);              \
             /*@ignore@*/                                                     \
             exit(GT_EXIT_PROGRAMMING_ERROR);                                 \
