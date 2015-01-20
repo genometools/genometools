@@ -37,7 +37,7 @@ void          gt_type_node_add_is_a_vertex(GtTypeNode *src,
    The <id2name> mapping is optional and is only used for debugging output.
    The <indentlevel> is also used for debugging output and is increased in every
    recursive call. */
-bool          gt_type_node_has_parent(GtTypeNode *node, const char *id,
+bool          gt_type_node_has_parent(GtTypeNode *node, GtTypeNode *pnode,
                                       GtBoolMatrix *part_of_out_edges,
                                       GtBoolMatrix *part_of_in_edges,
                                       GtArray *node_list, GtHashmap *id2name,

@@ -1,0 +1,4 @@
+##gff-version 3
+##sequence-region Si_gnF.scaffold02694 1 6355204
+Si_gnF.scaffold02694	afra	mRNA	401035	403323	.	+	.	ID=mRNA1;Name=Si_estOR100817isotig13026
+Si_gnF.scaffold02694	afra	exon	401035	401411	.	+	.	ID=exon1;               Name=Si_estOR100817isotig13026:exon1;               Parent=mRNA1

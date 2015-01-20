@@ -160,7 +160,7 @@ bool gt_type_graph_is_partof(GtTypeGraph *type_graph, const char *parent_type,
                              const char *child_type)
 {
   const char *parent_id, *child_id;
-  GtTypeNode *child_node;
+  GtTypeNode *parent_node, *child_node;
   gt_assert(type_graph && parent_type && child_type);
   /* make sure graph is built */
   if (!type_graph->ready) {
@@ -173,11 +173,14 @@ bool gt_type_graph_is_partof(GtTypeGraph *type_graph, const char *parent_type,
   /* get child ID, if the type is not mappable to an ID, assmue it is the ID */
   if (!(child_id = gt_hashmap_get(type_graph->name2id, child_type)))
     child_id = child_type;
+  /* get parent node */
+  parent_node = gt_hashmap_get(type_graph->nodemap, parent_id);
+  gt_assert(parent_node);
   /* get child node */
   child_node = gt_hashmap_get(type_graph->nodemap, child_id);
   gt_assert(child_node);
   /* check for parent */
-  return gt_type_node_has_parent(child_node, parent_id,
+  return gt_type_node_has_parent(child_node, parent_node,
                                  type_graph->part_of_out_edges,
                                  type_graph->part_of_in_edges,
                                  type_graph->nodes, type_graph->id2name, 0);
