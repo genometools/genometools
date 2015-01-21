@@ -201,9 +201,8 @@ end
 Name "gt gff3 test 17"
 Keywords "gt_gff3"
 Test do
-  run_test "#{$bin}gt gff3 #{$testdata}gt_gff3_test_17.gff3", :retval => 1
+  run_test "#{$bin}gt gff3 #{$testdata}gt_gff3_test_17.gff3"
   grep(last_stderr, /unknown meta-directive encountered/);
-  grep(last_stderr, /does not have data: ##foo/);
 end
 
 Name "gt gff3 test 18"
@@ -1279,6 +1278,16 @@ Test do
   run_test "#{$bin}gt gff3 #{$testdata}unknown_meta_directive.gff3"
   grep last_stderr, "unknown meta-directive encountered in line"
   run "diff #{last_stdout} #{$testdata}unknown_meta_directive.gff3"
+end
+
+Name "gt gff3 unknown meta directive (without argument)"
+Keywords "gt_gff3"
+Test do
+  run_test "#{$bin}gt gff3 " +
+           "#{$testdata}unknown_meta_directive_without_argument.gff3"
+  grep last_stderr, "unknown meta-directive encountered in line"
+  run "diff #{last_stdout} " +
+      "#{$testdata}unknown_meta_directive_without_argument.gff3"
 end
 
 Name "gt gff3 simple cycle"
