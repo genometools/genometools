@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2006-2013 Gordon Gremme <gordon@gremme.org>
-  Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2006-2013, 2015 Gordon Gremme <gordon@gremme.org>
+  Copyright (c) 2006-2008       Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -394,6 +394,7 @@ static int gff3_visitor_meta_node(GtNodeVisitor *nv, GtMetaNode *mn,
                                   GT_UNUSED GtError *err)
 {
   GtGFF3Visitor *gff3_visitor;
+  const char *data;
   gt_error_check(err);
   gff3_visitor = gff3_visitor_cast(nv);
   gt_assert(nv && mn);
@@ -407,16 +408,22 @@ static int gff3_visitor_meta_node(GtNodeVisitor *nv, GtMetaNode *mn,
       gff3_version_string(nv);
     }
   }
+  data = gt_meta_node_get_data(mn);
   if (!gff3_visitor->outstr) {
-    gt_file_xprintf(gff3_visitor->outfp, "##%s %s\n",
-                    gt_meta_node_get_directive(mn),
-                    gt_meta_node_get_data(mn));
-
+    if (data) {
+      gt_file_xprintf(gff3_visitor->outfp, "##%s %s\n",
+                      gt_meta_node_get_directive(mn), data);
+    } else {
+      gt_file_xprintf(gff3_visitor->outfp, "##%s\n",
+                      gt_meta_node_get_directive(mn));
+    }
   } else {
     gt_str_append_cstr(gff3_visitor->outstr, "##");
     gt_str_append_cstr(gff3_visitor->outstr, gt_meta_node_get_directive(mn));
-    gt_str_append_char(gff3_visitor->outstr, ' ');
-    gt_str_append_cstr(gff3_visitor->outstr, gt_meta_node_get_data(mn));
+    if (data) {
+      gt_str_append_char(gff3_visitor->outstr, ' ');
+      gt_str_append_cstr(gff3_visitor->outstr, data);
+    }
     gt_str_append_char(gff3_visitor->outstr, '\n');
   }
   return 0;

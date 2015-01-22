@@ -2053,17 +2053,12 @@ static int parse_meta_gff3_line(GtGFF3Parser *parser, GtQueue *genome_nodes,
       invalid = invalid_gff3_pragma(line);
     if (invalid) {
       gt_warning("unknown meta-directive encountered in line %u in file "
-                 "\"%s\", keep as comment: %s", line_number, filename, line);
+                 "\"%s\", keep anyway: %s", line_number, filename, line);
     }
     data = strchr(line+2, ' ');
     if (data) {
       data[0] = '\0';
       data++;
-    }
-    else {
-      gt_error_set(err, "meta-directive encountered in line %u in file "
-                 "\"%s\" does not have data: %s", line_number, filename, line);
-      had_err = -1;
     }
     if (!had_err) {
       /* storing meta node */

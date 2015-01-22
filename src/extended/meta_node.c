@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2012 Gordon Gremme <gordon@gremme.org>
+  Copyright (c) 2012, 2015 Gordon Gremme <gordon@gremme.org>
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -34,7 +34,6 @@ struct GtMetaNode
 static void meta_node_free(GtGenomeNode *gn)
 {
   GtMetaNode *m = gt_meta_node_cast(gn);
-  gt_assert(m && m->meta_directive && m->meta_data);
   gt_free(m->meta_directive);
   gt_free(m->meta_data);
   gt_str_delete(m->meta_str);
@@ -87,9 +86,10 @@ GtGenomeNode* gt_meta_node_new(const char *meta_directive,
 {
   GtGenomeNode *gn = gt_genome_node_create(gt_meta_node_class());
   GtMetaNode *m = gt_meta_node_cast(gn);
-  gt_assert(meta_directive && meta_data);
+  gt_assert(meta_directive);
   m->meta_directive = gt_cstr_dup(meta_directive);
-  m->meta_data = gt_cstr_dup(meta_data);
+  if (meta_data)
+    m->meta_data = gt_cstr_dup(meta_data);
   m->meta_str = gt_str_new_cstr("");
   return gn;
 }
@@ -102,7 +102,7 @@ const char* gt_meta_node_get_directive(const GtMetaNode *m)
 
 const char* gt_meta_node_get_data(const GtMetaNode *m)
 {
-  gt_assert(m && m->meta_data);
+  gt_assert(m);
   return m->meta_data;
 }
 

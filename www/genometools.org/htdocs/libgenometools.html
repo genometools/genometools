@@ -4346,7 +4346,7 @@ Create a <code>GtNodeStream*</code> which uses <code>in_stream</code> as input.
 <code>GtGenomeNode*  gt_genome_node_ref(GtGenomeNode *genome_node)</code>
 <p>
 Increase the reference count for <code>genome_node</code> and return it.
-   <code>genome_node</code> cannot be <code>NULL</code>.
+   <code>genome_node</code> must not be <code>NULL</code>.
 </p>
 <hr>
 <a name="gt_genome_node_get_seqid"></a>
@@ -5760,6 +5760,7 @@ Return a new <code>GtMetaNode</code> object representing a <code>meta_directive<
    corresponding <code>meta_data</code>. Please note that the leading ``<code>##</code>'' which
    denotes meta lines in GFF3 files should not be part of the
    <code>meta_directive</code>.
+   The <code>meta_directive</code> must not be <code>NULL</code>, the <code>meta_data</code> can be <code>NULL</code>.
 </p>
 <hr>
 <a name="gt_meta_node_get_directive"></a>
@@ -5774,7 +5775,7 @@ Return the meta directive stored in <code>meta_node</code>.
 
 <code>const char*               gt_meta_node_get_data(const GtMetaNode *meta_node)</code>
 <p>
-Return the meta data stored in <code>meta_node</code>.
+Return the meta data stored in <code>meta_node</code>. Can return NULL!
 </p>
 <hr>
 <a name="gt_meta_node_try_cast"></a>
@@ -9222,6 +9223,19 @@ Print a fasta entry with optional <code>description</code> and mandatory <code>s
    <code>outfp</code>. If <code>width</code> is != 0 the sequence is formatted accordingly.
 </p>
 <hr>
+<a name="gt_fasta_show_entry_nt"></a>
+
+<code>void  gt_fasta_show_entry_nt(const char *description, GtUword description_length,
+                            const char *sequence, GtUword sequence_length,
+                            GtUword width, GtFile *outfp)</code>
+<p>
+Print a fasta entry with optional <code>description</code> and mandatory <code>sequence</code> to
+   <code>outfp</code>. If <code>width</code> is != 0 the sequence is formatted accordingly.
+   Will print at most <code>sequence_length</code> characters from <code>sequence</code> if no
+   '\0'-byte is encountered. <code>description</code> and <code>description_length</code> are handled
+   accordingly if present.
+</p>
+<hr>
 <a name="gt_fasta_show_entry_str"></a>
 
 <code>void  gt_fasta_show_entry_str(const char *description, const char *sequence,
@@ -9230,6 +9244,22 @@ Print a fasta entry with optional <code>description</code> and mandatory <code>s
 <p>
 Append a fasta entry with optional <code>description</code> and mandatory <code>sequence</code> to
    <code>outstr</code>. If <code>width</code> is != 0 the sequence is formatted accordingly.
+</p>
+<hr>
+<a name="gt_fasta_show_entry_nt_str"></a>
+
+<code>void  gt_fasta_show_entry_nt_str(const char *description,
+                                GtUword description_length,
+                                const char *sequence,
+                                GtUword sequence_length,
+                                GtUword width,
+                                GtStr *outstr)</code>
+<p>
+Print a fasta entry with optional <code>description</code> and mandatory <code>sequence</code> to
+   <code>outstr</code>. If <code>width</code> is != 0 the sequence is formatted accordingly.
+   Will print at most <code>sequence_length</code> characters from <code>sequence</code> if no
+   '\0'-byte is encountered. <code>description</code> and <code>description_length</code> are handled
+   accordingly if present.
 </p>
 <hr>
 <a name="Fileutils"></a>
@@ -10757,6 +10787,10 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
 
   <a href="#gt_fasta_show_entry"><code>gt_fasta_show_entry</code></a><br>
 
+  <a href="#gt_fasta_show_entry_nt"><code>gt_fasta_show_entry_nt</code></a><br>
+
+  <a href="#gt_fasta_show_entry_nt_str"><code>gt_fasta_show_entry_nt_str</code></a><br>
+
   <a href="#gt_fasta_show_entry_str"><code>gt_fasta_show_entry_str</code></a><br>
 
   <a href="#gt_feature_in_stream_new"><code>gt_feature_in_stream_new</code></a><br>
@@ -11992,7 +12026,7 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
 <div id="footer">
 Copyright &copy; 2008-2013
 The <i>GenomeTools</i> authors.
-Last update: 2014-12-11
+Last update: 2015-01-21
 </div>
 </div>
 <!-- Piwik -->
