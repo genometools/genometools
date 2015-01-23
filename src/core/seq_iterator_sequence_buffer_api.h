@@ -30,7 +30,7 @@ typedef struct GtSeqIteratorSequenceBuffer GtSeqIteratorSequenceBuffer;
    the beginning of the first file. If an error occurs, NULL is returned (see
    the <err> object for details). */
 GtSeqIterator* gt_seq_iterator_sequence_buffer_new(const GtStrArray
-                                                                   *filenametab,
-                                                  GtError *err);
+                                                   *filenametab,
+                                                   GtError *err);
 
 #endif

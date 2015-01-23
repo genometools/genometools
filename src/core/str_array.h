@@ -21,7 +21,10 @@
 #include "core/str.h"
 #include "core/str_array_api.h"
 
+/* Returns an array of strings read from fila at <path>. Each line resulting in
+   one <GtStr> within the <GtStrArray>. */
 GtStrArray* gt_str_array_new_file(const char *path);
+
 /* Returns an internal GtStr pointer (i.e., _not_ a new reference!). */
 GtStr*      gt_str_array_get_str(const GtStrArray*, GtUword strnum);
 
