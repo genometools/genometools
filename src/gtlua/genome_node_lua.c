@@ -100,13 +100,15 @@ static int region_node_lua_new(lua_State *L)
 static int meta_node_lua_new(lua_State *L)
 {
   GtGenomeNode **mn;
-  const char *directive, *data;
+  const char *directive = NULL, *data = NULL;
   gt_assert(L);
   /* get_check parameters */
   directive = luaL_checkstring(L, 1);
-  data = luaL_checkstring(L, 2);
+  if (!lua_isnil(L, 2))
+    data = luaL_checkstring(L, 2);
   /* construct object */
   mn = lua_newuserdata(L, sizeof (GtGenomeNode*));
+  gt_assert(directive);
   *mn = gt_meta_node_new(directive, data);
   gt_assert(*mn);
   luaL_getmetatable(L, GENOME_NODE_METATABLE);
@@ -541,11 +543,14 @@ static int meta_node_lua_get_directive(lua_State *L)
 {
   GtGenomeNode **gn;
   GtMetaNode *mn;
+  const char *meta_directive = NULL;
   gn = check_genome_node(L, 1);
   /* make sure we get a meta node */
   mn = gt_meta_node_try_cast(*gn);
   luaL_argcheck(L, mn, 1, "not a meta node");
-  lua_pushstring(L, gt_meta_node_get_directive(mn));
+  meta_directive = gt_meta_node_get_directive(mn);
+  gt_assert(meta_directive);
+  lua_pushstring(L, meta_directive);
   return 1;
 }
 
@@ -553,11 +558,17 @@ static int meta_node_lua_get_data(lua_State *L)
 {
   GtGenomeNode **gn;
   GtMetaNode *mn;
+  const char *meta_data = NULL;
   gn = check_genome_node(L, 1);
   /* make sure we get a meta node */
   mn = gt_meta_node_try_cast(*gn);
   luaL_argcheck(L, mn, 1, "not a meta node");
-  lua_pushstring(L, gt_meta_node_get_data(mn));
+  meta_data = gt_meta_node_get_data(mn);
+  if (meta_data) {
+    lua_pushstring(L, meta_data);
+  } else {
+    lua_pushnil(L);
+  }
   return 1;
 }
 

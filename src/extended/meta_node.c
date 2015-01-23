@@ -90,6 +90,8 @@ GtGenomeNode* gt_meta_node_new(const char *meta_directive,
   m->meta_directive = gt_cstr_dup(meta_directive);
   if (meta_data)
     m->meta_data = gt_cstr_dup(meta_data);
+  else
+    m->meta_data = NULL;
   m->meta_str = gt_str_new_cstr("");
   return gn;
 }
