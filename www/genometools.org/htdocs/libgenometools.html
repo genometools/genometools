@@ -1020,7 +1020,7 @@ Create BED blocks parsed by <code>bed_in_stream</code> with given <code>type</co
 <hr>
 <a name="gt_bittab_new"></a>
 
-<code>GtBittab*      gt_bittab_new(GtUword num_of_bits)</code>
+<code>GtBittab*  gt_bittab_new(GtUword num_of_bits)</code>
 <p>
 Return a new <code>GtBittab</code> of length <code>num_of_bits</code>, initialised to 0.
    <code>num_of_bits</code> has to be > 0
@@ -1028,138 +1028,136 @@ Return a new <code>GtBittab</code> of length <code>num_of_bits</code>, initialis
 <hr>
 <a name="gt_bittab_set_bit"></a>
 
-<code>void           gt_bittab_set_bit(GtBittab *bittab, GtUword i)</code>
+<code>void       gt_bittab_set_bit(GtBittab *bittab, GtUword i)</code>
 <p>
 Set bit <code>i</code> in <code>bittab</code> to 1.
 </p>
 <hr>
 <a name="gt_bittab_unset_bit"></a>
 
-<code>void           gt_bittab_unset_bit(GtBittab *bittab, GtUword i)</code>
+<code>void       gt_bittab_unset_bit(GtBittab *bittab, GtUword i)</code>
 <p>
 Set bit <code>i</code> in <code>bittab</code> to 0.
 </p>
 <hr>
 <a name="gt_bittab_complement"></a>
 
-<code>void           gt_bittab_complement(GtBittab *bittab_a,
-                                   const GtBittab *bittab_b)</code>
+<code>void       gt_bittab_complement(GtBittab *bittab_a, const GtBittab *bittab_b)</code>
 <p>
 Set <code>bittab_a</code> to be the complement of <code>bittab_b</code>.
 </p>
 <hr>
 <a name="gt_bittab_equal"></a>
 
-<code>void           gt_bittab_equal(GtBittab *bittab_a, const GtBittab *bittab_b)</code>
+<code>void       gt_bittab_equal(GtBittab *bittab_a, const GtBittab *bittab_b)</code>
 <p>
 Set <code>bittab_a</code> to be equal to <code>bittab_b</code>.
 </p>
 <hr>
 <a name="gt_bittab_and"></a>
 
-<code>void           gt_bittab_and(GtBittab *bittab_a, const GtBittab *bittab_b,
-                            const GtBittab *bittab_c)</code>
+<code>void       gt_bittab_and(GtBittab *bittab_a, const GtBittab *bittab_b,
+                        const GtBittab *bittab_c)</code>
 <p>
 Set <code>bittab_a</code> to be the bitwise AND of <code>bittab_b</code> and <code>bittab_c</code>.
 </p>
 <hr>
 <a name="gt_bittab_or"></a>
 
-<code>void           gt_bittab_or(GtBittab *bittab_a, const GtBittab *bittab_b,
-                           const GtBittab *bittab_c)</code>
+<code>void       gt_bittab_or(GtBittab *bittab_a, const GtBittab *bittab_b,
+                       const GtBittab *bittab_c)</code>
 <p>
 Set <code>bittab_a</code> to be the bitwise OR of <code>bittab_b</code> and <code>bittab_c</code>.
 </p>
 <hr>
 <a name="gt_bittab_nand"></a>
 
-<code>void           gt_bittab_nand(GtBittab *bittab_a, const GtBittab *bittab_b,
-                             const GtBittab *bittab_c)</code>
+<code>void       gt_bittab_nand(GtBittab *bittab_a, const GtBittab *bittab_b,
+                         const GtBittab *bittab_c)</code>
 <p>
 Set <code>bittab_a</code> to be <code>bittab_b</code> NAND <code>bittab_c</code>.
 </p>
 <hr>
 <a name="gt_bittab_and_equal"></a>
 
-<code>void           gt_bittab_and_equal(GtBittab *bittab_a, const GtBittab *bittab_b)</code>
+<code>void       gt_bittab_and_equal(GtBittab *bittab_a, const GtBittab *bittab_b)</code>
 <p>
 Set <code>bittab_a</code> to be the bitwise AND of <code>bittab_a</code> and <code>bittab_b</code>.
 </p>
 <hr>
 <a name="gt_bittab_or_equal"></a>
 
-<code>void           gt_bittab_or_equal(GtBittab *bittab_a, const GtBittab *bittab_b)</code>
+<code>void       gt_bittab_or_equal(GtBittab *bittab_a, const GtBittab *bittab_b)</code>
 <p>
 Set <code>bittab_a</code> to be the bitwise OR of <code>bittab_a</code> and <code>bittab_b</code>.
 </p>
 <hr>
 <a name="gt_bittab_shift_left_equal"></a>
 
-<code>void           gt_bittab_shift_left_equal(GtBittab *bittab)</code>
+<code>void       gt_bittab_shift_left_equal(GtBittab *bittab)</code>
 <p>
 Shift <code>bittab</code> by one position to the left.
 </p>
 <hr>
 <a name="gt_bittab_shift_right_equal"></a>
 
-<code>void           gt_bittab_shift_right_equal(GtBittab *bittab)</code>
+<code>void       gt_bittab_shift_right_equal(GtBittab *bittab)</code>
 <p>
 Shift <code>bittab</code> by one position to the right.
 </p>
 <hr>
 <a name="gt_bittab_unset"></a>
 
-<code>void           gt_bittab_unset(GtBittab *bittab)</code>
+<code>void       gt_bittab_unset(GtBittab *bittab)</code>
 <p>
 Set all bits in <code>bittab</code> to 0.
 </p>
 <hr>
 <a name="gt_bittab_show"></a>
 
-<code>void           gt_bittab_show(const GtBittab *bittab, FILE *fp)</code>
+<code>void       gt_bittab_show(const GtBittab *bittab, FILE *fp)</code>
 <p>
 Output a representation of <code>bittab</code> to <code>fp</code>.
 </p>
 <hr>
 <a name="gt_bittab_get_all_bitnums"></a>
 
-<code>void           gt_bittab_get_all_bitnums(const GtBittab *bittab, GtArray *array)</code>
+<code>void       gt_bittab_get_all_bitnums(const GtBittab *bittab, GtArray *array)</code>
 <p>
 Fill <code>array</code> with the indices of all set bits in <code>bittab</code>.
 </p>
 <hr>
 <a name="gt_bittab_bit_is_set"></a>
 
-<code>bool           gt_bittab_bit_is_set(const GtBittab *bittab, GtUword i)</code>
+<code>bool       gt_bittab_bit_is_set(const GtBittab *bittab, GtUword i)</code>
 <p>
 Return <code>true</code> if bit <code>i</code> is set in <code>bittab</code>.
 </p>
 <hr>
 <a name="gt_bittab_cmp"></a>
 
-<code>bool           gt_bittab_cmp(const GtBittab *bittab_a, const GtBittab *bittab_b)</code>
+<code>bool       gt_bittab_cmp(const GtBittab *bittab_a, const GtBittab *bittab_b)</code>
 <p>
 Return <code>true</code> if <code>bittab_a</code> and <code>bittab_b</code> are identical.
 </p>
 <hr>
 <a name="gt_bittab_get_first_bitnum"></a>
 
-<code>GtUword  gt_bittab_get_first_bitnum(const GtBittab *bittab)</code>
+<code>GtUword    gt_bittab_get_first_bitnum(const GtBittab *bittab)</code>
 <p>
 Return the index of the first set bit in <code>bittab</code>.
 </p>
 <hr>
 <a name="gt_bittab_get_last_bitnum"></a>
 
-<code>GtUword  gt_bittab_get_last_bitnum(const GtBittab *bittab)</code>
+<code>GtUword    gt_bittab_get_last_bitnum(const GtBittab *bittab)</code>
 <p>
 Return the index of the last set bit in <code>bittab</code>.
 </p>
 <hr>
 <a name="gt_bittab_get_next_bitnum"></a>
 
-<code>GtUword  gt_bittab_get_next_bitnum(const GtBittab *bittab,
-                                        GtUword i)</code>
+<code>GtUword    gt_bittab_get_next_bitnum(const GtBittab *bittab, GtUword i)</code>
 <p>
 Return the index of the next set bit in <code>bittab</code> with an index greater
    than <code>i</code>.
@@ -1167,21 +1165,21 @@ Return the index of the next set bit in <code>bittab</code> with an index greate
 <hr>
 <a name="gt_bittab_count_set_bits"></a>
 
-<code>GtUword  gt_bittab_count_set_bits(const GtBittab *bittab)</code>
+<code>GtUword    gt_bittab_count_set_bits(const GtBittab *bittab)</code>
 <p>
 Return the number of set bits in <code>bittab</code>.
 </p>
 <hr>
 <a name="gt_bittab_size"></a>
 
-<code>GtUword  gt_bittab_size(GtBittab *bittab)</code>
+<code>GtUword    gt_bittab_size(GtBittab *bittab)</code>
 <p>
 Return the total number of bits of <code>bittab</code>.
 </p>
 <hr>
 <a name="gt_bittab_delete"></a>
 
-<code>void           gt_bittab_delete(GtBittab *bittab)</code>
+<code>void       gt_bittab_delete(GtBittab *bittab)</code>
 <p>
 Delete <code>bittab</code>.
 </p>
@@ -12026,7 +12024,7 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
 <div id="footer">
 Copyright &copy; 2008-2013
 The <i>GenomeTools</i> authors.
-Last update: 2015-01-21
+Last update: 2015-01-24
 </div>
 </div>
 <!-- Piwik -->
