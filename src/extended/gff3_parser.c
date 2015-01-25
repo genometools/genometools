@@ -847,7 +847,7 @@ static int process_parent_attr(char *parent_attr, GtGenomeNode *feature_node,
     }
     else if (!parser->strict &&
              gt_orphanage_is_orphan(parser->orphanage, parent)) {
-      /* children of orphaned parends are orphans themself */
+      /* children of orphaned parents are orphans themselves */
       orphaned_parent = true;
     }
     else if (gt_str_cmp(gt_genome_node_get_seqid(parent_gf),
