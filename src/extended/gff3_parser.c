@@ -2004,11 +2004,15 @@ static int parse_meta_gff3_line(GtGFF3Parser *parser, GtQueue *genome_nodes,
                    strlen(GT_GFF_VERSION_PREFIX)) == 0) {
     if (parser->tidy) {
       gt_warning("skipping illegal GFF version pragma in line %u of file "
-                 "\"%s\": %s", line_number, filename, line);
+                 "\"%s\": %s (merge multiple GFF3 files with `gt gff3 -sort` "
+                 "and do not concatenate them manually)", line_number, filename,
+                 line);
     }
     else {
       gt_error_set(err, "illegal GFF version pragma in line %u of file \"%s\": "
-                   "%s", line_number, filename, line);
+                   "%s (merge multiple GFF3 files with `gt gff3 -sort` and do "
+                   "not concatenate them manually)", line_number, filename,
+                   line);
       had_err = -1;
     }
   }
