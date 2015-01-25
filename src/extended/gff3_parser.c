@@ -1060,11 +1060,12 @@ static int check_multi_feature_constrains(GtGenomeNode *new_gf,
   /* check strand */
   if (!had_err && gt_feature_node_get_strand((GtFeatureNode*) new_gf) !=
                   gt_feature_node_get_strand((GtFeatureNode*) old_gf)) {
-    gt_error_set(err, "the multi-feature with %s \"%s\" on line %u in file "
-                 "\"%s\" has a different strand than its counterpart on line "
-                 "%u", GT_GFF_ID, id, line_number, filename,
-                 gt_genome_node_get_line_number(old_gf));
-    had_err = -1;
+    /* we just issue a warning here, because this is possible in rare cases, see
+       https://github.com/genometools/genometools/issues/225 */
+    gt_warning("the multi-feature with %s \"%s\" on line %u in file \"%s\" has "
+               "a different strand than its counterpart on line %u (possible "
+               "in rare cases)", GT_GFF_ID, id, line_number, filename,
+               gt_genome_node_get_line_number(old_gf));
   }
   /* check attributes (for target attribute only the name) */
   if (!had_err) {
