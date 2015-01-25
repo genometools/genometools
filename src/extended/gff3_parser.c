@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2006-2013 Gordon Gremme <gordon@gremme.org>
-  Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2006-2013, 2015 Gordon Gremme <gordon@gremme.org>
+  Copyright (c) 2006-2008       Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -1685,9 +1685,16 @@ static int parse_first_gff3_line(const char *line, const char *filename,
     had_err = gt_parse_int_line(&version, data, (unsigned int) *line_number,
                                 filename, err);
     if (!had_err && version != GT_GFF_VERSION) {
-      gt_error_set(err, "GFF version %s does not equal required version %s ",
-                   data, GT_GFF_VERSION_STRING);
-      had_err = -1;
+      if (tidy) {
+        gt_warning("GFF version %s does not equal required version %s, try to "
+                   "parse as version %s", data, GT_GFF_VERSION_STRING,
+                   GT_GFF_VERSION_STRING);
+      }
+      else {
+        gt_error_set(err, "GFF version %s does not equal required version %s",
+                     data, GT_GFF_VERSION_STRING);
+        had_err = -1;
+      }
     }
   }
   if (!had_err && *gvf_mode) {

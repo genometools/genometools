@@ -232,6 +232,13 @@ Test do
   grep(last_stderr, /does not equal required version/);
 end
 
+Name "gt gff3 test 21 (-tidy)"
+Keywords "gt_gff3"
+Test do
+  run_test("#{$bin}gt gff3 -tidy #{$testdata}gt_gff3_test_21.gff3")
+  grep(last_stderr, /try to parse as version 3/);
+end
+
 Name "gt gff3 test 22"
 Keywords "gt_gff3"
 Test do
