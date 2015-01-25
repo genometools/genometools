@@ -833,7 +833,12 @@ static int process_parent_attr(char *parent_attr, GtGenomeNode *feature_node,
     parent_gf = (GtGenomeNode*) gt_feature_info_get(parser->feature_info,
                                                     parent);
     if (!parent_gf) {
-      if (parser->strict) {
+      /* In strict mode or if the feature is a multi-feature orphan we fail
+         here. Multi-features cannot be added to the orphanage (who owns them)
+         without memory problems later on, because they are already owned by
+         their pseudo-parent. */
+      if (parser->strict ||
+          gt_feature_node_is_multi((GtFeatureNode*) feature_node)) {
         gt_error_set(err, "%s \"%s\" on line %u in file \"%s\" was not "
                      "previously defined (via \"%s=\")", GT_GFF_PARENT, parent,
                      line_number, filename, GT_GFF_ID);
