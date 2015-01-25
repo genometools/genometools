@@ -76,12 +76,11 @@ static int sequence_node_add_stream_next(GtNodeStream *ns, GtGenomeNode **gn,
       gt_str_append_cstr(seqid, gt_str_array_get(s->seqids, s->cur_seqid));
       had_err = gt_region_mapping_get_sequence_length(s->rm, &len, seqid, err);
       if (!had_err) {
-
         had_err = gt_region_mapping_get_sequence(s->rm, &seq, seqid, 1, len,
                                                  err);
       }
       if (!had_err) {
-        gt_str_append_cstr(seqstr, seq);
+        gt_str_append_cstr_nt(seqstr, seq, len);
         new_sn = gt_sequence_node_new(gt_str_get(seqid), seqstr);
         *gn = new_sn;
       }

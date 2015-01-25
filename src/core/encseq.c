@@ -2283,7 +2283,6 @@ static int fillViabytecompress(GtEncseq *encseq,
     exceptiontable->mappositions =
                               gt_malloc(sizeof (*exceptiontable->mappositions) *
                                         exceptiontable->numofpositionstostore);
-
     nextcheckpos = exceptiontable->maxrangevalue;
   }
   numofchars = gt_alphabet_num_of_chars(encseq->alpha);
