@@ -1,6 +1,8 @@
-changes in version 1.5.5 (2014-12-11)
+changes in version 1.5.5 (2015-01-25)
 
 - bugfixes and cleanups
+- multiple improvements to GFF3 parser
+
 
 changes in version 1.5.4 (2014-12-11)
 

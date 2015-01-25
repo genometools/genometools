@@ -1,0 +1,3 @@
+##gff-version   3
+seq	.	gene	1	100	.	+	.	ID=id1
+seq	.	mRNA	1	100	.	+	.	ID=id1;Parent=id2
