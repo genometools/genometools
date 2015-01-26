@@ -74,23 +74,23 @@ typedef struct FastqFileInfo {
 } FastqFileInfo;
 
 typedef struct GtHcrSeqEncoder {
-  GtQualRange        qrange;
-  FastqFileInfo     *fileinfos;
-  GtAlphabet        *alpha;
-  GtHuffman         *huffman;
-  GtSampling        *sampling;
-  GtUint64 total_num_of_symbols;
-  GtUword      num_of_files;
-  GtWord               startofsamplingtab,
-                     start_of_encoding;
-  unsigned int       qual_offset;
+  GtQualRange    qrange;
+  FastqFileInfo *fileinfos;
+  GtAlphabet    *alpha;
+  GtHuffman     *huffman;
+  GtSampling    *sampling;
+  GtUint64       total_num_of_symbols;
+  GtUword        num_of_files;
+  GtWord         startofsamplingtab,
+                 start_of_encoding;
+  unsigned int   qual_offset;
 } GtHcrSeqEncoder;
 
 struct GtHcrEncoder {
   GtEncdescEncoder *encdesc_encoder;
   GtHcrSeqEncoder  *seq_encoder;
   GtStrArray       *files;
-  GtUword     num_of_reads,
+  GtUword           num_of_reads,
                     num_of_files,
                     sampling_rate,
                     pagesize;
@@ -104,7 +104,7 @@ typedef struct hcr_huff_mem_info {
   size_t        start,
                 end,
                 pos;
-  GtUword pages_per_chunk,
+  GtUword       pages_per_chunk,
                 bitseq_per_chunk,
                 pagesize,
                 blocksize;
@@ -122,11 +122,11 @@ typedef struct GtHcrSeqDecoder {
   GtSampling          *sampling;
   GtStr               *filename;
   HcrHuffDataIterator *data_iter;
-  GtUword        readlength,
+  GtUword              readlength,
                        cur_read,
                        num_of_reads,
                        num_of_files;
-  GtWord                 start_of_encoding;
+  GtWord               start_of_encoding;
   unsigned int         alphabet_size,
                        qual_offset;
 } GtHcrSeqDecoder;
@@ -361,7 +361,6 @@ static int hcr_write_seqs(FILE *fp, GtHcrEncoder *hcr_enc, GtError *err)
   GtBitOutStream *bitstream;
 
   gt_error_check(err);
-  gt_assert(hcr_enc->seq_encoder->sampling);
 
   gt_safe_assign(bits_left_in_page, (hcr_enc->pagesize * 8));
 
@@ -384,17 +383,20 @@ static int hcr_write_seqs(FILE *fp, GtHcrEncoder *hcr_enc, GtError *err)
                                             &seq,
                                             &len,
                                             &desc, err)) == 1) {
+      GtSampling *sampling = hcr_enc->seq_encoder->sampling;
 
       /* count the bits */
       bits_to_write = hcr_write_seq(hcr_enc->seq_encoder, seq, qual, len,
                                     bitstream, true);
 
       /* check if a new sample has to be added */
-      if (gt_sampling_is_next_element_sample(hcr_enc->seq_encoder->sampling,
+      if (sampling != NULL &&
+          gt_sampling_is_next_element_sample(sampling,
                                              page_counter,
                                              read_counter,
                                              bits_to_write,
                                              bits_left_in_page)) {
+        gt_log_log("sampling read " GT_WU, cur_read);
         gt_bitoutstream_flush_advance(bitstream);
 
         filepos = gt_bitoutstream_pos(bitstream);
@@ -403,7 +405,7 @@ static int hcr_write_seqs(FILE *fp, GtHcrEncoder *hcr_enc, GtError *err)
           gt_error_set(err, "error by ftell: %s", strerror(errno));
         }
         else {
-        gt_sampling_add_sample(hcr_enc->seq_encoder->sampling,
+        gt_sampling_add_sample(sampling,
                                (size_t) filepos,
                                cur_read);
 
@@ -448,11 +450,12 @@ static int hcr_write_seqs(FILE *fp, GtHcrEncoder *hcr_enc, GtError *err)
       gt_error_set(err, "error by ftell: %s", strerror(errno));
     }
     else {
-    hcr_enc->seq_encoder->startofsamplingtab = filepos;
-    gt_log_log("start of samplingtab: "GT_WU"",
-               hcr_enc->seq_encoder->startofsamplingtab);
-    if (hcr_enc->seq_encoder->sampling != NULL)
-      gt_sampling_write(hcr_enc->seq_encoder->sampling, fp);
+      hcr_enc->seq_encoder->startofsamplingtab = filepos;
+      gt_log_log("start of samplingtab: " GT_WU,
+                 hcr_enc->seq_encoder->startofsamplingtab);
+      if (hcr_enc->seq_encoder->sampling != NULL) {
+        gt_sampling_write(hcr_enc->seq_encoder->sampling, fp);
+      }
     }
   }
   gt_bitoutstream_delete(bitstream);
@@ -595,10 +598,9 @@ static void hcr_read_file_info(GtHcrSeqDecoder *seq_dec, FILE *fp)
   seq_dec->num_of_reads = seq_dec->fileinfos[seq_dec->num_of_files - 1].readnum;
 }
 
-static HcrHuffDataIterator *decoder_init_data_iterator(
-                                                GtWord start_of_encoding,
-                                                GtWord end_of_encoding,
-                                                const GtStr *filename)
+static HcrHuffDataIterator *decoder_init_data_iterator(GtWord start_of_encoding,
+                                                       GtWord end_of_encoding,
+                                                       const GtStr *filename)
 {
   HcrHuffDataIterator *data_iter = gt_malloc(sizeof (*data_iter));
   data_iter->path = gt_str_get(filename);
@@ -627,7 +629,6 @@ static int get_next_file_chunk_for_huffman(GtBitsequence **bits,
   gt_assert(bits && length && offset && pad_length);
   data_iter = (HcrHuffDataIterator*) meminfo;
 
-  gt_log_log("pos in iter: "GT_WU"", (GtUword) data_iter->pos);
   if (data_iter->pos < data_iter->end) {
     gt_fa_xmunmap(data_iter->data);
     data_iter->data = NULL;
@@ -664,7 +665,6 @@ static void reset_data_iterator_to_pos(HcrHuffDataIterator *data_iter,
   gt_assert(pos < data_iter->end);
   gt_assert(data_iter->start <= pos);
   gt_fa_xmunmap(data_iter->data);
-  gt_log_log("reset to pos: "GT_WU"", (GtUword) pos);
   data_iter->data = NULL;
   data_iter->pos = pos;
 }
@@ -710,11 +710,12 @@ static inline GtWord decoder_calc_start_of_encoded_data(FILE *fp)
     return ftell(fp);
 }
 
-static void seq_decoder_init_huffman(GtHcrSeqDecoder *seq_dec,
-                                     GtWord end_of_encoding,
-                                     GtBaseQualDistr *bqd,
-                                     GtError *err)
+static int seq_decoder_init_huffman(GtHcrSeqDecoder *seq_dec,
+                                    GtWord end_of_encoding,
+                                    GtBaseQualDistr *bqd,
+                                    GtError *err)
 {
+  int had_err = 0;
   seq_dec->data_iter = decoder_init_data_iterator(seq_dec->start_of_encoding,
                                                   end_of_encoding,
                                                   seq_dec->filename);
@@ -723,9 +724,15 @@ static void seq_decoder_init_huffman(GtHcrSeqDecoder *seq_dec,
   seq_dec->huffman = gt_huffman_new(bqd, hcr_base_qual_distr_func,
                                     (GtUword) bqd->ncols * bqd->nrows);
 
-  seq_dec->huff_dec = gt_huffman_decoder_new_from_memory(seq_dec->huffman,
-                                                get_next_file_chunk_for_huffman,
-                                                seq_dec->data_iter, err);
+  seq_dec->huff_dec =
+    gt_huffman_decoder_new_from_memory(seq_dec->huffman,
+                                       get_next_file_chunk_for_huffman,
+                                       seq_dec->data_iter, err);
+  if (seq_dec->huff_dec == NULL) {
+    had_err = -1;
+    gt_huffman_delete(seq_dec->huffman);
+  }
+  return had_err;
 }
 
 static void hcr_seq_decoder_delete(GtHcrSeqDecoder *seq_dec)
@@ -746,12 +753,13 @@ static void hcr_seq_decoder_delete(GtHcrSeqDecoder *seq_dec)
 static GtHcrSeqDecoder *hcr_seq_decoder_new(GtAlphabet *alpha, const char *name,
                                             GtError *err)
 {
+  int had_err = 0;
   GtHcrSeqDecoder *seq_dec = gt_malloc(sizeof (GtHcrSeqDecoder));
   GtBaseQualDistr *bqd = NULL;
   GtWord end_enc_start_sampling = 0;
   FILE *fp = NULL;
-  GT_UNUSED size_t read,
-            one = (size_t) 1;
+  GT_UNUSED size_t read;
+  GT_UNUSED const size_t one = (size_t) 1;
 
   seq_dec->alpha = alpha;
   seq_dec->alphabet_size = gt_alphabet_size(alpha);
@@ -767,11 +775,13 @@ static GtHcrSeqDecoder *hcr_seq_decoder_new(GtAlphabet *alpha, const char *name,
   gt_str_append_cstr(seq_dec->filename, HCRFILESUFFIX);
 
   fp = gt_fa_fopen_with_suffix(name, HCRFILESUFFIX, "rb", err);
-  if (gt_error_is_set(err)) {
+  if (fp == NULL) {
+    had_err = -1;
     hcr_seq_decoder_delete(seq_dec);
     seq_dec = NULL;
   }
-  else {
+
+  if (!had_err) {
     hcr_read_file_info(seq_dec, fp);
 
     bqd = hcr_base_qual_distr_new_from_file(fp, seq_dec->alpha);
@@ -782,16 +792,24 @@ static GtHcrSeqDecoder *hcr_seq_decoder_new(GtAlphabet *alpha, const char *name,
 
     seq_dec->start_of_encoding = decoder_calc_start_of_encoded_data(fp);
 
-    seq_decoder_init_huffman(seq_dec, end_enc_start_sampling, bqd, err);
-    if (gt_error_is_set(err)) {
+    had_err = seq_decoder_init_huffman(seq_dec,
+                                       end_enc_start_sampling, bqd, err);
+    if (had_err) {
       hcr_seq_decoder_delete(seq_dec);
       seq_dec = NULL;
     }
   }
 
-  if (seq_dec != NULL) {
+  if (!had_err) {
+    size_t pos;
+    gt_xfseek(fp, 0, SEEK_END);
+    pos = ftell(fp);
+
     gt_xfseek(fp, end_enc_start_sampling, SEEK_SET);
-    seq_dec->sampling = gt_sampling_read(fp);
+    if (end_enc_start_sampling < pos)
+      seq_dec->sampling = gt_sampling_read(fp);
+    else
+      seq_dec->sampling = NULL;
 
     seq_dec->file_info_rbt = seq_decoder_init_file_info(seq_dec->fileinfos,
                                                         seq_dec->num_of_files);
@@ -875,6 +893,7 @@ static int hcr_next_seq_qual(GtHcrSeqDecoder *seq_dec, char *seq, char *qual,
   FastqFileInfo *fileinfo = NULL;
 
   if (seq_dec->cur_read <= seq_dec->num_of_reads) {
+    GtSampling *sampling = seq_dec->sampling;
     status = SUCCESS;
     if (seq_dec->symbols == NULL)
       seq_dec->symbols = gt_array_new(sizeof (GtUword));
@@ -882,7 +901,6 @@ static int hcr_next_seq_qual(GtHcrSeqDecoder *seq_dec, char *seq, char *qual,
       gt_array_reset(seq_dec->symbols);
 
     cur_read.readnum = seq_dec->cur_read;
-    gt_log_log("cur_read: "GT_WU"",seq_dec->cur_read);
     fileinfo = (FastqFileInfo *)gt_rbtree_next_key(seq_dec->file_info_rbt,
                                                    &cur_read,
                                                    hcr_cmp_FastqFileInfo,
@@ -890,10 +908,10 @@ static int hcr_next_seq_qual(GtHcrSeqDecoder *seq_dec, char *seq, char *qual,
     gt_assert(fileinfo);
 
     /* reset huffman_decoder if next read is sampled */
-    if (gt_sampling_get_next_elementnum(seq_dec->sampling) ==
-          seq_dec->cur_read) {
+    if (sampling != NULL &&
+        gt_sampling_get_next_elementnum(sampling) == seq_dec->cur_read) {
       gt_log_log("reset because sampled read is next");
-      (void) gt_sampling_get_next_sample(seq_dec->sampling,
+      (void) gt_sampling_get_next_sample(sampling,
                                          &nearestsample,
                                          &startofnearestsample);
       reset_data_iterator_to_pos(seq_dec->data_iter, startofnearestsample);
@@ -911,7 +929,6 @@ static int hcr_next_seq_qual(GtHcrSeqDecoder *seq_dec, char *seq, char *qual,
         gt_error_set(err, "reached end of file");
     }
     if (qual || seq) {
-      gt_log_log("set strings");
       for (i = 0; i < gt_array_size(seq_dec->symbols); i++) {
         symbol = (GtUword*) gt_array_get(seq_dec->symbols, i);
         if (qual != NULL)
@@ -935,6 +952,7 @@ static int hcr_next_seq_qual(GtHcrSeqDecoder *seq_dec, char *seq, char *qual,
 int gt_hcr_decoder_decode(GtHcrDecoder *hcr_dec, GtUword readnum,
                           char *seq, char *qual, GtStr *desc, GtError *err)
 {
+  int had_err = 0;
   GtUword nearestsample = 0,
                 reads_to_read = 0,
                 idx,
@@ -949,12 +967,9 @@ int gt_hcr_decoder_decode(GtHcrDecoder *hcr_dec, GtUword readnum,
   gt_assert(readnum < hcr_dec->seq_dec->num_of_reads);
   gt_assert(seq != NULL && qual != NULL);
 
-  if (current_read == readnum) {
-    if (hcr_next_seq_qual(hcr_dec->seq_dec, seq, qual, err) == -1) {
-      gt_assert(gt_error_is_set(err));
-      return -1;
-    }
-  }
+  if (current_read == readnum)
+    had_err = hcr_next_seq_qual(hcr_dec->seq_dec, seq, qual, err) == -1 ?
+      -1 : 0;
   else {
     sampling = hcr_dec->seq_dec->sampling;
     data_iter = hcr_dec->seq_dec->data_iter;
@@ -970,9 +985,7 @@ int gt_hcr_decoder_decode(GtHcrDecoder *hcr_dec, GtUword readnum,
         reads_to_read = readnum - current_read;
       else { /* reset decoder to new sample */
         reset_data_iterator_to_pos(data_iter, startofnearestsample);
-        (void) gt_huffman_decoder_get_new_mem_chunk(huff_dec, err);
-        if (gt_error_is_set(err))
-          return -1;
+        had_err = gt_huffman_decoder_get_new_mem_chunk(huff_dec, err);
         reads_to_read = readnum - nearestsample;
         hcr_dec->seq_dec->cur_read = nearestsample;
       }
@@ -985,36 +998,29 @@ int gt_hcr_decoder_decode(GtHcrDecoder *hcr_dec, GtUword readnum,
         reads_to_read = readnum - current_read;
       else {
         reset_data_iterator_to_start(data_iter);
-        (void) gt_huffman_decoder_get_new_mem_chunk(huff_dec, err);
-        if (gt_error_is_set(err))
-          return -1;
+        had_err = gt_huffman_decoder_get_new_mem_chunk(huff_dec, err);
         reads_to_read = readnum;
         hcr_dec->seq_dec->cur_read = 0;
       }
     }
 
-    for (idx = 0; idx < reads_to_read; idx++) {
-      if (hcr_next_seq_qual(hcr_dec->seq_dec, seq,qual, err) == -1) {
-        gt_assert(gt_error_is_set(err));
-        return -1;
-      }
-      gt_log_log("seq:\n%s\nqual:\n%s", seq, qual);
-    }
+    for (idx = 0; !had_err && idx < reads_to_read; idx++)
+      had_err = hcr_next_seq_qual(hcr_dec->seq_dec, seq,qual, err) == -1 ?
+        -1 : 0;
 
-    if (hcr_next_seq_qual(hcr_dec->seq_dec, seq, qual, err) == -1) {
-      gt_assert(gt_error_is_set(err));
-      return -1;
-    }
+    if (!had_err)
+      had_err = hcr_next_seq_qual(hcr_dec->seq_dec, seq, qual, err) == -1 ?
+        -1 : 0;
   }
+  if (had_err)
+    gt_assert(gt_error_is_set(err));
 
-  if (hcr_dec->encdesc != NULL) {
-    if (gt_encdesc_decode(hcr_dec->encdesc, readnum, desc, err) == -1) {
-      gt_error_set(err, "cannot retrieve description with number " GT_WU "."
-                   "(%d)", readnum, __LINE__);
-      return -1;
-    }
-  }
-  return 0;
+  if (!had_err && hcr_dec->encdesc != NULL)
+    had_err = gt_encdesc_decode(hcr_dec->encdesc, readnum, desc, err);
+  if (had_err)
+    gt_assert(gt_error_is_set(err));
+
+  return had_err;
 }
 
 int gt_hcr_decoder_decode_range(GtHcrDecoder *hcr_dec, const char *name,
@@ -1291,17 +1297,19 @@ int gt_hcr_encoder_encode(GtHcrEncoder *hcr_enc, const char *name,
     gt_log_log("sequences with qualities encoding overview:");
     gt_log_log("**>");
     if (hcr_enc->page_sampling)
-        gt_log_log("applied sampling technique: sampling every "GT_WU"th page",
+        gt_log_log("applied sampling technique: sampling every " GT_WU
+                   "th page",
                    hcr_enc->sampling_rate);
     else if (hcr_enc->regular_sampling)
-        gt_log_log("applied sampling technique: sampling every "GT_WU"th read",
+        gt_log_log("applied sampling technique: sampling every " GT_WU
+                   "th read",
                    hcr_enc->sampling_rate);
     else
         gt_log_log("applied sampling technique: none");
 
     gt_log_log("total number of encoded nucleotide sequences with qualities: "
-               ""GT_WU"", hcr_enc->num_of_reads);
-    gt_log_log("total number of encoded nucleotides: "GT_LLU"",
+               GT_WU, hcr_enc->num_of_reads);
+    gt_log_log("total number of encoded nucleotides: " GT_LLU,
                hcr_enc->seq_encoder->total_num_of_symbols);
     gt_log_log("bits per nucleotide encoding: %f",
                (gt_file_estimate_size(gt_str_get(name1)) * 8.0) /
