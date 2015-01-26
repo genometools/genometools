@@ -1017,7 +1017,7 @@ int gt_hcr_decoder_decode(GtHcrDecoder *hcr_dec, GtUword readnum,
 }
 
 int gt_hcr_decoder_decode_range(GtHcrDecoder *hcr_dec, const char *name,
-                                GtUword start, GtUword end,
+                                GtUword start, GtUword end, GtUword width,
                                 GtTimer *timer, GtError *err)
 {
   char qual[BUFSIZ] = {0},
@@ -1052,7 +1052,7 @@ int gt_hcr_decoder_decode_range(GtHcrDecoder *hcr_dec, const char *name,
         fprintf(output, ""GT_WU"", cur_read);
       gt_xfputc('\n', output);
       for (i = 0, cur_width = 0; i < strlen(seq); i++, cur_width++) {
-        if (cur_width == HCR_LINEWIDTH) {
+        if (width != 0 && cur_width == width) {
           cur_width = 0;
           gt_xfputc('\n', output);
         }
@@ -1062,7 +1062,7 @@ int gt_hcr_decoder_decode_range(GtHcrDecoder *hcr_dec, const char *name,
       gt_xfputc(HCR_DESCSEPQUAL, output);
       gt_xfputc('\n', output);
       for (i = 0, cur_width = 0; i < strlen(qual); i++, cur_width++) {
-        if (cur_width == HCR_LINEWIDTH) {
+        if (width != 0 && cur_width == width) {
           cur_width = 0;
           gt_xfputc('\n', output);
         }

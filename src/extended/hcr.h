@@ -94,11 +94,13 @@ int           gt_hcr_decoder_decode(GtHcrDecoder *hcr_dec,
                                     char *qual, GtStr * desc, GtError *err);
 
 /* Decodes the hcr encoded file starting at record number <start> until record
-   number <end> and writes the decoding to a file with base name <name>. */
+   number <end> and writes the decoding to a file with base name <name>. If
+   <width> is not 0 output of sequences and qualities will have that width. Be
+   advised to not use this if the data should be machine readable. */
 int           gt_hcr_decoder_decode_range(GtHcrDecoder *hcr_dec,
                                           const char *name, GtUword start,
-                                          GtUword end, GtTimer *timer,
-                                          GtError *err);
+                                          GtUword end, GtUword width,
+                                          GtTimer *timer, GtError *err);
 
 /* Returns the total number of reads in <hcr_dec>. */
 GtUword gt_hcr_decoder_num_of_reads(GtHcrDecoder *hcr_dec);
