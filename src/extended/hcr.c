@@ -805,7 +805,7 @@ static GtHcrSeqDecoder *hcr_seq_decoder_new(GtAlphabet *alpha, const char *name,
 GtHcrDecoder *gt_hcr_decoder_new(const char *name, GtAlphabet *alpha,
                                  bool descs, GtTimer *timer, GtError *err)
 {
-  GtHcrDecoder *hcr_dec;
+  GtHcrDecoder *hcr_dec = NULL;
   int had_err = 0;
 
   gt_error_check(err);
@@ -813,6 +813,7 @@ GtHcrDecoder *gt_hcr_decoder_new(const char *name, GtAlphabet *alpha,
     gt_timer_show_progress(timer, "initialize hcr decoder", stdout);
 
   hcr_dec = gt_malloc(sizeof (GtHcrDecoder));
+  hcr_dec->seq_dec = NULL;
 
   if (descs) {
     hcr_dec->encdesc = gt_encdesc_load(name, err);
