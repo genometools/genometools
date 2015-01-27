@@ -805,7 +805,7 @@ static GtHcrSeqDecoder *hcr_seq_decoder_new(GtAlphabet *alpha, const char *name,
 GtHcrDecoder *gt_hcr_decoder_new(const char *name, GtAlphabet *alpha,
                                  bool descs, GtTimer *timer, GtError *err)
 {
-  GtHcrDecoder *hcr_dec;
+  GtHcrDecoder *hcr_dec = NULL;
   int had_err = 0;
 
   gt_error_check(err);
@@ -813,6 +813,7 @@ GtHcrDecoder *gt_hcr_decoder_new(const char *name, GtAlphabet *alpha,
     gt_timer_show_progress(timer, "initialize hcr decoder", stdout);
 
   hcr_dec = gt_malloc(sizeof (GtHcrDecoder));
+  hcr_dec->seq_dec = NULL;
 
   if (descs) {
     hcr_dec->encdesc = gt_encdesc_load(name, err);
@@ -1017,7 +1018,7 @@ int gt_hcr_decoder_decode(GtHcrDecoder *hcr_dec, GtUword readnum,
 }
 
 int gt_hcr_decoder_decode_range(GtHcrDecoder *hcr_dec, const char *name,
-                                GtUword start, GtUword end,
+                                GtUword start, GtUword end, GtUword width,
                                 GtTimer *timer, GtError *err)
 {
   char qual[BUFSIZ] = {0},
@@ -1052,7 +1053,7 @@ int gt_hcr_decoder_decode_range(GtHcrDecoder *hcr_dec, const char *name,
         fprintf(output, ""GT_WU"", cur_read);
       gt_xfputc('\n', output);
       for (i = 0, cur_width = 0; i < strlen(seq); i++, cur_width++) {
-        if (cur_width == HCR_LINEWIDTH) {
+        if (width != 0 && cur_width == width) {
           cur_width = 0;
           gt_xfputc('\n', output);
         }
@@ -1062,7 +1063,7 @@ int gt_hcr_decoder_decode_range(GtHcrDecoder *hcr_dec, const char *name,
       gt_xfputc(HCR_DESCSEPQUAL, output);
       gt_xfputc('\n', output);
       for (i = 0, cur_width = 0; i < strlen(qual); i++, cur_width++) {
-        if (cur_width == HCR_LINEWIDTH) {
+        if (width != 0 && cur_width == width) {
           cur_width = 0;
           gt_xfputc('\n', output);
         }
