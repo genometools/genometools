@@ -111,7 +111,7 @@ GtBlastProcessCall *gt_blast_process_call_new_prot(void)
 {
   GtBlastProcessCall *call =
     gt_blast_process_call_new("blastp");
-  call->version_call = "blastp --version";
+  call->version_call = "blastp -version";
   call->nucl = call->all = false;
   return call;
 }
@@ -316,6 +316,11 @@ FILE *gt_blast_process_call_run(GtBlastProcessCall *call, GtError *err)
     }
   }
   return blastout;
+}
+
+const char *gt_blast_process_call_get_call(GtBlastProcessCall *call)
+{
+  return gt_str_get(call->str);
 }
 
 void gt_blast_process_call_delete(GtBlastProcessCall *call)
