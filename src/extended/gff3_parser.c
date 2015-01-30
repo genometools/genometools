@@ -833,12 +833,7 @@ static int process_parent_attr(char *parent_attr, GtGenomeNode *feature_node,
     parent_gf = (GtGenomeNode*) gt_feature_info_get(parser->feature_info,
                                                     parent);
     if (!parent_gf) {
-      /* In strict mode or if the feature is a multi-feature orphan we fail
-         here. Multi-features cannot be added to the orphanage (who owns them)
-         without memory problems later on, because they are already owned by
-         their pseudo-parent. */
-      if (parser->strict ||
-          gt_feature_node_is_multi((GtFeatureNode*) feature_node)) {
+      if (parser->strict) {
         gt_error_set(err, "%s \"%s\" on line %u in file \"%s\" was not "
                      "previously defined (via \"%s=\")", GT_GFF_PARENT, parent,
                      line_number, filename, GT_GFF_ID);
@@ -1414,16 +1409,16 @@ static int parse_attributes(char *attributes, GtGenomeNode *feature_node,
     }
   }
 
+  /* process ID attribute */
   if (!had_err && id_value) {
     had_err = store_id(id_value, (GtFeatureNode*) feature_node, is_child,
                        parser, genome_nodes, filename, line_number, err);
   }
-  if (!had_err && parent_value) {
-    had_err = process_parent_attr(parent_value, feature_node, id_value,
-                                  is_child, parser, genome_nodes, filename,
-                                  line_number, err);
-  }
 
+  /* we check multi-feature contrains before we process the Parent attribute,
+     because that prevents problems with multi-features with different parents
+     and allows to process multi-features with orphaned parents at the same
+     time. */
   if (!had_err && gt_feature_node_is_multi((GtFeatureNode*) feature_node)) {
     had_err =
       check_multi_feature_constrains(feature_node, (GtGenomeNode*)
@@ -1432,6 +1427,13 @@ static int parse_attributes(char *attributes, GtGenomeNode *feature_node,
                     gt_feature_node_get_attribute((GtFeatureNode*) feature_node,
                                                   GT_GFF_ID),
                                      parser, filename, line_number, err);
+  }
+
+  /* finally, process Parent attribute */
+  if (!had_err && parent_value) {
+    had_err = process_parent_attr(parent_value, feature_node, id_value,
+                                  is_child, parser, genome_nodes, filename,
+                                  line_number, err);
   }
 
   gt_splitter_delete(parent_splitter);

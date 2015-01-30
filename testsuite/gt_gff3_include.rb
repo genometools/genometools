@@ -858,7 +858,7 @@ Keywords "gt_gff3 multi-feature"
 Test do
   run_test("#{$bin}gt gff3 #{$testdata}multi_feature_undefined_parent.gff3",
            :retval => 1)
-  grep last_stderr, "Parent .* on line 4 .* was not previously defined"
+  grep last_stderr, "Parent .* on line 3 .* was not defined"
 end
 
 Name "gt gff3 multi-feature (different sequence ID)"
@@ -1318,12 +1318,18 @@ Test do
   grep last_stderr, "was not defined"
 end
 
-Name "gt gff3 multi-feature orphan"
+Name "gt gff3 multi-feature orphan (success)"
+Keywords "gt_gff3"
+Test do
+  run_test "#{$bin}gt gff3 #{$testdata}multi_feature_orphan_succ.gff3"
+end
+
+Name "gt gff3 multi-feature orphan (failure)"
 Keywords "gt_gff3"
 Test do
   run_test "#{$bin}gt gff3 #{$testdata}multi_feature_orphan_fail.gff3",
            :retval => 1
-  grep last_stderr, "was not previously defined"
+  grep last_stderr, "does not have a 'Parent' attribute which is present"
 end
 
 Name "gt gff3 uppercase attributes"
