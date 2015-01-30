@@ -514,10 +514,10 @@ static void feature_node_is_part_of_pseudo_node(GtFeatureNode *pseudo_node,
   gt_feature_info_add_pseudo_parent(feature_info, id, pseudo_node);
 }
 
-static int store_id(const char *id, GtFeatureNode *feature_node,
-                    bool *is_child, GtGFF3Parser *parser, GtQueue *genome_nodes,
-                    const char *filename, unsigned int line_number,
-                    GtError *err)
+static int process_id_attr(const char *id, GtFeatureNode *feature_node,
+                           bool *is_child, GtGFF3Parser *parser, GtQueue
+                           *genome_nodes, const char *filename,
+                           unsigned int line_number, GtError *err)
 {
   GtFeatureNode *fn;
   int had_err = 0;
@@ -1411,8 +1411,8 @@ static int parse_attributes(char *attributes, GtGenomeNode *feature_node,
 
   /* process ID attribute */
   if (!had_err && id_value) {
-    had_err = store_id(id_value, (GtFeatureNode*) feature_node, is_child,
-                       parser, genome_nodes, filename, line_number, err);
+    had_err = process_id_attr(id_value, (GtFeatureNode*) feature_node, is_child,
+                              parser, genome_nodes, filename, line_number, err);
   }
 
   /* we check multi-feature contrains before we process the Parent attribute,
