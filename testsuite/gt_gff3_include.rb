@@ -1321,7 +1321,8 @@ end
 Name "gt gff3 multi-feature orphan"
 Keywords "gt_gff3"
 Test do
-  run_test "#{$bin}gt gff3 #{$testdata}multi_feature_orphan.gff3", :retval => 1
+  run_test "#{$bin}gt gff3 #{$testdata}multi_feature_orphan_fail.gff3",
+           :retval => 1
   grep last_stderr, "was not previously defined"
 end
 
