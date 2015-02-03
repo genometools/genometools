@@ -64,10 +64,16 @@ void             gt_match_set_range_seq1(GtMatch *match, GtUword start,
 void             gt_match_set_range_seq2(GtMatch *match, GtUword start,
                                          GtUword end);
 /* Writes the range of the first sequence involved in the match <match> to the
-   location pointed to by <range>. */
+   location pointed to by <range>.
+   Note: depending on how the matches were produced the resulting range might
+   differ. e.g. Blast hit ranges are 1-Based, not zero based and inclusive i.e.
+   <range>.end is the last position that is part of the match. */
 void             gt_match_get_range_seq1(const GtMatch *match, GtRange *range);
 /* Writes the range of the second sequence involved in the match <match> to the
-   location pointed to by <range>. */
+   location pointed to by <range>.
+   Note: depending on how the matches were produced the resulting range might
+   differ. e.g. Blast hit ranges are 1-Based, not zero based and inclusive i.e.
+   <range>.end is the last position that is part of the match. */
 void             gt_match_get_range_seq2(const GtMatch *match, GtRange *range);
 /* Returns the match direction of <match>. */
 GtMatchDirection gt_match_get_direction(const GtMatch *match);

@@ -762,7 +762,7 @@ static inline char converttoprettysymbol(const GtAlphabet *alphabet,
 }
 
 void gt_alphabet_decode_seq_to_cstr(const GtAlphabet *alphabet, char *dest,
-                                      const GtUchar *src, GtUword len)
+                                    const GtUchar *src, GtUword len)
 {
   GtUword i;
 

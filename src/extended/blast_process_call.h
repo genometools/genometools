@@ -101,6 +101,8 @@ void                gt_blast_process_call_set_outfmt_tabular(
 /* Add string <opt> to options of <call>. */
 void                gt_blast_process_call_set_opt(GtBlastProcessCall *call,
                                                   const char *opt);
+/* Returns a string representation of the constructed call to blast */
+const char*         gt_blast_process_call_get_call(GtBlastProcessCall *call);
 
 /* Run the constructed blast-call and return a pointer to the pipe created with
    popen(3). Caller is responsible for freeing the FILE-pointer with pclose(3).
