@@ -218,7 +218,7 @@ GtCustomTrack* gt_custom_track_gc_content_new(const char *seq,
   ctgc->avg = avg;
   ctgc->show_scale = show_scale;
   ctgc->title = gt_str_new_cstr("GC content (window size ");
-  gt_str_append_ulong(ctgc->title, ctgc->windowsize);
+  gt_str_append_uword(ctgc->title, ctgc->windowsize);
   if (gt_double_smaller_double(0, avg))
   {
     (void) snprintf(buf, BUFSIZ, ", average: %.1f%%", avg*100);

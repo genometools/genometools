@@ -110,7 +110,7 @@ void gt_format_ruler_label(char *txt, GtWord pos,
       logval--;
     }
     /*@ignore@*/
-    gt_str_append_ulong(formatstring, (GtUword) logval);
+    gt_str_append_uword(formatstring, (GtUword) logval);
     gt_str_append_cstr(formatstring, "fG%s");
     (void) snprintf(txt, buflen, gt_str_get(formatstring), fpos, unitstr);
     /*@end@*/
@@ -124,7 +124,7 @@ void gt_format_ruler_label(char *txt, GtWord pos,
       logval--;
     }
     /*@ignore@*/
-    gt_str_append_ulong(formatstring, (GtUword) logval);
+    gt_str_append_uword(formatstring, (GtUword) logval);
     gt_str_append_cstr(formatstring, "fM%s");
     (void) snprintf(txt, buflen, gt_str_get(formatstring), fpos, unitstr);
     /*@end@*/
@@ -138,7 +138,7 @@ void gt_format_ruler_label(char *txt, GtWord pos,
       logval--;
     }
     /*@ignore@*/
-    gt_str_append_ulong(formatstring, (GtUword) logval);
+    gt_str_append_uword(formatstring, (GtUword) logval);
     gt_str_append_cstr(formatstring, "fk%s");
     (void) snprintf(txt, buflen, gt_str_get(formatstring), fpos, unitstr);
     /*@end@*/

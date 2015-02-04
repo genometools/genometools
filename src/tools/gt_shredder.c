@@ -141,9 +141,9 @@ static int gt_shredder_runner(GT_UNUSED int argc, const char **argv,
         if (arguments->clip_desc) {
           gt_str_clip_suffix(desc, ' ');
           gt_str_append_cstr(desc, "_");
-          gt_str_append_ulong(desc, fragment_offset);
+          gt_str_append_uword(desc, fragment_offset);
           gt_str_append_cstr(desc, "_");
-          gt_str_append_ulong(desc, fragment_length);
+          gt_str_append_uword(desc, fragment_length);
           gt_str_append_cstr(desc, " [shreddered fragment]");
         }
         else {

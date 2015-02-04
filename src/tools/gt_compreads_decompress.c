@@ -143,9 +143,9 @@ static int gt_compreads_decompress_benchmark(GtHcrDecoder *hcrd,
   GtStr *timer_comment = gt_str_new_cstr("extracting ");
   GtStr *desc = gt_str_new();
 
-  gt_str_append_ulong(timer_comment, amount);
+  gt_str_append_uword(timer_comment, amount);
   gt_str_append_cstr(timer_comment, " reads of ");
-  gt_str_append_ulong(timer_comment, max_rand + 1);
+  gt_str_append_uword(timer_comment, max_rand + 1);
   gt_str_append_cstr(timer_comment, "!");
 
   if (timer == NULL) {

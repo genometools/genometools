@@ -151,7 +151,7 @@ static int snp_annotator_classify_snp(GtSNPAnnotatorVisitor *sav,
         effect_string = gt_str_new_cstr(variant_effect);
       }
       gt_str_append_cstr(effect_string, " ");
-      gt_str_append_ulong(effect_string, variant_idx);
+      gt_str_append_uword(effect_string, variant_idx);
       gt_str_append_cstr(effect_string, " ");
       gt_str_append_cstr(effect_string, gt_feature_node_get_type(mRNA));
       gt_str_append_cstr(effect_string, " ");

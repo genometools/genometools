@@ -77,13 +77,13 @@ static void write_model(GtStr *str, const char *model_cstr,
   gt_str_append_cstr(str, model_cstr);
   gt_str_append_cstr(str, " = {\n");
   gt_str_append_cstr(str, "    hypothesis_num = ");
-  gt_str_append_ulong(str, model->hypothesis_num);
+  gt_str_append_uword(str, model->hypothesis_num);
   gt_str_append_cstr(str, ",\n");
   gt_str_append_cstr(str, "    window_size_left = ");
-  gt_str_append_ulong(str, model->window_size_left);
+  gt_str_append_uword(str, model->window_size_left);
   gt_str_append_cstr(str, ",\n");
   gt_str_append_cstr(str, "    window_size_right = ");
-  gt_str_append_ulong(str, model->window_size_right);
+  gt_str_append_uword(str, model->window_size_right);
   gt_str_append_cstr(str, ",\n");
   for (i = 0; i < model->hypothesis_num; i++) {
     gt_str_append_cstr(str, "    {\n");

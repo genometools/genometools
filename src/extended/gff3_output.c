@@ -51,9 +51,9 @@ void gt_gff3_output_leading_str(GtFeatureNode *fn, GtStr *outstr)
   gt_str_append_char(outstr, '\t');
   gt_str_append_cstr(outstr, gt_feature_node_get_type(fn));
   gt_str_append_char(outstr, '\t');
-  gt_str_append_ulong(outstr, gt_genome_node_get_start(gn));
+  gt_str_append_uword(outstr, gt_genome_node_get_start(gn));
   gt_str_append_char(outstr, '\t');
-  gt_str_append_ulong(outstr, gt_genome_node_get_end(gn));
+  gt_str_append_uword(outstr, gt_genome_node_get_end(gn));
   gt_str_append_char(outstr, '\t');
   if (gt_feature_node_score_is_defined(fn)) {
     char buf[BUFSIZ];

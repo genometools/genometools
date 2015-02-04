@@ -164,14 +164,14 @@ void gt_contigs_writer_write(GtContigsWriter *contigs_writer)
         contigs_writer->contig.nextfreechar);
     /* build description */
     gt_str_append_cstr(contigs_writer->contig_desc, "contig_");
-    gt_str_append_ulong(contigs_writer->contig_desc,
+    gt_str_append_uword(contigs_writer->contig_desc,
         contigs_writer->contignum);
     contigs_writer->depthinfo.length = contigs_writer->contig.nextfreechar;
     gt_str_append_cstr(contigs_writer->contig_desc, " length=");
-    gt_str_append_ulong(contigs_writer->contig_desc,
+    gt_str_append_uword(contigs_writer->contig_desc,
         contigs_writer->depthinfo.length);
     gt_str_append_cstr(contigs_writer->contig_desc, " depth=");
-    gt_str_append_ulong(contigs_writer->contig_desc,
+    gt_str_append_uword(contigs_writer->contig_desc,
         contigs_writer->depthinfo.depth);
     if (contigs_writer->rcn != NULL)
     {
@@ -213,7 +213,7 @@ void gt_contigs_writer_write(GtContigsWriter *contigs_writer)
       gt_str_append_cstr(contigs_writer->path_desc,
           contigs_writer->depthinfo.depth > 2UL ? "-->...-->" :
           "-->");
-      gt_str_append_ulong(contigs_writer->path_desc,
+      gt_str_append_uword(contigs_writer->path_desc,
           GT_CONTIGS_WRITER_READNUM(contigs_writer->lastseqnum,
               contigs_writer->nofseqs));
       gt_str_append_char(contigs_writer->path_desc,
@@ -260,9 +260,9 @@ void gt_contigs_writer_append(GtContigsWriter *contigs_writer,
   if (contigs_writer->show_paths)
   {
     gt_str_append_cstr(contigs_writer->path_desc, "-(");
-    gt_str_append_ulong(contigs_writer->path_desc, nofchars);
+    gt_str_append_uword(contigs_writer->path_desc, nofchars);
     gt_str_append_cstr(contigs_writer->path_desc, ")->");
-    gt_str_append_ulong(contigs_writer->path_desc,
+    gt_str_append_uword(contigs_writer->path_desc,
         GT_CONTIGS_WRITER_READNUM(seqnum, contigs_writer->nofseqs));
     gt_str_append_char(contigs_writer->path_desc,
         GT_CONTIGS_WRITER_LETTER(seqnum, contigs_writer->nofseqs));
@@ -289,7 +289,7 @@ void gt_contigs_writer_start(GtContigsWriter *contigs_writer,
         GT_READMODE_FORWARD)["acgt"];
   }
   contigs_writer->depthinfo.depth++;
-  gt_str_append_ulong(contigs_writer->path_desc,
+  gt_str_append_uword(contigs_writer->path_desc,
       GT_CONTIGS_WRITER_READNUM(seqnum, contigs_writer->nofseqs));
   gt_str_append_char(contigs_writer->path_desc,
       GT_CONTIGS_WRITER_LETTER(seqnum, contigs_writer->nofseqs));

@@ -1121,9 +1121,9 @@ void gt_gff3_parser_build_target_str(GtStr *target, GtStrArray *target_ids,
       gt_str_append_char(target, ',');
     gt_str_append_cstr(target, gt_str_array_get(target_ids, i));
     gt_str_append_char(target, ' ');
-    gt_str_append_ulong(target, range->start);
+    gt_str_append_uword(target, range->start);
     gt_str_append_char(target, ' ');
-    gt_str_append_ulong(target, range->end);
+    gt_str_append_uword(target, range->end);
     if (*strand != GT_NUM_OF_STRAND_TYPES) {
       gt_str_append_char(target, ' ');
       gt_str_append_char(target, GT_STRAND_CHARS[*strand]);

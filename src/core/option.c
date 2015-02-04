@@ -635,7 +635,7 @@ int gt_option_parser_manpage(GtOptionParser *op, const char *toolname,
         if (option->default_value.ul == GT_UNDEF_UWORD)
           gt_str_append_cstr(default_string, "undefined");
         else
-          gt_str_append_ulong(default_string, option->default_value.ul);
+          gt_str_append_uword(default_string, option->default_value.ul);
       }
       else if (option->option_type == OPTION_RANGE) {
         gt_str_append_cstr(outstr, "['start' 'end']");
@@ -643,9 +643,9 @@ int gt_option_parser_manpage(GtOptionParser *op, const char *toolname,
           gt_str_append_cstr(default_string, "undefined");
         else {
           gt_str_append_char(default_string, '[');
-          gt_str_append_ulong(default_string, option->default_value.r.start);
+          gt_str_append_uword(default_string, option->default_value.r.start);
           gt_str_append_cstr(default_string, "..");
-          gt_str_append_ulong(default_string, option->default_value.r.end);
+          gt_str_append_uword(default_string, option->default_value.r.end);
           gt_str_append_char(default_string, ']');
         }
       }

@@ -70,7 +70,7 @@ static void close_output_files(Store_in_subset_file_data
         gt_str_append_cstr(buf, "split file created: ");
         gt_str_append_str(buf, store_in_subset_file_data->subset_filenames[i]);
         gt_str_append_cstr(buf, " (size=");
-        gt_str_append_ulong(buf,
+        gt_str_append_uword(buf,
                           store_in_subset_file_data->subset_file_sa_counter[i]);
         gt_str_append_cstr(buf, ")");
         store_in_subset_file_data->gthsplitinfo->showverbose(gt_str_get(buf));
@@ -155,12 +155,12 @@ static int store_in_subset_file(void *data, GthSA *sa,
                        '.');
     gt_str_append_cstr(store_in_subset_file_data->subset_filenames[filenum],
                        filenamesuffix);
-    gt_str_append_ulong(store_in_subset_file_data->subset_filenames[filenum],
+    gt_str_append_uword(store_in_subset_file_data->subset_filenames[filenum],
                         filenum *
                         store_in_subset_file_data->gthsplitinfo->range);
     gt_str_append_char(store_in_subset_file_data->subset_filenames[filenum],
                        '-');
-    gt_str_append_ulong(store_in_subset_file_data->subset_filenames[filenum],
+    gt_str_append_uword(store_in_subset_file_data->subset_filenames[filenum],
                      (filenum + 1) *
                      store_in_subset_file_data->gthsplitinfo->range);
     gt_str_append_cstr(store_in_subset_file_data->subset_filenames[filenum],
