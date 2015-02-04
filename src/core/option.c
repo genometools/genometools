@@ -1231,7 +1231,7 @@ GtOPrval gt_option_parser_parse(GtOptionParser *op, int *parsed_args, int argc,
                                                err);
               if (!had_err) {
                 argnum++;
-                if (gt_parse_long(&long_value, argv[argnum])) {
+                if (gt_parse_word(&long_value, argv[argnum])) {
                   gt_error_set(err, "argument to option \"-%s\" must be an "
                                     "integer", gt_str_get(option->option_str));
                   had_err = -1;
@@ -1253,7 +1253,7 @@ GtOPrval gt_option_parser_parse(GtOptionParser *op, int *parsed_args, int argc,
                                                               argv, err);
               if (!had_err) {
                 argnum++;
-                if (gt_parse_ulong(&ulong_value, argv[argnum])) {
+                if (gt_parse_uword(&ulong_value, argv[argnum])) {
                   gt_error_set(err, "argument to option \"-%s\" is out of "
                                "range", gt_str_get(option->option_str));
                   had_err = -1;
@@ -1298,7 +1298,7 @@ GtOPrval gt_option_parser_parse(GtOptionParser *op, int *parsed_args, int argc,
                                                               argv, err);
               if (!had_err) {
                 argnum++;
-                if (gt_parse_long(&long_value, argv[argnum]) ||
+                if (gt_parse_word(&long_value, argv[argnum]) ||
                     long_value < 0) {
                   gt_error_set(err, "first argument to option \"-%s\" must be "
                                "a non-negative integer",
@@ -1328,7 +1328,7 @@ GtOPrval gt_option_parser_parse(GtOptionParser *op, int *parsed_args, int argc,
               }
               if (!had_err) {
                 argnum++;
-                if (gt_parse_long(&long_value, argv[argnum]) ||
+                if (gt_parse_word(&long_value, argv[argnum]) ||
                     long_value < 0) {
                   gt_error_set(err, "second argument to option \"-%s\" must be "
                                "a non-negative integer",

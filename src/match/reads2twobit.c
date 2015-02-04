@@ -214,10 +214,10 @@ int gt_reads2twobit_add_library(GtReads2Twobit *r2t, const GtStr *libspec,
       GT_READS2TWOBIT_INSERTSEP);
     if (gt_splitter_size(s2) <= 2UL)
     {
-      had_err = gt_parse_ulong(&insertlength, gt_splitter_get_token(s2, 0));
+      had_err = gt_parse_uword(&insertlength, gt_splitter_get_token(s2, 0));
       if (gt_splitter_size(s2) == 2UL && !had_err)
       {
-        had_err = gt_parse_ulong(&stdev, gt_splitter_get_token(s2, 1UL));
+        had_err = gt_parse_uword(&stdev, gt_splitter_get_token(s2, 1UL));
       }
     }
     if (gt_splitter_size(s2) > 2UL || had_err)

@@ -243,7 +243,7 @@ static int encdesc_analyze_descs(GtEncdesc *encdesc,
         cur_field->max_zero = 0;
         cur_field->num_values_size = 0;
         cur_field->delta_values_size = 0;
-        if (gt_parse_long(&out, cur_field->data) == 0) {
+        if (gt_parse_word(&out, cur_field->data) == 0) {
           cur_field->is_numeric = true;
           cur_field->max_value = out;
           cur_field->min_value = out;
@@ -329,7 +329,7 @@ static int encdesc_analyze_descs(GtEncdesc *encdesc,
           }
 
           if (cur_field->is_numeric) {
-            if (gt_parse_long(&out, (mutable_desc + start_pos)) != 0)
+            if (gt_parse_word(&out, (mutable_desc + start_pos)) != 0)
               cur_field->is_numeric = false;
             else {
 
@@ -690,7 +690,7 @@ static void parse_number_out_of_current_field(EncdescWriteInfo *info,
                                               GtWord *retval)
 {
   char *cur_field_num = info->descbuffer + info->cur_field_start_pos;
-  GT_UNUSED int had_err = gt_parse_long(retval, cur_field_num);
+  GT_UNUSED int had_err = gt_parse_word(retval, cur_field_num);
   gt_assert(!had_err);
 }
 

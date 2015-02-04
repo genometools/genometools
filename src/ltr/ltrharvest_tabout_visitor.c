@@ -105,7 +105,7 @@ static int gt_ltrharvest_tabout_visitor_feature_node(GtNodeVisitor *nv,
         had_err = -1;
       }
       if (!had_err) {
-        (void) gt_parse_ulong(&seqnum, val);
+        (void) gt_parse_uword(&seqnum, val);
       }
     }
     if (strcmp(fnt, gt_ft_long_terminal_repeat) == 0)

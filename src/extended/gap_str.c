@@ -85,7 +85,7 @@ static int gt_gap_str_parse(GtGapStr *gap_str, const char *str, GtError *err)
     if (!had_err) {
       GtUword oplen;
       code = (token++)[0];
-      if (0 != gt_parse_ulong(&oplen, token)) {
+      if (0 != gt_parse_uword(&oplen, token)) {
         gt_error_set(err, "cannot parse edit length from string: \"%s\"",
                      token);
         had_err = -1;

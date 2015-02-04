@@ -233,7 +233,7 @@ static int track_rest(GtBEDParser *bed_parser, GtIO *bed_file, GtError *err)
     }
     /* process offset if necessary */
     if (!had_err && !strcmp(gt_str_get(bed_parser->word), OFFSET_KEYWORD)) {
-      if (gt_parse_long(&bed_parser->offset,
+      if (gt_parse_word(&bed_parser->offset,
                          gt_str_get(bed_parser->another_word))) {
         gt_error_set(err,
                      "file \"%s\": line "GT_WU": could not parse offset value "
@@ -320,7 +320,7 @@ static int create_block_features(GtBEDParser *bed_parser, GtFeatureNode *fn,
     GtUword block_size, block_start, start, end;
     GtGenomeNode *block;
     const char *name;
-    if (gt_parse_ulong(&block_size, gt_splitter_get_token(size_splitter, i))) {
+    if (gt_parse_uword(&block_size, gt_splitter_get_token(size_splitter, i))) {
       gt_error_set(err,
                    "file \"%s\": line "GT_WU": could not parse blockSize '%s'",
                    gt_io_get_filename(bed_file),
@@ -328,7 +328,7 @@ static int create_block_features(GtBEDParser *bed_parser, GtFeatureNode *fn,
                    gt_splitter_get_token(size_splitter, i));
       had_err = -1;
     }
-    if (!had_err && gt_parse_ulong(&block_start,
+    if (!had_err && gt_parse_uword(&block_start,
                                    gt_splitter_get_token(start_splitter, i))) {
       gt_error_set(err, "file \"%s\": line "GT_WU": could not parse blockStart "
                    "'%s'", gt_io_get_filename(bed_file),
@@ -537,7 +537,7 @@ static int bed_rest(GtBEDParser *bed_parser, GtIO *bed_file, GtError *err)
   if (!had_err) {
     word(bed_parser->word, bed_file);
     if (gt_str_length(bed_parser->word)) {
-      if (gt_parse_ulong(&block_count, gt_str_get(bed_parser->word))) {
+      if (gt_parse_uword(&block_count, gt_str_get(bed_parser->word))) {
         gt_error_set(err,
                      "file \"%s\": line "GT_WU": could not parse blockCount",
                      gt_io_get_filename(bed_file),
