@@ -176,7 +176,7 @@ static void make_sequence_region(GtHashmap *sequence_regions,
     seqid = gt_str_new_cstr(base);
     gt_free(base);
     gt_str_append_char(seqid, '|');
-    gt_str_append_ulong(seqid, seqnum + 1); /* 1-based */
+    gt_str_append_uword(seqid, seqnum + 1); /* 1-based */
     seqid_store_add(srf->seqid_store, filenum, seqnum, seqid, GT_UNDEF_UWORD);
     gt_assert(!gt_cstr_table_get(srf->used_seqids, gt_str_get(seqid)));
     gt_cstr_table_add(srf->used_seqids, gt_str_get(seqid));

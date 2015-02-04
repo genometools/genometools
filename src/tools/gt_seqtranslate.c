@@ -123,7 +123,7 @@ static int gt_seqtranslate_do_translation(GtTranslateArguments *arguments,
     if (gt_str_length(translations[i]) > 0) {
       gt_str_append_cstr(str, desc);
       gt_str_append_cstr(str, " (");
-      gt_str_append_ulong(str, i+1);
+      gt_str_append_uword(str, i+1);
       gt_str_append_cstr(str, rev ? "-" : "+");
       gt_str_append_cstr(str, ")");
       gt_fasta_show_entry(gt_str_get(str), gt_str_get(translations[i]),

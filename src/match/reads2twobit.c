@@ -1489,11 +1489,11 @@ static void gt_reads2twobit_collect_fileinfo(const GtReads2Twobit *r2t,
     if (rli->paired)
     {
       gt_str_append_char(libname, GT_READS2TWOBIT_LIBSPECSEP);
-      gt_str_append_ulong(libname, rli->insertlength);
+      gt_str_append_uword(libname, rli->insertlength);
       if (rli->stdev > 0)
       {
         gt_str_append_char(libname, GT_READS2TWOBIT_INSERTSEP);
-        gt_str_append_ulong(libname, rli->stdev);
+        gt_str_append_uword(libname, rli->stdev);
       }
     }
     gt_str_array_add(*filenametab, libname);

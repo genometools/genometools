@@ -1374,7 +1374,7 @@ static int gt_ltrharvest_stream_next(GtNodeStream *ns,
             gt_str_append_cstr_nt(seqid, desc, i);
           } else {
             gt_str_append_cstr(seqid, "seq");
-            gt_str_append_ulong(seqid, seqnum);
+            gt_str_append_uword(seqid, seqnum);
           }
           rn = gt_region_node_new(seqid,
                                   1 + (GtUword) ltrh_stream->offset,
@@ -1500,7 +1500,7 @@ static int gt_ltrharvest_stream_next(GtNodeStream *ns,
         gt_str_append_cstr_nt(seqid, desc, i);
       } else {
         gt_str_append_cstr(seqid, "seq");
-        gt_str_append_ulong(seqid, elem->contignumber);
+        gt_str_append_uword(seqid, elem->contignumber);
       }
 
       /* repeat_region */

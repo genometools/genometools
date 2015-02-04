@@ -324,17 +324,17 @@ static void rcr_convert_cigar_string(GtStr *cigar_str)
 
   for (i = 1UL; i < gt_str_length(cigar_str); i++) {
     if ((cur_cigar_op != gt_str_get(cigar_str)[i])) {
-      gt_str_append_ulong(new_cigar_str, cur_cigar_len);
+      gt_str_append_uword(new_cigar_str, cur_cigar_len);
       gt_str_append_char(new_cigar_str, cur_cigar_op);
       cur_cigar_op = gt_str_get(cigar_str)[i];
       cur_cigar_len = 1UL;
       if (i == gt_str_length(cigar_str) - 1) {
-        gt_str_append_ulong(new_cigar_str, cur_cigar_len);
+        gt_str_append_uword(new_cigar_str, cur_cigar_len);
         gt_str_append_char(new_cigar_str, cur_cigar_op);
       }
     }
     else if (i == gt_str_length(cigar_str) - 1) {
-      gt_str_append_ulong(new_cigar_str, ++cur_cigar_len);
+      gt_str_append_uword(new_cigar_str, ++cur_cigar_len);
       gt_str_append_char(new_cigar_str, cur_cigar_op);
     }
     else
@@ -1985,7 +1985,7 @@ static int rcr_write_decoding_to_file(GtRcrDecoder *rcr_dec, GtError *err)
       }
     }
     else
-      gt_str_append_ulong(qname, cur_read);
+      gt_str_append_uword(qname, cur_read);
 
     /* read read length */
     if (!had_err) {

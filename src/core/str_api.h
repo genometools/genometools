@@ -54,7 +54,10 @@ void    gt_str_append_double(GtStr *str, double d, int precision);
    with given <precision>. */
 void gt_str_append_sci_double(GtStr *dest, double d, int precision);
 /* Append <ulong> to <str>. */
+GT_DEPRECATED("use gt_str_append_uword() instead")
 void    gt_str_append_ulong(GtStr *str, GtUword ulong);
+/* Append <ulong> to <str>. */
+void    gt_str_append_uword(GtStr *str, GtUword uword);
 /* Append <intval> to <str>. */
 void    gt_str_append_int(GtStr *str, int intval);
 /* Append <uint> to <str>. */

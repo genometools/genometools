@@ -1390,7 +1390,7 @@ static int encdesc_next_desc(GtEncdesc *encdesc, GtStr *desc, GtError *err)
             gt_str_append_char(desc, '0');
         }
         if (desc != NULL) {
-          gt_str_append_ulong(desc, (GtUword) tmp);
+          gt_str_append_uword(desc, (GtUword) tmp);
           gt_str_append_char(desc, cur_field->sep);
         }
         continue;

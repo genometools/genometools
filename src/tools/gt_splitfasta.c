@@ -177,7 +177,7 @@ static int split_fasta_file(const char *filename, GtUword max_filesize,
     gt_str_append_cstr_nt(destfilename, filename,
                           gt_file_basename_length(filename));
     gt_str_append_char(destfilename, '.');
-    gt_str_append_ulong(destfilename, ++filenum);
+    gt_str_append_uword(destfilename, ++filenum);
     gt_str_append_cstr(destfilename,
                        gt_file_mode_suffix(gt_file_mode(srcfp)));
     if (!(destfp = gt_output_file_xopen_forcecheck(gt_str_get(destfilename),
@@ -204,7 +204,7 @@ static int split_fasta_file(const char *filename, GtUword max_filesize,
           gt_str_append_cstr_nt(destfilename, filename,
                                 gt_file_basename_length(filename));
           gt_str_append_char(destfilename, '.');
-          gt_str_append_ulong(destfilename, ++filenum);
+          gt_str_append_uword(destfilename, ++filenum);
           gt_str_append_cstr(destfilename,
                              gt_file_mode_suffix(gt_file_mode(srcfp)));
           if (!(destfp =

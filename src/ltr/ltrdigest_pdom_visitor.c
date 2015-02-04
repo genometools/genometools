@@ -613,7 +613,7 @@ static int gt_ltrdigest_pdom_visitor_attach_hit(GtLTRdigestPdomVisitor *lv,
       for (j = 0UL; j < gt_array_size(singlehit->chains); j++) {
         gt_str_append_cstr(buffer, modelhit->modelname);
         gt_str_append_char(buffer, ':');
-        gt_str_append_ulong(buffer,
+        gt_str_append_uword(buffer,
                           *(GtUword*) gt_array_get(singlehit->chains, j));
         if (j != gt_array_size(singlehit->chains) - 1) {
           gt_str_append_char(buffer, ',');

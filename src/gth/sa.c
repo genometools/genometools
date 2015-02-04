@@ -999,12 +999,12 @@ static void set_gff3_target_attribute(GthSA *sa, bool md5ids)
   gt_gff3_escape(sa->gff3_target_attribute, gt_str_get(sa->ref_id),
                  gt_str_length(sa->ref_id));
   gt_str_append_char(sa->gff3_target_attribute, ' ');
-  gt_str_append_ulong(sa->gff3_target_attribute,
+  gt_str_append_uword(sa->gff3_target_attribute,
                       gth_sa_referencecutoff_start(sa) + 1); /* XXX: use
                                                                 reference
                                                                 dpstartpos */
   gt_str_append_char(sa->gff3_target_attribute, ' ');
-  gt_str_append_ulong(sa->gff3_target_attribute,
+  gt_str_append_uword(sa->gff3_target_attribute,
                       gth_sa_ref_total_length(sa) - /* XXX */
                       gth_sa_referencecutoff_end(sa));
   gt_str_append_char(sa->gff3_target_attribute, ' ');

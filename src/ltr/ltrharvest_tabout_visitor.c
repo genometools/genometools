@@ -207,7 +207,7 @@ static int gt_ltrharvest_tabout_visitor_feature_node(GtNodeVisitor *nv,
       gt_ltrharvest_tabout_visitor_seq4feat(lv, lefttsd, line, seqnum);
       gt_str_append_cstr(line, "  ");
       rng = gt_genome_node_get_range((GtGenomeNode*) lefttsd);
-      gt_str_append_ulong(line, gt_range_length(&rng));
+      gt_str_append_uword(line, gt_range_length(&rng));
       gt_str_append_cstr(line, "  ");
     }
     /* left motif */
@@ -230,7 +230,7 @@ static int gt_ltrharvest_tabout_visitor_feature_node(GtNodeVisitor *nv,
       gt_ltrharvest_tabout_visitor_seq4feat(lv, righttsd, line, seqnum);
       gt_str_append_cstr(line, "  ");
       rng = gt_genome_node_get_range((GtGenomeNode*) righttsd);
-      gt_str_append_ulong(line, gt_range_length(&rng));
+      gt_str_append_uword(line, gt_range_length(&rng));
       gt_str_append_cstr(line, "  ");
     }
     /* right motif */
@@ -245,7 +245,7 @@ static int gt_ltrharvest_tabout_visitor_feature_node(GtNodeVisitor *nv,
     gt_str_append_cstr(line, gt_feature_node_get_attribute(ltr_retrotrans,
                                                            "ltr_similarity"));
     gt_str_append_cstr(line, "  ");
-    gt_str_append_ulong(line, seqnum);
+    gt_str_append_uword(line, seqnum);
     printf("%s\n", gt_str_get(line));
   }
   gt_str_delete(line);
