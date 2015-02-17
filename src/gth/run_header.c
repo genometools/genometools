@@ -22,7 +22,6 @@
 #include "gth/call_info.h"
 #include "gth/gthspeciestab.h"
 #include "gth/run_header.h"
-#include "gt_config.h"
 
 /* The name of the splice site models. */
 #define SPLICE_SITE_MODEL_NAME  "Bayesian"
@@ -81,8 +80,8 @@ static void show_xml_run_header(GthCallInfo *call_info, GthInput *input,
   indentlevel++;
   gth_indent(outfp, indentlevel);
   gt_file_xprintf(outfp, "<source program=\"GenomeThreader\" version=\"%s\" "
-                  "build_date=\"%s\" run_date=\"%s\"/>\n", gth_version,
-                  GT_BUILT, timestring);
+                  "build_date=\"redacted\" run_date=\"%s\"/>\n", gth_version,
+                  timestring);
 
   /* show genomic file names */
   gth_indent(outfp, indentlevel);
@@ -177,8 +176,8 @@ void gth_run_header_show(GthCallInfo *call_info, GthInput *input,
                         args);
   }
   else if (!call_info->out->gff3out) {
-    gt_file_xprintf(outfp, "%c GenomeThreader %s (%s)\n", COMMENTCHAR,
-                    gth_version, GT_BUILT);
+    gt_file_xprintf(outfp, "%c GenomeThreader %s\n", COMMENTCHAR,
+                    gth_version);
     gt_file_xprintf(outfp, "%c Date run: %s\n", COMMENTCHAR, timestring);
     gt_file_xprintf(outfp, "%c Arguments: ", COMMENTCHAR);
     gt_cstr_array_show_genfile(args, outfp);
