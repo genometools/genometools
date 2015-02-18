@@ -197,7 +197,7 @@ static GtOptionParser* gt_hop_option_parser_new(void *tool_arguments)
   option = gt_option_new_double_min_max("altmax",
       "max support of alternate homopol. length;\n"
       "e.g. 0.8 means: do not correct any read if homop. length in more than "
-      "80\% of the reads has the same value, different from the cognate\n"
+      "80%% of the reads has the same value, different from the cognate\n"
       "if altmax is set to 1.0 reads are always corrected",
       &arguments->altmax, (double) 0.8, 0.0, (double) 1.0);
   gt_option_is_extended_option(option);
@@ -208,7 +208,7 @@ static GtOptionParser* gt_hop_option_parser_new(void *tool_arguments)
   option = gt_option_new_double_min_max("cogmin",
       "min support of cognate sequence homopol. length;\n"
       "e.g. 0.1 means: do not correct any read if cognate homop. length "
-      "is not present in at least 10\% of the reads\n"
+      "is not present in at least 10%% of the reads\n"
       "if cogmin is set to 0.0 reads are always corrected",
       &arguments->cogmin, (double) 0.1, 0.0, (double) 1.0);
   gt_option_hide_default(option);
