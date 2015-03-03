@@ -1,7 +1,8 @@
-changes in version 1.5.5 (2015-01-25)
+changes in version 1.5.5 (2015-03-03)
 
 - bugfixes and cleanups
 - multiple improvements to GFF3 parser
+- `gt interfeat` handles top-level multi-features correctly
 
 
 changes in version 1.5.4 (2014-12-11)
