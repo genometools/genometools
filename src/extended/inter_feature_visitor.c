@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2007-2009 Gordon Gremme <gordon@gremme.org>
-  Copyright (c) 2007-2008 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2007-2009, 2015 Gordon Gremme <gordon@gremme.org>
+  Copyright (c) 2007-2008       Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -139,9 +139,23 @@ static int inter_feature_visitor_feature_node(GtNodeVisitor *nv,
 {
   GtInterFeatureVisitor *v;
   gt_error_check(err);
+  int had_err = 0;
   v = gt_inter_feature_visitor_cast(nv);
-  return gt_feature_node_traverse_children(fn, v, inter_feature_if_necessary,
-                                           false, err);
+  /* gt_feature_node_traverse_children() ignores pseudo-nodes, therefore we have
+     to process the direct children of a pseudo-node separately. */
+  if (gt_feature_node_is_pseudo(fn)) {
+    v->parent_feature = fn;
+    v->previous_feature = NULL;
+    had_err = gt_feature_node_traverse_direct_children(fn, v,
+                                                      inter_feature_in_children,
+                                                       err);
+  }
+  if (!had_err) {
+    had_err = gt_feature_node_traverse_children(fn, v,
+                                                inter_feature_if_necessary,
+                                                false, err);
+  }
+  return had_err;
 }
 
 const GtNodeVisitorClass* gt_inter_feature_visitor_class()
