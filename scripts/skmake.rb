@@ -68,7 +68,7 @@ def parseargs(argv)
 end
 
 def makecompilerflags(fp,options)
-  fp.print "all:\n\t\${MAKE} -j #{options.jobs} with-sqlite=no"
+  fp.print "all:\n\t\${MAKE} -j #{options.jobs} wrapmemcpy=yes with-sqlite=no"
   # fp.print " CFLAGS+=-fstrict-aliasing"
   if options.speed
     fp.print " assert=no amalgamation=yes"
@@ -90,7 +90,7 @@ def makecompilerflags(fp,options)
   else
     fp.print " cairo=no"
   end
-  fp.print " CC='ccache " + ENV["CC"] + "'"
+  fp.print " CPPFLAGS='-fno-stack-protector -U_FORTIFY_SOURCE -D_GNU_SOURCE' CC='ccache " + ENV["CC"] + "'"
   if not options.fileargs.nil?
     filenames=options.fileargs.join(" ")
     fp.puts " #{filenames}"
