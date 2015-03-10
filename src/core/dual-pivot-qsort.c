@@ -67,13 +67,13 @@ static void gt_dual_pivots_get(GtUword *pivot1,GtUword *pivot2,
   }
   e[4] = e[3] + s7;
   e[5] = e[4] + s7;
-  for (idx = 1; idx <= 5; idx++)
+  for (idx = (GtUword) 1; idx <= (GtUword) 5; idx++)
   {
     gt_assert(lowindex <= e[idx] && e[idx] <= highindex);
     values[idx-1] = input[e[idx]];
   }
-  gt_dual_insertion_sort(values,0,4);
-  for (idx = 1; idx <= 5; idx++)
+  gt_dual_insertion_sort(values,0,(GtUword) 4);
+  for (idx = (GtUword) 1; idx <= (GtUword) 5; idx++)
   {
     input[e[idx]] = values[idx-1];
   }
