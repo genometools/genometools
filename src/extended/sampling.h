@@ -22,6 +22,8 @@
 #include <stdio.h>
 #include <sys/types.h>
 
+#include "core/types_api.h"
+
 #define GT_SAMPLING_DEFAULT_REGULAR_RATE 10000UL
 #define GT_SAMPLING_DEFAULT_PAGE_RATE 100UL
 
