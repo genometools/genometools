@@ -18,21 +18,24 @@
 #ifndef SHU_DIVERGENCE_H
 #define SHU_DIVERGENCE_H
 
+#include "core/types_api.h"
+
 /* calculates the divergence from the shulength */
-double gt_divergence (double E, /* relative error for shulen length */
-                   double T, /* absolute error */
-                   double M,
-                   double threshold, /* break criteria for pmax calculation */
-                   double shulen, /*avg shulength*/
-                   GtUword subjectLength, /*subjectlength*/
-                   double gc, /*combined gc-content*/
-                   double *ln_n_fac,
-                   GtUword n_s /*length of s-array*/);
+double  gt_divergence(double E, /* relative error for shulen length */
+                      double T, /* absolute error */
+                      double M,
+                      double threshold, /* break criteria for
+                                           pmax calculation */
+                      double shulen, /*avg shulength*/
+                      GtUword subjectLength, /*subjectlength*/
+                      double gc, /*combined gc-content*/
+                      double *ln_n_fac,
+                      GtUword n_s /*length of s-array*/);
 
 /* Jukes-Cantor transform of divergence: Kr */
-double gt_calculateKr(double d);
+double  gt_calculateKr(double d);
 
 /* Calculates ln(n!) for numbers 0 to given n */
-double *gt_get_ln_n_fac(GtUword n);
+double* gt_get_ln_n_fac(GtUword n);
 
 #endif

@@ -19,6 +19,7 @@
 #define POPCOUNT_TAB_H
 
 #include "core/error_api.h"
+#include "core/types_api.h"
 
 /* The <GtPopcountTab> class represents a table of values of a fixed bit
    width sorted by their popcount (number of bits set to 1). Values are sorted
