@@ -611,16 +611,10 @@ static int process_node(GtDiagram *d, GtFeatureNode *node,
     }
   }
 
-  /* we can now assume that this node (or its representative)
-     has been processed into the reverse lookup structure */
+  /* we can now assume that this node has been processed into the reverse
+     lookup structure */
 #ifndef NDEBUG
-  if (gt_feature_node_is_multi(node))
-  {
-    GtFeatureNode *rep;
-    rep = gt_feature_node_get_multi_representative((GtFeatureNode*) node);
-    gt_assert(gt_hashmap_get(d->nodeinfo, rep));
-  }
-  else
+  if (!gt_feature_node_is_multi(node))
     gt_assert(gt_hashmap_get(d->nodeinfo, node));
 #endif
 

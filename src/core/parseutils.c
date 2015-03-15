@@ -60,6 +60,11 @@ int gt_parse_uint(unsigned int *out, const char *nptr)
 
 int gt_parse_long(GtWord *out, const char *nptr)
 {
+  return gt_parse_word(out, nptr);
+}
+
+int gt_parse_word(GtWord *out, const char *nptr)
+{
   long lval;
   char *ep;
   gt_assert(out && nptr);
@@ -74,6 +79,11 @@ int gt_parse_long(GtWord *out, const char *nptr)
 }
 
 int gt_parse_ulong(GtUword *out, const char *nptr)
+{
+  return gt_parse_uword(out, nptr);
+}
+
+int gt_parse_uword(GtUword *out, const char *nptr)
 {
   GtUword ulval;
   char *ep;
@@ -353,14 +363,14 @@ int gt_parse_description_range(const char *description, GtRange *range)
   /* parse range start */
   gt_assert(desc[i-1] == '.' && desc[i] == '.');
   desc[i-1] = '\0';
-  if (gt_parse_ulong(&range->start, desc)) {
+  if (gt_parse_uword(&range->start, desc)) {
     /* parsing failed */
     gt_free(descptr);
     return -1;
   }
   /* parse range end */
   desc += i + 1;
-  if (gt_parse_ulong(&range->end, desc)) {
+  if (gt_parse_uword(&range->end, desc)) {
     /* parsing failed */
     gt_free(descptr);
     return -1;

@@ -38,11 +38,11 @@
 
 #define GT_MATCHER_BLAST_CANNOTPARSECOLUMN(S)\
         gt_error_set(err, "file %s, line " GT_WU ", column " GT_WU ": %s", \
-                     m->pvt->matchfile, m->pvt->curpos, columncount + 1, S)
+                     mib->pvt->matchfile, mib->pvt->curpos, columncount + 1, S)
 
 #define GT_MATCHER_BLAST_CANNOTPARSELINE(S)\
         gt_error_set(err, "file %s, line " GT_WU ": %s", \
-                     m->pvt->matchfile, m->pvt->curpos, S)
+                     mib->pvt->matchfile, mib->pvt->curpos, S)
 
 #define gt_match_iterator_blast_cast(M)\
         gt_match_iterator_cast(gt_match_iterator_blast_class(), M)
@@ -64,11 +64,11 @@ struct GtMatchIteratorBlast
 
 const GtMatchIteratorClass* gt_match_iterator_blast_class(void);
 
-static GtMatchIteratorStatus gt_match_iterator_blast_next(GtMatchIterator *gm,
+static GtMatchIteratorStatus gt_match_iterator_blast_next(GtMatchIterator *mi,
                                                           GtMatch **match,
                                                           GtError *err)
 {
-  gt_assert(gm);
+  gt_assert(mi);
   GtUword columncount = 0;
   GtWord storeinteger[READNUMS], tmp;
   double e_value;
@@ -76,20 +76,20 @@ static GtMatchIteratorStatus gt_match_iterator_blast_next(GtMatchIterator *gm,
   bool reverse = false;
   char query_seq[BUFSIZ], db_seq[BUFSIZ], buffer[BUFSIZ];
   int had_err = 0, i = 0, readvalues = 0;
-  GtMatchIteratorBlast *m = gt_match_iterator_blast_cast(gm);
+  GtMatchIteratorBlast *mib = gt_match_iterator_blast_cast(mi);
 
-  if (m->pvt->matchfilep) {
-    if (!m->pvt->process) {
+  if (mib->pvt->matchfilep) {
+    if (!mib->pvt->process) {
       while (true) {
-        if (fgetc(m->pvt->matchfilep) == '#') {
-          GT_UNUSED char *l = fgets(buffer, BUFSIZ, m->pvt->matchfilep);
-          m->pvt->curpos++;
+        if (fgetc(mib->pvt->matchfilep) == '#') {
+          GT_UNUSED char *l = fgets(buffer, BUFSIZ, mib->pvt->matchfilep);
+          mib->pvt->curpos++;
         } else break;
       }
     }
-    if (!m->pvt->process)
-      fseek(m->pvt->matchfilep, -1, SEEK_CUR);
-    readvalues = fscanf(m->pvt->matchfilep,
+    if (!mib->pvt->process)
+      fseek(mib->pvt->matchfilep, -1, SEEK_CUR);
+    readvalues = fscanf(mib->pvt->matchfilep,
                         "%s %s %f " GT_WD " %*d %*d " GT_WD " " GT_WD " " GT_WD
                         " " GT_WD " %lg %f\n", query_seq, db_seq, &identity,
                         &storeinteger[0],
@@ -104,14 +104,14 @@ static GtMatchIteratorStatus gt_match_iterator_blast_next(GtMatchIterator *gm,
     }
   } else {
     while (true) {
-      while ((buffer[i] = gt_file_xfgetc(m->pvt->gtmatchfilep)) != '\n') {
+      while ((buffer[i] = gt_file_xfgetc(mib->pvt->gtmatchfilep)) != '\n') {
         if (buffer[i] == EOF)
           return GT_MATCHER_STATUS_END;
         i++;
       }
       buffer[i+1] = '\0';
       if (buffer[0] == '#') {
-        m->pvt->curpos++;
+        mib->pvt->curpos++;
         i = 0;
       } else break;
     }
@@ -161,7 +161,7 @@ static GtMatchIteratorStatus gt_match_iterator_blast_next(GtMatchIterator *gm,
                                 storeinteger[0],
                                 identity,
                                 reverse ? GT_MATCH_REVERSE : GT_MATCH_DIRECT);
-    m->pvt->curpos++;
+    mib->pvt->curpos++;
     return GT_MATCHER_STATUS_OK;
   }
   else

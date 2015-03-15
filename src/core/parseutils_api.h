@@ -18,9 +18,10 @@
 #ifndef PARSEUTILS_API_H
 #define PARSEUTILS_API_H
 
+#include "core/deprecated_api.h"
 #include "core/error_api.h"
-#include "core/range_api.h"
 #include "core/phase_api.h"
+#include "core/range_api.h"
 #include "core/strand_api.h"
 
 /* Parseutils module */
@@ -35,11 +36,19 @@ int gt_parse_uint(unsigned int *out, const char *nptr);
 
 /* Parse long from <nptr> and store result in <out>.
    Returns 0 upon success and -1 upon failure. */
+GT_DEPRECATED("use gt_parse_word() instead")
 int gt_parse_long(GtWord *out, const char *nptr);
+/* Parse GtWord from <nptr> and store result in <out>.
+   Returns 0 upon success and -1 upon failure. */
+int gt_parse_word(GtWord *out, const char *nptr);
 
+/* Parse ulong from <nptr> and store result in <out>.
+   Returns 0 upon success and -1 upon failure. */
+GT_DEPRECATED("use gt_parse_uword() instead")
+int gt_parse_ulong(GtUword *out, const char *nptr);
 /* Parse GtUword from <nptr> and store result in <out>.
    Returns 0 upon success and -1 upon failure. */
-int gt_parse_ulong(GtUword *out, const char *nptr);
+int gt_parse_uword(GtUword *out, const char *nptr);
 
 /* Parse double from <nptr> and store result in <out>.
    Returns 0 upon success and -1 upon failure. */

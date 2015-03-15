@@ -20,7 +20,7 @@ GENOMETOOLS_PATH = "/home/satta/genometools_for_web"
 GTRUBY_PATH      = "#{GENOMETOOLS_PATH}/gtruby"
 # the LD_LIBRARY_PATH has to be set externally to "#{GENOMETOOLS_PATH}/lib"!
 SCRIPT_PATH      = "/var/www/servers/genometools.org/htdocs/cgi-bin"
-UPLOAD_PATH      = "/tmp"
+UPLOAD_PATH      = "/var/www/servers/genometools.org/htdocs/cgi-bin/gff3"
 MAXSIZE          = 52428800
 
 $: << (GTRUBY_PATH)
@@ -74,12 +74,12 @@ table.padded-table td {
 <div id="main">
   <h1><em>GFF3 online validator</h1>
   <p>Use this form to upload a GFF3 annotation file (up to 50 MB, can be .gz or
-.bz2 compressed) which is then validated against the <a href="http://www.sequenceontology.org/gff3.shtml">GFF3 specification</a> using the current <a href="http://song.cvs.sourceforge.net/song/ontology/so.obo?view=log">Sequence Ontology OBO file</a>.</p>
+.bz2 compressed) which is then validated against the <a href="http://www.sequenceontology.org/gff3.shtml">GFF3 specification</a> (potentially also using the current <a href="http://song.cvs.sourceforge.net/song/ontology/so.obo?view=log">Sequence Ontology OBO file</a>).</p>
 END
 
 HTML_FOOTER = <<END
 <div id="footer">
-Copyright &copy; 2012 Sascha Steinbiss. Last update: 2012-04-11
+Copyright &copy; 2012 Sascha Steinbiss. Last update: 2015-01-25
 </div>
 </div>
 <!-- Piwik -->
@@ -110,6 +110,7 @@ UPLOAD_FORM = <<END
       <tr><td></td>
         <td>
           <input type="checkbox" name="tidy" %s>enable &quot;tidy&quot; mode (tries to fix errors) <br />
+          <input type="checkbox" name="type" %s>use Sequence Ontology to validate types and parent-child relationships<br />
           <input type="checkbox" name="show" %s>also report content of affected GFF lines <br />
         </td>
       </tr>
@@ -120,7 +121,7 @@ UPLOAD_FORM = <<END
     </form>
     <p>This GFF3 validator is part of the <em>GenomeTools</em> distribution which you
 can <a href="http://genometools.org/pub">download</a> to your computer.
-Use the <tt>gff3validator</tt> tool to validate your own &ndash; possibly larger &ndash; GFF3 files and the <tt>gff3</tt> tool with option <tt>-tidy</tt> to tidy them up (<tt>-help</tt> shows further options).</p>
+Use the <tt>gff3validator</tt> tool to validate your own &ndash; possibly larger &ndash; GFF3 files (with option <tt>-typecheck so</tt> to use the Sequence Ontology). Use the <tt>gff3</tt> tool with option <tt>-tidy</tt> to tidy them up (<tt>-help</tt> shows further options).</p>
 END
 
 puts HTML_HEADER
@@ -138,18 +139,23 @@ end
 
 if cgi.params.has_key?('submitted') then
   tidy = (cgi.params["tidy"].length > 0)
+  type = (cgi.params["type"].length > 0)
   show = (cgi.params["show"].length > 0)
   begin
     show_checked = ''
+    type_checked = ''
     tidy_checked = ''
     if tidy then
       tidy_checked = 'checked="checked"'
+    end
+    if type then
+      type_checked = 'checked="checked"'
     end
     if show then
       show_checked = 'checked="checked"'
     end
 
-    puts UPLOAD_FORM % [tidy_checked, show_checked]
+    puts UPLOAD_FORM % [tidy_checked, type_checked, show_checked]
 
     ufile = cgi.params['file']
     if ufile.first.length == 0 then
@@ -170,10 +176,11 @@ if cgi.params.has_key?('submitted') then
     errfile = Tempfile.new('validator')
     $stderr.reopen(errfile)
 
-    checker = GT::TypeCheckerOBO.new("#{GENOMETOOLS_PATH}/gtdata/obo_files/so.obo")
-
     stream = GT::GFF3InStream.new(targetfilename, false)
-    stream.set_type_checker(checker)
+    if type then
+      checker = GT::TypeCheckerOBO.new("#{GENOMETOOLS_PATH}/gtdata/obo_files/so.obo")
+      stream.set_type_checker(checker)
+    end
     if tidy then
       stream.enable_tidy_mode
     end
@@ -215,7 +222,7 @@ if cgi.params.has_key?('submitted') then
     puts "<h2 style='color:red;'>Validation unsuccessful!</h2><p>#{err}</p>"
   end
 else
-  puts UPLOAD_FORM % ['', 'checked="checked"']
+  puts UPLOAD_FORM % ['', 'checked="checked"', 'checked="checked"']
 end
 
 print HTML_FOOTER

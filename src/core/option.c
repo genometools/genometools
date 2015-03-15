@@ -635,7 +635,7 @@ int gt_option_parser_manpage(GtOptionParser *op, const char *toolname,
         if (option->default_value.ul == GT_UNDEF_UWORD)
           gt_str_append_cstr(default_string, "undefined");
         else
-          gt_str_append_ulong(default_string, option->default_value.ul);
+          gt_str_append_uword(default_string, option->default_value.ul);
       }
       else if (option->option_type == OPTION_RANGE) {
         gt_str_append_cstr(outstr, "['start' 'end']");
@@ -643,9 +643,9 @@ int gt_option_parser_manpage(GtOptionParser *op, const char *toolname,
           gt_str_append_cstr(default_string, "undefined");
         else {
           gt_str_append_char(default_string, '[');
-          gt_str_append_ulong(default_string, option->default_value.r.start);
+          gt_str_append_uword(default_string, option->default_value.r.start);
           gt_str_append_cstr(default_string, "..");
-          gt_str_append_ulong(default_string, option->default_value.r.end);
+          gt_str_append_uword(default_string, option->default_value.r.end);
           gt_str_append_char(default_string, ']');
         }
       }
@@ -1231,7 +1231,7 @@ GtOPrval gt_option_parser_parse(GtOptionParser *op, int *parsed_args, int argc,
                                                err);
               if (!had_err) {
                 argnum++;
-                if (gt_parse_long(&long_value, argv[argnum])) {
+                if (gt_parse_word(&long_value, argv[argnum])) {
                   gt_error_set(err, "argument to option \"-%s\" must be an "
                                     "integer", gt_str_get(option->option_str));
                   had_err = -1;
@@ -1253,7 +1253,7 @@ GtOPrval gt_option_parser_parse(GtOptionParser *op, int *parsed_args, int argc,
                                                               argv, err);
               if (!had_err) {
                 argnum++;
-                if (gt_parse_ulong(&ulong_value, argv[argnum])) {
+                if (gt_parse_uword(&ulong_value, argv[argnum])) {
                   gt_error_set(err, "argument to option \"-%s\" is out of "
                                "range", gt_str_get(option->option_str));
                   had_err = -1;
@@ -1298,7 +1298,7 @@ GtOPrval gt_option_parser_parse(GtOptionParser *op, int *parsed_args, int argc,
                                                               argv, err);
               if (!had_err) {
                 argnum++;
-                if (gt_parse_long(&long_value, argv[argnum]) ||
+                if (gt_parse_word(&long_value, argv[argnum]) ||
                     long_value < 0) {
                   gt_error_set(err, "first argument to option \"-%s\" must be "
                                "a non-negative integer",
@@ -1328,7 +1328,7 @@ GtOPrval gt_option_parser_parse(GtOptionParser *op, int *parsed_args, int argc,
               }
               if (!had_err) {
                 argnum++;
-                if (gt_parse_long(&long_value, argv[argnum]) ||
+                if (gt_parse_word(&long_value, argv[argnum]) ||
                     long_value < 0) {
                   gt_error_set(err, "second argument to option \"-%s\" must be "
                                "a non-negative integer",

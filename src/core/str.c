@@ -100,14 +100,19 @@ void gt_str_append_cstr_nt(GtStr *dest, const char *cstr, GtUword length)
   dest->length += length;
 }
 
+void gt_str_append_ulong(GtStr *str, GtUword ulong)
+{
+  gt_str_append_uword(str,ulong);
+}
+
 /* inspired by D. J. Bernstein's fmt_ulong() */
-void gt_str_append_ulong(GtStr *dest, GtUword u)
+void gt_str_append_uword(GtStr *dest, GtUword uword)
 {
   unsigned int ulength = 1;
-  GtUword q = u;
+  GtUword q = uword;
   char *s;
   gt_assert(dest);
-  /* determine length of u */
+  /* determine length of uword */
   while (q > 9) {
     ulength++;
     q /= 10;
@@ -118,10 +123,10 @@ void gt_str_append_ulong(GtStr *dest, GtUword u)
  /* format */
   s = dest->cstr + dest->length + ulength;
   do {
-    *--s = '0' + (u % 10);
-    u /= 10;
+    *--s = '0' + (uword % 10);
+    uword /= 10;
   }
-  while (u); /* handles u == 0 */
+  while (uword); /* handles uword == 0 */
   dest->length += ulength;
 }
 
@@ -399,20 +404,20 @@ int gt_str_unit_test(GtError *err)
   gt_ensure(gt_str_length(s1) == 9);
   gt_ensure(strcmp("foobarbaz", gt_str_get(s1)) == 0);
   gt_ensure(strcmp("foo", gt_str_get(s2)) == 0);
-  gt_str_append_ulong(s1, 1984);
+  gt_str_append_uword(s1, 1984);
   gt_ensure(strcmp("foobarbaz1984", gt_str_get(s1)) == 0);
   gt_str_delete(s1);
   gt_str_delete(s2);
 
-  /* testing gt_str_append_ulong() and gt_str_set_length() */
+  /* testing gt_str_append_uword() and gt_str_set_length() */
   s = gt_str_new();
-  gt_str_append_ulong(s, 0);
+  gt_str_append_uword(s, 0);
   gt_ensure(strcmp("0", gt_str_get(s)) == 0);
   gt_str_reset(s);
   gt_ensure(strcmp("", gt_str_get(s)) == 0);
-  gt_str_append_ulong(s, 6);
+  gt_str_append_uword(s, 6);
   gt_ensure(strcmp("6", gt_str_get(s)) == 0);
-  gt_str_append_ulong(s, 16);
+  gt_str_append_uword(s, 16);
   gt_ensure(strcmp("616", gt_str_get(s)) == 0);
   gt_str_delete(s);
 

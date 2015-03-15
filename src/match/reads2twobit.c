@@ -214,10 +214,10 @@ int gt_reads2twobit_add_library(GtReads2Twobit *r2t, const GtStr *libspec,
       GT_READS2TWOBIT_INSERTSEP);
     if (gt_splitter_size(s2) <= 2UL)
     {
-      had_err = gt_parse_ulong(&insertlength, gt_splitter_get_token(s2, 0));
+      had_err = gt_parse_uword(&insertlength, gt_splitter_get_token(s2, 0));
       if (gt_splitter_size(s2) == 2UL && !had_err)
       {
-        had_err = gt_parse_ulong(&stdev, gt_splitter_get_token(s2, 1UL));
+        had_err = gt_parse_uword(&stdev, gt_splitter_get_token(s2, 1UL));
       }
     }
     if (gt_splitter_size(s2) > 2UL || had_err)
@@ -1489,11 +1489,11 @@ static void gt_reads2twobit_collect_fileinfo(const GtReads2Twobit *r2t,
     if (rli->paired)
     {
       gt_str_append_char(libname, GT_READS2TWOBIT_LIBSPECSEP);
-      gt_str_append_ulong(libname, rli->insertlength);
+      gt_str_append_uword(libname, rli->insertlength);
       if (rli->stdev > 0)
       {
         gt_str_append_char(libname, GT_READS2TWOBIT_INSERTSEP);
-        gt_str_append_ulong(libname, rli->stdev);
+        gt_str_append_uword(libname, rli->stdev);
       }
     }
     gt_str_array_add(*filenametab, libname);

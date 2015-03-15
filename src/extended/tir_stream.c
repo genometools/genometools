@@ -705,7 +705,7 @@ static int gt_tir_stream_next(GtNodeStream *ns, GT_UNUSED GtGenomeNode **gn,
           gt_md5_tab_delete(md5_tab);
         }
         gt_str_append_cstr(seqid, "seq");
-        gt_str_append_ulong(seqid, seqnum);
+        gt_str_append_uword(seqid, seqnum);
 
         rn = gt_region_node_new(seqid, 1, seqlength);
         gt_str_delete(seqid);
@@ -820,7 +820,7 @@ static int gt_tir_stream_next(GtNodeStream *ns, GT_UNUSED GtGenomeNode **gn,
         gt_md5_tab_delete(md5_tab);
       }
       gt_str_append_cstr(seqid, "seq");   /* XXX */
-      gt_str_append_ulong(seqid, pair->contignumber);
+      gt_str_append_uword(seqid, pair->contignumber);
 
       /* repeat region */
 

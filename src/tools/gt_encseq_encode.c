@@ -61,7 +61,8 @@ static GtOptionParser* gt_encseq_encode_option_parser_new(void *tool_arguments)
   /* init */
   op = gt_option_parser_new("sequence_file [sequence_file "
                             "[sequence_file ...]]",
-                            "Encode sequence files efficiently.");
+                            "Encode sequence files (FASTA/FASTQ, GenBank, "
+                            "EMBL) efficiently.");
 
   /* -showstats */
   option = gt_option_new_bool("showstats",

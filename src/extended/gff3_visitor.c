@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2006-2013 Gordon Gremme <gordon@gremme.org>
-  Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2006-2013, 2015 Gordon Gremme <gordon@gremme.org>
+  Copyright (c) 2006-2008       Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -248,7 +248,7 @@ static GtStr* create_unique_id(GtGFF3Visitor *gff3_visitor, GtFeatureNode *fn)
 
   /* build id string */
   id = gt_str_new_cstr(type);
-  gt_str_append_ulong(id, gt_string_distri_get(gff3_visitor->id_counter, type));
+  gt_str_append_uword(id, gt_string_distri_get(gff3_visitor->id_counter, type));
 
   /* store (unique) id */
   gt_hashmap_add(gff3_visitor->feature_node_to_unique_id_str, fn, id);
@@ -260,7 +260,7 @@ static void make_unique_id_string(GtStr *current_id, GtUword counter)
 {
   /* name => name.1 */
   gt_str_append_char(current_id, '.');
-  gt_str_append_ulong(current_id, counter);
+  gt_str_append_uword(current_id, counter);
 }
 
 static bool id_string_is_unique(GtStr *id, GtStr *buf, GtCstrTable *tab,
@@ -394,6 +394,7 @@ static int gff3_visitor_meta_node(GtNodeVisitor *nv, GtMetaNode *mn,
                                   GT_UNUSED GtError *err)
 {
   GtGFF3Visitor *gff3_visitor;
+  const char *data;
   gt_error_check(err);
   gff3_visitor = gff3_visitor_cast(nv);
   gt_assert(nv && mn);
@@ -407,16 +408,22 @@ static int gff3_visitor_meta_node(GtNodeVisitor *nv, GtMetaNode *mn,
       gff3_version_string(nv);
     }
   }
+  data = gt_meta_node_get_data(mn);
   if (!gff3_visitor->outstr) {
-    gt_file_xprintf(gff3_visitor->outfp, "##%s %s\n",
-                    gt_meta_node_get_directive(mn),
-                    gt_meta_node_get_data(mn));
-
+    if (data) {
+      gt_file_xprintf(gff3_visitor->outfp, "##%s %s\n",
+                      gt_meta_node_get_directive(mn), data);
+    } else {
+      gt_file_xprintf(gff3_visitor->outfp, "##%s\n",
+                      gt_meta_node_get_directive(mn));
+    }
   } else {
     gt_str_append_cstr(gff3_visitor->outstr, "##");
     gt_str_append_cstr(gff3_visitor->outstr, gt_meta_node_get_directive(mn));
-    gt_str_append_char(gff3_visitor->outstr, ' ');
-    gt_str_append_cstr(gff3_visitor->outstr, gt_meta_node_get_data(mn));
+    if (data) {
+      gt_str_append_char(gff3_visitor->outstr, ' ');
+      gt_str_append_cstr(gff3_visitor->outstr, data);
+    }
     gt_str_append_char(gff3_visitor->outstr, '\n');
   }
   return 0;
@@ -442,10 +449,10 @@ static int gff3_visitor_region_node(GtNodeVisitor *nv, GtRegionNode *rn,
     gt_str_append_cstr(gff3_visitor->outstr,
                       gt_str_get(gt_genome_node_get_seqid((GtGenomeNode*) rn)));
     gt_str_append_char(gff3_visitor->outstr, ' ');
-    gt_str_append_ulong(gff3_visitor->outstr,
+    gt_str_append_uword(gff3_visitor->outstr,
                                   gt_genome_node_get_start((GtGenomeNode*) rn));
     gt_str_append_char(gff3_visitor->outstr, ' ');
-    gt_str_append_ulong(gff3_visitor->outstr,
+    gt_str_append_uword(gff3_visitor->outstr,
                                   gt_genome_node_get_end((GtGenomeNode*) rn));
     gt_str_append_char(gff3_visitor->outstr, '\n');
   }

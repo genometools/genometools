@@ -348,6 +348,9 @@ assert(not rval)
 gn = gt.meta_node_new("foo","bar")
 assert(gn:get_directive() == "foo")
 assert(gn:get_data() == "bar")
+gn = gt.meta_node_new("foo", nil)
+assert(gn:get_directive() == "foo")
+assert(not gn:get_data())
 
 -- testing gt.comment_node_new
 rval, err = pcall(gt.comment_node_new, nil)

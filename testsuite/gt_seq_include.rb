@@ -108,7 +108,8 @@ end
   Name "gt seq test 3 out #{i}"
   Keywords "gt_seq"
   Test do
-    run_test "#{$bin}gt seq -showseqnum #{i} -width 70 #{$testdata}gt_bioseq_succ_3.fas"
+    FileUtils.copy("#{$testdata}gt_bioseq_succ_3.fas", ".")
+    run_test "#{$bin}gt seq -showseqnum #{i} -width 70 gt_bioseq_succ_3.fas"
     run "diff #{last_stdout} #{$testdata}gt_bioseq_succ_3.out#{i}"
   end
 end
@@ -132,7 +133,8 @@ end
 Name "gt seq test 3 stat"
 Keywords "gt_seq"
 Test do
-  run_test "#{$bin}gt seq -stat #{$testdata}gt_bioseq_succ_3.fas"
+  FileUtils.copy("#{$testdata}gt_bioseq_succ_3.fas", ".")
+  run_test "#{$bin}gt seq -stat gt_bioseq_succ_3.fas"
 end
 
 Name "gt seq test 3 stat (stdin)"

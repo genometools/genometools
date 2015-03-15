@@ -128,8 +128,11 @@ void           gt_alphabet_decode_seq_to_fp(const GtAlphabet *alphabet,
                                             FILE *fpout,
                                             const GtUchar *src,
                                             GtUword len);
-/* Analog to <gt_alphabet_decode_seq_to_fp()> but writing the output to
-   <dest>. */
+/* Suppose the string <src> of length <len> was transformed according to the
+   <alphabet>. The following method shows each character in <src> as the
+   printable character specified in the transformation. The output is written
+   to the given string <dest> and terminated with '\0' at dest[len]. <dest>
+   therefore has to be of at least <len> + 1 length. */
 void           gt_alphabet_decode_seq_to_cstr(const GtAlphabet *alphabet,
                                               char *dest,
                                               const GtUchar *src,

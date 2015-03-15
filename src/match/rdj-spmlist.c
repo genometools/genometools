@@ -178,15 +178,15 @@ static inline int parse_line(GtStr *s, GtUword min_length,
     had_err = -1;
   }
   if (!had_err) tokens = gt_splitter_get_tokens(splitter);
-  GT_SPMLIST_PARSE(0, gt_parse_ulong, &suffix_seqnum);
+  GT_SPMLIST_PARSE(0, gt_parse_uword, &suffix_seqnum);
   GT_SPMLIST_PARSE(1, parse_plusminus, &suffixseq_direct);
-  GT_SPMLIST_PARSE(2, gt_parse_ulong, &prefix_seqnum);
+  GT_SPMLIST_PARSE(2, gt_parse_uword, &prefix_seqnum);
   GT_SPMLIST_PARSE(3, parse_plusminus, &prefixseq_direct);
-  GT_SPMLIST_PARSE(4, gt_parse_ulong, &suffix_length);
+  GT_SPMLIST_PARSE(4, gt_parse_uword, &suffix_length);
   if (!exact)
   {
-    GT_SPMLIST_PARSE(5, gt_parse_ulong, &prefix_length);
-    GT_SPMLIST_PARSE(6, gt_parse_ulong, &unit_edist);
+    GT_SPMLIST_PARSE(5, gt_parse_uword, &prefix_length);
+    GT_SPMLIST_PARSE(6, gt_parse_uword, &unit_edist);
   }
   if (!had_err)
   {

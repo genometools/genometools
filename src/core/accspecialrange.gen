@@ -34,7 +34,7 @@ static int GT_APPENDINT(fillSWtable)(GtEncseq *encseq,
   GtUword fillwildcardrangeidx = 0, fillexceptionrangeidx = 0,
                 mapposition = 0, currentposition, pagenumber = 0,
                 exceptionpagenumber = 0, wildcardnextcheckpos,
-                exceptionnextcheckpos, widthbuffer = 0,
+                exceptionnextcheckpos = 0, widthbuffer = 0,
                 lastwildcardrangelength = 0,
                 lastexceptionrangelength = 0;
   int retval;
@@ -68,10 +68,9 @@ static int GT_APPENDINT(fillSWtable)(GtEncseq *encseq,
     exceptiontable->mappositions =
                               gt_malloc(sizeof (*exceptiontable->mappositions) *
                                         exceptiontable->numofpositionstostore);
+    exceptionnextcheckpos = exceptiontable->maxrangevalue;
   }
-
   wildcardnextcheckpos = wildcardrangetable->maxrangevalue;
-  exceptionnextcheckpos = exceptiontable->maxrangevalue;
   for (currentposition=0; /* Nothing */; currentposition++)
   {
     retval = gt_sequence_buffer_next_with_original(fb,&cc,&orig,err);
@@ -214,12 +213,14 @@ static int GT_APPENDINT(fillSWtable)(GtEncseq *encseq,
       pagenumber++;
       wildcardnextcheckpos += 1UL + wildcardrangetable->maxrangevalue;
     }
-    if (encseq->has_exceptiontable && currentposition == exceptionnextcheckpos)
-    {
-      exceptiontable->endidxinpage[exceptionpagenumber]
-        = fillexceptionrangeidx;
-      exceptionpagenumber++;
-      exceptionnextcheckpos += 1UL + exceptiontable->maxrangevalue;
+    if (encseq->has_exceptiontable) {
+      if (currentposition == exceptionnextcheckpos)
+      {
+        exceptiontable->endidxinpage[exceptionpagenumber]
+          = fillexceptionrangeidx;
+        exceptionpagenumber++;
+        exceptionnextcheckpos += 1UL + exceptiontable->maxrangevalue;
+      }
     }
 
     ssptaboutinfo_processanyposition(ssptaboutinfo,currentposition);

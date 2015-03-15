@@ -32,7 +32,7 @@ typedef struct GtGenomeNode GtGenomeNode;
 #include "extended/node_visitor_api.h"
 
 /* Increase the reference count for <genome_node> and return it.
-   <genome_node> cannot be <NULL>.*/
+   <genome_node> must not be <NULL>.*/
 GtGenomeNode* gt_genome_node_ref(GtGenomeNode *genome_node);
 
 /* Return the sequence ID of <genome_node>.

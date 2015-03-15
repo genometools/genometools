@@ -329,9 +329,9 @@ static GtStr* construct_seq_description(const GtRange *range, bool reverse,
   GtStr *desc;
   gt_assert(range && phase <= 2);
   desc = gt_str_new();
-  gt_str_append_ulong(desc, reverse ? range->end : range->start);
+  gt_str_append_uword(desc, reverse ? range->end : range->start);
   gt_str_append_char(desc, ' ');
-  gt_str_append_ulong(desc, reverse ? range->start : range->end);
+  gt_str_append_uword(desc, reverse ? range->start : range->end);
   gt_str_append_char(desc, ' ');
   gt_str_append_uint(desc, phase);
   gt_str_append_char(desc, ' ');

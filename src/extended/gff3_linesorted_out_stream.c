@@ -58,12 +58,14 @@ static int gt_linesorted_gff3_cmp(const void *val1, const void *val2,
                                   GT_UNUSED void *data)
 {
   GtUword p1s = 0, p1e = 0,
-          p2s = 0, p2e = 0;
+          p2s = 0, p2e = 0,
+          idlength1, idlength2;
   GT_UNUSED int p1scanned = 0,
                 p2scanned = 0;
   const char *s1 = *(const char**) val1,
              *s2 = *(const char**) val2,
              *seqidend1, *seqidend2;
+  char buf1[BUFSIZ], buf2[BUFSIZ];
   int str_cmp_result;
 
   if (s1[0] == '#' || s2[0] == '\0')
@@ -72,9 +74,18 @@ static int gt_linesorted_gff3_cmp(const void *val1, const void *val2,
     return -1;
 
   seqidend1 = strchr(s1, '\t');
+  gt_assert(seqidend1 && seqidend1 >= s1);
   seqidend2 = strchr(s2, '\t');
-  str_cmp_result = strncmp(s1, s2, MIN(((size_t) (seqidend1 - s1)),
-                                       ((size_t) (seqidend2 - s2))));
+  gt_assert(seqidend2 && seqidend2 >= s2);
+  idlength1 = MIN((seqidend1 - s1), BUFSIZ);
+  gt_assert(idlength1 > 0);
+  idlength2 = MIN((seqidend2 - s2), BUFSIZ);
+  gt_assert(idlength2 > 0);
+  (void) strncpy(buf1, s1, idlength1);
+  (void) strncpy(buf2, s2, idlength2);
+  buf1[idlength1] = '\0';
+  buf2[idlength2] = '\0';
+  str_cmp_result = strcmp(buf1, buf2);
   if (str_cmp_result != 0)
     return str_cmp_result;
 

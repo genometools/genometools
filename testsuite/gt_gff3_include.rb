@@ -201,9 +201,8 @@ end
 Name "gt gff3 test 17"
 Keywords "gt_gff3"
 Test do
-  run_test "#{$bin}gt gff3 #{$testdata}gt_gff3_test_17.gff3", :retval => 1
+  run_test "#{$bin}gt gff3 #{$testdata}gt_gff3_test_17.gff3"
   grep(last_stderr, /unknown meta-directive encountered/);
-  grep(last_stderr, /does not have data: ##foo/);
 end
 
 Name "gt gff3 test 18"
@@ -231,6 +230,13 @@ Keywords "gt_gff3"
 Test do
   run_test("#{$bin}gt gff3 #{$testdata}gt_gff3_test_21.gff3", :retval => 1);
   grep(last_stderr, /does not equal required version/);
+end
+
+Name "gt gff3 test 21 (-tidy)"
+Keywords "gt_gff3"
+Test do
+  run_test("#{$bin}gt gff3 -tidy #{$testdata}gt_gff3_test_21.gff3")
+  grep(last_stderr, /try to parse as version 3/);
 end
 
 Name "gt gff3 test 22"
@@ -1281,6 +1287,16 @@ Test do
   run "diff #{last_stdout} #{$testdata}unknown_meta_directive.gff3"
 end
 
+Name "gt gff3 unknown meta directive (without argument)"
+Keywords "gt_gff3"
+Test do
+  run_test "#{$bin}gt gff3 " +
+           "#{$testdata}unknown_meta_directive_without_argument.gff3"
+  grep last_stderr, "unknown meta-directive encountered in line"
+  run "diff #{last_stdout} " +
+      "#{$testdata}unknown_meta_directive_without_argument.gff3"
+end
+
 Name "gt gff3 simple cycle"
 Keywords "gt_gff3"
 Test do
@@ -1300,6 +1316,20 @@ Keywords "gt_gff3"
 Test do
   run_test "#{$bin}gt gff3 #{$testdata}orphaned_parent.gff3", :retval => 1
   grep last_stderr, "was not defined"
+end
+
+Name "gt gff3 multi-feature orphan (success)"
+Keywords "gt_gff3"
+Test do
+  run_test "#{$bin}gt gff3 #{$testdata}multi_feature_orphan_succ.gff3"
+end
+
+Name "gt gff3 multi-feature orphan (failure)"
+Keywords "gt_gff3"
+Test do
+  run_test "#{$bin}gt gff3 #{$testdata}multi_feature_orphan_fail.gff3",
+           :retval => 1
+  grep last_stderr, "does not have a 'Parent' attribute which is present"
 end
 
 Name "gt gff3 uppercase attributes"

@@ -92,8 +92,7 @@ static int gt_sequence_buffer_fasta_advance(GtSequenceBuffer *sb, GtError *err)
           pvt->filelengthtab[pvt->filenum].length += currentfileread;
           pvt->filelengthtab[pvt->filenum].effectivelength += currentfileadd;
         }
-        if ((GtUword) pvt->filenum
-                                     == gt_str_array_size(pvt->filenametab)-1)
+        if ((GtUword) pvt->filenum == gt_str_array_size(pvt->filenametab)-1)
         {
           pvt->complete = true;
           break;

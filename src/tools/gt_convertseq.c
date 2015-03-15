@@ -69,7 +69,8 @@ static GtOptionParser* gt_convertseq_option_parser_new(void *tool_arguments)
   gt_assert(arguments);
 
   op = gt_option_parser_new("[options] file [...]",
-                            "Parse and convert sequence file formats.");
+                            "Parse and convert sequence file formats "
+                            "(FASTA/FASTQ, GenBank, EMBL).");
 
   o = gt_option_new_bool("v","be verbose", &arguments->verbose, false);
   gt_option_parser_add_option(op, o);

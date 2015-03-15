@@ -29,10 +29,30 @@
 void gt_fasta_show_entry(const char *description, const char *sequence,
                          GtUword sequence_length, GtUword width, GtFile *outfp);
 
+/* Print a fasta entry with optional <description> and mandatory <sequence> to
+   <outfp>. If <width> is != 0 the sequence is formatted accordingly.
+   Will print at most <sequence_length> characters from <sequence> if no
+   '\0'-byte is encountered. <description> and <description_length> are handled
+   accordingly if present. */
+void gt_fasta_show_entry_nt(const char *description, GtUword description_length,
+                            const char *sequence, GtUword sequence_length,
+                            GtUword width, GtFile *outfp);
+
 /* Append a fasta entry with optional <description> and mandatory <sequence> to
    <outstr>. If <width> is != 0 the sequence is formatted accordingly. */
 void gt_fasta_show_entry_str(const char *description, const char *sequence,
                              GtUword sequence_length, GtUword width,
                              GtStr *outstr);
 
+/* Print a fasta entry with optional <description> and mandatory <sequence> to
+   <outstr>. If <width> is != 0 the sequence is formatted accordingly.
+   Will print at most <sequence_length> characters from <sequence> if no
+   '\0'-byte is encountered. <description> and <description_length> are handled
+   accordingly if present. */
+void gt_fasta_show_entry_nt_str(const char *description,
+                                GtUword description_length,
+                                const char *sequence,
+                                GtUword sequence_length,
+                                GtUword width,
+                                GtStr *outstr);
 #endif

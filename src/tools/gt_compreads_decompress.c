@@ -36,7 +36,8 @@
 typedef struct {
   bool descs,
        verbose;
-  GtUword bench;
+  GtUword bench,
+          width;
   GtStr  *file,
          *smap,
          *alphabet,
@@ -117,6 +118,13 @@ gt_compreads_decompress_option_parser_new(void *tool_arguments)
   gt_option_is_development_option(option);
   gt_option_parser_add_option(op, option);
 
+  option = gt_option_new_uword("width",
+                               "set width of output, 0 disables formating. "
+                               "line breaks in quality strings can cause "
+                               "problems with parsers, use with care",
+                               &arguments->width, 0);
+  gt_option_parser_add_option(op, option);
+
   gt_option_parser_set_min_max_args(op, 0U, 0U);
   return op;
 }
@@ -135,9 +143,9 @@ static int gt_compreads_decompress_benchmark(GtHcrDecoder *hcrd,
   GtStr *timer_comment = gt_str_new_cstr("extracting ");
   GtStr *desc = gt_str_new();
 
-  gt_str_append_ulong(timer_comment, amount);
+  gt_str_append_uword(timer_comment, amount);
   gt_str_append_cstr(timer_comment, " reads of ");
-  gt_str_append_ulong(timer_comment, max_rand + 1);
+  gt_str_append_uword(timer_comment, max_rand + 1);
   gt_str_append_cstr(timer_comment, "!");
 
   if (timer == NULL) {
@@ -243,7 +251,8 @@ static int gt_compreads_decompress_runner(GT_UNUSED int argc,
         if (!had_err) {
           gt_log_log("filebasename: %s", gt_str_get(arguments->name));
           if (gt_hcr_decoder_decode_range(hcrd, gt_str_get(arguments->name),
-                                          start, end, timer, err)
+                                          start, end, arguments->width,
+                                          timer, err)
             != 0)
             had_err = -1;
         }

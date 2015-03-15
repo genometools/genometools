@@ -28,6 +28,7 @@ struct GtTypeNode {
           *part_of_list;
   GtArray *is_a_out_edges;
   GtHashmap *cache;
+  bool transitive_edges_created;
 };
 
 GtTypeNode* gt_type_node_new(GtUword num, const char *id)
@@ -104,12 +105,36 @@ void gt_type_node_add_is_a_vertex(GtTypeNode *src, const GtTypeNode *dst)
   gt_array_add(src->is_a_out_edges, dst);
 }
 
+/* Recursively creates transitive part_of edges for the given <node>.
+
+   That is, if X is_a Y and Z part_of Y, then Z part_of X.
+
+   The method maintains a <node_stack> containing the inital <node> and all
+   its 'is_a' children.
+
+   Example from Sequence Ontology (we are looking at mRNA and exon, see
+   http://www.sequenceontology.org/browser/current_svn/term/SO:0000234 and
+   http://www.sequenceontology.org/browser/current_svn/term/SO:0000147,
+   respectively):
+
+   * mRNA is_a mature_transcript
+   * mature_transcript is_a transcript
+   * transcript_region part_of transcript
+
+   Therefore (transient edges):
+
+   * transcript_region part_of mRNA
+   * transcript_region part_of mature_transcript */
 static void create_transitive_part_of_edges(GtTypeNode *node,
                                             GtBoolMatrix *part_of_out_edges,
                                             GtBoolMatrix *part_of_in_edges,
                                             GtArray *node_stack)
 {
   GtUword i, j;
+  /* For every incoming part_of edge of the current node add a corresponding
+     part_of edge to all nodes in the stack. Note that the current node is not
+     part of the stack yet, therefore this is skipped on the first invocation.
+   */
   if (gt_array_size(node_stack)) {
     for (i  = gt_bool_matrix_get_first_column(part_of_in_edges, node->num);
          i != gt_bool_matrix_get_last_column(part_of_in_edges, node->num);
@@ -121,33 +146,35 @@ static void create_transitive_part_of_edges(GtTypeNode *node,
       }
     }
   }
+  /* add node to stack */
   gt_array_add(node_stack, node);
+  /* call method recursively for all is_a edges of the current node */
   for (i = 0; i < gt_array_size(node->is_a_out_edges); i++) {
     GtTypeNode *parent = *(GtTypeNode**) gt_array_get(node->is_a_out_edges, i);
     create_transitive_part_of_edges(parent, part_of_out_edges, part_of_in_edges,
                                     node_stack);
   }
+  /* pop node from stack */
   gt_array_pop(node_stack);
 }
 
-bool gt_type_node_has_parent(GtTypeNode *node, const char *id,
+bool gt_type_node_has_parent(GtTypeNode *node, GtTypeNode *pnode,
                              GtBoolMatrix *part_of_out_edges,
                              GtBoolMatrix *part_of_in_edges,
                              GtArray *node_list, GtHashmap *id2name,
                              unsigned int indentlevel)
 {
-  GtArray *node_stack;
   GtTypeNode *parent;
   GtUword i;
   bool *result;
-  gt_assert(node && id);
+  gt_assert(node && pnode);
   gt_log_log("%*scheck if node %s has parent %s", indentlevel * 2, "",
              (const char*) gt_hashmap_get(id2name, node->id),
-             (const char*) gt_hashmap_get(id2name, id));
+             (const char*) gt_hashmap_get(id2name, pnode->id));
 
   /* try cache */
   if (node->cache) {
-    if ((result = gt_hashmap_get(node->cache, id))) {
+    if ((result = gt_hashmap_get(node->cache, pnode->id))) {
       gt_log_log("%*sreturn %s (cache hit)", indentlevel * 2, "",
                  *result ?  "true" : "false");
       return *result;
@@ -158,27 +185,33 @@ bool gt_type_node_has_parent(GtTypeNode *node, const char *id,
   result = gt_malloc(sizeof (bool));
 
   /* no cache hit found */
-  if (node->id == id) {
+  if (node->id == pnode->id) {
     *result = true;
-    gt_hashmap_add(node->cache, (char*) id, result);
+    gt_hashmap_add(node->cache, (char*) pnode->id, result);
     gt_log_log("%*sreturn true", indentlevel * 2, "");
     return true;
   }
-  /* create transitive part_of edges */
-  node_stack = gt_array_new(sizeof (GtTypeNode*));
-  create_transitive_part_of_edges(node, part_of_out_edges, part_of_in_edges,
-                                  node_stack);
-  gt_assert(!gt_array_size(node_stack));
-  gt_array_delete(node_stack);
+  /* create transitive part_of edges for the parent, if they have not been
+     created already */
+  if (!pnode->transitive_edges_created) {
+    GtArray *node_stack;
+    node_stack = gt_array_new(sizeof (GtTypeNode*));
+    create_transitive_part_of_edges(pnode, part_of_out_edges, part_of_in_edges,
+                                    node_stack);
+    gt_assert(!gt_array_size(node_stack));
+    gt_array_delete(node_stack);
+    pnode->transitive_edges_created = true;
+  }
   /* traversal of part_of out edges */
   for (i  = gt_bool_matrix_get_first_column(part_of_out_edges, node->num);
        i != gt_bool_matrix_get_last_column(part_of_out_edges, node->num);
        i  = gt_bool_matrix_get_next_column(part_of_out_edges, node->num, i)) {
     parent = *(GtTypeNode**) gt_array_get(node_list, i);
-    if (gt_type_node_has_parent(parent, id, part_of_out_edges, part_of_in_edges,
-                                node_list, id2name, indentlevel + 1)) {
+    if (gt_type_node_has_parent(parent, pnode, part_of_out_edges,
+                                part_of_in_edges, node_list, id2name,
+                                indentlevel + 1)) {
       *result = true;
-      gt_hashmap_add(node->cache, (char*) id, result);
+      gt_hashmap_add(node->cache, (char*) pnode->id, result);
       gt_log_log("%*sreturn true", indentlevel * 2, "");
       return true;
     }
@@ -186,17 +219,18 @@ bool gt_type_node_has_parent(GtTypeNode *node, const char *id,
   /* traversal of is_a out edges */
   for (i = 0; i < gt_array_size(node->is_a_out_edges); i++) {
     parent = *(GtTypeNode**) gt_array_get(node->is_a_out_edges, i);
-    if (gt_type_node_has_parent(parent, id, part_of_out_edges, part_of_in_edges,
-                                node_list, id2name, indentlevel + 1)) {
+    if (gt_type_node_has_parent(parent, pnode, part_of_out_edges,
+                                part_of_in_edges, node_list, id2name,
+                                indentlevel + 1)) {
       *result = true;
-      gt_hashmap_add(node->cache, (char*) id, result);
+      gt_hashmap_add(node->cache, (char*) pnode->id, result);
       gt_log_log("%*sreturn true", indentlevel * 2, "");
       return true;
     }
   }
   /* no result found */
   *result = false;
-  gt_hashmap_add(node->cache, (char*) id, result);
+  gt_hashmap_add(node->cache, (char*) pnode->id, result);
   gt_log_log("%*sreturn false", indentlevel * 2, "");
   return false;
 }

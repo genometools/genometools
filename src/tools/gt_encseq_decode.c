@@ -107,7 +107,6 @@ static GtOptionParser* gt_encseq_decode_option_parser_new(void *tool_arguments)
                                        NULL);
   gt_option_parser_add_option(op, optionseqrange);
   gt_option_exclude(optionseqrange, optionseq);
-  gt_option_exclude(optionseq, optionseqrange);
 
   /* -output */
   optionmode = gt_option_new_choice("output",

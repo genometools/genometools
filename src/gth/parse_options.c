@@ -1504,7 +1504,7 @@ GtOPrval gth_parse_options(GthCallInfo *call_info, GthInput *input,
   if (oprval == GT_OPTION_PARSER_OK && optproteinsmap &&
       !gt_option_is_set(optproteinsmap)) {
     if (gt_str_length(gth_input_proteinsmap(input)) > MAXSUFFIXLEN) {
-      gt_error_set(err, "\%s argument \"%s\" is too long (>MAXSUFFIXLEN=%u)",
+      gt_error_set(err, "%s argument \"%s\" is too long (>MAXSUFFIXLEN=%u)",
                 PROTEINSMAP_OPT_CSTR,
                 gt_str_get(gth_input_proteinsmap(input)), MAXSUFFIXLEN);
       oprval = GT_OPTION_PARSER_ERROR;

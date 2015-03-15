@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2006-2013 Gordon Gremme <gordon@gremme.org>
-  Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2006-2013, 2015 Gordon Gremme <gordon@gremme.org>
+  Copyright (c) 2006-2008       Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -514,10 +514,10 @@ static void feature_node_is_part_of_pseudo_node(GtFeatureNode *pseudo_node,
   gt_feature_info_add_pseudo_parent(feature_info, id, pseudo_node);
 }
 
-static int store_id(const char *id, GtFeatureNode *feature_node,
-                    bool *is_child, GtGFF3Parser *parser, GtQueue *genome_nodes,
-                    const char *filename, unsigned int line_number,
-                    GtError *err)
+static int process_id_attr(const char *id, GtFeatureNode *feature_node,
+                           bool *is_child, GtGFF3Parser *parser, GtQueue
+                           *genome_nodes, const char *filename,
+                           unsigned int line_number, GtError *err)
 {
   GtFeatureNode *fn;
   int had_err = 0;
@@ -847,7 +847,7 @@ static int process_parent_attr(char *parent_attr, GtGenomeNode *feature_node,
     }
     else if (!parser->strict &&
              gt_orphanage_is_orphan(parser->orphanage, parent)) {
-      /* children of orphaned parends are orphans themself */
+      /* children of orphaned parents are orphans themselves */
       orphaned_parent = true;
     }
     else if (gt_str_cmp(gt_genome_node_get_seqid(parent_gf),
@@ -1060,11 +1060,12 @@ static int check_multi_feature_constrains(GtGenomeNode *new_gf,
   /* check strand */
   if (!had_err && gt_feature_node_get_strand((GtFeatureNode*) new_gf) !=
                   gt_feature_node_get_strand((GtFeatureNode*) old_gf)) {
-    gt_error_set(err, "the multi-feature with %s \"%s\" on line %u in file "
-                 "\"%s\" has a different strand than its counterpart on line "
-                 "%u", GT_GFF_ID, id, line_number, filename,
-                 gt_genome_node_get_line_number(old_gf));
-    had_err = -1;
+    /* we just issue a warning here, because this is possible in rare cases, see
+       https://github.com/genometools/genometools/issues/225 */
+    gt_warning("the multi-feature with %s \"%s\" on line %u in file \"%s\" has "
+               "a different strand than its counterpart on line %u (possible "
+               "in rare cases)", GT_GFF_ID, id, line_number, filename,
+               gt_genome_node_get_line_number(old_gf));
   }
   /* check attributes (for target attribute only the name) */
   if (!had_err) {
@@ -1120,9 +1121,9 @@ void gt_gff3_parser_build_target_str(GtStr *target, GtStrArray *target_ids,
       gt_str_append_char(target, ',');
     gt_str_append_cstr(target, gt_str_array_get(target_ids, i));
     gt_str_append_char(target, ' ');
-    gt_str_append_ulong(target, range->start);
+    gt_str_append_uword(target, range->start);
     gt_str_append_char(target, ' ');
-    gt_str_append_ulong(target, range->end);
+    gt_str_append_uword(target, range->end);
     if (*strand != GT_NUM_OF_STRAND_TYPES) {
       gt_str_append_char(target, ' ');
       gt_str_append_char(target, GT_STRAND_CHARS[*strand]);
@@ -1408,16 +1409,16 @@ static int parse_attributes(char *attributes, GtGenomeNode *feature_node,
     }
   }
 
+  /* process ID attribute */
   if (!had_err && id_value) {
-    had_err = store_id(id_value, (GtFeatureNode*) feature_node, is_child,
-                       parser, genome_nodes, filename, line_number, err);
-  }
-  if (!had_err && parent_value) {
-    had_err = process_parent_attr(parent_value, feature_node, id_value,
-                                  is_child, parser, genome_nodes, filename,
-                                  line_number, err);
+    had_err = process_id_attr(id_value, (GtFeatureNode*) feature_node, is_child,
+                              parser, genome_nodes, filename, line_number, err);
   }
 
+  /* we check multi-feature contrains before we process the Parent attribute,
+     because that prevents problems with multi-features with different parents
+     and allows to process multi-features with orphaned parents at the same
+     time. */
   if (!had_err && gt_feature_node_is_multi((GtFeatureNode*) feature_node)) {
     had_err =
       check_multi_feature_constrains(feature_node, (GtGenomeNode*)
@@ -1426,6 +1427,13 @@ static int parse_attributes(char *attributes, GtGenomeNode *feature_node,
                     gt_feature_node_get_attribute((GtFeatureNode*) feature_node,
                                                   GT_GFF_ID),
                                      parser, filename, line_number, err);
+  }
+
+  /* finally, process Parent attribute */
+  if (!had_err && parent_value) {
+    had_err = process_parent_attr(parent_value, feature_node, id_value,
+                                  is_child, parser, genome_nodes, filename,
+                                  line_number, err);
   }
 
   gt_splitter_delete(parent_splitter);
@@ -1685,9 +1693,16 @@ static int parse_first_gff3_line(const char *line, const char *filename,
     had_err = gt_parse_int_line(&version, data, (unsigned int) *line_number,
                                 filename, err);
     if (!had_err && version != GT_GFF_VERSION) {
-      gt_error_set(err, "GFF version %s does not equal required version %s ",
-                   data, GT_GFF_VERSION_STRING);
-      had_err = -1;
+      if (tidy) {
+        gt_warning("GFF version %s does not equal required version %s, try to "
+                   "parse as version %s", data, GT_GFF_VERSION_STRING,
+                   GT_GFF_VERSION_STRING);
+      }
+      else {
+        gt_error_set(err, "GFF version %s does not equal required version %s",
+                     data, GT_GFF_VERSION_STRING);
+        had_err = -1;
+      }
     }
   }
   if (!had_err && *gvf_mode) {
@@ -1996,11 +2011,15 @@ static int parse_meta_gff3_line(GtGFF3Parser *parser, GtQueue *genome_nodes,
                    strlen(GT_GFF_VERSION_PREFIX)) == 0) {
     if (parser->tidy) {
       gt_warning("skipping illegal GFF version pragma in line %u of file "
-                 "\"%s\": %s", line_number, filename, line);
+                 "\"%s\": %s (merge multiple GFF3 files with `gt gff3 -sort` "
+                 "and do not concatenate them manually)", line_number, filename,
+                 line);
     }
     else {
       gt_error_set(err, "illegal GFF version pragma in line %u of file \"%s\": "
-                   "%s", line_number, filename, line);
+                   "%s (merge multiple GFF3 files with `gt gff3 -sort` and do "
+                   "not concatenate them manually)", line_number, filename,
+                   line);
       had_err = -1;
     }
   }
@@ -2053,17 +2072,12 @@ static int parse_meta_gff3_line(GtGFF3Parser *parser, GtQueue *genome_nodes,
       invalid = invalid_gff3_pragma(line);
     if (invalid) {
       gt_warning("unknown meta-directive encountered in line %u in file "
-                 "\"%s\", keep as comment: %s", line_number, filename, line);
+                 "\"%s\", keep anyway: %s", line_number, filename, line);
     }
     data = strchr(line+2, ' ');
     if (data) {
       data[0] = '\0';
       data++;
-    }
-    else {
-      gt_error_set(err, "meta-directive encountered in line %u in file "
-                 "\"%s\" does not have data: %s", line_number, filename, line);
-      had_err = -1;
     }
     if (!had_err) {
       /* storing meta node */

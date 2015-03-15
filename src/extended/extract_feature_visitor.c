@@ -58,7 +58,7 @@ static void construct_description(GtStr *description, const char *type,
   if (!gt_str_length(description)) {
     gt_str_append_cstr(description, type);
     gt_str_append_char(description, '_');
-    gt_str_append_ulong(description, counter);
+    gt_str_append_uword(description, counter);
   }
   if (join)
     gt_str_append_cstr(description, " (joined)");

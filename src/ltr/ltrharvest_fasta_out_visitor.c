@@ -80,7 +80,7 @@ static int gt_ltrharvest_fasta_out_visitor_feature_node(GtNodeVisitor *nv,
         had_err = -1;
       }
       if (!had_err) {
-        (void) gt_parse_ulong(&seqnum, val);
+        (void) gt_parse_uword(&seqnum, val);
       }
     }
     if (strcmp(fnt, gt_ft_long_terminal_repeat) == 0)
@@ -135,11 +135,11 @@ static int gt_ltrharvest_fasta_out_visitor_feature_node(GtNodeVisitor *nv,
       desc = gt_str_new();
       gt_str_append_cstr_nt(desc, seqdesc, seqdesclen);
       gt_str_append_cstr(desc, " (dbseq-nr ");
-      gt_str_append_ulong(desc, seqnum);
+      gt_str_append_uword(desc, seqnum);
       gt_str_append_cstr(desc, ") [");
-      gt_str_append_ulong(desc, outrng.start);
+      gt_str_append_uword(desc, outrng.start);
       gt_str_append_cstr(desc, ",");
-      gt_str_append_ulong(desc, outrng.end);
+      gt_str_append_uword(desc, outrng.end);
       gt_str_append_cstr(desc, "]");
       buf = gt_calloc((size_t) gt_range_length(&outrng) + 1, sizeof (char));
       startpos = gt_encseq_seqstartpos(lv->encseq, seqnum);

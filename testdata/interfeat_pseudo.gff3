@@ -1,0 +1,4 @@
+##gff-version 3
+##sequence-region   chr1 2500 5700
+chr1	.	EST_match	2500	3050	.	+	.	ID=EST_match4
+chr1	.	EST_match	4000	5700	.	+	.	ID=EST_match4

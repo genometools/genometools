@@ -22,6 +22,14 @@ Test do
   grep last_stdout, "input is valid GFF3"
 end
 
+Name "gt gff3validator -typecheck so.obo (bug)"
+Keywords "gt_gff3validator typecheck"
+Test do
+  run_test "#{$bin}gt gff3validator -typecheck so " +
+           "#{$testdata}transient_edges_bug.gff3"
+  grep last_stdout, "input is valid GFF3"
+end
+
 Name "gt gff3validator -typecheck so-xp.obo"
 Keywords "gt_gff3validator typecheck"
 Test do

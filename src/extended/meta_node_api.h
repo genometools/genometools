@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2012 Gordon Gremme <gordon@gremme.org>
+  Copyright (c) 2012, 2015 Gordon Gremme <gordon@gremme.org>
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -31,7 +31,8 @@ const GtGenomeNodeClass* gt_meta_node_class(void);
 /* Return a new <GtMetaNode> object representing a <meta_directive> with the
    corresponding <meta_data>. Please note that the leading ``<##>'' which
    denotes meta lines in GFF3 files should not be part of the
-   <meta_directive>. */
+   <meta_directive>.
+   The <meta_directive> must not be <NULL>, the <meta_data> can be <NULL>. */
 GtGenomeNode*            gt_meta_node_new(const char *meta_directive,
                                           const char *meta_data);
 
@@ -39,7 +40,7 @@ GtGenomeNode*            gt_meta_node_new(const char *meta_directive,
 const char*              gt_meta_node_get_directive(const GtMetaNode
                                                     *meta_node);
 
-/* Return the meta data stored in <meta_node>. */
+/* Return the meta data stored in <meta_node>. Can return NULL! */
 const char*              gt_meta_node_get_data(const GtMetaNode *meta_node);
 
 /* Test whether the given genome node is a meta node. If so, a pointer to the
