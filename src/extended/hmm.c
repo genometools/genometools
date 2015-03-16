@@ -346,7 +346,7 @@ void gt_hmm_decode(const GtHMM *hmm,
         tmp_prob = max_probabilities[previous_row][precolidx] +
                    hmm->transition_prob[previous_row][row] +
                    hmm->emission_prob[row][emission];
-        if (tmp_prob - max_probabilities[row][colidx] < -DBL_EPSILON) {
+        if (tmp_prob - max_probabilities[row][colidx] > DBL_EPSILON) {
           max_probabilities[row][colidx] = tmp_prob;
           backtrace[row][column] = previous_row;
         }
