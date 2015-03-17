@@ -80,7 +80,6 @@ struct GtPPTHit {
 
 struct GtPPTResults {
   GtArray *hits;
-  GtFeatureNode *elem;
   GtRange leftltrrng,
           rightltrrng;
 };
