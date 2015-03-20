@@ -26,6 +26,7 @@
 
 struct GtFile {
   GtFileMode mode;
+  GtUword reference_count;
   union {
     FILE *file;
     gzFile gzfile;
@@ -90,6 +91,13 @@ GtFile* gt_file_new(const char *path, const char *mode, GtError *err)
   return gt_file_open(gt_file_mode_determine(path), path, mode, err);
 }
 
+GtFile* gt_file_ref(GtFile *file)
+{
+  if (!file) return NULL;
+  file->reference_count++;
+  return file;
+}
+
 GtFile* gt_file_open(GtFileMode file_mode, const char *path, const char *mode,
                      GtError *err)
 {
@@ -98,6 +106,7 @@ GtFile* gt_file_open(GtFileMode file_mode, const char *path, const char *mode,
   gt_assert(mode);
   file = gt_calloc(1, sizeof (GtFile));
   file->mode = file_mode;
+  file->reference_count = 0;
   if (path) {
     switch (file_mode) {
       case GT_FILE_MODE_UNCOMPRESSED:
@@ -141,6 +150,7 @@ GtFile* gt_file_xopen_file_mode(GtFileMode file_mode, const char *path,
   gt_assert(mode);
   file = gt_calloc(1, sizeof (GtFile));
   file->mode = file_mode;
+  file->reference_count = 0;
   if (path) {
     switch (file_mode) {
       case GT_FILE_MODE_UNCOMPRESSED:
@@ -176,6 +186,7 @@ GtFile* gt_file_new_from_fileptr(FILE *fp)
   GtFile *file;
   gt_assert(fp);
   file = gt_calloc(1, sizeof (GtFile));
+  file->reference_count = 0;
   file->mode = GT_FILE_MODE_UNCOMPRESSED;
   file->fileptr.file = fp;
   return file;
@@ -420,6 +431,10 @@ void gt_file_delete_without_handle(GtFile *file)
 void gt_file_delete(GtFile *file)
 {
   if (!file) return;
+  if (file->reference_count) {
+    file->reference_count--;
+    return;
+  }
   switch (file->mode) {
     case GT_FILE_MODE_UNCOMPRESSED:
         if (!file->is_stdin)

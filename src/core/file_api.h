@@ -33,6 +33,9 @@ typedef struct GtFile GtFile;
    compression if it ends with '.bz2', and uncompressed otherwise). */
 GtFile* gt_file_new(const char *path, const char *mode, GtError *err);
 
+/* Increments the reference count of <file>. */
+GtFile* gt_file_ref(GtFile *file);
+
 /* Create a new <GtFile> object from a normal file pointer <fp>. */
 GtFile* gt_file_new_from_fileptr(FILE *fp);
 
