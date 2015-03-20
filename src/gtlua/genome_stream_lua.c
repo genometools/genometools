@@ -33,6 +33,7 @@ static int gff3_in_stream_lua_new_sorted(lua_State *L)
   GtNodeStream **gs;
   const char *filename;
   gt_assert(L);
+  lua_settop(L, 1);
   /* get/check parameters */
   if (!lua_isnil(L, 1)) {
     filename = luaL_checkstring(L, 1);
