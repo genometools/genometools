@@ -20,6 +20,7 @@
 #include <string.h>
 #include "core/assert_api.h"
 #include "core/fasta.h"
+#include "core/file.h"
 #include "core/hashmap.h"
 #include "core/ma.h"
 #include "core/unused_api.h"
@@ -89,6 +90,7 @@ static void gff3_visitor_free(GtNodeVisitor *nv)
   gt_hashmap_delete(gff3_visitor->feature_node_to_unique_id_str);
   gt_cstr_table_delete(gff3_visitor->used_ids);
   gt_str_delete(gff3_visitor->outstr);
+  gt_file_delete(gff3_visitor->outfp);
 }
 
 static int gff3_visitor_comment_node(GtNodeVisitor *nv, GtCommentNode *cn,
@@ -536,7 +538,7 @@ GtNodeVisitor* gt_gff3_visitor_new(GtFile *outfp)
   GtNodeVisitor *nv = gt_node_visitor_create(gt_gff3_visitor_class());
   GtGFF3Visitor *gff3_visitor = gff3_visitor_cast(nv);
   gt_gff3_visitor_init(gff3_visitor);
-  gff3_visitor->outfp = outfp;
+  gff3_visitor->outfp = gt_file_ref(outfp);
   gff3_visitor->outstr = NULL;
   return nv;
 }
