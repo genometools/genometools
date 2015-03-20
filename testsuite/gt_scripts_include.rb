@@ -65,6 +65,18 @@ Test do
   run_test "#{$bin}gt #{$testdata}gtscripts/gff3.lua #{$testdata}gff3_file_1_short.txt"
   run "env LC_ALL=C sort #{last_stdout}"
   run "diff #{last_stdout} #{$testdata}gff3_file_1_short_sorted.txt"
+  run_test "#{$bin}gt #{$testdata}gtscripts/genome_stream_outfile.lua outfile < #{$testdata}eden.gff3"
+  run_test "#{$bin}gt gff3 -sort -retainids -tidy outfile > 1"
+  run_test "#{$bin}gt gff3 -sort -retainids -tidy #{$testdata}eden.gff3 > 2"
+  run "diff 1 2"
+  run_test "#{$bin}gt #{$testdata}gtscripts/genome_stream_outfile.lua /nonexist < #{$testdata}eden.gff3", :retval => 1
+end
+
+Name "genome_stream bindings (input stream stdin)"
+Keywords "gt_scripts"
+Test do
+  run_test "#{$bin}gt #{$testdata}gtscripts/genome_stream_stdin.lua #{$testdata}eden.gff3 < #{$testdata}eden.gff3"
+  run "diff #{last_stdout} #{$testdata}genome_stream_stdin.gff3"
 end
 
 Name "genome_visitor bindings"

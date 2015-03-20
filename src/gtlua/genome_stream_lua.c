@@ -31,11 +31,14 @@
 static int gff3_in_stream_lua_new_sorted(lua_State *L)
 {
   GtNodeStream **gs;
-  const char *filename;
+  const char *filename = NULL;
   gt_assert(L);
+  lua_settop(L, 1);
   /* get/check parameters */
-  filename = luaL_checkstring(L, 1);
-  luaL_argcheck(L, gt_file_exists(filename), 1, "file does not exist");
+  if (!lua_isnil(L, 1)) {
+    filename = luaL_checkstring(L, 1);
+    luaL_argcheck(L, gt_file_exists(filename), 1, "file does not exist");
+  }
   /* construct object */
   gs = lua_newuserdata(L, sizeof (GtNodeStream*));
   *gs = gt_gff3_in_stream_new_sorted(filename);
@@ -47,28 +50,54 @@ static int gff3_in_stream_lua_new_sorted(lua_State *L)
 
 static int gff3_out_stream_lua_new(lua_State *L)
 {
-  GtNodeStream **out_stream, **in_stream = check_genome_stream(L, 1);
+  GtFile *outfile = NULL;
+  GtError *err = NULL;
+  GtNodeStream **out_stream, **in_stream;
   gt_assert(L);
+  in_stream = check_genome_stream(L, 1);
+  lua_settop(L, 2);
+  if (!lua_isnil(L, 2)) {
+    const char *filename = luaL_checkstring(L, 2);
+    err = gt_error_new();
+    outfile = gt_file_new(filename, "w+", err);
+    if (!outfile)
+      return gt_lua_error(L, err);
+  }
   /* construct object */
   out_stream = lua_newuserdata(L, sizeof (GtNodeStream*));
-  *out_stream = gt_gff3_out_stream_new(*in_stream, NULL);
+  *out_stream = gt_gff3_out_stream_new(*in_stream, outfile);
   gt_assert(*out_stream);
   luaL_getmetatable(L, GENOME_STREAM_METATABLE);
   lua_setmetatable(L, -2);
+  gt_file_delete(outfile);
+  gt_error_delete(err);
   return 1;
 }
 
 static int gff3_out_stream_lua_new_retainids(lua_State *L)
 {
-  GtNodeStream **out_stream, **in_stream = check_genome_stream(L, 1);
+  GtFile *outfile = NULL;
+  GtError *err = NULL;
+  GtNodeStream **out_stream, **in_stream;
   gt_assert(L);
+  in_stream = check_genome_stream(L, 1);
+  lua_settop(L, 2);
+  if (!lua_isnil(L, 2)) {
+    const char *filename = luaL_checkstring(L, 2);
+    err = gt_error_new();
+    outfile = gt_file_new(filename, "w+", err);
+    if (!outfile)
+      return gt_lua_error(L, err);
+  }
   /* construct object */
   out_stream = lua_newuserdata(L, sizeof (GtNodeStream*));
-  *out_stream = gt_gff3_out_stream_new(*in_stream, NULL);
+  *out_stream = gt_gff3_out_stream_new(*in_stream, outfile);
   gt_assert(*out_stream);
   gt_gff3_out_stream_retain_id_attributes((GtGFF3OutStream*) *out_stream);
   luaL_getmetatable(L, GENOME_STREAM_METATABLE);
   lua_setmetatable(L, -2);
+  gt_file_delete(outfile);
+  gt_error_delete(err);
   return 1;
 }
 
