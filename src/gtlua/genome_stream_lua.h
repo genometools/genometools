@@ -27,7 +27,8 @@
 
 /* exports the GFF3InStream class to Lua:
    -- Returns a new GFF3 input stream object for <filename>. The file <filename>
-   -- has to be a sorted GFF3 file.
+   -- has to be a sorted GFF3 file. If filename is <nil>, input will be read
+   -- from standard input.
    function gff3_in_stream_new_sorted(filename)
 */
 
