@@ -340,7 +340,7 @@ char* gt_bioseq_get_sequence(const GtBioseq *bs, GtUword idx)
   GtUword startpos;
   gt_assert(bs);
   gt_assert(idx < gt_encseq_num_of_sequences(bs->encseq));
-  out = gt_calloc(gt_encseq_seqlength(bs->encseq, idx), sizeof (char));
+  out = gt_calloc(gt_encseq_seqlength(bs->encseq, idx) + 1, sizeof (char));
   startpos = gt_encseq_seqstartpos(bs->encseq, idx);
   gt_encseq_extract_decoded(bs->encseq, out, startpos,
                             startpos
@@ -355,7 +355,7 @@ char* gt_bioseq_get_sequence_range(const GtBioseq *bs, GtUword idx,
   GtUword startpos;
   gt_assert(bs);
   gt_assert(idx < gt_encseq_num_of_sequences(bs->encseq) && end >= start);
-  out = gt_malloc((end - start + 1) * sizeof (char));
+  out = gt_calloc((end - start + 1) + 1, sizeof (char));
   startpos = gt_encseq_seqstartpos(bs->encseq, idx);
   gt_encseq_extract_decoded(bs->encseq, out, startpos + start, startpos + end);
   return out;
