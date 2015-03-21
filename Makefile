@@ -41,10 +41,10 @@ ifneq ($(cairo),no)
   # XXX: check for existence of packages, and emit warning and disable cairo
   # if packages are not available
   ifeq ($(HAS_PKGCONFIG),yes)
-	INCLUDEOPT+=$(shell $(OVERRIDE_PC_PATH) pkg-config  --cflags-only-I pango) \
-	            $(shell $(OVERRIDE_PC_PATH) pkg-config  --cflags-only-I cairo) \
-	            $(shell $(OVERRIDE_PC_PATH) pkg-config  --cflags-only-I pangocairo) \
-	            $(shell $(OVERRIDE_PC_PATH) pkg-config  --cflags-only-I glib-2.0)
+	INCLUDEOPT+=$(shell $(OVERRIDE_PC_PATH) pkg-config --silence-errors --cflags-only-I pango) \
+	            $(shell $(OVERRIDE_PC_PATH) pkg-config --silence-errors --cflags-only-I cairo) \
+	            $(shell $(OVERRIDE_PC_PATH) pkg-config --silence-errors --cflags-only-I pangocairo) \
+	            $(shell $(OVERRIDE_PC_PATH) pkg-config --silence-errors --cflags-only-I glib-2.0)
   endif
 endif
 
@@ -377,13 +377,13 @@ ifneq ($(cairo),no)
   endif
   ifeq ($(HAS_PKGCONFIG),yes)
     GTSHAREDLIB_LIBDEP:= $(GTSHAREDLIB_LIBDEP) \
-                         $(shell $(OVERRIDE_PC_PATH) pkg-config  --libs pango) \
-                         $(shell $(OVERRIDE_PC_PATH) pkg-config  --libs cairo) \
-                         $(shell $(OVERRIDE_PC_PATH) pkg-config  --libs pangocairo)
+                         $(shell $(OVERRIDE_PC_PATH) pkg-config --silence-errors --libs pango) \
+                         $(shell $(OVERRIDE_PC_PATH) pkg-config --silence-errors --libs cairo) \
+                         $(shell $(OVERRIDE_PC_PATH) pkg-config --silence-errors --libs pangocairo)
     EXP_LDLIBS:=$(EXP_LDLIBS) \
-                $(shell $(OVERRIDE_PC_PATH) pkg-config  --libs pango) \
-                $(shell $(OVERRIDE_PC_PATH) pkg-config  --libs cairo) \
-                $(shell $(OVERRIDE_PC_PATH) pkg-config  --libs pangocairo)
+                $(shell $(OVERRIDE_PC_PATH) pkg-config --silence-errors --libs pango) \
+                $(shell $(OVERRIDE_PC_PATH) pkg-config --silence-errors --libs cairo) \
+                $(shell $(OVERRIDE_PC_PATH) pkg-config --silence-errors --libs pangocairo)
   endif
   ANNOTATIONSKETCH_EXAMPLES := bin/examples/sketch_constructed \
                                bin/examples/sketch_parsed_with_ctrack \
@@ -1158,7 +1158,7 @@ gtkviewer:
 	@echo "[compile $(notdir $@)]"
 	@$(CC) -o bin/examples/gtkviewer $(GT_CPPFLAGS) $(GT_LDFLAGS) \
   src/examples/gtkviewer.c \
-  -lcairo `$(OVERRIDE_PC_PATH) pkg-config  --cflags --libs gtk+-2.0` \
+  -lcairo `$(OVERRIDE_PC_PATH) pkg-config --silence-errors --cflags --libs gtk+-2.0` \
   -lgenometools
 
 cleanup: clean cleangenerated cleanindexes splintclean headerclean sbclean
