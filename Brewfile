@@ -1,4 +1,4 @@
-install caskroom/cask/brew-cask
-cask install xquartz
-install cairo
-install pango
+tap 'caskroom/cask'
+cask 'xquartz'
+brew 'cairo'
+brew 'pango'
