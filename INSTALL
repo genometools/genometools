@@ -45,6 +45,26 @@ AnnotationSketch support is not required, GenomeTools can be built without
 graphics support by invoking make as above with the argument `cairo=no'.
 
 
+Building GenomeTools on Mac OS X (>= 10.6):
+-------------------------------------------
+
+Make sure the command line developer tools are installed:
+
+$ xcode-select --install
+
+With these installed, you are ready to build GenomeTools without
+AnnotationSketch support (cairo=no). To build GenomeTools with AnnotationSketch,
+you can use Homebrew (http://brew.sh) to install the necessary dependencies
+required for building:
+
+$ brew install caskroom/cask/brew-cask
+$ brew cask install xquartz
+$ brew install cairo
+$ brew install pango
+
+To start the build process, invoke make as stated above.
+
+
 Building GenomeTools as a Universal Binary (on Mac OS X < v10.6):
 -----------------------------------------------------------------
 
@@ -58,7 +78,7 @@ universal binary may lead to problems.
 Building GenomeTools on Windows (using Cygwin):
 -----------------------------------------------
 
-Building GenomeTools with gcc on Windows occasionally results a warning
+Building GenomeTools with gcc on Windows occasionally results in a warning
 regarding the '-fPIC' parameter. This can be ignored without problems. To ignore
 this warning, please append the errorcheck=no option to your make call. All
 other options given in this file can still be used.
@@ -75,8 +95,8 @@ to make sure your GenomeTools build went fine. This step requires an installed
 Ruby 1.8 interpreter (see http://www.ruby-lang.org/en/ for informations on
 Ruby).
 
-Please note that all make options given during the compilation must be given in
-the `make test' invocation again. For example, if you compiled GenomeTools with
+Please note that all make options given during the compilation must be repeated
+in the `make test' invocation. For example, if you compiled GenomeTools with
 the '64bit=no cairo=no' options, the correct installation command would be:
 
 # make 64bit=no cairo=no test
