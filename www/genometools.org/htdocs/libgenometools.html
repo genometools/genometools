@@ -360,15 +360,6 @@ Duplicate internal feature nodes of type <code>source_type</code> as features wi
    <code>dest_type</code>. The duplicated features does not inherit the children.
 </p>
 <hr>
-<a name="GtTrackSelectorFunc"></a>
-
-<code>void  GtTrackSelectorFunc(GtBlock*, GtStr*, void*)</code>
-<p>
-A <code>GtTrackSelectorFunc</code> is a callback function which sets a <code>GtStr</code> to a
-   string to be used as a track identifier for assignment of a <code>GtBlock</code>
-   to a given track.
-</p>
-<hr>
 <a name="GtTrackOrderingFunc"></a>
 
 <code>int  GtTrackOrderingFunc(const char *s1, const char *s2, void *data)</code>
@@ -378,6 +369,15 @@ A function describing the order of tracks based on their track identifier
    should appear before the track with ID <code>s2</code> and a positive value if <code>s1</code>
    should appear after <code>s2</code>. Returning a value of 0 will result in an undefined
    ordering of <code>s1</code> and <code>s2</code>.
+</p>
+<hr>
+<a name="GtTrackSelectorFunc"></a>
+
+<code>void  GtTrackSelectorFunc(GtBlock*, GtStr*, void*)</code>
+<p>
+A <code>GtTrackSelectorFunc</code> is a callback function which sets a <code>GtStr</code> to a
+   string to be used as a track identifier for assignment of a <code>GtBlock</code>
+   to a given track.
 </p>
 <hr>
 <a name="GtAddIntronsStream"></a>
@@ -664,8 +664,11 @@ Suppose the string <code>src</code> of length <code>len</code> was transformed a
                                               const GtUchar *src,
                                               GtUword len)</code>
 <p>
-Analog to <code>gt_alphabet_decode_seq_to_fp()</code> but writing the output to
-   <code>dest</code>.
+Suppose the string <code>src</code> of length <code>len</code> was transformed according to the
+   <code>alphabet</code>. The following method shows each character in <code>src</code> as the
+   printable character specified in the transformation. The output is written
+   to the given string <code>dest</code> and terminated with '\0' at dest[len]. <code>dest</code>
+   therefore has to be of at least <code>len</code> + 1 length.
 </p>
 <hr>
 <a name="gt_alphabet_decode_seq_to_str"></a>
@@ -3954,6 +3957,13 @@ Return a new <code>GtFile</code> object for the given <code>path</code> and open
    compression if it ends with '.bz2', and uncompressed otherwise).
 </p>
 <hr>
+<a name="gt_file_ref"></a>
+
+<code>GtFile*  gt_file_ref(GtFile *file)</code>
+<p>
+Increments the reference count of <code>file</code>.
+</p>
+<hr>
 <a name="gt_file_new_from_fileptr"></a>
 
 <code>GtFile*  gt_file_new_from_fileptr(FILE *fp)</code>
@@ -5415,6 +5425,9 @@ Sets the range of the second sequence involved in the match <code>match</code> t
 <p>
 Writes the range of the first sequence involved in the match <code>match</code> to the
    location pointed to by <code>range</code>.
+   Note: depending on how the matches were produced the resulting range might
+   differ. e.g. Blast hit ranges are 1-Based, not zero based and inclusive i.e.
+   <code>range</code>.end is the last position that is part of the match.
 </p>
 <hr>
 <a name="gt_match_get_range_seq2"></a>
@@ -5423,6 +5436,9 @@ Writes the range of the first sequence involved in the match <code>match</code> 
 <p>
 Writes the range of the second sequence involved in the match <code>match</code> to the
    location pointed to by <code>range</code>.
+   Note: depending on how the matches were produced the resulting range might
+   differ. e.g. Blast hit ranges are 1-Based, not zero based and inclusive i.e.
+   <code>range</code>.end is the last position that is part of the match.
 </p>
 <hr>
 <a name="gt_match_get_direction"></a>
@@ -7474,8 +7490,8 @@ Disable checking if quality description is equal to read description in
 <a name="gt_seq_iterator_sequence_buffer_new"></a>
 
 <code>GtSeqIterator*  gt_seq_iterator_sequence_buffer_new(const GtStrArray
-                                                                   *filenametab,
-                                                  GtError *err)</code>
+                                                   *filenametab,
+                                                   GtError *err)</code>
 <p>
 Create a new <code>GtSeqIterator</code> for all sequence files in <code>filenametab</code>.
    All files have to be of the same format, which will be guessed by examining
@@ -7767,9 +7783,9 @@ Append double <code>d</code> to <code>str</code> in scientific notation e.g. 0.5
    with given <code>precision</code>.
 </p>
 <hr>
-<a name="gt_str_append_ulong"></a>
+<a name="gt_str_append_uword"></a>
 
-<code>void     gt_str_append_ulong(GtStr *str, GtUword ulong)</code>
+<code>void     gt_str_append_uword(GtStr *str, GtUword uword)</code>
 <p>
 Append <code>ulong</code> to <code>str</code>.
 </p>
@@ -9637,17 +9653,17 @@ Parse unsigned integer from <code>nptr</code> and store result in <code>out</cod
    Returns 0 upon success and -1 upon failure.
 </p>
 <hr>
-<a name="gt_parse_long"></a>
+<a name="gt_parse_word"></a>
 
-<code>int  gt_parse_long(GtWord *out, const char *nptr)</code>
+<code>int  gt_parse_word(GtWord *out, const char *nptr)</code>
 <p>
-Parse long from <code>nptr</code> and store result in <code>out</code>.
+Parse GtWord from <code>nptr</code> and store result in <code>out</code>.
    Returns 0 upon success and -1 upon failure.
 </p>
 <hr>
-<a name="gt_parse_ulong"></a>
+<a name="gt_parse_uword"></a>
 
-<code>int  gt_parse_ulong(GtUword *out, const char *nptr)</code>
+<code>int  gt_parse_uword(GtUword *out, const char *nptr)</code>
 <p>
 Parse GtUword from <code>nptr</code> and store result in <code>out</code>.
    Returns 0 upon success and -1 upon failure.
@@ -10947,6 +10963,8 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
 
   <a href="#gt_file_number_of_lines"><code>gt_file_number_of_lines</code></a><br>
 
+  <a href="#gt_file_ref"><code>gt_file_ref</code></a><br>
+
   <a href="#gt_file_size"><code>gt_file_size</code></a><br>
 
   <a href="#gt_file_size_with_suffix"><code>gt_file_size_with_suffix</code></a><br>
@@ -11527,15 +11545,15 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
 
   <a href="#gt_parse_int"><code>gt_parse_int</code></a><br>
 
-  <a href="#gt_parse_long"><code>gt_parse_long</code></a><br>
-
   <a href="#gt_parse_range"><code>gt_parse_range</code></a><br>
 
   <a href="#gt_parse_range_tidy"><code>gt_parse_range_tidy</code></a><br>
 
   <a href="#gt_parse_uint"><code>gt_parse_uint</code></a><br>
 
-  <a href="#gt_parse_ulong"><code>gt_parse_ulong</code></a><br>
+  <a href="#gt_parse_uword"><code>gt_parse_uword</code></a><br>
+
+  <a href="#gt_parse_word"><code>gt_parse_word</code></a><br>
 
   <a href="#gt_phase_get"><code>gt_phase_get</code></a><br>
 
@@ -11727,7 +11745,7 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
 
   <a href="#gt_str_append_uint"><code>gt_str_append_uint</code></a><br>
 
-  <a href="#gt_str_append_ulong"><code>gt_str_append_ulong</code></a><br>
+  <a href="#gt_str_append_uword"><code>gt_str_append_uword</code></a><br>
 
   <a href="#gt_str_array_add"><code>gt_str_array_add</code></a><br>
 
@@ -12024,7 +12042,7 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
 <div id="footer">
 Copyright &copy; 2008-2013
 The <i>GenomeTools</i> authors.
-Last update: 2015-01-24
+Last update: 2015-03-24
 </div>
 </div>
 <!-- Piwik -->

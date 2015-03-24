@@ -720,7 +720,7 @@ Returns a new feature visitor object over <code>feature_index</code>. That is, a
 
 <code> gff3_in_stream_new_sorted(filename)</code>
 <p>
-Returns a new GFF3 input stream object for <code>filename</code>. The file <code>filename</code> has to be a sorted GFF3 file.
+Returns a new GFF3 input stream object for <code>filename</code>. The file <code>filename</code> has to be a sorted GFF3 file. If <code>filename</code> is omitted or  <code>nil</code>, input will be read from standard input.
 </p>
 <hr>
 <a name="GFF3OutStream"></a>
@@ -1369,7 +1369,7 @@ Returns translated <code>dna</code>.
 <div id="footer">
 Copyright &copy; 2008-2013
 The <i>GenomeTools</i> authors.
-Last update: 2015-01-24
+Last update: 2015-03-24
 </div>
 </div>
 <!-- Piwik -->
