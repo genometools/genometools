@@ -1,8 +1,10 @@
-changes in version 1.5.5 (2015-03-03)
+changes in version 1.5.5 (2015-03-24)
 
 - bugfixes and cleanups
 - multiple improvements to GFF3 parser
 - `gt interfeat` handles top-level multi-features correctly
+- PPT detection working again in LTRdigest
+- additional input/output options for Lua stream bindings
 
 
 changes in version 1.5.4 (2014-12-11)
