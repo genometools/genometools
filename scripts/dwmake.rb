@@ -37,7 +37,7 @@ def parseargs(argv)
   options.prof = false
   options.speed = false
   options.makethreads = false
-  options.threds = false
+  options.threads = false
   opts = OptionParser.new
   opts.on("-a", "--amalgamation",
           "Combine code into one file for optimisation") do |x|
@@ -82,6 +82,7 @@ def parseargs(argv)
   end
   opts.on("-t", "--threads", "compile with threading enabled") do |x|
     options.check = false
+    options.threads = true
   end
   opts.on("--[no-]ccache", "use [no] ccache, defaults to using it") do |x|
     options.ccache = x
