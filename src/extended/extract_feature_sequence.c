@@ -65,12 +65,13 @@ static int extract_join_feature(GtGenomeNode *gn, const char *type,
   return had_err;
 }
 
-static int gt_extract_feature_sequence_generic(GtStr *sequence,
-                                GtGenomeNode *gn,
-                                const char *type, bool join, GtStr *seqid,
-                                GtStrArray *target_ids,
-                                unsigned int *out_phase_offset,
-                                GtRegionMapping *region_mapping, GtError *err)
+static int extract_feature_sequence_generic(GtStr *sequence, GtGenomeNode *gn,
+                                            const char *type, bool join,
+                                            GtStr *seqid,
+                                            GtStrArray *target_ids,
+                                            unsigned int *out_phase_offset,
+                                            GtRegionMapping *region_mapping,
+                                            GtError *err)
 {
   GtFeatureNode *fn;
   GtRange range;
@@ -167,9 +168,9 @@ int gt_extract_feature_sequence(GtStr *sequence, GtGenomeNode *gn,
                                 GtStrArray *target_ids,
                                 GtRegionMapping *region_mapping, GtError *err)
 {
-  return gt_extract_feature_sequence_generic(sequence, gn, type, join, seqid,
-                                             target_ids, NULL, region_mapping,
-                                             err);
+  return extract_feature_sequence_generic(sequence, gn, type, join, seqid,
+                                          target_ids, NULL, region_mapping,
+                                          err);
 }
 
 int gt_extract_and_translate_feature_sequence(GtFeatureNode *feature_node,
@@ -191,10 +192,10 @@ int gt_extract_and_translate_feature_sequence(GtFeatureNode *feature_node,
   GtStr *sequence = gt_str_new();
   gt_assert(feature_node && type);
 
-  had_err = gt_extract_feature_sequence_generic(sequence,
-                                                (GtGenomeNode*) feature_node,
-                                                type, join, NULL, NULL,
-                                                &phase_offset, rm, err);
+  had_err = extract_feature_sequence_generic(sequence,
+                                             (GtGenomeNode*) feature_node, type,
+                                             join, NULL, NULL, &phase_offset,
+                                             rm, err);
 
   /* do translation if we have at least one codon */
   if (!had_err && gt_str_length(sequence) > phase_offset + 2) {
