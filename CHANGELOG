@@ -1,3 +1,8 @@
+changes in version 1.5.6 (2015-04-19)
+
+- C API gt_assert() calls abort(3) instead of exit(3) in case of failure
+
+
 changes in version 1.5.5 (2015-03-24)
 
 - bugfixes and cleanups
