@@ -360,6 +360,15 @@ Duplicate internal feature nodes of type <code>source_type</code> as features wi
    <code>dest_type</code>. The duplicated features does not inherit the children.
 </p>
 <hr>
+<a name="GtTrackSelectorFunc"></a>
+
+<code>void  GtTrackSelectorFunc(GtBlock*, GtStr*, void*)</code>
+<p>
+A <code>GtTrackSelectorFunc</code> is a callback function which sets a <code>GtStr</code> to a
+   string to be used as a track identifier for assignment of a <code>GtBlock</code>
+   to a given track.
+</p>
+<hr>
 <a name="GtTrackOrderingFunc"></a>
 
 <code>int  GtTrackOrderingFunc(const char *s1, const char *s2, void *data)</code>
@@ -369,15 +378,6 @@ A function describing the order of tracks based on their track identifier
    should appear before the track with ID <code>s2</code> and a positive value if <code>s1</code>
    should appear after <code>s2</code>. Returning a value of 0 will result in an undefined
    ordering of <code>s1</code> and <code>s2</code>.
-</p>
-<hr>
-<a name="GtTrackSelectorFunc"></a>
-
-<code>void  GtTrackSelectorFunc(GtBlock*, GtStr*, void*)</code>
-<p>
-A <code>GtTrackSelectorFunc</code> is a callback function which sets a <code>GtStr</code> to a
-   string to be used as a track identifier for assignment of a <code>GtBlock</code>
-   to a given track.
 </p>
 <hr>
 <a name="GtAddIntronsStream"></a>
@@ -9062,8 +9062,7 @@ Frees the space allocated for the 2-dimensional array pointed to by
 <p>
 The <code>gt_assert()</code> macro tests the given <code>expression</code> and if it is false, the
    calling process is terminated. A diagnostic message is written to <code>stderr</code>
-   and the <code>exit(3)</code> function is called (with error code 2 as argument),
-   effectively terminating the program.
+   and the <code>abort(3)</code> function is called, effectively terminating the program.
    If <code>expression</code> is true, the <code>gt_assert()</code> macro does nothing.
 </p>
 <hr>
@@ -12042,7 +12041,7 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
 <div id="footer">
 Copyright &copy; 2008-2013
 The <i>GenomeTools</i> authors.
-Last update: 2015-03-24
+Last update: 2015-04-19
 </div>
 </div>
 <!-- Piwik -->
