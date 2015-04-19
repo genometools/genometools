@@ -15,30 +15,17 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "core/ma.h"
+#include "core/ma_api.h"
 #include "core/unused_api.h"
-#include "core/encseq.h"
-#include "core/encseq_metadata.h"
-#include "match/sfx-mappedstr.h"
+#include "core/encseq_api.h"
+#include "match/seed-extend.h"
 #include "tools/gt_seed_extend.h"
 
 typedef struct {
-  GtCodetype code;
-  GtUword read;
-  GtUword endpos;
-} GtSeedExtendKmerPos;
-
-typedef struct {
-  GtUword bpos;
-  GtUword apos;
-  GtUword bread;
-  GtUword aread;
-} GtSeedExtendSeedPair;
-
-typedef struct {
-  unsigned int k;
-  unsigned int s;
-  unsigned int z;
+  unsigned int kmerlen;
+  unsigned int diagbandw;
+  unsigned int mincoverage;
+  bool mirror;
 } GtSeedExtendArguments;
 
 static void* gt_seed_extend_arguments_new(void)
@@ -68,24 +55,29 @@ static GtOptionParser* gt_seed_extend_option_parser_new(void *tool_arguments)
                             "extend algorithm.");
 
   /* -k */
-  option = gt_option_new_uint_min("k", "k-mer length", &arguments->k, 14, 2);
+  option = gt_option_new_uint_min("k", "k-mer length", &arguments->kmerlen, 14, 2);
   gt_option_parser_add_option(op, option);
 
   /* -s */
-  option = gt_option_new_uint("s", "diagonal band width", &arguments->s, 6);
+  option = gt_option_new_uint("s", "diagonal band width",
+                              &arguments->diagbandw, 6);
   gt_option_parser_add_option(op, option);
 
   /* -z */
   option = gt_option_new_uint("z", "minimum coverage in two diagonal bands",
-                              &arguments->z, 35);
+                              &arguments->mincoverage, 35);
+  gt_option_parser_add_option(op, option);
+  
+  /* -m */
+  option = gt_option_new_bool("mirror", "add reverse complement reads",
+                              &arguments->mirror, false);
   gt_option_parser_add_option(op, option);
 
   return op;
 }
 
-static int gt_seed_extend_arguments_check(GT_UNUSED int rest_argc,
-                                       void *tool_arguments,
-                                       GT_UNUSED GtError *err)
+static int gt_seed_extend_arguments_check(GT_UNUSED int rest_argc, 
+                                          void *tool_arguments, GtError *err)
 {
   GtSeedExtendArguments *arguments = tool_arguments;
   int had_err = 0;
@@ -103,81 +95,13 @@ static int gt_seed_extend_arguments_check(GT_UNUSED int rest_argc,
   return had_err;
 }
 
-/* Returns a GTSeedExtendKmerPos list of kmers from a given encseq. */
-void gt_seed_extend_get_kmers(GtArray *list, const GtEncseq *encseq,
-                             const unsigned int k, GT_UNUSED GtError *err)
-{
-  GtKmercodeiterator *kc_iter;
-  const GtKmercode *kmercode;
-
-  kc_iter = gt_kmercodeiterator_encseq_new(encseq, GT_READMODE_FORWARD, k, 0);
-  while (kmercode = gt_kmercodeiterator_encseq_nonspecial_next(kc_iter)) {
-    GtSeedExtendKmerPos kp;
-    kp.code = kmercode->code;
-    kp.endpos = gt_kmercodeiterator_encseq_get_currentpos(kc_iter) - 1;
-    kp.read = gt_encseq_seqnum(encseq, kp.endpos);
-    gt_array_add(list, kp);
-  }
-  gt_kmercodeiterator_delete(kc_iter);
-}
-
-/* Returns a GTSeedExtendSeedPair list of equal kmers from lists a and b. */
-void gt_seed_extend_merge(const GtArray *alist, const GtArray *blist,
-                          GtArray *mlist, const bool two_files,
-                          GT_UNUSED GtError *err)
-{
-  const GtSeedExtendKmerPos *aptr, *bptr, *tptr, *aend, *bend;
-  aptr = gt_array_get_first(alist);
-  bptr = gt_array_get_first(blist);
-  aend = gt_array_get_last(alist);
-  bend = gt_array_get_last(blist);
-  while (aptr <= aend && bptr <= bend) {
-    if (aptr->code < bptr->code) {
-      aptr ++;
-    } else if (aptr->code > bptr->code) {
-      bptr ++;
-    } else { /* k-mer codes are equal */
-      for (tptr = bptr; tptr <= bend && aptr->code == tptr->code; tptr ++) {
-        if (two_files || aptr != tptr) {
-          GtSeedExtendSeedPair seed = {tptr->endpos, aptr->endpos, 
-                                       tptr->read, aptr->read};
-          gt_array_add(mlist, seed);
-        }
-      }
-      aptr ++;
-    }
-  }
-}
-
-static int gt_seed_extend_kp_cmp(const void *a, const void *b)
-{
-  const GtSeedExtendKmerPos *aptr = a, *bptr = b;
-  return (int)(aptr->code - bptr->code);
-}
-
-static int gt_seed_extend_sp_cmp(const void *a, const void *b)
-{
-  const GtSeedExtendSeedPair *aptr = a, *bptr = b;
-  int c;
-  if ((c = (int)(aptr->aread - bptr->aread)) != 0) {
-    return c;
-  } else if ((c = (int)(aptr->bread - bptr->bread)) != 0) {
-    return c;
-  } else {
-    return (int)(aptr->apos - bptr->apos);
-  }
-}
-
 static int gt_seed_extend_runner(int argc, const char **argv, int parsed_args,
                                  void *tool_arguments, GtError *err)
 {
   GtSeedExtendArguments *arguments = tool_arguments;
-  GtArray *alist, *blist, *mlist;
-  GtEncseq *aencseq, *bencseq;
   GtEncseqLoader *encseq_loader;
+  GtEncseq *aencseq, *bencseq;
   int had_err = 0;
-  const bool two_files = (argc - parsed_args == 2); /* => disjoint lists */
-  bool mirror = true;
 
   gt_error_check(err);
   gt_assert(arguments);
@@ -185,74 +109,33 @@ static int gt_seed_extend_runner(int argc, const char **argv, int parsed_args,
 
   /* load encseq A */
   encseq_loader = gt_encseq_loader_new();
-  if (mirror)
+  if (arguments->mirror)
     gt_encseq_loader_mirror(encseq_loader);
   gt_encseq_loader_enable_autosupport(encseq_loader);
   aencseq = gt_encseq_loader_load(encseq_loader, argv[parsed_args], err);
-  if (!aencseq) {
-    gt_encseq_loader_delete(encseq_loader);
-    return had_err = -1;
-  }
+  if (!aencseq)
+    had_err = -1;
 
-  alist = gt_array_new(sizeof(GtSeedExtendKmerPos));
-  gt_seed_extend_get_kmers(alist, aencseq, arguments->k, err);
-  gt_array_sort(alist, gt_seed_extend_kp_cmp);
-
-  if (two_files) { /* there is a 2nd read set: load encseq B */
-    bencseq = gt_encseq_loader_load(encseq_loader, argv[parsed_args+1], err);
+  /* if there is a 2nd read set: load encseq B */
+  if (!had_err) {
+    if (argc - parsed_args == 2)
+      bencseq = gt_encseq_loader_load(encseq_loader, argv[parsed_args+1], err);
+    else
+      bencseq = gt_encseq_ref(aencseq);
     if (!bencseq) {
-      gt_encseq_loader_delete(encseq_loader);
-      return had_err = -1;
+      had_err = -1;
+      gt_encseq_delete(aencseq);
     }
-    blist = gt_array_new(sizeof(GtSeedExtendKmerPos));
-    gt_seed_extend_get_kmers(blist, bencseq, arguments->k,err);
-    gt_array_sort(blist, gt_seed_extend_kp_cmp);
-  } else { /* compare all reads of encseq A with themselves */
-    blist = gt_array_ref(alist);
-    bencseq = aencseq;
-  }
-  
-  mlist = gt_array_new(sizeof(GtSeedExtendSeedPair));
-  gt_seed_extend_merge(alist, blist, mlist, two_files, err);
-  gt_array_sort(mlist, gt_seed_extend_sp_cmp);
-
-#ifndef NOPRINT
-  printf("Parameters: k = %d, z = %d, s = %d\n", arguments->k, arguments->z,
-    arguments->s);
-  char *buf = malloc((arguments->k+1)*sizeof (char));
-  const GtSeedExtendKmerPos *i;
-  for (i = gt_array_get_first(alist); 
-       i <= (GtSeedExtendKmerPos *) gt_array_get_last(alist); i++) {
-    gt_encseq_extract_decoded(aencseq,buf,1+i->endpos-arguments->k,i->endpos);
-    printf("listA: "GT_WU", "GT_WU", "FormatGtCodetype" = %s\n",
-      i->endpos, i->read, i->code, buf);
-  }
-  for (i = gt_array_get_first(blist); 
-       i <= (GtSeedExtendKmerPos *) gt_array_get_last(blist); i++) {
-    gt_encseq_extract_decoded(bencseq,buf,1+i->endpos-arguments->k,i->endpos);
-    printf("listB: "GT_WU", "GT_WU", "FormatGtCodetype" = %s\n",
-      i->endpos, i->read, i->code, buf);
-  }
-  free(buf);
-  if (gt_array_size(mlist) != 0) {
-    GtSeedExtendSeedPair *j = gt_array_get_first(mlist);
-    GtSeedExtendSeedPair *last = gt_array_get_last(mlist);
-    while (j <= last) {
-      printf("SeedPair ("GT_WU","GT_WU","GT_WU","GT_WU")\n", 
-             j->aread, j->bread, j->apos, j->bpos);
-      j ++;
-    }
-  }
-#endif
-  
-  gt_array_delete(mlist);
-  gt_array_delete(alist);
-  gt_array_delete(blist);
-  gt_encseq_delete(aencseq);
-  if (two_files) {
-    gt_encseq_delete(bencseq);
   }
   gt_encseq_loader_delete(encseq_loader);
+  
+  /* start algorithm */
+  if (!had_err) {
+    gt_seed_extend_run(aencseq, bencseq, arguments->kmerlen,
+                       arguments->mincoverage, arguments->diagbandw);
+    gt_encseq_delete(aencseq);
+    gt_encseq_delete(bencseq);
+  }
   return had_err;
 }
 
