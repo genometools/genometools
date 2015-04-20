@@ -222,9 +222,15 @@ static int file_find_in_env_generic(GtStr *path, const char *file_path,
     }
     if (i < gt_splitter_size(splitter)) {
       /* file found in path */
+#ifndef _WIN32
       char *abspath = realpath(gt_str_get(path), NULL);
       gt_file_dirname(path, abspath);
       free(abspath);
+#else
+      /* TODO: using old implementation for Windows correct? */
+      gt_str_reset(path);
+      gt_str_append_cstr(path, pathcomponent);
+#endif
     }
     else {
       /* file not found in path */
