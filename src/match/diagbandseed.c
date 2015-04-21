@@ -74,7 +74,7 @@ void gt_seed_extend_merge(GtArrayGtSeedExtendSeedPair *mlist,
       bptr ++;
     } else { /* k-mer codes are equal */
       for (tptr = bptr; tptr < bend && aptr->code == tptr->code; tptr ++) {
-        if (alist != blist || aptr != tptr) {
+        if (alist != blist || aptr->read != tptr->read) {
           GtSeedExtendSeedPair seed;
           seed.bread = tptr->read;
           seed.aread = aptr->read;
@@ -91,8 +91,8 @@ void gt_seed_extend_merge(GtArrayGtSeedExtendSeedPair *mlist,
 
 void gt_seed_extend_run(GtEncseq *aencseq, GtEncseq *bencseq,
                         const unsigned int kmerlen,
-                        const unsigned int mincoverage,
-                        const unsigned int diagbandw)
+                        GT_UNUSED const unsigned int mincoverage,
+                        GT_UNUSED const unsigned int diagbandw)
 {
   GtArrayGtSeedExtendKmerPos alist, blist;
   GtArrayGtSeedExtendSeedPair mlist;
@@ -128,27 +128,11 @@ void gt_seed_extend_run(GtEncseq *aencseq, GtEncseq *bencseq,
   gt_radixsort_delete(rdxinfo);
   
 #ifndef NOPRINT
-  printf("Parameters: k = %d, z = %d, s = %d\n", kmerlen, mincoverage, diagbandw);
-  char *buf = malloc((kmerlen+1)*sizeof (char));
-  const GtSeedExtendKmerPos *i;
-  for (i = alist.spaceGtSeedExtendKmerPos; i < alist.spaceGtSeedExtendKmerPos+ alist.nextfreeGtSeedExtendKmerPos; i++) {
-    gt_encseq_extract_decoded(aencseq,buf,1+i->endpos-kmerlen,i->endpos);
-    printf("listA: %d, %d, "FormatGtCodetype" = %s\n", i->endpos, i->read, i->code, buf);
-  }
-  if (two_files) {
-    for (i = blist.spaceGtSeedExtendKmerPos; i < blist.spaceGtSeedExtendKmerPos+ blist.nextfreeGtSeedExtendKmerPos; i++) {
-      gt_encseq_extract_decoded(bencseq,buf,1+i->endpos-kmerlen,i->endpos);
-      printf("listB: %d, %d, "FormatGtCodetype" = %s\n",
-             i->endpos, i->read, i->code, buf);
-    }
-  }
-  free(buf);
   if (mlist.nextfreeGtSeedExtendSeedPair != 0) {
     GtSeedExtendSeedPair *j = mlist.spaceGtSeedExtendSeedPair;
     GtSeedExtendSeedPair *last = j + mlist.nextfreeGtSeedExtendSeedPair;
     while (j < last) {
-      printf("SeedPair (%d,%d,%d,%d)\n", 
-             j->aread, j->bread, j->apos, j->bpos);
+      printf("SeedPair (%d,%d,%d,%d)\n", j->aread, j->bread, j->apos, j->bpos);
       j ++;
     }
   }

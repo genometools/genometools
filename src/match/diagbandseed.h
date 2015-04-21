@@ -16,6 +16,7 @@
  */
 
 #include "core/arraydef.h"
+#include "core/unused_api.h"
 
 typedef struct GtSeedExtendKmerPos GtSeedExtendKmerPos;
 typedef struct GtSeedExtendSeedPair GtSeedExtendSeedPair;
@@ -34,5 +35,5 @@ void gt_seed_extend_merge(GtArrayGtSeedExtendSeedPair *mlist,
 /* Run the whole algorithm. */
 void gt_seed_extend_run(GtEncseq *aencseq, GtEncseq *bencseq,
                         const unsigned int kmerlen,
-                        const unsigned int mincoverage,
-                        const unsigned int diagbandw);
+                        GT_UNUSED const unsigned int mincoverage,
+                        GT_UNUSED const unsigned int diagbandw);
