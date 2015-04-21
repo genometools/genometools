@@ -206,6 +206,7 @@ end
 require 'gt_sambam_include'
 require 'gt_script_filter_include'
 require 'gt_scripts_include'
+require 'gt_seed_extend_include'
 require 'gt_select_include'
 require 'gt_seq_include'
 require 'gt_seqbuffer_include'
