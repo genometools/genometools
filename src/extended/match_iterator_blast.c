@@ -312,7 +312,7 @@ GtMatchIterator* gt_match_iterator_blastn_process_new(const char *query,
                                                       const char *moreblast,
                                                       GtError *err)
 {
-  GtBlastProcessCall *call = gt_blast_process_call_new_all_prot();
+  GtBlastProcessCall *call = gt_blast_process_call_new_all_nucl();
   char buffer[BUFSIZ];
 
   gt_blast_process_call_set_query(call, query);
