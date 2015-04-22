@@ -17,6 +17,7 @@
 
 #include "core/codetype.h"
 #include "core/encseq_api.h"
+#include "core/minmax.h"
 #include "core/radix_sort.h"
 #include "match/seed-extend.h"
 #include "match/sfx-mappedstr.h"
@@ -52,6 +53,8 @@ void gt_seed_extend_get_kmers(GtArrayGtSeedExtendKmerPos *list,
     kp.code = kmercode->code;
     kp.endpos = gt_kmercodeiterator_encseq_get_currentpos(kc_iter) - 1;
     kp.read = gt_encseq_seqnum(encseq, kp.endpos);
+    kp.endpos -= gt_encseq_seqstartpos(encseq, gt_encseq_seqnum(encseq, 
+                                                                kp.endpos));
     GT_STOREINARRAY(list, GtSeedExtendKmerPos, GT_SEED_EXTEND_ARRAY_INCR, kp);
   }
   gt_kmercodeiterator_delete(kc_iter);
@@ -89,15 +92,98 @@ void gt_seed_extend_merge(GtArrayGtSeedExtendSeedPair *mlist,
   }
 }
 
+bool gt_seed_extend_is_seed(GT_UNUSED const GtSeedExtendSeedPair *entry, 
+                            const unsigned int *score,
+                            const unsigned int mincoverage,
+                            const unsigned int diag)
+{
+  // TODO: add path criteron
+  if (MAX(score[diag+1], score[diag-1]) + score[diag] >= mincoverage) {
+    return true;
+  } else {
+    return false;
+  }
+}
+
+void gt_seed_extend_find_seeds(const GtArrayGtSeedExtendSeedPair *mlist,
+                               const unsigned int kmerlen,
+                               const unsigned int mincoverage,
+                               const unsigned int diagbandw,
+                               const GtUword amaxlen, const GtUword bmaxlen)
+{
+  const GtUword mlen = mlist->nextfreeGtSeedExtendSeedPair;
+  const GtSeedExtendSeedPair *lm = mlist->spaceGtSeedExtendSeedPair;
+  const GtUword offset = (amaxlen >> diagbandw) + 1;
+  const GtUword ndiags = (bmaxlen >> diagbandw) + 1 + offset;
+  const GtUword minhit = (mincoverage-1) / kmerlen + 1;
+  unsigned int *score = gt_calloc(ndiags, sizeof(unsigned int));
+  GtSeedExtendPosition *lastp = gt_calloc(ndiags, sizeof(GtSeedExtendPosition));
+  GtUword diag;
+  unsigned int i, f;
+  
+#ifdef MYTEST
+  printf("ndiags="GT_WU", offset="GT_WU", s=%d\n", ndiags, offset, diagbandw);
+  printf("amaxlen="GT_WU", bmaxlen="GT_WU"\n", amaxlen, bmaxlen);
+#endif
+  
+  i = 0;
+  while (i+minhit <= mlen) {
+    const unsigned int p = i;
+    /* if insuffienct number of kmers in segment: skip whole segment */
+    if (lm[i].aread != lm[i+minhit-1].aread || 
+        lm[i].bread != lm[i+minhit-1].bread) {
+      do {
+        i ++;
+      } while (i < mlen && lm[i].aread == lm[p].aread && lm[i].bread == lm[p].bread);
+      continue;
+    }
+    
+    /* calculate diagonal band scores */
+    do {
+      diag = offset + (((long)lm[i].apos - (long)lm[i].bpos) >> diagbandw);
+      if (lm[i].apos >= kmerlen + lastp[diag]) {
+        score[diag] += kmerlen;
+      } else {
+        score[diag] += lm[i].apos - lastp[diag];
+      }
+      lastp[diag] = lm[i].apos;
+      i++;
+    } while (i < mlen && lm[i].aread == lm[p].aread && lm[i].bread == lm[p].bread);
+    
+    /* report seeds */
+    for (f = p; f < i; f++) {
+      diag = offset + (((long)lm[f].apos - (long)lm[f].bpos) >> diagbandw);
+      if (gt_seed_extend_is_seed(&lm[f], score, mincoverage, diag)) {
+#ifdef MYTEST
+        printf("report SeedPair (%d,%d,%d,%d), score["GT_WU"]=%d\n", 
+               lm[f].aread, lm[f].bread, lm[f].apos, lm[f].bpos, diag,
+               MAX(score[diag+1], score[diag-1]) + score[diag]);
+#endif
+      }
+    }
+    
+    /* reset diagonal band scores */
+    for (f = p; f < i; f++) {
+      diag = offset + (((long)lm[f].apos - (long)lm[f].bpos) >> diagbandw);
+      score[diag] = 0;
+      lastp[diag] = 0;
+    }
+  }
+  gt_free(score);
+  gt_free(lastp);
+}
+
 void gt_seed_extend_run(GtEncseq *aencseq, GtEncseq *bencseq,
                         const unsigned int kmerlen,
-                        GT_UNUSED const unsigned int mincoverage,
-                        GT_UNUSED const unsigned int diagbandw)
+                        const unsigned int mincoverage,
+                        const unsigned int diagbandw)
 {
   GtArrayGtSeedExtendKmerPos alist, blist;
   GtArrayGtSeedExtendSeedPair mlist;
   GtRadixsortinfo* rdxinfo;
   const bool two_files = (bencseq != aencseq);
+  const GtUword amaxlen = gt_encseq_max_seq_length(aencseq);
+  const GtUword bmaxlen = gt_encseq_max_seq_length(bencseq);
 
   GT_INITARRAY(&alist,GtSeedExtendKmerPos);
   gt_seed_extend_get_kmers(&alist, aencseq, kmerlen);
@@ -137,6 +223,9 @@ void gt_seed_extend_run(GtEncseq *aencseq, GtEncseq *bencseq,
     }
   }
 #endif
+  
+  gt_seed_extend_find_seeds(&mlist, kmerlen, mincoverage, diagbandw, amaxlen, 
+                            bmaxlen);
 
   GT_FREEARRAY(&mlist, GtSeedExtendSeedPair);
   GT_FREEARRAY(&alist, GtSeedExtendKmerPos);
