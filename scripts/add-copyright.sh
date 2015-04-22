@@ -22,7 +22,7 @@ for filename in $*
 do
   cat > ${TMPFILE} <<EOF
 /*
-  Copyright (c) ${YEAR} ${MYEMAIL} <${MYEMAIL}>
+  Copyright (c) ${YEAR} ${MYNAME} <${MYEMAIL}>
   ${AFF}
 
   Permission to use, copy, modify, and distribute this software for any
