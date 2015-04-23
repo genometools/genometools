@@ -533,7 +533,7 @@ void gt_mergertrie_insertsuffix(Mergertrierep *trierep,
         return;
       }
       succ = np.current;
-      if (MTRIE_ISLEAF(succ))
+      if MTRIE_ISLEAF(succ)
       {
         lcpvalue = getlcp(eri->encseqptr,
                           eri->readmode,

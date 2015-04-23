@@ -269,7 +269,7 @@ tre_add_tags(tre_mem_t mem, tre_stack_t *stack, tre_ast_node_t *tree,
 	      {
 		tre_literal_t *lit = node->obj;
 
-		if (!IS_SPECIAL(lit) || IS_BACKREF(lit))
+		if (!(IS_SPECIAL(lit)) || IS_BACKREF(lit))
 		  {
 		    int i;
 		    DPRINT(("Literal %d-%d\n",
@@ -309,7 +309,7 @@ tre_add_tags(tre_mem_t mem, tre_stack_t *stack, tre_ast_node_t *tree,
 		  }
 		else
 		  {
-		    assert(!IS_TAG(lit));
+		    assert(!(IS_TAG(lit)));
 		  }
 		break;
 	      }
@@ -691,7 +691,7 @@ tre_copy_ast(tre_mem_t mem, tre_stack_t *stack, tre_ast_node_t *ast,
 		int pos = lit->position;
 		int min = lit->code_min;
 		int max = lit->code_max;
-		if (!IS_SPECIAL(lit) || IS_BACKREF(lit))
+		if (!(IS_SPECIAL(lit)) || IS_BACKREF(lit))
 		  {
 		    /* XXX - e.g. [ab] has only one position but two
 		       nodes, so we are creating holes in the state space
@@ -839,7 +839,7 @@ tre_expand_ast(tre_mem_t mem, tre_stack_t *stack, tre_ast_node_t *ast,
 	    case LITERAL:
 	      {
 		tre_literal_t *lit= node->obj;
-		if (!IS_SPECIAL(lit) || IS_BACKREF(lit))
+		if (!(IS_SPECIAL(lit)) || IS_BACKREF(lit))
 		  {
 		    lit->position += pos_add;
 		    if (lit->position > max_pos)

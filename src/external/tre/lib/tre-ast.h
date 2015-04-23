@@ -30,12 +30,12 @@ typedef enum {
 #define BACKREF	  -4   /* Back reference leaf. */
 #define PARAMETER -5   /* Parameter. */
 
-#define IS_SPECIAL(x)	((x)->code_min < 0)
-#define IS_EMPTY(x)	((x)->code_min == EMPTY)
-#define IS_ASSERTION(x) ((x)->code_min == ASSERTION)
-#define IS_TAG(x)	((x)->code_min == TAG)
-#define IS_BACKREF(x)	((x)->code_min == BACKREF)
-#define IS_PARAMETER(x) ((x)->code_min == PARAMETER)
+#define IS_SPECIAL(x)	(x)->code_min < 0
+#define IS_EMPTY(x)	(x)->code_min == EMPTY
+#define IS_ASSERTION(x) (x)->code_min == ASSERTION
+#define IS_TAG(x)	(x)->code_min == TAG
+#define IS_BACKREF(x)	(x)->code_min == BACKREF
+#define IS_PARAMETER(x) (x)->code_min == PARAMETER
 
 
 /* A generic AST node.  All AST nodes consist of this node on the top

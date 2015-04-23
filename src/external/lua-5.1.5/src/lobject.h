@@ -76,15 +76,15 @@ typedef struct lua_TValue {
 
 
 /* Macros to test type */
-#define ttisnil(o)	(ttype(o) == LUA_TNIL)
-#define ttisnumber(o)	(ttype(o) == LUA_TNUMBER)
-#define ttisstring(o)	(ttype(o) == LUA_TSTRING)
-#define ttistable(o)	(ttype(o) == LUA_TTABLE)
-#define ttisfunction(o)	(ttype(o) == LUA_TFUNCTION)
-#define ttisboolean(o)	(ttype(o) == LUA_TBOOLEAN)
-#define ttisuserdata(o)	(ttype(o) == LUA_TUSERDATA)
-#define ttisthread(o)	(ttype(o) == LUA_TTHREAD)
-#define ttislightuserdata(o)	(ttype(o) == LUA_TLIGHTUSERDATA)
+#define ttisnil(o)	ttype(o) == LUA_TNIL
+#define ttisnumber(o)	ttype(o) == LUA_TNUMBER
+#define ttisstring(o)	ttype(o) == LUA_TSTRING
+#define ttistable(o)	ttype(o) == LUA_TTABLE
+#define ttisfunction(o)	ttype(o) == LUA_TFUNCTION
+#define ttisboolean(o)	ttype(o) == LUA_TBOOLEAN
+#define ttisuserdata(o)	ttype(o) == LUA_TUSERDATA
+#define ttisthread(o)	ttype(o) == LUA_TTHREAD
+#define ttislightuserdata(o)	ttype(o) == LUA_TLIGHTUSERDATA
 
 /* Macros to access values */
 #define ttype(o)	((o)->tt)
@@ -337,7 +337,7 @@ typedef struct Node {
 
 typedef struct Table {
   CommonHeader;
-  lu_byte flags;  /* 1<<p means tagmethod(p) is not present */ 
+  lu_byte flags;  /* 1<<p means tagmethod(p) is not present */
   lu_byte lsizenode;  /* log2 of size of `node' array */
   struct Table *metatable;
   TValue *array;  /* array part */
