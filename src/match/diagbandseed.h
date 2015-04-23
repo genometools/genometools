@@ -1,11 +1,11 @@
 /*
  Copyright (c) 2015 Jörg Winkler <joerg.winkler@studium.uni-hamburg.de>
  Copyright (c) 2015 Center for Bioinformatics, University of Hamburg
- 
+
  Permission to use, copy, modify, and distribute this software for any
  purpose with or without fee is hereby granted, provided that the above
  copyright notice and this permission notice appear in all copies.
- 
+
  THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
@@ -15,8 +15,9 @@
  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+#ifndef SEED_EXTEND_H
+#define SEED_EXTEND_H
 #include "core/arraydef.h"
-#include "core/unused_api.h"
 
 typedef struct GtSeedExtendKmerPos GtSeedExtendKmerPos;
 typedef struct GtSeedExtendSeedPair GtSeedExtendSeedPair;
@@ -25,15 +26,22 @@ GT_DECLAREARRAYSTRUCT(GtSeedExtendSeedPair);
 
 /* Returns a GtSeedExtendKmerPos list of k-mers from a given encseq. */
 void gt_seed_extend_get_kmers(GtArrayGtSeedExtendKmerPos *list,
-                              const GtEncseq *encseq, const unsigned int k);
+                              const GtEncseq *encseq, unsigned int k);
 
 /* Returns a GtSeedExtendSeedPair list of equal k-mers from lists a and b. */
 void gt_seed_extend_merge(GtArrayGtSeedExtendSeedPair *mlist,
                           const GtArrayGtSeedExtendKmerPos *alist,
                           const GtArrayGtSeedExtendKmerPos *blist);
 
+/* reports seeds from mlist that satisfy the filter criteria */
+void gt_seed_extend_find_seeds(const GtArrayGtSeedExtendSeedPair *mlist,
+                               unsigned int kmerlen, unsigned int mincoverage,
+                               unsigned int diagbandw, GtUword amaxlen,
+                               GtUword bmaxlen);
+
 /* Run the whole algorithm. */
-void gt_seed_extend_run(GtEncseq *aencseq, GtEncseq *bencseq,
-                        const unsigned int kmerlen,
-                        GT_UNUSED const unsigned int mincoverage,
-                        GT_UNUSED const unsigned int diagbandw);
+void gt_seed_extend_run(const GtEncseq *aencseq, const GtEncseq *bencseq,
+                        unsigned int kmerlen,
+                        unsigned int mincoverage,
+                        unsigned int diagbandw);
+#endif
