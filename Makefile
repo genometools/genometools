@@ -972,13 +972,16 @@ DWEXT=${shell grep -l Willrodt src/extended/*.c}
 GGTOOLS=${shell grep -l Gonnella src/tools/*.c}
 GGEXT=${shell grep -l Gonnella src/extended/*.c}
 GGCORE=${shell grep -l Gonnella src/core/*.c}
+ABEXT=${shell grep -l Blaufelder src/extended/*.c}
+ABTOOLS=${shell grep -l Blaufelder src/tools/*.c}
 
 ALLSPLINT=${addprefix obj/,${notdir ${subst .c,.splint,\
              ${filter-out ${EISFILES},${wildcard ${CURDIR}/src/match/*.c}}\
              ${wildcard ${CURDIR}/src/ltr/*.c}\
              ${SKTOOLS} ${SKCORE} ${SKEXT} \
 						 ${DWTOOLS} ${DWCORE} ${DWEXT} \
-             ${GGTOOLS} ${GGCORE} ${GGEXT} }}}
+             ${GGTOOLS} ${GGCORE} ${GGEXT} \
+						 ${ABEXT} }}}
 
 ALLSCANBUILD=${subst .splint,.sb, ${ALLSPLINT}}
 
