@@ -55,7 +55,8 @@ static GtOptionParser* gt_seed_extend_option_parser_new(void *tool_arguments)
                             "extend algorithm.");
 
   /* -k */
-  option = gt_option_new_uint_min("k", "k-mer length", &arguments->kmerlen, 14, 2);
+  option = gt_option_new_uint_min("k", "k-mer length", &arguments->kmerlen, 14,
+                                  2);
   gt_option_parser_add_option(op, option);
 
   /* -s */
@@ -67,7 +68,7 @@ static GtOptionParser* gt_seed_extend_option_parser_new(void *tool_arguments)
   option = gt_option_new_uint("z", "minimum coverage in two diagonal bands",
                               &arguments->mincoverage, 35);
   gt_option_parser_add_option(op, option);
-  
+
   /* -m */
   option = gt_option_new_bool("mirror", "add reverse complement reads",
                               &arguments->mirror, false);
@@ -76,7 +77,7 @@ static GtOptionParser* gt_seed_extend_option_parser_new(void *tool_arguments)
   return op;
 }
 
-static int gt_seed_extend_arguments_check(GT_UNUSED int rest_argc, 
+static int gt_seed_extend_arguments_check(GT_UNUSED int rest_argc,
                                           void *tool_arguments, GtError *err)
 {
   GtSeedExtendArguments *arguments = tool_arguments;
@@ -128,7 +129,7 @@ static int gt_seed_extend_runner(int argc, const char **argv, int parsed_args,
     }
   }
   gt_encseq_loader_delete(encseq_loader);
-  
+
   /* start algorithm */
   if (!had_err) {
     gt_seed_extend_run(aencseq, bencseq, arguments->kmerlen,
