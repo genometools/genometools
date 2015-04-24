@@ -39,7 +39,7 @@ static double pmax(double M, /* M value should be explored by simulation ??? */
   double s = 0.0, ln_x_choose_k;
   double ln, ln1, m1, m, delta;
 
-  gt_assert(x <= n_s || " The maximum number of elements in the array s1 "
+  gt_assert(x <= n_s && " The maximum number of elements in the array s1 "
             "should be increased!");
   if (s1[x] != 0.0)
     return s1[x];
