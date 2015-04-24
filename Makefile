@@ -981,7 +981,7 @@ ALLSPLINT=${addprefix obj/,${notdir ${subst .c,.splint,\
              ${SKTOOLS} ${SKCORE} ${SKEXT} \
 						 ${DWTOOLS} ${DWCORE} ${DWEXT} \
              ${GGTOOLS} ${GGCORE} ${GGEXT} \
-						 ${ABEXT} }}}
+						 ${ABEXT} ${ABTOOLS}}}}
 
 ALLSCANBUILD=${subst .splint,.sb, ${ALLSPLINT}}
 

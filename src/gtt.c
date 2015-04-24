@@ -71,6 +71,7 @@
 #include "extended/hmm.h"
 #include "extended/huffcode.h"
 #include "extended/intset.h"
+#include "extended/kmer_database.h"
 #include "extended/luaserialize.h"
 #include "extended/n_r_encseq.h"
 #include "extended/popcount_tab.h"
@@ -333,6 +334,7 @@ GtHashmap* gtt_unit_tests(void)
   gt_hashmap_add(unit_tests, "huffman coding class", gt_huffman_unit_test);
   gt_hashmap_add(unit_tests, "interval tree class", gt_interval_tree_unit_test);
   gt_hashmap_add(unit_tests, "intset classes", gt_intset_unit_test);
+  gt_hashmap_add(unit_tests, "kmer_database class", gt_kmer_database_unit_test);
   gt_hashmap_add(unit_tests, "Lua serializer module",
                                                    gt_lua_serializer_unit_test);
   gt_hashmap_add(unit_tests, "mathsupport module", gt_mathsupport_unit_test);
