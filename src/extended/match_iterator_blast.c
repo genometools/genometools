@@ -260,7 +260,7 @@ GtMatchIterator* gt_match_iterator_blastalln_process_new(const char *query,
   if (threshold != GT_UNDEF_DOUBLE) {
     GT_UNUSED int ret;
     ret = snprintf(buffer, BUFSIZ, " -f %.3f", threshold);
-    gt_assert(ret < BUFSIZ);
+    gt_assert((size_t) ret < BUFSIZ);
     gt_blast_process_call_set_opt(call, buffer);
   }
   if (num_threads != GT_UNDEF_INT)
@@ -334,7 +334,7 @@ GtMatchIterator* gt_match_iterator_blastn_process_new(const char *query,
   if (perc_identity != GT_UNDEF_DOUBLE) {
     GT_UNUSED int ret;
     ret = snprintf(buffer, BUFSIZ, " -perc_identity %.2f", perc_identity);
-    gt_assert(ret < BUFSIZ);
+    gt_assert((size_t) ret < BUFSIZ);
     gt_blast_process_call_set_opt(call, buffer);
   }
   if (num_threads != GT_UNDEF_INT)
@@ -344,7 +344,7 @@ GtMatchIterator* gt_match_iterator_blastn_process_new(const char *query,
   if (moreblast != NULL) {
     GT_UNUSED int ret;
     ret = snprintf(buffer, BUFSIZ, " %s", moreblast);
-    gt_assert(ret < BUFSIZ);
+    gt_assert((size_t) ret < BUFSIZ);
     gt_blast_process_call_set_opt(call, buffer);
   }
   return gt_match_iterator_blast_process_new(call, err);
