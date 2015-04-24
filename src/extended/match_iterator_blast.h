@@ -18,8 +18,9 @@
 #ifndef MATCH_ITERATOR_BLAST_H
 #define MATCH_ITERATOR_BLAST_H
 
-#include "extended/match_iterator_api.h"
+#include "core/deprecated_api.h"
 #include "extended/blast_process_call.h"
+#include "extended/match_iterator_api.h"
 
 typedef struct GtMatchIteratorBlast GtMatchIteratorBlast;
 
@@ -34,6 +35,7 @@ GtMatchIterator *gt_match_iterator_blast_process_new(GtBlastProcessCall *call,
                                                      GtError *err);
 
 /* DEPRECATED, use gt_match_iterator_process_new instead. */
+GT_DEPRECATED("use gt_match_iterator_process_new instead")
 GtMatchIterator* gt_match_iterator_blastalln_process_new(const char *query,
                                                          const char *db_name,
                                                          double evalue,
@@ -49,6 +51,7 @@ GtMatchIterator* gt_match_iterator_blastalln_process_new(const char *query,
                                                          GtError *err);
 
 /* DEPRECATED, use gt_match_iterator_process_new instead. */
+GT_DEPRECATED("use gt_match_iterator_process_new instead")
 GtMatchIterator* gt_match_iterator_blastallp_process_new(const char *query,
                                                          const char *db_name,
                                                          double evalue,
@@ -59,6 +62,7 @@ GtMatchIterator* gt_match_iterator_blastallp_process_new(const char *query,
                                                          GtError *err);
 
 /* DEPRECATED, use gt_match_iterator_process_new instead. */
+GT_DEPRECATED("use gt_match_iterator_process_new instead")
 GtMatchIterator* gt_match_iterator_blastn_process_new(const char *query,
                                                       const char *db_name,
                                                       double evalue,
@@ -75,6 +79,7 @@ GtMatchIterator* gt_match_iterator_blastn_process_new(const char *query,
                                                       GtError *err);
 
 /* DEPRECATED, use gt_match_iterator_process_new instead. */
+GT_DEPRECATED("use gt_match_iterator_process_new instead")
 GtMatchIterator* gt_match_iterator_blastp_process_new(const char *query,
                                                       const char *db_name,
                                                       double evalue,

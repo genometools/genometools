@@ -188,6 +188,7 @@ static int gt_matchtool_runner(GT_UNUSED int argc,
   GtMatchtoolArguments *arguments = tool_arguments;
   GtMatchIterator *mp = NULL;
   GtMatch *match = NULL;
+  GtBlastProcessCall *blast_call = NULL;
 
   int status, had_err = 0;
 
@@ -204,39 +205,31 @@ static int gt_matchtool_runner(GT_UNUSED int argc,
     if (!mp)
       had_err = -1;
   } else if (strcmp(gt_str_get(arguments->type), "BLASTALLP") == 0) {
-    mp = gt_match_iterator_blastallp_process_new(gt_str_get(arguments->query),
-                                          gt_str_get(arguments->db),
-                                          GT_UNDEF_DOUBLE, GT_UNDEF_INT,
-                                          GT_UNDEF_INT, GT_UNDEF_INT,
-                                          GT_UNDEF_INT, err);
+    blast_call = gt_blast_process_call_new_all_prot();
+    gt_blast_process_call_set_query(blast_call, gt_str_get(arguments->query));
+    gt_blast_process_call_set_db(blast_call, gt_str_get(arguments->db));
+    mp = gt_match_iterator_blast_process_new(blast_call, err);
     if (!mp)
       had_err = -1;
   } else if (strcmp(gt_str_get(arguments->type), "BLASTALLN") == 0) {
-    mp = gt_match_iterator_blastalln_process_new(gt_str_get(arguments->query),
-                                          gt_str_get(arguments->db),
-                                          GT_UNDEF_DOUBLE, false, GT_UNDEF_INT,
-                                          GT_UNDEF_INT, GT_UNDEF_INT,
-                                          GT_UNDEF_INT, GT_UNDEF_INT,
-                                          GT_UNDEF_DOUBLE, GT_UNDEF_INT,
-                                          GT_UNDEF_INT, err);
+    blast_call = gt_blast_process_call_new_all_nucl();
+    gt_blast_process_call_set_query(blast_call, gt_str_get(arguments->query));
+    gt_blast_process_call_set_db(blast_call, gt_str_get(arguments->db));
+    mp = gt_match_iterator_blast_process_new(blast_call, err);
     if (!mp)
       had_err = -1;
   } else if (strcmp(gt_str_get(arguments->type), "BLASTP") == 0) {
-    mp = gt_match_iterator_blastp_process_new(gt_str_get(arguments->query),
-                                       gt_str_get(arguments->db),
-                                       GT_UNDEF_DOUBLE, GT_UNDEF_INT,
-                                       GT_UNDEF_INT, GT_UNDEF_INT,
-                                       GT_UNDEF_INT, GT_UNDEF_DOUBLE, err);
+    blast_call = gt_blast_process_call_new_all_prot();
+    gt_blast_process_call_set_query(blast_call, gt_str_get(arguments->query));
+    gt_blast_process_call_set_db(blast_call, gt_str_get(arguments->db));
+    mp = gt_match_iterator_blast_process_new(blast_call, err);
     if (!mp)
       had_err = -1;
   } else if (strcmp(gt_str_get(arguments->type), "BLASTN") == 0) {
-    mp = gt_match_iterator_blastn_process_new(gt_str_get(arguments->query),
-                                       gt_str_get(arguments->db),
-                                       GT_UNDEF_DOUBLE, false, GT_UNDEF_INT,
-                                       GT_UNDEF_INT, GT_UNDEF_INT,
-                                       GT_UNDEF_INT, GT_UNDEF_INT,
-                                       GT_UNDEF_DOUBLE, GT_UNDEF_INT,
-                                       GT_UNDEF_DOUBLE, NULL, err);
+    blast_call = gt_blast_process_call_new_all_prot();
+    gt_blast_process_call_set_query(blast_call, gt_str_get(arguments->query));
+    gt_blast_process_call_set_db(blast_call, gt_str_get(arguments->db));
+    mp =  gt_match_iterator_blast_process_new(blast_call, err);
     if (!mp)
       had_err = -1;
   } else if (strcmp(gt_str_get(arguments->type), "SW") == 0) {
