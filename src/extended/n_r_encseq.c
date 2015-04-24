@@ -1954,6 +1954,7 @@ static void gt_n_r_encseq_process_link_print(const GtNREncseq *nre,
   GtUword offset = 0,
           len = printstate->link.len,
           i;
+  GT_UNUSED GtUword ret_len;
   GtAlphabet *alph = nre->alphabet;
   char *offset_buff;
   /*set offset if first element*/
@@ -1969,20 +1970,24 @@ static void gt_n_r_encseq_process_link_print(const GtNREncseq *nre,
     len = printstate->extraction_range->end - offset -
       printstate->link.orig_startpos + 1;
   }
+  /* we need +1 len for gt_alphabet_decode_seq_to_cstr() */
   if (len + offset >= printstate->buffsize) {
     gt_safe_assign(printstate->buffsize, len + offset + 1);
     printstate->buffer = gt_realloc(printstate->buffer,
                           sizeof (*printstate->buffer) * printstate->buffsize);
   }
-  (void) gt_editscript_get_sequence(
-                           printstate->link.editscript,
-                           nre->unique_es,
-                           gt_encseq_seqstartpos(nre->unique_es,
-                                                 printstate->link.unique_id) +
-                             printstate->link.unique_offset,
-                           GT_READMODE_FORWARD,
+  ret_len = gt_editscript_get_sequence(
+                             printstate->link.editscript,
+                             nre->unique_es,
+                             gt_encseq_seqstartpos(nre->unique_es,
+                                                   printstate->link.unique_id) +
+                               printstate->link.unique_offset,
+                             GT_READMODE_FORWARD,
                              (GtUchar **) &printstate->buffer,
                              &printstate->buffsize);
+  gt_assert(ret_len == printstate->link.len);
+  gt_assert(ret_len < printstate->buffsize);
+  gt_assert(len + offset < printstate->buffsize);
   gt_alphabet_decode_seq_to_cstr(alph,
                                  printstate->buffer,
                                  (GtUchar *) printstate->buffer,
