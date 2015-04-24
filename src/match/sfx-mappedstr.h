@@ -47,9 +47,7 @@ void                gt_kmercodeiterator_reset(
                                          GtKmercodeiterator *kmercodeiterator,
                                          GtReadmode readmode, GtUword startpos);
 
-/* Returns the next kmer in encseq. Returns NULL if end of sequence reached.
-   First call does not advance the position but returns first kmer. Consequtive
-   calls will advance position in sequence. */
+/* Returns the next kmer in encseq. Returns NULL if end of sequence reached. */
 const GtKmercode*   gt_kmercodeiterator_encseq_next(
                                           GtKmercodeiterator *kmercodeiterator);
 
