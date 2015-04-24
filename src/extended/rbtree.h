@@ -31,27 +31,40 @@ typedef enum
   GT_RBTREE_LEAF
 } GtRBTreeContext;
 
+/* The <GtRBTree> class. Fast logarithmic data structure. This implementation
+   does not allow storage of duplicates. */
 typedef struct GtRBTree GtRBTree;
 typedef struct GtRBTreeIter GtRBTreeIter;
 
 typedef int   (*GtRBTreeAction)(void *key, GtRBTreeContext, GtUword, void*);
 typedef void  (*GtRBTreeFreeFunc)(void *p);
 
+/* Returns a new <GtRBTree> object. <free> might be NULL and will be used
+   to free key-object otherwise. <info> is the data for the <cmp>-function. */
 GtRBTree*      gt_rbtree_new(GtCompareWithData cmp, GtRBTreeFreeFunc free,
                              void *info);
 void           gt_rbtree_delete(GtRBTree *tree);
+/* Deletes all tree elements */
 void           gt_rbtree_clear(GtRBTree *tree);
+
+/* Returns <key> if element was found in <tree> and NULL if not */
 void*          gt_rbtree_find(GtRBTree *tree, void *key);
 void*          gt_rbtree_find_with_cmp(GtRBTree *tree, void *key,
                                        GtCompareWithData cmpfunc, void *info);
-int            gt_rbtree_insert(GtRBTree *tree, void *key);
-int            gt_rbtree_insert_with_cmp(GtRBTree *tree, void *key,
+/* inserts <key> into <tree>. If <key> is already present in <tree>, it will not
+   be changed. */
+void           gt_rbtree_insert(GtRBTree *tree, void *key);
+void           gt_rbtree_insert_with_cmp(GtRBTree *tree, void *key,
                                          GtCompareWithData cmpfunc,
                                          void *info);
+/* Returns <key>, if <key> is not present in <tree>
+   it will be inserted and <nodecreated> set accordingly */
 void*          gt_rbtree_search(GtRBTree *tree, void *key, bool *nodecreated);
 void*          gt_rbtree_search_with_cmp(GtRBTree *tree, void *key,
                                          GtCompareWithData cmpfunc,
                                          void *info, bool *nodecreated);
+/* Remove <key> from <tree>, returns -1 if no such key exists and 0 on success
+*/
 int            gt_rbtree_erase(GtRBTree *tree, void *key);
 size_t         gt_rbtree_size(GtRBTree *tree);
 int            gt_rbtree_walk(GtRBTree *tree, GtRBTreeAction action,
@@ -79,8 +92,17 @@ int            gt_rbtree_unit_test(GtError *err);
 
 GtRBTreeIter*  gt_rbtree_iter_new_from_first(GtRBTree *tree);
 GtRBTreeIter*  gt_rbtree_iter_new_from_last(GtRBTree *tree);
+/* Resets the iterator to the first (smallest) element */
+void           gt_rbtree_iter_reset_from_first(GtRBTreeIter *trav);
+/* Resets the iterator to the last (largest) element */
+void           gt_rbtree_iter_reset_from_last(GtRBTreeIter *trav);
+/* Return next (larger) key */
 void*          gt_rbtree_iter_next(GtRBTreeIter *trav);
+/* Return previous (smaller) key */
 void*          gt_rbtree_iter_prev(GtRBTreeIter *trav);
+/* Returns data of the current leaf the iterator <trav> is positioned on. */
+void*          gt_rbtree_iter_data (GtRBTreeIter *trav);
+/* free all memory of <trav> */
 void           gt_rbtree_iter_delete(GtRBTreeIter *trav);
 
 #endif
