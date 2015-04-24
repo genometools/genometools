@@ -52,6 +52,8 @@ GtWord       gt_round_to_long(double x);
 unsigned int gt_gcd_uint(unsigned int m, unsigned int n);
 /* Compute the least common multiplier of two unsigned integers */
 unsigned int gt_lcm_uint(unsigned int m, unsigned int n);
+/* Compute the logarith of <x> to the base <b> */
+double       gt_log_base(double x, double b);
 
 int          gt_mathsupport_unit_test(GtError *err);
 
