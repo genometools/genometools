@@ -1981,7 +1981,8 @@ static void gt_n_r_encseq_process_link_print(const GtNREncseq *nre,
                                                  printstate->link.unique_id) +
                              printstate->link.unique_offset,
                            GT_READMODE_FORWARD,
-                           (GtUchar *)printstate->buffer);
+                             (GtUchar **) &printstate->buffer,
+                             &printstate->buffsize);
   gt_alphabet_decode_seq_to_cstr(alph,
                                  printstate->buffer,
                                  (GtUchar *) printstate->buffer,
