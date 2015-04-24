@@ -436,8 +436,8 @@ void gt_evalxdroparbitscoresextend(bool forward,
   }
 }
 
-GtMultieoplist * gt_xdrop_backtrack(GtXdropresources *res,
-                                    GtXdropbest *best)
+GtMultieoplist * gt_xdrop_backtrack(const GtXdropresources *res,
+                                    const GtXdropbest *best)
 {
   GtMultieoplist *meops = gt_multieoplist_new();
   GtUword idx, i;
@@ -446,7 +446,7 @@ GtMultieoplist * gt_xdrop_backtrack(GtXdropresources *res,
        old_row = (GtWord) best->ivalue;
   GtXdropfrontvalue *fronts = res->fronts.spaceGtXdropfrontvalue,
                     currfront;
-  gt_assert(best->ivalue && best->jvalue);
+  gt_assert(best->ivalue != 0 && best->jvalue != 0);
 
   idx = GT_XDROP_FRONTIDX(d, k);
   currfront = fronts[idx];

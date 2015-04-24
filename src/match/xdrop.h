@@ -78,7 +78,8 @@ void              gt_xdrop_resources_delete(GtXdropresources *);
 
 /* Creates a <GtMultieoplist> by backtrack algorythm. The <GtMultieoplist> is in
    reverse orientation to the alignment! */
-GtMultieoplist*   gt_xdrop_backtrack(GtXdropresources *res, GtXdropbest *best);
+GtMultieoplist*   gt_xdrop_backtrack(const GtXdropresources *res,
+                                     const GtXdropbest *best);
 
 int               gt_xdrop_unit_test(GtError *err);
 
