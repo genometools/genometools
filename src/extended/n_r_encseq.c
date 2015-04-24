@@ -84,7 +84,7 @@ struct GtNREncseq {
 static inline
 GtUword gt_n_r_encseq_ssp_pos2seqnum(const GtNREncseq *nre, GtUword pos)
 {
-  GtUword ret = gt_intset_get_idx_smaller_geq(nre->ssptab, pos);
+  GtUword ret = gt_intset_get_idx_smallest_geq(nre->ssptab, pos);
   return ret;
 }
 

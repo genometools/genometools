@@ -88,6 +88,8 @@ GtIntset* gt_intset_<%=bits%>_new(GtUword maxelement, GtUword num_of_elems)
   GtIntsetMembers *members;
   GtUword idx;
 
+  gt_assert(num_of_elems != 0);
+
   intset = gt_intset_create(gt_intset_<%=bits%>_class());
   intset_<%=bits%> = gt_intset_<%=bits%>_cast(intset);
   members = intset->members;

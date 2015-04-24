@@ -83,7 +83,7 @@ bool gt_intset_is_member(GtIntset *intset, GtUword elem)
   return false;
 }
 
-GtUword gt_intset_get_idx_smaller_geq(GtIntset *intset, GtUword pos)
+GtUword gt_intset_get_idx_smallest_geq(GtIntset *intset, GtUword pos)
 {
   gt_assert(intset != NULL);
   gt_assert(intset->c_class != NULL);
@@ -183,7 +183,7 @@ int gt_intset_unit_test_check_seqnum(GtIntset *intset, GtUword start,
   int had_err = 0;
   GtUword test;
   for (test = start; test <= end; ++test) {
-    gt_ensure(gt_intset_get_idx_smaller_geq(intset, test) == num);
+    gt_ensure(gt_intset_get_idx_smallest_geq(intset, test) == num);
   }
   return had_err;
 }

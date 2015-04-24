@@ -100,7 +100,7 @@ int gt_intset_unit_test_notinset(GtIntset *intset, GtUword start,
                                  GtUword end, GtError *err);
 
 /* Function for unit tests within implementations of this class. Fails if
-   <gt_intset_get_idx_smaller_geq()> called with any number between and
+   <gt_intset_get_idx_smallest_geq()> called with any number between and
    including <start> and <end> returns any number different than <num>. */
 int gt_intset_unit_test_check_seqnum(GtIntset *intset, GtUword start,
                                      GtUword end, GtUword num, GtError *err);
