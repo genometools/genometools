@@ -51,8 +51,8 @@
 #include "core/splitter.h"
 #include "core/symbol.h"
 #include "core/tokenizer.h"
-#include "core/translator.h"
 #include "core/trans_table.h"
+#include "core/translator.h"
 #include "extended/alignment.h"
 #include "extended/anno_db_gfflike_api.h"
 #include "extended/compressed_bitsequence.h"
@@ -71,7 +71,9 @@
 #include "extended/hmm.h"
 #include "extended/huffcode.h"
 #include "extended/intset.h"
+#include "extended/kmer_database.h"
 #include "extended/luaserialize.h"
+#include "extended/multieoplist.h"
 #include "extended/n_r_encseq.h"
 #include "extended/popcount_tab.h"
 #include "extended/priority_queue.h"
@@ -97,7 +99,7 @@
 #include "tools/gt_clean.h"
 #include "tools/gt_compreads.h"
 #include "tools/gt_compressedbits.h"
-#include "tools/gt_condenser.h"
+#include "tools/gt_condenseq.h"
 #include "tools/gt_congruence.h"
 #include "tools/gt_convertseq.h"
 #include "tools/gt_csa.h"
@@ -119,8 +121,8 @@
 #include "tools/gt_gtf_to_gff3.h"
 #include "tools/gt_hop.h"
 #include "tools/gt_id_to_md5.h"
-#include "tools/gt_inlineseq_split.h"
 #include "tools/gt_inlineseq_add.h"
+#include "tools/gt_inlineseq_split.h"
 #include "tools/gt_interfeat.h"
 #include "tools/gt_loccheck.h"
 #include "tools/gt_matchtool.h"
@@ -195,7 +197,7 @@ GtToolbox* gtt_tools(void)
   gt_toolbox_add_tool(tools, "chseqids", gt_chseqids());
   gt_toolbox_add_tool(tools, "clean", gt_clean());
   gt_toolbox_add_tool(tools, "compreads", gt_compreads());
-  gt_toolbox_add_tool(tools, "condenser", gt_condenser());
+  gt_toolbox_add_tool(tools, "condenseq", gt_condenseq());
   gt_toolbox_add_tool(tools, "congruence", gt_congruence());
   gt_toolbox_add_tool(tools, "convertseq", gt_convertseq());
   gt_toolbox_add_tool(tools, "csa", gt_csa());
@@ -333,10 +335,12 @@ GtHashmap* gtt_unit_tests(void)
   gt_hashmap_add(unit_tests, "huffman coding class", gt_huffman_unit_test);
   gt_hashmap_add(unit_tests, "interval tree class", gt_interval_tree_unit_test);
   gt_hashmap_add(unit_tests, "intset classes", gt_intset_unit_test);
+  gt_hashmap_add(unit_tests, "kmer_database class", gt_kmer_database_unit_test);
   gt_hashmap_add(unit_tests, "Lua serializer module",
                                                    gt_lua_serializer_unit_test);
   gt_hashmap_add(unit_tests, "mathsupport module", gt_mathsupport_unit_test);
   gt_hashmap_add(unit_tests, "memory allocator module", gt_ma_unit_test);
+  gt_hashmap_add(unit_tests, "multieoplist", gt_multieoplist_unit_test);
   gt_hashmap_add(unit_tests, "MD5 seqid module", gt_md5_seqid_unit_test);
   gt_hashmap_add(unit_tests, "n_r_encseq", gt_n_r_encseq_unit_test);
   gt_hashmap_add(unit_tests, "rdj: suffix-prefix matches list module",

@@ -128,18 +128,20 @@ end
 Name "gt extractfeat -regionmapping test 1 (mapping table)"
 Keywords "gt_extractfeat"
 Test do
+  FileUtils.copy "#{$testdata}gt_extractfeat_succ_1.gff3", "."
   run "env GT_TESTDATA=#{$testdata} #{$memcheck} #{$bin}gt extractfeat " \
     "-type gene -regionmapping #{$testdata}regionmapping_4.lua " \
-    "#{$testdata}gt_extractfeat_succ_1.gff3"
+    "gt_extractfeat_succ_1.gff3"
   run "diff #{last_stdout} #{$testdata}gt_extractfeat_succ_1.out"
 end
 
 Name "gt extractfeat -regionmapping test 1 (mapping function)"
 Keywords "gt_extractfeat"
 Test do
+  FileUtils.copy "#{$testdata}gt_extractfeat_succ_1.gff3", "."
   run "env GT_TESTDATA=#{$testdata} #{$memcheck} #{$bin}gt extractfeat " \
     "-type gene -regionmapping #{$testdata}regionmapping_6.lua " \
-    "#{$testdata}gt_extractfeat_succ_1.gff3"
+    "gt_extractfeat_succ_1.gff3"
 end
 
 Name "gt extractfeat error message"

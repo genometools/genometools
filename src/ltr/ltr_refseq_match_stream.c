@@ -269,20 +269,43 @@ static int gt_ltr_refseq_match_stream_refseq_match(GtLTRRefseqMatchStream *rms,
                     rms->refseq_file);
   had_err = system(makeblastdb_call);
   if (!had_err) {
-    mi = gt_match_iterator_blastn_process_new(rms->seq_file,
-                                              rms->refseq_file,
-                                              rms->evalue,
-                                              rms->dust,
-                                              rms->word_size,
-                                              rms->gapopen,
-                                              rms->gapextend,
-                                              rms->penalty,
-                                              rms->reward,
-                                              rms->identity,
-                                              rms->num_threads,
-                                              rms->xdrop,
-                                              rms->moreblast,
-                                              err);
+    GtBlastProcessCall *call = gt_blast_process_call_new_all_prot();
+    char buffer[BUFSIZ];
+
+    gt_blast_process_call_set_query(call, rms->seq_file);
+    gt_blast_process_call_set_db(call, rms->refseq_file);
+    if (rms->evalue != GT_UNDEF_DOUBLE)
+      gt_blast_process_call_set_evalue(call, rms->evalue);
+    if (rms->dust)
+      gt_blast_process_call_set_opt(call, " -dust yes");
+    if (rms->word_size != GT_UNDEF_INT)
+      gt_blast_process_call_set_wordsize(call, rms->word_size);
+    if (rms->gapopen != GT_UNDEF_INT)
+      gt_blast_process_call_set_gapopen(call, rms->gapopen);
+    if (rms->gapextend != GT_UNDEF_INT)
+      gt_blast_process_call_set_gapextend(call, rms->gapextend);
+    if (rms->penalty != GT_UNDEF_INT)
+      gt_blast_process_call_set_penalty(call, rms->penalty);
+    if (rms->reward != GT_UNDEF_INT)
+      gt_blast_process_call_set_reward(call, rms->reward);
+    if (rms->identity != GT_UNDEF_DOUBLE) {
+      GT_UNUSED int ret;
+      ret = snprintf(buffer,
+                     BUFSIZ, " -perc_identity %.2f", rms->identity);
+      gt_assert((size_t) ret < BUFSIZ);
+      gt_blast_process_call_set_opt(call, buffer);
+    }
+    if (rms->num_threads != GT_UNDEF_INT)
+      gt_blast_process_call_set_num_threads(call, rms->num_threads);
+    if (rms->xdrop != GT_UNDEF_DOUBLE)
+      gt_blast_process_call_set_xdrop_gap_final(call, rms->xdrop);
+    if (rms->moreblast != NULL) {
+      GT_UNUSED int ret;
+      ret = snprintf(buffer, BUFSIZ, " %s", rms->moreblast);
+      gt_assert((size_t) ret < BUFSIZ);
+      gt_blast_process_call_set_opt(call, buffer);
+    }
+    mi = gt_match_iterator_blast_process_new(call, err);
     if (mi != NULL) {
       if ((status = gt_match_iterator_next(mi, &match, err))
            != GT_MATCHER_STATUS_OK) {

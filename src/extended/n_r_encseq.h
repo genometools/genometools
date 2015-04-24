@@ -54,9 +54,9 @@ void        gt_n_r_encseq_print_info(const GtNREncseq *n_r_encseq);
    seperators (like <GtEncseq>). */
 GtUword     gt_n_r_encseq_get_orig_length(GtNREncseq *n_r_encseq);
 
-/* Return the length of unique db, that is the length of non-redundand sequences
+/* Return the length of unique db, that is the length of non-redundant sequences
    stored concatenated with seperators, representing the reference for all
-   redundand sequences. */
+   redundant sequences. */
 GtUword     gt_n_r_encseq_get_unique_length(GtNREncseq *n_r_encseq);
 
 /* Free space for <n_r_encseq> */

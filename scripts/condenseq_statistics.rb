@@ -65,8 +65,8 @@ class Hit
   end
 
   def to_s
-    "#@qseqid #@sseqid #@pident #@length #@qstart #@qend #@sstart #@ssend" +
-      " #@evalue #@bitscore"
+    "#@qseqid\t#@sseqid\t#@pident\t#@length\t#@qstart\t#@qend\t#@sstart\t#@send" \
+      "\t#@evalue\t#@bitscore"
   end
 
   def overlapping?(other)

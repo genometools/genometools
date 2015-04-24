@@ -97,7 +97,7 @@ GtMultieoplist* gt_multieoplist_clone(GtMultieoplist *copy,
 GtUword         gt_multieoplist_get_num_entries(GtMultieoplist *multieops);
 
 /* Returns <GtMultieop> number <index>. */
-GtMultieop      gt_multieoplist_get_entry(GtMultieoplist *multieops,
+GtMultieop      gt_multieoplist_get_entry(const GtMultieoplist *multieops,
                                           GtUword index);
 
 /* Returns sum of <Replacement>, <Match>, <Mismatch> and <Deletion> including
@@ -119,22 +119,22 @@ GtUword         gt_multieoplist_get_length(GtMultieoplist *multieops);
    Assumes reverse ordered <GtMultieoplist>. */
 void            gt_multieoplist_show(GtMultieoplist *multieops, FILE *fp);
 
-/* combine two <GtMultieoplist>s. Adds <multieops_to_add> to the end of
-   <multieops> (which is usualy the start of the alignment). <forward> defines
-   if <multieops_to_add> should be read in forward or reverse direction.
-   If <multieops_to_add> and <multieops> are from consequtive alignments:
+/* Returns the combination of two <GtMultieoplist>s. Adds <multieops_to_add> to
+   the end of <multieops> (which is usualy the start of the alignment).
+   <forward> defines if <multieops_to_add> should be read in forward or reverse
+   direction.  If <multieops_to_add> and <multieops> are from consequtive
+   alignments:
    [...<-...][...<-...] or [...->...][...->...]
    use true
    if they ar from alignments with the same startpoint:
    [...->...][...<-...]
    use false
-   and add the one that is at the end of the other.
    if the layout is like this:
    [...<-...][...->...]
    none of them can be added to the end of the other without reversing one
    beforehand. */
 void            gt_multieoplist_combine(GtMultieoplist *multieops,
-                                        GtMultieoplist *multieops_to_add,
+                                        const GtMultieoplist *multieops_to_add,
                                         bool forward);
 
 /* Read or write to/from File, depending on <multieops>. If <NULL>, it allocates
@@ -142,7 +142,8 @@ void            gt_multieoplist_combine(GtMultieoplist *multieops,
    If not <NULL> it writs the content of <multieops> to <fp>.
    Returns <NULL> on error, in which case <multieops> will be deleted and <err>
    will be set. */
-GtMultieoplist* gt_meoplist_io(GtMultieoplist *multieops, FILE *fp,
-                               GtError *err);
+GtMultieoplist* gt_multieoplist_io(GtMultieoplist *multieops, FILE *fp,
+                                   GtError *err);
 
+int             gt_multieoplist_unit_test(GtError *err);
 #endif

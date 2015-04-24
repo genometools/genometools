@@ -58,9 +58,8 @@ bool      gt_intset_is_member(GtIntset *intset, GtUword elem);
    larger than or equal <pos> or <num_of_elems> if there is no such <element>.
    This can be used for sets representing the separator positions in a set of
    sequences, to determine the sequence number corresponding to any position in
-   the concatenated string of the sequence set.
-   Fails for <pos> > <maxelement>! */
-GtUword   gt_intset_get_idx_smaller_geq(GtIntset *intset, GtUword pos);
+   the concatenated string of the sequence set. */
+GtUword   gt_intset_get_idx_smallest_geq(GtIntset *intset, GtUword pos);
 
 /* Returns the size in bytes of the <GtIntset>-structure. */
 size_t    gt_intset_size_of_struct(GtIntset *intset);

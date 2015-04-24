@@ -92,7 +92,8 @@ struct GtRBTreeIter
 
 static inline GtRBTreeNode *gt_rbtree_single(GtRBTreeNode *root, int dir)
 {
-  GtRBTreeNode *save = root->link[(int) !dir];
+  GtRBTreeNode *save;
+  save = root->link[(int) !dir];
   root->link[(int) !dir] = save->link[dir];
   save->link[dir] = root;
 
@@ -112,9 +113,6 @@ static GtRBTreeNode *gt_rbtree_new_node(void *key)
 {
   GtRBTreeNode *rn = (GtRBTreeNode *) gt_malloc(sizeof *rn);
 
-  if (rn == NULL)
-    return NULL;
-
   rn->red = 1;
   rn->key = key;
   rn->link[0] = rn->link[1] = NULL;
@@ -127,9 +125,6 @@ GtRBTree *gt_rbtree_new(GtCompareWithData cmp, GtRBTreeFreeFunc free,
 {
   GtRBTree *rt = (GtRBTree *) gt_malloc(sizeof *rt);
   gt_assert(cmp);
-
-  if (rt == NULL)
-    return NULL;
 
   rt->root = NULL;
   rt->cmp = cmp;
@@ -189,8 +184,6 @@ static inline void *gt_rbtree_find_with_cmp_g(GtRBTree *tree, void *key,
     if (cmp == 0)
       break;
 
-    /* If the tree supports duplicates, they should be
-       chained to the right subtree for this to work */
     it = it->link[(int) (cmp < 0)];
   }
 
@@ -213,10 +206,10 @@ void *gt_rbtree_find(GtRBTree *tree, void *key)
   return gt_rbtree_find_with_cmp_g(tree, key, tree->cmp, tree->info);
 }
 
-static inline int gt_rbtree_insert_g(GtRBTree *tree, void *key,
-                                     bool *nodecreated,
-                                     GtCompareWithData cmpfunc,
-                                     void *info)
+static inline void gt_rbtree_insert_g(GtRBTree *tree, void *key,
+                                      bool *nodecreated,
+                                      GtCompareWithData cmpfunc,
+                                      void *info)
 {
   *nodecreated = false;
   if (tree->root == NULL) {
@@ -224,8 +217,6 @@ static inline int gt_rbtree_insert_g(GtRBTree *tree, void *key,
     tree->root = gt_rbtree_new_node(key);
     *nodecreated = true;
 
-    if (tree->root == NULL)
-      return -1;
   } else {
     GtRBTreeNode head = {0,0,{NULL, NULL}}; /* False tree root */
     GtRBTreeNode *g, *t;     /* Grandparent & parent */
@@ -238,15 +229,14 @@ static inline int gt_rbtree_insert_g(GtRBTree *tree, void *key,
     q = t->link[1] = tree->root;
 
     /* Search down the tree for a place to insert */
-    for (;;) {
+    while (true) {
+      int cmp;
       if (q == NULL) {
         /* Insert a new node at the first null link */
         gt_assert(p != NULL);
         p->link[dir] = q = gt_rbtree_new_node(key);
         *nodecreated = true;
 
-        if (q == NULL)
-          return -1;
       } else if (GT_RBTREE_NODE_IS_RED(q->link[0] )
                  && GT_RBTREE_NODE_IS_RED(q->link[1])) {
         /* Simple red violation: color flip */
@@ -265,15 +255,15 @@ static inline int gt_rbtree_insert_g(GtRBTree *tree, void *key,
           t->link[dir2] = gt_rbtree_double(g, (int) !last);
       }
 
-      /*
-        Stop working if we inserted a node. This
-        check also disallows duplicates in the tree
-      */
-      if (cmpfunc(q->key, key, info) == 0)
+      cmp = cmpfunc(q->key, key, info);
+
+      /* Stop working if we inserted a node. This check also disallows
+         duplicates in the tree */
+      if (cmp == 0)
         break;
 
       last = dir;
-      dir = (int) (cmpfunc(q->key, key, info) < 0);
+      dir = (int) (cmp < 0);
 
       /* Move the helpers down */
       if (g != NULL)
@@ -290,27 +280,26 @@ static inline int gt_rbtree_insert_g(GtRBTree *tree, void *key,
 
   /* Make the root black for simplified logic */
   tree->root->red = 0;
-  ++tree->size;
-
-  return 0;
+  if (*nodecreated)
+    ++tree->size;
 }
 
-int gt_rbtree_insert(GtRBTree *tree, void *key)
+void gt_rbtree_insert(GtRBTree *tree, void *key)
 {
   GT_UNUSED bool nodecreated;
   gt_assert(tree);
   gt_assert(key);
-  return gt_rbtree_insert_g(tree, key, &nodecreated, tree->cmp, tree->info);
+  gt_rbtree_insert_g(tree, key, &nodecreated, tree->cmp, tree->info);
 }
 
-int gt_rbtree_insert_with_cmp(GtRBTree *tree, void *key,
-                              GtCompareWithData cmpfunc, void *info)
+void gt_rbtree_insert_with_cmp(GtRBTree *tree, void *key,
+                               GtCompareWithData cmpfunc, void *info)
 {
   GT_UNUSED bool nodecreated;
   gt_assert(tree);
   gt_assert(key);
   gt_assert(cmpfunc);
-  return gt_rbtree_insert_g(tree, key, &nodecreated, cmpfunc, info);
+  gt_rbtree_insert_g(tree, key, &nodecreated, cmpfunc, info);
 }
 
 void* gt_rbtree_search(GtRBTree *tree, void *key, bool *nodecreated)
@@ -318,13 +307,8 @@ void* gt_rbtree_search(GtRBTree *tree, void *key, bool *nodecreated)
   gt_assert(tree);
   gt_assert(key);
   gt_assert(nodecreated);
-  return gt_rbtree_insert_g(tree,
-                            key,
-                            nodecreated,
-                            tree->cmp,
-                            tree->info) == 0
-    ? key
-    : NULL;
+  gt_rbtree_insert_g(tree, key, nodecreated, tree->cmp, tree->info);
+  return key;
 }
 
 void* gt_rbtree_search_with_cmp(GtRBTree *tree, void *key,
@@ -335,9 +319,8 @@ void* gt_rbtree_search_with_cmp(GtRBTree *tree, void *key,
   gt_assert(nodecreated);
   gt_assert(cmpfunc);
   gt_assert(key);
-  return gt_rbtree_insert_g(tree, key, nodecreated, cmpfunc, info) == 0
-    ? key
-    : NULL;
+  gt_rbtree_insert_g(tree, key, nodecreated, cmpfunc, info);
+  return key;
 }
 
 int gt_rbtree_erase(GtRBTree *tree, void *key)
@@ -806,6 +789,18 @@ GtRBTreeIter* gt_rbtree_iter_new_from_last(GtRBTree *tree)
   gt_assert(tree);
   (void) start(trav, tree, 1);
   return trav;
+}
+
+void gt_rbtree_iter_reset_from_first(GtRBTreeIter *trav)
+{
+  gt_assert(trav);
+  (void) start(trav, trav->tree, 0);
+}
+
+void gt_rbtree_iter_reset_from_last(GtRBTreeIter *trav)
+{
+  gt_assert(trav);
+  (void) start(trav, trav->tree, 1);
 }
 
 void *gt_rbtree_iter_next(GtRBTreeIter *trav)

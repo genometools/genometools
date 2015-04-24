@@ -26,6 +26,7 @@
 #include "core/intbits.h"
 #include "core/mathsupport.h"
 #include "core/yarandom.h" /* necessary to define random() correctly */
+#include "core/log_api.h"
 
 #define GT_DBL_MAX_ABS_ERROR 1.0E-100
 #define GT_DBL_MAX_REL_ERROR 1.0E-8
@@ -145,7 +146,7 @@ unsigned int gt_determinebitspervalue(GtUword maxvalue)
 }
 
 GtUword gt_power_for_small_exponents(unsigned int base,
-                                           unsigned int exponent)
+                                     unsigned int exponent)
 {
   unsigned int logvalue = 0;
 
@@ -240,6 +241,11 @@ unsigned int gt_lcm_uint(unsigned int m, unsigned int n)
   return (m * n)/gt_gcd_uint(m,n);
 }
 
+double gt_log_base(double x, double b)
+{
+  return log(x) / log(b);
+}
+
 /* Make some unit tests for this? */
 void gt_out_power_for_small_exponents(void)
 {
@@ -315,6 +321,8 @@ int gt_mathsupport_unit_test(GtError *err)
 
   for (i = 0; !had_err && i < GT_MAXLOG2VALUE; ++i) {
     gt_ensure(i+1 == gt_determinebitspervalue(1UL << i));
+    gt_ensure((GtWord) i == gt_round_to_long(
+               gt_log_base((double) (1UL << i), (double) 2.0)));
   }
   return had_err;
 }

@@ -109,7 +109,6 @@ const char*         gt_blast_process_call_get_call(GtBlastProcessCall *call);
    Asserts query and db options were set. */
 FILE*               gt_blast_process_call_run(GtBlastProcessCall *call,
                                               GtError *err);
-
 /* Free memory of <call>. */
 void                gt_blast_process_call_delete(GtBlastProcessCall *call);
 
