@@ -20,7 +20,9 @@
 #include <stdio.h>
 #include <string.h>
 #include <sys/types.h>
+#ifndef _WIN32
 #include <sys/wait.h>
+#endif
 
 #include "core/basename_api.h"
 #include "core/divmodmul.h"
@@ -252,11 +254,17 @@ static inline int gt_condenseq_blast_create_blastdb(const char *dbfile,
       had_err = -1;
       if (errno == ECHILD)
         gt_error_set(err, "Error calling makeblastdb.");
+#ifndef _WIN32
       else if (WEXITSTATUS(pipe_status) == 127)
         gt_error_set(err, "shell returned 127, makeblastdb not installed?");
       else
         gt_error_set(err, "makeblastdb error, returned %d",
                      WEXITSTATUS(pipe_status));
+#else
+      /* XXX */
+      else
+        gt_error_set(err, "not implemented on Windows");
+#endif
     }
   }
   return had_err;

@@ -21,7 +21,9 @@
 #include <stdio.h>
 #include <string.h>
 #include <sys/types.h>
+#ifndef _WIN32
 #include <sys/wait.h>
+#endif
 
 #include "core/cstr_array.h"
 #include "core/error.h"
