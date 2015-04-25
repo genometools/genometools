@@ -498,7 +498,7 @@ endif
 GT_CFLAGS_NO_WERROR:=$(GT_CFLAGS) -w
 
 ifneq ($(errorcheck),no)
-  GT_CFLAGS += -Werror -Wno-parentheses-equality
+  GT_CFLAGS += -Werror
 endif
 
 # set prefix for install target

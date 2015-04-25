@@ -962,7 +962,7 @@ static int ktablelen (lua_State *L, int idx) {
 ** 'p' keeps its original ktable.  If 'p' has no elements, it shares
 ** 'p1' ktable.  Otherwise, this function creates a new ktable for 'p'.
 ** Return the offset of original 'p' elements in the new ktable.
-*/ 
+*/
 static int jointable (lua_State *L, int p1) {
   int n, n1, i;
   lua_getfenv(L, p1);
@@ -1326,9 +1326,9 @@ static int pattern_l (lua_State *L) {
 }
 
 
-#define isany(p)	((p)->i.code == IAny && ((p) + 1)->i.code == IEnd)
-#define isfail(p)	((p)->i.code == IFail)
-#define issucc(p)	((p)->i.code == IEnd)
+#define isany(p)	(p)->i.code == IAny && ((p) + 1)->i.code == IEnd
+#define isfail(p)	(p)->i.code == IFail
+#define issucc(p)	(p)->i.code == IEnd
 
 static int concat_l (lua_State *L) {
   /* p1; p2; */
@@ -1841,13 +1841,13 @@ typedef struct CapState {
 } CapState;
 
 
-#define captype(cap)	((cap)->kind)
+#define captype(cap)	(cap)->kind
 
-#define isclosecap(cap)	(captype(cap) == Cclose)
+#define isclosecap(cap)	captype(cap) == Cclose
 
 #define closeaddr(c)	((c)->s + (c)->siz - 1)
 
-#define isfullcap(cap)	((cap)->siz != 0)
+#define isfullcap(cap)	(cap)->siz != 0
 
 #define getfromenv(cs,v)	lua_rawgeti((cs)->L, penvidx((cs)->ptop), v)
 #define pushluaval(cs)		getfromenv(cs, (cs)->cap->idx)

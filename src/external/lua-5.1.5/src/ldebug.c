@@ -184,7 +184,7 @@ static void collectvalidlines (lua_State *L, Closure *f) {
     int i;
     for (i=0; i<f->l.p->sizelineinfo; i++)
       setbvalue(luaH_setnum(L, t, lineinfo[i]), 1);
-    sethvalue(L, L->top, t); 
+    sethvalue(L, L->top, t);
   }
   incr_top(L);
 }
@@ -580,7 +580,7 @@ void luaG_typeerror (lua_State *L, const TValue *o, const char *op) {
 
 void luaG_concaterror (lua_State *L, StkId p1, StkId p2) {
   if (ttisstring(p1) || ttisnumber(p1)) p1 = p2;
-  lua_assert(!ttisstring(p1) && !ttisnumber(p1));
+  lua_assert(!(ttisstring(p1)) && !(ttisnumber(p1)));
   luaG_typeerror(L, p1, "concatenate");
 }
 
@@ -618,7 +618,7 @@ static void addinfo (lua_State *L, const char *msg) {
 void luaG_errormsg (lua_State *L) {
   if (L->errfunc != 0) {  /* is there an error handling function? */
     StkId errfunc = restorestack(L, L->errfunc);
-    if (!ttisfunction(errfunc)) luaD_throw(L, LUA_ERRERR);
+    if (!(ttisfunction(errfunc))) luaD_throw(L, LUA_ERRERR);
     setobjs2s(L, L->top, L->top - 1);  /* move argument */
     setobjs2s(L, L->top - 1, errfunc);  /* push function */
     incr_top(L);

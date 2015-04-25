@@ -245,7 +245,7 @@ static StkId tryfuncTM (lua_State *L, StkId func) {
   const TValue *tm = luaT_gettmbyobj(L, func, TM_CALL);
   StkId p;
   ptrdiff_t funcr = savestack(L, func);
-  if (!ttisfunction(tm))
+  if (!(ttisfunction(tm)))
     luaG_typeerror(L, func, "call");
   /* Open a hole inside the stack at `func' */
   for (p = L->top; p > func; p--) setobjs2s(L, p, p-1);
@@ -265,7 +265,7 @@ static StkId tryfuncTM (lua_State *L, StkId func) {
 int luaD_precall (lua_State *L, StkId func, int nresults) {
   LClosure *cl;
   ptrdiff_t funcr;
-  if (!ttisfunction(func)) /* `func' is not a function? */
+  if (!(ttisfunction(func))) /* `func' is not a function? */
     func = tryfuncTM(L, func);  /* check the `function' tag method */
   funcr = savestack(L, func);
   cl = &clvalue(func)->l;
@@ -366,7 +366,7 @@ int luaD_poscall (lua_State *L, StkId firstResult) {
 ** The arguments are on the stack, right after the function.
 ** When returns, all the results are on the stack, starting at the original
 ** function position.
-*/ 
+*/
 void luaD_call (lua_State *L, StkId func, int nResults) {
   if (++L->nCcalls >= LUAI_MAXCCALLS) {
     if (L->nCcalls == LUAI_MAXCCALLS)

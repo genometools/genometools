@@ -110,9 +110,9 @@ typedef GtEndofTwobitencoding GtSfxcmp;
                                                              bsr->complement,\
                                                              COMMONUNITS,&X,&Y)
 
-#define GtSfxcmpEQUAL(X,Y)      (ret##X##Y == 0)
-#define GtSfxcmpSMALLER(X,Y)    (ret##X##Y < 0)
-#define GtSfxcmpGREATER(X,Y)    (ret##X##Y > 0)
+#define GtSfxcmpEQUAL(X,Y)      ret##X##Y == 0
+#define GtSfxcmpSMALLER(X,Y)    ret##X##Y < 0
+#define GtSfxcmpGREATER(X,Y)    ret##X##Y > 0
 
 typedef struct
 {

@@ -211,7 +211,7 @@ LUA_API void lua_replace (lua_State *L, int idx) {
   api_checkvalidindex(L, o);
   if (idx == LUA_ENVIRONINDEX) {
     Closure *func = curr_func(L);
-    api_check(L, ttistable(L->top - 1)); 
+    api_check(L, ttistable(L->top - 1));
     func->c.env = hvalue(L->top - 1);
     luaC_barrier(L, func, L->top - 1);
   }
@@ -342,7 +342,7 @@ LUA_API int lua_toboolean (lua_State *L, int idx) {
 
 LUA_API const char *lua_tolstring (lua_State *L, int idx, size_t *len) {
   StkId o = index2adr(L, idx);
-  if (!ttisstring(o)) {
+  if (!(ttisstring(o))) {
     lua_lock(L);  /* `luaV_tostring' may create a new string */
     if (!luaV_tostring(L, o)) {  /* conversion failed? */
       if (len != NULL) *len = 0;
@@ -394,7 +394,7 @@ LUA_API void *lua_touserdata (lua_State *L, int idx) {
 
 LUA_API lua_State *lua_tothread (lua_State *L, int idx) {
   StkId o = index2adr(L, idx);
-  return (!ttisthread(o)) ? NULL : thvalue(o);
+  return (!(ttisthread(o))) ? NULL : thvalue(o);
 }
 
 
@@ -771,7 +771,7 @@ LUA_API int lua_setfenv (lua_State *L, int idx) {
 
 #define checkresults(L,na,nr) \
      api_check(L, (nr) == LUA_MULTRET || (L->ci->top - L->top >= (nr) - (na)))
-	
+
 
 LUA_API void lua_call (lua_State *L, int nargs, int nresults) {
   StkId func;
@@ -1038,7 +1038,7 @@ LUA_API void *lua_newuserdata (lua_State *L, size_t size) {
 
 static const char *aux_upvalue (StkId fi, int n, TValue **val) {
   Closure *f;
-  if (!ttisfunction(fi)) return NULL;
+  if (!(ttisfunction(fi))) return NULL;
   f = clvalue(fi);
   if (f->c.isC) {
     if (!(1 <= n && n <= f->c.nupvalues)) return NULL;
