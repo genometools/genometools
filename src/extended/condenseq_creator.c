@@ -721,7 +721,7 @@ static GtCondenseqLink ces_c_extend_seeds_diags(GtCondenseqCreator *ces_c)
 {
   GtCondenseqLink best_link = {NULL, 0, 0, 0, 0};
   GtRange seed_bounds,
-          match_bounds;
+          match_bounds = {0,0};
   GtKmerStartpos match_positions;
   GtCondenseqCreatorWindow *win = &ces_c->window;
   GtCondenseqCreatorXdrop *xdrop = &ces_c->xdrop;

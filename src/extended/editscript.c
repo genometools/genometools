@@ -934,7 +934,7 @@ int gt_editscript_unit_test(GT_UNUSED GtError *err)
   GtEditscriptPos     get_pos,
                       fill_pos;
   GtUchar csoll;
-  GtUword length,
+  GtUword length = 0,
           i,
           max,
           bufsize = (GtUword) EDITSCRIPT_TEST_SEQLEN;
