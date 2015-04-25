@@ -40,6 +40,7 @@ testdata_exclude = ["solid_color_reads.fastq",
                     "test4_different_seqlengths.fastq",
                     "test3_different_seqnames.fastq",
                     "corruptpatternfile.fna",
+                    "TTT-small-wrongchar.fna",
                     "sw100K1.fsa",
                     "sw100K2.fsa"]
 
