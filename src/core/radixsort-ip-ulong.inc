@@ -281,7 +281,7 @@ static void gt_radixsort_ulong_process_bin(
 
       if (width == (GtCountbasetype) 2)
       {
-        if (*ptr > *(ptr+1))
+        if (*(ptr+1) < *ptr)
         {
           GtUword tmp = *ptr;
           *ptr = *(ptr+1);

@@ -55,6 +55,7 @@
 #include "core/divmodmul.h"
 #include "core/minmax.h"
 #include "core/types_api.h"
+#include "core/seedpair.h"
 #include "core/stack-inlined.h"
 #include "core/radix_sort.h"
 #ifdef GT_THREADS_ENABLED
@@ -164,11 +165,10 @@ void gt_radixsort_lsb_linear(GtUword *source,GtUword len)
 }
 
 #ifdef GT_THREADS_ENABLED
-static GtUword gt_radixsort_findfirstlarger(const GtUword
-                                                    *leftborder,
-                                                  GtUword start,
-                                                  GtUword end,
-                                                  GtUword offset)
+static GtUword gt_radixsort_findfirstlarger(const GtUword *leftborder,
+                                            GtUword start,
+                                            GtUword end,
+                                            GtUword offset)
 {
   const GtUword *left = leftborder + start,
                       *right = leftborder + end,
@@ -239,10 +239,18 @@ static void gt_evenly_divide_lentab(GtUword *endindexes,
 }
 #endif
 
+typedef enum
+{
+  GtRadixelemtypeGtUword,
+  GtRadixelemtypeGtUwordPair,
+  GtRadixelemtypeGtQuasiSeedExtendSeedPair
+} GtRadixelemtype;
+
 typedef union
 {
   GtUword *ulongptr;
   GtUwordPair *ulongpairptr;
+  GtQuasiSeedExtendSeedPair *seedpairptr;
 } GtRadixvalues;
 
 typedef struct
@@ -261,40 +269,48 @@ typedef struct
   GtCountbasetype *startofbin, *endofbin;
   uint8_t *nextidx;
   int log_bufsize;
-  bool pairs;
+  GtRadixelemtype elemtype;
   GtRadixvalues values;
   size_t size;
 } GtRadixbuffer;
 
-static GtRadixbuffer *gt_radixbuffer_new(bool pairs)
+static GtRadixbuffer *gt_radixbuffer_new(GtRadixelemtype elemtype)
 {
   GtRadixbuffer *buf;
 
-  buf = gt_malloc(sizeof (*buf));
-  buf->size = sizeof (*buf);
+  buf = gt_malloc(sizeof *buf);
+  buf->size = sizeof *buf;
   buf->log_bufsize = 5;
   buf->buf_size = 1UL << buf->log_bufsize;
   gt_assert(buf->buf_size <= UINT8_MAX);
   buf->cachesize = (UINT8_MAX+1) << buf->log_bufsize;
-  if (pairs)
+  buf->elemtype = elemtype;
+  if (elemtype == GtRadixelemtypeGtUwordPair)
   {
-    buf->pairs = true;
-    buf->values.ulongpairptr = gt_malloc(sizeof (*buf->values.ulongpairptr) *
+    buf->values.ulongpairptr = gt_malloc(sizeof *buf->values.ulongpairptr *
                                          buf->cachesize);
     buf->size += sizeof (*buf->values.ulongpairptr) * buf->cachesize;
   } else
   {
-    buf->pairs = false;
-    buf->values.ulongptr = gt_malloc(sizeof (*buf->values.ulongptr) *
-                                     buf->cachesize);
-    buf->size += sizeof (*buf->values.ulongptr) * buf->cachesize;
+    if (elemtype == GtRadixelemtypeGtUword)
+    {
+      buf->values.ulongptr = gt_malloc(sizeof *buf->values.ulongptr *
+                                       buf->cachesize);
+      buf->size += sizeof *buf->values.ulongptr * buf->cachesize;
+    } else
+    {
+      buf->values.seedpairptr = gt_malloc(sizeof *buf->values.seedpairptr *
+                                          buf->cachesize);
+      buf->size += sizeof *buf->values.seedpairptr *
+                   buf->cachesize;
+    }
   }
-  buf->startofbin = gt_malloc(sizeof (*buf->startofbin) * (UINT8_MAX + 2));
-  buf->size += sizeof (*buf->startofbin) * (UINT8_MAX + 2);
-  buf->endofbin = gt_malloc(sizeof (*buf->endofbin) * (UINT8_MAX + 1));
-  buf->size += sizeof (*buf->endofbin) * (UINT8_MAX + 1);
-  buf->nextidx = gt_malloc(sizeof (*buf->nextidx) * (UINT8_MAX + 1));
-  buf->size += sizeof (*buf->nextidx) * (UINT8_MAX + 1);
+  buf->startofbin = gt_malloc(sizeof *buf->startofbin * (UINT8_MAX + 2));
+  buf->size += sizeof *buf->startofbin * (UINT8_MAX + 2);
+  buf->endofbin = gt_malloc(sizeof *buf->endofbin * (UINT8_MAX + 1));
+  buf->size += sizeof *buf->endofbin * (UINT8_MAX + 1);
+  buf->nextidx = gt_malloc(sizeof *buf->nextidx * (UINT8_MAX + 1));
+  buf->size += sizeof *buf->nextidx * (UINT8_MAX + 1);
   buf->countcached = buf->countuncached = buf->countinsertionsort = 0;
   return buf;
 }
@@ -307,12 +323,18 @@ static size_t gt_radixbuffer_size(const GtRadixbuffer *buf)
 static void gt_radixbuffer_delete(GtRadixbuffer *buf)
 {
   gt_assert(buf != NULL);
-  if (buf->pairs)
+  if (buf->elemtype == GtRadixelemtypeGtUwordPair)
   {
     gt_free(buf->values.ulongpairptr);
   } else
   {
-    gt_free(buf->values.ulongptr);
+    if (buf->elemtype == GtRadixelemtypeGtUword)
+    {
+      gt_free(buf->values.ulongptr);
+    } else
+    {
+      gt_free(buf->values.seedpairptr);
+    }
   }
   gt_free(buf->nextidx);
   gt_free(buf->startofbin);
@@ -322,6 +344,7 @@ static void gt_radixbuffer_delete(GtRadixbuffer *buf)
 
 #include "core/radixsort-ip-ulong.inc"
 #include "core/radixsort-ip-ulongpair.inc"
+#include "core/radixsort-ip-seedpair.inc"
 
 #ifdef GT_THREADS_ENABLED
 typedef struct
@@ -334,9 +357,19 @@ typedef struct
 static void *gt_radixsort_thread_caller(void *data)
 {
   GtRadixinplacethreadinfo *threadinfo = (GtRadixinplacethreadinfo *) data;
-  (threadinfo->rbuf->pairs
-    ? gt_radixsort_ulongpair_sub_inplace
-    : gt_radixsort_ulong_sub_inplace) (threadinfo->rbuf,&threadinfo->stack);
+  if (threadinfo->rbuf->elemtype == GtRadixelemtypeGtUwordPair)
+  {
+    gt_radixsort_ulongpair_sub_inplace(threadinfo->rbuf,&threadinfo->stack);
+  } else
+  {
+    if (threadinfo->rbuf->elemtype == GtRadixelemtypeGtUword)
+    {
+      gt_radixsort_ulong_sub_inplace (threadinfo->rbuf,&threadinfo->stack);
+    } else
+    {
+      gt_radixsort_seedpair_sub_inplace (threadinfo->rbuf,&threadinfo->stack);
+    }
+  }
   return NULL;
 }
 #endif
@@ -347,7 +380,7 @@ struct GtRadixsortinfo
   GtRadixbuffer *rbuf;
   GtRadixvalues sortspace;
   GtUword maxlen;
-  bool pairs;
+  GtRadixelemtype elemtype;
   size_t size;
 #ifdef GT_THREADS_ENABLED
   GtUword *lentab, *endindexes;
@@ -357,33 +390,44 @@ struct GtRadixsortinfo
 
 #define GT_THREADS_JOBS gt_jobs
 
-static GtRadixsortinfo *gt_radixsort_new(bool pairs,GtUword maxlen)
+static GtRadixsortinfo *gt_radixsort_new(GtRadixelemtype elemtype,
+                                         GtUword maxlen)
 {
-  GtRadixsortinfo *radixsortinfo = gt_malloc(sizeof (*radixsortinfo));
+  GtRadixsortinfo *radixsortinfo = gt_malloc(sizeof *radixsortinfo);
 
-  radixsortinfo->size = sizeof (*radixsortinfo);
-  radixsortinfo->rbuf = gt_radixbuffer_new(pairs);
+  radixsortinfo->size = sizeof *radixsortinfo;
+  radixsortinfo->rbuf = gt_radixbuffer_new(elemtype);
   radixsortinfo->size += gt_radixbuffer_size(radixsortinfo->rbuf);
-  radixsortinfo->pairs = pairs;
+  radixsortinfo->elemtype = elemtype;
   radixsortinfo->maxlen = maxlen;
   if (maxlen > 0)
   {
-    if (pairs)
+    if (elemtype == GtRadixelemtypeGtUwordPair)
     {
       radixsortinfo->sortspace.ulongpairptr
-        = gt_malloc(sizeof (*radixsortinfo->sortspace.ulongpairptr) * maxlen);
-     radixsortinfo->size += sizeof (*radixsortinfo->sortspace.ulongpairptr)
+        = gt_malloc(sizeof *radixsortinfo->sortspace.ulongpairptr * maxlen);
+     radixsortinfo->size += sizeof *radixsortinfo->sortspace.ulongpairptr
                             * maxlen;
     } else
     {
-      radixsortinfo->sortspace.ulongptr
-        = gt_malloc(sizeof (*radixsortinfo->sortspace.ulongptr) * maxlen);
-      radixsortinfo->size += sizeof (*radixsortinfo->sortspace.ulongptr)
-                             * maxlen;
+      if (elemtype == GtRadixelemtypeGtUword)
+      {
+        radixsortinfo->sortspace.ulongptr
+          = gt_malloc(sizeof *radixsortinfo->sortspace.ulongptr * maxlen);
+        radixsortinfo->size += sizeof *radixsortinfo->sortspace.ulongptr
+                               * maxlen;
+      } else
+      {
+        radixsortinfo->sortspace.seedpairptr
+          = gt_malloc(sizeof *radixsortinfo->sortspace.seedpairptr
+                      * maxlen);
+        radixsortinfo->size
+          += sizeof *radixsortinfo->sortspace.seedpairptr * maxlen;
+      }
     }
   }
   GT_STACK_INIT(&radixsortinfo->stack,32UL);
-  radixsortinfo->size += sizeof (radixsortinfo->stack);
+  radixsortinfo->size += sizeof radixsortinfo->stack;
 #ifdef GT_THREADS_ENABLED
   {
     const unsigned int threads = GT_THREADS_JOBS;
@@ -392,19 +436,19 @@ static GtRadixsortinfo *gt_radixsort_new(bool pairs,GtUword maxlen)
     {
       unsigned int t;
       radixsortinfo->lentab
-        = gt_malloc(sizeof (*radixsortinfo->lentab) * (UINT8_MAX+1));
-      radixsortinfo->size += sizeof (*radixsortinfo->lentab) * (UINT8_MAX+1);
+        = gt_malloc(sizeof *radixsortinfo->lentab * (UINT8_MAX+1));
+      radixsortinfo->size += sizeof *radixsortinfo->lentab * (UINT8_MAX+1);
       radixsortinfo->endindexes
-        = gt_malloc(sizeof (*radixsortinfo->endindexes) * threads);
-      radixsortinfo->size += sizeof (*radixsortinfo->endindexes) * threads;
+        = gt_malloc(sizeof *radixsortinfo->endindexes * threads);
+      radixsortinfo->size += sizeof *radixsortinfo->endindexes * threads;
       radixsortinfo->threadinfo
-        = gt_malloc(sizeof (*radixsortinfo->threadinfo) * threads);
-      radixsortinfo->size += sizeof (*radixsortinfo->threadinfo) * threads;
+        = gt_malloc(sizeof *radixsortinfo->threadinfo * threads);
+      radixsortinfo->size += sizeof *radixsortinfo->threadinfo * threads;
       for (t = 0; t < threads; t++)
       {
         GT_STACK_INIT(&radixsortinfo->threadinfo[t].stack,32UL);
         radixsortinfo->size += sizeof (radixsortinfo->threadinfo[t].stack);
-        radixsortinfo->threadinfo[t].rbuf = gt_radixbuffer_new(pairs);
+        radixsortinfo->threadinfo[t].rbuf = gt_radixbuffer_new(elemtype);
         radixsortinfo->size
           += gt_radixbuffer_size(radixsortinfo->threadinfo[t].rbuf);
       }
@@ -451,12 +495,18 @@ void gt_radixsort_delete(GtRadixsortinfo *radixsortinfo)
 #endif
     if (radixsortinfo->maxlen > 0)
     {
-      if (radixsortinfo->pairs)
+      if (radixsortinfo->elemtype == GtRadixelemtypeGtUwordPair)
       {
         gt_free(radixsortinfo->sortspace.ulongpairptr);
       } else
       {
-        gt_free(radixsortinfo->sortspace.ulongptr);
+        if (radixsortinfo->elemtype == GtRadixelemtypeGtUword)
+        {
+          gt_free(radixsortinfo->sortspace.ulongptr);
+        } else
+        {
+          gt_free(radixsortinfo->sortspace.seedpairptr);
+        }
       }
     }
     gt_radixbuffer_delete(radixsortinfo->rbuf);
@@ -465,19 +515,19 @@ void gt_radixsort_delete(GtRadixsortinfo *radixsortinfo)
   }
 }
 
-static size_t gt_radixsort_elemsize(bool pair)
-{
-  return pair ? sizeof (GtUwordPair) : sizeof (GtUword);
-}
-
 GtUword gt_radixsort_max_num_of_entries_ulong(size_t memlimit)
 {
-  return (GtUword) memlimit/gt_radixsort_elemsize(false);
+  return (GtUword) memlimit/sizeof(GtUword);
 }
 
 GtUword gt_radixsort_max_num_of_entries_ulongpair(size_t memlimit)
 {
-  return (GtUword) memlimit/gt_radixsort_elemsize(true);
+  return (GtUword) memlimit/sizeof(GtUwordPair);
+}
+
+GtUword gt_radixsort_max_num_of_entries_seedpair(size_t memlimit)
+{
+  return (GtUword) memlimit/sizeof(GtQuasiSeedExtendSeedPair);
 }
 
 static void gt_radixsort_inplace(GtRadixsortinfo *radixsortinfo,
@@ -499,18 +549,26 @@ static void gt_radixsort_inplace(GtRadixsortinfo *radixsortinfo,
     exit(GT_EXIT_PROGRAMMING_ERROR);
   }
   gt_assert(radixsortinfo != NULL);
-  if (radixsortinfo->pairs)
+  if (radixsortinfo->elemtype == GtRadixelemtypeGtUwordPair)
   {
     gt_radixsort_ulongpair_shuffle(radixsortinfo->rbuf,
                                    radixvalues->ulongpairptr,
                                    (GtCountbasetype) len,shift);
   } else
   {
-    gt_radixsort_ulong_shuffle(radixsortinfo->rbuf,radixvalues->ulongptr,
-                               (GtCountbasetype) len,shift);
+    if (radixsortinfo->elemtype == GtRadixelemtypeGtUword)
+    {
+      gt_radixsort_ulong_shuffle(radixsortinfo->rbuf,radixvalues->ulongptr,
+                                 (GtCountbasetype) len,shift);
+    } else
+    {
+      gt_radixsort_seedpair_shuffle(radixsortinfo->rbuf,
+                                    radixvalues->seedpairptr,
+                                    (GtCountbasetype) len,shift);
+    }
   }
   GT_STACK_MAKEEMPTY(&radixsortinfo->stack);
-  if (radixsortinfo->pairs)
+  if (radixsortinfo->elemtype == GtRadixelemtypeGtUwordPair)
   {
     gt_radixsort_ulongpair_process_bin(&radixsortinfo->stack,
                                        radixsortinfo->rbuf,
@@ -518,19 +576,36 @@ static void gt_radixsort_inplace(GtRadixsortinfo *radixsortinfo,
                                        shift);
   } else
   {
-    gt_radixsort_ulong_process_bin(&radixsortinfo->stack,
-                                   radixsortinfo->rbuf,
-                                   radixvalues->ulongptr,shift);
+    if (radixsortinfo->elemtype == GtRadixelemtypeGtUword)
+    {
+      gt_radixsort_ulong_process_bin(&radixsortinfo->stack,
+                                     radixsortinfo->rbuf,
+                                     radixvalues->ulongptr,shift);
+    } else
+    {
+      gt_radixsort_seedpair_process_bin(&radixsortinfo->stack,
+                                        radixsortinfo->rbuf,
+                                        radixvalues->seedpairptr,
+                                        shift);
+    }
   }
   if (threads == 1U || radixsortinfo->stack.nextfree < (GtUword) threads)
   {
-    if (radixsortinfo->pairs)
+    if (radixsortinfo->elemtype == GtRadixelemtypeGtUwordPair)
     {
       gt_radixsort_ulongpair_sub_inplace(radixsortinfo->rbuf,
                                          &radixsortinfo->stack);
     } else
     {
-      gt_radixsort_ulong_sub_inplace(radixsortinfo->rbuf,&radixsortinfo->stack);
+      if (radixsortinfo->elemtype == GtRadixelemtypeGtUword)
+      {
+        gt_radixsort_ulong_sub_inplace(radixsortinfo->rbuf,
+                                       &radixsortinfo->stack);
+      } else
+      {
+        gt_radixsort_seedpair_sub_inplace(radixsortinfo->rbuf,
+                                          &radixsortinfo->stack);
+      }
     }
   } else
   {
@@ -541,8 +616,7 @@ static void gt_radixsort_inplace(GtRadixsortinfo *radixsortinfo,
     gt_assert(radixsortinfo->stack.nextfree <= UINT8_MAX+1);
     for (j=0; j<radixsortinfo->stack.nextfree; j++)
     {
-      radixsortinfo->lentab[j] = (GtUword)
-                                              radixsortinfo->stack.space[j].len;
+      radixsortinfo->lentab[j] = (GtUword) radixsortinfo->stack.space[j].len;
     }
     gt_evenly_divide_lentab(radixsortinfo->endindexes,
                             radixsortinfo->lentab,
@@ -599,12 +673,12 @@ void gt_radixsort_inplace_sort(GtRadixsortinfo *radixsortinfo,GtUword len)
 
 GtUword *gt_radixsort_space_ulong(GtRadixsortinfo *radixsortinfo)
 {
-  gt_assert(!radixsortinfo->pairs);
+  gt_assert(radixsortinfo->elemtype == GtRadixelemtypeGtUword);
   return radixsortinfo->sortspace.ulongptr;
 }
 
 GtUwordPair *gt_radixsort_space_ulongpair(GtRadixsortinfo *radixsortinfo)
 {
-  gt_assert(radixsortinfo->pairs);
+  gt_assert(radixsortinfo->elemtype == GtRadixelemtypeGtUwordPair);
   return radixsortinfo->sortspace.ulongpairptr;
 }

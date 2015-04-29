@@ -1,20 +1,20 @@
-static GtUwordPair gt_radixsort_ulongpair_bin_get(
+static GtQuasiSeedExtendSeedPair gt_radixsort_seedpair_bin_get(
                                             const GtRadixbuffer *rbuf,
                                             GtUword binnum)
 {
-  return rbuf->values.ulongpairptr[(binnum << rbuf->log_bufsize) +
+  return rbuf->values.seedpairptr[(binnum << rbuf->log_bufsize) +
                              (GtUword) rbuf->nextidx[binnum]];
 }
 
-static void gt_radixsort_ulongpair_bin_update(
-                                    GtUwordPair *target,
+static void gt_radixsort_seedpair_bin_update(
+                                    GtQuasiSeedExtendSeedPair *target,
                                     GtRadixbuffer *rbuf,
                                     GtUword binnum,
-                                    GtUwordPair value)
+                                    GtQuasiSeedExtendSeedPair value)
 {
   GtUword binoffset = binnum << rbuf->log_bufsize;
 
-  rbuf->values.ulongpairptr[binoffset +
+  rbuf->values.seedpairptr[binoffset +
                                       (GtUword) rbuf->nextidx[binnum]] = value;
   if ((GtUword) rbuf->nextidx[binnum] < rbuf->buf_size - 1)
   {
@@ -22,12 +22,12 @@ static void gt_radixsort_ulongpair_bin_update(
   } else
   {
     GtUword j;
-    GtUwordPair *wtargetptr, *rtargetptr, *rend, *valptr;
+    GtQuasiSeedExtendSeedPair *wtargetptr, *rtargetptr, *rend, *valptr;
 
     wtargetptr = target + rbuf->endofbin[binnum] - (rbuf->buf_size - 1);
     rtargetptr = wtargetptr + rbuf->buf_size;
     rend = target + rbuf->startofbin[binnum+1];
-    valptr = rbuf->values.ulongpairptr + binoffset;
+    valptr = rbuf->values.seedpairptr + binoffset;
     for (j=0; j<rbuf->buf_size; j++)
     {
       *wtargetptr++ = *valptr;
@@ -42,15 +42,15 @@ static void gt_radixsort_ulongpair_bin_update(
   rbuf->endofbin[binnum]++;
 }
 
-static void gt_radixsort_ulongpair_cached_shuffle(GtRadixbuffer *rbuf,
-                                              GtUwordPair *source,
+static void gt_radixsort_seedpair_cached_shuffle(GtRadixbuffer *rbuf,
+                                              GtQuasiSeedExtendSeedPair *source,
                                               GtCountbasetype len,
                                               size_t rightshift)
 {
   GtUword binoffset, binnum, bufoffset,
                 nextbin, firstnonemptybin = UINT8_MAX+1;
   GtCountbasetype *count, previouscount, current;
-  GtUwordPair *sp, *spend = source + len;
+  GtQuasiSeedExtendSeedPair *sp, *spend = source + len;
 
   rbuf->countcached++;
   count = rbuf->startofbin; /* use same memory for count and startofbin */
@@ -75,7 +75,7 @@ static void gt_radixsort_ulongpair_cached_shuffle(GtRadixbuffer *rbuf,
     }
     for (j=0; j<end; j++)
     {
-      rbuf->values.ulongpairptr[bufoffset + j] =
+      rbuf->values.seedpairptr[bufoffset + j] =
         source[binoffset + j];
     }
   }
@@ -93,23 +93,23 @@ static void gt_radixsort_ulongpair_cached_shuffle(GtRadixbuffer *rbuf,
   for (current = 0, binnum = firstnonemptybin;
        current < len; binnum = nextbin - 1)
   {
-    GtUwordPair currentvalue =
-      gt_radixsort_ulongpair_bin_get(rbuf,binnum);
+    GtQuasiSeedExtendSeedPair currentvalue =
+      gt_radixsort_seedpair_bin_get(rbuf,binnum);
     while (true)
     {
       binnum = GT_RADIX_KEY(UINT8_MAX,rightshift,
                             currentvalue.a);
       if (current != rbuf->endofbin[binnum])
       {
-        GtUwordPair tmp = currentvalue;
-        currentvalue = gt_radixsort_ulongpair_bin_get(rbuf,binnum);
-        gt_radixsort_ulongpair_bin_update(source,rbuf,binnum,tmp);
+        GtQuasiSeedExtendSeedPair tmp = currentvalue;
+        currentvalue = gt_radixsort_seedpair_bin_get(rbuf,binnum);
+        gt_radixsort_seedpair_bin_update(source,rbuf,binnum,tmp);
       } else
       {
         break;
       }
     }
-    gt_radixsort_ulongpair_bin_update(source,rbuf,binnum,
+    gt_radixsort_seedpair_bin_update(source,rbuf,binnum,
                                                 currentvalue);
     current++;
     /* skip over empty bins */
@@ -135,10 +135,10 @@ static void gt_radixsort_ulongpair_cached_shuffle(GtRadixbuffer *rbuf,
     if (bufleft > 0)
     {
       GtUword j;
-      GtUwordPair *targetptr, *valptr;
+      GtQuasiSeedExtendSeedPair *targetptr, *valptr;
 
       valptr =
-        rbuf->values.ulongpairptr + (binnum << rbuf->log_bufsize);
+        rbuf->values.seedpairptr + (binnum << rbuf->log_bufsize);
       targetptr = source + rbuf->startofbin[binnum+1] - bufleft;
       for (j=0; j < bufleft; j++)
       {
@@ -148,14 +148,14 @@ static void gt_radixsort_ulongpair_cached_shuffle(GtRadixbuffer *rbuf,
   }
 }
 
-static void gt_radixsort_ulongpair_uncached_shuffle(
+static void gt_radixsort_seedpair_uncached_shuffle(
                                                 GtRadixbuffer *rbuf,
-                                                GtUwordPair *source,
+                                                GtQuasiSeedExtendSeedPair *source,
                                                 GtCountbasetype len,
                                                 size_t rightshift)
 {
   GtUword binnum, nextbin;
-  GtUwordPair *sp, *spend = source + len;
+  GtQuasiSeedExtendSeedPair *sp, *spend = source + len;
   GtCountbasetype current, previouscount, *count;
 
   rbuf->countuncached++;
@@ -182,7 +182,7 @@ static void gt_radixsort_ulongpair_uncached_shuffle(
   rbuf->startofbin[UINT8_MAX+1] = len;
   for (current = 0; current < len; /* Nothing */)
   {
-    GtUwordPair currentvalue = source[current];
+    GtQuasiSeedExtendSeedPair currentvalue = source[current];
     GtCountbasetype *binptr;
 
     while (true)
@@ -192,7 +192,7 @@ static void gt_radixsort_ulongpair_uncached_shuffle(
                             currentvalue.a);
       if (current != *binptr)
       {
-        GtUwordPair tmp = currentvalue;
+        GtQuasiSeedExtendSeedPair tmp = currentvalue;
         currentvalue = source[*binptr];
         source[*binptr] = tmp;
         (*binptr)++;
@@ -221,33 +221,33 @@ static void gt_radixsort_ulongpair_uncached_shuffle(
   }
 }
 
-static void gt_radixsort_ulongpair_shuffle(GtRadixbuffer *rbuf,
-                                       GtUwordPair *source,
+static void gt_radixsort_seedpair_shuffle(GtRadixbuffer *rbuf,
+                                       GtQuasiSeedExtendSeedPair *source,
                                        GtCountbasetype len,
                                        size_t rightshift)
 {
   gt_assert(rbuf != NULL);
   if ((GtUword) len > rbuf->cachesize)
   {
-    gt_radixsort_ulongpair_cached_shuffle(rbuf,source,len,rightshift);
+    gt_radixsort_seedpair_cached_shuffle(rbuf,source,len,rightshift);
   } else
   {
-    gt_radixsort_ulongpair_uncached_shuffle(rbuf,source,len,
+    gt_radixsort_seedpair_uncached_shuffle(rbuf,source,len,
                                                       rightshift);
   }
 }
 
 static void
-gt_radixsort_ulongpair_inplace_insertionsort(GtUwordPair *a,
+gt_radixsort_seedpair_inplace_insertionsort(GtQuasiSeedExtendSeedPair *a,
                                                GtCountbasetype a_size)
 {
-  GtUwordPair *optr, *iptr, *end = a + a_size;
+  GtQuasiSeedExtendSeedPair *optr, *iptr, *end = a + a_size;
 
   for (optr = a + 1; optr < end; optr++)
   {
     if (optr->a < (optr-1)->a)
     {
-      GtUwordPair currentElement = *optr;
+      GtQuasiSeedExtendSeedPair currentElement = *optr;
 
       *optr = *(optr-1);
       for (iptr = optr-1;
@@ -263,10 +263,10 @@ gt_radixsort_ulongpair_inplace_insertionsort(GtUwordPair *a,
   }
 }
 
-static void gt_radixsort_ulongpair_process_bin(
+static void gt_radixsort_seedpair_process_bin(
                                      GtStackGtRadixsort_stackelem *stack,
                                      GtRadixbuffer *rbuf,
-                                     GtUwordPair *source,
+                                     GtQuasiSeedExtendSeedPair *source,
                                      size_t shift)
 {
   GtUword binnum;
@@ -277,13 +277,13 @@ static void gt_radixsort_ulongpair_process_bin(
 
     if (width >= (GtCountbasetype) 2)
     {
-      GtUwordPair *ptr = source + rbuf->startofbin[binnum];
+      GtQuasiSeedExtendSeedPair *ptr = source + rbuf->startofbin[binnum];
 
       if (width == (GtCountbasetype) 2)
       {
         if ((ptr+1)->a < ptr->a)
         {
-          GtUwordPair tmp = *ptr;
+          GtQuasiSeedExtendSeedPair tmp = *ptr;
           *ptr = *(ptr+1);
           *(ptr+1) = tmp;
         }
@@ -292,12 +292,12 @@ static void gt_radixsort_ulongpair_process_bin(
         if (width <= (GtCountbasetype) 32)
         {
           rbuf->countinsertionsort++;
-          gt_radixsort_ulongpair_inplace_insertionsort(ptr,width);
+          gt_radixsort_seedpair_inplace_insertionsort(ptr,width);
         } else
         {
           GtRadixsort_stackelem tmpstackelem;
 
-          tmpstackelem.left.ulongpairptr = ptr;
+          tmpstackelem.left.seedpairptr = ptr;
           tmpstackelem.len = width;
           tmpstackelem.shift = shift - CHAR_BIT;
           GT_STACK_PUSH(stack,tmpstackelem);
@@ -307,7 +307,7 @@ static void gt_radixsort_ulongpair_process_bin(
   }
 }
 
-static void gt_radixsort_ulongpair_sub_inplace(GtRadixbuffer *rbuf,
+static void gt_radixsort_seedpair_sub_inplace(GtRadixbuffer *rbuf,
                                            GtStackGtRadixsort_stackelem *stack)
 {
   GtRadixsort_stackelem currentstackelem;
@@ -315,14 +315,14 @@ static void gt_radixsort_ulongpair_sub_inplace(GtRadixbuffer *rbuf,
   while (!GT_STACK_ISEMPTY(stack))
   {
     currentstackelem = GT_STACK_POP(stack);
-    gt_radixsort_ulongpair_shuffle(rbuf,
-                         currentstackelem.left.ulongpairptr,
+    gt_radixsort_seedpair_shuffle(rbuf,
+                         currentstackelem.left.seedpairptr,
                          currentstackelem.len,
                          currentstackelem.shift);
     if (currentstackelem.shift > 0)
     {
-      (void) gt_radixsort_ulongpair_process_bin(stack,rbuf,
-                                   currentstackelem.left.ulongpairptr,
+      (void) gt_radixsort_seedpair_process_bin(stack,rbuf,
+                                   currentstackelem.left.seedpairptr,
                                    currentstackelem.shift);
     }
   }

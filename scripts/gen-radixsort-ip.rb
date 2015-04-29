@@ -10,36 +10,52 @@ end
 
 def parseargs(argv)
   options = OpenStruct.new
-  options.ulong = true
+  options.typename = :ulong
+  ulongpairset = false
+  seedpairset = false
   opts = OptionParser.new
-  opts.on("--ulongpair","generate code sorting pairs of ulongs") do |x|
-    options.ulong = false
+  opts.on("--ulongpair",
+          "generate code sorting key/value pairs of ulongs") do |x|
+    ulongpairset = true
+    options.typename = :ulongkeyvaluepair
+  end
+  opts.on("--seedpair","generate code sorting pairs of seeds (128 bit)") do |x|
+    seedpairset = true
+    options.typename = :seedpair
   end
   rest = opts.parse(argv)
   if not rest.empty?
     usage(opts,"superfluous arguments")
   end
+  if ulongpairset and seedpairset
+    STDERR.puts "#{$0}: cannot combine option --ulongpair and --seedpair"
+    exit 1 
+  end
   return options
 end
 
 def makekey(options)
-  if options.ulong
+  if options.typename == :ulong
     return "ulong"
-  else
+  elsif options.typename == :ulongkeyvaluepair
     return "ulongpair"
+  else
+    return "seedpair"
   end
 end
 
 def maketype(options)
-  if options.ulong
+  if options.typename == :ulong
     return "GtUword"
-  else
+  elsif options.typename == :ulongkeyvaluepair
     return "GtUwordPair"
+  else
+    return "GtQuasiSeedExtendSeedPair"
   end
 end
 
 def derefptr(ptr,options)
-  if options.ulong
+  if options.typename == :ulong
     return "*#{ptr}"
   else
     return "#{ptr}->a"
@@ -47,7 +63,7 @@ def derefptr(ptr,options)
 end
 
 def derefval(val,options)
-  if options.ulong
+  if options.typename == :ulong
     return "#{val}"
   else
     return "#{val}.a"
@@ -340,7 +356,7 @@ static void gt_radixsort_#{makekey(options)}_process_bin(
 
       if (width == (GtCountbasetype) 2)
       {
-        if (#{derefptr("ptr",options)} > #{derefptr("(ptr+1)",options)})
+        if (#{derefptr("(ptr+1)",options)} < #{derefptr("ptr",options)})
         {
           #{maketype(options)} tmp = *ptr;
           *ptr = *(ptr+1);
