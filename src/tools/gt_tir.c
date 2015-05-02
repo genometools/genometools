@@ -49,7 +49,9 @@ typedef struct {
         evalue_cutoff;
   GtStr *str_overlaps;
   bool best_overlaps,
-       no_overlaps;
+       no_overlaps,
+       seqids,
+       md5;
   unsigned int chain_max_gap_length;
   GtOption *optionoverlaps;
   GtStrArray *hmm_files;
@@ -101,7 +103,9 @@ static GtOptionParser* gt_tir_option_parser_new(void *tool_arguments)
            *optionhmms,
            *optionevalcutoff,
            *optionpdomcutoff,
-           *optionmaxgap;
+           *optionmaxgap,
+           *optionseqids,
+           *optionmd5;
   static const char *overlaps[] = {
     "best", /* default */
     "no",
@@ -205,7 +209,8 @@ static GtOptionParser* gt_tir_option_parser_new(void *tool_arguments)
 
   /* -similar */
   optionsimilar = gt_option_new_double_min_max("similar",
-                                               "specify similaritythreshold in "
+                                               "specify TIR similarity "
+                                               "threshold in the"
                                                "range [1..100%]",
                                                &arguments->similarity_threshold,
                                                (double) 85.0, (double) 0.0,
@@ -284,6 +289,19 @@ static GtOptionParser* gt_tir_option_parser_new(void *tool_arguments)
   gt_option_parser_add_option(op, optionmaxgap);
   gt_option_is_extended_option(optionmaxgap);
   gt_option_imply(optionmaxgap, optionhmms);
+
+  optionseqids = gt_option_new_bool("seqids",
+                                    "use sequence descriptions instead of "
+                                    "sequence numbers in GFF3 output",
+                                    &arguments->seqids,
+                                    false);
+  gt_option_parser_add_option(op, optionseqids);
+
+  optionmd5 = gt_option_new_bool("md5",
+                                 "add MD5 hashes to seqids in GFF3 output",
+                                 &arguments->md5,
+                                 false);
+  gt_option_parser_add_option(op, optionmd5);
 
   return op;
 }
@@ -370,6 +388,15 @@ static int gt_tir_runner(GT_UNUSED int argc, GT_UNUSED const char **argv,
   if (tir_stream == NULL)
     return -1;
   last_stream = tir_stream;
+
+  if (!arguments->md5)
+    gt_tir_stream_disable_md5_seqids((GtTIRStream*) tir_stream);
+  else
+    gt_tir_stream_enable_md5_seqids((GtTIRStream*) tir_stream);
+  if (!arguments->seqids)
+    gt_tir_stream_disable_seqids((GtTIRStream*) tir_stream);
+  else
+    gt_tir_stream_enable_seqids((GtTIRStream*) tir_stream);
 
   rmap = gt_region_mapping_new_encseq((GtEncseq*)
                             gt_tir_stream_get_encseq((GtTIRStream*) tir_stream),

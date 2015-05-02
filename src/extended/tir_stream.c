@@ -108,14 +108,12 @@ struct GtTIRStream
   const TIRPair**             tir_pairs;
   GtArrayTIRPair              first_pairs;
   GtTIRStreamState            state;
-
-  GtUword               num_of_tirs,
+  GtUword                     num_of_tirs,
                               cur_elem_index,
                               prev_seqnum;
-
   /* options */
   GtStr                       *str_indexname;
-  GtUword               min_seed_length,
+  GtUword                     min_seed_length,
                               min_TIR_length,
                               max_TIR_length,
                               min_TIR_distance,
@@ -125,7 +123,9 @@ struct GtTIRStream
   double                      similarity_threshold;
   bool                        no_overlaps;
   bool                        best_overlaps;
-  GtUword               min_TSD_length,
+  bool                        output_seqids,
+                              output_md5;
+  GtUword                     min_TSD_length,
                               max_TSD_length,
                               vicinity;
 };
@@ -571,9 +571,9 @@ static int gt_tir_searchforTIRs(GtTIRStream *tir_stream,
 
     /* re-check length constraints */
     if ((seedptr->pos1 + seedptr->len - 1 + xdropbest_right.ivalue) -
-        (seedptr->pos2 - xdropbest_left.jvalue + 1) < tir_stream->min_TIR_length
-        || (seedptr->pos1 + seedptr->len - 1 + xdropbest_right.ivalue) -
-        (seedptr->pos2 - xdropbest_left.jvalue + 1) < tir_stream->min_TIR_length)
+      (seedptr->pos2 - xdropbest_left.jvalue + 1) < tir_stream->min_TIR_length
+      || (seedptr->pos1 + seedptr->len - 1 + xdropbest_right.ivalue) -
+      (seedptr->pos2 - xdropbest_left.jvalue + 1) < tir_stream->min_TIR_length)
     {
       gt_log_log("ext: out!");
       continue;
@@ -681,8 +681,7 @@ static int gt_tir_stream_next(GtNodeStream *ns, GT_UNUSED GtGenomeNode **gn,
 
     /* check whether index is valid */
     if (tir_stream->cur_elem_index < tir_stream->num_of_tirs) {
-      GtUword seqnum,
-                    seqlength;
+      GtUword seqnum, seqlength;
       GtGenomeNode *rn;
       GtStr *seqid;
       seqnum = tir_stream->tir_pairs[tir_stream->cur_elem_index]->contignumber;
@@ -712,7 +711,8 @@ static int gt_tir_stream_next(GtNodeStream *ns, GT_UNUSED GtGenomeNode **gn,
         seqlength = gt_encseq_seqlength(tir_stream->encseq, seqnum);
         seqid = gt_str_new();
 
-        if (gt_encseq_has_md5_support(tir_stream->encseq)) {
+        if (gt_encseq_has_md5_support(tir_stream->encseq)
+              && tir_stream->output_md5) {
           GtMD5Tab *md5_tab = NULL;
           md5_tab = gt_encseq_get_md5_tab(tir_stream->encseq, err);
           if (!md5_tab) {
@@ -726,13 +726,26 @@ static int gt_tir_stream_next(GtNodeStream *ns, GT_UNUSED GtGenomeNode **gn,
           }
           gt_md5_tab_delete(md5_tab);
         }
-        gt_str_append_cstr(seqid, "seq");
-        gt_str_append_uword(seqid, seqnum);
 
-        rn = gt_region_node_new(seqid, 1, seqlength);
-        gt_str_delete(seqid);
-        *gn = rn;
-        tir_stream->cur_elem_index++;
+        if (!had_err) {
+          if (gt_encseq_has_description_support(tir_stream->encseq)
+                && tir_stream->output_seqids) {
+            GtUword desclength = 0UL, i = 0UL;
+            const char *desc;
+            desc = gt_encseq_description(tir_stream->encseq,
+                                         &desclength, seqnum);
+            while (*(desc+i) != ' ' && i != desclength)
+              i++;
+            gt_str_append_cstr_nt(seqid, desc, i);
+          } else {
+            gt_str_append_cstr(seqid, "seq");
+            gt_str_append_uword(seqid, seqnum);
+          }
+          rn = gt_region_node_new(seqid, 1, seqlength);
+          gt_str_delete(seqid);
+          *gn = rn;
+          tir_stream->cur_elem_index++;
+        }
       } else {
         /* skipping */
         tir_stream->cur_elem_index = 0;
@@ -826,7 +839,8 @@ static int gt_tir_stream_next(GtNodeStream *ns, GT_UNUSED GtGenomeNode **gn,
       seqid = gt_str_new();
       source = gt_str_new_cstr("TIRvish");
 
-      if (gt_encseq_has_md5_support(tir_stream->encseq)) {
+      if (gt_encseq_has_md5_support(tir_stream->encseq)
+            && tir_stream->output_md5) {
         GtMD5Tab *md5_tab = NULL;
         md5_tab = gt_encseq_get_md5_tab(tir_stream->encseq, err);
         if (!md5_tab) {
@@ -841,11 +855,22 @@ static int gt_tir_stream_next(GtNodeStream *ns, GT_UNUSED GtGenomeNode **gn,
         }
         gt_md5_tab_delete(md5_tab);
       }
-      gt_str_append_cstr(seqid, "seq");   /* XXX */
-      gt_str_append_uword(seqid, pair->contignumber);
+
+      if (!had_err && gt_encseq_has_description_support(tir_stream->encseq)
+            && tir_stream->output_seqids) {
+        GtUword desclength = 0UL, i = 0UL;
+        const char *desc;
+        desc = gt_encseq_description(tir_stream->encseq,
+                                     &desclength, pair->contignumber);
+        while (*(desc+i) != ' ' && i != desclength)
+          i++;
+        gt_str_append_cstr_nt(seqid, desc, i);
+      } else {
+        gt_str_append_cstr(seqid, "seq");
+        gt_str_append_uword(seqid, pair->contignumber);
+      }
 
       /* repeat region */
-
       node = gt_feature_node_new(seqid, gt_ft_repeat_region,
                                  pair->left_tir_start - seqstartpos -
                                    pair->tsd_length + 1,
@@ -1028,4 +1053,28 @@ const GtEncseq* gt_tir_stream_get_encseq(GtTIRStream *ts)
 {
   gt_assert(ts);
   return ts->encseq;
+}
+
+void gt_tir_stream_disable_md5_seqids(GtTIRStream *tir_stream)
+{
+  gt_assert(tir_stream != NULL);
+  tir_stream->output_md5 = false;
+}
+
+void gt_tir_stream_enable_md5_seqids(GtTIRStream *tir_stream)
+{
+  gt_assert(tir_stream != NULL);
+  tir_stream->output_md5 = true;
+}
+
+void gt_tir_stream_disable_seqids(GtTIRStream *tir_stream)
+{
+  gt_assert(tir_stream != NULL);
+  tir_stream->output_seqids = false;
+}
+
+void gt_tir_stream_enable_seqids(GtTIRStream *tir_stream)
+{
+  gt_assert(tir_stream != NULL);
+  tir_stream->output_seqids = true;
 }
