@@ -294,7 +294,7 @@ static GtOptionParser* gt_tir_option_parser_new(void *tool_arguments)
                                     "use sequence descriptions instead of "
                                     "sequence numbers in GFF3 output",
                                     &arguments->seqids,
-                                    false);
+                                    true);
   gt_option_parser_add_option(op, optionseqids);
 
   optionmd5 = gt_option_new_bool("md5",

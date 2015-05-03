@@ -1009,6 +1009,8 @@ GtNodeStream* gt_tir_stream_new(GtStr *str_indexname,
   tir_stream->min_TSD_length = min_TSD_length;
   tir_stream->max_TSD_length = max_TSD_length;
   tir_stream->vicinity = vicinity;
+  tir_stream->output_seqids = true;
+  tir_stream->output_md5 = false;
 
   tir_stream->seedinfo.max_tir_length = max_TIR_length;
   tir_stream->seedinfo.min_tir_length = min_TIR_length;
