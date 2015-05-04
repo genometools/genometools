@@ -363,15 +363,10 @@ static void gt_tir_find_best_TSD(TSDinfo *info, GtTIRStream *tir_stream,
 static int gt_tir_search_for_TSDs(GtTIRStream *tir_stream, TIRPair *tir_pair,
                                   const GtEncseq *encseq, GtError *err)
 {
-  GtUword start_left_tir,
-                end_left_tir,
-                start_right_tir,
-                end_right_tir,
-                left_length,
-                right_length,
-                seq_start_pos1,
-                seq_end_pos2,
-                seq_length;
+  GtUword start_left_tir,  end_left_tir,
+          start_right_tir, end_right_tir,
+          left_length, right_length,
+          seq_start_pos1, seq_end_pos2, seq_length;
   GtUword contignumber = tir_pair->contignumber;
   TSDinfo info;
   int had_err = 0;
@@ -601,16 +596,18 @@ static int gt_tir_searchforTIRs(GtTIRStream *tir_stream,
     gt_tir_search_for_TSDs(tir_stream, pair, encseq, err);
 
     /* make sure the TIR coords are still OK */
-    if (pair->left_tir_end <= pair->left_tir_start ||
-        pair->right_tir_end <= pair->right_tir_start) {
+    if (!pair->skip && (pair->left_tir_end <= pair->left_tir_start ||
+        pair->right_tir_end <= pair->right_tir_start)) {
       pair->skip = true;
     }
     if (!pair->skip) {
       /* determine and filter by similarity */
       ulen = pair->left_tir_end - pair->left_tir_start;
       vlen = pair->right_tir_end - pair->right_tir_start;
-      gt_seqabstract_reinit_encseq(sa_useq, encseq, ulen, pair->left_tir_start);
-      gt_seqabstract_reinit_encseq(sa_vseq, encseq, vlen, pair->right_tir_start);
+      gt_seqabstract_reinit_encseq(sa_useq, encseq, ulen,
+                                   pair->left_tir_start);
+      gt_seqabstract_reinit_encseq(sa_vseq, encseq, vlen,
+                                   pair->right_tir_start);
       edist = greedyunitedist(frontresource, sa_useq, sa_vseq);
       pair->similarity = 100.0 * (1.0 - (double) edist/MAX(ulen, vlen));
       gt_log_log("edist "GT_WU", sim %f", edist, pair->similarity);

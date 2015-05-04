@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2012-2013 Sascha Steinbiss <steinbiss@informatik.uni-hamburg.de>
+  Copyright (c) 2012-2015 Sascha Steinbiss <sascha@steinbiss.name>
   Copyright (c) 2012      Manuela Beckert <9beckert@informatik.uni-hamburg.de>
   Copyright (c) 2012      Dorle Osterode <9osterod@informatik.uni-hamburg.de>
   Copyright (c) 2012-2013 Center for Bioinformatics, University of Hamburg
@@ -26,7 +26,7 @@
 #include "extended/gff3_out_stream_api.h"
 #include "extended/tir_stream.h"
 #include "extended/visitor_stream.h"
-  /* XXX */
+/* XXX */
 #include "ltr/ltrdigest_pdom_visitor.h"
 #include "ltr/pdom_model_set.h"
 #include "match/xdrop.h"
