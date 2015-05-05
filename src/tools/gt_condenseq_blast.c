@@ -65,7 +65,7 @@ typedef struct {
   bool    blastp,
           blastn,
           createdb;
-} GtCondenserSearchArguments;
+} GtCondenseqBlastArguments;
 
 typedef struct{
   GtRange range;
@@ -79,12 +79,12 @@ typedef struct {
           max,
           count;
   double  raw_eval;
-} GtCondenserBlastQInfo;
+} GtCondenseqBlastQInfo;
 
 typedef struct {
   GtCondenseq                *ces;
   GtCondenseqBlastHitPos     *hits;
-  GtCondenserSearchArguments *args;
+  GtCondenseqBlastArguments *args;
   GtError                    *err;
   GtLogger                   *logger;
   GtNodeVisitor              *nodev;
@@ -99,7 +99,7 @@ typedef struct {
 
 static void* gt_condenseq_blast_arguments_new(void)
 {
-  GtCondenserSearchArguments *arguments =
+  GtCondenseqBlastArguments *arguments =
     gt_calloc((size_t) 1, sizeof *arguments);
   arguments->querypath = gt_str_new();
   arguments->gff = gt_str_new();
@@ -110,7 +110,7 @@ static void* gt_condenseq_blast_arguments_new(void)
 
 static void gt_condenseq_blast_arguments_delete(void *tool_arguments)
 {
-  GtCondenserSearchArguments *arguments = tool_arguments;
+  GtCondenseqBlastArguments *arguments = tool_arguments;
   if (arguments != NULL) {
     gt_condenseq_search_info_delete(arguments->csi);
     gt_file_delete(arguments->outfp);
@@ -124,7 +124,7 @@ static void gt_condenseq_blast_arguments_delete(void *tool_arguments)
 static GtOptionParser*
 gt_condenseq_blast_option_parser_new(void *tool_arguments)
 {
-  GtCondenserSearchArguments *arguments = tool_arguments;
+  GtCondenseqBlastArguments *arguments = tool_arguments;
   GtOptionParser *op;
   GtOption *option, *score_opt, *ceval_opt, *feval_opt, *blastp_opt,
            *blastn_opt;
@@ -203,7 +203,7 @@ static int gt_condenseq_blast_arguments_check(GT_UNUSED int rest_argc,
                                               void *tool_arguments,
                                               GT_UNUSED GtError *err)
 {
-  GtCondenserSearchArguments *arguments = tool_arguments;
+  GtCondenseqBlastArguments *arguments = tool_arguments;
   int had_err = 0;
   if (!(arguments->blastn || arguments->blastp)) {
     gt_error_set(err, "no other searches then blast implemented yet, please "
@@ -286,7 +286,7 @@ static inline int gt_condenseq_avg_helper(GtUword current_len,
                                           void *data,
                                           GT_UNUSED GtError *err)
 {
-  GtCondenserBlastQInfo *qinfo = (GtCondenserBlastQInfo *) data;
+  GtCondenseqBlastQInfo *qinfo = (GtCondenseqBlastQInfo *) data;
   qinfo->avg += current_len;
   qinfo->count++;
   gt_assert(qinfo->avg >= current_len);
@@ -409,7 +409,7 @@ static int gt_condenseq_blast_hit_overlaps(GtCondenseqBlastPrintHitInfo *info)
 
 static inline int
 gt_condenseq_blast_calc_query_stats(GtCesBlastInfo *info,
-                                    GtCondenserBlastQInfo *qinfo)
+                                    GtCondenseqBlastQInfo *qinfo)
 {
   int had_err = 0;
   qinfo->max = 0;
@@ -449,7 +449,7 @@ gt_condenseq_blast_calc_query_stats(GtCesBlastInfo *info,
 static inline int
 gt_condenseq_blast_parse_coarse_hits(const GtMatch *match,
                                      GtCesBlastInfo *info,
-                                     const GtCondenserBlastQInfo qinfo)
+                                     const GtCondenseqBlastQInfo qinfo)
 {
   int had_err = 0;
   GtUword hit_seq_id;
@@ -485,7 +485,7 @@ gt_condenseq_blast_parse_coarse_hits(const GtMatch *match,
 
 static inline int
 gt_condenseq_blast_run_coarse(GtCesBlastInfo *info,
-                              const GtCondenserBlastQInfo qinfo)
+                              const GtCondenseqBlastQInfo qinfo)
 {
   int had_err = 0;
   GtBlastProcessCall *call;
@@ -567,7 +567,7 @@ static int gt_condenseq_blast_runner(GT_UNUSED int argc,
   int had_err = 0;
 
   GtCesBlastInfo info;
-  GtCondenserBlastQInfo qinfo;
+  GtCondenseqBlastQInfo qinfo;
 
   GtFile          *gffout = NULL;
   GtMatchIterator *mp = NULL;
