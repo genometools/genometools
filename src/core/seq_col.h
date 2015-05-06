@@ -30,6 +30,8 @@ int         gt_seq_col_grep_desc(GtSeqCol*, char **seq,
                                  GtStr *seqid, GtError*);
 int         gt_seq_col_grep_desc_md5(GtSeqCol*, const char **md5,
                                      GtStr *seqid, GtError*);
+int         gt_seq_col_grep_desc_description(GtSeqCol*, GtStr *desc,
+                                             GtStr *seqid, GtError*);
 int         gt_seq_col_grep_desc_sequence_length(GtSeqCol *sc,
                                                  GtUword *length,
                                                  GtStr *seqid,

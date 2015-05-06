@@ -203,6 +203,24 @@ static int gt_encseq_col_grep_desc_md5(GtSeqCol *sc, const char **md5,
   return had_err;
 }
 
+static int gt_encseq_col_grep_desc_desc(GtSeqCol *sc, GtStr *desc,
+                                        GtStr *seqid, GtError *err)
+{
+  GtUword filenum = 0, seqnum = 0;
+  int had_err;
+  GtEncseqCol *esc;
+  esc = gt_encseq_col_cast(sc);
+  gt_error_check(err);
+  gt_assert(esc && desc && seqid);
+  had_err = gt_encseq_col_do_grep_desc(esc, &filenum, &seqnum, seqid, err);
+  if (!had_err) {
+    const char *mydesc = gt_seq_col_get_description(sc, seqnum, filenum);
+    if (mydesc)
+      gt_str_append_cstr(desc, mydesc);
+  }
+  return had_err;
+}
+
 static int gt_encseq_col_grep_desc_sequence_length(GtSeqCol *sc,
                                                    GtUword *length,
                                                    GtStr *seqid,
@@ -418,6 +436,7 @@ const GtSeqColClass* gt_encseq_col_class(void)
                                        gt_encseq_col_delete,
                                        gt_encseq_col_enable_match_desc_start,
                                        gt_encseq_col_grep_desc,
+                                       gt_encseq_col_grep_desc_desc,
                                        gt_encseq_col_grep_desc_md5,
                                        gt_encseq_col_grep_desc_sequence_length,
                                        gt_encseq_col_md5_to_seq,
