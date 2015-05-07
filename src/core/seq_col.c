@@ -27,6 +27,8 @@ const GtSeqColClass* gt_seq_col_class_new(size_t size,
                                           GtSeqColEnableMatchDescStartFunc
                                                         enable_match_desc_start,
                                           GtSeqColGrepDescFunc grep_desc,
+                                          GtSeqColGrepDescDescFunc
+                                                                 grep_desc_desc,
                                           GtSeqColGrepDescMD5Func grep_desc_md5,
                                           GtSeqColGrepDescSeqlenFunc
                                                                grep_desc_seqlen,
@@ -45,6 +47,7 @@ const GtSeqColClass* gt_seq_col_class_new(size_t size,
   c_class->free = free;
   c_class->enable_match_desc_start = enable_match_desc_start;
   c_class->grep_desc = grep_desc;
+  c_class->grep_desc_desc = grep_desc_desc;
   c_class->grep_desc_md5 = grep_desc_md5;
   c_class->grep_desc_seqlen = grep_desc_seqlen;
   c_class->md5_to_desc = md5_to_desc;
@@ -105,6 +108,15 @@ int gt_seq_col_grep_desc_md5(GtSeqCol *sc, const char **md5, GtStr *seqid,
   gt_assert(sc && md5 && seqid);
   if (sc->c_class->grep_desc_md5)
     return sc->c_class->grep_desc_md5(sc, md5, seqid, err);
+  return 0;
+}
+
+int gt_seq_col_grep_desc_description(GtSeqCol *sc, GtStr *desc, GtStr *seqid,
+                                     GtError *err)
+{
+  gt_assert(sc && desc && seqid);
+  if (sc->c_class->grep_desc_desc)
+    return sc->c_class->grep_desc_desc(sc, desc, seqid, err);
   return 0;
 }
 

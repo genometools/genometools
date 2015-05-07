@@ -424,11 +424,7 @@ int gt_region_mapping_get_description(GtRegionMapping *rm, GtStr *desc,
     if (gt_md5_seqid_has_prefix(gt_str_get(seqid))) {
       had_err = gt_seq_col_md5_to_description(rm->seq_col, desc, seqid,
                                               err);
-    }
-    return had_err;
-  }
-  if (!had_err) {
-    if (rm->usedesc) {
+    } else if (rm->usedesc) {
       GtUword filenum, seqnum;
       gt_assert(rm->seqid2seqnum_mapping);
       had_err = gt_seqid2seqnum_mapping_map(rm->seqid2seqnum_mapping,
@@ -441,8 +437,7 @@ int gt_region_mapping_get_description(GtRegionMapping *rm, GtStr *desc,
         gt_str_append_cstr(desc, cdesc);
         gt_free(cdesc);
       }
-    }
-    else if (rm->useseqno) {
+    } else if (rm->useseqno) {
       GtUword seqno = GT_UNDEF_UWORD;
       gt_assert(rm->encseq);
       if (1 != sscanf(gt_str_get(seqid), "seq"GT_WU"", &seqno)) {
@@ -465,15 +460,8 @@ int gt_region_mapping_get_description(GtRegionMapping *rm, GtStr *desc,
         gt_str_append_cstr_nt(desc, edesc, desclen);
       }
     } else if (rm->matchdesc) {
-      const char *md5;
-      /* XXX: not beautiful, but works -- this may be LOTS faster */
-      had_err = gt_seq_col_grep_desc_md5(rm->seq_col, &md5, seqid, err);
-      if (!had_err) {
-        GtStr *md5_seqid = gt_str_new_cstr(md5);
-        had_err = gt_seq_col_md5_to_description(rm->seq_col, desc, md5_seqid,
-                                                err);
-        gt_str_delete(md5_seqid);
-      }
+      had_err = gt_seq_col_grep_desc_description(rm->seq_col, desc,
+                                                 seqid, err);
     } else if (rm->mapping) {
       char *cdesc;
       cdesc = gt_seq_col_get_description(rm->seq_col, 0, 0);

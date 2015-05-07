@@ -84,11 +84,11 @@ static int seqid_info_get(SeqidInfo *seqid_info, GtUword *seqnum,
   SeqidInfoElem *seqid_info_elem;
   GtUword i;
   gt_error_check(err);
-  gt_assert(seqid_info && seqnum && outrange && inrange);
+  gt_assert(seqid_info && seqnum && outrange);
   for (i = 0; i < gt_array_size(seqid_info); i++) {
     seqid_info_elem = gt_array_get(seqid_info, i);
     if (seqid_info_elem->descrange.end == GT_UNDEF_UWORD ||
-        gt_range_contains(&seqid_info_elem->descrange, inrange)) {
+        (inrange && gt_range_contains(&seqid_info_elem->descrange, inrange))) {
       *seqnum = seqid_info_elem->seqnum;
       *filenum = seqid_info_elem->filenum;
       *outrange = seqid_info_elem->descrange;
