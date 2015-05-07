@@ -21,6 +21,7 @@
 #include "core/radix_sort.h"
 #include "match/seed-extend.h"
 #include "match/sfx-mappedstr.h"
+#include "core/unused_api.h"
 
 #define GT_SEED_EXTEND_ARRAY_INCR 256
 
@@ -47,6 +48,7 @@ void gt_seed_extend_get_kmers(GtArrayGtSeedExtendKmerPos *list,
   GtKmercodeiterator *kc_iter;
   const GtKmercode *kmercode;
 
+  gt_assert(list != NULL && encseq != NULL);
   kc_iter = gt_kmercodeiterator_encseq_new(encseq, GT_READMODE_FORWARD, kmerlen,
                                            0);
   while ((kmercode = gt_kmercodeiterator_encseq_nonspecial_next(kc_iter))
@@ -57,6 +59,8 @@ void gt_seed_extend_get_kmers(GtArrayGtSeedExtendKmerPos *list,
     kmerposptr->code = kmercode->code;
     kmerposptr->endpos = gt_kmercodeiterator_encseq_get_currentpos(kc_iter) - 1;
     kmerposptr->seqnum = gt_encseq_seqnum(encseq, kmerposptr->endpos);
+    gt_assert(kmerposptr->endpos >= gt_encseq_seqstartpos(encseq,
+                                                          kmerposptr->seqnum));
     kmerposptr->endpos -= gt_encseq_seqstartpos(encseq, kmerposptr->seqnum);
   }
   gt_kmercodeiterator_delete(kc_iter);
@@ -78,9 +82,9 @@ void gt_seed_extend_merge(GtArrayGtSeedExtendSeedPair *mlist,
       aptr ++;
     } else if (aptr->code > bptr->code) {
       bptr ++;
-    } else { /* k-mer codes are equal */
+    } else { /* k-mer codes are equal: process all equal elements from blist */
       for (tptr = bptr; tptr < bend && aptr->code == tptr->code; tptr ++) {
-        if (alist != blist || aptr->seqnum < tptr->seqnum) {
+        if (alist != blist || aptr->seqnum < tptr->seqnum) { /* no duplicates */
           GtSeedExtendSeedPair *seedptr;
           GT_GETNEXTFREEINARRAY(seedptr, mlist, GtSeedExtendSeedPair,
                                 GT_SEED_EXTEND_ARRAY_INCR);
@@ -148,7 +152,7 @@ void gt_seed_extend_find_seeds(const GtArrayGtSeedExtendSeedPair *mlist,
         score[diag] += kmerlen;
       } else {
         /* gt_assert(lastp[diag] <= lm[nextsegm].apos);  TODO: sort on Apos! */
-        score[diag] += lm[nextsegm].apos - lastp[diag];
+        score[diag] = score[diag] + lm[nextsegm].apos - lastp[diag];
       }
       lastp[diag] = lm[nextsegm].apos;
       nextsegm ++;
@@ -158,6 +162,7 @@ void gt_seed_extend_find_seeds(const GtArrayGtSeedExtendSeedPair *mlist,
 
     /* report seeds */
     for (i = currsegm; i < nextsegm; i++) {
+      gt_assert(lm[i].bpos <= bmaxlen);
       diag = (bmaxlen + lm[i].apos - lm[i].bpos) >> diagbandw;
       if (gt_seed_extend_is_seed(&lm[i], score, mincoverage, diag)) {
 #ifdef MYTEST
@@ -207,7 +212,7 @@ void gt_seed_extend_run(const GtEncseq *aencseq, const GtEncseq *bencseq,
                                      blist.nextfreeGtSeedExtendKmerPos);
     gt_radixsort_delete(rdxinfo);
   } else { /* compare all reads of encseq A with themselves */
-    bencseq = aencseq;
+    /* bencseq = aencseq; */
   }
 
   GT_INITARRAY(&mlist,GtSeedExtendSeedPair);
@@ -233,8 +238,9 @@ void gt_seed_extend_run(const GtEncseq *aencseq, const GtEncseq *bencseq,
   }
 #endif
 
-  gt_seed_extend_find_seeds(&mlist, kmerlen, mincoverage, diagbandw, amaxlen,
-                            bmaxlen);
+  if (mlist.nextfreeGtSeedExtendSeedPair != 0)
+    gt_seed_extend_find_seeds(&mlist, kmerlen, mincoverage, diagbandw, amaxlen,
+                              bmaxlen);
 
   GT_FREEARRAY(&mlist, GtSeedExtendSeedPair);
   GT_FREEARRAY(&alist, GtSeedExtendKmerPos);
