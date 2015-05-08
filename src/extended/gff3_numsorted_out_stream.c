@@ -59,7 +59,7 @@ static int gff3_numsorted_out_stream_next(GtNodeStream *ns, GtGenomeNode **gn,
       }
     }
   }
-  if (gff3_out_stream->outqueue) {
+  if (gff3_out_stream->outqueue && !had_err) {
     if (gt_queue_size(gff3_out_stream->outqueue) > 0) {
       GtGenomeNode *mygn = (GtGenomeNode*)
                                         gt_queue_get(gff3_out_stream->outqueue);
