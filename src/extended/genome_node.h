@@ -37,11 +37,16 @@ int           gt_genome_node_compare_with_data(GtGenomeNode**, GtGenomeNode**,
 /* <delta> has to point to a variable of type GtUword. */
 int           gt_genome_node_compare_delta(GtGenomeNode**, GtGenomeNode**,
                                            void *delta);
+int           gt_genome_node_compare_numeric_seqids(GtGenomeNode **gn_a,
+                                                    GtGenomeNode **gn_b);
 
 void          gt_genome_nodes_show(GtArray *nodes, GtFile *outfp);
 bool          gt_genome_nodes_are_equal_region_nodes(GtGenomeNode*,
                                                      GtGenomeNode*);
 bool          gt_genome_nodes_are_sorted(const GtArray*);
+void          gt_genome_nodes_sort_with_func(GtArray *nodes, GtCompare cmp);
+void          gt_genome_nodes_sort_stable_with_func(GtArray *nodes,
+                                                    GtCompare cmp);
 
 int           gt_genome_node_unit_test(GtError*);
 

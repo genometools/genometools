@@ -24,6 +24,7 @@
 #include "core/ma.h"
 #include "core/md5_seqid.h"
 #include "core/msort.h"
+#include "core/parseutils_api.h"
 #include "core/queue_api.h"
 #include "core/unused_api.h"
 #include "extended/eof_node_api.h"
@@ -138,7 +139,9 @@ static int compare_genome_node_type(GtGenomeNode *gn_a, GtGenomeNode *gn_b)
   return 0;
 }
 
-int gt_genome_node_cmp(GtGenomeNode *gn_a, GtGenomeNode *gn_b)
+static inline int gt_genome_node_cmp_generic(GtGenomeNode *gn_a,
+                                             GtGenomeNode *gn_b,
+                                             bool numeric_cmp)
 {
   GtRange range_a, range_b;
   int rval;
@@ -151,12 +154,39 @@ int gt_genome_node_cmp(GtGenomeNode *gn_a, GtGenomeNode *gn_b)
 
   id_a = gt_str_get(gt_genome_node_get_idstr(gn_a));
   id_b = gt_str_get(gt_genome_node_get_idstr(gn_b));
-  if ((rval = gt_md5_seqid_cmp_seqids(id_a, id_b))) {
-    return rval;
+  if (numeric_cmp) {
+    GtUword anum, bnum;
+    int arval, brval;
+    arval = gt_parse_uword(&anum, id_a);
+    brval = gt_parse_uword(&bnum, id_b);
+    if (arval == 0 && brval == 0)
+      rval = anum-bnum;
+    else if (arval == 0)
+      return -1;
+    else if (brval == 0)
+      return 1;
+    else
+      rval = 0;
+    if (rval)
+      return rval;
+  } else {
+    if ((rval = gt_md5_seqid_cmp_seqids(id_a, id_b))) {
+      return rval;
+    }
   }
   range_a = gt_genome_node_get_range(gn_a),
   range_b = gt_genome_node_get_range(gn_b);
   return gt_range_compare(&range_a, &range_b);
+}
+
+int gt_genome_node_cmp(GtGenomeNode *gn_a, GtGenomeNode *gn_b)
+{
+  return gt_genome_node_cmp_generic(gn_a, gn_b, false);
+}
+
+int gt_genome_node_cmp_num_seqid(GtGenomeNode *gn_a, GtGenomeNode *gn_b)
+{
+  return gt_genome_node_cmp_generic(gn_a, gn_b, true);
 }
 
 static int compare_genome_nodes_with_delta(GtGenomeNode *gn_a,
@@ -302,6 +332,12 @@ int gt_genome_node_compare(GtGenomeNode **gn_a, GtGenomeNode **gn_b)
   return gt_genome_node_cmp(*gn_a, *gn_b);
 }
 
+int gt_genome_node_compare_numeric_seqids(GtGenomeNode **gn_a,
+                                          GtGenomeNode **gn_b)
+{
+  return gt_genome_node_cmp_num_seqid(*gn_a, *gn_b);
+}
+
 int gt_genome_node_compare_with_data(GtGenomeNode **gn_a, GtGenomeNode **gn_b,
                                      GT_UNUSED void *unused)
 {
@@ -322,10 +358,22 @@ void gt_genome_nodes_sort(GtArray *nodes)
         sizeof (GtGenomeNode*), (GtCompare) gt_genome_node_compare);
 }
 
+void gt_genome_nodes_sort_with_func(GtArray *nodes, GtCompare cmp)
+{
+  qsort(gt_array_get_space(nodes), gt_array_size(nodes),
+        sizeof (GtGenomeNode*), cmp);
+}
+
 void gt_genome_nodes_sort_stable(GtArray *nodes)
 {
   gt_msort(gt_array_get_space(nodes), gt_array_size(nodes),
            sizeof (GtGenomeNode*), (GtCompare) gt_genome_node_compare);
+}
+
+void gt_genome_nodes_sort_stable_with_func(GtArray *nodes, GtCompare cmp)
+{
+  gt_msort(gt_array_get_space(nodes), gt_array_size(nodes),
+           sizeof (GtGenomeNode*), cmp);
 }
 
 void gt_genome_nodes_show(GtArray *nodes, GtFile *outfp)

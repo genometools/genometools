@@ -27,12 +27,13 @@
 #include "extended/gff3_in_stream.h"
 #include "extended/gff3_out_stream_api.h"
 #include "extended/gff3_linesorted_out_stream.h"
+#include "extended/gff3_numsorted_out_stream.h"
 #include "extended/gff3_parser.h"
 #include "extended/gtdatahelp.h"
 #include "extended/load_stream.h"
 #include "extended/merge_feature_stream_api.h"
 #include "extended/set_source_visitor_api.h"
-#include "extended/sort_stream_api.h"
+#include "extended/sort_stream.h"
 #include "extended/typecheck_info.h"
 #include "extended/visitor_stream_api.h"
 #include "extended/xrfcheck_info.h"
@@ -41,6 +42,7 @@
 typedef struct {
   bool sort,
        sortlines,
+       sortnum,
        load,
        retainids,
        checkids,
@@ -91,7 +93,8 @@ static GtOptionParser* gt_gff3_option_parser_new(void *tool_arguments)
   GtOptionParser *op;
   GtOption *sort_option, *load_option, *strict_option, *tidy_option,
            *mergefeat_option, *addintrons_option, *offset_option,
-           *offsetfile_option, *setsource_option, *sortlines_option, *option;
+           *offsetfile_option, *setsource_option, *sortlines_option,
+           *sortnum_option, *option;
   gt_assert(arguments);
 
   /* init */
@@ -112,6 +115,15 @@ static GtOptionParser* gt_gff3_option_parser_new(void *tool_arguments)
                                         &arguments->sortlines, false);
   gt_option_imply(sortlines_option, sort_option);
   gt_option_parser_add_option(op, sortlines_option);
+
+  /* -sortnum */
+  sortnum_option = gt_option_new_bool("sortnum", "enable natural numeric "
+                                        "sorting for sequence regions (not "
+                                        "sorted as defined by GenomeTools)",
+                                        &arguments->sortnum, false);
+  gt_option_imply(sortnum_option, sort_option);
+  gt_option_parser_add_option(op, sortnum_option);
+  gt_option_exclude(sortlines_option, sortnum_option);
 
   /* -strict */
   strict_option = gt_option_new_bool("strict", "be very strict during GFF3 "
@@ -342,6 +354,15 @@ static int gt_gff3_runner(int argc, const char **argv, int parsed_args,
       if (arguments->retainids)
         gt_gff3_linesorted_out_stream_retain_id_attributes(
                                   (GtGFF3LinesortedOutStream*) gff3_out_stream);
+    } else if (arguments->sortnum) {
+      gff3_out_stream = gt_gff3_numsorted_out_stream_new(last_stream,
+                                                          arguments->outfp);
+      gt_gff3_numsorted_out_stream_set_fasta_width(
+                                   (GtGFF3NumsortedOutStream*) gff3_out_stream,
+                                   arguments->width);
+      if (arguments->retainids)
+        gt_gff3_numsorted_out_stream_retain_id_attributes(
+                                  (GtGFF3NumsortedOutStream*) gff3_out_stream);
     } else {
       gff3_out_stream = gt_gff3_out_stream_new(last_stream, arguments->outfp);
       gt_gff3_out_stream_set_fasta_width((GtGFF3OutStream*) gff3_out_stream,

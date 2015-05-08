@@ -1,0 +1,141 @@
+##gff-version   3
+##sequence-region   1 131538 888657
+##sequence-region   2 15868 654363
+##sequence-region   3 319250 989224
+##sequence-region   4 81061 839965
+##sequence-region   5 178328 989113
+##sequence-region   6 66843 500480
+##sequence-region   7 26877 990441
+##sequence-region   8 103434 671189
+##sequence-region   9 252127 878767
+##sequence-region   10 596 842839
+##sequence-region   11 588977 1003901
+##sequence-region   12 554584 785979
+##sequence-region   13 34573 710245
+##sequence-region   14 92174 909512
+##sequence-region   15 153605 949496
+##sequence-region   ctg123 1 1497228
+1	.	gene	131538	135317	.	+	.	.
+1	.	gene	678865	682262	.	+	.	.
+1	.	gene	736082	737724	.	+	.	.
+1	.	gene	886032	888657	.	+	.	.
+2	.	gene	15868	19311	.	+	.	.
+2	.	gene	274589	274604	.	+	.	.
+2	.	gene	365340	366606	.	+	.	.
+2	.	gene	500708	502629	.	+	.	.
+2	.	gene	631635	636059	.	+	.	.
+2	.	gene	651254	654363	.	+	.	.
+3	.	gene	319250	322397	.	+	.	.
+3	.	gene	681347	683277	.	+	.	.
+3	.	gene	783154	785431	.	+	.	.
+3	.	gene	916634	920964	.	+	.	.
+3	.	gene	983236	984457	.	+	.	.
+3	.	gene	987938	989224	.	+	.	.
+4	.	gene	81061	83006	.	+	.	.
+4	.	gene	90733	95472	.	+	.	.
+4	.	gene	101638	102736	.	+	.	.
+4	.	gene	306322	308078	.	+	.	.
+4	.	gene	714710	715363	.	+	.	.
+4	.	gene	836420	839965	.	+	.	.
+5	.	gene	178328	179097	.	+	.	.
+5	.	gene	193968	194025	.	+	.	.
+5	.	gene	436412	440245	.	+	.	.
+5	.	gene	692169	693590	.	+	.	.
+5	.	gene	886991	890252	.	+	.	.
+5	.	gene	913818	916467	.	+	.	.
+5	.	gene	986643	989113	.	+	.	.
+6	.	gene	66843	68931	.	+	.	.
+6	.	gene	166508	168941	.	+	.	.
+6	.	gene	203251	203393	.	+	.	.
+6	.	gene	247039	251952	.	+	.	.
+6	.	gene	452301	456346	.	+	.	.
+6	.	gene	499742	500480	.	+	.	.
+7	.	gene	26877	30427	.	+	.	.
+7	.	gene	65194	68762	.	+	.	.
+7	.	gene	315733	318307	.	+	.	.
+7	.	gene	532768	533863	.	+	.	.
+7	.	gene	537304	539644	.	+	.	.
+7	.	gene	682495	685898	.	+	.	.
+7	.	gene	824698	828143	.	+	.	.
+7	.	gene	841511	842858	.	+	.	.
+7	.	gene	940980	941231	.	+	.	.
+7	.	gene	951368	954532	.	+	.	.
+7	.	gene	961096	961727	.	+	.	.
+7	.	gene	989363	990441	.	+	.	.
+8	.	gene	103434	105505	.	+	.	.
+8	.	gene	237775	239150	.	+	.	.
+8	.	gene	591114	595344	.	+	.	.
+8	.	gene	667680	671091	.	+	.	.
+8	.	gene	671150	671189	.	+	.	.
+9	.	gene	252127	254570	.	+	.	.
+9	.	gene	498481	503258	.	+	.	.
+9	.	gene	802406	802572	.	+	.	.
+9	.	gene	845576	848527	.	+	.	.
+9	.	gene	876566	878767	.	+	.	.
+10	.	gene	596	601	.	+	.	.
+10	.	gene	176881	181023	.	+	.	.
+10	.	gene	416000	419506	.	+	.	.
+10	.	gene	696008	699982	.	+	.	.
+10	.	gene	756411	761367	.	+	.	.
+10	.	gene	817562	821342	.	+	.	.
+10	.	gene	842040	842839	.	+	.	.
+11	.	gene	588977	593630	.	+	.	.
+11	.	gene	753356	756614	.	+	.	.
+11	.	gene	869264	872843	.	+	.	.
+11	.	gene	908922	910173	.	+	.	.
+11	.	gene	987146	991919	.	+	.	.
+11	.	gene	999458	1003901	.	+	.	.
+12	.	gene	554584	559038	.	+	.	.
+12	.	gene	629572	630642	.	+	.	.
+12	.	gene	727335	728931	.	+	.	.
+12	.	gene	770205	774345	.	+	.	.
+12	.	gene	783866	785979	.	+	.	.
+13	.	gene	34573	34841	.	+	.	.
+13	.	gene	94549	94958	.	+	.	.
+13	.	gene	136455	138446	.	+	.	.
+13	.	gene	247842	250225	.	+	.	.
+13	.	gene	289317	292005	.	+	.	.
+13	.	gene	365159	366217	.	+	.	.
+13	.	gene	471263	473793	.	+	.	.
+13	.	gene	526929	527389	.	+	.	.
+13	.	gene	706536	710245	.	+	.	.
+14	.	gene	92174	92985	.	+	.	.
+14	.	gene	426498	427209	.	+	.	.
+14	.	gene	439726	442064	.	+	.	.
+14	.	gene	504523	507105	.	+	.	.
+14	.	gene	543949	544645	.	+	.	.
+14	.	gene	629544	633226	.	+	.	.
+14	.	gene	651647	652724	.	+	.	.
+14	.	gene	762199	763512	.	+	.	.
+14	.	gene	909209	909512	.	+	.	.
+15	.	gene	153605	156758	.	+	.	.
+15	.	gene	239911	240816	.	+	.	.
+15	.	gene	383503	386101	.	+	.	.
+15	.	gene	408767	409477	.	+	.	.
+15	.	gene	410314	410970	.	+	.	.
+15	.	gene	556147	556888	.	+	.	.
+15	.	gene	947546	949496	.	+	.	.
+ctg123	.	gene	1000	9000	.	+	.	ID=gene1;Name=EDEN
+ctg123	.	TF_binding_site	1000	1012	.	+	.	Parent=gene1
+ctg123	.	mRNA	1050	9000	.	+	.	ID=mRNA1;Parent=gene1;Name=EDEN.1
+ctg123	.	CDS	1201	1500	.	+	0	ID=CDS1;Parent=mRNA1;Name=edenprotein.1
+ctg123	.	CDS	3000	3902	.	+	0	ID=CDS1;Parent=mRNA1;Name=edenprotein.1
+ctg123	.	CDS	5000	5500	.	+	0	ID=CDS1;Parent=mRNA1;Name=edenprotein.1
+ctg123	.	CDS	7000	7600	.	+	0	ID=CDS1;Parent=mRNA1;Name=edenprotein.1
+ctg123	.	mRNA	1050	9000	.	+	.	ID=mRNA2;Parent=gene1;Name=EDEN.2
+ctg123	.	exon	1050	1500	.	+	.	Parent=mRNA1,mRNA2
+ctg123	.	CDS	1201	1500	.	+	0	ID=CDS2;Parent=mRNA2;Name=edenprotein.2
+ctg123	.	CDS	5000	5500	.	+	0	ID=CDS2;Parent=mRNA2;Name=edenprotein.2
+ctg123	.	CDS	7000	7600	.	+	0	ID=CDS2;Parent=mRNA2;Name=edenprotein.2
+ctg123	.	mRNA	1300	9000	.	+	.	ID=mRNA3;Parent=gene1;Name=EDEN.3
+ctg123	.	exon	1300	1500	.	+	.	Parent=mRNA3
+ctg123	.	exon	3000	3902	.	+	.	Parent=mRNA1,mRNA3
+ctg123	.	CDS	3301	3902	.	+	0	ID=CDS3;Parent=mRNA3;Name=edenprotein.3
+ctg123	.	CDS	3391	3902	.	+	0	ID=CDS4;Parent=mRNA3;Name=edenprotein.4
+ctg123	.	exon	5000	5500	.	+	.	Parent=mRNA1,mRNA2,mRNA3
+ctg123	.	CDS	5000	5500	.	+	1	ID=CDS3;Parent=mRNA3;Name=edenprotein.3
+ctg123	.	CDS	5000	5500	.	+	1	ID=CDS4;Parent=mRNA3;Name=edenprotein.4
+ctg123	.	CDS	7000	7600	.	+	1	ID=CDS3;Parent=mRNA3;Name=edenprotein.3
+ctg123	.	CDS	7000	7600	.	+	1	ID=CDS4;Parent=mRNA3;Name=edenprotein.4
+ctg123	.	exon	7000	9000	.	+	.	Parent=mRNA1,mRNA2,mRNA3
+###

@@ -1497,6 +1497,35 @@ Test do
   run "diff 1 3"
 end
 
+Name "gt gff3 -sortnum (missing -sort) "
+Keywords "gt_gff3 numsorting"
+Test do
+  run_test "#{$bin}gt gff3 -sortnum #{$testdata}eden.gff3", :retval => 1
+  grep last_stderr, "requires option \"-sort\""
+end
+
+Name "gt gff3 -sortnum (standard gene)"
+Keywords "gt_gff3 numsorting"
+Test do
+  run_test "#{$bin}gt gff3 -sort -retainids #{$testdata}eden.gff3 > 1"
+  run_test "#{$bin}gt gff3 -sort -retainids -sortnum #{$testdata}eden.gff3"
+  run "diff #{last_stdout} 1"
+end
+
+Name "gt gff3 -sortnum (numeric seqids only)"
+Keywords "gt_gff3 numsorting"
+Test do
+  run_test "#{$bin}gt gff3 -sort -retainids -sortnum #{$testdata}gff3_numeric_only.gff3"
+  run "diff #{last_stdout} #{$testdata}gff3_numeric_only.out"
+end
+
+Name "gt gff3 -sortnum (mixed numeric + alphanumeric seqids)"
+Keywords "gt_gff3 numsorting"
+Test do
+  run_test "#{$bin}gt gff3 -sort -retainids -sortnum #{$testdata}gff3_numeric_mixed.gff3"
+  run "diff #{last_stdout} #{$testdata}gff3_numeric_mixed.out"
+end
+
 Name "gt gff3 (double free regression)"
 Keywords "gt_gff3"
 Test do
