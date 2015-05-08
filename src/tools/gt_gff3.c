@@ -113,7 +113,6 @@ static GtOptionParser* gt_gff3_option_parser_new(void *tool_arguments)
                                         "on a strict line basis (not sorted as"
                                         "defined by GenomeTools)",
                                         &arguments->sortlines, false);
-  gt_option_imply(sortlines_option, sort_option);
   gt_option_parser_add_option(op, sortlines_option);
 
   /* -sortnum */
@@ -121,7 +120,6 @@ static GtOptionParser* gt_gff3_option_parser_new(void *tool_arguments)
                                         "sorting for sequence regions (not "
                                         "sorted as defined by GenomeTools)",
                                         &arguments->sortnum, false);
-  gt_option_imply(sortnum_option, sort_option);
   gt_option_parser_add_option(op, sortnum_option);
   gt_option_exclude(sortlines_option, sortnum_option);
 
@@ -316,7 +314,7 @@ static int gt_gff3_runner(int argc, const char **argv, int parsed_args,
   }
 
   /* create sort stream (if necessary) */
-  if (!had_err && arguments->sort) {
+  if (!had_err && (arguments->sort || arguments->sortlines)) {
     sort_stream = gt_sort_stream_new(last_stream);
     last_stream = sort_stream;
   }
