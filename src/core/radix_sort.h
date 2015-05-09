@@ -52,6 +52,11 @@
    This mechanism is implemented by the class GtRadixreader which, for
    efficiency reasons, is not opaque and mainly accessed via macros. */
 
+typedef struct
+{
+  uint64_t uint64_a, uint64_b;
+} Gtuint64keyPair;
+
 /* Same as before, but for the case that pairs are to be sorted. */
 void gt_radixsort_lsb_linear(GtUword *source,GtUword len);
 
@@ -127,6 +132,19 @@ void             gt_radixsort_delete(GtRadixsortinfo *radixsortinfo);
 
 void gt_radixsort_lsb_linear(GtUword *source,GtUword len);
 
+/* Special version of function to sort Pairs of GtUwords, where the
+   first component is the key */
+
 void gt_radixsort_inplace_GtUwordPair(GtUwordPair *source, GtUword len);
+
+/* Special version of function to sort Pairs of uint64_t-values, where 
+   both components serve as keys. */
+
+void gt_radixsort_inplace_Gtuint64keyPair(Gtuint64keyPair *source,GtUword len);
+
+/* Return the space storing the uint64_t key pairs. */
+
+Gtuint64keyPair *gt_radixsort_space_uint64keypair(
+                                 GtRadixsortinfo *radixsortinfo);
 
 #endif
