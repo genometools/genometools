@@ -12,24 +12,24 @@ def parseargs(argv)
   options = OpenStruct.new
   options.typename = :ulong
   ulongpairset = false
-  seedpairset = false
+  uint64keypairset = false
   opts = OptionParser.new
   opts.on("--ulongpair",
           "generate code sorting key/value pairs of ulongs") do |x|
     ulongpairset = true
     options.typename = :ulongkeyvaluepair
   end
-  opts.on("--seedpair","generate code sorting pairs of seeds (128 bit)") do |x|
-    seedpairset = true
-    options.typename = :seedpair
+  opts.on("--uint64keypair","generate code sorting pairs of uint64_t keys") do |x|
+    uint64keypairset = true
+    options.typename = :uint64keypair
   end
   rest = opts.parse(argv)
   if not rest.empty?
     usage(opts,"superfluous arguments")
   end
-  if ulongpairset and seedpairset
-    STDERR.puts "#{$0}: cannot combine option --ulongpair and --seedpair"
-    exit 1 
+  if ulongpairset and uint64keypairset
+    STDERR.puts "#{$0}: cannot combine option --ulongpair and --uint64keypair"
+    exit 1
   end
   return options
 end
@@ -40,7 +40,7 @@ def makekey(options)
   elsif options.typename == :ulongkeyvaluepair
     return "ulongpair"
   else
-    return "seedpair"
+    return "uint64keypair"
   end
 end
 
@@ -50,23 +50,53 @@ def maketype(options)
   elsif options.typename == :ulongkeyvaluepair
     return "GtUwordPair"
   else
-    return "GtQuasiSeedExtendSeedPair"
+    return "Gtuint64keyPair"
   end
 end
 
-def derefptr(ptr,options)
-  if options.typename == :ulong
-    return "*#{ptr}"
+def derefptr(ptr,options,comp="a")
+  if m = ptr.match(/^&(\w+)/)
+    var = m[1]
   else
-    return "#{ptr}->a"
+    var = ptr
+  end
+  if options.typename == :ulong
+    if var == ptr
+      return "*#{var}"
+    else
+      return "#{var}"
+    end
+  elsif options.typename == :ulongkeyvaluepair
+    if var == ptr
+      return "#{var}->#{comp}"
+    else
+      return "#{var}.#{comp}"
+    end
+  else
+    if var == ptr
+      return "#{var}->uint64_#{comp}"
+    else
+      return "#{var}.uint64_#{comp}"
+    end
   end
 end
 
-def derefval(val,options)
-  if options.typename == :ulong
-    return "#{val}"
+def radixkey(var,options)
+  if options.typename == :ulong or options.typename == :ulongkeyvaluepair
+    return "GT_RADIX_KEY(UINT8_MAX,rightshift,#{derefptr(var,options)})"
   else
-    return "#{val}.a"
+    return "(rightshift > (sizeof (GtUword) - 1) * CHAR_BIT) ? " +
+           "GT_RADIX_KEY(UINT8_MAX,rightshift - sizeof (GtUword) * CHAR_BIT," +
+           "#{derefptr(var,options)}) : " +
+           "GT_RADIX_KEY(UINT8_MAX,rightshift,#{derefptr(var,options,"b")})"
+  end
+end
+
+def compare_smaller(ptr1,ptr2,options)
+  if options.typename == :ulong or options.typename == :ulongkeyvaluepair
+    return "#{derefptr(ptr1,options)} < #{derefptr(ptr2,options)}"
+  else
+    return "gt_radixsort_compare_smaller(#{ptr1},#{ptr2})"
   end
 end
 
@@ -136,7 +166,7 @@ static void gt_radixsort_#{makekey(options)}_cached_shuffle(GtRadixbuffer *rbuf,
   }
   for (sp = source; sp < spend; sp++)
   {
-    count[GT_RADIX_KEY(UINT8_MAX,rightshift,#{derefptr("sp",options)})]++;
+    count[#{radixkey("sp",options)}]++;
   }
   for (bufoffset = 0, binoffset = 0, binnum = 0; binnum <= UINT8_MAX;
        bufoffset += rbuf->buf_size, binoffset += count[binnum], binnum++)
@@ -172,8 +202,7 @@ static void gt_radixsort_#{makekey(options)}_cached_shuffle(GtRadixbuffer *rbuf,
       gt_radixsort_#{makekey(options)}_bin_get(rbuf,binnum);
     while (true)
     {
-      binnum = GT_RADIX_KEY(UINT8_MAX,rightshift,
-                            #{derefval("currentvalue",options)});
+      binnum = #{radixkey("&currentvalue",options)};
       if (current != rbuf->endofbin[binnum])
       {
         #{maketype(options)} tmp = currentvalue;
@@ -242,7 +271,7 @@ static void gt_radixsort_#{makekey(options)}_uncached_shuffle(
   }
   for (sp = source; sp < spend; sp++)
   {
-    count[GT_RADIX_KEY(UINT8_MAX,rightshift,#{derefptr("sp",options)})]++;
+    count[#{radixkey("sp",options)}]++;
   }
   previouscount = count[0];
   rbuf->startofbin[0] = rbuf->endofbin[0] = 0;
@@ -262,9 +291,7 @@ static void gt_radixsort_#{makekey(options)}_uncached_shuffle(
 
     while (true)
     {
-      binptr = rbuf->endofbin +
-               GT_RADIX_KEY(UINT8_MAX,rightshift,
-                            #{derefval("currentvalue",options)});
+      binptr = rbuf->endofbin + (#{radixkey("&currentvalue",options)});
       if (current != *binptr)
       {
         #{maketype(options)} tmp = currentvalue;
@@ -320,15 +347,13 @@ gt_radixsort_#{makekey(options)}_inplace_insertionsort(#{maketype(options)} *a,
 
   for (optr = a + 1; optr < end; optr++)
   {
-    if (#{derefptr("optr",options)} < #{derefptr("(optr-1)",options)})
+    if (#{compare_smaller("optr","(optr-1)",options)})
     {
       #{maketype(options)} currentElement = *optr;
 
       *optr = *(optr-1);
       for (iptr = optr-1;
-           iptr > a &&
-             #{derefval("currentElement",options)} <
-             #{derefptr("(iptr-1)",options)};
+           iptr > a && #{compare_smaller("&currentElement","(iptr-1)",options)};
            iptr--)
       {
         *iptr = *(iptr-1);
@@ -356,7 +381,7 @@ static void gt_radixsort_#{makekey(options)}_process_bin(
 
       if (width == (GtCountbasetype) 2)
       {
-        if (#{derefptr("(ptr+1)",options)} < #{derefptr("ptr",options)})
+        if (#{compare_smaller("(ptr+1)","ptr",options)})
         {
           #{maketype(options)} tmp = *ptr;
           *ptr = *(ptr+1);
