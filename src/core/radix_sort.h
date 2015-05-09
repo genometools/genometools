@@ -137,7 +137,7 @@ void gt_radixsort_lsb_linear(GtUword *source,GtUword len);
 
 void gt_radixsort_inplace_GtUwordPair(GtUwordPair *source, GtUword len);
 
-/* Special version of function to sort Pairs of uint64_t-values, where 
+/* Special version of function to sort Pairs of uint64_t-values, where
    both components serve as keys. */
 
 void gt_radixsort_inplace_Gtuint64keyPair(Gtuint64keyPair *source,GtUword len);

@@ -85,9 +85,9 @@ def radixkey(var,options)
   if options.typename == :ulong or options.typename == :ulongkeyvaluepair
     return "GT_RADIX_KEY(UINT8_MAX,rightshift,#{derefptr(var,options)})"
   else
-    return "(rightshift > (sizeof (GtUword) - 1) * CHAR_BIT) ? " +
-           "GT_RADIX_KEY(UINT8_MAX,rightshift - sizeof (GtUword) * CHAR_BIT," +
-           "#{derefptr(var,options)}) : " +
+    return "(rightshift > (sizeof (GtUword) - 1) * CHAR_BIT) ?\n" +
+           "GT_RADIX_KEY(UINT8_MAX,rightshift - sizeof (GtUword) * CHAR_BIT,\n" +
+           "#{derefptr(var,options)}) :\n" +
            "GT_RADIX_KEY(UINT8_MAX,rightshift,#{derefptr(var,options,"b")})"
   end
 end
@@ -291,7 +291,8 @@ static void gt_radixsort_#{makekey(options)}_uncached_shuffle(
 
     while (true)
     {
-      binptr = rbuf->endofbin + (#{radixkey("&currentvalue",options)});
+      binptr = rbuf->endofbin +
+               (#{radixkey("&currentvalue",options)});
       if (current != *binptr)
       {
         #{maketype(options)} tmp = currentvalue;

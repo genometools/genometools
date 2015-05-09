@@ -186,7 +186,8 @@ static void gt_radixsort_ulong_uncached_shuffle(
 
     while (true)
     {
-      binptr = rbuf->endofbin + (GT_RADIX_KEY(UINT8_MAX,rightshift,currentvalue));
+      binptr = rbuf->endofbin +
+               (GT_RADIX_KEY(UINT8_MAX,rightshift,currentvalue));
       if (current != *binptr)
       {
         GtUword tmp = currentvalue;
