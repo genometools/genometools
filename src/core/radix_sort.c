@@ -283,7 +283,8 @@ static GtRadixbuffer *gt_radixbuffer_new(GtRadixelemtype elemtype)
       buf->size += sizeof *buf->values.ulongptr * buf->cachesize;
     } else
     {
-      buf->values.uint64keypairptr = gt_malloc(sizeof *buf->values.uint64keypairptr *
+      buf->values.uint64keypairptr
+        = gt_malloc(sizeof *buf->values.uint64keypairptr *
                                           buf->cachesize);
       buf->size += sizeof *buf->values.uint64keypairptr *
     }
@@ -358,7 +359,8 @@ static void *gt_radixsort_thread_caller(void *data)
       gt_radixsort_ulong_sub_inplace (threadinfo->rbuf,&threadinfo->stack);
     } else
     {
-      gt_radixsort_uint64keypair_sub_inplace (threadinfo->rbuf,&threadinfo->stack);
+      gt_radixsort_uint64keypair_sub_inplace (threadinfo->rbuf,
+                                              &threadinfo->stack);
     }
   }
   return NULL;

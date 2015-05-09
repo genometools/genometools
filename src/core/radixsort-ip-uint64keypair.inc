@@ -61,7 +61,10 @@ static void gt_radixsort_uint64keypair_cached_shuffle(GtRadixbuffer *rbuf,
   }
   for (sp = source; sp < spend; sp++)
   {
-    count[(rightshift > (sizeof (GtUword) - 1) * CHAR_BIT) ? GT_RADIX_KEY(UINT8_MAX,rightshift - sizeof (GtUword) * CHAR_BIT,sp->uint64_a) : GT_RADIX_KEY(UINT8_MAX,rightshift,sp->uint64_b)]++;
+    count[(rightshift > (sizeof (GtUword) - 1) * CHAR_BIT) ?
+GT_RADIX_KEY(UINT8_MAX,rightshift - sizeof (GtUword) * CHAR_BIT,
+sp->uint64_a) :
+GT_RADIX_KEY(UINT8_MAX,rightshift,sp->uint64_b)]++;
   }
   for (bufoffset = 0, binoffset = 0, binnum = 0; binnum <= UINT8_MAX;
        bufoffset += rbuf->buf_size, binoffset += count[binnum], binnum++)
@@ -97,7 +100,10 @@ static void gt_radixsort_uint64keypair_cached_shuffle(GtRadixbuffer *rbuf,
       gt_radixsort_uint64keypair_bin_get(rbuf,binnum);
     while (true)
     {
-      binnum = (rightshift > (sizeof (GtUword) - 1) * CHAR_BIT) ? GT_RADIX_KEY(UINT8_MAX,rightshift - sizeof (GtUword) * CHAR_BIT,currentvalue.uint64_a) : GT_RADIX_KEY(UINT8_MAX,rightshift,currentvalue.uint64_b);
+      binnum = (rightshift > (sizeof (GtUword) - 1) * CHAR_BIT) ?
+GT_RADIX_KEY(UINT8_MAX,rightshift - sizeof (GtUword) * CHAR_BIT,
+currentvalue.uint64_a) :
+GT_RADIX_KEY(UINT8_MAX,rightshift,currentvalue.uint64_b);
       if (current != rbuf->endofbin[binnum])
       {
         Gtuint64keyPair tmp = currentvalue;
@@ -166,7 +172,10 @@ static void gt_radixsort_uint64keypair_uncached_shuffle(
   }
   for (sp = source; sp < spend; sp++)
   {
-    count[(rightshift > (sizeof (GtUword) - 1) * CHAR_BIT) ? GT_RADIX_KEY(UINT8_MAX,rightshift - sizeof (GtUword) * CHAR_BIT,sp->uint64_a) : GT_RADIX_KEY(UINT8_MAX,rightshift,sp->uint64_b)]++;
+    count[(rightshift > (sizeof (GtUword) - 1) * CHAR_BIT) ?
+GT_RADIX_KEY(UINT8_MAX,rightshift - sizeof (GtUword) * CHAR_BIT,
+sp->uint64_a) :
+GT_RADIX_KEY(UINT8_MAX,rightshift,sp->uint64_b)]++;
   }
   previouscount = count[0];
   rbuf->startofbin[0] = rbuf->endofbin[0] = 0;
@@ -186,7 +195,11 @@ static void gt_radixsort_uint64keypair_uncached_shuffle(
 
     while (true)
     {
-      binptr = rbuf->endofbin + ((rightshift > (sizeof (GtUword) - 1) * CHAR_BIT) ? GT_RADIX_KEY(UINT8_MAX,rightshift - sizeof (GtUword) * CHAR_BIT,currentvalue.uint64_a) : GT_RADIX_KEY(UINT8_MAX,rightshift,currentvalue.uint64_b));
+      binptr = rbuf->endofbin +
+               ((rightshift > (sizeof (GtUword) - 1) * CHAR_BIT) ?
+GT_RADIX_KEY(UINT8_MAX,rightshift - sizeof (GtUword) * CHAR_BIT,
+currentvalue.uint64_a) :
+GT_RADIX_KEY(UINT8_MAX,rightshift,currentvalue.uint64_b));
       if (current != *binptr)
       {
         Gtuint64keyPair tmp = currentvalue;
