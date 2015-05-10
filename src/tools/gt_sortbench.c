@@ -271,6 +271,60 @@ static void gt_sortbench_verify(GT_UNUSED const GtUword *arr,
   printf("verified\n");
 }
 
+typedef uint32_t GtSeedExtendPosition;
+typedef uint32_t GtSeedExtendSeqnum;
+
+/* do not change the order of the components */
+
+typedef struct
+{
+  GtSeedExtendSeqnum bseqnum; /*  2nd important sort criterion */
+  GtSeedExtendSeqnum aseqnum; /* most important sort criterion */
+  GtSeedExtendPosition bpos;
+  GtSeedExtendPosition apos;  /*  3rd important sort criterion */
+} GtSeedExtendSeedPair;
+
+/* The following implements the comparison function we want when ordering
+   values of type GtSeedExtendSeedPair. */
+
+static int compareseedextendseedpair(const GtSeedExtendSeedPair *p1,
+                                     const GtSeedExtendSeedPair *p2)
+{
+  if (p1->aseqnum < p2->aseqnum)
+  {
+    return -1;
+  }
+  if (p1->aseqnum > p2->aseqnum)
+  {
+    return 1;
+  }
+  if (p1->bseqnum < p2->bseqnum)
+  {
+    return -1;
+  }
+  if (p1->bseqnum > p2->bseqnum)
+  {
+    return 1;
+  }
+  if (p1->apos < p2->apos)
+  {
+    return -1;
+  }
+  if (p1->apos > p2->apos)
+  {
+    return 1;
+  }
+  if (p1->bpos < p2->bpos)
+  {
+    return -1;
+  }
+  if (p1->bpos > p2->bpos)
+  {
+    return 1;
+  }
+  return 0;
+}
+
 static void gt_sortbench_verify_keypair(GT_UNUSED const Gtuint64keyPair *arr,
                                         GT_UNUSED const Gtuint64keyPair
                                              *arr_copy,
@@ -278,16 +332,30 @@ static void gt_sortbench_verify_keypair(GT_UNUSED const Gtuint64keyPair *arr,
 {
   GtUword idx;
 
+  gt_assert(sizeof (GtSeedExtendSeedPair) == sizeof (*arr));
   for (idx = 1UL; idx < len; idx++)
   {
+    /* We check if the order in GtSeedExtendSeedPair is correctly implemented
+       by casting a Gtuint64keyPair-pointer to a GtSeedExtendSeedPair-pointer
+       and then calling the comparison function. The order on
+       Gtuint64keyPair implies the order on GtSeedExtendSeedPair. */
+#ifndef NDEBUG
+    GtSeedExtendSeedPair *ptr1, *ptr2;
+    ptr1 = (GtSeedExtendSeedPair *) (arr + idx - 1);
+    ptr2 = (GtSeedExtendSeedPair *) (arr + idx);
+#endif
     gt_assert(arr[idx-1].uint64_a < arr[idx].uint64_a ||
               (arr[idx-1].uint64_a == arr[idx].uint64_a &&
                arr[idx-1].uint64_b <= arr[idx].uint64_b));
+    gt_assert(compareseedextendseedpair(ptr1,ptr2) <= 0);
   }
   for (idx = 0UL; idx < len; idx++)
   {
     gt_assert(arr[idx].uint64_a == arr_copy[idx].uint64_a);
     gt_assert(arr[idx].uint64_b == arr_copy[idx].uint64_b);
+    /*seedptr = (GtSeedExtendSeedPair *) (arr + idx);
+    printf("%12u %12u %12u %12u\n",seedptr->bseqnum,seedptr->aseqnum,
+                           seedptr->bpos,seedptr->apos);*/
   }
   printf("verified\n");
 }
