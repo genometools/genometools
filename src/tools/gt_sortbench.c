@@ -271,6 +271,7 @@ static void gt_sortbench_verify(GT_UNUSED const GtUword *arr,
   printf("verified\n");
 }
 
+#ifndef NDEBUG
 typedef uint32_t GtSeedExtendPosition;
 typedef uint32_t GtSeedExtendSeqnum;
 
@@ -324,6 +325,7 @@ static int compareseedextendseedpair(const GtSeedExtendSeedPair *p1,
   }
   return 0;
 }
+#endif
 
 static void gt_sortbench_verify_keypair(GT_UNUSED const Gtuint64keyPair *arr,
                                         GT_UNUSED const Gtuint64keyPair
