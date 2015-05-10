@@ -151,7 +151,7 @@ void gt_seed_extend_find_seeds(const GtArrayGtSeedExtendSeedPair *mlist,
       if (lm[nextsegm].apos >= kmerlen + lastp[diag]) {
         score[diag] += kmerlen;
       } else {
-        /* gt_assert(lastp[diag] <= lm[nextsegm].apos);  TODO: sort on Apos! */
+        gt_assert(lastp[diag] <= lm[nextsegm].apos);/*if fail: sorted by apos?*/
         score[diag] = score[diag] + lm[nextsegm].apos - lastp[diag];
       }
       lastp[diag] = lm[nextsegm].apos;
@@ -220,10 +220,10 @@ void gt_seed_extend_run(const GtEncseq *aencseq, const GtEncseq *bencseq,
     gt_seed_extend_merge(&mlist, &alist, &blist);
   else
     gt_seed_extend_merge(&mlist, &alist, &alist);
-  rdxinfo = gt_radixsort_new_ulongpair(mlist.nextfreeGtSeedExtendSeedPair);
-  gt_radixsort_inplace_GtUwordPair((GtUwordPair*)mlist.
-                                   spaceGtSeedExtendSeedPair,
-                                   mlist.nextfreeGtSeedExtendSeedPair);
+  rdxinfo = gt_radixsort_new_uint64keypair(mlist.nextfreeGtSeedExtendSeedPair);
+  gt_radixsort_inplace_Gtuint64keyPair((Gtuint64keyPair*)mlist.
+                                       spaceGtSeedExtendSeedPair,
+                                       mlist.nextfreeGtSeedExtendSeedPair);
   gt_radixsort_delete(rdxinfo);
 
 #ifndef NOPRINT
