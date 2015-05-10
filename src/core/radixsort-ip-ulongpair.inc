@@ -97,8 +97,7 @@ static void gt_radixsort_ulongpair_cached_shuffle(GtRadixbuffer *rbuf,
       gt_radixsort_ulongpair_bin_get(rbuf,binnum);
     while (true)
     {
-      binnum = GT_RADIX_KEY(UINT8_MAX,rightshift,
-                            currentvalue.a);
+      binnum = GT_RADIX_KEY(UINT8_MAX,rightshift,currentvalue.a);
       if (current != rbuf->endofbin[binnum])
       {
         GtUwordPair tmp = currentvalue;
@@ -188,8 +187,7 @@ static void gt_radixsort_ulongpair_uncached_shuffle(
     while (true)
     {
       binptr = rbuf->endofbin +
-               GT_RADIX_KEY(UINT8_MAX,rightshift,
-                            currentvalue.a);
+               (GT_RADIX_KEY(UINT8_MAX,rightshift,currentvalue.a));
       if (current != *binptr)
       {
         GtUwordPair tmp = currentvalue;
@@ -251,9 +249,7 @@ gt_radixsort_ulongpair_inplace_insertionsort(GtUwordPair *a,
 
       *optr = *(optr-1);
       for (iptr = optr-1;
-           iptr > a &&
-             currentElement.a <
-             (iptr-1)->a;
+           iptr > a && currentElement.a < (iptr-1)->a;
            iptr--)
       {
         *iptr = *(iptr-1);
@@ -281,7 +277,7 @@ static void gt_radixsort_ulongpair_process_bin(
 
       if (width == (GtCountbasetype) 2)
       {
-        if (ptr->a > (ptr+1)->a)
+        if ((ptr+1)->a < ptr->a)
         {
           GtUwordPair tmp = *ptr;
           *ptr = *(ptr+1);

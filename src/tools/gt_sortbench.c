@@ -62,7 +62,7 @@ static void gt_sortbench_arguments_delete(void *tool_arguments)
 
 static const char *gt_sort_implementation_names[]
     = {"thomas","system","inlinedptr","inlinedarr","direct","dual-pivot",
-       "radixinplace","radixlsb",NULL};
+       "radixinplace","radixlsb","radixkeypair",NULL};
 
 static GtOptionParser* gt_sortbench_option_parser_new(void *tool_arguments)
 {
@@ -79,7 +79,7 @@ static GtOptionParser* gt_sortbench_option_parser_new(void *tool_arguments)
   option = gt_option_new_choice(
                  "impl", "implementation\nchoose from "
                  "thomas|system|inlinedptr|inlinedarr|direct|\n"
-                 "dual-pivot|radixinplace|radixlsb",
+                 "dual-pivot|radixinplace|radixlsb|radixkeypair",
                   arguments->impl,
                   gt_sort_implementation_names[0],
                   gt_sort_implementation_names);
@@ -122,12 +122,19 @@ static GtOptionParser* gt_sortbench_option_parser_new(void *tool_arguments)
 
 static int gt_sortbench_arguments_check(GT_UNUSED int rest_argc,
                                         void *tool_arguments,
-                                        GT_UNUSED GtError *err)
+                                        GtError *err)
 {
-  GT_UNUSED QSortBenchArguments *arguments = tool_arguments;
+  QSortBenchArguments *arguments = tool_arguments;
   int had_err = 0;
 
   gt_assert(arguments != NULL);
+  if ((arguments->use_aqsort || arguments->use_permute) &&
+      strcmp(gt_str_get(arguments->impl),"radixkeypair") == 0)
+  {
+    gt_error_set(err,"options -aqsort and -permute is not compatible with "
+                     "option -impl radixkeypair");
+    had_err = -1;
+  }
   return had_err;
 }
 
@@ -248,13 +255,109 @@ static int QSORTNAME(qsortcmparr)(const QSORTNAME(Sorttype) *arr,
 }
 
 static void gt_sortbench_verify(GT_UNUSED const GtUword *arr,
-                                 GtUword len)
+                                GT_UNUSED const GtUword *arr_copy,
+                                GtUword len)
 {
   GtUword idx;
 
   for (idx = 1UL; idx < len; idx++)
   {
     gt_assert(arr[idx-1] <= arr[idx]);
+  }
+  for (idx = 0UL; idx < len; idx++)
+  {
+    gt_assert(arr[idx] <= arr_copy[idx]);
+  }
+  printf("verified\n");
+}
+
+#ifndef NDEBUG
+typedef uint32_t GtSeedExtendPosition;
+typedef uint32_t GtSeedExtendSeqnum;
+
+/* do not change the order of the components */
+
+typedef struct
+{
+  GtSeedExtendSeqnum bseqnum; /*  2nd important sort criterion */
+  GtSeedExtendSeqnum aseqnum; /* most important sort criterion */
+  GtSeedExtendPosition bpos;
+  GtSeedExtendPosition apos;  /*  3rd important sort criterion */
+} GtSeedExtendSeedPair;
+
+/* The following implements the comparison function we want when ordering
+   values of type GtSeedExtendSeedPair. */
+
+static int compareseedextendseedpair(const GtSeedExtendSeedPair *p1,
+                                     const GtSeedExtendSeedPair *p2)
+{
+  if (p1->aseqnum < p2->aseqnum)
+  {
+    return -1;
+  }
+  if (p1->aseqnum > p2->aseqnum)
+  {
+    return 1;
+  }
+  if (p1->bseqnum < p2->bseqnum)
+  {
+    return -1;
+  }
+  if (p1->bseqnum > p2->bseqnum)
+  {
+    return 1;
+  }
+  if (p1->apos < p2->apos)
+  {
+    return -1;
+  }
+  if (p1->apos > p2->apos)
+  {
+    return 1;
+  }
+  if (p1->bpos < p2->bpos)
+  {
+    return -1;
+  }
+  if (p1->bpos > p2->bpos)
+  {
+    return 1;
+  }
+  return 0;
+}
+#endif
+
+static void gt_sortbench_verify_keypair(GT_UNUSED const Gtuint64keyPair *arr,
+                                        GT_UNUSED const Gtuint64keyPair
+                                             *arr_copy,
+                                        GtUword len)
+{
+  GtUword idx;
+
+  gt_assert(sizeof (GtSeedExtendSeedPair) == sizeof (*arr));
+  for (idx = 1UL; idx < len; idx++)
+  {
+    /* We check if the order in GtSeedExtendSeedPair is correctly implemented
+       by casting a Gtuint64keyPair-pointer to a GtSeedExtendSeedPair-pointer
+       and then calling the comparison function. The order on
+       Gtuint64keyPair implies the order on GtSeedExtendSeedPair. */
+#ifndef NDEBUG
+    GtSeedExtendSeedPair *ptr1, *ptr2;
+    ptr1 = (GtSeedExtendSeedPair *) (arr + idx - 1);
+    ptr2 = (GtSeedExtendSeedPair *) (arr + idx);
+#endif
+    gt_assert(arr[idx-1].uint64_a < arr[idx].uint64_a ||
+              (arr[idx-1].uint64_a == arr[idx].uint64_a &&
+               arr[idx-1].uint64_b <= arr[idx].uint64_b));
+    gt_assert(compareseedextendseedpair(ptr1,ptr2) <= 0);
+  }
+  for (idx = 0UL; idx < len; idx++)
+  {
+    gt_assert(arr[idx].uint64_a == arr_copy[idx].uint64_a);
+    gt_assert(arr[idx].uint64_b == arr_copy[idx].uint64_b);
+    /*seedptr = (GtSeedExtendSeedPair *) (arr + idx);
+    printf("%12u %12u %12u %12u\n",seedptr->bseqnum,seedptr->aseqnum,
+                           seedptr->bpos,seedptr->apos);*/
   }
   printf("verified\n");
 }
@@ -332,6 +435,46 @@ static GtQsortimplementationfunc gt_sort_implementation_funcs[] =
   gt_radixsort_lsb_linear
 };
 
+static int voidqsortcmp(const void *va,const void *vb)
+{
+  const GtUword a = *((GtUword *) va);
+  const GtUword b = *((GtUword *) vb);
+
+  if (a < b)
+  {
+    return -1;
+  }
+  if (a > b)
+  {
+    return 1;
+  }
+  return 0;
+}
+
+static int voidkeypairqsortcmp(const void *va,const void *vb)
+{
+  const Gtuint64keyPair *a = (const Gtuint64keyPair *) va;
+  const Gtuint64keyPair *b = (const Gtuint64keyPair *) vb;
+
+  if (a->uint64_a < b->uint64_a)
+  {
+    return -1;
+  }
+  if (a->uint64_a > b->uint64_a)
+  {
+    return 1;
+  }
+  if (a->uint64_b < b->uint64_b)
+  {
+    return -1;
+  }
+  if (a->uint64_b > b->uint64_b)
+  {
+    return 1;
+  }
+  return 0;
+}
+
 #define GT_NUM_OF_SORT_IMPLEMENTATIONS\
         (sizeof (gt_sort_implementation_funcs)/\
          sizeof (gt_sort_implementation_funcs[0]))
@@ -344,7 +487,8 @@ static int gt_sortbench_runner(GT_UNUSED int argc, GT_UNUSED const char **argv,
   int had_err = 0;
   size_t method;
   GtTimer *timer;
-  GtUword *array, idx;
+  GtUword *array = NULL, *array_copy = NULL, idx, r;
+  Gtuint64keyPair *arraykeypair = NULL, *arraykeypair_copy = NULL;
 
   gt_error_check(err);
   gt_assert(arguments);
@@ -355,52 +499,111 @@ static int gt_sortbench_runner(GT_UNUSED int argc, GT_UNUSED const char **argv,
   }
 
   /* prepare benchmark input data */
-  array = gt_malloc(sizeof (*array) * arguments->num_values );
-  if (arguments->use_aqsort) {
-    if (arguments->verbose)
-      printf("# using aqsort\n");
-    gt_sortbench_aqsort(arguments->num_values, array);
-  } else if (arguments->use_permute) {
-    if (arguments->verbose)
-      printf("# using permuted array\n");
-    for (idx = 0; idx < arguments->num_values; idx++) {
-      array[idx] = idx;
-    }
-    gt_qbenchsort_permute_ulong_array(array, arguments->num_values);
-  } else {
-    if (arguments->verbose)
-      printf("# using simple array of random numbers\n");
-    /* use seed initialization to make array deterministic */
-#ifndef _WIN32
-    srand48(366292341);
-    for (idx = 0; idx < arguments->num_values; idx++) {
-      array[idx] = drand48() * arguments->maxvalue;
-    }
-#else
-    /* XXX: use random instead of drand48() above */
-    fprintf(stderr, "drand48() not implemented\n");
-    exit(EXIT_FAILURE);
-#endif
+  if (strcmp(gt_str_get(arguments->impl),"radixkeypair") == 0)
+  {
+    arraykeypair = gt_malloc(sizeof (*arraykeypair) * arguments->num_values);
+  } else
+  {
+    array = gt_malloc(sizeof (*array) * arguments->num_values);
   }
-
+  if (arguments->use_aqsort)
+  {
+    if (arguments->verbose)
+    {
+      printf("# using aqsort\n");
+    }
+    gt_sortbench_aqsort(arguments->num_values, array);
+  } else
+  {
+    if (arguments->use_permute)
+    {
+      if (arguments->verbose)
+      {
+        printf("# using permuted array\n");
+      }
+      for (idx = 0; idx < arguments->num_values; idx++)
+      {
+        array[idx] = idx;
+      }
+      gt_qbenchsort_permute_ulong_array(array, arguments->num_values);
+    } else
+    {
+      if (arguments->verbose)
+      {
+        printf("# using simple array of random numbers\n");
+      }
+      /* use seed initialization to make array deterministic */
+#ifndef _WIN32
+      srand48(366292341);
+      if (arraykeypair != NULL)
+      {
+        for (idx = 0; idx < arguments->num_values; idx++)
+        {
+          arraykeypair[idx].uint64_a = drand48() * arguments->maxvalue;
+          arraykeypair[idx].uint64_b = drand48() * arguments->maxvalue;
+        }
+      } else
+      {
+        for (idx = 0; idx < arguments->num_values; idx++)
+        {
+          array[idx] = drand48() * arguments->maxvalue;
+        }
+      }
+#else
+      /* XXX: use random instead of drand48() above */
+      fprintf(stderr, "drand48() not implemented\n");
+      exit(EXIT_FAILURE);
+#endif
+    }
+  }
+  if (arguments->verify)
+  {
+    if (arraykeypair != NULL)
+    {
+      arraykeypair_copy = gt_malloc(sizeof (*arraykeypair_copy) *
+                                    arguments->num_values);
+      for (idx = 0; idx < arguments->num_values; idx++)
+      {
+        arraykeypair_copy[idx] = arraykeypair[idx];
+      }
+      qsort(arraykeypair_copy,arguments->num_values,sizeof *arraykeypair_copy,
+            voidkeypairqsortcmp);
+    } else
+    {
+      array_copy = gt_malloc(sizeof (*array_copy) * arguments->num_values);
+      for (idx = 0; idx < arguments->num_values; idx++)
+      {
+        array_copy[idx] = array[idx];
+      }
+      qsort(array_copy,arguments->num_values,sizeof *array_copy,voidqsortcmp);
+    }
+  }
   timer = gt_timer_new();
   gt_timer_start(timer);
   /* run implementation */
-  for (method = 0; method < GT_NUM_OF_SORT_IMPLEMENTATIONS; method++)
+  if (arraykeypair != NULL)
   {
-    if (strcmp(gt_str_get(arguments->impl),
-               gt_sort_implementation_names[method]) == 0)
+    for (r = 0; r < arguments->runs; r++)
     {
-      GtUword r;
-
-      for (r = 0; r < arguments->runs; r++)
+      gt_radixsort_inplace_Gtuint64keyPair(arraykeypair,arguments->num_values);
+    }
+  } else
+  {
+    for (method = 0; method < GT_NUM_OF_SORT_IMPLEMENTATIONS; method++)
+    {
+      if (strcmp(gt_str_get(arguments->impl),
+                 gt_sort_implementation_names[method]) == 0)
       {
-        gt_sort_implementation_funcs[method](array, arguments->num_values);
+        for (r = 0; r < arguments->runs; r++)
+        {
+          gt_assert(array != NULL && arraykeypair == NULL);
+          gt_assert(method < GT_NUM_OF_SORT_IMPLEMENTATIONS);
+          gt_sort_implementation_funcs[method](array, arguments->num_values);
+        }
+        break;
       }
-      break;
     }
   }
-  gt_assert(method < GT_NUM_OF_SORT_IMPLEMENTATIONS);
   printf("# TIME %s-t%u-r" GT_WU "-n" GT_WU " overall ",
           gt_str_get(arguments->impl),
 #ifdef GT_THREADS_ENABLED
@@ -413,9 +616,19 @@ static int gt_sortbench_runner(GT_UNUSED int argc, GT_UNUSED const char **argv,
   gt_timer_delete(timer);
   if (arguments->verify)
   {
-    gt_sortbench_verify(array,arguments->num_values);
+    if (arraykeypair != NULL)
+    {
+      gt_sortbench_verify_keypair(arraykeypair,arraykeypair_copy,
+                                  arguments->num_values);
+    } else
+    {
+      gt_sortbench_verify(array,array_copy,arguments->num_values);
+    }
   }
   gt_free(array);
+  gt_free(array_copy);
+  gt_free(arraykeypair);
+  gt_free(arraykeypair_copy);
   if (cmpcount > 0)
   {
     printf("cmpcount = "GT_WU"\n",cmpcount);

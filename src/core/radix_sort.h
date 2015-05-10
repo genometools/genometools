@@ -19,6 +19,7 @@
 #define RADIX_SORT_H
 
 #include <stdbool.h>
+#include <stdint.h>
 #include "core/types_api.h"
 
 /* This file describes the interface of a radixsort implementation
@@ -51,6 +52,11 @@
    Thus we only need a mechanism to simultaneously read the <p> sorted parts.
    This mechanism is implemented by the class GtRadixreader which, for
    efficiency reasons, is not opaque and mainly accessed via macros. */
+
+typedef struct
+{
+  uint64_t uint64_a, uint64_b;
+} Gtuint64keyPair;
 
 /* Same as before, but for the case that pairs are to be sorted. */
 void gt_radixsort_lsb_linear(GtUword *source,GtUword len);
@@ -102,6 +108,11 @@ GtRadixsortinfo *gt_radixsort_new_ulong(GtUword maxlen);
    created object can be used to sort arrays of <GtUwordPair> values. */
 GtRadixsortinfo* gt_radixsort_new_ulongpair(GtUword maxlen);
 
+/* The following function is like the previous, except that the
+   created object can be used to sort arrays of <Gtuint64keypair> values. */
+
+GtRadixsortinfo *gt_radixsort_new_uint64keypair(GtUword maxlen);
+
 /* Return the size of the <GtRadixsortinfo> object. */
 size_t           gt_radixsort_size(const GtRadixsortinfo *radixsortinfo);
 
@@ -127,6 +138,19 @@ void             gt_radixsort_delete(GtRadixsortinfo *radixsortinfo);
 
 void gt_radixsort_lsb_linear(GtUword *source,GtUword len);
 
+/* Special version of function to sort Pairs of GtUwords, where the
+   first component is the key */
+
 void gt_radixsort_inplace_GtUwordPair(GtUwordPair *source, GtUword len);
+
+/* Special version of function to sort Pairs of uint64_t-values, where
+   both components serve as keys. */
+
+void gt_radixsort_inplace_Gtuint64keyPair(Gtuint64keyPair *source,GtUword len);
+
+/* Return the space storing the uint64_t key pairs. */
+
+Gtuint64keyPair *gt_radixsort_space_uint64keypair(
+                                 GtRadixsortinfo *radixsortinfo);
 
 #endif
