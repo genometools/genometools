@@ -356,11 +356,11 @@ static void *gt_radixsort_thread_caller(void *data)
   {
     if (threadinfo->rbuf->elemtype == GtRadixelemtypeGtUword)
     {
-      gt_radixsort_ulong_sub_inplace (threadinfo->rbuf,&threadinfo->stack);
+      gt_radixsort_ulong_sub_inplace(threadinfo->rbuf,&threadinfo->stack);
     } else
     {
-      gt_radixsort_uint64keypair_sub_inplace (threadinfo->rbuf,
-                                              &threadinfo->stack);
+      gt_radixsort_uint64keypair_sub_inplace(threadinfo->rbuf,
+                                             &threadinfo->stack);
     }
   }
   return NULL;
