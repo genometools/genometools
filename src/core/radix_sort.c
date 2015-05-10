@@ -287,6 +287,7 @@ static GtRadixbuffer *gt_radixbuffer_new(GtRadixelemtype elemtype)
         = gt_malloc(sizeof *buf->values.uint64keypairptr *
                                           buf->cachesize);
       buf->size += sizeof *buf->values.uint64keypairptr *
+                   buf->cachesize;
     }
   }
   buf->startofbin = gt_malloc(sizeof *buf->startofbin * (UINT8_MAX + 2));
