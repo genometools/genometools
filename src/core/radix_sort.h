@@ -108,6 +108,11 @@ GtRadixsortinfo *gt_radixsort_new_ulong(GtUword maxlen);
    created object can be used to sort arrays of <GtUwordPair> values. */
 GtRadixsortinfo* gt_radixsort_new_ulongpair(GtUword maxlen);
 
+/* The following function is like the previous, except that the
+   created object can be used to sort arrays of <Gtuint64keypair> values. */
+
+GtRadixsortinfo *gt_radixsort_new_uint64keypair(GtUword maxlen);
+
 /* Return the size of the <GtRadixsortinfo> object. */
 size_t           gt_radixsort_size(const GtRadixsortinfo *radixsortinfo);
 
