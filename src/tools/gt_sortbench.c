@@ -254,7 +254,9 @@ static int QSORTNAME(qsortcmparr)(const QSORTNAME(Sorttype) *arr,
   return 0;
 }
 
-static void gt_sortbench_verify(GT_UNUSED const GtUword *arr,GtUword len)
+static void gt_sortbench_verify(GT_UNUSED const GtUword *arr,
+                                GT_UNUSED const GtUword *arr_copy,
+                                GtUword len)
 {
   GtUword idx;
 
@@ -262,11 +264,17 @@ static void gt_sortbench_verify(GT_UNUSED const GtUword *arr,GtUword len)
   {
     gt_assert(arr[idx-1] <= arr[idx]);
   }
+  for (idx = 0UL; idx < len; idx++)
+  {
+    gt_assert(arr[idx] <= arr_copy[idx]);
+  }
   printf("verified\n");
 }
 
-static void gt_sortbench_verify_keypairs(GT_UNUSED const Gtuint64keyPair *arr,
-                                         GtUword len)
+static void gt_sortbench_verify_keypair(GT_UNUSED const Gtuint64keyPair *arr,
+                                        GT_UNUSED const Gtuint64keyPair
+                                             *arr_copy,
+                                        GtUword len)
 {
   GtUword idx;
 
@@ -275,6 +283,11 @@ static void gt_sortbench_verify_keypairs(GT_UNUSED const Gtuint64keyPair *arr,
     gt_assert(arr[idx-1].uint64_a < arr[idx].uint64_a ||
               (arr[idx-1].uint64_a == arr[idx].uint64_a &&
                arr[idx-1].uint64_b <= arr[idx].uint64_b));
+  }
+  for (idx = 0UL; idx < len; idx++)
+  {
+    gt_assert(arr[idx].uint64_a == arr_copy[idx].uint64_a);
+    gt_assert(arr[idx].uint64_b == arr_copy[idx].uint64_b);
   }
   printf("verified\n");
 }
@@ -352,6 +365,46 @@ static GtQsortimplementationfunc gt_sort_implementation_funcs[] =
   gt_radixsort_lsb_linear
 };
 
+static int voidqsortcmp(const void *va,const void *vb)
+{
+  const GtUword a = *((GtUword *) va);
+  const GtUword b = *((GtUword *) vb);
+
+  if (a < b)
+  {
+    return -1;
+  }
+  if (a > b)
+  {
+    return 1;
+  }
+  return 0;
+}
+
+static int voidkeypairqsortcmp(const void *va,const void *vb)
+{
+  const Gtuint64keyPair *a = (const Gtuint64keyPair *) va;
+  const Gtuint64keyPair *b = (const Gtuint64keyPair *) vb;
+
+  if (a->uint64_a < b->uint64_a)
+  {
+    return -1;
+  }
+  if (a->uint64_a > b->uint64_a)
+  {
+    return 1;
+  }
+  if (a->uint64_b < b->uint64_b)
+  {
+    return -1;
+  }
+  if (a->uint64_b > b->uint64_b)
+  {
+    return 1;
+  }
+  return 0;
+}
+
 #define GT_NUM_OF_SORT_IMPLEMENTATIONS\
         (sizeof (gt_sort_implementation_funcs)/\
          sizeof (gt_sort_implementation_funcs[0]))
@@ -364,8 +417,8 @@ static int gt_sortbench_runner(GT_UNUSED int argc, GT_UNUSED const char **argv,
   int had_err = 0;
   size_t method;
   GtTimer *timer;
-  GtUword *array = NULL, idx;
-  Gtuint64keyPair *arraykeypairs = NULL;
+  GtUword *array = NULL, *array_copy = NULL, idx, r;
+  Gtuint64keyPair *arraykeypair = NULL, *arraykeypair_copy = NULL;
 
   gt_error_check(err);
   gt_assert(arguments);
@@ -378,7 +431,7 @@ static int gt_sortbench_runner(GT_UNUSED int argc, GT_UNUSED const char **argv,
   /* prepare benchmark input data */
   if (strcmp(gt_str_get(arguments->impl),"radixkeypair") == 0)
   {
-    arraykeypairs = gt_malloc(sizeof (*arraykeypairs) * arguments->num_values);
+    arraykeypair = gt_malloc(sizeof (*arraykeypair) * arguments->num_values);
   } else
   {
     array = gt_malloc(sizeof (*array) * arguments->num_values);
@@ -412,12 +465,12 @@ static int gt_sortbench_runner(GT_UNUSED int argc, GT_UNUSED const char **argv,
       /* use seed initialization to make array deterministic */
 #ifndef _WIN32
       srand48(366292341);
-      if (arraykeypairs != NULL)
+      if (arraykeypair != NULL)
       {
         for (idx = 0; idx < arguments->num_values; idx++)
         {
-          arraykeypairs[idx].uint64_a = drand48() * arguments->maxvalue;
-          arraykeypairs[idx].uint64_b = drand48() * arguments->maxvalue;
+          arraykeypair[idx].uint64_a = drand48() * arguments->maxvalue;
+          arraykeypair[idx].uint64_b = drand48() * arguments->maxvalue;
         }
       } else
       {
@@ -433,30 +486,52 @@ static int gt_sortbench_runner(GT_UNUSED int argc, GT_UNUSED const char **argv,
 #endif
     }
   }
+  if (arguments->verify)
+  {
+    if (arraykeypair != NULL)
+    {
+      arraykeypair_copy = gt_malloc(sizeof (*arraykeypair_copy) *
+                                    arguments->num_values);
+      for (idx = 0; idx < arguments->num_values; idx++)
+      {
+        arraykeypair_copy[idx] = arraykeypair[idx];
+      }
+      qsort(arraykeypair_copy,arguments->num_values,sizeof *arraykeypair_copy,
+            voidkeypairqsortcmp);
+    } else
+    {
+      array_copy = gt_malloc(sizeof (*array_copy) * arguments->num_values);
+      for (idx = 0; idx < arguments->num_values; idx++)
+      {
+        array_copy[idx] = array[idx];
+      }
+      qsort(array_copy,arguments->num_values,sizeof *array_copy,voidqsortcmp);
+    }
+  }
   timer = gt_timer_new();
   gt_timer_start(timer);
   /* run implementation */
-  for (method = 0; method < GT_NUM_OF_SORT_IMPLEMENTATIONS; method++)
+  if (arraykeypair != NULL)
   {
-    if (strcmp(gt_str_get(arguments->impl),
-               gt_sort_implementation_names[method]) == 0)
+    for (r = 0; r < arguments->runs; r++)
     {
-      GtUword r;
-
-      for (r = 0; r < arguments->runs; r++)
+      gt_radixsort_inplace_Gtuint64keyPair(arraykeypair,arguments->num_values);
+    }
+  } else
+  {
+    for (method = 0; method < GT_NUM_OF_SORT_IMPLEMENTATIONS; method++)
+    {
+      if (strcmp(gt_str_get(arguments->impl),
+                 gt_sort_implementation_names[method]) == 0)
       {
-        if (arraykeypairs != NULL)
+        for (r = 0; r < arguments->runs; r++)
         {
-          gt_radixsort_inplace_Gtuint64keyPair(arraykeypairs,
-                                               arguments->num_values);
-        } else
-        {
-          gt_assert(array != NULL && arraykeypairs == NULL);
+          gt_assert(array != NULL && arraykeypair == NULL);
           gt_assert(method < GT_NUM_OF_SORT_IMPLEMENTATIONS);
           gt_sort_implementation_funcs[method](array, arguments->num_values);
         }
+        break;
       }
-      break;
     }
   }
   printf("# TIME %s-t%u-r" GT_WU "-n" GT_WU " overall ",
@@ -471,16 +546,19 @@ static int gt_sortbench_runner(GT_UNUSED int argc, GT_UNUSED const char **argv,
   gt_timer_delete(timer);
   if (arguments->verify)
   {
-    if (arraykeypairs != NULL)
+    if (arraykeypair != NULL)
     {
-      gt_sortbench_verify_keypairs(arraykeypairs,arguments->num_values);
+      gt_sortbench_verify_keypair(arraykeypair,arraykeypair_copy,
+                                  arguments->num_values);
     } else
     {
-      gt_sortbench_verify(array,arguments->num_values);
+      gt_sortbench_verify(array,array_copy,arguments->num_values);
     }
   }
   gt_free(array);
-  gt_free(arraykeypairs);
+  gt_free(array_copy);
+  gt_free(arraykeypair);
+  gt_free(arraykeypair_copy);
   if (cmpcount > 0)
   {
     printf("cmpcount = "GT_WU"\n",cmpcount);

@@ -19,7 +19,7 @@
   The code was adapted from the Java code in
   http://algs4.cs.princeton.edu/23quicksort/QuickDualPivot.java.html
   Can be optimized by determining better pivot elements and
-  using insertion sort for small subarrays to soet.
+  using insertion sort for small subarrays to sort.
 */
 
 #include "core/types_api.h"
@@ -50,40 +50,7 @@ static void gt_dual_insertion_sort(GtUword *input,GtUword lowindex,
   }
 }
 
-static void gt_dual_pivots_get(GtUword *pivot1,GtUword *pivot2,
-                               GtUword *input,GtUword lowindex,
-                               GtUword highindex)
-{
-  GtUword s7, idx, len = highindex - lowindex + 1, e[6], values[5];
-
-  s7 = (len >> 3) + (len >> 6) + 1;
-  e[3] = (lowindex + highindex) >> 1;
-  gt_assert(e[3] >= s7);
-  e[2] = e[3] - s7;
-  e[1] = e[2] - s7;
-  if (len == 8UL)
-  {
-    e[1]++;
-  }
-  e[4] = e[3] + s7;
-  e[5] = e[4] + s7;
-  for (idx = (GtUword) 1; idx <= (GtUword) 5; idx++)
-  {
-    gt_assert(lowindex <= e[idx] && e[idx] <= highindex);
-    values[idx-1] = input[e[idx]];
-  }
-  gt_dual_insertion_sort(values,0,(GtUword) 4);
-  for (idx = (GtUword) 1; idx <= (GtUword) 5; idx++)
-  {
-    input[e[idx]] = values[idx-1];
-  }
-  *pivot1 = input[e[2]];
-  *pivot2 = input[e[4]];
-  input[lowindex] = *pivot1;
-  input[highindex] = *pivot2;
-}
-
-void gt_rec_dual_pivot_quicksort(GtUword *input,GtUword lowindex,
+static void gt_rec_dual_pivot_quicksort(GtUword *input,GtUword lowindex,
                                         GtUword highindex)
 {
   if (lowindex >= highindex)
@@ -142,6 +109,41 @@ void gt_rec_dual_pivot_quicksort(GtUword *input,GtUword lowindex,
     }
   }
 }
+
+static void gt_dual_pivots_get(GtUword *pivot1,GtUword *pivot2,
+                               GtUword *input,GtUword lowindex,
+                               GtUword highindex)
+{
+  GtUword s7, idx, len = highindex - lowindex + 1, e[6], values[5];
+
+  s7 = (len >> 3) + (len >> 6) + 1;
+  e[3] = (lowindex + highindex) >> 1;
+  gt_assert(e[3] >= s7);
+  e[2] = e[3] - s7;
+  e[1] = e[2] - s7;
+  if (len == 8UL)
+  {
+    e[1]++;
+  }
+  e[4] = e[3] + s7;
+  e[5] = e[4] + s7;
+  for (idx = (GtUword) 1; idx <= (GtUword) 5; idx++)
+  {
+    gt_assert(lowindex <= e[idx] && e[idx] <= highindex);
+    values[idx-1] = input[e[idx]];
+  }
+  gt_dual_insertion_sort(values,0,(GtUword) 4);
+  for (idx = (GtUword) 1; idx <= (GtUword) 5; idx++)
+  {
+    input[e[idx]] = values[idx-1];
+  }
+  *pivot1 = input[e[2]];
+  *pivot2 = input[e[4]];
+  input[lowindex] = *pivot1;
+  input[highindex] = *pivot2;
+}
+
+/* This does not work at the moment. Needs to be fixed */
 
 void gt_rec_dual_pivot_quicksort_fast(GtUword *input,GtUword lowindex,
                                       GtUword highindex)
@@ -215,6 +217,6 @@ void gt_dual_pivot_qsort(GtUword *source,GtUword len)
 {
   if (len >= 2UL)
   {
-    gt_rec_dual_pivot_quicksort_fast(source,0,len-1);
+    gt_rec_dual_pivot_quicksort(source,0,len-1);
   }
 }
