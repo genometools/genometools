@@ -19,6 +19,7 @@
 #define RADIX_SORT_H
 
 #include <stdbool.h>
+#include <stdint.h>
 #include "core/types_api.h"
 
 /* This file describes the interface of a radixsort implementation
