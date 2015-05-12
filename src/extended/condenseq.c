@@ -535,7 +535,6 @@ GtCondenseq *gt_condenseq_new_from_file(const char *indexname,
                                         GtLogger *logger, GtError *err)
 {
   int had_err = 0;
-  GtUword i;
   FILE* fp;
   GtEncseqLoader *esl;
   GtEncseq *unique_es;
@@ -558,16 +557,22 @@ GtCondenseq *gt_condenseq_new_from_file(const char *indexname,
     else {
       had_err = condenseq_io(condenseq, fp, gt_io_error_fread, err);
       if (!had_err) {
+        GtUword i;
         gt_assert(condenseq->uniques);
         gt_assert(condenseq->links);
         gt_fa_fclose(fp);
-        /*create link array for eacht unique entry*/
+        /*create link array for each unique entry*/
         for (i = 0; i < condenseq->udb_nelems; i++) {
           GT_INITARRAY(&(condenseq->uniques[i].links),uint32_t);
         }
+        /* check for overflows */
+        if (condenseq->ldb_nelems > (GtUword) ((uint32_t) 0 - (uint32_t) 1)) {
+          gt_error_set(err, "Overflow, to many link-elements. Can't be stored");
+          had_err = -1;
+        }
         /* iterate through link entrys and store ids in corresponding unique
           entry array */
-        for (i = 0; i < condenseq->ldb_nelems; i++) {
+        for (i = 0; !had_err && (GtUword) i < condenseq->ldb_nelems; i++) {
           GtUword uid = condenseq->links[i].unique_id;
           gt_assert(uid < condenseq->udb_nelems);
           GT_STOREINARRAY(&(condenseq->uniques[uid].links),
@@ -878,7 +883,7 @@ const char *gt_condenseq_extract_decoded(GtCondenseq *condenseq,
   return gt_condenseq_extract_decoded_range(condenseq, range, '\0');
 }
 
-GtRange
+/* static GtRange
 gt_condenseq_convert_unique_range_to_global(const GtCondenseq *condenseq,
                                             GtUword unique_id,
                                             GtRange range)
@@ -891,6 +896,36 @@ gt_condenseq_convert_unique_range_to_global(const GtCondenseq *condenseq,
   ret.start = unique->orig_startpos + range.start;
   ret.end = unique->orig_startpos + range.end;
   return ret;
+} */
+
+GtUword gt_condenseq_each_redundant_seq(
+                                       const GtCondenseq *condenseq,
+                                       GtUword uid,
+                                       GtCondenseqProcessExtractedSeqs callback,
+                                       void *callback_data,
+                                       GtError *err)
+{
+  int had_err = 0;
+  GtUword num_seqs = (GtUword) 1, linkidx,
+          orig_seqnum;
+  const GtCondenseqUnique unique = condenseq->uniques[uid];
+
+  orig_seqnum = gt_condenseq_pos2seqnum(condenseq, unique.orig_startpos);
+
+  had_err = callback(callback_data, orig_seqnum, err);
+
+  for (linkidx = 0;
+       !had_err && linkidx < unique.links.nextfreeuint32_t;
+       ++linkidx) {
+    GtUword linkid = (GtUword) unique.links.spaceuint32_t[linkidx];
+    const GtCondenseqLink link = condenseq->links[linkid];
+    orig_seqnum = gt_condenseq_pos2seqnum(condenseq, link.orig_startpos);
+    had_err = callback(callback_data, orig_seqnum, err);
+    num_seqs++;
+  }
+  if (!had_err)
+    return num_seqs;
+  return (GtUword) had_err;
 }
 
 GtUword gt_condenseq_each_redundant_range(
@@ -1158,6 +1193,24 @@ GtUword gt_condenseq_unique_range_to_seqrange(GtCondenseq *condenseq,
   urange->end += uq.orig_startpos - seqstart;
   return seqnum;
 }
+
+/* static GtUword gt_condenseq_link_range_to_seqrange(GtCondenseq *condenseq,
+                                                   GtUword lid,
+                                                   GtRange *lrange)
+{
+  GtUword seqnum = 0, seqstart = 0;
+  GtCondenseqLink lk;
+
+  gt_assert(condenseq != NULL);
+  gt_assert(lid < condenseq->ldb_nelems);
+
+  lk = condenseq->links[lid];
+  seqnum = gt_condenseq_pos2seqnum(condenseq, lk.orig_startpos);
+  seqstart = gt_condenseq_seqstartpos(condenseq, seqnum);
+  lrange->start = lk.orig_startpos - seqstart;
+  lrange->end = lk.orig_startpos - seqstart;
+  return seqnum;
+} */
 
 const GtEditscript *gt_condenseq_link_editscript(const GtCondenseq *condenseq,
                                                  GtUword lid)

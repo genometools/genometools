@@ -31,6 +31,8 @@
   The contents of this file is to be considered private implementation detail.
 */
 
+/* TODO DW: maybe unsigned int for len, unique_id and offset would be all right?
+   */
 typedef struct {
   GtEditscript *editscript;
   GtUword       len,

@@ -103,7 +103,15 @@ const char*        gt_condenseq_extract_decoded(GtCondenseq *condenseq,
 const char*        gt_condenseq_extract_decoded_range(GtCondenseq *condenseq,
                                                       GtRange range,
                                                       char separator);
-
+typedef int (GtCondenseqProcessExtractedSeqs)(void *data,
+                                              GtUword seqid,
+                                              GtError *err);
+GtUword            gt_condenseq_each_redundant_seq(
+                                       const GtCondenseq *condenseq,
+                                       GtUword uid,
+                                       GtCondenseqProcessExtractedSeqs callback,
+                                       void *callback_data,
+                                       GtError *err);
 /* Funktion type used to process redundand ranges, should return != 0 on error
    and set <err> accordingly. */
 typedef int        (GtCondenseqProcessExtractedRange)(void *data,
@@ -139,12 +147,6 @@ char*               gt_condenseq_basefilename(const GtCondenseq *condenseq);
 GtStr*              gt_condenseq_unique_fasta_file(
                                                   const GtCondenseq *condenseq);
 
-/* Returns the global original range that corresponds to <range> within the
-   unique fragment <unique_id>. */
-GtRange             gt_condenseq_convert_unique_range_to_global(
-                                                   const GtCondenseq *condenseq,
-                                                   GtUword unique_id,
-                                                   GtRange range);
 /* Creates an gff3-File with the basename of the index containing the unique and
    link ranges as experimental_features */
 int                 gt_condenseq_output_to_gff3(const GtCondenseq *condenseq,
@@ -159,7 +161,8 @@ GtDiscDistri*       gt_condenseq_link_length_dist(const GtCondenseq *condenseq);
 GtDiscDistri*       gt_condenseq_link_comp_dist(const GtCondenseq *condenseq);
 
 /* Returns the original seqnum from which the unique with <uid> derives, changes
-   urange so it represents the same range but relative to the sequence. */
+   urange (which has coordinate relative to that unique) so it represents the
+   same range but relative to the sequence collection. */
 GtUword             gt_condenseq_unique_range_to_seqrange(
                                                          GtCondenseq *condenseq,
                                                          GtUword uid,
