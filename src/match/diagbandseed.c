@@ -37,8 +37,8 @@ struct GtSeedExtendKmerPos {
 struct GtSeedExtendSeedPair {
   GtSeedExtendSeqnum bseqnum; /*  2nd important sort criterion */
   GtSeedExtendSeqnum aseqnum; /* most important sort criterion */
-  GtSeedExtendPosition bpos;
-  GtSeedExtendPosition apos;  /*  3rd important sort criterion */
+  GtSeedExtendPosition apos;
+  GtSeedExtendPosition bpos;  /*  3rd important sort criterion */
 };
 
 /* Returns a GtSeedExtendKmerPos list of k-mers from a given encseq. */
@@ -147,14 +147,14 @@ void gt_seed_extend_find_seeds(const GtArrayGtSeedExtendSeedPair *mlist,
     /* calculate diagonal band scores */
     do {
       gt_assert(lm[nextsegm].bpos <= bmaxlen && lm[nextsegm].apos <= amaxlen);
-      diag = (bmaxlen + lm[nextsegm].apos - lm[nextsegm].bpos) >> diagbandw;
-      if (lm[nextsegm].apos >= kmerlen + lastp[diag]) {
+      diag = (amaxlen + lm[nextsegm].bpos - lm[nextsegm].apos) >> diagbandw;
+      if (lm[nextsegm].bpos >= kmerlen + lastp[diag]) {
         score[diag] += kmerlen;
       } else {
-        gt_assert(lastp[diag] <= lm[nextsegm].apos);/*if fail: sorted by apos?*/
-        score[diag] = score[diag] + lm[nextsegm].apos - lastp[diag];
+        gt_assert(lastp[diag] <= lm[nextsegm].bpos);/*if fail: sorted by bpos?*/
+        score[diag] = score[diag] + lm[nextsegm].bpos - lastp[diag];
       }
-      lastp[diag] = lm[nextsegm].apos;
+      lastp[diag] = lm[nextsegm].bpos;
       nextsegm ++;
     } while (nextsegm < mlen &&
              lm[nextsegm].aseqnum == lm[currsegm].aseqnum &&
@@ -162,8 +162,8 @@ void gt_seed_extend_find_seeds(const GtArrayGtSeedExtendSeedPair *mlist,
 
     /* report seeds */
     for (i = currsegm; i < nextsegm; i++) {
-      gt_assert(lm[i].bpos <= bmaxlen);
-      diag = (bmaxlen + lm[i].apos - lm[i].bpos) >> diagbandw;
+      gt_assert(lm[i].apos <= amaxlen);
+      diag = (amaxlen + lm[i].bpos - lm[i].apos) >> diagbandw;
       if (gt_seed_extend_is_seed(&lm[i], score, mincoverage, diag)) {
 #ifdef MYTEST
         printf("report SeedPair (%d,%d,%d,%d), score["GT_WU"]=%d\n",
@@ -175,7 +175,7 @@ void gt_seed_extend_find_seeds(const GtArrayGtSeedExtendSeedPair *mlist,
 
     /* reset diagonal band scores */
     for (i = currsegm; i < nextsegm; i++) {
-      diag = (bmaxlen + lm[i].apos - lm[i].bpos) >> diagbandw;
+      diag = (amaxlen + lm[i].bpos - lm[i].apos) >> diagbandw;
       score[diag] = 0;
       lastp[diag] = 0;
     }
