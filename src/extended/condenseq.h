@@ -103,16 +103,24 @@ const char*        gt_condenseq_extract_decoded(GtCondenseq *condenseq,
 const char*        gt_condenseq_extract_decoded_range(GtCondenseq *condenseq,
                                                       GtRange range,
                                                       char separator);
+/* Function type used to process redundant seqs, should return != 0 on error
+   and set <err> accordingly. */
 typedef int (GtCondenseqProcessExtractedSeqs)(void *data,
                                               GtUword seqid,
                                               GtError *err);
+/* Returns the number of sequences within <condenseq> that are similar to unique
+   given by <uid>.
+   Each such sequence, including the sequence of <uid>, will be passed to
+   <callback> along with <callback_data>, its number and <err>.
+   Returns 0 on error as there is at least one similar range, the input range
+   itself. */
 GtUword            gt_condenseq_each_redundant_seq(
                                        const GtCondenseq *condenseq,
                                        GtUword uid,
                                        GtCondenseqProcessExtractedSeqs callback,
                                        void *callback_data,
                                        GtError *err);
-/* Funktion type used to process redundand ranges, should return != 0 on error
+/* Function type used to process redundant ranges, should return != 0 on error
    and set <err> accordingly. */
 typedef int        (GtCondenseqProcessExtractedRange)(void *data,
                                                       GtUword seqid,
