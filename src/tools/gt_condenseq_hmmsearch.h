@@ -1,7 +1,6 @@
 /*
-  Copyright (c) 2014 Florian Markowsky <moltenboron@web.de>
-  Copyright (c) 2014 Dirk Willrodt <willrodt@zbh.uni-hamburg.de>
-  Copyright (c) 2014 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2015 Dirk Willrodt <willrodt@zbh.uni-hamburg.de>
+  Copyright (c) 2015 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -16,14 +15,12 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef GT_CONDENSEQ_SEARCH_H
-#define GT_CONDENSEQ_SEARCH_H
-
-#include "extended/condenseq.h"
+#ifndef GT_CONDENSEQ_HMMSEARCH_H
+#define GT_CONDENSEQ_HMMSEARCH_H
 
 #include "core/tool_api.h"
 
-/* the condenseq_search tool */
-GtTool* gt_condenseq_search(void);
+/* the condenseq_hmmsearch tool */
+GtTool* gt_condenseq_hmmsearch(void);
 
 #endif

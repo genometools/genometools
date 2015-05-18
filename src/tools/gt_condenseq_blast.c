@@ -49,15 +49,15 @@
 #include "extended/match_blast_api.h"
 #include "extended/match_iterator_blast.h"
 
-#include "tools/gt_condenseq_search.h"
+#include "extended/condenseq_search_arguments.h"
 #include "tools/gt_condenseq_blast.h"
 
 typedef struct {
-  GtFile                *outfp;
-  GtOutputFileInfo      *ofi;
-  GtCondenseqSearchInfo *csi;
-  GtStr                 *querypath,
-                        *gff;
+  GtFile                     *outfp;
+  GtOutputFileInfo           *ofi;
+  GtCondenseqSearchArguments *csa;
+  GtStr                      *querypath,
+                             *gff;
   GtUword bitscore;
   double  ceval,
           feval;
@@ -104,7 +104,7 @@ static void* gt_condenseq_blast_arguments_new(void)
   arguments->querypath = gt_str_new();
   arguments->gff = gt_str_new();
   arguments->ofi = gt_output_file_info_new();
-  arguments->csi = gt_condenseq_search_info_new();
+  arguments->csa = gt_condenseq_search_arguments_new();
   return arguments;
 }
 
@@ -112,7 +112,7 @@ static void gt_condenseq_blast_arguments_delete(void *tool_arguments)
 {
   GtCondenseqBlastArguments *arguments = tool_arguments;
   if (arguments != NULL) {
-    gt_condenseq_search_info_delete(arguments->csi);
+    gt_condenseq_search_arguments_delete(arguments->csa);
     gt_file_delete(arguments->outfp);
     gt_output_file_info_delete(arguments->ofi);
     gt_str_delete(arguments->gff);
@@ -135,7 +135,7 @@ gt_condenseq_blast_option_parser_new(void *tool_arguments)
                             "Perform a BLASTsearch on the given compressed "
                             "database.");
 
-  gt_condenseq_search_register_options(arguments->csi, op);
+  gt_condenseq_search_register_options(arguments->csa, op);
 
   /* -blastn */
   blastn_opt = gt_option_new_bool("blastn", "perform blastn search",
@@ -594,8 +594,9 @@ static int gt_condenseq_blast_runner(GT_UNUSED int argc,
   gt_error_check(err);
   gt_assert(info.args != NULL);
 
-  info.logger = gt_logger_new(gt_condenseq_search_info_verbose(info.args->csi),
-                              GT_LOGGER_DEFLT_PREFIX, stderr);
+  info.logger =
+    gt_logger_new(gt_condenseq_search_arguments_verbose(info.args->csa),
+                  GT_LOGGER_DEFLT_PREFIX, stderr);
 
   if (gt_showtime_enabled()) {
     info.timer = gt_timer_new_with_progress_description("initialization");
@@ -611,9 +612,9 @@ static int gt_condenseq_blast_runner(GT_UNUSED int argc,
       gt_gff3_visitor_retain_id_attributes((GtGFF3Visitor *) info.nodev);
     }
   }
-  info.ces = gt_condenseq_search_info_read_condenseq(info.args->csi,
-                                                     info.logger,
-                                                     info.err);
+  info.ces = gt_condenseq_search_arguments_read_condenseq(info.args->csa,
+                                                          info.logger,
+                                                          info.err);
   if (info.ces == NULL)
     had_err = -1;
 
