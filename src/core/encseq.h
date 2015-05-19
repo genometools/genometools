@@ -281,7 +281,6 @@ GtUword gt_encseq_extract2bitencwithtwobitencodingstoppos(
    stops after at most <maxdepth> character have been extracted.
    The result is stored in <tbereservoir> which points to an array of
    size <sizeofvector>. */
-
 unsigned int gt_encseq_extract2bitencvector(
                                          GtArrayGtTwobitencoding *tbereservoir,
                                          const GtEncseq *encseq,
@@ -297,7 +296,6 @@ unsigned int gt_encseq_extract2bitencvector(
    are extracted. The result is stored in <tbereservoir> which
    points to an array of appropriate size. The number of elements
    is stored at the address <storedvalues> points to.  */
-
 unsigned int gt_encseq_relpos_extract2bitencvector(
                                           GtArrayGtTwobitencoding *tbereservoir,
                                           const GtEncseq *encseq,
