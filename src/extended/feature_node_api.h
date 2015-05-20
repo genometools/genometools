@@ -71,6 +71,7 @@ typedef struct GtFeatureNode GtFeatureNode;
 GtGenomeNode*  gt_feature_node_new(GtStr *seqid, const char *type,
                                    GtUword start, GtUword end,
                                    GtStrand strand);
+
 /* Return a new pseudo-<GtFeatureNode> object on sequence with ID <seqid> which
    lies from <start> to <end> on strand <strand>. Pseudo-features do not have a
    type.  The <GtFeatureNode > stores a new reference to <seqid>, so make sure
@@ -106,8 +107,8 @@ void           gt_feature_node_set_source(GtFeatureNode *feature_node,
    from "."). <false> otherwise. */
 bool           gt_feature_node_has_source(const GtFeatureNode *feature_node);
 
-/* Return the type of <feature_node>.
-   Corresponds to column 3 of GFF3 feature lines. */
+/* Return the type of <feature_node>. Corresponds to column 3 of GFF3 feature
+   lines. */
 const char*    gt_feature_node_get_type(const GtFeatureNode *feature_node);
 
 /* Set the type of <feature_node> to <type>. */
@@ -119,12 +120,12 @@ bool           gt_feature_node_has_type(GtFeatureNode *feature_node,
                                         const char *type);
 
 /* Return the number of children for given <feature_node>. */
-GtUword  gt_feature_node_number_of_children(const GtFeatureNode
+GtUword        gt_feature_node_number_of_children(const GtFeatureNode
                                                   *feature_node);
 
 /* Return the number of children of type <node>
    for given GtFeatureNode <parent>. */
-GtUword  gt_feature_node_number_of_children_of_type(const GtFeatureNode
+GtUword        gt_feature_node_number_of_children_of_type(const GtFeatureNode
                                                           *parent,
                                                           const GtFeatureNode
                                                           *node);
@@ -144,16 +145,16 @@ void           gt_feature_node_set_score(GtFeatureNode *feature_node,
 /* Unset the score of <feature_node>. */
 void           gt_feature_node_unset_score(GtFeatureNode *feature_node);
 
-/* Return the strand of <feature_node>.
-   Corresponds to column 7 of GFF3 feature lines. */
+/* Return the strand of <feature_node>. Corresponds to column 7 of GFF3
+   feature lines. */
 GtStrand       gt_feature_node_get_strand(const GtFeatureNode *feature_node);
 
 /* Set the strand of <feature_node> to <strand>. */
 void           gt_feature_node_set_strand(GtFeatureNode *feature_node,
                                           GtStrand strand);
 
-/* Return the phase of <feature_node>.
-   Corresponds to column 8 of GFF3 feature lines. */
+/* Return the phase of <feature_node>. Corresponds to column 8 of GFF3 feature
+   lines. */
 GtPhase        gt_feature_node_get_phase(const GtFeatureNode *feature_node);
 
 /* Set the phase of <feature_node> to <phase>. */
