@@ -22,6 +22,7 @@
 #include "match/seed-extend.h"
 #include "match/sfx-mappedstr.h"
 #include "core/unused_api.h"
+#include "core/alphabet_api.h"
 
 #define GT_SEED_EXTEND_ARRAY_INCR 256
 
@@ -51,17 +52,33 @@ void gt_seed_extend_get_kmers(GtArrayGtSeedExtendKmerPos *list,
   gt_assert(list != NULL && encseq != NULL);
   kc_iter = gt_kmercodeiterator_encseq_new(encseq, GT_READMODE_FORWARD, kmerlen,
                                            0);
-  while ((kmercode = gt_kmercodeiterator_encseq_nonspecial_next(kc_iter))
-         != NULL) {
-    GtSeedExtendKmerPos *kmerposptr;
-    GT_GETNEXTFREEINARRAY(kmerposptr, list, GtSeedExtendKmerPos,
-                          GT_SEED_EXTEND_ARRAY_INCR);
-    kmerposptr->code = kmercode->code;
-    kmerposptr->endpos = gt_kmercodeiterator_encseq_get_currentpos(kc_iter) - 1;
-    kmerposptr->seqnum = gt_encseq_seqnum(encseq, kmerposptr->endpos);
-    gt_assert(kmerposptr->endpos >= gt_encseq_seqstartpos(encseq,
-                                                          kmerposptr->seqnum));
-    kmerposptr->endpos -= gt_encseq_seqstartpos(encseq, kmerposptr->seqnum);
+  while ((kmercode = gt_kmercodeiterator_encseq_next(kc_iter)) != NULL) {
+    if (!kmercode->definedspecialposition) {
+      /* store (kmercode, seqnum, endpos) in array */
+      GtSeedExtendKmerPos *kmerposptr;
+      GT_GETNEXTFREEINARRAY(kmerposptr, list, GtSeedExtendKmerPos,
+                            GT_SEED_EXTEND_ARRAY_INCR);
+      kmerposptr->code = kmercode->code;
+      kmerposptr->endpos = gt_kmercodeiterator_encseq_get_currentpos(kc_iter)-1;
+      kmerposptr->seqnum = gt_encseq_seqnum(encseq, kmerposptr->endpos);
+      gt_assert(kmerposptr->endpos >= gt_encseq_seqstartpos(encseq,
+                kmerposptr->seqnum));
+      kmerposptr->endpos -= gt_encseq_seqstartpos(encseq, kmerposptr->seqnum);
+#ifdef MYTEST
+      if (true) {
+        char *buf = gt_malloc(kmerlen*sizeof(char));
+        GtSeedExtendPosition tmp
+          = gt_kmercodeiterator_encseq_get_currentpos(kc_iter) - 1;
+        gt_encseq_extract_decoded(encseq, buf, tmp+1-kmerlen, tmp);
+        printf("Kmer (%7lu, %s, %d, %d)\n", kmercode->code, buf,
+               kmerposptr->seqnum, kmerposptr->endpos);
+        gt_free(buf);
+      }
+#endif
+    } else {
+      /* if specialposition is N: store kmer in array */
+      /* allow comparison of N-containing kmers */
+    }
   }
   gt_kmercodeiterator_delete(kc_iter);
 }
@@ -196,6 +213,11 @@ void gt_seed_extend_run(const GtEncseq *aencseq, const GtEncseq *bencseq,
   const GtUword amaxlen = gt_encseq_max_seq_length(aencseq);
   const GtUword bmaxlen = gt_encseq_max_seq_length(bencseq);
 
+  if (amaxlen < kmerlen || bmaxlen < kmerlen) {
+    /* printf("maximum sequence length too short to find any kmers\n"); */
+    return;
+  }
+
   GT_INITARRAY(&alist,GtSeedExtendKmerPos);
   gt_seed_extend_get_kmers(&alist, aencseq, kmerlen);
   rdxinfo = gt_radixsort_new_ulongpair(alist.nextfreeGtSeedExtendKmerPos);
@@ -215,6 +237,20 @@ void gt_seed_extend_run(const GtEncseq *aencseq, const GtEncseq *bencseq,
     /* bencseq = aencseq; */
   }
 
+#ifdef MYTEST
+  if (alist.nextfreeGtSeedExtendKmerPos != 0) {
+    char *buf = gt_malloc(kmerlen*sizeof(char));
+    GtSeedExtendKmerPos *j = alist.spaceGtSeedExtendKmerPos;
+    GtSeedExtendKmerPos *last = j + alist.nextfreeGtSeedExtendKmerPos;
+    while (j < last) {
+      gt_encseq_extract_decoded(aencseq, buf, j->endpos+1-kmerlen, j->endpos);
+      printf("Kmer (%lu, %d, %d)\n", j->code, j->seqnum, j->endpos);
+      j ++;
+    }
+    gt_free(buf);
+  }
+#endif
+
   GT_INITARRAY(&mlist,GtSeedExtendSeedPair);
   if (two_files)
     gt_seed_extend_merge(&mlist, &alist, &blist);
@@ -226,15 +262,23 @@ void gt_seed_extend_run(const GtEncseq *aencseq, const GtEncseq *bencseq,
                                        mlist.nextfreeGtSeedExtendSeedPair);
   gt_radixsort_delete(rdxinfo);
 
-#ifndef NOPRINT
+#ifndef MYTEST
   if (mlist.nextfreeGtSeedExtendSeedPair != 0) {
     GtSeedExtendSeedPair *j = mlist.spaceGtSeedExtendSeedPair;
     GtSeedExtendSeedPair *last = j + mlist.nextfreeGtSeedExtendSeedPair;
+    char *buf = gt_malloc(kmerlen*sizeof(char));
+    char *buf2 = gt_malloc(kmerlen*sizeof(char));
     while (j < last) {
+      GtSeedExtendPosition a=j->apos+gt_encseq_seqstartpos(aencseq, j->aseqnum);
+      GtSeedExtendPosition b=j->bpos+gt_encseq_seqstartpos(bencseq, j->bseqnum);
+      gt_encseq_extract_decoded(aencseq, buf, a+1-kmerlen, a);
+      gt_encseq_extract_decoded(bencseq, buf2, b+1-kmerlen, b);
       printf("SeedPair (%d,%d,%d,%d)\n", j->aseqnum, j->bseqnum, j->apos,
              j->bpos);
       j ++;
     }
+    gt_free(buf);
+    gt_free(buf2);
   }
 #endif
 
