@@ -19,6 +19,7 @@
 #ifndef LINEAREDIST_H
 #define LINEAREDIST_H
 
+#include "core/unused_api.h"
 #include "core/error.h"
 
 /* Compute the edit distance of sequences u and v in O(max{|u|,|v|}) space */
@@ -29,6 +30,13 @@ GtUword gt_calc_linearedist(const GtUchar *u, GtUword ulen,
    length <ulen> and <vlen> in O(ulen+vlen) space. */
 
 GtUword gt_calc_linearalign(const GtUchar *u, GtUword ulen,
-                            const GtUchar *v, GtUword vlen);
+                            const GtUchar *v, GtUword vlen,
+                            GtUchar *ali1, GtUchar *ali2, GtUword *alilen);
+
+void gt_checklinearspace(GT_UNUSED bool forward,
+                         const GtUchar *useq,
+                         GtUword ulen,
+                         const GtUchar *vseq,
+                         GtUword vlen);
 
 #endif

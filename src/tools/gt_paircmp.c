@@ -25,6 +25,7 @@
 #include "core/str_array.h"
 #include "core/types_api.h"
 #include "match/test-pairwise.h"
+#include "extended/linearedist.h"
 #include "tools/gt_paircmp.h"
 
 typedef struct
@@ -36,7 +37,7 @@ typedef struct
 typedef struct
 {
   GtStrArray *strings,
-           *files;
+             *files;
   Charlistlen *charlistlen;
   GtStr *text;
   bool showedist;
@@ -265,13 +266,17 @@ int gt_paircmp(int argc, const char **argv, GtError *err)
         (const GtUchar *) gt_str_array_get(cmppairwise.strings,1UL),
         (GtUword) strlen(gt_str_array_get(cmppairwise.strings,1UL)));
       printf(GT_WU "\n", edist);
-    }
-    else
+    } else
     {
       GtUword testcases;
       testcases = applycheckfunctiontosimpleoptions(gt_checkgreedyunitedist,
                                                     &cmppairwise);
-      printf("# number of testcases: " GT_WU "\n", testcases);
+      printf("# number of testcases for gt_checkgreedyunitedist: " GT_WU "\n", 
+              testcases);
+      testcases = applycheckfunctiontosimpleoptions(gt_checklinearspace,
+                                                    &cmppairwise);
+      printf("# number of testcases for gt_checklinearspace: " GT_WU "\n", 
+              testcases);
     }
   }
   freesimpleoption(&cmppairwise);

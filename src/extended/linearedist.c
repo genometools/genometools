@@ -22,10 +22,12 @@
 #include "core/ma.h"
 #include "core/minmax.h"
 #include "core/assert_api.h"
+#include "core/unused_api.h"
 #include "core/divmodmul.h"
+#include "match/squarededist.h"
 #include "extended/linearedist.h"
 
-#define LINEAR_EDIST_GAP          ((GtUchar) '-')
+#define LINEAR_EDIST_GAP          ((GtUchar) UCHAR_MAX)
 
 /*
    The following function computes the first column of the E and R table as
@@ -264,18 +266,13 @@ static GtUword computealignment(const GtUchar *useq,
 }
 
 GtUword gt_calc_linearalign(const GtUchar *u, GtUword ulen,
-                            const GtUchar *v, GtUword vlen)
+                            const GtUchar *v, GtUword vlen,
+                            GtUchar *ali1, GtUchar *ali2, GtUword *alilen)
 {
-  GtUword *Ctab, edist, maxalilen, alilen;
-  GtUchar *ali1, *ali2;
+  GtUword *Ctab, edist;
 
-  maxalilen = ulen + vlen;
-  ali1 = gt_malloc(sizeof *ali1 * maxalilen);
-  ali2 = gt_malloc(sizeof *ali2 * maxalilen);
   Ctab = gt_malloc(sizeof *Ctab * (vlen+1));
-  edist = computealignment(u, v, ulen, vlen, ali1, ali2, &alilen, Ctab);
-  gt_free(ali1);
-  gt_free(ali2);
+  edist = computealignment(u, v, ulen, vlen, ali1, ali2, alilen, Ctab);
   gt_free(Ctab);
   return edist;
 }
@@ -314,4 +311,95 @@ GtUword gt_calc_linearedist(const GtUchar *u, GtUword ulen,
   edist = dpcolumn[MIN(ulen,vlen)];
   gt_free(dpcolumn);
   return edist;
+}
+
+static GtUword evaluate_alcost(const GtUchar *ali1,const GtUchar *ali2,
+                               GtUword alilen,
+                               const GtUchar *useq,GtUword ulen,
+                               const GtUchar *vseq,GtUword vlen)
+{
+  const GtUchar *uptr, *vptr;
+  GtUword idx, alcost = 0;
+
+  for (idx = 0, uptr = useq, vptr = vseq; idx < alilen; idx++)
+  {
+    if (ali1[idx] != ali2[idx])
+    {
+      alcost++;
+    }
+    if (ali1[idx] != LINEAR_EDIST_GAP)
+    {
+      gt_assert(*uptr == ali1[idx]);
+      uptr++;
+    }
+    if (ali2[idx] != LINEAR_EDIST_GAP)
+    {
+      gt_assert(*vptr == ali2[idx]);
+      vptr++;
+    }
+  }
+  gt_assert(uptr == useq + ulen);
+  gt_assert(vptr == vseq + vlen);
+  return alcost;
+}
+
+static bool gap_symbol_in_sequence(const GtUchar *seq, GtUword len)
+{
+  const GtUchar *sptr;
+
+  for (sptr = seq; sptr < seq + len; sptr++)
+  {
+    if (*sptr == LINEAR_EDIST_GAP)
+    {
+      return true;
+    }
+  }
+  return false;
+}
+
+void gt_checklinearspace(GT_UNUSED bool forward,
+                         const GtUchar *useq,
+                         GtUword ulen,
+                         const GtUchar *vseq,
+                         GtUword vlen)
+{
+  GtUchar *ali1, *ali2;
+  GtUword maxalilen = ulen + vlen, alcost, alilen, edist1, edist2, edist3;
+
+  if (gap_symbol_in_sequence(useq,ulen))
+  {
+    fprintf(stderr,"%s: sequence u contains gap symbol\n",__func__);
+    exit(GT_EXIT_PROGRAMMING_ERROR);
+  }
+  if (gap_symbol_in_sequence(vseq,vlen))
+  {
+    fprintf(stderr,"%s: sequence v contains gap symbol\n",__func__);
+    exit(GT_EXIT_PROGRAMMING_ERROR);
+  }
+  edist1 = gt_calc_linearedist(useq,ulen,vseq,vlen);
+  edist2 = gt_squarededistunit (useq,ulen,vseq,vlen);
+  if (edist1 != edist2)
+  {
+    fprintf(stderr,"gt_calc_linearedist = "GT_WU" != "GT_WU
+            " = gt_squarededistunit\n", edist1,edist2);
+    exit(GT_EXIT_PROGRAMMING_ERROR);
+  }
+  ali1 = gt_malloc(sizeof *ali1 * maxalilen);
+  ali2 = gt_malloc(sizeof *ali2 * maxalilen);
+  edist3 = gt_calc_linearalign(useq, ulen, vseq, vlen, ali1, ali2, &alilen);
+  if (edist2 != edist3)
+  {
+    fprintf(stderr,"gt_calc_linearalign = "GT_WU" != "GT_WU
+            " = gt_squarededistunit\n", edist1,edist2);
+    exit(GT_EXIT_PROGRAMMING_ERROR);
+  }
+  alcost = evaluate_alcost(ali1,ali2,alilen,useq,ulen,vseq,vlen);
+  if (edist2 != alcost)
+  {
+    fprintf(stderr,"evaluate_alcost= "GT_WU" != "GT_WU
+            " = gt_squarededistunit\n", edist1,edist2);
+    exit(GT_EXIT_PROGRAMMING_ERROR);
+  }
+  gt_free(ali1);
+  gt_free(ali2);
 }
