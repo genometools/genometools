@@ -539,6 +539,22 @@ static int feature_node_lua_get_type(lua_State *L)
   return 1;
 }
 
+static int feature_node_lua_set_type(lua_State *L)
+{
+  GtGenomeNode **gn;
+  const char *type = NULL;
+  GtFeatureNode *fn;
+  gn = check_genome_node(L, 1);
+  /* make sure we get a feature node */
+  fn = gt_feature_node_try_cast(*gn);
+  luaL_argcheck(L, fn, 1, "not a feature node");
+  type = luaL_checkstring(L, 2);
+  gt_assert(type);
+  luaL_argcheck(L, strlen(type) > 0, 2, "must not be empty");
+  gt_feature_node_set_type(fn, type);
+  return 0;
+}
+
 static int meta_node_lua_get_directive(lua_State *L)
 {
   GtGenomeNode **gn;
@@ -850,6 +866,7 @@ static const struct luaL_Reg genome_node_lib_m [] = {
   { "contains_marked", genome_node_lua_contains_marked },
   { "output_leading", feature_node_lua_output_leading },
   { "get_type", feature_node_lua_get_type },
+  { "set_type", feature_node_lua_set_type },
   { "get_children", feature_node_lua_get_children },
   { "get_direct_children", feature_node_lua_get_direct_children },
   { "children", feature_node_lua_get_children },

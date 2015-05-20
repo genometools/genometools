@@ -81,6 +81,9 @@
    -- Return type of <feature_node> as string.
    function feature_node:get_type()
 
+   -- Sets type of <feature_node> to be <type>.
+   function feature_node:set_type(type)
+
    -- Returns the <attrib> attribute of <feature_node>.
    function feature_node:get_attribute(attrib)
 
