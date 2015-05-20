@@ -1512,6 +1512,14 @@ Test do
   run "diff #{last_stdout} #{$testdata}gff3_numeric_mixed.out"
 end
 
+Name "gt gff3 -sortnum (implicit -sort)"
+Keywords "gt_gff3 numsorting"
+Test do
+  run_test "#{$bin}gt gff3 -sort -retainids -sortnum #{$testdata}gff3_numeric_a.gff #{$testdata}gff3_numeric_a.gff  > 1"
+  run_test "#{$bin}gt gff3 -retainids -sortnum #{$testdata}gff3_numeric_a.gff #{$testdata}gff3_numeric_a.gff "
+  run "diff #{last_stdout} 1"
+end
+
 Name "gt gff3 (double free regression)"
 Keywords "gt_gff3"
 Test do
