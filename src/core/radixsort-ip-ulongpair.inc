@@ -148,10 +148,10 @@ static void gt_radixsort_ulongpair_cached_shuffle(GtRadixbuffer *rbuf,
 }
 
 static void gt_radixsort_ulongpair_uncached_shuffle(
-                                                GtRadixbuffer *rbuf,
-                                                GtUwordPair *source,
-                                                GtCountbasetype len,
-                                                size_t rightshift)
+                       GtRadixbuffer *rbuf,
+                       GtUwordPair *source,
+                       GtCountbasetype len,
+                       size_t rightshift)
 {
   GtUword binnum, nextbin;
   GtUwordPair *sp, *spend = source + len;

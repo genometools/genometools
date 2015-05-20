@@ -60,7 +60,8 @@ static GtOptionParser*
   option_parser = gt_option_parser_new("tool [option ...]",
                             "Call one of the CONDENSER search tools to query "
                             "redundancy compressed genomic data.");
-  gt_option_parser_set_comment_func(option_parser, gt_toolbox_show, search_toolbox);
+  gt_option_parser_set_comment_func(option_parser, gt_toolbox_show,
+                                    search_toolbox);
   gt_option_parser_set_min_args(option_parser, 1U);
   return option_parser;
 }
@@ -85,7 +86,8 @@ static int gt_condenseq_search_runner(GT_UNUSED int argc,
     gt_error_set(err,
                  "condenseq search tool '%s' not found; option -help lists "
                  "possible tools", argv[parsed_args]);
-    had_err = -1; } 
+    had_err = -1;
+  }
   /* call search tool */
   if (!had_err) {
     gt_assert(tool);

@@ -521,6 +521,7 @@ static int gt_sortbench_runner(GT_UNUSED int argc, GT_UNUSED const char **argv,
       {
         printf("# using permuted array\n");
       }
+      gt_assert(array != NULL);
       for (idx = 0; idx < arguments->num_values; idx++)
       {
         array[idx] = idx;
@@ -544,6 +545,7 @@ static int gt_sortbench_runner(GT_UNUSED int argc, GT_UNUSED const char **argv,
         }
       } else
       {
+        gt_assert(array != NULL);
         for (idx = 0; idx < arguments->num_values; idx++)
         {
           array[idx] = drand48() * arguments->maxvalue;
@@ -571,6 +573,7 @@ static int gt_sortbench_runner(GT_UNUSED int argc, GT_UNUSED const char **argv,
     } else
     {
       array_copy = gt_malloc(sizeof (*array_copy) * arguments->num_values);
+      gt_assert(array != NULL);
       for (idx = 0; idx < arguments->num_values; idx++)
       {
         array_copy[idx] = array[idx];

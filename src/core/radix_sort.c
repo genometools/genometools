@@ -55,7 +55,6 @@
 #include "core/divmodmul.h"
 #include "core/minmax.h"
 #include "core/types_api.h"
-#include "core/seedpair.h"
 #include "core/stack-inlined.h"
 #include "core/radix_sort.h"
 #ifdef GT_THREADS_ENABLED
