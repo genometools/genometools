@@ -568,7 +568,8 @@ static int gt_sortbench_runner(GT_UNUSED int argc, GT_UNUSED const char **argv,
       {
         arraykeypair_copy[idx] = arraykeypair[idx];
       }
-      qsort(arraykeypair_copy,arguments->num_values,sizeof *arraykeypair_copy,
+      qsort(arraykeypair_copy,(size_t) arguments->num_values,
+            sizeof *arraykeypair_copy,
             voidkeypairqsortcmp);
     } else
     {
@@ -578,7 +579,8 @@ static int gt_sortbench_runner(GT_UNUSED int argc, GT_UNUSED const char **argv,
       {
         array_copy[idx] = array[idx];
       }
-      qsort(array_copy,arguments->num_values,sizeof *array_copy,voidqsortcmp);
+      qsort(array_copy,(size_t) arguments->num_values,sizeof *array_copy,
+            voidqsortcmp);
     }
   }
   timer = gt_timer_new();
