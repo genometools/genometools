@@ -231,7 +231,7 @@ static int gt_condenseq_hmmsearch_runner(GT_UNUSED int argc,
     hmmargs[0] = gt_str_get(arguments->hmm_path);
     hmmargs[1] = gt_cstr_dup("--noali");
     hmmargs[2] = gt_cstr_dup("--notextw");
-    hmmargs[3] = gt_cstr_dup("--tblout");
+    hmmargs[3] = gt_cstr_dup("--domtblout");
     hmmargs[4] = gt_str_get(coarse_tbl);
     hmmargs[5] = gt_str_get(arguments->hmm);
     hmmargs[6] = gt_str_get(coarse_fas);
@@ -277,7 +277,7 @@ static int gt_condenseq_hmmsearch_runner(GT_UNUSED int argc,
       char *c_line = gt_str_get(line);
 
       if (c_line[0] != '#') {
-        if (sscanf(c_line, "unique" GT_WU, &uid) != 1) {
+        if (sscanf(c_line, GT_WU, &uid) != 1) {
           gt_error_set(err, "couldn't parse line: %s", c_line);
           had_err = -1;
         }
