@@ -30,8 +30,12 @@ typedef struct {
 
 /* open a child process, execute <path> with <argv> arguments and <envp> by
    calling execve(), returning a pipe to read and write to the new processes
-   stdin or stdout,
+   stdin or stdout.
+   <path> should hold the complete path to the executable, <argv> is a NULL
+   terminated array of strings, <envp> likewise, where the strings should be of
+   the form key=value (see execve()).
    returns NULL on error. */
+/* Will not work on windows, as it uses fork() */
 GtSafePipe *gt_safe_popen(const char *path,
                           char *const argv[],
                           char *const envp[],

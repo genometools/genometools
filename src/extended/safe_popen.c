@@ -51,6 +51,7 @@ GtSafePipe *gt_safe_popen(const char *path,
                           GtError *err) {
   int stdin_pipe[2], stdout_pipe[2], had_err = 0;
   GtSafePipe *p = NULL;
+#ifndef _WIN32
 
   p = gt_malloc(sizeof(*p));
   p->read_fd = p->write_fd = NULL;
@@ -94,7 +95,7 @@ GtSafePipe *gt_safe_popen(const char *path,
                 (void) close(stdout_pipe[1]);
               }
               (void) execve(path, argv, envp);
-              perror("could not execute external program");
+              perror("could not execute external program: ");
               perror(strerror(errno));
               exit(127);
             }
@@ -124,6 +125,10 @@ GtSafePipe *gt_safe_popen(const char *path,
     p = NULL;
   }
   return p;
+#else
+  gt_error_set(err, "Function gt_safe_popen not implemented for windows yet");
+  return p;
+#endif
 }
 
 int gt_safe_pclose(GtSafePipe *p) {
