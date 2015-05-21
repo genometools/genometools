@@ -521,6 +521,7 @@ static int gt_sortbench_runner(GT_UNUSED int argc, GT_UNUSED const char **argv,
       {
         printf("# using permuted array\n");
       }
+      gt_assert(array != NULL);
       for (idx = 0; idx < arguments->num_values; idx++)
       {
         array[idx] = idx;
@@ -544,6 +545,7 @@ static int gt_sortbench_runner(GT_UNUSED int argc, GT_UNUSED const char **argv,
         }
       } else
       {
+        gt_assert(array != NULL);
         for (idx = 0; idx < arguments->num_values; idx++)
         {
           array[idx] = drand48() * arguments->maxvalue;
@@ -566,16 +568,19 @@ static int gt_sortbench_runner(GT_UNUSED int argc, GT_UNUSED const char **argv,
       {
         arraykeypair_copy[idx] = arraykeypair[idx];
       }
-      qsort(arraykeypair_copy,arguments->num_values,sizeof *arraykeypair_copy,
+      qsort(arraykeypair_copy,(size_t) arguments->num_values,
+            sizeof *arraykeypair_copy,
             voidkeypairqsortcmp);
     } else
     {
       array_copy = gt_malloc(sizeof (*array_copy) * arguments->num_values);
+      gt_assert(array != NULL);
       for (idx = 0; idx < arguments->num_values; idx++)
       {
         array_copy[idx] = array[idx];
       }
-      qsort(array_copy,arguments->num_values,sizeof *array_copy,voidqsortcmp);
+      qsort(array_copy,(size_t) arguments->num_values,sizeof *array_copy,
+            voidqsortcmp);
     }
   }
   timer = gt_timer_new();

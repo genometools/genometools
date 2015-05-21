@@ -1,4 +1,5 @@
 /*
+  Copyright (C) 2015 Joerg Winkler, joerg.winkler@studium.uni-hamburg.de
   Copyright (c) 2006-2007 Gordon Gremme <gordon@gremme.org>
   Copyright (c) 2006-2007 Center for Bioinformatics, University of Hamburg
 
@@ -18,10 +19,24 @@
 #ifndef LINEAREDIST_H
 #define LINEAREDIST_H
 
+#include "core/unused_api.h"
 #include "core/error.h"
 
 /* Compute the edit distance of sequences u and v in O(max{|u|,|v|}) space */
-GtUword gt_calc_linearedist(const char *u, GtUword n,
-                                  const char *v, GtUword m);
+GtUword gt_calc_linearedist(const GtUchar *u, GtUword ulen,
+                            const GtUchar *v, GtUword vlen);
+
+/* Compute the alignment and edit distance of sequences <u> and <v> of
+   length <ulen> and <vlen> in O(ulen+vlen) space. */
+
+GtUword gt_calc_linearalign(const GtUchar *u, GtUword ulen,
+                            const GtUchar *v, GtUword vlen,
+                            GtUchar *ali1, GtUchar *ali2, GtUword *alilen);
+
+void gt_checklinearspace(GT_UNUSED bool forward,
+                         const GtUchar *useq,
+                         GtUword ulen,
+                         const GtUchar *vseq,
+                         GtUword vlen);
 
 #endif

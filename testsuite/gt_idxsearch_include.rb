@@ -129,6 +129,19 @@ Name "gt paircmp"
 Keywords "gt_paircmp"
 Test do
   run_test "#{$bin}gt dev paircmp -a ac 11" # mv to idx
+  paircmplist = ["Duplicate.fna",
+                 "Random-Small.fna",
+                 "Random159.fna",
+                 "Random160.fna",
+                 "TTT-small.fna",
+                 "trna_glutamine.fna"]
+  paircmplist.each do |f1|
+    paircmplist.each do |f2|
+      if f1 != f2
+        run_test "#{$bin}gt dev paircmp -ff #{$testdata}#{f1} #{$testdata}#{f2}"
+      end
+    end
+  end
 end
 
 Name "gt patternmatch"

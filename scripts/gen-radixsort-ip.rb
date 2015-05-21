@@ -253,10 +253,10 @@ static void gt_radixsort_#{makekey(options)}_cached_shuffle(GtRadixbuffer *rbuf,
 }
 
 static void gt_radixsort_#{makekey(options)}_uncached_shuffle(
-                                                GtRadixbuffer *rbuf,
-                                                #{maketype(options)} *source,
-                                                GtCountbasetype len,
-                                                size_t rightshift)
+                       GtRadixbuffer *rbuf,
+                       #{maketype(options)} *source,
+                       GtCountbasetype len,
+                       size_t rightshift)
 {
   GtUword binnum, nextbin;
   #{maketype(options)} *sp, *spend = source + len;

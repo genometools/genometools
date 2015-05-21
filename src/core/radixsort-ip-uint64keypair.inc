@@ -154,10 +154,10 @@ GT_RADIX_KEY(UINT8_MAX,rightshift,currentvalue.uint64_b);
 }
 
 static void gt_radixsort_uint64keypair_uncached_shuffle(
-                                                GtRadixbuffer *rbuf,
-                                                Gtuint64keyPair *source,
-                                                GtCountbasetype len,
-                                                size_t rightshift)
+                       GtRadixbuffer *rbuf,
+                       Gtuint64keyPair *source,
+                       GtCountbasetype len,
+                       size_t rightshift)
 {
   GtUword binnum, nextbin;
   Gtuint64keyPair *sp, *spend = source + len;
