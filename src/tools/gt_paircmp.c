@@ -271,11 +271,11 @@ int gt_paircmp(int argc, const char **argv, GtError *err)
       GtUword testcases;
       testcases = applycheckfunctiontosimpleoptions(gt_checkgreedyunitedist,
                                                     &cmppairwise);
-      printf("# number of testcases for gt_checkgreedyunitedist: " GT_WU "\n", 
+      printf("# number of testcases for gt_checkgreedyunitedist: " GT_WU "\n",
               testcases);
       testcases = applycheckfunctiontosimpleoptions(gt_checklinearspace,
                                                     &cmppairwise);
-      printf("# number of testcases for gt_checklinearspace: " GT_WU "\n", 
+      printf("# number of testcases for gt_checklinearspace: " GT_WU "\n",
               testcases);
     }
   }

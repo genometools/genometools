@@ -490,6 +490,7 @@ void gt_kmercodeiterator_reset(GtKmercodeiterator *kmercodeiterator,
   gt_assert(!GT_ISDIRREVERSE(readmode) || startpos == 0);
   kmercodeiterator = gt_malloc(sizeof (*kmercodeiterator));
   kmercodeiterator->totallength = gt_encseq_total_length(encseq);
+  gt_assert(kmersize >= kmercodeiterator->totallength);
   kmercodeiterator->startpos = startpos;
   gt_assert(startpos < kmercodeiterator->totallength);
   kmercodeiterator->fb = NULL;
