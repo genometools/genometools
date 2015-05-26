@@ -146,10 +146,13 @@ static int gt_condenseq_hmmsearch_arguments_check(int rest_argc,
 
 typedef struct {
   GtRBTree *seqs_tree;
-  GtArrayGtUword seqnums;
 } HmmsearchInfo;
 
 #define HMMSEARCH_INFO_RESIZE 100
+
+static void hmmsearch_tree_free_node(void *ptr) {
+  gt_free(ptr);
+}
 
 static int hmmsearch_process_seq(void *data,
                                  GtUword seqnum,
@@ -158,14 +161,16 @@ static int hmmsearch_process_seq(void *data,
   int had_err = 0;
   bool nodecreated = false;
   HmmsearchInfo *info = (HmmsearchInfo *) data;
-  GtArrayGtUword *seqnums = &info->seqnums;
+  GtUword *seqnum_p = gt_malloc(sizeof (*seqnum_p));
+  /* TODO DW: find a way to not have to do all these malloc frees. dynamic array
+     can be a problem, as the adresses change on a realloc! */
   GtRBTree *tree = info->seqs_tree;
-  GT_STOREINARRAY(seqnums, GtUword, HMMSEARCH_INFO_RESIZE, seqnum);
+  *seqnum_p = seqnum;
   (void) gt_rbtree_search(tree,
-                          seqnums->spaceGtUword + seqnums->nextfreeGtUword - 1,
+                          seqnum_p,
                           &nodecreated);
   if (!nodecreated)
-    seqnums->nextfreeGtUword--;
+    gt_free(seqnum_p);
   return had_err;
 }
 
@@ -269,8 +274,8 @@ static int gt_condenseq_hmmsearch_runner(GT_UNUSED int argc,
     table = gt_xfopen(gt_str_get(coarse_tbl), "r");
 
     info = gt_malloc(sizeof (*info));
-    info->seqs_tree = gt_rbtree_new(hmmsearch_cmp_seqnum, NULL, NULL);
-    GT_INITARRAY(&info->seqnums, GtUword);
+    info->seqs_tree = gt_rbtree_new(hmmsearch_cmp_seqnum,
+                                    hmmsearch_tree_free_node, NULL);
 
     while (!had_err && gt_str_read_next_line(line, table) == 0) {
       GtUword uid;
@@ -315,7 +320,6 @@ static int gt_condenseq_hmmsearch_runner(GT_UNUSED int argc,
     printf("file created: %s", gt_str_get(fine_fas));
     gt_file_delete(gt_outfp);
     gt_rbtree_delete(info->seqs_tree);
-    GT_FREEARRAY(&info->seqnums, GtUword);
     gt_free(info);
     gt_rbtree_iter_delete(tree_iter);
   }
