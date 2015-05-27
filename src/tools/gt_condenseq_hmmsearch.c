@@ -317,7 +317,6 @@ static int gt_condenseq_hmmsearch_runner(GT_UNUSED int argc,
       gt_fasta_show_entry_nt(desc, desclen, seq, seqlen,
                              GT_FASTA_DEFAULT_WIDTH, gt_outfp);
     }
-    printf("file created: %s", gt_str_get(fine_fas));
     gt_file_delete(gt_outfp);
     gt_rbtree_delete(info->seqs_tree);
     gt_free(info);
