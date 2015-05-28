@@ -68,7 +68,7 @@ static GtOptionParser* gt_seqtranslate_option_parser_new(void *tool_arguments)
                               &arguments->reverse, true);
   gt_option_parser_add_option(op, option);
 
-  option = gt_option_new_uword("fastawidth", "width of the FASTA output",
+  option = gt_option_new_uword("fastawidth", "width of the FASTA output, 0 for unlimited",
                               &arguments->fasta_width, 60);
   gt_option_parser_add_option(op, option);
 

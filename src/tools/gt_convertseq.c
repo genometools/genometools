@@ -87,7 +87,7 @@ static GtOptionParser* gt_convertseq_option_parser_new(void *tool_arguments)
                          &arguments->showseq, false);
   gt_option_parser_add_option(op, o);
 
-  o = gt_option_new_uword("fastawidth","FASTA output line width",
+  o = gt_option_new_uword("fastawidth","FASTA output line width, 0 for unlimited",
                          &arguments->fastawidth, 60UL);
   gt_option_parser_add_option(op, o);
 

@@ -83,7 +83,7 @@ static GtOptionParser* gt_readreads_option_parser_new(void *tool_arguments)
   gt_option_exclude(fasta, option);
   gt_option_parser_add_option(op, fasta);
 
-  option = gt_option_new_uword("fastawidth","fasta output line width",
+  option = gt_option_new_uword("fastawidth","fasta output line width, 0 for unlimited",
                                &opts->fastawidth, 60UL);
   gt_option_imply(option, fasta);
   gt_option_parser_add_option(op, option);
