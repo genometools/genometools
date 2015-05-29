@@ -684,7 +684,8 @@ static int feature_node_lua_extract_and_translate_sequence(lua_State *L)
   err = gt_error_new();
   sequence = gt_str_new();
   if (gt_extract_and_translate_feature_sequence(fn, gt_symbol(type), join,
-                                                *region_mapping, NULL,
+                                                NULL, NULL, *region_mapping,
+                                                NULL,
                                                 sequence, NULL, NULL, err)) {
     gt_str_delete(sequence);
     return gt_lua_error(L, err);

@@ -36,6 +36,8 @@ int gt_extract_feature_sequence(GtStr *sequence, GtGenomeNode*,
    <err> accordingly. */
 int gt_extract_and_translate_feature_sequence(GtFeatureNode *feature_node,
                                               const char *type, bool join,
+                                              GtStr *seqid,
+                                              GtStrArray *target_ids,
                                               GtRegionMapping *rm,
                                               GtTransTable *ttable,
                                               GtStr *translation_fr1,
