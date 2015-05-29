@@ -490,7 +490,6 @@ static int encdesc_write_encoding(GtEncdesc *encdesc,
                 page_counter = 0,
                 idx = 0,
                 bits_left_in_page;
-  /* const long pagesize = sysconf((int) _SC_PAGESIZE); */
   EncdescWriteInfo *info = gt_calloc((size_t) 1, sizeof (*info));
   GtBitOutStream *bitstream;
 

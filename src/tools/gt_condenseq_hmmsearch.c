@@ -101,8 +101,10 @@ gt_condenseq_hmmsearch_option_parser_new(void *tool_arguments)
   gt_option_parser_add_option(op, option);
 
   /* -tblout */
-  option = gt_option_new_string("tblout", "filename to output tabular "
-                                "hmmsearch output to (option --tblout)",
+  option = gt_option_new_string("tblout", "file basename to output tabular "
+                                "hmmsearch output to (like hmmer option "
+                                "--tblout). Depending on -max_queries will "
+                                "produce multiple numbered files.",
                                 arguments->outtable_filename, NULL);
   gt_option_parser_add_option(op, option);
 
@@ -114,7 +116,7 @@ gt_condenseq_hmmsearch_option_parser_new(void *tool_arguments)
   /* -max_queries */
   option = gt_option_new_uint("max_queries", "maximum number of queries per "
                               "fine search, influences file-size and therefore "
-                              "speed!",
+                              "speed!, 0 disables splitting",
                               &arguments->max_queries, 5U);
   gt_option_parser_add_option(op, option);
   return op;
@@ -197,9 +199,9 @@ static void hmmsearch_create_fine_fas(GtStr *fine_fasta_filename,
   GtUword *seqnum;
   GtFile *gt_outfp;
   FILE *outfp;
-  gt_assert(fine_fasta_filename != NULL && seqnums != NULL);
+
   tree_iter = gt_rbtree_iter_new_from_first(seqnums);
-  outfp = gt_xtmpfp(fine_fasta_filename);
+  outfp = gt_xtmpfp_generic(fine_fasta_filename, TMPFP_USETEMPLATE);
   gt_outfp = gt_file_new_from_fileptr(outfp);
   while ((seqnum = gt_rbtree_iter_next(tree_iter)) != NULL) {
     const char *seq, *desc;
@@ -215,7 +217,6 @@ static void hmmsearch_create_fine_fas(GtStr *fine_fasta_filename,
 }
 
 static int hmmsearch_call_fine_search(GtStr *table_filename,
-                                      GtUword counter,
                                       char *fine_fasta_filename,
                                       char *hmmsearch_path,
                                       char *hmm_filename,
@@ -227,18 +228,15 @@ static int hmmsearch_call_fine_search(GtStr *table_filename,
        *hmmenv[] = { NULL };
   size_t hmmargc = (size_t) 4;
   unsigned int hmmidx = 0;
-  GtUword old_length = gt_str_length(table_filename);
 
-  if (old_length!= 0) {
+  if (table_filename != NULL) {
     hmmargc += (size_t) 2;
   }
   hmmargs = gt_calloc(hmmargc, sizeof (*hmmargs));
   hmmargs[hmmidx++] = hmmsearch_path;
-  if (old_length != 0) {
-    gt_str_append_uword(table_filename, counter);
+  if (table_filename != NULL) {
     hmmargs[hmmidx++] = gt_cstr_dup("--tblout");
     hmmargs[hmmidx++] = gt_str_get(table_filename);
-    gt_str_set_length(table_filename, old_length);
   }
   hmmargs[hmmidx++] = hmm_filename;
   hmmargs[hmmidx++] = fine_fasta_filename;
@@ -248,7 +246,7 @@ static int hmmsearch_call_fine_search(GtStr *table_filename,
 
   pipe = gt_safe_popen(hmmsearch_path, hmmargs, hmmenv, err);
 
-  if (old_length != 0)
+  if (table_filename != NULL)
     gt_free(hmmargs[1]);
   gt_free(hmmargs);
 
@@ -319,16 +317,23 @@ static int hmmsearch_call_coarse_search(GtCondenseq* ces,
   return had_err;
 }
 
-static GtRBTree *hmmsearch_process_coarse_hits(char *table_filename,
-                                               GtCondenseq *ces,
-                                               GtLogger *logger,
-                                               GtError *err) {
+static int hmmsearch_process_coarse_hits(
+                                       char *table_filename,
+                                       GtCondenseq *ces,
+                                       GtCondenseqHmmsearchArguments *arguments,
+                                       GtLogger *logger,
+                                       GtError *err) {
   int had_err = 0;
   GtStr *line = gt_str_new();
   FILE *table = NULL;
   GtSplitter *splitter = gt_splitter_new();
-  GtStr *query = gt_str_new();
+  GtStr *query = gt_str_new(),
+        *fine_fasta_filename = gt_str_new_cstr("condenseq");
   GtRBTree *sequences = NULL;
+  GtUword filecount = (GtUword) 1;
+  unsigned int querycount = 0;
+  const GtUword fine_fasta_name_length = gt_str_length(fine_fasta_filename);
+  const GtUword table_name_length = gt_str_length(arguments->outtable_filename);
 
   table = gt_xfopen(table_filename, "r");
 
@@ -355,6 +360,25 @@ static GtRBTree *hmmsearch_process_coarse_hits(char *table_filename,
                  gt_splitter_get_token(splitter, query_column)) != 0) {
         gt_str_set(query, gt_splitter_get_token(splitter, query_column));
         gt_logger_log(logger, "new query: %s", gt_str_get(query));
+        querycount++;
+      }
+      if (!had_err && querycount == arguments->max_queries) {
+        hmmsearch_create_fine_fas(fine_fasta_filename, sequences, ces);
+        if (table_name_length != 0)
+          gt_str_append_uword(arguments->outtable_filename, filecount++);
+        had_err =
+          hmmsearch_call_fine_search(table_name_length != 0 ?
+                                       arguments->outtable_filename :
+                                       NULL,
+                                     gt_str_get(fine_fasta_filename),
+                                     gt_str_get(arguments->hmmsearch_path),
+                                     gt_str_get(arguments->hmm),
+                                     logger, err);
+        gt_rbtree_clear(sequences);
+        gt_str_set_length(fine_fasta_filename, fine_fasta_name_length);
+        if (table_name_length != 0)
+          gt_str_set_length(arguments->outtable_filename, table_name_length);
+        querycount = 0;
       }
       if (!had_err) {
         if (gt_condenseq_each_redundant_seq(ces, uid,
@@ -372,11 +396,23 @@ static GtRBTree *hmmsearch_process_coarse_hits(char *table_filename,
   gt_str_delete(query);
   gt_xfclose(table);
 
-  if (!had_err)
-    return sequences;
-
+  if (!had_err) {
+    hmmsearch_create_fine_fas(fine_fasta_filename, sequences, ces);
+    if (table_name_length != 0)
+      gt_str_append_uword(arguments->outtable_filename, filecount++);
+    had_err =
+      hmmsearch_call_fine_search(table_name_length != 0 ?
+                                 arguments->outtable_filename :
+                                 NULL,
+                                 gt_str_get(fine_fasta_filename),
+                                 gt_str_get(arguments->hmmsearch_path),
+                                 gt_str_get(arguments->hmm),
+                                 logger, err);
+  }
+  gt_log_log("created " GT_WU " files", filecount);
   gt_rbtree_delete(sequences);
-  return NULL;
+  gt_str_delete(fine_fasta_filename);
+  return had_err;
 }
 
 static int gt_condenseq_hmmsearch_runner(GT_UNUSED int argc,
@@ -387,13 +423,9 @@ static int gt_condenseq_hmmsearch_runner(GT_UNUSED int argc,
 {
   GtCondenseqHmmsearchArguments *arguments = tool_arguments;
   GtCondenseq *ces = NULL;
-  GtStr *table_filename = NULL,
-        *fine_fasta_filename = gt_str_new_cstr("condenseq");
+  GtStr *table_filename = NULL;
   GtLogger *logger = NULL;
   int had_err = 0;
-  GtRBTree *sequences = NULL;
-  /* const GtUword fasta_filename_length = gt_str_length(fine_fasta_filename);
-  */
 
   logger = gt_logger_new(gt_condenseq_search_arguments_verbose(arguments->csa),
                          GT_LOGGER_DEFLT_PREFIX, stderr);
@@ -427,30 +459,14 @@ static int gt_condenseq_hmmsearch_runner(GT_UNUSED int argc,
                                    logger, err);
   }
   if (!had_err) {
-    sequences = hmmsearch_process_coarse_hits(gt_str_get(table_filename),
-                                              ces, logger, err);
-    if (sequences == NULL)
-      had_err = -1;
-  }
-
-  if (!had_err) {
-    hmmsearch_create_fine_fas(fine_fasta_filename, sequences, ces);
-    gt_rbtree_delete(sequences);
-  }
-
-  if (!had_err) {
-    had_err = hmmsearch_call_fine_search(arguments->outtable_filename,
-                                         (GtUword) 1,
-                                         gt_str_get(fine_fasta_filename),
-                                         gt_str_get(arguments->hmmsearch_path),
-                                         gt_str_get(arguments->hmm),
-                                         logger, err);
+    had_err = hmmsearch_process_coarse_hits(gt_str_get(table_filename),
+                                            ces, arguments,
+                                            logger, err);
   }
 
   gt_condenseq_delete(ces);
   gt_logger_delete(logger);
   gt_str_delete(table_filename);
-  gt_str_delete(fine_fasta_filename);
 
   return had_err;
 }
