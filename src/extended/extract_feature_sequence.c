@@ -176,6 +176,8 @@ int gt_extract_feature_sequence(GtStr *sequence, GtGenomeNode *gn,
 int gt_extract_and_translate_feature_sequence(GtFeatureNode *feature_node,
                                               const char *type,
                                               bool join,
+                                              GtStr *seqid,
+                                              GtStrArray *target_ids,
                                               GtRegionMapping *rm,
                                               GtTransTable *ttable,
                                               GtStr *translation_fr1,
@@ -194,8 +196,8 @@ int gt_extract_and_translate_feature_sequence(GtFeatureNode *feature_node,
 
   had_err = extract_feature_sequence_generic(sequence,
                                              (GtGenomeNode*) feature_node, type,
-                                             join, NULL, NULL, &phase_offset,
-                                             rm, err);
+                                             join, seqid, target_ids,
+                                             &phase_offset, rm, err);
 
   /* do translation if we have at least one codon */
   if (!had_err && gt_str_length(sequence) > phase_offset + 2) {

@@ -111,6 +111,7 @@ static int extract_feature_visitor_feature_node(GtNodeVisitor *nv,
     if (efv->translate) {
       if (gt_extract_and_translate_feature_sequence(child,
                                                     efv->type, efv->join,
+                                                    seqid, target_ids,
                                                     efv->region_mapping, NULL,
                                                     sequence, NULL, NULL,
                                                     err)) {
@@ -124,7 +125,6 @@ static int extract_feature_visitor_feature_node(GtNodeVisitor *nv,
         had_err = -1;
       }
     }
-
     if (!had_err && gt_str_length(sequence)) {
       efv->fastaseq_counter++;
       if (efv->retain_ids && gt_feature_node_get_attribute(child, "ID")) {
