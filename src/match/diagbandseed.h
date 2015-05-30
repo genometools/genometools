@@ -43,5 +43,6 @@ void gt_seed_extend_find_seeds(const GtArrayGtSeedExtendSeedPair *mlist,
 void gt_seed_extend_run(const GtEncseq *aencseq, const GtEncseq *bencseq,
                         unsigned int kmerlen,
                         unsigned int mincoverage,
-                        unsigned int diagbandw);
+                        unsigned int diagbandw,
+                        bool verify);
 #endif

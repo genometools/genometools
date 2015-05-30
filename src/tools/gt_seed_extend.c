@@ -26,6 +26,7 @@ typedef struct {
   unsigned int diagbandw;
   unsigned int mincoverage;
   bool mirror;
+  bool verify;
 } GtSeedExtendArguments;
 
 static void* gt_seed_extend_arguments_new(void)
@@ -69,9 +70,15 @@ static GtOptionParser* gt_seed_extend_option_parser_new(void *tool_arguments)
                               &arguments->mincoverage, 35);
   gt_option_parser_add_option(op, option);
 
-  /* -m */
+  /* -mirror */
   option = gt_option_new_bool("mirror", "add reverse complement reads",
                               &arguments->mirror, false);
+  gt_option_parser_add_option(op, option);
+
+  /* -verify */
+  option = gt_option_new_bool("verify", "check, whether k-mer seeds can be "
+                              "found in the sequences",
+                              &arguments->verify, false);
   gt_option_parser_add_option(op, option);
 
   return op;
@@ -133,7 +140,8 @@ static int gt_seed_extend_runner(int argc, const char **argv, int parsed_args,
   /* start algorithm */
   if (!had_err) {
     gt_seed_extend_run(aencseq, bencseq, arguments->kmerlen,
-                       arguments->mincoverage, arguments->diagbandw);
+                       arguments->mincoverage, arguments->diagbandw,
+                       arguments->verify);
     gt_encseq_delete(aencseq);
     gt_encseq_delete(bencseq);
   }
