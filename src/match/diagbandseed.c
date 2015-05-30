@@ -15,6 +15,8 @@
  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+#include <string.h>
+#include <stdio.h>
 #include "core/codetype.h"
 #include "core/encseq_api.h"
 #include "core/minmax.h"
@@ -142,11 +144,6 @@ void gt_seed_extend_find_seeds(const GtArrayGtSeedExtendSeedPair *mlist,
   GtSeedExtendPosition *lastp = gt_calloc(ndiags, sizeof *lastp);
   GtUword diag, nextsegm, i;
 
-#ifdef MYTEST
-  printf("ndiags="GT_WU", s=%d\n", ndiags, diagbandw);
-  printf("amaxlen="GT_WU", bmaxlen="GT_WU"\n", amaxlen, bmaxlen);
-#endif
-
   nextsegm = 0;
   while (nextsegm + minhit <= mlen) {
     const GtUword currsegm = nextsegm;
@@ -202,9 +199,8 @@ void gt_seed_extend_find_seeds(const GtArrayGtSeedExtendSeedPair *mlist,
 }
 
 void gt_seed_extend_run(const GtEncseq *aencseq, const GtEncseq *bencseq,
-                        unsigned int kmerlen,
-                        unsigned int mincoverage,
-                        unsigned int diagbandw)
+                        unsigned int kmerlen, unsigned int mincoverage,
+                        unsigned int diagbandw, bool verify)
 {
   GtArrayGtSeedExtendKmerPos alist, blist;
   GtArrayGtSeedExtendSeedPair mlist;
@@ -233,23 +229,7 @@ void gt_seed_extend_run(const GtEncseq *aencseq, const GtEncseq *bencseq,
                                      spaceGtSeedExtendKmerPos,
                                      blist.nextfreeGtSeedExtendKmerPos);
     gt_radixsort_delete(rdxinfo);
-  } else { /* compare all reads of encseq A with themselves */
-    /* bencseq = aencseq; */
-  }
-
-#ifdef MYTEST
-  if (alist.nextfreeGtSeedExtendKmerPos != 0) {
-    char *buf = gt_malloc(kmerlen*sizeof(char));
-    GtSeedExtendKmerPos *j = alist.spaceGtSeedExtendKmerPos;
-    GtSeedExtendKmerPos *last = j + alist.nextfreeGtSeedExtendKmerPos;
-    while (j < last) {
-      gt_encseq_extract_decoded(aencseq, buf, j->endpos+1-kmerlen, j->endpos);
-      printf("Kmer (%lu, %d, %d)\n", j->code, j->seqnum, j->endpos);
-      j ++;
-    }
-    gt_free(buf);
-  }
-#endif
+  } /* else: compare all reads of encseq A with themselves */
 
   GT_INITARRAY(&mlist,GtSeedExtendSeedPair);
   if (two_files)
@@ -262,25 +242,32 @@ void gt_seed_extend_run(const GtEncseq *aencseq, const GtEncseq *bencseq,
                                        mlist.nextfreeGtSeedExtendSeedPair);
   gt_radixsort_delete(rdxinfo);
 
-#ifndef MYTEST
-  if (mlist.nextfreeGtSeedExtendSeedPair != 0) {
+
+  if (verify && mlist.nextfreeGtSeedExtendSeedPair != 0) {
     GtSeedExtendSeedPair *j = mlist.spaceGtSeedExtendSeedPair;
     GtSeedExtendSeedPair *last = j + mlist.nextfreeGtSeedExtendSeedPair;
-    char *buf = gt_malloc(kmerlen*sizeof(char));
-    char *buf2 = gt_malloc(kmerlen*sizeof(char));
+    char *buf1 = gt_malloc(kmerlen*sizeof(char)+1);
+    char *buf2 = gt_malloc(kmerlen*sizeof(char)+1);
     while (j < last) {
       GtSeedExtendPosition a=j->apos+gt_encseq_seqstartpos(aencseq, j->aseqnum);
       GtSeedExtendPosition b=j->bpos+gt_encseq_seqstartpos(bencseq, j->bseqnum);
-      gt_encseq_extract_decoded(aencseq, buf, a+1-kmerlen, a);
+      gt_encseq_extract_decoded(aencseq, buf1, a+1-kmerlen, a);
       gt_encseq_extract_decoded(bencseq, buf2, b+1-kmerlen, b);
+      buf1[kmerlen] = buf2[kmerlen] = '\0';
+#ifndef MYTEST
       printf("SeedPair (%d,%d,%d,%d)\n", j->aseqnum, j->bseqnum, j->apos,
              j->bpos);
-      j ++;
+#endif
+      if (strcmp(buf1, buf2) != 0) {
+        fprintf(stderr, "wrong seed(%d,%d,%d,%d): %s != %s\n",
+                j->aseqnum, j->bseqnum, j->apos, j->bpos, buf1, buf2);
+        gt_assert(strcmp(buf1, buf2) == 0);
+      }
+      j++;
     }
-    gt_free(buf);
+    gt_free(buf1);
     gt_free(buf2);
   }
-#endif
 
   if (mlist.nextfreeGtSeedExtendSeedPair != 0)
     gt_seed_extend_find_seeds(&mlist, kmerlen, mincoverage, diagbandw, amaxlen,
