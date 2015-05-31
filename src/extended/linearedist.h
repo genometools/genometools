@@ -21,6 +21,7 @@
 
 #include "core/unused_api.h"
 #include "core/error.h"
+#include "extended/alignment.h"
 
 /* Compute the edit distance of sequences u and v in O(max{|u|,|v|}) space */
 GtUword gt_calc_linearedist(const GtUchar *u, GtUword ulen,
@@ -29,10 +30,14 @@ GtUword gt_calc_linearedist(const GtUchar *u, GtUword ulen,
 /* Compute the alignment and edit distance of sequences <u> and <v> of
    length <ulen> and <vlen> in O(ulen+vlen) space. */
 
+/*GtUword gt_calc_linearalign(const GtUchar *u, GtUword ulen,
+                            const GtUchar *v, GtUword vlen,
+                            GtUchar *ali1, GtUchar *ali2, GtUword *alilen);*/
+                        
 GtUword gt_calc_linearalign(const GtUchar *u, GtUword ulen,
                             const GtUchar *v, GtUword vlen,
-                            GtUchar *ali1, GtUchar *ali2, GtUword *alilen);
-
+                            GtAlignment *align, GtUword *alilen);
+                            
 void gt_checklinearspace(GT_UNUSED bool forward,
                          const GtUchar *useq,
                          GtUword ulen,
