@@ -27,6 +27,7 @@ typedef struct {
   unsigned int mincoverage;
   bool mirror;
   bool verify;
+  bool benchmark;
 } GtSeedExtendArguments;
 
 static void* gt_seed_extend_arguments_new(void)
@@ -79,6 +80,11 @@ static GtOptionParser* gt_seed_extend_option_parser_new(void *tool_arguments)
   option = gt_option_new_bool("verify", "check, whether k-mer seeds can be "
                               "found in the sequences",
                               &arguments->verify, false);
+  gt_option_parser_add_option(op, option);
+
+  /* -benchmark */
+  option = gt_option_new_bool("benchmark", "measure time of different steps",
+                              &arguments->benchmark, false);
   gt_option_parser_add_option(op, option);
 
   return op;
@@ -141,7 +147,7 @@ static int gt_seed_extend_runner(int argc, const char **argv, int parsed_args,
   if (!had_err) {
     gt_seed_extend_run(aencseq, bencseq, arguments->kmerlen,
                        arguments->mincoverage, arguments->diagbandw,
-                       arguments->verify);
+                       arguments->verify, arguments->benchmark);
     gt_encseq_delete(aencseq);
     gt_encseq_delete(bencseq);
   }

@@ -26,7 +26,8 @@ GT_DECLAREARRAYSTRUCT(GtSeedExtendSeedPair);
 
 /* Returns a GtSeedExtendKmerPos list of k-mers from a given encseq. */
 void gt_seed_extend_get_kmers(GtArrayGtSeedExtendKmerPos *list,
-                              const GtEncseq *encseq, unsigned int k);
+                              const GtEncseq *encseq,
+                              unsigned int k);
 
 /* Returns a GtSeedExtendSeedPair list of equal k-mers from lists a and b. */
 void gt_seed_extend_merge(GtArrayGtSeedExtendSeedPair *mlist,
@@ -35,14 +36,18 @@ void gt_seed_extend_merge(GtArrayGtSeedExtendSeedPair *mlist,
 
 /* reports seeds from mlist that satisfy the filter criteria */
 void gt_seed_extend_find_seeds(const GtArrayGtSeedExtendSeedPair *mlist,
-                               unsigned int kmerlen, unsigned int mincoverage,
-                               unsigned int diagbandw, GtUword amaxlen,
+                               unsigned int kmerlen,
+                               unsigned int mincoverage,
+                               unsigned int diagbandw,
+                               GtUword amaxlen,
                                GtUword bmaxlen);
 
 /* Run the whole algorithm. */
-void gt_seed_extend_run(const GtEncseq *aencseq, const GtEncseq *bencseq,
+void gt_seed_extend_run(const GtEncseq *aencseq,
+                        const GtEncseq *bencseq,
                         unsigned int kmerlen,
                         unsigned int mincoverage,
                         unsigned int diagbandw,
-                        bool verify);
+                        bool verify,
+                        bool benchmark);
 #endif

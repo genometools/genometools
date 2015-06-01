@@ -25,6 +25,7 @@
 #include "match/sfx-mappedstr.h"
 #include "core/unused_api.h"
 #include "core/alphabet_api.h"
+#include "core/timer_api.h"
 
 #define GT_SEED_EXTEND_ARRAY_INCR 256
 
@@ -200,22 +201,31 @@ void gt_seed_extend_find_seeds(const GtArrayGtSeedExtendSeedPair *mlist,
 
 void gt_seed_extend_run(const GtEncseq *aencseq, const GtEncseq *bencseq,
                         unsigned int kmerlen, unsigned int mincoverage,
-                        unsigned int diagbandw, bool verify)
+                        unsigned int diagbandw, bool verify, bool benchmark)
 {
   GtArrayGtSeedExtendKmerPos alist, blist;
   GtArrayGtSeedExtendSeedPair mlist;
   GtRadixsortinfo* rdxinfo;
   const bool two_files = (bencseq != aencseq) ? true : false;
+  const bool one_seq = (!two_files && gt_encseq_num_of_sequences(aencseq) <= 1);
   const GtUword amaxlen = gt_encseq_max_seq_length(aencseq);
   const GtUword bmaxlen = gt_encseq_max_seq_length(bencseq);
+  GtTimer *timer;
 
-  if (amaxlen < kmerlen || bmaxlen < kmerlen) {
-    /* printf("maximum sequence length too short to find any kmers\n"); */
+  if (one_seq || amaxlen < kmerlen || bmaxlen < kmerlen) {
+    /*printf("maximum sequence length too short or only 1 sequence given\n");*/
+    if (benchmark) {
+      printf("0.000000,0,0\n");
+    }
     return;
   }
 
   GT_INITARRAY(&alist,GtSeedExtendKmerPos);
   gt_seed_extend_get_kmers(&alist, aencseq, kmerlen);
+  if (benchmark) {
+    timer = gt_timer_new();
+    gt_timer_start(timer);
+  }
   rdxinfo = gt_radixsort_new_ulongpair(alist.nextfreeGtSeedExtendKmerPos);
   gt_radixsort_inplace_GtUwordPair((GtUwordPair*)alist.spaceGtSeedExtendKmerPos,
                                    alist.nextfreeGtSeedExtendKmerPos);
@@ -241,7 +251,10 @@ void gt_seed_extend_run(const GtEncseq *aencseq, const GtEncseq *bencseq,
                                        spaceGtSeedExtendSeedPair,
                                        mlist.nextfreeGtSeedExtendSeedPair);
   gt_radixsort_delete(rdxinfo);
-
+  if (benchmark) {
+    gt_timer_stop(timer);
+    gt_timer_show_formatted(timer, GT_WD ".%06ld,"GT_WD","GT_WD"\n", stdout);
+  }
 
   if (verify && mlist.nextfreeGtSeedExtendSeedPair != 0) {
     GtSeedExtendSeedPair *j = mlist.spaceGtSeedExtendSeedPair;
@@ -277,4 +290,6 @@ void gt_seed_extend_run(const GtEncseq *aencseq, const GtEncseq *bencseq,
   GT_FREEARRAY(&alist, GtSeedExtendKmerPos);
   if (two_files)
     GT_FREEARRAY(&blist, GtSeedExtendKmerPos);
+  if (benchmark)
+    gt_timer_delete(timer);
 }
