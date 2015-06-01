@@ -1,4 +1,5 @@
 /*
+  Copyright (C) 2015 Annika Seidel, annika.seidel@studium.uni-hamburg.de
   Copyright (C) 2015 Stefan Kurtz, kurtz@zbh.uni-hamburg.de
   Copyright (C) 2015 Joerg Winkler, joerg.winkler@studium.uni-hamburg.de
   Copyright (C) 2014 Dirk Willrodt, willrodt@zbh.uni-hamburg.de
@@ -19,7 +20,6 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include <string.h>
 #include "core/ma.h"
 #include "core/minmax.h"
 #include "core/assert_api.h"
@@ -239,20 +239,23 @@ static GtUword reconstructalignmentnew(GtAlignment *align,
                                        GtUword vlen)
 {
   GtUword alilen, i,j;
-  for (i = vlen; i > 0; i--)
-  {
+  
+  gt_assert(align != NULL && Ctab != NULL);
+  for (i = vlen; i > 0; i--){
     if(Ctab[i] == Ctab[i-1]+1)
       gt_alignment_add_replacement(align);
     else if (Ctab[i] == Ctab[i-1])
       gt_alignment_add_insertion(align);
-    else if (Ctab[i] > Ctab[i-1])
-    {
-      gt_alignment_add_replacement(align);
-      for (j = 0; j < Ctab[i]-(Ctab[i-1]+1); j++)
+    else if (Ctab[i] > Ctab[i-1]){
+      for (j = 0; j < (Ctab[i]-Ctab[i-1])-1; j++)
         gt_alignment_add_deletion(align);
+      gt_alignment_add_replacement(align);
     }
-  } 
-  alilen=gt_alignment_get_length(align);
+  }
+  for(j = Ctab[0];j > 0; j--)
+    gt_alignment_add_deletion(align);
+    
+  alilen = gt_alignment_get_length(align);
   return alilen;
 }
 
@@ -303,12 +306,10 @@ static GtUword computealignment(const GtUchar *useq,
   EDtabcolumn = gt_malloc(sizeof *EDtabcolumn * (ulen+1));
   Rtabcolumn = gt_malloc(sizeof *Rtabcolumn * (ulen+1));
   Ctab[vlen] = ulen;
-  if (vlen == 1UL)
-  {
+  if (vlen == 1UL){
     distance = determineCtab0(Ctab, vseq[0], useq);
   }
-  else
-  {
+  else{
     distance = evaluatecrosspoints(useq, vseq, ulen, vlen, EDtabcolumn,
                                    Rtabcolumn, Ctab, 0);
     (void) determineCtab0(Ctab, vseq[0], useq);
@@ -336,7 +337,7 @@ GtUword gt_calc_linearalign(const GtUchar *u, GtUword ulen,
                             GtAlignment *align, GtUword *alilen)
 {
   GtUword *Ctab, edist;
-
+  
   Ctab = gt_malloc(sizeof *Ctab * (vlen+1));
   edist = computealignment(u, v, ulen, vlen, align, alilen, Ctab);
   gt_free(Ctab);
@@ -413,6 +414,7 @@ static GtUword evaluate_alcost(const GtAlignment *align)
 {
   GtUword alcost = 0;
   
+  gt_assert(align != NULL);
   alcost = gt_alignment_eval(align);
   
   return alcost;
@@ -465,7 +467,6 @@ void gt_checklinearspace(GT_UNUSED bool forward,
   ali2 = gt_malloc(sizeof *ali2 * maxalilen);
   edist3 = gt_calc_linearalign(useq, ulen, vseq, vlen, ali1, ali2, &alilen);*/
   align = gt_alignment_new_with_seqs(useq, ulen, vseq, vlen);
-  
   edist3 = gt_calc_linearalign(useq, ulen, vseq, vlen, align, &alilen);
   if (edist2 != edist3)
   {
