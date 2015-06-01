@@ -39,7 +39,7 @@ bool          gt_io_line_start(const GtIO*);
 bool          gt_io_has_char(GtIO*);
 signed char   gt_io_peek(GtIO*);
 signed char   gt_io_next(GtIO*);
-GtUword gt_io_get_line_number(const GtIO*);
+GtUword       gt_io_get_line_number(const GtIO*);
 const char*   gt_io_get_filename(const GtIO*);
 GtStr*        gt_io_get_filename_str(const GtIO*);
 

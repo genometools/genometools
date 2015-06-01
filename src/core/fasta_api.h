@@ -22,6 +22,8 @@
 #include "core/str_api.h"
 #include "core/types_api.h"
 
+# define GT_FASTA_DEFAULT_WIDTH ((GtUword) 80)
+
 /* FASTA module */
 
 /* Print a fasta entry with optional <description> and mandatory <sequence> to
