@@ -915,8 +915,9 @@ static int gt_ltrdigest_pdom_visitor_feature_node(GtNodeVisitor *nv,
   #endif
       }
     } else {
-      gt_warning("LTR_retrotransposon (%s, line %u) is too short to be "
+      gt_warning("%s (%s, line %u) is too short to be "
                  "translated (" GT_WU " nt), skipped domain search",
+            gt_feature_node_get_type(lv->ltr_retrotrans),
             gt_genome_node_get_filename((GtGenomeNode*) lv->ltr_retrotrans),
             gt_genome_node_get_line_number((GtGenomeNode*) lv->ltr_retrotrans),
             gt_str_length(seq));

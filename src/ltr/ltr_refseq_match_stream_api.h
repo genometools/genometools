@@ -20,6 +20,8 @@
 
 #include "core/error_api.h"
 #include "extended/node_stream_api.h"
+#include "extended/region_mapping_api.h"
+
 
 typedef struct GtLTRRefseqMatchStream GtLTRRefseqMatchStream;
 
@@ -48,5 +50,26 @@ GtNodeStream* gt_ltr_refseq_match_stream_new(GtNodeStream *in_stream,
                                              GtUword params_id,
                                              const char *source,
                                              GtError *err);
+
+GtNodeStream* gt_ltr_refseq_match_stream_new_with_mapping(
+                                             GtNodeStream *in_stream,
+                                             const char *refseq_file,
+                                             GtRegionMapping *rmap,
+                                             double evalue,
+                                             bool dust,
+                                             int word_size,
+                                             int gapopen,
+                                             int gapextend,
+                                             int penalty,
+                                             int reward,
+                                             int num_threads,
+                                             double xdrop,
+                                             double identity,
+                                             const char *moreblast,
+                                             bool flcands,
+                                             double min_ali_len_perc,
+                                             GtUword params_id,
+                                             const char *source,
+                                             GT_UNUSED GtError *err);
 
 #endif

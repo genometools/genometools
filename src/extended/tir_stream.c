@@ -123,6 +123,7 @@ struct GtTIRStream
   double                      similarity_threshold;
   bool                        no_overlaps;
   bool                        best_overlaps;
+  bool                        longest_overlaps;
   bool                        output_seqids,
                               output_md5;
   GtUword                     min_TSD_length,
@@ -227,18 +228,19 @@ static inline bool tirboundaries_overlap(GtRange *a, TIRPair *b) {
 }
 
 static void gt_tir_remove_overlaps(GtArrayTIRPair *arrayTIRPair,
-                                   bool nooverlapallowed)
+                                   bool nooverlapallowed, bool keeplongest)
 {
   GtUword i;
-  TIRPair *boundaries, *oldboundaries, *maxsimboundaries = NULL;
+  TIRPair *boundaries, *oldboundaries, *maxsimboundaries = NULL,
+          *maxlenboundaries = NULL;
   GtRange refrng;
   gt_assert(arrayTIRPair != NULL);
 
   if (arrayTIRPair->spaceTIRPair == NULL)
     return;
   gt_assert(arrayTIRPair->spaceTIRPair != NULL);
-
-  maxsimboundaries = oldboundaries = arrayTIRPair->spaceTIRPair;
+  maxlenboundaries = maxsimboundaries = oldboundaries =
+                                                     arrayTIRPair->spaceTIRPair;
   refrng.start = oldboundaries->left_tir_start;
   refrng.end = oldboundaries->right_transformed_end;
   for (i = 1UL; i < arrayTIRPair->nextfreeTIRPair; i++) {
@@ -254,12 +256,24 @@ static void gt_tir_remove_overlaps(GtArrayTIRPair *arrayTIRPair,
         oldboundaries->skip = true;
         boundaries->skip = true;
       } else {
-        if (gt_double_smaller_double(maxsimboundaries->similarity,
-                                     boundaries->similarity)) {
-          maxsimboundaries->skip = true;
-          maxsimboundaries = boundaries;
+        if (keeplongest) {
+          if (gt_double_smaller_double(maxlenboundaries->right_tir_end
+                                             - maxlenboundaries->left_tir_start,
+                                       boundaries->right_tir_end
+                                             - boundaries->left_tir_start)) {
+            maxlenboundaries->skip = true;
+            maxlenboundaries = boundaries;
+          } else {
+            boundaries->skip = true;
+          }
         } else {
-          boundaries->skip = true;
+          if (gt_double_smaller_double(maxsimboundaries->similarity,
+                                       boundaries->similarity)) {
+            maxsimboundaries->skip = true;
+            maxsimboundaries = boundaries;
+          } else {
+            boundaries->skip = true;
+          }
         }
       }
     } else {
@@ -268,6 +282,7 @@ static void gt_tir_remove_overlaps(GtArrayTIRPair *arrayTIRPair,
       refrng.start = boundaries->left_tir_start;
       refrng.end = boundaries->right_transformed_end;
       maxsimboundaries = boundaries;
+      maxlenboundaries = boundaries;
     }
   }
 }
@@ -566,9 +581,9 @@ static int gt_tir_searchforTIRs(GtTIRStream *tir_stream,
 
     /* re-check length constraints */
     if ((seedptr->pos1 + seedptr->len - 1 + xdropbest_right.ivalue) -
-      (seedptr->pos2 - xdropbest_left.jvalue + 1) < tir_stream->min_TIR_length
+      (seedptr->pos1 - xdropbest_left.jvalue + 1) < tir_stream->min_TIR_length
       || (seedptr->pos1 + seedptr->len - 1 + xdropbest_right.ivalue) -
-      (seedptr->pos2 - xdropbest_left.jvalue + 1) < tir_stream->min_TIR_length)
+      (seedptr->pos1 - xdropbest_left.jvalue + 1) > tir_stream->max_TIR_length)
     {
       gt_log_log("ext: out!");
       continue;
@@ -629,9 +644,12 @@ static int gt_tir_searchforTIRs(GtTIRStream *tir_stream,
   GT_INITARRAY(&new, TIRPair);
 
  /* remove overlaps if wanted */
-  if (tir_stream->best_overlaps || tir_stream->no_overlaps) {
-    gt_tir_remove_overlaps(&tir_stream->first_pairs, tir_stream->no_overlaps);
+  if (tir_stream->best_overlaps || tir_stream->no_overlaps
+       || tir_stream->longest_overlaps) {
+    gt_tir_remove_overlaps(&tir_stream->first_pairs, tir_stream->no_overlaps,
+                           tir_stream->longest_overlaps);
   }
+
 
   /* remove skipped candidates */
   tir_stream->tir_pairs = tir_compactboundaries(&tir_stream->num_of_tirs,
@@ -977,6 +995,7 @@ GtNodeStream* gt_tir_stream_new(GtStr *str_indexname,
                                 int xdrop_belowscore,
                                 double similarity_threshold,
                                 bool best_overlaps,
+                                bool longest_overlaps,
                                 bool no_overlaps,
                                 GtUword min_TSD_length,
                                 GtUword max_TSD_length,
@@ -1002,6 +1021,7 @@ GtNodeStream* gt_tir_stream_new(GtStr *str_indexname,
   tir_stream->xdrop_belowscore = xdrop_belowscore;
   tir_stream->similarity_threshold = similarity_threshold;
   tir_stream->best_overlaps = best_overlaps;
+  tir_stream->longest_overlaps = longest_overlaps;
   tir_stream->no_overlaps = no_overlaps;
   tir_stream->min_TSD_length = min_TSD_length;
   tir_stream->max_TSD_length = max_TSD_length;
