@@ -171,13 +171,13 @@ end
 
 if $gttestdata then
   Name "gt repfind extend at1MB"
-  Keywords "gt_repfind extend"
+  Keywords "gt_repfind_extend"
   Test do
     run_test "#{$bin}gt suffixerator -db #{$testdata}at1MB " +
              "-indexname sfx -dna -tis -suf -lcp"
-    run_test "#{$bin}gt repfind -l 20 -extend -ii sfx"
+    run_test "#{$bin}gt repfind -l 20 -extendxdrop -ii sfx"
     run "diff #{last_stdout} #{$testdata}repfind-20-extend.txt"
-    run_test "#{$bin}gt repfind -l 20 -extend -ii sfx -q " +
+    run_test "#{$bin}gt repfind -l 20 -extendxdrop -ii sfx -q " +
              "#{$testdata}/U89959_genomic.fas"
     run "diff #{last_stdout} #{$testdata}repfind-20-query-extend.txt"
   end

@@ -34,6 +34,8 @@ fi
 # optional -memcheck   (run valgrind)
 #          -select 253 (run testcase 253)
 
+bin/gt -test
+
 startdate="`date`"
 cd testsuite
 env -i GT_MEM_BOOKKEEPING=on ${program} -keywords 'gt_encseq'
