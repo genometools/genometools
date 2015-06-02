@@ -105,7 +105,7 @@ static GtOptionParser* gt_extractfeat_option_parser_new(void *tool_arguments)
   /* -coords */
   option = gt_option_new_bool("coords", "add location of extracted features "
                               "to FASTA descriptions", &arguments->showcoords,
-                              true);
+                              false);
   gt_option_parser_add_option(op, option);
 
   /* -retainids */
