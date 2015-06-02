@@ -33,6 +33,7 @@ struct GtExtractFeatureVisitor {
        translate,
        seqid,
        target,
+       coords,
        retain_ids;
   GtUword fastaseq_counter,
                 width;
@@ -51,9 +52,9 @@ static void extract_feature_visitor_free(GtNodeVisitor *nv)
 }
 
 static void construct_description(GtStr *description, const char *type,
-                                  GtUword counter, bool join,
-                                  bool translate, GtStr *seqid,
-                                  GtStrArray *target_ids)
+                                  GtUword counter, bool join, bool translate,
+                                  GtRange *coords, GtStrand strand,
+                                  GtStr *seqid, GtStrArray *target_ids)
 {
   if (!gt_str_length(description)) {
     gt_str_append_cstr(description, type);
@@ -68,6 +69,14 @@ static void construct_description(GtStr *description, const char *type,
     gt_assert(gt_str_length(seqid));
     gt_str_append_cstr(description, " [seqid ");
     gt_str_append_str(description, seqid);
+    if (coords) {
+      gt_str_append_cstr(description, ":");
+      gt_str_append_uword(description, coords->start);
+      gt_str_append_cstr(description, "-");
+      gt_str_append_uword(description, coords->end);
+      gt_str_append_cstr(description, " ");
+      gt_str_append_char(description, GT_STRAND_CHARS[strand]);
+    }
     gt_str_append_char(description, ']');
   }
   if (target_ids && gt_str_array_size(target_ids)) {
@@ -127,13 +136,18 @@ static int extract_feature_visitor_feature_node(GtNodeVisitor *nv,
     }
     if (!had_err && gt_str_length(sequence)) {
       efv->fastaseq_counter++;
+      GtRange coords;
       if (efv->retain_ids && gt_feature_node_get_attribute(child, "ID")) {
         gt_assert(!gt_str_length(description));
         gt_str_append_cstr(description, gt_feature_node_get_attribute(child,
                                                                       "ID"));
       }
+      coords = gt_genome_node_get_range((GtGenomeNode*) child);
       construct_description(description, efv->type, efv->fastaseq_counter,
-                            efv->join, efv->translate, seqid, target_ids);
+                            efv->join, efv->translate,
+                            efv->coords ? &coords : NULL,
+                            gt_feature_node_get_strand(child),
+                            seqid, target_ids);
       gt_fasta_show_entry(gt_str_get(description), gt_str_get(sequence),
                           gt_str_length(sequence),  efv->width,  efv->outfp);
       gt_str_reset(description);
@@ -182,6 +196,7 @@ GtNodeVisitor* gt_extract_feature_visitor_new(GtRegionMapping *rm,
   efv->translate = translate;
   efv->seqid = seqid;
   efv->target = target;
+  efv->coords = false;
   efv->fastaseq_counter = 0;
   efv->region_mapping = rm;
   efv->width = width;
@@ -196,4 +211,10 @@ void gt_extract_feature_visitor_retain_id_attributes(GtExtractFeatureVisitor
 {
   gt_assert(efv);
   efv->retain_ids = true;
+}
+
+void gt_extract_feature_visitor_show_coords(GtExtractFeatureVisitor *efv)
+{
+  gt_assert(efv);
+  efv->coords = true;
 }
