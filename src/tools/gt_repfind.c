@@ -933,8 +933,8 @@ static int gt_repfind_runner(GT_UNUSED int argc,
       }
     } else
     {
-      GtProcessquerymatch processquerymatch;
-      void *processquerymatch_data;
+      GtProcessquerymatch processquerymatch = NULL;
+      void *processquerymatch_data = NULL;
 
       if (arguments->extendxdrop)
       {

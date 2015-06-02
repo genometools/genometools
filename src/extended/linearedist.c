@@ -315,8 +315,8 @@ GtUword gt_calc_linearedist(const GtUchar *u, GtUword ulen,
 
 static GtUword evaluate_alcost(const GtUchar *ali1,const GtUchar *ali2,
                                GtUword alilen,
-                               const GtUchar *useq,GtUword ulen,
-                               const GtUchar *vseq,GtUword vlen)
+                               const GtUchar *useq,GT_UNUSED GtUword ulen,
+                               const GtUchar *vseq,GT_UNUSED GtUword vlen)
 {
   const GtUchar *uptr, *vptr;
   GtUword idx, alcost = 0;
