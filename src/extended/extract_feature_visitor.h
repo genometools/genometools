@@ -39,4 +39,7 @@ GtNodeVisitor*            gt_extract_feature_visitor_new(GtRegionMapping *rm,
 void                      gt_extract_feature_visitor_retain_id_attributes(
                                                 GtExtractFeatureVisitor *efv);
 
+void                      gt_extract_feature_visitor_show_coords(
+                                                GtExtractFeatureVisitor *efv);
+
 #endif
