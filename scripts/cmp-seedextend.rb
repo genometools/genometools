@@ -12,7 +12,7 @@ def makeseedhash(seedlength,minlength,errpercoption,maxalilendiffopt,
                  extend_opt)
   seedhash = Hash.new()
   key = nil
-  repfindcall = "bin/gt repfind -scan -v -seedlength #{seedlength} " +
+  repfindcall = "env -i bin/gt repfind -scan -v -seedlength #{seedlength} " +
                 "-l #{minlength} -#{extend_opt} -ii sfx #{errpercoption}" +
                 " #{maxalilendiffopt}"
   puts "#{repfindcall}"
@@ -35,6 +35,10 @@ def makeseedhash(seedlength,minlength,errpercoption,maxalilendiffopt,
                                 nil,nil,nil)
       key = nil
     end
+  end
+  if not "#{$?}".match(/exit 0$/)
+    STDERR.puts "FAILURE: #{repfindcall}"
+    exit 1
   end
   return seedhash
 end
@@ -80,6 +84,15 @@ def evaluate_itv(start1,len1,start2,len2)
     ovperc = 100.0 * ov.to_f/[len1,len2].max.to_f
   end
   return Results.new(contained,containing,ovperc)
+end
+
+def addpercentage(h,val)
+  sval = sprintf("%.1f",val)
+  if h.has_key?(sval)
+    h[sval] += 1
+  else
+    h[sval] = 1
+  end
 end
 
 def cmpseedhashes(checkbetter,minidentity,taglist,h1,h2)
@@ -138,15 +151,6 @@ def cmpseedhashes(checkbetter,minidentity,taglist,h1,h2)
   puts "#{taglist[0]}: nobrother=#{nobrother}"
 end
 
-def addpercentage(h,val)
-  sval = sprintf("%.1f",val)
-  if h.has_key?(sval)
-    h[sval] += 1
-  else
-    h[sval] = 1
-  end
-end
-
 if ARGV.length != 5
   STDERR.puts "Usage: #{$0} <inputfile> <seedlength> <minlength> <errperc> <maxalilendiff>"
   exit 1
@@ -157,8 +161,12 @@ seedlength = ARGV[1].to_i
 minlength = ARGV[2].to_i
 errperc = ARGV[3].to_i
 maxalilendiff = ARGV[4].to_i
-system("bin/gt suffixerator -suftabuint -db #{inputfile} -dna -suf -tis -lcp " +
-       "-md5 no -des no -sds no -indexname sfx")
+suffixeratorcall = "env -i bin/gt suffixerator -suftabuint -db #{inputfile} " +
+                   "-dna -suf -tis -lcp -md5 no -des no -sds no -indexname sfx"
+if not system(suffixeratorcall)
+  STDERR.puts "FAILURE: #{suffixeratorcall}"
+  exit 1
+end
 taglist = ["greedy","xdrop"]
 seedhash1 = makeseedhash(seedlength,minlength,"-err #{errperc}",
                          "-maxalilendiff #{maxalilendiff}",

@@ -151,7 +151,7 @@ static int gt_simplexdropselfmatchoutput(void *info,
 {
   GtXdropmatchinfo *xdropmatchinfo = (GtXdropmatchinfo *) info;
   Repfindsequenceinfo rfsi;
-  GtUword dblen, querylen;
+  GtUword dblen, querylen, seqend1, seqend2;
   const GtEncseq *encseq;
 
   if (pos1 > pos2)
@@ -178,7 +178,7 @@ static int gt_simplexdropselfmatchoutput(void *info,
                                  pos1 - rfsi.dbseqstartpos,
                                  rfsi.dbseqstartpos);
     gt_seqabstract_reinit_encseq(xdropmatchinfo->vseq,encseq,
-                                 pos2 - rfsi.queryseqstartpos,
+                                 pos2 - MAX(pos1 + len,rfsi.queryseqstartpos),
                                  rfsi.queryseqstartpos);
     gt_evalxdroparbitscoresextend(false,
                                   &xdropmatchinfo->best_left,
@@ -194,12 +194,11 @@ static int gt_simplexdropselfmatchoutput(void *info,
   }
   /*
   */
-  if (pos1 + len < rfsi.dbseqstartpos + rfsi.dbseqlength &&
-      pos2 + len < rfsi.queryseqstartpos + rfsi.queryseqlength)
+  seqend1 = MIN(rfsi.dbseqstartpos + rfsi.dbseqlength,
+                pos2 - xdropmatchinfo->best_left.jvalue);
+  seqend2 = rfsi.queryseqstartpos + rfsi.queryseqlength;
+  if (pos1 + len < seqend1 && pos2 + len < seqend2)
   { /* there is something to align on the right of the seed */
-    const GtUword seqend1 = rfsi.dbseqstartpos + rfsi.dbseqlength;
-    const GtUword seqend2 = rfsi.queryseqstartpos + rfsi.queryseqlength;
-
     gt_seqabstract_reinit_encseq(xdropmatchinfo->useq,
                                  encseq,seqend1 - (pos1 + len),
                                  pos1 + len);
