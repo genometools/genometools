@@ -15,6 +15,8 @@
  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+#define DEBUG_SEEDPAIR
+
 #include <string.h>
 #include <stdio.h>
 #include "core/codetype.h"
@@ -46,11 +48,12 @@ struct GtSeedExtendSeedPair {
 };
 
 /* Returns a GtSeedExtendKmerPos list of k-mers from a given encseq. */
-void gt_seed_extend_get_kmers(GtArrayGtSeedExtendKmerPos *list,
+GtUword gt_seed_extend_get_kmers(GtSeedExtendKmerPos *list,
                               const GtEncseq *encseq, unsigned int kmerlen)
 {
   GtKmercodeiterator *kc_iter;
   const GtKmercode *kmercode;
+  GtUword length = 0;
 
   gt_assert(list != NULL && encseq != NULL);
   kc_iter = gt_kmercodeiterator_encseq_new(encseq, GT_READMODE_FORWARD, kmerlen,
@@ -58,45 +61,45 @@ void gt_seed_extend_get_kmers(GtArrayGtSeedExtendKmerPos *list,
   while ((kmercode = gt_kmercodeiterator_encseq_next(kc_iter)) != NULL) {
     if (!kmercode->definedspecialposition) {
       /* store (kmercode, seqnum, endpos) in array */
-      GtSeedExtendKmerPos *kmerposptr;
-      GT_GETNEXTFREEINARRAY(kmerposptr, list, GtSeedExtendKmerPos,
-                            GT_SEED_EXTEND_ARRAY_INCR);
+      GtSeedExtendKmerPos *kmerposptr = list + length;
       kmerposptr->code = kmercode->code;
       kmerposptr->endpos = gt_kmercodeiterator_encseq_get_currentpos(kc_iter)-1;
       kmerposptr->seqnum = gt_encseq_seqnum(encseq, kmerposptr->endpos);
       gt_assert(kmerposptr->endpos >= gt_encseq_seqstartpos(encseq,
                 kmerposptr->seqnum));
       kmerposptr->endpos -= gt_encseq_seqstartpos(encseq, kmerposptr->seqnum);
-#ifdef MYTEST
+#ifdef DEBUG_KMERS
       if (true) {
         char *buf = gt_malloc(kmerlen*sizeof(char));
         GtSeedExtendPosition tmp
           = gt_kmercodeiterator_encseq_get_currentpos(kc_iter) - 1;
         gt_encseq_extract_decoded(encseq, buf, tmp+1-kmerlen, tmp);
-        printf("Kmer (%7lu, %s, %d, %d)\n", kmercode->code, buf,
+        printf("Kmer (%9lu, %s, %d, %d)\n", kmercode->code, buf,
                kmerposptr->seqnum, kmerposptr->endpos);
         gt_free(buf);
       }
 #endif
+      length++;
     } else {
       /* if specialposition is N: store kmer in array */
       /* allow comparison of N-containing kmers */
     }
   }
   gt_kmercodeiterator_delete(kc_iter);
+  return length;
 }
 
 /* Returns a GtSeedExtendSeedPair list of equal kmers from lists a and b. */
 void gt_seed_extend_merge(GtArrayGtSeedExtendSeedPair *mlist,
-                          const GtArrayGtSeedExtendKmerPos *alist,
-                          const GtArrayGtSeedExtendKmerPos *blist)
+                          const GtSeedExtendKmerPos *alist, GtUword alen,
+                          const GtSeedExtendKmerPos *blist, GtUword blen)
 {
   const GtSeedExtendKmerPos *aptr, *bptr, *tptr, *aend, *bend;
   gt_assert(alist != NULL && blist != NULL && mlist != NULL);
-  aptr = alist->spaceGtSeedExtendKmerPos;
-  bptr = blist->spaceGtSeedExtendKmerPos;
-  aend = aptr + alist->nextfreeGtSeedExtendKmerPos;
-  bend = bptr + blist->nextfreeGtSeedExtendKmerPos;
+  aptr = alist;
+  bptr = blist;
+  aend = aptr + alen;
+  bend = bptr + blen;
   while (aptr < aend && bptr < bend) {
     if (aptr->code < bptr->code) {
       aptr ++;
@@ -180,7 +183,7 @@ void gt_seed_extend_find_seeds(const GtArrayGtSeedExtendSeedPair *mlist,
       gt_assert(lm[i].apos <= amaxlen);
       diag = (amaxlen + lm[i].bpos - lm[i].apos) >> diagbandw;
       if (gt_seed_extend_is_seed(&lm[i], score, mincoverage, diag)) {
-#ifdef MYTEST
+#ifdef DEBUG_SEED_REPORT
         printf("report SeedPair (%d,%d,%d,%d), score["GT_WU"]=%d\n",
                lm[i].aseqnum, lm[i].bseqnum, lm[i].apos, lm[i].bpos, diag,
                MAX(score[diag+1], score[diag-1]) + score[diag]);
@@ -203,13 +206,20 @@ void gt_seed_extend_run(const GtEncseq *aencseq, const GtEncseq *bencseq,
                         unsigned int kmerlen, unsigned int mincoverage,
                         unsigned int diagbandw, bool verify, bool benchmark)
 {
-  GtArrayGtSeedExtendKmerPos alist, blist;
+  GtSeedExtendKmerPos *alist, *blist;
   GtArrayGtSeedExtendSeedPair mlist;
   GtRadixsortinfo* rdxinfo;
+  GtUword alen, blen;
   const bool two_files = (bencseq != aencseq) ? true : false;
   const bool one_seq = (!two_files && gt_encseq_num_of_sequences(aencseq) <= 1);
   const GtUword amaxlen = gt_encseq_max_seq_length(aencseq);
   const GtUword bmaxlen = gt_encseq_max_seq_length(bencseq);
+  const GtUword ankmers = gt_encseq_total_length(aencseq) -
+                          MIN(kmerlen-1, gt_encseq_min_seq_length(aencseq)) *
+                          gt_encseq_num_of_sequences(aencseq);
+  const GtUword bnkmers = gt_encseq_total_length(bencseq) -
+                          MIN(kmerlen-1, gt_encseq_min_seq_length(bencseq)) *
+                          gt_encseq_num_of_sequences(bencseq);
   GtTimer *timer;
 
   if (one_seq || amaxlen < kmerlen || bmaxlen < kmerlen) {
@@ -220,32 +230,33 @@ void gt_seed_extend_run(const GtEncseq *aencseq, const GtEncseq *bencseq,
     return;
   }
 
-  GT_INITARRAY(&alist,GtSeedExtendKmerPos);
-  gt_seed_extend_get_kmers(&alist, aencseq, kmerlen);
+  alist = gt_malloc(1000 + ankmers * sizeof(GtSeedExtendKmerPos));
+  alen = gt_seed_extend_get_kmers(alist, aencseq, kmerlen);
   if (benchmark) {
     timer = gt_timer_new();
     gt_timer_start(timer);
   }
-  rdxinfo = gt_radixsort_new_ulongpair(alist.nextfreeGtSeedExtendKmerPos);
-  gt_radixsort_inplace_GtUwordPair((GtUwordPair*)alist.spaceGtSeedExtendKmerPos,
-                                   alist.nextfreeGtSeedExtendKmerPos);
+  rdxinfo = gt_radixsort_new_ulongpair(alen);
+  gt_radixsort_inplace_GtUwordPair((GtUwordPair*)alist, alen);
   gt_radixsort_delete(rdxinfo);
 
   if (two_files) {
-    GT_INITARRAY(&blist,GtSeedExtendKmerPos);
-    gt_seed_extend_get_kmers(&blist, bencseq, kmerlen);
-    rdxinfo = gt_radixsort_new_ulongpair(blist.nextfreeGtSeedExtendKmerPos);
-    gt_radixsort_inplace_GtUwordPair((GtUwordPair*)blist.
-                                     spaceGtSeedExtendKmerPos,
-                                     blist.nextfreeGtSeedExtendKmerPos);
+    blist = gt_malloc(bnkmers * sizeof(GtSeedExtendKmerPos));
+    blen = gt_seed_extend_get_kmers(blist, bencseq, kmerlen);
+    rdxinfo = gt_radixsort_new_ulongpair(blen);
+    gt_radixsort_inplace_GtUwordPair((GtUwordPair*)blist, blen);
     gt_radixsort_delete(rdxinfo);
-  } /* else: compare all reads of encseq A with themselves */
+  } else {
+    /* compare all reads of encseq A with themselves */
+    blist = alist;
+    blen = alen;
+  }
 
   GT_INITARRAY(&mlist,GtSeedExtendSeedPair);
+  gt_seed_extend_merge(&mlist, alist, alen, blist, blen);
+  gt_free(alist);
   if (two_files)
-    gt_seed_extend_merge(&mlist, &alist, &blist);
-  else
-    gt_seed_extend_merge(&mlist, &alist, &alist);
+    gt_free(blist);
   rdxinfo = gt_radixsort_new_uint64keypair(mlist.nextfreeGtSeedExtendSeedPair);
   gt_radixsort_inplace_Gtuint64keyPair((Gtuint64keyPair*)mlist.
                                        spaceGtSeedExtendSeedPair,
@@ -267,7 +278,7 @@ void gt_seed_extend_run(const GtEncseq *aencseq, const GtEncseq *bencseq,
       gt_encseq_extract_decoded(aencseq, buf1, a+1-kmerlen, a);
       gt_encseq_extract_decoded(bencseq, buf2, b+1-kmerlen, b);
       buf1[kmerlen] = buf2[kmerlen] = '\0';
-#ifndef MYTEST
+#ifdef DEBUG_SEEDPAIR
       printf("SeedPair (%d,%d,%d,%d)\n", j->aseqnum, j->bseqnum, j->apos,
              j->bpos);
 #endif
@@ -287,9 +298,6 @@ void gt_seed_extend_run(const GtEncseq *aencseq, const GtEncseq *bencseq,
                               bmaxlen);
 
   GT_FREEARRAY(&mlist, GtSeedExtendSeedPair);
-  GT_FREEARRAY(&alist, GtSeedExtendKmerPos);
-  if (two_files)
-    GT_FREEARRAY(&blist, GtSeedExtendKmerPos);
   if (benchmark)
     gt_timer_delete(timer);
 }
