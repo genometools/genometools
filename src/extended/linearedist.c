@@ -199,22 +199,22 @@ static GtUword reconstructalignment(GtAlignment *align,
                                        GtUword vlen)
 {
   GtUword alilen, i,j;
-  
+
   gt_assert(align != NULL && Ctab != NULL);
-  for (i = vlen; i > 0; i--){
-    if(Ctab[i] == Ctab[i-1]+1)
+  for (i = vlen; i > 0; i--) {
+    if (Ctab[i] == Ctab[i-1] + 1)
       gt_alignment_add_replacement(align);
     else if (Ctab[i] == Ctab[i-1])
       gt_alignment_add_insertion(align);
-    else if (Ctab[i] > Ctab[i-1]){
+    else if (Ctab[i] > Ctab[i-1]) {
       for (j = 0; j < (Ctab[i]-Ctab[i-1])-1; j++)
         gt_alignment_add_deletion(align);
       gt_alignment_add_replacement(align);
     }
   }
-  for(j = Ctab[0];j > 0; j--)
+  for (j = Ctab[0]; j > 0; j--)
     gt_alignment_add_deletion(align);
-    
+
   alilen = gt_alignment_get_length(align);
   return alilen;
 }
@@ -234,7 +234,7 @@ static GtUword computealignment(const GtUchar *useq,
   EDtabcolumn = gt_malloc(sizeof *EDtabcolumn * (ulen+1));
   Rtabcolumn = gt_malloc(sizeof *Rtabcolumn * (ulen+1));
   Ctab[vlen] = ulen;
-  if (vlen == 1UL){
+  if (vlen == 1UL) {
     distance = determineCtab0(Ctab, vseq[0], useq);
   }
   else{
@@ -253,7 +253,7 @@ GtUword gt_calc_linearalign(const GtUchar *u, GtUword ulen,
                             GtAlignment *align, GtUword *alilen)
 {
   GtUword *Ctab, edist;
-  
+
   Ctab = gt_malloc(sizeof *Ctab * (vlen+1));
   edist = computealignment(u, v, ulen, vlen, align, alilen, Ctab);
   gt_free(Ctab);
@@ -299,10 +299,10 @@ GtUword gt_calc_linearedist(const GtUchar *u, GtUword ulen,
 static GtUword evaluate_alcost(const GtAlignment *align)
 {
   GtUword alcost = 0;
-  
+
   gt_assert(align != NULL);
   alcost = gt_alignment_eval(align);
-  
+
   return alcost;
 }
 

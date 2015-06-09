@@ -29,11 +29,11 @@ GtUword gt_calc_linearedist(const GtUchar *u, GtUword ulen,
                             const GtUchar *v, GtUword vlen);
 
 /* Compute the alignment and edit distance of sequences <u> and <v> of
-   length <ulen> and <vlen>. */               
+   length <ulen> and <vlen>. */
 GtUword gt_calc_linearalign(const GtUchar *u, GtUword ulen,
                             const GtUchar *v, GtUword vlen,
                             GtAlignment *align, GtUword *alilen);
-                            
+
 void gt_checklinearspace(GT_UNUSED bool forward,
                          const GtUchar *useq,
                          GtUword ulen,
