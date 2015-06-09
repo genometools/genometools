@@ -194,47 +194,7 @@ static GtUword determineCtab0(GtUword *Ctab,
   return Ctab[1];
 }
 
-//static GtUword reconstructalignment(GtUchar *ali1,
-                                    //GtUchar *ali2,
-                                    //GtUword *Ctab,
-                                    //const GtUchar *useq,
-                                    //const GtUchar *vseq,
-                                    //GtUword vlen)
-//{
-  //GtUword alilen, rowindex, colindex;
-
-  ///* reconstruct upper alignment sequence */
-  //for (alilen=0,colindex=0,rowindex=0; colindex<vlen; colindex++)
-  //{
-    ///* remain in same column, no advance in u */
-    //if (Ctab[colindex] == Ctab[colindex+1])
-    //{
-      //ali1[alilen++] = LINEAR_EDIST_GAP;
-    //}
-
-    //while (rowindex < Ctab[colindex+1])
-    //{
-      //ali1[alilen++] = useq[rowindex++];
-    //}
-  //}
-  ///* reconstruct lower alignment sequence */
-  //for (alilen=0,rowindex=0,colindex=0; colindex<=vlen; colindex++)
-  //{
-    //while (rowindex < Ctab[colindex])
-    //{
-      //ali2[alilen++] = LINEAR_EDIST_GAP;
-      //rowindex++;
-    //}
-    //if (colindex < vlen)
-    //{
-      //ali2[alilen++] = vseq[colindex];
-      //rowindex = Ctab[colindex]+1;
-    //}
-  //}
-  //return alilen;
-//}
-
-static GtUword reconstructalignmentnew(GtAlignment *align,
+static GtUword reconstructalignment(GtAlignment *align,
                                        GtUword *Ctab,
                                        GtUword vlen)
 {
@@ -259,38 +219,6 @@ static GtUword reconstructalignmentnew(GtAlignment *align,
   return alilen;
 }
 
-/*static GtUword computealignment(const GtUchar *useq,
-                                const GtUchar *vseq,
-                                GtUword ulen,
-                                GtUword vlen,
-                                GtUchar *ali1,
-                                GtUchar *ali2,
-                                GtUword *alilen,
-                                GtUword *Ctab)
-{
-  GtUword distance,
-          *EDtabcolumn,
-          *Rtabcolumn;
-
-  EDtabcolumn = gt_malloc(sizeof *EDtabcolumn * (ulen+1));
-  Rtabcolumn = gt_malloc(sizeof *Rtabcolumn * (ulen+1));
-  Ctab[vlen] = ulen;
-  if (vlen == 1UL)
-  {
-    distance = determineCtab0(Ctab, vseq[0], useq);
-  }
-  else
-  {
-    distance = evaluatecrosspoints(useq, vseq, ulen, vlen, EDtabcolumn,
-                                   Rtabcolumn, Ctab, 0);
-    (void) determineCtab0(Ctab, vseq[0], useq);
-  }
-  *alilen = reconstructalignment(ali1, ali2, Ctab, useq, vseq, vlen);
-  gt_free(EDtabcolumn);
-  gt_free(Rtabcolumn);
-  return distance;
-}*/
-
 static GtUword computealignment(const GtUchar *useq,
                                 const GtUchar *vseq,
                                 GtUword ulen,
@@ -314,23 +242,11 @@ static GtUword computealignment(const GtUchar *useq,
                                    Rtabcolumn, Ctab, 0);
     (void) determineCtab0(Ctab, vseq[0], useq);
   }
-  *alilen = reconstructalignmentnew(align, Ctab, vlen);
+  *alilen = reconstructalignment(align, Ctab, vlen);
   gt_free(EDtabcolumn);
   gt_free(Rtabcolumn);
   return distance;
 }
-
-/*GtUword gt_calc_linearalign(const GtUchar *u, GtUword ulen,
-                            const GtUchar *v, GtUword vlen,
-                            GtUchar *ali1, GtUchar *ali2, GtUword *alilen)
-{
-  GtUword *Ctab, edist;
-
-  Ctab = gt_malloc(sizeof *Ctab * (vlen+1));
-  edist = computealignment(u, v, ulen, vlen, ali1, ali2, alilen, Ctab);
-  gt_free(Ctab);
-  return edist;
-}*/
 
 GtUword gt_calc_linearalign(const GtUchar *u, GtUword ulen,
                             const GtUchar *v, GtUword vlen,
@@ -380,36 +296,6 @@ GtUword gt_calc_linearedist(const GtUchar *u, GtUword ulen,
   return edist;
 }
 
-/*static GtUword evaluate_alcost(const GtUchar *ali1,const GtUchar *ali2,
-                               GtUword alilen,
-                               const GtUchar *useq,GtUword ulen,
-                               const GtUchar *vseq,GtUword vlen)
-{
-  const GtUchar *uptr, *vptr;
-  GtUword idx, alcost = 0;
-
-  for (idx = 0, uptr = useq, vptr = vseq; idx < alilen; idx++)
-  {
-    if (ali1[idx] != ali2[idx])
-    {
-      alcost++;
-    }
-    if (ali1[idx] != LINEAR_EDIST_GAP)
-    {
-      gt_assert(*uptr == ali1[idx]);
-      uptr++;
-    }
-    if (ali2[idx] != LINEAR_EDIST_GAP)
-    {
-      gt_assert(*vptr == ali2[idx]);
-      vptr++;
-    }
-  }
-  gt_assert(uptr == useq + ulen);
-  gt_assert(vptr == vseq + vlen);
-  return alcost;
-}*/
-
 static GtUword evaluate_alcost(const GtAlignment *align)
 {
   GtUword alcost = 0;
@@ -440,9 +326,7 @@ void gt_checklinearspace(GT_UNUSED bool forward,
                          const GtUchar *vseq,
                          GtUword vlen)
 {
-  //GtUchar *ali1, *ali2;
   GtAlignment *align;
-  //GtUword maxalilen = ulen + vlen,
   GtUword  alcost, alilen, edist1, edist2, edist3;
 
   if (gap_symbol_in_sequence(useq,ulen))
@@ -463,9 +347,7 @@ void gt_checklinearspace(GT_UNUSED bool forward,
             " = gt_squarededistunit\n", edist1,edist2);
     exit(GT_EXIT_PROGRAMMING_ERROR);
   }
-  /*ali1 = gt_malloc(sizeof *ali1 * maxalilen);
-  ali2 = gt_malloc(sizeof *ali2 * maxalilen);
-  edist3 = gt_calc_linearalign(useq, ulen, vseq, vlen, ali1, ali2, &alilen);*/
+
   align = gt_alignment_new_with_seqs(useq, ulen, vseq, vlen);
   edist3 = gt_calc_linearalign(useq, ulen, vseq, vlen, align, &alilen);
   if (edist2 != edist3)
@@ -474,7 +356,6 @@ void gt_checklinearspace(GT_UNUSED bool forward,
             " = gt_squarededistunit\n", edist3,edist2);
     exit(GT_EXIT_PROGRAMMING_ERROR);
   }
-  //alcost = evaluate_alcost(ali1,ali2,alilen,useq,ulen,vseq,vlen);
   alcost = evaluate_alcost(align);
   if (edist2 != alcost)
   {
@@ -482,7 +363,6 @@ void gt_checklinearspace(GT_UNUSED bool forward,
             " = gt_squarededistunit\n", alcost, edist2);
     exit(GT_EXIT_PROGRAMMING_ERROR);
   }
-  //gt_free(ali1);
-  //gt_free(ali2);
+
   gt_alignment_delete(align);
 }
