@@ -38,6 +38,23 @@
 #include "match/ft-front-prune.h"
 #include "tools/gt_repfind.h"
 
+static GtWord distance2score(GtUword distance,GtUword alignedlen)
+{
+  return ((GtWord) alignedlen) - (GtWord) (3 * distance);
+}
+
+static GtUword score2distance(GtWord score,GtUword alignedlen)
+{
+  if (score >= 0)
+  {
+    gt_assert(alignedlen >= score);
+    return ((GtWord) alignedlen - score)/3;
+  } else
+  {
+    return -(((GtWord) alignedlen + score)/3);
+  }
+}
+
 typedef struct
 {
   unsigned int userdefinedleastlength, seedlength;
@@ -192,8 +209,14 @@ static int gt_simplexdropselfmatchoutput(void *info,
     xdropmatchinfo->best_left.jvalue = 0;
     xdropmatchinfo->best_left.score = 0;
   }
-  /*
-  */
+  gt_log_log("left: best_left=align=" GT_WU ",row=" GT_WU
+             ",distance=" GT_WU "\n",
+              xdropmatchinfo->best_left.ivalue +
+              xdropmatchinfo->best_left.jvalue,
+              xdropmatchinfo->best_left.ivalue,
+              score2distance(xdropmatchinfo->best_left.score,
+                             xdropmatchinfo->best_left.ivalue +
+                             xdropmatchinfo->best_left.jvalue));
   seqend1 = MIN(rfsi.dbseqstartpos + rfsi.dbseqlength,
                 pos2 - xdropmatchinfo->best_left.jvalue);
   seqend2 = rfsi.queryseqstartpos + rfsi.queryseqlength;
@@ -280,11 +303,6 @@ typedef struct
   GtEncseqReader *encseq_r_in_u, *encseq_r_in_v;
   GtAllocatedMemory usequence_cache, vsequence_cache, frontspace_reservoir;
 } GtGreedyextendmatchinfo;
-
-static GtWord distance2score(GtWord distance,GtUword alignedlen)
-{
-  return ((GtWord) alignedlen) - (GtWord) (3 * (distance));
-}
 
 static int gt_simplegreedyselfmatchoutput(void *info,
                                           const GtGenericEncseq *genericencseq,
@@ -807,9 +825,14 @@ static int gt_repfind_runner(GT_UNUSED int argc,
   xdropmatchinfo.useq = gt_seqabstract_new_empty();
   xdropmatchinfo.vseq = gt_seqabstract_new_empty();
   xdropmatchinfo.arbitscores.mat = 2;
+  xdropmatchinfo.arbitscores.mis = -1;
+  xdropmatchinfo.arbitscores.ins = -2;
+  xdropmatchinfo.arbitscores.del = -2;
+  /*
   xdropmatchinfo.arbitscores.mis = -2;
   xdropmatchinfo.arbitscores.ins = -3;
   xdropmatchinfo.arbitscores.del = -3;
+  */
   xdropmatchinfo.beverbose = arguments->beverbose;
   xdropmatchinfo.frontresource = gt_frontresource_new(100UL);
   xdropmatchinfo.res = gt_xdrop_resources_new(&xdropmatchinfo.arbitscores);
