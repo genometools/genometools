@@ -36,14 +36,10 @@ typedef struct
   Backreferencetype backreference;
 } Frontvalue;
 
-#ifdef WITHCACHE
+#ifndef OUTSIDE_OF_GT
 typedef struct
 {
-#ifdef OUTSIDE_OF_GT
-  const GtUchar *sequence_ptr;
-#else
   GtEncseqReader *encseqreader;
-#endif
   GtUchar *cache_ptr;
   GtAllocatedMemory *sequence_cache;
   GtUword substringlength,
@@ -53,34 +49,20 @@ typedef struct
 } Sequenceobject;
 
 static void sequenceobject_init(Sequenceobject *seq,
-#ifdef OUTSIDE_OF_GT
-                                const GtUchar *ptr,
-                                GtUword startpos,
-                                GtUword len
-#else
                                 const GtEncseq *encseq,
                                 GtReadmode readmode,
                                 GtUword startpos,
                                 GtUword len,
                                 GtEncseqReader *encseq_r,
                                 GtAllocatedMemory *sequence_cache
-#endif
                                 )
 {
   gt_assert(seq != NULL);
-#ifdef OUTSIDE_OF_GT
-  seq->sequence_ptr = ptr + startpos;
-  seq->sequence_cache = gt_malloc(sizeof *seq->sequence_cache);
-  seq->sequence_cache->space = NULL;
-  seq->sequence_cache->allocated = 0;
-  seq->cache_ptr = NULL;
-#else
   gt_encseq_reader_reinit_with_readmode(encseq_r, encseq, readmode, startpos);
   seq->encseqreader = encseq_r;
   seq->sequence_cache = sequence_cache;
   gt_assert(sequence_cache != NULL);
   seq->cache_ptr = sequence_cache->space;
-#endif
   seq->substringlength = len;
   seq->min_access_pos = GT_UWORD_MAX;
   seq->cache_num_positions = 0;
@@ -124,12 +106,7 @@ static GtUchar sequenceobject_get_char(Sequenceobject *seq,GtUword pos)
     for (idx = seq->cache_num_positions; idx < tostore; idx++)
     {
       seq->cache_ptr[idx]
-#ifdef OUTSIDE_OF_GT
-        = seq->sequence_ptr[idx];
-#else
         = gt_encseq_reader_next_encoded_char(seq->encseqreader);
-      gt_assert(seq->cache_ptr[idx] != SEPARATOR);
-#endif
     }
     seq->cache_num_positions = tostore;
   }
@@ -162,20 +139,15 @@ static bool sequenceobject_symbol_match(Sequenceobject *useq,
                                         Sequenceobject *vseq,
                                         GtUword vpos)
 {
-#ifdef WITHCACHE
-  GtUchar cu = sequenceobject_get_char(useq,upos);
-#else
-  GtUchar cu = useq->sequence_ptr[upos];
-#endif
 #ifndef OUTSIDE_OF_GT
+  GtUchar cu = sequenceobject_get_char(useq,upos);
   if (ISSPECIAL(cu))
   {
     return false;
   }
-#endif
-#ifdef WITHCACHE
   return cu == sequenceobject_get_char(vseq,vpos) ? true : false;
 #else
+  GtUchar cu = useq->sequence_ptr[upos];
   return cu == vseq->sequence_ptr[vpos] ? true : false;
 #endif
 }
@@ -460,7 +432,7 @@ static Frontvalue *frontspace_allocate(GtUword minsizeforshift,
 }
 
 static void update_trace_and_polished(Polished_point *best_polished_point,
-#ifdef WITHCACHE
+#ifndef OUTSIDE_OF_GT
                                       GtUword *minrow,
                                       GtUword *mincol,
 #endif
@@ -474,7 +446,7 @@ static void update_trace_and_polished(Polished_point *best_polished_point,
 {
   const Frontvalue *frontptr;
 
-#ifdef WITHCACHE
+#ifndef OUTSIDE_OF_GT
   *minrow = GT_UWORD_MAX;
   *mincol = GT_UWORD_MAX;
 #endif
@@ -482,7 +454,7 @@ static void update_trace_and_polished(Polished_point *best_polished_point,
   {
     GtUword alignedlen = GT_MULT2(frontptr->row) + DIAGONAL(frontptr);
 
-#ifdef WITHCACHE
+#ifndef OUTSIDE_OF_GT
     GtUword currentcol;
 
     if (*minrow > frontptr->row)
@@ -671,7 +643,7 @@ GtUword front_prune_edist_inplace(
     }
     front_trace_add_gen(front_trace,trimleft,valid);
     update_trace_and_polished(best_polished_point,
-#ifdef WITHCACHE
+#ifndef OUTSIDE_OF_GT
                               &useq.min_access_pos,
                               &vseq.min_access_pos,
 #endif
@@ -697,15 +669,5 @@ GtUword front_prune_edist_inplace(
       break;
     }
   }
-#ifdef WITHCACHE
-#ifdef OUTSIDE_OF_GT
-  gt_free(useq.sequence_cache->space);
-  gt_free(useq.sequence_cache);
-  gt_free(vseq.sequence_cache->space);
-  gt_free(vseq.sequence_cache);
-  gt_free(frontspace->space);
-  gt_free(frontspace);
-#endif
-#endif
   return diedout ? sumseqlength + 1 : distance;
 }

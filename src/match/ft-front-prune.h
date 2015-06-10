@@ -5,19 +5,11 @@
 #include "ft-front-generation.h"
 #include "core/encseq_api.h"
 
-#define WITHCACHE
-
-#ifndef OUTSIDE_OF_GT
-#define WITHCACHE
-#endif
-
-#ifdef WITHCACHE
 typedef struct
 {
   void *space;
   GtUword offset, allocated;
 } GtAllocatedMemory;
-#endif
 
 #ifndef OUTSIDE_OF_GT
 typedef struct
