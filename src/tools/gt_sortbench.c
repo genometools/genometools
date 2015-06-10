@@ -152,6 +152,21 @@ static void gt_qbenchsort_permute_ulong_array (GtUword *arr,
   }
 }
 
+/* The following implements the method
+   as described in
+   @article{MCI:1999,
+      author = {McIlroy, M. D.},
+      title = {A Killer Adversary for Quicksort},
+      journal = {Softw. Pract. Exper.},
+      volume = {29},
+      number = {4},
+      year = {1999},
+      issn = {0038-0644},
+      pages = {341--344}
+     }
+
+   See http://www.cs.dartmouth.edu/~doug/mdmspe.pdf for a preprint. */
+
 GtUword *val;         /* array, solidified on the fly */
 GtUword ncmp;         /* number of comparisons */
 GtUword nsolid;       /* number of solid items */
