@@ -19,6 +19,8 @@ def makeseedhash(seedlength,minlength,errpercoption,maxalilendiffopt,
   IO.popen(repfindcall.split(/\s/)).each_line do |line|
     if line.match(/# seed:/)
       key = line.chomp.gsub(/# seed:\s+/,"")
+    elsif line.match(/^#/)
+      next
     elsif line.match(/^\d/)
       a = line.split(/\s/)
       if key.nil?
