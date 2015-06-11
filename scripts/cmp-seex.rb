@@ -122,19 +122,22 @@ def seedhash2seqnum_pairs(seedhash)
 end
 
 def showcomment(size,sum_size,comment)
-  printf("# %d (%.0f%%) of %d sequence pairs %s\n",
-          size,100.0 * size.to_f/sum_size.to_f,sum_size,comment)
+  perc = 100.0 * size.to_f/sum_size.to_f
+  printf("# %d (%.0f%%) of %d sequence pairs %s\n",size,perc,sum_size,comment)
+  return perc.to_i
 end
 
 def calcdifference(seqnumpair_set1,seqnumpair_set2)
   sum_size = seqnumpair_set1.length + seqnumpair_set2.length
   size_both = (seqnumpair_set1 & seqnumpair_set2).length
-  showcomment(size_both,sum_size,"occur in greedy and xdrop")
+  perc_both = showcomment(size_both,sum_size,"occur in greedy and xdrop")
   size_only_greedy = (seqnumpair_set1 - seqnumpair_set2).length
-  showcomment(size_only_greedy,sum_size,"occur in greedy but not xdrop")
+  perc_only_greedy = showcomment(size_only_greedy,sum_size,
+                                 "occur in greedy but not xdrop")
   size_only_xdrop = (seqnumpair_set2 - seqnumpair_set1).length
-  showcomment(size_only_xdrop,sum_size,"occur in xdrop but not greedy")
-  return size_both, size_only_greedy, size_only_xdrop, sum_size
+  perc_only_xdrop = showcomment(size_only_xdrop,sum_size,
+                                "occur in xdrop but not greedy")
+  puts [perc_both,perc_only_greedy,perc_only_xdrop,sum_size].join("\t")
 end
 
 def cmpseedhashes(checkbetter,minidentity,taglist,h1,h2)
@@ -207,9 +210,12 @@ indexname = "sfx"
 suffixeratorcall = "env -i bin/gt suffixerator -suftabuint -db #{inputfile} " +
                    "-dna -suf -tis -lcp -md5 no -des no -sds no " +
                    "-indexname #{indexname}"
-if not system(suffixeratorcall)
-  STDERR.puts "FAILURE: #{suffixeratorcall}"
-  exit 1
+if not File.exist?("#{indexname}.prj") or 
+   File.stat("#{indexname}.prj").mtime < File.stat(inputfile).mtime
+  if not system(suffixeratorcall)
+    STDERR.puts "FAILURE: #{suffixeratorcall}"
+    exit 1
+  end
 end
 taglist = ["greedy","xdrop"]
 seedhash1 = makeseedhash(indexname,seedlength,minlength,errperc,
