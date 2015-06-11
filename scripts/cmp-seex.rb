@@ -8,12 +8,30 @@ def match_to_s(m)
                       join(" ") + sprintf(" %.2f",m.identity)
 end
 
-def makeseedhash(seedlength,minlength,errpercoption,maxalilendiffopt,
+def prefixlength_get(prjfile)
+  prefixlength = nil
+  File.open(prjfile).each_line do |line|
+    if m = line.match(/^prefixlength=(\d+)$/)
+      prefixlength = m[1].to_i
+    end
+  end
+  if prefixlength.nil?
+    STDERR.puts "#{prjfile} does not contain definition of prefixlength"
+    exit 1
+  end
+  return prefixlength
+end
+
+def makeseedhash(indexname,seedlength,minlength,errpercoption,maxalilendiffopt,
                  extend_opt)
   seedhash = Hash.new()
   key = nil
+  if seedlength == 0
+    seedlength = 3 * prefixlength_get("#{indexname}.prj")
+  end
   repfindcall = "env -i bin/gt repfind -scan -v -seedlength #{seedlength} " +
-                "-l #{minlength} -#{extend_opt} -ii sfx #{errpercoption}" +
+                "-l #{minlength} -#{extend_opt} " +
+                "-ii #{indexname} #{errpercoption}" +
                 " #{maxalilendiffopt}"
   puts "#{repfindcall}"
   IO.popen(repfindcall.split(/\s/)).each_line do |line|
@@ -163,18 +181,21 @@ seedlength = ARGV[1].to_i
 minlength = ARGV[2].to_i
 errperc = ARGV[3].to_i
 maxalilendiff = ARGV[4].to_i
+indexname = "sfx"
 suffixeratorcall = "env -i bin/gt suffixerator -suftabuint -db #{inputfile} " +
-                   "-dna -suf -tis -lcp -md5 no -des no -sds no -indexname sfx"
+                   "-dna -suf -tis -lcp -md5 no -des no -sds no " +
+                   "-indexname #{indexname}"
 if not system(suffixeratorcall)
   STDERR.puts "FAILURE: #{suffixeratorcall}"
   exit 1
 end
 taglist = ["greedy","xdrop"]
-seedhash1 = makeseedhash(seedlength,minlength,"-err #{errperc}",
+seedhash1 = makeseedhash(indexname,seedlength,minlength,"-err #{errperc}",
                          "-maxalilendiff #{maxalilendiff}",
                          "extend#{taglist[0]}")
 puts "seedhash1: size = #{seedhash1.length}"
-seedhash2 = makeseedhash(seedlength,minlength,"","","extend#{taglist[1]}")
+seedhash2 = makeseedhash(indexname,seedlength,minlength,"","",
+                         "extend#{taglist[1]}")
 puts "seedhash2: size = #{seedhash2.length}"
 
 minidentity = 100 - errperc

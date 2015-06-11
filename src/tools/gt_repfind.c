@@ -128,6 +128,7 @@ typedef struct
   GtXdropbest best_right;
   GtXdropscore belowscore;
   GtSeqabstract *useq, *vseq;
+  GtWord errorpercentage;
   bool beverbose;
   const GtUchar *query_sequence;
   GtUword query_totallength;
@@ -188,8 +189,9 @@ static int gt_simplexdropselfmatchoutput(void *info,
 {
   GtXdropmatchinfo *xdropmatchinfo = (GtXdropmatchinfo *) info;
   Repfindsequenceinfo rfsi;
-  GtUword dblen, querylen, seqend1, seqend2;
+  GtUword dblen, total_distance, querylen, seqend1, seqend2;
   const GtEncseq *encseq;
+  GtXdropscore score;
 
   if (pos1 > pos2)
   {
@@ -270,23 +272,24 @@ static int gt_simplexdropselfmatchoutput(void *info,
               + xdropmatchinfo->best_right.ivalue;
   querylen = len + xdropmatchinfo->best_left.jvalue
                  + xdropmatchinfo->best_right.jvalue;
-  if (dblen + querylen >= 2 * xdropmatchinfo->userdefinedleastlength)
+  score = (GtXdropscore) len * xdropmatchinfo->arbitscores.mat +
+          xdropmatchinfo->best_left.score +
+          xdropmatchinfo->best_right.score;
+  total_distance = score2distance(score,dblen+querylen);
+  if (error_rate(total_distance,dblen + querylen) <=
+      (double) xdropmatchinfo->errorpercentage &&
+      dblen + querylen >= 2 * xdropmatchinfo->userdefinedleastlength)
   {
-    GtUword distance, dbstart, querystart;
-    GtXdropscore score;
+    GtUword dbstart, querystart;
 
     gt_assert(pos1 >= xdropmatchinfo->best_left.ivalue &&
               pos2 >= xdropmatchinfo->best_left.jvalue);
     querystart = pos2 - xdropmatchinfo->best_left.jvalue;
     gt_assert(querystart >= rfsi.queryseqstartpos);
     dbstart = pos1 - xdropmatchinfo->best_left.ivalue;
-    score = (GtXdropscore) len * xdropmatchinfo->arbitscores.mat +
-            xdropmatchinfo->best_left.score +
-            xdropmatchinfo->best_right.score;
-    distance = score2distance(score,dblen+querylen);
     skdebug("total_distance=" GT_WU ", score=" GT_WD ",total_alignedlen=" GT_WU
-            ", err=%.2f",distance,score,dblen+querylen,
-            error_rate(distance,dblen+querylen));
+            ", err=%.2f",total_distance,score,dblen+querylen,
+            error_rate(total_distance,dblen+querylen));
     /*
     gt_seqabstract_reinit_encseq(xdropmatchinfo->useq,
                                  encseq,
@@ -303,7 +306,7 @@ static int gt_simplexdropselfmatchoutput(void *info,
                        GT_READMODE_FORWARD,
                        false,
                        score,
-                       distance,
+                       total_distance,
                        /*greedyunitedist(xdropmatchinfo->frontresource,
                                        xdropmatchinfo->useq,
                                        xdropmatchinfo->vseq),
@@ -820,7 +823,8 @@ static GtOptionParser *gt_repfind_option_parser_new(void *tool_arguments)
   gt_option_exclude(sampleoption,spmoption);
   gt_option_imply_either_2(seedlengthoption,extendxdropoption,
                            extendgreedyoption);
-  gt_option_imply(errorpercentageoption,extendgreedyoption);
+  gt_option_imply_either_2(errorpercentageoption,extendxdropoption,
+                           extendgreedyoption);
   gt_option_imply(maxalilendiffoption,extendgreedyoption);
   return op;
 }
@@ -877,6 +881,7 @@ static int gt_repfind_runner(GT_UNUSED int argc,
   xdropmatchinfo.frontresource = gt_frontresource_new(100UL);
   xdropmatchinfo.res = gt_xdrop_resources_new(&xdropmatchinfo.arbitscores);
   xdropmatchinfo.userdefinedleastlength = arguments->userdefinedleastlength;
+  xdropmatchinfo.errorpercentage = arguments->errorpercentage;
   xdropmatchinfo.belowscore = 5L;
 
   greedyextendmatchinfo.querymatchspaceptr = querymatchspaceptr;
