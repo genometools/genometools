@@ -58,8 +58,8 @@ def makeseedhash(indexname,seedlength,minlength,errperc,maxalilendiffopt,
       key = nil
     end
   end
-  if not "#{$?}".match(/exit 0$/)
-    STDERR.puts "FAILURE: #{repfindcall}"
+  if "#{$?}" != "" and not "#{$?}".match(/exit 0$/)
+    STDERR.puts "FAILURE: #{repfindcall}: \"#{$?}\""
     exit 1
   end
   return seedhash
@@ -137,7 +137,7 @@ def calcdifference(seqnumpair_set1,seqnumpair_set2)
   size_only_xdrop = (seqnumpair_set2 - seqnumpair_set1).length
   perc_only_xdrop = showcomment(size_only_xdrop,sum_size,
                                 "occur in xdrop but not greedy")
-  puts [perc_both,perc_only_greedy,perc_only_xdrop,sum_size].join("\t")
+  return [sum_size,perc_both,perc_only_greedy,perc_only_xdrop].join("\t")
 end
 
 def cmpseedhashes(checkbetter,minidentity,taglist,h1,h2)
@@ -206,36 +206,33 @@ seedlength = ARGV[1].to_i
 minlength = ARGV[2].to_i
 errperc = ARGV[3].to_i
 maxalilendiff = ARGV[4].to_i
-indexname = "sfx"
 suffixeratorcall = "env -i bin/gt suffixerator -suftabuint -db #{inputfile} " +
-                   "-dna -suf -tis -lcp -md5 no -des no -sds no " +
-                   "-indexname #{indexname}"
+                   "-dna -suf -tis -lcp -md5 no -des no -sds no "
+indexname = File.basename(inputfile)
 if not File.exist?("#{indexname}.prj") or 
-   File.stat("#{indexname}.prj").mtime < File.stat(inputfile).mtime
+  File.stat("#{indexname}.prj").mtime < File.stat(inputfile).mtime
   if not system(suffixeratorcall)
     STDERR.puts "FAILURE: #{suffixeratorcall}"
     exit 1
   end
+  puts "# #{suffixeratorcall}"
 end
 taglist = ["greedy","xdrop"]
 seedhash1 = makeseedhash(indexname,seedlength,minlength,errperc,
                          "-maxalilendiff #{maxalilendiff}",
                          "extend#{taglist[0]}")
-puts "seedhash1: size = #{seedhash1.length}"
+puts "# seedhash1: size = #{seedhash1.length}"
 seedhash2 = makeseedhash(indexname,seedlength,minlength,errperc,"",
                          "extend#{taglist[1]}")
-puts "seedhash2: size = #{seedhash2.length}"
+puts "# seedhash2: size = #{seedhash2.length}"
 
 minidentity = 100 - errperc
-silent = true
+silent = false
 seqnumpair_set1 = seedhash2seqnum_pairs(seedhash1)
 seqnumpair_set2 = seedhash2seqnum_pairs(seedhash2)
-if seqnumpair_set1 == seqnumpair_set2
-  puts "sets of sequence pairs are identical"
-else
-  calcdifference(seqnumpair_set1,seqnumpair_set2)
-end
+result = calcdifference(seqnumpair_set1,seqnumpair_set2)
+puts "#{seedlength}\t#{minlength}\t#{result}"
 if not silent
-  cmpseedhashes(silent,true,minidentity,taglist,seedhash1,seedhash2)
-  cmpseedhashes(silent,false,minidentity,taglist.reverse,seedhash2,seedhash1)
+  cmpseedhashes(true,minidentity,taglist,seedhash1,seedhash2)
+  cmpseedhashes(false,minidentity,taglist.reverse,seedhash2,seedhash1)
 end
