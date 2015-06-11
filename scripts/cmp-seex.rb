@@ -1,5 +1,7 @@
 #!/usr/bin/env ruby
 
+require "set"
+
 Match = Struct.new("Match",:len1,:seq1,:start1,:len2,:seq2,:start2,:score,
                             :distance,:identity,:other,:result1,:result2)
 
@@ -22,7 +24,7 @@ def prefixlength_get(prjfile)
   return prefixlength
 end
 
-def makeseedhash(indexname,seedlength,minlength,errpercoption,maxalilendiffopt,
+def makeseedhash(indexname,seedlength,minlength,errperc,maxalilendiffopt,
                  extend_opt)
   seedhash = Hash.new()
   key = nil
@@ -31,9 +33,9 @@ def makeseedhash(indexname,seedlength,minlength,errpercoption,maxalilendiffopt,
   end
   repfindcall = "env -i bin/gt repfind -scan -v -seedlength #{seedlength} " +
                 "-l #{minlength} -#{extend_opt} " +
-                "-ii #{indexname} #{errpercoption}" +
+                "-ii #{indexname} -err #{errperc}" +
                 " #{maxalilendiffopt}"
-  puts "#{repfindcall}"
+  puts "\# #{repfindcall}"
   IO.popen(repfindcall.split(/\s/)).each_line do |line|
     if line.match(/# seed:/)
       key = line.chomp.gsub(/# seed:\s+/,"")
@@ -115,6 +117,26 @@ def addpercentage(h,val)
   end
 end
 
+def seedhash2seqnum_pairs(seedhash)
+  return Set.new(seedhash.values.map {|m| [m.seq1,m.seq2]})
+end
+
+def showcomment(size,sum_size,comment)
+  printf("# %d (%.0f%%) of %d sequence pairs %s\n",
+          size,100.0 * size.to_f/sum_size.to_f,sum_size,comment)
+end
+
+def calcdifference(seqnumpair_set1,seqnumpair_set2)
+  sum_size = seqnumpair_set1.length + seqnumpair_set2.length
+  size_both = (seqnumpair_set1 & seqnumpair_set2).length
+  showcomment(size_both,sum_size,"occur in greedy and xdrop")
+  size_only_greedy = (seqnumpair_set1 - seqnumpair_set2).length
+  showcomment(size_only_greedy,sum_size,"occur in greedy but not xdrop")
+  size_only_xdrop = (seqnumpair_set2 - seqnumpair_set1).length
+  showcomment(size_only_xdrop,sum_size,"occur in xdrop but not greedy")
+  return size_both, size_only_greedy, size_only_xdrop, sum_size
+end
+
 def cmpseedhashes(checkbetter,minidentity,taglist,h1,h2)
   nobrother = 0
   h1.each_pair do |k,v1|
@@ -190,14 +212,24 @@ if not system(suffixeratorcall)
   exit 1
 end
 taglist = ["greedy","xdrop"]
-seedhash1 = makeseedhash(indexname,seedlength,minlength,"-err #{errperc}",
+seedhash1 = makeseedhash(indexname,seedlength,minlength,errperc,
                          "-maxalilendiff #{maxalilendiff}",
                          "extend#{taglist[0]}")
 puts "seedhash1: size = #{seedhash1.length}"
-seedhash2 = makeseedhash(indexname,seedlength,minlength,"","",
+seedhash2 = makeseedhash(indexname,seedlength,minlength,errperc,"",
                          "extend#{taglist[1]}")
 puts "seedhash2: size = #{seedhash2.length}"
 
 minidentity = 100 - errperc
-cmpseedhashes(true,minidentity,taglist,seedhash1,seedhash2)
-cmpseedhashes(false,minidentity,taglist.reverse,seedhash2,seedhash1)
+silent = true
+seqnumpair_set1 = seedhash2seqnum_pairs(seedhash1)
+seqnumpair_set2 = seedhash2seqnum_pairs(seedhash2)
+if seqnumpair_set1 == seqnumpair_set2
+  puts "sets of sequence pairs are identical"
+else
+  calcdifference(seqnumpair_set1,seqnumpair_set2)
+end
+if not silent
+  cmpseedhashes(silent,true,minidentity,taglist,seedhash1,seedhash2)
+  cmpseedhashes(silent,false,minidentity,taglist.reverse,seedhash2,seedhash1)
+end
