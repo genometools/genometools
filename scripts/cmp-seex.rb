@@ -135,13 +135,21 @@ end
 def calcdifference(seqnumpair_set1,seqnumpair_set2)
   sum_size = seqnumpair_set1.length + seqnumpair_set2.length
   size_both = (seqnumpair_set1 & seqnumpair_set2).length
-  perc_both = showcomment(size_both,sum_size,"occur in greedy and xdrop")
+  perc_both = showcomment(2 * size_both,sum_size,"occur in greedy and xdrop")
   size_only_greedy = (seqnumpair_set1 - seqnumpair_set2).length
-  perc_only_greedy = showcomment(size_only_greedy,sum_size,
-                                 "occur in greedy but not xdrop")
+  if size_only_greedy > 0
+    perc_only_greedy = showcomment(size_only_greedy,sum_size,
+                                   "occur in greedy but not xdrop")
+  else
+    perc_only_greedy = 0
+  end
   size_only_xdrop = (seqnumpair_set2 - seqnumpair_set1).length
-  perc_only_xdrop = showcomment(size_only_xdrop,sum_size,
-                                "occur in xdrop but not greedy")
+  if size_only_xdrop > 0
+    perc_only_xdrop = showcomment(size_only_xdrop,sum_size,
+                                  "occur in xdrop but not greedy")
+  else
+    perc_only_xdrop = 0
+  end
   return [sum_size,perc_both,perc_only_greedy,perc_only_xdrop].join("\t")
 end
 
