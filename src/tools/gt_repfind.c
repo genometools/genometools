@@ -78,7 +78,8 @@ typedef struct
        extendgreedy;
   GtStr *indexname;
   GtStrArray *queryfiles;
-  GtOption *refforwardoption, *refseedlengthoption;
+  GtOption *refforwardoption, *refseedlengthoption,
+           *refuserdefinedleastlengthoption;
 } Maxpairsoptions;
 
 static int gt_simpleexactselfmatchoutput(void *info,
@@ -705,6 +706,7 @@ static void gt_repfind_arguments_delete(void *tool_arguments)
   gt_str_array_delete(arguments->queryfiles);
   gt_option_delete(arguments->refforwardoption);
   gt_option_delete(arguments->refseedlengthoption);
+  gt_option_delete(arguments->refuserdefinedleastlengthoption);
   gt_free(arguments);
 }
 
@@ -714,18 +716,19 @@ static GtOptionParser *gt_repfind_option_parser_new(void *tool_arguments)
   GtOption *option, *reverseoption, *queryoption, *extendxdropoption,
            *extendgreedyoption, *scanoption, *sampleoption, *forwardoption,
            *spmoption, *seedlengthoption, *errorpercentageoption,
-           *maxalilendiffoption;
+           *maxalilendiffoption, *optionleastlength;
   Maxpairsoptions *arguments = tool_arguments;
 
   op = gt_option_parser_new("[options] -ii indexname",
                             "Compute maximal repeats.");
   gt_option_parser_set_mail_address(op,"<kurtz@zbh.uni-hamburg.de>");
 
-  option = gt_option_new_uint_min("l","Specify minimum length of repeats",
-                                  &arguments->userdefinedleastlength,
-                                  20U,
-                                  1U);
-  gt_option_parser_add_option(op, option);
+  optionleastlength
+    = gt_option_new_uint("l","Specify minimum length of repeats",
+                         &arguments->userdefinedleastlength,
+                         0U);
+  gt_option_parser_add_option(op, optionleastlength);
+  arguments->refuserdefinedleastlengthoption = gt_option_ref(optionleastlength);
 
   forwardoption = gt_option_new_bool("f","Compute maximal forward repeats",
                                      &arguments->forward,
@@ -839,14 +842,26 @@ static int gt_repfind_arguments_check(GT_UNUSED int rest_argc,
   {
     arguments->forward = false;
   }
-  if (!gt_option_is_set(arguments->refseedlengthoption))
+  if (!gt_option_is_set(arguments->refuserdefinedleastlengthoption))
   {
-    arguments->seedlength = arguments->userdefinedleastlength;
+    if (!gt_option_is_set(arguments->refseedlengthoption))
+    {
+      arguments->seedlength = arguments->userdefinedleastlength = 20U;
+    } else
+    {
+      arguments->userdefinedleastlength = arguments->seedlength;
+    }
   } else
   {
-    if (arguments->seedlength > arguments->userdefinedleastlength)
+    if (!gt_option_is_set(arguments->refseedlengthoption))
     {
       arguments->seedlength = arguments->userdefinedleastlength;
+    } else
+    {
+      if (arguments->seedlength > arguments->userdefinedleastlength)
+      {
+        arguments->seedlength = arguments->userdefinedleastlength;
+      }
     }
   }
   return 0;
@@ -923,6 +938,8 @@ static int gt_repfind_runner(GT_UNUSED int argc,
     gt_error_set(err,"superfluous arguments: \"%s\"",argv[argc-1]);
     haserr = true;
   }
+  printf("-seedlength %u -l %u\n",arguments->seedlength,
+                                  arguments->userdefinedleastlength);
   if (!haserr)
   {
     if (gt_str_array_size(arguments->queryfiles) == 0)

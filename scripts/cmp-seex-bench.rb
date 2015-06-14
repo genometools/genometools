@@ -1,28 +1,25 @@
 #!/usr/bin/env ruby
 
-if ARGV.length != 2
-  STDERR.puts "Usage: #{$0} <startseedlength> <multiple fasta file>"
+if ARGV.length != 3
+  STDERR.puts "Usage: #{$0} <startseedlength> <endseedlength> <multiple fasta file>"
   exit 1
 end
 
 startseedlength = ARGV[0].to_i
-inputfile = ARGV[1]
+endseedlength = ARGV[1].to_i
+inputfile = ARGV[2]
 
-def run_evaluations(startseedlength,inputfile)
-  startseedlength.upto(20) do |seedlength|
-    len = 50
-    while len <= 500
-      cmd = "cmp-seex.rb #{inputfile} #{seedlength} #{len} 10 30"
-      IO.popen(cmd.split(/\s/)).each_line do |line|
-        if not line.match(/^#/)
-          yield line
-        end
+def run_evaluations(startseedlength,endseedlength,inputfile)
+  startseedlength.upto(endseedlength) do |seedlength|
+    cmd = "cmp-seex.rb --silent --inputfile #{inputfile} --seedlength #{seedlength} --errperc 10 --maxalilendiff 30"
+    IO.popen(cmd.split(/\s/)).each_line do |line|
+      if not line.match(/^#/)
+        yield line
       end
-      if "#{$?}" != "" and not "#{$?}".match(/exit 0$/)
-        STDERR.puts "FAILURE: #{cmd}: \"#{$?}\""
-        exit 1
-      end
-      len += 50
+    end
+    if "#{$?}" != "" and not "#{$?}".match(/exit 0$/)
+      STDERR.puts "FAILURE: #{cmd}: \"#{$?}\""
+      exit 1
     end
   end
 end
@@ -52,6 +49,6 @@ def accumulate(filename)
   end
 end
 
-run_evaluations(startseedlength,inputfile) do |line|
+run_evaluations(startseedlength,endseedlength,inputfile) do |line|
   puts line
 end

@@ -1,6 +1,8 @@
 #!/usr/bin/env ruby
 
 require "set"
+require 'ostruct'
+require 'optparse'
 
 Match = Struct.new("Match",:len1,:seq1,:start1,:len2,:seq2,:start2,:score,
                             :distance,:identity,:other,:result1,:result2)
@@ -24,7 +26,7 @@ def prefixlength_get(prjfile)
   return prefixlength
 end
 
-def makeseedhash(indexname,seedlength,minlength,errperc,maxalilendiffopt,
+def makeseedhash(indexname,seedlength,errperc,maxalilendiffopt,
                  extend_opt)
   seedhash = Hash.new()
   key = nil
@@ -32,8 +34,7 @@ def makeseedhash(indexname,seedlength,minlength,errperc,maxalilendiffopt,
     seedlength = 3 * prefixlength_get("#{indexname}.prj")
   end
   repfindcall = "env -i bin/gt repfind -scan -v -seedlength #{seedlength} " +
-                "-l #{minlength} -#{extend_opt} " +
-                "-ii #{indexname} -err #{errperc}" +
+                "-#{extend_opt} -ii #{indexname} -err #{errperc}" +
                 " #{maxalilendiffopt}"
   puts "\# #{repfindcall}"
   IO.popen(repfindcall.split(/\s/)).each_line do |line|
@@ -122,9 +123,13 @@ def seedhash2seqnum_pairs(seedhash)
 end
 
 def showcomment(size,sum_size,comment)
-  perc = 100.0 * size.to_f/sum_size.to_f
-  printf("# %d (%.0f%%) of %d sequence pairs %s\n",size,perc,sum_size,comment)
-  return perc.to_i
+  if sum_size > 0
+    perc = 100.0 * size.to_f/sum_size.to_f
+    printf("# %d (%.0f%%) of %d sequence pairs %s\n",size,perc,sum_size,comment)
+    return perc.to_i
+  else 
+    return 0
+  end
 end
 
 def calcdifference(seqnumpair_set1,seqnumpair_set2)
@@ -196,21 +201,55 @@ def cmpseedhashes(checkbetter,minidentity,taglist,h1,h2)
   puts "#{taglist[0]}: nobrother=#{nobrother}"
 end
 
-if ARGV.length != 5
-  STDERR.puts "Usage: #{$0} <inputfile> <seedlength> <minlength> <errperc> <maxalilendiff>"
+def usage(opts,msg)
+  STDERR.puts "#{$0}: #{msg}\n#{opts.to_s}"
   exit 1
 end
 
-inputfile = ARGV[0]
-seedlength = ARGV[1].to_i
-minlength = ARGV[2].to_i
-errperc = ARGV[3].to_i
-maxalilendiff = ARGV[4].to_i
-suffixeratorcall = "env -i bin/gt suffixerator -suftabuint -db #{inputfile} " +
+def parseargs(argv)
+  options = OpenStruct.new
+  options.inputfile = nil
+  options.seedlength = 20
+  options.errperc = 10
+  options.maxalilendiff = 30
+  options.silent = false
+  opts = OptionParser.new
+  opts.on("--inputfile STRING","specify input file") do |x|
+    options.inputfile = x
+  end
+  opts.on("--seedlength NUM","specify seedlength") do |x|
+    options.seedlength = x.to_i
+  end
+  opts.on("--errperc NUM","specify error percentage") do |x|
+    options.errperc = x.to_i
+  end
+  opts.on("--maxalilendiff NUM",
+          "specify maximum difference of aligned length") do |x|
+    options.maxalilendiff = x.to_i
+  end
+  opts.on("--silent","do not show differences") do |x|
+    options.silent = true
+  end
+  rest = opts.parse(argv)
+  if not rest.empty?
+    STDERR.puts "#{$0}: superfluous arguments: #{rest}"
+    exit 1
+  end
+  if options.inputfile.nil?
+    STDERR.puts "#{$0}: option -inputfile is mandatory"
+    exit 1
+  end
+  return options
+end
+
+options = parseargs(ARGV)
+  
+suffixeratorcall = "env -i bin/gt suffixerator -suftabuint " +
+                   "-db #{options.inputfile} " +
                    "-dna -suf -tis -lcp -md5 no -des no -sds no "
-indexname = File.basename(inputfile)
+indexname = File.basename(options.inputfile)
 if not File.exist?("#{indexname}.prj") or 
-  File.stat("#{indexname}.prj").mtime < File.stat(inputfile).mtime
+  File.stat("#{indexname}.prj").mtime < File.stat(options.inputfile).mtime
   if not system(suffixeratorcall)
     STDERR.puts "FAILURE: #{suffixeratorcall}"
     exit 1
@@ -218,21 +257,20 @@ if not File.exist?("#{indexname}.prj") or
   puts "# #{suffixeratorcall}"
 end
 taglist = ["greedy","xdrop"]
-seedhash1 = makeseedhash(indexname,seedlength,minlength,errperc,
-                         "-maxalilendiff #{maxalilendiff}",
+seedhash1 = makeseedhash(indexname,options.seedlength,options.errperc,
+                         "-maxalilendiff #{options.maxalilendiff}",
                          "extend#{taglist[0]}")
 puts "# seedhash1: size = #{seedhash1.length}"
-seedhash2 = makeseedhash(indexname,seedlength,minlength,errperc,"",
+seedhash2 = makeseedhash(indexname,options.seedlength,options.errperc,"",
                          "extend#{taglist[1]}")
 puts "# seedhash2: size = #{seedhash2.length}"
 
-minidentity = 100 - errperc
-silent = false
+minidentity = 100 - options.errperc
 seqnumpair_set1 = seedhash2seqnum_pairs(seedhash1)
 seqnumpair_set2 = seedhash2seqnum_pairs(seedhash2)
 result = calcdifference(seqnumpair_set1,seqnumpair_set2)
-puts "#{seedlength}\t#{minlength}\t#{result}"
-if not silent
+puts "#{options.seedlength}\t#{result}"
+if not options.silent
   cmpseedhashes(true,minidentity,taglist,seedhash1,seedhash2)
   cmpseedhashes(false,minidentity,taglist.reverse,seedhash2,seedhash1)
 end
