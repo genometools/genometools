@@ -26,6 +26,7 @@
 #include "core/types_api.h"
 #include "match/test-pairwise.h"
 #include "extended/linearedist.h"
+#include "extended/linearedist_local.h"
 #include "tools/gt_paircmp.h"
 
 typedef struct
@@ -276,6 +277,11 @@ int gt_paircmp(int argc, const char **argv, GtError *err)
       testcases = applycheckfunctiontosimpleoptions(gt_checklinearspace,
                                                     &cmppairwise);
       printf("# number of testcases for gt_checklinearspace: " GT_WU "\n", 
+              testcases);
+              
+      testcases = applycheckfunctiontosimpleoptions(gt_checklinearspace_local,
+                                                    &cmppairwise);
+      printf("# number of testcases for gt_checklinearspace_local: " GT_WU "\n", 
               testcases);
     }
   }

@@ -194,11 +194,11 @@ static GtUword determineCtab0(GtUword *Ctab,
   return Ctab[1];
 }
 
-static GtUword reconstructalignment(GtAlignment *align,
+static void reconstructalignment(GtAlignment *align,
                                        GtUword *Ctab,
                                        GtUword vlen)
 {
-  GtUword alilen, i,j;
+  GtUword i,j;
 
   gt_assert(align != NULL && Ctab != NULL);
   for (i = vlen; i > 0; i--) {
@@ -215,8 +215,6 @@ static GtUword reconstructalignment(GtAlignment *align,
   for (j = Ctab[0]; j > 0; j--)
     gt_alignment_add_deletion(align);
 
-  alilen = gt_alignment_get_length(align);
-  return alilen;
 }
 
 static GtUword computealignment(const GtUchar *useq,
@@ -224,7 +222,6 @@ static GtUword computealignment(const GtUchar *useq,
                                 GtUword ulen,
                                 GtUword vlen,
                                 GtAlignment *align,
-                                GtUword *alilen,
                                 GtUword *Ctab)
 {
   GtUword distance,
@@ -242,7 +239,7 @@ static GtUword computealignment(const GtUchar *useq,
                                    Rtabcolumn, Ctab, 0);
     (void) determineCtab0(Ctab, vseq[0], useq);
   }
-  *alilen = reconstructalignment(align, Ctab, vlen);
+  reconstructalignment(align,Ctab, vlen);
   gt_free(EDtabcolumn);
   gt_free(Rtabcolumn);
   return distance;
@@ -250,12 +247,12 @@ static GtUword computealignment(const GtUchar *useq,
 
 GtUword gt_calc_linearalign(const GtUchar *u, GtUword ulen,
                             const GtUchar *v, GtUword vlen,
-                            GtAlignment *align, GtUword *alilen)
+                            GtAlignment *align)
 {
   GtUword *Ctab, edist;
 
   Ctab = gt_malloc(sizeof *Ctab * (vlen+1));
-  edist = computealignment(u, v, ulen, vlen, align, alilen, Ctab);
+  edist = computealignment(u, v, ulen, vlen, align, Ctab);
   gt_free(Ctab);
   return edist;
 }
@@ -327,7 +324,7 @@ void gt_checklinearspace(GT_UNUSED bool forward,
                          GtUword vlen)
 {
   GtAlignment *align;
-  GtUword  alcost, alilen, edist1, edist2, edist3;
+  GtUword  alcost, edist1, edist2, edist3;
 
   if (gap_symbol_in_sequence(useq,ulen))
   {
@@ -349,7 +346,7 @@ void gt_checklinearspace(GT_UNUSED bool forward,
   }
 
   align = gt_alignment_new_with_seqs(useq, ulen, vseq, vlen);
-  edist3 = gt_calc_linearalign(useq, ulen, vseq, vlen, align, &alilen);
+  edist3 = gt_calc_linearalign(useq, ulen, vseq, vlen, align);
   if (edist2 != edist3)
   {
     fprintf(stderr,"gt_calc_linearalign = "GT_WU" != "GT_WU
