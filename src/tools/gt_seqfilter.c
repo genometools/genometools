@@ -40,6 +40,7 @@ typedef struct {
           step,
           width;
   double sample_prob;
+  bool nowildcards;
 } SeqFilterArguments;
 
 static void* gt_seqfilter_arguments_new(void)
@@ -105,6 +106,12 @@ static GtOptionParser* gt_seqfilter_option_parser_new(void *tool_arguments)
                                    SEQFILTER_MIN_STEP);
   gt_option_parser_add_option(op, option);
 
+  /* -nowildcards */
+  option = gt_option_new_bool("nowildcards", "filter out seqences containing "
+                              "wildcards",
+                              &arguments->nowildcards, false);
+  gt_option_parser_add_option(op, option);
+
   /* -width */
   option = gt_option_new_width(&arguments->width);
   gt_option_parser_add_option(op, option);
@@ -145,7 +152,9 @@ static int gt_seqfilter_runner(int argc, const char **argv, int parsed_args,
           (arguments->minlength == GT_UNDEF_UWORD ||
            gt_bioseq_get_sequence_length(bioseq, i) >= arguments->minlength) &&
           (arguments->maxlength == GT_UNDEF_UWORD ||
-           gt_bioseq_get_sequence_length(bioseq, i) <= arguments->maxlength)) {
+           gt_bioseq_get_sequence_length(bioseq, i) <= arguments->maxlength) &&
+          (!arguments->nowildcards ||
+           !gt_bioseq_seq_has_wildcards(bioseq, i))) {
         seq = gt_bioseq_get_sequence(bioseq, i);
         gt_fasta_show_entry(gt_bioseq_get_description(bioseq, i),
                             seq,

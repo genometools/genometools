@@ -100,6 +100,11 @@ char              gt_encseq_get_decoded_char(const GtEncseq *encseq,
 bool              gt_encseq_position_is_separator(const GtEncseq *encseq,
                                                   GtUword pos,
                                                   GtReadmode readmode);
+/* Returns true iff <pos> is a wildcard in <encseq>
+   read in the direction as indicated by <readmode>. */
+bool              gt_encseq_position_is_wildcard(const GtEncseq *encseq,
+                                                 GtUword pos,
+                                                 GtReadmode readmode);
 /* Increases the reference count of <encseq>. */
 GtEncseq*         gt_encseq_ref(GtEncseq *encseq);
 /* Returns a new <GtEncseqReader> for <encseq>, starting from position

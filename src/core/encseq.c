@@ -415,6 +415,32 @@ GtUchar gt_encseq_get_encoded_char_nospecial(const GtEncseq *encseq,
   }
 }
 
+bool gt_encseq_position_is_wildcard(const GtEncseq *encseq,
+                                    GtUword pos,
+                                    GtReadmode readmode)
+{
+  gt_assert(encseq != NULL && pos < encseq->logicaltotallength);
+  /* translate into forward coords */
+  if (GT_ISDIRREVERSE(readmode))
+    pos = GT_REVERSEPOS(encseq->logicaltotallength, pos);
+  /* handle virtual coordinates */
+  if (encseq->hasmirror) {
+    if (pos > encseq->totallength) {
+      /* invert coordinates and readmode */
+      gt_readmode_invert(readmode);
+      pos = GT_REVERSEPOS(encseq->totallength, pos - encseq->totallength - 1);
+    }
+    else {
+      if (pos == encseq->totallength)
+        return true;
+    }
+  }
+  if (encseq->numofdbsequences == 1UL)
+    return false;
+  gt_assert(encseq->issinglepositioninwildcardrange != NULL);
+  return encseq->issinglepositioninwildcardrange(encseq, pos);
+}
+
 bool gt_encseq_position_is_separator(const GtEncseq *encseq,
                                      GtUword pos,
                                      GtReadmode readmode)
@@ -4360,8 +4386,8 @@ static GtEncseqfunctions encodedseqfunctab[] =
         }
 
 static unsigned int determineleastprobablecharacter(const GtAlphabet *alpha,
-                                                     const GtUword
-                                                     *characterdistribution)
+                                                    const GtUword
+                                                    *characterdistribution)
 {
   unsigned int idx, minidx;
   GtUword mindist;
