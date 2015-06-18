@@ -153,24 +153,29 @@ def calcdifference(seqnumpair_set1,seqnumpair_set2)
   return [sum_size,perc_both,perc_only_greedy,perc_only_xdrop].join("\t")
 end
 
-def cmpseedhashes(checkbetter,minidentity,taglist,h1,h2)
-  nobrother = 0
+def fillotherhash(h1,h2)
   h1.each_pair do |k,v1|
-    if not h2.has_key?(k)
-      if v1.identity >= minidentity
-        puts "#{taglist[0]}: #{k}=>#{match_to_s(v1)}, #{taglist[1]}=[]"
-        nobrother += 1
-      end
-    else
+    if h2.has_key?(k)
       v2 = h2[k]
       if [v1.seq1,v1.seq2] != [v2.seq1,v2.seq2]
-        puts "seq: #{taglist[0]}=[#{v1.seq1},#{v1.seq2}] != " +
-             "     [#{v2.seq1},#{v2.seq2}]=#{taglist[1]}"
+        STDERR.puts "seq: #{taglist[0]}=[#{v1.seq1},#{v1.seq2}] != " +
+                    "     [#{v2.seq1},#{v2.seq2}]=#{taglist[1]}"
         exit 1
       end
       h1[k].result1 = evaluate_itv(v1.start1,v1.len1,v2.start1,v2.len1)
       h1[k].result2 = evaluate_itv(v1.start2,v1.len2,v2.start2,v2.len2)
       h1[k].other = v2
+    end
+  end
+end
+
+def cmpseedhashes(checkbetter,minidentity,taglist,h1,h2)
+  fillotherhash(h1,h2)
+  nobrother = 0
+  h1.each_pair do |k,v1|
+    if v1.identity >= minidentity and not h2.has_key?(k)
+      puts "#{taglist[0]}: #{k}=>#{match_to_s(v1)}, #{taglist[1]}=[]"
+      nobrother += 1
     end
   end
   count_identical = 0
