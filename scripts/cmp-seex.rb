@@ -31,7 +31,7 @@ def makeseedhash(indexname,seedlength,errperc,maxalilendiffopt,
   seedhash = Hash.new()
   key = nil
   if seedlength == 0
-    seedlength = 3 * prefixlength_get("#{indexname}.prj")
+    seedlength = 2 * prefixlength_get("#{indexname}.prj")
   end
   repfindcall = "env -i bin/gt repfind -scan -v -seedlength #{seedlength} " +
                 "-#{extend_opt} -ii #{indexname} -err #{errperc}" +

@@ -190,7 +190,7 @@ static int gt_simplexdropselfmatchoutput(void *info,
 {
   GtXdropmatchinfo *xdropmatchinfo = (GtXdropmatchinfo *) info;
   Repfindsequenceinfo rfsi;
-  GtUword dblen, total_distance, querylen, seqend1, seqend2;
+  GtUword dblen, querylen, total_distance, total_alignedlen, seqend1, seqend2;
   const GtEncseq *encseq;
   GtXdropscore score;
 
@@ -273,13 +273,14 @@ static int gt_simplexdropselfmatchoutput(void *info,
               + xdropmatchinfo->best_right.ivalue;
   querylen = len + xdropmatchinfo->best_left.jvalue
                  + xdropmatchinfo->best_right.jvalue;
+  total_alignedlen = dblen + querylen;
   score = (GtXdropscore) len * xdropmatchinfo->arbitscores.mat +
           xdropmatchinfo->best_left.score +
           xdropmatchinfo->best_right.score;
-  total_distance = score2distance(score,dblen+querylen);
-  if (error_rate(total_distance,dblen + querylen) <=
+  total_distance = score2distance(score,total_alignedlen);
+  if (error_rate(total_distance,total_alignedlen) <=
       (double) xdropmatchinfo->errorpercentage &&
-      dblen + querylen >= 2 * xdropmatchinfo->userdefinedleastlength)
+      total_alignedlen >= 2 * xdropmatchinfo->userdefinedleastlength)
   {
     GtUword dbstart, querystart;
 
@@ -289,8 +290,8 @@ static int gt_simplexdropselfmatchoutput(void *info,
     gt_assert(querystart >= rfsi.queryseqstartpos);
     dbstart = pos1 - xdropmatchinfo->best_left.ivalue;
     skdebug("total_distance=" GT_WU ", score=" GT_WD ",total_alignedlen=" GT_WU
-            ", err=%.2f",total_distance,score,dblen+querylen,
-            error_rate(total_distance,dblen+querylen));
+            ", err=%.2f",total_distance,score,total_alignedlen,
+            error_rate(total_distance,total_alignedlen));
     /*
     gt_seqabstract_reinit_encseq(xdropmatchinfo->useq,
                                  encseq,
@@ -353,7 +354,7 @@ static int gt_simplegreedyselfmatchoutput(void *info,
     = (GtGreedyextendmatchinfo *) info;
   const GtEncseq *encseq;
   GtUword vextend_left, vextend_right, ulen, vlen, urightbound,
-          total_distance, total_alignedlen;
+          total_distance, dblen, querylen, total_alignedlen;
   Repfindsequenceinfo rfsi;
   Polished_point left_best_polished_point = {0,0,0},
                  right_best_polished_point = {0,0,0};
@@ -468,8 +469,13 @@ static int gt_simplegreedyselfmatchoutput(void *info,
           right_best_polished_point.distance);
   total_distance = left_best_polished_point.distance +
                    right_best_polished_point.distance;
-  total_alignedlen = left_best_polished_point.alignedlen + GT_MULT2(len) +
-                     right_best_polished_point.alignedlen;
+  dblen = len + left_best_polished_point.row + right_best_polished_point.row;
+  gt_assert(right_best_polished_point.alignedlen >=
+            right_best_polished_point.row);
+  vextend_right
+    = right_best_polished_point.alignedlen - right_best_polished_point.row;
+  querylen = len + vextend_left + vextend_right;
+  total_alignedlen = dblen + querylen;
   skdebug("total_distance=" GT_WU ", total_alignedlen=" GT_WU ",err=%.2f",
           total_distance,
           total_alignedlen,
@@ -478,21 +484,14 @@ static int gt_simplegreedyselfmatchoutput(void *info,
       (double) greedyextendmatchinfo->errorpercentage &&
       total_alignedlen >= 2 * greedyextendmatchinfo->userdefinedleastlength)
   {
-    GtUword dbstart, dblen, querylen, querystart;
+    GtUword dbstart, querystart;
     GtXdropscore score = distance2score(total_distance,total_alignedlen);
-
-    dblen = len + left_best_polished_point.row + right_best_polished_point.row;
-    gt_assert(right_best_polished_point.alignedlen >=
-              right_best_polished_point.row);
-    vextend_right
-      = right_best_polished_point.alignedlen - right_best_polished_point.row;
 
     gt_assert(pos1 >= left_best_polished_point.row &&
               pos2 >= vextend_left);
     querystart = pos2 - vextend_left;
     gt_assert(querystart >= rfsi.queryseqstartpos);
     dbstart = pos1 - left_best_polished_point.row;
-    querylen = len + vextend_left + vextend_right;
     gt_querymatch_fill(greedyextendmatchinfo->querymatchspaceptr,
                        dblen,
                        dbstart,
@@ -514,12 +513,12 @@ static int gt_simplegreedyselfmatchoutput(void *info,
     if (error_rate(total_distance,total_alignedlen) >
       (double) greedyextendmatchinfo->errorpercentage)
     {
-      skdebug("reject: error rate %.2f > %.2f\n",
+      printf("reject: error rate %.2f > %.2f\n",
               error_rate(total_distance,total_alignedlen),
               (double) greedyextendmatchinfo->errorpercentage);
     } else
     {
-      skdebug("reject: aligned_len = " GT_WU " < 2 * %u\n",
+      printf("reject: aligned_len = " GT_WU " < 2 * %u\n",
               total_alignedlen,greedyextendmatchinfo->userdefinedleastlength);
     }
     return 0;

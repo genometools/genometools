@@ -46,7 +46,7 @@ test_files.each do |filename|
     STDERR.puts "#{filename} does not exist"
     exit 1
   else
-    cmd = "scripts/cmp-seex.rb --silent --inputfile #{filename}"
+    cmd = "scripts/cmp-seex.rb --seedlength 0 --silent --inputfile #{filename}"
     puts "run #{cmd}"
     if not system(cmd)
       STDERR.puts "FAILURE: #{cmd}"

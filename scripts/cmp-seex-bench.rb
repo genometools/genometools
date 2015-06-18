@@ -11,7 +11,8 @@ inputfile = ARGV[2]
 
 def run_evaluations(startseedlength,endseedlength,inputfile)
   startseedlength.upto(endseedlength) do |seedlength|
-    cmd = "cmp-seex.rb --silent --inputfile #{inputfile} --seedlength #{seedlength} --errperc 10 --maxalilendiff 30"
+    cmd = "cmp-seex.rb --silent --inputfile #{inputfile} " +
+          "--seedlength #{seedlength} --errperc 10 --maxalilendiff 30"
     IO.popen(cmd.split(/\s/)).each_line do |line|
       if not line.match(/^#/)
         yield line
@@ -43,7 +44,7 @@ def accumulate(filename)
     add_value(dist_xdrop_only,values[5].to_i)
   end
   [dist_both,dist_greedy_only,dist_xdrop_only].each do |h|
-    h.sort.each do |k,v| 
+    h.sort.each do |k,v|
       puts "#{k}\t#{v}"
     end
   end
