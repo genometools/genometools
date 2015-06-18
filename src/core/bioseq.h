@@ -41,6 +41,8 @@ GtSeq*      gt_bioseq_get_seq_range(GtBioseq*, GtUword index,
 const char* gt_bioseq_get_description(GtBioseq*, GtUword);
 char        gt_bioseq_get_char(const GtBioseq*, GtUword index,
                                GtUword position);
+bool        gt_bioseq_seq_has_wildcards(const GtBioseq* bioseq,
+                                        GtUword idx);
 /* Return sequence with given <index> (not '\0' terminated). */
 char*       gt_bioseq_get_sequence(const GtBioseq*, GtUword index);
 char*       gt_bioseq_get_sequence_range(const GtBioseq*, GtUword index,

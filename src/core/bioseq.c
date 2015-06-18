@@ -334,6 +334,20 @@ char gt_bioseq_get_char(const GtBioseq *bs, GtUword index,
                                     GT_READMODE_FORWARD);
 }
 
+bool gt_bioseq_seq_has_wildcards(const GtBioseq* bioseq,
+                                 GtUword idx) {
+  bool has_wildcard = false;
+  GtUword length = gt_encseq_seqlength(bioseq->encseq, idx),
+          seqstart = gt_encseq_seqstartpos(bioseq->encseq, idx),
+          i;
+  for (i = 0; !has_wildcard && i < length; ++i) {
+    has_wildcard = gt_encseq_position_is_wildcard(bioseq->encseq,
+                                                  seqstart + i,
+                                                  GT_READMODE_FORWARD);
+  }
+  return has_wildcard;
+}
+
 char* gt_bioseq_get_sequence(const GtBioseq *bs, GtUword idx)
 {
   char *out;
@@ -413,7 +427,7 @@ const char* gt_bioseq_filename(const GtBioseq *bs)
 }
 
 GtUword gt_bioseq_get_sequence_length(const GtBioseq *bs,
-                                            GtUword idx)
+                                      GtUword idx)
 {
   gt_assert(bs);
   return gt_encseq_seqlength(bs->encseq, idx);

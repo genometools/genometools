@@ -42,3 +42,16 @@ Test do
   run_test "#{$bin}gt seqfilter -sample 0.5 " \
     "./protein_100.fas"
 end
+
+Name "gt seqfilter -nowildcards"
+Keywords "gt_seqfilter"
+Test do
+  FileUtils.copy("#{$testdata}U89959_ests.fas", ".")
+  run_test "#{$bin}gt seqfilter -nowildcards " \
+    "./U89959_ests.fas"
+  run "diff #{last_stdout} #{$testdata}U89959_ests_no_wildcards.fas"
+  FileUtils.copy("#{$testdata}seqfilter_prot_wildcard.fas", ".")
+  run_test "#{$bin}gt seqfilter -nowildcards " \
+    "./seqfilter_prot_wildcard.fas"
+  run "diff #{last_stdout} #{$testdata}seqfilter_prot_wildcard_no_wildcards.fas"
+end
