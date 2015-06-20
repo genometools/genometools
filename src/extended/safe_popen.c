@@ -15,13 +15,16 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "extended/safe_popen.h"
-#include <unistd.h>
-#include "core/ma_api.h"
 #include <errno.h>
-#include <sys/wait.h>
 #include <string.h>
+#include <unistd.h>
+#ifndef _WIN32
+#include <sys/wait.h>
+#endif
+#include "core/ma_api.h"
+#include "extended/safe_popen.h"
 
+#ifndef _WIN32
 static pid_t safe_fork(void) {
   pid_t childpid;
 
@@ -45,13 +48,15 @@ static pid_t safe_fork(void) {
 
   return 0;
 }
+#endif
+
 GtSafePipe *gt_safe_popen(const char *path,
                           char *const argv[],
                           char *const envp[],
                           GtError *err) {
+#ifndef _WIN32
   int stdin_pipe[2], stdout_pipe[2], had_err = 0;
   GtSafePipe *p = NULL;
-#ifndef _WIN32
 
   p = gt_malloc(sizeof(*p));
   p->read_fd = p->write_fd = NULL;
@@ -127,11 +132,12 @@ GtSafePipe *gt_safe_popen(const char *path,
   return p;
 #else
   gt_error_set(err, "Function gt_safe_popen not implemented for windows yet");
-  return p;
+  return NULL;
 #endif
 }
 
 int gt_safe_pclose(GtSafePipe *p) {
+#ifndef _WIN32
   int   status;
   pid_t pid = (pid_t) -1;
 
@@ -149,4 +155,8 @@ int gt_safe_pclose(GtSafePipe *p) {
     return WEXITSTATUS(status);
   else
     return (pid == (pid_t) -1 ? -1 : 0);
+#else
+  /* TODO: implement for Windows */
+  gt_assert(0);
+#endif
 }

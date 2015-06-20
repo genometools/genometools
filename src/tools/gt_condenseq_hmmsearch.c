@@ -145,9 +145,12 @@ static int gt_condenseq_hmmsearch_arguments_check(int rest_argc,
     }
     if (!had_err) {
       mode_t mode = buf.st_mode & S_IRWXU;
-      if (!(mode & S_IXUSR) && /* owner executable */
-          !(mode & S_IXGRP) && /* group ~ */
-          !(mode & S_IXOTH)) { /* other ~ */
+      if (!(mode & S_IXUSR)    /* owner executable */
+#ifndef _WIN32
+          && !(mode & S_IXGRP) /* group ~ */
+          && !(mode & S_IXOTH) /* other ~ */
+#endif
+         ) {
         gt_error_set(err, "%s is not executable",
                      gt_str_get(arguments->hmmsearch_path));
         had_err = -1;
