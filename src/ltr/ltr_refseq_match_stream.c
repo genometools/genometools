@@ -269,6 +269,7 @@ static int gt_ltr_refseq_match_stream_refseq_match(GtLTRRefseqMatchStream *rms,
 {
   GtMatchIterator *mi = NULL;
   GtMatch *match = NULL;
+  FILE *makeblastdb_output = NULL;
   GtMatchIteratorStatus status;
   char makeblastdb_call[BUFSIZ],
        *env = NULL;
@@ -285,7 +286,13 @@ static int gt_ltr_refseq_match_stream_refseq_match(GtLTRRefseqMatchStream *rms,
     (void) snprintf(makeblastdb_call, BUFSIZ,
                     "makeblastdb -in %s -dbtype nucl -logfile /dev/null",
                     rms->refseq_file);
-  had_err = system(makeblastdb_call);
+  makeblastdb_output = popen(makeblastdb_call, "r");
+  if (!makeblastdb_output)
+    had_err = -1;
+  else {
+    while (fgetc(makeblastdb_output) != EOF);
+    pclose(makeblastdb_output);
+  }
   if (!had_err) {
     GtBlastProcessCall *call = gt_blast_process_call_new_nucl();
     char buffer[BUFSIZ];
