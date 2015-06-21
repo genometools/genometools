@@ -22,7 +22,6 @@
 #include "extended/node_stream_api.h"
 #include "extended/region_mapping_api.h"
 
-
 typedef struct GtLTRRefseqMatchStream GtLTRRefseqMatchStream;
 
 /* Implements the <GtNodeStream> interface. <GtLTRRefseqMatchStream>

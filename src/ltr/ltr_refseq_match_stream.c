@@ -99,7 +99,6 @@ static int gt_ltr_refseq_match_stream_extract_sequences(
 
   gt_assert(rms);
   gt_error_check(err);
-//  outfp = gt_file_new("foo", "w+", err);
   outfp = gt_file_new(rms->seq_file, "w", err);
   if (!outfp)
     had_err = -1;
@@ -157,7 +156,8 @@ static int gt_ltr_refseq_match_stream_extract_sequences(
         startpos = gt_encseq_seqstartpos(encseq, seqnum);
         gt_encseq_extract_decoded(encseq, buffer, startpos + range.start - 1,
                                   startpos + range.end - 1);
-        gt_fasta_show_entry(header, buffer, gt_range_length(&range), 50UL, outfp);
+        gt_fasta_show_entry(header, buffer, gt_range_length(&range), 50UL,
+                            outfp);
         gt_free(buffer);
       }
       (*n_to_check)++;

@@ -466,25 +466,25 @@ static int gt_tir_runner(GT_UNUSED int argc, GT_UNUSED const char **argv,
 
   if (!had_err && gt_str_length(arguments->refseq_file) > 0) {
     match_stream = gt_ltr_refseq_match_stream_new_with_mapping(
-                                             last_stream,
-                                             gt_str_get(arguments->refseq_file),
-                                             rmap,
-                                             0.0001, //double evalue,
-                                             true, //bool dust,
-                                             12, //int word_size,
-                                             GT_UNDEF_INT, //int gapopen,
-                                             GT_UNDEF_INT, //int gapextend,
-                                             GT_UNDEF_INT, //int penalty,
-                                             GT_UNDEF_INT, //int reward,
-                                             2, //int num_threads,
-                                             GT_UNDEF_DOUBLE, //double xdrop,
-                                             GT_UNDEF_DOUBLE, //double identity,
-                                             NULL, //const char *moreblast,
-                                             false, //bool flcands,
-                                             10, //double min_ali_len_perc,
-                                             GT_UNDEF_UWORD, //GtUword params_id,
-                                             "TIRvish",
-                                             err);
+                                      last_stream,
+                                      gt_str_get(arguments->refseq_file),
+                                      rmap,
+                                      0.0001, /* double evalue, */
+                                      true, /* bool dust, */
+                                      12, /* int word_size, */
+                                      GT_UNDEF_INT, /* int gapopen, */
+                                      GT_UNDEF_INT, /* int gapextend, */
+                                      GT_UNDEF_INT, /* int penalty, */
+                                      GT_UNDEF_INT, /* int reward, */
+                                      2, /* int num_threads, */
+                                      GT_UNDEF_DOUBLE, /* double xdrop, */
+                                      GT_UNDEF_DOUBLE, /* double identity, */
+                                      NULL, /* const char *moreblast, */
+                                      false, /* bool flcands, */
+                                      10, /* double min_ali_len_perc, */
+                                      GT_UNDEF_UWORD, /* GtUword params_id, */
+                                      "TIRvish",
+                                      err);
     if (!match_stream)
       had_err = -1;
     else
