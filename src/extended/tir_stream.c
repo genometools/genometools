@@ -585,7 +585,7 @@ static int gt_tir_searchforTIRs(GtTIRStream *tir_stream,
       || (seedptr->pos1 + seedptr->len - 1 + xdropbest_right.ivalue) -
       (seedptr->pos1 - xdropbest_left.jvalue + 1) > tir_stream->max_TIR_length)
     {
-      gt_log_log("ext: out!");
+      /*  gt_log_log("ext: out!"); */
       continue;
     }
 
@@ -625,7 +625,7 @@ static int gt_tir_searchforTIRs(GtTIRStream *tir_stream,
                                    pair->right_tir_start);
       edist = greedyunitedist(frontresource, sa_useq, sa_vseq);
       pair->similarity = 100.0 * (1.0 - (double) edist/MAX(ulen, vlen));
-      gt_log_log("edist "GT_WU", sim %f", edist, pair->similarity);
+      /* gt_log_log("edist "GT_WU", sim %f", edist, pair->similarity); */
       if (gt_double_smaller_double(pair->similarity,
                                    tir_stream->similarity_threshold)) {
         pair->skip = true;
@@ -649,7 +649,6 @@ static int gt_tir_searchforTIRs(GtTIRStream *tir_stream,
     gt_tir_remove_overlaps(&tir_stream->first_pairs, tir_stream->no_overlaps,
                            tir_stream->longest_overlaps);
   }
-
 
   /* remove skipped candidates */
   tir_stream->tir_pairs = tir_compactboundaries(&tir_stream->num_of_tirs,
