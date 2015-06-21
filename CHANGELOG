@@ -1,6 +1,9 @@
 changes in version 1.5.6 (2015-04-19)
 
+- many bugfixes and cleanups
 - C API gt_assert() calls abort(3) instead of exit(3) in case of failure
+- new Lua API methods added
+- optional numeric sequence ID sorting
 
 
 changes in version 1.5.5 (2015-03-24)
