@@ -25,6 +25,7 @@
 #include "core/str.h"
 #include "core/undef_api.h"
 #include "core/unused_api.h"
+#include "extended/extract_feature_sequence.h"
 #include "extended/feature_node.h"
 #include "extended/feature_node_iterator_api.h"
 #include "extended/node_stream_api.h"
@@ -32,6 +33,7 @@
 #include "extended/match_blast.h"
 #include "extended/match_iterator_api.h"
 #include "extended/match_iterator_blast.h"
+#include "extended/region_mapping.h"
 #include "ltr/ltr_refseq_match_stream.h"
 
 #define ATTR_FLCAND "flcand"
@@ -50,6 +52,7 @@ struct GtLTRRefseqMatchStream {
              *refseq_file,
              *seq_file,
              *source;
+  GtRegionMapping *rmap;
   GtUword params_id,
                 next_index;
   bool first_next,
@@ -89,12 +92,10 @@ static int gt_ltr_refseq_match_stream_extract_sequences(
   GtFile *outfp;
   GtEncseqLoader *el = NULL;
   GtEncseq *encseq = NULL;
-  char *buffer, header[BUFSIZ];
+  char header[BUFSIZ];
   const char *attr;
   int had_err = 0;
-  GtUword i,
-                seqnum,
-                startpos;
+  GtUword i, seqnum, startpos;
 
   gt_assert(rms);
   gt_error_check(err);
@@ -102,7 +103,7 @@ static int gt_ltr_refseq_match_stream_extract_sequences(
   if (!outfp)
     had_err = -1;
 
-  if (!had_err) {
+  if (!had_err && !rms->rmap) {
     el = gt_encseq_loader_new();
     encseq = gt_encseq_loader_load(el, rms->indexname, err);
     if (!encseq)
@@ -112,6 +113,8 @@ static int gt_ltr_refseq_match_stream_extract_sequences(
   if (!had_err) {
     for (i = 0; i < gt_array_size(rms->nodes); i++) {
       gn = *(GtGenomeNode**) gt_array_get(rms->nodes, i);
+      if (!gt_feature_node_try_cast(gn))
+        continue;
       fni = gt_feature_node_iterator_new((GtFeatureNode*) gn);
       curnode = gt_feature_node_iterator_next(fni);
       seqid = gt_genome_node_get_seqid((GtGenomeNode*) curnode);
@@ -133,14 +136,32 @@ static int gt_ltr_refseq_match_stream_extract_sequences(
       gt_cstr_rep(header, ' ', '+');
       gt_hashmap_add(rms->header_to_fn, (void*) gt_cstr_dup(header),
                      (void*) curnode);
-      (void) sscanf(gt_str_get(seqid), "seq"GT_WU"", &seqnum);
-      buffer = gt_calloc((size_t) gt_range_length(&range) + 1, sizeof (char));
-      startpos = gt_encseq_seqstartpos(encseq, seqnum);
-      gt_encseq_extract_decoded(encseq, buffer, startpos + range.start - 1,
-                                startpos + range.end - 1);
+
+      if (rms->rmap) {
+        GtStr *seq = gt_str_new();
+        had_err = gt_extract_feature_sequence(seq, (GtGenomeNode*) curnode,
+                                              gt_feature_node_get_type(curnode),
+                                              false, NULL, NULL,
+                                              rms->rmap, err);
+        if (!had_err) {
+        gt_fasta_show_entry(header, gt_str_get(seq),
+                            gt_str_length(seq), 50UL, outfp);
+        }
+        gt_str_delete(seq);
+      } else {
+        char *buffer = NULL;
+        (void) sscanf(gt_str_get(seqid), "seq"GT_WU"", &seqnum);
+        /* XXX errorcheck?! */
+        buffer = gt_calloc((size_t) gt_range_length(&range) + 1, sizeof (char));
+        startpos = gt_encseq_seqstartpos(encseq, seqnum);
+        gt_encseq_extract_decoded(encseq, buffer, startpos + range.start - 1,
+                                  startpos + range.end - 1);
+        gt_fasta_show_entry(header, buffer, gt_range_length(&range), 50UL,
+                            outfp);
+        gt_free(buffer);
+      }
       (*n_to_check)++;
-      gt_fasta_show_entry(header, buffer, gt_range_length(&range), 50UL, outfp);
-      gt_free(buffer);
+
       gt_feature_node_iterator_delete(fni);
     }
     gt_file_delete(outfp);
@@ -192,8 +213,7 @@ static void gt_ltr_refseq_match_stream_add_match_to_fn(
   fn = (GtFeatureNode*) gt_hashmap_get(rms->header_to_fn, (void*) seqid1);
   fn_length = gt_genome_node_get_length((GtGenomeNode*) fn);
   fn_range = gt_genome_node_get_range((GtGenomeNode*) fn);
-  min_ali_length = (GtUword)
-                                  ((rms->min_ali_len_perc / 100.0) * fn_length);
+  min_ali_length = (GtUword) ((rms->min_ali_len_perc / 100.0) * fn_length);
   ali_length = gt_match_blast_get_align_length((GtMatchBlast*) match);
   if (ali_length < min_ali_length) {
     gt_match_delete(match);
@@ -249,6 +269,7 @@ static int gt_ltr_refseq_match_stream_refseq_match(GtLTRRefseqMatchStream *rms,
 {
   GtMatchIterator *mi = NULL;
   GtMatch *match = NULL;
+  FILE *makeblastdb_output = NULL;
   GtMatchIteratorStatus status;
   char makeblastdb_call[BUFSIZ],
        *env = NULL;
@@ -259,17 +280,21 @@ static int gt_ltr_refseq_match_stream_refseq_match(GtLTRRefseqMatchStream *rms,
   env = getenv(GT_BLAST_PATH_ENV);
   if (env != NULL)
     (void) snprintf(makeblastdb_call, BUFSIZ,
-                    "%s/makeblastdb -in %s -dbtype nucl -logfile "
-                    "makeblastdb.txt",
+                    "%s/makeblastdb -in %s -dbtype nucl -logfile /dev/null",
                     env, rms->refseq_file);
   else
     (void) snprintf(makeblastdb_call, BUFSIZ,
-                    "makeblastdb -in %s -dbtype nucl -logfile "
-                    "makeblastdb.txt",
+                    "makeblastdb -in %s -dbtype nucl -logfile /dev/null",
                     rms->refseq_file);
-  had_err = system(makeblastdb_call);
+  makeblastdb_output = popen(makeblastdb_call, "r");
+  if (!makeblastdb_output)
+    had_err = -1;
+  else {
+    while (fgetc(makeblastdb_output) != EOF);
+    pclose(makeblastdb_output);
+  }
   if (!had_err) {
-    GtBlastProcessCall *call = gt_blast_process_call_new_all_prot();
+    GtBlastProcessCall *call = gt_blast_process_call_new_nucl();
     char buffer[BUFSIZ];
 
     gt_blast_process_call_set_query(call, rms->seq_file);
@@ -313,7 +338,7 @@ static int gt_ltr_refseq_match_stream_refseq_match(GtLTRRefseqMatchStream *rms,
           had_err = -1;
       } else {
           gt_ltr_refseq_match_stream_add_match_to_fn(rms, match, err);
-          while ((status = gt_match_iterator_next(mi, &match, err))
+          while (!had_err && (status = gt_match_iterator_next(mi, &match, err))
                  != GT_MATCHER_STATUS_END) {
             if (status == GT_MATCHER_STATUS_OK) {
               gt_ltr_refseq_match_stream_add_match_to_fn(rms, match, err);
@@ -428,6 +453,61 @@ GtNodeStream* gt_ltr_refseq_match_stream_new(GtNodeStream *in_stream,
   rms->indexname = indexname;
   rms->refseq_file = refseq_file;
   rms->seq_file = seq_file;
+  rms->evalue = evalue;
+  rms->dust = dust;
+  rms->rmap = NULL;
+  rms->word_size = word_size;
+  rms->gapopen = gapopen;
+  rms->gapextend = gapextend;
+  rms->penalty = penalty;
+  rms->reward = reward;
+  rms->num_threads = num_threads;
+  rms->xdrop = xdrop;
+  rms->identity = identity;
+  rms->moreblast = moreblast;
+  rms->flcands = flcands;
+  rms->source = source;
+  rms->min_ali_len_perc = min_ali_len_perc;
+
+  return gs;
+}
+
+GtNodeStream* gt_ltr_refseq_match_stream_new_with_mapping(
+                                             GtNodeStream *in_stream,
+                                             const char *refseq_file,
+                                             GtRegionMapping *rmap,
+                                             double evalue,
+                                             bool dust,
+                                             int word_size,
+                                             int gapopen,
+                                             int gapextend,
+                                             int penalty,
+                                             int reward,
+                                             int num_threads,
+                                             double xdrop,
+                                             double identity,
+                                             const char *moreblast,
+                                             bool flcands,
+                                             double min_ali_len_perc,
+                                             GtUword params_id,
+                                             const char *source,
+                                             GT_UNUSED GtError *err)
+{
+  GtNodeStream *gs;
+  GtLTRRefseqMatchStream *rms;
+  gs = gt_node_stream_create(gt_ltr_refseq_match_stream_class(), false);
+  rms = gt_ltr_refseq_match_stream_cast(gs);
+  rms->in_stream = gt_node_stream_ref(in_stream);
+  rms->nodes = gt_array_new(sizeof(GtGenomeNode*));
+  rms->first_next = true;
+  rms->params_id = params_id;
+  rms->next_index = 0;
+  rms->header_to_fn = gt_hashmap_new(GT_HASH_STRING,
+                                     gt_ltr_refseq_match_stream_free_hash_elem,
+                                     NULL);
+  rms->refseq_file = refseq_file;
+  rms->seq_file = "/tmp/run.tmp";   /* XXXX */
+  rms->rmap = rmap;
   rms->evalue = evalue;
   rms->dust = dust;
   rms->word_size = word_size;

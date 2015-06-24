@@ -857,8 +857,6 @@ static int gt_ltrdigest_pdom_visitor_feature_node(GtNodeVisitor *nv,
         int pid, pc[2], cp[2];
         GT_UNUSED int rval;
 
-        (void) signal(SIGCHLD, SIG_IGN); /* XXX: for now, ignore child's
-                                                 exit status */
         rval = pipe(pc);
         gt_assert(rval == 0);
         rval = pipe(cp);
@@ -903,6 +901,7 @@ static int gt_ltrdigest_pdom_visitor_feature_node(GtNodeVisitor *nv,
             had_err = gt_ltrdigest_pdom_visitor_parse_output(lv, pstatus,
                                                              instream, err);
             (void) fclose(instream);
+            wait(NULL);
             if (!had_err)
               had_err = gt_ltrdigest_pdom_visitor_process_hits(lv, pstatus,
                                                                err);
@@ -915,8 +914,9 @@ static int gt_ltrdigest_pdom_visitor_feature_node(GtNodeVisitor *nv,
   #endif
       }
     } else {
-      gt_warning("LTR_retrotransposon (%s, line %u) is too short to be "
+      gt_warning("%s (%s, line %u) is too short to be "
                  "translated (" GT_WU " nt), skipped domain search",
+            gt_feature_node_get_type(lv->ltr_retrotrans),
             gt_genome_node_get_filename((GtGenomeNode*) lv->ltr_retrotrans),
             gt_genome_node_get_line_number((GtGenomeNode*) lv->ltr_retrotrans),
             gt_str_length(seq));

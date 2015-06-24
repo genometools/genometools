@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2012-2013 Sascha Steinbiss <steinbiss@informatik.uni-hamburg.de>
+  Copyright (c) 2012-2015 Sascha Steinbiss <sascha@steinbiss.name>
   Copyright (c) 2012      Manuela Beckert <9beckert@informatik.uni-hamburg.de>
   Copyright (c) 2012      Dorle Osterode <9osterod@informatik.uni-hamburg.de>
   Copyright (c) 2012-2013 Center for Bioinformatics, University of Hamburg
@@ -26,15 +26,16 @@
 #include "extended/gff3_out_stream_api.h"
 #include "extended/tir_stream.h"
 #include "extended/visitor_stream.h"
-  /* XXX */
+/* XXX */
 #include "ltr/ltrdigest_pdom_visitor.h"
+#include "ltr/ltr_refseq_match_stream.h"
 #include "ltr/pdom_model_set.h"
 #include "match/xdrop.h"
 #include "tools/gt_tir.h"
 
 /* struct with all arguments */
 typedef struct {
-  GtStr *str_indexname, *cutoffs;
+  GtStr *str_indexname, *cutoffs, *str_overlaps, *refseq_file;
   GtUword min_seed_length,
                 min_TIR_length,
                 max_TIR_length,
@@ -47,9 +48,11 @@ typedef struct {
   int xdrop_belowscore;
   double similarity_threshold,
         evalue_cutoff;
-  GtStr *str_overlaps;
   bool best_overlaps,
-       no_overlaps;
+       no_overlaps,
+       longest_overlaps,
+       seqids,
+       md5;
   unsigned int chain_max_gap_length;
   GtOption *optionoverlaps;
   GtStrArray *hmm_files;
@@ -61,6 +64,7 @@ static void* gt_tir_arguments_new(void)
   GtTirArguments *arguments = gt_calloc(1, sizeof *arguments);
   arguments->str_indexname = gt_str_new();
   arguments->str_overlaps = gt_str_new();
+  arguments->refseq_file = gt_str_new();
   arguments->cutoffs = gt_str_new();
   arguments->hmm_files = gt_str_array_new();
   return arguments;
@@ -72,6 +76,7 @@ static void gt_tir_arguments_delete(void *tool_arguments)
   if (!arguments) return;
   gt_str_delete(arguments->str_indexname);
   gt_str_delete(arguments->cutoffs);
+  gt_str_delete(arguments->refseq_file);
   gt_str_delete(arguments->str_overlaps);
   gt_str_array_delete(arguments->hmm_files);
   gt_option_delete(arguments->optionoverlaps);
@@ -99,11 +104,15 @@ static GtOptionParser* gt_tir_option_parser_new(void *tool_arguments)
            *optionmaxtsd,     /* maximal length for Target Site Duplication */
            *optionvicinity,   /* vicinity around TIRs to be searched for TSDs */
            *optionhmms,
+           *optionrefseqfile,
            *optionevalcutoff,
            *optionpdomcutoff,
-           *optionmaxgap;
+           *optionmaxgap,
+           *optionseqids,
+           *optionmd5;
   static const char *overlaps[] = {
     "best", /* default */
+    "longest",
     "no",
     "all",
     NULL
@@ -133,7 +142,7 @@ static GtOptionParser* gt_tir_option_parser_new(void *tool_arguments)
   optionseed = gt_option_new_uword_min("seed",
                                        "specify minimum seed length for "
                                        "exact repeats",
-                                       &arguments->min_seed_length, 20UL, 2UL);
+                                       &arguments->min_seed_length, 20UL, 5UL);
   gt_option_parser_add_option(op, optionseed);
 
   /* -minlentir */
@@ -141,7 +150,7 @@ static GtOptionParser* gt_tir_option_parser_new(void *tool_arguments)
                                                 "specify minimum length for "
                                                 "each TIR",
                                                 &arguments->min_TIR_length,
-                                                27UL, 1UL, GT_UNDEF_UWORD);
+                                                100UL, 1UL, GT_UNDEF_UWORD);
   gt_option_parser_add_option(op, optionminlentir);
 
   /* -maxlentir */
@@ -157,7 +166,7 @@ static GtOptionParser* gt_tir_option_parser_new(void *tool_arguments)
                                                  "specify minimum distance of "
                                                  "TIRs",
                                                  &arguments->min_TIR_distance,
-                                                 100UL, 1UL, GT_UNDEF_UWORD);
+                                                 500UL, 1UL, GT_UNDEF_UWORD);
   gt_option_parser_add_option(op, optionmindisttir);
 
   /* -maxdisttir */
@@ -205,7 +214,8 @@ static GtOptionParser* gt_tir_option_parser_new(void *tool_arguments)
 
   /* -similar */
   optionsimilar = gt_option_new_double_min_max("similar",
-                                               "specify similaritythreshold in "
+                                               "specify TIR similarity "
+                                               "threshold in the"
                                                "range [1..100%]",
                                                &arguments->similarity_threshold,
                                                (double) 85.0, (double) 0.0,
@@ -213,7 +223,8 @@ static GtOptionParser* gt_tir_option_parser_new(void *tool_arguments)
   gt_option_parser_add_option(op, optionsimilar);
 
   /* -overlaps */
-  optionoverlaps = gt_option_new_choice("overlaps", "specify no|best|all",
+  optionoverlaps = gt_option_new_choice("overlaps",
+                                        "specify no|best|longest|all",
                                         arguments->str_overlaps,
                                         overlaps[0], overlaps);
   gt_option_parser_add_option(op, optionoverlaps);
@@ -285,6 +296,25 @@ static GtOptionParser* gt_tir_option_parser_new(void *tool_arguments)
   gt_option_is_extended_option(optionmaxgap);
   gt_option_imply(optionmaxgap, optionhmms);
 
+  optionrefseqfile = gt_option_new_string("refseqs",
+                                     "specify the name of the gene sequences "
+                                     "to scan for inside candidates",
+                                     arguments->refseq_file, NULL);
+  gt_option_parser_add_option(op, optionrefseqfile);
+
+  optionseqids = gt_option_new_bool("seqids",
+                                    "use sequence descriptions instead of "
+                                    "sequence numbers in GFF3 output",
+                                    &arguments->seqids,
+                                    true);
+  gt_option_parser_add_option(op, optionseqids);
+
+  optionmd5 = gt_option_new_bool("md5",
+                                 "add MD5 hashes to seqids in GFF3 output",
+                                 &arguments->md5,
+                                 false);
+  gt_option_parser_add_option(op, optionmd5);
+
   return op;
 }
 
@@ -302,17 +332,25 @@ static int gt_tir_arguments_check(GT_UNUSED int rest_argc,
       if (strcmp(gt_str_get(arguments->str_overlaps), "no") == 0) {
         arguments->best_overlaps = false;
         arguments->no_overlaps = true;
+        arguments->longest_overlaps = false;
       } else if (strcmp(gt_str_get(arguments->str_overlaps), "best") == 0 ) {
         arguments->best_overlaps = true;
         arguments->no_overlaps = false;
+        arguments->longest_overlaps = false;
+      } else if (strcmp(gt_str_get(arguments->str_overlaps), "longest") == 0 ) {
+        arguments->best_overlaps = false;
+        arguments->no_overlaps = false;
+        arguments->longest_overlaps = true;
       } else if (strcmp(gt_str_get(arguments->str_overlaps), "all") == 0 ) {
         arguments->best_overlaps = false;
         arguments->no_overlaps = false;
+        arguments->longest_overlaps = false;
       } else {
         gt_assert(0); /* cannot happen */
       }
     } else {
       /* default is "best" */
+      arguments->longest_overlaps = false;
       arguments->best_overlaps = true;  /* take best prediction
                                            if overlap occurs, default */
       arguments->no_overlaps = false; /* overlapping predictions (not)
@@ -343,6 +381,7 @@ static int gt_tir_runner(GT_UNUSED int argc, GT_UNUSED const char **argv,
   GtNodeStream *tir_stream = NULL,
                *pdom_stream = NULL,
                *gff3_out_stream = NULL,
+               *match_stream = NULL,
                *last_stream = NULL;
   GtPdomModelSet *ms = NULL;
   GtRegionMapping *rmap = NULL;
@@ -361,6 +400,7 @@ static int gt_tir_runner(GT_UNUSED int argc, GT_UNUSED const char **argv,
                                  arguments->xdrop_belowscore,
                                  arguments->similarity_threshold,
                                  arguments->best_overlaps,
+                                 arguments->longest_overlaps,
                                  arguments->no_overlaps,
                                  arguments->min_TSD_length,
                                  arguments->max_TSD_length,
@@ -371,9 +411,21 @@ static int gt_tir_runner(GT_UNUSED int argc, GT_UNUSED const char **argv,
     return -1;
   last_stream = tir_stream;
 
-  rmap = gt_region_mapping_new_encseq((GtEncseq*)
-                            gt_tir_stream_get_encseq((GtTIRStream*) tir_stream),
-                            true, false);
+  if (!arguments->md5)
+    gt_tir_stream_disable_md5_seqids((GtTIRStream*) tir_stream);
+  else
+    gt_tir_stream_enable_md5_seqids((GtTIRStream*) tir_stream);
+  if (!arguments->seqids)
+    gt_tir_stream_disable_seqids((GtTIRStream*) tir_stream);
+  else
+    gt_tir_stream_enable_seqids((GtTIRStream*) tir_stream);
+
+  /* re-load unmirrored encseq */
+  GtEncseqLoader *el = gt_encseq_loader_new();
+  GtEncseq *unm_es = gt_encseq_loader_load(el,
+                                           gt_str_get(arguments->str_indexname),
+                                           err);
+  rmap = gt_region_mapping_new_encseq(unm_es, true, false);
   gt_assert(rmap);
 
   if (!had_err && gt_str_array_size(arguments->hmm_files) > 0)
@@ -412,6 +464,33 @@ static int gt_tir_runner(GT_UNUSED int argc, GT_UNUSED const char **argv,
     } else had_err = -1;
   }
 
+  if (!had_err && gt_str_length(arguments->refseq_file) > 0) {
+    match_stream = gt_ltr_refseq_match_stream_new_with_mapping(
+                                      last_stream,
+                                      gt_str_get(arguments->refseq_file),
+                                      rmap,
+                                      0.0001, /* double evalue, */
+                                      true, /* bool dust, */
+                                      12, /* int word_size, */
+                                      GT_UNDEF_INT, /* int gapopen, */
+                                      GT_UNDEF_INT, /* int gapextend, */
+                                      GT_UNDEF_INT, /* int penalty, */
+                                      GT_UNDEF_INT, /* int reward, */
+                                      2, /* int num_threads, */
+                                      GT_UNDEF_DOUBLE, /* double xdrop, */
+                                      GT_UNDEF_DOUBLE, /* double identity, */
+                                      NULL, /* const char *moreblast, */
+                                      false, /* bool flcands, */
+                                      10, /* double min_ali_len_perc, */
+                                      GT_UNDEF_UWORD, /* GtUword params_id, */
+                                      "TIRvish",
+                                      err);
+    if (!match_stream)
+      had_err = -1;
+    else
+      last_stream = match_stream;
+  }
+
   gff3_out_stream = gt_gff3_out_stream_new(last_stream, NULL);
   last_stream = gff3_out_stream;
 
@@ -422,8 +501,11 @@ static int gt_tir_runner(GT_UNUSED int argc, GT_UNUSED const char **argv,
   gt_node_stream_delete(tir_stream);
   gt_node_stream_delete(pdom_stream);
   gt_node_stream_delete(gff3_out_stream);
+  gt_node_stream_delete(match_stream);
   gt_region_mapping_delete(rmap);
   gt_pdom_model_set_delete(ms);
+  gt_encseq_delete(unm_es);
+  gt_encseq_loader_delete(el);
 
   return had_err;
 }

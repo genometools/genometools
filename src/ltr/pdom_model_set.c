@@ -138,7 +138,7 @@ GtPdomModelSet* gt_pdom_model_set_new(GtStrArray *hmmfiles, bool force,
             (void) fputc(ch, dest);
             len++;
           }
-          (void) fclose(source);
+          (void) pclose(source);
           if (len == 0) {
             gt_error_set(err, "invalid HMMER format encountered trying to "
                               "convert HMM file %s",
