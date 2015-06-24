@@ -169,18 +169,18 @@ Test do
   run "#{$bin}gt repfind -samples 1000 -l 6 -ii sfx",:maxtime => 600
 end
 
+Name "gt repfind extend at1MB"
+Keywords "gt_repfind extend"
+Test do
+  run_test "#{$bin}gt suffixerator -db #{$testdata}at1MB " +
+           "-indexname sfx -dna -tis -suf -lcp"
+  run_test "#{$bin}gt repfind -l 20 -extendxdrop -ii sfx"
+  run "diff #{last_stdout} #{$testdata}repfind-20-extend.txt"
+  run_test "#{$bin}gt repfind -l 20 -extendxdrop -ii sfx -q " +
+           "#{$testdata}/U89959_genomic.fas"
+  run "diff #{last_stdout} #{$testdata}repfind-20-query-extend.txt"
+end
 if $gttestdata then
-  Name "gt repfind extend at1MB"
-  Keywords "gt_repfind_extend"
-  Test do
-    run_test "#{$bin}gt suffixerator -db #{$testdata}at1MB " +
-             "-indexname sfx -dna -tis -suf -lcp"
-    run_test "#{$bin}gt repfind -l 20 -extendxdrop -ii sfx"
-    run "diff #{last_stdout} #{$testdata}repfind-20-extend.txt"
-    run_test "#{$bin}gt repfind -l 20 -extendxdrop -ii sfx -q " +
-             "#{$testdata}/U89959_genomic.fas"
-    run "diff #{last_stdout} #{$testdata}repfind-20-query-extend.txt"
-  end
   repfindtestfiles.each do |reffile|
     Name "gt repfind #{reffile}"
     Keywords "gt_repfind gttestdata"

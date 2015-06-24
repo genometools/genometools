@@ -883,14 +883,18 @@ static int gt_repfind_runner(GT_UNUSED int argc,
   xdropmatchinfo.useq = gt_seqabstract_new_empty();
   xdropmatchinfo.vseq = gt_seqabstract_new_empty();
   xdropmatchinfo.arbitscores.mat = 2;
-  xdropmatchinfo.arbitscores.mis = -1;
-  xdropmatchinfo.arbitscores.ins = -2;
-  xdropmatchinfo.arbitscores.del = -2;
-  /*
-  xdropmatchinfo.arbitscores.mis = -2;
-  xdropmatchinfo.arbitscores.ins = -3;
-  xdropmatchinfo.arbitscores.del = -3;
-  */
+  if (gt_str_array_size(arguments->queryfiles) == 0)
+  {
+    /* To obtain scores compatible with extendgreedy */
+    xdropmatchinfo.arbitscores.mis = -1;
+    xdropmatchinfo.arbitscores.ins = -2;
+    xdropmatchinfo.arbitscores.del = -2;
+  } else
+  {
+    xdropmatchinfo.arbitscores.mis = -2;
+    xdropmatchinfo.arbitscores.ins = -3;
+    xdropmatchinfo.arbitscores.del = -3;
+  }
   xdropmatchinfo.beverbose = arguments->beverbose;
   xdropmatchinfo.frontresource = gt_frontresource_new(100UL);
   xdropmatchinfo.res = gt_xdrop_resources_new(&xdropmatchinfo.arbitscores);
