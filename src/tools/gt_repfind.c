@@ -937,8 +937,6 @@ static int gt_repfind_runner(GT_UNUSED int argc,
     gt_error_set(err,"superfluous arguments: \"%s\"",argv[argc-1]);
     haserr = true;
   }
-  printf("-seedlength %u -l %u\n",arguments->seedlength,
-                                  arguments->userdefinedleastlength);
   if (!haserr)
   {
     if (gt_str_array_size(arguments->queryfiles) == 0)
