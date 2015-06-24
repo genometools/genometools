@@ -153,7 +153,7 @@ def calcdifference(seqnumpair_set1,seqnumpair_set2)
   return [sum_size,perc_both,perc_only_greedy,perc_only_xdrop].join("\t")
 end
 
-def fillotherhash(h1,h2)
+def fill_other_hash(h1,h2)
   h1.each_pair do |k,v1|
     if h2.has_key?(k)
       v2 = h2[k]
@@ -170,7 +170,7 @@ def fillotherhash(h1,h2)
 end
 
 def cmpseedhashes(checkbetter,minidentity,taglist,h1,h2)
-  fillotherhash(h1,h2)
+  fill_other_hash(h1,h2)
   nobrother = 0
   h1.each_pair do |k,v1|
     if v1.identity >= minidentity and not h2.has_key?(k)
@@ -212,6 +212,45 @@ def cmpseedhashes(checkbetter,minidentity,taglist,h1,h2)
     puts "#{k[0]}%\t#{k[1]}"
   end
   puts "#{taglist[0]}: nobrother=#{nobrother}"
+end
+
+def cmpextendedlength(minidentity,h1,h2)
+  fill_other_hash(h1,h2)
+  lendiff_dist = Hash.new()
+  h1.each_pair do |k,v1|
+    if v1.identity < minidentity
+      next
+    end
+    h1len = (v1.len1 + v1.len2)/2
+    if not h2.has_key?(k)
+      h2len = 0
+    else
+      h2len = (h2[k].len1 + h2[k].len2)/2
+    end
+    lendiff = (100.0 * (h1len - h2len).to_f/[h1len,h2len].max.to_f).to_i
+    if not lendiff_dist.has_key?(lendiff)
+      lendiff_dist[lendiff] = 1
+    else
+      lendiff_dist[lendiff] += 1
+    end
+  end
+  h2.each_pair do |k,v2|
+    if v2.identity < minidentity
+      next
+    end
+    h2len = (v2.len1 + v2.len2)/2
+    if not h1.has_key?(k)
+      lendiff = -100
+      if not lendiff_dist.has_key?(lendiff)
+        lendiff_dist[lendiff] = 1
+      else
+        lendiff_dist[lendiff] += 1
+      end
+    end
+  end
+  lendiff_dist.sort.each do |diff,count|
+    puts "diff #{diff}\t#{count}"
+  end
 end
 
 def usage(opts,msg)
@@ -283,7 +322,9 @@ seqnumpair_set1 = seedhash2seqnum_pairs(seedhash1)
 seqnumpair_set2 = seedhash2seqnum_pairs(seedhash2)
 result = calcdifference(seqnumpair_set1,seqnumpair_set2)
 puts "#{options.seedlength}\t#{result}"
-if not options.silent
+if options.silent
+  cmpextendedlength(minidentity,seedhash1,seedhash2)
+else
   cmpseedhashes(true,minidentity,taglist,seedhash1,seedhash2)
   cmpseedhashes(false,minidentity,taglist.reverse,seedhash2,seedhash1)
 end
