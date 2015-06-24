@@ -17,7 +17,10 @@
 
 #ifndef SEED_EXTEND_H
 #define SEED_EXTEND_H
+#include <stdbool.h>
 #include "core/arraydef.h"
+#include "core/encseq_api.h"
+#include "core/types_api.h"
 
 typedef struct GtSeedExtendKmerPos GtSeedExtendKmerPos;
 typedef struct GtSeedExtendSeedPair GtSeedExtendSeedPair;
@@ -25,13 +28,13 @@ GT_DECLAREARRAYSTRUCT(GtSeedExtendSeedPair);
 
 /* Returns a GtSeedExtendKmerPos list of k-mers from a given encseq. */
 GtUword gt_seed_extend_get_kmers(GtSeedExtendKmerPos *list,
-                              const GtEncseq *encseq,
-                              unsigned int k);
+                                 const GtEncseq *encseq, unsigned int k);
 
 /* Returns a GtSeedExtendSeedPair list of equal k-mers from lists a and b. */
 void gt_seed_extend_merge(GtArrayGtSeedExtendSeedPair *mlist,
                           const GtSeedExtendKmerPos *alist, GtUword alen,
-                          const GtSeedExtendKmerPos *blist, GtUword blen);
+                          const GtSeedExtendKmerPos *blist, GtUword blen,
+                          unsigned int maxfreq);
 
 /* reports seeds from mlist that satisfy the filter criteria */
 void gt_seed_extend_find_seeds(const GtArrayGtSeedExtendSeedPair *mlist,
@@ -47,6 +50,7 @@ void gt_seed_extend_run(const GtEncseq *aencseq,
                         unsigned int kmerlen,
                         unsigned int mincoverage,
                         unsigned int diagbandw,
+                        unsigned int maxfreq,
                         bool verify,
                         bool benchmark);
 #endif

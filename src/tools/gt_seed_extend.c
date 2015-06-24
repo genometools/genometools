@@ -15,9 +15,10 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#include <limits.h>
+#include "core/encseq_api.h"
 #include "core/ma_api.h"
 #include "core/unused_api.h"
-#include "core/encseq_api.h"
 #include "match/seed-extend.h"
 #include "tools/gt_seed_extend.h"
 
@@ -25,6 +26,7 @@ typedef struct {
   unsigned int kmerlen;
   unsigned int diagbandw;
   unsigned int mincoverage;
+  unsigned int maxfreq;
   bool mirror;
   bool verify;
   bool benchmark;
@@ -69,6 +71,11 @@ static GtOptionParser* gt_seed_extend_option_parser_new(void *tool_arguments)
   /* -z */
   option = gt_option_new_uint("z", "minimum coverage in two diagonal bands",
                               &arguments->mincoverage, 35);
+  gt_option_parser_add_option(op, option);
+
+  /* -maxfreq */
+  option = gt_option_new_uint("maxfreq", "maximum frequency of a k-mer",
+                              &arguments->maxfreq, UINT_MAX);
   gt_option_parser_add_option(op, option);
 
   /* -mirror */
@@ -147,7 +154,8 @@ static int gt_seed_extend_runner(int argc, const char **argv, int parsed_args,
   if (!had_err) {
     gt_seed_extend_run(aencseq, bencseq, arguments->kmerlen,
                        arguments->mincoverage, arguments->diagbandw,
-                       arguments->verify, arguments->benchmark);
+                       arguments->maxfreq, arguments->verify,
+                       arguments->benchmark);
     gt_encseq_delete(aencseq);
     gt_encseq_delete(bencseq);
   }

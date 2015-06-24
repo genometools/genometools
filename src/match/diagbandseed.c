@@ -15,20 +15,18 @@
  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#define DEBUG_SEEDPAIR
-
 #include <string.h>
 #include <stdio.h>
+#include "core/alphabet_api.h"
 #include "core/codetype.h"
-#include "core/encseq_api.h"
 #include "core/minmax.h"
 #include "core/radix_sort.h"
+#include "core/timer_api.h"
+#include "core/unused_api.h"
 #include "match/seed-extend.h"
 #include "match/sfx-mappedstr.h"
-#include "core/unused_api.h"
-#include "core/alphabet_api.h"
-#include "core/timer_api.h"
 
+#define DEBUG_SEEDPAIR
 #define GT_SEED_EXTEND_ARRAY_INCR 256
 
 typedef uint32_t GtSeedExtendPosition;
@@ -81,10 +79,13 @@ GtUword gt_seed_extend_get_kmers(GtSeedExtendKmerPos *list,
 /* Returns a GtSeedExtendSeedPair list of equal kmers from lists a and b. */
 void gt_seed_extend_merge(GtArrayGtSeedExtendSeedPair *mlist,
                           const GtSeedExtendKmerPos *alist, GtUword alen,
-                          const GtSeedExtendKmerPos *blist, GtUword blen)
+                          const GtSeedExtendKmerPos *blist, GtUword blen,
+                          unsigned int maxfreq)
 {
   const GtSeedExtendKmerPos *aptr, *bptr, *tptr, *aend, *bend;
+  unsigned int acnt = 0;
   gt_assert(alist != NULL && blist != NULL && mlist != NULL);
+
   aptr = alist;
   bptr = blist;
   aend = aptr + alen;
@@ -94,8 +95,13 @@ void gt_seed_extend_merge(GtArrayGtSeedExtendSeedPair *mlist,
       aptr ++;
     } else if (aptr->code > bptr->code) {
       bptr ++;
-    } else { /* k-mer codes are equal: process all equal elements from blist */
-      for (tptr = bptr; tptr < bend && aptr->code == tptr->code; tptr ++) {
+      acnt = 0;
+    } else if (acnt < maxfreq) {
+      /* k-mer codes are equal: process all equal elements from blist */
+      unsigned int bcnt = 0;
+      acnt ++;
+      for (tptr = bptr; tptr < bend && aptr->code == tptr->code &&
+           bcnt < maxfreq; tptr ++) {
         if (alist != blist || aptr->seqnum < tptr->seqnum) { /* no duplicates */
           GtSeedExtendSeedPair *seedptr;
           GT_GETNEXTFREEINARRAY(seedptr, mlist, GtSeedExtendSeedPair,
@@ -105,6 +111,7 @@ void gt_seed_extend_merge(GtArrayGtSeedExtendSeedPair *mlist,
           seedptr->aseqnum = aptr->seqnum;
           seedptr->bpos = tptr->endpos;
           seedptr->apos = aptr->endpos;
+          bcnt ++;
         }
       }
       aptr ++;
@@ -194,7 +201,8 @@ void gt_seed_extend_find_seeds(const GtArrayGtSeedExtendSeedPair *mlist,
 
 void gt_seed_extend_run(const GtEncseq *aencseq, const GtEncseq *bencseq,
                         unsigned int kmerlen, unsigned int mincoverage,
-                        unsigned int diagbandw, bool verify, bool benchmark)
+                        unsigned int diagbandw, unsigned int maxfreq,
+                        bool verify, bool benchmark)
 {
   GtSeedExtendKmerPos *alist, *blist;
   GtArrayGtSeedExtendSeedPair mlist;
@@ -243,7 +251,7 @@ void gt_seed_extend_run(const GtEncseq *aencseq, const GtEncseq *bencseq,
   }
 
   GT_INITARRAY(&mlist,GtSeedExtendSeedPair);
-  gt_seed_extend_merge(&mlist, alist, alen, blist, blen);
+  gt_seed_extend_merge(&mlist, alist, alen, blist, blen, maxfreq);
   gt_free(alist);
   if (two_files)
     gt_free(blist);
