@@ -22,7 +22,7 @@ def determineminlength(reffile)
   end
 end
 
-def checkrepfind(reffile)
+def checkrepfind(reffile,withextend = false)
   reffilepath=addfilepath(reffile)
   run_test("#{$bin}gt suffixerator -algbds 3 31 80 -db " +
            "#{reffilepath} -indexname sfxidx -dna -suf -tis -lcp -ssp -pl",
@@ -34,6 +34,12 @@ def checkrepfind(reffile)
   run_test("#{$bin}gt repfind -l #{minlength} -r -ii sfxidx", :maxtime => 600)
   resultfile="#{$gttestdata}repfind-result/#{reffile}-r.result"
   run "cmp -s #{last_stdout} #{resultfile}"
+  if withextend
+    run_test("#{$bin}gt repfind -l #{minlength} -ii sfxidx -extendgreedy", 
+             :maxtime => 600)
+    resultfile="#{$gttestdata}repfind-result/#{reffile}-gr-ext.result"
+    run "cmp -s #{last_stdout} #{resultfile}"
+  end
 end
 
 def checkrepfindwithquery(reffile,queryfile)
@@ -92,12 +98,15 @@ Test do
            "#{$testdata}/U89959_genomic.fas"
   run "diff #{last_stdout} #{$testdata}repfind-20-query-extend.txt"
 end
+
 if $gttestdata then
+  extendexception = ["hs5hcmvcg.fna","Duplicate.fna","Wildcards.fna","at1MB"]
   repfindtestfiles.each do |reffile|
     Name "gt repfind #{reffile}"
     Keywords "gt_repfind gttestdata"
     Test do
-      checkrepfind(reffile)
+      withextend = if extendexception.member?(reffile) then false else true end
+      checkrepfind(reffile,withextend)
     end
     repfindtestfiles.each do |queryfile|
       if reffile != queryfile

@@ -413,12 +413,12 @@ int gt_simplegreedyselfmatchoutput(void *info,
     if (error_rate(total_distance,total_alignedlen) >
       (double) greedyextendmatchinfo->errorpercentage)
     {
-      printf("reject: error rate %.2f > %.2f\n",
+      skdebug("reject: error rate %.2f > %.2f\n",
               error_rate(total_distance,total_alignedlen),
               (double) greedyextendmatchinfo->errorpercentage);
     } else
     {
-      printf("reject: aligned_len = " GT_WU " < 2 * %u\n",
+      skdebug("reject: aligned_len = " GT_WU " < 2 * %u\n",
               total_alignedlen,greedyextendmatchinfo->userdefinedleastlength);
     }
     return 0;
