@@ -125,6 +125,18 @@ def checkrepfindwithquery(reffile,queryfile)
   run "cmp -s #{last_stdout} #{$gttestdata}repfind-result/#{reffile}-#{queryfile}.result"
 end
 
+Name "gt repfind mirror symmetric"
+Keywords "gt_repfind"
+Test do
+  10.times.each do
+    run "#{$scriptsdir}gen-mirrorseq.rb"
+    run_test "#{$bin}gt suffixerator -suftabuint -db #{last_stdout} " +
+             "-dna -suf -tis -lcp -md5 no -des no -sds no -indexname sfx"
+    run_test "#{$bin}gt repfind -scan -check_extend_symmetry -seedlength 200 " +
+             " -extendgreedy -ii sfx -err 10 -maxalilendiff 30"
+  end
+end
+
 Name "gt paircmp"
 Keywords "gt_paircmp"
 Test do

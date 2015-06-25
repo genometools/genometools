@@ -75,7 +75,7 @@ typedef struct
   unsigned int userdefinedleastlength, seedlength;
   GtUword samples, errorpercentage, maxalignedlendifference;
   bool scanfile, beverbose, forward, reverse, searchspm, extendxdrop,
-       extendgreedy;
+       extendgreedy, check_extend_symmetry;
   GtStr *indexname;
   GtStrArray *queryfiles;
   GtOption *refforwardoption, *refseedlengthoption,
@@ -337,7 +337,8 @@ typedef struct
           errorpercentage,
           totallength;
   unsigned int userdefinedleastlength;
-  bool beverbose;
+  bool beverbose,
+       check_extend_symmetry;
   GtQuerymatch *querymatchspaceptr;
   GtEncseqReader *encseq_r_in_u, *encseq_r_in_v;
   GtAllocatedMemory usequence_cache, vsequence_cache, frontspace_reservoir;
@@ -467,6 +468,15 @@ static int gt_simplegreedyselfmatchoutput(void *info,
           right_best_polished_point.alignedlen,
           right_best_polished_point.row,
           right_best_polished_point.distance);
+  if (greedyextendmatchinfo->check_extend_symmetry)
+  {
+    gt_assert(right_best_polished_point.alignedlen ==
+              left_best_polished_point.alignedlen);
+    gt_assert(right_best_polished_point.row ==
+              left_best_polished_point.row);
+    gt_assert(right_best_polished_point.distance ==
+              left_best_polished_point.distance);
+  }
   total_distance = left_best_polished_point.distance +
                    right_best_polished_point.distance;
   dblen = len + left_best_polished_point.row + right_best_polished_point.row;
@@ -715,19 +725,21 @@ static GtOptionParser *gt_repfind_option_parser_new(void *tool_arguments)
   GtOption *option, *reverseoption, *queryoption, *extendxdropoption,
            *extendgreedyoption, *scanoption, *sampleoption, *forwardoption,
            *spmoption, *seedlengthoption, *errorpercentageoption,
-           *maxalilendiffoption, *optionleastlength;
+           *maxalilendiffoption, *leastlength_option,
+           *check_extend_symmetry_option;
   Maxpairsoptions *arguments = tool_arguments;
 
   op = gt_option_parser_new("[options] -ii indexname",
                             "Compute maximal repeats.");
   gt_option_parser_set_mail_address(op,"<kurtz@zbh.uni-hamburg.de>");
 
-  optionleastlength
+  leastlength_option
     = gt_option_new_uint("l","Specify minimum length of repeats",
                          &arguments->userdefinedleastlength,
                          0U);
-  gt_option_parser_add_option(op, optionleastlength);
-  arguments->refuserdefinedleastlengthoption = gt_option_ref(optionleastlength);
+  gt_option_parser_add_option(op, leastlength_option);
+  arguments->refuserdefinedleastlengthoption
+    = gt_option_ref(leastlength_option);
 
   forwardoption = gt_option_new_bool("f","Compute maximal forward repeats",
                                      &arguments->forward,
@@ -776,6 +788,15 @@ static GtOptionParser *gt_repfind_option_parser_new(void *tool_arguments)
                          &arguments->extendgreedy,
                          false);
   gt_option_parser_add_option(op, extendgreedyoption);
+
+  check_extend_symmetry_option
+    = gt_option_new_bool("check_extend_symmetry",
+                         "check that left/right greedy extension is symmetric "
+                         "for sequences mirror around seed",
+                         &arguments->check_extend_symmetry,
+                         false);
+  gt_option_parser_add_option(op, check_extend_symmetry_option);
+  gt_option_is_development_option(check_extend_symmetry_option);
 
   errorpercentageoption
     = gt_option_new_uword("err","Specify error percentage of matches "
@@ -935,6 +956,8 @@ static int gt_repfind_runner(GT_UNUSED int argc,
   greedyextendmatchinfo.frontspace_reservoir.space = NULL;
   greedyextendmatchinfo.frontspace_reservoir.allocated = 0;
   greedyextendmatchinfo.frontspace_reservoir.offset = 0;
+  greedyextendmatchinfo.check_extend_symmetry
+    = arguments->check_extend_symmetry;
   logger = gt_logger_new(arguments->beverbose, GT_LOGGER_DEFLT_PREFIX, stdout);
   if (parsed_args < argc)
   {
