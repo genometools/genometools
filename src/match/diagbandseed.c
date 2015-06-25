@@ -82,8 +82,7 @@ void gt_seed_extend_merge(GtArrayGtSeedExtendSeedPair *mlist,
                           const GtSeedExtendKmerPos *blist, GtUword blen,
                           unsigned int maxfreq)
 {
-  const GtSeedExtendKmerPos *aptr, *bptr, *tptr, *aend, *bend;
-  unsigned int acnt = 0;
+  const GtSeedExtendKmerPos *aptr, *bptr, *aend, *bend;
   gt_assert(alist != NULL && blist != NULL && mlist != NULL);
 
   aptr = alist;
@@ -95,26 +94,32 @@ void gt_seed_extend_merge(GtArrayGtSeedExtendSeedPair *mlist,
       aptr ++;
     } else if (aptr->code > bptr->code) {
       bptr ++;
-      acnt = 0;
-    } else if (acnt < maxfreq) {
-      /* k-mer codes are equal: process all equal elements from blist */
-      unsigned int bcnt = 0;
-      acnt ++;
-      for (tptr = bptr; tptr < bend && aptr->code == tptr->code &&
-           bcnt < maxfreq; tptr ++) {
-        if (alist != blist || aptr->seqnum < tptr->seqnum) { /* no duplicates */
-          GtSeedExtendSeedPair *seedptr;
-          GT_GETNEXTFREEINARRAY(seedptr, mlist, GtSeedExtendSeedPair,
-                                GT_SEED_EXTEND_ARRAY_INCR + 1.2 *
-                                mlist->allocatedGtSeedExtendSeedPair);
-          seedptr->bseqnum = tptr->seqnum;
-          seedptr->aseqnum = aptr->seqnum;
-          seedptr->bpos = tptr->endpos;
-          seedptr->apos = aptr->endpos;
-          bcnt ++;
+    } else {
+      /* equality: count frequency of current k-mer in both lists */
+      const GtSeedExtendKmerPos *aiter, *biter;
+      for (aiter = aptr; aiter < aend && aiter->code == bptr->code; aiter++) {}
+      for (biter = bptr; biter < bend && biter->code == aptr->code; biter++) {}
+      if (aiter - aptr <= maxfreq && biter - bptr <= maxfreq) {
+        /* add all equal k-mers */
+        const GtSeedExtendKmerPos *asegm_end = aiter, *bsegm_end = biter;
+        for (aiter = aptr; aiter < asegm_end; aiter++) {
+          for (biter = bptr; biter < bsegm_end; biter++) {
+            if (alist != blist || aiter->seqnum < biter->seqnum) {
+              /* no duplicates from the same dataset */
+              GtSeedExtendSeedPair *seedptr;
+              GT_GETNEXTFREEINARRAY(seedptr, mlist, GtSeedExtendSeedPair,
+                                    GT_SEED_EXTEND_ARRAY_INCR + 1.2 *
+                                    mlist->allocatedGtSeedExtendSeedPair);
+              seedptr->bseqnum = biter->seqnum;
+              seedptr->aseqnum = aiter->seqnum;
+              seedptr->bpos = biter->endpos;
+              seedptr->apos = aiter->endpos;
+            }
+          }
         }
-      }
-      aptr ++;
+      } /* else: ignore all equal elements */
+      aptr = aiter;
+      bptr = biter;
     }
   }
 }
