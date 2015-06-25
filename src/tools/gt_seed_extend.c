@@ -74,8 +74,8 @@ static GtOptionParser* gt_seed_extend_option_parser_new(void *tool_arguments)
   gt_option_parser_add_option(op, option);
 
   /* -maxfreq */
-  option = gt_option_new_uint("maxfreq", "maximum frequency of a k-mer",
-                              &arguments->maxfreq, UINT_MAX);
+  option = gt_option_new_uint_min("maxfreq", "maximum frequency of a k-mer",
+                              &arguments->maxfreq, UINT_MAX, 1);
   gt_option_parser_add_option(op, option);
 
   /* -mirror */
@@ -104,6 +104,12 @@ static int gt_seed_extend_arguments_check(GT_UNUSED int rest_argc,
   int had_err = 0;
   gt_error_check(err);
   gt_assert(arguments);
+
+  if (rest_argc == 1 && arguments->maxfreq == 1) {
+    gt_error_set(err, "for 1 input file maxfreq must be >= 2 to find matching "
+                 "k-mers");
+    had_err = -1;
+  }
 
   if (rest_argc > 2) {
     gt_error_set(err, "too many arguments (-help shows correct usage)");
