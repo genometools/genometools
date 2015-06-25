@@ -1,4 +1,5 @@
 /*
+  Copyright (C) 2015 Annika Seidel, annika.seidel@studium.uni-hamburg.de
   Copyright (c) 2007 Stefan Kurtz <kurtz@zbh.uni-hamburg.de>
   Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
 
@@ -42,6 +43,7 @@ typedef struct
   Charlistlen *charlistlen;
   GtStr *text;
   bool showedist;
+  bool print;
 } Cmppairwiseopt;
 
 static void showsimpleoptions(const Cmppairwiseopt *opt)
@@ -82,7 +84,8 @@ static GtOPrval parse_options(int *parsed_args,
          *optionfiles,
          *optioncharlistlen,
          *optiontext,
-         *optionshowedist;
+         *optionshowedist,
+         *optionprint;
   GtStrArray *charlistlen;
   GtOPrval oprval;
 
@@ -93,6 +96,7 @@ static GtOPrval parse_options(int *parsed_args,
   pw->text = gt_str_new();
   pw->charlistlen = NULL;
   pw->showedist = false;
+  pw->print = false;
   op = gt_option_parser_new("options", "Apply function to pairs of strings.");
   gt_option_parser_set_mail_address(op, "<kurtz@zbh.uni-hamburg.de>");
 
@@ -116,6 +120,10 @@ static GtOPrval parse_options(int *parsed_args,
                       &pw->showedist, false);
   gt_option_parser_add_option(op, optionshowedist);
 
+  optionprint = gt_option_new_bool("p", "print alignments",
+                      &pw->print, false);
+  gt_option_parser_add_option(op, optionprint);
+
   gt_option_exclude(optionstrings, optionfiles);
   gt_option_exclude(optionstrings, optioncharlistlen);
   gt_option_exclude(optionstrings, optiontext);
@@ -123,6 +131,7 @@ static GtOPrval parse_options(int *parsed_args,
   gt_option_exclude(optionfiles, optiontext);
   gt_option_exclude(optioncharlistlen, optiontext);
   gt_option_imply(optionshowedist, optionstrings);
+  gt_option_imply(optionprint, optionstrings);
 
   oprval = gt_option_parser_parse(op, parsed_args, argc, argv, gt_versionfunc,
                                   err);
@@ -267,22 +276,30 @@ int gt_paircmp(int argc, const char **argv, GtError *err)
         (const GtUchar *) gt_str_array_get(cmppairwise.strings,1UL),
         (GtUword) strlen(gt_str_array_get(cmppairwise.strings,1UL)));
       printf(GT_WU "\n", edist);
-    } else
+    }
+    else if (cmppairwise.print)
+    {
+      gt_computelinearspace(
+        (const GtUchar *) gt_str_array_get(cmppairwise.strings,0),
+        (GtUword) strlen(gt_str_array_get(cmppairwise.strings,0)),
+        (const GtUchar *) gt_str_array_get(cmppairwise.strings,1UL),
+        (GtUword) strlen(gt_str_array_get(cmppairwise.strings,1UL)));
+    }else
     {
       GtUword testcases;
       testcases = applycheckfunctiontosimpleoptions(gt_checkgreedyunitedist,
                                                     &cmppairwise);
-      printf("# number of testcases for gt_checkgreedyunitedist: " GT_WU "\n", 
+      printf("# number of testcases for gt_checkgreedyunitedist: " GT_WU "\n",
               testcases);
       testcases = applycheckfunctiontosimpleoptions(gt_checklinearspace,
                                                     &cmppairwise);
-      printf("# number of testcases for gt_checklinearspace: " GT_WU "\n", 
+      printf("# number of testcases for gt_checklinearspace: " GT_WU "\n",
               testcases);
-              
-      testcases = applycheckfunctiontosimpleoptions(gt_checklinearspace_local,
+
+      /*testcases = applycheckfunctiontosimpleoptions(gt_checklinearspace_local,
                                                     &cmppairwise);
-      printf("# number of testcases for gt_checklinearspace_local: " GT_WU "\n", 
-              testcases);
+      printf("# number of testcases for gt_checklinearspace_local: " GT_WU "\n",
+              testcases);*/
     }
   }
   freesimpleoption(&cmppairwise);

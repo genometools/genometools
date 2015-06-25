@@ -40,4 +40,9 @@ void gt_checklinearspace(GT_UNUSED bool forward,
                          const GtUchar *vseq,
                          GtUword vlen);
 
+void gt_computelinearspace(const GtUchar *useq,
+                           GtUword ulen,
+                           const GtUchar *vseq,
+                           GtUword vlen);
+
 #endif

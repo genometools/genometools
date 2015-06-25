@@ -303,6 +303,26 @@ static GtUword evaluate_alcost(const GtAlignment *align)
   return alcost;
 }
 
+static void alignment_to_stdout(const GtAlignment *align)
+{
+    gt_assert(align != NULL);
+    gt_alignment_show(align, stdout, 80);
+}
+
+void gt_computelinearspace(const GtUchar *useq,
+                           GtUword ulen,
+                           const GtUchar *vseq,
+                           GtUword vlen)
+{
+  GtAlignment *align;
+
+  align = gt_alignment_new_with_seqs(useq, ulen, vseq, vlen);
+  gt_calc_linearalign(useq, ulen, vseq, vlen, align);
+
+  alignment_to_stdout(align);
+  gt_alignment_delete(align);
+}
+
 static bool gap_symbol_in_sequence(const GtUchar *seq, GtUword len)
 {
   const GtUchar *sptr;
@@ -356,7 +376,7 @@ void gt_checklinearspace(GT_UNUSED bool forward,
   alcost = evaluate_alcost(align);
   if (edist2 != alcost)
   {
-    fprintf(stderr,"evaluate_alcost= "GT_WU" != "GT_WU
+    fprintf(stderr,"evaluate_alcost = "GT_WU" != "GT_WU
             " = gt_squarededistunit\n", alcost, edist2);
     exit(GT_EXIT_PROGRAMMING_ERROR);
   }
