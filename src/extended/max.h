@@ -17,27 +17,27 @@
 #define MAX_H
 #include "core/types_api.h"
 
-typedef struct Gtmax Gtmax;
+typedef struct Gtmaxcoordvalue Gtmaxcoordvalue;
 
-Gtmax* gt_max_new(void);
+Gtmaxcoordvalue* gt_max_new(void);
 
-void gt_max_delete(Gtmax *max);
+void gt_max_delete(Gtmaxcoordvalue *max);
 
-void gt_max_set_value(Gtmax *max, GtWord value);
+void gt_max_set_value(Gtmaxcoordvalue *max, GtWord value);
 
-GtWord gt_max_get_value(Gtmax *max);
+GtWord gt_max_get_value(Gtmaxcoordvalue *max);
 
-void gt_max_set_start(Gtmax *max, GtUwordPair *start );
+void gt_max_set_start(Gtmaxcoordvalue*max, GtUwordPair start );
 
-GtUwordPair* gt_max_get_start(Gtmax *max);
+GtUwordPair gt_max_get_start(Gtmaxcoordvalue *max);
 
-void gt_max_set_end_with_pair(Gtmax *max, GtUwordPair *end);
+void gt_max_set_end_with_pair(Gtmaxcoordvalue *max, GtUwordPair end);
 
-void gt_max_set_end(Gtmax *max, GtUword a, GtUword b);
+void gt_max_set_end(Gtmaxcoordvalue *max, GtUword a, GtUword b);
 
-GtUwordPair* gt_max_get_end(Gtmax *max);
+GtUwordPair gt_max_get_end(Gtmaxcoordvalue *max);
 
-GtUword gt_max_get_row_length(Gtmax *max);
+GtUword gt_max_get_row_length(Gtmaxcoordvalue *max);
 
-GtUword gt_max_get_col_length(Gtmax *max);
+GtUword gt_max_get_col_length(Gtmaxcoordvalue *max);
 #endif

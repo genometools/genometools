@@ -20,91 +20,93 @@
 #include "core/ma_api.h"
 #include "extended/max.h"
 
-struct Gtmax{
+struct Gtmaxcoordvalue{
     GtWord value;
-    GtUwordPair *start;
-    GtUwordPair *end;
+    GtUwordPair start;
+    GtUwordPair end;
 };
 
-Gtmax* gt_max_new(void)
+Gtmaxcoordvalue* gt_max_new(void)
 {
-  Gtmax *max;
-  max = gt_calloc((size_t) 1, sizeof (Gtmax));
+  Gtmaxcoordvalue *max;
+  max = gt_calloc((size_t) 1, sizeof (Gtmaxcoordvalue));
   max->value = 0;
 
-  max->start = gt_malloc(sizeof *(max->start));
-  max->start->a=0;
-  max->start->b=0;
+  max->start.a=0;
+  max->start.b=0;
 
-  max->end = gt_malloc(sizeof *(max->end));
-  max->end->a=0;
-  max->end->b=0;
+  max->end.a=0;
+  max->end.b=0;
   return max;
 }
 
-void gt_max_delete(Gtmax *max)
+void gt_max_delete(Gtmaxcoordvalue *max)
 {
   if (max != NULL)
     gt_free(max);
 }
 
-void gt_max_set_value(Gtmax *max, GtWord value)
+void gt_max_set_value(Gtmaxcoordvalue *max, GtWord value)
 {
-  gt_assert(max!=NULL);
+  gt_assert(max != NULL);
   max->value=value;
 }
 
-GtWord gt_max_get_value(Gtmax *max)
+GtWord gt_max_get_value(Gtmaxcoordvalue *max)
 {
-  gt_assert(max!=NULL);
+  gt_assert(max != NULL);
   return(max->value);
 }
 
-void gt_max_set_start(Gtmax *max, GtUwordPair *start )
+void gt_max_set_start(Gtmaxcoordvalue *max, GtUwordPair start )
 {
-  gt_assert(max!=NULL);
+  gt_assert(max != NULL);
   max->start=start;
 }
 
-GtUwordPair* gt_max_get_start(Gtmax *max)
+GtUwordPair gt_max_get_start(Gtmaxcoordvalue *max)
 {
-  gt_assert(max!=NULL);
+  gt_assert(max != NULL);
   return(max->start);
 }
 
-void gt_max_set_end_with_pair(Gtmax *max, GtUwordPair *end)
+void gt_max_set_end_with_pair(Gtmaxcoordvalue *max, GtUwordPair end)
 {
-  gt_assert(max!=NULL && end!=NULL);
-  max->end=end;
+  gt_assert(max != NULL);
+  max->end = end;
 }
 
-void gt_max_set_end(Gtmax *max, GtUword a, GtUword b)
+void gt_max_set_end(Gtmaxcoordvalue *max, GtUword a, GtUword b)
 {
-  gt_assert(max!=NULL);
-  max->end->a = a;
-  max->end->b =b ;
+  gt_assert(max != NULL);
+  max->end.a = a;
+  max->end.b = b ;
 }
 
-GtUwordPair* gt_max_get_end(Gtmax *max)
+GtUwordPair gt_max_get_end(Gtmaxcoordvalue *max)
 {
-  gt_assert(max!=NULL);
+  gt_assert(max != NULL);
   return(max->end);
 }
 
-GtUword gt_max_get_row_length(Gtmax *max)
+GtUword gt_max_get_row_length(Gtmaxcoordvalue *max)
 {
-  GtUword length;
-  gt_assert(max!=NULL);
+  gt_assert(max != NULL);
 
-  length = (gt_max_get_end(max))->a -(gt_max_get_start(max))->a;
-  return(length);
+  GtUword end = (gt_max_get_end(max)).a;
+  GtUword start = (gt_max_get_start(max)).a;
+
+  gt_assert(end >= start);
+  return end-start;
 }
 
-GtUword gt_max_get_col_length(Gtmax *max)
+GtUword gt_max_get_col_length(Gtmaxcoordvalue*max)
 {
-  GtUword length;
-  gt_assert(max!=NULL);
+  gt_assert(max != NULL);
 
-  length = (gt_max_get_end(max))->b -(gt_max_get_start(max))->b;
-  return(length);
+  GtUword end = (gt_max_get_end(max)).b;
+  GtUword start = (gt_max_get_start(max)).b;
+
+  gt_assert(end >= start);
+  return end-start;
 }

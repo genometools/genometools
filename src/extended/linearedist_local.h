@@ -21,4 +21,10 @@ void gt_checklinearspace_local(GT_UNUSED bool forward,
                          GtUword ulen,
                          const GtUchar *vseq,
                          GtUword vlen);
+
+void gt_computelinearspace_local(const GtUchar *useq, GtUword ulen,
+                                 const GtUchar *vseq, GtUword vlen,
+                                 GtWord matchscore,
+                                 GtWord mismatchscore,
+                                 GtWord gapscore);
 #endif
