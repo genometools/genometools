@@ -6,45 +6,52 @@ repfindtestfiles=["Duplicate.fna",
                   "at1MB",
                   "ychrIII.fna"]
 
-def addfilepath(filename)
+def testdatadir(filename)
   if filename == 'Duplicate.fna' or filename == 'at1MB'
-    return "#{$testdata}#{filename}"
+    return "#{$testdata}/"
   else
-    return "#{$gttestdata}DNA-mix/Grumbach.fna/#{filename}"
+    return "#{$gttestdata}DNA-mix/Grumbach.fna/"
   end
 end
 
 def determineminlength(reffile)
   if reffile == 'at1MB'
     return 22
+  elsif reffile == 'Duplicate.fna'
+    return 8
   else
     return 14
   end
 end
 
 def checkrepfind(reffile,withextend = false)
-  reffilepath=addfilepath(reffile)
+  reffilepath=testdatadir(reffile) + reffile
+  if reffile == 'Duplicate.fna'
+    testdatadir = $testdata
+  else
+    testdatadir = $gttestdata
+  end
   run_test("#{$bin}gt suffixerator -algbds 3 31 80 -db " +
            "#{reffilepath} -indexname sfxidx -dna -suf -tis -lcp -ssp -pl",
            :maxtime => 320)
   minlength = determineminlength(reffile)
   run_test("#{$bin}gt repfind -l #{minlength} -ii sfxidx", :maxtime => 600)
-  resultfile="#{$gttestdata}repfind-result/#{reffile}.result"
+  resultfile="#{testdatadir}repfind-result/#{reffile}.result"
   run "cmp -s #{last_stdout} #{resultfile}"
   run_test("#{$bin}gt repfind -l #{minlength} -r -ii sfxidx", :maxtime => 600)
-  resultfile="#{$gttestdata}repfind-result/#{reffile}-r.result"
+  resultfile="#{testdatadir}repfind-result/#{reffile}-r.result"
   run "cmp -s #{last_stdout} #{resultfile}"
   if withextend
     run_test("#{$bin}gt repfind -l #{minlength} -ii sfxidx -extendgreedy", 
              :maxtime => 600)
-    resultfile="#{$gttestdata}repfind-result/#{reffile}-gr-ext.result"
+    resultfile="#{testdatadir}repfind-result/#{reffile}-gr-ext.result"
     run "cmp -s #{last_stdout} #{resultfile}"
   end
 end
 
 def checkrepfindwithquery(reffile,queryfile)
-  reffilepath=addfilepath(reffile)
-  queryfilepath=addfilepath(queryfile)
+  reffilepath=testdatadir(reffile) + reffile
+  queryfilepath=testdatadir(queryfile) + queryfile
   idxname=reffile + "-idx"
   run_test "#{$bin}gt suffixerator -algbds 3 31 80 -db " +
            "#{reffilepath} -indexname #{idxname} -dna -suf -tis -lcp -ssp -pl"
@@ -100,7 +107,7 @@ Test do
 end
 
 if $gttestdata then
-  extendexception = ["hs5hcmvcg.fna","Duplicate.fna","Wildcards.fna","at1MB"]
+  extendexception = ["hs5hcmvcg.fna","Wildcards.fna","at1MB"]
   repfindtestfiles.each do |reffile|
     Name "gt repfind #{reffile}"
     Keywords "gt_repfind gttestdata"
