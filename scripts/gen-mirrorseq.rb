@@ -49,10 +49,15 @@ class String
   end
 end
 
+if ARGV.length != 2
+  STDERR.puts "Usage: #{$0} <seedlength> <extendlength>"
+  exit 1
+end
+
 alphabet = "acgt"
 errperc = 10
-seedlength = 200
-extendlength = 1000
+seedlength = ARGV[0].to_i
+extendlength = ARGV[1].to_i
 rseq = Randomsequence.new(alphabet)
 seed = rseq.sequence(seedlength)
 leftcontext1 = rseq.sequence(extendlength)

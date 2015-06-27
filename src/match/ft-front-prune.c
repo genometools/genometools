@@ -44,7 +44,7 @@ typedef struct
 {
   const GtTwobitencoding *twobitencoding;
   const GtEncseq *encseq;
-  GtReadmode readmode;
+  bool forward;
   GtEncseqReader *encseqreader;
   GtUchar *cache_ptr;
   GtAllocatedMemory *sequence_cache;
@@ -66,8 +66,7 @@ static void sequenceobject_init(Sequenceobject *seq,
 {
   gt_assert(seq != NULL);
   gt_encseq_reader_reinit_with_readmode(encseq_r, encseq, readmode, startpos);
-  if (gt_encseq_has_twobitencoding(encseq) && gt_encseq_wildcards(encseq) == 0
-      && readmode == GT_READMODE_FORWARD)
+  if (gt_encseq_has_twobitencoding(encseq) && gt_encseq_wildcards(encseq) == 0)
   {
     seq->twobitencoding = gt_encseq_twobitencoding_export(encseq);
   } else
@@ -76,7 +75,6 @@ static void sequenceobject_init(Sequenceobject *seq,
   }
   seq->encseqreader = encseq_r;
   seq->encseq = encseq;
-  seq->readmode = readmode;
   seq->sequence_cache = sequence_cache;
   gt_assert(sequence_cache != NULL);
   seq->cache_ptr = sequence_cache->space;
@@ -84,7 +82,17 @@ static void sequenceobject_init(Sequenceobject *seq,
   seq->min_access_pos = GT_UWORD_MAX;
   seq->cache_num_positions = 0;
   seq->cache_offset = 0;
-  seq->startpos = startpos;
+  if (readmode == GT_READMODE_FORWARD)
+  {
+    seq->startpos = startpos;
+    seq->forward = true;
+  } else
+  {
+    gt_assert(readmode == GT_READMODE_REVERSE);
+    gt_assert(startpos <= gt_encseq_total_length(encseq) - 1);
+    seq->startpos = gt_encseq_total_length(encseq) - 1 - startpos;
+    seq->forward = false;
+  }
 }
 
 static GtUchar gt_twobitencoding_char_at_pos(
@@ -139,11 +147,27 @@ static GtUchar sequenceobject_get_char(Sequenceobject *seq,GtUword pos)
   gt_assert(pos < seq->cache_offset + seq->sequence_cache->allocated);
   if (seq->twobitencoding != NULL)
   {
-    GtUchar cc = gt_twobitencoding_char_at_pos(seq->twobitencoding,
-                                               seq->startpos + pos);
-    gt_assert(cc == seq->cache_ptr[pos]);
-    gt_assert(cc == gt_encseq_get_encoded_char(seq->encseq,seq->startpos + pos,
-                                               seq->readmode));
+    if (seq->forward)
+    {
+      GtUchar cc = gt_twobitencoding_char_at_pos(seq->twobitencoding,
+                                                 seq->startpos + pos);
+      gt_assert(cc == seq->cache_ptr[pos]);
+      gt_assert(cc == gt_encseq_get_encoded_char(seq->encseq,
+                                                 seq->startpos + pos,
+                                                 GT_READMODE_FORWARD));
+    } else
+    {
+      GtUchar cc, cc2;
+
+      gt_assert(pos <= seq->startpos);
+      cc = gt_twobitencoding_char_at_pos(seq->twobitencoding,
+                                         seq->startpos - pos);
+      cc2 = gt_encseq_get_encoded_char(seq->encseq,
+                                       seq->startpos - pos,
+                                       GT_READMODE_FORWARD);
+      gt_assert(cc == seq->cache_ptr[pos]);
+      gt_assert(cc2 == seq->cache_ptr[pos]);
+    }
   }
   return seq->cache_ptr[pos];
 }
