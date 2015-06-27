@@ -8,6 +8,9 @@
 #include "core/unused_api.h"
 #include "core/divmodmul.h"
 #include "core/chardef.h"
+#include "core/divmodmul.h"
+#include "core/intbits.h"
+#include "core/encseq.h"
 #include "core/ma_api.h"
 #include "core/types_api.h"
 #include "ft-front-prune.h"
@@ -39,13 +42,17 @@ typedef struct
 #ifndef OUTSIDE_OF_GT
 typedef struct
 {
+  const GtTwobitencoding *twobitencoding;
+  const GtEncseq *encseq;
+  GtReadmode readmode;
   GtEncseqReader *encseqreader;
   GtUchar *cache_ptr;
   GtAllocatedMemory *sequence_cache;
   GtUword substringlength,
           min_access_pos,
           cache_num_positions,
-          cache_offset;
+          cache_offset,
+          startpos;
 } Sequenceobject;
 
 static void sequenceobject_init(Sequenceobject *seq,
@@ -59,7 +66,17 @@ static void sequenceobject_init(Sequenceobject *seq,
 {
   gt_assert(seq != NULL);
   gt_encseq_reader_reinit_with_readmode(encseq_r, encseq, readmode, startpos);
+  if (gt_encseq_has_twobitencoding(encseq) && gt_encseq_wildcards(encseq) == 0
+      && readmode == GT_READMODE_FORWARD)
+  {
+    seq->twobitencoding = gt_encseq_twobitencoding_export(encseq);
+  } else
+  {
+    seq->twobitencoding = NULL;
+  }
   seq->encseqreader = encseq_r;
+  seq->encseq = encseq;
+  seq->readmode = readmode;
   seq->sequence_cache = sequence_cache;
   gt_assert(sequence_cache != NULL);
   seq->cache_ptr = sequence_cache->space;
@@ -67,6 +84,15 @@ static void sequenceobject_init(Sequenceobject *seq,
   seq->min_access_pos = GT_UWORD_MAX;
   seq->cache_num_positions = 0;
   seq->cache_offset = 0;
+  seq->startpos = startpos;
+}
+
+static GtUchar gt_twobitencoding_char_at_pos(
+                                      const GtTwobitencoding *twobitencoding,
+                                      GtUword pos)
+{
+  return (twobitencoding[GT_DIVBYUNITSIN2BITENC(pos)] >>
+          GT_MULT2(GT_UNITSIN2BITENC - 1 - GT_MODBYUNITSIN2BITENC(pos))) & 3;
 }
 
 static GtUchar sequenceobject_get_char(Sequenceobject *seq,GtUword pos)
@@ -111,6 +137,14 @@ static GtUchar sequenceobject_get_char(Sequenceobject *seq,GtUword pos)
     seq->cache_num_positions = tostore;
   }
   gt_assert(pos < seq->cache_offset + seq->sequence_cache->allocated);
+  if (seq->twobitencoding != NULL)
+  {
+    GtUchar cc = gt_twobitencoding_char_at_pos(seq->twobitencoding,
+                                               seq->startpos + pos);
+    gt_assert(cc == seq->cache_ptr[pos]);
+    gt_assert(cc == gt_encseq_get_encoded_char(seq->encseq,seq->startpos + pos,
+                                               seq->readmode));
+  }
   return seq->cache_ptr[pos];
 }
 
