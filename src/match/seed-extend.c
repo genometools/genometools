@@ -321,8 +321,10 @@ int gt_simplegreedyselfmatchoutput(void *info,
   ufsr.encseq = vfsr.encseq = encseq;
   ufsr.encseq_r = greedyextendmatchinfo->encseq_r_in_u;
   ufsr.sequence_cache = &greedyextendmatchinfo->usequence_cache;
+  ufsr.extend_char_access = greedyextendmatchinfo->extend_char_access;
   vfsr.encseq_r = greedyextendmatchinfo->encseq_r_in_v;
   vfsr.sequence_cache = &greedyextendmatchinfo->vsequence_cache;
+  vfsr.extend_char_access = greedyextendmatchinfo->extend_char_access;
   fill_repfind_sequence_info(&rfsi,pos1,pos2,encseq);
   if (pos1 > rfsi.dbseqstartpos && pos2 > rfsi.queryseqstartpos)
   { /* there is something to align on the left of the seed */

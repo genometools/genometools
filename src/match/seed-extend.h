@@ -17,6 +17,7 @@
 #ifndef SEED_EXTEND_H
 #define SEED_EXTEND_H
 #include "core/types_api.h"
+#include "match/ft-front-prune.h"
 
 typedef struct GtXdropmatchinfo GtXdropmatchinfo;
 
@@ -40,14 +41,6 @@ int gt_processxdropquerymatches(void *info,
                                 const GtUchar *query,
                                 GtUword query_totallength,
                                 GtError *err);
-
-typedef enum
-{
-  GT_EXTEND_CHAR_ACCESS_TWOBIT,
-  GT_EXTEND_CHAR_ACCESS_ENCSEQ,
-  GT_EXTEND_CHAR_ACCESS_ENCSEQ_READER,
-  GT_EXTEND_CHAR_ACCESS_ANY
-} GtExtendCharAccess;
 
 GtExtendCharAccess gt_greedy_extend_char_access(const char *cam_string,
                                                 GtError *err);
