@@ -80,7 +80,7 @@ GtUword gt_seed_extend_get_kmers(GtSeedExtendKmerPos *list,
 void gt_seed_extend_merge(GtArrayGtSeedExtendSeedPair *mlist,
                           const GtSeedExtendKmerPos *alist, GtUword alen,
                           const GtSeedExtendKmerPos *blist, GtUword blen,
-                          unsigned int maxfreq)
+                          unsigned int kmerlen, unsigned int maxfreq)
 {
   const GtSeedExtendKmerPos *aptr, *bptr, *aend, *bend;
   gt_assert(alist != NULL && blist != NULL && mlist != NULL);
@@ -104,7 +104,9 @@ void gt_seed_extend_merge(GtArrayGtSeedExtendSeedPair *mlist,
         const GtSeedExtendKmerPos *asegm_end = aiter, *bsegm_end = biter;
         for (aiter = aptr; aiter < asegm_end; aiter++) {
           for (biter = bptr; biter < bsegm_end; biter++) {
-            if (alist != blist || aiter->seqnum < biter->seqnum) {
+            if (alist != blist || aiter->seqnum < biter->seqnum ||
+                (aiter->seqnum == biter->seqnum && aiter->endpos + kmerlen <=
+                 biter->endpos)) {
               /* no duplicates from the same dataset */
               GtSeedExtendSeedPair *seedptr;
               GT_GETNEXTFREEINARRAY(seedptr, mlist, GtSeedExtendSeedPair,
@@ -256,7 +258,7 @@ void gt_seed_extend_run(const GtEncseq *aencseq, const GtEncseq *bencseq,
   }
 
   GT_INITARRAY(&mlist,GtSeedExtendSeedPair);
-  gt_seed_extend_merge(&mlist, alist, alen, blist, blen, maxfreq);
+  gt_seed_extend_merge(&mlist, alist, alen, blist, blen, kmerlen, maxfreq);
   gt_free(alist);
   if (two_files)
     gt_free(blist);

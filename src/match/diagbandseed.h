@@ -34,7 +34,7 @@ GtUword gt_seed_extend_get_kmers(GtSeedExtendKmerPos *list,
 void gt_seed_extend_merge(GtArrayGtSeedExtendSeedPair *mlist,
                           const GtSeedExtendKmerPos *alist, GtUword alen,
                           const GtSeedExtendKmerPos *blist, GtUword blen,
-                          unsigned int maxfreq);
+                          unsigned int kmerlen, unsigned int maxfreq);
 
 /* reports seeds from mlist that satisfy the filter criteria */
 void gt_seed_extend_find_seeds(const GtArrayGtSeedExtendSeedPair *mlist,
