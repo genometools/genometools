@@ -42,7 +42,7 @@ typedef struct
   GtUword samples, errorpercentage, maxalignedlendifference;
   bool scanfile, beverbose, forward, reverse, searchspm, extendxdrop,
        extendgreedy, check_extend_symmetry;
-  GtStr *indexname;
+  GtStr *indexname, *cam_string;
   GtStrArray *queryfiles;
   GtOption *refforwardoption, *refseedlengthoption,
            *refuserdefinedleastlengthoption;
@@ -141,6 +141,7 @@ static void *gt_repfind_arguments_new(void)
 
   arguments = gt_malloc(sizeof (*arguments));
   arguments->indexname = gt_str_new();
+  arguments->cam_string = gt_str_new();
   arguments->queryfiles = gt_str_array_new();
   return arguments;
 }
@@ -154,6 +155,7 @@ static void gt_repfind_arguments_delete(void *tool_arguments)
     return;
   }
   gt_str_delete(arguments->indexname);
+  gt_str_delete(arguments->cam_string);
   gt_str_array_delete(arguments->queryfiles);
   gt_option_delete(arguments->refforwardoption);
   gt_option_delete(arguments->refseedlengthoption);
@@ -167,7 +169,7 @@ static GtOptionParser *gt_repfind_option_parser_new(void *tool_arguments)
   GtOption *option, *reverseoption, *queryoption, *extendxdropoption,
            *extendgreedyoption, *scanoption, *sampleoption, *forwardoption,
            *spmoption, *seedlengthoption, *errorpercentageoption,
-           *maxalilendiffoption, *leastlength_option,
+           *maxalilendiffoption, *leastlength_option, *option_char_access_mode,
            *check_extend_symmetry_option;
   Maxpairsoptions *arguments = tool_arguments;
 
@@ -225,11 +227,12 @@ static GtOptionParser *gt_repfind_option_parser_new(void *tool_arguments)
 
   extendgreedyoption
     = gt_option_new_bool("extendgreedy",
-                         "Extend seed to both sides using trimmed "
-                         "greey algorithm",
+                         "Extend seed to both sides using "
+                         "greedy algorithm with trimming of waves",
                          &arguments->extendgreedy,
                          false);
   gt_option_parser_add_option(op, extendgreedyoption);
+  gt_option_is_development_option(extendgreedyoption);
 
   check_extend_symmetry_option
     = gt_option_new_bool("check_extend_symmetry",
@@ -266,6 +269,12 @@ static GtOptionParser *gt_repfind_option_parser_new(void *tool_arguments)
   gt_option_parser_add_option(op, option);
   gt_option_is_mandatory(option);
 
+  option_char_access_mode = gt_option_new_string("cam",
+                                       gt_cam_extendgreedy_comment(),
+                                       arguments->cam_string,"");
+  gt_option_parser_add_option(op, option_char_access_mode);
+  gt_option_is_development_option(option_char_access_mode);
+
   queryoption = gt_option_new_filename_array("q",
                                              "Specify query files",
                                              arguments->queryfiles);
@@ -286,6 +295,7 @@ static GtOptionParser *gt_repfind_option_parser_new(void *tool_arguments)
   gt_option_exclude(reverseoption,spmoption);
   gt_option_exclude(queryoption,spmoption);
   gt_option_exclude(sampleoption,spmoption);
+  gt_option_imply(option_char_access_mode,extendgreedyoption);
   gt_option_imply_either_2(seedlengthoption,extendxdropoption,
                            extendgreedyoption);
   gt_option_imply_either_2(errorpercentageoption,extendxdropoption,
@@ -342,31 +352,42 @@ static int gt_repfind_runner(GT_UNUSED int argc,
   GtQuerymatch *querymatchspaceptr = NULL;
 
   gt_error_check(err);
-  if (arguments->extendxdrop)
-  {
-  xdropmatchinfo
-    = gt_xdrop_matchinfo_new(arguments->userdefinedleastlength,
-                             arguments->errorpercentage,
-                             gt_str_array_size(arguments->queryfiles) == 0
-                                           ? true : false,
-                             arguments->beverbose);
-  }
-  if (arguments->extendgreedy)
-  {
-    greedyextendmatchinfo = gt_greedy_extend_matchinfo_new(
-                                   arguments->errorpercentage,
-                                   arguments-> maxalignedlendifference,
-                                   60,
-                                   arguments->userdefinedleastlength,
-                                   arguments->beverbose,
-                                   arguments->check_extend_symmetry);
-  }
-
   logger = gt_logger_new(arguments->beverbose, GT_LOGGER_DEFLT_PREFIX, stdout);
   if (parsed_args < argc)
   {
     gt_error_set(err,"superfluous arguments: \"%s\"",argv[argc-1]);
     haserr = true;
+  }
+  if (!haserr && arguments->extendxdrop)
+  {
+    xdropmatchinfo
+      = gt_xdrop_matchinfo_new(arguments->userdefinedleastlength,
+                               arguments->errorpercentage,
+                               gt_str_array_size(arguments->queryfiles) == 0
+                                             ? true : false,
+                               arguments->beverbose);
+    gt_assert(xdropmatchinfo != NULL);
+  }
+  if (!haserr && arguments->extendgreedy)
+  {
+    GtExtendCharAccess extend_char_access
+      = gt_greedy_extend_char_access(gt_str_get(arguments->cam_string),err);
+
+    if ((int) extend_char_access == -1)
+    {
+      haserr = true;
+    }
+    if (!haserr)
+    {
+      greedyextendmatchinfo = gt_greedy_extend_matchinfo_new(
+                                     arguments->errorpercentage,
+                                     arguments-> maxalignedlendifference,
+                                     60,
+                                     arguments->userdefinedleastlength,
+                                     extend_char_access,
+                                     arguments->beverbose,
+                                     arguments->check_extend_symmetry);
+    }
   }
   if (!haserr)
   {

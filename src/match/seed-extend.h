@@ -41,6 +41,19 @@ int gt_processxdropquerymatches(void *info,
                                 GtUword query_totallength,
                                 GtError *err);
 
+typedef enum
+{
+  GT_EXTEND_CHAR_ACCESS_TWOBIT,
+  GT_EXTEND_CHAR_ACCESS_ENCSEQ,
+  GT_EXTEND_CHAR_ACCESS_ENCSEQ_READER,
+  GT_EXTEND_CHAR_ACCESS_ANY
+} GtExtendCharAccess;
+
+GtExtendCharAccess gt_greedy_extend_char_access(const char *cam_string,
+                                                GtError *err);
+
+const char *gt_cam_extendgreedy_comment(void);
+
 typedef struct GtGreedyextendmatchinfo GtGreedyextendmatchinfo;
 
 GtGreedyextendmatchinfo *gt_greedy_extend_matchinfo_new(
@@ -48,6 +61,7 @@ GtGreedyextendmatchinfo *gt_greedy_extend_matchinfo_new(
                                    GtUword maxalignedlendifference,
                                    GtUword history,
                                    GtUword userdefinedleastlength,
+                                   GtExtendCharAccess extend_char_access,
                                    bool beverbose,
                                    bool check_extend_symmetry);
 

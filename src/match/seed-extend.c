@@ -161,6 +161,36 @@ static void skdebug(GT_UNUSED const char *format, ...)
 #endif
 }
 
+const char *gt_cam_extendgreedy_comment(void)
+{
+  return "specify character access mode: possible values: "
+         "twobit, encseq, encseq_reader";
+}
+
+GtExtendCharAccess gt_greedy_extend_char_access(const char *cam_string,
+                                                GtError *err)
+{
+  if (strcmp(cam_string,"twobit") == 0)
+  {
+    return GT_EXTEND_CHAR_ACCESS_TWOBIT;
+  }
+  if (strcmp(cam_string,"encseq") == 0)
+  {
+    return GT_EXTEND_CHAR_ACCESS_ENCSEQ;
+  }
+  if (strcmp(cam_string,"encseq_reader") == 0)
+  {
+    return GT_EXTEND_CHAR_ACCESS_ENCSEQ_READER;
+  }
+  if (strcmp(cam_string,"") == 0)
+  {
+    return GT_EXTEND_CHAR_ACCESS_ANY;
+  }
+  gt_error_set(err,"illegal parameter for option -cam: %s",
+                    gt_cam_extendgreedy_comment());
+  return -1;
+}
+
 struct GtGreedyextendmatchinfo
 {
   Fronttrace *left_front_trace, *right_front_trace;
@@ -171,6 +201,7 @@ struct GtGreedyextendmatchinfo
           errorpercentage,
           totallength;
   unsigned int userdefinedleastlength;
+  GtExtendCharAccess extend_char_access;
   bool beverbose,
        check_extend_symmetry;
   GtQuerymatch *querymatchspaceptr;
@@ -183,6 +214,7 @@ GtGreedyextendmatchinfo *gt_greedy_extend_matchinfo_new(
                                    GtUword maxalignedlendifference,
                                    GtUword history,
                                    GtUword userdefinedleastlength,
+                                   GtExtendCharAccess extend_char_access,
                                    bool beverbose,
                                    bool check_extend_symmetry)
 {
@@ -215,6 +247,7 @@ GtGreedyextendmatchinfo *gt_greedy_extend_matchinfo_new(
   ggemi->frontspace_reservoir.allocated = 0;
   ggemi->frontspace_reservoir.offset = 0;
   ggemi->check_extend_symmetry = check_extend_symmetry;
+  ggemi->extend_char_access = extend_char_access;
   return ggemi;
 }
 
