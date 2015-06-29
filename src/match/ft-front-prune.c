@@ -66,11 +66,11 @@ static void sequenceobject_init(Sequenceobject *seq,
                                 )
 {
   gt_assert(seq != NULL);
-  seq->cache_ptr = NULL;
   seq->encseq = NULL;
+  seq->encseqreader = NULL;
   seq->twobitencoding = NULL;
   if ((extend_char_access_mode == GT_EXTEND_CHAR_ACCESS_ANY ||
-      extend_char_access_mode == GT_EXTEND_CHAR_ACCESS_TWOBIT) &&
+       extend_char_access_mode == GT_EXTEND_CHAR_ACCESS_TWOBIT) &&
       gt_encseq_has_twobitencoding(encseq) && gt_encseq_wildcards(encseq) == 0)
   {
     seq->twobitencoding = gt_encseq_twobitencoding_export(encseq);
@@ -81,20 +81,21 @@ static void sequenceobject_init(Sequenceobject *seq,
   {
     gt_encseq_reader_reinit_with_readmode(encseq_r, encseq, readmode, startpos);
     seq->encseqreader = encseq_r;
+    gt_assert(seq->encseqreader != NULL);
     seq->sequence_cache = sequence_cache;
     gt_assert(sequence_cache != NULL);
     seq->cache_ptr = sequence_cache->space;
-    seq->substringlength = len;
     seq->min_access_pos = GT_UWORD_MAX;
     seq->cache_num_positions = 0;
     seq->cache_offset = 0;
   }
-  if (seq->twobitencoding == NULL && seq->cache_ptr == NULL &&
+  if (seq->twobitencoding == NULL && seq->encseqreader == NULL &&
       (extend_char_access_mode == GT_EXTEND_CHAR_ACCESS_ANY ||
        extend_char_access_mode == GT_EXTEND_CHAR_ACCESS_ENCSEQ))
   {
     seq->encseq = encseq;
   }
+  seq->substringlength = len;
   if (readmode == GT_READMODE_FORWARD)
   {
     seq->startpos = startpos;
@@ -106,7 +107,7 @@ static void sequenceobject_init(Sequenceobject *seq,
     seq->startpos = gt_encseq_total_length(encseq) - 1 - startpos;
     seq->forward = false;
   }
-  gt_assert(seq->twobitencoding != NULL || seq->cache_ptr != NULL ||
+  gt_assert(seq->twobitencoding != NULL || seq->encseqreader != NULL ||
             seq->encseq != NULL);
 }
 
@@ -126,7 +127,7 @@ static GtUchar sequenceobject_get_char(Sequenceobject *seq,GtUword pos)
                                          seq->forward ? seq->startpos + pos
                                                       : seq->startpos - pos);
   }
-  if (seq->cache_ptr != NULL)
+  if (seq->encseqreader != NULL)
   {
     const GtUword addamount = 256UL;
 
@@ -136,7 +137,7 @@ static GtUchar sequenceobject_get_char(Sequenceobject *seq,GtUword pos)
       GtUword idx, end = MIN(seq->cache_num_positions,seq->substringlength);
       GtUchar *cs = ((GtUchar *) seq->sequence_cache->space)
                     - seq->min_access_pos;
-  
+
       for (idx = seq->min_access_pos; idx < end; idx++)
       {
         cs[idx] = seq->cache_ptr[idx];
@@ -148,7 +149,7 @@ static GtUchar sequenceobject_get_char(Sequenceobject *seq,GtUword pos)
     if (pos >= seq->cache_num_positions)
     {
       GtUword idx, tostore;
-  
+
       tostore = MIN(seq->cache_num_positions + addamount,seq->substringlength);
       if (tostore > seq->cache_offset + seq->sequence_cache->allocated)
       {
@@ -168,9 +169,11 @@ static GtUchar sequenceobject_get_char(Sequenceobject *seq,GtUword pos)
       seq->cache_num_positions = tostore;
     }
     gt_assert(pos < seq->cache_offset + seq->sequence_cache->allocated);
+    gt_assert(seq->cache_ptr != NULL);
     return seq->cache_ptr[pos];
   }
   gt_assert(seq->encseq != NULL);
+  gt_assert(seq->forward || seq->startpos >= pos);
   return gt_encseq_get_encoded_char(seq->encseq,
                                     seq->forward ? seq->startpos + pos
                                                  : seq->startpos - pos,
