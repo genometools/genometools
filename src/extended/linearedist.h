@@ -44,5 +44,4 @@ void gt_computelinearspace(const GtUchar *useq,
                            GtUword ulen,
                            const GtUchar *vseq,
                            GtUword vlen);
-
 #endif

@@ -27,7 +27,7 @@
 #include "core/types_api.h"
 #include "match/test-pairwise.h"
 #include "extended/linearedist.h"
-#include "extended/linearedist_local.h"
+#include "extended/localAlignment.h"
 #include "tools/gt_paircmp.h"
 
 typedef struct
@@ -39,11 +39,14 @@ typedef struct
 typedef struct
 {
   GtStrArray *strings,
-             *files;
+             *files,
+             *score;
   Charlistlen *charlistlen;
   GtStr *text;
   bool showedist;
   bool print;
+  //nur zum ausprobieren
+  bool local;
 } Cmppairwiseopt;
 
 static void showsimpleoptions(const Cmppairwiseopt *opt)
@@ -85,7 +88,7 @@ static GtOPrval parse_options(int *parsed_args,
          *optioncharlistlen,
          *optiontext,
          *optionshowedist,
-         *optionprint;
+         *optionprint, *optionscore;
   GtStrArray *charlistlen;
   GtOPrval oprval;
 
@@ -97,6 +100,8 @@ static GtOPrval parse_options(int *parsed_args,
   pw->charlistlen = NULL;
   pw->showedist = false;
   pw->print = false;
+  pw->local = false;
+  pw->score = gt_str_array_new();
   op = gt_option_parser_new("options", "Apply function to pairs of strings.");
   gt_option_parser_set_mail_address(op, "<kurtz@zbh.uni-hamburg.de>");
 
@@ -122,7 +127,12 @@ static GtOPrval parse_options(int *parsed_args,
 
   optionprint = gt_option_new_bool("p", "print alignments",
                       &pw->print, false);
+                       
   gt_option_parser_add_option(op, optionprint);
+
+  optionscore = gt_option_new_string_array("l", "use three scores", pw->score);
+  
+  gt_option_parser_add_option(op, optionscore);
 
   gt_option_exclude(optionstrings, optionfiles);
   gt_option_exclude(optionstrings, optioncharlistlen);
@@ -132,7 +142,8 @@ static GtOPrval parse_options(int *parsed_args,
   gt_option_exclude(optioncharlistlen, optiontext);
   gt_option_imply(optionshowedist, optionstrings);
   gt_option_imply(optionprint, optionstrings);
-
+  gt_option_imply(optionscore, optionstrings);
+  
   oprval = gt_option_parser_parse(op, parsed_args, argc, argv, gt_versionfunc,
                                   err);
   if (oprval == GT_OPTION_PARSER_OK)
@@ -143,6 +154,16 @@ static GtOPrval parse_options(int *parsed_args,
       {
         gt_error_set(err, "option -ss requires two string arguments");
         oprval = GT_OPTION_PARSER_ERROR;
+      }
+      
+      if(gt_option_is_set(optionscore))
+      {
+          pw->local=true;
+          if(gt_str_array_size(pw->score) != 3UL)
+          {
+            gt_error_set(err, "option -l requires matchscore, mismatchscore, gapscore");
+            oprval = GT_OPTION_PARSER_ERROR;
+          }  
       }
     } else
     {
@@ -284,6 +305,23 @@ int gt_paircmp(int argc, const char **argv, GtError *err)
         (GtUword) strlen(gt_str_array_get(cmppairwise.strings,0)),
         (const GtUchar *) gt_str_array_get(cmppairwise.strings,1UL),
         (GtUword) strlen(gt_str_array_get(cmppairwise.strings,1UL)));
+    }
+    else if (cmppairwise.local)
+    {
+      GtWord matchscore, mismatchscore, gapscore, check;
+      check = sscanf(gt_str_array_get(cmppairwise.score,0),GT_WD, &matchscore);
+      gt_assert(check == 1);
+      check = sscanf(gt_str_array_get(cmppairwise.score,1UL),GT_WD, &mismatchscore);
+      gt_assert(check == 1);
+      check = sscanf(gt_str_array_get(cmppairwise.score,2UL),GT_WD, &gapscore);
+      gt_assert(check == 1);
+      
+      gt_computelinearspace_local(
+      (const GtUchar *) gt_str_array_get(cmppairwise.strings,0),
+      (GtUword) strlen(gt_str_array_get(cmppairwise.strings,0)),
+      (const GtUchar *) gt_str_array_get(cmppairwise.strings,1UL),
+      (GtUword) strlen(gt_str_array_get(cmppairwise.strings,1UL)),
+      matchscore,mismatchscore,gapscore);  
     }else
     {
       GtUword testcases;
@@ -296,10 +334,10 @@ int gt_paircmp(int argc, const char **argv, GtError *err)
       printf("# number of testcases for gt_checklinearspace: " GT_WU "\n",
               testcases);
 
-      /*testcases = applycheckfunctiontosimpleoptions(gt_checklinearspace_local,
+      testcases = applycheckfunctiontosimpleoptions(gt_checklinearspace_local,
                                                     &cmppairwise);
       printf("# number of testcases for gt_checklinearspace_local: " GT_WU "\n",
-              testcases);*/
+              testcases);
     }
   }
   freesimpleoption(&cmppairwise);

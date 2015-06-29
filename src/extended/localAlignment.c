@@ -21,8 +21,8 @@
 #include "core/ma.h"
 #include "core/minmax.h"
 
-#include "extended/linearedist_local.h"
-#include "extended/linearedist.h"
+#include "extended/localAlignment.h"
+#include "extended/linearspaceAlignment.h"
 #include "extended/alignment.h"
 #include "extended/max.h"
 
@@ -142,6 +142,29 @@ static GtWord gt_calc_linearscore(const GtUchar *useq, GtUword ulen,
     return(score);
 }
 
+static void change_score_to_cost_function(const GtWord matchscore,
+                                          const GtWord mismatchscore,
+                                          const GtWord gapscore,
+                                          GtWord *matchcost,
+                                          GtWord *mismatchcost,
+                                          GtWord *gapcost )
+{
+  GtWord temp;
+  
+  temp=0;
+  if(matchscore/2>temp)
+    temp=matchscore/2;
+  else if(mismatchscore/2>temp)
+    temp=mismatchscore/2;
+  else if(gapscore>temp)
+    temp=gapscore;
+    
+  *matchcost = 2*temp-matchscore;
+  *mismatchcost = 2*temp-mismatchscore;
+  *gapcost = temp-gapscore;
+  
+}
+
 static GtAlignment *gt_calc_linearalign_local(const GtUchar *useq,GtUword ulen,
                                               const GtUchar *vseq,GtUword vlen,
                                               const GtWord matchscore,
@@ -154,6 +177,7 @@ static GtAlignment *gt_calc_linearalign_local(const GtUchar *useq,GtUword ulen,
   const GtUchar *useq_part, *vseq_part;
   GtAlignment *align;
   Gtmaxcoordvalue *max;
+  GtWord matchcost, mismatchcost, gapcost;
 
   Ltabcolumn = gt_malloc(sizeof *Ltabcolumn * (ulen+1));
   Starttabcolumn = gt_malloc(sizeof *Starttabcolumn * (ulen+1));
@@ -174,7 +198,13 @@ static GtAlignment *gt_calc_linearalign_local(const GtUchar *useq,GtUword ulen,
   align = gt_alignment_new_with_seqs(useq_part,ulen_part,vseq_part,vlen_part);
 
   /*hier noch score in kosten an globale funktion umwandeln*/
-  gt_calc_linearalign(useq_part, ulen_part, vseq_part, vlen_part, align);
+  change_score_to_cost_function(matchscore,
+                                mismatchscore,
+                                gapscore,
+                                &matchcost,
+                                &mismatchcost,
+                                &gapcost );
+  gt_computelinearspace_with_costs(useq_part, ulen_part, vseq_part, vlen_part, align, matchcost, mismatchcost, gapcost);
   gt_max_delete(max);
 
   return align;

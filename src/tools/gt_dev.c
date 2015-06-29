@@ -34,6 +34,7 @@
 #include "tools/gt_guessprot.h"
 #include "tools/gt_idxlocali.h"
 #include "tools/gt_kmer_database.h"
+#include "tools/gt_linearalign.h"
 #include "tools/gt_magicmatch.h"
 #include "tools/gt_mergeesa.h"
 #include "tools/gt_paircmp.h"
@@ -86,6 +87,7 @@ static void* gt_dev_arguments_new(void)
   gt_toolbox_add_tool(dev_toolbox, "sfxmap", gt_sfxmap());
   gt_toolbox_add_tool(dev_toolbox, "skproto", gt_skproto());
   gt_toolbox_add_tool(dev_toolbox, "sortbench", gt_sortbench());
+  gt_toolbox_add(dev_toolbox, "linearalign", gt_linearalign);
   return dev_toolbox;
 }
 
