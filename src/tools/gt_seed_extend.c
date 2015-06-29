@@ -27,6 +27,10 @@ typedef struct {
   unsigned int diagbandw;
   unsigned int mincoverage;
   unsigned int maxfreq;
+  unsigned int correlation;
+  unsigned int minalilen;
+  unsigned int maxfrontdist;
+  unsigned int minquality;
   bool mirror;
   bool verify;
   bool benchmark;
@@ -58,24 +62,44 @@ static GtOptionParser* gt_seed_extend_option_parser_new(void *tool_arguments)
                             "Calculate local alignments using the seed and "
                             "extend algorithm.");
 
-  /* -k */
-  option = gt_option_new_uint_min("k", "k-mer length", &arguments->kmerlen, 14,
-                                  2);
+  /* -kmerlen */
+  option = gt_option_new_uint_min("kmerlen", "k-mer length",
+                                  &arguments->kmerlen, 14, 2);
   gt_option_parser_add_option(op, option);
 
-  /* -s */
-  option = gt_option_new_uint("s", "diagonal band width",
+  /* -diagbandw */
+  option = gt_option_new_uint("diagbandw", "diagonal band width",
                               &arguments->diagbandw, 6);
   gt_option_parser_add_option(op, option);
 
-  /* -z */
-  option = gt_option_new_uint("z", "minimum coverage in two diagonal bands",
-                              &arguments->mincoverage, 35);
+  /* -mincoverage */
+  option = gt_option_new_uint("mincoverage", "minimum coverage in two diagonal "
+                              "bands", &arguments->mincoverage, 35);
   gt_option_parser_add_option(op, option);
 
   /* -maxfreq */
   option = gt_option_new_uint_min("maxfreq", "maximum frequency of a k-mer",
-                              &arguments->maxfreq, UINT_MAX, 1);
+                                  &arguments->maxfreq, UINT_MAX, 1);
+  gt_option_parser_add_option(op, option);
+
+  /* -correlation */
+  option = gt_option_new_uint("correlation", "percent similarity of the reads",
+                              &arguments->correlation, 70);
+  gt_option_parser_add_option(op, option);
+
+  /* -minalilen */
+  option = gt_option_new_uint_min("minalilen", "minimum alignment length",
+                                  &arguments->minalilen, 1000, 1);
+  gt_option_parser_add_option(op, option);
+
+  /* -maxfrontdist */
+  option = gt_option_new_uint("maxfrontdist", "maximum distance between 2 "
+                              "fronts", &arguments->maxfrontdist, UINT_MAX);
+  gt_option_parser_add_option(op, option);
+
+  /* -minquality */
+  option = gt_option_new_uint("minquality", "percent minimum alignment quality",
+                              &arguments->minquality, 50);
   gt_option_parser_add_option(op, option);
 
   /* -mirror */
@@ -84,9 +108,8 @@ static GtOptionParser* gt_seed_extend_option_parser_new(void *tool_arguments)
   gt_option_parser_add_option(op, option);
 
   /* -verify */
-  option = gt_option_new_bool("verify", "check, whether k-mer seeds can be "
-                              "found in the sequences",
-                              &arguments->verify, false);
+  option = gt_option_new_bool("verify", "check that k-mer seeds occur in the "
+                              "sequences", &arguments->verify, false);
   gt_option_parser_add_option(op, option);
 
   /* -benchmark */
@@ -104,6 +127,16 @@ static int gt_seed_extend_arguments_check(GT_UNUSED int rest_argc,
   int had_err = 0;
   gt_error_check(err);
   gt_assert(arguments);
+
+  if (arguments->correlation > 100) {
+    gt_error_set(err, "correlation must be <= 100");
+    had_err = -1;
+  }
+
+  if (arguments->minquality > 100) {
+    gt_error_set(err, "minquality must be <= 100");
+    had_err = -1;
+  }
 
   if (rest_argc == 1 && arguments->maxfreq == 1) {
     gt_error_set(err, "for 1 input file maxfreq must be >= 2 to find matching "
@@ -158,10 +191,7 @@ static int gt_seed_extend_runner(int argc, const char **argv, int parsed_args,
 
   /* start algorithm */
   if (!had_err) {
-    gt_seed_extend_run(aencseq, bencseq, arguments->kmerlen,
-                       arguments->mincoverage, arguments->diagbandw,
-                       arguments->maxfreq, arguments->verify,
-                       arguments->benchmark);
+    gt_seed_extend_run(aencseq, bencseq, (GtSeedExtend *)arguments);
     gt_encseq_delete(aencseq);
     gt_encseq_delete(bencseq);
   }
