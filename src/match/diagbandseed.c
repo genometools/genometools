@@ -207,14 +207,13 @@ void gt_seed_extend_find_seeds(const GtArrayGtSeedExtendSeedPair *mlist,
 }
 
 void gt_seed_extend_run(const GtEncseq *aencseq, const GtEncseq *bencseq,
-                        unsigned int kmerlen, unsigned int mincoverage,
-                        unsigned int diagbandw, unsigned int maxfreq,
-                        bool verify, bool benchmark)
+                        const GtSeedExtend *arg)
 {
   GtSeedExtendKmerPos *alist, *blist;
   GtArrayGtSeedExtendSeedPair mlist;
   GtRadixsortinfo* rdxinfo;
   GtUword alen, blen;
+  const unsigned int kmerlen = arg->kmerlen;
   const bool two_files = (bencseq != aencseq) ? true : false;
   const bool one_seq = (!two_files && gt_encseq_num_of_sequences(aencseq) <= 1);
   const GtUword amaxlen = gt_encseq_max_seq_length(aencseq);
@@ -229,7 +228,7 @@ void gt_seed_extend_run(const GtEncseq *aencseq, const GtEncseq *bencseq,
 
   if (one_seq || amaxlen < kmerlen || bmaxlen < kmerlen) {
     /*printf("maximum sequence length too short or only 1 sequence given\n");*/
-    if (benchmark) {
+    if (arg->benchmark) {
       printf("0.000000,0,0\n");
     }
     return;
@@ -237,7 +236,7 @@ void gt_seed_extend_run(const GtEncseq *aencseq, const GtEncseq *bencseq,
 
   alist = gt_malloc(ankmers * sizeof *alist);
   alen = gt_seed_extend_get_kmers(alist, aencseq, kmerlen);
-  if (benchmark) {
+  if (arg->benchmark) {
     timer = gt_timer_new();
     gt_timer_start(timer);
   }
@@ -258,7 +257,7 @@ void gt_seed_extend_run(const GtEncseq *aencseq, const GtEncseq *bencseq,
   }
 
   GT_INITARRAY(&mlist,GtSeedExtendSeedPair);
-  gt_seed_extend_merge(&mlist, alist, alen, blist, blen, kmerlen, maxfreq);
+  gt_seed_extend_merge(&mlist, alist, alen, blist, blen, kmerlen, arg->maxfreq);
   gt_free(alist);
   if (two_files)
     gt_free(blist);
@@ -267,12 +266,12 @@ void gt_seed_extend_run(const GtEncseq *aencseq, const GtEncseq *bencseq,
                                        spaceGtSeedExtendSeedPair,
                                        mlist.nextfreeGtSeedExtendSeedPair);
   gt_radixsort_delete(rdxinfo);
-  if (benchmark) {
+  if (arg->benchmark) {
     gt_timer_stop(timer);
     gt_timer_show_formatted(timer, GT_WD ".%06ld,"GT_WD","GT_WD"\n", stdout);
   }
 
-  if (verify && mlist.nextfreeGtSeedExtendSeedPair != 0) {
+  if (arg->verify && mlist.nextfreeGtSeedExtendSeedPair != 0) {
     GtSeedExtendSeedPair *j = mlist.spaceGtSeedExtendSeedPair;
     GtSeedExtendSeedPair *last = j + mlist.nextfreeGtSeedExtendSeedPair;
     char *buf1 = gt_malloc(1 + kmerlen * sizeof *buf1);
@@ -299,10 +298,10 @@ void gt_seed_extend_run(const GtEncseq *aencseq, const GtEncseq *bencseq,
   }
 
   if (mlist.nextfreeGtSeedExtendSeedPair != 0)
-    gt_seed_extend_find_seeds(&mlist, kmerlen, mincoverage, diagbandw, amaxlen,
-                              bmaxlen);
+    gt_seed_extend_find_seeds(&mlist, kmerlen, arg->mincoverage, arg->diagbandw,
+                              amaxlen, bmaxlen);
 
   GT_FREEARRAY(&mlist, GtSeedExtendSeedPair);
-  if (benchmark)
+  if (arg->benchmark)
     gt_timer_delete(timer);
 }

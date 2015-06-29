@@ -22,6 +22,21 @@
 #include "core/encseq_api.h"
 #include "core/types_api.h"
 
+struct GtSeedExtend {
+  unsigned int kmerlen;
+  unsigned int diagbandw;
+  unsigned int mincoverage;
+  unsigned int maxfreq;
+  unsigned int correlation;
+  unsigned int minalilen;
+  unsigned int maxfrontdist;
+  unsigned int minquality;
+  bool mirror;
+  bool verify;
+  bool benchmark;
+};
+
+typedef struct GtSeedExtend GtSeedExtend;
 typedef struct GtSeedExtendKmerPos GtSeedExtendKmerPos;
 typedef struct GtSeedExtendSeedPair GtSeedExtendSeedPair;
 GT_DECLAREARRAYSTRUCT(GtSeedExtendSeedPair);
@@ -45,12 +60,6 @@ void gt_seed_extend_find_seeds(const GtArrayGtSeedExtendSeedPair *mlist,
                                GtUword bmaxlen);
 
 /* Run the whole algorithm. */
-void gt_seed_extend_run(const GtEncseq *aencseq,
-                        const GtEncseq *bencseq,
-                        unsigned int kmerlen,
-                        unsigned int mincoverage,
-                        unsigned int diagbandw,
-                        unsigned int maxfreq,
-                        bool verify,
-                        bool benchmark);
+void gt_seed_extend_run(const GtEncseq *aencseq, const GtEncseq *bencseq,
+                        const GtSeedExtend *arg);
 #endif
