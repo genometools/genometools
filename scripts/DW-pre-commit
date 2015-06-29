@@ -8,5 +8,3 @@
 [ $? -eq 0 ] && make -j4 cairo=no CFLAGS+=-fstrict-aliasing opt=no 64bit=yes CC='ccache clang -fcolor-diagnostics'
 
 [ $? -eq 0 ] && make cairo=no CFLAGS+=-fstrict-aliasing opt=no 64bit=yes -j4 sbgt
-
-[ $? -eq 0 ] && make cairo=no CFLAGS+=-fstrict-aliasing opt=no 64bit=yes -j4 spgt
