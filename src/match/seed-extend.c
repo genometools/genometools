@@ -59,6 +59,7 @@ struct GtXdropmatchinfo
 
 GtXdropmatchinfo *gt_xdrop_matchinfo_new(GtUword userdefinedleastlength,
                                          GtUword errorpercentage,
+                                         GtXdropscore xdropbelowscore,
                                          bool selfcompare,
                                          bool beverbose)
 {
@@ -85,7 +86,7 @@ GtXdropmatchinfo *gt_xdrop_matchinfo_new(GtUword userdefinedleastlength,
   xdropmatchinfo->res = gt_xdrop_resources_new(&xdropmatchinfo->arbitscores);
   xdropmatchinfo->userdefinedleastlength = userdefinedleastlength;
   xdropmatchinfo->errorpercentage = errorpercentage;
-  xdropmatchinfo->belowscore = 5L;
+  xdropmatchinfo->belowscore = xdropbelowscore;
   return xdropmatchinfo;
 }
 

@@ -17,12 +17,14 @@
 #ifndef SEED_EXTEND_H
 #define SEED_EXTEND_H
 #include "core/types_api.h"
+#include "match/xdrop.h"
 #include "match/ft-front-prune.h"
 
 typedef struct GtXdropmatchinfo GtXdropmatchinfo;
 
 GtXdropmatchinfo *gt_xdrop_matchinfo_new(GtUword userdefinedleastlength,
                                          GtUword errorpercentage,
+                                         GtXdropscore xdropbelowscore,
                                          bool selfcompare,
                                          bool beverbose);
 

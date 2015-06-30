@@ -39,6 +39,7 @@
 typedef struct
 {
   unsigned int userdefinedleastlength, seedlength;
+  GtXdropscore xdropbelowscore;
   GtUword samples, errorpercentage, maxalignedlendifference;
   bool scanfile, beverbose, forward, reverse, searchspm, extendxdrop,
        extendgreedy, check_extend_symmetry;
@@ -169,8 +170,8 @@ static GtOptionParser *gt_repfind_option_parser_new(void *tool_arguments)
   GtOption *option, *reverseoption, *queryoption, *extendxdropoption,
            *extendgreedyoption, *scanoption, *sampleoption, *forwardoption,
            *spmoption, *seedlengthoption, *errorpercentageoption,
-           *maxalilendiffoption, *leastlength_option, *option_char_access_mode,
-           *check_extend_symmetry_option;
+           *maxalilendiffoption, *leastlength_option, *char_access_mode_option,
+           *check_extend_symmetry_option, *xdropbelowoption;
   Maxpairsoptions *arguments = tool_arguments;
 
   op = gt_option_parser_new("[options] -ii indexname",
@@ -225,6 +226,12 @@ static GtOptionParser *gt_repfind_option_parser_new(void *tool_arguments)
   gt_option_is_development_option(extendxdropoption);
   gt_option_parser_add_option(op, extendxdropoption);
 
+  xdropbelowoption = gt_option_new_word("xdropbelow",
+                                        "Specify xdrop cutoff score",
+                                        &arguments->xdropbelowscore,
+                                        5L);
+  gt_option_parser_add_option(op, xdropbelowoption);
+
   extendgreedyoption
     = gt_option_new_bool("extendgreedy",
                          "Extend seed to both sides using "
@@ -269,11 +276,11 @@ static GtOptionParser *gt_repfind_option_parser_new(void *tool_arguments)
   gt_option_parser_add_option(op, option);
   gt_option_is_mandatory(option);
 
-  option_char_access_mode = gt_option_new_string("cam",
-                                       gt_cam_extendgreedy_comment(),
-                                       arguments->cam_string,"");
-  gt_option_parser_add_option(op, option_char_access_mode);
-  gt_option_is_development_option(option_char_access_mode);
+  char_access_mode_option = gt_option_new_string("cam",
+                                                 gt_cam_extendgreedy_comment(),
+                                                 arguments->cam_string,"");
+  gt_option_parser_add_option(op, char_access_mode_option);
+  gt_option_is_development_option(char_access_mode_option);
 
   queryoption = gt_option_new_filename_array("q",
                                              "Specify query files",
@@ -295,7 +302,8 @@ static GtOptionParser *gt_repfind_option_parser_new(void *tool_arguments)
   gt_option_exclude(reverseoption,spmoption);
   gt_option_exclude(queryoption,spmoption);
   gt_option_exclude(sampleoption,spmoption);
-  gt_option_imply(option_char_access_mode,extendgreedyoption);
+  gt_option_imply(xdropbelowoption,extendxdropoption);
+  gt_option_imply(char_access_mode_option,extendgreedyoption);
   gt_option_imply_either_2(seedlengthoption,extendxdropoption,
                            extendgreedyoption);
   gt_option_imply_either_2(errorpercentageoption,extendxdropoption,
@@ -363,6 +371,7 @@ static int gt_repfind_runner(GT_UNUSED int argc,
     xdropmatchinfo
       = gt_xdrop_matchinfo_new(arguments->userdefinedleastlength,
                                arguments->errorpercentage,
+                               arguments->xdropbelowscore,
                                gt_str_array_size(arguments->queryfiles) == 0
                                              ? true : false,
                                arguments->beverbose);
