@@ -38,12 +38,16 @@
 
 typedef struct
 {
-  unsigned int userdefinedleastlength, seedlength;
+  unsigned int userdefinedleastlength, /* minalilen */
+               seedlength; /* like kmerlen, but here MEMs are used */
   GtXdropscore xdropbelowscore;
-  GtUword samples, errorpercentage, maxalignedlendifference;
+  GtUword samples,
+          errorpercentage, /* 100 - 2 * errorpercentage = correlation */
+          maxalignedlendifference; /* maxfrontdist */
   bool scanfile, beverbose, forward, reverse, searchspm, extendxdrop,
        extendgreedy, check_extend_symmetry;
-  GtStr *indexname, *cam_string;
+  GtStr *indexname, *cam_string; /* parse this using
+                                    gt_greedy_extend_char_access*/
   GtStrArray *queryfiles;
   GtOption *refforwardoption, *refseedlengthoption,
            *refuserdefinedleastlengthoption;
@@ -390,7 +394,7 @@ static int gt_repfind_runner(GT_UNUSED int argc,
     {
       greedyextendmatchinfo = gt_greedy_extend_matchinfo_new(
                                      arguments->errorpercentage,
-                                     arguments-> maxalignedlendifference,
+                                     arguments->maxalignedlendifference,
                                      60,
                                      arguments->userdefinedleastlength,
                                      extend_char_access,

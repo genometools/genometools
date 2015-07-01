@@ -62,6 +62,8 @@ GtGreedyextendmatchinfo *gt_greedy_extend_matchinfo_new(
 
 void gt_greedy_extend_matchinfo_delete(GtGreedyextendmatchinfo *ggemi);
 
+/* Supply method which only uses an encoded sequence/two encoded sequence */
+
 int gt_simplexdropselfmatchoutput(void *info,
                                   const GtGenericEncseq *genericencseq,
                                   GtUword len,
