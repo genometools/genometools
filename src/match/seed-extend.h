@@ -55,6 +55,7 @@ GtGreedyextendmatchinfo *gt_greedy_extend_matchinfo_new(
                                    GtUword errorpercentage,
                                    GtUword maxalignedlendifference,
                                    GtUword history,
+                                   GtUword perc_mat_history,
                                    GtUword userdefinedleastlength,
                                    GtExtendCharAccess extend_char_access,
                                    bool beverbose,

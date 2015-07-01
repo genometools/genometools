@@ -42,6 +42,8 @@ typedef struct
                seedlength; /* like kmerlen, but here MEMs are used */
   GtXdropscore xdropbelowscore;
   GtUword samples,
+          history,        /* number of bits used for history of alignments */
+          perc_mat_history, /* percent of matches in history */
           errorpercentage, /* 100 - 2 * errorpercentage = correlation */
           maxalignedlendifference; /* maxfrontdist */
   bool scanfile, beverbose, forward, reverse, searchspm, extendxdrop,
@@ -175,7 +177,8 @@ static GtOptionParser *gt_repfind_option_parser_new(void *tool_arguments)
            *extendgreedyoption, *scanoption, *sampleoption, *forwardoption,
            *spmoption, *seedlengthoption, *errorpercentageoption,
            *maxalilendiffoption, *leastlength_option, *char_access_mode_option,
-           *check_extend_symmetry_option, *xdropbelowoption;
+           *check_extend_symmetry_option, *xdropbelowoption, *historyoption,
+           *percmathistoryoption;
   Maxpairsoptions *arguments = tool_arguments;
 
   op = gt_option_parser_new("[options] -ii indexname",
@@ -227,7 +230,6 @@ static GtOptionParser *gt_repfind_option_parser_new(void *tool_arguments)
                          "Extend seed to both sides using xdrop algorithm",
                          &arguments->extendxdrop,
                          false);
-  gt_option_is_development_option(extendxdropoption);
   gt_option_parser_add_option(op, extendxdropoption);
 
   xdropbelowoption = gt_option_new_word("xdropbelow",
@@ -243,7 +245,6 @@ static GtOptionParser *gt_repfind_option_parser_new(void *tool_arguments)
                          &arguments->extendgreedy,
                          false);
   gt_option_parser_add_option(op, extendgreedyoption);
-  gt_option_is_development_option(extendgreedyoption);
 
   check_extend_symmetry_option
     = gt_option_new_bool("check_extend_symmetry",
@@ -267,6 +268,25 @@ static GtOptionParser *gt_repfind_option_parser_new(void *tool_arguments)
                           &arguments->maxalignedlendifference,
                           30);
   gt_option_parser_add_option(op, maxalilendiffoption);
+
+  historyoption
+    = gt_option_new_uword_min_max("history",
+                                  "Specify size of history in range [1..64] "
+                                  "(trimming for greedy extension)",
+                                  &arguments->history,
+                                  60,
+                                  0,
+                                  64);
+  gt_option_parser_add_option(op, historyoption);
+
+  percmathistoryoption
+    = gt_option_new_uword_min_max("percmathistory",
+                                  "percentage of matches required in history",
+                                  &arguments->perc_mat_history,
+                                  55,
+                                  1,
+                                  100);
+  gt_option_parser_add_option(op, percmathistoryoption);
 
   scanoption = gt_option_new_bool("scan","scan index rather than mapping "
                                          "it to main memory",
@@ -308,11 +328,13 @@ static GtOptionParser *gt_repfind_option_parser_new(void *tool_arguments)
   gt_option_exclude(sampleoption,spmoption);
   gt_option_imply(xdropbelowoption,extendxdropoption);
   gt_option_imply(char_access_mode_option,extendgreedyoption);
+  gt_option_imply(historyoption,extendgreedyoption);
+  gt_option_imply(maxalilendiffoption,extendgreedyoption);
+  gt_option_imply(percmathistoryoption,extendgreedyoption);
   gt_option_imply_either_2(seedlengthoption,extendxdropoption,
                            extendgreedyoption);
   gt_option_imply_either_2(errorpercentageoption,extendxdropoption,
                            extendgreedyoption);
-  gt_option_imply(maxalilendiffoption,extendgreedyoption);
   return op;
 }
 
@@ -395,7 +417,8 @@ static int gt_repfind_runner(GT_UNUSED int argc,
       greedyextendmatchinfo = gt_greedy_extend_matchinfo_new(
                                      arguments->errorpercentage,
                                      arguments->maxalignedlendifference,
-                                     60,
+                                     arguments->history,
+                                     arguments->perc_mat_history,
                                      arguments->userdefinedleastlength,
                                      extend_char_access,
                                      arguments->beverbose,

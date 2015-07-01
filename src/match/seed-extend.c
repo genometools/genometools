@@ -214,6 +214,7 @@ GtGreedyextendmatchinfo *gt_greedy_extend_matchinfo_new(
                                    GtUword errorpercentage,
                                    GtUword maxalignedlendifference,
                                    GtUword history,
+                                   GtUword perc_mat_history,
                                    GtUword userdefinedleastlength,
                                    GtExtendCharAccess extend_char_access,
                                    bool beverbose,
@@ -232,7 +233,7 @@ GtGreedyextendmatchinfo *gt_greedy_extend_matchinfo_new(
   ggemi->errorpercentage = errorpercentage;
   ggemi->maxalignedlendifference = maxalignedlendifference;
   ggemi->history = history;
-  ggemi->minmatchnum = (history * 55)/100;
+  ggemi->minmatchnum = (history * perc_mat_history)/100;
   ggemi->beverbose = beverbose;
   ggemi->userdefinedleastlength = userdefinedleastlength;
   ggemi->pol_info
