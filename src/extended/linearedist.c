@@ -27,6 +27,7 @@
 #include "core/divmodmul.h"
 #include "match/squarededist.h"
 #include "extended/linearedist.h"
+#include "extended/reconstructalignment.h"
 
 #define LINEAR_EDIST_GAP          ((GtUchar) UCHAR_MAX)
 
@@ -92,7 +93,7 @@ static void nextEDtabRtabcolumn(GtUword *EDtabcolumn,
     EDtabcolumn[rowindex]++; /* 1. recurrence */
     /* Rtabcolumn[rowindex] is unchanged */
     /* 2. recurrence: */
-    if ((val = northwestEDtabentry + (useq[rowindex-1] == b ? 0 : 1)) <
+    if ((val = northwestEDtabentry + (useq[rowindex-1] == b ? 0 : 1)) <=
         EDtabcolumn[rowindex])
     {
       EDtabcolumn[rowindex] = val;
@@ -175,48 +176,6 @@ static GtUword evaluatecrosspoints(const GtUchar *useq,
   return 0;
 }
 
-static GtUword determineCtab0(GtUword *Ctab,
-                              GtUchar vseq0,
-                              const GtUchar *useq)
-{
-  GtUword rowindex;
-
-  for (rowindex=0; rowindex < Ctab[1]; rowindex++)
-  {
-    if (vseq0 == useq[rowindex])
-    {
-      Ctab[0] = rowindex;
-      return Ctab[1] - 1;
-    }
-  }
-
-  Ctab[0] = (Ctab[1] > 0) ?  Ctab[1]-1 : 0;
-  return Ctab[1];
-}
-
-static void reconstructalignment(GtAlignment *align,
-                                       GtUword *Ctab,
-                                       GtUword vlen)
-{
-  GtUword i,j;
-
-  gt_assert(align != NULL && Ctab != NULL);
-  for (i = vlen; i > 0; i--) {
-    if (Ctab[i] == Ctab[i-1] + 1)
-      gt_alignment_add_replacement(align);
-    else if (Ctab[i] == Ctab[i-1])
-      gt_alignment_add_insertion(align);
-    else if (Ctab[i] > Ctab[i-1]) {
-      for (j = 0; j < (Ctab[i]-Ctab[i-1])-1; j++)
-        gt_alignment_add_deletion(align);
-      gt_alignment_add_replacement(align);
-    }
-  }
-  for (j = Ctab[0]; j > 0; j--)
-    gt_alignment_add_deletion(align);
-
-}
-
 static GtUword computealignment(const GtUchar *useq,
                                 const GtUchar *vseq,
                                 GtUword ulen,
@@ -239,9 +198,11 @@ static GtUword computealignment(const GtUchar *useq,
                                    Rtabcolumn, Ctab, 0);
     (void) determineCtab0(Ctab, vseq[0], useq);
   }
+
   reconstructalignment(align,Ctab, vlen);
   gt_free(EDtabcolumn);
   gt_free(Rtabcolumn);
+
   return distance;
 }
 
@@ -346,6 +307,7 @@ void gt_checklinearspace(GT_UNUSED bool forward,
   GtAlignment *align;
   GtUword  alcost, edist1, edist2, edist3;
 
+  /*gt_assert(useq && ulen && vseq && vlen);*/
   if (gap_symbol_in_sequence(useq,ulen))
   {
     fprintf(stderr,"%s: sequence u contains gap symbol\n",__func__);
@@ -357,7 +319,7 @@ void gt_checklinearspace(GT_UNUSED bool forward,
     exit(GT_EXIT_PROGRAMMING_ERROR);
   }
   edist1 = gt_calc_linearedist(useq,ulen,vseq,vlen);
-  edist2 = gt_squarededistunit (useq,ulen,vseq,vlen);
+  edist2 = gt_squarededistunit(useq,ulen,vseq,vlen);
   if (edist1 != edist2)
   {
     fprintf(stderr,"gt_calc_linearedist = "GT_WU" != "GT_WU

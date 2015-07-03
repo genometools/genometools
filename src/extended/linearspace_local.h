@@ -13,8 +13,8 @@
   ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
-#ifndef LOCAL_ALIGNMENT_H
-#define LOCAL_ALIGNMENT_H
+#ifndef LINEARSPACE_LOCAL_H
+#define LINEARSPACE_LOCAL_H
 
 void gt_checklinearspace_local(GT_UNUSED bool forward,
                          const GtUchar *useq,
@@ -26,5 +26,6 @@ void gt_computelinearspace_local(const GtUchar *useq, GtUword ulen,
                                  const GtUchar *vseq, GtUword vlen,
                                  GtWord matchscore,
                                  GtWord mismatchscore,
-                                 GtWord gapscore);
+                                 GtWord gapscore,
+                                 FILE *fp);
 #endif

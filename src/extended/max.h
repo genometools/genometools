@@ -23,21 +23,23 @@ Gtmaxcoordvalue* gt_max_new(void);
 
 void gt_max_delete(Gtmaxcoordvalue *max);
 
-void gt_max_set_value(Gtmaxcoordvalue *max, GtWord value);
+void gt_max_set_value(Gtmaxcoordvalue *max, const GtWord value);
 
-GtWord gt_max_get_value(Gtmaxcoordvalue *max);
+GtWord gt_max_get_value(const Gtmaxcoordvalue *max);
 
-void gt_max_set_start(Gtmaxcoordvalue*max, GtUwordPair start );
+void gt_max_set_start(Gtmaxcoordvalue *max, const GtUwordPair start );
 
-GtUwordPair gt_max_get_start(Gtmaxcoordvalue *max);
+GtUwordPair gt_max_get_start(const Gtmaxcoordvalue *max);
 
-void gt_max_set_end_with_pair(Gtmaxcoordvalue *max, GtUwordPair end);
+void gt_max_set_end_with_pair(Gtmaxcoordvalue *max, const GtUwordPair end);
 
-void gt_max_set_end(Gtmaxcoordvalue *max, GtUword a, GtUword b);
+void gt_max_set_end(Gtmaxcoordvalue *max, const GtUword a, const GtUword b);
 
-GtUwordPair gt_max_get_end(Gtmaxcoordvalue *max);
+GtUwordPair gt_max_get_end(const Gtmaxcoordvalue *max);
 
-GtUword gt_max_get_row_length(Gtmaxcoordvalue *max);
+GtUword gt_max_get_row_length(const Gtmaxcoordvalue *max);
 
-GtUword gt_max_get_col_length(Gtmaxcoordvalue *max);
+GtUword gt_max_get_col_length(const Gtmaxcoordvalue *max);
+
+bool gt_max_get_length_safe(const Gtmaxcoordvalue *max);
 #endif

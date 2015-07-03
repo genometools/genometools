@@ -46,50 +46,50 @@ void gt_max_delete(Gtmaxcoordvalue *max)
     gt_free(max);
 }
 
-void gt_max_set_value(Gtmaxcoordvalue *max, GtWord value)
+void gt_max_set_value(Gtmaxcoordvalue *max, const GtWord value)
 {
   gt_assert(max != NULL);
   max->value=value;
 }
 
-GtWord gt_max_get_value(Gtmaxcoordvalue *max)
+GtWord gt_max_get_value(const Gtmaxcoordvalue *max)
 {
   gt_assert(max != NULL);
   return(max->value);
 }
 
-void gt_max_set_start(Gtmaxcoordvalue *max, GtUwordPair start )
+void gt_max_set_start(Gtmaxcoordvalue *max, const GtUwordPair start )
 {
   gt_assert(max != NULL);
   max->start=start;
 }
 
-GtUwordPair gt_max_get_start(Gtmaxcoordvalue *max)
+GtUwordPair gt_max_get_start(const Gtmaxcoordvalue *max)
 {
   gt_assert(max != NULL);
   return(max->start);
 }
 
-void gt_max_set_end_with_pair(Gtmaxcoordvalue *max, GtUwordPair end)
+void gt_max_set_end_with_pair(Gtmaxcoordvalue *max, const  GtUwordPair end)
 {
   gt_assert(max != NULL);
   max->end = end;
 }
 
-void gt_max_set_end(Gtmaxcoordvalue *max, GtUword a, GtUword b)
+void gt_max_set_end(Gtmaxcoordvalue *max, const GtUword a, const GtUword b)
 {
   gt_assert(max != NULL);
   max->end.a = a;
   max->end.b = b ;
 }
 
-GtUwordPair gt_max_get_end(Gtmaxcoordvalue *max)
+GtUwordPair gt_max_get_end(const Gtmaxcoordvalue *max)
 {
   gt_assert(max != NULL);
   return(max->end);
 }
 
-GtUword gt_max_get_row_length(Gtmaxcoordvalue *max)
+GtUword gt_max_get_row_length(const Gtmaxcoordvalue *max)
 {
   gt_assert(max != NULL);
 
@@ -100,7 +100,7 @@ GtUword gt_max_get_row_length(Gtmaxcoordvalue *max)
   return end-start;
 }
 
-GtUword gt_max_get_col_length(Gtmaxcoordvalue*max)
+GtUword gt_max_get_col_length(const Gtmaxcoordvalue *max)
 {
   gt_assert(max != NULL);
 
@@ -109,4 +109,12 @@ GtUword gt_max_get_col_length(Gtmaxcoordvalue*max)
 
   gt_assert(end >= start);
   return end-start;
+}
+
+bool gt_max_get_length_safe(const Gtmaxcoordvalue *max)
+{
+  if(gt_max_get_end(max).a == gt_max_get_start(max).a && 
+     gt_max_get_end(max).b == gt_max_get_start(max).b  )
+     return false;
+  return true;
 }

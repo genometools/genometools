@@ -1,15 +1,18 @@
 #include <string.h>
 #include <inttypes.h>
 #include "core/error.h"
+#include "core/fa.h"
 #include "core/ma_api.h"
 #include "core/versionfunc.h"
 #include "core/option_api.h"
 #include "core/str.h"
+#include "core/str_api.h"
 #include "core/str_array.h"
 #include "core/types_api.h"
+#include "extended/affinealign_linear.h"
 #include "extended/linearedist.h"
-#include "extended/linearspaceAlignment.h"
-#include "extended/localAlignment.h"
+#include "extended/linearspace.h"
+#include "extended/linearspace_local.h"
 #include "tools/gt_linearalign.h"
 
 typedef struct
@@ -17,11 +20,13 @@ typedef struct
   GtStrArray *strings,
              *costs,
              *scores;
+  GtStr *outfilename;
   bool showedist,
        global,
-       local;
+       local,
+       affine,
+       outfile;
 } Alignopt;
-
 
 static void showsimpleoptions(const Alignopt *opt)
 {
@@ -30,7 +35,6 @@ static void showsimpleoptions(const Alignopt *opt)
     if (!opt->showedist)
       printf("# two strings \"%s\" \"%s\"\n", gt_str_array_get(opt->strings,0),
              gt_str_array_get(opt->strings,1UL));
-    //return;
   }
 }
 
@@ -49,20 +53,24 @@ static GtOPrval parse_options(int *parsed_args,
   GtOption *optionstrings,
            *optionshowedist,
            *optioncosts,
-           *optionscores;
+           *optionscores,
+           *optionaffine,
+           *optionoutfilename;
   GtOPrval oprval;
 
   gt_error_check(err);
   aop->strings = gt_str_array_new();
   aop->costs = gt_str_array_new();
   aop->scores = gt_str_array_new();
-  //op->files = gt_str_array_new();
+  aop->outfilename = gt_str_new();
   aop->showedist = false;
   aop->local = false;
   aop->global = true;
-  
+  aop->outfile = false;
+  aop->affine = false;
+
   op = gt_option_parser_new("options", "Apply function to compute alignment.");
-  gt_option_parser_set_mail_address(op, "<annika.seidel@studium.uni-hamburg.de>");
+  gt_option_parser_set_mail_address(op, "<>");
 
   optionstrings = gt_option_new_string_array("ss", "use two strings",
                                              aop->strings);
@@ -72,28 +80,32 @@ static GtOPrval parse_options(int *parsed_args,
                       &aop->showedist, false);
   gt_option_parser_add_option(op, optionshowedist);
 
-  //optionprint = gt_option_new_bool("p", "print alignments",
-    //                  &aop->print, false);
-                       
- // gt_option_parser_add_option(op, optionprint);
-  
+  optionoutfilename = gt_option_new_string("o", "use outputfile",
+                      aop->outfilename, "stdout");
+  gt_option_parser_add_option(op, optionoutfilename);
+
   optioncosts = gt_option_new_string_array("g", "use three costs", aop->costs);
-  
+
   gt_option_parser_add_option(op, optioncosts);
 
-  optionscores = gt_option_new_string_array("l", "use three scores", aop->scores);
-  
+  optionscores = gt_option_new_string_array("l", "use three scores",
+                                            aop->scores);
+
   gt_option_parser_add_option(op, optionscores);
 
-  //gt_option_exclude(optionstrings, optionfiles);
-  //gt_option_exclude(optionlocal, optionglobal);
+  optionaffine = gt_option_new_bool("a", "use g or l with affine gapcosts",
+                      &aop->affine, false);
+  gt_option_parser_add_option(op, optionaffine);
+
+  gt_option_exclude(optioncosts, optionscores);
+  gt_option_exclude(optionshowedist, optionaffine);
   gt_option_imply(optionshowedist, optionstrings);
-  //gt_option_imply(optionprint, optionstrings);
   gt_option_imply(optioncosts, optionstrings);
   gt_option_imply(optionscores, optionstrings);
-  
-  oprval = gt_option_parser_parse(op, parsed_args, argc, argv, gt_versionfunc,
-                                  err);
+  gt_option_imply_either_2(optionaffine, optioncosts, optionscores);
+
+  oprval = gt_option_parser_parse(op, parsed_args, argc, argv,
+                                  gt_versionfunc, err);
   if (oprval == GT_OPTION_PARSER_OK)
   {
     if (gt_option_is_set(optionstrings))
@@ -103,27 +115,38 @@ static GtOPrval parse_options(int *parsed_args,
         gt_error_set(err, "option -ss requires two string arguments");
         oprval = GT_OPTION_PARSER_ERROR;
       }
-      
-      if(gt_option_is_set(optionscores))
+
+      if (gt_option_is_set(optionscores))
       {
           aop->local=true;
-          if(gt_str_array_size(aop->scores) != 3UL)
+          if (gt_str_array_size(aop->scores) != 3UL)
           {
-            gt_error_set(err, "option -l requires matchscore, mismatchscore, gapscore");
+            gt_error_set(err, "option -l requires matchscore, "
+                              "mismatchscore, gapscore");
             oprval = GT_OPTION_PARSER_ERROR;
-          }  
+          }
       }
-      if(gt_option_is_set(optioncosts))
+      if (gt_option_is_set(optioncosts))
       {
-          if(gt_str_array_size(aop->costs) != 3UL)
+          if (gt_str_array_size(aop->costs) != 3UL)
           {
-            gt_error_set(err, "option -g requires matchcost, mismatchcost, gapcosts");
+            if (gt_option_is_set(optionaffine))
+              gt_error_set(err, "option -g related to -a requires "
+               "mismatchcost, gap_opening_cost, gap_extension_cost");
+            else
+              gt_error_set(err, "option -g requires matchcost, "
+                                "mismatchcost, gapcosts");
             oprval = GT_OPTION_PARSER_ERROR;
-          }  
+          }
       }
-    }else
+      if (gt_option_is_set(optionoutfilename))
+        aop->outfile = true;
+      if (gt_option_is_set(optionaffine))
+        aop->affine = true;
+    }
+    else
     {
-      gt_error_set(err,"use exactly one of the options -ss");//-ff
+      gt_error_set(err,"use exactly one of the options -ss");/*-ff*/
       oprval = GT_OPTION_PARSER_ERROR;
     }
   }
@@ -136,11 +159,31 @@ static GtOPrval parse_options(int *parsed_args,
   return oprval;
 }
 
+static void select_evalues(GtStrArray *evalues,
+                           GtWord *val1,
+                           GtWord *val2,
+                           GtWord *val3)
+{
+  GtWord check;
+
+  gt_assert(gt_str_array_size(evalues) == 3UL);
+
+  check = sscanf(gt_str_array_get(evalues,0),GT_WD, val1);
+        gt_assert(check == 1);
+        check = sscanf(gt_str_array_get(evalues,1UL),GT_WD, val2);
+        gt_assert(check == 1);
+        check = sscanf(gt_str_array_get(evalues,2UL),GT_WD, val3);
+        gt_assert(check == 1);
+}
+
 int gt_linearalign(int argc, const char **argv, GtError *err)
 {
   int parsed_args;
   Alignopt aop;
   GtOPrval oprval;
+  FILE *fp;
+  GtWord matchcost = 0, mismatchcost = 1, gapcost = 1,
+  matchscore,mismatchscore,gapscore;/*evalue?*/
 
   gt_error_check(err);
 
@@ -148,8 +191,15 @@ int gt_linearalign(int argc, const char **argv, GtError *err)
   if (oprval == GT_OPTION_PARSER_OK)
   {
     gt_assert(parsed_args == argc);
-    showsimpleoptions(&aop);
-    if (aop.showedist)//global alignment
+    if (!aop.outfile)
+      showsimpleoptions(&aop);
+
+    fp = (aop.outfile? gt_fa_fopen_func(
+                       gt_str_get(aop.outfilename), "a", __FILE__,__LINE__,err)
+                       :stdout);
+    gt_error_check(err);
+
+    if (aop.showedist)/*global alignment*/
     {
       GtUword edist;
       edist = gt_calc_linearedist(
@@ -169,41 +219,56 @@ int gt_linearalign(int argc, const char **argv, GtError *err)
     }*/
     else if (aop.local)
     {
-      GtWord matchscore, mismatchscore, gapscore, check;
-      check = sscanf(gt_str_array_get(aop.scores,0),GT_WD, &matchscore);
-      gt_assert(check == 1);
-      check = sscanf(gt_str_array_get(aop.scores,1UL),GT_WD, &mismatchscore);
-      gt_assert(check == 1);
-      check = sscanf(gt_str_array_get(aop.scores,2UL),GT_WD, &gapscore);
-      gt_assert(check == 1);
-      
+      if (aop.affine)
+      {
+        fprintf(stderr,"-l -a is not implemented\n");
+        exit(GT_EXIT_PROGRAMMING_ERROR);
+      }
+      select_evalues(aop.scores, &matchscore, &mismatchscore, &gapscore);
+
       gt_computelinearspace_local(
       (const GtUchar *) gt_str_array_get(aop.strings,0),
       (GtUword) strlen(gt_str_array_get(aop.strings,0)),
       (const GtUchar *) gt_str_array_get(aop.strings,1UL),
       (GtUword) strlen(gt_str_array_get(aop.strings,1UL)),
-      matchscore,mismatchscore,gapscore);  
-    }else
+      matchscore,mismatchscore,gapscore,fp);
+    }else /* global */
     {
-      GtWord matchcost = 0, mismatchcost = 1, gapcost = 1, check;
       if (gt_str_array_size(aop.costs))
       {
-        check = sscanf(gt_str_array_get(aop.costs,0),GT_WD, &matchcost);
-        gt_assert(check == 1);
-        check = sscanf(gt_str_array_get(aop.costs,1UL),GT_WD, &mismatchcost);
-        gt_assert(check == 1);
-        check = sscanf(gt_str_array_get(aop.costs,2UL),GT_WD, &gapcost);
-        gt_assert(check == 1);
+        select_evalues(aop.costs, &matchcost, &mismatchcost, &gapcost);
+        if (matchcost < 0 || mismatchcost < 0 || gapcost < 0)
+        {
+          gt_error_set(err, "invalid cost value to option -g");
+          oprval = GT_OPTION_PARSER_ERROR;
+         return -1;
+        }
       }
-
-      gt_computelinearspace_with_output(
-      (const GtUchar *) gt_str_array_get(aop.strings,0),
-      (GtUword) strlen(gt_str_array_get(aop.strings,0)),
-      (const GtUchar *) gt_str_array_get(aop.strings,1UL),
-      (GtUword) strlen(gt_str_array_get(aop.strings,1UL)),
-      matchcost,mismatchcost,gapcost);
+      if (aop.affine)
+      {
+        /* matchcost=replacement_cost,
+         * mismatchcost=gap_opening_cost,
+         * gapcost=gap_extension_cost*/
+        gt_computeaffinelinearspace(
+        (const GtUchar *) gt_str_array_get(aop.strings,0),
+        (GtUword) strlen(gt_str_array_get(aop.strings,0)),
+        (const GtUchar *) gt_str_array_get(aop.strings,1UL),
+        (GtUword) strlen(gt_str_array_get(aop.strings,1UL)),
+         matchcost,mismatchcost, gapcost,fp);/*variablebennenung???*/
+      }else
+      {
+        gt_computelinearspace2(
+        (const GtUchar *) gt_str_array_get(aop.strings,0),
+        (GtUword) strlen(gt_str_array_get(aop.strings,0)),
+        (const GtUchar *) gt_str_array_get(aop.strings,1UL),
+        (GtUword) strlen(gt_str_array_get(aop.strings,1UL)),
+        matchcost,mismatchcost,gapcost,fp);
+      }
     }
+    if (aop.outfile)
+      gt_fa_fclose(fp);
   }
+
   freesimpleoption(&aop);
   if (oprval == GT_OPTION_PARSER_REQUESTS_EXIT)
   {
