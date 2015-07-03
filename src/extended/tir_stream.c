@@ -508,15 +508,10 @@ static int gt_tir_searchforTIRs(GtTIRStream *tir_stream,
       if (alilen <= seedptr->pos1 - seqstart1
             && alilen <= seedptr->pos2 - seqstart2)
       {
-        gt_seqabstract_reinit_encseq(sa_useq, encseq, alilen-1,
+        gt_seqabstract_reinit_encseq(sa_useq, encseq, alilen,
                                      seedptr->pos1 - alilen);
-        gt_seqabstract_reinit_encseq(sa_vseq, encseq, alilen-1,
+        gt_seqabstract_reinit_encseq(sa_vseq, encseq, alilen,
                                      seedptr->pos2 - alilen);
-        gt_log_log("reinit "GT_WU"-"GT_WU":"GT_WU"-"GT_WU,
-                   seedptr->pos1 - alilen,
-                   seedptr->pos1 - 1,
-                   seedptr->pos2 - alilen,
-                   seedptr->pos2 - 1);
 
       } else
       {
@@ -552,11 +547,6 @@ static int gt_tir_searchforTIRs(GtTIRStream *tir_stream,
                                      seedptr->pos1 + seedptr->len);
         gt_seqabstract_reinit_encseq(sa_vseq, encseq, alilen,
                                      seedptr->pos2 + seedptr->len);
-        gt_log_log("reinit "GT_WU"-"GT_WU":"GT_WU"-"GT_WU,
-                seedptr->pos1 + seedptr->len,
-                seedptr->pos1 + seedptr->len + alilen,
-                seedptr->pos2 + seedptr->len,
-                seedptr->pos2 + seedptr->len + alilen);
       } else
       {
         GtUword maxright = MIN(seqend1 - (seedptr->pos1 + seedptr->len),
