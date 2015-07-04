@@ -2,7 +2,8 @@
 #define AFFINEALIGN_LINEAR_H
 
 #include "core/types_api.h"
-void gt_computeaffinelinearspace(const GtUchar *useq,
+void gt_computeaffinelinearspace(bool showevalue, 
+                                 const GtUchar *useq,
                                  GtUword ulen,
                                  const GtUchar *vseq,
                                  GtUword vlen,

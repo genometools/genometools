@@ -422,7 +422,8 @@ static GtUword gt_calc_affinealign_linear(const GtUchar *useq,
   return distance;
 }
 
-void gt_computeaffinelinearspace(const GtUchar *useq,
+void gt_computeaffinelinearspace(bool showevalue,
+                                 const GtUchar *useq,
                                  GtUword ulen,
                                  const GtUchar *vseq,
                                  GtUword vlen,
@@ -432,6 +433,7 @@ void gt_computeaffinelinearspace(const GtUchar *useq,
                                  FILE *fp)
 {
   GtAlignment *align;
+  GtUword distance;
 
   gt_assert(useq && ulen && vseq && vlen);
   if (replacement_cost < 0 || gap_opening < 0 || gap_extension < 0)
@@ -440,13 +442,15 @@ void gt_computeaffinelinearspace(const GtUchar *useq,
     exit(GT_EXIT_PROGRAMMING_ERROR);
   }
   align = gt_alignment_new_with_seqs(useq, ulen, vseq, vlen);
-  (void) gt_calc_affinealign_linear(useq, ulen,
+  distance = gt_calc_affinealign_linear(useq, ulen,
                                 vseq, vlen,
                                 align, replacement_cost,
                                 gap_opening,gap_extension);
 
   gt_assert(fp != NULL);
   gt_alignment_show(align, fp, 80);
+  if(showevalue)
+    fprintf(fp, "affine costs: "GT_WU"\n", distance);
   gt_alignment_delete(align);
 
   /*printf("gt-programm\n");

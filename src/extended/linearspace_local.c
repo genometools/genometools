@@ -238,7 +238,10 @@ static bool gap_symbol_in_sequence(const GtUchar *seq, GtUword len)
 
 static GtWord fillLtable(GtWord *lcolumn,
                          const GtUchar *u, GtUword ulen,
-                         const GtUchar *v, GtUword vlen)
+                         const GtUchar *v, GtUword vlen,
+                         const GtWord matchscore,
+                         const GtWord mismatchscore,
+                         const GtWord gapscore)
 {
   GtUword i, j;
   GtWord nw, we, max = 0;
@@ -251,11 +254,12 @@ static GtWord fillLtable(GtWord *lcolumn,
     for (i = 1UL; i <= ulen; i++)
     {
       we = lcolumn[i];
-      lcolumn[i] = nw + (u[i-1] == v[j-1] ? 2 : -2); /* replacement */
-      if (lcolumn[i-1] - 1 > lcolumn[i]) /* deletion */
-        lcolumn[i] = lcolumn[i-1] - 1;
-      if (we - 1 >lcolumn[i]) /* insertion */
-        lcolumn[i] = we - 1;
+      lcolumn[i] = nw + (u[i-1] == v[j-1] ?
+                        matchscore : mismatchscore); /* replacement */
+      if (lcolumn[i-1] + gapscore > lcolumn[i]) /* deletion */
+        lcolumn[i] = lcolumn[i-1] + gapscore;
+      if (we + gapscore >lcolumn[i]) /* insertion */
+        lcolumn[i] = we + gapscore;
       if (0 > lcolumn[i])
         lcolumn[i]=0;
       nw = we;
@@ -266,33 +270,42 @@ static GtWord fillLtable(GtWord *lcolumn,
   return max;
 }
 
-static GtUword gt_calc_linearscore_safe(const GtUword ulen, const GtUword vlen)
+/* use this function to calculate score if no char matches*/
+static GtUword gt_calc_linearscore_safe(const GtUword ulen,
+                                        const GtUword vlen,
+                                        const GtWord mismatchscore,
+                                        const GtWord gapscore)
 {
-  GtUword idx, length, score;
+  GtUword idx, length, score=0;
 
   length = MAX(ulen,vlen);
-  score = -2;
+  score += mismatchscore;
   for (idx = 1; idx < length ; idx++)
   {
-    score += -1;
+    score += gapscore;
   }
   return score;
 }
 
 static GtUword gt_calc_linearscore_with_table(const GtUchar *useq, GtUword ulen,
-                                              const GtUchar *vseq, GtUword vlen)
+                                              const GtUchar *vseq, GtUword vlen,
+                                              const GtWord matchscore,
+                                              const GtWord mismatchscore,
+                                              const GtWord gapscore)
 {
   GtWord *lcolumn, score;
 
   lcolumn = gt_malloc(sizeof *lcolumn * (MIN(ulen,vlen) + 1));
   score = fillLtable(lcolumn, ulen <= vlen ? useq : vseq, MIN(ulen,vlen),
-                     ulen <= vlen ? vseq : useq, MAX(ulen,vlen));
+                     ulen <= vlen ? vseq : useq, MAX(ulen,vlen),
+                     matchscore, mismatchscore, gapscore);
 
   gt_free(lcolumn);
   return score;
 }
 
-void gt_computelinearspace_local(const GtUchar *useq, GtUword ulen,
+void gt_computelinearspace_local(bool showevalue,
+                                 const GtUchar *useq, GtUword ulen,
                                  const GtUchar *vseq, GtUword vlen,
                                  const GtWord matchscore,
                                  const GtWord mismatchscore,
@@ -300,12 +313,19 @@ void gt_computelinearspace_local(const GtUchar *useq, GtUword ulen,
                                  FILE *fp)
 {
   GtAlignment *align;
+  GtUword score;
 
   /*gt_assert(useq && ulen && vseq && vlen);*/
   align = gt_calc_linearalign_local(useq, ulen, vseq, vlen,
                                     matchscore, mismatchscore, gapscore);
  /* fprintf(fp, ">> local alignment: u = %s, v = %s\n",useq,vseq);*/
   gt_alignment_show(align, fp, 80);
+  if(showevalue)
+  {
+    score = gt_alignment_eval_with_score(align, matchscore,
+                                         mismatchscore, gapscore);
+    fprintf(fp, "linear score: "GT_WU"\n", score);
+  }
   gt_alignment_delete(align);
 }
 
@@ -333,7 +353,7 @@ void gt_checklinearspace_local(GT_UNUSED bool forward,
   }
 
   score1 = gt_calc_linearscore(useq, ulen, vseq, vlen, 2, -2, -1);
-  score2 = gt_calc_linearscore_with_table(useq, ulen, vseq, vlen);
+  score2 = gt_calc_linearscore_with_table(useq, ulen, vseq, vlen, 2, -2, -1);
 
   if (score1 != score2)
   {
@@ -349,7 +369,7 @@ void gt_checklinearspace_local(GT_UNUSED bool forward,
 
   if (no_align)
   {
-    score4 = gt_calc_linearscore_safe(ulen,vlen);
+    score4 = gt_calc_linearscore_safe(ulen,vlen, -2, -1);
     if (score3 != score4)
     {
       fprintf(stderr,"gt_calc_linearalign_local = "GT_WD" != "GT_WD

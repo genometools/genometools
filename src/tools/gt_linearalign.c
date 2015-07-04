@@ -22,6 +22,7 @@ typedef struct
              *scores;
   GtStr *outfilename;
   bool showedist,
+       showevalue,
        global,
        local,
        affine,
@@ -52,6 +53,7 @@ static GtOPrval parse_options(int *parsed_args,
   GtOptionParser *op;
   GtOption *optionstrings,
            *optionshowedist,
+           *optionshowevalue,
            *optioncosts,
            *optionscores,
            *optionaffine,
@@ -64,6 +66,7 @@ static GtOPrval parse_options(int *parsed_args,
   aop->scores = gt_str_array_new();
   aop->outfilename = gt_str_new();
   aop->showedist = false;
+  aop->showevalue = false;
   aop->local = false;
   aop->global = true;
   aop->outfile = false;
@@ -96,12 +99,20 @@ static GtOPrval parse_options(int *parsed_args,
   optionaffine = gt_option_new_bool("a", "use g or l with affine gapcosts",
                       &aop->affine, false);
   gt_option_parser_add_option(op, optionaffine);
+  
+  optionshowevalue = gt_option_new_bool("v", "output costs",
+                      &aop->showevalue, false);
+  gt_option_parser_add_option(op, optionshowevalue);
 
   gt_option_exclude(optioncosts, optionscores);
   gt_option_exclude(optionshowedist, optionaffine);
+  gt_option_exclude(optionshowedist, optionshowevalue);
+  gt_option_exclude(optionshowedist, optioncosts);
+  gt_option_exclude(optionshowedist, optionscores);
   gt_option_imply(optionshowedist, optionstrings);
   gt_option_imply(optioncosts, optionstrings);
   gt_option_imply(optionscores, optionstrings);
+  gt_option_imply_either_2(optionshowevalue, optioncosts, optionscores);
   gt_option_imply_either_2(optionaffine, optioncosts, optionscores);
 
   oprval = gt_option_parser_parse(op, parsed_args, argc, argv,
@@ -207,7 +218,7 @@ int gt_linearalign(int argc, const char **argv, GtError *err)
         (GtUword) strlen(gt_str_array_get(aop.strings,0)),
         (const GtUchar *) gt_str_array_get(aop.strings,1UL),
         (GtUword) strlen(gt_str_array_get(aop.strings,1UL)));
-      printf(GT_WU "\n", edist);
+      fprintf(fp, "edist: "GT_WU "\n", edist);
     }
    /* else if (cmppairwise.print)
     {
@@ -226,7 +237,7 @@ int gt_linearalign(int argc, const char **argv, GtError *err)
       }
       select_evalues(aop.scores, &matchscore, &mismatchscore, &gapscore);
 
-      gt_computelinearspace_local(
+      gt_computelinearspace_local(aop.showevalue,
       (const GtUchar *) gt_str_array_get(aop.strings,0),
       (GtUword) strlen(gt_str_array_get(aop.strings,0)),
       (const GtUchar *) gt_str_array_get(aop.strings,1UL),
@@ -249,7 +260,7 @@ int gt_linearalign(int argc, const char **argv, GtError *err)
         /* matchcost=replacement_cost,
          * mismatchcost=gap_opening_cost,
          * gapcost=gap_extension_cost*/
-        gt_computeaffinelinearspace(
+        gt_computeaffinelinearspace(aop.showevalue,
         (const GtUchar *) gt_str_array_get(aop.strings,0),
         (GtUword) strlen(gt_str_array_get(aop.strings,0)),
         (const GtUchar *) gt_str_array_get(aop.strings,1UL),
@@ -257,7 +268,7 @@ int gt_linearalign(int argc, const char **argv, GtError *err)
          matchcost,mismatchcost, gapcost,fp);/*variablebennenung???*/
       }else
       {
-        gt_computelinearspace2(
+        gt_computelinearspace2(aop.showevalue,
         (const GtUchar *) gt_str_array_get(aop.strings,0),
         (GtUword) strlen(gt_str_array_get(aop.strings,0)),
         (const GtUchar *) gt_str_array_get(aop.strings,1UL),

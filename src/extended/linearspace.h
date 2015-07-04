@@ -5,7 +5,8 @@
 #include "core/error.h"
 #include "extended/alignment.h"
 
-void gt_computelinearspace2(const GtUchar *useq,
+void gt_computelinearspace2(bool showevalue,
+                            const GtUchar *useq,
                              GtUword ulen,
                              const GtUchar *vseq,
                              GtUword vlen,
