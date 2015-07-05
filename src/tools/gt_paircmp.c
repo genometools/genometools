@@ -25,9 +25,10 @@
 #include "core/str.h"
 #include "core/str_array.h"
 #include "core/types_api.h"
-#include "match/test-pairwise.h"
+#include "extended/affinealign_linear.h"
 #include "extended/linearedist.h"
 #include "extended/linearspace_local.h"
+#include "match/test-pairwise.h"
 #include "tools/gt_paircmp.h"
 
 typedef struct
@@ -300,6 +301,10 @@ int gt_paircmp(int argc, const char **argv, GtError *err)
                                                     &cmppairwise);
       printf("# number of testcases for gt_checklinearspace_local: " GT_WU "\n",
               testcases);
+      testcases = applycheckfunctiontosimpleoptions(gt_checkaffinelinearspace,
+                                                    &cmppairwise);
+      printf("# number of testcases for gt_checkaffinelinearspace: " GT_WU "\n",
+              testcases);            
     }
   }
   freesimpleoption(&cmppairwise);

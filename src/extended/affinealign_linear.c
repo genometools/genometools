@@ -8,6 +8,7 @@
 #include "affinealign_linear.h"
 #include "extended/reconstructalignment.h"
 
+#define LINEAR_EDIST_GAP          ((GtUchar) UCHAR_MAX)
 typedef enum {
   R,
   D,
@@ -461,4 +462,61 @@ void gt_computeaffinelinearspace(bool showevalue,
   gt_alignment_show(align, fp, 80);*/
 }
 
-/*TODO:checkfunction*/
+static bool gap_symbol_in_sequence(const GtUchar *seq, GtUword len)
+{
+  const GtUchar *sptr;
+
+  for (sptr = seq; sptr < seq + len; sptr++)
+  {
+    if (*sptr == LINEAR_EDIST_GAP)
+    {
+      return true;
+    }
+  }
+  return false;
+}
+
+void gt_checkaffinelinearspace(GT_UNUSED bool forward,
+                               const GtUchar *useq,
+                               GtUword ulen,
+                               const GtUchar *vseq,
+                               GtUword vlen)
+{
+  GtAlignment *align_linear, *align_square;
+  GtUword  affine1, affine2, affine3;
+
+  /*gt_assert(useq && ulen && vseq && vlen);*/
+  if (gap_symbol_in_sequence(useq,ulen))
+  {
+    fprintf(stderr,"%s: sequence u contains gap symbol\n",__func__);
+    exit(GT_EXIT_PROGRAMMING_ERROR);
+  }
+  if (gap_symbol_in_sequence(vseq,vlen))
+  {
+    fprintf(stderr,"%s: sequence v contains gap symbol\n",__func__);
+    exit(GT_EXIT_PROGRAMMING_ERROR);
+  }
+  align_linear = gt_alignment_new_with_seqs(useq, ulen, vseq, vlen);
+  affine1 = gt_calc_affinealign_linear(useq, ulen, vseq, vlen, align_linear, 3, 3, 1);
+  
+  affine2 = gt_alignment_eval_with_score(align_linear, 3, 3, 1);
+  
+  if (affine1 != affine2)
+  {
+    fprintf(stderr,"gt_calc_affinealign_linear = "GT_WU" != "GT_WU
+            " = gt_alignment_eval_with_score(linear)\n", affine1, affine2);
+    exit(GT_EXIT_PROGRAMMING_ERROR);
+  }
+  
+  align_square = gt_affinealign((const char *)useq, ulen, (const char *)vseq, vlen,3,3,1);
+  affine3 =  gt_alignment_eval_with_score(align_square, 3,3,1);
+  
+  if (affine2 != affine3)
+  {
+    fprintf(stderr,"gt_alignment_eval_with_score(linear) = "GT_WU" != "GT_WU
+            " = gt_alignment_eval_with_score(square)\n", affine2,affine3);
+    exit(GT_EXIT_PROGRAMMING_ERROR);
+  }
+  gt_alignment_delete(align_linear);
+  gt_alignment_delete(align_square);
+}

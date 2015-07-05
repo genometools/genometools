@@ -44,6 +44,8 @@ static void freesimpleoption(Alignopt *opt)
   gt_str_array_delete(opt->strings);
   gt_str_array_delete(opt->costs);
   gt_str_array_delete(opt->scores);
+  gt_str_delete(opt->outfilename);
+  
 }
 
 static GtOPrval parse_options(int *parsed_args,
@@ -112,7 +114,8 @@ static GtOPrval parse_options(int *parsed_args,
   gt_option_imply(optionshowedist, optionstrings);
   gt_option_imply(optioncosts, optionstrings);
   gt_option_imply(optionscores, optionstrings);
-  gt_option_imply_either_2(optionshowevalue, optioncosts, optionscores);
+  gt_option_imply(optionshowevalue, optionstrings);
+  //gt_option_imply_either_2(optionshowevalue, optioncosts, optionscores);
   gt_option_imply_either_2(optionaffine, optioncosts, optionscores);
 
   oprval = gt_option_parser_parse(op, parsed_args, argc, argv,
@@ -202,7 +205,7 @@ int gt_linearalign(int argc, const char **argv, GtError *err)
   if (oprval == GT_OPTION_PARSER_OK)
   {
     gt_assert(parsed_args == argc);
-    if (!aop.outfile)
+   if (!aop.outfile)
       showsimpleoptions(&aop);
 
     fp = (aop.outfile? gt_fa_fopen_func(
@@ -279,7 +282,6 @@ int gt_linearalign(int argc, const char **argv, GtError *err)
     if (aop.outfile)
       gt_fa_fclose(fp);
   }
-
   freesimpleoption(&aop);
   if (oprval == GT_OPTION_PARSER_REQUESTS_EXIT)
   {
