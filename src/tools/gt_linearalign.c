@@ -90,11 +90,13 @@ static GtOPrval parse_options(int *parsed_args,
                       aop->outfilename, "stdout");
   gt_option_parser_add_option(op, optionoutfilename);
 
-  optioncosts = gt_option_new_string_array("g", "use three costs", aop->costs);
+  optioncosts = gt_option_new_string_array("g", "global alignment, "
+                                           "use three costs", aop->costs);
 
   gt_option_parser_add_option(op, optioncosts);
 
-  optionscores = gt_option_new_string_array("l", "use three scores",
+  optionscores = gt_option_new_string_array("l", "local alignment, "
+                                            "use three scores",
                                             aop->scores);
 
   gt_option_parser_add_option(op, optionscores);
@@ -198,7 +200,7 @@ int gt_linearalign(int argc, const char **argv, GtError *err)
   GtOPrval oprval;
   FILE *fp;
   GtWord matchcost = 0, mismatchcost = 1, gapcost = 1,
-  matchscore,mismatchscore,gapscore;/*evalue?*/
+  matchscore,mismatchscore,gapscore;/*TODO:evalue*/
 
   gt_error_check(err);
 
@@ -237,16 +239,17 @@ int gt_linearalign(int argc, const char **argv, GtError *err)
       select_evalues(aop.scores, &matchscore, &mismatchscore, &gapscore);
       if (aop.affine)
       {
-        /*gt_computeaffinelinearspace_local(aop.showevalue,
+        gt_computeaffinelinearspace_local(aop.showevalue,
       (const GtUchar *) gt_str_array_get(aop.strings,0),
       (GtUword) strlen(gt_str_array_get(aop.strings,0)),
       (const GtUchar *) gt_str_array_get(aop.strings,1UL),
       (GtUword) strlen(gt_str_array_get(aop.strings,1UL)),
-      matchscore,mismatchscore,gapscore,fp);*/
-        fprintf(stderr,"-l -a is not implemented\n");
-        exit(GT_EXIT_PROGRAMMING_ERROR);
+      matchscore,mismatchscore,gapscore,fp);
+        /*fprintf(stderr,"-l -a is not implemented\n");
+        exit(GT_EXIT_PROGRAMMING_ERROR);*/
         
       }
+      else{
       
 
       gt_computelinearspace_local(aop.showevalue,
@@ -254,7 +257,7 @@ int gt_linearalign(int argc, const char **argv, GtError *err)
       (GtUword) strlen(gt_str_array_get(aop.strings,0)),
       (const GtUchar *) gt_str_array_get(aop.strings,1UL),
       (GtUword) strlen(gt_str_array_get(aop.strings,1UL)),
-      matchscore,mismatchscore,gapscore,fp);
+      matchscore,mismatchscore,gapscore,fp);}
     }else /* global */
     {
       if (gt_str_array_size(aop.costs))
@@ -277,7 +280,7 @@ int gt_linearalign(int argc, const char **argv, GtError *err)
         (GtUword) strlen(gt_str_array_get(aop.strings,0)),
         (const GtUchar *) gt_str_array_get(aop.strings,1UL),
         (GtUword) strlen(gt_str_array_get(aop.strings,1UL)),
-         matchcost,mismatchcost, gapcost,fp);/*variablebennenung???*/
+         matchcost,mismatchcost, gapcost,fp);/*TODO:variablebennenung???*/
       }else
       {
         gt_computelinearspace2(aop.showevalue,

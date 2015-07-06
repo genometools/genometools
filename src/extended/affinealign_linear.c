@@ -387,7 +387,7 @@ static GtUword evaluateaffinecrosspoints(const GtUchar *useq, GtUword ulen,
   return 0;
 }
 
-static GtUword gt_calc_affinealign_linear(const GtUchar *useq,
+GtUword gt_calc_affinealign_linear(const GtUchar *useq,
                                           const GtUword ulen,
                                           const GtUchar *vseq,
                                           const GtUword vlen,
