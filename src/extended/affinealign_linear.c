@@ -4,11 +4,11 @@
 #include "core/types_api.h"
 #include "core/divmodmul.h"
 #include "core/ma_api.h"
-#include "affinealign.h"
-#include "affinealign_linear.h"
+#include "extended/affinealign.h"
+#include "extended/affinealign_linear.h"
+#include "extended/checksequence.h"
 #include "extended/reconstructalignment.h"
 
-#define LINEAR_EDIST_GAP          ((GtUchar) UCHAR_MAX)
 typedef enum {
   R,
   D,
@@ -460,20 +460,6 @@ void gt_computeaffinelinearspace(bool showevalue,
   * replacement_cost,gap_opening,gap_extension);
   gt_assert(fp != NULL);
   gt_alignment_show(align, fp, 80);*/
-}
-
-static bool gap_symbol_in_sequence(const GtUchar *seq, GtUword len)
-{
-  const GtUchar *sptr;
-
-  for (sptr = seq; sptr < seq + len; sptr++)
-  {
-    if (*sptr == LINEAR_EDIST_GAP)
-    {
-      return true;
-    }
-  }
-  return false;
 }
 
 void gt_checkaffinelinearspace(GT_UNUSED bool forward,

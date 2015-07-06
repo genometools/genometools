@@ -10,6 +10,7 @@
 #include "core/str_array.h"
 #include "core/types_api.h"
 #include "extended/affinealign_linear.h"
+#include "extended/affinealign_linear_local.h"
 #include "extended/linearedist.h"
 #include "extended/linearspace.h"
 #include "extended/linearspace_local.h"
@@ -233,12 +234,20 @@ int gt_linearalign(int argc, const char **argv, GtError *err)
     }*/
     else if (aop.local)
     {
+      select_evalues(aop.scores, &matchscore, &mismatchscore, &gapscore);
       if (aop.affine)
       {
+        /*gt_computeaffinelinearspace_local(aop.showevalue,
+      (const GtUchar *) gt_str_array_get(aop.strings,0),
+      (GtUword) strlen(gt_str_array_get(aop.strings,0)),
+      (const GtUchar *) gt_str_array_get(aop.strings,1UL),
+      (GtUword) strlen(gt_str_array_get(aop.strings,1UL)),
+      matchscore,mismatchscore,gapscore,fp);*/
         fprintf(stderr,"-l -a is not implemented\n");
         exit(GT_EXIT_PROGRAMMING_ERROR);
+        
       }
-      select_evalues(aop.scores, &matchscore, &mismatchscore, &gapscore);
+      
 
       gt_computelinearspace_local(aop.showevalue,
       (const GtUchar *) gt_str_array_get(aop.strings,0),

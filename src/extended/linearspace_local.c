@@ -21,13 +21,12 @@
 #include "core/ma.h"
 #include "core/minmax.h"
 
+#include "extended/checksequence.h"
 #include "extended/linearspace_local.h"
 #include "extended/linearspace.h"
 #include "extended/reconstructalignment.h"
 #include "extended/alignment.h"
 #include "extended/max.h"
-
-#define LINEAR_EDIST_GAP          ((GtUchar) UCHAR_MAX)
 
 static void firstLStabcolumn(const GtUword ulen,
                              GtWord *Ltabcolumn,
@@ -152,7 +151,7 @@ static void change_score_to_cost_function(const GtWord matchscore,
                                           GtWord *gapcost )
 {
   GtWord temp;
-
+//hier noch max und div nutzen und aufrunden
   temp=0;
   if (matchscore/2 > temp)
     temp=matchscore/2;
@@ -193,7 +192,8 @@ static GtAlignment *gt_calc_linearalign_local(const GtUchar *useq,GtUword ulen,
                              matchscore,
                              mismatchscore,
                              gapscore);
-
+  gt_free(Ltabcolumn);
+  gt_free(Starttabcolumn);
   change_score_to_cost_function(matchscore,
                                 mismatchscore,
                                 gapscore,
@@ -220,20 +220,6 @@ static GtAlignment *gt_calc_linearalign_local(const GtUchar *useq,GtUword ulen,
   gt_max_delete(max);
 
   return align;
-}
-
-static bool gap_symbol_in_sequence(const GtUchar *seq, GtUword len)
-{
-  const GtUchar *sptr;
-
-  for (sptr = seq; sptr < seq + len; sptr++)
-  {
-    if (*sptr == LINEAR_EDIST_GAP)
-    {
-      return true;
-    }
-  }
-  return false;
 }
 
 static GtWord fillLtable(GtWord *lcolumn,
