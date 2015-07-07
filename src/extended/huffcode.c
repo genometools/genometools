@@ -156,7 +156,7 @@ static void initialise_rbt(GtHuffman *huffman,
   for (i = 0; i < huffman->num_of_symbols; i++) {
     ret = distrfunc(distr, i);
     if (ret > 0) {
-      huffptr = huffman_tree_new(i, distrfunc(distr, i));
+      huffptr = huffman_tree_new(i, ret);
       nodecreated = false;
       huffptr2 = (GtHuffmanTree*)gt_rbtree_search(huffman->rbt_root,
                                                   huffptr,
@@ -471,9 +471,6 @@ GtHuffmanDecoder *gt_huffman_decoder_new_from_memory(
     gt_error_set(err, "error calling mem_func");
     return NULL;
   }
-  gt_log_log(GT_WU ", " GT_WU ", " GT_WU, huff_decoder->length,
-             huff_decoder->cur_bit, huff_decoder->pad_length);
-  gt_log_log("got new memchunk, returned %d", huff_decoder->mem_func_stat);
   gt_assert(huff_decoder->mem_func_stat == 1);
   return huff_decoder;
 }
@@ -497,9 +494,6 @@ int gt_huffman_decoder_get_new_mem_chunk(GtHuffmanDecoder *huff_decoder,
     return huff_decoder->mem_func_stat;
   }
   huff_decoder->cur_bitseq = 0;
-  gt_log_log(GT_WU ", " GT_WU ", " GT_WU, huff_decoder->length,
-             huff_decoder->cur_bit, huff_decoder->pad_length);
-  gt_log_log("got new memchunk, returned %d", huff_decoder->mem_func_stat);
   return had_err;
 }
 
@@ -548,15 +542,12 @@ int gt_huffman_decoder_next(GtHuffmanDecoder *huff_decoder,
           return 0;  /*EOF*/
         }
 
-        gt_log_log("reset because end of block");
         huff_decoder->mem_func_stat =
           huff_decoder->mem_func(&huff_decoder->bitsequence,
                                  &huff_decoder->length,
                                  &huff_decoder->cur_bit,
                                  &huff_decoder->pad_length,
                                  huff_decoder->info);
-        gt_log_log(GT_WU ", " GT_WU ", " GT_WU, huff_decoder->length,
-                   huff_decoder->cur_bit, huff_decoder->pad_length);
         if (huff_decoder->mem_func_stat == -1) {
           gt_error_set(err, "error calling mem_func");
           had_err = huff_decoder->mem_func_stat;
