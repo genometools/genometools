@@ -23,14 +23,14 @@
 #include "tools/gt_seed_extend.h"
 
 typedef struct {
-  unsigned int kmerlen;
-  unsigned int diagbandw;
-  unsigned int mincoverage;
-  unsigned int maxfreq;
-  unsigned int correlation;
-  unsigned int minalilen;
-  unsigned int maxfrontdist;
-  unsigned int minquality;
+  unsigned int dbs_seedlength;
+  GtUword dbs_logdiagbandwidth;
+  GtUword dbs_mincoverage;
+  GtUword dbs_maxfreq;
+  GtUword se_alignlength;
+  GtUword se_maxalilendiff;
+  GtUword se_errorpercentage;
+  GtUword se_historysize;
   bool mirror;
   bool verify;
   bool benchmark;
@@ -58,64 +58,73 @@ static GtOptionParser* gt_seed_extend_option_parser_new(void *tool_arguments)
   gt_assert(arguments);
 
   /* init */
-  op = gt_option_parser_new("[option ...] encseq_basename",
+  op = gt_option_parser_new("[option ...] encseq_basename [encseq_basename]",
                             "Calculate local alignments using the seed and "
                             "extend algorithm.");
 
-  /* -kmerlen */
-  option = gt_option_new_uint_min("kmerlen", "k-mer length",
-                                  &arguments->kmerlen, 14, 2);
+  /* -seedlength */
+  option = gt_option_new_uint_min("seedlength", "Minimum length of a seed",
+                                  &arguments->dbs_seedlength, 14, 2UL);
   gt_option_parser_add_option(op, option);
 
-  /* -diagbandw */
-  option = gt_option_new_uint("diagbandw", "diagonal band width",
-                              &arguments->diagbandw, 6);
+  /* -diagbandwidth */
+  option = gt_option_new_uword("diagbandwidth", "Logarithm of diagonal band "
+                               "width (for filter)",
+                               &arguments->dbs_logdiagbandwidth, 6);
   gt_option_parser_add_option(op, option);
 
   /* -mincoverage */
-  option = gt_option_new_uint("mincoverage", "minimum coverage in two diagonal "
-                              "bands", &arguments->mincoverage, 35);
+  option = gt_option_new_uword("mincoverage", "Minimum coverage in two "
+                               "neighbouring diagonal bands (for filter)",
+                               &arguments->dbs_mincoverage, 35);
   gt_option_parser_add_option(op, option);
 
   /* -maxfreq */
-  option = gt_option_new_uint_min("maxfreq", "maximum frequency of a k-mer",
-                                  &arguments->maxfreq, UINT_MAX, 1);
+  option = gt_option_new_uword_min("maxfreq", "Maximum frequency of a k-mer "
+                                   "(for filter)",
+                                   &arguments->dbs_maxfreq, GT_UWORD_MAX, 1);
   gt_option_parser_add_option(op, option);
 
-  /* -correlation */
-  option = gt_option_new_uint("correlation", "percent similarity of the reads",
-                              &arguments->correlation, 70);
+  /* -err */
+  option = gt_option_new_uword_min_max("err", "Error percentage of matches "
+                                       "(for greedy extension)",
+                                       &arguments->se_errorpercentage, 15, 0,
+                                       100);
   gt_option_parser_add_option(op, option);
 
-  /* -minalilen */
-  option = gt_option_new_uint_min("minalilen", "minimum alignment length",
-                                  &arguments->minalilen, 1000, 1);
+  /* -alignlength */
+  option = gt_option_new_uword_min("alignlength", "Minimum alignment length",
+                                   &arguments->se_alignlength, 1000, 1);
   gt_option_parser_add_option(op, option);
 
-  /* -maxfrontdist */
-  option = gt_option_new_uint("maxfrontdist", "maximum distance between 2 "
-                              "fronts", &arguments->maxfrontdist, UINT_MAX);
+  /* -maxalilendiff */
+  option = gt_option_new_uword("maxalilendiff", "Maximum difference of align"
+                               "ment length (trimming for greedy extension)",
+                               &arguments->se_maxalilendiff, 30);
   gt_option_parser_add_option(op, option);
 
-  /* -minquality */
-  option = gt_option_new_uint("minquality", "percent minimum alignment quality",
-                              &arguments->minquality, 50);
+  /* -historysize */
+  option = gt_option_new_uword_min("historysize", "Size of (mis)match history "
+                                   "(for greedy extension)",
+                                   &arguments->se_historysize, 65, 1);
   gt_option_parser_add_option(op, option);
 
   /* -mirror */
-  option = gt_option_new_bool("mirror", "add reverse complement reads",
+  option = gt_option_new_bool("mirror", "Add reverse complement reads",
                               &arguments->mirror, false);
   gt_option_parser_add_option(op, option);
 
   /* -verify */
-  option = gt_option_new_bool("verify", "check that k-mer seeds occur in the "
+  option = gt_option_new_bool("verify", "Check that k-mer seeds occur in the "
                               "sequences", &arguments->verify, false);
   gt_option_parser_add_option(op, option);
+  gt_option_is_development_option(option);
 
   /* -benchmark */
-  option = gt_option_new_bool("benchmark", "measure time of different steps",
+  option = gt_option_new_bool("benchmark", "Measure time of different steps",
                               &arguments->benchmark, false);
   gt_option_parser_add_option(op, option);
+  gt_option_is_development_option(option);
 
   return op;
 }
@@ -128,17 +137,7 @@ static int gt_seed_extend_arguments_check(GT_UNUSED int rest_argc,
   gt_error_check(err);
   gt_assert(arguments);
 
-  if (arguments->correlation > 100) {
-    gt_error_set(err, "correlation must be <= 100");
-    had_err = -1;
-  }
-
-  if (arguments->minquality > 100) {
-    gt_error_set(err, "minquality must be <= 100");
-    had_err = -1;
-  }
-
-  if (rest_argc == 1 && arguments->maxfreq == 1) {
+  if (rest_argc == 1 && arguments->dbs_maxfreq == 1) {
     gt_error_set(err, "for 1 input file maxfreq must be >= 2 to find matching "
                  "k-mers");
     had_err = -1;
@@ -191,7 +190,7 @@ static int gt_seed_extend_runner(int argc, const char **argv, int parsed_args,
 
   /* start algorithm */
   if (!had_err) {
-    gt_seed_extend_run(aencseq, bencseq, (GtSeedExtend *)arguments);
+    gt_diagbandseed_run(aencseq, bencseq, (GtDiagbandseed *)arguments);
     gt_encseq_delete(aencseq);
     gt_encseq_delete(bencseq);
   }

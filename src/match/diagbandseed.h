@@ -15,51 +15,49 @@
  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef SEED_EXTEND_H
-#define SEED_EXTEND_H
+#ifndef DIAGBANDSEED_H
+#define DIAGBANDSEED_H
 #include <stdbool.h>
 #include "core/arraydef.h"
 #include "core/encseq_api.h"
 #include "core/types_api.h"
 
-struct GtSeedExtend {
-  unsigned int kmerlen;
-  unsigned int diagbandw;
-  unsigned int mincoverage;
-  unsigned int maxfreq;
-  unsigned int correlation;
-  unsigned int minalilen;
-  unsigned int maxfrontdist;
-  unsigned int minquality;
+struct GtDiagbandseed {
+  unsigned int dbs_seedlength;
+  GtUword dbs_logdiagbandwidth;
+  GtUword dbs_mincoverage;
+  GtUword dbs_maxfreq;
+  GtUword se_alignlength;
+  GtUword se_maxalilendiff;
+  GtUword se_errorpercentage;
+  GtUword se_historysize;
   bool mirror;
   bool verify;
   bool benchmark;
 };
 
-typedef struct GtSeedExtend GtSeedExtend;
-typedef struct GtSeedExtendKmerPos GtSeedExtendKmerPos;
-typedef struct GtSeedExtendSeedPair GtSeedExtendSeedPair;
-GT_DECLAREARRAYSTRUCT(GtSeedExtendSeedPair);
+typedef struct GtDiagbandseed GtDiagbandseed;
+typedef struct GtDiagbandseedKmerPos GtDiagbandseedKmerPos;
+typedef struct GtDiagbandseedSeedPair GtDiagbandseedSeedPair;
+GT_DECLAREARRAYSTRUCT(GtDiagbandseedSeedPair);
 
-/* Returns a GtSeedExtendKmerPos list of k-mers from a given encseq. */
-GtUword gt_seed_extend_get_kmers(GtSeedExtendKmerPos *list,
-                                 const GtEncseq *encseq, unsigned int k);
+/* Returns a GtDiagbandseedKmerPos list of k-mers from a given encseq. */
+GtUword gt_diagbandseed_get_kmers(GtDiagbandseedKmerPos *list,
+                                  const GtEncseq *encseq, unsigned int kmerlen);
 
-/* Returns a GtSeedExtendSeedPair list of equal k-mers from lists a and b. */
-void gt_seed_extend_merge(GtArrayGtSeedExtendSeedPair *mlist,
-                          const GtSeedExtendKmerPos *alist, GtUword alen,
-                          const GtSeedExtendKmerPos *blist, GtUword blen,
-                          unsigned int kmerlen, unsigned int maxfreq);
+/* Returns a GtDiagbandseedSeedPair list of equal k-mers from lists a and b. */
+void gt_diagbandseed_merge(GtArrayGtDiagbandseedSeedPair *mlist,
+                           const GtDiagbandseedKmerPos *alist, GtUword alen,
+                           const GtDiagbandseedKmerPos *blist, GtUword blen,
+                           unsigned int kmerlen, GtUword maxfreq);
 
 /* reports seeds from mlist that satisfy the filter criteria */
-void gt_seed_extend_find_seeds(const GtArrayGtSeedExtendSeedPair *mlist,
-                               unsigned int kmerlen,
-                               unsigned int mincoverage,
-                               unsigned int diagbandw,
-                               GtUword amaxlen,
-                               GtUword bmaxlen);
+void gt_diagbandseed_find_seeds(const GtArrayGtDiagbandseedSeedPair *mlist,
+                                unsigned int kmerlen, GtUword mincoverage,
+                                GtUword log_diagbandwidth, GtUword amaxlen,
+                                GtUword bmaxlen);
 
 /* Run the whole algorithm. */
-void gt_seed_extend_run(const GtEncseq *aencseq, const GtEncseq *bencseq,
-                        const GtSeedExtend *arg);
+void gt_diagbandseed_run(const GtEncseq *aencseq, const GtEncseq *bencseq,
+                         const GtDiagbandseed *arg);
 #endif
