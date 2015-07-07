@@ -23,7 +23,7 @@
 #include "core/radix_sort.h"
 #include "core/timer_api.h"
 #include "core/unused_api.h"
-#include "match/seed-extend.h"
+#include "match/diagbandseed.h"
 #include "match/sfx-mappedstr.h"
 
 #define DEBUG_SEEDPAIR
