@@ -19,7 +19,7 @@
 #include "core/encseq_api.h"
 #include "core/ma_api.h"
 #include "core/unused_api.h"
-#include "match/seed-extend.h"
+#include "match/diagbandseed.h"
 #include "tools/gt_seed_extend.h"
 
 typedef struct {
