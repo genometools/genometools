@@ -26,17 +26,15 @@ def prefixlength_get(prjfile)
   return prefixlength
 end
 
-def makeseedhash(indexname,seedlength,errperc,maxalilendiffopt,
-                 extend_opt)
+def makeseedhash(indexname,seedlength,extend_opt,optionlist)
   seedhash = Hash.new()
   key = nil
   if seedlength == 0
     seedlength = 2 * prefixlength_get("#{indexname}.prj")
   end
   repfindcall = "env -i bin/gt repfind -scan -v -seedlength #{seedlength} " +
-                "-#{extend_opt} -ii #{indexname} -err #{errperc}" +
-                " #{maxalilendiffopt}"
-  puts "\# #{repfindcall}"
+                "-#{extend_opt} -ii #{indexname} " + optionlist.join(" ")
+  STDERR.puts "\# #{repfindcall}"
   IO.popen(repfindcall.split(/\s/)).each_line do |line|
     if line.match(/# seed:/)
       key = line.chomp.gsub(/# seed:\s+/,"")
@@ -127,7 +125,7 @@ def showcomment(size,sum_size,comment)
     perc = 100.0 * size.to_f/sum_size.to_f
     printf("# %d (%.0f%%) of %d sequence pairs %s\n",size,perc,sum_size,comment)
     return perc.to_i
-  else 
+  else
     return 0
   end
 end
@@ -258,13 +256,40 @@ def usage(opts,msg)
   exit 1
 end
 
+def checkrange(val,tag,from,to)
+  if val < from or val > to
+    STDERR.puts "#{$0}: #{tag} must be value in range [#{from}..#{to}]"
+    exit(1)
+  end
+  return val
+end
+
+def preprocess_index(inputfile)
+  suffixeratorcall = "env -i bin/gt suffixerator -suftabuint " +
+                     "-db #{inputfile} " +
+                     "-dna -suf -tis -lcp -md5 no -des no -sds no "
+  indexname = File.basename(inputfile)
+  if not File.exist?("#{indexname}.prj") or
+    File.stat("#{indexname}.prj").mtime < File.stat(inputfile).mtime
+    puts "# #{suffixeratorcall}"
+    if not system(suffixeratorcall)
+      STDERR.puts "FAILURE: #{suffixeratorcall}"
+      exit 1
+    end
+  end
+  return indexname
+end
+
 def parseargs(argv)
   options = OpenStruct.new
   options.inputfile = nil
   options.seedlength = 20
   options.errperc = 10
   options.maxalilendiff = 30
+  options.history = 60
   options.silent = false
+  options.percmathistory = 55
+  options.xdropbelow = 5
   opts = OptionParser.new
   opts.on("--inputfile STRING","specify input file") do |x|
     options.inputfile = x
@@ -272,12 +297,29 @@ def parseargs(argv)
   opts.on("--seedlength NUM","specify seedlength") do |x|
     options.seedlength = x.to_i
   end
-  opts.on("--errperc NUM","specify error percentage") do |x|
-    options.errperc = x.to_i
+  opts.on("--errperc NUM","specify error percentage",
+                          "default: #{options.errperc}") do |x|
+    options.errperc = checkrange(x.to_i,"errperc",1,15)
   end
   opts.on("--maxalilendiff NUM",
-          "specify maximum difference of aligned length") do |x|
+          "specify maximum difference of aligned length",
+          "default: #{options.maxalilendiff}") do |x|
     options.maxalilendiff = x.to_i
+  end
+  opts.on("--history NUM",
+          "specify size of history in range [1..64]",
+          "default #{options.history}") do |x|
+    options.history = checkrange(x.to_i,"history",1,64)
+  end
+  opts.on("--percmathistory NUM",
+          "percentage of matches required in history",
+          "default #{options.percmathistory}") do |x|
+    options.percmathistory = checkrange(x.to_i,"percmathhistory",1,100)
+  end
+  opts.on("--xdropbelow NUM",
+          "specify xdrop cutoff score",
+          "default #{options.xdropbelow}") do |x|
+    options.xdropbelow = checkrange(x.to_i,"xdropbelow",1,100)
   end
   opts.on("--silent","do not show differences") do |x|
     options.silent = true
@@ -295,26 +337,18 @@ def parseargs(argv)
 end
 
 options = parseargs(ARGV)
-  
-suffixeratorcall = "env -i bin/gt suffixerator -suftabuint " +
-                   "-db #{options.inputfile} " +
-                   "-dna -suf -tis -lcp -md5 no -des no -sds no "
-indexname = File.basename(options.inputfile)
-if not File.exist?("#{indexname}.prj") or 
-  File.stat("#{indexname}.prj").mtime < File.stat(options.inputfile).mtime
-  if not system(suffixeratorcall)
-    STDERR.puts "FAILURE: #{suffixeratorcall}"
-    exit 1
-  end
-  puts "# #{suffixeratorcall}"
-end
+
+indexname = preprocess_index(options.inputfile)
+
 taglist = ["greedy","xdrop"]
-seedhash1 = makeseedhash(indexname,options.seedlength,options.errperc,
-                         "-maxalilendiff #{options.maxalilendiff}",
-                         "extend#{taglist[0]}")
+seedhash1 = makeseedhash(indexname,options.seedlength,"extend#{taglist[0]}",
+                         ["-err #{options.errperc}",
+                          "-maxalilendiff #{options.maxalilendiff}",
+                          "-history #{options.history}",
+                          "-percmathistory #{options.percmathistory}"])
 puts "# seedhash1: size = #{seedhash1.length}"
-seedhash2 = makeseedhash(indexname,options.seedlength,options.errperc,"",
-                         "extend#{taglist[1]}")
+seedhash2 = makeseedhash(indexname,options.seedlength,"extend#{taglist[1]}",
+                         ["-err #{options.errperc}"])
 puts "# seedhash2: size = #{seedhash2.length}"
 
 minidentity = 100 - options.errperc
