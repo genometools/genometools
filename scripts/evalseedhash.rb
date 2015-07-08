@@ -119,7 +119,8 @@ end
 def showcomment(size,sum_size,comment)
   if sum_size > 0
     perc = 100.0 * size.to_f/sum_size.to_f
-    printf("# %d (%.0f%%) of %d sequence pairs %s\n",size,perc,sum_size,comment)
+    STDERR.printf("# %d (%.0f%%) of %d sequence pairs %s\n",size,perc,
+                                                  sum_size,comment)
     return perc.to_i
   else
     return 0

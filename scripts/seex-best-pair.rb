@@ -32,13 +32,13 @@ seedhash2 = Hash.new()
                          ["-maxalilendiff #{maxalilendiff}",
                           "-history #{history}",
                           "-percmathistory #{permathistory}"])
-    puts "# seedhash1: size = #{h1.length}"
+    STDERR.puts "# seedhash1: size = #{h1.length}"
     seedhash1[Pair.new(errperc,permathistory,0)] = h1.dup
   end
   [1,2,3,4,5,6,7,8].each do |xdropbelow|
     h2 = makeseedhash(indexname,seedlength,"extend#{taglist[1]}",
                          commonoptions + ["-xdropbelow #{xdropbelow}"])
-    puts "# seedhash2: size = #{h2.length}"
+    STDERR.puts "# seedhash2: size = #{h2.length}"
     seedhash2[Pair.new(errperc,0,xdropbelow)] = h2.dup
   end
 end
