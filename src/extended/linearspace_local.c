@@ -151,7 +151,7 @@ static void change_score_to_cost_function(const GtWord matchscore,
                                           GtWord *gapcost )
 {
   GtWord temp;
-//hier noch max und div nutzen und aufrunden
+//TODO:hier noch max und div nutzen und aufrunden
   temp=0;
   if (matchscore/2 > temp)
     temp=matchscore/2;
@@ -310,7 +310,7 @@ void gt_computelinearspace_local(bool showevalue,
   {
     score = gt_alignment_eval_with_score(align, matchscore,
                                          mismatchscore, gapscore);
-    fprintf(fp, "linear score: "GT_WU"\n", score);
+    fprintf(fp, "linear score: "GT_WD"\n", score);
   }
   gt_alignment_delete(align);
 }

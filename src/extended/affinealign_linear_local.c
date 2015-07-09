@@ -205,7 +205,7 @@ static GtUword gt_calc_affinealign_linear_local(const GtUchar *useq,
     gt_alignment_set_seqs(align,useq_part,ulen_part,vseq_part,vlen_part);
     score = gt_calc_affinealign_linear(useq_part, ulen_part,
                                        vseq_part, vlen_part,
-                                       align, 0,1,3);
+                                       align, 6,1,3);
   }else
   {
     gt_alignment_set_seqs(align,useq,ulen,vseq,vlen);
@@ -237,5 +237,6 @@ void gt_computeaffinelinearspace_local(bool showevalue,
   gt_alignment_show(align, fp, 80);
   if (showevalue)
     fprintf(fp, "local affine score: "GT_WU"\n", score);
+  //TODO:score ausgabe noch statt kostenausgabe
   gt_alignment_delete(align);
 }

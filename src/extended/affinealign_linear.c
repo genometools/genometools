@@ -1,3 +1,4 @@
+#include <string.h>
 #include "core/assert_api.h"
 #include "core/minmax.h"
 #include "core/error.h"
@@ -217,7 +218,6 @@ static void nextAtabRtabcolumn(const GtUchar *useq,
     }
     Anw=Awe;
     Rnw=Rwe;
-
   }
 }
 
@@ -396,9 +396,10 @@ GtUword gt_calc_affinealign_linear(const GtUchar *useq,
                                           const GtWord gap_opening,
                                           const GtWord gap_extension)
 {
-  GtUword distance,*Ctab;
+  GtUword distance,*Ctab, matchcost = 0;
   Atabentry *Atabcolumn;
   Rtabentry *Rtabcolumn;
+  GtUchar *pos;
 
   Ctab = gt_malloc(sizeof *Ctab * (vlen+1));
   Atabcolumn = gt_malloc(sizeof *Atabcolumn * (ulen+1));
@@ -406,16 +407,23 @@ GtUword gt_calc_affinealign_linear(const GtUchar *useq,
 
   Ctab[vlen] = ulen;
   if (vlen == 1UL) {
-    distance = determineCtab0(Ctab, vseq[0], useq);
+    pos = (GtUchar*)strrchr((const char *)useq, vseq[0]);
+    if(pos == NULL || gap_opening > replacement_cost-matchcost){
+      Ctab[0] = Ctab[1]-1;
+      distance = replacement_cost + (ulen-1)*gap_extension + gap_opening;
+    }
+    else{
+      Ctab[0] = (pos-useq);
+      distance = matchcost + (ulen-1)*gap_extension + 2*gap_opening;
+    }
   }
   else{
     distance = evaluateaffinecrosspoints(useq, ulen, vseq, vlen,
                                          Atabcolumn, Rtabcolumn,
                                          Ctab, 0, replacement_cost,
                                          gap_opening,gap_extension, X);
-    (void) determineCtab0(Ctab, vseq[0], useq);
+    Ctab[0] = 0;
   }
-
   reconstructalignment(align, Ctab, vlen);
   gt_free(Ctab);
   gt_free(Atabcolumn);
@@ -453,16 +461,10 @@ void gt_computeaffinelinearspace(bool showevalue,
   if(showevalue)
     fprintf(fp, "affine costs: "GT_WU"\n", distance);
   gt_alignment_delete(align);
-
-  /*printf("gt-programm\n");
-  align = gt_alignment_new_with_seqs(useq, ulen, vseq, vlen);
-  align= gt_affinealign((const char *)useq, ulen, (const char *)vseq, vlen,
-  * replacement_cost,gap_opening,gap_extension);
-  gt_assert(fp != NULL);
-  gt_alignment_show(align, fp, 80);*/
 }
 
-void gt_checkaffinelinearspace(GT_UNUSED bool forward,
+
+/*TODO:void gt_checkaffinelinearspace(GT_UNUSED bool forward,
                                const GtUchar *useq,
                                GtUword ulen,
                                const GtUchar *vseq,
@@ -471,7 +473,7 @@ void gt_checkaffinelinearspace(GT_UNUSED bool forward,
   GtAlignment *align_linear, *align_square;
   GtUword  affine1, affine2, affine3;
 
-  /*gt_assert(useq && ulen && vseq && vlen);*/
+  gt_assert(useq && ulen && vseq && vlen);
   if (gap_symbol_in_sequence(useq,ulen))
   {
     fprintf(stderr,"%s: sequence u contains gap symbol\n",__func__);
@@ -484,25 +486,9 @@ void gt_checkaffinelinearspace(GT_UNUSED bool forward,
   }
   align_linear = gt_alignment_new_with_seqs(useq, ulen, vseq, vlen);
   affine1 = gt_calc_affinealign_linear(useq, ulen, vseq, vlen, align_linear, 3, 3, 1);
-  
-  affine2 = gt_alignment_eval_with_score(align_linear, 3, 3, 1);
-  
-  if (affine1 != affine2)
-  {
-    fprintf(stderr,"gt_calc_affinealign_linear = "GT_WU" != "GT_WU
-            " = gt_alignment_eval_with_score(linear)\n", affine1, affine2);
-    exit(GT_EXIT_PROGRAMMING_ERROR);
-  }
-  
+
   align_square = gt_affinealign((const char *)useq, ulen, (const char *)vseq, vlen,3,3,1);
-  affine3 =  gt_alignment_eval_with_score(align_square, 3,3,1);
-  
-  if (affine2 != affine3)
-  {
-    fprintf(stderr,"gt_alignment_eval_with_score(linear) = "GT_WU" != "GT_WU
-            " = gt_alignment_eval_with_score(square)\n", affine2,affine3);
-    exit(GT_EXIT_PROGRAMMING_ERROR);
-  }
+
   gt_alignment_delete(align_linear);
   gt_alignment_delete(align_square);
-}
+}*/

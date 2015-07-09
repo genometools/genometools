@@ -22,22 +22,3 @@ void reconstructalignment(GtAlignment *align,
     gt_alignment_add_deletion(align);
 
 }
-
-GtUword determineCtab0(GtUword *Ctab,
-                            const GtUchar vseq0,
-                            const GtUchar *useq)
-{
-  GtUword rowindex;
-
-  for (rowindex=Ctab[1]; rowindex > 0; rowindex--)
-  {
-    if (vseq0 == useq[rowindex-1])
-    {
-      Ctab[0] = rowindex-1;
-      return Ctab[1] - 1;
-    }
-  }
-
-  Ctab[0] = (Ctab[1] > 0) ?  Ctab[1]-1 : 0;
-  return Ctab[1];
-}

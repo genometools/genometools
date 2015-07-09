@@ -113,8 +113,6 @@ GtUword gt_max_get_col_length(const Gtmaxcoordvalue *max)
 
 bool gt_max_get_length_safe(const Gtmaxcoordvalue *max)
 {
-    printf("end.a "GT_WU",end.b:"GT_WU"\n",gt_max_get_end(max).a, gt_max_get_end(max).b);
-    printf("start.a "GT_WU",start.b:"GT_WU"\n",gt_max_get_start(max).a, gt_max_get_start(max).b);
   if(gt_max_get_end(max).a == gt_max_get_start(max).a && 
      gt_max_get_end(max).b == gt_max_get_start(max).b  )
      return false;

@@ -28,7 +28,7 @@ typedef struct {
   Rnode R,D,I;
 }Rtabentry;
 
-static char* edge_to_char(Edge edge)
+/*static char* edge_to_char(Edge edge)
 {
   switch (edge){
     case 0: return "R";
@@ -36,9 +36,9 @@ static char* edge_to_char(Edge edge)
     case 2: return "I";
     default: return "X";
     }
-}
+}*/
 
-void print(Atabentry *Atabcolumn, Rtabentry *Rtabcolumn,const GtUword ulen, const GtUword colindex)
+/*void print(Atabentry *Atabcolumn, Rtabentry *Rtabcolumn,const GtUword ulen, const GtUword colindex)
 {
     FILE *data_A, *data_R;
     data_A =fopen("data_A","a");
@@ -71,4 +71,4 @@ void print(Atabentry *Atabcolumn, Rtabentry *Rtabcolumn,const GtUword ulen, cons
     }
     fclose(data_A);
     fclose(data_R);
-}
+}*/

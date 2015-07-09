@@ -20,6 +20,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#include <string.h>
 #include "core/ma.h"
 #include "core/minmax.h"
 #include "core/assert_api.h"
@@ -186,17 +187,26 @@ static GtUword computealignment(const GtUchar *useq,
   GtUword distance,
           *EDtabcolumn,
           *Rtabcolumn;
+  GtUchar *pos;
 
   EDtabcolumn = gt_malloc(sizeof *EDtabcolumn * (ulen+1));
   Rtabcolumn = gt_malloc(sizeof *Rtabcolumn * (ulen+1));
   Ctab[vlen] = ulen;
   if (vlen == 1UL) {
-    distance = determineCtab0(Ctab, vseq[0], useq);
+    pos = (GtUchar*)strrchr((const char *)useq, vseq[0]);
+    if(pos == NULL){
+      Ctab[0] = Ctab[1]-1;
+      distance = 1 + (ulen-1)*1;
+    }
+    else{
+      Ctab[0] = (pos-useq);
+      distance = 1 + (ulen-1)*1;
+    }
   }
   else{
     distance = evaluatecrosspoints(useq, vseq, ulen, vlen, EDtabcolumn,
                                    Rtabcolumn, Ctab, 0);
-    (void) determineCtab0(Ctab, vseq[0], useq);
+    Ctab[0] = 0;
   }
 
   reconstructalignment(align,Ctab, vlen);
@@ -307,7 +317,7 @@ void gt_checklinearspace(GT_UNUSED bool forward,
   GtAlignment *align;
   GtUword  alcost, edist1, edist2, edist3;
 
-  /*gt_assert(useq && ulen && vseq && vlen);*/
+  gt_assert(useq && ulen && vseq && vlen);
   if (gap_symbol_in_sequence(useq,ulen))
   {
     fprintf(stderr,"%s: sequence u contains gap symbol\n",__func__);

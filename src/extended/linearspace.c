@@ -1,3 +1,4 @@
+#include <string.h>
 #include "core/ma.h"
 #include "core/minmax.h"
 #include "core/assert_api.h"
@@ -163,21 +164,32 @@ static GtUword computealignment(const GtUchar *useq,
   GtUword distance,
           *EDtabcolumn,
           *Rtabcolumn;
+  char *pos, *useq_part;
+  useq_part= gt_malloc(sizeof *useq_part * (ulen+1));
 
   EDtabcolumn = gt_malloc(sizeof *EDtabcolumn * (ulen+1));
   Rtabcolumn = gt_malloc(sizeof *Rtabcolumn * (ulen+1));
   Ctab[vlen] = ulen;
   if (vlen == 1UL) {
-    distance = determineCtab0(Ctab, vseq[0], useq);
+    strncpy(useq_part,(const char*)useq,ulen);
+    useq_part[ulen] = '\0';
+    pos = strrchr(useq_part, vseq[0]);
+    if(pos == NULL){
+      Ctab[0] = Ctab[1]-1;
+      distance = mismatchcost + (ulen-1)*gapcost;
+    }
+    else{
+      Ctab[0] = (pos-useq_part);
+      distance = matchcost + (ulen-1)*gapcost;
+    }
   }
   else{
     distance = evaluatecrosspoints(useq, vseq, ulen, vlen,
                                    EDtabcolumn, Rtabcolumn,
                                    Ctab, 0, matchcost,
                                    mismatchcost, gapcost);
-    (void) determineCtab0(Ctab, vseq[0], useq);
+    Ctab[0] = 0;
   }
-
   reconstructalignment(align, Ctab, vlen);
   gt_free(EDtabcolumn);
   gt_free(Rtabcolumn);
