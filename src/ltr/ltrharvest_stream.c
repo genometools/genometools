@@ -1756,7 +1756,8 @@ GtNodeStream* gt_ltrharvest_stream_new(GtStr *str_indexname,
   /* get encseq associated with suffix array */
   ltrh_stream->encseq = gt_encseqSequentialsuffixarrayreader(ltrh_stream->ssar);
   /* let's print a warning if a mirrored index is used, this might have
-     probably unintended effects if the user is reusing indexes from */
+     probably unintended effects if the user is reusing indexes from
+     TIRvish */
   if (gt_encseq_is_mirrored(ltrh_stream->encseq)) {
     gt_warning("running LTRharvest on a mirrored index, "
                "results may be duplicated");
