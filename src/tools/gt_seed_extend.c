@@ -168,8 +168,6 @@ static int gt_seed_extend_runner(int argc, const char **argv, int parsed_args,
 
   /* load encseq A */
   encseq_loader = gt_encseq_loader_new();
-  if (arguments->mirror)
-    gt_encseq_loader_mirror(encseq_loader);
   gt_encseq_loader_enable_autosupport(encseq_loader);
   aencseq = gt_encseq_loader_load(encseq_loader, argv[parsed_args], err);
   if (!aencseq)

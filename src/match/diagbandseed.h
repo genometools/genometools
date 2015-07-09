@@ -43,13 +43,15 @@ GT_DECLAREARRAYSTRUCT(GtDiagbandseedSeedPair);
 
 /* Returns a GtDiagbandseedKmerPos list of k-mers from a given encseq. */
 GtUword gt_diagbandseed_get_kmers(GtDiagbandseedKmerPos *list,
-                                  const GtEncseq *encseq, unsigned int kmerlen);
+                                  const GtEncseq *encseq, unsigned int kmerlen,
+                                  bool revcompl);
 
 /* Returns a GtDiagbandseedSeedPair list of equal k-mers from lists a and b. */
 void gt_diagbandseed_merge(GtArrayGtDiagbandseedSeedPair *mlist,
                            const GtDiagbandseedKmerPos *alist, GtUword alen,
                            const GtDiagbandseedKmerPos *blist, GtUword blen,
-                           unsigned int kmerlen, GtUword maxfreq);
+                           unsigned int kmerlen, GtUword maxfreq,
+                           bool two_files);
 
 /* reports seeds from mlist that satisfy the filter criteria */
 void gt_diagbandseed_find_seeds(const GtArrayGtDiagbandseedSeedPair *mlist,
