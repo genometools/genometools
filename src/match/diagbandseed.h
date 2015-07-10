@@ -32,6 +32,7 @@ struct GtDiagbandseed {
   GtUword se_errorpercentage;
   GtUword se_historysize;
   bool mirror;
+  bool overlappingseeds;
   bool verify;
   bool benchmark;
 };

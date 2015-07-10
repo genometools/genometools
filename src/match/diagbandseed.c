@@ -98,7 +98,7 @@ GtUword gt_diagbandseed_get_kmers(GtDiagbandseedKmerPos *list,
 void gt_diagbandseed_merge(GtArrayGtDiagbandseedSeedPair *mlist,
                            const GtDiagbandseedKmerPos *alist, GtUword alen,
                            const GtDiagbandseedKmerPos *blist, GtUword blen,
-                           unsigned int kmerlen, GtUword maxfreq,
+                           unsigned int endposdiff, GtUword maxfreq,
                            bool two_files)
 {
   const GtDiagbandseedKmerPos *aptr = alist, *bptr = blist, *aend, *bend;
@@ -128,7 +128,7 @@ void gt_diagbandseed_merge(GtArrayGtDiagbandseedSeedPair *mlist,
         for (aiter = aptr; aiter < asegm_end; aiter++) {
           for (biter = bptr; biter < bsegm_end; biter++) {
             if (two_files || aiter->seqnum < biter->seqnum ||
-                (aiter->seqnum == biter->seqnum && aiter->endpos + kmerlen <=
+                (aiter->seqnum == biter->seqnum && aiter->endpos + endposdiff <
                  biter->endpos)) {
               /* no duplicates from the same dataset */
               GtDiagbandseedSeedPair *seedptr;
@@ -246,6 +246,7 @@ void gt_diagbandseed_run(const GtEncseq *aencseq, const GtEncseq *bencseq,
   GtRadixsortinfo* rdxinfo;
   GtUword alen, blen;
   const unsigned int kmerlen = arg->dbs_seedlength;
+  const unsigned int endposdiff = arg->overlappingseeds ? 0 : kmerlen - 1;
   const bool two_files = (bencseq != aencseq) ? true : false;
   const GtUword amaxlen = gt_encseq_max_seq_length(aencseq);
   const GtUword bmaxlen = gt_encseq_max_seq_length(bencseq);
@@ -316,7 +317,7 @@ void gt_diagbandseed_run(const GtEncseq *aencseq, const GtEncseq *bencseq,
 
   /* create mlist of SeedPairs */
   GT_INITARRAY(&mlist,GtDiagbandseedSeedPair);
-  gt_diagbandseed_merge(&mlist, alist, alen, blist, blen, kmerlen,
+  gt_diagbandseed_merge(&mlist, alist, alen, blist, blen, endposdiff,
                         arg->dbs_maxfreq, two_files);
   gt_free(alist);
   if (two_files || arg->mirror)
