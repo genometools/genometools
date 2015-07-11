@@ -45,15 +45,16 @@ GtStr* gt_get_gtdata_path(const char *prog, GtError *err)
   path = gt_str_new();
   had_err = gt_file_find_exec_in_path(path, prog, err);
   if (!had_err) {
-    gt_assert(gt_str_length(path));
-    gt_str_append_cstr(path, GTDATADIR);
-    if (gt_file_exists_and_is_dir(gt_str_get(path)))
-      return path;
-    gt_str_set_length(path, gt_str_length(path) - strlen(GTDATADIR));
-    gt_str_append_cstr(path, UPDIR);
-    gt_str_append_cstr(path, GTDATADIR);
-    if (gt_file_exists_and_is_dir(gt_str_get(path)))
-      return path;
+    if (gt_file_exists_and_is_dir(gt_str_get(path))) {
+      gt_str_append_cstr(path, GTDATADIR);
+      if (gt_file_exists_and_is_dir(gt_str_get(path)))
+        return path;
+      gt_str_set_length(path, gt_str_length(path) - strlen(GTDATADIR));
+      gt_str_append_cstr(path, UPDIR);
+      gt_str_append_cstr(path, GTDATADIR);
+      if (gt_file_exists_and_is_dir(gt_str_get(path)))
+        return path;
+    }
     for (defaultpath = GTDATA_DEFAULT_PATHS; *defaultpath; defaultpath++) {
       gt_str_reset(path);
       gt_str_append_cstr(path, *defaultpath);
