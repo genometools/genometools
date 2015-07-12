@@ -22,14 +22,24 @@ def prefixlength_get(prjfile)
   return prefixlength
 end
 
-def makeseedhash(indexname,seedlength,extend_opt,optionlist)
+def createrepfindcall(indexname,seedlength,extend_opt,optionlist,
+                      gencall = false)
+  verbose = if gencall then "" else "-v " end
+  return "env -i bin/gt repfind -scan #{verbose} -seedlength #{seedlength} " +
+         "-#{extend_opt} -ii #{indexname} " + optionlist.join(" ")
+end
+
+def makeseedhash(indexname,seedlength,extend_opt,optionlist,gencall = false)
   seedhash = Hash.new()
   key = nil
   if seedlength == 0
     seedlength = 2 * prefixlength_get("#{indexname}.prj")
   end
-  repfindcall = "env -i bin/gt repfind -scan -v -seedlength #{seedlength} " +
-                "-#{extend_opt} -ii #{indexname} " + optionlist.join(" ")
+  repfindcall = createrepfindcall(indexname,seedlength,extend_opt,optionlist,
+                                  gencall)
+  if gencall
+    return repfindcall
+  end
   STDERR.puts "\# #{repfindcall}"
   IO.popen(repfindcall.split(/\s/)).each_line do |line|
     if line.match(/# seed:/)

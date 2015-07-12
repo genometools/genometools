@@ -19,28 +19,45 @@ maxalilendiff = 30
 history = 60
 silent = false
 taglist = ["greedy","xdrop"]
+gencall = true
 
 Pair = Struct.new("Pair",:errperc,:permathistory,:xdropbelow)
 
+if gencall
+  puts "\#!/bin/sh"
+end
+
 seedhash1 = Hash.new()
 seedhash2 = Hash.new()
-[1,2,5,7,10,12,15].each do |errperc|
+1.upto(15).each do |errperc|
   commonoptions = ["-err #{errperc}","-l #{minlength}"]
-  [40,45,50,55].each do |permathistory|
+  [50,55].each do |permathistory|
     h1 = makeseedhash(indexname,seedlength,"extend#{taglist[0]}",
                          commonoptions +
                          ["-maxalilendiff #{maxalilendiff}",
                           "-history #{history}",
-                          "-percmathistory #{permathistory}"])
-    STDERR.puts "# seedhash1: size = #{h1.length}"
-    seedhash1[Pair.new(errperc,permathistory,0)] = h1.dup
+                          "-percmathistory #{permathistory}"],gencall)
+    if gencall
+      puts "#{h1} > result-" + [taglist[0],seedlength,minlength,errperc,permathistory].join("-") + ".matches"
+    else
+      STDERR.puts "# seedhash1: size = #{h1.length}"
+      seedhash1[Pair.new(errperc,permathistory,0)] = h1.dup
+    end
   end
   [1,2,3,4,5,6,7,8].each do |xdropbelow|
     h2 = makeseedhash(indexname,seedlength,"extend#{taglist[1]}",
-                         commonoptions + ["-xdropbelow #{xdropbelow}"])
-    STDERR.puts "# seedhash2: size = #{h2.length}"
-    seedhash2[Pair.new(errperc,0,xdropbelow)] = h2.dup
+                         commonoptions + ["-xdropbelow #{xdropbelow}"],gencall)
+    if gencall
+      puts "#{h2} > result-" + [taglist[1],seedlength,minlength,errperc,xdropbelow].join("-") + ".matches"
+    else
+      STDERR.puts "# seedhash2: size = #{h2.length}"
+      seedhash2[Pair.new(errperc,0,xdropbelow)] = h2.dup
+    end
   end
+end
+
+if gencall
+  exit(0)
 end
 
 Differenceresult = Struct.new("Differenceresult",:pair,:sum_size,
