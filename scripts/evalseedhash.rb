@@ -23,10 +23,21 @@ def prefixlength_get(prjfile)
 end
 
 def createrepfindcall(indexname,seedlength,extend_opt,optionlist,
+                      emptyenv,
                       gencall = false)
   verbose = if gencall then "" else "-v " end
-  return "env -i bin/gt repfind -scan #{verbose} -seedlength #{seedlength} " +
-         "-#{extend_opt} -ii #{indexname} " + optionlist.join(" ")
+  repfindcall = "bin/gt repfind -scan #{verbose} -seedlength #{seedlength} " +
+                "-#{extend_opt} -ii #{indexname} " + optionlist.join(" ")
+  if emptyenv 
+    return "env -i #{repfindcall}" 
+  else 
+    return repfindcall 
+  end
+end
+
+def match_new_without_result(a)
+  return Match.new(a[0].to_i,a[1].to_i,a[2].to_i,a[4].to_i,a[5].to_i,a[6].to_i,
+                   a[7].to_i,a[8].to_i,a[9].to_f,nil,nil,nil)
 end
 
 def makeseedhash(indexname,seedlength,extend_opt,optionlist,gencall = false)
@@ -36,7 +47,7 @@ def makeseedhash(indexname,seedlength,extend_opt,optionlist,gencall = false)
     seedlength = 2 * prefixlength_get("#{indexname}.prj")
   end
   repfindcall = createrepfindcall(indexname,seedlength,extend_opt,optionlist,
-                                  gencall)
+                                  true,gencall)
   if gencall
     return repfindcall
   end
@@ -56,10 +67,7 @@ def makeseedhash(indexname,seedlength,extend_opt,optionlist,gencall = false)
         STDERR.puts "#{$0}: key #{key} already occurs"
         exit 1
       end
-      seedhash[key] = Match.new(a[0].to_i,a[1].to_i,a[2].to_i,
-                                a[4].to_i,a[5].to_i,a[6].to_i,
-                                a[7].to_i,a[8].to_i,a[9].to_f,
-                                nil,nil,nil)
+      seedhash[key] = match_new_without_result(a)
       key = nil
     end
   end
@@ -272,4 +280,18 @@ def preprocess_index(inputfile)
     end
   end
   return indexname
+end
+
+def readmatchesfromfile(resultmatchfile)
+  thishash = Hash.new()
+  key = 0
+  File.open(resultmatchfile,"r").each_line do |line|
+    if not line.match(/^\d/)
+      STDERR.print "#{$0}: #{resultfile}: illegal line #{line}"
+      exit 1
+    end
+    thishash[key] = match_new_without_result(line.split(/\s/))
+    key += 1
+  end
+  return thishash
 end
