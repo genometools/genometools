@@ -29,6 +29,8 @@
 #include "core/versionfunc.h"
 #include "core/minmax.h"
 #include "core/encseq.h"
+#include "core/showtime.h"
+#include "core/timer_api.h"
 #include "match/esa-maxpairs.h"
 #include "match/esa-mmsearch.h"
 #include "match/querymatch.h"
@@ -384,9 +386,15 @@ static int gt_repfind_runner(GT_UNUSED int argc,
   GtXdropmatchinfo *xdropmatchinfo = NULL;
   GtGreedyextendmatchinfo *greedyextendmatchinfo = NULL;
   GtQuerymatch *querymatchspaceptr = NULL;
+  GtTimer *repfindtimer = NULL;
 
   gt_error_check(err);
   logger = gt_logger_new(arguments->beverbose, GT_LOGGER_DEFLT_PREFIX, stdout);
+  if (gt_showtime_enabled())
+  {
+    repfindtimer = gt_timer_new();
+    gt_timer_start(repfindtimer);
+  }
   if (parsed_args < argc)
   {
     gt_error_set(err,"superfluous arguments: \"%s\"",argv[argc-1]);
@@ -541,6 +549,37 @@ static int gt_repfind_runner(GT_UNUSED int argc,
   gt_xdrop_matchinfo_delete(xdropmatchinfo);
   gt_greedy_extend_matchinfo_delete(greedyextendmatchinfo);
   gt_logger_delete(logger);
+  if (repfindtimer != NULL)
+  {
+    printf("# TIME repfind");
+    if (arguments->extendgreedy)
+    {
+      printf("-greedy");
+    } else
+    {
+      if (arguments->extendxdrop)
+      {
+        printf("-xdrop");
+      }
+    }
+    printf("-%u-%u",arguments->seedlength,arguments->userdefinedleastlength);
+    if (arguments->extendgreedy || arguments->extendxdrop)
+    {
+      printf("-" GT_WU,arguments->errorpercentage);
+    }
+    if (arguments->extendgreedy)
+    {
+      printf("-" GT_WU,arguments->perc_mat_history);
+    } else
+    {
+      if (arguments->extendxdrop)
+      {
+        printf("-" GT_WD,arguments->xdropbelowscore);
+      }
+    }
+    gt_timer_show_formatted(repfindtimer," overall " GT_WD ".%02ld\n",stdout);
+    gt_timer_delete(repfindtimer);
+  }
   return haserr ? -1 : 0;
 }
 
