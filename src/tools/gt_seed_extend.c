@@ -115,9 +115,9 @@ static GtOptionParser* gt_seed_extend_option_parser_new(void *tool_arguments)
                               &arguments->mirror, false);
   gt_option_parser_add_option(op, option);
 
-  /* -olseeds */
-  option = gt_option_new_bool("olseeds", "allow SeedPairs, which overlap",
-                              &arguments->overlappingseeds, false);
+  /* -overlappingseeds */
+  option = gt_option_new_bool("overlappingseeds", "allow SeedPairs, which "
+                              "overlap", &arguments->overlappingseeds, false);
   gt_option_parser_add_option(op, option);
   gt_option_is_development_option(option);
 
