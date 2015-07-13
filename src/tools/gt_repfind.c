@@ -49,7 +49,7 @@ typedef struct
           errorpercentage, /* 100 - 2 * errorpercentage = correlation */
           maxalignedlendifference; /* maxfrontdist */
   bool scanfile, beverbose, forward, reverse, searchspm, extendxdrop,
-       extendgreedy, check_extend_symmetry;
+       extendgreedy, check_extend_symmetry, silent;
   GtStr *indexname, *cam_string; /* parse this using
                                     gt_greedy_extend_char_access*/
   GtStrArray *queryfiles;
@@ -314,10 +314,12 @@ static GtOptionParser *gt_repfind_option_parser_new(void *tool_arguments)
   gt_option_is_development_option(queryoption);
   gt_option_parser_add_option(op, queryoption);
 
-  option = gt_option_new_bool("v",
-                              "be verbose ",
-                              &arguments->beverbose,
-                              false);
+  option = gt_option_new_bool("silent","do not report matches",
+                               &arguments->silent, false);
+  gt_option_parser_add_option(op, option);
+  gt_option_is_development_option(option);
+
+  option = gt_option_new_bool("v","be verbose",&arguments->beverbose, false);
   gt_option_parser_add_option(op, option);
 
   gt_option_exclude(extendgreedyoption,extendxdropoption);
@@ -408,7 +410,8 @@ static int gt_repfind_runner(GT_UNUSED int argc,
                                arguments->xdropbelowscore,
                                gt_str_array_size(arguments->queryfiles) == 0
                                              ? true : false,
-                               arguments->beverbose);
+                               arguments->beverbose,
+                               arguments->silent);
     gt_assert(xdropmatchinfo != NULL);
   }
   if (!haserr && arguments->extendgreedy)
@@ -430,7 +433,8 @@ static int gt_repfind_runner(GT_UNUSED int argc,
                                      arguments->userdefinedleastlength,
                                      extend_char_access,
                                      arguments->beverbose,
-                                     arguments->check_extend_symmetry);
+                                     arguments->check_extend_symmetry,
+                                     arguments->silent);
     }
   }
   if (!haserr)

@@ -24,10 +24,11 @@ end
 
 def createrepfindcall(indexname,seedlength,extend_opt,optionlist,
                       emptyenv,
-                      gencall = false)
-  verbose = if gencall then "" else "-v " end
-  repfindcall = "bin/gt repfind -scan #{verbose} -seedlength #{seedlength} " +
-                "-#{extend_opt} -ii #{indexname} " + optionlist.join(" ")
+                      verbose = true)
+  verboseoption = if verbose then "-v" else "" end
+  repfindcall = "bin/gt repfind -scan #{verboseoption} " +
+                "-seedlength #{seedlength} -#{extend_opt} -ii #{indexname} " + 
+                optionlist.join(" ")
   if emptyenv 
     return "env -i #{repfindcall}" 
   else 
@@ -47,7 +48,7 @@ def makeseedhash(indexname,seedlength,extend_opt,optionlist,gencall = false)
     seedlength = 2 * prefixlength_get("#{indexname}.prj")
   end
   repfindcall = createrepfindcall(indexname,seedlength,extend_opt,optionlist,
-                                  true,gencall)
+                                  true,if gencall then false else true end)
   if gencall
     return repfindcall
   end

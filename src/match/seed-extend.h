@@ -26,7 +26,8 @@ GtXdropmatchinfo *gt_xdrop_matchinfo_new(GtUword userdefinedleastlength,
                                          GtUword errorpercentage,
                                          GtXdropscore xdropbelowscore,
                                          bool selfcompare,
-                                         bool beverbose);
+                                         bool beverbose,
+                                         bool silent);
 
 void gt_xdrop_matchinfo_delete(GtXdropmatchinfo *xdropmatchinfo);
 
@@ -59,7 +60,8 @@ GtGreedyextendmatchinfo *gt_greedy_extend_matchinfo_new(
                                    GtUword userdefinedleastlength,
                                    GtExtendCharAccess extend_char_access,
                                    bool beverbose,
-                                   bool check_extend_symmetry);
+                                   bool check_extend_symmetry,
+                                   bool silent);
 
 void gt_greedy_extend_matchinfo_delete(GtGreedyextendmatchinfo *ggemi);
 

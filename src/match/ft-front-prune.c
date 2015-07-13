@@ -542,8 +542,11 @@ static void update_trace_and_polished(Polished_point *best_polished_point,
       best_polished_point->distance = distance;
       best_polished_point->trimleft = trimleft;
     }
-    front_trace_add_trace(front_trace,frontptr->backreference,
-                          frontptr->localmatch_count);
+    if (front_trace != NULL)
+    {
+      front_trace_add_trace(front_trace,frontptr->backreference,
+                            frontptr->localmatch_count);
+    }
   }
 }
 
@@ -707,7 +710,10 @@ GtUword front_prune_edist_inplace(
       diedout = true;
       break;
     }
-    front_trace_add_gen(front_trace,trimleft,valid);
+    if (front_trace != NULL)
+    {
+      front_trace_add_gen(front_trace,trimleft,valid);
+    }
     update_trace_and_polished(best_polished_point,
 #ifndef OUTSIDE_OF_GT
                               &useq.min_access_pos,

@@ -85,15 +85,18 @@ choosemin = 1
 end
 
 
+emptyenv = false
 1.upto(maxerrperc).each do |errperc|
   puts "#{paramchoices[errperc]}"
-  commonoptions = ["-err #{errperc}","-l #{minlength}"]
+  commonoptions = ["-err #{errperc}","-l #{minlength}","-silent"]
   permathistory = paramchoices[errperc][0]
   xdropbelow = paramchoices[errperc][1]
   optionlist = commonoptions + ["-percmathistory #{permathistory}"]
-  repfindcall = createrepfindcall(indexname,seedlength,"extendgreedy",optionlist,false)
+  repfindcall = createrepfindcall(indexname,seedlength,"extendgreedy",
+                                  optionlist,emptyenv,false)
   puts "#{repfindcall}"
   optionlist = commonoptions + ["-xdropbelow #{xdropbelow}"]
-  repfindcall = createrepfindcall(indexname,seedlength,"extendxdrop",optionlist,false)
+  repfindcall = createrepfindcall(indexname,seedlength,"extendxdrop",optionlist,
+                                  emptyenv,false)
   puts "#{repfindcall}"
 end

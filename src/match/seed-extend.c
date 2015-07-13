@@ -51,7 +51,7 @@ struct GtXdropmatchinfo
   GtXdropscore belowscore;
   GtSeqabstract *useq, *vseq;
   GtWord errorpercentage;
-  bool beverbose;
+  bool beverbose, silent;
   const GtUchar *query_sequence;
   GtUword query_totallength;
   unsigned int userdefinedleastlength;
@@ -61,7 +61,8 @@ GtXdropmatchinfo *gt_xdrop_matchinfo_new(GtUword userdefinedleastlength,
                                          GtUword errorpercentage,
                                          GtXdropscore xdropbelowscore,
                                          bool selfcompare,
-                                         bool beverbose)
+                                         bool beverbose,
+                                         bool silent)
 {
   GtXdropmatchinfo *xdropmatchinfo = gt_malloc(sizeof *xdropmatchinfo);
 
@@ -87,6 +88,7 @@ GtXdropmatchinfo *gt_xdrop_matchinfo_new(GtUword userdefinedleastlength,
   xdropmatchinfo->userdefinedleastlength = userdefinedleastlength;
   xdropmatchinfo->errorpercentage = errorpercentage;
   xdropmatchinfo->belowscore = xdropbelowscore;
+  xdropmatchinfo->silent = silent;
   return xdropmatchinfo;
 }
 
@@ -204,7 +206,8 @@ struct GtGreedyextendmatchinfo
   unsigned int userdefinedleastlength;
   GtExtendCharAccess extend_char_access;
   bool beverbose,
-       check_extend_symmetry;
+       check_extend_symmetry,
+       silent;
   GtQuerymatch *querymatchspaceptr;
   GtEncseqReader *encseq_r_in_u, *encseq_r_in_v;
   GtAllocatedMemory usequence_cache, vsequence_cache, frontspace_reservoir;
@@ -218,7 +221,8 @@ GtGreedyextendmatchinfo *gt_greedy_extend_matchinfo_new(
                                    GtUword userdefinedleastlength,
                                    GtExtendCharAccess extend_char_access,
                                    bool beverbose,
-                                   bool check_extend_symmetry)
+                                   bool check_extend_symmetry,
+                                   bool silent)
 {
   GtGreedyextendmatchinfo *ggemi = gt_malloc(sizeof *ggemi);
 
@@ -250,6 +254,7 @@ GtGreedyextendmatchinfo *gt_greedy_extend_matchinfo_new(
   ggemi->frontspace_reservoir.offset = 0;
   ggemi->check_extend_symmetry = check_extend_symmetry;
   ggemi->extend_char_access = extend_char_access;
+  ggemi->silent = silent;
   return ggemi;
 }
 
@@ -287,8 +292,14 @@ int gt_simplegreedyselfmatchoutput(void *info,
   Polished_point left_best_polished_point = {0,0,0},
                  right_best_polished_point = {0,0,0};
 
-  front_trace_reset(greedyextendmatchinfo->left_front_trace,0);
-  front_trace_reset(greedyextendmatchinfo->right_front_trace,0);
+  if (greedyextendmatchinfo->left_front_trace != NULL)
+  {
+    front_trace_reset(greedyextendmatchinfo->left_front_trace,0);
+  }
+  if (greedyextendmatchinfo->right_front_trace != NULL)
+  {
+    front_trace_reset(greedyextendmatchinfo->right_front_trace,0);
+  }
   gt_assert(genericencseq != NULL && genericencseq->hasencseq);
   encseq = genericencseq->seqptr.encseq;
   if (pos1 > pos2)
@@ -440,11 +451,17 @@ int gt_simplegreedyselfmatchoutput(void *info,
                        (uint64_t) rfsi.queryseqnum,
                        querylen,
                        querystart - rfsi.queryseqstartpos);
-    return gt_querymatch_output(info, encseq,
-                                greedyextendmatchinfo->querymatchspaceptr,
-                                NULL,
-                                rfsi.queryseqlength,
-                                err);
+    if (greedyextendmatchinfo->silent)
+    {
+      return 0;
+    } else
+    {
+      return gt_querymatch_output(info, encseq,
+                                  greedyextendmatchinfo->querymatchspaceptr,
+                                  NULL,
+                                  rfsi.queryseqlength,
+                                  err);
+    }
   } else
   {
     if (error_rate(total_distance,total_alignedlen) >
@@ -598,10 +615,16 @@ int gt_simplexdropselfmatchoutput(void *info,
                        (uint64_t) rfsi.queryseqnum,
                        querylen,
                        querystart - rfsi.queryseqstartpos);
-    return gt_querymatch_output(info, encseq,
-                                xdropmatchinfo->querymatchspaceptr,NULL,
-                                rfsi.queryseqlength,
-                                err);
+    if (xdropmatchinfo->silent)
+    {
+      return 0;
+    } else
+    {
+      return gt_querymatch_output(info, encseq,
+                                  xdropmatchinfo->querymatchspaceptr,NULL,
+                                  rfsi.queryseqlength,
+                                  err);
+    }
   } else
   {
     return 0;
