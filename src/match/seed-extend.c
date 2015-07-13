@@ -21,6 +21,7 @@
 #include "match/xdrop.h"
 #include "match/esa-maxpairs.h"
 #include "match/ft-front-prune.h"
+#include "match/ft-trimstat.h"
 #include "match/seed-extend.h"
 
 static GtWord distance2score(GtUword distance,GtUword alignedlen)
@@ -204,6 +205,7 @@ struct GtGreedyextendmatchinfo
   bool beverbose,
        check_extend_symmetry,
        silent;
+  Trimstat *trimstat;
   GtQuerymatch *querymatchspaceptr;
   GtEncseqReader *encseq_r_in_u, *encseq_r_in_v;
   GtAllocatedMemory usequence_cache, vsequence_cache, frontspace_reservoir;
@@ -251,6 +253,9 @@ GtGreedyextendmatchinfo *gt_greedy_extend_matchinfo_new(
   ggemi->check_extend_symmetry = check_extend_symmetry;
   ggemi->extend_char_access = extend_char_access;
   ggemi->silent = silent;
+  ggemi->trimstat = trimstat_new(errorpercentage,
+                                 perc_mat_history,
+                                 maxalignedlendifference);
   return ggemi;
 }
 
@@ -267,6 +272,7 @@ void gt_greedy_extend_matchinfo_delete(GtGreedyextendmatchinfo *ggemi)
     gt_free(ggemi->usequence_cache.space);
     gt_free(ggemi->vsequence_cache.space);
     gt_free(ggemi->frontspace_reservoir.space);
+    trimstat_delete(ggemi->trimstat,0.0,true);
     gt_free(ggemi);
   }
 }
@@ -349,6 +355,7 @@ int gt_simplegreedyselfmatchoutput(void *info,
     (void) front_prune_edist_inplace(false,
                                      &greedyextendmatchinfo->
                                         frontspace_reservoir,
+                                     greedyextendmatchinfo->trimstat,
                                      &left_best_polished_point,
                                      greedyextendmatchinfo->left_front_trace,
                                      greedyextendmatchinfo->pol_info,
@@ -384,6 +391,7 @@ int gt_simplegreedyselfmatchoutput(void *info,
     (void) front_prune_edist_inplace(true,
                                      &greedyextendmatchinfo->
                                         frontspace_reservoir,
+                                     greedyextendmatchinfo->trimstat,
                                      &right_best_polished_point,
                                      greedyextendmatchinfo->right_front_trace,
                                      greedyextendmatchinfo->pol_info,

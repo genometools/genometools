@@ -14,6 +14,7 @@
 #include "core/ma_api.h"
 #include "core/types_api.h"
 #include "ft-front-prune.h"
+#include "ft-trimstat.h"
 #include "core/minmax.h"
 #include "ft-polish.h"
 #include "ft-front-generation.h"
@@ -561,6 +562,7 @@ GtUword front_prune_edist_inplace(
                          bool forward,
                          GtAllocatedMemory *frontspace,
 #endif
+                         Trimstat *trimstat,
                          Polished_point *best_polished_point,
                          Fronttrace *front_trace,
                          const Polishing_info *pol_info,
@@ -749,5 +751,16 @@ GtUword front_prune_edist_inplace(
       break;
     }
   }
+  trimstat_add(trimstat,diedout,sumvalid,maxvalid,distance,
+               sizeof (Frontvalue) * frontspace->allocated,
+#ifndef OUTSIDE_OF_GT
+               useq.sequence_cache != NULL &&
+               vseq.sequence_cache != NULL ? MAX(useq.sequence_cache->allocated,
+                                                 vseq.sequence_cache->allocated)
+                                           : 0
+#else
+               0
+#endif
+              );
   return diedout ? sumseqlength + 1 : distance;
 }
