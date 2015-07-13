@@ -70,6 +70,8 @@ static void sequenceobject_init(Sequenceobject *seq,
   seq->encseq = NULL;
   seq->encseqreader = NULL;
   seq->twobitencoding = NULL;
+  seq->cache_ptr = NULL;
+  seq->sequence_cache = NULL;
   if (extend_char_access_mode == GT_EXTEND_CHAR_ACCESS_ANY &&
       gt_encseq_has_twobitencoding(encseq) && gt_encseq_wildcards(encseq) == 0)
   {
@@ -512,6 +514,7 @@ static void update_trace_and_polished(Polished_point *best_polished_point,
                                       Frontvalue *highfront)
 {
   const Frontvalue *frontptr;
+  uint64_t lsb;
 
 #ifndef OUTSIDE_OF_GT
   *minrow = GT_UWORD_MAX;
@@ -536,7 +539,8 @@ static void update_trace_and_polished(Polished_point *best_polished_point,
       *mincol = currentcol;
     }
 #endif
-    if (history_is_polished(pol_info,frontptr->matchhistory) &&
+    lsb = frontptr->matchhistory & pol_info->mask;
+    if (HISTORY_IS_POLISHED(pol_info,frontptr->matchhistory,lsb) &&
         alignedlen > best_polished_point->alignedlen)
     {
       best_polished_point->alignedlen = alignedlen;

@@ -7,18 +7,6 @@
 #include "core/types_api.h"
 #include "ft-polish.h"
 
-typedef struct
-{
-  int16_t score_sum, diff_from_max;
-} Polishing_value;
-
-struct Polishing_info
-{
-  GtUword entries, cut_depth, mask;
-  GtWord difference_score, match_score;
-  Polishing_value *values;
-};
-
 static void fill_polishing_info(Polishing_info *pol_info,
                                 GtUword currentdepth,
                                 GtUword prefix, GtWord score, GtWord maxscore)
@@ -106,22 +94,6 @@ void polishing_info_delete(Polishing_info *pol_info)
     gt_free(pol_info->values);
     gt_free(pol_info);
   }
-}
-
-bool history_is_polished(const Polishing_info *pol_info,uint64_t matchhistory)
-{
-  uint64_t lsb;
-
-  gt_assert(pol_info != NULL);
-  lsb = matchhistory & pol_info->mask;
-  if (pol_info->values[lsb].diff_from_max >= 0 &&
-      pol_info->values[lsb].score_sum +
-      pol_info->values[(matchhistory >> pol_info->cut_depth) &
-                       pol_info->mask].diff_from_max >= 0)
-  {
-    return true;
-  }
-  return false;
 }
 
 bool history_is_polished_brute_force(const Polishing_info *pol_info,
