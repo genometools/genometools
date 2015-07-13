@@ -73,11 +73,11 @@ static void gt_diagbandseed_processkmercode(void *prockmerinfo,
   GtDiagbandseedKmerPos *kmerposptr = arg->list + arg->numberofkmerscollected;
   if (firstinrange == true) {
     arg->endpos = (GtDiagbandseedPosition)(arg->kmerlen - 1);
-    if (arg->seqnum == GT_DIAGBANDSEED_SEQNUM_UNDEF) {
-      arg->seqnum = 0;
-    } else if (arg->has_short_sequences) {
+    if (arg->has_short_sequences) {
       arg->seqnum = (GtDiagbandseedSeqnum)gt_encseq_seqnum(arg->encseq,
                                                            position);
+    } else if (arg->seqnum == GT_DIAGBANDSEED_SEQNUM_UNDEF) {
+      arg->seqnum = 0;
     } else {
       arg->seqnum++;
     }
@@ -375,10 +375,10 @@ void gt_diagbandseed_run(const GtEncseq *aencseq, const GtEncseq *bencseq,
 
 #ifdef DEBUG_GET_KMERS
   for (GtDiagbandseedKmerPos *a = alist; a < alist+alen; a++) {
-    printf("a) Kmer (%07lX,%d,%d)\n", a->code, a->endpos, a->seqnum);
+    printf("a) Kmer (%lX,%d,%d)\n", a->code, a->endpos, a->seqnum);
   }
   for (GtDiagbandseedKmerPos *b = blist; b < blist+blen; b++) {
-    printf("b) Kmer (%07lX,%d,%d)\n", b->code, b->endpos, b->seqnum);
+    printf("b) Kmer (%lX,%d,%d)\n", b->code, b->endpos, b->seqnum);
   }
 #endif
 
