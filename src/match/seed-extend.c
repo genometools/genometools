@@ -253,9 +253,15 @@ GtGreedyextendmatchinfo *gt_greedy_extend_matchinfo_new(
   ggemi->check_extend_symmetry = check_extend_symmetry;
   ggemi->extend_char_access = extend_char_access;
   ggemi->silent = silent;
-  ggemi->trimstat = trimstat_new(errorpercentage,
-                                 perc_mat_history,
-                                 maxalignedlendifference);
+  if (silent)
+  {
+    ggemi->trimstat = trimstat_new(errorpercentage,
+                                   perc_mat_history,
+                                   maxalignedlendifference);
+  } else
+  {
+    ggemi->trimstat = NULL;
+  }
   return ggemi;
 }
 
