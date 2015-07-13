@@ -14,7 +14,6 @@ typedef struct
 #ifndef OUTSIDE_OF_GT
 typedef enum
 {
-  GT_EXTEND_CHAR_ACCESS_TWOBIT,
   GT_EXTEND_CHAR_ACCESS_ENCSEQ,
   GT_EXTEND_CHAR_ACCESS_ENCSEQ_READER,
   GT_EXTEND_CHAR_ACCESS_ANY
@@ -26,6 +25,7 @@ typedef struct
   GtAllocatedMemory *sequence_cache;
   GtEncseqReader *encseq_r;
   GtExtendCharAccess extend_char_access;
+  GtUword totallength;
 } FTsequenceResources;
 #endif
 

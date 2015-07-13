@@ -167,16 +167,12 @@ static void skdebug(GT_UNUSED const char *format, ...)
 const char *gt_cam_extendgreedy_comment(void)
 {
   return "specify character access mode: possible values: "
-         "twobit, encseq, encseq_reader";
+         "encseq, encseq_reader";
 }
 
 GtExtendCharAccess gt_greedy_extend_char_access(const char *cam_string,
                                                 GtError *err)
 {
-  if (strcmp(cam_string,"twobit") == 0)
-  {
-    return GT_EXTEND_CHAR_ACCESS_TWOBIT;
-  }
   if (strcmp(cam_string,"encseq") == 0)
   {
     return GT_EXTEND_CHAR_ACCESS_ENCSEQ;
@@ -332,6 +328,7 @@ int gt_simplegreedyselfmatchoutput(void *info,
                                               0);
   }
   ufsr.encseq = vfsr.encseq = encseq;
+  ufsr.totallength = vfsr.totallength = gt_encseq_total_length(encseq);
   ufsr.encseq_r = greedyextendmatchinfo->encseq_r_in_u;
   ufsr.sequence_cache = &greedyextendmatchinfo->usequence_cache;
   ufsr.extend_char_access = greedyextendmatchinfo->extend_char_access;
