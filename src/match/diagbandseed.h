@@ -20,6 +20,7 @@
 #include <stdbool.h>
 #include "core/arraydef.h"
 #include "core/encseq_api.h"
+#include "core/readmode_api.h"
 #include "core/types_api.h"
 
 struct GtDiagbandseed {
@@ -44,8 +45,9 @@ GT_DECLAREARRAYSTRUCT(GtDiagbandseedSeedPair);
 
 /* Returns a GtDiagbandseedKmerPos list of k-mers from a given encseq. */
 GtUword gt_diagbandseed_get_kmers(GtDiagbandseedKmerPos *list,
-                                  const GtEncseq *encseq, unsigned int kmerlen,
-                                  bool revcompl);
+                                  const GtEncseq *encseq,
+                                  unsigned int kmerlen,
+                                  GtReadmode readmode);
 
 /* Returns a GtDiagbandseedSeedPair list of equal k-mers from lists a and b. */
 void gt_diagbandseed_merge(GtArrayGtDiagbandseedSeedPair *mlist,
