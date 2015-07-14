@@ -287,12 +287,13 @@ def readmatchesfromfile(resultmatchfile)
   thishash = Hash.new()
   key = 0
   File.open(resultmatchfile,"r").each_line do |line|
-    if not line.match(/^\d/)
+    if line.match(/^\d/)
+      thishash[key] = match_new_without_result(line.split(/\s/))
+      key += 1
+    elsif not line.match(/^\#/)
       STDERR.print "#{$0}: #{resultfile}: illegal line #{line}"
       exit 1
     end
-    thishash[key] = match_new_without_result(line.split(/\s/))
-    key += 1
   end
   return thishash
 end

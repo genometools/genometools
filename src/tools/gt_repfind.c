@@ -574,6 +574,7 @@ static int gt_repfind_runner(GT_UNUSED int argc,
     if (arguments->extendgreedy)
     {
       printf("-" GT_WU,arguments->perc_mat_history);
+      printf("-" GT_WU,arguments->maxalignedlendifference);
     } else
     {
       if (arguments->extendxdrop)
