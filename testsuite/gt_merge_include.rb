@@ -40,6 +40,13 @@ Test do
   run_test("#{$bin}gt merge #{$testdata}/standard_gene_as_tree.gff3 1")
 end
 
+Name "gt merge many unsorted files"
+Keywords "gt_merge"
+Test do
+  run_test("#{$bin}gt merge #{$testdata}/standard_gene_as_tree.gff3 #{$testdata}unsorted_gff3_file.txt #{$testdata}unsorted_gff3_file.txt #{$testdata}unsorted_gff3_file.txt", :retval => 1)
+  grep(last_stderr, "is not sorted")
+end
+
 Name "gt merge with sequence"
 Keywords "gt_merge"
 Test do
