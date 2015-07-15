@@ -89,7 +89,7 @@ static int merge_stream_next_in_order(GtNodeStream *ns, GtGenomeNode **gn,
   }
 
   /* stream the queue contents */
-  if (!gt_priority_queue_is_empty(ms->pq)) {
+  if (!had_err && !gt_priority_queue_is_empty(ms->pq)) {
     GtMergeStreamItem *min_item = gt_priority_queue_extract_min(ms->pq);
     GtGenomeNode *nextnode = NULL;
     gt_assert(min_item && min_item->gn);
@@ -152,7 +152,7 @@ static int merge_stream_next(GtNodeStream *ns, GtGenomeNode **gn, GtError *err)
     }
   }
 
-  for (;;) {
+  while (!had_err) {
     gt_assert(ms->first_node && !ms->second_node);
     had_err = merge_stream_next_in_order(ns, &ms->second_node, err);
     if (!had_err && ms->second_node) {
