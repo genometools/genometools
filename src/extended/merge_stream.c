@@ -105,6 +105,7 @@ static int merge_stream_next_in_order(GtNodeStream *ns, GtGenomeNode **gn,
         min_item->gn = nextnode;
         gt_priority_queue_add(ms->pq, min_item);
       } else {
+        min_item->gn = NULL;
         gt_genome_node_delete(nextnode);
       }
     }
@@ -177,8 +178,11 @@ static void merge_stream_free(GtNodeStream *ns)
 {
   GtMergeStream *ms = gt_merge_stream_cast(ns);
   GtUword i;
-  for (i = 0; i < gt_array_size(ms->node_streams); i++)
+  for (i = 0; i < gt_array_size(ms->node_streams); i++) {
+    if (ms->items[i].gn)
+      gt_genome_node_delete(ms->items[i].gn);
     gt_node_stream_delete(*(GtNodeStream**) gt_array_get(ms->node_streams, i));
+  }
   gt_array_delete(ms->node_streams);
   gt_free(ms->items);
   gt_priority_queue_delete(ms->pq);
