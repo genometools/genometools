@@ -377,6 +377,40 @@ static int gt_repfind_arguments_check(GT_UNUSED int rest_argc,
   return 0;
 }
 
+static int gt_generic_simplexdropselfmatchoutput(
+                                           void *info,
+                                           const GtGenericEncseq *genericencseq,
+                                           GtUword len,
+                                           GtUword pos1,
+                                           GtUword pos2,
+                                           GtError *err)
+{
+  gt_assert(genericencseq != NULL && genericencseq->hasencseq);
+  return gt_simplexdropselfmatchoutput(info,
+                                       genericencseq->seqptr.encseq,
+                                       len,
+                                       pos1,
+                                       pos2,
+                                       err);
+}
+
+static int gt_generic_simplegreedyselfmatchoutput(
+                                           void *info,
+                                           const GtGenericEncseq *genericencseq,
+                                           GtUword len,
+                                           GtUword pos1,
+                                           GtUword pos2,
+                                           GtError *err)
+{
+  gt_assert(genericencseq != NULL && genericencseq->hasencseq);
+  return gt_simplegreedyselfmatchoutput(info,
+                                        genericencseq->seqptr.encseq,
+                                        len,
+                                        pos1,
+                                        pos2,
+                                        err);
+}
+
 static int gt_repfind_runner(GT_UNUSED int argc,
                              GT_UNUSED const char **argv,
                              GT_UNUSED int parsed_args,
@@ -456,13 +490,13 @@ static int gt_repfind_runner(GT_UNUSED int argc,
           {
             if (arguments->extendxdrop)
             {
-              processmaxpairs = gt_simplexdropselfmatchoutput;
+              processmaxpairs = gt_generic_simplexdropselfmatchoutput;
               processmaxpairsdata = (void *) xdropmatchinfo;
             } else
             {
               if (arguments->extendgreedy)
               {
-                processmaxpairs = gt_simplegreedyselfmatchoutput;
+                processmaxpairs = gt_generic_simplegreedyselfmatchoutput;
                 processmaxpairsdata = (void *) greedyextendmatchinfo;
               } else
               {

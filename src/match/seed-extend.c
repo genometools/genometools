@@ -284,7 +284,7 @@ void gt_greedy_extend_matchinfo_delete(GtGreedyextendmatchinfo *ggemi)
 }
 
 int gt_simplegreedyselfmatchoutput(void *info,
-                                   const GtGenericEncseq *genericencseq,
+                                   const GtEncseq *encseq,
                                    GtUword len,
                                    GtUword pos1,
                                    GtUword pos2,
@@ -292,7 +292,6 @@ int gt_simplegreedyselfmatchoutput(void *info,
 {
   GtGreedyextendmatchinfo *greedyextendmatchinfo
     = (GtGreedyextendmatchinfo *) info;
-  const GtEncseq *encseq;
   GtUword vextend_left, vextend_right, ulen, vlen, urightbound,
           total_distance, dblen, querylen, total_alignedlen;
   Repfindsequenceinfo rfsi;
@@ -308,8 +307,6 @@ int gt_simplegreedyselfmatchoutput(void *info,
   {
     front_trace_reset(greedyextendmatchinfo->right_front_trace,0);
   }
-  gt_assert(genericencseq != NULL && genericencseq->hasencseq);
-  encseq = genericencseq->seqptr.encseq;
   if (pos1 > pos2)
   {
     GtUword tmp = pos1;
@@ -491,7 +488,7 @@ int gt_simplegreedyselfmatchoutput(void *info,
 }
 
 int gt_simplexdropselfmatchoutput(void *info,
-                                  const GtGenericEncseq *genericencseq,
+                                  const GtEncseq *encseq,
                                   GtUword len,
                                   GtUword pos1,
                                   GtUword pos2,
@@ -500,7 +497,6 @@ int gt_simplexdropselfmatchoutput(void *info,
   GtXdropmatchinfo *xdropmatchinfo = (GtXdropmatchinfo *) info;
   Repfindsequenceinfo rfsi;
   GtUword dblen, querylen, total_distance, total_alignedlen, seqend1, seqend2;
-  const GtEncseq *encseq;
   GtXdropscore score;
 
   if (pos1 > pos2)
@@ -518,8 +514,6 @@ int gt_simplexdropselfmatchoutput(void *info,
     /* overlapping seeds */
     return 0;
   }
-  gt_assert(genericencseq != NULL && genericencseq->hasencseq);
-  encseq = genericencseq->seqptr.encseq;
   fill_repfind_sequence_info(&rfsi,pos1,pos2,encseq);
   if (pos1 > rfsi.dbseqstartpos && pos2 > rfsi.queryseqstartpos)
   { /* there is something to align on the left of the seed */
@@ -644,7 +638,7 @@ int gt_simplexdropselfmatchoutput(void *info,
 
 int gt_processxdropquerymatches(void *info,
                                 const GtEncseq *encseq,
-                                const GtQuerymatch *querymatch,
+                                const GtQuerymatch *queryseed,
                                 const GtUchar *query,
                                 GtUword query_totallength,
                                 GtError *err)
@@ -653,9 +647,9 @@ int gt_processxdropquerymatches(void *info,
   GtXdropscore score;
   GtUword querystart, dblen, dbstart, querylen,
           dbseqnum, dbseqstartpos, dbseqlength,
-          pos1 = gt_querymatch_dbstart(querymatch),
-          pos2 = gt_querymatch_querystart(querymatch),
-          len = gt_querymatch_querylen(querymatch);
+          pos1 = gt_querymatch_dbstart(queryseed),
+          pos2 = gt_querymatch_querystart(queryseed),
+          len = gt_querymatch_querylen(queryseed);
   uint64_t queryseqnum;
 
   dbseqnum = gt_encseq_seqnum(encseq,pos1);
@@ -718,7 +712,7 @@ int gt_processxdropquerymatches(void *info,
   gt_assert(pos1 >= (GtUword) xdropmatchinfo->best_left.ivalue &&
             pos2 >= (GtUword) xdropmatchinfo->best_left.jvalue);
   querystart = pos2 - xdropmatchinfo->best_left.jvalue;
-  queryseqnum = gt_querymatch_queryseqnum(querymatch);
+  queryseqnum = gt_querymatch_queryseqnum(queryseed);
   dblen = len + xdropmatchinfo->best_left.ivalue
               + xdropmatchinfo->best_right.ivalue;
   dbstart = pos1 - xdropmatchinfo->best_left.ivalue;
