@@ -240,9 +240,9 @@ GtNodeVisitor* gt_stat_visitor_new(bool gene_length_distri,
 }
 
 static void gt_stat_print_string_distri_item(const char *string,
-                                      GtUword occurrences,
-                                      GT_UNUSED double probability,
-                                      GT_UNUSED void *data)
+                                             GtUword occurrences,
+                                             GT_UNUSED double probability,
+                                             GT_UNUSED void *data)
 {
   GtFile *outfp = (GtFile*) data;
   gt_file_xprintf(outfp, "%ss: "GT_WU"\n", string, occurrences);
