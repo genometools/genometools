@@ -3,3 +3,4 @@ sequence regions: 1 (total length: 1497228)
 genes: 1
 mRNAs: 3
 exons: 11
+TF_binding_sites: 1

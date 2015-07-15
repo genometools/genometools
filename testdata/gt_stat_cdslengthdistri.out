@@ -6,5 +6,9 @@ protein-coding genes: 1
 mRNAs: 1
 protein-coding mRNAs: 1
 CDSs: 4
+TF_binding_sites: 1
+cDNA_matchs: 3
+five_prime_UTRs: 1
+three_prime_UTRs: 1
 CDS length distribution:
 2305: 1 (prob=1.0000,cumulative=1.0000)
