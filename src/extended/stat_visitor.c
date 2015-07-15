@@ -239,7 +239,7 @@ GtNodeVisitor* gt_stat_visitor_new(bool gene_length_distri,
   return nv;
 }
 
-void gt_stat_print_string_distri_item(const char *string,
+static void gt_stat_print_string_distri_item(const char *string,
                                       GtUword occurrences,
                                       GT_UNUSED double probability,
                                       GT_UNUSED void *data)
