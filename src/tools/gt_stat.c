@@ -143,7 +143,7 @@ static int gt_stat_runner(int argc, const char **argv, int parsed_args,
     add_introns_stream = gt_add_introns_stream_new(sort_stream);
   }
 
-  /* create s status stream */
+  /* create stat stream */
   stat_stream = gt_stat_stream_new(arguments->addintrons
                                    ? add_introns_stream : gff3_in_stream,
                                    arguments->gene_length_distribution,
