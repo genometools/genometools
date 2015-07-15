@@ -1,3 +1,7 @@
 parsed genome node DAGs: 61
 sequence regions: 16 (total length: 12069317)
 LTR_retrotransposons: 45
+inverted_repeats: 180
+long_terminal_repeats: 90
+repeat_regions: 45
+target_site_duplications: 90

@@ -3,6 +3,7 @@ sequence regions: 1 (total length: 1497228)
 genes: 1
 mRNAs: 3
 exons: 11
+TF_binding_sites: 1
 exon length distribution:
 201: 1 (prob=0.0909,cumulative=0.0909)
 451: 2 (prob=0.1818,cumulative=0.2727)
