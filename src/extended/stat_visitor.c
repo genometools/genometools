@@ -125,6 +125,7 @@ static void compute_type_statistics(GtFeatureNode *fn, GtStatVisitor *sv)
     sv->number_of_CDSs++;
   }
   else if (gt_feature_node_has_type(fn, gt_ft_intron)) {
+    gt_string_distri_add(sv->type_counts, gt_feature_node_get_type(fn));
     if (sv->intron_length_distribution) {
       range = gt_genome_node_get_range((GtGenomeNode*) fn);
       gt_disc_distri_add(sv->intron_length_distribution,
