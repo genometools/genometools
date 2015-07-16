@@ -1,4 +1,4 @@
-# GenomeTools
+# GenomeTools [![Build Status](https://travis-ci.org/genometools/genometools.png)](https://travis-ci.org/genometools/genometools)
 
 The GenomeTools genome analysis system is a free collection of bioinformatics
 tools (in the realm of genome informatics) combined into a single binary named
