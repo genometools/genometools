@@ -334,10 +334,6 @@ int gt_simplegreedyselfmatchoutput(void *info,
     pos1 = pos2;
     pos2 = tmp;
   }
-  if (greedyextendmatchinfo->beverbose)
-  {
-    printf("# seed:\t" GT_WU "\t" GT_WU "\t" GT_WU "\n",pos1,pos2,len);
-  }
   if (pos1 + len >= pos2)
   {
     /* overlapping seeds */
@@ -485,6 +481,10 @@ int gt_simplegreedyselfmatchoutput(void *info,
       return 0;
     } else
     {
+      if (greedyextendmatchinfo->beverbose)
+      {
+        printf("# seed:\t" GT_WU "\t" GT_WU "\t" GT_WU "\n",pos1,pos2,len);
+      }
       return gt_querymatch_output(info, encseq,
                                   greedyextendmatchinfo->querymatchspaceptr,
                                   NULL,
@@ -525,10 +525,6 @@ int gt_simplexdropselfmatchoutput(void *info,
     GtUword tmp = pos1;
     pos1 = pos2;
     pos2 = tmp;
-  }
-  if (xdropmatchinfo->beverbose)
-  {
-    printf("# seed:\t" GT_WU "\t" GT_WU "\t" GT_WU "\n",pos1,pos2,len);
   }
   if (pos1 + len >= pos2)
   {
@@ -646,6 +642,10 @@ int gt_simplexdropselfmatchoutput(void *info,
       return 0;
     } else
     {
+      if (xdropmatchinfo->beverbose)
+      {
+        printf("# seed:\t" GT_WU "\t" GT_WU "\t" GT_WU "\n",pos1,pos2,len);
+      }
       return gt_querymatch_output(info, encseq,
                                   xdropmatchinfo->querymatchspaceptr,NULL,
                                   rfsi.queryseqlength,
@@ -760,6 +760,10 @@ int gt_processxdropquerymatches(void *info,
                      queryseqnum,
                      querylen,
                      querystart);
+  if (xdropmatchinfo->beverbose)
+  {
+    printf("# seed:\t" GT_WU "\t" GT_WU "\t" GT_WU "\n",pos1,pos2,len);
+  }
   return gt_querymatch_output(info, encseq, xdropmatchinfo->querymatchspaceptr,
                               query, query_totallength,
                               err);
