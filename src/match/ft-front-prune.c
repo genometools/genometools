@@ -8,9 +8,13 @@
 #include "core/unused_api.h"
 #include "core/divmodmul.h"
 #include "core/chardef.h"
+#include "core/divmodmul.h"
+#include "core/intbits.h"
+#include "core/encseq.h"
 #include "core/ma_api.h"
 #include "core/types_api.h"
 #include "ft-front-prune.h"
+#include "ft-trimstat.h"
 #include "core/minmax.h"
 #include "ft-polish.h"
 #include "ft-front-generation.h"
@@ -39,79 +43,145 @@ typedef struct
 #ifndef OUTSIDE_OF_GT
 typedef struct
 {
+  const GtTwobitencoding *twobitencoding;
+  const GtEncseq *encseq;
+  bool forward;
   GtEncseqReader *encseqreader;
   GtUchar *cache_ptr;
   GtAllocatedMemory *sequence_cache;
   GtUword substringlength,
           min_access_pos,
           cache_num_positions,
-          cache_offset;
+          cache_offset,
+          startpos;
 } Sequenceobject;
 
 static void sequenceobject_init(Sequenceobject *seq,
+                                GtExtendCharAccess extend_char_access_mode,
                                 const GtEncseq *encseq,
                                 GtReadmode readmode,
                                 GtUword startpos,
                                 GtUword len,
                                 GtEncseqReader *encseq_r,
-                                GtAllocatedMemory *sequence_cache
+                                GtAllocatedMemory *sequence_cache,
+                                GtUword totallength
                                 )
 {
   gt_assert(seq != NULL);
-  gt_encseq_reader_reinit_with_readmode(encseq_r, encseq, readmode, startpos);
-  seq->encseqreader = encseq_r;
-  seq->sequence_cache = sequence_cache;
-  gt_assert(sequence_cache != NULL);
-  seq->cache_ptr = sequence_cache->space;
+  seq->encseq = NULL;
+  seq->encseqreader = NULL;
+  seq->twobitencoding = NULL;
+  seq->cache_ptr = NULL;
+  seq->sequence_cache = NULL;
+  if (extend_char_access_mode == GT_EXTEND_CHAR_ACCESS_ANY &&
+      gt_encseq_has_twobitencoding(encseq) && gt_encseq_wildcards(encseq) == 0)
+  {
+    seq->twobitencoding = gt_encseq_twobitencoding_export(encseq);
+  }
+  if (seq->twobitencoding == NULL &&
+      (extend_char_access_mode == GT_EXTEND_CHAR_ACCESS_ANY ||
+       extend_char_access_mode == GT_EXTEND_CHAR_ACCESS_ENCSEQ_READER))
+  {
+    gt_encseq_reader_reinit_with_readmode(encseq_r, encseq, readmode, startpos);
+    seq->encseqreader = encseq_r;
+    gt_assert(seq->encseqreader != NULL);
+    seq->sequence_cache = sequence_cache;
+    gt_assert(sequence_cache != NULL);
+    seq->cache_ptr = sequence_cache->space;
+    seq->min_access_pos = GT_UWORD_MAX;
+    seq->cache_num_positions = 0;
+    seq->cache_offset = 0;
+  }
+  if (seq->twobitencoding == NULL && seq->encseqreader == NULL &&
+      (extend_char_access_mode == GT_EXTEND_CHAR_ACCESS_ANY ||
+       extend_char_access_mode == GT_EXTEND_CHAR_ACCESS_ENCSEQ))
+  {
+    seq->encseq = encseq;
+  }
   seq->substringlength = len;
-  seq->min_access_pos = GT_UWORD_MAX;
-  seq->cache_num_positions = 0;
-  seq->cache_offset = 0;
+  if (readmode == GT_READMODE_FORWARD)
+  {
+    seq->startpos = startpos;
+    seq->forward = true;
+  } else
+  {
+    gt_assert(readmode == GT_READMODE_REVERSE);
+    gt_assert(gt_encseq_total_length(encseq) == totallength);
+    gt_assert(startpos + 1 <= totallength);
+    seq->startpos = totallength - 1 - startpos;
+    seq->forward = false;
+  }
+  gt_assert(seq->twobitencoding != NULL || seq->encseqreader != NULL ||
+            seq->encseq != NULL);
+}
+
+static GtUchar gt_twobitencoding_char_at_pos(
+                                      const GtTwobitencoding *twobitencoding,
+                                      GtUword pos)
+{
+  return (twobitencoding[GT_DIVBYUNITSIN2BITENC(pos)] >>
+          GT_MULT2(GT_UNITSIN2BITENC - 1 - GT_MODBYUNITSIN2BITENC(pos))) & 3;
 }
 
 static GtUchar sequenceobject_get_char(Sequenceobject *seq,GtUword pos)
 {
-  const GtUword addamount = 256UL;
-
-  if (seq->min_access_pos != GT_UWORD_MAX &&
-      seq->min_access_pos >= seq->cache_offset + addamount)
+  if (seq->twobitencoding != NULL)
   {
-    GtUword idx, end = MIN(seq->cache_num_positions,seq->substringlength);
-    GtUchar *cs = ((GtUchar *) seq->sequence_cache->space)
-                  - seq->min_access_pos;
-
-    for (idx = seq->min_access_pos; idx < end; idx++)
-    {
-      cs[idx] = seq->cache_ptr[idx];
-    }
-    seq->cache_offset = seq->min_access_pos;
-    seq->cache_ptr = ((GtUchar *) seq->sequence_cache->space)
-                     - seq->cache_offset;
+    return gt_twobitencoding_char_at_pos(seq->twobitencoding,
+                                         seq->forward ? seq->startpos + pos
+                                                      : seq->startpos - pos);
   }
-  if (pos >= seq->cache_num_positions)
+  if (seq->encseqreader != NULL)
   {
-    GtUword idx, tostore;
+    const GtUword addamount = 256UL;
 
-    tostore = MIN(seq->cache_num_positions + addamount,seq->substringlength);
-    if (tostore > seq->cache_offset + seq->sequence_cache->allocated)
+    if (seq->min_access_pos != GT_UWORD_MAX &&
+        seq->min_access_pos >= seq->cache_offset + addamount)
     {
-      seq->sequence_cache->allocated += addamount;
-      seq->sequence_cache->space
-        = gt_realloc(seq->sequence_cache->space,
-                     sizeof (GtUchar) * seq->sequence_cache->allocated);
+      GtUword idx, end = MIN(seq->cache_num_positions,seq->substringlength);
+      GtUchar *cs = ((GtUchar *) seq->sequence_cache->space)
+                    - seq->min_access_pos;
+
+      for (idx = seq->min_access_pos; idx < end; idx++)
+      {
+        cs[idx] = seq->cache_ptr[idx];
+      }
+      seq->cache_offset = seq->min_access_pos;
       seq->cache_ptr = ((GtUchar *) seq->sequence_cache->space)
                        - seq->cache_offset;
     }
-    gt_assert(pos >= seq->cache_offset);
-    for (idx = seq->cache_num_positions; idx < tostore; idx++)
+    if (pos >= seq->cache_num_positions)
     {
-      seq->cache_ptr[idx]
-        = gt_encseq_reader_next_encoded_char(seq->encseqreader);
+      GtUword idx, tostore;
+
+      tostore = MIN(seq->cache_num_positions + addamount,seq->substringlength);
+      if (tostore > seq->cache_offset + seq->sequence_cache->allocated)
+      {
+        seq->sequence_cache->allocated += addamount;
+        seq->sequence_cache->space
+          = gt_realloc(seq->sequence_cache->space,
+                       sizeof (GtUchar) * seq->sequence_cache->allocated);
+        seq->cache_ptr = ((GtUchar *) seq->sequence_cache->space)
+                         - seq->cache_offset;
+      }
+      gt_assert(pos >= seq->cache_offset);
+      for (idx = seq->cache_num_positions; idx < tostore; idx++)
+      {
+        seq->cache_ptr[idx]
+          = gt_encseq_reader_next_encoded_char(seq->encseqreader);
+      }
+      seq->cache_num_positions = tostore;
     }
-    seq->cache_num_positions = tostore;
+    gt_assert(pos < seq->cache_offset + seq->sequence_cache->allocated);
+    gt_assert(seq->cache_ptr != NULL);
+    return seq->cache_ptr[pos];
   }
-  gt_assert(pos < seq->cache_offset + seq->sequence_cache->allocated);
-  return seq->cache_ptr[pos];
+  gt_assert(seq->encseq != NULL);
+  gt_assert(seq->forward || seq->startpos >= pos);
+  return gt_encseq_get_encoded_char(seq->encseq,
+                                    seq->forward ? seq->startpos + pos
+                                                 : seq->startpos - pos,
+                                    GT_READMODE_FORWARD);
 }
 
 #else
@@ -132,7 +202,7 @@ static void sequenceobject_init(Sequenceobject *seq,
 }
 #endif
 
-#define DIAGONAL(FRONTPTR) (GtWord) ((FRONTPTR) - midfront)
+#define FRONT_DIAGONAL(FRONTPTR) (GtWord) ((FRONTPTR) - midfront)
 
 static bool sequenceobject_symbol_match(Sequenceobject *useq,
                                         GtUword upos,
@@ -152,16 +222,16 @@ static bool sequenceobject_symbol_match(Sequenceobject *useq,
 #endif
 }
 
-static void add_matches(Frontvalue *midfront,
-                        Frontvalue *fv,
-                        uint64_t mask,
-                        Sequenceobject *useq,
-                        Sequenceobject *vseq)
+static void inline add_matches(Frontvalue *midfront,
+                               Frontvalue *fv,
+                               uint64_t mask,
+                               Sequenceobject *useq,
+                               Sequenceobject *vseq)
 {
   GtUword upos, vpos;
 
   fv->localmatch_count = 0;
-  for (upos = fv->row, vpos = fv->row + DIAGONAL(fv);
+  for (upos = fv->row, vpos = fv->row + FRONT_DIAGONAL(fv);
        upos < useq->substringlength && vpos < vseq->substringlength &&
        sequenceobject_symbol_match(useq,upos,vseq,vpos);
        upos++, vpos++)
@@ -195,7 +265,7 @@ static GtUword front_next_inplace(Frontvalue *midfront,
   *lowfront = bestfront;
   lowfront->backreference = FT_EOP_DELETION;
   add_matches(midfront,lowfront,mask,useq,vseq);
-  maxalignedlen = GT_MULT2(lowfront->row) + DIAGONAL(lowfront);
+  maxalignedlen = GT_MULT2(lowfront->row) + FRONT_DIAGONAL(lowfront);
 
   replacement_value = *(lowfront+1);
   if (bestfront.row < replacement_value.row + 1)
@@ -214,7 +284,7 @@ static GtUword front_next_inplace(Frontvalue *midfront,
   }
   *(lowfront+1) = bestfront;
   add_matches(midfront,lowfront + 1,mask,useq,vseq);
-  alignedlen = GT_MULT2((lowfront+1)->row) + DIAGONAL(lowfront + 1);
+  alignedlen = GT_MULT2((lowfront+1)->row) + FRONT_DIAGONAL(lowfront + 1);
   if (maxalignedlen < alignedlen)
   {
     maxalignedlen = alignedlen;
@@ -261,7 +331,7 @@ static GtUword front_next_inplace(Frontvalue *midfront,
     }
     *frontptr = bestfront;
     add_matches(midfront,frontptr,mask,useq,vseq);
-    alignedlen = GT_MULT2(frontptr->row) + DIAGONAL(frontptr);
+    alignedlen = GT_MULT2(frontptr->row) + FRONT_DIAGONAL(frontptr);
     if (maxalignedlen < alignedlen)
     {
       maxalignedlen = alignedlen;
@@ -284,14 +354,14 @@ static GtUword front_second_inplace(Frontvalue *midfront,
   lowfront->backreference = FT_EOP_DELETION;
   UPDATE_MATCH_HISTORY(lowfront->matchhistory_count,lowfront->matchhistory);
   add_matches(midfront,lowfront,mask,useq,vseq);
-  maxalignedlen = GT_MULT2(lowfront->row) + DIAGONAL(lowfront);
+  maxalignedlen = GT_MULT2(lowfront->row) + FRONT_DIAGONAL(lowfront);
 
   (lowfront+1)->row++;
   (lowfront+1)->backreference = FT_EOP_REPLACEMENT;
   UPDATE_MATCH_HISTORY((lowfront+1)->matchhistory_count,
                        (lowfront+1)->matchhistory);
   add_matches(midfront,lowfront + 1,mask,useq,vseq);
-  alignedlen = GT_MULT2((lowfront+1)->row) + DIAGONAL(lowfront + 1);
+  alignedlen = GT_MULT2((lowfront+1)->row) + FRONT_DIAGONAL(lowfront + 1);
   if (maxalignedlen < alignedlen)
   {
     maxalignedlen = alignedlen;
@@ -301,7 +371,7 @@ static GtUword front_second_inplace(Frontvalue *midfront,
   UPDATE_MATCH_HISTORY((lowfront+2)->matchhistory_count,
                        (lowfront+2)->matchhistory);
   add_matches(midfront,lowfront + 2,mask,useq,vseq);
-  alignedlen = GT_MULT2((lowfront+2)->row) + DIAGONAL(lowfront + 2);
+  alignedlen = GT_MULT2((lowfront+2)->row) + FRONT_DIAGONAL(lowfront + 2);
   if (maxalignedlen < alignedlen)
   {
     maxalignedlen = alignedlen;
@@ -373,7 +443,7 @@ static GtUword trim_front(bool upward,
   for (frontptr = from; frontptr != stop; frontptr = upward ? (frontptr + 1)
                                                             : (frontptr - 1))
   {
-    GtUword alignedlen = GT_MULT2(frontptr->row) + DIAGONAL(frontptr);
+    GtUword alignedlen = GT_MULT2(frontptr->row) + FRONT_DIAGONAL(frontptr);
 
     if (alignedlen <= sumseqlength)
     {
@@ -382,7 +452,7 @@ static GtUword trim_front(bool upward,
 #ifdef TRIM_INFO_OUT
                         distance,
                         frontptr->row,
-                        DIAGONAL(frontptr),
+                        FRONT_DIAGONAL(frontptr),
 #endif
                         alignedlen,minlenforhistorycheck,
                         frontptr->matchhistory_count,minmatchnum,
@@ -445,6 +515,7 @@ static void update_trace_and_polished(Polished_point *best_polished_point,
                                       Frontvalue *highfront)
 {
   const Frontvalue *frontptr;
+  uint64_t lsb;
 
 #ifndef OUTSIDE_OF_GT
   *minrow = GT_UWORD_MAX;
@@ -452,7 +523,7 @@ static void update_trace_and_polished(Polished_point *best_polished_point,
 #endif
   for (frontptr = lowfront; frontptr <= highfront; frontptr++)
   {
-    GtUword alignedlen = GT_MULT2(frontptr->row) + DIAGONAL(frontptr);
+    GtUword alignedlen = GT_MULT2(frontptr->row) + FRONT_DIAGONAL(frontptr);
 
 #ifndef OUTSIDE_OF_GT
     GtUword currentcol;
@@ -461,14 +532,16 @@ static void update_trace_and_polished(Polished_point *best_polished_point,
     {
       *minrow = frontptr->row;
     }
-    gt_assert(DIAGONAL(frontptr) >= 0 || frontptr->row >= -DIAGONAL(frontptr));
-    currentcol = frontptr->row + DIAGONAL(frontptr);
+    gt_assert(FRONT_DIAGONAL(frontptr) >= 0 ||
+              frontptr->row >= -FRONT_DIAGONAL(frontptr));
+    currentcol = frontptr->row + FRONT_DIAGONAL(frontptr);
     if (*mincol > currentcol)
     {
       *mincol = currentcol;
     }
 #endif
-    if (history_is_polished(pol_info,frontptr->matchhistory) &&
+    lsb = frontptr->matchhistory & pol_info->mask;
+    if (HISTORY_IS_POLISHED(pol_info,frontptr->matchhistory,lsb) &&
         alignedlen > best_polished_point->alignedlen)
     {
       best_polished_point->alignedlen = alignedlen;
@@ -476,8 +549,11 @@ static void update_trace_and_polished(Polished_point *best_polished_point,
       best_polished_point->distance = distance;
       best_polished_point->trimleft = trimleft;
     }
-    front_trace_add_trace(front_trace,frontptr->backreference,
-                          frontptr->localmatch_count);
+    if (front_trace != NULL)
+    {
+      front_trace_add_trace(front_trace,frontptr->backreference,
+                            frontptr->localmatch_count);
+    }
   }
 }
 
@@ -486,6 +562,7 @@ GtUword front_prune_edist_inplace(
                          bool forward,
                          GtAllocatedMemory *frontspace,
 #endif
+                         Trimstat *trimstat,
                          Polished_point *best_polished_point,
                          Fronttrace *front_trace,
                          const Polishing_info *pol_info,
@@ -520,10 +597,12 @@ GtUword front_prune_edist_inplace(
   sequenceobject_init(&vseq,vseqptr,vstart,vlen);
 #else
   GtReadmode readmode = forward ? GT_READMODE_FORWARD : GT_READMODE_REVERSE;
-  sequenceobject_init(&useq,ufsr->encseq,readmode,ustart,ulen,ufsr->encseq_r,
-                      ufsr->sequence_cache);
-  sequenceobject_init(&vseq,vfsr->encseq,readmode,vstart,vlen,vfsr->encseq_r,
-                      vfsr->sequence_cache);
+  sequenceobject_init(&useq,ufsr->extend_char_access,ufsr->encseq,readmode,
+                      ustart,ulen,ufsr->encseq_r,ufsr->sequence_cache,
+                      ufsr->totallength);
+  sequenceobject_init(&vseq,ufsr->extend_char_access,vfsr->encseq,readmode,
+                      vstart,vlen,vfsr->encseq_r,vfsr->sequence_cache,
+                      vfsr->totallength);
   frontspace->offset = 0;
 #endif
 #ifdef TRIM_INFO_OUT
@@ -641,7 +720,10 @@ GtUword front_prune_edist_inplace(
       diedout = true;
       break;
     }
-    front_trace_add_gen(front_trace,trimleft,valid);
+    if (front_trace != NULL)
+    {
+      front_trace_add_gen(front_trace,trimleft,valid);
+    }
     update_trace_and_polished(best_polished_point,
 #ifndef OUTSIDE_OF_GT
                               &useq.min_access_pos,
@@ -669,5 +751,16 @@ GtUword front_prune_edist_inplace(
       break;
     }
   }
+  trimstat_add(trimstat,diedout,sumvalid,maxvalid,distance,
+               sizeof (Frontvalue) * frontspace->allocated,
+#ifndef OUTSIDE_OF_GT
+               useq.sequence_cache != NULL &&
+               vseq.sequence_cache != NULL ? MAX(useq.sequence_cache->allocated,
+                                                 vseq.sequence_cache->allocated)
+                                           : 0
+#else
+               0
+#endif
+              );
   return diedout ? sumseqlength + 1 : distance;
 }

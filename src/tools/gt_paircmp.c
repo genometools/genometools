@@ -259,13 +259,20 @@ int gt_paircmp(int argc, const char **argv, GtError *err)
     showsimpleoptions(&cmppairwise);
     if (cmppairwise.showedist)
     {
-      GtUword edist;
-      edist = gt_computegreedyunitedist(
-        (const GtUchar *) gt_str_array_get(cmppairwise.strings,0),
-        (GtUword) strlen(gt_str_array_get(cmppairwise.strings,0)),
-        (const GtUchar *) gt_str_array_get(cmppairwise.strings,1UL),
-        (GtUword) strlen(gt_str_array_get(cmppairwise.strings,1UL)));
-      printf(GT_WU "\n", edist);
+      GtUword edist, len1, len2;
+      GtStr *s1, *s2;
+
+      gt_assert(gt_str_array_size(cmppairwise.strings) >= 2);
+      s1 = gt_str_array_get_str(cmppairwise.strings,0);
+      s2 = gt_str_array_get_str(cmppairwise.strings,1UL);
+      len1 = gt_str_length(s1);
+      len2 = gt_str_length(s2);
+      edist = gt_computegreedyunitedist((const GtUchar *) gt_str_get(s1),
+                                        len1,
+                                        (const GtUchar *) gt_str_get(s2),
+                                        len2);
+      printf(GT_WU " " GT_WU " " GT_WU " " GT_WU "%% errors\n", edist, len1,
+             len2,(200 * edist)/(len1+len2));
     } else
     {
       GtUword testcases;

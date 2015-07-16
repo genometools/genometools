@@ -78,17 +78,17 @@ static size_t front_trace_size(const Fronttrace *front_trace)
 void front_trace_reset(Fronttrace *front_trace,
                        GT_UNUSED GtUword sumseqlen)
 {
-  if (front_trace != NULL)
-  {
 #ifdef WITHDISTRIBUTION
-    double space_per_pos = (double) front_trace_size(front_trace)/sumseqlen;
-
-    distribution_add(front_trace->space_per_pos_dist,
-                     (GtUword) (space_per_pos * 100.0));
+  double space_per_pos = (double) front_trace_size(front_trace)/sumseqlen;
 #endif
-    front_trace->backref_nextfree = 0;
-    front_trace->gen_nextfree = 0;
-  }
+
+  gt_assert(front_trace != NULL);
+#ifdef WITHDISTRIBUTION
+  distribution_add(front_trace->space_per_pos_dist,
+                   (GtUword) (space_per_pos * 100.0));
+#endif
+  front_trace->backref_nextfree = 0;
+  front_trace->gen_nextfree = 0;
 }
 
 void front_trace_delete(Fronttrace *front_trace)
@@ -116,10 +116,7 @@ void front_trace_delete(Fronttrace *front_trace)
 void front_trace_add_gen(Fronttrace *front_trace,GtUword trimleft,
                          GtUword valid)
 {
-  if (front_trace == NULL)
-  {
-    return;
-  }
+  gt_assert (front_trace != NULL);
   if (front_trace->gen_nextfree >= front_trace->gen_allocated)
   {
     front_trace->gen_allocated
@@ -157,10 +154,7 @@ void front_trace_add_gen(Fronttrace *front_trace,GtUword trimleft,
 void front_trace_add_trace(Fronttrace *front_trace,uint8_t backreference,
                            unsigned int lcs)
 {
-  if (front_trace == NULL)
-  {
-    return;
-  }
+  gt_assert (front_trace != NULL);
   if (front_trace->backref_nextfree >= front_trace->backref_allocated)
   {
     front_trace->backref_allocated
