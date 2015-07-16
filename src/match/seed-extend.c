@@ -61,9 +61,7 @@ struct GtXdropmatchinfo
 GtXdropmatchinfo *gt_xdrop_matchinfo_new(GtUword userdefinedleastlength,
                                          GtUword errorpercentage,
                                          GtXdropscore xdropbelowscore,
-                                         bool selfcompare,
-                                         bool beverbose,
-                                         bool silent)
+                                         bool selfcompare)
 {
   GtXdropmatchinfo *xdropmatchinfo = gt_malloc(sizeof *xdropmatchinfo);
 
@@ -83,13 +81,13 @@ GtXdropmatchinfo *gt_xdrop_matchinfo_new(GtUword userdefinedleastlength,
     xdropmatchinfo->arbitscores.ins = -3;
     xdropmatchinfo->arbitscores.del = -3;
   }
-  xdropmatchinfo->beverbose = beverbose;
   xdropmatchinfo->frontresource = gt_frontresource_new(100UL);
   xdropmatchinfo->res = gt_xdrop_resources_new(&xdropmatchinfo->arbitscores);
   xdropmatchinfo->userdefinedleastlength = userdefinedleastlength;
   xdropmatchinfo->errorpercentage = errorpercentage;
   xdropmatchinfo->belowscore = xdropbelowscore;
-  xdropmatchinfo->silent = silent;
+  xdropmatchinfo->silent = false;
+  xdropmatchinfo->beverbose = false;
   return xdropmatchinfo;
 }
 
@@ -104,6 +102,16 @@ void gt_xdrop_matchinfo_delete(GtXdropmatchinfo *xdropmatchinfo)
     gt_frontresource_delete(xdropmatchinfo->frontresource);
     gt_free(xdropmatchinfo);
   }
+}
+
+void gt_xdrop_matchinfo_verbose_set(GtXdropmatchinfo *xdropmatchinfo)
+{
+  xdropmatchinfo->beverbose = true;
+}
+
+void gt_xdrop_matchinfo_silent_set(GtXdropmatchinfo *xdropmatchinfo)
+{
+  xdropmatchinfo->silent = true;
 }
 
 typedef struct
@@ -199,6 +207,7 @@ struct GtGreedyextendmatchinfo
           minmatchnum,
           maxalignedlendifference,
           errorpercentage,
+          perc_mat_history,
           totallength;
   unsigned int userdefinedleastlength;
   GtExtendCharAccess extend_char_access;
@@ -217,10 +226,7 @@ GtGreedyextendmatchinfo *gt_greedy_extend_matchinfo_new(
                                    GtUword history,
                                    GtUword perc_mat_history,
                                    GtUword userdefinedleastlength,
-                                   GtExtendCharAccess extend_char_access,
-                                   bool beverbose,
-                                   bool check_extend_symmetry,
-                                   bool silent)
+                                   GtExtendCharAccess extend_char_access)
 {
   GtGreedyextendmatchinfo *ggemi = gt_malloc(sizeof *ggemi);
 
@@ -236,7 +242,7 @@ GtGreedyextendmatchinfo *gt_greedy_extend_matchinfo_new(
   ggemi->maxalignedlendifference = maxalignedlendifference;
   ggemi->history = history;
   ggemi->minmatchnum = (history * perc_mat_history)/100;
-  ggemi->beverbose = beverbose;
+  ggemi->perc_mat_history = perc_mat_history;
   ggemi->userdefinedleastlength = userdefinedleastlength;
   ggemi->pol_info
     = polishing_info_new(MIN(15,ggemi->minmatchnum/2),errorpercentage);
@@ -250,19 +256,34 @@ GtGreedyextendmatchinfo *gt_greedy_extend_matchinfo_new(
   ggemi->frontspace_reservoir.space = NULL;
   ggemi->frontspace_reservoir.allocated = 0;
   ggemi->frontspace_reservoir.offset = 0;
-  ggemi->check_extend_symmetry = check_extend_symmetry;
   ggemi->extend_char_access = extend_char_access;
-  ggemi->silent = silent;
-  if (silent)
-  {
-    ggemi->trimstat = trimstat_new(errorpercentage,
-                                   perc_mat_history,
-                                   maxalignedlendifference);
-  } else
-  {
-    ggemi->trimstat = NULL;
-  }
+  ggemi->beverbose = false;
+  ggemi->check_extend_symmetry = false;
+  ggemi->silent = false;
+  ggemi->trimstat = NULL;
   return ggemi;
+}
+
+void gt_greedy_extend_matchinfo_check_extend_symmetry_set(
+                        GtGreedyextendmatchinfo *ggemi)
+{
+  gt_assert(ggemi != NULL);
+  ggemi->check_extend_symmetry = true;
+}
+
+void gt_greedy_extend_matchinfo_silent_set(GtGreedyextendmatchinfo *ggemi)
+{
+  gt_assert(ggemi != NULL && ggemi->trimstat == NULL);
+  ggemi->silent = true;
+  ggemi->trimstat = trimstat_new(ggemi->errorpercentage,
+                                 ggemi->perc_mat_history,
+                                 ggemi->maxalignedlendifference);
+}
+
+void gt_greedy_extend_matchinfo_verbose_set(GtGreedyextendmatchinfo *ggemi)
+{
+  gt_assert(ggemi != NULL);
+  ggemi->beverbose = true;
 }
 
 void gt_greedy_extend_matchinfo_delete(GtGreedyextendmatchinfo *ggemi)

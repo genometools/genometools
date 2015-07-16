@@ -411,9 +411,9 @@ static int gt_generic_simplegreedyselfmatchoutput(
                                         err);
 }
 
-static int gt_repfind_runner(GT_UNUSED int argc,
+static int gt_repfind_runner(int argc,
                              GT_UNUSED const char **argv,
-                             GT_UNUSED int parsed_args,
+                             int parsed_args,
                              void *tool_arguments, GtError *err)
 {
   bool haserr = false;
@@ -443,10 +443,16 @@ static int gt_repfind_runner(GT_UNUSED int argc,
                                arguments->errorpercentage,
                                arguments->xdropbelowscore,
                                gt_str_array_size(arguments->queryfiles) == 0
-                                             ? true : false,
-                               arguments->beverbose,
-                               arguments->silent);
+                                             ? true : false);
     gt_assert(xdropmatchinfo != NULL);
+    if (arguments->beverbose)
+    {
+      gt_xdrop_matchinfo_verbose_set(xdropmatchinfo);
+    }
+    if (arguments->silent)
+    {
+      gt_xdrop_matchinfo_silent_set(xdropmatchinfo);
+    }
   }
   if (!haserr && arguments->extendgreedy)
   {
@@ -465,10 +471,20 @@ static int gt_repfind_runner(GT_UNUSED int argc,
                                      arguments->history,
                                      arguments->perc_mat_history,
                                      arguments->userdefinedleastlength,
-                                     extend_char_access,
-                                     arguments->beverbose,
-                                     arguments->check_extend_symmetry,
-                                     arguments->silent);
+                                     extend_char_access);
+      if (arguments->beverbose)
+      {
+        gt_greedy_extend_matchinfo_verbose_set(greedyextendmatchinfo);
+      }
+      if (arguments->check_extend_symmetry)
+      {
+        gt_greedy_extend_matchinfo_check_extend_symmetry_set(
+                                                  greedyextendmatchinfo);
+      }
+      if (arguments->silent)
+      {
+        gt_greedy_extend_matchinfo_silent_set(greedyextendmatchinfo);
+      }
     }
   }
   if (!haserr)

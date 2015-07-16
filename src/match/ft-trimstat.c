@@ -121,9 +121,9 @@ void trimstat_delete(Trimstat *trimstat,double total_time,bool verbose)
   if (trimstat != NULL)
   {
     printf("erp=%.1f\t",trimstat->errorpercentage);
-    printf("mmp=%lu\t",trimstat->minmatchpercentage);
-    printf("mad=%lu\t",trimstat->maxalignedlendifference);
-    printf("died_out=%lu\t",trimstat->diedout);
+    printf("mmp=" GT_WU "\t",trimstat->minmatchpercentage);
+    printf("mad=" GT_WU "\t",trimstat->maxalignedlendifference);
+    printf("died_out=" GT_WU "\t",trimstat->diedout);
     if (trimstat->dist_nextfree > 0)
     {
       printf("mean_valid=%.2f\t",
@@ -141,12 +141,13 @@ void trimstat_delete(Trimstat *trimstat,double total_time,bool verbose)
     {
       GtUword idx, count = 1UL;
 
-      printf("max_cache_size = %lu bytes\n",trimstat->max_cache_size);
+      printf("max_cache_size = " GT_WU " bytes\n",trimstat->max_cache_size);
       for (idx = 0; idx <= 100UL; idx++)
       {
         if (trimstat->trimdist[idx] > 0)
         {
-          printf("# trim by %lu%%: %lu times\n",idx,trimstat->trimdist[idx]);
+          printf("# trim by " GT_WU "%%: " GT_WU " times\n",
+                 idx,trimstat->trimdist[idx]);
         }
       }
       qsort(trimstat->distarray,trimstat->dist_nextfree,
@@ -162,18 +163,19 @@ void trimstat_delete(Trimstat *trimstat,double total_time,bool verbose)
             count++;
           } else
           {
-            printf("distance %lu: %lu times\n",previous,count);
+            printf("distance " GT_WU ": " GT_WU " times\n",previous,count);
             count = 1UL;
             previous = trimstat->distarray[idx];
           }
         }
-        printf("distance %lu: %lu times\n",previous,count);
+        printf("distance " GT_WU ": " GT_WU " times\n",previous,count);
       }
       for (idx = 0; idx < trimstat->allocated_maxvalid; idx++)
       {
         if (trimstat->dist_maxvalid[idx] > 0)
         {
-          printf("maxvalid=%lu: %lu times\n",idx,trimstat->dist_maxvalid[idx]);
+          printf("maxvalid=" GT_WU ": " GT_WU " times\n",idx,
+                 trimstat->dist_maxvalid[idx]);
         }
       }
     }

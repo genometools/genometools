@@ -21,30 +21,34 @@
 #include "match/ft-front-prune.h"
 
 /* This header file describes the interface to two different
-   methods for extending seeds, the xdrop-based method based on
-  @ARTICLE{ZHA:SCHWA:WAG:MIL:2000,
-  author = {Zhang, Z. and Schwartz, S. and Wagner, L. and Miller, W.},
-  title = {{A Greedy Algorithm for Aligning DNA Sequences}},
-  journal = JCB,
-  year = {2000},
-  volume = {{\PrintVol{7}}},
-  pages = {{203-214}},
-  number = {{1/2}}
+   methods for extending seeds, namely the xdrop-based method based on
+
+   @ARTICLE{ZHA:SCHWA:WAG:MIL:2000,
+   author = {Zhang, Z. and Schwartz, S. and Wagner, L. and Miller, W.},
+   title = {{A Greedy Algorithm for Aligning DNA Sequences}},
+   journal = JCB,
+   year = {2000},
+   volume = {{\PrintVol{7}}},
+   pages = {{203-214}},
+   number = {{1/2}}
+   }
+
+   and the greedy method of
+
+   @inproceedings{MYE:2014,
+   author    = {Gene Myers},
+   title     = {Efficient Local Alignment Discovery amongst Noisy Long Reads},
+   booktitle = {Algorithms in Bioinformatics - 14th International Workshop,
+                {WABI} 2014, Wroclaw, Poland, September 8-10, 2014.
+                Proceedings},
+   year      = {2014},
+   pages     = {52--67},
+   url       = {http://dx.doi.org/10.1007/978-3-662-44753-6_5},
+   doi       = {10.1007/978-3-662-44753-6_5},
+   timestamp = {Tue, 30 Sep 2014 11:35:42 +0200},
+   biburl    = {http://dblp.uni-trier.de/rec/bib/conf/wabi/Myers14},
+   bibsource = {dblp computer science bibliography, http://dblp.org}
   }
-  and the greedy method of
-  @inproceedings{MYE:2014,
-  author    = {Gene Myers},
-  title     = {Efficient Local Alignment Discovery amongst Noisy Long Reads},
-  booktitle = {Algorithms in Bioinformatics - 14th International Workshop, {WABI}
-               2014, Wroclaw, Poland, September 8-10, 2014. Proceedings},
-  year      = {2014},
-  pages     = {52--67},
-  url       = {http://dx.doi.org/10.1007/978-3-662-44753-6_5},
-  doi       = {10.1007/978-3-662-44753-6_5},
-  timestamp = {Tue, 30 Sep 2014 11:35:42 +0200},
-  biburl    = {http://dblp.uni-trier.de/rec/bib/conf/wabi/Myers14},
-  bibsource = {dblp computer science bibliography, http://dblp.org}
-}
 */
 
 /* This is the type storing the relevant information for
@@ -54,10 +58,10 @@ typedef struct GtXdropmatchinfo GtXdropmatchinfo;
 
 /* The constructor, which is called once before the first seed
    is to be extended. The parameter <selfcompare> is true iff an index
-   is compared against itself. Use the value <false> for <beverbose>
-   and <silent>. The parameter <userdefinedleastlength> is the minimum
-   length, the extension to both sides (including the seed itself) must
-   achieve. <errorpercentage> is the percentage of errors allowed in the
+   is compared against itself.
+   The parameter <userdefinedleastlength> is the minimum
+   length of the the extension to both sides (including the seed itself).
+   <errorpercentage> is the percentage of errors allowed in the
    extended seeds. <xdropbelowscore> is the parameter which influences the
    search space of the Xdrop-based extension. The larger this parameter,
    the larger the search space. */
@@ -65,27 +69,34 @@ typedef struct GtXdropmatchinfo GtXdropmatchinfo;
 GtXdropmatchinfo *gt_xdrop_matchinfo_new(GtUword userdefinedleastlength,
                                          GtUword errorpercentage,
                                          GtXdropscore xdropbelowscore,
-                                         bool selfcompare,
-                                         bool beverbose,
-                                         bool silent);
+                                         bool selfcompare);
+
+/* Set the verbose flag in the matchinfo object. */
+
+void gt_xdrop_matchinfo_verbose_set(GtXdropmatchinfo *xdropmatchinfo);
+
+/* Set the silent flag in the matchinfo object. */
+
+void gt_xdrop_matchinfo_silent_set(GtXdropmatchinfo *xdropmatchinfo);
 
 /* The destructor-method. */
 
 void gt_xdrop_matchinfo_delete(GtXdropmatchinfo *xdropmatchinfo);
 
 /* The following function is used for extending a seed obtained
-   in a self comparison of the given <encseq>. The seed is specified
+   in a self comparison of the given <encseq>. The extension is performed
+   using the xdrop strategy. The seed is specified
    by its length <len> and the two positions <pos1> and <pos2> which are not
    ordered. A GtXdropmatchinfo-object is passed via the void pointer <info>. If
    an error occurs, the function returns a value different from 0 and
    stores the error message in the <err>-object. */
 
-int gt_simplegreedyselfmatchoutput(void *info,
-                                   const GtEncseq *encseq,
-                                   GtUword len,
-                                   GtUword pos1,
-                                   GtUword pos2,
-                                   GtError *err);
+int gt_simplexdropselfmatchoutput(void *info,
+                                  const GtEncseq *encseq,
+                                  GtUword len,
+                                  GtUword pos1,
+                                  GtUword pos2,
+                                  GtError *err);
 
 /* The following function is used for extending a seed obtained
    in a comparison of the given sequence <query> of length <query_totallength>
@@ -102,12 +113,73 @@ int gt_processxdropquerymatches(void *info,
                                 GtUword query_totallength,
                                 GtError *err);
 
+/* The following function is used for extending a seed obtained
+   in a self comparison of the given <encseq>. The extension is performed
+   using the greedy strategy. The seed is specified
+   by its length <len> and the two positions <pos1> and <pos2> which are not
+   ordered. A GtXdropmatchinfo-object is passed via the void pointer <info>. If
+   an error occurs, the function returns a value different from 0 and
+   stores the error message in the <err>-object. */
+
+int gt_simplegreedyselfmatchoutput(void *info,
+                                   const GtEncseq *encseq,
+                                   GtUword len,
+                                   GtUword pos1,
+                                   GtUword pos2,
+                                   GtError *err);
+
 /* The following functions are used for the greedy extension. */
+
+/* This is the type storing the relevant information for
+   the greedy seed extension method. */
+
+typedef struct GtGreedyextendmatchinfo GtGreedyextendmatchinfo;
+
+/* The constructor, which is called once before the first seed
+   is to be extended. <errorpercentage> is the percentage of errors
+   allowed in the alignments reported.
+   <maxalignedlendifference> is the maximum difference of the length
+   of the aligned sequences for front-entries compared to the
+   the arrow of the front.
+   <history> is the size of the history. This is a value in the range
+   from 1 to 64.
+   <perc_mat_history> is the minimum percentage of the number of columns
+   in the history are matches. This is a value in the range from
+   1 to 100.
+   <userdefinedleastlength> is the minimum
+   length of the extension on both sides (including the seed itself).
+   <extend_char_access> is the mode by which the characters are accessed
+   in the encoded sequence. */
+
+GtGreedyextendmatchinfo *gt_greedy_extend_matchinfo_new(
+                                   GtUword errorpercentage,
+                                   GtUword maxalignedlendifference,
+                                   GtUword history,
+                                   GtUword perc_mat_history,
+                                   GtUword userdefinedleastlength,
+                                   GtExtendCharAccess extend_char_access);
+
+/* Set the check_extend_symmetry flag in the matchinfo object. */
+
+void gt_greedy_extend_matchinfo_check_extend_symmetry_set(
+                        GtGreedyextendmatchinfo *ggemi);
+
+/* Set the silent flag in the matchinfo object. */
+
+void gt_greedy_extend_matchinfo_silent_set(GtGreedyextendmatchinfo *ggemi);
+
+/* Set the verbose flag in the mathchinfo object. */
+
+void gt_greedy_extend_matchinfo_verbose_set(GtGreedyextendmatchinfo *ggemi);
+
+/* the destructor-method for the gven object. */
+
+void gt_greedy_extend_matchinfo_delete(GtGreedyextendmatchinfo *ggemi);
 
 /* This function converts a string given as argument for option -cam
    and converts it to the given enum type <GtExtendCharAccess>. This
    option is used in the tool gt_repfind and the tool implemented
-   by Joerg Winkler. */
+   by Joerg Winkler. Return in case of error ? */
 
 GtExtendCharAccess gt_greedy_extend_char_access(const char *cam_string,
                                                 GtError *err);
@@ -116,36 +188,5 @@ GtExtendCharAccess gt_greedy_extend_char_access(const char *cam_string,
    for the mentioned option -cam. */
 
 const char *gt_cam_extendgreedy_comment(void);
-
-/* This is the type storing the relevant information for
-   the greedy seed extension method. */
-
-typedef struct GtGreedyextendmatchinfo GtGreedyextendmatchinfo;
-
-/* The constructor, which is called once before the first seed
-   is to be extended. The name of the other parameters
-   are supposed to be clear. */
-
-GtGreedyextendmatchinfo *gt_greedy_extend_matchinfo_new(
-                                   GtUword errorpercentage,
-                                   GtUword maxalignedlendifference,
-                                   GtUword history,
-                                   GtUword perc_mat_history,
-                                   GtUword userdefinedleastlength,
-                                   GtExtendCharAccess extend_char_access,
-                                   bool beverbose,
-                                   bool check_extend_symmetry,
-                                   bool silent);
-
-void gt_greedy_extend_matchinfo_delete(GtGreedyextendmatchinfo *ggemi);
-
-/* Supply method which only uses an encoded sequence/two encoded sequence */
-
-int gt_simplexdropselfmatchoutput(void *info,
-                                  const GtEncseq *encseq,
-                                  GtUword len,
-                                  GtUword pos1,
-                                  GtUword pos2,
-                                  GtError *err);
 
 #endif

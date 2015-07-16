@@ -1,5 +1,5 @@
-#ifndef TRIMSTAT_H
-#define TRIMSTAT_H
+#ifndef FT_TRIMSTAT_H
+#define FT_TRIMSTAT_H
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdbool.h>
