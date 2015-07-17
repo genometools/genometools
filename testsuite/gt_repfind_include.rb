@@ -42,7 +42,8 @@ def checkrepfind(reffile,withextend = false)
   resultfile="#{testdatadir}repfind-result/#{reffile}-r.result"
   run "cmp -s #{last_stdout} #{resultfile}"
   if withextend
-    run_test("#{$bin}gt repfind -l #{minlength} -ii sfxidx -extendgreedy", 
+    run_test("#{$bin}gt repfind -l #{minlength} -ii sfxidx -extendgreedy " +
+             "-maxalilendiff 30", 
              :maxtime => 600)
     resultfile="#{testdatadir}repfind-result/#{reffile}-gr-ext.result"
     run "cmp -s #{last_stdout} #{resultfile}"

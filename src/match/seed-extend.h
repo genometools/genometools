@@ -138,16 +138,23 @@ typedef struct GtGreedyextendmatchinfo GtGreedyextendmatchinfo;
 /* The constructor, which is called once before the first seed
    is to be extended. <errorpercentage> is the percentage of errors
    allowed in the alignments reported.
+
    <maxalignedlendifference> is the maximum difference of the length
    of the aligned sequences for front-entries compared to the
-   the arrow of the front.
+   the arrow of the front. If <maxalignedlendifference> equals 0, then
+   a reasonable default value depending on the the <errorpercentage>
+   is automatically chosen.
+
    <history> is the size of the history. This is a value in the range
    from 1 to 64.
+
    <perc_mat_history> is the minimum percentage of the number of columns
    in the history are matches. This is a value in the range from
    1 to 100.
+
    <userdefinedleastlength> is the minimum
    length of the extension on both sides (including the seed itself).
+
    <extend_char_access> is the mode by which the characters are accessed
    in the encoded sequence. */
 

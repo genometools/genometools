@@ -220,6 +220,21 @@ struct GtGreedyextendmatchinfo
   GtAllocatedMemory usequence_cache, vsequence_cache, frontspace_reservoir;
 };
 
+static GtUword gt_optimalmaxalilendifference(GtUword errorpercentage)
+{
+  const int optmaxalilen_tab[]
+    = {0, 2, 2, 4, 6, 6, 7, 7, 9, 8, 8, 8, 9, 10, 10, 14};
+  const size_t tablen = sizeof optmaxalilen_tab/sizeof optmaxalilen_tab[0];
+
+  if (errorpercentage >= tablen)
+  {
+    return (GtUword) 30;
+  } else
+  {
+    return (GtUword) optmaxalilen_tab[errorpercentage];
+  }
+}
+
 GtGreedyextendmatchinfo *gt_greedy_extend_matchinfo_new(
                                    GtUword errorpercentage,
                                    GtUword maxalignedlendifference,
@@ -239,7 +254,14 @@ GtGreedyextendmatchinfo *gt_greedy_extend_matchinfo_new(
     -h <length of match history <= 64>, default 60>
     -p <minimal percentage of matches in history>, default 55%>*/
   ggemi->errorpercentage = errorpercentage;
-  ggemi->maxalignedlendifference = maxalignedlendifference;
+  if (maxalignedlendifference == 0)
+  {
+    ggemi->maxalignedlendifference
+      = gt_optimalmaxalilendifference(errorpercentage);
+  } else
+  {
+    ggemi->maxalignedlendifference = maxalignedlendifference;
+  }
   ggemi->history = history;
   ggemi->minmatchnum = (history * perc_mat_history)/100;
   ggemi->perc_mat_history = perc_mat_history;

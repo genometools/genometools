@@ -79,6 +79,31 @@ def makeseedhash(indexname,seedlength,extend_opt,optionlist,gencall = false)
   return seedhash
 end
 
+def inputseedhash(matchfile)
+  seedhash = Hash.new()
+  key = nil
+  File.open(matchfile,"r").each_line do |line|
+    if line.match(/# seed:/)
+      key = line.chomp.gsub(/# seed:\s+/,"")
+    elsif line.match(/^#/)
+      next
+    elsif line.match(/^\d/)
+      a = line.split(/\s/)
+      if key.nil?
+        STDERR.puts "#{$0}: expect that key is defined"
+        exit 1
+      end
+      if seedhash.has_key?(key)
+        STDERR.puts "#{$0}: key #{key} already occurs"
+        exit 1
+      end
+      seedhash[key] = match_new_without_result(a)
+      key = nil
+    end
+  end
+  return seedhash
+end
+
 def is_contained(start1,end1,start2,end2)
   if start2 <= start1 and end1 <= end2
     return true
@@ -183,12 +208,14 @@ def fill_other_hash(h1,h2)
   end
 end
 
-def cmpseedhashes(checkbetter,minidentity,taglist,h1,h2)
+def cmpseedhashes(checkbetter,minidentity,taglist,h1,h2,silent = false)
   fill_other_hash(h1,h2)
   nobrother = 0
   h1.each_pair do |k,v1|
     if v1.identity >= minidentity and not h2.has_key?(k)
-      puts "#{taglist[0]}: #{k}=>#{match_to_s(v1)}, #{taglist[1]}=[]"
+      if not silent
+        puts "#{taglist[0]}: #{k}=>#{match_to_s(v1)}, #{taglist[1]}=[]"
+      end
       nobrother += 1
     end
   end

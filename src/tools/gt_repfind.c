@@ -266,10 +266,13 @@ static GtOptionParser *gt_repfind_option_parser_new(void *tool_arguments)
 
   maxalilendiffoption
     = gt_option_new_uword("maxalilendiff","Specify maximum difference of "
-                          "alignment length (trimming for greedy extension)",
+                          "alignment length (trimming for greedy extension), "
+                          "if option is not used or parameter 0 is specified, "
+                          "then good value is automatically chosen",
                           &arguments->maxalignedlendifference,
-                          30);
+                          0);
   gt_option_parser_add_option(op, maxalilendiffoption);
+  gt_option_is_development_option(maxalilendiffoption);
 
   historyoption
     = gt_option_new_uword_min_max("history",
