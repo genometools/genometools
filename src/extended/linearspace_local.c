@@ -88,7 +88,7 @@ static void nextLStabcolumn(const GtUchar *useq, const GtUword ulen,
       Starttabcolumn[rowindex].a = rowindex;
       Starttabcolumn[rowindex].b = colindex;
     }
-    if (Ltabcolumn[rowindex] > gt_max_get_value(max))
+    if (Ltabcolumn[rowindex] >= gt_max_get_value(max))
     {
       gt_max_set_value(max, Ltabcolumn[rowindex]);
       gt_max_set_start(max, Starttabcolumn[rowindex]);
@@ -207,14 +207,13 @@ static GtAlignment *gt_calc_linearalign_local(const GtUchar *useq,GtUword ulen,
     vseq_part = &vseq[(gt_max_get_start(max)).b];
     ulen_part = gt_max_get_row_length(max);
     vlen_part = gt_max_get_col_length(max);
+
     align = gt_alignment_new_with_seqs(useq_part,ulen_part,vseq_part,vlen_part);
     gt_calc_linearalign_with_costs(useq_part, ulen_part, vseq_part, vlen_part,
                                    align, matchcost, mismatchcost, gapcost);
   }else
   {
-    align = gt_alignment_new_with_seqs(useq,ulen,vseq,vlen);
-    gt_calc_linearalign_with_costs(useq, ulen, vseq, vlen,
-                                   align, matchcost, mismatchcost, gapcost);
+    align = gt_alignment_new_with_seqs((const GtUchar*)"",0,(const GtUchar*)"",0);
   }
 
   gt_max_delete(max);
@@ -257,7 +256,7 @@ static GtWord fillLtable(GtWord *lcolumn,
 }
 
 /* use this function to calculate score if no char matches*/
-static GtUword gt_calc_linearscore_safe(const GtUword ulen,
+/*static GtUword gt_calc_linearscore_safe(const GtUword ulen,
                                         const GtUword vlen,
                                         const GtWord mismatchscore,
                                         const GtWord gapscore)
@@ -271,7 +270,7 @@ static GtUword gt_calc_linearscore_safe(const GtUword ulen,
     score += gapscore;
   }
   return score;
-}
+}*/
 
 static GtUword gt_calc_linearscore_with_table(const GtUchar *useq, GtUword ulen,
                                               const GtUchar *vseq, GtUword vlen,
@@ -321,11 +320,10 @@ void gt_checklinearspace_local(GT_UNUSED bool forward,
 {
   /*printf("useq %s, vseq %s, ulen:"GT_WU", vlen:"GT_WU"\n",
    * useq,vseq,ulen,vlen);*/
-  GtWord score1, score2, score3, score4;
+  GtWord score1, score2, score3;
   GtAlignment *align;
-  bool no_align = false;
 
-  gt_assert(useq && ulen && vseq && vlen);
+  //gt_assert(useq && ulen && vseq && vlen);
 
   if (gap_symbol_in_sequence(useq,ulen))
   {
@@ -347,30 +345,18 @@ void gt_checklinearspace_local(GT_UNUSED bool forward,
             " = gt_calc_linearscore_with_table\n", score1, score2);
     exit(GT_EXIT_PROGRAMMING_ERROR);
   }
-  if (score1 == 0)
-     no_align =true;
 
   align = gt_calc_linearalign_local(useq, ulen, vseq, vlen, 2, -2, -1);
   score3 = gt_alignment_eval_with_score(align, 2,-2,-1);
 
-  if (no_align)
-  {
-    score4 = gt_calc_linearscore_safe(ulen,vlen, -2, -1);
-    if (score3 != score4)
-    {
-      fprintf(stderr,"gt_calc_linearalign_local = "GT_WD" != "GT_WD
-              " = gt_calc_linearscore_safe\n", score3, score4);
-      exit(GT_EXIT_PROGRAMMING_ERROR);
-    }
-  }
-  else{
+ 
     if (score1 != score3)
     {
       fprintf(stderr,"gt_calc_linearscore = "GT_WD" != "GT_WD
               " = gt_calc_linearalign_local\n", score1, score3);
       exit(GT_EXIT_PROGRAMMING_ERROR);
     }
-  }
+  
 
   gt_alignment_delete(align);
 }

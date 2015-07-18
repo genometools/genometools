@@ -386,6 +386,18 @@ static GtUword evaluateaffinecrosspoints(const GtUchar *useq, GtUword ulen,
   }
   return 0;
 }
+/*noch auslagern fuer alle varianten an alignments*/
+static GtUword construct_trivial_alignment(GtUword len, GtAlignment *align, const GtWord gapcost, void (*indel)(GtAlignment*))
+{
+  GtUword idx, distance=0;
+  
+  for (idx = 0; idx < len; idx ++)
+  {
+    indel(align);
+    distance += gapcost;
+  }
+  return distance;
+}
 
 GtUword gt_calc_affinealign_linear(const GtUchar *useq,
                                           const GtUword ulen,
@@ -396,35 +408,47 @@ GtUword gt_calc_affinealign_linear(const GtUchar *useq,
                                           const GtWord gap_opening,
                                           const GtWord gap_extension)
 {
-  GtUword distance,*Ctab, matchcost = 0;
+  GtUword distance,*Ctab;// matchcost = 0;
   Atabentry *Atabcolumn;
   Rtabentry *Rtabcolumn;
-  GtUchar *pos;
-
+ // GtUchar *pos;
+  GtAlignment *align2;
   Ctab = gt_malloc(sizeof *Ctab * (vlen+1));
   Atabcolumn = gt_malloc(sizeof *Atabcolumn * (ulen+1));
   Rtabcolumn = gt_malloc(sizeof *Rtabcolumn * (ulen+1));
 
-  Ctab[vlen] = ulen;
-  if (vlen == 1UL) {
-    pos = (GtUchar*)strrchr((const char *)useq, vseq[0]);
-    if(pos == NULL || gap_opening > replacement_cost-matchcost){
-      Ctab[0] = Ctab[1]-1;
-      distance = replacement_cost + (ulen-1)*gap_extension + gap_opening;
-    }
-    else{
-      Ctab[0] = (pos-useq);
-      distance = matchcost + (ulen-1)*gap_extension + 2*gap_opening;
-    }
+    if (ulen == 0UL)
+  {
+      distance = construct_trivial_alignment(vlen, align,gap_extension,
+                                  gt_alignment_add_insertion)+gap_opening;
+  } 
+  else if (vlen == 0UL)
+  {
+      distance = construct_trivial_alignment(ulen, align,gap_extension,
+                                  gt_alignment_add_deletion)+gap_opening;
+  }
+  else if (vlen ==  1UL)
+  {
+    align2 = gt_affinealign((const char*)useq, ulen, (const char*)vseq, vlen, (int)replacement_cost,
+                       (int)gap_opening, (int)gap_extension);
+    gt_alignment_clone(align2, align);
+
+   distance = gt_alignment_eval_with_affine_score(align, replacement_cost,
+                                          gap_opening,
+                                          gap_extension);
+
   }
   else{
+      Ctab[vlen] = ulen;
     distance = evaluateaffinecrosspoints(useq, ulen, vseq, vlen,
                                          Atabcolumn, Rtabcolumn,
                                          Ctab, 0, replacement_cost,
                                          gap_opening,gap_extension, X);
     Ctab[0] = 0;
+    reconstructalignment(align, Ctab, vlen);
+    
   }
-  reconstructalignment(align, Ctab, vlen);
+  
   gt_free(Ctab);
   gt_free(Atabcolumn);
   gt_free(Rtabcolumn);
@@ -463,17 +487,17 @@ void gt_computeaffinelinearspace(bool showevalue,
   gt_alignment_delete(align);
 }
 
-
-/*TODO:void gt_checkaffinelinearspace(GT_UNUSED bool forward,
+/*TODO*/
+void gt_checkaffinelinearspace(GT_UNUSED bool forward,
                                const GtUchar *useq,
                                GtUword ulen,
                                const GtUchar *vseq,
                                GtUword vlen)
 {
   GtAlignment *align_linear, *align_square;
-  GtUword  affine1, affine2, affine3;
+  //GtUword  affine1;
 
-  gt_assert(useq && ulen && vseq && vlen);
+  //gt_assert(useq && ulen && vseq && vlen);
   if (gap_symbol_in_sequence(useq,ulen))
   {
     fprintf(stderr,"%s: sequence u contains gap symbol\n",__func__);
@@ -485,10 +509,10 @@ void gt_computeaffinelinearspace(bool showevalue,
     exit(GT_EXIT_PROGRAMMING_ERROR);
   }
   align_linear = gt_alignment_new_with_seqs(useq, ulen, vseq, vlen);
-  affine1 = gt_calc_affinealign_linear(useq, ulen, vseq, vlen, align_linear, 3, 3, 1);
-
+  gt_calc_affinealign_linear(useq, ulen, vseq, vlen, align_linear, 3, 3, 1);
+//gt_alignment_show(align_linear, stdout, 80);
   align_square = gt_affinealign((const char *)useq, ulen, (const char *)vseq, vlen,3,3,1);
-
+//gt_alignment_show(align_square, stdout, 80);
   gt_alignment_delete(align_linear);
   gt_alignment_delete(align_square);
-}*/
+}

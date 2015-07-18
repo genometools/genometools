@@ -1,4 +1,5 @@
 /*
+  Copyright (c) 2015 Annika Seidel <annika.seidel@studium.uni-hamburg.de>
   Copyright (c) 2006-2009 Gordon Gremme <gordon@gremme.org>
   Copyright (c)      2013 Ole Eigenbrod <ole.eigenbrod@gmx.de>
   Copyright (c)      2013 Dirk Willrodt <willrodt@zbh.uni-hamburg.de>
@@ -34,7 +35,7 @@ struct GtAlignment {
   const GtUchar  *u,
                  *v;
   GtMultieoplist *eops;
-  GtUword   ulen,
+  GtUword         ulen,
                   vlen,
                   alilen;
 };
@@ -264,6 +265,53 @@ GtWord gt_alignment_eval_with_score(const GtAlignment *alignment,
   return sumscore;
 }
 
+GtWord gt_alignment_eval_with_affine_score(const GtAlignment *alignment,
+                                           const GtWord replacement_score,
+                                           const GtWord gap_opening,
+                                           const GtWord gap_extension)
+{
+  GtUword i, j, idx_u = 0, idx_v = 0, meoplen;
+  GtWord sumscore = 0;
+  GtMultieop meop;
+
+  gt_assert(alignment != NULL);
+  gt_assert(gt_alignment_is_valid(alignment));
+
+  meoplen = gt_multieoplist_get_num_entries(alignment->eops);
+
+   meoplen = gt_multieoplist_get_num_entries(alignment->eops);
+
+  for (i = meoplen; i > 0; i--) {
+    meop = gt_multieoplist_get_entry(alignment->eops, i-1);
+    switch (meop.type) {
+      case Mismatch:
+      case Match:
+      case Replacement:
+        for (j = 0; j < meop.steps; j++) {
+          if (alignment->u[idx_u] == alignment->v[idx_v] &&
+              ISNOTSPECIAL(alignment->u[idx_u])) {
+            sumscore += replacement_score;
+          }
+          /*fall für mismatch score fehlt noch*/
+          else {
+            sumscore += replacement_score;
+          }
+          idx_u++;
+          idx_v++;
+        }
+        break;
+      case Deletion:
+        sumscore += gap_extension * meop.steps + gap_opening;
+        idx_u += meop.steps;
+        break;
+      case Insertion:
+        sumscore += gap_extension * meop.steps + gap_opening;
+        idx_v += meop.steps;
+        break;
+    }
+  }
+  return sumscore;
+}
 static inline unsigned int gt_alignment_show_advance(unsigned int pos,
                                                      unsigned int width,
                                                      GtUchar *top,
@@ -476,6 +524,23 @@ void gt_alignment_delete(GtAlignment *alignment)
   if (!alignment) return;
   gt_multieoplist_delete(alignment->eops);
   gt_free(alignment);
+}
+
+void gt_alignment_clone(const GtAlignment *alignment_from,
+                             GtAlignment *alignment_to)
+{
+  gt_assert(alignment_from != NULL && alignment_to != NULL);
+  
+  alignment_to->u = alignment_from->u;
+  alignment_to->v = alignment_from->v;
+  alignment_to->ulen = alignment_from->ulen;
+  alignment_to->vlen = alignment_from->vlen;
+  alignment_to->aligned_range_u.start = alignment_from->aligned_range_u.start;
+  alignment_to->aligned_range_v.start = alignment_from->aligned_range_v.start;
+  alignment_to->aligned_range_u.end = alignment_from->aligned_range_u.end;
+  alignment_to->aligned_range_v.end = alignment_from->aligned_range_v.end;
+  gt_multieoplist_clone(alignment_to->eops,alignment_from->eops);
+  alignment_to->alilen = alignment_from->alilen;
 }
 
 int gt_alignment_unit_test(GtError *err)

@@ -51,7 +51,8 @@ static void affinealign_fill_table(AffinealignDPentry **dptable,
 {
   GtUword i, j, Rvalue, Dvalue, Ivalue, minvalue;
   int rcost;
-  gt_assert(dptable && u && ulen && v && vlen);
+  gt_assert(dptable && u && v);
+  //gt_assert(ulen && vlen);
   for (i = 0; i <= ulen; i++) {
     for (j = 0; j <= vlen; j++) {
       if (!i && !j) {
@@ -169,7 +170,8 @@ GtAlignment* gt_affinealign(const char *u, GtUword ulen,
 {
   AffinealignDPentry **dptable;
   GtAlignment *a;
-  gt_assert(u && ulen && v && vlen);
+  gt_assert(u && v);
+  //gt_assert(ulen && vlen);
   gt_array2dim_malloc(dptable, ulen+1, vlen+1);
   affinealign_fill_table(dptable, u, ulen, v, vlen, replacement_cost,
                          gap_opening_cost, gap_extension_cost);

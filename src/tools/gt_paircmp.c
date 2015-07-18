@@ -301,10 +301,10 @@ int gt_paircmp(int argc, const char **argv, GtError *err)
                                                     &cmppairwise);
       printf("# number of testcases for gt_checklinearspace_local: " GT_WU "\n",
               testcases);
-      /*testcases = applycheckfunctiontosimpleoptions(gt_checkaffinelinearspace,
+      testcases = applycheckfunctiontosimpleoptions(gt_checkaffinelinearspace,
                                                     &cmppairwise);
       printf("# number of testcases for gt_checkaffinelinearspace: " GT_WU "\n",
-              testcases);      */      
+              testcases);          
     }
   }
   freesimpleoption(&cmppairwise);

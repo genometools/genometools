@@ -1,4 +1,5 @@
 /*
+  Copyright (c) 2015 Annika Seidel <annika.seidel@studium.uni-hamburg.de>
   Copyright (c) 2006-2007 Gordon Gremme <gordon@gremme.org>
   Copyright (c) 2006-2007 Center for Bioinformatics, University of Hamburg
 
@@ -59,6 +60,10 @@ GtWord       gt_alignment_eval_with_score(const GtAlignment *alignment,
                                           GtWord matchscore,
                                           GtWord mismatchscore,
                                           GtWord gapscore);
+GtWord       gt_alignment_eval_with_affine_score(const GtAlignment *alignment,
+                                          GtWord matchscore,
+                                          GtWord mismatchscore,
+                                          GtWord gapscore);
 /* print alignment to <fp>. This will break the lines after width characters */
 void         gt_alignment_show(const GtAlignment *alignment, FILE *fp,
                                unsigned int width);
@@ -70,5 +75,8 @@ void         gt_alignment_show_multieop_list(const GtAlignment *alignment,
                                              FILE *fp);
 int          gt_alignment_unit_test(GtError *err);
 void         gt_alignment_delete(GtAlignment *alignment);
+
+void gt_alignment_clone(const GtAlignment *alignment_from,
+                              GtAlignment *alignment_to);
 
 #endif

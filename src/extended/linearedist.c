@@ -32,6 +32,78 @@
 
 #define LINEAR_EDIST_GAP          ((GtUchar) UCHAR_MAX)
 
+static GtUword alignment_in_square_space(GtAlignment *align, const GtUchar *useq, GtUword ulen,
+                                              const GtUchar *vseq, GtUword vlen,
+                                              const GtWord matchcost,
+                                              const GtWord mismatchcost,
+                                              const GtWord gapcost)
+{
+  GtUword **E, distance=0;
+  GtUword i,j, val;
+  
+  E = gt_malloc((sizeof **E)*(ulen+1));
+  *E = gt_malloc((sizeof *E)*((vlen+1)*(ulen+1)));
+  for(j = 1; j <= ulen; j++)
+  {
+    E[j] = E[j-1]+vlen+1;
+  }
+  
+  E[0][0] = 0;
+  for (i = 1; i <= ulen; i++)
+  {
+      E[i][0] = E[i-1][0] + gapcost;
+  }
+      
+  for (j = 1; j <= vlen; j++)
+  {
+      E[0][j] = E[0][j-1] + gapcost;
+      for (i = 1; i <= ulen; i++)
+      {
+        E[i][j] = E[i][j-1];
+        if ((val = E[i-1][j-1] + (useq[i-1] == vseq[j-1] ? matchcost : mismatchcost))
+            <= E[i][j])
+        { 
+          E[i][j] = val;
+        }
+  
+        if ((val = E[i-1][j] + gapcost) < E[i][j])
+        {
+          E[i][j] = val;
+        }
+     }
+  }
+  i = ulen;
+  j = vlen;
+
+  distance = E[i][j];
+
+  while( i != 0 || j != 0)
+  {
+    if(i != 0 && j != 0 && E[i][j]==E[i-1][j-1] + (useq[i-1] == vseq[j-1] ? matchcost : mismatchcost))
+    {
+      gt_alignment_add_replacement(align);
+      i--; j--;
+    }
+    else if (j!=0 &&E[i][j] == E[i][j-1] + gapcost)
+    {
+      gt_alignment_add_insertion(align);
+      j--;
+    }
+    else if(i!=0 &&E[i][j] == E[i-1][j] + gapcost)
+    {
+      gt_alignment_add_deletion(align);
+      i--;
+    }
+    else
+    {
+      /*never reach this line*/
+      fprintf(stderr,"the impossible happend\n");
+      exit(GT_EXIT_PROGRAMMING_ERROR);
+    }
+  }
+  return distance;
+}
+
 /*
    The following function computes the first column of the E and R table as
    described in the handout of the lecture on ``A Linear Space Alignmen
@@ -176,7 +248,17 @@ static GtUword evaluatecrosspoints(const GtUchar *useq,
   }
   return 0;
 }
-
+static GtUword construct_trivial_alignment(GtUword len, GtAlignment *align, void (*indel)(GtAlignment*))
+{
+  GtUword idx, distance=0;
+  
+  for (idx = 0; idx < len; idx ++)
+  {
+    indel(align);
+    distance += 1;
+  }
+  return distance;
+}
 static GtUword computealignment(const GtUchar *useq,
                                 const GtUchar *vseq,
                                 GtUword ulen,
@@ -187,32 +269,31 @@ static GtUword computealignment(const GtUchar *useq,
   GtUword distance,
           *EDtabcolumn,
           *Rtabcolumn;
-  GtUchar *pos;
 
-  EDtabcolumn = gt_malloc(sizeof *EDtabcolumn * (ulen+1));
-  Rtabcolumn = gt_malloc(sizeof *Rtabcolumn * (ulen+1));
-  Ctab[vlen] = ulen;
-  if (vlen == 1UL) {
-    pos = (GtUchar*)strrchr((const char *)useq, vseq[0]);
-    if(pos == NULL){
-      Ctab[0] = Ctab[1]-1;
-      distance = 1 + (ulen-1)*1;
-    }
-    else{
-      Ctab[0] = (pos-useq);
-      distance = 1 + (ulen-1)*1;
-    }
+  if (ulen == 0UL)
+  {
+      distance = construct_trivial_alignment(vlen, align,
+                                  gt_alignment_add_insertion);
+  } 
+  else if (vlen == 0UL)
+  {
+      distance = construct_trivial_alignment(ulen, align,
+                                  gt_alignment_add_deletion);
+  }
+  else if (vlen == 1UL) {
+    distance = alignment_in_square_space(align,useq,ulen,vseq,vlen,0,1,1);
   }
   else{
+    EDtabcolumn = gt_malloc(sizeof *EDtabcolumn * (ulen+1));
+    Rtabcolumn = gt_malloc(sizeof *Rtabcolumn * (ulen+1));
+    Ctab[vlen] = ulen;
     distance = evaluatecrosspoints(useq, vseq, ulen, vlen, EDtabcolumn,
                                    Rtabcolumn, Ctab, 0);
     Ctab[0] = 0;
+    reconstructalignment(align,Ctab, vlen);
+    gt_free(EDtabcolumn);
+    gt_free(Rtabcolumn);
   }
-
-  reconstructalignment(align,Ctab, vlen);
-  gt_free(EDtabcolumn);
-  gt_free(Rtabcolumn);
-
   return distance;
 }
 
@@ -317,7 +398,7 @@ void gt_checklinearspace(GT_UNUSED bool forward,
   GtAlignment *align;
   GtUword  alcost, edist1, edist2, edist3;
 
-  gt_assert(useq && ulen && vseq && vlen);
+  //gt_assert(useq && ulen && vseq && vlen);
   if (gap_symbol_in_sequence(useq,ulen))
   {
     fprintf(stderr,"%s: sequence u contains gap symbol\n",__func__);
