@@ -235,9 +235,14 @@ static GtOptionParser *gt_repfind_option_parser_new(void *tool_arguments)
   gt_option_parser_add_option(op, extendxdropoption);
 
   xdropbelowoption = gt_option_new_word("xdropbelow",
-                                        "Specify xdrop cutoff score",
+                                        "Specify xdrop cutoff score "
+                                        "(argument 0 means undefined). If "
+                                        "undefined an optimal value is "
+                                        "determined automatically depending "
+                                        "on the error "
+                                        "rate",
                                         &arguments->xdropbelowscore,
-                                        5L);
+                                        0);
   gt_option_parser_add_option(op, xdropbelowoption);
 
   extendgreedyoption
@@ -288,7 +293,7 @@ static GtOptionParser *gt_repfind_option_parser_new(void *tool_arguments)
     = gt_option_new_uword_min_max("percmathistory",
                                   "percentage of matches required in history",
                                   &arguments->perc_mat_history,
-                                  55,
+                                  85,
                                   1,
                                   100);
   gt_option_parser_add_option(op, percmathistoryoption);
@@ -627,12 +632,26 @@ static int gt_repfind_runner(int argc,
     if (arguments->extendgreedy)
     {
       printf("-" GT_WU,arguments->perc_mat_history);
-      printf("-" GT_WU,arguments->maxalignedlendifference);
+      if (arguments->maxalignedlendifference == 0)
+      {
+        printf("-" GT_WU,
+               gt_optimalmaxalilendifference(arguments->errorpercentage));
+      } else
+      {
+        printf("-" GT_WU,arguments->maxalignedlendifference);
+      }
     } else
     {
       if (arguments->extendxdrop)
       {
-        printf("-" GT_WD,arguments->xdropbelowscore);
+        if (arguments->xdropbelowscore == 0)
+        {
+          printf("-" GT_WD,
+                 gt_optimalxdropbelowscore(arguments->errorpercentage));
+        } else
+        {
+          printf("-" GT_WD,arguments->xdropbelowscore);
+        }
       }
     }
     gt_timer_show_formatted(repfindtimer," overall " GT_WD ".%02ld\n",stdout);

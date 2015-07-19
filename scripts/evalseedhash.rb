@@ -81,24 +81,24 @@ end
 
 def inputseedhash(matchfile)
   seedhash = Hash.new()
-  key = nil
+  seed = nil
   File.open(matchfile,"r").each_line do |line|
     if line.match(/# seed:/)
-      key = line.chomp.gsub(/# seed:\s+/,"")
+      seed = line.chomp.gsub(/# seed:\s+/,"")
     elsif line.match(/^#/)
       next
     elsif line.match(/^\d/)
       a = line.split(/\s/)
-      if key.nil?
-        STDERR.puts "#{$0}: expect that key is defined"
+      if seed.nil?
+        STDERR.puts "#{$0}: expect that seed is defined"
         exit 1
       end
-      if seedhash.has_key?(key)
-        STDERR.puts "#{$0}: key #{key} already occurs"
+      if seedhash.has_key?(seed)
+        STDERR.puts "#{$0}: seed #{seed} already occurs"
         exit 1
       end
-      seedhash[key] = match_new_without_result(a)
-      key = nil
+      seedhash[seed] = match_new_without_result(a)
+      seed = nil
     end
   end
   return seedhash

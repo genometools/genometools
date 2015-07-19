@@ -64,12 +64,19 @@ typedef struct GtXdropmatchinfo GtXdropmatchinfo;
    <errorpercentage> is the percentage of errors allowed in the
    extended seeds. <xdropbelowscore> is the parameter which influences the
    search space of the Xdrop-based extension. The larger this parameter,
-   the larger the search space. */
+   the larger the search space. If <xdropbelowscore> is 0,
+   then a reasonable default value depending on the the <errorpercentage>
+   is chosen. */
 
 GtXdropmatchinfo *gt_xdrop_matchinfo_new(GtUword userdefinedleastlength,
                                          GtUword errorpercentage,
                                          GtXdropscore xdropbelowscore,
                                          bool selfcompare);
+
+/* The following function returns the optimal xdrop score depending
+   on the error percentag. */
+
+GtWord gt_optimalxdropbelowscore(GtUword errorpercentage);
 
 /* Set the verbose flag in the matchinfo object. */
 
@@ -165,6 +172,11 @@ GtGreedyextendmatchinfo *gt_greedy_extend_matchinfo_new(
                                    GtUword perc_mat_history,
                                    GtUword userdefinedleastlength,
                                    GtExtendCharAccess extend_char_access);
+
+/* Determine the optimal value for maximal alignment difference, depending
+   on the error percentage. */
+
+GtUword gt_optimalmaxalilendifference(GtUword errorpercentage);
 
 /* Set the check_extend_symmetry flag in the matchinfo object. */
 

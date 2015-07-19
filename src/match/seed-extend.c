@@ -58,6 +58,22 @@ struct GtXdropmatchinfo
   unsigned int userdefinedleastlength;
 };
 
+GtWord gt_optimalxdropbelowscore(GtUword errorpercentage)
+{
+  const int optxdropbelowscore_tab[]
+    = {0, 1, 1, 1, 1, 1, 1, 1, 2, 2, 4, 4, 4, 4, 5, 5};
+  const size_t tablen = sizeof optxdropbelowscore_tab/
+                        sizeof optxdropbelowscore_tab[0];
+
+  if (errorpercentage >= tablen)
+  {
+    return (GtUword) 6;
+  } else
+  {
+    return (GtUword) optxdropbelowscore_tab[errorpercentage];
+  }
+}
+
 GtXdropmatchinfo *gt_xdrop_matchinfo_new(GtUword userdefinedleastlength,
                                          GtUword errorpercentage,
                                          GtXdropscore xdropbelowscore,
@@ -85,7 +101,13 @@ GtXdropmatchinfo *gt_xdrop_matchinfo_new(GtUword userdefinedleastlength,
   xdropmatchinfo->res = gt_xdrop_resources_new(&xdropmatchinfo->arbitscores);
   xdropmatchinfo->userdefinedleastlength = userdefinedleastlength;
   xdropmatchinfo->errorpercentage = errorpercentage;
-  xdropmatchinfo->belowscore = xdropbelowscore;
+  if (xdropbelowscore == 0)
+  {
+    xdropmatchinfo->belowscore = gt_optimalxdropbelowscore(errorpercentage);
+  } else
+  {
+    xdropmatchinfo->belowscore = xdropbelowscore;
+  }
   xdropmatchinfo->silent = false;
   xdropmatchinfo->beverbose = false;
   return xdropmatchinfo;
@@ -220,7 +242,7 @@ struct GtGreedyextendmatchinfo
   GtAllocatedMemory usequence_cache, vsequence_cache, frontspace_reservoir;
 };
 
-static GtUword gt_optimalmaxalilendifference(GtUword errorpercentage)
+GtUword gt_optimalmaxalilendifference(GtUword errorpercentage)
 {
   const int optmaxalilen_tab[]
     = {0, 2, 2, 4, 6, 6, 7, 7, 9, 8, 8, 8, 9, 10, 10, 14};
@@ -266,8 +288,7 @@ GtGreedyextendmatchinfo *gt_greedy_extend_matchinfo_new(
   ggemi->minmatchnum = (history * perc_mat_history)/100;
   ggemi->perc_mat_history = perc_mat_history;
   ggemi->userdefinedleastlength = userdefinedleastlength;
-  ggemi->pol_info
-    = polishing_info_new(MIN(15,ggemi->minmatchnum/2),errorpercentage);
+  ggemi->pol_info = polishing_info_new(ggemi->minmatchnum/2,errorpercentage);
   ggemi->totallength = GT_UWORD_MAX;
   ggemi->encseq_r_in_u = NULL;
   ggemi->encseq_r_in_v = NULL;
