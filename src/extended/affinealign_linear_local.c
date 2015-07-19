@@ -170,13 +170,13 @@ static Gtmaxcoordvalue *evaluateallAStabcolumns(const GtUchar *useq,
 }
 
 static GtUword gt_calc_affinealign_linear_local(const GtUchar *useq,
-                                          const GtUword ulen,
-                                          const GtUchar *vseq,
-                                          const GtUword vlen,
-                                          GtAlignment *align,
-                                          const GtWord replacement_score,
-                                          const GtWord gap_opening,
-                                          const GtWord gap_extension)
+                                                const GtUword ulen,
+                                                const GtUchar *vseq,
+                                                const GtUword vlen,
+                                                GtAlignment *align,
+                                                const GtWord replacement_score,
+                                                const GtWord gap_opening,
+                                                const GtWord gap_extension)
 {
   GtUword score;
   GtUword ulen_part, vlen_part;
@@ -203,14 +203,17 @@ static GtUword gt_calc_affinealign_linear_local(const GtUchar *useq,
     ulen_part = gt_max_get_row_length(max);
     vlen_part = gt_max_get_col_length(max);
     gt_alignment_set_seqs(align,useq_part,ulen_part,vseq_part,vlen_part);
-    score = gt_calc_affinealign_linear(useq_part, ulen_part,
+    gt_calc_affinealign_linear(useq_part, ulen_part,
                                        vseq_part, vlen_part,
                                        align, 6,1,3);
+    score = gt_alignment_eval_with_affine_score(align,replacement_score,
+                                                gap_opening,
+                                                gap_extension);
   }else
   {
-    gt_alignment_set_seqs(align,useq,ulen,vseq,vlen);
-    score = gt_calc_affinealign_linear(useq, ulen, vseq, vlen,
-                                       align, 6,1,3);
+     gt_alignment_set_seqs(align,(const GtUchar*)"",0,
+                                        (const GtUchar*)"",0);
+     score = 0;
   }
   gt_max_delete(max);
   gt_free(Atabcolumn);
@@ -218,25 +221,26 @@ static GtUword gt_calc_affinealign_linear_local(const GtUchar *useq,
   return(score);
 }
 
-void gt_computeaffinelinearspace_local(bool showevalue,
-                                 const GtUchar *useq, GtUword ulen,
-                                 const GtUchar *vseq, GtUword vlen,
-                                 const GtWord replacement_score,
-                                 const GtWord gap_opening,
-                                 const GtWord gap_extension,
-                                 FILE *fp)
+void gt_computeaffinelinearspace_local(const GtUchar *useq, GtUword ulen,
+                                       const GtUchar *vseq, GtUword vlen,
+                                       const GtWord replacement_score,
+                                       const GtWord gap_opening,
+                                       const GtWord gap_extension,
+                                       FILE *fp)
 {
   GtAlignment *align;
-  GtUword score;
+  //GtUword score;
 
   /*gt_assert(useq && ulen && vseq && vlen);*/
   align = gt_alignment_new();
-  score = gt_calc_affinealign_linear_local(useq, ulen, vseq, vlen,
+  (void)gt_calc_affinealign_linear_local(useq, ulen, vseq, vlen,
                                            align, replacement_score,
                                            gap_opening, gap_extension);
   gt_alignment_show(align, fp, 80);
-  if (showevalue)
-    fprintf(fp, "local affine score: "GT_WU"\n", score);
+  /*if (showevalue)
+    fprintf(fp, "local affine score: "GT_WU"\n", score);*/
   //TODO:score ausgabe noch statt kostenausgabe
   gt_alignment_delete(align);
 }
+
+/*TODO:checkfunction*/

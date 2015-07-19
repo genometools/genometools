@@ -239,7 +239,7 @@ int gt_linearalign(int argc, const char **argv, GtError *err)
       select_evalues(aop.scores, &matchscore, &mismatchscore, &gapscore);
       if (aop.affine)
       {
-        gt_computeaffinelinearspace_local(aop.showevalue,
+        gt_computeaffinelinearspace_local(//aop.showevalue,
       (const GtUchar *) gt_str_array_get(aop.strings,0),
       (GtUword) strlen(gt_str_array_get(aop.strings,0)),
       (const GtUchar *) gt_str_array_get(aop.strings,1UL),
@@ -252,7 +252,7 @@ int gt_linearalign(int argc, const char **argv, GtError *err)
       else{
       
 
-      gt_computelinearspace_local(aop.showevalue,
+      gt_computelinearspace_local(//aop.showevalue,
       (const GtUchar *) gt_str_array_get(aop.strings,0),
       (GtUword) strlen(gt_str_array_get(aop.strings,0)),
       (const GtUchar *) gt_str_array_get(aop.strings,1UL),
@@ -275,7 +275,7 @@ int gt_linearalign(int argc, const char **argv, GtError *err)
         /* matchcost=replacement_cost,
          * mismatchcost=gap_opening_cost,
          * gapcost=gap_extension_cost*/
-        gt_computeaffinelinearspace(aop.showevalue,
+        gt_computeaffinelinearspace(//aop.showevalue,
         (const GtUchar *) gt_str_array_get(aop.strings,0),
         (GtUword) strlen(gt_str_array_get(aop.strings,0)),
         (const GtUchar *) gt_str_array_get(aop.strings,1UL),
@@ -283,7 +283,7 @@ int gt_linearalign(int argc, const char **argv, GtError *err)
          matchcost,mismatchcost, gapcost,fp);/*TODO:variablebennenung???*/
       }else
       {
-        gt_computelinearspace2(aop.showevalue,
+        gt_computelinearspace2(//aop.showevalue,
         (const GtUchar *) gt_str_array_get(aop.strings,0),
         (GtUword) strlen(gt_str_array_get(aop.strings,0)),
         (const GtUchar *) gt_str_array_get(aop.strings,1UL),

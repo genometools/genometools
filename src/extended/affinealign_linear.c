@@ -33,6 +33,49 @@ typedef struct {
 typedef struct {
   Rnode R,D,I;
 }Rtabentry;
+static char* edge_to_char(Edge edge)
+{
+  switch (edge){
+    case 0: return "R";
+    case 1: return "D";
+    case 2: return "I";
+    default: return "X";
+    }
+}
+void print(Atabentry *Atabcolumn, Rtabentry *Rtabcolumn,const GtUword ulen, const GtUword colindex)
+{
+    FILE *data_A, *data_R;
+    data_A =fopen("data_A","a");
+    data_R =fopen("data_R","a");
+    Atabentry *a;
+    Rtabentry *r;
+    fprintf(data_A, "****************************************\n"
+                     GT_WU"\n"
+                     "******************************************\n", 
+                     colindex);
+    fprintf(data_R, "****************************************\n"
+                     GT_WU"\n"
+                     "******************************************\n", 
+                     colindex);
+    for(a = Atabcolumn;a <= Atabcolumn+ulen ; a++)
+    {   
+      fprintf(data_A,"Atab[%d].R: ("GT_WU", %s) I: ("GT_WU", %s) D: ("GT_WU", %s)\n",
+                    (int)(a-Atabcolumn),
+                    a->Rvalue, edge_to_char(a->Redge),
+                    a->Ivalue, edge_to_char(a->Iedge),
+                    a->Dvalue, edge_to_char(a->Dedge));
+    }
+    for(r = Rtabcolumn;r <= Rtabcolumn+ulen ; r++)
+    {   
+      fprintf(data_R,"Rtab[%d].R:("GT_WU", %s) I: ("GT_WU", %s) D: ("GT_WU", %s)\n",
+                  (int)(r-Rtabcolumn),
+                  r->R.idx, edge_to_char(r->R.edge),
+                  r->I.idx, edge_to_char(r->I.edge),
+                  r->D.idx, edge_to_char(r->D.edge));
+    }
+    fclose(data_A);
+    fclose(data_R);
+}
 
 static GtUword add_safe(const GtUword val1, const GtUword val2)
 {
@@ -61,7 +104,9 @@ static Edge set_edge(const GtUword Rdist,
   return X;
 }
 
-static void set_Rtabentry(Rnode *rnode, const Rtabentry *rtab, const Edge edge )
+static void set_Rtabentry(Rnode *rnode, 
+                          const Rtabentry *rtab,
+                          const Edge edge )
 {
   if (edge == R)
   {
@@ -109,6 +154,10 @@ static void firstAtabRtabcolumn(const GtUword ulen,
     Atabcolumn[0].Dvalue = gap_opening;
     Atabcolumn[0].Ivalue = gap_opening;
   }
+  
+  Atabcolumn[0].Redge = X;
+  Atabcolumn[0].Dedge = X;
+  Atabcolumn[0].Iedge = X;
 
   Rtabcolumn[0].R.idx = 0;
   Rtabcolumn[0].D.idx = 0;
@@ -124,6 +173,10 @@ static void firstAtabRtabcolumn(const GtUword ulen,
     Atabcolumn[rowindex].Dvalue = add_safe(Atabcolumn[rowindex-1].Dvalue,
                                            gap_extension);
     Atabcolumn[rowindex].Ivalue = GT_UWORD_MAX;
+    
+    Atabcolumn[rowindex].Redge = X;
+    Atabcolumn[rowindex].Dedge = D;
+    Atabcolumn[rowindex].Iedge = X;
 
     Rtabcolumn[rowindex].R.idx = rowindex;
     Rtabcolumn[rowindex].D.idx = rowindex;
@@ -163,6 +216,10 @@ static void nextAtabRtabcolumn(const GtUchar *useq,
   Atabcolumn[0].Ivalue = minvalue;
   Atabcolumn[0].Rvalue = GT_UWORD_MAX;
   Atabcolumn[0].Dvalue = GT_UWORD_MAX;
+  
+  Atabcolumn[0].Redge = X;
+  Atabcolumn[0].Dedge = X;
+  Atabcolumn[0].Iedge = I;
 
   if (colindex > midcolumn)
   {
@@ -235,6 +292,7 @@ static GtUword evaluateallAtabRtabcolumns(const GtUchar *useq, GtUword ulen,
 
   firstAtabRtabcolumn(ulen, Atabcolumn, Rtabcolumn,
                       gap_opening, gap_extension, edge);
+                  //   print(Atabcolumn, Rtabcolumn,ulen, 0);
   for (colindex = 1UL; colindex <= vlen; colindex++)
   {
     nextAtabRtabcolumn(useq, ulen,
@@ -297,7 +355,7 @@ static GtUword evaluateaffinecrosspoints(const GtUchar *useq, GtUword ulen,
                                          const GtWord replacement_cost,
                                          const GtWord gap_opening,
                                          const GtWord gap_extension,
-                                         Edge edge)
+                                         Edge from_edge,Edge to_edge)
 {
   GtUword  midrow, midcol, distance, colindex;
   Edge bottomtype, midtype;
@@ -310,9 +368,9 @@ static GtUword evaluateaffinecrosspoints(const GtUchar *useq, GtUword ulen,
                                           replacement_cost,
                                           gap_opening,
                                           gap_extension,
-                                          midcol,edge);
+                                          midcol, from_edge);
 
-    bottomtype = minAdditionalCosts(Atabcolumn[ulen], edge, gap_opening);
+    bottomtype = minAdditionalCosts(Atabcolumn[ulen], to_edge, gap_opening);
     switch (bottomtype) {
       case R: midrow = (Rtabcolumn[ulen].R).idx;
               midtype = (Rtabcolumn[ulen].R).edge;
@@ -346,7 +404,7 @@ static GtUword evaluateaffinecrosspoints(const GtUchar *useq, GtUword ulen,
                                              replacement_cost,
                                              gap_opening,
                                              gap_extension,
-                                             edge);
+                                             from_edge,midtype);
           break;
         case D:
           (void) evaluateaffinecrosspoints(useq,midrow-1,vseq,midcol,
@@ -355,7 +413,7 @@ static GtUword evaluateaffinecrosspoints(const GtUchar *useq, GtUword ulen,
                                            replacement_cost,
                                            gap_opening,
                                            gap_extension,
-                                           edge);
+                                           from_edge,midtype);
           break;
         case I:
           if (midcol>1)
@@ -366,7 +424,7 @@ static GtUword evaluateaffinecrosspoints(const GtUchar *useq, GtUword ulen,
                                            replacement_cost,
                                            gap_opening,
                                            gap_extension,
-                                           edge);
+                                           from_edge,midtype);
           break;
         case X: /*never reach this line*/
                 fprintf(stderr,"the impossible happend\n");
@@ -381,92 +439,146 @@ static GtUword evaluateaffinecrosspoints(const GtUchar *useq, GtUword ulen,
                              replacement_cost,
                              gap_opening,
                              gap_extension,
-                             midtype);
+                             midtype, to_edge);
     return distance;
   }
   return 0;
 }
-/*noch auslagern fuer alle varianten an alignments*/
-static GtUword construct_trivial_alignment(GtUword len, GtAlignment *align, const GtWord gapcost, void (*indel)(GtAlignment*))
+
+static void determineCtab0(GtUword *Ctab, GtUchar vseq0,
+                          const GtUchar *useq,
+                          const GtWord replacement_cost,
+                          const GtWord gap_opening)
 {
-  GtUword idx, distance=0;
+  GtUword rowindex;
   
-  for (idx = 0; idx < len; idx ++)
+  if (Ctab[1] == 1 || Ctab[1] == 0)
   {
-    indel(align);
-    distance += gapcost;
+    Ctab[0] = 0; return;
   }
-  return distance;
+  else
+  {
+    if (Ctab[2]-Ctab[1] > 1)
+    {
+      if (gap_opening > replacement_cost)
+      {
+        Ctab[0] = 0; return;
+      }
+      else
+      {
+        for (rowindex = 0; rowindex < Ctab[1]; rowindex++)
+        {
+          if (vseq0 == useq[rowindex])
+          {
+            Ctab[0] = rowindex;
+            return;
+          }
+        }
+        Ctab[0] = 0; return;
+      }
+    }
+    else
+    {
+      if (gap_opening > replacement_cost)
+      {
+        Ctab[0] = Ctab[1]-1; return;
+      }
+      else
+      {
+        if (vseq0 == useq[Ctab[1]-1])
+        {
+          Ctab[0] = Ctab[1]-1; return;
+        }
+        for (rowindex = 0; rowindex < Ctab[1]; rowindex++)
+        {
+          if (vseq0 == useq[rowindex])
+          {
+            Ctab[0] = rowindex;
+            return;
+          }
+        }
+         Ctab[0] = Ctab[1]-1; return;
+      }
+    }
+  }
+
+  Ctab[0] = (Ctab[1] > 0) ?  Ctab[1]-1 : 0;
+
 }
 
 GtUword gt_calc_affinealign_linear(const GtUchar *useq,
-                                          const GtUword ulen,
-                                          const GtUchar *vseq,
-                                          const GtUword vlen,
-                                          GtAlignment *align,
-                                          const GtWord replacement_cost,
-                                          const GtWord gap_opening,
-                                          const GtWord gap_extension)
+                                   const GtUword ulen,
+                                   const GtUchar *vseq,
+                                   const GtUword vlen,
+                                   GtAlignment *align,
+                                   const GtWord replacement_cost,
+                                   const GtWord gap_opening,
+                                   const GtWord gap_extension)
 {
   GtUword distance,*Ctab;// matchcost = 0;
   Atabentry *Atabcolumn;
   Rtabentry *Rtabcolumn;
- // GtUchar *pos;
-  GtAlignment *align2;
-  Ctab = gt_malloc(sizeof *Ctab * (vlen+1));
-  Atabcolumn = gt_malloc(sizeof *Atabcolumn * (ulen+1));
-  Rtabcolumn = gt_malloc(sizeof *Rtabcolumn * (ulen+1));
-
-    if (ulen == 0UL)
+  GtAlignment *square_align;
+  
+  if (ulen == 0UL)
   {
-      distance = construct_trivial_alignment(vlen, align,gap_extension,
-                                  gt_alignment_add_insertion)+gap_opening;
+      distance = construct_trivial_alignment(align, vlen, gap_extension,
+                                             gt_alignment_add_insertion);
+      distance += gap_opening;
   } 
   else if (vlen == 0UL)
   {
-      distance = construct_trivial_alignment(ulen, align,gap_extension,
-                                  gt_alignment_add_deletion)+gap_opening;
+      distance = construct_trivial_alignment(align,ulen, gap_extension,
+                                             gt_alignment_add_deletion);
+      
   }
-  else if (vlen ==  1UL)
+  else if (ulen == 1UL || vlen == 1UL )
   {
-    align2 = gt_affinealign((const char*)useq, ulen, (const char*)vseq, vlen, (int)replacement_cost,
-                       (int)gap_opening, (int)gap_extension);
-    gt_alignment_clone(align2, align);
+    square_align = gt_affinealign((const char*)useq, ulen,
+                                  (const char*)vseq, vlen,
+                                  (int)replacement_cost,
+                                  (int)gap_opening,
+                                  (int)gap_extension);
+    gt_alignment_clone(square_align, align);
 
-   distance = gt_alignment_eval_with_affine_score(align, replacement_cost,
-                                          gap_opening,
-                                          gap_extension);
+    distance = gt_alignment_eval_with_affine_score(align,
+                                                   replacement_cost,
+                                                   gap_opening,
+                                                   gap_extension);
 
   }
-  else{
-      Ctab[vlen] = ulen;
+  else
+  {
+    Ctab = gt_malloc(sizeof *Ctab * (vlen+1));
+    Atabcolumn = gt_malloc(sizeof *Atabcolumn * (ulen+1));
+    Rtabcolumn = gt_malloc(sizeof *Rtabcolumn * (ulen+1));
+    
+    Ctab[vlen] = ulen;
     distance = evaluateaffinecrosspoints(useq, ulen, vseq, vlen,
                                          Atabcolumn, Rtabcolumn,
                                          Ctab, 0, replacement_cost,
-                                         gap_opening,gap_extension, X);
-    Ctab[0] = 0;
+                                         gap_opening,gap_extension, X,X);
+     
+    determineCtab0(Ctab, vseq[0],useq, replacement_cost, gap_opening);
     reconstructalignment(align, Ctab, vlen);
-    
+
+    gt_free(Ctab);
+    gt_free(Atabcolumn);
+    gt_free(Rtabcolumn);
   }
   
-  gt_free(Ctab);
-  gt_free(Atabcolumn);
-  gt_free(Rtabcolumn);
   return distance;
 }
 
-void gt_computeaffinelinearspace(bool showevalue,
-                                 const GtUchar *useq,
-                                 GtUword ulen,
-                                 const GtUchar *vseq,
-                                 GtUword vlen,
+void gt_computeaffinelinearspace(const GtUchar *useq, GtUword ulen,
+                                 const GtUchar *vseq, GtUword vlen,
                                  const GtWord replacement_cost,
                                  const GtWord gap_opening,
                                  const GtWord gap_extension,
                                  FILE *fp)
 {
   GtAlignment *align;
-  GtUword distance;
+  //GtUword distance;
 
   gt_assert(useq && ulen && vseq && vlen);
   if (replacement_cost < 0 || gap_opening < 0 || gap_extension < 0)
@@ -475,19 +587,18 @@ void gt_computeaffinelinearspace(bool showevalue,
     exit(GT_EXIT_PROGRAMMING_ERROR);
   }
   align = gt_alignment_new_with_seqs(useq, ulen, vseq, vlen);
-  distance = gt_calc_affinealign_linear(useq, ulen,
+  (void)gt_calc_affinealign_linear(useq, ulen,
                                 vseq, vlen,
                                 align, replacement_cost,
                                 gap_opening,gap_extension);
 
   gt_assert(fp != NULL);
   gt_alignment_show(align, fp, 80);
-  if(showevalue)
-    fprintf(fp, "affine costs: "GT_WU"\n", distance);
+  /*if(showevalue)
+    fprintf(fp, "affine costs: "GT_WU"\n", distance);*/
   gt_alignment_delete(align);
 }
 
-/*TODO*/
 void gt_checkaffinelinearspace(GT_UNUSED bool forward,
                                const GtUchar *useq,
                                GtUword ulen,
@@ -495,7 +606,7 @@ void gt_checkaffinelinearspace(GT_UNUSED bool forward,
                                GtUword vlen)
 {
   GtAlignment *align_linear, *align_square;
-  //GtUword  affine1;
+  GtUword affine_score1, affine_score2, affine_score3;
 
   //gt_assert(useq && ulen && vseq && vlen);
   if (gap_symbol_in_sequence(useq,ulen))
@@ -508,11 +619,27 @@ void gt_checkaffinelinearspace(GT_UNUSED bool forward,
     fprintf(stderr,"%s: sequence v contains gap symbol\n",__func__);
     exit(GT_EXIT_PROGRAMMING_ERROR);
   }
+  
   align_linear = gt_alignment_new_with_seqs(useq, ulen, vseq, vlen);
-  gt_calc_affinealign_linear(useq, ulen, vseq, vlen, align_linear, 3, 3, 1);
-//gt_alignment_show(align_linear, stdout, 80);
+  affine_score1 = gt_calc_affinealign_linear(useq, ulen, vseq, vlen, align_linear, 3, 3, 1);
+  affine_score2 = gt_alignment_eval_with_affine_score(align_linear,3,3,1);
+  if (affine_score1 != affine_score2)
+  {
+    fprintf(stderr,"gt_calc_affinealign_linear = "GT_WU" != "GT_WU
+            " = gt_alignment_eval_with_affine_score\n", affine_score1, affine_score2);
+    exit(GT_EXIT_PROGRAMMING_ERROR);
+  }
+
   align_square = gt_affinealign((const char *)useq, ulen, (const char *)vseq, vlen,3,3,1);
-//gt_alignment_show(align_square, stdout, 80);
+  affine_score3 = gt_alignment_eval_with_affine_score(align_square,3,3,1);
+
+  if (affine_score1 != affine_score3)
+  {
+    fprintf(stderr,"gt_calc_affinealign_linear = "GT_WU" != "GT_WU
+            " = gt_affinealign\n", affine_score1, affine_score3);
+    exit(GT_EXIT_PROGRAMMING_ERROR);
+  }
+
   gt_alignment_delete(align_linear);
   gt_alignment_delete(align_square);
 }

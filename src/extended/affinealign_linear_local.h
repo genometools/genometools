@@ -3,7 +3,7 @@
 
 #include "core/types_api.h"
 
-void gt_computeaffinelinearspace_local(bool showevalue,
+void gt_computeaffinelinearspace_local(
                                  const GtUchar *useq, GtUword ulen,
                                  const GtUchar *vseq, GtUword vlen,
                                  const GtWord replacement_score,

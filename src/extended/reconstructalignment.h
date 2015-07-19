@@ -6,4 +6,8 @@
 void reconstructalignment(GtAlignment *align,
                           const GtUword *Ctab,
                           const GtUword vlen);
+                          
+GtUword construct_trivial_alignment(GtAlignment *align, GtUword len, 
+                                    const GtWord gapcost,
+                                    void (*indel)(GtAlignment*));
 #endif

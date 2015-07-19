@@ -248,16 +248,23 @@ static GtUword evaluatecrosspoints(const GtUchar *useq,
   }
   return 0;
 }
-static GtUword construct_trivial_alignment(GtUword len, GtAlignment *align, void (*indel)(GtAlignment*))
+
+static void determineCtab0(GtUword *Ctab,
+                              GtUchar vseq0,
+                              const GtUchar *useq)
 {
-  GtUword idx, distance=0;
-  
-  for (idx = 0; idx < len; idx ++)
+  GtUword rowindex;
+
+  for (rowindex = 0; rowindex < Ctab[1]; rowindex++)
   {
-    indel(align);
-    distance += 1;
+    if (vseq0 == useq[rowindex])
+    {
+      Ctab[0] = rowindex;
+      return;
+    }
   }
-  return distance;
+
+  Ctab[0] = (Ctab[1] > 0) ?  Ctab[1]-1 : 0;
 }
 static GtUword computealignment(const GtUchar *useq,
                                 const GtUchar *vseq,
@@ -272,12 +279,12 @@ static GtUword computealignment(const GtUchar *useq,
 
   if (ulen == 0UL)
   {
-      distance = construct_trivial_alignment(vlen, align,
+      distance = construct_trivial_alignment(align, vlen, 1,
                                   gt_alignment_add_insertion);
   } 
   else if (vlen == 0UL)
   {
-      distance = construct_trivial_alignment(ulen, align,
+      distance = construct_trivial_alignment(align, ulen, 1,
                                   gt_alignment_add_deletion);
   }
   else if (vlen == 1UL) {
@@ -289,7 +296,8 @@ static GtUword computealignment(const GtUchar *useq,
     Ctab[vlen] = ulen;
     distance = evaluatecrosspoints(useq, vseq, ulen, vlen, EDtabcolumn,
                                    Rtabcolumn, Ctab, 0);
-    Ctab[0] = 0;
+    determineCtab0(Ctab,vseq[0],useq);
+
     reconstructalignment(align,Ctab, vlen);
     gt_free(EDtabcolumn);
     gt_free(Rtabcolumn);
@@ -394,7 +402,7 @@ void gt_checklinearspace(GT_UNUSED bool forward,
                          GtUword ulen,
                          const GtUchar *vseq,
                          GtUword vlen)
-{
+{printf("useq: %s, ulen: "GT_WU", vseq: %s, vlen: "GT_WU"\n",useq,ulen,vseq,vlen);
   GtAlignment *align;
   GtUword  alcost, edist1, edist2, edist3;
 

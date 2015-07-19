@@ -11,7 +11,7 @@ void gt_checkaffinelinearspace(GT_UNUSED bool forward,
                                const GtUchar *vseq,
                                GtUword vlen);
 
-void gt_computeaffinelinearspace(bool showevalue, 
+void gt_computeaffinelinearspace(
                                  const GtUchar *useq,
                                  GtUword ulen,
                                  const GtUchar *vseq,
@@ -20,6 +20,7 @@ void gt_computeaffinelinearspace(bool showevalue,
                                  const GtWord gap_opening,
                                  const GtWord gap_extension,
                                  FILE *fp);
+                                 
 GtUword gt_calc_affinealign_linear(const GtUchar *useq,
                                           const GtUword ulen,
                                           const GtUchar *vseq,

@@ -7,7 +7,7 @@ void gt_checklinearspace_local(GT_UNUSED bool forward,
                          const GtUchar *vseq,
                          GtUword vlen);
 
-void gt_computelinearspace_local(bool showevalue,
+void gt_computelinearspace_local(
                                  const GtUchar *useq, GtUword ulen,
                                  const GtUchar *vseq, GtUword vlen,
                                  GtWord matchscore,

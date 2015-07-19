@@ -290,9 +290,8 @@ GtWord gt_alignment_eval_with_affine_score(const GtAlignment *alignment,
         for (j = 0; j < meop.steps; j++) {
           if (alignment->u[idx_u] == alignment->v[idx_v] &&
               ISNOTSPECIAL(alignment->u[idx_u])) {
-            sumscore += replacement_score;
+            sumscore += 0;
           }
-          /*fall für mismatch score fehlt noch*/
           else {
             sumscore += replacement_score;
           }
