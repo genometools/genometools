@@ -17,9 +17,12 @@
 
 #include <limits.h>
 #include "core/encseq_api.h"
+#include "core/error_api.h"
 #include "core/ma_api.h"
-#include "core/unused_api.h"
+#include "core/str_api.h"
 #include "match/diagbandseed.h"
+#include "match/seed-extend.h"
+#include "match/xdrop.h"
 #include "tools/gt_seed_extend.h"
 
 typedef struct {
@@ -27,10 +30,15 @@ typedef struct {
   GtUword dbs_logdiagbandwidth;
   GtUword dbs_mincoverage;
   GtUword dbs_maxfreq;
-  GtUword se_alignlength;
+  GtUword se_minalignlength;
   GtUword se_maxalilendiff;
   GtUword se_errorpercentage;
   GtUword se_historysize;
+  GtUword se_perc_match_hist;
+  GtStr *se_char_access_mode;
+  GtXdropscore se_xdropbelowscore;
+  bool extendgreedy;
+  bool extendxdrop;
   bool mirror;
   bool overlappingseeds;
   bool verify;
@@ -40,6 +48,7 @@ typedef struct {
 static void* gt_seed_extend_arguments_new(void)
 {
   GtSeedExtendArguments *arguments = gt_calloc((size_t) 1, sizeof *arguments);
+  arguments->se_char_access_mode = gt_str_new();
   return arguments;
 }
 
@@ -47,6 +56,7 @@ static void gt_seed_extend_arguments_delete(void *tool_arguments)
 {
   GtSeedExtendArguments *arguments = tool_arguments;
   if (arguments != NULL) {
+    gt_str_delete(arguments->se_char_access_mode);
     gt_free(arguments);
   }
 }
@@ -55,7 +65,8 @@ static GtOptionParser* gt_seed_extend_option_parser_new(void *tool_arguments)
 {
   GtSeedExtendArguments *arguments = tool_arguments;
   GtOptionParser *op;
-  GtOption *option;
+  GtOption *option, *op_gre, *op_xdr, *op_cam, *op_his, *op_dif, *op_pmh,
+    *op_len, *op_err, *op_xbe;
   gt_assert(arguments);
 
   /* init */
@@ -64,9 +75,9 @@ static GtOptionParser* gt_seed_extend_option_parser_new(void *tool_arguments)
                             "extend algorithm.");
 
   /* -seedlength */
-  option = gt_option_new_uint_min("seedlength", "Minimum length of a seed",
+  op_len = gt_option_new_uint_min("seedlength", "Minimum length of a seed",
                                   &arguments->dbs_seedlength, 14, 2UL);
-  gt_option_parser_add_option(op, option);
+  gt_option_parser_add_option(op, op_len);
 
   /* -diagbandwidth */
   option = gt_option_new_uword("diagbandwidth", "Logarithm of diagonal band "
@@ -87,28 +98,60 @@ static GtOptionParser* gt_seed_extend_option_parser_new(void *tool_arguments)
   gt_option_parser_add_option(op, option);
 
   /* -err */
-  option = gt_option_new_uword_min_max("err", "Error percentage of matches "
+  op_err = gt_option_new_uword_min_max("err", "Error percentage of matches "
                                        "(for greedy extension)",
                                        &arguments->se_errorpercentage, 15, 0,
                                        100);
-  gt_option_parser_add_option(op, option);
+  gt_option_parser_add_option(op, op_err);
 
   /* -alignlength */
-  option = gt_option_new_uword_min("alignlength", "Minimum alignment length",
-                                   &arguments->se_alignlength, 1000, 1);
-  gt_option_parser_add_option(op, option);
+  op_len = gt_option_new_uword_min("alignlength", "Minimum alignment length",
+                                   &arguments->se_minalignlength, 1000, 1);
+  gt_option_parser_add_option(op, op_len);
 
   /* -maxalilendiff */
-  option = gt_option_new_uword("maxalilendiff", "Maximum difference of align"
+  op_dif = gt_option_new_uword("maxalilendiff", "Maximum difference of align"
                                "ment length (trimming for greedy extension)",
                                &arguments->se_maxalilendiff, 30);
-  gt_option_parser_add_option(op, option);
+  gt_option_parser_add_option(op, op_dif);
 
-  /* -historysize */
-  option = gt_option_new_uword_min("historysize", "Size of (mis)match history "
-                                   "(for greedy extension)",
-                                   &arguments->se_historysize, 65, 1);
-  gt_option_parser_add_option(op, option);
+  /* -history */
+  op_his = gt_option_new_uword_min_max("history", "Size of (mis)match history "
+                                       "in range [1..64] (trimming for greedy "
+                                       "extension)",
+                                       &arguments->se_historysize, 60, 0, 64);
+  gt_option_parser_add_option(op, op_his);
+
+  /* -percmathistory */
+  op_pmh = gt_option_new_uword_min_max("percmathistory", "percentage of matches"
+                                       " required in history",
+                                       &arguments->se_perc_match_hist, 55, 1,
+                                       100);
+  gt_option_parser_add_option(op, op_pmh);
+
+
+  /* -xdropbelow */
+  op_xbe = gt_option_new_word("xdropbelow", "Specify xdrop cutoff score",
+                              &arguments->se_xdropbelowscore, 5L);
+  gt_option_parser_add_option(op, op_xbe);
+
+  /* -cam */
+  op_cam = gt_option_new_string("cam", gt_cam_extendgreedy_comment(),
+                                arguments->se_char_access_mode,"");
+  gt_option_parser_add_option(op, op_cam);
+  gt_option_is_development_option(op_cam);
+
+  /* -extendgreedy */
+  op_gre = gt_option_new_bool("extendgreedy", "Extend seed to both sides using "
+                              "xdrop algorithm",
+                              &arguments->extendgreedy, false);
+  gt_option_parser_add_option(op, op_gre);
+
+  /* -extendxdrop */
+  op_xdr = gt_option_new_bool("extendxdrop", "Extend seed to both sides using "
+                              "greedy algorithm with trimming of waves",
+                              &arguments->extendxdrop, false);
+  gt_option_parser_add_option(op, op_xdr);
 
   /* -mirror */
   option = gt_option_new_bool("mirror", "Add reverse complement reads",
@@ -132,6 +175,15 @@ static GtOptionParser* gt_seed_extend_option_parser_new(void *tool_arguments)
                               &arguments->benchmark, false);
   gt_option_parser_add_option(op, option);
   gt_option_is_development_option(option);
+
+  gt_option_exclude(op_gre, op_xdr);
+  gt_option_imply(op_xbe, op_xdr);
+  gt_option_imply(op_cam, op_gre);
+  gt_option_imply(op_his, op_gre);
+  gt_option_imply(op_dif, op_gre);
+  gt_option_imply(op_pmh, op_gre);
+  gt_option_imply_either_2(op_len, op_xdr, op_gre);
+  gt_option_imply_either_2(op_err, op_xdr, op_gre);
 
   return op;
 }
@@ -167,6 +219,8 @@ static int gt_seed_extend_runner(int argc, const char **argv, int parsed_args,
   GtSeedExtendArguments *arguments = tool_arguments;
   GtEncseqLoader *encseq_loader;
   GtEncseq *aencseq, *bencseq;
+  GtGreedyextendmatchinfo *grextinfo = NULL;
+  GtXdropmatchinfo *xdropinfo = NULL;
   int had_err = 0;
 
   gt_error_check(err);
@@ -193,11 +247,49 @@ static int gt_seed_extend_runner(int argc, const char **argv, int parsed_args,
   }
   gt_encseq_loader_delete(encseq_loader);
 
+  if (!had_err && arguments->extendgreedy) {
+    GtExtendCharAccess cam = gt_greedy_extend_char_access(gt_str_get
+                             (arguments->se_char_access_mode), err);
+    if ((int) cam != -1) {
+      grextinfo = gt_greedy_extend_matchinfo_new(arguments->se_errorpercentage,
+                                                 arguments->se_maxalilendiff,
+                                                 arguments->se_historysize,
+                                                 arguments->se_perc_match_hist,
+                                                 arguments->se_minalignlength,
+                                                 cam);
+    } else {
+      had_err = -1;
+    }
+  }
+
+  if (!had_err && arguments->extendxdrop) {
+    xdropinfo = gt_xdrop_matchinfo_new(arguments->se_minalignlength,
+                                       arguments->se_errorpercentage,
+                                       arguments->se_xdropbelowscore,
+                                       true);
+  }
+
   /* start algorithm */
   if (!had_err) {
-    gt_diagbandseed_run(aencseq, bencseq, (GtDiagbandseed *)arguments);
+    GtDiagbandseed dbsarguments;
+    dbsarguments.seedlength = arguments->dbs_seedlength;
+    dbsarguments.logdiagbandwidth = arguments->dbs_logdiagbandwidth;
+    dbsarguments.mincoverage = arguments->dbs_mincoverage;
+    dbsarguments.maxfreq = arguments->dbs_maxfreq;
+    dbsarguments.mirror = arguments->mirror;
+    dbsarguments.overlappingseeds = arguments->overlappingseeds;
+    dbsarguments.verify = arguments->verify;
+    dbsarguments.benchmark = arguments->benchmark;
+    dbsarguments.extendgreedyinfo = grextinfo;
+    dbsarguments.extendxdropinfo = xdropinfo;
+
+    had_err = gt_diagbandseed_run(aencseq, bencseq, &dbsarguments, err);
     gt_encseq_delete(aencseq);
     gt_encseq_delete(bencseq);
+    if (arguments->extendgreedy)
+      gt_greedy_extend_matchinfo_delete(grextinfo);
+    if (arguments->extendxdrop)
+      gt_xdrop_matchinfo_delete(xdropinfo);
   }
   return had_err;
 }

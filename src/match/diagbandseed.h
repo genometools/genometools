@@ -20,22 +20,23 @@
 #include <stdbool.h>
 #include "core/arraydef.h"
 #include "core/encseq_api.h"
+#include "core/error_api.h"
 #include "core/readmode_api.h"
 #include "core/types_api.h"
+#include "match/seed-extend.h"
+#include "match/xdrop.h"
 
 struct GtDiagbandseed {
-  unsigned int dbs_seedlength;
-  GtUword dbs_logdiagbandwidth;
-  GtUword dbs_mincoverage;
-  GtUword dbs_maxfreq;
-  GtUword se_alignlength;
-  GtUword se_maxalilendiff;
-  GtUword se_errorpercentage;
-  GtUword se_historysize;
+  unsigned int seedlength;
+  GtUword logdiagbandwidth;
+  GtUword mincoverage;
+  GtUword maxfreq;
   bool mirror;
   bool overlappingseeds;
   bool verify;
   bool benchmark;
+  GtGreedyextendmatchinfo *extendgreedyinfo;
+  GtXdropmatchinfo *extendxdropinfo;
 };
 
 typedef struct GtDiagbandseed GtDiagbandseed;
@@ -60,9 +61,11 @@ void gt_diagbandseed_merge(GtArrayGtDiagbandseedSeedPair *mlist,
 void gt_diagbandseed_find_seeds(const GtArrayGtDiagbandseedSeedPair *mlist,
                                 unsigned int kmerlen, GtUword mincoverage,
                                 GtUword log_diagbandwidth, GtUword amaxlen,
-                                GtUword bmaxlen);
+                                GtUword bmaxlen,
+                                GtGreedyextendmatchinfo *extendgreedyinfo,
+                                GtXdropmatchinfo *extendxdropinfo);
 
 /* Run the whole algorithm. */
-void gt_diagbandseed_run(const GtEncseq *aencseq, const GtEncseq *bencseq,
-                         const GtDiagbandseed *arg);
+int gt_diagbandseed_run(const GtEncseq *aencseq, const GtEncseq *bencseq,
+                        const GtDiagbandseed *arg, GtError *err);
 #endif
