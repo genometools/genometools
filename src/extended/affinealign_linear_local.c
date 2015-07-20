@@ -369,7 +369,7 @@ static GtUword gt_calc_affinealign_linear_local(const GtUchar *useq,
   return(score);
 }
 
-void gt_computeaffinelinearspace_local(const GtUchar *useq,
+GtAlignment *gt_computeaffinelinearspace_local(const GtUchar *useq,
                                        const GtUword ustart,
                                        const GtUword ulen,
                                        const GtUchar *vseq,
@@ -378,22 +378,16 @@ void gt_computeaffinelinearspace_local(const GtUchar *useq,
                                        const GtWord matchscore,
                                        const GtWord mismatchscore,
                                        const GtWord gap_opening,
-                                       const GtWord gap_extension,
-                                       FILE *fp)
+                                       const GtWord gap_extension)
 {
   GtAlignment *align;
-  GtUword score;
 
   align = gt_alignment_new();
-  score = gt_calc_affinealign_linear_local(useq, ustart, ulen,
+  (void) gt_calc_affinealign_linear_local(useq, ustart, ulen,
                                            vseq, vstart, vlen,
                                            align, matchscore,mismatchscore,
                                            gap_opening, gap_extension);
-  gt_alignment_show(align, fp, 80);
-
-  fprintf(fp, "local affine score: "GT_WU"\n", score);
-
-  gt_alignment_delete(align);
+  return align;
 }
 
 void gt_checkaffinelinearspace_local(GT_UNUSED bool forward,

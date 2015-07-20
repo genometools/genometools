@@ -28,15 +28,15 @@ void gt_checkaffinelinearspace(GT_UNUSED bool forward,
                                const GtUchar *vseq,
                                GtUword vlen);
 
-void gt_computeaffinelinearspace(
-                                 const GtUchar *useq, GtUword ustart,
-                                 GtUword ulen,
-                                 const GtUchar *vseq, GtUword vstart,
-                                 GtUword vlen,
-                                 const GtWord replacement_cost,
-                                 const GtWord gap_opening,
-                                 const GtWord gap_extension,
-                                 FILE *fp);
+GtAlignment *gt_computeaffinelinearspace(const GtUchar *useq,
+                                         const GtUword ustart,
+                                         const GtUword ulen,
+                                         const GtUchar *vseq,
+                                         const GtUword vstart,
+                                         const GtUword vlen,
+                                         const GtWord replacement_cost,
+                                         const GtWord gap_opening,
+                                         const GtWord gap_extension);
 
 GtUword gt_calc_affinealign_linear(const GtUchar *useq, const GtUword ustart,
                                    const GtUword ulen,

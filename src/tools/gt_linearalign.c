@@ -1,3 +1,4 @@
+/*noch Chaos, TODO:Anpassung an Vorlage und Eingabeparameter richten*/
 #include <string.h>
 #include <inttypes.h>
 #include "core/error.h"
@@ -192,7 +193,7 @@ static void select_evalues(GtStrArray *evalues,
         check = sscanf(gt_str_array_get(evalues,2UL),GT_WD, val3);
         gt_assert(check == 1);
 }
-
+/*TODO:in arbeit*/
 int gt_linearalign(int argc, const char **argv, GtError *err)
 {
   int parsed_args;
@@ -200,7 +201,8 @@ int gt_linearalign(int argc, const char **argv, GtError *err)
   GtOPrval oprval;
   FILE *fp;
   GtWord matchcost = 0, mismatchcost = 1, gapcost = 1,
-  matchscore,mismatchscore,gapscore;/*TODO:evalue*/
+  matchscore,mismatchscore,gapscore,distance;/*TODO:evalue*/
+  GtAlignment *align;
 
   gt_error_check(err);
 
@@ -208,7 +210,7 @@ int gt_linearalign(int argc, const char **argv, GtError *err)
   if (oprval == GT_OPTION_PARSER_OK)
   {
     gt_assert(parsed_args == argc);
-   if (!aop.outfile)
+    if (!aop.outfile)
       showsimpleoptions(&aop);
 
     fp = (aop.outfile? gt_fa_fopen_func(
@@ -234,30 +236,37 @@ int gt_linearalign(int argc, const char **argv, GtError *err)
         (const GtUchar *) gt_str_array_get(cmppairwise.strings,1UL),
         (GtUword) strlen(gt_str_array_get(cmppairwise.strings,1UL)));
     }*/
-    else if (aop.local)
+    else{
+    if (aop.local)
     {
       select_evalues(aop.scores, &matchscore, &mismatchscore, &gapscore);
       if (aop.affine)
       {
-        gt_computeaffinelinearspace_local(//aop.showevalue,
+        align=gt_computeaffinelinearspace_local(//aop.showevalue,
       (const GtUchar *) gt_str_array_get(aop.strings,0),0,
       (GtUword) strlen(gt_str_array_get(aop.strings,0)),
       (const GtUchar *) gt_str_array_get(aop.strings,1UL),0,
       (GtUword) strlen(gt_str_array_get(aop.strings,1UL)),
-      6,matchscore,mismatchscore,gapscore,fp);
+      6,matchscore,mismatchscore,gapscore);
         /*fprintf(stderr,"-l -a is not implemented\n");
         exit(GT_EXIT_PROGRAMMING_ERROR);*/
-        
-      }
+        if (aop.showevalue){
+          distance =  gt_alignment_eval_with_affine_score(align,6,
+                                      matchscore,mismatchscore,gapscore);
+        } }
       else{
       
 
-      gt_computelinearspace_local(//aop.showevalue,
+      align=gt_computelinearspace_local(//aop.showevalue,
       (const GtUchar *) gt_str_array_get(aop.strings,0),0,
       (GtUword) strlen(gt_str_array_get(aop.strings,0)),
       (const GtUchar *) gt_str_array_get(aop.strings,1UL),0,
       (GtUword) strlen(gt_str_array_get(aop.strings,1UL)),
-      matchscore,mismatchscore,gapscore,fp);}
+      matchscore,mismatchscore,gapscore);
+          if (aop.showevalue){
+          distance =  gt_alignment_eval_with_score(align,
+                                      matchscore,mismatchscore,gapscore);
+        }}
     }else /* global */
     {
       if (gt_str_array_size(aop.costs))
@@ -275,21 +284,36 @@ int gt_linearalign(int argc, const char **argv, GtError *err)
         /* matchcost=replacement_cost,
          * mismatchcost=gap_opening_cost,
          * gapcost=gap_extension_cost*/
-        gt_computeaffinelinearspace(//aop.showevalue,
+        align=gt_computeaffinelinearspace(//aop.showevalue,
         (const GtUchar *) gt_str_array_get(aop.strings,0),0,
         (GtUword) strlen(gt_str_array_get(aop.strings,0)),
         (const GtUchar *) gt_str_array_get(aop.strings,1UL),0,
         (GtUword) strlen(gt_str_array_get(aop.strings,1UL)),
-         matchcost,mismatchcost, gapcost,fp);/*TODO:variablebennenung???*/
+         matchcost,mismatchcost, gapcost);/*TODO:variablebennenung???*/
+             if (aop.showevalue){
+          distance =  gt_alignment_eval_with_affine_score(align,0,
+                                     matchcost,mismatchcost, gapcost);
+        }
       }else
       {
-        gt_computelinearspace2(//aop.showevalue,
+        align=gt_computelinearspace2(//aop.showevalue,
         (const GtUchar *) gt_str_array_get(aop.strings,0),0,
         (GtUword) strlen(gt_str_array_get(aop.strings,0)),
         (const GtUchar *) gt_str_array_get(aop.strings,1UL),0,
         (GtUword) strlen(gt_str_array_get(aop.strings,1UL)),
-        matchcost,mismatchcost,gapcost,fp);
+        matchcost,mismatchcost,gapcost);
+        if (aop.showevalue){
+          distance =  gt_alignment_eval_with_score(align,
+                                      matchcost,mismatchcost, gapcost);
+        }
       }
+    }
+    gt_alignment_show(align, fp, 80);
+    if (aop.showevalue)
+    {
+      fprintf(fp, "costs/score: "GT_WD"\n", distance);
+    }
+    gt_alignment_delete(align);
     }
     if (aop.outfile)
       gt_fa_fclose(fp);

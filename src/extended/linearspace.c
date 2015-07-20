@@ -278,8 +278,6 @@ GtUword gt_calc_linearalign2(const GtUchar *useq, const GtUword ustart,
                              const GtWord gapcost)
 {
   GtUword distance, *Ctab, *EDtabcolumn,*Rtabcolumn;
-  char *useq_part;
-  useq_part = gt_malloc(sizeof *useq_part * (ulen+1));
 
   if (ulen == 0UL)
   {
@@ -318,14 +316,13 @@ GtUword gt_calc_linearalign2(const GtUchar *useq, const GtUword ustart,
   return distance;
 }
 
-void gt_computelinearspace2(const GtUchar *useq,
+GtAlignment *gt_computelinearspace2(const GtUchar *useq,
                             GtUword ustart, GtUword ulen,
                             const GtUchar *vseq,
                             GtUword vstart,GtUword vlen,
                             const GtWord matchcost,
                             const GtWord mismatchcost,
-                            const GtWord gapcost,
-                            FILE *fp)
+                            const GtWord gapcost)
 {
   GtAlignment *align;
 
@@ -340,7 +337,5 @@ void gt_computelinearspace2(const GtUchar *useq,
   (void)gt_calc_linearalign2(useq, ustart, ulen, vseq, vstart, vlen, align,
                                  matchcost, mismatchcost, gapcost);
 
-  gt_alignment_show(align, fp, 80);
-  /*fprintf(stdout, "linear costs: "GT_WU"\n", distance);*/
-  gt_alignment_delete(align);
+  return align;
 }

@@ -24,12 +24,13 @@ void gt_checklinearspace_local(GT_UNUSED bool forward,
                          const GtUchar *vseq,
                          GtUword vlen);
 
-void gt_computelinearspace_local(const GtUchar *useq,
-                                 const GtUword ustart, const GtUword ulen,
-                                 const GtUchar *vseq,
-                                 const GtUword vstart, const GtUword vlen,
-                                 const GtWord matchscore,
-                                 const GtWord mismatchscore,
-                                 const GtWord gapscore,
-                                 FILE *fp);
+GtAlignment * gt_computelinearspace_local(const GtUchar *useq,
+                                          const GtUword ustart,
+                                          const GtUword ulen,
+                                          const GtUchar *vseq,
+                                          const GtUword vstart,
+                                          const GtUword vlen,
+                                          const GtWord matchscore,
+                                          const GtWord mismatchscore,
+                                          const GtWord gapscore);
 #endif

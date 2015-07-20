@@ -20,17 +20,16 @@
 
 #include "core/types_api.h"
 
-void gt_computeaffinelinearspace_local(const GtUchar *useq,
-                                       const GtUword ustart,
-                                       const GtUword ulen,
-                                       const GtUchar *vseq,
-                                       const GtUword vstart,
-                                       const GtUword vlen,
-                                       const GtWord matchscore,
-                                       const GtWord mismatchscore,
-                                       const GtWord gap_opening,
-                                       const GtWord gap_extension,
-                                       FILE *fp);
+GtAlignment *gt_computeaffinelinearspace_local(const GtUchar *useq,
+                                               const GtUword ustart,
+                                               const GtUword ulen,
+                                               const GtUchar *vseq,
+                                               const GtUword vstart,
+                                               const GtUword vlen,
+                                               const GtWord matchscore,
+                                               const GtWord mismatchscore,
+                                               const GtWord gap_opening,
+                                               const GtWord gap_extension);
 
 void gt_checkaffinelinearspace_local(GT_UNUSED bool forward,
                                const GtUchar *useq,

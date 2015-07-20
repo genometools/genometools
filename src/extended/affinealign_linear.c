@@ -1,3 +1,20 @@
+/*
+  Copyright (c) 2015 Annika <annika.seidel@studium.uni-hamburg.de>
+  Copyright (c) 2015 Center for Bioinformatics, University of Hamburg
+
+  Permission to use, copy, modify, and distribute this software for any
+  purpose with or without fee is hereby granted, provided that the above
+  copyright notice and this permission notice appear in all copies.
+
+  THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+  WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+  MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+  ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+  WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+  ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+*/
+
 #include <string.h>
 #include "core/assert_api.h"
 #include "core/minmax.h"
@@ -519,6 +536,7 @@ GtUword gt_calc_affinealign_linear(const GtUchar *useq, GtUword ustart,
                                                    replacement_cost,
                                                    gap_opening,
                                                    gap_extension);
+    gt_alignment_delete(square_align);
   }
   else
   {
@@ -545,17 +563,15 @@ GtUword gt_calc_affinealign_linear(const GtUchar *useq, GtUword ustart,
   return distance;
 }
 
-void gt_computeaffinelinearspace(const GtUchar *useq,
+GtAlignment *gt_computeaffinelinearspace(const GtUchar *useq,
                                  const GtUword ustart, const GtUword ulen,
                                  const GtUchar *vseq,
                                  const GtUword vstart, const GtUword vlen,
                                  const GtWord replacement_cost,
                                  const GtWord gap_opening,
-                                 const GtWord gap_extension,
-                                 FILE *fp)
+                                 const GtWord gap_extension)
 {
   GtAlignment *align;
-  GtUword distance;
 
   gt_assert(useq && ulen && vseq && vlen);
   if (replacement_cost < 0 || gap_opening < 0 || gap_extension < 0)
@@ -564,15 +580,12 @@ void gt_computeaffinelinearspace(const GtUchar *useq,
     exit(GT_EXIT_PROGRAMMING_ERROR);
   }
   align = gt_alignment_new_with_seqs(useq+ustart, ulen, vseq+vstart, vlen);
-  distance = gt_calc_affinealign_linear(useq, ustart, ulen,
+  (void) gt_calc_affinealign_linear(useq, ustart, ulen,
                                 vseq, vstart, vlen,
                                 align, replacement_cost,
                                 gap_opening,gap_extension);
 
-  gt_assert(fp != NULL);
-  gt_alignment_show(align, fp, 80);
-  fprintf(fp, "affine costs: "GT_WU"\n", distance);
-  gt_alignment_delete(align);
+  return align;
 }
 
 void gt_checkaffinelinearspace(GT_UNUSED bool forward,

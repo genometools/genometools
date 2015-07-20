@@ -22,14 +22,15 @@
 #include "core/error.h"
 #include "extended/alignment.h"
 
-void gt_computelinearspace2( const GtUchar *useq,
-                             const GtUword ustart, GtUword ulen,
-                             const GtUchar *vseq,
-                             const GtUword vstart, GtUword vlen,
-                             const GtWord matchcost,
-                             const GtWord mismatchcost,
-                             const GtWord gapcost,
-                             FILE *fp);
+GtAlignment *gt_computelinearspace2( const GtUchar *useq,
+                                     const GtUword ustart,
+                                     const GtUword ulen,
+                                     const GtUchar *vseq,
+                                     const GtUword vstart,
+                                     const GtUword vlen,
+                                     const GtWord matchcost,
+                                     const GtWord mismatchcost,
+                                     const GtWord gapcost);
 
 GtUword gt_calc_linearalign2(const GtUchar *useq,
                              const GtUword ustart, GtUword ulen,
