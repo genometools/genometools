@@ -26,6 +26,7 @@
 #include "core/str_array.h"
 #include "core/types_api.h"
 #include "extended/affinealign_linear.h"
+#include "extended/affinealign_linear_local.h"
 #include "extended/linearedist.h"
 #include "extended/linearspace_local.h"
 #include "match/test-pairwise.h"
@@ -304,7 +305,11 @@ int gt_paircmp(int argc, const char **argv, GtError *err)
       testcases = applycheckfunctiontosimpleoptions(gt_checkaffinelinearspace,
                                                     &cmppairwise);
       printf("# number of testcases for gt_checkaffinelinearspace: " GT_WU "\n",
-              testcases);          
+              testcases);
+      testcases = applycheckfunctiontosimpleoptions(
+                  gt_checkaffinelinearspace_local,&cmppairwise);
+      printf("# number of testcases for gt_checkaffinelinearspace_local: "
+              GT_WU "\n",testcases);
     }
   }
   freesimpleoption(&cmppairwise);

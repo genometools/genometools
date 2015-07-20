@@ -240,11 +240,11 @@ int gt_linearalign(int argc, const char **argv, GtError *err)
       if (aop.affine)
       {
         gt_computeaffinelinearspace_local(//aop.showevalue,
-      (const GtUchar *) gt_str_array_get(aop.strings,0),
+      (const GtUchar *) gt_str_array_get(aop.strings,0),0,
       (GtUword) strlen(gt_str_array_get(aop.strings,0)),
-      (const GtUchar *) gt_str_array_get(aop.strings,1UL),
+      (const GtUchar *) gt_str_array_get(aop.strings,1UL),0,
       (GtUword) strlen(gt_str_array_get(aop.strings,1UL)),
-      matchscore,mismatchscore,gapscore,fp);
+      6,matchscore,mismatchscore,gapscore,fp);
         /*fprintf(stderr,"-l -a is not implemented\n");
         exit(GT_EXIT_PROGRAMMING_ERROR);*/
         
@@ -253,9 +253,9 @@ int gt_linearalign(int argc, const char **argv, GtError *err)
       
 
       gt_computelinearspace_local(//aop.showevalue,
-      (const GtUchar *) gt_str_array_get(aop.strings,0),
+      (const GtUchar *) gt_str_array_get(aop.strings,0),0,
       (GtUword) strlen(gt_str_array_get(aop.strings,0)),
-      (const GtUchar *) gt_str_array_get(aop.strings,1UL),
+      (const GtUchar *) gt_str_array_get(aop.strings,1UL),0,
       (GtUword) strlen(gt_str_array_get(aop.strings,1UL)),
       matchscore,mismatchscore,gapscore,fp);}
     }else /* global */
@@ -276,17 +276,17 @@ int gt_linearalign(int argc, const char **argv, GtError *err)
          * mismatchcost=gap_opening_cost,
          * gapcost=gap_extension_cost*/
         gt_computeaffinelinearspace(//aop.showevalue,
-        (const GtUchar *) gt_str_array_get(aop.strings,0),
+        (const GtUchar *) gt_str_array_get(aop.strings,0),0,
         (GtUword) strlen(gt_str_array_get(aop.strings,0)),
-        (const GtUchar *) gt_str_array_get(aop.strings,1UL),
+        (const GtUchar *) gt_str_array_get(aop.strings,1UL),0,
         (GtUword) strlen(gt_str_array_get(aop.strings,1UL)),
          matchcost,mismatchcost, gapcost,fp);/*TODO:variablebennenung???*/
       }else
       {
         gt_computelinearspace2(//aop.showevalue,
-        (const GtUchar *) gt_str_array_get(aop.strings,0),
+        (const GtUchar *) gt_str_array_get(aop.strings,0),0,
         (GtUword) strlen(gt_str_array_get(aop.strings,0)),
-        (const GtUchar *) gt_str_array_get(aop.strings,1UL),
+        (const GtUchar *) gt_str_array_get(aop.strings,1UL),0,
         (GtUword) strlen(gt_str_array_get(aop.strings,1UL)),
         matchcost,mismatchcost,gapcost,fp);
       }

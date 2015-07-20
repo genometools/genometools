@@ -32,40 +32,44 @@
 
 #define LINEAR_EDIST_GAP          ((GtUchar) UCHAR_MAX)
 
-static GtUword alignment_in_square_space(GtAlignment *align, const GtUchar *useq, GtUword ulen,
-                                              const GtUchar *vseq, GtUword vlen,
-                                              const GtWord matchcost,
-                                              const GtWord mismatchcost,
-                                              const GtWord gapcost)
+static GtUword alignment_in_square_space(GtAlignment *align,
+                                         const GtUchar *useq,
+                                         const GtUword ulen,
+                                         const GtUchar *vseq,
+                                         const GtUword vlen,
+                                         const GtWord matchcost,
+                                         const GtWord mismatchcost,
+                                         const GtWord gapcost)
 {
   GtUword **E, distance=0;
   GtUword i,j, val;
-  
+
   E = gt_malloc((sizeof **E)*(ulen+1));
   *E = gt_malloc((sizeof *E)*((vlen+1)*(ulen+1)));
-  for(j = 1; j <= ulen; j++)
+  for (j = 1; j <= ulen; j++)
   {
     E[j] = E[j-1]+vlen+1;
   }
-  
+
   E[0][0] = 0;
   for (i = 1; i <= ulen; i++)
   {
       E[i][0] = E[i-1][0] + gapcost;
   }
-      
+
   for (j = 1; j <= vlen; j++)
   {
       E[0][j] = E[0][j-1] + gapcost;
       for (i = 1; i <= ulen; i++)
       {
         E[i][j] = E[i][j-1];
-        if ((val = E[i-1][j-1] + (useq[i-1] == vseq[j-1] ? matchcost : mismatchcost))
+        if ((val = E[i-1][j-1] + (useq[i-1] == vseq[j-1] ?
+                                matchcost : mismatchcost))
             <= E[i][j])
-        { 
+        {
           E[i][j] = val;
         }
-  
+
         if ((val = E[i-1][j] + gapcost) < E[i][j])
         {
           E[i][j] = val;
@@ -77,9 +81,11 @@ static GtUword alignment_in_square_space(GtAlignment *align, const GtUchar *useq
 
   distance = E[i][j];
 
-  while( i != 0 || j != 0)
+  while ( i != 0 || j != 0)
   {
-    if(i != 0 && j != 0 && E[i][j]==E[i-1][j-1] + (useq[i-1] == vseq[j-1] ? matchcost : mismatchcost))
+    if (i != 0 && j != 0 && E[i][j] == E[i-1][j-1] +
+                            (useq[i-1] == vseq[j-1] ?
+                            matchcost : mismatchcost))
     {
       gt_alignment_add_replacement(align);
       i--; j--;
@@ -89,7 +95,7 @@ static GtUword alignment_in_square_space(GtAlignment *align, const GtUchar *useq
       gt_alignment_add_insertion(align);
       j--;
     }
-    else if(i!=0 &&E[i][j] == E[i-1][j] + gapcost)
+    else if (i!=0 &&E[i][j] == E[i-1][j] + gapcost)
     {
       gt_alignment_add_deletion(align);
       i--;
@@ -101,6 +107,8 @@ static GtUword alignment_in_square_space(GtAlignment *align, const GtUchar *useq
       exit(GT_EXIT_PROGRAMMING_ERROR);
     }
   }
+  gt_free(E[0]);
+  gt_free(E);
   return distance;
 }
 
@@ -119,7 +127,7 @@ static void firstEDtabRtabcolumn(GtUword *EDtabcolumn,
 {
   GtUword rowindex;
 
-  for (rowindex=0; rowindex <= ulen; rowindex++)
+  for (rowindex = 0; rowindex <= ulen; rowindex++)
   {
     EDtabcolumn[rowindex] = rowindex;
     Rtabcolumn[rowindex]  = rowindex;
@@ -281,14 +289,15 @@ static GtUword computealignment(const GtUchar *useq,
   {
       distance = construct_trivial_alignment(align, vlen, 1,
                                   gt_alignment_add_insertion);
-  } 
+  }
   else if (vlen == 0UL)
   {
       distance = construct_trivial_alignment(align, ulen, 1,
                                   gt_alignment_add_deletion);
   }
   else if (vlen == 1UL) {
-    distance = alignment_in_square_space(align,useq,ulen,vseq,vlen,0,1,1);
+    distance = alignment_in_square_space(align, useq, ulen, vseq, vlen,
+                                         0, 1, 1);
   }
   else{
     EDtabcolumn = gt_malloc(sizeof *EDtabcolumn * (ulen+1));
@@ -402,11 +411,11 @@ void gt_checklinearspace(GT_UNUSED bool forward,
                          GtUword ulen,
                          const GtUchar *vseq,
                          GtUword vlen)
-{printf("useq: %s, ulen: "GT_WU", vseq: %s, vlen: "GT_WU"\n",useq,ulen,vseq,vlen);
+{
   GtAlignment *align;
   GtUword  alcost, edist1, edist2, edist3;
 
-  //gt_assert(useq && ulen && vseq && vlen);
+  /*gt_assert(useq && ulen && vseq && vlen);*/
   if (gap_symbol_in_sequence(useq,ulen))
   {
     fprintf(stderr,"%s: sequence u contains gap symbol\n",__func__);

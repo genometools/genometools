@@ -266,7 +266,8 @@ GtWord gt_alignment_eval_with_score(const GtAlignment *alignment,
 }
 
 GtWord gt_alignment_eval_with_affine_score(const GtAlignment *alignment,
-                                           const GtWord replacement_score,
+                                           const GtWord matchscore,
+                                           const GtWord mismatchscore,
                                            const GtWord gap_opening,
                                            const GtWord gap_extension)
 {
@@ -290,10 +291,10 @@ GtWord gt_alignment_eval_with_affine_score(const GtAlignment *alignment,
         for (j = 0; j < meop.steps; j++) {
           if (alignment->u[idx_u] == alignment->v[idx_v] &&
               ISNOTSPECIAL(alignment->u[idx_u])) {
-            sumscore += 0;
+            sumscore += matchscore;
           }
           else {
-            sumscore += replacement_score;
+            sumscore += mismatchscore;
           }
           idx_u++;
           idx_v++;
@@ -529,7 +530,7 @@ void gt_alignment_clone(const GtAlignment *alignment_from,
                              GtAlignment *alignment_to)
 {
   gt_assert(alignment_from != NULL && alignment_to != NULL);
-  
+
   alignment_to->u = alignment_from->u;
   alignment_to->v = alignment_from->v;
   alignment_to->ulen = alignment_from->ulen;

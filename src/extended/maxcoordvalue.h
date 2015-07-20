@@ -1,5 +1,6 @@
 /*
-  Copyright (C) 2015 Annika Seidel, annika.seidel@studium.uni-hamburg.de
+  Copyright (c) 2015 Annika <annika.seidel@studium.uni-hamburg.de>
+  Copyright (c) 2015 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -13,8 +14,8 @@
   ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
-#ifndef MAX_H
-#define MAX_H
+#ifndef MAXCOORDVALUE_H
+#define MAXCOORDVALUE_H
 #include "core/types_api.h"
 
 typedef struct Gtmaxcoordvalue Gtmaxcoordvalue;
@@ -23,19 +24,17 @@ Gtmaxcoordvalue* gt_max_new(void);
 
 void gt_max_delete(Gtmaxcoordvalue *max);
 
-void gt_max_set_value(Gtmaxcoordvalue *max, const GtWord value);
-
 GtWord gt_max_get_value(const Gtmaxcoordvalue *max);
-
-void gt_max_set_start(Gtmaxcoordvalue *max, const GtUwordPair start );
 
 GtUwordPair gt_max_get_start(const Gtmaxcoordvalue *max);
 
 void gt_max_set_end_with_pair(Gtmaxcoordvalue *max, const GtUwordPair end);
 
-void gt_max_set_end(Gtmaxcoordvalue *max, const GtUword a, const GtUword b);
-
 GtUwordPair gt_max_get_end(const Gtmaxcoordvalue *max);
+
+void gt_max_coord_update(Gtmaxcoordvalue *max, const GtWord value,
+                         const GtUwordPair start,
+                         const GtUword enda, const GtUword endb);
 
 GtUword gt_max_get_row_length(const Gtmaxcoordvalue *max);
 

@@ -61,9 +61,10 @@ GtWord       gt_alignment_eval_with_score(const GtAlignment *alignment,
                                           GtWord mismatchscore,
                                           GtWord gapscore);
 GtWord       gt_alignment_eval_with_affine_score(const GtAlignment *alignment,
-                                          GtWord matchscore,
-                                          GtWord mismatchscore,
-                                          GtWord gapscore);
+                                           const GtWord matchscore,
+                                           const GtWord mismatchscore,
+                                           const GtWord gap_opening,
+                                           const GtWord gap_extension);
 /* print alignment to <fp>. This will break the lines after width characters */
 void         gt_alignment_show(const GtAlignment *alignment, FILE *fp,
                                unsigned int width);
