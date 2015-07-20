@@ -25,7 +25,9 @@
 #include "core/timer_api.h"
 #include "core/unused_api.h"
 #include "match/diagbandseed.h"
+#include "match/ft-front-prune.h"
 #include "match/kmercodes.h"
+#include "match/seed-extend.h"
 #include "match/sfx-mappedstr.h"
 #include "match/sfx-suffixer.h"
 
@@ -212,10 +214,14 @@ void gt_diagbandseed_merge(GtArrayGtDiagbandseedSeedPair *mlist,
 static
 bool gt_diagbandseed_is_seed(GT_UNUSED const GtDiagbandseedSeedPair *entry,
                              const GtDiagbandseedScore *score,
-                             GtUword mincoverage, GtUword diag)
+                             GtUword mincoverage, GtUword diag,
+                             GtGreedyextendmatchinfo *extendgreedyinfo,
+                             GtXdropmatchinfo *extendxdropinfo)
 {
   /* TODO: add path criterion */
   gt_assert(score != NULL);
+  if (extendgreedyinfo != NULL) printf("");
+  if (extendxdropinfo != NULL) printf("");
   if ((GtUword)(MAX(score[diag+1], score[diag-1])) + (GtUword)(score[diag])
       >= mincoverage) {
     return true;
@@ -227,7 +233,9 @@ bool gt_diagbandseed_is_seed(GT_UNUSED const GtDiagbandseedSeedPair *entry,
 void gt_diagbandseed_find_seeds(const GtArrayGtDiagbandseedSeedPair *mlist,
                                 unsigned int kmerlen, GtUword mincoverage,
                                 GtUword log_diagbandwidth, GtUword amaxlen,
-                                GtUword bmaxlen)
+                                GtUword bmaxlen,
+                                GtGreedyextendmatchinfo *extendgreedyinfo,
+                                GtXdropmatchinfo *extendxdropinfo)
 {
   const GtUword mlen = mlist->nextfreeGtDiagbandseedSeedPair; /* mlist length */
   const GtDiagbandseedSeedPair *lm = mlist->spaceGtDiagbandseedSeedPair;
@@ -278,7 +286,8 @@ void gt_diagbandseed_find_seeds(const GtArrayGtDiagbandseedSeedPair *mlist,
       gt_assert(lm[idx].apos <= amaxlen);
       diag = (amaxlen + (GtUword)lm[idx].bpos - (GtUword)lm[idx].apos)
              >> log_diagbandwidth;
-      if (gt_diagbandseed_is_seed(&lm[idx], score, mincoverage, diag)) {
+      if (gt_diagbandseed_is_seed(&lm[idx], score, mincoverage, diag,
+                                  extendgreedyinfo, extendxdropinfo)) {
 #ifdef DEBUG_SEED_REPORT
         printf("report SeedPair (%d,%d,%d,%d), score["GT_WU"]=%d\n",
                lm[idx].aseqnum, lm[idx].bseqnum, lm[idx].apos, lm[idx].bpos,
@@ -299,14 +308,14 @@ void gt_diagbandseed_find_seeds(const GtArrayGtDiagbandseedSeedPair *mlist,
   gt_free(lastp);
 }
 
-void gt_diagbandseed_run(const GtEncseq *aencseq, const GtEncseq *bencseq,
-                         const GtDiagbandseed *arg)
+int gt_diagbandseed_run(const GtEncseq *aencseq, const GtEncseq *bencseq,
+                        const GtDiagbandseed *arg, GtError *err)
 {
   GtDiagbandseedKmerPos *alist, *blist;
   GtArrayGtDiagbandseedSeedPair mlist;
   GtRadixsortinfo* rdxinfo;
   GtUword alen, blen;
-  const unsigned int kmerlen = arg->dbs_seedlength;
+  const unsigned int kmerlen = arg->seedlength;
   const unsigned int endposdiff = arg->overlappingseeds ? 0 : kmerlen - 1;
   const bool two_files = (bencseq != aencseq) ? true : false;
   const GtUword amaxlen = gt_encseq_max_seq_length(aencseq);
@@ -320,17 +329,18 @@ void gt_diagbandseed_run(const GtEncseq *aencseq, const GtEncseq *bencseq,
                           gt_encseq_num_of_sequences(bencseq);
   GtTimer *timer;
 
-  if (arg->benchmark) {
-    timer = gt_timer_new();
-    gt_timer_start(timer);
-  }
-
   if (amaxlen < kmerlen || bmaxlen < kmerlen) {
-    /* printf("maximum sequence length too short\n"); */
+    gt_error_set(err,
+                 "maximum sequence length too short for required seedlength");
     if (arg->benchmark) {
       printf("0.000000,0,0\n");
     }
-    return;
+    return -1;
+  }
+
+  if (arg->benchmark) {
+    timer = gt_timer_new();
+    gt_timer_start(timer);
   }
 
   /* prepare list of kmers from aencseq and sort */
@@ -385,7 +395,7 @@ void gt_diagbandseed_run(const GtEncseq *aencseq, const GtEncseq *bencseq,
   /* create mlist of SeedPairs */
   GT_INITARRAY(&mlist,GtDiagbandseedSeedPair);
   gt_diagbandseed_merge(&mlist, alist, alen, blist, blen, endposdiff,
-                        arg->dbs_maxfreq, two_files);
+                        arg->maxfreq, two_files);
   gt_free(alist);
   if (two_files || arg->mirror)
     gt_free(blist);
@@ -438,10 +448,12 @@ void gt_diagbandseed_run(const GtEncseq *aencseq, const GtEncseq *bencseq,
 
   /* process SeedPairs */
   if (mlist.nextfreeGtDiagbandseedSeedPair != 0)
-    gt_diagbandseed_find_seeds(&mlist, kmerlen, arg->dbs_mincoverage,
-                               arg->dbs_logdiagbandwidth, amaxlen, bmaxlen);
+    gt_diagbandseed_find_seeds(&mlist, arg->seedlength, arg->mincoverage,
+                               arg->logdiagbandwidth, amaxlen, bmaxlen,
+                               arg->extendgreedyinfo, arg->extendxdropinfo);
 
   GT_FREEARRAY(&mlist, GtDiagbandseedSeedPair);
   if (arg->benchmark)
     gt_timer_delete(timer);
+  return 0;
 }
