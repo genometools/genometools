@@ -26,7 +26,7 @@ def createrepfindcall(indexname,seedlength,extend_opt,optionlist,
                       emptyenv,
                       verbose = true)
   verboseoption = if verbose then "-v" else "" end
-  repfindcall = "bin/gt repfind -scan #{verboseoption} " +
+  repfindcall = "bin/gt repfind -scan #{verboseoption} -minid 80 " +
                 "-seedlength #{seedlength} -#{extend_opt} -ii #{indexname} " + 
                 optionlist.join(" ")
   if emptyenv 

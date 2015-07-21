@@ -43,7 +43,7 @@ def checkrepfind(reffile,withextend = false)
   run "cmp -s #{last_stdout} #{resultfile}"
   if withextend
     run_test("#{$bin}gt repfind -l #{minlength} -ii sfxidx -extendgreedy " +
-             "-maxalilendiff 30", 
+             "-minidentity 90 -maxalilendiff 30 -percmathistory 55",
              :maxtime => 600)
     resultfile="#{testdatadir}repfind-result/#{reffile}-gr-ext.result"
     run "cmp -s #{last_stdout} #{resultfile}"
@@ -75,8 +75,9 @@ Test do
     run "#{$scriptsdir}gen-mirrorseq.rb 200 1000"
     run_test "#{$bin}gt suffixerator -suftabuint -db #{last_stdout} " +
              "-dna -suf -tis -lcp -md5 no -des no -sds no -indexname sfx"
-    run_test "#{$bin}gt repfind -scan -check_extend_symmetry -seedlength 200 " +
-             " -extendgreedy -ii sfx -err 10 -maxalilendiff 30"
+    run_test "#{$bin}gt repfind -minidentity 90 -percmathistory 55 " +
+             "-scan -check_extend_symmetry -seedlength 200 " +
+             "-extendgreedy -ii sfx -maxalilendiff 30"
   end
 end
 
@@ -100,9 +101,9 @@ Keywords "gt_repfind extend"
 Test do
   run_test "#{$bin}gt suffixerator -db #{$testdata}at1MB " +
            "-indexname sfx -dna -tis -suf -lcp"
-  run_test "#{$bin}gt repfind -l 20 -extendxdrop -ii sfx"
+  run_test "#{$bin}gt repfind -minidentity 90 -l 20 -xdropbelow 5 -extendxdrop -ii sfx"
   run "diff #{last_stdout} #{$testdata}repfind-20-extend.txt"
-  run_test "#{$bin}gt repfind -l 20 -extendxdrop -ii sfx -q " +
+  run_test "#{$bin}gt repfind -minidentity 85 -l 20 -extendxdrop -ii sfx -q " +
            "#{$testdata}/U89959_genomic.fas"
   run "diff #{last_stdout} #{$testdata}repfind-20-query-extend.txt"
 end

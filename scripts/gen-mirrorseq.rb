@@ -55,7 +55,8 @@ if ARGV.length != 2
 end
 
 alphabet = "acgt"
-errperc = 10
+minidentity = 90
+errperc = 100 - minidentity
 seedlength = ARGV[0].to_i
 extendlength = ARGV[1].to_i
 rseq = Randomsequence.new(alphabet)

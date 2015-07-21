@@ -44,7 +44,8 @@ File.new(resultfile,"r").each_line do |line|
   else
     len = a.length
   end
-  errperc = a[0].to_i
+  minidentity = a[0].to_i
+  errperc = 100 - minidentity
   common = a[4].to_i
   if best[errperc].nil? or best[errperc][4].to_i < common
     best[errperc] = a
@@ -52,7 +53,8 @@ File.new(resultfile,"r").each_line do |line|
 end
 File.new(ARGV[0],"r").each_line do |line|
   a = line.chomp.split(/\t/)
-  errperc = a[0].to_i
+  minidentity = a[0].to_i
+  errperc = 100 - minidentity
   common = a[4].to_i
   tolerance = (best[errperc][4].to_f/12.0).to_i
   if common + tolerance >= best[errperc][4].to_i
