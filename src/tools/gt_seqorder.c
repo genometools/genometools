@@ -62,7 +62,8 @@ static GtOptionParser* gt_seqorder_option_parser_new(void *tool_arguments)
   gt_option_parser_add_option(op, invert_option);
 
   /* -sort */
-  sort_option = gt_option_new_bool("sort", "sort sequences lexicographically",
+  sort_option = gt_option_new_bool("sort", "sort sequences lexicographically "
+                                           "(by actual sequence)",
                            &arguments->sort, false);
   gt_option_exclude(sort_option, invert_option);
   gt_option_parser_add_option(op, sort_option);
