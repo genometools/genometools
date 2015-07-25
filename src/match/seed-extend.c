@@ -58,25 +58,19 @@ struct GtXdropmatchinfo
   unsigned int userdefinedleastlength;
 };
 
-GtWord gt_optimalxdropbelowscore(GtUword errorpercentage)
-{
-  const int optxdropbelowscore_tab[]
-    = {0, 1, 1, 1, 1, 1, 1, 1, 2, 2, 4, 4, 4, 4, 5, 5};
-  const size_t tablen = sizeof optxdropbelowscore_tab/
-                        sizeof optxdropbelowscore_tab[0];
+#include "match/seed-extend-params.h"
 
-  if (errorpercentage >= tablen)
-  {
-    return (GtUword) 6;
-  } else
-  {
-    return (GtUword) optxdropbelowscore_tab[errorpercentage];
-  }
+GtWord gt_optimalxdropbelowscore(GtUword errorpercentage,GtUword sensitivity)
+{
+  gt_assert(errorpercentage <= 100 - GT_EXTEND_MIN_IDENTITY_PERCENTAGE &&
+            sensitivity >= 90 && sensitivity - 90 <= 10);
+  return best_xdropbelow[sensitivity - 90][errorpercentage];
 }
 
 GtXdropmatchinfo *gt_xdrop_matchinfo_new(GtUword userdefinedleastlength,
                                          GtUword errorpercentage,
                                          GtXdropscore xdropbelowscore,
+                                         GtUword sensitivity,
                                          bool selfcompare)
 {
   GtXdropmatchinfo *xdropmatchinfo = gt_malloc(sizeof *xdropmatchinfo);
@@ -103,7 +97,8 @@ GtXdropmatchinfo *gt_xdrop_matchinfo_new(GtUword userdefinedleastlength,
   xdropmatchinfo->errorpercentage = errorpercentage;
   if (xdropbelowscore == 0)
   {
-    xdropmatchinfo->belowscore = gt_optimalxdropbelowscore(errorpercentage);
+    xdropmatchinfo->belowscore = gt_optimalxdropbelowscore(errorpercentage,
+                                                           sensitivity);
   } else
   {
     xdropmatchinfo->belowscore = xdropbelowscore;
@@ -242,18 +237,41 @@ struct GtGreedyextendmatchinfo
   GtAllocatedMemory usequence_cache, vsequence_cache, frontspace_reservoir;
 };
 
-GtUword gt_optimalmaxalilendifference(GtUword errorpercentage)
+void gt_optimal_maxalilendiff_perc_mat_history(
+                GtUword *maxalignedlendifference,
+                GtUword *perc_mat_history,
+                GtUword arg_maxalignedlendifference,
+                GtUword arg_perc_mat_history,
+                GtUword errorpercentage,
+                GtUword sensitivity)
 {
-  const int optmaxalilen_tab[]
-    = {0, 2, 2, 4, 6, 6, 7, 7, 9, 8, 8, 8, 9, 10, 10, 14};
-  const size_t tablen = sizeof optmaxalilen_tab/sizeof optmaxalilen_tab[0];
-
-  if (errorpercentage >= tablen)
+  if (arg_maxalignedlendifference == 0)
   {
-    return (GtUword) 30;
+    if (arg_perc_mat_history == 0)
+    {
+      const GtGreedyparams *best_value;
+
+      gt_assert(errorpercentage <= 100 - GT_EXTEND_MIN_IDENTITY_PERCENTAGE &&
+                sensitivity >= 90 && sensitivity - 90 <= 10);
+      best_value = best_percmathistory_maxalilendiff[sensitivity - 90];
+      *maxalignedlendifference = best_value[errorpercentage].maxalilendiff;
+      *perc_mat_history = best_value[errorpercentage].percmathistory;
+    } else
+    {
+      *maxalignedlendifference = 0; /* case to be implemented */
+      *perc_mat_history = arg_perc_mat_history;
+    }
   } else
   {
-    return (GtUword) optmaxalilen_tab[errorpercentage];
+    if (perc_mat_history == 0)
+    {
+      *maxalignedlendifference = arg_maxalignedlendifference;
+      *perc_mat_history = 0; /* case to be implemented */
+    } else
+    {
+      *perc_mat_history = arg_perc_mat_history;
+      *maxalignedlendifference = arg_maxalignedlendifference;
+    }
   }
 }
 
@@ -263,30 +281,23 @@ GtGreedyextendmatchinfo *gt_greedy_extend_matchinfo_new(
                                    GtUword history,
                                    GtUword perc_mat_history,
                                    GtUword userdefinedleastlength,
-                                   GtExtendCharAccess extend_char_access)
+                                   GtExtendCharAccess extend_char_access,
+                                   GtUword sensitivity)
 {
   GtGreedyextendmatchinfo *ggemi = gt_malloc(sizeof *ggemi);
 
   ggemi->querymatchspaceptr = gt_querymatch_new();
   ggemi->left_front_trace = NULL;
   ggemi->right_front_trace = NULL;
-/* Set parameters to default values as in front-prune.x:
-    -e <percentage of errors <= 15%>, default 10%
-    -d <maximal difference of alignedlens>, default 30>
-    -h <length of match history <= 64>, default 60>
-    -p <minimal percentage of matches in history>, default 55%>*/
   ggemi->errorpercentage = errorpercentage;
-  if (maxalignedlendifference == 0)
-  {
-    ggemi->maxalignedlendifference
-      = gt_optimalmaxalilendifference(errorpercentage);
-  } else
-  {
-    ggemi->maxalignedlendifference = maxalignedlendifference;
-  }
+  gt_optimal_maxalilendiff_perc_mat_history(&ggemi->maxalignedlendifference,
+                                            &ggemi->perc_mat_history,
+                                            maxalignedlendifference,
+                                            perc_mat_history,
+                                            errorpercentage,
+                                            sensitivity);
   ggemi->history = history;
   ggemi->minmatchnum = (history * perc_mat_history)/100;
-  ggemi->perc_mat_history = perc_mat_history;
   ggemi->userdefinedleastlength = userdefinedleastlength;
   ggemi->pol_info = polishing_info_new(ggemi->minmatchnum/2,errorpercentage);
   ggemi->totallength = GT_UWORD_MAX;

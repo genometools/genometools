@@ -51,6 +51,9 @@
   }
 */
 
+/* This is the minimum percentage value for extended seeds. */
+#define GT_EXTEND_MIN_IDENTITY_PERCENTAGE 70
+
 /* This is the type storing the relevant information for
    the xdrop-based seed extension method. */
 
@@ -71,12 +74,13 @@ typedef struct GtXdropmatchinfo GtXdropmatchinfo;
 GtXdropmatchinfo *gt_xdrop_matchinfo_new(GtUword userdefinedleastlength,
                                          GtUword errorpercentage,
                                          GtXdropscore xdropbelowscore,
+                                         GtUword sensitivity,
                                          bool selfcompare);
 
 /* The following function returns the optimal xdrop score depending
    on the error percentag. */
 
-GtWord gt_optimalxdropbelowscore(GtUword errorpercentage);
+GtWord gt_optimalxdropbelowscore(GtUword errorpercentage,GtUword sensitivity);
 
 /* Set the verbose flag in the matchinfo object. */
 
@@ -171,12 +175,19 @@ GtGreedyextendmatchinfo *gt_greedy_extend_matchinfo_new(
                                    GtUword history,
                                    GtUword perc_mat_history,
                                    GtUword userdefinedleastlength,
-                                   GtExtendCharAccess extend_char_access);
+                                   GtExtendCharAccess extend_char_access,
+                                   GtUword sensitivity);
 
-/* Determine the optimal value for maximal alignment difference, depending
-   on the error percentage. */
+/* Determine the optimal value for maximal alignment difference and
+   the percentage match history, depending on the error percentage. */
 
-GtUword gt_optimalmaxalilendifference(GtUword errorpercentage);
+void gt_optimal_maxalilendiff_perc_mat_history(
+                GtUword *maxalignedlendifference,
+                GtUword *perc_mat_history,
+                GtUword arg_maxalignedlendifference,
+                GtUword arg_perc_mat_history,
+                GtUword errorpercentage,
+                GtUword sensitivity);
 
 /* Set the check_extend_symmetry flag in the matchinfo object. */
 
