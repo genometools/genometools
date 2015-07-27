@@ -384,12 +384,13 @@ static GtUword front_second_inplace(Frontvalue *midfront,
 static bool trimthisentry(GtUword distance,
                           Rowvaluetype row,
                           GtWord diagonal,
-                          GtUword alignedlen,
                           GtUword minlenforhistorycheck,
                           Matchcounttype matchhistory_count,
                           GtUword minmatchnum,
                           GtUword minlenfrommaxdiff)
 {
+  GtUword alignedlen = GT_MULT2(row) + diagonal;
+
   if (alignedlen >= minlenforhistorycheck && matchhistory_count < minmatchnum)
   {
     printf(GT_WD "&" GT_WU "&%u&1: matches=%d < " GT_WU "=minmatches\n",
@@ -406,12 +407,15 @@ static bool trimthisentry(GtUword distance,
   return false;
 }
 #else
-static bool trimthisentry(GtUword alignedlen,
+static bool trimthisentry(Rowvaluetype row,
+                          GtWord diagonal,
                           GtUword minlenforhistorycheck,
                           Matchcounttype matchhistory_count,
                           GtUword minmatchnum,
                           GtUword minlenfrommaxdiff)
 {
+  GtUword alignedlen = GT_MULT2(row) + diagonal;
+
   if (alignedlen >= minlenforhistorycheck && matchhistory_count < minmatchnum)
   {
     return true;
@@ -428,7 +432,8 @@ static GtUword trim_front(bool upward,
 #ifdef TRIM_INFO_OUT
                           GtUword distance,
 #endif
-                          GtUword sumseqlength,
+                          GtUword ulen,
+                          GtUword vlen,
                           GtUword minmatchnum,
                           GtUword minlenforhistorycheck,
                           GtUword minlenfrommaxdiff,
@@ -443,29 +448,23 @@ static GtUword trim_front(bool upward,
   for (frontptr = from; frontptr != stop; frontptr = upward ? (frontptr + 1)
                                                             : (frontptr - 1))
   {
-    GtUword alignedlen = GT_MULT2(frontptr->row) + FRONT_DIAGONAL(frontptr);
-
-    if (alignedlen <= sumseqlength)
-    {
-      if (alignedlen < sumseqlength &&
-          trimthisentry(
+    if (frontptr->row > ulen ||
+        frontptr->row + FRONT_DIAGONAL(frontptr) > vlen ||
+        trimthisentry(
 #ifdef TRIM_INFO_OUT
                         distance,
+#endif
                         frontptr->row,
                         FRONT_DIAGONAL(frontptr),
-#endif
-                        alignedlen,minlenforhistorycheck,
-                        frontptr->matchhistory_count,minmatchnum,
+                        minlenforhistorycheck,
+                        frontptr->matchhistory_count,
+                        minmatchnum,
                         minlenfrommaxdiff))
-      {
-        trim++;
-      } else
-      {
-        break;
-      }
-    } else
     {
       trim++;
+    } else
+    {
+      break;
     }
   }
   return trim;
@@ -676,7 +675,8 @@ GtUword front_prune_edist_inplace(
 #ifdef TRIM_INFO_OUT
                       distance,
 #endif
-                      sumseqlength,
+                      ulen,
+                      vlen,
                       minmatchnum,
                       minlenforhistorycheck,
                       minlenfrommaxdiff,
@@ -698,7 +698,8 @@ GtUword front_prune_edist_inplace(
 #ifdef TRIM_INFO_OUT
                         distance,
 #endif
-                        sumseqlength,
+                        ulen,
+                        vlen,
                         minmatchnum,
                         minlenforhistorycheck,
                         minlenfrommaxdiff,
