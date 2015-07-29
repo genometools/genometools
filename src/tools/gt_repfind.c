@@ -53,7 +53,7 @@ typedef struct
           maxalignedlendifference, /* maxfrontdist */
           extendgreedy; /* determines which of the tables in
                            seed-extend-params.h is used */
-  bool scanfile, beverbose, forward, reverse, searchspm, 
+  bool scanfile, beverbose, forward, reverse, searchspm,
        check_extend_symmetry, silent;
   GtStr *indexname, *cam_string; /* parse this using
                                     gt_greedy_extend_char_access*/
