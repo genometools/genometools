@@ -49,7 +49,9 @@ typedef struct
           perc_mat_history, /* percent of matches in history */
           minidentity, /* We prefer to specify the minidentity. The use of the
            notion of error percentage may be misleading, as in Myers paper it
-           refers to the percentage of errors in a read. */
+           refers to the percentage of errors in a read. If (for compatibility
+           reasons, the option -err is used, then the minidentity contains the
+           error rate, a value in the range from 1 to 30. */
           maxalignedlendifference, /* maxfrontdist */
           extendgreedy; /* determines which of the tables in
                            seed-extend-params.h is used */
@@ -189,7 +191,7 @@ static GtOptionParser *gt_repfind_option_parser_new(void *tool_arguments)
            *spmoption, *seedlengthoption, *minidentityoption,
            *maxalilendiffoption, *leastlength_option, *char_access_mode_option,
            *check_extend_symmetry_option, *xdropbelowoption, *historyoption,
-           *percmathistoryoption;
+           *percmathistoryoption, *errorpercentageoption;
   Maxpairsoptions *arguments = tool_arguments;
 
   op = gt_option_parser_new("[options] -ii indexname",
@@ -276,6 +278,18 @@ static GtOptionParser *gt_repfind_option_parser_new(void *tool_arguments)
   gt_option_parser_add_option(op, check_extend_symmetry_option);
   gt_option_is_development_option(check_extend_symmetry_option);
 
+  errorpercentageoption
+    = gt_option_new_uword_min_max("err","Specify error percentage of matches "
+                         "as integer in the range from 1 to 30 "
+                         "(for xdrop and greedy extension) [deprecated option, "
+                         "kept for backwards compatibility]",
+                         &arguments->minidentity,
+                         10,
+                         1,
+                         100 - GT_EXTEND_MIN_IDENTITY_PERCENTAGE);
+  gt_option_is_development_option(errorpercentageoption);
+  gt_option_parser_add_option(op, errorpercentageoption);
+
   minidentityoption
     = gt_option_new_uword_min_max("minidentity",
                           "Specify minimum identity of matches\n"
@@ -354,6 +368,7 @@ static GtOptionParser *gt_repfind_option_parser_new(void *tool_arguments)
   gt_option_exclude(queryoption,reverseoption);
   gt_option_exclude(queryoption,spmoption);
   gt_option_exclude(reverseoption,spmoption);
+  gt_option_exclude(errorpercentageoption,minidentityoption);
   gt_option_exclude(queryoption,spmoption);
   gt_option_exclude(sampleoption,spmoption);
   gt_option_imply(xdropbelowoption,extendxdropoption);
@@ -364,6 +379,8 @@ static GtOptionParser *gt_repfind_option_parser_new(void *tool_arguments)
   gt_option_imply_either_2(seedlengthoption,extendxdropoption,
                            extendgreedyoption);
   gt_option_imply_either_2(minidentityoption,extendxdropoption,
+                           extendgreedyoption);
+  gt_option_imply_either_2(errorpercentageoption,extendxdropoption,
                            extendgreedyoption);
   return op;
 }
@@ -437,6 +454,19 @@ static int gt_generic_simplegreedyselfmatchoutput(
                                         err);
 }
 
+static GtUword minidentity2errorpercentage(GtUword minidentity)
+{
+  if (minidentity >= 1 &&
+      minidentity <= 100 - GT_EXTEND_MIN_IDENTITY_PERCENTAGE)
+  {
+    return minidentity;
+  } else
+  {
+    gt_assert(minidentity >= GT_EXTEND_MIN_IDENTITY_PERCENTAGE);
+    return 100 - minidentity;
+  }
+}
+
 static int gt_repfind_runner(int argc,
                              GT_UNUSED const char **argv,
                              int parsed_args,
@@ -464,10 +494,10 @@ static int gt_repfind_runner(int argc,
   }
   if (!haserr && gt_option_is_set(arguments->refextendxdropoption))
   {
-    gt_assert(arguments->minidentity >= GT_EXTEND_MIN_IDENTITY_PERCENTAGE);
     xdropmatchinfo
       = gt_xdrop_matchinfo_new(arguments->userdefinedleastlength,
-                               100 - arguments->minidentity,
+                               minidentity2errorpercentage(
+                                            arguments->minidentity),
                                arguments->xdropbelowscore,
                                arguments->extendxdrop,
                                gt_str_array_size(arguments->queryfiles) == 0
@@ -493,15 +523,15 @@ static int gt_repfind_runner(int argc,
     }
     if (!haserr)
     {
-      gt_assert(arguments->minidentity >= GT_EXTEND_MIN_IDENTITY_PERCENTAGE);
-      greedyextendmatchinfo = gt_greedy_extend_matchinfo_new(
-                                     100 - arguments->minidentity,
-                                     arguments->maxalignedlendifference,
-                                     arguments->history,
-                                     arguments->perc_mat_history,
-                                     arguments->userdefinedleastlength,
-                                     extend_char_access,
-                                     arguments->extendgreedy);
+      greedyextendmatchinfo
+        = gt_greedy_extend_matchinfo_new(minidentity2errorpercentage(
+                                             arguments->minidentity),
+                                         arguments->maxalignedlendifference,
+                                         arguments->history,
+                                         arguments->perc_mat_history,
+                                         arguments->userdefinedleastlength,
+                                         extend_char_access,
+                                         arguments->extendgreedy);
       if (arguments->beverbose)
       {
         gt_greedy_extend_matchinfo_verbose_set(greedyextendmatchinfo);
@@ -650,7 +680,8 @@ static int gt_repfind_runner(int argc,
     if (gt_option_is_set(arguments->refextendgreedyoption) ||
         gt_option_is_set(arguments->refextendxdropoption))
     {
-      printf("-" GT_WU,arguments->minidentity);
+      printf("-" GT_WU,
+             100 - minidentity2errorpercentage(arguments->minidentity));
     }
     if (gt_option_is_set(arguments->refextendgreedyoption))
     {
@@ -660,7 +691,7 @@ static int gt_repfind_runner(int argc,
                 &perc_mat_history,
                 arguments->maxalignedlendifference,
                 arguments->perc_mat_history,
-                100 - arguments->minidentity,
+                minidentity2errorpercentage(arguments->minidentity),
                 arguments->extendgreedy);
       printf("-" GT_WU,maxalignedlendifference);
       printf("-" GT_WU,perc_mat_history);
@@ -671,8 +702,9 @@ static int gt_repfind_runner(int argc,
         if (arguments->xdropbelowscore == 0)
         {
           printf("-" GT_WD,
-                 gt_optimalxdropbelowscore(100 - arguments->minidentity,
-                                           arguments->extendxdrop));
+                 gt_optimalxdropbelowscore(
+                       minidentity2errorpercentage(arguments->minidentity),
+                       arguments->extendxdrop));
         } else
         {
           printf("-" GT_WD,arguments->xdropbelowscore);
