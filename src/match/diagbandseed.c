@@ -32,8 +32,8 @@
 #include "match/sfx-suffixer.h"
 
 #define GT_DIAGBANDSEED_SEQNUM_UNDEF UINT_MAX
-#define DEBUG_SEEDPAIR
-#undef  DEBUG_SEED_REPORT
+#undef  DEBUG_SEEDPAIR
+#define DEBUG_SEED_REPORT
 #undef  DEBUG_GET_KMERS
 
 typedef uint32_t GtDiagbandseedPosition;
@@ -214,14 +214,10 @@ void gt_diagbandseed_merge(GtArrayGtDiagbandseedSeedPair *mlist,
 static
 bool gt_diagbandseed_is_seed(GT_UNUSED const GtDiagbandseedSeedPair *entry,
                              const GtDiagbandseedScore *score,
-                             GtUword mincoverage, GtUword diag,
-                             GtGreedyextendmatchinfo *extendgreedyinfo,
-                             GtXdropmatchinfo *extendxdropinfo)
+                             GtUword mincoverage, GtUword diag)
 {
   /* TODO: add path criterion */
   gt_assert(score != NULL);
-  if (extendgreedyinfo != NULL) printf("");
-  if (extendxdropinfo != NULL) printf("");
   if ((GtUword)(MAX(score[diag+1], score[diag-1])) + (GtUword)(score[diag])
       >= mincoverage) {
     return true;
@@ -230,24 +226,25 @@ bool gt_diagbandseed_is_seed(GT_UNUSED const GtDiagbandseedSeedPair *entry,
   }
 }
 
-void gt_diagbandseed_find_seeds(const GtArrayGtDiagbandseedSeedPair *mlist,
-                                unsigned int kmerlen, GtUword mincoverage,
-                                GtUword log_diagbandwidth, GtUword amaxlen,
-                                GtUword bmaxlen,
-                                GtGreedyextendmatchinfo *extendgreedyinfo,
-                                GtXdropmatchinfo *extendxdropinfo)
+int gt_diagbandseed_find_seeds(const GtEncseq *aencseq, const GtEncseq *bencseq,
+                               const GtDiagbandseed *arg, GtError *err,
+                               const GtArrayGtDiagbandseedSeedPair *mlist,
+                               GtUword amaxlen, GtUword bmaxlen)
 {
+  int had_err = 0;
+  const bool selfcomp = (bencseq == aencseq) ? true : false;
   const GtUword mlen = mlist->nextfreeGtDiagbandseedSeedPair; /* mlist length */
   const GtDiagbandseedSeedPair *lm = mlist->spaceGtDiagbandseedSeedPair;
-  const GtUword ndiags = (amaxlen >> log_diagbandwidth) +
-                         (bmaxlen >> log_diagbandwidth) + 2;
-  const GtUword minhit = (mincoverage-1) / kmerlen + 1; /* min segment length */
+  const GtUword ndiags = (amaxlen >> arg->logdiagbandwidth) +
+                         (bmaxlen >> arg->logdiagbandwidth) + 2;
+  /* minimum segment length */
+  const GtUword minhit = (arg->mincoverage-1) / arg->seedlength + 1;
   GtUword diag, idx, maxsegm, nextsegm = 0;
   GtDiagbandseedScore *score = gt_calloc(ndiags, sizeof *score);
   GtDiagbandseedPosition *lastp = gt_calloc(ndiags, sizeof *lastp);
 
   if (mlen < minhit)
-    return;
+    return 0;
   maxsegm = mlen - minhit;
 
   while (nextsegm <= maxsegm) {
@@ -269,9 +266,9 @@ void gt_diagbandseed_find_seeds(const GtArrayGtDiagbandseedSeedPair *mlist,
     do {
       gt_assert(lm[nextsegm].bpos <= bmaxlen && lm[nextsegm].apos <= amaxlen);
       diag = (amaxlen + (GtUword)lm[nextsegm].bpos - (GtUword)lm[nextsegm].apos)
-             >> log_diagbandwidth;
-      if (lm[nextsegm].bpos >= kmerlen + lastp[diag]) {
-        score[diag] += kmerlen;
+             >> arg->logdiagbandwidth;
+      if (lm[nextsegm].bpos >= arg->seedlength + lastp[diag]) {
+        score[diag] += arg->seedlength;
       } else {
         gt_assert(lastp[diag] <= lm[nextsegm].bpos);/*if fail: sorted by bpos?*/
         score[diag] = score[diag] + lm[nextsegm].bpos - lastp[diag];
@@ -285,27 +282,45 @@ void gt_diagbandseed_find_seeds(const GtArrayGtDiagbandseedSeedPair *mlist,
     for (idx = currsegm; idx < nextsegm; idx++) {
       gt_assert(lm[idx].apos <= amaxlen);
       diag = (amaxlen + (GtUword)lm[idx].bpos - (GtUword)lm[idx].apos)
-             >> log_diagbandwidth;
-      if (gt_diagbandseed_is_seed(&lm[idx], score, mincoverage, diag,
-                                  extendgreedyinfo, extendxdropinfo)) {
+             >> arg->logdiagbandwidth;
+      if (gt_diagbandseed_is_seed(&lm[idx], score, arg->mincoverage, diag))
+      {
+        GtUword astart = lm[idx].apos + gt_encseq_seqstartpos
+          (aencseq, lm[idx].aseqnum) + 1 - arg->seedlength;
+        GtUword bstart = lm[idx].bpos + gt_encseq_seqstartpos
+          (bencseq, lm[idx].bseqnum) + 1 - arg->seedlength;
 #ifdef DEBUG_SEED_REPORT
-        printf("report SeedPair (%d,%d,%d,%d), score["GT_WU"]=%d\n",
-               lm[idx].aseqnum, lm[idx].bseqnum, lm[idx].apos, lm[idx].bpos,
-               diag, MAX(score[diag+1], score[diag-1]) + score[diag]);
+        printf("SP(%d,%d,%d,%d) ",
+               lm[idx].aseqnum, lm[idx].bseqnum, lm[idx].apos, lm[idx].bpos);
 #endif
+        if (selfcomp && arg->extendgreedyinfo != NULL) {
+          gt_greedy_extend_matchinfo_verbose_set(arg->extendgreedyinfo);
+          had_err = gt_simplegreedyselfmatchoutput((void *)
+                                                   arg->extendgreedyinfo,
+                                                   aencseq, arg->seedlength,
+                                                   astart, bstart, err);
+        } else if (selfcomp && arg->extendxdropinfo != NULL) {
+          gt_xdrop_matchinfo_verbose_set(arg->extendxdropinfo);
+          had_err = gt_simplexdropselfmatchoutput((void *)arg->extendxdropinfo,
+                                                  aencseq, arg->seedlength,
+                                                  astart, bstart, err);
+        } else {
+          printf("comparison of two encseqs not implemented\n");
+        }
       }
     }
 
     /* reset diagonal band scores */
     for (idx = currsegm; idx < nextsegm; idx++) {
       diag = (amaxlen + (GtUword)lm[idx].bpos - (GtUword)lm[idx].apos)
-             >> log_diagbandwidth;
+             >> arg->logdiagbandwidth;
       score[diag] = 0;
       lastp[diag] = 0;
     }
   }
   gt_free(score);
   gt_free(lastp);
+  return had_err;
 }
 
 int gt_diagbandseed_run(const GtEncseq *aencseq, const GtEncseq *bencseq,
@@ -448,9 +463,8 @@ int gt_diagbandseed_run(const GtEncseq *aencseq, const GtEncseq *bencseq,
 
   /* process SeedPairs */
   if (mlist.nextfreeGtDiagbandseedSeedPair != 0)
-    gt_diagbandseed_find_seeds(&mlist, arg->seedlength, arg->mincoverage,
-                               arg->logdiagbandwidth, amaxlen, bmaxlen,
-                               arg->extendgreedyinfo, arg->extendxdropinfo);
+    gt_diagbandseed_find_seeds(aencseq, bencseq, arg, err, &mlist, amaxlen,
+                               bmaxlen);
 
   GT_FREEARRAY(&mlist, GtDiagbandseedSeedPair);
   if (arg->benchmark)

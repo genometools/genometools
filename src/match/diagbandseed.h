@@ -58,12 +58,10 @@ void gt_diagbandseed_merge(GtArrayGtDiagbandseedSeedPair *mlist,
                            bool two_files);
 
 /* reports seeds from mlist that satisfy the filter criteria */
-void gt_diagbandseed_find_seeds(const GtArrayGtDiagbandseedSeedPair *mlist,
-                                unsigned int kmerlen, GtUword mincoverage,
-                                GtUword log_diagbandwidth, GtUword amaxlen,
-                                GtUword bmaxlen,
-                                GtGreedyextendmatchinfo *extendgreedyinfo,
-                                GtXdropmatchinfo *extendxdropinfo);
+int gt_diagbandseed_find_seeds(const GtEncseq *aencseq, const GtEncseq *bencseq,
+                               const GtDiagbandseed *arg, GtError *err,
+                               const GtArrayGtDiagbandseedSeedPair *mlist,
+                               GtUword amaxlen, GtUword bmaxlen);
 
 /* Run the whole algorithm. */
 int gt_diagbandseed_run(const GtEncseq *aencseq, const GtEncseq *bencseq,
