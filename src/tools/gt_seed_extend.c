@@ -129,7 +129,6 @@ static GtOptionParser* gt_seed_extend_option_parser_new(void *tool_arguments)
                                        100);
   gt_option_parser_add_option(op, op_pmh);
 
-
   /* -xdropbelow */
   op_xbe = gt_option_new_word("xdropbelow", "Specify xdrop cutoff score",
                               &arguments->se_xdropbelowscore, 5L);
