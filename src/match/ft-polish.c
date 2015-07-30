@@ -36,7 +36,12 @@ Polishing_info *polishing_info_new(GtUword cut_depth,
                                    double errorpercentage)
 {
   Polishing_info *pol_info = gt_malloc(sizeof *pol_info);
+  GtUword maxshift_for_INT16 = (GtUword) 15;
 
+  if (cut_depth > maxshift_for_INT16)
+  {
+    cut_depth = maxshift_for_INT16;
+  }
   gt_assert(pol_info != NULL);
   pol_info->entries = 1UL << cut_depth;
   pol_info->mask = pol_info->entries - 1;

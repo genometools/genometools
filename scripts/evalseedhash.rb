@@ -26,7 +26,7 @@ def createrepfindcall(indexname,seedlength,extend_opt,optionlist,
                       emptyenv,
                       verbose = true)
   verboseoption = if verbose then "-v" else "" end
-  repfindcall = "bin/gt repfind -scan #{verboseoption} " +
+  repfindcall = "bin/gt repfind -scan #{verboseoption} -minid 80 " +
                 "-seedlength #{seedlength} -#{extend_opt} -ii #{indexname} " + 
                 optionlist.join(" ")
   if emptyenv 
@@ -75,6 +75,31 @@ def makeseedhash(indexname,seedlength,extend_opt,optionlist,gencall = false)
   if "#{$?}" != "" and not "#{$?}".match(/exit 0$/)
     STDERR.puts "FAILURE: #{repfindcall}: \"#{$?}\""
     exit 1
+  end
+  return seedhash
+end
+
+def inputseedhash(matchfile)
+  seedhash = Hash.new()
+  seed = nil
+  File.open(matchfile,"r").each_line do |line|
+    if line.match(/# seed:/)
+      seed = line.chomp.gsub(/# seed:\s+/,"")
+    elsif line.match(/^#/)
+      next
+    elsif line.match(/^\d/)
+      a = line.split(/\s/)
+      if seed.nil?
+        STDERR.puts "#{$0}: expect that seed is defined"
+        exit 1
+      end
+      if seedhash.has_key?(seed)
+        STDERR.puts "#{$0}: seed #{seed} already occurs"
+        exit 1
+      end
+      seedhash[seed] = match_new_without_result(a)
+      seed = nil
+    end
   end
   return seedhash
 end
@@ -183,12 +208,14 @@ def fill_other_hash(h1,h2)
   end
 end
 
-def cmpseedhashes(checkbetter,minidentity,taglist,h1,h2)
+def cmpseedhashes(checkbetter,minidentity,taglist,h1,h2,silent = false)
   fill_other_hash(h1,h2)
   nobrother = 0
   h1.each_pair do |k,v1|
     if v1.identity >= minidentity and not h2.has_key?(k)
-      puts "#{taglist[0]}: #{k}=>#{match_to_s(v1)}, #{taglist[1]}=[]"
+      if not silent
+        puts "#{taglist[0]}: #{k}=>#{match_to_s(v1)}, #{taglist[1]}=[]"
+      end
       nobrother += 1
     end
   end

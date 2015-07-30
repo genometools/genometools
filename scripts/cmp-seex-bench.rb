@@ -12,7 +12,7 @@ inputfile = ARGV[2]
 def run_evaluations(startseedlength,endseedlength,inputfile)
   startseedlength.upto(endseedlength) do |seedlength|
     cmd = "cmp-seex.rb --silent --inputfile #{inputfile} " +
-          "--seedlength #{seedlength} --errperc 10 --maxalilendiff 30"
+          "--seedlength #{seedlength} --minid 90 --maxalilendiff 30"
     IO.popen(cmd.split(/\s/)).each_line do |line|
       if not line.match(/^#/)
         yield line
