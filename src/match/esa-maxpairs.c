@@ -17,6 +17,7 @@
 
 #include "core/arraydef.h"
 #include "core/unused_api.h"
+#include "core/minmax.h"
 #include "esa-seqread.h"
 #include "esa-maxpairs.h"
 #include "sfx-sain.h"
@@ -125,7 +126,8 @@ static int cartproduct1_maxpairs(GtBUstate_maxpairs *state,
   for (spptr = start; spptr < start + pl->length; spptr++)
   {
     if (state->processmaxpairs(state->processmaxpairsinfo,&state->genericencseq,
-                               fatherdepth,leafnumber,*spptr,err) != 0)
+                               fatherdepth,MIN(leafnumber,*spptr),
+                                           MAX(leafnumber,*spptr),err) != 0)
     {
       return -1;
     }
@@ -154,7 +156,8 @@ static int cartproduct2_maxpairs(GtBUstate_maxpairs *state,
     {
       if (state->processmaxpairs(state->processmaxpairsinfo,
                                  &state->genericencseq,
-                                 fatherdepth,*spptr1,*spptr2,err) != 0)
+                                 fatherdepth,MIN(*spptr1,*spptr2),
+                                             MAX(*spptr1,*spptr2),err) != 0)
       {
         return -1;
       }
@@ -258,7 +261,8 @@ static int processleafedge_maxpairs(bool firstsucc,
     {
       if (state->processmaxpairs(state->processmaxpairsinfo,
                                  &state->genericencseq,
-                                 fatherdepth,leafnumber,*spptr,err) != 0)
+                                 fatherdepth,MIN(leafnumber,*spptr),
+                                             MAX(leafnumber,*spptr),err) != 0)
       {
         return -2;
       }
@@ -348,7 +352,8 @@ static int processbranchingedge_maxpairs(bool firstsucc,
       {
         if (state->processmaxpairs(state->processmaxpairsinfo,
                                    &state->genericencseq,
-                                   fatherdepth,*fptr,*spptr,err) != 0)
+                                   fatherdepth,MIN(*fptr,*spptr),
+                                               MAX(*fptr,*spptr),err) != 0)
         {
           return -4;
         }

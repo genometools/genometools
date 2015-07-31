@@ -382,12 +382,7 @@ int gt_simplegreedyselfmatchoutput(void *info,
   {
     front_trace_reset(greedyextendmatchinfo->right_front_trace,0);
   }
-  if (pos1 > pos2)
-  {
-    GtUword tmp = pos1;
-    pos1 = pos2;
-    pos2 = tmp;
-  }
+  gt_assert(pos1 < pos2);
   if (pos1 + len >= pos2)
   {
     /* overlapping seeds */
@@ -574,12 +569,7 @@ int gt_simplexdropselfmatchoutput(void *info,
   GtUword dblen, querylen, total_distance, total_alignedlen, seqend1, seqend2;
   GtXdropscore score;
 
-  if (pos1 > pos2)
-  {
-    GtUword tmp = pos1;
-    pos1 = pos2;
-    pos2 = tmp;
-  }
+  gt_assert(pos1 < pos2);
   if (pos1 + len >= pos2)
   {
     /* overlapping seeds */
