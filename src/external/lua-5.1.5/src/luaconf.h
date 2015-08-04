@@ -540,7 +540,7 @@
 #define luai_numeq(a,b)		(a)==(b)
 #define luai_numlt(a,b)		((a)<(b))
 #define luai_numle(a,b)		((a)<=(b))
-#define luai_numisnan(a)	(!luai_numeq((a), (a)))
+#define luai_numisnan(a)	(!(luai_numeq((a), (a))))
 #endif
 
 
