@@ -46,13 +46,13 @@ static GtUword infadd(GtUword inf, GtUword s)
 static void affinealign_fill_table(AffinealignDPentry **dptable,
                                    const char *u, GtUword ulen,
                                    const char *v, GtUword vlen,
-                                   int matchcost, int mismatchcost, 
+                                   int matchcost, int mismatchcost,
                                    int gap_opening, int gap_extension)
 {
   GtUword i, j, Rvalue, Dvalue, Ivalue, minvalue;
   int rcost;
   gt_assert(dptable && u && v);
-  //gt_assert(ulen && vlen);
+  /*gt_assert(ulen && vlen);*/
   for (i = 0; i <= ulen; i++) {
     for (j = 0; j <= vlen; j++) {
       if (!i && !j) {
@@ -165,13 +165,13 @@ static void affinealign_traceback(GtAlignment *a, AffinealignDPentry **dptable,
 
 GtAlignment* gt_affinealign(const char *u, GtUword ulen,
                             const char *v, GtUword vlen,
-                            int matchcost, int mismatchcost, 
+                            int matchcost, int mismatchcost,
                             int gap_opening_cost, int gap_extension_cost)
 {
   AffinealignDPentry **dptable;
   GtAlignment *a;
   gt_assert(u && v);
-  //gt_assert(ulen && vlen);
+  /*gt_assert(ulen && vlen);*/
   gt_array2dim_malloc(dptable, ulen+1, vlen+1);
   affinealign_fill_table(dptable, u, ulen, v, vlen, matchcost, mismatchcost,
                          gap_opening_cost, gap_extension_cost);

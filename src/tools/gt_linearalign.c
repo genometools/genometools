@@ -10,11 +10,8 @@
 #include "core/str_api.h"
 #include "core/str_array.h"
 #include "core/types_api.h"
-#include "extended/affinealign_linear.h"
-#include "extended/affinealign_linear_local.h"
-#include "extended/linearedist.h"
-#include "extended/linearspace.h"
-#include "extended/linearspace_local.h"
+#include "extended/linearalign_affinegapcost.h"
+#include "extended/linearalign.h"
 #include "tools/gt_linearalign.h"
 
 typedef struct
@@ -296,7 +293,7 @@ int gt_linearalign(int argc, const char **argv, GtError *err)
         }
       }else
       {
-        align=gt_computelinearspace2(//aop.showevalue,
+        align=gt_computelinearspace(//aop.showevalue,
         (const GtUchar *) gt_str_array_get(aop.strings,0),0,
         (GtUword) strlen(gt_str_array_get(aop.strings,0)),
         (const GtUchar *) gt_str_array_get(aop.strings,1UL),0,

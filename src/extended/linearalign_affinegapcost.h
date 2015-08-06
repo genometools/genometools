@@ -15,14 +15,20 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef AFFINEALIGN_LINEAR_H
-#define AFFINEALIGN_LINEAR_H
+#ifndef LINEARALIGN_AFFINEGAPCOST_H
+#define LINEARALIGN_AFFINEGAPCOST_H
 
 #include "core/unused_api.h"
 #include "core/types_api.h"
 #include "extended/alignment.h"
 
 void gt_checkaffinelinearspace(GT_UNUSED bool forward,
+                               const GtUchar *useq,
+                               GtUword ulen,
+                               const GtUchar *vseq,
+                               GtUword vlen);
+
+void gt_checkaffinelinearspace_local(GT_UNUSED bool forward,
                                const GtUchar *useq,
                                GtUword ulen,
                                const GtUchar *vseq,
@@ -39,13 +45,15 @@ GtAlignment *gt_computeaffinelinearspace(const GtUchar *useq,
                                          const GtWord gap_opening,
                                          const GtWord gap_extension);
 
-GtUword gt_calc_affinealign_linear(const GtUchar *useq, const GtUword ustart,
-                                   const GtUword ulen,
-                                   const GtUchar *vseq, const GtUword vstart,
-                                   const GtUword vlen,
-                                   GtAlignment *align,
-                                   const GtWord matchcost,
-                                   const GtWord mismatchcost,
-                                   const GtWord gap_opening,
-                                   const GtWord gap_extension);
+GtAlignment *gt_computeaffinelinearspace_local(const GtUchar *useq,
+                                               const GtUword ustart,
+                                               const GtUword ulen,
+                                               const GtUchar *vseq,
+                                               const GtUword vstart,
+                                               const GtUword vlen,
+                                               const GtWord matchscore,
+                                               const GtWord mismatchscore,
+                                               const GtWord gap_opening,
+                                               const GtWord gap_extension);
+
 #endif

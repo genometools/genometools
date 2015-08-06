@@ -25,10 +25,8 @@
 #include "core/str.h"
 #include "core/str_array.h"
 #include "core/types_api.h"
-#include "extended/affinealign_linear.h"
-#include "extended/affinealign_linear_local.h"
-#include "extended/linearedist.h"
-#include "extended/linearspace_local.h"
+#include "extended/linearalign_affinegapcost.h"
+#include "extended/linearalign.h"
 #include "match/test-pairwise.h"
 #include "tools/gt_paircmp.h"
 
@@ -122,7 +120,7 @@ static GtOPrval parse_options(int *parsed_args,
                       &pw->showedist, false);
   gt_option_parser_add_option(op, optionshowedist);
 
-  optionprint = gt_option_new_bool("p", "print alignments",
+  optionprint = gt_option_new_bool("p", "print edist alignment",
                       &pw->print, false);
   gt_option_parser_add_option(op, optionprint);
 
@@ -282,10 +280,10 @@ int gt_paircmp(int argc, const char **argv, GtError *err)
     }
     else if (cmppairwise.print)
     {
-      gt_computelinearspace(
-        (const GtUchar *) gt_str_array_get(cmppairwise.strings,0),
+      gt_print_edist_alignment(
+        (const GtUchar *) gt_str_array_get(cmppairwise.strings,0),0,
         (GtUword) strlen(gt_str_array_get(cmppairwise.strings,0)),
-        (const GtUchar *) gt_str_array_get(cmppairwise.strings,1UL),
+        (const GtUchar *) gt_str_array_get(cmppairwise.strings,1UL),0,
         (GtUword) strlen(gt_str_array_get(cmppairwise.strings,1UL)));
     }else
     {
