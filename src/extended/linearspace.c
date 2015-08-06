@@ -281,13 +281,13 @@ GtUword gt_calc_linearalign2(const GtUchar *useq, const GtUword ustart,
 
   if (ulen == 0UL)
   {
-      distance = construct_trivial_alignment(align, vlen, gapcost,
-                                       gt_alignment_add_insertion);
+      distance = construct_trivial_insertion_alignment(align,vlen,
+                                                       gapcost);
   }
   else if (vlen == 0UL)
   {
-      distance = construct_trivial_alignment(align, ulen, gapcost,
-                                  gt_alignment_add_deletion);
+      distance = construct_trivial_deletion_alignment(align,vlen,
+                                                       gapcost);
   }
   else if (ulen == 1UL || vlen == 1UL ) {
     distance = alignment_in_square_space(align, useq, ustart, ulen,
@@ -308,7 +308,7 @@ GtUword gt_calc_linearalign2(const GtUchar *useq, const GtUword ustart,
                                    mismatchcost, gapcost);
     determineCtab0(Ctab,vseq[vstart],useq, ustart);
 
-    reconstructalignment(align, Ctab, vlen);
+    reconstructalignment_from_Ctab(align, Ctab, vlen);
     gt_free(Ctab);
     gt_free(EDtabcolumn);
     gt_free(Rtabcolumn);

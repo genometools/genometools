@@ -289,7 +289,7 @@ int gt_linearalign(int argc, const char **argv, GtError *err)
         (GtUword) strlen(gt_str_array_get(aop.strings,0)),
         (const GtUchar *) gt_str_array_get(aop.strings,1UL),0,
         (GtUword) strlen(gt_str_array_get(aop.strings,1UL)),
-         matchcost,mismatchcost, gapcost);/*TODO:variablebennenung???*/
+         0, matchcost,mismatchcost, gapcost);/*TODO:variablebennenung???*/
              if (aop.showevalue){
           distance =  gt_alignment_eval_with_affine_score(align,0,
                                      matchcost,mismatchcost, gapcost);

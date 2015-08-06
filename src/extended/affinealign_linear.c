@@ -168,7 +168,8 @@ static void nextAtabRtabcolumn(const GtUchar *useq, const GtUword ustart,
                                const GtUchar b,
                                Atabentry *Atabcolumn,
                                Rtabentry *Rtabcolumn,
-                               const GtWord replacement_cost,
+                               const GtWord matchcost,
+                               const GtWord mismatchcost,
                                const GtWord gap_opening,
                                const GtWord gap_extension,
                                const GtUword midcolumn,
@@ -215,7 +216,7 @@ static void nextAtabRtabcolumn(const GtUchar *useq, const GtUword ustart,
     Awe = Atabcolumn[rowindex];
     Rwe = Rtabcolumn[rowindex];
 
-    rcost = useq[ustart+rowindex-1]==b? 0:replacement_cost;
+    rcost = useq[ustart+rowindex-1]==b? matchcost:mismatchcost;
     Rdist = add_safe(Anw.Rvalue, rcost);
     Ddist = add_safe(Anw.Dvalue, rcost);
     Idist = add_safe(Anw.Ivalue, rcost);
@@ -262,7 +263,8 @@ static GtUword evaluateallAtabRtabcolumns(const GtUchar *useq,
                                           const GtUword vlen,
                                           Atabentry *Atabcolumn,
                                           Rtabentry *Rtabcolumn,
-                                          const GtWord replacement_cost,
+                                          const GtWord matchcost,
+                                          const GtWord mismatchcost,
                                           const GtWord gap_opening,
                                           const GtWord gap_extension,
                                           GtUword midcolumn,
@@ -279,7 +281,8 @@ static GtUword evaluateallAtabRtabcolumns(const GtUchar *useq,
                        vseq[vstart+colindex-1],
                        Atabcolumn,
                        Rtabcolumn,
-                       replacement_cost,
+                       matchcost,
+                       mismatchcost,
                        gap_opening,
                        gap_extension,
                        midcolumn,
@@ -336,7 +339,8 @@ static GtUword evaluateaffinecrosspoints(const GtUchar *useq,
                                          Rtabentry *Rtabcolumn,
                                          GtUword *Ctab,
                                          GtUword rowoffset,
-                                         const GtWord replacement_cost,
+                                         const GtWord matchcost,
+                                         const GtWord mismatchcost,
                                          const GtWord gap_opening,
                                          const GtWord gap_extension,
                                          Edge from_edge,Edge to_edge)
@@ -350,7 +354,7 @@ static GtUword evaluateaffinecrosspoints(const GtUchar *useq,
     distance = evaluateallAtabRtabcolumns(useq, ustart, ulen,
                                           vseq, vstart, vlen,
                                           Atabcolumn, Rtabcolumn,
-                                          replacement_cost,
+                                          matchcost, mismatchcost,
                                           gap_opening,
                                           gap_extension,
                                           midcol, from_edge);
@@ -387,7 +391,7 @@ static GtUword evaluateaffinecrosspoints(const GtUchar *useq,
                                              vseq, vstart, midcol-1,
                                              Atabcolumn,Rtabcolumn,
                                              Ctab,rowoffset,
-                                             replacement_cost,
+                                             matchcost, mismatchcost,
                                              gap_opening,
                                              gap_extension,
                                              from_edge,midtype);
@@ -397,7 +401,7 @@ static GtUword evaluateaffinecrosspoints(const GtUchar *useq,
                                            vseq,vstart,midcol,
                                            Atabcolumn,Rtabcolumn,
                                            Ctab,rowoffset,
-                                           replacement_cost,
+                                           matchcost, mismatchcost,
                                            gap_opening,
                                            gap_extension,
                                            from_edge,midtype);
@@ -409,7 +413,7 @@ static GtUword evaluateaffinecrosspoints(const GtUchar *useq,
                                            vseq,vstart,midcol-1,
                                            Atabcolumn,Rtabcolumn,
                                            Ctab,rowoffset,
-                                           replacement_cost,
+                                           matchcost, mismatchcost,
                                            gap_opening,
                                            gap_extension,
                                            from_edge,midtype);
@@ -424,7 +428,7 @@ static GtUword evaluateaffinecrosspoints(const GtUchar *useq,
                              vseq, vstart+midcol,vlen-midcol,
                              Atabcolumn,Rtabcolumn,
                              Ctab+midcol,rowoffset+midrow,
-                             replacement_cost,
+                             matchcost, mismatchcost,
                              gap_opening,
                              gap_extension,
                              midtype, to_edge);
@@ -435,7 +439,8 @@ static GtUword evaluateaffinecrosspoints(const GtUchar *useq,
 
 static void determineCtab0(GtUword *Ctab, GtUchar vseq0,
                           const GtUchar *useq,GtUword ustart,
-                          const GtWord replacement_cost,
+                          const GtWord matchcost,
+                          const GtWord mismatchcost,
                           const GtWord gap_opening)
 {
   GtUword rowindex;
@@ -448,7 +453,7 @@ static void determineCtab0(GtUword *Ctab, GtUchar vseq0,
   {
     if (Ctab[2]-Ctab[1] > 1)
     {
-      if (gap_opening > replacement_cost)
+      if (gap_opening > (mismatchcost-matchcost))
       {
         Ctab[0] = 0; return;
       }
@@ -475,7 +480,7 @@ static void determineCtab0(GtUword *Ctab, GtUchar vseq0,
       {
           Ctab[0] = 0; return;
       }
-      if (gap_opening > replacement_cost)
+      if (gap_opening > (mismatchcost-matchcost))
       {
         Ctab[0] = Ctab[1]-1; return;
       }
@@ -503,7 +508,8 @@ GtUword gt_calc_affinealign_linear(const GtUchar *useq, GtUword ustart,
                                    const GtUchar *vseq, GtUword vstart,
                                    const GtUword vlen,
                                    GtAlignment *align,
-                                   const GtWord replacement_cost,
+                                   const GtWord matchcost,
+                                   const GtWord mismatchcost,
                                    const GtWord gap_opening,
                                    const GtWord gap_extension)
 {
@@ -514,26 +520,27 @@ GtUword gt_calc_affinealign_linear(const GtUchar *useq, GtUword ustart,
 
   if (ulen == 0UL)
   {
-      distance = construct_trivial_alignment(align, vlen, gap_extension,
-                                             gt_alignment_add_insertion);
+      distance = construct_trivial_insertion_alignment(align, vlen,
+                                                      gap_extension);
       distance += gap_opening;
   }
   else if (vlen == 0UL)
   {
-      distance = construct_trivial_alignment(align,ulen, gap_extension,
-                                             gt_alignment_add_deletion);
+      distance = construct_trivial_deletion_alignment(align, ulen,
+                                                      gap_extension);
+      distance += gap_opening;
   }
   else if (ulen == 1UL || vlen == 1UL )
   {
     square_align = gt_affinealign((const char*)useq+ustart, ulen,
                                   (const char*)vseq+vstart, vlen,
-                                  (int)replacement_cost,
+                                  (int)matchcost, (int)mismatchcost,
                                   (int)gap_opening,
                                   (int)gap_extension);
     gt_alignment_clone(square_align, align);
 
-    distance = gt_alignment_eval_with_affine_score(align,0,
-                                                   replacement_cost,
+    distance = gt_alignment_eval_with_affine_score(align,matchcost,
+                                                   mismatchcost,
                                                    gap_opening,
                                                    gap_extension);
     gt_alignment_delete(square_align);
@@ -547,13 +554,13 @@ GtUword gt_calc_affinealign_linear(const GtUchar *useq, GtUword ustart,
     Ctab[vlen] = ulen;
     distance = evaluateaffinecrosspoints(useq, ustart, ulen, vseq, vstart, vlen,
                                          Atabcolumn, Rtabcolumn,
-                                         Ctab, 0, replacement_cost,
+                                         Ctab, 0, matchcost, mismatchcost,
                                          gap_opening,gap_extension, X,X);
 
     determineCtab0(Ctab, vseq[vstart],useq, ustart,
-                   replacement_cost, gap_opening);
+                   matchcost, mismatchcost, gap_opening);
 
-    reconstructalignment(align, Ctab, vlen);
+    reconstructalignment_from_Ctab(align, Ctab, vlen);
 
     gt_free(Ctab);
     gt_free(Atabcolumn);
@@ -567,14 +574,15 @@ GtAlignment *gt_computeaffinelinearspace(const GtUchar *useq,
                                  const GtUword ustart, const GtUword ulen,
                                  const GtUchar *vseq,
                                  const GtUword vstart, const GtUword vlen,
-                                 const GtWord replacement_cost,
+                                 const GtWord matchcost,
+                                 const GtWord mismatchcost,
                                  const GtWord gap_opening,
                                  const GtWord gap_extension)
 {
   GtAlignment *align;
 
   gt_assert(useq && ulen && vseq && vlen);
-  if (replacement_cost < 0 || gap_opening < 0 || gap_extension < 0)
+  if (matchcost < 0 || mismatchcost < 0 || gap_opening < 0 || gap_extension < 0)
   {
     fprintf(stderr,"invalid cost value");
     exit(GT_EXIT_PROGRAMMING_ERROR);
@@ -582,7 +590,7 @@ GtAlignment *gt_computeaffinelinearspace(const GtUchar *useq,
   align = gt_alignment_new_with_seqs(useq+ustart, ulen, vseq+vstart, vlen);
   (void) gt_calc_affinealign_linear(useq, ustart, ulen,
                                 vseq, vstart, vlen,
-                                align, replacement_cost,
+                                align, matchcost, mismatchcost,
                                 gap_opening,gap_extension);
 
   return align;
@@ -612,7 +620,7 @@ void gt_checkaffinelinearspace(GT_UNUSED bool forward,
   align_linear = gt_alignment_new_with_seqs(useq, ulen, vseq, vlen);
   affine_score1 = gt_calc_affinealign_linear(useq, 0, ulen,
                                              vseq, 0, vlen,
-                                             align_linear, 3, 4, 1);
+                                             align_linear, 0, 3, 4, 1);
   affine_score2 = gt_alignment_eval_with_affine_score(align_linear,0,3,4,1);
 
   if (affine_score1 != affine_score2)
@@ -625,7 +633,7 @@ void gt_checkaffinelinearspace(GT_UNUSED bool forward,
   }
 
   align_square = gt_affinealign((const char *)useq, ulen,
-                                (const char *)vseq, vlen,3,4,1);
+                                (const char *)vseq, vlen,0,3,4,1);
   affine_score3 = gt_alignment_eval_with_affine_score(align_square,0,3,4,1);
 
   if (affine_score1 != affine_score3)

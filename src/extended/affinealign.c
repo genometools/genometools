@@ -46,8 +46,8 @@ static GtUword infadd(GtUword inf, GtUword s)
 static void affinealign_fill_table(AffinealignDPentry **dptable,
                                    const char *u, GtUword ulen,
                                    const char *v, GtUword vlen,
-                                   int replacement_cost, int gap_opening,
-                                   int gap_extension)
+                                   int matchcost, int mismatchcost, 
+                                   int gap_opening, int gap_extension)
 {
   GtUword i, j, Rvalue, Dvalue, Ivalue, minvalue;
   int rcost;
@@ -65,7 +65,7 @@ static void affinealign_fill_table(AffinealignDPentry **dptable,
         if (!i || !j)
           dptable[i][j].Rdist = ULONG_MAX;
         else {
-          rcost  = (u[i-1] == v[j-1]) ? 0 : replacement_cost;
+          rcost  = (u[i-1] == v[j-1]) ? matchcost : mismatchcost;
           Rvalue = infadd(dptable[i-1][j-1].Rdist, rcost);
           Dvalue = infadd(dptable[i-1][j-1].Ddist, rcost);
           Ivalue = infadd(dptable[i-1][j-1].Idist, rcost);
@@ -165,15 +165,15 @@ static void affinealign_traceback(GtAlignment *a, AffinealignDPentry **dptable,
 
 GtAlignment* gt_affinealign(const char *u, GtUword ulen,
                             const char *v, GtUword vlen,
-                            int replacement_cost, int gap_opening_cost,
-                            int gap_extension_cost)
+                            int matchcost, int mismatchcost, 
+                            int gap_opening_cost, int gap_extension_cost)
 {
   AffinealignDPentry **dptable;
   GtAlignment *a;
   gt_assert(u && v);
   //gt_assert(ulen && vlen);
   gt_array2dim_malloc(dptable, ulen+1, vlen+1);
-  affinealign_fill_table(dptable, u, ulen, v, vlen, replacement_cost,
+  affinealign_fill_table(dptable, u, ulen, v, vlen, matchcost, mismatchcost,
                          gap_opening_cost, gap_extension_cost);
   a = gt_alignment_new_with_seqs((const GtUchar *) u, ulen, (const GtUchar *) v,
                                  vlen);

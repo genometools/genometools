@@ -34,7 +34,8 @@ GtAlignment *gt_computeaffinelinearspace(const GtUchar *useq,
                                          const GtUchar *vseq,
                                          const GtUword vstart,
                                          const GtUword vlen,
-                                         const GtWord replacement_cost,
+                                         const GtWord matchcost,
+                                         const GtWord mismatchcost,
                                          const GtWord gap_opening,
                                          const GtWord gap_extension);
 
@@ -43,7 +44,8 @@ GtUword gt_calc_affinealign_linear(const GtUchar *useq, const GtUword ustart,
                                    const GtUchar *vseq, const GtUword vstart,
                                    const GtUword vlen,
                                    GtAlignment *align,
-                                   const GtWord replacement_cost,
+                                   const GtWord matchcost,
+                                   const GtWord mismatchcost,
                                    const GtWord gap_opening,
                                    const GtWord gap_extension);
 #endif

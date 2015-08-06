@@ -17,9 +17,9 @@
 
 #include "extended/reconstructalignment.h"
 
-void reconstructalignment(GtAlignment *align,
-                          const GtUword *Ctab,
-                          const GtUword vlen)
+void reconstructalignment_from_Ctab(GtAlignment *align,
+                                    const GtUword *Ctab,
+                                    const GtUword vlen)
 {
   GtUword i,j;
 
@@ -40,16 +40,30 @@ void reconstructalignment(GtAlignment *align,
     gt_alignment_add_deletion(align);
 }
 
-GtUword construct_trivial_alignment(GtAlignment *align, GtUword len,
-                                    const GtWord gapcost,
-                                    void (*indel)(GtAlignment*))
+GtUword construct_trivial_deletion_alignment(GtAlignment *align,
+                                             const GtUword len,
+                                             const GtWord gapcost)
 {
-  GtUword idx, distance=0;
+  GtUword idx;
 
   for (idx = 0; idx < len; idx ++)
   {
-    indel(align);
-    distance += gapcost;
+    gt_alignment_add_deletion(align);
   }
-  return distance;
+  
+  return (len*gapcost);
+}
+
+GtUword construct_trivial_insertion_alignment(GtAlignment *align,
+                                              const GtUword len,
+                                              const GtWord gapcost)
+{
+  GtUword idx;
+
+  for (idx = 0; idx < len; idx ++)
+  {
+    gt_alignment_add_insertion(align);
+  }
+  
+  return (len*gapcost);
 }

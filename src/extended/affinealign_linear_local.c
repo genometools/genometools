@@ -284,24 +284,23 @@ static void change_score_to_cost_affine_function(const GtWord matchscore,
                                                  const GtWord mismatchscore,
                                                  const GtWord gap_opening,
                                                  const GtWord gap_extension,
-                                                 GtWord *replacement_cost,
+                                                 GtWord *match_cost,
+                                                 GtWord *mismatch_cost,
                                                  GtWord *gap_opening_cost,
                                                  GtWord *gap_extension_cost)
 {
-  GtWord temp1, temp2, max, matchcost;
+  GtWord temp1, temp2, max;
 
   temp1 = MAX(GT_DIV2(matchscore), GT_DIV2(mismatchscore));
 
-  temp2 = MAX(1 + gap_opening, 1 + gap_extension);
+  temp2 = MAX(0, 1 + gap_extension);
 
   max = MAX(temp1, temp2);
-  if (max < 0)
-    max = 0;
 
-  matchcost =  2 * max-matchscore; /*set matchcost to zero*/
-  *replacement_cost = 2 * max-mismatchscore-matchcost;
-  *gap_opening_cost = max-gap_opening;
-  *gap_extension_cost = max-gap_extension-matchcost;
+  *match_cost = 2 * max-matchscore;
+  *mismatch_cost = 2 * max-mismatchscore;
+  *gap_opening_cost = -gap_opening;
+  *gap_extension_cost = max-gap_extension;
 }
 
 static GtUword gt_calc_affinealign_linear_local(const GtUchar *useq,
@@ -317,7 +316,7 @@ static GtUword gt_calc_affinealign_linear_local(const GtUchar *useq,
                                                 const GtWord gap_extension)
 {
   GtUword score, ulen_part, ustart_part, vlen_part, vstart_part;
-  GtWord replacement_cost,
+  GtWord match_cost, mismatch_cost,
          gap_opening_cost,
          gap_extension_cost;
   Atabentry *Atabcolumn;
@@ -347,13 +346,14 @@ static GtUword gt_calc_affinealign_linear_local(const GtUchar *useq,
 
     change_score_to_cost_affine_function(matchscore,mismatchscore,
                                          gap_opening,gap_extension,
-                                         &replacement_cost,
+                                         &match_cost,
+                                         &mismatch_cost,
                                          &gap_opening_cost,
                                          &gap_extension_cost);
 
     gt_calc_affinealign_linear(useq, ustart_part, ulen_part,
                                vseq, vstart_part, vlen_part,
-                               align, replacement_cost,
+                               align, match_cost, mismatch_cost,
                                gap_opening_cost,gap_extension_cost);
   }else
   {
