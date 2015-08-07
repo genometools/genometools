@@ -35,6 +35,7 @@ struct GtDiagbandseed {
   bool overlappingseeds;
   bool verify;
   bool benchmark;
+  bool verbose;
   GtGreedyextendmatchinfo *extendgreedyinfo;
   GtXdropmatchinfo *extendxdropinfo;
 };
@@ -57,11 +58,14 @@ void gt_diagbandseed_merge(GtArrayGtDiagbandseedSeedPair *mlist,
                            unsigned int kmerlen, GtUword maxfreq,
                            bool two_files);
 
-/* reports seeds from mlist that satisfy the filter criteria */
-int gt_diagbandseed_find_seeds(const GtEncseq *aencseq, const GtEncseq *bencseq,
-                               const GtDiagbandseed *arg, GtError *err,
-                               const GtArrayGtDiagbandseedSeedPair *mlist,
-                               GtUword amaxlen, GtUword bmaxlen);
+/* start extension for seeds that satisfy the filter criteria */
+int gt_diagbandseed_process_seeds(const GtEncseq *aencseq,
+                                  const GtEncseq *bencseq,
+                                  const GtDiagbandseed *arg,
+                                  GtError *err,
+                                  const GtArrayGtDiagbandseedSeedPair *mlist,
+                                  GtUword amaxlen,
+                                  GtUword bmaxlen);
 
 /* Run the whole algorithm. */
 int gt_diagbandseed_run(const GtEncseq *aencseq, const GtEncseq *bencseq,
