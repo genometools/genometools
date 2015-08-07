@@ -84,7 +84,8 @@ static GtWord add_safe_max(const GtWord val1, const GtWord val2)
 {
   if (val1 != GT_WORD_MAX && val2 != GT_WORD_MAX)
   {
-     gt_assert(val1+val2 >= val1 && val1+val2 >= val2);/*check overflow*/
+     if (val1 > 0 && val2 > 0)
+       gt_assert(val1+val2 >= val1 && val1+val2 >= val2);/*check overflow*/
      return val1+val2;
   }
 
@@ -549,6 +550,9 @@ GtUword gt_calc_affinealign_linear(const GtUchar *useq, GtUword ustart,
   Rtabentry *Rtabcolumn;
   GtAlignment *square_align;
 
+  gt_assert(ustart + ulen <= strlen((const char *)useq));
+  gt_assert(vstart + vlen <= strlen((const char *)vseq));
+
   if (ulen == 0UL)
   {
       distance = construct_trivial_insertion_alignment(align, vlen,
@@ -885,6 +889,9 @@ static GtUword gt_calc_affinealign_linear_local(const GtUchar *useq,
   Atabentry *Atabcolumn;
   Starttabentry *Starttabcolumn;
   Gtmaxcoordvalue *max;
+
+  gt_assert(ustart + ulen <= strlen((const char *)useq));
+  gt_assert(vstart + vlen <= strlen((const char *)vseq));
 
   Atabcolumn = gt_malloc(sizeof *Atabcolumn * (ulen+1));
   Starttabcolumn = gt_malloc(sizeof *Starttabcolumn * (ulen+1));

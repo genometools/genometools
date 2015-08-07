@@ -311,6 +311,8 @@ GtUword gt_calc_linearalign(const GtUchar *useq,
 {
   GtUword distance, *Ctab, *EDtabcolumn,*Rtabcolumn;
 
+  gt_assert(ustart + ulen <= strlen((const char *)useq));
+  gt_assert(vstart + vlen <= strlen((const char *)vseq));
   if (ulen == 0UL)
   {
       distance = construct_trivial_insertion_alignment(align,vlen,
@@ -534,6 +536,9 @@ GtWord gt_calc_linearalign_local(const GtUchar *useq,
 
   Gtmaxcoordvalue *max;
   GtWord matchcost, mismatchcost, gapcost;
+
+  gt_assert(ustart + ulen <= strlen((const char *)useq));
+  gt_assert(vstart + vlen <= strlen((const char *)vseq));
 
   Ltabcolumn = gt_malloc(sizeof *Ltabcolumn * (ulen+1));
   Starttabcolumn = gt_malloc(sizeof *Starttabcolumn * (ulen+1));

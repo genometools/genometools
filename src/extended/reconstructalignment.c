@@ -50,7 +50,7 @@ GtUword construct_trivial_deletion_alignment(GtAlignment *align,
   {
     gt_alignment_add_deletion(align);
   }
-  
+
   return (len*gapcost);
 }
 
@@ -64,6 +64,6 @@ GtUword construct_trivial_insertion_alignment(GtAlignment *align,
   {
     gt_alignment_add_insertion(align);
   }
-  
+
   return (len*gapcost);
 }
