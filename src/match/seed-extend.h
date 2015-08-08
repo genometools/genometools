@@ -77,8 +77,12 @@ GtXdropmatchinfo *gt_xdrop_matchinfo_new(GtUword userdefinedleastlength,
                                          GtUword sensitivity,
                                          bool selfcompare);
 
+/* The destructor-method. */
+
+void gt_xdrop_matchinfo_delete(GtXdropmatchinfo *xdropmatchinfo);
+
 /* The following function returns the optimal xdrop score depending
-   on the error percentag. */
+   on the error percentage. */
 
 GtWord gt_optimalxdropbelowscore(GtUword errorpercentage,GtUword sensitivity);
 
@@ -89,10 +93,6 @@ void gt_xdrop_matchinfo_verbose_set(GtXdropmatchinfo *xdropmatchinfo);
 /* Set the silent flag in the matchinfo object. */
 
 void gt_xdrop_matchinfo_silent_set(GtXdropmatchinfo *xdropmatchinfo);
-
-/* The destructor-method. */
-
-void gt_xdrop_matchinfo_delete(GtXdropmatchinfo *xdropmatchinfo);
 
 /* The following function is used for extending a seed obtained
    in a self comparison of the given <encseq>. The extension is performed
@@ -123,21 +123,6 @@ int gt_processxdropquerymatches(void *info,
                                 const GtUchar *query,
                                 GtUword query_totallength,
                                 GtError *err);
-
-/* The following function is used for extending a seed obtained
-   in a self comparison of the given <encseq>. The extension is performed
-   using the greedy strategy. The seed is specified
-   by its length <len> and the two positions <pos1> and <pos2> which are not
-   ordered. A GtXdropmatchinfo-object is passed via the void pointer <info>. If
-   an error occurs, the function returns a value different from 0 and
-   stores the error message in the <err>-object. */
-
-int gt_simplegreedyselfmatchoutput(void *info,
-                                   const GtEncseq *encseq,
-                                   GtUword len,
-                                   GtUword pos1,
-                                   GtUword pos2,
-                                   GtError *err);
 
 /* The following functions are used for the greedy extension. */
 
@@ -178,16 +163,9 @@ GtGreedyextendmatchinfo *gt_greedy_extend_matchinfo_new(
                                    GtExtendCharAccess extend_char_access,
                                    GtUword sensitivity);
 
-/* Determine the optimal value for maximal alignment difference and
-   the percentage match history, depending on the error percentage. */
+/* the destructor-method for the gven object. */
 
-void gt_optimal_maxalilendiff_perc_mat_history(
-                GtUword *maxalignedlendifference,
-                GtUword *perc_mat_history,
-                GtUword arg_maxalignedlendifference,
-                GtUword arg_perc_mat_history,
-                GtUword errorpercentage,
-                GtUword sensitivity);
+void gt_greedy_extend_matchinfo_delete(GtGreedyextendmatchinfo *ggemi);
 
 /* Set the check_extend_symmetry flag in the matchinfo object. */
 
@@ -198,13 +176,31 @@ void gt_greedy_extend_matchinfo_check_extend_symmetry_set(
 
 void gt_greedy_extend_matchinfo_silent_set(GtGreedyextendmatchinfo *ggemi);
 
-/* Set the verbose flag in the mathchinfo object. */
+/* Set the verbose flag in the matchinfo object. */
 
 void gt_greedy_extend_matchinfo_verbose_set(GtGreedyextendmatchinfo *ggemi);
 
-/* the destructor-method for the gven object. */
+/* If <arg_maxalignedlendifference> and <arg_perc_mat_history> are 0, then
+   an optimal value for the maximal alignment length difference and
+   the percentage match history are determined, depending on the error
+   percentage and sensitivity. The optimal values is determined by
+   simulations with sequences of the given error percentage.
+   The determined values are stored in the memory cells pointed
+   to by <maxalignedlendifference> and <perc_mat_history>. If
+   <arg_maxalignedlendifference> is not 0, then this value is
+   used as the maximal alignment length difference and stored in the
+   specified memory area. If <arg_perc_mat_history> is not 0, then this value is
+   used as the percentage match history, and stored in the
+   specified memory area.
+*/
 
-void gt_greedy_extend_matchinfo_delete(GtGreedyextendmatchinfo *ggemi);
+void gt_optimal_maxalilendiff_perc_mat_history(
+                GtUword *maxalignedlendifference,
+                GtUword *perc_mat_history,
+                GtUword arg_maxalignedlendifference,
+                GtUword arg_perc_mat_history,
+                GtUword errorpercentage,
+                GtUword sensitivity);
 
 /* This function converts a string given as argument for option -cam
    and converts it to the given enum type <GtExtendCharAccess>. This
@@ -218,5 +214,20 @@ GtExtendCharAccess gt_greedy_extend_char_access(const char *cam_string,
    for the mentioned option -cam. */
 
 const char *gt_cam_extendgreedy_comment(void);
+
+/* The following function is used for extending a seed obtained
+   in a self comparison of the given <encseq>. The extension is performed
+   using the greedy strategy. The seed is specified
+   by its length <len> and the two positions <pos1> and <pos2> which are not
+   ordered. A GtXdropmatchinfo-object is passed via the void pointer <info>. If
+   an error occurs, the function returns a value different from 0 and
+   stores the error message in the <err>-object. */
+
+int gt_simplegreedyselfmatchoutput(void *info,
+                                   const GtEncseq *encseq,
+                                   GtUword len,
+                                   GtUword pos1,
+                                   GtUword pos2,
+                                   GtError *err);
 
 #endif
