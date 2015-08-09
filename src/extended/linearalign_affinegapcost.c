@@ -619,7 +619,7 @@ GtAlignment *gt_computeaffinelinearspace(const GtUchar *useq,
   gt_assert(useq && ulen && vseq && vlen);
   if (matchcost < 0 || mismatchcost < 0 || gap_opening < 0 || gap_extension < 0)
   {
-    fprintf(stderr,"invalid cost value");
+    fprintf(stderr,"invalid cost value\n");
     exit(GT_EXIT_PROGRAMMING_ERROR);
   }
   align = gt_alignment_new_with_seqs(useq+ustart, ulen, vseq+vstart, vlen);

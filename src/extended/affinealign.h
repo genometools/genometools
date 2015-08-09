@@ -1,4 +1,5 @@
 /*
+  Copyright (C) 2015 Annika Seidel, annika.seidel@studium.uni-hamburg.de
   Copyright (c) 2007 Gordon Gremme <gordon@gremme.org>
   Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
 
