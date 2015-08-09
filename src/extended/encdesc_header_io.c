@@ -35,16 +35,23 @@ static inline int encdesc_header_io_basics(GtEncdesc *encdesc,
 {
   int had_err = 0;
   had_err = GT_ENCDESC_IO_ONE((encdesc->num_of_descs));
+  gt_log_log("num of descs: " GT_WU, encdesc->num_of_descs);
   if (!had_err)
     had_err = GT_ENCDESC_IO_ONE((encdesc->num_of_fields));
+  gt_log_log("num of fields: " GT_WU, encdesc->num_of_fields);
   if (!had_err)
-    had_err = GT_ENCDESC_IO_ONE((encdesc->num_of_fields_is_cons));
+    had_err = GT_ENCDESC_IO_ONE((encdesc->num_of_fields_is_const));
+  if (encdesc->num_of_fields_is_const)
+    gt_log_log("num of fields is a constant");
+  else
+    gt_log_log("num of fields is variable");
   if (!had_err)
     had_err = GT_ENCDESC_IO_ONE((encdesc->bits_per_field));
+  gt_log_log("num of bits per field: %u", encdesc->bits_per_field);
   return had_err;
 }
 
-static int io_field_sep_and_is_cons(DescField *field,
+static int io_field_sep_and_is_const(DescField *field,
                                     FILE *fp,
                                     GtIOFunc io_func,
                                     GtError *err)
@@ -52,7 +59,7 @@ static int io_field_sep_and_is_cons(DescField *field,
   int had_err = 0;
   had_err = GT_ENCDESC_IO_ONE(field->sep);
   if (!had_err)
-    had_err = GT_ENCDESC_IO_ONE(field->is_cons);
+    had_err = GT_ENCDESC_IO_ONE(field->is_const);
   return had_err;
 }
 
@@ -150,18 +157,18 @@ static int io_min_max_calc_ranges(DescField *field,
   }
 
   if (!had_err) {
-    had_err = GT_ENCDESC_IO_ONE(field->is_value_cons);
-    if (field->is_value_cons)
+    had_err = GT_ENCDESC_IO_ONE(field->is_value_const);
+    if (field->is_value_const)
       had_err = GT_ENCDESC_IO_ONE(field->global_value);
   }
   if (!had_err) {
-    if (field->is_value_cons) {
+    if (field->is_value_const) {
       gt_assert(field->min_value == field->global_value);
       gt_assert(field->max_value == field->global_value);
     }
-    had_err = GT_ENCDESC_IO_ONE(field->is_delta_cons);
+    had_err = GT_ENCDESC_IO_ONE(field->is_delta_const);
   }
-  if (!had_err && field->is_delta_cons) {
+  if (!had_err && field->is_delta_const) {
     had_err = GT_ENCDESC_IO_ONE(field->global_delta);
     gt_assert(field->min_delta == field->global_delta);
     gt_assert(field->max_delta == field->global_delta);
@@ -186,19 +193,19 @@ static void numeric_field_check_distri_dependence(DescField *field,
 {
   field->use_hc = false;
   if (field->use_delta_coding) {
-    if (!field->is_delta_cons &&
+    if (!field->is_delta_const &&
         field->delta_values_size <= GT_ENCDESC_MAX_NUM_VAL_HUF) {
       *needs_delta_dist = true;
       field->use_hc = true;
-      gt_log_log("delta_values_size: "GT_WU"", field->delta_values_size);
+      gt_log_log("delta_values_size: " GT_WU, field->delta_values_size);
     }
   }
   else {
-    if (!field->is_value_cons && field->num_values_size > 0 &&
+    if (!field->is_value_const && field->num_values_size > 0 &&
         field->num_values_size <= GT_ENCDESC_MAX_NUM_VAL_HUF) {
       *needs_value_dist = true;
       field->use_hc = true;
-      gt_log_log("num_values_size: "GT_WU"", field->num_values_size);
+      gt_log_log("num_values_size: " GT_WU, field->num_values_size);
     }
   }
 }
@@ -374,7 +381,17 @@ static int io_numeric_field_header(DescField *field, FILE *fp, GtIOFunc io_func,
 
   data.fp = fp;
 
-  had_err = io_zero_padding(field, fp, io_func, err);
+  had_err = GT_ENCDESC_IO_ONE(field->is_delta_positive);
+  if (field->is_delta_positive)
+    gt_log_log("strictly increasing");
+  if (!had_err) {
+    had_err = GT_ENCDESC_IO_ONE(field->is_delta_negative);
+    if (field->is_delta_negative)
+      gt_log_log("strictly decreasing");
+  }
+
+  if (!had_err)
+    had_err = io_zero_padding(field, fp, io_func, err);
   if (!had_err) {
     needs_zero_dist = zero_padding_needs_dist(field);
     had_err = io_min_max_calc_ranges(field, fp, io_func, err);
@@ -382,6 +399,10 @@ static int io_numeric_field_header(DescField *field, FILE *fp, GtIOFunc io_func,
   if (!had_err) {
     numeric_field_check_distri_dependence(field, &needs_delta_dist,
                                           &needs_value_dist);
+    if (field->use_hc)
+      gt_log_log("uses huffman");
+    if (field->use_delta_coding)
+      gt_log_log("uses delta values");
   }
 
   if (!had_err && needs_delta_dist) {
@@ -544,9 +565,9 @@ int encdesc_write_header(GtEncdesc *encdesc, FILE *fp, GtError *err)
        !had_err && cur_field_num < encdesc->num_of_fields;
        cur_field_num++) {
     cur_field = &encdesc->fields[cur_field_num];
-    had_err = io_field_sep_and_is_cons(cur_field, fp, gt_io_error_fwrite, err);
+    had_err = io_field_sep_and_is_const(cur_field, fp, gt_io_error_fwrite, err);
 
-    if (!had_err && cur_field->is_cons) {
+    if (!had_err && cur_field->is_const) {
       had_err = io_cons_field_header(cur_field, fp, gt_io_error_fwrite, err);
     }
     else if (!had_err) {
@@ -592,14 +613,16 @@ int encdesc_read_header(GtEncdesc *encdesc, FILE *fp, GtError *err)
     cur_field = &encdesc->fields[cur_field_num];
     /* cur_field->bits_per_num = 0; */
     /* cur_field->prev_value = 0; */
-    had_err = io_field_sep_and_is_cons(cur_field, fp, gt_io_error_fread, err);
+    had_err = io_field_sep_and_is_const(cur_field, fp, gt_io_error_fread, err);
 
-    if (!had_err && cur_field->is_cons) {
+    if (!had_err && cur_field->is_const) {
+      gt_log_log("field " GT_WU " is const", cur_field_num);
       had_err = io_cons_field_header(cur_field, fp, gt_io_error_fread, err);
     }
     else if (!had_err) {
       had_err = gt_io_error_fread_one(cur_field->is_numeric, fp, err);
       if (!had_err && cur_field->is_numeric) {
+        gt_log_log("field " GT_WU " is numeric", cur_field_num);
         had_err = io_numeric_field_header(cur_field, fp, gt_io_error_fread,
                                           err);
       }
@@ -627,5 +650,9 @@ int encdesc_read_header(GtEncdesc *encdesc, FILE *fp, GtError *err)
       }
     }
   }
+  if (!had_err)
+    had_err = gt_io_error_fread_one(encdesc->start_of_samplingtab, fp, err);
+  if (!had_err)
+    had_err = gt_io_error_fread_one(encdesc->start_of_encoding, fp, err);
   return had_err;
 }

@@ -51,27 +51,40 @@ struct GtBioseq {
   GtMD5Tab *md5_tab;
 };
 
-/* this global variables are necessary for the signal handler below */
+/* this global variable is necessary for the signal handler below */
 static const char *gt_bioseq_index_filename;
 
-static void remove_indexfile(const char *suffix)
+static void remove_indexfile(const char *suffix, const char *base)
 {
-  GtStr *fn = gt_str_new_cstr(gt_bioseq_index_filename);
+  GtStr *fn = gt_str_new_cstr(base);
   gt_str_append_cstr(fn, suffix);
   if (gt_file_exists(gt_str_get(fn)))
     gt_xunlink(gt_str_get(fn));
   gt_str_delete(fn);
 }
 
-/* removes the incomplete bioseq files */
-static void remove_bioseq_files(int sigraised)
+static void remove_bioseq_files(GtBioseq *bs)
 {
-  remove_indexfile(GT_ENCSEQFILESUFFIX);
-  remove_indexfile(GT_DESTABFILESUFFIX);
-  remove_indexfile(GT_SSPTABFILESUFFIX);
-  remove_indexfile(GT_SDSTABFILESUFFIX);
-  remove_indexfile(GT_MD5TABFILESUFFIX);
-  remove_indexfile(GT_OISTABFILESUFFIX);
+  GtStr *base = gt_str_new_cstr("stdin.");
+  gt_str_append_uword(base, (GtUword) bs);
+  remove_indexfile(GT_ENCSEQFILESUFFIX, gt_str_get(base));
+  remove_indexfile(GT_DESTABFILESUFFIX, gt_str_get(base));
+  remove_indexfile(GT_SSPTABFILESUFFIX, gt_str_get(base));
+  remove_indexfile(GT_SDSTABFILESUFFIX, gt_str_get(base));
+  remove_indexfile(GT_MD5TABFILESUFFIX, gt_str_get(base));
+  remove_indexfile(GT_OISTABFILESUFFIX, gt_str_get(base));
+  gt_str_delete(base);
+}
+
+/* removes the incomplete bioseq files */
+static void remove_bioseq_files_sig(int sigraised)
+{
+  remove_indexfile(GT_ENCSEQFILESUFFIX, gt_bioseq_index_filename);
+  remove_indexfile(GT_DESTABFILESUFFIX, gt_bioseq_index_filename);
+  remove_indexfile(GT_SSPTABFILESUFFIX, gt_bioseq_index_filename);
+  remove_indexfile(GT_SDSTABFILESUFFIX, gt_bioseq_index_filename);
+  remove_indexfile(GT_MD5TABFILESUFFIX, gt_bioseq_index_filename);
+  remove_indexfile(GT_OISTABFILESUFFIX, gt_bioseq_index_filename);
   (void) gt_xsignal(sigraised, SIG_DFL);
   gt_xraise(sigraised);
 }
@@ -89,7 +102,7 @@ static int construct_bioseq_files(GtBioseq *bs, GtStr *bioseq_indexname,
   /* register the signal handler to remove incomplete files upon termination */
   if (!bs->use_stdin) {
     gt_bioseq_index_filename = gt_str_get(bs->sequence_file);
-    gt_sig_register_all(remove_bioseq_files);
+    gt_sig_register_all(remove_bioseq_files_sig);
   }
 
   /* if stdin is used as input, we need to create a tempfile containing the
@@ -144,9 +157,11 @@ static int bioseq_fill(GtBioseq *bs, bool recreate, GtError *err)
 
   gt_assert(!bs->encseq);
 
-  if (bs->use_stdin)
-    bioseq_basename = gt_str_new_cstr("stdin");
-  else
+  if (bs->use_stdin) {
+    bioseq_basename = gt_str_new_cstr("stdin.");
+    /* assign a unique name */
+    gt_str_append_uword(bioseq_basename, (GtUword) bs);
+  } else
     bioseq_basename = bs->sequence_file;
 
   /* construct file names */
@@ -271,6 +286,8 @@ void gt_bioseq_delete(GtBioseq *bs)
     gt_free(bs->descriptions);
   }
   gt_encseq_delete(bs->encseq);
+  if (bs->use_stdin)
+    remove_bioseq_files(bs);
   gt_free(bs);
 }
 
@@ -332,6 +349,20 @@ char gt_bioseq_get_char(const GtBioseq *bs, GtUword index,
   startpos = gt_encseq_seqstartpos(bs->encseq, index);
   return gt_encseq_get_decoded_char(bs->encseq, startpos + position,
                                     GT_READMODE_FORWARD);
+}
+
+bool gt_bioseq_seq_has_wildcards(const GtBioseq* bioseq,
+                                 GtUword idx) {
+  bool has_wildcard = false;
+  GtUword length = gt_encseq_seqlength(bioseq->encseq, idx),
+          seqstart = gt_encseq_seqstartpos(bioseq->encseq, idx),
+          i;
+  for (i = 0; !has_wildcard && i < length; ++i) {
+    has_wildcard = gt_encseq_position_is_wildcard(bioseq->encseq,
+                                                  seqstart + i,
+                                                  GT_READMODE_FORWARD);
+  }
+  return has_wildcard;
 }
 
 char* gt_bioseq_get_sequence(const GtBioseq *bs, GtUword idx)
@@ -413,7 +444,7 @@ const char* gt_bioseq_filename(const GtBioseq *bs)
 }
 
 GtUword gt_bioseq_get_sequence_length(const GtBioseq *bs,
-                                            GtUword idx)
+                                      GtUword idx)
 {
   gt_assert(bs);
   return gt_encseq_seqlength(bs->encseq, idx);

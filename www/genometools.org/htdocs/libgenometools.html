@@ -2129,6 +2129,16 @@ Returns true iff <code>pos</code> is a separator position of <code>encseq</code>
    read in the direction as indicated by <code>readmode</code>.
 </p>
 <hr>
+<a name="gt_encseq_position_is_wildcard"></a>
+
+<code>bool               gt_encseq_position_is_wildcard(const GtEncseq *encseq,
+                                                 GtUword pos,
+                                                 GtReadmode readmode)</code>
+<p>
+Returns true iff <code>pos</code> is a wildcard in <code>encseq</code>
+   read in the direction as indicated by <code>readmode</code>.
+</p>
+<hr>
 <a name="gt_encseq_ref"></a>
 
 <code>GtEncseq*          gt_encseq_ref(GtEncseq *encseq)</code>
@@ -3583,8 +3593,8 @@ Return <code>true</code> if <code>feature_node</code> has a defined source (i.e.
 
 <code>const char*     gt_feature_node_get_type(const GtFeatureNode *feature_node)</code>
 <p>
-Return the type of <code>feature_node</code>.
-   Corresponds to column 3 of GFF3 feature lines.
+Return the type of <code>feature_node</code>. Corresponds to column 3 of GFF3 feature
+   lines.
 </p>
 <hr>
 <a name="gt_feature_node_set_type"></a>
@@ -3605,7 +3615,7 @@ Return <code>true</code> if <code>feature_node</code> has given <code>type</code
 <hr>
 <a name="gt_feature_node_number_of_children"></a>
 
-<code>GtUword   gt_feature_node_number_of_children(const GtFeatureNode
+<code>GtUword         gt_feature_node_number_of_children(const GtFeatureNode
                                                   *feature_node)</code>
 <p>
 Return the number of children for given <code>feature_node</code>.
@@ -3613,7 +3623,7 @@ Return the number of children for given <code>feature_node</code>.
 <hr>
 <a name="gt_feature_node_number_of_children_of_type"></a>
 
-<code>GtUword   gt_feature_node_number_of_children_of_type(const GtFeatureNode
+<code>GtUword         gt_feature_node_number_of_children_of_type(const GtFeatureNode
                                                           *parent,
                                                           const GtFeatureNode
                                                           *node)</code>
@@ -3658,8 +3668,8 @@ Unset the score of <code>feature_node</code>.
 
 <code>GtStrand        gt_feature_node_get_strand(const GtFeatureNode *feature_node)</code>
 <p>
-Return the strand of <code>feature_node</code>.
-   Corresponds to column 7 of GFF3 feature lines.
+Return the strand of <code>feature_node</code>. Corresponds to column 7 of GFF3
+   feature lines.
 </p>
 <hr>
 <a name="gt_feature_node_set_strand"></a>
@@ -3674,8 +3684,8 @@ Set the strand of <code>feature_node</code> to <code>strand</code>.
 
 <code>GtPhase         gt_feature_node_get_phase(const GtFeatureNode *feature_node)</code>
 <p>
-Return the phase of <code>feature_node</code>.
-   Corresponds to column 8 of GFF3 feature lines.
+Return the phase of <code>feature_node</code>. Corresponds to column 8 of GFF3 feature
+   lines.
 </p>
 <hr>
 <a name="gt_feature_node_set_phase"></a>
@@ -4375,7 +4385,7 @@ Return the genomic range of of <code>genome_node</code>.
 <hr>
 <a name="gt_genome_node_get_start"></a>
 
-<code>GtUword  gt_genome_node_get_start(GtGenomeNode *genome_node)</code>
+<code>GtUword        gt_genome_node_get_start(GtGenomeNode *genome_node)</code>
 <p>
 Return the start of <code>genome_node</code>.
    Corresponds to column 4 of GFF3 feature lines.
@@ -4383,7 +4393,7 @@ Return the start of <code>genome_node</code>.
 <hr>
 <a name="gt_genome_node_get_end"></a>
 
-<code>GtUword  gt_genome_node_get_end(GtGenomeNode *genome_node)</code>
+<code>GtUword        gt_genome_node_get_end(GtGenomeNode *genome_node)</code>
 <p>
 Return the end of <code>genome_node</code>.
    Corresponds to column 5 of GFF3 feature lines.
@@ -4391,7 +4401,7 @@ Return the end of <code>genome_node</code>.
 <hr>
 <a name="gt_genome_node_get_length"></a>
 
-<code>GtUword  gt_genome_node_get_length(GtGenomeNode *genome_node)</code>
+<code>GtUword        gt_genome_node_get_length(GtGenomeNode *genome_node)</code>
 <p>
 Return the length of <code>genome_node</code>.
    Computed from column 4 and 5 of GFF3 feature lines.
@@ -7614,6 +7624,16 @@ Use <code>splitter</code> to split <code>string</code> of given <code>length</co
    <code>delimiter</code>. Note that <code>string</code> is modified in the splitting process!
 </p>
 <hr>
+<a name="gt_splitter_split_non_empty"></a>
+
+<code>void           gt_splitter_split_non_empty(GtSplitter *s, char *string,
+                                          GtUword length, char delimiter)</code>
+<p>
+Use <code>splitter</code> to split <code>string</code> of given <code>length</code> into tokens delimited by
+   <code>delimiter</code>. Empty tokens will be ignored. Note that <code>string</code> is modified in
+   the splitting process!
+</p>
+<hr>
 <a name="gt_splitter_get_tokens"></a>
 
 <code>char**         gt_splitter_get_tokens(GtSplitter *splitter)</code>
@@ -7638,7 +7658,7 @@ Reset the <code>splitter</code>.
 <hr>
 <a name="gt_splitter_size"></a>
 
-<code>GtUword  gt_splitter_size(GtSplitter *splitter)</code>
+<code>GtUword        gt_splitter_size(GtSplitter *splitter)</code>
 <p>
 Return the number of tokens in <code>splitter</code>.
 </p>
@@ -10752,6 +10772,8 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
 
   <a href="#gt_encseq_position_is_separator"><code>gt_encseq_position_is_separator</code></a><br>
 
+  <a href="#gt_encseq_position_is_wildcard"><code>gt_encseq_position_is_wildcard</code></a><br>
+
   <a href="#gt_encseq_reader_delete"><code>gt_encseq_reader_delete</code></a><br>
 
   <a href="#gt_encseq_reader_next_decoded_char"><code>gt_encseq_reader_next_decoded_char</code></a><br>
@@ -11724,6 +11746,8 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
 
   <a href="#gt_splitter_split"><code>gt_splitter_split</code></a><br>
 
+  <a href="#gt_splitter_split_non_empty"><code>gt_splitter_split_non_empty</code></a><br>
+
   <a href="#gt_stat_stream_new"><code>gt_stat_stream_new</code></a><br>
 
   <a href="#gt_stat_stream_show_stats"><code>gt_stat_stream_show_stats</code></a><br>
@@ -12041,7 +12065,7 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
 <div id="footer">
 Copyright &copy; 2008-2013
 The <i>GenomeTools</i> authors.
-Last update: 2015-04-19
+Last update: 2015-06-22
 </div>
 </div>
 <!-- Piwik -->

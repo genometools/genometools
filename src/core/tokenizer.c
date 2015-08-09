@@ -72,7 +72,8 @@ GtStr* gt_tokenizer_get_token(GtTokenizer *t)
           break;
         }
       }
-    } /* skip blanks */
+    }
+    /* skip blanks */
     while (((rval = gt_io_get_char(t->io, &c)) != -1) && c == ' ');
     if (rval == -1)
       has_eof = true;

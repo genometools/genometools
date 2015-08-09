@@ -100,7 +100,7 @@ void           gt_rbtree_iter_reset_from_last(GtRBTreeIter *trav);
 void*          gt_rbtree_iter_next(GtRBTreeIter *trav);
 /* Return previous (smaller) key */
 void*          gt_rbtree_iter_prev(GtRBTreeIter *trav);
-/* Returns data of the current leaf the iterator <trav> is positioned on. */
+/* Returns data of the current node the iterator <trav> is positioned on. */
 void*          gt_rbtree_iter_data (GtRBTreeIter *trav);
 /* free all memory of <trav> */
 void           gt_rbtree_iter_delete(GtRBTreeIter *trav);

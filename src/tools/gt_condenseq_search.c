@@ -32,6 +32,7 @@
 #include "core/unused_api.h"
 
 #include "tools/gt_condenseq_blast.h"
+#include "tools/gt_condenseq_hmmsearch.h"
 
 #include "tools/gt_condenseq_search.h"
 
@@ -40,6 +41,8 @@ static void* gt_condenseq_search_toolbox_new(void)
   GtToolbox *condenseq_search_toolbox = gt_toolbox_new();
   gt_toolbox_add_tool(condenseq_search_toolbox,
                       "blast", gt_condenseq_blast());
+  gt_toolbox_add_tool(condenseq_search_toolbox,
+                      "hmmsearch", gt_condenseq_hmmsearch());
   return condenseq_search_toolbox;
 }
 
@@ -110,57 +113,4 @@ GtTool* gt_condenseq_search(void)
                      gt_condenseq_search_option_parser_new,
                      NULL,
                      gt_condenseq_search_runner);
-}
-
-struct GtCondenseqSearchInfo {
-  GtStr *dbpath;
-  bool   verbose;
-};
-
-GtCondenseqSearchInfo *gt_condenseq_search_info_new(void)
-{
-  GtCondenseqSearchInfo *csi = gt_malloc(sizeof(*csi));
-  csi->dbpath = gt_str_new();
-  return csi;
-}
-
-void gt_condenseq_search_info_delete(
-                                   GtCondenseqSearchInfo *condenseq_search_info)
-{
-  if (condenseq_search_info != NULL) {
-    gt_str_delete(condenseq_search_info->dbpath);
-    gt_free(condenseq_search_info);
-  }
-}
-
-GtCondenseq *gt_condenseq_search_info_read_condenseq(
-                             const GtCondenseqSearchInfo *condenseq_search_info,
-                             GtLogger *logger,
-                             GtError *err)
-{
-  return gt_condenseq_new_from_file(gt_str_get(condenseq_search_info->dbpath),
-                                    logger, err);
-}
-
-bool gt_condenseq_search_info_verbose(
-                             const GtCondenseqSearchInfo *condenseq_search_info)
-{
-  return condenseq_search_info->verbose;
-}
-
-void gt_condenseq_search_register_options(
-                                   GtCondenseqSearchInfo *condenseq_search_info,
-                                   GtOptionParser *option_parser)
-{
-  GtOption *option;
-   /* -db */
-  option = gt_option_new_filename("db", "path of (compressed) fasta database",
-                                  condenseq_search_info->dbpath);
-  gt_option_is_mandatory(option);
-  gt_option_parser_add_option(option_parser, option);
-
-  /* -verbose */
-  option = gt_option_new_bool("verbose", "verbose output",
-                              &condenseq_search_info->verbose, false);
-  gt_option_parser_add_option(option_parser, option);
 }

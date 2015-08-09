@@ -110,7 +110,7 @@ static GtOptionParser* gt_seqstat_option_parser_new(void *tool_arguments)
 
   optioncontigs = gt_option_new_bool("contigs",
                                    "summary of contigs set statistics",
-                                   &arguments->docstats,false);
+                                   &arguments->docstats,true);
   gt_option_parser_add_option(op, optioncontigs);
 
   optionastretch = gt_option_new_bool("astretch",

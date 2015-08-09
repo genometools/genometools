@@ -20,6 +20,7 @@
 #include "core/compat.h"
 #include "core/cstr_table_api.h"
 #include "core/disc_distri_api.h"
+#include "core/string_distri.h"
 #include "core/unused_api.h"
 #include "extended/feature_node.h"
 #include "extended/node_visitor_api.h"
@@ -46,6 +47,7 @@ struct GtStatVisitor {
                *intron_length_distribution,
                *cds_length_distribution;
   GtCstrTable *used_sources;
+  GtStringDistri *type_counts;
 };
 
 #define stat_visitor_cast(GV)\
@@ -61,6 +63,7 @@ static void stat_visitor_free(GtNodeVisitor *nv)
   gt_disc_distri_delete(sv->exon_length_distribution);
   gt_disc_distri_delete(sv->gene_score_distribution);
   gt_disc_distri_delete(sv->gene_length_distribution);
+  gt_string_distri_delete(sv->type_counts);
 }
 
 static int add_exon_or_cds_number(GtFeatureNode *fn, void *data,
@@ -122,6 +125,7 @@ static void compute_type_statistics(GtFeatureNode *fn, GtStatVisitor *sv)
     sv->number_of_CDSs++;
   }
   else if (gt_feature_node_has_type(fn, gt_ft_intron)) {
+    gt_string_distri_add(sv->type_counts, gt_feature_node_get_type(fn));
     if (sv->intron_length_distribution) {
       range = gt_genome_node_get_range((GtGenomeNode*) fn);
       gt_disc_distri_add(sv->intron_length_distribution,
@@ -130,6 +134,8 @@ static void compute_type_statistics(GtFeatureNode *fn, GtStatVisitor *sv)
   }
   else if (gt_feature_node_has_type(fn, gt_ft_LTR_retrotransposon)) {
     sv->number_of_LTR_retrotransposons++;
+  } else {
+    gt_string_distri_add(sv->type_counts, gt_feature_node_get_type(fn));
   }
 }
 
@@ -228,9 +234,19 @@ GtNodeVisitor* gt_stat_visitor_new(bool gene_length_distri,
     sv->intron_length_distribution = gt_disc_distri_new();
   if (cds_length_distri)
     sv->cds_length_distribution = gt_disc_distri_new();
+  sv->type_counts = gt_string_distri_new();
   if (used_sources)
     sv->used_sources = gt_cstr_table_new();
   return nv;
+}
+
+static void gt_stat_print_string_distri_item(const char *string,
+                                             GtUword occurrences,
+                                             GT_UNUSED double probability,
+                                             void *data)
+{
+  GtFile *outfp = (GtFile*) data;
+  gt_file_xprintf(outfp, "%ss: "GT_WU"\n", string, occurrences);
 }
 
 void gt_stat_visitor_show_stats(GtNodeVisitor *nv, GtFile *outfp)
@@ -266,6 +282,8 @@ void gt_stat_visitor_show_stats(GtNodeVisitor *nv, GtFile *outfp)
     gt_file_xprintf(outfp, "LTR_retrotransposons: "GT_WU"\n",
                     sv->number_of_LTR_retrotransposons);
   }
+  gt_string_distri_foreach(sv->type_counts, gt_stat_print_string_distri_item,
+                           outfp);
   if (sv->gene_length_distribution) {
     gt_file_xprintf(outfp, "gene length distribution:\n");
     gt_disc_distri_show(sv->gene_length_distribution, outfp);

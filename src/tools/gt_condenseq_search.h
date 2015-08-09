@@ -26,28 +26,4 @@
 /* the condenseq_search tool */
 GtTool* gt_condenseq_search(void);
 
-typedef struct GtCondenseqSearchInfo GtCondenseqSearchInfo;
-
-/* Returns a new <GtCondenseqSearchInfo> object */
-GtCondenseqSearchInfo* gt_condenseq_search_info_new(void);
-
-/* Deletes <condenseq_search_info> and frees all associated memory. */
-void                   gt_condenseq_search_info_delete(
-                                  GtCondenseqSearchInfo *condenseq_search_info);
-
-/* register the options -db for the mandatory input archive and -verbose for
-   verbose output */
-void                   gt_condenseq_search_register_options(
-                                   GtCondenseqSearchInfo *condenseq_search_info,
-                                   GtOptionParser *option_parser);
-
-/* Returns the <GtCondenseq> object read from file given by -db option */
-GtCondenseq*           gt_condenseq_search_info_read_condenseq(
-                            const GtCondenseqSearchInfo *condenseq_search_info,
-                            GtLogger *logger,
-                            GtError *err);
-
-/* Returns true if -verbose was set to true/yes */
-bool                   gt_condenseq_search_info_verbose(
-                            const GtCondenseqSearchInfo *condenseq_search_info);
 #endif

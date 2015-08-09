@@ -233,9 +233,9 @@ static int gt_compreads_decompress_runner(GT_UNUSED int argc,
             && arguments->rng.end != GT_UNDEF_UWORD) {
           if (arguments->rng.start >= gt_hcr_decoder_num_of_reads(hcrd)
                 || arguments->rng.end >= gt_hcr_decoder_num_of_reads(hcrd)) {
-            gt_error_set(err, "range "GT_WU"-"GT_WU" includes a read "
-                              "number exceeding "
-                              "the total number of reads ("GT_WU")",
+            gt_error_set(err, "range " GT_WU "-" GT_WU " includes a read "
+                              "number exceeding the total number of reads ("
+                              GT_WU ")",
                               arguments->rng.start,
                               arguments->rng.end,
                               gt_hcr_decoder_num_of_reads(hcrd));

@@ -39,3 +39,10 @@ void gt_extract_feature_stream_retain_id_attributes(GtExtractFeatureStream *es)
   gt_extract_feature_visitor_retain_id_attributes((GtExtractFeatureVisitor*)
                          gt_visitor_stream_get_visitor((GtVisitorStream*) es));
 }
+
+void gt_extract_feature_stream_show_coords(GtExtractFeatureStream *es)
+{
+  gt_assert(es);
+  gt_extract_feature_visitor_show_coords((GtExtractFeatureVisitor*)
+                         gt_visitor_stream_get_visitor((GtVisitorStream*) es));
+}

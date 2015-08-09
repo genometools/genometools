@@ -33,7 +33,7 @@ void            gt_string_distri_add(GtStringDistri*, const char*);
 /* <string_distri> must contain at least one element with given <key>. */
 void            gt_string_distri_sub(GtStringDistri *string_distri,
                                      const char *key);
-GtUword   gt_string_distri_get(const GtStringDistri*, const char*);
+GtUword         gt_string_distri_get(const GtStringDistri*, const char*);
 /* return probability */
 double          gt_string_distri_get_prob(const GtStringDistri*, const char*);
 void            gt_string_distri_foreach(const GtStringDistri*,

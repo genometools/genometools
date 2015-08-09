@@ -35,6 +35,7 @@
 #include "core/thread_api.h"
 #include "core/types_api.h"
 #include "core/undef_api.h"
+#include "core/warning_api.h"
 #include "extended/feature_type.h"
 #include "extended/genome_node.h"
 #include "extended/node_stream_api.h"
@@ -1754,6 +1755,13 @@ GtNodeStream* gt_ltrharvest_stream_new(GtStr *str_indexname,
   }
   /* get encseq associated with suffix array */
   ltrh_stream->encseq = gt_encseqSequentialsuffixarrayreader(ltrh_stream->ssar);
+  /* let's print a warning if a mirrored index is used, this might have
+     probably unintended effects if the user is reusing indexes from
+     TIRvish */
+  if (gt_encseq_is_mirrored(ltrh_stream->encseq)) {
+    gt_warning("running LTRharvest on a mirrored index, "
+               "results may be duplicated");
+  }
   max_contiglength = gt_encseq_max_seq_length(ltrh_stream->encseq);
   ltrh_stream->repeatinfo.dmax = MIN(maxdistance,max_contiglength);
   ltrh_stream->repeatinfo.dmin = mindistance;

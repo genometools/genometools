@@ -85,7 +85,7 @@ typedef struct {
   GtArray *fwd_hits,
           *rev_hits;
   GtUword last_array_size_fwd,
-                last_array_size_rev;
+          last_array_size_rev;
   double best_rev,
          best_fwd;
   char *modelname;
@@ -263,11 +263,10 @@ static inline int pdom_parser_get_next_line(char *buf, FILE *instream,
 }
 
 #ifndef _WIN32
-static int gt_ltrdigest_pdom_visitor_parse_statistics(GT_UNUSED
-                                                      GtLTRdigestPdomVisitor
-                                                                            *lv,
-                                                     char *buf, FILE *instream,
-                                                     GtError *err)
+static int gt_ltrdigest_pdom_visitor_parse_statistics(
+                                           GT_UNUSED GtLTRdigestPdomVisitor *lv,
+                                           char *buf, FILE *instream,
+                                           GtError *err)
 {
   int had_err = 0;
   gt_assert(lv && instream);
@@ -290,7 +289,7 @@ static int gt_ltrdigest_pdom_visitor_parse_scores(GT_UNUSED
   had_err = pdom_parser_get_next_line(buf, instream, err);
   gt_assert(had_err || buf != NULL);
   if (!had_err && strncmp("Scores", buf, (size_t) 6) != 0) {
-    gt_error_set(err, "expected 'Scores:' at beginning of new scores "
+    gt_error_set(err, "expected 'Scores' at beginning of new scores "
                       "section, '%s' read instead", buf);
     had_err = -1;
   }
@@ -322,13 +321,12 @@ GT_UNUSED static void gt_ltrdigest_pdom_visitor_add_aaseq(const char *str,
 }
 
 #ifndef _WIN32
-static int gt_ltrdigest_pdom_visitor_parse_alignments(GT_UNUSED
-                                                      GtLTRdigestPdomVisitor
-                                                                            *lv,
-                                                     GtHMMERParseStatus *status,
-                                                     char *buf,
-                                                     FILE *instream,
-                                                     GtError *err)
+static int gt_ltrdigest_pdom_visitor_parse_alignments(
+                                           GT_UNUSED GtLTRdigestPdomVisitor *lv,
+                                           GtHMMERParseStatus *status,
+                                           char *buf,
+                                           FILE *instream,
+                                           GtError *err)
 {
   int had_err = 0, cur_domain = GT_UNDEF_INT, line = GT_UNDEF_INT;
   int mod_val = 4;
@@ -391,8 +389,8 @@ static int gt_ltrdigest_pdom_visitor_parse_alignments(GT_UNUSED
 #endif
 
 #ifndef _WIN32
-static int gt_ltrdigest_pdom_visitor_parse_domainhits(GtLTRdigestPdomVisitor
-                                                                            *lv,
+static int gt_ltrdigest_pdom_visitor_parse_domainhits(
+                                                     GtLTRdigestPdomVisitor *lv,
                                                      GtHMMERParseStatus *status,
                                                      char *buf,
                                                      FILE *instream,
@@ -859,8 +857,6 @@ static int gt_ltrdigest_pdom_visitor_feature_node(GtNodeVisitor *nv,
         int pid, pc[2], cp[2];
         GT_UNUSED int rval;
 
-        (void) signal(SIGCHLD, SIG_IGN); /* XXX: for now, ignore child's
-                                                 exit status */
         rval = pipe(pc);
         gt_assert(rval == 0);
         rval = pipe(cp);
@@ -905,6 +901,7 @@ static int gt_ltrdigest_pdom_visitor_feature_node(GtNodeVisitor *nv,
             had_err = gt_ltrdigest_pdom_visitor_parse_output(lv, pstatus,
                                                              instream, err);
             (void) fclose(instream);
+            wait(NULL);
             if (!had_err)
               had_err = gt_ltrdigest_pdom_visitor_process_hits(lv, pstatus,
                                                                err);
@@ -917,8 +914,9 @@ static int gt_ltrdigest_pdom_visitor_feature_node(GtNodeVisitor *nv,
   #endif
       }
     } else {
-      gt_warning("LTR_retrotransposon (%s, line %u) is too short to be "
+      gt_warning("%s (%s, line %u) is too short to be "
                  "translated (" GT_WU " nt), skipped domain search",
+            gt_feature_node_get_type(lv->ltr_retrotrans),
             gt_genome_node_get_filename((GtGenomeNode*) lv->ltr_retrotrans),
             gt_genome_node_get_line_number((GtGenomeNode*) lv->ltr_retrotrans),
             gt_str_length(seq));
@@ -1043,7 +1041,7 @@ GtNodeVisitor* gt_ltrdigest_pdom_visitor_new(GtPdomModelSet *model,
     }
     gt_str_append_cstr(cmd, " ");
     gt_str_append_cstr(cmd, gt_pdom_model_set_get_filename(model));
-    gt_str_append_cstr(cmd, " -");
+    gt_str_append_cstr(cmd, " -"); /* stdin */
     lv->cmdline = cmd;
     lv->args = gt_cstr_split(gt_str_get(lv->cmdline), ' ');
     gt_log_log("HMMER cmdline: %s", gt_str_get(cmd));

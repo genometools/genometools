@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2012-2013 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
+  Copyright (c) 2012-2015 Sascha Steinbiss <sascha@steinbiss.name>
   Copyright (c) 2012      Manuela Beckert <9beckert@informatik.uni-hamburg.de>
   Copyright (c) 2012      Dorle Osterode <9osterod@informatik.uni-hamburg.de>
   Copyright (c) 2012-2013 Center for Bioinformatics, University of Hamburg
@@ -108,14 +108,12 @@ struct GtTIRStream
   const TIRPair**             tir_pairs;
   GtArrayTIRPair              first_pairs;
   GtTIRStreamState            state;
-
-  GtUword               num_of_tirs,
+  GtUword                     num_of_tirs,
                               cur_elem_index,
                               prev_seqnum;
-
   /* options */
   GtStr                       *str_indexname;
-  GtUword               min_seed_length,
+  GtUword                     min_seed_length,
                               min_TIR_length,
                               max_TIR_length,
                               min_TIR_distance,
@@ -125,7 +123,10 @@ struct GtTIRStream
   double                      similarity_threshold;
   bool                        no_overlaps;
   bool                        best_overlaps;
-  GtUword               min_TSD_length,
+  bool                        longest_overlaps;
+  bool                        output_seqids,
+                              output_md5;
+  GtUword                     min_TSD_length,
                               max_TSD_length,
                               vicinity;
 };
@@ -227,18 +228,19 @@ static inline bool tirboundaries_overlap(GtRange *a, TIRPair *b) {
 }
 
 static void gt_tir_remove_overlaps(GtArrayTIRPair *arrayTIRPair,
-                                   bool nooverlapallowed)
+                                   bool nooverlapallowed, bool keeplongest)
 {
   GtUword i;
-  TIRPair *boundaries, *oldboundaries, *maxsimboundaries = NULL;
+  TIRPair *boundaries, *oldboundaries, *maxsimboundaries = NULL,
+          *maxlenboundaries = NULL;
   GtRange refrng;
   gt_assert(arrayTIRPair != NULL);
 
   if (arrayTIRPair->spaceTIRPair == NULL)
     return;
   gt_assert(arrayTIRPair->spaceTIRPair != NULL);
-
-  maxsimboundaries = oldboundaries = arrayTIRPair->spaceTIRPair;
+  maxlenboundaries = maxsimboundaries = oldboundaries =
+                                                     arrayTIRPair->spaceTIRPair;
   refrng.start = oldboundaries->left_tir_start;
   refrng.end = oldboundaries->right_transformed_end;
   for (i = 1UL; i < arrayTIRPair->nextfreeTIRPair; i++) {
@@ -254,12 +256,24 @@ static void gt_tir_remove_overlaps(GtArrayTIRPair *arrayTIRPair,
         oldboundaries->skip = true;
         boundaries->skip = true;
       } else {
-        if (gt_double_smaller_double(maxsimboundaries->similarity,
-                                     boundaries->similarity)) {
-          maxsimboundaries->skip = true;
-          maxsimboundaries = boundaries;
+        if (keeplongest) {
+          if (gt_double_smaller_double(maxlenboundaries->right_tir_end
+                                             - maxlenboundaries->left_tir_start,
+                                       boundaries->right_tir_end
+                                             - boundaries->left_tir_start)) {
+            maxlenboundaries->skip = true;
+            maxlenboundaries = boundaries;
+          } else {
+            boundaries->skip = true;
+          }
         } else {
-          boundaries->skip = true;
+          if (gt_double_smaller_double(maxsimboundaries->similarity,
+                                       boundaries->similarity)) {
+            maxsimboundaries->skip = true;
+            maxsimboundaries = boundaries;
+          } else {
+            boundaries->skip = true;
+          }
         }
       }
     } else {
@@ -268,6 +282,7 @@ static void gt_tir_remove_overlaps(GtArrayTIRPair *arrayTIRPair,
       refrng.start = boundaries->left_tir_start;
       refrng.end = boundaries->right_transformed_end;
       maxsimboundaries = boundaries;
+      maxlenboundaries = boundaries;
     }
   }
 }
@@ -363,15 +378,10 @@ static void gt_tir_find_best_TSD(TSDinfo *info, GtTIRStream *tir_stream,
 static int gt_tir_search_for_TSDs(GtTIRStream *tir_stream, TIRPair *tir_pair,
                                   const GtEncseq *encseq, GtError *err)
 {
-  GtUword start_left_tir,
-                end_left_tir,
-                start_right_tir,
-                end_right_tir,
-                left_length,
-                right_length,
-                seq_start_pos1,
-                seq_end_pos2,
-                seq_length;
+  GtUword start_left_tir,  end_left_tir,
+          start_right_tir, end_right_tir,
+          left_length, right_length,
+          seq_start_pos1, seq_end_pos2, seq_length;
   GtUword contignumber = tir_pair->contignumber;
   TSDinfo info;
   int had_err = 0;
@@ -485,8 +495,8 @@ static int gt_tir_searchforTIRs(GtTIRStream *tir_stream,
     alilen = tir_stream->seedinfo.max_tir_length - seedptr->len;
     seqstart1 = gt_encseq_seqstartpos(tir_stream->encseq,
                                        seedptr->contignumber);
-    seqend1 = seqstart1
-                + gt_encseq_seqlength(tir_stream->encseq,seedptr->contignumber);
+    seqend1 = seqstart1 + gt_encseq_seqlength(tir_stream->encseq,
+                                              seedptr->contignumber);
     seqstart2 = GT_REVERSEPOS(total_length, seqend1);
     seqend2 = GT_REVERSEPOS(total_length, seqstart1);
 
@@ -502,6 +512,7 @@ static int gt_tir_searchforTIRs(GtTIRStream *tir_stream,
                                      seedptr->pos1 - alilen);
         gt_seqabstract_reinit_encseq(sa_vseq, encseq, alilen,
                                      seedptr->pos2 - alilen);
+
       } else
       {
         GtUword maxleft = MIN(seedptr->pos1 - seqstart1,
@@ -559,11 +570,14 @@ static int gt_tir_searchforTIRs(GtTIRStream *tir_stream,
     }
 
     /* re-check length constraints */
-    if (seedptr->pos1 + seedptr->len - 1 + xdropbest_right.ivalue -
-        seedptr->pos2 - xdropbest_left.jvalue + 1 < tir_stream->min_TIR_length
-        || seedptr->pos1 + seedptr->len - 1 + xdropbest_right.ivalue -
-        seedptr->pos2 - xdropbest_left.jvalue + 1 < tir_stream->min_TIR_length)
+    if ((seedptr->pos1 + seedptr->len - 1 + xdropbest_right.ivalue) -
+      (seedptr->pos1 - xdropbest_left.jvalue + 1) < tir_stream->min_TIR_length
+      || (seedptr->pos1 + seedptr->len - 1 + xdropbest_right.ivalue) -
+      (seedptr->pos1 - xdropbest_left.jvalue + 1) > tir_stream->max_TIR_length)
+    {
+      /*  gt_log_log("ext: out!"); */
       continue;
+    }
 
     GT_GETNEXTFREEINARRAY(pair, &tir_stream->first_pairs, TIRPair, 256);
     /* Store positions for the found TIR */
@@ -586,16 +600,26 @@ static int gt_tir_searchforTIRs(GtTIRStream *tir_stream,
     /* TSDs */
     gt_tir_search_for_TSDs(tir_stream, pair, encseq, err);
 
-    /* determine and filter by similarity */
-    ulen = pair->left_tir_end - pair->left_tir_start + 1;
-    vlen = pair->right_tir_end - pair->right_tir_start + 1;
-    gt_seqabstract_reinit_encseq(sa_useq, encseq, ulen, pair->left_tir_start);
-    gt_seqabstract_reinit_encseq(sa_vseq, encseq, vlen, pair->right_tir_start);
-    edist = greedyunitedist(frontresource, sa_useq, sa_vseq);
-    pair->similarity = 100.0 * (1.0 - (double) edist/MAX(ulen, vlen));
-    if (gt_double_smaller_double(pair->similarity,
-                                 tir_stream->similarity_threshold)) {
+    /* make sure the TIR coords are still OK */
+    if (!pair->skip && (pair->left_tir_end <= pair->left_tir_start ||
+        pair->right_tir_end <= pair->right_tir_start)) {
       pair->skip = true;
+    }
+    if (!pair->skip) {
+      /* determine and filter by similarity */
+      ulen = pair->left_tir_end - pair->left_tir_start;
+      vlen = pair->right_tir_end - pair->right_tir_start;
+      gt_seqabstract_reinit_encseq(sa_useq, encseq, ulen,
+                                   pair->left_tir_start);
+      gt_seqabstract_reinit_encseq(sa_vseq, encseq, vlen,
+                                   pair->right_tir_start);
+      edist = greedyunitedist(frontresource, sa_useq, sa_vseq);
+      pair->similarity = 100.0 * (1.0 - (double) edist/MAX(ulen, vlen));
+      /* gt_log_log("edist "GT_WU", sim %f", edist, pair->similarity); */
+      if (gt_double_smaller_double(pair->similarity,
+                                   tir_stream->similarity_threshold)) {
+        pair->skip = true;
+      }
     }
   }
 
@@ -610,8 +634,10 @@ static int gt_tir_searchforTIRs(GtTIRStream *tir_stream,
   GT_INITARRAY(&new, TIRPair);
 
  /* remove overlaps if wanted */
-  if (tir_stream->best_overlaps || tir_stream->no_overlaps) {
-    gt_tir_remove_overlaps(&tir_stream->first_pairs, tir_stream->no_overlaps);
+  if (tir_stream->best_overlaps || tir_stream->no_overlaps
+       || tir_stream->longest_overlaps) {
+    gt_tir_remove_overlaps(&tir_stream->first_pairs, tir_stream->no_overlaps,
+                           tir_stream->longest_overlaps);
   }
 
   /* remove skipped candidates */
@@ -659,8 +685,7 @@ static int gt_tir_stream_next(GtNodeStream *ns, GT_UNUSED GtGenomeNode **gn,
 
     /* check whether index is valid */
     if (tir_stream->cur_elem_index < tir_stream->num_of_tirs) {
-      GtUword seqnum,
-                    seqlength;
+      GtUword seqnum, seqlength;
       GtGenomeNode *rn;
       GtStr *seqid;
       seqnum = tir_stream->tir_pairs[tir_stream->cur_elem_index]->contignumber;
@@ -690,7 +715,8 @@ static int gt_tir_stream_next(GtNodeStream *ns, GT_UNUSED GtGenomeNode **gn,
         seqlength = gt_encseq_seqlength(tir_stream->encseq, seqnum);
         seqid = gt_str_new();
 
-        if (gt_encseq_has_md5_support(tir_stream->encseq)) {
+        if (gt_encseq_has_md5_support(tir_stream->encseq)
+              && tir_stream->output_md5) {
           GtMD5Tab *md5_tab = NULL;
           md5_tab = gt_encseq_get_md5_tab(tir_stream->encseq, err);
           if (!md5_tab) {
@@ -704,13 +730,26 @@ static int gt_tir_stream_next(GtNodeStream *ns, GT_UNUSED GtGenomeNode **gn,
           }
           gt_md5_tab_delete(md5_tab);
         }
-        gt_str_append_cstr(seqid, "seq");
-        gt_str_append_uword(seqid, seqnum);
 
-        rn = gt_region_node_new(seqid, 1, seqlength);
-        gt_str_delete(seqid);
-        *gn = rn;
-        tir_stream->cur_elem_index++;
+        if (!had_err) {
+          if (gt_encseq_has_description_support(tir_stream->encseq)
+                && tir_stream->output_seqids) {
+            GtUword desclength = 0UL, i = 0UL;
+            const char *desc;
+            desc = gt_encseq_description(tir_stream->encseq,
+                                         &desclength, seqnum);
+            while (*(desc+i) != ' ' && i != desclength)
+              i++;
+            gt_str_append_cstr_nt(seqid, desc, i);
+          } else {
+            gt_str_append_cstr(seqid, "seq");
+            gt_str_append_uword(seqid, seqnum);
+          }
+          rn = gt_region_node_new(seqid, 1, seqlength);
+          gt_str_delete(seqid);
+          *gn = rn;
+          tir_stream->cur_elem_index++;
+        }
       } else {
         /* skipping */
         tir_stream->cur_elem_index = 0;
@@ -804,7 +843,8 @@ static int gt_tir_stream_next(GtNodeStream *ns, GT_UNUSED GtGenomeNode **gn,
       seqid = gt_str_new();
       source = gt_str_new_cstr("TIRvish");
 
-      if (gt_encseq_has_md5_support(tir_stream->encseq)) {
+      if (gt_encseq_has_md5_support(tir_stream->encseq)
+            && tir_stream->output_md5) {
         GtMD5Tab *md5_tab = NULL;
         md5_tab = gt_encseq_get_md5_tab(tir_stream->encseq, err);
         if (!md5_tab) {
@@ -819,11 +859,22 @@ static int gt_tir_stream_next(GtNodeStream *ns, GT_UNUSED GtGenomeNode **gn,
         }
         gt_md5_tab_delete(md5_tab);
       }
-      gt_str_append_cstr(seqid, "seq");   /* XXX */
-      gt_str_append_uword(seqid, pair->contignumber);
+
+      if (!had_err && gt_encseq_has_description_support(tir_stream->encseq)
+            && tir_stream->output_seqids) {
+        GtUword desclength = 0UL, i = 0UL;
+        const char *desc;
+        desc = gt_encseq_description(tir_stream->encseq,
+                                     &desclength, pair->contignumber);
+        while (*(desc+i) != ' ' && i != desclength)
+          i++;
+        gt_str_append_cstr_nt(seqid, desc, i);
+      } else {
+        gt_str_append_cstr(seqid, "seq");
+        gt_str_append_uword(seqid, pair->contignumber);
+      }
 
       /* repeat region */
-
       node = gt_feature_node_new(seqid, gt_ft_repeat_region,
                                  pair->left_tir_start - seqstartpos -
                                    pair->tsd_length + 1,
@@ -933,6 +984,7 @@ GtNodeStream* gt_tir_stream_new(GtStr *str_indexname,
                                 int xdrop_belowscore,
                                 double similarity_threshold,
                                 bool best_overlaps,
+                                bool longest_overlaps,
                                 bool no_overlaps,
                                 GtUword min_TSD_length,
                                 GtUword max_TSD_length,
@@ -958,10 +1010,13 @@ GtNodeStream* gt_tir_stream_new(GtStr *str_indexname,
   tir_stream->xdrop_belowscore = xdrop_belowscore;
   tir_stream->similarity_threshold = similarity_threshold;
   tir_stream->best_overlaps = best_overlaps;
+  tir_stream->longest_overlaps = longest_overlaps;
   tir_stream->no_overlaps = no_overlaps;
   tir_stream->min_TSD_length = min_TSD_length;
   tir_stream->max_TSD_length = max_TSD_length;
   tir_stream->vicinity = vicinity;
+  tir_stream->output_seqids = true;
+  tir_stream->output_md5 = false;
 
   tir_stream->seedinfo.max_tir_length = max_TIR_length;
   tir_stream->seedinfo.min_tir_length = min_TIR_length;
@@ -1006,4 +1061,28 @@ const GtEncseq* gt_tir_stream_get_encseq(GtTIRStream *ts)
 {
   gt_assert(ts);
   return ts->encseq;
+}
+
+void gt_tir_stream_disable_md5_seqids(GtTIRStream *tir_stream)
+{
+  gt_assert(tir_stream != NULL);
+  tir_stream->output_md5 = false;
+}
+
+void gt_tir_stream_enable_md5_seqids(GtTIRStream *tir_stream)
+{
+  gt_assert(tir_stream != NULL);
+  tir_stream->output_md5 = true;
+}
+
+void gt_tir_stream_disable_seqids(GtTIRStream *tir_stream)
+{
+  gt_assert(tir_stream != NULL);
+  tir_stream->output_seqids = false;
+}
+
+void gt_tir_stream_enable_seqids(GtTIRStream *tir_stream)
+{
+  gt_assert(tir_stream != NULL);
+  tir_stream->output_seqids = true;
 }

@@ -22,9 +22,9 @@
 #include "core/unused_api.h"
 #include "tools/gt_condenseq.h"
 #include "tools/gt_condenseq_compress.h"
-#include "tools/gt_condenseq_search.h"
 #include "tools/gt_condenseq_extract.h"
 #include "tools/gt_condenseq_info.h"
+#include "tools/gt_condenseq_search.h"
 
 static void* gt_condenseq_toolbox_new(void)
 {

@@ -46,4 +46,6 @@ GtNodeStream* gt_extract_feature_stream_new(GtNodeStream *in_stream,
 void          gt_extract_feature_stream_retain_id_attributes(
                                                        GtExtractFeatureStream*);
 
+void          gt_extract_feature_stream_show_coords(GtExtractFeatureStream*);
+
 #endif

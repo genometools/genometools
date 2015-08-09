@@ -30,7 +30,7 @@
 #include "extended/huffcode.h"
 #include "extended/sampling.h"
 
-#define GT_ENCDESC_MAX_NUM_VAL_HUF 512UL
+#define GT_ENCDESC_MAX_NUM_VAL_HUF 1024UL
 
 DECLARE_HASHMAP(GtWord, li, GtUint64, ull, static, inline)
 DEFINE_HASHMAP(GtWord, li, GtUint64, ull, gt_ht_ul_elem_hash,
@@ -72,10 +72,12 @@ typedef struct {
   char          sep;
   bool          fieldlen_is_const,
                 has_zero_padding,
-                is_cons,
-                is_delta_cons,
+                is_const,
+                is_delta_const,
+                is_delta_positive,
+                is_delta_negative,
                 is_numeric,
-                is_value_cons,
+                is_value_const,
                 use_delta_coding,
                 use_hc;
 } DescField;
@@ -93,7 +95,7 @@ struct GtEncdesc {
   GtWord          start_of_samplingtab,
                   start_of_encoding;
   unsigned int    bits_per_field;
-  bool            num_of_fields_is_cons;
+  bool            num_of_fields_is_const;
 };
 
 struct GtEncdescEncoder {

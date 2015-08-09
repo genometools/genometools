@@ -21,6 +21,8 @@
 #include "core/timer_api.h"
 #include "core/showtime.h"
 #include "core/logger.h"
+#include "core/xansi_api.h"
+#include "core/basename_api.h"
 #include "tools/gt_sain.h"
 #include "match/sfx-linlcp.h"
 #include "match/sfx-sain.h"
@@ -29,7 +31,7 @@
 typedef struct
 {
   bool icheck, fcheck, outlcptab, lcpkasai,
-       verbose, dommap, dnaalphabet, proteinalphabet;
+       verbose, dommap, dnaalphabet, proteinalphabet, suftabout, tistabout;
   GtStr *encseqfile, *plainseqfile, *fastafile, *dir, *smap;
   GtReadmode readmode;
 } GtSainArguments;
@@ -37,6 +39,8 @@ typedef struct
 static void* gt_sain_arguments_new(void)
 {
   GtSainArguments *arguments = gt_calloc((size_t) 1, sizeof *arguments);
+  arguments->suftabout = false;
+  arguments->tistabout = false;
   arguments->encseqfile = gt_str_new();
   arguments->plainseqfile = gt_str_new();
   arguments->fastafile = gt_str_new();
@@ -67,7 +71,7 @@ static GtOptionParser *gt_sain_option_parser_new(void *tool_arguments)
   GtOptionParser *op;
   GtOption *option, *optionesq, *optionfile, *optionmmap,
            *optionfasta, *optiondnaalphabet, *optionproteinalphabet,
-           *optionlcp, *optionlcpkasai, *optionsmap;
+           *optionlcp, *optionlcpkasai, *optionsmap, *optiontistabout;
 
   gt_assert(arguments != NULL);
 
@@ -139,6 +143,17 @@ static GtOptionParser *gt_sain_option_parser_new(void *tool_arguments)
                               &arguments->fcheck, false);
   gt_option_parser_add_option(op, option);
 
+  /* -suf */
+  option = gt_option_new_bool("suf","output suffix array (table suftab)",
+                              &arguments->suftabout, false);
+  gt_option_parser_add_option(op, option);
+
+  /* -tis */
+  optiontistabout
+    = gt_option_new_bool("tis","output transformed input sequence",
+                         &arguments->tistabout, false);
+  gt_option_parser_add_option(op, optiontistabout);
+
   /* -v */
   option = gt_option_new_verbose(&arguments->verbose);
   gt_option_parser_add_option(op, option);
@@ -154,6 +169,7 @@ static GtOptionParser *gt_sain_option_parser_new(void *tool_arguments)
   gt_option_imply(optionlcpkasai,optionlcp);
   gt_option_imply(optionproteinalphabet,optionfasta);
   gt_option_imply(optionsmap,optionfasta);
+  gt_option_imply_either_2(optiontistabout,optionfasta,optionfile);
   return op;
 }
 
@@ -416,7 +432,57 @@ static int gt_sain_runner(int argc, GT_UNUSED const char **argv,
                                                       tl->logger,
                                                       tl->timer);
           }
-          if (arguments->outlcptab)
+          if (arguments->suftabout)
+          {
+            char *inputfile_basename = gt_basename(inputfile);
+            FILE *fpout = gt_fa_fopen_with_suffix(inputfile_basename,
+                                                  ".suf","wb",err);
+            if (fpout == NULL)
+            {
+              had_err = -1;
+            } else
+            {
+              GtUword totallength;
+              if (bare_encseq != NULL)
+              {
+                totallength = gt_bare_encseq_total_length(bare_encseq);
+              } else
+              {
+                totallength = len;
+              }
+              gt_xfwrite(suftab,sizeof *suftab,totallength+1,fpout);
+              gt_fa_fclose(fpout);
+            }
+            gt_free(inputfile_basename);
+          }
+          if (arguments->tistabout)
+          {
+            char *inputfile_basename = gt_basename(inputfile);
+            FILE *fpout = gt_fa_fopen_with_suffix(inputfile_basename,
+                                                  ".tis","wb",err);
+            if (fpout == NULL)
+            {
+              had_err = -1;
+            } else
+            {
+              GtUword totallength;
+              const GtUchar *sequence;
+
+              if (bare_encseq != NULL)
+              {
+                totallength = gt_bare_encseq_total_length(bare_encseq);
+                sequence = gt_bare_encseq_sequence(bare_encseq);
+              } else
+              {
+                totallength = len;
+                sequence = filecontents;
+              }
+              gt_xfwrite(sequence,sizeof *sequence,totallength,fpout);
+              gt_fa_fclose(fpout);
+            }
+            gt_free(inputfile_basename);
+          }
+          if (!had_err && arguments->outlcptab)
           {
             unsigned int *lcptab;
             GtUword maxlcp = 0, partwidth, totallength;

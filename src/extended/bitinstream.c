@@ -31,7 +31,7 @@
 struct GtBitInStream {
   size_t         cur_filepos,
                  filesize;
-  GtUword  bufferlength,
+  GtUword        bufferlength,
                  cur_bitseq,
                  pages_to_map,
                  pagesize,
@@ -120,8 +120,8 @@ int gt_bitinstream_get_next_bit(GtBitInStream *bitstream,
     }
   }
   gt_assert(bitstream->cur_bitseq != bitstream->bufferlength);
-  *bit =  GT_ISBITSET(bitstream->bitseqbuffer[bitstream->cur_bitseq],
-                      bitstream->cur_bit++) != 0;
+  *bit = GT_ISBITSET(bitstream->bitseqbuffer[bitstream->cur_bitseq],
+                     bitstream->cur_bit++) != 0;
   bitstream->read_bits++;
   return more_to_read;
 }

@@ -16,6 +16,7 @@
 */
 
 #include <string.h>
+#include <unistd.h>
 #include "gtr.h"
 #include "gtt.h"
 #include "interactive.h"
@@ -475,10 +476,32 @@ int gtr_run(GtR *gtr, int argc, const char **argv, GtError *err)
         }
       }
       else {
-        /* neither tool nor script found */
-        gt_error_set(err, "neither tool nor script '%s' found; option -help "
-                          "lists possible tools", argv[0]);
-        had_err = -1;
+        GtStr *extpath, *extname;
+        extpath = gt_str_new();
+        extname = gt_str_new_cstr("gt-");
+        gt_str_append_cstr(extname, argv[0]);
+        had_err = gt_file_find_in_path(extpath, gt_str_get(extname), err);
+        if (!had_err && gt_str_length(extpath) > 0) {
+          extern char **environ;
+          struct stat sb;
+          nargv = gt_cstr_array_dup(argv);
+          gt_str_append_cstr(extpath, "/");
+          gt_str_append_str(extpath, extname);
+          if (!(stat(gt_str_get(extpath), &sb) == 0 && sb.st_mode & S_IXUSR) ||
+               execve(gt_str_get(extpath), nargv, environ)) {
+            gt_error_set(err, "could not execute userscript %s",
+                         gt_str_get(extpath));
+            gt_cstr_array_delete(nargv);
+            had_err = -1;
+          }
+        } else {
+          /* neither tool nor script found */
+          gt_error_set(err, "neither tool nor script '%s' found; option -help "
+                            "lists possible tools", argv[0]);
+          had_err = -1;
+        }
+        gt_str_delete(extpath);
+        gt_str_delete(extname);
       }
     }
     else {

@@ -22,7 +22,9 @@
 #include "extended/encdesc.h"
 
 /* Write header information of <encdesc> to <FILE> <fp>.
-   Returns 0 on success, 1 on error, sets <err> accordingly. */
+   Returns 0 on success, 1 on error, sets <err> accordingly.
+   TODO DW this function does more than that, it sets some bool within the
+   header! This should be refactored. */
 int encdesc_write_header(GtEncdesc *encdesc, FILE *fp, GtError *err);
 
 /* Read header information of <encdesc> from <FILE> <fp>.
