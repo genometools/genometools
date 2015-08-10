@@ -316,6 +316,8 @@ static int gt_seed_extend_runner(int argc, const char **argv, int parsed_args,
                                                  arguments->se_alignlength,
                                                  cam,
                                                  arguments->se_extendgreedy);
+      if (arguments->benchmark)
+        gt_greedy_extend_matchinfo_silent_set(grextinfo);
     } else {
       had_err = -1;
     }
@@ -327,6 +329,8 @@ static int gt_seed_extend_runner(int argc, const char **argv, int parsed_args,
                                        arguments->se_xdropbelowscore,
                                        arguments->se_extendxdrop,
                                        true);
+    if (arguments->benchmark)
+      gt_xdrop_matchinfo_silent_set(xdropinfo);
   }
 
   /* start algorithm */

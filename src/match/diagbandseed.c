@@ -283,13 +283,11 @@ int gt_diagbandseed_process_seeds(const GtEncseq *aencseq,
                lm[idx].aseqnum, lm[idx].bseqnum, lm[idx].apos, lm[idx].bpos);
 #endif
         if (selfcomp && arg->extendgreedyinfo != NULL) {
-          /*gt_greedy_extend_matchinfo_verbose_set(arg->extendgreedyinfo);*/
           had_err = gt_simplegreedyselfmatchoutput((void *)
                                                    arg->extendgreedyinfo,
                                                    aencseq, arg->seedlength,
                                                    astart, bstart, err);
         } else if (selfcomp && arg->extendxdropinfo != NULL) {
-          /* gt_xdrop_matchinfo_verbose_set(arg->extendxdropinfo);*/
           had_err = gt_simplexdropselfmatchoutput((void *)arg->extendxdropinfo,
                                                   aencseq, arg->seedlength,
                                                   astart, bstart, err);
