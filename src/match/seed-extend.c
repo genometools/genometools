@@ -176,18 +176,275 @@ static double error_rate(GtUword distance,GtUword alignedlen)
   return 200.0 * (double) distance/alignedlen;
 }
 
-static void skdebug(GT_UNUSED const char *format, ...)
+int gt_simplexdropselfmatchoutput(void *info,
+                                  const GtEncseq *encseq,
+                                  GtUword len,
+                                  GtUword pos1,
+                                  GtUword pos2,
+                                  GtError *err)
 {
+  GtXdropmatchinfo *xdropmatchinfo = (GtXdropmatchinfo *) info;
+  Repfindsequenceinfo rfsi;
+  GtUword dblen, querylen, total_distance, total_alignedlen,
+          urightbound, vrightbound;
+  GtXdropscore score;
+
+  gt_assert(pos1 < pos2);
+  if (pos1 + len >= pos2)
+  {
+    /* overlapping seeds */
+    return 0;
+  }
+  fill_repfind_sequence_info(&rfsi,pos1,pos2,encseq);
+  if (pos1 > rfsi.dbseqstartpos && pos2 > rfsi.queryseqstartpos)
+  { /* there is something to align on the left of the seed */
+    gt_seqabstract_reinit_encseq(xdropmatchinfo->useq,encseq,
+                                 pos1 - rfsi.dbseqstartpos,
+                                 rfsi.dbseqstartpos);
+    /* stop extension at left instance of seed or querystart,
+                     whichever is larger */
+    gt_seqabstract_reinit_encseq(xdropmatchinfo->vseq,encseq,
+                                 pos2 - MAX(pos1 + len,rfsi.queryseqstartpos),
+                                 rfsi.queryseqstartpos);
+    gt_evalxdroparbitscoresextend(false,
+                                  &xdropmatchinfo->best_left,
+                                  xdropmatchinfo->res,
+                                  xdropmatchinfo->useq,
+                                  xdropmatchinfo->vseq,
+                                  xdropmatchinfo->belowscore);
+  } else
+  {
+    xdropmatchinfo->best_left.ivalue = 0;
+    xdropmatchinfo->best_left.jvalue = 0;
+    xdropmatchinfo->best_left.score = 0;
+  }
+#undef SKDEBUG
 #ifdef SKDEBUG
-  va_list ap;
-  va_start(ap, format);
-  printf("# ");
-  printf(format, ap);
-  printf("\n");
-  va_end(ap);
-#else
-  return;
+  printf("left: best_left=align=" GT_WU ",row=" GT_WU ",distance=" GT_WU "\n",
+          xdropmatchinfo->best_left.ivalue +
+          xdropmatchinfo->best_left.jvalue,
+          xdropmatchinfo->best_left.ivalue,
+          score2distance(xdropmatchinfo->best_left.score,
+                         xdropmatchinfo->best_left.ivalue +
+                         xdropmatchinfo->best_left.jvalue));
 #endif
+  gt_assert(pos2 >= xdropmatchinfo->best_left.jvalue);
+  urightbound = MIN(rfsi.dbseqstartpos + rfsi.dbseqlength,
+                    pos2 - xdropmatchinfo->best_left.jvalue);
+  vrightbound = rfsi.queryseqstartpos + rfsi.queryseqlength;
+  if (pos1 + len < urightbound && pos2 + len < vrightbound)
+  { /* there is something to align on the right of the seed */
+    gt_seqabstract_reinit_encseq(xdropmatchinfo->useq,
+                                 encseq,urightbound - (pos1 + len),
+                                 pos1 + len);
+    gt_seqabstract_reinit_encseq(xdropmatchinfo->vseq,
+                                 encseq,vrightbound - (pos2 + len),
+                                 pos2 + len);
+    gt_evalxdroparbitscoresextend(true,
+                                  &xdropmatchinfo->best_right,
+                                  xdropmatchinfo->res,
+                                  xdropmatchinfo->useq,
+                                  xdropmatchinfo->vseq,
+                                  xdropmatchinfo->belowscore);
+  } else
+  {
+    xdropmatchinfo->best_right.ivalue = 0;
+    xdropmatchinfo->best_right.jvalue = 0;
+    xdropmatchinfo->best_right.score = 0;
+  }
+#ifdef SKDEBUG
+  printf("right: best_left=align=" GT_WU ",row=" GT_WU ",distance=" GT_WU "\n",
+              xdropmatchinfo->best_right.ivalue +
+              xdropmatchinfo->best_right.jvalue,
+              xdropmatchinfo->best_right.ivalue,
+              score2distance(xdropmatchinfo->best_right.score,
+                             xdropmatchinfo->best_right.ivalue +
+                             xdropmatchinfo->best_right.jvalue));
+#endif
+  dblen = len + xdropmatchinfo->best_left.ivalue
+              + xdropmatchinfo->best_right.ivalue;
+  querylen = len + xdropmatchinfo->best_left.jvalue
+                 + xdropmatchinfo->best_right.jvalue;
+  total_alignedlen = dblen + querylen;
+  score = (GtXdropscore) len * xdropmatchinfo->arbitscores.mat +
+          xdropmatchinfo->best_left.score +
+          xdropmatchinfo->best_right.score;
+  total_distance = score2distance(score,total_alignedlen);
+  if (error_rate(total_distance,total_alignedlen) <=
+      (double) xdropmatchinfo->errorpercentage &&
+      total_alignedlen >= 2 * xdropmatchinfo->userdefinedleastlength)
+  {
+    GtUword dbstart, querystart;
+
+    gt_assert(pos1 >= xdropmatchinfo->best_left.ivalue &&
+              pos2 >= xdropmatchinfo->best_left.jvalue);
+    querystart = pos2 - xdropmatchinfo->best_left.jvalue;
+    gt_assert(querystart >= rfsi.queryseqstartpos);
+    dbstart = pos1 - xdropmatchinfo->best_left.ivalue;
+#ifdef SKDEBUG
+    printf("total_distance=" GT_WU ", score=" GT_WD ",total_alignedlen=" GT_WU
+            ", err=%.2f\n",total_distance,score,total_alignedlen,
+            error_rate(total_distance,total_alignedlen));
+#endif
+    /*
+    gt_seqabstract_reinit_encseq(xdropmatchinfo->useq,
+                                 encseq,
+                                 dblen,
+                                 dbstart);
+    gt_seqabstract_reinit_encseq(xdropmatchinfo->vseq,
+                                 encseq,
+                                 querylen,
+                                 querystart);
+    */
+    gt_querymatch_fill(xdropmatchinfo->querymatchspaceptr,
+                       dblen,
+                       dbstart,
+                       GT_READMODE_FORWARD,
+                       false,
+                       score,
+                       total_distance,
+                       /*greedyunitedist(xdropmatchinfo->frontresource,
+                                       xdropmatchinfo->useq,
+                                       xdropmatchinfo->vseq),
+                       */
+                       true,
+                       (uint64_t) rfsi.queryseqnum,
+                       querylen,
+                       querystart - rfsi.queryseqstartpos);
+    if (xdropmatchinfo->silent)
+    {
+      return 0;
+    } else
+    {
+      if (xdropmatchinfo->beverbose)
+      {
+        printf("# seed:\t" GT_WU "\t" GT_WU "\t" GT_WU "\n",pos1,pos2,len);
+      }
+      return gt_querymatch_output(info, encseq,
+                                  xdropmatchinfo->querymatchspaceptr,NULL,
+                                  rfsi.queryseqlength,
+                                  err);
+    }
+  } else
+  {
+    return 0;
+  }
+}
+
+int gt_processxdropquerymatches(void *info,
+                                const GtEncseq *encseq,
+                                const GtQuerymatch *queryseed,
+                                const GtUchar *query,
+                                GtUword query_totallength,
+                                GtError *err)
+{
+  GtXdropmatchinfo *xdropmatchinfo = (GtXdropmatchinfo *) info;
+  GtXdropscore score;
+  GtUword querystart, dblen, dbstart, querylen,
+          dbseqnum, dbseqstartpos, dbseqlength,
+          pos1 = gt_querymatch_dbstart(queryseed),
+          pos2 = gt_querymatch_querystart(queryseed),
+          len = gt_querymatch_querylen(queryseed);
+  uint64_t queryseqnum;
+
+  dbseqnum = gt_encseq_seqnum(encseq,pos1);
+  dbseqstartpos = gt_encseq_seqstartpos(encseq,dbseqnum);
+  dbseqlength = gt_encseq_seqlength(encseq,dbseqnum);
+  /* xdrop left of seed, only if length > 0 excluding pos1 and pos2 */
+  if (pos1 > dbseqstartpos &&
+      pos2 > 0)
+  {
+#ifdef SKDEBUG
+    printf("leftextend: " GT_WU " to " GT_WU " and " GT_WU " to " GT_WU "\n",
+               dbseqstartpos, pos1,
+               (GtUword) 0, pos2);
+#endif
+    gt_seqabstract_reinit_encseq(xdropmatchinfo->useq,
+                                 encseq,
+                                 pos1 - dbseqstartpos,
+                                 dbseqstartpos);
+    gt_seqabstract_reinit_gtuchar(xdropmatchinfo->vseq,
+                                  query,
+                                  pos2,
+                                  0);
+    gt_evalxdroparbitscoresextend(false,
+                                  &xdropmatchinfo->best_left,
+                                  xdropmatchinfo->res,
+                                  xdropmatchinfo->useq,
+                                  xdropmatchinfo->vseq,
+                                  xdropmatchinfo->belowscore);
+  } else
+  {
+    xdropmatchinfo->best_left.ivalue = 0;
+    xdropmatchinfo->best_left.jvalue = 0;
+    xdropmatchinfo->best_left.score = 0;
+  }
+  /* xdrop right of seed, only if length > 0 including pos1+len and pos2+len */
+  if (pos1 + len < dbseqstartpos + dbseqlength &&
+      pos2 + len < query_totallength)
+  {
+#ifdef SKDEBUG
+    printf("rightextend: " GT_WU " to " GT_WU " and " GT_WU " to " GT_WU "\n",
+            pos1 + len, dbseqstartpos + dbseqlength,
+            pos2 + len, query_totallength - 1);
+#endif
+    gt_seqabstract_reinit_encseq(xdropmatchinfo->useq,
+                                 encseq,
+                                 dbseqstartpos + dbseqlength - (pos1 + len),
+                                 pos1 + len);
+    gt_seqabstract_reinit_gtuchar(xdropmatchinfo->vseq,
+                                  query,
+                                  query_totallength - (pos2 + len),
+                                  pos2 + len);
+    gt_evalxdroparbitscoresextend(true,
+                                  &xdropmatchinfo->best_right,
+                                  xdropmatchinfo->res,
+                                  xdropmatchinfo->useq,
+                                  xdropmatchinfo->vseq,
+                                  xdropmatchinfo->belowscore);
+  } else
+  {
+    xdropmatchinfo->best_right.ivalue = 0;
+    xdropmatchinfo->best_right.jvalue = 0;
+    xdropmatchinfo->best_right.score = 0;
+  }
+  gt_assert(pos1 >= (GtUword) xdropmatchinfo->best_left.ivalue &&
+            pos2 >= (GtUword) xdropmatchinfo->best_left.jvalue);
+  querystart = pos2 - xdropmatchinfo->best_left.jvalue;
+  queryseqnum = gt_querymatch_queryseqnum(queryseed);
+  dblen = len + xdropmatchinfo->best_left.ivalue
+              + xdropmatchinfo->best_right.ivalue;
+  dbstart = pos1 - xdropmatchinfo->best_left.ivalue;
+  querylen = len + xdropmatchinfo->best_left.jvalue
+                 + xdropmatchinfo->best_right.jvalue,
+  score = (GtXdropscore) len * xdropmatchinfo->arbitscores.mat +
+          xdropmatchinfo->best_left.score +
+          xdropmatchinfo->best_right.score;
+  gt_seqabstract_reinit_encseq(xdropmatchinfo->useq,
+                               encseq,
+                               dblen,
+                               dbstart);
+  gt_seqabstract_reinit_gtuchar(xdropmatchinfo->vseq, query, querylen,
+                                querystart);
+  gt_querymatch_fill(xdropmatchinfo->querymatchspaceptr,
+                     dblen,
+                     dbstart,
+                     GT_READMODE_FORWARD,
+                     false,
+                     score,
+                     greedyunitedist(xdropmatchinfo->frontresource,
+                                     xdropmatchinfo->useq,xdropmatchinfo->vseq),
+                     false,
+                     queryseqnum,
+                     querylen,
+                     querystart);
+  if (xdropmatchinfo->beverbose)
+  {
+    printf("# seed:\t" GT_WU "\t" GT_WU "\t" GT_WU "\n",pos1,pos2,len);
+  }
+  return gt_querymatch_output(info, encseq, xdropmatchinfo->querymatchspaceptr,
+                              query, query_totallength,
+                              err);
 }
 
 const char *gt_cam_extendgreedy_comment(void)
@@ -297,7 +554,7 @@ GtGreedyextendmatchinfo *gt_greedy_extend_matchinfo_new(
                                             errorpercentage,
                                             sensitivity);
   ggemi->history = history;
-  ggemi->minmatchnum = (history * perc_mat_history)/100;
+  ggemi->minmatchnum = (history * ggemi->perc_mat_history)/100;
   ggemi->userdefinedleastlength = userdefinedleastlength;
   ggemi->pol_info = polishing_info_new(ggemi->minmatchnum/2,errorpercentage);
   ggemi->totallength = GT_UWORD_MAX;
@@ -316,6 +573,24 @@ GtGreedyextendmatchinfo *gt_greedy_extend_matchinfo_new(
   ggemi->silent = false;
   ggemi->trimstat = NULL;
   return ggemi;
+}
+
+void gt_greedy_extend_matchinfo_delete(GtGreedyextendmatchinfo *ggemi)
+{
+  if (ggemi != NULL)
+  {
+    gt_querymatch_delete(ggemi->querymatchspaceptr);
+    polishing_info_delete(ggemi->pol_info);
+    front_trace_delete(ggemi->left_front_trace);
+    front_trace_delete(ggemi->right_front_trace);
+    gt_encseq_reader_delete(ggemi->encseq_r_in_u);
+    gt_encseq_reader_delete(ggemi->encseq_r_in_v);
+    gt_free(ggemi->usequence_cache.space);
+    gt_free(ggemi->vsequence_cache.space);
+    gt_free(ggemi->frontspace_reservoir.space);
+    trimstat_delete(ggemi->trimstat,0.0,true);
+    gt_free(ggemi);
+  }
 }
 
 void gt_greedy_extend_matchinfo_check_extend_symmetry_set(
@@ -340,24 +615,6 @@ void gt_greedy_extend_matchinfo_verbose_set(GtGreedyextendmatchinfo *ggemi)
   ggemi->beverbose = true;
 }
 
-void gt_greedy_extend_matchinfo_delete(GtGreedyextendmatchinfo *ggemi)
-{
-  if (ggemi != NULL)
-  {
-    gt_querymatch_delete(ggemi->querymatchspaceptr);
-    polishing_info_delete(ggemi->pol_info);
-    front_trace_delete(ggemi->left_front_trace);
-    front_trace_delete(ggemi->right_front_trace);
-    gt_encseq_reader_delete(ggemi->encseq_r_in_u);
-    gt_encseq_reader_delete(ggemi->encseq_r_in_v);
-    gt_free(ggemi->usequence_cache.space);
-    gt_free(ggemi->vsequence_cache.space);
-    gt_free(ggemi->frontspace_reservoir.space);
-    trimstat_delete(ggemi->trimstat,0.0,true);
-    gt_free(ggemi);
-  }
-}
-
 int gt_simplegreedyselfmatchoutput(void *info,
                                    const GtEncseq *encseq,
                                    GtUword len,
@@ -367,7 +624,7 @@ int gt_simplegreedyselfmatchoutput(void *info,
 {
   GtGreedyextendmatchinfo *greedyextendmatchinfo
     = (GtGreedyextendmatchinfo *) info;
-  GtUword vextend_left, vextend_right, ulen, vlen, urightbound,
+  GtUword vextend_left, vextend_right, ulen, vlen, urightbound, vrightbound,
           total_distance, dblen, querylen, total_alignedlen;
   Repfindsequenceinfo rfsi;
   FTsequenceResources ufsr, vfsr;
@@ -382,12 +639,7 @@ int gt_simplegreedyselfmatchoutput(void *info,
   {
     front_trace_reset(greedyextendmatchinfo->right_front_trace,0);
   }
-  if (pos1 > pos2)
-  {
-    GtUword tmp = pos1;
-    pos1 = pos2;
-    pos2 = tmp;
-  }
+  gt_assert(pos1 < pos2);
   if (pos1 + len >= pos2)
   {
     /* overlapping seeds */
@@ -446,22 +698,26 @@ int gt_simplegreedyselfmatchoutput(void *info,
                                                    totallength,pos2 - 1),
                                      vlen);
   }
-  skdebug("left: best_polished=align=" GT_WU ",row=" GT_WU ",distance=" GT_WU,
+#ifdef SKDEBUG
+  printf("left: best_polished=align=" GT_WU ",row=" GT_WU ",distance="
+         GT_WU "\n",
           left_best_polished_point.alignedlen,
           left_best_polished_point.row,
           left_best_polished_point.distance);
+#endif
   gt_assert(left_best_polished_point.alignedlen >=
             left_best_polished_point.row);
   vextend_left
     = left_best_polished_point.alignedlen - left_best_polished_point.row;
   gt_assert(vextend_left <= pos2);
   urightbound = MIN(rfsi.dbseqstartpos + rfsi.dbseqlength,pos2 - vextend_left);
+  vrightbound = rfsi.queryseqstartpos + rfsi.queryseqlength;
   if (pos1 + len < urightbound &&
-      pos2 + len < rfsi.queryseqstartpos + rfsi.queryseqlength)
+      pos2 + len < vrightbound)
   { /* there is something to align on the right of the seed */
     /* stop extension at right instance of extended seed */
     ulen = urightbound - (pos1 + len);
-    vlen = rfsi.queryseqstartpos + rfsi.queryseqlength - (pos2 + len);
+    vlen = vrightbound - (pos2 + len);
     (void) front_prune_edist_inplace(true,
                                      &greedyextendmatchinfo->
                                         frontspace_reservoir,
@@ -480,11 +736,13 @@ int gt_simplegreedyselfmatchoutput(void *info,
                                      pos2 + len,
                                      vlen);
   }
-  skdebug("right: best_polished=align=" GT_WU ",row=" GT_WU
-                 ",distance=" GT_WU,
+#ifdef SKDEBUG
+  fprintf(stdout,"right: best_polished=align=" GT_WU ",row=" GT_WU
+                 ",distance=" GT_WU "\n",
           right_best_polished_point.alignedlen,
           right_best_polished_point.row,
           right_best_polished_point.distance);
+#endif
   if (greedyextendmatchinfo->check_extend_symmetry)
   {
     gt_assert(right_best_polished_point.alignedlen ==
@@ -503,10 +761,12 @@ int gt_simplegreedyselfmatchoutput(void *info,
     = right_best_polished_point.alignedlen - right_best_polished_point.row;
   querylen = len + vextend_left + vextend_right;
   total_alignedlen = dblen + querylen;
-  skdebug("total_distance=" GT_WU ", total_alignedlen=" GT_WU ",err=%.2f",
+#ifdef SKDEBUG
+  printf("total_distance=" GT_WU ", total_alignedlen=" GT_WU ",err=%.2f\n",
           total_distance,
           total_alignedlen,
           error_rate(total_distance,total_alignedlen));
+#endif
   if (error_rate(total_distance,total_alignedlen) <=
       (double) greedyextendmatchinfo->errorpercentage &&
       total_alignedlen >= 2 * greedyextendmatchinfo->userdefinedleastlength)
@@ -547,278 +807,19 @@ int gt_simplegreedyselfmatchoutput(void *info,
     }
   } else
   {
+#ifdef SKDEBUG
     if (error_rate(total_distance,total_alignedlen) >
       (double) greedyextendmatchinfo->errorpercentage)
     {
-      skdebug("reject: error rate %.2f > %.2f\n",
+      printf("reject: error rate %.2f > %.2f\n",
               error_rate(total_distance,total_alignedlen),
               (double) greedyextendmatchinfo->errorpercentage);
     } else
     {
-      skdebug("reject: aligned_len = " GT_WU " < 2 * %u\n",
+      printf("reject: aligned_len = " GT_WU " < 2 * %u\n",
               total_alignedlen,greedyextendmatchinfo->userdefinedleastlength);
     }
+#endif
     return 0;
   }
-}
-
-int gt_simplexdropselfmatchoutput(void *info,
-                                  const GtEncseq *encseq,
-                                  GtUword len,
-                                  GtUword pos1,
-                                  GtUword pos2,
-                                  GtError *err)
-{
-  GtXdropmatchinfo *xdropmatchinfo = (GtXdropmatchinfo *) info;
-  Repfindsequenceinfo rfsi;
-  GtUword dblen, querylen, total_distance, total_alignedlen, seqend1, seqend2;
-  GtXdropscore score;
-
-  if (pos1 > pos2)
-  {
-    GtUword tmp = pos1;
-    pos1 = pos2;
-    pos2 = tmp;
-  }
-  if (pos1 + len >= pos2)
-  {
-    /* overlapping seeds */
-    return 0;
-  }
-  fill_repfind_sequence_info(&rfsi,pos1,pos2,encseq);
-  if (pos1 > rfsi.dbseqstartpos && pos2 > rfsi.queryseqstartpos)
-  { /* there is something to align on the left of the seed */
-    gt_seqabstract_reinit_encseq(xdropmatchinfo->useq,encseq,
-                                 pos1 - rfsi.dbseqstartpos,
-                                 rfsi.dbseqstartpos);
-    gt_seqabstract_reinit_encseq(xdropmatchinfo->vseq,encseq,
-                                 pos2 - MAX(pos1 + len,rfsi.queryseqstartpos),
-                                 rfsi.queryseqstartpos);
-    gt_evalxdroparbitscoresextend(false,
-                                  &xdropmatchinfo->best_left,
-                                  xdropmatchinfo->res,
-                                  xdropmatchinfo->useq,
-                                  xdropmatchinfo->vseq,
-                                  xdropmatchinfo->belowscore);
-  } else
-  {
-    xdropmatchinfo->best_left.ivalue = 0;
-    xdropmatchinfo->best_left.jvalue = 0;
-    xdropmatchinfo->best_left.score = 0;
-  }
-  skdebug("left: best_left=align=" GT_WU ",row=" GT_WU ",distance=" GT_WU,
-          xdropmatchinfo->best_left.ivalue +
-          xdropmatchinfo->best_left.jvalue,
-          xdropmatchinfo->best_left.ivalue,
-          score2distance(xdropmatchinfo->best_left.score,
-                         xdropmatchinfo->best_left.ivalue +
-                         xdropmatchinfo->best_left.jvalue));
-  seqend1 = MIN(rfsi.dbseqstartpos + rfsi.dbseqlength,
-                pos2 - xdropmatchinfo->best_left.jvalue);
-  seqend2 = rfsi.queryseqstartpos + rfsi.queryseqlength;
-  if (pos1 + len < seqend1 && pos2 + len < seqend2)
-  { /* there is something to align on the right of the seed */
-    gt_seqabstract_reinit_encseq(xdropmatchinfo->useq,
-                                 encseq,seqend1 - (pos1 + len),
-                                 pos1 + len);
-    gt_seqabstract_reinit_encseq(xdropmatchinfo->vseq,
-                                 encseq,seqend2 - (pos2 + len),
-                                 pos2 + len);
-    gt_evalxdroparbitscoresextend(true,
-                                  &xdropmatchinfo->best_right,
-                                  xdropmatchinfo->res,
-                                  xdropmatchinfo->useq,
-                                  xdropmatchinfo->vseq,
-                                  xdropmatchinfo->belowscore);
-  } else
-  {
-    xdropmatchinfo->best_right.ivalue = 0;
-    xdropmatchinfo->best_right.jvalue = 0;
-    xdropmatchinfo->best_right.score = 0;
-  }
-  skdebug("right: best_left=align=" GT_WU ",row=" GT_WU ",distance=" GT_WU,
-              xdropmatchinfo->best_right.ivalue +
-              xdropmatchinfo->best_right.jvalue,
-              xdropmatchinfo->best_right.ivalue,
-              score2distance(xdropmatchinfo->best_right.score,
-                             xdropmatchinfo->best_right.ivalue +
-                             xdropmatchinfo->best_right.jvalue));
-  dblen = len + xdropmatchinfo->best_left.ivalue
-              + xdropmatchinfo->best_right.ivalue;
-  querylen = len + xdropmatchinfo->best_left.jvalue
-                 + xdropmatchinfo->best_right.jvalue;
-  total_alignedlen = dblen + querylen;
-  score = (GtXdropscore) len * xdropmatchinfo->arbitscores.mat +
-          xdropmatchinfo->best_left.score +
-          xdropmatchinfo->best_right.score;
-  total_distance = score2distance(score,total_alignedlen);
-  if (error_rate(total_distance,total_alignedlen) <=
-      (double) xdropmatchinfo->errorpercentage &&
-      total_alignedlen >= 2 * xdropmatchinfo->userdefinedleastlength)
-  {
-    GtUword dbstart, querystart;
-
-    gt_assert(pos1 >= xdropmatchinfo->best_left.ivalue &&
-              pos2 >= xdropmatchinfo->best_left.jvalue);
-    querystart = pos2 - xdropmatchinfo->best_left.jvalue;
-    gt_assert(querystart >= rfsi.queryseqstartpos);
-    dbstart = pos1 - xdropmatchinfo->best_left.ivalue;
-    skdebug("total_distance=" GT_WU ", score=" GT_WD ",total_alignedlen=" GT_WU
-            ", err=%.2f",total_distance,score,total_alignedlen,
-            error_rate(total_distance,total_alignedlen));
-    /*
-    gt_seqabstract_reinit_encseq(xdropmatchinfo->useq,
-                                 encseq,
-                                 dblen,
-                                 dbstart);
-    gt_seqabstract_reinit_encseq(xdropmatchinfo->vseq,
-                                 encseq,
-                                 querylen,
-                                 querystart);
-    */
-    gt_querymatch_fill(xdropmatchinfo->querymatchspaceptr,
-                       dblen,
-                       dbstart,
-                       GT_READMODE_FORWARD,
-                       false,
-                       score,
-                       total_distance,
-                       /*greedyunitedist(xdropmatchinfo->frontresource,
-                                       xdropmatchinfo->useq,
-                                       xdropmatchinfo->vseq),
-                       */
-                       true,
-                       (uint64_t) rfsi.queryseqnum,
-                       querylen,
-                       querystart - rfsi.queryseqstartpos);
-    if (xdropmatchinfo->silent)
-    {
-      return 0;
-    } else
-    {
-      if (xdropmatchinfo->beverbose)
-      {
-        printf("# seed:\t" GT_WU "\t" GT_WU "\t" GT_WU "\n",pos1,pos2,len);
-      }
-      return gt_querymatch_output(info, encseq,
-                                  xdropmatchinfo->querymatchspaceptr,NULL,
-                                  rfsi.queryseqlength,
-                                  err);
-    }
-  } else
-  {
-    return 0;
-  }
-}
-
-int gt_processxdropquerymatches(void *info,
-                                const GtEncseq *encseq,
-                                const GtQuerymatch *queryseed,
-                                const GtUchar *query,
-                                GtUword query_totallength,
-                                GtError *err)
-{
-  GtXdropmatchinfo *xdropmatchinfo = (GtXdropmatchinfo *) info;
-  GtXdropscore score;
-  GtUword querystart, dblen, dbstart, querylen,
-          dbseqnum, dbseqstartpos, dbseqlength,
-          pos1 = gt_querymatch_dbstart(queryseed),
-          pos2 = gt_querymatch_querystart(queryseed),
-          len = gt_querymatch_querylen(queryseed);
-  uint64_t queryseqnum;
-
-  dbseqnum = gt_encseq_seqnum(encseq,pos1);
-  dbseqstartpos = gt_encseq_seqstartpos(encseq,dbseqnum);
-  dbseqlength = gt_encseq_seqlength(encseq,dbseqnum);
-  /* xdrop left of seed, only if length > 0 excluding pos1 and pos2 */
-  if (pos1 > dbseqstartpos &&
-      pos2 > 0)
-  {
-    skdebug("leftextend: " GT_WU " to " GT_WU " and " GT_WU " to " GT_WU,
-               dbseqstartpos, pos1,
-               (GtUword) 0, pos2);
-    gt_seqabstract_reinit_encseq(xdropmatchinfo->useq,
-                                 encseq,
-                                 pos1 - dbseqstartpos,
-                                 dbseqstartpos);
-    gt_seqabstract_reinit_gtuchar(xdropmatchinfo->vseq,
-                                  query,
-                                  pos2,
-                                  0);
-    gt_evalxdroparbitscoresextend(false,
-                                  &xdropmatchinfo->best_left,
-                                  xdropmatchinfo->res,
-                                  xdropmatchinfo->useq,
-                                  xdropmatchinfo->vseq,
-                                  xdropmatchinfo->belowscore);
-  } else
-  {
-    xdropmatchinfo->best_left.ivalue = 0;
-    xdropmatchinfo->best_left.jvalue = 0;
-    xdropmatchinfo->best_left.score = 0;
-  }
-  /* xdrop right of seed, only if length > 0 including pos1+len and pos2+len */
-  if (pos1 + len < dbseqstartpos + dbseqlength &&
-      pos2 + len < query_totallength)
-  {
-    skdebug("rightextend: " GT_WU " to " GT_WU " and " GT_WU " to " GT_WU,
-            pos1 + len, dbseqstartpos + dbseqlength,
-            pos2 + len, query_totallength - 1);
-    gt_seqabstract_reinit_encseq(xdropmatchinfo->useq,
-                                 encseq,
-                                 dbseqstartpos + dbseqlength - (pos1 + len),
-                                 pos1 + len);
-    gt_seqabstract_reinit_gtuchar(xdropmatchinfo->vseq,
-                                  query,
-                                  query_totallength - (pos2 + len),
-                                  pos2 + len);
-    gt_evalxdroparbitscoresextend(true,
-                                  &xdropmatchinfo->best_right,
-                                  xdropmatchinfo->res,
-                                  xdropmatchinfo->useq,
-                                  xdropmatchinfo->vseq,
-                                  xdropmatchinfo->belowscore);
-  } else
-  {
-    xdropmatchinfo->best_right.ivalue = 0;
-    xdropmatchinfo->best_right.jvalue = 0;
-    xdropmatchinfo->best_right.score = 0;
-  }
-  gt_assert(pos1 >= (GtUword) xdropmatchinfo->best_left.ivalue &&
-            pos2 >= (GtUword) xdropmatchinfo->best_left.jvalue);
-  querystart = pos2 - xdropmatchinfo->best_left.jvalue;
-  queryseqnum = gt_querymatch_queryseqnum(queryseed);
-  dblen = len + xdropmatchinfo->best_left.ivalue
-              + xdropmatchinfo->best_right.ivalue;
-  dbstart = pos1 - xdropmatchinfo->best_left.ivalue;
-  querylen = len + xdropmatchinfo->best_left.jvalue
-                 + xdropmatchinfo->best_right.jvalue,
-  score = (GtXdropscore) len * xdropmatchinfo->arbitscores.mat +
-          xdropmatchinfo->best_left.score +
-          xdropmatchinfo->best_right.score;
-  gt_seqabstract_reinit_encseq(xdropmatchinfo->useq,
-                               encseq,
-                               dblen,
-                               dbstart);
-  gt_seqabstract_reinit_gtuchar(xdropmatchinfo->vseq, query, querylen,
-                                querystart);
-  gt_querymatch_fill(xdropmatchinfo->querymatchspaceptr,
-                     dblen,
-                     dbstart,
-                     GT_READMODE_FORWARD,
-                     false,
-                     score,
-                     greedyunitedist(xdropmatchinfo->frontresource,
-                                     xdropmatchinfo->useq,xdropmatchinfo->vseq),
-                     false,
-                     queryseqnum,
-                     querylen,
-                     querystart);
-  if (xdropmatchinfo->beverbose)
-  {
-    printf("# seed:\t" GT_WU "\t" GT_WU "\t" GT_WU "\n",pos1,pos2,len);
-  }
-  return gt_querymatch_output(info, encseq, xdropmatchinfo->querymatchspaceptr,
-                              query, query_totallength,
-                              err);
 }

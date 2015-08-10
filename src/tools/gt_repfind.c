@@ -77,12 +77,7 @@ static int gt_simpleexactselfmatchoutput(void *info,
   GtQuerymatch *querymatch = (GtQuerymatch *) info;
   const GtEncseq *encseq;
 
-  if (pos1 > pos2)
-  {
-    GtUword tmp = pos1;
-    pos1 = pos2;
-    pos2 = tmp;
-  }
+  gt_assert(pos1 < pos2);
   gt_assert(genericencseq != NULL && genericencseq->hasencseq);
   encseq = genericencseq->seqptr.encseq;
   queryseqnum = gt_encseq_seqnum(encseq,pos2);
@@ -114,12 +109,7 @@ static int gt_simplesuffixprefixmatchoutput(GT_UNUSED void *info,
   GtUword seqnum1, relpos1, seqnum2, relpos2, seqstartpos;
   const GtEncseq *encseq;
 
-  if (pos1 > pos2)
-  {
-    GtUword tmp = pos1;
-    pos1 = pos2;
-    pos2 = tmp;
-  }
+  gt_assert(pos1 < pos2);
   gt_assert(genericencseq != NULL && genericencseq->hasencseq);
   encseq = genericencseq->seqptr.encseq;
   seqnum1 = gt_encseq_seqnum(encseq,pos1);
