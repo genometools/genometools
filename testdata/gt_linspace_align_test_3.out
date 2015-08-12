@@ -1,0 +1,12 @@
+# two sequences "uag" "ctuaccccat"
+--u-----ag
+  |     | 
+ctuaccccat
+# two sequences "uag" "auggggnnnnnnnngggag"
+-u---------------ag
+ |               ||
+auggggnnnnnnnngggag
+# two sequences "uag" "ctaccccagtt"
+------uag--
+       ||  
+ctaccccagtt
