@@ -16,6 +16,7 @@
 */
 
 #include <string.h>
+#include "core/cstr_api.h"
 #include "core/fa.h"
 #include "core/fasta_api.h"
 #include "core/fasta_reader.h"
@@ -196,12 +197,26 @@ static int gt_linspace_align_arguments_check(GT_UNUSED int rest_argc,
   return had_err;
 }
 
-static void show(const GtUchar* useq, const GtUchar *vseq,
+static void print_sequence(const GtUchar *seq, const GtUword len, FILE *fp)
+{
+  GtUword i = 0;
+  fprintf(fp, "#\n");
+  do{
+    fprintf(fp, "%.80s\n",seq+i);
+    i += 80;
+  }while (i < len);
+}
+
+static void show(const GtUchar *useq, const GtUword ulen,
+                 const GtUchar *vseq, const GtUword vlen,
                  const GtAlignment *align, FILE *fp)
 {
   if (fp != NULL)
   {
-    fprintf(fp,"# two sequences \"%s\" \"%s\"\n", useq, vseq);
+    //fprintf(fp,"# two sequences\n");
+    print_sequence(useq, ulen, fp);
+    fprintf(fp, "#\n");
+    print_sequence(vseq, vlen, fp);
     gt_alignment_show(align, fp, 80);
   }
 
@@ -377,13 +392,13 @@ static int gt_linspace_align_runner(GT_UNUSED int argc,
       /* show */
       gt_assert(align != NULL);
       if (!strcmp(gt_str_get(arguments->outputfile),"stdout"))
-        show(useq, vseq,align,stdout);
+        show(useq, ulen, vseq, vlen, align, stdout);
       else
       {
         fp = gt_fa_fopen_func(gt_str_get(arguments->outputfile),
                               "a", __FILE__,__LINE__,err);
         gt_error_check(err);
-        show(useq, vseq,align,fp);
+        show(useq, ulen, vseq, vlen, align, fp);
         gt_fa_fclose(fp);
       }
       
