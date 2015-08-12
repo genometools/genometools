@@ -200,7 +200,7 @@ static int gt_linspace_align_arguments_check(GT_UNUSED int rest_argc,
 static void print_sequence(const GtUchar *seq, const GtUword len, FILE *fp)
 {
   GtUword i = 0;
-  fprintf(fp, "#\n");
+  fprintf(fp, "######\n");
   do{
     fprintf(fp, "%.80s\n",seq+i);
     i += 80;
@@ -213,11 +213,13 @@ static void show(const GtUchar *useq, const GtUword ulen,
 {
   if (fp != NULL)
   {
-    //fprintf(fp,"# two sequences\n");
+    /*fprintf(fp,"# two sequences \"%s\" \"%s\"\n", useq, vseq);*/
     print_sequence(useq, ulen, fp);
-    fprintf(fp, "#\n");
     print_sequence(vseq, vlen, fp);
+    fprintf(fp, "######\n");
+
     gt_alignment_show(align, fp, 80);
+    gt_alignment_eval_with_score(align, 0,1,1);
   }
 
 }

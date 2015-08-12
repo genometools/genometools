@@ -36,15 +36,15 @@ void reconstructalignment_from_Ctab(GtAlignment *align,
   for (i = vlen; i > 0; i--) {
     if (Ctab[i] == Ctab[i-1] + 1)
     {
-      if(Ctab[i-2] == Ctab[i-1])
+      if (i > 1 && Ctab[i-2] == Ctab[i-1])
         indel = 2*gap_extension + gap_opening;
       else
         indel = (2*gap_extension + 2*gap_opening);
-      if(vseq[vstart+i-1]==useq[ustart+Ctab[i]-1])
+      if (vseq[vstart+i-1]==useq[ustart+Ctab[i]-1])
         repl = matchcost;
       else
         repl = mismatchcost;
-      if(indel>repl)
+      if (indel>repl)
         gt_alignment_add_replacement(align);
       else
       {
@@ -59,15 +59,15 @@ void reconstructalignment_from_Ctab(GtAlignment *align,
       for (j = 0; j < (Ctab[i]-Ctab[i-1])-1; j++)
        gt_alignment_add_deletion(align);
       /*replacmente or insertion+deletion*/
-      if(Ctab[i-2] == Ctab[i-1])
+      if (i > 1 && Ctab[i-2] == Ctab[i-1])
         indel = 2*gap_extension;
       else
         indel = (2*gap_extension+gap_opening);
-      if(vseq[vstart+i-1]==useq[ustart+Ctab[i]-j-1])
+      if (vseq[vstart+i-1]==useq[ustart+Ctab[i]-j-1])
         repl = matchcost;
       else
         repl = mismatchcost;
-      if(indel>repl)
+      if (indel>repl)
         gt_alignment_add_replacement(align);
       else
       {

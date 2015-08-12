@@ -313,7 +313,7 @@ int gt_paircmp(int argc, const char **argv, GtError *err)
               testcases);
       testcases = applycheckfunctiontosimpleoptions(gt_checkaffinelinearspace_local,
                                                     &cmppairwise);
-      printf("# number of testcases for gt_checkaffinelinearspace: " GT_WU "\n",
+      printf("# number of testcases for gt_checkaffinelinearspace_local: " GT_WU "\n",
               testcases);
     }
   }

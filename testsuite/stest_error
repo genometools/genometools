@@ -1,9 +1,0 @@
-Test 587 'gt linspace_align global lin gap test 1': error:
-could not create test dir 'stest_testsuite/test587':
-/work/stud2014/aseidel/workspace/genometools/testsuite/stest.rb:110:in `rescue in setup_dir'
-/work/stud2014/aseidel/workspace/genometools/testsuite/stest.rb:102:in `setup_dir'
-/work/stud2014/aseidel/workspace/genometools/testsuite/stest.rb:175:in `block in test'
-/work/stud2014/aseidel/workspace/genometools/testsuite/stest.rb:165:in `fork'
-/work/stud2014/aseidel/workspace/genometools/testsuite/stest.rb:165:in `test'
-/work/stud2014/aseidel/workspace/genometools/testsuite/stest.rb:120:in `process'
-/work/stud2014/aseidel/workspace/genometools/testsuite/stest.rb:34:in `block (2 levels) in run'
