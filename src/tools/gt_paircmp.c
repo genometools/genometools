@@ -282,8 +282,8 @@ int gt_paircmp(int argc, const char **argv, GtError *err)
                                         len1,
                                         (const GtUchar *) gt_str_get(s2),
                                         len2);
-      printf(GT_WU " " GT_WU " " GT_WU " " GT_WU "%% errors\n", edist, len1,
-             len2,(200 * edist)/(len1+len2));
+      printf(GT_WU " " GT_WU " " GT_WU " " GT_WU "%% errors\n", 
+             edist, len1,len2,(200 * edist)/(len1+len2));
     }
     else if (cmppairwise.print)
     {
@@ -306,6 +306,14 @@ int gt_paircmp(int argc, const char **argv, GtError *err)
       testcases = applycheckfunctiontosimpleoptions(gt_checklinearspace_local,
                                                     &cmppairwise);
       printf("# number of testcases for gt_checklinearspace_local: " GT_WU "\n",
+              testcases);
+      testcases = applycheckfunctiontosimpleoptions(gt_checkaffinelinearspace,
+                                                    &cmppairwise);
+      printf("# number of testcases for gt_checkaffinelinearspace: " GT_WU "\n",
+              testcases);
+      testcases = applycheckfunctiontosimpleoptions(gt_checkaffinelinearspace_local,
+                                                    &cmppairwise);
+      printf("# number of testcases for gt_checkaffinelinearspace: " GT_WU "\n",
               testcases);
     }
   }

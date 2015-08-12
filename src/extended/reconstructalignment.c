@@ -57,7 +57,7 @@ void reconstructalignment_from_Ctab(GtAlignment *align,
     else if (Ctab[i] > Ctab[i-1]) {
       indel = 0; repl = 0;
       for (j = 0; j < (Ctab[i]-Ctab[i-1])-1; j++)
-        gt_alignment_add_deletion(align);
+       gt_alignment_add_deletion(align);
       /*replacmente or insertion+deletion*/
       if(Ctab[i-2] == Ctab[i-1])
         indel = 2*gap_extension;

@@ -994,13 +994,14 @@ void gt_checkaffinelinearspace(GT_UNUSED bool forward,
                                              vseq, 0, vlen,
                                              align_linear, 0, 4, 4, 1);
   affine_score2 = gt_alignment_eval_with_affine_score(align_linear,0,4,4,1);
+    align_square = gt_affinealign((const char *)useq, ulen,
+                                (const char *)vseq, vlen,0,4,4,1);
 
   if (affine_score1 != affine_score2)
   {
     fprintf(stderr,"gt_calc_affinealign_linear = "GT_WU" != "GT_WU
             " = gt_alignment_eval_with_affine_score\n", affine_score1,
                                                         affine_score2);
-    gt_alignment_show(align_linear,stderr,80);
     exit(GT_EXIT_PROGRAMMING_ERROR);
   }
 
@@ -1012,10 +1013,8 @@ void gt_checkaffinelinearspace(GT_UNUSED bool forward,
   {
     fprintf(stderr,"gt_calc_affinealign_linear = "GT_WU" != "GT_WU
             " = gt_affinealign\n", affine_score1, affine_score3);
-    gt_alignment_show(align_linear,stderr,80);
     exit(GT_EXIT_PROGRAMMING_ERROR);
   }
-
   gt_alignment_delete(align_linear);
   gt_alignment_delete(align_square);
 }

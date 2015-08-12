@@ -280,8 +280,6 @@ GtWord gt_alignment_eval_with_affine_score(const GtAlignment *alignment,
 
   meoplen = gt_multieoplist_get_num_entries(alignment->eops);
 
-   meoplen = gt_multieoplist_get_num_entries(alignment->eops);
-
   for (i = meoplen; i > 0; i--) {
     meop = gt_multieoplist_get_entry(alignment->eops, i-1);
     switch (meop.type) {
@@ -293,23 +291,40 @@ GtWord gt_alignment_eval_with_affine_score(const GtAlignment *alignment,
               ISNOTSPECIAL(alignment->u[idx_u])) {
             sumscore += matchscore;
           }
-          else {
+          else
             sumscore += mismatchscore;
-          }
+          
           idx_u++;
           idx_v++;
         }
         break;
       case Deletion:
-        sumscore += gap_extension * meop.steps + gap_opening;
+        if(i < meoplen)
+        {
+          if(gt_multieoplist_get_entry(alignment->eops, i).type == Deletion)
+            sumscore += gap_extension * meop.steps;
+          else
+            sumscore += gap_extension * meop.steps + gap_opening;
+        }
+        else
+          sumscore += gap_extension * meop.steps + gap_opening;
         idx_u += meop.steps;
         break;
       case Insertion:
-        sumscore += gap_extension * meop.steps + gap_opening;
+        if(i < meoplen)
+        {
+          if (gt_multieoplist_get_entry(alignment->eops, i).type == Insertion)
+            sumscore += gap_extension * meop.steps;
+          else
+            sumscore += gap_extension * meop.steps + gap_opening;
+        }
+        else
+          sumscore += gap_extension * meop.steps + gap_opening;
         idx_v += meop.steps;
         break;
     }
   }
+
   return sumscore;
 }
 static inline unsigned int gt_alignment_show_advance(unsigned int pos,
