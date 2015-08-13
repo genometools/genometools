@@ -381,6 +381,10 @@ static int genome_node_lua_add_child(lua_State *L)
   luaL_argcheck(L, pf, 1, "not a feature node");
   cf = gt_feature_node_try_cast(*child);
   luaL_argcheck(L, cf, 2, "not a feature node");
+  luaL_argcheck(L,
+               !strcmp(gt_str_get(gt_genome_node_get_seqid((GtGenomeNode*) pf)),
+                      gt_str_get(gt_genome_node_get_seqid((GtGenomeNode*) cf))),
+                2, "has a sequence ID different to the one of its parent");
   gt_feature_node_add_child(pf, (GtFeatureNode*)
                                 gt_genome_node_ref((GtGenomeNode*) cf));
   return 0;

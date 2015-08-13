@@ -72,6 +72,13 @@ rval, fn = pcall(gn.get_filename, gn)
 assert(rval)
 assert(string.find(fn, "^generated$"))
 
+-- testing feature_node:add_child
+parent = gt.feature_node_new("seqid", "gene", range:get_start(), range:get_end(), "+")
+child  = gt.feature_node_new("seqid2", "exon", range:get_start(), range:get_end(), "+")
+rval, err = pcall(GenomeTools_genome_node.add_child, parent, child)
+assert(not rval)
+assert(string.find(err, "sequence ID different"))
+
 -- testing genome_node:remove_leaf
 -- testing removal of leaves which are direct children
 parent = gt.feature_node_new("seqid", "gene", range:get_start(), range:get_end(), "+")
