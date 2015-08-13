@@ -207,13 +207,6 @@ static GtOptionParser *gt_repfind_option_parser_new(void *tool_arguments)
                                      false);
   gt_option_parser_add_option(op, reverseoption);
 
-  sampleoption = gt_option_new_uword_min("samples","Specify number of samples",
-                                         &arguments->samples,
-                                         0,
-                                         1UL);
-  gt_option_is_development_option(sampleoption);
-  gt_option_parser_add_option(op, sampleoption);
-
   seedlengthoption = gt_option_new_uint_min("seedlength",
                                              "Specify minimum length of seed",
                                              &arguments->seedlength,
@@ -221,12 +214,6 @@ static GtOptionParser *gt_repfind_option_parser_new(void *tool_arguments)
                                              1UL);
   gt_option_parser_add_option(op, seedlengthoption);
   arguments->refseedlengthoption = gt_option_ref(seedlengthoption);
-
-  spmoption = gt_option_new_bool("spm","Search for suffix prefix matches",
-                                       &arguments->searchspm,
-                                       false);
-  gt_option_is_development_option(spmoption);
-  gt_option_parser_add_option(op, spmoption);
 
   extendxdropoption
     = gt_option_new_uword_min_max("extendxdrop",
@@ -258,15 +245,6 @@ static GtOptionParser *gt_repfind_option_parser_new(void *tool_arguments)
   gt_option_argument_is_optional(extendgreedyoption);
   gt_option_parser_add_option(op, extendgreedyoption);
   arguments->refextendgreedyoption = gt_option_ref(extendgreedyoption);
-
-  check_extend_symmetry_option
-    = gt_option_new_bool("check_extend_symmetry",
-                         "check that left/right greedy extension is symmetric "
-                         "for sequences mirror around seed",
-                         &arguments->check_extend_symmetry,
-                         false);
-  gt_option_parser_add_option(op, check_extend_symmetry_option);
-  gt_option_is_development_option(check_extend_symmetry_option);
 
   errorpercentageoption
     = gt_option_new_uword_min_max("err","Specify error percentage of matches "
@@ -309,6 +287,7 @@ static GtOptionParser *gt_repfind_option_parser_new(void *tool_arguments)
                                   0,
                                   64);
   gt_option_parser_add_option(op, historyoption);
+  gt_option_is_development_option(historyoption);
 
   percmathistoryoption
     = gt_option_new_uword_min_max("percmathistory",
@@ -319,12 +298,6 @@ static GtOptionParser *gt_repfind_option_parser_new(void *tool_arguments)
                                   100);
   gt_option_parser_add_option(op, percmathistoryoption);
   gt_option_is_development_option(percmathistoryoption);
-
-  scanoption = gt_option_new_bool("scan","scan index rather than mapping "
-                                         "it to main memory",
-                                  &arguments->scanfile,
-                                  false);
-  gt_option_parser_add_option(op, scanoption);
 
   option = gt_option_new_string("ii",
                                 "Specify input index",
@@ -338,29 +311,58 @@ static GtOptionParser *gt_repfind_option_parser_new(void *tool_arguments)
   gt_option_parser_add_option(op, char_access_mode_option);
   gt_option_is_development_option(char_access_mode_option);
 
+  option = gt_option_new_bool("silent","do not report matches",
+                               &arguments->silent, false);
+  gt_option_parser_add_option(op, option);
+  gt_option_is_development_option(option);
+
+  /* the following option are options special to repfind */
+
   queryoption = gt_option_new_filename_array("q",
                                              "Specify query files",
                                              arguments->queryfiles);
   gt_option_is_development_option(queryoption);
   gt_option_parser_add_option(op, queryoption);
 
-  option = gt_option_new_bool("silent","do not report matches",
-                               &arguments->silent, false);
-  gt_option_parser_add_option(op, option);
-  gt_option_is_development_option(option);
+  sampleoption = gt_option_new_uword_min("samples","Specify number of samples",
+                                         &arguments->samples,
+                                         0,
+                                         1UL);
+  gt_option_is_development_option(sampleoption);
+  gt_option_parser_add_option(op, sampleoption);
+
+  spmoption = gt_option_new_bool("spm","Search for suffix prefix matches",
+                                       &arguments->searchspm,
+                                       false);
+  gt_option_is_development_option(spmoption);
+  gt_option_parser_add_option(op, spmoption);
+
+  check_extend_symmetry_option
+    = gt_option_new_bool("check_extend_symmetry",
+                         "check that left/right greedy extension is symmetric "
+                         "for sequences mirror around seed",
+                         &arguments->check_extend_symmetry,
+                         false);
+  gt_option_parser_add_option(op, check_extend_symmetry_option);
+  gt_option_is_development_option(check_extend_symmetry_option);
+
+  scanoption = gt_option_new_bool("scan","scan index rather than map "
+                                         "it to main memory",
+                                  &arguments->scanfile,
+                                  false);
+  gt_option_parser_add_option(op, scanoption);
 
   option = gt_option_new_bool("v","be verbose",&arguments->beverbose, false);
   gt_option_parser_add_option(op, option);
 
-  gt_option_exclude(extendgreedyoption,extendxdropoption);
   gt_option_exclude(queryoption,sampleoption);
   gt_option_exclude(queryoption,scanoption);
   gt_option_exclude(queryoption,reverseoption);
   gt_option_exclude(queryoption,spmoption);
-  gt_option_exclude(reverseoption,spmoption);
-  gt_option_exclude(errorpercentageoption,minidentityoption);
-  gt_option_exclude(queryoption,spmoption);
   gt_option_exclude(sampleoption,spmoption);
+  gt_option_exclude(reverseoption,spmoption);
+  gt_option_exclude(extendgreedyoption,extendxdropoption);
+  gt_option_exclude(errorpercentageoption,minidentityoption);
   gt_option_imply(xdropbelowoption,extendxdropoption);
   gt_option_imply(char_access_mode_option,extendgreedyoption);
   gt_option_imply(historyoption,extendgreedyoption);
