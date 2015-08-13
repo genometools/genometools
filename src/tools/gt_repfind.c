@@ -56,7 +56,7 @@ typedef struct
           extendgreedy; /* determines which of the tables in
                            seed-extend-params.h is used */
   bool scanfile, beverbose, forward, reverse, searchspm,
-       check_extend_symmetry, silent;
+       check_extend_symmetry, silent, trimstat;
   GtStr *indexname, *cam_string; /* parse this using
                                     gt_greedy_extend_char_access*/
   GtStrArray *queryfiles;
@@ -181,11 +181,11 @@ static GtOptionParser *gt_repfind_option_parser_new(void *tool_arguments)
            *spmoption, *seedlengthoption, *minidentityoption,
            *maxalilendiffoption, *leastlength_option, *char_access_mode_option,
            *check_extend_symmetry_option, *xdropbelowoption, *historyoption,
-           *percmathistoryoption, *errorpercentageoption;
+           *percmathistoryoption, *errorpercentageoption, *optiontrimstat;
   Maxpairsoptions *arguments = tool_arguments;
 
   op = gt_option_parser_new("[options] -ii indexname",
-                            "Compute maximal repeats.");
+                                  "Compute maximal repeats (and more).");
   gt_option_parser_set_mail_address(op,"<kurtz@zbh.uni-hamburg.de>");
 
   leastlength_option
@@ -316,6 +316,11 @@ static GtOptionParser *gt_repfind_option_parser_new(void *tool_arguments)
   gt_option_parser_add_option(op, option);
   gt_option_is_development_option(option);
 
+  optiontrimstat = gt_option_new_bool("trimstat","show trimming statistics",
+                                      &arguments->trimstat, false);
+  gt_option_parser_add_option(op, optiontrimstat);
+  gt_option_is_development_option(optiontrimstat);
+
   /* the following option are options special to repfind */
 
   queryoption = gt_option_new_filename_array("q",
@@ -352,7 +357,7 @@ static GtOptionParser *gt_repfind_option_parser_new(void *tool_arguments)
                                   false);
   gt_option_parser_add_option(op, scanoption);
 
-  option = gt_option_new_bool("v","be verbose",&arguments->beverbose, false);
+  option = gt_option_new_verbose(&arguments->beverbose);
   gt_option_parser_add_option(op, option);
 
   gt_option_exclude(queryoption,sampleoption);
@@ -368,6 +373,7 @@ static GtOptionParser *gt_repfind_option_parser_new(void *tool_arguments)
   gt_option_imply(historyoption,extendgreedyoption);
   gt_option_imply(maxalilendiffoption,extendgreedyoption);
   gt_option_imply(percmathistoryoption,extendgreedyoption);
+  gt_option_imply(optiontrimstat,extendgreedyoption);
   gt_option_imply_either_2(seedlengthoption,extendxdropoption,
                            extendgreedyoption);
   gt_option_imply_either_2(minidentityoption,extendxdropoption,
@@ -536,6 +542,10 @@ static int gt_repfind_runner(int argc,
       if (arguments->silent)
       {
         gt_greedy_extend_matchinfo_silent_set(greedyextendmatchinfo);
+      }
+      if (arguments->trimstat)
+      {
+        gt_greedy_extend_matchinfo_trimstat_set(greedyextendmatchinfo);
       }
     }
   }

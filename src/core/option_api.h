@@ -96,15 +96,15 @@ void            gt_option_parser_register_hook(GtOptionParser *option_parser,
                                                GtOptionParserHookFunc
                                                hook_function,
                                                void *data);
-/* The the <minimum> number of additional command line arguments <option_parser>
+/* The <minimum> number of additional command line arguments <option_parser>
    must parse in order to succeed. */
 void            gt_option_parser_set_min_args(GtOptionParser *option_parser,
                                               unsigned int minimum);
-/* The the <maximum> number of additional command line arguments <option_parser>
+/* The <maximum> number of additional command line arguments <option_parser>
    must parse in order to succeed. */
 void            gt_option_parser_set_max_args(GtOptionParser *option_parser,
                                               unsigned int maximum);
-/* The the <minimum> and <maximum> number of additional command line arguments
+/* The <minimum> and <maximum> number of additional command line arguments
    <option_parser> must parse in order to succeed. */
 void            gt_option_parser_set_min_max_args(GtOptionParser *option_parser,
                                                   unsigned int minimum,

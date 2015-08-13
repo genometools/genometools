@@ -177,6 +177,10 @@ void gt_greedy_extend_matchinfo_check_extend_symmetry_set(
 
 void gt_greedy_extend_matchinfo_silent_set(GtGreedyextendmatchinfo *ggemi);
 
+/* Set the silent trimstat in the matchinfo object. */
+
+void gt_greedy_extend_matchinfo_trimstat_set(GtGreedyextendmatchinfo *ggemi);
+
 /* Set the verbose flag in the matchinfo object. */
 
 void gt_greedy_extend_matchinfo_verbose_set(GtGreedyextendmatchinfo *ggemi);

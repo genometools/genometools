@@ -602,8 +602,14 @@ void gt_greedy_extend_matchinfo_check_extend_symmetry_set(
 
 void gt_greedy_extend_matchinfo_silent_set(GtGreedyextendmatchinfo *ggemi)
 {
-  gt_assert(ggemi != NULL && ggemi->trimstat == NULL);
+  gt_assert(ggemi != NULL);
   ggemi->silent = true;
+}
+
+void gt_greedy_extend_matchinfo_trimstat_set(GtGreedyextendmatchinfo *ggemi)
+{
+  gt_assert(ggemi != NULL && ggemi->perc_mat_history > 0 &&
+            ggemi->maxalignedlendifference > 0 && ggemi->trimstat == NULL);
   ggemi->trimstat = trimstat_new(ggemi->errorpercentage,
                                  ggemi->perc_mat_history,
                                  ggemi->maxalignedlendifference);
