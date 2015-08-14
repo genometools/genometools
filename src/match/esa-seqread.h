@@ -35,6 +35,7 @@ struct Sequentialsuffixarrayreader
   const ESASuffixptr *suftab;
   const GtEncseq *encseq;
   bool scanfile;
+  void *extrainfo;
   GtReadmode readmode;
 };
 

@@ -20,12 +20,17 @@
 
 #include "core/logger_api.h"
 #include "core/error_api.h"
+#include "match/lcpinterval.h"
 
-int gt_runenumlcpvalues(const char *inputindex,
-                        bool outedges,
-                        bool bottomup,
-                        GtLogger *logger,
-                        GtError *err);
+int gt_runenumlcpvalues_bottomup(const char *inputindex,
+                                 GtLogger *logger,
+                                 GtError *err);
+
+int gt_runenumlcpvalues_process(const char *inputindex,
+                             int (*processfunction)(void *,const Lcpinterval *),
+                             void *processdata,
+                             GtLogger *logger,
+                             GtError *err);
 
 int gt_runscanesa(const char *inputindex, unsigned int mode,
                   GtLogger *logger,GtError *err);

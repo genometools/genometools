@@ -45,6 +45,7 @@ typedef struct
   GtXdropscore xdropbelowscore;
   GtUword samples,
           extendxdrop,
+          maxfreq,
           history,        /* number of bits used for history of alignments */
           perc_mat_history, /* percent of matches in history */
           minidentity, /* We prefer to specify the minidentity. The use of the
@@ -214,6 +215,14 @@ static GtOptionParser *gt_repfind_option_parser_new(void *tool_arguments)
                                              1UL);
   gt_option_parser_add_option(op, seedlengthoption);
   arguments->refseedlengthoption = gt_option_ref(seedlengthoption);
+
+  option = gt_option_new_uword_min("maxfreq",
+                                   "Specify maximal frequency of maximal exact "
+                                   "matches in reference sequence",
+                                   &arguments->maxfreq,
+                                   0,
+                                   2UL);
+  gt_option_parser_add_option(op, option);
 
   extendxdropoption
     = gt_option_new_uword_min_max("extendxdrop",
@@ -586,6 +595,7 @@ static int gt_repfind_runner(int argc,
           }
           if (gt_callenummaxpairs(gt_str_get(arguments->indexname),
                                   arguments->seedlength,
+                                  arguments->maxfreq,
                                   arguments->scanfile,
                                   processmaxpairs,
                                   processmaxpairsdata,

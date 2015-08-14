@@ -1403,6 +1403,14 @@ static int gt_sfxmap_run_diffcover_check(const Sfxmapoptions *arguments,
   return had_err;
 }
 
+static int showlcpinterval(GT_UNUSED void *data,const Lcpinterval *lcpinterval)
+{
+  printf("N "GT_WU" "GT_WU" "GT_WU"\n",lcpinterval->offset,
+                           lcpinterval->left,
+                           lcpinterval->right);
+  return 0;
+}
+
 static int gt_sfxmap_runner(GT_UNUSED int argc,
                             GT_UNUSED const char **argv,
                             GT_UNUSED int parsed_args,
@@ -1472,12 +1480,23 @@ static int gt_sfxmap_runner(GT_UNUSED int argc,
   if (!haserr && (arguments->enumlcpitvs || arguments->enumlcpitvtree ||
                   arguments->enumlcpitvtreeBU))
   {
-    if (gt_runenumlcpvalues(gt_str_get(arguments->esaindexname),
-                            arguments->enumlcpitvs ? false : true,
-                            arguments->enumlcpitvtreeBU,
-                            logger, err) != 0)
+    if (arguments->enumlcpitvtreeBU)
     {
-      haserr = true;
+      if (gt_runenumlcpvalues_bottomup(gt_str_get(arguments->esaindexname),
+                                       logger, err) != 0)
+      {
+        haserr = true;
+      }
+    } else
+    {
+      if (gt_runenumlcpvalues_process(gt_str_get(arguments->esaindexname),
+                                      arguments->enumlcpitvs ? showlcpinterval
+                                                             : NULL,
+                                      NULL,
+                                     logger, err) != 0)
+      {
+        haserr = true;
+      }
     }
   }
   if (!haserr && arguments->scanesa > 0)

@@ -6,6 +6,7 @@ SC=scripts/gen-esa-bottomup.rb
 ${SC} --key maxpairs --reader \
                      --absolute \
                      --sa_reader_sain \
+                     --fatherwithlb \
                      --no_process_lcpinterval > ${TEMPLATE}-maxpairs.inc
 
 ${SC} --key spmsk --no_process_branchingedge > ${TEMPLATE}-spmsk.inc

@@ -21,6 +21,7 @@ def parseargs(argv)
   options.sa_reader_standard = true
   options.nodeclarations = false
   options.additionaluint32bucket = false
+  options.fatherwithlb = false
   opts = OptionParser.new
   opts.on("-k","--key STRING","use given key as suffix for all symbols") do |x|
     options.key = x
@@ -33,6 +34,9 @@ def parseargs(argv)
   end
   opts.on("--no_process_branchingedge","no processbranchingedge function") do |x|
     options.with_process_branching = false
+  end
+  opts.on("--fatherwithlb","add lb argument to father for processbranchingedge") do |x|
+    options.fatherwithlb = true
   end
   opts.on("--no_process_lcpinterval","no processlcpinterval function") do |x|
     options.with_process_lcpinterval = false
@@ -95,6 +99,15 @@ def previoussuffix_param_get(width,options)
   return previoussuffix_expr_get(width,"previoussuffix",options)
 end
 
+def processbranching_fatherparams(key,options)
+  if options.fatherwithlb
+    return "TOP_ESA_BOTTOMUP_#{key}.lcp,
+            TOP_ESA_BOTTOMUP_#{key}.lb"
+  else
+    return "TOP_ESA_BOTTOMUP_#{key}.lcp"
+  end
+end
+
 def processbranching_call1(key,options)
   if options.with_process_branching
     return "if (TOP_ESA_BOTTOMUP_#{key}.lcp > 0 || !firstedgefromroot)
@@ -106,7 +119,7 @@ def processbranching_call1(key,options)
           firstedgefromroot = false;
         }
         if (processbranchingedge_#{key}(firstedge,
-               TOP_ESA_BOTTOMUP_#{key}.lcp,
+               #{processbranching_fatherparams(key,options)},
                &TOP_ESA_BOTTOMUP_#{key}.info,
                lastinterval->lcp,
                lastinterval->rb - lastinterval->lb + 1,
@@ -131,7 +144,7 @@ def processbranching_call2(key,options)
               lastintervalrb = lastinterval->rb;
         PUSH_ESA_BOTTOMUP_#{key}(lcpvalue,lastintervallb);
         if (processbranchingedge_#{key}(true,
-                       TOP_ESA_BOTTOMUP_#{key}.lcp,
+                       #{processbranching_fatherparams(key,options)},
                        &TOP_ESA_BOTTOMUP_#{key}.info,
                        lastintervallcp,
                        lastintervalrb - lastintervallb + 1,
@@ -304,9 +317,9 @@ end
 
 def processbranchingedge_decl(key,options)
   if options.with_process_branching
-    return "static int processbranchingedge_#{key}(bool firstsucc,
-    GtUword,
-    GtBUinfo_#{key} *,
+    return "static int processbranchingedge_#{key}(bool firstsucc," +
+        (if options.fatherwithlb then "GtUword,GtUword,\n" else "\n    GtUword,\n    " end) +
+    "GtBUinfo_#{key} *,
     GtUword,
     GtUword,
     GtBUinfo_#{key} *,

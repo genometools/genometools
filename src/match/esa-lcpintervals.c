@@ -129,32 +129,25 @@ static void assignrightmostleaf_elcp(Dfsinfo *adfsinfo,
   ((Lcpinterval *) adfsinfo)->right = currentindex;
 }
 
-static int gt_processlcpintervals(bool outedges,
-                                  Sequentialsuffixarrayreader *ssar,
-                                  int (*processfunction)(void *,
-                                                         const Lcpinterval *),
-                                  void *processinfo,
-                                  GtLogger *logger,
-                                  GtError *err)
+int gt_processlcpintervals(Sequentialsuffixarrayreader *ssar,
+                           int (*processfunction)(void *,const Lcpinterval *),
+                           void *processinfo,
+                           GtLogger *logger,
+                           GtError *err)
 {
   Elcpstate *state;
   bool haserr = false;
 
   state = gt_malloc(sizeof (*state));
-  if (outedges)
-  {
-    state->processlcpinterval = NULL;
-    state->processinfo = NULL;
-  } else
-  {
-    state->processlcpinterval = processfunction;
-    state->processinfo = processinfo;
-  }
+  state->processlcpinterval = processfunction;
+  state->processinfo = processinfo;
   if (gt_depthfirstesa(ssar,
                        allocateDfsinfo_elcp,
                        freeDfsinfo_elcp,
-                       outedges ? processleafedge_elcp : NULL,
-                       outedges ? processbranchedge_elcp : NULL,
+                       state->processlcpinterval == NULL
+                         ? processleafedge_elcp : NULL,
+                       state->processlcpinterval == NULL
+                         ? processbranchedge_elcp : NULL,
                        processcompletenode_elcp,
                        assignleftmostleaf_elcp,
                        assignrightmostleaf_elcp,
@@ -180,19 +173,9 @@ static int gt_processlcpintervals(bool outedges,
   return haserr ? -1 : 0;
 }
 
-static int showlcpinterval(GT_UNUSED void *data,const Lcpinterval *lcpinterval)
-{
-  printf("N "GT_WU" "GT_WU" "GT_WU"\n",lcpinterval->offset,
-                           lcpinterval->left,
-                           lcpinterval->right);
-  return 0;
-}
-
-int gt_runenumlcpvalues(const char *inputindex,
-                        bool outedges,
-                        bool bottomup,
-                        GtLogger *logger,
-                        GtError *err)
+int gt_runenumlcpvalues_bottomup(const char *inputindex,
+                                 GtLogger *logger,
+                                 GtError *err)
 {
   bool haserr = false;
   Sequentialsuffixarrayreader *ssar;
@@ -211,21 +194,47 @@ int gt_runenumlcpvalues(const char *inputindex,
   }
   if (!haserr)
   {
-    if (bottomup)
+    GtESAVisitor *elv = gt_esa_lcpitvs_visitor_new();
+    if (gt_esa_bottomup(ssar, elv, err) != 0)
     {
-      GtESAVisitor *elv = gt_esa_lcpitvs_visitor_new();
-      if (gt_esa_bottomup(ssar, elv, err) != 0)
-      {
-        haserr = true;
-      }
-      gt_esa_visitor_delete(elv);
-    } else
+      haserr = true;
+    }
+    gt_esa_visitor_delete(elv);
+  }
+  if (ssar != NULL)
+  {
+    gt_freeSequentialsuffixarrayreader(&ssar);
+  }
+  return haserr ? -1 : 0;
+}
+
+int gt_runenumlcpvalues_process(const char *inputindex,
+                             int (*processfunction)(void *,const Lcpinterval *),
+                             void *processdata,
+                             GtLogger *logger,
+                             GtError *err)
+{
+  bool haserr = false;
+  Sequentialsuffixarrayreader *ssar;
+
+  gt_error_check(err);
+  ssar = gt_newSequentialsuffixarrayreaderfromfile(inputindex,
+                                                   SARR_LCPTAB |
+                                                   SARR_SUFTAB |
+                                                   SARR_ESQTAB,
+                                                   true,
+                                                   logger,
+                                                   err);
+  if (ssar == NULL)
+  {
+    haserr = true;
+  }
+  if (!haserr)
+  {
+    if (gt_processlcpintervals(ssar, processfunction, processdata,
+                               logger, err) != 0)
     {
-      if (gt_processlcpintervals(outedges, ssar, showlcpinterval, NULL,
-                                 logger, err) != 0)
-      {
-        haserr = true;
-      }
+      haserr = true;
     }
   }
   if (ssar != NULL)

@@ -55,6 +55,7 @@ Sequentialsuffixarrayreader *gt_newSequentialsuffixarrayreaderfromfile(
   ssar->numberofsuffixes = gt_encseq_total_length(ssar->encseq) + 1;
   ssar->nonspecials = gt_encseq_total_length(ssar->encseq) -
                       gt_encseq_specialcharacters(ssar->encseq);
+  ssar->extrainfo = NULL;
   return ssar;
 }
 
