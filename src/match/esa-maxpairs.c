@@ -490,7 +490,6 @@ int gt_enumeratemaxpairs_generic(Sequentialsuffixarrayreader *ssar,
   state->searchlength = searchlength;
   state->processmaxpairs = processmaxpairs;
   state->processmaxpairsinfo = processmaxpairsinfo;
-  state->maxfreqcollect = (const GtMaxfreqcollect *) ssar->extrainfo;
   state->nextmaxfreq = 0;
   state->initialized = false;
   if (ssar != NULL)
@@ -502,6 +501,7 @@ int gt_enumeratemaxpairs_generic(Sequentialsuffixarrayreader *ssar,
     state->genericencseq.hasencseq = true;
     state->genericencseq.seqptr.encseq = encseq;
     state->sequence = NULL;
+    state->maxfreqcollect = (const GtMaxfreqcollect *) ssar->extrainfo;
   } else
   {
     const GtBareEncseq *bare_encseq;
@@ -513,6 +513,7 @@ int gt_enumeratemaxpairs_generic(Sequentialsuffixarrayreader *ssar,
     state->genericencseq.hasencseq = false;
     state->genericencseq.seqptr.bare_encseq = bare_encseq;
     state->sequence = gt_bare_encseq_sequence(bare_encseq);
+    state->maxfreqcollect = NULL;
   }
   GT_INITARRAY(&state->uniquechar,GtUword);
   state->poslist = gt_malloc(sizeof (*state->poslist) * state->alphabetsize);
