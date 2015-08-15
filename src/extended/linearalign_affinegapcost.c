@@ -207,7 +207,7 @@ static void nextAtabRtabcolumn(const GtUchar *useq, const GtUword ustart,
 {
   Atabentry Anw, Awe;
   Rtabentry Rnw, Rwe;
-  GtUword rcost, rowindex, Rdist,
+  GtWord rcost, rowindex, Rdist,
           Ddist, Idist, minvalue;
   bool rtab = false;
 
@@ -265,6 +265,12 @@ static void nextAtabRtabcolumn(const GtUchar *useq, const GtUword ustart,
     Atabcolumn[rowindex].Dvalue = minvalue;
     Atabcolumn[rowindex].Dedge = set_edge(Rdist, Ddist, Idist);
 
+    /*if (colindex == midcolumn)
+    {
+      set_Rtabentry(&Rtabcolumn[rowindex].D, &Rtabcolumn[rowindex-1],
+                     Atabcolumn[rowindex].Dedge);
+    }*/
+
     Rdist = add_safe_max(Awe.Rvalue,gap_extension+gap_opening);
     Ddist = add_safe_max(Awe.Dvalue,gap_extension+gap_opening);
     Idist = add_safe_max(Awe.Ivalue,gap_extension);
@@ -303,7 +309,6 @@ static GtUword evaluateallAtabRtabcolumns(const GtUchar *useq,
                                           Edge edge)
 {
   GtUword colindex;
-
   firstAtabRtabcolumn(ulen, Atabcolumn, Rtabcolumn,
                       gap_opening, gap_extension, edge);
 
@@ -594,8 +599,10 @@ GtUword gt_calc_affinealign_linear(const GtUchar *useq, GtUword ustart,
 
     determineCtab0(Ctab, vseq[vstart],useq, ustart,
                    matchcost, mismatchcost, gap_opening);
-
-    reconstructalignment_from_Ctab(align, Ctab, vlen);
+    
+    reconstructalignment_from_Ctab(align,Ctab,useq,ustart,vseq,
+                                   vstart,vlen,matchcost,mismatchcost,
+                                   gap_opening,gap_extension);
 
     gt_free(Ctab);
     gt_free(Atabcolumn);
@@ -985,30 +992,27 @@ void gt_checkaffinelinearspace(GT_UNUSED bool forward,
   align_linear = gt_alignment_new_with_seqs(useq, ulen, vseq, vlen);
   affine_score1 = gt_calc_affinealign_linear(useq, 0, ulen,
                                              vseq, 0, vlen,
-                                             align_linear, 0, 3, 4, 1);
-  affine_score2 = gt_alignment_eval_with_affine_score(align_linear,0,3,4,1);
+                                             align_linear, 0, 4, 4, 1);
+  affine_score2 = gt_alignment_eval_with_affine_score(align_linear,0,4,4,1);
 
   if (affine_score1 != affine_score2)
   {
     fprintf(stderr,"gt_calc_affinealign_linear = "GT_WU" != "GT_WU
             " = gt_alignment_eval_with_affine_score\n", affine_score1,
                                                         affine_score2);
-
     exit(GT_EXIT_PROGRAMMING_ERROR);
   }
 
   align_square = gt_affinealign((const char *)useq, ulen,
-                                (const char *)vseq, vlen,0,3,4,1);
-  affine_score3 = gt_alignment_eval_with_affine_score(align_square,0,3,4,1);
+                                (const char *)vseq, vlen,0,4,4,1);
+  affine_score3 = gt_alignment_eval_with_affine_score(align_square,0,4,4,1);
 
   if (affine_score1 != affine_score3)
   {
     fprintf(stderr,"gt_calc_affinealign_linear = "GT_WU" != "GT_WU
             " = gt_affinealign\n", affine_score1, affine_score3);
-
     exit(GT_EXIT_PROGRAMMING_ERROR);
   }
-
   gt_alignment_delete(align_linear);
   gt_alignment_delete(align_square);
 }

@@ -15,12 +15,12 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef GT_LINEARSPACE_H
-#define GT_LINEARSPACE_H
+#ifndef GT_LINSPACE_ALIGN_H
+#define GT_LINSPACE_ALIGN_H
 
 #include "core/tool_api.h"
 
 /* the linearspace tool */
-GtTool* gt_linearspace(void);
+GtTool* gt_linspace_align(void);
 
 #endif

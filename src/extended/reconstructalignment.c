@@ -19,6 +19,70 @@
 
 void reconstructalignment_from_Ctab(GtAlignment *align,
                                     const GtUword *Ctab,
+                                    const GtUchar *useq,
+                                    const GtUword ustart,
+                                    const GtUchar *vseq,
+                                    const GtUword vstart,
+                                    const GtUword vlen,
+                                    const GtWord matchcost,
+                                    const GtWord mismatchcost,
+                                    const GtWord gap_opening,
+                                    const GtWord gap_extension)
+{
+  GtUword i,j;
+  GtWord indel, repl;
+
+  gt_assert(align != NULL && Ctab != NULL);
+  for (i = vlen; i > 0; i--) {
+    if (Ctab[i] == Ctab[i-1] + 1)
+    {
+      if (i > 1 && Ctab[i-2] == Ctab[i-1])
+        indel = 2*gap_extension + gap_opening;
+      else
+        indel = (2*gap_extension + 2*gap_opening);
+      if (vseq[vstart+i-1]==useq[ustart+Ctab[i]-1])
+        repl = matchcost;
+      else
+        repl = mismatchcost;
+      if (indel>repl)
+        gt_alignment_add_replacement(align);
+      else
+      {
+        gt_alignment_add_deletion(align);
+        gt_alignment_add_insertion(align);
+      }
+    }
+    else if (Ctab[i] == Ctab[i-1])
+      gt_alignment_add_insertion(align);
+    else if (Ctab[i] > Ctab[i-1]) {
+      indel = 0; repl = 0;
+      for (j = 0; j < (Ctab[i]-Ctab[i-1])-1; j++)
+       gt_alignment_add_deletion(align);
+      /*replacmente or insertion+deletion*/
+      if (i > 1 && Ctab[i-2] == Ctab[i-1])
+        indel = 2*gap_extension;
+      else
+        indel = (2*gap_extension+gap_opening);
+      if (vseq[vstart+i-1]==useq[ustart+Ctab[i]-j-1])
+        repl = matchcost;
+      else
+        repl = mismatchcost;
+      if (indel>repl)
+        gt_alignment_add_replacement(align);
+      else
+      {
+        gt_alignment_add_deletion(align);
+        gt_alignment_add_insertion(align);
+      }
+
+    }
+  }
+  for (j = Ctab[0]; j > 0; j--)
+    gt_alignment_add_deletion(align);
+}
+
+/*void reconstructalignment_from_Ctab(GtAlignment *align,
+                                    const GtUword *Ctab,
                                     const GtUword vlen)
 {
   GtUword i,j;
@@ -38,7 +102,7 @@ void reconstructalignment_from_Ctab(GtAlignment *align,
   }
   for (j = Ctab[0]; j > 0; j--)
     gt_alignment_add_deletion(align);
-}
+}*/
 
 GtUword construct_trivial_deletion_alignment(GtAlignment *align,
                                              const GtUword len,
