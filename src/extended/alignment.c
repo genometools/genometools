@@ -274,6 +274,7 @@ GtWord gt_alignment_eval_with_affine_score(const GtAlignment *alignment,
   GtUword i, j, idx_u = 0, idx_v = 0, meoplen;
   GtWord sumscore = 0;
   GtMultieop meop;
+  AlignmentEoptype next_meop_type = Insertion + 1;
 
   gt_assert(alignment != NULL);
   gt_assert(gt_alignment_is_valid(alignment));
@@ -290,43 +291,40 @@ GtWord gt_alignment_eval_with_affine_score(const GtAlignment *alignment,
           if (alignment->u[idx_u] == alignment->v[idx_v] &&
               ISNOTSPECIAL(alignment->u[idx_u])) {
             sumscore += matchscore;
-          }
-          else
+          } else
+          {
             sumscore += mismatchscore;
-          
+          }
           idx_u++;
           idx_v++;
         }
         break;
       case Deletion:
-        if(i < meoplen)
+        if (i < meoplen && next_meop_type == Deletion)
         {
-          if(gt_multieoplist_get_entry(alignment->eops, i).type == Deletion)
-            sumscore += gap_extension * meop.steps;
-          else
-            sumscore += gap_extension * meop.steps + gap_opening;
-        }
-        else
+          sumscore += gap_extension * meop.steps;
+        } else
+        {
           sumscore += gap_extension * meop.steps + gap_opening;
+        }
         idx_u += meop.steps;
         break;
       case Insertion:
-        if(i < meoplen)
+        if (i < meoplen && next_meop_type == Insertion)
         {
-          if (gt_multieoplist_get_entry(alignment->eops, i).type == Insertion)
             sumscore += gap_extension * meop.steps;
-          else
+        } else
+        {
             sumscore += gap_extension * meop.steps + gap_opening;
         }
-        else
-          sumscore += gap_extension * meop.steps + gap_opening;
         idx_v += meop.steps;
         break;
     }
+    next_meop_type = meop.type;
   }
-
   return sumscore;
 }
+
 static inline unsigned int gt_alignment_show_advance(unsigned int pos,
                                                      unsigned int width,
                                                      GtUchar *top,

@@ -311,17 +311,13 @@ GtUword gt_calc_linearalign(const GtUchar *useq,
 {
   GtUword distance, *Ctab, *EDtabcolumn,*Rtabcolumn;
 
-  gt_assert(ustart + ulen <= strlen((const char *)useq));
-  gt_assert(vstart + vlen <= strlen((const char *)vseq));
   if (ulen == 0UL)
   {
-      distance = construct_trivial_insertion_alignment(align,vlen,
-                                                       gapcost);
+    distance = construct_trivial_insertion_alignment(align,vlen,gapcost);
   }
   else if (vlen == 0UL)
   {
-      distance = construct_trivial_deletion_alignment(align,vlen,
-                                                       gapcost);
+    distance = construct_trivial_deletion_alignment(align,vlen,gapcost);
   }
   else if (ulen == 1UL || vlen == 1UL ) {
     distance = alignment_in_square_space(align, useq, ustart, ulen,
@@ -342,7 +338,7 @@ GtUword gt_calc_linearalign(const GtUchar *useq,
                                    mismatchcost, gapcost);
     determineCtab0(Ctab,vseq[vstart],useq, ustart);
 
-    //reconstructalignment_from_Ctab(align, Ctab, vlen);
+    /* reconstructalignment_from_Ctab(align, Ctab, vlen); */
 
     reconstructalignment_from_Ctab(align,Ctab,useq,ustart,vseq,
                                    vstart,vlen,matchcost,mismatchcost,
@@ -540,9 +536,6 @@ GtWord gt_calc_linearalign_local(const GtUchar *useq,
 
   Gtmaxcoordvalue *max;
   GtWord matchcost, mismatchcost, gapcost;
-
-  gt_assert(ustart + ulen <= strlen((const char *)useq));
-  gt_assert(vstart + vlen <= strlen((const char *)vseq));
 
   Ltabcolumn = gt_malloc(sizeof *Ltabcolumn * (ulen+1));
   Starttabcolumn = gt_malloc(sizeof *Starttabcolumn * (ulen+1));

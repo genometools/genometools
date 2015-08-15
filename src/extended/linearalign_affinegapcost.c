@@ -599,7 +599,6 @@ GtUword gt_calc_affinealign_linear(const GtUchar *useq, GtUword ustart,
 
     determineCtab0(Ctab, vseq[vstart],useq, ustart,
                    matchcost, mismatchcost, gap_opening);
-    
     reconstructalignment_from_Ctab(align,Ctab,useq,ustart,vseq,
                                    vstart,vlen,matchcost,mismatchcost,
                                    gap_opening,gap_extension);

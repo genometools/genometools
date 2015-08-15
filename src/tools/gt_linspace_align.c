@@ -256,9 +256,10 @@ static int save_fastasequence(const char *seqpart, GtUword length,
     fasta_seqs->maxsize += 5;
     fasta_seqs->seqarray = gt_realloc(fasta_seqs->seqarray,
                                       fasta_seqs->maxsize*
-                                      sizeof(*fasta_seqs->seqarray));
+                                      sizeof (*fasta_seqs->seqarray));
   }
-  fasta_seqs->seqarray[fasta_seqs->size].seq = gt_malloc(sizeof(char)*(length+1));
+  fasta_seqs->seqarray[fasta_seqs->size].seq
+    = gt_malloc(sizeof(char)*(length+1));
   memcpy(fasta_seqs->seqarray[fasta_seqs->size].seq, seqpart, length+1);
   fasta_seqs->seqarray[fasta_seqs->size].len = length;
   fasta_seqs->size++;
@@ -403,7 +404,6 @@ static int gt_linspace_align_runner(GT_UNUSED int argc,
         show(useq, ulen, vseq, vlen, align, fp);
         gt_fa_fclose(fp);
       }
-      
       gt_alignment_delete(align);
     }
   }
