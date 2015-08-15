@@ -112,7 +112,7 @@ if $gttestdata then
   extendexception = ["hs5hcmvcg.fna","Wildcards.fna","at1MB"]
   repfindtestfiles.each do |reffile|
     Name "gt repfind #{reffile}"
-    Keywords "gt_repfind gttestdata"
+    Keywords "gt_repfind_gttestdata"
     Test do
       withextend = if extendexception.member?(reffile) then false else true end
       checkrepfind(reffile,withextend)
@@ -120,7 +120,7 @@ if $gttestdata then
     repfindtestfiles.each do |queryfile|
       if reffile != queryfile
         Name "gt repfind #{reffile} versus #{queryfile}"
-        Keywords "gt_repfind gttestdata"
+        Keywords "gt_repfind_gttestdata"
         Test do
           checkrepfindwithquery(reffile,queryfile)
         end

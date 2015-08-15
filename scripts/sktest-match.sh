@@ -42,10 +42,10 @@ then
     fi
   done
   env -i GT_MEM_BOOKKEEPING=on GTTESTDATA=${HOME}/gttestdata ${program} \
-       -keywords 'gt_repfind and gttestdata' \
+       -keywords 'gt_repfind_gttestdata' \
        -gttestdata ${GTTESTDATA}
   env -i GT_MEM_BOOKKEEPING=on GTTESTDATA=${HOME}/gttestdata ${program} \
-       -keywords 'gt_greedyfwdmat and gttestdata' \
+       -keywords 'gt_greedyfwdmat_gttestdata' \
        -gttestdata ${GTTESTDATA}
   cd ..
 fi

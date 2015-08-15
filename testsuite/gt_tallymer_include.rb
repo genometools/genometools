@@ -1,6 +1,6 @@
 def runtyrmkifail(args)
   inputfile = "#{$testdata}Duplicate.fna"
-  Name "gt tallymer mkindex failure"
+  Name "gt tallymer mkindex failure #{args}"
   Keywords "gt_tallymer mkindex"
   Test do
     run_test "#{$bin}gt suffixerator -db #{inputfile} -tis " +

@@ -274,7 +274,7 @@ Test do
 end
 
 def check_shulen_for_list_pairwise(list)
-  Name "gt genomediff pairwise test"
+  Name "gt genomediff pairwise test filelistlength=#{list.length}"
   Keywords "gt_genomediff pairwise esa pck check_shulen"
   Test do
     start_idx = 1

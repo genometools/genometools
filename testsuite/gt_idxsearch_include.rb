@@ -164,7 +164,7 @@ allfiles.each do |reffile|
 end
 
 Name "gt matstat/uniquesub at1MB U8"
-Keywords "gt_greedyfwdmat gt_matstat gt_uniquesub gttestdata"
+Keywords "gt_greedyfwdmat"
 Test do
   createandcheckgreedyfwdmat("#{$testdata}at1MB",
                              "#{$testdata}U89959_genomic.fas")
