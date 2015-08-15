@@ -1,16 +1,16 @@
+Name "gt linspace_align (nonexistant input)"
+Keywords "gt_linspace_align"
+Test do
+  run_test "#{$bin}gt dev linspace_align -ff #{$testdata}/imnotthere "\
+           "#{$testdata}/imnotthere -global -l 0 1 1", :retval => 1
+end
+
 Name "gt linspace_align error message"
 Keywords "gt_linspace_align"
 Test do
   run "#{$bin}gt dev linspace_align -ss acg acgt -global "\
       "-l \" -1\" 1 1 ", :retval => 2
   grep last_stderr, "invalid cost value"
-end
-
-Name "gt linspace_align (nonexistant input)"
-Keywords "gt_linspace_align"
-Test do
-  run_test "#{$bin}gt dev linspace_align -ff #{$testdata}/imnotthere "\
-           "#{$testdata}/imnotthere -global -l 0 1 1", :retval => 1
 end
 
 Name "gt linspace_align global lin gap filelist"
@@ -42,3 +42,22 @@ end
     run "diff #{last_stdout} #{$testdata}gt_linspace_align_local_test_#{i}.out"
   end
 end
+
+=begin 
+TODO: test cases affine gapcosts, maxtime
+=end
+
+Name "gt linspace_align special cases"
+  Keywords "gt_linspace_align"
+  Test do
+    run_test "#{$bin}gt dev linspace_align -ff "\
+             "#{$testdata}gt_linspace_align_special_cases_test_1.fas "\
+             "#{$testdata}gt_linspace_align_special_cases_test_2.fas "\
+             "-global -l 0 1 1"
+    run "diff #{last_stdout} #{$testdata}gt_linspace_align_global_special_cases.out"
+    run_test "#{$bin}gt dev linspace_align -ff "\
+             "#{$testdata}gt_linspace_align_special_cases_test_1.fas "\
+             "#{$testdata}gt_linspace_align_special_cases_test_2.fas "\
+             "-local -l 2 \" -2\" \" -1\""
+    run "diff #{last_stdout} #{$testdata}gt_linspace_align_local_special_cases.out"
+  end
