@@ -55,6 +55,7 @@ struct GtXdropmatchinfo
   bool beverbose, silent;
   const GtUchar *query_sequence;
   GtUword query_totallength;
+  GtQuerymatchoutoptions *querymatchoutoptions;
   unsigned int userdefinedleastlength;
 };
 
@@ -71,13 +72,16 @@ GtXdropmatchinfo *gt_xdrop_matchinfo_new(GtUword userdefinedleastlength,
                                          GtUword errorpercentage,
                                          GtXdropscore xdropbelowscore,
                                          GtUword sensitivity,
-                                         bool selfcompare)
+                                         bool selfcompare,
+                                         GtUword alignmentwidth)
 {
   GtXdropmatchinfo *xdropmatchinfo = gt_malloc(sizeof *xdropmatchinfo);
 
   xdropmatchinfo->querymatchspaceptr = gt_querymatch_new();
   xdropmatchinfo->useq = gt_seqabstract_new_empty();
   xdropmatchinfo->vseq = gt_seqabstract_new_empty();
+  xdropmatchinfo->querymatchoutoptions
+    = gt_querymatchoutoptions_new(alignmentwidth);
   xdropmatchinfo->arbitscores.mat = 2;
   if (selfcompare)
   {
@@ -117,6 +121,7 @@ void gt_xdrop_matchinfo_delete(GtXdropmatchinfo *xdropmatchinfo)
     gt_seqabstract_delete(xdropmatchinfo->vseq);
     gt_xdrop_resources_delete(xdropmatchinfo->res);
     gt_frontresource_delete(xdropmatchinfo->frontresource);
+    gt_querymatchoutoptions_delete(xdropmatchinfo->querymatchoutoptions);
     gt_free(xdropmatchinfo);
   }
 }
@@ -320,8 +325,10 @@ int gt_simplexdropselfmatchoutput(void *info,
       {
         printf("# seed:\t" GT_WU "\t" GT_WU "\t" GT_WU "\n",pos1,pos2,len);
       }
-      return gt_querymatch_output(info, encseq,
-                                  xdropmatchinfo->querymatchspaceptr,NULL,
+      return gt_querymatch_output((void *) xdropmatchinfo->querymatchoutoptions,
+                                  encseq,
+                                  xdropmatchinfo->querymatchspaceptr,
+                                  NULL,
                                   rfsi.queryseqlength,
                                   err);
     }
@@ -442,8 +449,11 @@ int gt_processxdropquerymatches(void *info,
   {
     printf("# seed:\t" GT_WU "\t" GT_WU "\t" GT_WU "\n",pos1,pos2,len);
   }
-  return gt_querymatch_output(info, encseq, xdropmatchinfo->querymatchspaceptr,
-                              query, query_totallength,
+  return gt_querymatch_output(xdropmatchinfo->querymatchoutoptions,
+                              encseq,
+                              xdropmatchinfo->querymatchspaceptr,
+                              query,
+                              query_totallength,
                               err);
 }
 
@@ -491,6 +501,7 @@ struct GtGreedyextendmatchinfo
   Trimstat *trimstat;
   GtQuerymatch *querymatchspaceptr;
   GtEncseqReader *encseq_r_in_u, *encseq_r_in_v;
+  GtQuerymatchoutoptions *querymatchoutoptions;
   GtAllocatedMemory usequence_cache, vsequence_cache, frontspace_reservoir;
 };
 
@@ -539,7 +550,8 @@ GtGreedyextendmatchinfo *gt_greedy_extend_matchinfo_new(
                                    GtUword perc_mat_history,
                                    GtUword userdefinedleastlength,
                                    GtExtendCharAccess extend_char_access,
-                                   GtUword sensitivity)
+                                   GtUword sensitivity,
+                                   GtUword alignmentwidth)
 {
   GtGreedyextendmatchinfo *ggemi = gt_malloc(sizeof *ggemi);
 
@@ -572,6 +584,7 @@ GtGreedyextendmatchinfo *gt_greedy_extend_matchinfo_new(
   ggemi->check_extend_symmetry = false;
   ggemi->silent = false;
   ggemi->trimstat = NULL;
+  ggemi->querymatchoutoptions = gt_querymatchoutoptions_new(alignmentwidth);
   return ggemi;
 }
 
@@ -589,6 +602,7 @@ void gt_greedy_extend_matchinfo_delete(GtGreedyextendmatchinfo *ggemi)
     gt_free(ggemi->vsequence_cache.space);
     gt_free(ggemi->frontspace_reservoir.space);
     trimstat_delete(ggemi->trimstat,0.0,true);
+    gt_querymatchoutoptions_delete(ggemi->querymatchoutoptions);
     gt_free(ggemi);
   }
 }
@@ -805,7 +819,8 @@ int gt_simplegreedyselfmatchoutput(void *info,
       {
         printf("# seed:\t" GT_WU "\t" GT_WU "\t" GT_WU "\n",pos1,pos2,len);
       }
-      return gt_querymatch_output(info, encseq,
+      return gt_querymatch_output(greedyextendmatchinfo->querymatchoutoptions,
+                                  encseq,
                                   greedyextendmatchinfo->querymatchspaceptr,
                                   NULL,
                                   rfsi.queryseqlength,

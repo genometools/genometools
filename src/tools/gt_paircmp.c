@@ -255,6 +255,13 @@ static GtUword applycheckfunctiontosimpleoptions(
   return 0;
 }
 
+typedef struct {
+  Checkcmppairfuntype function;
+  const char *name;
+} Checkfunctiontabentry;
+
+#define MAKECheckfunctiontabentry(X) {X, #X}
+
 int gt_paircmp(int argc, const char **argv, GtError *err)
 {
   int parsed_args;
@@ -294,27 +301,23 @@ int gt_paircmp(int argc, const char **argv, GtError *err)
         (GtUword) strlen(gt_str_array_get(cmppairwise.strings,1UL)));
     } else
     {
-      GtUword testcases;
-      testcases = applycheckfunctiontosimpleoptions(gt_checkgreedyunitedist,
-                                                    &cmppairwise);
-      printf("# number of testcases for gt_checkgreedyunitedist: " GT_WU "\n",
-              testcases);
-      testcases = applycheckfunctiontosimpleoptions(gt_checklinearspace,
-                                                    &cmppairwise);
-      printf("# number of testcases for gt_checklinearspace: " GT_WU "\n",
-              testcases);
-      testcases = applycheckfunctiontosimpleoptions(gt_checklinearspace_local,
-                                                    &cmppairwise);
-      printf("# number of testcases for gt_checklinearspace_local: " GT_WU "\n",
-              testcases);
-      testcases = applycheckfunctiontosimpleoptions(gt_checkaffinelinearspace,
-                                                    &cmppairwise);
-      printf("# number of testcases for gt_checkaffinelinearspace: " GT_WU "\n",
-              testcases);
-      testcases = applycheckfunctiontosimpleoptions(gt_checkaffinelinearspace_local,
-                                                    &cmppairwise);
-      printf("# number of testcases for gt_checkaffinelinearspace_local: " GT_WU "\n",
-              testcases);
+      size_t idx;
+      Checkfunctiontabentry checkfunction_tab[] = {
+        MAKECheckfunctiontabentry(gt_checkgreedyunitedist),
+        MAKECheckfunctiontabentry(gt_checklinearspace),
+        MAKECheckfunctiontabentry(gt_checklinearspace_local),
+        MAKECheckfunctiontabentry(gt_checkaffinelinearspace),
+        MAKECheckfunctiontabentry(gt_checkaffinelinearspace_local)
+      };
+      for (idx = 0; idx < sizeof checkfunction_tab/sizeof checkfunction_tab[0];
+           idx++)
+      {
+        GtUword testcases
+          = applycheckfunctiontosimpleoptions(checkfunction_tab[idx].function,
+                                              &cmppairwise);
+        printf("# number of testcases for %s: " GT_WU "\n",
+               checkfunction_tab[idx].name,testcases);
+      }
     }
   }
   freesimpleoption(&cmppairwise);

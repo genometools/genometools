@@ -65,4 +65,11 @@ GtUword gt_querymatch_dbseqnum(const GtEncseq *encseq,
 
 bool gt_querymatch_queryreverse(const GtQuerymatch *querymatch);
 
+typedef struct GtQuerymatchoutoptions GtQuerymatchoutoptions;
+
+GtQuerymatchoutoptions *gt_querymatchoutoptions_new(GtUword alignmentwidth);
+
+void gt_querymatchoutoptions_delete(
+        GtQuerymatchoutoptions *querymatchoutoptions);
+
 #endif

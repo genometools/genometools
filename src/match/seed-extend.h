@@ -69,14 +69,17 @@ typedef struct GtXdropmatchinfo GtXdropmatchinfo;
    extended seeds. <xdropbelowscore> is the parameter which influences the
    search space of the Xdrop-based extension. The larger this parameter,
    the larger the search space. If <xdropbelowscore> is 0,
-   then a reasonable default value depending on the the <errorpercentage>
-   is chosen. */
+   then a reasonable default value depending on the <errorpercentage>
+   is chosen. The parameter <alignmentwidth> is either 0, in which case
+   alignments are not displayed, or otherwise this parameter specifies the
+   number of alignment columns per line displayed. */
 
 GtXdropmatchinfo *gt_xdrop_matchinfo_new(GtUword userdefinedleastlength,
                                          GtUword errorpercentage,
                                          GtXdropscore xdropbelowscore,
                                          GtUword sensitivity,
-                                         bool selfcompare);
+                                         bool selfcompare,
+                                         GtUword alignmentwidth);
 
 /* The destructor-method. */
 
@@ -153,7 +156,10 @@ typedef struct GtGreedyextendmatchinfo GtGreedyextendmatchinfo;
    length of the extension on both sides (including the seed itself).
 
    <extend_char_access> is the mode by which the characters are accessed
-   in the encoded sequence. */
+   in the encoded sequence.
+   The parameter <alignmentwidth> is either 0, in which case
+   alignments are not displayed, or otherwise this parameter specifies the
+   number of alignment columns per line displayed. */
 
 GtGreedyextendmatchinfo *gt_greedy_extend_matchinfo_new(
                                    GtUword errorpercentage,
@@ -162,7 +168,8 @@ GtGreedyextendmatchinfo *gt_greedy_extend_matchinfo_new(
                                    GtUword perc_mat_history,
                                    GtUword userdefinedleastlength,
                                    GtExtendCharAccess extend_char_access,
-                                   GtUword sensitivity);
+                                   GtUword sensitivity,
+                                   GtUword alignmentwidth);
 
 /* the destructor-method for the gven object. */
 

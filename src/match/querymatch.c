@@ -127,7 +127,13 @@ GtUword gt_querymatch_dbseqnum(const GtEncseq *encseq,
   return gt_encseq_seqnum(encseq,querymatch->dbstart);
 }
 
-int gt_querymatch_output(GT_UNUSED void *info,
+struct GtQuerymatchoutoptions
+{
+  bool exactmatch;
+  GtUword alignmentwidth; /* if > 0, then with alignment of this width */
+};
+
+int gt_querymatch_output(void *info,
                          const GtEncseq *encseq,
                          const GtQuerymatch *querymatch,
                          GT_UNUSED const GtUchar *query,
@@ -136,6 +142,8 @@ int gt_querymatch_output(GT_UNUSED void *info,
 {
   const char *outflag = "FRCP";
   GtUword dbseqnum, querystart, dbstart_relative, seqstartpos;
+  const GtQuerymatchoutoptions *querymatchoutoptions
+    = (const GtQuerymatchoutoptions *) info;
 
   gt_assert(encseq != NULL);
   dbseqnum = gt_querymatch_dbseqnum(encseq,querymatch);
@@ -186,6 +194,11 @@ int gt_querymatch_output(GT_UNUSED void *info,
     {
       printf("\n");
     }
+    if (querymatchoutoptions->alignmentwidth > 0)
+    {
+      printf("show alignment of width " GT_WU " here\n",
+             querymatchoutoptions->alignmentwidth);
+    }
   }
   return 0;
 }
@@ -213,4 +226,23 @@ uint64_t gt_querymatch_queryseqnum(const GtQuerymatch *querymatch)
 bool gt_querymatch_queryreverse(const GtQuerymatch *querymatch)
 {
   return querymatch->query_as_reversecopy;
+}
+
+GtQuerymatchoutoptions *gt_querymatchoutoptions_new(GtUword alignmentwidth)
+{
+  GtQuerymatchoutoptions *querymatchoutoptions
+    = gt_malloc(sizeof *querymatchoutoptions);
+
+  querymatchoutoptions->alignmentwidth = alignmentwidth;
+  querymatchoutoptions->exactmatch = false;
+  return querymatchoutoptions;
+}
+
+void gt_querymatchoutoptions_delete(
+        GtQuerymatchoutoptions *querymatchoutoptions)
+{
+  if (querymatchoutoptions != NULL)
+  {
+    gt_free(querymatchoutoptions);
+  }
 }
