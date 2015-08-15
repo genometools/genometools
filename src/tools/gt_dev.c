@@ -34,6 +34,7 @@
 #include "tools/gt_guessprot.h"
 #include "tools/gt_idxlocali.h"
 #include "tools/gt_kmer_database.h"
+#include "tools/gt_linearspace.h"
 #include "tools/gt_magicmatch.h"
 #include "tools/gt_mergeesa.h"
 #include "tools/gt_paircmp.h"
@@ -76,6 +77,7 @@ static void* gt_dev_arguments_new(void)
   gt_toolbox_add_tool(dev_toolbox, "gthbssmtrain", gt_gthbssmtrain());
   gt_toolbox_add_tool(dev_toolbox, "idxlocali", gt_idxlocali());
   gt_toolbox_add_tool(dev_toolbox, "kmer_database", gt_kmer_database());
+  gt_toolbox_add_tool(dev_toolbox, "linearspace", gt_linearspace());
   gt_toolbox_add_tool(dev_toolbox, "magicmatch", gt_magicmatch());
   gt_toolbox_add_tool(dev_toolbox, "parsexrf", gt_parsexrf());
   gt_toolbox_add_tool(dev_toolbox, "readreads", gt_readreads());

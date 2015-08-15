@@ -1,4 +1,5 @@
 /*
+  Copyright (C) 2015 Annika Seidel, annika.seidel@studium.uni-hamburg.de
   Copyright (c) 2007 Stefan Kurtz <kurtz@zbh.uni-hamburg.de>
   Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
 
@@ -24,8 +25,9 @@
 #include "core/str.h"
 #include "core/str_array.h"
 #include "core/types_api.h"
+#include "extended/linearalign_affinegapcost.h"
+#include "extended/linearalign.h"
 #include "match/test-pairwise.h"
-#include "extended/linearedist.h"
 #include "tools/gt_paircmp.h"
 
 typedef struct
@@ -41,6 +43,7 @@ typedef struct
   Charlistlen *charlistlen;
   GtStr *text;
   bool showedist;
+  bool print;
 } Cmppairwiseopt;
 
 static void showsimpleoptions(const Cmppairwiseopt *opt)
@@ -81,7 +84,8 @@ static GtOPrval parse_options(int *parsed_args,
          *optionfiles,
          *optioncharlistlen,
          *optiontext,
-         *optionshowedist;
+         *optionshowedist,
+         *optionprint;
   GtStrArray *charlistlen;
   GtOPrval oprval;
 
@@ -92,6 +96,7 @@ static GtOPrval parse_options(int *parsed_args,
   pw->text = gt_str_new();
   pw->charlistlen = NULL;
   pw->showedist = false;
+  pw->print = false;
   op = gt_option_parser_new("options", "Apply function to pairs of strings.");
   gt_option_parser_set_mail_address(op, "<kurtz@zbh.uni-hamburg.de>");
 
@@ -115,6 +120,10 @@ static GtOPrval parse_options(int *parsed_args,
                       &pw->showedist, false);
   gt_option_parser_add_option(op, optionshowedist);
 
+  optionprint = gt_option_new_bool("p", "print edist alignment",
+                      &pw->print, false);
+  gt_option_parser_add_option(op, optionprint);
+
   gt_option_exclude(optionstrings, optionfiles);
   gt_option_exclude(optionstrings, optioncharlistlen);
   gt_option_exclude(optionstrings, optiontext);
@@ -122,6 +131,7 @@ static GtOPrval parse_options(int *parsed_args,
   gt_option_exclude(optionfiles, optiontext);
   gt_option_exclude(optioncharlistlen, optiontext);
   gt_option_imply(optionshowedist, optionstrings);
+  gt_option_imply(optionprint, optionstrings);
 
   oprval = gt_option_parser_parse(op, parsed_args, argc, argv, gt_versionfunc,
                                   err);
@@ -148,25 +158,26 @@ static GtOPrval parse_options(int *parsed_args,
         if (gt_option_is_set(optioncharlistlen))
         {
           GtWord readint;
-
           if (gt_str_array_size(charlistlen) != 2UL)
           {
             gt_error_set(err,
                          "option -a requires charlist and length argument");
             oprval = GT_OPTION_PARSER_ERROR;
-          }
-          pw->charlistlen = gt_malloc(sizeof *pw->charlistlen);
-          pw->charlistlen->charlist =
-            gt_str_ref(gt_str_array_get_str(charlistlen,
-                                                                  0));
-          if (sscanf(gt_str_array_get(charlistlen,1UL), GT_WD, &readint) != 1 ||
-              readint < 1L)
+          }else
           {
-            gt_error_set(err,
-                         "option -a requires charlist and length argument");
-            oprval = GT_OPTION_PARSER_ERROR;
+            pw->charlistlen = gt_malloc(sizeof *pw->charlistlen);
+            pw->charlistlen->charlist =
+              gt_str_ref(gt_str_array_get_str(charlistlen,
+                                                                    0));
+            if (sscanf(gt_str_array_get(charlistlen,1UL), GT_WD, &readint) != 1
+                || readint < 1L)
+            {
+              gt_error_set(err,
+                           "option -a requires charlist and length argument");
+              oprval = GT_OPTION_PARSER_ERROR;
+            }
+            pw->charlistlen->len = (GtUword) readint;
           }
-          pw->charlistlen->len = (GtUword) readint;
         } else
         {
           if (!gt_option_is_set(optiontext))
@@ -273,6 +284,14 @@ int gt_paircmp(int argc, const char **argv, GtError *err)
                                         len2);
       printf(GT_WU " " GT_WU " " GT_WU " " GT_WU "%% errors\n", edist, len1,
              len2,(200 * edist)/(len1+len2));
+    }
+    else if (cmppairwise.print)
+    {
+      gt_print_edist_alignment(
+        (const GtUchar *) gt_str_array_get(cmppairwise.strings,0),0,
+        (GtUword) strlen(gt_str_array_get(cmppairwise.strings,0)),
+        (const GtUchar *) gt_str_array_get(cmppairwise.strings,1UL),0,
+        (GtUword) strlen(gt_str_array_get(cmppairwise.strings,1UL)));
     } else
     {
       GtUword testcases;
@@ -284,6 +303,18 @@ int gt_paircmp(int argc, const char **argv, GtError *err)
                                                     &cmppairwise);
       printf("# number of testcases for gt_checklinearspace: " GT_WU "\n",
               testcases);
+      testcases = applycheckfunctiontosimpleoptions(gt_checklinearspace_local,
+                                                    &cmppairwise);
+      printf("# number of testcases for gt_checklinearspace_local: " GT_WU "\n",
+              testcases);
+      testcases = applycheckfunctiontosimpleoptions(gt_checkaffinelinearspace,
+                                                    &cmppairwise);
+      printf("# number of testcases for gt_checkaffinelinearspace: " GT_WU "\n",
+              testcases);
+      testcases = applycheckfunctiontosimpleoptions(
+                  gt_checkaffinelinearspace_local, &cmppairwise);
+      printf("# number of testcases for gt_checkaffinelinearspace_local: "
+              GT_WU "\n",testcases);
     }
   }
   freesimpleoption(&cmppairwise);

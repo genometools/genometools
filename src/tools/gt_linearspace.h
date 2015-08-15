@@ -1,7 +1,6 @@
 /*
-  Copyright (C) 2015 Annika Seidel, annika.seidel@studium.uni-hamburg.de
-  Copyright (c) 2007 Gordon Gremme <gordon@gremme.org>
-  Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2015 Annika <annika.seidel@studium.uni-hamburg.de>
+  Copyright (c) 2015 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -16,16 +15,12 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef AFFINEALIGN_H
-#define AFFINEALIGN_H
+#ifndef GT_LINEARSPACE_H
+#define GT_LINEARSPACE_H
 
-#include "extended/alignment.h"
+#include "core/tool_api.h"
 
-/* (globally) align u and v (affine gap costs) and return one optimal
-   GtAlignment */
-GtAlignment* gt_affinealign(const char *u, GtUword ulen,
-                            const char *v, GtUword vlen,
-                            int matchcost, int mismatchcost,
-                            int gap_opening_cost, int gap_extension_cost);
+/* the linearspace tool */
+GtTool* gt_linearspace(void);
 
 #endif
