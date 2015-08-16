@@ -129,7 +129,6 @@ GtUword gt_querymatch_dbseqnum(const GtEncseq *encseq,
 
 struct GtQuerymatchoutoptions
 {
-  bool exactmatch;
   GtUword alignmentwidth; /* if > 0, then with alignment of this width */
 };
 
@@ -203,6 +202,44 @@ int gt_querymatch_output(void *info,
   return 0;
 }
 
+int gt_querymatch_fill_and_output(
+                        GtUword dblen,
+                        GtUword dbstart,
+                        GtReadmode readmode,
+                        bool query_as_reversecopy,
+                        GtWord score,
+                        GtUword edist,
+                        bool selfmatch,
+                        uint64_t queryseqnum,
+                        GtUword querylen,
+                        GtUword querystart,
+                        void *info,
+                        const GtEncseq *encseq,
+                        const GtUchar *query,
+                        GtUword query_totallength,
+                        GtError *err)
+{
+  GtQuerymatch querymatch;
+
+  gt_querymatch_fill(&querymatch,
+                     dblen,
+                     dbstart,
+                     readmode,
+                     query_as_reversecopy,
+                     score,
+                     edist,
+                     selfmatch,
+                     queryseqnum,
+                     querylen,
+                     querystart);
+  return gt_querymatch_output(info,
+                       encseq,
+                       &querymatch,
+                       query,
+                       query_totallength,
+                       err);
+}
+
 GtUword gt_querymatch_querylen(const GtQuerymatch *querymatch)
 {
   return querymatch->querylen;
@@ -234,7 +271,6 @@ GtQuerymatchoutoptions *gt_querymatchoutoptions_new(GtUword alignmentwidth)
     = gt_malloc(sizeof *querymatchoutoptions);
 
   querymatchoutoptions->alignmentwidth = alignmentwidth;
-  querymatchoutoptions->exactmatch = false;
   return querymatchoutoptions;
 }
 

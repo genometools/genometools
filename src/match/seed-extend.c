@@ -43,7 +43,6 @@ static GtUword score2distance(GtWord score,GtUword alignedlen)
 
 struct GtXdropmatchinfo
 {
-  GtQuerymatch *querymatchspaceptr;
   GtXdropArbitraryscores arbitscores;
   GtXdropresources *res;
   GtFrontResource *frontresource;
@@ -77,7 +76,6 @@ GtXdropmatchinfo *gt_xdrop_matchinfo_new(GtUword userdefinedleastlength,
 {
   GtXdropmatchinfo *xdropmatchinfo = gt_malloc(sizeof *xdropmatchinfo);
 
-  xdropmatchinfo->querymatchspaceptr = gt_querymatch_new();
   xdropmatchinfo->useq = gt_seqabstract_new_empty();
   xdropmatchinfo->vseq = gt_seqabstract_new_empty();
   xdropmatchinfo->querymatchoutoptions
@@ -116,7 +114,6 @@ void gt_xdrop_matchinfo_delete(GtXdropmatchinfo *xdropmatchinfo)
 {
   if (xdropmatchinfo != NULL)
   {
-    gt_querymatch_delete(xdropmatchinfo->querymatchspaceptr);
     gt_seqabstract_delete(xdropmatchinfo->useq);
     gt_seqabstract_delete(xdropmatchinfo->vseq);
     gt_xdrop_resources_delete(xdropmatchinfo->res);
@@ -301,7 +298,15 @@ int gt_simplexdropselfmatchoutput(void *info,
                                  querylen,
                                  querystart);
     */
-    gt_querymatch_fill(xdropmatchinfo->querymatchspaceptr,
+    if (xdropmatchinfo->silent)
+    {
+      return 0;
+    }
+    if (xdropmatchinfo->beverbose)
+    {
+      printf("# seed:\t" GT_WU "\t" GT_WU "\t" GT_WU "\n",pos1,pos2,len);
+    }
+    return gt_querymatch_fill_and_output(
                        dblen,
                        dbstart,
                        GT_READMODE_FORWARD,
@@ -315,23 +320,12 @@ int gt_simplexdropselfmatchoutput(void *info,
                        true,
                        (uint64_t) rfsi.queryseqnum,
                        querylen,
-                       querystart - rfsi.queryseqstartpos);
-    if (xdropmatchinfo->silent)
-    {
-      return 0;
-    } else
-    {
-      if (xdropmatchinfo->beverbose)
-      {
-        printf("# seed:\t" GT_WU "\t" GT_WU "\t" GT_WU "\n",pos1,pos2,len);
-      }
-      return gt_querymatch_output((void *) xdropmatchinfo->querymatchoutoptions,
-                                  encseq,
-                                  xdropmatchinfo->querymatchspaceptr,
-                                  NULL,
-                                  rfsi.queryseqlength,
-                                  err);
-    }
+                       querystart - rfsi.queryseqstartpos,
+                       (void *) xdropmatchinfo->querymatchoutoptions,
+                       encseq,
+                       NULL,
+                       rfsi.queryseqlength,
+                       err);
   } else
   {
     return 0;
@@ -433,7 +427,11 @@ int gt_processxdropquerymatches(void *info,
                                dbstart);
   gt_seqabstract_reinit_gtuchar(xdropmatchinfo->vseq, query, querylen,
                                 querystart);
-  gt_querymatch_fill(xdropmatchinfo->querymatchspaceptr,
+  if (xdropmatchinfo->beverbose)
+  {
+    printf("# seed:\t" GT_WU "\t" GT_WU "\t" GT_WU "\n",pos1,pos2,len);
+  }
+  return gt_querymatch_fill_and_output(
                      dblen,
                      dbstart,
                      GT_READMODE_FORWARD,
@@ -444,17 +442,12 @@ int gt_processxdropquerymatches(void *info,
                      false,
                      queryseqnum,
                      querylen,
-                     querystart);
-  if (xdropmatchinfo->beverbose)
-  {
-    printf("# seed:\t" GT_WU "\t" GT_WU "\t" GT_WU "\n",pos1,pos2,len);
-  }
-  return gt_querymatch_output(xdropmatchinfo->querymatchoutoptions,
-                              encseq,
-                              xdropmatchinfo->querymatchspaceptr,
-                              query,
-                              query_totallength,
-                              err);
+                     querystart,
+                     (void *) xdropmatchinfo->querymatchoutoptions,
+                     encseq,
+                     query,
+                     query_totallength,
+                     err);
 }
 
 const char *gt_cam_extendgreedy_comment(void)
@@ -499,7 +492,6 @@ struct GtGreedyextendmatchinfo
        check_extend_symmetry,
        silent;
   Trimstat *trimstat;
-  GtQuerymatch *querymatchspaceptr;
   GtEncseqReader *encseq_r_in_u, *encseq_r_in_v;
   GtQuerymatchoutoptions *querymatchoutoptions;
   GtAllocatedMemory usequence_cache, vsequence_cache, frontspace_reservoir;
@@ -555,7 +547,6 @@ GtGreedyextendmatchinfo *gt_greedy_extend_matchinfo_new(
 {
   GtGreedyextendmatchinfo *ggemi = gt_malloc(sizeof *ggemi);
 
-  ggemi->querymatchspaceptr = gt_querymatch_new();
   ggemi->left_front_trace = NULL;
   ggemi->right_front_trace = NULL;
   ggemi->errorpercentage = errorpercentage;
@@ -592,7 +583,6 @@ void gt_greedy_extend_matchinfo_delete(GtGreedyextendmatchinfo *ggemi)
 {
   if (ggemi != NULL)
   {
-    gt_querymatch_delete(ggemi->querymatchspaceptr);
     polishing_info_delete(ggemi->pol_info);
     front_trace_delete(ggemi->left_front_trace);
     front_trace_delete(ggemi->right_front_trace);
@@ -633,6 +623,19 @@ void gt_greedy_extend_matchinfo_verbose_set(GtGreedyextendmatchinfo *ggemi)
 {
   gt_assert(ggemi != NULL);
   ggemi->beverbose = true;
+}
+
+static void gt_FTsequenceResources_init(FTsequenceResources *fsr,
+                                        const GtEncseq *encseq,
+                                        GtEncseqReader *encseq_r,
+                                        GtAllocatedMemory *sequence_cache,
+                                        GtExtendCharAccess extend_char_access)
+{
+  fsr->encseq = encseq;
+  fsr->totallength = gt_encseq_total_length(encseq);
+  fsr->encseq_r = encseq_r;
+  fsr->sequence_cache = sequence_cache;
+  fsr->extend_char_access = extend_char_access;
 }
 
 int gt_simplegreedyselfmatchoutput(void *info,
@@ -679,14 +682,14 @@ int gt_simplegreedyselfmatchoutput(void *info,
                                               GT_READMODE_FORWARD,
                                               0);
   }
-  ufsr.encseq = vfsr.encseq = encseq;
-  ufsr.totallength = vfsr.totallength = gt_encseq_total_length(encseq);
-  ufsr.encseq_r = greedyextendmatchinfo->encseq_r_in_u;
-  ufsr.sequence_cache = &greedyextendmatchinfo->usequence_cache;
-  ufsr.extend_char_access = greedyextendmatchinfo->extend_char_access;
-  vfsr.encseq_r = greedyextendmatchinfo->encseq_r_in_v;
-  vfsr.sequence_cache = &greedyextendmatchinfo->vsequence_cache;
-  vfsr.extend_char_access = greedyextendmatchinfo->extend_char_access;
+  gt_FTsequenceResources_init(&ufsr,encseq,
+                              greedyextendmatchinfo->encseq_r_in_u,
+                              &greedyextendmatchinfo->usequence_cache,
+                              greedyextendmatchinfo->extend_char_access);
+  gt_FTsequenceResources_init(&vfsr,encseq,
+                              greedyextendmatchinfo->encseq_r_in_v,
+                              &greedyextendmatchinfo->vsequence_cache,
+                              greedyextendmatchinfo->extend_char_access);
   fill_repfind_sequence_info(&rfsi,pos1,pos2,encseq);
   if (pos1 > rfsi.dbseqstartpos && pos2 > rfsi.queryseqstartpos)
   { /* there is something to align on the left of the seed */
@@ -799,7 +802,15 @@ int gt_simplegreedyselfmatchoutput(void *info,
     querystart = pos2 - vextend_left;
     gt_assert(querystart >= rfsi.queryseqstartpos);
     dbstart = pos1 - left_best_polished_point.row;
-    gt_querymatch_fill(greedyextendmatchinfo->querymatchspaceptr,
+    if (greedyextendmatchinfo->silent)
+    {
+      return 0;
+    }
+    if (greedyextendmatchinfo->beverbose)
+    {
+      printf("# seed:\t" GT_WU "\t" GT_WU "\t" GT_WU "\n",pos1,pos2,len);
+    }
+    return gt_querymatch_fill_and_output(
                        dblen,
                        dbstart,
                        GT_READMODE_FORWARD,
@@ -809,23 +820,12 @@ int gt_simplegreedyselfmatchoutput(void *info,
                        true,
                        (uint64_t) rfsi.queryseqnum,
                        querylen,
-                       querystart - rfsi.queryseqstartpos);
-    if (greedyextendmatchinfo->silent)
-    {
-      return 0;
-    } else
-    {
-      if (greedyextendmatchinfo->beverbose)
-      {
-        printf("# seed:\t" GT_WU "\t" GT_WU "\t" GT_WU "\n",pos1,pos2,len);
-      }
-      return gt_querymatch_output(greedyextendmatchinfo->querymatchoutoptions,
-                                  encseq,
-                                  greedyextendmatchinfo->querymatchspaceptr,
-                                  NULL,
-                                  rfsi.queryseqlength,
-                                  err);
-    }
+                       querystart - rfsi.queryseqstartpos,
+                       (void *) greedyextendmatchinfo->querymatchoutoptions,
+                       encseq,
+                       NULL,
+                       rfsi.queryseqlength,
+                       err);
   } else
   {
 #ifdef SKDEBUG
@@ -843,4 +843,51 @@ int gt_simplegreedyselfmatchoutput(void *info,
 #endif
     return 0;
   }
+}
+
+void align_front_prune_edist(Fronttrace *front_trace,
+                             const GtEncseq *encseq,
+                             GtGreedyextendmatchinfo *ggemi,
+                             GtUword ustart,
+                             GtUword ulen,
+                             GtUword vstart,
+                             GtUword vlen)
+{
+  GtUword distance;
+  FTsequenceResources ufsr, vfsr;
+  Polished_point best_polished_point = {0,0,0};
+
+  gt_assert(front_trace != NULL && ggemi != NULL);
+  gt_FTsequenceResources_init(&ufsr,
+                              encseq,
+                              ggemi->encseq_r_in_u,
+                              &ggemi->usequence_cache,
+                              ggemi->extend_char_access);
+  gt_FTsequenceResources_init(&vfsr,
+                              encseq,
+                              ggemi->encseq_r_in_v,
+                              &ggemi->vsequence_cache,
+                              ggemi->extend_char_access);
+  distance = front_prune_edist_inplace(true,
+                                       &ggemi->frontspace_reservoir,
+                                       NULL,
+                                       &best_polished_point,
+                                       front_trace,
+                                       ggemi->pol_info,
+                                       ggemi->history,
+                                       ggemi->minmatchnum,
+                                       ggemi->maxalignedlendifference,
+                                       &ufsr,
+                                       ustart,
+                                       ulen,
+                                       &vfsr,
+                                       vstart,
+                                       vlen);
+  if (distance == ulen + vlen + 1)
+  {
+    fprintf(stderr,"Cannot align sequences\n");
+    exit(EXIT_FAILURE);
+  }
+  printf("align with distance " GT_WU "\n",distance);
+  front_trace_reset(front_trace,ulen + vlen);
 }

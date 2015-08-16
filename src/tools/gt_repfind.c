@@ -70,12 +70,6 @@ typedef struct
            *refalignmentwidthoption;
 } Maxpairsoptions;
 
-typedef struct
-{
-  GtQuerymatch *querymatchspaceptr;
-  GtQuerymatchoutoptions *querymatchoutoptions;
-} GtSimpleexactselfmatchinfo;
-
 static int gt_simpleexactselfmatchoutput(void *info,
                                          const GtGenericEncseq *genericencseq,
                                          GtUword len,
@@ -84,10 +78,7 @@ static int gt_simpleexactselfmatchoutput(void *info,
                                          GtError *err)
 {
   GtUword queryseqnum, seqstartpos, seqlength;
-  GtSimpleexactselfmatchinfo *simpleexactselfmatchinfo
-    = (GtSimpleexactselfmatchinfo *) info;
   const GtEncseq *encseq;
-  GtQuerymatch *querymatch = simpleexactselfmatchinfo->querymatchspaceptr;
 
   gt_assert(pos1 < pos2);
   gt_assert(genericencseq != NULL && genericencseq->hasencseq);
@@ -96,7 +87,7 @@ static int gt_simpleexactselfmatchoutput(void *info,
   seqstartpos = gt_encseq_seqstartpos(encseq,queryseqnum);
   seqlength = gt_encseq_seqlength(encseq,queryseqnum);
   gt_assert(pos2 >= seqstartpos);
-  gt_querymatch_fill(querymatch,
+  return gt_querymatch_fill_and_output(
                      len,
                      pos1,
                      GT_READMODE_FORWARD,
@@ -106,10 +97,12 @@ static int gt_simpleexactselfmatchoutput(void *info,
                      true,
                      (uint64_t) queryseqnum,
                      len,
-                     pos2 - seqstartpos);
-  return gt_querymatch_output(simpleexactselfmatchinfo->querymatchoutoptions,
-                              encseq, querymatch,
-                              NULL, seqlength, err);
+                     pos2 - seqstartpos,
+                     info,
+                     encseq,
+                     NULL,
+                     seqlength,
+                     err);
 }
 
 static int gt_simplesuffixprefixmatchoutput(GT_UNUSED void *info,
@@ -516,7 +509,6 @@ static int gt_repfind_runner(int argc,
   GtLogger *logger = NULL;
   GtXdropmatchinfo *xdropmatchinfo = NULL;
   GtGreedyextendmatchinfo *greedyextendmatchinfo = NULL;
-  GtSimpleexactselfmatchinfo simpleexactselfmatchinfo = {NULL,NULL};
   GtTimer *repfindtimer = NULL;
 
   gt_error_check(err);
@@ -598,6 +590,8 @@ static int gt_repfind_runner(int argc,
   }
   if (!haserr)
   {
+    GtQuerymatchoutoptions *querymatchoutoptions
+      = gt_querymatchoutoptions_new(arguments->alignmentwidth);
     if (gt_str_array_size(arguments->queryfiles) == 0)
     {
       if (arguments->samples == 0)
@@ -625,12 +619,8 @@ static int gt_repfind_runner(int argc,
                 processmaxpairsdata = (void *) greedyextendmatchinfo;
               } else
               {
-                simpleexactselfmatchinfo.querymatchspaceptr
-                  = gt_querymatch_new();
-                simpleexactselfmatchinfo.querymatchoutoptions
-                  = gt_querymatchoutoptions_new(arguments->alignmentwidth);
                 processmaxpairs = gt_simpleexactselfmatchoutput;
-                processmaxpairsdata = (void *) &simpleexactselfmatchinfo;
+                processmaxpairsdata = (void *) querymatchoutoptions;
               }
             }
           }
@@ -648,23 +638,16 @@ static int gt_repfind_runner(int argc,
         }
         if (!haserr && arguments->reverse)
         {
-          GtQuerymatchoutoptions *querymatchoutoptions
-            = gt_querymatchoutoptions_new(arguments->alignmentwidth);
           if (gt_callenumselfmatches(gt_str_get(arguments->indexname),
                                      GT_READMODE_REVERSE,
                                      arguments->seedlength,
-                          /* gt_option_is_set(arguments->refextendxdropoption))
-                               ? gt_processxdropquerymatches
-                               : */  gt_querymatch_output,
-                          /* gt_option_is_set(arguments->refextendxdropoption))
-                               ? (void *) xdropmatchinfo
-                               :*/   querymatchoutoptions,
+                                     gt_querymatch_output,
+                                     querymatchoutoptions,
                                      logger,
                                      err) != 0)
           {
             haserr = true;
           }
-          gt_querymatchoutoptions_delete(querymatchoutoptions);
         }
       } else
       {
@@ -683,8 +666,6 @@ static int gt_repfind_runner(int argc,
     {
       GtProcessquerymatch processquerymatch = NULL;
       void *processquerymatch_data = NULL;
-      GtQuerymatchoutoptions *querymatchoutoptions
-        = gt_querymatchoutoptions_new(arguments->alignmentwidth);
 
       if (gt_option_is_set(arguments->refextendxdropoption))
       {
@@ -715,11 +696,9 @@ static int gt_repfind_runner(int argc,
       {
         haserr = true;
       }
-      gt_querymatchoutoptions_delete(querymatchoutoptions);
     }
+    gt_querymatchoutoptions_delete(querymatchoutoptions);
   }
-  gt_querymatch_delete(simpleexactselfmatchinfo.querymatchspaceptr);
-  gt_querymatchoutoptions_delete(simpleexactselfmatchinfo.querymatchoutoptions);
   gt_xdrop_matchinfo_delete(xdropmatchinfo);
   gt_greedy_extend_matchinfo_delete(greedyextendmatchinfo);
   gt_logger_delete(logger);

@@ -48,6 +48,23 @@ int gt_querymatch_output(void *info,
                          GtUword query_totallength,
                          GtError *err);
 
+int gt_querymatch_fill_and_output(
+                        GtUword dblen,
+                        GtUword dbstart,
+                        GtReadmode readmode,
+                        bool query_as_reversecopy,
+                        GtWord score,
+                        GtUword edist,
+                        bool selfmatch,
+                        uint64_t queryseqnum,
+                        GtUword querylen,
+                        GtUword querystart,
+                        void *info,
+                        const GtEncseq *encseq,
+                        const GtUchar *query,
+                        GtUword query_totallength,
+                        GtError *err);
+
 GtUword gt_querymatch_querylen(const GtQuerymatch *querymatch);
 
 GtUword gt_querymatch_dbstart(const GtQuerymatch *querymatch);
