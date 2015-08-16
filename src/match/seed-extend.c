@@ -54,7 +54,6 @@ struct GtXdropmatchinfo
   bool beverbose, silent;
   const GtUchar *query_sequence;
   GtUword query_totallength;
-  GtQuerymatchoutoptions *querymatchoutoptions;
   unsigned int userdefinedleastlength;
 };
 
@@ -71,15 +70,12 @@ GtXdropmatchinfo *gt_xdrop_matchinfo_new(GtUword userdefinedleastlength,
                                          GtUword errorpercentage,
                                          GtXdropscore xdropbelowscore,
                                          GtUword sensitivity,
-                                         bool selfcompare,
-                                         GtUword alignmentwidth)
+                                         bool selfcompare)
 {
   GtXdropmatchinfo *xdropmatchinfo = gt_malloc(sizeof *xdropmatchinfo);
 
   xdropmatchinfo->useq = gt_seqabstract_new_empty();
   xdropmatchinfo->vseq = gt_seqabstract_new_empty();
-  xdropmatchinfo->querymatchoutoptions
-    = gt_querymatchoutoptions_new(alignmentwidth);
   xdropmatchinfo->arbitscores.mat = 2;
   if (selfcompare)
   {
@@ -118,7 +114,6 @@ void gt_xdrop_matchinfo_delete(GtXdropmatchinfo *xdropmatchinfo)
     gt_seqabstract_delete(xdropmatchinfo->vseq);
     gt_xdrop_resources_delete(xdropmatchinfo->res);
     gt_frontresource_delete(xdropmatchinfo->frontresource);
-    gt_querymatchoutoptions_delete(xdropmatchinfo->querymatchoutoptions);
     gt_free(xdropmatchinfo);
   }
 }
@@ -185,12 +180,15 @@ int gt_simplexdropselfmatchoutput(void *info,
                                   GtUword pos2,
                                   GtError *err)
 {
-  GtXdropmatchinfo *xdropmatchinfo = (GtXdropmatchinfo *) info;
+  GtProcessinfo_and_outoptions *processinfo_and_outoptions
+    = (GtProcessinfo_and_outoptions *) info;
+  GtXdropmatchinfo *xdropmatchinfo;
   Repfindsequenceinfo rfsi;
   GtUword dblen, querylen, total_distance, total_alignedlen,
           urightbound, vrightbound;
   GtXdropscore score;
 
+  xdropmatchinfo = processinfo_and_outoptions->processinfo;
   gt_assert(pos1 < pos2);
   if (pos1 + len >= pos2)
   {
@@ -321,7 +319,7 @@ int gt_simplexdropselfmatchoutput(void *info,
                        (uint64_t) rfsi.queryseqnum,
                        querylen,
                        querystart - rfsi.queryseqstartpos,
-                       (void *) xdropmatchinfo->querymatchoutoptions,
+                       processinfo_and_outoptions->querymatchoutoptions,
                        encseq,
                        NULL,
                        rfsi.queryseqlength,
@@ -339,7 +337,8 @@ int gt_processxdropquerymatches(void *info,
                                 GtUword query_totallength,
                                 GtError *err)
 {
-  GtXdropmatchinfo *xdropmatchinfo = (GtXdropmatchinfo *) info;
+  GtProcessinfo_and_outoptions *processinfo_and_outoptions
+    = (GtProcessinfo_and_outoptions *) info;
   GtXdropscore score;
   GtUword querystart, dblen, dbstart, querylen,
           dbseqnum, dbseqstartpos, dbseqlength,
@@ -347,7 +346,9 @@ int gt_processxdropquerymatches(void *info,
           pos2 = gt_querymatch_querystart(queryseed),
           len = gt_querymatch_querylen(queryseed);
   uint64_t queryseqnum;
+  GtXdropmatchinfo *xdropmatchinfo;
 
+  xdropmatchinfo = processinfo_and_outoptions->processinfo;
   dbseqnum = gt_encseq_seqnum(encseq,pos1);
   dbseqstartpos = gt_encseq_seqstartpos(encseq,dbseqnum);
   dbseqlength = gt_encseq_seqlength(encseq,dbseqnum);
@@ -443,7 +444,8 @@ int gt_processxdropquerymatches(void *info,
                      queryseqnum,
                      querylen,
                      querystart,
-                     (void *) xdropmatchinfo->querymatchoutoptions,
+                     (void *)
+                     processinfo_and_outoptions->querymatchoutoptions,
                      encseq,
                      query,
                      query_totallength,
@@ -493,7 +495,6 @@ struct GtGreedyextendmatchinfo
        silent;
   Trimstat *trimstat;
   GtEncseqReader *encseq_r_in_u, *encseq_r_in_v;
-  GtQuerymatchoutoptions *querymatchoutoptions;
   GtAllocatedMemory usequence_cache, vsequence_cache, frontspace_reservoir;
 };
 
@@ -542,8 +543,7 @@ GtGreedyextendmatchinfo *gt_greedy_extend_matchinfo_new(
                                    GtUword perc_mat_history,
                                    GtUword userdefinedleastlength,
                                    GtExtendCharAccess extend_char_access,
-                                   GtUword sensitivity,
-                                   GtUword alignmentwidth)
+                                   GtUword sensitivity)
 {
   GtGreedyextendmatchinfo *ggemi = gt_malloc(sizeof *ggemi);
 
@@ -575,7 +575,6 @@ GtGreedyextendmatchinfo *gt_greedy_extend_matchinfo_new(
   ggemi->check_extend_symmetry = false;
   ggemi->silent = false;
   ggemi->trimstat = NULL;
-  ggemi->querymatchoutoptions = gt_querymatchoutoptions_new(alignmentwidth);
   return ggemi;
 }
 
@@ -592,7 +591,6 @@ void gt_greedy_extend_matchinfo_delete(GtGreedyextendmatchinfo *ggemi)
     gt_free(ggemi->vsequence_cache.space);
     gt_free(ggemi->frontspace_reservoir.space);
     trimstat_delete(ggemi->trimstat,0.0,true);
-    gt_querymatchoutoptions_delete(ggemi->querymatchoutoptions);
     gt_free(ggemi);
   }
 }
@@ -645,8 +643,9 @@ int gt_simplegreedyselfmatchoutput(void *info,
                                    GtUword pos2,
                                    GtError *err)
 {
-  GtGreedyextendmatchinfo *greedyextendmatchinfo
-    = (GtGreedyextendmatchinfo *) info;
+  GtProcessinfo_and_outoptions *processinfo_and_outoptions
+    = (GtProcessinfo_and_outoptions *) info;
+  GtGreedyextendmatchinfo *greedyextendmatchinfo;
   GtUword vextend_left, vextend_right, ulen, vlen, urightbound, vrightbound,
           total_distance, dblen, querylen, total_alignedlen;
   Repfindsequenceinfo rfsi;
@@ -654,6 +653,7 @@ int gt_simplegreedyselfmatchoutput(void *info,
   Polished_point left_best_polished_point = {0,0,0},
                  right_best_polished_point = {0,0,0};
 
+  greedyextendmatchinfo = processinfo_and_outoptions->processinfo;
   if (greedyextendmatchinfo->left_front_trace != NULL)
   {
     front_trace_reset(greedyextendmatchinfo->left_front_trace,0);
@@ -821,7 +821,7 @@ int gt_simplegreedyselfmatchoutput(void *info,
                        (uint64_t) rfsi.queryseqnum,
                        querylen,
                        querystart - rfsi.queryseqstartpos,
-                       (void *) greedyextendmatchinfo->querymatchoutoptions,
+                       processinfo_and_outoptions->querymatchoutoptions,
                        encseq,
                        NULL,
                        rfsi.queryseqlength,

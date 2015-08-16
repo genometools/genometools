@@ -194,12 +194,7 @@ static int gt_simpleexactselfmatchstore(void *info,
   RepeatInfo *repeatinfo = (RepeatInfo *) info;
 
   gt_error_check(err);
-  if (pos1 > pos2)
-  {
-    GtUword tmp = pos1;
-    pos1 = pos2;
-    pos2 = tmp;
-  }
+  gt_assert(pos1 < pos2);
   if (repeatinfo->ltrsearchseqrange.start > 0 ||
       repeatinfo->ltrsearchseqrange.end > 0)
   {

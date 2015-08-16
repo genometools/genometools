@@ -22,8 +22,11 @@
 #include "core/error_api.h"
 #include "core/readmode.h"
 #include "core/encseq.h"
+#include "ft-front-prune.h"
 
 typedef struct GtQuerymatch GtQuerymatch;
+
+typedef struct GtQuerymatchoutoptions GtQuerymatchoutoptions;
 
 GtQuerymatch *gt_querymatch_new(void);
 
@@ -59,7 +62,7 @@ int gt_querymatch_fill_and_output(
                         uint64_t queryseqnum,
                         GtUword querylen,
                         GtUword querystart,
-                        void *info,
+                        GtQuerymatchoutoptions *querymatchoutoptions,
                         const GtEncseq *encseq,
                         const GtUchar *query,
                         GtUword query_totallength,
@@ -82,9 +85,13 @@ GtUword gt_querymatch_dbseqnum(const GtEncseq *encseq,
 
 bool gt_querymatch_queryreverse(const GtQuerymatch *querymatch);
 
-typedef struct GtQuerymatchoutoptions GtQuerymatchoutoptions;
-
-GtQuerymatchoutoptions *gt_querymatchoutoptions_new(GtUword alignmentwidth);
+GtQuerymatchoutoptions *gt_querymatchoutoptions_new(
+                                GtUword alignmentwidth,
+                                GtUword errorpercentage,
+                                GtUword maxalignedlendifference,
+                                GtUword history,
+                                GtUword perc_mat_history,
+                                GtExtendCharAccess extend_char_access);
 
 void gt_querymatchoutoptions_delete(
         GtQuerymatchoutoptions *querymatchoutoptions);

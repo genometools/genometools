@@ -98,7 +98,7 @@ static int gt_simpleexactselfmatchoutput(void *info,
                      (uint64_t) queryseqnum,
                      len,
                      pos2 - seqstartpos,
-                     info,
+                     (GtQuerymatchoutoptions *) info,
                      encseq,
                      NULL,
                      seqlength,
@@ -470,7 +470,7 @@ static int gt_generic_simplexdropselfmatchoutput(
 }
 
 static int gt_generic_simplegreedyselfmatchoutput(
-                                           void *info,
+                                           void *processinfo,
                                            const GtGenericEncseq *genericencseq,
                                            GtUword len,
                                            GtUword pos1,
@@ -478,7 +478,7 @@ static int gt_generic_simplegreedyselfmatchoutput(
                                            GtError *err)
 {
   gt_assert(genericencseq != NULL && genericencseq->hasencseq);
-  return gt_simplegreedyselfmatchoutput(info,
+  return gt_simplegreedyselfmatchoutput(processinfo,
                                         genericencseq->seqptr.encseq,
                                         len,
                                         pos1,
@@ -510,6 +510,7 @@ static int gt_repfind_runner(int argc,
   GtXdropmatchinfo *xdropmatchinfo = NULL;
   GtGreedyextendmatchinfo *greedyextendmatchinfo = NULL;
   GtTimer *repfindtimer = NULL;
+  GtExtendCharAccess extend_char_access = GT_EXTEND_CHAR_ACCESS_ANY;
 
   gt_error_check(err);
   logger = gt_logger_new(arguments->beverbose, GT_LOGGER_DEFLT_PREFIX, stdout);
@@ -536,8 +537,7 @@ static int gt_repfind_runner(int argc,
                                arguments->xdropbelowscore,
                                arguments->extendxdrop,
                                gt_str_array_size(arguments->queryfiles) == 0
-                                             ? true : false,
-                               arguments->alignmentwidth);
+                                             ? true : false);
     gt_assert(xdropmatchinfo != NULL);
     if (arguments->beverbose)
     {
@@ -550,7 +550,7 @@ static int gt_repfind_runner(int argc,
   }
   if (!haserr && gt_option_is_set(arguments->refextendgreedyoption))
   {
-    GtExtendCharAccess extend_char_access
+    extend_char_access
       = gt_greedy_extend_char_access(gt_str_get(arguments->cam_string),err);
 
     if ((int) extend_char_access == -1)
@@ -567,8 +567,7 @@ static int gt_repfind_runner(int argc,
                                          arguments->perc_mat_history,
                                          arguments->userdefinedleastlength,
                                          extend_char_access,
-                                         arguments->extendgreedy,
-                                         arguments->alignmentwidth);
+                                         arguments->extendgreedy);
       if (arguments->beverbose)
       {
         gt_greedy_extend_matchinfo_verbose_set(greedyextendmatchinfo);
@@ -590,8 +589,17 @@ static int gt_repfind_runner(int argc,
   }
   if (!haserr)
   {
-    GtQuerymatchoutoptions *querymatchoutoptions
-      = gt_querymatchoutoptions_new(arguments->alignmentwidth);
+    GtProcessinfo_and_outoptions processinfo_and_outoptions;
+
+    processinfo_and_outoptions.processinfo = NULL;
+    processinfo_and_outoptions.querymatchoutoptions
+      = gt_querymatchoutoptions_new(arguments->alignmentwidth,
+                                    minidentity2errorpercentage(
+                                             arguments->minidentity),
+                                    arguments->maxalignedlendifference,
+                                    arguments->history,
+                                    arguments->perc_mat_history,
+                                    extend_char_access);
     if (gt_str_array_size(arguments->queryfiles) == 0)
     {
       if (arguments->samples == 0)
@@ -610,17 +618,21 @@ static int gt_repfind_runner(int argc,
             if (gt_option_is_set(arguments->refextendxdropoption))
             {
               processmaxpairs = gt_generic_simplexdropselfmatchoutput;
-              processmaxpairsdata = (void *) xdropmatchinfo;
+              processinfo_and_outoptions.processinfo = (void *) xdropmatchinfo;
+              processmaxpairsdata = (void *) &processinfo_and_outoptions;
             } else
             {
               if (gt_option_is_set(arguments->refextendgreedyoption))
               {
                 processmaxpairs = gt_generic_simplegreedyselfmatchoutput;
-                processmaxpairsdata = (void *) greedyextendmatchinfo;
+                processinfo_and_outoptions.processinfo
+                  = (void *) greedyextendmatchinfo;
+                processmaxpairsdata = (void *) &processinfo_and_outoptions;
               } else
               {
                 processmaxpairs = gt_simpleexactselfmatchoutput;
-                processmaxpairsdata = (void *) querymatchoutoptions;
+                processmaxpairsdata
+                  = (void *) processinfo_and_outoptions.querymatchoutoptions;
               }
             }
           }
@@ -642,7 +654,8 @@ static int gt_repfind_runner(int argc,
                                      GT_READMODE_REVERSE,
                                      arguments->seedlength,
                                      gt_querymatch_output,
-                                     querymatchoutoptions,
+                                     processinfo_and_outoptions.
+                                         querymatchoutoptions,
                                      logger,
                                      err) != 0)
           {
@@ -670,7 +683,8 @@ static int gt_repfind_runner(int argc,
       if (gt_option_is_set(arguments->refextendxdropoption))
       {
         processquerymatch = gt_processxdropquerymatches;
-        processquerymatch_data = (void *) xdropmatchinfo;
+        processinfo_and_outoptions.processinfo = xdropmatchinfo;
+        processquerymatch_data = (void *) &processinfo_and_outoptions;
       } else
       {
         if (gt_option_is_set(arguments->refextendgreedyoption))
@@ -679,7 +693,8 @@ static int gt_repfind_runner(int argc,
         } else
         {
           processquerymatch = gt_querymatch_output;
-          processquerymatch_data = querymatchoutoptions;
+          processquerymatch_data
+            = processinfo_and_outoptions.querymatchoutoptions;
         }
       }
       if (gt_callenumquerymatches(gt_str_get(arguments->indexname),
@@ -697,7 +712,8 @@ static int gt_repfind_runner(int argc,
         haserr = true;
       }
     }
-    gt_querymatchoutoptions_delete(querymatchoutoptions);
+    gt_querymatchoutoptions_delete(processinfo_and_outoptions.
+                                   querymatchoutoptions);
   }
   gt_xdrop_matchinfo_delete(xdropmatchinfo);
   gt_greedy_extend_matchinfo_delete(greedyextendmatchinfo);

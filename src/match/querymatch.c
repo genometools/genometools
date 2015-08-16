@@ -22,6 +22,7 @@
 #include "core/format64.h"
 #include "core/minmax.h"
 #include "querymatch.h"
+#include "seed-extend.h"
 
 struct GtQuerymatch
 {
@@ -129,6 +130,8 @@ GtUword gt_querymatch_dbseqnum(const GtEncseq *encseq,
 
 struct GtQuerymatchoutoptions
 {
+  Fronttrace *front_trace;
+  GtGreedyextendmatchinfo *ggemi;
   GtUword alignmentwidth; /* if > 0, then with alignment of this width */
 };
 
@@ -141,8 +144,6 @@ int gt_querymatch_output(void *info,
 {
   const char *outflag = "FRCP";
   GtUword dbseqnum, querystart, dbstart_relative, seqstartpos;
-  const GtQuerymatchoutoptions *querymatchoutoptions
-    = (const GtQuerymatchoutoptions *) info;
 
   gt_assert(encseq != NULL);
   dbseqnum = gt_querymatch_dbseqnum(encseq,querymatch);
@@ -165,6 +166,8 @@ int gt_querymatch_output(void *info,
       (uint64_t) dbseqnum != querymatch->queryseqnum ||
       dbstart_relative <= querystart)
   {
+    GtQuerymatchoutoptions *querymatchoutoptions
+      = (GtQuerymatchoutoptions *) info;
 #ifdef VERIFY
     verifymatch(encseq,
                 querymatch->len,
@@ -193,10 +196,26 @@ int gt_querymatch_output(void *info,
     {
       printf("\n");
     }
-    if (querymatchoutoptions->alignmentwidth > 0)
+    if (querymatchoutoptions != NULL &&
+        querymatchoutoptions->alignmentwidth > 0)
     {
       printf("show alignment of width " GT_WU " here\n",
              querymatchoutoptions->alignmentwidth);
+      if (query == NULL)
+      {
+        if (querymatch->edist > 0)
+        {
+          /*
+          align_front_prune_edist(querymatchoutoptions->front_trace,
+                                  encseq,
+                                  querymatchoutoptions->ggemi,
+                                  querymatch->dbstart,
+                                  querymatch->dblen,
+                                  querymatch->querystart,
+                                  querymatch->querylen);
+          */
+        }
+      }
     }
   }
   return 0;
@@ -213,7 +232,7 @@ int gt_querymatch_fill_and_output(
                         uint64_t queryseqnum,
                         GtUword querylen,
                         GtUword querystart,
-                        void *info,
+                        GtQuerymatchoutoptions *querymatchoutoptions,
                         const GtEncseq *encseq,
                         const GtUchar *query,
                         GtUword query_totallength,
@@ -232,7 +251,7 @@ int gt_querymatch_fill_and_output(
                      queryseqnum,
                      querylen,
                      querystart);
-  return gt_querymatch_output(info,
+  return gt_querymatch_output(querymatchoutoptions,
                        encseq,
                        &querymatch,
                        query,
@@ -265,12 +284,34 @@ bool gt_querymatch_queryreverse(const GtQuerymatch *querymatch)
   return querymatch->query_as_reversecopy;
 }
 
-GtQuerymatchoutoptions *gt_querymatchoutoptions_new(GtUword alignmentwidth)
+GtQuerymatchoutoptions *gt_querymatchoutoptions_new(
+                                GtUword alignmentwidth,
+                                GtUword errorpercentage,
+                                GtUword maxalignedlendifference,
+                                GtUword history,
+                                GtUword perc_mat_history,
+                                GtExtendCharAccess extend_char_access)
 {
   GtQuerymatchoutoptions *querymatchoutoptions
     = gt_malloc(sizeof *querymatchoutoptions);
 
   querymatchoutoptions->alignmentwidth = alignmentwidth;
+  if (alignmentwidth > 0 && errorpercentage > 0)
+  {
+    querymatchoutoptions->front_trace = front_trace_new();
+    querymatchoutoptions->ggemi
+      = gt_greedy_extend_matchinfo_new(errorpercentage,
+                                       maxalignedlendifference,
+                                       history, /* default value */
+                                       perc_mat_history,
+                                       0,/* userdefinedleastlength not used */
+                                       extend_char_access,
+                                       100); /* maximumum sensitity */
+  } else
+  {
+    querymatchoutoptions->front_trace = NULL;
+    querymatchoutoptions->ggemi = NULL;
+  }
   return querymatchoutoptions;
 }
 
@@ -279,6 +320,8 @@ void gt_querymatchoutoptions_delete(
 {
   if (querymatchoutoptions != NULL)
   {
+    front_trace_delete(querymatchoutoptions->front_trace);
+    gt_greedy_extend_matchinfo_delete(querymatchoutoptions->ggemi);
     gt_free(querymatchoutoptions);
   }
 }
