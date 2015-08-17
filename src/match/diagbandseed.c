@@ -32,7 +32,7 @@
 #include "match/sfx-suffixer.h"
 
 #define GT_DIAGBANDSEED_SEQNUM_UNDEF UINT_MAX
-#undef  DEBUG_SEEDPAIR
+#define DEBUG_SEEDPAIR
 #undef  DEBUG_SEED_REPORT
 #undef  DEBUG_GET_KMERS
 
@@ -97,8 +97,8 @@ static void gt_diagbandseed_processkmercode(void *prockmerinfo,
 /* Uses GtKmercodeiterator for fetching the kmers. */
 static void gt_diagbandseed_get_kmers_kciter(GtDiagbandseedProcKmerInfo *pkinfo)
 {
-  GtKmercodeiterator *kc_iter;
-  const GtKmercode *kmercode;
+  GtKmercodeiterator *kc_iter = NULL;
+  const GtKmercode *kmercode = NULL;
   bool firstinrange = true;
   GtDiagbandseedPosition position;
   gt_assert(pkinfo != NULL);
@@ -146,7 +146,7 @@ GtUword gt_diagbandseed_get_kmers(GtDiagbandseedKmerPos *list,
                                   kmerlen,
                                   false,
                                   gt_diagbandseed_processkmercode,
-                                  (void *)(&pkinfo),
+                                  (void *) &pkinfo,
                                   NULL,
                                   NULL);
   } else {
@@ -193,7 +193,7 @@ void gt_diagbandseed_merge(GtArrayGtDiagbandseedSeedPair *mlist,
                 (aiter->seqnum == biter->seqnum && aiter->endpos + endposdiff <
                  biter->endpos)) {
               /* no duplicates from the same dataset */
-              GtDiagbandseedSeedPair *seedptr;
+              GtDiagbandseedSeedPair *seedptr = NULL;
               GT_GETNEXTFREEINARRAY(seedptr, mlist, GtDiagbandseedSeedPair,
                                     array_incr + 0.2 *
                                     mlist->allocatedGtDiagbandseedSeedPair);
@@ -214,10 +214,10 @@ void gt_diagbandseed_merge(GtArrayGtDiagbandseedSeedPair *mlist,
 int gt_diagbandseed_process_seeds(const GtEncseq *aencseq,
                                   const GtEncseq *bencseq,
                                   const GtDiagbandseed *arg,
-                                  GtError *err,
                                   const GtArrayGtDiagbandseedSeedPair *mlist,
                                   GtUword amaxlen,
-                                  GtUword bmaxlen)
+                                  GtUword bmaxlen,
+                                  GtError *err)
 {
   int had_err = 0;
   const bool selfcomp = (bencseq == aencseq) ? true : false;
@@ -228,11 +228,18 @@ int gt_diagbandseed_process_seeds(const GtEncseq *aencseq,
   /* minimum segment length */
   const GtUword minhit = (arg->mincoverage-1) / arg->seedlength + 1;
   GtUword diag, idx, maxsegm, nextsegm = 0;
-  GtDiagbandseedScore *score = gt_calloc(ndiags, sizeof *score);
-  GtDiagbandseedPosition *lastp = gt_calloc(ndiags, sizeof *lastp);
+  GtDiagbandseedScore *score = NULL;
+  GtDiagbandseedPosition *lastp = NULL;
 
   if (mlen < minhit)
     return 0;
+  if (!selfcomp &&
+      (arg->extendxdropinfo != NULL || arg->extendgreedyinfo != NULL)) {
+    gt_error_set(err, "comparison of two encseqs not implemented");
+    return -1;
+  }
+  score = gt_calloc(ndiags, sizeof *score);
+  lastp = gt_calloc(ndiags, sizeof *lastp);
   maxsegm = mlen - minhit;
 
   while (nextsegm <= maxsegm) {
@@ -282,18 +289,17 @@ int gt_diagbandseed_process_seeds(const GtEncseq *aencseq,
         printf("SP(%d,%d,%d,%d) ",
                lm[idx].aseqnum, lm[idx].bseqnum, lm[idx].apos, lm[idx].bpos);
 #endif
-        if (selfcomp && arg->extendgreedyinfo != NULL) {
+        if (arg->extendgreedyinfo != NULL) {
           had_err = gt_simplegreedyselfmatchoutput((void *)
                                                    arg->extendgreedyinfo,
                                                    aencseq, arg->seedlength,
                                                    astart, bstart, err);
-        } else if (selfcomp && arg->extendxdropinfo != NULL) {
+        } else if (arg->extendxdropinfo != NULL) {
           had_err = gt_simplexdropselfmatchoutput((void *)arg->extendxdropinfo,
                                                   aencseq, arg->seedlength,
                                                   astart, bstart, err);
-        } else {
-          printf("comparison of two encseqs not implemented\n");
         }
+        /* else: no seed extension */
       }
     }
 
@@ -313,9 +319,9 @@ int gt_diagbandseed_process_seeds(const GtEncseq *aencseq,
 int gt_diagbandseed_run(const GtEncseq *aencseq, const GtEncseq *bencseq,
                         const GtDiagbandseed *arg, GtError *err)
 {
-  GtDiagbandseedKmerPos *alist, *blist;
+  GtDiagbandseedKmerPos *alist = NULL, *blist = NULL;
   GtArrayGtDiagbandseedSeedPair mlist;
-  GtRadixsortinfo* rdxinfo;
+  GtRadixsortinfo* rdxinfo = NULL;
   GtUword alen, blen, mlen;
   const unsigned int kmerlen = arg->seedlength;
   const unsigned int endposdiff = arg->overlappingseeds ? 0 : kmerlen - 1;
@@ -329,7 +335,7 @@ int gt_diagbandseed_run(const GtEncseq *aencseq, const GtEncseq *bencseq,
   const GtUword bnkmers = gt_encseq_total_length(bencseq) -
                           MIN(kmerlen-1, gt_encseq_min_seq_length(bencseq)) *
                           gt_encseq_num_of_sequences(bencseq);
-  GtTimer *btimer, *vtimer;
+  GtTimer *btimer = NULL, *vtimer = NULL;
   int had_err = 0;
 
   if (amaxlen < kmerlen || bmaxlen < kmerlen) {
@@ -445,7 +451,7 @@ int gt_diagbandseed_run(const GtEncseq *aencseq, const GtEncseq *bencseq,
     char *buf2 = buf1 + 1 + kmerlen;
     char *buf3 = buf2 + 1 + kmerlen;
     while (j < last) {
-      char *idx;
+      char *idx = NULL;
       GtDiagbandseedPosition a = j->apos + gt_encseq_seqstartpos(aencseq,
                                                                  j->aseqnum);
       GtDiagbandseedPosition b = j->bpos + gt_encseq_seqstartpos(bencseq,
@@ -477,8 +483,8 @@ int gt_diagbandseed_run(const GtEncseq *aencseq, const GtEncseq *bencseq,
     gt_timer_start(vtimer);
   }
   if (had_err == 0 && mlen != 0)
-    had_err = gt_diagbandseed_process_seeds(aencseq, bencseq, arg, err, &mlist,
-                                            amaxlen, bmaxlen);
+    had_err = gt_diagbandseed_process_seeds(aencseq, bencseq, arg, &mlist,
+                                            amaxlen, bmaxlen, err);
   GT_FREEARRAY(&mlist, GtDiagbandseedSeedPair);
 
   if (arg->verbose) {

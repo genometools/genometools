@@ -62,10 +62,10 @@ void gt_diagbandseed_merge(GtArrayGtDiagbandseedSeedPair *mlist,
 int gt_diagbandseed_process_seeds(const GtEncseq *aencseq,
                                   const GtEncseq *bencseq,
                                   const GtDiagbandseed *arg,
-                                  GtError *err,
                                   const GtArrayGtDiagbandseedSeedPair *mlist,
                                   GtUword amaxlen,
-                                  GtUword bmaxlen);
+                                  GtUword bmaxlen,
+                                  GtError *err);
 
 /* Run the whole algorithm. */
 int gt_diagbandseed_run(const GtEncseq *aencseq, const GtEncseq *bencseq,
