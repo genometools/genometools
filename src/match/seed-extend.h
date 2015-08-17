@@ -245,6 +245,7 @@ void gt_greedy_extend_matchinfo_relax(GtGreedyextendmatchinfo *ggemi,
                                       GtUword steps);
 
 GtUword align_front_prune_edist(bool forward,
+                                Polished_point *best_polished_point,
                                 Fronttrace *front_trace,
                                 const GtEncseq *encseq,
                                 GtGreedyextendmatchinfo *ggemi,

@@ -23,6 +23,7 @@
 #include "core/minmax.h"
 #include "querymatch.h"
 #include "seed-extend.h"
+#include "ft-front-generation.h"
 
 struct GtQuerymatch
 {
@@ -121,7 +122,7 @@ static void verifyexactmatch(const GtEncseq *encseq,
 #endif
 
 GtUword gt_querymatch_dbseqnum(const GtEncseq *encseq,
-                                     const GtQuerymatch *querymatch)
+                               const GtQuerymatch *querymatch)
 {
   return gt_encseq_seqnum(encseq,querymatch->dbstart);
 }
@@ -133,6 +134,68 @@ struct GtQuerymatchoutoptions
   GtUword seedpos1, seedpos2, seedlen, totallength,
           alignmentwidth; /* if > 0, then with alignment of this width */
 };
+
+static void seededmatch2alignment(const GtQuerymatch *querymatch,
+                                  GtUword querystartabsolute,
+                                  const GtEncseq *encseq,
+                                  GtQuerymatchoutoptions *querymatchoutoptions)
+{
+  GtUword ulen, vlen, rightdistance = 0, leftdistance = 0,
+          offset1 = querymatchoutoptions->seedpos1 +
+                    querymatchoutoptions->seedlen,
+          offset2 = querymatchoutoptions->seedpos2 +
+                    querymatchoutoptions->seedlen;
+  GtAlignment *alignment = gt_alignment_new();
+
+  gt_assert(querymatch->dbstart + querymatch->dblen >= offset1);
+  ulen = querymatch->dbstart + querymatch->dblen - offset1;
+  gt_assert(querystartabsolute + querymatch->querylen >= offset2);
+  vlen = querystartabsolute + querymatch->querylen - offset2;
+  if (ulen > 0 && vlen > 0)
+  {
+    Polished_point best_polished_point = {0,0,0};
+    rightdistance = align_front_prune_edist(true,
+                                            &best_polished_point,
+                                            querymatchoutoptions->front_trace,
+                                            encseq,
+                                            querymatchoutoptions->ggemi,
+                                            offset1,
+                                            ulen,
+                                            offset2,
+                                            vlen);
+    front_trace2alignments(alignment,
+                           querymatchoutoptions->front_trace,
+                           &best_polished_point,
+                           ulen,vlen);
+    front_trace_reset(querymatchoutoptions->front_trace,ulen+vlen);
+  }
+  gt_assert(rightdistance <= querymatch->edist);
+  if (querymatchoutoptions->totallength == GT_UWORD_MAX)
+  {
+    querymatchoutoptions->totallength = gt_encseq_total_length(encseq);
+  }
+  if (querymatchoutoptions->seedpos1 > querymatch->dbstart &&
+      querymatchoutoptions->seedpos2 > querystartabsolute)
+  {
+    Polished_point best_polished_point = {0,0,0};
+    ulen = querymatchoutoptions->seedpos1 - querymatch->dbstart;
+    vlen = querymatchoutoptions->seedpos2 - querystartabsolute;
+    leftdistance = align_front_prune_edist(false,
+                               &best_polished_point,
+                               querymatchoutoptions->front_trace,
+                               encseq,
+                               querymatchoutoptions->ggemi,
+                               GT_REVERSEPOS(querymatchoutoptions->totallength,
+                                             querymatchoutoptions->seedpos1-1),
+                               ulen,
+                               GT_REVERSEPOS(querymatchoutoptions->totallength,
+                                             querymatchoutoptions->seedpos2-1),
+                               vlen);
+    front_trace_reset(querymatchoutoptions->front_trace,ulen+vlen);
+  }
+  gt_assert(leftdistance + rightdistance <= querymatch->edist);
+  gt_alignment_delete(alignment);
+}
 
 int gt_querymatch_output(void *info,
                          const GtEncseq *encseq,
@@ -204,55 +267,12 @@ int gt_querymatch_output(void *info,
       {
         if (querymatch->edist > 0)
         {
-          GtUword querystartabsolute, ulen, vlen, rightdistance = 0,
-                  leftdistance = 0,
-                  offset1 = querymatchoutoptions->seedpos1 +
-                            querymatchoutoptions->seedlen,
-                  offset2 = querymatchoutoptions->seedpos2 +
-                            querymatchoutoptions->seedlen,
-                  queryseqstartpos = gt_encseq_seqstartpos(encseq,
-                                                      querymatch->queryseqnum);
-
-          querystartabsolute = queryseqstartpos + querystart;
-          gt_assert(querymatch->dbstart + querymatch->dblen >= offset1);
-          ulen = querymatch->dbstart + querymatch->dblen - offset1;
-          gt_assert(querystartabsolute + querymatch->querylen >= offset2);
-          vlen = querystartabsolute + querymatch->querylen - offset2;
-          if (ulen > 0 && vlen > 0)
-          {
-            rightdistance = align_front_prune_edist(true,
-                                        querymatchoutoptions->front_trace,
-                                        encseq,
-                                        querymatchoutoptions->ggemi,
-                                        offset1,
-                                        ulen,
-                                        offset2,
-                                        vlen);
-            front_trace_reset(querymatchoutoptions->front_trace,ulen+vlen);
-          }
-          gt_assert(rightdistance <= querymatch->edist);
-          if (querymatchoutoptions->totallength == GT_UWORD_MAX)
-          {
-            querymatchoutoptions->totallength = gt_encseq_total_length(encseq);
-          }
-          if (querymatchoutoptions->seedpos1 > querymatch->dbstart &&
-              querymatchoutoptions->seedpos2 > querystartabsolute)
-          {
-            ulen = querymatchoutoptions->seedpos1 - querymatch->dbstart;
-            vlen = querymatchoutoptions->seedpos2 - querystartabsolute;
-            leftdistance = align_front_prune_edist(false,
-                               querymatchoutoptions->front_trace,
-                               encseq,
-                               querymatchoutoptions->ggemi,
-                               GT_REVERSEPOS(querymatchoutoptions->totallength,
-                                             querymatchoutoptions->seedpos1-1),
-                               ulen,
-                               GT_REVERSEPOS(querymatchoutoptions->totallength,
-                                             querymatchoutoptions->seedpos2-1),
-                               vlen);
-            front_trace_reset(querymatchoutoptions->front_trace,ulen+vlen);
-          }
-          gt_assert(leftdistance + rightdistance <= querymatch->edist);
+          seededmatch2alignment(querymatch,
+                                gt_encseq_seqstartpos(encseq,
+                                                      querymatch->queryseqnum)
+                                + querystart,
+                                encseq,
+                                querymatchoutoptions);
         }
       }
     }

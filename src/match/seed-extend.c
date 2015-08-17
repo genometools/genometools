@@ -870,6 +870,7 @@ int gt_simplegreedyselfmatchoutput(void *info,
 }
 
 GtUword align_front_prune_edist(bool forward,
+                                Polished_point *best_polished_point,
                                 Fronttrace *front_trace,
                                 const GtEncseq *encseq,
                                 GtGreedyextendmatchinfo *ggemi,
@@ -880,7 +881,6 @@ GtUword align_front_prune_edist(bool forward,
 {
   GtUword distance;
   FTsequenceResources ufsr, vfsr;
-  Polished_point best_polished_point = {0,0,0};
 
   gt_assert(front_trace != NULL && ggemi != NULL);
   if (ggemi->encseq_r_in_u == NULL)
@@ -916,7 +916,7 @@ GtUword align_front_prune_edist(bool forward,
   distance = front_prune_edist_inplace(forward,
                                        &ggemi->frontspace_reservoir,
                                        NULL,
-                                       &best_polished_point,
+                                       best_polished_point,
                                        front_trace,
                                        ggemi->pol_info,
                                        ggemi->history,
