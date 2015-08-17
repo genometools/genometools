@@ -91,9 +91,13 @@ GtQuerymatchoutoptions *gt_querymatchoutoptions_new(
                                 GtUword maxalignedlendifference,
                                 GtUword history,
                                 GtUword perc_mat_history,
-                                GtExtendCharAccess extend_char_access);
+                                GtExtendCharAccess extend_char_access,
+                                GtUword sensitivity);
 
 void gt_querymatchoutoptions_delete(
         GtQuerymatchoutoptions *querymatchoutoptions);
+
+void gt_querymatch_set_seed(GtQuerymatchoutoptions *querymatchoutoptions,
+                            GtUword pos1,GtUword pos2,GtUword len);
 
 #endif

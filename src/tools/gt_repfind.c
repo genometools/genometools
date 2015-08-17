@@ -590,6 +590,9 @@ static int gt_repfind_runner(int argc,
   if (!haserr)
   {
     GtProcessinfo_and_outoptions processinfo_and_outoptions;
+    GtUword sensitivity = gt_option_is_set(arguments->refextendgreedyoption)
+                            ? arguments->extendgreedy
+                            : 100;
 
     processinfo_and_outoptions.processinfo = NULL;
     processinfo_and_outoptions.querymatchoutoptions
@@ -599,7 +602,8 @@ static int gt_repfind_runner(int argc,
                                     arguments->maxalignedlendifference,
                                     arguments->history,
                                     arguments->perc_mat_history,
-                                    extend_char_access);
+                                    extend_char_access,
+                                    sensitivity);
     if (gt_str_array_size(arguments->queryfiles) == 0)
     {
       if (arguments->samples == 0)

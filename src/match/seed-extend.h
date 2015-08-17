@@ -241,12 +241,16 @@ int gt_simplegreedyselfmatchoutput(void *info,
                                    GtUword pos2,
                                    GtError *err);
 
-void align_front_prune_edist(Fronttrace *front_trace,
-                             const GtEncseq *encseq,
-                             GtGreedyextendmatchinfo *ggemi,
-                             GtUword ustart,
-                             GtUword ulen,
-                             GtUword vstart,
-                             GtUword vlen);
+void gt_greedy_extend_matchinfo_relax(GtGreedyextendmatchinfo *ggemi,
+                                      GtUword steps);
+
+GtUword align_front_prune_edist(bool forward,
+                                Fronttrace *front_trace,
+                                const GtEncseq *encseq,
+                                GtGreedyextendmatchinfo *ggemi,
+                                GtUword ustart,
+                                GtUword ulen,
+                                GtUword vstart,
+                                GtUword vlen);
 
 #endif

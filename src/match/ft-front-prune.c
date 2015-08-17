@@ -622,7 +622,7 @@ GtUword front_prune_edist_inplace(
     if (maxvalid < valid)
     {
       maxvalid = valid;
-    }
+   }
     validbasefront = frontspace_allocate(minsizeforshift,trimleft,valid,
                                          frontspace);
     if (distance == 0)
