@@ -71,7 +71,16 @@ void         gt_alignment_show(const GtAlignment *alignment, FILE *fp,
 void         gt_alignment_show_with_mapped_chars(const GtAlignment *alignment,
                                                  const GtUchar *characters,
                                                  GtUchar wildcardshow,
-                                                 FILE *fp);
+                                                 FILE *fp,
+                                                 unsigned int width);
+GtUchar *gt_alignment_buffer_new(unsigned int width);
+void gt_alignment_buffer_delete(GtUchar *buffer);
+void gt_alignment_show_generic(GtUchar *buffer,
+                               const GtAlignment *alignment,
+                               FILE *fp,
+                               unsigned int width,
+                               const GtUchar *characters,
+                               GtUchar wildcardshow);
 void         gt_alignment_show_multieop_list(const GtAlignment *alignment,
                                              FILE *fp);
 int          gt_alignment_unit_test(GtError *err);

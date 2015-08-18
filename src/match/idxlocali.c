@@ -70,7 +70,8 @@ static void idxlocali_showmatch(void *processinfo,const GtIdxMatch *match)
                 (const GtAlignment *) match->alignment,
                 showmatchinfo->characters,
                 showmatchinfo->wildcardshow,
-                stdout);
+                stdout,
+                70);
   }
 }
 
