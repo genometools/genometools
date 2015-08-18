@@ -424,9 +424,7 @@ void gt_alignment_show_with_mapped_chars(const GtAlignment *alignment,
   GtUword i, j, idx_u, idx_v, meoplen;
   GtMultieop meop;
 
-  gt_assert(alignment);
-  gt_assert(gt_alignment_is_valid(alignment));
-
+  gt_assert(alignment != NULL);
   meoplen = gt_multieoplist_get_num_entries(alignment->eops);
   /* output first line */
   idx_u = 0;

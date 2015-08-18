@@ -21,6 +21,13 @@
 
 #include "extended/alignment.h"
 
+typedef enum {
+  Affine_R,
+  Affine_D,
+  Affine_I,
+  Affine_X /* unknown */
+} AffineAlignEdge;
+
 /* (globally) align u and v (affine gap costs) and return one optimal
    GtAlignment */
 GtAlignment* gt_affinealign(const char *u, GtUword ulen,

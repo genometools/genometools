@@ -22,19 +22,13 @@
 #include "core/minmax.h"
 #include "extended/affinealign.h"
 
-typedef enum {
-  R,
-  D,
-  I
-} Edge;
-
 typedef struct {
   GtUword Rdist,
                 Ddist,
                 Idist;
-  Edge Redge,
-       Dedge,
-       Iedge;
+  AffineAlignEdge Redge,
+                  Dedge,
+                  Iedge;
 } AffinealignDPentry;
 
 static GtUword infadd(GtUword inf, GtUword s)
@@ -75,11 +69,11 @@ static void affinealign_fill_table(AffinealignDPentry **dptable,
           dptable[i][j].Rdist = minvalue;
           /* set backtracing edge */
           if (Rvalue == minvalue)
-            dptable[i][j].Redge = R;
+            dptable[i][j].Redge = Affine_R;
           else if (Dvalue == minvalue)
-            dptable[i][j].Redge = D;
+            dptable[i][j].Redge = Affine_D;
           else /* Ivalue == minvalue */
-            dptable[i][j].Redge = I;
+            dptable[i][j].Redge = Affine_I;
         }
         /* compute A_affine(i,j,D) */
         if (!i)
@@ -93,11 +87,11 @@ static void affinealign_fill_table(AffinealignDPentry **dptable,
           dptable[i][j].Ddist = minvalue;
           /* set backtracing edge */
           if (Rvalue == minvalue)
-            dptable[i][j].Dedge = R;
+            dptable[i][j].Dedge = Affine_R;
           else if (Dvalue == minvalue)
-            dptable[i][j].Dedge = D;
+            dptable[i][j].Dedge = Affine_D;
           else /* Ivalue == minvalue */
-            dptable[i][j].Dedge = I;
+            dptable[i][j].Dedge = Affine_I;
         }
         /* compute A_affine(i,j,I) */
         if (!j)
@@ -111,55 +105,58 @@ static void affinealign_fill_table(AffinealignDPentry **dptable,
           dptable[i][j].Idist = minvalue;
           /* set backtracing edge */
           if (Rvalue == minvalue)
-            dptable[i][j].Iedge = R;
+            dptable[i][j].Iedge = Affine_R;
           else if (Dvalue == minvalue)
-            dptable[i][j].Iedge = D;
+            dptable[i][j].Iedge = Affine_D;
           else /* Ivalue == minvalue */
-            dptable[i][j].Iedge = I;
+            dptable[i][j].Iedge = Affine_I;
         }
       }
     }
   }
 }
 
-static void affinealign_traceback(GtAlignment *a, AffinealignDPentry **dptable,
+static void affinealign_traceback(GtAlignment *a,
+                                  AffinealignDPentry * const *dptable,
                                   GtUword i, GtUword j)
 {
   GtUword minvalue;
-  Edge edge;
+  AffineAlignEdge edge;
   gt_assert(a && dptable);
   /* determine min{A_affine(m,n,x) | x in {R,D,I}} */
   minvalue = MIN3(dptable[i][j].Rdist, dptable[i][j].Ddist,
                   dptable[i][j].Idist);
   if (dptable[i][j].Rdist == minvalue)
-    edge = R;
+    edge = Affine_R;
   else if (dptable[i][j].Ddist == minvalue)
-    edge = D;
+    edge = Affine_D;
   else /* dptable[i][j].Idist == minvalue */
-    edge = I;
+    edge = Affine_I;
   /* backtracing */
   while (i > 0 || j > 0) {
     switch (edge) {
-      case R:
+      case Affine_R:
         gt_assert(dptable[i][j].Rdist != ULONG_MAX);
         gt_alignment_add_replacement(a);
         edge = dptable[i][j].Redge;
-        /* gt_assert(i && j); */
+        gt_assert(i > 0 && j > 0);
         i--;
         j--;
         break;
-      case D:
+      case Affine_D:
         gt_alignment_add_deletion(a);
         edge = dptable[i][j].Dedge;
         gt_assert(i);
         i--;
         break;
-      case I:
+      case Affine_I:
         gt_alignment_add_insertion(a);
         edge = dptable[i][j].Iedge;
         gt_assert(j);
         j--;
         break;
+      default:
+        gt_assert(false);
     }
   }
 }

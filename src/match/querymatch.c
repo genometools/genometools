@@ -193,6 +193,12 @@ static void seededmatch2alignment(const GtQuerymatch *querymatch,
                                vlen);
     front_trace_reset(querymatchoutoptions->front_trace,ulen+vlen);
   }
+  if (leftdistance + rightdistance > querymatch->edist)
+  {
+    fprintf(stderr,"leftdistance + rightdistance = " GT_WU " + " GT_WU " > "
+                   GT_WU " = querymatch->edist\n",
+                   leftdistance,rightdistance,querymatch->edist);
+  }
   gt_assert(leftdistance + rightdistance <= querymatch->edist);
   gt_alignment_delete(alignment);
 }
