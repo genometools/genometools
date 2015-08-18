@@ -72,7 +72,7 @@ Name "gt repfind mirror symmetric"
 Keywords "gt_repfind"
 Test do
   10.times.each do
-    run "#{$scriptsdir}gen-mirrorseq.rb 200 1000"
+    run "#{$scriptsdir}gen-randseq.rb --seedlength 200 --length 2200 --mirrored"
     run_test "#{$bin}gt suffixerator -suftabuint -db #{last_stdout} " +
              "-dna -suf -tis -lcp -md5 no -des no -sds no -indexname sfx"
     run_test "#{$bin}gt repfind -minidentity 90 -percmathistory 55 " +
