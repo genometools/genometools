@@ -159,6 +159,13 @@ void gt_multieoplist_add_replacement(GtMultieoplist *multieops)
   gt_multieoplist_add_eops(multieops, Replacement, (GtUword) 1);
 }
 
+void gt_multieoplist_add_replacement_multi(GtMultieoplist *multieops,
+                                           GtUword num)
+{
+  gt_assert(num > 0);
+  gt_multieoplist_add_eops(multieops, Replacement, num);
+}
+
 void gt_multieoplist_add_insertion(GtMultieoplist *multieops)
 {
   gt_multieoplist_add_eops(multieops, Insertion, (GtUword) 1);

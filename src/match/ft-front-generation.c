@@ -249,19 +249,16 @@ void front_trace2eoplist(GtArraychar *eoplist,
       totalrunlength++;
       if (preferred_eop == FT_EOP_REPLACEMENT)
       {
-        GT_STOREINARRAY(eoplist,char,addamount,FT_EOP_REPLACEMENT);
         nextrowadd = 1;
       } else
       {
         if (preferred_eop == FT_EOP_INSERTION)
         {
-          GT_STOREINARRAY(eoplist,char,addamount,FT_EOP_INSERTION);
           gt_assert(-(GtWord) ulen < diagonal);
           diagonal--;
           nextrowadd = 0;
         } else
         {
-          GT_STOREINARRAY(eoplist,char,addamount,FT_EOP_DELETION);
           gt_assert(preferred_eop == FT_EOP_DELETION);
           gt_assert(diagonal < (GtWord) vlen);
           diagonal++;
@@ -272,21 +269,18 @@ void front_trace2eoplist(GtArraychar *eoplist,
     {
       if (trace & FT_EOP_REPLACEMENT)
       {
-        GT_STOREINARRAY(eoplist,char,addamount,FT_EOP_REPLACEMENT);
         preferred_eop = FT_EOP_REPLACEMENT;
         nextrowadd = 1;
       } else
       {
         if (trace & FT_EOP_INSERTION)
         {
-          GT_STOREINARRAY(eoplist,char,addamount,FT_EOP_INSERTION);
           gt_assert(-(GtWord) ulen < diagonal);
           diagonal--;
           preferred_eop = FT_EOP_INSERTION;
           nextrowadd = 0;
         } else
         {
-          GT_STOREINARRAY(eoplist,char,addamount,FT_EOP_DELETION);
           gt_assert(trace & FT_EOP_DELETION);
           gt_assert(diagonal < (GtWord) vlen);
           diagonal++;
@@ -295,6 +289,7 @@ void front_trace2eoplist(GtArraychar *eoplist,
         }
       }
     }
+    GT_STOREINARRAY(eoplist,char,addamount,preferred_eop);
     gt_assert(trimleft >=
               (GtUword) front_trace->gen_table[distance].trimleft_diff);
     trimleft -= (GtUword) front_trace->gen_table[distance].trimleft_diff;

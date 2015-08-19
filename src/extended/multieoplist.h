@@ -61,6 +61,11 @@ void            gt_multieoplist_delete(GtMultieoplist *multieops);
    additions will be combined by increasing <steps>. */
 void            gt_multieoplist_add_replacement(GtMultieoplist *multieops);
 
+/* Add num <Replacement> operations to the list of edit operations. Multiple
+   additions will be combined by increasing <steps>. */
+void gt_multieoplist_add_replacement_multi(GtMultieoplist *multieops,
+                                           GtUword num);
+
 /* Add one <Insertion> operation to the list of edit operations. Multiple
    additions will be combined by increasing <steps>. */
 void            gt_multieoplist_add_insertion(GtMultieoplist *multieops);

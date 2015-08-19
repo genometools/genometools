@@ -44,6 +44,8 @@ void         gt_alignment_set_urange(GtAlignment *alignment, GtRange range);
 void         gt_alignment_set_vrange(GtAlignment *alignment, GtRange range);
 /* can be either match, mismatch, <GtMultieoplist> handles them as match! */
 void         gt_alignment_add_replacement(GtAlignment *alignment);
+void         gt_alignment_add_replacement_multi(GtAlignment *alignment,
+                                                GtUword num);
 void         gt_alignment_add_deletion(GtAlignment *alignment);
 void         gt_alignment_add_insertion(GtAlignment *alignment);
 /* NOT the length of the alignment, but the number of distinct stored elements

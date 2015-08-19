@@ -126,6 +126,13 @@ void gt_alignment_set_vrange(GtAlignment *alignment, GtRange range)
   alignment->aligned_range_v.end = range.end;
 }
 
+void gt_alignment_add_replacement_multi(GtAlignment *alignment,GtUword num)
+{
+  gt_assert(alignment != NULL && num > 0);
+  gt_multieoplist_add_replacement_multi(alignment->eops,num);
+  alignment->alilen += num;
+}
+
 void gt_alignment_add_replacement(GtAlignment *alignment)
 {
   gt_assert(alignment != NULL);
@@ -162,22 +169,22 @@ void gt_alignment_remove_last(GtAlignment *alignment)
 }
 
 #ifndef NDEBUG
-static int gt_alignment_is_valid(const GtAlignment *alignment)
+static bool gt_alignment_is_valid(const GtAlignment *alignment)
 {
   GtUword len;
   /* check ulen */
   len = gt_multieoplist_get_repdel_length(alignment->eops);
   if (len != alignment->ulen) {
     printf("ulen: "GT_WU", repdel: "GT_WU"\n", alignment->ulen, len);
-    return 0;
+    return false;
   }
   /* check vlen */
   len = gt_multieoplist_get_repins_length(alignment->eops);
   if (len != alignment->vlen) {
     printf("vlen: "GT_WU", repins: "GT_WU"\n", alignment->vlen, len);
-    return 0;
+    return false;
   }
-  return 1;
+  return true;
 }
 #endif
 
@@ -227,9 +234,9 @@ GtUword gt_alignment_eval(const GtAlignment *alignment)
 }
 
 GtWord gt_alignment_eval_with_score(const GtAlignment *alignment,
-                                  GtWord matchscore,
-                                  GtWord mismatchscore,
-                                  GtWord gapscore)
+                                    GtWord matchscore,
+                                    GtWord mismatchscore,
+                                    GtWord gapscore)
 {
   GtUword i, j, idx_u = 0, idx_v = 0, meoplen;
   GtWord sumscore = 0;

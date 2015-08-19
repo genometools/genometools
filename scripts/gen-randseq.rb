@@ -10,7 +10,7 @@ class Randomsequence
     if myseed.nil?
       seed = Random.new_seed
     else
-      seed=myseed
+      seed = myseed
     end
     @rgen = Random.new(seed)
   end
@@ -21,31 +21,26 @@ class Randomsequence
     end
     return s.join
   end
-end
-
-class String
-  def mutate(errperc,alphabet)
-    len = self.length
+  def mutate(sequence,errperc,alphabet)
+    len = sequence.length
     err_prob = errperc.to_f/100.0
-    seed = Random.new_seed
-    rgen = Random.new(seed)
     asize = alphabet.length
     s = Array.new()
     i = 0
     loop do
-      r = rgen.rand
+      r = @rgen.rand
       if r <= err_prob
-        r = rgen.rand
+        r = @rgen.rand
         if r <= 0.8
-          s.push(alphabet[rgen.rand * asize])
+          s.push(alphabet[@rgen.rand * asize])
           i += 1
         elsif r <= 0.9
-          s.push(alphabet[rgen.rand * asize])
+          s.push(alphabet[@rgen.rand * asize])
         else
           i += 1
         end
       else
-        s.push(self[i])
+        s.push(sequence[i])
         i += 1
       end
       if i == len
@@ -58,16 +53,15 @@ end
 
 def parseargs(argv)
   options = OpenStruct.new
-  options.mirrored = false
+  mode = nil
   options.seedlength = nil
   options.lengthparam = nil
   options.pairparam = false
+  options.mirrored = false
+  options.seeded = false
   opts = OptionParser.new
-  opts.on("-m","--mirrored","output mirrored sequences") do |x|
-    options.mirrored = true
-  end
-  opts.on("-p","--pair","output pair of sequences on single line") do |x|
-    options.pairparam = true
+  opts.on("-m","--mode STRING","specify mode: mirrored|seeded|pair") do |x|
+    mode = x
   end
   opts.on("-s","--seedlength NUM","specify seed length for mirrored sequences") do |x|
     options.seedlength = x.to_i
@@ -80,20 +74,30 @@ def parseargs(argv)
     STDERR.puts "Usage: #{$0} [options]"
     exit 1
   end
-  if options.pairparam and options.mirrored
-    STDERR.puts "#{$0}: options --pair and -mirrored cannot be combined"
+  if mode.nil?
+    STDERR.puts "#{$0}: options --mode is mandatory"
     exit 1
   end
-  if not options.seedlength.nil? and not options.mirrored
-    STDERR.puts "#{$0}: option --seedlength requires option --mirrored"
+  if mode == "mirrored"
+    options.mirrored = true
+  elsif mode == "seeded"
+    options.seeded = true
+  elsif mode == "pair"
+    options.pairparam = true
+  else
+    STDERR.puts "#{$0}: possible modes are mirrored|seeded|pair"
+    exit 1
+  end
+  if not options.seedlength.nil? and not (options.seeded or options.mirrored)
+    STDERR.puts "#{$0}: option --seedlength requires option --mode seeded or --mode mirrored"
     exit 1
   end
   if options.lengthparam.nil?
     STDERR.puts "#{$0}: option --length is mandatory"
     exit 1
   end
-  if options.mirrored and options.seedlength.nil?
-    STDERR.puts "#{$0}: option --mirrored implies option --seedlength"
+  if (options.mirrored or options.seeded) and options.seedlength.nil?
+    STDERR.puts "#{$0}: option --mode mirrored and --mode seed imply option --seedlength"
     exit 1
   end
   if not options.seedlength.nil? and options.seedlength >= options.lengthparam
@@ -103,25 +107,52 @@ def parseargs(argv)
   return options
 end
 
-options = parseargs(ARGV)
-alphabet = "acgt"
-minidentity = 90
-errperc = 100 - minidentity
-rseq = Randomsequence.new(alphabet,3423414324)
-if options.mirrored
+def gen_mirrored(rseq,options,alphabet,errperc,seed)
   extendlength = (options.lengthparam - options.seedlength)/2
-  seed = rseq.sequence(options.seedlength)
+  seedstring = rseq.sequence(options.seedlength)
   leftcontext1 = rseq.sequence(extendlength)
-  leftcontext2 = leftcontext1.mutate(errperc,alphabet)
+  leftcontext2 = mutate(leftcontext1,errperc,alphabet)
   puts ">seedlength=#{options.seedlength},extendlength=#{extendlength}," +
        "errperc=#{errperc}"
   puts "#{leftcontext1}"
-  puts "#{seed}"
+  puts "#{seedstring}"
   puts "#{leftcontext1.reverse}"
-  puts ">seedlength=#{options.seedlength},extendlength=#{extendlength},errperc=#{errperc}"
+  puts ">seedlength=#{options.seedlength},extendlength=#{extendlength}," +
+       "errperc=#{errperc}"
   puts "#{leftcontext2}"
-  puts "#{seed}"
+  puts "#{seedstring}"
   puts "#{leftcontext2.reverse}"
+end
+
+def gen_seeded(rseq,options,alphabet,errperc)
+  extendlength = (options.lengthparam - options.seedlength)/2
+  seedstring = rseq.sequence(options.seedlength)
+  leftcontext1 = rseq.sequence(extendlength)
+  leftcontext2 = rseq.mutate(leftcontext1,errperc,alphabet)
+  rightcontext1 = rseq.sequence(extendlength)
+  rightcontext2 = rseq.mutate(rightcontext1,errperc,alphabet)
+  puts ">seedlength=#{options.seedlength},extendlength=#{extendlength}," +
+       "errperc=#{errperc}"
+  puts "#{leftcontext1}"
+  puts "#{seedstring}"
+  puts "#{rightcontext1}"
+  puts ">seedlength=#{options.seedlength},extendlength=#{extendlength}," +
+       "errperc=#{errperc}"
+  puts "#{leftcontext2}"
+  puts "#{seedstring}"
+  puts "#{rightcontext2}"
+end
+
+options = parseargs(ARGV)
+alphabet = "acgt"
+minidentity = 80
+errperc = 100 - minidentity
+myseed = nil
+rseq = Randomsequence.new(alphabet,myseed)
+if options.mirrored
+  gen_mirrored(rseq,options,alphabet,errperc)
+elsif options.seeded
+  gen_seeded(rseq,options,alphabet,errperc)
 elsif options.pairparam
   seq1 = rseq.sequence(options.lengthparam)
   seq2 = rseq.sequence(options.lengthparam)

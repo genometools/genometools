@@ -136,15 +136,13 @@ struct GtQuerymatchoutoptions
           alignmentwidth; /* if > 0, then with alignment of this width */
 };
 
-static void eoplist_reverse_order(GtArraychar *eoplist)
+static void eoplist_reverse_order(char *start,char *end)
 {
-  if (eoplist->nextfreechar > 0)
+  if (start < end)
   {
     char *fwd, *bwd;
 
-    for (fwd = eoplist->spacechar,
-         bwd = eoplist->spacechar + eoplist->nextfreechar - 1; fwd < bwd;
-         fwd++, bwd--)
+    for (fwd = start, bwd = end; fwd < bwd; fwd++, bwd--)
     {
       char tmp = *fwd;
       *fwd = *bwd;
@@ -153,11 +151,11 @@ static void eoplist_reverse_order(GtArraychar *eoplist)
   }
 }
 
-static void seed2eoplist(GtArraychar *eoplist,GtUword seedlen)
+static void multireplacement_eoplist(GtArraychar *eoplist,GtUword len)
 {
   GtUword idx;
 
-  for (idx = 0; idx < seedlen; idx++)
+  for (idx = 0; idx < len; idx++)
   {
     GT_STOREINARRAY(eoplist,char,128,FT_EOP_REPLACEMENT);
   }
@@ -168,8 +166,8 @@ static void converteoplist2alignment(GtAlignment *alignment,
 {
   char *ptr;
 
-  for (ptr = eoplist->spacechar + eoplist->nextfreechar - 1;
-       ptr >= eoplist->spacechar; ptr--)
+  for (ptr = eoplist->spacechar;
+       ptr < eoplist->spacechar + eoplist->nextfreechar; ptr++)
   {
     switch (*ptr)
     {
@@ -188,6 +186,49 @@ static void converteoplist2alignment(GtAlignment *alignment,
   }
 }
 
+static char editoperation_pretty(uint8_t eop)
+{
+  switch (eop)
+  {
+    case FT_EOP_REPLACEMENT:
+      return 'R';
+    case FT_EOP_INSERTION:
+      return 'I';
+    case FT_EOP_DELETION:
+      return 'D';
+    default:
+      gt_assert(false);
+  }
+  return 0;
+}
+
+void showeoplist(const GtArraychar *eoplist)
+{
+  char *ptr;
+  GtUword run = 1;
+
+  gt_assert(eoplist != NULL);
+  if (eoplist->nextfreechar == 0)
+  {
+    printf("[]\n");
+    return;
+  }
+  for (ptr = eoplist->spacechar + 1;
+       ptr < eoplist->spacechar + eoplist->nextfreechar;
+       ptr++)
+  {
+    if (*(ptr-1) == *ptr)
+    {
+      run++;
+    } else
+    {
+      printf("%c " GT_WU ",",editoperation_pretty(*(ptr-1)),run);
+      run = 1;
+    }
+  }
+  printf("%c " GT_WU "\n",editoperation_pretty(*(ptr-1)),run);
+}
+
 static void seededmatch2alignment(GtAlignment *alignment,
                                   const GtQuerymatch *querymatch,
                                   GtUword querystartabsolute,
@@ -202,32 +243,6 @@ static void seededmatch2alignment(GtAlignment *alignment,
   {
     querymatchoutoptions->totallength = gt_encseq_total_length(encseq);
   }
-  if (querymatchoutoptions->seedpos1 > querymatch->dbstart &&
-      querymatchoutoptions->seedpos2 > querystartabsolute)
-  {
-    Polished_point best_polished_point = {0,0,0};
-    ulen = querymatchoutoptions->seedpos1 - querymatch->dbstart;
-    vlen = querymatchoutoptions->seedpos2 - querystartabsolute;
-    leftdistance = align_front_prune_edist(false,
-                               &best_polished_point,
-                               querymatchoutoptions->front_trace,
-                               encseq,
-                               querymatchoutoptions->ggemi,
-                               GT_REVERSEPOS(querymatchoutoptions->totallength,
-                                             querymatchoutoptions->seedpos1-1),
-                               ulen,
-                               GT_REVERSEPOS(querymatchoutoptions->totallength,
-                                             querymatchoutoptions->seedpos2-1),
-                               vlen);
-    front_trace2eoplist(&eoplist,
-                        querymatchoutoptions->front_trace,
-                        &best_polished_point,
-                        ulen,
-                        vlen);
-    front_trace_reset(querymatchoutoptions->front_trace,ulen+vlen);
-    eoplist_reverse_order(&eoplist);
-  }
-  seed2eoplist(&eoplist,querymatchoutoptions->seedlen);
   offset1 = querymatchoutoptions->seedpos1 + querymatchoutoptions->seedlen;
   offset2 = querymatchoutoptions->seedpos2 + querymatchoutoptions->seedlen;
   gt_assert(querymatch->dbstart + querymatch->dblen >= offset1);
@@ -253,6 +268,36 @@ static void seededmatch2alignment(GtAlignment *alignment,
     front_trace_reset(querymatchoutoptions->front_trace,ulen+vlen);
   }
   gt_assert(rightdistance <= querymatch->edist);
+  multireplacement_eoplist(&eoplist,querymatchoutoptions->seedlen);
+  if (querymatchoutoptions->seedpos1 > querymatch->dbstart &&
+      querymatchoutoptions->seedpos2 > querystartabsolute)
+  {
+    Polished_point best_polished_point = {0,0,0};
+    GtUword eoplistlen;
+
+    ulen = querymatchoutoptions->seedpos1 - querymatch->dbstart;
+    vlen = querymatchoutoptions->seedpos2 - querystartabsolute;
+    leftdistance = align_front_prune_edist(false,
+                               &best_polished_point,
+                               querymatchoutoptions->front_trace,
+                               encseq,
+                               querymatchoutoptions->ggemi,
+                               GT_REVERSEPOS(querymatchoutoptions->totallength,
+                                             querymatchoutoptions->seedpos1-1),
+                               ulen,
+                               GT_REVERSEPOS(querymatchoutoptions->totallength,
+                                             querymatchoutoptions->seedpos2-1),
+                               vlen);
+    eoplistlen = eoplist.nextfreechar;
+    front_trace2eoplist(&eoplist,
+                        querymatchoutoptions->front_trace,
+                        &best_polished_point,
+                        ulen,
+                        vlen);
+    front_trace_reset(querymatchoutoptions->front_trace,ulen+vlen);
+    eoplist_reverse_order(eoplist.spacechar + eoplistlen,
+                          eoplist.spacechar + eoplist.nextfreechar - 1);
+  }
   if (leftdistance + rightdistance > querymatch->edist)
   {
     fprintf(stderr,"leftdistance + rightdistance = " GT_WU " + " GT_WU " > "
@@ -328,43 +373,45 @@ int gt_querymatch_output(void *info,
     if (querymatchoutoptions != NULL &&
         querymatchoutoptions->alignmentwidth > 0)
     {
-      printf("show alignment of width " GT_WU " here\n",
-             querymatchoutoptions->alignmentwidth);
       if (querymatch->selfmatch)
       {
+        GtAlignment *alignment = gt_alignment_new();
+        GtUword evalcost, querystartabsolute
+          = gt_encseq_seqstartpos(encseq,querymatch->queryseqnum) + querystart;
+        GtUchar *useq, *vseq;
+
+        useq = gt_malloc(sizeof *useq * querymatch->dblen);
+        vseq = gt_malloc(sizeof *vseq * querymatch->querylen);
+        gt_encseq_extract_decoded(encseq,
+                                  (char *) useq,
+                                  querymatch->dbstart,
+                                  querymatch->dbstart + querymatch->dblen - 1);
+        gt_encseq_extract_decoded(encseq,
+                                  (char *) vseq,
+                                  querystartabsolute,
+                                  querystartabsolute + querymatch->querylen -1);
+        gt_alignment_set_seqs(alignment,useq,querymatch->dblen,
+                              vseq,querymatch->querylen);
+
         if (querymatch->edist > 0)
         {
-          GtUchar *useq, *vseq;
-          GtUword querystartabsolute
-            = gt_encseq_seqstartpos(encseq,querymatch->queryseqnum)
-              + querystart;
-          GtAlignment *alignment = gt_alignment_new();
-
           seededmatch2alignment(alignment,
                                 querymatch,
                                 querystartabsolute,
                                 encseq,
                                 querymatchoutoptions);
-          useq = gt_malloc(sizeof *useq * querymatch->dblen);
-          gt_encseq_extract_decoded(encseq,
-                                    (char *) useq,
-                                    querymatch->dbstart,
-                                    querymatch->dbstart+querymatch->dblen-1);
-          vseq = gt_malloc(sizeof *vseq * querymatch->querylen);
-          gt_encseq_extract_decoded(encseq,
-                                    (char *) vseq,
-                                    querystartabsolute,
-                                    querystartabsolute+querymatch->querylen-1);
-          gt_alignment_set_seqs(alignment,
-                                useq,querymatch->dblen,
-                                vseq,querymatch->querylen);
-          gt_alignment_delete(alignment);
-          gt_alignment_show(alignment, stdout, true,
-                            (unsigned int)
-                            querymatchoutoptions->alignmentwidth);
-          gt_free(useq);
-          gt_free(vseq);
+        } else
+        {
+          gt_assert(querymatch->dblen == querymatch->querylen);
+          gt_alignment_add_replacement_multi(alignment,querymatch->dblen);
         }
+        evalcost = gt_alignment_eval(alignment);
+        gt_alignment_show(alignment, stdout, true,
+                          (unsigned int) querymatchoutoptions->alignmentwidth);
+        gt_assert(evalcost <= querymatch->edist);
+        gt_free(useq);
+        gt_free(vseq);
+        gt_alignment_delete(alignment);
       }
     }
   }
