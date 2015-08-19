@@ -384,7 +384,7 @@ void gt_print_edist_alignment(const GtUchar *useq, GtUword ustart,
   align = gt_alignment_new_with_seqs(useq+ustart, ulen, vseq+vstart, vlen);
   (void)gt_calc_linearalign(useq, ustart, ulen, vseq, vstart, vlen, align,
                              0,1,1);
-  gt_alignment_show(align, stdout, 80);
+  gt_alignment_show(align, stdout, true, 80);
   gt_alignment_delete(align);
 }
 

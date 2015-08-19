@@ -343,16 +343,17 @@ static unsigned int gt_alignment_show_advance(unsigned int pos,
 void gt_alignment_show_generic(GtUchar *buffer,
                                const GtAlignment *alignment,
                                FILE *fp,
+                               bool reverse_order,
                                unsigned int width,
                                const GtUchar *characters,
                                GtUchar wildcardshow)
 {
   GtMultieop meop;
-  GtUword i, j, idx_u = 0, idx_v = 0, meoplen, alignmentlength;
+  GtUword idx_eop, idx_u = 0, idx_v = 0, meoplen, alignmentlength;
   unsigned int pos = 0;
   GtUchar *topbuf = buffer, *midbuf = NULL, *lowbuf = NULL;
 
-  gt_assert(alignment);
+  gt_assert(alignment != NULL);
   alignmentlength = gt_multieoplist_get_length(alignment->eops);
   if ((GtUword) width > alignmentlength)
   {
@@ -364,11 +365,15 @@ void gt_alignment_show_generic(GtUchar *buffer,
   lowbuf = midbuf + width + 1;
   lowbuf[width] = '\n';
   meoplen = gt_multieoplist_get_num_entries(alignment->eops);
-  for (i = meoplen; i > 0; i--)
+  gt_assert(meoplen > 0);
+  idx_eop = reverse_order ? meoplen - 1 : 0;
+  while (true)
   {
-    meop = gt_multieoplist_get_entry(alignment->eops, i - 1);
+    meop = gt_multieoplist_get_entry(alignment->eops, idx_eop);
     switch (meop.type)
     {
+      GtUword j;
+
       case Mismatch:
       case Match:
       case Replacement:
@@ -430,8 +435,24 @@ void gt_alignment_show_generic(GtUchar *buffer,
         }
         break;
     }
+    if (reverse_order)
+    {
+      if (idx_eop == 0)
+      {
+        break;
+      }
+      idx_eop--;
+    } else
+    {
+      if (idx_eop == meoplen - 1)
+      {
+        break;
+      }
+      idx_eop++;
+    }
   }
-  if (pos > 0) {
+  if (pos > 0)
+  {
     topbuf[pos] = '\n';
     fwrite(topbuf,sizeof *topbuf,pos+1,fp);
     midbuf[pos] = '\n';
@@ -453,11 +474,11 @@ void gt_alignment_buffer_delete(GtUchar *buffer)
 }
 
 void gt_alignment_show(const GtAlignment *alignment, FILE *fp,
-                       unsigned int width)
+                       bool reverse_order, unsigned int width)
 {
   GtUchar *buffer = gt_alignment_buffer_new(width);
 
-  gt_alignment_show_generic(buffer, alignment, fp, width,NULL,0);
+  gt_alignment_show_generic(buffer, alignment, fp, reverse_order,width,NULL,0);
   gt_alignment_buffer_delete(buffer);
 }
 
@@ -465,12 +486,13 @@ void gt_alignment_show_with_mapped_chars(const GtAlignment *alignment,
                                          const GtUchar *characters,
                                          GtUchar wildcardshow,
                                          FILE *fp,
+                                         bool reverse_order,
                                          unsigned int width)
 {
   GtUchar *buffer = gt_alignment_buffer_new(width);
 
-  gt_alignment_show_generic(buffer,alignment, fp, width,characters,
-                            wildcardshow);
+  gt_alignment_show_generic(buffer,alignment, fp, reverse_order, width,
+                            characters, wildcardshow);
   gt_alignment_buffer_delete(buffer);
 }
 

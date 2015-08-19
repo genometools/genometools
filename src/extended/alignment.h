@@ -67,17 +67,20 @@ GtWord       gt_alignment_eval_with_affine_score(const GtAlignment *alignment,
                                            const GtWord gap_extension);
 /* print alignment to <fp>. This will break the lines after width characters */
 void         gt_alignment_show(const GtAlignment *alignment, FILE *fp,
+                               bool reverse_order,
                                unsigned int width);
 void         gt_alignment_show_with_mapped_chars(const GtAlignment *alignment,
                                                  const GtUchar *characters,
                                                  GtUchar wildcardshow,
                                                  FILE *fp,
+                                                 bool reverse_order,
                                                  unsigned int width);
 GtUchar *gt_alignment_buffer_new(unsigned int width);
 void gt_alignment_buffer_delete(GtUchar *buffer);
 void gt_alignment_show_generic(GtUchar *buffer,
                                const GtAlignment *alignment,
                                FILE *fp,
+                               bool reverse_order,
                                unsigned int width,
                                const GtUchar *characters,
                                GtUchar wildcardshow);
