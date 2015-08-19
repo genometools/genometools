@@ -9,7 +9,7 @@
 #include "core/assert_api.h"
 #include "core/divmodmul.h"
 #include "core/unused_api.h"
-#include "extended/alignment.h"
+#include "core/arraydef.h"
 #include "core/ma_api.h"
 #include "core/types_api.h"
 #include "ft-front-generation.h"
@@ -204,14 +204,14 @@ static GtUword valid_total_fronts(const FrontGeneration *gen_table,
 }
 
 #ifndef OUTSIDE_OF_GT
-void front_trace2alignments(GtAlignment *al,
-                            const Fronttrace *front_trace,
-                            const Polished_point *pp,
-                            GT_UNUSED GtUword ulen,
-                            GT_UNUSED GtUword vlen)
+void front_trace2eoplist(GtArraychar *eoplist,
+                         const Fronttrace *front_trace,
+                         const Polished_point *pp,
+                         GT_UNUSED GtUword ulen,
+                         GT_UNUSED GtUword vlen)
 {
   GtUword distance, localoffset, globaloffset, remainingvalidfronts,
-          totalrunlength = 0, trimleft;
+          totalrunlength = 0, trimleft, addamount = 128;
   GtWord diagonal;
   unsigned int row, lcs;
   uint8_t trace, preferred_eop = FT_EOP_REPLACEMENT;
@@ -241,7 +241,7 @@ void front_trace2alignments(GtAlignment *al,
 
       for (idx = 0; idx < lcs; idx++)
       {
-        gt_alignment_add_replacement(al);
+        GT_STOREINARRAY(eoplist,char,addamount,FT_EOP_REPLACEMENT);
       }
     }
     if (trace & preferred_eop)
@@ -249,19 +249,19 @@ void front_trace2alignments(GtAlignment *al,
       totalrunlength++;
       if (preferred_eop == FT_EOP_REPLACEMENT)
       {
-        gt_alignment_add_replacement(al);
+        GT_STOREINARRAY(eoplist,char,addamount,FT_EOP_REPLACEMENT);
         nextrowadd = 1;
       } else
       {
         if (preferred_eop == FT_EOP_INSERTION)
         {
-          gt_alignment_add_insertion(al);
+          GT_STOREINARRAY(eoplist,char,addamount,FT_EOP_INSERTION);
           gt_assert(-(GtWord) ulen < diagonal);
           diagonal--;
           nextrowadd = 0;
         } else
         {
-          gt_alignment_add_deletion(al);
+          GT_STOREINARRAY(eoplist,char,addamount,FT_EOP_DELETION);
           gt_assert(preferred_eop == FT_EOP_DELETION);
           gt_assert(diagonal < (GtWord) vlen);
           diagonal++;
@@ -272,21 +272,21 @@ void front_trace2alignments(GtAlignment *al,
     {
       if (trace & FT_EOP_REPLACEMENT)
       {
-        gt_alignment_add_replacement(al);
+        GT_STOREINARRAY(eoplist,char,addamount,FT_EOP_REPLACEMENT);
         preferred_eop = FT_EOP_REPLACEMENT;
         nextrowadd = 1;
       } else
       {
         if (trace & FT_EOP_INSERTION)
         {
-          gt_alignment_add_insertion(al);
+          GT_STOREINARRAY(eoplist,char,addamount,FT_EOP_INSERTION);
           gt_assert(-(GtWord) ulen < diagonal);
           diagonal--;
           preferred_eop = FT_EOP_INSERTION;
           nextrowadd = 0;
         } else
         {
-          gt_alignment_add_deletion(al);
+          GT_STOREINARRAY(eoplist,char,addamount,FT_EOP_DELETION);
           gt_assert(trace & FT_EOP_DELETION);
           gt_assert(diagonal < (GtWord) vlen);
           diagonal++;

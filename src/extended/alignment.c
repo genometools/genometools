@@ -1,9 +1,10 @@
 /*
+  Copyright (c) 2015 Stefan Kurtz <kurtz@zbh.uni-hamburg.de>
   Copyright (c) 2015 Annika Seidel <annika.seidel@studium.uni-hamburg.de>
   Copyright (c) 2006-2009 Gordon Gremme <gordon@gremme.org>
   Copyright (c)      2013 Ole Eigenbrod <ole.eigenbrod@gmx.de>
   Copyright (c)      2013 Dirk Willrodt <willrodt@zbh.uni-hamburg.de>
-  Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2006-2015 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -57,7 +58,8 @@ GtAlignment* gt_alignment_new_with_seqs(const GtUchar *u, GtUword ulen,
                                         const GtUchar *v, GtUword vlen)
 {
   GtAlignment *alignment;
-  gt_assert(u && v);
+
+  gt_assert(u != NULL && v != NULL);
   alignment = gt_alignment_new();
   gt_alignment_set_seqs(alignment, u, ulen, v, vlen);
   return alignment;
@@ -67,7 +69,7 @@ void gt_alignment_set_seqs(GtAlignment *alignment, const GtUchar *u,
                            GtUword ulen, const GtUchar *v,
                            GtUword vlen)
 {
-  gt_assert(alignment && u && v);
+  gt_assert(alignment != NULL && u != NULL && v != NULL);
   alignment->u = u;
   alignment->v = v;
   alignment->ulen = ulen;
@@ -88,67 +90,73 @@ void gt_alignment_set_multieop_list(GtAlignment *alignment,
 
 GtRange gt_alignment_get_urange(const GtAlignment *alignment)
 {
-  gt_assert(alignment);
+  gt_assert(alignment != NULL);
   return alignment->aligned_range_u;
 }
 
 GtUword gt_alignment_get_num_entries(const GtAlignment *alignment)
 {
-  gt_assert(alignment);
+  gt_assert(alignment != NULL);
   return alignment->alilen;
 }
 
 GtUword gt_alignment_get_length(const GtAlignment *alignment)
 {
+  gt_assert(alignment != NULL);
   return gt_multieoplist_get_length(alignment->eops);
 }
 
 void gt_alignment_set_urange(GtAlignment *alignment, GtRange range)
 {
-  gt_assert(alignment && range.start <= range.end);
+  gt_assert(alignment != NULL && range.start <= range.end);
   alignment->aligned_range_u.start = range.start;
   alignment->aligned_range_u.end = range.end;
 }
 
 GtRange gt_alignment_get_vrange(const GtAlignment *alignment)
 {
-  gt_assert(alignment);
+  gt_assert(alignment != NULL);
   return alignment->aligned_range_v;
 }
 
 void gt_alignment_set_vrange(GtAlignment *alignment, GtRange range)
 {
-  gt_assert(alignment && range.start <= range.end);
+  gt_assert(alignment != NULL && range.start <= range.end);
   alignment->aligned_range_v.start = range.start;
   alignment->aligned_range_v.end = range.end;
 }
 
 void gt_alignment_add_replacement(GtAlignment *alignment)
 {
+  gt_assert(alignment != NULL);
   gt_multieoplist_add_replacement(alignment->eops);
   alignment->alilen++;
 }
 
 void gt_alignment_add_deletion(GtAlignment *alignment)
 {
+  gt_assert(alignment != NULL);
   gt_multieoplist_add_deletion(alignment->eops);
   alignment->alilen++;
 }
 
 void gt_alignment_add_insertion(GtAlignment *alignment)
 {
+  gt_assert(alignment != NULL);
   gt_multieoplist_add_insertion(alignment->eops);
   alignment->alilen++;
 }
 
 void gt_alignment_reset(GtAlignment *alignment)
 {
+  gt_assert(alignment != NULL);
   gt_multieoplist_reset(alignment->eops);
   alignment->alilen = 0;
 }
 
 void gt_alignment_remove_last(GtAlignment *alignment)
 {
+  gt_assert(alignment != NULL);
   gt_multieoplist_remove_last(alignment->eops);
   alignment->alilen--;
 }
@@ -233,7 +241,6 @@ GtWord gt_alignment_eval_with_score(const GtAlignment *alignment,
 #endif
 
   meoplen = gt_multieoplist_get_num_entries(alignment->eops);
-
   for (i = meoplen; i > 0; i--) {
     meop = gt_multieoplist_get_entry(alignment->eops, i - 1);
     switch (meop.type) {
@@ -277,10 +284,11 @@ GtWord gt_alignment_eval_with_affine_score(const GtAlignment *alignment,
   AlignmentEoptype next_meop_type = Insertion + 1;
 
   gt_assert(alignment != NULL);
+#ifndef NDEBUG
   gt_assert(gt_alignment_is_valid(alignment));
+#endif
 
   meoplen = gt_multieoplist_get_num_entries(alignment->eops);
-
   for (i = meoplen; i > 0; i--) {
     meop = gt_multieoplist_get_entry(alignment->eops, i-1);
     switch (meop.type) {
@@ -354,7 +362,7 @@ void gt_alignment_show_generic(GtUchar *buffer,
   GtUchar *topbuf = buffer, *midbuf = NULL, *lowbuf = NULL;
 
   gt_assert(alignment != NULL);
-  alignmentlength = gt_multieoplist_get_length(alignment->eops);
+  alignmentlength = gt_alignment_get_length(alignment);
   if ((GtUword) width > alignmentlength)
   {
     width = (unsigned int) alignmentlength;
