@@ -71,7 +71,6 @@ static void idxlocali_showmatch(void *processinfo,const GtIdxMatch *match)
                 showmatchinfo->characters,
                 showmatchinfo->wildcardshow,
                 stdout,
-                true,
                 70);
   }
 }

@@ -358,7 +358,6 @@ static unsigned int gt_alignment_show_advance(unsigned int pos,
 void gt_alignment_show_generic(GtUchar *buffer,
                                const GtAlignment *alignment,
                                FILE *fp,
-                               bool reverse_order,
                                unsigned int width,
                                const GtUchar *characters,
                                GtUchar wildcardshow)
@@ -381,7 +380,7 @@ void gt_alignment_show_generic(GtUchar *buffer,
   lowbuf[width] = '\n';
   meoplen = gt_multieoplist_get_num_entries(alignment->eops);
   gt_assert(meoplen > 0);
-  idx_eop = reverse_order ? meoplen - 1 : 0;
+  idx_eop = meoplen - 1;
   while (true)
   {
     meop = gt_multieoplist_get_entry(alignment->eops, idx_eop);
@@ -450,21 +449,11 @@ void gt_alignment_show_generic(GtUchar *buffer,
         }
         break;
     }
-    if (reverse_order)
+    if (idx_eop == 0)
     {
-      if (idx_eop == 0)
-      {
-        break;
-      }
-      idx_eop--;
-    } else
-    {
-      if (idx_eop == meoplen - 1)
-      {
-        break;
-      }
-      idx_eop++;
+      break;
     }
+    idx_eop--;
   }
   if (pos > 0)
   {
@@ -489,11 +478,11 @@ void gt_alignment_buffer_delete(GtUchar *buffer)
 }
 
 void gt_alignment_show(const GtAlignment *alignment, FILE *fp,
-                       bool reverse_order, unsigned int width)
+                       unsigned int width)
 {
   GtUchar *buffer = gt_alignment_buffer_new(width);
 
-  gt_alignment_show_generic(buffer, alignment, fp, reverse_order,width,NULL,0);
+  gt_alignment_show_generic(buffer, alignment, fp, width,NULL,0);
   gt_alignment_buffer_delete(buffer);
 }
 
@@ -501,13 +490,12 @@ void gt_alignment_show_with_mapped_chars(const GtAlignment *alignment,
                                          const GtUchar *characters,
                                          GtUchar wildcardshow,
                                          FILE *fp,
-                                         bool reverse_order,
                                          unsigned int width)
 {
   GtUchar *buffer = gt_alignment_buffer_new(width);
 
-  gt_alignment_show_generic(buffer,alignment, fp, reverse_order, width,
-                            characters, wildcardshow);
+  gt_alignment_show_generic(buffer,alignment, fp, width, characters,
+                            wildcardshow);
   gt_alignment_buffer_delete(buffer);
 }
 

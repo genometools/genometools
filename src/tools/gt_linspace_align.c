@@ -218,7 +218,7 @@ static void show(const GtUchar *useq, const GtUword ulen,
     print_sequence(vseq, vlen, fp);
     fprintf(fp, "######\n");
 
-    gt_alignment_show(align, fp, true, 80);
+    gt_alignment_show(align, fp, 80);
     gt_alignment_eval_with_score(align, 0,1,1);
   }
 
