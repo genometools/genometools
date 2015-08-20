@@ -27,8 +27,8 @@
 #include "squarededist.h"
 
 void gt_runcheckfunctionontwofiles(Checkcmppairfuntype checkfunction,
-                                const char *file1,
-                                const char *file2)
+                                   const char *file1,
+                                   const char *file2)
 {
   const GtUchar *useq = NULL, *vseq = NULL;
   size_t ulen, vlen;
@@ -187,7 +187,7 @@ void gt_checkgreedyunitedist(GT_UNUSED bool forward,
   edist1 = greedyunitedist(frontresource,greedyedistuseq,greedyedistvseq);
   edist2 = gt_squarededistunit (useq,ulen,vseq,vlen);
 #ifdef SKDEBUG
-  printf("edist = "GT_WU"\n",edist1);
+  printf("edist = " GT_WU "\n",edist1);
 #endif
   if (edist1 != edist2)
   {

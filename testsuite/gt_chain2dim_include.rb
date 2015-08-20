@@ -1,5 +1,5 @@
 def runchain2dimfailure(args,matchfile='matchfile')
-  Name "gt chain2dim failure"
+  Name "gt chain2dim failure #{args} #{matchfile}"
   Keywords "gt_chain2dim"
   Test do
     run_test "#{$bin}gt chain2dim -m #{matchfile} " + args,:retval => 1

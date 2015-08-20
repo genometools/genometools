@@ -384,9 +384,8 @@ static int gt_queryuniquematch(bool selfmatch,
                                GtQuerymatch *querymatchspaceptr,
                                GtError *err)
 {
-  GtUword offset,
-                totallength = gt_encseq_total_length(suffixarray->encseq),
-                localqueryoffset = 0;
+  GtUword offset, totallength = gt_encseq_total_length(suffixarray->encseq),
+          localqueryoffset = 0;
   uint64_t localqueryunitnum = queryunitnum;
   bool haserr = false;
 
@@ -491,12 +490,12 @@ static int gt_querysubstringmatch_generic(
                                     &querysubstring))
       {
         GtUword extend = gt_mmsearch_extendright(dbencseq,
-                                                       mmsi->esr,
-                                                       readmode,
-                                                       totallength,
-                                                       dbstart + minmatchlength,
-                                                       &querysubstring,
-                                                       minmatchlength);
+                                                 mmsi->esr,
+                                                 readmode,
+                                                 totallength,
+                                                 dbstart + minmatchlength,
+                                                 &querysubstring,
+                                                 minmatchlength);
         gt_querymatch_fill(querymatchspaceptr,
                            minmatchlength + extend,
                            dbstart,

@@ -31,7 +31,7 @@ then
   for keyword in gt_idxlocali gt_chain2dim gt_greedyfwdmat \
                  gt_paircmp gt_patternmatch gt_ltrharvest\
                  gt_repfind gt_tallymer gt_uniquesub gt_genomediff \
-                 gt_readjoiner
+                 gt_readjoiner gt_linspace_align
   do
     env -i GT_MEM_BOOKKEEPING=on ${program} \
          -keywords ${keyword} \
@@ -42,10 +42,10 @@ then
     fi
   done
   env -i GT_MEM_BOOKKEEPING=on GTTESTDATA=${HOME}/gttestdata ${program} \
-       -keywords 'gt_repfind and gttestdata' \
+       -keywords 'gt_repfind_gttestdata' \
        -gttestdata ${GTTESTDATA}
   env -i GT_MEM_BOOKKEEPING=on GTTESTDATA=${HOME}/gttestdata ${program} \
-       -keywords 'gt_greedyfwdmat and gttestdata' \
+       -keywords 'gt_greedyfwdmat_gttestdata' \
        -gttestdata ${GTTESTDATA}
   cd ..
 fi

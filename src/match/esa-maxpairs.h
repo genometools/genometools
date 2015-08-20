@@ -56,6 +56,7 @@ int gt_enumeratemaxpairs_sain(GtSainSufLcpIterator *suflcpiterator,
 
 int gt_callenummaxpairs(const char *indexname,
                         unsigned int userdefinedleastlength,
+                        GtUword maxfreq,
                         bool scanfile,
                         GtProcessmaxpairs processmaxpairs,
                         void *processmaxpairsinfo,

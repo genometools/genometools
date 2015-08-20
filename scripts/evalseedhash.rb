@@ -223,6 +223,10 @@ def cmpseedhashes(checkbetter,minidentity,taglist,h1,h2,silent = false)
   count_contained = 0
   count_containing = 0
   ovperc_hash = Hash.new()
+  miniddiff = 3
+  commentcheckbetter = "matches in #{taglist[1]} >= #{miniddiff}%-points " +
+                       "better than the corresponding matches in " +
+                       "#{taglist[0]}:"
   h1.each_pair do |k,v|
     if v.result2.nil?
       next
@@ -237,7 +241,12 @@ def cmpseedhashes(checkbetter,minidentity,taglist,h1,h2,silent = false)
     elsif checkbetter
       if v.other.identity >= minidentity
         if (v.other.len1 > v.len1 or v.other.len2 > v.len2) and
-           (v.other.identity > v.identity)
+           (v.other.identity > v.identity) and 
+           (v.other.identity - v.identity >= miniddiff.to_f)
+          if not commentcheckbetter.nil?
+             puts commentcheckbetter
+             commentcheckbetter = nil
+          end
           puts "#{taglist[0]}=#{match_to_s(v)}"
           puts "#{taglist[1]}=#{match_to_s(v.other)}"
           addpercentage(ovperc_hash,v.result1.ovperc)
@@ -252,7 +261,8 @@ def cmpseedhashes(checkbetter,minidentity,taglist,h1,h2,silent = false)
   ovperc_hash.sort.each do |k|
     puts "#{k[0]}%\t#{k[1]}"
   end
-  puts "#{taglist[0]}: nobrother=#{nobrother}"
+  puts "matches in #{taglist[0]} with no corresponding matches in " +
+       "#{taglist[1]}=#{nobrother}"
 end
 
 def cmpextendedlength(minidentity,h1,h2)

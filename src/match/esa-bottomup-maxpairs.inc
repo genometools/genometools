@@ -22,6 +22,7 @@
   --reader
   --absolute
   --sa_reader_sain
+  --fatherwithlb
   --no_process_lcpinterval.
   DO NOT EDIT.
 */
@@ -44,9 +45,8 @@ static int processleafedge_maxpairs(bool,
     GtBUstate_maxpairs *,
     GtError *err);
 
-static int processbranchingedge_maxpairs(bool firstsucc,
-    GtUword,
-    GtBUinfo_maxpairs *,
+static int processbranchingedge_maxpairs(bool firstsucc,GtUword,GtUword,
+GtBUinfo_maxpairs *,
     GtUword,
     GtUword,
     GtBUinfo_maxpairs *,
@@ -194,6 +194,7 @@ GtSainSufLcpIterator *ssli,
         }
         if (processbranchingedge_maxpairs(firstedge,
                TOP_ESA_BOTTOMUP_maxpairs.lcp,
+            TOP_ESA_BOTTOMUP_maxpairs.lb,
                &TOP_ESA_BOTTOMUP_maxpairs.info,
                lastinterval->lcp,
                lastinterval->rb - lastinterval->lb + 1,
@@ -216,6 +217,7 @@ GtSainSufLcpIterator *ssli,
         PUSH_ESA_BOTTOMUP_maxpairs(lcpvalue,lastintervallb);
         if (processbranchingedge_maxpairs(true,
                        TOP_ESA_BOTTOMUP_maxpairs.lcp,
+            TOP_ESA_BOTTOMUP_maxpairs.lb,
                        &TOP_ESA_BOTTOMUP_maxpairs.info,
                        lastintervallcp,
                        lastintervalrb - lastintervallb + 1,

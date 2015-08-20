@@ -22,8 +22,11 @@
 #include "core/error_api.h"
 #include "core/readmode.h"
 #include "core/encseq.h"
+#include "ft-front-prune.h"
 
 typedef struct GtQuerymatch GtQuerymatch;
+
+typedef struct GtQuerymatchoutoptions GtQuerymatchoutoptions;
 
 GtQuerymatch *gt_querymatch_new(void);
 
@@ -48,6 +51,23 @@ int gt_querymatch_output(void *info,
                          GtUword query_totallength,
                          GtError *err);
 
+int gt_querymatch_fill_and_output(
+                        GtUword dblen,
+                        GtUword dbstart,
+                        GtReadmode readmode,
+                        bool query_as_reversecopy,
+                        GtWord score,
+                        GtUword edist,
+                        bool selfmatch,
+                        uint64_t queryseqnum,
+                        GtUword querylen,
+                        GtUword querystart,
+                        GtQuerymatchoutoptions *querymatchoutoptions,
+                        const GtEncseq *encseq,
+                        const GtUchar *query,
+                        GtUword query_totallength,
+                        GtError *err);
+
 GtUword gt_querymatch_querylen(const GtQuerymatch *querymatch);
 
 GtUword gt_querymatch_dbstart(const GtQuerymatch *querymatch);
@@ -64,5 +84,20 @@ GtUword gt_querymatch_dbseqnum(const GtEncseq *encseq,
                                      const GtQuerymatch *querymatch);
 
 bool gt_querymatch_queryreverse(const GtQuerymatch *querymatch);
+
+GtQuerymatchoutoptions *gt_querymatchoutoptions_new(
+                                GtUword alignmentwidth,
+                                GtUword errorpercentage,
+                                GtUword maxalignedlendifference,
+                                GtUword history,
+                                GtUword perc_mat_history,
+                                GtExtendCharAccess extend_char_access,
+                                GtUword sensitivity);
+
+void gt_querymatchoutoptions_delete(
+        GtQuerymatchoutoptions *querymatchoutoptions);
+
+void gt_querymatch_set_seed(GtQuerymatchoutoptions *querymatchoutoptions,
+                            GtUword pos1,GtUword pos2,GtUword len);
 
 #endif

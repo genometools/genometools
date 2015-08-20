@@ -18,7 +18,9 @@
 #include "core/arraydef.h"
 #include "core/unused_api.h"
 #include "core/minmax.h"
+#include "core/arraydef.h"
 #include "esa-seqread.h"
+#include "esa-lcpintervals.h"
 #include "esa-maxpairs.h"
 #include "sfx-sain.h"
 
@@ -54,6 +56,15 @@ typedef struct /* information stored for each node of the lcp interval tree */
   Listtype *nodeposlist;
 } GtBUinfo_maxpairs;
 
+GT_DECLAREARRAYSTRUCT(Lcpinterval);
+
+typedef struct
+{
+  unsigned int userdefinedleastlength;
+  GtUword maxfreq;
+  GtArrayLcpinterval arr;
+} GtMaxfreqcollect;
+
 typedef struct  /* global information */
 {
   bool initialized;
@@ -65,6 +76,8 @@ typedef struct  /* global information */
   const GtUchar *sequence;
   GtReadmode readmode;
   GtProcessmaxpairs processmaxpairs;
+  const GtMaxfreqcollect *maxfreqcollect;
+  GtUword nextmaxfreq;
   void *processmaxpairsinfo;
 } GtBUstate_maxpairs;
 
@@ -272,8 +285,66 @@ static int processleafedge_maxpairs(bool firstsucc,
   return 0;
 }
 
+#ifdef SKDEBUG
+#ifndef NDEBUG
+static bool linearfindlcpinterval(const Lcpinterval *itvtab,GtUword num,
+                                  GtUword lcp,GtUword lb)
+{
+  const Lcpinterval *lcpitv;
+
+  for (lcpitv = itvtab; lcpitv < itvtab + num; lcpitv++)
+  {
+    if (lcpitv->offset == lcp && lcpitv->left == lb)
+    {
+      return true;
+    }
+  }
+  return false;
+}
+#endif
+#endif
+
+static bool binaryfindlcpinterval(const Lcpinterval *itvtab,GtUword num,
+                                  GtUword lcp,GtUword lb)
+{
+  const Lcpinterval *left = itvtab, *right = itvtab + num - 1;
+
+  while (left <= right)
+  {
+    const Lcpinterval *mid = left + (right - left + 1)/2;
+
+    if (lb < mid->left)
+    {
+      right = mid - 1;
+    } else
+    {
+      if (lb > mid->left)
+      {
+        left = mid + 1;
+      } else
+      {
+        if (lcp < mid->offset)
+        {
+          right = mid - 1;
+        } else
+        {
+          if (lcp > mid->offset)
+          {
+            left = mid+1;
+          } else
+          {
+            return true;
+          }
+        }
+      }
+    }
+  }
+  return false;
+}
+
 static int processbranchingedge_maxpairs(bool firstsucc,
                                          GtUword fatherdepth,
+                                         GtUword fatherlb,
                                          GtBUinfo_maxpairs *father,
                                          GT_UNUSED GtUword sondepth,
                                          GT_UNUSED GtUword sonwidth,
@@ -292,6 +363,21 @@ static int processbranchingedge_maxpairs(bool firstsucc,
   {
     setpostabto0_maxpairs(state);
     return 0;
+  }
+  if (state->maxfreqcollect != NULL)
+  {
+    if (binaryfindlcpinterval(state->maxfreqcollect->arr.spaceLcpinterval,
+                              state->maxfreqcollect->arr.nextfreeLcpinterval,
+                              fatherdepth,fatherlb))
+    {
+      return 0;
+    }
+#ifdef SKDEBUG
+    gt_assert(!linearfindlcpinterval(
+                              state->maxfreqcollect->arr.spaceLcpinterval,
+                              state->maxfreqcollect->arr.nextfreeLcpinterval,
+                              fatherdepth,fatherlb));
+#endif
   }
   state->initialized = false;
   if (firstsucc)
@@ -404,6 +490,7 @@ int gt_enumeratemaxpairs_generic(Sequentialsuffixarrayreader *ssar,
   state->searchlength = searchlength;
   state->processmaxpairs = processmaxpairs;
   state->processmaxpairsinfo = processmaxpairsinfo;
+  state->nextmaxfreq = 0;
   state->initialized = false;
   if (ssar != NULL)
   {
@@ -414,6 +501,7 @@ int gt_enumeratemaxpairs_generic(Sequentialsuffixarrayreader *ssar,
     state->genericencseq.hasencseq = true;
     state->genericencseq.seqptr.encseq = encseq;
     state->sequence = NULL;
+    state->maxfreqcollect = (const GtMaxfreqcollect *) ssar->extrainfo;
   } else
   {
     const GtBareEncseq *bare_encseq;
@@ -425,6 +513,7 @@ int gt_enumeratemaxpairs_generic(Sequentialsuffixarrayreader *ssar,
     state->genericencseq.hasencseq = false;
     state->genericencseq.seqptr.bare_encseq = bare_encseq;
     state->sequence = gt_bare_encseq_sequence(bare_encseq);
+    state->maxfreqcollect = NULL;
   }
   GT_INITARRAY(&state->uniquechar,GtUword);
   state->poslist = gt_malloc(sizeof (*state->poslist) * state->alphabetsize);
@@ -478,8 +567,70 @@ int gt_enumeratemaxpairs_sain(GtSainSufLcpIterator *suflcpiterator,
                                       err);
 }
 
+static int collectmaxfreqintervals(void *data,const Lcpinterval *lcpitv)
+{
+  GtMaxfreqcollect *maxfreqcollect = (GtMaxfreqcollect *) data;
+
+  if (lcpitv->offset >= (GtUword) maxfreqcollect->userdefinedleastlength)
+  {
+    gt_assert(lcpitv->left <= lcpitv->right);
+    if (lcpitv->right - lcpitv->left - 1 >= maxfreqcollect->maxfreq)
+    {
+      Lcpinterval *lcpitvptr;
+
+      GT_GETNEXTFREEINARRAY(lcpitvptr,&maxfreqcollect->arr,Lcpinterval,
+                            maxfreqcollect->arr.allocatedLcpinterval * 0.2 +
+                            1024UL);
+      *lcpitvptr = *lcpitv;
+    }
+  }
+  return 0;
+}
+
+static int compareLcpitervals(const void *a,const void *b)
+{
+  const Lcpinterval *lcpitv_a = (const Lcpinterval *) a;
+  const Lcpinterval *lcpitv_b = (const Lcpinterval *) b;
+
+  if (lcpitv_a->left < lcpitv_b->left)
+  {
+    return -1;
+  }
+  if (lcpitv_a->left > lcpitv_b->left)
+  {
+    return 1;
+  }
+  if (lcpitv_a->offset < lcpitv_b->offset)
+  {
+    return -1;
+  }
+  if (lcpitv_a->offset > lcpitv_b->offset)
+  {
+    return 1;
+  }
+  gt_assert(false);
+  return 0;
+}
+
+static void sortLcpintervals(Lcpinterval *itvtab,GtUword elems)
+{
+  qsort(itvtab,elems,sizeof *itvtab,compareLcpitervals);
+}
+
+void showcollectedintervals(const Lcpinterval *itvtab,GtUword num)
+{
+  const Lcpinterval *lcpitv;
+
+  for (lcpitv = itvtab; lcpitv < itvtab + num; lcpitv++)
+  {
+    printf("# " GT_WU " " GT_WU " " GT_WU "\n",lcpitv->offset,lcpitv->left,
+                                               lcpitv->right);
+  }
+}
+
 int gt_callenummaxpairs(const char *indexname,
                         unsigned int userdefinedleastlength,
+                        GtUword maxfreq,
                         bool scanfile,
                         GtProcessmaxpairs processmaxpairs,
                         void *processmaxpairsinfo,
@@ -487,29 +638,59 @@ int gt_callenummaxpairs(const char *indexname,
                         GtError *err)
 {
   bool haserr = false;
-  Sequentialsuffixarrayreader *ssar;
+  Sequentialsuffixarrayreader *ssar = NULL;
+  GtMaxfreqcollect maxfreqcollect;
 
   gt_error_check(err);
-  ssar = gt_newSequentialsuffixarrayreaderfromfile(indexname,
-                                                   SARR_LCPTAB |
-                                                   SARR_SUFTAB |
-                                                   SARR_ESQTAB |
-                                                   SARR_SSPTAB,
-                                                   scanfile,
-                                                   logger,
-                                                   err);
-  if (ssar == NULL)
+  GT_INITARRAY(&maxfreqcollect.arr,Lcpinterval);
+  if (maxfreq > 0)
   {
-    haserr = true;
+    maxfreqcollect.userdefinedleastlength = userdefinedleastlength;
+    maxfreqcollect.maxfreq = maxfreq;
+    if (gt_runenumlcpvalues_process(indexname,
+                                    collectmaxfreqintervals,
+                                    &maxfreqcollect,
+                                    logger,
+                                    err) != 0)
+    {
+      haserr = true;
+    }
+    sortLcpintervals(maxfreqcollect.arr.spaceLcpinterval,
+                     maxfreqcollect.arr.nextfreeLcpinterval);
+    /*showcollectedintervals(maxfreqcollect.arr.spaceLcpinterval,
+                           maxfreqcollect.arr.nextfreeLcpinterval);*/
   }
-  if (!haserr && gt_enumeratemaxpairs(ssar,
-                                      userdefinedleastlength,
-                                      processmaxpairs,
-                                      processmaxpairsinfo,
-                                      err) != 0)
+  if (!haserr)
   {
-    haserr = true;
+    ssar = gt_newSequentialsuffixarrayreaderfromfile(indexname,
+                                                     SARR_LCPTAB |
+                                                     SARR_SUFTAB |
+                                                     SARR_ESQTAB |
+                                                     SARR_SSPTAB,
+                                                     scanfile,
+                                                     logger,
+                                                     err);
+    if (ssar == NULL)
+    {
+      haserr = true;
+    }
   }
+  if (!haserr)
+  {
+    if (maxfreq > 0)
+    {
+      ssar->extrainfo = &maxfreqcollect;
+    }
+    if (gt_enumeratemaxpairs(ssar,
+                             userdefinedleastlength,
+                             processmaxpairs,
+                             processmaxpairsinfo,
+                             err) != 0)
+    {
+      haserr = true;
+    }
+  }
+  GT_FREEARRAY(&maxfreqcollect.arr,Lcpinterval);
   if (ssar != NULL)
   {
     gt_freeSequentialsuffixarrayreader(&ssar);

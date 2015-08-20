@@ -2,6 +2,9 @@
 #define FT_FRONT_GENERATION_H
 #include <stdint.h>
 #include "core/types_api.h"
+#ifndef OUTSIDE_OF_GT
+#include "extended/alignment.h"
+#endif
 
 #define FT_EOP_REPLACEMENT 1
 #define FT_EOP_INSERTION   (1 << 1)
@@ -26,6 +29,7 @@ void front_trace_add_gen(Fronttrace *front_trace,GtUword trimleft,
 void front_trace_add_trace(Fronttrace *front_trace,uint8_t backreference,
                            unsigned int lcs);
 
+#ifdef OUTSIDE_OF_GT
 void front_trace_verify(const Fronttrace *front_trace,
                         const Polished_point *pp,
                         const GtUchar *useq,
@@ -39,5 +43,12 @@ void front_trace_verify_all(const Fronttrace *front_trace,
                             GtUword ulen,
                             const GtUchar *vseq,
                             GtUword vlen);
+#else
+void front_trace2alignments(GtAlignment *al,
+                            const Fronttrace *front_trace,
+                            const Polished_point *pp,
+                            GT_UNUSED GtUword ulen,
+                            GT_UNUSED GtUword vlen);
+#endif
 
 #endif

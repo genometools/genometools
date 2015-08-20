@@ -72,7 +72,7 @@ Name "gt repfind mirror symmetric"
 Keywords "gt_repfind"
 Test do
   10.times.each do
-    run "#{$scriptsdir}gen-mirrorseq.rb 200 1000"
+    run "#{$scriptsdir}gen-randseq.rb --seedlength 200 --length 2200 --mirrored"
     run_test "#{$bin}gt suffixerator -suftabuint -db #{last_stdout} " +
              "-dna -suf -tis -lcp -md5 no -des no -sds no -indexname sfx"
     run_test "#{$bin}gt repfind -minidentity 90 -percmathistory 55 " +
@@ -112,7 +112,7 @@ if $gttestdata then
   extendexception = ["hs5hcmvcg.fna","Wildcards.fna","at1MB"]
   repfindtestfiles.each do |reffile|
     Name "gt repfind #{reffile}"
-    Keywords "gt_repfind gttestdata"
+    Keywords "gt_repfind"
     Test do
       withextend = if extendexception.member?(reffile) then false else true end
       checkrepfind(reffile,withextend)
@@ -120,7 +120,7 @@ if $gttestdata then
     repfindtestfiles.each do |queryfile|
       if reffile != queryfile
         Name "gt repfind #{reffile} versus #{queryfile}"
-        Keywords "gt_repfind gttestdata"
+        Keywords "gt_repfind"
         Test do
           checkrepfindwithquery(reffile,queryfile)
         end

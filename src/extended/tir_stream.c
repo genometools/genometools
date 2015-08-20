@@ -147,12 +147,7 @@ static int gt_tir_store_seeds(void *info, const GtGenericEncseq *genericencseq,
   gt_assert(genericencseq->hasencseq);
   encseq = genericencseq->seqptr.encseq;
   /* ensure order of seeds */
-  if (pos1 > pos2) {
-    GtUword tmp = 0;
-    tmp = pos1;
-    pos1 = pos2;
-    pos2 = tmp;
-  }
+  gt_assert(pos1 < pos2);
 
   /* match mirrored vs. unmirrored */
   if (pos1 > seeds->midpos || pos2 < seeds->midpos)

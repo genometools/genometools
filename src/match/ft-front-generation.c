@@ -9,6 +9,7 @@
 #include "core/assert_api.h"
 #include "core/divmodmul.h"
 #include "core/unused_api.h"
+#include "extended/alignment.h"
 #include "core/ma_api.h"
 #include "core/types_api.h"
 #include "ft-front-generation.h"
@@ -201,6 +202,120 @@ static GtUword valid_total_fronts(const FrontGeneration *gen_table,
   }
   return valid_total;
 }
+
+#ifndef OUTSIDE_OF_GT
+void front_trace2alignments(GtAlignment *al,
+                            const Fronttrace *front_trace,
+                            const Polished_point *pp,
+                            GT_UNUSED GtUword ulen,
+                            GT_UNUSED GtUword vlen)
+{
+  GtUword distance, localoffset, globaloffset, remainingvalidfronts,
+          totalrunlength = 0, trimleft;
+  GtWord diagonal;
+  unsigned int row, lcs;
+  uint8_t trace, preferred_eop = FT_EOP_REPLACEMENT;
+
+  gt_assert(front_trace != NULL && front_trace->gen_nextfree > 0 && pp != NULL);
+  localoffset = polished_point2offset(front_trace,pp);
+  remainingvalidfronts = valid_total_fronts(front_trace->gen_table,
+                                            pp->distance,
+                                            front_trace->gen_nextfree);
+  gt_assert(remainingvalidfronts <= front_trace->backref_nextfree);
+  globaloffset = front_trace->backref_nextfree - remainingvalidfronts;
+  distance = pp->distance;
+  diagonal = (GtWord) pp->alignedlen - (GtWord) GT_MULT2(pp->row);
+  trace = front_trace->backref_table[globaloffset + localoffset].bits;
+  lcs = front_trace->backref_table[globaloffset + localoffset].lcs;
+  row = pp->row;
+  trimleft = pp->trimleft;
+  gt_assert(distance < front_trace->gen_nextfree);
+  while (distance > 0)
+  {
+    GtUword nextrowadd;
+    GtWord base_diagonal;
+
+    if (lcs > 0)
+    {
+      unsigned int idx;
+
+      for (idx = 0; idx < lcs; idx++)
+      {
+        gt_alignment_add_replacement(al);
+      }
+    }
+    if (trace & preferred_eop)
+    {
+      totalrunlength++;
+      if (preferred_eop == FT_EOP_REPLACEMENT)
+      {
+        gt_alignment_add_replacement(al);
+        nextrowadd = 1;
+      } else
+      {
+        if (preferred_eop == FT_EOP_INSERTION)
+        {
+          gt_alignment_add_insertion(al);
+          gt_assert(-(GtWord) ulen < diagonal);
+          diagonal--;
+          nextrowadd = 0;
+        } else
+        {
+          gt_alignment_add_deletion(al);
+          gt_assert(preferred_eop == FT_EOP_DELETION);
+          gt_assert(diagonal < (GtWord) vlen);
+          diagonal++;
+          nextrowadd = 1;
+        }
+      }
+    } else
+    {
+      if (trace & FT_EOP_REPLACEMENT)
+      {
+        gt_alignment_add_replacement(al);
+        preferred_eop = FT_EOP_REPLACEMENT;
+        nextrowadd = 1;
+      } else
+      {
+        if (trace & FT_EOP_INSERTION)
+        {
+          gt_alignment_add_insertion(al);
+          gt_assert(-(GtWord) ulen < diagonal);
+          diagonal--;
+          preferred_eop = FT_EOP_INSERTION;
+          nextrowadd = 0;
+        } else
+        {
+          gt_alignment_add_deletion(al);
+          gt_assert(trace & FT_EOP_DELETION);
+          gt_assert(diagonal < (GtWord) vlen);
+          diagonal++;
+          preferred_eop = FT_EOP_DELETION;
+          nextrowadd = 1;
+        }
+      }
+    }
+    gt_assert(trimleft >=
+              (GtUword) front_trace->gen_table[distance].trimleft_diff);
+    trimleft -= (GtUword) front_trace->gen_table[distance].trimleft_diff;
+    distance--;
+    base_diagonal = (GtWord) trimleft - (GtWord) distance;
+    gt_assert(base_diagonal <= diagonal);
+    gt_assert(diagonal <
+              base_diagonal + (GtWord) front_trace->gen_table[distance].valid);
+    localoffset = (GtUword) (diagonal - base_diagonal);
+    gt_assert((GtUword) front_trace->gen_table[distance].valid
+              <= globaloffset);
+    globaloffset -= (GtUword) front_trace->gen_table[distance].valid;
+    gt_assert(row >= lcs + nextrowadd);
+    row -= lcs + nextrowadd;
+    trace = front_trace->backref_table[globaloffset + localoffset].bits;
+    lcs = front_trace->backref_table[globaloffset + localoffset].lcs;
+  }
+  /*printf("avg runlength=%.2f\n",(double) pp->distance/totalrunlength);*/
+  gt_assert(globaloffset + localoffset == 0 && trace == 0);
+}
+#endif
 
 #define DEBUG
 #ifdef DEBUG

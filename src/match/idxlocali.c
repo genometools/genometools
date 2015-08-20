@@ -39,7 +39,7 @@ typedef struct
   const GtEncseq *encseq;
 } Showmatchinfo;
 
-static void showmatch(void *processinfo,const GtIdxMatch *match)
+static void idxlocali_showmatch(void *processinfo,const GtIdxMatch *match)
 {
   Showmatchinfo *showmatchinfo = (Showmatchinfo *) processinfo;
   GtUword seqnum;
@@ -219,7 +219,7 @@ int gt_runidxlocali(const IdxlocaliOptions *idxlocalioptions,GtError *err)
       processmatchinfooffline = &storeoffline;
     } else
     {
-      processmatch = showmatch;
+      processmatch = idxlocali_showmatch;
       showmatchinfo.encseq = encseq;
       showmatchinfo.characters = gt_alphabet_characters(a);
       showmatchinfo.wildcardshow = gt_alphabet_wildcard_show(a);

@@ -17,6 +17,7 @@
 #ifndef SEED_EXTEND_H
 #define SEED_EXTEND_H
 #include "core/types_api.h"
+#include "match/querymatch.h"
 #include "match/xdrop.h"
 #include "match/ft-front-prune.h"
 
@@ -68,8 +69,14 @@ typedef struct GtXdropmatchinfo GtXdropmatchinfo;
    extended seeds. <xdropbelowscore> is the parameter which influences the
    search space of the Xdrop-based extension. The larger this parameter,
    the larger the search space. If <xdropbelowscore> is 0,
-   then a reasonable default value depending on the the <errorpercentage>
+   then a reasonable default value depending on the <errorpercentage>
    is chosen. */
+
+typedef struct
+{
+  void *processinfo;
+  GtQuerymatchoutoptions *querymatchoutoptions;
+} GtProcessinfo_and_outoptions;
 
 GtXdropmatchinfo *gt_xdrop_matchinfo_new(GtUword userdefinedleastlength,
                                          GtUword errorpercentage,
@@ -176,6 +183,10 @@ void gt_greedy_extend_matchinfo_check_extend_symmetry_set(
 
 void gt_greedy_extend_matchinfo_silent_set(GtGreedyextendmatchinfo *ggemi);
 
+/* Set the silent trimstat in the matchinfo object. */
+
+void gt_greedy_extend_matchinfo_trimstat_set(GtGreedyextendmatchinfo *ggemi);
+
 /* Set the verbose flag in the matchinfo object. */
 
 void gt_greedy_extend_matchinfo_verbose_set(GtGreedyextendmatchinfo *ggemi);
@@ -229,5 +240,18 @@ int gt_simplegreedyselfmatchoutput(void *info,
                                    GtUword pos1,
                                    GtUword pos2,
                                    GtError *err);
+
+void gt_greedy_extend_matchinfo_relax(GtGreedyextendmatchinfo *ggemi,
+                                      GtUword steps);
+
+GtUword align_front_prune_edist(bool forward,
+                                Polished_point *best_polished_point,
+                                Fronttrace *front_trace,
+                                const GtEncseq *encseq,
+                                GtGreedyextendmatchinfo *ggemi,
+                                GtUword ustart,
+                                GtUword ulen,
+                                GtUword vstart,
+                                GtUword vlen);
 
 #endif
