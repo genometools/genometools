@@ -402,7 +402,7 @@ void gt_alignment_show_generic(GtUchar *buffer,
             midbuf[pos] = ISSPECIAL(a) || ISSPECIAL(b) || a != b
                             ? (GtUchar) MISMATCHSYMBOL
                             : (GtUchar) MATCHSYMBOL;
-            lowbuf[pos] = ISSPECIAL(b) ? wildcardshow : characters[a];
+            lowbuf[pos] = ISSPECIAL(b) ? wildcardshow : characters[b];
           } else
           {
             topbuf[pos] = a;

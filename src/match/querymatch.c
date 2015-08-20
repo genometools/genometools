@@ -216,6 +216,8 @@ struct GtQuerymatchoutoptions
   GtArrayuint8_t eoplist;
   GtUchar *alignment_show_buffer;
   GtEncseqReader *esr_for_align_show;
+  const GtUchar *characters;
+  GtUchar wildcardshow;
 };
 
 static void seededmatch2eoplist(GtArrayuint8_t *eoplist,
@@ -361,7 +363,7 @@ int gt_querymatch_output(void *info,
     {
       if (querymatch->selfmatch)
       {
-        GtUword evalcost, querystartabsolute
+        GtUword /*evalcost,*/ querystartabsolute
           = gt_encseq_seqstartpos(encseq,querymatch->queryseqnum) + querystart;
 
         if (querymatch->dblen > querymatchoutoptions->useqbuffer_size)
@@ -387,16 +389,23 @@ int gt_querymatch_output(void *info,
                                                     GT_READMODE_FORWARD,
                                                     0);
         }
-        gt_encseq_extract_decoded_with_reader(
+        if (querymatchoutoptions->characters == NULL)
+        {
+          querymatchoutoptions->characters
+            = gt_encseq_alphabetcharacters(encseq);
+          querymatchoutoptions->wildcardshow
+            = gt_alphabet_wildcard_show(gt_encseq_alphabet(encseq));
+        }
+        gt_encseq_extract_encoded_with_reader(
                                   querymatchoutoptions->esr_for_align_show,
                                   encseq,
-                                  (char *) querymatchoutoptions->useqbuffer,
+                                  querymatchoutoptions->useqbuffer,
                                   querymatch->dbstart,
                                   querymatch->dbstart + querymatch->dblen - 1);
-        gt_encseq_extract_decoded_with_reader(
+        gt_encseq_extract_encoded_with_reader(
                                   querymatchoutoptions->esr_for_align_show,
                                   encseq,
-                                  (char *) querymatchoutoptions->vseqbuffer,
+                                  querymatchoutoptions->vseqbuffer,
                                   querystartabsolute,
                                   querystartabsolute + querymatch->querylen -1);
         gt_alignment_set_seqs(querymatchoutoptions->alignment,
@@ -419,13 +428,15 @@ int gt_querymatch_output(void *info,
           gt_alignment_add_replacement_multi(querymatchoutoptions->alignment,
                                              querymatch->dblen);
         }
-        evalcost = gt_alignment_eval(querymatchoutoptions->alignment);
+        /*evalcost = gt_alignment_eval(querymatchoutoptions->alignment);*/
         gt_alignment_show_generic(querymatchoutoptions->alignment_show_buffer,
-                                  querymatchoutoptions->alignment, stdout,
+                                  querymatchoutoptions->alignment,
+                                  stdout,
                                   (unsigned int)
                                   querymatchoutoptions->alignmentwidth,
-                                  NULL,0);
-        gt_assert(evalcost <= querymatch->edist);
+                                  querymatchoutoptions->characters,
+                                  querymatchoutoptions->wildcardshow);
+        /*gt_assert(evalcost <= querymatch->edist);*/
         gt_alignment_reset(querymatchoutoptions->alignment);
       }
     }
@@ -528,6 +539,7 @@ GtQuerymatchoutoptions *gt_querymatchoutoptions_new(
   GT_INITARRAY(&querymatchoutoptions->eoplist,uint8_t);
   querymatchoutoptions->totallength = GT_UWORD_MAX;
   querymatchoutoptions->esr_for_align_show = NULL;
+  querymatchoutoptions->characters = NULL;
   if (alignmentwidth > 0)
   {
     querymatchoutoptions->alignment_show_buffer
