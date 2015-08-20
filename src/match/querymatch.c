@@ -136,85 +136,64 @@ struct GtQuerymatchoutoptions
           alignmentwidth; /* if > 0, then with alignment of this width */
 };
 
-static void eoplist_reverse_order(char *start,char *end)
+static void eoplist_reverse_order(uint8_t *start,uint8_t *end)
 {
   if (start < end)
   {
-    char *fwd, *bwd;
+    uint8_t *fwd, *bwd;
 
     for (fwd = start, bwd = end; fwd < bwd; fwd++, bwd--)
     {
-      char tmp = *fwd;
+      uint8_t tmp = *fwd;
       *fwd = *bwd;
       *bwd = tmp;
     }
   }
 }
 
-static void multireplacement_eoplist(GtArraychar *eoplist,GtUword len)
-{
-  GtUword idx;
-
-  for (idx = 0; idx < len; idx++)
-  {
-    GT_STOREINARRAY(eoplist,char,128,FT_EOP_REPLACEMENT);
-  }
-}
-
 static void converteoplist2alignment(GtAlignment *alignment,
-                                     const GtArraychar *eoplist)
+                                     const GtArrayuint8_t *eoplist)
 {
-  char *ptr;
+  uint8_t *ptr;
 
-  for (ptr = eoplist->spacechar;
-       ptr < eoplist->spacechar + eoplist->nextfreechar; ptr++)
+  for (ptr = eoplist->spaceuint8_t;
+       ptr < eoplist->spaceuint8_t + eoplist->nextfreeuint8_t; ptr++)
   {
-    switch (*ptr)
+    if (*ptr == FT_EOPCODE_DELETION)
     {
-      case FT_EOP_REPLACEMENT:
-        gt_alignment_add_replacement(alignment);
-        break;
-      case FT_EOP_INSERTION:
+      gt_alignment_add_deletion(alignment);
+    } else
+    {
+      if (*ptr == FT_EOPCODE_INSERTION)
+      {
         gt_alignment_add_insertion(alignment);
-        break;
-      case FT_EOP_DELETION:
-        gt_alignment_add_deletion(alignment);
-        break;
-      default:
-        gt_assert(false);
+      } else
+      {
+        gt_alignment_add_replacement_multi(alignment,(GtUword) ((*ptr) + 1));
+      }
     }
   }
 }
 
 static char editoperation_pretty(uint8_t eop)
 {
-  switch (eop)
-  {
-    case FT_EOP_REPLACEMENT:
-      return 'R';
-    case FT_EOP_INSERTION:
-      return 'I';
-    case FT_EOP_DELETION:
-      return 'D';
-    default:
-      gt_assert(false);
-  }
-  return 0;
+  gt_assert(eop <= 2);
+  return "DIR"[eop];
 }
 
-void showeoplist(const GtArraychar *eoplist)
+void gt_querymatch_showeoplist(const GtArrayuint8_t *eoplist)
 {
-  char *ptr;
+  uint8_t *ptr;
   GtUword run = 1;
 
   gt_assert(eoplist != NULL);
-  if (eoplist->nextfreechar == 0)
+  if (eoplist->nextfreeuint8_t == 0)
   {
     printf("[]\n");
     return;
   }
-  for (ptr = eoplist->spacechar + 1;
-       ptr < eoplist->spacechar + eoplist->nextfreechar;
+  for (ptr = eoplist->spaceuint8_t + 1;
+       ptr < eoplist->spaceuint8_t + eoplist->nextfreeuint8_t;
        ptr++)
   {
     if (*(ptr-1) == *ptr)
@@ -236,9 +215,9 @@ static void seededmatch2alignment(GtAlignment *alignment,
                                   GtQuerymatchoutoptions *querymatchoutoptions)
 {
   GtUword ulen, vlen, rightdistance = 0, leftdistance = 0, offset1, offset2;
-  GtArraychar eoplist;
+  GtArrayuint8_t eoplist;
 
-  GT_INITARRAY(&eoplist,char);
+  GT_INITARRAY(&eoplist,uint8_t);
   if (querymatchoutoptions->totallength == GT_UWORD_MAX)
   {
     querymatchoutoptions->totallength = gt_encseq_total_length(encseq);
@@ -268,7 +247,7 @@ static void seededmatch2alignment(GtAlignment *alignment,
     front_trace_reset(querymatchoutoptions->front_trace,ulen+vlen);
   }
   gt_assert(rightdistance <= querymatch->edist);
-  multireplacement_eoplist(&eoplist,querymatchoutoptions->seedlen);
+  front_trace_multireplacement(&eoplist,querymatchoutoptions->seedlen);
   if (querymatchoutoptions->seedpos1 > querymatch->dbstart &&
       querymatchoutoptions->seedpos2 > querystartabsolute)
   {
@@ -288,15 +267,15 @@ static void seededmatch2alignment(GtAlignment *alignment,
                                GT_REVERSEPOS(querymatchoutoptions->totallength,
                                              querymatchoutoptions->seedpos2-1),
                                vlen);
-    eoplistlen = eoplist.nextfreechar;
+    eoplistlen = eoplist.nextfreeuint8_t;
     front_trace2eoplist(&eoplist,
                         querymatchoutoptions->front_trace,
                         &best_polished_point,
                         ulen,
                         vlen);
     front_trace_reset(querymatchoutoptions->front_trace,ulen+vlen);
-    eoplist_reverse_order(eoplist.spacechar + eoplistlen,
-                          eoplist.spacechar + eoplist.nextfreechar - 1);
+    eoplist_reverse_order(eoplist.spaceuint8_t + eoplistlen,
+                          eoplist.spaceuint8_t + eoplist.nextfreeuint8_t - 1);
   }
   if (leftdistance + rightdistance > querymatch->edist)
   {
@@ -306,7 +285,7 @@ static void seededmatch2alignment(GtAlignment *alignment,
   }
   gt_assert(leftdistance + rightdistance <= querymatch->edist);
   converteoplist2alignment(alignment,&eoplist);
-  GT_FREEARRAY(&eoplist,char);
+  GT_FREEARRAY(&eoplist,uint8_t);
 }
 
 int gt_querymatch_output(void *info,

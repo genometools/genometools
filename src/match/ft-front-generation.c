@@ -204,7 +204,24 @@ static GtUword valid_total_fronts(const FrontGeneration *gen_table,
 }
 
 #ifndef OUTSIDE_OF_GT
-void front_trace2eoplist(GtArraychar *eoplist,
+void front_trace_multireplacement(GtArrayuint8_t *eoplist,GtUword repnum)
+{
+  const GtUword addamount = 128;
+  while (true)
+  {
+    if (repnum <= FT_EOPCODE_MAXREPLACEMENT)
+    {
+      gt_assert(repnum > 0);
+      GT_STOREINARRAY(eoplist,uint8_t,addamount,(uint8_t) (repnum - 1));
+      break;
+    }
+    GT_STOREINARRAY(eoplist,uint8_t,addamount,
+                    (uint8_t) (FT_EOPCODE_MAXREPLACEMENT - 1));
+    repnum -= FT_EOPCODE_MAXREPLACEMENT;
+  }
+}
+
+void front_trace2eoplist(GtArrayuint8_t *eoplist,
                          const Fronttrace *front_trace,
                          const Polished_point *pp,
                          GT_UNUSED GtUword ulen,
@@ -237,12 +254,7 @@ void front_trace2eoplist(GtArraychar *eoplist,
 
     if (lcs > 0)
     {
-      unsigned int idx;
-
-      for (idx = 0; idx < lcs; idx++)
-      {
-        GT_STOREINARRAY(eoplist,char,addamount,FT_EOP_REPLACEMENT);
-      }
+      front_trace_multireplacement(eoplist,lcs);
     }
     if (trace & preferred_eop)
     {
@@ -289,7 +301,19 @@ void front_trace2eoplist(GtArraychar *eoplist,
         }
       }
     }
-    GT_STOREINARRAY(eoplist,char,addamount,preferred_eop);
+    if (preferred_eop == FT_EOP_DELETION)
+    {
+      GT_STOREINARRAY(eoplist,uint8_t,addamount,FT_EOPCODE_DELETION);
+    } else
+    {
+      if (preferred_eop == FT_EOP_INSERTION)
+      {
+        GT_STOREINARRAY(eoplist,uint8_t,addamount,FT_EOPCODE_INSERTION);
+      } else
+      {
+        GT_STOREINARRAY(eoplist,uint8_t,addamount,0);
+      }
+    }
     gt_assert(trimleft >=
               (GtUword) front_trace->gen_table[distance].trimleft_diff);
     trimleft -= (GtUword) front_trace->gen_table[distance].trimleft_diff;
