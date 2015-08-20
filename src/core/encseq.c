@@ -707,6 +707,23 @@ static void showGtRange(const GtRange *range)
 }
 #endif
 
+void gt_encseq_extract_encoded_with_reader(GtEncseqReader *esr,
+                               const GtEncseq *encseq,
+                               GtUchar *buffer,
+                               GtUword frompos,
+                               GtUword topos)
+{
+  GtUword idx, pos;
+
+  gt_assert(frompos <= topos && encseq != NULL &&
+            topos < encseq->logicaltotallength && buffer != NULL);
+  gt_encseq_reader_reinit_with_readmode(esr, encseq, GT_READMODE_FORWARD,
+                                        frompos);
+  for (pos=frompos, idx = 0; pos <= topos; pos++, idx++) {
+    buffer[idx] = gt_encseq_reader_next_encoded_char(esr);
+  }
+}
+
 void gt_encseq_extract_encoded(const GtEncseq *encseq,
                                GtUchar *buffer,
                                GtUword frompos,
@@ -716,7 +733,7 @@ void gt_encseq_extract_encoded(const GtEncseq *encseq,
   GtUword idx, pos;
 
   gt_assert(frompos <= topos && encseq != NULL &&
-            topos < encseq->logicaltotallength);
+            topos < encseq->logicaltotallength && buffer != NULL);
   esr = gt_encseq_create_reader_with_readmode(encseq,
                                               GT_READMODE_FORWARD,
                                               frompos);
@@ -724,6 +741,23 @@ void gt_encseq_extract_encoded(const GtEncseq *encseq,
     buffer[idx] = gt_encseq_reader_next_encoded_char(esr);
   }
   gt_encseq_reader_delete(esr);
+}
+
+void gt_encseq_extract_decoded_with_reader(GtEncseqReader *esr,
+                                           const GtEncseq *encseq,
+                                           char *buffer,
+                                           GtUword frompos,
+                                           GtUword topos)
+{
+  GtUword idx, pos;
+
+  gt_assert(frompos <= topos && encseq != NULL &&
+            topos < encseq->logicaltotallength && buffer != NULL);
+  gt_encseq_reader_reinit_with_readmode(esr, encseq, GT_READMODE_FORWARD,
+                                        frompos);
+  for (pos=frompos, idx = 0; pos <= topos; pos++, idx++) {
+    buffer[idx] = gt_encseq_reader_next_decoded_char(esr);
+  }
 }
 
 void gt_encseq_extract_decoded(const GtEncseq *encseq,
@@ -735,8 +769,7 @@ void gt_encseq_extract_decoded(const GtEncseq *encseq,
   GtUword idx, pos;
 
   gt_assert(frompos <= topos && encseq != NULL &&
-            topos < encseq->logicaltotallength);
-  gt_assert(buffer != NULL);
+            topos < encseq->logicaltotallength && buffer != NULL);
   esr = gt_encseq_create_reader_with_readmode(encseq,
                                               GT_READMODE_FORWARD,
                                               frompos);
