@@ -31,6 +31,7 @@ typedef struct {
   GtUword dbs_logdiagbandwidth;
   GtUword dbs_mincoverage;
   GtUword dbs_maxfreq;
+  GtUword dbs_suppress;
   /* xdrop extension options */
   GtOption *se_option_xdrop;
   GtUword se_extendxdrop;
@@ -75,7 +76,7 @@ static GtOptionParser* gt_seed_extend_option_parser_new(void *tool_arguments)
   GtSeedExtendArguments *arguments = tool_arguments;
   GtOptionParser *op;
   GtOption *option, *op_gre, *op_xdr, *op_cam, *op_his, *op_dif, *op_pmh,
-    *op_len, *op_err, *op_xbe;
+    *op_len, *op_err, *op_xbe, *op_sup, *op_frq;
   gt_assert(arguments);
 
   /* init */
@@ -108,11 +109,21 @@ static GtOptionParser* gt_seed_extend_option_parser_new(void *tool_arguments)
   gt_option_parser_add_option(op, option);
 
   /* -maxfreq */
-  option = gt_option_new_uword_min("maxfreq",
+  op_frq = gt_option_new_uword_min("maxfreq",
                                    "Maximum frequency of a k-mer (for filter)",
                                    &arguments->dbs_maxfreq,
                                    GT_UWORD_MAX, 1UL);
-  gt_option_parser_add_option(op, option);
+  gt_option_parser_add_option(op, op_frq);
+
+  /* -t */
+  op_sup = gt_option_new_uword_min("t",
+                                   "Suppress k-mers occurring at least t times "
+                                   "(for filter)",
+                                   &arguments->dbs_suppress,
+                                   GT_UWORD_MAX, 2UL);
+  gt_option_exclude(op_sup, op_frq);
+  gt_option_is_development_option(op_sup);
+  gt_option_parser_add_option(op, op_sup);
 
   /* SEED EXTENSION OPTIONS */
 
@@ -250,9 +261,18 @@ static int gt_seed_extend_arguments_check(int rest_argc, void *tool_arguments,
   gt_error_check(err);
   gt_assert(arguments);
 
+  if (arguments->dbs_suppress < GT_UWORD_MAX) {
+    arguments->dbs_maxfreq = arguments->dbs_suppress - 1;
+  }
+
   if (rest_argc == 1 && arguments->dbs_maxfreq == 1) {
-    gt_error_set(err, "for 1 input file maxfreq must be >= 2 to find matching "
-                 "k-mers");
+    if (arguments->dbs_suppress == GT_UWORD_MAX) {
+      gt_error_set(err, "for 1 input file: parameter -maxfreq must be >= 2 to "
+                   "find matching k-mers");
+    } else {
+      gt_error_set(err, "for 1 input file: parameter -t must be >= 3 to find "
+                   "matching k-mers");
+    }
     had_err = -1;
   }
 
