@@ -32,6 +32,8 @@ typedef struct {
   GtUword dbs_mincoverage;
   GtUword dbs_maxfreq;
   GtUword dbs_suppress;
+  GtUword dbs_memlimit;
+  GtStr *dbs_memlimit_str;
   /* xdrop extension options */
   GtOption *se_option_xdrop;
   GtUword se_extendxdrop;
@@ -56,6 +58,7 @@ typedef struct {
 static void* gt_seed_extend_arguments_new(void)
 {
   GtSeedExtendArguments *arguments = gt_calloc((size_t) 1, sizeof *arguments);
+  arguments->dbs_memlimit_str = gt_str_new();
   arguments->se_char_access_mode = gt_str_new();
   return arguments;
 }
@@ -64,6 +67,7 @@ static void gt_seed_extend_arguments_delete(void *tool_arguments)
 {
   GtSeedExtendArguments *arguments = tool_arguments;
   if (arguments != NULL) {
+    gt_str_delete(arguments->dbs_memlimit_str);
     gt_str_delete(arguments->se_char_access_mode);
     gt_option_delete(arguments->se_option_greedy);
     gt_option_delete(arguments->se_option_xdrop);
@@ -76,7 +80,7 @@ static GtOptionParser* gt_seed_extend_option_parser_new(void *tool_arguments)
   GtSeedExtendArguments *arguments = tool_arguments;
   GtOptionParser *op;
   GtOption *option, *op_gre, *op_xdr, *op_cam, *op_his, *op_dif, *op_pmh,
-    *op_len, *op_err, *op_xbe, *op_sup, *op_frq;
+    *op_len, *op_err, *op_xbe, *op_sup, *op_frq, *op_mem;
   gt_assert(arguments);
 
   /* init */
@@ -124,6 +128,16 @@ static GtOptionParser* gt_seed_extend_option_parser_new(void *tool_arguments)
   gt_option_exclude(op_sup, op_frq);
   gt_option_is_development_option(op_sup);
   gt_option_parser_add_option(op, op_sup);
+
+  /* -memlimit */
+  op_mem = gt_option_new_string("memlimit",
+                                "Maximum memory usage to determine the maximum "
+                                "frequency of a k-mer (for filter)",
+                                arguments->dbs_memlimit_str,
+                                "");
+  gt_option_exclude(op_mem, op_frq);
+  gt_option_exclude(op_mem, op_sup);
+  gt_option_parser_add_option(op, op_mem);
 
   /* SEED EXTENSION OPTIONS */
 
@@ -265,7 +279,17 @@ static int gt_seed_extend_arguments_check(int rest_argc, void *tool_arguments,
     arguments->dbs_maxfreq = arguments->dbs_suppress - 1;
   }
 
-  if (rest_argc == 1 && arguments->dbs_maxfreq == 1) {
+  arguments->dbs_memlimit = GT_UWORD_MAX;
+  if (strcmp(gt_str_get(arguments->dbs_memlimit_str), "") != 0) {
+    had_err = gt_option_parse_spacespec(&arguments->dbs_memlimit, "memlimit",
+                                        arguments->dbs_memlimit_str, err);
+    if (!had_err && arguments->dbs_memlimit == 0) {
+      gt_error_set(err, "option -memlimit must be at least 1MB");
+      had_err = -1;
+    }
+  }
+
+  if (!had_err && rest_argc == 1 && arguments->dbs_maxfreq == 1) {
     if (arguments->dbs_suppress == GT_UWORD_MAX) {
       gt_error_set(err, "for 1 input file: parameter -maxfreq must be >= 2 to "
                    "find matching k-mers");
@@ -276,10 +300,10 @@ static int gt_seed_extend_arguments_check(int rest_argc, void *tool_arguments,
     had_err = -1;
   }
 
-  if (rest_argc > 2) {
+  if (!had_err && rest_argc > 2) {
     gt_error_set(err, "too many arguments (-help shows correct usage)");
     had_err = -1;
-  } else if (rest_argc < 1) {
+  } else if (!had_err && rest_argc < 1) {
     gt_error_set(err, "at least one encseq index name must be specified "
       "(-help shows correct usage)");
     had_err = -1;
@@ -360,6 +384,7 @@ static int gt_seed_extend_runner(int argc, const char **argv, int parsed_args,
     dbsarguments.logdiagbandwidth = arguments->dbs_logdiagbandwidth;
     dbsarguments.mincoverage = arguments->dbs_mincoverage;
     dbsarguments.maxfreq = arguments->dbs_maxfreq;
+    dbsarguments.memlimit = arguments->dbs_memlimit;
     dbsarguments.mirror = arguments->mirror;
     dbsarguments.overlappingseeds = arguments->overlappingseeds;
     dbsarguments.verify = arguments->verify;

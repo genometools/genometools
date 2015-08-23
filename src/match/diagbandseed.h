@@ -31,6 +31,7 @@ struct GtDiagbandseed {
   GtUword logdiagbandwidth;
   GtUword mincoverage;
   GtUword maxfreq;
+  GtUword memlimit;
   bool mirror;
   bool overlappingseeds;
   bool verify;
