@@ -510,6 +510,7 @@ void gt_optimal_maxalilendiff_perc_mat_history(
                 GtUword errorpercentage,
                 GtUword sensitivity)
 {
+  gt_assert(perc_mat_history != NULL);
   if (arg_maxalignedlendifference == 0)
   {
     if (arg_perc_mat_history == 0)
