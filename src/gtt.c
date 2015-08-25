@@ -74,7 +74,6 @@
 #include "extended/kmer_database.h"
 #include "extended/luaserialize.h"
 #include "extended/multieoplist.h"
-#include "extended/n_r_encseq.h"
 #include "extended/popcount_tab.h"
 #include "extended/priority_queue.h"
 #include "extended/ranked_list.h"
@@ -342,7 +341,6 @@ GtHashmap* gtt_unit_tests(void)
   gt_hashmap_add(unit_tests, "memory allocator module", gt_ma_unit_test);
   gt_hashmap_add(unit_tests, "multieoplist", gt_multieoplist_unit_test);
   gt_hashmap_add(unit_tests, "MD5 seqid module", gt_md5_seqid_unit_test);
-  gt_hashmap_add(unit_tests, "n_r_encseq", gt_n_r_encseq_unit_test);
   gt_hashmap_add(unit_tests, "rdj: suffix-prefix matches list module",
                                                           gt_spmlist_unit_test);
   gt_hashmap_add(unit_tests, "PBS finder module",

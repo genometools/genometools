@@ -162,7 +162,7 @@ class HitCollection
 end
 
 if ARGV.length != 2
-  STDERR.puts "Usage: #$0 blastoutput condenseroutput"
+  STDERR.puts "Usage: #$0 blastoutput condenseqoutput"
   STDERR.puts "format of blastout:"
   STDERR.puts "qseqid sseqid pident length qstart qend " +
     "sstart send evalue bitscore"
@@ -170,7 +170,7 @@ if ARGV.length != 2
 end
 
 blastname = ARGV[0]
-condensername = ARGV[1]
+condenseqname = ARGV[1]
 
 STDERR.puts "## sorting blasthits"
 blastres = HitCollection.new(blastname).sort!
@@ -179,7 +179,7 @@ File.open('blastsorted', 'w') do |file|
 end
 
 STDERR.puts "## sorting searchhits"
-condres = HitCollection.new(condensername).sort!
+condres = HitCollection.new(condenseqname).sort!
 File.open('searchsorted', 'w') do |file|
   file.puts condres
 end

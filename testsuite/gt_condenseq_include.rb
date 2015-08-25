@@ -1,26 +1,26 @@
 require 'open3'
 
-files = {"#{$testdata}condenser/unique_encseq_test.fas" => [14,7,41,4,2],
+files = {"#{$testdata}condenseq/unique_encseq_test.fas" => [14,7,41,4,2],
          "#{$testdata}tRNA.dos.fas" => [71,100,300, -1,-1],
-         "#{$testdata}condenser/varlen_50.fas" => [100,3000,10000, -1,4]}
+         "#{$testdata}condenseq/varlen_50.fas" => [100,3000,10000, -1,4]}
 if not $arguments['memcheck']
-  files["#{$testdata}condenser/varlen_0.01_50.fas"] = [100,3000,10000, -1,4]
+  files["#{$testdata}condenseq/varlen_0.01_50.fas"] = [100,3000,10000, -1,4]
 end
 
-searchfiles = {"#{$testdata}condenser/varlen_0.01_50.fas" =>
+searchfiles = {"#{$testdata}condenseq/varlen_0.01_50.fas" =>
                [100,3000,10000, -1,4],
-               "#{$testdata}condenser/varlen_50.fas" =>
+               "#{$testdata}condenseq/varlen_50.fas" =>
                [100,3000,10000, -1,4]}
 
 largefiles = {}
 if $gttestdata
-  largefiles["#{$gttestdata}condenser/yeastproteomes.fas"] = [100,3000,10000,-1,-1]
+  largefiles["#{$gttestdata}condenseq/yeastproteomes.fas"] = [100,3000,10000,-1,-1]
 end
 
-desc_files = {"#{$testdata}condenser/varlen_200.fas" => [100,3000,10000],
-              "#{$testdata}condenser/varlen_longer_ids_200.fas" =>
+desc_files = {"#{$testdata}condenseq/varlen_200.fas" => [100,3000,10000],
+              "#{$testdata}condenseq/varlen_longer_ids_200.fas" =>
                 [100,3000,10000],
-              "#{$testdata}condenser/varlen_increasing_ids_200.fas" =>
+              "#{$testdata}condenseq/varlen_increasing_ids_200.fas" =>
                 [100,3000,10000]}
 
 opt_arr = ["-brute_force yes -diagonals no",
@@ -224,7 +224,7 @@ end
 Name "gt condenseq compress options fail"
 Keywords "gt_condenseq compress options fail"
 Test do
-  file = "#{$testdata}condenser/small_10_10b.fas"
+  file = "#{$testdata}condenseq/small_10_10b.fas"
   basename = File.basename(file)
 
   run_test "#{$bin}gt encseq encode -clipdesc -indexname #{basename} " \
@@ -258,7 +258,7 @@ end
 Name "gt condenseq init len fail"
 Keywords "gt_condenseq fail"
 Test do
-  file = "#{$testdata}condenser/small_10_10b.fas"
+  file = "#{$testdata}condenseq/small_10_10b.fas"
   basename = File.basename(file)
   run_test "#{$bin}gt encseq encode -clipdesc -indexname #{basename} " \
     "-md5 no " \
