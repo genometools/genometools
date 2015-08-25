@@ -1,4 +1,4 @@
 file varsize.fas contains the same sequences as in ../0.1 . But shredded to
 sizes between 70 and 2000
 the different versions of that file contain different fasta-header, meant to
-test the header functionality of n_r_encseq
+test the header functionality of condenseq

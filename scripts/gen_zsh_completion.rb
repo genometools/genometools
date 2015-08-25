@@ -10,7 +10,7 @@ tools = %w{
   chseqids
   clean
   compreads
-  condenser
+  condenseq
   congruence
   convertseq
   csa

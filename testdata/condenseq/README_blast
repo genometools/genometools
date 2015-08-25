@@ -2,7 +2,7 @@ called with
 -outfmt "6 qseqid sseqid pident length qstart qend sstart send evalue bitscore"
 
 evalue set depending on target score (score is used to make it comparable to
-condenser, score is independed on db length, evalue is not)
+condenseq, score is independed on db length, evalue is not)
 
 if score 30 is assumed:
 evalue for varlen_200.fas: 0.06018122658133507
