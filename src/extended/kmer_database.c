@@ -1,5 +1,6 @@
 /*
   Copyright (c) 2014 Andreas Blaufelder <9blaufel@informatik.uni-hamburg.de>
+  Copyright (c) 2014 Dirk Willrodt <willrodt@zbh.uni-hamburg.de>
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -40,22 +41,24 @@ GT_DECLAREARRAYSTRUCT(GtRange);
 
 typedef struct {
   GtArrayGtRange     *intervals;
-  GtUword            max_nu_kmers,
-                     kmer_count,
-                     preprocessed_kmer_count,
-                     *kmers,
-                     offset,
-                     intervals_kmer_count;
+  GtArrayGtUword     *ids;
   GtEncseq           *es;
   GtKmercodeiterator *kmer_iter;
-  unsigned int       kmer_size;
-  bool               printed;
+  GtUwordPair        *kmers;
+  GtUword             max_nu_kmers,
+                      kmer_count,
+                      preprocessed_kmer_count,
+                      offset,
+                      intervals_kmer_count;
+  unsigned int        kmer_size;
+  bool                printed;
 } GtSortedBuffer;
 
 struct GtKmerDatabase {
  GtUword        *offset,
                 *seen_kmer_counts,
-                *positions;
+                *positions,
+                *unique_ids;
  GtBittab       *deleted_positions;
  GtUword        nu_kmer_codes,
                 initial_size,
@@ -88,11 +91,13 @@ GtKmerDatabase* gt_kmer_database_new(unsigned int alpabet_size,
                               sizeof (*kdb->seen_kmer_counts));
   kdb->deleted_positions = gt_bittab_new(kdb->nu_kmer_codes);
   kdb->positions = NULL;
+  kdb->unique_ids = NULL;
   kdb->sb.max_nu_kmers = sb_max_nu_kmers;
   /* may need upper bound */
   kdb->initial_size = gt_encseq_total_length(encseq) / (GtUword) 100;
   if (kdb->initial_size < sb_max_nu_kmers)
     kdb->initial_size = sb_max_nu_kmers;
+
   kdb->seen_kmers = 0;
   kdb->current_size = 0;
   kdb->min_nu_occ = 0;
@@ -110,9 +115,11 @@ GtKmerDatabase* gt_kmer_database_new(unsigned int alpabet_size,
   kdb->sb.kmer_size = kmer_size;
   kdb->sb.intervals_kmer_count = 0;
   kdb->sb.kmers = gt_malloc((size_t) sb_max_nu_kmers *
-                        sizeof (*kdb->sb.kmers));
+                            sizeof (*kdb->sb.kmers));
   kdb->sb.intervals = gt_malloc(sizeof (*kdb->sb.intervals));
+  kdb->sb.ids = gt_malloc(sizeof (*kdb->sb.ids));
   GT_INITARRAY(kdb->sb.intervals, GtRange);
+  GT_INITARRAY(kdb->sb.ids, GtUword);
   kdb->sb.es = gt_encseq_ref(encseq);
   kdb->sb.kmer_iter =
       gt_kmercodeiterator_encseq_new(kdb->sb.es, GT_READMODE_FORWARD,
@@ -127,10 +134,13 @@ void gt_kmer_database_delete(GtKmerDatabase *kdb)
     gt_free(kdb->offset);
     gt_free(kdb->seen_kmer_counts);
     gt_free(kdb->positions);
+    gt_free(kdb->unique_ids);
     gt_free(kdb->sb.kmers);
     gt_bittab_delete(kdb->deleted_positions);
     GT_FREEARRAY(kdb->sb.intervals, GtRange);
     gt_free(kdb->sb.intervals);
+    GT_FREEARRAY(kdb->sb.ids, GtUword);
+    gt_free(kdb->sb.ids);
     gt_encseq_delete(kdb->sb.es);
     gt_kmercodeiterator_delete(kdb->sb.kmer_iter);
     gt_free(kdb);
@@ -140,6 +150,7 @@ void gt_kmer_database_delete(GtKmerDatabase *kdb)
 static void gt_kmer_database_intervals_reset(GtKmerDatabase *kdb)
 {
   kdb->sb.intervals->nextfreeGtRange = 0;
+  kdb->sb.ids->nextfreeGtUword = 0;
   kdb->sb.intervals_kmer_count = 0;
 }
 
@@ -147,24 +158,19 @@ static void gt_kmer_database_increase_size(GtKmerDatabase *kdb)
 {
   gt_assert(kdb != NULL);
 
-  if (kdb->positions == NULL) {
-    kdb->positions = gt_malloc((size_t) kdb->initial_size *
-                               sizeof (*kdb->positions));
-    kdb->current_size = kdb->initial_size;
-  }
-  else {
-    kdb->current_size = (GtUword) (kdb->current_size * 1.2) + kdb->initial_size;
-    kdb->positions = gt_realloc((void*) kdb->positions, (size_t)
-                                kdb->current_size * sizeof (*kdb->positions));
-  }
+  kdb->current_size = (GtUword) (kdb->current_size * 1.2) + kdb->initial_size;
+  kdb->positions = gt_realloc((void*) kdb->positions, (size_t)
+                              kdb->current_size * sizeof (*kdb->positions));
+  kdb->unique_ids = gt_realloc((void*) kdb->unique_ids, (size_t)
+                               kdb->current_size * sizeof (*kdb->unique_ids));
 }
 
 #define gt_kmer_database_decode_kmer(coded_kmer, kmercode, startposition) \
   kmercode = coded_kmer >> GT_DIV2(GT_INTWORDSIZE), \
   startposition = (GtUword) (coded_kmer & GT_LASTHALVEBITS)
 
-#define GT_KMER_DATABASE_RESTORE_BUFFFER (GtUword) 2
-#define GT_KMER_DATABASE_DELETE_BUFFFER (GtUword) 1
+#define GT_KMER_DATABASE_RESTORE_BUFFFER ((GtUword) 2UL)
+#define GT_KMER_DATABASE_DELETE_BUFFFER ((GtUword) 1UL)
 
 static void gt_kmer_database_preprocess_buffer(GtKmerDatabase *kdb)
 {
@@ -182,14 +188,14 @@ static void gt_kmer_database_preprocess_buffer(GtKmerDatabase *kdb)
 
   if (size_sb > 0) {
     while (i < size_sb) {
-      gt_kmer_database_decode_kmer(kdb->sb.kmers[i], kmercode, startpos);
+      gt_kmer_database_decode_kmer(kdb->sb.kmers[i].a, kmercode, startpos);
       current_kmer_code = kmercode;
       current_kmer_count = 0;
       while (i < size_sb && current_kmer_code == kmercode) {
         current_kmer_count++;
         i++;
         if (i < size_sb)
-          gt_kmer_database_decode_kmer(kdb->sb.kmers[i], kmercode, startpos);
+          gt_kmer_database_decode_kmer(kdb->sb.kmers[i].a, kmercode, startpos);
       }
       if (kdb->seen_kmer_counts[current_kmer_code] == 0)
         kdb->seen_kmers++;
@@ -234,8 +240,9 @@ static void gt_kmer_database_prune(GtKmerDatabase *kdb)
         !gt_bittab_bit_is_set(kdb->deleted_positions, code)) {
       if (!delete && deleted > 0) {
         memmove(kdb->positions + left - deleted, kdb->positions + left,
-                (size_t) (current_left - left) *
-                sizeof (*kdb->positions));
+                (size_t) (current_left - left) * sizeof (*kdb->positions));
+        memmove(kdb->unique_ids + left - deleted, kdb->unique_ids + left,
+                (size_t) (current_left - left) * sizeof (*kdb->unique_ids));
       }
       delete = true;
       deleted += right - current_left;
@@ -249,11 +256,13 @@ static void gt_kmer_database_prune(GtKmerDatabase *kdb)
   if (!delete && deleted > 0) {
     memmove(kdb->positions + left - deleted, kdb->positions + left,
             (size_t) (right - left) * sizeof (*kdb->positions));
+    memmove(kdb->unique_ids + left - deleted, kdb->unique_ids + left,
+            (size_t) (right - left) * sizeof (*kdb->unique_ids));
   }
   kdb->offset[code] -= deleted;
 }
 
-#define GT_KMER_DATABASE_CALL_PRUNE_INTERVAL (GtUword) 5
+#define GT_KMER_DATABASE_CALL_PRUNE_INTERVAL ((GtUword) 5)
 
 static void gt_kmer_database_merge(GtKmerDatabase *kdb)
 {
@@ -277,28 +286,29 @@ static void gt_kmer_database_merge(GtKmerDatabase *kdb)
   preprocessed_size = kdb->sb.preprocessed_kmer_count;
 
   if (preprocessed_size > 0) {
-    if (preprocessed_size + kdb->offset[kdb->nu_kmer_codes] >
-      kdb->current_size)
+    if (preprocessed_size + kdb->offset[kdb->nu_kmer_codes] > kdb->current_size)
       gt_kmer_database_increase_size(kdb);
 
-    for (code = kdb->nu_kmer_codes; code > 0; code--) {
-      if (preprocessed_size == 0)
-        break;
-      deleted = false;
+    for (code = kdb->nu_kmer_codes;
+         code > 0 && preprocessed_size != 0;
+         code--) {
       left = kdb->offset[code - 1];
       right = kdb->offset[code];
       occ = right - left;
-      if (gt_bittab_bit_is_set(kdb->deleted_positions, code - 1))
-        deleted = true;
+
+      deleted = gt_bittab_bit_is_set(kdb->deleted_positions, code - 1);
+
       kdb->offset[code] += preprocessed_size;
-      gt_kmer_database_decode_kmer(kdb->sb.kmers[size_sb - 1], kmercode,
-                                   startpos);
+
+      gt_kmer_database_decode_kmer(kdb->sb.kmers[size_sb - 1].a,
+                                   kmercode, startpos);
       /* add new kmer positions from buffer (last to first) where <kmercode> =
          <code> - 1 */
       while (preprocessed_size > 0 && code - 1 == kmercode && size_sb > 0) {
         if (!kdb->cutoff_is_set || !deleted) {
           new_pos = right + preprocessed_size - 1;
           kdb->positions[new_pos] = kdb->sb.offset + startpos;
+          kdb->unique_ids[new_pos] = kdb->sb.kmers[size_sb - 1].b;
           preprocessed_size--;
           occ++;
           if (code - 1 == kdb->min_code)
@@ -306,8 +316,8 @@ static void gt_kmer_database_merge(GtKmerDatabase *kdb)
         }
         size_sb--;
         if (size_sb > 0) {
-          gt_kmer_database_decode_kmer(kdb->sb.kmers[size_sb - 1], kmercode,
-                                       startpos);
+          gt_kmer_database_decode_kmer(kdb->sb.kmers[size_sb - 1].a,
+                                       kmercode, startpos);
         }
       }
       if (occ != 0 && occ < current_min_occ) {
@@ -319,6 +329,9 @@ static void gt_kmer_database_merge(GtKmerDatabase *kdb)
         memmove(kdb->positions + (left + preprocessed_size),
                 kdb->positions + left,
                 (size_t) (right - left) * sizeof (*kdb->positions));
+        memmove(kdb->unique_ids + (left + preprocessed_size),
+                kdb->unique_ids + left,
+                (size_t) (right - left) * sizeof (*kdb->unique_ids));
       }
     }
     gt_assert(preprocessed_size == 0);
@@ -340,7 +353,7 @@ static void gt_kmer_database_sort_sb(GtKmerDatabase *kdb)
 {
   gt_assert(kdb != NULL);
 
-  gt_radixsort_inplace_ulong(kdb->sb.kmers, kdb->sb.kmer_count);
+  gt_radixsort_inplace_GtUwordPair(kdb->sb.kmers, kdb->sb.kmer_count);
 }
 
 #define gt_kmer_database_encode_kmer(kmercode, startpos) \
@@ -349,20 +362,24 @@ static void gt_kmer_database_sort_sb(GtKmerDatabase *kdb)
 /*Doesn't sort the inserted kmers*/
 static void gt_kmer_database_add_kmer_to_sb(GtKmerDatabase *kdb,
                                             GtCodetype kmercode,
-                                            GtUword startpos)
+                                            GtUword startpos,
+                                            GtUword id)
 {
   gt_assert(kdb != NULL);
   gt_assert(kdb->sb.kmer_count <= kdb->sb.max_nu_kmers);
 
   startpos -= kdb->sb.offset;
-  kdb->sb.kmers[kdb->sb.kmer_count] = gt_kmer_database_encode_kmer(kmercode,
-                                                                   startpos);
+  kdb->sb.kmers[kdb->sb.kmer_count].a = gt_kmer_database_encode_kmer(kmercode,
+                                                                     startpos);
+  kdb->sb.kmers[kdb->sb.kmer_count].b = id;
   kdb->sb.kmer_count++;
 }
 
 void gt_kmer_database_flush(GtKmerDatabase *kdb)
 {
   gt_assert(kdb != NULL);
+  gt_assert(kdb->sb.intervals->nextfreeGtRange ==
+            kdb->sb.ids->nextfreeGtUword);
 
   if (kdb->sb.intervals->nextfreeGtRange != 0) {
     GtUword interval_idx;
@@ -372,10 +389,9 @@ void gt_kmer_database_flush(GtKmerDatabase *kdb)
     for (interval_idx = 0;
          interval_idx < kdb->sb.intervals->nextfreeGtRange;
          interval_idx++) {
-
-      GtUword startpos =
-        kdb->sb.intervals->spaceGtRange[interval_idx].start,
-              endpos = kdb->sb.intervals->spaceGtRange[interval_idx].end;
+      GtUword startpos = kdb->sb.intervals->spaceGtRange[interval_idx].start,
+              endpos = kdb->sb.intervals->spaceGtRange[interval_idx].end,
+              id = kdb->sb.ids->spaceGtUword[interval_idx];
       const GtKmercode *kmercode = NULL;
 
       gt_kmercodeiterator_reset(kdb->sb.kmer_iter, GT_READMODE_FORWARD,
@@ -386,7 +402,7 @@ void gt_kmer_database_flush(GtKmerDatabase *kdb)
               gt_kmercodeiterator_encseq_next(kdb->sb.kmer_iter)) != NULL &&
              startpos <= endpos - (kdb->sb.kmer_size - 1)) {
         if (!kmercode->definedspecialposition) {
-          gt_kmer_database_add_kmer_to_sb(kdb, kmercode->code, startpos);
+          gt_kmer_database_add_kmer_to_sb(kdb, kmercode->code, startpos, id);
         }
         startpos++;
       }
@@ -398,11 +414,11 @@ void gt_kmer_database_flush(GtKmerDatabase *kdb)
 }
 
 void gt_kmer_database_add_interval(GtKmerDatabase *kdb,
-                                   GtUword start, GtUword end)
+                                   GtUword start, GtUword end,
+                                   GtUword id)
 {
   GtRange new;
-  GtUword original_end = end,
-          interval_size;
+  GtUword interval_size;
 
   gt_assert(kdb != NULL);
   gt_assert(start < end + 1 - (kdb->sb.kmer_size - 1));
@@ -423,6 +439,7 @@ void gt_kmer_database_add_interval(GtKmerDatabase *kdb,
     new.end = start + kdb->sb.max_nu_kmers + (kdb->sb.kmer_size - 1) - 1;
 
     GT_STOREINARRAY(kdb->sb.intervals, GtRange, 10, new);
+    GT_STOREINARRAY(kdb->sb.ids, GtUword, 10, id);
 
     kdb->sb.intervals_kmer_count += kdb->sb.max_nu_kmers;
     interval_size -= kdb->sb.max_nu_kmers;
@@ -435,58 +452,55 @@ void gt_kmer_database_add_interval(GtKmerDatabase *kdb,
     kdb->sb.printed = false;
   }
   new.start = start;
-  new.end = original_end;
+  new.end = end;
   GT_STOREINARRAY(kdb->sb.intervals, GtRange, 10, new);
+  GT_STOREINARRAY(kdb->sb.ids, GtUword, 10, id);
   kdb->sb.intervals_kmer_count += interval_size;
 }
 
 void gt_kmer_database_add_kmer(GtKmerDatabase *kdb,
                                GtCodetype kmercode,
-                               GtUword startpos)
+                               GtUword startpos,
+                               GtUword id)
 {
   GtUword start,
           end,
           i;
-  bool    not_in_db = false;
+  bool    in_db = true;
 
   gt_assert(kdb != NULL);
   gt_assert(kmercode < kdb->nu_kmer_codes);
 
-  kdb->current_size++;
-  if (kdb->positions == NULL) {
-    kdb->positions = gt_malloc((size_t) (GtUword) 100 *
-                               sizeof (*kdb->positions));
-    kdb->current_size = (GtUword) 100;
-  }
-  else if (kdb->offset[kdb->nu_kmer_codes] <= kdb->current_size) {
+  if (kdb->offset[kdb->nu_kmer_codes] == kdb->current_size) {
+    kdb->current_size += 100;
+    kdb->current_size *= 1.2;
     kdb->positions = gt_realloc((void*) kdb->positions, (size_t)
-                                (kdb->current_size + (GtUword) 100)
-                                * sizeof (*kdb->positions));
+                                kdb->current_size * sizeof (*kdb->positions));
+    kdb->unique_ids = gt_realloc((void*) kdb->unique_ids, (size_t)
+                                 kdb->current_size * sizeof (*kdb->unique_ids));
   }
 
-  start = kdb->offset[kmercode] + 1;
+  start = kdb->offset[kmercode];
   end = kdb->offset[kmercode + 1];
 
-  if (start > end) {
-    end = start;
-    not_in_db = true;
-  }
-
-  end--;
+  if (start + 1 > end)
+    in_db = false;
 
   for (i = kdb->offset[kdb->nu_kmer_codes]; i > end; i--) {
     kdb->positions[i] = kdb->positions[i - 1];
-  }
-  if (not_in_db)
-    kdb->positions[end] = startpos;
-  else {
-    gt_assert(kdb->positions[end] < startpos);
-    kdb->positions[end + 1] = startpos;
+    kdb->unique_ids[i] = kdb->unique_ids[i - 1];
   }
 
-  for (i = kmercode + 1; i <= kdb->nu_kmer_codes; i++) {
-    kdb->offset[i]++;
+  if (in_db) {
+    gt_assert(kdb->positions[end - 1] < startpos);
+    gt_assert(kdb->unique_ids[end - 1] <= id);
   }
+
+  kdb->positions[end] = startpos;
+  kdb->unique_ids[end] = id;
+
+  for (i = kmercode + 1; i <= kdb->nu_kmer_codes; i++)
+    kdb->offset[i]++;
 }
 
 GtKmerStartpos gt_kmer_database_get_startpos(GtKmerDatabase *kdb,
@@ -496,10 +510,14 @@ GtKmerStartpos gt_kmer_database_get_startpos(GtKmerDatabase *kdb,
 
   gt_assert(kdb != NULL);
   gt_assert(kmercode < kdb->nu_kmer_codes);
+  gt_assert(kdb->positions != NULL);
+  gt_assert(kdb->unique_ids != NULL);
 
   sp.startpos = kdb->positions + kdb->offset[kmercode];
+  sp.unique_ids = kdb->unique_ids + kdb->offset[kmercode];
   sp.no_positions = kdb->offset[kmercode + 1] - kdb->offset[kmercode];
-  if (kdb->mean_cutoff && sp.no_positions > kdb->min_cutoff &&
+  if (kdb->mean_cutoff &&
+      sp.no_positions > kdb->min_cutoff &&
       sp.no_positions > (kdb->cutoff / GT_KMER_DATABASE_DELETE_BUFFFER))
     sp.no_positions = 0;
   else if (kdb->cutoff_is_set && sp.no_positions > kdb->cutoff)
@@ -580,7 +598,7 @@ int gt_kmer_database_compare(GtKmerDatabase *a, GtKmerDatabase *b, GtError *err)
   gt_error_check(err);
 
   if (a->nu_kmer_codes != b->nu_kmer_codes) {
-    gt_error_set(err, "Kmer Databases not identical. Alphabet sizes are"
+    gt_error_set(err, "Kmer Dtaatabases not identical. Alphabet sizes are"
                  ": " GT_WU " and " GT_WU, a->nu_kmer_codes, b->nu_kmer_codes);
     had_err = -1;
   }
@@ -605,6 +623,12 @@ int gt_kmer_database_compare(GtKmerDatabase *a, GtKmerDatabase *b, GtError *err)
       gt_error_set(err, "Kmer Databases not identical. Positions at " GT_WU
                    " are: "GT_WU " and " GT_WU, i, a->positions[i],
                    b->positions[i]);
+      had_err = -1;
+    }
+    if (!had_err && a->unique_ids[i] != b->unique_ids[i]) {
+      gt_error_set(err, "Kmer Databases not identical. Ids at " GT_WU
+                   " are: "GT_WU " and " GT_WU,
+                   i, a->unique_ids[i], b->unique_ids[i]);
       had_err = -1;
     }
   }
@@ -637,6 +661,13 @@ int gt_kmer_database_check_consistency(GtKmerDatabase *kdb, GtError *err)
             kdb->positions[j]);
         had_err = -1;
       }
+      if (kdb->unique_ids[j - 1] > kdb->unique_ids[j]) {
+        gt_error_set(err, "Kmer Database is inconsistent in unique_ids at "
+            "kmer: " GT_WU ", last startposition: " GT_WU ", current "
+            "startposition " GT_WU,
+            i, kdb->unique_ids[j - 1], kdb->unique_ids[j]);
+        had_err = -1;
+      }
     }
     start = end;
   }
@@ -649,6 +680,7 @@ GtUword gt_kmer_database_get_byte_size(GtKmerDatabase *kdb)
   gt_assert(kdb != NULL);
 
   return ((GtUword) kdb->current_size * sizeof (*kdb->positions)) +
+    ((GtUword) kdb->current_size * sizeof (*kdb->unique_ids)) +
    (2 * ((GtUword) sizeof (GtUword) * (kdb->nu_kmer_codes + 1)) - 1);
 }
 
@@ -717,7 +749,7 @@ void gt_kmer_database_print_buffer(GtKmerDatabase *kdb, GtLogger *logger)
     return;
 
   for (i = 0; i < kdb->sb.kmer_count; i++) {
-    gt_kmer_database_decode_kmer(kdb->sb.kmers[i], kmercode, startpos);
+    gt_kmer_database_decode_kmer(kdb->sb.kmers[i].a, kmercode, startpos);
     gt_logger_log(logger, "Kmer: " GT_WU ", Startpos: " GT_WU, kmercode,
            startpos + kdb->sb.offset);
   }
@@ -798,21 +830,21 @@ int gt_kmer_database_unit_test(GtError *err)
   /*test if sorting in sb works*/
   for (i = 0; i < nu_kmers_sort_test; i++) {
     gt_kmer_database_add_kmer_to_sb(sb_test, unsorted_codes[i],
-                                    unsorted_starts[i]);
+                                    unsorted_starts[i], 0);
   }
 
   gt_kmer_database_sort_sb(sb_test);
 
   for (i = 0; !had_err && i < nu_kmers_sort_test; i++) {
-    gt_kmer_database_decode_kmer(sb_test->sb.kmers[i], kmercode, startpos);
+    gt_kmer_database_decode_kmer(sb_test->sb.kmers[i].a, kmercode, startpos);
     gt_ensure(kmercode == codes[i]);
     gt_ensure(startpos == starts[i]);
   }
 
   /*test if add_kmer works*/
   for (i = 0; i < seq_length; i++) {
-    gt_kmer_database_add_kmer(kdb, seq[i], i);
-    gt_kmer_database_add_kmer(compare_kdb, seq[i], i);
+    gt_kmer_database_add_kmer(kdb, seq[i], i, 0);
+    gt_kmer_database_add_kmer(compare_kdb, seq[i], i, 0);
   }
 
   had_err = gt_kmer_database_check_consistency(kdb, err);
@@ -828,9 +860,9 @@ int gt_kmer_database_unit_test(GtError *err)
 
   /*test if intervals bigger than the buffer size are handled correctly*/
   if (!had_err) {
-    gt_kmer_database_add_interval(intervals_too_big, 0, max_nu_kmers + 1);
+    gt_kmer_database_add_interval(intervals_too_big, 0, max_nu_kmers + 1, 0);
     gt_kmer_database_add_interval(intervals_too_big, max_nu_kmers + 2,
-                                  seq_length);
+                                  seq_length, 0);
     gt_kmer_database_flush(intervals_too_big);
     had_err = gt_kmer_database_check_consistency(intervals_too_big, err);
   }
@@ -839,7 +871,7 @@ int gt_kmer_database_unit_test(GtError *err)
 
   /*test if merge works with empty kmer_database*/
   for (i = 0; i < max_nu_kmers; i++) {
-    gt_kmer_database_add_kmer_to_sb(empty_kdb, sb_codes[i], sb_starts[i]);
+    gt_kmer_database_add_kmer_to_sb(empty_kdb, sb_codes[i], sb_starts[i], 0);
   }
 
   gt_kmer_database_merge(empty_kdb);
@@ -856,8 +888,8 @@ int gt_kmer_database_unit_test(GtError *err)
 
   /*test if merge works with filled kmer_database*/
   for (i = 0; i < max_nu_kmers; i++) {
-    gt_kmer_database_add_kmer(compare_kdb, sb_codes[i], sb_starts[i]);
-    gt_kmer_database_add_kmer_to_sb(kdb, sb_codes[i], sb_starts[i]);
+    gt_kmer_database_add_kmer(compare_kdb, sb_codes[i], sb_starts[i], 0);
+    gt_kmer_database_add_kmer_to_sb(kdb, sb_codes[i], sb_starts[i], 0);
   }
 
   gt_kmer_database_merge(kdb);

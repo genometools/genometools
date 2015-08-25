@@ -28,14 +28,16 @@
    objects and store them to disk. */
 typedef struct GtCondenseqCreator GtCondenseqCreator;
 
-/* Returns a new <GtCondenseqCreator> object. */
+/* Returns a new <GtCondenseqCreator> object. Checks if minalignlength is to
+   large to be stored. Returns NULL in that case and sets <err> accordingly. */
 GtCondenseqCreator* gt_condenseq_creator_new(GtUword initsize,
                                              GtUword minalignlength,
                                              GtWord xdropscore,
                                              GtXdropArbitraryscores *scores,
                                              unsigned int kmersize,
                                              unsigned int windowsize,
-                                             GtLogger *logger);
+                                             GtLogger *logger,
+                                             GtError *err);
 /* Free memory of <condenseq_creator>. */
 void                gt_condenseq_creator_delete(
                                          GtCondenseqCreator *condenseq_creator);

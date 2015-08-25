@@ -30,8 +30,12 @@
 #include "core/log_api.h"
 #include "core/logger.h"
 #include "core/ma.h"
+#include "core/parseutils_api.h"
+#include "core/showtime.h"
 #include "core/splitter_api.h"
 #include "core/str.h"
+#include "core/timer_api.h"
+#include "core/undef_api.h"
 #include "core/unused_api.h"
 #include "core/xansi_api.h"
 #include "extended/condenseq.h"
@@ -45,7 +49,8 @@ typedef struct {
   GtStr *hmm,
         *hmmsearch_path,
         *outtable_filename;
-  unsigned int max_queries;
+  unsigned int max_queries,
+               hmm_num_threads;
   bool force_ow;
 } GtCondenseqHmmsearchArguments;
 
@@ -104,7 +109,8 @@ gt_condenseq_hmmsearch_option_parser_new(void *tool_arguments)
   option = gt_option_new_string("tblout", "file basename to output tabular "
                                 "hmmsearch output to (like hmmer option "
                                 "--tblout). Depending on -max_queries will "
-                                "produce multiple numbered files.",
+                                "produce multiple numbered files with .tab "
+                                "ending.",
                                 arguments->outtable_filename, NULL);
   gt_option_parser_add_option(op, option);
 
@@ -118,6 +124,12 @@ gt_condenseq_hmmsearch_option_parser_new(void *tool_arguments)
                               "fine search, influences file-size and therefore "
                               "speed!, 0 disables splitting",
                               &arguments->max_queries, 5U);
+  gt_option_parser_add_option(op, option);
+
+  /* -max_threads */
+  option = gt_option_new_uint("max_threads", "maximum number of threads "
+                              "hmmsearch may use",
+                              &arguments->hmm_num_threads, GT_UNDEF_UINT);
   gt_option_parser_add_option(op, option);
   return op;
 }
@@ -186,7 +198,7 @@ static int hmmsearch_process_seq(void *data,
 static int hmmsearch_cmp_seqnum(const void *a, const void *b,
                                 GT_UNUSED void *data) {
   GtUword *a_w = (GtUword *) a,
-          *b_w = (GtUword *) b;
+  *b_w = (GtUword *) b;
   gt_assert(data == NULL);
   if (*a_w < *b_w)
     return -1;
@@ -206,14 +218,15 @@ static void hmmsearch_create_fine_fas(GtStr *fine_fasta_filename,
   tree_iter = gt_rbtree_iter_new_from_first(seqnums);
   outfp = gt_xtmpfp_generic(fine_fasta_filename, TMPFP_USETEMPLATE);
   gt_outfp = gt_file_new_from_fileptr(outfp);
-  while ((seqnum = gt_rbtree_iter_next(tree_iter)) != NULL) {
+  seqnum = gt_rbtree_iter_data(tree_iter);
+  while (seqnum != NULL) {
     const char *seq, *desc;
     GtUword seqlen, desclen;
-    gt_log_log("seqnum: " GT_WU, *seqnum);
     seq = gt_condenseq_extract_decoded(ces, &seqlen, *seqnum);
     desc = gt_condenseq_description(ces, &desclen, *seqnum);
     gt_fasta_show_entry_nt(desc, desclen, seq, seqlen,
                            GT_FASTA_DEFAULT_WIDTH, gt_outfp);
+    seqnum = gt_rbtree_iter_next(tree_iter);
   }
   gt_file_delete(gt_outfp);
   gt_rbtree_iter_delete(tree_iter);
@@ -223,35 +236,39 @@ static int hmmsearch_call_fine_search(GtStr *table_filename,
                                       char *fine_fasta_filename,
                                       char *hmmsearch_path,
                                       char *hmm_filename,
+                                      unsigned int max_threads,
                                       GtLogger *logger,
                                       GtError *err) {
   int had_err = 0;
   GtSafePipe *pipe = NULL;
   char **hmmargs = NULL,
        *hmmenv[] = { NULL };
-  size_t hmmargc = (size_t) 4;
-  unsigned int hmmidx = 0;
+  const size_t hmmargc = (size_t) 8; /* max # of args + NULL */
+  unsigned int idx = 0;
+  GtStr *num_threads = gt_str_new();
 
-  if (table_filename != NULL) {
-    hmmargc += (size_t) 2;
-  }
   hmmargs = gt_calloc(hmmargc, sizeof (*hmmargs));
-  hmmargs[hmmidx++] = hmmsearch_path;
+  hmmargs[idx++] = hmmsearch_path;
   if (table_filename != NULL) {
-    hmmargs[hmmidx++] = gt_cstr_dup("--tblout");
-    hmmargs[hmmidx++] = gt_str_get(table_filename);
+    hmmargs[idx++] = "--tblout";
+    hmmargs[idx++] = gt_str_get(table_filename);
   }
-  hmmargs[hmmidx++] = hmm_filename;
-  hmmargs[hmmidx++] = fine_fasta_filename;
-  gt_assert(hmmargs[hmmidx] == NULL);
+  if (max_threads != GT_UNDEF_UINT) {
+    gt_str_append_uint(num_threads, max_threads);
+    hmmargs[idx++] = "--cpu";
+    hmmargs[idx++] = gt_str_get(num_threads);
+  }
+  hmmargs[idx++] = hmm_filename;
+  hmmargs[idx++] = fine_fasta_filename;
+  gt_assert(hmmargs[idx] == NULL);
 
   gt_logger_log(logger, "calling: %s", hmmsearch_path);
 
   pipe = gt_safe_popen(hmmsearch_path, hmmargs, hmmenv, err);
 
-  if (table_filename != NULL)
-    gt_free(hmmargs[1]);
   gt_free(hmmargs);
+
+  gt_str_delete(num_threads);
 
   if (pipe == NULL)
     had_err = -1;
@@ -273,24 +290,38 @@ static int hmmsearch_call_coarse_search(GtCondenseq* ces,
                                         char *hmmsearch_path,
                                         char *table_filename,
                                         char *hmm_filename,
+                                        unsigned int max_threads,
+                                        GtTimer *timer,
                                         GtLogger *logger,
                                         GtError *err) {
   int had_err = 0;
+  unsigned int idx = 0;
   char **hmmargs = NULL,
        *hmmenv[] = { NULL };
-  GtStr *coarse_fas = gt_condenseq_unique_fasta_file(ces);
+  const size_t hmmargc = (size_t) 10;  /* max # of args + NULL */
+  GtStr *coarse_fas = gt_condenseq_unique_fasta_file(ces),
+        *num_threads = gt_str_new();
   GtSafePipe *pipe = NULL;
   gt_assert(coarse_fas != NULL);
 
+  if (timer != NULL)
+    gt_timer_show_progress(timer, "run coarse hmmsearch", stderr);
+
   /* Array has to end with NULL */
-  hmmargs = gt_calloc((size_t) 8, sizeof (*hmmargs));
-  hmmargs[0] = hmmsearch_path;
-  hmmargs[1] = gt_cstr_dup("--noali");
-  hmmargs[2] = gt_cstr_dup("--notextw");
-  hmmargs[3] = gt_cstr_dup("--domtblout");
-  hmmargs[4] = table_filename;
-  hmmargs[5] = hmm_filename;
-  hmmargs[6] = gt_str_get(coarse_fas);
+  hmmargs = gt_calloc(hmmargc, sizeof (*hmmargs));
+  hmmargs[idx++] = hmmsearch_path;
+  hmmargs[idx++] = "--noali";
+  hmmargs[idx++] = "--notextw";
+  hmmargs[idx++] = "--domtblout";
+  hmmargs[idx++] = table_filename;
+  if (max_threads != GT_UNDEF_UINT) {
+    gt_str_append_uint(num_threads, max_threads);
+    hmmargs[idx++] = "--cpu";
+    hmmargs[idx++] = gt_str_get(num_threads);
+  }
+  hmmargs[idx++] = hmm_filename;
+  hmmargs[idx++] = gt_str_get(coarse_fas);
+  gt_assert(hmmargs[idx] == NULL);
 
   gt_logger_log(logger, "calling: %s", hmmsearch_path);
 
@@ -299,22 +330,20 @@ static int hmmsearch_call_coarse_search(GtCondenseq* ces,
   if (pipe == NULL)
     had_err = -1;
 
-  gt_free(hmmargs[1]);
-  gt_free(hmmargs[2]);
-  gt_free(hmmargs[3]);
   gt_free(hmmargs);
+
   gt_str_delete(coarse_fas);
+  gt_str_delete(num_threads);
 
   /* pipe test for splint */
   if (!had_err && pipe != NULL) {
-    if (gt_log_enabled()) {
-      GtStr *line = gt_str_new();
-      while (gt_str_read_next_line(line, pipe->read_fd) == 0) {
-        gt_log_log("%s", gt_str_get(line));
-        gt_str_reset(line);
-      }
-      gt_str_delete(line);
+    GtStr *line = gt_str_new();
+    /* we have to read everything, as otherwise the pipe will not close */
+    while (gt_str_read_next_line(line, pipe->read_fd) == 0) {
+      /* gt_log_log("%s", gt_str_get(line)); */
+      gt_str_reset(line);
     }
+    gt_str_delete(line);
     (void) gt_safe_pclose(pipe);
   }
   return had_err;
@@ -324,20 +353,28 @@ static int hmmsearch_process_coarse_hits(
                                        char *table_filename,
                                        GtCondenseq *ces,
                                        GtCondenseqHmmsearchArguments *arguments,
+                                       GtTimer *timer,
                                        GtLogger *logger,
                                        GtError *err) {
   int had_err = 0;
-  GtStr *line = gt_str_new();
   FILE *table = NULL;
+  GtRBTree *sequences = NULL;
   GtSplitter *splitter = gt_splitter_new();
+  GtStr *line = gt_str_new();
   GtStr *query = gt_str_new(),
         *fine_fasta_filename = gt_str_new_cstr("condenseq");
-  GtRBTree *sequences = NULL;
-  GtUword filecount = (GtUword) 1;
+  GtTimer *hmmtimer = NULL;
+  GtUword filecount = (GtUword) 1,
+          hmmcounter = 1;
+  const GtUword fine_fasta_name_length = gt_str_length(fine_fasta_filename),
+        table_name_length = gt_str_length(arguments->outtable_filename);
   unsigned int querycount = 0;
-  const GtUword fine_fasta_name_length = gt_str_length(fine_fasta_filename);
-  const GtUword table_name_length = gt_str_length(arguments->outtable_filename);
 
+  if (timer != NULL) {
+    gt_timer_show_progress(timer, "processing coarse hits", stderr);
+    hmmtimer = gt_timer_new_with_progress_description("ran 1 fine hmmsearch");
+    gt_timer_start(hmmtimer);
+  }
   table = gt_xfopen(table_filename, "r");
 
   sequences = gt_rbtree_new(hmmsearch_cmp_seqnum,
@@ -350,38 +387,60 @@ static int hmmsearch_process_coarse_hits(
           query_column = (GtUword) 3;
 
     if (c_line[0] != '#') {
+      const char *token, *skip;
       gt_splitter_split_non_empty(splitter, c_line, gt_str_length(line), ' ');
-      gt_assert(gt_splitter_size(splitter) == (GtUword) 23);
-      if (sscanf(gt_splitter_get_token(splitter, target_column),
-                 GT_WU, &uid) != 1) {
-        gt_error_set(err, "couldn't parse target number: %s",
-                     gt_splitter_get_token(splitter, target_column));
-        had_err = -1;
+      gt_assert(gt_splitter_size(splitter) >= (GtUword) 23);
+      token = gt_splitter_get_token(splitter, target_column);
+      /* seqids printed with -debug will contain 'unique' in front of the actual
+         id as a number */
+      if ((skip = strchr(token, 'e')) != NULL) {
+        token=++skip;
       }
-      if (gt_str_length(query) == 0 ||
+      if (gt_parse_uword(&uid, token) == 0) {
+        /* old files had a ',' at the end of 'unique000', this leads to an error
+           with gt_parse_uword() */
+        if (sscanf(token, GT_WU ",", &uid) != 1) {
+          gt_error_set(err, "couldn't parse target number: %s", token);
+          had_err = -1;
+        }
+      }
+      if (!had_err &&
+          (gt_str_length(query) == 0 ||
           strcmp(gt_str_get(query),
-                 gt_splitter_get_token(splitter, query_column)) != 0) {
+                 gt_splitter_get_token(splitter, query_column)) != 0)) {
         gt_str_set(query, gt_splitter_get_token(splitter, query_column));
-        gt_logger_log(logger, "new query: %s", gt_str_get(query));
         querycount++;
+        gt_logger_log(logger, "new query (%u): %s", querycount,
+                      gt_str_get(query));
       }
-      if (!had_err && querycount == arguments->max_queries) {
+      if (!had_err && arguments->max_queries != 0 &&
+          querycount > arguments->max_queries) {
         hmmsearch_create_fine_fas(fine_fasta_filename, sequences, ces);
-        if (table_name_length != 0)
+        gt_logger_log(logger, "fine fasta: %s",
+                      gt_str_get(fine_fasta_filename));
+        if (table_name_length != 0) {
           gt_str_append_uword(arguments->outtable_filename, filecount++);
+          gt_str_append_cstr(arguments->outtable_filename, ".tab");
+          gt_logger_log(logger, "out table: %s",
+                        gt_str_get(arguments->outtable_filename));
+        }
         had_err =
           hmmsearch_call_fine_search(table_name_length != 0 ?
-                                       arguments->outtable_filename :
-                                       NULL,
+                                     arguments->outtable_filename :
+                                     NULL,
                                      gt_str_get(fine_fasta_filename),
                                      gt_str_get(arguments->hmmsearch_path),
                                      gt_str_get(arguments->hmm),
+                                     arguments->hmm_num_threads,
                                      logger, err);
+        if (hmmtimer != NULL)
+          gt_timer_show_progress_formatted(hmmtimer, stderr, "ran " GT_WU
+                                           " fine hmmsearch", ++hmmcounter);
         gt_rbtree_clear(sequences);
         gt_str_set_length(fine_fasta_filename, fine_fasta_name_length);
         if (table_name_length != 0)
           gt_str_set_length(arguments->outtable_filename, table_name_length);
-        querycount = 0;
+        querycount = 1;
       }
       if (!had_err) {
         if (gt_condenseq_each_redundant_seq(ces, uid,
@@ -401,8 +460,14 @@ static int hmmsearch_process_coarse_hits(
 
   if (!had_err) {
     hmmsearch_create_fine_fas(fine_fasta_filename, sequences, ces);
-    if (table_name_length != 0)
-      gt_str_append_uword(arguments->outtable_filename, filecount++);
+    gt_logger_log(logger, "fine fasta: %s",
+                  gt_str_get(fine_fasta_filename));
+    if (table_name_length != 0) {
+      gt_str_append_uword(arguments->outtable_filename, filecount);
+      gt_str_append_cstr(arguments->outtable_filename, ".tab");
+      gt_logger_log(logger, "out table: %s",
+                    gt_str_get(arguments->outtable_filename));
+    }
     had_err =
       hmmsearch_call_fine_search(table_name_length != 0 ?
                                  arguments->outtable_filename :
@@ -410,8 +475,13 @@ static int hmmsearch_process_coarse_hits(
                                  gt_str_get(fine_fasta_filename),
                                  gt_str_get(arguments->hmmsearch_path),
                                  gt_str_get(arguments->hmm),
+                                 arguments->hmm_num_threads,
                                  logger, err);
   }
+  if (hmmtimer != NULL)
+    gt_timer_show_progress_final(hmmtimer, stderr);
+
+  gt_timer_delete(hmmtimer);
   gt_log_log("created " GT_WU " files", filecount);
   gt_rbtree_delete(sequences);
   gt_str_delete(fine_fasta_filename);
@@ -428,16 +498,27 @@ static int gt_condenseq_hmmsearch_runner(GT_UNUSED int argc,
   GtCondenseq *ces = NULL;
   GtStr *table_filename = NULL;
   GtLogger *logger = NULL;
+  GtTimer *timer = NULL;
   int had_err = 0;
 
   logger = gt_logger_new(gt_condenseq_search_arguments_verbose(arguments->csa),
                          GT_LOGGER_DEFLT_PREFIX, stderr);
+  if (gt_showtime_enabled()) {
+    timer = gt_timer_new_with_progress_description("initialization");
+    gt_timer_start(timer);
+  }
 
   gt_error_check(err);
   gt_assert(arguments);
 
-  table_filename = gt_condenseq_search_arguments_db_filename(arguments->csa,
-                                                             "_tabout.tsv");
+  if (gt_str_length(arguments->outtable_filename) != 0) {
+    table_filename = gt_str_clone(arguments->outtable_filename);
+    gt_str_append_cstr(table_filename, "tabout.tsv");
+  }
+  else {
+    table_filename = gt_condenseq_search_arguments_db_filename(arguments->csa,
+                                                               "_tabout.tsv");
+  }
   if (!had_err) {
     struct stat buf;
     if (stat(gt_str_get(table_filename), &buf) == 0 && !arguments->force_ow) {
@@ -447,6 +528,8 @@ static int gt_condenseq_hmmsearch_runner(GT_UNUSED int argc,
     }
   }
 
+  if (timer != NULL)
+    gt_timer_show_progress(timer, "read condenseq", stderr);
   if (!had_err) {
     ces = gt_condenseq_search_arguments_read_condenseq(arguments->csa,
                                                        logger, err);
@@ -459,18 +542,24 @@ static int gt_condenseq_hmmsearch_runner(GT_UNUSED int argc,
                                    gt_str_get(arguments->hmmsearch_path),
                                    gt_str_get(table_filename),
                                    gt_str_get(arguments->hmm),
-                                   logger, err);
+                                   arguments->hmm_num_threads,
+                                   timer, logger, err);
   }
   if (!had_err) {
     had_err = hmmsearch_process_coarse_hits(gt_str_get(table_filename),
                                             ces, arguments,
-                                            logger, err);
+                                            timer, logger, err);
   }
 
+  if (timer != NULL)
+    gt_timer_show_progress(timer, "cleanup", stderr);
   gt_condenseq_delete(ces);
   gt_logger_delete(logger);
   gt_str_delete(table_filename);
 
+  if (timer != NULL)
+    gt_timer_show_progress_final(timer, stderr);
+  gt_timer_delete(timer);
   return had_err;
 }
 
