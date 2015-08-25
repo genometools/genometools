@@ -96,9 +96,9 @@ GtRBTreeIter*  gt_rbtree_iter_new_from_last(GtRBTree *tree);
 void           gt_rbtree_iter_reset_from_first(GtRBTreeIter *trav);
 /* Resets the iterator to the last (largest) element */
 void           gt_rbtree_iter_reset_from_last(GtRBTreeIter *trav);
-/* Return next (larger) key */
+/* Return next (larger) key, NULL if iterator reached end */
 void*          gt_rbtree_iter_next(GtRBTreeIter *trav);
-/* Return previous (smaller) key */
+/* Return previous (smaller) key, NULL if iterator reached end */
 void*          gt_rbtree_iter_prev(GtRBTreeIter *trav);
 /* Returns data of the current node the iterator <trav> is positioned on. */
 void*          gt_rbtree_iter_data (GtRBTreeIter *trav);
