@@ -139,7 +139,7 @@ opt_arr.each do |opt|
           "-db #{basename}_nr -verbose",
           :maxtime => 600
         grep(last_stderr, /debug: [1-9]+[0-9]* hits found/)
-        run_ruby "#$scriptsdir/condenseq_statistics.rb " \
+        run_ruby "#$scriptsdir/condenseq_blastsearch_stats.rb " \
           "#{File.join(File.dirname(file), File.basename(file,'.fas'))}" \
           "_queries_300_2x_blast?_result #{last_stdout}"
         # grep(last_stdout, /^## FP: 0$/)
