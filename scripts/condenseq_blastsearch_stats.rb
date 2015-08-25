@@ -28,40 +28,22 @@ class Hit
   end
 
   def <=> (other)
-    if self.overlapping?(other)
-      return 0
-    end
-    if (@qseqid < other.qseqid)
-      return -1
-    elsif (@qseqid > other.qseqid)
-      return 1
-    end
-    if (@sseqid < other.sseqid)
-      return -1
-    elsif (@sseqid > other.sseqid)
-      return 1
-    end
-    if (@qstart < other.qstart)
-      return -1
-    elsif (@qstart > other.qstart)
-      return 1
-    end
-    if (@sstart < other.sstart)
-      return -1
-    elsif (@sstart > other.sstart)
-      return 1
-    end
-    if (@qend < other.qend)
-      return -1
-    elsif (@qend > other.qend)
-      return 1
-    end
-    if (@send < other.send)
-      return -1
-    elsif (@send > other.send)
-      return 1
-    end
-    return 0
+    diff = @sseqid <=> other.sseqid
+    return diff if diff != 0
+
+    diff = @qseqid <=> other.qseqid
+    return diff if diff != 0
+
+    diff = @sstart - other.sstart
+    return diff if diff != 0
+
+    diff = @send - other.send
+    return diff if diff != 0
+
+    diff = @qstart - other.qstart
+    return diff if diff != 0
+
+    return @qend - other.qend
   end
 
   def to_s
@@ -69,17 +51,17 @@ class Hit
       "\t#@evalue\t#@bitscore"
   end
 
-  def overlapping?(other)
-    if (@qseqid == other.qseqid and @sseqid == other.sseqid)
-      overlapstart = [@qstart, other.qstart].max
-      overlapend = [@qend, other.qend].min
-      overlaplength = overlapend - overlapstart
-      if ((@length * 0.8) <= overlaplength and
-        (other.length * 0.8) <= overlaplength)
-        return true
-      end
+  def disjuct?(other)
+    if (@qseqid != other.qseqid or @sseqid != other.sseqid) or
+       (@sstart > other.send or @send < other.sstart) or
+       (@qstart > other.qend or @qend < other.qstart)
+      return true
     end
     return false
+  end
+
+  def overlapping?(other)
+    return (not self.disjuct?(other))
   end
 
 end
@@ -129,14 +111,17 @@ class HitCollection
     otherlen = other.length
 
     while selfidx < selflen and otheridx < otherlen
-      case @arr[selfidx] <=> other[otheridx]
-      when 0
+      diff = 0
+      if not @arr[selfidx].overlapping?(other[otheridx])
+        diff = @arr[selfidx] <=> other[otheridx]
+      end
+      if diff == 0
         new.push @arr[selfidx]
         selfidx += 1
         otheridx += 1
-      when -1
+      elsif diff < 0
         selfidx += 1
-      when 1
+      elsif diff >0
         otheridx += 1
       end
     end
@@ -154,14 +139,17 @@ class HitCollection
     otherlen = other.length
 
     while selfidx < selflen and otheridx < otherlen
-      case @arr[selfidx] <=> other[otheridx]
-      when 0
+      diff = 0
+      if not @arr[selfidx].overlapping?(other[otheridx])
+        diff = @arr[selfidx] <=> other[otheridx]
+      end
+      if diff == 0
         selfidx += 1
         otheridx += 1
-      when -1
+      elsif diff < 0
         new.push @arr[selfidx]
         selfidx += 1
-      when 1
+      elsif diff > 0
         otheridx += 1
       end
     end
