@@ -58,26 +58,29 @@ static GtOptionParser* gt_seqorder_option_parser_new(void *tool_arguments)
 
   /* -invert */
   invert_option = gt_option_new_bool("invert", "invert order of sequences",
-                           &arguments->invert, false);
+                                     &arguments->invert, false);
   gt_option_parser_add_option(op, invert_option);
 
   /* -sort */
-  sort_option = gt_option_new_bool("sort", "sort sequences lexicographically "
-                                           "(by actual sequence)",
-                           &arguments->sort, false);
+  sort_option = gt_option_new_bool("sort",
+                                   "sort sequences lexicographically "
+                                   "(by actual sequence)",
+                                   &arguments->sort, false);
   gt_option_exclude(sort_option, invert_option);
   gt_option_parser_add_option(op, sort_option);
 
   /* -revsort */
   revsort_option = gt_option_new_bool("revsort", "sort sequences in reverse "
-                           "lexicographic order", &arguments->revsort, false);
+                                      "lexicographic order",
+                                      &arguments->revsort, false);
   gt_option_exclude(revsort_option, invert_option);
   gt_option_exclude(revsort_option, sort_option);
   gt_option_parser_add_option(op, revsort_option);
 
   /* -shuffle */
   shuffle_option = gt_option_new_bool("shuffle", "shuffle sequences "
-                           "pseudo-randomly", &arguments->shuffle, false);
+                                      "pseudo-randomly",
+                                      &arguments->shuffle, false);
   gt_option_exclude(shuffle_option, invert_option);
   gt_option_exclude(shuffle_option, sort_option);
   gt_option_exclude(shuffle_option, revsort_option);
@@ -98,7 +101,7 @@ static int gt_seqorder_arguments_check(GT_UNUSED int rest_argc,
   gt_assert(arguments != NULL);
 
   if (!(arguments->invert || arguments->sort || arguments->revsort ||
-      arguments->shuffle))
+        arguments->shuffle))
   {
     had_err = 1;
     gt_error_set(err, "order option needed: -invert|-sort|-revsort|-shuffle");
@@ -115,12 +118,13 @@ static void gt_seqorder_sort(GtSuffixsortspace *suffixsortspace,
   defaultsfxstrategy(&sfxstrategy, false);
   gt_suffixsortspace_init_seqstartpos(suffixsortspace,encseq);
   gt_sortallsuffixesfromstart(suffixsortspace,
-      gt_encseq_num_of_sequences(encseq), encseq, GT_READMODE_FORWARD, NULL, 0,
-      &sfxstrategy, NULL, NULL, NULL);
+                              gt_encseq_num_of_sequences(encseq),
+                              encseq, GT_READMODE_FORWARD, NULL, 0,
+                              &sfxstrategy, NULL, NULL, NULL);
 }
 
 static void gt_seqorder_get_shuffled_seqnums(GtUword nofseqs,
-    GtUword *seqnums)
+                                             GtUword *seqnums)
 {
   GtUword i, j;
 
@@ -151,7 +155,7 @@ static void gt_seqorder_output(GtUword seqnum, GtEncseq *encseq)
   }
   gt_xfputc('\n', stdout);
   esr = gt_encseq_create_reader_with_readmode(encseq, GT_READMODE_FORWARD,
-      startpos);
+                                              startpos);
   for (i = 0; i < len; i++)
   {
     gt_xfputc(gt_encseq_reader_next_decoded_char(esr), stdout);
@@ -160,8 +164,11 @@ static void gt_seqorder_output(GtUword seqnum, GtEncseq *encseq)
   gt_xfputc('\n', stdout);
 }
 
-static int gt_seqorder_runner(GT_UNUSED int argc, const char **argv,
-    int parsed_args, void *tool_arguments, GtError *err)
+static int gt_seqorder_runner(GT_UNUSED int argc,
+                              const char **argv,
+                              int parsed_args,
+                              void *tool_arguments,
+                              GtError *err)
 {
   GtSeqorderArguments *arguments = tool_arguments;
   int had_err = 0;
@@ -209,12 +216,18 @@ static int gt_seqorder_runner(GT_UNUSED int argc, const char **argv,
       gt_seqorder_sort(suffixsortspace, encseq);
       if (arguments->sort)
         for (i = 0; i < nofseqs; i++)
-          gt_seqorder_output(gt_encseq_seqnum(encseq,
-                gt_suffixsortspace_getdirect(suffixsortspace, i)), encseq);
+          gt_seqorder_output(gt_encseq_seqnum(
+                                   encseq,
+                                   gt_suffixsortspace_getdirect(suffixsortspace,
+                                                                i)),
+                             encseq);
       else
         for (i = nofseqs; i > 0; i--)
-          gt_seqorder_output(gt_encseq_seqnum(encseq,
-                gt_suffixsortspace_getdirect(suffixsortspace, i - 1)), encseq);
+          gt_seqorder_output(gt_encseq_seqnum(
+                                   encseq,
+                                   gt_suffixsortspace_getdirect(suffixsortspace,
+                                                                i - 1)),
+                             encseq);
       gt_suffixsortspace_delete(suffixsortspace, false);
     }
   }
@@ -227,8 +240,8 @@ static int gt_seqorder_runner(GT_UNUSED int argc, const char **argv,
 GtTool* gt_seqorder(void)
 {
   return gt_tool_new(gt_seqorder_arguments_new,
-                  gt_seqorder_arguments_delete,
-                  gt_seqorder_option_parser_new,
-                  gt_seqorder_arguments_check,
-                  gt_seqorder_runner);
+                     gt_seqorder_arguments_delete,
+                     gt_seqorder_option_parser_new,
+                     gt_seqorder_arguments_check,
+                     gt_seqorder_runner);
 }

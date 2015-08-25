@@ -50,21 +50,23 @@ static GtOptionParser* gt_seqlensort_option_parser_new(void *tool_arguments)
   gt_assert(arguments);
 
   /* init */
-  op = gt_option_parser_new("-db <fas ...> [-indexname ...]",
-      "Encode DNA MultiFasta sequences (with no wildcards) "
-      "in GtEncseq format, sorting the sequences by length.");
+  op = gt_option_parser_new("-db <fas ...> [-indexname ...]", "Encode DNA "
+                            "MultiFasta sequences (with no wildcards) in "
+                            "GtEncseq format, sorting the sequences by "
+                            "length.");
 
   /* -indexname */
   indexname_option = gt_option_new_string("indexname",
-      "specify the indexname to use\n"
-      "default: first argument of -db option",
-      arguments->indexname, NULL);
+                                          "specify the indexname to use\n"
+                                          "default: first argument of -db "
+                                          "option",
+                                          arguments->indexname, NULL);
   gt_option_hide_default(indexname_option);
   gt_option_parser_add_option(op, indexname_option);
 
   /* -db */
-  db_option = gt_option_new_filename_array("db",
-      "name of input MultiFasta file(s)", arguments->db);
+  db_option = gt_option_new_filename_array("db", "name of input MultiFasta "
+                                           "file(s)", arguments->db);
   gt_option_hide_default(db_option);
   gt_option_is_mandatory(db_option);
   gt_option_parser_add_option(op, db_option);
@@ -74,23 +76,25 @@ static GtOptionParser* gt_seqlensort_option_parser_new(void *tool_arguments)
 
 #define GT_SEQLENSORT_SEQLEN(SEQNUM, SEPPOS) \
   ((SEQNUM) == 0 \
-    ? ((SEPPOS)[SEQNUM]) \
-    : ((SEPPOS)[SEQNUM] - ((SEPPOS)[(SEQNUM) - 1UL] + 1UL)))
+   ? ((SEPPOS)[SEQNUM]) \
+   : ((SEPPOS)[SEQNUM] - ((SEPPOS)[(SEQNUM) - 1UL] + 1UL)))
 
 static int gt_seqlensort_cmp(const void *a, const void *b, void *data)
 {
   const GtUword seqnum_a = *(const GtUword*)a,
-                      seqnum_b = *(const GtUword*)b;
+        seqnum_b = *(const GtUword*)b;
   GtUword seqlen_a = GT_SEQLENSORT_SEQLEN(seqnum_a, (GtUword*)data),
-                seqlen_b = GT_SEQLENSORT_SEQLEN(seqnum_b, (GtUword*)data);
+          seqlen_b = GT_SEQLENSORT_SEQLEN(seqnum_b, (GtUword*)data);
   if (seqlen_a == seqlen_b)
     return (int)((seqnum_a > seqnum_b) - (seqnum_a < seqnum_b));
   return (int)((seqlen_a > seqlen_b) - (seqlen_a < seqlen_b));
 }
 
 static int gt_seqlensort_runner(GT_UNUSED int argc,
-    GT_UNUSED const char **argv, GT_UNUSED int parsed_args,
-    void *tool_arguments, GtError *err)
+                                GT_UNUSED const char **argv,
+                                GT_UNUSED int parsed_args,
+                                void *tool_arguments,
+                                GtError *err)
 {
   GtSeqlensortArguments *arguments = tool_arguments;
   int had_err = 0;
@@ -103,14 +107,16 @@ static int gt_seqlensort_runner(GT_UNUSED int argc,
   if (gt_str_length(arguments->indexname) == 0)
   {
     gt_str_append_cstr(arguments->indexname,
-        gt_str_array_get(arguments->db, 0));
+                       gt_str_array_get(arguments->db, 0));
   }
 
   r2t = gt_reads2twobit_new(arguments->indexname);
 
   for (i = 0; i < gt_str_array_size(arguments->db) && !had_err; i++)
-    had_err = gt_reads2twobit_add_library(r2t, gt_str_array_get_str(
-          arguments->db, i), err);
+    had_err = gt_reads2twobit_add_library(r2t,
+                                          gt_str_array_get_str(arguments->db,
+                                                               i),
+                                          err);
 
   if (!had_err)
     had_err = gt_reads2twobit_encode(r2t, err);
@@ -120,7 +126,7 @@ static int gt_seqlensort_runner(GT_UNUSED int argc,
     if (gt_reads2twobit_seqlen_eqlen(r2t) == 0)
     {
       gt_reads2twobit_sort(r2t, gt_seqlensort_cmp,
-          gt_reads2twobit_export_seppos(r2t));
+                           gt_reads2twobit_export_seppos(r2t));
     }
     had_err = gt_reads2twobit_write_encseq(r2t, err);
   }
@@ -132,8 +138,8 @@ static int gt_seqlensort_runner(GT_UNUSED int argc,
 GtTool* gt_seqlensort(void)
 {
   return gt_tool_new(gt_seqlensort_arguments_new,
-                  gt_seqlensort_arguments_delete,
-                  gt_seqlensort_option_parser_new,
-                  NULL,
-                  gt_seqlensort_runner);
+                     gt_seqlensort_arguments_delete,
+                     gt_seqlensort_option_parser_new,
+                     NULL,
+                     gt_seqlensort_runner);
 }
