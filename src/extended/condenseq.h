@@ -27,7 +27,7 @@
 #include "extended/editscript.h"
 
 #define GT_CONDENSEQ_FILE_SUFFIX ".cse"
-#define GT_CONDENSEQ_VERSION 0
+#define GT_CONDENSEQ_VERSION 1
 
 /* The <GtCondenseq> class efficiently stores Sequences, either DNA or protein
    by finding redundancies and storing only references with editscripts of
@@ -154,6 +154,21 @@ char*               gt_condenseq_basefilename(const GtCondenseq *condenseq);
    Returns NULL if no such file exists. */
 GtStr*              gt_condenseq_unique_fasta_file(
                                                   const GtCondenseq *condenseq);
+
+/* Returns the number of uniques with length at least <min_align_len> */
+GtUword             gt_condenseq_count_relevant_uniques(
+                                                   const GtCondenseq *condenseq,
+                                                   unsigned int min_align_len);
+
+/* return size in bytes of the <condenseq>, other parameters will be set to the
+   sise in bytes of the various elements. where <links> does not contain the
+   size of the included editscript, but only the pointer to it. */
+GtUword             gt_condenseq_size(const GtCondenseq *condenseq,
+                                      GtUword *uniques,
+                                      GtUword *links,
+                                      GtUword *editscripts,
+                                      GtUword *descriptions,
+                                      GtUword *separators);
 
 /* Creates an gff3-File with the basename of the index containing the unique and
    link ranges as experimental_features */

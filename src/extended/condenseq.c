@@ -336,7 +336,7 @@ static inline void condenseq_ldb_resize(GtCondenseq *condenseq)
 
 void gt_condenseq_add_unique_to_db(GtCondenseq *condenseq,
                                    GtUword orig_startpos,
-                                   GtUword len)
+                                   ces_unsigned len)
 {
   gt_assert(len != 0);
   /* if previous unique and this one are not consecutive, add the new one */
@@ -374,11 +374,7 @@ void gt_condenseq_add_link_to_db(GtCondenseq *condenseq, GtCondenseqLink link)
             condenseq->uniques[condenseq->udb_nelems - 1].orig_startpos +
             condenseq->uniques[condenseq->udb_nelems - 1].len <=
             link.orig_startpos);
-  condenseq->links[condenseq->ldb_nelems].editscript    = link.editscript;
-  condenseq->links[condenseq->ldb_nelems].len           = link.len;
-  condenseq->links[condenseq->ldb_nelems].orig_startpos = link.orig_startpos;
-  condenseq->links[condenseq->ldb_nelems].unique_id     = link.unique_id;
-  condenseq->links[condenseq->ldb_nelems].unique_offset = link.unique_offset;
+  condenseq->links[condenseq->ldb_nelems] = link;
   condenseq->ldb_nelems++;
 }
 
@@ -448,7 +444,6 @@ static int condenseq_uniqueentry_io(GtCondenseqUnique* unique,
   return had_err;
 }
 
-/*generic IO function for condenseq data structure*/
 static int condenseq_io(GtCondenseq *condenseq,
                         FILE* fp,
                         GtIOFunc io_func,
@@ -949,6 +944,7 @@ GtUword gt_condenseq_each_redundant_range(
 
   gt_assert(condenseq != NULL);
   gt_assert(uid < condenseq->udb_nelems);
+  gt_assert(urange.start <= urange.end);
 
   unique = &condenseq->uniques[uid];
 
@@ -1222,4 +1218,39 @@ const GtEditscript *gt_condenseq_link_editscript(const GtCondenseq *condenseq,
 GtAlphabet *gt_condenseq_alphabet(const GtCondenseq *condenseq)
 {
   return gt_alphabet_ref(condenseq->alphabet);
+}
+
+GtUword gt_condenseq_count_relevant_uniques(const GtCondenseq *condenseq,
+                                            unsigned int min_align_len)
+{
+  GtUword idx, count = 0;
+  for (idx = 0; idx < condenseq->udb_nelems; idx++) {
+    if (condenseq->uniques[idx].len >= min_align_len)
+      count++;
+  }
+  return count;
+}
+
+GtUword gt_condenseq_size(const GtCondenseq *condenseq,
+                          GtUword *uniques,
+                          GtUword *links,
+                          GtUword *editscripts,
+                          GtUword *descriptions,
+                          GtUword *separators) {
+  GtUword idx;
+  *uniques = condenseq->udb_nelems * sizeof (*condenseq->uniques);
+  for (idx = 0; idx < condenseq->udb_nelems; idx++) {
+    *uniques += condenseq->uniques[idx].links.allocateduint32_t *
+      sizeof (*condenseq->uniques[idx].links.spaceuint32_t);
+  }
+  *links = condenseq->ldb_nelems * sizeof (*condenseq->links);
+  *editscripts = 0;
+  for (idx = 0; idx < condenseq->ldb_nelems; idx++)
+    *editscripts += gt_editscript_size(condenseq->links[idx].editscript);
+  *descriptions = condenseq->ids_total_len;
+  *descriptions += gt_intset_size_of_struct(condenseq->sdstab);
+  *descriptions += gt_intset_size_of_rep(condenseq->sdstab);
+  *separators = gt_intset_size_of_struct(condenseq->ssptab);
+  *separators = gt_intset_size_of_rep(condenseq->ssptab);
+  return *uniques + *links + *editscripts + *descriptions + *separators;
 }

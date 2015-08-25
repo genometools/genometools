@@ -367,7 +367,12 @@ static int gt_condenseq_compress_runner(GT_UNUSED int argc, const char **argv,
                                        &(arguments->scores),
                                        arguments->kmersize,
                                        arguments->windowsize,
-                                       logger);
+                                       logger,
+                                       err);
+      if (ces_c == NULL)
+        had_err = -1;
+    }
+    if (!had_err) {
       if (arguments->cutoff_value == GT_UNDEF_UWORD)
         gt_condenseq_creator_use_mean_cutoff(ces_c);
       else if (arguments->cutoff_value == 0)

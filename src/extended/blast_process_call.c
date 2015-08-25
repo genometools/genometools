@@ -258,6 +258,7 @@ void gt_blast_process_call_set_outfmt_tabular(GtBlastProcessCall *call)
 void gt_blast_process_call_set_opt(GtBlastProcessCall *call,
                                    const char *opt)
 {
+  gt_str_append_cstr(call->str, " ");
   gt_str_append_cstr(call->str, opt);
 }
 

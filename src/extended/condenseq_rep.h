@@ -27,6 +27,14 @@
 
 #include "extended/condenseq.h"
 
+#ifdef GT_CONDENSEQ_64_BIT
+typedef GtUword ces_unsigned;
+#define CES_UNSIGNED_MAX ((ces_unsigned) GT_UWORD_MAX)
+#else
+typedef unsigned int ces_unsigned;
+#define CES_UNSIGNED_MAX ((ces_unsigned) UINT_MAX)
+#endif
+
 /*
   The contents of this file is to be considered private implementation detail.
 */
@@ -35,16 +43,16 @@
    */
 typedef struct {
   GtEditscript *editscript;
-  GtUword       len,
-                orig_startpos,
+  GtUword       orig_startpos;
+  ces_unsigned  len,
                 unique_id,
                 unique_offset;
 } GtCondenseqLink;
 
 typedef struct {
   GtArrayuint32_t links;
-  GtUword         len,
-                  orig_startpos;
+  GtUword         orig_startpos;
+  ces_unsigned    len;
 } GtCondenseqUnique;
 
 struct GtCondenseq {
@@ -86,5 +94,5 @@ void gt_condenseq_add_link_to_db(GtCondenseq *condenseq, GtCondenseqLink link);
 /* Add unique substring to <condenseq>. */
 void gt_condenseq_add_unique_to_db(GtCondenseq *condenseq,
                                    GtUword orig_startpos,
-                                   GtUword len);
+                                   ces_unsigned len);
 #endif

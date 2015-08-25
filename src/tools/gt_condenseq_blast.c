@@ -24,6 +24,7 @@
 #include <sys/wait.h>
 #endif
 
+#include "core/arraydef.h"
 #include "core/basename_api.h"
 #include "core/divmodmul.h"
 #include "core/encseq_api.h"
@@ -31,6 +32,7 @@
 #include "core/fasta_api.h"
 #include "core/fasta_reader.h"
 #include "core/fasta_reader_rec.h"
+#include "core/fileutils_api.h"
 #include "core/log_api.h"
 #include "core/logger.h"
 #include "core/ma.h"
@@ -48,6 +50,7 @@
 #include "extended/match.h"
 #include "extended/match_blast_api.h"
 #include "extended/match_iterator_blast.h"
+#include "extended/rbtree.h"
 
 #include "extended/condenseq_search_arguments.h"
 #include "tools/gt_condenseq_blast.h"
@@ -57,7 +60,8 @@ typedef struct {
   GtOutputFileInfo           *ofi;
   GtCondenseqSearchArguments *csa;
   GtStr                      *querypath,
-                             *gff;
+                             *gff,
+                             *extraopts;
   GtUword bitscore;
   double  ceval,
           feval;
@@ -87,7 +91,7 @@ typedef struct {
   GtCondenseqBlastArguments *args;
   GtError                    *err;
   GtLogger                   *logger;
-  GtNodeVisitor              *nodev;
+  GtNodeVisitor              *gff_node_visitor;
   GtTimer                    *timer;
   GtStr                      *fastaname,
                              *seqid,
@@ -101,10 +105,11 @@ static void* gt_condenseq_blast_arguments_new(void)
 {
   GtCondenseqBlastArguments *arguments =
     gt_calloc((size_t) 1, sizeof *arguments);
-  arguments->querypath = gt_str_new();
+  arguments->csa = gt_condenseq_search_arguments_new();
+  arguments->extraopts = gt_str_new();
   arguments->gff = gt_str_new();
   arguments->ofi = gt_output_file_info_new();
-  arguments->csa = gt_condenseq_search_arguments_new();
+  arguments->querypath = gt_str_new();
   return arguments;
 }
 
@@ -115,13 +120,14 @@ static void gt_condenseq_blast_arguments_delete(void *tool_arguments)
     gt_condenseq_search_arguments_delete(arguments->csa);
     gt_file_delete(arguments->outfp);
     gt_output_file_info_delete(arguments->ofi);
+    gt_str_delete(arguments->extraopts);
     gt_str_delete(arguments->gff);
     gt_str_delete(arguments->querypath);
     gt_free(arguments);
   }
 }
 
-static GtOptionParser*
+  static GtOptionParser*
 gt_condenseq_blast_option_parser_new(void *tool_arguments)
 {
   GtCondenseqBlastArguments *arguments = tool_arguments;
@@ -133,7 +139,7 @@ gt_condenseq_blast_option_parser_new(void *tool_arguments)
   /* init */
   op = gt_option_parser_new("[option ...] -db <archive> -query <query>",
                             "Perform a BLASTsearch on the given compressed "
-                            "database.");
+                            "database. Output similar to blast -outfmt 6.");
 
   gt_condenseq_search_register_options(arguments->csa, op);
 
@@ -196,6 +202,12 @@ gt_condenseq_blast_option_parser_new(void *tool_arguments)
 
   gt_output_file_info_register_options(arguments->ofi, op, &arguments->outfp);
 
+  /* -extraopts */
+  option = gt_option_new_string("extraopts", "pass this string to blast(n|p)",
+                                arguments->extraopts, NULL);
+  gt_option_is_extended_option(option);
+
+  gt_option_parser_add_option(op, option);
   return op;
 }
 
@@ -261,7 +273,7 @@ static inline int gt_condenseq_blast_create_blastdb(const char *dbfile,
         gt_error_set(err, "makeblastdb error, returned %d",
                      WEXITSTATUS(pipe_status));
 #else
-      /* XXX */
+      /* TODO DW check if this can be done in windows */
       else
         gt_error_set(err, "not implemented on Windows");
 #endif
@@ -270,17 +282,11 @@ static inline int gt_condenseq_blast_create_blastdb(const char *dbfile,
   return had_err;
 }
 
-static int gt_condenseq_blast_create_prot_blastdb(const char *dbfile,
-                                                  GtError *err)
-{
-  return gt_condenseq_blast_create_blastdb(dbfile, "prot", err);
-}
+#define gt_condenseq_blast_create_blastdb_prot(FILE) \
+  gt_condenseq_blast_create_blastdb(FILE, "prot", err)
 
-static int gt_condenseq_blast_create_nucl_blastdb(const char *dbfile,
-                                                  GtError *err)
-{
-  return gt_condenseq_blast_create_blastdb(dbfile, "nucl", err);
-}
+#define gt_condenseq_blast_create_blastdb_nucl(FILE) \
+  gt_condenseq_blast_create_blastdb(FILE, "nucl", err)
 
 static inline int gt_condenseq_avg_helper(GtUword current_len,
                                           void *data,
@@ -297,13 +303,40 @@ static inline int gt_condenseq_avg_helper(GtUword current_len,
 #define GT_CONDENSEQ_HITS_INIT_SIZE ((GtUword) 100UL)
 
 typedef struct {
-  GtCondenseq *ces;
-  GtStr **descs;
-  GtRange *to_extract;
-  GtUword num_ranges,
-          size;
-  bool overlapping;
+  GtRange range;
+  GtUword seqid;
+} HitRange;
+
+GT_DECLAREARRAYSTRUCT(HitRange);
+
+typedef struct {
+  GtCondenseq      *ces;
+  GtArrayHitRange   sorted;
+  GtRBTree         *to_extract_rbt;
+  GtUword           size;
 } GtCondenseqBlastPrintHitInfo;
+
+static int gt_ces_blast_range_compare(const void *a, const void *b,
+                                      GT_UNUSED void* data)
+{
+  const HitRange *rangeA = a,
+        *rangeB = b;
+  gt_assert(data == NULL);
+
+  if (rangeA->seqid < rangeB->seqid)
+    return -1;
+  if (rangeA->seqid > rangeB->seqid)
+    return 1;
+  if (rangeA->range.start < rangeB->range.start)
+    return -1;
+  if (rangeA->range.start > rangeB->range.start)
+    return 1;
+  if (rangeA->range.end < rangeB->range.end)
+    return -1;
+  if (rangeA->range.end > rangeB->range.end)
+    return 1;
+  return 0;
+}
 
 static int gt_condenseq_blast_process_hit(void *data,
                                           GtUword seqid,
@@ -312,141 +345,59 @@ static int gt_condenseq_blast_process_hit(void *data,
 {
   GtCondenseqBlastPrintHitInfo *info =
     (GtCondenseqBlastPrintHitInfo *) data;
-  GtUword idx;
-  bool overlap_found = false;
+  bool nodecreated;
+  HitRange *key = gt_malloc(sizeof(*key));
 
   gt_error_check(err);
 
-  if (info->num_ranges == info->size) {
-    info->size *= 1.2;
-    info->size += 10;
-    info->descs = gt_realloc(info->descs,
-                             (size_t) info->size * sizeof (*info->descs));
-    info->to_extract =
-      gt_realloc(info->to_extract,
-                 (size_t) info->size * sizeof (*info->to_extract));
-  }
-  for (idx = 0; idx < info->num_ranges; ++idx) {
-    if (!(info->to_extract[idx].start > seqrange.end ||
-          info->to_extract[idx].end < seqrange.start)) {
-      if (overlap_found)
-        info->overlapping = true;
-      info->to_extract[idx].start =
-        info->to_extract[idx].start < seqrange.start ?
-        info->to_extract[idx].start : seqrange.start;
-      info->to_extract[idx].end = info->to_extract[idx].end > seqrange.end ?
-        info->to_extract[idx].end : seqrange.end;
-      overlap_found = true;
-    }
-  }
-  if (!overlap_found) {
-    info->descs[info->num_ranges] = gt_str_new();
-    gt_str_append_uword(info->descs[info->num_ranges], seqid);
-    info->to_extract[info->num_ranges].start = seqrange.start;
-    info->to_extract[info->num_ranges].end = seqrange.end;
-    info->num_ranges++;
-  }
+  key->range = seqrange;
+  key->seqid = seqid;
+  key = gt_rbtree_search(info->to_extract_rbt, key, &nodecreated);
+  if (!nodecreated)
+    gt_free(key);
+
   return 0;
 }
 
-static int gt_condenseq_blast_hit_overlaps(GtCondenseqBlastPrintHitInfo *info)
-{
-  int had_err = 0;
-  GtUword idx;
-  GtRange *tmp_ext = NULL;
-  GtStr **tmp_descs = NULL;
-  if (info->overlapping) {
-    tmp_ext = gt_calloc((size_t) info->num_ranges, sizeof (*info->to_extract));
-    tmp_descs = gt_calloc((size_t) info->num_ranges, sizeof (*info->descs));
-  }
-  while (info->overlapping) {
-    GtUword new_num_ranges = 0,
-            jdx;
-    GtStr **swap_descs;
-    GtRange *swap_ext;
-    info->overlapping = false;
-    gt_assert(tmp_ext != NULL && tmp_descs != NULL);
-    for (idx = 0; idx < info->num_ranges; ++idx) {
-      bool overlap_found = false;
-      for (jdx = 0; jdx < new_num_ranges; ++jdx) {
-        if (!(tmp_ext[jdx].start > info->to_extract[idx].end ||
-              tmp_ext[jdx].end < info->to_extract[idx].start)) {
-          if (overlap_found)
-            info->overlapping = true;
-          gt_assert(!gt_str_cmp(tmp_descs[jdx], info->descs[idx]));
-          tmp_ext[jdx].start =
-            tmp_ext[jdx].start < info->to_extract[idx].start ?
-            tmp_ext[jdx].start : info->to_extract[idx].start;
-          tmp_ext[jdx].end = tmp_ext[jdx].end > info->to_extract[idx].end ?
-            tmp_ext[jdx].end : info->to_extract[idx].end;
-          overlap_found = true;
-        }
-      }
-      if (!overlap_found) {
-        gt_assert(new_num_ranges <= idx);
-        tmp_descs[new_num_ranges] = gt_str_ref(info->descs[idx]);
-        tmp_ext[new_num_ranges].start = info->to_extract[idx].start;
-        tmp_ext[new_num_ranges].end = info->to_extract[idx].end;
-        new_num_ranges++;
-      }
-      gt_assert(new_num_ranges <= info->num_ranges);
-    }
-    swap_descs = info->descs;
-    swap_ext = info->to_extract;
-    info->descs = tmp_descs;
-    info->to_extract = tmp_ext;
-    tmp_descs = swap_descs;
-    tmp_ext = swap_ext;
-    for (idx = 0; idx < info->num_ranges; ++idx) {
-      gt_str_delete(tmp_descs[idx]);
-    }
-    info->num_ranges = new_num_ranges;
-  }
-  gt_free(tmp_ext);
-  gt_free(tmp_descs);
-  return had_err;
-}
-
-static inline int
+  static inline int
 gt_condenseq_blast_calc_query_stats(GtCesBlastInfo *info,
                                     GtCondenseqBlastQInfo *qinfo)
 {
   int had_err = 0;
+  GtFastaReader *reader;
+
   qinfo->max = 0;
   qinfo->count = 0;
   qinfo->avg = 0;
   qinfo->raw_eval = 0.0;
 
-  if (info->args->feval == GT_UNDEF_DOUBLE) {
-    GtFastaReader *reader;
-    /* from NCBI BLAST tutorial:
-       E = Kmne^{-lambdaS}
-       calculates E-value for score S with natural scale parameters K for
-       search space size and lambda for the scoring system
-       E = mn2^-S'
-       m being the subject (total) length, n the length of ONE query
-       calculates E-value for bit-score S'
-       */
-    reader = gt_fasta_reader_rec_new(info->args->querypath);
-    had_err = gt_fasta_reader_run(reader, NULL, NULL,
-                                  gt_condenseq_avg_helper,
-                                  qinfo,
-                                  info->err);
-    if (!had_err) {
-      GtUword S = info->args->bitscore;
-      qinfo->avg /= qinfo->count;
-      gt_log_log(GT_WU " queries, avg query size: " GT_WU,
-                 qinfo->count, qinfo->avg);
-      qinfo->raw_eval = 1/pow(2.0, (double) S) * qinfo->avg;
-      gt_logger_log(info->logger, "Raw E-value set to %.4e", qinfo->raw_eval);
-      gt_assert(qinfo->avg != 0);
-    }
-    gt_fasta_reader_delete(reader);
+  /* from NCBI BLAST tutorial:
+     E = Kmne^{-lambdaS}
+     calculates E-value for score S with natural scale parameters K for
+     search space size and lambda for the scoring system
+     E = mn2^-S'
+     m being the subject (total) length, n the length of ONE query
+     calculates E-value for bit-score S'
+     */
+  reader = gt_fasta_reader_rec_new(info->args->querypath);
+  had_err = gt_fasta_reader_run(reader, NULL, NULL,
+                                gt_condenseq_avg_helper,
+                                qinfo,
+                                info->err);
+  if (!had_err) {
+    GtUword S = info->args->bitscore;
+    qinfo->avg /= qinfo->count;
+    gt_log_log(GT_WU " queries, avg query size: " GT_WU,
+               qinfo->count, qinfo->avg);
+    qinfo->raw_eval = 1/pow(2.0, (double) S) * qinfo->avg;
+    gt_logger_log(info->logger, "Raw E-value set to %.4e", qinfo->raw_eval);
+    gt_assert(qinfo->avg != 0);
   }
+  gt_fasta_reader_delete(reader);
   return had_err;
 }
 
-static inline int
+  static inline int
 gt_condenseq_blast_parse_coarse_hits(const GtMatch *match,
                                      GtCesBlastInfo *info,
                                      const GtCondenseqBlastQInfo qinfo)
@@ -454,8 +405,22 @@ gt_condenseq_blast_parse_coarse_hits(const GtMatch *match,
   int had_err = 0;
   GtUword hit_seq_id;
   GtRange query;
-  const char *dbseqid = gt_match_get_seqid2(match);
-  if (gt_parse_uword(&hit_seq_id, dbseqid) == 0) {
+  const char *dbseqid = gt_match_get_seqid2(match),
+        *skip;
+  /* seqids printed with -debug will contain 'unique' in front of the actual id
+     as a number */
+  if ((skip = strchr(dbseqid, 'e')) != NULL) {
+    dbseqid=++skip;
+  }
+  if (gt_parse_uword(&hit_seq_id, dbseqid) != 0) {
+    /* old files had a ',' at the end of 'unique000', this leads to an error
+       with gt_parse_uword() */
+    if (sscanf(dbseqid, GT_WU ",", &hit_seq_id) != 1) {
+      gt_error_set(info->err, "couldn't parse target number: %s", dbseqid);
+      had_err = -1;
+    }
+  }
+  if (!had_err) {
     GtCondenseqBlastHitPos *hit;
     if (info->curr_hits == info->hits_size) {
       info->hits_size *= 1.2;
@@ -476,14 +441,10 @@ gt_condenseq_blast_parse_coarse_hits(const GtMatch *match,
     hit->range.end--;
     info->curr_hits++;
   }
-  else {
-    had_err = -1;
-    gt_error_set(info->err, "couldn't parse %s as a number", dbseqid);
-  }
   return had_err;
 }
 
-static inline int
+  static inline int
 gt_condenseq_blast_run_coarse(GtCesBlastInfo *info,
                               const GtCondenseqBlastQInfo qinfo)
 {
@@ -492,6 +453,7 @@ gt_condenseq_blast_run_coarse(GtCesBlastInfo *info,
   GtMatch            *match;
   GtMatchIterator    *mp = NULL;
   GtMatchIteratorStatus status;
+  GT_UNUSED GtUword hitcounter = 0;
 
   if (info->timer != NULL)
     gt_timer_show_progress(info->timer, "coarse BLAST run", stderr);
@@ -514,6 +476,9 @@ gt_condenseq_blast_run_coarse(GtCesBlastInfo *info,
 
   gt_blast_process_call_delete(call);
 
+  if (info->timer != NULL)
+    gt_timer_show_progress(info->timer, "parse coarse blast hits", stderr);
+
   gt_assert(info->hits != NULL);
   if (info->seqid == NULL)
     info->seqid = gt_str_new();
@@ -524,8 +489,9 @@ gt_condenseq_blast_run_coarse(GtCesBlastInfo *info,
          GT_MATCHER_STATUS_OK)
   {
     had_err = gt_condenseq_blast_parse_coarse_hits(match, info, qinfo);
+    hitcounter++;
 
-    if (info->nodev != NULL) {
+    if (info->gff_node_visitor != NULL) {
       const char *desc;
       GtGenomeNode *node;
       GtUword desclen;
@@ -544,11 +510,12 @@ gt_condenseq_blast_run_coarse(GtCesBlastInfo *info,
       gt_feature_node_set_source((GtFeatureNode *) node, info->source);
       gt_feature_node_set_attribute((GtFeatureNode *) node,
                                     "Name", "Coarse Hit");
-      had_err = gt_genome_node_accept(node, info->nodev, info->err);
+      had_err = gt_genome_node_accept(node, info->gff_node_visitor, info->err);
       gt_genome_node_delete(node);
     }
     gt_match_delete(match);
   }
+  gt_log_log("hits processed: " GT_WU, hitcounter);
   gt_str_delete(info->source);
   info->source = NULL;
   if (!had_err && status == GT_MATCHER_STATUS_ERROR)
@@ -557,6 +524,32 @@ gt_condenseq_blast_run_coarse(GtCesBlastInfo *info,
   gt_match_iterator_delete(mp);
   return had_err;
 }
+
+static void gt_ces_blast_range_free(void *range)
+{
+  gt_free(range);
+}
+
+#define gt_ces_blast_create_db(TYPE, SHORT)                                  \
+do {                                                                         \
+  gt_str_append_cstr(info.fastaname, "."SHORT"in");                          \
+  if (info.args->createdb ||                                                 \
+      !gt_file_exists(gt_str_get(info.fastaname))) {                         \
+    gt_str_set_length(info.fastaname, namelength);                           \
+    gt_str_append_cstr(info.fastaname, "."SHORT"al");                        \
+    if (info.args->createdb ||                                               \
+        !gt_file_exists(gt_str_get(info.fastaname))) {                       \
+      if (info.args->createdb)                                               \
+        gt_log_log("force creation of db");                                  \
+      else                                                                   \
+        gt_log_log("%s does not exist, creating",                            \
+                   gt_str_get(info.fastaname));                              \
+      gt_str_set_length(info.fastaname, namelength);                         \
+      had_err =                                                              \
+        gt_condenseq_blast_create_blastdb_##TYPE(gt_str_get(info.fastaname));\
+    }                                                                        \
+  }                                                                          \
+} while (false)
 
 static int gt_condenseq_blast_runner(GT_UNUSED int argc,
                                      GT_UNUSED const char **argv,
@@ -567,7 +560,10 @@ static int gt_condenseq_blast_runner(GT_UNUSED int argc,
   int had_err = 0;
 
   GtCesBlastInfo info;
-  GtCondenseqBlastQInfo qinfo;
+  GtCondenseqBlastQInfo qinfo = {GT_UNDEF_UWORD,
+                                 GT_UNDEF_UWORD,
+                                 GT_UNDEF_UWORD,
+                                 GT_UNDEF_DOUBLE};
 
   GtFile          *gffout = NULL;
   GtMatchIterator *mp = NULL;
@@ -585,7 +581,7 @@ static int gt_condenseq_blast_runner(GT_UNUSED int argc,
   info.hits = NULL;
   info.hits_size = GT_CONDENSEQ_HITS_INIT_SIZE;
   info.logger = NULL;
-  info.nodev = NULL;
+  info.gff_node_visitor = NULL;
   info.querypath = gt_str_get(info.args->querypath);
   info.seqid = NULL;
   info.source = NULL;
@@ -608,15 +604,18 @@ static int gt_condenseq_blast_runner(GT_UNUSED int argc,
     if (gffout == NULL)
       had_err = -1;
     if (!had_err) {
-      info.nodev = gt_gff3_visitor_new(gffout);
-      gt_gff3_visitor_retain_id_attributes((GtGFF3Visitor *) info.nodev);
+      info.gff_node_visitor = gt_gff3_visitor_new(gffout);
+      gt_gff3_visitor_retain_id_attributes((GtGFF3Visitor*)
+                                           info.gff_node_visitor);
     }
   }
-  info.ces = gt_condenseq_search_arguments_read_condenseq(info.args->csa,
-                                                          info.logger,
-                                                          info.err);
-  if (info.ces == NULL)
-    had_err = -1;
+  if (!had_err) {
+    info.ces = gt_condenseq_search_arguments_read_condenseq(info.args->csa,
+                                                            info.logger,
+                                                            info.err);
+    if (info.ces == NULL)
+      had_err = -1;
+  }
 
   if (!had_err) {
     db_basename = gt_condenseq_basefilename(info.ces);
@@ -635,14 +634,16 @@ static int gt_condenseq_blast_runner(GT_UNUSED int argc,
 
   /*create BLAST database from compressed database fasta file*/
   if (!had_err) {
+    GtUword namelength = gt_str_length(info.fastaname);
     if (info.timer != NULL)
       gt_timer_show_progress(info.timer, "create coarse BLAST db", stderr);
-    if (info.args->blastn)
-      had_err =
-        gt_condenseq_blast_create_nucl_blastdb(gt_str_get(info.fastaname), err);
-    else
-      had_err =
-        gt_condenseq_blast_create_prot_blastdb(gt_str_get(info.fastaname), err);
+    if (info.args->blastn) {
+      gt_ces_blast_create_db(nucl,"n");
+    }
+    else {
+      gt_ces_blast_create_db(prot,"p");
+    }
+    gt_str_set_length(info.fastaname, namelength);
   }
 
   /* run coarse blast */
@@ -651,8 +652,8 @@ static int gt_condenseq_blast_runner(GT_UNUSED int argc,
   }
 
   if (!had_err && info.curr_hits == 0) {
-    had_err = -1;
     gt_error_set(err, "No hits found in coarse search");
+    had_err = -1;
   }
 
   /*extract sequences*/
@@ -660,15 +661,17 @@ static int gt_condenseq_blast_runner(GT_UNUSED int argc,
     GtCondenseqBlastPrintHitInfo pinfo;
     GtUword idx;
     GtFile *outfp = gt_file_new(gt_str_get(coarse_fname), "w", err);
-    GtStr *seqid = gt_str_new();
+    GtStr *orig_seqid = gt_str_new(),
+          *coarse_seqid = gt_str_new();
+    if (info.timer != NULL)
+      gt_timer_show_progress(info.timer, "identify ranges", stderr);
 
     pinfo.ces = info.ces;
-    pinfo.to_extract = gt_calloc((size_t) info.curr_hits,
-                                sizeof (*pinfo.to_extract));
-    pinfo.descs = gt_calloc((size_t) info.curr_hits, sizeof (*pinfo.descs));
-    pinfo.num_ranges = 0;
-    pinfo.size = info.curr_hits;
-    pinfo.overlapping = false;
+    pinfo.to_extract_rbt = gt_rbtree_new(gt_ces_blast_range_compare,
+                                         gt_ces_blast_range_free,
+                                         NULL);
+    GT_INITARRAY(&pinfo.sorted, HitRange);
+    pinfo.size = 0;
 
     gt_assert(info.hits != NULL);
     for (idx = 0; !had_err && idx < info.curr_hits; ++idx) {
@@ -683,60 +686,88 @@ static int gt_condenseq_blast_runner(GT_UNUSED int argc,
       if (num_ranges == 0)
         had_err = -1;
     }
-    gt_log_log("there are %soverlaps", pinfo.overlapping ? "" : "no ");
-    if (pinfo.overlapping) {
-      had_err = gt_condenseq_blast_hit_overlaps(&pinfo);
+    if (!had_err) {
+      GtRBTreeIter *iter = gt_rbtree_iter_new_from_first(pinfo.to_extract_rbt);
+      GtArrayHitRange *gt_arr = &pinfo.sorted;
+      HitRange *key;
+      HitRange  *arr = NULL;
+      GT_UNUSED GtUword joincount = 0;
+
+      gt_log_log(GT_WU " elements in rbt",
+                 (GtUword) gt_rbtree_size(pinfo.to_extract_rbt));
+      key = gt_rbtree_iter_data(iter);
+      while (key != NULL) {
+        GtUword last = gt_arr->nextfreeHitRange - 1;
+        arr = pinfo.sorted.spaceHitRange;
+        if (gt_arr->nextfreeHitRange != 0 &&
+            key->seqid == arr[last].seqid &&
+            gt_range_overlap(&key->range, &arr[last].range)) {
+          joincount++;
+          arr[last].range = gt_range_join(&arr[last].range, &key->range);
+        }
+        else {
+          GT_STOREINARRAY(gt_arr, HitRange, 128, *key);
+        }
+        key = gt_rbtree_iter_next(iter);
+      }
+      gt_log_log("joined " GT_WU, joincount);
+      gt_rbtree_iter_delete(iter);
     }
 
+    if (info.timer != NULL)
+      gt_timer_show_progress(info.timer, "extract ranges", stderr);
     if (info.seqid == NULL)
       info.seqid = gt_str_new();
     if (info.source == NULL)
       info.source = gt_str_new_cstr("Extracted");
 
-    for (idx = 0; !had_err && idx < pinfo.num_ranges; idx++) {
-      GtUword len = pinfo.to_extract[idx].end - pinfo.to_extract[idx].start + 1;
-      gt_str_append_cstr(pinfo.descs[idx], "|");
-      gt_str_append_uword(pinfo.descs[idx], pinfo.to_extract[idx].start);
-      gt_str_append_cstr(pinfo.descs[idx], "|");
-      gt_str_append_uword(pinfo.descs[idx], pinfo.to_extract[idx].end);
-      gt_fasta_show_entry_nt(
-                       gt_str_get(pinfo.descs[idx]),
-                       gt_str_length(pinfo.descs[idx]),
-                       gt_condenseq_extract_decoded_range(info.ces,
-                                                          pinfo.to_extract[idx],
-                                                          '\0'),
-                       len, (GtUword) 100, outfp);
+    for (idx = 0; !had_err && idx < pinfo.sorted.nextfreeHitRange; idx++) {
+      GtRange current = pinfo.sorted.spaceHitRange[idx].range;
+      GtUword len = gt_range_length(&current),
+              seqid = pinfo.sorted.spaceHitRange[idx].seqid;
+      gt_str_reset(coarse_seqid);
+      gt_str_append_uword(coarse_seqid, seqid);
+      gt_str_append_cstr(coarse_seqid, "|");
+      gt_str_append_uword(coarse_seqid, current.start);
+      gt_str_append_cstr(coarse_seqid, "|");
+      gt_str_append_uword(coarse_seqid, current.end);
+      gt_fasta_show_entry_nt(gt_str_get(coarse_seqid),
+                             gt_str_length(coarse_seqid),
+                             gt_condenseq_extract_decoded_range(info.ces,
+                                                                current,
+                                                                '\0'),
+                             len, (GtUword) 100, outfp);
       coarse_db_len += len;
-      if (info.nodev != NULL) {
+      if (info.gff_node_visitor != NULL) {
         GtGenomeNode *node;
         GtUword seqnum, desclen, seqstart;
         const char *desc;
         seqnum = gt_condenseq_pos2seqnum(info.ces,
-                                         pinfo.to_extract[idx].start);
+                                         current.start);
         seqstart = gt_condenseq_seqstartpos(info.ces,
                                             seqnum);
         desc = gt_condenseq_description(info.ces,
                                         &desclen, seqnum);
-        gt_str_reset(seqid);
-        gt_str_append_cstr_nt(seqid, desc, desclen);
-        node = gt_feature_node_new(seqid, "experimental_feature",
-                                   pinfo.to_extract[idx].start + 1 - seqstart,
-                                   pinfo.to_extract[idx].end + 1 - seqstart,
+        gt_str_reset(orig_seqid);
+        gt_str_append_cstr_nt(orig_seqid, desc, desclen);
+        node = gt_feature_node_new(orig_seqid, "experimental_feature",
+                                   current.start + 1 - seqstart,
+                                   current.end + 1 - seqstart,
                                    GT_STRAND_BOTH);
         gt_feature_node_set_source((GtFeatureNode *) node, info.source);
         gt_feature_node_set_attribute((GtFeatureNode *) node,
                                       "Name", "Fine Extract");
-        had_err = gt_genome_node_accept(node, info.nodev, info.err);
+        had_err = gt_genome_node_accept(node, info.gff_node_visitor, info.err);
         gt_genome_node_delete(node);
       }
-      gt_str_delete(pinfo.descs[idx]);
     }
     gt_str_delete(info.source);
     info.source = NULL;
     gt_file_delete(outfp);
-    gt_free(pinfo.descs);
-    gt_free(pinfo.to_extract);
-    gt_str_delete(seqid);
+    gt_rbtree_delete(pinfo.to_extract_rbt);
+    GT_FREEARRAY(&pinfo.sorted, HitRange);
+    gt_str_delete(coarse_seqid);
+    gt_str_delete(orig_seqid);
   }
 
   /* create BLAST database from decompressed database file */
@@ -745,12 +776,10 @@ static int gt_condenseq_blast_runner(GT_UNUSED int argc,
       gt_timer_show_progress(info.timer, "create fine BLAST db", stderr);
     if (info.args->blastn)
       had_err =
-        gt_condenseq_blast_create_nucl_blastdb(gt_str_get(coarse_fname),
-                                               err);
+        gt_condenseq_blast_create_blastdb_nucl(gt_str_get(coarse_fname));
     else
       had_err =
-        gt_condenseq_blast_create_prot_blastdb(gt_str_get(coarse_fname),
-                                               err);
+        gt_condenseq_blast_create_blastdb_prot(gt_str_get(coarse_fname));
   }
   /* perform fine BLAST search */
   if (!had_err) {
@@ -775,6 +804,11 @@ static int gt_condenseq_blast_runner(GT_UNUSED int argc,
     gt_blast_process_call_set_query(call, info.querypath);
     gt_blast_process_call_set_evalue(call, eval);
     gt_blast_process_call_set_num_threads(call, info.args->blthreads);
+    if (gt_str_length(info.args->extraopts) != 0) {
+      GtStr *opt = gt_str_new_cstr("-");
+      gt_str_append_str(opt, info.args->extraopts);
+      gt_blast_process_call_set_opt(call, gt_str_get(opt));
+    }
 
     gt_logger_log(info.logger, "Fine E-value set to: %.4e (len)" GT_WU, eval,
                   coarse_db_len);
@@ -816,6 +850,10 @@ static int gt_condenseq_blast_runner(GT_UNUSED int argc,
         db_orig_startpos = gt_condenseq_seqstartpos(info.ces, dbid);
         range_seq2.start += orig_range_seq2.start - db_orig_startpos;
         range_seq2.end += orig_range_seq2.start - db_orig_startpos;
+        /* output like
+           blast -outfmt 6 'qseqid sseqid pident length qstart qend sstart send
+           evalue bitscore'
+           */
         gt_file_xprintf(info.args->outfp,
                         "%s\t%.*s\t%.2f\t" GT_WU "\t" GT_WU "\t" GT_WU "\t"
                         GT_WU "\t" GT_WU "\t%g\t%.3f\n",
@@ -829,7 +867,7 @@ static int gt_condenseq_blast_runner(GT_UNUSED int argc,
                         range_seq2.end,
                         gt_match_blast_get_evalue(matchb),
                         (double) gt_match_blast_get_bitscore(matchb));
-        if (info.nodev != NULL) {
+        if (info.gff_node_visitor != NULL) {
           GtGenomeNode *node;
           GtStrand strand = gt_match_get_direction(match) == GT_MATCH_DIRECT ?
             GT_STRAND_FORWARD : GT_STRAND_REVERSE;
@@ -840,7 +878,9 @@ static int gt_condenseq_blast_runner(GT_UNUSED int argc,
           gt_feature_node_set_source((GtFeatureNode *) node, info.source);
           gt_feature_node_set_attribute((GtFeatureNode *) node,
                                         "Name", "Fine Hit");
-          had_err = gt_genome_node_accept(node, info.nodev, info.err);
+          had_err = gt_genome_node_accept(node,
+                                          info.gff_node_visitor,
+                                          info.err);
           gt_genome_node_delete(node);
         }
         gt_match_delete(match);
@@ -865,7 +905,7 @@ static int gt_condenseq_blast_runner(GT_UNUSED int argc,
   /*cleanup*/
   gt_file_delete(gffout);
   gt_free(info.hits);
-  gt_node_visitor_delete(info.nodev);
+  gt_node_visitor_delete(info.gff_node_visitor);
   gt_str_delete(info.fastaname);
   gt_str_delete(info.seqid);
 

@@ -31,17 +31,17 @@ static pid_t safe_fork(void) {
   if ((childpid = fork()) == (pid_t) -1)
     return (pid_t) -1;
 
-  /* XXX Reseed PRNGs in both the parent and the child */
+  /* TODO DW Reseed PRNGs in both the parent and the child */
 
   /* If this is the parent process, there's nothing more to do */
   if (childpid != 0)
     return childpid;
 
   /* This is the child process */
-  /* XXX Close all open files.  See
+  /* TODO DW Close all open files.  See
      https://www.safaribooksonline.com/library/view/secure-programming-cookbook/
      0596003943/ch01.html#secureprgckbk-CHP-1-SECT-1 */
-  /* XXX Permanently drop privileges.  See
+  /* TODO DW Permanently drop privileges.  See
      https://www.safaribooksonline.com/library/view/secure-programming-cookbook/
      0596003943/ch01s03.html#secureprgckbk-CHP-1-FNOTE-3
   */

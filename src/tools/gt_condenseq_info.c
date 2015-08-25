@@ -25,11 +25,13 @@
 #include "tools/gt_condenseq_info.h"
 
 typedef struct {
+  GtUword link;
+  unsigned int align_len;
   bool  verbose,
         gff,
         dist,
-        compdist;
-  GtUword link;
+        compdist,
+        size;
 } GtCondenseqInfoArguments;
 
 static void* gt_condenseq_info_arguments_new(void)
@@ -64,6 +66,11 @@ gt_condenseq_info_option_parser_new(void *tool_arguments)
                               false);
   gt_option_parser_add_option(op, option);
 
+  /* -size */
+  option = gt_option_new_bool("size", "output size in bytes in memory",
+                              &arguments->size, false);
+  gt_option_parser_add_option(op, option);
+
   /* -gff */
   option = gt_option_new_bool("gff", "output uniques and links as gff3 file",
                               &arguments->gff, false);
@@ -83,6 +90,12 @@ gt_condenseq_info_option_parser_new(void *tool_arguments)
   /* -link */
   option = gt_option_new_uword("link", "output editscript information of given "
                                "link", &arguments->link, GT_UNDEF_UWORD);
+  gt_option_parser_add_option(op, option);
+
+  /* -align_len */
+  option = gt_option_new_uint("align_len", "show statistics for unique with "
+                              "assumed min alignment length.",
+                              &arguments->align_len, GT_UNDEF_UINT);
   gt_option_parser_add_option(op, option);
 
   return op;
@@ -114,6 +127,11 @@ static int gt_condenseq_info_runner(GT_UNUSED int argc, const char **argv,
     printf(GT_WU "\tunique entries\n", num);
     printf(GT_WU "\tunique length\n", total);
     printf(GT_WU "\taverage unique length\n", total / num);
+    if (arguments->align_len != GT_UNDEF_UINT)
+      printf(GT_WU "\trelevant uniques (>= %u)\n",
+             gt_condenseq_count_relevant_uniques(ces,
+                                                 arguments->align_len),
+             arguments->align_len);
     num = gt_condenseq_num_links(ces);
     total = gt_condenseq_total_link_len(ces);
     printf(GT_WU "\tlink entries\n", num);
@@ -122,6 +140,16 @@ static int gt_condenseq_info_runner(GT_UNUSED int argc, const char **argv,
     printf(GT_WU "\ttotal length\n", gt_condenseq_total_length(ces));
   }
 
+  if (!had_err && arguments->size) {
+    GtUword size, links, uniques, eds, descs, ssp;
+    size = gt_condenseq_size(ces, &uniques, &links, &eds, &descs, &ssp);
+    printf(GT_WU "\tbytes total size\n", size);
+    printf(GT_WU "\tbytes uniques size\n", uniques);
+    printf(GT_WU "\tbytes links size (without editscripts)\n", links);
+    printf(GT_WU "\tbytes editscripts size\n", eds);
+    printf(GT_WU "\tbytes descriptions size\n", descs);
+    printf(GT_WU "\tbytes ssptab size\n", ssp);
+  }
   if (!had_err && arguments->gff) {
     had_err = gt_condenseq_output_to_gff3(ces, err);
   }

@@ -277,7 +277,8 @@ static int gt_kmer_database_runner(GT_UNUSED int argc, const char **argv,
                                             arguments->kmersize);
     if (!arguments->merge_only && !arguments->use_hash && !arguments->bench) {
       compare_db = gt_kmer_database_new(gt_alphabet_num_of_chars(alphabet),
-                                arguments->kmersize, arguments->sb_size, es);
+                                        arguments->kmersize,
+                                        arguments->sb_size, es);
     }
     if (!arguments->use_hash) {
       db = gt_kmer_database_new(gt_alphabet_num_of_chars(alphabet),
@@ -297,7 +298,8 @@ static int gt_kmer_database_runner(GT_UNUSED int argc, const char **argv,
 
   if (!had_err) {
     GtUword startpos = 0,
-            endpos;
+            endpos,
+            interval_id = 0;
     GtKmercodeiterator *iter;
     const GtKmercode *kmercode = NULL;
     iter = gt_kmercodeiterator_encseq_new(es, GT_READMODE_FORWARD,
@@ -320,7 +322,7 @@ static int gt_kmer_database_runner(GT_UNUSED int argc, const char **argv,
         if (!arguments->merge_only && !arguments->use_hash &&
             !kmercode->definedspecialposition && !arguments->bench) {
           gt_kmer_database_add_kmer(compare_db, kmercode->code,
-                                    startpos_add_kmer);
+                                    startpos_add_kmer, interval_id);
         }
         if (arguments->use_hash && !kmercode->definedspecialposition) {
           gt_kmer_database_add_to_hash(kmer_hash, kmercode->code,
@@ -329,7 +331,7 @@ static int gt_kmer_database_runner(GT_UNUSED int argc, const char **argv,
         startpos_add_kmer++;
       }
       if (!arguments->use_hash) {
-        gt_kmer_database_add_interval(db, startpos, endpos);
+        gt_kmer_database_add_interval(db, startpos, endpos, interval_id++);
         gt_kmer_database_print_buffer(db, logger);
         if (!arguments->bench)
           had_err = gt_kmer_database_check_consistency(db, err);
