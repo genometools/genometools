@@ -56,8 +56,8 @@ void          gt_md5_tab_disable_file_locking(GtMD5Tab *md5_tab);
 /* Return the MD5 sum for sequence <index>. */
 const char*   gt_md5_tab_get(const GtMD5Tab*, GtUword index);
 /* Map <md5> back to sequence index. */
-GtUword gt_md5_tab_map(GtMD5Tab*, const char *md5);
-GtUword gt_md5_tab_size(const GtMD5Tab*);
+GtUword       gt_md5_tab_map(GtMD5Tab*, const char *md5);
+GtUword       gt_md5_tab_size(const GtMD5Tab*);
 void          gt_md5_tab_delete(GtMD5Tab *md5_tab);
 
 #endif
