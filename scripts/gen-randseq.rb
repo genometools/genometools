@@ -107,11 +107,11 @@ def parseargs(argv)
   return options
 end
 
-def gen_mirrored(rseq,options,alphabet,errperc,seed)
+def gen_mirrored(rseq,options,alphabet,errperc)
   extendlength = (options.lengthparam - options.seedlength)/2
   seedstring = rseq.sequence(options.seedlength)
   leftcontext1 = rseq.sequence(extendlength)
-  leftcontext2 = mutate(leftcontext1,errperc,alphabet)
+  leftcontext2 = rseq.mutate(leftcontext1,errperc,alphabet)
   puts ">seedlength=#{options.seedlength},extendlength=#{extendlength}," +
        "errperc=#{errperc}"
   puts "#{leftcontext1}"

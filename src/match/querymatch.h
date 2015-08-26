@@ -66,6 +66,7 @@ int gt_querymatch_fill_and_output(
                         const GtEncseq *encseq,
                         const GtUchar *query,
                         GtUword query_totallength,
+                        bool greedyextension,
                         GtError *err);
 
 GtUword gt_querymatch_querylen(const GtQuerymatch *querymatch);

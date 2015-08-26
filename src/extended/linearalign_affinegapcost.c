@@ -49,10 +49,10 @@ typedef struct {
   GtUwordPair Rstart, Dstart, Istart;
 } Starttabentry;
 
-static void change_score_to_cost_affine_function(const GtWord matchscore,
-                                                 const GtWord mismatchscore,
-                                                 const GtWord gap_opening,
-                                                 const GtWord gap_extension,
+static void change_score_to_cost_affine_function(GtWord matchscore,
+                                                 GtWord mismatchscore,
+                                                 GtWord gap_opening,
+                                                 GtWord gap_extension,
                                                  GtWord *match_cost,
                                                  GtWord *mismatch_cost,
                                                  GtWord *gap_opening_cost,
@@ -70,7 +70,7 @@ static void change_score_to_cost_affine_function(const GtWord matchscore,
 }
 
 /*------------------------------global--------------------------------*/
-static GtWord add_safe_max(const GtWord val1, const GtWord val2)
+static GtWord add_safe_max(GtWord val1, GtWord val2)
 {
   if (val1 != GT_WORD_MAX && val2 != GT_WORD_MAX)
   {
@@ -81,9 +81,9 @@ static GtWord add_safe_max(const GtWord val1, const GtWord val2)
   return GT_WORD_MAX;
 }
 
-static AffineAlignEdge set_edge(const GtWord Rdist,
-                                const GtWord Ddist,
-                                const GtWord Idist)
+static AffineAlignEdge set_edge(GtWord Rdist,
+                                GtWord Ddist,
+                                GtWord Idist)
 {
   GtUword minvalue;
 
@@ -119,11 +119,11 @@ static void set_Rtabentry(Rnode *rnode,
   }
 }
 
-static void firstAtabRtabcolumn(const GtUword ulen,
+static void firstAtabRtabcolumn(GtUword ulen,
                                 Atabentry *Atabcolumn,
                                 Rtabentry *Rtabcolumn,
-                                const GtWord gap_opening,
-                                const GtWord gap_extension,
+                                GtWord gap_opening,
+                                GtWord gap_extension,
                                 AffineAlignEdge edge)
 {
   GtUword rowindex;
@@ -182,17 +182,18 @@ static void firstAtabRtabcolumn(const GtUword ulen,
   }
 }
 
-static void nextAtabRtabcolumn(const GtUchar *useq, const GtUword ustart,
-                               const GtUword ulen,
+static void nextAtabRtabcolumn(const GtUchar *useq,
+                               GtUword ustart,
+                               GtUword ulen,
                                const GtUchar b,
                                Atabentry *Atabcolumn,
                                Rtabentry *Rtabcolumn,
-                               const GtWord matchcost,
-                               const GtWord mismatchcost,
-                               const GtWord gap_opening,
-                               const GtWord gap_extension,
-                               const GtUword midcolumn,
-                               const GtUword colindex)
+                               GtWord matchcost,
+                               GtWord mismatchcost,
+                               GtWord gap_opening,
+                               GtWord gap_extension,
+                               GtUword midcolumn,
+                               GtUword colindex)
 {
   Atabentry Anw, Awe;
   Rtabentry Rnw, Rwe;
@@ -283,17 +284,17 @@ static void nextAtabRtabcolumn(const GtUchar *useq, const GtUword ustart,
 }
 
 static GtUword evaluateallAtabRtabcolumns(const GtUchar *useq,
-                                          const GtUword ustart,
-                                          const GtUword ulen,
+                                          GtUword ustart,
+                                          GtUword ulen,
                                           const GtUchar *vseq,
-                                          const GtUword vstart,
-                                          const GtUword vlen,
+                                          GtUword vstart,
+                                          GtUword vlen,
                                           Atabentry *Atabcolumn,
                                           Rtabentry *Rtabcolumn,
-                                          const GtWord matchcost,
-                                          const GtWord mismatchcost,
-                                          const GtWord gap_opening,
-                                          const GtWord gap_extension,
+                                          GtWord matchcost,
+                                          GtWord mismatchcost,
+                                          GtWord gap_opening,
+                                          GtWord gap_extension,
                                           GtUword midcolumn,
                                           AffineAlignEdge edge)
 {
@@ -322,7 +323,7 @@ static GtUword evaluateallAtabRtabcolumns(const GtUchar *useq,
 
 static AffineAlignEdge minAdditionalCosts(const Atabentry entry,
                                const AffineAlignEdge edge,
-                               const GtWord gap_opening)
+                               GtWord gap_opening)
 {
   GtUword Rdist, Ddist, Idist, minvalue;
     Rdist = entry.Rvalue;
@@ -356,19 +357,19 @@ static AffineAlignEdge minAdditionalCosts(const Atabentry entry,
 }
 
 static GtUword evaluateaffinecrosspoints(const GtUchar *useq,
-                                         const GtUword ustart,
-                                         const GtUword ulen,
+                                         GtUword ustart,
+                                         GtUword ulen,
                                          const GtUchar *vseq,
-                                         const GtUword vstart,
-                                         const GtUword vlen,
+                                         GtUword vstart,
+                                         GtUword vlen,
                                          Atabentry *Atabcolumn,
                                          Rtabentry *Rtabcolumn,
                                          GtUword *Ctab,
                                          GtUword rowoffset,
-                                         const GtWord matchcost,
-                                         const GtWord mismatchcost,
-                                         const GtWord gap_opening,
-                                         const GtWord gap_extension,
+                                         GtWord matchcost,
+                                         GtWord mismatchcost,
+                                         GtWord gap_opening,
+                                         GtWord gap_extension,
                                          AffineAlignEdge from_edge,
                                          AffineAlignEdge to_edge)
 {
@@ -468,9 +469,9 @@ static GtUword evaluateaffinecrosspoints(const GtUchar *useq,
 static void affine_determineCtab0(GtUword *Ctab, GtUchar vseq0,
                                   const GtUchar *useq,
                                   GtUword ustart,
-                                  const GtWord matchcost,
-                                  const GtWord mismatchcost,
-                                  const GtWord gap_opening)
+                                  GtWord matchcost,
+                                  GtWord mismatchcost,
+                                  GtWord gap_opening)
 {
   GtUword rowindex;
 
@@ -533,22 +534,19 @@ static void affine_determineCtab0(GtUword *Ctab, GtUchar vseq0,
 }
 
 GtUword gt_calc_affinealign_linear(const GtUchar *useq, GtUword ustart,
-                                   const GtUword ulen,
+                                   GtUword ulen,
                                    const GtUchar *vseq, GtUword vstart,
-                                   const GtUword vlen,
+                                   GtUword vlen,
                                    GtAlignment *align,
-                                   const GtWord matchcost,
-                                   const GtWord mismatchcost,
-                                   const GtWord gap_opening,
-                                   const GtWord gap_extension)
+                                   GtWord matchcost,
+                                   GtWord mismatchcost,
+                                   GtWord gap_opening,
+                                   GtWord gap_extension)
 {
   GtUword distance, *Ctab;
   Atabentry *Atabcolumn;
   Rtabentry *Rtabcolumn;
   GtAlignment *square_align;
-
-  gt_assert(ustart + ulen <= strlen((const char *)useq));
-  gt_assert(vstart + vlen <= strlen((const char *)vseq));
 
   if (ulen == 0UL)
   {
@@ -564,8 +562,8 @@ GtUword gt_calc_affinealign_linear(const GtUchar *useq, GtUword ustart,
   }
   else if (ulen == 1UL || vlen == 1UL )
   {
-    square_align = gt_affinealign((const char*)useq+ustart, ulen,
-                                  (const char*)vseq+vstart, vlen,
+    square_align = gt_affinealign(useq+ustart, ulen,
+                                  vseq+vstart, vlen,
                                   (int)matchcost, (int)mismatchcost,
                                   (int)gap_opening,
                                   (int)gap_extension);
@@ -604,35 +602,35 @@ GtUword gt_calc_affinealign_linear(const GtUchar *useq, GtUword ustart,
   return distance;
 }
 
-GtAlignment *gt_computeaffinelinearspace(const GtUchar *useq,
-                                 const GtUword ustart, const GtUword ulen,
+void gt_computeaffinelinearspace(GtAlignment *align,
+                                 const GtUchar *useq,
+                                 GtUword ustart,
+                                 GtUword ulen,
                                  const GtUchar *vseq,
-                                 const GtUword vstart, const GtUword vlen,
-                                 const GtWord matchcost,
-                                 const GtWord mismatchcost,
-                                 const GtWord gap_opening,
-                                 const GtWord gap_extension)
+                                 GtUword vstart,
+                                 GtUword vlen,
+                                 GtWord matchcost,
+                                 GtWord mismatchcost,
+                                 GtWord gap_opening,
+                                 GtWord gap_extension)
 {
-  GtAlignment *align;
-
-  gt_assert(useq && ulen && vseq && vlen);
+  gt_assert(useq != NULL  && ulen > 0 && vseq != NULL  && vlen > 0);
   if (matchcost < 0 || mismatchcost < 0 || gap_opening < 0 || gap_extension < 0)
   {
     fprintf(stderr,"invalid cost value\n");
     exit(GT_EXIT_PROGRAMMING_ERROR);
   }
-  align = gt_alignment_new_with_seqs(useq+ustart, ulen, vseq+vstart, vlen);
+  gt_alignment_set_seqs(align,useq+ustart, ulen, vseq+vstart, vlen);
   (void) gt_calc_affinealign_linear(useq, ustart, ulen,
                                 vseq, vstart, vlen,
                                 align, matchcost, mismatchcost,
                                 gap_opening,gap_extension);
 
-  return align;
 }
 
 /*------------------------------local--------------------------------*/
 
-static GtWord add_safe_min(const GtWord val1, const GtWord val2)
+static GtWord add_safe_min(GtWord val1, GtWord val2)
 {
   if (val1 != GT_WORD_MIN && val2 != GT_WORD_MIN)
      return val1+val2;
@@ -640,11 +638,11 @@ static GtWord add_safe_min(const GtWord val1, const GtWord val2)
   return GT_WORD_MIN;
 }
 
-static void firstAStabcolumn(const GtUword ulen,
+static void firstAStabcolumn(GtUword ulen,
                              Atabentry *Atabcolumn,
                              Starttabentry *Starttabcolumn,
-                             const GtWord gap_opening,
-                             const GtWord gap_extension)
+                             GtWord gap_opening,
+                             GtWord gap_extension)
 {
   GtUword rowindex;
 
@@ -678,9 +676,9 @@ static void firstAStabcolumn(const GtUword ulen,
 
 static GtUwordPair setStarttabentry(GtWord entry, Atabentry aTab,
                                     Starttabentry sTab,
-                                    const GtWord replacement,
-                                    const GtWord gap_opening,
-                                    const GtWord gap_extension,
+                                    GtWord replacement,
+                                    GtWord gap_opening,
+                                    GtWord gap_extension,
                                     const AffineAlignEdge edge)
 {
   GtUwordPair start;
@@ -723,15 +721,15 @@ static GtUwordPair setStarttabentry(GtWord entry, Atabentry aTab,
 }
 
 static void nextAStabcolumn(const GtUchar *useq, GtUword ustart,
-                            const GtUword ulen,
+                            GtUword ulen,
                             const GtUchar b,
                             Atabentry *Atabcolumn,
                             Starttabentry *Starttabcolumn,
-                            const GtWord matchscore,
-                            const GtWord mismatchscore,
-                            const GtWord gap_opening,
-                            const GtWord gap_extension,
-                            const GtUword colindex,
+                            GtWord matchscore,
+                            GtWord mismatchscore,
+                            GtWord gap_opening,
+                            GtWord gap_extension,
+                            GtUword colindex,
                             Gtmaxcoordvalue *max)
 {
   Atabentry Anw, Awe;
@@ -837,17 +835,17 @@ static void nextAStabcolumn(const GtUchar *useq, GtUword ustart,
 }
 
 static Gtmaxcoordvalue *evaluateallAStabcolumns(const GtUchar *useq,
-                                                const GtUword ustart,
-                                                const GtUword ulen,
+                                                GtUword ustart,
+                                                GtUword ulen,
                                                 const GtUchar *vseq,
-                                                const GtUword vstart,
-                                                const GtUword vlen,
+                                                GtUword vstart,
+                                                GtUword vlen,
                                                 Atabentry *Atabcolumn,
                                                 Starttabentry *Starttabcolumn,
-                                                const GtWord matchscore,
-                                                const GtWord mismatchscore,
-                                                const GtWord gap_opening,
-                                                const GtWord gap_extension)
+                                                GtWord matchscore,
+                                                GtWord mismatchscore,
+                                                GtWord gap_opening,
+                                                GtWord gap_extension)
 {
   GtUword colindex;
   Gtmaxcoordvalue *max;
@@ -870,16 +868,16 @@ static Gtmaxcoordvalue *evaluateallAStabcolumns(const GtUchar *useq,
 }
 
 static GtUword gt_calc_affinealign_linear_local(const GtUchar *useq,
-                                                const GtUword ustart,
-                                                const GtUword ulen,
+                                                GtUword ustart,
+                                                GtUword ulen,
                                                 const GtUchar *vseq,
-                                                const GtUword vstart,
-                                                const GtUword vlen,
+                                                GtUword vstart,
+                                                GtUword vlen,
                                                 GtAlignment *align,
-                                                const GtWord matchscore,
-                                                const GtWord mismatchscore,
-                                                const GtWord gap_opening,
-                                                const GtWord gap_extension)
+                                                GtWord matchscore,
+                                                GtWord mismatchscore,
+                                                GtWord gap_opening,
+                                                GtWord gap_extension)
 {
   GtUword score, ulen_part, ustart_part, vlen_part, vstart_part;
   GtWord match_cost, mismatch_cost,
@@ -888,9 +886,6 @@ static GtUword gt_calc_affinealign_linear_local(const GtUchar *useq,
   Atabentry *Atabcolumn;
   Starttabentry *Starttabcolumn;
   Gtmaxcoordvalue *max;
-
-  gt_assert(ustart + ulen <= strlen((const char *)useq));
-  gt_assert(vstart + vlen <= strlen((const char *)vseq));
 
   Atabcolumn = gt_malloc(sizeof *Atabcolumn * (ulen+1));
   Starttabcolumn = gt_malloc(sizeof *Starttabcolumn * (ulen+1));
@@ -938,25 +933,22 @@ static GtUword gt_calc_affinealign_linear_local(const GtUchar *useq,
   return(score);
 }
 
-GtAlignment *gt_computeaffinelinearspace_local(const GtUchar *useq,
-                                       const GtUword ustart,
-                                       const GtUword ulen,
+void gt_computeaffinelinearspace_local(GtAlignment *align,
+                                       const GtUchar *useq,
+                                       GtUword ustart,
+                                       GtUword ulen,
                                        const GtUchar *vseq,
-                                       const GtUword vstart,
-                                       const GtUword vlen,
-                                       const GtWord matchscore,
-                                       const GtWord mismatchscore,
-                                       const GtWord gap_opening,
-                                       const GtWord gap_extension)
+                                       GtUword vstart,
+                                       GtUword vlen,
+                                       GtWord matchscore,
+                                       GtWord mismatchscore,
+                                       GtWord gap_opening,
+                                       GtWord gap_extension)
 {
-  GtAlignment *align;
-
-  align = gt_alignment_new();
   (void) gt_calc_affinealign_linear_local(useq, ustart, ulen,
                                            vseq, vstart, vlen,
                                            align, matchscore,mismatchscore,
                                            gap_opening, gap_extension);
-  return align;
 }
 
 /*----------------------------checkfunctions--------------------------*/
@@ -970,18 +962,18 @@ void gt_checkaffinelinearspace(GT_UNUSED bool forward,
   GtUword affine_score1, affine_score2, affine_score3;
 
   /*gt_assert(useq && ulen && vseq && vlen);*/
-  if (strchr((const char*)useq, LINEAR_EDIST_GAP))
+  if (memchr(useq, LINEAR_EDIST_GAP,ulen) != NULL)
   {
     fprintf(stderr,"%s: sequence u contains gap symbol\n",__func__);
     exit(GT_EXIT_PROGRAMMING_ERROR);
   }
-  if (strchr((const char*)vseq, LINEAR_EDIST_GAP))
+  if (memchr(vseq, LINEAR_EDIST_GAP,vlen) != NULL)
   {
     fprintf(stderr,"%s: sequence v contains gap symbol\n",__func__);
     exit(GT_EXIT_PROGRAMMING_ERROR);
   }
-
   align_linear = gt_alignment_new_with_seqs(useq, ulen, vseq, vlen);
+  /* SK: use const variable for costs */
   affine_score1 = gt_calc_affinealign_linear(useq, 0, ulen,
                                              vseq, 0, vlen,
                                              align_linear, 0, 4, 4, 1);
@@ -995,8 +987,8 @@ void gt_checkaffinelinearspace(GT_UNUSED bool forward,
     exit(GT_EXIT_PROGRAMMING_ERROR);
   }
 
-  align_square = gt_affinealign((const char *)useq, ulen,
-                                (const char *)vseq, vlen,0,4,4,1);
+  align_square = gt_affinealign(useq, ulen,
+                                vseq, vlen,0,4,4,1);
   affine_score3 = gt_alignment_eval_with_affine_score(align_square,0,4,4,1);
 
   if (affine_score1 != affine_score3)
@@ -1017,19 +1009,19 @@ void gt_checkaffinelinearspace_local(GT_UNUSED bool forward,
 {
   GtAlignment *align;
   GtUword affine_score1, affine_score2;
+/* SK: use const variable for cost valued  */
 
   /*gt_assert(useq && ulen && vseq && vlen);*/
-  if (strchr((const char*)useq, LINEAR_EDIST_GAP))
+  if (memchr(useq, LINEAR_EDIST_GAP,ulen) != NULL)
   {
     fprintf(stderr,"%s: sequence u contains gap symbol\n",__func__);
     exit(GT_EXIT_PROGRAMMING_ERROR);
   }
-  if (strchr((const char*)vseq, LINEAR_EDIST_GAP))
+  if (memchr(vseq, LINEAR_EDIST_GAP,vlen) != NULL)
   {
     fprintf(stderr,"%s: sequence v contains gap symbol\n",__func__);
     exit(GT_EXIT_PROGRAMMING_ERROR);
   }
-
   align = gt_alignment_new();
   affine_score1 = gt_calc_affinealign_linear_local(useq,0, ulen,
                                                 vseq,0,vlen,align,

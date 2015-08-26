@@ -614,7 +614,7 @@ static int compareLcpitervals(const void *a,const void *b)
 
 static void sortLcpintervals(Lcpinterval *itvtab,GtUword elems)
 {
-  qsort(itvtab,elems,sizeof *itvtab,compareLcpitervals);
+  qsort(itvtab,(size_t) elems,sizeof *itvtab,compareLcpitervals);
 }
 
 void showcollectedintervals(const Lcpinterval *itvtab,GtUword num)
@@ -679,6 +679,7 @@ int gt_callenummaxpairs(const char *indexname,
   {
     if (maxfreq > 0)
     {
+      gt_assert(ssar != NULL);
       ssar->extrainfo = &maxfreqcollect;
     }
     if (gt_enumeratemaxpairs(ssar,

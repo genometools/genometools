@@ -34,7 +34,8 @@ void gt_checkaffinelinearspace_local(GT_UNUSED bool forward,
                                const GtUchar *vseq,
                                GtUword vlen);
 
-GtAlignment *gt_computeaffinelinearspace(const GtUchar *useq,
+void gt_computeaffinelinearspace(GtAlignment *align,
+                                         const GtUchar *useq,
                                          const GtUword ustart,
                                          const GtUword ulen,
                                          const GtUchar *vseq,
@@ -45,7 +46,8 @@ GtAlignment *gt_computeaffinelinearspace(const GtUchar *useq,
                                          const GtWord gap_opening,
                                          const GtWord gap_extension);
 
-GtAlignment *gt_computeaffinelinearspace_local(const GtUchar *useq,
+void gt_computeaffinelinearspace_local(GtAlignment *align,
+                                               const GtUchar *useq,
                                                const GtUword ustart,
                                                const GtUword ulen,
                                                const GtUchar *vseq,

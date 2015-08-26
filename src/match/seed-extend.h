@@ -241,8 +241,9 @@ int gt_simplegreedyselfmatchoutput(void *info,
                                    GtUword pos2,
                                    GtError *err);
 
-void gt_greedy_extend_matchinfo_relax(GtGreedyextendmatchinfo *ggemi,
-                                      GtUword steps);
+bool gt_greedy_extend_matchinfo_relax(GtGreedyextendmatchinfo *ggemi);
+
+void gt_greedy_extend_matchinfo_restore(GtGreedyextendmatchinfo *ggemi);
 
 GtUword align_front_prune_edist(bool forward,
                                 Polished_point *best_polished_point,

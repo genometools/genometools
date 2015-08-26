@@ -175,13 +175,13 @@ static bool gt_alignment_is_valid(const GtAlignment *alignment)
   /* check ulen */
   len = gt_multieoplist_get_repdel_length(alignment->eops);
   if (len != alignment->ulen) {
-    printf("ulen: "GT_WU", repdel: "GT_WU"\n", alignment->ulen, len);
+    printf("ulen: " GT_WU ", repdel: " GT_WU "\n", alignment->ulen, len);
     return false;
   }
   /* check vlen */
   len = gt_multieoplist_get_repins_length(alignment->eops);
   if (len != alignment->vlen) {
-    printf("vlen: "GT_WU", repins: "GT_WU"\n", alignment->vlen, len);
+    printf("vlen: " GT_WU ", repins: " GT_WU "\n", alignment->vlen, len);
     return false;
   }
   return true;
@@ -215,6 +215,61 @@ GtUword gt_alignment_eval(const GtAlignment *alignment)
           if (tolower((int) alignment->u[idx_u]) !=
               tolower((int) alignment->v[idx_v])) {
             sumcost++;
+          }
+          idx_u++;
+          idx_v++;
+        }
+        break;
+      case Deletion:
+        sumcost += meop.steps;
+        idx_u += meop.steps;
+        break;
+      case Insertion:
+        sumcost += meop.steps;
+        idx_v += meop.steps;
+        break;
+    }
+  }
+  return sumcost;
+}
+
+GtUword gt_alignment_eval_generic(bool mapped,const GtAlignment *alignment)
+{
+  GtUword i, j, idx_u = 0, idx_v = 0, sumcost = 0, meoplen;
+  GtMultieop meop;
+
+  gt_assert(alignment != NULL);
+#ifndef NDEBUG
+  gt_assert(gt_alignment_is_valid(alignment));
+#endif
+
+  meoplen = gt_multieoplist_get_num_entries(alignment->eops);
+  for (i = meoplen; i > 0; i--) {
+    meop = gt_multieoplist_get_entry(alignment->eops, i - 1);
+    switch (meop.type) {
+      case Mismatch:
+        sumcost += meop.steps;
+        idx_u += meop.steps;
+        idx_v += meop.steps;
+        break;
+      case Match:
+      case Replacement:
+        for (j = 0; j < meop.steps; j++) {
+          if (mapped)
+          {
+            GtUchar a = alignment->u[idx_u],
+                    b = alignment->v[idx_v];
+            if (ISSPECIAL(a) || ISSPECIAL(b) || a != b)
+            {
+              sumcost++;
+            }
+          } else
+          {
+            if (tolower((int) alignment->u[idx_u]) !=
+                tolower((int) alignment->v[idx_v]))
+            {
+              sumcost++;
+            }
           }
           idx_u++;
           idx_v++;
@@ -454,6 +509,52 @@ void gt_alignment_show_generic(GtUchar *buffer,
       break;
     }
     idx_eop--;
+  }
+  if (pos > 0)
+  {
+    topbuf[pos] = '\n';
+    fwrite(topbuf,sizeof *topbuf,pos+1,fp);
+    midbuf[pos] = '\n';
+    fwrite(midbuf,sizeof *midbuf,pos+1,fp);
+    lowbuf[pos] = '\n';
+    fwrite(lowbuf,sizeof *lowbuf,pos+1,fp);
+  }
+}
+
+void gt_alignment_exact_show(GtUchar *buffer,
+                             const GtUchar *sequence,
+                             GtUword seqlen,
+                             FILE *fp,
+                             unsigned int width,
+                             const GtUchar *characters)
+{
+  GtUword idx;
+  unsigned int pos = 0;
+  GtUchar *topbuf = buffer, *midbuf = NULL, *lowbuf = NULL;
+
+  if ((GtUword) width > seqlen)
+  {
+    width = (unsigned int) seqlen;
+  }
+  topbuf[width] = '\n';
+  midbuf = topbuf + width + 1;
+  for (idx = 0; idx < (GtUword) width; idx++)
+  {
+    midbuf[idx] = (GtUchar) MATCHSYMBOL;
+  }
+  midbuf[width] = '\n';
+  lowbuf = midbuf + width + 1;
+  lowbuf[width] = '\n';
+  for (idx = 0; idx < seqlen; idx++)
+  {
+    if (characters != NULL)
+    {
+      lowbuf[pos] = topbuf[pos] = characters[sequence[idx]];
+    } else
+    {
+      lowbuf[pos] = topbuf[pos] = sequence[idx];
+    }
+    pos = gt_alignment_show_advance(pos,width,topbuf,fp);
   }
   if (pos > 0)
   {

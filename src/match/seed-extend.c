@@ -205,7 +205,7 @@ int gt_simplexdropselfmatchoutput(void *info,
                      whichever is larger */
     gt_seqabstract_reinit_encseq(xdropmatchinfo->vseq,encseq,
                                  pos2 - MAX(pos1 + len,rfsi.queryseqstartpos),
-                                 rfsi.queryseqstartpos);
+                                 MAX(pos1 + len,rfsi.queryseqstartpos));
     gt_evalxdroparbitscoresextend(false,
                                   &xdropmatchinfo->best_left,
                                   xdropmatchinfo->res,
@@ -286,16 +286,6 @@ int gt_simplexdropselfmatchoutput(void *info,
             ", err=%.2f\n",total_distance,score,total_alignedlen,
             error_rate(total_distance,total_alignedlen));
 #endif
-    /*
-    gt_seqabstract_reinit_encseq(xdropmatchinfo->useq,
-                                 encseq,
-                                 dblen,
-                                 dbstart);
-    gt_seqabstract_reinit_encseq(xdropmatchinfo->vseq,
-                                 encseq,
-                                 querylen,
-                                 querystart);
-    */
     if (xdropmatchinfo->silent)
     {
       return 0;
@@ -313,10 +303,6 @@ int gt_simplexdropselfmatchoutput(void *info,
                        false,
                        score,
                        total_distance,
-                       /*greedyunitedist(xdropmatchinfo->frontresource,
-                                       xdropmatchinfo->useq,
-                                       xdropmatchinfo->vseq),
-                       */
                        true,
                        (uint64_t) rfsi.queryseqnum,
                        querylen,
@@ -325,6 +311,7 @@ int gt_simplexdropselfmatchoutput(void *info,
                        encseq,
                        NULL,
                        rfsi.queryseqlength,
+                       false,
                        err);
   } else
   {
@@ -453,6 +440,7 @@ int gt_processxdropquerymatches(void *info,
                      encseq,
                      query,
                      query_totallength,
+                     false,
                      err);
 }
 
@@ -491,7 +479,9 @@ struct GtGreedyextendmatchinfo
           maxalignedlendifference,
           errorpercentage,
           perc_mat_history,
-          totallength;
+          totallength,
+          orig_perc_mat_history,
+          orig_maxalignedlendifference;
   unsigned int userdefinedleastlength;
   GtExtendCharAccess extend_char_access;
   bool beverbose,
@@ -580,22 +570,30 @@ GtGreedyextendmatchinfo *gt_greedy_extend_matchinfo_new(
   ggemi->check_extend_symmetry = false;
   ggemi->silent = false;
   ggemi->trimstat = NULL;
+  ggemi->orig_perc_mat_history = ggemi->perc_mat_history;
+  ggemi->orig_maxalignedlendifference = ggemi->maxalignedlendifference;
   return ggemi;
 }
 
-void gt_greedy_extend_matchinfo_relax(GtGreedyextendmatchinfo *ggemi,
-                                      GtUword steps)
+bool gt_greedy_extend_matchinfo_relax(GtGreedyextendmatchinfo *ggemi)
 {
-  ggemi->maxalignedlendifference += steps;
-  if (steps < ggemi->perc_mat_history)
+  ggemi->maxalignedlendifference += 1;
+  if (ggemi->perc_mat_history > 1)
   {
-    ggemi->perc_mat_history -= steps;
+    ggemi->perc_mat_history--;
   } else
   {
     ggemi->perc_mat_history = 1UL;
   }
   ggemi->minmatchnum = (ggemi->history * ggemi->perc_mat_history)/100;
-  gt_assert(ggemi->minmatchnum > 0);
+  return ggemi->minmatchnum > 0 ? true : false;
+}
+
+void gt_greedy_extend_matchinfo_restore(GtGreedyextendmatchinfo *ggemi)
+{
+  ggemi->perc_mat_history = ggemi->orig_perc_mat_history;
+  ggemi->maxalignedlendifference = ggemi->orig_maxalignedlendifference;
+  ggemi->minmatchnum = (ggemi->history * ggemi->perc_mat_history)/100;
 }
 
 void gt_greedy_extend_matchinfo_delete(GtGreedyextendmatchinfo *ggemi)
@@ -850,6 +848,7 @@ int gt_simplegreedyselfmatchoutput(void *info,
                        encseq,
                        NULL,
                        rfsi.queryseqlength,
+                       true,
                        err);
   } else
   {
@@ -929,10 +928,5 @@ GtUword align_front_prune_edist(bool forward,
                                        &vfsr,
                                        vstart,
                                        vlen);
-  if (distance == ulen + vlen + 1)
-  {
-    fprintf(stderr,"Cannot align sequences\n");
-    exit(EXIT_FAILURE);
-  }
   return distance;
 }

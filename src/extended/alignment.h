@@ -58,6 +58,7 @@ void         gt_alignment_remove_last(GtAlignment *alignment);
 void         gt_alignment_reset(GtAlignment *alignment);
 /* returns unit cost */
 GtUword      gt_alignment_eval(const GtAlignment*);
+GtUword gt_alignment_eval_generic(bool mapped,const GtAlignment *alignment);
 GtWord       gt_alignment_eval_with_score(const GtAlignment *alignment,
                                           GtWord matchscore,
                                           GtWord mismatchscore,
@@ -83,6 +84,12 @@ void gt_alignment_show_generic(GtUchar *buffer,
                                unsigned int width,
                                const GtUchar *characters,
                                GtUchar wildcardshow);
+void gt_alignment_exact_show(GtUchar *buffer,
+                             const GtUchar *sequence,
+                             GtUword seqlen,
+                             FILE *fp,
+                             unsigned int width,
+                             const GtUchar *characters);
 void         gt_alignment_show_multieop_list(const GtAlignment *alignment,
                                              FILE *fp);
 int          gt_alignment_unit_test(GtError *err);
