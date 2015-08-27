@@ -91,7 +91,7 @@ static void gt_sequences_delete(GtSequences *sequences)
 {
   GtUword i;
   if (sequences != NULL) {
-    for (i = 0; i < sequences->size ; i++)
+   for (i = 0; i < sequences->size ; i++)
     {
       gt_free(sequences->seqarray[i].seq);
     }
@@ -285,6 +285,29 @@ static int get_fastasequences(GtSequences *sequences, GtStr *filename,
   return had_err;
 }
 
+static int get_onesequence(GtSequences *sequences, const GtStrArray *strings,
+                         const GtUword pos, GtError *err)
+{
+  int had_err = 0;
+  gt_assert(sequences != NULL && strings != NULL);
+  
+  if (gt_str_array_size(strings) <= pos)
+  {
+    gt_error_set(err, "out of range");
+    return  1;
+  }
+
+  sequences->seqarray[0].len = (GtUword) strlen(gt_str_array_get(strings,pos));
+  sequences->seqarray[0].seq = gt_malloc(sizeof(*sequences->seqarray[0].seq)*
+                                         (sequences->seqarray[0].len+1));
+  memcpy(sequences->seqarray[0].seq,
+        (GtUchar *) gt_str_array_get(strings,pos),
+        sequences->seqarray[0].len+1 );
+  sequences->size++;
+
+  return had_err;
+}
+
 static int gt_linspace_align_runner(GT_UNUSED int argc,
                                  GT_UNUSED const char **argv,
                                  GT_UNUSED int parsed_args,
@@ -307,38 +330,17 @@ static int gt_linspace_align_runner(GT_UNUSED int argc,
   align = gt_alignment_new();
   if (gt_str_array_size(arguments->strings) > 0)
   {
-    sequences1->seqarray[0].seq =
-                    (GtUchar *) gt_str_array_get(arguments->strings,0);
-    sequences1->seqarray[0].len =
-               (GtUword) strlen(gt_str_array_get(arguments->strings,0));
-    sequences1->size++;
-
-    sequences2->seqarray[0].seq =
-                    (GtUchar *) gt_str_array_get(arguments->strings,1UL);
-    sequences2->seqarray[0].len =
-               (GtUword) strlen(gt_str_array_get(arguments->strings,1UL));
-    sequences2->size++;
+    get_onesequence(sequences1, arguments->strings, 0, err);
+    gt_error_check(err);
+    get_onesequence(sequences2, arguments->strings, 1, err);
+    gt_error_check(err);
   }
   else if (gt_str_array_size(arguments->files) > 0)
   {
-    had_err = get_fastasequences(sequences1,
-                                 gt_str_array_get_str(arguments->files,0),
-                                 err);
-    if (had_err)
-    {
-      gt_sequences_delete(sequences1);
-      gt_sequences_delete(sequences2);
-      return had_err;
-    }
-    had_err = get_fastasequences(sequences2,
-                                 gt_str_array_get_str(arguments->files,1),
-                                 err);
-    if (had_err)
-    {
-      gt_sequences_delete(sequences1);
-      gt_sequences_delete(sequences2);
-      return had_err;
-    }
+    get_fastasequences(sequences1,gt_str_array_get_str(arguments->files,0),err);
+    gt_error_check(err);
+    get_fastasequences(sequences2,gt_str_array_get_str(arguments->files,1),err);
+    gt_error_check(err);
   }
 
   /* call functions */
