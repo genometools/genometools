@@ -363,7 +363,7 @@ GtAlignment *gt_computelinearspace(const GtUchar *useq,
   gt_assert(useq && ulen && vseq && vlen);
   if (matchcost < 0 || mismatchcost < 0 || gapcost < 0)
   {
-    fprintf(stderr,"invalid cost value");
+    fprintf(stderr,"invalid cost value\n");
     exit(GT_EXIT_PROGRAMMING_ERROR);
   }
 
