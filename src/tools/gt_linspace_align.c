@@ -38,7 +38,8 @@ typedef struct {
              *linearcosts,
              *affinecosts;
   bool global,
-       local;
+       local,
+       showscore;
 } GtLinspaceArguments;
 
 typedef struct {
@@ -105,7 +106,7 @@ static GtOptionParser* gt_linspace_align_option_parser_new(void *tool_arguments)
   GtLinspaceArguments *arguments = tool_arguments;
   GtOptionParser *op;
   GtOption *optionstrings, *optionfiles, *optionglobal, *optionlocal,
-  *optionlinearcosts, *optionaffinecosts, *optionoutputfile;
+  *optionlinearcosts, *optionaffinecosts, *optionoutputfile, *optionshowscore;
   gt_assert(arguments);
 
   /* init */
@@ -122,6 +123,10 @@ static GtOptionParser* gt_linspace_align_option_parser_new(void *tool_arguments)
   optionlocal = gt_option_new_bool("local", "local alignment",
                               &arguments->local, false);
   gt_option_parser_add_option(op, optionlocal);
+
+  optionshowscore= gt_option_new_bool("showscore", "show score for alignment",
+                              &arguments->showscore, false);
+  gt_option_parser_add_option(op, optionshowscore);
 
   /* -str */
   optionstrings = gt_option_new_string_array("ss", "use two strings",
@@ -154,6 +159,7 @@ static GtOptionParser* gt_linspace_align_option_parser_new(void *tool_arguments)
   gt_option_imply_either_2(optionfiles, optionglobal, optionlocal);
   gt_option_imply_either_2(optionlocal, optionlinearcosts, optionaffinecosts);
   gt_option_imply_either_2(optionglobal, optionlinearcosts, optionaffinecosts);
+  gt_option_imply_either_2(optionshowscore, optionlinearcosts, optionaffinecosts);
 
   return op;
 }
@@ -209,17 +215,17 @@ static void print_sequence(const GtUchar *seq, const GtUword len, FILE *fp)
 
 static void alignment_with_seqs_show(const GtUchar *useq, const GtUword ulen,
                  const GtUchar *vseq, const GtUword vlen,
-                 const GtAlignment *align, FILE *fp)
+                 const GtAlignment *align, const GtWord score, FILE *fp)
 {
   if (fp != NULL)
   {
-    /*fprintf(fp,"# two sequences \"%s\" \"%s\"\n", useq, vseq);*/
     print_sequence(useq, ulen, fp);
     print_sequence(vseq, vlen, fp);
     fprintf(fp, "######\n");
 
     gt_alignment_show(align, fp, 80);
-    gt_alignment_eval_with_score(align, 0,1,1);
+    if (score != GT_WORD_MAX)
+      fprintf(fp, "score: "GT_WD"\n", score);
   }
 }
 
@@ -320,6 +326,9 @@ static int gt_linspace_align_runner(GT_UNUSED int argc,
   GtUword i, j, ulen, vlen;
   GtWord *linearcosts;
   GtAlignment *align;
+  GtWord *linearcosts, *affinecosts, score = GT_WORD_MAX;
+  FILE *fp;
+
   GtSequences *sequences1, *sequences2;
 
   gt_error_check(err);
@@ -370,6 +379,12 @@ static int gt_linspace_align_runner(GT_UNUSED int argc,
           gt_computelinearspace_local(align,useq, 0, ulen, vseq, 0, vlen,
                   linearcosts[0],linearcosts[1],linearcosts[2]);
         }
+
+        if (arguments->showscore)
+        {
+          score = gt_alignment_eval_with_score(align, linearcosts[0],
+                                       linearcosts[1],linearcosts[2]);
+        }
         gt_free(linearcosts);
       }/* affine gap costs */
       else if (gt_str_array_size(arguments->affinecosts) > 0)
@@ -395,6 +410,16 @@ static int gt_linspace_align_runner(GT_UNUSED int argc,
                                             affinecosts[3]);
         }
         gt_free(affinecosts);
+
+        if (arguments->showscore)
+        {
+          score = gt_alignment_eval_with_affine_score(align,
+                                                      affinecosts[0],
+                                                      affinecosts[1],
+                                                      affinecosts[2],
+                                                      affinecosts[3]);
+        }
+         gt_free(affinecosts);
       }
 
       /* show */
@@ -405,7 +430,8 @@ static int gt_linspace_align_runner(GT_UNUSED int argc,
       {
         FILE *fp = gt_fa_fopen_func(gt_str_get(arguments->outputfile),
                                                "a", __FILE__,__LINE__,err);
-        alignment_with_seqs_show(useq, ulen, vseq, vlen, align, fp);
+        gt_error_check(err);
+        alignment_with_seqs_show(useq, ulen, vseq, vlen, align, fp);//TODO:score
         gt_fa_fclose(fp);
       }
     }
