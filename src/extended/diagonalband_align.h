@@ -23,18 +23,18 @@
 #include "extended/alignment.h"
 
 void gt_checkdiagnonalbandalign(GT_UNUSED bool forward,
-                                       const GtUchar *useq,
-                                       GtUword ulen,
-                                       const GtUchar *vseq,
-                                       GtUword vlen);
+                                const GtUchar *useq,
+                                GtUword ulen,
+                                const GtUchar *vseq,
+                                GtUword vlen);
 
 GtAlignment *gt_computediagnoalbandalign(const GtUchar *useq,
-                                        GtUword ustart, GtUword ulen,
-                                        const GtUchar *vseq,
-                                        GtUword vstart, GtUword vlen,
-                                        const GtWord left_dist,
-                                        const GtWord right_dist,
-                                        const GtWord matchcost,
-                                        const GtWord mismatchcost,
-                                        const GtWord gapcost);
+                                         GtUword ustart, GtUword ulen,
+                                         const GtUchar *vseq,
+                                         GtUword vstart, GtUword vlen,
+                                         const GtWord left_dist,
+                                         const GtWord right_dist,
+                                         const GtWord matchcost,
+                                         const GtWord mismatchcost,
+                                         const GtWord gapcost);
 #endif

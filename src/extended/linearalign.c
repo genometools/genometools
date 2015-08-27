@@ -358,7 +358,7 @@ GtUword gt_computelinearspace(GtAlignment *align,
 
   if (matchcost < 0 || mismatchcost < 0 || gapcost < 0)
   {
-    fprintf(stderr,"invalid cost value");
+    fprintf(stderr,"invalid cost value\n");
     exit(GT_EXIT_PROGRAMMING_ERROR);
   }
   gt_alignment_set_seqs(align, useq+ustart, ulen, vseq+vstart, vlen);
