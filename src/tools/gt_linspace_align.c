@@ -159,7 +159,7 @@ static GtOptionParser* gt_linspace_align_option_parser_new(void *tool_arguments)
   gt_option_imply_either_2(optionfiles, optionglobal, optionlocal);
   gt_option_imply_either_2(optionlocal, optionlinearcosts, optionaffinecosts);
   gt_option_imply_either_2(optionglobal, optionlinearcosts, optionaffinecosts);
-  gt_option_imply_either_2(optionshowscore, optionlinearcosts, optionaffinecosts);
+  gt_option_imply_either_2(optionshowscore,optionlinearcosts,optionaffinecosts);
 
   return op;
 }
@@ -296,11 +296,11 @@ static int get_onesequence(GtSequences *sequences, const GtStrArray *strings,
 {
   int had_err = 0;
   gt_assert(sequences != NULL && strings != NULL);
-  
+
   if (gt_str_array_size(strings) <= pos)
   {
     gt_error_set(err, "out of range");
-    return  1;
+    return 1;
   }
 
   sequences->seqarray[0].len = (GtUword) strlen(gt_str_array_get(strings,pos));
