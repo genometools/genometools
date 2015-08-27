@@ -68,8 +68,8 @@ static GtUword alignment_in_square_space(GtAlignment *align,
   GtUword **E, distance=0;
   GtUword i,j, val;
 
-  E = gt_malloc((sizeof **E)*(ulen+1));
-  *E = gt_malloc((sizeof *E)*((vlen+1)*(ulen+1)));
+  E = gt_malloc((sizeof *E)*(ulen+1));
+  *E = gt_malloc((sizeof **E)*((vlen+1)*(ulen+1)));
   for (j = 1; j <= ulen; j++)
   {
     E[j] = E[j-1]+vlen+1;
