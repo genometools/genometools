@@ -66,8 +66,8 @@ static GtUword alignment_in_square_space(GtAlignment *align,
 
   /* SK: use gt_array2dim_malloc here and in all other similar places. */
 
-  E = gt_malloc((sizeof **E)*(ulen+1));
-  *E = gt_malloc((sizeof *E)*((vlen+1)*(ulen+1)));
+  E = gt_malloc((sizeof *E)*(ulen+1));
+  *E = gt_malloc((sizeof **E)*((vlen+1)*(ulen+1)));
   for (j = 1; j <= ulen; j++)
   {
     E[j] = E[j-1] + vlen + 1;
