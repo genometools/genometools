@@ -65,7 +65,7 @@ Test do
   run "diff #{last_stdout} #{$testdata}gt_linspace_align_local_affine_test_1.out"
 end
 
-Name "gt linspace_align global lin gap diagonalband"
+Name "gt linspace_align diagonalband filelist"
 Keywords "gt_linspace_align"
 Test do
   i=0
@@ -81,6 +81,14 @@ Test do
       end
     end
   end
+end
+
+Name "gt linspace_align diagonalband (invalid bounds)"
+Keywords "gt_linspace_align"
+Test do
+  run_test "#{$bin}gt dev linspace_align -ss cg acgt"\
+           " -global -l 0 1 1 -d 0 1", :retval => 2
+  grep last_stderr, "invalid diagonalband"
 end
 
 Name "gt linspace_align special cases"

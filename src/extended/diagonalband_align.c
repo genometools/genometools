@@ -71,12 +71,12 @@ void reconstructalignment_from_Dtab(GtAlignment *align,
     {
       if (Dtab[i].edge == Linear_R)
         gt_alignment_add_replacement(align);
-      else if(Dtab[i].edge == Linear_D)
+      else if (Dtab[i].edge == Linear_D)
       {
          gt_alignment_add_deletion(align);
          gt_alignment_add_insertion(align);
       }
-      else if(Dtab[i].edge == Linear_I)
+      else if (Dtab[i].edge == Linear_I)
       {
          gt_alignment_add_insertion(align);
          gt_alignment_add_deletion(align);
@@ -516,7 +516,6 @@ static GtUword evaluateallcolumns(GtUword *EDtabcolumn,
     }
   }
   /* last crosspoint of optimal path */
-  
   return Rtabcolumn[high_row-low_row];
 }
 
