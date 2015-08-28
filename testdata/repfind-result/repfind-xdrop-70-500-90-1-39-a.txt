@@ -26,7 +26,7 @@ tgtaatctcagtgtatgttgggcttttggttttttagcccatgtatggttggttaacgttaataagattt
 tccacttatgag
 ||||||||||||
 tccacttatgag
-742 5 0 F 746 16 118 1323 55 92.59
+742 5 0 F 746 16 118 1323 55 92.61
 aaatatttgtctgttacagatggaacagtgaagcgatacaacgatgcaaaaaaagagtggggattcacac
 ||||||||| |||||||||||||   |||||||||||| ||| |||| |||||||| ||||| |||  ||
 aaatatttgactgttacagatggcttagtgaagcgatataacaatgcgaaaaaagaatggggtttcggac
@@ -60,7 +60,7 @@ atatctgcncttctttgtctacnancaatccaccttatgaataaaaaaat-tttaatttgatgaatttgt
 aataagaaaacgttaatgtttgtgaattgtgaa
  |||| ||||| ||||||||||| || ||||||
 tataanaaaactttaatgtttgttaaatgtgaa
-746 3 0 F 743 39 72 1291 66 91.12
+746 3 0 F 743 39 72 1291 66 91.13
 gtgaagcgatacaacgatgcaaaaaaagagtggggattcacacaattgatttctcttccaacattctaca
 |||||||||||||||||||| |||||||||||||||||||||||||||||||||||||||||||||||||
 gtgaagcgatacaacgatgcnaaaaaagagtggggattcacacaattgatttctcttccaacattctaca
@@ -91,7 +91,7 @@ agctgaaatggttaaggtctctgtga-caaacatagtctccgtttaaatatcac-t-acttctttttcaa
 cccccgnaataaccttacaaagaaaaatt-gatga-tttaatttgttatac
 |  |     || |   | ||||   | || ||||| |||||||||||||||
 caacaacctta-c-gaataaagtggactttgatgagtttaatttgttatac
-797 6 0 F 802 39 72 1419 60 92.47
+797 6 0 F 802 39 72 1419 60 92.50
 cgcgaangaagggtaccttgtgnangacnnnncttctttnggtgctganatcttcatgcgntancccgac
 |||||| ||||||||||||||| | |||    ||||||| |||||||| |||||||| || || ||||||
 cgcgaacgaagggtaccttgtgcaggacacagcttcttttggtgctgagatcttcat-cgttaacccgac
@@ -125,7 +125,7 @@ natcgttgtttctgctctccgagttttcgttttactttttttttcatgttttgctatccaatgaaaataa
 a-ggtataaaactctc-tt-ggtttt
 | ||| |||||||||| || ||||||
 aaggtttaaaactctcctttggtttt
-797 6 0 F 802 39 72 1419 60 92.47
+797 6 0 F 802 39 72 1419 60 92.50
 cgcgaangaagggtaccttgtgnangacnnnncttctttnggtgctganatcttcatgcgntancccgac
 |||||| ||||||||||||||| | |||    ||||||| |||||||| |||||||| || || ||||||
 cgcgaacgaagggtaccttgtgcaggacacagcttcttttggtgctgagatcttcat-cgttaacccgac
@@ -159,7 +159,7 @@ natcgttgtttctgctctccgagttttcgttttactttttttttcatgttttgctatccaatgaaaataa
 a-ggtataaaactctc-tt-ggtttt
 | ||| |||||||||| || ||||||
 aaggtttaaaactctcctttggtttt
-746 3 0 F 743 39 72 1291 66 91.12
+746 3 0 F 743 39 72 1291 66 91.13
 gtgaagcgatacaacgatgcaaaaaaagagtggggattcacacaattgatttctcttccaacattctaca
 |||||||||||||||||||| |||||||||||||||||||||||||||||||||||||||||||||||||
 gtgaagcgatacaacgatgcnaaaaaagagtggggattcacacaattgatttctcttccaacattctaca
@@ -190,7 +190,7 @@ agctgaaatggttaaggtctctgtga-caaacatagtctccgtttaaatatcac-t-acttctttttcaa
 cccccgnaataaccttacaaagaaaaatt-gatga-tttaatttgttatac
 |  |     || |   | ||||   | || ||||| |||||||||||||||
 caacaacctta-c-gaataaagtggactttgatgagtttaatttgttatac
-797 6 0 F 802 39 72 1419 60 92.47
+797 6 0 F 802 39 72 1419 60 92.50
 cgcgaangaagggtaccttgtgnangacnnnncttctttnggtgctganatcttcatgcgntancccgac
 |||||| ||||||||||||||| | |||    ||||||| |||||||| |||||||| || || ||||||
 cgcgaacgaagggtaccttgtgcaggacacagcttcttttggtgctgagatcttcat-cgttaacccgac
@@ -224,7 +224,7 @@ natcgttgtttctgctctccgagttttcgttttactttttttttcatgttttgctatccaatgaaaataa
 a-ggtataaaactctc-tt-ggtttt
 | ||| |||||||||| || ||||||
 aaggtttaaaactctcctttggtttt
-609 4 16 F 571 47 0 1018 54 90.54
+609 4 16 F 571 47 0 1018 54 90.85
 cacaaatggagtctaggtttcacattacttgctttcctcttcatcacttcctcttccgctgagctcatca
 ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 cacaaatggagtctaggtttcacattacttgctttcctcttcatcacttcctcttccgctgagctcatca
@@ -271,7 +271,7 @@ cttcttccccacaatgattgaaaaactcttcttgttatgaataaagatggatgcccatttataagggcca
 tcatctaagcccatcatctagattttt
 |||||||||||||||||||||||||||
 tcatctaagcccatcatctagattttt
-504 1788 0 F 510 1850 9 888 42 91.67
+504 1788 0 F 510 1850 9 888 42 91.72
 gaaaatggcttccaagactttccttcttttgggtctctttgcatttntttncatcgtctcagaaatggct
 |||||||||||||||||||||||||||||||||||||||||||||| ||| |||||||||||||||||||
 gaaaatggcttccaagactttccttcttttgggtctctttgcatttntttncatcgtctcagaaatggct
@@ -293,7 +293,7 @@ actaaatctacataatatatcaa-ccaccatgagtgtacgatttcatttatatatacacttacgtgtgta
 tgt
 |||
 tgt
-540 474 0 F 522 658 80 975 29 94.44
+540 474 0 F 522 658 80 975 29 94.54
 aggttgcccccaatcggaagagaagttgngcnctttcttcctccctgccnttagtgccgttgaattggct
 |||||| |||| |||||||||||| |||  | | |||||||| |||  | |||||| || || |||||||
 aggttg-cccc-atcggaagagaanttgaactc-ttcttcct-cctnnc-ttagtgacg-tg-attggct
@@ -318,7 +318,7 @@ gtggtcaatgcaaatttaagaaattatttgccgacttaaaagttgaggaactattgtttgaaagtgaaaa
 tgttattcctatcagtttctctataattatagttatcatttcatttc
 |||||||||||||||||||||||||||||||||||||||||||||||
 tgttattcctatcagtttctctataattatagttatcatttcatttc
-551 78 214 F 548 1488 0 1000 33 93.98
+551 78 214 F 548 1488 0 1000 33 93.99
 ggatttgaagcgaagcttaaccatc-ttatggtgacttagatctatttagaacc-tttagttggtggctt
 |||||||| ||| |||||| ||||| ||||||||  || || |||||||| ||| ||||| |||||||||
 ggatttgacgcg-agcttacccatctttatggtgctttgga-ctatttag-accntttag-tggtggctt
@@ -343,7 +343,7 @@ atatattgtgtgggcctttatgggctgtaatctgttttgtaacccatgttgttatgaataaaatcctaat
 cttgcgag
 ||||||||
 cttgcgag
-742 5 0 F 746 16 118 1323 55 92.59
+742 5 0 F 746 16 118 1323 55 92.61
 aaatatttgtctgttacagatggaacagtgaagcgatacaacgatgcaaaaaaagagtggggattcacac
 ||||||||| |||||||||||||   |||||||||||| ||| |||| |||||||| ||||| |||  ||
 aaatatttgactgttacagatggcttagtgaagcgatataacaatgcgaaaaaagaatggggtttcggac
@@ -377,7 +377,7 @@ atatctgcncttctttgtctacnancaatccaccttatgaataaaaaaat-tttaatttgatgaatttgt
 aataagaaaacgttaatgtttgtgaattgtgaa
  |||| ||||| ||||||||||| || ||||||
 tataanaaaactttaatgtttgttaaatgtgaa
-504 1788 0 F 510 1850 9 888 42 91.67
+504 1788 0 F 510 1850 9 888 42 91.72
 gaaaatggcttccaagactttccttcttttgggtctctttgcatttntttncatcgtctcagaaatggct
 |||||||||||||||||||||||||||||||||||||||||||||| ||| |||||||||||||||||||
 gaaaatggcttccaagactttccttcttttgggtctctttgcatttntttncatcgtctcagaaatggct
@@ -399,7 +399,7 @@ actaaatctacataatatatcaa-ccaccatgagtgtacgatttcatttatatatacacttacgtgtgta
 tgt
 |||
 tgt
-510 736 0 F 525 846 91 915 40 92.16
+510 736 0 F 525 846 91 915 40 92.27
 cctgccttagtg-cgtcgaatggctaaggaagttgactn-cttctccgcaacaagtgga-tccnttgtgt
 |||| ||||||| |||||| ||||  ||||||||||||  |||| ||||| | |||||| |||  |||||
 cctgacttagtgacgtcgattggcn-aggaagttgactaccttcaccgcanc-agtggattccc-tgtgt
@@ -421,7 +421,7 @@ aattatctctgctcatttcatttcctattgtctgtgttctttttctctttatgagacaatttctatcgga
 ttgtcaaatgtctgatttatgaatatgtaatttat
 |||||||||||||||||||||||||||||||||||
 ttgtcaaatgtctgatttatgaatatgtaatttat
-715 2 0 F 747 16 84 1264 66 90.77
+715 2 0 F 747 16 84 1264 66 90.97
 tgttgatctcaaactctttgtccataatgggaagctacacaaatatttgactgttacagatggcttagtg
 ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 tgttgatctcaaactctttgtccataatgggaagctacacaaatatttgactgttacagatggcttagtg
@@ -452,7 +452,7 @@ tactgttagctgatttaaacgatgcatccaaaggatatttggtgaatgatgccattatctttgaagctga
 a-tggttaag
 | ||||||||
 aatggttaag
-503 846 115 F 511 1230 2 879 45 91.05
+503 846 115 F 511 1230 2 879 45 91.12
 aggaagttgactaccttcaccgcanc-agtggattccc-tgtgttgaattcgagttagagcacggatttg
 |||||||||||| | ||| | ||| | | |||  |||| ||||||||||||||||||| || ||||||||
 aggaagttgactccnttctcngcaacaaatggn-tcccttgtgttgaattcgagttagggcncggatttg
@@ -474,7 +474,7 @@ cctattgtctgtgttctttttctctttatgagacaatttctatcggattgtcaaatgtctgatttatgaa
 tatgtaatttatat
 ||||||||||||||
 tatgtaatttatat
-510 736 0 F 525 846 91 915 40 92.16
+510 736 0 F 525 846 91 915 40 92.27
 cctgccttagtg-cgtcgaatggctaaggaagttgactn-cttctccgcaacaagtgga-tccnttgtgt
 |||| ||||||| |||||| ||||  ||||||||||||  |||| ||||| | |||||| |||  |||||
 cctgacttagtgacgtcgattggcn-aggaagttgactaccttcaccgcanc-agtggattccc-tgtgt
@@ -496,7 +496,7 @@ aattatctctgctcatttcatttcctattgtctgtgttctttttctctttatgagacaatttctatcgga
 ttgtcaaatgtctgatttatgaatatgtaatttat
 |||||||||||||||||||||||||||||||||||
 ttgtcaaatgtctgatttatgaatatgtaatttat
-715 2 0 F 747 16 84 1264 66 90.77
+715 2 0 F 747 16 84 1264 66 90.97
 gtgantgttgatctcaaactctttgtccataatgggaagctacacaaatatttgactgttacagatggct
 |||| |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 gtgaatgttgatctcaaactctttgtccataatgggaagctacacaaatatttgactgttacagatggct
@@ -527,7 +527,7 @@ tatcatactgttagctgatttaaacgatgcatccaaaggatatttggtgaatgatgccattatctttgaa
 -ctgaa-tggttaag
  ||||| ||||||||
 gctgaaatggttaag
-742 5 0 F 746 16 118 1323 55 92.59
+742 5 0 F 746 16 118 1323 55 92.61
 aaatatttgtctgttacagatggaacagtgaagcgatacaacgatgcaaaaaaagagtggggattcacac
 ||||||||| |||||||||||||   |||||||||||| ||| |||| |||||||| ||||| |||  ||
 aaatatttgactgttacagatggcttagtgaagcgatataacaatgcgaaaaaagaatggggtttcggac
@@ -561,7 +561,7 @@ atatctgcncttctttgtctacnancaatccaccttatgaataaaaaaat-tttaatttgatgaatttgt
 aataagaaaacgttaatgtttgtgaattgtgaa
  |||| ||||| ||||||||||| || ||||||
 tataanaaaactttaatgtttgttaaatgtgaa
-746 3 0 F 743 39 72 1291 66 91.12
+746 3 0 F 743 39 72 1291 66 91.13
 gtgaagcgatacaacgatgcaaaaaaagagtggggattcacacaattgatttctcttccaacattctaca
 |||||||||||||||||||| |||||||||||||||||||||||||||||||||||||||||||||||||
 gtgaagcgatacaacgatgcnaaaaaagagtggggattcacacaattgatttctcttccaacattctaca

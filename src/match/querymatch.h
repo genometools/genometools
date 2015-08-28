@@ -31,6 +31,7 @@ typedef struct GtQuerymatchoutoptions GtQuerymatchoutoptions;
 GtQuerymatch *gt_querymatch_new(void);
 
 void gt_querymatch_fill(GtQuerymatch *querymatch,
+                        const GtEncseq *encseq,
                         GtUword dblen,
                         GtUword dbstart,
                         GtReadmode readmode,
@@ -40,7 +41,8 @@ void gt_querymatch_fill(GtQuerymatch *querymatch,
                         bool selfmatch,
                         uint64_t queryseqnum,
                         GtUword querylen,
-                        GtUword querystart);
+                        GtUword querystart,
+                        GtUword query_totallength);
 
 void gt_querymatch_delete(GtQuerymatch *querymatch);
 
@@ -100,5 +102,7 @@ void gt_querymatchoutoptions_delete(
 
 void gt_querymatch_set_seed(GtQuerymatchoutoptions *querymatchoutoptions,
                             GtUword pos1,GtUword pos2,GtUword len);
+
+double gt_querymatch_error_rate(GtUword distance,GtUword alignedlen);
 
 #endif

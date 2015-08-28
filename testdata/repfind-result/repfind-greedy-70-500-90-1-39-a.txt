@@ -29,7 +29,7 @@ atggtgaatgatgccattatctttgaagctgaaatggttaaggtctctgtgacaaacatagtctccgttt
 aaatatc
 |||||||
 aaatatc
-565 79 59 F 566 1495 2 1020 37 93.45
+565 79 59 F 566 1495 2 1020 37 93.46
 gccggatttggtttgtatccaacgttgttttgtttttctttcaataatctcatagatcttat-gttggtg
 ||||| ||||||||||  ||||||||| ||||  |||| ||| |||| | ||| |  ||| | |||||  
 gccgg-tttggtttgtncccaacgttg-tttggntttccttcnataaccccatggnccttntggttgg-n
@@ -88,7 +88,7 @@ ggtgaatgatgccattatctttgaagctgaaatggttaaggtctctataaccaacatcgtctccgcttaa
 atatctgcacttctttgtctacgatcaatcaaccttatgaataaa
 |||||||| ||||||||||||| | ||||| ||||||||||||||
 atatctgcncttctttgtctacnancaatccaccttatgaataaa
-677 3 0 F 673 39 72 1215 45 93.31
+677 3 0 F 673 39 72 1215 45 93.33
 gtgaagcgatacaacgatgcaaaaaaagagtggggattcacacaattgatttctcttccaacattctaca
 |||||||||||||||||||| |||||||||||||||||||||||||||||||||||||||||||||||||
 gtgaagcgatacaacgatgcnaaaaaagagtggggattcacacaattgatttctcttccaacattctaca
@@ -119,7 +119,7 @@ agctgaaatggttaaggtctctgtga-caaacatagtctccgtttaaatatcac-t-acttctttttcaa
 cccccgnaataaccttacaaa-gaaaaattgatga-tttaatttgttatac
 |  |     ||    || ||  | |   ||||||| |||||||||||||||
 caacaaccttacgaata-aagtgga-ctttgatgagtttaatttgttatac
-721 6 71 F 724 39 143 1343 34 95.28
+721 6 71 F 724 39 143 1343 34 95.29
 cgcgaangaagggtaccttgtgnangacnnnncttctttnggtgctganatcttcatgcgntancccgac
 |||||| ||||||||||||||| | |||    ||||||| |||||||| |||||||| || || ||||||
 cgcgaacgaagggtaccttgtgcaggacacagcttcttttggtgctgagatcttcat-cgttaacccgac
@@ -153,7 +153,7 @@ natcgttgtttctgctctccgagttttcgttttactttttttttcatgttttgctatccaatgaaaataa
 a-ggtataaaactctc-tt-ggtttt
 | ||| |||||||||| || ||||||
 aaggtttaaaactctcctttggtttt
-581 2 45 F 600 5 11 1010 57 90.19
+581 2 45 F 600 5 11 1010 57 90.35
 aaatatttgactgttacagatggcttagtgaagcgatataacaatgcgaaaaaagaatggggtttcggac
 ||||||||| |||||||||||||   |||||||||||| ||| |||| |||||||| ||||| |||  ||
 aaatatttgtctgttacagatggaacagtgaagcgatacaacgatgcaaaaaaagagtggggattcacac
@@ -212,7 +212,7 @@ aatataatattgatgtcagagctaaaagatgcatcaaaagggtatatggtgaatgatgccattatctttg
 aagctgaaatggttaaggtctctataaccaacatcgtctccgcttaaatatc
 ||||||||||||||||||||||| | || ||||| ||||||| |||||||||
 aagctgaaatggttaaggtctctgtgacaaacatagtctccgtttaaatatc
-721 6 71 F 724 39 143 1343 34 95.28
+721 6 71 F 724 39 143 1343 34 95.29
 cgcgaangaagggtaccttgtgnangacnnnncttctttnggtgctganatcttcatgcgntancccgac
 |||||| ||||||||||||||| | |||    ||||||| |||||||| |||||||| || || ||||||
 cgcgaacgaagggtaccttgtgcaggacacagcttcttttggtgctgagatcttcat-cgttaacccgac
@@ -246,7 +246,7 @@ natcgttgtttctgctctccgagttttcgttttactttttttttcatgttttgctatccaatgaaaataa
 a-ggtataaaactctc-tt-ggtttt
 | ||| |||||||||| || ||||||
 aaggtttaaaactctcctttggtttt
-677 3 0 F 673 39 72 1215 45 93.31
+677 3 0 F 673 39 72 1215 45 93.33
 gtgaagcgatacaacgatgcaaaaaaagagtggggattcacacaattgatttctcttccaacattctaca
 |||||||||||||||||||| |||||||||||||||||||||||||||||||||||||||||||||||||
 gtgaagcgatacaacgatgcnaaaaaagagtggggattcacacaattgatttctcttccaacattctaca
@@ -277,7 +277,7 @@ agctgaaatggttaaggtctctgtga-caaacatagtctccgtttaaatatcac-t-acttctttttcaa
 cccccgnaataaccttacaaa-gaaaaattgatga-tttaatttgttatac
 |  |     ||    || ||  | |   ||||||| |||||||||||||||
 caacaaccttacgaata-aagtgga-ctttgatgagtttaatttgttatac
-721 6 71 F 724 39 143 1343 34 95.28
+721 6 71 F 724 39 143 1343 34 95.29
 cgcgaangaagggtaccttgtgnangacnnnncttctttnggtgctganatcttcatgcgntancccgac
 |||||| ||||||||||||||| | |||    ||||||| |||||||| |||||||| || || ||||||
 cgcgaacgaagggtaccttgtgcaggacacagcttcttttggtgctgagatcttcat-cgttaacccgac
@@ -336,7 +336,7 @@ cttcttccccacaatgattgaaaaactcttcttgttatgaataaagatggatgcccatttataagggcca
 tcatctaagcccatcatctagattttt
 |||||||||||||||||||||||||||
 tcatctaagcccatcatctagattttt
-537 474 3 F 520 658 82 970 29 94.42
+537 474 3 F 520 658 82 970 29 94.51
 aggttgcccccaatcggaagagaagttgngcnct-ttcttcctccctgccnttagtgccgttgaattggc
 |||||| |||| |||||||||||| ||  |  || |||||||| |||  | |||||| || || ||||||
 aggttg-cccc-atcggaagagaantt--gaactcttcttcct-cctnnc-ttagtgacg-tg-attggc
@@ -392,7 +392,7 @@ ggtgaatgatgccattatctttgaagctgaaatggttaaggtctctataaccaacatcgtctccgcttaa
 atatctgcacttctttgtctacgatcaatcaaccttatgaataaa
 |||||||| ||||||||||||| | ||||| ||||||||||||||
 atatctgcncttctttgtctacnancaatccaccttatgaataaa
-610 3 0 F 607 5 38 1091 42 93.08
+610 3 0 F 607 5 38 1091 42 93.10
 gtgaagcgatacaacgatgcaaaaaaagagtggggattcacacaattgatttctcttccaacattctaca
 ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 gtgaagcgatacaacgatgcaaaaaaagagtggggattcacacaattgatttctcttccaacattctaca
@@ -420,7 +420,7 @@ aatatcatactgttagctga-tttaaacgatgcatcaaaaggatatttggtgaatgatgccattatcttt
 tgaaactgaaatggttaaggtctctgtgaac-aacatantctccncttaaatat
  ||| |||||||||||||||||||| | ||| |||||  ||||| |||||||||
 -gaagctgaaatggttaaggtctctat-aaccaacatcgtctccgcttaaatat
-621 2 5 F 640 16 89 1183 26 95.81
+621 2 5 F 640 16 89 1183 26 95.88
 tgttgatctcaaactctttgtccataatgggaagctacacaaatatttgactgttacagatggcttagtg
 ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 tgttgatctcaaactctttgtccataatgggaagctacacaaatatttgactgttacagatggcttagtg
@@ -451,7 +451,7 @@ tactgttagctgatttaaacgatgcatccaaaggatatttggtgaatgatgccattatctttgaagctga
 a-tggttaag
 | ||||||||
 aatggttaag
-626 2 0 F 645 16 84 1190 27 95.69
+626 2 0 F 645 16 84 1190 27 95.75
 gtgantgttgatctcaaactctttgtccataatgggaagctacacaaatatttgactgttacagatggct
 |||| |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 gtgaatgttgatctcaaactctttgtccataatgggaagctacacaaatatttgactgttacagatggct
@@ -513,7 +513,7 @@ ggtgaatgatgccattatctttgaagctgaaatggttaaggtctctataaccaacatcgtctccgcttaa
 atatctgcacttctttgtctacgatcaatcaaccttatgaataaa
 |||||||| ||||||||||||| | ||||| ||||||||||||||
 atatctgcncttctttgtctacnancaatccaccttatgaataaa
-677 3 0 F 673 39 72 1215 45 93.31
+677 3 0 F 673 39 72 1215 45 93.33
 gtgaagcgatacaacgatgcaaaaaaagagtggggattcacacaattgatttctcttccaacattctaca
 |||||||||||||||||||| |||||||||||||||||||||||||||||||||||||||||||||||||
 gtgaagcgatacaacgatgcnaaaaaagagtggggattcacacaattgatttctcttccaacattctaca
@@ -544,7 +544,7 @@ agctgaaatggttaaggtctctgtga-caaacatagtctccgtttaaatatcac-t-acttctttttcaa
 cccccgnaataaccttacaaa-gaaaaattgatga-tttaatttgttatac
 |  |     ||    || ||  | |   ||||||| |||||||||||||||
 caacaaccttacgaata-aagtgga-ctttgatgagtttaatttgttatac
-610 3 0 F 607 5 38 1091 42 93.08
+610 3 0 F 607 5 38 1091 42 93.10
 gtgaagcgatacaacgatgcaaaaaaagagtggggattcacacaattgatttctcttccaacattctaca
 ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 gtgaagcgatacaacgatgcaaaaaaagagtggggattcacacaattgatttctcttccaacattctaca

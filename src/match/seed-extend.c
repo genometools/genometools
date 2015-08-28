@@ -168,11 +168,6 @@ static void fill_repfind_sequence_info(Repfindsequenceinfo *rfsi,
   */
 }
 
-static double error_rate(GtUword distance,GtUword alignedlen)
-{
-  return 200.0 * (double) distance/alignedlen;
-}
-
 int gt_simplexdropselfmatchoutput(void *info,
                                   const GtEncseq *encseq,
                                   GtUword len,
@@ -270,7 +265,7 @@ int gt_simplexdropselfmatchoutput(void *info,
           xdropmatchinfo->best_left.score +
           xdropmatchinfo->best_right.score;
   total_distance = score2distance(score,total_alignedlen);
-  if (error_rate(total_distance,total_alignedlen) <=
+  if (gt_querymatch_error_rate(total_distance,total_alignedlen) <=
       (double) xdropmatchinfo->errorpercentage &&
       total_alignedlen >= 2 * xdropmatchinfo->userdefinedleastlength)
   {
@@ -284,7 +279,7 @@ int gt_simplexdropselfmatchoutput(void *info,
 #ifdef SKDEBUG
     printf("total_distance=" GT_WU ", score=" GT_WD ",total_alignedlen=" GT_WU
             ", err=%.2f\n",total_distance,score,total_alignedlen,
-            error_rate(total_distance,total_alignedlen));
+            gt_querymatch_error_rate(total_distance,total_alignedlen));
 #endif
     if (xdropmatchinfo->silent)
     {
@@ -809,9 +804,9 @@ int gt_simplegreedyselfmatchoutput(void *info,
   printf("total_distance=" GT_WU ", total_alignedlen=" GT_WU ",err=%.2f\n",
           total_distance,
           total_alignedlen,
-          error_rate(total_distance,total_alignedlen));
+          gt_querymatch_error_rate(total_distance,total_alignedlen));
 #endif
-  if (error_rate(total_distance,total_alignedlen) <=
+  if (gt_querymatch_error_rate(total_distance,total_alignedlen) <=
       (double) greedyextendmatchinfo->errorpercentage &&
       total_alignedlen >= 2 * greedyextendmatchinfo->userdefinedleastlength)
   {
@@ -853,11 +848,11 @@ int gt_simplegreedyselfmatchoutput(void *info,
   } else
   {
 #ifdef SKDEBUG
-    if (error_rate(total_distance,total_alignedlen) >
+    if (gt_querymatch_error_rate(total_distance,total_alignedlen) >
       (double) greedyextendmatchinfo->errorpercentage)
     {
       printf("reject: error rate %.2f > %.2f\n",
-              error_rate(total_distance,total_alignedlen),
+              gt_querymatch_error_rate(total_distance,total_alignedlen),
               (double) greedyextendmatchinfo->errorpercentage);
     } else
     {

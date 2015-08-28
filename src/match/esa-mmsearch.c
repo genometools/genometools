@@ -410,6 +410,7 @@ static int gt_queryuniquematch(bool selfmatch,
                              queryrep->sequence))
     {
       gt_querymatch_fill(querymatchspaceptr,
+                         suffixarray->encseq,
                          matchlen,
                          dbstart,
                          queryrep->readmode,
@@ -419,7 +420,8 @@ static int gt_queryuniquematch(bool selfmatch,
                          selfmatch,
                          localqueryunitnum,
                          matchlen,
-                         localqueryoffset);
+                         localqueryoffset,
+                         queryrep->length);
       if (processquerymatch(processquerymatchinfo,
                             suffixarray->encseq,
                             querymatchspaceptr,
@@ -497,6 +499,7 @@ static int gt_querysubstringmatch_generic(
                                                  &querysubstring,
                                                  minmatchlength);
         gt_querymatch_fill(querymatchspaceptr,
+                           dbencseq,
                            minmatchlength + extend,
                            dbstart,
                            queryrep->readmode,
@@ -506,7 +509,8 @@ static int gt_querysubstringmatch_generic(
                            selfmatch,
                            localqueryunitnum,
                            minmatchlength + extend,
-                           localqueryoffset);
+                           localqueryoffset,
+                           queryrep->length);
         if (processquerymatch(processquerymatchinfo,
                               dbencseq,
                               querymatchspaceptr,
