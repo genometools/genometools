@@ -155,9 +155,9 @@ static GtOptionParser* gt_linspace_align_option_parser_new(void *tool_arguments)
                                                  arguments->affinecosts);
   gt_option_parser_add_option(op, optionaffinecosts);
 
-  optiondiagonalbonds = gt_option_new_string_array("d", "diagonalband alignment, "
-                                                 "use two bounds",
-                                                 arguments->diagonalbonds);
+  optiondiagonalbonds = gt_option_new_string_array("d", "diagonalband alignment"
+                                                   ", use two bounds",
+                                                   arguments->diagonalbonds);
   gt_option_parser_add_option(op, optiondiagonalbonds);
 
   optionoutputfile = gt_option_new_string("o", "use outputfile",
@@ -218,7 +218,6 @@ static int gt_linspace_align_arguments_check(GT_UNUSED int rest_argc,
     gt_error_set(err, "option -d requires left and right shift of diagonal");
     had_err = 1;
   }
-
 
   return had_err;
 }
@@ -391,7 +390,7 @@ static int gt_linspace_align_runner(GT_UNUSED int argc,
              diagonalbonds = select_costs(arguments->diagonalbonds, err);
              if (diagonalbonds == NULL)
                return 1;
-              
+
              align = gt_computediagnoalbandalign(useq, 0, ulen, vseq, 0, vlen,
                                                  diagonalbonds[0],
                                                  diagonalbonds[1],

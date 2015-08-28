@@ -831,7 +831,7 @@ void gt_checkdiagnonalbandalign(GT_UNUSED bool forward,
   edist4 = diagonalband_linear_distance_only(useq, 0, ulen, vseq, 0, vlen,
                                              left_dist, right_dist, 0,1,1);
   edist5 = gt_squarededistunit(useq, ulen, vseq, vlen);
-  
+
   if (edist4 != edist5)
   {
     fprintf(stderr,"diagonalband_linear_distance_only = "GT_WU" != "GT_WU
