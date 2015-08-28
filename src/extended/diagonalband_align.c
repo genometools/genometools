@@ -71,10 +71,15 @@ void reconstructalignment_from_Dtab(GtAlignment *align,
     {
       if (Dtab[i].edge == Linear_R)
         gt_alignment_add_replacement(align);
-      else
+      else if(Dtab[i].edge == Linear_D)
       {
          gt_alignment_add_deletion(align);
          gt_alignment_add_insertion(align);
+      }
+      else if(Dtab[i].edge == Linear_I)
+      {
+         gt_alignment_add_insertion(align);
+         gt_alignment_add_deletion(align);
       }
     }
     else if (Dtab[i].currentrowindex == Dtab[i-1].currentrowindex)
@@ -91,6 +96,15 @@ void reconstructalignment_from_Dtab(GtAlignment *align,
           gt_alignment_add_deletion(align);
         }
       }
+      else if (Dtab[i].edge == Linear_I)
+      {
+        gt_alignment_add_insertion(align);
+        for (j = 0; j < (Dtab[i].currentrowindex -
+                         Dtab[i-1].currentrowindex); j++)
+        {
+          gt_alignment_add_deletion(align);
+        }
+      }
       else
       {
         for (j = 0; j < (Dtab[i].currentrowindex -
@@ -99,7 +113,6 @@ void reconstructalignment_from_Dtab(GtAlignment *align,
           gt_alignment_add_deletion(align);
         }
         gt_alignment_add_replacement(align);
-        /*TODO: insertion + deletion = replacement als weitere Möglichkeit*/
       }
     }
   }
@@ -503,6 +516,7 @@ static GtUword evaluateallcolumns(GtUword *EDtabcolumn,
     }
   }
   /* last crosspoint of optimal path */
+  
   return Rtabcolumn[high_row-low_row];
 }
 
@@ -572,7 +586,7 @@ static void evaluatecrosspoints(GtUword *EDtabcolumn,
   {
     if (diag + ((GtWord)ulen-(GtWord)vlen) > 0)
     {
-      new_left = MAX((GtWord)left_dist+(GtWord)cpoint,
+      new_left = MAX((GtWord)left_dist,
                     -((GtWord)ulen - ((GtWord)Diagcolumn[cpoint].currentrowindex
                     -(GtWord)rowoffset)));
       new_right = 0;
