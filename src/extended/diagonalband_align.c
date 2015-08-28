@@ -14,7 +14,6 @@
   ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
-
 #include <string.h>
 #include "core/assert_api.h"
 #include "core/ma.h"
@@ -23,6 +22,7 @@
 #include "core/types_api.h"
 #include "core/divmodmul.h"
 #include "core/unused_api.h"
+#include "match/squarededist.h"
 
 #include "extended/diagonalband_align.h"
 
@@ -721,6 +721,7 @@ static void gt_calc_diagonalbandalign(const GtUchar *useq,
     Diagcolumn[idx].lastcpoint = GT_UWORD_MAX;
     Diagcolumn[idx].currentrowindex = GT_UWORD_MAX;
   }
+
   evaluatecrosspoints(EDtabcolumn, Rtabcolumn, Diagcolumn, Linear_X, 0, 0,
                       useq, ustart, ulen, vseq, vstart, vlen,
                       left_dist, right_dist,
@@ -771,7 +772,7 @@ void gt_checkdiagnonalbandalign(GT_UNUSED bool forward,
                                 const GtUchar *vseq,
                                 GtUword vlen)
 {
-  GtUword edist1, edist2, edist3;
+  GtUword edist1, edist2, edist3, edist4, edist5;
   GtWord left_dist, right_dist;
   GtAlignment *align;
 
@@ -796,13 +797,11 @@ void gt_checkdiagnonalbandalign(GT_UNUSED bool forward,
   else
     right_dist = 0;
 
-  edist1 = diagonalband_linear_distance_only(useq, 0, ulen,
-                                   vseq,0, vlen, left_dist, right_dist,
-                                   0,1,1);
+  edist1 = diagonalband_linear_distance_only(useq, 0, ulen, vseq, 0, vlen,
+                                             left_dist, right_dist, 0,1,1);
 
-  edist2 = diagonalband_squarespace_distance_only(useq, 0, ulen,
-                                   vseq,0, vlen, left_dist, right_dist,
-                                   0,1,1);
+  edist2 = diagonalband_squarespace_distance_only(useq, 0, ulen, vseq, 0, vlen,
+                                                  left_dist, right_dist, 0,1,1);
 
   if (edist1 != edist2)
   {
@@ -812,10 +811,10 @@ void gt_checkdiagnonalbandalign(GT_UNUSED bool forward,
   }
 
   align = gt_alignment_new_with_seqs(useq, ulen, vseq, vlen);
-  gt_calc_diagonalbandalign(useq, 0, ulen,vseq, 0,vlen,
-                                    left_dist, right_dist, align,0,1,1);
+  gt_calc_diagonalbandalign(useq, 0, ulen, vseq, 0, vlen,
+                            left_dist, right_dist, align, 0, 1, 1);
 
-  edist3 = gt_alignment_eval_with_score(align,0,1,1);
+  edist3 = gt_alignment_eval_with_score(align, 0, 1, 1);
 
   if (edist2 != edist3)
   {
@@ -825,4 +824,19 @@ void gt_checkdiagnonalbandalign(GT_UNUSED bool forward,
     exit(GT_EXIT_PROGRAMMING_ERROR);
   }
   gt_alignment_delete(align);
+
+  /* set new left and right to set diagonalband to the whole matrix */
+  left_dist = -ulen;
+  right_dist = vlen;
+  edist4 = diagonalband_linear_distance_only(useq, 0, ulen, vseq, 0, vlen,
+                                             left_dist, right_dist, 0,1,1);
+  edist5 = gt_squarededistunit(useq, ulen, vseq, vlen);
+  
+  if (edist4 != edist5)
+  {
+    fprintf(stderr,"diagonalband_linear_distance_only = "GT_WU" != "GT_WU
+              " = gt_squarededistunit\n", edist4, edist5);
+
+    exit(GT_EXIT_PROGRAMMING_ERROR);
+  }
 }
