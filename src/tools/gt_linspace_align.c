@@ -27,8 +27,10 @@
 #include "core/str_array.h"
 #include "core/types_api.h"
 #include "core/unused_api.h"
+#include "extended/diagonalband_align.h"
 #include "extended/linearalign_affinegapcost.h"
 #include "extended/linearalign.h"
+
 #include "tools/gt_linspace_align.h"
 
 typedef struct {
@@ -36,10 +38,13 @@ typedef struct {
   GtStrArray *strings,
              *files,
              *linearcosts,
-             *affinecosts;
+             *affinecosts,
+             *diagonalbonds;
   bool global,
        local,
        showscore;
+       /*attention, still difference between alignment and score,
+        * because of different handling with lower and upper case, TODO*/
 } GtLinspaceArguments;
 
 typedef struct {
@@ -60,6 +65,7 @@ static void* gt_linspace_align_arguments_new(void)
   arguments->files = gt_str_array_new();
   arguments->linearcosts = gt_str_array_new();
   arguments->affinecosts = gt_str_array_new();
+  arguments->diagonalbonds = gt_str_array_new();
   return arguments;
 }
 
@@ -72,6 +78,7 @@ static void gt_linspace_align_arguments_delete(void *tool_arguments)
     gt_str_array_delete(arguments->files);
     gt_str_array_delete(arguments->linearcosts);
     gt_str_array_delete(arguments->affinecosts);
+    gt_str_array_delete(arguments->diagonalbonds);
     gt_free(arguments);
   }
 }
@@ -106,7 +113,8 @@ static GtOptionParser* gt_linspace_align_option_parser_new(void *tool_arguments)
   GtLinspaceArguments *arguments = tool_arguments;
   GtOptionParser *op;
   GtOption *optionstrings, *optionfiles, *optionglobal, *optionlocal,
-  *optionlinearcosts, *optionaffinecosts, *optionoutputfile, *optionshowscore;
+           *optionlinearcosts, *optionaffinecosts, *optionoutputfile,
+           *optionshowscore, *optiondiagonalbonds;
   gt_assert(arguments);
 
   /* init */
@@ -146,6 +154,11 @@ static GtOptionParser* gt_linspace_align_option_parser_new(void *tool_arguments)
                                                  "use four values",
                                                  arguments->affinecosts);
   gt_option_parser_add_option(op, optionaffinecosts);
+
+  optiondiagonalbonds = gt_option_new_string_array("d", "diagonalband alignment, "
+                                                 "use two bounds",
+                                                 arguments->diagonalbonds);
+  gt_option_parser_add_option(op, optiondiagonalbonds);
 
   optionoutputfile = gt_option_new_string("o", "use outputfile",
                                           arguments->outputfile, "stdout");
@@ -199,6 +212,13 @@ static int gt_linspace_align_arguments_check(GT_UNUSED int rest_argc,
                       "gap_opening, gap_extending costs/scores");
     had_err = 1;
   }
+  if ((gt_str_array_size(arguments->diagonalbonds) > 0) &&
+     (gt_str_array_size(arguments->diagonalbonds) != 2UL))
+  {
+    gt_error_set(err, "option -d requires left and right shift of diagonal");
+    had_err = 1;
+  }
+
 
   return had_err;
 }
@@ -322,7 +342,7 @@ static int gt_linspace_align_runner(GT_UNUSED int argc,
   int had_err = 0;
   const GtUchar *useq, *vseq;
   GtUword i, j, ulen, vlen;
-  GtWord *linearcosts, *affinecosts, score = GT_WORD_MAX;
+  GtWord *linearcosts, *affinecosts, *diagonalbonds, score = GT_WORD_MAX;
   GtAlignment *align = NULL;
   FILE *fp;
 
@@ -366,8 +386,24 @@ static int gt_linspace_align_runner(GT_UNUSED int argc,
 
         if (arguments->global)
         {
-            align = gt_computelinearspace(useq, 0, ulen, vseq, 0, vlen,
-                    linearcosts[0],linearcosts[1],linearcosts[2]);
+           if (gt_str_array_size(arguments->diagonalbonds) > 0)
+           {
+             diagonalbonds = select_costs(arguments->diagonalbonds, err);
+             if (diagonalbonds == NULL)
+               return 1;
+              
+             align = gt_computediagnoalbandalign(useq, 0, ulen, vseq, 0, vlen,
+                                                 diagonalbonds[0],
+                                                 diagonalbonds[1],
+                                                 linearcosts[0],
+                                                 linearcosts[1],
+                                                 linearcosts[2]);
+           }
+           else
+           {
+             align = gt_computelinearspace(useq, 0, ulen, vseq, 0, vlen,
+                     linearcosts[0],linearcosts[1],linearcosts[2]);
+           }
         }
         else if (arguments->local)
         {

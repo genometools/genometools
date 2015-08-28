@@ -65,6 +65,23 @@ Test do
   run "diff #{last_stdout} #{$testdata}gt_linspace_align_local_affine_test_1.out"
 end
 
+Name "gt linspace_align global lin gap diagonalband"
+Keywords "gt_linspace_align"
+Test do
+  i=0
+  filelist = ["Ecoli-section1.fna",
+              "Ecoli-section2.fna"]
+  filelist.each do |f1|
+    filelist.each do |f2|
+      if f1 != f2
+        i=i+1
+        run_test "#{$bin}gt dev linspace_align -ff #{$testdata}#{f1} #{$testdata}#{f2} "\
+                 "-global -l 0 1 1 -d \" -400\" 400", :maxtime => 1
+        run "diff #{last_stdout} #{$testdata}gt_linspace_align_global_test_#{i}.out"
+      end
+    end
+  end
+end
 
 Name "gt linspace_align special cases"
 Keywords "gt_linspace_align"
@@ -89,4 +106,9 @@ Test do
            "#{$testdata}gt_linspace_align_special_cases_test_2.fas "\
            "-local -a  6 \" -2\" \" -5\" \" -1\""
   run "diff #{last_stdout} #{$testdata}gt_linspace_align_local_affine_special_cases.out"
+  run_test "#{$bin}gt dev linspace_align -ff "\
+           "#{$testdata}gt_linspace_align_special_cases_test_1.fas "\
+           "#{$testdata}gt_linspace_align_special_cases_test_2.fas "\
+           "-global -l 0 1 1 -d \" -5\" 4"
+  run "diff #{last_stdout} #{$testdata}gt_linspace_align_global_linear_special_cases.out"
 end
