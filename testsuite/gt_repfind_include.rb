@@ -102,14 +102,14 @@ Test do
   run_test "#{$bin}gt suffixerator -db #{$testdata}at1MB " +
            "-indexname sfx -dna -tis -suf -lcp"
   run_test "#{$bin}gt repfind -minidentity 90 -l 20 -xdropbelow 5 -extendxdrop -ii sfx"
-  run "diff #{last_stdout} #{$testdata}repfind-result/repfind-20-extend.txt"
+  run "cmp -s #{last_stdout} #{$testdata}repfind-result/repfind-20-extend.txt"
   run_test "#{$bin}gt repfind -minidentity 85 -l 20 -extendxdrop -ii sfx -q " +
            "#{$testdata}/U89959_genomic.fas"
-  run "diff #{last_stdout} #{$testdata}repfind-result/repfind-20-query-extend.txt"
+  run "cmp -s #{last_stdout} #{$testdata}repfind-result/repfind-20-query-extend.txt"
   run_test "#{$bin}gt repfind -extendxdrop -ii sfx -seedlength 70 -l 500 -minidentity 90 -a"
-  run "diff #{last_stdout} #{$testdata}repfind-result/repfind-xdrop-70-500-90-1-39-a.txt"
+  run "cmp -s #{last_stdout} #{$testdata}repfind-result/repfind-xdrop-70-500-90-1-39-a.txt"
   run_test "#{$bin}gt repfind -extendgreedy -ii sfx -seedlength 70 -l 500 -minidentity 90 -a"
-  run "diff #{last_stdout} #{$testdata}repfind-result/repfind-greedy-70-500-90-1-39-a.txt"
+  run "cmp -s #{last_stdout} #{$testdata}repfind-result/repfind-greedy-70-500-90-1-39-a.txt"
 end
 
 if $gttestdata then

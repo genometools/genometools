@@ -42,6 +42,7 @@ struct GtQuerymatch
       dbseqnum, querystart_fwdstrand, dbstart_relative;
    GtWord score; /* 0 for exact match */
    uint64_t queryseqnum; /* ordinal number of match in query */
+   double similarity;
    GtReadmode readmode; /* readmode by which reference sequence was accessed */
    bool selfmatch,       /* true if both instances of the match refer to the
                             same sequence */
@@ -105,6 +106,16 @@ void gt_querymatch_fill(GtQuerymatch *querymatch,
   }
   gt_assert(querymatch->dbstart >= dbseqstartpos);
   querymatch->dbstart_relative = querymatch->dbstart - dbseqstartpos;
+  if (querymatch->edist == 0)
+  {
+    querymatch->similarity = 100.0;
+  } else
+  {
+    querymatch->similarity
+      = 100.0 - gt_querymatch_error_rate(querymatch->edist,
+                                          querymatch->dblen +
+                                          querymatch->querylen);
+  }
 }
 
 void gt_querymatch_delete(GtQuerymatch *querymatch)
@@ -527,7 +538,22 @@ int gt_querymatch_output(void *info,
                      querystart_fwdstrand,
                      querymatch->readmode);
 #endif
-    printf(GT_WU " " GT_WU " " GT_WU " %c " GT_WU " " Formatuint64_t " " GT_WU,
+    if (querymatchoutoptions != NULL &&
+        querymatchoutoptions->alignmentwidth > 0)
+    {
+      if (querymatch->selfmatch)
+      {
+        gt_querymatch_alignment_prepare(querymatchoutoptions,
+                                        encseq,
+                                        querymatch,
+                                        querymatch->querystart_fwdstrand);
+      } else
+      {
+        gt_assert(false); /* case not implemented yet */
+      }
+    }
+    printf(GT_WU " " GT_WU " " GT_WU " %c " GT_WU " " Formatuint64_t
+                   " " GT_WU,
            querymatch->dblen,
            querymatch->dbseqnum,
            querymatch->dbstart_relative,
@@ -537,31 +563,15 @@ int gt_querymatch_output(void *info,
            querymatch->querystart_fwdstrand);
     if (querymatch->score > 0)
     {
-      double similarity;
-      if (querymatch->edist == 0)
-      {
-        similarity = 100.0;
-      } else
-      {
-        similarity = 100.0 - gt_querymatch_error_rate(querymatch->edist,
-                                                      querymatch->dblen +
-                                                      querymatch->querylen);
-      }
-      printf(" " GT_WD " " GT_WU " %.2f\n",
-             querymatch->score,querymatch->edist,similarity);
-    } else
-    {
-      printf("\n");
+      printf(" " GT_WD " " GT_WU " %.2f",
+             querymatch->score,querymatch->edist,querymatch->similarity);
     }
+    printf("\n");
     if (querymatchoutoptions != NULL &&
         querymatchoutoptions->alignmentwidth > 0)
     {
       if (querymatch->selfmatch)
       {
-        gt_querymatch_alignment_prepare(querymatchoutoptions,
-                                     encseq,
-                                     querymatch,
-                                     querymatch->querystart_fwdstrand);
         if (querymatch->edist > 0)
         {
           gt_alignment_show_generic(querymatchoutoptions->alignment_show_buffer,
