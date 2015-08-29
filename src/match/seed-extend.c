@@ -169,12 +169,11 @@ static void fill_repfind_sequence_info(Repfindsequenceinfo *rfsi,
   */
 }
 
-int gt_simplexdropselfmatchoutput(void *info,
-                                  const GtEncseq *encseq,
-                                  GtUword len,
-                                  GtUword pos1,
-                                  GtUword pos2,
-                                  GtError *err)
+const GtQuerymatch *gt_extend_selfmatch_xdrop(void *info,
+                                              const GtEncseq *encseq,
+                                              GtUword len,
+                                              GtUword pos1,
+                                              GtUword pos2)
 {
   GtProcessinfo_and_outoptions *processinfo_and_outoptions
     = (GtProcessinfo_and_outoptions *) info;
@@ -290,7 +289,9 @@ int gt_simplexdropselfmatchoutput(void *info,
     {
       printf("# seed:\t" GT_WU "\t" GT_WU "\t" GT_WU "\n",pos1,pos2,len);
     }
-    return gt_querymatch_fill_and_output(
+    if (gt_querymatch_complete(
+                       processinfo_and_outoptions->querymatchspaceptr,
+                       processinfo_and_outoptions->querymatchoutoptions,
                        dblen,
                        dbstart,
                        GT_READMODE_FORWARD,
@@ -301,27 +302,44 @@ int gt_simplexdropselfmatchoutput(void *info,
                        (uint64_t) rfsi.queryseqnum,
                        querylen,
                        querystart - rfsi.queryseqstartpos,
-                       processinfo_and_outoptions->querymatchoutoptions,
                        encseq,
                        NULL,
                        rfsi.queryseqlength,
                        pos1,
                        pos2,
                        len,
-                       false,
-                       err);
-  } else
-  {
-    return 0;
+                       false))
+    {
+      return processinfo_and_outoptions->querymatchspaceptr;
+    }
   }
+  return NULL;
 }
 
-int gt_processxdropquerymatches(void *info,
-                                const GtEncseq *encseq,
-                                const GtQuerymatch *queryseed,
-                                const GtUchar *query,
-                                GtUword query_totallength,
-                                GtError *err)
+int gt_extend_selfmatch_xdrop_with_output(void *info,
+                                          const GtEncseq *encseq,
+                                          GtUword len,
+                                          GtUword pos1,
+                                          GtUword pos2,
+                                          GT_UNUSED GtError *err)
+{
+  const GtQuerymatch *querymatch = gt_extend_selfmatch_xdrop(info,
+                                                             encseq,
+                                                             len,
+                                                             pos1,
+                                                             pos2);
+  if (querymatch != NULL)
+  {
+    gt_querymatch_prettyprint(querymatch);
+  }
+  return 0;
+}
+
+const GtQuerymatch* gt_extend_querymatch_xdrop(void *info,
+                                               const GtEncseq *encseq,
+                                               const GtQuerymatch *queryseed,
+                                               const GtUchar *query,
+                                               GtUword query_totallength)
 {
   GtProcessinfo_and_outoptions *processinfo_and_outoptions
     = (GtProcessinfo_and_outoptions *) info;
@@ -339,8 +357,7 @@ int gt_processxdropquerymatches(void *info,
   dbseqstartpos = gt_encseq_seqstartpos(encseq,dbseqnum);
   dbseqlength = gt_encseq_seqlength(encseq,dbseqnum);
   /* xdrop left of seed, only if length > 0 excluding pos1 and pos2 */
-  if (pos1 > dbseqstartpos &&
-      pos2 > 0)
+  if (pos1 > dbseqstartpos && pos2 > 0)
   {
 #ifdef SKDEBUG
     printf("leftextend: " GT_WU " to " GT_WU " and " GT_WU " to " GT_WU "\n",
@@ -418,7 +435,9 @@ int gt_processxdropquerymatches(void *info,
   {
     printf("# seed:\t" GT_WU "\t" GT_WU "\t" GT_WU "\n",pos1,pos2,len);
   }
-  return gt_querymatch_fill_and_output(
+  if (gt_querymatch_complete(
+                     processinfo_and_outoptions->querymatchspaceptr,
+                     processinfo_and_outoptions->querymatchoutoptions,
                      dblen,
                      dbstart,
                      GT_READMODE_FORWARD,
@@ -430,16 +449,37 @@ int gt_processxdropquerymatches(void *info,
                      queryseqnum,
                      querylen,
                      querystart,
-                     (void *)
-                     processinfo_and_outoptions->querymatchoutoptions,
                      encseq,
                      query,
                      query_totallength,
                      pos1,
                      pos2,
                      len,
-                     false,
-                     err);
+                     false))
+  {
+    return processinfo_and_outoptions->querymatchspaceptr;
+  }
+  return NULL;
+}
+
+int gt_extend_querymatch_xdrop_with_output(void *info,
+                                           const GtEncseq *encseq,
+                                           const GtQuerymatch *queryseed,
+                                           const GtUchar *query,
+                                           GtUword query_totallength,
+                                           GT_UNUSED GtError *err)
+{
+  const GtQuerymatch *querymatch
+    = gt_extend_querymatch_xdrop(info,
+                                 encseq,
+                                 queryseed,
+                                 query,
+                                 query_totallength);
+  if (querymatch != NULL)
+  {
+    gt_querymatch_prettyprint(querymatch);
+  }
+  return 0;
 }
 
 const char *gt_cam_extendgreedy_comment(void)
@@ -653,12 +693,11 @@ static void gt_FTsequenceResources_init(FTsequenceResources *fsr,
   fsr->extend_char_access = extend_char_access;
 }
 
-int gt_simplegreedyselfmatchoutput(void *info,
-                                   const GtEncseq *encseq,
-                                   GtUword len,
-                                   GtUword pos1,
-                                   GtUword pos2,
-                                   GtError *err)
+const GtQuerymatch *gt_extend_selfmatch_greedy(void *info,
+                                               const GtEncseq *encseq,
+                                               GtUword len,
+                                               GtUword pos1,
+                                               GtUword pos2)
 {
   GtProcessinfo_and_outoptions *processinfo_and_outoptions
     = (GtProcessinfo_and_outoptions *) info;
@@ -829,7 +868,9 @@ int gt_simplegreedyselfmatchoutput(void *info,
     {
       printf("# seed:\t" GT_WU "\t" GT_WU "\t" GT_WU "\n",pos1,pos2,len);
     }
-    return gt_querymatch_fill_and_output(
+    if (gt_querymatch_complete(
+                       processinfo_and_outoptions->querymatchspaceptr,
+                       processinfo_and_outoptions->querymatchoutoptions,
                        dblen,
                        dbstart,
                        GT_READMODE_FORWARD,
@@ -840,15 +881,16 @@ int gt_simplegreedyselfmatchoutput(void *info,
                        (uint64_t) rfsi.queryseqnum,
                        querylen,
                        querystart - rfsi.queryseqstartpos,
-                       processinfo_and_outoptions->querymatchoutoptions,
                        encseq,
                        NULL,
                        rfsi.queryseqlength,
                        pos1,
                        pos2,
                        len,
-                       true,
-                       err);
+                       true))
+    {
+      return processinfo_and_outoptions->querymatchspaceptr;
+    }
   } else
   {
 #ifdef SKDEBUG
@@ -864,8 +906,27 @@ int gt_simplegreedyselfmatchoutput(void *info,
               total_alignedlen,greedyextendmatchinfo->userdefinedleastlength);
     }
 #endif
-    return 0;
   }
+  return NULL;
+}
+
+int gt_extend_selfmatch_greedy_with_output(void *info,
+                                           const GtEncseq *encseq,
+                                           GtUword len,
+                                           GtUword pos1,
+                                           GtUword pos2,
+                                           GT_UNUSED GtError *err)
+{
+  const GtQuerymatch *querymatch = gt_extend_selfmatch_greedy(info,
+                                                              encseq,
+                                                              len,
+                                                              pos1,
+                                                              pos2);
+  if (querymatch != NULL)
+  {
+    gt_querymatch_prettyprint(querymatch);
+  }
+  return 0;
 }
 
 GtUword align_front_prune_edist(bool forward,

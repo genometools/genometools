@@ -68,45 +68,49 @@ typedef struct
            *refextendxdropoption,
            *refextendgreedyoption,
            *refalignmentwidthoption;
-} Maxpairsoptions;
+} GtMaxpairsoptions;
 
-static int gt_simpleexactselfmatchoutput(void *info,
+static int gt_simpleexactselfmatch_with_output(void *info,
                                          const GtGenericEncseq *genericencseq,
                                          GtUword len,
                                          GtUword pos1,
                                          GtUword pos2,
-                                         GtError *err)
+                                         GT_UNUSED GtError *err)
 {
   GtUword queryseqnum, seqstartpos, seqlength;
   const GtEncseq *encseq;
+  GtProcessinfo_and_outoptions *processinfo_and_outoptions
+    = (GtProcessinfo_and_outoptions *) info;
 
-  gt_assert(pos1 < pos2);
-  gt_assert(genericencseq != NULL && genericencseq->hasencseq);
+  gt_assert(pos1 < pos2 && genericencseq != NULL && genericencseq->hasencseq);
   encseq = genericencseq->seqptr.encseq;
   queryseqnum = gt_encseq_seqnum(encseq,pos2);
   seqstartpos = gt_encseq_seqstartpos(encseq,queryseqnum);
   seqlength = gt_encseq_seqlength(encseq,queryseqnum);
   gt_assert(pos2 >= seqstartpos);
-  return gt_querymatch_fill_and_output(
-                     len,
-                     pos1,
-                     GT_READMODE_FORWARD,
-                     false,
-                     0,
-                     0,
-                     true,
-                     (uint64_t) queryseqnum,
-                     len,
-                     pos2 - seqstartpos,
-                     (GtQuerymatchoutoptions *) info,
-                     encseq,
-                     NULL,
-                     seqlength,
-                     pos1,
-                     pos2,
-                     len,
-                     false,
-                     err);
+  if (gt_querymatch_complete(processinfo_and_outoptions->querymatchspaceptr,
+                             processinfo_and_outoptions->querymatchoutoptions,
+                             len,
+                             pos1,
+                             GT_READMODE_FORWARD,
+                             false,
+                             0,
+                             0,
+                             true,
+                             (uint64_t) queryseqnum,
+                             len,
+                             pos2 - seqstartpos,
+                             encseq,
+                             NULL,
+                             seqlength,
+                             pos1,
+                             pos2,
+                             len,
+                             false))
+  {
+    gt_querymatch_prettyprint(processinfo_and_outoptions->querymatchspaceptr);
+  }
+  return 0;
 }
 
 static int gt_simplesuffixprefixmatchoutput(GT_UNUSED void *info,
@@ -156,7 +160,7 @@ static int gt_simplesuffixprefixmatchoutput(GT_UNUSED void *info,
 
 static void *gt_repfind_arguments_new(void)
 {
-  Maxpairsoptions *arguments;
+  GtMaxpairsoptions *arguments;
 
   arguments = gt_malloc(sizeof (*arguments));
   arguments->indexname = gt_str_new();
@@ -167,7 +171,7 @@ static void *gt_repfind_arguments_new(void)
 
 static void gt_repfind_arguments_delete(void *tool_arguments)
 {
-  Maxpairsoptions *arguments = tool_arguments;
+  GtMaxpairsoptions *arguments = tool_arguments;
 
   if (!arguments)
   {
@@ -195,7 +199,7 @@ static GtOptionParser *gt_repfind_option_parser_new(void *tool_arguments)
            *check_extend_symmetry_option, *xdropbelowoption, *historyoption,
            *percmathistoryoption, *errorpercentageoption, *optiontrimstat,
            *optionwithalignment;
-  Maxpairsoptions *arguments = tool_arguments;
+  GtMaxpairsoptions *arguments = tool_arguments;
 
   op = gt_option_parser_new("[options] -ii indexname",
                                   "Compute maximal repeats (and more).");
@@ -425,7 +429,7 @@ static int gt_repfind_arguments_check(GT_UNUSED int rest_argc,
                                       void *tool_arguments,
                                       GT_UNUSED GtError *err)
 {
-  Maxpairsoptions *arguments = tool_arguments;
+  GtMaxpairsoptions *arguments = tool_arguments;
 
   if (!gt_option_is_set(arguments->refforwardoption) && arguments->reverse)
   {
@@ -465,12 +469,12 @@ static int gt_generic_simplexdropselfmatchoutput(
                                            GtError *err)
 {
   gt_assert(genericencseq != NULL && genericencseq->hasencseq);
-  return gt_simplexdropselfmatchoutput(info,
-                                       genericencseq->seqptr.encseq,
-                                       len,
-                                       pos1,
-                                       pos2,
-                                       err);
+  return gt_extend_selfmatch_xdrop_with_output(info,
+                                               genericencseq->seqptr.encseq,
+                                               len,
+                                               pos1,
+                                               pos2,
+                                               err);
 }
 
 static int gt_generic_simplegreedyselfmatchoutput(
@@ -482,12 +486,12 @@ static int gt_generic_simplegreedyselfmatchoutput(
                                            GtError *err)
 {
   gt_assert(genericencseq != NULL && genericencseq->hasencseq);
-  return gt_simplegreedyselfmatchoutput(processinfo,
-                                        genericencseq->seqptr.encseq,
-                                        len,
-                                        pos1,
-                                        pos2,
-                                        err);
+  return gt_extend_selfmatch_greedy_with_output(processinfo,
+                                                genericencseq->seqptr.encseq,
+                                                len,
+                                                pos1,
+                                                pos2,
+                                                err);
 }
 
 static GtUword minidentity2errorpercentage(GtUword minidentity)
@@ -509,7 +513,7 @@ static int gt_repfind_runner(int argc,
                              void *tool_arguments, GtError *err)
 {
   bool haserr = false;
-  Maxpairsoptions *arguments = (Maxpairsoptions *) tool_arguments;
+  GtMaxpairsoptions *arguments = (GtMaxpairsoptions *) tool_arguments;
   GtLogger *logger = NULL;
   GtXdropmatchinfo *xdropmatchinfo = NULL;
   GtGreedyextendmatchinfo *greedyextendmatchinfo = NULL;
@@ -599,6 +603,7 @@ static int gt_repfind_runner(int argc,
                             : 100;
 
     processinfo_and_outoptions.processinfo = NULL;
+    processinfo_and_outoptions.querymatchspaceptr = gt_querymatch_new();
     if (arguments->alignmentwidth > 0)
     {
       processinfo_and_outoptions.querymatchoutoptions
@@ -644,9 +649,8 @@ static int gt_repfind_runner(int argc,
                 processmaxpairsdata = (void *) &processinfo_and_outoptions;
               } else
               {
-                processmaxpairs = gt_simpleexactselfmatchoutput;
-                processmaxpairsdata
-                  = (void *) processinfo_and_outoptions.querymatchoutoptions;
+                processmaxpairs = gt_simpleexactselfmatch_with_output;
+                processmaxpairsdata = (void *) &processinfo_and_outoptions;
               }
             }
           }
@@ -696,7 +700,7 @@ static int gt_repfind_runner(int argc,
 
       if (gt_option_is_set(arguments->refextendxdropoption))
       {
-        processquerymatch = gt_processxdropquerymatches;
+        processquerymatch = gt_extend_querymatch_xdrop_with_output;
         processinfo_and_outoptions.processinfo = xdropmatchinfo;
         processquerymatch_data = (void *) &processinfo_and_outoptions;
       } else
@@ -728,6 +732,7 @@ static int gt_repfind_runner(int argc,
     }
     gt_querymatchoutoptions_delete(processinfo_and_outoptions.
                                    querymatchoutoptions);
+    gt_querymatch_delete(processinfo_and_outoptions.querymatchspaceptr);
   }
   gt_xdrop_matchinfo_delete(xdropmatchinfo);
   gt_greedy_extend_matchinfo_delete(greedyextendmatchinfo);

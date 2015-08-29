@@ -22,13 +22,14 @@
 #include "core/error_api.h"
 #include "core/readmode.h"
 #include "core/encseq.h"
+#include "core/unused_api.h"
 #include "querymatch-align.h"
 
 typedef struct GtQuerymatch GtQuerymatch;
 
 GtQuerymatch *gt_querymatch_new(void);
 
-void gt_querymatch_fill(GtQuerymatch *querymatch,
+void gt_querymatch_init(GtQuerymatch *querymatch,
                         const GtEncseq *encseq,
                         GtUword dblen,
                         GtUword dbstart,
@@ -51,26 +52,25 @@ int gt_querymatch_output(void *info,
                          GtUword query_totallength,
                          GtError *err);
 
-int gt_querymatch_fill_and_output(
-                        GtUword dblen,
-                        GtUword dbstart,
-                        GtReadmode readmode,
-                        bool query_as_reversecopy,
-                        GtWord score,
-                        GtUword edist,
-                        bool selfmatch,
-                        uint64_t queryseqnum,
-                        GtUword querylen,
-                        GtUword querystart,
-                        GtQuerymatchoutoptions *querymatchoutoptions,
-                        const GtEncseq *encseq,
-                        const GtUchar *query,
-                        GtUword query_totallength,
-                        GtUword seedpos1,
-                        GtUword seedpos2,
-                        GtUword seedlen,
-                        bool greedyextension,
-                        GtError *err);
+bool gt_querymatch_complete(GtQuerymatch *querymatchptr,
+                            GtQuerymatchoutoptions *querymatchoutoptions,
+                            GtUword dblen,
+                            GtUword dbstart,
+                            GtReadmode readmode,
+                            bool query_as_reversecopy,
+                            GtWord score,
+                            GtUword edist,
+                            bool selfmatch,
+                            uint64_t queryseqnum,
+                            GtUword querylen,
+                            GtUword querystart,
+                            const GtEncseq *encseq,
+                            GT_UNUSED const GtUchar *query,
+                            GtUword query_totallength,
+                            GtUword seedpos1,
+                            GtUword seedpos2,
+                            GtUword seedlen,
+                            bool greedyextension);
 
 GtUword gt_querymatch_querylen(const GtQuerymatch *querymatch);
 
@@ -90,5 +90,7 @@ GtUword gt_querymatch_dbseqnum(const GtEncseq *encseq,
 bool gt_querymatch_queryreverse(const GtQuerymatch *querymatch);
 
 double gt_querymatch_error_rate(GtUword distance,GtUword alignedlen);
+
+void gt_querymatch_prettyprint(const GtQuerymatch *querymatch);
 
 #endif

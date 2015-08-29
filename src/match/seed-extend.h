@@ -17,9 +17,10 @@
 #ifndef SEED_EXTEND_H
 #define SEED_EXTEND_H
 #include "core/types_api.h"
-#include "match/querymatch.h"
-#include "match/xdrop.h"
-#include "match/ft-front-prune.h"
+#include "core/unused_api.h"
+#include "querymatch.h"
+#include "xdrop.h"
+#include "ft-front-prune.h"
 
 /* This header file describes the interface to two different
    methods for extending seeds, namely the xdrop-based method based on
@@ -76,6 +77,7 @@ typedef struct
 {
   void *processinfo;
   GtQuerymatchoutoptions *querymatchoutoptions;
+  GtQuerymatch *querymatchspaceptr;
 } GtProcessinfo_and_outoptions;
 
 GtXdropmatchinfo *gt_xdrop_matchinfo_new(GtUword userdefinedleastlength,
@@ -109,12 +111,12 @@ void gt_xdrop_matchinfo_silent_set(GtXdropmatchinfo *xdropmatchinfo);
    an error occurs, the function returns a value different from 0 and
    stores the error message in the <err>-object. */
 
-int gt_simplexdropselfmatchoutput(void *info,
-                                  const GtEncseq *encseq,
-                                  GtUword len,
-                                  GtUword pos1,
-                                  GtUword pos2,
-                                  GtError *err);
+int gt_extend_selfmatch_xdrop_with_output(void *info,
+                                          const GtEncseq *encseq,
+                                          GtUword len,
+                                          GtUword pos1,
+                                          GtUword pos2,
+                                          GT_UNUSED GtError *err);
 
 /* The following function is used for extending a seed obtained
    in a comparison of the given sequence <query> of length <query_totallength>
@@ -124,12 +126,12 @@ int gt_simplexdropselfmatchoutput(void *info,
    an error occurs, the function returns a value different from 0 and
    stores the error message in the <err>-object. */
 
-int gt_processxdropquerymatches(void *info,
-                                const GtEncseq *encseq,
-                                const GtQuerymatch *queryseed,
-                                const GtUchar *query,
-                                GtUword query_totallength,
-                                GtError *err);
+int gt_extend_querymatch_xdrop_with_output(void *info,
+                                           const GtEncseq *encseq,
+                                           const GtQuerymatch *queryseed,
+                                           const GtUchar *query,
+                                           GtUword query_totallength,
+                                           GT_UNUSED GtError *err);
 
 /* The following functions are used for the greedy extension. */
 
@@ -234,12 +236,12 @@ const char *gt_cam_extendgreedy_comment(void);
    an error occurs, the function returns a value different from 0 and
    stores the error message in the <err>-object. */
 
-int gt_simplegreedyselfmatchoutput(void *info,
-                                   const GtEncseq *encseq,
-                                   GtUword len,
-                                   GtUword pos1,
-                                   GtUword pos2,
-                                   GtError *err);
+int gt_extend_selfmatch_greedy_with_output(void *info,
+                                           const GtEncseq *encseq,
+                                           GtUword len,
+                                           GtUword pos1,
+                                           GtUword pos2,
+                                           GT_UNUSED GtError *err);
 
 bool gt_greedy_extend_matchinfo_relax(GtGreedyextendmatchinfo *ggemi);
 

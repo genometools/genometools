@@ -409,7 +409,7 @@ static int gt_queryuniquematch(bool selfmatch,
                              offset,
                              queryrep->sequence))
     {
-      gt_querymatch_fill(querymatchspaceptr,
+      gt_querymatch_init(querymatchspaceptr,
                          suffixarray->encseq,
                          matchlen,
                          dbstart,
@@ -498,7 +498,7 @@ static int gt_querysubstringmatch_generic(
                                                  dbstart + minmatchlength,
                                                  &querysubstring,
                                                  minmatchlength);
-        gt_querymatch_fill(querymatchspaceptr,
+        gt_querymatch_init(querymatchspaceptr,
                            dbencseq,
                            minmatchlength + extend,
                            dbstart,
