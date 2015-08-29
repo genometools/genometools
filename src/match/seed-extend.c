@@ -17,7 +17,6 @@
 
 #include "core/minmax.h"
 #include "match/querymatch.h"
-#include "match/querymatch-align.h"
 #include "match/greedyedist.h"
 #include "match/xdrop.h"
 #include "match/esa-maxpairs.h"
@@ -289,26 +288,25 @@ const GtQuerymatch *gt_extend_selfmatch_xdrop(void *info,
     {
       printf("# seed:\t" GT_WU "\t" GT_WU "\t" GT_WU "\n",pos1,pos2,len);
     }
-    if (gt_querymatch_complete(
-                       processinfo_and_outoptions->querymatchspaceptr,
-                       processinfo_and_outoptions->querymatchoutoptions,
-                       dblen,
-                       dbstart,
-                       GT_READMODE_FORWARD,
-                       false,
-                       score,
-                       total_distance,
-                       true,
-                       (uint64_t) rfsi.queryseqnum,
-                       querylen,
-                       querystart - rfsi.queryseqstartpos,
-                       encseq,
-                       NULL,
-                       rfsi.queryseqlength,
-                       pos1,
-                       pos2,
-                       len,
-                       false))
+    if (gt_querymatch_complete(processinfo_and_outoptions->querymatchspaceptr,
+                               processinfo_and_outoptions->querymatchoutoptions,
+                               dblen,
+                               dbstart,
+                               GT_READMODE_FORWARD,
+                               false,
+                               score,
+                               total_distance,
+                               true,
+                               (uint64_t) rfsi.queryseqnum,
+                               querylen,
+                               querystart - rfsi.queryseqstartpos,
+                               encseq,
+                               NULL,
+                               rfsi.queryseqlength,
+                               pos1,
+                               pos2,
+                               len,
+                               false))
     {
       return processinfo_and_outoptions->querymatchspaceptr;
     }
@@ -435,27 +433,27 @@ const GtQuerymatch* gt_extend_querymatch_xdrop(void *info,
   {
     printf("# seed:\t" GT_WU "\t" GT_WU "\t" GT_WU "\n",pos1,pos2,len);
   }
-  if (gt_querymatch_complete(
-                     processinfo_and_outoptions->querymatchspaceptr,
-                     processinfo_and_outoptions->querymatchoutoptions,
-                     dblen,
-                     dbstart,
-                     GT_READMODE_FORWARD,
-                     false,
-                     score,
-                     greedyunitedist(xdropmatchinfo->frontresource,
-                                     xdropmatchinfo->useq,xdropmatchinfo->vseq),
-                     false,
-                     queryseqnum,
-                     querylen,
-                     querystart,
-                     encseq,
-                     query,
-                     query_totallength,
-                     pos1,
-                     pos2,
-                     len,
-                     false))
+  if (gt_querymatch_complete(processinfo_and_outoptions->querymatchspaceptr,
+                             processinfo_and_outoptions->querymatchoutoptions,
+                             dblen,
+                             dbstart,
+                             GT_READMODE_FORWARD,
+                             false,
+                             score,
+                             greedyunitedist(xdropmatchinfo->frontresource,
+                                             xdropmatchinfo->useq,
+                                             xdropmatchinfo->vseq),
+                             false,
+                             queryseqnum,
+                             querylen,
+                             querystart,
+                             encseq,
+                             query,
+                             query_totallength,
+                             pos1,
+                             pos2,
+                             len,
+                             false))
   {
     return processinfo_and_outoptions->querymatchspaceptr;
   }
@@ -868,26 +866,25 @@ const GtQuerymatch *gt_extend_selfmatch_greedy(void *info,
     {
       printf("# seed:\t" GT_WU "\t" GT_WU "\t" GT_WU "\n",pos1,pos2,len);
     }
-    if (gt_querymatch_complete(
-                       processinfo_and_outoptions->querymatchspaceptr,
-                       processinfo_and_outoptions->querymatchoutoptions,
-                       dblen,
-                       dbstart,
-                       GT_READMODE_FORWARD,
-                       false,
-                       score,
-                       total_distance,
-                       true,
-                       (uint64_t) rfsi.queryseqnum,
-                       querylen,
-                       querystart - rfsi.queryseqstartpos,
-                       encseq,
-                       NULL,
-                       rfsi.queryseqlength,
-                       pos1,
-                       pos2,
-                       len,
-                       true))
+    if (gt_querymatch_complete(processinfo_and_outoptions->querymatchspaceptr,
+                               processinfo_and_outoptions->querymatchoutoptions,
+                               dblen,
+                               dbstart,
+                               GT_READMODE_FORWARD,
+                               false,
+                               score,
+                               total_distance,
+                               true,
+                               (uint64_t) rfsi.queryseqnum,
+                               querylen,
+                               querystart - rfsi.queryseqstartpos,
+                               encseq,
+                               NULL,
+                               rfsi.queryseqlength,
+                               pos1,
+                               pos2,
+                               len,
+                               true))
     {
       return processinfo_and_outoptions->querymatchspaceptr;
     }

@@ -35,17 +35,16 @@ struct GtQuerymatch
       dbstart, /* absolute start position of match in database seq */
       querystart, /* start of match in query, relative to start of query */
       edist, /* 0 for exact match */
-      dbseqnum, querystart_fwdstrand, dbstart_relative,
-      seedpos1, seedpos2, seedlen;
+      dbseqnum, querystart_fwdstrand, dbstart_relative;
    GtWord score; /* 0 for exact match */
    uint64_t queryseqnum; /* ordinal number of match in query */
    double similarity;
    GtReadmode readmode; /* readmode by which reference sequence was accessed */
    bool selfmatch,       /* true if both instances of the match refer to the
                             same sequence */
-        query_as_reversecopy, /* matched the reverse copy of the query */
-        greedyextension;
-   const GtQuerymatchoutoptions *ref_querymatchoutoptions;
+        query_as_reversecopy; /* matched the reverse copy of the query */
+   const GtQuerymatchoutoptions *ref_querymatchoutoptions; /* reference to
+        resources needed for alignment output */
 };
 
 GtQuerymatch *gt_querymatch_new(void)
@@ -85,7 +84,6 @@ void gt_querymatch_init(GtQuerymatch *querymatch,
   querymatch->queryseqnum = queryseqnum;
   querymatch->querylen = querylen;
   querymatch->querystart = querystart;
-  querymatch->greedyextension = false;
   querymatch->ref_querymatchoutoptions = NULL;
   gt_assert(encseq != NULL);
   if (gt_encseq_has_multiseq_support(encseq))
@@ -265,10 +263,6 @@ bool gt_querymatch_complete(GtQuerymatch *querymatchptr,
                      querylen,
                      querystart,
                      query_totallength);
-  querymatchptr->greedyextension = greedyextension;
-  querymatchptr->seedpos1 = seedpos1;
-  querymatchptr->seedpos2 = seedpos2;
-  querymatchptr->seedlen = seedlen;
   if (!querymatchptr->selfmatch ||
       (uint64_t) querymatchptr->dbseqnum != querymatchptr->queryseqnum ||
       querymatchptr->dbstart_relative <= querymatchptr->querystart_fwdstrand)
@@ -287,14 +281,14 @@ bool gt_querymatch_complete(GtQuerymatch *querymatchptr,
                                                   querystartabsolute,
                                                   querymatchptr->querylen,
                                                   querymatchptr->edist,
-                                                  querymatchptr->seedpos1,
-                                                  querymatchptr->seedpos2,
-                                                  querymatchptr->seedlen,
-                                                  querymatchptr->
-                                                       greedyextension);
+                                                  seedpos1,
+                                                  seedpos2,
+                                                  seedlen,
+                                                  greedyextension);
         querymatchptr->ref_querymatchoutoptions = querymatchoutoptions;
       } else
       {
+        querymatchptr->ref_querymatchoutoptions = NULL;
         gt_assert(false); /* case not implemented yet */
       }
     }

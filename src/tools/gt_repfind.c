@@ -672,8 +672,7 @@ static int gt_repfind_runner(int argc,
                                      GT_READMODE_REVERSE,
                                      arguments->seedlength,
                                      gt_querymatch_output,
-                                     processinfo_and_outoptions.
-                                         querymatchoutoptions,
+                                     NULL,
                                      logger,
                                      err) != 0)
           {
@@ -711,8 +710,7 @@ static int gt_repfind_runner(int argc,
         } else
         {
           processquerymatch = gt_querymatch_output;
-          processquerymatch_data
-            = processinfo_and_outoptions.querymatchoutoptions;
+          processquerymatch_data = NULL;
         }
       }
       if (gt_callenumquerymatches(gt_str_get(arguments->indexname),
