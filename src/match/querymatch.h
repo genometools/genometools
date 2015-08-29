@@ -27,7 +27,7 @@
 
 typedef struct GtQuerymatch GtQuerymatch;
 
-GtQuerymatch *gt_querymatch_new(void);
+GtQuerymatch *gt_querymatch_new(GtQuerymatchoutoptions *querymatchoutoptions);
 
 void gt_querymatch_init(GtQuerymatch *querymatch,
                         const GtEncseq *encseq,
@@ -53,7 +53,6 @@ int gt_querymatch_output(GT_UNUSED void *info,
                          GT_UNUSED GtError *err);
 
 bool gt_querymatch_complete(GtQuerymatch *querymatchptr,
-                            GtQuerymatchoutoptions *querymatchoutoptions,
                             GtUword dblen,
                             GtUword dbstart,
                             GtReadmode readmode,

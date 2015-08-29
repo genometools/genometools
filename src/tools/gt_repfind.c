@@ -79,8 +79,8 @@ static int gt_exact_selfmatch_with_output(void *info,
 {
   GtUword queryseqnum, seqstartpos, seqlength;
   const GtEncseq *encseq;
-  GtProcessinfo_and_outoptions *processinfo_and_outoptions
-    = (GtProcessinfo_and_outoptions *) info;
+  GtProcessinfo_and_querymatchspaceptr *processinfo_and_querymatchspaceptr
+    = (GtProcessinfo_and_querymatchspaceptr *) info;
 
   gt_assert(pos1 < pos2 && genericencseq != NULL && genericencseq->hasencseq);
   encseq = genericencseq->seqptr.encseq;
@@ -88,8 +88,8 @@ static int gt_exact_selfmatch_with_output(void *info,
   seqstartpos = gt_encseq_seqstartpos(encseq,queryseqnum);
   seqlength = gt_encseq_seqlength(encseq,queryseqnum);
   gt_assert(pos2 >= seqstartpos);
-  if (gt_querymatch_complete(processinfo_and_outoptions->querymatchspaceptr,
-                             processinfo_and_outoptions->querymatchoutoptions,
+  if (gt_querymatch_complete(processinfo_and_querymatchspaceptr->
+                                  querymatchspaceptr,
                              len,
                              pos1,
                              GT_READMODE_FORWARD,
@@ -108,7 +108,8 @@ static int gt_exact_selfmatch_with_output(void *info,
                              len,
                              false))
   {
-    gt_querymatch_prettyprint(processinfo_and_outoptions->querymatchspaceptr);
+    gt_querymatch_prettyprint(processinfo_and_querymatchspaceptr->
+                                         querymatchspaceptr);
   }
   return 0;
 }
@@ -469,7 +470,7 @@ static int gt_generic_extend_selfmatch_xdrop_with_output(
                                            GtError *err)
 {
   gt_assert(genericencseq != NULL && genericencseq->hasencseq);
-  return gt_extend_selfmatch_xdrop_with_output(info,
+  return gt_xdrop_extend_selfmatch_with_output(info,
                                                genericencseq->seqptr.encseq,
                                                len,
                                                pos1,
@@ -486,7 +487,7 @@ static int gt_generic_simplegreedyselfmatchoutput(
                                            GtError *err)
 {
   gt_assert(genericencseq != NULL && genericencseq->hasencseq);
-  return gt_extend_selfmatch_greedy_with_output(processinfo,
+  return gt_greedy_extend_selfmatch_with_output(processinfo,
                                                 genericencseq->seqptr.encseq,
                                                 len,
                                                 pos1,
@@ -597,16 +598,16 @@ static int gt_repfind_runner(int argc,
   }
   if (!haserr)
   {
-    GtProcessinfo_and_outoptions processinfo_and_outoptions;
+    GtQuerymatchoutoptions *querymatchoutoptions;
+    GtProcessinfo_and_querymatchspaceptr processinfo_and_querymatchspaceptr;
     GtUword sensitivity = gt_option_is_set(arguments->refextendgreedyoption)
                             ? arguments->extendgreedy
                             : 100;
 
-    processinfo_and_outoptions.processinfo = NULL;
-    processinfo_and_outoptions.querymatchspaceptr = gt_querymatch_new();
+    processinfo_and_querymatchspaceptr.processinfo = NULL;
     if (arguments->alignmentwidth > 0)
     {
-      processinfo_and_outoptions.querymatchoutoptions
+      querymatchoutoptions
         = gt_querymatchoutoptions_new(arguments->alignmentwidth,
                                       minidentity2errorpercentage(
                                                arguments->minidentity),
@@ -617,8 +618,10 @@ static int gt_repfind_runner(int argc,
                                       sensitivity);
     } else
     {
-      processinfo_and_outoptions.querymatchoutoptions = NULL;
+      querymatchoutoptions = NULL;
     }
+    processinfo_and_querymatchspaceptr.querymatchspaceptr
+      = gt_querymatch_new(querymatchoutoptions);
     if (gt_str_array_size(arguments->queryfiles) == 0)
     {
       if (arguments->samples == 0)
@@ -637,22 +640,21 @@ static int gt_repfind_runner(int argc,
             if (gt_option_is_set(arguments->refextendxdropoption))
             {
               processmaxpairs = gt_generic_extend_selfmatch_xdrop_with_output;
-              processinfo_and_outoptions.processinfo = (void *) xdropmatchinfo;
-              processmaxpairsdata = (void *) &processinfo_and_outoptions;
+              processinfo_and_querymatchspaceptr.processinfo
+                = (void *) xdropmatchinfo;
             } else
             {
               if (gt_option_is_set(arguments->refextendgreedyoption))
               {
                 processmaxpairs = gt_generic_simplegreedyselfmatchoutput;
-                processinfo_and_outoptions.processinfo
+                processinfo_and_querymatchspaceptr.processinfo
                   = (void *) greedyextendmatchinfo;
-                processmaxpairsdata = (void *) &processinfo_and_outoptions;
               } else
               {
                 processmaxpairs = gt_exact_selfmatch_with_output;
-                processmaxpairsdata = (void *) &processinfo_and_outoptions;
               }
             }
+            processmaxpairsdata = (void *) &processinfo_and_querymatchspaceptr;
           }
           if (gt_callenummaxpairs(gt_str_get(arguments->indexname),
                                   arguments->seedlength,
@@ -699,9 +701,9 @@ static int gt_repfind_runner(int argc,
 
       if (gt_option_is_set(arguments->refextendxdropoption))
       {
-        processquerymatch = gt_extend_querymatch_xdrop_with_output;
-        processinfo_and_outoptions.processinfo = xdropmatchinfo;
-        processquerymatch_data = (void *) &processinfo_and_outoptions;
+        processquerymatch = gt_xdrop_extend_querymatch_with_output;
+        processinfo_and_querymatchspaceptr.processinfo = xdropmatchinfo;
+        processquerymatch_data = (void *) &processinfo_and_querymatchspaceptr;
       } else
       {
         if (gt_option_is_set(arguments->refextendgreedyoption))
@@ -728,9 +730,8 @@ static int gt_repfind_runner(int argc,
         haserr = true;
       }
     }
-    gt_querymatchoutoptions_delete(processinfo_and_outoptions.
-                                   querymatchoutoptions);
-    gt_querymatch_delete(processinfo_and_outoptions.querymatchspaceptr);
+    gt_querymatchoutoptions_delete(querymatchoutoptions);
+    gt_querymatch_delete(processinfo_and_querymatchspaceptr.querymatchspaceptr);
   }
   gt_xdrop_matchinfo_delete(xdropmatchinfo);
   gt_greedy_extend_matchinfo_delete(greedyextendmatchinfo);

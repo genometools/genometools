@@ -596,7 +596,7 @@ static int gt_callenumquerymatches_withindex(
     haserr = true;
   } else
   {
-    GtQuerymatch *querymatchspaceptr = gt_querymatch_new();
+    GtQuerymatch *querymatchspaceptr = gt_querymatch_new(NULL);
     const GtUchar *query;
     GtUword querylen;
     int retval;
@@ -758,7 +758,7 @@ int gt_callenumselfmatches(const char *indexname,
   } else
   {
     GtUword seqnum, numofsequences, seqlength, seqstartpos;
-    GtQuerymatch *querymatchspaceptr = gt_querymatch_new();
+    GtQuerymatch *querymatchspaceptr = gt_querymatch_new(NULL);
     GtQueryrep queryrep;
 
     numofsequences = gt_encseq_num_of_sequences(suffixarray.encseq);
@@ -835,7 +835,7 @@ static int gt_constructsarrandrunmmsearch(
   {
     const GtSuffixsortspace *suffixsortspace;
     GtUword numberofsuffixes;
-    GtQuerymatch *querymatchspaceptr = gt_querymatch_new();
+    GtQuerymatch *querymatchspaceptr = gt_querymatch_new(NULL);
     GtQueryrep queryrep;
 
     queryrep.sequence = query;

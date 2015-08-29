@@ -168,21 +168,21 @@ static void fill_repfind_sequence_info(Repfindsequenceinfo *rfsi,
   */
 }
 
-const GtQuerymatch *gt_extend_selfmatch_xdrop(void *info,
+const GtQuerymatch *gt_xdrop_extend_selfmatch(void *info,
                                               const GtEncseq *encseq,
                                               GtUword len,
                                               GtUword pos1,
                                               GtUword pos2)
 {
-  GtProcessinfo_and_outoptions *processinfo_and_outoptions
-    = (GtProcessinfo_and_outoptions *) info;
+  GtProcessinfo_and_querymatchspaceptr *processinfo_and_querymatchspaceptr
+    = (GtProcessinfo_and_querymatchspaceptr *) info;
   GtXdropmatchinfo *xdropmatchinfo;
   Repfindsequenceinfo rfsi;
   GtUword dblen, querylen, total_distance, total_alignedlen,
           urightbound, vrightbound;
   GtXdropscore score;
 
-  xdropmatchinfo = processinfo_and_outoptions->processinfo;
+  xdropmatchinfo = processinfo_and_querymatchspaceptr->processinfo;
   gt_assert(pos1 < pos2);
   if (pos1 + len >= pos2)
   {
@@ -288,8 +288,8 @@ const GtQuerymatch *gt_extend_selfmatch_xdrop(void *info,
     {
       printf("# seed:\t" GT_WU "\t" GT_WU "\t" GT_WU "\n",pos1,pos2,len);
     }
-    if (gt_querymatch_complete(processinfo_and_outoptions->querymatchspaceptr,
-                               processinfo_and_outoptions->querymatchoutoptions,
+    if (gt_querymatch_complete(processinfo_and_querymatchspaceptr->
+                                 querymatchspaceptr,
                                dblen,
                                dbstart,
                                GT_READMODE_FORWARD,
@@ -308,20 +308,20 @@ const GtQuerymatch *gt_extend_selfmatch_xdrop(void *info,
                                len,
                                false))
     {
-      return processinfo_and_outoptions->querymatchspaceptr;
+      return processinfo_and_querymatchspaceptr->querymatchspaceptr;
     }
   }
   return NULL;
 }
 
-int gt_extend_selfmatch_xdrop_with_output(void *info,
+int gt_xdrop_extend_selfmatch_with_output(void *info,
                                           const GtEncseq *encseq,
                                           GtUword len,
                                           GtUword pos1,
                                           GtUword pos2,
                                           GT_UNUSED GtError *err)
 {
-  const GtQuerymatch *querymatch = gt_extend_selfmatch_xdrop(info,
+  const GtQuerymatch *querymatch = gt_xdrop_extend_selfmatch(info,
                                                              encseq,
                                                              len,
                                                              pos1,
@@ -333,14 +333,14 @@ int gt_extend_selfmatch_xdrop_with_output(void *info,
   return 0;
 }
 
-const GtQuerymatch* gt_extend_querymatch_xdrop(void *info,
+const GtQuerymatch* gt_xdrop_extend_querymatch(void *info,
                                                const GtEncseq *encseq,
                                                const GtQuerymatch *queryseed,
                                                const GtUchar *query,
                                                GtUword query_totallength)
 {
-  GtProcessinfo_and_outoptions *processinfo_and_outoptions
-    = (GtProcessinfo_and_outoptions *) info;
+  GtProcessinfo_and_querymatchspaceptr *processinfo_and_querymatchspaceptr
+    = (GtProcessinfo_and_querymatchspaceptr *) info;
   GtXdropscore score;
   GtUword querystart, dblen, dbstart, querylen,
           dbseqnum, dbseqstartpos, dbseqlength,
@@ -350,7 +350,7 @@ const GtQuerymatch* gt_extend_querymatch_xdrop(void *info,
   uint64_t queryseqnum;
   GtXdropmatchinfo *xdropmatchinfo;
 
-  xdropmatchinfo = processinfo_and_outoptions->processinfo;
+  xdropmatchinfo = processinfo_and_querymatchspaceptr->processinfo;
   dbseqnum = gt_encseq_seqnum(encseq,pos1);
   dbseqstartpos = gt_encseq_seqstartpos(encseq,dbseqnum);
   dbseqlength = gt_encseq_seqlength(encseq,dbseqnum);
@@ -433,8 +433,8 @@ const GtQuerymatch* gt_extend_querymatch_xdrop(void *info,
   {
     printf("# seed:\t" GT_WU "\t" GT_WU "\t" GT_WU "\n",pos1,pos2,len);
   }
-  if (gt_querymatch_complete(processinfo_and_outoptions->querymatchspaceptr,
-                             processinfo_and_outoptions->querymatchoutoptions,
+  if (gt_querymatch_complete(processinfo_and_querymatchspaceptr->
+                               querymatchspaceptr,
                              dblen,
                              dbstart,
                              GT_READMODE_FORWARD,
@@ -455,12 +455,12 @@ const GtQuerymatch* gt_extend_querymatch_xdrop(void *info,
                              len,
                              false))
   {
-    return processinfo_and_outoptions->querymatchspaceptr;
+    return processinfo_and_querymatchspaceptr->querymatchspaceptr;
   }
   return NULL;
 }
 
-int gt_extend_querymatch_xdrop_with_output(void *info,
+int gt_xdrop_extend_querymatch_with_output(void *info,
                                            const GtEncseq *encseq,
                                            const GtQuerymatch *queryseed,
                                            const GtUchar *query,
@@ -468,7 +468,7 @@ int gt_extend_querymatch_xdrop_with_output(void *info,
                                            GT_UNUSED GtError *err)
 {
   const GtQuerymatch *querymatch
-    = gt_extend_querymatch_xdrop(info,
+    = gt_xdrop_extend_querymatch(info,
                                  encseq,
                                  queryseed,
                                  query,
@@ -691,14 +691,14 @@ static void gt_FTsequenceResources_init(FTsequenceResources *fsr,
   fsr->extend_char_access = extend_char_access;
 }
 
-const GtQuerymatch *gt_extend_selfmatch_greedy(void *info,
+const GtQuerymatch *gt_greedy_extend_selfmatch(void *info,
                                                const GtEncseq *encseq,
                                                GtUword len,
                                                GtUword pos1,
                                                GtUword pos2)
 {
-  GtProcessinfo_and_outoptions *processinfo_and_outoptions
-    = (GtProcessinfo_and_outoptions *) info;
+  GtProcessinfo_and_querymatchspaceptr *processinfo_and_querymatchspaceptr
+    = (GtProcessinfo_and_querymatchspaceptr *) info;
   GtGreedyextendmatchinfo *greedyextendmatchinfo;
   GtUword vextend_left, vextend_right, ulen, vlen, urightbound, vrightbound,
           total_distance, dblen, querylen, total_alignedlen;
@@ -707,7 +707,7 @@ const GtQuerymatch *gt_extend_selfmatch_greedy(void *info,
   Polished_point left_best_polished_point = {0,0,0},
                  right_best_polished_point = {0,0,0};
 
-  greedyextendmatchinfo = processinfo_and_outoptions->processinfo;
+  greedyextendmatchinfo = processinfo_and_querymatchspaceptr->processinfo;
   if (greedyextendmatchinfo->left_front_trace != NULL)
   {
     front_trace_reset(greedyextendmatchinfo->left_front_trace,0);
@@ -866,8 +866,8 @@ const GtQuerymatch *gt_extend_selfmatch_greedy(void *info,
     {
       printf("# seed:\t" GT_WU "\t" GT_WU "\t" GT_WU "\n",pos1,pos2,len);
     }
-    if (gt_querymatch_complete(processinfo_and_outoptions->querymatchspaceptr,
-                               processinfo_and_outoptions->querymatchoutoptions,
+    if (gt_querymatch_complete(processinfo_and_querymatchspaceptr->
+                                 querymatchspaceptr,
                                dblen,
                                dbstart,
                                GT_READMODE_FORWARD,
@@ -886,7 +886,7 @@ const GtQuerymatch *gt_extend_selfmatch_greedy(void *info,
                                len,
                                true))
     {
-      return processinfo_and_outoptions->querymatchspaceptr;
+      return processinfo_and_querymatchspaceptr->querymatchspaceptr;
     }
   } else
   {
@@ -907,14 +907,14 @@ const GtQuerymatch *gt_extend_selfmatch_greedy(void *info,
   return NULL;
 }
 
-int gt_extend_selfmatch_greedy_with_output(void *info,
+int gt_greedy_extend_selfmatch_with_output(void *info,
                                            const GtEncseq *encseq,
                                            GtUword len,
                                            GtUword pos1,
                                            GtUword pos2,
                                            GT_UNUSED GtError *err)
 {
-  const GtQuerymatch *querymatch = gt_extend_selfmatch_greedy(info,
+  const GtQuerymatch *querymatch = gt_greedy_extend_selfmatch(info,
                                                               encseq,
                                                               len,
                                                               pos1,
