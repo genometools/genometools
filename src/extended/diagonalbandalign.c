@@ -259,7 +259,7 @@ GtUword diagonalband_linear_distance_only(const GtUchar *useq,
       westEDtabentry = EDtabcolumn[0];
     if (high_row < ulen)
       high_row ++;
-    EDtabcolumn[0] = add_safe_max(westEDtabentry, 1);
+    EDtabcolumn[0] = add_safe_max(westEDtabentry, gapcost);
 
     if (low_row > 0 )
     {

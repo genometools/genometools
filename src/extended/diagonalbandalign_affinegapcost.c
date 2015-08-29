@@ -74,7 +74,7 @@ static GtUword diagonalband_squarespace_affine(const GtUchar *useq,
   *Atabcolumn = gt_malloc((sizeof **Atabcolumn)*((vlen+1)*(ulen+1)));
   for (j = 1; j <= ulen; j++)
   {
-    Atabcolumn[j] = Atabcolumn[j-1]+vlen+1;
+    Atabcolumn[j] = Atabcolumn[j-1] + vlen + 1;
   }
 
   /* first column */
@@ -167,13 +167,143 @@ static GtUword diagonalband_squarespace_affine(const GtUchar *useq,
   return distance;
 }
 
+/* calculate only distance with diagonalband in linear space O(n)
+ * with affine gapcosts */
+static GtUword diagonalband_linear_affine(const GtUchar *useq,
+                                          const GtUword ustart,
+                                          const GtUword ulen,
+                                          const GtUchar *vseq,
+                                          const GtUword vstart,
+                                          const GtUword vlen,
+                                          const GtWord left_dist,
+                                          const GtWord right_dist,
+                                          const GtWord matchcost,
+                                          const GtWord mismatchcost,
+                                          const GtWord gap_opening,
+                                          const GtWord gap_extension)
+{
+  GtUword distance, colindex, rowindex, low_row, high_row, width,
+  rcost, Rdist,
+          Ddist, Idist, minvalue;
+  Atabentry *Atabcolumn, Anw, Awe;
+  bool last_row = false;
+
+  distance = GT_UWORD_MAX;
+
+  if ((left_dist > MIN(0, (GtWord)vlen-(GtWord)ulen))||
+      (right_dist < MAX(0, (GtWord)vlen-(GtWord)ulen)))
+  {
+    return GT_UWORD_MAX;
+  }
+
+  width = right_dist - left_dist + 1;
+  Atabcolumn = gt_malloc(sizeof(*Atabcolumn) * width);
+
+  low_row = 0;
+  high_row = -left_dist;
+  Atabcolumn[low_row].Rvalue = 0;
+  Atabcolumn[low_row].Dvalue = gap_opening;
+  Atabcolumn[low_row].Ivalue = gap_opening;
+
+  for (rowindex = low_row+1; rowindex <= high_row; rowindex ++)
+  {
+    Atabcolumn[rowindex-low_row].Rvalue = GT_UWORD_MAX;
+    Atabcolumn[rowindex-low_row].Dvalue = add_safe_max(
+                                          Atabcolumn[rowindex-low_row-1].Dvalue,
+                                          gap_extension);
+    Atabcolumn[rowindex-low_row].Ivalue = GT_UWORD_MAX;
+  }
+  for (colindex = 1; colindex <= vlen; colindex++)
+  {
+    Anw = Atabcolumn[0];
+
+    if (colindex > right_dist)
+    {
+      Awe = Atabcolumn[1];
+      low_row++;
+    }
+    else
+      Awe = Atabcolumn[0];
+    if (high_row < ulen)
+      high_row ++;
+
+    Rdist = add_safe_max(Awe.Rvalue,gap_extension+gap_opening);
+    Ddist = add_safe_max(Awe.Dvalue,gap_extension+gap_opening);
+    Idist = add_safe_max(Awe.Ivalue,gap_extension);
+    minvalue = MIN3(Rdist, Ddist, Idist);
+    Atabcolumn[0].Ivalue = minvalue;
+    Atabcolumn[0].Rvalue = GT_UWORD_MAX;
+    Atabcolumn[0].Dvalue = GT_UWORD_MAX;
+
+    if (low_row > 0 )
+    {
+      rcost = useq[ustart+rowindex-1] == vseq[vstart+colindex-1]?
+              matchcost:mismatchcost;
+      Rdist = add_safe_max(Anw.Rvalue, rcost);
+      Ddist = add_safe_max(Anw.Dvalue, rcost);
+      Idist = add_safe_max(Anw.Ivalue, rcost);
+      minvalue = MIN3(Rdist, Ddist, Idist);
+      Atabcolumn[0].Rvalue = minvalue;
+    }
+    for (rowindex = low_row + 1; rowindex <= high_row; rowindex++)
+    {
+      Anw = Awe;
+      if (!last_row && rowindex == high_row)
+      {
+        Awe.Rvalue = GT_UWORD_MAX;
+        Awe.Dvalue = GT_UWORD_MAX;
+        Awe.Ivalue = GT_UWORD_MAX;
+      }
+      else if (low_row > 0)
+        Awe = Atabcolumn[rowindex-low_row+1];
+      else
+        Awe = Atabcolumn[rowindex-low_row];
+
+      if (rowindex == ulen)
+        last_row = true;
+
+      Rdist = add_safe_max(Awe.Rvalue,gap_extension+gap_opening);
+      Ddist = add_safe_max(Awe.Dvalue,gap_extension+gap_opening);
+      Idist = add_safe_max(Awe.Ivalue,gap_extension);
+
+      minvalue = MIN3(Rdist, Ddist, Idist);
+      Atabcolumn[rowindex-low_row].Ivalue = minvalue;
+
+      rcost = useq[ustart+rowindex-1] == vseq[vstart+colindex-1]?
+              matchcost:mismatchcost;
+      Rdist = add_safe_max(Anw.Rvalue, rcost);
+      Ddist = add_safe_max(Anw.Dvalue, rcost);
+      Idist = add_safe_max(Anw.Ivalue, rcost);
+
+      minvalue = MIN3(Rdist, Ddist, Idist);
+      Atabcolumn[rowindex-low_row].Rvalue = minvalue;
+
+      Rdist = add_safe_max(Atabcolumn[rowindex-low_row-1].Rvalue,
+                           gap_extension+gap_opening);
+      Ddist = add_safe_max(Atabcolumn[rowindex-low_row-1].Dvalue,gap_extension);
+      Idist = add_safe_max(Atabcolumn[rowindex-low_row-1].Ivalue,
+                           gap_extension+gap_opening);
+
+      minvalue = MIN3(Rdist, Ddist, Idist);
+      Atabcolumn[rowindex-low_row].Dvalue = minvalue;
+    }
+  }
+
+  distance = MIN3(Atabcolumn[high_row-low_row].Rvalue,
+                  Atabcolumn[high_row-low_row].Dvalue,
+                  Atabcolumn[high_row-low_row].Ivalue);
+  gt_free(Atabcolumn);
+
+  return distance;
+}
+
 void gt_checkdiagnonalbandaffinealign(GT_UNUSED bool forward,
                                 const GtUchar *useq,
                                 GtUword ulen,
                                 const GtUchar *vseq,
                                 GtUword vlen)
 {
-  GtUword affine_cost1, affine_cost2;
+  GtUword affine_cost1, affine_cost2, affine_cost3;
   GtWord left_dist, right_dist;
   GtAlignment *align_square;
 
@@ -198,11 +328,23 @@ void gt_checkdiagnonalbandaffinealign(GT_UNUSED bool forward,
                                 (const char*)vseq, vlen,
                                 0, 4, 4, 1);
   affine_cost2 = gt_alignment_eval_with_affine_score(align_square, 0, 4, 4, 1);
+  gt_alignment_delete(align_square);
 
   if (affine_cost1 != affine_cost2)
   {
     fprintf(stderr,"diagonalband_squarespace_affine = "GT_WU
             " != "GT_WU" = gt_affinealign\n", affine_cost1, affine_cost2);
+
+    exit(GT_EXIT_PROGRAMMING_ERROR);
+  }
+
+  affine_cost3 = diagonalband_linear_affine(useq, 0, ulen, vseq, 0, vlen,
+                                            left_dist, right_dist,
+                                             0, 4, 4, 1);
+  if (affine_cost3 != affine_cost2)
+  {
+    fprintf(stderr,"diagonalband_linear_affine = "GT_WU
+            " != "GT_WU" = gt_affinealign\n", affine_cost3, affine_cost2);
 
     exit(GT_EXIT_PROGRAMMING_ERROR);
   }
