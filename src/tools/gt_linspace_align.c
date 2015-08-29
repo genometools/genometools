@@ -27,7 +27,7 @@
 #include "core/str_array.h"
 #include "core/types_api.h"
 #include "core/unused_api.h"
-#include "extended/diagonalband_align.h"
+#include "extended/diagonalbandalign.h"
 #include "extended/linearalign_affinegapcost.h"
 #include "extended/linearalign.h"
 
