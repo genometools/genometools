@@ -35,7 +35,8 @@ struct GtQuerymatch
       dbstart, /* absolute start position of match in database seq */
       querystart, /* start of match in query, relative to start of query */
       edist, /* 0 for exact match */
-      dbseqnum, querystart_fwdstrand, dbstart_relative;
+      dbseqnum, querystart_fwdstrand, dbstart_relative,
+      seedpos1, seedpos2, seedlen;
    GtWord score; /* 0 for exact match */
    uint64_t queryseqnum; /* ordinal number of match in query */
    double similarity;
@@ -199,13 +200,17 @@ int gt_querymatch_output(void *info,
         GtUword querystartabsolute
           = gt_encseq_seqstartpos(encseq,querymatch->queryseqnum) +
             querymatch->querystart_fwdstrand;
-        gt_querymatch_alignment_prepare((GtQuerymatchoutoptions *) info,
+        gt_querymatchoutoptions_alignment_prepare(
+                                        (GtQuerymatchoutoptions *) info,
                                         encseq,
                                         querymatch->dbstart,
                                         querymatch->dblen,
                                         querystartabsolute,
                                         querymatch->querylen,
                                         querymatch->edist,
+                                        querymatch->seedpos1,
+                                        querymatch->seedpos2,
+                                        querymatch->seedlen,
                                         querymatch->greedyextension);
       } else
       {
@@ -265,6 +270,9 @@ int gt_querymatch_fill_and_output(
                         const GtEncseq *encseq,
                         const GtUchar *query,
                         GtUword query_totallength,
+                        GtUword seedpos1,
+                        GtUword seedpos2,
+                        GtUword seedlen,
                         bool greedyextension,
                         GtError *err)
 {
@@ -284,6 +292,9 @@ int gt_querymatch_fill_and_output(
                      querystart,
                      query_totallength);
   querymatch.greedyextension = greedyextension;
+  querymatch.seedpos1 = seedpos1;
+  querymatch.seedpos2 = seedpos2;
+  querymatch.seedlen = seedlen;
   return gt_querymatch_output(querymatchoutoptions,
                               encseq,
                               &querymatch,

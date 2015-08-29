@@ -102,6 +102,9 @@ static int gt_simpleexactselfmatchoutput(void *info,
                      encseq,
                      NULL,
                      seqlength,
+                     pos1,
+                     pos2,
+                     len,
                      false,
                      err);
 }

@@ -35,11 +35,7 @@ GtQuerymatchoutoptions *gt_querymatchoutoptions_new(
 void gt_querymatchoutoptions_delete(
         GtQuerymatchoutoptions *querymatchoutoptions);
 
-void gt_querymatchoutoptions_set_seed(
-                            GtQuerymatchoutoptions *querymatchoutoptions,
-                            GtUword pos1,GtUword pos2,GtUword len);
-
-void gt_querymatch_alignment_prepare(GtQuerymatchoutoptions
+void gt_querymatchoutoptions_alignment_prepare(GtQuerymatchoutoptions
                                      *querymatchoutoptions,
                                      const GtEncseq *encseq,
                                      GtUword dbstart,
@@ -47,6 +43,9 @@ void gt_querymatch_alignment_prepare(GtQuerymatchoutoptions
                                      GtUword querystartabsolute,
                                      GtUword querylen,
                                      GtUword edist,
+                                     GtUword seedpos1,
+                                     GtUword seedpos2,
+                                     GtUword seedlen,
                                      GT_UNUSED bool greedyextension);
 
 void gt_querymatchoutoptions_alignment_show(const GtQuerymatchoutoptions

@@ -290,11 +290,6 @@ int gt_simplexdropselfmatchoutput(void *info,
     {
       printf("# seed:\t" GT_WU "\t" GT_WU "\t" GT_WU "\n",pos1,pos2,len);
     }
-    if (processinfo_and_outoptions->querymatchoutoptions != NULL)
-    {
-      gt_querymatchoutoptions_set_seed(
-        processinfo_and_outoptions->querymatchoutoptions,pos1,pos2,len);
-    }
     return gt_querymatch_fill_and_output(
                        dblen,
                        dbstart,
@@ -310,6 +305,9 @@ int gt_simplexdropselfmatchoutput(void *info,
                        encseq,
                        NULL,
                        rfsi.queryseqlength,
+                       pos1,
+                       pos2,
+                       len,
                        false,
                        err);
   } else
@@ -420,11 +418,6 @@ int gt_processxdropquerymatches(void *info,
   {
     printf("# seed:\t" GT_WU "\t" GT_WU "\t" GT_WU "\n",pos1,pos2,len);
   }
-  if (processinfo_and_outoptions->querymatchoutoptions != NULL)
-  {
-    gt_querymatchoutoptions_set_seed(
-      processinfo_and_outoptions->querymatchoutoptions,pos1,pos2,len);
-  }
   return gt_querymatch_fill_and_output(
                      dblen,
                      dbstart,
@@ -442,6 +435,9 @@ int gt_processxdropquerymatches(void *info,
                      encseq,
                      query,
                      query_totallength,
+                     pos1,
+                     pos2,
+                     len,
                      false,
                      err);
 }
@@ -833,11 +829,6 @@ int gt_simplegreedyselfmatchoutput(void *info,
     {
       printf("# seed:\t" GT_WU "\t" GT_WU "\t" GT_WU "\n",pos1,pos2,len);
     }
-    if (processinfo_and_outoptions->querymatchoutoptions != NULL)
-    {
-      gt_querymatchoutoptions_set_seed(
-        processinfo_and_outoptions->querymatchoutoptions,pos1,pos2,len);
-    }
     return gt_querymatch_fill_and_output(
                        dblen,
                        dbstart,
@@ -853,6 +844,9 @@ int gt_simplegreedyselfmatchoutput(void *info,
                        encseq,
                        NULL,
                        rfsi.queryseqlength,
+                       pos1,
+                       pos2,
+                       len,
                        true,
                        err);
   } else

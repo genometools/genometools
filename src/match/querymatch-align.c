@@ -105,18 +105,17 @@ void gt_querymatch_showeoplist(const GtArrayuint8_t *eoplist)
 
 struct GtQuerymatchoutoptions
 {
-  Fronttrace *front_trace;
-  GtGreedyextendmatchinfo *ggemi;
-  GtUword seedpos1, seedpos2, seedlen, totallength,
+  GtUword totallength,
           alignmentwidth, /* if > 0, then with alignment of this width */
           useqbuffer_size,
           vseqbuffer_size;
-  GtUchar *useqbuffer, *vseqbuffer;
-  GtAlignment *alignment;
   GtArrayuint8_t eoplist;
-  GtUchar *alignment_show_buffer;
-  GtEncseqReader *esr_for_align_show;
+  Fronttrace *front_trace;
+  GtGreedyextendmatchinfo *ggemi;
+  GtUchar *useqbuffer, *vseqbuffer, *alignment_show_buffer;
   const GtUchar *characters;
+  GtAlignment *alignment;
+  GtEncseqReader *esr_for_align_show;
   GtUchar wildcardshow;
 };
 
@@ -194,10 +193,13 @@ static bool seededmatch2eoplist(GtSeqpaircoordinates *coords,
                                 GtUword dblen,
                                 GtUword querystartabsolute,
                                 GtUword querylen,
+                                GtUword seedpos1,
+                                GtUword seedpos2,
+                                GtUword seedlen,
                                 GtQuerymatchoutoptions *querymatchoutoptions,
                                 const GtEncseq *encseq)
 {
-  GtUword ulen, vlen, rightdistance = 0, ustart, vstart;
+  GtUword ulen, vlen, ustart, vstart;
   bool alignment_succeeded = true;
   Polished_point right_best_polished_point = {0,0,0};
   Polished_point left_best_polished_point = {0,0,0};
@@ -208,15 +210,15 @@ static bool seededmatch2eoplist(GtSeqpaircoordinates *coords,
   {
     querymatchoutoptions->totallength = gt_encseq_total_length(encseq);
   }
-  ustart = querymatchoutoptions->seedpos1 + querymatchoutoptions->seedlen;
-  vstart = querymatchoutoptions->seedpos2 + querymatchoutoptions->seedlen;
+  ustart = seedpos1 + seedlen;
+  vstart = seedpos2 + seedlen;
   gt_assert(dbstart + dblen >= ustart);
   ulen = dbstart + dblen - ustart;
   gt_assert(querystartabsolute + querylen >= vstart);
   vlen = querystartabsolute + querylen - vstart;
   if (ulen > 0 && vlen > 0)
   {
-    rightdistance = align_front_prune_edist(true,
+    GtUword rightdistance = align_front_prune_edist(true,
                                             &right_best_polished_point,
                                             querymatchoutoptions->front_trace,
                                             encseq,
@@ -239,19 +241,15 @@ static bool seededmatch2eoplist(GtSeqpaircoordinates *coords,
   }
   if (alignment_succeeded)
   {
-    GtUword leftdistance;
-
-    front_trace_multireplacement(&querymatchoutoptions->eoplist,
-                                 querymatchoutoptions->seedlen);
-    if (querymatchoutoptions->seedpos1 > dbstart &&
-        querymatchoutoptions->seedpos2 > querystartabsolute)
+    front_trace_multireplacement(&querymatchoutoptions->eoplist,seedlen);
+    if (seedpos1 > dbstart && seedpos2 > querystartabsolute)
     {
-      ustart = GT_REVERSEPOS(querymatchoutoptions->totallength,
-                             querymatchoutoptions->seedpos1 - 1);
-      ulen = querymatchoutoptions->seedpos1 - dbstart;
-      vstart = GT_REVERSEPOS(querymatchoutoptions->totallength,
-                             querymatchoutoptions->seedpos2-1);
-      vlen = querymatchoutoptions->seedpos2 - querystartabsolute;
+      GtUword leftdistance;
+
+      ustart = GT_REVERSEPOS(querymatchoutoptions->totallength,seedpos1 - 1);
+      ulen = seedpos1 - dbstart;
+      vstart = GT_REVERSEPOS(querymatchoutoptions->totallength,seedpos2-1);
+      vlen = seedpos2 - querystartabsolute;
       leftdistance = align_front_prune_edist(false,
                                              &left_best_polished_point,
                                              querymatchoutoptions->front_trace,
@@ -286,24 +284,18 @@ static bool seededmatch2eoplist(GtSeqpaircoordinates *coords,
   {
     GtUword leftcolumn, rightcolumn;
 
-    gt_assert(dbstart <= querymatchoutoptions->seedpos1 -
-                         left_best_polished_point.row);
-    coords->uoffset = querymatchoutoptions->seedpos1 -
-                      left_best_polished_point.row - dbstart;
-    coords->ulen = querymatchoutoptions->seedlen +
-                   left_best_polished_point.row +
+    gt_assert(dbstart <= seedpos1 - left_best_polished_point.row);
+    coords->uoffset = seedpos1 - left_best_polished_point.row - dbstart;
+    coords->ulen = seedlen + left_best_polished_point.row +
                    right_best_polished_point.row;
     leftcolumn = left_best_polished_point.alignedlen -
                  left_best_polished_point.row;
     rightcolumn = right_best_polished_point.alignedlen -
                   right_best_polished_point.row;
-    gt_assert(querymatchoutoptions->seedpos2 >= leftcolumn &&
-              querystartabsolute <= querymatchoutoptions->seedpos2 -
-                                    leftcolumn);
-    coords->voffset = querymatchoutoptions->seedpos2 -
-                      leftcolumn - querystartabsolute;
-    coords->vlen = querymatchoutoptions->seedlen +
-                   leftcolumn + rightcolumn;
+    gt_assert(seedpos2 >= leftcolumn &&
+              querystartabsolute <= seedpos2 - leftcolumn);
+    coords->voffset = seedpos2 - leftcolumn - querystartabsolute;
+    coords->vlen = seedlen + leftcolumn + rightcolumn;
   } else
   {
     coords->uoffset = coords->voffset = 0;
@@ -333,7 +325,7 @@ static void check_correct_edist(const GtUchar *useq,
 }
 #endif
 
-void gt_querymatch_alignment_prepare(GtQuerymatchoutoptions
+void gt_querymatchoutoptions_alignment_prepare(GtQuerymatchoutoptions
                                      *querymatchoutoptions,
                                      const GtEncseq *encseq,
                                      GtUword dbstart,
@@ -341,6 +333,9 @@ void gt_querymatch_alignment_prepare(GtQuerymatchoutoptions
                                      GtUword querystartabsolute,
                                      GtUword querylen,
                                      GtUword edist,
+                                     GtUword seedpos1,
+                                     GtUword seedpos2,
+                                     GtUword seedlen,
                                      GT_UNUSED bool greedyextension)
 {
   gt_assert(querymatchoutoptions != NULL);
@@ -393,6 +388,9 @@ void gt_querymatch_alignment_prepare(GtQuerymatchoutoptions
                             dblen,
                             querystartabsolute,
                             querylen,
+                            seedpos1,
+                            seedpos2,
+                            seedlen,
                             querymatchoutoptions,
                             encseq))
     {
@@ -436,16 +434,6 @@ void gt_querymatch_alignment_prepare(GtQuerymatchoutoptions
                         edist);
 #endif
   }
-}
-
-void gt_querymatchoutoptions_set_seed(
-                            GtQuerymatchoutoptions *querymatchoutoptions,
-                            GtUword pos1,GtUword pos2,GtUword len)
-{
-  gt_assert(querymatchoutoptions != NULL);
-  querymatchoutoptions->seedpos1 = pos1;
-  querymatchoutoptions->seedpos2 = pos2;
-  querymatchoutoptions->seedlen = len;
 }
 
 void gt_querymatchoutoptions_alignment_show(const GtQuerymatchoutoptions
