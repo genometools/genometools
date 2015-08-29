@@ -24,7 +24,7 @@
 #include "core/unused_api.h"
 #include "match/squarededist.h"
 
-#include "extended/diagonalband_align.h"
+#include "extended/diagonalbandalign.h"
 
 #define LINEAR_EDIST_GAP          ((GtUchar) UCHAR_MAX)
 typedef enum {
