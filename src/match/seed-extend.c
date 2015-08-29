@@ -17,6 +17,7 @@
 
 #include "core/minmax.h"
 #include "match/querymatch.h"
+#include "match/querymatch-align.h"
 #include "match/greedyedist.h"
 #include "match/xdrop.h"
 #include "match/esa-maxpairs.h"
@@ -289,8 +290,11 @@ int gt_simplexdropselfmatchoutput(void *info,
     {
       printf("# seed:\t" GT_WU "\t" GT_WU "\t" GT_WU "\n",pos1,pos2,len);
     }
-    gt_querymatch_set_seed(processinfo_and_outoptions->querymatchoutoptions,
-                           pos1,pos2,len);
+    if (processinfo_and_outoptions->querymatchoutoptions != NULL)
+    {
+      gt_querymatchoutoptions_set_seed(
+        processinfo_and_outoptions->querymatchoutoptions,pos1,pos2,len);
+    }
     return gt_querymatch_fill_and_output(
                        dblen,
                        dbstart,
@@ -416,8 +420,11 @@ int gt_processxdropquerymatches(void *info,
   {
     printf("# seed:\t" GT_WU "\t" GT_WU "\t" GT_WU "\n",pos1,pos2,len);
   }
-  gt_querymatch_set_seed(processinfo_and_outoptions->querymatchoutoptions,
-                         pos1,pos2,len);
+  if (processinfo_and_outoptions->querymatchoutoptions != NULL)
+  {
+    gt_querymatchoutoptions_set_seed(
+      processinfo_and_outoptions->querymatchoutoptions,pos1,pos2,len);
+  }
   return gt_querymatch_fill_and_output(
                      dblen,
                      dbstart,
@@ -826,8 +833,11 @@ int gt_simplegreedyselfmatchoutput(void *info,
     {
       printf("# seed:\t" GT_WU "\t" GT_WU "\t" GT_WU "\n",pos1,pos2,len);
     }
-    gt_querymatch_set_seed(processinfo_and_outoptions->querymatchoutoptions,
-                           pos1,pos2,len);
+    if (processinfo_and_outoptions->querymatchoutoptions != NULL)
+    {
+      gt_querymatchoutoptions_set_seed(
+        processinfo_and_outoptions->querymatchoutoptions,pos1,pos2,len);
+    }
     return gt_querymatch_fill_and_output(
                        dblen,
                        dbstart,

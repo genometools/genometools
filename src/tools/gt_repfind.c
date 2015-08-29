@@ -596,15 +596,21 @@ static int gt_repfind_runner(int argc,
                             : 100;
 
     processinfo_and_outoptions.processinfo = NULL;
-    processinfo_and_outoptions.querymatchoutoptions
-      = gt_querymatchoutoptions_new(arguments->alignmentwidth,
-                                    minidentity2errorpercentage(
-                                             arguments->minidentity),
-                                    arguments->maxalignedlendifference,
-                                    arguments->history,
-                                    arguments->perc_mat_history,
-                                    extend_char_access,
-                                    sensitivity);
+    if (arguments->alignmentwidth > 0)
+    {
+      processinfo_and_outoptions.querymatchoutoptions
+        = gt_querymatchoutoptions_new(arguments->alignmentwidth,
+                                      minidentity2errorpercentage(
+                                               arguments->minidentity),
+                                      arguments->maxalignedlendifference,
+                                      arguments->history,
+                                      arguments->perc_mat_history,
+                                      extend_char_access,
+                                      sensitivity);
+    } else
+    {
+      processinfo_and_outoptions.querymatchoutoptions = NULL;
+    }
     if (gt_str_array_size(arguments->queryfiles) == 0)
     {
       if (arguments->samples == 0)
