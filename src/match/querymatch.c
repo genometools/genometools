@@ -95,6 +95,8 @@ void gt_querymatch_fill(GtQuerymatch *querymatch,
     querymatch->dbseqnum = 0;
     dbseqstartpos = 0;
   }
+  gt_assert(querymatch->dbstart >= dbseqstartpos);
+  querymatch->dbstart_relative = querymatch->dbstart - dbseqstartpos;
   gt_assert((int) querymatch->readmode < 4);
   if (querymatch->readmode == GT_READMODE_REVERSE ||
       querymatch->readmode == GT_READMODE_REVCOMPL)
@@ -107,8 +109,6 @@ void gt_querymatch_fill(GtQuerymatch *querymatch,
   {
     querymatch->querystart_fwdstrand = querymatch->querystart;
   }
-  gt_assert(querymatch->dbstart >= dbseqstartpos);
-  querymatch->dbstart_relative = querymatch->dbstart - dbseqstartpos;
   if (querymatch->edist == 0)
   {
     querymatch->similarity = 100.0;
@@ -116,8 +116,8 @@ void gt_querymatch_fill(GtQuerymatch *querymatch,
   {
     querymatch->similarity
       = 100.0 - gt_querymatch_error_rate(querymatch->edist,
-                                          querymatch->dblen +
-                                          querymatch->querylen);
+                                         querymatch->dblen +
+                                         querymatch->querylen);
   }
 }
 
@@ -173,7 +173,7 @@ static void verifyexactmatch(const GtEncseq *encseq,
 #endif
 
 int gt_querymatch_output(void *info,
-                         const GtEncseq *encseq,
+                         GT_UNUSED const GtEncseq *encseq,
                          const GtQuerymatch *querymatch,
                          GT_UNUSED const GtUchar *query,
                          GT_UNUSED GtUword query_totallength,
@@ -193,30 +193,6 @@ int gt_querymatch_output(void *info,
                      querystart_fwdstrand,
                      querymatch->readmode);
 #endif
-    if (info != NULL)
-    {
-      if (querymatch->selfmatch)
-      {
-        GtUword querystartabsolute
-          = gt_encseq_seqstartpos(encseq,querymatch->queryseqnum) +
-            querymatch->querystart_fwdstrand;
-        gt_querymatchoutoptions_alignment_prepare(
-                                        (GtQuerymatchoutoptions *) info,
-                                        encseq,
-                                        querymatch->dbstart,
-                                        querymatch->dblen,
-                                        querystartabsolute,
-                                        querymatch->querylen,
-                                        querymatch->edist,
-                                        querymatch->seedpos1,
-                                        querymatch->seedpos2,
-                                        querymatch->seedlen,
-                                        querymatch->greedyextension);
-      } else
-      {
-        gt_assert(false); /* case not implemented yet */
-      }
-    }
     printf(GT_WU " " GT_WU " " GT_WU " %c " GT_WU " " Formatuint64_t
                    " " GT_WU,
            querymatch->dblen,
@@ -236,16 +212,9 @@ int gt_querymatch_output(void *info,
     {
       if (querymatch->selfmatch)
       {
-        if (querymatch->edist > 0)
-        {
-          gt_querymatchoutoptions_alignment_show(
-            (GtQuerymatchoutoptions *) info);
-        } else
-        {
-          gt_assert(querymatch->dblen == querymatch->querylen);
-          gt_querymatchoutoptions_exact_alignment_show(
-            (GtQuerymatchoutoptions *) info,querymatch->dblen);
-        }
+        gt_querymatchoutoptions_alignment_show((GtQuerymatchoutoptions *) info,
+                                               querymatch->edist,
+                                               querymatch->dblen);
       } else
       {
         gt_assert(false); /* case not implemented yet */
@@ -295,6 +264,31 @@ int gt_querymatch_fill_and_output(
   querymatch.seedpos1 = seedpos1;
   querymatch.seedpos2 = seedpos2;
   querymatch.seedlen = seedlen;
+  if (querymatchoutoptions && (!querymatch.selfmatch ||
+      (uint64_t) querymatch.dbseqnum != querymatch.queryseqnum ||
+      querymatch.dbstart_relative <= querymatch.querystart_fwdstrand))
+  {
+    if (querymatch.selfmatch)
+    {
+      GtUword querystartabsolute
+        = gt_encseq_seqstartpos(encseq,querymatch.queryseqnum) +
+          querymatch.querystart_fwdstrand;
+      gt_querymatchoutoptions_alignment_prepare(querymatchoutoptions,
+                                                encseq,
+                                                querymatch.dbstart,
+                                                querymatch.dblen,
+                                                querystartabsolute,
+                                                querymatch.querylen,
+                                                querymatch.edist,
+                                                querymatch.seedpos1,
+                                                querymatch.seedpos2,
+                                                querymatch.seedlen,
+                                                querymatch.greedyextension);
+    } else
+    {
+      gt_assert(false); /* case not implemented yet */
+    }
+  }
   return gt_querymatch_output(querymatchoutoptions,
                               encseq,
                               &querymatch,

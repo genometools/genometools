@@ -437,28 +437,28 @@ void gt_querymatchoutoptions_alignment_prepare(GtQuerymatchoutoptions
 }
 
 void gt_querymatchoutoptions_alignment_show(const GtQuerymatchoutoptions
-                                              *querymatchoutoptions)
+                                              *querymatchoutoptions,
+                                            GtUword edist,
+                                            GtUword len)
 {
   gt_assert(querymatchoutoptions != NULL);
-  gt_alignment_show_generic(querymatchoutoptions->alignment_show_buffer,
-                            querymatchoutoptions->alignment,
+  if (edist > 0)
+  {
+    gt_alignment_show_generic(querymatchoutoptions->alignment_show_buffer,
+                              querymatchoutoptions->alignment,
+                              stdout,
+                              (unsigned int)
+                              querymatchoutoptions->alignmentwidth,
+                              querymatchoutoptions->characters,
+                              querymatchoutoptions->wildcardshow);
+    gt_alignment_reset(querymatchoutoptions->alignment);
+  } else
+  {
+    gt_alignment_exact_show(querymatchoutoptions->alignment_show_buffer,
+                            querymatchoutoptions->useqbuffer,
+                            len,
                             stdout,
-                            (unsigned int)
                             querymatchoutoptions->alignmentwidth,
-                            querymatchoutoptions->characters,
-                            querymatchoutoptions->wildcardshow);
-  gt_alignment_reset(querymatchoutoptions->alignment);
-}
-
-void gt_querymatchoutoptions_exact_alignment_show(const GtQuerymatchoutoptions
-                                                     *querymatchoutoptions,
-                                                  GtUword len)
-{
-  gt_assert(querymatchoutoptions != NULL);
-  gt_alignment_exact_show(querymatchoutoptions->alignment_show_buffer,
-                          querymatchoutoptions->useqbuffer,
-                          len,
-                          stdout,
-                          querymatchoutoptions->alignmentwidth,
-                          querymatchoutoptions->characters);
+                            querymatchoutoptions->characters);
+  }
 }

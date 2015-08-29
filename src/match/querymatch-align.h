@@ -49,10 +49,8 @@ void gt_querymatchoutoptions_alignment_prepare(GtQuerymatchoutoptions
                                      GT_UNUSED bool greedyextension);
 
 void gt_querymatchoutoptions_alignment_show(const GtQuerymatchoutoptions
-                                              *querymatchoutoptions);
-
-void gt_querymatchoutoptions_exact_alignment_show(const GtQuerymatchoutoptions
-                                                     *querymatchoutoptions,
-                                                  GtUword len);
+                                              *querymatchoutoptions,
+                                            GtUword edist,
+                                            GtUword len);
 
 #endif
