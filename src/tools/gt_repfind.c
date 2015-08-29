@@ -70,12 +70,12 @@ typedef struct
            *refalignmentwidthoption;
 } GtMaxpairsoptions;
 
-static int gt_simpleexactselfmatch_with_output(void *info,
-                                         const GtGenericEncseq *genericencseq,
-                                         GtUword len,
-                                         GtUword pos1,
-                                         GtUword pos2,
-                                         GT_UNUSED GtError *err)
+static int gt_exact_selfmatch_with_output(void *info,
+                                          const GtGenericEncseq *genericencseq,
+                                          GtUword len,
+                                          GtUword pos1,
+                                          GtUword pos2,
+                                          GT_UNUSED GtError *err)
 {
   GtUword queryseqnum, seqstartpos, seqlength;
   const GtEncseq *encseq;
@@ -113,13 +113,13 @@ static int gt_simpleexactselfmatch_with_output(void *info,
   return 0;
 }
 
-static int gt_simplesuffixprefixmatchoutput(GT_UNUSED void *info,
-                                            const GtGenericEncseq
-                                              *genericencseq,
-                                            GtUword matchlen,
-                                            GtUword pos1,
-                                            GtUword pos2,
-                                            GT_UNUSED GtError *err)
+static int gt_suffix_prefix_match_with_output(GT_UNUSED void *info,
+                                              const GtGenericEncseq
+                                                *genericencseq,
+                                              GtUword matchlen,
+                                              GtUword pos1,
+                                              GtUword pos2,
+                                              GT_UNUSED GtError *err)
 {
   GtUword seqnum1, relpos1, seqnum2, relpos2, seqstartpos;
   const GtEncseq *encseq;
@@ -460,7 +460,7 @@ static int gt_repfind_arguments_check(GT_UNUSED int rest_argc,
   return 0;
 }
 
-static int gt_generic_simplexdropselfmatchoutput(
+static int gt_generic_extend_selfmatch_xdrop_with_output(
                                            void *info,
                                            const GtGenericEncseq *genericencseq,
                                            GtUword len,
@@ -630,13 +630,13 @@ static int gt_repfind_runner(int argc,
 
           if (arguments->searchspm)
           {
-            processmaxpairs = gt_simplesuffixprefixmatchoutput;
+            processmaxpairs = gt_suffix_prefix_match_with_output;
             processmaxpairsdata = NULL;
           } else
           {
             if (gt_option_is_set(arguments->refextendxdropoption))
             {
-              processmaxpairs = gt_generic_simplexdropselfmatchoutput;
+              processmaxpairs = gt_generic_extend_selfmatch_xdrop_with_output;
               processinfo_and_outoptions.processinfo = (void *) xdropmatchinfo;
               processmaxpairsdata = (void *) &processinfo_and_outoptions;
             } else
@@ -649,7 +649,7 @@ static int gt_repfind_runner(int argc,
                 processmaxpairsdata = (void *) &processinfo_and_outoptions;
               } else
               {
-                processmaxpairs = gt_simpleexactselfmatch_with_output;
+                processmaxpairs = gt_exact_selfmatch_with_output;
                 processmaxpairsdata = (void *) &processinfo_and_outoptions;
               }
             }
