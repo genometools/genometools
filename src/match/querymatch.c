@@ -35,10 +35,13 @@ struct GtQuerymatch
       dbstart, /* absolute start position of match in database seq */
       querystart, /* start of match in query, relative to start of query */
       edist, /* 0 for exact match */
-      dbseqnum, querystart_fwdstrand, dbstart_relative;
+      dbseqnum, /* sequence number of dbstart */
+      dbstart_relative, /* start position of match in dbsequence
+                           relative to start of sequence */
+      querystart_fwdstrand, /* absolute start of query on forward strand */
+      query_totallength; /* totallength of all query sequence */
    GtWord score; /* 0 for exact match */
    uint64_t queryseqnum; /* ordinal number of match in query */
-   double similarity;
    GtReadmode readmode; /* readmode by which reference sequence was accessed */
    bool selfmatch,       /* true if both instances of the match refer to the
                             same sequence */
@@ -62,9 +65,10 @@ GtUword gt_querymatch_dbseqnum(const GtEncseq *encseq,
 }
 
 void gt_querymatch_init(GtQuerymatch *querymatch,
-                        const GtEncseq *encseq,
                         GtUword dblen,
                         GtUword dbstart,
+                        GtUword dbseqnum,
+                        GtUword dbstart_relative,
                         GtReadmode readmode,
                         bool query_as_reversecopy,
                         GtWord score,
@@ -75,8 +79,6 @@ void gt_querymatch_init(GtQuerymatch *querymatch,
                         GtUword querystart,
                         GtUword query_totallength)
 {
-  GtUword dbseqstartpos;
-
   querymatch->dblen = dblen;
   querymatch->dbstart = dbstart;
   querymatch->readmode = readmode;
@@ -87,18 +89,9 @@ void gt_querymatch_init(GtQuerymatch *querymatch,
   querymatch->queryseqnum = queryseqnum;
   querymatch->querylen = querylen;
   querymatch->querystart = querystart;
-  gt_assert(encseq != NULL);
-  if (gt_encseq_has_multiseq_support(encseq))
-  {
-    querymatch->dbseqnum = gt_querymatch_dbseqnum(encseq,querymatch);
-    dbseqstartpos = gt_encseq_seqstartpos(encseq, querymatch->dbseqnum);
-  } else
-  {
-    querymatch->dbseqnum = 0;
-    dbseqstartpos = 0;
-  }
-  gt_assert(querymatch->dbstart >= dbseqstartpos);
-  querymatch->dbstart_relative = querymatch->dbstart - dbseqstartpos;
+  querymatch->dbseqnum = dbseqnum;
+  querymatch->dbstart_relative = dbstart_relative;
+  querymatch->query_totallength = query_totallength;
   gt_assert((int) querymatch->readmode < 4);
   if (querymatch->readmode == GT_READMODE_REVERSE ||
       querymatch->readmode == GT_READMODE_REVCOMPL)
@@ -110,16 +103,6 @@ void gt_querymatch_init(GtQuerymatch *querymatch,
   } else
   {
     querymatch->querystart_fwdstrand = querymatch->querystart;
-  }
-  if (querymatch->edist == 0)
-  {
-    querymatch->similarity = 100.0;
-  } else
-  {
-    querymatch->similarity
-      = 100.0 - gt_querymatch_error_rate(querymatch->edist,
-                                         querymatch->dblen +
-                                         querymatch->querylen);
   }
 }
 
@@ -187,7 +170,7 @@ void gt_querymatch_prettyprint(const GtQuerymatch *querymatch)
                      querymatch->len,
                      querymatch->dbstart,
                      querymatch->queryseqnum,
-                     querystart_fwdstrand,
+                     querymatch->querystart_fwdstrand,
                      querymatch->readmode);
 #endif
     printf(GT_WU " " GT_WU " " GT_WU " %c " GT_WU " " Formatuint64_t
@@ -201,8 +184,19 @@ void gt_querymatch_prettyprint(const GtQuerymatch *querymatch)
            querymatch->querystart_fwdstrand);
     if (querymatch->score > 0)
     {
+      double similarity;
+
+      if (querymatch->edist == 0)
+      {
+        similarity = 100.0;
+      } else
+      {
+        similarity = 100.0 - gt_querymatch_error_rate(querymatch->edist,
+                                                      querymatch->dblen +
+                                                      querymatch->querylen);
+      }
       printf(" " GT_WD " " GT_WU " %.2f",
-             querymatch->score,querymatch->edist,querymatch->similarity);
+             querymatch->score,querymatch->edist,similarity);
     }
     printf("\n");
     if (querymatch->ref_querymatchoutoptions != NULL)
@@ -235,6 +229,8 @@ int gt_querymatch_output(GT_UNUSED void *info,
 bool gt_querymatch_complete(GtQuerymatch *querymatchptr,
                             GtUword dblen,
                             GtUword dbstart,
+                            GtUword dbseqnum,
+                            GtUword dbstart_relative,
                             GtReadmode readmode,
                             bool query_as_reversecopy,
                             GtWord score,
@@ -252,9 +248,10 @@ bool gt_querymatch_complete(GtQuerymatch *querymatchptr,
                             bool greedyextension)
 {
   gt_querymatch_init(querymatchptr,
-                     encseq,
                      dblen,
                      dbstart,
+                     dbseqnum,
+                     dbstart_relative,
                      readmode,
                      query_as_reversecopy,
                      score,

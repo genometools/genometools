@@ -77,21 +77,36 @@ static int gt_exact_selfmatch_with_output(void *info,
                                           GtUword pos2,
                                           GT_UNUSED GtError *err)
 {
-  GtUword queryseqnum, seqstartpos, seqlength;
+  GtUword queryseqnum, queryseqstartpos, query_totallength, dbseqnum,
+          dbseqstartpos;
   const GtEncseq *encseq;
   GtProcessinfo_and_querymatchspaceptr *processinfo_and_querymatchspaceptr
     = (GtProcessinfo_and_querymatchspaceptr *) info;
 
   gt_assert(pos1 < pos2 && genericencseq != NULL && genericencseq->hasencseq);
   encseq = genericencseq->seqptr.encseq;
-  queryseqnum = gt_encseq_seqnum(encseq,pos2);
-  seqstartpos = gt_encseq_seqstartpos(encseq,queryseqnum);
-  seqlength = gt_encseq_seqlength(encseq,queryseqnum);
-  gt_assert(pos2 >= seqstartpos);
+  if (gt_encseq_has_multiseq_support(encseq))
+  {
+    dbseqnum = gt_encseq_seqnum(encseq,pos1);
+    dbseqstartpos = gt_encseq_seqstartpos(encseq,dbseqnum);
+    queryseqnum = gt_encseq_seqnum(encseq,pos2);
+    queryseqstartpos = gt_encseq_seqstartpos(encseq,queryseqnum);
+    query_totallength = gt_encseq_seqlength(encseq,queryseqnum);
+  } else
+  {
+    dbseqnum = 0;
+    dbseqstartpos = 0;
+    queryseqnum = 0;
+    queryseqstartpos = 0;
+    query_totallength = 0;
+  }
+  gt_assert(pos2 >= queryseqstartpos);
   if (gt_querymatch_complete(processinfo_and_querymatchspaceptr->
                                   querymatchspaceptr,
                              len,
                              pos1,
+                             dbseqnum,
+                             pos1 - dbseqstartpos,
                              GT_READMODE_FORWARD,
                              false,
                              0,
@@ -99,10 +114,10 @@ static int gt_exact_selfmatch_with_output(void *info,
                              true,
                              (uint64_t) queryseqnum,
                              len,
-                             pos2 - seqstartpos,
+                             pos2 - queryseqstartpos,
                              encseq,
                              NULL,
-                             seqlength,
+                             query_totallength,
                              pos1,
                              pos2,
                              len,

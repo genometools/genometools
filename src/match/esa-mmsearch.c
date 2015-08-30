@@ -409,10 +409,15 @@ static int gt_queryuniquematch(bool selfmatch,
                              offset,
                              queryrep->sequence))
     {
+      GtUword dbseqnum = gt_encseq_seqnum(suffixarray->encseq,dbstart),
+              dbseqstartpos = gt_encseq_seqstartpos(suffixarray->encseq,
+                                                    dbseqnum);
+
       gt_querymatch_init(querymatchspaceptr,
-                         suffixarray->encseq,
                          matchlen,
                          dbstart,
+                         dbseqnum,
+                         dbstart - dbseqstartpos,
                          queryrep->readmode,
                          queryrep->reversecopy,
                          0, /* score */
@@ -491,17 +496,29 @@ static int gt_querysubstringmatch_generic(
                                     dbstart,
                                     &querysubstring))
       {
-        GtUword extend = gt_mmsearch_extendright(dbencseq,
-                                                 mmsi->esr,
-                                                 readmode,
-                                                 totallength,
-                                                 dbstart + minmatchlength,
-                                                 &querysubstring,
-                                                 minmatchlength);
+        GtUword dbseqnum, dbseqstartpos, extend;
+
+        extend = gt_mmsearch_extendright(dbencseq,
+                                         mmsi->esr,
+                                         readmode,
+                                         totallength,
+                                         dbstart + minmatchlength,
+                                         &querysubstring,
+                                         minmatchlength);
+
+        if (gt_encseq_has_multiseq_support(dbencseq))
+        {
+          dbseqnum = gt_encseq_seqnum(dbencseq,dbstart);
+          dbseqstartpos = gt_encseq_seqstartpos(dbencseq,dbseqnum);
+        } else
+        {
+          dbseqnum = dbseqstartpos = 0;
+        }
         gt_querymatch_init(querymatchspaceptr,
-                           dbencseq,
                            minmatchlength + extend,
                            dbstart,
+                           dbseqnum,
+                           dbstart - dbseqstartpos,
                            queryrep->readmode,
                            queryrep->reversecopy,
                            0, /* score */
