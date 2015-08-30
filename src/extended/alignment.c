@@ -505,7 +505,7 @@ void gt_alignment_show_generic(GtUchar *buffer,
         }
         break;
     }
-    if (idx_eop > 0 && idx_u < alignment->ulen && idx_v < alignment->vlen)
+    if (idx_eop > 0 && (idx_u < alignment->ulen || idx_v < alignment->vlen))
     {
       idx_eop--;
     } else

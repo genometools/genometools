@@ -935,7 +935,7 @@ GtUword align_front_prune_edist(bool forward,
   GtUword distance;
   FTsequenceResources ufsr, vfsr;
 
-  gt_assert(front_trace != NULL && ggemi != NULL);
+  gt_assert(ggemi != NULL);
   if (ggemi->encseq_r_in_u == NULL)
   {
     ggemi->encseq_r_in_u
