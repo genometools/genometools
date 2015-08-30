@@ -446,7 +446,8 @@ void gt_alignment_show_generic(GtUchar *buffer,
       case Mismatch:
       case Match:
       case Replacement:
-        for (j = 0; j < meop.steps; j++)
+        for (j = 0; j < meop.steps && idx_u < alignment->ulen &&
+                                      idx_v < alignment->vlen; j++)
         {
           GtUchar a = alignment->u[idx_u++];
           GtUchar b = alignment->v[idx_v++];
@@ -470,7 +471,7 @@ void gt_alignment_show_generic(GtUchar *buffer,
         }
         break;
       case Deletion:
-        for (j = 0; j < meop.steps; j++)
+        for (j = 0; j < meop.steps && idx_u < alignment->ulen; j++)
         {
           GtUchar a = alignment->u[idx_u++];
 
@@ -487,7 +488,7 @@ void gt_alignment_show_generic(GtUchar *buffer,
         }
         break;
       case Insertion:
-        for (j = 0; j < meop.steps; j++)
+        for (j = 0; j < meop.steps && idx_v < alignment->vlen; j++)
         {
           GtUchar b = alignment->v[idx_v++];
 
@@ -504,11 +505,13 @@ void gt_alignment_show_generic(GtUchar *buffer,
         }
         break;
     }
-    if (idx_eop == 0)
+    if (idx_eop > 0 && idx_u < alignment->ulen && idx_v < alignment->vlen)
+    {
+      idx_eop--;
+    } else
     {
       break;
     }
-    idx_eop--;
   }
   if (pos > 0)
   {

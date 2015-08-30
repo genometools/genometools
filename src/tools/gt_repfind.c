@@ -620,7 +620,9 @@ static int gt_repfind_runner(int argc,
                             : 100;
 
     processinfo_and_querymatchspaceptr.processinfo = NULL;
-    if (arguments->alignmentwidth > 0)
+    if (arguments->alignmentwidth > 0 ||
+        (gt_str_array_size(arguments->queryfiles) == 0 &&
+         gt_option_is_set(arguments->refextendxdropoption)))
     {
       querymatchoutoptions
         = gt_querymatchoutoptions_new(arguments->alignmentwidth,

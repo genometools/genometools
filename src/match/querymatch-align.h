@@ -35,8 +35,9 @@ GtQuerymatchoutoptions *gt_querymatchoutoptions_new(
 void gt_querymatchoutoptions_delete(
         GtQuerymatchoutoptions *querymatchoutoptions);
 
-void gt_querymatchoutoptions_alignment_prepare(GtQuerymatchoutoptions
-                                     *querymatchoutoptions,
+bool gt_querymatchoutoptions_alignment_prepare(
+                                     GtQuerymatchoutoptions
+                                       *querymatchoutoptions,
                                      const GtEncseq *encseq,
                                      GtUword dbstart,
                                      GtUword dblen,
@@ -50,7 +51,16 @@ void gt_querymatchoutoptions_alignment_prepare(GtQuerymatchoutoptions
 
 void gt_querymatchoutoptions_alignment_show(const GtQuerymatchoutoptions
                                               *querymatchoutoptions,
+                                            bool selfmatch,
                                             GtUword edist,
                                             GtUword len);
+
+typedef struct
+{
+  GtUword uoffset, voffset, ulen, vlen, sumdist;
+} GtSeqpaircoordinates;
+
+const GtSeqpaircoordinates *gt_querymatchoutoptions_correction_get(
+              const GtQuerymatchoutoptions *querymatchoutoptions);
 
 #endif

@@ -17,17 +17,11 @@
 
 #include "core/minmax.h"
 #include "match/querymatch.h"
-#include "match/greedyedist.h"
 #include "match/xdrop.h"
 #include "match/esa-maxpairs.h"
 #include "match/ft-front-prune.h"
 #include "match/ft-trimstat.h"
 #include "match/seed-extend.h"
-
-static GtWord distance2score(GtUword distance,GtUword alignedlen)
-{
-  return ((GtWord) alignedlen) - (GtWord) (3 * distance);
-}
 
 static GtUword score2distance(GtWord score,GtUword alignedlen)
 {
@@ -45,7 +39,6 @@ struct GtXdropmatchinfo
 {
   GtXdropArbitraryscores arbitscores;
   GtXdropresources *res;
-  GtFrontResource *frontresource;
   GtXdropbest best_left,
               best_right;
   GtXdropscore belowscore;
@@ -89,7 +82,6 @@ GtXdropmatchinfo *gt_xdrop_matchinfo_new(GtUword userdefinedleastlength,
     xdropmatchinfo->arbitscores.ins = -3;
     xdropmatchinfo->arbitscores.del = -3;
   }
-  xdropmatchinfo->frontresource = gt_frontresource_new(100UL);
   xdropmatchinfo->res = gt_xdrop_resources_new(&xdropmatchinfo->arbitscores);
   xdropmatchinfo->userdefinedleastlength = userdefinedleastlength;
   xdropmatchinfo->errorpercentage = errorpercentage;
@@ -113,7 +105,6 @@ void gt_xdrop_matchinfo_delete(GtXdropmatchinfo *xdropmatchinfo)
     gt_seqabstract_delete(xdropmatchinfo->useq);
     gt_seqabstract_delete(xdropmatchinfo->vseq);
     gt_xdrop_resources_delete(xdropmatchinfo->res);
-    gt_frontresource_delete(xdropmatchinfo->frontresource);
     gt_free(xdropmatchinfo);
   }
 }
@@ -444,9 +435,7 @@ const GtQuerymatch* gt_xdrop_extend_querymatch(void *info,
                              GT_READMODE_FORWARD,
                              false,
                              score,
-                             greedyunitedist(xdropmatchinfo->frontresource,
-                                             xdropmatchinfo->useq,
-                                             xdropmatchinfo->vseq),
+                             score2distance(score,querylen + dblen),
                              false,
                              queryseqnum,
                              querylen,
@@ -855,7 +844,8 @@ const GtQuerymatch *gt_greedy_extend_selfmatch(void *info,
       total_alignedlen >= 2 * greedyextendmatchinfo->userdefinedleastlength)
   {
     GtUword dbstart, querystart;
-    GtXdropscore score = distance2score(total_distance,total_alignedlen);
+    GtXdropscore score = gt_querymatch_distance2score(total_distance,
+                                                      total_alignedlen);
 
     gt_assert(pos1 >= left_best_polished_point.row &&
               pos2 >= vextend_left);
@@ -991,5 +981,6 @@ GtUword align_front_prune_edist(bool forward,
                                        &vfsr,
                                        vstart,
                                        vlen);
+  gt_assert(distance >= best_polished_point->distance);
   return distance;
 }
