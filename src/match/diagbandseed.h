@@ -39,6 +39,7 @@ struct GtDiagbandseed {
   bool verbose;
   GtGreedyextendmatchinfo *extendgreedyinfo;
   GtXdropmatchinfo *extendxdropinfo;
+  GtQuerymatchoutoptions *querymatchoutopt;
 };
 
 typedef struct GtDiagbandseed GtDiagbandseed;

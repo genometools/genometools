@@ -27,6 +27,8 @@
 #include "match/diagbandseed.h"
 #include "match/ft-front-prune.h"
 #include "match/kmercodes.h"
+#include "match/querymatch.h"
+#include "match/querymatch-align.h"
 #include "match/seed-extend.h"
 #include "match/sfx-mappedstr.h"
 #include "match/sfx-suffixer.h"
@@ -211,7 +213,7 @@ GtUword gt_diagbandseed_maxfreq(const GtDiagbandseedKmerPos *alist,
   available_mem -= MAXGRAM * sizeof *histogram;
   for (frequency = 1, count = 0; frequency <= MAXGRAM && count < available_mem;
        frequency++) {
-    count += histogram[frequency - 1] * sizeof(GtDiagbandseedSeedPair);
+    count += histogram[frequency - 1] * sizeof (GtDiagbandseedSeedPair);
   }
   if (count > available_mem) {
     frequency -= 2;
@@ -295,14 +297,24 @@ int gt_diagbandseed_process_seeds(const GtEncseq *aencseq,
   GtUword diag, idx, maxsegm, nextsegm = 0;
   GtDiagbandseedScore *score = NULL;
   GtDiagbandseedPosition *lastp = NULL;
+  GtProcessinfo_and_querymatchspaceptr info_querymatch;
+
+  if (arg->extendgreedyinfo != NULL) {
+    info_querymatch.processinfo = (void *)(arg->extendgreedyinfo);
+  } else if (arg->extendxdropinfo != NULL) {
+    info_querymatch.processinfo = (void *)(arg->extendxdropinfo);
+  } else { /* no seed extension */
+    return 0;
+  }
 
   if (mlen < minhit)
     return 0;
-  if (!selfcomp &&
-      (arg->extendxdropinfo != NULL || arg->extendgreedyinfo != NULL)) {
+  if (!selfcomp) {
     gt_error_set(err, "comparison of two encseqs not implemented");
     return -1;
   }
+
+  info_querymatch.querymatchspaceptr = gt_querymatch_new(arg->querymatchoutopt);
   score = gt_calloc(ndiags, sizeof *score);
   lastp = gt_calloc(ndiags, sizeof *lastp);
   maxsegm = mlen - minhit;
@@ -355,14 +367,13 @@ int gt_diagbandseed_process_seeds(const GtEncseq *aencseq,
                lm[idx].aseqnum, lm[idx].bseqnum, lm[idx].apos, lm[idx].bpos);
 #endif
         if (arg->extendgreedyinfo != NULL) {
-          had_err = gt_simplegreedyselfmatchoutput((void *)
-                                                   arg->extendgreedyinfo,
-                                                   aencseq, arg->seedlength,
-                                                   astart, bstart, err);
+          gt_greedy_extend_selfmatch_with_output(&info_querymatch, aencseq,
+                                                 arg->seedlength, astart,
+                                                 bstart, err);
         } else if (arg->extendxdropinfo != NULL) {
-          had_err = gt_simplexdropselfmatchoutput((void *)arg->extendxdropinfo,
-                                                  aencseq, arg->seedlength,
-                                                  astart, bstart, err);
+          gt_xdrop_extend_selfmatch_with_output(&info_querymatch, aencseq,
+                                                arg->seedlength, astart,
+                                                bstart, err);
         }
         /* else: no seed extension */
       }
@@ -376,6 +387,7 @@ int gt_diagbandseed_process_seeds(const GtEncseq *aencseq,
       lastp[diag] = 0;
     }
   }
+  gt_querymatch_delete(info_querymatch.querymatchspaceptr);
   gt_free(score);
   gt_free(lastp);
   return had_err;
@@ -419,7 +431,8 @@ int gt_diagbandseed_run(const GtEncseq *aencseq, const GtEncseq *bencseq,
 
   if (arg->verbose) {
     vtimer = gt_timer_new();
-    printf("Start fetching (at most "GT_WU") k-mers for list A...\n", ankmers);
+    printf("# Start fetching (at most "GT_WU") k-mers for list A...\n",
+           ankmers);
     gt_timer_start(vtimer);
   }
 
@@ -432,14 +445,14 @@ int gt_diagbandseed_run(const GtEncseq *aencseq, const GtEncseq *bencseq,
   gt_radixsort_inplace_GtUwordPair((GtUwordPair*)alist, alen);
   gt_radixsort_delete(rdxinfo);
   if (arg->verbose) {
-    printf("Found and sorted "GT_WU" k-mers ", alen);
+    printf("# Found and sorted "GT_WU" k-mers ", alen);
     gt_timer_show_formatted(vtimer, "in "GT_WD".%06ld seconds.\n", stdout);
   }
 
   if (!selfcomp || arg->mirror) {
     /* allocate second list */
     if (arg->verbose) {
-      printf("Start fetching (at most "GT_WU") k-mers for list B...\n",
+      printf("# Start fetching (at most "GT_WU") k-mers for list B...\n",
              arg->mirror ? 2 * bnkmers : bnkmers);
       gt_timer_start(vtimer);
     }
@@ -467,7 +480,7 @@ int gt_diagbandseed_run(const GtEncseq *aencseq, const GtEncseq *bencseq,
     gt_radixsort_inplace_GtUwordPair((GtUwordPair*)blist, blen);
     gt_radixsort_delete(rdxinfo);
     if (arg->verbose) {
-      printf("Found and sorted "GT_WU" k-mers ", blen);
+      printf("# Found and sorted "GT_WU" k-mers ", blen);
       gt_timer_show_formatted(vtimer, "in "GT_WD".%06ld seconds.\n", stdout);
     }
   } else {
@@ -503,7 +516,7 @@ int gt_diagbandseed_run(const GtEncseq *aencseq, const GtEncseq *bencseq,
   GT_INITARRAY(&mlist,GtDiagbandseedSeedPair);
   if (!had_err) {
     if (arg->verbose) {
-      printf("Start building seed pairs on equal k-mers...\n");
+      printf("# Start building seed pairs on equal k-mers...\n");
       gt_timer_start(vtimer);
     }
     gt_diagbandseed_merge(&mlist, alist, alen, blist, blen, endposdiff, maxfreq,
@@ -522,7 +535,7 @@ int gt_diagbandseed_run(const GtEncseq *aencseq, const GtEncseq *bencseq,
                                          spaceGtDiagbandseedSeedPair, mlen);
     gt_radixsort_delete(rdxinfo);
     if (arg->verbose) {
-      printf("Collected and sorted "GT_WU" seed pairs ", mlen);
+      printf("# Collected and sorted "GT_WU" seed pairs ", mlen);
       gt_timer_show_formatted(vtimer, "in "GT_WD".%06ld seconds.\n", stdout);
     }
   }
@@ -563,7 +576,7 @@ int gt_diagbandseed_run(const GtEncseq *aencseq, const GtEncseq *bencseq,
 
   /* process SeedPairs */
   if (had_err == 0 && arg->verbose) {
-    printf("Start seed pair extension...\n");
+    printf("# Start seed pair extension...\n");
     gt_timer_start(vtimer);
   }
   if (had_err == 0 && mlen != 0)
@@ -573,14 +586,14 @@ int gt_diagbandseed_run(const GtEncseq *aencseq, const GtEncseq *bencseq,
 
   if (arg->verbose) {
     if (had_err == 0)
-      gt_timer_show_formatted(vtimer, "Completed extension in "GT_WD".%06ld "
+      gt_timer_show_formatted(vtimer, "# Completed extension in "GT_WD".%06ld "
                               "seconds.\n", stdout);
     gt_timer_stop(vtimer);
     gt_timer_delete(vtimer);
   }
 
   if (arg->benchmark) {
-    gt_timer_show_formatted(btimer, "Overall time "GT_WD".%06ld seconds.\n",
+    gt_timer_show_formatted(btimer, "# Overall time "GT_WD".%06ld seconds.\n",
                             stdout);
     gt_timer_delete(btimer);
   }

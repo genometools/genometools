@@ -46,8 +46,10 @@ typedef struct {
   GtUword se_perc_match_hist;
   GtStr *se_char_access_mode;
   /* general options */
+  GtOption *se_option_withali;
   GtUword se_alignlength;
   GtUword se_minidentity;
+  GtUword se_alignmentwidth;
   bool mirror;
   bool overlappingseeds;
   bool verify;
@@ -71,6 +73,7 @@ static void gt_seed_extend_arguments_delete(void *tool_arguments)
     gt_str_delete(arguments->se_char_access_mode);
     gt_option_delete(arguments->se_option_greedy);
     gt_option_delete(arguments->se_option_xdrop);
+    gt_option_delete(arguments->se_option_withali);
     gt_free(arguments);
   }
 }
@@ -80,7 +83,7 @@ static GtOptionParser* gt_seed_extend_option_parser_new(void *tool_arguments)
   GtSeedExtendArguments *arguments = tool_arguments;
   GtOptionParser *op;
   GtOption *option, *op_gre, *op_xdr, *op_cam, *op_his, *op_dif, *op_pmh,
-    *op_len, *op_err, *op_xbe, *op_sup, *op_frq, *op_mem;
+    *op_len, *op_err, *op_xbe, *op_sup, *op_frq, *op_mem, *op_ali;
   gt_assert(arguments);
 
   /* init */
@@ -229,6 +232,16 @@ static GtOptionParser* gt_seed_extend_option_parser_new(void *tool_arguments)
   gt_option_imply_either_2(op_err, op_xdr, op_gre);
   gt_option_parser_add_option(op, op_err);
 
+  /* -a */
+  op_ali = gt_option_new_uword_min("a",
+                                   "show alignments/sequences (optional "
+                                   "argument is number of columns per line)",
+                                   &arguments->se_alignmentwidth,
+                                   70, 20);
+  gt_option_argument_is_optional(op_ali);
+  gt_option_parser_add_option(op, op_ali);
+  arguments->se_option_withali = gt_option_ref(op_ali);
+
   /* -mirror */
   option = gt_option_new_bool("mirror",
                               "Add reverse complement reads",
@@ -279,6 +292,10 @@ static int gt_seed_extend_arguments_check(int rest_argc, void *tool_arguments,
     arguments->dbs_maxfreq = arguments->dbs_suppress - 1;
   }
 
+  if (!gt_option_is_set(arguments->se_option_withali)) {
+    arguments->se_alignmentwidth = 0;
+  }
+
   arguments->dbs_memlimit = GT_UWORD_MAX;
   if (strcmp(gt_str_get(arguments->dbs_memlimit_str), "") != 0) {
     had_err = gt_option_parse_spacespec(&arguments->dbs_memlimit, "memlimit",
@@ -319,6 +336,8 @@ static int gt_seed_extend_runner(int argc, const char **argv, int parsed_args,
   GtEncseq *aencseq, *bencseq;
   GtGreedyextendmatchinfo *grextinfo = NULL;
   GtXdropmatchinfo *xdropinfo = NULL;
+  GtQuerymatchoutoptions *querymatchoutopt = NULL;
+  GtExtendCharAccess cam = GT_EXTEND_CHAR_ACCESS_ANY;
   GtUword errorpercentage;
   int had_err = 0;
 
@@ -329,14 +348,14 @@ static int gt_seed_extend_runner(int argc, const char **argv, int parsed_args,
   gt_assert(arguments->se_minidentity <= 100);
   errorpercentage = 100 - arguments->se_minidentity;
 
-  /* load encseq A */
+  /* Load encseq A */
   encseq_loader = gt_encseq_loader_new();
   gt_encseq_loader_enable_autosupport(encseq_loader);
   aencseq = gt_encseq_loader_load(encseq_loader, argv[parsed_args], err);
   if (!aencseq)
     had_err = -1;
 
-  /* if there is a 2nd read set: load encseq B */
+  /* If there is a 2nd read set: Load encseq B */
   if (!had_err) {
     if (argc - parsed_args == 2)
       bencseq = gt_encseq_loader_load(encseq_loader, argv[parsed_args+1], err);
@@ -349,9 +368,10 @@ static int gt_seed_extend_runner(int argc, const char **argv, int parsed_args,
   }
   gt_encseq_loader_delete(encseq_loader);
 
+  /* Prepare options for greedy extension */
   if (!had_err && gt_option_is_set(arguments->se_option_greedy)) {
-    GtExtendCharAccess cam = gt_greedy_extend_char_access(gt_str_get
-                             (arguments->se_char_access_mode), err);
+    cam = gt_greedy_extend_char_access(gt_str_get
+                                       (arguments->se_char_access_mode), err);
     if ((int) cam != -1) {
       grextinfo = gt_greedy_extend_matchinfo_new(errorpercentage,
                                                  arguments->se_maxalilendiff,
@@ -367,6 +387,7 @@ static int gt_seed_extend_runner(int argc, const char **argv, int parsed_args,
     }
   }
 
+  /* Prepare options for xdrop extension */
   if (!had_err && gt_option_is_set(arguments->se_option_xdrop)) {
     xdropinfo = gt_xdrop_matchinfo_new(arguments->se_alignlength,
                                        errorpercentage,
@@ -377,7 +398,23 @@ static int gt_seed_extend_runner(int argc, const char **argv, int parsed_args,
       gt_xdrop_matchinfo_silent_set(xdropinfo);
   }
 
-  /* start algorithm */
+  /* Prepare output options */
+  if (!had_err && arguments->se_alignmentwidth > 0) {
+    /* || (gt_str_array_size(arguments->queryfiles) == 0
+     && gt_option_is_set(arguments->se_option_xdrop)) */
+    GtUword sensitivity = gt_option_is_set(arguments->se_option_greedy)
+      ? arguments->se_extendgreedy : 100;
+    querymatchoutopt
+      = gt_querymatchoutoptions_new(arguments->se_alignmentwidth,
+                                    errorpercentage,
+                                    arguments->se_maxalilendiff,
+                                    arguments->se_historysize,
+                                    arguments->se_perc_match_hist,
+                                    cam,
+                                    sensitivity);
+  }
+
+  /* Start algorithm */
   if (!had_err) {
     GtDiagbandseed dbsarguments;
     dbsarguments.seedlength = arguments->dbs_seedlength;
@@ -392,6 +429,7 @@ static int gt_seed_extend_runner(int argc, const char **argv, int parsed_args,
     dbsarguments.verbose = arguments->verbose;
     dbsarguments.extendgreedyinfo = grextinfo;
     dbsarguments.extendxdropinfo = xdropinfo;
+    dbsarguments.querymatchoutopt = querymatchoutopt;
 
     had_err = gt_diagbandseed_run(aencseq, bencseq, &dbsarguments, err);
     gt_encseq_delete(aencseq);
@@ -400,6 +438,8 @@ static int gt_seed_extend_runner(int argc, const char **argv, int parsed_args,
       gt_greedy_extend_matchinfo_delete(grextinfo);
     if (gt_option_is_set(arguments->se_option_xdrop))
       gt_xdrop_matchinfo_delete(xdropinfo);
+    if (querymatchoutopt != NULL)
+      gt_querymatchoutoptions_delete(querymatchoutopt);
   }
   return had_err;
 }
