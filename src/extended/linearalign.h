@@ -31,39 +31,41 @@ void gt_checklinearspace(GT_UNUSED bool forward,
                          GtUword vlen);
 
 void gt_checklinearspace_local(GT_UNUSED bool forward,
-                         const GtUchar *useq,
-                         GtUword ulen,
-                         const GtUchar *vseq,
-                         GtUword vlen);
+                               const GtUchar *useq,
+                               GtUword ulen,
+                               const GtUchar *vseq,
+                               GtUword vlen);
 
 /*global alignment with linear gapcosts*/
-GtAlignment *gt_computelinearspace( const GtUchar *useq,
-                                     const GtUword ustart,
-                                     const GtUword ulen,
-                                     const GtUchar *vseq,
-                                     const GtUword vstart,
-                                     const GtUword vlen,
-                                     const GtWord matchcost,
-                                     const GtWord mismatchcost,
-                                     const GtWord gapcost);
+GtUword gt_computelinearspace(GtAlignment *align,
+                              const GtUchar *useq,
+                              GtUword ustart,
+                              GtUword ulen,
+                              const GtUchar *vseq,
+                              GtUword vstart,
+                              GtUword vlen,
+                              GtWord matchcost,
+                              GtWord mismatchcost,
+                              GtWord gapcost);
 
 /*local alignment with linear gapcosts*/
-GtAlignment * gt_computelinearspace_local(const GtUchar *useq,
-                                          const GtUword ustart,
-                                          const GtUword ulen,
-                                          const GtUchar *vseq,
-                                          const GtUword vstart,
-                                          const GtUword vlen,
-                                          const GtWord matchscore,
-                                          const GtWord mismatchscore,
-                                          const GtWord gapscore);
+GtUword gt_computelinearspace_local(GtAlignment *align,
+                                    const GtUchar *useq,
+                                    GtUword ustart,
+                                    GtUword ulen,
+                                    const GtUchar *vseq,
+                                    GtUword vstart,
+                                    GtUword vlen,
+                                    GtWord matchscore,
+                                    GtWord mismatchscore,
+                                    GtWord gapscore);
 
 /*edit distance of sequences u and v*/
 GtUword gt_calc_linearedist(const GtUchar *u, GtUword ulen,
                             const GtUchar *v, GtUword vlen);
 
 void gt_print_edist_alignment(const GtUchar *useq, GtUword ustart,
-                           GtUword ulen,
-                           const GtUchar *vseq,GtUword vstart,
-                           GtUword vlen);
+                              GtUword ulen,
+                              const GtUchar *vseq,GtUword vstart,
+                              GtUword vlen);
 #endif

@@ -22,38 +22,18 @@
 #include "core/error_api.h"
 #include "core/readmode.h"
 #include "core/encseq.h"
-#include "ft-front-prune.h"
+#include "core/unused_api.h"
+#include "querymatch-align.h"
 
 typedef struct GtQuerymatch GtQuerymatch;
 
-typedef struct GtQuerymatchoutoptions GtQuerymatchoutoptions;
+GtQuerymatch *gt_querymatch_new(GtQuerymatchoutoptions *querymatchoutoptions);
 
-GtQuerymatch *gt_querymatch_new(void);
-
-void gt_querymatch_fill(GtQuerymatch *querymatch,
+void gt_querymatch_init(GtQuerymatch *querymatch,
                         GtUword dblen,
                         GtUword dbstart,
-                        GtReadmode readmode,
-                        bool query_as_reversecopy,
-                        GtWord score,
-                        GtUword edist,
-                        bool selfmatch,
-                        uint64_t queryseqnum,
-                        GtUword querylen,
-                        GtUword querystart);
-
-void gt_querymatch_delete(GtQuerymatch *querymatch);
-
-int gt_querymatch_output(void *info,
-                         const GtEncseq *encseq,
-                         const GtQuerymatch *querymatch,
-                         const GtUchar *query,
-                         GtUword query_totallength,
-                         GtError *err);
-
-int gt_querymatch_fill_and_output(
-                        GtUword dblen,
-                        GtUword dbstart,
+                        GtUword dbseqnum,
+                        GtUword dbstart_relative,
                         GtReadmode readmode,
                         bool query_as_reversecopy,
                         GtWord score,
@@ -62,11 +42,37 @@ int gt_querymatch_fill_and_output(
                         uint64_t queryseqnum,
                         GtUword querylen,
                         GtUword querystart,
-                        GtQuerymatchoutoptions *querymatchoutoptions,
-                        const GtEncseq *encseq,
-                        const GtUchar *query,
-                        GtUword query_totallength,
-                        GtError *err);
+                        GtUword query_totallength);
+
+void gt_querymatch_delete(GtQuerymatch *querymatch);
+
+int gt_querymatch_output(GT_UNUSED void *info,
+                         GT_UNUSED const GtEncseq *encseq,
+                         const GtQuerymatch *querymatch,
+                         GT_UNUSED const GtUchar *query,
+                         GT_UNUSED GtUword query_totallength,
+                         GT_UNUSED GtError *err);
+
+bool gt_querymatch_complete(GtQuerymatch *querymatchptr,
+                            GtUword dblen,
+                            GtUword dbstart,
+                            GtUword dbseqnum,
+                            GtUword dbstart_relative,
+                            GtReadmode readmode,
+                            bool query_as_reversecopy,
+                            GtWord score,
+                            GtUword edist,
+                            bool selfmatch,
+                            uint64_t queryseqnum,
+                            GtUword querylen,
+                            GtUword querystart,
+                            const GtEncseq *encseq,
+                            GT_UNUSED const GtUchar *query,
+                            GtUword query_totallength,
+                            GtUword seedpos1,
+                            GtUword seedpos2,
+                            GtUword seedlen,
+                            bool greedyextension);
 
 GtUword gt_querymatch_querylen(const GtQuerymatch *querymatch);
 
@@ -85,19 +91,10 @@ GtUword gt_querymatch_dbseqnum(const GtEncseq *encseq,
 
 bool gt_querymatch_queryreverse(const GtQuerymatch *querymatch);
 
-GtQuerymatchoutoptions *gt_querymatchoutoptions_new(
-                                GtUword alignmentwidth,
-                                GtUword errorpercentage,
-                                GtUword maxalignedlendifference,
-                                GtUword history,
-                                GtUword perc_mat_history,
-                                GtExtendCharAccess extend_char_access,
-                                GtUword sensitivity);
+double gt_querymatch_error_rate(GtUword distance,GtUword alignedlen);
 
-void gt_querymatchoutoptions_delete(
-        GtQuerymatchoutoptions *querymatchoutoptions);
+void gt_querymatch_prettyprint(const GtQuerymatch *querymatch);
 
-void gt_querymatch_set_seed(GtQuerymatchoutoptions *querymatchoutoptions,
-                            GtUword pos1,GtUword pos2,GtUword len);
+GtWord gt_querymatch_distance2score(GtUword distance,GtUword alignedlen);
 
 #endif

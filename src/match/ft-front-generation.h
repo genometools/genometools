@@ -3,12 +3,18 @@
 #include <stdint.h>
 #include "core/types_api.h"
 #ifndef OUTSIDE_OF_GT
-#include "extended/alignment.h"
+#include "core/arraydef.h"
 #endif
 
 #define FT_EOP_REPLACEMENT 1
 #define FT_EOP_INSERTION   (1 << 1)
 #define FT_EOP_DELETION    (1 << 2)
+
+#ifndef OUTSIDE_OF_GT
+#define FT_EOPCODE_MAXREPLACEMENT 254
+#define FT_EOPCODE_DELETION       254
+#define FT_EOPCODE_INSERTION      255
+#endif
 
 typedef struct
 {
@@ -44,11 +50,13 @@ void front_trace_verify_all(const Fronttrace *front_trace,
                             const GtUchar *vseq,
                             GtUword vlen);
 #else
-void front_trace2alignments(GtAlignment *al,
-                            const Fronttrace *front_trace,
-                            const Polished_point *pp,
-                            GT_UNUSED GtUword ulen,
-                            GT_UNUSED GtUword vlen);
-#endif
+void front_trace_multireplacement(GtArrayuint8_t *eoplist,GtUword repnum);
 
+void front_trace2eoplist(GtArrayuint8_t *eoplist,
+                         const Fronttrace *front_trace,
+                         const Polished_point *pp,
+                         GT_UNUSED GtUword ulen,
+                         GT_UNUSED GtUword vlen);
+
+#endif
 #endif

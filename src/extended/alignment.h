@@ -44,6 +44,8 @@ void         gt_alignment_set_urange(GtAlignment *alignment, GtRange range);
 void         gt_alignment_set_vrange(GtAlignment *alignment, GtRange range);
 /* can be either match, mismatch, <GtMultieoplist> handles them as match! */
 void         gt_alignment_add_replacement(GtAlignment *alignment);
+void         gt_alignment_add_replacement_multi(GtAlignment *alignment,
+                                                GtUword num);
 void         gt_alignment_add_deletion(GtAlignment *alignment);
 void         gt_alignment_add_insertion(GtAlignment *alignment);
 /* NOT the length of the alignment, but the number of distinct stored elements
@@ -56,6 +58,7 @@ void         gt_alignment_remove_last(GtAlignment *alignment);
 void         gt_alignment_reset(GtAlignment *alignment);
 /* returns unit cost */
 GtUword      gt_alignment_eval(const GtAlignment*);
+GtUword gt_alignment_eval_generic(bool mapped,const GtAlignment *alignment);
 GtWord       gt_alignment_eval_with_score(const GtAlignment *alignment,
                                           GtWord matchscore,
                                           GtWord mismatchscore,
@@ -71,7 +74,22 @@ void         gt_alignment_show(const GtAlignment *alignment, FILE *fp,
 void         gt_alignment_show_with_mapped_chars(const GtAlignment *alignment,
                                                  const GtUchar *characters,
                                                  GtUchar wildcardshow,
-                                                 FILE *fp);
+                                                 FILE *fp,
+                                                 unsigned int width);
+GtUchar *gt_alignment_buffer_new(unsigned int width);
+void gt_alignment_buffer_delete(GtUchar *buffer);
+void gt_alignment_show_generic(GtUchar *buffer,
+                               const GtAlignment *alignment,
+                               FILE *fp,
+                               unsigned int width,
+                               const GtUchar *characters,
+                               GtUchar wildcardshow);
+void gt_alignment_exact_show(GtUchar *buffer,
+                             const GtUchar *sequence,
+                             GtUword seqlen,
+                             FILE *fp,
+                             unsigned int width,
+                             const GtUchar *characters);
 void         gt_alignment_show_multieop_list(const GtAlignment *alignment,
                                              FILE *fp);
 int          gt_alignment_unit_test(GtError *err);

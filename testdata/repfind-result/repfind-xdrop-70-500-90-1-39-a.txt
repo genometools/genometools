@@ -1,0 +1,594 @@
+565 79 59 F 566 1495 2 1020 37 93.46
+gccggatttggtttgtatccaacgttgttttgtttttctttcaataatctcatagatcttat-gttggtg
+||||| ||||||||||  ||||||||| ||||  |||| ||| |||| | ||| |  ||| | |||||  
+gccgg-tttggtttgtncccaacgttg-tttggntttccttcnataaccccatggnccttntggttggnn
+ataatggtttaggtgatttttcgc-ttaaaga-tctttattatccaattcgatcttttgagttt-gagat
+ |||||||||||| | |||||||| ||||||| | ||||||| ||||||||| ||||  ||||| | |||
+-taatggtttaggngttttttcgcattaaagact-tttattanccaattcgacctttnnagtttggggat
+ttgca-ggaatcaa-tttagagatttgcatc-ttaagttgaagaaaagaagaagttttcgttgcatatta
+||||  ||| |||| ||| |||| ||||||| ||||||||||| ||||||||||||||||||||||||||
+ttgcngggattcaattttggaga-ttgcatcnttaagttgaag-aaagaagaagttttcgttgcatatta
+atattgcccttagctgctaagtttttatctggaagttcgattggtttgtttaaggtgaaacccagaagaa
+||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+atattgcccttagctgctaagtttttatctggaagttcgattggtttgtttaaggtgaaacccagaagaa
+tcaaacttgctttcattatcaatgttgatttttctcaccggaatcaatctcagacggcaaaggaagatgt
+||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+tcaaacttgctttcattatcaatgttgatttttctcaccggaatcaatctcagacggcaaaggaagatgt
+cggaaatgcttttagattactcatccaaacgtgtgctgtgttgttttcagctgttgacacgtaagattgg
+||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+cggaaatgcttttagattactcatccaaacgtgtgctgtgttgttttcagctgttgacacgtaagattgg
+ttggagccacaatatcagttcttcatctttaagcaatgttcttggactcatttaggacttcaaatgttct
+||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+ttggagccacaatatcagttcttcatctttaagcaatgttcttggactcatttaggacttcaaatgttct
+tgtaatctcagtgtatgttgggcttttggttttttagcccatgtatggttggttaacgttaataagattt
+||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+tgtaatctcagtgtatgttgggcttttggttttttagcccatgtatggttggttaacgttaataagattt
+tccacttatgag
+||||||||||||
+tccacttatgag
+728 5 11 F 732 16 129 1307 51 93.01
+aaatatttgtctgttacagatggaacagtgaagcgatacaacgatgcaaaaaaagagtggggattcacac
+||||||||| |||||||||||||   |||||||||||| ||| |||| |||||||| ||||| |||  ||
+aaatatttgactgttacagatggcttagtgaagcgatataacaatgcgaaaaaagaatggggtttcggac
+aattgatttctcttccaacattctacaacgcgaacgaagggtaccttgtgcaggacacagcttcttttgg
+|||||||| |||   ||||||||||||||||||||||||| |||||||  |||||||| | |||||||||
+aattgattcctcgatcaacattctacaacgcgaacgaaggttaccttgaccaggacactggttcttttgg
+tgctgagatcttcatcgttaacccgacagaaaaacaagagaaagtcacattcatatcaaaccctccagac
+|||||||||||| || ||||| ||| |  || ||||||||||||| ||||||||||||||||||||| ||
+tgctgagatctttattgttaaaccggctcaacaacaagagaaagttacattcatatcaaaccctccaaac
+aatgttttcacttggaagatacttcgtttctctaccttggaagataaattctattactccgatgattttc
+|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||| |||
+aatgttttcacttggaagatacttcgtttctctaccttggaagataaattctattactccgatgatnttc
+tcgttgaagaccgatactggagactaggatttaacccgaaaggggatggaggaggaagaccacatgcact
+||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+tcgttgaagaccgatactggagactaggatttaacccgaaaggggatggaggaggaagaccacatgcact
+tccaatcttcctatttgctcaaggccataaggcaaacgcagttgctacaaacacttggggagcggttaat
+|||||||||||||||||||||||||||||||||||| |||||||||||||||||||||||||||||||||
+tccaatcttcctatttgctcaaggccataaggcaaatgcagttgctacaaacacttggggagcggttaat
+ctgcggttaaagaatcaacgaagtactaaccatagacaaatatattctgcagcttggtacccgattggaa
+||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+ctgcggttaaagaatcaacgaagtactaaccatagacaaatatattctgcagcttggtacccgattggaa
+gcggttatggtgtgggagtgaacaatatcatactgttagctgatttaaacgatgcatcaaaaggatattt
+ ||||||||||||||||||||||||||||||||||||||||||||||||||||||||| |||||||||||
+acggttatggtgtgggagtgaacaatatcatactgttagctgatttaaacgatgcatccaaaggatattt
+ggtgaatgatgccattatctttgaagctgaaatggttaaggtctctataaccaacatcgtctccgcttaa
+||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+ggtgaatgatgccattatctttgaagctgaaatggttaaggtctctataaccaacatcgtctccgcttaa
+atatctgcacttctttgtctacgatcaatcaaccttatgaataaagagatatttgat--ga-g--tttgt
+|||||||| ||||||||||||| | ||||| |||||||||||||| | || ||| ||  || |  |||||
+atatctgcncttctttgtctacnancaatccaccttatgaataaaaaaat-tttaatttgatgaatttgt
+aataagaaaacgttaatgtttgtgaattgtgaa
+ |||| ||||| ||||||||||| || ||||||
+tataanaaaactttaatgtttgttaaatgtgaa
+677 3 0 F 673 39 72 1218 44 93.48
+gtgaagcgatacaacgatgcaaaaaaagagtggggattcacacaattgatttctcttccaacattctaca
+|||||||||||||||||||| |||||||||||||||||||||||||||||||||||||||||||||||||
+gtgaagcgatacaacgatgcnaaaaaagagtggggattcacacaattgatttctcttccaacattctaca
+acgcgaacgaagggtacnttgtgcaggacacagcttcttttggtgctgagatcttcatcgttaacccgac
+||||||||||||||||| ||||||||||||||||||||||||||||||||||||||||||||||||||||
+acgcgaacgaagggtaccttgtgcaggacacagcttcttttggtgctgagatcttcatcgttaacccgac
+agaaaaacaagagaaagtcacattcatatcaaaccctccgaacaatgttttcacttggaagatacttcgt
+||||||||||||||||||||||||||||||||||||||| ||||||||||||||||||||||||||||||
+agaaaaacaagagaaagtcacattcatatcaaaccctccaaacaatgttttcacttggaagatacttcgt
+ttctctaccttggaagataaattctattactctgatgattttctcgttgaagaccgatactggagattag
+|||||||||||||||||||||||||||||||||||||||||||| |||| |||||||||||||||| |||
+ttctctaccttggaagataaattctattactctgatgattttctngttggagaccgatactggagactag
+gatttaacccgaaaggatctggtggagggagaccacatgcacttccaatcttcctatatgctcaaggcca
+|||||||||||||||||||||||||||| |||||||||||||||||||||||||||||||||||||||||
+gatttaacccgaaaggatctggtggaggaagaccacatgcacttccaatcttcctatatgctcaaggcca
+taaggcaaacgcagttgttacaaacacttggggagcggttaatctgcggttaaagaatcaacgaagctcc
+||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+taaggcaaacgcagttgttacaaacacttggggagcggttaatctgcggttaaagaatcaacgaagctcc
+aaccacaaacaattatattctgcagcttggtaccccgattcgaagcgattatggtgtgggagtgaacaat
+||||||||||||||||||||||||||||||||||| ||||||||||||||||||||||||||||||||||
+aaccacaaacaattatattctgcagcttggtaccc-gattcgaagcgattatggtgtgggagtgaacaat
+atcatattgatgtcagaagctaaaagatgcatcnaaagggtatatggtgaatgatgccattatcttttga
+|| |||||||||||||| ||||||||||||||| ||||||||||||||||||||||||||||||||| ||
+ataatattgatgtcaga-gctaaaagatgcatcaaaagggtatatggtgaatgatgccattatcttt-ga
+aactgaaatggttaaggtctctgtgaacaa-catantctccncttaaatat-atntcactacttctttat
+| |||||||||||||||||||||||| ||| |||| |||||  |||||||| |  | ||| ||| || | 
+agctgaaatggttaaggtctctgtga-caaacatagtctccgtttaaatatcac-t-acttctttttcaa
+cccccgnaataaccttacaaagaaaaatt-gatga-tttaatttgttatac
+|  |     || |   | ||||   | || ||||| |||||||||||||||
+caacaacctta-c-gaataaagtggactttgatgagtttaatttgttatac
+721 6 71 F 724 39 143 1343 34 95.29
+cgcgaangaagggtaccttgtgnangacnnnncttctttnggtgctganatcttcatgcgntancccgac
+|||||| ||||||||||||||| | |||    ||||||| |||||||| |||||||| || || ||||||
+cgcgaacgaagggtaccttgtgcaggacacagcttcttttggtgctgagatcttcat-cgttaacccgac
+agaaanacnnnananagtcncattcatatcnnaccctccnaacaatgttttcacttggaagatacttcgt
+||||| ||   | | |||| ||||||||||  ||||||| ||||||||||||||||||||||||||||||
+agaaaaacaagagaaagtcacattcatatcaaaccctccaaacaatgttttcacttggaagatacttcgt
+ttctctaccttggaagataaattctattactctgatgattttctcgttgaagaccgatactggagattag
+|||||||||||||||||||||||||||||||||||||||||||| |||| |||||||||||||||| |||
+ttctctaccttggaagataaattctattactctgatgattttctngttggagaccgatactggagactag
+gatttaacccgaaaggatctggtggagggagaccacatgcacttccaatcttcctatatgctcaaggcca
+|||||||||||||||||||||||||||| |||||||||||||||||||||||||||||||||||||||||
+gatttaacccgaaaggatctggtggaggaagaccacatgcacttccaatcttcctatatgctcaaggcca
+taaggcaaacgcagttgttacaaacacttggggagcggttaatctgcggttaaagaatcaacgaagctcc
+||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+taaggcaaacgcagttgttacaaacacttggggagcggttaatctgcggttaaagaatcaacgaagctcc
+aaccacaaacaattatattctgcagcttggtacccgattcgaagcgattatggtgtgggagtgaacaata
+||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+aaccacaaacaattatattctgcagcttggtacccgattcgaagcgattatggtgtgggagtgaacaata
+taatattgatgtcagagctaaaagatgcatccaaaagggtatatggtgaatgatgccattatctttgaag
+||||||||||||||||||||||||||||||| ||||||||||||||||||||||||||||||||||||||
+taatattgatgtcagagctaaaagatgcatc-aaaagggtatatggtgaatgatgccattatctttgaag
+ctgaaatggttaaggtctctgtgacaaacatagtctccgtttaaatatcactacttctttttcaacaaca
+||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+ctgaaatggttaaggtctctgtgacaaacatagtctccgtttaaatatcactacttctttttcaacaaca
+accttacgaataaagtggactttgatgagtttaatttgttatacgacaacgttgttgatgcttgtgatgt
+||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+accttacgaataaagtggactttgatgagtttaatttgttatacgacaacgttgttgatgcttgtgatgt
+aatcgttgtttctgctctccgagttttcgttttactttttttttcatgttttgctatc-aatgaaa-taa
+ ||||||||||||||||||||||||||||||||||||||||||||||||||||||||| ||||||| |||
+natcgttgtttctgctctccgagttttcgttttactttttttttcatgttttgctatccaatgaaaataa
+a-ggtataaaactctc-tt-ggtttt
+| ||| |||||||||| || ||||||
+aaggtttaaaactctcctttggtttt
+721 6 71 F 724 39 143 1343 34 95.29
+cgcgaangaagggtaccttgtgnangacnnnncttctttnggtgctganatcttcatgcgntancccgac
+|||||| ||||||||||||||| | |||    ||||||| |||||||| |||||||| || || ||||||
+cgcgaacgaagggtaccttgtgcaggacacagcttcttttggtgctgagatcttcat-cgttaacccgac
+agaaanacnnnananagtcncattcatatcnnaccctccnaacaatgttttcacttggaagatacttcgt
+||||| ||   | | |||| ||||||||||  ||||||| ||||||||||||||||||||||||||||||
+agaaaaacaagagaaagtcacattcatatcaaaccctccaaacaatgttttcacttggaagatacttcgt
+ttctctaccttggaagataaattctattactctgatgattttctcgttgaagaccgatactggagattag
+|||||||||||||||||||||||||||||||||||||||||||| |||| |||||||||||||||| |||
+ttctctaccttggaagataaattctattactctgatgattttctngttggagaccgatactggagactag
+gatttaacccgaaaggatctggtggagggagaccacatgcacttccaatcttcctatatgctcaaggcca
+|||||||||||||||||||||||||||| |||||||||||||||||||||||||||||||||||||||||
+gatttaacccgaaaggatctggtggaggaagaccacatgcacttccaatcttcctatatgctcaaggcca
+taaggcaaacgcagttgttacaaacacttggggagcggttaatctgcggttaaagaatcaacgaagctcc
+||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+taaggcaaacgcagttgttacaaacacttggggagcggttaatctgcggttaaagaatcaacgaagctcc
+aaccacaaacaattatattctgcagcttggtacccgattcgaagcgattatggtgtgggagtgaacaata
+||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+aaccacaaacaattatattctgcagcttggtacccgattcgaagcgattatggtgtgggagtgaacaata
+taatattgatgtcagagctaaaagatgcatccaaaagggtatatggtgaatgatgccattatctttgaag
+||||||||||||||||||||||||||||||| ||||||||||||||||||||||||||||||||||||||
+taatattgatgtcagagctaaaagatgcatc-aaaagggtatatggtgaatgatgccattatctttgaag
+ctgaaatggttaaggtctctgtgacaaacatagtctccgtttaaatatcactacttctttttcaacaaca
+||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+ctgaaatggttaaggtctctgtgacaaacatagtctccgtttaaatatcactacttctttttcaacaaca
+accttacgaataaagtggactttgatgagtttaatttgttatacgacaacgttgttgatgcttgtgatgt
+||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+accttacgaataaagtggactttgatgagtttaatttgttatacgacaacgttgttgatgcttgtgatgt
+aatcgttgtttctgctctccgagttttcgttttactttttttttcatgttttgctatc-aatgaaa-taa
+ ||||||||||||||||||||||||||||||||||||||||||||||||||||||||| ||||||| |||
+natcgttgtttctgctctccgagttttcgttttactttttttttcatgttttgctatccaatgaaaataa
+a-ggtataaaactctc-tt-ggtttt
+| ||| |||||||||| || ||||||
+aaggtttaaaactctcctttggtttt
+677 3 0 F 673 39 72 1218 44 93.48
+gtgaagcgatacaacgatgcaaaaaaagagtggggattcacacaattgatttctcttccaacattctaca
+|||||||||||||||||||| |||||||||||||||||||||||||||||||||||||||||||||||||
+gtgaagcgatacaacgatgcnaaaaaagagtggggattcacacaattgatttctcttccaacattctaca
+acgcgaacgaagggtacnttgtgcaggacacagcttcttttggtgctgagatcttcatcgttaacccgac
+||||||||||||||||| ||||||||||||||||||||||||||||||||||||||||||||||||||||
+acgcgaacgaagggtaccttgtgcaggacacagcttcttttggtgctgagatcttcatcgttaacccgac
+agaaaaacaagagaaagtcacattcatatcaaaccctccgaacaatgttttcacttggaagatacttcgt
+||||||||||||||||||||||||||||||||||||||| ||||||||||||||||||||||||||||||
+agaaaaacaagagaaagtcacattcatatcaaaccctccaaacaatgttttcacttggaagatacttcgt
+ttctctaccttggaagataaattctattactctgatgattttctcgttgaagaccgatactggagattag
+|||||||||||||||||||||||||||||||||||||||||||| |||| |||||||||||||||| |||
+ttctctaccttggaagataaattctattactctgatgattttctngttggagaccgatactggagactag
+gatttaacccgaaaggatctggtggagggagaccacatgcacttccaatcttcctatatgctcaaggcca
+|||||||||||||||||||||||||||| |||||||||||||||||||||||||||||||||||||||||
+gatttaacccgaaaggatctggtggaggaagaccacatgcacttccaatcttcctatatgctcaaggcca
+taaggcaaacgcagttgttacaaacacttggggagcggttaatctgcggttaaagaatcaacgaagctcc
+||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+taaggcaaacgcagttgttacaaacacttggggagcggttaatctgcggttaaagaatcaacgaagctcc
+aaccacaaacaattatattctgcagcttggtaccccgattcgaagcgattatggtgtgggagtgaacaat
+||||||||||||||||||||||||||||||||||| ||||||||||||||||||||||||||||||||||
+aaccacaaacaattatattctgcagcttggtaccc-gattcgaagcgattatggtgtgggagtgaacaat
+atcatattgatgtcagaagctaaaagatgcatcnaaagggtatatggtgaatgatgccattatcttttga
+|| |||||||||||||| ||||||||||||||| ||||||||||||||||||||||||||||||||| ||
+ataatattgatgtcaga-gctaaaagatgcatcaaaagggtatatggtgaatgatgccattatcttt-ga
+aactgaaatggttaaggtctctgtgaacaa-catantctccncttaaatat-atntcactacttctttat
+| |||||||||||||||||||||||| ||| |||| |||||  |||||||| |  | ||| ||| || | 
+agctgaaatggttaaggtctctgtga-caaacatagtctccgtttaaatatcac-t-acttctttttcaa
+cccccgnaataaccttacaaagaaaaatt-gatga-tttaatttgttatac
+|  |     || |   | ||||   | || ||||| |||||||||||||||
+caacaacctta-c-gaataaagtggactttgatgagtttaatttgttatac
+721 6 71 F 724 39 143 1343 34 95.29
+cgcgaangaagggtaccttgtgnangacnnnncttctttnggtgctganatcttcatgcgntancccgac
+|||||| ||||||||||||||| | |||    ||||||| |||||||| |||||||| || || ||||||
+cgcgaacgaagggtaccttgtgcaggacacagcttcttttggtgctgagatcttcat-cgttaacccgac
+agaaanacnnnananagtcncattcatatcnnaccctccnaacaatgttttcacttggaagatacttcgt
+||||| ||   | | |||| ||||||||||  ||||||| ||||||||||||||||||||||||||||||
+agaaaaacaagagaaagtcacattcatatcaaaccctccaaacaatgttttcacttggaagatacttcgt
+ttctctaccttggaagataaattctattactctgatgattttctcgttgaagaccgatactggagattag
+|||||||||||||||||||||||||||||||||||||||||||| |||| |||||||||||||||| |||
+ttctctaccttggaagataaattctattactctgatgattttctngttggagaccgatactggagactag
+gatttaacccgaaaggatctggtggagggagaccacatgcacttccaatcttcctatatgctcaaggcca
+|||||||||||||||||||||||||||| |||||||||||||||||||||||||||||||||||||||||
+gatttaacccgaaaggatctggtggaggaagaccacatgcacttccaatcttcctatatgctcaaggcca
+taaggcaaacgcagttgttacaaacacttggggagcggttaatctgcggttaaagaatcaacgaagctcc
+||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+taaggcaaacgcagttgttacaaacacttggggagcggttaatctgcggttaaagaatcaacgaagctcc
+aaccacaaacaattatattctgcagcttggtacccgattcgaagcgattatggtgtgggagtgaacaata
+||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+aaccacaaacaattatattctgcagcttggtacccgattcgaagcgattatggtgtgggagtgaacaata
+taatattgatgtcagagctaaaagatgcatccaaaagggtatatggtgaatgatgccattatctttgaag
+|||||||||||||||||||||||||||||| |||||||||||||||||||||||||||||||||||||||
+taatattgatgtcagagctaaaagatgcat-caaaagggtatatggtgaatgatgccattatctttgaag
+ctgaaatggttaaggtctctgtgacaaacatagtctccgtttaaatatcactacttctttttcaacaaca
+||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+ctgaaatggttaaggtctctgtgacaaacatagtctccgtttaaatatcactacttctttttcaacaaca
+accttacgaataaagtggactttgatgagtttaatttgttatacgacaacgttgttgatgcttgtgatgt
+||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+accttacgaataaagtggactttgatgagtttaatttgttatacgacaacgttgttgatgcttgtgatgt
+aatcgttgtttctgctctccgagttttcgttttactttttttttcatgttttgctatc-aatgaaa-taa
+ ||||||||||||||||||||||||||||||||||||||||||||||||||||||||| ||||||| |||
+natcgttgtttctgctctccgagttttcgttttactttttttttcatgttttgctatccaatgaaaataa
+a-ggtataaaactctc-tt-ggtttt
+| ||| |||||||||| || ||||||
+aaggtttaaaactctcctttggtttt
+481 4 16 F 475 47 0 911 15 96.86
+cacaaatggagtctaggtttcacattacttgctttcctcttcatcacttcctcttccgctgagctcatca
+||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+cacaaatggagtctaggtttcacattacttgctttcctcttcatcacttcctcttccgctgagctcatca
+ttaaacaggtcacacagggcagaggaatagagtacaacaactcttacagtctcacgtcgaatcttggagt
+||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+ttaaacaggtcacacagggcagaggaatagagtacaacaactcttacagtctcacgtcgaatcttggagt
+gacgacaagagagttgagagacgagcgaccatcaagtaagatagtgacaatcacaagcttctctgtgatt
+||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+gacgacaagagagttgagagacgagcgaccatcaagtaagatagtgacaatcacaagcttctctgtgatt
+aaggacagaggagaaccctatgaatcatctatttttgaggctgccggttacaaatggagattagttttgt
+||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||| ||||||
+aaggacagaggagaaccctatgaatcatctatttttgaggctgccggttacaaatggagattanttttgt
+acgtgaagggtaatccgaaaggcggtataaataatcatatttcactttacgcgaggatagaagagacaga
+||||||||||||||||||||||||||||| ||||||||||||||||||||||||||||||||||||||||
+acgtgaagggtaatccgaaaggcggtatanataatcatatttcactttacgcgaggatagaagagacaga
+aactcttccaagagggtgggaagtgaatgttgatctcaaactctttgtccacaatcggaanttaaagaaa
+||||||||||||| |||||||||||||||||||||||||||||||||||||||||||||| | |||||| 
+aactcttccaagaaggtgggaagtgaatgttgatctcaaactctttgtccacaatcggaagtnaaagaa-
+tatttgtctgttacagatggaacagtgaagcgatacaacgatgcaaaaaaagagtggggat
+|||| |||||||||||||||| || |||| |||| || | |||| |||||||| |||||||
+tatt-gtctgttacagatgga-ca-tgaancgatcca-cnatgcnaaaaaaga-tggggat
+517 64 0 F 517 65 0 1034 0 100.00
+cacgaaagtcttacgcgtctccttgaagatgcgaaatctattattgagaaatattggaaactcagatgga
+||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+cacgaaagtcttacgcgtctccttgaagatgcgaaatctattattgagaaatattggaaactcagatgga
+gcagacacgtttgcaggaagtacaggtacatcaaaaaactcgaatcgatagaacttgaattagtaagggt
+||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+gcagacacgtttgcaggaagtacaggtacatcaaaaaactcgaatcgatagaacttgaattagtaagggt
+agcacgtgagatacaagtccaccaatggaccgatatcaaagaaatgaaggcgatacaagtccaccaatgg
+||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+agcacgtgagatacaagtccaccaatggaccgatatcaaagaaatgaaggcgatacaagtccaccaatgg
+accgatatcaaagaaatgaaggcgatacaagtcgaccaatggaccgatatcaaagaaatgaaggcgatac
+||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+accgatatcaaagaaatgaaggcgatacaagtcgaccaatggaccgatatcaaagaaatgaaggcgatac
+aagtcgaccaatggatcgatatcaaagaaatgaaggcgatacaagtcgaccaatggaccgatatcaaaga
+||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+aagtcgaccaatggatcgatatcaaagaaatgaaggcgatacaagtcgaccaatggaccgatatcaaaga
+aatgaaggccagatatctgaaaagcataataaatgaatcaatatctaaaatctggtgtttttctctcttt
+||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+aatgaaggccagatatctgaaaagcataataaatgaatcaatatctaaaatctggtgtttttctctcttt
+cttcttccccacaatgattgaaaaactcttcttgttatgaataaagatggatgcccatttataagggcca
+||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+cttcttccccacaatgattgaaaaactcttcttgttatgaataaagatggatgcccatttataagggcca
+tcatctaagcccatcatctagattttt
+|||||||||||||||||||||||||||
+tcatctaagcccatcatctagattttt
+423 1788 0 F 422 1850 9 803 14 96.69
+gaaaatggcttccaagactttccttcttttgggtctctttgcatttntttncatcgtctcagaaatggct
+|||||||||||||||||||||||||||||||||||||||||||||| ||| |||||||||||||||||||
+gaaaatggcttccaagactttccttcttttgggtctctttgcatttntttncatcgtctcagaaatggct
+gcngcgggcacggtgaagtcagagagtgaggaaactntgaaacctgaacaacatggtggtggattcggtg
+|| ||||||||||||||||||||||||||||||||| |||||||||||||||||||||||||||||||||
+gccgcgggcacggtgaagtcagagagtgaggaaactntgaaacctgaacaacatggtggtggattcggtg
+acaatggaggaggaagataccaaggaggaggcggccatggtggccacggagggggaggataccaaggagg
+||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+acaatggaggaggaagataccaaggaggaggcggccatggtggccacggagggggaggataccaaggagg
+aggaggacgataccaaggaggcggtgggcgacaaggaggagggggaagttactnccgccacggctgctgc
+||||||||||||||||||||||||||||||||||||||||||||||||||||| ||||||||||||||||
+aggaggacgataccaaggaggcggtgggcgacaaggaggagggggaagttactgccgccacggctgctgc
+tacaaaggttaccatggctgctcaaggtgttgttcatatgccggagaagcggttcanactcagtctngtc
+|||||||||||||||||||||||||||||||||||||||||||||||||||||||| ||||||||| |||
+tacaaaggttaccatggctgctcaaggtgttgttcatatgccggagaagcggttcanactcagtctggtc
+actaaatctncataatttttcaanccaccatgagtgtacggtttcatttntatatacacttacgggtgta
+||||||||| |||||| | |||| |||||||||||||||| |||||||| |||||||||||||| |||||
+actaaatctacataatatatcaa-ccaccatgagtgtacgatttcatttatatatacacttacgtgtgta
+tgt
+|||
+tgt
+537 474 3 F 520 658 82 973 28 94.70
+aggttgcccccaatcggaagagaagttgngcnctttcttcctccctgccnttagtgccgttgaattggct
+|||||| |||| |||||||||||| |||  | | |||||||| |||  | |||||| || || |||||||
+aggttg-cccc-atcggaagagaanttgaactc-ttcttcct-cctnnc-ttagtgacg-tg-attggct
+aaggaagttgcttccttctccgcaacaagtggatcccttgtgttgaattcgagttggagcaccggattng
+||||||| ||  ||||||||||| || ||||||| || ||||||| ||||||||||||||| |||||| |
+aaggaag-tgactccttctccgc-ac-agtggattcc-tgtgttg-attcgagttggagca-cggatttg
+tgtaccgtgagcacggaaccactcccggatactatgatggacggtactggacaatgtggaagcttccatt
+|||||||||||||||||| |||||||||||||||||||||||||||||||||||||||| ||||||||||
+tgtaccgtgagcacggaa-cactcccggatactatgatggacggtactggacaatgtgg-agcttccatt
+ggttcggatgcaccgactccgctcaagtgttgaaggaagttgaagaatgcaagaaggagtaccctggcgc
+ |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||| ||||||||
+-gttcggatgcaccgactccgctcaagtgttgaaggaagttgaagaatgcaagaaggagta-cctggcgc
+cttcattaggatcatcggattcgacaacacccgtcaagtccaatgcatcagtttcattgcctacaagccc
+||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+cttcattaggatcatcggattcgacaacacccgtcaagtccaatgcatcagtttcattgcctacaagccc
+ccaagcttcaccgaagcttaatcccctttctggaatattcagcgttgattattctggaacccatttctat
+||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+ccaagcttcaccgaagcttaatcccctttctggaatattcagcgttgattattctggaacccatttctat
+gtggtcaatgcaaatttaagaaattatttgccgacttaaaagttgaggaactattgtttgaaagtgaaaa
+||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+gtggtcaatgcaaatttaagaaattatttgccgacttaaaagttgaggaactattgtttgaaagtgaaaa
+tgttattcctatcagtttctctataattatagttatcatttcatttc
+|||||||||||||||||||||||||||||||||||||||||||||||
+tgttattcctatcagtttctctataattatagttatcatttcatttc
+496 78 269 F 494 1488 54 948 14 97.17
+ggatttgaagcgaagcttaaccatc-ttatggtgacttagatctatttagaacc-tttagttggtggctt
+|||||||| ||| |||||| ||||| ||||||||  || || |||||||| ||| ||||| |||||||||
+ggatttgacgcg-agcttacccatctttatggtgctttgga-ctatttag-accntttag-tggtggctt
+ttctccggatcgtcatgttgggtatacggattactgaaatttcaaggatagtttgcaaataaaattgaag
+| ||||||||| ||||||||||||| ||||||||||||||||||||||||||||||||||||||||||||
+tcctccggatcntcatgttgggtatccggattactgaaatttcaaggatagtttgcaaataaaattgaag
+aaaagaaagaaatttccttcgcgattttaagatgccttttagccgtgatttcaattgttcggagttttga
+||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+aaaagaaagaaatttccttcgcgattttaagatgccttttagccgtgatttcaattgttcggagttttga
+ttcgttttgcaaccagctttgtcggtgaaaatcagaagaatcaatagtcgaatttcagttatcggcaatg
+||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+ttcgttttgcaaccagctttgtcggtgaaaatcagaagaatcaatagtcgaatttcagttatcggcaatg
+attttcttcaccagaatcagcatcttagatggcggtggtgatgtcggaaagcttttagaattttcatcca
+||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+attttcttcaccagaatcagcatcttagatggcggtggtgatgtcggaaagcttttagaattttcatcca
+acacgtgtaccactgttgacacgtttgtttgggaatgaaactaatgataaactttcttcaagttgaagca
+||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+acacgtgtaccactgttgacacgtttgtttgggaatgaaactaatgataaactttcttcaagttgaagca
+atatattgtgtgggcctttatgggctgtaatctgttttgtaacccatgttgttatgaataaaatcctaat
+||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+atatattgtgtgggcctttatgggctgtaatctgttttgtaacccatgttgttatgaataaaatcctaat
+cttgcgag
+||||||||
+cttgcgag
+728 5 11 F 732 16 129 1307 51 93.01
+aaatatttgtctgttacagatggaacagtgaagcgatacaacgatgcaaaaaaagagtggggattcacac
+||||||||| |||||||||||||   |||||||||||| ||| |||| |||||||| ||||| |||  ||
+aaatatttgactgttacagatggcttagtgaagcgatataacaatgcgaaaaaagaatggggtttcggac
+aattgatttctcttccaacattctacaacgcgaacgaagggtaccttgtgcaggacacagcttcttttgg
+|||||||| |||   ||||||||||||||||||||||||| |||||||  |||||||| | |||||||||
+aattgattcctcgatcaacattctacaacgcgaacgaaggttaccttgaccaggacactggttcttttgg
+tgctgagatcttcatcgttaacccgacagaaaaacaagagaaagtcacattcatatcaaaccctccagac
+|||||||||||| || ||||| ||| |  || ||||||||||||| ||||||||||||||||||||| ||
+tgctgagatctttattgttaaaccggctcaacaacaagagaaagttacattcatatcaaaccctccaaac
+aatgttttcacttggaagatacttcgtttctctaccttggaagataaattctattactccgatgattttc
+|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||| |||
+aatgttttcacttggaagatacttcgtttctctaccttggaagataaattctattactccgatgatnttc
+tcgttgaagaccgatactggagactaggatttaacccgaaaggggatggaggaggaagaccacatgcact
+||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+tcgttgaagaccgatactggagactaggatttaacccgaaaggggatggaggaggaagaccacatgcact
+tccaatcttcctatttgctcaaggccataaggcaaacgcagttgctacaaacacttggggagcggttaat
+|||||||||||||||||||||||||||||||||||| |||||||||||||||||||||||||||||||||
+tccaatcttcctatttgctcaaggccataaggcaaatgcagttgctacaaacacttggggagcggttaat
+ctgcggttaaagaatcaacgaagtactaaccatagacaaatatattctgcagcttggtacccgattggaa
+||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+ctgcggttaaagaatcaacgaagtactaaccatagacaaatatattctgcagcttggtacccgattggaa
+gcggttatggtgtgggagtgaacaatatcatactgttagctgatttaaacgatgcatcaaaaggatattt
+ ||||||||||||||||||||||||||||||||||||||||||||||||||||||||| |||||||||||
+acggttatggtgtgggagtgaacaatatcatactgttagctgatttaaacgatgcatccaaaggatattt
+ggtgaatgatgccattatctttgaagctgaaatggttaaggtctctataaccaacatcgtctccgcttaa
+||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+ggtgaatgatgccattatctttgaagctgaaatggttaaggtctctataaccaacatcgtctccgcttaa
+atatctgcacttctttgtctacgatcaatcaaccttatgaataaagagatatttgat--ga-g--tttgt
+|||||||| ||||||||||||| | ||||| |||||||||||||| | || ||| ||  || |  |||||
+atatctgcncttctttgtctacnancaatccaccttatgaataaaaaaat-tttaatttgatgaatttgt
+aataagaaaacgttaatgtttgtgaattgtgaa
+ |||| ||||| ||||||||||| || ||||||
+tataanaaaactttaatgtttgttaaatgtgaa
+423 1788 0 F 422 1850 9 803 14 96.69
+gaaaatggcttccaagactttccttcttttgggtctctttgcatttntttncatcgtctcagaaatggct
+|||||||||||||||||||||||||||||||||||||||||||||| ||| |||||||||||||||||||
+gaaaatggcttccaagactttccttcttttgggtctctttgcatttntttncatcgtctcagaaatggct
+gcngcgggcacggtgaagtcagagagtgaggaaactntgaaacctgaacaacatggtggtggattcggtg
+|| ||||||||||||||||||||||||||||||||| |||||||||||||||||||||||||||||||||
+gccgcgggcacggtgaagtcagagagtgaggaaactntgaaacctgaacaacatggtggtggattcggtg
+acaatggaggaggaagataccaaggaggaggcggccatggtggccacggagggggaggataccaaggagg
+||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+acaatggaggaggaagataccaaggaggaggcggccatggtggccacggagggggaggataccaaggagg
+aggaggacgataccaaggaggcggtgggcgacaaggaggagggggaagttactnccgccacggctgctgc
+||||||||||||||||||||||||||||||||||||||||||||||||||||| ||||||||||||||||
+aggaggacgataccaaggaggcggtgggcgacaaggaggagggggaagttactgccgccacggctgctgc
+tacaaaggttaccatggctgctcaaggtgttgttcatatgccggagaagcggttcanactcagtctngtc
+|||||||||||||||||||||||||||||||||||||||||||||||||||||||| ||||||||| |||
+tacaaaggttaccatggctgctcaaggtgttgttcatatgccggagaagcggttcanactcagtctggtc
+actaaatctncataatttttcaanccaccatgagtgtacggtttcatttntatatacacttacgggtgta
+||||||||| |||||| | |||| |||||||||||||||| |||||||| |||||||||||||| |||||
+actaaatctacataatatatcaa-ccaccatgagtgtacgatttcatttatatatacacttacgtgtgta
+tgt
+|||
+tgt
+452 736 58 F 452 846 164 859 15 96.68
+cctgccttagtg-cgtcgaatggctaaggaagttgactn-cttctccgcaacaagtgga-tccnttgtgt
+|||| ||||||| |||||| ||||  ||||||||||||  |||| ||||| | |||||| |||  |||||
+cctgacttagtgacgtcgattggcn-aggaagttgactaccttcaccgcanc-agtggattccc-tgtgt
+tgaattcgagttagagcacggatttgtgtaccgtgagcacggaaacactcccggatactacgatggacgg
+||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+tgaattcgagttagagcacggatttgtgtaccgtgagcacggaaacactcccggatactacgatggacgg
+tactggacaatgtggaagcttccattgttcggatgcaccgactccgctcaagtgttgaaggaagttgaag
+||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+tactggacaatgtggaagcttccattgttcggatgcaccgactccgctcaagtgttgaaggaagttgaag
+aatgcaagaaggagtacccgggcgccttcattaggatcatcggattcgacaacacccgtcaagtccaatg
+||||||||||||| ||||||||||| ||||||||||||||||||||||||||||||||||||||||||||
+aatgcaagaaggantacccgggcgcnttcattaggatcatcggattcgacaacacccgtcaagtccaatg
+catcagtttcattgcctacaagcccccaagcttcaccgaagcttaatttcttttctaaaacattcttatg
+||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+catcagtttcattgcctacaagcccccaagcttcaccgaagcttaatttcttttctaaaacattcttatg
+aattatctctgctcatttcatttcctattgtctgtgttctttttctctttatgagacaatttctatcgga
+||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+aattatctctgctcatttcatttcctattgtctgtgttctttttctctttatgagacaatttctatcgga
+ttgtcaaatgtctgatttatgaatatgtaatttat
+|||||||||||||||||||||||||||||||||||
+ttgtcaaatgtctgatttatgaatatgtaatttat
+621 2 5 F 640 16 89 1183 26 95.88
+tgttgatctcaaactctttgtccataatgggaagctacacaaatatttgactgttacagatggcttagtg
+||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+tgttgatctcaaactctttgtccataatgggaagctacacaaatatttgactgttacagatggcttagtg
+aagcgatataacaatgcgaaaaaagaatggggtttcggacaattgattcctcgatcaacattctacaacg
+||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+aagcgatataacaatgcgaaaaaagaatggggtttcggacaattgattcctcgatcaacattctacaacg
+cgaacgaaggttaccttgaccaggacactggttcttttggtgctgagatctttattgttaaaccggctca
+||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+cgaacgaaggttaccttgaccaggacactggttcttttggtgctgagatctttattgttaaaccggctca
+acaacaagagaaagttacattcatatcaaaccctccaaacaatgttttcacttggaagatacttcgtttc
+||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+acaacaagagaaagttacattcatatcaaaccctccaaacaatgttttcacttggaagatacttcgtttc
+tctaccttggaagataaattctattactccgatgattttctcgttgaagaccgatactggagactaggat
+|||||||||||||||||||||||||||||||||||| |||||||||||||||||||||||||||||||||
+tctaccttggaagataaattctattactccgatgatnttctcgttgaagaccgatactggagactaggat
+ttaacccgaaaggggatggaggaggaagaccacatgcacttccaatcttcctatttgctcaaggccataa
+||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+ttaacccgaaaggggatggaggaggaagaccacatgcacttccaatcttcctatttgctcaaggccataa
+ggcaaatgcagttgctacaaacacttggggagcggttaatctgcggttaaagaatcaacgaanttctaac
+|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||| | |||||
+ggcaaatgcagttgctacaaacacttggggagcggttaatctgcggttaaagaatcaacgaagtactaac
+catagacaa-tatnt-ctgca-cttggtaccc-attggaaacg-ttatggtntgggant-aaca-tatc-
+||||||||| ||| | ||||| |||||||||| |||||||||| ||||||| ||||| | |||| |||| 
+catagacaaatatattctgcagcttggtacccgattggaaacggttatggtgtgggagtgaacaatatca
+tactgtt-gctgatt-aa-cga-gcatccaaaggat-tttggtga-tga-gccnt-atctt-gaa-ctga
+||||||| ||||||| || ||| ||||||||||||| |||||||| ||| ||| | ||||| ||| ||||
+tactgttagctgatttaaacgatgcatccaaaggatatttggtgaatgatgccattatctttgaagctga
+a-tggttaag
+| ||||||||
+aatggttaag
+429 846 189 F 433 1230 80 805 19 95.59
+aggaagttgactaccttcaccgcanc-agtggattccc-tgtgttgaattcgagttagagcacggatttg
+|||||||||||| | ||| | ||| | | |||  |||| ||||||||||||||||||| || ||||||||
+aggaagttgactccnttctcngcaacaaatggn-tcccttgtgttgaattcgagttagggcncggatttg
+tgtaccgtgagcacggaaacactcccggatactacgatgga-cggtactggacaa-tgtggaagctt-cc
+||| |||||||| |||||||||||||||||||||||||||| ||||||||||||| ||||||||||| ||
+tgtcccgtgagcccggaaacactcccggatactacgatggaccggtactggacaattgtggaagcttccc
+attgttcggatgcaccgactccgctcaagtgttgaaggaagttgaagaatgcaagaaggantacccgggc
+|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||| |||||||||
+attgttcggatgcaccgactccgctcaagtgttgaaggaagttgaagaatgcaagaaggagtacccgggc
+gcnttcattaggatcatcggattcgacaacacccgtcaagtccaatgcatcagtttcattgcctacaagc
+|| |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+gccttcattaggatcatcggattcgacaacacccgtcaagtccaatgcatcagtttcattgcctacaagc
+ccccaagcttcaccgaagcttaatttcttttctaaaacattcttatgaattatctctgctcatttcattt
+||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+ccccaagcttcaccgaagcttaatttcttttctaaaacattcttatgaattatctctgctcatttcattt
+cctattgtctgtgttctttttctctttatgagacaatttctatcggattgtcaaatgtctgatttatgaa
+||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+cctattgtctgtgttctttttctctttatgagacaatttctatcggattgtcaaatgtctgatttatgaa
+tatgtaatttatat
+||||||||||||||
+tatgtaatttatat
+452 736 58 F 452 846 164 859 15 96.68
+cctgccttagtg-cgtcgaatggctaaggaagttgactn-cttctccgcaacaagtgga-tccnttgtgt
+|||| ||||||| |||||| ||||  ||||||||||||  |||| ||||| | |||||| |||  |||||
+cctgacttagtgacgtcgattggcn-aggaagttgactaccttcaccgcanc-agtggattccc-tgtgt
+tgaattcgagttagagcacggatttgtgtaccgtgagcacggaaacactcccggatactacgatggacgg
+||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+tgaattcgagttagagcacggatttgtgtaccgtgagcacggaaacactcccggatactacgatggacgg
+tactggacaatgtggaagcttccattgttcggatgcaccgactccgctcaagtgttgaaggaagttgaag
+||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+tactggacaatgtggaagcttccattgttcggatgcaccgactccgctcaagtgttgaaggaagttgaag
+aatgcaagaaggagtacccgggcgccttcattaggatcatcggattcgacaacacccgtcaagtccaatg
+||||||||||||| ||||||||||| ||||||||||||||||||||||||||||||||||||||||||||
+aatgcaagaaggantacccgggcgcnttcattaggatcatcggattcgacaacacccgtcaagtccaatg
+catcagtttcattgcctacaagcccccaagcttcaccgaagcttaatttcttttctaaaacattcttatg
+||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+catcagtttcattgcctacaagcccccaagcttcaccgaagcttaatttcttttctaaaacattcttatg
+aattatctctgctcatttcatttcctattgtctgtgttctttttctctttatgagacaatttctatcgga
+||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+aattatctctgctcatttcatttcctattgtctgtgttctttttctctttatgagacaatttctatcgga
+ttgtcaaatgtctgatttatgaatatgtaatttat
+|||||||||||||||||||||||||||||||||||
+ttgtcaaatgtctgatttatgaatatgtaatttat
+626 2 0 F 645 16 84 1190 27 95.75
+gtgantgttgatctcaaactctttgtccataatgggaagctacacaaatatttgactgttacagatggct
+|||| |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+gtgaatgttgatctcaaactctttgtccataatgggaagctacacaaatatttgactgttacagatggct
+tagtgaagcgatataacaatgcgaaaaaagaatggggtttcggacaattgattcctcgatcaacattcta
+||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+tagtgaagcgatataacaatgcgaaaaaagaatggggtttcggacaattgattcctcgatcaacattcta
+caacgcgaacgaaggttaccttgaccaggacactggttcttttggtgctgagatctttattgttaaaccg
+||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+caacgcgaacgaaggttaccttgaccaggacactggttcttttggtgctgagatctttattgttaaaccg
+gctcaacaacaagagaaagttacattcatatcaaaccctccaaacaatgttttcacttggaagatacttc
+||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+gctcaacaacaagagaaagttacattcatatcaaaccctccaaacaatgttttcacttggaagatacttc
+gtttctctaccttggaagataaattctattactccgatgattttctcgttgaagaccgatactggagact
+||||||||||||||||||||||||||||||||||||||||| ||||||||||||||||||||||||||||
+gtttctctaccttggaagataaattctattactccgatgatnttctcgttgaagaccgatactggagact
+aggatttaacccgaaaggggatggaggaggaagaccacatgcacttccaatcttcctatttgctcaaggc
+||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+aggatttaacccgaaaggggatggaggaggaagaccacatgcacttccaatcttcctatttgctcaaggc
+cataaggcaaatgcagttgctacaaacacttggggagcggttaatctgcggttaaagaatcaacgaantt
+||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||| | 
+cataaggcaaatgcagttgctacaaacacttggggagcggttaatctgcggttaaagaatcaacgaagta
+ctaaccatagacaa-tatnt-ctgca-cttggtaccc-attggaaacg-ttatggtntgggant-aaca-
+|||||||||||||| ||| | ||||| |||||||||| |||||||||| ||||||| ||||| | |||| 
+ctaaccatagacaaatatattctgcagcttggtacccgattggaaacggttatggtgtgggagtgaacaa
+tatc-tactgtt-gctgatt-aa-cga-gcatccaaaggat-tttggtga-tga-gccnt-atctt-gaa
+|||| ||||||| ||||||| || ||| ||||||||||||| |||||||| ||| ||| | ||||| |||
+tatcatactgttagctgatttaaacgatgcatccaaaggatatttggtgaatgatgccattatctttgaa
+-ctgaa-tggttaag
+ ||||| ||||||||
+gctgaaatggttaag
+728 5 11 F 732 16 129 1307 51 93.01
+aaatatttgtctgttacagatggaacagtgaagcgatacaacgatgcaaaaaaagagtggggattcacac
+||||||||| |||||||||||||   |||||||||||| ||| |||| |||||||| ||||| |||  ||
+aaatatttgactgttacagatggcttagtgaagcgatataacaatgcgaaaaaagaatggggtttcggac
+aattgatttctcttccaacattctacaacgcgaacgaagggtaccttgtgcaggacacagcttcttttgg
+|||||||| |||   ||||||||||||||||||||||||| |||||||  |||||||| | |||||||||
+aattgattcctcgatcaacattctacaacgcgaacgaaggttaccttgaccaggacactggttcttttgg
+tgctgagatcttcatcgttaacccgacagaaaaacaagagaaagtcacattcatatcaaaccctccagac
+|||||||||||| || ||||| ||| |  || ||||||||||||| ||||||||||||||||||||| ||
+tgctgagatctttattgttaaaccggctcaacaacaagagaaagttacattcatatcaaaccctccaaac
+aatgttttcacttggaagatacttcgtttctctaccttggaagataaattctattactccgatgattttc
+|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||| |||
+aatgttttcacttggaagatacttcgtttctctaccttggaagataaattctattactccgatgatnttc
+tcgttgaagaccgatactggagactaggatttaacccgaaaggggatggaggaggaagaccacatgcact
+||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+tcgttgaagaccgatactggagactaggatttaacccgaaaggggatggaggaggaagaccacatgcact
+tccaatcttcctatttgctcaaggccataaggcaaacgcagttgctacaaacacttggggagcggttaat
+|||||||||||||||||||||||||||||||||||| |||||||||||||||||||||||||||||||||
+tccaatcttcctatttgctcaaggccataaggcaaatgcagttgctacaaacacttggggagcggttaat
+ctgcggttaaagaatcaacgaagtactaaccatagacaaatatattctgcagcttggtacccgattggaa
+||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+ctgcggttaaagaatcaacgaagtactaaccatagacaaatatattctgcagcttggtacccgattggaa
+gcggttatggtgtgggagtgaacaatatcatactgttagctgatttaaacgatgcatcaaaaggatattt
+ ||||||||||||||||||||||||||||||||||||||||||||||||||||||||| |||||||||||
+acggttatggtgtgggagtgaacaatatcatactgttagctgatttaaacgatgcatccaaaggatattt
+ggtgaatgatgccattatctttgaagctgaaatggttaaggtctctataaccaacatcgtctccgcttaa
+||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+ggtgaatgatgccattatctttgaagctgaaatggttaaggtctctataaccaacatcgtctccgcttaa
+atatctgcacttctttgtctacgatcaatcaaccttatgaataaagagatatttgat--ga-g--tttgt
+|||||||| ||||||||||||| | ||||| |||||||||||||| | || ||| ||  || |  |||||
+atatctgcncttctttgtctacnancaatccaccttatgaataaaaaaat-tttaatttgatgaatttgt
+aataagaaaacgttaatgtttgtgaattgtgaa
+ |||| ||||| ||||||||||| || ||||||
+tataanaaaactttaatgtttgttaaatgtgaa
+677 3 0 F 673 39 72 1218 44 93.48
+gtgaagcgatacaacgatgcaaaaaaagagtggggattcacacaattgatttctcttccaacattctaca
+|||||||||||||||||||| |||||||||||||||||||||||||||||||||||||||||||||||||
+gtgaagcgatacaacgatgcnaaaaaagagtggggattcacacaattgatttctcttccaacattctaca
+acgcgaacgaagggtacnttgtgcaggacacagcttcttttggtgctgagatcttcatcgttaacccgac
+||||||||||||||||| ||||||||||||||||||||||||||||||||||||||||||||||||||||
+acgcgaacgaagggtaccttgtgcaggacacagcttcttttggtgctgagatcttcatcgttaacccgac
+agaaaaacaagagaaagtcacattcatatcaaaccctccgaacaatgttttcacttggaagatacttcgt
+||||||||||||||||||||||||||||||||||||||| ||||||||||||||||||||||||||||||
+agaaaaacaagagaaagtcacattcatatcaaaccctccaaacaatgttttcacttggaagatacttcgt
+ttctctaccttggaagataaattctattactctgatgattttctcgttgaagaccgatactggagattag
+|||||||||||||||||||||||||||||||||||||||||||| |||| |||||||||||||||| |||
+ttctctaccttggaagataaattctattactctgatgattttctngttggagaccgatactggagactag
+gatttaacccgaaaggatctggtggagggagaccacatgcacttccaatcttcctatatgctcaaggcca
+|||||||||||||||||||||||||||| |||||||||||||||||||||||||||||||||||||||||
+gatttaacccgaaaggatctggtggaggaagaccacatgcacttccaatcttcctatatgctcaaggcca
+taaggcaaacgcagttgttacaaacacttggggagcggttaatctgcggttaaagaatcaacgaagctcc
+||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+taaggcaaacgcagttgttacaaacacttggggagcggttaatctgcggttaaagaatcaacgaagctcc
+aaccacaaacaattatattctgcagcttggtaccccgattcgaagcgattatggtgtgggagtgaacaat
+||||||||||||||||||||||||||||||||||| ||||||||||||||||||||||||||||||||||
+aaccacaaacaattatattctgcagcttggtaccc-gattcgaagcgattatggtgtgggagtgaacaat
+atcatattgatgtcagaagctaaaagatgcatcnaaagggtatatggtgaatgatgccattatcttttga
+|| |||||||||||||| ||||||||||||||| ||||||||||||||||||||||||||||||||| ||
+ataatattgatgtcaga-gctaaaagatgcatcaaaagggtatatggtgaatgatgccattatcttt-ga
+aactgaaatggttaaggtctctgtgaacaa-catantctccncttaaatat-atntcactacttctttat
+| |||||||||||||||||||||||| ||| |||| |||||  |||||||| |  | ||| ||| || | 
+agctgaaatggttaaggtctctgtga-caaacatagtctccgtttaaatatcac-t-acttctttttcaa
+cccccgnaataaccttacaaagaaaaatt-gatga-tttaatttgttatac
+|  |     || |   | ||||   | || ||||| |||||||||||||||
+caacaacctta-c-gaataaagtggactttgatgagtttaatttgttatac

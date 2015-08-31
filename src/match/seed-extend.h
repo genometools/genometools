@@ -17,9 +17,10 @@
 #ifndef SEED_EXTEND_H
 #define SEED_EXTEND_H
 #include "core/types_api.h"
-#include "match/querymatch.h"
-#include "match/xdrop.h"
-#include "match/ft-front-prune.h"
+#include "core/unused_api.h"
+#include "querymatch.h"
+#include "xdrop.h"
+#include "ft-front-prune.h"
 
 /* This header file describes the interface to two different
    methods for extending seeds, namely the xdrop-based method based on
@@ -75,8 +76,8 @@ typedef struct GtXdropmatchinfo GtXdropmatchinfo;
 typedef struct
 {
   void *processinfo;
-  GtQuerymatchoutoptions *querymatchoutoptions;
-} GtProcessinfo_and_outoptions;
+  GtQuerymatch *querymatchspaceptr;
+} GtProcessinfo_and_querymatchspaceptr;;
 
 GtXdropmatchinfo *gt_xdrop_matchinfo_new(GtUword userdefinedleastlength,
                                          GtUword errorpercentage,
@@ -104,32 +105,64 @@ void gt_xdrop_matchinfo_silent_set(GtXdropmatchinfo *xdropmatchinfo);
 /* The following function is used for extending a seed obtained
    in a self comparison of the given <encseq>. The extension is performed
    using the xdrop strategy. The seed is specified
-   by its length <len> and the two positions <pos1> and <pos2> which are not
-   ordered. A GtXdropmatchinfo-object is passed via the void pointer <info>. If
-   an error occurs, the function returns a value different from 0 and
-   stores the error message in the <err>-object. */
+   by its length <len> and the two positions <pos1> and <pos2> such that
+   <pos1> is smaller than <pos2>.
+   A <GtProcessinfo_and_querymatchspaceptr>-object is passed via the
+   void pointer <info>.
+   After the extension is performed and satisfies
+   certain criteria, the resulting
+   coordinates and possibly the alignment are output.
+   The function always returns 0, so the <GtError>-object <err> is not used. */
 
-int gt_simplexdropselfmatchoutput(void *info,
-                                  const GtEncseq *encseq,
-                                  GtUword len,
-                                  GtUword pos1,
-                                  GtUword pos2,
-                                  GtError *err);
+const GtQuerymatch *gt_xdrop_extend_selfmatch(void *info,
+                                              const GtEncseq *encseq,
+                                              GtUword len,
+                                              GtUword pos1,
+                                              GtUword pos2);
+
+/*
+   The following function performs an xdrop extension (as the previous function)
+   and outputs the formatted match and possibly the alignment to stdout if
+   the previous function returns a pointer different from NULL.
+   The function always returns 0, so the <GtError>-object <err> is not used.
+*/
+
+int gt_xdrop_extend_selfmatch_with_output(void *info,
+                                          const GtEncseq *encseq,
+                                          GtUword len,
+                                          GtUword pos1,
+                                          GtUword pos2,
+                                          GT_UNUSED GtError *err);
 
 /* The following function is used for extending a seed obtained
    in a comparison of the given sequence <query> of length <query_totallength>
    against <encseq>. So here a byte sequence is compared against an
    encoded sequence and the seed is specified by <queryseed>.
-   A GtXdropmatchinfo-object is passed via the void pointer <info>. If
-   an error occurs, the function returns a value different from 0 and
-   stores the error message in the <err>-object. */
+   A <GtProcessinfo_and_querymatchspaceptr>-object is passed via the
+   void pointer <info>.
+   After the extension is performed and satisfies
+   certain criteria, the resulting
+   coordinates are returned as a reference to a <GtQuerymatch>-object. */
 
-int gt_processxdropquerymatches(void *info,
-                                const GtEncseq *encseq,
-                                const GtQuerymatch *queryseed,
-                                const GtUchar *query,
-                                GtUword query_totallength,
-                                GtError *err);
+const GtQuerymatch* gt_xdrop_extend_querymatch(void *info,
+                                               const GtEncseq *encseq,
+                                               const GtQuerymatch *queryseed,
+                                               const GtUchar *query,
+                                               GtUword query_totallength);
+
+/*
+   The following function performs an xdrop extension (as the previous function)
+   and outputs the formatted match to stdout if
+   the previous function returns a pointer different from NULL.
+   The function always returns 0, so the <GtError>-object <err> is not used.
+*/
+
+int gt_xdrop_extend_querymatch_with_output(void *info,
+                                           const GtEncseq *encseq,
+                                           const GtQuerymatch *queryseed,
+                                           const GtUchar *query,
+                                           GtUword query_totallength,
+                                           GT_UNUSED GtError *err);
 
 /* The following functions are used for the greedy extension. */
 
@@ -215,8 +248,8 @@ void gt_optimal_maxalilendiff_perc_mat_history(
 
 /* This function converts a string given as argument for option -cam
    and converts it to the given enum type <GtExtendCharAccess>. This
-   option is used in the tool gt_repfind and the tool implemented
-   by Joerg Winkler. Return in case of error ? */
+   option is used in the tool gt_repfind and gt_seedextend.
+   In case of error, -1 is returned. */
 
 GtExtendCharAccess gt_greedy_extend_char_access(const char *cam_string,
                                                 GtError *err);
@@ -229,20 +262,37 @@ const char *gt_cam_extendgreedy_comment(void);
 /* The following function is used for extending a seed obtained
    in a self comparison of the given <encseq>. The extension is performed
    using the greedy strategy. The seed is specified
-   by its length <len> and the two positions <pos1> and <pos2> which are not
-   ordered. A GtXdropmatchinfo-object is passed via the void pointer <info>. If
-   an error occurs, the function returns a value different from 0 and
-   stores the error message in the <err>-object. */
+   by its length <len> and the two positions <pos1> and <pos2> such that
+   <pos1> is smaller than <pos2>.
+   A <GtProcessinfo_and_querymatchspaceptr>-object is passed via the
+   void pointer <info>.
+   After the extension is performed and the resulting alignment has an
+   error rate below some threshold and a length above some threshold, then
+   the cooordinates are delivered as a <GtQuerymatch>-object.
+*/
 
-int gt_simplegreedyselfmatchoutput(void *info,
-                                   const GtEncseq *encseq,
-                                   GtUword len,
-                                   GtUword pos1,
-                                   GtUword pos2,
-                                   GtError *err);
+const GtQuerymatch *gt_greedy_extend_selfmatch(void *info,
+                                               const GtEncseq *encseq,
+                                               GtUword len,
+                                               GtUword pos1,
+                                               GtUword pos2);
 
-void gt_greedy_extend_matchinfo_relax(GtGreedyextendmatchinfo *ggemi,
-                                      GtUword steps);
+/*
+   The following function performs a greedy extension (as the previous function)
+   and outputs the formatted match and possibly the alignment to stdout.
+   The function always returns 0, so the <GtError>-object <err> is not used.
+*/
+
+int gt_greedy_extend_selfmatch_with_output(void *info,
+                                           const GtEncseq *encseq,
+                                           GtUword len,
+                                           GtUword pos1,
+                                           GtUword pos2,
+                                           GT_UNUSED GtError *err);
+
+bool gt_greedy_extend_matchinfo_relax(GtGreedyextendmatchinfo *ggemi);
+
+void gt_greedy_extend_matchinfo_restore(GtGreedyextendmatchinfo *ggemi);
 
 GtUword align_front_prune_edist(bool forward,
                                 Polished_point *best_polished_point,

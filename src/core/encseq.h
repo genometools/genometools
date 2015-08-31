@@ -73,6 +73,36 @@ typedef struct
   GtUword referstartpos;    /* position of suffix to be compared */
 } GtEndofTwobitencoding;
 
+/* Stores the decoded version of the substring from 0-based position <frompos>
+   to position <topos> of <encseq>. If the extracted region contains a separator
+   character, it will be represented by non-printable SEPARATOR constant.
+   The caller is responsible to handle this case. The result of the extraction
+   is written to the location pointed to by <buffer>, which must be sufficiently
+   large to hold the result. The function is identical to
+   <gt_encseq_extract_decoded}, except that  this function requires an
+   <GtEncseqReader> to be supplied as first argument. This allows to reduce
+   unnecessary allocations in cases many sequences are extracted.
+*/
+void gt_encseq_extract_decoded_with_reader(GtEncseqReader *esr,
+                                           const GtEncseq *encseq,
+                                           char *buffer,
+                                           GtUword frompos,
+                                           GtUword topos);
+
+/* Stores the encoded representation of the substring from 0-based position
+   <frompos> to position <topos> of <encseq>. The result is written to the
+   location pointed to by <buffer>, which must be large enough to hold the
+   result. The function is identical to <gt_encseq_extract_encoded> except
+   that this function requires an <GtEncseqReader> as first argument.
+   <GtEncseqReader> to be supplied as first argument. This allows to reduce
+   unnecessary allocations in cases many sequences are extracted.
+*/
+void gt_encseq_extract_encoded_with_reader(GtEncseqReader *esr,
+                               const GtEncseq *encseq,
+                               GtUchar *buffer,
+                               GtUword frompos,
+                               GtUword topos);
+
 /* The following type stores the result of comparing a pair of twobit
   encodings. <common> stores the number of units which are common
   (either from the beginning or from the end. common is in the range 0 to

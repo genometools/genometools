@@ -115,7 +115,7 @@ GtEncseq*         gt_encseq_ref(GtEncseq *encseq);
 GtEncseqReader*   gt_encseq_create_reader_with_readmode(const GtEncseq *encseq,
                                                         GtReadmode readmode,
                                                         GtUword startpos);
-/* Returns the encoded representation of the substring from 0-based position
+/* Stores the encoded representation of the substring from 0-based position
    <frompos> to position <topos> of <encseq>. The result is written to the
    location pointed to by <buffer>, which must be large enough to hold the
    result. */
@@ -123,7 +123,7 @@ void              gt_encseq_extract_encoded(const GtEncseq *encseq,
                                             GtUchar *buffer,
                                             GtUword frompos,
                                             GtUword topos);
-/* Returns the decoded version of the substring from 0-based position <frompos>
+/* Stores the decoded version of the substring from 0-based position <frompos>
    to position <topos> of <encseq>. If the extracted region contains a separator
    character, it will be represented by non-printable SEPARATOR constant.
    The caller is responsible to handle this case. The result of the extraction

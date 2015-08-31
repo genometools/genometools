@@ -107,11 +107,9 @@ static void gt_multieoplist_add_eops(GtMultieoplist *multieops,
                                      AlignmentEoptype type,
                                      GtUword steps)
 {
-  Eop *space,
-      tmp,
-      type_bits = 0;
-  gt_assert(multieops != NULL);
+  Eop *space, type_bits = 0;
 
+  gt_assert(multieops != NULL);
   space = multieops->meoplist.spaceEop;
   switch (type) {
     case Deletion:
@@ -142,7 +140,7 @@ static void gt_multieoplist_add_eops(GtMultieoplist *multieops,
   }
   if (steps != 0) {
     while (steps != 0) {
-      tmp = type_bits << GT_MEOPS_STEPS_BITS;
+      Eop tmp = type_bits << GT_MEOPS_STEPS_BITS;
       if (steps < (GtUword) GT_MEOPS_STEPS_MASK) {
         tmp += steps;
         steps = 0;
@@ -159,6 +157,13 @@ static void gt_multieoplist_add_eops(GtMultieoplist *multieops,
 void gt_multieoplist_add_replacement(GtMultieoplist *multieops)
 {
   gt_multieoplist_add_eops(multieops, Replacement, (GtUword) 1);
+}
+
+void gt_multieoplist_add_replacement_multi(GtMultieoplist *multieops,
+                                           GtUword num)
+{
+  gt_assert(num > 0);
+  gt_multieoplist_add_eops(multieops, Replacement, num);
 }
 
 void gt_multieoplist_add_insertion(GtMultieoplist *multieops)
@@ -313,7 +318,7 @@ void gt_multieoplist_show(GtMultieoplist *multieops, FILE *fp)
           gt_xfputc('D', fp);
           break;
       }
-      fprintf(fp, " %u, ", (unsigned int) (stepssum));
+      fprintf(fp, " %u, ", (unsigned int) stepssum);
       last--;
       stepssum = (GtUword) (*last & GT_MEOPS_STEPS_MASK);
       next = last - 1;
@@ -334,7 +339,7 @@ void gt_multieoplist_show(GtMultieoplist *multieops, FILE *fp)
       gt_xfputc('D', fp);
       break;
   }
-  fprintf(fp, " %u", (unsigned int) (stepssum));
+  fprintf(fp, " %u", (unsigned int) stepssum);
   gt_xfputs("]\n", fp);
 }
 

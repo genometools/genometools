@@ -207,7 +207,7 @@ static void print_sequence(const GtUchar *seq, const GtUword len, FILE *fp)
   }while (i < len);
 }
 
-static void show(const GtUchar *useq, const GtUword ulen,
+static void alignment_with_seqs_show(const GtUchar *useq, const GtUword ulen,
                  const GtUchar *vseq, const GtUword vlen,
                  const GtAlignment *align, FILE *fp)
 {
@@ -221,28 +221,30 @@ static void show(const GtUchar *useq, const GtUword ulen,
     gt_alignment_show(align, fp, 80);
     gt_alignment_eval_with_score(align, 0,1,1);
   }
-
 }
 
-static GtWord* select_costs(const GtStrArray *arr,
-                            GT_UNUSED GtError *err)
+static GtWord* select_costs(const GtStrArray *arr,GtError *err)
 {
-  GtWord *evalues, check;
+  bool haserr = false;
+  GtWord *evalues;
   GtUword size, i;
 
+  gt_assert(arr != NULL);
   size = gt_str_array_size(arr);
   evalues = gt_malloc(sizeof(*evalues)*size);
-  for (i = 0; i < size; i++)
+  for (i = 0; !haserr && i < size; i++)
   {
-    check = sscanf(gt_str_array_get(arr,i),GT_WD, &evalues[i]);
-    if (check != 1)
+    if (sscanf(gt_str_array_get(arr,i),GT_WD, &evalues[i]) != 1)
     {
-      gt_error_set(err, "find invalid cost or score");
-      gt_free(evalues);
-      return NULL;
+      gt_error_set(err, "found invalid cost or score");
+      haserr = true;
     }
   }
-
+  if (haserr)
+  {
+    gt_free(evalues);
+    return NULL;
+  }
   return evalues;
 }
 
@@ -293,17 +295,16 @@ static int gt_linspace_align_runner(GT_UNUSED int argc,
   int had_err = 0;
   const GtUchar *useq, *vseq;
   GtUword i, j, ulen, vlen;
-  GtWord *linearcosts, *affinecosts;
-  GtAlignment *align = NULL;
-  FILE *fp;
-
+  GtWord *linearcosts;
+  GtAlignment *align;
   GtSequences *sequences1, *sequences2;
-  sequences1 = gt_sequences_new();
-  sequences2 = gt_sequences_new();
 
   gt_error_check(err);
   gt_assert(arguments);
 
+  sequences1 = gt_sequences_new();
+  sequences2 = gt_sequences_new();
+  align = gt_alignment_new();
   if (gt_str_array_size(arguments->strings) > 0)
   {
     sequences1->seqarray[0].seq =
@@ -347,6 +348,7 @@ static int gt_linspace_align_runner(GT_UNUSED int argc,
       ulen = sequences1->seqarray[i].len;
       vseq = sequences2->seqarray[j].seq;
       vlen = sequences2->seqarray[j].len;
+      gt_alignment_reset(align);
 
       /* linear gap costs */
       if (gt_str_array_size(arguments->linearcosts) > 0)
@@ -358,19 +360,20 @@ static int gt_linspace_align_runner(GT_UNUSED int argc,
 
         if (arguments->global)
         {
-          align = gt_computelinearspace(useq, 0, ulen, vseq, 0, vlen,
+          gt_computelinearspace(align,useq, 0, ulen, vseq, 0, vlen,
                   linearcosts[0],linearcosts[1],linearcosts[2]);
         }
         else if (arguments->local)
         {
-          align = gt_computelinearspace_local(useq, 0, ulen, vseq, 0, vlen,
+          gt_computelinearspace_local(align,useq, 0, ulen, vseq, 0, vlen,
                   linearcosts[0],linearcosts[1],linearcosts[2]);
         }
-
         gt_free(linearcosts);
       }/* affine gap costs */
       else if (gt_str_array_size(arguments->affinecosts) > 0)
       {
+        GtWord *affinecosts;
+
         gt_assert(gt_str_array_size(arguments->affinecosts) == 4UL);
         affinecosts = select_costs(arguments->affinecosts, err);
         if (affinecosts == NULL)
@@ -378,38 +381,36 @@ static int gt_linspace_align_runner(GT_UNUSED int argc,
 
         if (arguments->global)
         {
-          align = gt_computeaffinelinearspace(useq, 0, ulen, vseq, 0, vlen,
+          gt_computeaffinelinearspace(align,useq, 0, ulen, vseq, 0, vlen,
                   affinecosts[0],affinecosts[1],affinecosts[2], affinecosts[3]);
         }
         else if (arguments->local)
         {
-          align = gt_computeaffinelinearspace_local(useq, 0, ulen, vseq, 0,
-                                                    vlen, affinecosts[0],
-                                                    affinecosts[1],
-                                                    affinecosts[2],
-                                                    affinecosts[3]);
+          gt_computeaffinelinearspace_local(align,useq, 0, ulen, vseq, 0,
+                                            vlen, affinecosts[0],
+                                            affinecosts[1],
+                                            affinecosts[2],
+                                            affinecosts[3]);
         }
-         gt_free(affinecosts);
+        gt_free(affinecosts);
       }
 
       /* show */
       gt_assert(align != NULL);
       if (!strcmp(gt_str_get(arguments->outputfile),"stdout"))
-        show(useq, ulen, vseq, vlen, align, stdout);
+        alignment_with_seqs_show(useq, ulen, vseq, vlen, align, stdout);
       else
       {
-        fp = gt_fa_fopen_func(gt_str_get(arguments->outputfile),
-                              "a", __FILE__,__LINE__,err);
-        gt_error_check(err);
-        show(useq, ulen, vseq, vlen, align, fp);
+        FILE *fp = gt_fa_fopen_func(gt_str_get(arguments->outputfile),
+                                               "a", __FILE__,__LINE__,err);
+        alignment_with_seqs_show(useq, ulen, vseq, vlen, align, fp);
         gt_fa_fclose(fp);
       }
-      gt_alignment_delete(align);
     }
   }
   gt_sequences_delete(sequences1);
   gt_sequences_delete(sequences2);
-
+  gt_alignment_delete(align);
   return had_err;
 }
 
