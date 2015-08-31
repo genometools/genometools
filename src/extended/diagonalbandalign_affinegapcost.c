@@ -324,9 +324,7 @@ void gt_checkdiagnonalbandaffinealign(GT_UNUSED bool forward,
   affine_cost1 = diagonalband_squarespace_affine(useq, 0, ulen, vseq, 0, vlen,
                                                  left_dist, right_dist,
                                                  0, 4, 4, 1);
-  align_square = gt_affinealign((const char*)useq, ulen,
-                                (const char*)vseq, vlen,
-                                0, 4, 4, 1);
+  align_square = gt_affinealign(useq, ulen, vseq, vlen, 0, 4, 4, 1);
   affine_cost2 = gt_alignment_eval_with_affine_score(align_square, 0, 4, 4, 1);
   gt_alignment_delete(align_square);
 

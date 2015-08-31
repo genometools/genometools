@@ -233,8 +233,9 @@ static void print_sequence(const GtUchar *seq, const GtUword len, FILE *fp)
 }
 
 static void alignment_with_seqs_show(const GtUchar *useq, const GtUword ulen,
-                 const GtUchar *vseq, const GtUword vlen,
-                 const GtAlignment *align, const GtWord score, FILE *fp)
+                                     const GtUchar *vseq, const GtUword vlen,
+                                     const GtAlignment *align,
+                                     const GtWord score, FILE *fp)
 {
   if (fp != NULL)
   {
@@ -242,7 +243,10 @@ static void alignment_with_seqs_show(const GtUchar *useq, const GtUword ulen,
     print_sequence(vseq, vlen, fp);
     fprintf(fp, "######\n");
 
-    gt_alignment_show(align, fp, 80);
+    if (gt_alignment_get_length(align) > 0)
+      gt_alignment_show(align, fp, 80);
+    else
+      fprintf(fp, "empty alignment\n");
     if (score != GT_WORD_MAX)
       fprintf(fp, "score: "GT_WD"\n", score);
   }
@@ -344,7 +348,7 @@ static int gt_linspace_align_runner(GT_UNUSED int argc,
   const GtUchar *useq, *vseq;
   GtUword i, j, ulen, vlen;
   GtAlignment *align;
-  GtWord *linearcosts, *affinecosts, *diagonalbonds, score = GT_WORD_MAX;
+  GtWord *linearcosts, *diagonalbonds, score = GT_WORD_MAX;
 
   GtSequences *sequences1, *sequences2;
 
@@ -442,17 +446,6 @@ static int gt_linspace_align_runner(GT_UNUSED int argc,
                                             affinecosts[2],
                                             affinecosts[3]);
         }
-        gt_free(affinecosts);
-
-        if (arguments->showscore)
-        {
-          score = gt_alignment_eval_with_affine_score(align,
-                                                      affinecosts[0],
-                                                      affinecosts[1],
-                                                      affinecosts[2],
-                                                      affinecosts[3]);
-        }
-
         if (arguments->showscore)
         {
           score = gt_alignment_eval_with_affine_score(align,
@@ -467,13 +460,13 @@ static int gt_linspace_align_runner(GT_UNUSED int argc,
       /* show */
       gt_assert(align != NULL);
       if (!strcmp(gt_str_get(arguments->outputfile),"stdout"))
-        alignment_with_seqs_show(useq, ulen, vseq, vlen, align, stdout);
+        alignment_with_seqs_show(useq, ulen, vseq, vlen, align, score, stdout);
       else
       {
         FILE *fp = gt_fa_fopen_func(gt_str_get(arguments->outputfile),
                                                "a", __FILE__,__LINE__,err);
         gt_error_check(err);
-        alignment_with_seqs_show(useq, ulen, vseq, vlen, align, fp);//TODO:score
+        alignment_with_seqs_show(useq, ulen, vseq, vlen, align, score, fp);
         gt_fa_fclose(fp);
       }
     }

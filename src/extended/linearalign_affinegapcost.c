@@ -1023,8 +1023,8 @@ void gt_checkaffinelinearspace_local(GT_UNUSED bool forward,
     exit(GT_EXIT_PROGRAMMING_ERROR);
   }
   align = gt_alignment_new();
-  affine_score1 = gt_calc_affinealign_linear_local(useq,0, ulen,
-                                                vseq,0,vlen,align,
+  affine_score1 = gt_calc_affinealign_linear_local(useq, 0, ulen,
+                                                vseq, 0, vlen, align,
                                                 6,-3,-2,-1);
   affine_score2 = gt_alignment_eval_with_affine_score(align, 6,-3,-2,-1);
 
