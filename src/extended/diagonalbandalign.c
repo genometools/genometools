@@ -15,6 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 #include <string.h>
+#include "core/array2dim_api.h"
 #include "core/assert_api.h"
 #include "core/ma.h"
 #include "core/minmax.h"
@@ -146,12 +147,7 @@ static GtUword diagonalband_squarespace_distance_only(const GtUchar *useq,
   low_row = 0;
   high_row = -left_dist;
 
-  E = gt_malloc((sizeof *E)*(ulen+1));
-  *E = gt_malloc((sizeof **E)*((vlen+1)*(ulen+1)));
-  for (j = 1; j <= ulen; j++)
-  {
-    E[j] = E[j-1]+vlen+1;
-  }
+  gt_array2dim_malloc(E, (ulen+1), (vlen+1));
 
   /* first column */
   E[0][0] = 0;
@@ -748,18 +744,17 @@ static void gt_calc_diagonalbandalign(const GtUchar *useq,
 }
 
 /* compute alignment within a diagonal band */
-GtAlignment *gt_computediagnoalbandalign(const GtUchar *useq,
-                                         GtUword ustart, GtUword ulen,
-                                         const GtUchar *vseq,
-                                         GtUword vstart, GtUword vlen,
-                                         GtWord left_dist,
-                                         GtWord right_dist,
-                                         const GtWord matchcost,
-                                         const GtWord mismatchcost,
-                                         const GtWord gapcost)
-              {
-  GtAlignment *align;
-
+void gt_computediagnoalbandalign(GtAlignment *align,
+                                 const GtUchar *useq,
+                                 GtUword ustart, GtUword ulen,
+                                 const GtUchar *vseq,
+                                 GtUword vstart, GtUword vlen,
+                                 GtWord left_dist,
+                                 GtWord right_dist,
+                                 const GtWord matchcost,
+                                 const GtWord mismatchcost,
+                                 const GtWord gapcost)
+{
   gt_assert(useq  && vseq);
   if (matchcost < 0 || mismatchcost < 0 || gapcost < 0)
   {
@@ -771,12 +766,10 @@ GtAlignment *gt_computediagnoalbandalign(const GtUchar *useq,
   left_dist = MAX(-(GtWord) ulen,left_dist);
   right_dist = MIN((GtWord) vlen,right_dist);
 
-  align = gt_alignment_new_with_seqs(useq + ustart, ulen, vseq + vstart, vlen);
+  gt_alignment_set_seqs(align,useq+ustart, ulen, vseq+vstart, vlen);
   gt_calc_diagonalbandalign(useq, ustart, ulen, vseq, vstart, vlen,
                             left_dist, right_dist, align,
                             matchcost, mismatchcost, gapcost);
-
-  return align;
 }
 
 void gt_checkdiagnonalbandalign(GT_UNUSED bool forward,
@@ -786,7 +779,7 @@ void gt_checkdiagnonalbandalign(GT_UNUSED bool forward,
                                 GtUword vlen)
 {
   GtUword edist1, edist2, edist3, edist4, edist5;
-  GtWord left_dist, right_dist;
+  GtWord left_dist, right_dist, matchcost = 0, mismatchcost = 1, gapcost = 1;
   GtAlignment *align;
 
   if (strchr((const char*)useq, LINEAR_EDIST_GAP))
@@ -811,10 +804,13 @@ void gt_checkdiagnonalbandalign(GT_UNUSED bool forward,
     right_dist = 0;
 
   edist1 = diagonalband_linear_distance_only(useq, 0, ulen, vseq, 0, vlen,
-                                             left_dist, right_dist, 0,1,1);
+                                             left_dist, right_dist, matchcost,
+                                             mismatchcost, gapcost);
 
   edist2 = diagonalband_squarespace_distance_only(useq, 0, ulen, vseq, 0, vlen,
-                                                  left_dist, right_dist, 0,1,1);
+                                                  left_dist, right_dist,
+                                                  matchcost, mismatchcost,
+                                                  gapcost);
 
   if (edist1 != edist2)
   {
@@ -824,10 +820,10 @@ void gt_checkdiagnonalbandalign(GT_UNUSED bool forward,
   }
 
   align = gt_alignment_new_with_seqs(useq, ulen, vseq, vlen);
-  gt_calc_diagonalbandalign(useq, 0, ulen, vseq, 0, vlen,
-                            left_dist, right_dist, align, 0, 1, 1);
+  gt_calc_diagonalbandalign(useq, 0, ulen, vseq, 0, vlen, left_dist, right_dist,
+                            align, matchcost, mismatchcost, gapcost);
 
-  edist3 = gt_alignment_eval_with_score(align, 0, 1, 1);
+  edist3 = gt_alignment_eval_with_score(align, matchcost,mismatchcost, gapcost);
 
   if (edist2 != edist3)
   {
@@ -842,7 +838,8 @@ void gt_checkdiagnonalbandalign(GT_UNUSED bool forward,
   left_dist = -ulen;
   right_dist = vlen;
   edist4 = diagonalband_linear_distance_only(useq, 0, ulen, vseq, 0, vlen,
-                                             left_dist, right_dist, 0,1,1);
+                                             left_dist, right_dist, matchcost,
+                                             mismatchcost, gapcost);
   edist5 = gt_squarededistunit(useq, ulen, vseq, vlen);
 
   if (edist4 != edist5)

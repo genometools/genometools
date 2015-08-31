@@ -338,10 +338,10 @@ static int get_onesequence(GtSequences *sequences, const GtStrArray *strings,
 }
 
 static int gt_linspace_align_runner(GT_UNUSED int argc,
-                                 GT_UNUSED const char **argv,
-                                 GT_UNUSED int parsed_args,
-                                 void *tool_arguments,
-                                 GtError *err)
+                                    GT_UNUSED const char **argv,
+                                    GT_UNUSED int parsed_args,
+                                    void *tool_arguments,
+                                    GtError *err)
 {
   GtLinspaceArguments *arguments = tool_arguments;
   int had_err = 0;
@@ -398,29 +398,27 @@ static int gt_linspace_align_runner(GT_UNUSED int argc,
              if (diagonalbonds == NULL)
                return 1;
 
-             align = gt_computediagnoalbandalign(useq, 0, ulen, vseq, 0, vlen,
-                                                 diagonalbonds[0],
-                                                 diagonalbonds[1],
-                                                 linearcosts[0],
-                                                 linearcosts[1],
-                                                 linearcosts[2]);
+             gt_computediagnoalbandalign(align, useq, 0, ulen, vseq, 0, vlen,
+                                         diagonalbonds[0], diagonalbonds[1],
+                                         linearcosts[0], linearcosts[1],
+                                         linearcosts[2]);
            }
            else
            {
-             gt_computelinearspace(align,useq, 0, ulen, vseq, 0, vlen,
-                  linearcosts[0],linearcosts[1],linearcosts[2]);
+             gt_computelinearspace(align, useq, 0, ulen, vseq, 0, vlen,
+                                   linearcosts[0],linearcosts[1],linearcosts[2]);
            }
         }
         else if (arguments->local)
         {
-          gt_computelinearspace_local(align,useq, 0, ulen, vseq, 0, vlen,
-                  linearcosts[0],linearcosts[1],linearcosts[2]);
+          gt_computelinearspace_local(align, useq, 0, ulen, vseq, 0, vlen,
+                                     linearcosts[0],linearcosts[1],linearcosts[2]);
         }
 
         if (arguments->showscore)
         {
           score = gt_alignment_eval_with_score(align, linearcosts[0],
-                                       linearcosts[1],linearcosts[2]);
+                                               linearcosts[1],linearcosts[2]);
         }
         gt_free(linearcosts);
       }/* affine gap costs */
@@ -435,8 +433,9 @@ static int gt_linspace_align_runner(GT_UNUSED int argc,
 
         if (arguments->global)
         {
-          gt_computeaffinelinearspace(align,useq, 0, ulen, vseq, 0, vlen,
-                  affinecosts[0],affinecosts[1],affinecosts[2], affinecosts[3]);
+          gt_computeaffinelinearspace(align, useq, 0, ulen, vseq, 0, vlen,
+                                      affinecosts[0], affinecosts[1],
+                                      affinecosts[2], affinecosts[3]);
         }
         else if (arguments->local)
         {

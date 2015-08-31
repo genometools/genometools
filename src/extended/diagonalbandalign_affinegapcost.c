@@ -26,9 +26,6 @@
 #define LINEAR_EDIST_GAP          ((GtUchar) UCHAR_MAX)
 typedef struct {
   GtUword Rvalue, Dvalue, Ivalue;
-  /*AffineAlignEdge Redge,
-                    Dedge,
-                    Iedge;*/
 } Atabentry;
 
 static GtWord add_safe_max(const GtUword val1, const GtUword val2)

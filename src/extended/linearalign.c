@@ -23,6 +23,7 @@
 #include <string.h>
 #include "core/ma.h"
 #include "core/minmax.h"
+#include "core/array2dim_api.h"
 #include "core/assert_api.h"
 #include "core/unused_api.h"
 #include "core/divmodmul.h"
@@ -64,13 +65,8 @@ static GtUword alignment_in_square_space(GtAlignment *align,
 {
   GtUword **E, distance, i, j;
 
-  /* SK: use gt_array2dim_malloc here and in all other similar places. */
-  E = gt_malloc((sizeof *E)*(ulen+1));
-  *E = gt_malloc((sizeof **E)*((vlen+1)*(ulen+1)));
-  for (j = 1; j <= ulen; j++)
-  {
-    E[j] = E[j-1] + vlen + 1;
-  }
+  gt_array2dim_malloc(E, (ulen+1), (vlen+1));
+
   E[0][0] = 0;
   for (i = 1; i <= ulen; i++)
   {
@@ -582,6 +578,7 @@ void gt_checklinearspace(GT_UNUSED bool forward,
 {
   GtAlignment *align;
   GtUword edist1, edist2, edist3, edist4;
+  GtWord matchcost = 0, mismatchcost = 1, gapcost = 1;
 
   if (memchr(useq, LINEAR_EDIST_GAP,ulen) != NULL)
   {
@@ -595,8 +592,8 @@ void gt_checklinearspace(GT_UNUSED bool forward,
   }
 
   align = gt_alignment_new_with_seqs(useq, ulen, vseq, vlen);
-  edist1 = gt_calc_linearalign(useq, 0, ulen, vseq, 0, vlen,
-                               align, 0, 1, 1);
+  edist1 = gt_calc_linearalign(useq, 0, ulen, vseq, 0, vlen, align,
+                               matchcost, mismatchcost, gapcost);
   edist2 = gt_squarededistunit(useq,ulen,vseq,vlen);
 
   if (edist1 != edist2)
@@ -606,7 +603,7 @@ void gt_checklinearspace(GT_UNUSED bool forward,
     exit(GT_EXIT_PROGRAMMING_ERROR);
   }
 
-  edist3 = gt_alignment_eval_with_score(align,0,1,1);
+  edist3 = gt_alignment_eval_with_score(align,matchcost,mismatchcost,gapcost);
   if (edist2 != edist3)
   {
     fprintf(stderr,"gt_squarededistunit = "GT_WU" != "GT_WU
@@ -629,6 +626,7 @@ void gt_checklinearspace_local(GT_UNUSED bool forward,
                                const GtUchar *vseq, GtUword vlen)
 {
   GtAlignment *align;
+  GtWord matchscore = 2, mismatchscore = -2, gapscore = -1;
 
   if (memchr(useq, LINEAR_EDIST_GAP,ulen) != NULL)
   {
@@ -641,6 +639,7 @@ void gt_checklinearspace_local(GT_UNUSED bool forward,
     exit(GT_EXIT_PROGRAMMING_ERROR);
   }
   align = gt_alignment_new();
-  gt_computelinearspace_local(align,useq, 0, ulen, vseq, 0, vlen, 2, -2, -1);
+  gt_computelinearspace_local(align,useq, 0, ulen, vseq, 0, vlen,
+                              matchscore, mismatchscore, gapscore);
   gt_alignment_delete(align);
 }

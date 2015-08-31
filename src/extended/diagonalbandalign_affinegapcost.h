@@ -23,9 +23,9 @@
 #include "extended/alignment.h"
 
 void gt_checkdiagnonalbandaffinealign(GT_UNUSED bool forward,
-                                const GtUchar *useq,
-                                GtUword ulen,
-                                const GtUchar *vseq,
-                                GtUword vlen);
+                                      const GtUchar *useq,
+                                      GtUword ulen,
+                                      const GtUchar *vseq,
+                                      GtUword vlen);
 
 #endif

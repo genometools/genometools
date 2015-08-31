@@ -35,27 +35,27 @@ void gt_checkaffinelinearspace_local(GT_UNUSED bool forward,
                                GtUword vlen);
 
 void gt_computeaffinelinearspace(GtAlignment *align,
-                                         const GtUchar *useq,
-                                         const GtUword ustart,
-                                         const GtUword ulen,
-                                         const GtUchar *vseq,
-                                         const GtUword vstart,
-                                         const GtUword vlen,
-                                         const GtWord matchcost,
-                                         const GtWord mismatchcost,
-                                         const GtWord gap_opening,
-                                         const GtWord gap_extension);
+                                 const GtUchar *useq,
+                                 const GtUword ustart,
+                                 const GtUword ulen,
+                                 const GtUchar *vseq,
+                                 const GtUword vstart,
+                                 const GtUword vlen,
+                                 const GtWord matchcost,
+                                 const GtWord mismatchcost,
+                                 const GtWord gap_opening,
+                                 const GtWord gap_extension);
 
 void gt_computeaffinelinearspace_local(GtAlignment *align,
-                                               const GtUchar *useq,
-                                               const GtUword ustart,
-                                               const GtUword ulen,
-                                               const GtUchar *vseq,
-                                               const GtUword vstart,
-                                               const GtUword vlen,
-                                               const GtWord matchscore,
-                                               const GtWord mismatchscore,
-                                               const GtWord gap_opening,
-                                               const GtWord gap_extension);
+                                      const GtUchar *useq,
+                                      const GtUword ustart,
+                                      const GtUword ulen,
+                                      const GtUchar *vseq,
+                                      const GtUword vstart,
+                                      const GtUword vlen,
+                                      const GtWord matchscore,
+                                      const GtWord mismatchscore,
+                                      const GtWord gap_opening,
+                                      const GtWord gap_extension);
 
 #endif

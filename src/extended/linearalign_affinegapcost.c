@@ -946,9 +946,9 @@ void gt_computeaffinelinearspace_local(GtAlignment *align,
                                        GtWord gap_extension)
 {
   (void) gt_calc_affinealign_linear_local(useq, ustart, ulen,
-                                           vseq, vstart, vlen,
-                                           align, matchscore,mismatchscore,
-                                           gap_opening, gap_extension);
+                                          vseq, vstart, vlen,
+                                          align, matchscore,mismatchscore,
+                                          gap_opening, gap_extension);
 }
 
 /*----------------------------checkfunctions--------------------------*/
@@ -960,6 +960,7 @@ void gt_checkaffinelinearspace(GT_UNUSED bool forward,
 {
   GtAlignment *align_linear, *align_square;
   GtUword affine_score1, affine_score2, affine_score3;
+  GtWord matchcost = 0, mismatchcost = 4, gap_opening = 4, gap_extension = 1;
 
   /*gt_assert(useq && ulen && vseq && vlen);*/
   if (memchr(useq, LINEAR_EDIST_GAP,ulen) != NULL)
@@ -973,11 +974,15 @@ void gt_checkaffinelinearspace(GT_UNUSED bool forward,
     exit(GT_EXIT_PROGRAMMING_ERROR);
   }
   align_linear = gt_alignment_new_with_seqs(useq, ulen, vseq, vlen);
-  /* SK: use const variable for costs */
+
   affine_score1 = gt_calc_affinealign_linear(useq, 0, ulen,
                                              vseq, 0, vlen,
-                                             align_linear, 0, 4, 4, 1);
-  affine_score2 = gt_alignment_eval_with_affine_score(align_linear,0,4,4,1);
+                                             align_linear, matchcost,
+                                             mismatchcost, gap_opening,
+                                             gap_extension);
+  affine_score2 = gt_alignment_eval_with_affine_score(align_linear,matchcost,
+                                                      mismatchcost, gap_opening,
+                                                      gap_extension);
 
   if (affine_score1 != affine_score2)
   {
@@ -987,9 +992,11 @@ void gt_checkaffinelinearspace(GT_UNUSED bool forward,
     exit(GT_EXIT_PROGRAMMING_ERROR);
   }
 
-  align_square = gt_affinealign(useq, ulen,
-                                vseq, vlen,0,4,4,1);
-  affine_score3 = gt_alignment_eval_with_affine_score(align_square,0,4,4,1);
+  align_square = gt_affinealign(useq, ulen, vseq, vlen, matchcost,
+                                mismatchcost, gap_opening, gap_extension);
+  affine_score3 = gt_alignment_eval_with_affine_score(align_square, matchcost,
+                                                      mismatchcost, gap_opening,
+                                                      gap_extension);
 
   if (affine_score1 != affine_score3)
   {
@@ -1009,7 +1016,8 @@ void gt_checkaffinelinearspace_local(GT_UNUSED bool forward,
 {
   GtAlignment *align;
   GtUword affine_score1, affine_score2;
-/* SK: use const variable for cost valued  */
+  GtWord matchscore = 6, mismatchscore = -3,
+         gap_opening = -2, gap_extension = -1;
 
   /*gt_assert(useq && ulen && vseq && vlen);*/
   if (memchr(useq, LINEAR_EDIST_GAP,ulen) != NULL)
@@ -1023,10 +1031,13 @@ void gt_checkaffinelinearspace_local(GT_UNUSED bool forward,
     exit(GT_EXIT_PROGRAMMING_ERROR);
   }
   align = gt_alignment_new();
-  affine_score1 = gt_calc_affinealign_linear_local(useq, 0, ulen,
-                                                vseq, 0, vlen, align,
-                                                6,-3,-2,-1);
-  affine_score2 = gt_alignment_eval_with_affine_score(align, 6,-3,-2,-1);
+  affine_score1 = gt_calc_affinealign_linear_local(useq, 0, ulen, vseq, 0, vlen,
+                                                   align, matchscore,
+                                                   mismatchscore, gap_opening,
+                                                   gap_extension );
+
+  affine_score2 = gt_alignment_eval_with_affine_score(align, matchscore,
+                                     mismatchscore, gap_opening, gap_extension);
 
   if (affine_score1 != affine_score2)
   {
