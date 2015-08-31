@@ -28,4 +28,14 @@ void gt_checkdiagnonalbandaffinealign(GT_UNUSED bool forward,
                                       const GtUchar *vseq,
                                       GtUword vlen);
 
+GtAlignment *t_computediagnoalbandaffinealign(const GtUchar *useq,
+                                              GtUword ustart, GtUword ulen,
+                                              const GtUchar *vseq,
+                                              GtUword vstart, GtUword vlen,
+                                              GtWord left_dist,
+                                              GtWord right_dist,
+                                              const GtWord matchcost,
+                                              const GtWord mismatchcost,
+                                              const GtWord gap_opening,
+                                              const GtWord gap_extension);
 #endif

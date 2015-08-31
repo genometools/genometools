@@ -37,15 +37,6 @@ typedef struct {
 } Atabentry;
 
 typedef struct {
-  GtUword idx;
-  AffineAlignEdge edge;
-} Rnode;
-
-typedef struct {
-  Rnode val_R, val_D, val_I;
-} Rtabentry;
-
-typedef struct {
   GtUwordPair Rstart, Dstart, Istart;
 } Starttabentry;
 

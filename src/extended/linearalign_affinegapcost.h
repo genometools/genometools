@@ -20,7 +20,17 @@
 
 #include "core/unused_api.h"
 #include "core/types_api.h"
+#include "extended/affinealign.h"
 #include "extended/alignment.h"
+
+typedef struct {
+  GtUword idx;
+  AffineAlignEdge edge;
+} Rnode;
+
+typedef struct {
+  Rnode val_R, val_D, val_I;
+} Rtabentry;
 
 void gt_checkaffinelinearspace(GT_UNUSED bool forward,
                                const GtUchar *useq,
