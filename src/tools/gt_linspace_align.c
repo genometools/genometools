@@ -406,13 +406,15 @@ static int gt_linspace_align_runner(GT_UNUSED int argc,
            else
            {
              gt_computelinearspace(align, useq, 0, ulen, vseq, 0, vlen,
-                                   linearcosts[0],linearcosts[1],linearcosts[2]);
+                                   linearcosts[0], linearcosts[1],
+                                   linearcosts[2]);
            }
         }
         else if (arguments->local)
         {
           gt_computelinearspace_local(align, useq, 0, ulen, vseq, 0, vlen,
-                                     linearcosts[0],linearcosts[1],linearcosts[2]);
+                                      linearcosts[0], linearcosts[1],
+                                      linearcosts[2]);
         }
 
         if (arguments->showscore)

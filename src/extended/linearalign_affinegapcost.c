@@ -165,7 +165,7 @@ static void firstAtabRtabcolumn(GtUword ulen,
   {
     Atabcolumn[rowindex].Rvalue = GT_WORD_MAX;
     Atabcolumn[rowindex].Dvalue = add_safe_max(Atabcolumn[rowindex-1].Dvalue,
-                                           gap_extension);
+                                               gap_extension);
     Atabcolumn[rowindex].Ivalue = GT_WORD_MAX;
 
     Atabcolumn[rowindex].Redge = Affine_X;
@@ -204,9 +204,9 @@ static void nextAtabRtabcolumn(const GtUchar *useq,
   Anw = Atabcolumn[0];
   Rnw = Rtabcolumn[0];
 
-  Rdist = add_safe_max(Atabcolumn[0].Rvalue,gap_extension+gap_opening);
-  Ddist = add_safe_max(Atabcolumn[0].Dvalue,gap_extension+gap_opening);
-  Idist = add_safe_max(Atabcolumn[0].Ivalue,gap_extension);
+  Rdist = add_safe_max(Atabcolumn[0].Rvalue, gap_extension + gap_opening);
+  Ddist = add_safe_max(Atabcolumn[0].Dvalue, gap_extension + gap_opening);
+  Idist = add_safe_max(Atabcolumn[0].Ivalue, gap_extension);
 
   minvalue = MIN3(Rdist, Ddist, Idist);
   Atabcolumn[0].Ivalue = minvalue;
@@ -236,7 +236,7 @@ static void nextAtabRtabcolumn(const GtUchar *useq,
     Awe = Atabcolumn[rowindex];
     Rwe = Rtabcolumn[rowindex];
 
-    rcost = useq[ustart+rowindex-1]==b? matchcost:mismatchcost;
+    rcost = useq[ustart+rowindex-1] == b? matchcost:mismatchcost;
     Rdist = add_safe_max(Anw.Rvalue, rcost);
     Ddist = add_safe_max(Anw.Dvalue, rcost);
     Idist = add_safe_max(Anw.Ivalue, rcost);
@@ -246,24 +246,18 @@ static void nextAtabRtabcolumn(const GtUchar *useq,
     Atabcolumn[rowindex].Redge = set_edge(Rdist, Ddist, Idist);
 
     Rdist = add_safe_max(Atabcolumn[rowindex-1].Rvalue,
-                         gap_extension+gap_opening);
+                         gap_extension + gap_opening);
     Ddist = add_safe_max(Atabcolumn[rowindex-1].Dvalue,gap_extension);
     Idist = add_safe_max(Atabcolumn[rowindex-1].Ivalue,
-                        gap_extension+gap_opening);
+                         gap_extension + gap_opening);
 
     minvalue = MIN3(Rdist, Ddist, Idist);
     Atabcolumn[rowindex].Dvalue = minvalue;
     Atabcolumn[rowindex].Dedge = set_edge(Rdist, Ddist, Idist);
 
-    /*if (colindex == midcolumn)
-    {
-      set_Rtabentry(&Rtabcolumn[rowindex].val_D, &Rtabcolumn[rowindex-1],
-                     Atabcolumn[rowindex].Dedge);
-    }*/
-
-    Rdist = add_safe_max(Awe.Rvalue,gap_extension+gap_opening);
-    Ddist = add_safe_max(Awe.Dvalue,gap_extension+gap_opening);
-    Idist = add_safe_max(Awe.Ivalue,gap_extension);
+    Rdist = add_safe_max(Awe.Rvalue, gap_extension + gap_opening);
+    Ddist = add_safe_max(Awe.Dvalue, gap_extension + gap_opening);
+    Idist = add_safe_max(Awe.Ivalue, gap_extension);
 
     minvalue = MIN3(Rdist, Ddist, Idist);
     Atabcolumn[rowindex].Ivalue = minvalue;
@@ -276,7 +270,7 @@ static void nextAtabRtabcolumn(const GtUchar *useq,
       set_Rtabentry(&Rtabcolumn[rowindex].val_D, &Rtabcolumn[rowindex-1],
                      Atabcolumn[rowindex].Dedge);
       set_Rtabentry(&Rtabcolumn[rowindex].val_I, &Rwe,
-                    Atabcolumn[rowindex].Iedge);
+                     Atabcolumn[rowindex].Iedge);
     }
     Anw = Awe;
     Rnw = Rwe;
@@ -775,20 +769,20 @@ static void nextAStabcolumn(const GtUchar *useq, GtUword ustart,
     Swe = Starttabcolumn[rowindex];
 
     /*calculate Rvalue*/
-    replacement = (useq[ustart+rowindex-1]==b? matchscore:mismatchscore);
-    Atabcolumn[rowindex].Rvalue = add_safe_min(Anw.totalvalue,replacement);
+    replacement = (useq[ustart+rowindex-1] == b? matchscore:mismatchscore);
+    Atabcolumn[rowindex].Rvalue = add_safe_min(Anw.totalvalue, replacement);
     Starttabcolumn[rowindex].Rstart =
     setStarttabentry(Atabcolumn[rowindex].Rvalue, Anw, Snw,
-                     replacement,gap_opening,gap_extension,Affine_R);
+                     replacement,gap_opening, gap_extension, Affine_R);
 
     /*calculate Dvalue*/
-    val1 = add_safe_min(Atabcolumn[rowindex-1].Dvalue,gap_extension);
+    val1 = add_safe_min(Atabcolumn[rowindex-1].Dvalue, gap_extension);
     val2 = add_safe_min(Atabcolumn[rowindex-1].totalvalue,
-                   (gap_opening+gap_extension));
+                       (gap_opening+gap_extension));
     Atabcolumn[rowindex].Dvalue = MAX(val1,val2);
     Starttabcolumn[rowindex].Dstart =
     setStarttabentry(Atabcolumn[rowindex].Dvalue, Atabcolumn[rowindex-1],
-                     Starttabcolumn[rowindex-1], replacement,gap_opening,
+                     Starttabcolumn[rowindex-1], replacement, gap_opening,
                      gap_extension,Affine_D);
 
     /*calculate Ivalue*/
@@ -855,14 +849,9 @@ static Gtmaxcoordvalue *evaluateallAStabcolumns(const GtUchar *useq,
   max = gt_max_new();
   for (colindex = 1UL; colindex <= vlen; colindex++)
   {
-    nextAStabcolumn(useq, ustart, ulen,
-                       vseq[vstart+colindex-1],
-                       Atabcolumn,
-                       Starttabcolumn,
-                       matchscore,mismatchscore,
-                       gap_opening,
-                       gap_extension,
-                       colindex,max);
+    nextAStabcolumn(useq, ustart, ulen, vseq[vstart+colindex-1],
+                    Atabcolumn, Starttabcolumn, matchscore,mismatchscore,
+                    gap_opening, gap_extension, colindex, max);
   }
   return max;
 }
@@ -921,8 +910,7 @@ static GtUword gt_calc_affinealign_linear_local(const GtUchar *useq,
                                gap_opening_cost,gap_extension_cost);
   }else
   {
-     gt_alignment_set_seqs(align,(const GtUchar*)"",0,
-                                        (const GtUchar*)"",0);
+     gt_alignment_set_seqs(align,(const GtUchar*)"", 0, (const GtUchar*)"", 0);
      score = 0;
   }
 
@@ -1034,7 +1022,7 @@ void gt_checkaffinelinearspace_local(GT_UNUSED bool forward,
   affine_score1 = gt_calc_affinealign_linear_local(useq, 0, ulen, vseq, 0, vlen,
                                                    align, matchscore,
                                                    mismatchscore, gap_opening,
-                                                   gap_extension );
+                                                   gap_extension);
 
   affine_score2 = gt_alignment_eval_with_affine_score(align, matchscore,
                                      mismatchscore, gap_opening, gap_extension);
