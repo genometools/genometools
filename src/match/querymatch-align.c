@@ -433,7 +433,9 @@ bool gt_querymatchoutoptions_alignment_prepare(GtQuerymatchoutoptions
     {
       if (querymatchoutoptions->alignmentwidth > 0)
       {
+#ifndef NDEBUG
         GtUword linedist;
+#endif
 
         gt_assert(!greedyextension);
         gt_alignment_set_seqs(querymatchoutoptions->alignment,
@@ -441,7 +443,12 @@ bool gt_querymatchoutoptions_alignment_prepare(GtQuerymatchoutoptions
                               dblen,
                               querymatchoutoptions->vseqbuffer,
                               querylen);
-        linedist = gt_computelinearspace(querymatchoutoptions->alignment,
+#ifndef NDEBUG
+        linedist =
+#else
+        (void)
+#endif
+                   gt_computelinearspace(querymatchoutoptions->alignment,
                                          querymatchoutoptions->useqbuffer,
                                          0,
                                          dblen,
