@@ -59,4 +59,11 @@ GtUchar gt_lcpintervalextendlcp(const GtEncseq *encseq,
                            GtUword parentleft,
                            GtUword parentright);
 
+GtUword gt_findmaximalprefixinESA(const GtEncseq *encseq,
+                                  GtReadmode readmode,
+                                  GtUword totallength,
+                                  const ESASuffixptr *suftab,
+                                  const GtUchar *query,
+                                  GtUword querylen);
+
 #endif

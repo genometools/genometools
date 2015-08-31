@@ -102,6 +102,42 @@ bool gt_lcpintervalfindcharchildintv(const GtEncseq *encseq,
   return false;
 }
 
+GtUword gt_findmaximalprefixinESA(const GtEncseq *encseq,
+                                  GtReadmode readmode,
+                                  GtUword totallength,
+                                  const ESASuffixptr *suftab,
+                                  const GtUchar *query,
+                                  GtUword querylen)
+{
+  Simplelcpinterval current_itv;
+  GtUword idx;
+
+  current_itv.left = 0;
+  current_itv.right = totallength;
+
+  for (idx = 0; idx < querylen; idx++)
+  {
+    if (ISSPECIAL(query[idx]))
+    {
+      gt_assert(query[idx] != SEPARATOR);
+      break;
+    }
+    if (!gt_lcpintervalfindcharchildintv(encseq,
+                                         readmode,
+                                         totallength,
+                                         suftab,
+                                         &current_itv,
+                                         query[idx],
+                                         idx,
+                                         current_itv.left,
+                                         current_itv.right))
+    {
+      break;
+    }
+  }
+  return idx;
+}
+
 #define ADDCURRENTLBOUND(V)\
         bwci->spaceBoundswithchar[bwci->nextfreeBoundswithchar].lbound = V
 
