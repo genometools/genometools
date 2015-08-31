@@ -134,7 +134,7 @@ static GtUword diagonalband_squarespace_affine(const GtUchar *useq,
     if (high_row < ulen)
       high_row ++;
 
-    /* diagonaldband */
+    /* diagonalband */
     for (; i <= high_row; i++)
     {
       Rdist = add_safe_max(Atabcolumn[i][j-1].Rvalue,gap_extension+gap_opening);
@@ -304,6 +304,55 @@ static GtUword diagonalband_linear_affine(const GtUchar *useq,
   return distance;
 }
 
+static void set_invalid_Diagnode(Diagnode *node)
+{
+  gt_assert(node != NULL);
+  node->currentrowindex = GT_UWORD_MAX;
+  node->edge = Affine_X;
+  node->lastcpoint = GT_UWORD_MAX;
+}
+
+static void set_valid_Diagnode(Diagnode *node_to, Rtabentry *entry_from,
+                               const GtUword minvalue, const GtUword Rdist,
+                               const GtUword Idist, const GtUword Ddist)
+{
+  gt_assert(node_to != NULL && entry_from != NULL);
+  if (minvalue == Rdist)
+  {
+    node_to->edge = entry_from->val_R.edge;
+    node_to->lastcpoint = entry_from->val_R.idx;
+  }
+  else if (minvalue == Idist)
+  {
+    node_to->edge = entry_from->val_I.edge;
+    node_to->lastcpoint = entry_from->val_I.idx;
+  }
+  else if (minvalue == Ddist)
+  {
+    node_to->edge = entry_from->val_D.edge;
+    node_to->lastcpoint = entry_from->val_D.idx;
+  }
+}
+static void set_invalid_Rnode(Rnode *node)
+{
+  gt_assert(node != NULL);
+  node->idx = GT_UWORD_MAX;
+  node->edge = Affine_X;
+}
+
+static void set_valid_Rnode(Rnode *node_to, Rtabentry *entry_from,
+                            const GtUword minvalue, const GtUword Rdist,
+                            const GtUword Idist, const GtUword Ddist)
+{
+  gt_assert(node_to != NULL && entry_from != NULL);
+  if (minvalue == Rdist)
+    *node_to = entry_from->val_R;
+  else if (minvalue == Idist)
+     *node_to = entry_from->val_I;
+  else if (minvalue == Ddist)
+     *node_to = entry_from->val_D;
+}
+
 static void firstEDtabRtabcolumn(Atabentry *Atabcolumn,
                                  Rtabentry *Rtabcolumn,
                                  Diagentry *Diagcolumn,
@@ -320,29 +369,18 @@ static void firstEDtabRtabcolumn(Atabentry *Atabcolumn,
   diag = GT_DIV2(left_dist + right_dist);
   low_row = 0;
   high_row = -left_dist;
-  
+
   Atabcolumn[low_row].Rvalue = GT_UWORD_MAX;
   Atabcolumn[low_row].Dvalue = GT_UWORD_MAX;
   Atabcolumn[low_row].Ivalue = GT_UWORD_MAX;
 
-  Diagcolumn[0].val_R.currentrowindex = GT_UWORD_MAX;
-  Diagcolumn[0].val_R.edge = Affine_X;
-  Diagcolumn[0].val_R.lastcpoint = GT_UWORD_MAX;
-  
-  Diagcolumn[0].val_D.currentrowindex = GT_UWORD_MAX;
-  Diagcolumn[0].val_D.edge = Affine_X;
-  Diagcolumn[0].val_D.lastcpoint = GT_UWORD_MAX;
-  
-  Diagcolumn[0].val_I.currentrowindex = GT_UWORD_MAX;
-  Diagcolumn[0].val_I.edge = Affine_X;
-  Diagcolumn[0].val_I.lastcpoint = GT_UWORD_MAX;
-  
-  Rtabcolumn[0].val_R.idx = GT_UWORD_MAX;
-  Rtabcolumn[0].val_R.edge = Affine_X;
-  Rtabcolumn[0].val_D.idx = GT_UWORD_MAX;
-  Rtabcolumn[0].val_D.edge = Affine_X;
-  Rtabcolumn[0].val_I.idx = GT_UWORD_MAX;
-  Rtabcolumn[0].val_I.edge = Affine_X;
+  set_invalid_Diagnode(&Diagcolumn[0].val_R);
+  set_invalid_Diagnode(&Diagcolumn[0].val_D);
+  set_invalid_Diagnode(&Diagcolumn[0].val_I);
+
+  set_invalid_Rnode(&Rtabcolumn[0].val_R);
+  set_invalid_Rnode(&Rtabcolumn[0].val_D);
+  set_invalid_Rnode(&Rtabcolumn[0].val_I);
 
   switch (edge) {
   case Affine_R:
@@ -381,7 +419,7 @@ static void firstEDtabRtabcolumn(Atabentry *Atabcolumn,
       Diagcolumn[0].val_R.currentrowindex = 0 + offset;
       Diagcolumn[0].val_D.currentrowindex = 0 + offset;
       Diagcolumn[0].val_I.currentrowindex = 0 + offset;
-      
+
       Rtabcolumn[0].val_R.idx = 0;
       Rtabcolumn[0].val_R.edge = Affine_R;
       Rtabcolumn[0].val_D.idx = 0;
@@ -399,7 +437,7 @@ static void firstEDtabRtabcolumn(Atabentry *Atabcolumn,
     Atabcolumn[rowindex].Ivalue = GT_WORD_MAX;
 
     if (diag == -(GtWord)rowindex)
-    {      
+    {
       Diagcolumn[0].val_D.edge = Affine_X;
       Diagcolumn[0].val_D.lastcpoint = GT_UWORD_MAX;
       Diagcolumn[0].val_D.currentrowindex = rowindex + offset;
@@ -445,7 +483,6 @@ static Rnode evaluateallcolumns(Atabentry *Atabcolumn,
     gt_assert(false);
   }
   diag = GT_DIV2(left_dist + right_dist);
-  printf("diag: "GT_WD"\n",diag);
   low_row = 0;
   high_row = -left_dist;
 
@@ -472,73 +509,38 @@ static Rnode evaluateallcolumns(Atabentry *Atabcolumn,
     if (high_row < ulen)
       high_row ++;
 
-    Rdist = add_safe_max(Atabcolumn[0].Rvalue,gap_extension+gap_opening);
-    Ddist = add_safe_max(Atabcolumn[0].Dvalue,gap_extension+gap_opening);
-    Idist = add_safe_max(Atabcolumn[0].Ivalue,gap_extension);
-  
+    Rdist = add_safe_max(Atabcolumn[0].Rvalue, gap_extension + gap_opening);
+    Ddist = add_safe_max(Atabcolumn[0].Dvalue, gap_extension + gap_opening);
+    Idist = add_safe_max(Atabcolumn[0].Ivalue, gap_extension);
+
     minvalue = MIN3(Rdist, Ddist, Idist);
     Atabcolumn[0].Ivalue = minvalue;
     Atabcolumn[0].Rvalue = GT_WORD_MAX;
     Atabcolumn[0].Dvalue = GT_WORD_MAX;
-    
+
     if (diag == (GtWord)colindex - (GtWord)low_row)
     {
-      Diagcolumn[colindex].val_R.currentrowindex = GT_UWORD_MAX;
-      Diagcolumn[colindex].val_R.edge = Affine_X;
-      Diagcolumn[colindex].val_R.lastcpoint = GT_UWORD_MAX;
-      
-      Diagcolumn[colindex].val_D.currentrowindex = GT_UWORD_MAX;
-      Diagcolumn[colindex].val_D.edge = Affine_X;
-      Diagcolumn[colindex].val_D.lastcpoint = GT_UWORD_MAX;
-      
+      set_invalid_Diagnode(&Diagcolumn[colindex].val_R);
+      set_invalid_Diagnode(&Diagcolumn[colindex].val_D);
+      set_valid_Diagnode(&Diagcolumn[colindex].val_I, &Rwe, minvalue,
+                          Rdist, Idist, Ddist);
       Diagcolumn[colindex].val_I.currentrowindex = low_row + offset;
-      
-      if (minvalue == Rdist)
-      {
-        Diagcolumn[colindex].val_I.edge = Rwe.val_R.edge;
-        Diagcolumn[colindex].val_I.lastcpoint = Rwe.val_R.idx;
-      }
-      else if (minvalue == Idist)
-      {
-        Diagcolumn[colindex].val_I.edge = Rwe.val_I.edge;
-        Diagcolumn[colindex].val_I.lastcpoint = Rwe.val_I.idx;
-      }
-      else if (minvalue == Ddist)
-      {
-        Diagcolumn[colindex].val_I.edge = Rwe.val_D.edge;
-        Diagcolumn[colindex].val_I.lastcpoint = Rwe.val_D.idx;
-      }
-      
-      Rtabcolumn[0].val_R.idx = GT_UWORD_MAX;
-      Rtabcolumn[0].val_R.edge = Affine_X;
-      Rtabcolumn[0].val_D.idx = GT_UWORD_MAX;
-      Rtabcolumn[0].val_D.edge = Affine_X;
-      Rtabcolumn[0].val_I.idx = colindex;
-      Rtabcolumn[0].val_I.edge = Affine_I;
-      
+      set_invalid_Rnode(&Rtabcolumn[0].val_R);
+      set_invalid_Rnode(&Rtabcolumn[0].val_D);
+      set_invalid_Rnode(&Rtabcolumn[0].val_I);
     }
     else
     {
-      if (minvalue == Rdist)
-      {
-        Rtabcolumn[0].val_I = Rwe.val_R;
-      }
-      else if (minvalue == Idist)
-      {
-       Rtabcolumn[0].val_I = Rwe.val_I;
-      }
-      else if (minvalue == Ddist)
-      {
-        Rtabcolumn[0].val_I = Rwe.val_D;
-      }
-      Rtabcolumn[0].val_D = (Rnode){GT_UWORD_MAX, Affine_X};
-      Rtabcolumn[0].val_R = (Rnode){GT_UWORD_MAX, Affine_X};
+      set_valid_Rnode(&Rtabcolumn[0].val_I, &Rwe, minvalue, Rdist,Idist,Ddist);
+      Rtabcolumn[0].val_D = (Rnode) {GT_UWORD_MAX, Affine_X};
+      Rtabcolumn[0].val_R = (Rnode) {GT_UWORD_MAX, Affine_X};
     }
 
     /* replacement possible for 0-entry */
     if (low_row > 0 )
     {
-      rcost = useq[ustart+low_row-1] == vseq[vstart+colindex-1]? matchcost:mismatchcost;
+      rcost = useq[ustart+low_row-1] == vseq[vstart+colindex-1]?
+              matchcost:mismatchcost;
       Rdist = add_safe_max(Anw.Rvalue, rcost);
       Ddist = add_safe_max(Anw.Dvalue, rcost);
       Idist = add_safe_max(Anw.Ivalue, rcost);
@@ -548,35 +550,15 @@ static Rnode evaluateallcolumns(Atabentry *Atabcolumn,
 
       if (diag == (GtWord)colindex - (GtWord)low_row)
       {
+        set_valid_Diagnode(&Diagcolumn[colindex].val_R, &Rnw, minvalue,
+                            Rdist, Idist, Ddist);
         Diagcolumn[colindex].val_R.currentrowindex = low_row + offset;
-        
-        if (minvalue == Rdist)
-        {
-          Diagcolumn[colindex].val_R.edge = Rnw.val_R.edge;
-          Diagcolumn[colindex].val_R.lastcpoint = Rnw.val_R.idx;
-        }
-        else if (minvalue == Idist)
-        {
-          Diagcolumn[colindex].val_R.edge = Rnw.val_I.edge;
-          Diagcolumn[colindex].val_R.lastcpoint = Rnw.val_I.idx;
-        }
-        else if (minvalue == Ddist)
-        {
-          Diagcolumn[colindex].val_R.edge = Rnw.val_D.edge;
-          Diagcolumn[colindex].val_R.lastcpoint = Rnw.val_D.idx;
-        }
-
         Rtabcolumn[0].val_R.idx = colindex;
         Rtabcolumn[0].val_R.edge = Affine_R;
       }
       else
       {
-        if (minvalue == Rdist)
-          Rtabcolumn[0].val_R = Rnw.val_R;
-        else if (minvalue == Idist)
-           Rtabcolumn[0].val_R = Rnw.val_I;
-        else if (minvalue == Ddist)
-           Rtabcolumn[0].val_R = Rnw.val_D;
+        set_valid_Rnode(&Rtabcolumn[0].val_R, &Rnw, minvalue,Rdist,Idist,Ddist);
       }
     }
     for (rowindex = low_row + 1; rowindex <= high_row; rowindex++)
@@ -586,10 +568,10 @@ static Rnode evaluateallcolumns(Atabentry *Atabcolumn,
 
       if (!last_row && rowindex == high_row)
       {/* prev is outside of diagonalband*/
-        Awe = (Atabentry){GT_UWORD_MAX,GT_UWORD_MAX,GT_UWORD_MAX};
-        Rwe.val_R = (Rnode){GT_UWORD_MAX,Affine_X};
-        Rwe.val_D = (Rnode){GT_UWORD_MAX,Affine_X};
-        Rwe.val_I = (Rnode){GT_UWORD_MAX,Affine_X};
+        Awe = (Atabentry) {GT_UWORD_MAX,GT_UWORD_MAX,GT_UWORD_MAX};
+        Rwe.val_R = (Rnode) {GT_UWORD_MAX,Affine_X};
+        Rwe.val_D = (Rnode) {GT_UWORD_MAX,Affine_X};
+        Rwe.val_I = (Rnode) {GT_UWORD_MAX,Affine_X};
       }
       else if (low_row > 0)
       {/* shifted diagonalband*/
@@ -612,116 +594,65 @@ static Rnode evaluateallcolumns(Atabentry *Atabcolumn,
       Atabcolumn[rowindex-low_row].Ivalue = minvalue;
       if (diag == (GtWord)colindex - (GtWord)rowindex)
       {
-        if (minvalue == Rdist)
-        {
-          Diagcolumn[colindex].val_I.edge = Rwe.val_R.edge;
-          Diagcolumn[colindex].val_I.lastcpoint = Rwe.val_R.idx;
-        }
-        else if (minvalue == Idist)
-        {
-          Diagcolumn[colindex].val_I.edge = Rwe.val_I.edge;
-          Diagcolumn[colindex].val_I.lastcpoint = Rwe.val_I.idx;
-        }
-        else if (minvalue == Ddist)
-        {
-          Diagcolumn[colindex].val_I.edge = Rwe.val_D.edge;
-          Diagcolumn[colindex].val_I.lastcpoint = Rwe.val_D.idx;
-        }
+        set_valid_Diagnode(&Diagcolumn[colindex].val_I, &Rwe, minvalue,
+                            Rdist, Idist, Ddist);
         Diagcolumn[colindex].val_I.currentrowindex = rowindex+offset;
         Rtabcolumn[rowindex-low_row].val_I.idx = colindex;
         Rtabcolumn[rowindex-low_row].val_I.edge = Affine_I;
       }
       else
       {
-        if (minvalue == Rdist)
-          Rtabcolumn[rowindex-low_row].val_I = Rwe.val_R;
-        else if (minvalue == Idist)
-           Rtabcolumn[rowindex-low_row].val_I = Rwe.val_I;
-        else if (minvalue == Ddist)
-           Rtabcolumn[rowindex-low_row].val_I = Rwe.val_D;
+        set_valid_Rnode(&Rtabcolumn[rowindex-low_row].val_I, &Rwe, minvalue,
+                         Rdist,Idist,Ddist);
       }
       /* replacement */
-      rcost = useq[ustart+rowindex-1]==vseq[vstart+colindex-1]? matchcost:mismatchcost;
+      rcost = useq[ustart+rowindex-1]==vseq[vstart+colindex-1]?
+              matchcost:mismatchcost;
       Rdist = add_safe_max(Anw.Rvalue, rcost);
       Ddist = add_safe_max(Anw.Dvalue, rcost);
       Idist = add_safe_max(Anw.Ivalue, rcost);
       minvalue = MIN3(Rdist, Ddist, Idist);
-    
+
       Atabcolumn[rowindex-low_row].Rvalue = minvalue;
       if (diag == (GtWord)colindex - (GtWord)rowindex)
       {
-        if (minvalue == Rdist)
-        {
-          Diagcolumn[colindex].val_R.edge = Rnw.val_R.edge;
-          Diagcolumn[colindex].val_R.lastcpoint = Rnw.val_R.idx;
-        }
-        else if (minvalue == Idist)
-        {
-          Diagcolumn[colindex].val_R.edge = Rnw.val_I.edge;
-          Diagcolumn[colindex].val_R.lastcpoint = Rnw.val_I.idx;
-        }
-        else if (minvalue == Ddist)
-        {
-          Diagcolumn[colindex].val_R.edge = Rnw.val_D.edge;
-          Diagcolumn[colindex].val_R.lastcpoint = Rnw.val_D.idx;
-        }
-
+        set_valid_Diagnode(&Diagcolumn[colindex].val_R, &Rnw, minvalue,
+                            Rdist, Idist, Ddist);
         Diagcolumn[colindex].val_R.currentrowindex = rowindex+offset;
         Rtabcolumn[rowindex-low_row].val_R.idx = colindex;
         Rtabcolumn[rowindex-low_row].val_R.edge = Affine_R;
       }
       else
       {
-        if (minvalue == Rdist)
-          Rtabcolumn[rowindex-low_row].val_R = Rnw.val_R;
-        else if (minvalue == Idist)
-           Rtabcolumn[rowindex-low_row].val_R = Rnw.val_I;
-        else if (minvalue == Ddist)
-           Rtabcolumn[rowindex-low_row].val_R = Rnw.val_D;
+        set_valid_Rnode(&Rtabcolumn[rowindex-low_row].val_R, &Rnw, minvalue,
+                         Rdist,Idist,Ddist);
       }
-      
+
       /* deletion */
       Rdist = add_safe_max(Atabcolumn[rowindex-low_row-1].Rvalue,
                            gap_extension+gap_opening);
       Ddist = add_safe_max(Atabcolumn[rowindex-low_row-1].Dvalue,gap_extension);
       Idist = add_safe_max(Atabcolumn[rowindex-low_row-1].Ivalue,
                            gap_extension+gap_opening);
-    
+
       minvalue = MIN3(Rdist, Ddist, Idist);
       Atabcolumn[rowindex].Dvalue = minvalue;
 
       if (diag == (GtWord)colindex - (GtWord)rowindex)
       {
-        if (minvalue == Rdist)
-        {
-          Diagcolumn[colindex].val_D.edge = Rtabcolumn[rowindex-low_row-1].val_R.edge;
-          Diagcolumn[colindex].val_D.lastcpoint = Rtabcolumn[rowindex-low_row-1].val_R.idx;
-        }
-        else if (minvalue == Idist)
-        {
-          Diagcolumn[colindex].val_D.edge = Rtabcolumn[rowindex-low_row-1].val_I.edge;
-          Diagcolumn[colindex].val_D.lastcpoint = Rtabcolumn[rowindex-low_row-1].val_I.idx;
-        }
-        else if (minvalue == Ddist)
-        {
-          Diagcolumn[colindex].val_D.edge = Rtabcolumn[rowindex-low_row-1].val_D.edge;
-          Diagcolumn[colindex].val_D.lastcpoint = Rtabcolumn[rowindex-low_row-1].val_D.idx;
-        }
-
+        set_valid_Diagnode(&Diagcolumn[colindex].val_D,
+                           &Rtabcolumn[rowindex-low_row-1], minvalue,
+                            Rdist,Idist, Ddist);
         Diagcolumn[colindex].val_D.currentrowindex = rowindex+offset;
         Rtabcolumn[rowindex-low_row].val_D.idx = colindex;
         Rtabcolumn[rowindex-low_row].val_D.edge = Affine_D;
       }
       else
       {
-        if (minvalue == Rdist)
-          Rtabcolumn[rowindex-low_row].val_D = Rtabcolumn[rowindex-low_row-1].val_R;
-        else if (minvalue == Idist)
-           Rtabcolumn[rowindex-low_row].val_D = Rtabcolumn[rowindex-low_row-1].val_I;
-        else if (minvalue == Ddist)
-           Rtabcolumn[rowindex-low_row].val_D = Rtabcolumn[rowindex-low_row-1].val_D;
+        set_valid_Rnode(&Rtabcolumn[rowindex-low_row].val_D,
+                        &Rtabcolumn[rowindex-low_row-1], minvalue,
+                         Rdist,Idist,Ddist);
       }
-      
     }
   }
   /* last crosspoint of optimal path */
@@ -736,7 +667,7 @@ static Rnode evaluateallcolumns(Atabentry *Atabcolumn,
     lastcpoint = Rtabcolumn[high_row-low_row].val_I;
   else if (minvalue == Ddist)
     lastcpoint = Rtabcolumn[high_row-low_row].val_D;
-  
+
   return lastcpoint;
 }
 
@@ -759,13 +690,13 @@ static void evaluatecrosspoints(Atabentry *Atabcolumn,
                                 const GtWord gap_opening,
                                 const GtWord gap_extension)
 {//TODO recursive
-  Rnode cpoint;
+  GT_UNUSED Rnode cpoint;
 
   cpoint = evaluateallcolumns(Atabcolumn, Rtabcolumn, Diagcolumn, edge,
                               rowoffset, useq, ustart, ulen, vseq, vstart, vlen,
-                              left_dist, right_dist,
-                              matchcost, mismatchcost, gap_opening, gap_extension);
-  printf("idx: "GT_WU", edge: %d\n", cpoint.idx, cpoint.edge);
+                              left_dist, right_dist, matchcost, mismatchcost,
+                              gap_opening, gap_extension);
+  //printf("idx: "GT_WU", edge: %d\n", cpoint.idx, cpoint.edge);
 }
 
 static void gt_calc_diagonalbandaffinealign(const GtUchar *useq,
@@ -801,9 +732,9 @@ static void gt_calc_diagonalbandaffinealign(const GtUchar *useq,
   /* initialize Diagcolumn */
   for (idx = 0; idx <= vlen; idx++)
   {
-    Diagcolumn[idx].val_R = (Diagnode){GT_UWORD_MAX, GT_UWORD_MAX, Affine_X};
-    Diagcolumn[idx].val_D = (Diagnode){GT_UWORD_MAX, GT_UWORD_MAX, Affine_X};
-    Diagcolumn[idx].val_I = (Diagnode){GT_UWORD_MAX, GT_UWORD_MAX, Affine_X};
+    Diagcolumn[idx].val_R = (Diagnode) {GT_UWORD_MAX, GT_UWORD_MAX, Affine_X};
+    Diagcolumn[idx].val_D = (Diagnode) {GT_UWORD_MAX, GT_UWORD_MAX, Affine_X};
+    Diagcolumn[idx].val_I = (Diagnode) {GT_UWORD_MAX, GT_UWORD_MAX, Affine_X};
   }
 
   evaluatecrosspoints(Atabcolumn, Rtabcolumn, Diagcolumn, Affine_X, 0, 0,
@@ -844,8 +775,8 @@ void gt_computediagnoalbandaffinealign(GtAlignment * align,
 
   align = gt_alignment_new_with_seqs(useq + ustart, ulen, vseq + vstart, vlen);
   gt_calc_diagonalbandaffinealign(useq, ustart, ulen, vseq, vstart, vlen,
-                            left_dist, right_dist, align,
-                            matchcost, mismatchcost, gap_opening, gap_extension);
+                                  left_dist, right_dist, align, matchcost,
+                                  mismatchcost, gap_opening, gap_extension);
 }
 
 void gt_checkdiagnonalbandaffinealign(GT_UNUSED bool forward,
