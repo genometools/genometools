@@ -139,7 +139,6 @@ GtQuerymatchoutoptions *gt_querymatchoutoptions_new(
   querymatchoutoptions->useqbuffer_size = 0;
   querymatchoutoptions->vseqbuffer = NULL;
   querymatchoutoptions->vseqbuffer_size = 0;
-  querymatchoutoptions->alignment = NULL;
   GT_INITARRAY(&querymatchoutoptions->eoplist,uint8_t);
   querymatchoutoptions->totallength = GT_UWORD_MAX; /* not yet known */
   querymatchoutoptions->esr_for_align_show = NULL;

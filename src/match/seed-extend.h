@@ -304,4 +304,17 @@ GtUword align_front_prune_edist(bool forward,
                                 GtUword vstart,
                                 GtUword vlen);
 
+GtUword gt_minidentity2errorpercentage(GtUword minidentity);
+
+char *gt_seed_extend_params_keystring(bool use_greedy,
+                                      bool use_xdrop,
+                                      unsigned int seedlength,
+                                      unsigned int userdefinedleastlength,
+                                      GtUword minidentity,
+                                      GtUword maxalignedlendifference,
+                                      GtUword perc_mat_history,
+                                      GtUword extendgreedy,
+                                      GtUword extendxdrop,
+                                      GtUword xdropbelowscore);
+
 #endif

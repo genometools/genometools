@@ -4,7 +4,7 @@ require "scripts/evalseedhash.rb"
 
 def filename2keys(filename)
   File.open(filename).each_line do |line|
-    if m = line.match(/^\# TIME repfind-([a-z]+)*([\d\-]+)/)
+    if m = line.match(/^\# TIME [A-Za-z]+-([a-z]+)*([\d\-]+)/)
       minidentity = (line.split(/-/)[4]).to_i
       return m[1], m[2], minidentity
     end

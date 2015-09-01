@@ -984,3 +984,77 @@ GtUword align_front_prune_edist(bool forward,
   gt_assert(distance >= best_polished_point->distance);
   return distance;
 }
+
+GtUword gt_minidentity2errorpercentage(GtUword minidentity)
+{
+  if (minidentity >= 1 &&
+      minidentity <= 100 - GT_EXTEND_MIN_IDENTITY_PERCENTAGE)
+  {
+    return minidentity;
+  } else
+  {
+    gt_assert(minidentity >= GT_EXTEND_MIN_IDENTITY_PERCENTAGE);
+    return 100 - minidentity;
+  }
+}
+
+#define GT_SEED_EXTEND_PARAMS_APPEND(FORMAT,VALUE)\
+    gt_assert(maxstrlen > offset);\
+    offset += snprintf(out + offset,maxstrlen - offset,FORMAT,VALUE)
+
+char *gt_seed_extend_params_keystring(bool use_greedy,
+                                      bool use_xdrop,
+                                      unsigned int seedlength,
+                                      unsigned int userdefinedleastlength,
+                                      GtUword minidentity,
+                                      GtUword maxalignedlendifference,
+                                      GtUword perc_mat_history,
+                                      GtUword extendgreedy,
+                                      GtUword extendxdrop,
+                                      GtUword xdropbelowscore)
+{
+  size_t maxstrlen = 256, offset = 0;
+  char *out = gt_malloc(sizeof *out * (maxstrlen + 1));
+
+  if (use_greedy || use_xdrop)
+  {
+    GT_SEED_EXTEND_PARAMS_APPEND("%s",use_greedy ? "greedy-" : "xdrop-");
+  }
+  GT_SEED_EXTEND_PARAMS_APPEND("%u",seedlength);
+  GT_SEED_EXTEND_PARAMS_APPEND("-%u",userdefinedleastlength);
+  if (use_greedy || use_xdrop)
+  {
+    GT_SEED_EXTEND_PARAMS_APPEND("-" GT_WU,100 -
+                                 gt_minidentity2errorpercentage(minidentity));
+  }
+  if (use_greedy)
+  {
+    GtUword loc_maxalignedlendifference, loc_perc_mat_history;
+
+    gt_optimal_maxalilendiff_perc_mat_history(
+                &loc_maxalignedlendifference,
+                &loc_perc_mat_history,
+                maxalignedlendifference,
+                perc_mat_history,
+                gt_minidentity2errorpercentage(minidentity),
+                extendgreedy);
+    GT_SEED_EXTEND_PARAMS_APPEND("-" GT_WU,loc_maxalignedlendifference);
+    GT_SEED_EXTEND_PARAMS_APPEND("-" GT_WU,loc_perc_mat_history);
+  } else
+  {
+    if (use_xdrop)
+    {
+      if (xdropbelowscore == 0)
+      {
+        GT_SEED_EXTEND_PARAMS_APPEND("-" GT_WD,
+                          gt_optimalxdropbelowscore(
+                          gt_minidentity2errorpercentage(minidentity),
+                                                      extendxdrop));
+      } else
+      {
+        GT_SEED_EXTEND_PARAMS_APPEND("-" GT_WD,xdropbelowscore);
+      }
+    }
+  }
+  return out;
+}
