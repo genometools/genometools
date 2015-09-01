@@ -208,6 +208,10 @@ def fill_other_hash(h1,h2)
   end
 end
 
+def percent(a,b)
+  return 100.0 * a.to_f/b.to_f
+end
+
 def cmpseedhashes(checkbetter,minidentity,taglist,h1,h2,silent = false)
   fill_other_hash(h1,h2)
   nobrother = 0
@@ -255,7 +259,12 @@ def cmpseedhashes(checkbetter,minidentity,taglist,h1,h2,silent = false)
       end
     end
   end
-  puts "identical=#{count_identical}"
+  h1perc = percent(count_identical,h1.length)
+  h2perc = percent(count_identical,h2.length)
+  puts "matches in #{taglist[0]}: #{h1.length}"
+  puts "matches in #{taglist[1]}: #{h2.length}"
+  printf("identical=%d: %.2f of %s/%.2f of %s\n",count_identical,
+             h1perc,taglist[0],h2perc,taglist[1])
   puts "contained=#{count_contained}"
   puts "containing=#{count_containing}"
   ovperc_hash.sort.each do |k|
