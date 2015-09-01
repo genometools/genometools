@@ -320,19 +320,16 @@ const GtQuerymatch *gt_greedy_extend_selfmatch_relpos(void *info,
                                               GtUword querystart_relative,
                                               GtUword len);
 
-bool gt_greedy_extend_matchinfo_relax(GtGreedyextendmatchinfo *ggemi);
-
-void gt_greedy_extend_matchinfo_restore(GtGreedyextendmatchinfo *ggemi);
-
-GtUword align_front_prune_edist(bool forward,
-                                Polished_point *best_polished_point,
-                                Fronttrace *front_trace,
-                                const GtEncseq *encseq,
-                                GtGreedyextendmatchinfo *ggemi,
-                                GtUword ustart,
-                                GtUword ulen,
-                                GtUword vstart,
-                                GtUword vlen);
+GtUword gt_align_front_prune_edist(bool forward,
+                                   Polished_point *best_polished_point,
+                                   Fronttrace *front_trace,
+                                   const GtEncseq *encseq,
+                                   GtGreedyextendmatchinfo *ggemi,
+                                   bool greedyextension,
+                                   GtUword ustart,
+                                   GtUword ulen,
+                                   GtUword vstart,
+                                   GtUword vlen);
 
 GtUword gt_minidentity2errorpercentage(GtUword minidentity);
 

@@ -576,9 +576,7 @@ struct GtGreedyextendmatchinfo
           maxalignedlendifference,
           errorpercentage,
           perc_mat_history,
-          totallength,
-          orig_perc_mat_history,
-          orig_maxalignedlendifference;
+          totallength;
   unsigned int userdefinedleastlength;
   GtExtendCharAccess extend_char_access;
   bool beverbose,
@@ -667,30 +665,7 @@ GtGreedyextendmatchinfo *gt_greedy_extend_matchinfo_new(
   ggemi->check_extend_symmetry = false;
   ggemi->silent = false;
   ggemi->trimstat = NULL;
-  ggemi->orig_perc_mat_history = ggemi->perc_mat_history;
-  ggemi->orig_maxalignedlendifference = ggemi->maxalignedlendifference;
   return ggemi;
-}
-
-bool gt_greedy_extend_matchinfo_relax(GtGreedyextendmatchinfo *ggemi)
-{
-  ggemi->maxalignedlendifference += 1;
-  if (ggemi->perc_mat_history > 1)
-  {
-    ggemi->perc_mat_history--;
-  } else
-  {
-    ggemi->perc_mat_history = 1UL;
-  }
-  ggemi->minmatchnum = (ggemi->history * ggemi->perc_mat_history)/100;
-  return ggemi->minmatchnum > 0 ? true : false;
-}
-
-void gt_greedy_extend_matchinfo_restore(GtGreedyextendmatchinfo *ggemi)
-{
-  ggemi->perc_mat_history = ggemi->orig_perc_mat_history;
-  ggemi->maxalignedlendifference = ggemi->orig_maxalignedlendifference;
-  ggemi->minmatchnum = (ggemi->history * ggemi->perc_mat_history)/100;
 }
 
 void gt_greedy_extend_matchinfo_delete(GtGreedyextendmatchinfo *ggemi)
@@ -1022,17 +997,18 @@ const GtQuerymatch *gt_greedy_extend_selfmatch_relpos(void *info,
   return gt_greedy_extend_selfmatch_sesp(info, encseq, &sesp);
 }
 
-GtUword align_front_prune_edist(bool forward,
-                                Polished_point *best_polished_point,
-                                Fronttrace *front_trace,
-                                const GtEncseq *encseq,
-                                GtGreedyextendmatchinfo *ggemi,
-                                GtUword ustart,
-                                GtUword ulen,
-                                GtUword vstart,
-                                GtUword vlen)
+GtUword gt_align_front_prune_edist(bool forward,
+                                   Polished_point *best_polished_point,
+                                   Fronttrace *front_trace,
+                                   const GtEncseq *encseq,
+                                   GtGreedyextendmatchinfo *ggemi,
+                                   bool greedyextension,
+                                   GtUword ustart,
+                                   GtUword ulen,
+                                   GtUword vstart,
+                                   GtUword vlen)
 {
-  GtUword distance;
+  GtUword distance = 0, iteration, maxiterations;
   FTsequenceResources ufsr, vfsr;
 
   gt_assert(ggemi != NULL);
@@ -1066,21 +1042,40 @@ GtUword align_front_prune_edist(bool forward,
                               &ggemi->vsequence_cache,
                               ggemi->extend_char_access,
                               ggemi->totallength);
-  distance = front_prune_edist_inplace(forward,
-                                       &ggemi->frontspace_reservoir,
-                                       NULL,
-                                       best_polished_point,
-                                       front_trace,
-                                       ggemi->pol_info,
-                                       ggemi->history,
-                                       ggemi->minmatchnum,
-                                       ggemi->maxalignedlendifference,
-                                       &ufsr,
-                                       ustart,
-                                       ulen,
-                                       &vfsr,
-                                       vstart,
-                                       vlen);
+  maxiterations = greedyextension ? 1 : ggemi->minmatchnum;
+  gt_assert(best_polished_point != NULL);
+  for (iteration = 0; iteration < maxiterations; iteration++)
+  {
+    gt_assert(iteration < ggemi->minmatchnum);
+    distance = front_prune_edist_inplace(forward,
+                                         &ggemi->frontspace_reservoir,
+                                         NULL,
+                                         best_polished_point,
+                                         front_trace,
+                                         ggemi->pol_info,
+                                         ggemi->history,
+                                         ggemi->minmatchnum - iteration,
+                                         ggemi->maxalignedlendifference
+                                           + iteration,
+                                         &ufsr,
+                                         ustart,
+                                         ulen,
+                                         &vfsr,
+                                         vstart,
+                                         vlen);
+    if (distance < ulen + vlen + 1)
+    {
+      break;
+    }
+    if (front_trace != NULL)
+    {
+      front_trace_reset(front_trace,ulen + vlen);
+    }
+    best_polished_point->alignedlen = 0;
+    best_polished_point->row = 0;
+    best_polished_point->distance = 0;
+    best_polished_point->trimleft = 0;
+  }
   gt_assert(distance >= best_polished_point->distance);
   return distance;
 }
