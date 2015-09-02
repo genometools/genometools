@@ -354,11 +354,11 @@ bool gt_querymatch_checkoverlap(const GtQuerymatch *querymatch, GtUword seqnum,
                                 GtUword start_relative)
 {
   gt_assert(querymatch);
-  gt_assert(querymatch->dbseqnum == seqnum);
-  /*printf("# "GT_WU" == "GT_WU" && "GT_WU"+"GT_WU" < "GT_WU"\n",
-         querymatch->dbseqnum, seqnum, querymatch->dbstart_relative,
-         querymatch->dblen, start_relative);*/
-  if (querymatch->dbstart_relative + querymatch->dblen >= start_relative) {
+  /* printf("# "GT_WU" == "GT_WU" && "GT_WU"+"GT_WU" < "GT_WU"\n",
+         (GtUword)querymatch->queryseqnum, seqnum, querymatch->querystart,
+         querymatch->querylen, start_relative); */
+  gt_assert(querymatch->queryseqnum == seqnum);
+  if (querymatch->querystart + querymatch->querylen >= start_relative) {
     return false; /* overlap with querymatch */
   } else {
     return true; /* start below querymatch */
