@@ -141,7 +141,7 @@ int gt_xdrop_extend_selfmatch_with_output(void *info,
    (dbstart_relative for the first instance and querystart_relative
    for the second instance). */
 
-const GtQuerymatch *gt_xdrop_extend_selfmatch_relpos(void *info,
+const GtQuerymatch *gt_xdrop_extend_selfmatch_relative(void *info,
                                               const GtEncseq *encseq,
                                               GtUword dbseqnum,
                                               GtUword dbstart_relative,
@@ -312,7 +312,7 @@ int gt_greedy_extend_selfmatch_with_output(void *info,
    (dbstart_relative for the first instance and querystart_relative
    for the second instance). */
 
-const GtQuerymatch *gt_greedy_extend_selfmatch_relpos(void *info,
+const GtQuerymatch *gt_greedy_extend_selfmatch_relative(void *info,
                                               const GtEncseq *encseq,
                                               GtUword dbseqnum,
                                               GtUword dbstart_relative,

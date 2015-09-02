@@ -378,7 +378,7 @@ int gt_xdrop_extend_selfmatch_with_output(void *info,
   return 0;
 }
 
-const GtQuerymatch *gt_xdrop_extend_selfmatch_relpos(void *info,
+const GtQuerymatch *gt_xdrop_extend_selfmatch_relative(void *info,
                                               const GtEncseq *encseq,
                                               GtUword dbseqnum,
                                               GtUword dbstart_relative,
@@ -981,7 +981,7 @@ int gt_greedy_extend_selfmatch_with_output(void *info,
   return 0;
 }
 
-const GtQuerymatch *gt_greedy_extend_selfmatch_relpos(void *info,
+const GtQuerymatch *gt_greedy_extend_selfmatch_relative(void *info,
                                               const GtEncseq *encseq,
                                               GtUword dbseqnum,
                                               GtUword dbstart_relative,
