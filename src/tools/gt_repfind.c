@@ -604,15 +604,16 @@ static int gt_repfind_runner(int argc,
   {
     GtQuerymatchoutoptions *querymatchoutoptions;
     GtProcessinfo_and_querymatchspaceptr processinfo_and_querymatchspaceptr;
-    GtUword sensitivity = gt_option_is_set(arguments->refextendgreedyoption)
-                            ? arguments->extendgreedy
-                            : 100;
 
     processinfo_and_querymatchspaceptr.processinfo = NULL;
     if (arguments->alignmentwidth > 0 ||
         (gt_str_array_size(arguments->queryfiles) == 0 &&
          gt_option_is_set(arguments->refextendxdropoption)))
     {
+      const GtUword sensitivity
+        = gt_option_is_set(arguments->refextendgreedyoption)
+            ? arguments->extendgreedy
+            : 100;
       querymatchoutoptions
         = gt_querymatchoutoptions_new(arguments->alignmentwidth,
                                       gt_minidentity2errorpercentage(
