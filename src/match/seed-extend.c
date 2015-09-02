@@ -395,8 +395,8 @@ const GtQuerymatch *gt_xdrop_extend_selfmatch_relative(void *info,
 }
 
 const GtQuerymatch* gt_xdrop_extend_querymatch(void *info,
-                                               const GtEncseq *encseq,
-                                               const GtQuerymatch *queryseed,
+                                               const GtEncseq *dbencseq,
+                                               const GtQuerymatch *exactseed,
                                                const GtUchar *query,
                                                GtUword query_totallength)
 {
@@ -405,16 +405,16 @@ const GtQuerymatch* gt_xdrop_extend_querymatch(void *info,
   GtXdropscore score;
   GtUword querystart, dblen, dbstart, querylen,
           dbseqnum, dbseqstartpos, dbseqlength,
-          pos1 = gt_querymatch_dbstart(queryseed),
-          pos2 = gt_querymatch_querystart(queryseed),
-          len = gt_querymatch_querylen(queryseed);
+          pos1 = gt_querymatch_dbstart(exactseed),
+          pos2 = gt_querymatch_querystart(exactseed), /* relative to query */
+          len = gt_querymatch_querylen(exactseed);
   uint64_t queryseqnum;
   GtXdropmatchinfo *xdropmatchinfo;
 
   xdropmatchinfo = processinfo_and_querymatchspaceptr->processinfo;
-  dbseqnum = gt_encseq_seqnum(encseq,pos1);
-  dbseqstartpos = gt_encseq_seqstartpos(encseq,dbseqnum);
-  dbseqlength = gt_encseq_seqlength(encseq,dbseqnum);
+  dbseqnum = gt_querymatch_dbseqnum(exactseed);
+  dbseqstartpos = gt_encseq_seqstartpos(dbencseq,dbseqnum);
+  dbseqlength = gt_encseq_seqlength(dbencseq,dbseqnum);
   /* xdrop left of seed, only if length > 0 excluding pos1 and pos2 */
   if (pos1 > dbseqstartpos && pos2 > 0)
   {
@@ -424,7 +424,7 @@ const GtQuerymatch* gt_xdrop_extend_querymatch(void *info,
                (GtUword) 0, pos2);
 #endif
     gt_seqabstract_reinit_encseq(xdropmatchinfo->useq,
-                                 encseq,
+                                 dbencseq,
                                  pos1 - dbseqstartpos,
                                  dbseqstartpos);
     gt_seqabstract_reinit_gtuchar(xdropmatchinfo->vseq,
@@ -453,7 +453,7 @@ const GtQuerymatch* gt_xdrop_extend_querymatch(void *info,
             pos2 + len, query_totallength - 1);
 #endif
     gt_seqabstract_reinit_encseq(xdropmatchinfo->useq,
-                                 encseq,
+                                 dbencseq,
                                  dbseqstartpos + dbseqlength - (pos1 + len),
                                  pos1 + len);
     gt_seqabstract_reinit_gtuchar(xdropmatchinfo->vseq,
@@ -475,7 +475,7 @@ const GtQuerymatch* gt_xdrop_extend_querymatch(void *info,
   gt_assert(pos1 >= (GtUword) xdropmatchinfo->best_left.ivalue &&
             pos2 >= (GtUword) xdropmatchinfo->best_left.jvalue);
   querystart = pos2 - xdropmatchinfo->best_left.jvalue;
-  queryseqnum = gt_querymatch_queryseqnum(queryseed);
+  queryseqnum = gt_querymatch_queryseqnum(exactseed);
   dblen = len + xdropmatchinfo->best_left.ivalue
               + xdropmatchinfo->best_right.ivalue;
   dbstart = pos1 - xdropmatchinfo->best_left.ivalue;
@@ -484,12 +484,6 @@ const GtQuerymatch* gt_xdrop_extend_querymatch(void *info,
   score = (GtXdropscore) len * xdropmatchinfo->arbitscores.mat +
           xdropmatchinfo->best_left.score +
           xdropmatchinfo->best_right.score;
-  gt_seqabstract_reinit_encseq(xdropmatchinfo->useq,
-                               encseq,
-                               dblen,
-                               dbstart);
-  gt_seqabstract_reinit_gtuchar(xdropmatchinfo->vseq, query, querylen,
-                                querystart);
   if (xdropmatchinfo->beverbose)
   {
     printf("# seed:\t" GT_WU "\t" GT_WU "\t" GT_WU "\n",pos1,pos2,len);
@@ -508,7 +502,7 @@ const GtQuerymatch* gt_xdrop_extend_querymatch(void *info,
                              queryseqnum,
                              querylen,
                              querystart,
-                             encseq,
+                             dbencseq,
                              query,
                              query_totallength,
                              pos1,
@@ -522,16 +516,16 @@ const GtQuerymatch* gt_xdrop_extend_querymatch(void *info,
 }
 
 int gt_xdrop_extend_querymatch_with_output(void *info,
-                                           const GtEncseq *encseq,
-                                           const GtQuerymatch *queryseed,
+                                           const GtEncseq *dbencseq,
+                                           const GtQuerymatch *exactseed,
                                            const GtUchar *query,
                                            GtUword query_totallength,
                                            GT_UNUSED GtError *err)
 {
   const GtQuerymatch *querymatch
     = gt_xdrop_extend_querymatch(info,
-                                 encseq,
-                                 queryseed,
+                                 dbencseq,
+                                 exactseed,
                                  query,
                                  query_totallength);
   if (querymatch != NULL)

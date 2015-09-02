@@ -86,8 +86,7 @@ const GtUchar *gt_querymatch_querysequence(const GtQuerymatch *querymatch);
 
 GtUword gt_querymatch_querytotallength(const GtQuerymatch *querymatch);
 
-GtUword gt_querymatch_dbseqnum(const GtEncseq *encseq,
-                                     const GtQuerymatch *querymatch);
+GtUword gt_querymatch_dbseqnum(const GtQuerymatch *querymatch);
 
 bool gt_querymatch_queryreverse(const GtQuerymatch *querymatch);
 

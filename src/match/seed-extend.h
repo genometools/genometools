@@ -152,7 +152,7 @@ const GtQuerymatch *gt_xdrop_extend_selfmatch_relative(void *info,
 /* The following function is used for extending a seed obtained
    in a comparison of the given sequence <query> of length <query_totallength>
    against <encseq>. So here a byte sequence is compared against an
-   encoded sequence and the seed is specified by <queryseed>.
+   encoded sequence and the seed is specified by <exactseed>.
    A <GtProcessinfo_and_querymatchspaceptr>-object is passed via the
    void pointer <info>.
    After the extension is performed and satisfies
@@ -161,7 +161,7 @@ const GtQuerymatch *gt_xdrop_extend_selfmatch_relative(void *info,
 
 const GtQuerymatch* gt_xdrop_extend_querymatch(void *info,
                                                const GtEncseq *encseq,
-                                               const GtQuerymatch *queryseed,
+                                               const GtQuerymatch *exactseed,
                                                const GtUchar *query,
                                                GtUword query_totallength);
 
@@ -174,7 +174,7 @@ const GtQuerymatch* gt_xdrop_extend_querymatch(void *info,
 
 int gt_xdrop_extend_querymatch_with_output(void *info,
                                            const GtEncseq *encseq,
-                                           const GtQuerymatch *queryseed,
+                                           const GtQuerymatch *exactseed,
                                            const GtUchar *query,
                                            GtUword query_totallength,
                                            GT_UNUSED GtError *err);

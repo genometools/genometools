@@ -58,10 +58,9 @@ GtQuerymatch *gt_querymatch_new(GtQuerymatchoutoptions *querymatchoutoptions)
   return querymatch;
 }
 
-GtUword gt_querymatch_dbseqnum(const GtEncseq *encseq,
-                               const GtQuerymatch *querymatch)
+GtUword gt_querymatch_dbseqnum(const GtQuerymatch *querymatch)
 {
-  return gt_encseq_seqnum(encseq,querymatch->dbstart);
+  return querymatch->dbseqnum;
 }
 
 void gt_querymatch_init(GtQuerymatch *querymatch,
