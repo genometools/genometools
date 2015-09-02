@@ -4,7 +4,7 @@ require "scripts/evalseedhash.rb"
 
 def filename2keys(filename)
   File.open(filename).each_line do |line|
-    if m = line.match(/^\# TIME repfind-([a-z]+)*([\d\-]+)/)
+    if m = line.match(/^\# TIME [A-Za-z]+-([a-z]+)*([\d\-]+)/)
       minidentity = (line.split(/-/)[4]).to_i
       return m[1], m[2], minidentity
     end
@@ -15,8 +15,9 @@ end
 seedhash_tab = Hash.new()
 filelist = Array.new()
 ARGV.each do |matchfile|
-  STDERR.puts "read #{matchfile}"
+  STDERR.print "read #{matchfile} "
   seedhash_tab[matchfile] = inputseedhash(matchfile)
+  STDERR.puts "contains #{seedhash_tab[matchfile].length} matches"
   filelist.push(matchfile)
 end
 
@@ -26,8 +27,8 @@ end
   0.upto(filelist.length-1) do |idx2|
     filename2 = filelist[idx2]
     tag2, spec2, minidentity2 = filename2keys(filename2)
-    if idx1 < idx2 and minidentity1 == minidentity2
-    puts "minidentity=#{minidentity1}%: #{tag1}#{spec1} vs #{tag2}#{spec2}"
+    if idx1 < idx2
+      puts "minidentity=#{minidentity1}%: #{tag1}#{spec1} vs #{tag2}#{spec2}"
       cmpseedhashes(true,100.0 - minidentity1,[tag1,tag2],
                     seedhash_tab[filename1],seedhash_tab[filename2],true)
       cmpseedhashes(false,100.0 - minidentity1,[tag2,tag1],

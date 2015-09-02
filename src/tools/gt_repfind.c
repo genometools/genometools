@@ -207,6 +207,7 @@ static void gt_repfind_arguments_delete(void *tool_arguments)
 
 static GtOptionParser *gt_repfind_option_parser_new(void *tool_arguments)
 {
+  const GtUword extension_sensitivity = 97;
   GtOptionParser *op;
   GtOption *option, *reverseoption, *queryoption, *extendxdropoption,
            *extendgreedyoption, *scanoption, *sampleoption, *forwardoption,
@@ -258,10 +259,10 @@ static GtOptionParser *gt_repfind_option_parser_new(void *tool_arguments)
 
   extendxdropoption
     = gt_option_new_uword_min_max("extendxdrop",
-                         "Extend seed to both sides using xdrop algorithm,"
+                         "Extend seed to both sides using xdrop algorithm, "
                          "optional parameter specifies sensitivity",
                          &arguments->extendxdrop,
-                         93,90,100);
+                         extension_sensitivity, 90, 100);
   gt_option_argument_is_optional(extendxdropoption);
   gt_option_parser_add_option(op, extendxdropoption);
   arguments->refextendxdropoption = gt_option_ref(extendxdropoption);
@@ -282,7 +283,8 @@ static GtOptionParser *gt_repfind_option_parser_new(void *tool_arguments)
                                   "Extend seed to both sides using "
                                   "greedy algorithm with trimming of waves, "
                                   "optional parameter specifies sensitivity",
-                                  &arguments->extendgreedy, 93, 90, 100);
+                                  &arguments->extendgreedy,
+                                  extension_sensitivity, 90, 100);
   gt_option_argument_is_optional(extendgreedyoption);
   gt_option_parser_add_option(op, extendgreedyoption);
   arguments->refextendgreedyoption = gt_option_ref(extendgreedyoption);
@@ -510,19 +512,6 @@ static int gt_generic_simplegreedyselfmatchoutput(
                                                 err);
 }
 
-static GtUword minidentity2errorpercentage(GtUword minidentity)
-{
-  if (minidentity >= 1 &&
-      minidentity <= 100 - GT_EXTEND_MIN_IDENTITY_PERCENTAGE)
-  {
-    return minidentity;
-  } else
-  {
-    gt_assert(minidentity >= GT_EXTEND_MIN_IDENTITY_PERCENTAGE);
-    return 100 - minidentity;
-  }
-}
-
 static int gt_repfind_runner(int argc,
                              GT_UNUSED const char **argv,
                              int parsed_args,
@@ -556,7 +545,7 @@ static int gt_repfind_runner(int argc,
   {
     xdropmatchinfo
       = gt_xdrop_matchinfo_new(arguments->userdefinedleastlength,
-                               minidentity2errorpercentage(
+                               gt_minidentity2errorpercentage(
                                             arguments->minidentity),
                                arguments->xdropbelowscore,
                                arguments->extendxdrop,
@@ -584,7 +573,7 @@ static int gt_repfind_runner(int argc,
     if (!haserr)
     {
       greedyextendmatchinfo
-        = gt_greedy_extend_matchinfo_new(minidentity2errorpercentage(
+        = gt_greedy_extend_matchinfo_new(gt_minidentity2errorpercentage(
                                              arguments->minidentity),
                                          arguments->maxalignedlendifference,
                                          arguments->history,
@@ -626,7 +615,7 @@ static int gt_repfind_runner(int argc,
     {
       querymatchoutoptions
         = gt_querymatchoutoptions_new(arguments->alignmentwidth,
-                                      minidentity2errorpercentage(
+                                      gt_minidentity2errorpercentage(
                                                arguments->minidentity),
                                       arguments->maxalignedlendifference,
                                       arguments->history,
@@ -755,52 +744,19 @@ static int gt_repfind_runner(int argc,
   gt_logger_delete(logger);
   if (repfindtimer != NULL)
   {
-    printf("# TIME repfind");
-    if (gt_option_is_set(arguments->refextendgreedyoption))
-    {
-      printf("-greedy");
-    } else
-    {
-      if (gt_option_is_set(arguments->refextendxdropoption))
-      {
-        printf("-xdrop");
-      }
-    }
-    printf("-%u-%u",arguments->seedlength,arguments->userdefinedleastlength);
-    if (gt_option_is_set(arguments->refextendgreedyoption) ||
-        gt_option_is_set(arguments->refextendxdropoption))
-    {
-      printf("-" GT_WU,
-             100 - minidentity2errorpercentage(arguments->minidentity));
-    }
-    if (gt_option_is_set(arguments->refextendgreedyoption))
-    {
-      GtUword maxalignedlendifference, perc_mat_history;
-      gt_optimal_maxalilendiff_perc_mat_history(
-                &maxalignedlendifference,
-                &perc_mat_history,
-                arguments->maxalignedlendifference,
-                arguments->perc_mat_history,
-                minidentity2errorpercentage(arguments->minidentity),
-                arguments->extendgreedy);
-      printf("-" GT_WU,maxalignedlendifference);
-      printf("-" GT_WU,perc_mat_history);
-    } else
-    {
-      if (gt_option_is_set(arguments->refextendxdropoption))
-      {
-        if (arguments->xdropbelowscore == 0)
-        {
-          printf("-" GT_WD,
-                 gt_optimalxdropbelowscore(
-                       minidentity2errorpercentage(arguments->minidentity),
-                       arguments->extendxdrop));
-        } else
-        {
-          printf("-" GT_WD,arguments->xdropbelowscore);
-        }
-      }
-    }
+    char *keystring = gt_seed_extend_params_keystring(
+                             gt_option_is_set(arguments->refextendgreedyoption),
+                             gt_option_is_set(arguments->refextendxdropoption),
+                             arguments->seedlength,
+                             arguments->userdefinedleastlength,
+                             arguments->minidentity,
+                             arguments->maxalignedlendifference,
+                             arguments->perc_mat_history,
+                             arguments->extendgreedy,
+                             arguments->extendxdrop,
+                             arguments->xdropbelowscore);
+    printf("# TIME repfind-%s",keystring);
+    gt_free(keystring);
     gt_timer_show_formatted(repfindtimer," overall " GT_WD ".%02ld\n",stdout);
     gt_timer_delete(repfindtimer);
   }
