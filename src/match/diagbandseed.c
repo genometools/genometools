@@ -371,8 +371,8 @@ int gt_diagbandseed_process_seeds(const GtEncseq *aencseq,
         gt_assert(info_querymatch.querymatchspaceptr != NULL);
         if (firstinrange ||
             gt_querymatch_checkoverlap(info_querymatch.querymatchspaceptr,
-                                       lm[idx].aseqnum,
-                                       lm[idx].apos + 1 - arg->seedlength))
+                                       lm[idx].bseqnum,
+                                       lm[idx].bpos + 1 - arg->seedlength))
         {
           const GtQuerymatch *querymatch = NULL;
           if (arg->extendgreedyinfo != NULL) {
