@@ -34,8 +34,7 @@
 #include "match/sfx-suffixer.h"
 
 #define GT_DIAGBANDSEED_SEQNUM_UNDEF UINT_MAX
-#define MAXGRAM 10000 /* Cap on k-mer count histogram */
-#define DEBUG_SEEDPAIR
+#undef  DEBUG_SEEDPAIR
 #undef  DEBUG_SEED_REPORT
 #undef  DEBUG_GET_KMERS
 
@@ -168,8 +167,9 @@ GtUword gt_diagbandseed_maxfreq(const GtDiagbandseedKmerPos *alist,
                                 unsigned int endposdiff,
                                 bool selfcomp)
 {
+  const GtUword maxgram = 10000; /* Cap on k-mer count histogram */
   const GtDiagbandseedKmerPos *aptr = alist, *bptr = blist, *aend, *bend;
-  GtUword *histogram = gt_calloc(MAXGRAM, sizeof *histogram);
+  GtUword *histogram = gt_calloc(maxgram, sizeof *histogram);
   GtUword count, frequency, available_mem;
 
   gt_assert(alist != NULL && blist != NULL);
@@ -189,7 +189,7 @@ GtUword gt_diagbandseed_maxfreq(const GtDiagbandseedKmerPos *alist,
       for (biter = bptr; biter < bend && biter->code == aptr->code; biter++) {
         /* nothing */
       }
-      frequency = MIN(MAXGRAM, MAX(aiter-aptr, biter-bptr));
+      frequency = MIN(maxgram, MAX(aiter-aptr, biter-bptr));
       gt_assert(frequency > 0);
 
       /* fill histogram of equal k-mers */
@@ -210,14 +210,14 @@ GtUword gt_diagbandseed_maxfreq(const GtDiagbandseedKmerPos *alist,
   }
   available_mem = 0.98 * memlimit;
   available_mem -= (alen + blen) * sizeof *alist;
-  available_mem -= MAXGRAM * sizeof *histogram;
-  for (frequency = 1, count = 0; frequency <= MAXGRAM && count < available_mem;
+  available_mem -= maxgram * sizeof *histogram;
+  for (frequency = 1, count = 0; frequency <= maxgram && count < available_mem;
        frequency++) {
     count += histogram[frequency - 1] * sizeof (GtDiagbandseedSeedPair);
   }
   if (count > available_mem) {
     frequency -= 2;
-  } else if (frequency == MAXGRAM + 1) {
+  } else if (frequency == maxgram + 1) {
     frequency = GT_UWORD_MAX;
   }
   return frequency;
@@ -295,6 +295,7 @@ int gt_diagbandseed_process_seeds(const GtEncseq *aencseq,
   /* minimum segment length */
   const GtUword minhit = (arg->mincoverage-1) / arg->seedlength + 1;
   GtUword diag, idx, maxsegm, nextsegm = 0;
+  bool firstinrange;
   GtDiagbandseedScore *score = NULL;
   GtDiagbandseedPosition *lastp = NULL;
   GtProcessinfo_and_querymatchspaceptr info_querymatch;
@@ -342,7 +343,7 @@ int gt_diagbandseed_process_seeds(const GtEncseq *aencseq,
       if (lm[nextsegm].bpos >= arg->seedlength + lastp[diag]) {
         score[diag] += arg->seedlength;
       } else {
-        gt_assert(lastp[diag] <= lm[nextsegm].bpos);/*if fail: sorted by bpos?*/
+        gt_assert(lastp[diag] <= lm[nextsegm].bpos); /* if fail: sort by bpos */
         score[diag] = score[diag] + lm[nextsegm].bpos - lastp[diag];
       }
       lastp[diag] = lm[nextsegm].bpos;
@@ -351,31 +352,48 @@ int gt_diagbandseed_process_seeds(const GtEncseq *aencseq,
              lm[nextsegm].bseqnum == currsegm_bseqnum);
 
     /* report seeds */
+    firstinrange = true;
     for (idx = currsegm; idx < nextsegm; idx++) {
       gt_assert(lm[idx].apos <= amaxlen);
       diag = (amaxlen + (GtUword)lm[idx].bpos - (GtUword)lm[idx].apos)
              >> arg->logdiagbandwidth;
-      if ((GtUword)(MAX(score[diag+1], score[diag-1])) + (GtUword)(score[diag])
+      if ((GtUword) MAX(score[diag+1], score[diag-1]) + (GtUword) score[diag]
           >= arg->mincoverage)
       {
-        GtUword astart = lm[idx].apos + gt_encseq_seqstartpos
-          (aencseq, lm[idx].aseqnum) + 1 - arg->seedlength;
-        GtUword bstart = lm[idx].bpos + gt_encseq_seqstartpos
-          (bencseq, lm[idx].bseqnum) + 1 - arg->seedlength;
+        GtUword astart = lm[idx].apos +
+          gt_encseq_seqstartpos(aencseq, lm[idx].aseqnum) + 1 - arg->seedlength;
+        GtUword bstart = lm[idx].bpos +
+          gt_encseq_seqstartpos(bencseq, lm[idx].bseqnum) + 1 - arg->seedlength;
 #ifdef DEBUG_SEED_REPORT
         printf("SP(%d,%d,%d,%d) ",
                lm[idx].aseqnum, lm[idx].bseqnum, lm[idx].apos, lm[idx].bpos);
 #endif
-        if (arg->extendgreedyinfo != NULL) {
-          gt_greedy_extend_selfmatch_with_output(&info_querymatch, aencseq,
-                                                 arg->seedlength, astart,
-                                                 bstart, err);
-        } else if (arg->extendxdropinfo != NULL) {
-          gt_xdrop_extend_selfmatch_with_output(&info_querymatch, aencseq,
-                                                arg->seedlength, astart,
-                                                bstart, err);
+        gt_assert(info_querymatch.querymatchspaceptr != NULL);
+        if (firstinrange ||
+            gt_querymatch_checkoverlap(info_querymatch.querymatchspaceptr,
+                                       lm[idx].aseqnum,
+                                       lm[idx].apos + 1 - arg->seedlength))
+        {
+          const GtQuerymatch *querymatch = NULL;
+          if (arg->extendgreedyinfo != NULL) {
+            querymatch = gt_greedy_extend_selfmatch(&info_querymatch,
+                                                    aencseq,
+                                                    arg->seedlength,
+                                                    astart,
+                                                    bstart);
+          } else if (arg->extendxdropinfo != NULL) {
+            querymatch = gt_xdrop_extend_selfmatch(&info_querymatch,
+                                                   aencseq,
+                                                   arg->seedlength,
+                                                   astart,
+                                                   bstart);
+          }
+          /* else: no seed extension */
+          if (querymatch != NULL) {
+            firstinrange = false;
+            gt_querymatch_prettyprint(querymatch);
+          }
         }
-        /* else: no seed extension */
       }
     }
 
@@ -399,7 +417,7 @@ int gt_diagbandseed_run(const GtEncseq *aencseq, const GtEncseq *bencseq,
   GtDiagbandseedKmerPos *alist = NULL, *blist = NULL;
   GtArrayGtDiagbandseedSeedPair mlist;
   GtRadixsortinfo* rdxinfo = NULL;
-  GtUword alen, blen, mlen, maxfreq = arg->maxfreq;
+  GtUword alen = 0, blen = 0, mlen = 0, maxfreq = arg->maxfreq;
   const unsigned int kmerlen = arg->seedlength;
   const unsigned int endposdiff = arg->overlappingseeds ? 0 : kmerlen - 1;
   const bool selfcomp = (bencseq == aencseq) ? true : false;
