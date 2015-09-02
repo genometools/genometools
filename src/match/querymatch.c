@@ -349,3 +349,18 @@ GtWord gt_querymatch_distance2score(GtUword distance,GtUword alignedlen)
 {
   return ((GtWord) alignedlen) - (GtWord) (3 * distance);
 }
+
+bool gt_querymatch_checkoverlap(const GtQuerymatch *querymatch, GtUword seqnum,
+                                GtUword start_relative)
+{
+  gt_assert(querymatch);
+  gt_assert(querymatch->dbseqnum == seqnum);
+  /*printf("# "GT_WU" == "GT_WU" && "GT_WU"+"GT_WU" < "GT_WU"\n",
+         querymatch->dbseqnum, seqnum, querymatch->dbstart_relative,
+         querymatch->dblen, start_relative);*/
+  if (querymatch->dbstart_relative + querymatch->dblen >= start_relative) {
+    return false; /* overlap with querymatch */
+  } else {
+    return true; /* start below querymatch */
+  }
+}
