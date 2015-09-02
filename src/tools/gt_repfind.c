@@ -207,6 +207,7 @@ static void gt_repfind_arguments_delete(void *tool_arguments)
 
 static GtOptionParser *gt_repfind_option_parser_new(void *tool_arguments)
 {
+  const GtUword extension_sensitivity = 97;
   GtOptionParser *op;
   GtOption *option, *reverseoption, *queryoption, *extendxdropoption,
            *extendgreedyoption, *scanoption, *sampleoption, *forwardoption,
@@ -258,10 +259,10 @@ static GtOptionParser *gt_repfind_option_parser_new(void *tool_arguments)
 
   extendxdropoption
     = gt_option_new_uword_min_max("extendxdrop",
-                         "Extend seed to both sides using xdrop algorithm,"
+                         "Extend seed to both sides using xdrop algorithm, "
                          "optional parameter specifies sensitivity",
                          &arguments->extendxdrop,
-                         93,90,100);
+                         extension_sensitivity, 90, 100);
   gt_option_argument_is_optional(extendxdropoption);
   gt_option_parser_add_option(op, extendxdropoption);
   arguments->refextendxdropoption = gt_option_ref(extendxdropoption);
@@ -282,7 +283,8 @@ static GtOptionParser *gt_repfind_option_parser_new(void *tool_arguments)
                                   "Extend seed to both sides using "
                                   "greedy algorithm with trimming of waves, "
                                   "optional parameter specifies sensitivity",
-                                  &arguments->extendgreedy, 93, 90, 100);
+                                  &arguments->extendgreedy,
+                                  extension_sensitivity, 90, 100);
   gt_option_argument_is_optional(extendgreedyoption);
   gt_option_parser_add_option(op, extendgreedyoption);
   arguments->refextendgreedyoption = gt_option_ref(extendgreedyoption);
