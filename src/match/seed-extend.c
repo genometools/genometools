@@ -728,7 +728,7 @@ static void gt_FTsequenceResources_init(FTsequenceResources *fsr,
   fsr->extend_char_access = extend_char_access;
 }
 
-const GtQuerymatch *gt_greedy_extend_selfmatch_sesp(
+static const GtQuerymatch *gt_greedy_extend_selfmatch_sesp(
                                         void *info,
                                         const GtEncseq *encseq,
                                         const GtSeedextendSequencepair *sesp)
@@ -1002,6 +1002,7 @@ GtUword gt_align_front_prune_edist(bool forward,
                                    Polished_point *best_polished_point,
                                    Fronttrace *front_trace,
                                    const GtEncseq *encseq,
+                                   const GtUchar *query,
                                    GtGreedyextendmatchinfo *ggemi,
                                    bool greedyextension,
                                    GtUword ustart,
@@ -1020,7 +1021,7 @@ GtUword gt_align_front_prune_edist(bool forward,
                                               GT_READMODE_FORWARD,
                                               0);
   }
-  if (ggemi->encseq_r_in_v == NULL)
+  if (query == NULL && ggemi->encseq_r_in_v == NULL)
   {
     ggemi->encseq_r_in_v
       = gt_encseq_create_reader_with_readmode(encseq,
