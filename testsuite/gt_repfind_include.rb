@@ -103,7 +103,7 @@ Test do
            "-indexname sfx -dna -tis -suf -lcp"
   run_test "#{$bin}gt repfind -minidentity 90 -l 20 -xdropbelow 5 -extendxdrop -ii sfx"
   run "cmp -s #{last_stdout} #{$testdata}repfind-result/repfind-20-extend.txt"
-  run_test "#{$bin}gt repfind -minidentity 85 -l 20 -extendxdrop -ii sfx -q " +
+  run_test "#{$bin}gt repfind -minidentity 80 -l 20 -extendxdrop -ii sfx -q " +
            "#{$testdata}/U89959_genomic.fas"
   run "cmp -s #{last_stdout} #{$testdata}repfind-result/repfind-20-query-extend.txt"
   run_test "#{$bin}gt repfind -extendxdrop -ii sfx -seedlength 70 -l 500 -minidentity 90 -a"
@@ -112,7 +112,7 @@ Test do
   run "cmp -s #{last_stdout} #{$testdata}repfind-result/repfind-greedy-70-500-90-1-39-a.txt"
   run_test "#{$bin}gt suffixerator -db #{$testdata}U89959_genomic.fas " +
            "-indexname sfx -dna -tis -suf -lcp"
-  run_test "#{$bin}gt repfind -minidentity 85 -l 20 -extendxdrop -ii sfx -q " +
+  run_test "#{$bin}gt repfind -minidentity 80 -l 20 -extendxdrop -ii sfx -q " +
            "#{$testdata}/at1MB"
   run "#{$scriptsdir}cmp_db_query_exch.rb #{last_stdout} #{$testdata}repfind-result/repfind-20-query-extend.txt 35"
 end

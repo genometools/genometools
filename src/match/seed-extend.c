@@ -403,12 +403,11 @@ const GtQuerymatch* gt_xdrop_extend_querymatch(void *info,
   GtProcessinfo_and_querymatchspaceptr *processinfo_and_querymatchspaceptr
     = (GtProcessinfo_and_querymatchspaceptr *) info;
   GtXdropscore score;
-  GtUword querystart, dblen, dbstart, querylen,
-          dbseqnum, dbseqstartpos, dbseqlength,
+  GtUword querylen, dblen, dbseqnum, dbseqstartpos, dbseqlength, total_distance,
+          total_alignedlen,
           pos1 = gt_querymatch_dbstart(exactseed),
           pos2 = gt_querymatch_querystart(exactseed), /* relative to query */
           len = gt_querymatch_querylen(exactseed);
-  uint64_t queryseqnum;
   GtXdropmatchinfo *xdropmatchinfo;
 
   xdropmatchinfo = processinfo_and_querymatchspaceptr->processinfo;
@@ -474,43 +473,51 @@ const GtQuerymatch* gt_xdrop_extend_querymatch(void *info,
   }
   gt_assert(pos1 >= (GtUword) xdropmatchinfo->best_left.ivalue &&
             pos2 >= (GtUword) xdropmatchinfo->best_left.jvalue);
-  querystart = pos2 - xdropmatchinfo->best_left.jvalue;
-  queryseqnum = gt_querymatch_queryseqnum(exactseed);
   dblen = len + xdropmatchinfo->best_left.ivalue
               + xdropmatchinfo->best_right.ivalue;
-  dbstart = pos1 - xdropmatchinfo->best_left.ivalue;
   querylen = len + xdropmatchinfo->best_left.jvalue
                  + xdropmatchinfo->best_right.jvalue,
+  total_alignedlen = dblen + querylen;
   score = (GtXdropscore) len * xdropmatchinfo->arbitscores.mat +
           xdropmatchinfo->best_left.score +
           xdropmatchinfo->best_right.score;
-  if (xdropmatchinfo->beverbose)
+  total_distance = score2distance(score,total_alignedlen);
+  if (gt_querymatch_error_rate(total_distance,total_alignedlen) <=
+      (double) xdropmatchinfo->errorpercentage &&
+      total_alignedlen >= 2 * xdropmatchinfo->userdefinedleastlength)
   {
-    printf("# seed:\t" GT_WU "\t" GT_WU "\t" GT_WU "\n",pos1,pos2,len);
-  }
-  if (gt_querymatch_complete(processinfo_and_querymatchspaceptr->
-                               querymatchspaceptr,
-                             dblen,
-                             dbstart,
-                             dbseqnum,
-                             dbstart - dbseqstartpos,
-                             GT_READMODE_FORWARD,
-                             false,
-                             score,
-                             score2distance(score,querylen + dblen),
-                             false,
-                             queryseqnum,
-                             querylen,
-                             querystart,
-                             dbencseq,
-                             query,
-                             query_totallength,
-                             pos1,
-                             pos2,
-                             len,
-                             false))
-  {
-    return processinfo_and_querymatchspaceptr->querymatchspaceptr;
+    const GtUword dbstart = pos1 - xdropmatchinfo->best_left.ivalue;
+    const uint64_t queryseqnum = gt_querymatch_queryseqnum(exactseed);
+    const GtUword querystart = pos2 - xdropmatchinfo->best_left.jvalue;
+
+    if (xdropmatchinfo->beverbose)
+    {
+      printf("# seed:\t" GT_WU "\t" GT_WU "\t" GT_WU "\n",pos1,pos2,len);
+    }
+    if (gt_querymatch_complete(processinfo_and_querymatchspaceptr->
+                                 querymatchspaceptr,
+                               dblen,
+                               dbstart,
+                               dbseqnum,
+                               dbstart - dbseqstartpos,
+                               GT_READMODE_FORWARD,
+                               false, /* query_as_reversecopy */
+                               score,
+                               total_distance,
+                               false, /* selfmatch */
+                               queryseqnum,
+                               querylen,
+                               querystart,
+                               dbencseq,
+                               query,
+                               query_totallength,
+                               pos1,
+                               pos2,
+                               len,
+                               false)) /* greedy extension */
+    {
+      return processinfo_and_querymatchspaceptr->querymatchspaceptr;
+    }
   }
   return NULL;
 }
