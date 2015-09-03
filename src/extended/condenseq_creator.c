@@ -560,7 +560,7 @@ static int ces_c_extend_seeds_window(GtCondenseqCreator *ces_c,
   GtCondenseqCreatorXdrop *xdrop = &ces_c->xdrop;
   GtUword best_match = GT_UNDEF_UWORD,
           idx_cur,
-          j = ces_c->main_pos - ces_c->windowsize + 1;
+          querypos = ces_c->main_pos - ces_c->windowsize + 1;
   const unsigned int max_win_idx = ces_c->windowsize - 1;
   unsigned int idx_win;
   GtXdropbest empty = {0,0,0,0,0};
@@ -581,24 +581,34 @@ static int ces_c_extend_seeds_window(GtCondenseqCreator *ces_c,
   /* get bounds for current .end is exclusive */
   seed_bounds.start = ces_c->current_orig_start;
   seed_bounds.end = ces_c->current_seq_start + ces_c->current_seq_len;
-  gt_assert(seed_bounds.start <= j);
-  gt_assert(j <= seed_bounds.end - ces_c->windowsize);
-
-  for (idx_win = 0; idx_win <= max_win_idx; idx_win++) {
-    win->idxs[idx_win] = 0;
+  gt_assert(seed_bounds.start <= querypos);
+  if (!(querypos <= seed_bounds.end - ces_c->windowsize)) {
+    gt_error_set(err, "querypos: " GT_WU ", not smaller end (" GT_WU
+                 ") - windowsize (%u) (xdrop calls: " GT_WU " )",
+                 querypos,
+                 seed_bounds.end,
+                 ces_c->windowsize,
+                 ces_c_xdrops);
+    had_err = -1;
   }
 
-  if (seed_bounds.start < j) {
-    gt_seqabstract_reinit_encseq(xdrop->current_seq_bwd,
-                                 ces_c->input_es,
-                                 j - seed_bounds.start,
-                                 seed_bounds.start);
-  }
-  if (j < seed_bounds.end) {
-    gt_seqabstract_reinit_encseq(xdrop->current_seq_fwd,
-                                 ces_c->input_es,
-                                 seed_bounds.end - j,
-                                 j);
+  if (!had_err) {
+    for (idx_win = 0; idx_win <= max_win_idx; idx_win++) {
+      win->idxs[idx_win] = 0;
+    }
+
+    if (seed_bounds.start < querypos) {
+      gt_seqabstract_reinit_encseq(xdrop->current_seq_bwd,
+                                   ces_c->input_es,
+                                   querypos - seed_bounds.start,
+                                   seed_bounds.start);
+    }
+    if (querypos < seed_bounds.end) {
+      gt_seqabstract_reinit_encseq(xdrop->current_seq_fwd,
+                                   ces_c->input_es,
+                                   seed_bounds.end - querypos,
+                                   querypos);
+    }
   }
 
   /* iterate over all known match_positions of left kmer */
@@ -607,21 +617,21 @@ static int ces_c_extend_seeds_window(GtCondenseqCreator *ces_c,
        idx_cur++)
   {
     bool found = false;
-    GtUword i = match_positions.startpos[idx_cur],
+    GtUword subjectpos = match_positions.startpos[idx_cur],
             new_uid = match_positions.unique_ids[idx_cur];
-    /* end == i should not be possible as this would be a separator */
-    if (match_bounds.end <= i || match_bounds.end == 0) {
+    /* end == subjectpos should not be possible as this would be a separator */
+    if (match_bounds.end <= subjectpos || match_bounds.end == 0) {
       gt_assert(new_uid != ces_c->ces->udb_nelems);
       match_bounds.start = ces_c->ces->uniques[new_uid].orig_startpos;
       match_bounds.end = match_bounds.start +
         ces_c->ces->uniques[new_uid].len;
-      gt_assert(match_bounds.start <= i &&
-                i + ces_c->kmersize <= match_bounds.end);
+      gt_assert(match_bounds.start <= subjectpos &&
+                subjectpos + ces_c->kmersize <= match_bounds.end);
     }
     /* check if new position is already covered by current best alignment */
     if (best_match == GT_UNDEF_UWORD ||
         /* ivalue is a length -> best + ivalue is outside of best alignment */
-        i >= best_match + xdrop->right->ivalue) {
+        subjectpos >= best_match + xdrop->right->ivalue) {
       /* start with search for right hit at end of window */
       for (idx_win = ces_c->windowsize - 1;
            !had_err && !found && idx_win >= ces_c->kmersize;
@@ -637,17 +647,17 @@ static int ces_c_extend_seeds_window(GtCondenseqCreator *ces_c,
         if (i_primes.no_positions != 0) {
           GtUword i_prime_idx;
           /* within each position array, remember last highest position, start
-             there, because i increases each iteration */
+             there, because subjectpos increases each iteration */
           for (i_prime_idx = win->idxs[idx_win];
                !had_err && !found && i_prime_idx < i_primes.no_positions;
                i_prime_idx++) {
             GtUword i_prime = i_primes.startpos[i_prime_idx];
-            if (i_prime > i + ces_c->windowsize)
+            if (i_prime > subjectpos + ces_c->windowsize)
               break;
-            if (i_prime > i + ces_c->kmersize - 1) {
+            if (i_prime > subjectpos + ces_c->kmersize - 1) {
               found = true;
               had_err = ces_c_xdrop(ces_c,
-                                    i, j,
+                                    subjectpos, querypos,
                                     seed_bounds,
                                     match_bounds,
                                     new_uid,
@@ -1177,20 +1187,21 @@ ces_c_reset_pos_and_iter_to_current_seq(GtCondenseqCreator *ces_c)
 
 static CesCState ces_c_skip_short_seqs(GtCondenseqCreator *ces_c)
 {
-  GtUword start;
 
-  while (ces_c->main_seqnum <
-         ces_c->ces->orig_num_seq &&
-         (ces_c->current_seq_len =
-            gt_condenseq_seqlength(ces_c->ces,
-                                   ces_c->main_seqnum)) <
-         ces_c->min_align_len) {
-    start = gt_condenseq_seqstartpos(ces_c->ces,
-                                     ces_c->main_seqnum);
+  if (ces_c->main_seqnum < ces_c->ces->orig_num_seq) {
+    ces_c->current_seq_len = gt_condenseq_seqlength(ces_c->ces,
+                                                    ces_c->main_seqnum);
+  }
+  while (ces_c->main_seqnum < ces_c->ces->orig_num_seq &&
+         ces_c->current_seq_len < ces_c->min_align_len) {
+    GtUword start = gt_condenseq_seqstartpos(ces_c->ces,
+                                             ces_c->main_seqnum);
     /* no check necessary, as minalignlength was checked */
     gt_condenseq_add_unique_to_db(ces_c->ces, start,
                                   ces_c->current_seq_len);
     ces_c->main_seqnum++;
+    ces_c->current_seq_len = gt_condenseq_seqlength(ces_c->ces,
+                                                    ces_c->main_seqnum);
   }
   return ces_c->main_seqnum >= ces_c->ces->orig_num_seq ?
     GT_CONDENSEQ_CREATOR_EOD : GT_CONDENSEQ_CREATOR_CONT;
@@ -1373,11 +1384,26 @@ static CesCState ces_c_process_kmer(GtCondenseqCreator *ces_c,
   return state;
 }
 
+#define INIT_EOD_CHECK                                                         \
+  do {                                                                         \
+    if (!had_err && state == GT_CONDENSEQ_CREATOR_EOD) {                       \
+      gt_error_set(err, "reached end of data, check input data or review "     \
+                   "initsize!  (found " GT_WU " kmers at position " GT_WU ")", \
+                   gt_kmer_database_get_kmer_count(ces_c->kmer_db),            \
+                   ces_c->main_pos);                                           \
+        had_err = -1;                                                          \
+    }                                                                          \
+  } while (false);
+
 static int ces_c_init_kmer_db(GtCondenseqCreator *ces_c, GtError *err)
 {
   int had_err = 0;
-  GtUword k = (GtUword) ces_c->kmersize - 1;
+  GtUword kmersize = (GtUword) ces_c->kmersize - 1;
   CesCState state;
+
+  /* disable pruning for initialization */
+  if (ces_c->use_cutoff && ces_c->prune_kmer_db)
+    gt_kmer_database_disable_prune(ces_c->kmer_db);
 
   state = ces_c_skip_short_seqs(ces_c);
   if (state == GT_CONDENSEQ_CREATOR_CONT) {
@@ -1387,17 +1413,30 @@ static int ces_c_init_kmer_db(GtCondenseqCreator *ces_c, GtError *err)
          state != GT_CONDENSEQ_CREATOR_EOD &&
          ces_c->initsize > gt_kmer_database_get_kmer_count(ces_c->kmer_db)) {
     GtUword initsize = ces_c->initsize -
-      gt_kmer_database_get_kmer_count(ces_c->kmer_db);
-    if (ces_c->current_seq_len - k >= initsize) {
+                       gt_kmer_database_get_kmer_count(ces_c->kmer_db),
+            usable_seqlen = ces_c->current_seq_len - kmersize -
+                            ces_c->current_seq_pos;
+    gt_log_log("at pos: " GT_WU ", seq: " GT_WU " remaining: " GT_WU " kmers, "
+               "have: " GT_WU " kmers",
+               ces_c->main_pos, ces_c->main_seqnum, initsize,
+               gt_kmer_database_get_kmer_count(ces_c->kmer_db));
+    /* assure initzise is long enough to allow addition of kmers to kmer-db */
+    initsize = initsize < ces_c->min_align_len ?
+                 ces_c->min_align_len :
+                 initsize;
+    /* large sequences */
+    if (usable_seqlen >= initsize) {
       /* if rest would be to small on its own, put it into initial set */
-      if (ces_c->current_seq_len - k - initsize < ces_c->min_align_len) {
+      if (usable_seqlen - initsize < ces_c->min_align_len) {
         GT_CES_LENCHECK(ces_c->current_seq_len);
+        gt_log_log("large enough with end (" GT_WU ") add all",
+                   usable_seqlen);
         if (!had_err) {
           gt_condenseq_add_unique_to_db(ces_c->ces,
                                         ces_c->main_pos,
-                                        ces_c->current_seq_len);
+                                        usable_seqlen + kmersize);
           ces_c_add_kmers(ces_c, ces_c->main_pos,
-                          ces_c->main_pos + ces_c->current_seq_len);
+                          ces_c->main_pos + usable_seqlen);
           ces_c->main_seqnum++;
           state = ces_c_skip_short_seqs(ces_c);
           if (state == GT_CONDENSEQ_CREATOR_CONT) {
@@ -1406,7 +1445,9 @@ static int ces_c_init_kmer_db(GtCondenseqCreator *ces_c, GtError *err)
         }
       }
       else {
-        initsize += k;
+        initsize += kmersize;
+        gt_log_log("large enough (" GT_WU ") add " GT_WU,
+                   usable_seqlen, initsize);
         GT_CES_LENCHECK(initsize);
         if (!had_err) {
           gt_condenseq_add_unique_to_db(ces_c->ces,
@@ -1420,14 +1461,16 @@ static int ces_c_init_kmer_db(GtCondenseqCreator *ces_c, GtError *err)
         }
       }
     }
+    /* small sequences */
     else {
-      GT_CES_LENCHECK(ces_c->current_seq_len);
+      gt_log_log("small seq: " GT_WU "add all", usable_seqlen);
+      GT_CES_LENCHECK(usable_seqlen);
       if (!had_err) {
         gt_condenseq_add_unique_to_db(ces_c->ces,
                                       ces_c->main_pos,
-                                      ces_c->current_seq_len);
+                                      usable_seqlen + kmersize);
         ces_c_add_kmers(ces_c, ces_c->main_pos,
-                        ces_c->main_pos + ces_c->current_seq_len);
+                        ces_c->main_pos + usable_seqlen + kmersize);
         ces_c->main_seqnum++;
         state = ces_c_skip_short_seqs(ces_c);
         if (state == GT_CONDENSEQ_CREATOR_CONT) {
@@ -1439,13 +1482,20 @@ static int ces_c_init_kmer_db(GtCondenseqCreator *ces_c, GtError *err)
       gt_kmer_database_flush(ces_c->kmer_db);
     }
   }
+  INIT_EOD_CHECK;
   if (!had_err &&
       ces_c->initsize > gt_kmer_database_get_kmer_count(ces_c->kmer_db)) {
-    gt_error_set(err, "Sequence seems to contain no kmers or only too short "
-                 "sequences, check input data or review initsize!");
+    gt_error_set(err, "not enough kmers found for init, check input data or "
+                 "review initsize! (found " GT_WU " kmers)",
+                 gt_kmer_database_get_kmer_count(ces_c->kmer_db));
     had_err = -1;
   }
 
+  if (!had_err)
+    gt_log_log("filled kmer-db at pos " GT_WU, ces_c->main_pos);
+  /* reanable */
+  if (ces_c->use_cutoff && ces_c->prune_kmer_db)
+    gt_kmer_database_set_prune(ces_c->kmer_db);
   return had_err;
 }
 

@@ -87,8 +87,11 @@ void            gt_kmer_database_use_mean_cutoff(GtKmerDatabase *kdb,
                                                  GtUword min_cutoff);
 
 /* If <cutoff> and this option are set, kmers occuring more than <cutoff> times
-   will be removed during the process. */
+   will be removed during the process. Function fails if no cutoff is set. */
 void            gt_kmer_database_set_prune(GtKmerDatabase *kdb);
+
+/* Disables pruning within kmer-database */
+void            gt_kmer_database_disable_prune(GtKmerDatabase *kdb);
 
 /* Returns the number of kmers inserted in the <GtKmerDatabase>. */
 GtUword         gt_kmer_database_get_kmer_count(GtKmerDatabase *kdb);
