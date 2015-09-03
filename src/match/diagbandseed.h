@@ -57,8 +57,9 @@ GtUword gt_diagbandseed_get_kmers(GtDiagbandseedKmerPos *list,
 void gt_diagbandseed_merge(GtArrayGtDiagbandseedSeedPair *mlist,
                            const GtDiagbandseedKmerPos *alist, GtUword alen,
                            const GtDiagbandseedKmerPos *blist, GtUword blen,
-                           unsigned int kmerlen, GtUword maxfreq,
-                           bool two_files);
+                           GtUword *maxfreq, GtUword maxgram, GtUword memlimit,
+                           GtUword *histogram, unsigned int endposdiff,
+                           bool selfcomp);
 
 /* start extension for seeds that satisfy the filter criteria */
 int gt_diagbandseed_process_seeds(const GtEncseq *aencseq,
