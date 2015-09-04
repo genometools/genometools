@@ -6816,9 +6816,7 @@ void gt_encseq_showatstartpos(FILE *fp,
   GtUchar buffer[GT_UNITSIN2BITENC];
   gt_assert(fp != NULL);
   /* scan-build was complaining about uninitialized values */
-  for (pos=0; pos < GT_UNITSIN2BITENC; pos++) {
-    buffer[pos] = GT_UNDEF_UCHAR;
-  }
+  memset(buffer, GT_UNDEF_UCHAR, GT_UNITSIN2BITENC);
 
   fprintf(fp, "          0123456789012345");
   if (GT_UNITSIN2BITENC == 32) {
