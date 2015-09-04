@@ -252,7 +252,17 @@ static void alignment_with_seqs_show(const GtUchar *useq, const GtUword ulen,
   }
 }
 
-static GtWord* select_costs(const GtStrArray *arr,GtError *err)
+static inline int check_costs(GtWord costs)
+{
+  if (costs >= 0)
+    return 1;
+
+   fprintf(stderr, "invalid cost value " GT_WD"\n", costs);
+   exit(GT_EXIT_PROGRAMMING_ERROR);
+}
+
+static GtWord* select_digit_from_string(const GtStrArray *arr,
+                                        bool global, GtError *err)
 {
   bool haserr = false;
   GtWord *evalues;
@@ -268,6 +278,8 @@ static GtWord* select_costs(const GtStrArray *arr,GtError *err)
       gt_error_set(err, "found invalid cost or score");
       haserr = true;
     }
+    if (global)
+      check_costs(evalues[i]);
   }
   if (haserr)
   {
@@ -386,7 +398,9 @@ static int gt_linspace_align_runner(GT_UNUSED int argc,
       if (gt_str_array_size(arguments->linearcosts) > 0)
       {
         gt_assert(gt_str_array_size(arguments->linearcosts) == 3UL);
-        linearcosts = select_costs(arguments->linearcosts, err);
+        linearcosts = select_digit_from_string(arguments->linearcosts,
+                                               arguments->global, err);
+        gt_error_check(err);
         if (linearcosts == NULL)
           return 1;
 
@@ -394,7 +408,8 @@ static int gt_linspace_align_runner(GT_UNUSED int argc,
         {
            if (gt_str_array_size(arguments->diagonalbonds) > 0)
            {
-             diagonalbonds = select_costs(arguments->diagonalbonds, err);
+             diagonalbonds = select_digit_from_string(arguments->diagonalbonds,
+                                                      false, err);
              if (diagonalbonds == NULL)
                return 1;
 
@@ -429,7 +444,9 @@ static int gt_linspace_align_runner(GT_UNUSED int argc,
         GtWord *affinecosts;
 
         gt_assert(gt_str_array_size(arguments->affinecosts) == 4UL);
-        affinecosts = select_costs(arguments->affinecosts, err);
+        affinecosts = select_digit_from_string(arguments->affinecosts,
+                                               arguments->global, err);
+        gt_error_check(err);
         if (affinecosts == NULL)
           return 1;
 

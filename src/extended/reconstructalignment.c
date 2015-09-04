@@ -20,17 +20,16 @@
 void reconstructalignment_from_Ctab(GtAlignment *align,
                                     const GtUword *Ctab,
                                     const GtUchar *useq,
-                                    const GtUword ustart,
+                                    GtUword ustart,
                                     const GtUchar *vseq,
-                                    const GtUword vstart,
-                                    const GtUword vlen,
-                                    const GtWord matchcost,
-                                    const GtWord mismatchcost,
-                                    const GtWord gap_opening,
-                                    const GtWord gap_extension)
+                                    GtUword vstart,
+                                    GtUword vlen,
+                                    GtUword matchcost,
+                                    GtUword mismatchcost,
+                                    GtUword gap_opening,
+                                    GtUword gap_extension)
 {
-  GtUword i,j;
-  GtWord indel, repl;
+  GtUword i,j, indel, repl;
 
   gt_assert(align != NULL && Ctab != NULL);
   for (i = vlen; i > 0; i--) {
@@ -81,32 +80,9 @@ void reconstructalignment_from_Ctab(GtAlignment *align,
     gt_alignment_add_deletion(align);
 }
 
-/*void reconstructalignment_from_Ctab(GtAlignment *align,
-                                    const GtUword *Ctab,
-                                    const GtUword vlen)
-{
-  GtUword i,j;
-
-  gt_assert(align != NULL && Ctab != NULL);
-  for (i = vlen; i > 0; i--) {
-    if (Ctab[i] == Ctab[i-1] + 1)
-      gt_alignment_add_replacement(align);
-    else if (Ctab[i] == Ctab[i-1])
-      gt_alignment_add_insertion(align);
-    else if (Ctab[i] > Ctab[i-1]) {
-      for (j = 0; j < (Ctab[i]-Ctab[i-1])-1; j++)
-        gt_alignment_add_deletion(align);
-      gt_alignment_add_replacement(align);
-
-    }
-  }
-  for (j = Ctab[0]; j > 0; j--)
-    gt_alignment_add_deletion(align);
-}*/
-
 GtUword construct_trivial_deletion_alignment(GtAlignment *align,
-                                             const GtUword len,
-                                             const GtWord gapcost)
+                                             GtUword len,
+                                             GtUword gapcost)
 {
   GtUword idx;
 
@@ -119,8 +95,8 @@ GtUword construct_trivial_deletion_alignment(GtAlignment *align,
 }
 
 GtUword construct_trivial_insertion_alignment(GtAlignment *align,
-                                              const GtUword len,
-                                              const GtWord gapcost)
+                                              GtUword len,
+                                              GtUword gapcost)
 {
   GtUword idx;
 

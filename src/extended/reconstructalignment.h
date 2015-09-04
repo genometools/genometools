@@ -23,20 +23,20 @@
 void reconstructalignment_from_Ctab(GtAlignment *align,
                                     const GtUword *Ctab,
                                     const GtUchar *useq,
-                                    const GtUword ustart,
+                                    GtUword ustart,
                                     const GtUchar *vseq,
-                                    const GtUword vstart,
-                                    const GtUword vlen,
-                                    const GtWord matchcost,
-                                    const GtWord mismatchcost,
-                                    const GtWord gap_opening,
-                                    const GtWord gap_extension);
+                                    GtUword vstart,
+                                    GtUword vlen,
+                                    GtUword matchcost,
+                                    GtUword mismatchcost,
+                                    GtUword gap_opening,
+                                    GtUword gap_extension);
 
 GtUword construct_trivial_deletion_alignment(GtAlignment *align,
-                                              const GtUword len,
-                                              const GtWord gapcost);
+                                             GtUword len,
+                                             GtUword gapcost);
 
 GtUword construct_trivial_insertion_alignment(GtAlignment *align,
-                                              const GtUword len,
-                                              const GtWord gapcost);
+                                              GtUword len,
+                                              GtUword gapcost);
 #endif

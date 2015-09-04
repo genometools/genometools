@@ -40,23 +40,20 @@ typedef struct {
   LinearAlignEdge edge;
 } Diagentry;
 
-static GtUword add_safe_max(const GtUword val1, const GtUword val2)
+static inline GtWord add_safe(GtUword val1, GtUword val2, GtUword exception)
 {
-  if (val1 != GT_UWORD_MAX && val2 != GT_UWORD_MAX)
-  {
-     if (val1 > 0 && val2 > 0)
-       gt_assert(val1+val2 >= val1 && val1+val2 >= val2);/*check overflow*/
-     return val1+val2;
-  }
+  return (val1 != exception) ? val1 + val2 : exception;
+}
 
-    return GT_UWORD_MAX;
+static inline GtWord add_safe_max(GtUword val1, GtUword val2)
+{
+  return add_safe(val1,val2,GT_UWORD_MAX);
 }
 
 /*reconstruct alignment from crosspoints, crosspoints relating to diagonalband*/
 void reconstructalignment_from_Dtab(GtAlignment *align,
                                     const Diagentry *Dtab,
-                                    const GtUword ulen,
-                                    const GtUword vlen)
+                                    GtUword ulen, GtUword vlen)
 {
   GtUword i,j;
 
@@ -125,16 +122,16 @@ void reconstructalignment_from_Dtab(GtAlignment *align,
 
 /* calculate only distance with diagonalband in square space O(n²) */
 static GtUword diagonalband_squarespace_distance_only(const GtUchar *useq,
-                                                      const GtUword ustart,
-                                                      const GtUword ulen,
+                                                      GtUword ustart,
+                                                      GtUword ulen,
                                                       const GtUchar *vseq,
-                                                      const GtUword vstart,
-                                                      const GtUword vlen,
-                                                      const GtWord left_dist,
-                                                      const GtWord right_dist,
-                                                      const GtWord matchcost,
-                                                      const GtWord mismatchcost,
-                                                      const GtWord gapcost)
+                                                      GtUword vstart,
+                                                      GtUword vlen,
+                                                      GtWord left_dist,
+                                                      GtWord right_dist,
+                                                      GtUword matchcost,
+                                                      GtUword mismatchcost,
+                                                      GtUword gapcost)
 {
   GtUword **E, i,j, val, low_row, high_row, distance = GT_UWORD_MAX;
 
@@ -207,17 +204,17 @@ static GtUword diagonalband_squarespace_distance_only(const GtUchar *useq,
 }
 
 /* calculate only distance with diagonalband in linear space O(n) */
-GtUword diagonalband_linear_distance_only(const GtUchar *useq,
-                                          const GtUword ustart,
-                                          const GtUword ulen,
-                                          const GtUchar *vseq,
-                                          const GtUword vstart,
-                                          const GtUword vlen,
-                                          const GtWord left_dist,
-                                          const GtWord right_dist,
-                                          const GtWord matchcost,
-                                          const GtWord mismatchcost,
-                                          const GtWord gapcost)
+static GtUword diagonalband_linear_distance_only(const GtUchar *useq,
+                                                 GtUword ustart,
+                                                 GtUword ulen,
+                                                 const GtUchar *vseq,
+                                                 GtUword vstart,
+                                                 GtUword vlen,
+                                                 GtWord left_dist,
+                                                 GtWord right_dist,
+                                                 GtUword matchcost,
+                                                 GtUword mismatchcost,
+                                                 GtUword gapcost)
 {
   GtUword distance, colindex, rowindex, low_row, high_row, width, val,
         *EDtabcolumn, northwestEDtabentry, westEDtabentry;
@@ -304,7 +301,7 @@ static void firstEDtabRtabcolumn(GtUword *EDtabcolumn,
                                  const GtWord offset,
                                  GtWord left_dist,
                                  GtWord right_dist,
-                                 const GtWord gapcost)
+                                 GtUword gapcost)
 {
   GtUword rowindex, low_row, high_row;
   GtWord diag;
@@ -350,18 +347,18 @@ static GtUword evaluateallcolumns(GtUword *EDtabcolumn,
                                   GtUword *Rtabcolumn,
                                   Diagentry *Diagcolumn,
                                   LinearAlignEdge edge,
-                                  const GtWord offset,
+                                  GtWord offset,
                                   const GtUchar *useq,
-                                  const GtUword ustart,
-                                  const GtUword ulen,
+                                  GtUword ustart,
+                                  GtUword ulen,
                                   const GtUchar *vseq,
-                                  const GtUword vstart,
-                                  const GtUword vlen,
+                                  GtUword vstart,
+                                  GtUword vlen,
                                   GtWord left_dist,
                                   GtWord right_dist,
-                                  const GtWord matchcost,
-                                  const GtWord mismatchcost,
-                                  const GtWord gapcost)
+                                  GtUword matchcost,
+                                  GtUword mismatchcost,
+                                  GtUword gapcost)
 {
   GtUword colindex, rowindex, val, northwestEDtabentry, westEDtabentry,
           northwestRtabentry, westRtabentry,
@@ -380,7 +377,7 @@ static GtUword evaluateallcolumns(GtUword *EDtabcolumn,
 
  /* first column */
   firstEDtabRtabcolumn(EDtabcolumn, Rtabcolumn, Diagcolumn, edge, offset,
-                     left_dist, right_dist, gapcost);
+                       left_dist, right_dist, gapcost);
   /* next columns */
   for (colindex = 1; colindex <= vlen; colindex++)
   {
@@ -520,19 +517,19 @@ static void evaluatecrosspoints(GtUword *EDtabcolumn,
                           GtUword *Rtabcolumn,
                           Diagentry *Diagcolumn,
                           LinearAlignEdge edge,
-                          const GtUword rowoffset,
-                          const GtUword coloffset,
+                          GtUword rowoffset,
+                          GtUword coloffset,
                           const GtUchar *useq,
-                          const GtUword ustart,
-                          const GtUword ulen,
+                          GtUword ustart,
+                          GtUword ulen,
                           const GtUchar *vseq,
-                          const GtUword vstart,
-                          const GtUword vlen,
-                          const GtWord left_dist,
-                          const GtWord right_dist,
-                          const GtWord matchcost,
-                          const GtWord mismatchcost,
-                          const GtWord gapcost)
+                          GtUword vstart,
+                          GtUword vlen,
+                          GtWord left_dist,
+                          GtWord right_dist,
+                          GtUword matchcost,
+                          GtUword mismatchcost,
+                          GtUword gapcost)
 {
   GtUword idx, prevcpoint, cpoint, ctemp, new_ulen;
   GtWord new_left, new_right, diag = GT_DIV2(left_dist+right_dist);
@@ -704,9 +701,9 @@ static void gt_calc_diagonalbandalign(const GtUchar *useq,
                                       GtWord left_dist,
                                       GtWord right_dist,
                                       GtAlignment *align,
-                                      const GtWord matchcost,
-                                      const GtWord mismatchcost,
-                                      const GtWord gapcost)
+                                      GtUword matchcost,
+                                      GtUword mismatchcost,
+                                      GtUword gapcost)
 {
   Diagentry *Diagcolumn;
   GtUword idx, *EDtabcolumn, *Rtabcolumn;
@@ -751,16 +748,11 @@ void gt_computediagnoalbandalign(GtAlignment *align,
                                  GtUword vstart, GtUword vlen,
                                  GtWord left_dist,
                                  GtWord right_dist,
-                                 const GtWord matchcost,
-                                 const GtWord mismatchcost,
-                                 const GtWord gapcost)
+                                 GtUword matchcost,
+                                 GtUword mismatchcost,
+                                 GtUword gapcost)
 {
   gt_assert(useq  && vseq);
-  if (matchcost < 0 || mismatchcost < 0 || gapcost < 0)
-  {
-    fprintf(stderr,"invalid cost value\n");
-    exit(GT_EXIT_PROGRAMMING_ERROR);
-  }
 
   /* set new bounds, if left_dist or right_dist is out of sequence */
   left_dist = MAX(-(GtWord) ulen,left_dist);
@@ -782,12 +774,12 @@ void gt_checkdiagnonalbandalign(GT_UNUSED bool forward,
   GtWord left_dist, right_dist, matchcost = 0, mismatchcost = 1, gapcost = 1;
   GtAlignment *align;
 
-  if (strchr((const char*)useq, LINEAR_EDIST_GAP))
+  if (memchr(useq, LINEAR_EDIST_GAP,ulen) != NULL)
   {
     fprintf(stderr,"%s: sequence u contains gap symbol\n",__func__);
     exit(GT_EXIT_PROGRAMMING_ERROR);
   }
-  if (strchr((const char*)vseq, LINEAR_EDIST_GAP))
+  if (memchr(vseq, LINEAR_EDIST_GAP,vlen) != NULL)
   {
     fprintf(stderr,"%s: sequence v contains gap symbol\n",__func__);
     exit(GT_EXIT_PROGRAMMING_ERROR);

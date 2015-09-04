@@ -44,9 +44,9 @@ GtUword gt_computelinearspace(GtAlignment *align,
                               const GtUchar *vseq,
                               GtUword vstart,
                               GtUword vlen,
-                              GtWord matchcost,
-                              GtWord mismatchcost,
-                              GtWord gapcost);
+                              GtUword matchcost,
+                              GtUword mismatchcost,
+                              GtUword gapcost);
 
 /*local alignment with linear gapcosts*/
 GtUword gt_computelinearspace_local(GtAlignment *align,
