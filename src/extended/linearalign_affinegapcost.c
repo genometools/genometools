@@ -95,7 +95,7 @@ static AffineAlignEdge set_edge(GtWord Rdist,
 
 static Rnode get_Rtabentry(const Rtabentry *rtab, const AffineAlignEdge edge)
 {
-  switch (edge){
+  switch (edge) {
   case Affine_R:
     return rtab->val_R;
   case Affine_D:
@@ -725,8 +725,9 @@ static void nextAStabcolumn(const GtUchar *useq, GtUword ustart,
     Swe = Starttabcolumn[rowindex];
 
     /*calculate Rvalue*/
-    replacement = (useq[ustart+rowindex-1] == b? matchscore:mismatchscore);
-    Atabcolumn[rowindex].Rvalue = add_safe_min(northwestAtabentry.totalvalue, replacement);
+    replacement = (useq[ustart+rowindex-1] == b? matchscore : mismatchscore);
+    Atabcolumn[rowindex].Rvalue = add_safe_min(northwestAtabentry.totalvalue,
+                                               replacement);
     Starttabcolumn[rowindex].Rstart =
     setStarttabentry(Atabcolumn[rowindex].Rvalue, &northwestAtabentry, &Snw,
                      replacement,gap_opening, gap_extension, Affine_R);
