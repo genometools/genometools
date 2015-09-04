@@ -12,8 +12,8 @@ AGCTTTTCATTCTGACTGCAACGGGCAATATGTCTCTGTGTGGATTAAAAAAAGAGTGTCTGATAGCAGCTTCTGAACTG
 NTTTTN
 ######
 AGCTTTTCATTCTGACTGCAACGGGCAATATGTCTCTGTGTGGATTAAAAAAAGAGTGTCTGATAGCAGCTTCTGAACTG
-   ||||                                                                         
---NTTTT------------------------------------------------------------------------N
+    |||                                                                       | 
+---NTTT-----------------------------------------------------------------------TN
 ######
 AACGGTGCGGGCACAGAAAAAA
 ######
@@ -29,4 +29,4 @@ NTTTTN
 ######
 AACGGTGCGGGCACAGAAAAAA
                       
-NTTTT----------------N
+----------------NTTTTN

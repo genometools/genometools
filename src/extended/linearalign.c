@@ -448,9 +448,8 @@ static void nextLStabcolumn(const GtUchar *useq,
     westStarttabentry = Starttabcolumn[rowindex];
     Ltabcolumn[rowindex] += gapscore;
 
-    if ((val = northwestLtabentry + (useq[ustart + rowindex-1] == b
-          ? matchscore :
-          mismatchscore)) > Ltabcolumn[rowindex])
+    if ((val = northwestLtabentry + (useq[ustart + rowindex-1] == b ?
+          matchscore : mismatchscore)) > Ltabcolumn[rowindex])
     {
       Ltabcolumn[rowindex] = val;
       Starttabcolumn[rowindex] = northwestStarttabentry;

@@ -20,7 +20,17 @@
 
 #include "core/unused_api.h"
 #include "core/types_api.h"
+#include "extended/affinealign.h"
 #include "extended/alignment.h"
+
+typedef struct {
+  GtUword idx;
+  AffineAlignEdge edge;
+} Rnode;
+
+typedef struct {
+  Rnode val_R, val_D, val_I;
+} Rtabentry;
 
 void gt_checkaffinelinearspace(GT_UNUSED bool forward,
                                const GtUchar *useq,
@@ -29,33 +39,33 @@ void gt_checkaffinelinearspace(GT_UNUSED bool forward,
                                GtUword vlen);
 
 void gt_checkaffinelinearspace_local(GT_UNUSED bool forward,
-                               const GtUchar *useq,
-                               GtUword ulen,
-                               const GtUchar *vseq,
-                               GtUword vlen);
+                                     const GtUchar *useq,
+                                     GtUword ulen,
+                                     const GtUchar *vseq,
+                                     GtUword vlen);
 
 void gt_computeaffinelinearspace(GtAlignment *align,
                                  const GtUchar *useq,
-                                 const GtUword ustart,
-                                 const GtUword ulen,
+                                 GtUword ustart,
+                                 GtUword ulen,
                                  const GtUchar *vseq,
-                                 const GtUword vstart,
-                                 const GtUword vlen,
-                                 const GtWord matchcost,
-                                 const GtWord mismatchcost,
-                                 const GtWord gap_opening,
-                                 const GtWord gap_extension);
+                                 GtUword vstart,
+                                 GtUword vlen,
+                                 GtUword matchcost,
+                                 GtUword mismatchcost,
+                                 GtUword gap_opening,
+                                 GtUword gap_extension);
 
 void gt_computeaffinelinearspace_local(GtAlignment *align,
-                                      const GtUchar *useq,
-                                      const GtUword ustart,
-                                      const GtUword ulen,
-                                      const GtUchar *vseq,
-                                      const GtUword vstart,
-                                      const GtUword vlen,
-                                      const GtWord matchscore,
-                                      const GtWord mismatchscore,
-                                      const GtWord gap_opening,
-                                      const GtWord gap_extension);
+                                       const GtUchar *useq,
+                                       GtUword ustart,
+                                       GtUword ulen,
+                                       const GtUchar *vseq,
+                                       GtUword vstart,
+                                       GtUword vlen,
+                                       GtWord matchscore,
+                                       GtWord mismatchscore,
+                                       GtWord gap_opening,
+                                       GtWord gap_extension);
 
 #endif

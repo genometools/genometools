@@ -164,7 +164,8 @@ static void affinealign_traceback(GtAlignment *a,
 GtAlignment* gt_affinealign(const GtUchar *u, GtUword ulen,
                             const GtUchar *v, GtUword vlen,
                             GtUword matchcost, GtUword mismatchcost,
-                            GtUword gap_opening_cost, GtUword gap_extension_cost)
+                            GtUword gap_opening_cost,
+                            GtUword gap_extension_cost)
 {
   AffinealignDPentry **dptable;
   GtAlignment *align;
