@@ -38,9 +38,9 @@
 static void change_score_to_cost_function(GtWord matchscore,
                                           GtWord mismatchscore,
                                           GtWord gapscore,
-                                          GtWord *matchcost,
-                                          GtWord *mismatchcost,
-                                          GtWord *gapcost )
+                                          GtUword *matchcost,
+                                          GtUword *mismatchcost,
+                                          GtUword *gapcost )
 {
   GtWord max;
 
@@ -59,9 +59,9 @@ static GtUword alignment_in_square_space(GtAlignment *align,
                                          const GtUchar *vseq,
                                          GtUword vstart,
                                          GtUword vlen,
-                                         GtWord matchcost,
-                                         GtWord mismatchcost,
-                                         GtWord gapcost)
+                                         GtUword matchcost,
+                                         GtUword mismatchcost,
+                                         GtUword gapcost)
 {
   GtUword **E, distance, i, j;
 
@@ -129,7 +129,7 @@ static GtUword alignment_in_square_space(GtAlignment *align,
 static void firstEDtabRtabcolumn(GtUword *EDtabcolumn,
                                  GtUword *Rtabcolumn,
                                  GtUword ulen,
-                                 GtWord gapcost)
+                                 GtUword gapcost)
 {
   GtUword rowindex;
   EDtabcolumn[0] = 0;
@@ -150,23 +150,21 @@ static void nextEDtabRtabcolumn(GtUword *EDtabcolumn,
                                 const GtUchar *useq,
                                 GtUword ustart,
                                 GtUword ulen,
-                                GtWord matchcost,
-                                GtWord mismatchcost,
-                                GtWord gapcost)
+                                GtUword matchcost,
+                                GtUword mismatchcost,
+                                GtUword gapcost)
 {
   GtUword rowindex, val,
           northwestEDtabentry,
           westEDtabentry,
           northwestRtabentry,
-          westRtabentry=0;
-  bool updateRtabcolumn = false;
+          westRtabentry = 0;
 
   gt_assert(EDtabcolumn != NULL);
   westEDtabentry = EDtabcolumn[0];
-  EDtabcolumn[0]+=gapcost;
+  EDtabcolumn[0] += gapcost;
   if (colindex > midcolumn)
   {
-    updateRtabcolumn = true;
     Rtabcolumn[0] = 0;
   }
 
@@ -183,7 +181,7 @@ static void nextEDtabRtabcolumn(GtUword *EDtabcolumn,
         <= EDtabcolumn[rowindex])
     {
       EDtabcolumn[rowindex] = val;
-      if (updateRtabcolumn)
+      if (colindex > midcolumn)
       {
         Rtabcolumn[rowindex] = northwestRtabentry;
       }
@@ -192,7 +190,7 @@ static void nextEDtabRtabcolumn(GtUword *EDtabcolumn,
     if ((val = EDtabcolumn[rowindex-1]+gapcost) < EDtabcolumn[rowindex])
     {
       EDtabcolumn[rowindex] = val;
-      if (updateRtabcolumn)
+      if (colindex > midcolumn)
       {
         Rtabcolumn[rowindex] = Rtabcolumn[rowindex-1];
       }
@@ -209,9 +207,9 @@ static GtUword evaluateallcolumns(GtUword *EDtabcolumn,
                                   const GtUchar *vseq,
                                   GtUword vstart,
                                   GtUword vlen,
-                                  GtWord matchcost,
-                                  GtWord mismatchcost,
-                                  GtWord gapcost)
+                                  GtUword matchcost,
+                                  GtUword mismatchcost,
+                                  GtUword gapcost)
 {
   GtUword colindex;
 
@@ -233,9 +231,9 @@ static GtUword evaluatecrosspoints(const GtUchar *useq,
                                    GtUword *Rtabcolumn,
                                    GtUword *Ctab,
                                    GtUword rowoffset,
-                                   GtWord matchcost,
-                                   GtWord mismatchcost,
-                                   GtWord gapcost)
+                                   GtUword matchcost,
+                                   GtUword mismatchcost,
+                                   GtUword gapcost)
 {
   GtUword midrow, midcol, distance;
 
@@ -296,11 +294,11 @@ GtUword gt_calc_linearalign(const GtUchar *useq,
                             GtUword vstart,
                             GtUword vlen,
                             GtAlignment *align,
-                            GtWord matchcost,
-                            GtWord mismatchcost,
-                            GtWord gapcost)
+                            GtUword matchcost,
+                            GtUword mismatchcost,
+                            GtUword gapcost)
 {
-  GtUword distance, *Ctab, *EDtabcolumn,*Rtabcolumn;
+  GtUword distance, *Ctab, *EDtabcolumn, *Rtabcolumn;
 
   if (ulen == 0UL)
   {
@@ -345,31 +343,24 @@ GtUword gt_computelinearspace(GtAlignment *align,
                               const GtUchar *vseq,
                               GtUword vstart,
                               GtUword vlen,
-                              GtWord matchcost,
-                              GtWord mismatchcost,
-                              GtWord gapcost)
+                              GtUword matchcost,
+                              GtUword mismatchcost,
+                              GtUword gapcost)
 {
   gt_assert(useq != NULL  && ulen > 0 && vseq != NULL  && vlen > 0);
 
-  if (matchcost < 0 || mismatchcost < 0 || gapcost < 0)
-  {
-    fprintf(stderr,"invalid cost value\n");
-    exit(GT_EXIT_PROGRAMMING_ERROR);
-  }
   gt_alignment_set_seqs(align, useq+ustart, ulen, vseq+vstart, vlen);
   return gt_calc_linearalign(useq, ustart, ulen, vseq, vstart, vlen, align,
                              matchcost, mismatchcost, gapcost);
 }
 
-void gt_print_edist_alignment(const GtUchar *useq, GtUword ustart,
-                              GtUword ulen,
-                              const GtUchar *vseq,GtUword vstart,GtUword vlen)
+void gt_print_edist_alignment(const GtUchar *useq, GtUword ustart, GtUword ulen,
+                              const GtUchar *vseq, GtUword vstart, GtUword vlen)
 {
   GtAlignment *align;
 
   align = gt_alignment_new_with_seqs(useq+ustart, ulen, vseq+vstart, vlen);
-  (void)gt_calc_linearalign(useq, ustart, ulen, vseq, vstart, vlen, align,
-                             0,1,1);
+  (void)gt_calc_linearalign(useq,ustart,ulen,vseq,vstart,vlen,align,0,1,1);
   gt_alignment_show(align, stdout, 80);
   gt_alignment_delete(align);
 }
@@ -525,7 +516,7 @@ GtUword gt_computelinearspace_local(GtAlignment *align,
   GtUwordPair *Starttabcolumn;
   GtUword ulen_part, ustart_part, vlen_part, vstart_part, score;
   Gtmaxcoordvalue *max;
-  GtWord matchcost, mismatchcost, gapcost;
+  GtUword matchcost, mismatchcost, gapcost;
 
   Ltabcolumn = gt_malloc(sizeof *Ltabcolumn * (ulen+1));
   Starttabcolumn = gt_malloc(sizeof *Starttabcolumn * (ulen+1));
@@ -577,8 +568,8 @@ void gt_checklinearspace(GT_UNUSED bool forward,
                          GtUword vlen)
 {
   GtAlignment *align;
-  GtUword edist1, edist2, edist3, edist4;
-  GtWord matchcost = 0, mismatchcost = 1, gapcost = 1;
+  GtUword edist1, edist2, edist3, edist4,
+          matchcost = 0, mismatchcost = 1, gapcost = 1;
 
   if (memchr(useq, LINEAR_EDIST_GAP,ulen) != NULL)
   {
