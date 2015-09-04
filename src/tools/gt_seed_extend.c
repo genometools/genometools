@@ -19,6 +19,7 @@
 #include "core/encseq_api.h"
 #include "core/error_api.h"
 #include "core/ma_api.h"
+#include "core/showtime.h"
 #include "core/str_api.h"
 #include "match/diagbandseed.h"
 #include "match/seed-extend.h"
@@ -150,7 +151,7 @@ static GtOptionParser* gt_seed_extend_option_parser_new(void *tool_arguments)
                                        "algorithm, optional parameter "
                                        "specifies sensitivity",
                                        &arguments->se_extendxdrop,
-                                       93UL, 90UL, 100UL);
+                                       97UL, 90UL, 100UL);
   gt_option_argument_is_optional(op_xdr);
   gt_option_parser_add_option(op, op_xdr);
   arguments->se_option_xdrop = gt_option_ref(op_xdr);
@@ -170,7 +171,7 @@ static GtOptionParser* gt_seed_extend_option_parser_new(void *tool_arguments)
                                        "algorithm, optional parameter "
                                        "specifies sensitivity",
                                        &arguments->se_extendgreedy,
-                                       93UL, 90UL, 100UL);
+                                       97UL, 90UL, 100UL);
   gt_option_argument_is_optional(op_gre);
   gt_option_exclude(op_gre, op_xdr);
   gt_option_parser_add_option(op, op_gre);
@@ -338,6 +339,7 @@ static int gt_seed_extend_runner(int argc, const char **argv, int parsed_args,
   GtXdropmatchinfo *xdropinfo = NULL;
   GtQuerymatchoutoptions *querymatchoutopt = NULL;
   GtExtendCharAccess cam = GT_EXTEND_CHAR_ACCESS_ANY;
+  GtTimer *seedextendtimer = NULL;
   GtUword errorpercentage;
   int had_err = 0;
 
@@ -347,6 +349,15 @@ static int gt_seed_extend_runner(int argc, const char **argv, int parsed_args,
   gt_assert(arguments->se_minidentity >= GT_EXTEND_MIN_IDENTITY_PERCENTAGE);
   gt_assert(arguments->se_minidentity <= 100);
   errorpercentage = 100 - arguments->se_minidentity;
+
+  if (arguments->benchmark || arguments->verbose) {
+    gt_showtime_enable();
+  }
+  if (gt_showtime_enabled())
+  {
+    seedextendtimer = gt_timer_new();
+    gt_timer_start(seedextendtimer);
+  }
 
   /* Load encseq A */
   encseq_loader = gt_encseq_loader_new();
@@ -380,8 +391,12 @@ static int gt_seed_extend_runner(int argc, const char **argv, int parsed_args,
                                                  arguments->se_alignlength,
                                                  cam,
                                                  arguments->se_extendgreedy);
-      if (arguments->benchmark)
+      if (arguments->benchmark) {
         gt_greedy_extend_matchinfo_silent_set(grextinfo);
+      }
+      if (arguments->verbose) {
+        gt_greedy_extend_matchinfo_verbose_set(grextinfo);
+      }
     } else {
       had_err = -1;
     }
@@ -394,8 +409,12 @@ static int gt_seed_extend_runner(int argc, const char **argv, int parsed_args,
                                        arguments->se_xdropbelowscore,
                                        arguments->se_extendxdrop,
                                        true);
-    if (arguments->benchmark)
+    if (arguments->benchmark) {
       gt_xdrop_matchinfo_silent_set(xdropinfo);
+    }
+    if (arguments->verbose) {
+      gt_xdrop_matchinfo_verbose_set(xdropinfo);
+    }
   }
 
   /* Prepare output options */
@@ -440,6 +459,27 @@ static int gt_seed_extend_runner(int argc, const char **argv, int parsed_args,
       gt_xdrop_matchinfo_delete(xdropinfo);
     if (querymatchoutopt != NULL)
       gt_querymatchoutoptions_delete(querymatchoutopt);
+  }
+
+  if (seedextendtimer != NULL) {
+    char *keystring
+      = gt_seed_extend_params_keystring(gt_option_is_set(arguments->
+                                                         se_option_greedy),
+                                        gt_option_is_set(arguments->
+                                                         se_option_xdrop),
+                                        arguments->dbs_seedlength,
+                                        arguments->se_alignlength,
+                                        arguments->se_minidentity,
+                                        arguments->se_maxalilendiff,
+                                        arguments->se_perc_match_hist,
+                                        arguments->se_extendgreedy,
+                                        arguments->se_extendxdrop,
+                                        arguments->se_xdropbelowscore);
+    printf("# TIME seedextend-%s", keystring);
+    gt_free(keystring);
+    gt_timer_show_formatted(seedextendtimer, " overall " GT_WD ".%02ld\n",
+                            stdout);
+    gt_timer_delete(seedextendtimer);
   }
   return had_err;
 }
