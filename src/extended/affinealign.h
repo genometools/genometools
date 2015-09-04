@@ -32,7 +32,8 @@ typedef enum {
    GtAlignment */
 GtAlignment* gt_affinealign(const GtUchar *u, GtUword ulen,
                             const GtUchar *v, GtUword vlen,
-                            int matchcost, int mismatchcost,
-                            int gap_opening_cost, int gap_extension_cost);
+                            GtUword matchcost, GtUword mismatchcost,
+                            GtUword gap_opening_cost,
+                            GtUword gap_extension_cost);
 
 #endif
