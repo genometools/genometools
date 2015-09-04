@@ -27,16 +27,16 @@ void reconstructalignment_from_Ctab(GtAlignment *align,
                                     const GtUchar *vseq,
                                     GtUword vstart,
                                     GtUword vlen,
-                                    GtWord matchcost,
-                                    GtWord mismatchcost,
-                                    GtWord gap_opening,
-                                    GtWord gap_extension);
+                                    GtUword matchcost,
+                                    GtUword mismatchcost,
+                                    GtUword gap_opening,
+                                    GtUword gap_extension);
 
 GtUword construct_trivial_deletion_alignment(GtAlignment *align,
-                                             const GtUword len,
-                                             GtWord gapcost);
+                                             GtUword len,
+                                             GtUword gapcost);
 
 GtUword construct_trivial_insertion_alignment(GtAlignment *align,
-                                              const GtUword len,
-                                              const GtWord gapcost);
+                                              GtUword len,
+                                              GtUword gapcost);
 #endif

@@ -24,13 +24,12 @@ void reconstructalignment_from_Ctab(GtAlignment *align,
                                     const GtUchar *vseq,
                                     GtUword vstart,
                                     GtUword vlen,
-                                    GtWord matchcost,
-                                    GtWord mismatchcost,
-                                    GtWord gap_opening,
-                                    GtWord gap_extension)
+                                    GtUword matchcost,
+                                    GtUword mismatchcost,
+                                    GtUword gap_opening,
+                                    GtUword gap_extension)
 {
-  GtUword i,j;
-  GtWord indel, repl;
+  GtUword i,j, indel, repl;
 
   gt_assert(align != NULL && Ctab != NULL);
   for (i = vlen; i > 0; i--) {
@@ -82,8 +81,8 @@ void reconstructalignment_from_Ctab(GtAlignment *align,
 }
 
 GtUword construct_trivial_deletion_alignment(GtAlignment *align,
-                                             const GtUword len,
-                                             GtWord gapcost)
+                                             GtUword len,
+                                             GtUword gapcost)
 {
   GtUword idx;
 
@@ -96,8 +95,8 @@ GtUword construct_trivial_deletion_alignment(GtAlignment *align,
 }
 
 GtUword construct_trivial_insertion_alignment(GtAlignment *align,
-                                              const GtUword len,
-                                              GtWord gapcost)
+                                              GtUword len,
+                                              GtUword gapcost)
 {
   GtUword idx;
 
