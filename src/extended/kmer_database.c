@@ -69,7 +69,7 @@ struct GtKmerDatabase {
                 mean_fraction,
                 min_nu_occ,
                 min_code,
-                prune_interval;
+                last_size;
  bool           cutoff_is_set,
                 mean_cutoff,
                 prune_is_set;
@@ -108,7 +108,7 @@ GtKmerDatabase* gt_kmer_database_new(unsigned int alpabet_size,
   kdb->cutoff_is_set = false;
   kdb->mean_cutoff = false;
   kdb->prune_is_set = false;
-  kdb->prune_interval = 0;
+  kdb->last_size = 0;
   kdb->sb.kmer_count = 0;
   kdb->sb.preprocessed_kmer_count = 0;
   kdb->sb.offset = 0;
@@ -262,7 +262,7 @@ static void gt_kmer_database_prune(GtKmerDatabase *kdb)
   kdb->offset[code] -= deleted;
 }
 
-#define GT_KMER_DATABASE_CALL_PRUNE_INTERVAL ((GtUword) 5)
+#define GT_KMER_DATABASE_CALL_PRUNE_FACTOR (1.1)
 
 static void gt_kmer_database_merge(GtKmerDatabase *kdb)
 {
@@ -341,11 +341,11 @@ static void gt_kmer_database_merge(GtKmerDatabase *kdb)
       kdb->min_code = current_min_code;
     }
   }
-  kdb->prune_interval++;
   if (kdb->prune_is_set &&
-      (kdb->prune_interval == GT_KMER_DATABASE_CALL_PRUNE_INTERVAL)) {
+      (kdb->last_size * GT_KMER_DATABASE_CALL_PRUNE_FACTOR <=
+       kdb->offset[kdb->nu_kmer_codes])) {
       gt_kmer_database_prune(kdb);
-      kdb->prune_interval = 0;
+      kdb->last_size = kdb->offset[kdb->nu_kmer_codes];
   }
 }
 
@@ -428,11 +428,25 @@ void gt_kmer_database_add_interval(GtKmerDatabase *kdb,
     gt_assert(start > kdb->sb.intervals->spaceGtRange[prev].end);
   }
 
-  interval_size = end - start + 1 - (kdb->sb.kmer_size - 1);
-  /* when while triggers not every SB will be printed in the tool with -verbose
+  /*
+     K=5
+     S         E
+     0 1 2 3 4 5 6
+     _________     kmer1
+       _________   kmer2
+     E+1-(K-1)-S = 2
    */
-  while (interval_size > kdb->sb.max_nu_kmers) {
+  interval_size = end + 1 - (kdb->sb.kmer_size - 1) - start;
+
+  /* flush if sum is to large */
+  if (kdb->sb.intervals_kmer_count != 0 &&
+      interval_size + kdb->sb.intervals_kmer_count >= kdb->sb.max_nu_kmers) {
     gt_kmer_database_flush(kdb);
+    kdb->sb.printed = false;
+  }
+
+  /* split overall to large, sb is empty because of code above */
+  while (interval_size > kdb->sb.max_nu_kmers) {
     kdb->sb.printed = false;
 
     new.start = start;
@@ -442,15 +456,12 @@ void gt_kmer_database_add_interval(GtKmerDatabase *kdb,
     GT_STOREINARRAY(kdb->sb.ids, GtUword, 10, id);
 
     kdb->sb.intervals_kmer_count += kdb->sb.max_nu_kmers;
+    gt_kmer_database_flush(kdb);
     interval_size -= kdb->sb.max_nu_kmers;
     start = start + kdb->sb.max_nu_kmers;
   }
 
-  if (interval_size + kdb->sb.intervals_kmer_count
-      >= kdb->sb.max_nu_kmers) {
-    gt_kmer_database_flush(kdb);
-    kdb->sb.printed = false;
-  }
+  /* definitely fits, add */
   new.start = start;
   new.end = end;
   GT_STOREINARRAY(kdb->sb.intervals, GtRange, 10, new);
@@ -561,6 +572,13 @@ void gt_kmer_database_set_prune(GtKmerDatabase *kdb)
   gt_assert(kdb->cutoff_is_set);
 
   kdb->prune_is_set = true;
+}
+
+void gt_kmer_database_disable_prune(GtKmerDatabase *kdb)
+{
+  gt_assert(kdb != NULL);
+
+  kdb->prune_is_set = false;
 }
 
 GtUword gt_kmer_database_get_kmer_count(GtKmerDatabase *kdb)

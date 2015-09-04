@@ -23,6 +23,7 @@
 #include "core/logger.h"
 #include "core/ma.h"
 #include "core/output_file_api.h"
+#include "core/showtime.h"
 #include "core/str_api.h"
 #include "core/types_api.h"
 #include "core/undef_api.h"
@@ -209,9 +210,15 @@ static int gt_condenseq_extract_runner(GT_UNUSED int argc,
   GtCondenserExtractArguments *arguments = tool_arguments;
   GtCondenseq *condenseq = NULL;
   GtLogger *logger = NULL;
+  GtTimer *timer = NULL;
 
   gt_error_check(err);
   gt_assert(arguments);
+
+  if (gt_showtime_enabled()) {
+    timer = gt_timer_new_with_progress_description("load condenseq");
+    gt_timer_start(timer);
+  }
 
   logger = gt_logger_new(arguments->verbose, GT_LOGGER_DEFLT_PREFIX, stderr);
 
@@ -264,6 +271,9 @@ static int gt_condenseq_extract_runner(GT_UNUSED int argc,
               current_length = 0, i;
       const char sepchar = gt_str_get(arguments->sepchar)[0];
 
+      if (timer)
+        gt_timer_show_progress(timer, "extract sequence region(s)", stderr);
+
       if (arguments->range.end >= rend) {
         had_err = -1;
         gt_error_set(err, "range end " GT_WU " excedes length of sequence "
@@ -311,6 +321,8 @@ static int gt_condenseq_extract_runner(GT_UNUSED int argc,
       GtUword seqnum,
               sstart = arguments->seqrange.start;
 
+      if (timer)
+        gt_timer_show_progress(timer, "extract sequence(s)", stderr);
       if (arguments->seqrange.end >= send) {
         had_err = -1;
         gt_error_set(err, "range end " GT_WU " excedes number of sequences "
@@ -330,8 +342,13 @@ static int gt_condenseq_extract_runner(GT_UNUSED int argc,
       }
     }
   }
+  if (timer)
+    gt_timer_show_progress(timer, "cleanup", stderr);
   gt_condenseq_delete(condenseq);
   gt_logger_delete(logger);
+  if (timer)
+    gt_timer_show_progress_final(timer, stderr);
+  gt_timer_delete(timer);
   return had_err;
 }
 

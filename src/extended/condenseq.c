@@ -536,6 +536,9 @@ GtCondenseq *gt_condenseq_new_from_file(const char *indexname,
   GtCondenseq *condenseq = NULL;
   /*load unique_es*/
   esl = gt_encseq_loader_new();
+  gt_encseq_loader_disable_autosupport(esl);
+  gt_encseq_loader_drop_md5_support(esl);
+  gt_encseq_loader_require_ssp_tab(esl);
   unique_es = gt_encseq_loader_load(esl, indexname, err);
   if (!unique_es)
     had_err = -1;
