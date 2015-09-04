@@ -725,7 +725,7 @@ static void nextAStabcolumn(const GtUchar *useq, GtUword ustart,
     Swe = Starttabcolumn[rowindex];
 
     /*calculate Rvalue*/
-    replacement = (useq[ustart+rowindex-1] == b? matchscore : mismatchscore);
+    replacement = (useq[ustart+rowindex-1] == b ? matchscore : mismatchscore);
     Atabcolumn[rowindex].Rvalue = add_safe_min(northwestAtabentry.totalvalue,
                                                replacement);
     Starttabcolumn[rowindex].Rstart =

@@ -33,9 +33,9 @@ void gt_computediagnoalbandalign(GtAlignment *align,
                                  GtUword ustart, GtUword ulen,
                                  const GtUchar *vseq,
                                  GtUword vstart, GtUword vlen,
-                                 const GtWord left_dist,
-                                 const GtWord right_dist,
-                                 const GtWord matchcost,
-                                 const GtWord mismatchcost,
-                                 const GtWord gapcost);
+                                 GtWord left_dist,
+                                 GtWord right_dist,
+                                 GtUword matchcost,
+                                 GtUword mismatchcost,
+                                 GtUword gapcost);
 #endif
