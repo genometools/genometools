@@ -32,8 +32,11 @@
 #include "extended/linearalign.h"
 
 #include "tools/gt_linspace_align.h"
+#define CHECK_COST(cost) { if (cost < 0) {\
+                        fprintf(stderr, "invalid cost value " GT_WD"\n", cost);\
+                        exit(GT_EXIT_PROGRAMMING_ERROR);}}
 
-typedef struct {
+typedef struct{
   GtStr *outputfile;
   GtStrArray *strings,
              *files,
@@ -48,12 +51,7 @@ typedef struct {
 } GtLinspaceArguments;
 
 typedef struct {
-  GtUchar* seq;
-  GtUword len;
-} Fastaentry;
-
-typedef struct {
-  Fastaentry *seqarray;
+  GtStr **seqarray;
   GtUword size, maxsize;
 } GtSequences;
 
@@ -101,7 +99,7 @@ static void gt_sequences_delete(GtSequences *sequences)
   if (sequences != NULL) {
    for (i = 0; i < sequences->size ; i++)
     {
-      gt_free(sequences->seqarray[i].seq);
+       gt_str_delete(sequences->seqarray[i]);
     }
     gt_free(sequences->seqarray);
     gt_free(sequences);
@@ -252,15 +250,6 @@ static void alignment_with_seqs_show(const GtUchar *useq, const GtUword ulen,
   }
 }
 
-static inline int check_costs(GtWord costs)
-{
-  if (costs >= 0)
-    return 1;
-
-   fprintf(stderr, "invalid cost value " GT_WD"\n", costs);
-   exit(GT_EXIT_PROGRAMMING_ERROR);
-}
-
 static GtWord* select_digit_from_string(const GtStrArray *arr,
                                         bool global, GtError *err)
 {
@@ -279,7 +268,7 @@ static GtWord* select_digit_from_string(const GtStrArray *arr,
       haserr = true;
     }
     if (global)
-      check_costs(evalues[i]);
+      CHECK_COST(evalues[i]);
   }
   if (haserr)
   {
@@ -289,7 +278,7 @@ static GtWord* select_digit_from_string(const GtStrArray *arr,
   return evalues;
 }
 
-static int save_fastasequence(const char *seqpart, GtUword length,
+static int save_fastasequence(const char *seqpart, GT_UNUSED GtUword length,
                               void *data, GT_UNUSED GtError* err)
 {
   GtSequences *fasta_seqs = (GtSequences*) data;
@@ -301,10 +290,7 @@ static int save_fastasequence(const char *seqpart, GtUword length,
                                       fasta_seqs->maxsize*
                                       sizeof (*fasta_seqs->seqarray));
   }
-  fasta_seqs->seqarray[fasta_seqs->size].seq
-    = gt_malloc(sizeof(char)*(length+1));
-  memcpy(fasta_seqs->seqarray[fasta_seqs->size].seq, seqpart, length+1);
-  fasta_seqs->seqarray[fasta_seqs->size].len = length;
+  fasta_seqs->seqarray[fasta_seqs->size] = gt_str_new_cstr(seqpart);
   fasta_seqs->size++;
 
   return 0;
@@ -327,26 +313,78 @@ static int get_fastasequences(GtSequences *sequences, GtStr *filename,
 }
 
 static int get_onesequence(GtSequences *sequences, const GtStrArray *strings,
-                         const GtUword pos, GtError *err)
+                           const GtUword idx, GtError *err)
 {
   int had_err = 0;
   gt_assert(sequences != NULL && strings != NULL);
 
-  if (gt_str_array_size(strings) <= pos)
+  if (gt_str_array_size(strings) <= idx)
   {
     gt_error_set(err, "out of range");
     return 1;
   }
-
-  sequences->seqarray[0].len = (GtUword) strlen(gt_str_array_get(strings,pos));
-  sequences->seqarray[0].seq = gt_malloc(sizeof(*sequences->seqarray[0].seq)*
-                                         (sequences->seqarray[0].len+1));
-  memcpy(sequences->seqarray[0].seq,
-        (GtUchar *) gt_str_array_get(strings,pos),
-        sequences->seqarray[0].len+1 );
+  sequences->seqarray[0] = gt_str_new_cstr(gt_str_array_get(strings,idx));
   sequences->size++;
 
   return had_err;
+}
+
+static void alignment_with_linear_gap_costs(GtLinspaceArguments *arguments,
+                                            GtError *err, GtWord *linearcosts,
+                                            GtAlignment *align,
+                                            const GtUchar *useq, GtUword ulen,
+                                            const GtUchar *vseq, GtUword vlen)
+{
+  GtWord *diagonalbonds;
+
+  if (arguments->global)
+  {
+     if (gt_str_array_size(arguments->diagonalbonds) > 0)
+     {
+       diagonalbonds = select_digit_from_string(arguments->diagonalbonds,
+                                                false, err);
+         gt_error_check(err);
+       gt_computediagnoalbandalign(align, useq, 0, ulen, vseq, 0, vlen,
+                                   diagonalbonds[0], diagonalbonds[1],
+                                   linearcosts[0], linearcosts[1],
+                                   linearcosts[2]);
+     }
+     else
+     {
+       gt_computelinearspace(align, useq, 0, ulen, vseq, 0, vlen,
+                             linearcosts[0], linearcosts[1],
+                             linearcosts[2]);
+     }
+  }
+  else if (arguments->local)
+  {
+    gt_computelinearspace_local(align, useq, 0, ulen, vseq, 0, vlen,
+                                linearcosts[0], linearcosts[1],
+                                linearcosts[2]);
+  }
+}
+
+static void alignment_with_affine_gap_costs(GtLinspaceArguments *arguments,
+                                            GT_UNUSED GtError *err,
+                                            GtWord *affinecosts,
+                                            GtAlignment *align,
+                                            const GtUchar *useq, GtUword ulen,
+                                            const GtUchar *vseq, GtUword vlen)
+{
+  if (arguments->global)
+  {
+    gt_computeaffinelinearspace(align, useq, 0, ulen, vseq, 0, vlen,
+                                affinecosts[0], affinecosts[1],
+                                affinecosts[2], affinecosts[3]);
+  }
+  else if (arguments->local)
+  {
+    gt_computeaffinelinearspace_local(align,useq, 0, ulen, vseq, 0,
+                                      vlen, affinecosts[0],
+                                      affinecosts[1],
+                                      affinecosts[2],
+                                      affinecosts[3]);
+  }
 }
 
 static int gt_linspace_align_runner(GT_UNUSED int argc,
@@ -360,7 +398,7 @@ static int gt_linspace_align_runner(GT_UNUSED int argc,
   const GtUchar *useq, *vseq;
   GtUword i, j, ulen, vlen;
   GtAlignment *align;
-  GtWord *linearcosts, *diagonalbonds, score = GT_WORD_MAX;
+  GtWord score = GT_WORD_MAX;
 
   GtSequences *sequences1, *sequences2;
 
@@ -388,15 +426,16 @@ static int gt_linspace_align_runner(GT_UNUSED int argc,
   /* call functions */
   for (i = 0; i < sequences1->size; i++) {
     for (j = 0; j< sequences2->size; j++) {
-      useq = sequences1->seqarray[i].seq;
-      ulen = sequences1->seqarray[i].len;
-      vseq = sequences2->seqarray[j].seq;
-      vlen = sequences2->seqarray[j].len;
+      useq = (GtUchar*) gt_str_get(sequences1->seqarray[i]);
+      ulen = gt_str_length(sequences1->seqarray[i]);
+      vseq = (GtUchar*) gt_str_get(sequences2->seqarray[j]);
+      vlen = gt_str_length(sequences2->seqarray[j]);
       gt_alignment_reset(align);
 
-      /* linear gap costs */
+      /* alignment functions with linear gap costs */
       if (gt_str_array_size(arguments->linearcosts) > 0)
       {
+        GtWord *linearcosts;
         gt_assert(gt_str_array_size(arguments->linearcosts) == 3UL);
         linearcosts = select_digit_from_string(arguments->linearcosts,
                                                arguments->global, err);
@@ -404,33 +443,8 @@ static int gt_linspace_align_runner(GT_UNUSED int argc,
         if (linearcosts == NULL)
           return 1;
 
-        if (arguments->global)
-        {
-           if (gt_str_array_size(arguments->diagonalbonds) > 0)
-           {
-             diagonalbonds = select_digit_from_string(arguments->diagonalbonds,
-                                                      false, err);
-             if (diagonalbonds == NULL)
-               return 1;
-
-             gt_computediagnoalbandalign(align, useq, 0, ulen, vseq, 0, vlen,
-                                         diagonalbonds[0], diagonalbonds[1],
-                                         linearcosts[0], linearcosts[1],
-                                         linearcosts[2]);
-           }
-           else
-           {
-             gt_computelinearspace(align, useq, 0, ulen, vseq, 0, vlen,
-                                   linearcosts[0], linearcosts[1],
-                                   linearcosts[2]);
-           }
-        }
-        else if (arguments->local)
-        {
-          gt_computelinearspace_local(align, useq, 0, ulen, vseq, 0, vlen,
-                                      linearcosts[0], linearcosts[1],
-                                      linearcosts[2]);
-        }
+        alignment_with_linear_gap_costs(arguments, err, linearcosts, align,
+                                        useq, ulen, vseq, vlen);
 
         if (arguments->showscore)
         {
@@ -438,7 +452,7 @@ static int gt_linspace_align_runner(GT_UNUSED int argc,
                                                linearcosts[1],linearcosts[2]);
         }
         gt_free(linearcosts);
-      }/* affine gap costs */
+      }/* alignment functions with affine gap costs */
       else if (gt_str_array_size(arguments->affinecosts) > 0)
       {
         GtWord *affinecosts;
@@ -450,20 +464,8 @@ static int gt_linspace_align_runner(GT_UNUSED int argc,
         if (affinecosts == NULL)
           return 1;
 
-        if (arguments->global)
-        {
-          gt_computeaffinelinearspace(align, useq, 0, ulen, vseq, 0, vlen,
-                                      affinecosts[0], affinecosts[1],
-                                      affinecosts[2], affinecosts[3]);
-        }
-        else if (arguments->local)
-        {
-          gt_computeaffinelinearspace_local(align,useq, 0, ulen, vseq, 0,
-                                            vlen, affinecosts[0],
-                                            affinecosts[1],
-                                            affinecosts[2],
-                                            affinecosts[3]);
-        }
+        alignment_with_affine_gap_costs(arguments, err, affinecosts, align,
+                                        useq, ulen, vseq, vlen);
         if (arguments->showscore)
         {
           score = gt_alignment_eval_with_affine_score(align,
