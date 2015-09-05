@@ -63,11 +63,13 @@ typedef struct
   GtStr *indexname, *cam_string; /* parse this using
                                     gt_greedy_extend_char_access*/
   GtStrArray *queryfiles;
-  GtOption *refforwardoption, *refseedlengthoption,
+  GtOption *refforwardoption,
+           *refseedlengthoption,
            *refuserdefinedleastlengthoption,
            *refextendxdropoption,
            *refextendgreedyoption,
-           *refalignmentwidthoption;
+           *refqueryfilesoption,
+           *refalignmentoutoption;
 } GtMaxpairsoptions;
 
 static int gt_exact_selfmatch_with_output(void *info,
@@ -201,7 +203,8 @@ static void gt_repfind_arguments_delete(void *tool_arguments)
   gt_option_delete(arguments->refuserdefinedleastlengthoption);
   gt_option_delete(arguments->refextendxdropoption);
   gt_option_delete(arguments->refextendgreedyoption);
-  gt_option_delete(arguments->refalignmentwidthoption);
+  gt_option_delete(arguments->refqueryfilesoption);
+  gt_option_delete(arguments->refalignmentoutoption);
   gt_free(arguments);
 }
 
@@ -352,7 +355,7 @@ static GtOptionParser *gt_repfind_option_parser_new(void *tool_arguments)
                               20);
   gt_option_argument_is_optional(optionwithalignment);
   gt_option_parser_add_option(op, optionwithalignment);
-  arguments->refalignmentwidthoption = gt_option_ref(optionwithalignment);
+  arguments->refalignmentoutoption = gt_option_ref(optionwithalignment);
 
   char_access_mode_option = gt_option_new_string("cam",
                                                  gt_cam_extendgreedy_comment(),
@@ -388,6 +391,7 @@ static GtOptionParser *gt_repfind_option_parser_new(void *tool_arguments)
                                              arguments->queryfiles);
   gt_option_is_development_option(queryoption);
   gt_option_parser_add_option(op, queryoption);
+  arguments->refqueryfilesoption = gt_option_ref(queryoption);
 
   sampleoption = gt_option_new_uword_min("samples","Specify number of samples",
                                          &arguments->samples,
@@ -428,6 +432,9 @@ static GtOptionParser *gt_repfind_option_parser_new(void *tool_arguments)
   gt_option_exclude(reverseoption,spmoption);
   gt_option_exclude(extendgreedyoption,extendxdropoption);
   gt_option_exclude(errorpercentageoption,minidentityoption);
+  gt_option_exclude(optionwithalignment,reverseoption);
+  gt_option_exclude(optionwithalignment,sampleoption);
+  gt_option_exclude(optionwithalignment,spmoption);
   gt_option_imply(xdropbelowoption,extendxdropoption);
   gt_option_imply(char_access_mode_option,extendgreedyoption);
   gt_option_imply(historyoption,extendgreedyoption);
@@ -445,7 +452,7 @@ static GtOptionParser *gt_repfind_option_parser_new(void *tool_arguments)
 
 static int gt_repfind_arguments_check(GT_UNUSED int rest_argc,
                                       void *tool_arguments,
-                                      GT_UNUSED GtError *err)
+                                      GtError *err)
 {
   GtMaxpairsoptions *arguments = tool_arguments;
 
@@ -474,6 +481,15 @@ static int gt_repfind_arguments_check(GT_UNUSED int rest_argc,
         arguments->seedlength = arguments->userdefinedleastlength;
       }
     }
+  }
+  if (gt_option_is_set(arguments->refqueryfilesoption) &&
+      gt_option_is_set(arguments->refalignmentoutoption) &&
+      !gt_option_is_set(arguments->refextendxdropoption) &&
+      !gt_option_is_set(arguments->refextendgreedyoption))
+  {
+    gt_error_set(err,"option -q and -a can only be combined if either "
+                     "option -extendgreedy or -extendxdrop is used");
+    return -1;
   }
   return 0;
 }
@@ -537,7 +553,7 @@ static int gt_repfind_runner(int argc,
     gt_error_set(err,"superfluous arguments: \"%s\"",argv[argc-1]);
     haserr = true;
   }
-  if (!haserr && !gt_option_is_set(arguments->refalignmentwidthoption))
+  if (!haserr && !gt_option_is_set(arguments->refalignmentoutoption))
   {
     arguments->alignmentwidth = 0;
   }
