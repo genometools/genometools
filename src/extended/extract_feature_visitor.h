@@ -22,6 +22,7 @@
 typedef struct GtExtractFeatureVisitor GtExtractFeatureVisitor;
 
 #include <stdbool.h>
+#include "core/trans_table_api.h"
 #include "extended/node_visitor.h"
 #include "extended/region_mapping_api.h"
 
@@ -38,6 +39,10 @@ GtNodeVisitor*            gt_extract_feature_visitor_new(GtRegionMapping *rm,
 
 void                      gt_extract_feature_visitor_retain_id_attributes(
                                                 GtExtractFeatureVisitor *efv);
+
+void                      gt_extract_feature_visitor_set_trans_table(
+                                                GtExtractFeatureVisitor *efv,
+                                                GtTransTable *table);
 
 void                      gt_extract_feature_visitor_show_coords(
                                                 GtExtractFeatureVisitor *efv);

@@ -16,6 +16,7 @@
 */
 
 #include "core/assert_api.h"
+#include "core/trans_table_api.h"
 #include "extended/extract_feature_stream_api.h"
 #include "extended/extract_feature_visitor.h"
 #include "extended/visitor_stream.h"
@@ -38,6 +39,15 @@ void gt_extract_feature_stream_retain_id_attributes(GtExtractFeatureStream *es)
   gt_assert(es);
   gt_extract_feature_visitor_retain_id_attributes((GtExtractFeatureVisitor*)
                          gt_visitor_stream_get_visitor((GtVisitorStream*) es));
+}
+
+void gt_extract_feature_stream_set_trans_table(GtExtractFeatureStream *es,
+                                               GtTransTable *table)
+{
+  gt_assert(es);
+  gt_extract_feature_visitor_set_trans_table((GtExtractFeatureVisitor*)
+                         gt_visitor_stream_get_visitor((GtVisitorStream*) es),
+                         table);
 }
 
 void gt_extract_feature_stream_show_coords(GtExtractFeatureStream *es)

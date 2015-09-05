@@ -20,6 +20,7 @@
 #include "core/codon_iterator_simple_api.h"
 #include "core/fasta.h"
 #include "core/symbol_api.h"
+#include "core/trans_table_api.h"
 #include "core/translator.h"
 #include "extended/extract_feature_sequence.h"
 #include "extended/extract_feature_visitor.h"
@@ -29,6 +30,7 @@
 struct GtExtractFeatureVisitor {
   const GtNodeVisitor parent_instance;
   const char *type;
+  GtTransTable *ttable;
   bool join,
        translate,
        seqid,
@@ -121,7 +123,8 @@ static int extract_feature_visitor_feature_node(GtNodeVisitor *nv,
       if (gt_extract_and_translate_feature_sequence(child,
                                                     efv->type, efv->join,
                                                     seqid, target_ids,
-                                                    efv->region_mapping, NULL,
+                                                    efv->region_mapping,
+                                                    efv->ttable,
                                                     sequence, NULL, NULL,
                                                     err)) {
         had_err = -1;
@@ -153,7 +156,6 @@ static int extract_feature_visitor_feature_node(GtNodeVisitor *nv,
       gt_str_reset(description);
       gt_str_reset(sequence);
     }
-
   }
   gt_str_delete(sequence);
   gt_str_delete(description);
@@ -195,6 +197,7 @@ GtNodeVisitor* gt_extract_feature_visitor_new(GtRegionMapping *rm,
   efv->join = join;
   efv->translate = translate;
   efv->seqid = seqid;
+  efv->ttable = NULL;
   efv->target = target;
   efv->coords = false;
   efv->fastaseq_counter = 0;
@@ -211,6 +214,13 @@ void gt_extract_feature_visitor_retain_id_attributes(GtExtractFeatureVisitor
 {
   gt_assert(efv);
   efv->retain_ids = true;
+}
+
+void gt_extract_feature_visitor_set_trans_table(GtExtractFeatureVisitor *efv,
+                                                GtTransTable *table)
+{
+  gt_assert(efv);
+  efv->ttable = table;
 }
 
 void gt_extract_feature_visitor_show_coords(GtExtractFeatureVisitor *efv)
