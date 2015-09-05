@@ -20,6 +20,7 @@
 
 #include <stdio.h>
 #include "core/file_api.h"
+#include "core/trans_table_api.h"
 #include "extended/node_stream_api.h"
 #include "extended/region_mapping_api.h"
 
@@ -45,6 +46,10 @@ GtNodeStream* gt_extract_feature_stream_new(GtNodeStream *in_stream,
 
 void          gt_extract_feature_stream_retain_id_attributes(
                                                        GtExtractFeatureStream*);
+
+void          gt_extract_feature_stream_set_trans_table(
+                                                       GtExtractFeatureStream*,
+                                                       GtTransTable*);
 
 void          gt_extract_feature_stream_show_coords(GtExtractFeatureStream*);
 
