@@ -199,7 +199,6 @@ void gt_querymatch_prettyprint(const GtQuerymatch *querymatch)
     }
     printf("\n");
     gt_querymatchoutoptions_alignment_show(querymatch->ref_querymatchoutoptions,
-                                           querymatch->selfmatch,
                                            querymatch->edist,
                                            querymatch->dblen);
   }
@@ -290,6 +289,7 @@ bool gt_querymatch_complete(GtQuerymatch *querymatchptr,
                                                     ref_querymatchoutoptions,
                                                     encseq,
                                                     query,
+                                                    query_totallength,
                                                     querymatchptr->dbstart,
                                                     querymatchptr->dblen,
                                                     querystartabsolute,

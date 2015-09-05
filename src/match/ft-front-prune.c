@@ -51,6 +51,7 @@ typedef struct
   GtUchar *cache_ptr;
   GtAllocatedMemory *sequence_cache;
   GtUword substringlength,
+          totallength,
           min_access_pos,
           cache_num_positions,
           cache_offset,
@@ -107,15 +108,14 @@ static void sequenceobject_init(Sequenceobject *seq,
     seq->bytesequenceptr = bytesequence;
   }
   seq->substringlength = len;
+  seq->totallength = totallength;
   if (readmode == GT_READMODE_FORWARD)
   {
     seq->startpos = startpos;
     seq->forward = true;
   } else
   {
-    gt_assert(readmode == GT_READMODE_REVERSE);
-    gt_assert(gt_encseq_total_length(encseq) == totallength);
-    gt_assert(startpos + 1 <= totallength);
+    gt_assert(readmode == GT_READMODE_REVERSE && startpos < totallength);
     seq->startpos = totallength - 1 - startpos;
     seq->forward = false;
   }
@@ -193,6 +193,8 @@ static GtUchar sequenceobject_get_char(Sequenceobject *seq,GtUword pos)
                                       GT_READMODE_FORWARD);
   }
   gt_assert(seq->bytesequenceptr != NULL);
+  gt_assert((seq->forward && seq->startpos + pos < seq->totallength) ||
+            !(seq->forward && seq->startpos - pos < seq->totallength));
   return seq->bytesequenceptr[seq->forward ? seq->startpos + pos
                                            : seq->startpos - pos];
 }

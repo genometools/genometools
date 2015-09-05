@@ -110,6 +110,9 @@ Test do
   run "cmp -s #{last_stdout} #{$testdata}repfind-result/repfind-xdrop-70-500-90-1-39-a.txt"
   run_test "#{$bin}gt repfind -extendgreedy -ii sfx -seedlength 70 -l 500 -minidentity 90 -a"
   run "cmp -s #{last_stdout} #{$testdata}repfind-result/repfind-greedy-70-500-90-1-39-a.txt"
+  run_test "#{$bin}gt repfind -minidentity 80 -l 20 -extendxdrop -ii sfx -q " +
+           "#{$testdata}U89959_genomic.fas -a"
+  run "cmp -s #{last_stdout} #{$testdata}repfind-result/repfind-xdrop-20-20-80-6.txt"
   run_test "#{$bin}gt suffixerator -db #{$testdata}U89959_genomic.fas " +
            "-indexname sfx -dna -tis -suf -lcp"
   run_test "#{$bin}gt repfind -minidentity 80 -l 20 -extendxdrop -ii sfx -q " +
