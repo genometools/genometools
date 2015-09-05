@@ -32,11 +32,11 @@
 #include "extended/linearalign.h"
 
 #include "tools/gt_linspace_align.h"
-#define CHECK_COST(cost){if (cost < 0){\
+#define CHECK_COST(cost) { if (cost < 0) {\
                         fprintf(stderr, "invalid cost value " GT_WD"\n", cost);\
                         exit(GT_EXIT_PROGRAMMING_ERROR);}}
 
-typedef struct{ 
+typedef struct{
   GtStr *outputfile;
   GtStrArray *strings,
              *files,
@@ -329,6 +329,64 @@ static int get_onesequence(GtSequences *sequences, const GtStrArray *strings,
   return had_err;
 }
 
+static void alignment_with_linear_gap_costs(GtLinspaceArguments *arguments,
+                                            GtError *err, GtWord *linearcosts,
+                                            GtAlignment *align,
+                                            const GtUchar *useq, GtUword ulen,
+                                            const GtUchar *vseq, GtUword vlen)
+{
+  GtWord *diagonalbonds;
+
+  if (arguments->global)
+  {
+     if (gt_str_array_size(arguments->diagonalbonds) > 0)
+     {
+       diagonalbonds = select_digit_from_string(arguments->diagonalbonds,
+                                                false, err);
+         gt_error_check(err);
+       gt_computediagnoalbandalign(align, useq, 0, ulen, vseq, 0, vlen,
+                                   diagonalbonds[0], diagonalbonds[1],
+                                   linearcosts[0], linearcosts[1],
+                                   linearcosts[2]);
+     }
+     else
+     {
+       gt_computelinearspace(align, useq, 0, ulen, vseq, 0, vlen,
+                             linearcosts[0], linearcosts[1],
+                             linearcosts[2]);
+     }
+  }
+  else if (arguments->local)
+  {
+    gt_computelinearspace_local(align, useq, 0, ulen, vseq, 0, vlen,
+                                linearcosts[0], linearcosts[1],
+                                linearcosts[2]);
+  }
+}
+
+static void alignment_with_affine_gap_costs(GtLinspaceArguments *arguments,
+                                            GT_UNUSED GtError *err,
+                                            GtWord *affinecosts,
+                                            GtAlignment *align,
+                                            const GtUchar *useq, GtUword ulen,
+                                            const GtUchar *vseq, GtUword vlen)
+{
+  if (arguments->global)
+  {
+    gt_computeaffinelinearspace(align, useq, 0, ulen, vseq, 0, vlen,
+                                affinecosts[0], affinecosts[1],
+                                affinecosts[2], affinecosts[3]);
+  }
+  else if (arguments->local)
+  {
+    gt_computeaffinelinearspace_local(align,useq, 0, ulen, vseq, 0,
+                                      vlen, affinecosts[0],
+                                      affinecosts[1],
+                                      affinecosts[2],
+                                      affinecosts[3]);
+  }
+}
+
 static int gt_linspace_align_runner(GT_UNUSED int argc,
                                     GT_UNUSED const char **argv,
                                     GT_UNUSED int parsed_args,
@@ -340,7 +398,7 @@ static int gt_linspace_align_runner(GT_UNUSED int argc,
   const GtUchar *useq, *vseq;
   GtUword i, j, ulen, vlen;
   GtAlignment *align;
-  GtWord *linearcosts, *diagonalbonds, score = GT_WORD_MAX;
+  GtWord score = GT_WORD_MAX;
 
   GtSequences *sequences1, *sequences2;
 
@@ -374,9 +432,10 @@ static int gt_linspace_align_runner(GT_UNUSED int argc,
       vlen = gt_str_length(sequences2->seqarray[j]);
       gt_alignment_reset(align);
 
-      /* linear gap costs */
+      /* alignment functions with linear gap costs */
       if (gt_str_array_size(arguments->linearcosts) > 0)
       {
+        GtWord *linearcosts;
         gt_assert(gt_str_array_size(arguments->linearcosts) == 3UL);
         linearcosts = select_digit_from_string(arguments->linearcosts,
                                                arguments->global, err);
@@ -384,33 +443,8 @@ static int gt_linspace_align_runner(GT_UNUSED int argc,
         if (linearcosts == NULL)
           return 1;
 
-        if (arguments->global)
-        {
-           if (gt_str_array_size(arguments->diagonalbonds) > 0)
-           {
-             diagonalbonds = select_digit_from_string(arguments->diagonalbonds,
-                                                      false, err);
-             if (diagonalbonds == NULL)
-               return 1;
-
-             gt_computediagnoalbandalign(align, useq, 0, ulen, vseq, 0, vlen,
-                                         diagonalbonds[0], diagonalbonds[1],
-                                         linearcosts[0], linearcosts[1],
-                                         linearcosts[2]);
-           }
-           else
-           {
-             gt_computelinearspace(align, useq, 0, ulen, vseq, 0, vlen,
-                                   linearcosts[0], linearcosts[1],
-                                   linearcosts[2]);
-           }
-        }
-        else if (arguments->local)
-        {
-          gt_computelinearspace_local(align, useq, 0, ulen, vseq, 0, vlen,
-                                      linearcosts[0], linearcosts[1],
-                                      linearcosts[2]);
-        }
+        alignment_with_linear_gap_costs(arguments, err, linearcosts, align,
+                                        useq, ulen, vseq, vlen);
 
         if (arguments->showscore)
         {
@@ -418,7 +452,7 @@ static int gt_linspace_align_runner(GT_UNUSED int argc,
                                                linearcosts[1],linearcosts[2]);
         }
         gt_free(linearcosts);
-      }/* affine gap costs */
+      }/* alignment functions with affine gap costs */
       else if (gt_str_array_size(arguments->affinecosts) > 0)
       {
         GtWord *affinecosts;
@@ -430,20 +464,8 @@ static int gt_linspace_align_runner(GT_UNUSED int argc,
         if (affinecosts == NULL)
           return 1;
 
-        if (arguments->global)
-        {
-          gt_computeaffinelinearspace(align, useq, 0, ulen, vseq, 0, vlen,
-                                      affinecosts[0], affinecosts[1],
-                                      affinecosts[2], affinecosts[3]);
-        }
-        else if (arguments->local)
-        {
-          gt_computeaffinelinearspace_local(align,useq, 0, ulen, vseq, 0,
-                                            vlen, affinecosts[0],
-                                            affinecosts[1],
-                                            affinecosts[2],
-                                            affinecosts[3]);
-        }
+        alignment_with_affine_gap_costs(arguments, err, affinecosts, align,
+                                        useq, ulen, vseq, vlen);
         if (arguments->showscore)
         {
           score = gt_alignment_eval_with_affine_score(align,
