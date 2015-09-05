@@ -398,7 +398,7 @@ static GtUword evaluateallcolumns(GtUword *EDtabcolumn,
     if (high_row < ulen)
       high_row ++;
 
-    EDtabcolumn[0] = add_safe_max(westEDtabentry, 1);
+    EDtabcolumn[0] = add_safe_max(westEDtabentry, gapcost);
     if (diag == (GtWord)colindex - (GtWord)low_row)
     {
       Diagcolumn[colindex].edge = Linear_I;
