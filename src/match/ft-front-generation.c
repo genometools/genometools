@@ -224,11 +224,11 @@ void front_trace_multireplacement(GtArrayuint8_t *eoplist,GtUword repnum)
 void front_trace2eoplist(GtArrayuint8_t *eoplist,
                          const Fronttrace *front_trace,
                          const Polished_point *pp,
-                         GtUword ulen,
-                         GtUword vlen)
+                         GT_UNUSED GtUword ulen,
+                         GT_UNUSED GtUword vlen)
 {
   GtUword distance, localoffset, globaloffset, remainingvalidfronts,
-          totalrunlength = 0, trimleft;
+          totalrunlength = 0, trimleft, addamount = 128;
   GtWord diagonal;
   unsigned int row, lcs;
   uint8_t trace, preferred_eop = FT_EOP_REPLACEMENT;
@@ -303,15 +303,15 @@ void front_trace2eoplist(GtArrayuint8_t *eoplist,
     }
     if (preferred_eop == FT_EOP_DELETION)
     {
-      GT_STOREINARRAY(eoplist,uint8_t,ulen + vlen,FT_EOPCODE_DELETION);
+      GT_STOREINARRAY(eoplist,uint8_t,addamount,FT_EOPCODE_DELETION);
     } else
     {
       if (preferred_eop == FT_EOP_INSERTION)
       {
-        GT_STOREINARRAY(eoplist,uint8_t,ulen + vlen,FT_EOPCODE_INSERTION);
+        GT_STOREINARRAY(eoplist,uint8_t,addamount,FT_EOPCODE_INSERTION);
       } else
       {
-        GT_STOREINARRAY(eoplist,uint8_t,ulen + vlen,0);
+        GT_STOREINARRAY(eoplist,uint8_t,addamount,0);
       }
     }
     gt_assert(trimleft >=

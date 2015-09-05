@@ -718,6 +718,7 @@ static void gt_FTsequenceResources_init(FTsequenceResources *fsr,
                                         const GtEncseq *encseq,
                                         GtEncseqReader *encseq_r,
                                         GtAllocatedMemory *sequence_cache,
+                                        const GtUchar *bytesequence,
                                         GtExtendCharAccess extend_char_access,
                                         GtUword totallength)
 {
@@ -725,7 +726,9 @@ static void gt_FTsequenceResources_init(FTsequenceResources *fsr,
   fsr->totallength = totallength;
   fsr->encseq_r = encseq_r;
   fsr->sequence_cache = sequence_cache;
-  fsr->extend_char_access = extend_char_access;
+  fsr->bytesequence = bytesequence;
+  fsr->extend_char_access = bytesequence == NULL ? extend_char_access
+                                                 : GT_EXTEND_CHAR_ACCESS_DIRECT;
 }
 
 static const GtQuerymatch *gt_greedy_extend_selfmatch_sesp(
@@ -778,11 +781,13 @@ static const GtQuerymatch *gt_greedy_extend_selfmatch_sesp(
   gt_FTsequenceResources_init(&ufsr,encseq,
                               greedyextendmatchinfo->encseq_r_in_u,
                               &greedyextendmatchinfo->usequence_cache,
+                              NULL,
                               greedyextendmatchinfo->extend_char_access,
                               greedyextendmatchinfo->totallength);
   gt_FTsequenceResources_init(&vfsr,encseq,
                               greedyextendmatchinfo->encseq_r_in_v,
                               &greedyextendmatchinfo->vsequence_cache,
+                              NULL,
                               greedyextendmatchinfo->extend_char_access,
                               greedyextendmatchinfo->totallength);
   if (sesp->seedpos1 > sesp->dbseqstartpos &&
@@ -1036,12 +1041,14 @@ GtUword gt_align_front_prune_edist(bool forward,
                               encseq,
                               ggemi->encseq_r_in_u,
                               &ggemi->usequence_cache,
+                              NULL,
                               ggemi->extend_char_access,
                               ggemi->totallength);
   gt_FTsequenceResources_init(&vfsr,
                               encseq,
                               ggemi->encseq_r_in_v,
                               &ggemi->vsequence_cache,
+                              query,
                               ggemi->extend_char_access,
                               ggemi->totallength);
   maxiterations = greedyextension ? 1 : ggemi->minmatchnum;
@@ -1051,7 +1058,7 @@ GtUword gt_align_front_prune_edist(bool forward,
     gt_assert(iteration < ggemi->minmatchnum);
     distance = front_prune_edist_inplace(forward,
                                          &ggemi->frontspace_reservoir,
-                                         NULL,
+                                         NULL, /* trimstat */
                                          best_polished_point,
                                          front_trace,
                                          ggemi->pol_info,

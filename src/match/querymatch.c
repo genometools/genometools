@@ -282,32 +282,26 @@ bool gt_querymatch_complete(GtQuerymatch *querymatchptr,
   {
     if (querymatchptr->ref_querymatchoutoptions != NULL)
     {
-      if (querymatchptr->selfmatch)
+      GtUword querystartabsolute
+        = gt_encseq_seqstartpos(encseq,querymatchptr->queryseqnum) +
+          querymatchptr->querystart_fwdstrand;
+      bool seededalignment
+        = gt_querymatchoutoptions_alignment_prepare(querymatchptr->
+                                                    ref_querymatchoutoptions,
+                                                    encseq,
+                                                    query,
+                                                    querymatchptr->dbstart,
+                                                    querymatchptr->dblen,
+                                                    querystartabsolute,
+                                                    querymatchptr->querylen,
+                                                    querymatchptr->edist,
+                                                    seedpos1,
+                                                    seedpos2,
+                                                    seedlen,
+                                                    greedyextension);
+      if (seededalignment && !greedyextension)
       {
-        GtUword querystartabsolute
-          = gt_encseq_seqstartpos(encseq,querymatchptr->queryseqnum) +
-            querymatchptr->querystart_fwdstrand;
-        bool seededalignment
-          = gt_querymatchoutoptions_alignment_prepare(querymatchptr->
-                                                      ref_querymatchoutoptions,
-                                                      encseq,
-                                                      query,
-                                                      querymatchptr->dbstart,
-                                                      querymatchptr->dblen,
-                                                      querystartabsolute,
-                                                      querymatchptr->querylen,
-                                                      querymatchptr->edist,
-                                                      seedpos1,
-                                                      seedpos2,
-                                                      seedlen,
-                                                      greedyextension);
-        if (seededalignment && !greedyextension)
-        {
-          gt_querymatch_applycorrection(querymatchptr);
-        }
-      } else
-      {
-        gt_assert(false); /* case not implemented yet */
+        gt_querymatch_applycorrection(querymatchptr);
       }
     }
     return true;
