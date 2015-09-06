@@ -411,41 +411,33 @@ const GtQuerymatch *gt_xdrop_extend_selfmatch_relative(void *info,
   return gt_xdrop_extend_selfmatch_sesp(info, encseq, &sesp);
 }
 
-const GtQuerymatch* gt_xdrop_extend_querymatch(void *info,
+const GtQuerymatch* gt_xdrop_extend_querymatch_sesp(void *info,
+                                               const GtSeedextendSeqpair *sesp,
                                                const GtEncseq *dbencseq,
-                                               const GtQuerymatch *exactseed,
-                                               const GtUchar *query,
-                                               GtUword query_totallength)
+                                               const GtUchar *query)
 {
   GtProcessinfo_and_querymatchspaceptr *processinfo_and_querymatchspaceptr
     = (GtProcessinfo_and_querymatchspaceptr *) info;
   GtXdropscore score;
-  GtUword querylen, dblen, dbseqnum, dbseqstartpos, dbseqlength, total_distance,
-          total_alignedlen,
-          seedpos1 = gt_querymatch_dbstart(exactseed),
-          seedpos2 = gt_querymatch_querystart(exactseed),/* relative to query */
-          seedlen = gt_querymatch_querylen(exactseed);
+  GtUword querylen, dblen, total_distance, total_alignedlen;
   GtXdropmatchinfo *xdropmatchinfo;
 
   xdropmatchinfo = processinfo_and_querymatchspaceptr->processinfo;
-  dbseqnum = gt_querymatch_dbseqnum(exactseed);
-  dbseqstartpos = gt_encseq_seqstartpos(dbencseq,dbseqnum);
-  dbseqlength = gt_encseq_seqlength(dbencseq,dbseqnum);
   /* xdrop left of seed, only if length > 0 excluding seedpos1 and seedpos2 */
-  if (seedpos1 > dbseqstartpos && seedpos2 > 0)
+  if (sesp->seedpos1 > sesp->dbseqstartpos && sesp->seedpos2 > 0)
   {
 #ifdef SKDEBUG
     printf("leftextend: " GT_WU " to " GT_WU " and " GT_WU " to " GT_WU "\n",
-               dbseqstartpos, seedpos1,
-               (GtUword) 0, seedpos2);
+               sesp->dbseqstartpos, sesp->seedpos1,
+               (GtUword) 0, sesp->seedpos2);
 #endif
     gt_seqabstract_reinit_encseq(xdropmatchinfo->useq,
                                  dbencseq,
-                                 seedpos1 - dbseqstartpos,
-                                 dbseqstartpos);
+                                 sesp->seedpos1 - sesp->dbseqstartpos,
+                                 sesp->dbseqstartpos);
     gt_seqabstract_reinit_gtuchar(xdropmatchinfo->vseq,
                                   query,
-                                  seedpos2,
+                                  sesp->seedpos2,
                                   0);
     gt_evalxdroparbitscoresextend(false,
                                   &xdropmatchinfo->best_left,
@@ -461,23 +453,25 @@ const GtQuerymatch* gt_xdrop_extend_querymatch(void *info,
   }
   /* xdrop right of seed, only if length > 0 including
      seedpos1 + seedlen and seedpos2 + seedlen */
-  if (seedpos1 + seedlen < dbseqstartpos + dbseqlength &&
-      seedpos2 + seedlen < query_totallength)
+  if (sesp->seedpos1 + sesp->seedlen < sesp->dbseqstartpos + sesp->dbseqlength
+      && sesp->seedpos2 + sesp->seedlen < sesp->query_totallength)
   {
 #ifdef SKDEBUG
     printf("rightextend: " GT_WU " to " GT_WU " and " GT_WU " to " GT_WU "\n",
-            seedpos1 + seedlen, dbseqstartpos + dbseqlength,
-            seedpos2 + seedlen, query_totallength - 1);
+            sesp->seedpos1 + sesp->seedlen,
+            sesp->dbseqstartpos + sesp->dbseqlength,
+            sesp->seedpos2 + sesp->seedlen, sesp->query_totallength - 1);
 #endif
     gt_seqabstract_reinit_encseq(xdropmatchinfo->useq,
                                  dbencseq,
-                                 dbseqstartpos + dbseqlength
-                                               - (seedpos1 + seedlen),
-                                 seedpos1 + seedlen);
+                                 sesp->dbseqstartpos + sesp->dbseqlength
+                                 - (sesp->seedpos1 + sesp->seedlen),
+                                 sesp->seedpos1 + sesp->seedlen);
     gt_seqabstract_reinit_gtuchar(xdropmatchinfo->vseq,
                                   query,
-                                  query_totallength - (seedpos2 + seedlen),
-                                  seedpos2 + seedlen);
+                                  sesp->query_totallength -
+                                  (sesp->seedpos2 + sesp->seedlen),
+                                  sesp->seedpos2 + sesp->seedlen);
     gt_evalxdroparbitscoresextend(true,
                                   &xdropmatchinfo->best_right,
                                   xdropmatchinfo->res,
@@ -490,14 +484,14 @@ const GtQuerymatch* gt_xdrop_extend_querymatch(void *info,
     xdropmatchinfo->best_right.jvalue = 0;
     xdropmatchinfo->best_right.score = 0;
   }
-  gt_assert(seedpos1 >= (GtUword) xdropmatchinfo->best_left.ivalue &&
-            seedpos2 >= (GtUword) xdropmatchinfo->best_left.jvalue);
-  dblen = seedlen + xdropmatchinfo->best_left.ivalue
-                  + xdropmatchinfo->best_right.ivalue;
-  querylen = seedlen + xdropmatchinfo->best_left.jvalue
+  gt_assert(sesp->seedpos1 >= (GtUword) xdropmatchinfo->best_left.ivalue &&
+            sesp->seedpos2 >= (GtUword) xdropmatchinfo->best_left.jvalue);
+  dblen = sesp->seedlen + xdropmatchinfo->best_left.ivalue
+                        + xdropmatchinfo->best_right.ivalue;
+  querylen = sesp->seedlen + xdropmatchinfo->best_left.jvalue
                  + xdropmatchinfo->best_right.jvalue,
   total_alignedlen = dblen + querylen;
-  score = (GtXdropscore) seedlen * xdropmatchinfo->arbitscores.mat +
+  score = (GtXdropscore) sesp->seedlen * xdropmatchinfo->arbitscores.mat +
           xdropmatchinfo->best_left.score +
           xdropmatchinfo->best_right.score;
   total_distance = score2distance(score,total_alignedlen);
@@ -505,41 +499,67 @@ const GtQuerymatch* gt_xdrop_extend_querymatch(void *info,
       (double) xdropmatchinfo->errorpercentage &&
       total_alignedlen >= 2 * xdropmatchinfo->userdefinedleastlength)
   {
-    const GtUword dbstart = seedpos1 - xdropmatchinfo->best_left.ivalue;
-    const uint64_t queryseqnum = gt_querymatch_queryseqnum(exactseed);
-    const GtUword querystart = seedpos2 - xdropmatchinfo->best_left.jvalue;
+    const GtUword dbstart = sesp->seedpos1 - xdropmatchinfo->best_left.ivalue;
+    const GtUword querystart
+      = sesp->seedpos2 - xdropmatchinfo->best_left.jvalue;
 
     if (xdropmatchinfo->beverbose)
     {
-      printf("# seed:\t" GT_WU "\t" GT_WU "\t" GT_WU "\n",seedpos1,
-             seedpos2,seedlen);
+      printf("# seed:\t" GT_WU "\t" GT_WU "\t" GT_WU "\n",sesp->seedpos1,
+             sesp->seedpos2,sesp->seedlen);
     }
     if (gt_querymatch_complete(processinfo_and_querymatchspaceptr->
                                  querymatchspaceptr,
                                dblen,
                                dbstart,
-                               dbseqnum,
-                               dbstart - dbseqstartpos,
+                               sesp->dbseqnum,
+                               dbstart - sesp->dbseqstartpos,
                                GT_READMODE_FORWARD,
                                false, /* query_as_reversecopy */
                                score,
                                total_distance,
                                false, /* selfmatch */
-                               queryseqnum,
+                               sesp->queryseqnum,
                                querylen,
                                querystart,
                                dbencseq,
                                query,
-                               query_totallength,
-                               seedpos1,
-                               seedpos2,
-                               seedlen,
+                               sesp->query_totallength,
+                               sesp->seedpos1,
+                               sesp->seedpos2,
+                               sesp->seedlen,
                                false)) /* greedy extension */
     {
       return processinfo_and_querymatchspaceptr->querymatchspaceptr;
     }
   }
   return NULL;
+}
+
+const GtQuerymatch* gt_xdrop_extend_querymatch(void *info,
+                                               const GtEncseq *dbencseq,
+                                               const GtQuerymatch *exactseed,
+                                               const GtUchar *query,
+                                               GtUword query_totallength)
+{
+  GtSeedextendSeqpair sesp;
+  GtUword dbseqnum = gt_querymatch_dbseqnum(exactseed),
+          dbstart = gt_querymatch_dbstart(exactseed),
+          dbseqstartpos = gt_encseq_seqstartpos(dbencseq,dbseqnum);
+
+  gt_sesp_from_relative(&sesp,dbencseq,
+                        dbseqnum,
+                        dbstart - dbseqstartpos,
+                        NULL,
+                        gt_querymatch_queryseqnum(exactseed),
+                        gt_querymatch_querystart(exactseed),
+                        0,
+                        query_totallength,
+                        gt_querymatch_querylen(exactseed));
+  return gt_xdrop_extend_querymatch_sesp(info,
+                                         &sesp,
+                                         dbencseq,
+                                         query);
 }
 
 int gt_xdrop_extend_querymatch_with_output(void *info,
