@@ -22,21 +22,21 @@
 #include "core/unused_api.h"
 #include "extended/alignment.h"
 
-void gt_checkdiagnonalbandaffinealign(GT_UNUSED bool forward,
-                                      const GtUchar *useq,
-                                      GtUword ulen,
-                                      const GtUchar *vseq,
-                                      GtUword vlen);
+void gt_checkdiagonalbandaffinealign(GT_UNUSED bool forward,
+                                     const GtUchar *useq,
+                                     GtUword ulen,
+                                     const GtUchar *vseq,
+                                     GtUword vlen);
 
-void gt_computediagnoalbandaffinealign(GtAlignment * align,
+void gt_computediagonalbandaffinealign(GtAlignment *align,
                                        const GtUchar *useq,
                                        GtUword ustart, GtUword ulen,
                                        const GtUchar *vseq,
                                        GtUword vstart, GtUword vlen,
                                        GtWord left_dist,
                                        GtWord right_dist,
-                                       const GtWord matchcost,
-                                       const GtWord mismatchcost,
-                                       const GtWord gap_opening,
-                                       const GtWord gap_extension);
+                                        GtUword matchcost,
+                                       GtUword mismatchcost,
+                                       GtUword gap_opening,
+                                       GtUword gap_extension);
 #endif

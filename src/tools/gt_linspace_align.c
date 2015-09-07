@@ -28,6 +28,7 @@
 #include "core/types_api.h"
 #include "core/unused_api.h"
 #include "extended/diagonalbandalign.h"
+#include "extended/diagonalbandalign_affinegapcost.h"
 #include "extended/linearalign_affinegapcost.h"
 #include "extended/linearalign.h"
 
@@ -170,6 +171,7 @@ static GtOptionParser* gt_linspace_align_option_parser_new(void *tool_arguments)
   gt_option_imply_either_2(optionfiles, optionglobal, optionlocal);
   gt_option_imply_either_2(optionlocal, optionlinearcosts, optionaffinecosts);
   gt_option_imply_either_2(optionglobal, optionlinearcosts, optionaffinecosts);
+  gt_option_imply_either_2(optiondiagonalbonds, optionglobal, optionlocal);
   gt_option_imply_either_2(optionshowscore,optionlinearcosts,optionaffinecosts);
 
   return op;
@@ -343,11 +345,12 @@ static void alignment_with_linear_gap_costs(GtLinspaceArguments *arguments,
      {
        diagonalbonds = select_digit_from_string(arguments->diagonalbonds,
                                                 false, err);
-         gt_error_check(err);
-       gt_computediagnoalbandalign(align, useq, 0, ulen, vseq, 0, vlen,
+       gt_error_check(err);
+       gt_computediagonalbandalign(align, useq, 0, ulen, vseq, 0, vlen,
                                    diagonalbonds[0], diagonalbonds[1],
                                    linearcosts[0], linearcosts[1],
                                    linearcosts[2]);
+       gt_free(diagonalbonds);
      }
      else
      {
@@ -371,11 +374,26 @@ static void alignment_with_affine_gap_costs(GtLinspaceArguments *arguments,
                                             const GtUchar *useq, GtUword ulen,
                                             const GtUchar *vseq, GtUword vlen)
 {
+  GtWord *diagonalbonds;
   if (arguments->global)
   {
-    gt_computeaffinelinearspace(align, useq, 0, ulen, vseq, 0, vlen,
-                                affinecosts[0], affinecosts[1],
-                                affinecosts[2], affinecosts[3]);
+    if (gt_str_array_size(arguments->diagonalbonds) > 0)
+    {
+      diagonalbonds = select_digit_from_string(arguments->diagonalbonds,
+                                               false, err);
+      gt_error_check(err);
+      gt_computediagonalbandaffinealign(align, useq, 0, ulen, vseq, 0, vlen,
+                                        diagonalbonds[0], diagonalbonds[1],
+                                        affinecosts[0], affinecosts[1],
+                                        affinecosts[2], affinecosts[3]);
+
+      gt_free(diagonalbonds);
+    }
+    else
+    {  gt_computeaffinelinearspace(align, useq, 0, ulen, vseq, 0, vlen,
+                                   affinecosts[0], affinecosts[1],
+                                   affinecosts[2], affinecosts[3]);
+    }
   }
   else if (arguments->local)
   {

@@ -91,6 +91,16 @@ Test do
   grep last_stderr, "invalid diagonalband"
 end
 
+Name "gt linspace_align diagonalband affine"
+Keywords "gt_linspace_align"
+Test do
+  run_test "#{$bin}gt dev linspace_align -ff "\
+           "#{$testdata}gt_linspace_align_affine_test_1.fas "\
+           "#{$testdata}gt_linspace_align_affine_test_2.fas "\
+           " -global -a 0 2 3 1 -d \" -80\"  60", :maxtime => 1
+  run "diff #{last_stdout} #{$testdata}gt_linspace_align_global_affine_test_1.out"
+end
+
 Name "gt linspace_align special cases"
 Keywords "gt_linspace_align"
 Test do
@@ -119,4 +129,9 @@ Test do
            "#{$testdata}gt_linspace_align_special_cases_test_2.fas "\
            "-global -l 0 1 1 -d \" -5\" 4"
   run "diff #{last_stdout} #{$testdata}gt_linspace_align_global_linear_special_cases.out"
+  run_test "#{$bin}gt dev linspace_align -ff "\
+           "#{$testdata}gt_linspace_align_special_cases_test_1.fas "\
+           "#{$testdata}gt_linspace_align_special_cases_test_2.fas "\
+           "-global -a 0 2 3 1 -d \" -5\" 4"
+  run "diff #{last_stdout} #{$testdata}gt_linspace_align_global_affine_special_cases.out"
 end

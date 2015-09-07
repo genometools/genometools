@@ -398,7 +398,7 @@ static GtUword evaluateallcolumns(GtUword *EDtabcolumn,
     if (high_row < ulen)
       high_row ++;
 
-    EDtabcolumn[0] = add_safe_max(westEDtabentry, 1);
+    EDtabcolumn[0] = add_safe_max(westEDtabentry, gapcost);
     if (diag == (GtWord)colindex - (GtWord)low_row)
     {
       Diagcolumn[colindex].edge = Linear_I;
@@ -579,19 +579,19 @@ static void evaluatecrosspoints(GtUword *EDtabcolumn,
     if (diag + ((GtWord)ulen-(GtWord)vlen) > 0)
     {
       new_left = MAX((GtWord)left_dist,
-                    -((GtWord)ulen - ((GtWord)Diagcolumn[cpoint].currentrowindex
+                    -((GtWord)ulen-((GtWord)Diagcolumn[cpoint].currentrowindex+1
                     -(GtWord)rowoffset)));
       new_right = 0;
-      new_ulen =  ulen - (Diagcolumn[cpoint].currentrowindex-rowoffset);
+      new_ulen =  ulen - (Diagcolumn[cpoint].currentrowindex+1-rowoffset);
       evaluatecrosspoints(EDtabcolumn, Rtabcolumn, Diagcolumn+cpoint, Linear_D,
-                         Diagcolumn[cpoint].currentrowindex, coloffset+cpoint,
-                         useq, Diagcolumn[cpoint].currentrowindex, new_ulen,
+                         Diagcolumn[cpoint].currentrowindex+1, coloffset+cpoint,
+                         useq, Diagcolumn[cpoint].currentrowindex+1, new_ulen,
                          vseq, vstart+cpoint, vlen-cpoint, new_left, new_right,
                          matchcost, mismatchcost, gapcost);
     }
     else
     {
-      new_left = 0;
+      new_left = -1;
       new_right =  MIN((GtWord)right_dist-((GtWord)diag)-1,
                       ((GtWord)vlen-(GtWord)cpoint-1));
       new_ulen = ulen - (Diagcolumn[cpoint].currentrowindex-rowoffset);
@@ -618,8 +618,8 @@ static void evaluatecrosspoints(GtUword *EDtabcolumn,
     }
     else if (Diagcolumn[prevcpoint].edge == Linear_D)
     {
-      new_left = 0;
-      new_right = MIN(right_dist-((GtWord)cpoint),
+      new_left = -1;
+      new_right = MIN(right_dist-((GtWord)diag),
                      (GtWord)prevcpoint-(GtWord)cpoint-1);
       new_ulen = Diagcolumn[prevcpoint].currentrowindex-
                  Diagcolumn[cpoint].currentrowindex-1;
@@ -713,7 +713,10 @@ static void gt_calc_diagonalbandalign(const GtUchar *useq,
   if ((left_dist > MIN(0, (GtWord)vlen-(GtWord)ulen))||
       (right_dist < MAX(0, (GtWord)vlen-(GtWord)ulen)))
   {
-    fprintf(stderr,"invalid diagonalband for global alignment\n");
+    fprintf(stderr,"ERROR: invalid diagonalband for global alignment "
+                   "(ulen: "GT_WU", vlen: "GT_WU")\n"
+                   "left_dist <= MIN(0, vlen-ulen) and "
+                   "right_dist <= MAX(0, vlen-ulen)\n", ulen, vlen);
     exit(GT_EXIT_PROGRAMMING_ERROR);
   }
 
@@ -741,7 +744,7 @@ static void gt_calc_diagonalbandalign(const GtUchar *useq,
 }
 
 /* compute alignment within a diagonal band */
-void gt_computediagnoalbandalign(GtAlignment *align,
+void gt_computediagonalbandalign(GtAlignment *align,
                                  const GtUchar *useq,
                                  GtUword ustart, GtUword ulen,
                                  const GtUchar *vseq,
@@ -755,8 +758,8 @@ void gt_computediagnoalbandalign(GtAlignment *align,
   gt_assert(useq  && vseq);
 
   /* set new bounds, if left_dist or right_dist is out of sequence */
-  left_dist = MAX(-(GtWord) ulen,left_dist);
-  right_dist = MIN((GtWord) vlen,right_dist);
+  left_dist = MAX(-(GtWord) ulen, left_dist);
+  right_dist = MIN((GtWord) vlen, right_dist);
 
   gt_alignment_set_seqs(align,useq+ustart, ulen, vseq+vstart, vlen);
   gt_calc_diagonalbandalign(useq, ustart, ulen, vseq, vstart, vlen,
@@ -764,7 +767,7 @@ void gt_computediagnoalbandalign(GtAlignment *align,
                             matchcost, mismatchcost, gapcost);
 }
 
-void gt_checkdiagnonalbandalign(GT_UNUSED bool forward,
+void gt_checkdiagonalbandalign(GT_UNUSED bool forward,
                                 const GtUchar *useq,
                                 GtUword ulen,
                                 const GtUchar *vseq,
