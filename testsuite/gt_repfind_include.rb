@@ -45,7 +45,11 @@ def checkrepfind(reffile,withextend = false)
     run_test("#{$bin}gt repfind -l #{minlength} -ii sfxidx -extendgreedy " +
              "-minidentity 90 -maxalilendiff 30 -percmathistory 55",
              :maxtime => 600)
-    resultfile="#{testdatadir}repfind-result/#{reffile}-gr-ext.result"
+    if reffile == "Duplicate.fna"
+      resultfile="#{testdatadir}repfind-result/#{reffile}-greedy-8-8-90-30-55"
+    else
+      resultfile="#{testdatadir}repfind-result/#{reffile}-gr-ext.result"
+    end
     run "cmp -s #{last_stdout} #{resultfile}"
   end
 end
@@ -88,10 +92,10 @@ Test do
            "-indexname sfx -dna -tis -suf -lcp -ssp -pl"
   run_test "#{$bin}gt repfind -l 8 -ii sfx"
   run "grep -v '^#' #{last_stdout}"
-  run "diff -w #{last_stdout} #{$testdata}repfind-result/repfind-8-Atinsert.txt"
+  run "diff -w #{last_stdout} #{$testdata}repfind-result/Atinsert-8-8"
   run_test "#{$bin}gt repfind -scan -l 8 -ii sfx"
   run "grep -v '^#' #{last_stdout}"
-  run "diff -w #{last_stdout} #{$testdata}repfind-result/repfind-8-Atinsert.txt"
+  run "diff -w #{last_stdout} #{$testdata}repfind-result/Atinsert-8-8"
   run_test "#{$bin}gt repfind -samples 10 -l 6 -ii sfx",:maxtime => 600
   run "#{$bin}gt repfind -samples 1000 -l 6 -ii sfx",:maxtime => 600
 end
@@ -101,23 +105,23 @@ Keywords "gt_repfind extend"
 Test do
   run_test "#{$bin}gt suffixerator -db #{$testdata}at1MB " +
            "-indexname sfx -dna -tis -suf -lcp"
-  run_test "#{$bin}gt repfind -minidentity 90 -l 20 -xdropbelow 5 -extendxdrop -ii sfx"
-  run "cmp -s #{last_stdout} #{$testdata}repfind-result/repfind-20-extend.txt"
+  run_test "#{$bin}gt repfind -minidentity 90 -l 20 -extendxdrop -xdropbelow 5 -ii sfx"
+  run "cmp -s #{last_stdout} #{$testdata}repfind-result/at1MB-xdrop-20-20-80-6"
   run_test "#{$bin}gt repfind -minidentity 80 -l 20 -extendxdrop -ii sfx -q " +
            "#{$testdata}/U89959_genomic.fas"
-  run "cmp -s #{last_stdout} #{$testdata}repfind-result/repfind-20-query-extend.txt"
+  run "cmp -s #{last_stdout} #{$testdata}repfind-result/at1MB-U8-xdrop-20-20-80-6"
   run_test "#{$bin}gt repfind -extendxdrop -ii sfx -seedlength 70 -l 500 -minidentity 90 -a"
-  run "cmp -s #{last_stdout} #{$testdata}repfind-result/repfind-xdrop-70-500-90-1-39-a.txt"
+  run "cmp -s #{last_stdout} #{$testdata}repfind-result/at1MB-xdrop-70-500-90-1-39-a"
   run_test "#{$bin}gt repfind -extendgreedy -ii sfx -seedlength 70 -l 500 -minidentity 90 -a"
-  run "cmp -s #{last_stdout} #{$testdata}repfind-result/repfind-greedy-70-500-90-1-39-a.txt"
+  run "cmp -s #{last_stdout} #{$testdata}repfind-result/at1MB-greedy-70-500-90-1-39-a"
   run_test "#{$bin}gt repfind -minidentity 80 -l 20 -extendxdrop -ii sfx -q " +
            "#{$testdata}U89959_genomic.fas -a"
-  run "cmp -s #{last_stdout} #{$testdata}repfind-result/repfind-xdrop-20-20-80-6.txt"
+  run "cmp -s #{last_stdout} #{$testdata}repfind-result/at1MB-U9-xdrop-20-20-80-6-a"
   run_test "#{$bin}gt suffixerator -db #{$testdata}U89959_genomic.fas " +
            "-indexname sfx -dna -tis -suf -lcp"
   run_test "#{$bin}gt repfind -minidentity 80 -l 20 -extendxdrop -ii sfx -q " +
            "#{$testdata}/at1MB"
-  run "#{$scriptsdir}cmp_db_query_exch.rb #{last_stdout} #{$testdata}repfind-result/repfind-20-query-extend.txt 35"
+  run "#{$scriptsdir}cmp_db_query_exch.rb #{last_stdout} #{$testdata}repfind-result/at1MB-U8-xdrop-20-20-80-6 35"
 end
 
 if $gttestdata then
