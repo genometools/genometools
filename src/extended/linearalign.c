@@ -120,8 +120,8 @@ static GtUword alignment_in_square_space(GtAlignment *align,
       gt_assert(false);
     }
   }
-  gt_free(E[0]);
-  gt_free(E);
+
+  gt_array2dim_delete(E);
   return distance;
 }
 

@@ -283,8 +283,8 @@ static GtUword diagonalband_squarespace_affine(const GtUchar *useq,
   distance = MIN3(Atabcolumn[ulen][vlen].Rvalue,
                   Atabcolumn[ulen][vlen].Dvalue,
                   Atabcolumn[ulen][vlen].Ivalue);
-  gt_free(Atabcolumn[0]);
-  gt_free(Atabcolumn);
+
+  gt_array2dim_delete(Atabcolumn);
   return distance;
 }
 
@@ -419,7 +419,7 @@ static GtUword diagonalband_linear_affine(const GtUchar *useq,
 }
 
 /* helpfunctions */
-static void set_invalid_Diagnode(Diagnode *node)
+static void inline  set_invalid_Diagnode(Diagnode *node)
 {
   gt_assert(node != NULL);
   node->currentrowindex = GT_UWORD_MAX;
@@ -427,7 +427,7 @@ static void set_invalid_Diagnode(Diagnode *node)
   node->lastcpoint = GT_UWORD_MAX;
 }
 
-static void set_valid_Diagnode(Diagnode *node_to, Rtabentry *entry_from,
+static void inline set_valid_Diagnode(Diagnode *node_to, Rtabentry *entry_from,
                                GtUword minvalue, GtUword r_dist,
                                GtUword i_dist, GtUword d_dist)
 {
@@ -448,14 +448,14 @@ static void set_valid_Diagnode(Diagnode *node_to, Rtabentry *entry_from,
     node_to->lastcpoint = entry_from->val_D.idx;
   }
 }
-static void set_invalid_Rnode(Rnode *node)
+static void inline set_invalid_Rnode(Rnode *node)
 {
   gt_assert(node != NULL);
   node->idx = GT_UWORD_MAX;
   node->edge = Affine_X;
 }
 
-static void set_valid_Rnode(Rnode *node_to, Rtabentry *entry_from,
+static void inline set_valid_Rnode(Rnode *node_to, Rtabentry *entry_from,
                             GtUword minvalue, GtUword r_dist,
                             GtUword i_dist, GtUword d_dist)
 {
@@ -567,8 +567,6 @@ static void firstAtabRtabcolumn(Atabentry *Atabcolumn,
       Diagcolumn[0].val_D.edge = from_edge;
       Diagcolumn[0].val_D.lastcpoint = GT_UWORD_MAX;
       Diagcolumn[0].val_D.currentrowindex = rowindex + offset;
-      Diagcolumn[0].val_I.currentrowindex = rowindex + offset;
-      Diagcolumn[0].val_R.currentrowindex = rowindex + offset;
       Rtabcolumn[rowindex-low_row].val_D.idx = 0;
       Rtabcolumn[rowindex-low_row].val_D.edge = Affine_D;
       set_invalid_Diagnode(&Diagcolumn[0].val_R);
@@ -643,6 +641,7 @@ static Rnode evaluateallcolumns(Atabentry *Atabcolumn,
     if (high_row < ulen)
       high_row ++;
 
+    /* insertion */
     r_dist = add_safe_max(westAtabentry.Rvalue, gap_extension + gap_opening);
     d_dist = add_safe_max(westAtabentry.Dvalue, gap_extension + gap_opening);
     i_dist = add_safe_max(westAtabentry.Ivalue, gap_extension);
@@ -879,6 +878,7 @@ static Rnode evaluatecrosspoints(Atabentry *Atabcolumn,
   lastrpoint = rpoint;
   idx = rpoint.idx;
 
+  /* no crosspoint */
   if (idx == GT_UWORD_MAX)
   {
     if (diag < 0)

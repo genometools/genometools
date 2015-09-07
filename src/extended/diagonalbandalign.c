@@ -198,8 +198,7 @@ static GtUword diagonalband_squarespace_distance_only(const GtUchar *useq,
       E[i][j] = GT_UWORD_MAX;
   }
   distance = E[ulen][vlen];
-  gt_free(E[0]);
-  gt_free(E);
+  gt_array2dim_delete(E);
   return distance;
 }
 
