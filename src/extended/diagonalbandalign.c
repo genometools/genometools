@@ -41,14 +41,14 @@ typedef struct {
   LinearAlignEdge edge;
 } Diagentry;
 
-static inline GtWord add_safe(GtUword val1, GtUword val2, GtUword exception)
+inline GtWord add_usafe(GtUword val1, GtUword val2, GtUword exception)
 {
   return (val1 != exception) ? val1 + val2 : exception;
 }
 
-static inline GtWord add_safe_max(GtUword val1, GtUword val2)
+inline GtWord add_safe_umax(GtUword val1, GtUword val2)
 {
-  return add_safe(val1,val2,GT_UWORD_MAX);
+  return add_usafe(val1, val2, GT_UWORD_MAX);
 }
 
 /*reconstruct alignment from crosspoints, crosspoints relating to diagonalband*/
@@ -151,7 +151,7 @@ static GtUword diagonalband_squarespace_distance_only(const GtUchar *useq,
   E[0][0] = 0;
   for (i = 1; i <= high_row; i++)
   {
-      E[i][0] = add_safe_max(E[i-1][0], gapcost);
+      E[i][0] = add_safe_umax(E[i-1][0], gapcost);
   }
   for (; i <= ulen; i++)
   {
@@ -166,7 +166,7 @@ static GtUword diagonalband_squarespace_distance_only(const GtUchar *useq,
     {
       if (j <= right_dist)
       {
-        E[i][j] = add_safe_max(E[i][j-1], gapcost);
+        E[i][j] = add_safe_umax(E[i][j-1], gapcost);
       }
       else{
         E[i][j] = GT_UWORD_MAX;
@@ -180,9 +180,9 @@ static GtUword diagonalband_squarespace_distance_only(const GtUchar *useq,
     /* diagonaldband */
     for (; i <= high_row; i++)
     {
-      E[i][j] = add_safe_max(E[i][j-1], gapcost);
+      E[i][j] = add_safe_umax(E[i][j-1], gapcost);
 
-      if ((val = add_safe_max(E[i-1][j-1],(tolower((int)useq[ustart+i-1]) ==
+      if ((val = add_safe_umax(E[i-1][j-1],(tolower((int)useq[ustart+i-1]) ==
                                            tolower((int)vseq[vstart+j-1]) ?
                                 matchcost : mismatchcost)))
           <= E[i][j])
@@ -190,7 +190,7 @@ static GtUword diagonalband_squarespace_distance_only(const GtUchar *useq,
         E[i][j] = val;
       }
 
-      if ((val = add_safe_max(E[i-1][j],gapcost)) < E[i][j])
+      if ((val = add_safe_umax(E[i-1][j],gapcost)) < E[i][j])
       {
         E[i][j] = val;
       }
@@ -253,11 +253,11 @@ static GtUword diagonalband_linear_distance_only(const GtUchar *useq,
       westEDtabentry = EDtabcolumn[0];
     if (high_row < ulen)
       high_row ++;
-    EDtabcolumn[0] = add_safe_max(westEDtabentry, gapcost);
+    EDtabcolumn[0] = add_safe_umax(westEDtabentry, gapcost);
 
     if (low_row > 0 )
     {
-      if ((val = add_safe_max(northwestEDtabentry,
+      if ((val = add_safe_umax(northwestEDtabentry,
                               (tolower((int)useq[ustart+low_row-1]) ==
                               tolower((int)vseq[vstart+colindex-1])?
                               matchcost : mismatchcost)))
@@ -276,16 +276,16 @@ static GtUword diagonalband_linear_distance_only(const GtUchar *useq,
 
       if (rowindex == ulen)
         last_row = true;
-      EDtabcolumn[rowindex-low_row] = add_safe_max(westEDtabentry, gapcost);
+      EDtabcolumn[rowindex-low_row] = add_safe_umax(westEDtabentry, gapcost);
 
-      val = add_safe_max(northwestEDtabentry,
+      val = add_safe_umax(northwestEDtabentry,
                         (tolower((int)useq[ustart+rowindex-1]) ==
                          tolower((int)vseq[vstart+colindex-1]) ?
                          matchcost : mismatchcost));
       if (val <= EDtabcolumn[rowindex-low_row])
         EDtabcolumn[rowindex-low_row] = val;
 
-      if ((val = add_safe_max(EDtabcolumn[rowindex-low_row-1], gapcost))
+      if ((val = add_safe_umax(EDtabcolumn[rowindex-low_row-1], gapcost))
                                        <= EDtabcolumn[rowindex-low_row])
         EDtabcolumn[rowindex-low_row] = val;
     }
@@ -401,7 +401,7 @@ static GtUword evaluateallcolumns(GtUword *EDtabcolumn,
     if (high_row < ulen)
       high_row ++;
 
-    EDtabcolumn[0] = add_safe_max(westEDtabentry, gapcost);
+    EDtabcolumn[0] = add_safe_umax(westEDtabentry, gapcost);
     if (diag == (GtWord)colindex - (GtWord)low_row)
     {
       Diagcolumn[colindex].edge = Linear_I;
@@ -417,7 +417,7 @@ static GtUword evaluateallcolumns(GtUword *EDtabcolumn,
     /* replacement possible for 0-entry */
     if (low_row > 0 )
     {
-      if ((val = add_safe_max(northwestEDtabentry,
+      if ((val = add_safe_umax(northwestEDtabentry,
                              (tolower((int)useq[ustart+low_row-1]) ==
                               tolower((int)vseq[vstart+colindex-1])?
                               matchcost : mismatchcost)))
@@ -462,7 +462,7 @@ static GtUword evaluateallcolumns(GtUword *EDtabcolumn,
       if (rowindex == ulen)
         last_row = true;
       /* insertion */
-      EDtabcolumn[rowindex-low_row] = add_safe_max(westEDtabentry, gapcost);
+      EDtabcolumn[rowindex-low_row] = add_safe_umax(westEDtabentry, gapcost);
       if (diag == (GtWord)colindex - (GtWord)rowindex)
       {
         Diagcolumn[colindex].edge = Linear_I;
@@ -475,7 +475,7 @@ static GtUword evaluateallcolumns(GtUword *EDtabcolumn,
         Rtabcolumn[rowindex-low_row] = westRtabentry;
       }
       /* replacement */
-      val = add_safe_max(northwestEDtabentry,
+      val = add_safe_umax(northwestEDtabentry,
                         (tolower((int)useq[ustart+rowindex-1]) ==
                          tolower((int)vseq[vstart+colindex-1]) ?
                          matchcost : mismatchcost));
@@ -495,7 +495,7 @@ static GtUword evaluateallcolumns(GtUword *EDtabcolumn,
         }
       }
       /* deletion */
-      if ((val = add_safe_max(EDtabcolumn[rowindex-low_row-1], gapcost))
+      if ((val = add_safe_umax(EDtabcolumn[rowindex-low_row-1], gapcost))
                                        < EDtabcolumn[rowindex-low_row])
       {
         EDtabcolumn[rowindex-low_row] = val;

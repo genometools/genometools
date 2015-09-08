@@ -38,4 +38,7 @@ void gt_computediagonalbandalign(GtAlignment *align,
                                  GtUword matchcost,
                                  GtUword mismatchcost,
                                  GtUword gapcost);
+
+inline GtWord add_safe_umax(GtUword val1, GtUword val2);
+
 #endif

@@ -23,6 +23,7 @@
 #include "core/divmodmul.h"
 #include "core/ma_api.h"
 #include "extended/affinealign.h"
+#include "extended/diagonalbandalign.h"
 #include "extended/linearalign_affinegapcost.h"
 
 #include "extended/diagonalbandalign_affinegapcost.h"
@@ -40,16 +41,6 @@ typedef struct {
 typedef struct {
   Diagnode val_R, val_D, val_I;
 } AffineDiagentry;
-
-static inline GtUword add_safe(GtUword val1, GtUword val2, GtUword exception)
-{
-  return (val1 != exception) ? val1 + val2 : exception;
-}
-
-static inline GtUword add_safe_max(GtUword val1, GtUword val2)
-{
-  return add_safe(val1,val2,GT_UWORD_MAX);
-}
 
 /*reconstruct alignment from crosspoints, crosspoints relating to diagonalband*/
 void reconstructalignment_from_affineDtab(GtAlignment *align,
@@ -211,8 +202,8 @@ static GtUword diagonalband_squarespace_affine(const GtUchar *useq,
   for (i = 1; i <= high_row; i++)
   {
     Atabcolumn[i][0].Rvalue = GT_UWORD_MAX;
-    Atabcolumn[i][0].Dvalue = add_safe_max(Atabcolumn[i-1][0].Dvalue,
-                                                      gap_extension);
+    Atabcolumn[i][0].Dvalue = add_safe_umax(Atabcolumn[i-1][0].Dvalue,
+                                                       gap_extension);
     Atabcolumn[i][0].Ivalue = GT_UWORD_MAX;
   }
   for (; i <= ulen; i++)
@@ -231,11 +222,11 @@ static GtUword diagonalband_squarespace_affine(const GtUchar *useq,
     {
       if (j <= right_dist)
       {
-        r_dist = add_safe_max(Atabcolumn[i][j-1].Rvalue,
-                             gap_extension + gap_opening);
-        d_dist = add_safe_max(Atabcolumn[i][j-1].Dvalue,
-                             gap_extension + gap_opening);
-        i_dist = add_safe_max(Atabcolumn[i][j-1].Ivalue,gap_extension);
+        r_dist = add_safe_umax(Atabcolumn[i][j-1].Rvalue,
+                               gap_extension + gap_opening);
+        d_dist = add_safe_umax(Atabcolumn[i][j-1].Dvalue,
+                               gap_extension + gap_opening);
+        i_dist = add_safe_umax(Atabcolumn[i][j-1].Ivalue,gap_extension);
 
         minvalue = MIN3(r_dist, d_dist, i_dist);
         Atabcolumn[i][j].Ivalue = minvalue;
@@ -256,25 +247,25 @@ static GtUword diagonalband_squarespace_affine(const GtUchar *useq,
     /* diagonalband */
     for (; i <= high_row; i++)
     {
-      r_dist =add_safe_max(Atabcolumn[i][j-1].Rvalue,gap_extension+gap_opening);
-      d_dist =add_safe_max(Atabcolumn[i][j-1].Dvalue,gap_extension+gap_opening);
-      i_dist =add_safe_max(Atabcolumn[i][j-1].Ivalue,gap_extension);
+      r_dist=add_safe_umax(Atabcolumn[i][j-1].Rvalue,gap_extension+gap_opening);
+      d_dist=add_safe_umax(Atabcolumn[i][j-1].Dvalue,gap_extension+gap_opening);
+      i_dist=add_safe_umax(Atabcolumn[i][j-1].Ivalue,gap_extension);
       minvalue = MIN3(r_dist, d_dist, i_dist);
       Atabcolumn[i][j].Ivalue = minvalue;
 
       rcost = tolower((int)useq[ustart+i-1]) ==
               tolower((int)vseq[vstart+j-1]) ?
               matchcost:mismatchcost;
-      r_dist = add_safe_max(Atabcolumn[i-1][j-1].Rvalue, rcost);
-      d_dist = add_safe_max(Atabcolumn[i-1][j-1].Dvalue, rcost);
-      i_dist = add_safe_max(Atabcolumn[i-1][j-1].Ivalue, rcost);
+      r_dist = add_safe_umax(Atabcolumn[i-1][j-1].Rvalue, rcost);
+      d_dist = add_safe_umax(Atabcolumn[i-1][j-1].Dvalue, rcost);
+      i_dist = add_safe_umax(Atabcolumn[i-1][j-1].Ivalue, rcost);
       minvalue = MIN3(r_dist, d_dist, i_dist);
       Atabcolumn[i][j].Rvalue = minvalue;
 
-      r_dist = add_safe_max(Atabcolumn[i-1][j].Rvalue,
+      r_dist = add_safe_umax(Atabcolumn[i-1][j].Rvalue,
                          gap_extension+gap_opening);
-      d_dist = add_safe_max(Atabcolumn[i-1][j].Dvalue,gap_extension);
-      i_dist = add_safe_max(Atabcolumn[i-1][j].Ivalue,
+      d_dist = add_safe_umax(Atabcolumn[i-1][j].Dvalue,gap_extension);
+      i_dist = add_safe_umax(Atabcolumn[i-1][j].Ivalue,
                           gap_extension+gap_opening);
       minvalue = MIN3(r_dist, d_dist, i_dist);
       Atabcolumn[i][j].Dvalue = minvalue;
@@ -335,7 +326,7 @@ static GtUword diagonalband_linear_affine(const GtUchar *useq,
   for (rowindex = low_row+1; rowindex <= high_row; rowindex ++)
   {
     Atabcolumn[rowindex-low_row].Rvalue = GT_UWORD_MAX;
-    Atabcolumn[rowindex-low_row].Dvalue = add_safe_max(
+    Atabcolumn[rowindex-low_row].Dvalue = add_safe_umax(
                                           Atabcolumn[rowindex-low_row-1].Dvalue,
                                           gap_extension);
     Atabcolumn[rowindex-low_row].Ivalue = GT_UWORD_MAX;
@@ -354,9 +345,9 @@ static GtUword diagonalband_linear_affine(const GtUchar *useq,
     if (high_row < ulen)
       high_row ++;
 
-    r_dist = add_safe_max(westAtabentry.Rvalue,gap_extension+gap_opening);
-    d_dist = add_safe_max(westAtabentry.Dvalue,gap_extension+gap_opening);
-    i_dist = add_safe_max(westAtabentry.Ivalue,gap_extension);
+    r_dist = add_safe_umax(westAtabentry.Rvalue,gap_extension+gap_opening);
+    d_dist = add_safe_umax(westAtabentry.Dvalue,gap_extension+gap_opening);
+    i_dist = add_safe_umax(westAtabentry.Ivalue,gap_extension);
     minvalue = MIN3(r_dist, d_dist, i_dist);
     Atabcolumn[0].Ivalue = minvalue;
     Atabcolumn[0].Rvalue = GT_UWORD_MAX;
@@ -367,9 +358,9 @@ static GtUword diagonalband_linear_affine(const GtUchar *useq,
       rcost = tolower((int)useq[ustart+rowindex-1]) ==
               tolower((int)vseq[vstart+colindex-1]) ?
                                                     matchcost:mismatchcost;
-      r_dist = add_safe_max(northwestAtabentry.Rvalue, rcost);
-      d_dist = add_safe_max(northwestAtabentry.Dvalue, rcost);
-      i_dist = add_safe_max(northwestAtabentry.Ivalue, rcost);
+      r_dist = add_safe_umax(northwestAtabentry.Rvalue, rcost);
+      d_dist = add_safe_umax(northwestAtabentry.Dvalue, rcost);
+      i_dist = add_safe_umax(northwestAtabentry.Ivalue, rcost);
       minvalue = MIN3(r_dist, d_dist, i_dist);
       Atabcolumn[0].Rvalue = minvalue;
     }
@@ -390,9 +381,9 @@ static GtUword diagonalband_linear_affine(const GtUchar *useq,
       if (rowindex == ulen)
         last_row = true;
 
-      r_dist = add_safe_max(westAtabentry.Rvalue,gap_extension+gap_opening);
-      d_dist = add_safe_max(westAtabentry.Dvalue,gap_extension+gap_opening);
-      i_dist = add_safe_max(westAtabentry.Ivalue,gap_extension);
+      r_dist = add_safe_umax(westAtabentry.Rvalue,gap_extension+gap_opening);
+      d_dist = add_safe_umax(westAtabentry.Dvalue,gap_extension+gap_opening);
+      i_dist = add_safe_umax(westAtabentry.Ivalue,gap_extension);
 
       minvalue = MIN3(r_dist, d_dist, i_dist);
       Atabcolumn[rowindex-low_row].Ivalue = minvalue;
@@ -400,18 +391,18 @@ static GtUword diagonalband_linear_affine(const GtUchar *useq,
       rcost = tolower((int)useq[ustart+rowindex-1]) ==
               tolower((int)vseq[vstart+colindex-1]) ?
                                                     matchcost:mismatchcost;
-      r_dist = add_safe_max(northwestAtabentry.Rvalue, rcost);
-      d_dist = add_safe_max(northwestAtabentry.Dvalue, rcost);
-      i_dist = add_safe_max(northwestAtabentry.Ivalue, rcost);
+      r_dist = add_safe_umax(northwestAtabentry.Rvalue, rcost);
+      d_dist = add_safe_umax(northwestAtabentry.Dvalue, rcost);
+      i_dist = add_safe_umax(northwestAtabentry.Ivalue, rcost);
 
       minvalue = MIN3(r_dist, d_dist, i_dist);
       Atabcolumn[rowindex-low_row].Rvalue = minvalue;
 
-      r_dist = add_safe_max(Atabcolumn[rowindex-low_row-1].Rvalue,
+      r_dist = add_safe_umax(Atabcolumn[rowindex-low_row-1].Rvalue,
                            gap_extension+gap_opening);
-      d_dist = add_safe_max(Atabcolumn[rowindex-low_row-1].Dvalue,
+      d_dist = add_safe_umax(Atabcolumn[rowindex-low_row-1].Dvalue,
                             gap_extension);
-      i_dist = add_safe_max(Atabcolumn[rowindex-low_row-1].Ivalue,
+      i_dist = add_safe_umax(Atabcolumn[rowindex-low_row-1].Ivalue,
                            gap_extension+gap_opening);
 
       minvalue = MIN3(r_dist, d_dist, i_dist);
@@ -566,7 +557,7 @@ static void firstAtabRtabcolumn(Atabentry *Atabcolumn,
   for (rowindex = low_row+1; rowindex <= high_row; rowindex++)
   {
     Atabcolumn[rowindex-low_row].Rvalue = GT_UWORD_MAX;
-    Atabcolumn[rowindex-low_row].Dvalue = add_safe_max(
+    Atabcolumn[rowindex-low_row].Dvalue = add_safe_umax(
                                           Atabcolumn[rowindex-low_row-1].Dvalue,
                                           gap_extension);
     Atabcolumn[rowindex-low_row].Ivalue = GT_UWORD_MAX;
@@ -651,9 +642,9 @@ static Rnode evaluateallcolumns(Atabentry *Atabcolumn,
       high_row ++;
 
     /* insertion */
-    r_dist = add_safe_max(westAtabentry.Rvalue, gap_extension + gap_opening);
-    d_dist = add_safe_max(westAtabentry.Dvalue, gap_extension + gap_opening);
-    i_dist = add_safe_max(westAtabentry.Ivalue, gap_extension);
+    r_dist = add_safe_umax(westAtabentry.Rvalue, gap_extension + gap_opening);
+    d_dist = add_safe_umax(westAtabentry.Dvalue, gap_extension + gap_opening);
+    i_dist = add_safe_umax(westAtabentry.Ivalue, gap_extension);
 
     minvalue = MIN3(r_dist, d_dist, i_dist);
     Atabcolumn[0].Ivalue = minvalue;
@@ -686,9 +677,9 @@ static Rnode evaluateallcolumns(Atabentry *Atabcolumn,
       rcost = tolower((int)useq[ustart+low_row-1]) ==
               tolower((int)vseq[vstart+colindex-1]) ?
                                                    matchcost:mismatchcost;
-      r_dist = add_safe_max(northwestAtabentry.Rvalue, rcost);
-      d_dist = add_safe_max(northwestAtabentry.Dvalue, rcost);
-      i_dist = add_safe_max(northwestAtabentry.Ivalue, rcost);
+      r_dist = add_safe_umax(northwestAtabentry.Rvalue, rcost);
+      d_dist = add_safe_umax(northwestAtabentry.Dvalue, rcost);
+      i_dist = add_safe_umax(northwestAtabentry.Ivalue, rcost);
 
       minvalue = MIN3(r_dist, d_dist, i_dist);
       Atabcolumn[0].Rvalue = minvalue;
@@ -733,9 +724,9 @@ static Rnode evaluateallcolumns(Atabentry *Atabcolumn,
         last_row = true;
 
       /* insertion */
-      r_dist = add_safe_max(westAtabentry.Rvalue,gap_extension+gap_opening);
-      d_dist = add_safe_max(westAtabentry.Dvalue,gap_extension+gap_opening);
-      i_dist = add_safe_max(westAtabentry.Ivalue,gap_extension);
+      r_dist = add_safe_umax(westAtabentry.Rvalue,gap_extension+gap_opening);
+      d_dist = add_safe_umax(westAtabentry.Dvalue,gap_extension+gap_opening);
+      i_dist = add_safe_umax(westAtabentry.Ivalue,gap_extension);
 
       minvalue = MIN3(r_dist, d_dist, i_dist);
       Atabcolumn[rowindex-low_row].Ivalue = minvalue;
@@ -756,9 +747,9 @@ static Rnode evaluateallcolumns(Atabentry *Atabcolumn,
       rcost = tolower((int)useq[ustart+rowindex-1]) ==
               tolower((int)vseq[vstart+colindex-1]) ?
                                                    matchcost:mismatchcost;
-      r_dist = add_safe_max(northwestAtabentry.Rvalue, rcost);
-      d_dist = add_safe_max(northwestAtabentry.Dvalue, rcost);
-      i_dist = add_safe_max(northwestAtabentry.Ivalue, rcost);
+      r_dist = add_safe_umax(northwestAtabentry.Rvalue, rcost);
+      d_dist = add_safe_umax(northwestAtabentry.Dvalue, rcost);
+      i_dist = add_safe_umax(northwestAtabentry.Ivalue, rcost);
       minvalue = MIN3(r_dist, d_dist, i_dist);
 
       Atabcolumn[rowindex-low_row].Rvalue = minvalue;
@@ -777,11 +768,11 @@ static Rnode evaluateallcolumns(Atabentry *Atabcolumn,
       }
 
       /* deletion */
-      r_dist = add_safe_max(Atabcolumn[rowindex-low_row-1].Rvalue,
+      r_dist = add_safe_umax(Atabcolumn[rowindex-low_row-1].Rvalue,
                            gap_extension+gap_opening);
-      d_dist = add_safe_max(Atabcolumn[rowindex-low_row-1].Dvalue,
+      d_dist = add_safe_umax(Atabcolumn[rowindex-low_row-1].Dvalue,
                            gap_extension);
-      i_dist = add_safe_max(Atabcolumn[rowindex-low_row-1].Ivalue,
+      i_dist = add_safe_umax(Atabcolumn[rowindex-low_row-1].Ivalue,
                            gap_extension+gap_opening);
 
       minvalue = MIN3(r_dist, d_dist, i_dist);
@@ -813,12 +804,12 @@ static Rnode evaluateallcolumns(Atabentry *Atabcolumn,
   switch (to_edge)
   {
     case Affine_I:
-      r_dist = add_safe_max (r_dist, gap_opening);
-      d_dist = add_safe_max (d_dist, gap_opening);
+      r_dist = add_safe_umax (r_dist, gap_opening);
+      d_dist = add_safe_umax (d_dist, gap_opening);
       break;
     case Affine_D:
-      r_dist = add_safe_max (r_dist, gap_opening);
-      i_dist = add_safe_max (i_dist, gap_opening);
+      r_dist = add_safe_umax (r_dist, gap_opening);
+      i_dist = add_safe_umax (i_dist, gap_opening);
       break;
     default:
       break;
