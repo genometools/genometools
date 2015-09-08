@@ -460,6 +460,11 @@ static void affine_determineCtab0(GtUword *Ctab, GtUchar vseq0,
       }
       else
       {
+        if (tolower((int)vseq0) == tolower((int)useq[ustart]))
+        {
+          Ctab[0] = 0;
+          return;  
+        }
         for (rowindex = Ctab[1]-1; rowindex >= 0; rowindex--)
         {
           if (tolower((int)vseq0) == tolower((int)useq[ustart+rowindex]))
@@ -479,7 +484,7 @@ static void affine_determineCtab0(GtUword *Ctab, GtUchar vseq0,
           Ctab[0] = Ctab[1]-1;
           return;
       }
-      else if (vseq0 == useq[ustart])
+      else if (tolower((int)vseq0) == tolower((int)useq[ustart]))
       {
           Ctab[0] = 0;
           return;
@@ -567,6 +572,7 @@ GtUword gt_calc_affinealign_linear(const GtUchar *useq, GtUword ustart,
 
     affine_determineCtab0(Ctab, vseq[vstart],useq, ustart,
                           matchcost, mismatchcost, gap_opening);
+
     reconstructalignment_from_Ctab(align,Ctab,useq,ustart,vseq,
                                    vstart,vlen,matchcost,mismatchcost,
                                    gap_opening,gap_extension);
