@@ -64,7 +64,9 @@ void reconstructalignment_from_Ctab(GtAlignment *align,
         indel = (2*gap_extension+gap_opening);
       if (tolower((int)vseq[vstart+i-1]) ==
                                          tolower((int)useq[ustart+Ctab[i]-j-1]))
+      {
         repl = matchcost;
+      }
       else
         repl = mismatchcost;
       if (indel>repl)

@@ -281,7 +281,7 @@ static GtUword evaluateallAtabRtabcolumns(const GtUchar *useq,
   GtUword colindex;
   firstAtabRtabcolumn(ulen, Atabcolumn, Rtabcolumn,
                       gap_opening, gap_extension, edge);
-
+//printf("useq %s, ustart: "GT_WU", ulen "GT_WU", vseq %s, vstart: "GT_WU"vlen : "GT_WU"\n", useq, ustart, ulen, vseq, vstart, vlen);
   for (colindex = 1UL; colindex <= vlen; colindex++)
   {
     nextAtabRtabcolumn(useq, ustart,ulen,
@@ -375,6 +375,7 @@ static GtUword evaluateaffinecrosspoints(const GtUchar *useq,
         gt_assert(false);
     }
     Ctab[midcol] = rowoffset + midrow;
+    //printf("Ctab[] = "GT_WU" + "GT_WU"\n", rowoffset, midrow);
     gt_assert(midcol > 0);
     if (midrow == 0) {
       for (colindex = midcol-1; colindex > 0; colindex--)
@@ -438,6 +439,75 @@ static GtUword evaluateaffinecrosspoints(const GtUchar *useq,
 static void affine_determineCtab0(GtUword *Ctab, GtUchar vseq0,
                                   const GtUchar *useq,
                                   GtUword ustart,
+                                  const GtWord matchcost,
+                                  const GtWord mismatchcost,
+                                  const GtWord gap_opening)
+{
+  GtUword rowindex;
+/*printf("*****************\n");
+printf("vseq0: %c, useq: %s\n", vseq0, useq);
+printf("ustart: "GT_WU", matchcost" GT_WD", mismatchcost" GT_WD",gap_opening:" GT_WD"\n", ustart, matchcost, mismatchcost, gap_opening);*/
+  if (Ctab[1] == 1 || Ctab[1] == 0)
+  {
+    Ctab[0] = 0; return;
+  }
+  else
+  {
+    if (Ctab[2]-Ctab[1] > 1)
+    {
+      if (gap_opening > (mismatchcost-matchcost))
+      {
+        Ctab[0] = 0; return;
+      }
+      else
+      {
+        //for (rowindex = 0; rowindex < Ctab[1]; rowindex++)
+        for (rowindex = Ctab[1]-1; rowindex >= 0; rowindex--)
+        {
+          if (tolower((int)vseq0) == tolower((int)useq[ustart+rowindex]))
+          {
+            Ctab[0] = rowindex;
+            return;
+          }
+        }
+        Ctab[0] = 0; return;
+      }
+    }
+    else
+    {
+      if (tolower((int)vseq0) == tolower((int)useq[ustart+Ctab[1]-1]))
+      {
+          Ctab[0] = Ctab[1]-1; return;
+      }
+      else if (vseq0 == useq[ustart])
+      {
+          Ctab[0] = 0; return;
+      }
+      if (gap_opening > (mismatchcost-matchcost))
+      {
+        Ctab[0] = Ctab[1]-1; return;
+      }
+      else
+      {
+        for (rowindex = 0; rowindex < Ctab[1]; rowindex++)
+        {
+          if (tolower((int)vseq0) == tolower((int)useq[ustart+rowindex]))
+          {
+            Ctab[0] = rowindex;
+            return;
+          }
+        }
+         Ctab[0] = Ctab[1]-1; return;
+      }
+    }
+  }
+
+  Ctab[0] = (Ctab[1] > 0) ?  Ctab[1]-1 : 0;
+
+}
+/*static void affine_determineCtab0(GtUword *Ctab, GtUchar vseq0,
+                                  const GtUchar *useq,
+                                  GtUword ustart,
                                   GtUword matchcost,
                                   GtUword mismatchcost,
                                   GtUword gap_opening)
@@ -496,7 +566,8 @@ static void affine_determineCtab0(GtUword *Ctab, GtUchar vseq0,
      Ctab[0] = Ctab[1]-1;
      return;
   }
-}
+  Ctab[0] = (Ctab[1] > 0)? Ctab[1]-1 : 0;
+}*/
 
 GtUword gt_calc_affinealign_linear(const GtUchar *useq, GtUword ustart,
                                    GtUword ulen,
@@ -534,10 +605,11 @@ GtUword gt_calc_affinealign_linear(const GtUchar *useq, GtUword ustart,
                                   (int)gap_extension);
     gt_alignment_clone(square_align, align);
 
-    distance = gt_alignment_eval_with_affine_score(align,matchcost,
-                                                   mismatchcost,
-                                                   gap_opening,
-                                                   gap_extension);
+    distance = gt_alignment_eval_generic_with_affine_score(false, align,
+                                                           matchcost,
+                                                           mismatchcost,
+                                                           gap_opening,
+                                                           gap_extension);
     gt_alignment_delete(square_align);
   }
   else
@@ -555,10 +627,14 @@ GtUword gt_calc_affinealign_linear(const GtUchar *useq, GtUword ustart,
 
     affine_determineCtab0(Ctab, vseq[vstart],useq, ustart,
                           matchcost, mismatchcost, gap_opening);
+          //printf("Ctab[0]="GT_WU"\n", Ctab[0]);
     reconstructalignment_from_Ctab(align,Ctab,useq,ustart,vseq,
                                    vstart,vlen,matchcost,mismatchcost,
                                    gap_opening,gap_extension);
-
+/*GtUword i;
+printf("*************\n");
+for(i=0; i<vlen+1; i++)
+  printf("Ctab: "GT_WU"\n", Ctab[i]);*/
     gt_free(Ctab);
     gt_free(Atabcolumn);
     gt_free(Rtabcolumn);
@@ -929,7 +1005,7 @@ void gt_checkaffinelinearspace(GT_UNUSED bool forward,
   for (i = 0; i < vlen; i++)
     low_vseq[i] = tolower((int)vseq[i]);
 
-  align_linear = gt_alignment_new_with_seqs(useq, ulen, vseq, vlen);
+  align_linear = gt_alignment_new_with_seqs(low_useq, ulen, low_vseq, vlen);
 
   affine_score1 = gt_calc_affinealign_linear(low_useq, 0, ulen,
                                              low_vseq, 0, vlen,
@@ -942,12 +1018,13 @@ void gt_checkaffinelinearspace(GT_UNUSED bool forward,
                                                       gap_extension);
 
   if (affine_score1 != affine_score2)
-  {
+  {printf("low_useq %s, low_vseq %s\n", low_useq, low_vseq);
+    gt_alignment_show(align_linear, stdout, 80);
     fprintf(stderr,"gt_calc_affinealign_linear = "GT_WU" != "GT_WU
             " = gt_alignment_eval_with_affine_score\n", affine_score1,
                                                         affine_score2);
     exit(GT_EXIT_PROGRAMMING_ERROR);
-  }
+  }//gt_alignment_show(align_linear, stdout, 80);
 
   align_square = gt_affinealign(low_useq, ulen, low_vseq, vlen, matchcost,
                                 mismatchcost, gap_opening, gap_extension);
@@ -1001,7 +1078,8 @@ void gt_checkaffinelinearspace_local(GT_UNUSED bool forward,
                                                  gap_opening, gap_extension);
 
   if (affine_score1 != affine_score2)
-  {
+  {printf("useq %s,ulen: "GT_WU" vseq %s, vlen : "GT_WU"\n", useq, ulen,vseq, vlen);
+    gt_alignment_show(align, stdout, 80);
     fprintf(stderr,"gt_calc_affinealign_linear_local = "GT_WU" != "GT_WU
             " = gt_alignment_eval_with_affine_score\n", affine_score1,
                                                         affine_score2);
