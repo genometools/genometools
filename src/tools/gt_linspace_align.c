@@ -466,8 +466,8 @@ static int gt_linspace_align_runner(GT_UNUSED int argc,
 
         if (arguments->showscore)
         {
-          score = gt_alignment_eval_with_score(align, linearcosts[0],
-                                               linearcosts[1],linearcosts[2]);
+          score = gt_alignment_eval_generic_with_score(false, align,
+                                 linearcosts[0], linearcosts[1],linearcosts[2]);
         }
         gt_free(linearcosts);
       }/* alignment functions with affine gap costs */
@@ -486,11 +486,11 @@ static int gt_linspace_align_runner(GT_UNUSED int argc,
                                         useq, ulen, vseq, vlen);
         if (arguments->showscore)
         {
-          score = gt_alignment_eval_with_affine_score(align,
-                                                      affinecosts[0],
-                                                      affinecosts[1],
-                                                      affinecosts[2],
-                                                      affinecosts[3]);
+          score = gt_alignment_eval_generic_with_affine_score(false, align,
+                                                              affinecosts[0],
+                                                              affinecosts[1],
+                                                              affinecosts[2],
+                                                              affinecosts[3]);
         }
          gt_free(affinecosts);
       }

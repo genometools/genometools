@@ -15,6 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#include <ctype.h>
 #include <string.h>
 #include "core/assert_api.h"
 #include "core/minmax.h"
@@ -220,7 +221,8 @@ static void nextAtabRtabcolumn(const GtUchar *useq,
     westAtabentry = Atabcolumn[rowindex];
     westRtabentry = Rtabcolumn[rowindex];
 
-    rcost = useq[ustart+rowindex-1] == b ? matchcost:mismatchcost;
+    rcost = tolower((int)useq[ustart+rowindex-1]) == tolower((int)b) ?
+            matchcost:mismatchcost;
     rdist = add_safe_max(northwestAtabentry.Rvalue, rcost);
     ddist = add_safe_max(northwestAtabentry.Dvalue, rcost);
     idist = add_safe_max(northwestAtabentry.Ivalue, rcost);
@@ -456,7 +458,7 @@ static void affine_determineCtab0(GtUword *Ctab, GtUchar vseq0,
     }
     for (rowindex = 0; rowindex < Ctab[1]; rowindex++)
     {
-      if (vseq0 == useq[ustart+rowindex])
+      if (tolower((int)vseq0) == tolower((int)useq[ustart+rowindex]))
       {
         Ctab[0] = rowindex;
         return;
@@ -466,12 +468,12 @@ static void affine_determineCtab0(GtUword *Ctab, GtUchar vseq0,
     return;
   }
 
-  if (vseq0 == useq[ustart+Ctab[1]-1])
+  if (tolower((int)vseq0) == tolower((int)useq[ustart+Ctab[1]-1]))
   {
       Ctab[0] = Ctab[1]-1;
       return;
   }
-  else if (vseq0 == useq[ustart])
+  else if (tolower((int)vseq0) == tolower((int)useq[ustart]))
   {
       Ctab[0] = 0;
       return;
@@ -485,7 +487,7 @@ static void affine_determineCtab0(GtUword *Ctab, GtUchar vseq0,
   {
     for (rowindex = 0; rowindex < Ctab[1]; rowindex++)
     {
-      if (vseq0 == useq[ustart+rowindex])
+      if (tolower((int)vseq0) == tolower((int)useq[ustart+rowindex]))
       {
         Ctab[0] = rowindex;
         return;
@@ -725,7 +727,8 @@ static void nextAStabcolumn(const GtUchar *useq, GtUword ustart,
     Swe = Starttabcolumn[rowindex];
 
     /*calculate Rvalue*/
-    replacement = (useq[ustart+rowindex-1] == b ? matchscore : mismatchscore);
+    replacement = (tolower((int)useq[ustart+rowindex-1]) == tolower((int)b) ?
+                   matchscore : mismatchscore);
     Atabcolumn[rowindex].Rvalue = add_safe_min(northwestAtabentry.totalvalue,
                                                replacement);
     Starttabcolumn[rowindex].Rstart =
@@ -903,8 +906,12 @@ void gt_checkaffinelinearspace(GT_UNUSED bool forward,
                                GtUword vlen)
 {
   GtAlignment *align_linear, *align_square;
-  GtUword affine_score1, affine_score2, affine_score3;
+  GtUword i, affine_score1, affine_score2, affine_score3;
   GtWord matchcost = 0, mismatchcost = 4, gap_opening = 4, gap_extension = 1;
+  /* immediate result, because affinealign (square) cannot
+   * handle lower/upper cases*/
+  GtUchar *low_useq = malloc(sizeof(*low_useq)*ulen),
+          *low_vseq = malloc(sizeof(*low_vseq)*vlen);
 
   gt_assert(useq && vseq);
   if (memchr(useq, LINEAR_EDIST_GAP,ulen) != NULL)
@@ -917,14 +924,20 @@ void gt_checkaffinelinearspace(GT_UNUSED bool forward,
     fprintf(stderr,"%s: sequence v contains gap symbol\n",__func__);
     exit(GT_EXIT_PROGRAMMING_ERROR);
   }
+  for (i = 0; i < ulen; i++)
+    low_useq[i] = tolower((int)useq[i]);
+  for (i = 0; i < vlen; i++)
+    low_vseq[i] = tolower((int)vseq[i]);
+
   align_linear = gt_alignment_new_with_seqs(useq, ulen, vseq, vlen);
 
-  affine_score1 = gt_calc_affinealign_linear(useq, 0, ulen,
-                                             vseq, 0, vlen,
+  affine_score1 = gt_calc_affinealign_linear(low_useq, 0, ulen,
+                                             low_vseq, 0, vlen,
                                              align_linear, matchcost,
                                              mismatchcost, gap_opening,
                                              gap_extension);
-  affine_score2 = gt_alignment_eval_with_affine_score(align_linear,matchcost,
+  affine_score2 = gt_alignment_eval_generic_with_affine_score(false,
+                                                      align_linear, matchcost,
                                                       mismatchcost, gap_opening,
                                                       gap_extension);
 
@@ -936,9 +949,10 @@ void gt_checkaffinelinearspace(GT_UNUSED bool forward,
     exit(GT_EXIT_PROGRAMMING_ERROR);
   }
 
-  align_square = gt_affinealign(useq, ulen, vseq, vlen, matchcost,
+  align_square = gt_affinealign(low_useq, ulen, low_vseq, vlen, matchcost,
                                 mismatchcost, gap_opening, gap_extension);
-  affine_score3 = gt_alignment_eval_with_affine_score(align_square, matchcost,
+  affine_score3 = gt_alignment_eval_generic_with_affine_score(false,
+                                                      align_square, matchcost,
                                                       mismatchcost, gap_opening,
                                                       gap_extension);
 
@@ -948,15 +962,17 @@ void gt_checkaffinelinearspace(GT_UNUSED bool forward,
             " = gt_affinealign\n", affine_score1, affine_score3);
     exit(GT_EXIT_PROGRAMMING_ERROR);
   }
+  gt_free(low_useq);
+  gt_free(low_vseq);
   gt_alignment_delete(align_linear);
   gt_alignment_delete(align_square);
 }
 
 void gt_checkaffinelinearspace_local(GT_UNUSED bool forward,
-                               const GtUchar *useq,
-                               GtUword ulen,
-                               const GtUchar *vseq,
-                               GtUword vlen)
+                                     const GtUchar *useq,
+                                     GtUword ulen,
+                                     const GtUchar *vseq,
+                                     GtUword vlen)
 {
   GtAlignment *align;
   GtUword affine_score1, affine_score2;
@@ -980,8 +996,9 @@ void gt_checkaffinelinearspace_local(GT_UNUSED bool forward,
                                                    mismatchscore, gap_opening,
                                                    gap_extension);
 
-  affine_score2 = gt_alignment_eval_with_affine_score(align, matchscore,
-                                     mismatchscore, gap_opening, gap_extension);
+  affine_score2 = gt_alignment_eval_generic_with_affine_score(false, align,
+                                                 matchscore, mismatchscore,
+                                                 gap_opening, gap_extension);
 
   if (affine_score1 != affine_score2)
   {

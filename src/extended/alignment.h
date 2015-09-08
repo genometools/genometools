@@ -58,16 +58,27 @@ void         gt_alignment_remove_last(GtAlignment *alignment);
 void         gt_alignment_reset(GtAlignment *alignment);
 /* returns unit cost */
 GtUword      gt_alignment_eval(const GtAlignment*);
-GtUword gt_alignment_eval_generic(bool mapped,const GtAlignment *alignment);
+GtUword     gt_alignment_eval_generic(bool mapped,const GtAlignment *alignment);
 GtWord       gt_alignment_eval_with_score(const GtAlignment *alignment,
                                           GtWord matchscore,
                                           GtWord mismatchscore,
                                           GtWord gapscore);
+GtWord       gt_alignment_eval_generic_with_score(bool mapped,
+                                                  const GtAlignment *alignment,
+                                                  GtWord matchscore,
+                                                  GtWord mismatchscore,
+                                                  GtWord gapscore);
 GtWord       gt_alignment_eval_with_affine_score(const GtAlignment *alignment,
-                                           const GtWord matchscore,
-                                           const GtWord mismatchscore,
-                                           const GtWord gap_opening,
-                                           const GtWord gap_extension);
+                                                 GtWord matchscore,
+                                                 GtWord mismatchscore,
+                                                 GtWord gap_opening,
+                                                 GtWord gap_extension);
+GtWord       gt_alignment_eval_generic_with_affine_score(bool mapped,
+                                                   const GtAlignment *alignment,
+                                                   GtWord matchscore,
+                                                   GtWord mismatchscore,
+                                                   GtWord gap_opening,
+                                                   GtWord gap_extension);
 /* print alignment to <fp>. This will break the lines after width characters */
 void         gt_alignment_show(const GtAlignment *alignment, FILE *fp,
                                unsigned int width);

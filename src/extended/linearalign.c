@@ -20,6 +20,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#include <ctype.h>
 #include <string.h>
 #include "core/ma.h"
 #include "core/minmax.h"
@@ -81,7 +82,8 @@ static GtUword alignment_in_square_space(GtAlignment *align,
 
         E[i][j] = E[i][j-1] + gapcost;
 
-        if ((val = E[i-1][j-1] + (useq[ustart+i-1] == vseq[vstart+j-1] ?
+        if ((val = E[i-1][j-1] + (tolower((int)useq[ustart+i-1]) ==
+                                  tolower((int)vseq[vstart+j-1]) ?
                                   matchcost : mismatchcost))
             <= E[i][j])
         {
@@ -99,7 +101,7 @@ static GtUword alignment_in_square_space(GtAlignment *align,
   while (i > 0 || j > 0)
   {
     if (i > 0 && j > 0 && E[i][j] == E[i-1][j-1] +
-            (useq[ustart+i-1] == vseq[vstart+j-1] ?
+            (tolower((int)useq[ustart+i-1]) == tolower((int) vseq[vstart+j-1]) ?
                          matchcost : mismatchcost))
     {
       gt_alignment_add_replacement(align);
@@ -177,8 +179,8 @@ static void nextEDtabRtabcolumn(GtUword *EDtabcolumn,
 
     /* 2. recurrence: */
     if ((val = northwestEDtabentry +
-        (useq[ustart+rowindex-1] == b ? matchcost : mismatchcost))
-        <= EDtabcolumn[rowindex])
+        (tolower((int)useq[ustart+rowindex-1]) == tolower((int)b) ?
+         matchcost : mismatchcost)) <= EDtabcolumn[rowindex])
     {
       EDtabcolumn[rowindex] = val;
       if (colindex > midcolumn)
@@ -277,7 +279,7 @@ static void determineCtab0(GtUword *Ctab, GtUchar vseq0,
 
   for (rowindex = 0; rowindex < Ctab[1]; rowindex++)
   {
-    if (vseq0 == useq[ustart+rowindex])
+    if (tolower((int)vseq0) == tolower((int)useq[ustart+rowindex]))
     {
       Ctab[0] = rowindex;
       return;
@@ -378,7 +380,8 @@ static void fillDPtable(GtUword *dpcolumn,
     dpcolumn[0] = j;
     for (i = 1UL; i <= ulen; i++) {
       we = dpcolumn[i];
-      dpcolumn[i] = nw + (u[i-1] == v[j-1] ? 0 : 1); /* replacement */
+       /* replacement */
+      dpcolumn[i] = nw + (tolower((int)u[i-1]) == tolower((int)v[j-1]) ? 0 : 1);
       if (dpcolumn[i-1] + 1 < dpcolumn[i]) /* deletion */
         dpcolumn[i] = dpcolumn[i-1] + 1;
       if (we + 1 < dpcolumn[i]) /* insertion */
@@ -448,7 +451,8 @@ static void nextLStabcolumn(const GtUchar *useq,
     westStarttabentry = Starttabcolumn[rowindex];
     Ltabcolumn[rowindex] += gapscore;
 
-    if ((val = northwestLtabentry + (useq[ustart + rowindex-1] == b ?
+    if ((val = northwestLtabentry + (tolower((int)useq[ustart + rowindex-1]) ==
+                                     tolower((int) b) ?
           matchscore : mismatchscore)) > Ltabcolumn[rowindex])
     {
       Ltabcolumn[rowindex] = val;
@@ -546,16 +550,18 @@ GtUword gt_computelinearspace_local(GtAlignment *align,
     gt_calc_linearalign(useq, ustart_part, ulen_part,
                          vseq, vstart_part, vlen_part,
                          align, matchcost, mismatchcost, gapcost);
-    score = gt_alignment_eval_with_score(align, matchscore,
-                                         mismatchscore, gapscore);
+    score = gt_alignment_eval_generic_with_score(false, align, matchscore,
+                                                 mismatchscore, gapscore);
   } else
   {
     gt_alignment_set_seqs(align,(const GtUchar*) "",0,(const GtUchar*) "",0);
     score = 0;
   }
   gt_max_delete(max);
-  gt_assert(score == gt_alignment_eval_with_score(align,matchscore,
-                                        mismatchscore,gapscore));
+  gt_assert(score == gt_alignment_eval_generic_with_score(false, align,
+                                                          matchscore,
+                                                          mismatchscore,
+                                                          gapscore));
   return score;
 }
 
@@ -567,8 +573,11 @@ void gt_checklinearspace(GT_UNUSED bool forward,
                          GtUword vlen)
 {
   GtAlignment *align;
-  GtUword edist1, edist2, edist3, edist4,
+  GtUword i, edist1, edist2, edist3, edist4,
           matchcost = 0, mismatchcost = 1, gapcost = 1;
+  /*immediate result, because squareedistunit cannot handle lower/upper cases*/
+  GtUchar *low_useq = malloc(sizeof(*low_useq)*ulen),
+          *low_vseq = malloc(sizeof(*low_vseq)*vlen);
 
   if (memchr(useq, LINEAR_EDIST_GAP,ulen) != NULL)
   {
@@ -581,21 +590,29 @@ void gt_checklinearspace(GT_UNUSED bool forward,
     exit(GT_EXIT_PROGRAMMING_ERROR);
   }
 
+  for (i = 0; i < ulen; i++)
+    low_useq[i] = tolower((int)useq[i]);
+  for (i = 0; i < vlen; i++)
+    low_vseq[i] = tolower((int)vseq[i]);
+
   align = gt_alignment_new_with_seqs(useq, ulen, vseq, vlen);
-  edist1 = gt_calc_linearalign(useq, 0, ulen, vseq, 0, vlen, align,
+  edist1 = gt_calc_linearalign(low_useq, 0, ulen, low_vseq, 0, vlen, align,
                                matchcost, mismatchcost, gapcost);
-  edist2 = gt_squarededistunit(useq,ulen,vseq,vlen);
+  edist2 = gt_squarededistunit(low_useq, ulen, low_vseq, vlen);
 
   if (edist1 != edist2)
   {
-    fprintf(stderr,"gt_calc_linearalign2 = "GT_WU" != "GT_WU
+    fprintf(stderr,"gt_calc_linearalign = "GT_WU" != "GT_WU
             " = gt_squarededistunit\n", edist1,edist2);
     exit(GT_EXIT_PROGRAMMING_ERROR);
   }
 
-  edist3 = gt_alignment_eval_with_score(align,matchcost,mismatchcost,gapcost);
+  edist3 = gt_alignment_eval_generic_with_score(false, align, matchcost,
+                                                mismatchcost, gapcost);
   if (edist2 != edist3)
-  {
+  {gt_alignment_show(align, stdout, 80);
+    printf("useq: %s, ulen: "GT_WU", low_useq %s\n", useq, ulen, low_useq);
+   printf("vseq: %s, vlen: "GT_WU", low_vseq %s\n", vseq, vlen, low_vseq);
     fprintf(stderr,"gt_squarededistunit = "GT_WU" != "GT_WU
             " = gt_alignment_eval_with_score\n", edist2,edist3);
     exit(GT_EXIT_PROGRAMMING_ERROR);
@@ -608,6 +625,8 @@ void gt_checklinearspace(GT_UNUSED bool forward,
             " = gt_calc_linearedist\n", edist3, edist4);
     exit(GT_EXIT_PROGRAMMING_ERROR);
   }
+  gt_free(low_useq);
+  gt_free(low_vseq);
   gt_alignment_delete(align);
 }
 
@@ -616,7 +635,7 @@ void gt_checklinearspace_local(GT_UNUSED bool forward,
                                const GtUchar *vseq, GtUword vlen)
 {
   GtAlignment *align;
-  GtWord matchscore = 2, mismatchscore = -2, gapscore = -1;
+  GtWord score1, score2, matchscore = 2, mismatchscore = -2, gapscore = -1;
 
   if (memchr(useq, LINEAR_EDIST_GAP,ulen) != NULL)
   {
@@ -628,8 +647,17 @@ void gt_checklinearspace_local(GT_UNUSED bool forward,
     fprintf(stderr,"%s: sequence v contains gap symbol\n",__func__);
     exit(GT_EXIT_PROGRAMMING_ERROR);
   }
+
   align = gt_alignment_new();
-  gt_computelinearspace_local(align,useq, 0, ulen, vseq, 0, vlen,
-                              matchscore, mismatchscore, gapscore);
+  score1 = gt_computelinearspace_local(align,useq, 0, ulen, vseq, 0, vlen,
+                                       matchscore, mismatchscore, gapscore);
+  score2 = gt_alignment_eval_generic_with_score(false, align, matchscore,
+                                                mismatchscore, gapscore);
   gt_alignment_delete(align);
+  if (score1 != score2)
+  {
+    fprintf(stderr,"gt_computelinearspace_local = "GT_WU" != "GT_WU
+            " = gt_alignment_eval_generic_with_score\n", score1, score2);
+    exit(GT_EXIT_PROGRAMMING_ERROR);
+  }
 }

@@ -14,7 +14,7 @@
   ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
-
+#include <ctype.h>
 #include "extended/reconstructalignment.h"
 
 void reconstructalignment_from_Ctab(GtAlignment *align,
@@ -39,7 +39,7 @@ void reconstructalignment_from_Ctab(GtAlignment *align,
         indel = 2*gap_extension + gap_opening;
       else
         indel = (2*gap_extension + 2*gap_opening);
-      if (vseq[vstart+i-1]==useq[ustart+Ctab[i]-1])
+      if (tolower((int)vseq[vstart+i-1])==tolower((int)useq[ustart+Ctab[i]-1]))
         repl = matchcost;
       else
         repl = mismatchcost;
@@ -62,7 +62,8 @@ void reconstructalignment_from_Ctab(GtAlignment *align,
         indel = 2*gap_extension;
       else
         indel = (2*gap_extension+gap_opening);
-      if (vseq[vstart+i-1]==useq[ustart+Ctab[i]-j-1])
+      if (tolower((int)vseq[vstart+i-1]) ==
+                                         tolower((int)useq[ustart+Ctab[i]-j-1]))
         repl = matchcost;
       else
         repl = mismatchcost;

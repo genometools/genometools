@@ -35,7 +35,7 @@ void gt_computediagonalbandaffinealign(GtAlignment *align,
                                        GtUword vstart, GtUword vlen,
                                        GtWord left_dist,
                                        GtWord right_dist,
-                                        GtUword matchcost,
+                                       GtUword matchcost,
                                        GtUword mismatchcost,
                                        GtUword gap_opening,
                                        GtUword gap_extension);

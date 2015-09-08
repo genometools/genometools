@@ -14,6 +14,8 @@
   ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
+
+#include <ctype.h>
 #include <string.h>
 #include "core/array2dim_api.h"
 #include "core/minmax.h"
@@ -148,8 +150,11 @@ void reconstructalignment_from_affineDtab(GtAlignment *align,
         }
         if (prevnode.edge == Affine_I)
         {
-          if (vseq[i-1]== useq[node.currentrowindex])
+          if (tolower((int)vseq[i-1]) ==
+                                      tolower((int)useq[node.currentrowindex]))
+          {
             gt_alignment_add_replacement(align);
+          }
           else
           {
             gt_alignment_add_deletion(align);
@@ -257,7 +262,9 @@ static GtUword diagonalband_squarespace_affine(const GtUchar *useq,
       minvalue = MIN3(r_dist, d_dist, i_dist);
       Atabcolumn[i][j].Ivalue = minvalue;
 
-      rcost = useq[ustart+i-1]==vseq[vstart+j-1]? matchcost:mismatchcost;
+      rcost = tolower((int)useq[ustart+i-1]) ==
+              tolower((int)vseq[vstart+j-1]) ?
+              matchcost:mismatchcost;
       r_dist = add_safe_max(Atabcolumn[i-1][j-1].Rvalue, rcost);
       d_dist = add_safe_max(Atabcolumn[i-1][j-1].Dvalue, rcost);
       i_dist = add_safe_max(Atabcolumn[i-1][j-1].Ivalue, rcost);
@@ -357,8 +364,9 @@ static GtUword diagonalband_linear_affine(const GtUchar *useq,
 
     if (low_row > 0 )
     {
-      rcost = useq[ustart+rowindex-1] == vseq[vstart+colindex-1]?
-              matchcost:mismatchcost;
+      rcost = tolower((int)useq[ustart+rowindex-1]) ==
+              tolower((int)vseq[vstart+colindex-1]) ?
+                                                    matchcost:mismatchcost;
       r_dist = add_safe_max(northwestAtabentry.Rvalue, rcost);
       d_dist = add_safe_max(northwestAtabentry.Dvalue, rcost);
       i_dist = add_safe_max(northwestAtabentry.Ivalue, rcost);
@@ -389,8 +397,9 @@ static GtUword diagonalband_linear_affine(const GtUchar *useq,
       minvalue = MIN3(r_dist, d_dist, i_dist);
       Atabcolumn[rowindex-low_row].Ivalue = minvalue;
 
-      rcost = useq[ustart+rowindex-1] == vseq[vstart+colindex-1]?
-              matchcost:mismatchcost;
+      rcost = tolower((int)useq[ustart+rowindex-1]) ==
+              tolower((int)vseq[vstart+colindex-1]) ?
+                                                    matchcost:mismatchcost;
       r_dist = add_safe_max(northwestAtabentry.Rvalue, rcost);
       d_dist = add_safe_max(northwestAtabentry.Dvalue, rcost);
       i_dist = add_safe_max(northwestAtabentry.Ivalue, rcost);
@@ -674,8 +683,9 @@ static Rnode evaluateallcolumns(Atabentry *Atabcolumn,
     /* replacement possible for 0-entry */
     if (low_row > 0 )
     {
-      rcost = useq[ustart+low_row-1] == vseq[vstart+colindex-1] ?
-              matchcost:mismatchcost;
+      rcost = tolower((int)useq[ustart+low_row-1]) ==
+              tolower((int)vseq[vstart+colindex-1]) ?
+                                                   matchcost:mismatchcost;
       r_dist = add_safe_max(northwestAtabentry.Rvalue, rcost);
       d_dist = add_safe_max(northwestAtabentry.Dvalue, rcost);
       i_dist = add_safe_max(northwestAtabentry.Ivalue, rcost);
@@ -743,8 +753,9 @@ static Rnode evaluateallcolumns(Atabentry *Atabcolumn,
                          minvalue,r_dist,i_dist,d_dist);
       }
       /* replacement */
-      rcost = useq[ustart+rowindex-1] == vseq[vstart+colindex-1] ?
-              matchcost:mismatchcost;
+      rcost = tolower((int)useq[ustart+rowindex-1]) ==
+              tolower((int)vseq[vstart+colindex-1]) ?
+                                                   matchcost:mismatchcost;
       r_dist = add_safe_max(northwestAtabentry.Rvalue, rcost);
       d_dist = add_safe_max(northwestAtabentry.Dvalue, rcost);
       i_dist = add_safe_max(northwestAtabentry.Ivalue, rcost);
@@ -1166,10 +1177,10 @@ void gt_checkdiagonalbandaffinealign(GT_UNUSED bool forward,
                                      const GtUchar *useq, GtUword ulen,
                                      const GtUchar *vseq, GtUword vlen)
 {
-  GtUword affine_cost1, affine_cost2, affine_cost3, affine_cost4;
+  GtUword affine_cost1, affine_cost2, affine_cost3;
   GtWord left_dist, right_dist, matchcost = 0, mismatchcost = 4,
          gap_opening = 4, gap_extension = 1;
-  GtAlignment *align_linear, *align_square;
+  GtAlignment *align_linear;
 
   if (memchr(useq, LINEAR_EDIST_GAP,ulen) != NULL)
   {
@@ -1189,17 +1200,22 @@ void gt_checkdiagonalbandaffinealign(GT_UNUSED bool forward,
                                                  left_dist, right_dist,
                                                  matchcost, mismatchcost,
                                                  gap_opening, gap_extension);
-  align_square = gt_affinealign(useq, ulen, vseq, vlen, matchcost,
-                                mismatchcost, gap_opening, gap_extension);
-  affine_cost2 = gt_alignment_eval_with_affine_score(align_square, matchcost,
+
+  align_linear = gt_alignment_new_with_seqs(useq, ulen, vseq, vlen);
+  gt_calc_diagonalbandaffinealign(useq, 0, ulen, vseq, 0, vlen,
+                                            left_dist, right_dist,align_linear,
+                                            matchcost, mismatchcost,
+                                            gap_opening, gap_extension);
+
+  affine_cost2 = gt_alignment_eval_generic_with_affine_score(false,
+                                                     align_linear, matchcost,
                                                      mismatchcost, gap_opening,
                                                      gap_extension);
-  gt_alignment_delete(align_square);
-
   if (affine_cost1 != affine_cost2)
   {
     fprintf(stderr,"diagonalband_squarespace_affine = "GT_WU
-            " != "GT_WU" = gt_affinealign\n", affine_cost1, affine_cost2);
+            " != "GT_WU" = gt_calc_diagonalbandaffinealign\n",
+            affine_cost1, affine_cost2);
 
     exit(GT_EXIT_PROGRAMMING_ERROR);
   }
@@ -1215,24 +1231,5 @@ void gt_checkdiagonalbandaffinealign(GT_UNUSED bool forward,
 
     exit(GT_EXIT_PROGRAMMING_ERROR);
   }
-
-  align_linear = gt_alignment_new_with_seqs(useq, ulen, vseq, vlen);
-  gt_calc_diagonalbandaffinealign(useq, 0, ulen, vseq, 0, vlen,
-                                            left_dist, right_dist,align_linear,
-                                            matchcost, mismatchcost,
-                                            gap_opening, gap_extension);
-
-  affine_cost4 = gt_alignment_eval_with_affine_score(align_linear, matchcost,
-                                                     mismatchcost, gap_opening,
-                                                     gap_extension);
-  if (affine_cost1 != affine_cost4)
-  {
-    fprintf(stderr,"diagonalband_squarespace_affine = "GT_WU
-            " != "GT_WU" = gt_calc_diagonalbandaffinealign\n", affine_cost1,
-                                                               affine_cost4);
-
-    exit(GT_EXIT_PROGRAMMING_ERROR);
-  }
-    gt_alignment_delete(align_linear);
-
+  gt_alignment_delete(align_linear);
 }

@@ -14,6 +14,7 @@
   ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
+#include <ctype.h>
 #include <string.h>
 #include "core/array2dim_api.h"
 #include "core/assert_api.h"
@@ -181,7 +182,8 @@ static GtUword diagonalband_squarespace_distance_only(const GtUchar *useq,
     {
       E[i][j] = add_safe_max(E[i][j-1], gapcost);
 
-      if ((val = add_safe_max(E[i-1][j-1],(useq[ustart+i-1] == vseq[vstart+j-1]?
+      if ((val = add_safe_max(E[i-1][j-1],(tolower((int)useq[ustart+i-1]) ==
+                                           tolower((int)vseq[vstart+j-1]) ?
                                 matchcost : mismatchcost)))
           <= E[i][j])
       {
@@ -256,7 +258,8 @@ static GtUword diagonalband_linear_distance_only(const GtUchar *useq,
     if (low_row > 0 )
     {
       if ((val = add_safe_max(northwestEDtabentry,
-                             (useq[ustart+low_row-1] == vseq[vstart+colindex-1]?
+                              (tolower((int)useq[ustart+low_row-1]) ==
+                              tolower((int)vseq[vstart+colindex-1])?
                               matchcost : mismatchcost)))
           < EDtabcolumn[0])
       EDtabcolumn[0] = val;
@@ -276,7 +279,8 @@ static GtUword diagonalband_linear_distance_only(const GtUchar *useq,
       EDtabcolumn[rowindex-low_row] = add_safe_max(westEDtabentry, gapcost);
 
       val = add_safe_max(northwestEDtabentry,
-                        (useq[ustart+rowindex-1] == vseq[vstart+colindex-1] ?
+                        (tolower((int)useq[ustart+rowindex-1]) ==
+                         tolower((int)vseq[vstart+colindex-1]) ?
                          matchcost : mismatchcost));
       if (val <= EDtabcolumn[rowindex-low_row])
         EDtabcolumn[rowindex-low_row] = val;
@@ -414,7 +418,8 @@ static GtUword evaluateallcolumns(GtUword *EDtabcolumn,
     if (low_row > 0 )
     {
       if ((val = add_safe_max(northwestEDtabentry,
-                             (useq[ustart+low_row-1] == vseq[vstart+colindex-1]?
+                             (tolower((int)useq[ustart+low_row-1]) ==
+                              tolower((int)vseq[vstart+colindex-1])?
                               matchcost : mismatchcost)))
           <= EDtabcolumn[0])
       {
@@ -471,7 +476,8 @@ static GtUword evaluateallcolumns(GtUword *EDtabcolumn,
       }
       /* replacement */
       val = add_safe_max(northwestEDtabentry,
-                        (useq[ustart+rowindex-1] == vseq[vstart+colindex-1] ?
+                        (tolower((int)useq[ustart+rowindex-1]) ==
+                         tolower((int)vseq[vstart+colindex-1]) ?
                          matchcost : mismatchcost));
       if (val <= EDtabcolumn[rowindex-low_row])
       {
@@ -772,7 +778,7 @@ void gt_checkdiagonalbandalign(GT_UNUSED bool forward,
                                 const GtUchar *vseq,
                                 GtUword vlen)
 {
-  GtUword edist1, edist2, edist3, edist4, edist5;
+  GtUword edist1, edist2, edist3;
   GtWord left_dist, right_dist, matchcost = 0, mismatchcost = 1, gapcost = 1;
   GtAlignment *align;
 
@@ -817,7 +823,8 @@ void gt_checkdiagonalbandalign(GT_UNUSED bool forward,
   gt_calc_diagonalbandalign(useq, 0, ulen, vseq, 0, vlen, left_dist, right_dist,
                             align, matchcost, mismatchcost, gapcost);
 
-  edist3 = gt_alignment_eval_with_score(align, matchcost,mismatchcost, gapcost);
+  edist3 = gt_alignment_eval_generic_with_score(false, align, matchcost,
+                                                mismatchcost, gapcost);
 
   if (edist2 != edist3)
   {
@@ -827,20 +834,4 @@ void gt_checkdiagonalbandalign(GT_UNUSED bool forward,
     exit(GT_EXIT_PROGRAMMING_ERROR);
   }
   gt_alignment_delete(align);
-
-  /* set new left and right to set diagonalband to the whole matrix */
-  left_dist = -ulen;
-  right_dist = vlen;
-  edist4 = diagonalband_linear_distance_only(useq, 0, ulen, vseq, 0, vlen,
-                                             left_dist, right_dist, matchcost,
-                                             mismatchcost, gapcost);
-  edist5 = gt_squarededistunit(useq, ulen, vseq, vlen);
-
-  if (edist4 != edist5)
-  {
-    fprintf(stderr,"diagonalband_linear_distance_only = "GT_WU" != "GT_WU
-              " = gt_squarededistunit\n", edist4, edist5);
-
-    exit(GT_EXIT_PROGRAMMING_ERROR);
-  }
 }
