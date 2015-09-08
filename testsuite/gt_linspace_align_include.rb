@@ -135,3 +135,9 @@ Test do
            "-global -a 0 2 3 1 -d \" -5\" 4"
   run "diff #{last_stdout} #{$testdata}gt_linspace_align_global_affine_special_cases.out"
 end
+
+Name "gt linspace_align all checkfun with gt_paircmp"
+Keywords "gt_linspace_align"
+Test do
+  run_test "#{$bin}gt dev paircmp -a acgt 6"
+end
