@@ -31,7 +31,7 @@
 #define LINEAR_EDIST_GAP          ((GtUchar) UCHAR_MAX)
 typedef struct {
   GtUword Rvalue, Dvalue, Ivalue;
-} Atabentry;
+} ADiagtabentry;
 
 typedef struct {
   GtUword lastcpoint, currentrowindex;
@@ -181,7 +181,7 @@ static GtUword diagonalband_squarespace_affine(const GtUchar *useq,
 {
   GtUword i,j, low_row, high_row, rcost, r_dist, d_dist, i_dist,
           minvalue, distance;
-  Atabentry **Atabcolumn;
+  ADiagtabentry **Atabcolumn;
 
    if ((left_dist > MIN(0, (GtWord)vlen-(GtWord)ulen))||
       (right_dist < MAX(0, (GtWord)vlen-(GtWord)ulen)))
@@ -303,7 +303,7 @@ static GtUword diagonalband_linear_affine(const GtUchar *useq,
 {
   GtUword distance, colindex, rowindex, low_row, high_row, width,
           rcost, r_dist, d_dist, i_dist, minvalue;
-  Atabentry *Atabcolumn, northwestAtabentry, westAtabentry;
+  ADiagtabentry *Atabcolumn, northwestADiagtabentry, westADiagtabentry;
   bool last_row = false;
 
   distance = GT_UWORD_MAX;
@@ -333,21 +333,21 @@ static GtUword diagonalband_linear_affine(const GtUchar *useq,
   }
   for (colindex = 1; colindex <= vlen; colindex++)
   {
-    northwestAtabentry = Atabcolumn[0];
+    northwestADiagtabentry = Atabcolumn[0];
 
     if (colindex > right_dist)
     {
-      westAtabentry = Atabcolumn[1];
+      westADiagtabentry = Atabcolumn[1];
       low_row++;
     }
     else
-      westAtabentry = Atabcolumn[0];
+      westADiagtabentry = Atabcolumn[0];
     if (high_row < ulen)
       high_row ++;
 
-    r_dist = add_safe_umax(westAtabentry.Rvalue,gap_extension+gap_opening);
-    d_dist = add_safe_umax(westAtabentry.Dvalue,gap_extension+gap_opening);
-    i_dist = add_safe_umax(westAtabentry.Ivalue,gap_extension);
+    r_dist = add_safe_umax(westADiagtabentry.Rvalue,gap_extension+gap_opening);
+    d_dist = add_safe_umax(westADiagtabentry.Dvalue,gap_extension+gap_opening);
+    i_dist = add_safe_umax(westADiagtabentry.Ivalue,gap_extension);
     minvalue = MIN3(r_dist, d_dist, i_dist);
     Atabcolumn[0].Ivalue = minvalue;
     Atabcolumn[0].Rvalue = GT_UWORD_MAX;
@@ -358,32 +358,32 @@ static GtUword diagonalband_linear_affine(const GtUchar *useq,
       rcost = tolower((int)useq[ustart+rowindex-1]) ==
               tolower((int)vseq[vstart+colindex-1]) ?
                                                     matchcost:mismatchcost;
-      r_dist = add_safe_umax(northwestAtabentry.Rvalue, rcost);
-      d_dist = add_safe_umax(northwestAtabentry.Dvalue, rcost);
-      i_dist = add_safe_umax(northwestAtabentry.Ivalue, rcost);
+      r_dist = add_safe_umax(northwestADiagtabentry.Rvalue, rcost);
+      d_dist = add_safe_umax(northwestADiagtabentry.Dvalue, rcost);
+      i_dist = add_safe_umax(northwestADiagtabentry.Ivalue, rcost);
       minvalue = MIN3(r_dist, d_dist, i_dist);
       Atabcolumn[0].Rvalue = minvalue;
     }
     for (rowindex = low_row + 1; rowindex <= high_row; rowindex++)
     {
-      northwestAtabentry = westAtabentry;
+      northwestADiagtabentry = westADiagtabentry;
       if (!last_row && rowindex == high_row)
       {
-        westAtabentry.Rvalue = GT_UWORD_MAX;
-        westAtabentry.Dvalue = GT_UWORD_MAX;
-        westAtabentry.Ivalue = GT_UWORD_MAX;
+        westADiagtabentry.Rvalue = GT_UWORD_MAX;
+        westADiagtabentry.Dvalue = GT_UWORD_MAX;
+        westADiagtabentry.Ivalue = GT_UWORD_MAX;
       }
       else if (low_row > 0)
-        westAtabentry = Atabcolumn[rowindex-low_row+1];
+        westADiagtabentry = Atabcolumn[rowindex-low_row+1];
       else
-        westAtabentry = Atabcolumn[rowindex-low_row];
+        westADiagtabentry = Atabcolumn[rowindex-low_row];
 
       if (rowindex == ulen)
         last_row = true;
 
-      r_dist = add_safe_umax(westAtabentry.Rvalue,gap_extension+gap_opening);
-      d_dist = add_safe_umax(westAtabentry.Dvalue,gap_extension+gap_opening);
-      i_dist = add_safe_umax(westAtabentry.Ivalue,gap_extension);
+      r_dist = add_safe_umax(westADiagtabentry.Rvalue,gap_extension+gap_opening);
+      d_dist = add_safe_umax(westADiagtabentry.Dvalue,gap_extension+gap_opening);
+      i_dist = add_safe_umax(westADiagtabentry.Ivalue,gap_extension);
 
       minvalue = MIN3(r_dist, d_dist, i_dist);
       Atabcolumn[rowindex-low_row].Ivalue = minvalue;
@@ -391,9 +391,9 @@ static GtUword diagonalband_linear_affine(const GtUchar *useq,
       rcost = tolower((int)useq[ustart+rowindex-1]) ==
               tolower((int)vseq[vstart+colindex-1]) ?
                                                     matchcost:mismatchcost;
-      r_dist = add_safe_umax(northwestAtabentry.Rvalue, rcost);
-      d_dist = add_safe_umax(northwestAtabentry.Dvalue, rcost);
-      i_dist = add_safe_umax(northwestAtabentry.Ivalue, rcost);
+      r_dist = add_safe_umax(northwestADiagtabentry.Rvalue, rcost);
+      d_dist = add_safe_umax(northwestADiagtabentry.Dvalue, rcost);
+      i_dist = add_safe_umax(northwestADiagtabentry.Ivalue, rcost);
 
       minvalue = MIN3(r_dist, d_dist, i_dist);
       Atabcolumn[rowindex-low_row].Rvalue = minvalue;
@@ -468,16 +468,16 @@ static void inline set_valid_Rnode(Rnode *node_to, Rtabentry *entry_from,
      *node_to = entry_from->val_D;
 }
 
-static void firstAtabRtabcolumn(Atabentry *Atabcolumn,
-                                Rtabentry *Rtabcolumn,
-                                AffineDiagentry *Diagcolumn,
-                                AffineAlignEdge edge,
-                                AffineAlignEdge from_edge,
-                                GtUword offset,
-                                GtWord left_dist,
-                                GtWord right_dist,
-                                GtUword gap_opening,
-                                GtUword gap_extension)
+static void firstaffineDBtabcolumn(ADiagtabentry *Atabcolumn,
+                                   Rtabentry *Rtabcolumn,
+                                   AffineDiagentry *Diagcolumn,
+                                   AffineAlignEdge edge,
+                                   AffineAlignEdge from_edge,
+                                   GtUword offset,
+                                   GtWord left_dist,
+                                   GtWord right_dist,
+                                   GtUword gap_opening,
+                                   GtUword gap_extension)
 {
   GtUword rowindex, low_row, high_row;
   GtWord diag;
@@ -580,28 +580,28 @@ static void firstAtabRtabcolumn(Atabentry *Atabcolumn,
 
 }
 
-static Rnode evaluateallcolumns(Atabentry *Atabcolumn,
-                                Rtabentry *Rtabcolumn,
-                                AffineDiagentry *Diagcolumn,
-                                AffineAlignEdge edge,
-                                AffineAlignEdge from_edge,
-                                AffineAlignEdge to_edge,
-                                GtUword offset,
-                                const GtUchar *useq,
-                                GtUword ustart, GtUword ulen,
-                                const GtUchar *vseq,
-                                GtUword vstart, GtUword vlen,
-                                GtWord left_dist, GtWord right_dist,
-                                GtUword matchcost,
-                                GtUword mismatchcost,
-                                GtUword gap_opening,
-                                GtUword gap_extension)
+static Rnode evaluateallaffineDBcolumns(ADiagtabentry *Atabcolumn,
+                                        Rtabentry *Rtabcolumn,
+                                        AffineDiagentry *Diagcolumn,
+                                        AffineAlignEdge edge,
+                                        AffineAlignEdge from_edge,
+                                        AffineAlignEdge to_edge,
+                                        GtUword offset,
+                                        const GtUchar *useq,
+                                        GtUword ustart, GtUword ulen,
+                                        const GtUchar *vseq,
+                                        GtUword vstart, GtUword vlen,
+                                        GtWord left_dist, GtWord right_dist,
+                                        GtUword matchcost,
+                                        GtUword mismatchcost,
+                                        GtUword gap_opening,
+                                        GtUword gap_extension)
 {
   GtUword colindex, rowindex, r_dist, d_dist, i_dist, minvalue, rcost,
           low_row, high_row; /*lowest and highest row between a diagonal band*/
   GtWord diag;
   bool last_row = false;
-  Atabentry northwestAtabentry, westAtabentry;
+  ADiagtabentry northwestADiagtabentry, westADiagtabentry;
   Rtabentry northwestRtabentry, westRtabentry;
   Rnode lastcpoint = {GT_UWORD_MAX, Affine_X};
 
@@ -618,33 +618,33 @@ static Rnode evaluateallcolumns(Atabentry *Atabcolumn,
     last_row = true;
 
  /* first column */
-  firstAtabRtabcolumn(Atabcolumn, Rtabcolumn, Diagcolumn, edge,from_edge,offset,
-                     left_dist, right_dist, gap_opening, gap_extension);
+  firstaffineDBtabcolumn(Atabcolumn, Rtabcolumn, Diagcolumn, edge, from_edge,
+                   offset, left_dist, right_dist, gap_opening, gap_extension);
 
   /* next columns */
   for (colindex = 1; colindex <= vlen; colindex++)
   {
-    northwestAtabentry = Atabcolumn[0];
+    northwestADiagtabentry = Atabcolumn[0];
     northwestRtabentry = Rtabcolumn[0];
 
     if (colindex > right_dist)
     {
-      westAtabentry = Atabcolumn[1];
+      westADiagtabentry = Atabcolumn[1];
       westRtabentry = Rtabcolumn[1];
       low_row++;
     }
     else
     {
-      westAtabentry = Atabcolumn[0];
+      westADiagtabentry = Atabcolumn[0];
       westRtabentry = Rtabcolumn[0];
     }
     if (high_row < ulen)
       high_row ++;
 
     /* insertion */
-    r_dist = add_safe_umax(westAtabentry.Rvalue, gap_extension + gap_opening);
-    d_dist = add_safe_umax(westAtabentry.Dvalue, gap_extension + gap_opening);
-    i_dist = add_safe_umax(westAtabentry.Ivalue, gap_extension);
+    r_dist = add_safe_umax(westADiagtabentry.Rvalue, gap_extension + gap_opening);
+    d_dist = add_safe_umax(westADiagtabentry.Dvalue, gap_extension + gap_opening);
+    i_dist = add_safe_umax(westADiagtabentry.Ivalue, gap_extension);
 
     minvalue = MIN3(r_dist, d_dist, i_dist);
     Atabcolumn[0].Ivalue = minvalue;
@@ -677,9 +677,9 @@ static Rnode evaluateallcolumns(Atabentry *Atabcolumn,
       rcost = tolower((int)useq[ustart+low_row-1]) ==
               tolower((int)vseq[vstart+colindex-1]) ?
                                                    matchcost:mismatchcost;
-      r_dist = add_safe_umax(northwestAtabentry.Rvalue, rcost);
-      d_dist = add_safe_umax(northwestAtabentry.Dvalue, rcost);
-      i_dist = add_safe_umax(northwestAtabentry.Ivalue, rcost);
+      r_dist = add_safe_umax(northwestADiagtabentry.Rvalue, rcost);
+      d_dist = add_safe_umax(northwestADiagtabentry.Dvalue, rcost);
+      i_dist = add_safe_umax(northwestADiagtabentry.Ivalue, rcost);
 
       minvalue = MIN3(r_dist, d_dist, i_dist);
       Atabcolumn[0].Rvalue = minvalue;
@@ -700,33 +700,33 @@ static Rnode evaluateallcolumns(Atabentry *Atabcolumn,
     }
     for (rowindex = low_row + 1; rowindex <= high_row; rowindex++)
     {
-      northwestAtabentry = westAtabentry;
+      northwestADiagtabentry = westADiagtabentry;
       northwestRtabentry = westRtabentry;
 
       if (!last_row && rowindex == high_row)
       {/* prev is outside of diagonalband*/
-        westAtabentry = (Atabentry) {GT_UWORD_MAX,GT_UWORD_MAX,GT_UWORD_MAX};
+        westADiagtabentry = (ADiagtabentry) {GT_UWORD_MAX,GT_UWORD_MAX,GT_UWORD_MAX};
         westRtabentry.val_R = (Rnode) {GT_UWORD_MAX,Affine_X};
         westRtabentry.val_D = (Rnode) {GT_UWORD_MAX,Affine_X};
         westRtabentry.val_I = (Rnode) {GT_UWORD_MAX,Affine_X};
       }
       else if (low_row > 0)
       {/* shifted diagonalband*/
-        westAtabentry = Atabcolumn[rowindex-low_row+1];
+        westADiagtabentry = Atabcolumn[rowindex-low_row+1];
         westRtabentry = Rtabcolumn[rowindex-low_row+1];
       }
       else
       {/* normaly prev*/
-        westAtabentry = Atabcolumn[rowindex-low_row];
+        westADiagtabentry = Atabcolumn[rowindex-low_row];
         westRtabentry = Rtabcolumn[rowindex-low_row];
       }
       if (rowindex == ulen)
         last_row = true;
 
       /* insertion */
-      r_dist = add_safe_umax(westAtabentry.Rvalue,gap_extension+gap_opening);
-      d_dist = add_safe_umax(westAtabentry.Dvalue,gap_extension+gap_opening);
-      i_dist = add_safe_umax(westAtabentry.Ivalue,gap_extension);
+      r_dist = add_safe_umax(westADiagtabentry.Rvalue,gap_extension+gap_opening);
+      d_dist = add_safe_umax(westADiagtabentry.Dvalue,gap_extension+gap_opening);
+      i_dist = add_safe_umax(westADiagtabentry.Ivalue,gap_extension);
 
       minvalue = MIN3(r_dist, d_dist, i_dist);
       Atabcolumn[rowindex-low_row].Ivalue = minvalue;
@@ -747,9 +747,9 @@ static Rnode evaluateallcolumns(Atabentry *Atabcolumn,
       rcost = tolower((int)useq[ustart+rowindex-1]) ==
               tolower((int)vseq[vstart+colindex-1]) ?
                                                    matchcost:mismatchcost;
-      r_dist = add_safe_umax(northwestAtabentry.Rvalue, rcost);
-      d_dist = add_safe_umax(northwestAtabentry.Dvalue, rcost);
-      i_dist = add_safe_umax(northwestAtabentry.Ivalue, rcost);
+      r_dist = add_safe_umax(northwestADiagtabentry.Rvalue, rcost);
+      d_dist = add_safe_umax(northwestADiagtabentry.Dvalue, rcost);
+      i_dist = add_safe_umax(northwestADiagtabentry.Ivalue, rcost);
       minvalue = MIN3(r_dist, d_dist, i_dist);
 
       Atabcolumn[rowindex-low_row].Rvalue = minvalue;
@@ -826,26 +826,26 @@ static Rnode evaluateallcolumns(Atabentry *Atabcolumn,
   return lastcpoint;
 }
 
-static Rnode evaluatecrosspoints(Atabentry *Atabcolumn,
-                                 Rtabentry *Rtabcolumn,
-                                 AffineDiagentry *Diagcolumn,
-                                 AffineAlignEdge edge,
-                                 AffineAlignEdge from_edge,
-                                 AffineAlignEdge to_edge,
-                                 GtUword rowoffset,
-                                 GtUword coloffset,
-                                 const GtUchar *useq,
-                                 GtUword ustart,
-                                 GtUword ulen,
-                                 const GtUchar *vseq,
-                                 GtUword vstart,
-                                 GtUword vlen,
-                                 GtWord left_dist,
-                                 GtWord right_dist,
-                                 GtUword matchcost,
-                                 GtUword mismatchcost,
-                                 GtUword gap_opening,
-                                 GtUword gap_extension)
+static Rnode evaluateaffineDBcrosspoints(ADiagtabentry *Atabcolumn,
+                                         Rtabentry *Rtabcolumn,
+                                         AffineDiagentry *Diagcolumn,
+                                         AffineAlignEdge edge,
+                                         AffineAlignEdge from_edge,
+                                         AffineAlignEdge to_edge,
+                                         GtUword rowoffset,
+                                         GtUword coloffset,
+                                         const GtUchar *useq,
+                                         GtUword ustart,
+                                         GtUword ulen,
+                                         const GtUchar *vseq,
+                                         GtUword vstart,
+                                         GtUword vlen,
+                                         GtWord left_dist,
+                                         GtWord right_dist,
+                                         GtUword matchcost,
+                                         GtUword mismatchcost,
+                                         GtUword gap_opening,
+                                         GtUword gap_extension)
 {
   GtUword idx, currentrowindex, new_ulen;
   GtWord new_left, new_right, diag;
@@ -872,7 +872,7 @@ static Rnode evaluatecrosspoints(Atabentry *Atabcolumn,
     return (Rnode) {0, Affine_D};
   }
 
-  rpoint = evaluateallcolumns(Atabcolumn, Rtabcolumn, Diagcolumn, edge,
+  rpoint = evaluateallaffineDBcolumns(Atabcolumn, Rtabcolumn, Diagcolumn, edge,
                               from_edge, to_edge, rowoffset, useq, ustart, ulen,
                               vseq, vstart, vlen, left_dist, right_dist,
                               matchcost, mismatchcost,
@@ -884,14 +884,14 @@ static Rnode evaluatecrosspoints(Atabentry *Atabcolumn,
   if (idx == GT_UWORD_MAX)
   {
     if (diag < 0)
-      return evaluatecrosspoints(Atabcolumn, Rtabcolumn,Diagcolumn, edge,
-                                 from_edge, to_edge, rowoffset, coloffset,
+      return evaluateaffineDBcrosspoints(Atabcolumn, Rtabcolumn,Diagcolumn,
+                                 edge, from_edge, to_edge, rowoffset, coloffset,
                                  useq, ustart, ulen, vseq, vstart, vlen,
                                  left_dist+1, right_dist, matchcost,
                                  mismatchcost, gap_opening, gap_extension);
     else if (diag > 0)
-      return evaluatecrosspoints(Atabcolumn, Rtabcolumn, Diagcolumn, edge,
-                                 from_edge, to_edge, rowoffset, coloffset,
+      return evaluateaffineDBcrosspoints(Atabcolumn, Rtabcolumn, Diagcolumn,
+                                 edge, from_edge, to_edge, rowoffset, coloffset,
                                  useq, ustart, ulen, vseq, vstart, vlen,
                                  left_dist, right_dist-1, matchcost,
                                  mismatchcost, gap_opening, gap_extension);
@@ -934,7 +934,8 @@ static Rnode evaluatecrosspoints(Atabentry *Atabcolumn,
       new_right = 0;
       new_ulen =  ulen - (currentrowindex+1-rowoffset);
 
-      lastrpoint = evaluatecrosspoints(Atabcolumn, Rtabcolumn, Diagcolumn+idx,
+      lastrpoint = evaluateaffineDBcrosspoints(
+                           Atabcolumn, Rtabcolumn, Diagcolumn+idx,
                            Affine_D, cpoint.edge, to_edge, currentrowindex+1,
                            coloffset+idx, useq, currentrowindex+1, new_ulen,
                            vseq, vstart+idx, vlen-idx, new_left, new_right,
@@ -948,7 +949,8 @@ static Rnode evaluatecrosspoints(Atabentry *Atabcolumn,
                       ((GtWord)vlen-(GtWord)idx-1));
       new_ulen = ulen - (currentrowindex-rowoffset);
 
-      lastrpoint = evaluatecrosspoints(Atabcolumn, Rtabcolumn, Diagcolumn+idx+1,
+      lastrpoint = evaluateaffineDBcrosspoints(
+                           Atabcolumn, Rtabcolumn, Diagcolumn+idx+1,
                            Affine_I, cedge, to_edge, currentrowindex,
                            coloffset+idx+1, useq, currentrowindex, new_ulen,
                            vseq, vstart+idx+1, vlen-idx-1, new_left, new_right,
@@ -997,7 +999,8 @@ static Rnode evaluatecrosspoints(Atabentry *Atabcolumn,
       new_ulen = prevcpoint.currentrowindex-
                  currentrowindex-1;
 
-      temprpoint = evaluatecrosspoints(Atabcolumn, Rtabcolumn,Diagcolumn+idx+1,
+      temprpoint = evaluateaffineDBcrosspoints(
+                           Atabcolumn, Rtabcolumn,Diagcolumn+idx+1,
                            Affine_I, cedge, Affine_D, currentrowindex,
                            coloffset + idx + 1, useq, currentrowindex, new_ulen,
                            vseq, vstart + idx + 1, rpoint.idx-idx-1,
@@ -1024,7 +1027,8 @@ static Rnode evaluatecrosspoints(Atabentry *Atabcolumn,
       new_right = 0;
       new_ulen = prevcpoint.currentrowindex-currentrowindex-1;
 
-      temprpoint = evaluatecrosspoints(Atabcolumn, Rtabcolumn, Diagcolumn + idx,
+      temprpoint = evaluateaffineDBcrosspoints(
+                         Atabcolumn, Rtabcolumn, Diagcolumn + idx,
                          Affine_D, cpoint.edge, Affine_I, currentrowindex + 1,
                          coloffset + idx, useq, currentrowindex+1, new_ulen,
                          vseq, vstart+idx, rpoint.idx-1-idx,new_left, new_right,
@@ -1048,7 +1052,8 @@ static Rnode evaluatecrosspoints(Atabentry *Atabcolumn,
        new_right = MIN(right_dist, (GtWord)idx);
        new_ulen = Diagcolumn[idx].val_D.currentrowindex-ustart-1;
 
-       rpoint = evaluatecrosspoints(Atabcolumn, Rtabcolumn, Diagcolumn,
+       rpoint = evaluateaffineDBcrosspoints(
+                          Atabcolumn, Rtabcolumn, Diagcolumn,
                           edge, from_edge,Affine_D,rowoffset, coloffset,
                           useq, ustart, new_ulen,
                           vseq, vstart, idx,
@@ -1068,7 +1073,8 @@ static Rnode evaluatecrosspoints(Atabentry *Atabcolumn,
                  -((GtWord)cpoint.currentrowindex-(GtWord)ustart));
 
        new_right = MIN((GtWord)idx-1, right_dist);
-       rpoint = evaluatecrosspoints(Atabcolumn, Rtabcolumn, Diagcolumn,
+       rpoint = evaluateaffineDBcrosspoints(
+                            Atabcolumn, Rtabcolumn, Diagcolumn,
                             edge, from_edge,Affine_I,rowoffset, coloffset,
                             useq, ustart, cpoint.currentrowindex-ustart,
                             vseq, vstart, idx-1, new_left, new_right,
@@ -1095,7 +1101,7 @@ static void gt_calc_diagonalbandaffinealign(const GtUchar *useq,
                                             GtUword gap_opening,
                                             GtUword gap_extension)
 {
-  Atabentry *Atabcolumn;
+  ADiagtabentry *Atabcolumn;
   Rtabentry *Rtabcolumn;
   AffineDiagentry *Diagcolumn;
   Rnode lastnode;
@@ -1124,7 +1130,8 @@ static void gt_calc_diagonalbandaffinealign(const GtUchar *useq,
     Diagcolumn[idx].val_I = (Diagnode) {GT_UWORD_MAX, GT_UWORD_MAX, Affine_X};
   }
 
-  lastnode = evaluatecrosspoints(Atabcolumn, Rtabcolumn, Diagcolumn, Affine_X,
+  lastnode = evaluateaffineDBcrosspoints(
+                            Atabcolumn, Rtabcolumn, Diagcolumn, Affine_X,
                             Affine_X, Affine_X, 0, 0, useq, ustart, ulen,
                             vseq, vstart, vlen, left_dist, right_dist,
                             matchcost, mismatchcost, gap_opening,gap_extension);
