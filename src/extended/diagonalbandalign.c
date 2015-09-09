@@ -24,6 +24,7 @@
 #include "core/types_api.h"
 #include "core/divmodmul.h"
 #include "core/unused_api.h"
+#include "extended/linearalign_utilities.h"
 #include "match/squarededist.h"
 
 #include "extended/diagonalbandalign.h"
@@ -40,16 +41,6 @@ typedef struct {
   GtUword lastcpoint, currentrowindex;
   LinearAlignEdge edge;
 } Diagentry;
-
-inline GtWord add_usafe(GtUword val1, GtUword val2, GtUword exception)
-{
-  return (val1 != exception) ? val1 + val2 : exception;
-}
-
-inline GtWord add_safe_umax(GtUword val1, GtUword val2)
-{
-  return add_usafe(val1, val2, GT_UWORD_MAX);
-}
 
 /*reconstruct alignment from crosspoints, crosspoints relating to diagonalband*/
 void reconstructalignment_from_Dtab(GtAlignment *align,

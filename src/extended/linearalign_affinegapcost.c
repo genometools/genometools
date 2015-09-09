@@ -25,6 +25,7 @@
 #include "core/ma_api.h"
 #include "extended/affinealign.h"
 #include "extended/linearalign_affinegapcost.h"
+#include "extended/linearalign_utilities.h"
 #include "extended/maxcoordvalue.h"
 #include "extended/reconstructalignment.h"
 
@@ -33,21 +34,6 @@
 typedef struct {
   GtUwordPair Rstart, Dstart, Istart;
 } Starttabentry;
-
-static inline GtWord add_safe(GtWord val1, GtWord val2, GtWord exception)
-{
-  return (val1 != exception) ? val1 + val2 : exception;
-}
-
-static inline GtWord add_safe_max(GtWord val1, GtWord val2)
-{
-  return add_safe(val1,val2,GT_WORD_MAX);
-}
-
-static inline GtWord add_safe_min(GtWord val1, GtWord val2)
-{
-  return add_safe(val1,val2,GT_WORD_MIN);
-}
 
 static void change_score_to_cost_affine_function(GtWord matchscore,
                                                  GtWord mismatchscore,
@@ -545,20 +531,26 @@ GtUword gt_calc_affinealign_linear(const GtUchar *useq, GtUword ustart,
   AffinealignDPentry *Atabcolumn;
   Rtabentry *Rtabcolumn;
   GtAlignment *square_align;
+  GtUchar *low_useq, *low_vseq;
 
   if (ulen == 0UL)
   {
       distance = construct_trivial_insertion_alignment(align, vlen,
                                                       gap_extension);
       distance += gap_opening;
+      return distance;
   }
   else if (vlen == 0UL)
   {
       distance = construct_trivial_deletion_alignment(align, ulen,
                                                       gap_extension);
       distance += gap_opening;
+      return distance;
   }
-  else if (ulen == 1UL || vlen == 1UL )
+
+  low_useq = sequence_to_lower_case(useq, ulen);
+  low_vseq = sequence_to_lower_case(vseq, vlen);
+  if (ulen == 1UL || vlen == 1UL )
   {
     square_align = gt_affinealign(useq+ustart, ulen,
                                   vseq+vstart, vlen,
@@ -599,7 +591,8 @@ GtUword gt_calc_affinealign_linear(const GtUchar *useq, GtUword ustart,
     gt_free(Atabcolumn);
     gt_free(Rtabcolumn);
   }
-
+  gt_free(low_useq);
+  gt_free(low_vseq);
   return distance;
 }
 
@@ -943,12 +936,11 @@ void gt_checkaffinelinearspace(GT_UNUSED bool forward,
                                GtUword vlen)
 {
   GtAlignment *align_linear, *align_square;
-  GtUword i, affine_score1, affine_score2, affine_score3;
+  GtUword affine_score1, affine_score2, affine_score3;
   GtWord matchcost = 0, mismatchcost = 4, gap_opening = 4, gap_extension = 1;
   /* immediate result, because affinealign (square) cannot
    * handle lower/upper cases*/
-  GtUchar *low_useq = malloc(sizeof(*low_useq)*ulen),
-          *low_vseq = malloc(sizeof(*low_vseq)*vlen);
+  GtUchar *low_useq, *low_vseq;
 
   gt_assert(useq && vseq);
   if (memchr(useq, LINEAR_EDIST_GAP,ulen) != NULL)
@@ -961,12 +953,9 @@ void gt_checkaffinelinearspace(GT_UNUSED bool forward,
     fprintf(stderr,"%s: sequence v contains gap symbol\n",__func__);
     exit(GT_EXIT_PROGRAMMING_ERROR);
   }
-  for (i = 0; i < ulen; i++)
-    low_useq[i] = tolower((int)useq[i]);
-  low_useq[i] = '\0';
-  for (i = 0; i < vlen; i++)
-    low_vseq[i] = tolower((int)vseq[i]);
-  low_vseq[i] = '\0';
+
+  low_useq = sequence_to_lower_case(useq, ulen);
+  low_vseq = sequence_to_lower_case(vseq, vlen);
 
   align_linear = gt_alignment_new_with_seqs(low_useq, ulen, low_vseq, vlen);
 
@@ -1014,11 +1003,10 @@ void gt_checkaffinelinearspace_local(GT_UNUSED bool forward,
                                      GtUword vlen)
 {
   GtAlignment *align;
-  GtUword i, affine_score1, affine_score2;
+  GtUword affine_score1, affine_score2;
   GtWord matchscore = 6, mismatchscore = -3,
          gap_opening = -2, gap_extension = -1;
-  GtUchar *low_useq = malloc(sizeof(*low_useq)*ulen),
-          *low_vseq = malloc(sizeof(*low_vseq)*vlen);
+  GtUchar *low_useq, *low_vseq;
 
   gt_assert(useq && vseq);
   if (memchr(useq, LINEAR_EDIST_GAP,ulen) != NULL)
@@ -1031,12 +1019,9 @@ void gt_checkaffinelinearspace_local(GT_UNUSED bool forward,
     fprintf(stderr,"%s: sequence v contains gap symbol\n",__func__);
     exit(GT_EXIT_PROGRAMMING_ERROR);
   }
-  for (i = 0; i < ulen; i++)
-    low_useq[i] = tolower((int)useq[i]);
-  low_useq[i] = '\0';
-  for (i = 0; i < vlen; i++)
-    low_vseq[i] = tolower((int)vseq[i]);
-  low_vseq[i] = '\0';
+
+  low_useq = sequence_to_lower_case(useq, ulen);
+  low_vseq = sequence_to_lower_case(vseq, vlen);
 
   align = gt_alignment_new();
   affine_score1 = gt_calc_affinealign_linear_local(low_useq, 0, ulen, low_vseq,

@@ -30,8 +30,9 @@
 #include "core/divmodmul.h"
 #include "match/squarededist.h"
 #include "extended/alignment.h"
-#include "extended/reconstructalignment.h"
+#include "extended/linearalign_utilities.h"
 #include "extended/maxcoordvalue.h"
+#include "extended/reconstructalignment.h"
 
 #include "extended/linearalign.h"
 #define LINEAR_EDIST_GAP          ((GtUchar) UCHAR_MAX)
@@ -365,6 +366,7 @@ GtUword gt_calc_linearalign(const GtUchar *useq,
                             GtUword gapcost)
 {
   GtUword distance, *Ctab, *EDtabcolumn, *Rtabcolumn;
+  GtUchar *low_useq, *low_vseq;
 
   if (ulen == 0UL)
   {
@@ -375,6 +377,8 @@ GtUword gt_calc_linearalign(const GtUchar *useq,
     return construct_trivial_deletion_alignment(align,vlen,gapcost);
   }
 
+  low_useq = sequence_to_lower_case(useq, ulen);
+  low_vseq = sequence_to_lower_case(vseq, vlen);
   if (ulen == 1UL || vlen == 1UL ) {
     distance = alignment_in_square_space(align, useq, ustart, ulen,
                                          vseq, vstart, vlen, matchcost,
@@ -402,6 +406,8 @@ GtUword gt_calc_linearalign(const GtUchar *useq,
     gt_free(EDtabcolumn);
     gt_free(Rtabcolumn);
   }
+  gt_free(low_useq);
+  gt_free(low_vseq);
   return distance;
 }
 
@@ -640,11 +646,10 @@ void gt_checklinearspace(GT_UNUSED bool forward,
                          GtUword vlen)
 {
   GtAlignment *align;
-  GtUword i, edist1, edist2, edist3, edist4,
+  GtUword edist1, edist2, edist3, edist4,
           matchcost = 0, mismatchcost = 1, gapcost = 1;
   /*immediate result, because squareedistunit cannot handle lower/upper cases*/
-  GtUchar *low_useq = malloc(sizeof(*low_useq)*ulen),
-          *low_vseq = malloc(sizeof(*low_vseq)*vlen);
+  GtUchar *low_useq, *low_vseq;
 
   if (memchr(useq, LINEAR_EDIST_GAP,ulen) != NULL)
   {
@@ -657,12 +662,8 @@ void gt_checklinearspace(GT_UNUSED bool forward,
     exit(GT_EXIT_PROGRAMMING_ERROR);
   }
 
-  for (i = 0; i < ulen; i++)
-    low_useq[i] = tolower((int)useq[i]);
-  low_useq[i] = '\0';
-  for (i = 0; i < vlen; i++)
-    low_vseq[i] = tolower((int)vseq[i]);
-  low_vseq[i] = '\0';
+  low_useq = sequence_to_lower_case(useq, ulen);
+  low_vseq = sequence_to_lower_case(vseq, vlen);
 
   align = gt_alignment_new_with_seqs(low_useq, ulen, low_vseq, vlen);
   edist1 = gt_calc_linearalign(low_useq, 0, ulen, low_vseq, 0, vlen, align,
@@ -704,9 +705,8 @@ void gt_checklinearspace_local(GT_UNUSED bool forward,
                                const GtUchar *vseq, GtUword vlen)
 {
   GtAlignment *align;
-  GtWord i, score1, score2, matchscore = 2, mismatchscore = -2, gapscore = -1;
-  GtUchar *low_useq = malloc(sizeof(*low_useq)*(ulen+1)),
-          *low_vseq = malloc(sizeof(*low_vseq)*(vlen+1));
+  GtWord score1, score2, matchscore = 2, mismatchscore = -2, gapscore = -1;
+  GtUchar *low_useq, *low_vseq;
 
   if (memchr(useq, LINEAR_EDIST_GAP,ulen) != NULL)
   {
@@ -719,12 +719,8 @@ void gt_checklinearspace_local(GT_UNUSED bool forward,
     exit(GT_EXIT_PROGRAMMING_ERROR);
   }
 
-  for (i = 0; i < ulen; i++)
-    low_useq[i] = tolower((int)useq[i]);
-  low_useq[i] = '\0';
-  for (i = 0; i < vlen; i++)
-    low_vseq[i] = tolower((int)vseq[i]);
-  low_vseq[i] = '\0';
+  low_useq = sequence_to_lower_case(useq, ulen);
+  low_vseq = sequence_to_lower_case(vseq, vlen);
 
   align = gt_alignment_new();
   score1 = gt_computelinearspace_local(align,useq, 0, ulen, vseq, 0, vlen,

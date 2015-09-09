@@ -21,19 +21,9 @@
 #include "core/array2dim_api.h"
 #include "core/minmax.h"
 #include "extended/linearalign_affinegapcost.h"
+#include "extended/linearalign_utilities.h"
 
 #include "extended/affinealign.h"
-
-/*Code duplizierung add_safe noch auslagern */
-static inline GtWord add_safe(GtWord val1, GtWord val2, GtWord exception)
-{
-  return (val1 != exception) ? val1 + val2 : exception;
-}
-
-static inline GtWord add_safe_max(GtWord val1, GtWord val2)
-{
-  return add_safe(val1,val2,GT_WORD_MAX);
-}
 
 static void affinealign_fill_table(AffinealignDPentry **dptable,
                                    const GtUchar *u, GtUword ulen,
