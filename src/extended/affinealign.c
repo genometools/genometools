@@ -20,29 +20,27 @@
 #include "core/assert_api.h"
 #include "core/array2dim_api.h"
 #include "core/minmax.h"
+#include "extended/linearalign_affinegapcost.h"
+
 #include "extended/affinealign.h"
 
-typedef struct {
-  GtUword Rdist,
-                Ddist,
-                Idist;
-  AffineAlignEdge Redge,
-                  Dedge,
-                  Iedge;
-} AffinealignDPentry;
-
-static GtUword infadd(GtUword inf, GtUword s)
+/*Code duplizierung add_safe noch auslagern */
+static inline GtWord add_safe(GtWord val1, GtWord val2, GtWord exception)
 {
-  if (inf == ULONG_MAX)
-    return inf;
-  return inf + s;
+  return (val1 != exception) ? val1 + val2 : exception;
+}
+
+static inline GtWord add_safe_max(GtWord val1, GtWord val2)
+{
+  return add_safe(val1,val2,GT_WORD_MAX);
 }
 
 static void affinealign_fill_table(AffinealignDPentry **dptable,
                                    const GtUchar *u, GtUword ulen,
                                    const GtUchar *v, GtUword vlen,
                                    GtUword matchcost, GtUword mismatchcost,
-                                   GtUword gap_opening, GtUword gap_extension)
+                                   GtUword gap_opening, GtUword gap_extension,
+                                   bool complete, AffineAlignEdge edge)
 {
   GtUword i, j, Rvalue, Dvalue, Ivalue, minvalue;
   int rcost;
@@ -51,22 +49,26 @@ static void affinealign_fill_table(AffinealignDPentry **dptable,
   for (i = 0; i <= ulen; i++) {
     for (j = 0; j <= vlen; j++) {
       if (!i && !j) {
-        dptable[0][0].Rdist = 0;
-        dptable[0][0].Ddist = gap_opening;
-        dptable[0][0].Idist = gap_opening;
+        if (complete) {
+          dptable[0][0].Rvalue = 0;
+          dptable[0][0].Dvalue = gap_opening;
+          dptable[0][0].Ivalue = gap_opening;
+        }
+        else
+         firstAtabRtabentry(dptable[0], gap_opening, edge);
       }
       else {
         /* compute A_affine(i,j,R) */
         if (!i || !j)
-          dptable[i][j].Rdist = ULONG_MAX;
+          dptable[i][j].Rvalue = LONG_MAX;
         else {
           rcost  = (u[i-1] == v[j-1]) ? matchcost : mismatchcost;
-          Rvalue = infadd(dptable[i-1][j-1].Rdist, rcost);
-          Dvalue = infadd(dptable[i-1][j-1].Ddist, rcost);
-          Ivalue = infadd(dptable[i-1][j-1].Idist, rcost);
+          Rvalue = add_safe_max(dptable[i-1][j-1].Rvalue, rcost);
+          Dvalue = add_safe_max(dptable[i-1][j-1].Dvalue, rcost);
+          Ivalue = add_safe_max(dptable[i-1][j-1].Ivalue, rcost);
           minvalue = MIN3(Rvalue, Dvalue, Ivalue);
-          gt_assert(minvalue != ULONG_MAX);
-          dptable[i][j].Rdist = minvalue;
+          gt_assert(minvalue != LONG_MAX);
+          dptable[i][j].Rvalue = minvalue;
           /* set backtracing edge */
           if (Rvalue == minvalue)
             dptable[i][j].Redge = Affine_R;
@@ -77,14 +79,16 @@ static void affinealign_fill_table(AffinealignDPentry **dptable,
         }
         /* compute A_affine(i,j,D) */
         if (!i)
-          dptable[i][j].Ddist = ULONG_MAX;
+          dptable[i][j].Dvalue = LONG_MAX;
         else {
-          Rvalue = infadd(dptable[i-1][j].Rdist, gap_opening + gap_extension);
-          Dvalue = infadd(dptable[i-1][j].Ddist, gap_extension);
-          Ivalue = infadd(dptable[i-1][j].Idist, gap_opening + gap_extension);
+          Rvalue = add_safe_max(dptable[i-1][j].Rvalue,
+                                gap_opening + gap_extension);
+          Dvalue = add_safe_max(dptable[i-1][j].Dvalue, gap_extension);
+          Ivalue = add_safe_max(dptable[i-1][j].Ivalue,
+                                gap_opening + gap_extension);
           minvalue = MIN3(Rvalue, Dvalue, Ivalue);
           gt_assert(minvalue != ULONG_MAX);
-          dptable[i][j].Ddist = minvalue;
+          dptable[i][j].Dvalue = minvalue;
           /* set backtracing edge */
           if (Rvalue == minvalue)
             dptable[i][j].Dedge = Affine_R;
@@ -95,14 +99,16 @@ static void affinealign_fill_table(AffinealignDPentry **dptable,
         }
         /* compute A_affine(i,j,I) */
         if (!j)
-          dptable[i][j].Idist = ULONG_MAX;
+          dptable[i][j].Ivalue = LONG_MAX;
         else {
-          Rvalue = infadd(dptable[i][j-1].Rdist, gap_opening + gap_extension);
-          Dvalue = infadd(dptable[i][j-1].Ddist, gap_opening + gap_extension);
-          Ivalue = infadd(dptable[i][j-1].Idist, gap_extension);
+          Rvalue = add_safe_max(dptable[i][j-1].Rvalue,
+                                gap_opening + gap_extension);
+          Dvalue = add_safe_max(dptable[i][j-1].Dvalue,
+                                gap_opening + gap_extension);
+          Ivalue = add_safe_max(dptable[i][j-1].Ivalue, gap_extension);
           minvalue = MIN3(Rvalue, Dvalue, Ivalue);
-          gt_assert(minvalue != ULONG_MAX);
-          dptable[i][j].Idist = minvalue;
+          gt_assert(minvalue != LONG_MAX);
+          dptable[i][j].Ivalue = minvalue;
           /* set backtracing edge */
           if (Rvalue == minvalue)
             dptable[i][j].Iedge = Affine_R;
@@ -124,19 +130,19 @@ static void affinealign_traceback(GtAlignment *a,
   AffineAlignEdge edge;
   gt_assert(a && dptable);
   /* determine min{A_affine(m,n,x) | x in {R,D,I}} */
-  minvalue = MIN3(dptable[i][j].Rdist, dptable[i][j].Ddist,
-                  dptable[i][j].Idist);
-  if (dptable[i][j].Rdist == minvalue)
+  minvalue = MIN3(dptable[i][j].Rvalue, dptable[i][j].Dvalue,
+                  dptable[i][j].Ivalue);
+  if (dptable[i][j].Rvalue == minvalue)
     edge = Affine_R;
-  else if (dptable[i][j].Ddist == minvalue)
+  else if (dptable[i][j].Dvalue == minvalue)
     edge = Affine_D;
-  else /* dptable[i][j].Idist == minvalue */
+  else /* dptable[i][j].Ivalue == minvalue */
     edge = Affine_I;
   /* backtracing */
   while (i > 0 || j > 0) {
     switch (edge) {
       case Affine_R:
-        gt_assert(dptable[i][j].Rdist != ULONG_MAX);
+        gt_assert(dptable[i][j].Rvalue != LONG_MAX);
         gt_alignment_add_replacement(a);
         edge = dptable[i][j].Redge;
         gt_assert(i > 0 && j > 0);
@@ -164,8 +170,8 @@ static void affinealign_traceback(GtAlignment *a,
 GtAlignment* gt_affinealign(const GtUchar *u, GtUword ulen,
                             const GtUchar *v, GtUword vlen,
                             GtUword matchcost, GtUword mismatchcost,
-                            GtUword gap_opening_cost,
-                            GtUword gap_extension_cost)
+                            GtUword gap_opening,
+                            GtUword gap_extension)
 {
   AffinealignDPentry **dptable;
   GtAlignment *align;
@@ -173,9 +179,78 @@ GtAlignment* gt_affinealign(const GtUchar *u, GtUword ulen,
   gt_assert(u && v);
   gt_array2dim_malloc(dptable, ulen+1, vlen+1);
   affinealign_fill_table(dptable, u, ulen, v, vlen, matchcost, mismatchcost,
-                         gap_opening_cost, gap_extension_cost);
+                         gap_opening, gap_extension, true, Affine_X);
   align = gt_alignment_new_with_seqs(u, ulen,  v, vlen);
   affinealign_traceback(align, dptable, ulen, vlen);
   gt_array2dim_delete(dptable);
   return align;
+}
+
+static void evaluate_affinecrosspoints_from_2dimtab(GtUword *Ctab,
+                                                AffinealignDPentry **Atabcolumn,
+                                                GtUword ulen, GtUword vlen,
+                                                GtUword gap_opening,
+                                                GtUword rowoffset,
+                                                AffineAlignEdge edge)
+{
+  GtUword i, j;
+  gt_assert(Atabcolumn != NULL);
+
+  i = ulen;
+  j = vlen;
+  edge = minAdditionalCosts(&Atabcolumn[i][j], edge, gap_opening);
+
+  while (i > 0 || j > 1) {
+    switch (edge) {
+      case Affine_R:
+        gt_assert(Atabcolumn[i][j].Rvalue != LONG_MAX);
+        Ctab[j-1] = i-1 + rowoffset;
+        edge = Atabcolumn[i][j].Redge;
+        gt_assert(i > 0 && j > 0);
+        i--;
+        j--;
+        break;
+      case Affine_D:
+        edge = Atabcolumn[i][j].Dedge;
+        gt_assert(i);
+        i--;
+        break;
+      case Affine_I:
+        Ctab[j-1] = i + rowoffset;
+        edge = Atabcolumn[i][j].Iedge;
+        gt_assert(j);
+        j--;
+        break;
+      default:
+        gt_assert(false);
+    }
+  }
+}
+
+void affine_ctab_in_square_space(GtUword *Ctab,
+                                 const GtUchar *useq,
+                                 GtUword ustart,
+                                 GtUword ulen,
+                                 const GtUchar *vseq,
+                                 GtUword vstart,
+                                 GtUword vlen,
+                                 GtUword matchcost,
+                                 GtUword mismatchcost,
+                                 GtUword gap_opening,
+                                 GtUword gap_extension,
+                                 GtUword rowoffset,
+                                 AffineAlignEdge from_edge,
+                                 AffineAlignEdge to_edge)
+{
+  AffinealignDPentry **Atabcolumn;
+  gt_assert(Ctab != NULL);
+
+  gt_array2dim_malloc(Atabcolumn, (ulen+1), (vlen+1));
+  affinealign_fill_table(Atabcolumn, &useq[ustart], ulen, &vseq[vstart], vlen,
+                         matchcost, mismatchcost, gap_opening,
+                         gap_extension, false, from_edge);
+
+  evaluate_affinecrosspoints_from_2dimtab(Ctab, Atabcolumn, ulen, vlen,
+                                          gap_opening, rowoffset, to_edge);
+  gt_array2dim_delete(Atabcolumn);
 }

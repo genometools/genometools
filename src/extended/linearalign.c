@@ -287,15 +287,16 @@ static GtUword evaluatelinearcrosspoints(const GtUchar *useq,
 
   if (vlen >= 2UL)
   {
-    if((ulen+1)*(vlen+1)>(original_ulen+1))
+    if ((ulen+1)*(vlen+1)>(original_ulen+1))
     {
       midcol = GT_DIV2(vlen);
       distance = evaluateallEDtabRtabcolumns(EDtabcolumn, Rtabcolumn, midcol,
-                                          useq, ustart, ulen, vseq, vstart, vlen,
-                                          matchcost, mismatchcost, gapcost);
+                                             useq, ustart, ulen, vseq, vstart,
+                                             vlen, matchcost, mismatchcost,
+                                             gapcost);
       midrow = Rtabcolumn[ulen];
       Ctab[midcol] = rowoffset + midrow;
-  
+
        /* upper left corner */
       (void) evaluatelinearcrosspoints(useq, ustart, midrow,
                                        vseq, vstart, midcol,
@@ -308,7 +309,7 @@ static GtUword evaluatelinearcrosspoints(const GtUchar *useq,
                                        gapcost,
                                        original_ulen,
                                        original_vlen);
-  
+
       /* bottom right corner */
       (void) evaluatelinearcrosspoints(useq, ustart + midrow,
                                        ulen-midrow,
@@ -323,7 +324,7 @@ static GtUword evaluatelinearcrosspoints(const GtUchar *useq,
                                        gapcost,
                                        original_ulen,
                                        original_vlen);
-  
+
       return distance;
     }
     else /* product of subsquences is in O(n) */

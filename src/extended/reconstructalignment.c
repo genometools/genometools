@@ -138,14 +138,15 @@ void evaluate_crosspoints_from_2dimtab(GtUword **E,
       jdx--;
       Ctab[jdx] = idx + rowoffset;
     }
+    else if (idx > 0 && E[idx][jdx] == E[idx-1][jdx] + gapcost)
+    {
+      idx--;
+      /*continue*/
+    }
     else if (jdx > 0 && E[idx][jdx] == E[idx][jdx-1] + gapcost)
     {
       jdx--;
       Ctab[jdx] = idx + rowoffset;
-    }
-    else if (idx > 0 && E[idx][jdx] == E[idx-1][jdx] + gapcost)
-    {
-      idx--;
     }
     else
       gt_assert(false);

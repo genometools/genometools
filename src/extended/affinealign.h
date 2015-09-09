@@ -28,6 +28,13 @@ typedef enum {
   Affine_X /* unknown */
 } AffineAlignEdge;
 
+typedef struct {
+  GtWord Rvalue, Dvalue, Ivalue, totalvalue;
+  AffineAlignEdge Redge,
+                  Dedge,
+                  Iedge;
+} AffinealignDPentry;
+
 /* (globally) align u and v (affine gap costs) and return one optimal
    GtAlignment */
 GtAlignment* gt_affinealign(const GtUchar *u, GtUword ulen,
@@ -35,5 +42,14 @@ GtAlignment* gt_affinealign(const GtUchar *u, GtUword ulen,
                             GtUword matchcost, GtUword mismatchcost,
                             GtUword gap_opening_cost,
                             GtUword gap_extension_cost);
+
+void affine_ctab_in_square_space(GtUword *Ctab, const GtUchar *useq,
+                                 GtUword ustart,  GtUword ulen,
+                                 const GtUchar *vseq, GtUword vstart,
+                                 GtUword vlen, GtUword matchcost,
+                                 GtUword mismatchcost, GtUword gap_opening,
+                                 GtUword gap_extension, GtUword rowoffset,
+                                 AffineAlignEdge from_edge,
+                                 AffineAlignEdge to_edge);
 
 #endif

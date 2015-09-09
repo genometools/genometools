@@ -68,4 +68,11 @@ void gt_computeaffinelinearspace_local(GtAlignment *align,
                                        GtWord gap_opening,
                                        GtWord gap_extension);
 
+AffineAlignEdge minAdditionalCosts(const AffinealignDPentry *entry,
+                                   const AffineAlignEdge edge,
+                                   GtUword gap_opening);
+
+inline void firstAtabRtabentry(AffinealignDPentry *Atabcolumn,
+                               GtUword gap_opening,
+                               AffineAlignEdge edge);
 #endif
