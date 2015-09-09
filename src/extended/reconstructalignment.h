@@ -50,5 +50,6 @@ void evaluate_crosspoints_from_2dimtab(GtUword **E,
                                        GtUword vlen,
                                        GtUword matchcost,
                                        GtUword mismatchcost,
-                                       GtUword gapcost);
+                                       GtUword gapcost,
+                                       GtUword rowoffset);
 #endif

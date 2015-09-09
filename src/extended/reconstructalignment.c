@@ -120,7 +120,8 @@ void evaluate_crosspoints_from_2dimtab(GtUword **E,
                                        GtUword vlen,
                                        GtUword matchcost,
                                        GtUword mismatchcost,
-                                       GtUword gapcost)
+                                       GtUword gapcost,
+                                       GtUword rowoffset)
 
 {
   GtUword idx, jdx;
@@ -135,12 +136,12 @@ void evaluate_crosspoints_from_2dimtab(GtUword **E,
     {
       idx--;
       jdx--;
-      Ctab[jdx] = idx;
+      Ctab[jdx] = idx + rowoffset;
     }
     else if (jdx > 0 && E[idx][jdx] == E[idx][jdx-1] + gapcost)
     {
       jdx--;
-      Ctab[jdx] = idx;
+      Ctab[jdx] = idx + rowoffset;
     }
     else if (idx > 0 && E[idx][jdx] == E[idx-1][jdx] + gapcost)
     {
