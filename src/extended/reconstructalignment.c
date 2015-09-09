@@ -16,7 +16,7 @@
 */
 #include <ctype.h>
 #include "extended/reconstructalignment.h"
-
+#include "extended/alignment.h"
 void reconstructalignment_from_Ctab(GtAlignment *align,
                                     const GtUword *Ctab,
                                     const GtUchar *useq,
@@ -30,7 +30,6 @@ void reconstructalignment_from_Ctab(GtAlignment *align,
                                     GtUword gap_extension)
 {
   GtUword i,j, indel, repl;
-
   gt_assert(align != NULL && Ctab != NULL);
   for (i = vlen; i > 0; i--) {
     if (Ctab[i] == Ctab[i-1] + 1)
@@ -109,4 +108,46 @@ GtUword construct_trivial_insertion_alignment(GtAlignment *align,
   }
 
   return (len*gapcost);
+}
+
+void evaluate_crosspoints_from_2dimtab(GtUword **E,
+                                       GtUword *Ctab,
+                                       const GtUchar *useq,
+                                       GtUword ustart,
+                                       GtUword ulen,
+                                       const GtUchar *vseq,
+                                       GtUword vstart,
+                                       GtUword vlen,
+                                       GtUword matchcost,
+                                       GtUword mismatchcost,
+                                       GtUword gapcost)
+
+{
+  GtUword idx, jdx;
+
+  idx = ulen;
+  jdx = vlen;
+  while (jdx > 1 || idx > 0)
+  {
+    if (idx > 0 && jdx > 0 && E[idx][jdx] == E[idx-1][jdx-1] +
+       (tolower((int)useq[ustart+idx-1]) == tolower((int) vseq[vstart+jdx-1]) ?
+                                                     matchcost : mismatchcost))
+    {
+      idx--;
+      jdx--;
+      Ctab[jdx] = idx;
+    }
+    else if (jdx > 0 && E[idx][jdx] == E[idx][jdx-1] + gapcost)
+    {
+      jdx--;
+      Ctab[jdx] = idx;
+    }
+    else if (idx > 0 && E[idx][jdx] == E[idx-1][jdx] + gapcost)
+    {
+      idx--;
+    }
+    else
+      gt_assert(false);
+  }
+
 }

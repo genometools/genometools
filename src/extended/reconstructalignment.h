@@ -39,4 +39,16 @@ GtUword construct_trivial_deletion_alignment(GtAlignment *align,
 GtUword construct_trivial_insertion_alignment(GtAlignment *align,
                                               GtUword len,
                                               GtUword gapcost);
+
+void evaluate_crosspoints_from_2dimtab(GtUword **E,
+                                       GtUword *Ctab,
+                                       const GtUchar *useq,
+                                       GtUword ustart,
+                                       GtUword ulen,
+                                       const GtUchar *vseq,
+                                       GtUword vstart,
+                                       GtUword vlen,
+                                       GtUword matchcost,
+                                       GtUword mismatchcost,
+                                       GtUword gapcost);
 #endif
