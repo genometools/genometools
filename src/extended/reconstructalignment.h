@@ -20,6 +20,19 @@
 #include "core/types_api.h"
 #include "extended/alignment.h"
 
+/* reconstruct alignment from square space table ED */
+void reconstructalignment_from_EDtab(GtAlignment *align, GtUword **E,
+                                     const GtUchar *useq,
+                                     GtUword ustart,
+                                     GtUword ulen,
+                                     const GtUchar *vseq,
+                                     GtUword vstart,
+                                     GtUword vlen,
+                                     GtUword matchcost,
+                                     GtUword mismatchcost,
+                                     GtUword gapcost);
+
+/* reconstruct alignment from crosspoint table */
 void reconstructalignment_from_Ctab(GtAlignment *align,
                                     const GtUword *Ctab,
                                     const GtUchar *useq,

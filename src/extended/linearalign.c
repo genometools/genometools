@@ -105,7 +105,7 @@ static GtUword alignment_in_square_space(GtAlignment *align,
                                          GtUword mismatchcost,
                                          GtUword gapcost)
 {
-  GtUword **E, distance, i, j;
+  GtUword **E, distance;
 
   gt_assert(align != NULL);
   gt_array2dim_malloc(E, (ulen+1), (vlen+1));
@@ -113,35 +113,10 @@ static GtUword alignment_in_square_space(GtAlignment *align,
   fillDPtab_in_square_space(E, useq, ustart, ulen, vseq, vstart, vlen,
                            matchcost, mismatchcost, gapcost);
 
-  i = ulen;
-  j = vlen;
-  distance = E[i][j];
-
+  distance = E[ulen][vlen];
   /* reconstruct alignment from 2dimarray E */
-  while (i > 0 || j > 0)
-  {
-    if (i > 0 && j > 0 && E[i][j] == E[i-1][j-1] +
-            (tolower((int)useq[ustart+i-1]) == tolower((int) vseq[vstart+j-1]) ?
-                         matchcost : mismatchcost))
-    {
-      gt_alignment_add_replacement(align);
-      i--; j--;
-    }
-    else if (j > 0 && E[i][j] == E[i][j-1] + gapcost)
-    {
-      gt_alignment_add_insertion(align);
-      j--;
-    }
-    else if (i > 0 && E[i][j] == E[i-1][j] + gapcost)
-    {
-      gt_alignment_add_deletion(align);
-      i--;
-    }
-    else
-    {
-      gt_assert(false);
-    }
-  }
+  reconstructalignment_from_EDtab(align, E, useq, ustart, ulen, vseq, vstart,
+                                  vlen, matchcost, mismatchcost, gapcost);
 
   gt_array2dim_delete(E);
   return distance;
@@ -366,7 +341,6 @@ GtUword gt_calc_linearalign(const GtUchar *useq,
                             GtUword gapcost)
 {
   GtUword distance, *Ctab, *EDtabcolumn, *Rtabcolumn;
-  GtUchar *low_useq, *low_vseq;
 
   if (ulen == 0UL)
   {
@@ -376,10 +350,7 @@ GtUword gt_calc_linearalign(const GtUchar *useq,
   {
     return construct_trivial_deletion_alignment(align,vlen,gapcost);
   }
-
-  low_useq = sequence_to_lower_case(useq, ulen);
-  low_vseq = sequence_to_lower_case(vseq, vlen);
-  if (ulen == 1UL || vlen == 1UL ) {
+  else if (ulen == 1UL || vlen == 1UL ) {
     distance = alignment_in_square_space(align, useq, ustart, ulen,
                                          vseq, vstart, vlen, matchcost,
                                          mismatchcost, gapcost);
@@ -406,8 +377,7 @@ GtUword gt_calc_linearalign(const GtUchar *useq,
     gt_free(EDtabcolumn);
     gt_free(Rtabcolumn);
   }
-  gt_free(low_useq);
-  gt_free(low_vseq);
+
   return distance;
 }
 

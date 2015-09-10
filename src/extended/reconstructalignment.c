@@ -17,6 +17,51 @@
 #include <ctype.h>
 #include "extended/reconstructalignment.h"
 #include "extended/alignment.h"
+
+/* reconstruct alignment from square space table ED */
+void reconstructalignment_from_EDtab(GtAlignment *align, GtUword **E,
+                                     const GtUchar *useq,
+                                     GtUword ustart,
+                                     GtUword ulen,
+                                     const GtUchar *vseq,
+                                     GtUword vstart,
+                                     GtUword vlen,
+                                     GtUword matchcost,
+                                     GtUword mismatchcost,
+                                     GtUword gapcost)
+{
+  GtUword i, j;
+  gt_assert(align && E);
+  i = ulen;
+  j = vlen;
+
+  while (i > 0 || j > 0)
+  {
+    if (i > 0 && j > 0 && E[i][j] == E[i-1][j-1] +
+            (tolower((int)useq[ustart+i-1]) == tolower((int) vseq[vstart+j-1]) ?
+                         matchcost : mismatchcost))
+    {
+      gt_alignment_add_replacement(align);
+      i--; j--;
+    }
+    else if (j > 0 && E[i][j] == E[i][j-1] + gapcost)
+    {
+      gt_alignment_add_insertion(align);
+      j--;
+    }
+    else if (i > 0 && E[i][j] == E[i-1][j] + gapcost)
+    {
+      gt_alignment_add_deletion(align);
+      i--;
+    }
+    else
+    {
+      gt_assert(false);
+    }
+  }
+}
+
+/* reconstruct alignment from crosspoint table */
 void reconstructalignment_from_Ctab(GtAlignment *align,
                                     const GtUword *Ctab,
                                     const GtUchar *useq,
