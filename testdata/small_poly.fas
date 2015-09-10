@@ -1,0 +1,6 @@
+>gi|1111111|dbj|AV111111.1|AV111111 just a poly-C sequence of length 14
+CCCCCCCCCCCCCC
+>gi|1111211|dbj|AV111121.2|AV111112 a poly-C sequence with wildcard
+CCCCCCCCCCNCCCCCCCCCCC
+>gi|1111211|dbj|AV111121.2|AV111112 poly-G sequence for reverse complement tests
+GGGGGGGGGGGGG
