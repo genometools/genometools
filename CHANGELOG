@@ -1,5 +1,7 @@
 changes in version 1.5.7 (2015-06-22)
 
+- bugfixes and cleanups
+- optimizations within condenseq create
 
 changes in version 1.5.6 (2015-06-21)
 
