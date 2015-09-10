@@ -35,6 +35,9 @@ typedef struct {
   GtUword dbs_suppress;
   GtUword dbs_memlimit;
   GtStr *dbs_memlimit_str;
+  bool dbs_debug_kmer;
+  bool dbs_debug_seedpair;
+  bool dbs_verify;
   /* xdrop extension options */
   GtOption *se_option_xdrop;
   GtUword se_extendxdrop;
@@ -53,7 +56,6 @@ typedef struct {
   GtUword se_alignmentwidth;
   bool mirror;
   bool overlappingseeds;
-  bool verify;
   bool benchmark;
   bool verbose;
 } GtSeedExtendArguments;
@@ -139,9 +141,31 @@ static GtOptionParser* gt_seed_extend_option_parser_new(void *tool_arguments)
                                 "frequency of a k-mer (for filter)",
                                 arguments->dbs_memlimit_str,
                                 "");
-  gt_option_exclude(op_mem, op_frq);
-  gt_option_exclude(op_mem, op_sup);
   gt_option_parser_add_option(op, op_mem);
+
+  /* -debug-kmer */
+  option = gt_option_new_bool("debug-kmer",
+                              "Output KmerPos lists",
+                              &arguments->dbs_debug_kmer,
+                              false);
+  gt_option_is_development_option(option);
+  gt_option_parser_add_option(op, option);
+
+  /* -debug-seedpair */
+  option = gt_option_new_bool("debug-seedpair",
+                              "Output SeedPair lists",
+                              &arguments->dbs_debug_seedpair,
+                              false);
+  gt_option_is_development_option(option);
+  gt_option_parser_add_option(op, option);
+
+  /* -verify */
+  option = gt_option_new_bool("verify",
+                              "Check that k-mer seeds occur in the sequences",
+                              &arguments->dbs_verify,
+                              false);
+  gt_option_is_development_option(option);
+  gt_option_parser_add_option(op, option);
 
   /* SEED EXTENSION OPTIONS */
 
@@ -214,8 +238,8 @@ static GtOptionParser* gt_seed_extend_option_parser_new(void *tool_arguments)
   gt_option_is_development_option(op_cam);
   gt_option_parser_add_option(op, op_cam);
 
-  /* -alignlength */
-  op_len = gt_option_new_uword_min("alignlength",
+  /* -l */
+  op_len = gt_option_new_uword_min("l",
                                    "Minimum alignment length "
                                    "(for seed extension)",
                                    &arguments->se_alignlength,
@@ -258,21 +282,13 @@ static GtOptionParser* gt_seed_extend_option_parser_new(void *tool_arguments)
   gt_option_is_development_option(option);
   gt_option_parser_add_option(op, option);
 
-  /* -verify */
-  option = gt_option_new_bool("verify",
-                              "Check that k-mer seeds occur in the sequences",
-                              &arguments->verify,
-                              false);
-  gt_option_is_development_option(option);
-  gt_option_parser_add_option(op, option);
-
   /* -benchmark */
   option = gt_option_new_bool("benchmark",
                               "Measure time of different steps",
                               &arguments->benchmark,
                               false);
-  gt_option_parser_add_option(op, option);
   gt_option_is_development_option(option);
+  gt_option_parser_add_option(op, option);
 
   /* -v */
   option = gt_option_new_verbose(&arguments->verbose);
@@ -443,9 +459,11 @@ static int gt_seed_extend_runner(int argc, const char **argv, int parsed_args,
     dbsarguments.memlimit = arguments->dbs_memlimit;
     dbsarguments.mirror = arguments->mirror;
     dbsarguments.overlappingseeds = arguments->overlappingseeds;
-    dbsarguments.verify = arguments->verify;
+    dbsarguments.verify = arguments->dbs_verify;
     dbsarguments.benchmark = arguments->benchmark;
     dbsarguments.verbose = arguments->verbose;
+    dbsarguments.debug_kmer = arguments->dbs_debug_kmer;
+    dbsarguments.debug_seedpair = arguments->dbs_debug_seedpair;
     dbsarguments.extendgreedyinfo = grextinfo;
     dbsarguments.extendxdropinfo = xdropinfo;
     dbsarguments.querymatchoutopt = querymatchoutopt;
