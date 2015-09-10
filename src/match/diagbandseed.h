@@ -37,6 +37,8 @@ struct GtDiagbandseed {
   bool verify;
   bool benchmark;
   bool verbose;
+  bool debug_kmer;
+  bool debug_seedpair;
   GtGreedyextendmatchinfo *extendgreedyinfo;
   GtXdropmatchinfo *extendxdropinfo;
   GtQuerymatchoutoptions *querymatchoutopt;
@@ -57,20 +59,30 @@ GtUword gt_diagbandseed_get_kmers(GtDiagbandseedKmerPos *list,
 void gt_diagbandseed_merge(GtArrayGtDiagbandseedSeedPair *mlist,
                            const GtDiagbandseedKmerPos *alist, GtUword alen,
                            const GtDiagbandseedKmerPos *blist, GtUword blen,
-                           GtUword *maxfreq, GtUword maxgram, GtUword memlimit,
-                           GtUword *histogram, unsigned int endposdiff,
+                           GtUword *maxfreq,
+                           GtUword maxgram,
+                           GtUword memlimit,
+                           GtUword *histogram,
+                           unsigned int endposdiff,
                            bool selfcomp);
 
 /* start extension for seeds that satisfy the filter criteria */
 int gt_diagbandseed_process_seeds(const GtEncseq *aencseq,
                                   const GtEncseq *bencseq,
-                                  const GtDiagbandseed *arg,
                                   const GtArrayGtDiagbandseedSeedPair *mlist,
+                                  GtGreedyextendmatchinfo *extendgreedyinfo,
+                                  GtXdropmatchinfo *extendxdropinfo,
+                                  GtQuerymatchoutoptions *querymatchoutopt,
+                                  unsigned int seedlength,
+                                  GtUword logdiagbandwidth,
+                                  GtUword mincoverage,
                                   GtUword amaxlen,
                                   GtUword bmaxlen,
                                   GtError *err);
 
 /* Run the whole algorithm. */
-int gt_diagbandseed_run(const GtEncseq *aencseq, const GtEncseq *bencseq,
-                        const GtDiagbandseed *arg, GtError *err);
+int gt_diagbandseed_run(const GtEncseq *aencseq,
+                        const GtEncseq *bencseq,
+                        const GtDiagbandseed *arg,
+                        GtError *err);
 #endif
