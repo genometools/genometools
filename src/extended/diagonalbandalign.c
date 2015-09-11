@@ -892,6 +892,7 @@ static void gt_calc_diagonalbandalign(const GtUchar *useq,
                                                  vseq, vstart, vlen, left_dist,
                                                  right_dist, matchcost,
                                                  mismatchcost, gapcost);
+    return;
   }
   else
   {

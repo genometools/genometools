@@ -26,6 +26,8 @@
 #include "extended/diagonalbandalign.h"
 #include "extended/linearalign_affinegapcost.h"
 #include "extended/linearalign_utilities.h"
+#include "extended/linearalign_affinegapcost.h"
+#include "extended/reconstructalignment.h"
 
 #include "extended/diagonalbandalign_affinegapcost.h"
 
@@ -174,7 +176,8 @@ static void diagonalband_fillDPtab_affine(AffinealignDPentry **Atabcolumn,
                                           GtUword matchcost,
                                           GtUword mismatchcost,
                                           GtUword gap_opening,
-                                          GtUword gap_extension)
+                                          GtUword gap_extension,
+                                          AffineAlignEdge edge)
 {
   GtUword i,j, low_row, high_row;
   GtWord rcost, r_dist, d_dist, i_dist, minvalue;
@@ -182,17 +185,43 @@ static void diagonalband_fillDPtab_affine(AffinealignDPentry **Atabcolumn,
   low_row = 0;
   high_row = -left_dist;
 
+  /* first entry */
+   switch (edge) {
+    case Affine_R:
+      Atabcolumn[0][0].Rvalue = 0;
+      Atabcolumn[0][0].Dvalue = GT_WORD_MAX;
+      Atabcolumn[0][0].Ivalue = GT_WORD_MAX;
+      break;
+    case Affine_D:
+      Atabcolumn[0][0].Rvalue = GT_WORD_MAX;
+      Atabcolumn[0][0].Dvalue = 0;
+      Atabcolumn[0][0].Ivalue = GT_WORD_MAX;
+      break;
+    case Affine_I:
+      Atabcolumn[0][0].Rvalue = GT_WORD_MAX;
+      Atabcolumn[0][0].Dvalue = GT_WORD_MAX;
+      Atabcolumn[0][0].Ivalue = 0;
+      break;
+    default:
+      Atabcolumn[0][0].Rvalue = 0;
+      Atabcolumn[0][0].Dvalue = gap_opening;
+      Atabcolumn[0][0].Ivalue = gap_opening;
+    }
   /* first column */
-  Atabcolumn[0][0].Rvalue = 0;
-  Atabcolumn[0][0].Dvalue = gap_opening;
-  Atabcolumn[0][0].Ivalue = gap_opening;
-
   for (i = 1; i <= high_row; i++)
   {
     Atabcolumn[i][0].Rvalue = GT_WORD_MAX;
-    Atabcolumn[i][0].Dvalue = add_safe_max(Atabcolumn[i-1][0].Dvalue,
-                                                      gap_extension);
+    r_dist = add_safe_max(Atabcolumn[i-1][0].Rvalue,
+                         gap_opening + gap_extension);
+    d_dist = add_safe_max(Atabcolumn[i-1][0].Dvalue, gap_extension);
+    i_dist = add_safe_max(Atabcolumn[i-1][0].Ivalue,
+                         gap_opening + gap_extension);
+    Atabcolumn[i][0].Dvalue = MIN3(r_dist, d_dist, i_dist);
     Atabcolumn[i][0].Ivalue = GT_WORD_MAX;
+
+    Atabcolumn[i][0].Redge = Affine_X;
+    Atabcolumn[i][0].Dedge = set_edge(r_dist, d_dist, i_dist);
+    Atabcolumn[i][0].Iedge = Affine_X;
   }
   for (; i <= ulen; i++)
   {
@@ -210,6 +239,8 @@ static void diagonalband_fillDPtab_affine(AffinealignDPentry **Atabcolumn,
     {
       if (j <= right_dist)
       {
+        Atabcolumn[i][j].Redge = Affine_X;
+        Atabcolumn[i][j].Dedge = Affine_X;
         r_dist = add_safe_max(Atabcolumn[i][j-1].Rvalue,
                                gap_extension + gap_opening);
         d_dist = add_safe_max(Atabcolumn[i][j-1].Dvalue,
@@ -220,11 +251,14 @@ static void diagonalband_fillDPtab_affine(AffinealignDPentry **Atabcolumn,
         Atabcolumn[i][j].Ivalue = minvalue;
         Atabcolumn[i][j].Rvalue = GT_WORD_MAX;
         Atabcolumn[i][j].Dvalue = GT_WORD_MAX;
+
+        Atabcolumn[i][j].Iedge = set_edge(r_dist, d_dist, i_dist);
       }
       else{
         Atabcolumn[i][j].Rvalue = GT_WORD_MAX;
         Atabcolumn[i][j].Dvalue = GT_WORD_MAX;
         Atabcolumn[i][j].Ivalue = GT_WORD_MAX;
+        Atabcolumn[i][j].Iedge = Affine_X;
       }
     }
     if ( j > right_dist)
@@ -235,12 +269,15 @@ static void diagonalband_fillDPtab_affine(AffinealignDPentry **Atabcolumn,
     /* diagonalband */
     for (; i <= high_row; i++)
     {
+      /* compute A_affine(i,j,I) */
       r_dist=add_safe_max(Atabcolumn[i][j-1].Rvalue,gap_extension+gap_opening);
       d_dist=add_safe_max(Atabcolumn[i][j-1].Dvalue,gap_extension+gap_opening);
       i_dist=add_safe_max(Atabcolumn[i][j-1].Ivalue,gap_extension);
       minvalue = MIN3(r_dist, d_dist, i_dist);
       Atabcolumn[i][j].Ivalue = minvalue;
+      Atabcolumn[i][j].Iedge = set_edge(r_dist, d_dist, i_dist);
 
+      /* compute A_affine(i,j,R) */
       rcost = tolower((int)useq[ustart+i-1]) ==
               tolower((int)vseq[vstart+j-1]) ?
               matchcost:mismatchcost;
@@ -249,7 +286,9 @@ static void diagonalband_fillDPtab_affine(AffinealignDPentry **Atabcolumn,
       i_dist = add_safe_max(Atabcolumn[i-1][j-1].Ivalue, rcost);
       minvalue = MIN3(r_dist, d_dist, i_dist);
       Atabcolumn[i][j].Rvalue = minvalue;
+      Atabcolumn[i][j].Redge = set_edge(r_dist, d_dist, i_dist);
 
+      /* compute A_affine(i,j,D) */
       r_dist = add_safe_max(Atabcolumn[i-1][j].Rvalue,
                          gap_extension+gap_opening);
       d_dist = add_safe_max(Atabcolumn[i-1][j].Dvalue,gap_extension);
@@ -257,6 +296,8 @@ static void diagonalband_fillDPtab_affine(AffinealignDPentry **Atabcolumn,
                           gap_extension+gap_opening);
       minvalue = MIN3(r_dist, d_dist, i_dist);
       Atabcolumn[i][j].Dvalue = minvalue;
+      Atabcolumn[i][j].Dedge = set_edge(r_dist, d_dist, i_dist);
+
     }
     /* above diagonal band */
     for (; i <= ulen; i++)
@@ -268,9 +309,47 @@ static void diagonalband_fillDPtab_affine(AffinealignDPentry **Atabcolumn,
   }
 }
 
+/* calculate alignment with diagonalband in square space O(n²) with
+ * affine gapcosts */
+static GtWord diagonalbandalignment_in_square_space_affine(GtAlignment *align,
+                                                    const GtUchar *useq,
+                                                    GtUword ustart,
+                                                    GtUword ulen,
+                                                    const GtUchar *vseq,
+                                                    GtUword vstart,
+                                                    GtUword vlen,
+                                                    GtWord left_dist,
+                                                    GtWord right_dist,
+                                                    GtUword matchcost,
+                                                    GtUword mismatchcost,
+                                                    GtUword gap_opening,
+                                                    GtUword gap_extension)
+{
+  GtWord distance;
+  AffinealignDPentry **Atabcolumn;
+
+  gt_assert(align != NULL);
+  gt_array2dim_malloc(Atabcolumn, (ulen+1), (vlen+1));
+
+  diagonalband_fillDPtab_affine(Atabcolumn, useq, ustart, ulen, vseq, vstart,
+                                vlen, left_dist, right_dist, matchcost,
+                                mismatchcost, gap_opening, gap_extension,
+                                Affine_X);
+
+  distance = MIN3(Atabcolumn[ulen][vlen].Rvalue,
+                  Atabcolumn[ulen][vlen].Dvalue,
+                  Atabcolumn[ulen][vlen].Ivalue);
+
+  /* reconstruct alignment from 2dimarray Atabcolumn */
+  affinealign_traceback(align, Atabcolumn, ulen, vlen);
+
+  gt_array2dim_delete(Atabcolumn);
+  return distance;
+}
+
 /* calculate only distance with diagonalband in square space O(n²) with
  * affine gapcosts */
-static GtWord diagonalband_squarespace_affine(const GtUchar *useq,
+static GtWord diagonalband_square_space_affine(const GtUchar *useq,
                                               GtUword ustart,
                                               GtUword ulen,
                                               const GtUchar *vseq,
@@ -295,7 +374,8 @@ static GtWord diagonalband_squarespace_affine(const GtUchar *useq,
   gt_array2dim_malloc(Atabcolumn, (ulen+1), (vlen+1));
   diagonalband_fillDPtab_affine(Atabcolumn, useq, ustart, ulen, vseq, vstart,
                                 vlen, left_dist, right_dist, matchcost,
-                                mismatchcost, gap_opening, gap_extension);
+                                mismatchcost, gap_opening, gap_extension,
+                                Affine_X);
 
   distance = MIN3(Atabcolumn[ulen][vlen].Rvalue,
                   Atabcolumn[ulen][vlen].Dvalue,
@@ -1147,6 +1227,24 @@ static void gt_calc_diagonalbandaffinealign(const GtUchar *useq,
     exit(GT_EXIT_PROGRAMMING_ERROR);
   }
 
+  if (ulen == 0UL)
+  {
+    (void) construct_trivial_insertion_alignment(align, vlen, gap_extension);
+    return;
+  }
+  else if (vlen == 0UL)
+  {
+    (void) construct_trivial_deletion_alignment(align,vlen, gap_extension);
+    return;
+  }
+  else if (ulen == 1UL || vlen == 1UL )
+  {
+    (void) diagonalbandalignment_in_square_space_affine(align, useq, ustart,
+                           ulen, vseq, vstart, vlen, left_dist, right_dist,
+                           matchcost, mismatchcost, gap_opening,gap_extension);
+    return;
+  }
+
   Diagcolumn = gt_malloc(sizeof *Diagcolumn * (vlen+1));
   Atabcolumn = gt_malloc(sizeof *Atabcolumn * (ulen+1));
   Rtabcolumn = gt_malloc(sizeof *Rtabcolumn * (ulen+1));
@@ -1224,10 +1322,10 @@ void gt_checkdiagonalbandaffinealign(GT_UNUSED bool forward,
   /* set left and right to set diagonalband to the whole matrix */
   left_dist = -ulen;
   right_dist = vlen;
-  affine_cost1 = diagonalband_squarespace_affine(useq, 0, ulen, vseq, 0, vlen,
-                                                 left_dist, right_dist,
-                                                 matchcost, mismatchcost,
-                                                 gap_opening, gap_extension);
+  affine_cost1 = diagonalband_square_space_affine(useq, 0, ulen, vseq, 0, vlen,
+                                                  left_dist, right_dist,
+                                                  matchcost, mismatchcost,
+                                                  gap_opening, gap_extension);
 
   align_linear = gt_alignment_new_with_seqs(useq, ulen, vseq, vlen);
   gt_calc_diagonalbandaffinealign(useq, 0, ulen, vseq, 0, vlen,

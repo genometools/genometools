@@ -126,9 +126,9 @@ static void affinealign_fill_table(AffinealignDPentry **dptable,
   }
 }
 
-static void affinealign_traceback(GtAlignment *a,
-                                  AffinealignDPentry * const *dptable,
-                                  GtUword i, GtUword j)
+void affinealign_traceback(GtAlignment *a,
+                           AffinealignDPentry * const *dptable,
+                           GtUword i, GtUword j)
 {
   GtWord minvalue;
   AffineAlignEdge edge;

@@ -43,6 +43,10 @@ GtAlignment* gt_affinealign(const GtUchar *u, GtUword ulen,
                             GtUword gap_opening_cost,
                             GtUword gap_extension_cost);
 
+void affinealign_traceback(GtAlignment *a,
+                           AffinealignDPentry * const *dptable,
+                           GtUword i, GtUword j);
+
 void affine_ctab_in_square_space(GtUword *Ctab, const GtUchar *useq,
                                  GtUword ustart,  GtUword ulen,
                                  const GtUchar *vseq, GtUword vstart,

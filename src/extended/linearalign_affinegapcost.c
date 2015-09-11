@@ -88,9 +88,13 @@ static Rnode get_Rtabentry(const Rtabentry *rtab, const AffineAlignEdge edge)
 }
 
 static inline void firstAtabRtabentry(AffinealignDPentry *Atabcolumn,
-                               GtUword gap_opening,
-                               AffineAlignEdge edge)
+                                      GtUword gap_opening,
+                                      AffineAlignEdge edge)
 {
+  Atabcolumn[0].Redge = Affine_X;
+  Atabcolumn[0].Dedge = Affine_X;
+  Atabcolumn[0].Iedge = Affine_X;
+
   switch (edge) {
   case Affine_R:
     Atabcolumn[0].Rvalue = 0;
@@ -122,11 +126,8 @@ static void firstAtabRtabcolumn(GtUword ulen,
                                 AffineAlignEdge edge)
 {
   GtUword rowindex;
+  GtWord rdist, ddist,idist;
   firstAtabRtabentry(Atabcolumn, gap_opening, edge);
-
-  Atabcolumn[0].Redge = Affine_X;
-  Atabcolumn[0].Dedge = Affine_X;
-  Atabcolumn[0].Iedge = Affine_X;
 
   Rtabcolumn[0].val_R.idx = 0;
   Rtabcolumn[0].val_D.idx = 0;
@@ -139,12 +140,16 @@ static void firstAtabRtabcolumn(GtUword ulen,
   for (rowindex = 1; rowindex <= ulen; rowindex++)
   {
     Atabcolumn[rowindex].Rvalue = GT_WORD_MAX;
-    Atabcolumn[rowindex].Dvalue = add_safe_max(Atabcolumn[rowindex-1].Dvalue,
-                                               gap_extension);
+    rdist = add_safe_max(Atabcolumn[rowindex-1].Rvalue,
+                         gap_opening + gap_extension);
+    ddist = add_safe_max(Atabcolumn[rowindex-1].Dvalue, gap_extension);
+    idist = add_safe_max(Atabcolumn[rowindex-1].Dvalue,
+                         gap_opening + gap_extension);
+    Atabcolumn[rowindex].Dvalue = MIN3(rdist, ddist, idist);
     Atabcolumn[rowindex].Ivalue = GT_WORD_MAX;
 
     Atabcolumn[rowindex].Redge = Affine_X;
-    Atabcolumn[rowindex].Dedge = Affine_D;
+    Atabcolumn[rowindex].Dedge = set_edge(rdist, ddist, idist);
     Atabcolumn[rowindex].Iedge = Affine_X;
 
     Rtabcolumn[rowindex].val_R.idx = rowindex;
@@ -188,7 +193,7 @@ static void nextAtabRtabcolumn(const GtUchar *useq,
 
   Atabcolumn[0].Redge = Affine_X;
   Atabcolumn[0].Dedge = Affine_X;
-  Atabcolumn[0].Iedge = Affine_I;
+  Atabcolumn[0].Iedge = set_edge(rdist, ddist, idist);
 
   if (colindex > midcolumn)
   {
