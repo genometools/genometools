@@ -171,6 +171,7 @@ void evaluate_crosspoints_from_2dimtab(GtUword **E,
 {
   GtUword idx, jdx;
 
+  gt_assert(E && Ctab);
   idx = ulen;
   jdx = vlen;
   while (jdx > 1 || idx > 0)
@@ -196,5 +197,4 @@ void evaluate_crosspoints_from_2dimtab(GtUword **E,
     else
       gt_assert(false);
   }
-
 }
