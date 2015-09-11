@@ -936,8 +936,8 @@ void gt_checkaffinelinearspace(GT_UNUSED bool forward,
                                GtUword vlen)
 {
   GtAlignment *align_linear, *align_square;
-  GtUword affine_score1, affine_score2, affine_score3;
-  GtWord matchcost = 0, mismatchcost = 4, gap_opening = 4, gap_extension = 1;
+  GtUword affine_score1, affine_score2, affine_score3, 
+          matchcost = 0, mismatchcost = 4, gap_opening = 4, gap_extension = 1;
   /* immediate result, because affinealign (square) cannot
    * handle lower/upper cases*/
   GtUchar *low_useq, *low_vseq;

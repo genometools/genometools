@@ -949,8 +949,8 @@ void gt_checkdiagonalbandalign(GT_UNUSED bool forward,
                                 const GtUchar *vseq,
                                 GtUword vlen)
 {
-  GtUword edist1, edist2, edist3;
-  GtWord left_dist, right_dist, matchcost = 0, mismatchcost = 1, gapcost = 1;
+  GtUword edist1, edist2, edist3, matchcost = 0, mismatchcost = 1, gapcost = 1;
+  GtWord left_dist, right_dist;
   GtAlignment *align;
 
   if (memchr(useq, LINEAR_EDIST_GAP,ulen) != NULL)

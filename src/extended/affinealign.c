@@ -116,7 +116,7 @@ static void affinealign_traceback(GtAlignment *a,
                                   AffinealignDPentry * const *dptable,
                                   GtUword i, GtUword j)
 {
-  GtUword minvalue;
+  GtWord minvalue;
   AffineAlignEdge edge;
   gt_assert(a && dptable);
   /* determine min{A_affine(m,n,x) | x in {R,D,I}} */
