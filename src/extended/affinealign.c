@@ -30,7 +30,7 @@ static void affinealign_fill_table(AffinealignDPentry **dptable,
                                    const GtUchar *v, GtUword vlen,
                                    GtUword matchcost, GtUword mismatchcost,
                                    GtUword gap_opening, GtUword gap_extension,
-                                   bool complete, AffineAlignEdge edge)
+                                   AffineAlignEdge edge)
 {
   GtUword i, j, Rvalue, Dvalue, Ivalue, minvalue;
   int rcost;
@@ -39,13 +39,27 @@ static void affinealign_fill_table(AffinealignDPentry **dptable,
   for (i = 0; i <= ulen; i++) {
     for (j = 0; j <= vlen; j++) {
       if (!i && !j) {
-        if (complete) {
-          dptable[0][0].Rvalue = 0;
-          dptable[0][0].Dvalue = gap_opening;
-          dptable[0][0].Ivalue = gap_opening;
+        switch (edge) {
+          case Affine_R:
+            dptable[0][0].Rvalue = 0;
+            dptable[0][0].Dvalue = GT_WORD_MAX;
+            dptable[0][0].Ivalue = GT_WORD_MAX;
+            break;
+          case Affine_D:
+            dptable[0][0].Rvalue = GT_WORD_MAX;
+            dptable[0][0].Dvalue = 0;
+            dptable[0][0].Ivalue = GT_WORD_MAX;
+            break;
+          case Affine_I:
+            dptable[0][0].Rvalue = GT_WORD_MAX;
+            dptable[0][0].Dvalue = GT_WORD_MAX;
+            dptable[0][0].Ivalue = 0;
+            break;
+          default:
+            dptable[0][0].Rvalue = 0;
+            dptable[0][0].Dvalue = gap_opening;
+            dptable[0][0].Ivalue = gap_opening;
         }
-        else
-         firstAtabRtabentry(dptable[0], gap_opening, edge);
       }
       else {
         /* compute A_affine(i,j,R) */
@@ -169,7 +183,7 @@ GtAlignment* gt_affinealign(const GtUchar *u, GtUword ulen,
   gt_assert(u && v);
   gt_array2dim_malloc(dptable, ulen+1, vlen+1);
   affinealign_fill_table(dptable, u, ulen, v, vlen, matchcost, mismatchcost,
-                         gap_opening, gap_extension, true, Affine_X);
+                         gap_opening, gap_extension, Affine_X);
   align = gt_alignment_new_with_seqs(u, ulen,  v, vlen);
   affinealign_traceback(align, dptable, ulen, vlen);
   gt_array2dim_delete(dptable);
@@ -238,7 +252,7 @@ void affine_ctab_in_square_space(GtUword *Ctab,
   gt_array2dim_malloc(Atabcolumn, (ulen+1), (vlen+1));
   affinealign_fill_table(Atabcolumn, &useq[ustart], ulen, &vseq[vstart], vlen,
                          matchcost, mismatchcost, gap_opening,
-                         gap_extension, false, from_edge);
+                         gap_extension, from_edge);
 
   evaluate_affinecrosspoints_from_2dimtab(Ctab, Atabcolumn, ulen, vlen,
                                           gap_opening, rowoffset, to_edge);

@@ -72,7 +72,5 @@ AffineAlignEdge minAdditionalCosts(const AffinealignDPentry *entry,
                                    const AffineAlignEdge edge,
                                    GtUword gap_opening);
 
-inline void firstAtabRtabentry(AffinealignDPentry *Atabcolumn,
-                               GtUword gap_opening,
-                               AffineAlignEdge edge);
+inline AffineAlignEdge set_edge(GtWord Rdist, GtWord Ddist, GtWord Idist);
 #endif

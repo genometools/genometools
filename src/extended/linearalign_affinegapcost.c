@@ -56,7 +56,7 @@ static void change_score_to_cost_affine_function(GtWord matchscore,
 }
 
 /*------------------------------global--------------------------------*/
-static AffineAlignEdge set_edge(GtWord Rdist,
+inline AffineAlignEdge set_edge(GtWord Rdist,
                                 GtWord Ddist,
                                 GtWord Idist)
 {
@@ -87,7 +87,7 @@ static Rnode get_Rtabentry(const Rtabentry *rtab, const AffineAlignEdge edge)
   }
 }
 
-inline void firstAtabRtabentry(AffinealignDPentry *Atabcolumn,
+static inline void firstAtabRtabentry(AffinealignDPentry *Atabcolumn,
                                GtUword gap_opening,
                                AffineAlignEdge edge)
 {
@@ -936,7 +936,7 @@ void gt_checkaffinelinearspace(GT_UNUSED bool forward,
                                GtUword vlen)
 {
   GtAlignment *align_linear, *align_square;
-  GtUword affine_score1, affine_score2, affine_score3, 
+  GtUword affine_score1, affine_score2, affine_score3,
           matchcost = 0, mismatchcost = 4, gap_opening = 4, gap_extension = 1;
   /* immediate result, because affinealign (square) cannot
    * handle lower/upper cases*/

@@ -25,6 +25,8 @@
 #include "core/str.h"
 #include "core/str_array.h"
 #include "core/types_api.h"
+#include "extended/diagonalbandalign.h"
+#include "extended/diagonalbandalign_affinegapcost.h"
 #include "extended/linearalign_affinegapcost.h"
 #include "extended/linearalign.h"
 #include "match/test-pairwise.h"
@@ -307,7 +309,9 @@ int gt_paircmp(int argc, const char **argv, GtError *err)
         MAKECheckfunctiontabentry(gt_checklinearspace),
         MAKECheckfunctiontabentry(gt_checklinearspace_local),
         MAKECheckfunctiontabentry(gt_checkaffinelinearspace),
-        MAKECheckfunctiontabentry(gt_checkaffinelinearspace_local)
+        MAKECheckfunctiontabentry(gt_checkaffinelinearspace_local),
+        MAKECheckfunctiontabentry(gt_checkdiagonalbandalign),
+        MAKECheckfunctiontabentry(gt_checkdiagonalbandaffinealign)
       };
       for (idx = 0; idx < sizeof checkfunction_tab/sizeof checkfunction_tab[0];
            idx++)

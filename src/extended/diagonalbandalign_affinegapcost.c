@@ -40,23 +40,6 @@ typedef struct {
   Diagnode val_R, val_D, val_I;
 } AffineDiagentry;
 
-AffineAlignEdge set_edge(GtWord Rdist,
-                                GtWord Ddist,
-                                GtWord Idist)
-{
-  GtUword minvalue;
-  minvalue = MIN3(Rdist, Ddist, Idist);
-
-  if (Rdist == minvalue)
-    return Affine_R;
-  else if (Ddist == minvalue)
-    return Affine_D;
-  else if (Idist == minvalue)
-    return Affine_I;
-
-  return Affine_X;
-}
-
 /*reconstruct alignment from crosspoints, crosspoints relating to diagonalband*/
 void reconstructalignment_from_affineDtab(GtAlignment *align,
                                           const AffineDiagentry *Dtab,
