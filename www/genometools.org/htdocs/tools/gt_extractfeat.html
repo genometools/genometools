@@ -102,6 +102,14 @@ use ID attributes of extracted features as FASTA descriptions (default: no)
 </p>
 </dd>
 <dt class="hdlist1">
+<strong>-gcode</strong> [<em>value</em>]
+</dt>
+<dd>
+<p>
+specify genetic code to use (default: 1)
+</p>
+</dd>
+<dt class="hdlist1">
 <strong>-seqfile</strong> [<em>filename</em>]
 </dt>
 <dd>
@@ -225,6 +233,24 @@ display version information and exit
 </p>
 </dd>
 </dl></div>
+<div class="paragraph"><p>Genetic code numbers for option <em>-gcode</em>:</p></div>
+<div class="paragraph"><p>1: Standard
+2: Vertebrate Mitochondrial
+3: Yeast Mitochondrial
+4: Mold Mitochondrial; Protozoan Mitochondrial; Coelenterate Mitochondrial; Mycoplasma; Spiroplasma
+5: Invertebrate Mitochondrial
+6: Ciliate Nuclear; Dasycladacean Nuclear; Hexamita Nuclear
+9: Echinoderm Mitochondrial
+10: Euplotid Nuclear
+11: Bacterial
+12: Alternative Yeast Nuclear
+13: Ascidian Mitochondrial
+14: Flatworm Mitochondrial
+15: Blepharisma Macronuclear
+16: Chlorophycean Mitochondrial
+21: Trematode Mitochondrial
+22: Scenedesmus Obliquus Mitochondrial
+23: Thraustochytrium Mitochondrial</p></div>
 <div class="paragraph"><p>File format for option <em>-regionmapping</em>:</p></div>
 <div class="paragraph"><p>The file supplied to option -regionmapping defines a &#8220;mapping&#8221;.  A mapping
 maps the <tt>sequence-region</tt> entries given in the <em>GFF3_file</em> to a sequence file

@@ -2166,7 +2166,7 @@ Returns a new <code>GtEncseqReader</code> for <code>encseq</code>, starting from
                                             GtUword frompos,
                                             GtUword topos)</code>
 <p>
-Returns the encoded representation of the substring from 0-based position
+Stores the encoded representation of the substring from 0-based position
    <code>frompos</code> to position <code>topos</code> of <code>encseq</code>. The result is written to the
    location pointed to by <code>buffer</code>, which must be large enough to hold the
    result.
@@ -2179,7 +2179,7 @@ Returns the encoded representation of the substring from 0-based position
                                             GtUword frompos,
                                             GtUword topos)</code>
 <p>
-Returns the decoded version of the substring from 0-based position <code>frompos</code>
+Stores the decoded version of the substring from 0-based position <code>frompos</code>
    to position <code>topos</code> of <code>encseq</code>. If the extracted region contains a separator
    character, it will be represented by non-printable SEPARATOR constant.
    The caller is responsible to handle this case. The result of the extraction
@@ -6666,7 +6666,7 @@ Register a <code>hook_function</code> with <code>option_parser</code>. All regis
 <code>void             gt_option_parser_set_min_args(GtOptionParser *option_parser,
                                               unsigned int minimum)</code>
 <p>
-The the <code>minimum</code> number of additional command line arguments <code>option_parser</code>
+The <code>minimum</code> number of additional command line arguments <code>option_parser</code>
    must parse in order to succeed.
 </p>
 <hr>
@@ -6675,7 +6675,7 @@ The the <code>minimum</code> number of additional command line arguments <code>o
 <code>void             gt_option_parser_set_max_args(GtOptionParser *option_parser,
                                               unsigned int maximum)</code>
 <p>
-The the <code>maximum</code> number of additional command line arguments <code>option_parser</code>
+The <code>maximum</code> number of additional command line arguments <code>option_parser</code>
    must parse in order to succeed.
 </p>
 <hr>
@@ -6685,7 +6685,7 @@ The the <code>maximum</code> number of additional command line arguments <code>o
                                                   unsigned int minimum,
                                                   unsigned int maximum)</code>
 <p>
-The the <code>minimum</code> and <code>maximum</code> number of additional command line arguments
+The <code>minimum</code> and <code>maximum</code> number of additional command line arguments
    <code>option_parser</code> must parse in order to succeed.
 </p>
 <hr>
@@ -12065,7 +12065,7 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
 <div id="footer">
 Copyright &copy; 2008-2013
 The <i>GenomeTools</i> authors.
-Last update: 2015-06-22
+Last update: 2015-09-12
 </div>
 </div>
 <!-- Piwik -->
