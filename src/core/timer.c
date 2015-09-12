@@ -65,7 +65,7 @@ GtTimer* gt_timer_new_with_progress_description(const char* desc)
   return t;
 }
 
-void gt_timer_start(GT_UNUSED GtTimer *t)
+void gt_timer_start(GtTimer *t)
 {
 #ifndef _WIN32
   gt_assert(t);
@@ -132,8 +132,7 @@ static int timeval_add(struct timeval *result,
 }
 #endif
 
-void gt_timer_show_formatted(GT_UNUSED GtTimer *t, GT_UNUSED const char *fmt,
-                             GT_UNUSED FILE *fp)
+void gt_timer_show_formatted(GtTimer *t, const char *fmt, FILE *fp)
 {
 #ifndef _WIN32
   struct timeval elapsed_tv;
@@ -203,8 +202,7 @@ static void gt_timer_print_progress_report(GtTimer *t,
 }
 #endif
 
-void gt_timer_show_progress(GT_UNUSED GtTimer *t, GT_UNUSED const char *desc,
-                            GT_UNUSED FILE *fp)
+void gt_timer_show_progress(GtTimer *t, const char *desc, FILE *fp)
 {
 #ifndef _WIN32
   gt_timer_show_progress_formatted(t, fp, "%s", desc);
@@ -215,20 +213,26 @@ void gt_timer_show_progress(GT_UNUSED GtTimer *t, GT_UNUSED const char *desc,
 #endif
 }
 
-#ifndef _WIN32
-void gt_timer_show_progress_formatted(GtTimer *t, FILE *fp,
-                                      const char *desc, ...)
+void gt_timer_show_progress_formatted(GtTimer *t, FILE *fp, const char *desc,
+                                      ...)
 {
+#ifndef _WIN32
   va_list ap;
   gt_assert(t && desc);
   va_start(ap, desc);
   gt_timer_show_progress_va(t, fp, desc, ap);
   va_end(ap);
+#else
+  /* XXX */
+  fprintf(stderr, "gt_timer_show_progress_formatted() not implemented\n");
+  exit(EXIT_FAILURE);
+#endif
 }
 
 void gt_timer_show_progress_va(GtTimer *t, FILE *fp, const char *desc,
                                va_list ap)
 {
+#ifndef _WIN32
   char buf[BUFSIZ];
   struct timeval elapsed_tv, elapsed_user_tv, elapsed_sys_tv;
   gt_assert(t && desc);
@@ -248,10 +252,14 @@ void gt_timer_show_progress_va(GtTimer *t, FILE *fp, const char *desc,
   t->statedesc = gt_cstr_dup(buf);
   gettimeofday(&t->start_tv, NULL);
   gt_xgetrusage(RUSAGE_SELF, &t->start_ru);
-}
+#else
+  /* XXX */
+  fprintf(stderr, "gt_timer_show_progress_va() not implemented\n");
+  exit(EXIT_FAILURE);
 #endif
+}
 
-void gt_timer_show_progress_final(GT_UNUSED GtTimer *t, GT_UNUSED FILE *fp)
+void gt_timer_show_progress_final(GtTimer *t, FILE *fp)
 {
 #ifndef _WIN32
   struct timeval elapsed_tv, elapsed_user_tv, elapsed_sys_tv;
