@@ -76,7 +76,7 @@ def parseargs(argv)
   opts.on("-l","--length NUM","specify length of sequences") do |x|
     options.lengthparam = x.to_i
   end
-  opts.on("-i","--minid NUM","specify minimum identity percentage in range " +
+  opts.on("-i","--minidentity NUM","specify minimum identity percentage in range " +
                "#{minidrange}, default is #{defaultminid}") do |x|
     options.minidentity = x.to_i
   end
