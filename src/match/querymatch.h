@@ -97,8 +97,7 @@ void gt_querymatch_prettyprint(const GtQuerymatch *querymatch);
 
 GtWord gt_querymatch_distance2score(GtUword distance,GtUword alignedlen);
 
-/* Returns true, iff the given seed position (seqnum, start_relative) is below
-   the querymatch. */
-bool gt_querymatch_checkoverlap(const GtQuerymatch *querymatch, GtUword seqnum,
+/* Returns true, iff the given seed start position is below the querymatch. */
+bool gt_querymatch_checkoverlap(const GtQuerymatch *querymatch,
                                 GtUword start_relative);
 #endif
