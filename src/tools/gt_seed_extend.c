@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2015 Jörg Winkler <joerg.winkler@studium.uni-hamburg.de>
+  Copyright (c) 2015 Joerg Winkler <joerg.winkler@studium.uni-hamburg.de>
   Copyright (c) 2015 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -87,7 +87,7 @@ static GtOptionParser* gt_seed_extend_option_parser_new(void *tool_arguments)
   GtOptionParser *op;
   GtOption *option, *op_gre, *op_xdr, *op_cam, *op_his, *op_dif, *op_pmh,
     *op_len, *op_err, *op_xbe, *op_sup, *op_frq, *op_mem, *op_ali;
-  gt_assert(arguments);
+  gt_assert(arguments != NULL);
 
   /* init */
   op = gt_option_parser_new("[option ...] encseq_basename [encseq_basename]",
@@ -97,10 +97,10 @@ static GtOptionParser* gt_seed_extend_option_parser_new(void *tool_arguments)
   /* DIAGBANDSEED OPTIONS */
 
   /* -seedlength */
-  op_len = gt_option_new_uint_min("seedlength",
-                                  "Minimum length of a seed",
-                                  &arguments->dbs_seedlength,
-                                  14UL, 1UL);
+  op_len = gt_option_new_uint_min_max("seedlength",
+                                      "Minimum length of a seed",
+                                      &arguments->dbs_seedlength,
+                                      14UL, 1UL, 32UL);
   gt_option_parser_add_option(op, op_len);
 
   /* -diagbandwidth */
@@ -303,26 +303,33 @@ static int gt_seed_extend_arguments_check(int rest_argc, void *tool_arguments,
   GtSeedExtendArguments *arguments = tool_arguments;
   int had_err = 0;
   gt_error_check(err);
-  gt_assert(arguments);
+  gt_assert(arguments != NULL);
 
+  /* -t parameter as alias for maxfreq := t - 1 */
   if (arguments->dbs_suppress < GT_UWORD_MAX) {
     arguments->dbs_maxfreq = arguments->dbs_suppress - 1;
   }
 
+  /* no alignment output */
   if (!gt_option_is_set(arguments->se_option_withali)) {
     arguments->se_alignmentwidth = 0;
   }
 
+  /* parse memlimit argument */
   arguments->dbs_memlimit = GT_UWORD_MAX;
   if (strcmp(gt_str_get(arguments->dbs_memlimit_str), "") != 0) {
-    had_err = gt_option_parse_spacespec(&arguments->dbs_memlimit, "memlimit",
-                                        arguments->dbs_memlimit_str, err);
+    had_err = gt_option_parse_spacespec(&arguments->dbs_memlimit,
+                                        "memlimit",
+                                        arguments->dbs_memlimit_str,
+                                        err);
     if (!had_err && arguments->dbs_memlimit == 0) {
-      gt_error_set(err, "option -memlimit must be at least 1MB");
+      gt_error_set(err,
+                   "argument to option \"-memlimit\" must be at least 1MB");
       had_err = -1;
     }
   }
 
+  /* minimum maxfreq value for 1 input file */
   if (!had_err && rest_argc == 1 && arguments->dbs_maxfreq == 1) {
     if (arguments->dbs_suppress == GT_UWORD_MAX) {
       gt_error_set(err, "for 1 input file: parameter -maxfreq must be >= 2 to "
@@ -334,6 +341,7 @@ static int gt_seed_extend_arguments_check(int rest_argc, void *tool_arguments,
     had_err = -1;
   }
 
+  /* allow 1 or 2 input files */
   if (!had_err && rest_argc > 2) {
     gt_error_set(err, "too many arguments (-help shows correct usage)");
     had_err = -1;
@@ -349,23 +357,26 @@ static int gt_seed_extend_runner(int argc, const char **argv, int parsed_args,
                                  void *tool_arguments, GtError *err)
 {
   GtSeedExtendArguments *arguments = tool_arguments;
-  GtEncseqLoader *encseq_loader;
-  GtEncseq *aencseq, *bencseq;
+  GtEncseqLoader *encseq_loader = NULL;
+  GtEncseq *aencseq = NULL, *bencseq = NULL;
   GtGreedyextendmatchinfo *grextinfo = NULL;
   GtXdropmatchinfo *xdropinfo = NULL;
   GtQuerymatchoutoptions *querymatchoutopt = NULL;
-  GtExtendCharAccess cam = GT_EXTEND_CHAR_ACCESS_ANY;
   GtTimer *seedextendtimer = NULL;
-  GtUword errorpercentage;
+  GtExtendCharAccess cam = GT_EXTEND_CHAR_ACCESS_ANY;
+  GtUword errorpercentage = 0;
   int had_err = 0;
 
   gt_error_check(err);
-  gt_assert(arguments);
+  gt_assert(arguments != NULL);
   gt_assert(argc - parsed_args >= 1);
-  gt_assert(arguments->se_minidentity >= GT_EXTEND_MIN_IDENTITY_PERCENTAGE);
-  gt_assert(arguments->se_minidentity <= 100);
+  gt_assert(arguments->se_minidentity >= GT_EXTEND_MIN_IDENTITY_PERCENTAGE &&
+            arguments->se_minidentity <= 100);
+
+  /* Calculate error percentage from minidentity */
   errorpercentage = 100 - arguments->se_minidentity;
 
+  /* Measure whole running time */
   if (arguments->benchmark || arguments->verbose) {
     gt_showtime_enable();
   }
@@ -379,7 +390,7 @@ static int gt_seed_extend_runner(int argc, const char **argv, int parsed_args,
   encseq_loader = gt_encseq_loader_new();
   gt_encseq_loader_enable_autosupport(encseq_loader);
   aencseq = gt_encseq_loader_load(encseq_loader, argv[parsed_args], err);
-  if (!aencseq)
+  if (aencseq == NULL)
     had_err = -1;
 
   /* If there is a 2nd read set: Load encseq B */
@@ -388,7 +399,7 @@ static int gt_seed_extend_runner(int argc, const char **argv, int parsed_args,
       bencseq = gt_encseq_loader_load(encseq_loader, argv[parsed_args+1], err);
     else
       bencseq = gt_encseq_ref(aencseq);
-    if (!bencseq) {
+    if (bencseq == NULL) {
       had_err = -1;
       gt_encseq_delete(aencseq);
     }
@@ -398,7 +409,8 @@ static int gt_seed_extend_runner(int argc, const char **argv, int parsed_args,
   /* Prepare options for greedy extension */
   if (!had_err && gt_option_is_set(arguments->se_option_greedy)) {
     cam = gt_greedy_extend_char_access(gt_str_get
-                                       (arguments->se_char_access_mode), err);
+                                       (arguments->se_char_access_mode),
+                                       err);
     if ((int) cam != -1) {
       grextinfo = gt_greedy_extend_matchinfo_new(errorpercentage,
                                                  arguments->se_maxalilendiff,
@@ -415,6 +427,8 @@ static int gt_seed_extend_runner(int argc, const char **argv, int parsed_args,
       }
     } else {
       had_err = -1;
+      gt_encseq_delete(aencseq);
+      gt_encseq_delete(bencseq);
     }
   }
 
@@ -435,9 +449,7 @@ static int gt_seed_extend_runner(int argc, const char **argv, int parsed_args,
 
   /* Prepare output options */
   if (!had_err && arguments->se_alignmentwidth > 0) {
-    /* || (gt_str_array_size(arguments->queryfiles) == 0
-     && gt_option_is_set(arguments->se_option_xdrop)) */
-    GtUword sensitivity = gt_option_is_set(arguments->se_option_greedy)
+    const GtUword sensitivity = gt_option_is_set(arguments->se_option_greedy)
       ? arguments->se_extendgreedy : 100;
     querymatchoutopt
       = gt_querymatchoutoptions_new(arguments->se_alignmentwidth,
@@ -469,34 +481,39 @@ static int gt_seed_extend_runner(int argc, const char **argv, int parsed_args,
     dbsarguments.querymatchoutopt = querymatchoutopt;
 
     had_err = gt_diagbandseed_run(aencseq, bencseq, &dbsarguments, err);
+
+    /* clean up */
     gt_encseq_delete(aencseq);
     gt_encseq_delete(bencseq);
     if (gt_option_is_set(arguments->se_option_greedy))
       gt_greedy_extend_matchinfo_delete(grextinfo);
     if (gt_option_is_set(arguments->se_option_xdrop))
       gt_xdrop_matchinfo_delete(xdropinfo);
-    if (querymatchoutopt != NULL)
+    if (arguments->se_alignmentwidth > 0)
       gt_querymatchoutoptions_delete(querymatchoutopt);
   }
 
-  if (seedextendtimer != NULL) {
-    char *keystring
-      = gt_seed_extend_params_keystring(gt_option_is_set(arguments->
-                                                         se_option_greedy),
-                                        gt_option_is_set(arguments->
-                                                         se_option_xdrop),
-                                        arguments->dbs_seedlength,
-                                        arguments->se_alignlength,
-                                        arguments->se_minidentity,
-                                        arguments->se_maxalilendiff,
-                                        arguments->se_perc_match_hist,
-                                        arguments->se_extendgreedy,
-                                        arguments->se_extendxdrop,
-                                        arguments->se_xdropbelowscore);
-    printf("# TIME seedextend-%s", keystring);
-    gt_free(keystring);
-    gt_timer_show_formatted(seedextendtimer, " overall " GT_WD ".%02ld\n",
-                            stdout);
+  if (gt_showtime_enabled()) {
+    if (!had_err) {
+      char *keystring
+        = gt_seed_extend_params_keystring(gt_option_is_set(arguments->
+                                                           se_option_greedy),
+                                          gt_option_is_set(arguments->
+                                                           se_option_xdrop),
+                                          arguments->dbs_seedlength,
+                                          arguments->se_alignlength,
+                                          arguments->se_minidentity,
+                                          arguments->se_maxalilendiff,
+                                          arguments->se_perc_match_hist,
+                                          arguments->se_extendgreedy,
+                                          arguments->se_extendxdrop,
+                                          arguments->se_xdropbelowscore);
+      printf("# TIME seedextend-%s", keystring);
+      gt_free(keystring);
+      gt_timer_show_formatted(seedextendtimer,
+                              " overall " GT_WD ".%02ld\n",
+                              stdout);
+    }
     gt_timer_delete(seedextendtimer);
   }
   return had_err;

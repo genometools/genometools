@@ -1,5 +1,5 @@
 /*
- Copyright (c) 2015 Jörg Winkler <joerg.winkler@studium.uni-hamburg.de>
+ Copyright (c) 2015 Joerg Winkler <joerg.winkler@studium.uni-hamburg.de>
  Copyright (c) 2015 Center for Bioinformatics, University of Hamburg
 
  Permission to use, copy, modify, and distribute this software for any
@@ -50,10 +50,12 @@ typedef struct GtDiagbandseedSeedPair GtDiagbandseedSeedPair;
 GT_DECLAREARRAYSTRUCT(GtDiagbandseedSeedPair);
 
 /* Returns a GtDiagbandseedKmerPos list of k-mers from a given encseq. */
-GtUword gt_diagbandseed_get_kmers(GtDiagbandseedKmerPos *list,
-                                  const GtEncseq *encseq,
-                                  unsigned int kmerlen,
-                                  GtReadmode readmode);
+int gt_diagbandseed_get_kmers(GtDiagbandseedKmerPos *list,
+                              GtUword *listlength,
+                              const GtEncseq *encseq,
+                              unsigned int seedlength,
+                              GtReadmode readmode,
+                              GtError *err);
 
 /* Returns a GtDiagbandseedSeedPair list of equal k-mers from lists a and b. */
 void gt_diagbandseed_merge(GtArrayGtDiagbandseedSeedPair *mlist,
