@@ -23,12 +23,6 @@ def convertfileinput(lines)
   return lines.map! {|l| l.split(/\s/).map {|v| conv_to_i(v)}}
 end
 
-def showinput(lines)
-  lines.each do |line|
-    puts "#{line}"
-  end
-end
-
 def extract(val,idxlist)
   a = Array.new()
   idxlist.each do |idx|

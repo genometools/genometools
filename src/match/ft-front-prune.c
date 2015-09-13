@@ -115,8 +115,15 @@ static void sequenceobject_init(Sequenceobject *seq,
     seq->forward = true;
   } else
   {
-    gt_assert(readmode == GT_READMODE_REVERSE && startpos < totallength);
-    seq->startpos = totallength - 1 - startpos;
+    gt_assert(readmode == GT_READMODE_REVERSE);
+    if (extend_char_access_mode == GT_EXTEND_CHAR_ACCESS_DIRECT)
+    {
+      seq->startpos = startpos;
+    } else
+    {
+      gt_assert(startpos < totallength);
+      seq->startpos = totallength - 1 - startpos;
+    }
     seq->forward = false;
   }
   gt_assert(seq->twobitencoding != NULL || seq->encseqreader != NULL ||

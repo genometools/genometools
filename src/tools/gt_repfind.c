@@ -59,7 +59,7 @@ typedef struct
           alignmentwidth; /* 0 for no alignment display and otherwidth number
                              of columns of alignment per line displayed. */
   bool scanfile, beverbose, forward, reverse, searchspm,
-       check_extend_symmetry, silent, trimstat;
+       check_extend_symmetry, silent, trimstat, seed_display;
   GtStr *indexname, *cam_string; /* parse this using
                                     gt_greedy_extend_char_access*/
   GtStrArray *queryfiles;
@@ -218,7 +218,7 @@ static GtOptionParser *gt_repfind_option_parser_new(void *tool_arguments)
            *maxalilendiffoption, *leastlength_option, *char_access_mode_option,
            *check_extend_symmetry_option, *xdropbelowoption, *historyoption,
            *percmathistoryoption, *errorpercentageoption, *optiontrimstat,
-           *optionwithalignment;
+           *optionwithalignment, *optionseed_display;
   GtMaxpairsoptions *arguments = tool_arguments;
 
   op = gt_option_parser_new("[options] -ii indexname",
@@ -383,6 +383,12 @@ static GtOptionParser *gt_repfind_option_parser_new(void *tool_arguments)
                                       &arguments->trimstat, false);
   gt_option_parser_add_option(op, optiontrimstat);
   gt_option_is_development_option(optiontrimstat);
+
+  optionseed_display = gt_option_new_bool("seed-display","display seeds in "
+                                          "#-line",
+                                          &arguments->seed_display, false);
+  gt_option_parser_add_option(op, optionseed_display);
+  gt_option_is_development_option(optionseed_display);
 
   /* the following option are options special to repfind */
 
@@ -564,9 +570,7 @@ static int gt_repfind_runner(int argc,
                                gt_minidentity2errorpercentage(
                                             arguments->minidentity),
                                arguments->xdropbelowscore,
-                               arguments->extendxdrop,
-                               gt_str_array_size(arguments->queryfiles) == 0
-                                             ? true : false);
+                               arguments->extendxdrop);
     gt_assert(xdropmatchinfo != NULL);
     if (arguments->beverbose)
     {
@@ -575,6 +579,10 @@ static int gt_repfind_runner(int argc,
     if (arguments->silent)
     {
       gt_xdrop_matchinfo_silent_set(xdropmatchinfo);
+    }
+    if (arguments->seed_display)
+    {
+      gt_xdrop_matchinfo_seed_display_set(xdropmatchinfo);
     }
   }
   if (!haserr && gt_option_is_set(arguments->refextendgreedyoption))
@@ -614,6 +622,10 @@ static int gt_repfind_runner(int argc,
       {
         gt_greedy_extend_matchinfo_trimstat_set(greedyextendmatchinfo);
       }
+      if (arguments->seed_display)
+      {
+        gt_greedy_matchinfo_seed_display_set(greedyextendmatchinfo);
+      }
     }
   }
   if (!haserr)
@@ -623,8 +635,7 @@ static int gt_repfind_runner(int argc,
 
     processinfo_and_querymatchspaceptr.processinfo = NULL;
     if (arguments->alignmentwidth > 0 ||
-        (gt_str_array_size(arguments->queryfiles) == 0 &&
-         gt_option_is_set(arguments->refextendxdropoption)))
+        gt_option_is_set(arguments->refextendxdropoption))
     {
       const GtUword sensitivity
         = gt_option_is_set(arguments->refextendgreedyoption)

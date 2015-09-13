@@ -37,7 +37,7 @@ void gt_querymatch_init(GtQuerymatch *querymatch,
                         GtReadmode readmode,
                         bool query_as_reversecopy,
                         GtWord score,
-                        GtUword edist,
+                        GtUword distance,
                         bool selfmatch,
                         uint64_t queryseqnum,
                         GtUword querylen,
@@ -61,7 +61,7 @@ bool gt_querymatch_complete(GtQuerymatch *querymatchptr,
                             GtReadmode readmode,
                             bool query_as_reversecopy,
                             GtWord score,
-                            GtUword edist,
+                            GtUword distance,
                             bool selfmatch,
                             uint64_t queryseqnum,
                             GtUword querylen,
@@ -91,6 +91,10 @@ GtUword gt_querymatch_dbseqnum(const GtQuerymatch *querymatch);
 bool gt_querymatch_queryreverse(const GtQuerymatch *querymatch);
 
 double gt_querymatch_error_rate(GtUword distance,GtUword alignedlen);
+
+bool gt_querymatch_verify(const GtQuerymatch *querymatch,
+                          GtUword errorpercentage,
+                          unsigned int userdefinedleastlength);
 
 void gt_querymatch_prettyprint(const GtQuerymatch *querymatch);
 

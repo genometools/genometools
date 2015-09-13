@@ -292,6 +292,7 @@ static bool seededmatch2eoplist(GtQuerymatchoutoptions *querymatchoutoptions,
         if (querymatchoutoptions->front_trace != NULL)
         {
           GtUword eoplistlen = querymatchoutoptions->eoplist.nextfreeuint8_t;
+
           front_trace2eoplist(&querymatchoutoptions->eoplist,
                               querymatchoutoptions->front_trace,
                               &left_best_polished_point,

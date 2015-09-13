@@ -62,9 +62,7 @@
 typedef struct GtXdropmatchinfo GtXdropmatchinfo;
 
 /* The constructor, which is called once before the first seed
-   is to be extended. The parameter <selfcompare> is true iff an index
-   is compared against itself.
-   The parameter <userdefinedleastlength> is the minimum
+   is to be extended. The parameter <userdefinedleastlength> is the minimum
    length of the the extension to both sides (including the seed itself).
    <errorpercentage> is the percentage of errors allowed in the
    extended seeds. <xdropbelowscore> is the parameter which influences the
@@ -82,8 +80,7 @@ typedef struct
 GtXdropmatchinfo *gt_xdrop_matchinfo_new(GtUword userdefinedleastlength,
                                          GtUword errorpercentage,
                                          GtXdropscore xdropbelowscore,
-                                         GtUword sensitivity,
-                                         bool selfcompare);
+                                         GtUword sensitivity);
 
 /* The destructor-method. */
 
@@ -97,6 +94,10 @@ GtWord gt_optimalxdropbelowscore(GtUword errorpercentage,GtUword sensitivity);
 /* Set the verbose flag in the matchinfo object. */
 
 void gt_xdrop_matchinfo_verbose_set(GtXdropmatchinfo *xdropmatchinfo);
+
+/* Set the seed_display flag in the matchinfo object. */
+
+void gt_xdrop_matchinfo_seed_display_set(GtXdropmatchinfo *xdropmatchinfo);
 
 /* Set the silent flag in the matchinfo object. */
 
@@ -231,9 +232,13 @@ void gt_greedy_extend_matchinfo_check_extend_symmetry_set(
 
 void gt_greedy_extend_matchinfo_silent_set(GtGreedyextendmatchinfo *ggemi);
 
-/* Set the silent trimstat in the matchinfo object. */
+/* Set the trimstat in the matchinfo object. */
 
 void gt_greedy_extend_matchinfo_trimstat_set(GtGreedyextendmatchinfo *ggemi);
+
+/* Set the seed_display flag in the matchinfo object. */
+
+void gt_greedy_matchinfo_seed_display_set(GtGreedyextendmatchinfo *ggemi);
 
 /* Set the verbose flag in the matchinfo object. */
 
