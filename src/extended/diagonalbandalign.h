@@ -22,12 +22,18 @@
 #include "core/unused_api.h"
 #include "extended/alignment.h"
 
+typedef struct {
+  GtUword lastcpoint, currentrowindex;
+  int edge;
+} Diagentry;
+
 void gt_checkdiagonalbandalign(GT_UNUSED bool forward,
                                 const GtUchar *useq,
                                 GtUword ulen,
                                 const GtUchar *vseq,
                                 GtUword vlen);
 
+/* creating alignment with diagonalband in linear space O(n) */
 void gt_computediagonalbandalign(GtAlignment *align,
                                  const GtUchar *useq,
                                  GtUword ustart, GtUword ulen,
@@ -38,5 +44,19 @@ void gt_computediagonalbandalign(GtAlignment *align,
                                  GtUword matchcost,
                                  GtUword mismatchcost,
                                  GtUword gapcost);
+
+/* creating alignment with diagonalband in square space O(n²) */
+GtUword diagonalbandalignment_in_square_space(GtAlignment *align,
+                                              const GtUchar *useq,
+                                              GtUword ustart,
+                                              GtUword ulen,
+                                              const GtUchar *vseq,
+                                              GtUword vstart,
+                                              GtUword vlen,
+                                              GtWord left_dist,
+                                              GtWord right_dist,
+                                              GtUword matchcost,
+                                              GtUword mismatchcost,
+                                              GtUword gapcost);
 
 #endif

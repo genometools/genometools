@@ -30,139 +30,7 @@
 #include "extended/reconstructalignment.h"
 
 #include "extended/diagonalbandalign_affinegapcost.h"
-
 #define LINEAR_EDIST_GAP          ((GtUchar) UCHAR_MAX)
-
-typedef struct {
-  GtUword lastcpoint, currentrowindex;
-  AffineAlignEdge edge;
-} Diagnode;
-
-typedef struct {
-  Diagnode val_R, val_D, val_I;
-} AffineDiagentry;
-
-/*reconstruct alignment from crosspoints, crosspoints relating to diagonalband*/
-void reconstructalignment_from_affineDtab(GtAlignment *align,
-                                          const AffineDiagentry *Dtab,
-                                          AffineAlignEdge edge,
-                                          const GtUchar *useq, GtUword ulen,
-                                          const GtUchar *vseq, GtUword vlen)
-{
-  GtUword i,j;
-  Diagnode node, prevnode;
-  AffineAlignEdge prevedge;
-  gt_assert(align != NULL && Dtab != NULL);
-
-  switch (edge) {
-    case Affine_R:
-      node = Dtab[vlen].val_R;
-      break;
-    case Affine_D:
-      node = Dtab[vlen].val_D;
-      break;
-    case Affine_I:
-      node = Dtab[vlen].val_I;
-      break;
-    default:
-      gt_assert(false);
-  }
-
-  for (j = ulen; j > node.currentrowindex; j--)
-  {
-    gt_alignment_add_deletion(align);
-  }
-  prevedge = edge;
-  /*consider pairwise distance between prevnode and node */
-  /*prevedge->prevnode, prevnode.edge->node, node.edge->nextnode*/
-  for (i = vlen; i > 0; i--)
-  {
-    prevnode = node;
-    switch (prevnode.edge) {
-      case Affine_R:
-        node = Dtab[i-1].val_R;
-        break;
-      case Affine_D:
-        node = Dtab[i-1].val_D;
-        break;
-      case Affine_I:
-        node = Dtab[i-1].val_I;
-        break;
-      default:
-        gt_assert(false);
-    }
-
-    gt_assert(prevnode.currentrowindex != GT_UWORD_MAX);
-    if (prevnode.currentrowindex == node.currentrowindex + 1)
-    {
-      if (prevedge == Affine_R)
-        {gt_alignment_add_replacement(align);}
-      else if (prevedge == Affine_D)
-      {
-         gt_alignment_add_deletion(align);
-         gt_alignment_add_insertion(align);
-      }
-      else if (prevedge == Affine_I)
-      {
-         gt_alignment_add_insertion(align);
-         gt_alignment_add_deletion(align);
-      }
-    }
-    else if (prevnode.currentrowindex == node.currentrowindex)
-      {gt_alignment_add_insertion(align);}
-
-    else if (prevnode.currentrowindex > node.currentrowindex)
-    {
-      if (prevedge == Affine_R)
-      {
-        gt_alignment_add_replacement(align);
-
-        for (j = 0; j < (prevnode.currentrowindex -
-                         node.currentrowindex)-1; j++)
-        {
-          gt_alignment_add_deletion(align);
-        }
-      }
-      else if (prevedge == Affine_I)
-      {
-        gt_alignment_add_insertion(align);
-        for (j = 0; j < (prevnode.currentrowindex -
-                         node.currentrowindex); j++)
-        {
-          gt_alignment_add_deletion(align);
-        }
-      }
-      else
-      {
-        for (j = 0; j < (prevnode.currentrowindex -
-                         node.currentrowindex)-1; j++)
-        {
-          gt_alignment_add_deletion(align);
-        }
-        if (prevnode.edge == Affine_I)
-        {
-          if (tolower((int)vseq[i-1]) ==
-                                      tolower((int)useq[node.currentrowindex]))
-          {
-            gt_alignment_add_replacement(align);
-          }
-          else
-          {
-            gt_alignment_add_deletion(align);
-            gt_alignment_add_insertion(align);
-          }
-        }
-        else
-          gt_alignment_add_replacement(align);
-      }
-    }
-    prevedge = prevnode.edge;
-  }
-  for (j = node.currentrowindex; j > 0; j--)
-  {
-    gt_alignment_add_deletion(align);
-  }
-}
 
 static void diagonalband_fillDPtab_affine(AffinealignDPentry **Atabcolumn,
                                           const GtUchar *useq,
@@ -177,10 +45,17 @@ static void diagonalband_fillDPtab_affine(AffinealignDPentry **Atabcolumn,
                                           GtUword mismatchcost,
                                           GtUword gap_opening,
                                           GtUword gap_extension,
+                                          AffineAlignEdge from_edge,
                                           AffineAlignEdge edge)
 {
   GtUword i,j, low_row, high_row;
   GtWord rcost, r_dist, d_dist, i_dist, minvalue;
+
+  if ((left_dist > MIN(0, (GtWord)vlen-(GtWord)ulen))||
+      (right_dist < MAX(0, (GtWord)vlen-(GtWord)ulen)))
+  {
+    gt_assert(false);
+  }
 
   low_row = 0;
   high_row = -left_dist;
@@ -189,18 +64,21 @@ static void diagonalband_fillDPtab_affine(AffinealignDPentry **Atabcolumn,
    switch (edge) {
     case Affine_R:
       Atabcolumn[0][0].Rvalue = 0;
+      Atabcolumn[0][0].Redge = from_edge;
       Atabcolumn[0][0].Dvalue = GT_WORD_MAX;
       Atabcolumn[0][0].Ivalue = GT_WORD_MAX;
       break;
     case Affine_D:
       Atabcolumn[0][0].Rvalue = GT_WORD_MAX;
       Atabcolumn[0][0].Dvalue = 0;
+      Atabcolumn[0][0].Dedge = from_edge;
       Atabcolumn[0][0].Ivalue = GT_WORD_MAX;
       break;
     case Affine_I:
       Atabcolumn[0][0].Rvalue = GT_WORD_MAX;
       Atabcolumn[0][0].Dvalue = GT_WORD_MAX;
       Atabcolumn[0][0].Ivalue = 0;
+      Atabcolumn[0][0].Iedge = from_edge;
       break;
     default:
       Atabcolumn[0][0].Rvalue = 0;
@@ -311,7 +189,7 @@ static void diagonalband_fillDPtab_affine(AffinealignDPentry **Atabcolumn,
 
 /* calculate alignment with diagonalband in square space O(n²) with
  * affine gapcosts */
-static GtWord diagonalbandalignment_in_square_space_affine(GtAlignment *align,
+GtWord diagonalbandalignment_in_square_space_affine(GtAlignment *align,
                                                     const GtUchar *useq,
                                                     GtUword ustart,
                                                     GtUword ulen,
@@ -334,7 +212,7 @@ static GtWord diagonalbandalignment_in_square_space_affine(GtAlignment *align,
   diagonalband_fillDPtab_affine(Atabcolumn, useq, ustart, ulen, vseq, vstart,
                                 vlen, left_dist, right_dist, matchcost,
                                 mismatchcost, gap_opening, gap_extension,
-                                Affine_X);
+                                Affine_X, Affine_X);
 
   distance = MIN3(Atabcolumn[ulen][vlen].Rvalue,
                   Atabcolumn[ulen][vlen].Dvalue,
@@ -375,7 +253,7 @@ static GtWord diagonalband_square_space_affine(const GtUchar *useq,
   diagonalband_fillDPtab_affine(Atabcolumn, useq, ustart, ulen, vseq, vstart,
                                 vlen, left_dist, right_dist, matchcost,
                                 mismatchcost, gap_opening, gap_extension,
-                                Affine_X);
+                                Affine_X, Affine_X);
 
   distance = MIN3(Atabcolumn[ulen][vlen].Rvalue,
                   Atabcolumn[ulen][vlen].Dvalue,
@@ -383,6 +261,120 @@ static GtWord diagonalband_square_space_affine(const GtUchar *useq,
 
   gt_array2dim_delete(Atabcolumn);
   return distance;
+}
+
+static Rnode evaluate_affineDBcrosspoints_from_2dimtab(AffineDiagentry *Dtab,
+                                                AffinealignDPentry **Atabcolumn,
+                                                GtUword ulen, GtUword vlen,
+                                                GtUword gap_opening,
+                                                GtUword rowoffset,
+                                                AffineAlignEdge from_edge,
+                                                AffineAlignEdge edge)
+{
+  GtUword i, j;
+  Rnode rnode;
+  Diagentry *tempnode;
+  gt_assert(Atabcolumn != NULL);
+
+  i = ulen;
+  j = vlen;
+
+  edge = minAdditionalCosts(&Atabcolumn[i][j], edge, gap_opening);
+
+  switch (edge)
+  {
+    case Affine_I:
+      tempnode = &Dtab[vlen].val_I;
+      rnode = (Rnode) {vlen, Affine_I};
+      break;
+    case Affine_D:
+      tempnode = &Dtab[vlen].val_D;
+      rnode = (Rnode) {vlen, Affine_D};
+      break;
+    default:
+      tempnode = &Dtab[vlen].val_R;
+      rnode = (Rnode) {vlen, Affine_R};
+  }
+
+  while (i > 0 || j > 0) {
+    if (j == vlen)
+      rnode.edge = edge;
+    switch (edge) {
+      case Affine_R:
+        gt_assert(Atabcolumn[i][j].Rvalue != GT_WORD_MAX);
+        Dtab[j].val_R.currentrowindex = i + rowoffset;
+        edge = Atabcolumn[i][j].Redge;
+        tempnode->edge = Affine_R;
+        tempnode = &Dtab[j].val_R;
+        gt_assert(i > 0 && j > 0);
+        i--;
+        j--;
+        break;
+      case Affine_D:
+        edge = Atabcolumn[i][j].Dedge;
+        gt_assert(i);
+        i--;
+        break;
+      case Affine_I:
+        Dtab[j].val_I.currentrowindex = i + rowoffset;
+        edge = Atabcolumn[i][j].Iedge;
+        tempnode->edge = Affine_I;
+        tempnode = &Dtab[j].val_I;
+        gt_assert(j);
+        j--;
+        break;
+      default:
+        gt_assert(false);
+    }
+  }
+  tempnode->edge = edge;
+  /* special case for first crosspoint */
+  Dtab[0].val_R = (Diagentry) {GT_UWORD_MAX, rowoffset, from_edge};
+  Dtab[0].val_D = (Diagentry) {GT_UWORD_MAX, rowoffset, from_edge};
+  Dtab[0].val_I = (Diagentry) {GT_UWORD_MAX, rowoffset, from_edge};
+
+  return rnode;
+}
+
+/* create affine DBcrosspointtab to combine square calculating with linear
+ * calculating. from_edge describes type of crosspoint node, edge describes the
+ * incoming way to next unkonown crosspoint and to_edge describes type of
+ * previous crosspoint.
+ * Returns edge and index of lastcrosspoint in matrix.
+ */
+static Rnode  affineDtab_in_square_space(AffineDiagentry *Dtab,
+                                 const GtUchar *useq,
+                                 GtUword ustart,
+                                 GtUword ulen,
+                                 const GtUchar *vseq,
+                                 GtUword vstart,
+                                 GtUword vlen,
+                                 GtWord left_dist,
+                                 GtWord right_dist,
+                                 GtUword matchcost,
+                                 GtUword mismatchcost,
+                                 GtUword gap_opening,
+                                 GtUword gap_extension,
+                                 GtUword rowoffset,
+                                 AffineAlignEdge from_edge,
+                                 AffineAlignEdge edge,
+                                 AffineAlignEdge to_edge)
+{
+  AffinealignDPentry **Atabcolumn;
+
+  gt_assert(Dtab != NULL);
+
+  gt_array2dim_malloc(Atabcolumn, (ulen+1), (vlen+1));
+  diagonalband_fillDPtab_affine(Atabcolumn, useq, ustart, ulen, vseq, vstart,
+                                vlen, left_dist, right_dist, matchcost,
+                                mismatchcost, gap_opening, gap_extension,
+                                from_edge, edge);
+
+  Rnode rnode = evaluate_affineDBcrosspoints_from_2dimtab(Dtab, Atabcolumn,
+                                                 ulen, vlen, gap_opening,
+                                                 rowoffset, from_edge, to_edge);
+  gt_array2dim_delete(Atabcolumn);
+  return rnode;
 }
 
 /* calculate only distance with diagonalband in linear space O(n)
@@ -430,10 +422,13 @@ static GtWord diagonalband_linear_affine(const GtUchar *useq,
                                           gap_extension);
     Atabcolumn[rowindex-low_row].Ivalue = GT_WORD_MAX;
   }
+  if (high_row == ulen)
+    last_row = true;
   for (colindex = 1; colindex <= vlen; colindex++)
   {
     northwestAffinealignDPentry = Atabcolumn[0];
-
+    if (high_row < ulen)
+      high_row ++;
     if (colindex > right_dist)
     {
       westAffinealignDPentry = Atabcolumn[1];
@@ -441,8 +436,12 @@ static GtWord diagonalband_linear_affine(const GtUchar *useq,
     }
     else
       westAffinealignDPentry = Atabcolumn[0];
-    if (high_row < ulen)
-      high_row ++;
+    if (!last_row && rowindex == high_row)
+      {
+        westAffinealignDPentry.Rvalue = GT_WORD_MAX;
+        westAffinealignDPentry.Dvalue = GT_WORD_MAX;
+        westAffinealignDPentry.Ivalue = GT_WORD_MAX;
+      }
 
     r_dist = add_safe_max(westAffinealignDPentry.Rvalue,
                           gap_extension+gap_opening);
@@ -522,7 +521,7 @@ static GtWord diagonalband_linear_affine(const GtUchar *useq,
 }
 
 /* helpfunctions */
-static void inline  set_invalid_Diagnode(Diagnode *node)
+static void inline  set_invalid_Diagentry(Diagentry *node)
 {
   gt_assert(node != NULL);
   node->currentrowindex = GT_UWORD_MAX;
@@ -530,9 +529,10 @@ static void inline  set_invalid_Diagnode(Diagnode *node)
   node->lastcpoint = GT_UWORD_MAX;
 }
 
-static void inline set_valid_Diagnode(Diagnode *node_to, Rtabentry *entry_from,
-                               GtWord minvalue, GtWord r_dist,
-                               GtWord i_dist, GtWord d_dist)
+static void inline set_valid_Diagentry(Diagentry *node_to,
+                                       const Rtabentry *entry_from,
+                                       GtWord minvalue, GtWord r_dist,
+                                       GtWord i_dist, GtWord d_dist)
 {
   gt_assert(node_to != NULL && entry_from != NULL);
   if (minvalue == r_dist)
@@ -551,6 +551,7 @@ static void inline set_valid_Diagnode(Diagnode *node_to, Rtabentry *entry_from,
     node_to->lastcpoint = entry_from->val_D.idx;
   }
 }
+
 static void inline set_invalid_Rnode(Rnode *node)
 {
   gt_assert(node != NULL);
@@ -571,6 +572,7 @@ static void inline set_valid_Rnode(Rnode *node_to, Rtabentry *entry_from,
      *node_to = entry_from->val_D;
 }
 
+/* calculate first column */
 static void firstaffineDBtabcolumn(AffinealignDPentry *Atabcolumn,
                                    Rtabentry *Rtabcolumn,
                                    AffineDiagentry *Diagcolumn,
@@ -593,9 +595,9 @@ static void firstaffineDBtabcolumn(AffinealignDPentry *Atabcolumn,
   Atabcolumn[low_row].Dvalue = GT_WORD_MAX;
   Atabcolumn[low_row].Ivalue = GT_WORD_MAX;
 
-  set_invalid_Diagnode(&Diagcolumn[0].val_R);
-  set_invalid_Diagnode(&Diagcolumn[0].val_D);
-  set_invalid_Diagnode(&Diagcolumn[0].val_I);
+  set_invalid_Diagentry(&Diagcolumn[0].val_R);
+  set_invalid_Diagentry(&Diagcolumn[0].val_D);
+  set_invalid_Diagentry(&Diagcolumn[0].val_I);
 
   set_invalid_Rnode(&Rtabcolumn[0].val_R);
   set_invalid_Rnode(&Rtabcolumn[0].val_D);
@@ -672,8 +674,8 @@ static void firstaffineDBtabcolumn(AffinealignDPentry *Atabcolumn,
       Diagcolumn[0].val_D.currentrowindex = rowindex + offset;
       Rtabcolumn[rowindex-low_row].val_D.idx = 0;
       Rtabcolumn[rowindex-low_row].val_D.edge = Affine_D;
-      set_invalid_Diagnode(&Diagcolumn[0].val_R);
-      set_invalid_Diagnode(&Diagcolumn[0].val_I);
+      set_invalid_Diagentry(&Diagcolumn[0].val_R);
+      set_invalid_Diagentry(&Diagcolumn[0].val_I);
     }
     else
     {
@@ -683,6 +685,7 @@ static void firstaffineDBtabcolumn(AffinealignDPentry *Atabcolumn,
 
 }
 
+/* calculate all columns */
 static Rnode evaluateallaffineDBcolumns(AffinealignDPentry *Atabcolumn,
                                         Rtabentry *Rtabcolumn,
                                         AffineDiagentry *Diagcolumn,
@@ -724,13 +727,14 @@ static Rnode evaluateallaffineDBcolumns(AffinealignDPentry *Atabcolumn,
  /* first column */
   firstaffineDBtabcolumn(Atabcolumn, Rtabcolumn, Diagcolumn, edge, from_edge,
                    offset, left_dist, right_dist, gap_opening, gap_extension);
-
   /* next columns */
   for (colindex = 1; colindex <= vlen; colindex++)
   {
     northwestAffinealignDPentry = Atabcolumn[0];
     northwestRtabentry = Rtabcolumn[0];
 
+    if (high_row < ulen)
+      high_row ++;
     if (colindex > right_dist)
     {
       westAffinealignDPentry = Atabcolumn[1];
@@ -742,8 +746,14 @@ static Rnode evaluateallaffineDBcolumns(AffinealignDPentry *Atabcolumn,
       westAffinealignDPentry = Atabcolumn[0];
       westRtabentry = Rtabcolumn[0];
     }
-    if (high_row < ulen)
-      high_row ++;
+    if (!last_row && low_row == high_row)
+    {/* prev is outside of diagonalband*/
+      westAffinealignDPentry = (AffinealignDPentry)
+                               {GT_WORD_MAX, GT_WORD_MAX, GT_WORD_MAX};
+      westRtabentry.val_R = (Rnode) {GT_UWORD_MAX, Affine_X};
+      westRtabentry.val_D = (Rnode) {GT_UWORD_MAX, Affine_X};
+      westRtabentry.val_I = (Rnode) {GT_UWORD_MAX, Affine_X};
+    }
 
     /* insertion */
     r_dist = add_safe_max(westAffinealignDPentry.Rvalue,
@@ -759,9 +769,9 @@ static Rnode evaluateallaffineDBcolumns(AffinealignDPentry *Atabcolumn,
 
     if (diag == (GtWord)colindex - (GtWord)low_row)
     {
-      set_invalid_Diagnode(&Diagcolumn[colindex].val_R);
-      set_invalid_Diagnode(&Diagcolumn[colindex].val_D);
-      set_valid_Diagnode(&Diagcolumn[colindex].val_I, &westRtabentry, minvalue,
+      set_invalid_Diagentry(&Diagcolumn[colindex].val_R);
+      set_invalid_Diagentry(&Diagcolumn[colindex].val_D);
+      set_valid_Diagentry(&Diagcolumn[colindex].val_I, &westRtabentry, minvalue,
                           r_dist, i_dist, d_dist);
       Diagcolumn[colindex].val_I.currentrowindex = low_row + offset;
       set_invalid_Rnode(&Rtabcolumn[0].val_R);
@@ -792,7 +802,7 @@ static Rnode evaluateallaffineDBcolumns(AffinealignDPentry *Atabcolumn,
 
       if (diag == (GtWord)colindex - (GtWord)low_row)
       {
-        set_valid_Diagnode(&Diagcolumn[colindex].val_R, &northwestRtabentry,
+        set_valid_Diagentry(&Diagcolumn[colindex].val_R, &northwestRtabentry,
                             minvalue, r_dist, i_dist, d_dist);
         Diagcolumn[colindex].val_R.currentrowindex = low_row + offset;
         Rtabcolumn[0].val_R.idx = colindex;
@@ -841,7 +851,7 @@ static Rnode evaluateallaffineDBcolumns(AffinealignDPentry *Atabcolumn,
       Atabcolumn[rowindex-low_row].Ivalue = minvalue;
       if (diag == (GtWord)colindex - (GtWord)rowindex)
       {
-        set_valid_Diagnode(&Diagcolumn[colindex].val_I, &westRtabentry,
+        set_valid_Diagentry(&Diagcolumn[colindex].val_I, &westRtabentry,
                              minvalue, r_dist, i_dist, d_dist);
         Diagcolumn[colindex].val_I.currentrowindex = rowindex+offset;
         Rtabcolumn[rowindex-low_row].val_I.idx = colindex;
@@ -864,7 +874,7 @@ static Rnode evaluateallaffineDBcolumns(AffinealignDPentry *Atabcolumn,
       Atabcolumn[rowindex-low_row].Rvalue = minvalue;
       if (diag == (GtWord)colindex - (GtWord)rowindex)
       {
-        set_valid_Diagnode(&Diagcolumn[colindex].val_R, &northwestRtabentry,
+        set_valid_Diagentry(&Diagcolumn[colindex].val_R, &northwestRtabentry,
                             minvalue, r_dist, i_dist, d_dist);
         Diagcolumn[colindex].val_R.currentrowindex = rowindex+offset;
         Rtabcolumn[rowindex-low_row].val_R.idx = colindex;
@@ -889,7 +899,7 @@ static Rnode evaluateallaffineDBcolumns(AffinealignDPentry *Atabcolumn,
 
       if (diag == (GtWord)colindex - (GtWord)rowindex)
       {
-        set_valid_Diagnode(&Diagcolumn[colindex].val_D,
+        set_valid_Diagentry(&Diagcolumn[colindex].val_D,
                            &Rtabcolumn[rowindex-low_row-1], minvalue,
                             r_dist,i_dist, d_dist);
         Diagcolumn[colindex].val_D.currentrowindex = rowindex+offset;
@@ -935,6 +945,7 @@ static Rnode evaluateallaffineDBcolumns(AffinealignDPentry *Atabcolumn,
   return lastcpoint;
 }
 
+/* calculate affine crosspoint realting to diagonal in recursive way */
 static Rnode evaluateaffineDBcrosspoints(AffinealignDPentry *Atabcolumn,
                                          Rtabentry *Rtabcolumn,
                                          AffineDiagentry *Diagcolumn,
@@ -946,6 +957,7 @@ static Rnode evaluateaffineDBcrosspoints(AffinealignDPentry *Atabcolumn,
                                          const GtUchar *useq,
                                          GtUword ustart,
                                          GtUword ulen,
+                                         GtUword original_ulen,
                                          const GtUchar *vseq,
                                          GtUword vstart,
                                          GtUword vlen,
@@ -958,7 +970,7 @@ static Rnode evaluateaffineDBcrosspoints(AffinealignDPentry *Atabcolumn,
 {
   GtUword idx, currentrowindex, new_ulen;
   GtWord new_left, new_right, diag;
-  Diagnode cpoint, prevcpoint;
+  Diagentry cpoint, prevcpoint;
   Rnode rpoint, temprpoint, lastrpoint;
   AffineAlignEdge cedge;
 
@@ -981,6 +993,15 @@ static Rnode evaluateaffineDBcrosspoints(AffinealignDPentry *Atabcolumn,
     return (Rnode) {0, Affine_D};
   }
 
+  if ((ulen+1)*(vlen+1) <= (original_ulen+1))
+  { /* product of subsquences is in O(n) */
+    return affineDtab_in_square_space(Diagcolumn, useq, ustart, ulen, vseq,
+                                      vstart, vlen, left_dist, right_dist,
+                                      matchcost, mismatchcost, gap_opening,
+                                      gap_extension, rowoffset, from_edge, edge,
+                                      to_edge);
+  }
+
   rpoint = evaluateallaffineDBcolumns(Atabcolumn, Rtabcolumn, Diagcolumn, edge,
                               from_edge, to_edge, rowoffset, useq, ustart, ulen,
                               vseq, vstart, vlen, left_dist, right_dist,
@@ -989,21 +1010,21 @@ static Rnode evaluateaffineDBcrosspoints(AffinealignDPentry *Atabcolumn,
   lastrpoint = rpoint;
   idx = rpoint.idx;
 
-  /* no crosspoint */
+  /* if no crosspoint is found */
   if (idx == GT_UWORD_MAX)
   {
     if (diag < 0)
       return evaluateaffineDBcrosspoints(Atabcolumn, Rtabcolumn,Diagcolumn,
-                                 edge, from_edge, to_edge, rowoffset, coloffset,
-                                 useq, ustart, ulen, vseq, vstart, vlen,
-                                 left_dist+1, right_dist, matchcost,
-                                 mismatchcost, gap_opening, gap_extension);
+                                edge, from_edge, to_edge, rowoffset, coloffset,
+                                useq, ustart, ulen, original_ulen, vseq, vstart,
+                                vlen, diag+1, right_dist, matchcost,
+                                mismatchcost, gap_opening, gap_extension);
     else if (diag > 0)
       return evaluateaffineDBcrosspoints(Atabcolumn, Rtabcolumn, Diagcolumn,
-                                 edge, from_edge, to_edge, rowoffset, coloffset,
-                                 useq, ustart, ulen, vseq, vstart, vlen,
-                                 left_dist, right_dist-1, matchcost,
-                                 mismatchcost, gap_opening, gap_extension);
+                                edge, from_edge, to_edge, rowoffset, coloffset,
+                                useq, ustart, ulen, original_ulen, vseq, vstart,
+                                vlen, left_dist, diag-1, matchcost,
+                                mismatchcost, gap_opening, gap_extension);
     else
     {
       gt_assert(false); /* there have to be an crosspoint */
@@ -1034,20 +1055,20 @@ static Rnode evaluateaffineDBcrosspoints(AffinealignDPentry *Atabcolumn,
 
   /* exception, if last cpoint != (m+1)entry */
   if (idx != vlen)
-  {
+  {;
     if (diag + ((GtWord)ulen-(GtWord)vlen) > 0)
     {
-      new_left = MAX((GtWord)left_dist-diag,
+      new_left = MAX((GtWord)left_dist-diag+1,
                     -((GtWord)ulen - ((GtWord)currentrowindex+1
                     -(GtWord)rowoffset)));
       new_right = 0;
       new_ulen =  ulen - (currentrowindex+1-rowoffset);
 
-      lastrpoint = evaluateaffineDBcrosspoints(
-                           Atabcolumn, Rtabcolumn, Diagcolumn+idx,
-                           Affine_D, cpoint.edge, to_edge, currentrowindex+1,
-                           coloffset+idx, useq, currentrowindex+1, new_ulen,
-                           vseq, vstart+idx, vlen-idx, new_left, new_right,
+      lastrpoint = evaluateaffineDBcrosspoints(Atabcolumn, Rtabcolumn,
+                           Diagcolumn+idx, Affine_D, cpoint.edge, to_edge,
+                           currentrowindex+1, coloffset+idx, useq,
+                           currentrowindex+1, new_ulen, original_ulen, vseq,
+                           vstart+idx, vlen-idx, new_left, new_right,
                            matchcost, mismatchcost, gap_opening, gap_extension);
       lastrpoint.idx += idx;
     }
@@ -1062,7 +1083,8 @@ static Rnode evaluateaffineDBcrosspoints(AffinealignDPentry *Atabcolumn,
                            Atabcolumn, Rtabcolumn, Diagcolumn+idx+1,
                            Affine_I, cedge, to_edge, currentrowindex,
                            coloffset+idx+1, useq, currentrowindex, new_ulen,
-                           vseq, vstart+idx+1, vlen-idx-1, new_left, new_right,
+                           original_ulen, vseq, vstart+idx+1, vlen-idx-1,
+                           new_left, new_right,
                            matchcost, mismatchcost, gap_opening, gap_extension);
       lastrpoint.idx += (idx+1);
     }
@@ -1077,17 +1099,17 @@ static Rnode evaluateaffineDBcrosspoints(AffinealignDPentry *Atabcolumn,
     idx = prevcpoint.lastcpoint;
     switch (prevcpoint.edge) {
     case Affine_R:
-      cpoint = Diagcolumn[prevcpoint.lastcpoint].val_R;
+      cpoint = Diagcolumn[idx].val_R;
       cedge = Affine_R;
       currentrowindex = Diagcolumn[idx].val_R.currentrowindex;
       break;
     case Affine_D:
-      cpoint = Diagcolumn[prevcpoint.lastcpoint].val_D;
+      cpoint = Diagcolumn[idx].val_D;
       cedge = Affine_D;
       currentrowindex = Diagcolumn[idx].val_D.currentrowindex;
       break;
     case Affine_I:
-      cpoint = Diagcolumn[prevcpoint.lastcpoint].val_I;
+      cpoint = Diagcolumn[idx].val_I;
       cedge = Affine_I;
       currentrowindex = Diagcolumn[idx].val_I.currentrowindex;
       break;
@@ -1096,14 +1118,15 @@ static Rnode evaluateaffineDBcrosspoints(AffinealignDPentry *Atabcolumn,
       gt_assert(false);
     }
 
-    if (rpoint.edge == Affine_R || rpoint.idx-idx == 1)
+    if (rpoint.edge == Affine_R ||
+       ((rpoint.edge == Affine_I) && (rpoint.idx-idx == 1)))
     {
       continue;/* next crosspoint is also on the diagonal*/
     }
     else if (rpoint.edge == Affine_D)
     {
       new_left = -1;
-      new_right = MIN(right_dist-diag,
+      new_right = MIN(right_dist-diag-1,
                      (GtWord)rpoint.idx-(GtWord)idx-1);
       new_ulen = prevcpoint.currentrowindex-
                  currentrowindex-1;
@@ -1112,8 +1135,8 @@ static Rnode evaluateaffineDBcrosspoints(AffinealignDPentry *Atabcolumn,
                            Atabcolumn, Rtabcolumn,Diagcolumn+idx+1,
                            Affine_I, cedge, Affine_D, currentrowindex,
                            coloffset + idx + 1, useq, currentrowindex, new_ulen,
-                           vseq, vstart + idx + 1, rpoint.idx-idx-1,
-                           new_left, new_right,
+                           original_ulen, vseq, vstart + idx + 1,
+                           rpoint.idx-idx-1, new_left, new_right,
                            matchcost, mismatchcost, gap_opening, gap_extension);
       if (temprpoint.idx + idx + 1 < vlen)
       {
@@ -1130,7 +1153,7 @@ static Rnode evaluateaffineDBcrosspoints(AffinealignDPentry *Atabcolumn,
     }
     else if (rpoint.edge == Affine_I)
     {
-      new_left = MAX(left_dist-diag,
+      new_left = MAX(left_dist-diag+1,
                         -((GtWord)Diagcolumn[rpoint.idx].val_I.currentrowindex-
                           (GtWord)currentrowindex-1));
       new_right = 0;
@@ -1140,8 +1163,9 @@ static Rnode evaluateaffineDBcrosspoints(AffinealignDPentry *Atabcolumn,
                          Atabcolumn, Rtabcolumn, Diagcolumn + idx,
                          Affine_D, cpoint.edge, Affine_I, currentrowindex + 1,
                          coloffset + idx, useq, currentrowindex+1, new_ulen,
-                         vseq, vstart+idx, rpoint.idx-1-idx,new_left, new_right,
-                         matchcost, mismatchcost, gap_opening, gap_extension);
+                         original_ulen, vseq, vstart+idx, rpoint.idx-1-idx,
+                         new_left, new_right, matchcost, mismatchcost,
+                         gap_opening, gap_extension);
       Diagcolumn[rpoint.idx].val_I.edge = temprpoint.edge;
     }
     else
@@ -1161,13 +1185,12 @@ static Rnode evaluateaffineDBcrosspoints(AffinealignDPentry *Atabcolumn,
        new_right = MIN(right_dist, (GtWord)idx);
        new_ulen = Diagcolumn[idx].val_D.currentrowindex-ustart-1;
 
-       rpoint = evaluateaffineDBcrosspoints(
-                          Atabcolumn, Rtabcolumn, Diagcolumn,
-                          edge, from_edge,Affine_D,rowoffset, coloffset,
-                          useq, ustart, new_ulen,
-                          vseq, vstart, idx,
-                          new_left, new_right,
-                          matchcost, mismatchcost,gap_opening, gap_extension);
+       rpoint = evaluateaffineDBcrosspoints(Atabcolumn, Rtabcolumn, Diagcolumn,
+                                 edge, from_edge,Affine_D,rowoffset, coloffset,
+                                 useq, ustart, new_ulen, original_ulen,
+                                 vseq, vstart, idx, new_left, new_right,
+                                 matchcost, mismatchcost, gap_opening,
+                                 gap_extension);
        if (idx + 1 <= vlen)
        {
          Diagcolumn[idx+1].val_R.edge = rpoint.edge;
@@ -1182,12 +1205,13 @@ static Rnode evaluateaffineDBcrosspoints(AffinealignDPentry *Atabcolumn,
                  -((GtWord)cpoint.currentrowindex-(GtWord)ustart));
 
        new_right = MIN((GtWord)idx-1, right_dist);
-       rpoint = evaluateaffineDBcrosspoints(
-                            Atabcolumn, Rtabcolumn, Diagcolumn,
-                            edge, from_edge,Affine_I,rowoffset, coloffset,
-                            useq, ustart, cpoint.currentrowindex-ustart,
-                            vseq, vstart, idx-1, new_left, new_right,
-                            matchcost, mismatchcost,gap_opening, gap_extension);
+       rpoint = evaluateaffineDBcrosspoints(Atabcolumn, Rtabcolumn, Diagcolumn,
+                                edge, from_edge, Affine_I,rowoffset, coloffset,
+                                useq, ustart, cpoint.currentrowindex-ustart,
+                                original_ulen, vseq, vstart, idx-1, new_left,
+                                new_right, matchcost, mismatchcost,gap_opening,
+                                gap_extension);
+
        Diagcolumn[idx].val_I.edge = rpoint.edge;
        break;
      default:
@@ -1198,6 +1222,8 @@ static Rnode evaluateaffineDBcrosspoints(AffinealignDPentry *Atabcolumn,
   return lastrpoint;
 }
 
+/* calculating alignment in linear space within a specified diagonal band
+ * with affine gapcosts */
 static void gt_calc_diagonalbandaffinealign(const GtUchar *useq,
                                             GtUword ustart, GtUword ulen,
                                             const GtUchar *vseq,
@@ -1252,17 +1278,16 @@ static void gt_calc_diagonalbandaffinealign(const GtUchar *useq,
   /* initialize Diagcolumn */
   for (idx = 0; idx <= vlen; idx++)
   {
-    Diagcolumn[idx].val_R = (Diagnode) {GT_UWORD_MAX, GT_UWORD_MAX, Affine_X};
-    Diagcolumn[idx].val_D = (Diagnode) {GT_UWORD_MAX, GT_UWORD_MAX, Affine_X};
-    Diagcolumn[idx].val_I = (Diagnode) {GT_UWORD_MAX, GT_UWORD_MAX, Affine_X};
+    Diagcolumn[idx].val_R = (Diagentry) {GT_UWORD_MAX, GT_UWORD_MAX, Affine_X};
+    Diagcolumn[idx].val_D = (Diagentry) {GT_UWORD_MAX, GT_UWORD_MAX, Affine_X};
+    Diagcolumn[idx].val_I = (Diagentry) {GT_UWORD_MAX, GT_UWORD_MAX, Affine_X};
   }
 
   lastnode = evaluateaffineDBcrosspoints(
                             Atabcolumn, Rtabcolumn, Diagcolumn, Affine_X,
-                            Affine_X, Affine_X, 0, 0, useq, ustart, ulen,
+                            Affine_X, Affine_X, 0, 0, useq, ustart, ulen, ulen,
                             vseq, vstart, vlen, left_dist, right_dist,
                             matchcost, mismatchcost, gap_opening,gap_extension);
-
   /* reconstruct alignment */
   reconstructalignment_from_affineDtab(align, Diagcolumn, lastnode.edge,
                                        useq, ulen, vseq, vlen);
@@ -1272,7 +1297,7 @@ static void gt_calc_diagonalbandaffinealign(const GtUchar *useq,
   gt_free(Rtabcolumn);
 }
 
-/* compute affine alignment within a diagonal band */
+/* compute alignment with affine gapcosts within a diagonal band */
 void gt_computediagonalbandaffinealign(GtAlignment *align,
                                        const GtUchar *useq,
                                        GtUword ustart, GtUword ulen,
@@ -1303,8 +1328,8 @@ void gt_checkdiagonalbandaffinealign(GT_UNUSED bool forward,
                                      const GtUchar *vseq, GtUword vlen)
 {
   GtUword affine_cost1, affine_cost2, affine_cost3,
-          matchcost = 0, mismatchcost = 4,
-          gap_opening = 4, gap_extension = 1;
+          matchcost = 0, mismatchcost = 1,
+          gap_opening = 2, gap_extension = 1;
   GtWord left_dist, right_dist;
   GtAlignment *align_linear;
 
@@ -1353,7 +1378,8 @@ void gt_checkdiagonalbandaffinealign(GT_UNUSED bool forward,
   if (affine_cost3 != affine_cost2)
   {
     fprintf(stderr,"diagonalband_linear_affine = "GT_WU
-            " != "GT_WU" = gt_affinealign\n", affine_cost3, affine_cost2);
+            " != "GT_WU" = gt_calc_diagonalbandaffinealign\n",
+            affine_cost3, affine_cost2);
 
     exit(GT_EXIT_PROGRAMMING_ERROR);
   }

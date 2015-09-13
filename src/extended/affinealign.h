@@ -47,6 +47,7 @@ void affinealign_traceback(GtAlignment *a,
                            AffinealignDPentry * const *dptable,
                            GtUword i, GtUword j);
 
+/*create ctab to combine square calculating with linear calculating */
 void affine_ctab_in_square_space(GtUword *Ctab, const GtUchar *useq,
                                  GtUword ustart,  GtUword ulen,
                                  const GtUchar *vseq, GtUword vstart,

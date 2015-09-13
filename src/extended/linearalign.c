@@ -94,6 +94,7 @@ static void fillDPtab_in_square_space(GtUword **E,
      }
   }
 }
+
 static GtUword alignment_in_square_space(GtAlignment *align,
                                          const GtUchar *useq,
                                          GtUword ustart,
@@ -122,6 +123,51 @@ static GtUword alignment_in_square_space(GtAlignment *align,
   return distance;
 }
 
+static void evaluate_crosspoints_from_2dimtab(GtUword **E,
+                                              GtUword *Ctab,
+                                              const GtUchar *useq,
+                                              GtUword ustart,
+                                              GtUword ulen,
+                                              const GtUchar *vseq,
+                                              GtUword vstart,
+                                              GtUword vlen,
+                                              GtUword matchcost,
+                                              GtUword mismatchcost,
+                                              GtUword gapcost,
+                                              GtUword rowoffset)
+
+{
+  GtUword idx, jdx;
+
+  gt_assert(E && Ctab);
+  idx = ulen;
+  jdx = vlen;
+  while (jdx > 1 || idx > 0)
+  {
+    if (idx > 0 && jdx > 0 && E[idx][jdx] == E[idx-1][jdx-1] +
+       (tolower((int)useq[ustart+idx-1]) == tolower((int) vseq[vstart+jdx-1]) ?
+                                                     matchcost : mismatchcost))
+    {
+      idx--;
+      jdx--;
+      Ctab[jdx] = idx + rowoffset;
+    }
+    else if (idx > 0 && E[idx][jdx] == E[idx-1][jdx] + gapcost)
+    {
+      idx--;
+      /*continue*/
+    }
+    else if (jdx > 0 && E[idx][jdx] == E[idx][jdx-1] + gapcost)
+    {
+      jdx--;
+      Ctab[jdx] = idx + rowoffset;
+    }
+    else
+      gt_assert(false);
+  }
+}
+
+/*create ctab to combine square calculating with linear calculating */
 static void ctab_in_square_space(GtUword *Ctab,
                                  const GtUchar *useq,
                                  GtUword ustart,
@@ -147,7 +193,7 @@ static void ctab_in_square_space(GtUword *Ctab,
   gt_array2dim_delete(E);
 }
 
-/*------------------------------global--------------------------------*/
+/*------------------------------global linear--------------------------------*/
 static void firstEDtabRtabcolumn(GtUword *EDtabcolumn,
                                  GtUword *Rtabcolumn,
                                  GtUword ulen,
@@ -185,6 +231,7 @@ static void nextEDtabRtabcolumn(GtUword *EDtabcolumn,
   gt_assert(EDtabcolumn != NULL);
   westEDtabentry = EDtabcolumn[0];
   EDtabcolumn[0] += gapcost;
+
   if (colindex > midcolumn)
   {
     Rtabcolumn[0] = 0;
@@ -245,6 +292,24 @@ static GtUword evaluateallEDtabRtabcolumns(GtUword *EDtabcolumn,
   return EDtabcolumn[ulen];
 }
 
+static void determineCtab0(GtUword *Ctab, GtUchar vseq0,
+                           const GtUchar *useq, GtUword ustart)
+{
+  GtUword rowindex;
+
+  for (rowindex = 0; rowindex < Ctab[1]; rowindex++)
+  {
+    if (tolower((int)vseq0) == tolower((int)useq[ustart+rowindex]))
+    {
+      Ctab[0] = rowindex;
+      return;
+    }
+  }
+
+  Ctab[0] = (Ctab[1] > 0) ?  Ctab[1]-1 : 0;
+}
+
+/* evaluate crosspoints in recursive way */
 static GtUword evaluatelinearcrosspoints(const GtUchar *useq,
                                          GtUword ustart, GtUword ulen,
                                          const GtUchar *vseq,
@@ -263,7 +328,18 @@ static GtUword evaluatelinearcrosspoints(const GtUchar *useq,
 
   if (vlen >= 2UL)
   {
-    if ((ulen+1)*(vlen+1)>(original_ulen+1))
+    if (ulen == 0)
+    {
+      GtUword i;
+      for (i=0; i<=vlen;i++)
+        Ctab[i] = rowoffset;
+    }
+    else if ((ulen+1)*(vlen+1) <= (original_ulen+1))
+    {  /* product of subsquences is in O(n) */
+      (void) ctab_in_square_space(Ctab, useq, ustart, ulen, vseq, vstart, vlen,
+                                  matchcost, mismatchcost, gapcost,rowoffset);
+    }
+    else
     {
       midcol = GT_DIV2(vlen);
       distance = evaluateallEDtabRtabcolumns(EDtabcolumn, Rtabcolumn, midcol,
@@ -303,32 +379,11 @@ static GtUword evaluatelinearcrosspoints(const GtUchar *useq,
 
       return distance;
     }
-    else /* product of subsquences is in O(n) */
-    {
-      (void) ctab_in_square_space(Ctab, useq, ustart, ulen, vseq, vstart, vlen,
-                                  matchcost, mismatchcost, gapcost,rowoffset);
-    }
   }
   return 0;
 }
 
-static void determineCtab0(GtUword *Ctab, GtUchar vseq0,
-                           const GtUchar *useq, GtUword ustart)
-{
-  GtUword rowindex;
-
-  for (rowindex = 0; rowindex < Ctab[1]; rowindex++)
-  {
-    if (tolower((int)vseq0) == tolower((int)useq[ustart+rowindex]))
-    {
-      Ctab[0] = rowindex;
-      return;
-    }
-  }
-
-  Ctab[0] = (Ctab[1] > 0) ?  Ctab[1]-1 : 0;
-}
-
+/* calculating alignment in linear space */
 GtUword gt_calc_linearalign(const GtUchar *useq,
                             GtUword ustart,
                             GtUword ulen,
@@ -381,6 +436,7 @@ GtUword gt_calc_linearalign(const GtUchar *useq,
   return distance;
 }
 
+/* global alignment with linear gapcosts in linear space */
 GtUword gt_computelinearspace(GtAlignment *align,
                               const GtUchar *useq,
                               GtUword ustart,
@@ -392,21 +448,25 @@ GtUword gt_computelinearspace(GtAlignment *align,
                               GtUword mismatchcost,
                               GtUword gapcost)
 {
+  GtUword distance;
   gt_assert(useq != NULL  && ulen > 0 && vseq != NULL  && vlen > 0);
 
   gt_alignment_set_seqs(align, useq+ustart, ulen, vseq+vstart, vlen);
-  return gt_calc_linearalign(useq, ustart, ulen, vseq, vstart, vlen, align,
+  distance = gt_calc_linearalign(useq, ustart, ulen, vseq, vstart, vlen, align,
                              matchcost, mismatchcost, gapcost);
+
+  return distance;
 }
 
 void gt_print_edist_alignment(const GtUchar *useq, GtUword ustart, GtUword ulen,
                               const GtUchar *vseq, GtUword vstart, GtUword vlen)
 {
   GtAlignment *align;
-
   align = gt_alignment_new_with_seqs(useq+ustart, ulen, vseq+vstart, vlen);
+
   (void)gt_calc_linearalign(useq,ustart,ulen,vseq,vstart,vlen,align,0,1,1);
   gt_alignment_show(align, stdout, 80);
+
   gt_alignment_delete(align);
 }
 
@@ -447,7 +507,7 @@ GtUword gt_calc_linearedist(const GtUchar *u, GtUword ulen,
   return edist;
 }
 
-/*------------------------------local---------------------------------*/
+/*------------------------------local linear---------------------------------*/
 static void firstLStabcolumn(GtUword ulen,
                              GtWord *Ltabcolumn,
                              GtUwordPair *Starttabcolumn)
@@ -547,6 +607,7 @@ static Gtmaxcoordvalue *evaluateallLScolumns(GtWord *Ltabcolumn,
   return max;
 }
 
+/* determining start and end of local alignment and call global function */
 GtUword gt_computelinearspace_local(GtAlignment *align,
                                     const GtUchar *useq,
                                     GtUword ustart,
@@ -608,7 +669,7 @@ GtUword gt_computelinearspace_local(GtAlignment *align,
   return score;
 }
 
-/*-------------------------checkfunctions-----------------------------*/
+/*-----------------------------checkfunctions--------------------------------*/
 void gt_checklinearspace(GT_UNUSED bool forward,
                          const GtUchar *useq,
                          GtUword ulen,
@@ -618,8 +679,8 @@ void gt_checklinearspace(GT_UNUSED bool forward,
   GtAlignment *align;
   GtUword edist1, edist2, edist3, edist4,
           matchcost = 0, mismatchcost = 1, gapcost = 1;
-  /*immediate result, because squareedistunit cannot handle lower/upper cases*/
   GtUchar *low_useq, *low_vseq;
+  /*squareedistunit cannot handle lower/upper cases*/
 
   if (memchr(useq, LINEAR_EDIST_GAP,ulen) != NULL)
   {
@@ -652,7 +713,7 @@ void gt_checklinearspace(GT_UNUSED bool forward,
                                                 mismatchcost, gapcost);
 
   if (edist2 != edist3)
-  {printf("useq %s, ulen:"GT_WU", vseq %s, vlen:"GT_WU"\n",useq,ulen,vseq,vlen);
+  {
     fprintf(stderr,"gt_squarededistunit = "GT_WU" != "GT_WU
             " = gt_alignment_eval_with_score\n", edist2,edist3);
     exit(GT_EXIT_PROGRAMMING_ERROR);
@@ -665,6 +726,7 @@ void gt_checklinearspace(GT_UNUSED bool forward,
             " = gt_calc_linearedist\n", edist3, edist4);
     exit(GT_EXIT_PROGRAMMING_ERROR);
   }
+
   gt_free(low_useq);
   gt_free(low_vseq);
   gt_alignment_delete(align);

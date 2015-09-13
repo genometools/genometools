@@ -22,12 +22,18 @@
 #include "core/unused_api.h"
 #include "extended/alignment.h"
 
+typedef struct {
+  Diagentry val_R, val_D, val_I;
+} AffineDiagentry;
+
 void gt_checkdiagonalbandaffinealign(GT_UNUSED bool forward,
                                      const GtUchar *useq,
                                      GtUword ulen,
                                      const GtUchar *vseq,
                                      GtUword vlen);
 
+/* creating alignment with diagonalband in linear space O(n)
+ * with affine gapcosts */
 void gt_computediagonalbandaffinealign(GtAlignment *align,
                                        const GtUchar *useq,
                                        GtUword ustart, GtUword ulen,
@@ -39,4 +45,20 @@ void gt_computediagonalbandaffinealign(GtAlignment *align,
                                        GtUword mismatchcost,
                                        GtUword gap_opening,
                                        GtUword gap_extension);
+
+/* calculate alignment with diagonalband in square space O(n²)
+ * with affine gapcosts */
+GtWord diagonalbandalignment_in_square_space_affine(GtAlignment *align,
+                                                    const GtUchar *useq,
+                                                    GtUword ustart,
+                                                    GtUword ulen,
+                                                    const GtUchar *vseq,
+                                                    GtUword vstart,
+                                                    GtUword vlen,
+                                                    GtWord left_dist,
+                                                    GtWord right_dist,
+                                                    GtUword matchcost,
+                                                    GtUword mismatchcost,
+                                                    GtUword gap_opening,
+                                                    GtUword gap_extension);
 #endif

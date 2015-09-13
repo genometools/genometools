@@ -18,6 +18,12 @@
 #ifndef LINEARALIGN_UTILITIES_H
 #define LINEARALIGN_UTILITIES_H
 #include "core/types_api.h"
+typedef enum {
+  Linear_R,
+  Linear_D,
+  Linear_I,
+  Linear_X /* unknown */
+} LinearAlignEdge;
 
 GtUchar* sequence_to_lower_case(const GtUchar *seq, GtUword len);
 inline GtWord add_safe_max(GtWord val1, GtWord val2);

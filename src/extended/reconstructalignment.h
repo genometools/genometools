@@ -18,9 +18,21 @@
 #ifndef RECONSTRUCTALIGNMENT_H
 #define RECONSTRUCTALIGNMENT_H
 #include "core/types_api.h"
+#include "extended/affinealign.h"
 #include "extended/alignment.h"
+#include "extended/diagonalbandalign.h"
+#include "extended/diagonalbandalign_affinegapcost.h"
 
-/* reconstruct alignment from square space table ED */
+GtUword construct_trivial_deletion_alignment(GtAlignment *align,
+                                             GtUword len,
+                                             GtUword gapcost);
+
+GtUword construct_trivial_insertion_alignment(GtAlignment *align,
+                                              GtUword len,
+                                              GtUword gapcost);
+
+/* reconstruct alignment from square space table ED
+ * use this function for global alignment with linear */
 void reconstructalignment_from_EDtab(GtAlignment *align, GtUword **E,
                                      const GtUchar *useq,
                                      GtUword ustart,
@@ -32,7 +44,9 @@ void reconstructalignment_from_EDtab(GtAlignment *align, GtUword **E,
                                      GtUword mismatchcost,
                                      GtUword gapcost);
 
-/* reconstruct alignment from crosspoint table */
+/* reconstruct alignment from crosspoint table, realting to midcolumn,
+ * use this function for global or local alignment with linear or affine
+ * gapcosts in diagonalband */
 void reconstructalignment_from_Ctab(GtAlignment *align,
                                     const GtUword *Ctab,
                                     const GtUchar *useq,
@@ -45,24 +59,18 @@ void reconstructalignment_from_Ctab(GtAlignment *align,
                                     GtUword gap_opening,
                                     GtUword gap_extension);
 
-GtUword construct_trivial_deletion_alignment(GtAlignment *align,
-                                             GtUword len,
-                                             GtUword gapcost);
+/* reconstruct alignment from crosspoints, crosspoints relating to diagonalband
+ * use this function for alignment with linear gapcosts in diagonalband */
+void reconstructalignment_from_Dtab(GtAlignment *align,
+                                    const Diagentry *Dtab,GtUword ulen,
+                                    GtUword vlen);
 
-GtUword construct_trivial_insertion_alignment(GtAlignment *align,
-                                              GtUword len,
-                                              GtUword gapcost);
-
-void evaluate_crosspoints_from_2dimtab(GtUword **E,
-                                       GtUword *Ctab,
-                                       const GtUchar *useq,
-                                       GtUword ustart,
-                                       GtUword ulen,
-                                       const GtUchar *vseq,
-                                       GtUword vstart,
-                                       GtUword vlen,
-                                       GtUword matchcost,
-                                       GtUword mismatchcost,
-                                       GtUword gapcost,
-                                       GtUword rowoffset);
+/* reconstruct alignment from crosspoints (affine gapcosts),
+ * crosspointsrelating to diagonalband, use this function for alignment with
+ * affine gapcosts in diagonalband */
+void reconstructalignment_from_affineDtab(GtAlignment *align,
+                                          const AffineDiagentry *Dtab,
+                                          AffineAlignEdge edge,
+                                          const GtUchar *useq, GtUword ulen,
+                                          const GtUchar *vseq, GtUword vlen);
 #endif
