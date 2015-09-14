@@ -19,7 +19,7 @@ Test do
   run_test "#{$bin}gt seed_extend -verify -debug-seedpair -memlimit 10MB " +
            "#{$testdata}at1MB"
   run "cmp -s #{last_stdout} #{$testdata}seedextend2.out"
-  run_test "#{$bin}bin/gt seed_extend -v -maxfreq 5 #{$testdata}at1MB"
+  run_test "#{$bin}gt seed_extend -v -maxfreq 5 #{$testdata}at1MB"
   run "grep -v '^# Found and sorted 582230 k-mers' #{last_stdout}"
   run "grep -v '^# Collected and sorted 68577 seed pairs' #{last_stdout}"
 end
