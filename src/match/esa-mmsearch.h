@@ -17,7 +17,7 @@
 
 #ifndef ESA_MMSEARCH_H
 #define ESA_MMSEARCH_H
-#include "core/error.h"
+#include "core/error_api.h"
 #include "core/encseq.h"
 #include "querymatch.h"
 

@@ -885,21 +885,6 @@ static const GtQuerymatch *gt_greedy_extend_selfmatch_sesp(
     {
       return processinfo_and_querymatchspaceptr->querymatchspaceptr;
     }
-  } else
-  {
-#ifdef SKDEBUG
-    if (gt_querymatch_error_rate(total_distance,total_alignedlen) >
-      (double) greedyextendmatchinfo->errorpercentage)
-    {
-      printf("reject: error rate %.2f > %.2f\n",
-              gt_querymatch_error_rate(total_distance,total_alignedlen),
-              (double) greedyextendmatchinfo->errorpercentage);
-    } else
-    {
-      printf("reject: aligned_len = " GT_WU " < 2 * %u\n",
-              total_alignedlen,greedyextendmatchinfo->userdefinedleastlength);
-    }
-#endif
   }
   return NULL;
 }
