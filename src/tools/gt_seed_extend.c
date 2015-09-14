@@ -332,10 +332,10 @@ static int gt_seed_extend_arguments_check(int rest_argc, void *tool_arguments,
   /* minimum maxfreq value for 1 input file */
   if (!had_err && rest_argc == 1 && arguments->dbs_maxfreq == 1) {
     if (arguments->dbs_suppress == GT_UWORD_MAX) {
-      gt_error_set(err, "for 1 input file: parameter -maxfreq must be >= 2 to "
+      gt_error_set(err, "argument to option \"-maxfreq\" must be >= 2 to "
                    "find matching k-mers");
     } else {
-      gt_error_set(err, "for 1 input file: parameter -t must be >= 3 to find "
+      gt_error_set(err, "argument to option \"-t\" must be >= 3 to find "
                    "matching k-mers");
     }
     had_err = -1;

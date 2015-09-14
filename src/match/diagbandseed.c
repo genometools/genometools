@@ -81,19 +81,22 @@ static void gt_diagbandseed_update_separatorpos(GtUword *separatorpos,
                                                 GtSpecialrangeiterator *sri,
                                                 const GtEncseq *encseq,
                                                 GtReadmode readmode) {
-  GtUword idx;
-  GtRange range;
+  gt_assert(separatorpos != NULL);
 
-  gt_assert(encseq != NULL && sri != NULL && separatorpos != NULL);
-  gt_assert(*separatorpos < gt_encseq_total_length(encseq));
+  if (sri != NULL) {
+    GtUword idx;
+    GtRange range;
 
-  range.start = *separatorpos;
-  range.end = *separatorpos + 1;
-  while (gt_specialrangeiterator_next(sri, &range)) {
-    for (idx = range.start; idx < range.end; idx++) {
-      if (gt_encseq_position_is_separator(encseq, idx, readmode)) {
-        *separatorpos = idx;
-        return;
+    gt_assert(encseq != NULL && *separatorpos < gt_encseq_total_length(encseq));
+
+    range.start = *separatorpos;
+    range.end = *separatorpos + 1;
+    while (gt_specialrangeiterator_next(sri, &range)) {
+      for (idx = range.start; idx < range.end; idx++) {
+        if (gt_encseq_position_is_separator(encseq, idx, readmode)) {
+          *separatorpos = idx;
+          return;
+        }
       }
     }
   }
@@ -198,7 +201,9 @@ int gt_diagbandseed_get_kmers(GtDiagbandseedKmerPos *list,
   pkinfo.encseq = encseq;
   pkinfo.seedlength = seedlength;
   pkinfo.readmode = readmode;
-  pkinfo.sri = gt_specialrangeiterator_new(encseq, true);
+  pkinfo.sri = NULL;
+  if (gt_encseq_has_specialranges(encseq))
+    pkinfo.sri = gt_specialrangeiterator_new(encseq, true);
   pkinfo.prev_separator = pkinfo.next_separator = 0;
   gt_diagbandseed_update_separatorpos(&pkinfo.next_separator,
                                       pkinfo.sri,
@@ -226,7 +231,8 @@ int gt_diagbandseed_get_kmers(GtDiagbandseedKmerPos *list,
     had_err = -1;
   }
   *listlength += pkinfo.numberofkmerscollected;
-  gt_specialrangeiterator_delete(pkinfo.sri);
+  if (gt_encseq_has_specialranges(encseq))
+    gt_specialrangeiterator_delete(pkinfo.sri);
   return had_err;
 }
 
@@ -705,7 +711,7 @@ int gt_diagbandseed_run(const GtEncseq *aencseq,
     /* check maxfreq value */
     if (maxfreq == 0 || (maxfreq == 1 && selfcomp)) {
       gt_error_set(err,
-                   "Option -memlimit too strict: need at least "GT_WU"MB",
+                   "option -memlimit too strict: need at least "GT_WU"MB",
                    (mlen >> 20) + 1);
       mlen = 0;
       had_err = -1;
