@@ -38,8 +38,7 @@ struct GtQuerymatch
       dbseqnum, /* sequence number of dbstart */
       dbstart_relative, /* start position of match in dbsequence
                            relative to start of sequence */
-      querystart_fwdstrand, /* absolute start of query on forward strand */
-      query_totallength; /* totallength of all query sequence */
+      querystart_fwdstrand; /* absolute start of query on forward strand */
    GtWord score; /* 0 for exact match */
    uint64_t queryseqnum; /* ordinal number of match in query */
    GtReadmode readmode; /* readmode by which reference sequence was accessed */
@@ -90,7 +89,6 @@ void gt_querymatch_init(GtQuerymatch *querymatch,
   querymatch->querystart = querystart;
   querymatch->dbseqnum = dbseqnum;
   querymatch->dbstart_relative = dbstart_relative;
-  querymatch->query_totallength = query_totallength;
   gt_assert((int) querymatch->readmode < 4);
   if (querymatch->readmode == GT_READMODE_REVERSE ||
       querymatch->readmode == GT_READMODE_REVCOMPL)
@@ -113,15 +111,17 @@ void gt_querymatch_delete(GtQuerymatch *querymatch)
   }
 }
 
-#ifdef VERIFY
-static void verifyexactmatch(const GtEncseq *encseq,
-                             GtUword len,
-                             GtUword pos1,
-                             uint64_t seqnum2,
-                             GtUword pos2,
-                             GtReadmode readmode)
+#undef SK_VERIFY_EXACT_SELFMATCH
+#ifdef SK_VERIFY_EXACT_SELFMATCH
+static void gt_verify_exact_selfmatch(const GtEncseq *encseq,
+                                      GtUword len,
+                                      GtUword pos1,
+                                      uint64_t seqnum2,
+                                      GtUword pos2,
+                                      bool selfmatch,
+                                      GtReadmode readmode)
 {
-  if (readmode == GT_READMODE_REVERSE)
+  if (selfmatch && readmode == GT_READMODE_REVERSE)
   {
     GtUword offset, seqstartpos, totallength = gt_encseq_total_length(encseq);
     GtUchar cc1, cc2;
@@ -131,8 +131,9 @@ static void verifyexactmatch(const GtEncseq *encseq,
     for (offset = 0; offset < len; offset++)
     {
       gt_assert(pos1 + len - 1 < totallength);
-      gt_assert(pos2 + len - 1 < totallength);
       cc1 = gt_encseq_get_encoded_char(encseq,pos1+offset,GT_READMODE_FORWARD);
+      gt_assert(pos2 + len - 1 >= offset &&
+                pos2 + len - 1 - offset < totallength);
       cc2 = gt_encseq_get_encoded_char(encseq,pos2+len-1-offset,
                                        GT_READMODE_FORWARD);
       gt_assert(cc1 == cc2 && ISNOTSPECIAL(cc1));
@@ -156,21 +157,6 @@ static void verifyexactmatch(const GtEncseq *encseq,
 }
 #endif
 
-bool gt_querymatch_verify(const GtQuerymatch *querymatch,
-                          GtUword errorpercentage,
-                          unsigned int userdefinedleastlength)
-{
-  GtUword total_alignedlen = querymatch->dblen + querymatch->querylen;
-
-  if (gt_querymatch_error_rate(querymatch->distance,total_alignedlen) <=
-      (double) errorpercentage &&
-      total_alignedlen >= 2 * userdefinedleastlength)
-  {
-    return true;
-  }
-  return false;
-}
-
 void gt_querymatch_prettyprint(const GtQuerymatch *querymatch)
 {
   if (!querymatch->selfmatch ||
@@ -179,14 +165,6 @@ void gt_querymatch_prettyprint(const GtQuerymatch *querymatch)
   {
     const char *outflag = "FRCP";
 
-#ifdef VERIFY
-    verifyexactmatch(encseq,
-                     querymatch->len,
-                     querymatch->dbstart,
-                     querymatch->queryseqnum,
-                     querymatch->querystart_fwdstrand,
-                     querymatch->readmode);
-#endif
     printf(GT_WU " " GT_WU " " GT_WU " %c " GT_WU " " Formatuint64_t
                    " " GT_WU,
            querymatch->dblen,
@@ -226,11 +204,21 @@ int gt_querymatch_output(GT_UNUSED void *info,
                          GT_UNUSED GtUword query_totallength,
                          GT_UNUSED GtError *err)
 {
+#ifdef SK_VERIFY_EXACT_SELFMATCH
+   gt_verify_exact_selfmatch(encseq,
+                             querymatch->dblen,
+                             querymatch->dbstart,
+                             querymatch->queryseqnum,
+                             querymatch->querystart_fwdstrand,
+                             querymatch->selfmatch,
+                             querymatch->readmode);
+#endif
   gt_querymatch_prettyprint(querymatch);
   return 0;
 }
 
-void gt_querymatch_applycorrection(GtQuerymatch *querymatch)
+static void gt_querymatch_applycorrection(GtQuerymatch *querymatch,
+                                          GtUword query_totallength)
 {
   const GtSeqpaircoordinates *coords;
 
@@ -252,7 +240,7 @@ void gt_querymatch_applycorrection(GtQuerymatch *querymatch)
                      querymatch->queryseqnum,
                      coords->vlen,
                      querymatch->querystart + coords->voffset,
-                     querymatch->query_totallength);
+                     query_totallength);
 }
 
 bool gt_querymatch_complete(GtQuerymatch *querymatchptr,
@@ -325,7 +313,7 @@ bool gt_querymatch_complete(GtQuerymatch *querymatchptr,
                                                     greedyextension);
       if (seededalignment && !greedyextension)
       {
-        gt_querymatch_applycorrection(querymatchptr);
+        gt_querymatch_applycorrection(querymatchptr,query_totallength);
       }
     }
     return true;

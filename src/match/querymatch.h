@@ -92,10 +92,6 @@ bool gt_querymatch_queryreverse(const GtQuerymatch *querymatch);
 
 double gt_querymatch_error_rate(GtUword distance,GtUword alignedlen);
 
-bool gt_querymatch_verify(const GtQuerymatch *querymatch,
-                          GtUword errorpercentage,
-                          unsigned int userdefinedleastlength);
-
 void gt_querymatch_prettyprint(const GtQuerymatch *querymatch);
 
 GtWord gt_querymatch_distance2score(GtUword distance,GtUword alignedlen);
