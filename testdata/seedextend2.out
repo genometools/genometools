@@ -1,4 +1,4 @@
-# Warning: Only k-mers occurring <= 3 times will be considered due to small memlimit.
+# Warning: Only k-mers occurring <= 3 times will be considered, due to small memlimit. Expect 50496 seed pairs.
 SeedPair (0,8,255,339)
 SeedPair (0,8,256,340)
 SeedPair (0,70,255,343)
