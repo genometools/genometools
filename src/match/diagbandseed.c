@@ -117,7 +117,7 @@ static void gt_diagbandseed_processkmercode(void *prockmerinfo,
   kmerposptr = arg->list + arg->numberofkmerscollected;
 
   /* check separator positions and determine next seqnum and endpos */
-  if (firstinrange == true) {
+  if (firstinrange) {
     const GtUword endpos = startpos + arg->seedlength - 1;
     while (endpos >= arg->next_separator) {
       arg->seqnum++;
@@ -311,7 +311,7 @@ void gt_diagbandseed_merge(GtArrayGtDiagbandseedSeedPair *mlist,
     /* calculate available memory, take 98% of memlimit */
     GtUword count = 0, mem_used = 0, mem_avail = 0.98 * memlimit;
     if (alist == blist) {
-      gt_assert(selfcomp == true);
+      gt_assert(selfcomp);
       mem_used = alen * sizeof *alist;
     } else {
       mem_used = (alen + blen) * sizeof *alist;
@@ -441,10 +441,10 @@ int gt_diagbandseed_process_seeds(const GtEncseq *aencseq,
 
   /* select extension method */
   if (extendgreedyinfo != NULL) {
-    info_querymatch.processinfo = (void *)(extendgreedyinfo);
+    info_querymatch.processinfo = (void *) extendgreedyinfo;
     extend_selfmatch_relative_function = gt_greedy_extend_selfmatch_relative;
   } else if (extendxdropinfo != NULL) {
-    info_querymatch.processinfo = (void *)(extendxdropinfo);
+    info_querymatch.processinfo = (void *) extendxdropinfo;
     extend_selfmatch_relative_function = gt_xdrop_extend_selfmatch_relative;
   } else { /* no seed extension */
     return 0;
@@ -454,6 +454,10 @@ int gt_diagbandseed_process_seeds(const GtEncseq *aencseq,
     return 0;
   gt_assert(aencseq != NULL && bencseq != NULL);
   if (aencseq != bencseq) {
+    /* SK: the error object is intended for handling messages resulting
+       from user errors, like files that cannot be openend, incorrect
+       parameter, etc. Everything else are programming errors which
+       should never occurs and be handled by assersion. */
     gt_error_set(err, "comparison of two encseqs not implemented");
     return -1;
   }
@@ -465,6 +469,8 @@ int gt_diagbandseed_process_seeds(const GtEncseq *aencseq,
   maxsegm = mlen - minsegmentlen;
 
   /* iterate through segments of equal k-mers */
+  /* You may want to use pointers to lm, this would simplify the code
+     as you do not have duplicated array indexes */
   while (nextsegm <= maxsegm) {
     const GtUword currsegm = nextsegm;
     const GtDiagbandseedSeqnum currsegm_aseqnum = lm[currsegm].aseqnum;
@@ -568,7 +574,7 @@ int gt_diagbandseed_run(const GtEncseq *aencseq,
 
   gt_assert(arg != NULL && aencseq != NULL && bencseq != NULL);
   maxfreq = arg->maxfreq;
-  endposdiff = arg->overlappingseeds == false ? arg->seedlength : 1;
+  endposdiff = !arg->overlappingseeds ? arg->seedlength : 1;
   amaxlen = gt_encseq_max_seq_length(aencseq);
   bmaxlen = gt_encseq_max_seq_length(bencseq);
   if (MIN(amaxlen, bmaxlen) < arg->seedlength) {
@@ -636,6 +642,8 @@ int gt_diagbandseed_run(const GtEncseq *aencseq,
 
     /* fill list with forward kmers */
     if (selfcomp) {
+      /* SK: why do we need a copy of alist? Can't we just let blist point to
+         alist */
       memcpy(blist, alist, alen * sizeof *alist);
       blen = alen;
     } else {
@@ -716,6 +724,8 @@ int gt_diagbandseed_run(const GtEncseq *aencseq,
       mlen = 0;
       had_err = -1;
     } else if (maxfreq < 10) {
+      /* SK: better use stderr for warnings, actually, there is
+         a module core/warning_api.h which handles warning in a generic way. */
       printf("# Warning: Only k-mers occurring <= "GT_WU" times will be "
              "considered, due to small memlimit. Expect "GT_WU" seed pairs.\n",
              maxfreq, mlen);
@@ -768,7 +778,9 @@ int gt_diagbandseed_run(const GtEncseq *aencseq,
     mlen = mlist.nextfreeGtDiagbandseedSeedPair;
     gt_free(alist);
     if (!selfcomp || arg->mirror)
+    {
       gt_free(blist);
+    }
 
     /* sort mlist */
     if (mlen > 0) {
@@ -846,6 +858,8 @@ int gt_diagbandseed_run(const GtEncseq *aencseq,
     }
   }
   if (arg->verbose)
+  {
     gt_timer_delete(vtimer);
+  }
   return had_err;
 }

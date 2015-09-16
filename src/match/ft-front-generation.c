@@ -333,6 +333,10 @@ void front_trace2eoplist(GtArrayuint8_t *eoplist,
   }
   /*printf("avg runlength=%.2f\n",(double) pp->distance/totalrunlength);*/
   gt_assert(globaloffset + localoffset == 0 && trace == 0);
+  if (lcs > 0)
+  {
+    front_trace_multireplacement(eoplist,lcs);
+  }
 }
 #endif
 
@@ -453,6 +457,7 @@ void front_trace_verify(const Fronttrace *front_trace,
   }
   /*printf("avg runlength=%.2f\n",(double) pp->distance/totalrunlength);*/
   gt_assert(globaloffset + localoffset == 0 && trace == 0);
+  /* the two aligned strings have a prefix of length lcs */
 }
 
 typedef struct

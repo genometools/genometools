@@ -244,11 +244,11 @@ static bool sequenceobject_symbol_match(Sequenceobject *useq,
 #endif
 }
 
-static void inline add_matches(Frontvalue *midfront,
-                               Frontvalue *fv,
-                               uint64_t mask,
-                               Sequenceobject *useq,
-                               Sequenceobject *vseq)
+static void inline front_prune_add_matches(Frontvalue *midfront,
+                                           Frontvalue *fv,
+                                           uint64_t mask,
+                                           Sequenceobject *useq,
+                                           Sequenceobject *vseq)
 {
   GtUword upos, vpos;
 
@@ -286,7 +286,7 @@ static GtUword front_next_inplace(Frontvalue *midfront,
   UPDATE_MATCH_HISTORY(bestfront.matchhistory_count,bestfront.matchhistory);
   *lowfront = bestfront;
   lowfront->backreference = FT_EOP_DELETION;
-  add_matches(midfront,lowfront,mask,useq,vseq);
+  front_prune_add_matches(midfront,lowfront,mask,useq,vseq);
   maxalignedlen = GT_MULT2(lowfront->row) + FRONT_DIAGONAL(lowfront);
 
   replacement_value = *(lowfront+1);
@@ -305,7 +305,7 @@ static GtUword front_next_inplace(Frontvalue *midfront,
     }
   }
   *(lowfront+1) = bestfront;
-  add_matches(midfront,lowfront + 1,mask,useq,vseq);
+  front_prune_add_matches(midfront,lowfront + 1,mask,useq,vseq);
   alignedlen = GT_MULT2((lowfront+1)->row) + FRONT_DIAGONAL(lowfront + 1);
   if (maxalignedlen < alignedlen)
   {
@@ -352,7 +352,7 @@ static GtUword front_next_inplace(Frontvalue *midfront,
       replacement_value = *frontptr;
     }
     *frontptr = bestfront;
-    add_matches(midfront,frontptr,mask,useq,vseq);
+    front_prune_add_matches(midfront,frontptr,mask,useq,vseq);
     alignedlen = GT_MULT2(frontptr->row) + FRONT_DIAGONAL(frontptr);
     if (maxalignedlen < alignedlen)
     {
@@ -375,14 +375,14 @@ static GtUword front_second_inplace(Frontvalue *midfront,
   lowfront->row++;
   lowfront->backreference = FT_EOP_DELETION;
   UPDATE_MATCH_HISTORY(lowfront->matchhistory_count,lowfront->matchhistory);
-  add_matches(midfront,lowfront,mask,useq,vseq);
+  front_prune_add_matches(midfront,lowfront,mask,useq,vseq);
   maxalignedlen = GT_MULT2(lowfront->row) + FRONT_DIAGONAL(lowfront);
 
   (lowfront+1)->row++;
   (lowfront+1)->backreference = FT_EOP_REPLACEMENT;
   UPDATE_MATCH_HISTORY((lowfront+1)->matchhistory_count,
                        (lowfront+1)->matchhistory);
-  add_matches(midfront,lowfront + 1,mask,useq,vseq);
+  front_prune_add_matches(midfront,lowfront + 1,mask,useq,vseq);
   alignedlen = GT_MULT2((lowfront+1)->row) + FRONT_DIAGONAL(lowfront + 1);
   if (maxalignedlen < alignedlen)
   {
@@ -392,7 +392,7 @@ static GtUword front_second_inplace(Frontvalue *midfront,
   (lowfront+2)->backreference = FT_EOP_INSERTION;
   UPDATE_MATCH_HISTORY((lowfront+2)->matchhistory_count,
                        (lowfront+2)->matchhistory);
-  add_matches(midfront,lowfront + 2,mask,useq,vseq);
+  front_prune_add_matches(midfront,lowfront + 2,mask,useq,vseq);
   alignedlen = GT_MULT2((lowfront+2)->row) + FRONT_DIAGONAL(lowfront + 2);
   if (maxalignedlen < alignedlen)
   {
@@ -666,7 +666,8 @@ GtUword front_prune_edist_inplace(
       validbasefront->matchhistory = 0;
       validbasefront->matchhistory_count = 0;
       validbasefront->backreference = 0; /* No back reference */
-      add_matches(validbasefront + distance,validbasefront,mask,&useq,&vseq);
+      front_prune_add_matches(validbasefront + distance,validbasefront,mask,
+                              &useq,&vseq);
       maxalignedlen = GT_MULT2(validbasefront->row);
     } else
     {
