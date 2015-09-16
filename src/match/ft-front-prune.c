@@ -200,8 +200,8 @@ static GtUchar sequenceobject_get_char(Sequenceobject *seq,GtUword pos)
                                       GT_READMODE_FORWARD);
   }
   gt_assert(seq->bytesequenceptr != NULL &&
-            (seq->forward && seq->startpos + pos < seq->totallength ||
-            !seq->forward && seq->startpos - pos < seq->totallength));
+            ((seq->forward && seq->startpos + pos < seq->totallength) ||
+             (!seq->forward && seq->startpos - pos < seq->totallength)));
   return seq->bytesequenceptr[seq->forward ? seq->startpos + pos
                                            : seq->startpos - pos];
 }
