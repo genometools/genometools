@@ -77,7 +77,6 @@ static int gt_extractfeat_comment_func(const char *progname,
   return gt_gtdata_show_help(progname, data,err);
 }
 
-
 static GtOptionParser* gt_extractfeat_option_parser_new(void *tool_arguments)
 {
   GtExtractFeatArguments *arguments = tool_arguments;
