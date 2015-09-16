@@ -425,7 +425,7 @@ int gt_diagbandseed_process_seeds(const GtEncseq *aencseq,
 {
   GtDiagbandseedScore *score = NULL;
   GtDiagbandseedPosition *lastp = NULL;
-  GtDiagbandseedExtendFunc extend_selfmatch_relpos_function = NULL;
+  GtDiagbandseedExtendFunc extend_selfmatch_relative_function = NULL;
   GtProcessinfo_and_querymatchspaceptr info_querymatch;
   const GtDiagbandseedSeedPair *lm = NULL;
   const GtUword ndiags = (amaxlen >> logdiagbandwidth) +
@@ -442,10 +442,10 @@ int gt_diagbandseed_process_seeds(const GtEncseq *aencseq,
   /* select extension method */
   if (extendgreedyinfo != NULL) {
     info_querymatch.processinfo = (void *)(extendgreedyinfo);
-    extend_selfmatch_relpos_function = gt_greedy_extend_selfmatch_relpos;
+    extend_selfmatch_relative_function = gt_greedy_extend_selfmatch_relative;
   } else if (extendxdropinfo != NULL) {
     info_querymatch.processinfo = (void *)(extendxdropinfo);
-    extend_selfmatch_relpos_function = gt_xdrop_extend_selfmatch_relpos;
+    extend_selfmatch_relative_function = gt_xdrop_extend_selfmatch_relative;
   } else { /* no seed extension */
     return 0;
   }
@@ -521,7 +521,7 @@ int gt_diagbandseed_process_seeds(const GtEncseq *aencseq,
         {
           /* extend seed */
           const GtQuerymatch *querymatch;
-          querymatch = extend_selfmatch_relpos_function(&info_querymatch,
+          querymatch = extend_selfmatch_relative_function(&info_querymatch,
                                                         aencseq,
                                                         lm[idx].aseqnum,
                                                         astart,

@@ -437,8 +437,7 @@ static int gt_seed_extend_runner(int argc, const char **argv, int parsed_args,
     xdropinfo = gt_xdrop_matchinfo_new(arguments->se_alignlength,
                                        errorpercentage,
                                        arguments->se_xdropbelowscore,
-                                       arguments->se_extendxdrop,
-                                       true);
+                                       arguments->se_extendxdrop);
     if (arguments->benchmark) {
       gt_xdrop_matchinfo_silent_set(xdropinfo);
     }
