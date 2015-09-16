@@ -845,6 +845,7 @@ int gt_diagbandseed_run(const GtEncseq *aencseq,
       gt_timer_show_formatted(vtimer, "in "GT_WD".%06ld seconds.\n", stdout);
     }
   }
-  gt_timer_delete(vtimer);
+  if (arg->verbose)
+    gt_timer_delete(vtimer);
   return had_err;
 }

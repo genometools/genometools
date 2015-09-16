@@ -27,14 +27,14 @@ def process_line(line, indexname, gt, tempdir, seedlength, count)
                   "-extendgreedy -l #{seedlength} #{fasfile} " +
                   "> #{tempdir}/seedext#{count}.txt")
   end
-  if File.size?("#{tempdir}/seedext#{count}.txt").nil? then
+  if succ and File.size?("#{tempdir}/seedext#{count}.txt").nil? then
     puts "#{count}: missing alignment of sequences #{seq1} and #{seq2} " +
          ">> repfind #{line}"
     system("rm #{tempdir}/seedext#{count}.txt")
-  else
-    system("rm #{fasfile}")
+    system("rm #{fasfile}.???")
+  elsif succ
+    system("rm #{fasfile}*")
   end
-  system("rm #{fasfile}.???")
   return succ
 end
 
