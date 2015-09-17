@@ -309,9 +309,7 @@ int gt_paircmp(int argc, const char **argv, GtError *err)
         MAKECheckfunctiontabentry(gt_checklinearspace),
         MAKECheckfunctiontabentry(gt_checklinearspace_local),
         MAKECheckfunctiontabentry(gt_checkaffinelinearspace),
-        MAKECheckfunctiontabentry(gt_checkaffinelinearspace_local),
-        MAKECheckfunctiontabentry(gt_checkdiagonalbandalign),
-        MAKECheckfunctiontabentry(gt_checkdiagonalbandaffinealign)
+        MAKECheckfunctiontabentry(gt_checkaffinelinearspace_local)
       };
       for (idx = 0; idx < sizeof checkfunction_tab/sizeof checkfunction_tab[0];
            idx++)

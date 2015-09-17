@@ -20,6 +20,88 @@
 #include "core/ma.h"
 #include "extended/linearalign_utilities.h"
 
+struct LinspaceManagement{
+  void    *valueTabspace,
+          *rTabspace,
+          *crosspointTabspace;
+  GtUword valuesize,
+          rsize,
+          crosspointsize;
+};
+
+LinspaceManagement* gt_linspaceManagement_new()
+{
+  LinspaceManagement *spacemanager;
+  spacemanager = gt_malloc(sizeof(*spacemanager));
+  spacemanager->valueTabspace = NULL;
+  spacemanager->rTabspace = NULL;
+  spacemanager->crosspointTabspace = NULL;
+  spacemanager->valuesize = 0;
+  spacemanager->rsize = 0;
+  spacemanager->crosspointsize = 0;
+  return spacemanager;
+}
+
+void gt_linspaceManagement_delete(LinspaceManagement *spacemanager)
+{
+  if (spacemanager != NULL)
+  {
+    gt_free(spacemanager->valueTabspace);
+    gt_free(spacemanager->rTabspace);
+    gt_free(spacemanager->crosspointTabspace);
+    gt_free(spacemanager);
+  }
+}
+
+void gt_linspaceManagement_check(LinspaceManagement *spacemanager,
+                                 GtUword ulen, GtUword vlen,
+                                 size_t valuesize,
+                                 size_t rtabsize,
+                                 size_t crosspointsize)
+{
+  gt_assert(spacemanager->valuesize == spacemanager->rsize);
+
+  /*if (spacemanager == NULL)
+    spacemanager = gt_new_linspaceManagement();*/
+
+  if (spacemanager->valuesize < ulen+1)
+  {
+    spacemanager->valueTabspace = gt_realloc(spacemanager->valueTabspace,
+                                            (ulen+1)*valuesize);
+    spacemanager->valuesize = ulen+1;
+    spacemanager->rTabspace = gt_realloc(spacemanager->rTabspace,
+                                        (ulen+1)*rtabsize);
+    spacemanager->rsize = ulen+1;
+  }
+  if (crosspointsize && spacemanager->crosspointsize < vlen+1)
+  {
+    spacemanager->crosspointTabspace =
+           gt_realloc(spacemanager->crosspointTabspace,(vlen+1)*crosspointsize);
+    spacemanager->crosspointsize = vlen+1;
+  }
+}
+
+void *gt_linspaceManagement_get_valueTabspace(LinspaceManagement *spacemanager)
+{
+  if (spacemanager != NULL)
+    return (spacemanager->valueTabspace);
+  return NULL;
+}
+
+void *gt_linspaceManagement_get_rTabspace(LinspaceManagement *spacemanager)
+{
+  if (spacemanager != NULL)
+    return (spacemanager->rTabspace);
+  return NULL;
+}
+
+void *gt_linspaceManagement_get_crosspointTabspace(LinspaceManagement *spacemanager)
+{
+  if (spacemanager != NULL)
+    return (spacemanager->crosspointTabspace);
+  return NULL;
+}
+
 GtUchar* sequence_to_lower_case(const GtUchar *seq, GtUword len)
 {
   GtUword i;
