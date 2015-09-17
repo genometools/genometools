@@ -19,14 +19,16 @@
 #include <string.h>
 #include "core/ma.h"
 #include "extended/linearalign_utilities.h"
+#include "extended/maxcoordvalue.h"
 
 struct LinspaceManagement{
-  void    *valueTabspace,
-          *rTabspace,
-          *crosspointTabspace;
-  GtUword valuesize,
-          rsize,
-          crosspointsize;
+  void             *valueTabspace,
+                   *rTabspace,
+                   *crosspointTabspace;
+  GtUword          valuesize,
+                   rsize,
+                   crosspointsize;
+  Gtmaxcoordvalue *maxscoordvaluepace;
 };
 
 LinspaceManagement* gt_linspaceManagement_new()
@@ -36,6 +38,7 @@ LinspaceManagement* gt_linspaceManagement_new()
   spacemanager->valueTabspace = NULL;
   spacemanager->rTabspace = NULL;
   spacemanager->crosspointTabspace = NULL;
+  spacemanager->maxscoordvaluepace = NULL;
   spacemanager->valuesize = 0;
   spacemanager->rsize = 0;
   spacemanager->crosspointsize = 0;
@@ -49,15 +52,17 @@ void gt_linspaceManagement_delete(LinspaceManagement *spacemanager)
     gt_free(spacemanager->valueTabspace);
     gt_free(spacemanager->rTabspace);
     gt_free(spacemanager->crosspointTabspace);
+    gt_max_delete(spacemanager->maxscoordvaluepace);
     gt_free(spacemanager);
   }
 }
 
-void gt_linspaceManagement_check(LinspaceManagement *spacemanager,
-                                 GtUword ulen, GtUword vlen,
-                                 size_t valuesize,
-                                 size_t rtabsize,
-                                 size_t crosspointsize)
+static void gt_linspaceManagement_check_generic(LinspaceManagement *spacemanager,
+                                                GtUword ulen, GtUword vlen,
+                                                size_t valuesize,
+                                                size_t rtabsize,
+                                                size_t crosspointsize,
+                                                bool local)
 {
   gt_assert(spacemanager->valuesize == spacemanager->rsize);
 
@@ -79,6 +84,35 @@ void gt_linspaceManagement_check(LinspaceManagement *spacemanager,
            gt_realloc(spacemanager->crosspointTabspace,(vlen+1)*crosspointsize);
     spacemanager->crosspointsize = vlen+1;
   }
+  if (local)
+  {
+    spacemanager->maxscoordvaluepace = gt_max_new();
+  }
+}
+
+void gt_linspaceManagement_check(LinspaceManagement *spacemanager,
+                                 GtUword ulen, GtUword vlen,
+                                 size_t valuesize,
+                                 size_t rtabsize,
+                                 size_t crosspointsize)
+{
+  gt_linspaceManagement_check_generic(spacemanager,
+                              ulen, vlen,
+                              valuesize,
+                              rtabsize,
+                              crosspointsize,
+                              false);
+}
+
+void  gt_linspaceManagement_check_local(LinspaceManagement *spacemanager,
+                                        GtUword ulen, GtUword vlen,
+                                        size_t valuesize, size_t rstabsize)
+{
+  gt_linspaceManagement_check_generic(spacemanager,
+                              ulen, vlen,
+                              valuesize,
+                              rstabsize,
+                              0, true);
 }
 
 void *gt_linspaceManagement_get_valueTabspace(LinspaceManagement *spacemanager)
@@ -99,6 +133,13 @@ void *gt_linspaceManagement_get_crosspointTabspace(LinspaceManagement *spacemana
 {
   if (spacemanager != NULL)
     return (spacemanager->crosspointTabspace);
+  return NULL;
+}
+
+void *gt_linspaceManagement_get_maxspace(LinspaceManagement *spacemanager)
+{
+  if (spacemanager != NULL)
+    return (spacemanager->maxscoordvaluepace);
   return NULL;
 }
 

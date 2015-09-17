@@ -27,7 +27,7 @@ typedef struct LinspaceManagement LinspaceManagement;
 
 LinspaceManagement* gt_linspaceManagement_new();
 
-void gt_linspaceManagement_delete(LinspaceManagement *space);
+void gt_linspaceManagement_delete(LinspaceManagement *spacemanager);
 
 /* checks if enough space is allocated */
 void gt_linspaceManagement_check(LinspaceManagement *spacemanager,
@@ -36,11 +36,18 @@ void gt_linspaceManagement_check(LinspaceManagement *spacemanager,
                                  size_t rtabsize,
                                  size_t crosspointsize);
 
-void *gt_linspaceManagement_get_valueTabspace(LinspaceManagement *space);
+void  gt_linspaceManagement_check_local(LinspaceManagement *spacemanager,
+                                        GtUword ulen, GtUword vlen,
+                                        size_t valuesize,
+                                        size_t rstabsize);
 
-void *gt_linspaceManagement_get_rTabspace(LinspaceManagement *space);
+void *gt_linspaceManagement_get_valueTabspace(LinspaceManagement *spacemanager);
 
-void *gt_linspaceManagement_get_crosspointTabspace(LinspaceManagement *space);
+void *gt_linspaceManagement_get_rTabspace(LinspaceManagement *spacemanager);
+
+void *gt_linspaceManagement_get_crosspointTabspace(LinspaceManagement *spacemanager);
+
+void *gt_linspaceManagement_get_maxspace(LinspaceManagement *spacemanager);
 
 GtUchar* sequence_to_lower_case(const GtUchar *seq, GtUword len);
 inline GtWord add_safe_max(GtWord val1, GtWord val2);
