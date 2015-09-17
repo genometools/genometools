@@ -19,6 +19,7 @@
 #define ESA_MMSEARCH_H
 #include "core/error_api.h"
 #include "core/encseq.h"
+#include "sarr-def.h"
 #include "querymatch.h"
 
 typedef int (*GtProcessquerymatch)(void *,
@@ -86,5 +87,9 @@ int gt_sarrquerysubstringmatch(const GtUchar *dbseq,
                                void *processquerymatchinfo,
                                GtLogger *logger,
                                GtError *err);
+
+typedef struct GtQuerysubstringmatchiterator GtQuerysubstringmatchiterator;
+
+void gt_querysubstringmatchiterator_delete(GtQuerysubstringmatchiterator *qsmi);
 
 #endif

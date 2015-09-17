@@ -751,9 +751,9 @@ static int gt_repfind_runner(int argc,
       }
       if (gt_callenumquerymatches(gt_str_get(arguments->indexname),
                                   arguments->queryfiles,
-                                  false,
-                                  true,
-                                  false,
+                                  false, /* findmums */
+                                  true, /* forward strand */
+                                  false, /* reverse strand */
                                   arguments->seedlength,
                                   NULL,
                                   processquerymatch,
