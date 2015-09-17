@@ -56,8 +56,9 @@ static char* get_value(const GtTagValueMap map, const char *tag,
   tag_ptr = tag;
   for (;;) {
     while (*map_ptr == *tag_ptr++) {
-      if (*map_ptr++ == '\0')
-        return map_ptr; /* match found -> return value */
+      if (*map_ptr == '\0' && *(map_ptr+1) != '\0')
+        return (map_ptr+1); /* match found -> return value */
+      map_ptr++;
     }
     /* no match found */
     while (*map_ptr++ != '\0'); /* go to next value */
@@ -361,6 +362,16 @@ int gt_tag_value_map_unit_test(GtError *err)
     gt_ensure(!gt_tag_value_map_get(map, "unused tag"));
     gt_ensure(!(old_map_len - new_map_len - strlen("tag 3") - 1
                      - strlen("value ZZZ") -1));
+    gt_tag_value_map_delete(map);
+  }
+
+    /* test gt_tag_value_map_get_value() (value == tag bug) */
+  if (!had_err) {
+    GtTagValueMap map = gt_tag_value_map_new("tag 1", "foo");
+    gt_tag_value_map_add(&map, "tag 2", "bar");
+    gt_ensure(!strcmp(gt_tag_value_map_get(map, "tag 1"), "foo"));
+    gt_ensure(!strcmp(gt_tag_value_map_get(map, "tag 2"), "bar"));
+    gt_ensure(!gt_tag_value_map_get(map, "bar"));
     gt_tag_value_map_delete(map);
   }
 
