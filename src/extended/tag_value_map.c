@@ -56,9 +56,12 @@ static char* get_value(const GtTagValueMap map, const char *tag,
   tag_ptr = tag;
   for (;;) {
     while (*map_ptr == *tag_ptr++) {
-      if (*map_ptr == '\0' && *(map_ptr+1) != '\0')
-        return (map_ptr+1); /* match found -> return value */
-      map_ptr++;
+      if (*map_ptr == '\0') {
+        if (*(map_ptr+1) != '\0')
+          return (map_ptr+1); /* match found -> return value */
+        else
+          break;
+      } else map_ptr++;
     }
     /* no match found */
     while (*map_ptr++ != '\0'); /* go to next value */
