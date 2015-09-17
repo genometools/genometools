@@ -20,6 +20,7 @@ Keywords "gt_seed_extend seedpair at1MB memlimit maxfreq verbose"
 Test do
   run_test build_encseq("at1MB", "#{$testdata}at1MB")
   run_test "#{$bin}gt seed_extend -verify -debug-seedpair -memlimit 10MB at1MB"
+  grep last_stderr, /Only k-mers occurring <= 3 times will be considered, due to small memlimit. Expect 50496 seed pairs./
   run "cmp -s #{last_stdout} #{$testdata}seedextend2.out"
   run_test "#{$bin}gt seed_extend -v -maxfreq 5 at1MB"
   grep last_stdout, /...found and sorted 582230 k-mers/
@@ -58,7 +59,4 @@ Test do
   grep last_stderr, /too many arguments/
   run_test "#{$bin}gt seed_extend -benchmark", :retval => 1
   grep last_stderr, /at least one encseq index name must be specified/
-  run_test "#{$bin}gt seed_extend -extendgreedy -seedlength 7 at1MB foo",
-    :retval => 1
-  grep last_stderr, /comparison of two encseqs not implemented/
 end

@@ -58,6 +58,7 @@ typedef struct {
   bool overlappingseeds;
   bool benchmark;
   bool verbose;
+  bool seeddisplay;
 } GtSeedExtendArguments;
 
 static void* gt_seed_extend_arguments_new(void)
@@ -290,6 +291,14 @@ static GtOptionParser* gt_seed_extend_option_parser_new(void *tool_arguments)
   gt_option_is_development_option(option);
   gt_option_parser_add_option(op, option);
 
+  /* -seed-display */
+  option = gt_option_new_bool("seed-display",
+                              "Display seeds in #-line",
+                              &arguments->seeddisplay,
+                              false);
+  gt_option_is_development_option(option);
+  gt_option_parser_add_option(op, option);
+
   /* -v */
   option = gt_option_new_verbose(&arguments->verbose);
   gt_option_parser_add_option(op, option);
@@ -395,10 +404,11 @@ static int gt_seed_extend_runner(int argc, const char **argv, int parsed_args,
 
   /* If there is a 2nd read set: Load encseq B */
   if (!had_err) {
-    if (argc - parsed_args == 2)
+    if (argc - parsed_args == 2) {
       bencseq = gt_encseq_loader_load(encseq_loader, argv[parsed_args+1], err);
-    else
+    } else {
       bencseq = gt_encseq_ref(aencseq);
+    }
     if (bencseq == NULL) {
       had_err = -1;
       gt_encseq_delete(aencseq);
@@ -424,7 +434,8 @@ static int gt_seed_extend_runner(int argc, const char **argv, int parsed_args,
       }
       if (arguments->verbose) {
         gt_greedy_extend_matchinfo_verbose_set(grextinfo);
-        /* SK: make this dependent on option seed-display */
+      }
+      if (arguments->seeddisplay) {
         gt_greedy_matchinfo_seed_display_set(grextinfo);
       }
     } else {
@@ -488,12 +499,16 @@ static int gt_seed_extend_runner(int argc, const char **argv, int parsed_args,
     /* clean up */
     gt_encseq_delete(aencseq);
     gt_encseq_delete(bencseq);
-    if (gt_option_is_set(arguments->se_option_greedy))
+    if (gt_option_is_set(arguments->se_option_greedy)) {
       gt_greedy_extend_matchinfo_delete(grextinfo);
-    if (gt_option_is_set(arguments->se_option_xdrop))
+    }
+    if (gt_option_is_set(arguments->se_option_xdrop)) {
       gt_xdrop_matchinfo_delete(xdropinfo);
-    if (arguments->se_alignmentwidth > 0)
+    }
+    if (arguments->se_alignmentwidth > 0 ||
+        gt_option_is_set(arguments->se_option_xdrop)) {
       gt_querymatchoutoptions_delete(querymatchoutopt);
+    }
   }
 
   if (gt_showtime_enabled()) {
