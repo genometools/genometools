@@ -65,6 +65,7 @@ def parseargs(argv)
   options.mirrored = false
   options.seeded = false
   options.namedfiles = false
+  options.withwildcards = false
   options.minidentity = defaultminid
   opts = OptionParser.new
   opts.on("-m","--mode STRING","specify mode: mirrored|seeded|pair") do |x|
@@ -83,6 +84,10 @@ def parseargs(argv)
   opts.on("-n","--namedfiles","store seeded matches in files db.fna and query.fna") do |x|
     options.namedfiles = true
   end
+  opts.on("-w","--withwildcards","store wildcards at end of extensions") do |x|
+    options.withwildcards = true
+  end
+  rest = opts.parse(argv)
   rest = opts.parse(argv)
   if rest.length != 0
     STDERR.puts "Usage: #{$0} [options]"
@@ -155,9 +160,14 @@ def gen_seeded(fpdb,fpquery,rseq,options,alphabet,errperc)
   leftcontext2 = rseq.mutate(leftcontext1,errperc,alphabet)
   rightcontext1 = rseq.sequence(extendlength)
   rightcontext2 = rseq.mutate(rightcontext1,errperc,alphabet)
+  if options.withwildcards
+    wildcard = "N"
+  else
+    wildcard = ""
+  end
   fpdb.puts ">seedlength=#{options.seedlength},extendlength=#{extendlength}," +
        "errperc=#{errperc}"
-  fpdb.puts "#{leftcontext1}"
+  fpdb.puts "#{leftcontext1}#{wildcard}"
   fpdb.puts "#{seedstring}"
   fpdb.puts "#{rightcontext1}"
   fpquery.puts ">seedlength=#{options.seedlength},extendlength=#{extendlength}," +
