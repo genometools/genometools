@@ -961,6 +961,8 @@ struct GtQuerysubstringmatchiterator
   const GtUchar *query;
   GtUword query_seqlen;
   GtSeqIterator *seqit;
+  GtUword dbstart,
+          matchlength;
   uint64_t queryunitnum;
   char *desc;
 };
@@ -988,6 +990,13 @@ GtQuerysubstringmatchiterator *gt_querysubstringmatchiterator_new(
   qsmi->desc = NULL;
   qsmi->query = NULL;
   qsmi->query_seqlen = 0;
+  qsmi->queryrep.reversecopy = false;
+  qsmi->queryrep.encseq = NULL;
+  qsmi->queryrep.readmode = GT_READMODE_FORWARD;
+  qsmi->queryrep.startpos = 0;
+  qsmi->dbstart = 0;
+  qsmi->matchlength = 0;
+  qsmi->querysubstring.queryrep = &qsmi->queryrep;
   qsmi->seqit = gt_seq_iterator_sequence_buffer_new(queryfiles, err);
   if (qsmi->seqit == NULL)
   {
@@ -1012,10 +1021,49 @@ void gt_querysubstringmatchiterator_delete(GtQuerysubstringmatchiterator *qsmi)
   }
 }
 
-int gt_querysubstringmatchiterator_next(GtUword *dbstart,
-                                        GtUword *querystart,
-                                        GtUword *matchlength,
-                                        GtQuerysubstringmatchiterator *qsmi,
+GtUword gt_querysubstringmatchiterator_dbstart(
+                      const GtQuerysubstringmatchiterator *qsmi)
+{
+  gt_assert(qsmi != NULL);
+  return qsmi->dbstart;
+}
+
+GtUword gt_querysubstringmatchiterator_querystart(
+                      const GtQuerysubstringmatchiterator *qsmi)
+{
+  gt_assert(qsmi != NULL);
+  return qsmi->querysubstring.offset;
+}
+
+GtUword gt_querysubstringmatchiterator_matchlength(
+                      const GtQuerysubstringmatchiterator *qsmi)
+{
+  gt_assert(qsmi != NULL);
+  return qsmi->matchlength;
+}
+
+uint64_t gt_querysubstringmatchiterator_queryunitnum(
+                      const GtQuerysubstringmatchiterator *qsmi)
+{
+  gt_assert(qsmi != NULL);
+  return qsmi->queryunitnum;
+}
+
+GtUword gt_querysubstringmatchiterator_query_seqlen(
+                      const GtQuerysubstringmatchiterator *qsmi)
+{
+  gt_assert(qsmi != NULL);
+  return qsmi->query_seqlen;
+}
+
+const GtUchar *gt_querysubstringmatchiterator_query(
+                      const GtQuerysubstringmatchiterator *qsmi)
+{
+  gt_assert(qsmi != NULL);
+  return qsmi->query;
+}
+
+int gt_querysubstringmatchiterator_next(GtQuerysubstringmatchiterator *qsmi,
                                         GtError *err)
 {
   gt_assert(qsmi != NULL);
@@ -1039,11 +1087,6 @@ int gt_querysubstringmatchiterator_next(GtUword *dbstart,
       gt_assert(qsmi->query_seqlen > 0 && qsmi->query != NULL);
       qsmi->queryrep.sequence = qsmi->query;
       qsmi->queryrep.length = qsmi->query_seqlen;
-      qsmi->queryrep.reversecopy = false;
-      qsmi->queryrep.encseq = NULL;
-      qsmi->queryrep.readmode = GT_READMODE_FORWARD;
-      qsmi->queryrep.startpos = 0;
-      qsmi->querysubstring.queryrep = &qsmi->queryrep;
       qsmi->querysubstring.offset = 0;
     }
     if (qsmi->query_seqlen >= qsmi->userdefinedleastlength)
@@ -1062,25 +1105,24 @@ int gt_querysubstringmatchiterator_next(GtUword *dbstart,
         gt_assert(qsmi->mmsi != NULL);
       } else
       {
-        if (gt_mmsearchiterator_next(dbstart,qsmi->mmsi))
+        if (gt_mmsearchiterator_next(&qsmi->dbstart,qsmi->mmsi))
         {
           GtUword extend;
 
           if (gt_mmsearch_isleftmaximal(qsmi->dbencseq,
                                         qsmi->readmode,
-                                        *dbstart,
+                                        qsmi->dbstart,
                                         &qsmi->querysubstring))
           {
             extend = gt_mmsearch_extendright(qsmi->dbencseq,
                                              qsmi->mmsi->esr,
                                              qsmi->readmode,
                                              qsmi->totallength,
-                                             *dbstart +
+                                             qsmi->dbstart +
                                                qsmi->userdefinedleastlength,
                                              &qsmi->querysubstring,
                                              qsmi->userdefinedleastlength);
-            *querystart = qsmi->querysubstring.offset;
-            *matchlength = qsmi->userdefinedleastlength + extend;
+            qsmi->matchlength = qsmi->userdefinedleastlength + extend;
             return 0;
           }
         } else
@@ -1088,8 +1130,7 @@ int gt_querysubstringmatchiterator_next(GtUword *dbstart,
           gt_mmsearchiterator_delete(qsmi->mmsi);
           qsmi->mmsi = NULL;
           if (qsmi->querysubstring.offset <
-              qsmi->querysubstring.queryrep->length
-                - qsmi->userdefinedleastlength)
+              qsmi->query_seqlen - qsmi->userdefinedleastlength)
           {
             qsmi->querysubstring.offset++;
           } else
@@ -1118,7 +1159,6 @@ int gt_callenumquerymatches(const char *indexname,
 {
   Suffixarray suffixarray;
   GtQuerysubstringmatchiterator *qsmi = NULL;
-  int retval;
   bool haserr = false;
 
   gt_assert(forwardstrand && !reversestrand);
@@ -1149,17 +1189,14 @@ int gt_callenumquerymatches(const char *indexname,
   }
   if (!haserr)
   {
+    int retval;
     GtQuerymatch *querymatchspaceptr = gt_querymatch_new(NULL);
-    GtUword dbstart, querystart, matchlength;
 
-    while ((retval = gt_querysubstringmatchiterator_next(&dbstart,
-                                                         &querystart,
-                                                         &matchlength,
-                                                         qsmi,
-                                                         err)) == 0)
+    while ((retval = gt_querysubstringmatchiterator_next(qsmi, err)) == 0)
     {
-      GtUword dbseqnum, dbseqstartpos;
+      GtUword dbstart, dbseqnum, dbseqstartpos, matchlength, query_seqlen;
 
+      dbstart = gt_querysubstringmatchiterator_dbstart(qsmi);
       if (gt_encseq_has_multiseq_support(suffixarray.encseq))
       {
         dbseqnum = gt_encseq_seqnum(suffixarray.encseq,dbstart);
@@ -1168,6 +1205,8 @@ int gt_callenumquerymatches(const char *indexname,
       {
         dbseqnum = dbseqstartpos = 0;
       }
+      matchlength = gt_querysubstringmatchiterator_matchlength(qsmi);
+      query_seqlen = gt_querysubstringmatchiterator_query_seqlen(qsmi);
       gt_querymatch_init(querymatchspaceptr,
                          matchlength,
                          dbstart,
@@ -1178,15 +1217,15 @@ int gt_callenumquerymatches(const char *indexname,
                          0, /* score */
                          0, /* edist */
                          false,
-                         qsmi->queryunitnum,
+                         gt_querysubstringmatchiterator_queryunitnum(qsmi),
                          matchlength,
-                         querystart,
-                         qsmi->query_seqlen);
+                         gt_querysubstringmatchiterator_querystart(qsmi),
+                         query_seqlen);
       if (processquerymatch(processquerymatchinfo,
                             suffixarray.encseq,
                             querymatchspaceptr,
-                            qsmi->query,
-                            qsmi->query_seqlen,
+                            gt_querysubstringmatchiterator_query(qsmi),
+                            query_seqlen,
                             err) != 0)
       {
         haserr = true;
