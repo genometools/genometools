@@ -52,9 +52,8 @@ typedef struct
   GtAllocatedMemory *sequence_cache;
   GtUword substringlength,
           totallength,
-          min_access_pos,
-          cache_num_positions,
-          cache_offset,
+          min_access_pos, /* no position accessed will be smaller than this */
+          cache_num_positions, /* number of positions in cache */
           startpos;
 } Sequenceobject;
 
@@ -87,13 +86,11 @@ static void sequenceobject_init(Sequenceobject *seq,
   {
     gt_encseq_reader_reinit_with_readmode(encseq_r, encseq, readmode, startpos);
     seq->encseqreader = encseq_r;
-    gt_assert(seq->encseqreader != NULL);
+    gt_assert(seq->encseqreader != NULL && sequence_cache != NULL);
     seq->sequence_cache = sequence_cache;
-    gt_assert(sequence_cache != NULL);
-    seq->cache_ptr = sequence_cache->space;
-    seq->min_access_pos = GT_UWORD_MAX;
+    seq->cache_ptr = (GtUchar *) sequence_cache->space;
+    seq->min_access_pos = GT_UWORD_MAX; /* undefined */
     seq->cache_num_positions = 0;
-    seq->cache_offset = 0;
   }
   if (seq->twobitencoding == NULL && seq->encseqreader == NULL &&
       (extend_char_access_mode == GT_EXTEND_CHAR_ACCESS_ANY ||
@@ -148,38 +145,21 @@ static GtUchar sequenceobject_get_char(Sequenceobject *seq,GtUword pos)
   }
   if (seq->encseqreader != NULL)
   {
-    const GtUword addamount = 256UL;
-
-    if (seq->min_access_pos != GT_UWORD_MAX &&
-        seq->min_access_pos >= seq->cache_offset + addamount)
-    {
-      GtUword idx, end = MIN(seq->cache_num_positions,seq->substringlength);
-      GtUchar *cs = ((GtUchar *) seq->sequence_cache->space)
-                    - seq->min_access_pos;
-
-      for (idx = seq->min_access_pos; idx < end; idx++)
-      {
-        cs[idx] = seq->cache_ptr[idx];
-      }
-      seq->cache_offset = seq->min_access_pos;
-      seq->cache_ptr = ((GtUchar *) seq->sequence_cache->space)
-                       - seq->cache_offset;
-    }
+    gt_assert(pos < seq->substringlength);
     if (pos >= seq->cache_num_positions)
     {
       GtUword idx, tostore;
+      const GtUword addamount = 256UL;
 
       tostore = MIN(seq->cache_num_positions + addamount,seq->substringlength);
-      if (tostore > seq->cache_offset + seq->sequence_cache->allocated)
+      if (tostore > seq->sequence_cache->allocated)
       {
         seq->sequence_cache->allocated += addamount;
         seq->sequence_cache->space
           = gt_realloc(seq->sequence_cache->space,
                        sizeof (GtUchar) * seq->sequence_cache->allocated);
-        seq->cache_ptr = ((GtUchar *) seq->sequence_cache->space)
-                         - seq->cache_offset;
+        seq->cache_ptr = (GtUchar *) seq->sequence_cache->space;
       }
-      gt_assert(pos >= seq->cache_offset);
       for (idx = seq->cache_num_positions; idx < tostore; idx++)
       {
         seq->cache_ptr[idx]
@@ -187,8 +167,7 @@ static GtUchar sequenceobject_get_char(Sequenceobject *seq,GtUword pos)
       }
       seq->cache_num_positions = tostore;
     }
-    gt_assert(pos < seq->cache_offset + seq->sequence_cache->allocated);
-    gt_assert(seq->cache_ptr != NULL);
+    gt_assert(seq->cache_ptr != NULL && pos < seq->cache_num_positions);
     return seq->cache_ptr[pos];
   }
   gt_assert(seq->forward || seq->startpos >= pos);

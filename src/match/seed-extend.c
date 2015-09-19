@@ -619,6 +619,12 @@ void gt_greedy_extend_matchinfo_delete(GtGreedyextendmatchinfo *ggemi)
     front_trace_delete(ggemi->right_front_trace);
     gt_encseq_reader_delete(ggemi->encseq_r_in_u);
     gt_encseq_reader_delete(ggemi->encseq_r_in_v);
+    /*
+    printf("usequence_cache.allocated=" GT_WU "\n",
+           ggemi->usequence_cache.allocated);
+    printf("vsequence_cache.allocated=" GT_WU "\n",
+           ggemi->vsequence_cache.allocated);
+    */
     gt_free(ggemi->usequence_cache.space);
     gt_free(ggemi->vsequence_cache.space);
     gt_free(ggemi->frontspace_reservoir.space);
