@@ -56,19 +56,6 @@ void gt_mmsearchiterator_delete(GtMMsearchiterator *mmsi);
 
 GtUword gt_mmsearchiterator_count(const GtMMsearchiterator *mmsi);
 
-int gt_callenumquerymatches(const char *indexname,
-                            const GtStrArray *queryfiles,
-                            bool findmums,
-                            bool forwardstrand,
-                            bool reversestrand,
-                            unsigned int userdefinedleastlength,
-                            GtProcessquerybeforematching
-                              processquerybeforematching,
-                            GtProcessquerymatch processquerymatch,
-                            void *processquerymatchinfo,
-                            GtLogger *logger,
-                            GtError *err);
-
 int gt_callenumselfmatches(const char *indexname,
                            GtReadmode queryreadmode,
                            unsigned int userdefinedleastlength,
@@ -90,6 +77,38 @@ int gt_sarrquerysubstringmatch(const GtUchar *dbseq,
 
 typedef struct GtQuerysubstringmatchiterator GtQuerysubstringmatchiterator;
 
+GtQuerysubstringmatchiterator *gt_querysubstringmatchiterator_new(
+                                     const GtEncseq *dbencseq,
+                                     GtUword totallength,
+                                     const ESASuffixptr *suftabpart,
+                                     GtReadmode readmode,
+                                     GtUword numberofsuffixes,
+                                     const GtStrArray *queryfiles,
+                                     GtReadmode queryreadmode,
+                                     unsigned int userdefinedleastlength,
+                                     GtError *err);
+
 void gt_querysubstringmatchiterator_delete(GtQuerysubstringmatchiterator *qsmi);
+
+GtUword gt_querysubstringmatchiterator_dbstart(
+                      const GtQuerysubstringmatchiterator *qsmi);
+
+GtUword gt_querysubstringmatchiterator_querystart(
+                      const GtQuerysubstringmatchiterator *qsmi);
+
+GtUword gt_querysubstringmatchiterator_matchlength(
+                      const GtQuerysubstringmatchiterator *qsmi);
+
+uint64_t gt_querysubstringmatchiterator_queryunitnum(
+                      const GtQuerysubstringmatchiterator *qsmi);
+
+GtUword gt_querysubstringmatchiterator_query_seqlen(
+                      const GtQuerysubstringmatchiterator *qsmi);
+
+const GtUchar *gt_querysubstringmatchiterator_query(
+                      const GtQuerysubstringmatchiterator *qsmi);
+
+int gt_querysubstringmatchiterator_next(GtQuerysubstringmatchiterator *qsmi,
+                                        GtError *err);
 
 #endif

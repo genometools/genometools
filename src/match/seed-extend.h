@@ -166,15 +166,13 @@ const GtQuerymatch* gt_xdrop_extend_querymatch(void *info,
    The following function performs an xdrop extension (as the previous function)
    and outputs the formatted match to stdout if
    the previous function returns a pointer different from NULL.
-   The function always returns 0, so the <GtError>-object <err> is not used.
 */
 
-int gt_xdrop_extend_querymatch_with_output(void *info,
-                                           const GtEncseq *encseq,
-                                           const GtQuerymatch *exactseed,
-                                           const GtUchar *query,
-                                           GtUword query_totallength,
-                                           GT_UNUSED GtError *err);
+void gt_xdrop_extend_querymatch_with_output(void *info,
+                                            const GtEncseq *encseq,
+                                            const GtQuerymatch *exactseed,
+                                            const GtUchar *query,
+                                            GtUword query_totallength);
 
 /* The following functions are used for the greedy extension. */
 

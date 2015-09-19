@@ -459,12 +459,11 @@ const GtQuerymatch* gt_xdrop_extend_querymatch(void *info,
   return gt_xdrop_extend_sesp(info, dbencseq, query, &sesp);
 }
 
-int gt_xdrop_extend_querymatch_with_output(void *info,
-                                           const GtEncseq *dbencseq,
-                                           const GtQuerymatch *exactseed,
-                                           const GtUchar *query,
-                                           GtUword query_totallength,
-                                           GT_UNUSED GtError *err)
+void gt_xdrop_extend_querymatch_with_output(void *info,
+                                            const GtEncseq *dbencseq,
+                                            const GtQuerymatch *exactseed,
+                                            const GtUchar *query,
+                                            GtUword query_totallength)
 {
   const GtQuerymatch *querymatch
     = gt_xdrop_extend_querymatch(info,
@@ -485,7 +484,6 @@ int gt_xdrop_extend_querymatch_with_output(void *info,
       gt_querymatch_prettyprint(querymatch);
     }
   }
-  return 0;
 }
 
 const char *gt_cam_extendgreedy_comment(void)

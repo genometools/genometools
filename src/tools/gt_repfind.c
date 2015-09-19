@@ -36,6 +36,7 @@
 #include "match/querymatch.h"
 #include "match/test-maxpairs.h"
 #include "match/seed-extend.h"
+#include "match/esa-map.h"
 #include "tools/gt_repfind.h"
 
 typedef struct
@@ -534,6 +535,101 @@ static int gt_generic_simplegreedyselfmatchoutput(
                                                 err);
 }
 
+typedef void (*GtXdrop_extend_querymatch_func)(void *,
+                                               const GtEncseq *,
+                                               const GtQuerymatch *,
+                                               const GtUchar *,
+                                               GtUword);
+
+static int gt_callenumquerymatches(const char *indexname,
+                            const GtStrArray *queryfiles,
+                            unsigned int userdefinedleastlength,
+                            GtXdrop_extend_querymatch_func eqmf,
+                            void *eqmf_data,
+                            GtLogger *logger,
+                            GtError *err)
+{
+  Suffixarray suffixarray;
+  GtQuerysubstringmatchiterator *qsmi = NULL;
+  bool haserr = false;
+
+  if (gt_mapsuffixarray(&suffixarray,
+                        SARR_ESQTAB | SARR_SUFTAB | SARR_SSPTAB,
+                        indexname,
+                        logger,
+                        err) != 0)
+  {
+    haserr = true;
+  }
+  if (!haserr)
+  {
+    GtUword totallength = gt_encseq_total_length(suffixarray.encseq);
+
+    qsmi = gt_querysubstringmatchiterator_new(suffixarray.encseq,
+                                              totallength,
+                                              suffixarray.suftab,
+                                              suffixarray.readmode,
+                                              totallength + 1,
+                                              queryfiles,
+                                              GT_READMODE_FORWARD,
+                                              userdefinedleastlength,
+                                              err);
+    if (qsmi == NULL)
+    {
+      haserr = true;
+    }
+  }
+  if (!haserr)
+  {
+    int retval;
+    GtQuerymatch *exactseed = gt_querymatch_new(NULL,false);
+
+    while ((retval = gt_querysubstringmatchiterator_next(qsmi, err)) == 0)
+    {
+      GtUword dbstart, dbseqnum, dbseqstartpos, matchlength, query_seqlen;
+
+      dbstart = gt_querysubstringmatchiterator_dbstart(qsmi);
+      if (gt_encseq_has_multiseq_support(suffixarray.encseq))
+      {
+        dbseqnum = gt_encseq_seqnum(suffixarray.encseq,dbstart);
+        dbseqstartpos = gt_encseq_seqstartpos(suffixarray.encseq, dbseqnum);
+      } else
+      {
+        dbseqnum = dbseqstartpos = 0;
+      }
+      matchlength = gt_querysubstringmatchiterator_matchlength(qsmi);
+      query_seqlen = gt_querysubstringmatchiterator_query_seqlen(qsmi);
+      gt_querymatch_init(exactseed,
+                         matchlength,
+                         dbstart,
+                         dbseqnum,
+                         dbstart - dbseqstartpos,
+                         suffixarray.readmode,
+                         NULL,
+                         0, /* score */
+                         0, /* edist */
+                         false,
+                         gt_querysubstringmatchiterator_queryunitnum(qsmi),
+                         matchlength,
+                         gt_querysubstringmatchiterator_querystart(qsmi),
+                         query_seqlen);
+      if (eqmf != NULL)
+      {
+        eqmf(eqmf_data,suffixarray.encseq,exactseed,
+             gt_querysubstringmatchiterator_query(qsmi),query_seqlen);
+      } else
+      {
+        gt_querymatch_prettyprint(exactseed);
+
+      }
+    }
+    gt_querymatch_delete(exactseed);
+  }
+  gt_querysubstringmatchiterator_delete(qsmi);
+  gt_freesuffixarray(&suffixarray);
+  return haserr ? -1 : 0;
+}
+
 static int gt_repfind_runner(int argc,
                              GT_UNUSED const char **argv,
                              int parsed_args,
@@ -722,34 +818,26 @@ static int gt_repfind_runner(int argc,
       }
     } else
     {
-      GtProcessquerymatch processquerymatch = NULL;
-      void *processquerymatch_data = NULL;
+      GtXdrop_extend_querymatch_func eqmf = NULL;
+      void *eqmf_data = NULL;
 
       if (gt_option_is_set(arguments->refextendxdropoption))
       {
-        processquerymatch = gt_xdrop_extend_querymatch_with_output;
+        eqmf = gt_xdrop_extend_querymatch_with_output;
         processinfo_and_querymatchspaceptr.processinfo = xdropmatchinfo;
-        processquerymatch_data = (void *) &processinfo_and_querymatchspaceptr;
+        eqmf_data = (void *) &processinfo_and_querymatchspaceptr;
       } else
       {
         if (gt_option_is_set(arguments->refextendgreedyoption))
         {
           gt_assert(false);
-        } else
-        {
-          processquerymatch = gt_querymatch_output;
-          processquerymatch_data = NULL;
         }
       }
       if (gt_callenumquerymatches(gt_str_get(arguments->indexname),
                                   arguments->queryfiles,
-                                  false, /* findmums */
-                                  true, /* forward strand */
-                                  false, /* reverse strand */
                                   arguments->seedlength,
-                                  NULL,
-                                  processquerymatch,
-                                  processquerymatch_data,
+                                  eqmf,
+                                  eqmf_data,
                                   logger,
                                   err) != 0)
       {
