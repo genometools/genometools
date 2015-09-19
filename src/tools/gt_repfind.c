@@ -580,10 +580,6 @@ static int gt_repfind_runner(int argc,
     {
       gt_xdrop_matchinfo_silent_set(xdropmatchinfo);
     }
-    if (arguments->seed_display)
-    {
-      gt_xdrop_matchinfo_seed_display_set(xdropmatchinfo);
-    }
   }
   if (!haserr && gt_option_is_set(arguments->refextendgreedyoption))
   {
@@ -622,10 +618,6 @@ static int gt_repfind_runner(int argc,
       {
         gt_greedy_extend_matchinfo_trimstat_set(greedyextendmatchinfo);
       }
-      if (arguments->seed_display)
-      {
-        gt_greedy_matchinfo_seed_display_set(greedyextendmatchinfo);
-      }
     }
   }
   if (!haserr)
@@ -655,7 +647,7 @@ static int gt_repfind_runner(int argc,
       querymatchoutoptions = NULL;
     }
     processinfo_and_querymatchspaceptr.querymatchspaceptr
-      = gt_querymatch_new(querymatchoutoptions);
+      = gt_querymatch_new(querymatchoutoptions,arguments->seed_display);
     if (gt_str_array_size(arguments->queryfiles) == 0)
     {
       if (arguments->samples == 0)

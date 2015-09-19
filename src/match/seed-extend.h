@@ -95,10 +95,6 @@ GtWord gt_optimalxdropbelowscore(GtUword errorpercentage,GtUword sensitivity);
 
 void gt_xdrop_matchinfo_verbose_set(GtXdropmatchinfo *xdropmatchinfo);
 
-/* Set the seed_display flag in the matchinfo object. */
-
-void gt_xdrop_matchinfo_seed_display_set(GtXdropmatchinfo *xdropmatchinfo);
-
 /* Set the silent flag in the matchinfo object. */
 
 void gt_xdrop_matchinfo_silent_set(GtXdropmatchinfo *xdropmatchinfo);
@@ -235,10 +231,6 @@ void gt_greedy_extend_matchinfo_silent_set(GtGreedyextendmatchinfo *ggemi);
 /* Set the trimstat in the matchinfo object. */
 
 void gt_greedy_extend_matchinfo_trimstat_set(GtGreedyextendmatchinfo *ggemi);
-
-/* Set the seed_display flag in the matchinfo object. */
-
-void gt_greedy_matchinfo_seed_display_set(GtGreedyextendmatchinfo *ggemi);
 
 /* Set the verbose flag in the matchinfo object. */
 

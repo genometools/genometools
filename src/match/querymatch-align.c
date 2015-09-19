@@ -529,5 +529,6 @@ void gt_querymatchoutoptions_alignment_show(const GtQuerymatchoutoptions
 const GtSeqpaircoordinates *gt_querymatchoutoptions_correction_get(
               const GtQuerymatchoutoptions *querymatchoutoptions)
 {
+  gt_assert(querymatchoutoptions != NULL);
   return &querymatchoutoptions->correction_info;
 }

@@ -117,11 +117,14 @@ Test do
   run_test "#{$bin}gt repfind -minidentity 80 -l 20 -extendxdrop -ii sfx -q " +
            "#{$testdata}U89959_genomic.fas -a"
   run "cmp -s #{last_stdout} #{$testdata}repfind-result/at1MB-U8-xdrop-20-20-80-6-a"
+  run_test "#{$bin}gt repfind -minidentity 80 -l 23 -extendxdrop -ii sfx -q " +
+           "#{$testdata}U89959_genomic.fas"
+  run "mv #{last_stdout} at1MB-vs-U8.matches"
   run_test "#{$bin}gt suffixerator -db #{$testdata}U89959_genomic.fas " +
            "-indexname sfx -dna -tis -suf -lcp"
-  run_test "#{$bin}gt repfind -minidentity 80 -l 20 -extendxdrop -ii sfx -q " +
+  run_test "#{$bin}gt repfind -minidentity 80 -l 23 -extendxdrop -ii sfx -q " +
            "#{$testdata}/at1MB"
-  run "#{$scriptsdir}cmp_db_query_exch.rb #{last_stdout} #{$testdata}repfind-result/at1MB-U8-xdrop-20-20-80-6 35"
+  run "#{$scriptsdir}cmp_db_query_exch.rb #{last_stdout} at1MB-vs-U8.matches"
 end
 
 Name "gt repfind extend self vs query"

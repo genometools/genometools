@@ -27,6 +27,8 @@
 #include "match/xdrop.h"
 
 struct GtDiagbandseed {
+  GtUword errorpercentage,
+          userdefinedleastlength;
   unsigned int seedlength;
   GtUword logdiagbandwidth;
   GtUword mincoverage;
@@ -39,6 +41,7 @@ struct GtDiagbandseed {
   bool verbose;
   bool debug_kmer;
   bool debug_seedpair;
+  bool seed_display;
   GtGreedyextendmatchinfo *extendgreedyinfo;
   GtXdropmatchinfo *extendxdropinfo;
   GtQuerymatchoutoptions *querymatchoutopt;
@@ -67,20 +70,6 @@ void gt_diagbandseed_merge(GtArrayGtDiagbandseedSeedPair *mlist,
                            GtUword *histogram,
                            unsigned int endposdiff,
                            bool selfcomp);
-
-/* start extension for seeds that satisfy the filter criteria */
-int gt_diagbandseed_process_seeds(const GtEncseq *aencseq,
-                                  const GtEncseq *bencseq,
-                                  const GtArrayGtDiagbandseedSeedPair *mlist,
-                                  GtGreedyextendmatchinfo *extendgreedyinfo,
-                                  GtXdropmatchinfo *extendxdropinfo,
-                                  GtQuerymatchoutoptions *querymatchoutopt,
-                                  unsigned int seedlength,
-                                  GtUword logdiagbandwidth,
-                                  GtUword mincoverage,
-                                  GtUword amaxlen,
-                                  GtUword bmaxlen,
-                                  GtError *err);
 
 /* Run the whole algorithm. */
 int gt_diagbandseed_run(const GtEncseq *aencseq,

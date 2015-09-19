@@ -38,22 +38,29 @@ struct GtQuerymatch
       dbseqnum, /* sequence number of dbstart */
       dbstart_relative, /* start position of match in dbsequence
                            relative to start of sequence */
-      querystart_fwdstrand; /* absolute start of query on forward strand */
+      querystart_fwdstrand, /* absolute start of query on forward strand */
+      seedpos1,
+      seedpos2,
+      seedlen;
    GtWord score; /* 0 for exact match */
    uint64_t queryseqnum; /* ordinal number of match in query */
    GtReadmode readmode; /* readmode by which reference sequence was accessed */
    bool selfmatch,       /* true if both instances of the match refer to the
                             same sequence */
-        query_as_reversecopy; /* matched the reverse copy of the query */
+        query_as_reversecopy, /* matched the reverse copy of the query */
+        seed_display;
    GtQuerymatchoutoptions *ref_querymatchoutoptions; /* reference to
         resources needed for alignment output */
 };
 
-GtQuerymatch *gt_querymatch_new(GtQuerymatchoutoptions *querymatchoutoptions)
+GtQuerymatch *gt_querymatch_new(GtQuerymatchoutoptions *querymatchoutoptions,
+                                bool seed_display)
 {
   GtQuerymatch *querymatch = gt_malloc(sizeof *querymatch);
+
   gt_assert(querymatch != NULL);
   querymatch->ref_querymatchoutoptions = querymatchoutoptions;
+  querymatch->seed_display = seed_display;
   return querymatch;
 }
 
@@ -165,6 +172,11 @@ void gt_querymatch_prettyprint(const GtQuerymatch *querymatch)
   {
     const char *outflag = "FRCP";
 
+    if (querymatch->seed_display)
+    {
+      printf("# seed:\t" GT_WU "\t" GT_WU "\t" GT_WU "\n",querymatch->seedpos1,
+               querymatch->seedpos2,querymatch->seedlen);
+    }
     printf(GT_WU " " GT_WU " " GT_WU " %c " GT_WU " " Formatuint64_t
                    " " GT_WU,
            querymatch->dblen,
@@ -215,6 +227,17 @@ int gt_querymatch_output(GT_UNUSED void *info,
 #endif
   gt_querymatch_prettyprint(querymatch);
   return 0;
+}
+
+bool gt_querymatch_verify(const GtQuerymatch *querymatch,
+                          GtUword errorpercentage,
+                          GtUword userdefinedleastlength)
+{
+  GtUword total_alignedlen = querymatch->dblen + querymatch->querylen;
+
+  return (gt_querymatch_error_rate(querymatch->distance,total_alignedlen)
+          <= (double) errorpercentage &&
+         total_alignedlen >= 2 * userdefinedleastlength) ? true : false;
 }
 
 static void gt_querymatch_applycorrection(GtQuerymatch *querymatch,
@@ -282,6 +305,9 @@ bool gt_querymatch_complete(GtQuerymatch *querymatchptr,
       (uint64_t) querymatchptr->dbseqnum != querymatchptr->queryseqnum ||
       querymatchptr->dbstart_relative <= querymatchptr->querystart_fwdstrand)
   {
+    querymatchptr->seedpos1 = seedpos1;
+    querymatchptr->seedpos2 = seedpos2;
+    querymatchptr->seedlen = seedlen;
     if (querymatchptr->ref_querymatchoutoptions != NULL)
     {
       bool seededalignment;
@@ -363,6 +389,6 @@ bool gt_querymatch_checkoverlap(const GtQuerymatch *querymatch,
   if (querymatch->querystart + querymatch->querylen >= start_relative) {
     return false; /* overlap with querymatch */
   } else {
-    return true; /* start below querymatch */
+    return true; /* next seeds starts after curren extension */
   }
 }

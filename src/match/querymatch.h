@@ -27,7 +27,8 @@
 
 typedef struct GtQuerymatch GtQuerymatch;
 
-GtQuerymatch *gt_querymatch_new(GtQuerymatchoutoptions *querymatchoutoptions);
+GtQuerymatch *gt_querymatch_new(GtQuerymatchoutoptions *querymatchoutoptions,
+                                bool seed_display);
 
 void gt_querymatch_init(GtQuerymatch *querymatch,
                         GtUword dblen,
@@ -93,6 +94,10 @@ bool gt_querymatch_queryreverse(const GtQuerymatch *querymatch);
 double gt_querymatch_error_rate(GtUword distance,GtUword alignedlen);
 
 void gt_querymatch_prettyprint(const GtQuerymatch *querymatch);
+
+bool gt_querymatch_verify(const GtQuerymatch *querymatch,
+                          GtUword errorpercentage,
+                          GtUword userdefinedleastlength);
 
 GtWord gt_querymatch_distance2score(GtUword distance,GtUword alignedlen);
 

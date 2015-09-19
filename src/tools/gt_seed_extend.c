@@ -58,7 +58,7 @@ typedef struct {
   bool overlappingseeds;
   bool benchmark;
   bool verbose;
-  bool seeddisplay;
+  bool seed_display;
 } GtSeedExtendArguments;
 
 static void* gt_seed_extend_arguments_new(void)
@@ -294,7 +294,7 @@ static GtOptionParser* gt_seed_extend_option_parser_new(void *tool_arguments)
   /* -seed-display */
   option = gt_option_new_bool("seed-display",
                               "Display seeds in #-line",
-                              &arguments->seeddisplay,
+                              &arguments->seed_display,
                               false);
   gt_option_is_development_option(option);
   gt_option_parser_add_option(op, option);
@@ -435,9 +435,6 @@ static int gt_seed_extend_runner(int argc, const char **argv, int parsed_args,
       if (arguments->verbose) {
         gt_greedy_extend_matchinfo_verbose_set(grextinfo);
       }
-      if (arguments->seeddisplay) {
-        gt_greedy_matchinfo_seed_display_set(grextinfo);
-      }
     } else {
       had_err = -1;
       gt_encseq_delete(aencseq);
@@ -478,6 +475,8 @@ static int gt_seed_extend_runner(int argc, const char **argv, int parsed_args,
   /* Start algorithm */
   if (!had_err) {
     GtDiagbandseed dbsarguments;
+    dbsarguments.errorpercentage = errorpercentage;
+    dbsarguments.userdefinedleastlength = arguments->se_alignlength;
     dbsarguments.seedlength = arguments->dbs_seedlength;
     dbsarguments.logdiagbandwidth = arguments->dbs_logdiagbandwidth;
     dbsarguments.mincoverage = arguments->dbs_mincoverage;
@@ -490,6 +489,7 @@ static int gt_seed_extend_runner(int argc, const char **argv, int parsed_args,
     dbsarguments.verbose = arguments->verbose;
     dbsarguments.debug_kmer = arguments->dbs_debug_kmer;
     dbsarguments.debug_seedpair = arguments->dbs_debug_seedpair;
+    dbsarguments.seed_display = arguments->seed_display;
     dbsarguments.extendgreedyinfo = grextinfo;
     dbsarguments.extendxdropinfo = xdropinfo;
     dbsarguments.querymatchoutopt = querymatchoutopt;

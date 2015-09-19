@@ -613,7 +613,7 @@ static int gt_callenumquerymatches_withindex(
     haserr = true;
   } else
   {
-    GtQuerymatch *querymatchspaceptr = gt_querymatch_new(NULL);
+    GtQuerymatch *querymatchspaceptr = gt_querymatch_new(NULL,false);
     const GtUchar *query;
     GtUword querylen;
     int retval;
@@ -774,7 +774,7 @@ int gt_callenumselfmatches(const char *indexname,
   } else
   {
     GtUword seqnum, numofsequences, seqlength, seqstartpos;
-    GtQuerymatch *querymatchspaceptr = gt_querymatch_new(NULL);
+    GtQuerymatch *querymatchspaceptr = gt_querymatch_new(NULL,false);
     GtQueryrep queryrep;
 
     numofsequences = gt_encseq_num_of_sequences(suffixarray.encseq);
@@ -851,7 +851,7 @@ static int gt_constructsarrandrunmmsearch(
   {
     const GtSuffixsortspace *suffixsortspace;
     GtUword numberofsuffixes;
-    GtQuerymatch *querymatchspaceptr = gt_querymatch_new(NULL);
+    GtQuerymatch *querymatchspaceptr = gt_querymatch_new(NULL,false);
     GtQueryrep queryrep;
 
     queryrep.sequence = query;
@@ -1147,8 +1147,8 @@ int gt_querysubstringmatchiterator_next(GtQuerysubstringmatchiterator *qsmi,
 int gt_callenumquerymatches(const char *indexname,
                             const GtStrArray *queryfiles,
                             GT_UNUSED bool findmums,
-                            bool forwardstrand,
-                            bool reversestrand,
+                            GT_UNUSED bool forwardstrand,
+                            GT_UNUSED bool reversestrand,
                             unsigned int userdefinedleastlength,
                             GT_UNUSED GtProcessquerybeforematching
                               processquerybeforematching,
@@ -1190,7 +1190,7 @@ int gt_callenumquerymatches(const char *indexname,
   if (!haserr)
   {
     int retval;
-    GtQuerymatch *querymatchspaceptr = gt_querymatch_new(NULL);
+    GtQuerymatch *querymatchspaceptr = gt_querymatch_new(NULL,false);
 
     while ((retval = gt_querysubstringmatchiterator_next(qsmi, err)) == 0)
     {

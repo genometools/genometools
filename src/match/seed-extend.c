@@ -44,7 +44,7 @@ struct GtXdropmatchinfo
   GtXdropscore belowscore;
   GtSeqabstract *useq, *vseq;
   GtWord errorpercentage;
-  bool beverbose, silent, seed_display;
+  bool beverbose, silent;
   const GtUchar *query_sequence;
   GtUword query_totallength;
   unsigned int userdefinedleastlength;
@@ -85,7 +85,6 @@ GtXdropmatchinfo *gt_xdrop_matchinfo_new(GtUword userdefinedleastlength,
   }
   xdropmatchinfo->silent = false;
   xdropmatchinfo->beverbose = false;
-  xdropmatchinfo->seed_display = false;
   return xdropmatchinfo;
 }
 
@@ -103,11 +102,6 @@ void gt_xdrop_matchinfo_delete(GtXdropmatchinfo *xdropmatchinfo)
 void gt_xdrop_matchinfo_verbose_set(GtXdropmatchinfo *xdropmatchinfo)
 {
   xdropmatchinfo->beverbose = true;
-}
-
-void gt_xdrop_matchinfo_seed_display_set(GtXdropmatchinfo *xdropmatchinfo)
-{
-  xdropmatchinfo->seed_display = true;
 }
 
 void gt_xdrop_matchinfo_silent_set(GtXdropmatchinfo *xdropmatchinfo)
@@ -339,9 +333,9 @@ const GtQuerymatch *gt_xdrop_extend_sesp(void *info,
           xdropmatchinfo->best_left.score +
           xdropmatchinfo->best_right.score;
   total_distance = score2distance(score,total_alignedlen);
-  if (gt_querymatch_error_rate(total_distance,total_alignedlen) <=
+  /*if (gt_querymatch_error_rate(total_distance,total_alignedlen) <=
       (double) xdropmatchinfo->errorpercentage &&
-      total_alignedlen >= 2 * xdropmatchinfo->userdefinedleastlength)
+      total_alignedlen >= 2 * xdropmatchinfo->userdefinedleastlength)*/
   {
     GtUword dbstart, querystart;
 
@@ -358,11 +352,6 @@ const GtQuerymatch *gt_xdrop_extend_sesp(void *info,
     if (xdropmatchinfo->silent)
     {
       return NULL;
-    }
-    if (xdropmatchinfo->seed_display)
-    {
-      printf("# seed:\t" GT_WU "\t" GT_WU "\t" GT_WU "\n",sesp->seedpos1,
-             sesp->seedpos2,sesp->seedlen);
     }
     if (gt_querymatch_complete(processinfo_and_querymatchspaceptr->
                                  querymatchspaceptr,
@@ -418,7 +407,16 @@ int gt_xdrop_extend_selfmatch_with_output(void *info,
                                                              pos2);
   if (querymatch != NULL)
   {
-    gt_querymatch_prettyprint(querymatch);
+    GtProcessinfo_and_querymatchspaceptr *processinfo_and_querymatchspaceptr
+      = (GtProcessinfo_and_querymatchspaceptr *) info;
+    GtXdropmatchinfo *xdropmatchinfo
+      = processinfo_and_querymatchspaceptr->processinfo;
+
+    if (gt_querymatch_verify(querymatch,xdropmatchinfo->errorpercentage,
+                             xdropmatchinfo->userdefinedleastlength))
+    {
+      gt_querymatch_prettyprint(querymatch);
+    }
   }
   return 0;
 }
@@ -476,7 +474,16 @@ int gt_xdrop_extend_querymatch_with_output(void *info,
                                  query_totallength);
   if (querymatch != NULL)
   {
-    gt_querymatch_prettyprint(querymatch);
+    GtProcessinfo_and_querymatchspaceptr *processinfo_and_querymatchspaceptr
+      = (GtProcessinfo_and_querymatchspaceptr *) info;
+    GtXdropmatchinfo *xdropmatchinfo
+      = processinfo_and_querymatchspaceptr->processinfo;
+
+    if (gt_querymatch_verify(querymatch,xdropmatchinfo->errorpercentage,
+                             xdropmatchinfo->userdefinedleastlength))
+    {
+      gt_querymatch_prettyprint(querymatch);
+    }
   }
   return 0;
 }
@@ -560,8 +567,7 @@ struct GtGreedyextendmatchinfo
   GtExtendCharAccess extend_char_access;
   bool beverbose,
        check_extend_symmetry,
-       silent,
-       seed_display;
+       silent;
   Trimstat *trimstat;
   GtEncseqReader *encseq_r_in_u, *encseq_r_in_v;
   GtAllocatedMemory usequence_cache, vsequence_cache, frontspace_reservoir;
@@ -606,7 +612,6 @@ GtGreedyextendmatchinfo *gt_greedy_extend_matchinfo_new(
   ggemi->check_extend_symmetry = false;
   ggemi->silent = false;
   ggemi->trimstat = NULL;
-  ggemi->seed_display = false;
   return ggemi;
 }
 
@@ -644,12 +649,6 @@ void gt_greedy_extend_matchinfo_silent_set(GtGreedyextendmatchinfo *ggemi)
 {
   gt_assert(ggemi != NULL);
   ggemi->silent = true;
-}
-
-void gt_greedy_matchinfo_seed_display_set(GtGreedyextendmatchinfo *ggemi)
-{
-  gt_assert(ggemi != NULL);
-  ggemi->seed_display = true;
 }
 
 void gt_greedy_extend_matchinfo_trimstat_set(GtGreedyextendmatchinfo *ggemi)
@@ -845,9 +844,9 @@ static const GtQuerymatch *gt_greedy_extend_selfmatch_sesp(
           total_alignedlen,
           gt_querymatch_error_rate(total_distance,total_alignedlen));
 #endif
-  if (gt_querymatch_error_rate(total_distance,total_alignedlen) <=
+  /*if (gt_querymatch_error_rate(total_distance,total_alignedlen) <=
       (double) greedyextendmatchinfo->errorpercentage &&
-      total_alignedlen >= 2 * greedyextendmatchinfo->userdefinedleastlength)
+      total_alignedlen >= 2 * greedyextendmatchinfo->userdefinedleastlength)*/
   {
     GtUword dbstart, querystart;
     GtXdropscore score = gt_querymatch_distance2score(total_distance,
@@ -861,11 +860,6 @@ static const GtQuerymatch *gt_greedy_extend_selfmatch_sesp(
     if (greedyextendmatchinfo->silent)
     {
       return NULL;
-    }
-    if (greedyextendmatchinfo->seed_display)
-    {
-      printf("# seed:\t" GT_WU "\t" GT_WU "\t" GT_WU "\n",sesp->seedpos1,
-             sesp->seedpos2,sesp->seedlen);
     }
     if (gt_querymatch_complete(processinfo_and_querymatchspaceptr->
                                  querymatchspaceptr,
@@ -921,7 +915,16 @@ int gt_greedy_extend_selfmatch_with_output(void *info,
                                                               pos2);
   if (querymatch != NULL)
   {
-    gt_querymatch_prettyprint(querymatch);
+    GtProcessinfo_and_querymatchspaceptr *processinfo_and_querymatchspaceptr
+      = (GtProcessinfo_and_querymatchspaceptr *) info;
+    GtGreedyextendmatchinfo *greedyextendmatchinfo
+      = processinfo_and_querymatchspaceptr->processinfo;
+
+    if (gt_querymatch_verify(querymatch,greedyextendmatchinfo->errorpercentage,
+                             greedyextendmatchinfo->userdefinedleastlength))
+    {
+      gt_querymatch_prettyprint(querymatch);
+    }
   }
   return 0;
 }
