@@ -28,6 +28,8 @@
 
 typedef struct {
   /* diagbandseed options */
+  GtStr *dbs_indexname;
+  GtStr *dbs_queryname;
   unsigned int dbs_seedlength;
   GtUword dbs_logdiagbandwidth;
   GtUword dbs_mincoverage;
@@ -64,6 +66,8 @@ typedef struct {
 static void* gt_seed_extend_arguments_new(void)
 {
   GtSeedExtendArguments *arguments = gt_calloc((size_t) 1, sizeof *arguments);
+  arguments->dbs_indexname = gt_str_new();
+  arguments->dbs_queryname = gt_str_new();
   arguments->dbs_memlimit_str = gt_str_new();
   arguments->se_char_access_mode = gt_str_new();
   return arguments;
@@ -73,6 +77,8 @@ static void gt_seed_extend_arguments_delete(void *tool_arguments)
 {
   GtSeedExtendArguments *arguments = tool_arguments;
   if (arguments != NULL) {
+    gt_str_delete(arguments->dbs_indexname);
+    gt_str_delete(arguments->dbs_queryname);
     gt_str_delete(arguments->dbs_memlimit_str);
     gt_str_delete(arguments->se_char_access_mode);
     gt_option_delete(arguments->se_option_greedy);
@@ -96,6 +102,21 @@ static GtOptionParser* gt_seed_extend_option_parser_new(void *tool_arguments)
                             "extend algorithm.");
 
   /* DIAGBANDSEED OPTIONS */
+
+  /* -ii */
+  option = gt_option_new_string("ii",
+                                "Input index for encseq encoded sequences",
+                                arguments->dbs_indexname,
+                                "");
+  gt_option_is_mandatory(option);
+  gt_option_parser_add_option(op, option);
+
+  /* -qii */
+  option = gt_option_new_string("qii",
+                                "Query input index (encseq)",
+                                arguments->dbs_queryname,
+                                "");
+  gt_option_parser_add_option(op, option);
 
   /* -seedlength */
   op_len = gt_option_new_uint_min_max("seedlength",
@@ -339,7 +360,8 @@ static int gt_seed_extend_arguments_check(int rest_argc, void *tool_arguments,
   }
 
   /* minimum maxfreq value for 1 input file */
-  if (!had_err && rest_argc == 1 && arguments->dbs_maxfreq == 1) {
+  if (!had_err && arguments->dbs_maxfreq == 1 &&
+      strcmp(gt_str_get(arguments->dbs_queryname), "") == 0) {
     if (arguments->dbs_suppress == GT_UWORD_MAX) {
       gt_error_set(err, "argument to option \"-maxfreq\" must be >= 2 to "
                    "find matching k-mers");
@@ -350,20 +372,19 @@ static int gt_seed_extend_arguments_check(int rest_argc, void *tool_arguments,
     had_err = -1;
   }
 
-  /* allow 1 or 2 input files */
-  if (!had_err && rest_argc > 2) {
+  /* no extra arguments */
+  if (!had_err && rest_argc > 0) {
     gt_error_set(err, "too many arguments (-help shows correct usage)");
-    had_err = -1;
-  } else if (!had_err && rest_argc < 1) {
-    gt_error_set(err, "at least one encseq index name must be specified "
-      "(-help shows correct usage)");
     had_err = -1;
   }
   return had_err;
 }
 
-static int gt_seed_extend_runner(int argc, const char **argv, int parsed_args,
-                                 void *tool_arguments, GtError *err)
+static int gt_seed_extend_runner(GT_UNUSED int argc,
+                                 GT_UNUSED const char **argv,
+                                 GT_UNUSED int parsed_args,
+                                 void *tool_arguments,
+                                 GtError *err)
 {
   GtSeedExtendArguments *arguments = tool_arguments;
   GtEncseqLoader *encseq_loader = NULL;
@@ -378,7 +399,6 @@ static int gt_seed_extend_runner(int argc, const char **argv, int parsed_args,
 
   gt_error_check(err);
   gt_assert(arguments != NULL);
-  gt_assert(argc - parsed_args >= 1);
   gt_assert(arguments->se_minidentity >= GT_EXTEND_MIN_IDENTITY_PERCENTAGE &&
             arguments->se_minidentity <= 100);
 
@@ -398,14 +418,18 @@ static int gt_seed_extend_runner(int argc, const char **argv, int parsed_args,
   /* Load encseq A */
   encseq_loader = gt_encseq_loader_new();
   gt_encseq_loader_enable_autosupport(encseq_loader);
-  aencseq = gt_encseq_loader_load(encseq_loader, argv[parsed_args], err);
+  aencseq = gt_encseq_loader_load(encseq_loader,
+                                  gt_str_get(arguments->dbs_indexname),
+                                  err);
   if (aencseq == NULL)
     had_err = -1;
 
   /* If there is a 2nd read set: Load encseq B */
   if (!had_err) {
-    if (argc - parsed_args == 2) {
-      bencseq = gt_encseq_loader_load(encseq_loader, argv[parsed_args+1], err);
+    if (strcmp(gt_str_get(arguments->dbs_queryname), "") != 0) {
+      bencseq = gt_encseq_loader_load(encseq_loader,
+                                      gt_str_get(arguments->dbs_queryname),
+                                      err);
     } else {
       bencseq = gt_encseq_ref(aencseq);
     }
