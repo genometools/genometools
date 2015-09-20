@@ -35,7 +35,6 @@
 typedef struct
 {
   const GtUchar *sequence;
-  bool reversecopy;
   const GtEncseq *encseq;
   GtReadmode readmode;
   GtUword startpos, length;
@@ -274,7 +273,6 @@ GtMMsearchiterator *gt_mmsearchiterator_new_complete_plain(
   const ESASuffixptr *suftab = (const ESASuffixptr *) voidsuftab; /* XXX */
 
   queryrep.sequence = pattern;
-  queryrep.reversecopy = false;
   queryrep.encseq = NULL;
   queryrep.readmode = GT_READMODE_FORWARD;
   queryrep.startpos = 0;
@@ -455,7 +453,6 @@ int gt_queryuniquematch(bool selfmatch,
                          dbseqnum,
                          dbstart - dbseqstartpos,
                          queryrep->readmode,
-                         queryrep->reversecopy,
                          0, /* score */
                          0, /* edist */
                          selfmatch,
@@ -555,7 +552,6 @@ static int gt_querysubstringmatch(bool selfmatch,
                            dbseqnum,
                            dbstart - dbseqstartpos,
                            queryrep->readmode,
-                           queryrep->reversecopy,
                            0, /* score */
                            0, /* edist */
                            selfmatch,
@@ -619,7 +615,6 @@ int gt_callenumselfmatches(const char *indexname,
 
     numofsequences = gt_encseq_num_of_sequences(suffixarray.encseq);
     queryrep.sequence = NULL;
-    queryrep.reversecopy = false;
     queryrep.encseq = suffixarray.encseq;
     queryrep.readmode = queryreadmode;
     for (seqnum = 0; seqnum < numofsequences; seqnum++)
@@ -698,7 +693,6 @@ static int gt_constructsarrandrunmmsearch(
     GtQueryrep queryrep;
 
     queryrep.sequence = query;
-    queryrep.reversecopy = false;
     queryrep.encseq = NULL;
     queryrep.readmode = GT_READMODE_FORWARD;
     queryrep.startpos = 0;
@@ -833,7 +827,6 @@ GtQuerysubstringmatchiterator *gt_querysubstringmatchiterator_new(
   qsmi->desc = NULL;
   qsmi->query = NULL;
   qsmi->query_seqlen = 0;
-  qsmi->queryrep.reversecopy = false;
   qsmi->queryrep.encseq = NULL;
   qsmi->queryrep.readmode = queryreadmode;
   qsmi->queryrep.startpos = 0;

@@ -47,7 +47,6 @@ struct GtQuerymatch
    GtReadmode readmode; /* readmode by which reference sequence was accessed */
    bool selfmatch,       /* true if both instances of the match refer to the
                             same sequence */
-        query_as_reversecopy, /* matched the reverse copy of the query */
         seed_display;
    GtQuerymatchoutoptions *ref_querymatchoutoptions; /* reference to
         resources needed for alignment output */
@@ -75,7 +74,6 @@ void gt_querymatch_init(GtQuerymatch *querymatch,
                         GtUword dbseqnum,
                         GtUword dbstart_relative,
                         GtReadmode readmode,
-                        bool query_as_reversecopy,
                         GtWord score,
                         GtUword distance,
                         bool selfmatch,
@@ -87,7 +85,6 @@ void gt_querymatch_init(GtQuerymatch *querymatch,
   querymatch->dblen = dblen;
   querymatch->dbstart = dbstart;
   querymatch->readmode = readmode;
-  querymatch->query_as_reversecopy = query_as_reversecopy;
   querymatch->score = score;
   querymatch->distance = distance;
   querymatch->selfmatch = selfmatch;
@@ -255,7 +252,6 @@ static void gt_querymatch_applycorrection(GtQuerymatch *querymatch,
                      querymatch->dbseqnum,
                      querymatch->dbstart_relative + coords->uoffset,
                      querymatch->readmode,
-                     querymatch->query_as_reversecopy,
                      gt_querymatch_distance2score(coords->sumdist,
                                                   coords->ulen + coords->vlen),
                      coords->sumdist,
@@ -272,7 +268,6 @@ bool gt_querymatch_complete(GtQuerymatch *querymatchptr,
                             GtUword dbseqnum,
                             GtUword dbstart_relative,
                             GtReadmode readmode,
-                            bool query_as_reversecopy,
                             GtWord score,
                             GtUword distance,
                             bool selfmatch,
@@ -293,7 +288,6 @@ bool gt_querymatch_complete(GtQuerymatch *querymatchptr,
                      dbseqnum,
                      dbstart_relative,
                      readmode,
-                     query_as_reversecopy,
                      score,
                      distance,
                      selfmatch,
@@ -365,11 +359,6 @@ GtUword gt_querymatch_querystart(const GtQuerymatch *querymatch)
 uint64_t gt_querymatch_queryseqnum(const GtQuerymatch *querymatch)
 {
   return querymatch->queryseqnum;
-}
-
-bool gt_querymatch_queryreverse(const GtQuerymatch *querymatch)
-{
-  return querymatch->query_as_reversecopy;
 }
 
 double gt_querymatch_error_rate(GtUword distance,GtUword alignedlen)
