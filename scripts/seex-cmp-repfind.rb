@@ -24,7 +24,7 @@ def process_line(line, indexname, gt, tempdir, seedlength, count)
     succ = system("#{gt} seed_extend -seedlength #{seedlength} " +
                   "-mincoverage #{seedlength} -overlappingseeds " +
                   "-debug-seedpair " +
-                  "-extendgreedy -l #{seedlength} #{fasfile} " +
+                  "-extendgreedy -l #{seedlength} -ii #{fasfile} " +
                   "> #{tempdir}/seedext#{count}.txt")
   end
   if succ and File.size?("#{tempdir}/seedext#{count}.txt").nil? then
