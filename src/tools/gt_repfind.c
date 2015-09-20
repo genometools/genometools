@@ -427,7 +427,6 @@ static GtOptionParser *gt_repfind_option_parser_new(void *tool_arguments)
 
   gt_option_exclude(queryoption,sampleoption);
   gt_option_exclude(queryoption,scanoption);
-  gt_option_exclude(queryoption,reverseoption);
   gt_option_exclude(queryoption,spmoption);
   gt_option_exclude(sampleoption,spmoption);
   gt_option_exclude(reverseoption,spmoption);
@@ -535,12 +534,13 @@ typedef void (*GtXdrop_extend_querymatch_func)(void *,
                                                GtUword);
 
 static int gt_callenumquerymatches(const char *indexname,
-                            const GtStrArray *queryfiles,
-                            unsigned int userdefinedleastlength,
-                            GtXdrop_extend_querymatch_func eqmf,
-                            void *eqmf_data,
-                            GtLogger *logger,
-                            GtError *err)
+                                   const GtStrArray *queryfiles,
+                                   GtReadmode query_readmode,
+                                   unsigned int userdefinedleastlength,
+                                   GtXdrop_extend_querymatch_func eqmf,
+                                   void *eqmf_data,
+                                   GtLogger *logger,
+                                   GtError *err)
 {
   Suffixarray suffixarray;
   GtQuerysubstringmatchiterator *qsmi = NULL;
@@ -564,7 +564,7 @@ static int gt_callenumquerymatches(const char *indexname,
                                               suffixarray.readmode,
                                               totallength + 1,
                                               queryfiles,
-                                              GT_READMODE_FORWARD,
+                                              query_readmode,
                                               userdefinedleastlength,
                                               err);
     if (qsmi == NULL)
@@ -576,7 +576,8 @@ static int gt_callenumquerymatches(const char *indexname,
   {
     int retval;
     GtQuerymatch *exactseed = gt_querymatch_new(NULL,false);
-
+ 
+    gt_querymatch_query_readmode_set(exactseed,query_readmode);
     while ((retval = gt_querysubstringmatchiterator_next(qsmi, err)) == 0)
     {
       GtUword dbstart, dbseqnum, dbseqstartpos, matchlength, query_seqlen;
@@ -832,6 +833,8 @@ static int gt_repfind_runner(int argc,
       }
       if (gt_callenumquerymatches(gt_str_get(arguments->indexname),
                                   arguments->queryfiles,
+                                  arguments->reverse ? GT_READMODE_REVERSE
+                                                     : GT_READMODE_FORWARD,
                                   arguments->seedlength,
                                   eqmf,
                                   eqmf_data,

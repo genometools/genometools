@@ -57,7 +57,7 @@ void gt_mmsearchiterator_delete(GtMMsearchiterator *mmsi);
 GtUword gt_mmsearchiterator_count(const GtMMsearchiterator *mmsi);
 
 int gt_callenumselfmatches(const char *indexname,
-                           GtReadmode queryreadmode,
+                           GtReadmode query_readmode,
                            unsigned int userdefinedleastlength,
                            GtProcessquerymatch processquerymatch,
                            void *processquerymatchinfo,
@@ -84,7 +84,7 @@ GtQuerysubstringmatchiterator *gt_querysubstringmatchiterator_new(
                                      GtReadmode readmode,
                                      GtUword numberofsuffixes,
                                      const GtStrArray *queryfiles,
-                                     GtReadmode queryreadmode,
+                                     GtReadmode query_readmode,
                                      unsigned int userdefinedleastlength,
                                      GtError *err);
 

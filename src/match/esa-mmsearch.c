@@ -55,12 +55,14 @@ static GtUchar gt_mmsearch_accessquery(const GtQueryrep *queryrep,
   abspos = queryrep->startpos + pos;
   if (queryrep->sequence != NULL)
   {
-    gt_assert(queryrep->readmode == GT_READMODE_FORWARD);
-    return queryrep->sequence[abspos];
+    gt_assert(!GT_ISDIRCOMPLEMENT(queryrep->readmode)); /* not implemented */
+    return queryrep->sequence[queryrep->readmode == GT_READMODE_FORWARD
+                                ? abspos
+                                : queryrep->startpos +
+                                  GT_REVERSEPOS(queryrep->length,pos)];
   } else
   {
-    gt_assert(queryrep->readmode != GT_READMODE_FORWARD &&
-              queryrep->encseq != NULL);
+    gt_assert(queryrep->encseq != NULL);
     return gt_encseq_get_encoded_char(queryrep->encseq,abspos,
                                       queryrep->readmode);
   }
@@ -589,7 +591,7 @@ static int gt_querysubstringmatch(bool selfmatch,
 }
 
 int gt_callenumselfmatches(const char *indexname,
-                           GtReadmode queryreadmode,
+                           GtReadmode query_readmode,
                            unsigned int userdefinedleastlength,
                            GtProcessquerymatch processquerymatch,
                            void *processquerymatchinfo,
@@ -599,7 +601,7 @@ int gt_callenumselfmatches(const char *indexname,
   Suffixarray suffixarray;
   bool haserr = false;
 
-  gt_assert(queryreadmode != GT_READMODE_FORWARD);
+  gt_assert(query_readmode != GT_READMODE_FORWARD);
   if (gt_mapsuffixarray(&suffixarray,
                         SARR_ESQTAB | SARR_SUFTAB | SARR_SSPTAB,
                         indexname,
@@ -616,7 +618,7 @@ int gt_callenumselfmatches(const char *indexname,
     numofsequences = gt_encseq_num_of_sequences(suffixarray.encseq);
     queryrep.sequence = NULL;
     queryrep.encseq = suffixarray.encseq;
-    queryrep.readmode = queryreadmode;
+    queryrep.readmode = query_readmode;
     for (seqnum = 0; seqnum < numofsequences; seqnum++)
     {
       seqstartpos = gt_encseq_seqstartpos(suffixarray.encseq, seqnum);
@@ -811,7 +813,7 @@ GtQuerysubstringmatchiterator *gt_querysubstringmatchiterator_new(
                                      GtReadmode db_readmode,
                                      GtUword numberofsuffixes,
                                      const GtStrArray *queryfiles,
-                                     GtReadmode queryreadmode,
+                                     GtReadmode query_readmode,
                                      unsigned int userdefinedleastlength,
                                      GtError *err)
 {
@@ -828,7 +830,7 @@ GtQuerysubstringmatchiterator *gt_querysubstringmatchiterator_new(
   qsmi->query = NULL;
   qsmi->query_seqlen = 0;
   qsmi->queryrep.encseq = NULL;
-  qsmi->queryrep.readmode = queryreadmode;
+  qsmi->queryrep.readmode = query_readmode;
   qsmi->queryrep.startpos = 0;
   qsmi->dbstart = 0;
   qsmi->matchlength = 0;

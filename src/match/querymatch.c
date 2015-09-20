@@ -44,7 +44,8 @@ struct GtQuerymatch
       seedlen;
    GtWord score; /* 0 for exact match */
    uint64_t queryseqnum; /* ordinal number of match in query */
-   GtReadmode readmode; /* readmode by which reference sequence was accessed */
+   GtReadmode readmode, /* readmode by which reference sequence was accessed */
+              query_readmode; /* readmode of reference sequence */
    bool selfmatch,       /* true if both instances of the match refer to the
                             same sequence */
         seed_display;
@@ -60,11 +61,13 @@ GtQuerymatch *gt_querymatch_new(GtQuerymatchoutoptions *querymatchoutoptions,
   gt_assert(querymatch != NULL);
   querymatch->ref_querymatchoutoptions = querymatchoutoptions;
   querymatch->seed_display = seed_display;
+  querymatch->query_readmode = GT_READMODE_FORWARD;
   return querymatch;
 }
 
 GtUword gt_querymatch_dbseqnum(const GtQuerymatch *querymatch)
 {
+  gt_assert(querymatch != NULL);
   return querymatch->dbseqnum;
 }
 
@@ -82,6 +85,7 @@ void gt_querymatch_init(GtQuerymatch *querymatch,
                         GtUword querystart,
                         GtUword query_totallength)
 {
+  gt_assert(querymatch != NULL);
   querymatch->dblen = dblen;
   querymatch->dbstart = dbstart;
   querymatch->readmode = readmode;
@@ -94,8 +98,8 @@ void gt_querymatch_init(GtQuerymatch *querymatch,
   querymatch->dbseqnum = dbseqnum;
   querymatch->dbstart_relative = dbstart_relative;
   gt_assert((int) querymatch->readmode < 4);
-  if (querymatch->readmode == GT_READMODE_REVERSE ||
-      querymatch->readmode == GT_READMODE_REVCOMPL)
+  if (querymatch->query_readmode == GT_READMODE_REVERSE ||
+      querymatch->query_readmode == GT_READMODE_REVCOMPL)
   {
     gt_assert(querymatch->querystart + querymatch->querylen <=
               query_totallength);
@@ -163,6 +167,7 @@ static void gt_verify_exact_selfmatch(const GtEncseq *encseq,
 
 void gt_querymatch_prettyprint(const GtQuerymatch *querymatch)
 {
+  gt_assert(querymatch != NULL);
   if (!querymatch->selfmatch ||
       (uint64_t) querymatch->dbseqnum != querymatch->queryseqnum ||
       querymatch->dbstart_relative <= querymatch->querystart_fwdstrand)
@@ -230,8 +235,10 @@ bool gt_querymatch_verify(const GtQuerymatch *querymatch,
                           GtUword errorpercentage,
                           GtUword userdefinedleastlength)
 {
-  GtUword total_alignedlen = querymatch->dblen + querymatch->querylen;
+  GtUword total_alignedlen;
 
+  gt_assert(querymatch != NULL);
+  total_alignedlen = querymatch->dblen + querymatch->querylen;
   return (gt_querymatch_error_rate(querymatch->distance,total_alignedlen)
           <= (double) errorpercentage &&
          total_alignedlen >= 2 * userdefinedleastlength) ? true : false;
@@ -282,6 +289,7 @@ bool gt_querymatch_complete(GtQuerymatch *querymatchptr,
                             GtUword seedlen,
                             bool greedyextension)
 {
+  gt_assert(querymatchptr != NULL);
   gt_querymatch_init(querymatchptr,
                      dblen,
                      dbstart,
@@ -343,27 +351,39 @@ bool gt_querymatch_complete(GtQuerymatch *querymatchptr,
 
 GtUword gt_querymatch_querylen(const GtQuerymatch *querymatch)
 {
+  gt_assert(querymatch != NULL);
   return querymatch->querylen;
 }
 
 GtUword gt_querymatch_dbstart(const GtQuerymatch *querymatch)
 {
+  gt_assert(querymatch != NULL);
   return querymatch->dbstart;
 }
 
 GtUword gt_querymatch_querystart(const GtQuerymatch *querymatch)
 {
+  gt_assert(querymatch != NULL);
   return querymatch->querystart;
 }
 
 uint64_t gt_querymatch_queryseqnum(const GtQuerymatch *querymatch)
 {
+  gt_assert(querymatch != NULL);
   return querymatch->queryseqnum;
 }
 
 double gt_querymatch_error_rate(GtUword distance,GtUword alignedlen)
 {
   return 200.0 * (double) distance/alignedlen;
+}
+
+void gt_querymatch_query_readmode_set(GtQuerymatch *querymatch,
+                                      GtReadmode readmode)
+{
+  gt_assert(querymatch != NULL);
+
+  querymatch->query_readmode = readmode;
 }
 
 GtWord gt_querymatch_distance2score(GtUword distance,GtUword alignedlen)
