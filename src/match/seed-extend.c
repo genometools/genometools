@@ -761,14 +761,10 @@ static const GtQuerymatch *gt_greedy_extend_selfmatch_sesp(
                                      greedyextendmatchinfo->
                                         maxalignedlendifference,
                                      &ufsr,
-                                     GT_REVERSEPOS(greedyextendmatchinfo->
-                                                   db_totallength,
-                                                   sesp->seedpos1 - 1),
+                                     sesp->seedpos1 - 1,
                                      ulen,
                                      &vfsr,
-                                     GT_REVERSEPOS(greedyextendmatchinfo->
-                                                   db_totallength,
-                                                   sesp->seedpos2 - 1),
+                                     sesp->seedpos2 - 1,
                                      vlen);
   }
 #ifdef SKDEBUG

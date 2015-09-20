@@ -84,7 +84,11 @@ static void sequenceobject_init(Sequenceobject *seq,
       (extend_char_access_mode == GT_EXTEND_CHAR_ACCESS_ANY ||
        extend_char_access_mode == GT_EXTEND_CHAR_ACCESS_ENCSEQ_READER))
   {
-    gt_encseq_reader_reinit_with_readmode(encseq_r, encseq, readmode, startpos);
+    gt_encseq_reader_reinit_with_readmode(encseq_r, encseq, readmode,
+                                          readmode == GT_READMODE_FORWARD
+                                            ? startpos
+                                            : GT_REVERSEPOS(totallength,
+                                                            startpos));
     seq->encseqreader = encseq_r;
     gt_assert(seq->encseqreader != NULL && sequence_cache != NULL);
     seq->sequence_cache = sequence_cache;
@@ -106,23 +110,8 @@ static void sequenceobject_init(Sequenceobject *seq,
   }
   seq->substringlength = len;
   seq->totallength = totallength;
-  if (readmode == GT_READMODE_FORWARD)
-  {
-    seq->startpos = startpos;
-    seq->forward = true;
-  } else
-  {
-    gt_assert(readmode == GT_READMODE_REVERSE);
-    if (extend_char_access_mode == GT_EXTEND_CHAR_ACCESS_DIRECT)
-    {
-      seq->startpos = startpos;
-    } else
-    {
-      gt_assert(startpos < totallength);
-      seq->startpos = totallength - 1 - startpos;
-    }
-    seq->forward = false;
-  }
+  seq->startpos = startpos;
+  seq->forward = readmode == GT_READMODE_FORWARD ? true : false;
   gt_assert(seq->twobitencoding != NULL || seq->encseqreader != NULL ||
             seq->encseq != NULL || seq->bytesequenceptr != NULL);
 }
@@ -609,7 +598,8 @@ GtUword front_prune_edist_inplace(
                       ufsr->totallength);
   sequenceobject_init(&vseq,
                       vfsr->extend_char_access,
-                      vfsr->encseq,readmode,
+                      vfsr->encseq,
+                      readmode,
                       vstart,
                       vlen,
                       vfsr->encseq_r,

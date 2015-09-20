@@ -256,7 +256,6 @@ static GtOptionParser* gt_seed_extend_option_parser_new(void *tool_arguments)
                                 gt_cam_extendgreedy_comment(),
                                 arguments->se_char_access_mode,
                                 "");
-  gt_option_imply(op_cam, op_gre);
   gt_option_is_development_option(op_cam);
   gt_option_parser_add_option(op, op_cam);
 

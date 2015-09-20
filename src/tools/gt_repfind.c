@@ -358,11 +358,6 @@ static GtOptionParser *gt_repfind_option_parser_new(void *tool_arguments)
   gt_option_parser_add_option(op, optionwithalignment);
   arguments->refalignmentoutoption = gt_option_ref(optionwithalignment);
 
-  char_access_mode_option = gt_option_new_string("cam",
-                                                 gt_cam_extendgreedy_comment(),
-                                                 arguments->cam_string,"");
-  gt_option_parser_add_option(op, char_access_mode_option);
-
   option = gt_option_new_string("ii",
                                 "Specify input index",
                                 arguments->indexname, NULL);
@@ -443,7 +438,6 @@ static GtOptionParser *gt_repfind_option_parser_new(void *tool_arguments)
   gt_option_exclude(optionwithalignment,sampleoption);
   gt_option_exclude(optionwithalignment,spmoption);
   gt_option_imply(xdropbelowoption,extendxdropoption);
-  gt_option_imply(char_access_mode_option,extendgreedyoption);
   gt_option_imply(historyoption,extendgreedyoption);
   gt_option_imply(maxalilendiffoption,extendgreedyoption);
   gt_option_imply(percmathistoryoption,extendgreedyoption);
@@ -677,43 +671,48 @@ static int gt_repfind_runner(int argc,
       gt_xdrop_matchinfo_silent_set(xdropmatchinfo);
     }
   }
+  if (!haserr)
+  {
+    if (gt_option_is_set(arguments->refextendgreedyoption) ||
+        arguments->alignmentwidth > 0 ||
+        gt_option_is_set(arguments->refextendxdropoption))
+    {
+      extend_char_access
+        = gt_greedy_extend_char_access(gt_str_get(arguments->cam_string),err);
+
+      if ((int) extend_char_access == -1)
+      {
+        haserr = true;
+      }
+    }
+  }
   if (!haserr && gt_option_is_set(arguments->refextendgreedyoption))
   {
-    extend_char_access
-      = gt_greedy_extend_char_access(gt_str_get(arguments->cam_string),err);
-
-    if ((int) extend_char_access == -1)
+    greedyextendmatchinfo
+      = gt_greedy_extend_matchinfo_new(gt_minidentity2errorpercentage(
+                                           arguments->minidentity),
+                                       arguments->maxalignedlendifference,
+                                       arguments->history,
+                                       arguments->perc_mat_history,
+                                       arguments->userdefinedleastlength,
+                                       extend_char_access,
+                                       arguments->extendgreedy);
+    if (arguments->beverbose)
     {
-      haserr = true;
+      gt_greedy_extend_matchinfo_verbose_set(greedyextendmatchinfo);
     }
-    if (!haserr)
+    if (arguments->check_extend_symmetry)
     {
-      greedyextendmatchinfo
-        = gt_greedy_extend_matchinfo_new(gt_minidentity2errorpercentage(
-                                             arguments->minidentity),
-                                         arguments->maxalignedlendifference,
-                                         arguments->history,
-                                         arguments->perc_mat_history,
-                                         arguments->userdefinedleastlength,
-                                         extend_char_access,
-                                         arguments->extendgreedy);
-      if (arguments->beverbose)
-      {
-        gt_greedy_extend_matchinfo_verbose_set(greedyextendmatchinfo);
-      }
-      if (arguments->check_extend_symmetry)
-      {
-        gt_greedy_extend_matchinfo_check_extend_symmetry_set(
-                                                  greedyextendmatchinfo);
-      }
-      if (arguments->silent)
-      {
-        gt_greedy_extend_matchinfo_silent_set(greedyextendmatchinfo);
-      }
-      if (arguments->trimstat)
-      {
-        gt_greedy_extend_matchinfo_trimstat_set(greedyextendmatchinfo);
-      }
+      gt_greedy_extend_matchinfo_check_extend_symmetry_set(
+                                                greedyextendmatchinfo);
+    }
+    if (arguments->silent)
+    {
+      gt_greedy_extend_matchinfo_silent_set(greedyextendmatchinfo);
+    }
+    if (arguments->trimstat)
+    {
+      gt_greedy_extend_matchinfo_trimstat_set(greedyextendmatchinfo);
     }
   }
   if (!haserr)
