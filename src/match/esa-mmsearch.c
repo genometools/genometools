@@ -829,8 +829,6 @@ GtQuerysubstringmatchiterator *gt_querysubstringmatchiterator_new(
   qsmi->numberofsuffixes = numberofsuffixes;
   qsmi->totallength = totallength;
   qsmi->userdefinedleastlength = (GtUword) userdefinedleastlength;
-  qsmi->mmsi = gt_mmsearchiterator_new_empty();
-  qsmi->mmsi_defined = false;
   qsmi->queryunitnum = 0;
   qsmi->desc = NULL;
   qsmi->query = NULL;
@@ -842,6 +840,8 @@ GtQuerysubstringmatchiterator *gt_querysubstringmatchiterator_new(
   qsmi->dbstart = 0;
   qsmi->matchlength = 0;
   qsmi->querysubstring.queryrep = &qsmi->queryrep;
+  qsmi->mmsi = gt_mmsearchiterator_new_empty();
+  qsmi->mmsi_defined = false;
   qsmi->seqit = gt_seq_iterator_sequence_buffer_new(queryfiles, err);
   if (qsmi->seqit == NULL)
   {
