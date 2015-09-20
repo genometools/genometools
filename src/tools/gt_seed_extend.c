@@ -58,6 +58,7 @@ typedef struct {
   bool overlappingseeds;
   bool benchmark;
   bool verbose;
+  bool seed_display;
 } GtSeedExtendArguments;
 
 static void* gt_seed_extend_arguments_new(void)
@@ -290,6 +291,14 @@ static GtOptionParser* gt_seed_extend_option_parser_new(void *tool_arguments)
   gt_option_is_development_option(option);
   gt_option_parser_add_option(op, option);
 
+  /* -seed-display */
+  option = gt_option_new_bool("seed-display",
+                              "Display seeds in #-line",
+                              &arguments->seed_display,
+                              false);
+  gt_option_is_development_option(option);
+  gt_option_parser_add_option(op, option);
+
   /* -v */
   option = gt_option_new_verbose(&arguments->verbose);
   gt_option_parser_add_option(op, option);
@@ -395,10 +404,11 @@ static int gt_seed_extend_runner(int argc, const char **argv, int parsed_args,
 
   /* If there is a 2nd read set: Load encseq B */
   if (!had_err) {
-    if (argc - parsed_args == 2)
+    if (argc - parsed_args == 2) {
       bencseq = gt_encseq_loader_load(encseq_loader, argv[parsed_args+1], err);
-    else
+    } else {
       bencseq = gt_encseq_ref(aencseq);
+    }
     if (bencseq == NULL) {
       had_err = -1;
       gt_encseq_delete(aencseq);
@@ -437,8 +447,7 @@ static int gt_seed_extend_runner(int argc, const char **argv, int parsed_args,
     xdropinfo = gt_xdrop_matchinfo_new(arguments->se_alignlength,
                                        errorpercentage,
                                        arguments->se_xdropbelowscore,
-                                       arguments->se_extendxdrop,
-                                       true);
+                                       arguments->se_extendxdrop);
     if (arguments->benchmark) {
       gt_xdrop_matchinfo_silent_set(xdropinfo);
     }
@@ -448,7 +457,9 @@ static int gt_seed_extend_runner(int argc, const char **argv, int parsed_args,
   }
 
   /* Prepare output options */
-  if (!had_err && arguments->se_alignmentwidth > 0) {
+  if (!had_err && (arguments->se_alignmentwidth > 0 ||
+                   gt_option_is_set(arguments->se_option_xdrop)))
+  {
     const GtUword sensitivity = gt_option_is_set(arguments->se_option_greedy)
       ? arguments->se_extendgreedy : 100;
     querymatchoutopt
@@ -464,6 +475,8 @@ static int gt_seed_extend_runner(int argc, const char **argv, int parsed_args,
   /* Start algorithm */
   if (!had_err) {
     GtDiagbandseed dbsarguments;
+    dbsarguments.errorpercentage = errorpercentage;
+    dbsarguments.userdefinedleastlength = arguments->se_alignlength;
     dbsarguments.seedlength = arguments->dbs_seedlength;
     dbsarguments.logdiagbandwidth = arguments->dbs_logdiagbandwidth;
     dbsarguments.mincoverage = arguments->dbs_mincoverage;
@@ -476,6 +489,7 @@ static int gt_seed_extend_runner(int argc, const char **argv, int parsed_args,
     dbsarguments.verbose = arguments->verbose;
     dbsarguments.debug_kmer = arguments->dbs_debug_kmer;
     dbsarguments.debug_seedpair = arguments->dbs_debug_seedpair;
+    dbsarguments.seed_display = arguments->seed_display;
     dbsarguments.extendgreedyinfo = grextinfo;
     dbsarguments.extendxdropinfo = xdropinfo;
     dbsarguments.querymatchoutopt = querymatchoutopt;
@@ -485,12 +499,16 @@ static int gt_seed_extend_runner(int argc, const char **argv, int parsed_args,
     /* clean up */
     gt_encseq_delete(aencseq);
     gt_encseq_delete(bencseq);
-    if (gt_option_is_set(arguments->se_option_greedy))
+    if (gt_option_is_set(arguments->se_option_greedy)) {
       gt_greedy_extend_matchinfo_delete(grextinfo);
-    if (gt_option_is_set(arguments->se_option_xdrop))
+    }
+    if (gt_option_is_set(arguments->se_option_xdrop)) {
       gt_xdrop_matchinfo_delete(xdropinfo);
-    if (arguments->se_alignmentwidth > 0)
+    }
+    if (arguments->se_alignmentwidth > 0 ||
+        gt_option_is_set(arguments->se_option_xdrop)) {
       gt_querymatchoutoptions_delete(querymatchoutopt);
+    }
   }
 
   if (gt_showtime_enabled()) {

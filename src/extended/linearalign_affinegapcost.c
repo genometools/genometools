@@ -736,7 +736,7 @@ static void nextAStabcolumn(const GtUchar *useq, GtUword ustart,
   Starttabentry Snw, Swe;
   GtUword rowindex;
   GtWord replacement, temp, val1, val2;
-  GtUwordPair start;
+  GtUwordPair start = {0};
 
   Anw = Atabcolumn[0];
   Snw = Starttabcolumn[0];

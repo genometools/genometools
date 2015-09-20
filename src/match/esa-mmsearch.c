@@ -22,7 +22,6 @@
 #include "core/types_api.h"
 #include "core/timer_api.h"
 #include "core/format64.h"
-#include "sarr-def.h"
 #include "revcompl.h"
 #include "lcpinterval.h"
 #include "esa-map.h"
@@ -31,6 +30,7 @@
 #include "sfx-suffixer.h"
 #include "esa-minunique.h"
 #include "esa-mmsearch.h"
+#include "stamp.h"
 
 typedef struct
 {
@@ -43,7 +43,7 @@ typedef struct
 
 typedef struct
 {
-  const GtQueryrep *queryrep;
+  GtQueryrep *queryrep;
   GtUword offset; /* position relative to startpos */
 } GtQuerysubstring;
 
@@ -244,7 +244,7 @@ GtMMsearchiterator *gt_mmsearchiterator_new_complete_plain(
   queryrep.encseq = NULL;
   queryrep.readmode = GT_READMODE_FORWARD;
   queryrep.startpos = 0;
-  queryrep.length = (GtUword) patternlength;
+  queryrep.length = patternlength;
   querysubstring.queryrep = &queryrep;
   querysubstring.offset = 0;
   return gt_mmsearchiterator_new_generic(dbencseq,
@@ -377,7 +377,7 @@ static GtUword gt_mmsearch_extendright(const GtEncseq *dbencseq,
 static int gt_queryuniquematch(bool selfmatch,
                                const Suffixarray *suffixarray,
                                uint64_t queryunitnum,
-                               const GtQueryrep *queryrep,
+                               GtQueryrep *queryrep,
                                GtUword minmatchlength,
                                GtProcessquerymatch processquerymatch,
                                void *processquerymatchinfo,
@@ -459,7 +459,7 @@ static int gt_querysubstringmatch_generic(
                                      GtReadmode readmode,
                                      GtUword numberofsuffixes,
                                      uint64_t queryunitnum,
-                                     const GtQueryrep *queryrep,
+                                     GtQueryrep *queryrep,
                                      GtUword minmatchlength,
                                      GtProcessquerymatch processquerymatch,
                                      void *processquerymatchinfo,
@@ -560,7 +560,7 @@ static int gt_querysubstringmatch_generic(
 static int gt_querysubstringmatch(bool selfmatch,
                                   const Suffixarray *suffixarray,
                                   uint64_t queryunitnum,
-                                  const GtQueryrep *queryrep,
+                                  GtQueryrep *queryrep,
                                   GtUword minmatchlength,
                                   GtProcessquerymatch processquerymatch,
                                   void *processquerymatchinfo,
@@ -584,7 +584,7 @@ static int gt_querysubstringmatch(bool selfmatch,
 typedef int (*GtQuerysubstringmatchfunc)(bool,
                                          const Suffixarray *,
                                          uint64_t,
-                                         const GtQueryrep *,
+                                         GtQueryrep *,
                                          GtUword,
                                          GtProcessquerymatch,
                                          void *,
@@ -613,7 +613,7 @@ static int gt_callenumquerymatches_withindex(
     haserr = true;
   } else
   {
-    GtQuerymatch *querymatchspaceptr = gt_querymatch_new(NULL);
+    GtQuerymatch *querymatchspaceptr = gt_querymatch_new(NULL,false);
     const GtUchar *query;
     GtUword querylen;
     int retval;
@@ -708,7 +708,7 @@ static int gt_callenumquerymatches_withindex(
   return haserr ? -1 : 0;
 }
 
-int gt_callenumquerymatches(const char *indexname,
+int gt_callenumquerymatches_old(const char *indexname,
                             const GtStrArray *queryfiles,
                             bool findmums,
                             bool forwardstrand,
@@ -733,9 +733,8 @@ int gt_callenumquerymatches(const char *indexname,
     haserr = true;
   } else
   {
-    if (gt_callenumquerymatches_withindex(findmums
-                                            ? gt_queryuniquematch
-                                            : gt_querysubstringmatch,
+    if (gt_callenumquerymatches_withindex(findmums ? gt_queryuniquematch
+                                                   : gt_querysubstringmatch,
                                           &suffixarray,
                                           queryfiles,
                                           forwardstrand,
@@ -775,7 +774,7 @@ int gt_callenumselfmatches(const char *indexname,
   } else
   {
     GtUword seqnum, numofsequences, seqlength, seqstartpos;
-    GtQuerymatch *querymatchspaceptr = gt_querymatch_new(NULL);
+    GtQuerymatch *querymatchspaceptr = gt_querymatch_new(NULL,false);
     GtQueryrep queryrep;
 
     numofsequences = gt_encseq_num_of_sequences(suffixarray.encseq);
@@ -852,7 +851,7 @@ static int gt_constructsarrandrunmmsearch(
   {
     const GtSuffixsortspace *suffixsortspace;
     GtUword numberofsuffixes;
-    GtQuerymatch *querymatchspaceptr = gt_querymatch_new(NULL);
+    GtQuerymatch *querymatchspaceptr = gt_querymatch_new(NULL,false);
     GtQueryrep queryrep;
 
     queryrep.sequence = query;
@@ -860,7 +859,7 @@ static int gt_constructsarrandrunmmsearch(
     queryrep.encseq = NULL;
     queryrep.readmode = GT_READMODE_FORWARD;
     queryrep.startpos = 0;
-    queryrep.length = (GtUword) querylen;
+    queryrep.length = querylen;
     while (true)
     {
       suffixsortspace = gt_Sfxiterator_next(&numberofsuffixes,NULL,sfi);
@@ -945,5 +944,297 @@ int gt_sarrquerysubstringmatch(const GtUchar *dbseq,
   }
   gt_encseq_delete(dbencseq);
   dbencseq = NULL;
+  return haserr ? -1 : 0;
+}
+
+struct GtQuerysubstringmatchiterator
+{
+  const GtEncseq *dbencseq;
+  const ESASuffixptr *suftabpart;
+  GtReadmode readmode;
+  GtUword numberofsuffixes,
+          totallength,
+          userdefinedleastlength;
+  GtMMsearchiterator *mmsi;
+  GtQueryrep queryrep;
+  GtQuerysubstring querysubstring;
+  const GtUchar *query;
+  GtUword query_seqlen;
+  GtSeqIterator *seqit;
+  GtUword dbstart,
+          matchlength;
+  uint64_t queryunitnum;
+  char *desc;
+};
+
+GtQuerysubstringmatchiterator *gt_querysubstringmatchiterator_new(
+                                     const GtEncseq *dbencseq,
+                                     GtUword totallength,
+                                     const ESASuffixptr *suftabpart,
+                                     GtReadmode readmode,
+                                     GtUword numberofsuffixes,
+                                     const GtStrArray *queryfiles,
+                                     unsigned int userdefinedleastlength,
+                                     GtError *err)
+{
+  GtQuerysubstringmatchiterator *qsmi = gt_malloc(sizeof *qsmi);
+
+  qsmi->dbencseq = dbencseq;
+  qsmi->suftabpart = suftabpart;
+  qsmi->readmode = readmode;
+  qsmi->numberofsuffixes = numberofsuffixes;
+  qsmi->totallength = totallength;
+  qsmi->userdefinedleastlength = (GtUword) userdefinedleastlength;
+  qsmi->mmsi = NULL;
+  qsmi->queryunitnum = 0;
+  qsmi->desc = NULL;
+  qsmi->query = NULL;
+  qsmi->query_seqlen = 0;
+  qsmi->queryrep.reversecopy = false;
+  qsmi->queryrep.encseq = NULL;
+  qsmi->queryrep.readmode = GT_READMODE_FORWARD;
+  qsmi->queryrep.startpos = 0;
+  qsmi->dbstart = 0;
+  qsmi->matchlength = 0;
+  qsmi->querysubstring.queryrep = &qsmi->queryrep;
+  qsmi->seqit = gt_seq_iterator_sequence_buffer_new(queryfiles, err);
+  if (qsmi->seqit == NULL)
+  {
+    gt_querysubstringmatchiterator_delete(qsmi);
+    return NULL;
+  }
+  gt_seq_iterator_set_symbolmap(qsmi->seqit,
+                      gt_alphabet_symbolmap(gt_encseq_alphabet(dbencseq)));
+  return qsmi;
+}
+
+void gt_querysubstringmatchiterator_delete(GtQuerysubstringmatchiterator *qsmi)
+{
+  if (qsmi != NULL)
+  {
+    gt_assert(qsmi->mmsi == NULL);
+    if (qsmi->seqit != NULL)
+    {
+      gt_seq_iterator_delete(qsmi->seqit);
+    }
+    gt_free(qsmi);
+  }
+}
+
+GtUword gt_querysubstringmatchiterator_dbstart(
+                      const GtQuerysubstringmatchiterator *qsmi)
+{
+  gt_assert(qsmi != NULL);
+  return qsmi->dbstart;
+}
+
+GtUword gt_querysubstringmatchiterator_querystart(
+                      const GtQuerysubstringmatchiterator *qsmi)
+{
+  gt_assert(qsmi != NULL);
+  return qsmi->querysubstring.offset;
+}
+
+GtUword gt_querysubstringmatchiterator_matchlength(
+                      const GtQuerysubstringmatchiterator *qsmi)
+{
+  gt_assert(qsmi != NULL);
+  return qsmi->matchlength;
+}
+
+uint64_t gt_querysubstringmatchiterator_queryunitnum(
+                      const GtQuerysubstringmatchiterator *qsmi)
+{
+  gt_assert(qsmi != NULL);
+  return qsmi->queryunitnum;
+}
+
+GtUword gt_querysubstringmatchiterator_query_seqlen(
+                      const GtQuerysubstringmatchiterator *qsmi)
+{
+  gt_assert(qsmi != NULL);
+  return qsmi->query_seqlen;
+}
+
+const GtUchar *gt_querysubstringmatchiterator_query(
+                      const GtQuerysubstringmatchiterator *qsmi)
+{
+  gt_assert(qsmi != NULL);
+  return qsmi->query;
+}
+
+int gt_querysubstringmatchiterator_next(GtQuerysubstringmatchiterator *qsmi,
+                                        GtError *err)
+{
+  gt_assert(qsmi != NULL);
+  while (true)
+  {
+    if (qsmi->query_seqlen < qsmi->userdefinedleastlength)
+    {
+      int retval = gt_seq_iterator_next(qsmi->seqit,
+                                        &qsmi->query,
+                                        &qsmi->query_seqlen,
+                                        &qsmi->desc,
+                                        err);
+      if (retval < 0)
+      {
+        return -1;
+      }
+      if (retval == 0)
+      {
+        return 1;
+      }
+      gt_assert(qsmi->query_seqlen > 0 && qsmi->query != NULL);
+      qsmi->queryrep.sequence = qsmi->query;
+      qsmi->queryrep.length = qsmi->query_seqlen;
+      qsmi->querysubstring.offset = 0;
+    }
+    if (qsmi->query_seqlen >= qsmi->userdefinedleastlength)
+    {
+      if (qsmi->mmsi == NULL)
+      {
+        qsmi->mmsi
+          = gt_mmsearchiterator_new_generic(qsmi->dbencseq,
+                                            qsmi->suftabpart,
+                                            0, /* l */
+                                            qsmi->numberofsuffixes - 1, /* r */
+                                            0, /* offset */
+                                            qsmi->readmode,
+                                            &qsmi->querysubstring,
+                                            qsmi->userdefinedleastlength);
+        gt_assert(qsmi->mmsi != NULL);
+      } else
+      {
+        if (gt_mmsearchiterator_next(&qsmi->dbstart,qsmi->mmsi))
+        {
+          GtUword extend;
+
+          if (gt_mmsearch_isleftmaximal(qsmi->dbencseq,
+                                        qsmi->readmode,
+                                        qsmi->dbstart,
+                                        &qsmi->querysubstring))
+          {
+            extend = gt_mmsearch_extendright(qsmi->dbencseq,
+                                             qsmi->mmsi->esr,
+                                             qsmi->readmode,
+                                             qsmi->totallength,
+                                             qsmi->dbstart +
+                                               qsmi->userdefinedleastlength,
+                                             &qsmi->querysubstring,
+                                             qsmi->userdefinedleastlength);
+            qsmi->matchlength = qsmi->userdefinedleastlength + extend;
+            return 0;
+          }
+        } else
+        {
+          gt_mmsearchiterator_delete(qsmi->mmsi);
+          qsmi->mmsi = NULL;
+          if (qsmi->querysubstring.offset <
+              qsmi->query_seqlen - qsmi->userdefinedleastlength)
+          {
+            qsmi->querysubstring.offset++;
+          } else
+          {
+            qsmi->query_seqlen = 0;
+            qsmi->queryunitnum++;
+          }
+        }
+      }
+    }
+  }
+}
+
+int gt_callenumquerymatches(const char *indexname,
+                            const GtStrArray *queryfiles,
+                            GT_UNUSED bool findmums,
+                            GT_UNUSED bool forwardstrand,
+                            GT_UNUSED bool reversestrand,
+                            unsigned int userdefinedleastlength,
+                            GT_UNUSED GtProcessquerybeforematching
+                              processquerybeforematching,
+                            GtProcessquerymatch processquerymatch,
+                            void *processquerymatchinfo,
+                            GtLogger *logger,
+                            GtError *err)
+{
+  Suffixarray suffixarray;
+  GtQuerysubstringmatchiterator *qsmi = NULL;
+  bool haserr = false;
+
+  gt_assert(forwardstrand && !reversestrand);
+  if (gt_mapsuffixarray(&suffixarray,
+                        SARR_ESQTAB | SARR_SUFTAB | SARR_SSPTAB,
+                        indexname,
+                        logger,
+                        err) != 0)
+  {
+    haserr = true;
+  }
+  if (!haserr)
+  {
+    GtUword totallength = gt_encseq_total_length(suffixarray.encseq);
+
+    qsmi = gt_querysubstringmatchiterator_new(suffixarray.encseq,
+                                              totallength,
+                                              suffixarray.suftab,
+                                              suffixarray.readmode,
+                                              totallength + 1,
+                                              queryfiles,
+                                              userdefinedleastlength,
+                                              err);
+    if (qsmi == NULL)
+    {
+      haserr = true;
+    }
+  }
+  if (!haserr)
+  {
+    int retval;
+    GtQuerymatch *querymatchspaceptr = gt_querymatch_new(NULL,false);
+
+    while ((retval = gt_querysubstringmatchiterator_next(qsmi, err)) == 0)
+    {
+      GtUword dbstart, dbseqnum, dbseqstartpos, matchlength, query_seqlen;
+
+      dbstart = gt_querysubstringmatchiterator_dbstart(qsmi);
+      if (gt_encseq_has_multiseq_support(suffixarray.encseq))
+      {
+        dbseqnum = gt_encseq_seqnum(suffixarray.encseq,dbstart);
+        dbseqstartpos = gt_encseq_seqstartpos(suffixarray.encseq, dbseqnum);
+      } else
+      {
+        dbseqnum = dbseqstartpos = 0;
+      }
+      matchlength = gt_querysubstringmatchiterator_matchlength(qsmi);
+      query_seqlen = gt_querysubstringmatchiterator_query_seqlen(qsmi);
+      gt_querymatch_init(querymatchspaceptr,
+                         matchlength,
+                         dbstart,
+                         dbseqnum,
+                         dbstart - dbseqstartpos,
+                         suffixarray.readmode,
+                         NULL,
+                         0, /* score */
+                         0, /* edist */
+                         false,
+                         gt_querysubstringmatchiterator_queryunitnum(qsmi),
+                         matchlength,
+                         gt_querysubstringmatchiterator_querystart(qsmi),
+                         query_seqlen);
+      if (processquerymatch(processquerymatchinfo,
+                            suffixarray.encseq,
+                            querymatchspaceptr,
+                            gt_querysubstringmatchiterator_query(qsmi),
+                            query_seqlen,
+                            err) != 0)
+      {
+        haserr = true;
+        break;
+      }
+    }
+    gt_querymatch_delete(querymatchspaceptr);
+  }
+  gt_querysubstringmatchiterator_delete(qsmi);
+  gt_freesuffixarray(&suffixarray);
   return haserr ? -1 : 0;
 }

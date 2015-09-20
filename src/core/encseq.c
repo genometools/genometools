@@ -6814,6 +6814,9 @@ void gt_encseq_showatstartpos(FILE *fp,
 {
   GtUword pos, endpos;
   GtUchar buffer[GT_UNITSIN2BITENC];
+  gt_assert(fp != NULL);
+  /* scan-build was complaining about uninitialized values */
+  memset(buffer, GT_UNDEF_UCHAR, GT_UNITSIN2BITENC);
 
   fprintf(fp, "          0123456789012345");
   if (GT_UNITSIN2BITENC == 32) {
@@ -6823,7 +6826,7 @@ void gt_encseq_showatstartpos(FILE *fp,
   if (fwd) {
     endpos = MIN(startpos + GT_UNITSIN2BITENC - 1, encseq->totallength-1);
     gt_encseq_extract_encoded(encseq, buffer, startpos, endpos);
-    for (pos=0; pos<endpos - startpos + 1; pos++) {
+    for (pos=0; pos < endpos - startpos + 1; pos++) {
       showbufchar(fp, complement, buffer[pos]);
     }
   }

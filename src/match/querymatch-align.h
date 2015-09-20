@@ -39,6 +39,8 @@ bool gt_querymatchoutoptions_alignment_prepare(
                                      GtQuerymatchoutoptions
                                        *querymatchoutoptions,
                                      const GtEncseq *encseq,
+                                     const GtUchar *query,
+                                     GtUword query_totallength,
                                      GtUword dbstart,
                                      GtUword dblen,
                                      GtUword querystartabsolute,
@@ -51,7 +53,6 @@ bool gt_querymatchoutoptions_alignment_prepare(
 
 void gt_querymatchoutoptions_alignment_show(const GtQuerymatchoutoptions
                                               *querymatchoutoptions,
-                                            bool selfmatch,
                                             GtUword edist,
                                             GtUword len);
 

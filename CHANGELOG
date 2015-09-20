@@ -1,5 +1,16 @@
-changes in version 1.5.7 (2015-06-22)
+changes in version 1.5.8 (2015-09-12)
 
+-
+
+
+changes in version 1.5.7 (2015-09-11)
+
+- bugfixes and cleanups
+- optimizations within `gt condenseq create'
+- `gt stat` shows generic type counts
+- rework of TIRvish code
+- allow execution of 'gt-<name>' user scripts in $PATH by calling
+  `gt <name>' (git-style)
 
 changes in version 1.5.6 (2015-06-21)
 

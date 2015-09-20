@@ -17,6 +17,7 @@ typedef enum
 {
   GT_EXTEND_CHAR_ACCESS_ENCSEQ,
   GT_EXTEND_CHAR_ACCESS_ENCSEQ_READER,
+  GT_EXTEND_CHAR_ACCESS_DIRECT,
   GT_EXTEND_CHAR_ACCESS_ANY
 } GtExtendCharAccess;
 
@@ -25,6 +26,7 @@ typedef struct
   const GtEncseq *encseq;
   GtAllocatedMemory *sequence_cache;
   GtEncseqReader *encseq_r;
+  const GtUchar *bytesequence;
   GtExtendCharAccess extend_char_access;
   GtUword totallength;
 } FTsequenceResources;

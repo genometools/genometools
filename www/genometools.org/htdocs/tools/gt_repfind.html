@@ -32,7 +32,7 @@
 <div class="sect1">
 <h2 id="_name">NAME</h2>
 <div class="sectionbody">
-<div class="paragraph"><p>gt-repfind - Compute maximal repeats.</p></div>
+<div class="paragraph"><p>gt-repfind - Compute maximal repeats (and more).</p></div>
 </div>
 </div>
 <div class="sect1">
@@ -50,7 +50,7 @@
 </dt>
 <dd>
 <p>
-Specify minimum length of repeats (default: 20)
+Specify minimum length of repeats (default: 0)
 </p>
 </dd>
 <dt class="hdlist1">
@@ -78,35 +78,60 @@ Specify minimum length of seed (default: 0)
 </p>
 </dd>
 <dt class="hdlist1">
-<strong>-extendgreedy</strong> [<em>yes|no</em>]
+<strong>-maxfreq</strong> [<em>value</em>]
 </dt>
 <dd>
 <p>
-Extend seed to both sides using trimmed greey algorithm (default: no)
+Specify maximal frequency of maximal exact matches in reference sequence (default: 0)
 </p>
 </dd>
 <dt class="hdlist1">
-<strong>-err</strong> [<em>value</em>]
+<strong>-extendxdrop</strong> [<em>value</em>]
 </dt>
 <dd>
 <p>
-Specify error percentage of matches (for greedy extension) (default: 10)
+Extend seed to both sides using xdrop algorithm, optional parameter specifies sensitivity (default: 97)
 </p>
 </dd>
 <dt class="hdlist1">
-<strong>-maxalilendiff</strong> [<em>value</em>]
+<strong>-xdropbelow</strong> [<em>value</em>]
 </dt>
 <dd>
 <p>
-Specify maximum difference of alignment length (trimming for greedy extension) (default: 30)
+Specify xdrop cutoff score (argument 0 means undefined). If undefined an optimal value is determined automatically depending on the error rate
 </p>
 </dd>
 <dt class="hdlist1">
-<strong>-scan</strong> [<em>yes|no</em>]
+<strong>-extendgreedy</strong> [<em>value</em>]
 </dt>
 <dd>
 <p>
-scan index rather than mapping it to main memory (default: no)
+Extend seed to both sides using greedy algorithm with trimming of waves, optional parameter specifies sensitivity (default: 97)
+</p>
+</dd>
+<dt class="hdlist1">
+<strong>-minidentity</strong> [<em>value</em>]
+</dt>
+<dd>
+<p>
+Specify minimum identity of matches
+as integer in the range from 70 to 99 (for xdrop and greedy extension) (default: 80)
+</p>
+</dd>
+<dt class="hdlist1">
+<strong>-a</strong> [<em>value</em>]
+</dt>
+<dd>
+<p>
+show alignments/sequences for exact matches (optional argument is number of columns per line) (default: 70)
+</p>
+</dd>
+<dt class="hdlist1">
+<strong>-cam</strong> [<em>string</em>]
+</dt>
+<dd>
+<p>
+specify character access mode: possible values: encseq, encseq_reader (default: undefined)
 </p>
 </dd>
 <dt class="hdlist1">
@@ -118,11 +143,19 @@ Specify input index (default: undefined)
 </p>
 </dd>
 <dt class="hdlist1">
+<strong>-scan</strong> [<em>yes|no</em>]
+</dt>
+<dd>
+<p>
+scan index rather than map it to main memory (default: no)
+</p>
+</dd>
+<dt class="hdlist1">
 <strong>-v</strong> [<em>yes|no</em>]
 </dt>
 <dd>
 <p>
-be verbose  (default: no)
+be verbose (default: no)
 </p>
 </dd>
 <dt class="hdlist1">

@@ -165,6 +165,29 @@ Test do
   run "diff #{last_stdout} #{$testdata}U89959_cds.fas"
 end
 
+Name "gt extractfeat -translate -gcode"
+Keywords "gt_extractfeat gcode"
+Test do
+  FileUtils.copy "#{$testdata}U89959_genomic.fas", "."
+  [1,2,3,4,5,6,9,10,11,12,13,14,16,21,22,23].each do |code|
+    run "#{$bin}gt extractfeat -seqfile U89959_genomic.fas " \
+    "-matchdesc -type CDS -join -translate -gcode #{code} " \
+    "#{$testdata}U89959_cds.gff3"
+    run "diff #{last_stdout} #{$testdata}U89959_cds_#{code}.fas"
+  end
+end
+
+Name "gt extractfeat -translate -gcode (errors)"
+Keywords "gt_extractfeat gcode"
+Test do
+  FileUtils.copy "#{$testdata}U89959_genomic.fas", "."
+  [7,8,17,18,19,20,26].each do |code|
+    run "#{$bin}gt extractfeat -seqfile U89959_genomic.fas " \
+        "-matchdesc -type CDS -join -translate -gcode #{code} " \
+        "#{$testdata}U89959_cds.gff3", :retval => 1
+    end
+end
+
 Name "gt extractfeat -translate (phases)"
 Keywords "gt_extractfeat"
 Test do

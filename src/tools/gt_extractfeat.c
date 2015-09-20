@@ -18,6 +18,8 @@
 #include "core/ma.h"
 #include "core/option_api.h"
 #include "core/output_file_api.h"
+#include "core/str_array_api.h"
+#include "core/trans_table_api.h"
 #include "core/unused_api.h"
 #include "extended/extract_feature_stream_api.h"
 #include "extended/genome_node.h"
@@ -34,6 +36,7 @@ typedef struct {
        verbose,
        showcoords,
        retainids;
+  unsigned int gcode;
   GtStr *type;
   GtSeqid2FileInfo *s2fi;
   GtUword width;
@@ -59,6 +62,19 @@ static void gt_extractfeat_arguments_delete(void *tool_arguments)
   gt_seqid2file_info_delete(arguments->s2fi);
   gt_str_delete(arguments->type);
   gt_free(arguments);
+}
+
+static int gt_extractfeat_comment_func(const char *progname,
+                                       void *data, GtError *err)
+{
+  GtStrArray *descs = gt_trans_table_get_scheme_descriptions();
+  GtUword i = 0;
+  printf("\nGenetic code numbers for option '-gcode':\n\n");
+  for (i = 0; i < gt_str_array_size(descs); i++) {
+    printf("%s\n", gt_str_array_get(descs, i));
+  }
+  gt_str_array_delete(descs);
+  return gt_gtdata_show_help(progname, data,err);
 }
 
 static GtOptionParser* gt_extractfeat_option_parser_new(void *tool_arguments)
@@ -114,6 +130,12 @@ static GtOptionParser* gt_extractfeat_option_parser_new(void *tool_arguments)
                               &arguments->retainids, false);
   gt_option_parser_add_option(op, option);
 
+  /* -gcode */
+  option = gt_option_new_uint_min("gcode", "specify genetic code to use",
+                                  &arguments->gcode,
+                                  GT_STANDARD_TRANSLATION_SCHEME, 1U);
+  gt_option_parser_add_option(op, option);
+
   /* -seqfile, -matchdesc, -usedesc and -regionmapping */
   gt_seqid2file_register_options(op, arguments->s2fi);
 
@@ -128,7 +150,7 @@ static GtOptionParser* gt_extractfeat_option_parser_new(void *tool_arguments)
   /* output file options */
   gt_output_file_info_register_options(arguments->ofi, op, &arguments->outfp);
 
-  gt_option_parser_set_comment_func(op, gt_gtdata_show_help, NULL);
+  gt_option_parser_set_comment_func(op, gt_extractfeat_comment_func, NULL);
   gt_option_parser_set_max_args(op, 1);
 
   return op;
@@ -141,6 +163,7 @@ static int gt_extractfeat_runner(GT_UNUSED int argc, const char **argv,
   GtNodeStream *gff3_in_stream = NULL, *extract_feature_stream = NULL;
   GtExtractFeatArguments *arguments = tool_arguments;
   GtRegionMapping *region_mapping;
+  GtTransTable *ttable = NULL;
   int had_err = 0;
 
   gt_error_check(err);
@@ -175,6 +198,19 @@ static int gt_extractfeat_runner(GT_UNUSED int argc, const char **argv,
       gt_extract_feature_stream_retain_id_attributes((GtExtractFeatureStream*)
                                                        extract_feature_stream);
 
+    if (arguments->gcode != GT_STANDARD_TRANSLATION_SCHEME) {
+      ttable = gt_trans_table_new(arguments->gcode, err);
+      if (!ttable) {
+        had_err = -1;
+      } else {
+        gt_extract_feature_stream_set_trans_table((GtExtractFeatureStream*)
+                                                       extract_feature_stream,
+                                                   ttable);
+      }
+    }
+  }
+
+  if (!had_err) {
     if (arguments->showcoords)
       gt_extract_feature_stream_show_coords((GtExtractFeatureStream*)
                                                         extract_feature_stream);
@@ -186,6 +222,7 @@ static int gt_extractfeat_runner(GT_UNUSED int argc, const char **argv,
   /* free */
   gt_node_stream_delete(extract_feature_stream);
   gt_node_stream_delete(gff3_in_stream);
+  gt_trans_table_delete(ttable);
 
   return had_err;
 }

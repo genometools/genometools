@@ -69,12 +69,10 @@ static void evalsplicesiteprobformodel(GthFlt *prob, bool donorsite,
     pc = gen_seq_tran[startpos];
     SUBSTITUTEWILDCARDWITHA(pc);
     if (bssmmodel->hypothesis_num == HYPOTHESIS2) {
-      gt_assert(bssmmodel->hypotables.hypo2table);
       Tv[0] = (double) bssmmodel->hypotables.hypo2table[0][0][pc][0];
       Fv[0] = (double) bssmmodel->hypotables.hypo2table[1][0][pc][0];
     }
     else {
-      gt_assert(bssmmodel->hypotables.hypo7table);
       Tv[0] = (double) bssmmodel->hypotables.hypo7table[0][0][pc][0];
       Tv[1] = (double) bssmmodel->hypotables.hypo7table[1][0][pc][0];
       Tv[2] = (double) bssmmodel->hypotables.hypo7table[2][0][pc][0];

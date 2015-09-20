@@ -66,7 +66,7 @@ specify minimum seed length for exact repeats (default: 20)
 </dt>
 <dd>
 <p>
-specify minimum length for each TIR (default: 27)
+specify minimum length for each TIR (default: 100)
 </p>
 </dd>
 <dt class="hdlist1">
@@ -82,7 +82,7 @@ specify maximum length for each TIR (default: 1000)
 </dt>
 <dd>
 <p>
-specify minimum distance of TIRs (default: 100)
+specify minimum distance of TIRs (default: 500)
 </p>
 </dd>
 <dt class="hdlist1">
@@ -138,7 +138,7 @@ specify xdropbelowscore for extension-alignment (default: 5)
 </dt>
 <dd>
 <p>
-specify similaritythreshold in range [1..100%] (default: 85.000000)
+specify TIR similarity threshold in therange [1..100%] (default: 85.000000)
 </p>
 </dd>
 <dt class="hdlist1">
@@ -146,7 +146,7 @@ specify similaritythreshold in range [1..100%] (default: 85.000000)
 </dt>
 <dd>
 <p>
-specify no|best|all (default: best)
+specify no|best|longest|all (default: best)
 </p>
 </dd>
 <dt class="hdlist1">
@@ -206,6 +206,30 @@ choose from TC (trusted cutoff) | GA (gathering cutoff) | NONE (no cutoffs) (def
 <dd>
 <p>
 maximal allowed gap size between fragments (in amino acids) when chaining pHMM hits for a protein domain (default: 50)
+</p>
+</dd>
+<dt class="hdlist1">
+<strong>-refseqs</strong> [<em>string</em>]
+</dt>
+<dd>
+<p>
+specify the name of the gene sequences to scan for inside candidates (default: undefined)
+</p>
+</dd>
+<dt class="hdlist1">
+<strong>-seqids</strong> [<em>yes|no</em>]
+</dt>
+<dd>
+<p>
+use sequence descriptions instead of sequence numbers in GFF3 output (default: yes)
+</p>
+</dd>
+<dt class="hdlist1">
+<strong>-md5</strong> [<em>yes|no</em>]
+</dt>
+<dd>
+<p>
+add MD5 hashes to seqids in GFF3 output (default: no)
 </p>
 </dd>
 <dt class="hdlist1">
