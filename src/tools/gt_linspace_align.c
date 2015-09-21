@@ -48,6 +48,7 @@ typedef struct{
              *diagonalbonds;
   bool       global,
              local,
+             diagonal,
              showscore;
   GtUword timesquarefactor;
 } GtLinspaceArguments;
@@ -114,11 +115,12 @@ static GtOptionParser* gt_linspace_align_option_parser_new(void *tool_arguments)
   GtOptionParser *op;
   GtOption *optionstrings, *optionfiles, *optionglobal, *optionlocal,
            *optionlinearcosts, *optionaffinecosts, *optionoutputfile,
-           *optionshowscore, *optiondiagonalbonds, *optiontsfactor;
+           *optionshowscore, *optiondiagonal, *optiondiagonalbonds,
+           *optiontsfactor;
   gt_assert(arguments);
 
   /* init */
-  op = gt_option_parser_new("[ss|ff] sequenc1 sequenc2 [global|local] "
+  op = gt_option_parser_new("[ss|ff] sequence1 sequence2 [global|local] "
                             "[a|l] [additional options]",
                             "Apply function to compute alignment.");
   gt_option_parser_set_mail_address(op,
@@ -126,14 +128,18 @@ static GtOptionParser* gt_linspace_align_option_parser_new(void *tool_arguments)
 
   /* -bool */
   optionglobal = gt_option_new_bool("global", "global alignment",
-                              &arguments->global, false);
+                                    &arguments->global, false);
   gt_option_parser_add_option(op, optionglobal);
 
   optionlocal = gt_option_new_bool("local", "local alignment",
-                              &arguments->local, false);
+                                   &arguments->local, false);
   gt_option_parser_add_option(op, optionlocal);
+  
+  optiondiagonal = gt_option_new_bool("d", "diagonalband alignment",
+                                      &arguments->diagonal, false);
+  gt_option_parser_add_option(op, optiondiagonal);
 
-  optionshowscore= gt_option_new_bool("showscore", "show score for alignment",
+  optionshowscore = gt_option_new_bool("showscore", "show score for alignment",
                                       &arguments->showscore, false);
   gt_option_parser_add_option(op, optionshowscore);
 
@@ -148,7 +154,7 @@ static GtOptionParser* gt_linspace_align_option_parser_new(void *tool_arguments)
 
   optionlinearcosts = gt_option_new_string_array("l", "lineargapcosts, "
                                                  "use three values",
-                                                arguments->linearcosts);
+                                                 arguments->linearcosts);
   gt_option_parser_add_option(op, optionlinearcosts);
 
   optionaffinecosts = gt_option_new_string_array("a", "affinegapcosts, "
@@ -156,15 +162,17 @@ static GtOptionParser* gt_linspace_align_option_parser_new(void *tool_arguments)
                                                  arguments->affinecosts);
   gt_option_parser_add_option(op, optionaffinecosts);
 
-  optiondiagonalbonds = gt_option_new_string_array("d", "diagonalband alignment"
-                                                   ", use two bounds",
+  optiondiagonalbonds = gt_option_new_string_array("lr", "left and right shift "
+                                                   "of diagonal",
                                                    arguments->diagonalbonds);
   gt_option_parser_add_option(op, optiondiagonalbonds);
 
-  optionoutputfile = gt_option_new_string("o", "use outputfile",
+  optionoutputfile = gt_option_new_string("o", "print alignment, "
+                                          "use outputfile",
                                           arguments->outputfile, "stdout");
   gt_option_parser_add_option(op, optionoutputfile);
 
+  /* -ulong */
   optiontsfactor = gt_option_new_ulong("t", "timesquarefactor to organize "
                                        "time and space",
                                        &arguments->timesquarefactor,1);
@@ -178,15 +186,17 @@ static GtOptionParser* gt_linspace_align_option_parser_new(void *tool_arguments)
   gt_option_imply_either_2(optionfiles, optionglobal, optionlocal);
   gt_option_imply_either_2(optionlocal, optionlinearcosts, optionaffinecosts);
   gt_option_imply_either_2(optionglobal, optionlinearcosts, optionaffinecosts);
-  gt_option_imply_either_2(optiondiagonalbonds, optionglobal, optionlocal);
   gt_option_imply_either_2(optionshowscore,optionlinearcosts,optionaffinecosts);
+  gt_option_imply(optiondiagonal, optionglobal);
+  gt_option_imply(optiondiagonalbonds, optiondiagonal);
+  //gt_option_argument_is_optional(optiondiagonalbonds);
 
   return op;
 }
 
 static int gt_linspace_align_arguments_check(GT_UNUSED int rest_argc,
-                                       void *tool_arguments,
-                                       GT_UNUSED GtError *err)
+                                             void *tool_arguments,
+                                             GtError *err)
 {
   GtLinspaceArguments *arguments = tool_arguments;
   int had_err = 0;
@@ -222,14 +232,14 @@ static int gt_linspace_align_arguments_check(GT_UNUSED int rest_argc,
   if ((gt_str_array_size(arguments->diagonalbonds) > 0) &&
      (gt_str_array_size(arguments->diagonalbonds) != 2UL))
   {
-    gt_error_set(err, "option -d requires left and right shift of diagonal");
+    gt_error_set(err, "option -lr requires left and right shift of diagonal");
     had_err = 1;
   }
 
   return had_err;
 }
 
-static void print_sequence(const GtUchar *seq, const GtUword len, FILE *fp)
+static void print_sequence(const GtUchar *seq, GtUword len, FILE *fp)
 {
   GtUword i = 0;
   fprintf(fp, "######\n");
@@ -239,10 +249,10 @@ static void print_sequence(const GtUchar *seq, const GtUword len, FILE *fp)
   }while (i < len);
 }
 
-static void alignment_with_seqs_show(const GtUchar *useq, const GtUword ulen,
-                                     const GtUchar *vseq, const GtUword vlen,
+static void alignment_with_seqs_show(const GtUchar *useq, GtUword ulen,
+                                     const GtUchar *vseq, GtUword vlen,
                                      const GtAlignment *align,
-                                     const GtWord score, FILE *fp)
+                                     GtWord score, FILE *fp)
 {
   if (fp != NULL)
   {
@@ -322,7 +332,7 @@ static int get_fastasequences(GtSequences *sequences, GtStr *filename,
 }
 
 static int get_onesequence(GtSequences *sequences, const GtStrArray *strings,
-                           const GtUword idx, GtError *err)
+                           GtUword idx, GtError *err)
 {
   int had_err = 0;
   gt_assert(sequences != NULL && strings != NULL);
@@ -348,6 +358,7 @@ static inline void sequence_to_lower(GtUchar *seq, GtUword len)
 /*call function with linear gap costs for all given sequences */
 static void alignment_with_linear_gap_costs(GtLinspaceArguments *arguments,
                                             GtError *err, GtWord *linearcosts,
+                                            GtWord *diagonalbonds,
                                             GtAlignment *align,
                                             LinspaceManagement *spacemanager,
                                             GtSequences *sequences1,
@@ -355,14 +366,7 @@ static void alignment_with_linear_gap_costs(GtLinspaceArguments *arguments,
 {
   GtUchar *useq, *vseq;
   GtUword i, j, ulen, vlen;
-  GtWord score = GT_WORD_MAX, *diagonalbonds = NULL;
-
-  if (gt_str_array_size(arguments->diagonalbonds) > 0)
-  {
-       diagonalbonds = select_digit_from_string(arguments->diagonalbonds,
-                                                false, err);
-       gt_error_check(err);
-  }
+  GtWord score = GT_WORD_MAX;
 
   for (i = 0; i < sequences1->size; i++)
   {
@@ -378,8 +382,14 @@ static void alignment_with_linear_gap_costs(GtLinspaceArguments *arguments,
       gt_alignment_reset(align);
       if (arguments->global)
       {
-         if (gt_str_array_size(arguments->diagonalbonds) > 0)
+         if (arguments->diagonal)
          {
+           if (!gt_str_array_size(arguments->diagonalbonds) > 0)
+           {
+             gt_assert (diagonalbonds != NULL);
+             diagonalbonds[0] = -ulen;
+             diagonalbonds[1] = vlen;
+           } 
            gt_computediagonalbandalign(spacemanager,align,
                                        useq, 0, ulen, vseq, 0, vlen,
                                        diagonalbonds[0], diagonalbonds[1],
@@ -431,6 +441,7 @@ static void alignment_with_linear_gap_costs(GtLinspaceArguments *arguments,
 static void alignment_with_affine_gap_costs(GtLinspaceArguments *arguments,
                                             GtError *err,
                                             GtWord *affinecosts,
+                                            GtWord *diagonalbonds,
                                             GtAlignment *align,
                                             LinspaceManagement *spacemanager,
                                             GtSequences *sequences1,
@@ -438,14 +449,7 @@ static void alignment_with_affine_gap_costs(GtLinspaceArguments *arguments,
 {
   GtUchar *useq, *vseq;
   GtUword i, j, ulen, vlen;
-  GtWord score = GT_WORD_MAX, *diagonalbonds = NULL;
-
-  if (gt_str_array_size(arguments->diagonalbonds) > 0)
-  {
-    diagonalbonds = select_digit_from_string(arguments->diagonalbonds,
-                                               false, err);
-    gt_error_check(err);
-  }
+  GtWord score = GT_WORD_MAX;
 
   for (i = 0; i < sequences1->size; i++)
   {
@@ -461,13 +465,19 @@ static void alignment_with_affine_gap_costs(GtLinspaceArguments *arguments,
       gt_alignment_reset(align);
       if (arguments->global)
       {
-        if (gt_str_array_size(arguments->diagonalbonds) > 0)
-        {
-          gt_computediagonalbandaffinealign(spacemanager, align,
-                                            useq, 0, ulen, vseq, 0, vlen,
-                                            diagonalbonds[0], diagonalbonds[1],
-                                            affinecosts[0], affinecosts[1],
-                                            affinecosts[2], affinecosts[3]);
+        if (arguments->diagonal)
+         {
+           if (!gt_str_array_size(arguments->diagonalbonds) > 0)
+           {
+             gt_assert (diagonalbonds != NULL);
+             diagonalbonds[0] = -ulen;
+             diagonalbonds[1] = vlen;
+           } 
+           gt_computediagonalbandaffinealign(spacemanager, align,
+                                             useq, 0, ulen, vseq, 0, vlen,
+                                             diagonalbonds[0], diagonalbonds[1],
+                                             affinecosts[0], affinecosts[1],
+                                             affinecosts[2], affinecosts[3]);
         }
         else
         {
@@ -523,7 +533,7 @@ static int gt_linspace_align_runner(GT_UNUSED int argc,
   GtLinspaceArguments *arguments = tool_arguments;
   int had_err = 0;
   GtAlignment *align;
-
+  GtWord *diagonalbonds = NULL;
   GtSequences *sequences1, *sequences2;
   LinspaceManagement *spacemanager;
 
@@ -553,7 +563,18 @@ static int gt_linspace_align_runner(GT_UNUSED int argc,
   }
 
   /* call alignment functions */
-
+  
+  if (arguments->diagonal)
+  {
+    if(gt_str_array_size(arguments->diagonalbonds) > 0)
+    {
+       diagonalbonds = select_digit_from_string(arguments->diagonalbonds,
+                                                false, err);
+       gt_error_check(err);
+    }
+    else
+      diagonalbonds = gt_malloc(sizeof (*diagonalbonds)*2);
+  }
   /* alignment functions with linear gap costs */
   if (gt_str_array_size(arguments->linearcosts) > 0)
   {
@@ -565,7 +586,8 @@ static int gt_linspace_align_runner(GT_UNUSED int argc,
     if (linearcosts == NULL)
       return 1;
 
-    alignment_with_linear_gap_costs(arguments, err, linearcosts,
+    alignment_with_linear_gap_costs(arguments, err,
+                                    linearcosts, diagonalbonds,
                                     align, spacemanager,
                                     sequences1, sequences2);
     gt_free(linearcosts);
@@ -581,7 +603,8 @@ static int gt_linspace_align_runner(GT_UNUSED int argc,
     if (affinecosts == NULL)
       return 1;
 
-    alignment_with_affine_gap_costs(arguments, err, affinecosts,
+    alignment_with_affine_gap_costs(arguments, err,
+                                    affinecosts, diagonalbonds,
                                     align, spacemanager,
                                     sequences1, sequences2);
      gt_free(affinecosts);

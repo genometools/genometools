@@ -76,7 +76,7 @@ Test do
       if f1 != f2
         i=i+1
         run_test "#{$bin}gt dev linspace_align -ff #{$testdata}#{f1} #{$testdata}#{f2} "\
-                 "-global -l 0 1 1 -d \" -400\" 400", :maxtime => 1
+                 "-global -l 0 1 1 -d", :maxtime => 1
         run "diff -i #{last_stdout} #{$testdata}gt_linspace_align_global_test_#{i}.out"
       end
     end
@@ -87,7 +87,7 @@ Name "gt linspace_align diagonalband (invalid bounds)"
 Keywords "gt_linspace_align"
 Test do
   run_test "#{$bin}gt dev linspace_align -ss cg acgt"\
-           " -global -l 0 1 1 -d 0 1", :retval => 2
+           " -global -l 0 1 1 -d -lr 0 1", :retval => 2
   grep last_stderr, "invalid diagonalband"
 end
 
@@ -97,7 +97,7 @@ Test do
   run_test "#{$bin}gt dev linspace_align -ff "\
            "#{$testdata}gt_linspace_align_affine_test_1.fas "\
            "#{$testdata}gt_linspace_align_affine_test_2.fas "\
-           " -global -a 0 2 3 1 -d \" -80\"  60", :maxtime => 1
+           " -global -a 0 2 3 1 -d", :maxtime => 1
   run "diff -i #{last_stdout} #{$testdata}gt_linspace_align_global_affine_test_1.out"
 end
 
@@ -127,12 +127,12 @@ Test do
   run_test "#{$bin}gt dev linspace_align -ff "\
            "#{$testdata}gt_linspace_align_special_cases_test_1.fas "\
            "#{$testdata}gt_linspace_align_special_cases_test_2.fas "\
-           "-global -l 0 1 1 -d \" -5\" 4"
+           "-global -l 0 1 1 -d"
   run "diff -i #{last_stdout} #{$testdata}gt_linspace_align_global_linear_special_cases.out"
   run_test "#{$bin}gt dev linspace_align -ff "\
            "#{$testdata}gt_linspace_align_special_cases_test_1.fas "\
            "#{$testdata}gt_linspace_align_special_cases_test_2.fas "\
-           "-global -a 0 2 3 1 -d \" -5\" 4"
+           "-global -a 0 2 3 1 -d"
   run "diff -i #{last_stdout} #{$testdata}gt_linspace_align_global_affine_special_cases.out"
 end
 
