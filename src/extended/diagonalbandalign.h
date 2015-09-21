@@ -21,6 +21,14 @@
 #include "core/types_api.h"
 #include "core/unused_api.h"
 #include "extended/alignment.h"
+#include "extended/linspaceManagement.h"
+
+typedef enum {
+  Linear_R,
+  Linear_D,
+  Linear_I,
+  Linear_X /* unknown */
+} LinearAlignEdge;
 
 typedef struct {
   GtUword lastcpoint, currentrowindex;
@@ -34,19 +42,23 @@ void gt_checkdiagonalbandalign(GT_UNUSED bool forward,
                                 GtUword vlen);
 
 /* creating alignment with diagonalband in linear space O(n) */
-void gt_computediagonalbandalign(GtAlignment *align,
-                                 const GtUchar *useq,
-                                 GtUword ustart, GtUword ulen,
-                                 const GtUchar *vseq,
-                                 GtUword vstart, GtUword vlen,
-                                 GtWord left_dist,
-                                 GtWord right_dist,
-                                 GtUword matchcost,
-                                 GtUword mismatchcost,
-                                 GtUword gapcost);
+GtUword gt_computediagonalbandalign(LinspaceManagement *spacemanager,
+                                    GtAlignment *align,
+                                    const GtUchar *useq,
+                                    GtUword ustart, GtUword ulen,
+                                    const GtUchar *vseq,
+                                    GtUword vstart, GtUword vlen,
+                                    GtWord left_dist,
+                                    GtWord right_dist,
+                                    GtUword matchcost,
+                                    GtUword mismatchcost,
+                                    GtUword gapcost);
 
-/* creating alignment with diagonalband in square space O(n²) */
-GtUword diagonalbandalignment_in_square_space(GtAlignment *align,
+/* creating alignment with diagonalband in square space O(n²),
+ * to use it in linear context you have to generate an spacemanager before,
+ * in any other case it can be NULL */
+GtUword diagonalbandalignment_in_square_space(LinspaceManagement *spacemanager,
+                                              GtAlignment *align,
                                               const GtUchar *useq,
                                               GtUword ustart,
                                               GtUword ulen,

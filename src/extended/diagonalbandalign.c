@@ -24,7 +24,7 @@
 #include "core/types_api.h"
 #include "core/divmodmul.h"
 #include "core/unused_api.h"
-#include "extended/linearalign_utilities.h"
+#include "extended/linspaceManagement.h"
 #include "extended/reconstructalignment.h"
 #include "match/squarededist.h"
 
@@ -136,7 +136,8 @@ static GtUword diagonalband_squarespace_distance_only(const GtUchar *useq,
 }
 
 /* creating alignment with diagonalband in square space O(n²) */
-GtUword diagonalbandalignment_in_square_space(GtAlignment *align,
+GtUword diagonalbandalignment_in_square_space(LinspaceManagement *spacemanager,
+                                              GtAlignment *align,
                                               const GtUchar *useq,
                                               GtUword ustart,
                                               GtUword ulen,
@@ -152,7 +153,17 @@ GtUword diagonalbandalignment_in_square_space(GtAlignment *align,
   GtUword **E, distance;
 
   gt_assert(align != NULL);
-  gt_array2dim_malloc(E, (ulen+1), (vlen+1));
+
+  if (spacemanager == NULL)
+  {
+    /*use it in normally case*/
+    gt_array2dim_malloc(E, (ulen+1), (vlen+1));
+  }
+  else
+  {
+    /*use it in lineraspace context*/
+    E = gt_linspaceManagement_change_to_square(spacemanager,ulen,vlen);
+  }
 
   if ((left_dist > MIN(0, (GtWord)vlen-(GtWord)ulen))||
       (right_dist < MAX(0, (GtWord)vlen-(GtWord)ulen)))
@@ -169,7 +180,8 @@ GtUword diagonalbandalignment_in_square_space(GtAlignment *align,
   reconstructalignment_from_EDtab(align, E, useq, ustart, ulen, vseq, vstart,
                                   vlen, matchcost, mismatchcost, gapcost);
 
-  gt_array2dim_delete(E);
+  if (spacemanager == NULL)
+    {gt_array2dim_delete(E);}
   return distance;
 }
 
@@ -232,7 +244,8 @@ void evaluate_DBcrosspoints_from_2dimtab(GtUword **E,
 }
 
 /*create DBcrosspointtab to combine square calculating with linear calculating*/
-static void dtab_in_square_space(Diagentry *Dtab,
+static void dtab_in_square_space(LinspaceManagement *spacemanager,
+                                 Diagentry *Dtab,
                                  const GtUchar *useq,
                                  GtUword ustart,
                                  GtUword ulen,
@@ -254,7 +267,7 @@ static void dtab_in_square_space(Diagentry *Dtab,
   {
     gt_assert(false);
   }
-  gt_array2dim_malloc(E, (ulen+1), (vlen+1));
+  E = gt_linspaceManagement_change_to_square(spacemanager,ulen,vlen);
   diagonalband_fillDPtab_in_square_space(E, useq, ustart, ulen, vseq, vstart,
                                          vlen, left_dist, right_dist, matchcost,
                                          mismatchcost, gapcost);
@@ -262,7 +275,6 @@ static void dtab_in_square_space(Diagentry *Dtab,
   evaluate_DBcrosspoints_from_2dimtab(E, Dtab, useq, ustart, ulen, vseq, vstart,
                                       vlen, matchcost, mismatchcost, gapcost,
                                       rowoffset);
-  gt_array2dim_delete(E);
 }
 
 /* calculate only distance with diagonalband in linear space O(n) */
@@ -411,10 +423,30 @@ static void firstDBtabcolumn(GtUword *EDtabcolumn,
   }
 }
 
+static inline void set_linear_DiagentryRtabentry(LinearAlignEdge edge,
+                                                 GtWord diag, GtUword colindex,
+                                                 GtUword rowindex,
+                                                 GtUword offset,
+                                                 Diagentry *Diagcolumnentry,
+                                                 GtUword *Rtabcolumnentry,
+                                                 GtUword Rtabentry_from)
+{
+    if (diag == (GtWord)colindex - (GtWord)rowindex)
+    {
+      Diagcolumnentry->edge = edge;
+      Diagcolumnentry->lastcpoint = Rtabentry_from;
+      Diagcolumnentry->currentrowindex = rowindex + offset;
+      *Rtabcolumnentry = colindex;
+    }
+    else
+    {
+      *Rtabcolumnentry = Rtabentry_from;
+    }
+}
+
 /* calculate all E- and Rtabcolumns, store crosspoints in  Diagcolumn,
  * return lastcrosspoint from optimal path */
-static GtUword evaluateallDBtabcolumns(GtUword *EDtabcolumn,
-                                       GtUword *Rtabcolumn,
+static GtUword evaluateallDBtabcolumns(LinspaceManagement *spacemanager,
                                        Diagentry *Diagcolumn,
                                        LinearAlignEdge edge,
                                        GtWord offset,
@@ -430,7 +462,8 @@ static GtUword evaluateallDBtabcolumns(GtUword *EDtabcolumn,
                                        GtUword mismatchcost,
                                        GtUword gapcost)
 {
-  GtUword colindex, rowindex, val, northwestEDtabentry, westEDtabentry,
+  GtUword colindex, rowindex, val, *EDtabcolumn, *Rtabcolumn,
+          northwestEDtabentry, westEDtabentry,
           northwestRtabentry, westRtabentry,
           low_row, high_row; /*lowest and highest row between a diagonal band*/
   GtWord diag;
@@ -441,6 +474,10 @@ static GtUword evaluateallDBtabcolumns(GtUword *EDtabcolumn,
   {
     gt_assert(false);
   }
+
+  EDtabcolumn = gt_linspaceManagement_get_valueTabspace(spacemanager);
+  Rtabcolumn = gt_linspaceManagement_get_rTabspace(spacemanager);
+
   diag = GT_DIV2(left_dist + right_dist);
   low_row = 0;
   high_row = -left_dist;
@@ -477,17 +514,7 @@ static GtUword evaluateallDBtabcolumns(GtUword *EDtabcolumn,
     }
 
     EDtabcolumn[0] = add_safe_umax(westEDtabentry, gapcost);
-    if (diag == (GtWord)colindex - (GtWord)low_row)
-    {
-      Diagcolumn[colindex].edge = Linear_I;
-      Diagcolumn[colindex].lastcpoint = westRtabentry;
-      Diagcolumn[colindex].currentrowindex = low_row + offset;
-      Rtabcolumn[0] = colindex;
-    }
-    else
-    {
-      Rtabcolumn[0] = westRtabentry;
-    }
+    edge = Linear_I;
 
     /* replacement possible for 0-entry */
     if (low_row > 0 )
@@ -498,21 +525,24 @@ static GtUword evaluateallDBtabcolumns(GtUword *EDtabcolumn,
                               matchcost : mismatchcost));
       if (val <= EDtabcolumn[0])
       {
+        edge = Linear_R;
         EDtabcolumn[0] = val;
-
-        if (diag == (GtWord)colindex - (GtWord)low_row)
-        {
-          Diagcolumn[colindex].edge = Linear_R;
-          Diagcolumn[colindex].lastcpoint = northwestRtabentry;
-          Diagcolumn[colindex].currentrowindex = low_row + offset;
-          Rtabcolumn[0] = colindex;
-        }
-        else
-        {
-          Rtabcolumn[0] = northwestRtabentry;
-        }
       }
     }
+
+    switch (edge) {
+      case Linear_R:
+        set_linear_DiagentryRtabentry(edge, diag, colindex, low_row, offset,
+        &Diagcolumn[colindex],&Rtabcolumn[0],northwestRtabentry);
+        break;
+      case Linear_I:
+        set_linear_DiagentryRtabentry(edge, diag, colindex, low_row, offset,
+        &Diagcolumn[colindex],&Rtabcolumn[0],westRtabentry);
+        break;
+      default:
+        gt_assert(false);
+    }
+
     for (rowindex = low_row + 1; rowindex <= high_row; rowindex++)
     {
       northwestEDtabentry = westEDtabentry;
@@ -538,17 +568,8 @@ static GtUword evaluateallDBtabcolumns(GtUword *EDtabcolumn,
         last_row = true;
       /* insertion */
       EDtabcolumn[rowindex-low_row] = add_safe_umax(westEDtabentry, gapcost);
-      if (diag == (GtWord)colindex - (GtWord)rowindex)
-      {
-        Diagcolumn[colindex].edge = Linear_I;
-        Diagcolumn[colindex].lastcpoint = westRtabentry;
-        Diagcolumn[colindex].currentrowindex = rowindex+offset;
-        Rtabcolumn[rowindex-low_row] = colindex;
-      }
-      else
-      {
-        Rtabcolumn[rowindex-low_row] = westRtabentry;
-      }
+      edge = Linear_I;
+
       /* replacement */
       val = add_safe_umax(northwestEDtabentry,
                         (tolower((int)useq[ustart+rowindex-1]) ==
@@ -558,43 +579,40 @@ static GtUword evaluateallDBtabcolumns(GtUword *EDtabcolumn,
       if (val <= EDtabcolumn[rowindex-low_row])
       {
         EDtabcolumn[rowindex-low_row] = val;
-        if (diag == (GtWord)colindex - (GtWord)rowindex)
-        {
-          Diagcolumn[colindex].edge = Linear_R;
-          Diagcolumn[colindex].lastcpoint = northwestRtabentry;
-          Diagcolumn[colindex].currentrowindex = rowindex + offset;
-          Rtabcolumn[rowindex-low_row] = colindex;
-        }
-        else
-        {
-          Rtabcolumn[rowindex-low_row] = northwestRtabentry;
-        }
+        edge = Linear_R;
       }
       /* deletion */
       if ((val = add_safe_umax(EDtabcolumn[rowindex-low_row-1], gapcost))
                                        < EDtabcolumn[rowindex-low_row])
       {
         EDtabcolumn[rowindex-low_row] = val;
-        if (diag == (GtWord)colindex - (GtWord)rowindex)
-        {
-          Diagcolumn[colindex].edge = Linear_D;
-          Diagcolumn[colindex].lastcpoint = Rtabcolumn[rowindex-low_row-1];
-          Diagcolumn[colindex].currentrowindex = rowindex + offset;
-          Rtabcolumn[rowindex-low_row] = colindex;
-        }
-        else
-        {
-          Rtabcolumn[rowindex-low_row] = Rtabcolumn[rowindex-low_row-1];
-        }
+        edge = Linear_D;
       }
+
+      GtUword Rtabentry_from;
+      switch (edge) {
+        case Linear_R:
+          Rtabentry_from = northwestRtabentry;
+          break;
+        case Linear_D:
+          Rtabentry_from = Rtabcolumn[rowindex-low_row-1];
+          break;
+        case Linear_I:
+          Rtabentry_from = westRtabentry;
+          break;
+        default:
+          gt_assert(false);
+      }
+      set_linear_DiagentryRtabentry(edge, diag, colindex, rowindex, offset,
+                           &Diagcolumn[colindex],&Rtabcolumn[rowindex-low_row],
+                           Rtabentry_from);
     }
   }
   return Rtabcolumn[high_row-low_row];
 }
 
 /* calculate crosspoint realting to diagonal in recursive way */
-static void evaluateDBcrosspoints(GtUword *EDtabcolumn,
-                                  GtUword *Rtabcolumn,
+static void evaluateDBcrosspoints(LinspaceManagement *spacemanager,
                                   Diagentry *Diagcolumn,
                                   LinearAlignEdge edge,
                                   GtUword rowoffset,
@@ -602,11 +620,9 @@ static void evaluateDBcrosspoints(GtUword *EDtabcolumn,
                                   const GtUchar *useq,
                                   GtUword ustart,
                                   GtUword ulen,
-                                  GtUword original_ulen,
                                   const GtUchar *vseq,
                                   GtUword vstart,
                                   GtUword vlen,
-                                  GtUword original_vlen,
                                   GtWord left_dist,
                                   GtWord right_dist,
                                   GtUword matchcost,
@@ -635,36 +651,41 @@ static void evaluateDBcrosspoints(GtUword *EDtabcolumn,
     return;
   }
 
-  if ((ulen+1)*(vlen+1) <= (original_ulen+1))
-  { /* product of subsquences is in O(n) */
-    dtab_in_square_space(Diagcolumn, useq, ustart, ulen, vseq, vstart, vlen,
-                         left_dist, right_dist, matchcost, mismatchcost,
+  if (gt_linspaceManagement_checksquare(spacemanager,ulen,vlen,
+                                        sizeof (GtUword),sizeof(GtUword)))
+  {
+    dtab_in_square_space(spacemanager, Diagcolumn,
+                         useq, ustart, ulen,
+                         vseq, vstart, vlen,
+                         left_dist, right_dist,
+                         matchcost, mismatchcost,
                          gapcost, rowoffset);
     return;
   }
 
-  cpoint = evaluateallDBtabcolumns (EDtabcolumn, Rtabcolumn, Diagcolumn, edge,
-                              rowoffset, useq, ustart, ulen, vseq, vstart, vlen,
-                              left_dist, right_dist,
-                              matchcost, mismatchcost, gapcost);
+  cpoint = evaluateallDBtabcolumns (spacemanager, Diagcolumn, edge,
+                                    rowoffset, useq, ustart, ulen,
+                                    vseq, vstart, vlen,
+                                    left_dist, right_dist,
+                                    matchcost, mismatchcost, gapcost);
 
   /* if no crosspoint is found */
   if (cpoint == GT_UWORD_MAX)
   {
     if (diag < 0)
     {
-      return evaluateDBcrosspoints(EDtabcolumn, Rtabcolumn,Diagcolumn, edge,
+      return evaluateDBcrosspoints(spacemanager,Diagcolumn, edge,
                                    rowoffset, coloffset, useq, ustart, ulen,
-                                   original_ulen, vseq, vstart, vlen,
-                                   original_vlen, diag+1, right_dist,
+                                   vseq, vstart, vlen,
+                                   diag+1, right_dist,
                                    matchcost,mismatchcost, gapcost);
     }
 
     else if (diag > 0)
-      return evaluateDBcrosspoints(EDtabcolumn, Rtabcolumn, Diagcolumn, edge,
+      return evaluateDBcrosspoints(spacemanager, Diagcolumn, edge,
                                    rowoffset, coloffset, useq, ustart, ulen,
-                                   original_ulen, vseq, vstart, vlen,
-                                   original_vlen, left_dist, diag-1,
+                                   vseq, vstart, vlen,
+                                   left_dist, diag-1,
                                    matchcost, mismatchcost, gapcost);
     else
     {
@@ -683,11 +704,11 @@ static void evaluateDBcrosspoints(GtUword *EDtabcolumn,
                     -(GtWord)rowoffset)));
       new_right = 0;
       new_ulen =  ulen - (Diagcolumn[cpoint].currentrowindex+1-rowoffset);
-      evaluateDBcrosspoints(EDtabcolumn, Rtabcolumn, Diagcolumn+cpoint,Linear_D,
+      evaluateDBcrosspoints(spacemanager, Diagcolumn+cpoint,Linear_D,
                          Diagcolumn[cpoint].currentrowindex+1, coloffset+cpoint,
                          useq, Diagcolumn[cpoint].currentrowindex+1, new_ulen,
-                         original_ulen, vseq, vstart+cpoint, vlen-cpoint,
-                         original_vlen, new_left, new_right,
+                         vseq, vstart+cpoint, vlen-cpoint,
+                         new_left, new_right,
                          matchcost, mismatchcost, gapcost);
 
     Diagcolumn[cpoint] = dtemp;
@@ -698,11 +719,11 @@ static void evaluateDBcrosspoints(GtUword *EDtabcolumn,
       new_right =  MIN((GtWord)right_dist-((GtWord)diag)-1,
                       ((GtWord)vlen-(GtWord)cpoint-1));
       new_ulen = ulen - (Diagcolumn[cpoint].currentrowindex-rowoffset);
-      evaluateDBcrosspoints(EDtabcolumn,Rtabcolumn,Diagcolumn+cpoint+1,Linear_I,
+      evaluateDBcrosspoints(spacemanager,Diagcolumn+cpoint+1,Linear_I,
                           Diagcolumn[cpoint].currentrowindex,coloffset+cpoint+1,
                           useq, Diagcolumn[cpoint].currentrowindex, new_ulen,
-                          original_ulen, vseq, vstart+cpoint+1, vlen-cpoint-1,
-                          original_vlen, new_left, new_right,
+                          vseq, vstart+cpoint+1, vlen-cpoint-1,
+                          new_left, new_right,
                           matchcost, mismatchcost, gapcost);
     }
   }
@@ -730,11 +751,11 @@ static void evaluateDBcrosspoints(GtUword *EDtabcolumn,
       new_ulen = Diagcolumn[prevcpoint].currentrowindex-
                  Diagcolumn[cpoint].currentrowindex-1;
 
-      evaluateDBcrosspoints(EDtabcolumn,Rtabcolumn,Diagcolumn+cpoint+1,Linear_I,
+      evaluateDBcrosspoints(spacemanager,Diagcolumn+cpoint+1,Linear_I,
                           Diagcolumn[cpoint].currentrowindex,coloffset+cpoint+1,
                           useq, Diagcolumn[cpoint].currentrowindex, new_ulen,
-                          original_ulen, vseq, vstart + cpoint+1,
-                          prevcpoint-cpoint-1, original_vlen,
+                          vseq, vstart + cpoint+1,
+                          prevcpoint-cpoint-1,
                           new_left, new_right,
                           matchcost, mismatchcost, gapcost);
     }
@@ -748,11 +769,11 @@ static void evaluateDBcrosspoints(GtUword *EDtabcolumn,
       new_ulen = Diagcolumn[prevcpoint].currentrowindex-
                  Diagcolumn[cpoint].currentrowindex-1;
 
-      evaluateDBcrosspoints(EDtabcolumn,Rtabcolumn, Diagcolumn+cpoint, Linear_D,
+      evaluateDBcrosspoints(spacemanager, Diagcolumn+cpoint, Linear_D,
                           Diagcolumn[cpoint].currentrowindex+1,coloffset+cpoint,
                           useq, Diagcolumn[cpoint].currentrowindex+1, new_ulen,
-                          original_ulen, vseq, vstart + cpoint,
-                          prevcpoint-1-cpoint, original_vlen,
+                          vseq, vstart + cpoint,
+                          prevcpoint-1-cpoint,
                           new_left, new_right,
                           matchcost, mismatchcost, gapcost);
       Diagcolumn[cpoint]=dtemp;
@@ -775,10 +796,10 @@ static void evaluateDBcrosspoints(GtUword *EDtabcolumn,
       new_right = MIN(right_dist, (GtWord)cpoint);
       new_ulen = Diagcolumn[cpoint].currentrowindex-ustart-1;
 
-      evaluateDBcrosspoints(EDtabcolumn, Rtabcolumn, Diagcolumn,
+      evaluateDBcrosspoints(spacemanager, Diagcolumn,
                             edge, rowoffset, coloffset,
-                            useq, ustart, new_ulen, original_ulen,
-                            vseq, vstart, cpoint, original_vlen,
+                            useq, ustart, new_ulen,
+                            vseq, vstart, cpoint,
                             new_left, new_right,
                             matchcost, mismatchcost, gapcost);
 
@@ -788,11 +809,11 @@ static void evaluateDBcrosspoints(GtUword *EDtabcolumn,
       new_left = MAX(left_dist,
                  -((GtWord)Diagcolumn[cpoint].currentrowindex-(GtWord)ustart));
       new_right = MIN((GtWord)cpoint-1, right_dist);
-      evaluateDBcrosspoints(EDtabcolumn, Rtabcolumn, Diagcolumn,
+      evaluateDBcrosspoints(spacemanager, Diagcolumn,
                             edge, rowoffset, coloffset, useq, ustart,
                             Diagcolumn[cpoint].currentrowindex-ustart,
-                            original_ulen, vseq, vstart, cpoint-1,
-                            original_vlen, new_left, new_right,
+                            vseq, vstart, cpoint-1,
+                            new_left, new_right,
                             matchcost, mismatchcost, gapcost);
     }
     else if (Diagcolumn[cpoint].edge == Linear_R ||
@@ -805,19 +826,20 @@ static void evaluateDBcrosspoints(GtUword *EDtabcolumn,
 }
 
 /* calculating alignment in linear space within a specified diagonal band */
-static void gt_calc_diagonalbandalign(const GtUchar *useq,
-                                      GtUword ustart, GtUword ulen,
-                                      const GtUchar *vseq,
-                                      GtUword vstart, GtUword vlen,
-                                      GtWord left_dist,
-                                      GtWord right_dist,
-                                      GtAlignment *align,
-                                      GtUword matchcost,
-                                      GtUword mismatchcost,
-                                      GtUword gapcost)
+static GtUword gt_calc_diagonalbandalign(LinspaceManagement *spacemanager,
+                                         GtAlignment *align,
+                                         const GtUchar *useq,
+                                         GtUword ustart, GtUword ulen,
+                                         const GtUchar *vseq,
+                                         GtUword vstart, GtUword vlen,
+                                         GtWord left_dist,
+                                         GtWord right_dist,
+                                         GtUword matchcost,
+                                         GtUword mismatchcost,
+                                         GtUword gapcost)
 {
   Diagentry *Diagcolumn;
-  GtUword idx, *EDtabcolumn, *Rtabcolumn;
+  GtUword idx, distance, *EDtabcolumn, *Rtabcolumn;
 
   gt_assert(align != NULL);
 
@@ -831,52 +853,56 @@ static void gt_calc_diagonalbandalign(const GtUchar *useq,
     exit(GT_EXIT_PROGRAMMING_ERROR);
   }
 
+  gt_linspaceManagement_set_ulen(spacemanager,ulen);
   if (ulen == 0UL)
   {
-    (void) construct_trivial_insertion_alignment(align,vlen,gapcost);
-    return;
+    return construct_trivial_insertion_alignment(align,vlen,gapcost);
   }
   else if (vlen == 0UL)
   {
-    (void) construct_trivial_deletion_alignment(align,vlen,gapcost);
-    return;
+    return construct_trivial_deletion_alignment(align,ulen,gapcost);
+
   }
-  else if (ulen == 1UL || vlen == 1UL )
+  else if (gt_linspaceManagement_checksquare(spacemanager, ulen, vlen,
+                                             sizeof (*EDtabcolumn),
+                                             sizeof (*Rtabcolumn)))
   {
-    (void) diagonalbandalignment_in_square_space(align, useq, ustart, ulen,
+    return diagonalbandalignment_in_square_space(spacemanager,align,
+                                                 useq, ustart, ulen,
                                                  vseq, vstart, vlen, left_dist,
                                                  right_dist, matchcost,
                                                  mismatchcost, gapcost);
-    return;
   }
-  else
+
+  gt_linspaceManagement_check(spacemanager,right_dist-left_dist,vlen,
+                              sizeof (*EDtabcolumn),
+                              sizeof (*Rtabcolumn),
+                              sizeof (*Diagcolumn));
+
+  Diagcolumn = gt_linspaceManagement_get_crosspointTabspace(spacemanager);
+  /* initialize Diagcolumn */
+  for (idx = 0; idx <= vlen; idx++)
   {
-    Diagcolumn = gt_malloc(sizeof *Diagcolumn * (vlen+1));
-    EDtabcolumn = gt_malloc(sizeof *EDtabcolumn * (ulen+1));
-    Rtabcolumn = gt_malloc(sizeof *Rtabcolumn * (ulen+1));
-
-    /* initialize Diagcolumn */
-    for (idx = 0; idx <= vlen; idx++)
-    {
-      Diagcolumn[idx].lastcpoint = GT_UWORD_MAX;
-      Diagcolumn[idx].currentrowindex = GT_UWORD_MAX;
-    }
-
-    evaluateDBcrosspoints(EDtabcolumn, Rtabcolumn, Diagcolumn, Linear_X, 0, 0,
-                          useq, ustart, ulen, ulen, vseq, vstart, vlen, vlen,
-                          left_dist, right_dist,
-                          matchcost, mismatchcost, gapcost);
-
-    reconstructalignment_from_Dtab(align,Diagcolumn,ulen, vlen);
-
-    gt_free(Diagcolumn);
-    gt_free(EDtabcolumn);
-    gt_free(Rtabcolumn);
+    Diagcolumn[idx].lastcpoint = GT_UWORD_MAX;
+    Diagcolumn[idx].currentrowindex = GT_UWORD_MAX;
   }
+
+  evaluateDBcrosspoints(spacemanager, Diagcolumn, Linear_X, 0, 0,
+                        useq, ustart, ulen, vseq, vstart, vlen,
+                        left_dist, right_dist,
+                        matchcost, mismatchcost, gapcost);
+
+  reconstructalignment_from_Dtab(align,Diagcolumn,ulen, vlen);
+  distance = gt_alignment_eval_generic_with_score(false, align,
+                                       matchcost,
+                                       mismatchcost,
+                                       gapcost);
+  return distance;
 }
 
 /* compute alignment within a diagonal band */
-void gt_computediagonalbandalign(GtAlignment *align,
+GtUword gt_computediagonalbandalign(LinspaceManagement *spacemanager,
+                                 GtAlignment *align,
                                  const GtUchar *useq,
                                  GtUword ustart, GtUword ulen,
                                  const GtUchar *vseq,
@@ -887,6 +913,7 @@ void gt_computediagonalbandalign(GtAlignment *align,
                                  GtUword mismatchcost,
                                  GtUword gapcost)
 {
+  GtUword distance;
   gt_assert(useq  && vseq);
 
   /* set new bounds, if left_dist or right_dist is out of sequence */
@@ -894,10 +921,11 @@ void gt_computediagonalbandalign(GtAlignment *align,
   right_dist = MIN((GtWord) vlen, right_dist);
 
   gt_alignment_set_seqs(align,useq+ustart, ulen, vseq+vstart, vlen);
-  gt_calc_diagonalbandalign(useq, ustart, ulen, vseq, vstart, vlen,
-                            left_dist, right_dist, align,
+  distance = gt_calc_diagonalbandalign(spacemanager, align,
+                            useq, ustart, ulen, vseq, vstart, vlen,
+                            left_dist, right_dist,
                             matchcost, mismatchcost, gapcost);
-
+  return distance;
 }
 
 void gt_checkdiagonalbandalign(GT_UNUSED bool forward,
@@ -909,6 +937,7 @@ void gt_checkdiagonalbandalign(GT_UNUSED bool forward,
   GtUword edist1, edist2, edist3, matchcost = 0, mismatchcost = 1, gapcost = 1;
   GtWord left_dist, right_dist;
   GtAlignment *align;
+  LinspaceManagement *spacemanager;
 
   if (memchr(useq, LINEAR_EDIST_GAP,ulen) != NULL)
   {
@@ -947,10 +976,14 @@ void gt_checkdiagonalbandalign(GT_UNUSED bool forward,
     exit(GT_EXIT_PROGRAMMING_ERROR);
   }
 
+  spacemanager = gt_linspaceManagement_new();
   align = gt_alignment_new_with_seqs(useq, ulen, vseq, vlen);
-  gt_calc_diagonalbandalign(useq, 0, ulen, vseq, 0, vlen, left_dist, right_dist,
-                            align, matchcost, mismatchcost, gapcost);
+  gt_calc_diagonalbandalign(spacemanager, align,
+                            useq, 0, ulen, vseq, 0, vlen,
+                            left_dist, right_dist,
+                            matchcost, mismatchcost, gapcost);
 
+  gt_linspaceManagement_delete(spacemanager);
   edist3 = gt_alignment_eval_generic_with_score(false, align, matchcost,
                                                 mismatchcost, gapcost);
   if (edist2 != edist3)

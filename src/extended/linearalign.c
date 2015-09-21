@@ -266,7 +266,7 @@ GtUword gt_calc_linearalign(LinspaceManagement *spacemanager,
   }
   else if (vlen == 0UL)
   {
-    return construct_trivial_deletion_alignment(align,vlen,gapcost);
+    return construct_trivial_deletion_alignment(align,ulen,gapcost);
   }
   else if (gt_linspaceManagement_checksquare(spacemanager, ulen, vlen,
                                              sizeof (*EDtabcolumn),
