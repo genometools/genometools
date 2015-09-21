@@ -24,6 +24,7 @@ typedef enum
 typedef struct
 {
   const GtEncseq *encseq;
+  GtReadmode readmode;
   GtAllocatedMemory *sequence_cache;
   GtEncseqReader *encseq_r;
   const GtUchar *bytesequence;

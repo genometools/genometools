@@ -46,7 +46,7 @@ typedef struct
   const GtTwobitencoding *twobitencoding;
   const GtEncseq *encseq;
   const GtUchar *bytesequenceptr;
-  bool forward;
+  GtReadmode readmode;
   GtEncseqReader *encseqreader;
   GtUchar *cache_ptr;
   GtAllocatedMemory *sequence_cache;
@@ -84,11 +84,17 @@ static void sequenceobject_init(Sequenceobject *seq,
       (extend_char_access_mode == GT_EXTEND_CHAR_ACCESS_ANY ||
        extend_char_access_mode == GT_EXTEND_CHAR_ACCESS_ENCSEQ_READER))
   {
-    gt_encseq_reader_reinit_with_readmode(encseq_r, encseq, readmode,
-                                          readmode == GT_READMODE_FORWARD
-                                            ? startpos
-                                            : GT_REVERSEPOS(totallength,
-                                                            startpos));
+    if (GT_ISDIRREVERSE(readmode))
+    {
+      gt_encseq_reader_reinit_with_readmode(encseq_r, encseq,
+                                            GT_READMODE_REVERSE,
+                                            GT_REVERSEPOS(totallength,
+                                                          startpos));
+    } else
+    {
+      gt_encseq_reader_reinit_with_readmode(encseq_r, encseq,
+                                            GT_READMODE_FORWARD,startpos);
+    }
     seq->encseqreader = encseq_r;
     gt_assert(seq->encseqreader != NULL && sequence_cache != NULL);
     seq->sequence_cache = sequence_cache;
@@ -111,7 +117,7 @@ static void sequenceobject_init(Sequenceobject *seq,
   seq->substringlength = len;
   seq->totallength = totallength;
   seq->startpos = startpos;
-  seq->forward = readmode == GT_READMODE_FORWARD ? true : false;
+  seq->readmode = readmode;
   gt_assert(seq->twobitencoding != NULL || seq->encseqreader != NULL ||
             seq->encseq != NULL || seq->bytesequenceptr != NULL);
 }
@@ -126,52 +132,71 @@ static GtUchar gt_twobitencoding_char_at_pos(
 
 static GtUchar sequenceobject_get_char(Sequenceobject *seq,GtUword pos)
 {
+  GtUchar cc;
+
   if (seq->twobitencoding != NULL)
   {
-    return gt_twobitencoding_char_at_pos(seq->twobitencoding,
-                                         seq->forward ? seq->startpos + pos
-                                                      : seq->startpos - pos);
-  }
-  if (seq->encseqreader != NULL)
+    cc = gt_twobitencoding_char_at_pos(seq->twobitencoding,
+                                       GT_ISDIRREVERSE(seq->readmode)
+                                         ? seq->startpos - pos
+                                         : seq->startpos + pos);
+  } else
   {
-    gt_assert(pos < seq->substringlength);
-    if (pos >= seq->cache_num_positions)
+    if (seq->encseqreader != NULL)
     {
-      GtUword idx, tostore;
-      const GtUword addamount = 256UL;
+      gt_assert(pos < seq->substringlength);
+      if (pos >= seq->cache_num_positions)
+      {
+        GtUword idx, tostore;
+        const GtUword addamount = 256UL;
 
-      tostore = MIN(seq->cache_num_positions + addamount,seq->substringlength);
-      if (tostore > seq->sequence_cache->allocated)
-      {
-        seq->sequence_cache->allocated += addamount;
-        seq->sequence_cache->space
-          = gt_realloc(seq->sequence_cache->space,
-                       sizeof (GtUchar) * seq->sequence_cache->allocated);
-        seq->cache_ptr = (GtUchar *) seq->sequence_cache->space;
+        tostore = MIN(seq->cache_num_positions + addamount,
+                      seq->substringlength);
+        if (tostore > seq->sequence_cache->allocated)
+        {
+          seq->sequence_cache->allocated += addamount;
+          seq->sequence_cache->space
+            = gt_realloc(seq->sequence_cache->space,
+                         sizeof (GtUchar) * seq->sequence_cache->allocated);
+          seq->cache_ptr = (GtUchar *) seq->sequence_cache->space;
+        }
+        for (idx = seq->cache_num_positions; idx < tostore; idx++)
+        {
+          seq->cache_ptr[idx]
+            = gt_encseq_reader_next_encoded_char(seq->encseqreader);
+        }
+        seq->cache_num_positions = tostore;
       }
-      for (idx = seq->cache_num_positions; idx < tostore; idx++)
+      gt_assert(seq->cache_ptr != NULL && pos < seq->cache_num_positions);
+      cc = seq->cache_ptr[pos];
+    } else
+    {
+      gt_assert(!GT_ISDIRREVERSE(seq->readmode) || seq->startpos >= pos);
+      if (seq->encseq != NULL)
       {
-        seq->cache_ptr[idx]
-          = gt_encseq_reader_next_encoded_char(seq->encseqreader);
+        cc = gt_encseq_get_encoded_char(seq->encseq,
+                                        GT_ISDIRREVERSE(seq->readmode)
+                                          ? seq->startpos - pos
+                                          : seq->startpos + pos,
+                                        GT_READMODE_FORWARD);
+      } else
+      {
+        gt_assert(seq->bytesequenceptr != NULL &&
+                  ((!GT_ISDIRREVERSE(seq->readmode)
+                    && seq->startpos + pos < seq->totallength) ||
+                   (GT_ISDIRREVERSE(seq->readmode)
+                    && seq->startpos - pos < seq->totallength)));
+        cc = seq->bytesequenceptr[GT_ISDIRREVERSE(seq->readmode)
+                                     ? seq->startpos - pos
+                                     : seq->startpos + pos];
       }
-      seq->cache_num_positions = tostore;
     }
-    gt_assert(seq->cache_ptr != NULL && pos < seq->cache_num_positions);
-    return seq->cache_ptr[pos];
   }
-  gt_assert(seq->forward || seq->startpos >= pos);
-  if (seq->encseq != NULL)
+  if (GT_ISDIRCOMPLEMENT(seq->readmode) && !ISSPECIAL(cc))
   {
-    return gt_encseq_get_encoded_char(seq->encseq,
-                                      seq->forward ? seq->startpos + pos
-                                                   : seq->startpos - pos,
-                                      GT_READMODE_FORWARD);
+    return GT_COMPLEMENTBASE(cc);
   }
-  gt_assert(seq->bytesequenceptr != NULL &&
-            ((seq->forward && seq->startpos + pos < seq->totallength) ||
-             (!seq->forward && seq->startpos - pos < seq->totallength)));
-  return seq->bytesequenceptr[seq->forward ? seq->startpos + pos
-                                           : seq->startpos - pos];
+  return cc;
 }
 
 #else
@@ -548,7 +573,7 @@ static void update_trace_and_polished(Polished_point *best_polished_point,
 
 GtUword front_prune_edist_inplace(
 #ifndef OUTSIDE_OF_GT
-                         bool forward,
+                         bool rightextension,
                          GtAllocatedMemory *frontspace,
 #endif
                          Trimstat *trimstat,
@@ -585,11 +610,17 @@ GtUword front_prune_edist_inplace(
   sequenceobject_init(&useq,useqptr,ustart,ulen);
   sequenceobject_init(&vseq,vseqptr,vstart,vlen);
 #else
-  GtReadmode readmode = forward ? GT_READMODE_FORWARD : GT_READMODE_REVERSE;
+  GtReadmode u_readmode = ufsr->readmode, v_readmode = ufsr->readmode;
+
+  if (!rightextension)
+  {
+    gt_readmode_invert(u_readmode);
+    gt_readmode_invert(v_readmode);
+  }
   sequenceobject_init(&useq,
                       ufsr->extend_char_access,
                       ufsr->encseq,
-                      readmode,
+                      u_readmode,
                       ustart,
                       ulen,
                       ufsr->encseq_r,
@@ -599,7 +630,7 @@ GtUword front_prune_edist_inplace(
   sequenceobject_init(&vseq,
                       vfsr->extend_char_access,
                       vfsr->encseq,
-                      readmode,
+                      v_readmode,
                       vstart,
                       vlen,
                       vfsr->encseq_r,

@@ -665,6 +665,7 @@ void gt_greedy_extend_matchinfo_verbose_set(GtGreedyextendmatchinfo *ggemi)
 
 static void gt_FTsequenceResources_init(FTsequenceResources *fsr,
                                         const GtEncseq *encseq,
+                                        GtReadmode readmode,
                                         GtEncseqReader *encseq_r,
                                         GtAllocatedMemory *sequence_cache,
                                         const GtUchar *bytesequence,
@@ -672,6 +673,7 @@ static void gt_FTsequenceResources_init(FTsequenceResources *fsr,
                                         GtExtendCharAccess extend_char_access)
 {
   fsr->encseq = encseq;
+  fsr->readmode = readmode;
   fsr->totallength = totallength;
   fsr->encseq_r = encseq_r;
   fsr->sequence_cache = sequence_cache;
@@ -728,6 +730,7 @@ static const GtQuerymatch *gt_greedy_extend_selfmatch_sesp(
   }
   gt_FTsequenceResources_init(&ufsr,
                               encseq,
+                              GT_READMODE_FORWARD,
                               greedyextendmatchinfo->encseq_r_in_u,
                               &greedyextendmatchinfo->usequence_cache,
                               NULL,
@@ -735,6 +738,7 @@ static const GtQuerymatch *gt_greedy_extend_selfmatch_sesp(
                               greedyextendmatchinfo->extend_char_access);
   gt_FTsequenceResources_init(&vfsr,
                               encseq,
+                              GT_READMODE_FORWARD,
                               greedyextendmatchinfo->encseq_r_in_v,
                               &greedyextendmatchinfo->vsequence_cache,
                               NULL,
@@ -973,6 +977,7 @@ GtUword gt_align_front_prune_edist(bool forward,
   }
   gt_FTsequenceResources_init(&ufsr,
                               dbencseq,
+                              GT_READMODE_FORWARD,
                               ggemi->encseq_r_in_u,
                               &ggemi->usequence_cache,
                               NULL,
@@ -980,6 +985,7 @@ GtUword gt_align_front_prune_edist(bool forward,
                               ggemi->extend_char_access);
   gt_FTsequenceResources_init(&vfsr,
                               dbencseq,
+                              GT_READMODE_FORWARD,
                               ggemi->encseq_r_in_v,
                               &ggemi->vsequence_cache,
                               query,

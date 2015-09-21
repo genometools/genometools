@@ -98,8 +98,12 @@ void gt_querymatch_init(GtQuerymatch *querymatch,
   querymatch->dbseqnum = dbseqnum;
   querymatch->dbstart_relative = dbstart_relative;
   gt_assert((int) querymatch->readmode < 4);
-  if (querymatch->query_readmode == GT_READMODE_REVERSE ||
-      querymatch->query_readmode == GT_READMODE_REVCOMPL)
+  /*
+  prefer this version later
+  if (GT_ISDIRREVERSE(querymatch->query_readmode))
+  */
+  if (querymatch->readmode == GT_READMODE_REVERSE ||
+      querymatch->readmode == GT_READMODE_REVCOMPL)
   {
     gt_assert(querymatch->querystart + querymatch->querylen <=
               query_totallength);
