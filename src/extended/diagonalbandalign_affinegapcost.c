@@ -451,15 +451,17 @@ static GtUword diagonalband_linear_affine(const GtUchar *useq,
   for (colindex = 1; colindex <= vlen; colindex++)
   {
     northwestAffinealignDPentry = Atabcolumn[0];
-    if (high_row < ulen)
-      high_row ++;
     if (colindex > right_dist)
     {
-      westAffinealignDPentry = Atabcolumn[1];
+      if (low_row != high_row)
+        westAffinealignDPentry = Atabcolumn[1];
       low_row++;
     }
     else
       westAffinealignDPentry = Atabcolumn[0];
+
+    if (high_row < ulen)
+      high_row ++;
     if (!last_row && rowindex == high_row)
       {
         westAffinealignDPentry.Rvalue = GT_WORD_MAX;
@@ -732,7 +734,8 @@ static Rnode evaluateallaffineDBcolumns(LinspaceManagement *spacemanager,
 
   bool last_row = false;
   AffinealignDPentry *Atabcolumn, northwestAffinealignDPentry,
-                     westAffinealignDPentry;
+  westAffinealignDPentry = (AffinealignDPentry)
+                           {GT_WORD_MAX, GT_WORD_MAX, GT_WORD_MAX};;
   Rtabentry *Rtabcolumn, northwestRtabentry, westRtabentry;
   Rnode lastcpoint = {GT_UWORD_MAX, Affine_X};
 
@@ -760,12 +763,12 @@ static Rnode evaluateallaffineDBcolumns(LinspaceManagement *spacemanager,
     northwestAffinealignDPentry = Atabcolumn[0];
     northwestRtabentry = Rtabcolumn[0];
 
-    if (high_row < ulen)
-      high_row ++;
     if (colindex > right_dist)
     {
-      westAffinealignDPentry = Atabcolumn[1];
-      westRtabentry = Rtabcolumn[1];
+      if (low_row != high_row) {
+        westAffinealignDPentry = Atabcolumn[1];
+        westRtabentry = Rtabcolumn[1];
+      }
       low_row++;
     }
     else
@@ -773,6 +776,8 @@ static Rnode evaluateallaffineDBcolumns(LinspaceManagement *spacemanager,
       westAffinealignDPentry = Atabcolumn[0];
       westRtabentry = Rtabcolumn[0];
     }
+    if (high_row < ulen)
+      high_row ++;
     if (!last_row && low_row == high_row)
     {/* prev is outside of diagonalband*/
       westAffinealignDPentry = (AffinealignDPentry)

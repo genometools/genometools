@@ -291,7 +291,7 @@ static GtUword diagonalband_linear_distance_only(const GtUchar *useq,
                                                  GtUword gapcost)
 {
   GtUword distance, colindex, rowindex, low_row, high_row, width, val,
-        *EDtabcolumn, northwestEDtabentry, westEDtabentry;
+        *EDtabcolumn, northwestEDtabentry, westEDtabentry = GT_UWORD_MAX;
   bool last_row = false;
 
   distance = GT_UWORD_MAX;
@@ -313,23 +313,23 @@ static GtUword diagonalband_linear_distance_only(const GtUchar *useq,
   {
     EDtabcolumn[rowindex-low_row] = EDtabcolumn[rowindex-low_row-1] + gapcost;
   }
-  if (high_row==ulen)
+  if (high_row == ulen)
     last_row = true;
   for (colindex = 1; colindex <= vlen; colindex++)
   {
     northwestEDtabentry = EDtabcolumn[0];
 
-    if (high_row < ulen)
-      high_row ++;
-
     if (colindex > right_dist)
     {
-      westEDtabentry = EDtabcolumn[1];
+      if (low_row != high_row)
+        westEDtabentry = EDtabcolumn[1];
       low_row++;
     }
     else
       westEDtabentry = EDtabcolumn[0];
 
+   if (high_row < ulen)
+      high_row ++;
    if (!last_row && low_row == high_row)
         westEDtabentry = GT_UWORD_MAX;
     EDtabcolumn[0] = add_safe_umax(westEDtabentry, gapcost);
@@ -463,8 +463,8 @@ static GtUword evaluateallDBtabcolumns(LinspaceManagement *spacemanager,
                                        GtUword gapcost)
 {
   GtUword colindex, rowindex, val, *EDtabcolumn, *Rtabcolumn,
-          northwestEDtabentry, westEDtabentry,
-          northwestRtabentry, westRtabentry,
+          northwestEDtabentry, westEDtabentry = GT_UWORD_MAX,
+          northwestRtabentry, westRtabentry = GT_UWORD_MAX,
           low_row, high_row; /*lowest and highest row between a diagonal band*/
   GtWord diag;
   bool last_row = false;
@@ -493,13 +493,13 @@ static GtUword evaluateallDBtabcolumns(LinspaceManagement *spacemanager,
     northwestEDtabentry = EDtabcolumn[0];
     northwestRtabentry = Rtabcolumn[0];
 
-    if (high_row < ulen)
-      high_row ++;
-
     if (colindex > right_dist)
     {
-      westEDtabentry = EDtabcolumn[1];
-      westRtabentry = Rtabcolumn[1];
+      if (low_row != high_row)
+      {
+        westEDtabentry = EDtabcolumn[1];
+        westRtabentry = Rtabcolumn[1];
+      }
       low_row++;
     }
     else
@@ -507,6 +507,8 @@ static GtUword evaluateallDBtabcolumns(LinspaceManagement *spacemanager,
       westEDtabentry = EDtabcolumn[0];
       westRtabentry = Rtabcolumn[0];
     }
+    if (high_row < ulen)
+      high_row ++;
     if (!last_row && low_row == high_row)
     {/* prev is outside of diagonalband*/
       westEDtabentry = GT_UWORD_MAX;
