@@ -16,7 +16,7 @@
 */
 #include <ctype.h>
 #include "extended/alignment.h"
-#include "extended/linearalign_utilities.h"
+#include "extended/linspaceManagement.h"
 
 #include "extended/reconstructalignment.h"
 
@@ -48,7 +48,7 @@ GtUword construct_trivial_insertion_alignment(GtAlignment *align,
   return (len*gapcost);
 }
 
-/* reconstruct alignment from square space table ED */
+/* reconstruct global alignment from square space table ED */
 void reconstructalignment_from_EDtab(GtAlignment *align, GtUword **E,
                                      const GtUchar *useq,
                                      GtUword ustart,
@@ -89,6 +89,57 @@ void reconstructalignment_from_EDtab(GtAlignment *align, GtUword **E,
       gt_assert(false);
     }
   }
+}
+
+/* reconstruct local alignment from square space table Ltab */
+void reconstructalignment_from_Ltab(GtAlignment *align,
+                                    GtWord **Ltabcolumn,
+                                    Gtmaxcoordvalue *max,
+                                    const GtUchar *useq,
+                                    GtUword ustart,
+                                    GtUword ulen,
+                                    const GtUchar *vseq,
+                                    GtUword vstart,
+                                    GtUword vlen,
+                                    GtWord matchscore,
+                                    GtWord mismatchscore,
+                                    GtWord gapscore)
+{
+  GtUword i, j;
+  GtUwordPair max_end;
+  gt_assert(align && Ltabcolumn);
+  max_end = gt_max_get_end(max);
+  i = max_end.a;
+  j = max_end.b;
+
+  gt_assert(i<=ulen && j<=vlen);
+  while (i > 0 || j > 0)
+  {
+    if (Ltabcolumn[i][j] == 0)
+      break;
+    else if (i > 0 && j > 0 && Ltabcolumn[i][j] == Ltabcolumn[i-1][j-1] +
+            (tolower((int)useq[ustart+i-1]) == tolower((int) vseq[vstart+j-1]) ?
+                         matchscore : mismatchscore))
+    {
+      gt_alignment_add_replacement(align);
+      i--; j--;
+    }
+    else if (j > 0 && Ltabcolumn[i][j] == Ltabcolumn[i][j-1] + gapscore)
+    {
+      gt_alignment_add_insertion(align);
+      j--;
+    }
+    else if (i > 0 && Ltabcolumn[i][j] == Ltabcolumn[i-1][j] + gapscore)
+    {
+      gt_alignment_add_deletion(align);
+      i--;
+    }
+    else
+    {
+      gt_assert(false);
+    }
+  }
+  gt_max_set_start(max,i,j);
 }
 
 /* reconstruct alignment from crosspoint table

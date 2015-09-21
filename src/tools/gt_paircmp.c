@@ -29,6 +29,7 @@
 #include "extended/diagonalbandalign_affinegapcost.h"
 #include "extended/linearalign_affinegapcost.h"
 #include "extended/linearalign.h"
+#include "extended/squarealign.h"
 #include "match/test-pairwise.h"
 #include "tools/gt_paircmp.h"
 
@@ -296,7 +297,7 @@ int gt_paircmp(int argc, const char **argv, GtError *err)
     }
     else if (cmppairwise.print)
     {
-      gt_print_edist_alignment(
+        gt_print_edist_alignment(
         (const GtUchar *) gt_str_array_get(cmppairwise.strings,0),0,
         (GtUword) strlen(gt_str_array_get(cmppairwise.strings,0)),
         (const GtUchar *) gt_str_array_get(cmppairwise.strings,1UL),0,

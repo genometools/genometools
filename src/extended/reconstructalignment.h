@@ -22,6 +22,7 @@
 #include "extended/alignment.h"
 #include "extended/diagonalbandalign.h"
 #include "extended/diagonalbandalign_affinegapcost.h"
+#include "extended/maxcoordvalue.h"
 
 GtUword construct_trivial_deletion_alignment(GtAlignment *align,
                                              GtUword len,
@@ -32,7 +33,7 @@ GtUword construct_trivial_insertion_alignment(GtAlignment *align,
                                               GtUword gapcost);
 
 /* reconstruct alignment from square space table ED
- * use this function for global alignment with linear */
+ * use this function for global alignment with linear gapcosts*/
 void reconstructalignment_from_EDtab(GtAlignment *align, GtUword **E,
                                      const GtUchar *useq,
                                      GtUword ustart,
@@ -43,6 +44,21 @@ void reconstructalignment_from_EDtab(GtAlignment *align, GtUword **E,
                                      GtUword matchcost,
                                      GtUword mismatchcost,
                                      GtUword gapcost);
+
+/* reconstruct alignment from square space table Ltab
+ * use this function for lcoal alignment with linear gapscores*/
+void reconstructalignment_from_Ltab(GtAlignment *align,
+                                    GtWord **Ltabcolumn,
+                                    Gtmaxcoordvalue *max,
+                                    const GtUchar *useq,
+                                    GtUword ustart,
+                                    GtUword ulen,
+                                    const GtUchar *vseq,
+                                    GtUword vstart,
+                                    GtUword vlen,
+                                    GtWord matchscore,
+                                    GtWord mismatchscore,
+                                    GtWord gapscore);
 
 /* reconstruct alignment from crosspoint table, realting to midcolumn,
  * use this function for global or local alignment with linear or affine

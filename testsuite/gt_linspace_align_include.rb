@@ -25,7 +25,7 @@ Test do
         i=i+1
         run_test "#{$bin}gt dev linspace_align -ff #{$testdata}#{f1} #{$testdata}#{f2} "\
                  "-global -l 0 1 1"
-        run "diff #{last_stdout} #{$testdata}gt_linspace_align_global_test_#{i}.out"
+        run "diff -i #{last_stdout} #{$testdata}gt_linspace_align_global_test_#{i}.out"
       end
     end
   end
@@ -39,7 +39,7 @@ end
              "#{$testdata}gt_linspace_align_test_#{i}.fas "\
              "#{$testdata}gt_linspace_align_test_#{i+1}.fas "\
              "-local -l 2 \" -2\" \" -1\""
-    run "diff #{last_stdout} #{$testdata}gt_linspace_align_local_test_#{i}.out"
+    run "diff -i #{last_stdout} #{$testdata}gt_linspace_align_local_test_#{i}.out"
   end
 end
 
@@ -51,7 +51,7 @@ end
              "#{$testdata}gt_linspace_align_affine_test_#{i}.fas "\
              "#{$testdata}gt_linspace_align_affine_test_#{i+1}.fas "\
              "-global -a 0 2 3 1"
-    run "diff #{last_stdout} #{$testdata}gt_linspace_align_global_affine_test_#{i}.out"
+    run "diff -i #{last_stdout} #{$testdata}gt_linspace_align_global_affine_test_#{i}.out"
   end
 end
 
@@ -62,7 +62,7 @@ Test do
            "#{$testdata}gt_linspace_align_affine_test_1.fas "\
            "#{$testdata}gt_linspace_align_affine_test_2.fas "\
            "-local -a 6 \" -2\" \" -5\" \" -1\""
-  run "diff #{last_stdout} #{$testdata}gt_linspace_align_local_affine_test_1.out"
+  run "diff -i #{last_stdout} #{$testdata}gt_linspace_align_local_affine_test_1.out"
 end
 
 Name "gt linspace_align diagonalband filelist"
@@ -77,7 +77,7 @@ Test do
         i=i+1
         run_test "#{$bin}gt dev linspace_align -ff #{$testdata}#{f1} #{$testdata}#{f2} "\
                  "-global -l 0 1 1 -d \" -400\" 400", :maxtime => 1
-        run "diff #{last_stdout} #{$testdata}gt_linspace_align_global_test_#{i}.out"
+        run "diff -i #{last_stdout} #{$testdata}gt_linspace_align_global_test_#{i}.out"
       end
     end
   end
@@ -98,7 +98,7 @@ Test do
            "#{$testdata}gt_linspace_align_affine_test_1.fas "\
            "#{$testdata}gt_linspace_align_affine_test_2.fas "\
            " -global -a 0 2 3 1 -d \" -80\"  60", :maxtime => 1
-  run "diff #{last_stdout} #{$testdata}gt_linspace_align_global_affine_test_1.out"
+  run "diff -i #{last_stdout} #{$testdata}gt_linspace_align_global_affine_test_1.out"
 end
 
 Name "gt linspace_align special cases"
@@ -108,32 +108,32 @@ Test do
            "#{$testdata}gt_linspace_align_special_cases_test_1.fas "\
            "#{$testdata}gt_linspace_align_special_cases_test_2.fas "\
            "-global -l 0 1 1"
-  run "diff #{last_stdout} #{$testdata}gt_linspace_align_global_linear_special_cases.out"
+  run "diff -i #{last_stdout} #{$testdata}gt_linspace_align_global_linear_special_cases.out"
   run_test "#{$bin}gt dev linspace_align -ff "\
            "#{$testdata}gt_linspace_align_special_cases_test_1.fas "\
            "#{$testdata}gt_linspace_align_special_cases_test_2.fas "\
            "-local -l 2 \" -2\" \" -1\""
-  run "diff #{last_stdout} #{$testdata}gt_linspace_align_local_linear_special_cases.out"
+  run "diff -i #{last_stdout} #{$testdata}gt_linspace_align_local_linear_special_cases.out"
   run_test "#{$bin}gt dev linspace_align -ff "\
            "#{$testdata}gt_linspace_align_special_cases_test_1.fas "\
            "#{$testdata}gt_linspace_align_special_cases_test_2.fas "\
            "-global -a 0 2 3 1"
-  run "diff #{last_stdout} #{$testdata}gt_linspace_align_global_affine_special_cases.out"
+  run "diff -i #{last_stdout} #{$testdata}gt_linspace_align_global_affine_special_cases.out"
   run_test "#{$bin}gt dev linspace_align -ff "\
            "#{$testdata}gt_linspace_align_special_cases_test_1.fas "\
            "#{$testdata}gt_linspace_align_special_cases_test_2.fas "\
            "-local -a  6 \" -2\" \" -5\" \" -1\""
-  run "diff #{last_stdout} #{$testdata}gt_linspace_align_local_affine_special_cases.out"
+  run "diff -i #{last_stdout} #{$testdata}gt_linspace_align_local_affine_special_cases.out"
   run_test "#{$bin}gt dev linspace_align -ff "\
            "#{$testdata}gt_linspace_align_special_cases_test_1.fas "\
            "#{$testdata}gt_linspace_align_special_cases_test_2.fas "\
            "-global -l 0 1 1 -d \" -5\" 4"
-  run "diff #{last_stdout} #{$testdata}gt_linspace_align_global_linear_special_cases.out"
+  run "diff -i #{last_stdout} #{$testdata}gt_linspace_align_global_linear_special_cases.out"
   run_test "#{$bin}gt dev linspace_align -ff "\
            "#{$testdata}gt_linspace_align_special_cases_test_1.fas "\
            "#{$testdata}gt_linspace_align_special_cases_test_2.fas "\
            "-global -a 0 2 3 1 -d \" -5\" 4"
-  run "diff #{last_stdout} #{$testdata}gt_linspace_align_global_affine_special_cases.out"
+  run "diff -i #{last_stdout} #{$testdata}gt_linspace_align_global_affine_special_cases.out"
 end
 
 Name "gt linspace_align all checkfun with gt_paircmp"
