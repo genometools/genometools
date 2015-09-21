@@ -22,7 +22,7 @@
 
 #include "core/unused_api.h"
 #include "core/error.h"
-#include "extended/alignment.h"
+#include "extended/linspaceManagement.h"
 
 void gt_checklinearspace(GT_UNUSED bool forward,
                          const GtUchar *useq,
@@ -37,7 +37,8 @@ void gt_checklinearspace_local(GT_UNUSED bool forward,
                                GtUword vlen);
 
 /*global alignment with linear gapcosts in linear space */
-GtUword gt_computelinearspace(GtAlignment *align,
+GtUword gt_computelinearspace(LinspaceManagement *spacemanager,
+                              GtAlignment *align,
                               const GtUchar *useq,
                               GtUword ustart,
                               GtUword ulen,
@@ -49,24 +50,20 @@ GtUword gt_computelinearspace(GtAlignment *align,
                               GtUword gapcost);
 
 /*local alignment with linear gapcosts in linear space */
-GtUword gt_computelinearspace_local(GtAlignment *align,
-                                    const GtUchar *useq,
-                                    GtUword ustart,
-                                    GtUword ulen,
-                                    const GtUchar *vseq,
-                                    GtUword vstart,
-                                    GtUword vlen,
-                                    GtWord matchscore,
-                                    GtWord mismatchscore,
-                                    GtWord gapscore);
+GtWord gt_computelinearspace_local(LinspaceManagement *spacemanager,
+                                   GtAlignment *align,
+                                   const GtUchar *useq,
+                                   GtUword ustart,
+                                   GtUword ulen,
+                                   const GtUchar *vseq,
+                                   GtUword vstart,
+                                   GtUword vlen,
+                                   GtWord matchscore,
+                                   GtWord mismatchscore,
+                                   GtWord gapscore);
 
-/* edit distance of sequences u and v */
+/* edit distance of sequences u and v in linear space*/
 GtUword gt_calc_linearedist(const GtUchar *u, GtUword ulen,
                             const GtUchar *v, GtUword vlen);
 
-/*global alignment with unitcosts in linear space */
-void gt_print_edist_alignment(const GtUchar *useq, GtUword ustart,
-                              GtUword ulen,
-                              const GtUchar *vseq,GtUword vstart,
-                              GtUword vlen);
 #endif
