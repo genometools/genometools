@@ -30,20 +30,17 @@ end
 Name "gt seed_extend artificial sequences"
 Keywords "gt_seed_extend artificial"
 Test do
-  minidentities = [80, 90]
-  10.times.each do
-    for minidentity in minidentities do
+  5.times.each do
+    for minidentity in [80, 90] do
       run "#{$scriptsdir}gen-randseq.rb --seedlength 14 --length 2200 " +
           "--mode seeded --minidentity #{minidentity} > artseq.fasta"
       run_test build_encseq("artseq", "artseq.fasta")
-      run_test "#{$bin}gt seed_extend -extendxdrop -l 2000 -ii artseq " +
+      run_test "#{$bin}gt seed_extend -extendxdrop 100 -l 2000 -ii artseq " +
                "-minidentity #{minidentity-2}"
       grep last_stdout, /^\d+ \d+ \d+ . \d+ \d+ \d+ \d+ \d+ \d+/
-      run "test -n \"`cat #{last_stdout}`\""
-      run_test "#{$bin}gt seed_extend -extendgreedy -l 2000 -ii artseq " +
+      run_test "#{$bin}gt seed_extend -extendgreedy 100 -l 2000 -ii artseq " +
                "-minidentity #{minidentity-10}"
       grep last_stdout, /^\d+ \d+ \d+ . \d+ \d+ \d+ \d+ \d+ \d+/
-      run "test -n \"`cat #{last_stdout}`\""
     end
   end
 end
