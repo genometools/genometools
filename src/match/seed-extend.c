@@ -359,7 +359,7 @@ const GtQuerymatch *gt_xdrop_extend_sesp(void *info,
                                dbstart,
                                sesp->dbseqnum,
                                dbstart - sesp->dbseqstartpos,
-                               GT_READMODE_FORWARD,
+                               GT_READMODE_FORWARD, /* db_readmode */
                                score,
                                total_distance,
                                query == NULL ? true : false,

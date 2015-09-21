@@ -35,7 +35,7 @@ void gt_querymatch_init(GtQuerymatch *querymatch,
                         GtUword dbstart,
                         GtUword dbseqnum,
                         GtUword dbstart_relative,
-                        GtReadmode readmode,
+                        GtReadmode db_readmode,
                         GtWord score,
                         GtUword distance,
                         bool selfmatch,
@@ -58,7 +58,7 @@ bool gt_querymatch_complete(GtQuerymatch *querymatchptr,
                             GtUword dbstart,
                             GtUword dbseqnum,
                             GtUword dbstart_relative,
-                            GtReadmode readmode,
+                            GtReadmode db_readmode,
                             GtWord score,
                             GtUword distance,
                             bool selfmatch,
@@ -98,7 +98,7 @@ bool gt_querymatch_verify(const GtQuerymatch *querymatch,
                           GtUword userdefinedleastlength);
 
 void gt_querymatch_query_readmode_set(GtQuerymatch *querymatch,
-                                      GtReadmode readmode);
+                                      GtReadmode query_readmode);
 
 GtWord gt_querymatch_distance2score(GtUword distance,GtUword alignedlen);
 

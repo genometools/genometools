@@ -44,8 +44,8 @@ struct GtQuerymatch
       seedlen;
    GtWord score; /* 0 for exact match */
    uint64_t queryseqnum; /* ordinal number of match in query */
-   GtReadmode readmode, /* readmode by which reference sequence was accessed */
-              query_readmode; /* readmode of reference sequence */
+   GtReadmode db_readmode, /* readmode by which reference seq. is accessed */
+              query_readmode; /* readmode of query sequence */
    bool selfmatch,       /* true if both instances of the match refer to the
                             same sequence */
         seed_display;
@@ -76,7 +76,7 @@ void gt_querymatch_init(GtQuerymatch *querymatch,
                         GtUword dbstart,
                         GtUword dbseqnum,
                         GtUword dbstart_relative,
-                        GtReadmode readmode,
+                        GtReadmode db_readmode,
                         GtWord score,
                         GtUword distance,
                         bool selfmatch,
@@ -88,7 +88,7 @@ void gt_querymatch_init(GtQuerymatch *querymatch,
   gt_assert(querymatch != NULL);
   querymatch->dblen = dblen;
   querymatch->dbstart = dbstart;
-  querymatch->readmode = readmode;
+  querymatch->db_readmode = db_readmode;
   querymatch->score = score;
   querymatch->distance = distance;
   querymatch->selfmatch = selfmatch;
@@ -97,13 +97,9 @@ void gt_querymatch_init(GtQuerymatch *querymatch,
   querymatch->querystart = querystart;
   querymatch->dbseqnum = dbseqnum;
   querymatch->dbstart_relative = dbstart_relative;
-  gt_assert((int) querymatch->readmode < 4);
-  /*
-  prefer this version later
+  gt_assert((int) querymatch->db_readmode < 4 &&
+            (int) querymatch->query_readmode < 4);
   if (GT_ISDIRREVERSE(querymatch->query_readmode))
-  */
-  if (querymatch->readmode == GT_READMODE_REVERSE ||
-      querymatch->readmode == GT_READMODE_REVCOMPL)
   {
     gt_assert(querymatch->querystart + querymatch->querylen <=
               query_totallength);
@@ -131,9 +127,9 @@ static void gt_verify_exact_selfmatch(const GtEncseq *encseq,
                                       uint64_t seqnum2,
                                       GtUword pos2,
                                       bool selfmatch,
-                                      GtReadmode readmode)
+                                      GtReadmode db_readmode)
 {
-  if (selfmatch && readmode == GT_READMODE_REVERSE)
+  if (selfmatch && db_readmode == GT_READMODE_REVERSE)
   {
     GtUword offset, seqstartpos, totallength = gt_encseq_total_length(encseq);
     GtUchar cc1, cc2;
@@ -188,7 +184,7 @@ void gt_querymatch_prettyprint(const GtQuerymatch *querymatch)
            querymatch->dblen,
            querymatch->dbseqnum,
            querymatch->dbstart_relative,
-           outflag[querymatch->readmode],
+           outflag[querymatch->query_readmode],
            querymatch->querylen,
            PRINTuint64_tcast(querymatch->queryseqnum),
            querymatch->querystart_fwdstrand);
@@ -229,7 +225,7 @@ int gt_querymatch_output(GT_UNUSED void *info,
                              querymatch->queryseqnum,
                              querymatch->querystart_fwdstrand,
                              querymatch->selfmatch,
-                             querymatch->readmode);
+                             querymatch->db_readmode);
 #endif
   gt_querymatch_prettyprint(querymatch);
   return 0;
@@ -262,7 +258,7 @@ static void gt_querymatch_applycorrection(GtQuerymatch *querymatch,
                      querymatch->dbstart + coords->uoffset,
                      querymatch->dbseqnum,
                      querymatch->dbstart_relative + coords->uoffset,
-                     querymatch->readmode,
+                     querymatch->db_readmode,
                      gt_querymatch_distance2score(coords->sumdist,
                                                   coords->ulen + coords->vlen),
                      coords->sumdist,
@@ -278,7 +274,7 @@ bool gt_querymatch_complete(GtQuerymatch *querymatchptr,
                             GtUword dbstart,
                             GtUword dbseqnum,
                             GtUword dbstart_relative,
-                            GtReadmode readmode,
+                            GtReadmode db_readmode,
                             GtWord score,
                             GtUword distance,
                             bool selfmatch,
@@ -299,7 +295,7 @@ bool gt_querymatch_complete(GtQuerymatch *querymatchptr,
                      dbstart,
                      dbseqnum,
                      dbstart_relative,
-                     readmode,
+                     db_readmode,
                      score,
                      distance,
                      selfmatch,
@@ -385,11 +381,11 @@ double gt_querymatch_error_rate(GtUword distance,GtUword alignedlen)
 }
 
 void gt_querymatch_query_readmode_set(GtQuerymatch *querymatch,
-                                      GtReadmode readmode)
+                                      GtReadmode query_readmode)
 {
   gt_assert(querymatch != NULL);
 
-  querymatch->query_readmode = readmode;
+  querymatch->query_readmode = query_readmode;
 }
 
 GtWord gt_querymatch_distance2score(GtUword distance,GtUword alignedlen)

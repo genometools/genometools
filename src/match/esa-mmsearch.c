@@ -619,6 +619,7 @@ int gt_callenumselfmatches(const char *indexname,
     queryrep.sequence = NULL;
     queryrep.encseq = suffixarray.encseq;
     queryrep.readmode = query_readmode;
+    gt_querymatch_query_readmode_set(querymatchspaceptr,query_readmode);
     for (seqnum = 0; seqnum < numofsequences; seqnum++)
     {
       seqstartpos = gt_encseq_seqstartpos(suffixarray.encseq, seqnum);
