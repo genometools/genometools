@@ -576,7 +576,7 @@ static int gt_callenumquerymatches(const char *indexname,
   {
     int retval;
     GtQuerymatch *exactseed = gt_querymatch_new(NULL,false);
- 
+
     gt_querymatch_query_readmode_set(exactseed,query_readmode);
     while ((retval = gt_querysubstringmatchiterator_next(qsmi, err)) == 0)
     {

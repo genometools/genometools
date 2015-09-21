@@ -439,29 +439,35 @@ static int gt_seed_extend_runner(GT_UNUSED int argc,
   }
   gt_encseq_loader_delete(encseq_loader);
 
-  /* Prepare options for greedy extension */
-  if (!had_err && gt_option_is_set(arguments->se_option_greedy)) {
+  /* set character access method */
+  if (!had_err && (gt_option_is_set(arguments->se_option_greedy) ||
+                   gt_option_is_set(arguments->se_option_xdrop) ||
+                   arguments->se_alignmentwidth > 0))
+  {
     cam = gt_greedy_extend_char_access(gt_str_get
                                        (arguments->se_char_access_mode),
                                        err);
-    if ((int) cam != -1) {
-      grextinfo = gt_greedy_extend_matchinfo_new(errorpercentage,
-                                                 arguments->se_maxalilendiff,
-                                                 arguments->se_historysize,
-                                                 arguments->se_perc_match_hist,
-                                                 arguments->se_alignlength,
-                                                 cam,
-                                                 arguments->se_extendgreedy);
-      if (arguments->benchmark) {
-        gt_greedy_extend_matchinfo_silent_set(grextinfo);
-      }
-      if (arguments->verbose) {
-        gt_greedy_extend_matchinfo_verbose_set(grextinfo);
-      }
-    } else {
+    if ((int) cam == -1) {
       had_err = -1;
       gt_encseq_delete(aencseq);
       gt_encseq_delete(bencseq);
+    }
+  }
+
+  /* Prepare options for greedy extension */
+  if (!had_err && gt_option_is_set(arguments->se_option_greedy)) {
+    grextinfo = gt_greedy_extend_matchinfo_new(errorpercentage,
+                                               arguments->se_maxalilendiff,
+                                               arguments->se_historysize,
+                                               arguments->se_perc_match_hist,
+                                               arguments->se_alignlength,
+                                               cam,
+                                               arguments->se_extendgreedy);
+    if (arguments->benchmark) {
+      gt_greedy_extend_matchinfo_silent_set(grextinfo);
+    }
+    if (arguments->verbose) {
+      gt_greedy_extend_matchinfo_verbose_set(grextinfo);
     }
   }
 
