@@ -131,11 +131,11 @@ Name "gt repfind extend self vs query"
 Keywords "gt_repfind extend"
 Test do
   seedlength = 40
-  totallength = 200
+  extendlength = 200
   minid = 80
   opts = "-dna -suf -lcp -tis"
   5.times do
-    run "#{$scriptsdir}gen-randseq.rb --minidentity #{minid} --seedlength #{seedlength} --length #{totallength} --mode seeded --namedfiles"
+    run "#{$scriptsdir}gen-randseq.rb --minidentity #{minid} --seedlength #{seedlength} --length #{extendlength} --mode seeded --namedfiles"
     run "#{$bin}gt suffixerator -indexname db-query-index -db db.fna query.fna #{opts}"
     run "#{$bin}gt suffixerator -indexname db-index -db db.fna #{opts}"
     run_test "#{$bin}gt repfind -minidentity #{minid} -extendxdrop -ii db-query-index -l #{seedlength}"

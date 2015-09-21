@@ -489,16 +489,23 @@ static int gt_seed_extend_runner(GT_UNUSED int argc,
   if (!had_err && (arguments->se_alignmentwidth > 0 ||
                    gt_option_is_set(arguments->se_option_xdrop)))
   {
-    const GtUword sensitivity = gt_option_is_set(arguments->se_option_greedy)
-      ? arguments->se_extendgreedy : 100;
     querymatchoutopt
-      = gt_querymatchoutoptions_new(arguments->se_alignmentwidth,
-                                    errorpercentage,
-                                    arguments->se_maxalilendiff,
-                                    arguments->se_historysize,
-                                    arguments->se_perc_match_hist,
-                                    cam,
-                                    sensitivity);
+      = gt_querymatchoutoptions_new(arguments->se_alignmentwidth);
+
+    if (gt_option_is_set(arguments->se_option_xdrop) ||
+        gt_option_is_set(arguments->se_option_greedy))
+    {
+      const GtUword sensitivity = gt_option_is_set(arguments->se_option_greedy)
+                                    ? arguments->se_extendgreedy : 100;
+
+      gt_querymatchoutoptions_extend(querymatchoutopt,
+                                     errorpercentage,
+                                     arguments->se_maxalilendiff,
+                                     arguments->se_historysize,
+                                     arguments->se_perc_match_hist,
+                                     cam,
+                                     sensitivity);
+    }
   }
 
   /* Start algorithm */

@@ -185,8 +185,8 @@ static void singleseqtyrsearch(const Tyrindex *tyrindex,
       if (tyrsearchinfo->searchstrand & STRAND_REVERSE)
       {
         gt_assert(tyrsearchinfo->rcbuf != NULL);
-        gt_copy_reversecomplement(tyrsearchinfo->rcbuf,qptr,
-                               tyrsearchinfo->mersize);
+        gt_copy_reverse_complement(tyrsearchinfo->rcbuf,qptr,
+                                   tyrsearchinfo->mersize);
         result = gt_searchsinglemer(tyrsearchinfo->rcbuf,tyrindex,
                                     tyrsearchinfo,tyrbckinfo);
         if (result != NULL)

@@ -330,9 +330,11 @@ bool gt_querymatch_complete(GtQuerymatch *querymatchptr,
       }
       seededalignment
         = gt_querymatchoutoptions_alignment_prepare(querymatchptr->
-                                                    ref_querymatchoutoptions,
+                                                      ref_querymatchoutoptions,
                                                     encseq,
                                                     query,
+                                                    querymatchptr->
+                                                      query_readmode,
                                                     query_totallength,
                                                     querymatchptr->dbstart,
                                                     querymatchptr->dblen,

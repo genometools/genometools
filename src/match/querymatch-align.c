@@ -24,8 +24,9 @@
 #ifdef SKDEBUG
 #include "match/greedyedist.h"
 #endif
-#include "querymatch-align.h"
+#include "revcompl.h"
 #include "seed-extend.h"
+#include "querymatch-align.h"
 
 static void eoplist_reverse_order(uint8_t *start,uint8_t *end)
 {
@@ -120,14 +121,7 @@ struct GtQuerymatchoutoptions
   GtSeqpaircoordinates correction_info;
 };
 
-GtQuerymatchoutoptions *gt_querymatchoutoptions_new(
-                                GtUword alignmentwidth,
-                                GtUword errorpercentage,
-                                GtUword maxalignedlendifference,
-                                GtUword history,
-                                GtUword perc_mat_history,
-                                GtExtendCharAccess extend_char_access,
-                                GtUword sensitivity)
+GtQuerymatchoutoptions *gt_querymatchoutoptions_new(GtUword alignmentwidth)
 {
   GtQuerymatchoutoptions *querymatchoutoptions
     = gt_malloc(sizeof *querymatchoutoptions);
@@ -152,9 +146,22 @@ GtQuerymatchoutoptions *gt_querymatchoutoptions_new(
   {
     querymatchoutoptions->alignment_show_buffer = NULL;
   }
+  return querymatchoutoptions;
+}
+
+void gt_querymatchoutoptions_extend(
+                  GtQuerymatchoutoptions *querymatchoutoptions,
+                  GtUword errorpercentage,
+                  GtUword maxalignedlendifference,
+                  GtUword history,
+                  GtUword perc_mat_history,
+                  GtExtendCharAccess extend_char_access,
+                  GtUword sensitivity)
+{
   if (errorpercentage > 0)
   {
-    if (alignmentwidth > 0)
+    gt_assert(querymatchoutoptions != NULL);
+    if (querymatchoutoptions->alignmentwidth > 0)
     {
       querymatchoutoptions->front_trace = front_trace_new();
       querymatchoutoptions->alignment = gt_alignment_new();
@@ -168,7 +175,6 @@ GtQuerymatchoutoptions *gt_querymatchoutoptions_new(
                                        extend_char_access,
                                        sensitivity);
   }
-  return querymatchoutoptions;
 }
 
 void gt_querymatchoutoptions_delete(
@@ -358,6 +364,7 @@ bool gt_querymatchoutoptions_alignment_prepare(GtQuerymatchoutoptions
                                                 *querymatchoutoptions,
                                                const GtEncseq *encseq,
                                                const GtUchar *query,
+                                               GtReadmode query_readmode,
                                                GtUword query_totallength,
                                                GtUword dbstart,
                                                GtUword dblen,
@@ -402,7 +409,7 @@ bool gt_querymatchoutoptions_alignment_prepare(GtQuerymatchoutoptions
                             dbstart + dblen - 1);
   if (edist > 0)
   {
-    if (query == NULL)
+    if (query == NULL || query_readmode != GT_READMODE_FORWARD)
     {
       if (querylen > querymatchoutoptions->vseqbuffer_size)
       {
@@ -411,6 +418,9 @@ bool gt_querymatchoutoptions_alignment_prepare(GtQuerymatchoutoptions
                        sizeof *querymatchoutoptions->vseqbuffer * querylen);
         querymatchoutoptions->vseqbuffer_size = querylen;
       }
+    }
+    if (query == NULL)
+    {
       gt_encseq_extract_encoded_with_reader(
                               querymatchoutoptions->esr_for_align_show,
                               encseq,
@@ -419,8 +429,33 @@ bool gt_querymatchoutoptions_alignment_prepare(GtQuerymatchoutoptions
                               querystartabsolute + querylen - 1);
     } else
     {
-      querymatchoutoptions->vseqbuffer
-        = (GtUchar *) (query + querystartabsolute);
+      if (query_readmode == GT_READMODE_FORWARD)
+      {
+        querymatchoutoptions->vseqbuffer
+          = (GtUchar *) (query + querystartabsolute);
+      } else
+      {
+        memcpy(querymatchoutoptions->vseqbuffer,
+               query + querystartabsolute,
+               querylen * sizeof *querymatchoutoptions->vseqbuffer);
+      }
+    }
+    if (query_readmode == GT_READMODE_REVERSE)
+    {
+      gt_inplace_reverse(querymatchoutoptions->vseqbuffer,querylen);
+    } else
+    {
+      if (query_readmode == GT_READMODE_REVCOMPL)
+      {
+        gt_inplace_reverse_complement(querymatchoutoptions->vseqbuffer,
+                                      querylen);
+      } else
+      {
+        if (query_readmode == GT_READMODE_COMPL)
+        {
+          gt_inplace_complement(querymatchoutoptions->vseqbuffer,querylen);
+        }
+      }
     }
     if (seededmatch2eoplist(querymatchoutoptions,
                             encseq,

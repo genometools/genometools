@@ -16,9 +16,11 @@
 */
 
 #include "core/types_api.h"
+#include "core/assert_api.h"
+#include "core/chardef.h"
 #include "core/readmode.h"
 
-void gt_inplace_reversecomplement(GtUchar *seq,GtUword len)
+void gt_inplace_reverse_complement(GtUchar *seq,GtUword len)
 {
   GtUchar tmp, *frontptr, *backptr;
 
@@ -26,12 +28,38 @@ void gt_inplace_reversecomplement(GtUchar *seq,GtUword len)
        frontptr <= backptr; frontptr++, backptr--)
   {
     tmp = *frontptr;
-    *frontptr = GT_COMPLEMENTBASE(*backptr);
-    *backptr = GT_COMPLEMENTBASE(tmp);
+    gt_assert((ISSPECIAL(*backptr) || *backptr < 4) &&
+              (ISSPECIAL(tmp) || tmp < 4));
+    *frontptr = ISSPECIAL(*backptr) ? *backptr : GT_COMPLEMENTBASE(*backptr);
+    *backptr = ISSPECIAL(tmp) ? tmp : GT_COMPLEMENTBASE(tmp);
   }
 }
 
-void gt_copy_reversecomplement(GtUchar *dest,const GtUchar *src,
+void gt_inplace_reverse(GtUchar *seq,GtUword len)
+{
+  GtUchar tmp, *frontptr, *backptr;
+
+  for (frontptr = seq, backptr = seq + len - 1;
+       frontptr < backptr; frontptr++, backptr--)
+  {
+    tmp = *frontptr;
+    *frontptr = *backptr;
+    *backptr = tmp;
+  }
+}
+
+void gt_inplace_complement(GtUchar *seq,GtUword len)
+{
+  GtUchar *ptr;
+
+  for (ptr = seq; ptr < seq + len; ptr++)
+  {
+    gt_assert(ISSPECIAL(*ptr) || *ptr < 4);
+    *ptr = GT_COMPLEMENTBASE(*ptr);
+  }
+}
+
+void gt_copy_reverse_complement(GtUchar *dest,const GtUchar *src,
                                GtUword len)
 {
   GtUchar *destptr;

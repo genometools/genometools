@@ -24,13 +24,16 @@
 typedef struct GtQuerymatchoutoptions GtQuerymatchoutoptions;
 
 GtQuerymatchoutoptions *gt_querymatchoutoptions_new(
-                                GtUword alignmentwidth,
-                                GtUword errorpercentage,
-                                GtUword maxalignedlendifference,
-                                GtUword history,
-                                GtUword perc_mat_history,
-                                GtExtendCharAccess extend_char_access,
-                                GtUword sensitivity);
+                                GtUword alignmentwidth);
+
+void gt_querymatchoutoptions_extend(
+                  GtQuerymatchoutoptions *querymatchoutoptions,
+                  GtUword errorpercentage,
+                  GtUword maxalignedlendifference,
+                  GtUword history,
+                  GtUword perc_mat_history,
+                  GtExtendCharAccess extend_char_access,
+                  GtUword sensitivity);
 
 void gt_querymatchoutoptions_delete(
         GtQuerymatchoutoptions *querymatchoutoptions);
@@ -40,6 +43,7 @@ bool gt_querymatchoutoptions_alignment_prepare(
                                        *querymatchoutoptions,
                                      const GtEncseq *encseq,
                                      const GtUchar *query,
+                                     GtReadmode query_readmode,
                                      GtUword query_totallength,
                                      GtUword dbstart,
                                      GtUword dblen,

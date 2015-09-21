@@ -75,6 +75,7 @@ static void sequenceobject_init(Sequenceobject *seq,
   seq->twobitencoding = NULL;
   seq->cache_ptr = NULL;
   seq->sequence_cache = NULL;
+  seq->bytesequenceptr = NULL;
   if (extend_char_access_mode == GT_EXTEND_CHAR_ACCESS_ANY &&
       gt_encseq_has_twobitencoding(encseq) && gt_encseq_wildcards(encseq) == 0)
   {
