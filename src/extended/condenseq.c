@@ -44,10 +44,8 @@ GtUword gt_condenseq_pos2seqnum(const GtCondenseq *condenseq, GtUword pos)
 
 GtUword gt_condenseq_seqstartpos(const GtCondenseq *condenseq, GtUword seqnum)
 {
-  GtUword ret;
-  if (seqnum == 0)
-    ret = 0;
-  else
+  GtUword ret = 0;
+  if (seqnum != 0)
     ret = gt_intset_get(condenseq->ssptab, seqnum - 1) + 1;
   return ret;
 }
@@ -64,9 +62,7 @@ static inline GtUword condenseq_seqlength_help(const GtCondenseq *condenseq,
 
 GtUword gt_condenseq_seqlength(const GtCondenseq *condenseq, GtUword seqnum)
 {
-  GtUword start = 0;
-  if (seqnum != 0)
-    start = gt_intset_get(condenseq->ssptab, seqnum - 1) + 1;
+  GtUword start = gt_condenseq_seqstartpos(condenseq, seqnum);
   return condenseq_seqlength_help(condenseq, seqnum, start);
 }
 
