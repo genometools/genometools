@@ -60,7 +60,7 @@ typedef struct
           alignmentwidth; /* 0 for no alignment display and otherwidth number
                              of columns of alignment per line displayed. */
   bool scanfile, beverbose, forward, reverse, searchspm,
-       check_extend_symmetry, silent, trimstat, seed_display;
+       check_extend_symmetry, silent, trimstat, seed_display, noxpolish;
   GtStr *indexname, *cam_string; /* parse this using
                                     gt_greedy_extend_char_access*/
   GtStrArray *queryfiles;
@@ -371,6 +371,11 @@ static GtOptionParser *gt_repfind_option_parser_new(void *tool_arguments)
 
   option = gt_option_new_bool("silent","do not report matches",
                                &arguments->silent, false);
+  gt_option_parser_add_option(op, option);
+  gt_option_is_development_option(option);
+
+  option = gt_option_new_bool("noxpolish","do not polish X-drop extesnsions",
+                              &arguments->noxpolish, false);
   gt_option_parser_add_option(op, option);
   gt_option_is_development_option(option);
 
@@ -737,7 +742,8 @@ static int gt_repfind_runner(int argc,
 
     processinfo_and_querymatchspaceptr.processinfo = NULL;
     if (arguments->alignmentwidth > 0 ||
-        gt_option_is_set(arguments->refextendxdropoption))
+        (gt_option_is_set(arguments->refextendxdropoption) &&
+         !arguments->noxpolish))
     {
       querymatchoutoptions
         = gt_querymatchoutoptions_new(arguments->alignmentwidth);

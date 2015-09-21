@@ -114,6 +114,7 @@ typedef struct
   GtUword seedpos1, seedpos2, seedlen,
           dbseqnum, dbseqstartpos, dbseqlength,
           queryseqnum, query_totallength, queryseqstartpos;
+  GtReadmode query_readmode;
 } GtSeedextendSeqpair;
 
 static void gt_sesp_from_absolute(GtSeedextendSeqpair *sesp,
@@ -143,6 +144,7 @@ static void gt_sesp_from_absolute(GtSeedextendSeqpair *sesp,
   }
   sesp->seedpos1 = pos1;
   sesp->seedpos2 = pos2;
+  sesp->query_readmode = GT_READMODE_FORWARD;
 }
 
 static void gt_sesp_from_relative(GtSeedextendSeqpair *sesp,
@@ -183,6 +185,7 @@ static void gt_sesp_from_relative(GtSeedextendSeqpair *sesp,
   }
   sesp->seedpos1 = sesp->dbseqstartpos + dbstart_relative;
   sesp->seedpos2 = sesp->queryseqstartpos + querystart_relative;
+  sesp->query_readmode = GT_READMODE_FORWARD;
 }
 
 void gt_sesp_show(const GtSeedextendSeqpair *sesp)
@@ -247,6 +250,7 @@ const GtQuerymatch *gt_xdrop_extend_sesp(void *info,
                                     sesp->seedpos2 - sesp->queryseqstartpos,
                                     sesp->queryseqstartpos);
     }
+    gt_seqabstract_readmode_set(xdropmatchinfo->vseq,sesp->query_readmode);
     gt_evalxdroparbitscoresextend(false,
                                   &xdropmatchinfo->best_left,
                                   xdropmatchinfo->res,
@@ -302,6 +306,7 @@ const GtQuerymatch *gt_xdrop_extend_sesp(void *info,
                                       (sesp->seedpos2 + sesp->seedlen),
                                     sesp->seedpos2 + sesp->seedlen);
     }
+    gt_seqabstract_readmode_set(xdropmatchinfo->vseq,sesp->query_readmode);
     gt_evalxdroparbitscoresextend(true,
                                   &xdropmatchinfo->best_right,
                                   xdropmatchinfo->res,
@@ -446,7 +451,8 @@ const GtQuerymatch* gt_xdrop_extend_querymatch(void *info,
           dbstart = gt_querymatch_dbstart(exactseed),
           dbseqstartpos = gt_encseq_seqstartpos(dbencseq,dbseqnum);
 
-  gt_sesp_from_relative(&sesp,dbencseq,
+  gt_sesp_from_relative(&sesp,
+                        dbencseq,
                         dbseqnum,
                         dbstart - dbseqstartpos,
                         NULL,
@@ -455,6 +461,7 @@ const GtQuerymatch* gt_xdrop_extend_querymatch(void *info,
                         0,
                         query_totallength,
                         gt_querymatch_querylen(exactseed));
+  sesp.query_readmode = gt_querymatch_query_readmode(exactseed);
   return gt_xdrop_extend_sesp(info, dbencseq, query, &sesp);
 }
 

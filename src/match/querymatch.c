@@ -384,8 +384,13 @@ void gt_querymatch_query_readmode_set(GtQuerymatch *querymatch,
                                       GtReadmode query_readmode)
 {
   gt_assert(querymatch != NULL);
-
   querymatch->query_readmode = query_readmode;
+}
+
+GtReadmode gt_querymatch_query_readmode(const GtQuerymatch *querymatch)
+{
+  gt_assert(querymatch != NULL);
+  return querymatch->query_readmode;
 }
 
 GtWord gt_querymatch_distance2score(GtUword distance,GtUword alignedlen)

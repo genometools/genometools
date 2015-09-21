@@ -85,17 +85,11 @@ static void sequenceobject_init(Sequenceobject *seq,
       (extend_char_access_mode == GT_EXTEND_CHAR_ACCESS_ANY ||
        extend_char_access_mode == GT_EXTEND_CHAR_ACCESS_ENCSEQ_READER))
   {
-    if (GT_ISDIRREVERSE(readmode))
-    {
-      gt_encseq_reader_reinit_with_readmode(encseq_r, encseq,
-                                            GT_READMODE_REVERSE,
-                                            GT_REVERSEPOS(totallength,
-                                                          startpos));
-    } else
-    {
-      gt_encseq_reader_reinit_with_readmode(encseq_r, encseq,
-                                            GT_READMODE_FORWARD,startpos);
-    }
+    gt_encseq_reader_reinit_with_readmode(encseq_r, encseq,
+                                          readmode,
+                                        GT_ISDIRREVERSE(readmode)
+                                          ? GT_REVERSEPOS(totallength,startpos)
+                                          : startpos);
     seq->encseqreader = encseq_r;
     gt_assert(seq->encseqreader != NULL && sequence_cache != NULL);
     seq->sequence_cache = sequence_cache;
@@ -141,57 +135,54 @@ static GtUchar sequenceobject_get_char(Sequenceobject *seq,GtUword pos)
                                        GT_ISDIRREVERSE(seq->readmode)
                                          ? seq->startpos - pos
                                          : seq->startpos + pos);
+    return GT_ISDIRCOMPLEMENT(seq->readmode) ? GT_COMPLEMENTBASE(cc) : cc;
+  }
+  if (seq->encseqreader != NULL)
+  {
+    gt_assert(pos < seq->substringlength);
+    if (pos >= seq->cache_num_positions)
+    {
+      GtUword idx, tostore;
+      const GtUword addamount = 256UL;
+
+      tostore = MIN(seq->cache_num_positions + addamount,
+                    seq->substringlength);
+      if (tostore > seq->sequence_cache->allocated)
+      {
+        seq->sequence_cache->allocated += addamount;
+        seq->sequence_cache->space
+          = gt_realloc(seq->sequence_cache->space,
+                       sizeof (GtUchar) * seq->sequence_cache->allocated);
+        seq->cache_ptr = (GtUchar *) seq->sequence_cache->space;
+      }
+      for (idx = seq->cache_num_positions; idx < tostore; idx++)
+      {
+        seq->cache_ptr[idx]
+          = gt_encseq_reader_next_encoded_char(seq->encseqreader);
+      }
+      seq->cache_num_positions = tostore;
+    }
+    gt_assert(seq->cache_ptr != NULL && pos < seq->cache_num_positions);
+    return seq->cache_ptr[pos];
+  }
+  gt_assert(!GT_ISDIRREVERSE(seq->readmode) || seq->startpos >= pos);
+  if (seq->encseq != NULL)
+  {
+    cc = gt_encseq_get_encoded_char(seq->encseq,
+                                    GT_ISDIRREVERSE(seq->readmode)
+                                      ? seq->startpos - pos
+                                      : seq->startpos + pos,
+                                    GT_READMODE_FORWARD);
   } else
   {
-    if (seq->encseqreader != NULL)
-    {
-      gt_assert(pos < seq->substringlength);
-      if (pos >= seq->cache_num_positions)
-      {
-        GtUword idx, tostore;
-        const GtUword addamount = 256UL;
-
-        tostore = MIN(seq->cache_num_positions + addamount,
-                      seq->substringlength);
-        if (tostore > seq->sequence_cache->allocated)
-        {
-          seq->sequence_cache->allocated += addamount;
-          seq->sequence_cache->space
-            = gt_realloc(seq->sequence_cache->space,
-                         sizeof (GtUchar) * seq->sequence_cache->allocated);
-          seq->cache_ptr = (GtUchar *) seq->sequence_cache->space;
-        }
-        for (idx = seq->cache_num_positions; idx < tostore; idx++)
-        {
-          seq->cache_ptr[idx]
-            = gt_encseq_reader_next_encoded_char(seq->encseqreader);
-        }
-        seq->cache_num_positions = tostore;
-      }
-      gt_assert(seq->cache_ptr != NULL && pos < seq->cache_num_positions);
-      cc = seq->cache_ptr[pos];
-    } else
-    {
-      gt_assert(!GT_ISDIRREVERSE(seq->readmode) || seq->startpos >= pos);
-      if (seq->encseq != NULL)
-      {
-        cc = gt_encseq_get_encoded_char(seq->encseq,
-                                        GT_ISDIRREVERSE(seq->readmode)
-                                          ? seq->startpos - pos
-                                          : seq->startpos + pos,
-                                        GT_READMODE_FORWARD);
-      } else
-      {
-        gt_assert(seq->bytesequenceptr != NULL &&
-                  ((!GT_ISDIRREVERSE(seq->readmode)
-                    && seq->startpos + pos < seq->totallength) ||
-                   (GT_ISDIRREVERSE(seq->readmode)
-                    && seq->startpos - pos < seq->totallength)));
-        cc = seq->bytesequenceptr[GT_ISDIRREVERSE(seq->readmode)
-                                     ? seq->startpos - pos
-                                     : seq->startpos + pos];
-      }
-    }
+    gt_assert(seq->bytesequenceptr != NULL &&
+                ((!GT_ISDIRREVERSE(seq->readmode)
+                  && seq->startpos + pos < seq->totallength) ||
+                 (GT_ISDIRREVERSE(seq->readmode)
+                  && seq->startpos - pos < seq->totallength)));
+    cc = seq->bytesequenceptr[GT_ISDIRREVERSE(seq->readmode)
+                                ? seq->startpos - pos
+                                : seq->startpos + pos];
   }
   if (GT_ISDIRCOMPLEMENT(seq->readmode) && !ISSPECIAL(cc))
   {

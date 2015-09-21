@@ -100,6 +100,8 @@ bool gt_querymatch_verify(const GtQuerymatch *querymatch,
 void gt_querymatch_query_readmode_set(GtQuerymatch *querymatch,
                                       GtReadmode query_readmode);
 
+GtReadmode gt_querymatch_query_readmode(const GtQuerymatch *querymatch);
+
 GtWord gt_querymatch_distance2score(GtUword distance,GtUword alignedlen);
 
 /* Returns true, iff the given seed start position is below the querymatch. */

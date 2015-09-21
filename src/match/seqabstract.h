@@ -72,4 +72,8 @@ GtUword        gt_seqabstract_lcp(bool forward,
 
 void           gt_seqabstract_delete(GtSeqabstract *sa);
 
+/* set the readmode flag which is GT_READMODE_FORWARD by default */
+
+void gt_seqabstract_readmode_set(GtSeqabstract *sa,GtReadmode readmode);
+
 #endif
