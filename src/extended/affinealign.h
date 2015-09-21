@@ -19,6 +19,7 @@
 #ifndef AFFINEALIGN_H
 #define AFFINEALIGN_H
 
+#include "extended/linspaceManagement.h"
 #include "extended/alignment.h"
 
 typedef enum {
@@ -43,12 +44,21 @@ GtAlignment* gt_affinealign(const GtUchar *u, GtUword ulen,
                             GtUword gap_opening_cost,
                             GtUword gap_extension_cost);
 
+void gt_affinealign_wit_Management(LinspaceManagement *spacemanager,
+                                   GtAlignment *align,
+                                   const GtUchar *u, GtUword ulen,
+                                   const GtUchar *v, GtUword vlen,
+                                   GtUword matchcost, GtUword mismatchcost,
+                                   GtUword gap_opening,
+                                   GtUword gap_extension);
+
 void affinealign_traceback(GtAlignment *a,
                            AffinealignDPentry * const *dptable,
                            GtUword i, GtUword j);
 
-/*create ctab to combine square calculating with linear calculating */
-void affine_ctab_in_square_space(GtUword *Ctab, const GtUchar *useq,
+/*filling ctab to combine square calculating with linear calculating */
+void affine_ctab_in_square_space(LinspaceManagement *spacemanager,
+                                 GtUword *Ctab, const GtUchar *useq,
                                  GtUword ustart,  GtUword ulen,
                                  const GtUchar *vseq, GtUword vstart,
                                  GtUword vlen, GtUword matchcost,
@@ -57,4 +67,18 @@ void affine_ctab_in_square_space(GtUword *Ctab, const GtUchar *useq,
                                  AffineAlignEdge from_edge,
                                  AffineAlignEdge to_edge);
 
+/* create an local alignment in square space, to use it in linear context you
+ * have to generate an spacemanager before, in any other case it can be NULL */
+GtWord affinealign_in_square_space_local(LinspaceManagement *spacemanager,
+                                         GtAlignment *align,
+                                         const GtUchar *useq,
+                                         GtUword ustart,
+                                         GtUword ulen,
+                                         const GtUchar *vseq,
+                                         GtUword vstart,
+                                         GtUword vlen,
+                                         GtWord matchscore,
+                                         GtWord mismatchscore,
+                                         GtWord gap_opening,
+                                         GtWord gap_extension);
 #endif

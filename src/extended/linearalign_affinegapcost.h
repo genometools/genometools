@@ -22,6 +22,7 @@
 #include "core/types_api.h"
 #include "extended/affinealign.h"
 #include "extended/alignment.h"
+#include "extended/linspaceManagement.h"
 
 typedef struct {
   GtUword idx;
@@ -45,30 +46,32 @@ void gt_checkaffinelinearspace_local(GT_UNUSED bool forward,
                                      GtUword vlen);
 
 /* global alignment with affine gapcosts in linear space */
-void gt_computeaffinelinearspace(GtAlignment *align,
-                                 const GtUchar *useq,
-                                 GtUword ustart,
-                                 GtUword ulen,
-                                 const GtUchar *vseq,
-                                 GtUword vstart,
-                                 GtUword vlen,
-                                 GtUword matchcost,
-                                 GtUword mismatchcost,
-                                 GtUword gap_opening,
-                                 GtUword gap_extension);
+GtUword gt_computeaffinelinearspace(LinspaceManagement *spacemanager,
+                                    GtAlignment *align,
+                                    const GtUchar *useq,
+                                    GtUword ustart,
+                                    GtUword ulen,
+                                    const GtUchar *vseq,
+                                    GtUword vstart,
+                                    GtUword vlen,
+                                    GtUword matchcost,
+                                    GtUword mismatchcost,
+                                    GtUword gap_opening,
+                                    GtUword gap_extension);
 
 /* local alignment with linear gapcosts in linear space */
-void gt_computeaffinelinearspace_local(GtAlignment *align,
-                                       const GtUchar *useq,
-                                       GtUword ustart,
-                                       GtUword ulen,
-                                       const GtUchar *vseq,
-                                       GtUword vstart,
-                                       GtUword vlen,
-                                       GtWord matchscore,
-                                       GtWord mismatchscore,
-                                       GtWord gap_opening,
-                                       GtWord gap_extension);
+GtWord gt_computeaffinelinearspace_local(LinspaceManagement *spacemanager,
+                                         GtAlignment *align,
+                                         const GtUchar *useq,
+                                         GtUword ustart,
+                                         GtUword ulen,
+                                         const GtUchar *vseq,
+                                         GtUword vstart,
+                                         GtUword vlen,
+                                         GtWord matchscore,
+                                         GtWord mismatchscore,
+                                         GtWord gap_opening,
+                                         GtWord gap_extension);
 
 AffineAlignEdge minAdditionalCosts(const AffinealignDPentry *entry,
                                    const AffineAlignEdge edge,

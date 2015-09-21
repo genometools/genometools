@@ -359,9 +359,9 @@ GtUword gt_calc_linearedist(const GtUchar *u, GtUword ulen,
 
 /*-------------------------------local linear---------------------------------*/
 
-static void firstLStabcolumn(GtUword ulen,
-                             GtWord *Ltabcolumn,
-                             GtUwordPair *Starttabcolumn)
+static void firstLStabcolumn(GtWord *Ltabcolumn,
+                             GtUwordPair *Starttabcolumn,
+                             GtUword ulen)
 {
   GtUword rowindex;
 
@@ -374,15 +374,15 @@ static void firstLStabcolumn(GtUword ulen,
   }
 }
 
-static void nextLStabcolumn(const GtUchar *useq,
+static void nextLStabcolumn(GtWord *Ltabcolumn,
+                            GtUwordPair *Starttabcolumn,
+                            const GtUchar *useq,
                             GtUword ustart, GtUword ulen,
                             const GtUchar b, GtUword colindex,
-                            GtWord *Ltabcolumn,
-                            GtUwordPair *Starttabcolumn,
-                            Gtmaxcoordvalue *max,
                             GtWord matchscore,
                             GtWord mismatchscore,
-                            GtWord gapscore)
+                            GtWord gapscore,
+                            Gtmaxcoordvalue *max)
 {
   GtUword rowindex;
   GtUwordPair northwestStarttabentry, westStarttabentry;
@@ -432,30 +432,35 @@ static void nextLStabcolumn(const GtUchar *useq,
   }
 }
 
-static void evaluateallLScolumns(GtWord *Ltabcolumn,
-                                 GtUwordPair *Starttabcolumn,
-                                 Gtmaxcoordvalue *max,
-                                 const GtUchar *useq,
-                                 GtUword ustart,
-                                 GtUword ulen,
-                                 const GtUchar *vseq,
-                                 GtUword vstart,
-                                 GtUword vlen,
-                                 GtWord matchscore,
-                                 GtWord mismatchscore,
-                                 GtWord gapscore)
+static Gtmaxcoordvalue *evaluateallLScolumns(LinspaceManagement *spacemanager,
+                                             const GtUchar *useq,
+                                             GtUword ustart,
+                                             GtUword ulen,
+                                             const GtUchar *vseq,
+                                             GtUword vstart,
+                                             GtUword vlen,
+                                             GtWord matchscore,
+                                             GtWord mismatchscore,
+                                             GtWord gapscore)
 {
   GtUword colindex;
+  GtWord *Ltabcolumn;
+  GtUwordPair *Starttabcolumn;
+  Gtmaxcoordvalue *max;
 
-  firstLStabcolumn(ulen, Ltabcolumn, Starttabcolumn);
+  Ltabcolumn = gt_linspaceManagement_get_valueTabspace(spacemanager);
+  Starttabcolumn = gt_linspaceManagement_get_rTabspace(spacemanager);
 
+  firstLStabcolumn(Ltabcolumn, Starttabcolumn, ulen);
+
+  max = gt_linspaceManagement_get_maxspace(spacemanager);
   for (colindex = 1UL; colindex <= vlen; colindex++)
   {
-    nextLStabcolumn(useq, ustart, ulen, vseq[vstart+colindex-1], colindex,
-                    Ltabcolumn, Starttabcolumn, max,
-                    matchscore, mismatchscore, gapscore);
+    nextLStabcolumn(Ltabcolumn, Starttabcolumn,
+                    useq, ustart, ulen, vseq[vstart+colindex-1], colindex,
+                    matchscore, mismatchscore, gapscore, max);
   }
-
+  return max;
 }
 
 /* determining start and end of local alignment and call global function */
@@ -497,17 +502,13 @@ GtWord gt_computelinearspace_local(LinspaceManagement *spacemanager,
                                     ulen, vlen,
                                     sizeof (*Ltabcolumn),
                                     sizeof (*Starttabcolumn));
-  Ltabcolumn = gt_linspaceManagement_get_valueTabspace(spacemanager);
-  Starttabcolumn = gt_linspaceManagement_get_rTabspace(spacemanager);
-  max = gt_linspaceManagement_get_maxspace(spacemanager);
 
-  evaluateallLScolumns(Ltabcolumn,
-                       Starttabcolumn, max,
-                       useq, ustart, ulen,
-                       vseq, vstart, vlen,
-                       matchscore,
-                       mismatchscore,
-                       gapscore);
+  max = evaluateallLScolumns(spacemanager,
+                             useq, ustart, ulen,
+                             vseq, vstart, vlen,
+                             matchscore,
+                             mismatchscore,
+                             gapscore);
 
   if (gt_max_get_length_safe(max))
   {

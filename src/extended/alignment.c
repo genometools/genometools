@@ -314,6 +314,8 @@ GtWord gt_alignment_eval_with_score(const GtAlignment *alignment,
                                     GtWord mismatchscore,
                                     GtWord gapscore)
 {
+  if (gt_alignment_get_length(alignment) == 0)
+    return 0;
   return gt_alignment_eval_generic_with_score(true, alignment, matchscore,
                                                  mismatchscore, gapscore);
 }
@@ -400,6 +402,8 @@ GtWord gt_alignment_eval_with_affine_score(const GtAlignment *alignment,
                                            GtWord gap_opening,
                                            GtWord gap_extension)
 {
+  if (gt_alignment_get_length(alignment) == 0)
+    return 0;
   return gt_alignment_eval_generic_with_affine_score(true, alignment,
                                                      matchscore,
                                                      mismatchscore,
