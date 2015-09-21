@@ -1188,20 +1188,20 @@ ces_c_reset_pos_and_iter_to_current_seq(GtCondenseqCreator *ces_c)
 static CesCState ces_c_skip_short_seqs(GtCondenseqCreator *ces_c)
 {
 
-  if (ces_c->main_seqnum < ces_c->ces->orig_num_seq) {
+  while (ces_c->main_seqnum < ces_c->ces->orig_num_seq) {
     ces_c->current_seq_len = gt_condenseq_seqlength(ces_c->ces,
                                                     ces_c->main_seqnum);
-  }
-  while (ces_c->main_seqnum < ces_c->ces->orig_num_seq &&
-         ces_c->current_seq_len < ces_c->min_align_len) {
-    GtUword start = gt_condenseq_seqstartpos(ces_c->ces,
-                                             ces_c->main_seqnum);
-    /* no check necessary, as minalignlength was checked */
-    gt_condenseq_add_unique_to_db(ces_c->ces, start,
-                                  ces_c->current_seq_len);
-    ces_c->main_seqnum++;
-    ces_c->current_seq_len = gt_condenseq_seqlength(ces_c->ces,
-                                                    ces_c->main_seqnum);
+    if (ces_c->current_seq_len < ces_c->min_align_len) {
+      GtUword start = gt_condenseq_seqstartpos(ces_c->ces,
+                                               ces_c->main_seqnum);
+      /* no check for overflow of length necessary, as minalignlength was
+         checked not to overflow */
+      gt_condenseq_add_unique_to_db(ces_c->ces, start,
+                                    ces_c->current_seq_len);
+      ces_c->main_seqnum++;
+    }
+    else
+      break;
   }
   return ces_c->main_seqnum >= ces_c->ces->orig_num_seq ?
     GT_CONDENSEQ_CREATOR_EOD : GT_CONDENSEQ_CREATOR_CONT;
