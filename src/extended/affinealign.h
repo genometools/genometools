@@ -44,13 +44,13 @@ GtAlignment* gt_affinealign(const GtUchar *u, GtUword ulen,
                             GtUword gap_opening_cost,
                             GtUword gap_extension_cost);
 
-void gt_affinealign_wit_Management(LinspaceManagement *spacemanager,
-                                   GtAlignment *align,
-                                   const GtUchar *u, GtUword ulen,
-                                   const GtUchar *v, GtUword vlen,
-                                   GtUword matchcost, GtUword mismatchcost,
-                                   GtUword gap_opening,
-                                   GtUword gap_extension);
+void gt_affinealign_with_Management(LinspaceManagement *spacemanager,
+                                    GtAlignment *align,
+                                    const GtUchar *u, GtUword ulen,
+                                    const GtUchar *v, GtUword vlen,
+                                    GtUword matchcost, GtUword mismatchcost,
+                                    GtUword gap_opening,
+                                    GtUword gap_extension);
 
 void affinealign_traceback(GtAlignment *a,
                            AffinealignDPentry * const *dptable,

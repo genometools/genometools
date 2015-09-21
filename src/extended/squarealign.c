@@ -304,6 +304,7 @@ GtWord alignment_in_square_space_local(LinspaceManagement *spacemanager,
   if (spacemanager == NULL)
   {
     gt_array2dim_delete(Ltabcolumn);
+    gt_max_delete(max);
   }
   return score;
 }

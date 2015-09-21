@@ -558,11 +558,11 @@ GtUword gt_calc_affinealign_linear(LinspaceManagement *spacemanager,
   if (gt_linspaceManagement_checksquare(spacemanager, ulen, vlen,
                                      sizeof (*Atabcolumn),sizeof (*Rtabcolumn)))
   {
-    gt_affinealign_wit_Management(spacemanager, align,
-                                  useq+ustart, ulen,
-                                  vseq+vstart, vlen,
-                                  matchcost, mismatchcost,
-                                  gap_opening, gap_extension);
+    gt_affinealign_with_Management(spacemanager, align,
+                                   useq+ustart, ulen,
+                                   vseq+vstart, vlen,
+                                   matchcost, mismatchcost,
+                                   gap_opening, gap_extension);
 
     distance = gt_alignment_eval_generic_with_affine_score(false, align,
                                                            matchcost,
@@ -1001,7 +1001,7 @@ void gt_checkaffinelinearspace(GT_UNUSED bool forward,
                                                       align, matchcost,
                                                       mismatchcost, gap_opening,
                                                       gap_extension);
-
+  gt_alignment_delete(align);
   if (affine_score1 != affine_score2)
   {
     fprintf(stderr,"gt_calc_affinealign_linear = "GT_WU" != "GT_WU
@@ -1010,7 +1010,6 @@ void gt_checkaffinelinearspace(GT_UNUSED bool forward,
     exit(GT_EXIT_PROGRAMMING_ERROR);
   }
 
-  gt_alignment_reset(align);
   align = gt_affinealign(low_useq, ulen, low_vseq, vlen, matchcost,
                          mismatchcost, gap_opening, gap_extension);
   affine_score3 = gt_alignment_eval_generic_with_affine_score(false,

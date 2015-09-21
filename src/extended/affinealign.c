@@ -191,13 +191,13 @@ GtAlignment* gt_affinealign(const GtUchar *u, GtUword ulen,
   return align;
 }
 
-void gt_affinealign_wit_Management(LinspaceManagement *spacemanager,
-                                   GtAlignment *align,
-                                   const GtUchar *u, GtUword ulen,
-                                   const GtUchar *v, GtUword vlen,
-                                   GtUword matchcost, GtUword mismatchcost,
-                                   GtUword gap_opening,
-                                   GtUword gap_extension)
+void gt_affinealign_with_Management(LinspaceManagement *spacemanager,
+                                    GtAlignment *align,
+                                    const GtUchar *u, GtUword ulen,
+                                    const GtUchar *v, GtUword vlen,
+                                    GtUword matchcost, GtUword mismatchcost,
+                                    GtUword gap_opening,
+                                    GtUword gap_extension)
 {
   AffinealignDPentry **dptable;
   GtUword idx;
@@ -547,6 +547,7 @@ GtWord affinealign_in_square_space_local(LinspaceManagement *spacemanager,
   if (spacemanager == NULL)
   {
     gt_array2dim_delete(Atabcolumn);
+    gt_max_delete(max);
   }
   return score;
 }
