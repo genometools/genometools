@@ -305,7 +305,7 @@ static GtOptionParser* gt_seed_extend_option_parser_new(void *tool_arguments)
 
   /* -benchmark */
   option = gt_option_new_bool("benchmark",
-                              "Measure time of different steps",
+                              "Measure total running time and be silent",
                               &arguments->benchmark,
                               false);
   gt_option_is_development_option(option);
@@ -521,7 +521,6 @@ static int gt_seed_extend_runner(GT_UNUSED int argc,
     dbsarguments.mirror = arguments->mirror;
     dbsarguments.overlappingseeds = arguments->overlappingseeds;
     dbsarguments.verify = arguments->dbs_verify;
-    dbsarguments.benchmark = arguments->benchmark;
     dbsarguments.verbose = arguments->verbose;
     dbsarguments.debug_kmer = arguments->dbs_debug_kmer;
     dbsarguments.debug_seedpair = arguments->dbs_debug_seedpair;

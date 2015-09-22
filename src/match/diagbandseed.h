@@ -37,7 +37,6 @@ struct GtDiagbandseed {
   bool mirror;
   bool overlappingseeds;
   bool verify;
-  bool benchmark;
   bool verbose;
   bool debug_kmer;
   bool debug_seedpair;

@@ -30,10 +30,21 @@ end
 Name "gt seed_extend artificial sequences"
 Keywords "gt_seed_extend artificial"
 Test do
-  5.times.each do
+  seeds = [170039800390891361279027638963673934519,
+           189224055964190192145211745471700259490,
+           80497492730600996116307599313171942911,
+           287388662527785534859766605927664912964,
+           296993902622042895065571446462399141014,
+           267703755545645415708106570926631501781,
+           31312989670081360011048989184888532950,
+           54623490901073137545509422160541861122,
+           255642063275935424280602245704332672807,
+           124756200605387950056148243621528752027]
+  for seed in seeds do
     for minidentity in [80, 90] do
-      run "#{$scriptsdir}gen-randseq.rb --seedlength 14 --length 2200 " +
-          "--mode seeded --minidentity #{minidentity} > artseq.fasta"
+      run "#{$scriptsdir}gen-randseq.rb --minidentity #{minidentity} " +
+          "--seedlength 14 --length 2200 --mode seeded --seed #{seed} " +
+          "> artseq.fasta"
       run_test build_encseq("artseq", "artseq.fasta")
       run_test "#{$bin}gt seed_extend -extendxdrop 100 -l 2000 -ii artseq " +
                "-minidentity #{minidentity-2}"
