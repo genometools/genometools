@@ -454,7 +454,6 @@ int gt_queryuniquematch(bool selfmatch,
                          dbstart,
                          dbseqnum,
                          dbstart - dbseqstartpos,
-                         queryrep->readmode,
                          0, /* score */
                          0, /* edist */
                          selfmatch,
@@ -553,7 +552,6 @@ static int gt_querysubstringmatch(bool selfmatch,
                            dbstart,
                            dbseqnum,
                            dbstart - dbseqstartpos,
-                           queryrep->readmode,
                            0, /* score */
                            0, /* edist */
                            selfmatch,

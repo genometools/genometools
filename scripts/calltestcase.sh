@@ -1,13 +1,17 @@
 #!/bin/sh 
 
-if test $# -ne 1
+if test $# -eq 0
 then
-  echo "Usage: $0 <keyword>"
+  echo "Usage: $0 <keyword1> [keyword2 ...]"
   exit 1
 fi
 
 cd testsuite
 
-env -i ./testsuite.rb -gttestdata ${GTTESTDATA} -keywords ${1}
+for keyword in $*
+do
+  echo "run testsuite for keyword ${keyword}"
+  env -i ./testsuite.rb -gttestdata ${GTTESTDATA} -keywords $keyword
+done
 
 cd ..

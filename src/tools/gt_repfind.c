@@ -110,7 +110,6 @@ static int gt_exact_selfmatch_with_output(void *info,
                              pos1,
                              dbseqnum,
                              pos1 - dbseqstartpos,
-                             GT_READMODE_FORWARD,
                              0,
                              0,
                              true,
@@ -602,7 +601,6 @@ static int gt_callenumquerymatches(const char *indexname,
                            dbstart,
                            dbseqnum,
                            dbstart - dbseqstartpos,
-                           suffixarray.readmode,
                            0, /* score */
                            0, /* edist */
                            false, /* selfmatch */
@@ -618,7 +616,6 @@ static int gt_callenumquerymatches(const char *indexname,
                                    dbstart,
                                    dbseqnum,
                                    dbstart - dbseqstartpos,
-                                   suffixarray.readmode,
                                    0, /* score */
                                    0, /* edist */
                                    false, /* selfmatch */
