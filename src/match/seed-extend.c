@@ -188,6 +188,19 @@ static void gt_sesp_from_relative(GtSeedextendSeqpair *sesp,
   sesp->query_readmode = GT_READMODE_FORWARD;
 }
 
+#undef SKDEBUG
+#ifdef SKDEBUG
+static void gt_se_show_aligned(bool rightextension,
+                               const GtXdropmatchinfo *xdropmatchinfo)
+{
+  char *uptr = gt_seqabstract_get(rightextension,xdropmatchinfo->useq);
+  char *vptr = gt_seqabstract_get(rightextension,xdropmatchinfo->vseq);
+  printf("%sextension:\n%s\n%s\n",rightextension ? "right" : "left",uptr,vptr);
+  free(uptr);
+  free(vptr);
+}
+#endif
+
 void gt_sesp_show(const GtSeedextendSeqpair *sesp)
 {
 
@@ -211,8 +224,8 @@ const GtQuerymatch *gt_xdrop_extend_sesp(void *info,
   GtProcessinfo_and_querymatchspaceptr *processinfo_and_querymatchspaceptr
     = (GtProcessinfo_and_querymatchspaceptr *) info;
   GtXdropscore score;
-  GtUword dblen, querylen, total_distance, total_alignedlen,
-          urightbound, vrightbound;
+  GtUword dblen, querylen, total_distance, total_alignedlen, ulen, vlen,
+          urightbound, vrightbound, vextend_left;
   GtXdropmatchinfo *xdropmatchinfo;
 
   if (query == NULL)
@@ -228,29 +241,30 @@ const GtQuerymatch *gt_xdrop_extend_sesp(void *info,
   if (sesp->seedpos1 > sesp->dbseqstartpos &&
       sesp->seedpos2 > sesp->queryseqstartpos)
   { /* there is something to align on the left of the seed */
-    gt_seqabstract_reinit_encseq(xdropmatchinfo->useq,
-                                 dbencseq,
-                                 sesp->seedpos1 - sesp->dbseqstartpos,
+    ulen = sesp->seedpos1 - sesp->dbseqstartpos;
+
+    gt_seqabstract_reinit_encseq(xdropmatchinfo->useq, dbencseq,ulen,
                                  sesp->dbseqstartpos);
     /* stop extension at left instance of seed or querystart,
                      whichever is larger */
+    vlen = MAX(sesp->seedpos1 + sesp->seedlen,sesp->queryseqstartpos);
     if (query == NULL)
     {
+      vlen = MAX(sesp->seedpos1 + sesp->seedlen,sesp->queryseqstartpos);
       gt_seqabstract_reinit_encseq(xdropmatchinfo->vseq,
                                    dbencseq,
-                                   sesp->seedpos2 -
-                                   MAX(sesp->seedpos1 + sesp->seedlen,
-                                       sesp->queryseqstartpos),
-                                   MAX(sesp->seedpos1 + sesp->seedlen,
-                                       sesp->queryseqstartpos));
+                                   sesp->seedpos2 - vlen,vlen);
     } else
     {
+      vlen = sesp->queryseqstartpos;
       gt_seqabstract_reinit_gtuchar(xdropmatchinfo->vseq,
                                     query,
-                                    sesp->seedpos2 - sesp->queryseqstartpos,
-                                    sesp->queryseqstartpos);
+                                    sesp->seedpos2 - vlen,vlen);
     }
     gt_seqabstract_readmode_set(xdropmatchinfo->vseq,sesp->query_readmode);
+#ifdef SKDEBUG
+    gt_se_show_aligned(false,xdropmatchinfo);
+#endif
     gt_evalxdroparbitscoresextend(false,
                                   &xdropmatchinfo->best_left,
                                   xdropmatchinfo->res,
@@ -263,7 +277,6 @@ const GtQuerymatch *gt_xdrop_extend_sesp(void *info,
     xdropmatchinfo->best_left.jvalue = 0;
     xdropmatchinfo->best_left.score = 0;
   }
-#undef SKDEBUG
 #ifdef SKDEBUG
   printf("xdrop-left: best_left=align=" GT_WU ",row=" GT_WU
          ",distance=" GT_WU "\n",
@@ -277,8 +290,9 @@ const GtQuerymatch *gt_xdrop_extend_sesp(void *info,
   if (query == NULL)
   {
     gt_assert(sesp->seedpos2 >= xdropmatchinfo->best_left.jvalue);
+    vextend_left = xdropmatchinfo->best_left.jvalue;
     urightbound = MIN(sesp->dbseqstartpos + sesp->dbseqlength,
-                      sesp->seedpos2 - xdropmatchinfo->best_left.jvalue);
+                      sesp->seedpos2 - vextend_left);
   } else
   {
     urightbound = sesp->dbseqstartpos + sesp->dbseqlength;
@@ -287,26 +301,26 @@ const GtQuerymatch *gt_xdrop_extend_sesp(void *info,
   if (sesp->seedpos1 + sesp->seedlen < urightbound &&
       sesp->seedpos2 + sesp->seedlen < vrightbound)
   { /* there is something to align on the right of the seed */
+    ulen = urightbound - (sesp->seedpos1 + sesp->seedlen);
+    vlen = vrightbound - (sesp->seedpos2 + sesp->seedlen);
     gt_seqabstract_reinit_encseq(xdropmatchinfo->useq,
-                                 dbencseq,
-                                 urightbound - (sesp->seedpos1 + sesp->seedlen),
+                                 dbencseq,ulen,
                                  sesp->seedpos1 + sesp->seedlen);
     if (query == NULL)
     {
       gt_seqabstract_reinit_encseq(xdropmatchinfo->vseq,
-                                   dbencseq,
-                                   vrightbound -
-                                     (sesp->seedpos2 + sesp->seedlen),
+                                   dbencseq,vlen,
                                    sesp->seedpos2 + sesp->seedlen);
     } else
     {
       gt_seqabstract_reinit_gtuchar(xdropmatchinfo->vseq,
-                                    query,
-                                    vrightbound -
-                                      (sesp->seedpos2 + sesp->seedlen),
+                                    query,vlen,
                                     sesp->seedpos2 + sesp->seedlen);
     }
     gt_seqabstract_readmode_set(xdropmatchinfo->vseq,sesp->query_readmode);
+#ifdef SKDEBUG
+    gt_se_show_aligned(true,xdropmatchinfo);
+#endif
     gt_evalxdroparbitscoresextend(true,
                                   &xdropmatchinfo->best_right,
                                   xdropmatchinfo->res,
@@ -831,8 +845,6 @@ static const GtQuerymatch *gt_greedy_extend_selfmatch_sesp(
     gt_assert(right_best_polished_point.distance ==
               left_best_polished_point.distance);
   }
-  total_distance = left_best_polished_point.distance +
-                   right_best_polished_point.distance;
   dblen = sesp->seedlen + left_best_polished_point.row
                         + right_best_polished_point.row;
   gt_assert(right_best_polished_point.alignedlen >=
@@ -841,6 +853,8 @@ static const GtQuerymatch *gt_greedy_extend_selfmatch_sesp(
     = right_best_polished_point.alignedlen - right_best_polished_point.row;
   querylen = sesp->seedlen + vextend_left + vextend_right;
   total_alignedlen = dblen + querylen;
+  total_distance = left_best_polished_point.distance +
+                   right_best_polished_point.distance;
 #ifdef SKDEBUG
   printf("total_distance=" GT_WU ", total_alignedlen=" GT_WU ",err=%.2f\n",
           total_distance,

@@ -66,6 +66,8 @@ GtSeqabstract *gt_seqabstract_new_empty(void)
 
 void gt_seqabstract_readmode_set(GtSeqabstract *sa,GtReadmode readmode)
 {
+  gt_assert(sa != NULL);
+  /*printf("seqabstract: readmode set to %s\n",gt_readmode_show(readmode));*/
   sa->readmode = readmode;
 }
 
@@ -154,6 +156,18 @@ void gt_seqabstract_delete(GtSeqabstract *sa)
   }
 }
 
+#define GT_SEQABSTRACT_ASSIGN_READMODES\
+        GtReadmode u_readmode, v_readmode;\
+        if (rightextension)\
+        {\
+          u_readmode = useq->readmode;\
+          v_readmode = vseq->readmode;\
+        } else\
+        {\
+          u_readmode = gt_readmode_inverse_dir(useq->readmode);\
+          v_readmode = gt_readmode_inverse_dir(vseq->readmode);\
+        }
+
 #define GT_SEQABSTRACT_CHAR_EQUAL_OR_BREAK(VARA,RMA,VARB,RMB)\
         if (GT_ISDIRCOMPLEMENT(RMA))\
         {\
@@ -211,14 +225,7 @@ gt_seqabstract_lcp_gtuchar_gtuchar(bool rightextension,
     }
   } else
   {
-    GtReadmode u_readmode = useq->readmode,
-               v_readmode = vseq->readmode;
-
-    if (!rightextension)
-    {
-      gt_readmode_invert(u_readmode);
-      gt_readmode_invert(v_readmode);
-    }
+    GT_SEQABSTRACT_ASSIGN_READMODES
     for (lcp = 0; lcp < maxlen; lcp++)
     {
       GtUchar u_cc, v_cc;
@@ -240,14 +247,7 @@ gt_seqabstract_lcp_gtuchar_encseq(bool rightextension,
                                   GtUword maxlen)
 {
   GtUword lcp;
-  GtReadmode u_readmode = useq->readmode,
-             v_readmode = vseq->readmode;
-
-  if (!rightextension)
-  {
-    gt_readmode_invert(u_readmode);
-    gt_readmode_invert(v_readmode);
-  }
+  GT_SEQABSTRACT_ASSIGN_READMODES
   for (lcp = 0; lcp < maxlen; lcp++)
   {
     GtUchar u_cc, v_cc;
@@ -269,14 +269,7 @@ gt_seqabstract_lcp_encseq_gtuchar(bool rightextension,
                                   GtUword maxlen)
 {
   GtUword lcp;
-  GtReadmode u_readmode = useq->readmode,
-             v_readmode = vseq->readmode;
-
-  if (!rightextension)
-  {
-    gt_readmode_invert(u_readmode);
-    gt_readmode_invert(v_readmode);
-  }
+  GT_SEQABSTRACT_ASSIGN_READMODES
   for (lcp = 0; lcp < maxlen; lcp++)
   {
     GtUchar u_cc, v_cc;
@@ -300,14 +293,8 @@ static GtUword gt_seqabstract_lcp_encseq_encseq(bool rightextension,
   bool is_same_sequence = useq->seq.encseq == vseq->seq.encseq &&
                           useq->offset + ustart == vseq->offset + vstart &&
                           useq->readmode == vseq->readmode;
-  GtReadmode u_readmode = useq->readmode,
-             v_readmode = vseq->readmode;
+  GT_SEQABSTRACT_ASSIGN_READMODES
 
-  if (!rightextension)
-  {
-    gt_readmode_invert(u_readmode);
-    gt_readmode_invert(v_readmode);
-  }
   if (useq->cmpcharbychar || vseq->cmpcharbychar || !is_same_sequence)
   {
     GtUchar u_cc, v_cc;
@@ -406,4 +393,37 @@ GtUword gt_seqabstract_lcp(bool rightextension,
     }
   }
   return lcp;
+}
+
+char *gt_seqabstract_get(bool rightextension,const GtSeqabstract *seq)
+{
+  GtUword idx, startpos;
+  GtReadmode readmode;
+  char *buffer = malloc(sizeof *buffer * (seq->len+1));
+  char *map = "acgt";
+
+  if (rightextension)
+  {
+    readmode = seq->readmode;
+  } else
+  {
+    readmode = gt_readmode_inverse_dir(seq->readmode);
+  }
+  startpos = GT_ISDIRREVERSE(readmode) ? seq->len - 1 : 0;
+  for (idx = 0; idx < seq->len; idx++)
+  {
+    GtUchar cc;
+
+    if (seq->seqtype == GT_SEQABSTRACT_STRING)
+    {
+      GT_SEQABSTRACT_SEQ_ACCESS(cc,seq->seq.string,readmode,startpos,idx);
+    } else
+    {
+      GT_SEQABSTRACT_ENC_ACCESS(cc,seq->seq.encseq,seq->offset,readmode,
+                                startpos,idx);
+    }
+    buffer[idx] = map[cc];
+  }
+  buffer[seq->len] = '\0';
+  return buffer;
 }
