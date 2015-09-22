@@ -74,7 +74,8 @@ void gt_seqabstract_readmode_set(GtSeqabstract *sa,GtReadmode readmode)
 void gt_seqabstract_reinit_gtuchar(GtSeqabstract *sa,
                                    const GtUchar *string,
                                    GtUword len,
-                                   GtUword offset)
+                                   GtUword offset,
+                                   GtUword totallength)
 {
   gt_assert(sa != NULL);
 
@@ -87,18 +88,26 @@ void gt_seqabstract_reinit_gtuchar(GtSeqabstract *sa,
   sa->cmpcharbychar = false;
   sa->stoppossupport = false;
   sa->len = len;
-  sa->totallength = 0;
-  sa->offset = offset;
-  sa->seq.string = string + offset;
+  sa->totallength = totallength;
+  if (GT_ISDIRREVERSE(sa->readmode))
+  {
+    gt_assert(offset < totallength);
+    sa->offset = GT_REVERSEPOS(totallength,offset);
+  } else
+  {
+    sa->offset = offset;
+  }
+  sa->seq.string = string + sa->offset;
 }
 
 GtSeqabstract *gt_seqabstract_new_gtuchar(const GtUchar *string,
                                           GtUword len,
-                                          GtUword offset)
+                                          GtUword offset,
+                                          GtUword totallength)
 {
   GtSeqabstract *sa = gt_seqabstract_new_empty();
 
-  gt_seqabstract_reinit_gtuchar(sa, string, len, offset);
+  gt_seqabstract_reinit_gtuchar(sa, string, len, offset, totallength);
   return sa;
 }
 

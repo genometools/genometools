@@ -164,8 +164,8 @@ GtUword gt_computegreedyunitedist(const GtUchar *useq,
 {
   GtUword edist;
   GtFrontResource *frontresource = gt_frontresource_new(10UL);
-  GtSeqabstract *greedyedistuseq = gt_seqabstract_new_gtuchar(useq,ulen,0),
-                *greedyedistvseq = gt_seqabstract_new_gtuchar(vseq,vlen,0);
+  GtSeqabstract *greedyedistuseq = gt_seqabstract_new_gtuchar(useq,ulen,0,ulen),
+                *greedyedistvseq = gt_seqabstract_new_gtuchar(vseq,vlen,0,vlen);
   edist = greedyunitedist(frontresource,greedyedistuseq,greedyedistvseq);
   gt_seqabstract_delete(greedyedistuseq);
   gt_seqabstract_delete(greedyedistvseq);
@@ -181,8 +181,8 @@ void gt_checkgreedyunitedist(GT_UNUSED bool forward,
 {
   GtUword edist1, edist2;
   GtFrontResource *frontresource = gt_frontresource_new(10UL);
-  GtSeqabstract *greedyedistuseq = gt_seqabstract_new_gtuchar(useq,ulen,0),
-                *greedyedistvseq = gt_seqabstract_new_gtuchar(vseq,vlen,0);
+  GtSeqabstract *greedyedistuseq = gt_seqabstract_new_gtuchar(useq,ulen,0,ulen),
+                *greedyedistvseq = gt_seqabstract_new_gtuchar(vseq,vlen,0,vlen);
 
   edist1 = greedyunitedist(frontresource,greedyedistuseq,greedyedistvseq);
   edist2 = gt_squarededistunit (useq,ulen,vseq,vlen);

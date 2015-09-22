@@ -33,7 +33,8 @@ GtSeqabstract* gt_seqabstract_new_empty(void);
    Ownership of <string> stays with the caller. */
 GtSeqabstract* gt_seqabstract_new_gtuchar(const GtUchar *string,
                                           GtUword len,
-                                          GtUword offset);
+                                          GtUword offset,
+                                          GtUword totallength);
 
 /* Creates new <GtSeqabstract> object from <encseq>, starting at <offset> with
    length <len>, fails if <offset> is out of bounds, or <offset> + <len> extends
@@ -47,7 +48,8 @@ GtSeqabstract* gt_seqabstract_new_encseq(const GtEncseq *encseq,
 void           gt_seqabstract_reinit_gtuchar(GtSeqabstract *sa,
                                              const GtUchar *string,
                                              GtUword len,
-                                             GtUword offset);
+                                             GtUword offset,
+                                             GtUword totallength);
 
 /* reinitialize <sa> with <encseq> starting at <offset> with length <len> */
 void           gt_seqabstract_reinit_encseq(GtSeqabstract *sa,

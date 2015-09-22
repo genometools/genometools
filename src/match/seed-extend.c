@@ -248,6 +248,7 @@ const GtQuerymatch *gt_xdrop_extend_sesp(void *info,
     /* stop extension at left instance of seed or querystart,
                      whichever is larger */
     vlen = MAX(sesp->seedpos1 + sesp->seedlen,sesp->queryseqstartpos);
+    gt_seqabstract_readmode_set(xdropmatchinfo->vseq,sesp->query_readmode);
     if (query == NULL)
     {
       vlen = MAX(sesp->seedpos1 + sesp->seedlen,sesp->queryseqstartpos);
@@ -259,9 +260,9 @@ const GtQuerymatch *gt_xdrop_extend_sesp(void *info,
       vlen = sesp->queryseqstartpos;
       gt_seqabstract_reinit_gtuchar(xdropmatchinfo->vseq,
                                     query,
-                                    sesp->seedpos2 - vlen,vlen);
+                                    sesp->seedpos2 - vlen,vlen,
+                                    sesp->query_totallength);
     }
-    gt_seqabstract_readmode_set(xdropmatchinfo->vseq,sesp->query_readmode);
 #ifdef SKDEBUG
     gt_se_show_aligned(false,xdropmatchinfo);
 #endif
@@ -306,6 +307,7 @@ const GtQuerymatch *gt_xdrop_extend_sesp(void *info,
     gt_seqabstract_reinit_encseq(xdropmatchinfo->useq,
                                  dbencseq,ulen,
                                  sesp->seedpos1 + sesp->seedlen);
+    gt_seqabstract_readmode_set(xdropmatchinfo->vseq,sesp->query_readmode);
     if (query == NULL)
     {
       gt_seqabstract_reinit_encseq(xdropmatchinfo->vseq,
@@ -315,9 +317,9 @@ const GtQuerymatch *gt_xdrop_extend_sesp(void *info,
     {
       gt_seqabstract_reinit_gtuchar(xdropmatchinfo->vseq,
                                     query,vlen,
-                                    sesp->seedpos2 + sesp->seedlen);
+                                    sesp->seedpos2 + sesp->seedlen,
+                                    sesp->query_totallength);
     }
-    gt_seqabstract_readmode_set(xdropmatchinfo->vseq,sesp->query_readmode);
 #ifdef SKDEBUG
     gt_se_show_aligned(true,xdropmatchinfo);
 #endif

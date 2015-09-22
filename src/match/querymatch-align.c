@@ -349,8 +349,8 @@ static void check_correct_edist(const GtUchar *useq,
 {
   GtUword realedist;
   GtFrontResource *ftres = gt_frontresource_new(edist);
-  GtSeqabstract *useq_abstract = gt_seqabstract_new_gtuchar(useq, ulen, 0);
-  GtSeqabstract *vseq_abstract = gt_seqabstract_new_gtuchar(vseq, vlen, 0);
+  GtSeqabstract *useq_abstract = gt_seqabstract_new_gtuchar(useq, ulen, 0,ulen);
+  GtSeqabstract *vseq_abstract = gt_seqabstract_new_gtuchar(vseq, vlen, 0,vlen);
 
   realedist = greedyunitedist(ftres,useq_abstract,vseq_abstract);
   gt_assert(realedist <= edist);
