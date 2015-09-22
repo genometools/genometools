@@ -91,7 +91,7 @@ def parseargs(argv)
   opts.on("-w","--withwildcards","store wildcards at end of extensions") do |x|
     options.withwildcards = true
   end
-  opts.on("--seed","specify the seed to make sequences reproducible") do |x|
+  opts.on("--seed NUM","specify the seed to make sequences reproducible") do |x|
     options.seednumber = x.to_i
   end
   rest = opts.parse(argv)
