@@ -75,7 +75,8 @@ void *gt_linspaceManagement_get_maxspace(const LinspaceManagement
                                                                  *spacemanager);
 
 /* change allocated linear space in 2dim format */
-GtUword **gt_linspaceManagement_change_to_square(LinspaceManagement *spacemanager,
+GtUword **gt_linspaceManagement_change_to_square(LinspaceManagement
+                                                 *spacemanager,
                                                  GtUword ulen, GtUword vlen);
 
 void gt_linspaceManagement_set_TSfactor(LinspaceManagement *spacemanager,

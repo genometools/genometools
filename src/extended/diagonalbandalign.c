@@ -181,7 +181,9 @@ GtUword diagonalbandalignment_in_square_space(LinspaceManagement *spacemanager,
                                   vlen, matchcost, mismatchcost, gapcost);
 
   if (spacemanager == NULL)
-    {gt_array2dim_delete(E);}
+  {
+    gt_array2dim_delete(E);
+  }
   return distance;
 }
 

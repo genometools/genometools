@@ -18,16 +18,19 @@
 #include <ctype.h>
 #include <string.h>
 #include "core/assert_api.h"
-#include "core/minmax.h"
-#include "core/error.h"
-#include "core/types_api.h"
 #include "core/divmodmul.h"
+#include "core/error.h"
 #include "core/ma_api.h"
+#include "core/minmax.h"
+#ifdef GT_THREADS_ENABLED
+#include "core/thread_api.h"
+#endif
+#include "core/types_api.h"
 #include "extended/affinealign.h"
-#include "extended/linearalign_affinegapcost.h"
 #include "extended/maxcoordvalue.h"
 #include "extended/reconstructalignment.h"
 
+#include "extended/linearalign_affinegapcost.h"
 #define LINEAR_EDIST_GAP          ((GtUchar) UCHAR_MAX)
 
 typedef struct {
@@ -321,6 +324,90 @@ AffineAlignEdge minAdditionalCosts(const AffinealignDPentry *entry,
   return set_edge(rdist, ddist, idist);
 }
 
+#ifdef GT_THREADS_ENABLED
+typedef struct{
+  LinspaceManagement *spacemanager;
+  const GtUchar *useq, * vseq;
+  GtUword ustart, ulen, vstart, vlen,
+          *Ctab, rowoffset, matchcost,
+          mismatchcost, gap_opening, gap_extension;
+  AffineAlignEdge from_edge, to_edge;
+}GtAffineCrosspointthreadinfo;
+
+static GtAffineCrosspointthreadinfo
+                set_AffineCrosspointthreadinfo(LinspaceManagement *spacemanager,
+                                               const GtUchar *useq,
+                                               GtUword ustart,
+                                               GtUword ulen,
+                                               const GtUchar *vseq,
+                                               GtUword vstart,
+                                               GtUword vlen,
+                                               GtUword *Ctab,
+                                               GtUword rowoffset,
+                                               GtUword matchcost,
+                                               GtUword mismatchcost,
+                                               GtUword gap_opening,
+                                               GtUword gap_extension,
+                                               AffineAlignEdge from_edge,
+                                               AffineAlignEdge to_edge)
+{
+  GtAffineCrosspointthreadinfo threadinfo;
+  threadinfo.spacemanager = spacemanager;
+  threadinfo.useq = useq;
+  threadinfo.ustart = ustart;
+  threadinfo.ulen = ulen;
+  threadinfo.vseq = vseq;
+  threadinfo.vstart = vstart;
+  threadinfo.vlen = vlen;
+  threadinfo.Ctab = Ctab;
+  threadinfo.rowoffset = rowoffset;
+  threadinfo.matchcost = matchcost;
+  threadinfo.mismatchcost = mismatchcost;
+  threadinfo.gap_opening = gap_opening;
+  threadinfo.gap_extension = gap_extension;
+  threadinfo.from_edge = from_edge;
+  threadinfo.to_edge = to_edge;
+  return threadinfo;
+}
+static GtUword evaluateaffinecrosspoints(LinspaceManagement *spacemanager,
+                                         const GtUchar *useq,
+                                         GtUword ustart,
+                                         GtUword ulen,
+                                         const GtUchar *vseq,
+                                         GtUword vstart,
+                                         GtUword vlen,
+                                         GtUword *Ctab,
+                                         GtUword rowoffset,
+                                         GtUword matchcost,
+                                         GtUword mismatchcost,
+                                         GtUword gap_opening,
+                                         GtUword gap_extension,
+                                         AffineAlignEdge from_edge,
+                                         AffineAlignEdge to_edge);
+
+static void *evaluateaffinecrosspoints_thread_caller(void *data)
+{
+  GtAffineCrosspointthreadinfo *threadinfo =
+                                         (GtAffineCrosspointthreadinfo *) data;
+  (void) evaluateaffinecrosspoints(threadinfo->spacemanager,
+                                   threadinfo->useq,
+                                   threadinfo->ustart,
+                                   threadinfo-> ulen,
+                                   threadinfo->vseq,
+                                   threadinfo->vstart,
+                                   threadinfo->vlen,
+                                   threadinfo->Ctab,
+                                   threadinfo->rowoffset,
+                                   threadinfo->matchcost,
+                                   threadinfo->mismatchcost,
+                                   threadinfo->gap_opening,
+                                   threadinfo->gap_extension,
+                                   threadinfo->from_edge,
+                                   threadinfo->to_edge);
+  return NULL;
+}
+#endif
+
 /* evaluate crosspoints in recursive way */
 static GtUword evaluateaffinecrosspoints(LinspaceManagement *spacemanager,
                                          const GtUchar *useq,
@@ -342,11 +429,17 @@ static GtUword evaluateaffinecrosspoints(LinspaceManagement *spacemanager,
   AffineAlignEdge bottomtype, midtype = Affine_X;
   AffinealignDPentry *Atabcolumn = NULL;
   Rtabentry *Rtabcolumn = NULL;
+#ifdef GT_THREADS_ENABLED
+  GtThread *t1 = NULL, *t2 = NULL;
+  GtAffineCrosspointthreadinfo threadinfo1, threadinfo2;
+#endif
 
   if (vlen >= 2UL)
   {
+#ifndef GT_THREADS_ENABLED
     if (gt_linspaceManagement_checksquare(spacemanager, ulen, vlen,
-                                     sizeof (*Atabcolumn),sizeof (*Rtabcolumn)))
+                                          sizeof (*Atabcolumn),
+                                          sizeof (*Rtabcolumn)))
     {
       affine_ctab_in_square_space(spacemanager, Ctab, useq, ustart, ulen,
                                   vseq, vstart, vlen,
@@ -354,9 +447,12 @@ static GtUword evaluateaffinecrosspoints(LinspaceManagement *spacemanager,
                                   gap_extension, rowoffset, from_edge, to_edge);
       return 0;
     }
-
+#endif
     Rtabcolumn = gt_linspaceManagement_get_rTabspace(spacemanager);
     Atabcolumn = gt_linspaceManagement_get_valueTabspace(spacemanager);
+    Rtabcolumn = Rtabcolumn + rowoffset;
+    Atabcolumn = Atabcolumn + rowoffset;
+
     distance = evaluateallAtabRtabcolumns(Atabcolumn,Rtabcolumn,
                                           useq, ustart, ulen,
                                           vseq, vstart, vlen,
@@ -394,32 +490,59 @@ static GtUword evaluateaffinecrosspoints(LinspaceManagement *spacemanager,
           if (midcol > 1)
             Ctab[midcol-1] = Ctab[midcol] == 0 ? 0: Ctab[midcol] - 1;
 
-            (void) evaluateaffinecrosspoints(spacemanager,
-                                             useq, ustart, midrow-1,
-                                             vseq, vstart, midcol-1,
-                                             Ctab,rowoffset,
-                                             matchcost, mismatchcost,
-                                             gap_opening,
-                                             gap_extension,
-                                             from_edge,midtype);
-          break;
-        case Affine_D:
+#ifdef GT_THREADS_ENABLED
+          threadinfo1 = set_AffineCrosspointthreadinfo(spacemanager,
+                                                       useq, ustart, midrow-1,
+                                                       vseq, vstart, midcol-1,
+                                                       Ctab, rowoffset,
+                                                       matchcost, mismatchcost,
+                                                       gap_opening,
+                                                       gap_extension,
+                                                       from_edge, midtype);
+          t1 = gt_thread_new(evaluateaffinecrosspoints_thread_caller,
+                             &threadinfo1, NULL);
+#else
           (void) evaluateaffinecrosspoints(spacemanager,
-                                           useq,ustart,midrow-1,
-                                           vseq,vstart,midcol,
-                                           Ctab,rowoffset,
+                                           useq, ustart, midrow-1,
+                                           vseq, vstart, midcol-1,
+                                           Ctab, rowoffset,
                                            matchcost, mismatchcost,
                                            gap_opening,
                                            gap_extension,
                                            from_edge,midtype);
+#endif
+          break;
+        case Affine_D:
+#ifdef GT_THREADS_ENABLED
+          threadinfo1 = set_AffineCrosspointthreadinfo(spacemanager,
+                                                       useq, ustart, midrow-1,
+                                                       vseq, vstart, midcol,
+                                                       Ctab, rowoffset,
+                                                       matchcost, mismatchcost,
+                                                       gap_opening,
+                                                       gap_extension,
+                                                       from_edge,midtype);
+
+          t1 = gt_thread_new(evaluateaffinecrosspoints_thread_caller,
+                             &threadinfo1, NULL);
+#else
+          (void) evaluateaffinecrosspoints(spacemanager,
+                                           useq, ustart, midrow-1,
+                                           vseq, vstart, midcol,
+                                           Ctab, rowoffset,
+                                           matchcost, mismatchcost,
+                                           gap_opening,
+                                           gap_extension,
+                                           from_edge,midtype);
+#endif
           break;
         case Affine_I:
-          if (midcol>1)
-            Ctab[midcol-1] = (Ctab[midcol]);
+          if (midcol > 1)
+            Ctab[midcol-1] = Ctab[midcol];
           (void) evaluateaffinecrosspoints(spacemanager,
-                                           useq,ustart,midrow,
-                                           vseq,vstart,midcol-1,
-                                           Ctab,rowoffset,
+                                           useq, ustart, midrow,
+                                           vseq, vstart, midcol-1,
+                                           Ctab, rowoffset,
                                            matchcost, mismatchcost,
                                            gap_opening,
                                            gap_extension,
@@ -430,15 +553,39 @@ static GtUword evaluateaffinecrosspoints(LinspaceManagement *spacemanager,
       }
     }
    /*bottom right corner */
-   evaluateaffinecrosspoints(spacemanager, useq, ustart+midrow, ulen-midrow,
-                             vseq, vstart+midcol,vlen-midcol,
-                             Ctab+midcol,rowoffset+midrow,
-                             matchcost, mismatchcost,
-                             gap_opening,
-                             gap_extension,
-                             midtype, to_edge);
+#ifdef GT_THREADS_ENABLED
+    threadinfo2 = set_AffineCrosspointthreadinfo(spacemanager,
+                                                 useq,ustart+midrow,ulen-midrow,
+                                                 vseq,vstart+midcol,vlen-midcol,
+                                                 Ctab+midcol,rowoffset+midrow,
+                                                 matchcost, mismatchcost,
+                                                 gap_opening,
+                                                 gap_extension,
+                                                 midtype, to_edge);
+    t2 = gt_thread_new(evaluateaffinecrosspoints_thread_caller,
+                       &threadinfo2, NULL);
+#else
+   (void) evaluateaffinecrosspoints(spacemanager,
+                                    useq, ustart+midrow, ulen-midrow,
+                                    vseq, vstart+midcol, vlen-midcol,
+                                    Ctab+midcol,rowoffset+midrow,
+                                    matchcost, mismatchcost,
+                                    gap_opening,
+                                    gap_extension,
+                                    midtype, to_edge);
+#endif
+#ifdef GT_THREADS_ENABLED
+  if (t1 != NULL)
+  {
+    gt_thread_join(t1);
+    gt_thread_delete(t1);
+  }
+  gt_thread_join(t2);
+  gt_thread_delete(t2);
+#endif
     return distance;
   }
+
   return 0;
 }
 
