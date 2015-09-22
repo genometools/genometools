@@ -58,6 +58,7 @@ def parseargs(argv)
   minminid = 70
   maxminid = 99
   defaultminid = 80
+  indent = 37
   minidrange = "[#{minminid}..#{maxminid}]"
   options.seedlength = nil
   options.lengthparam = nil
@@ -67,6 +68,7 @@ def parseargs(argv)
   options.namedfiles = false
   options.withwildcards = false
   options.minidentity = defaultminid
+  options.seednumber = nil
   opts = OptionParser.new
   opts.on("-m","--mode STRING","specify mode: mirrored|seeded|pair") do |x|
     mode = x
@@ -77,17 +79,21 @@ def parseargs(argv)
   opts.on("-l","--length NUM","specify length of sequences") do |x|
     options.lengthparam = x.to_i
   end
-  opts.on("-i","--minidentity NUM","specify minimum identity percentage in range " +
-               "#{minidrange}, default is #{defaultminid}") do |x|
+  opts.on("-i","--minidentity NUM","specify minimum identity percentage in\n" +
+            (" " * indent) + "range " + "#{minidrange}, " +
+            "default is #{defaultminid}") do |x|
     options.minidentity = x.to_i
   end
-  opts.on("-n","--namedfiles","store seeded matches in files db.fna and query.fna") do |x|
+  opts.on("-n","--namedfiles","store seeded matches in files db.fna and\n" +
+                              (" " * indent) + "query.fna") do |x|
     options.namedfiles = true
   end
   opts.on("-w","--withwildcards","store wildcards at end of extensions") do |x|
     options.withwildcards = true
   end
-  rest = opts.parse(argv)
+  opts.on("--seed","specify the seed to make sequences reproducible") do |x|
+    options.seednumber = x.to_i
+  end
   rest = opts.parse(argv)
   if rest.length != 0
     STDERR.puts "Usage: #{$0} [options]"
@@ -190,8 +196,7 @@ end
 options = parseargs(ARGV)
 alphabet = "acgt"
 errperc = 100 - options.minidentity
-myseed = nil
-rseq = Randomsequence.new(alphabet,myseed)
+rseq = Randomsequence.new(alphabet,options.seednumber)
 if options.namedfiles
   fpdb = openoutfile("db.fna")
   fpquery = openoutfile("query.fna")
