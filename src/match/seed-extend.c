@@ -943,42 +943,7 @@ GtUword gt_align_front_prune_edist(bool forward,
   FTsequenceResources ufsr, vfsr;
 
   gt_assert(ggemi != NULL);
-  if (ggemi->encseq_r_in_u == NULL)
-  {
-    ggemi->encseq_r_in_u
-      = gt_encseq_create_reader_with_readmode(dbencseq,
-                                              GT_READMODE_FORWARD,
-                                              0);
-  }
-  if (query == NULL && ggemi->encseq_r_in_v == NULL)
-  {
-    ggemi->encseq_r_in_v
-      = gt_encseq_create_reader_with_readmode(dbencseq,
-                                              GT_READMODE_FORWARD,
-                                              0);
-  }
-  if (ggemi->db_totallength == GT_UWORD_MAX)
-  {
-    ggemi->db_totallength = gt_encseq_total_length(dbencseq);
-  }
-  gt_FTsequenceResources_init(&ufsr,
-                              dbencseq,
-                              GT_READMODE_FORWARD,
-                              ggemi->encseq_r_in_u,
-                              &ggemi->usequence_cache,
-                              NULL,
-                              ggemi->db_totallength,
-                              ggemi->extend_char_access);
-  gt_FTsequenceResources_init(&vfsr,
-                              dbencseq,
-                              GT_READMODE_FORWARD,
-                              ggemi->encseq_r_in_v,
-                              &ggemi->vsequence_cache,
-                              query,
-                              query == NULL ? ggemi->db_totallength
-                                            : query_totallength,
-                              query == NULL ? ggemi->extend_char_access
-                                            : GT_EXTEND_CHAR_ACCESS_DIRECT);
+  gt_greedy_extend_init(&ufsr,&vfsr,dbencseq,query,query_totallength,ggemi);
   maxiterations = greedyextension ? 1 : ggemi->minmatchnum;
   gt_assert(best_polished_point != NULL);
   for (iteration = 0; iteration < maxiterations; iteration++)
