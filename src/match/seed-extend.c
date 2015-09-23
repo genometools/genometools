@@ -434,46 +434,6 @@ const GtQuerymatch *gt_xdrop_extend_sesp(void *info,
                    xdropmatchinfo->silent);
 }
 
-const GtQuerymatch *gt_xdrop_extend_selfmatch(void *info,
-                                              const GtEncseq *encseq,
-                                              GtUword len,
-                                              GtUword pos1,
-                                              GtUword pos2)
-{
-  GtSeedextendSeqpair sesp;
-
-  gt_sesp_from_absolute(&sesp,encseq, pos1, encseq, pos2, len);
-  return gt_xdrop_extend_sesp(info, encseq, NULL, &sesp);
-}
-
-int gt_xdrop_extend_selfmatch_with_output(void *info,
-                                          const GtEncseq *encseq,
-                                          GtUword len,
-                                          GtUword pos1,
-                                          GtUword pos2,
-                                          GT_UNUSED GtError *err)
-{
-  const GtQuerymatch *querymatch = gt_xdrop_extend_selfmatch(info,
-                                                             encseq,
-                                                             len,
-                                                             pos1,
-                                                             pos2);
-  if (querymatch != NULL)
-  {
-    GtProcessinfo_and_querymatchspaceptr *processinfo_and_querymatchspaceptr
-      = (GtProcessinfo_and_querymatchspaceptr *) info;
-    GtXdropmatchinfo *xdropmatchinfo
-      = processinfo_and_querymatchspaceptr->processinfo;
-
-    if (gt_querymatch_verify(querymatch,xdropmatchinfo->errorpercentage,
-                             xdropmatchinfo->userdefinedleastlength))
-    {
-      gt_querymatch_prettyprint(querymatch);
-    }
-  }
-  return 0;
-}
-
 const GtQuerymatch *gt_xdrop_extend_selfmatch_relative(void *info,
                                               const GtEncseq *encseq,
                                               GtUword dbseqnum,
@@ -869,16 +829,81 @@ static const GtQuerymatch *gt_greedy_extend_sesp(
                  greedyextendmatchinfo->silent);
 }
 
-const GtQuerymatch *gt_greedy_extend_selfmatch(void *info,
-                                               const GtEncseq *encseq,
-                                               GtUword len,
-                                               GtUword pos1,
-                                               GtUword pos2)
+const GtQuerymatch *gt_extend_selfmatch(bool forxdrop,
+                                        void *info,
+                                        const GtEncseq *encseq,
+                                        GtUword len,
+                                        GtUword pos1,
+                                        GtUword pos2)
 {
   GtSeedextendSeqpair sesp;
 
-  gt_sesp_from_absolute(&sesp, encseq, pos1, encseq, pos2, len);
-  return gt_greedy_extend_sesp(info,encseq,NULL,&sesp);
+  gt_sesp_from_absolute(&sesp,encseq, pos1, encseq, pos2, len);
+  return (forxdrop ? gt_xdrop_extend_sesp
+                   : gt_greedy_extend_sesp)(info, encseq, NULL, &sesp);
+}
+
+static void gt_extend_prettyprint(bool forxdrop,const GtQuerymatch *querymatch,
+                                  void *info)
+{
+  GtProcessinfo_and_querymatchspaceptr *processinfo_and_querymatchspaceptr
+    = (GtProcessinfo_and_querymatchspaceptr *) info;
+  GtUword errorpercentage, userdefinedleastlength;
+
+  if (forxdrop)
+  {
+    GtXdropmatchinfo *xdropmatchinfo
+      = processinfo_and_querymatchspaceptr->processinfo;
+    errorpercentage = xdropmatchinfo->errorpercentage;
+    userdefinedleastlength = xdropmatchinfo->userdefinedleastlength;
+  } else
+  {
+    GtGreedyextendmatchinfo *ggemi
+      = processinfo_and_querymatchspaceptr->processinfo;
+    errorpercentage = ggemi->errorpercentage;
+    userdefinedleastlength = ggemi->userdefinedleastlength;
+  }
+  if (gt_querymatch_verify(querymatch,errorpercentage,userdefinedleastlength))
+  {
+    gt_querymatch_prettyprint(querymatch);
+  }
+}
+
+int gt_extend_selfmatch_with_output(bool forxdrop,
+                                    void *info,
+                                    const GtEncseq *encseq,
+                                    GtUword len,
+                                    GtUword pos1,
+                                    GtUword pos2,
+                                    GT_UNUSED GtError *err)
+{
+  const GtQuerymatch *querymatch = gt_extend_selfmatch(forxdrop,
+                                                       info,
+                                                       encseq,
+                                                       len,
+                                                       pos1,
+                                                       pos2);
+  if (querymatch != NULL)
+  {
+    gt_extend_prettyprint(forxdrop,querymatch,info);
+  }
+  return 0;
+}
+
+int gt_xdrop_extend_selfmatch_with_output(void *info,
+                                          const GtEncseq *encseq,
+                                          GtUword len,
+                                          GtUword pos1,
+                                          GtUword pos2,
+                                          GT_UNUSED GtError *err)
+{
+  return gt_extend_selfmatch_with_output(true,
+                                         info,
+                                         encseq,
+                                         len,
+                                         pos1,
+                                         pos2,
+                                         err);
 }
 
 int gt_greedy_extend_selfmatch_with_output(void *info,
@@ -888,25 +913,13 @@ int gt_greedy_extend_selfmatch_with_output(void *info,
                                            GtUword pos2,
                                            GT_UNUSED GtError *err)
 {
-  const GtQuerymatch *querymatch = gt_greedy_extend_selfmatch(info,
-                                                              encseq,
-                                                              len,
-                                                              pos1,
-                                                              pos2);
-  if (querymatch != NULL)
-  {
-    GtProcessinfo_and_querymatchspaceptr *processinfo_and_querymatchspaceptr
-      = (GtProcessinfo_and_querymatchspaceptr *) info;
-    GtGreedyextendmatchinfo *greedyextendmatchinfo
-      = processinfo_and_querymatchspaceptr->processinfo;
-
-    if (gt_querymatch_verify(querymatch,greedyextendmatchinfo->errorpercentage,
-                             greedyextendmatchinfo->userdefinedleastlength))
-    {
-      gt_querymatch_prettyprint(querymatch);
-    }
-  }
-  return 0;
+  return gt_extend_selfmatch_with_output(false,
+                                         info,
+                                         encseq,
+                                         len,
+                                         pos1,
+                                         pos2,
+                                         err);
 }
 
 const GtQuerymatch *gt_greedy_extend_selfmatch_relative(void *info,
@@ -1093,26 +1106,7 @@ static void gt_extend_querymatch_with_output(bool forxdrop,
                            query_totallength);
   if (querymatch != NULL)
   {
-    GtUword errorpercentage, userdefinedleastlength;
-    GtProcessinfo_and_querymatchspaceptr *processinfo_and_querymatchspaceptr
-      = (GtProcessinfo_and_querymatchspaceptr *) info;
-    if (forxdrop)
-    {
-      GtXdropmatchinfo *xdropmatchinfo
-        = processinfo_and_querymatchspaceptr->processinfo;
-      errorpercentage = xdropmatchinfo->errorpercentage;
-      userdefinedleastlength = xdropmatchinfo->userdefinedleastlength;
-    } else
-    {
-      GtGreedyextendmatchinfo *ggemi
-        = processinfo_and_querymatchspaceptr->processinfo;
-      errorpercentage = ggemi->errorpercentage;
-      userdefinedleastlength = ggemi->userdefinedleastlength;
-    }
-    if (gt_querymatch_verify(querymatch,errorpercentage,userdefinedleastlength))
-    {
-      gt_querymatch_prettyprint(querymatch);
-    }
+    gt_extend_prettyprint(forxdrop,querymatch,info);
   }
 }
 
