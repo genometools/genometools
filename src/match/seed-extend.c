@@ -1143,3 +1143,244 @@ void gt_greedy_extend_querymatch_with_output(void *info,
                                    query,
                                    query_totallength);
 }
+
+const GtQuerymatch *gt_extend_sesp(bool forxdrop,
+                                          void *info,
+                                          const GtEncseq *dbencseq,
+                                          const GtUchar *query,
+                                          const GtSeedextendSeqpair *sesp)
+{
+  GtProcessinfo_and_querymatchspaceptr *processinfo_and_querymatchspaceptr
+    = (GtProcessinfo_and_querymatchspaceptr *) info;
+  GtGreedyextendmatchinfo *greedyextendmatchinfo = NULL;
+  GtXdropmatchinfo *xdropmatchinfo = NULL;
+  GtUword u_left_ext, v_left_ext, u_right_ext, v_right_ext,
+          ulen, vlen, urightbound, vrightbound;
+  GtXdropscore score = 0;
+  FTsequenceResources ufsr, vfsr;
+  Polished_point left_best_polished_point = {0,0,0},
+                 right_best_polished_point = {0,0,0};
+
+  if (query == NULL)
+  {
+    gt_assert(sesp->seedpos1 < sesp->seedpos2);
+    if (sesp->seedpos1 + sesp->seedlen >= sesp->seedpos2)
+    {
+      /* overlapping seeds */
+      return NULL;
+    }
+  }
+  if (forxdrop)
+  {
+    xdropmatchinfo = processinfo_and_querymatchspaceptr->processinfo;
+  } else
+  {
+    greedyextendmatchinfo = processinfo_and_querymatchspaceptr->processinfo;
+    gt_greedy_extend_init(&ufsr,&vfsr,dbencseq, query, sesp->query_totallength,
+                          greedyextendmatchinfo);
+  }
+  if (sesp->seedpos1 > sesp->dbseqstartpos &&
+      sesp->seedpos2 > sesp->queryseqstartpos)
+  { /* there is something to align on the left of the seed */
+    GtUword voffset;
+
+    ulen = sesp->seedpos1 - sesp->dbseqstartpos;
+    if (forxdrop)
+    {
+      gt_seqabstract_reinit_encseq(xdropmatchinfo->useq, dbencseq,ulen,
+                                 sesp->dbseqstartpos);
+      gt_seqabstract_readmode_set(xdropmatchinfo->vseq,sesp->query_readmode);
+    }
+    if (query == NULL)
+    {
+      voffset = MAX(sesp->seedpos1 + sesp->seedlen, sesp->queryseqstartpos);
+      /* stop extension at left instance of seed or querystart,
+         whichever is larger */
+      vlen = sesp->seedpos2 - voffset;
+      if (forxdrop)
+      {
+        gt_seqabstract_reinit_encseq(xdropmatchinfo->vseq, dbencseq,
+                                     vlen,voffset);
+      }
+    } else
+    {
+      voffset = sesp->queryseqstartpos;
+      vlen = sesp->seedpos2 - voffset;
+      if (forxdrop)
+      {
+        gt_seqabstract_reinit_gtuchar(xdropmatchinfo->vseq, query, vlen,voffset,
+                                      sesp->query_totallength);
+      }
+    }
+    if (forxdrop)
+    {
+      gt_evalxdroparbitscoresextend(false,
+                                  &xdropmatchinfo->best_left,
+                                  xdropmatchinfo->res,
+                                  xdropmatchinfo->useq,
+                                  xdropmatchinfo->vseq,
+                                  xdropmatchinfo->belowscore);
+    } else
+    {
+      (void) front_prune_edist_inplace(false,
+                                       &greedyextendmatchinfo->
+                                          frontspace_reservoir,
+                                       greedyextendmatchinfo->trimstat,
+                                       &left_best_polished_point,
+                                       greedyextendmatchinfo->left_front_trace,
+                                       greedyextendmatchinfo->pol_info,
+                                       greedyextendmatchinfo->history,
+                                       greedyextendmatchinfo->minmatchnum,
+                                       greedyextendmatchinfo->
+                                          maxalignedlendifference,
+                                       &ufsr,
+                                       sesp->seedpos1 - 1,
+                                       ulen,
+                                       &vfsr,
+                                       sesp->seedpos2 - 1,
+                                       vlen);
+    }
+  } else
+  {
+    if (forxdrop)
+    {
+      xdropmatchinfo->best_left.ivalue = 0;
+      xdropmatchinfo->best_left.jvalue = 0;
+      xdropmatchinfo->best_left.score = 0;
+    }
+  }
+  if (forxdrop)
+  {
+    u_left_ext = xdropmatchinfo->best_left.ivalue;
+    v_left_ext = xdropmatchinfo->best_left.jvalue;
+#ifdef SKDEBUG
+    extensioncoords_show(true,false,u_left_ext,v_left_ext,
+                         xdropmatchinfo->best_left.score);
+#endif
+  } else
+  {
+    u_left_ext = left_best_polished_point.row;
+    gt_assert(left_best_polished_point.alignedlen >= u_left_ext);
+    v_left_ext = left_best_polished_point.alignedlen - u_left_ext;
+#ifdef SKDEBUG
+    extensioncoords_show(false,false,u_left_ext,v_left_ext,
+                         (GtWord) left_best_polished_point.distance);
+#endif
+  }
+  if (query == NULL)
+  {
+    gt_assert(sesp->seedpos2 >= v_left_ext);
+    urightbound = MIN(sesp->dbseqstartpos + sesp->dbseqlength,
+                      sesp->seedpos2 - v_left_ext);
+  } else
+  {
+    urightbound = sesp->dbseqstartpos + sesp->dbseqlength;
+  }
+  vrightbound = sesp->queryseqstartpos + sesp->query_totallength;
+  if (sesp->seedpos1 + sesp->seedlen < urightbound &&
+      sesp->seedpos2 + sesp->seedlen < vrightbound)
+  { /* there is something to align on the right of the seed */
+    /* stop extension at right instance of extended seed */
+    ulen = urightbound - (sesp->seedpos1 + sesp->seedlen);
+    vlen = vrightbound - (sesp->seedpos2 + sesp->seedlen);
+    if (forxdrop)
+    {
+      gt_seqabstract_reinit_encseq(xdropmatchinfo->useq,
+                                 dbencseq,ulen,
+                                 sesp->seedpos1 + sesp->seedlen);
+      gt_seqabstract_readmode_set(xdropmatchinfo->vseq,sesp->query_readmode);
+      if (query == NULL)
+      {
+        gt_seqabstract_reinit_encseq(xdropmatchinfo->vseq,
+                                     dbencseq,vlen,
+                                     sesp->seedpos2 + sesp->seedlen);
+      } else
+      {
+        gt_seqabstract_reinit_gtuchar(xdropmatchinfo->vseq,
+                                      query,vlen,
+                                      sesp->seedpos2 + sesp->seedlen,
+                                      sesp->query_totallength);
+      }
+#ifdef SKDEBUG
+      gt_se_show_aligned(true,xdropmatchinfo);
+#endif
+      gt_evalxdroparbitscoresextend(true,
+                                    &xdropmatchinfo->best_right,
+                                    xdropmatchinfo->res,
+                                    xdropmatchinfo->useq,
+                                    xdropmatchinfo->vseq,
+                                    xdropmatchinfo->belowscore);
+    } else
+    {
+      (void) front_prune_edist_inplace(true,
+                                       &greedyextendmatchinfo->
+                                          frontspace_reservoir,
+                                       greedyextendmatchinfo->trimstat,
+                                       &right_best_polished_point,
+                                       greedyextendmatchinfo->right_front_trace,
+                                       greedyextendmatchinfo->pol_info,
+                                       greedyextendmatchinfo->history,
+                                       greedyextendmatchinfo->minmatchnum,
+                                       greedyextendmatchinfo->
+                                          maxalignedlendifference,
+                                       &ufsr,
+                                       sesp->seedpos1 + sesp->seedlen,
+                                       ulen,
+                                       &vfsr,
+                                       sesp->seedpos2 + sesp->seedlen,
+                                       vlen);
+    }
+  } else
+  {
+    if (forxdrop)
+    {
+      xdropmatchinfo->best_right.ivalue = 0;
+      xdropmatchinfo->best_right.jvalue = 0;
+      xdropmatchinfo->best_right.score = 0;
+    }
+  }
+  if (forxdrop)
+  {
+    u_right_ext = xdropmatchinfo->best_right.ivalue;
+    v_right_ext = xdropmatchinfo->best_right.jvalue;
+#ifdef SKDEBUG
+    extensioncoords_show(true,true,u_right_ext,v_right_ext,
+                         xdropmatchinfo->best_right.score);
+#endif
+    score = (GtXdropscore) sesp->seedlen * xdropmatchinfo->arbitscores.mat +
+            xdropmatchinfo->best_left.score +
+            xdropmatchinfo->best_right.score;
+  } else
+  {
+    u_right_ext = right_best_polished_point.row;
+    gt_assert(right_best_polished_point.alignedlen >= u_right_ext);
+    v_right_ext = right_best_polished_point.alignedlen - u_right_ext;
+#ifdef SKDEBUG
+    extensioncoords_show(false,true,u_right_ext,v_right_ext,
+                         (GtWord) right_best_polished_point.distance);
+#endif
+    if (greedyextendmatchinfo->check_extend_symmetry)
+    {
+      gt_assert(right_best_polished_point.alignedlen ==
+                left_best_polished_point.alignedlen);
+      gt_assert(u_right_ext == u_left_ext);
+      gt_assert(right_best_polished_point.distance ==
+                left_best_polished_point.distance);
+    }
+  }
+  return gt_combine_extensions(
+                 forxdrop,
+                 processinfo_and_querymatchspaceptr->querymatchspaceptr,
+                 dbencseq,
+                 query,
+                 sesp,
+                 u_left_ext,
+                 v_left_ext,
+                 u_right_ext,
+                 v_right_ext,
+                 forxdrop ? score : 0,
+                 forxdrop ? 0 : (left_best_polished_point.distance +
+                                 right_best_polished_point.distance),
+                 forxdrop ? xdropmatchinfo->silent
+                          : greedyextendmatchinfo->silent);
+}
