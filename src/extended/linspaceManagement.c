@@ -30,6 +30,7 @@ struct LinspaceManagement{
                    crosspointsize,
                    timesquarefactor,
                    ulen;
+  size_t           spacepeak; /*space in bytes*/
   Gtmaxcoordvalue *maxscoordvaluespace;
 };
 
@@ -46,6 +47,7 @@ LinspaceManagement* gt_linspaceManagement_new()
   spacemanager->crosspointsize = 0;
   spacemanager->timesquarefactor = 1;
   spacemanager->ulen = 0;
+  spacemanager->spacepeak = 0;
   return spacemanager;
 }
 
@@ -62,6 +64,15 @@ void gt_linspaceManagement_delete(LinspaceManagement *spacemanager)
   }
 }
 
+/* space in bytes */
+size_t gt_linspaceManagement_get_spacepeak(const LinspaceManagement
+                                                                  *spacemanager)
+{
+  gt_assert(spacemanager != NULL);
+  return spacemanager->spacepeak;
+}
+
+/* resize space */
 static void gt_linspaceManagement_check_generic(LinspaceManagement *spacemanager,
                                                 GtUword ulen, GtUword vlen,
                                                 size_t valuesize,
@@ -69,6 +80,7 @@ static void gt_linspaceManagement_check_generic(LinspaceManagement *spacemanager
                                                 size_t crosspointsize,
                                                 bool local)
 {
+  size_t space = 0, localspace = 0; /* space in bytes */
   /*if (spacemanager == NULL)
     spacemanager = gt_new_linspaceManagement();*/
 
@@ -97,7 +109,16 @@ static void gt_linspaceManagement_check_generic(LinspaceManagement *spacemanager
       spacemanager->maxscoordvaluespace = gt_max_new();
     else
       gt_max_reset(spacemanager->maxscoordvaluespace);
+
+    localspace = 2 * sizeof (GtUwordPair)+ sizeof (GtWord);
+            /* = sizeof (Gtmaxcoordvalue)*/
   }
+
+  /* determine space peak */
+  space = (ulen+1) * valuesize + (ulen +1) * rtabsize
+        + (vlen+1) * crosspointsize + localspace;
+  if (space > spacemanager->spacepeak)
+    spacemanager->spacepeak = space;
 }
 
 void gt_linspaceManagement_check(LinspaceManagement *spacemanager,
@@ -212,6 +233,7 @@ GtUword gt_linspaceManagement_get_valuesize(const LinspaceManagement
   return spacemanager->valuesize;
 }
 
+/* space for Gtmaxcoordvalue struct */
 void *gt_linspaceManagement_get_maxspace(const LinspaceManagement *spacemanager)
 {
   if (spacemanager != NULL)

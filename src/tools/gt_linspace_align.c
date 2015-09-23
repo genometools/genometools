@@ -49,7 +49,8 @@ typedef struct{
   bool       global,
              local,
              diagonal,
-             showscore;
+             showscore,
+             spacetime;
   GtUword timesquarefactor;
 } GtLinspaceArguments;
 
@@ -116,7 +117,7 @@ static GtOptionParser* gt_linspace_align_option_parser_new(void *tool_arguments)
   GtOption *optionstrings, *optionfiles, *optionglobal, *optionlocal,
            *optionlinearcosts, *optionaffinecosts, *optionoutputfile,
            *optionshowscore, *optiondiagonal, *optiondiagonalbonds,
-           *optiontsfactor;
+           *optiontsfactor, *optionspacetime;
   gt_assert(arguments);
 
   /* init */
@@ -134,7 +135,7 @@ static GtOptionParser* gt_linspace_align_option_parser_new(void *tool_arguments)
   optionlocal = gt_option_new_bool("local", "local alignment",
                                    &arguments->local, false);
   gt_option_parser_add_option(op, optionlocal);
-  
+
   optiondiagonal = gt_option_new_bool("d", "diagonalband alignment",
                                       &arguments->diagonal, false);
   gt_option_parser_add_option(op, optiondiagonal);
@@ -142,6 +143,11 @@ static GtOptionParser* gt_linspace_align_option_parser_new(void *tool_arguments)
   optionshowscore = gt_option_new_bool("showscore", "show score for alignment",
                                       &arguments->showscore, false);
   gt_option_parser_add_option(op, optionshowscore);
+
+  optionspacetime = gt_option_new_bool("spacetime", "write space peak and time"
+                                       " overall on stdout",
+                                       &arguments->spacetime, false);
+  gt_option_parser_add_option(op, optionspacetime);
 
   /* -str */
   optionstrings = gt_option_new_string_array("ss", "use two strings",
@@ -162,8 +168,8 @@ static GtOptionParser* gt_linspace_align_option_parser_new(void *tool_arguments)
                                                  arguments->affinecosts);
   gt_option_parser_add_option(op, optionaffinecosts);
 
-  optiondiagonalbonds = gt_option_new_string_array("lr", "left and right shift "
-                                                   "of diagonal",
+  optiondiagonalbonds = gt_option_new_string_array("lr", "specified left and "
+                                                   "right shift of diagonal",
                                                    arguments->diagonalbonds);
   gt_option_parser_add_option(op, optiondiagonalbonds);
 
@@ -178,7 +184,7 @@ static GtOptionParser* gt_linspace_align_option_parser_new(void *tool_arguments)
                                        &arguments->timesquarefactor,1);
   gt_option_parser_add_option(op, optiontsfactor);
 
-  /* dependencies*/
+  /* dependencies */
   gt_option_is_mandatory_either(optionstrings, optionfiles);
   gt_option_exclude(optionlocal, optionglobal);
   gt_option_exclude(optionlinearcosts, optionaffinecosts);
@@ -189,7 +195,8 @@ static GtOptionParser* gt_linspace_align_option_parser_new(void *tool_arguments)
   gt_option_imply_either_2(optionshowscore,optionlinearcosts,optionaffinecosts);
   gt_option_imply(optiondiagonal, optionglobal);
   gt_option_imply(optiondiagonalbonds, optiondiagonal);
-  //gt_option_argument_is_optional(optiondiagonalbonds);
+  /* development option(s) */
+  gt_option_is_development_option(optionspacetime);
 
   return op;
 }
@@ -389,7 +396,7 @@ static void alignment_with_linear_gap_costs(GtLinspaceArguments *arguments,
              gt_assert (diagonalbonds != NULL);
              diagonalbonds[0] = -ulen;
              diagonalbonds[1] = vlen;
-           } 
+           }
            gt_computediagonalbandalign(spacemanager,align,
                                        useq, 0, ulen, vseq, 0, vlen,
                                        diagonalbonds[0], diagonalbonds[1],
@@ -472,7 +479,7 @@ static void alignment_with_affine_gap_costs(GtLinspaceArguments *arguments,
              gt_assert (diagonalbonds != NULL);
              diagonalbonds[0] = -ulen;
              diagonalbonds[1] = vlen;
-           } 
+           }
            gt_computediagonalbandaffinealign(spacemanager, align,
                                              useq, 0, ulen, vseq, 0, vlen,
                                              diagonalbonds[0], diagonalbonds[1],
@@ -563,10 +570,10 @@ static int gt_linspace_align_runner(GT_UNUSED int argc,
   }
 
   /* call alignment functions */
-  
+
   if (arguments->diagonal)
   {
-    if(gt_str_array_size(arguments->diagonalbonds) > 0)
+    if (gt_str_array_size(arguments->diagonalbonds) > 0)
     {
        diagonalbonds = select_digit_from_string(arguments->diagonalbonds,
                                                 false, err);
@@ -613,6 +620,13 @@ static int gt_linspace_align_runner(GT_UNUSED int argc,
   gt_sequences_delete(sequences1);
   gt_sequences_delete(sequences2);
   gt_alignment_delete(align);
+
+  if (arguments->spacetime)
+  {
+    printf("# space peak: "GT_ZU"Bytes\n",
+                             gt_linspaceManagement_get_spacepeak(spacemanager));
+    /*TODO: add time*/
+  }
   gt_linspaceManagement_delete(spacemanager);
   return had_err;
 }

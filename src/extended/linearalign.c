@@ -277,8 +277,8 @@ GtUword gt_calc_linearalign(LinspaceManagement *spacemanager,
                                      mismatchcost, gapcost);
   }
 
-  gt_linspaceManagement_check(spacemanager,ulen,vlen,sizeof (*EDtabcolumn),
-                              sizeof (*Rtabcolumn),sizeof (*Ctab));
+  gt_linspaceManagement_check(spacemanager,ulen,vlen, sizeof (*EDtabcolumn),
+                              sizeof (*Rtabcolumn), sizeof (*Ctab));
 
   Ctab = gt_linspaceManagement_get_crosspointTabspace(spacemanager);
 

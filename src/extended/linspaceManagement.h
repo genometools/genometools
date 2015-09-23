@@ -29,14 +29,17 @@ LinspaceManagement* gt_linspaceManagement_new();
 
 void gt_linspaceManagement_delete(LinspaceManagement *spacemanager);
 
-/* checks if enough space is allocated in global case*/
+size_t gt_linspaceManagement_get_spacepeak(const LinspaceManagement
+                                                                 *spacemanager);
+
+/* checks if enough space is allocated in global case and resize if necessary */
 void gt_linspaceManagement_check(LinspaceManagement *spacemanager,
                                  GtUword ulen, GtUword vlen,
                                  size_t valuesize,
                                  size_t rtabsize,
                                  size_t crosspointsize);
 
-/* checks if enough space is allocated in local case*/
+/* checks if enough space is allocated in local case and resize if necessary */
 void  gt_linspaceManagement_check_local(LinspaceManagement *spacemanager,
                                         GtUword ulen, GtUword vlen,
                                         size_t valuesize,
