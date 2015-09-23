@@ -216,7 +216,7 @@ void evaluate_DBcrosspoints_from_2dimtab(GtUword **E,
       if (jdx == vlen)
         Dtab[vlen].currentrowindex = idx + rowoffset;
 
-      Dtab[jdx].edge = Linear_R;
+      Dtab[jdx].last_type = Linear_R;
       idx--;
       jdx--;
       Dtab[jdx].currentrowindex = idx + rowoffset;
@@ -226,7 +226,7 @@ void evaluate_DBcrosspoints_from_2dimtab(GtUword **E,
       if (jdx == vlen)
         Dtab[vlen].currentrowindex = idx + rowoffset;
 
-      Dtab[jdx].edge = Linear_D;
+      Dtab[jdx].last_type = Linear_D;
       idx--;
       Dtab[jdx].currentrowindex = idx + rowoffset;
     }
@@ -235,7 +235,7 @@ void evaluate_DBcrosspoints_from_2dimtab(GtUword **E,
       if (jdx == vlen)
         Dtab[vlen].currentrowindex = idx + rowoffset;
 
-      Dtab[jdx].edge = Linear_I;
+      Dtab[jdx].last_type = Linear_I;
       jdx--;
       Dtab[jdx].currentrowindex = idx + rowoffset;
     }
@@ -397,7 +397,7 @@ static void firstDBtabcolumn(GtUword *EDtabcolumn,
   EDtabcolumn[low_row] = 0;
   if (diag == 0)
   {
-    Diagcolumn[0].edge = edge;
+    Diagcolumn[0].last_type = edge;
     Diagcolumn[0].lastcpoint = GT_UWORD_MAX;
     Diagcolumn[0].currentrowindex = 0 + offset;
     Rtabcolumn[0] = 0;
@@ -413,7 +413,7 @@ static void firstDBtabcolumn(GtUword *EDtabcolumn,
 
     if (diag == -(GtWord)rowindex)
     {
-      Diagcolumn[0].edge = Linear_D;
+      Diagcolumn[0].last_type = Linear_D;
       Diagcolumn[0].lastcpoint = GT_UWORD_MAX;
       Diagcolumn[0].currentrowindex = rowindex + offset;
       Rtabcolumn[rowindex-low_row] = 0;
@@ -435,7 +435,7 @@ static inline void set_linear_DiagentryRtabentry(LinearAlignEdge edge,
 {
     if (diag == (GtWord)colindex - (GtWord)rowindex)
     {
-      Diagcolumnentry->edge = edge;
+      Diagcolumnentry->last_type = edge;
       Diagcolumnentry->lastcpoint = Rtabentry_from;
       Diagcolumnentry->currentrowindex = rowindex + offset;
       *Rtabcolumnentry = colindex;
@@ -642,10 +642,10 @@ static void evaluateDBcrosspoints(LinspaceManagement *spacemanager,
     for (idx = 1; idx <=vlen; idx++)
     {
       Diagcolumn[idx].currentrowindex = rowoffset;
-      Diagcolumn[idx].edge = Linear_I;
+      Diagcolumn[idx].last_type = Linear_I;
     }
     Diagcolumn[0].currentrowindex = rowoffset;
-    Diagcolumn[0].edge = edge;
+    Diagcolumn[0].last_type = edge;
     return;
   }
 
@@ -742,12 +742,13 @@ static void evaluateDBcrosspoints(LinspaceManagement *spacemanager,
 
     cpoint = Diagcolumn[cpoint].lastcpoint;
     ctemp =  Diagcolumn[cpoint].lastcpoint;
-    if (Diagcolumn[prevcpoint].edge == Linear_R ||
-       ((Diagcolumn[prevcpoint].edge == Linear_I) && (prevcpoint-cpoint == 1)))
+    if (Diagcolumn[prevcpoint].last_type == Linear_R ||
+       ((Diagcolumn[prevcpoint].last_type == Linear_I) &&
+       (prevcpoint-cpoint == 1)))
     {
       continue;
     }
-    else if (Diagcolumn[prevcpoint].edge == Linear_D)
+    else if (Diagcolumn[prevcpoint].last_type == Linear_D)
     {
       new_left = -1;
       new_right = MIN(right_dist-((GtWord)diag)-1,
@@ -763,7 +764,7 @@ static void evaluateDBcrosspoints(LinspaceManagement *spacemanager,
                           new_left, new_right,
                           matchcost, mismatchcost, gapcost);
     }
-    else if (Diagcolumn[prevcpoint].edge == Linear_I)
+    else if (Diagcolumn[prevcpoint].last_type == Linear_I)
     {
       dtemp = Diagcolumn[cpoint];
       new_left = MAX(left_dist-diag+1,
@@ -784,7 +785,7 @@ static void evaluateDBcrosspoints(LinspaceManagement *spacemanager,
     }
     else
     {
-      /* if (Diagcolumn[cpoint].edge == Linear_X), never reach this line */
+      /* if (Diagcolumn[cpoint].last_type == Linear_X), never reach this line */
       gt_assert(false);
     }
     Diagcolumn[cpoint].lastcpoint  = ctemp;
@@ -793,7 +794,7 @@ static void evaluateDBcrosspoints(LinspaceManagement *spacemanager,
   /* exception, if first crosspoint != 0-entry, upper left corner */
   if (vstart-coloffset != cpoint)
   {
-    if (Diagcolumn[cpoint].edge == Linear_D)
+    if (Diagcolumn[cpoint].last_type == Linear_D)
     {
       new_left =  MAX(left_dist,
                 -((GtWord)Diagcolumn[cpoint].currentrowindex-(GtWord)ustart-1));
@@ -808,7 +809,7 @@ static void evaluateDBcrosspoints(LinspaceManagement *spacemanager,
                             matchcost, mismatchcost, gapcost);
 
     }
-    else if (Diagcolumn[cpoint].edge == Linear_I)
+    else if (Diagcolumn[cpoint].last_type == Linear_I)
     {
       new_left = MAX(left_dist,
                  -((GtWord)Diagcolumn[cpoint].currentrowindex-(GtWord)ustart));
@@ -820,8 +821,8 @@ static void evaluateDBcrosspoints(LinspaceManagement *spacemanager,
                             new_left, new_right,
                             matchcost, mismatchcost, gapcost);
     }
-    else if (Diagcolumn[cpoint].edge == Linear_R ||
-             Diagcolumn[cpoint].edge == Linear_X)
+    else if (Diagcolumn[cpoint].last_type == Linear_R ||
+             Diagcolumn[cpoint].last_type  == Linear_X)
     {
       gt_assert(false); /* this cant be the first crosspoint or
                            it have to be 0-entry */

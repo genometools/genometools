@@ -227,15 +227,15 @@ void reconstructalignment_from_Dtab(GtAlignment *align,
     gt_assert(Dtab[i].currentrowindex != GT_UWORD_MAX);
     if (Dtab[i].currentrowindex == Dtab[i-1].currentrowindex + 1)
     {
-      if (Dtab[i].edge == Linear_R)
+      if (Dtab[i].last_type == Linear_R)
        gt_alignment_add_replacement(align);
 
-      else if (Dtab[i].edge == Linear_D)
+      else if (Dtab[i].last_type == Linear_D)
       {
          gt_alignment_add_deletion(align);
          gt_alignment_add_insertion(align);
       }
-      else if (Dtab[i].edge == Linear_I)
+      else if (Dtab[i].last_type == Linear_I)
       {
          gt_alignment_add_insertion(align);
          gt_alignment_add_deletion(align);
@@ -246,7 +246,7 @@ void reconstructalignment_from_Dtab(GtAlignment *align,
 
     else if (Dtab[i].currentrowindex > Dtab[i-1].currentrowindex)
     {
-      if (Dtab[i].edge == Linear_R)
+      if (Dtab[i].last_type == Linear_R)
       {
         gt_alignment_add_replacement(align);
         for (j = 0; j < (Dtab[i].currentrowindex -
@@ -255,7 +255,7 @@ void reconstructalignment_from_Dtab(GtAlignment *align,
           gt_alignment_add_deletion(align);
         }
       }
-      else if (Dtab[i].edge == Linear_I)
+      else if (Dtab[i].last_type == Linear_I)
       {
         gt_alignment_add_insertion(align);
         for (j = 0; j < (Dtab[i].currentrowindex -
@@ -320,7 +320,7 @@ void reconstructalignment_from_affineDtab(GtAlignment *align,
   for (i = vlen; i > 0; i--)
   {
     prevnode = node;
-    switch (prevnode.edge) {
+    switch (prevnode.last_type) {
       case Affine_R:
         node = Dtab[i-1].val_R;
         break;
@@ -381,7 +381,7 @@ void reconstructalignment_from_affineDtab(GtAlignment *align,
         {
           gt_alignment_add_deletion(align);
         }
-        if (prevnode.edge == Affine_I)
+        if (prevnode.last_type == Affine_I)
         {
           if (tolower((int)vseq[i-1]) ==
                                       tolower((int)useq[node.currentrowindex]))
@@ -398,7 +398,7 @@ void reconstructalignment_from_affineDtab(GtAlignment *align,
           gt_alignment_add_replacement(align);
       }
     }
-    prevedge = prevnode.edge;
+    prevedge = prevnode.last_type;
   }
   for (j = node.currentrowindex; j > 0; j--)
   {

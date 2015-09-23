@@ -321,7 +321,7 @@ static Rnode evaluate_affineDBcrosspoints_from_2dimtab(AffineDiagentry *Dtab,
         gt_assert(Atabcolumn[i][j].Rvalue != GT_WORD_MAX);
         Dtab[j].val_R.currentrowindex = i + rowoffset;
         edge = Atabcolumn[i][j].Redge;
-        tempnode->edge = Affine_R;
+        tempnode->last_type = Affine_R;
         tempnode = &Dtab[j].val_R;
         gt_assert(i > 0 && j > 0);
         i--;
@@ -335,7 +335,7 @@ static Rnode evaluate_affineDBcrosspoints_from_2dimtab(AffineDiagentry *Dtab,
       case Affine_I:
         Dtab[j].val_I.currentrowindex = i + rowoffset;
         edge = Atabcolumn[i][j].Iedge;
-        tempnode->edge = Affine_I;
+        tempnode->last_type = Affine_I;
         tempnode = &Dtab[j].val_I;
         gt_assert(j);
         j--;
@@ -344,7 +344,7 @@ static Rnode evaluate_affineDBcrosspoints_from_2dimtab(AffineDiagentry *Dtab,
         gt_assert(false);
     }
   }
-  tempnode->edge = edge;
+  tempnode->last_type = edge;
   /* special case for first crosspoint */
   Dtab[0].val_R = (Diagentry) {GT_UWORD_MAX, rowoffset, from_edge};
   Dtab[0].val_D = (Diagentry) {GT_UWORD_MAX, rowoffset, from_edge};
@@ -551,7 +551,7 @@ static void inline  set_invalid_Diagentry(Diagentry *node)
 {
   gt_assert(node != NULL);
   node->currentrowindex = GT_UWORD_MAX;
-  node->edge = Affine_X;
+  node->last_type = Affine_X;
   node->lastcpoint = GT_UWORD_MAX;
 }
 
@@ -563,17 +563,17 @@ static void inline set_valid_Diagentry(Diagentry *node_to,
   gt_assert(node_to != NULL && entry_from != NULL);
   if (minvalue == r_dist)
   {
-    node_to->edge = entry_from->val_R.edge;
+    node_to->last_type = entry_from->val_R.edge;
     node_to->lastcpoint = entry_from->val_R.idx;
   }
   else if (minvalue == i_dist)
   {
-    node_to->edge = entry_from->val_I.edge;
+    node_to->last_type = entry_from->val_I.edge;
     node_to->lastcpoint = entry_from->val_I.idx;
   }
   else if (minvalue == d_dist)
   {
-    node_to->edge = entry_from->val_D.edge;
+    node_to->last_type = entry_from->val_D.edge;
     node_to->lastcpoint = entry_from->val_D.idx;
   }
 }
@@ -636,7 +636,7 @@ static void firstaffineDBtabcolumn(AffinealignDPentry *Atabcolumn,
     if (diag == 0)
     {
       Diagcolumn[0].val_R.currentrowindex = 0 + offset;
-      Diagcolumn[0].val_R.edge = from_edge;
+      Diagcolumn[0].val_R.last_type = from_edge;
       Rtabcolumn[0].val_R.idx = 0;
       Rtabcolumn[0].val_R.edge = Affine_R;
     }
@@ -647,7 +647,7 @@ static void firstaffineDBtabcolumn(AffinealignDPentry *Atabcolumn,
     if (diag == 0)
     {
       Diagcolumn[0].val_D.currentrowindex = 0 + offset;
-      Diagcolumn[0].val_D.edge = from_edge;
+      Diagcolumn[0].val_D.last_type = from_edge;
       Rtabcolumn[0].val_D.idx = 0;
       Rtabcolumn[0].val_D.edge = Affine_D;
     }
@@ -658,7 +658,7 @@ static void firstaffineDBtabcolumn(AffinealignDPentry *Atabcolumn,
     if (diag == 0)
     {
       Diagcolumn[0].val_I.currentrowindex = 0 + offset;
-      Diagcolumn[0].val_I.edge = from_edge;
+      Diagcolumn[0].val_I.last_type = from_edge;
       Rtabcolumn[0].val_I.idx = 0;
       Rtabcolumn[0].val_I.edge = Affine_I;
     }
@@ -695,7 +695,7 @@ static void firstaffineDBtabcolumn(AffinealignDPentry *Atabcolumn,
 
     if (diag == -(GtWord)rowindex)
     {
-      Diagcolumn[0].val_D.edge = from_edge;
+      Diagcolumn[0].val_D.last_type = from_edge;
       Diagcolumn[0].val_D.lastcpoint = GT_UWORD_MAX;
       Diagcolumn[0].val_D.currentrowindex = rowindex + offset;
       Rtabcolumn[rowindex-low_row].val_D.idx = 0;
@@ -998,28 +998,29 @@ static Rnode evaluateaffineDBcrosspoints(LinspaceManagement *spacemanager,
                                          GtUword gap_opening,
                                          GtUword gap_extension)
 {
-  GtUword idx, currentrowindex, new_ulen;
+  GtUword i,new_ulen, new_vlen, col_start, col_end,
+          row_start, row_end;
   GtWord new_left, new_right, diag;
   Diagentry cpoint, prevcpoint;
   Rnode rpoint, temprpoint, lastrpoint;
-  AffineAlignEdge cedge;
+  AffineAlignEdge prevcp_type,cp_type;
 
   diag = GT_DIV2(left_dist+right_dist);
   if (ulen == 0)
   {
-    for (idx = 0; idx <=vlen; idx++)
+    for (i = 0; i <=vlen; i++)
     {
-      Diagcolumn[idx].val_I.currentrowindex = rowoffset;
-      Diagcolumn[idx].val_I.edge = Affine_I;
+      Diagcolumn[i].val_I.currentrowindex = rowoffset;
+      Diagcolumn[i].val_I.last_type = Affine_I;
     }
-    Diagcolumn[0].val_I.edge = from_edge;
+    Diagcolumn[0].val_I.last_type = from_edge;
     return (Rnode) {vlen, Affine_I};
   }
 
   if (vlen == 0)
   {
     Diagcolumn[0].val_D.currentrowindex = ulen;
-    Diagcolumn[0].val_D.edge = from_edge;
+    Diagcolumn[0].val_D.last_type = from_edge;
     return (Rnode) {0, Affine_D};
   }
 
@@ -1034,51 +1035,52 @@ static Rnode evaluateaffineDBcrosspoints(LinspaceManagement *spacemanager,
                                       rowoffset, from_edge, edge, to_edge);
   }
 
-  rpoint = evaluateallaffineDBcolumns(spacemanager, Diagcolumn, edge,
-                              from_edge, to_edge, rowoffset, useq, ustart, ulen,
-                              vseq, vstart, vlen, left_dist, right_dist,
-                              matchcost, mismatchcost,
-                              gap_opening, gap_extension);
+  rpoint = evaluateallaffineDBcolumns(spacemanager, Diagcolumn, edge, from_edge,
+                                      to_edge, rowoffset, useq, ustart, ulen,
+                                      vseq, vstart, vlen, left_dist, right_dist,
+                                      matchcost, mismatchcost,
+                                      gap_opening, gap_extension);
   lastrpoint = rpoint;
-  idx = rpoint.idx;
+  col_start = rpoint.idx;
+  cp_type = rpoint.edge;
 
   /* if no crosspoint is found */
-  if (idx == GT_UWORD_MAX)
+  if (col_start == GT_UWORD_MAX)
   {
     if (diag < 0)
-      return evaluateaffineDBcrosspoints(spacemanager,Diagcolumn,
-                                edge, from_edge, to_edge, rowoffset, coloffset,
-                                useq, ustart, ulen, vseq, vstart,
-                                vlen, diag+1, right_dist, matchcost,
-                                mismatchcost, gap_opening, gap_extension);
+      return evaluateaffineDBcrosspoints(spacemanager, Diagcolumn, edge,
+                                      from_edge, to_edge, rowoffset, coloffset,
+                                      useq, ustart, ulen, vseq, vstart,
+                                      vlen, diag+1, right_dist, matchcost,
+                                      mismatchcost, gap_opening, gap_extension);
     else if (diag > 0)
-      return evaluateaffineDBcrosspoints(spacemanager, Diagcolumn,
-                                edge, from_edge, to_edge, rowoffset, coloffset,
-                                useq, ustart, ulen, vseq, vstart,
-                                vlen, left_dist, diag-1, matchcost,
-                                mismatchcost, gap_opening, gap_extension);
+      return evaluateaffineDBcrosspoints(spacemanager, Diagcolumn, edge,
+                                      from_edge, to_edge, rowoffset, coloffset,
+                                      useq, ustart, ulen, vseq, vstart,
+                                      vlen, left_dist, diag-1, matchcost,
+                                      mismatchcost, gap_opening, gap_extension);
     else
     {
-      gt_assert(false); /* there have to be an crosspoint */
+      gt_assert(false); /* there has to be an crosspoint */
     }
   }
   else
   {
-    switch (rpoint.edge) {
+    switch (cp_type) {
     case Affine_R:
-      cpoint = Diagcolumn[rpoint.idx].val_R;
-      cedge = Affine_R;
-      currentrowindex = Diagcolumn[rpoint.idx].val_R.currentrowindex;
+      cpoint = Diagcolumn[col_start].val_R;
+      cp_type = Affine_R;
+      row_start = Diagcolumn[col_start].val_R.currentrowindex;
       break;
     case Affine_D:
-      cpoint = Diagcolumn[rpoint.idx].val_D;
-      cedge = Affine_D;
-      currentrowindex = Diagcolumn[rpoint.idx].val_D.currentrowindex;
+      cpoint = Diagcolumn[col_start].val_D;
+      cp_type = Affine_D;
+      row_start = Diagcolumn[col_start].val_D.currentrowindex;
       break;
     case Affine_I:
-      cpoint = Diagcolumn[rpoint.idx].val_I;
-      cedge = Affine_I;
-      currentrowindex = Diagcolumn[rpoint.idx].val_I.currentrowindex;
+      cpoint = Diagcolumn[col_start].val_I;
+      cp_type = Affine_I;
+      row_start = Diagcolumn[col_start].val_I.currentrowindex;
       break;
     default:
       gt_assert(false);
@@ -1086,162 +1088,165 @@ static Rnode evaluateaffineDBcrosspoints(LinspaceManagement *spacemanager,
   }
 
   /* exception, if last cpoint != (m+1)entry */
-  if (idx != vlen)
+  if (col_start != vlen)
   {
     if (diag + ((GtWord)ulen-(GtWord)vlen) > 0)
     {
+      new_ulen = ulen - (row_start+1-rowoffset);
+      new_vlen = vlen-col_start;
       new_left = MAX((GtWord)left_dist-diag+1,
-                    -((GtWord)ulen - ((GtWord)currentrowindex+1
-                    -(GtWord)rowoffset)));
+                    -(GtWord)new_ulen);
       new_right = 0;
-      new_ulen =  ulen - (currentrowindex+1-rowoffset);
 
       lastrpoint = evaluateaffineDBcrosspoints(spacemanager,
-                           Diagcolumn+idx, Affine_D, cpoint.edge, to_edge,
-                           currentrowindex+1, coloffset+idx, useq,
-                           currentrowindex+1, new_ulen, vseq,
-                           vstart+idx, vlen-idx, new_left, new_right,
-                           matchcost, mismatchcost, gap_opening, gap_extension);
-      lastrpoint.idx += idx;
+                      Diagcolumn+col_start, Affine_D, cpoint.last_type, to_edge,
+                      row_start+1, coloffset+col_start, useq,
+                      row_start+1, new_ulen, vseq,
+                      vstart+col_start, new_vlen, new_left, new_right,
+                      matchcost, mismatchcost, gap_opening, gap_extension);
+      lastrpoint.idx += col_start;
     }
     else
     {
+      new_ulen = ulen - (row_start-rowoffset);
+      new_vlen = ((GtWord)vlen-(GtWord)col_start-1);
       new_left = -1;
-      new_right =  MIN((GtWord)right_dist-((GtWord)diag)-1,
-                      ((GtWord)vlen-(GtWord)idx-1));
-      new_ulen = ulen - (currentrowindex-rowoffset);
+      new_right = MIN((GtWord)right_dist-((GtWord)diag)-1,new_vlen);
 
-      lastrpoint = evaluateaffineDBcrosspoints(spacemanager, Diagcolumn+idx+1,
-                           Affine_I, cedge, to_edge, currentrowindex,
-                           coloffset+idx+1, useq, currentrowindex, new_ulen,
-                           vseq, vstart+idx+1, vlen-idx-1,
-                           new_left, new_right,
-                           matchcost, mismatchcost, gap_opening, gap_extension);
-      lastrpoint.idx += (idx+1);
+      lastrpoint = evaluateaffineDBcrosspoints(spacemanager,
+                             Diagcolumn+col_start+1, Affine_I, cp_type, to_edge,
+                             row_start, coloffset+col_start+1, useq, row_start,
+                             new_ulen, vseq, vstart+col_start+1, new_vlen,
+                             new_left, new_right, matchcost, mismatchcost,
+                             gap_opening, gap_extension);
+      lastrpoint.idx += (col_start+1);
     }
   }
-
   /* look at all 'normally' crosspoints */
   while (cpoint.lastcpoint != GT_UWORD_MAX)
   {
-    rpoint = (Rnode) {idx, cedge};
     prevcpoint = cpoint;
-
-    idx = prevcpoint.lastcpoint;
-    switch (prevcpoint.edge) {
+    prevcp_type = cp_type;
+    col_end = col_start;
+    row_end = row_start;
+    col_start = prevcpoint.lastcpoint;
+    switch (prevcpoint.last_type) {
     case Affine_R:
-      cpoint = Diagcolumn[idx].val_R;
-      cedge = Affine_R;
-      currentrowindex = Diagcolumn[idx].val_R.currentrowindex;
+      cpoint = Diagcolumn[col_start].val_R;
+      cp_type = Affine_R;
+      row_start = Diagcolumn[col_start].val_R.currentrowindex;
       break;
     case Affine_D:
-      cpoint = Diagcolumn[idx].val_D;
-      cedge = Affine_D;
-      currentrowindex = Diagcolumn[idx].val_D.currentrowindex;
+      cpoint = Diagcolumn[col_start].val_D;
+      cp_type = Affine_D;
+      row_start = Diagcolumn[col_start].val_D.currentrowindex;
       break;
     case Affine_I:
-      cpoint = Diagcolumn[idx].val_I;
-      cedge = Affine_I;
-      currentrowindex = Diagcolumn[idx].val_I.currentrowindex;
+      cpoint = Diagcolumn[col_start].val_I;
+      cp_type = Affine_I;
+      row_start = Diagcolumn[col_start].val_I.currentrowindex;
       break;
     default:
-      cedge = Affine_X;
+      cp_type = Affine_X;
       gt_assert(false);
     }
 
-    if (rpoint.edge == Affine_R ||
-       ((rpoint.edge == Affine_I) && (rpoint.idx-idx == 1)))
+    if (prevcp_type == Affine_R ||
+       ((prevcp_type == Affine_I) && (col_end-col_start == 1)))
     {
       continue;/* next crosspoint is also on the diagonal*/
     }
-    else if (rpoint.edge == Affine_D)
+    else if (prevcp_type == Affine_D)
     {
+      new_ulen = row_end-row_start-1;
+      new_vlen = col_end-col_start-1;
       new_left = -1;
-      new_right = MIN(right_dist-diag-1,
-                     (GtWord)rpoint.idx-(GtWord)idx-1);
-      new_ulen = prevcpoint.currentrowindex-
-                 currentrowindex-1;
+      new_right = MIN(right_dist-diag-1,new_vlen);
 
-      temprpoint = evaluateaffineDBcrosspoints(spacemanager, Diagcolumn+idx+1,
-                           Affine_I, cedge, Affine_D, currentrowindex,
-                           coloffset + idx + 1, useq, currentrowindex, new_ulen,
-                           vseq, vstart + idx + 1,
-                           rpoint.idx-idx-1, new_left, new_right,
+      temprpoint = evaluateaffineDBcrosspoints(spacemanager,
+                           Diagcolumn+col_start+1,
+                           Affine_I, cp_type, Affine_D, row_start,
+                           coloffset + col_start + 1, useq, row_start, new_ulen,
+                           vseq, vstart + col_start + 1,
+                           new_vlen, new_left, new_right,
                            matchcost, mismatchcost, gap_opening, gap_extension);
-      if (temprpoint.idx + idx + 1 < vlen)
+      if (temprpoint.idx + col_start + 1 < vlen)
       {
-        GtUword update_idx = temprpoint.idx+1+idx+1;
-        Diagcolumn[update_idx].val_R.edge = temprpoint.edge;
-        Diagcolumn[update_idx].val_D.edge = temprpoint.edge;
-        Diagcolumn[update_idx].val_I.edge = temprpoint.edge;
+        GtUword update_idx = temprpoint.idx+1+col_start+1;
+        Diagcolumn[update_idx].val_R.last_type = temprpoint.edge;
+        Diagcolumn[update_idx].val_D.last_type = temprpoint.edge;
+        Diagcolumn[update_idx].val_I.last_type = temprpoint.edge;
       }
-      if (temprpoint.idx + idx + 1 == lastrpoint.idx)
+      if (temprpoint.idx + col_start + 1 == lastrpoint.idx)
       {
         lastrpoint = temprpoint;
-        lastrpoint.idx += idx + 1;
+        lastrpoint.idx += col_start + 1;
       }
     }
-    else if (rpoint.edge == Affine_I)
+    else if (prevcp_type == Affine_I)
     {
+      new_ulen = row_end-row_start-1;
       new_left = MAX(left_dist-diag+1,
-                        -((GtWord)Diagcolumn[rpoint.idx].val_I.currentrowindex-
-                          (GtWord)currentrowindex-1));
+                        -(GtWord)new_ulen);
       new_right = 0;
-      new_ulen = prevcpoint.currentrowindex-currentrowindex-1;
 
-      temprpoint = evaluateaffineDBcrosspoints(spacemanager, Diagcolumn + idx,
-                         Affine_D, cpoint.edge, Affine_I, currentrowindex + 1,
-                         coloffset + idx, useq, currentrowindex+1, new_ulen,
-                         vseq, vstart+idx, rpoint.idx-1-idx,
-                         new_left, new_right, matchcost, mismatchcost,
-                         gap_opening, gap_extension);
-      Diagcolumn[rpoint.idx].val_I.edge = temprpoint.edge;
+      temprpoint = evaluateaffineDBcrosspoints(spacemanager,
+                            Diagcolumn + col_start,
+                            Affine_D, cpoint.last_type, Affine_I, row_start + 1,
+                            row_start + col_start,
+                            useq, row_start+1, new_ulen,
+                            vseq, vstart+col_start, col_end-col_start-1,
+                            new_left, new_right, matchcost, mismatchcost,
+                            gap_opening, gap_extension);
+      Diagcolumn[col_end].val_I.last_type = temprpoint.edge;
     }
     else
     {
-      /* if (Diagcolumn[cpoint].edge == Linear_X), never reach this line */
+      /* if (Diagcolumn[cpoint].last_type == Linear_X), never reach this line */
       gt_assert(false);
     }
   }
-
+  col_end = col_start;
+  row_end = row_start;
   /* exception, if first crosspoint != 0-entry */
-   if (vstart-coloffset != idx)
+   if (vstart-coloffset != col_end)
    {
-     switch (cedge) {
+     switch (cp_type) {
      case Affine_D:
-       new_left =  MAX(-((GtWord)Diagcolumn[idx].val_D.currentrowindex-
-                        (GtWord)ustart-1), left_dist);
-       new_right = MIN(right_dist, (GtWord)idx);
-       new_ulen = Diagcolumn[idx].val_D.currentrowindex-ustart-1;
+       new_ulen = row_end-ustart-1;
+       new_left =  MAX(-new_ulen, left_dist);
+       new_right = MIN(right_dist, (GtWord)col_end);
 
        rpoint = evaluateaffineDBcrosspoints(spacemanager, Diagcolumn,
                                  edge, from_edge,Affine_D,rowoffset, coloffset,
                                  useq, ustart, new_ulen,
-                                 vseq, vstart, idx, new_left, new_right,
+                                 vseq, vstart, col_end, new_left, new_right,
                                  matchcost, mismatchcost, gap_opening,
                                  gap_extension);
-       if (idx + 1 <= vlen)
+       if (col_start + 1 <= vlen)
        {
-         Diagcolumn[idx+1].val_R.edge = rpoint.edge;
-         Diagcolumn[idx+1].val_D.edge = rpoint.edge;
-         Diagcolumn[idx+1].val_I.edge = rpoint.edge;
+         Diagcolumn[col_start+1].val_R.last_type = rpoint.edge;
+         Diagcolumn[col_start+1].val_D.last_type = rpoint.edge;
+         Diagcolumn[col_start+1].val_I.last_type = rpoint.edge;
        }
        if (rpoint.idx == lastrpoint.idx)
          lastrpoint = rpoint;
        break;
      case Affine_I:
+       new_ulen = row_end-ustart;
+       new_vlen = col_end-1;
        new_left = MAX(left_dist,
-                 -((GtWord)cpoint.currentrowindex-(GtWord)ustart));
+                 -(GtWord)new_ulen);
 
-       new_right = MIN((GtWord)idx-1, right_dist);
+       new_right = MIN((GtWord)new_vlen, right_dist);
        rpoint = evaluateaffineDBcrosspoints(spacemanager, Diagcolumn,
                                 edge, from_edge, Affine_I,rowoffset, coloffset,
-                                useq, ustart, cpoint.currentrowindex-ustart,
-                                vseq, vstart, idx-1, new_left,
+                                useq, ustart, new_ulen,
+                                vseq, vstart, new_vlen, new_left,
                                 new_right, matchcost, mismatchcost,gap_opening,
                                 gap_extension);
 
-       Diagcolumn[idx].val_I.edge = rpoint.edge;
+       Diagcolumn[col_start].val_I.last_type = rpoint.edge;
        break;
      default:
        gt_assert(false);

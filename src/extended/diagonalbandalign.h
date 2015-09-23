@@ -32,7 +32,7 @@ typedef enum {
 
 typedef struct {
   GtUword lastcpoint, currentrowindex;
-  int edge;
+  int last_type;
 } Diagentry;
 
 void gt_checkdiagonalbandalign(GT_UNUSED bool forward,
