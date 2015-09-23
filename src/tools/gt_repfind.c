@@ -854,7 +854,10 @@ static int gt_repfind_runner(int argc,
       {
         if (gt_option_is_set(arguments->refextendgreedyoption))
         {
-          gt_assert(false);
+          eqmf = gt_greedy_extend_querymatch_with_output;
+          processinfo_and_querymatchspaceptr.processinfo
+            = greedyextendmatchinfo;
+          eqmf_data = (void *) &processinfo_and_querymatchspaceptr;
         }
       }
       if (gt_callenumquerymatches(gt_str_get(arguments->indexname),

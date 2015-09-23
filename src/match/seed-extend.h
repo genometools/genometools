@@ -341,4 +341,9 @@ char *gt_seed_extend_params_keystring(bool use_greedy,
                                       GtUword extendxdrop,
                                       GtUword xdropbelowscore);
 
+void gt_greedy_extend_querymatch_with_output(void *info,
+                                             const GtEncseq *dbencseq,
+                                             const GtQuerymatch *exactseed,
+                                             const GtUchar *query,
+                                             GtUword query_totallength);
 #endif

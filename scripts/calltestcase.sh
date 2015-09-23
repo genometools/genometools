@@ -2,7 +2,12 @@
 
 cd testsuite
 
-TMPFILE=`mktemp TMP.XXXXXX` || exit 1
+if test "${TMPDIR}" == ""
+then
+  TMPDIR="."
+fi
+
+TMPFILE=`mktemp ${TMPDIR}/TMP.XXXXXX` || exit 1
 if test $# -eq 0
 then
   echo ${GTTESTKEYWORDS} | tr ' ' '\n' > ${TMPFILE}
