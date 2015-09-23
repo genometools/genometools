@@ -833,6 +833,7 @@ GtNodeStream* gt_ltrdigest_file_out_stream_new(GtNodeStream *in_stream,
   GtNodeStream *ns;
   GtLTRdigestFileOutStream *ls;
   char fn[GT_MAXFILENAMELEN];
+  int had_err = 0;
   gt_error_check(err);
 
   gt_assert(file_prefix && in_stream && rmap);
@@ -847,59 +848,87 @@ GtNodeStream* gt_ltrdigest_file_out_stream_new(GtNodeStream *in_stream,
   ls->seqnamelen = seqnamelen;
   ls->write_pdom_alignments = false;
   ls->write_pdom_aaseqs = false;
+  ls->tabout_file = ls->pptout_file = ls->pbsout_file = ls->ltr3out_file =
+    ls->ltr5out_file = ls->elemout_file = NULL;
 
   /* open outfiles */
   ls->fileprefix = file_prefix;
   (void) snprintf(fn, (size_t) (GT_MAXFILENAMELEN-1),
                   "%s_tabout.csv", file_prefix);
   ls->tabout_file = gt_file_open(GT_FILE_MODE_UNCOMPRESSED, fn, "w+", err);
-  if (tests_to_run & GT_LTRDIGEST_RUN_PPT)
+  if (!ls->tabout_file)
+    had_err = -1;
+  if (!had_err && (tests_to_run & GT_LTRDIGEST_RUN_PPT))
   {
     (void) snprintf(fn, (size_t) (GT_MAXFILENAMELEN-1),
                     "%s_ppt.fas", file_prefix);
     ls->pptout_file = gt_file_open(GT_FILE_MODE_UNCOMPRESSED, fn, "w+", err);
+    if (!ls->pptout_file)
+      had_err = -1;
   }
-  if (tests_to_run & GT_LTRDIGEST_RUN_PBS)
+  if (!had_err && (tests_to_run & GT_LTRDIGEST_RUN_PBS))
   {
     (void) snprintf(fn, (size_t) (GT_MAXFILENAMELEN-1),
                     "%s_pbs.fas", file_prefix);
     ls->pbsout_file = gt_file_open(GT_FILE_MODE_UNCOMPRESSED, fn, "w+", err);
+    if (!ls->pbsout_file)
+      had_err = -1;
   }
-  (void) snprintf(fn, (size_t) (GT_MAXFILENAMELEN-1),
-                   "%s_5ltr.fas", file_prefix);
-  ls->ltr5out_file = gt_file_open(GT_FILE_MODE_UNCOMPRESSED, fn, "w+", err);
-  (void) snprintf(fn, (size_t) (GT_MAXFILENAMELEN-1),
-                  "%s_3ltr.fas", file_prefix);
-  ls->ltr3out_file = gt_file_open(GT_FILE_MODE_UNCOMPRESSED, fn, "w+", err);
-  (void) snprintf(fn, (size_t) (GT_MAXFILENAMELEN-1),
-                  "%s_complete.fas", file_prefix);
-  ls->elemout_file = gt_file_open(GT_FILE_MODE_UNCOMPRESSED, fn, "w+", err);
+  if (!had_err) {
+    (void) snprintf(fn, (size_t) (GT_MAXFILENAMELEN-1),
+                     "%s_5ltr.fas", file_prefix);
+    ls->ltr5out_file = gt_file_open(GT_FILE_MODE_UNCOMPRESSED, fn, "w+", err);
+    if (!ls->ltr5out_file)
+      had_err = -1;
+  }
+  if (!had_err) {
+    (void) snprintf(fn, (size_t) (GT_MAXFILENAMELEN-1),
+                    "%s_3ltr.fas", file_prefix);
+    ls->ltr3out_file = gt_file_open(GT_FILE_MODE_UNCOMPRESSED, fn, "w+", err);
+    if (!ls->ltr3out_file)
+      had_err = -1;
+  }
+  if (!had_err) {
+    (void) snprintf(fn, (size_t) (GT_MAXFILENAMELEN-1),
+                    "%s_complete.fas", file_prefix);
+    ls->elemout_file = gt_file_open(GT_FILE_MODE_UNCOMPRESSED, fn, "w+", err);
+    if (!ls->elemout_file)
+      had_err = -1;
+  }
 
-  /* create hashmaps to hold protein domain output files */
-  ls->pdomout_files = gt_hashmap_new(GT_HASH_STRING, gt_free_func,
-                                     (GtFree) gt_file_delete);
-  ls->pdomali_files = gt_hashmap_new(GT_HASH_STRING, gt_free_func,
-                                     (GtFree) gt_file_delete);
-  ls->pdomaa_files  = gt_hashmap_new(GT_HASH_STRING, gt_free_func,
-                                     (GtFree) gt_file_delete);
+  if (!had_err) {
+    /* create hashmaps to hold protein domain output files */
+    ls->pdomout_files = gt_hashmap_new(GT_HASH_STRING, gt_free_func,
+                                       (GtFree) gt_file_delete);
+    ls->pdomali_files = gt_hashmap_new(GT_HASH_STRING, gt_free_func,
+                                       (GtFree) gt_file_delete);
+    ls->pdomaa_files  = gt_hashmap_new(GT_HASH_STRING, gt_free_func,
+                                       (GtFree) gt_file_delete);
 
-  /* print tabular outfile headline */
-  gt_file_xprintf(ls->tabout_file,
-              "element start\telement end\telement length\tsequence\t"
-              "lLTR start\tlLTR end\tlLTR length\t"
-              "rLTR start\trLTR end\trLTR length\t"
-              "lTSD start\tlTSD end\tlTSD motif\t"
-              "rTSD start\trTSD end\trTSD motif\t"
-              "PPT start\tPPT end\tPPT motif\tPPT strand\tPPT offset");
-  gt_file_xprintf(ls->tabout_file,
-              "\tPBS start\tPBS end\tPBS strand\ttRNA\ttRNA motif\tPBS offset\t"
-              "tRNA offset\tPBS/tRNA edist");
-#ifdef HAVE_HMMER
-  gt_file_xprintf(ls->tabout_file, "\tProtein domain hits");
-#endif
-  gt_file_xprintf(ls->tabout_file, "\n");
+    /* print tabular outfile headline */
+    gt_file_xprintf(ls->tabout_file,
+                "element start\telement end\telement length\tsequence\t"
+                "lLTR start\tlLTR end\tlLTR length\t"
+                "rLTR start\trLTR end\trLTR length\t"
+                "lTSD start\tlTSD end\tlTSD motif\t"
+                "rTSD start\trTSD end\trTSD motif\t"
+                "PPT start\tPPT end\tPPT motif\tPPT strand\tPPT offset");
+    gt_file_xprintf(ls->tabout_file,
+                "\tPBS start\tPBS end\tPBS strand\ttRNA\ttRNA motif\tPBS offset\t"
+                "tRNA offset\tPBS/tRNA edist");
+  #ifdef HAVE_HMMER
+    gt_file_xprintf(ls->tabout_file, "\tProtein domain hits");
+  #endif
+    gt_file_xprintf(ls->tabout_file, "\n");
 
-  /* create visitor */
-  ls->lv = (GtLTRVisitor*) gt_ltr_visitor_new(&ls->element);
+    /* create visitor */
+    ls->lv = (GtLTRVisitor*) gt_ltr_visitor_new(&ls->element);
+    gt_assert(ls->lv);
+  }
+
+  if (had_err) {
+    gt_node_stream_delete(ns);
+    ns = NULL;
+  }
   return ns;
 }

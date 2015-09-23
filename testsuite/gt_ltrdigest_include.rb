@@ -444,6 +444,18 @@ if $gttestdata then
     end
   end
 
+  Name "gt ltrdigest -outfileprefix fail (nonwritable path)"
+  Keywords "gt_ltrdigest aminoacidout aaout permissions"
+  Test do
+    run_test "#{$bin}gt suffixerator -lossless -dna -des -ssp -tis -v " + \
+             "-db #{$gttestdata}ltrharvest/d_mel/4_genomic_dmel_RELEASE3-1.FASTA.gz", \
+             :maxtime => 600
+    run_test "#{$bin}gt -j 2 ltrdigest -outfileprefix ./not/exist/foo " + \
+             "-encseq 4_genomic_dmel_RELEASE3-1.FASTA.gz " + \
+             "#{$gttestdata}ltrdigest/dmel_md5_4.gff3 ",
+             :retval => 1
+  end
+
   # LEGACY INTERFACE TESTS
 
   Name "gt ltrdigest missing input GFF (legacy syntax)"
