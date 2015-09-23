@@ -638,11 +638,14 @@ static int gt_ltrdigest_runner(GT_UNUSED int argc, const char **argv,
       }
     }
 
-    last_stream = gff3_out_stream = gt_gff3_out_stream_new(last_stream,
-                                                           arguments->outfp);
+    if (!had_err) {
+      last_stream = gff3_out_stream = gt_gff3_out_stream_new(last_stream,
+                                                             arguments->outfp);
+      gt_assert(last_stream);
 
-    /* pull the features through the stream and free them afterwards */
-    had_err = gt_node_stream_pull(last_stream, err);
+      /* pull the features through the stream and free them afterwards */
+      had_err = gt_node_stream_pull(last_stream, err);
+    }
   }
 
   gt_pdom_model_set_delete(ms);
