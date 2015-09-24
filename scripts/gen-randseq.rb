@@ -70,6 +70,7 @@ def parseargs(argv)
   options.minidentity = defaultminid
   options.seednumber = nil
   options.reverse = false
+  options.number = 1
   options.mems = false
   opts = OptionParser.new
   opts.on("-m","--mode STRING","specify mode: mirrored|seeded|pair") do |x|
@@ -99,6 +100,10 @@ def parseargs(argv)
   end
   opts.on("--mems","generate mems, i.e. the seed are maximal") do |x|
     options.mems = true
+  end
+  opts.on("--number NUM","specify the number of seeded pairs to be\n" +
+                         (" " * indent) + "generated (default 1)") do |x|
+    options.number = x.to_i
   end
   opts.on("--seed NUM","specify the seed for the random number\n" +
                        (" " * indent) + "generator to make sequences reproducible") do |x|
@@ -241,7 +246,9 @@ end
 if options.mirrored
   gen_mirrored(fpdb,fpquery,rseq,options,alphabet,errperc)
 elsif options.seeded
-  gen_seeded(fpdb,fpquery,fpquery_r,rseq,options,alphabet,errperc)
+  options.number.times do
+    gen_seeded(fpdb,fpquery,fpquery_r,rseq,options,alphabet,errperc)
+  end
 elsif options.pairparam
   seq1 = rseq.sequence(options.totallength)
   seq2 = rseq.sequence(options.totallength)

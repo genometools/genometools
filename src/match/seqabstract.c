@@ -374,7 +374,7 @@ char *gt_seqabstract_get(bool rightextension,const GtSeqabstract *seq)
       if (GT_ISDIRREVERSE(seq->readmode))
       {
         gt_assert(seq->totallength >= seq->len);
-        j = seq->totallength - seq->len + idx;
+        j = seq->offset + seq->totallength - seq->len + idx;
       } else
       {
         gt_assert(seq->offset + seq->len > idx);
