@@ -9,7 +9,7 @@ Name "gt linspace_align error message"
 Keywords "gt_linspace_align"
 Test do
   run "#{$bin}gt dev linspace_align -ss acg acgt -global "\
-      "-l \" -1\" 1 1 ", :retval => 2
+      "-l \" -1\" 1 1 ", :retval => 1
   grep last_stderr, "invalid cost value"
 end
 
@@ -87,7 +87,7 @@ Name "gt linspace_align diagonalband (invalid bounds)"
 Keywords "gt_linspace_align"
 Test do
   run_test "#{$bin}gt dev linspace_align -ss cg acgt"\
-           " -global -l 0 1 1 -d -lr 0 1", :retval => 2
+           " -global -l 0 1 1 -d -lr 0 1", :retval => 1
   grep last_stderr, "invalid diagonalband"
 end
 

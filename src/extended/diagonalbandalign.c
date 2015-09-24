@@ -851,11 +851,7 @@ static GtUword gt_calc_diagonalbandalign(LinspaceManagement *spacemanager,
   if ((left_dist > MIN(0, (GtWord)vlen-(GtWord)ulen))||
       (right_dist < MAX(0, (GtWord)vlen-(GtWord)ulen)))
   {
-    fprintf(stderr,"ERROR: invalid diagonalband for global alignment "
-                   "(ulen: "GT_WU", vlen: "GT_WU")\n"
-                   "left_dist <= MIN(0, vlen-ulen) and "
-                   "right_dist <= MAX(0, vlen-ulen)\n", ulen, vlen);
-    exit(GT_EXIT_PROGRAMMING_ERROR);
+    gt_assert(false); /* no global alignment */
   }
 
   gt_linspaceManagement_set_ulen(spacemanager,ulen);
