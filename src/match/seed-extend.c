@@ -195,7 +195,8 @@ static void gt_se_show_aligned(bool rightextension,
 {
   char *uptr = gt_seqabstract_get(rightextension,xdropmatchinfo->useq);
   char *vptr = gt_seqabstract_get(rightextension,xdropmatchinfo->vseq);
-  printf("%sextension:\n%s\n%s\n",rightextension ? "right" : "left",uptr,vptr);
+  printf(">%sextension:\n>%s\n>%s\n",rightextension ? "right" : "left",
+         uptr,vptr);
   free(uptr);
   free(vptr);
 }

@@ -41,6 +41,8 @@ struct GtSeqabstract
   GtReadmode readmode;
   bool cmpcharbychar,
        stoppossupport;
+  GtUword newoffset;
+  const GtUchar *origstring;
   union
   {
     const GtUchar *string;
@@ -61,6 +63,7 @@ GtSeqabstract *gt_seqabstract_new_empty(void)
   sa->readmode = GT_READMODE_FORWARD;
   sa->offset = 0;
   sa->seq.string = NULL;
+  sa->origstring = NULL;
   return sa;
 }
 
@@ -89,15 +92,9 @@ void gt_seqabstract_reinit_gtuchar(GtSeqabstract *sa,
   sa->stoppossupport = false;
   sa->len = len;
   sa->totallength = totallength;
-  if (GT_ISDIRREVERSE(sa->readmode))
-  {
-    gt_assert(offset < totallength);
-    sa->offset = GT_REVERSEPOS(totallength,offset);
-  } else
-  {
-    sa->offset = offset;
-  }
+  sa->offset = offset;
   sa->seq.string = string + sa->offset;
+  sa->origstring = string;
 }
 
 GtSeqabstract *gt_seqabstract_new_gtuchar(const GtUchar *string,
@@ -406,31 +403,52 @@ GtUword gt_seqabstract_lcp(bool rightextension,
 
 char *gt_seqabstract_get(bool rightextension,const GtSeqabstract *seq)
 {
-  GtUword idx, startpos;
+  GtUword idx;
   GtReadmode readmode;
   char *buffer = malloc(sizeof *buffer * (seq->len+1));
   char *map = "acgt";
 
-  if (rightextension)
-  {
-    readmode = seq->readmode;
-  } else
-  {
-    readmode = gt_readmode_inverse_dir(seq->readmode);
-  }
-  startpos = GT_ISDIRREVERSE(readmode) ? seq->len - 1 : 0;
+  readmode = seq->readmode;
+  printf("readmode=%s,rightextension=%s,totallength=" GT_WU ",len=" GT_WU
+         ",offset=" GT_WU "\n",
+           gt_readmode_show(readmode),rightextension ? "true" : "false",
+          seq->totallength,seq->len,seq->offset);
   for (idx = 0; idx < seq->len; idx++)
   {
     GtUchar cc;
+    GtUword j;
 
-    if (seq->seqtype == GT_SEQABSTRACT_STRING)
+    if (rightextension)
     {
-      GT_SEQABSTRACT_SEQ_ACCESS(cc,seq->seq.string,readmode,startpos,idx);
+      if (GT_ISDIRREVERSE(seq->readmode))
+      {
+        gt_assert(seq->offset + idx < seq->totallength);
+        j = seq->totallength - 1 - seq->offset - idx;
+      } else
+      {
+        j = seq->offset + idx;
+      }
     } else
     {
-      GT_SEQABSTRACT_ENC_ACCESS(cc,seq->seq.encseq,seq->offset,readmode,
-                                startpos,idx);
+      if (GT_ISDIRREVERSE(seq->readmode))
+      {
+        gt_assert(seq->totallength >= seq->len);
+        j = seq->totallength - seq->len + idx;
+      } else
+      {
+        gt_assert(seq->offset + seq->len > idx);
+        j = seq->offset + seq->len - 1 - idx;
+      }
     }
+    gt_assert(j < seq->totallength);
+    if (seq->seqtype == GT_SEQABSTRACT_STRING)
+    {
+      cc = seq->origstring[j];
+    } else
+    {
+      cc = gt_encseq_get_encoded_char(seq->seq.encseq,j,GT_READMODE_FORWARD);
+    }
+    gt_assert(cc < 4);
     buffer[idx] = map[cc];
   }
   buffer[seq->len] = '\0';
