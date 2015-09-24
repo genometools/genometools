@@ -203,8 +203,8 @@ void gt_affinealign_with_Management(LinspaceManagement *spacemanager,
   GtUword idx;
   gt_assert(u && v && spacemanager);
 
-  gt_assert(gt_linspaceManagement_get_valuesize(spacemanager) >=
-                                                            ( ulen+1)*(vlen+1));
+  gt_assert(gt_linspaceManagement_get_valueTabLen(spacemanager) >=
+                                                            (ulen+1)*(vlen+1));
 
   dptable=gt_linspaceManagement_get_valueTabspace(spacemanager);
   *dptable=gt_linspaceManagement_get_rTabspace(spacemanager);
@@ -279,8 +279,8 @@ void affine_ctab_in_square_space(LinspaceManagement *spacemanager,
   GtUword idx;
   gt_assert(Ctab != NULL && spacemanager != NULL);
 
-  gt_assert(gt_linspaceManagement_get_valuesize(spacemanager) >=
-                                                            ( ulen+1)*(vlen+1));
+  gt_assert(gt_linspaceManagement_get_valueTabLen(spacemanager) >=
+                                                            (ulen+1)*(vlen+1));
 
   dptable = gt_linspaceManagement_get_valueTabspace(spacemanager);
   *dptable = gt_linspaceManagement_get_rTabspace(spacemanager);
@@ -512,8 +512,8 @@ GtWord affinealign_in_square_space_local(LinspaceManagement *spacemanager,
   else
   {
     /*use it in lineraspace context*/
-    gt_assert(gt_linspaceManagement_get_valuesize(spacemanager) >=
-                                                (ulen+1)*(vlen+1));
+    gt_assert(gt_linspaceManagement_get_valueTabLen(spacemanager) >=
+                                                          (ulen+1)*(vlen+1));
 
     Atabcolumn = gt_linspaceManagement_get_valueTabspace(spacemanager);
     *Atabcolumn = gt_linspaceManagement_get_rTabspace(spacemanager);

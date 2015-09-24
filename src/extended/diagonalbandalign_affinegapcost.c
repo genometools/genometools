@@ -215,7 +215,7 @@ GtWord diagonalbandalignment_in_square_space_affine(LinspaceManagement *space,
   }
   else
   {
-    gt_assert(gt_linspaceManagement_get_valuesize(space)>=( ulen+1)*(vlen+1));
+    gt_assert(gt_linspaceManagement_get_valueTabLen(space)>=( ulen+1)*(vlen+1));
     Atabcolumn=gt_linspaceManagement_get_valueTabspace(space);
     *Atabcolumn=gt_linspaceManagement_get_rTabspace(space);
 
@@ -383,7 +383,7 @@ static Rnode affineDtab_in_square_space(LinspaceManagement *space,
 
   gt_assert(Dtab != NULL && space != NULL);
 
-  gt_assert(gt_linspaceManagement_get_valuesize(space)>=( ulen+1)*(vlen+1));
+  gt_assert(gt_linspaceManagement_get_valueTabLen(space)>=( ulen+1)*(vlen+1));
   Atabcolumn=gt_linspaceManagement_get_valueTabspace(space);
   *Atabcolumn=gt_linspaceManagement_get_rTabspace(space);
 
