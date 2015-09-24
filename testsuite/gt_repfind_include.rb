@@ -25,30 +25,31 @@ def determineminlength(reffile)
 end
 
 def checkrepfind(reffile,withextend = false)
-  reffilepath=testdatadir(reffile) + reffile
+  reffilepath = testdatadir(reffile) + reffile
   if reffile == 'Duplicate.fna'
     testdatadir = $testdata
   else
     testdatadir = $gttestdata
   end
+  rdir = "#{testdatadir}repfind-result"
   run_test("#{$bin}gt suffixerator -algbds 3 31 80 -db " +
            "#{reffilepath} -indexname sfxidx -dna -suf -tis -lcp -ssp -pl",
            :maxtime => 320)
   minlength = determineminlength(reffile)
   run_test("#{$bin}gt repfind -l #{minlength} -ii sfxidx", :maxtime => 600)
-  resultfile="#{testdatadir}repfind-result/#{reffile}.result"
+  resultfile="#{rdir}/#{reffile}.result"
   run "cmp -s #{last_stdout} #{resultfile}"
   run_test("#{$bin}gt repfind -l #{minlength} -r -ii sfxidx", :maxtime => 600)
-  resultfile="#{testdatadir}repfind-result/#{reffile}-r.result"
+  resultfile="#{rdir}/#{reffile}-r.result"
   run "cmp -s #{last_stdout} #{resultfile}"
   if withextend
     run_test("#{$bin}gt repfind -l #{minlength} -ii sfxidx -extendgreedy " +
              "-minidentity 90 -maxalilendiff 30 -percmathistory 55",
              :maxtime => 600)
     if reffile == "Duplicate.fna"
-      resultfile="#{testdatadir}repfind-result/#{reffile}-greedy-8-8-90-30-55"
+      resultfile="#{rdir}/#{reffile}-greedy-8-8-90-30-55"
     else
-      resultfile="#{testdatadir}repfind-result/#{reffile}-gr-ext.result"
+      resultfile="#{rdir}/#{reffile}-gr-ext.result"
     end
     run "cmp -s #{last_stdout} #{resultfile}"
   end
@@ -103,28 +104,36 @@ end
 Name "gt repfind extend at1MB"
 Keywords "gt_repfind extend"
 Test do
+  rdir = "#{$testdata}repfind-result"
   run_test "#{$bin}gt suffixerator -db #{$testdata}at1MB " +
-           "-indexname sfx -dna -tis -suf -lcp"
-  run_test "#{$bin}gt repfind -minidentity 90 -l 20 -extendxdrop -xdropbelow 5 -ii sfx"
-  run "cmp -s #{last_stdout} #{$testdata}repfind-result/at1MB-xdrop-20-20-80-6"
-  run_test "#{$bin}gt repfind -minidentity 80 -l 20 -extendxdrop -ii sfx -q " +
-           "#{$testdata}/U89959_genomic.fas"
-  run "cmp -s #{last_stdout} #{$testdata}repfind-result/at1MB-U8-xdrop-20-20-80-6"
-  run_test "#{$bin}gt repfind -extendxdrop -ii sfx -seedlength 70 -l 500 -minidentity 90 -a"
-  run "cmp -s #{last_stdout} #{$testdata}repfind-result/at1MB-xdrop-70-500-90-1-39-a"
-  run_test "#{$bin}gt repfind -extendgreedy -ii sfx -seedlength 70 -l 500 -minidentity 90 -a"
-  run "cmp -s #{last_stdout} #{$testdata}repfind-result/at1MB-greedy-70-500-90-1-39-a"
-  run_test "#{$bin}gt repfind -minidentity 80 -l 20 -extendxdrop -ii sfx -q " +
-           "#{$testdata}U89959_genomic.fas -a"
-  run "cmp -s #{last_stdout} #{$testdata}repfind-result/at1MB-U8-xdrop-20-20-80-6-a"
-  run_test "#{$bin}gt repfind -minidentity 80 -l 23 -extendxdrop -ii sfx -q " +
-           "#{$testdata}U89959_genomic.fas"
-  run "mv #{last_stdout} at1MB-vs-U8.matches"
+           "-indexname at1MB -dna -tis -suf -lcp"
+  run_test "#{$bin}gt repfind -minidentity 90 -l 20 -extendxdrop " +
+           "-xdropbelow 5 -ii at1MB"
+  run "cmp -s #{last_stdout} #{rdir}/at1MB-xdrop-20-20-80-6"
+  run_test "#{$bin}gt repfind -minidentity 80 -l 20 -extendxdrop -ii at1MB " +
+           "-q #{$testdata}/U89959_genomic.fas"
+  run "cmp -s #{last_stdout} #{rdir}/at1MB-U8-xdrop-20-20-80-6"
+  run_test "#{$bin}gt repfind -extendxdrop -ii at1MB -seedlength 70 -l 500 " +
+           "-minidentity 90 -a"
+  run "cmp -s #{last_stdout} #{rdir}/at1MB-xdrop-70-500-90-1-39-a"
+  run_test "#{$bin}gt repfind -extendgreedy -ii at1MB -seedlength 70 -l 500 " +
+           "-minidentity 90 -a"
+  run "cmp -s #{last_stdout} #{rdir}/at1MB-greedy-70-500-90-1-39-a"
+  run_test "#{$bin}gt repfind -minidentity 80 -l 20 -extendxdrop -ii at1MB " +
+           "-q #{$testdata}U89959_genomic.fas -a"
+  run "cmp -s #{last_stdout} #{rdir}/at1MB-U8-xdrop-20-20-80-6-a"
   run_test "#{$bin}gt suffixerator -db #{$testdata}U89959_genomic.fas " +
-           "-indexname sfx -dna -tis -suf -lcp"
-  run_test "#{$bin}gt repfind -minidentity 80 -l 23 -extendxdrop -ii sfx -q " +
-           "#{$testdata}/at1MB"
-  run "#{$scriptsdir}cmp_db_query_exch.rb #{last_stdout} at1MB-vs-U8.matches"
+           "-indexname U8 -dna -tis -suf -lcp"
+  ["xdrop","greedy"].each do |ext|
+    run_test "#{$bin}gt repfind -minidentity 80 -l 23 -extend#{ext} " +
+             "-ii at1MB -q #{$testdata}U89959_genomic.fas"
+    run "mv #{last_stdout} at1MB-vs-U8.#{ext}.matches"
+    run_test "#{$bin}gt repfind -minidentity 80 -l 23 -extend#{ext} -ii U8 " +
+             "-q #{$testdata}/at1MB"
+    run "mv #{last_stdout} U8-vs-at1MB.#{ext}.matches"
+    run "#{$scriptsdir}cmp_db_query_exch.rb U8-vs-at1MB.#{ext}.matches " +
+        "at1MB-vs-U8.#{ext}.matches 15 16"
+  end
 end
 
 Name "gt repfind extend self vs query"
@@ -134,20 +143,23 @@ Test do
   extendlength = 200
   minid = 80
   opts = "-dna -suf -lcp -tis"
-  5.times do
+  1.times do
     run "#{$scriptsdir}gen-randseq.rb --minidentity #{minid} --seedlength #{seedlength} --length #{extendlength} --mode seeded --namedfiles"
     run "#{$bin}gt suffixerator -indexname db-query-index -db db.fna query.fna #{opts}"
     run "#{$bin}gt suffixerator -indexname db-index -db db.fna #{opts}"
-    run_test "#{$bin}gt repfind -minidentity #{minid} -extendxdrop -ii db-query-index -l #{seedlength}"
-    run "cut -f 1-5,7-10 -d ' ' #{last_stdout}"
-    run "sort #{last_stdout}"
-    run "mv #{last_stdout} db-query-index.match"
-    run_test "#{$bin}gt repfind -minidentity #{minid} -extendxdrop -ii db-index -l #{seedlength} -q query.fna"
-    run "cut -f 1-5,7-10 -d ' ' #{last_stdout}"
-    run "sort #{last_stdout}"
-    run "mv #{last_stdout} db-index.match"
-    run "cmp -s db-index.match db-query-index.match"
-    run "test -n db-index.match"
+    ["xdrop","greedy"].each do |ext|
+      run_test "#{$bin}gt repfind -minidentity #{minid} -extend#{ext} " +
+               "-ii db-query-index -l #{seedlength}"
+      run "cut -f 1-5,7-10 -d ' ' #{last_stdout}"
+      run "sort #{last_stdout}"
+      run "mv #{last_stdout} db-query-index.match"
+      run_test "#{$bin}gt repfind -minidentity #{minid} -extend#{ext} -ii db-index -l #{seedlength} -q query.fna"
+      run "cut -f 1-5,7-10 -d ' ' #{last_stdout}"
+      run "sort #{last_stdout}"
+      run "mv #{last_stdout} db-index.match"
+      run "cmp -s db-index.match db-query-index.match"
+      grep "db-index.match", /^\d+ \d+ \d+ . \d+ \d+ \d+ \d+ \d+\.\d+$/
+    end
   end
 end
 
