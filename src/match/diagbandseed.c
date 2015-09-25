@@ -16,6 +16,7 @@
  */
 
 #include <limits.h>
+#include <stddef.h>
 #include <stdio.h>
 #include <string.h>
 #include "core/codetype.h"
@@ -573,14 +574,70 @@ static GtUword gt_diagbandseed_process_seeds(const GtEncseq *aencseq,
   return count_extensions;
 }
 
-static GtUword gt_seed_extend_numofkmers(const GtEncseq *encseq,
-                                         GtUword seedlength,bool mirror)
+/* Build blist for the case selfcompare && mirror=true. alist must be sorted.
+   Creates a temporary clist with the reverse complement k-mers,
+   and merges sorted alist and sorted clist to blist. */
+static int gt_diagbandseed_blist_mirror_self(GtDiagbandseedKmerPos *blist,
+                                             GtUword *blen,
+                                             const GtEncseq *bencseq,
+                                             const GtDiagbandseedKmerPos *alist,
+                                             GtUword alen,
+                                             unsigned int seedlength,
+                                             GtError *err)
 {
-  GtUword kmers, totallength = gt_encseq_total_length(encseq),
-          min_seq_length = gt_encseq_min_seq_length(encseq),
-          num_of_sequences = gt_encseq_num_of_sequences(encseq);
-  kmers = totallength -
-          MIN(seedlength - 1, min_seq_length) * num_of_sequences;
+  /* expected size of clist: alen */
+  GtDiagbandseedKmerPos *clist = gt_malloc(alen * sizeof *clist);
+  GtUword clen = 0;
+  int had_err = 0;
+
+  /* get reverse complement k-mers from encseq and store them in clist */
+  had_err = gt_diagbandseed_get_kmers(clist,
+                                      &clen,
+                                      bencseq,
+                                      seedlength,
+                                      GT_READMODE_COMPL,
+                                      err);
+  if (!had_err) {
+    const GtDiagbandseedKmerPos *aptr = alist, *cptr = clist;
+    const GtDiagbandseedKmerPos *aend = alist + alen, *cend = clist + clen;
+    GtDiagbandseedKmerPos *bptr = blist;
+    ptrdiff_t rest = 0;
+
+    /* sort clist */
+    GtRadixsortinfo *rdxinfo = gt_radixsort_new_ulongpair(clen);
+    gt_radixsort_inplace_GtUwordPair((GtUwordPair *)clist, clen);
+    gt_radixsort_delete(rdxinfo);
+
+    /* merge alist and clist */
+    while (aptr < aend && cptr < cend) {
+      *bptr = aptr->code <= cptr->code ? *aptr++ : *cptr++;
+      bptr++;
+    }
+    if (aptr < aend) {
+      rest = aend - aptr;
+      memcpy(bptr, aptr, rest * sizeof *aptr);
+    } else if (cptr < cend) {
+      rest = cend - cptr;
+      memcpy(bptr, cptr, rest * sizeof *cptr);
+    }
+    /* calculate length of blist */
+    *blen = (GtUword)(bptr - blist + rest);
+  }
+  gt_free(clist);
+  return had_err;
+}
+
+static GtUword gt_seed_extend_numofkmers(const GtEncseq *encseq,
+                                         GtUword seedlength,
+                                         bool mirror)
+{
+  GtUword kmers;
+  const GtUword totallength = gt_encseq_total_length(encseq),
+                min_seq_length = gt_encseq_min_seq_length(encseq),
+                num_of_sequences = gt_encseq_num_of_sequences(encseq),
+                num_specialchar = gt_encseq_specialcharacters(encseq);
+  kmers = totallength - (num_of_sequences * MIN(seedlength - 1, min_seq_length)
+                         + num_specialchar);
   return mirror ? kmers * 2 : kmers;
 }
 
@@ -613,7 +670,7 @@ int gt_diagbandseed_run(const GtEncseq *aencseq,
   }
 
   /* estimate number of expected kmers */
-  ankmers = gt_seed_extend_numofkmers(aencseq,arg->seedlength,false);
+  ankmers = gt_seed_extend_numofkmers(aencseq, arg->seedlength, false);
 
   /* prepare list of kmers from aencseq */
   if (arg->verbose) {
@@ -654,9 +711,16 @@ int gt_diagbandseed_run(const GtEncseq *aencseq,
 
   /* if necessary: prepare list of kmers from bencseq */
   if (!had_err && (!selfcomp || arg->mirror)) {
+    GtUword bnkmers = 0;
+
     /* estimate number of expected kmers */
-    const GtUword bnkmers
-      = gt_seed_extend_numofkmers(bencseq,arg->seedlength,arg->mirror);
+    if (selfcomp) {         /* add reverse complement k-mers */
+      bnkmers = 2 * alen;
+    } else {                /* calculate from encseq */
+      bnkmers = gt_seed_extend_numofkmers(bencseq,
+                                          arg->seedlength,
+                                          arg->mirror);
+    }
 
     if (arg->verbose) {
       printf("# Start fetching (at most " GT_WU ") k-mers for list B...\n",
@@ -666,37 +730,42 @@ int gt_diagbandseed_run(const GtEncseq *aencseq,
 
     blist = gt_malloc(bnkmers * sizeof *blist);
 
-    /* fill list with forward kmers */
-    if (selfcomp) {
-      gt_assert(arg->mirror);
-      /* copy alist because complements will be added and list sort wrt k-mer */
-      memcpy(blist, alist, alen * sizeof *alist);
-      blen = alen;
-    } else {
+    if (!selfcomp) {
+      /* fill blist with forward kmers from bencseq */
       had_err = gt_diagbandseed_get_kmers(blist,
                                           &blen,
                                           bencseq,
                                           arg->seedlength,
                                           GT_READMODE_FORWARD,
                                           err);
+      if (!had_err && arg->mirror) {
+        /* add reverse complement kmers of bencseq*/
+        had_err = gt_diagbandseed_get_kmers(blist + blen,
+                                            &blen,
+                                            bencseq,
+                                            arg->seedlength,
+                                            GT_READMODE_COMPL,
+                                            err);
+      }
+      if (!had_err) {
+        /* sort blist */
+        GtRadixsortinfo *rdxinfo = gt_radixsort_new_ulongpair(blen);
+        gt_radixsort_inplace_GtUwordPair((GtUwordPair *)blist, blen);
+        gt_radixsort_delete(rdxinfo);
+      }
+    } else {
+      /* selfcomp = true && mirror = true */
+      had_err = gt_diagbandseed_blist_mirror_self(blist,
+                                                  &blen,
+                                                  bencseq,
+                                                  alist,
+                                                  alen,
+                                                  arg->seedlength,
+                                                  err);
     }
 
-    /* add reverse complement kmers */
-    if (!had_err && arg->mirror) {
-      had_err = gt_diagbandseed_get_kmers(blist + blen,
-                                          &blen,
-                                          bencseq,
-                                          arg->seedlength,
-                                          GT_READMODE_COMPL,
-                                          err);
-    }
-
-    /* sort blist */
+    /* debug and verbose output for sorted blist */
     if (!had_err) {
-      GtRadixsortinfo *rdxinfo = gt_radixsort_new_ulongpair(blen);
-      gt_radixsort_inplace_GtUwordPair((GtUwordPair *)blist, blen);
-      gt_radixsort_delete(rdxinfo);
-
       if (arg->debug_kmer) {
         GtDiagbandseedKmerPos *idx;
         for (idx = blist; idx < blist + blen; idx++) {
@@ -706,7 +775,8 @@ int gt_diagbandseed_run(const GtEncseq *aencseq,
 
       if (arg->verbose) {
         printf("# ...found and sorted " GT_WU " k-mers ", blen);
-        gt_timer_show_formatted(vtimer, "in " GT_WD ".%06ld seconds.\n",stdout);
+        gt_timer_show_formatted(vtimer,
+                                "in " GT_WD ".%06ld seconds.\n", stdout);
       }
     } else {
       gt_free(blist);
@@ -770,8 +840,9 @@ int gt_diagbandseed_run(const GtEncseq *aencseq,
 
     if (had_err) {
       gt_free(alist);
-      if (!selfcomp || arg->mirror)
+      if (!selfcomp || arg->mirror) {
         gt_free(blist);
+      }
     }
   }
 

@@ -617,7 +617,7 @@ static int gt_seed_extend_runner(GT_UNUSED int argc,
       printf("# TIME seedextend-%s", keystring);
       gt_free(keystring);
       gt_timer_show_formatted(seedextendtimer,
-                              " overall " GT_WD ".%02ld\n",
+                              " overall " GT_WD ".%06ld\n",
                               stdout);
     }
     gt_timer_delete(seedextendtimer);
