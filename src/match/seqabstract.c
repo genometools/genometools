@@ -213,7 +213,7 @@ char *gt_seqabstract_get(bool rightextension,const GtSeqabstract *seq)
   char *buffer = malloc(sizeof *buffer * (seq->len+1));
   char *map = "acgt";
 
-  printf("readmode=%s,rightextension=%s,totallength=" GT_WU ",len=" GT_WU
+  printf("# readmode=%s,rightextension=%s,totallength=" GT_WU ",len=" GT_WU
          ",offset=" GT_WU "\n",
            gt_readmode_show(seq->readmode),rightextension ? "true" : "false",
           seq->totallength,seq->len,seq->offset);
