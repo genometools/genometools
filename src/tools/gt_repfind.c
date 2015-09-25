@@ -217,7 +217,7 @@ static GtOptionParser *gt_repfind_option_parser_new(void *tool_arguments)
            *maxalilendiffoption, *leastlength_option, *char_access_mode_option,
            *check_extend_symmetry_option, *xdropbelowoption, *historyoption,
            *percmathistoryoption, *errorpercentageoption, *optiontrimstat,
-           *withalignmentoption, *optionseed_display;
+           *withalignmentoption, *optionseed_display, *optionnoxpolish;
   GtMaxpairsoptions *arguments = tool_arguments;
 
   op = gt_option_parser_new("[options] -ii indexname",
@@ -373,10 +373,11 @@ static GtOptionParser *gt_repfind_option_parser_new(void *tool_arguments)
   gt_option_parser_add_option(op, option);
   gt_option_is_development_option(option);
 
-  option = gt_option_new_bool("noxpolish","do not polish X-drop extesnsions",
-                              &arguments->noxpolish, false);
-  gt_option_parser_add_option(op, option);
-  gt_option_is_development_option(option);
+  optionnoxpolish
+    = gt_option_new_bool("noxpolish","do not polish X-drop extensions",
+                         &arguments->noxpolish, false);
+  gt_option_parser_add_option(op, optionnoxpolish);
+  gt_option_is_development_option(optionnoxpolish);
 
   optiontrimstat = gt_option_new_bool("trimstat","show trimming statistics",
                                       &arguments->trimstat, false);
@@ -438,11 +439,13 @@ static GtOptionParser *gt_repfind_option_parser_new(void *tool_arguments)
   gt_option_exclude(errorpercentageoption,minidentityoption);
   gt_option_exclude(withalignmentoption,sampleoption);
   gt_option_exclude(withalignmentoption,spmoption);
+  gt_option_exclude(optionnoxpolish,withalignmentoption);
   gt_option_imply(xdropbelowoption,extendxdropoption);
   gt_option_imply(historyoption,extendgreedyoption);
   gt_option_imply(maxalilendiffoption,extendgreedyoption);
   gt_option_imply(percmathistoryoption,extendgreedyoption);
   gt_option_imply(optiontrimstat,extendgreedyoption);
+  gt_option_imply(optionnoxpolish,extendxdropoption);
   gt_option_imply_either_2(seedlengthoption,extendxdropoption,
                            extendgreedyoption);
   gt_option_imply_either_2(minidentityoption,extendxdropoption,
@@ -816,6 +819,9 @@ static int gt_repfind_runner(int argc,
         }
         if (!haserr && arguments->reverse)
         {
+          gt_querymatch_query_readmode_set(
+            processinfo_and_querymatchspaceptr.querymatchspaceptr,
+            GT_READMODE_REVERSE);
           if (gt_callenumselfmatches(gt_str_get(arguments->indexname),
                                      GT_READMODE_REVERSE,
                                      arguments->seedlength,
@@ -859,6 +865,12 @@ static int gt_repfind_runner(int argc,
             = greedyextendmatchinfo;
           eqmf_data = (void *) &processinfo_and_querymatchspaceptr;
         }
+      }
+      if (arguments->reverse)
+      {
+        gt_querymatch_query_readmode_set(
+            processinfo_and_querymatchspaceptr.querymatchspaceptr,
+            GT_READMODE_REVERSE);
       }
       if (gt_callenumquerymatches(gt_str_get(arguments->indexname),
                                   arguments->queryfiles,
