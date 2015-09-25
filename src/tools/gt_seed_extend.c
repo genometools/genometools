@@ -16,9 +16,12 @@
 */
 
 #include <limits.h>
+#include "core/alphabet_api.h"
+#include "core/encseq.h"
 #include "core/encseq_api.h"
 #include "core/error_api.h"
 #include "core/ma_api.h"
+#include "core/minmax.h"
 #include "core/showtime.h"
 #include "core/str_api.h"
 #include "match/diagbandseed.h"
@@ -51,6 +54,7 @@ typedef struct {
   GtUword se_maxalilendiff;
   GtUword se_perc_match_hist;
   GtStr *se_char_access_mode;
+  bool bias_parameters;
   /* general options */
   GtOption *se_option_withali;
   GtUword se_alignlength;
@@ -93,7 +97,7 @@ static GtOptionParser* gt_seed_extend_option_parser_new(void *tool_arguments)
   GtSeedExtendArguments *arguments = tool_arguments;
   GtOptionParser *op;
   GtOption *option, *op_gre, *op_xdr, *op_cam, *op_his, *op_dif, *op_pmh,
-    *op_len, *op_err, *op_xbe, *op_sup, *op_frq, *op_mem, *op_ali;
+    *op_len, *op_err, *op_xbe, *op_sup, *op_frq, *op_mem, *op_ali, *op_bia;
   gt_assert(arguments != NULL);
 
   /* init */
@@ -251,6 +255,18 @@ static GtOptionParser* gt_seed_extend_option_parser_new(void *tool_arguments)
   gt_option_is_development_option(op_pmh);
   gt_option_parser_add_option(op, op_pmh);
 
+  /* -bias-parameters */
+  op_bia = gt_option_new_bool("bias-parameters",
+                              "Use -maxalilendiff 30 and let percmathistory "
+                              "depend on minidentiy and DNA base distribution",
+                              &arguments->bias_parameters,
+                              false);
+  gt_option_imply(op_bia, op_gre);
+  gt_option_exclude(op_bia, op_pmh);
+  gt_option_exclude(op_bia, op_dif);
+  gt_option_is_development_option(op_bia);
+  gt_option_parser_add_option(op, op_bia);
+
   /* -cam */
   op_cam = gt_option_new_string("cam",
                                 gt_cam_extendgreedy_comment(),
@@ -393,16 +409,16 @@ static int gt_seed_extend_runner(GT_UNUSED int argc,
   GtQuerymatchoutoptions *querymatchoutopt = NULL;
   GtTimer *seedextendtimer = NULL;
   GtExtendCharAccess cam = GT_EXTEND_CHAR_ACCESS_ANY;
-  GtUword errorpercentage = 0;
+  GtUword errorpercentage = 0UL;
   int had_err = 0;
 
   gt_error_check(err);
   gt_assert(arguments != NULL);
   gt_assert(arguments->se_minidentity >= GT_EXTEND_MIN_IDENTITY_PERCENTAGE &&
-            arguments->se_minidentity <= 100);
+            arguments->se_minidentity <= 100UL);
 
   /* Calculate error percentage from minidentity */
-  errorpercentage = 100 - arguments->se_minidentity;
+  errorpercentage = 100UL - arguments->se_minidentity;
 
   /* Measure whole running time */
   if (arguments->benchmark || arguments->verbose) {
@@ -449,6 +465,43 @@ static int gt_seed_extend_runner(GT_UNUSED int argc,
                                        err);
     if ((int) cam == -1) {
       had_err = -1;
+      gt_encseq_delete(aencseq);
+      gt_encseq_delete(bencseq);
+    }
+  }
+
+  /* Use bias dependent parameters, adapted from E. Myers' DALIGNER */
+  if (!had_err && arguments->bias_parameters) {
+    const GtAlphabet *alpha = gt_encseq_alphabet(aencseq);
+    const double bias_factor[10] = {.690, .690, .690, .690, .780,
+                                    .850, .900, .933, .966, 1.000};
+
+    if (gt_alphabet_is_dna(alpha)) {
+      GtUword at, cg;
+      at = gt_encseq_charcount(aencseq, gt_alphabet_encode(alpha, 'a'));
+      at += gt_encseq_charcount(aencseq, gt_alphabet_encode(alpha, 't'));
+      cg = gt_encseq_charcount(aencseq, gt_alphabet_encode(alpha, 'c'));
+      cg += gt_encseq_charcount(aencseq, gt_alphabet_encode(alpha, 'g'));
+      if (at + cg > 0) {
+        const double ratio = (double)MIN(at, cg) / (at + cg);
+        int bias_index = (int)MAX(0.0, (ratio + 0.025) * 20.0 - 1.0);
+        gt_assert(bias_index < 10);
+        arguments->se_maxalilendiff = 30;
+        arguments->se_perc_match_hist = (GtUword)(100.0 - errorpercentage *
+                                                  bias_factor[bias_index]);
+        if (arguments->verbose) {
+          printf("# Base ratio = %4.2lf -> percmathistory = "GT_WU"\n",
+                 ratio, arguments->se_perc_match_hist);
+        }
+      } else {
+        had_err = -1;
+      }
+    } else {
+      had_err = -1;
+    }
+    if (had_err) {
+      gt_error_set(err, "option \"-bias-parameters\" can only be applied to "
+                   "the DNA alphabet");
       gt_encseq_delete(aencseq);
       gt_encseq_delete(bencseq);
     }
