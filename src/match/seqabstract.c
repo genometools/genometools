@@ -27,6 +27,8 @@
 #include "core/xansi_api.h"
 #include "match/greedyedist.h"
 
+#define GT_SEQABSTRACT_TOTALLENGTH_UNDEF GT_UWORD_MAX
+
 typedef enum GtSeqabstractType {
   GT_SEQABSTRACT_UNDEF,
   GT_SEQABSTRACT_STRING,
@@ -38,7 +40,6 @@ struct GtSeqabstract
   GtUword len, offset, totallength;
   GtSeqabstractType seqtype;
   GtReadmode readmode;
-  const GtUchar *origstring;
   union
   {
     const GtUchar *string;
@@ -52,18 +53,16 @@ GtSeqabstract *gt_seqabstract_new_empty(void)
 
   sa->seqtype = GT_SEQABSTRACT_UNDEF;
   sa->len = 0;
-  sa->totallength = GT_UWORD_MAX;
+  sa->totallength = GT_SEQABSTRACT_TOTALLENGTH_UNDEF;
   sa->readmode = GT_READMODE_FORWARD; /* default read mode */
   sa->offset = 0;
   sa->seq.string = NULL;
-  sa->origstring = NULL;
   return sa;
 }
 
 void gt_seqabstract_readmode_set(GtSeqabstract *sa,GtReadmode readmode)
 {
-  gt_assert(sa != NULL && (!GT_ISDIRREVERSE(readmode) ||
-                           sa->totallength != GT_UWORD_MAX));
+  gt_assert(sa != NULL);
   sa->readmode = readmode;
 }
 
@@ -73,14 +72,13 @@ void gt_seqabstract_reinit_gtuchar(GtSeqabstract *sa,
                                    GtUword offset,
                                    GtUword totallength)
 {
-  gt_assert(sa != NULL && totallength != GT_UWORD_MAX);
+  gt_assert(sa != NULL && totallength != GT_SEQABSTRACT_TOTALLENGTH_UNDEF);
 
   sa->seqtype = GT_SEQABSTRACT_STRING;
   sa->len = len;
   sa->totallength = totallength;
   sa->offset = offset;
-  sa->seq.string = string + sa->offset;
-  sa->origstring = string;
+  sa->seq.string = string;
 }
 
 GtSeqabstract *gt_seqabstract_new_gtuchar(const GtUchar *string,
@@ -140,7 +138,8 @@ static GtUchar gt_seqabstract_get_encoded_char(bool rightextension,
   {
     if (GT_ISDIRREVERSE(seq->readmode))
     {
-      gt_assert(seq->offset + idx < seq->totallength);
+      gt_assert(seq->totallength != GT_SEQABSTRACT_TOTALLENGTH_UNDEF &&
+                seq->offset + idx < seq->totallength);
       accesspos = seq->totallength - 1 - seq->offset - idx;
     } else
     {
@@ -161,219 +160,48 @@ static GtUchar gt_seqabstract_get_encoded_char(bool rightextension,
   gt_assert(accesspos < seq->totallength);
   if (seq->seqtype == GT_SEQABSTRACT_STRING)
   {
-    return seq->origstring[accesspos];
+    return seq->seq.string[accesspos];
   }
-   return gt_encseq_get_encoded_char(seq->seq.encseq,accesspos,
-                                     GT_READMODE_FORWARD);
-}
-
-#define GT_SEQABSTRACT_ASSIGN_READMODES\
-        GtReadmode u_readmode, v_readmode;\
-        if (rightextension)\
-        {\
-          u_readmode = useq->readmode;\
-          v_readmode = vseq->readmode;\
-        } else\
-        {\
-          u_readmode = gt_readmode_inverse_dir(useq->readmode);\
-          v_readmode = gt_readmode_inverse_dir(vseq->readmode);\
-        }
-
-#define GT_SEQABSTRACT_CHAR_EQUAL_OR_BREAK(VARA,RMA,VARB,RMB)\
-        if (GT_ISDIRCOMPLEMENT(RMA))\
-        {\
-          VARA = GT_COMPLEMENTBASE(VARA);\
-        }\
-        if (GT_ISDIRCOMPLEMENT(v_readmode))\
-        {\
-          VARB = GT_COMPLEMENTBASE(VARB);\
-        }\
-        if (VARA != VARB)\
-        {\
-          break;\
-        }
-
-#define GT_SEQABSTRACT_SEQ_ACCESS(VAR,STR,RM,START,LCP)\
-        VAR = STR[GT_ISDIRREVERSE(RM) ? ((START) - (LCP)) : ((START) + (LCP))];\
-        if (ISSPECIAL(VAR))\
-        {\
-          break;\
-        }
-
-#define GT_SEQABSTRACT_ENC_ACCESS(VAR,ENC,OFF,RM,START,LCP)\
-        VAR = gt_encseq_get_encoded_char(ENC,\
-                                         (OFF) + (GT_ISDIRREVERSE(RM) \
-                                                     ? ((START) - (LCP))\
-                                                     : ((START) + (LCP))),\
-                                         GT_READMODE_FORWARD);\
-        if (ISSPECIAL(VAR))\
-        {\
-          break;\
-        }
-
-static GtUword
-gt_seqabstract_lcp_gtuchar_gtuchar(bool rightextension,
-                                   const GtSeqabstract *useq,
-                                   const GtSeqabstract *vseq,
-                                   GtUword ustart,
-                                   GtUword vstart,
-                                   GtUword maxlen)
-{
-  GtUword lcp;
-
-  if (useq->seq.string == vseq->seq.string &&
-      useq->offset == vseq->offset &&
-      ustart == vstart && useq->readmode == vseq->readmode)
-  {
-    for (lcp = 0; lcp < maxlen; lcp++)
-    {
-      GtUchar u_cc
-        = useq->seq.string[rightextension ? ustart + lcp : ustart - lcp];
-      if (ISSPECIAL(u_cc))
-      {
-        break;
-      }
-    }
-  } else
-  {
-    GT_SEQABSTRACT_ASSIGN_READMODES
-    for (lcp = 0; lcp < maxlen; lcp++)
-    {
-      GtUchar u_cc, v_cc;
-
-      GT_SEQABSTRACT_SEQ_ACCESS(u_cc,useq->seq.string,u_readmode,ustart,lcp);
-      GT_SEQABSTRACT_SEQ_ACCESS(v_cc,vseq->seq.string,v_readmode,vstart,lcp);
-      GT_SEQABSTRACT_CHAR_EQUAL_OR_BREAK(u_cc,u_readmode,v_cc,v_readmode);
-    }
-  }
-  return lcp;
-}
-
-static GtUword
-gt_seqabstract_lcp_gtuchar_encseq(bool rightextension,
-                                  const GtSeqabstract *useq,
-                                  const GtSeqabstract *vseq,
-                                  GtUword ustart,
-                                  GtUword vstart,
-                                  GtUword maxlen)
-{
-  GtUword lcp;
-  GT_SEQABSTRACT_ASSIGN_READMODES
-  for (lcp = 0; lcp < maxlen; lcp++)
-  {
-    GtUchar u_cc, v_cc;
-
-    GT_SEQABSTRACT_SEQ_ACCESS(u_cc,useq->seq.string,u_readmode,ustart,lcp);
-    GT_SEQABSTRACT_ENC_ACCESS(v_cc,vseq->seq.encseq,vseq->offset,v_readmode,
-                              vstart,lcp);
-    GT_SEQABSTRACT_CHAR_EQUAL_OR_BREAK(u_cc,u_readmode,v_cc,v_readmode);
-  }
-  return lcp;
-}
-
-static GtUword
-gt_seqabstract_lcp_encseq_gtuchar(bool rightextension,
-                                  const GtSeqabstract *useq,
-                                  const GtSeqabstract *vseq,
-                                  GtUword ustart,
-                                  GtUword vstart,
-                                  GtUword maxlen)
-{
-  GtUword lcp;
-  GT_SEQABSTRACT_ASSIGN_READMODES
-  for (lcp = 0; lcp < maxlen; lcp++)
-  {
-    GtUchar u_cc, v_cc;
-
-    GT_SEQABSTRACT_ENC_ACCESS(u_cc,useq->seq.encseq,useq->offset,u_readmode,
-                              ustart,lcp);
-    GT_SEQABSTRACT_SEQ_ACCESS(v_cc,vseq->seq.string,v_readmode,vstart,lcp);
-    GT_SEQABSTRACT_CHAR_EQUAL_OR_BREAK(u_cc,u_readmode,v_cc,v_readmode);
-  }
-  return lcp;
-}
-
-static GtUword gt_seqabstract_lcp_encseq_encseq(bool rightextension,
-                                                const GtSeqabstract *useq,
-                                                const GtSeqabstract *vseq,
-                                                GtUword ustart,
-                                                GtUword vstart,
-                                                GtUword maxlen)
-{
-  GtUword lcp;
-  bool is_same_sequence = useq->seq.encseq == vseq->seq.encseq &&
-                          useq->offset + ustart == vseq->offset + vstart &&
-                          useq->readmode == vseq->readmode;
-  GT_SEQABSTRACT_ASSIGN_READMODES
-
-  if (!is_same_sequence)
-  {
-    GtUchar u_cc, v_cc;
-
-    for (lcp = 0; lcp < maxlen; lcp++)
-    {
-      GT_SEQABSTRACT_ENC_ACCESS(u_cc,useq->seq.encseq,useq->offset,u_readmode,
-                                ustart,lcp);
-      GT_SEQABSTRACT_ENC_ACCESS(v_cc,vseq->seq.encseq,vseq->offset,v_readmode,
-                                vstart,lcp);
-      GT_SEQABSTRACT_CHAR_EQUAL_OR_BREAK(u_cc,u_readmode,v_cc,v_readmode);
-    }
-  } else
-  {
-    GtUword startpos = useq->offset + ustart;
-
-    for (lcp = 0; lcp < maxlen; lcp++)
-    {
-      GtUchar u_cc = gt_encseq_get_encoded_char(useq->seq.encseq,
-                                                GT_ISDIRREVERSE(u_readmode)
-                                                     ? (startpos - lcp)
-                                                     : (startpos + lcp),
-                                                GT_READMODE_FORWARD);
-      if (ISSPECIAL(u_cc))
-      {
-        break;
-      }
-    }
-  }
-  return lcp;
+  return gt_encseq_get_encoded_char(seq->seq.encseq,accesspos,
+                                    GT_READMODE_FORWARD);
 }
 
 GtUword gt_seqabstract_lcp(bool rightextension,
                            const GtSeqabstract *useq,
                            const GtSeqabstract *vseq,
-                           GtUword ustart,
-                           GtUword vstart)
+                           GtUword u_start,
+                           GtUword v_start)
 {
-  GtUword lcp,
-          maxlen;
+  GtUword lcp, maxlen;
 
   gt_assert(useq != NULL && vseq != NULL &&
-            useq->len >= ustart && vseq->len >= vstart);
-  maxlen = rightextension ? MIN(useq->len - ustart, vseq->len - vstart)
-                          : 1 + MIN(ustart, vstart);
-
-  if (useq->seqtype == GT_SEQABSTRACT_STRING)
+            useq->len >= u_start && vseq->len >= v_start);
+  maxlen = MIN(useq->len - u_start, vseq->len - v_start);
+  for (lcp = 0; lcp < maxlen; lcp++)
   {
-    if (vseq->seqtype == GT_SEQABSTRACT_STRING)
+    GtUchar u_cc, v_cc;
+
+    u_cc = gt_seqabstract_get_encoded_char(rightextension,useq,u_start + lcp);
+    if (ISSPECIAL(u_cc))
     {
-      lcp = gt_seqabstract_lcp_gtuchar_gtuchar(rightextension, useq, vseq,
-                                               ustart, vstart, maxlen);
-    } else
-    {
-      lcp = gt_seqabstract_lcp_gtuchar_encseq(rightextension, useq, vseq,
-                                              ustart, vstart, maxlen);
+      break;
     }
-  } else
-  {
-    if (vseq->seqtype == GT_SEQABSTRACT_STRING)
+    if (GT_ISDIRCOMPLEMENT(useq->readmode))
     {
-      lcp = gt_seqabstract_lcp_encseq_gtuchar(rightextension, useq, vseq,
-                                              ustart, vstart, maxlen);
-
-    } else
+      u_cc = GT_COMPLEMENTBASE(u_cc);
+    }
+    v_cc = gt_seqabstract_get_encoded_char(rightextension,vseq,v_start + lcp);
+    if (ISSPECIAL(v_cc))
     {
-      lcp = gt_seqabstract_lcp_encseq_encseq(rightextension, useq, vseq, ustart,
-                                             vstart, maxlen);
+      break;
+    }
+    if (GT_ISDIRCOMPLEMENT(vseq->readmode))
+    {
+      v_cc = GT_COMPLEMENTBASE(v_cc);
+    }
+    if (u_cc != v_cc)
+    {
+      break;
     }
   }
   return lcp;

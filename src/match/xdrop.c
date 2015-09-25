@@ -254,9 +254,7 @@ void gt_evalxdroparbitscoresextend(bool forward,
   res->big_t.nextfreeGtXdropscore = 0;
   res->fronts.nextfreeGtXdropfrontvalue = 0;
   /* phase 0 */
-  idx =  (GtWord) gt_seqabstract_lcp(forward, useq, vseq,
-                                     forward ? 0 : (GtUword) ulen - 1,
-                                     forward ? 0 : (GtUword) vlen - 1);
+  idx =  (GtWord) gt_seqabstract_lcp(forward, useq, vseq,0,0);
   /* alignment already finished */
   if (idx >= ulen || idx >= vlen) {
     lbound =  1L;
@@ -344,9 +342,7 @@ void gt_evalxdroparbitscoresextend(bool forward,
               GtUword lcp;
               gt_assert(forward || (ulen - 1 >= (GtWord) i &&
                                     vlen - 1 >= (GtWord) j));
-              lcp = gt_seqabstract_lcp(forward, useq, vseq,
-                                       (GtUword) (forward ? i : ulen - i - 1),
-                                       (GtUword) (forward ? j : vlen - j - 1));
+              lcp = gt_seqabstract_lcp(forward, useq, vseq,i,j);
               i += lcp;
               j += lcp;
             }
