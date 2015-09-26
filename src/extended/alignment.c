@@ -23,11 +23,12 @@
 #include <string.h>
 #include "core/assert_api.h"
 #include "core/array.h"
+#include "core/chardef.h"
 #include "core/ensure.h"
 #include "core/ma.h"
 #include "core/xansi_api.h"
 #include "core/types_api.h"
-#include "core/chardef.h"
+
 #include "extended/alignment.h"
 
 struct GtAlignment {
@@ -188,11 +189,6 @@ static bool gt_alignment_is_valid(const GtAlignment *alignment)
 }
 #endif
 
-GtUword gt_alignment_eval(const GtAlignment *alignment)
-{
-  return gt_alignment_eval_generic(false, alignment);
-}
-
 GtUword gt_alignment_eval_generic(bool mapped,const GtAlignment *alignment)
 {
   GtUword i, j, idx_u = 0, idx_v = 0, sumcost = 0, meoplen;
@@ -248,8 +244,15 @@ GtUword gt_alignment_eval_generic(bool mapped,const GtAlignment *alignment)
   return sumcost;
 }
 
-GtWord gt_alignment_eval_generic_with_score(bool mapped,
+GtUword gt_alignment_eval(const GtAlignment *alignment)
+{
+  return gt_alignment_eval_generic(false, alignment);
+}
+
+static GtWord gt_alignment_eval_generic_with_score(bool mapped,
+                                            const GtUchar *character,
                                             const GtAlignment *alignment,
+                                            GtScoreMatrix *sm,
                                             GtWord matchscore,
                                             GtWord mismatchscore,
                                             GtWord gapscore)
@@ -259,6 +262,8 @@ GtWord gt_alignment_eval_generic_with_score(bool mapped,
   GtMultieop meop;
 
   gt_assert(alignment != NULL);
+  if (gt_alignment_get_length(alignment) == 0)
+    return 0;
 #ifndef NDEBUG
   gt_assert(gt_alignment_is_valid(alignment));
 #endif
@@ -275,12 +280,17 @@ GtWord gt_alignment_eval_generic_with_score(bool mapped,
           {
             GtUchar a = alignment->u[idx_u],
                     b = alignment->v[idx_v];
-            if (ISSPECIAL(a) || ISSPECIAL(b) || a != b)
-            {
-              sumscore += mismatchscore;
-            }
+            if (sm != NULL)
+              sumscore += gt_score_matrix_get_score(sm, a, b);
             else
-              sumscore += matchscore;
+            {
+              if (ISSPECIAL(a) || ISSPECIAL(b) || character[a] != character[b])
+              {
+                sumscore += mismatchscore;
+              }
+              else
+                sumscore += matchscore;
+            }
           }
           else
           {
@@ -314,14 +324,34 @@ GtWord gt_alignment_eval_with_score(const GtAlignment *alignment,
                                     GtWord mismatchscore,
                                     GtWord gapscore)
 {
-  if (gt_alignment_get_length(alignment) == 0)
-    return 0;
-  return gt_alignment_eval_generic_with_score(true, alignment, matchscore,
-                                                 mismatchscore, gapscore);
+  return gt_alignment_eval_generic_with_score(false, NULL,alignment, NULL,
+                                          matchscore, mismatchscore, gapscore);
 }
 
-GtWord gt_alignment_eval_generic_with_affine_score(bool mapped,
+GtWord gt_alignment_eval_with_mapped_score(const GtUchar *character,
+                                           const GtAlignment *alignment,
+                                           GtWord matchscore,
+                                           GtWord mismatchscore,
+                                           GtWord gapscore)
+{
+  return gt_alignment_eval_generic_with_score(true, character, alignment, NULL,
+                                          matchscore, mismatchscore, gapscore);
+}
+
+GtWord gt_alignment_eval_with_scorematrix(const GtUchar *character,
+                                          const GtAlignment *alignment,
+                                          GtScoreMatrix *sm,
+                                          GtWord gapscore)
+{
+  gt_assert(sm);
+  return gt_alignment_eval_generic_with_score(true, character, alignment, sm,
+                                            GT_WORD_MAX, GT_WORD_MAX, gapscore);
+}
+
+static GtWord gt_alignment_eval_generic_with_affine_score(bool mapped,
+                                                   const GtUchar *character,
                                                    const GtAlignment *alignment,
+                                                   GtScoreMatrix *sm,
                                                    GtWord matchscore,
                                                    GtWord mismatchscore,
                                                    GtWord gap_opening,
@@ -333,6 +363,8 @@ GtWord gt_alignment_eval_generic_with_affine_score(bool mapped,
   AlignmentEoptype next_meop_type = Insertion + 1;
 
   gt_assert(alignment != NULL);
+  if (gt_alignment_get_length(alignment) == 0)
+    return 0;
 #ifndef NDEBUG
   gt_assert(gt_alignment_is_valid(alignment));
 #endif
@@ -349,12 +381,17 @@ GtWord gt_alignment_eval_generic_with_affine_score(bool mapped,
           {
             GtUchar a = alignment->u[idx_u],
                     b = alignment->v[idx_v];
-            if (ISSPECIAL(a) || ISSPECIAL(b) || a != b)
-            {
-              sumscore += mismatchscore;
-            }
+            if (sm != NULL)
+              sumscore += gt_score_matrix_get_score(sm, a, b);
             else
-              sumscore += matchscore;
+            {
+              if (ISSPECIAL(a) || ISSPECIAL(b) || character[a] != character[b])
+              {
+                sumscore += mismatchscore;
+              }
+              else
+                sumscore += matchscore;
+            }
           }
           else
           {
@@ -402,11 +439,40 @@ GtWord gt_alignment_eval_with_affine_score(const GtAlignment *alignment,
                                            GtWord gap_opening,
                                            GtWord gap_extension)
 {
-  if (gt_alignment_get_length(alignment) == 0)
-    return 0;
-  return gt_alignment_eval_generic_with_affine_score(true, alignment,
+  return gt_alignment_eval_generic_with_affine_score(false, NULL,
+                                                     alignment,NULL,
                                                      matchscore,
                                                      mismatchscore,
+                                                     gap_opening,
+                                                     gap_extension);
+}
+
+GtWord gt_alignment_eval_with_mapped_affine_score(const GtUchar *character,
+                                                  const GtAlignment *alignment,
+                                                  GtWord matchscore,
+                                                  GtWord mismatchscore,
+                                                  GtWord gap_opening,
+                                                  GtWord gap_extension)
+{
+  return gt_alignment_eval_generic_with_affine_score(true, character,
+                                                     alignment, NULL,
+                                                     matchscore,
+                                                     mismatchscore,
+                                                     gap_opening,
+                                                     gap_extension);
+}
+
+GtWord gt_alignment_eval_with_affine_scorematrix(const GtUchar *character,
+                                                 const GtAlignment *alignment,
+                                                 GtScoreMatrix *sm,
+                                                 GtWord gap_opening,
+                                                 GtWord gap_extension)
+{
+  gt_assert(sm);
+  return gt_alignment_eval_generic_with_affine_score(true, character,
+                                                     alignment, sm,
+                                                     GT_WORD_MAX,
+                                                     GT_WORD_MAX,
                                                      gap_opening,
                                                      gap_extension);
 }
