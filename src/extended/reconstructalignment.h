@@ -23,6 +23,7 @@
 #include "extended/diagonalbandalign.h"
 #include "extended/diagonalbandalign_affinegapcost.h"
 #include "extended/maxcoordvalue.h"
+#include "extended/scorehandler.h"
 
 GtUword construct_trivial_deletion_alignment(GtAlignment *align,
                                              GtUword len,
@@ -41,9 +42,7 @@ void reconstructalignment_from_EDtab(GtAlignment *align, GtUword **E,
                                      const GtUchar *vseq,
                                      GtUword vstart,
                                      GtUword vlen,
-                                     GtUword matchcost,
-                                     GtUword mismatchcost,
-                                     GtUword gapcost);
+                                     GtScoreHandler *scorehandler);
 
 /* reconstruct alignment from square space table Ltab
  * use this function for lcoal alignment with linear gapscores*/
@@ -56,9 +55,7 @@ void reconstructalignment_from_Ltab(GtAlignment *align,
                                     const GtUchar *vseq,
                                     GtUword vstart,
                                     GtUword vlen,
-                                    GtWord matchscore,
-                                    GtWord mismatchscore,
-                                    GtWord gapscore);
+                                    GtScoreHandler *scorehandler);
 
 /* reconstruct alignment from crosspoint table, realting to midcolumn,
  * use this function for global or local alignment with linear or affine
@@ -70,10 +67,7 @@ void reconstructalignment_from_Ctab(GtAlignment *align,
                                     const GtUchar *vseq,
                                     GtUword vstart,
                                     GtUword vlen,
-                                    GtUword matchcost,
-                                    GtUword mismatchcost,
-                                    GtUword gap_opening,
-                                    GtUword gap_extension);
+                                    GtScoreHandler *scorehandler);
 
 /* reconstruct alignment from crosspoints, crosspoints relating to diagonalband
  * use this function for alignment with linear gapcosts in diagonalband */

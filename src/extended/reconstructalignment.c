@@ -56,20 +56,19 @@ void reconstructalignment_from_EDtab(GtAlignment *align, GtUword **E,
                                      const GtUchar *vseq,
                                      GtUword vstart,
                                      GtUword vlen,
-                                     GtUword matchcost,
-                                     GtUword mismatchcost,
-                                     GtUword gapcost)
+                                     GtScoreHandler *scorehandler)
 {
-  GtUword i, j;
-  gt_assert(align && E);
+  GtUword i, j, gapcost;
+  gt_assert(align && E && scorehandler);
   i = ulen;
   j = vlen;
 
+  gapcost = gt_scorehandler_get_gapscore(scorehandler);
   while (i > 0 || j > 0)
   {
     if (i > 0 && j > 0 && E[i][j] == E[i-1][j-1] +
-            (tolower((int)useq[ustart+i-1]) == tolower((int) vseq[vstart+j-1]) ?
-                         matchcost : mismatchcost))
+                                   gt_scorehandler_get_replacement(scorehandler,
+                                            useq[ustart+i-1],vseq[vstart+j-1]))
     {
       gt_alignment_add_replacement(align);
       i--; j--;
@@ -101,25 +100,27 @@ void reconstructalignment_from_Ltab(GtAlignment *align,
                                     const GtUchar *vseq,
                                     GtUword vstart,
                                     GtUword vlen,
-                                    GtWord matchscore,
-                                    GtWord mismatchscore,
-                                    GtWord gapscore)
+                                    GtScoreHandler *scorehandler)
 {
   GtUword i, j;
+  GtWord gapscore;
   GtUwordPair max_end;
-  gt_assert(align && Ltabcolumn);
+
+  gt_assert(align && Ltabcolumn && scorehandler);
   max_end = gt_max_get_end(max);
   i = max_end.a;
   j = max_end.b;
 
-  gt_assert(i<=ulen && j<=vlen);
+  gt_assert(i <= ulen && j <= vlen);
+  gapscore = gt_scorehandler_get_gapscore(scorehandler);
+
   while (i > 0 || j > 0)
   {
     if (Ltabcolumn[i][j] == 0)
       break;
-    else if (i > 0 && j > 0 && Ltabcolumn[i][j] == Ltabcolumn[i-1][j-1] +
-            (tolower((int)useq[ustart+i-1]) == tolower((int) vseq[vstart+j-1]) ?
-                         matchscore : mismatchscore))
+    else if (i > 0 && j > 0 && Ltabcolumn[i][j] == Ltabcolumn[i-1][j-1] + 
+                                   gt_scorehandler_get_replacement(scorehandler,
+                                             useq[ustart+i-1],vseq[vstart+j-1]))
     {
       gt_alignment_add_replacement(align);
       i--; j--;
@@ -152,13 +153,14 @@ void reconstructalignment_from_Ctab(GtAlignment *align,
                                     const GtUchar *vseq,
                                     GtUword vstart,
                                     GtUword vlen,
-                                    GtUword matchcost,
-                                    GtUword mismatchcost,
-                                    GtUword gap_opening,
-                                    GtUword gap_extension)
+                                    GtScoreHandler *scorehandler)
 {
-  GtUword i,j, indel, repl;
-  gt_assert(align != NULL && Ctab != NULL);
+  GtUword i,j, repl, indel, gap_opening, gap_extension;
+  gt_assert(align && Ctab && scorehandler);
+
+  gap_opening = gt_scorehandler_get_gap_opening(scorehandler);
+  gap_extension = gt_scorehandler_get_gapscore(scorehandler);
+
   for (i = vlen; i > 0; i--) {
     if (Ctab[i] == Ctab[i-1] + 1)
     {
@@ -166,10 +168,11 @@ void reconstructalignment_from_Ctab(GtAlignment *align,
         indel = 2*gap_extension + gap_opening;
       else
         indel = (2*gap_extension + 2*gap_opening);
-      if (tolower((int)vseq[vstart+i-1])==tolower((int)useq[ustart+Ctab[i]-1]))
-        repl = matchcost;
-      else
-        repl = mismatchcost;
+      
+      repl = gt_scorehandler_get_replacement(scorehandler,
+                                             vseq[vstart+i-1],
+                                             useq[ustart+Ctab[i]-1]);
+
       if (indel>repl)
         gt_alignment_add_replacement(align);
       else
@@ -189,21 +192,17 @@ void reconstructalignment_from_Ctab(GtAlignment *align,
         indel = 2*gap_extension;
       else
         indel = (2*gap_extension+gap_opening);
-      if (tolower((int)vseq[vstart+i-1]) ==
-                                         tolower((int)useq[ustart+Ctab[i]-j-1]))
-      {
-        repl = matchcost;
-      }
-      else
-        repl = mismatchcost;
-      if (indel>repl)
+
+      repl = gt_scorehandler_get_replacement (scorehandler,
+                                              vseq[vstart+i-1],
+                                              useq[ustart+Ctab[i]-j-1]);
+      if (indel > repl)
         gt_alignment_add_replacement(align);
       else
       {
         gt_alignment_add_deletion(align);
         gt_alignment_add_insertion(align);
       }
-
     }
   }
   for (j = Ctab[0]; j > 0; j--)
@@ -211,13 +210,12 @@ void reconstructalignment_from_Ctab(GtAlignment *align,
 }
 
 /*reconstruct alignment from crosspoints, crosspoints relating to diagonalband*/
-void reconstructalignment_from_Dtab(GtAlignment *align,
-                                    const Diagentry *Dtab,GtUword ulen,
-                                    GtUword vlen)
+void reconstructalignment_from_Dtab(GtAlignment *align, const Diagentry *Dtab,
+                                    GtUword ulen, GtUword vlen)
 {
   GtUword i,j;
 
-  gt_assert(align != NULL && Dtab != NULL);
+  gt_assert(align && Dtab);
 
   for (j = ulen; j > Dtab[vlen].currentrowindex; j--)
   {
