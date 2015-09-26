@@ -20,6 +20,8 @@
 #define AFFINEALIGN_H
 
 #include "extended/linspaceManagement.h"
+#include "extended/scorehandler.h"
+
 #include "extended/alignment.h"
 
 typedef enum {
@@ -44,31 +46,45 @@ GtAlignment* gt_affinealign(const GtUchar *u, GtUword ulen,
                             GtUword gap_opening_cost,
                             GtUword gap_extension_cost);
 
-void gt_affinealign_with_Management(LinspaceManagement *spacemanager,
+/* globall alignment (DNA or protein)*/
+GtWord gt_affinealign_with_Management(LinspaceManagement *spacemanager,
+                                    GtScoreHandler *scorehandler,
                                     GtAlignment *align,
                                     const GtUchar *u, GtUword ulen,
-                                    const GtUchar *v, GtUword vlen,
-                                    GtUword matchcost, GtUword mismatchcost,
-                                    GtUword gap_opening,
-                                    GtUword gap_extension);
+                                    const GtUchar *v, GtUword vlen);
 
-void affinealign_traceback(GtAlignment *a,
+GtWord affinealign_traceback(GtAlignment *a,
                            AffinealignDPentry * const *dptable,
                            GtUword i, GtUword j);
 
-/*filling ctab to combine square calculating with linear calculating */
+/* filling ctab to combine square calculating with linear calculating */
 void affine_ctab_in_square_space(LinspaceManagement *spacemanager,
-                                 GtUword *Ctab, const GtUchar *useq,
-                                 GtUword ustart,  GtUword ulen,
-                                 const GtUchar *vseq, GtUword vstart,
-                                 GtUword vlen, GtUword matchcost,
-                                 GtUword mismatchcost, GtUword gap_opening,
-                                 GtUword gap_extension, GtUword rowoffset,
+                                 GtScoreHandler *scorehandler,
+                                 GtUword *Ctab,
+                                 const GtUchar *useq,
+                                 GtUword ustart,
+                                 GtUword ulen,
+                                 const GtUchar *vseq,
+                                 GtUword vstart,
+                                 GtUword vlen,
+                                 GtUword rowoffset,
                                  AffineAlignEdge from_edge,
                                  AffineAlignEdge to_edge);
 
 /* create an local alignment in square space, to use it in linear context you
- * have to generate an spacemanager before, in any other case it can be NULL */
+ * have to generate an spacemanager before, in any other case it can be NULL,
+ * (DNA or protein) */
+GtWord affinealign_in_square_space_local_generic(LinspaceManagement *space,
+                                                 GtScoreHandler *scorehandler,
+                                                 GtAlignment *align,
+                                                 const GtUchar *useq,
+                                                 GtUword ustart,
+                                                 GtUword ulen,
+                                                 const GtUchar *vseq,
+                                                 GtUword vstart,
+                                                 GtUword vlen);
+
+/* same with constant score values, use it only for DNA sequences! */
 GtWord affinealign_in_square_space_local(LinspaceManagement *spacemanager,
                                          GtAlignment *align,
                                          const GtUchar *useq,
@@ -81,4 +97,5 @@ GtWord affinealign_in_square_space_local(LinspaceManagement *spacemanager,
                                          GtWord mismatchscore,
                                          GtWord gap_opening,
                                          GtWord gap_extension);
+
 #endif

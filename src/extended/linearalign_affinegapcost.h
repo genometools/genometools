@@ -23,6 +23,7 @@
 #include "extended/affinealign.h"
 #include "extended/alignment.h"
 #include "extended/linspaceManagement.h"
+#include "extended/scorehandler.h"
 
 typedef struct {
   GtUword idx;
@@ -45,7 +46,19 @@ void gt_checkaffinelinearspace_local(GT_UNUSED bool forward,
                                      const GtUchar *vseq,
                                      GtUword vlen);
 
-/* global alignment with affine gapcosts in linear space */
+/* global alignment with affine gapcosts in linear space*/
+GtUword gt_computeaffinelinearspace_generic(LinspaceManagement *spacemanager,
+                                            GtScoreHandler *scorehandler,
+                                            GtAlignment *align,
+                                            const GtUchar *useq,
+                                            GtUword ustart,
+                                            GtUword ulen,
+                                            const GtUchar *vseq,
+                                            GtUword vstart,
+                                            GtUword vlen);
+
+/* global alignment with constant affine gapcosts in linear space,
+ * only useful for DNA sequences*/
 GtUword gt_computeaffinelinearspace(LinspaceManagement *spacemanager,
                                     GtAlignment *align,
                                     const GtUchar *useq,
@@ -60,6 +73,18 @@ GtUword gt_computeaffinelinearspace(LinspaceManagement *spacemanager,
                                     GtUword gap_extension);
 
 /* local alignment with linear gapcosts in linear space */
+GtWord gt_computeaffinelinearspace_local_generic(LinspaceManagement *spacemanager,
+                                                 GtScoreHandler *scorehandler,
+                                                 GtAlignment *align,
+                                                 const GtUchar *useq,
+                                                 GtUword ustart,
+                                                 GtUword ulen,
+                                                 const GtUchar *vseq,
+                                                 GtUword vstart,
+                                                 GtUword vlen);
+
+/* local alignment with constant linear gapcosts in linear space,
+ * only useful for DNA sequences */
 GtWord gt_computeaffinelinearspace_local(LinspaceManagement *spacemanager,
                                          GtAlignment *align,
                                          const GtUchar *useq,
