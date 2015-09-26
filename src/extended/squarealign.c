@@ -16,9 +16,9 @@
 */
 #include <ctype.h>
 #include "core/array2dim_api.h"
+#include "extended/maxcoordvalue.h"
 #include "core/minmax.h"
 #include "extended/reconstructalignment.h"
-#include "extended/maxcoordvalue.h"
 
 #include "extended/squarealign.h"
 
@@ -30,11 +30,10 @@ static void fillDPtab_in_square_space(GtUword **E,
                                       const GtUchar *vseq,
                                       GtUword vstart,
                                       GtUword vlen,
-                                      GtUword matchcost,
-                                      GtUword mismatchcost,
-                                      GtUword gapcost)
+                                      GtScoreHandler *scorehandler)
 {
-  GtUword i, j;
+  GtUword i, j, gapcost;
+  gapcost =  gt_scorehandler_get_gapscore(scorehandler);
 
   E[0][0] = 0;
   for (i = 1; i <= ulen; i++)
@@ -49,10 +48,10 @@ static void fillDPtab_in_square_space(GtUword **E,
         GtUword val;
 
         E[i][j] = E[i][j-1] + gapcost;
-        if ((val = E[i-1][j-1] + (tolower((int)useq[ustart+i-1]) ==
-                                  tolower((int)vseq[vstart+j-1]) ?
-                                  matchcost : mismatchcost))
-            <= E[i][j])
+        val = E[i-1][j-1] + gt_scorehandler_get_replacement(scorehandler,
+                                                            useq[ustart+i-1],
+                                                            vseq[vstart+j-1]);
+        if (val <= E[i][j])
         {
           E[i][j] = val;
         }
@@ -66,20 +65,18 @@ static void fillDPtab_in_square_space(GtUword **E,
 
 /* create an global alignment in square space, to use it in linear context you
  * have to generate an spacemanager before, in any other case it can be NULL */
-GtUword alignment_in_square_space(LinspaceManagement *spacemanager,
-                                  GtAlignment *align,
-                                  const GtUchar *useq,
-                                  GtUword ustart,
-                                  GtUword ulen,
-                                  const GtUchar *vseq,
-                                  GtUword vstart,
-                                  GtUword vlen,
-                                  GtUword matchcost,
-                                  GtUword mismatchcost,
-                                  GtUword gapcost)
+GtUword alignment_in_square_space_generic (LinspaceManagement *spacemanager,
+                                           GtAlignment *align,
+                                           const GtUchar *useq,
+                                           GtUword ustart,
+                                           GtUword ulen,
+                                           const GtUchar *vseq,
+                                           GtUword vstart,
+                                           GtUword vlen,
+                                           GtScoreHandler *scorehandler)
 {
   GtUword **E, distance;
-  gt_assert(align != NULL);
+  gt_assert(align && scorehandler);
 
   if (spacemanager == NULL)
   {
@@ -92,18 +89,47 @@ GtUword alignment_in_square_space(LinspaceManagement *spacemanager,
     E = gt_linspaceManagement_change_to_square(spacemanager,ulen,vlen);
   }
 
-  fillDPtab_in_square_space(E, useq, ustart, ulen, vseq, vstart, vlen,
-                           matchcost, mismatchcost, gapcost);
+  fillDPtab_in_square_space(E, useq, ustart, ulen,
+                            vseq, vstart, vlen, scorehandler);
 
   distance = E[ulen][vlen];
   /* reconstruct alignment from 2dimarray E */
   reconstructalignment_from_EDtab(align, E, useq, ustart, ulen, vseq, vstart,
-                                  vlen, matchcost, mismatchcost, gapcost);
+                                  vlen, scorehandler);
   if (spacemanager == NULL)
   {
     gt_array2dim_delete(E);
   }
 
+  return distance;
+}
+
+/* create an global alignment in square space with constant cost values,
+ * to use it in linear context you have to generate an spacemanager before,
+ * in any other case it can be NULL */
+GtUword alignment_in_square_space(LinspaceManagement *spacemanager,
+                                  GtAlignment *align,
+                                  const GtUchar *useq,
+                                  GtUword ustart,
+                                  GtUword ulen,
+                                  const GtUchar *vseq,
+                                  GtUword vstart,
+                                  GtUword vlen,
+                                  GtUword matchcost,
+                                  GtUword mismatchcost,
+                                  GtUword gapcost)
+{
+  GtUword distance;
+  GtScoreHandler *scorehandler;
+
+  gt_assert(align);
+  scorehandler = gt_scorehandler_new_DNA(matchcost, mismatchcost, 0, gapcost);
+
+  distance = alignment_in_square_space_generic (spacemanager, align,
+                                                useq, ustart,  ulen,
+                                                vseq,  vstart, vlen,
+                                                scorehandler);
+  gt_scorehandler_delete(scorehandler);
   return distance;
 }
 
@@ -122,28 +148,28 @@ void gt_print_edist_alignment(const GtUchar *useq, GtUword ustart, GtUword ulen,
 
 static void evaluate_crosspoints_from_2dimtab(GtUword **E,
                                               GtUword *Ctab,
+                                              GtScoreHandler *scorehandler,
                                               const GtUchar *useq,
                                               GtUword ustart,
                                               GtUword ulen,
                                               const GtUchar *vseq,
                                               GtUword vstart,
                                               GtUword vlen,
-                                              GtUword matchcost,
-                                              GtUword mismatchcost,
-                                              GtUword gapcost,
                                               GtUword rowoffset)
 
 {
-  GtUword idx, jdx;
+  GtUword gapcost, idx, jdx;
 
   gt_assert(E && Ctab);
+  gapcost = gt_scorehandler_get_gapscore(scorehandler);
   idx = ulen;
   jdx = vlen;
   while (jdx > 1 || idx > 0)
   {
     if (idx > 0 && jdx > 0 && E[idx][jdx] == E[idx-1][jdx-1] +
-       (tolower((int)useq[ustart+idx-1]) == tolower((int) vseq[vstart+jdx-1]) ?
-                                                     matchcost : mismatchcost))
+                                   gt_scorehandler_get_replacement(scorehandler,
+                                                             useq[ustart+idx-1],
+                                                            vseq[vstart+jdx-1]))
     {
       idx--;
       jdx--;
@@ -167,6 +193,7 @@ static void evaluate_crosspoints_from_2dimtab(GtUword **E,
 /* fill crosspointtable ctab for part of seuqneces useq and vseq in square
  * space, use it to combine square calculating with linear calculating */
 void ctab_in_square_space(LinspaceManagement *spacemanager,
+                          GtScoreHandler *scorehandler,
                           GtUword *Ctab,
                           const GtUchar *useq,
                           GtUword ustart,
@@ -174,24 +201,20 @@ void ctab_in_square_space(LinspaceManagement *spacemanager,
                           const GtUchar *vseq,
                           GtUword vstart,
                           GtUword vlen,
-                          GtUword matchcost,
-                          GtUword mismatchcost,
-                          GtUword gapcost,
                           GtUword rowoffset)
 {
   GtUword **E;
 
-  gt_assert(Ctab != NULL && spacemanager != NULL);
+  gt_assert(Ctab && spacemanager && scorehandler);
 
   E = gt_linspaceManagement_change_to_square(spacemanager,ulen,vlen);
   E = gt_linspaceManagement_change_to_square(spacemanager,ulen, vlen);
 
-  fillDPtab_in_square_space(E, useq, ustart, ulen, vseq, vstart, vlen,
-                            matchcost, mismatchcost, gapcost);
+  fillDPtab_in_square_space(E, useq, ustart, ulen,
+                            vseq, vstart, vlen, scorehandler);
 
-  evaluate_crosspoints_from_2dimtab(E, Ctab, useq, ustart, ulen,
-                                    vseq, vstart, vlen, matchcost,
-                                    mismatchcost, gapcost, rowoffset);
+  evaluate_crosspoints_from_2dimtab(E, Ctab, scorehandler, useq, ustart, ulen,
+                                    vseq, vstart, vlen,  rowoffset);
 }
 
 /*----------------------------local alignment---------------------------------*/
@@ -203,12 +226,12 @@ static GtWord fillDPtab_in_square_space_local(GtWord **Ltabcolumn,
                                               const GtUchar *vseq,
                                               GtUword vstart,
                                               GtUword vlen,
-                                              GtWord matchscore,
-                                              GtWord mismatchscore,
-                                              GtWord gapscore)
+                                              GtScoreHandler *scorehandler)
 {
   GtUword i, j;
-  GtWord maxscore, overall_maxscore = 0;
+  GtWord gapscore, maxscore, overall_maxscore = 0;
+
+  gapscore = gt_scorehandler_get_gapscore(scorehandler);
   Ltabcolumn[0][0] = 0;
   for (i = 1; i <= ulen; i++)
   {
@@ -223,9 +246,10 @@ static GtWord fillDPtab_in_square_space_local(GtWord **Ltabcolumn,
 
         Ltabcolumn[i][j] = Ltabcolumn[i][j-1] + gapscore;
 
-        val = Ltabcolumn[i-1][j-1] + (tolower((int)useq[ustart+i-1]) ==
-                                  tolower((int)vseq[vstart+j-1]) ?
-                                  matchscore : mismatchscore);
+        val = Ltabcolumn[i-1][j-1] +
+                                  gt_scorehandler_get_replacement(scorehandler,
+                                           useq[ustart+i-1], vseq[vstart+j-1]);
+
         if (val >= Ltabcolumn[i][j])
         {
           Ltabcolumn[i][j] = val;
@@ -250,17 +274,15 @@ static GtWord fillDPtab_in_square_space_local(GtWord **Ltabcolumn,
 
 /* create an local alignment in square space, to use it in linear context you
  * have to generate an spacemanager before, in any other case it can be NULL */
-GtWord alignment_in_square_space_local(LinspaceManagement *spacemanager,
-                                        GtAlignment *align,
-                                        const GtUchar *useq,
-                                        GtUword ustart,
-                                        GtUword ulen,
-                                        const GtUchar *vseq,
-                                        GtUword vstart,
-                                        GtUword vlen,
-                                        GtWord matchscore,
-                                        GtWord mismatchscore,
-                                        GtWord gapscore)
+GtWord alignment_in_square_space_local_generic(LinspaceManagement *spacemanager,
+                                               GtAlignment *align,
+                                               const GtUchar *useq,
+                                               GtUword ustart,
+                                               GtUword ulen,
+                                               const GtUchar *vseq,
+                                               GtUword vstart,
+                                               GtUword vlen,
+                                               GtScoreHandler *scorehandler)
 {
   GtWord score = 0, **Ltabcolumn;
   Gtmaxcoordvalue *max;
@@ -281,14 +303,12 @@ GtWord alignment_in_square_space_local(LinspaceManagement *spacemanager,
   }
 
   score = fillDPtab_in_square_space_local(Ltabcolumn, max, useq, ustart, ulen,
-                                          vseq, vstart, vlen,
-                                          matchscore, mismatchscore, gapscore);
+                                          vseq, vstart, vlen, scorehandler);
 
   /* reconstruct local alignment from 2dimarray Ltabcolumn */
   reconstructalignment_from_Ltab(align, Ltabcolumn, max,
                                  useq, ustart, ulen,
-                                 vseq,vstart,vlen,
-                                 matchscore,mismatchscore, gapscore);
+                                 vseq,vstart,vlen,scorehandler);
 
   if (gt_max_get_length_safe(max))
   {
@@ -306,5 +326,33 @@ GtWord alignment_in_square_space_local(LinspaceManagement *spacemanager,
     gt_array2dim_delete(Ltabcolumn);
     gt_max_delete(max);
   }
+  return score;
+}
+
+/* create an local alignment in square space with constant score values,
+ * to use it in linear context you have to generate an spacemanager before,
+ * in any other case it can be NULL */
+GtWord alignment_in_square_space_local(LinspaceManagement *spacemanager,
+                                       GtAlignment *align,
+                                       const GtUchar *useq,
+                                       GtUword ustart,
+                                       GtUword ulen,
+                                       const GtUchar *vseq,
+                                       GtUword vstart,
+                                       GtUword vlen,
+                                       GtWord matchscore,
+                                       GtWord mismatchscore,
+                                       GtWord gapscore)
+{
+  GtWord score;
+  gt_assert(align);
+  GtScoreHandler *scorehandler = gt_scorehandler_new_DNA(matchscore,
+                                                         mismatchscore, 0,
+                                                         gapscore);
+  score = alignment_in_square_space_local_generic(spacemanager, align,
+                                                  useq, ustart, ulen,
+                                                  vseq, vstart, vlen,
+                                                  scorehandler);
+  gt_scorehandler_delete(scorehandler);
   return score;
 }

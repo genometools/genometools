@@ -23,6 +23,7 @@
 #include "core/unused_api.h"
 #include "core/error.h"
 #include "extended/linspaceManagement.h"
+#include "extended/scorehandler.h"
 
 void gt_checklinearspace(GT_UNUSED bool forward,
                          const GtUchar *useq,
@@ -36,7 +37,19 @@ void gt_checklinearspace_local(GT_UNUSED bool forward,
                                const GtUchar *vseq,
                                GtUword vlen);
 
-/*global alignment with linear gapcosts in linear space */
+/* global alignment with linear gapcosts in linear space (DNA or protein)*/
+GtUword gt_computelinearspace_generic(LinspaceManagement *spacemanager,
+                                      GtScoreHandler *scorehandler,
+                                      GtAlignment *align,
+                                      const GtUchar *useq,
+                                      GtUword ustart,
+                                      GtUword ulen,
+                                      const GtUchar *vseq,
+                                      GtUword vstart,
+                                      GtUword vlen);
+
+/* global alignment with linear gapcosts in linear space
+ * with constant cost values, only useful for DNA sequences */
 GtUword gt_computelinearspace(LinspaceManagement *spacemanager,
                               GtAlignment *align,
                               const GtUchar *useq,
@@ -49,7 +62,19 @@ GtUword gt_computelinearspace(LinspaceManagement *spacemanager,
                               GtUword mismatchcost,
                               GtUword gapcost);
 
-/*local alignment with linear gapcosts in linear space */
+/* local alignment with linear gapcosts in linear space (DNA or protein)*/
+GtWord gt_computelinearspace_local_generic(LinspaceManagement *spacemanager,
+                                           GtScoreHandler *scorehandler,
+                                           GtAlignment *align,
+                                           const GtUchar *useq,
+                                           GtUword ustart,
+                                           GtUword ulen,
+                                           const GtUchar *vseq,
+                                           GtUword vstart,
+                                           GtUword vlen);
+
+/* local alignment with linear gapcosts in linear space
+ * with constant score values, only useful for DNA sequences */
 GtWord gt_computelinearspace_local(LinspaceManagement *spacemanager,
                                    GtAlignment *align,
                                    const GtUchar *useq,
@@ -62,8 +87,8 @@ GtWord gt_computelinearspace_local(LinspaceManagement *spacemanager,
                                    GtWord mismatchscore,
                                    GtWord gapscore);
 
-/* edit distance of sequences u and v in linear space*/
-GtUword gt_calc_linearedist(const GtUchar *u, GtUword ulen,
-                            const GtUchar *v, GtUword vlen);
+/* edit distance of sequences useq and vseq in linear space*/
+GtUword gt_calc_linearedist(const GtUchar *useq, GtUword ulen,
+                            const GtUchar *vseq, GtUword vlen);
 
 #endif
