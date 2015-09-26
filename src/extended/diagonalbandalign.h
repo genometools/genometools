@@ -22,6 +22,7 @@
 #include "core/unused_api.h"
 #include "extended/alignment.h"
 #include "extended/linspaceManagement.h"
+#include "extended/scorehandler.h"
 
 typedef enum {
   Linear_R,
@@ -41,8 +42,21 @@ void gt_checkdiagonalbandalign(GT_UNUSED bool forward,
                                 const GtUchar *vseq,
                                 GtUword vlen);
 
-/* creating alignment with diagonalband in linear space O(n) */
-GtUword gt_computediagonalbandalign(LinspaceManagement *spacemanager,
+/* creating global alignment with diagonalband in linear space,
+ * (DNA or protein) */
+void gt_computediagonalbandalign_generic(LinspaceManagement *spacemanager,
+                                            GtScoreHandler *scorehandler,
+                                            GtAlignment *align,
+                                            const GtUchar *useq,
+                                            GtUword ustart, GtUword ulen,
+                                            const GtUchar *vseq,
+                                            GtUword vstart, GtUword vlen,
+                                            GtWord left_dist,
+                                            GtWord right_dist);
+
+/* creating alignment with diagonalband in linear space
+ * with constant cost values, only useful for DNA sequences */
+void gt_computediagonalbandalign(LinspaceManagement *spacemanager,
                                     GtAlignment *align,
                                     const GtUchar *useq,
                                     GtUword ustart, GtUword ulen,
@@ -54,9 +68,23 @@ GtUword gt_computediagonalbandalign(LinspaceManagement *spacemanager,
                                     GtUword mismatchcost,
                                     GtUword gapcost);
 
-/* creating alignment with diagonalband in square space O(n²),
+/* creating alignment with diagonalband in square space,
  * to use it in linear context you have to generate an spacemanager before,
- * in any other case it can be NULL */
+ * in any other case it can be NULL,
+ * (DNA or protein) */
+GtUword diagonalbandalignment_in_square_space_generic(LinspaceManagement *space,
+                                                  GtAlignment *align,
+                                                  const GtUchar *useq,
+                                                  GtUword ustart,
+                                                  GtUword ulen,
+                                                  const GtUchar *vseq,
+                                                  GtUword vstart,
+                                                  GtUword vlen,
+                                                  GtWord left_dist,
+                                                  GtWord right_dist,
+                                                  GtScoreHandler *scorehandler);
+
+/* same with constant cost values, only useful for DNA sequences */
 GtUword diagonalbandalignment_in_square_space(LinspaceManagement *spacemanager,
                                               GtAlignment *align,
                                               const GtUchar *useq,
@@ -71,4 +99,16 @@ GtUword diagonalbandalignment_in_square_space(LinspaceManagement *spacemanager,
                                               GtUword mismatchcost,
                                               GtUword gapcost);
 
+/* calculate only distance with diagonalband in square space */
+GtUword diagonalband_squarespace_distance_only(const GtUchar *useq,
+                                               GtUword ustart,
+                                               GtUword ulen,
+                                               const GtUchar *vseq,
+                                               GtUword vstart,
+                                               GtUword vlen,
+                                               GtWord left_dist,
+                                               GtWord right_dist,
+                                               GtUword matchcost,
+                                               GtUword mismatchcost,
+                                               GtUword gapcost);
 #endif

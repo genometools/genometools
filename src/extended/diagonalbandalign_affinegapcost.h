@@ -33,9 +33,21 @@ void gt_checkdiagonalbandaffinealign(GT_UNUSED bool forward,
                                      const GtUchar *vseq,
                                      GtUword vlen);
 
-/* creating alignment with diagonalband in linear space O(n)
- * with affine gapcosts */
-GtUword gt_computediagonalbandaffinealign(LinspaceManagement *spacemanager,
+/* creating alignment with diagonalband in linear space
+ * with affine gapcosts (DNA or protein) */
+void gt_computediagonalbandaffinealign_generic(LinspaceManagement *spacemanager,
+                                              GtScoreHandler *scorehandler,
+                                              GtAlignment *align,
+                                              const GtUchar *useq,
+                                              GtUword ustart, GtUword ulen,
+                                              const GtUchar *vseq,
+                                              GtUword vstart, GtUword vlen,
+                                              GtWord left_dist,
+                                              GtWord right_dist);
+
+/* creating alignment with diagonalband in linear space
+ * with constant affine gapcosts, only useful for DNA sequences */
+void gt_computediagonalbandaffinealign(LinspaceManagement *spacemanager,
                                           GtAlignment *align,
                                           const GtUchar *useq,
                                           GtUword ustart, GtUword ulen,
@@ -48,9 +60,35 @@ GtUword gt_computediagonalbandaffinealign(LinspaceManagement *spacemanager,
                                           GtUword gap_opening,
                                           GtUword gap_extension);
 
-/* calculate alignment with diagonalband in square space O(n²)
+/* calculate only distance with diagonalband in square space with
+ * affine gapcosts */
+GtWord diagonalband_square_space_affine(const GtUchar *useq,
+                                         GtUword ustart,
+                                         GtUword ulen,
+                                         const GtUchar *vseq,
+                                         GtUword vstart,
+                                         GtUword vlen,
+                                         GtWord left_dist,
+                                         GtWord right_dist,
+                                         GtScoreHandler *scorehandler);
+
+/* calculate alignment with diagonalband in square space
  * with affine gapcosts, to use it in linear context you
  * have to generate an spacemanager before, in any other case it can be NULL */
+GtWord diagonalbandalignment_in_square_space_affine_generic(
+                                                   LinspaceManagement *space,
+                                                   GtScoreHandler *scorehandler,
+                                                   GtAlignment *align,
+                                                   const GtUchar *useq,
+                                                   GtUword ustart,
+                                                   GtUword ulen,
+                                                   const GtUchar *vseq,
+                                                   GtUword vstart,
+                                                   GtUword vlen,
+                                                   GtWord left_dist,
+                                                   GtWord right_dist);
+
+/* same with constant cost values, only useful for DNA sequences */
 GtWord diagonalbandalignment_in_square_space_affine(LinspaceManagement *space,
                                                     GtAlignment *align,
                                                     const GtUchar *useq,
