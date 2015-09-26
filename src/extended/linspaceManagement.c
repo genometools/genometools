@@ -271,19 +271,6 @@ void gt_linspaceManagement_set_TSfactor(LinspaceManagement *spacemanager,
   spacemanager->timesquarefactor = timesquarefactor;
 }
 
-GtUchar* sequence_to_lower_case(const GtUchar *seq, GtUword len)
-{
-  GtUword i;
-  GtUchar *low_seq;
-
-  low_seq = gt_malloc(sizeof(*low_seq)*(len+1));
-  for (i = 0; i < len; i++)
-    low_seq[i] = tolower((int)seq[i]);
-  low_seq[i] = '\0';
-
-  return low_seq;
-}
-
 inline GtWord add_safe(GtWord val1, GtWord val2, GtWord exception)
 {
   return (val1 != exception) ? val1 + val2 : exception;

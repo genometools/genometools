@@ -85,8 +85,6 @@ GtUword **gt_linspaceManagement_change_to_square(LinspaceManagement
 void gt_linspaceManagement_set_TSfactor(LinspaceManagement *spacemanager,
                                         GtUword timesquarefactor);
 
-GtUchar* sequence_to_lower_case(const GtUchar *seq, GtUword len);
-
 inline GtWord add_safe_max(GtWord val1, GtWord val2);
 inline GtWord add_safe_min(GtWord val1, GtWord val2);
 inline GtUword add_safe_umax(GtUword val1, GtUword val2);
