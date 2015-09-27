@@ -54,7 +54,9 @@ typedef struct{
              dna,
              protein,
              costmatrix,
-             showscore;
+             showscore,
+             wildcardshow,
+             spacetime;
   GtUword timesquarefactor;
 } GtLinspaceArguments;
 
@@ -121,7 +123,8 @@ static GtOptionParser* gt_linspace_align_option_parser_new(void *tool_arguments)
   GtOption *optionstrings, *optionfiles, *optionglobal, *optionlocal,
            *optiondna, *optionprotein, *optioncostmatrix, *optionlinearcosts,
            *optionaffinecosts, *optionoutputfile, *optionshowscore,
-           *optiondiagonal, *optiondiagonalbonds, *optiontsfactor;
+           *optiondiagonal, *optiondiagonalbonds, *optiontsfactor,
+           *optionspacetime, *optionwildcardsymbol;
   gt_assert(arguments);
 
   /* init */
@@ -153,6 +156,11 @@ static GtOptionParser* gt_linspace_align_option_parser_new(void *tool_arguments)
                                       &arguments->protein, false);
   gt_option_parser_add_option(op, optionprotein);
 
+  optionwildcardsymbol = gt_option_new_bool("wildcard", "show symbol used to "
+                                            "represented wildcards in output",
+                                            &arguments->wildcardshow, false);
+  gt_option_parser_add_option(op, optionwildcardsymbol);
+
   /* special case, if given matrix includes cost values in place of scores */
   optioncostmatrix = gt_option_new_bool("costmatrix", "describes type of "
                                         "given matrix",
@@ -162,6 +170,11 @@ static GtOptionParser* gt_linspace_align_option_parser_new(void *tool_arguments)
   optionshowscore = gt_option_new_bool("showscore", "show score for alignment",
                                        &arguments->showscore, false);
   gt_option_parser_add_option(op, optionshowscore);
+
+  optionspacetime = gt_option_new_bool("spacetime", "write space peak and time"
+                                       " overall on stdout",
+                                       &arguments->spacetime, false);
+  gt_option_parser_add_option(op, optionspacetime);
 
   /* -str */
   optionstrings = gt_option_new_string_array("ss", "use two strings",
@@ -218,7 +231,11 @@ static GtOptionParser* gt_linspace_align_option_parser_new(void *tool_arguments)
   /* extended options */
   gt_option_is_extended_option(optiontsfactor);
   gt_option_is_extended_option(optionshowscore);
+  gt_option_is_extended_option(optionwildcardsymbol);
   gt_option_is_extended_option(optioncostmatrix);
+
+  /* development option(s) */
+  gt_option_is_development_option(optionspacetime);
 
   return op;
 }
@@ -328,15 +345,13 @@ static void alignment_show_with_sequences(GtUchar *useq, GtUword ulen,
     fprintf(fp, "######\n");
 
     characters = gt_alphabet_characters(alphabet);
+    sequence_encode(useq,ulen,alphabet);
+    sequence_encode(vseq,vlen,alphabet);
+
     if (gt_alignment_get_length(align) > 0)
     {
-      sequence_encode(useq,ulen,alphabet);
-      sequence_encode(vseq,vlen,alphabet);
-
       gt_alignment_show_with_mapped_chars(align, characters,
                                           wildcardshow, fp, 80);
-      sequence_decode(useq,ulen,alphabet);
-      sequence_decode(vseq,vlen,alphabet);
     }
     else
       fprintf(fp, "empty alignment\n");
@@ -347,6 +362,9 @@ static void alignment_show_with_sequences(GtUchar *useq, GtUword ulen,
                                                          align, characters);
       fprintf(fp, "score: "GT_WD"\n", score);
     }
+
+    sequence_decode(useq,ulen,alphabet);
+    sequence_decode(vseq,vlen,alphabet);
   }
 }
 
@@ -555,6 +573,8 @@ static int alignment_with_linear_gap_costs(GtLinspaceArguments *arguments,
       }
     }
   }
+  if (!had_err && arguments->wildcardshow)
+    printf("wildcards are represented by %c\n", wildcardshow);
 
   return had_err;
 }
@@ -661,6 +681,8 @@ static int alignment_with_affine_gap_costs(GtLinspaceArguments *arguments,
       }
     }
   }
+  if (!had_err && arguments->wildcardshow)
+    printf("wildcards are represented by %c\n", wildcardshow);
 
   return had_err;
 }
@@ -822,6 +844,13 @@ static int gt_linspace_align_runner(GT_UNUSED int argc,
   gt_sequences_delete(sequences2);
   gt_alignment_delete(align);
   gt_scorehandler_delete(scorehandler);
+
+  if (!had_err && arguments->spacetime)
+  {
+    printf("# space peak: "GT_ZU" Bytes\n",
+                             gt_linspaceManagement_get_spacepeak(spacemanager));
+    /*TODO: add time*/
+  }
   gt_linspaceManagement_delete(spacemanager);
   return had_err;
 }
