@@ -10,7 +10,8 @@ end
   Name "gt seq fail #{i}"
   Keywords "gt_seq"
   Test do
-    run_test("#{$bin}gt seq -recreate #{$testdata}gt_bioseq_fail_#{i}.fas",
+    FileUtils.copy "#{$testdata}gt_bioseq_fail_#{i}.fas", "."
+    run_test("#{$bin}gt seq -recreate gt_bioseq_fail_#{i}.fas",
              :retval => 1)
   end
 end
@@ -26,8 +27,9 @@ end
 Name "gt seq (DOS line breaks)"
 Keywords "gt_seq"
 Test do
+  FileUtils.copy "#{$testdata}tRNA.dos.fas", "."
   run "#{$scriptsdir}dos2unix #{$testdata}tRNA.dos.fas > ./tRNA.unix.fas"
-  run_test "#{$bin}gt seq -showfasta -width 60 #{$testdata}tRNA.dos.fas"
+  run_test "#{$bin}gt seq -showfasta -width 60 tRNA.dos.fas"
   run "diff #{last_stdout} tRNA.unix.fas"
   run "diff #{last_stdout} #{$testdata}tRNA.dos.fas", :retval => 1
 end
@@ -93,7 +95,8 @@ end
 Name "gt seq test 3"
 Keywords "gt_seq"
 Test do
-  run_test "#{$bin}gt seq -recreate -showfasta -width 70 #{$testdata}gt_bioseq_succ_3.fas"
+  FileUtils.copy("#{$testdata}gt_bioseq_succ_3.fas", ".")
+  run_test "#{$bin}gt seq -recreate -showfasta -width 70 gt_bioseq_succ_3.fas"
   run "diff #{last_stdout} #{$testdata}gt_bioseq_succ_3.fas"
 end
 
@@ -126,7 +129,8 @@ end
 Name "gt seq test 3 out 4 fail"
 Keywords "gt_seq"
 Test do
-  run_test("#{$bin}gt seq -showseqnum 4 #{$testdata}gt_bioseq_succ_3.fas",
+  FileUtils.copy("#{$testdata}gt_bioseq_succ_3.fas", ".")
+  run_test("#{$bin}gt seq -showseqnum 4 gt_bioseq_succ_3.fas",
            :retval => 1)
 end
 
@@ -154,7 +158,8 @@ end
 Name "gt seq test multiple sequence files (incl. stdin)"
 Keywords "gt_seq"
 Test do
-  run "cat #{$testdata}gt_bioseq_succ_2.fas | #{$memcheck} #{$bin}gt seq -recreate #{$testdata}gt_bioseq_succ_1.fas -"
+  FileUtils.copy("#{$testdata}gt_bioseq_succ_1.fas", ".")
+  run "cat #{$testdata}gt_bioseq_succ_2.fas | #{$memcheck} #{$bin}gt seq -recreate gt_bioseq_succ_1.fas -"
 end
 
 Name "gt seq -gc-content"
@@ -167,7 +172,8 @@ end
 Name "gt seq -seqlengthdistri"
 Keywords "gt_seq"
 Test do
-  run_test "#{$bin}gt seq -seqlengthdistri #{$testdata}sw100K1.fsa"
+  FileUtils.copy("#{$testdata}sw100K1.fsa", ".")
+  run_test "#{$bin}gt seq -seqlengthdistri sw100K1.fsa"
   run "diff #{last_stdout} #{$testdata}gt_bioseq_seqlengthdistri.out"
 end
 
