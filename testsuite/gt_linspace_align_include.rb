@@ -163,7 +163,7 @@ Test do
   run_test "#{$bin}gt dev paircmp -a acg 6"
 end
 
-if $gttestdata
+if $gttestdata then
   Name "gt linspace_align global lin gap dna gttestdata filelist"
   Keywords "gt_linspace_align edist"
   Test do
