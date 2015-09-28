@@ -13,7 +13,7 @@ Test do
   grep last_stderr, "invalid cost value"
 end
 
-Name "gt linspace_align global lin gap filelist"
+Name "gt linspace_align global lin gap dna filelist"
 Keywords "gt_linspace_align edist"
 Test do
   i=0
@@ -26,6 +26,27 @@ Test do
         run_test "#{$bin}gt dev linspace_align -ff #{$testdata}#{f1} #{$testdata}#{f2} "\
                  "-dna -global -l 0 1 1 -wildcard"
         run "diff -i #{last_stdout} #{$testdata}gt_linspace_align_global_test_#{i}.out"
+      end
+    end
+  end
+end
+
+#development option 'showonlyscore' to compare with and without diagonalband
+Name "gt linspace_align global lin gap protein filelist"
+Keywords "gt_linspace_align"
+Test do
+  filelist = ["protein_10.fas",
+              "protein_10th.fas",
+              "protein_short.fas"]
+  filelist.each do |f1|
+    filelist.each do |f2|
+      if f1 != f2
+        run_test "#{$bin}gt dev linspace_align -ff #{$testdata}/nGASP/#{f1} #{$testdata}nGASP/#{f2} "\
+                 "-protein -global -l #{$testdata}BLOSUM62 \" -1\" -showonlyscore"
+        temp = last_stdout
+        run_test "#{$bin}gt dev linspace_align -ff #{$testdata}/nGASP/#{f1} #{$testdata}nGASP/#{f2} "\
+                 "-protein -global -l #{$testdata}BLOSUM62 \" -1\" -d -showonlyscore"
+        run "diff #{last_stdout} #{temp}"
       end
     end
   end
@@ -76,7 +97,7 @@ Test do
       if f1 != f2
         i=i+1
         run_test "#{$bin}gt dev linspace_align -ff #{$testdata}#{f1} #{$testdata}#{f2} "\
-                 "-dna -global -l 0 1 1 -d -wildcard", :maxtime => 1
+                 "-dna -global -l 0 1 1 -d -wildcard"
         run "diff -i #{last_stdout} #{$testdata}gt_linspace_align_global_test_#{i}.out"
       end
     end
@@ -97,7 +118,7 @@ Test do
   run_test "#{$bin}gt dev linspace_align -ff "\
            "#{$testdata}gt_linspace_align_affine_test_1.fas "\
            "#{$testdata}gt_linspace_align_affine_test_2.fas "\
-           " -dna -global -a 0 2 3 1 -d", :maxtime => 1
+           " -dna -global -a 0 2 3 1 -d"
   run "diff -i #{last_stdout} #{$testdata}gt_linspace_align_global_affine_test_1.out"
 end
 
@@ -136,8 +157,36 @@ Test do
   run "diff -i #{last_stdout} #{$testdata}gt_linspace_align_global_affine_special_cases.out"
 end
 
-Name "gt linspace_align all checkfun with gt_paircmp"
+Name "gt linspace_align all checkfun with gt_paircmp (dna)"
 Keywords "gt_linspace_align"
 Test do
   run_test "#{$bin}gt dev paircmp -a acg 6"
+end
+
+if $gttestdata
+  Name "gt linspace_align global lin gap dna gttestdata filelist"
+  Keywords "gt_linspace_align edist"
+  Test do
+    run_test "#{$bin}gt dev linspace_align -ff #{$gttestdata}DNA-mix/Grumbach.fna/humdystrop.fna"\
+             " #{$gttestdata}DNA-mix/Grumbach.fna/humhdabcd.fna "\
+             "-dna -global -l 0 1 1 -showonlyscore", :maxtime =>120
+    temp = last_stdout
+    run_test "#{$bin}gt dev linspace_align -ff #{$gttestdata}DNA-mix/Grumbach.fna/humdystrop.fna "\
+             "#{$gttestdata}DNA-mix/Grumbach.fna/humhdabcd.fna "\
+             "-dna -global -l 0 1 1 -d -showonlyscore", :maxtime =>120
+    run "diff #{last_stdout} #{temp}"
+  end
+
+  Name "gt linspace_align global lin gap protein gttestdata filelist"
+  Keywords "gt_linspace_align edist"
+  Test do
+    run_test "#{$bin}gt dev linspace_align -ff #{$gttestdata}swissprot/swiss10K "\
+             "#{$gttestdata}swissprot/swiss10K " \
+             "-protein -global -l #{$testdata}BLOSUM62 \" -1\" -showonlyscore"
+    temp = last_stdout
+    run_test "#{$bin}gt dev linspace_align -ff #{$gttestdata}swissprot/swiss10K "\
+             "#{$gttestdata}swissprot/swiss10K "\
+             "-protein -global -l #{$testdata}BLOSUM62 \" -1\" -d -showonlyscore"
+    run "diff #{last_stdout} #{temp}"
+  end
 end
