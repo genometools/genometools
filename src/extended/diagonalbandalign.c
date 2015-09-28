@@ -190,7 +190,7 @@ GtUword diagonalbandalignment_in_square_space_generic(LinspaceManagement *space,
 
 /* creating alignment with diagonalband in square space
  * with constant cost values */
-GtUword diagonalbandalignment_in_square_spacec(LinspaceManagement *spacemanager,
+GtUword diagonalbandalignment_in_square_space(LinspaceManagement *spacemanager,
                                               GtAlignment *align,
                                               const GtUchar *useq,
                                               GtUword ustart,
@@ -288,6 +288,7 @@ static void dtab_in_square_space(LinspaceManagement *spacemanager,
                                  GtWord left_dist,
                                  GtWord right_dist,
                                  GtUword rowoffset,
+                                 LinearAlignEdge edge,
                                  GtScoreHandler *scorehandler)
 {
   GtUword **EDtabcolumn;
@@ -307,6 +308,7 @@ static void dtab_in_square_space(LinspaceManagement *spacemanager,
   evaluate_DBcrosspoints_from_2dimtab(EDtabcolumn, Dtab, useq, ustart, ulen,
                                       vseq, vstart, vlen, rowoffset,
                                       scorehandler);
+  Dtab[0].last_type = edge;
 }
 
 /* calculate only distance with diagonalband in linear space O(n) */
@@ -687,7 +689,7 @@ static void evaluateDBcrosspoints(LinspaceManagement *spacemanager,
                          useq, ustart, ulen,
                          vseq, vstart, vlen,
                          left_dist, right_dist,
-                         rowoffset, scorehandler);
+                         rowoffset, edge, scorehandler);
     return;
   }
 
