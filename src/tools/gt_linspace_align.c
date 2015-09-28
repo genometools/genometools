@@ -55,6 +55,7 @@ typedef struct{
              protein,
              costmatrix,
              showscore,
+             scoreonly,
              wildcardshow,
              spacetime;
   GtUword timesquarefactor;
@@ -124,7 +125,7 @@ static GtOptionParser* gt_linspace_align_option_parser_new(void *tool_arguments)
            *optiondna, *optionprotein, *optioncostmatrix, *optionlinearcosts,
            *optionaffinecosts, *optionoutputfile, *optionshowscore,
            *optiondiagonal, *optiondiagonalbonds, *optiontsfactor,
-           *optionspacetime, *optionwildcardsymbol;
+           *optionspacetime, *optionscoreonly, *optionwildcardsymbol;
   gt_assert(arguments);
 
   /* init */
@@ -170,6 +171,12 @@ static GtOptionParser* gt_linspace_align_option_parser_new(void *tool_arguments)
   optionshowscore = gt_option_new_bool("showscore", "show score for alignment",
                                        &arguments->showscore, false);
   gt_option_parser_add_option(op, optionshowscore);
+
+  optionscoreonly = gt_option_new_bool("showonlyscore", "show only score for "
+                                       "generated alignment to compare with "
+                                       "other algorithmen",
+                                       &arguments->scoreonly, false);
+  gt_option_parser_add_option(op, optionscoreonly);
 
   optionspacetime = gt_option_new_bool("spacetime", "write space peak and time"
                                        " overall on stdout",
@@ -220,10 +227,11 @@ static GtOptionParser* gt_linspace_align_option_parser_new(void *tool_arguments)
   gt_option_imply_either_2(optionfiles, optionglobal, optionfiles);
   gt_option_imply_either_2(optiondna, optionstrings, optionfiles);
   gt_option_imply_either_2(optionstrings, optionglobal, optionlocal);
-  gt_option_imply_either_2(optionprotein, optionstrings, optionlocal);
+  gt_option_imply_either_2(optionprotein, optionstrings, optionfiles);
   gt_option_imply_either_2(optionlocal, optionlinearcosts, optionaffinecosts);
   gt_option_imply_either_2(optionglobal, optionlinearcosts, optionaffinecosts);
   gt_option_imply_either_2(optionshowscore,optionlinearcosts,optionaffinecosts);
+  gt_option_imply_either_2(optionscoreonly,optionlinearcosts,optionaffinecosts);
   gt_option_imply(optiondiagonal, optionglobal);
   gt_option_imply(optiondiagonalbonds, optiondiagonal);
   gt_option_imply(optioncostmatrix, optionprotein);
@@ -236,6 +244,7 @@ static GtOptionParser* gt_linspace_align_option_parser_new(void *tool_arguments)
 
   /* development option(s) */
   gt_option_is_development_option(optionspacetime);
+  gt_option_is_development_option(optionscoreonly);
 
   return op;
 }
@@ -333,6 +342,7 @@ static void alignment_show_with_sequences(GtUchar *useq, GtUword ulen,
                                           GtAlphabet *alphabet,
                                           GtUchar wildcardshow,
                                           bool showscore,
+                                          bool showalign,
                                           GtScoreHandler *scorehandler,
                                           FILE *fp)
 {
@@ -340,23 +350,26 @@ static void alignment_show_with_sequences(GtUchar *useq, GtUword ulen,
 
   if (fp != NULL)
   {
-    print_sequence(useq, ulen, fp);
-    print_sequence(vseq, vlen, fp);
-    fprintf(fp, "######\n");
+    if (showalign)
+    {
+      print_sequence(useq, ulen, fp);
+      print_sequence(vseq, vlen, fp);
+      fprintf(fp, "######\n");
+    }
 
     characters = gt_alphabet_characters(alphabet);
     sequence_encode(useq,ulen,alphabet);
     sequence_encode(vseq,vlen,alphabet);
 
-    if (gt_alignment_get_length(align) > 0)
+    if (showalign && gt_alignment_get_length(align) > 0)
     {
       gt_alignment_show_with_mapped_chars(align, characters,
                                           wildcardshow, fp, 80);
     }
-    else
+    else if (showalign)
       fprintf(fp, "empty alignment\n");
 
-    if (showscore)
+    if (!showalign || showscore)
     {
       GtWord score = gt_scorehandler_eval_alignmentscore(scorehandler,
                                                          align, characters);
@@ -559,7 +572,8 @@ static int alignment_with_linear_gap_costs(GtLinspaceArguments *arguments,
         if (!strcmp(gt_str_get(arguments->outputfile),"stdout"))
         {
           alignment_show_with_sequences(useq, ulen, vseq, vlen, align, alphabet,
-                                 wildcardshow, showscore, scorehandler, stdout);
+                                 wildcardshow, showscore, !arguments->scoreonly,
+                                 scorehandler, stdout);
         }
         else
         {
@@ -567,7 +581,8 @@ static int alignment_with_linear_gap_costs(GtLinspaceArguments *arguments,
                                                  "a", __FILE__,__LINE__,err);
           gt_error_check(err);
           alignment_show_with_sequences(useq, ulen, vseq, vlen, align, alphabet,
-                                     wildcardshow, showscore, scorehandler, fp);
+                                        wildcardshow, showscore,
+                                        !arguments->scoreonly, scorehandler,fp);
           gt_fa_fclose(fp);
         }
       }
@@ -667,7 +682,8 @@ static int alignment_with_affine_gap_costs(GtLinspaceArguments *arguments,
         if (!strcmp(gt_str_get(arguments->outputfile),"stdout"))
         {
           alignment_show_with_sequences(useq, ulen, vseq, vlen, align, alphabet,
-                                 wildcardshow, showscore, scorehandler, stdout);
+                                 wildcardshow, showscore,
+                                 !arguments->scoreonly, scorehandler, stdout);
         }
         else
         {
@@ -675,7 +691,8 @@ static int alignment_with_affine_gap_costs(GtLinspaceArguments *arguments,
                                                  "a", __FILE__,__LINE__,err);
           gt_error_check(err);
           alignment_show_with_sequences(useq, ulen, vseq, vlen, align, alphabet,
-                                     wildcardshow, showscore, scorehandler, fp);
+                                        wildcardshow, showscore,
+                                        !arguments->scoreonly, scorehandler,fp);
           gt_fa_fclose(fp);
         }
       }
