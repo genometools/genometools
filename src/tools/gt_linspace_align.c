@@ -258,6 +258,11 @@ static int gt_linspace_align_arguments_check(GT_UNUSED int rest_argc,
   gt_error_check(err);
   gt_assert(arguments);
 
+  if (rest_argc != 0)
+  {
+    gt_error_set(err,"superfluous arguments");
+    return 1;
+  }
   if ((gt_str_array_size(arguments->strings) > 0) &&
      (gt_str_array_size(arguments->strings) != 2UL))
   {
