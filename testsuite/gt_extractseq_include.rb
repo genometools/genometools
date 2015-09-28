@@ -22,42 +22,49 @@ end
 Name "gt extractseq test foo"
 Keywords "gt_extractseq"
 Test do
-  run_test "#{$bin}gt extractseq -match foo #{$testdata}foo.fas"
+  FileUtils.copy "#{$testdata}foo.fas", "."
+  run_test "#{$bin}gt extractseq -match foo foo.fas"
   run "diff #{last_stdout} #{$testdata}foo.fas"
 end
 
 Name "gt extractseq test foo width 4"
 Keywords "gt_extractseq"
 Test do
-  run_test "#{$bin}gt extractseq -match foo -width 4 #{$testdata}foo.fas"
+  FileUtils.copy "#{$testdata}foo.fas", "."
+  run_test "#{$bin}gt extractseq -match foo -width 4 foo.fas"
   run "diff #{last_stdout} #{$testdata}foo_width4.fas"
 end
 
 Name "gt extractseq test bar"
 Keywords "gt_extractseq"
 Test do
-  run_test "#{$bin}gt extractseq -match bar -width 4 #{$testdata}bar.fas"
+  FileUtils.copy "#{$testdata}bar.fas", "."
+  run_test "#{$bin}gt extractseq -match bar -width 4 bar.fas"
   run "diff #{last_stdout} #{$testdata}bar.fas"
 end
 
 Name "gt extractseq test baz"
 Keywords "gt_extractseq"
 Test do
-  run "cat #{$testdata}foo.fas | #{$memcheck} #{$bin}gt extractseq -match baz - #{$testdata}bar.fas"
+  FileUtils.copy "#{$testdata}bar.fas", "."
+  run "cat #{$testdata}foo.fas | #{$memcheck} #{$bin}gt extractseq -match baz - bar.fas"
   grep(last_stdout, ".", true)
 end
 
 Name "gt extractseq test foo|bar"
 Keywords "gt_extractseq"
 Test do
-  run_test "#{$bin}gt extractseq -match 'foo|bar' #{$testdata}foo.fas #{$testdata}bar.fas"
+  FileUtils.copy "#{$testdata}foo.fas", "."
+  FileUtils.copy "#{$testdata}bar.fas", "."
+  run_test "#{$bin}gt extractseq -match 'foo|bar' foo.fas bar.fas"
   run "diff #{last_stdout} #{$testdata}foobar.fas"
 end
 
 Name "gt extractseq test '(foo'"
 Keywords "gt_extractseq"
 Test do
-  run_test("#{$bin}gt extractseq -match '(foo' #{$testdata}foo.fas", :retval => 1)
+  FileUtils.copy "#{$testdata}foo.fas", "."
+  run_test("#{$bin}gt extractseq -match '(foo' foo.fas", :retval => 1)
 end
 
 Name "gt extractseq test corrupt"
@@ -77,7 +84,8 @@ end
 Name "gt extractseq -frompos"
 Keywords "gt_extractseq"
 Test do
-  run_test "#{$bin}gt extractseq -frompos 5 -topos 12 #{$testdata}foobar.fas"
+  FileUtils.copy "#{$testdata}foobar.fas", "."
+  run_test "#{$bin}gt extractseq -frompos 5 -topos 12 foobar.fas"
   run "diff #{last_stdout} #{$testdata}frompos.fas"
 end
 
@@ -92,7 +100,8 @@ end
 Name "gt extractseq -frompos (fail 1)"
 Keywords "gt_extractseq"
 Test do
-  run_test "#{$bin}gt extractseq -frompos 5 -topos 17 #{$testdata}foobar.fas",
+  FileUtils.copy "#{$testdata}foobar.fas", "."
+  run_test "#{$bin}gt extractseq -frompos 5 -topos 17 foobar.fas",
            :retval => 1
   grep last_stderr, "larger than"
 end
@@ -108,7 +117,8 @@ end
 Name "gt extractseq marker.fas"
 Keywords "gt_extractseq"
 Test do
-  run_test "#{$bin}gt extractseq -frompos 21 -topos 40 #{$testdata}marker.fas"
+  FileUtils.copy "#{$testdata}marker.fas", "."
+  run_test "#{$bin}gt extractseq -frompos 21 -topos 40 marker.fas"
   run "diff #{last_stdout} #{$testdata}marker.out"
 end
 
