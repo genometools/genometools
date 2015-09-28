@@ -150,17 +150,19 @@ static void determineCtab0(GtUword *Ctab, GtScoreHandler *scorehandler,
   {
     repl = gt_scorehandler_get_replacement(scorehandler,
                            vseq0, useq[ustart+rowindex]);
+
     if (repl == 0)
     {
       Ctab[0] = rowindex;
       return;
     }
-    if (repl < mincost)
+    if (repl <= mincost)
     {
-      repl = mincost;
+      mincost = repl;
       Ctab[0] = rowindex;
     }
   }
+
   if (mincost > 2 * gt_scorehandler_get_gapscore(scorehandler))
   {
     Ctab[0] = (Ctab[1] > 0) ?  Ctab[1]-1 : 0;
