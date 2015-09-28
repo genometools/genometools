@@ -15,7 +15,7 @@ searchfiles = {"#{$testdata}condenseq/varlen_0.01_50.fas" =>
 
 largefiles = {}
 if $gttestdata
-  largefiles["#{$gttestdata}condenseq/yeastproteomes.fas"] = [100,3000,10000,-1,-1]
+  largefiles["#{$gttestdata}condenser/yeastproteomes.fas"] = [100,3000,10000,-1,-1]
 end
 
 desc_files = {"#{$testdata}condenseq/varlen_200.fas" => [100,3000,10000],

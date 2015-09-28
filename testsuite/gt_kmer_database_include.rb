@@ -19,8 +19,8 @@ files_kmersize = ["#{$testdata}TTT-small.fna"]
 
 file_big = []
 if $gttestdata
-  files_big = ["#{$gttestdata}condenseq/varlen_0.01_50.fas",
-               "#{$gttestdata}condenseq/varlen_0.01_200.fas"]
+  files_big = ["#{$testdata}condenseq/varlen_0.01_50.fas",
+               "#{$testdata}condenseq/varlen_0.01_200.fas"]
 end
 
 1.step(7, 3) do |i|

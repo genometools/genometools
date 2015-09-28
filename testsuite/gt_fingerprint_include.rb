@@ -35,7 +35,7 @@ Keywords "gt_fingerprint"
 Test do
   FileUtils.copy "#{$testdata}U89959_ests.fas", "."
   run "cat #{$testdata}U89959_ests.checklist | #{$memcheck} #{$bin}gt " +
-      "fingerprint -check - #{$testdata}U89959_ests.fas"
+      "fingerprint -check - U89959_ests.fas"
 end
 
 Name "fingerprint -check (failure)"
