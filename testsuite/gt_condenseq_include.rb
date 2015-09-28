@@ -1,4 +1,5 @@
 require 'open3'
+require 'fileutils'
 
 files = {"#{$testdata}condenseq/unique_encseq_test.fas" => [14,7,41,4,2],
          "#{$testdata}tRNA.dos.fas" => [71,100,300, -1,-1],
@@ -44,7 +45,8 @@ Keywords "gt_condenseq description"
 Test do
   desc_files.each_pair do |file, info|
     basename = File.basename(file)
-    run_test "#{$bin}gt seqfilter -o #{basename}_10th.fas -step 10 #{file}"
+    FileUtils.copy "#{file}", "."
+    run_test "#{$bin}gt seqfilter -o #{basename}_10th.fas -step 10 #{basename}"
     run_test "#{$bin}gt encseq encode -indexname #{basename}_10th " \
       "-md5 no " \
       "#{basename}_10th.fas"
