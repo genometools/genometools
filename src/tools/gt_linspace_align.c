@@ -26,10 +26,12 @@
 #include "core/fasta_reader_rec.h"
 #include "core/ma.h"
 #include "core/minmax.h"
+#include "core/spacecalc.h"
 #include "core/score_matrix.h"
 #include "core/str.h"
 #include "core/str_api.h"
 #include "core/str_array.h"
+#include "core/timer_api.h"
 #include "core/types_api.h"
 #include "core/unused_api.h"
 #include "extended/diagonalbandalign.h"
@@ -224,7 +226,7 @@ static GtOptionParser* gt_linspace_align_option_parser_new(void *tool_arguments)
   gt_option_exclude(optionlocal, optionglobal);
   gt_option_exclude(optionlinearcosts, optionaffinecosts);
   gt_option_exclude(optiondna, optionprotein);
-  gt_option_imply_either_2(optionfiles, optionglobal, optionfiles);
+  gt_option_imply_either_2(optionfiles, optionglobal, optionlocal);
   gt_option_imply_either_2(optiondna, optionstrings, optionfiles);
   gt_option_imply_either_2(optionstrings, optionglobal, optionlocal);
   gt_option_imply_either_2(optionprotein, optionstrings, optionfiles);
@@ -249,7 +251,7 @@ static GtOptionParser* gt_linspace_align_option_parser_new(void *tool_arguments)
   return op;
 }
 
-static int gt_linspace_align_arguments_check(GT_UNUSED int rest_argc,
+static int gt_linspace_align_arguments_check(int rest_argc,
                                              void *tool_arguments,
                                              GtError *err)
 {
@@ -498,7 +500,8 @@ static int alignment_with_linear_gap_costs(GtLinspaceArguments *arguments,
                                            GtAlignment *align,
                                            LinspaceManagement *spacemanager,
                                            GtSequences *sequences1,
-                                           GtSequences *sequences2)
+                                           GtSequences *sequences2,
+                                           GtTimer *linspacetimer)
 {
   GtUchar *useq, *vseq, wildcardshow;
   GtUword i, j, ulen, vlen;
@@ -508,6 +511,9 @@ static int alignment_with_linear_gap_costs(GtLinspaceArguments *arguments,
   gt_error_check(err);
   GtAlphabet *alphabet = gt_scorehandler_get_alphabet(scorehandler);
   wildcardshow = gt_alphabet_wildcard_show(alphabet);
+
+  if (linspacetimer != NULL)
+    gt_timer_start(linspacetimer);
 
   for (i = 0; i < sequences1->size; i++)
   {
@@ -593,6 +599,9 @@ static int alignment_with_linear_gap_costs(GtLinspaceArguments *arguments,
       }
     }
   }
+  if (linspacetimer != NULL)
+    gt_timer_stop(linspacetimer);
+
   if (!had_err && arguments->wildcardshow)
     printf("wildcards are represented by %c\n", wildcardshow);
 
@@ -618,6 +627,7 @@ static int alignment_with_affine_gap_costs(GtLinspaceArguments *arguments,
   gt_error_check(err);
   GtAlphabet *alphabet = gt_scorehandler_get_alphabet(scorehandler);
   wildcardshow =  gt_alphabet_wildcard_show(alphabet);
+
   for (i = 0; i < sequences1->size; i++)
   {
     ulen = gt_str_length(sequences1->seqarray[i]);
@@ -803,6 +813,7 @@ static int gt_linspace_align_runner(GT_UNUSED int argc,
   GtSequences *sequences1, *sequences2;
   LinspaceManagement *spacemanager;
   GtScoreHandler *scorehandler = NULL;
+  GtTimer *linspacetimer = NULL;
 
   gt_error_check(err);
   gt_assert(arguments);
@@ -846,13 +857,19 @@ static int gt_linspace_align_runner(GT_UNUSED int argc,
     }
   }
 
+  if (arguments->spacetime)
+  {
+    linspacetimer = gt_timer_new();
+  }
+
   /* alignment functions with linear gap costs */
   if (!had_err && gt_str_array_size(arguments->linearcosts) > 0)
   {
     had_err  = alignment_with_linear_gap_costs(arguments, err, scorehandler,
                                                left_dist, right_dist,
                                                align, spacemanager,
-                                               sequences1, sequences2);
+                                               sequences1, sequences2,
+                                               linspacetimer);
   }/* alignment functions with affine gap costs */
   else if (!had_err && gt_str_array_size(arguments->affinecosts) > 0)
   {
@@ -869,9 +886,12 @@ static int gt_linspace_align_runner(GT_UNUSED int argc,
 
   if (!had_err && arguments->spacetime)
   {
-    printf("# space peak: "GT_ZU" Bytes\n",
-                             gt_linspaceManagement_get_spacepeak(spacemanager));
-    /*TODO: add time*/
+    printf("# combined space peak in kilobytes: %f\n",GT_KILOBYTES(
+                            gt_linspaceManagement_get_spacepeak(spacemanager)));
+    printf("# TIME");
+
+    gt_timer_show_formatted(linspacetimer," overall " GT_WD ".%02ld\n",stdout);
+    gt_timer_delete(linspacetimer);
   }
   gt_linspaceManagement_delete(spacemanager);
   return had_err;
