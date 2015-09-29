@@ -971,11 +971,13 @@ static int gt_searchforLTRs(GtLTRharvestStream *lo,
       gt_assert(substrstart_u >= seqstart);
       gt_assert(substrstart_v >= seqstart && substrstart_v >= substrstart_u);
 
-      gt_seqabstract_reinit_encseq(sa_useq,
+      gt_seqabstract_reinit_encseq(false,GT_READMODE_FORWARD,
+                                   sa_useq,
                                    lo->encseq,
                                    alilen,
                                    substrstart_u);
-      gt_seqabstract_reinit_encseq(sa_vseq,
+      gt_seqabstract_reinit_encseq(false,GT_READMODE_FORWARD,
+                                   sa_vseq,
                                    lo->encseq,
                                    alilen,
                                    substrstart_v);
@@ -1011,11 +1013,13 @@ static int gt_searchforLTRs(GtLTRharvestStream *lo,
       substrstart_u = repeatptr->pos1 + repeatptr->len;
       substrstart_v = repeatptr->pos1 + repeatptr->offset + repeatptr->len;
 
-      gt_seqabstract_reinit_encseq(sa_useq,
+      gt_seqabstract_reinit_encseq(true,GT_READMODE_FORWARD,
+                                   sa_useq,
                                    lo->encseq,
                                    alilen,
                                    substrstart_u);
-      gt_seqabstract_reinit_encseq(sa_vseq,
+      gt_seqabstract_reinit_encseq(true,GT_READMODE_FORWARD,
+                                   sa_vseq,
                                    lo->encseq,
                                    alilen,
                                    substrstart_v);
@@ -1111,12 +1115,16 @@ static int gt_searchforLTRs(GtLTRharvestStream *lo,
                                             boundaries.leftLTR_3);
     gt_encseq_extract_encoded(encseq, vseq, boundaries.rightLTR_5,
                                             boundaries.rightLTR_3);
-    gt_seqabstract_reinit_gtuchar(sa_useq, useq, ulen, 0);
-    gt_seqabstract_reinit_gtuchar(sa_vseq, vseq, vlen, 0);
+    gt_seqabstract_reinit_gtuchar(true,GT_READMODE_FORWARD,
+                                  sa_useq, useq, ulen, 0);
+    gt_seqabstract_reinit_gtuchar(true,GT_READMODE_FORWARD,
+                                  sa_vseq, vseq, vlen, 0);
 #else
-    gt_seqabstract_reinit_encseq(sa_useq, lo->encseq, ulen,
+    gt_seqabstract_reinit_encseq(true,GT_READMODE_FORWARD,
+                                 sa_useq, lo->encseq, ulen,
                                  boundaries.leftLTR_5);
-    gt_seqabstract_reinit_encseq(sa_vseq, lo->encseq, vlen,
+    gt_seqabstract_reinit_encseq(true,GT_READMODE_FORWARD,
+                                 sa_vseq, lo->encseq, vlen,
                                  boundaries.rightLTR_5);
 #endif
     edist = greedyunitedist(frontresource,sa_useq,sa_vseq);

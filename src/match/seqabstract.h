@@ -31,7 +31,9 @@ GtSeqabstract* gt_seqabstract_new_empty(void);
 /* Creates new <GtSeqabstract> object from <string>, starting at <startpos> with
    length <len>, <string> should be long enough and <startpos> within <string>.
    Ownership of <string> stays with the caller. */
-GtSeqabstract* gt_seqabstract_new_gtuchar(const GtUchar *string,
+GtSeqabstract* gt_seqabstract_new_gtuchar(bool rightextension,
+                                          GtReadmode readmode,
+                                          const GtUchar *string,
                                           GtUword len,
                                           GtUword startpos,
                                           GtUword totallength);
@@ -40,19 +42,25 @@ GtSeqabstract* gt_seqabstract_new_gtuchar(const GtUchar *string,
    length <len>, fails if <startpos> is out of bounds, or
    <startpos> + <len> extends <encseq>.
  */
-GtSeqabstract* gt_seqabstract_new_encseq(const GtEncseq *encseq,
+GtSeqabstract* gt_seqabstract_new_encseq(bool rightextension,
+                                         GtReadmode readmode,
+                                         const GtEncseq *encseq,
                                          GtUword len,
                                          GtUword startpos);
 
 /* reinitialize <sa> with <string> starting at <startpos> with length <len> */
-void           gt_seqabstract_reinit_gtuchar(GtSeqabstract *sa,
+void           gt_seqabstract_reinit_gtuchar(bool rightextension,
+                                             GtReadmode readmode,
+                                             GtSeqabstract *sa,
                                              const GtUchar *string,
                                              GtUword len,
                                              GtUword startpos,
                                              GtUword totallength);
 
 /* reinitialize <sa> with <encseq> starting at <startpos> with length <len> */
-void           gt_seqabstract_reinit_encseq(GtSeqabstract *sa,
+void           gt_seqabstract_reinit_encseq(bool rightextension,
+                                            GtReadmode readmode,
+                                            GtSeqabstract *sa,
                                             const GtEncseq *encseq,
                                             GtUword len,
                                             GtUword startpos);
@@ -77,7 +85,5 @@ void           gt_seqabstract_delete(GtSeqabstract *sa);
 /* set the readmode flag which is GT_READMODE_FORWARD by default */
 
 void gt_seqabstract_readmode_set(GtSeqabstract *sa,GtReadmode readmode);
-
-char *gt_seqabstract_get(bool rightextension,const GtSeqabstract *seq);
 
 #endif

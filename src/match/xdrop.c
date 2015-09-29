@@ -591,6 +591,7 @@ int gt_xdrop_unit_test(GT_UNUSED GtError *err)
   GtXdropscore dropscore = (GtXdropscore) 12;
   GtMultieoplist *edit_ops = NULL;
   GtAlignment *alignment;
+  bool rightextension = true;
 
   gt_error_check(err);
 
@@ -598,8 +599,10 @@ int gt_xdrop_unit_test(GT_UNUSED GtError *err)
     resources = gt_xdrop_resources_new(&score[s]);
     for (i = 0; i < GT_XDROP_NUM_OF_TESTS && !had_err; ++i) {
       for (j = 0; j < GT_XDROP_NUM_OF_TESTS; ++j) {
-        useq = gt_seqabstract_new_gtuchar(strings[i], lengths[i], 0,lengths[i]);
-        vseq = gt_seqabstract_new_gtuchar(strings[j], lengths[j], 0,lengths[j]);
+        useq = gt_seqabstract_new_gtuchar(rightextension,GT_READMODE_FORWARD,
+                                          strings[i], lengths[i], 0,lengths[i]);
+        vseq = gt_seqabstract_new_gtuchar(rightextension, GT_READMODE_FORWARD,
+                                          strings[j], lengths[j], 0,lengths[j]);
         gt_evalxdroparbitscoresextend(true, &best, resources, useq, vseq,
                                       dropscore);
 
