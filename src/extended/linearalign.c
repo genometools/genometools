@@ -252,6 +252,14 @@ GtUword gt_calc_linearalign(LinspaceManagement *spacemanager,
   {
     return construct_trivial_deletion_alignment(align,ulen,gapcost);
   }
+  else if (vlen == 1UL)
+  {
+    gt_linspaceManagement_check(spacemanager,(ulen+1)*(vlen+1)-1,ulen,
+                                sizeof (*EDtabcolumn), sizeof (EDtabcolumn), 0);
+    return alignment_in_square_space_generic(spacemanager, align,
+                                             useq, ustart, ulen,
+                                             vseq, vstart, vlen, scorehandler);
+  }
   else if (gt_linspaceManagement_checksquare(spacemanager, ulen, vlen,
                                              sizeof (*EDtabcolumn),
                                              sizeof (*Rtabcolumn)))
@@ -491,6 +499,17 @@ GtWord gt_computelinearspace_local_generic(LinspaceManagement *spacemanager,
   {
      /* empty alignment */
     return 0;
+  }
+  else if (vlen == 1UL)
+  {
+    gt_linspaceManagement_check_local(spacemanager,
+                                    (ulen+1)*(vlen+1)-1, ulen,
+                                    sizeof (GtWord),
+                                    sizeof (GtWord *));
+    return alignment_in_square_space_local_generic(spacemanager, align,
+                                                   useq, ustart, ulen,
+                                                   vseq, vstart, vlen,
+                                                   scorehandler);
   }
   else if (gt_linspaceManagement_checksquare_local(spacemanager, ulen, vlen,
                                                    sizeof (*Ltabcolumn),

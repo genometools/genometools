@@ -25,12 +25,12 @@ struct LinspaceManagement{
   void             *valueTabspace,
                    *rTabspace,
                    *crosspointTabspace;
-  GtUword          valueTabLen,
-                   rTabLen,
-                   crosspointTabLen,
-                   timesquarefactor,
-                   ulen;
-  size_t           spacepeak; /*space in bytes*/
+  GtUword          ulen,
+                   timesquarefactor;
+  size_t           valueTabsize,
+                   rTabsize,
+                   crosspointTabsize,
+                   spacepeak; /*sum of space in bytes*/
   Gtmaxcoordvalue *maxscoordvaluespace;
 };
 
@@ -42,9 +42,9 @@ LinspaceManagement* gt_linspaceManagement_new()
   spacemanager->rTabspace = NULL;
   spacemanager->crosspointTabspace = NULL;
   spacemanager->maxscoordvaluespace = NULL;
-  spacemanager->valueTabLen = 0;
-  spacemanager->rTabLen = 0;
-  spacemanager->crosspointTabLen = 0;
+  spacemanager->valueTabsize = 0;
+  spacemanager->rTabsize = 0;
+  spacemanager->crosspointTabsize = 0;
   spacemanager->timesquarefactor = 1;
   spacemanager->ulen = 0;
   spacemanager->spacepeak = 0;
@@ -85,23 +85,25 @@ static void gt_linspaceManagement_check_generic(LinspaceManagement *spacemanager
     spacemanager = gt_new_linspaceManagement();*/
 
   gt_assert(spacemanager != NULL);
-  gt_assert(spacemanager->valueTabLen == spacemanager->rTabLen);
 
-  if (spacemanager->valueTabLen < ulen+1)
+  if (spacemanager->valueTabsize < (ulen+1)*valuesize)
   {
     spacemanager->valueTabspace = gt_realloc(spacemanager->valueTabspace,
                                             (ulen+1)*valuesize);
-    spacemanager->valueTabLen = ulen+1;
+    spacemanager->valueTabsize = (ulen+1)*valuesize;
+  }
 
+  if (spacemanager->rTabsize < (ulen+1)*rtabsize)
+  {
     spacemanager->rTabspace = gt_realloc(spacemanager->rTabspace,
                                         (ulen+1)*rtabsize);
-    spacemanager->rTabLen = ulen+1;
+    spacemanager->rTabsize = (ulen+1)*rtabsize;
   }
-  if (crosspointsize && spacemanager->crosspointTabLen < vlen+1)
+  if (spacemanager->crosspointTabsize < (vlen+1)*crosspointsize)
   {
     spacemanager->crosspointTabspace =
            gt_realloc(spacemanager->crosspointTabspace,(vlen+1)*crosspointsize);
-    spacemanager->crosspointTabLen = vlen+1;
+    spacemanager->crosspointTabsize = (vlen+1)*crosspointsize;
   }
   if (local)
   {
@@ -109,14 +111,15 @@ static void gt_linspaceManagement_check_generic(LinspaceManagement *spacemanager
       spacemanager->maxscoordvaluespace = gt_max_new();
     else
       gt_max_reset(spacemanager->maxscoordvaluespace);
-
-    localspace = 2 * sizeof (GtUwordPair)+ sizeof (GtWord);
-            /* = sizeof (Gtmaxcoordvalue)*/
   }
+  if (spacemanager->maxscoordvaluespace != NULL)
+    localspace = 2 * sizeof (GtUwordPair) + sizeof (GtWord);
+            /* = sizeof (Gtmaxcoordvalue)*/
 
   /* determine space peak */
-  space = (ulen+1) * valuesize + (ulen +1) * rtabsize
-        + (vlen+1) * crosspointsize + localspace;
+  space = spacemanager->valueTabsize + spacemanager->rTabsize +
+          spacemanager->crosspointTabsize + localspace;
+
   if (space > spacemanager->spacepeak)
     spacemanager->spacepeak = space;
 }
@@ -157,10 +160,9 @@ static bool checksquare(LinspaceManagement *spacemanager,
   gt_assert(spacemanager);
 
   TSfactor = spacemanager->timesquarefactor;
-  if ((ulen+1)*(vlen+1) <= spacemanager->valueTabLen)
+  if ((ulen+1)*(vlen+1)*valuesize <= spacemanager->valueTabsize)
     return true;
-  else if (ulen == 1|| vlen == 1 ||
-          ((ulen+1)*(vlen+1) <= (spacemanager->ulen+1)*TSfactor))
+  else if ((ulen+1)*(vlen+1) <= (spacemanager->ulen+1)*TSfactor)
   {
     if (!local)
     {
@@ -226,11 +228,11 @@ void *gt_linspaceManagement_get_crosspointTabspace(const LinspaceManagement
   return NULL;
 }
 
-GtUword gt_linspaceManagement_get_valueTabLen(const LinspaceManagement
+size_t gt_linspaceManagement_get_valueTabsize(const LinspaceManagement
                                                                   *spacemanager)
 {
   gt_assert(spacemanager != NULL);
-  return spacemanager->valueTabLen;
+  return spacemanager->valueTabsize;
 }
 
 /* space for Gtmaxcoordvalue struct */
@@ -244,7 +246,7 @@ void *gt_linspaceManagement_get_maxspace(const LinspaceManagement *spacemanager)
 static inline bool check(const LinspaceManagement *spacemanager,
                          GtUword ulen, GtUword vlen)
 {
-  return ((ulen+1)*(vlen+1) <= spacemanager->valueTabLen);
+  return ((ulen+1)*(vlen+1)*sizeof(GtUword) <= spacemanager->valueTabsize);
 }
 
 GtUword **gt_linspaceManagement_change_to_square(LinspaceManagement
@@ -255,8 +257,8 @@ GtUword **gt_linspaceManagement_change_to_square(LinspaceManagement
   GtUword idx;
   gt_assert(check(spacemanager, ulen, vlen));
 
-  E=gt_linspaceManagement_get_valueTabspace(spacemanager);
-  *E=gt_linspaceManagement_get_rTabspace(spacemanager);
+  E = gt_linspaceManagement_get_rTabspace(spacemanager);
+  *E = gt_linspaceManagement_get_valueTabspace(spacemanager);
 
   for (idx=1;idx<ulen+1;idx++)
     E[idx]=E[idx-1]+vlen+1;

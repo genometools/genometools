@@ -65,9 +65,6 @@ void gt_linspaceManagement_set_ulen(LinspaceManagement *spacemanager,
 void *gt_linspaceManagement_get_valueTabspace(const LinspaceManagement
                                                                  *spacemanager);
 
-GtUword gt_linspaceManagement_get_valueTabLen(const LinspaceManagement
-                                                                 *spacemanager);
-
 void *gt_linspaceManagement_get_rTabspace(const LinspaceManagement
                                                                  *spacemanager);
 
@@ -82,6 +79,8 @@ GtUword **gt_linspaceManagement_change_to_square(LinspaceManagement
                                                  *spacemanager,
                                                  GtUword ulen, GtUword vlen);
 
+size_t gt_linspaceManagement_get_valueTabsize(const LinspaceManagement
+                                                                 *spacemanager);
 void gt_linspaceManagement_set_TSfactor(LinspaceManagement *spacemanager,
                                         GtUword timesquarefactor);
 

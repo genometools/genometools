@@ -213,11 +213,11 @@ GtWord gt_affinealign_with_Management(LinspaceManagement *spacemanager,
   GtUword idx;
   gt_assert(u && v && spacemanager && scorehandler);
 
-  gt_assert(gt_linspaceManagement_get_valueTabLen(spacemanager) >=
-                                                            (ulen+1)*(vlen+1));
+  gt_assert((ulen+1)*(vlen+1)*sizeof(**dptable) <=
+             gt_linspaceManagement_get_valueTabsize(spacemanager));
 
-  dptable = gt_linspaceManagement_get_valueTabspace(spacemanager);
-  *dptable = gt_linspaceManagement_get_rTabspace(spacemanager);
+  dptable = gt_linspaceManagement_get_rTabspace(spacemanager);
+  *dptable = gt_linspaceManagement_get_valueTabspace(spacemanager);
 
   for (idx = 1; idx < ulen + 1; idx++)
     dptable[idx] = dptable[idx-1] + vlen + 1;
@@ -285,12 +285,11 @@ void affine_ctab_in_square_space(LinspaceManagement *spacemanager,
   AffinealignDPentry **dptable;
   GtUword idx;
   gt_assert(Ctab && spacemanager && scorehandler);
+  gt_assert((ulen+1)*(vlen+1)*sizeof(**dptable) <=
+             gt_linspaceManagement_get_valueTabsize(spacemanager));
 
-  gt_assert(gt_linspaceManagement_get_valueTabLen(spacemanager) >=
-                                                            (ulen+1)*(vlen+1));
-
-  dptable = gt_linspaceManagement_get_valueTabspace(spacemanager);
-  *dptable = gt_linspaceManagement_get_rTabspace(spacemanager);
+  dptable = gt_linspaceManagement_get_rTabspace(spacemanager);
+  *dptable = gt_linspaceManagement_get_valueTabspace(spacemanager);
 
   for (idx = 1; idx < ulen+1; idx++)
     dptable[idx] = dptable[idx-1] + vlen + 1;
@@ -528,10 +527,11 @@ GtWord affinealign_in_square_space_local_generic(LinspaceManagement *space,
   else
   {
     /*use it in lineraspace context*/
-    gt_assert(gt_linspaceManagement_get_valueTabLen(space)>=(ulen+1)*(vlen+1));
+    gt_assert((ulen+1)*(vlen+1)*sizeof(**Atabcolumn) <=
+               gt_linspaceManagement_get_valueTabsize(space));
 
-    Atabcolumn = gt_linspaceManagement_get_valueTabspace(space);
-    *Atabcolumn = gt_linspaceManagement_get_rTabspace(space);
+    Atabcolumn = gt_linspaceManagement_get_rTabspace(space);
+    *Atabcolumn = gt_linspaceManagement_get_valueTabspace(space);
 
     GtUword idx;
     for (idx = 1;idx < ulen+1;idx++)
