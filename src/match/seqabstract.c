@@ -37,10 +37,10 @@ typedef enum GtSeqabstractType {
 
 struct GtSeqabstract
 {
-  GtUword len, startpos, totallength;
+  GtUword len, offset, totallength;
   GtSeqabstractType seqtype;
-  GtReadmode readmode;
-  bool rightextension;
+  bool read_seq_left2right,
+       dir_is_complement;
   union
   {
     const GtUchar *string;
@@ -53,13 +53,31 @@ GtSeqabstract *gt_seqabstract_new_empty(void)
   GtSeqabstract *sa = gt_malloc(sizeof *sa);
 
   sa->seqtype = GT_SEQABSTRACT_UNDEF;
-  sa->len = 0;
+  sa->len = sa->offset = 0;
+  sa->read_seq_left2right = true;
+  sa->dir_is_complement = false;
   sa->totallength = GT_SEQABSTRACT_TOTALLENGTH_UNDEF;
-  sa->readmode = GT_READMODE_FORWARD; /* default read mode */
-  sa->rightextension = true;
-  sa->startpos = 0;
   sa->seq.string = NULL;
   return sa;
+}
+
+static void gt_seqabstract_init(GtSeqabstract *sa,
+                                bool rightextension,
+                                GtReadmode readmode,
+                                GtUword len,
+                                GtUword startpos,
+                                GtUword totallength)
+{
+  sa->len = len;
+  sa->offset = gt_extend_offset(rightextension,
+                                readmode,
+                                totallength,
+                                startpos,
+                                len,
+                                GT_SEQABSTRACT_TOTALLENGTH_UNDEF);
+  sa->read_seq_left2right = gt_extend_read_seq_left2right(rightextension,
+                                                          readmode);
+  sa->dir_is_complement = GT_ISDIRCOMPLEMENT(readmode) ? true : false;
 }
 
 void gt_seqabstract_reinit_gtuchar(bool rightextension,
@@ -73,12 +91,14 @@ void gt_seqabstract_reinit_gtuchar(bool rightextension,
   gt_assert(sa != NULL && totallength != GT_SEQABSTRACT_TOTALLENGTH_UNDEF);
 
   sa->seqtype = GT_SEQABSTRACT_STRING;
-  sa->len = len;
   sa->totallength = totallength;
-  sa->startpos = startpos;
   sa->seq.string = string;
-  sa->rightextension = rightextension;
-  sa->readmode = readmode;
+  gt_seqabstract_init(sa,
+                      rightextension,
+                      readmode,
+                      len,
+                      startpos,
+                      totallength);
 }
 
 GtSeqabstract *gt_seqabstract_new_gtuchar(bool rightextension,
@@ -104,12 +124,14 @@ void gt_seqabstract_reinit_encseq(bool rightextension,
 {
   gt_assert(sa != NULL);
   sa->seqtype = GT_SEQABSTRACT_ENCSEQ;
-  sa->len = len;
   sa->totallength = gt_encseq_total_length(encseq);
-  sa->startpos = startpos;
   sa->seq.encseq = encseq;
-  sa->rightextension = rightextension;
-  sa->readmode = readmode;
+  gt_seqabstract_init(sa,
+                      rightextension,
+                      readmode,
+                      len,
+                      startpos,
+                      sa->totallength);
 }
 
 GtSeqabstract *gt_seqabstract_new_encseq(bool rightextension,
@@ -138,27 +160,19 @@ void gt_seqabstract_delete(GtSeqabstract *sa)
   }
 }
 
-static GtUchar gt_seqabstract_get_encoded_char(bool rightextension,
+static GtUchar gt_seqabstract_get_encoded_char(GT_UNUSED bool rightextension,
                                                const GtSeqabstract *seq,
                                                GtUword idx)
 {
-  GtUword accesspos, offset;
+  GtUword accesspos;
 
-  gt_assert(rightextension == seq->rightextension);
-  offset = gt_extend_offset(rightextension,
-                            seq->readmode,
-                            seq->totallength,
-                            seq->startpos,
-                            seq->len,
-                            GT_SEQABSTRACT_TOTALLENGTH_UNDEF);
-
-  if (gt_extend_read_seq_left2right(rightextension,seq->readmode))
+  if (seq->read_seq_left2right)
   {
-    accesspos = offset + idx;
+    accesspos = seq->offset + idx;
   } else
   {
-    gt_assert(offset >= idx);
-    accesspos = offset - idx;
+    gt_assert(seq->offset >= idx);
+    accesspos = seq->offset - idx;
   }
   gt_assert(accesspos < seq->totallength);
   if (seq->seqtype == GT_SEQABSTRACT_STRING)
@@ -189,7 +203,7 @@ GtUword gt_seqabstract_lcp(bool rightextension,
     {
       break;
     }
-    if (GT_ISDIRCOMPLEMENT(useq->readmode))
+    if (useq->read_seq_left2right)
     {
       u_cc = GT_COMPLEMENTBASE(u_cc);
     }
@@ -198,7 +212,7 @@ GtUword gt_seqabstract_lcp(bool rightextension,
     {
       break;
     }
-    if (GT_ISDIRCOMPLEMENT(vseq->readmode))
+    if (vseq->read_seq_left2right)
     {
       v_cc = GT_COMPLEMENTBASE(v_cc);
     }
@@ -216,11 +230,6 @@ char *gt_seqabstract_get(bool rightextension,const GtSeqabstract *seq)
   char *buffer = malloc(sizeof *buffer * (seq->len+1));
   char *map = "acgt";
 
-  gt_assert(rightextension == seq->rightextension);
-  printf("# readmode=%s,rightextension=%s,totallength=" GT_WU ",len=" GT_WU
-         ",offset=" GT_WU "\n",
-           gt_readmode_show(seq->readmode),rightextension ? "true" : "false",
-          seq->totallength,seq->len,seq->startpos);
   for (idx = 0; idx < seq->len; idx++)
   {
     GtUchar cc = gt_seqabstract_get_encoded_char(rightextension,seq,idx);
