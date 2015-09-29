@@ -140,6 +140,16 @@ Test do
     run "#{$scriptsdir}cmp_db_query_exch.rb U8-vs-at1MB.#{ext}.matches " +
         "at1MB-vs-U8.#{ext}.matches 15 16"
   end
+  [12,13,14].each do |seedlength|
+     run_test "#{$bin}gt repfind -seedlength #{seedlength} -extendgreedy -ii U8"
+     run "mv #{last_stdout} U8-selfcompare.matches"
+     run_test "#{$bin}gt repfind -seedlength #{seedlength} -extendgreedy -ii U8 "
+              "-cam encseq"
+     run "cmp -s #{last_stdout} U8-selfcompare.matches"
+     run_test "#{$bin}gt repfind -seedlength #{seedlength} -extendgreedy -ii U8 "
+              "-cam encseq_reader"
+     run "cmp -s #{last_stdout} U8-selfcompare.matches"
+  end
 end
 
 Name "gt repfind extend self vs query"
