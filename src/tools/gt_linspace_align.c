@@ -617,7 +617,8 @@ static int alignment_with_affine_gap_costs(GtLinspaceArguments *arguments,
                                            GtAlignment *align,
                                            LinspaceManagement *spacemanager,
                                            GtSequences *sequences1,
-                                           GtSequences *sequences2)
+                                           GtSequences *sequences2,
+                                           GtTimer *linspacetimer)
 {
   int had_err = 0;
   GtUchar *useq, *vseq, wildcardshow;
@@ -628,6 +629,8 @@ static int alignment_with_affine_gap_costs(GtLinspaceArguments *arguments,
   GtAlphabet *alphabet = gt_scorehandler_get_alphabet(scorehandler);
   wildcardshow =  gt_alphabet_wildcard_show(alphabet);
 
+  if (linspacetimer != NULL)
+    gt_timer_start(linspacetimer);
   for (i = 0; i < sequences1->size; i++)
   {
     ulen = gt_str_length(sequences1->seqarray[i]);
@@ -636,7 +639,7 @@ static int alignment_with_affine_gap_costs(GtLinspaceArguments *arguments,
     if (had_err)
       return 1;
 
-    for (j = 0; j< sequences2->size; j++)
+    for (j = 0; j < sequences2->size; j++)
     {
       vlen = gt_str_length(sequences2->seqarray[j]);
       vseq = (GtUchar*) gt_str_get(sequences2->seqarray[j]);
@@ -713,6 +716,9 @@ static int alignment_with_affine_gap_costs(GtLinspaceArguments *arguments,
       }
     }
   }
+  if (linspacetimer != NULL)
+    gt_timer_stop(linspacetimer);
+
   if (!had_err && arguments->wildcardshow)
     printf("wildcards are represented by %c\n", wildcardshow);
 
@@ -876,7 +882,8 @@ static int gt_linspace_align_runner(GT_UNUSED int argc,
     had_err = alignment_with_affine_gap_costs(arguments, err, scorehandler,
                                               left_dist, right_dist,
                                               align, spacemanager,
-                                              sequences1, sequences2);
+                                              sequences1, sequences2,
+                                              linspacetimer);
   }
 
   gt_sequences_delete(sequences1);
