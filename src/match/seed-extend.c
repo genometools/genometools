@@ -150,6 +150,7 @@ static void gt_sesp_from_relative(GtSeedextendSeqpair *sesp,
                                   GtUword query_totallength,
                                   GtUword len)
 {
+  gt_assert(dbencseq != NULL);
   sesp->seedlen = len;
   sesp->dbseqnum = dbseqnum;
   sesp->dbseqstartpos = gt_encseq_seqstartpos(dbencseq,sesp->dbseqnum),
@@ -607,7 +608,7 @@ GtUword gt_minidentity2errorpercentage(GtUword minidentity)
     offset += snprintf(out + offset,maxstrlen - offset,FORMAT,VALUE)
 
 char *gt_seed_extend_params_keystring(bool use_greedy,
-                                      bool use_xdrop,
+                                      bool forxdrop,
                                       unsigned int seedlength,
                                       unsigned int userdefinedleastlength,
                                       GtUword minidentity,
@@ -620,13 +621,13 @@ char *gt_seed_extend_params_keystring(bool use_greedy,
   size_t maxstrlen = 256, offset = 0;
   char *out = gt_malloc(sizeof *out * (maxstrlen + 1));
 
-  if (use_greedy || use_xdrop)
+  if (use_greedy || forxdrop)
   {
     GT_SEED_EXTEND_PARAMS_APPEND("%s",use_greedy ? "greedy-" : "xdrop-");
   }
   GT_SEED_EXTEND_PARAMS_APPEND("%u",seedlength);
   GT_SEED_EXTEND_PARAMS_APPEND("-%u",userdefinedleastlength);
-  if (use_greedy || use_xdrop)
+  if (use_greedy || forxdrop)
   {
     GT_SEED_EXTEND_PARAMS_APPEND("-" GT_WU,100 -
                                  gt_minidentity2errorpercentage(minidentity));
@@ -646,7 +647,7 @@ char *gt_seed_extend_params_keystring(bool use_greedy,
     GT_SEED_EXTEND_PARAMS_APPEND("-" GT_WU,loc_perc_mat_history);
   } else
   {
-    if (use_xdrop)
+    if (forxdrop)
     {
       if (xdropbelowscore == 0)
       {

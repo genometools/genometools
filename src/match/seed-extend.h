@@ -324,7 +324,7 @@ GtUword gt_align_front_prune_edist(bool forward,
 GtUword gt_minidentity2errorpercentage(GtUword minidentity);
 
 char *gt_seed_extend_params_keystring(bool use_greedy,
-                                      bool use_xdrop,
+                                      bool forxdrop,
                                       unsigned int seedlength,
                                       unsigned int userdefinedleastlength,
                                       GtUword minidentity,
