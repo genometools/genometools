@@ -31,7 +31,7 @@ then
   for keyword in gt_idxlocali gt_chain2dim gt_greedyfwdmat \
                  gt_paircmp gt_patternmatch gt_ltrharvest\
                  gt_repfind gt_tallymer gt_uniquesub gt_genomediff \
-                 gt_readjoiner gt_linspace_align gt_seed_extend
+                 gt_readjoiner gt_linspace_align gt_seed_extend gt_condenseq
   do
     env -i GT_MEM_BOOKKEEPING=on ${program} \
          -keywords ${keyword} \

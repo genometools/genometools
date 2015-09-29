@@ -497,6 +497,7 @@ static void gt_greedy_extend_init(FTsequenceResources *ufsr,
                                   FTsequenceResources *vfsr,
                                   const GtEncseq *dbencseq,
                                   const GtUchar *query,
+                                  GtReadmode query_readmode,
                                   const GtUword query_totallength,
                                   GtGreedyextendmatchinfo *ggemi)
 {
@@ -519,7 +520,7 @@ static void gt_greedy_extend_init(FTsequenceResources *ufsr,
   {
     ggemi->encseq_r_in_v
       = gt_encseq_create_reader_with_readmode(dbencseq,
-                                              GT_READMODE_FORWARD,
+                                              query_readmode,
                                               0);
   }
   if (ggemi->db_totallength == GT_UWORD_MAX)
@@ -536,7 +537,7 @@ static void gt_greedy_extend_init(FTsequenceResources *ufsr,
                               ggemi->extend_char_access);
   gt_FTsequenceResources_init(vfsr,
                               dbencseq,
-                              GT_READMODE_FORWARD,
+                              query_readmode,
                               ggemi->encseq_r_in_v,
                               &ggemi->vsequence_cache,
                               query,
@@ -551,6 +552,7 @@ GtUword gt_align_front_prune_edist(bool forward,
                                    Fronttrace *front_trace,
                                    const GtEncseq *dbencseq,
                                    const GtUchar *query,
+                                   GtReadmode query_readmode,
                                    GtUword query_totallength,
                                    GtGreedyextendmatchinfo *ggemi,
                                    bool greedyextension,
@@ -563,7 +565,8 @@ GtUword gt_align_front_prune_edist(bool forward,
   FTsequenceResources ufsr, vfsr;
 
   gt_assert(ggemi != NULL);
-  gt_greedy_extend_init(&ufsr,&vfsr,dbencseq,query,query_totallength,ggemi);
+  gt_greedy_extend_init(&ufsr,&vfsr,dbencseq,query,query_readmode,
+                        query_totallength,ggemi);
   maxiterations = greedyextension ? 1 : ggemi->minmatchnum;
   gt_assert(best_polished_point != NULL);
   for (iteration = 0; iteration < maxiterations; iteration++)
@@ -708,19 +711,19 @@ static const GtQuerymatch *gt_extend_sesp(bool forxdrop,
   } else
   {
     greedyextendmatchinfo = processinfo_and_querymatchspaceptr->processinfo;
-    gt_greedy_extend_init(&ufsr,&vfsr,dbencseq, query, sesp->query_totallength,
-                          greedyextendmatchinfo);
+    gt_greedy_extend_init(&ufsr,&vfsr,dbencseq, query, sesp->query_readmode,
+                          sesp->query_totallength, greedyextendmatchinfo);
   }
   if (sesp->seedpos1 > sesp->dbseqstartpos &&
       sesp->seedpos2 > sesp->queryseqstartpos)
   { /* there is something to align on the left of the seed */
-    GtUword voffset;
+    GtUword uoffset, voffset;
 
     ulen = sesp->seedpos1 - sesp->dbseqstartpos;
+    uoffset = sesp->dbseqstartpos;
     if (forxdrop)
     {
-      gt_seqabstract_reinit_encseq(xdropmatchinfo->useq, dbencseq,ulen,
-                                 sesp->dbseqstartpos);
+      gt_seqabstract_reinit_encseq(xdropmatchinfo->useq, dbencseq,ulen,uoffset);
       gt_seqabstract_readmode_set(xdropmatchinfo->vseq,sesp->query_readmode);
     }
     if (query == NULL)
@@ -747,11 +750,11 @@ static const GtQuerymatch *gt_extend_sesp(bool forxdrop,
     if (forxdrop)
     {
       gt_evalxdroparbitscoresextend(false,
-                                  &xdropmatchinfo->best_left,
-                                  xdropmatchinfo->res,
-                                  xdropmatchinfo->useq,
-                                  xdropmatchinfo->vseq,
-                                  xdropmatchinfo->belowscore);
+                                    &xdropmatchinfo->best_left,
+                                    xdropmatchinfo->res,
+                                    xdropmatchinfo->useq,
+                                    xdropmatchinfo->vseq,
+                                    xdropmatchinfo->belowscore);
     } else
     {
       (void) front_prune_edist_inplace(false,
@@ -766,10 +769,10 @@ static const GtQuerymatch *gt_extend_sesp(bool forxdrop,
                                        greedyextendmatchinfo->
                                           maxalignedlendifference,
                                        &ufsr,
-                                       sesp->seedpos1 - 1,
+                                       uoffset,
                                        ulen,
                                        &vfsr,
-                                       sesp->seedpos2 - 1,
+                                       voffset,
                                        vlen);
     }
   } else

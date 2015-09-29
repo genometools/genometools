@@ -200,6 +200,7 @@ void gt_querymatchoutoptions_delete(
 static bool seededmatch2eoplist(GtQuerymatchoutoptions *querymatchoutoptions,
                                 const GtEncseq *encseq,
                                 const GtUchar *query,
+                                GtReadmode query_readmode,
                                 GtUword query_totallength,
                                 GtUword dbstart,
                                 GtUword dblen,
@@ -235,6 +236,7 @@ static bool seededmatch2eoplist(GtQuerymatchoutoptions *querymatchoutoptions,
                                    querymatchoutoptions->front_trace,
                                    encseq,
                                    query,
+                                   query_readmode,
                                    query_totallength,
                                    querymatchoutoptions->ggemi,
                                    greedyextension,
@@ -278,12 +280,13 @@ static bool seededmatch2eoplist(GtQuerymatchoutoptions *querymatchoutoptions,
                                      querymatchoutoptions->front_trace,
                                      encseq,
                                      query,
+                                     query_readmode,
                                      query_totallength,
                                      querymatchoutoptions->ggemi,
                                      greedyextension,
-                                     ustart,
+                                     dbstart,
                                      ulen,
-                                     vstart,
+                                     querystartabsolute,
                                      vlen) == ulen + vlen + 1)
       {
         alignment_succeeded = false;
@@ -409,15 +412,13 @@ bool gt_querymatchoutoptions_alignment_prepare(GtQuerymatchoutoptions
                             dbstart + dblen - 1);
   if (edist > 0)
   {
-    if (query == NULL || query_readmode != GT_READMODE_FORWARD)
+    if ((query == NULL || query_readmode != GT_READMODE_FORWARD) &&
+        querylen > querymatchoutoptions->vseqbuffer_size)
     {
-      if (querylen > querymatchoutoptions->vseqbuffer_size)
-      {
-        querymatchoutoptions->vseqbuffer
-          = gt_realloc(querymatchoutoptions->vseqbuffer,
-                       sizeof *querymatchoutoptions->vseqbuffer * querylen);
-        querymatchoutoptions->vseqbuffer_size = querylen;
-      }
+      querymatchoutoptions->vseqbuffer
+        = gt_realloc(querymatchoutoptions->vseqbuffer,
+                     sizeof *querymatchoutoptions->vseqbuffer * querylen);
+      querymatchoutoptions->vseqbuffer_size = querylen;
     }
     if (query == NULL)
     {
@@ -460,6 +461,7 @@ bool gt_querymatchoutoptions_alignment_prepare(GtQuerymatchoutoptions
     if (seededmatch2eoplist(querymatchoutoptions,
                             encseq,
                             query,
+                            query_readmode,
                             query_totallength,
                             dbstart,
                             dblen,
