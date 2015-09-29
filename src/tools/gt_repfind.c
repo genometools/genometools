@@ -682,10 +682,6 @@ static int gt_repfind_runner(int argc,
                                arguments->xdropbelowscore,
                                arguments->extendxdrop);
     gt_assert(xdropmatchinfo != NULL);
-    if (arguments->beverbose)
-    {
-      gt_xdrop_matchinfo_verbose_set(xdropmatchinfo);
-    }
     if (arguments->silent)
     {
       gt_xdrop_matchinfo_silent_set(xdropmatchinfo);
@@ -717,10 +713,6 @@ static int gt_repfind_runner(int argc,
                                        arguments->userdefinedleastlength,
                                        extend_char_access,
                                        arguments->extendgreedy);
-    if (arguments->beverbose)
-    {
-      gt_greedy_extend_matchinfo_verbose_set(greedyextendmatchinfo);
-    }
     if (arguments->check_extend_symmetry)
     {
       gt_greedy_extend_matchinfo_check_extend_symmetry_set(

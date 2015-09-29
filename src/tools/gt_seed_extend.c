@@ -519,9 +519,6 @@ static int gt_seed_extend_runner(GT_UNUSED int argc,
     if (arguments->benchmark) {
       gt_greedy_extend_matchinfo_silent_set(grextinfo);
     }
-    if (arguments->verbose) {
-      gt_greedy_extend_matchinfo_verbose_set(grextinfo);
-    }
   }
 
   /* Prepare options for xdrop extension */
@@ -532,9 +529,6 @@ static int gt_seed_extend_runner(GT_UNUSED int argc,
                                        arguments->se_extendxdrop);
     if (arguments->benchmark) {
       gt_xdrop_matchinfo_silent_set(xdropinfo);
-    }
-    if (arguments->verbose) {
-      gt_xdrop_matchinfo_verbose_set(xdropinfo);
     }
   }
 

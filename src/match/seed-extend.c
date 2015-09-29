@@ -44,9 +44,7 @@ struct GtXdropmatchinfo
   GtXdropscore belowscore;
   GtSeqabstract *useq, *vseq;
   GtWord errorpercentage;
-  bool beverbose, silent;
-  const GtUchar *query_sequence;
-  GtUword query_totallength;
+  bool silent;
   unsigned int userdefinedleastlength;
 };
 
@@ -84,7 +82,6 @@ GtXdropmatchinfo *gt_xdrop_matchinfo_new(GtUword userdefinedleastlength,
     xdropmatchinfo->belowscore = xdropbelowscore;
   }
   xdropmatchinfo->silent = false;
-  xdropmatchinfo->beverbose = false;
   return xdropmatchinfo;
 }
 
@@ -97,11 +94,6 @@ void gt_xdrop_matchinfo_delete(GtXdropmatchinfo *xdropmatchinfo)
     gt_xdrop_resources_delete(xdropmatchinfo->res);
     gt_free(xdropmatchinfo);
   }
-}
-
-void gt_xdrop_matchinfo_verbose_set(GtXdropmatchinfo *xdropmatchinfo)
-{
-  xdropmatchinfo->beverbose = true;
 }
 
 void gt_xdrop_matchinfo_silent_set(GtXdropmatchinfo *xdropmatchinfo)
@@ -374,8 +366,7 @@ struct GtGreedyextendmatchinfo
           db_totallength;
   unsigned int userdefinedleastlength;
   GtExtendCharAccess extend_char_access;
-  bool beverbose,
-       check_extend_symmetry,
+  bool check_extend_symmetry,
        silent;
   Trimstat *trimstat;
   GtEncseqReader *encseq_r_in_u, *encseq_r_in_v;
@@ -417,7 +408,6 @@ GtGreedyextendmatchinfo *gt_greedy_extend_matchinfo_new(
   ggemi->frontspace_reservoir.allocated = 0;
   ggemi->frontspace_reservoir.offset = 0;
   ggemi->extend_char_access = extend_char_access;
-  ggemi->beverbose = false;
   ggemi->check_extend_symmetry = false;
   ggemi->silent = false;
   ggemi->trimstat = NULL;
@@ -467,12 +457,6 @@ void gt_greedy_extend_matchinfo_trimstat_set(GtGreedyextendmatchinfo *ggemi)
   ggemi->trimstat = trimstat_new(ggemi->errorpercentage,
                                  ggemi->perc_mat_history,
                                  ggemi->maxalignedlendifference);
-}
-
-void gt_greedy_extend_matchinfo_verbose_set(GtGreedyextendmatchinfo *ggemi)
-{
-  gt_assert(ggemi != NULL);
-  ggemi->beverbose = true;
 }
 
 static void gt_FTsequenceResources_init(FTsequenceResources *fsr,

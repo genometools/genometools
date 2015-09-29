@@ -91,10 +91,6 @@ void gt_xdrop_matchinfo_delete(GtXdropmatchinfo *xdropmatchinfo);
 
 GtWord gt_optimalxdropbelowscore(GtUword errorpercentage,GtUword sensitivity);
 
-/* Set the verbose flag in the matchinfo object. */
-
-void gt_xdrop_matchinfo_verbose_set(GtXdropmatchinfo *xdropmatchinfo);
-
 /* Set the silent flag in the matchinfo object. */
 
 void gt_xdrop_matchinfo_silent_set(GtXdropmatchinfo *xdropmatchinfo);
@@ -229,10 +225,6 @@ void gt_greedy_extend_matchinfo_silent_set(GtGreedyextendmatchinfo *ggemi);
 /* Set the trimstat in the matchinfo object. */
 
 void gt_greedy_extend_matchinfo_trimstat_set(GtGreedyextendmatchinfo *ggemi);
-
-/* Set the verbose flag in the matchinfo object. */
-
-void gt_greedy_extend_matchinfo_verbose_set(GtGreedyextendmatchinfo *ggemi);
 
 /* If <arg_maxalignedlendifference> and <arg_perc_mat_history> are 0, then
    an optimal value for the maximal alignment length difference and

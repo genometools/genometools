@@ -43,7 +43,7 @@ typedef struct
 typedef struct
 {
   GtQueryrep *queryrep;
-  GtUword offset; /* position relative to startpos */
+  GtUword currentoffset; /* position relative to startpos */
 } GtQuerysubstring;
 
 static GtUchar gt_mmsearch_accessquery(const GtQueryrep *queryrep,
@@ -88,7 +88,8 @@ static GtUchar gt_mmsearch_accessquery(const GtQueryrep *queryrep,
           }\
           currentdbchar = gt_encseq_reader_next_encoded_char(esr);\
           currentquerychar = gt_mmsearch_accessquery(querysubstring->queryrep,\
-                                         querysubstring->offset + (LCPLEN));\
+                                         querysubstring->currentoffset + \
+                                          (LCPLEN));\
           retcode = (int) (currentquerychar - currentdbchar);\
           if (retcode == 0)\
           {\
@@ -280,7 +281,7 @@ GtMMsearchiterator *gt_mmsearchiterator_new_complete_plain(
   queryrep.startpos = 0;
   queryrep.length = patternlength;
   querysubstring.queryrep = &queryrep;
-  querysubstring.offset = 0;
+  querysubstring.currentoffset = 0;
   return gt_mmsearchiterator_new(dbencseq,
                                  suftab,
                                  leftbound,
@@ -341,7 +342,7 @@ static bool gt_mmsearch_isleftmaximal(const GtEncseq *dbencseq,
 {
   GtUchar dbleftchar;
 
-  if (dbstart == 0 || querysubstring->offset == 0)
+  if (dbstart == 0 || querysubstring->currentoffset == 0)
   {
     return true;
   }
@@ -350,7 +351,7 @@ static bool gt_mmsearch_isleftmaximal(const GtEncseq *dbencseq,
                                           readmode);
   if (ISSPECIAL(dbleftchar) ||
       dbleftchar != gt_mmsearch_accessquery(querysubstring->queryrep,
-                                            querysubstring->offset-1))
+                                            querysubstring->currentoffset-1))
   {
     return true;
   }
@@ -395,7 +396,7 @@ static GtUword gt_mmsearch_extendright(const GtEncseq *dbencseq,
   {
     gt_encseq_reader_reinit_with_readmode(esr,dbencseq,readmode,dbend);
   }
-  for (dbpos = dbend, querypos = querysubstring->offset + matchlength;
+  for (dbpos = dbend, querypos = querysubstring->currentoffset + matchlength;
        dbpos < totallength &&
        querypos < querysubstring->queryrep->length;
        dbpos++, querypos++)
@@ -508,9 +509,9 @@ static int gt_querysubstringmatch(bool selfmatch,
   gt_assert(numberofsuffixes > 0);
   totallength = gt_encseq_total_length(dbencseq);
   querysubstring.queryrep = queryrep;
-  for (querysubstring.offset = 0;
-       querysubstring.offset <= queryrep->length - minmatchlength;
-       querysubstring.offset++)
+  for (querysubstring.currentoffset = 0;
+       querysubstring.currentoffset <= queryrep->length - minmatchlength;
+       querysubstring.currentoffset++)
   {
     GtUword dbstart;
 
@@ -574,7 +575,7 @@ static int gt_querysubstringmatch(bool selfmatch,
     mmsi = NULL;
     if (!haserr)
     {
-      if (gt_mmsearch_accessquery(queryrep,querysubstring.offset)
+      if (gt_mmsearch_accessquery(queryrep,querysubstring.currentoffset)
           == (GtUchar) SEPARATOR)
       {
         localqueryunitnum++;
@@ -868,7 +869,7 @@ GtUword gt_querysubstringmatchiterator_querystart(
                       const GtQuerysubstringmatchiterator *qsmi)
 {
   gt_assert(qsmi != NULL);
-  return qsmi->querysubstring.offset;
+  return qsmi->querysubstring.currentoffset;
 }
 
 GtUword gt_querysubstringmatchiterator_matchlength(
@@ -923,7 +924,7 @@ int gt_querysubstringmatchiterator_next(GtQuerysubstringmatchiterator *qsmi,
       gt_assert(qsmi->query_seqlen > 0 && qsmi->query != NULL);
       qsmi->queryrep.sequence = qsmi->query;
       qsmi->queryrep.length = qsmi->query_seqlen;
-      qsmi->querysubstring.offset = 0;
+      qsmi->querysubstring.currentoffset = 0;
     }
     if (qsmi->query_seqlen >= qsmi->userdefinedleastlength)
     {
@@ -964,10 +965,10 @@ int gt_querysubstringmatchiterator_next(GtQuerysubstringmatchiterator *qsmi,
         } else
         {
           qsmi->mmsi_defined = false;
-          if (qsmi->querysubstring.offset <
+          if (qsmi->querysubstring.currentoffset <
               qsmi->query_seqlen - qsmi->userdefinedleastlength)
           {
-            qsmi->querysubstring.offset++;
+            qsmi->querysubstring.currentoffset++;
           } else
           {
             qsmi->query_seqlen = 0;
