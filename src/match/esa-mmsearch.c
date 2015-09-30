@@ -609,11 +609,12 @@ int gt_callenumselfmatches(const char *indexname,
     haserr = true;
   } else
   {
-    GtUword seqnum, numofsequences, seqlength, seqstartpos;
+    GtUword seqnum, numofsequences, seqlength, seqstartpos, totallength;
     GtQuerymatch *querymatchspaceptr = gt_querymatch_new(NULL,false);
     GtQueryrepresentation queryrep;
 
     numofsequences = gt_encseq_num_of_sequences(suffixarray.encseq);
+    totallength = gt_encseq_total_length(suffixarray.encseq);
     queryrep.sequence = NULL;
     queryrep.encseq = suffixarray.encseq;
     queryrep.readmode = query_readmode;
@@ -627,17 +628,17 @@ int gt_callenumselfmatches(const char *indexname,
         queryrep.startpos = seqstartpos;
         queryrep.seqlen = seqlength;
         if (gt_querysubstringmatch(true,
-                                suffixarray.encseq,
-                                suffixarray.suftab,
-                                suffixarray.readmode,
-                                gt_encseq_total_length(suffixarray.encseq) + 1,
-                                (uint64_t) seqnum,
-                                &queryrep,
-                                (GtUword) userdefinedleastlength,
-                                processquerymatch,
-                                processquerymatchinfo,
-                                querymatchspaceptr,
-                                err) != 0)
+                                   suffixarray.encseq,
+                                   suffixarray.suftab,
+                                   suffixarray.readmode,
+                                   totallength + 1,
+                                   (uint64_t) seqnum,
+                                   &queryrep,
+                                   (GtUword) userdefinedleastlength,
+                                   processquerymatch,
+                                   processquerymatchinfo,
+                                   querymatchspaceptr,
+                                   err) != 0)
         {
           haserr = true;
           break;
