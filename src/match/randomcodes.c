@@ -46,7 +46,6 @@
 #include "match/sfx-shortreadsort.h"
 #include "match/sfx-suffixer.h"
 #include "match/spmsuftab.h"
-#include "match/stamp.h"
 #include "match/kmercodes.h"
 
 typedef struct

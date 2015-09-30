@@ -21,7 +21,6 @@
 #include "core/codetype.h"
 #include "core/encseq.h"
 #include "sfx-enumcodes.h"
-#include "stamp.h"
 #include "initbasepower.h"
 
 struct Enumcodeatposition

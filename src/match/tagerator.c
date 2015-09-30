@@ -35,7 +35,6 @@
 #include "myersapm.h"
 #include "revcompl.h"
 #include "sarr-def.h"
-#include "stamp.h"
 #include "tagerator.h"
 
 #define MAXTAGSIZE GT_INTWORDSIZE

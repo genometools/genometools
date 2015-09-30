@@ -41,7 +41,6 @@
 #include "core/error_api.h"
 #include "core/logger.h"
 #include "extended/assembly_stats_calculator.h"
-#include "match/stamp.h"
 #include "tools/gt_seqstat.h"
 
 #define GT_SEQSTAT_BINARY_DISTLEN_SUFFIX ".distlen"

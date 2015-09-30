@@ -39,7 +39,6 @@
 #include "match/initbasepower.h"
 #include "match/intcode-def.h"
 #include "match/sfx-maprange.h"
-#include "match/stamp.h"
 
 #define GT_FROMCODE2SPECIALCODE(CODE,NUMOFCHARS)\
                                (((NUMOFCHARS) == 4U)\

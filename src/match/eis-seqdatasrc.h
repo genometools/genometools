@@ -24,7 +24,6 @@
 #include <string.h>
 
 #include "core/error.h"
-#include "stamp.h"
 #include "sfx-suffixgetset.h"
 
 /* sequential data source api */

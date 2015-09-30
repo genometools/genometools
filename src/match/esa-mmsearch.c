@@ -30,7 +30,6 @@
 #include "sfx-suffixer.h"
 #include "esa-minunique.h"
 #include "esa-mmsearch.h"
-#include "stamp.h"
 
 typedef struct
 {
@@ -38,15 +37,15 @@ typedef struct
   const GtEncseq *encseq;
   GtReadmode readmode;
   GtUword startpos, seqlen;
-} GtQueryrep;
+} GtQueryrepresentation;
 
 typedef struct
 {
-  GtQueryrep *queryrep;
+  GtQueryrepresentation *queryrep;
   GtUword currentoffset; /* position relative to startpos */
 } GtQuerysubstring;
 
-static GtUchar gt_mmsearch_accessquery(const GtQueryrep *queryrep,
+static GtUchar gt_mmsearch_accessquery(const GtQueryrepresentation *queryrep,
                                        GtUword pos)
 {
   GtUword abspos;
@@ -271,7 +270,7 @@ GtMMsearchiterator *gt_mmsearchiterator_new_complete_plain(
                                    const GtUchar *pattern,
                                    GtUword patternlength)
 {
-  GtQueryrep queryrep;
+  GtQueryrepresentation queryrep;
   GtQuerysubstring querysubstring;
   const ESASuffixptr *suftab = (const ESASuffixptr *) voidsuftab; /* XXX */
 
@@ -412,14 +411,14 @@ static GtUword gt_mmsearch_extendright(const GtEncseq *dbencseq,
 }
 
 int gt_queryuniquematch(bool selfmatch,
-                               const Suffixarray *suffixarray,
-                               uint64_t queryunitnum,
-                               GtQueryrep *queryrep,
-                               GtUword minmatchlength,
-                               GtProcessquerymatch processquerymatch,
-                               void *processquerymatchinfo,
-                               GtQuerymatch *querymatchspaceptr,
-                               GtError *err)
+                        const Suffixarray *suffixarray,
+                        uint64_t queryunitnum,
+                        GtQueryrepresentation *queryrep,
+                        GtUword minmatchlength,
+                        GtProcessquerymatch processquerymatch,
+                        void *processquerymatchinfo,
+                        GtQuerymatch *querymatchspaceptr,
+                        GtError *err)
 {
   GtUword offset, totallength = gt_encseq_total_length(suffixarray->encseq),
           localqueryoffset = 0;
@@ -493,7 +492,7 @@ static int gt_querysubstringmatch(bool selfmatch,
                                   GtReadmode readmode,
                                   GtUword numberofsuffixes,
                                   uint64_t queryunitnum,
-                                  GtQueryrep *queryrep,
+                                  GtQueryrepresentation *queryrep,
                                   GtUword minmatchlength,
                                   GtProcessquerymatch processquerymatch,
                                   void *processquerymatchinfo,
@@ -612,7 +611,7 @@ int gt_callenumselfmatches(const char *indexname,
   {
     GtUword seqnum, numofsequences, seqlength, seqstartpos;
     GtQuerymatch *querymatchspaceptr = gt_querymatch_new(NULL,false);
-    GtQueryrep queryrep;
+    GtQueryrepresentation queryrep;
 
     numofsequences = gt_encseq_num_of_sequences(suffixarray.encseq);
     queryrep.sequence = NULL;
@@ -692,7 +691,7 @@ static int gt_constructsarrandrunmmsearch(
     const GtSuffixsortspace *suffixsortspace;
     GtUword numberofsuffixes;
     GtQuerymatch *querymatchspaceptr = gt_querymatch_new(NULL,false);
-    GtQueryrep queryrep;
+    GtQueryrepresentation queryrep;
 
     queryrep.sequence = query;
     queryrep.encseq = NULL;
@@ -794,7 +793,7 @@ struct GtQuerysubstringmatchiterator
           totallength,
           userdefinedleastlength;
   GtMMsearchiterator *mmsi;
-  GtQueryrep queryrep;
+  GtQueryrepresentation queryrep;
   GtQuerysubstring querysubstring;
   const GtUchar *query;
   GtUword query_seqlen;

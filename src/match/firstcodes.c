@@ -46,7 +46,6 @@
 #include "sfx-shortreadsort.h"
 #include "sfx-suffixer.h"
 #include "spmsuftab.h"
-#include "stamp.h"
 
 typedef struct
 {
