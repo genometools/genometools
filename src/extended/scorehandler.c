@@ -245,7 +245,6 @@ void gt_scorehandler_change_score_to_cost_without_costhandler(GtScoreHandler
   }
   scorehandler->gap_extension = max - scorehandler->gap_extension;
   scorehandler->gap_opening = -scorehandler->gap_opening;
-
 }
 
 GtWord gt_scorehandler_eval_alignmentscore(const GtScoreHandler *scorehandler,

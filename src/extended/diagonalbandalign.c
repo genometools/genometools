@@ -277,7 +277,7 @@ static void evaluate_DBcrosspoints_from_2dimtab(GtUword **E,
 }
 
 /*create DBcrosspointtab to combine square calculating with linear calculating*/
-static void dtab_in_square_space(LinspaceManagement *spacemanager,
+GT_UNUSED  static void dtab_in_square_space(LinspaceManagement *spacemanager,
                                  Diagentry *Dtab,
                                  const GtUchar *useq,
                                  GtUword ustart,
@@ -788,12 +788,10 @@ static void evaluateDBcrosspoints(LinspaceManagement *spacemanager,
     else if (Diagcolumn[prevcpoint].last_type == Linear_I)
     {
       dtemp = Diagcolumn[cpoint];
-      new_left = MAX(left_dist-diag+1,
-                               -((GtWord)Diagcolumn[prevcpoint].currentrowindex-
-                                 (GtWord)Diagcolumn[cpoint].currentrowindex-1));
-      new_right = 0;
       new_ulen = Diagcolumn[prevcpoint].currentrowindex-
                  Diagcolumn[cpoint].currentrowindex-1;
+      new_left = MAX(left_dist-diag+1,-new_ulen);
+      new_right = 0;
 
       evaluateDBcrosspoints(spacemanager,Diagcolumn+cpoint,scorehandler,
                             Linear_D, Diagcolumn[cpoint].currentrowindex+1,
@@ -816,10 +814,9 @@ static void evaluateDBcrosspoints(LinspaceManagement *spacemanager,
   {
     if (Diagcolumn[cpoint].last_type == Linear_D)
     {
-      new_left =  MAX(left_dist,
-                -((GtWord)Diagcolumn[cpoint].currentrowindex-(GtWord)ustart-1));
-      new_right = MIN(right_dist, (GtWord)cpoint);
       new_ulen = Diagcolumn[cpoint].currentrowindex-ustart-1;
+      new_left =  MAX(diag, -new_ulen);
+      new_right = MIN(right_dist, (GtWord)cpoint);
 
       evaluateDBcrosspoints(spacemanager, Diagcolumn, scorehandler,
                             edge, rowoffset, coloffset,
@@ -832,7 +829,7 @@ static void evaluateDBcrosspoints(LinspaceManagement *spacemanager,
     {
       new_left = MAX(left_dist,
                  -((GtWord)Diagcolumn[cpoint].currentrowindex-(GtWord)ustart));
-      new_right = MIN((GtWord)cpoint-1, right_dist);
+      new_right = MIN((GtWord)cpoint-1, diag);
       evaluateDBcrosspoints(spacemanager, Diagcolumn, scorehandler,
                             edge, rowoffset, coloffset, useq, ustart,
                             Diagcolumn[cpoint].currentrowindex-ustart,
@@ -893,7 +890,7 @@ static void gt_calc_diagonalbandalign(LinspaceManagement *spacemanager,
     return;
   }
 
-  gt_linspaceManagement_check(spacemanager,right_dist-left_dist,vlen,
+  gt_linspaceManagement_check(spacemanager, MIN(right_dist-left_dist,ulen),vlen,
                               sizeof (*EDtabcolumn),
                               sizeof (*Rtabcolumn),
                               sizeof (*Diagcolumn));

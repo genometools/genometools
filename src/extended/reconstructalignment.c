@@ -118,7 +118,7 @@ void reconstructalignment_from_Ltab(GtAlignment *align,
   {
     if (Ltabcolumn[i][j] == 0)
       break;
-    else if (i > 0 && j > 0 && Ltabcolumn[i][j] == Ltabcolumn[i-1][j-1] + 
+    else if (i > 0 && j > 0 && Ltabcolumn[i][j] == Ltabcolumn[i-1][j-1] +
                                    gt_scorehandler_get_replacement(scorehandler,
                                              useq[ustart+i-1],vseq[vstart+j-1]))
     {
@@ -168,7 +168,7 @@ void reconstructalignment_from_Ctab(GtAlignment *align,
         indel = 2*gap_extension + gap_opening;
       else
         indel = (2*gap_extension + 2*gap_opening);
-      
+
       repl = gt_scorehandler_get_replacement(scorehandler,
                                              vseq[vstart+i-1],
                                              useq[ustart+Ctab[i]-1]);
@@ -264,13 +264,13 @@ void reconstructalignment_from_Dtab(GtAlignment *align, const Diagentry *Dtab,
       }
       else
       {
-          gt_assert(false);
-        for (j = 0; j < (Dtab[i].currentrowindex -
+        gt_assert(false);
+        /*for (j = 0; j < (Dtab[i].currentrowindex -
                          Dtab[i-1].currentrowindex)-1; j++)
         {
           gt_alignment_add_deletion(align);
         }
-          gt_alignment_add_replacement(align);
+          gt_alignment_add_replacement(align);*/
 
       }
     }
