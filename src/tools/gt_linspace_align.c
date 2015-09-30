@@ -44,23 +44,24 @@
 #include "tools/gt_linspace_align.h"
 
 typedef struct{
-  GtStr      *outputfile;
+  GtStr      *outputfile; /*default stdout*/
   GtStrArray *strings,
              *files,
              *linearcosts,
              *affinecosts,
-             *diagonalbonds;
+             *diagonalbonds; /* left and right shift of diagonal*/
   bool       global,
              local,
-             diagonal,
+             diagonal, /* call diagonalband algorithm */
              dna,
              protein,
-             costmatrix,
+             costmatrix, /* special case of substituation matrix*/
              showscore,
-             scoreonly,
-             wildcardshow,
-             spacetime;
-  GtUword timesquarefactor;
+             scoreonly, /* dev option generate alignment, but do not show it*/
+             wildcardshow, /* show symbol wildcards in output*/
+             spacetime; /* write space peak and time overall on stdout*/
+  GtUword timesquarefactor; /*factor to specified termination of recursion
+                              and call 2dim algorithm */
 } GtLinspaceArguments;
 
 typedef struct {
@@ -166,11 +167,15 @@ static GtOptionParser* gt_linspace_align_option_parser_new(void *tool_arguments)
 
   /* special case, if given matrix includes cost values in place of scores */
   optioncostmatrix = gt_option_new_bool("costmatrix", "describes type of "
-                                        "given matrix",
+                                        "given substituation matrix",
                                         &arguments->costmatrix, false);
   gt_option_parser_add_option(op, optioncostmatrix);
 
-  optionshowscore = gt_option_new_bool("showscore", "show score for alignment",
+  optionshowscore = gt_option_new_bool("showscore", "show score for alignment, "
+                                       "please note it will calculate costs "
+                                       "for global alignments and scores for "
+                                       "local alignemnts always, independtly "
+                                       "of input ",
                                        &arguments->showscore, false);
   gt_option_parser_add_option(op, optionshowscore);
 
@@ -186,22 +191,28 @@ static GtOptionParser* gt_linspace_align_option_parser_new(void *tool_arguments)
   gt_option_parser_add_option(op, optionspacetime);
 
   /* -str */
-  optionstrings = gt_option_new_string_array("ss", "use two strings",
+  optionstrings = gt_option_new_string_array("ss", "input, use two strings",
                                              arguments->strings);
   gt_option_parser_add_option(op, optionstrings);
 
-  optionfiles = gt_option_new_filename_array("ff", "use two files",
+  optionfiles = gt_option_new_filename_array("ff", "input, use two files",
                                              arguments->files);
   gt_option_parser_add_option(op, optionfiles);
 
   optionlinearcosts = gt_option_new_string_array("l", "lineargapcosts, "
-                                                 "use three values",
+                                                 "use match, mismatch and "
+                                                 "gapcost, alternatively "
+                                                 "substituationmatrix and "
+                                                 "gapcost",
                                                  arguments->linearcosts);
   gt_option_parser_add_option(op, optionlinearcosts);
 
   optionaffinecosts = gt_option_new_string_array("a", "affinegapcosts, "
-                                                 "use four values",
-                                                 arguments->affinecosts);
+                                           "use match, mismatch, gap_extension "
+                                           "and gap_opening, alternatively "
+                                           "substituationmatrix, gap_extension "
+                                           "and gap_opening",
+                                           arguments->affinecosts);
   gt_option_parser_add_option(op, optionaffinecosts);
 
   optiondiagonalbonds = gt_option_new_string_array("lr", "specified left and "
@@ -246,7 +257,7 @@ static GtOptionParser* gt_linspace_align_option_parser_new(void *tool_arguments)
 
   /* development option(s) */
   gt_option_is_development_option(optionspacetime);
-  gt_option_is_development_option(optionscoreonly);
+  gt_option_is_development_option(optionscoreonly);/*only useful to test*/
 
   return op;
 }
@@ -332,7 +343,7 @@ static void sequence_decode(GtUchar *seq, GtUword len, GtAlphabet *alphabet)
    seq[idx] = gt_alphabet_decode(alphabet, seq[idx]);
 }
 
-/*show*/
+/*show sequence*/
 static void print_sequence(const GtUchar *seq, GtUword len, FILE *fp)
 {
   GtUword i = 0;
@@ -343,6 +354,7 @@ static void print_sequence(const GtUchar *seq, GtUword len, FILE *fp)
   }while (i < len);
 }
 
+/*show sequences, alignment and score*/
 static void alignment_show_with_sequences(GtUchar *useq, GtUword ulen,
                                           GtUchar *vseq, GtUword vlen,
                                           const GtAlignment *align,
@@ -891,6 +903,7 @@ static int gt_linspace_align_runner(GT_UNUSED int argc,
   gt_alignment_delete(align);
   gt_scorehandler_delete(scorehandler);
 
+  /*spacetime option*/
   if (!had_err && arguments->spacetime)
   {
     printf("# combined space peak in kilobytes: %f\n",GT_KILOBYTES(
