@@ -27,7 +27,8 @@ void gt_lib_init(void);
 /* Registers exit function which calls <gt_lib_clean()> at exit. */
 void gt_lib_reg_atexit_func(void);
 
-/* Returns 0 if no memory map, file pointer, or memory has been leaked and a
+/* Frees all static data associated with the library.
+   Returns 0 if no memory map, file pointer, or memory has been leaked and a
    value != 0 otherwise. */
 int  gt_lib_clean(void);
 
