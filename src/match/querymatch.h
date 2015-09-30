@@ -24,6 +24,7 @@
 #include "core/encseq.h"
 #include "core/unused_api.h"
 #include "querymatch-align.h"
+#include "seq_or_encseq.h"
 
 typedef struct GtQuerymatch GtQuerymatch;
 
@@ -64,7 +65,7 @@ bool gt_querymatch_complete(GtQuerymatch *querymatchptr,
                             GtUword querylen,
                             GtUword querystart,
                             const GtEncseq *encseq,
-                            const GtUchar *query,
+                            const GtSeqorEncseq *query,
                             GtUword query_totallength,
                             GtUword seedpos1,
                             GtUword seedpos2,

@@ -527,7 +527,7 @@ static int gt_generic_simplegreedyselfmatchoutput(
 typedef void (*GtXdrop_extend_querymatch_func)(void *,
                                                const GtEncseq *,
                                                const GtQuerymatch *,
-                                               const GtUchar *,
+                                               const GtSeqorEncseq *,
                                                GtUword);
 
 static int gt_callenumquerymatches(const char *indexname,
@@ -573,6 +573,7 @@ static int gt_callenumquerymatches(const char *indexname,
   if (!haserr)
   {
     int retval;
+    GtSeqorEncseq query_seqorencseq;
     GtQuerymatch *exactseed = gt_querymatch_new(querymatchoutoptions,false);
 
     gt_querymatch_query_readmode_set(exactseed,query_readmode);
@@ -581,7 +582,6 @@ static int gt_callenumquerymatches(const char *indexname,
       GtUword dbstart, dbseqnum, dbseqstartpos, matchlength, query_seqlen,
               querystart;
       uint64_t queryunitnum;
-      const GtUchar *query;
 
       dbstart = gt_querysubstringmatchiterator_dbstart(qsmi);
       if (gt_encseq_has_multiseq_support(suffixarray.encseq))
@@ -594,7 +594,8 @@ static int gt_callenumquerymatches(const char *indexname,
       }
       matchlength = gt_querysubstringmatchiterator_matchlength(qsmi);
       query_seqlen = gt_querysubstringmatchiterator_query_seqlen(qsmi);
-      query = gt_querysubstringmatchiterator_query(qsmi);
+      query_seqorencseq.seq = gt_querysubstringmatchiterator_query(qsmi);
+      query_seqorencseq.encseq = NULL;
       querystart = gt_querysubstringmatchiterator_querystart(qsmi);
       queryunitnum = gt_querysubstringmatchiterator_queryunitnum(qsmi);
       if (eqmf != NULL)
@@ -611,7 +612,8 @@ static int gt_callenumquerymatches(const char *indexname,
                            matchlength,
                            querystart,
                            query_seqlen);
-        eqmf(eqmf_data,suffixarray.encseq,exactseed,query,query_seqlen);
+        eqmf(eqmf_data,suffixarray.encseq,exactseed,&query_seqorencseq,
+             query_seqlen);
       } else
       {
         if (gt_querymatch_complete(exactseed,
@@ -626,7 +628,7 @@ static int gt_callenumquerymatches(const char *indexname,
                                    matchlength,
                                    querystart,
                                    suffixarray.encseq,
-                                   query,
+                                   &query_seqorencseq,
                                    query_seqlen,
                                    dbstart,
                                    querystart,

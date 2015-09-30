@@ -20,6 +20,7 @@
 
 #include "core/types_api.h"
 #include "match/ft-front-prune.h"
+#include "match/seq_or_encseq.h"
 
 typedef struct GtQuerymatchoutoptions GtQuerymatchoutoptions;
 
@@ -42,7 +43,7 @@ bool gt_querymatchoutoptions_alignment_prepare(
                                      GtQuerymatchoutoptions
                                        *querymatchoutoptions,
                                      const GtEncseq *encseq,
-                                     const GtUchar *query,
+                                     const GtSeqorEncseq *query,
                                      GtReadmode query_readmode,
                                      GtUword query_totallength,
                                      GtUword dbstart,

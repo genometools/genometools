@@ -87,12 +87,12 @@ static void ft_sequenceobject_init(Sequenceobject *seq,
                                  GT_UWORD_MAX);
   seq->read_seq_left2right = gt_extend_read_seq_left2right(rightextension,
                                                            readmode);
-  if (extend_char_access_mode == GT_EXTEND_CHAR_ACCESS_ANY &&
+  if (encseq != NULL && extend_char_access_mode == GT_EXTEND_CHAR_ACCESS_ANY &&
       gt_encseq_has_twobitencoding(encseq) && gt_encseq_wildcards(encseq) == 0)
   {
     seq->twobitencoding = gt_encseq_twobitencoding_export(encseq);
   }
-  if (seq->twobitencoding == NULL &&
+  if (encseq != NULL && seq->twobitencoding == NULL &&
       (extend_char_access_mode == GT_EXTEND_CHAR_ACCESS_ANY ||
        extend_char_access_mode == GT_EXTEND_CHAR_ACCESS_ENCSEQ_READER))
   {
@@ -111,7 +111,8 @@ static void ft_sequenceobject_init(Sequenceobject *seq,
     seq->min_access_pos = GT_UWORD_MAX; /* undefined */
     seq->cache_num_positions = 0;
   }
-  if (seq->twobitencoding == NULL && seq->encseqreader == NULL &&
+  if (encseq != NULL && seq->twobitencoding == NULL &&
+      seq->encseqreader == NULL &&
       (extend_char_access_mode == GT_EXTEND_CHAR_ACCESS_ANY ||
        extend_char_access_mode == GT_EXTEND_CHAR_ACCESS_ENCSEQ))
   {

@@ -152,10 +152,10 @@ const GtQuerymatch *gt_xdrop_extend_selfmatch_relative(void *info,
    certain criteria, the resulting
    coordinates are returned as a reference to a <GtQuerymatch>-object. */
 
-const GtQuerymatch* gt_xdrop_extend_querymatch(void *info,
+const GtQuerymatch *gt_xdrop_extend_querymatch(void *info,
                                                const GtEncseq *encseq,
                                                const GtQuerymatch *exactseed,
-                                               const GtUchar *query,
+                                               const GtSeqorEncseq *query,
                                                GtUword query_totallength);
 
 /*
@@ -167,7 +167,7 @@ const GtQuerymatch* gt_xdrop_extend_querymatch(void *info,
 void gt_xdrop_extend_querymatch_with_output(void *info,
                                             const GtEncseq *encseq,
                                             const GtQuerymatch *exactseed,
-                                            const GtUchar *query,
+                                            const GtSeqorEncseq *query,
                                             GtUword query_totallength);
 
 /* The following functions are used for the greedy extension. */
@@ -311,7 +311,7 @@ GtUword gt_align_front_prune_edist(bool forward,
                                    Polished_point *best_polished_point,
                                    Fronttrace *front_trace,
                                    const GtEncseq *encseq,
-                                   const GtUchar *query,
+                                   const GtSeqorEncseq *query,
                                    GtReadmode query_readmode,
                                    GtUword query_totallength,
                                    GtGreedyextendmatchinfo *ggemi,
@@ -337,6 +337,6 @@ char *gt_seed_extend_params_keystring(bool use_greedy,
 void gt_greedy_extend_querymatch_with_output(void *info,
                                              const GtEncseq *dbencseq,
                                              const GtQuerymatch *exactseed,
-                                             const GtUchar *query,
+                                             const GtSeqorEncseq *query,
                                              GtUword query_totallength);
 #endif

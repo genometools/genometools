@@ -199,7 +199,7 @@ void gt_querymatchoutoptions_delete(
 
 static bool seededmatch2eoplist(GtQuerymatchoutoptions *querymatchoutoptions,
                                 const GtEncseq *encseq,
-                                const GtUchar *query,
+                                const GtSeqorEncseq *query,
                                 GtReadmode query_readmode,
                                 GtUword query_totallength,
                                 GtUword dbstart,
@@ -366,7 +366,7 @@ static void check_correct_edist(const GtUchar *useq,
 bool gt_querymatchoutoptions_alignment_prepare(GtQuerymatchoutoptions
                                                 *querymatchoutoptions,
                                                const GtEncseq *encseq,
-                                               const GtUchar *query,
+                                               const GtSeqorEncseq *query,
                                                GtReadmode query_readmode,
                                                GtUword query_totallength,
                                                GtUword dbstart,
@@ -420,11 +420,12 @@ bool gt_querymatchoutoptions_alignment_prepare(GtQuerymatchoutoptions
                      sizeof *querymatchoutoptions->vseqbuffer * querylen);
       querymatchoutoptions->vseqbuffer_size = querylen;
     }
-    if (query == NULL)
+    if (query == NULL || query->seq == NULL)
     {
+      gt_assert(query == NULL || query->encseq != NULL);
       gt_encseq_extract_encoded_with_reader(
                               querymatchoutoptions->esr_for_align_show,
-                              encseq,
+                              query == NULL ? encseq : query->encseq,
                               querymatchoutoptions->vseqbuffer,
                               querystartabsolute,
                               querystartabsolute + querylen - 1);
@@ -433,11 +434,11 @@ bool gt_querymatchoutoptions_alignment_prepare(GtQuerymatchoutoptions
       if (query_readmode == GT_READMODE_FORWARD)
       {
         querymatchoutoptions->vseqbuffer
-          = (GtUchar *) (query + querystartabsolute);
+          = (GtUchar *) (query->seq + querystartabsolute);
       } else
       {
         memcpy(querymatchoutoptions->vseqbuffer,
-               query + querystartabsolute,
+               query->seq + querystartabsolute,
                querylen * sizeof *querymatchoutoptions->vseqbuffer);
       }
     }
