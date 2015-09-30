@@ -9483,7 +9483,8 @@ Registers exit function which calls <code>gt_lib_clean()</code> at exit.
 
 <code>int   gt_lib_clean(void)</code>
 <p>
-Returns 0 if no memory map, file pointer, or memory has been leaked and a
+Frees all static data associated with the library.
+   Returns 0 if no memory map, file pointer, or memory has been leaked and a
    value != 0 otherwise.
 </p>
 <hr>
@@ -12065,7 +12066,7 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
 <div id="footer">
 Copyright &copy; 2008-2013
 The <i>GenomeTools</i> authors.
-Last update: 2015-09-12
+Last update: 2015-09-30
 </div>
 </div>
 <!-- Piwik -->
