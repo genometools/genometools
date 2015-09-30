@@ -562,6 +562,7 @@ static int gt_callenumquerymatches(const char *indexname,
                                               suffixarray.readmode,
                                               totallength + 1,
                                               queryfiles,
+                                              NULL,
                                               query_readmode,
                                               userdefinedleastlength,
                                               err);

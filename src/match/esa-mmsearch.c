@@ -30,6 +30,7 @@
 #include "sfx-suffixer.h"
 #include "esa-minunique.h"
 #include "esa-mmsearch.h"
+#include "stamp.h"
 
 typedef struct
 {
@@ -50,7 +51,8 @@ static GtUchar gt_mmsearch_accessquery(const GtQueryrepresentation *queryrep,
 {
   GtUword abspos;
 
-  gt_assert(queryrep != NULL && pos < queryrep->seqlen);
+  gt_assert(queryrep != NULL);
+  gt_assert(pos < queryrep->seqlen);
   abspos = queryrep->startpos + pos;
   if (queryrep->sequence != NULL)
   {
@@ -796,12 +798,13 @@ struct GtQuerysubstringmatchiterator
   GtMMsearchiterator *mmsi;
   GtQueryrepresentation queryrep;
   GtQuerysubstring querysubstring;
-  const GtUchar *query;
+  const GtUchar *query_for_seqit;
   GtUword query_seqlen;
   GtSeqIterator *seqit;
   GtUword dbstart,
           matchlength;
-  uint64_t queryunitnum;
+  const GtEncseq *query_encseq;
+  uint64_t queryunitnum, query_encseq_numofsequences;
   char *desc;
   bool mmsi_defined;
 };
@@ -813,6 +816,7 @@ GtQuerysubstringmatchiterator *gt_querysubstringmatchiterator_new(
                                      GtReadmode db_readmode,
                                      GtUword numberofsuffixes,
                                      const GtStrArray *queryfiles,
+                                     const GtEncseq *query_encseq,
                                      GtReadmode query_readmode,
                                      unsigned int userdefinedleastlength,
                                      GtError *err)
@@ -827,8 +831,9 @@ GtQuerysubstringmatchiterator *gt_querysubstringmatchiterator_new(
   qsmi->userdefinedleastlength = (GtUword) userdefinedleastlength;
   qsmi->queryunitnum = 0;
   qsmi->desc = NULL;
-  qsmi->query = NULL;
+  qsmi->query_for_seqit = NULL;
   qsmi->query_seqlen = 0;
+  qsmi->queryrep.sequence = NULL;
   qsmi->queryrep.encseq = NULL;
   qsmi->queryrep.readmode = query_readmode;
   qsmi->queryrep.startpos = 0;
@@ -837,14 +842,25 @@ GtQuerysubstringmatchiterator *gt_querysubstringmatchiterator_new(
   qsmi->querysubstring.queryrep = &qsmi->queryrep;
   qsmi->mmsi = gt_mmsearchiterator_new_empty();
   qsmi->mmsi_defined = false;
-  qsmi->seqit = gt_seq_iterator_sequence_buffer_new(queryfiles, err);
-  if (qsmi->seqit == NULL)
+  if (queryfiles != NULL)
   {
-    gt_querysubstringmatchiterator_delete(qsmi);
-    return NULL;
+    qsmi->query_encseq = NULL;
+    qsmi->seqit = gt_seq_iterator_sequence_buffer_new(queryfiles, err);
+    if (qsmi->seqit == NULL)
+    {
+      gt_querysubstringmatchiterator_delete(qsmi);
+      return NULL;
+    }
+    gt_seq_iterator_set_symbolmap(qsmi->seqit,
+                        gt_alphabet_symbolmap(gt_encseq_alphabet(dbencseq)));
+  } else
+  {
+    gt_assert(query_encseq != NULL);
+    qsmi->seqit = NULL;
+    qsmi->query_encseq = query_encseq;
+    qsmi->query_encseq_numofsequences
+      = (uint64_t) gt_encseq_num_of_sequences(query_encseq);
   }
-  gt_seq_iterator_set_symbolmap(qsmi->seqit,
-                      gt_alphabet_symbolmap(gt_encseq_alphabet(dbencseq)));
   return qsmi;
 }
 
@@ -896,8 +912,8 @@ GtUword gt_querysubstringmatchiterator_query_seqlen(
 const GtUchar *gt_querysubstringmatchiterator_query(
                       const GtQuerysubstringmatchiterator *qsmi)
 {
-  gt_assert(qsmi != NULL);
-  return qsmi->query;
+  gt_assert(qsmi != NULL && qsmi->query_for_seqit != NULL);
+  return qsmi->query_for_seqit;
 }
 
 int gt_querysubstringmatchiterator_next(GtQuerysubstringmatchiterator *qsmi,
@@ -908,21 +924,36 @@ int gt_querysubstringmatchiterator_next(GtQuerysubstringmatchiterator *qsmi,
   {
     if (qsmi->query_seqlen < qsmi->userdefinedleastlength)
     {
-      int retval = gt_seq_iterator_next(qsmi->seqit,
-                                        &qsmi->query,
-                                        &qsmi->query_seqlen,
-                                        &qsmi->desc,
-                                        err);
-      if (retval < 0)
+      if (qsmi->seqit != NULL)
       {
-        return -1;
-      }
-      if (retval == 0)
+        int retval = gt_seq_iterator_next(qsmi->seqit,
+                                          &qsmi->query_for_seqit,
+                                          &qsmi->query_seqlen,
+                                          &qsmi->desc,
+                                          err);
+        if (retval < 0)
+        {
+          return -1; /* error */
+        }
+        if (retval == 0)
+        {
+          return 1; /* no more sequences */
+        }
+        gt_assert(qsmi->query_seqlen > 0 && qsmi->query_for_seqit != NULL);
+        qsmi->queryrep.sequence = qsmi->query_for_seqit;
+      } else
       {
-        return 1;
+        if (qsmi->queryunitnum == qsmi->query_encseq_numofsequences)
+        {
+          return 1;
+        }
+        qsmi->queryrep.startpos = gt_encseq_seqstartpos(qsmi->queryrep.encseq,
+                                                        qsmi->queryunitnum);
+        qsmi->query_seqlen = gt_encseq_seqlength(qsmi->queryrep.encseq,
+                                                 qsmi->queryunitnum);
       }
-      gt_assert(qsmi->query_seqlen > 0 && qsmi->query != NULL);
-      qsmi->queryrep.sequence = qsmi->query;
+      gt_assert(qsmi->query_seqlen > 0 && (qsmi->query_for_seqit != NULL ||
+                                           qsmi->query_encseq != NULL));
       qsmi->queryrep.seqlen = qsmi->query_seqlen;
       qsmi->querysubstring.currentoffset = 0;
     }

@@ -69,13 +69,13 @@ static void gt_seqabstract_init(GtSeqabstract *sa,
                                 GtUword totallength)
 {
   sa->len = len;
-  sa->offset = gt_extend_offset(rightextension,
+  sa->offset = GT_EXTEND_OFFSET(rightextension,
                                 readmode,
                                 totallength,
                                 startpos,
                                 len,
                                 GT_SEQABSTRACT_TOTALLENGTH_UNDEF);
-  sa->read_seq_left2right = gt_extend_read_seq_left2right(rightextension,
+  sa->read_seq_left2right = GT_EXTEND_READ_SEQ_LEFT2RIGHT(rightextension,
                                                           readmode);
   sa->dir_is_complement = GT_ISDIRCOMPLEMENT(readmode) ? true : false;
 }

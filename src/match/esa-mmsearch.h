@@ -84,6 +84,7 @@ GtQuerysubstringmatchiterator *gt_querysubstringmatchiterator_new(
                                      GtReadmode readmode,
                                      GtUword numberofsuffixes,
                                      const GtStrArray *queryfiles,
+                                     const GtEncseq *query_encseq,
                                      GtReadmode query_readmode,
                                      unsigned int userdefinedleastlength,
                                      GtError *err);

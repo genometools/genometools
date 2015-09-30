@@ -25,45 +25,16 @@
 #include "core/assert_api.h"
 #include "core/readmode.h"
 
-inline bool gt_extend_read_seq_left2right(bool rightextension,
-                                          GtReadmode readmode)
-{
-  return (rightextension && !GT_ISDIRREVERSE(readmode)) ||
-         (!rightextension && GT_ISDIRREVERSE(readmode)) ? true : false;
-}
+#define GT_EXTEND_READ_SEQ_LEFT2RIGHT(RIGHTEXTENSION,READMODE)\
+        ((((RIGHTEXTENSION) && !GT_ISDIRREVERSE(READMODE)) ||\
+         (!(RIGHTEXTENSION) && GT_ISDIRREVERSE(READMODE))) ? true : false)
 
-inline GtUword gt_extend_offset(bool rightextension,
-                                GtReadmode readmode,
-                                GtUword totallength,
-                                GtUword startpos,
-                                GtUword len,
-                                GT_UNUSED GtUword totallength_undef)
-{
-  GtUword offset;
+#define GT_EXTEND_OFFSET(RIGHTEXTENSION,READMODE,TOTALLENGTH,STARTPOS,LEN,\
+                         TOTALLENGTH_UNDEF)\
+  ((RIGHTEXTENSION)\
+        ? (GT_ISDIRREVERSE(READMODE) ? ((TOTALLENGTH) - 1 - (STARTPOS))\
+                                     : (STARTPOS))\
+        : (GT_ISDIRREVERSE(readmode) ? (STARTPOS) + (TOTALLENGTH) - (LEN)\
+                                     : (STARTPOS) + (LEN) - 1))
 
-  if (rightextension)
-  {
-    if (GT_ISDIRREVERSE(readmode))
-    {
-      gt_assert(totallength != totallength_undef && startpos < totallength);
-      offset = totallength - 1 - startpos;
-    } else
-    {
-      offset = startpos;
-    }
-  } else
-  {
-    if (GT_ISDIRREVERSE(readmode))
-    {
-      gt_assert(totallength != totallength_undef &&
-                startpos + totallength >= len);
-      offset = startpos + totallength - len;
-    } else
-    {
-      gt_assert(startpos + len > 0);
-      offset = startpos + len - 1;
-    }
-  }
-  return offset;
-}
 #endif

@@ -79,13 +79,13 @@ static void ft_sequenceobject_init(Sequenceobject *seq,
   seq->cache_ptr = NULL;
   seq->sequence_cache = NULL;
   seq->bytesequenceptr = NULL;
-  seq->offset = gt_extend_offset(rightextension,
+  seq->offset = GT_EXTEND_OFFSET(rightextension,
                                  readmode,
                                  totallength,
                                  startpos,
                                  len,
                                  GT_UWORD_MAX);
-  seq->read_seq_left2right = gt_extend_read_seq_left2right(rightextension,
+  seq->read_seq_left2right = GT_EXTEND_READ_SEQ_LEFT2RIGHT(rightextension,
                                                            readmode);
   if (encseq != NULL && extend_char_access_mode == GT_EXTEND_CHAR_ACCESS_ANY &&
       gt_encseq_has_twobitencoding(encseq) && gt_encseq_wildcards(encseq) == 0)
