@@ -608,7 +608,6 @@ void gt_checklinearspace(GT_UNUSED bool forward,
     exit(GT_EXIT_PROGRAMMING_ERROR);
   }
 
-   /*squareedistunit handles lower/upper cases in another way*/
   scorehandler = gt_scorehandler_new_DNA(matchcost,  mismatchcost, 0, gapcost);
   GtAlphabet *alphabet = gt_scorehandler_get_alphabet(scorehandler);
   low_useq = check_dna_sequence(useq, ulen, alphabet);
@@ -616,6 +615,8 @@ void gt_checklinearspace(GT_UNUSED bool forward,
 
   if (low_useq == NULL || low_vseq == NULL)
   {
+    low_useq? gt_free(low_useq):0;
+    low_vseq? gt_free(low_vseq):0;
     gt_scorehandler_delete(scorehandler);
     return;
   }
@@ -627,12 +628,13 @@ void gt_checklinearspace(GT_UNUSED bool forward,
                                low_useq, 0, ulen,
                                low_vseq, 0, vlen);
 
-  edist2 = gt_squarededistunit(low_useq, ulen, low_vseq, vlen);
+  edist2 = distance_only_global_alignment(useq, 0, ulen, vseq, 0, vlen,
+                                          scorehandler);
 
   if (edist1 != edist2)
   {
     fprintf(stderr,"gt_calc_linearalign = "GT_WU" != "GT_WU
-            " = gt_squarededistunit\n", edist1,edist2);
+            " = distance_only_global_alignment\n", edist1,edist2);
     exit(GT_EXIT_PROGRAMMING_ERROR);
   }
 
@@ -640,8 +642,8 @@ void gt_checklinearspace(GT_UNUSED bool forward,
                                         mismatchcost, gapcost);
 
   if (edist2 != edist3)
-  {
-    fprintf(stderr,"gt_squarededistunit = "GT_WU" != "GT_WU
+  {fprintf(stderr," useq %s, vseq %s\n",useq,vseq);
+    fprintf(stderr,"distance_only_global_alignment = "GT_WU" != "GT_WU
             " = gt_alignment_eval_with_score\n", edist2,edist3);
     exit(GT_EXIT_PROGRAMMING_ERROR);
   }
@@ -692,6 +694,8 @@ void gt_checklinearspace_local(GT_UNUSED bool forward,
 
   if (low_useq == NULL || low_vseq == NULL)
   {
+    low_useq? gt_free(low_useq):0;
+    low_vseq? gt_free(low_vseq):0;
     gt_scorehandler_delete(scorehandler);
     return;
   }

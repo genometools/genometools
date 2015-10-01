@@ -1000,6 +1000,8 @@ void gt_checkdiagonalbandalign(GT_UNUSED bool forward,
 
   if (low_useq == NULL || low_vseq == NULL)
   {
+    low_useq? gt_free(low_useq):0;
+    low_vseq? gt_free(low_vseq):0;
     gt_scorehandler_delete(scorehandler);
     return;
   }

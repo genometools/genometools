@@ -1073,6 +1073,8 @@ void gt_checkaffinelinearspace(GT_UNUSED bool forward,
   low_vseq = check_dna_sequence(vseq, vlen, alphabet);
   if (low_useq == NULL || low_vseq == NULL)
   {
+    low_useq? gt_free(low_useq):0;
+    low_vseq? gt_free(low_vseq):0;
     gt_scorehandler_delete(scorehandler);
     return;
   }
@@ -1151,6 +1153,8 @@ void gt_checkaffinelinearspace_local(GT_UNUSED bool forward,
 
   if (low_useq == NULL || low_vseq == NULL)
   {
+    low_useq? gt_free(low_useq):0;
+    low_vseq? gt_free(low_vseq):0;
     gt_scorehandler_delete(scorehandler);
     return;
   }
