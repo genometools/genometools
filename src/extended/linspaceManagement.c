@@ -161,7 +161,11 @@ static bool checksquare(LinspaceManagement *spacemanager,
 
   TSfactor = spacemanager->timesquarefactor;
   if ((ulen+1)*(vlen+1)*valuesize <= spacemanager->valueTabsize)
+  {
+    if (local)
+      gt_max_reset(spacemanager->maxscoordvaluespace);
     return true;
+  }
   else if ((ulen+1)*(vlen+1) <= (spacemanager->ulen+1)*TSfactor)
   {
     if (!local)
