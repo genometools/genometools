@@ -1,3 +1,5 @@
+require 'fileutils'
+
 allfiles = ["Atinsert.fna",
             "Duplicate.fna",
             "Random-Small.fna",
@@ -104,10 +106,12 @@ allfiles.each do |reffile|
       Name "gt greedyfwdmat #{reffile} #{queryfile}"
       Keywords "gt_greedyfwdmat small"
       Test do
-        createandcheckgreedyfwdmat("#{$testdata}#{reffile}",
-                                   "#{$testdata}#{queryfile}")
-        checktagerator("#{$testdata}#{reffile}",
-                       "#{$testdata}#{queryfile}")
+        FileUtils.copy "#{$testdata}#{reffile}", "."
+        FileUtils.copy "#{$testdata}#{queryfile}", "."
+        createandcheckgreedyfwdmat("#{reffile}",
+                                   "#{queryfile}")
+        checktagerator("#{reffile}",
+                       "#{queryfile}")
         run "rm -f sfx.* fmi.* pck.*"
       end
     end

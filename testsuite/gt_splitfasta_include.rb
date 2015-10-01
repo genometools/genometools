@@ -1,3 +1,5 @@
+require 'fileutils'
+
 Name "gt splitfasta (default)"
 Keywords "gt_splitfasta"
 Test do
@@ -92,7 +94,8 @@ end
 Name "gt splitfasta (-splitdesc)"
 Keywords "gt_splitfasta"
 Test do
-  run_test "#{$bin}gt splitfasta -splitdesc . #{$testdata}foobar.fas"
+  FileUtils.copy "#{$testdata}foobar.fas", "."
+  run_test "#{$bin}gt splitfasta -splitdesc . foobar.fas"
   if not File.exists?("foo.fas") then
     raise TestFailed, "file 'foo.fas' does not exist"
   end
@@ -104,8 +107,9 @@ end
 Name "gt splitfasta (-splitdesc, file exists)"
 Keywords "gt_splitfasta"
 Test do
+  FileUtils.copy "#{$testdata}foobar.fas", "."
   run "touch foo.fas"
-  run_test("#{$bin}gt splitfasta -splitdesc . #{$testdata}foobar.fas",
+  run_test("#{$bin}gt splitfasta -splitdesc . foobar.fas",
            :retval => 1)
   grep last_stderr, /exists already/
 end
@@ -113,8 +117,9 @@ end
 Name "gt splitfasta (-splitdesc -force)"
 Keywords "gt_splitfasta"
 Test do
+  FileUtils.copy "#{$testdata}foobar.fas", "."
   run "touch foo.fas"
-  run_test "#{$bin}gt splitfasta -force -splitdesc . #{$testdata}foobar.fas"
+  run_test "#{$bin}gt splitfasta -force -splitdesc . foobar.fas"
   if not File.exists?("foo.fas") then
     raise TestFailed, "file 'foo.fas' does not exist"
   end

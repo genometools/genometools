@@ -1,3 +1,5 @@
+require 'fileutils'
+
 Name "arg passing test 1"
 Keywords "gt_scripts"
 Test do
@@ -33,8 +35,9 @@ end
   Name "cds_stream bindings #{i}"
   Keywords "gt_scripts"
   Test do
+    FileUtils.copy "#{$testdata}gt_cds_test_#{i}.fas", "."
     run_test "#{$bin}gt  #{$testdata}gtscripts/cds_stream.lua " +
-             "#{$testdata}gt_cds_test_#{i}.fas " +
+             "gt_cds_test_#{i}.fas " +
              "#{$testdata}gt_cds_test_#{i}.in"
     run "sed 's/gtscript/gt cds/' #{last_stdout}"
     run "diff #{last_stdout} #{$testdata}gt_cds_test_#{i}.out"

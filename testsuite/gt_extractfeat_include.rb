@@ -128,20 +128,20 @@ end
 Name "gt extractfeat -regionmapping test 1 (mapping table)"
 Keywords "gt_extractfeat"
 Test do
-  FileUtils.copy "#{$testdata}gt_extractfeat_succ_1.gff3", "."
-  run "env GT_TESTDATA=#{$testdata} #{$memcheck} #{$bin}gt extractfeat " \
+  FileUtils.copy "#{$testdata}gt_extractfeat_succ_1.fas", "."
+  run "env GT_TESTDATA=./ #{$memcheck} #{$bin}gt extractfeat " \
     "-type gene -regionmapping #{$testdata}regionmapping_4.lua " \
-    "gt_extractfeat_succ_1.gff3"
+    "#{$testdata}gt_extractfeat_succ_1.gff3"
   run "diff #{last_stdout} #{$testdata}gt_extractfeat_succ_1.out"
 end
 
 Name "gt extractfeat -regionmapping test 1 (mapping function)"
 Keywords "gt_extractfeat"
 Test do
-  FileUtils.copy "#{$testdata}gt_extractfeat_succ_1.gff3", "."
-  run "env GT_TESTDATA=#{$testdata} #{$memcheck} #{$bin}gt extractfeat " \
+  FileUtils.copy "#{$testdata}gt_extractfeat_succ_1.fas", "."
+  run "env GT_TESTDATA=./ #{$memcheck} #{$bin}gt extractfeat " \
     "-type gene -regionmapping #{$testdata}regionmapping_6.lua " \
-    "gt_extractfeat_succ_1.gff3"
+    "#{$testdata}gt_extractfeat_succ_1.gff3"
 end
 
 Name "gt extractfeat error message"
@@ -268,18 +268,25 @@ end
 Name "gt extractfeat compare query method combinations"
 Keywords "gt_extractfeat query_methods"
 Test do
-  run "#{$bin}gt encseq encode -lossless -indexname ./idx " \
+  FileUtils.copy "#{$testdata}gt_extractfeat_mappings.fas", "."
+  FileUtils.copy "#{$testdata}gt_extractfeat_mappings_sep1.fas", "."
+  FileUtils.copy "#{$testdata}gt_extractfeat_mappings_sep2.fas", "."
+  FileUtils.copy "#{$testdata}gt_extractfeat_mappings_seprm_bar.fas", "."
+  FileUtils.copy "#{$testdata}gt_extractfeat_mappings_seprm_baz.fas", "."
+  FileUtils.copy "#{$testdata}gt_extractfeat_mappings_seprm_foo.fas", "."
+  FileUtils.copy "#{$testdata}gt_extractfeat_mappings_seprm_quux.fas", "."
+  run "#{$bin}gt encseq encode -lossless -indexname idx " \
     "#{$testdata}gt_extractfeat_mappings.fas"
   ["", ".md5"].each do |md5|
     ["-usedesc","-matchdesc"].each do |method|
       run "#{$bin}gt extractfeat #{method} " \
-        "-seqfile #{$testdata}gt_extractfeat_mappings.fas " \
+        "-seqfile gt_extractfeat_mappings.fas " \
         "-type gene #{$testdata}gt_extractfeat_mappings#{md5}.gff3 "
       run "diff #{last_stdout} " \
         "#{$testdata}gt_extractfeat_mappings_ref#{md5}.fas"
       run "#{$bin}gt extractfeat #{method} -seqfiles " \
-        "#{$testdata}gt_extractfeat_mappings_sep1.fas " \
-        "#{$testdata}gt_extractfeat_mappings_sep2.fas " \
+        "gt_extractfeat_mappings_sep1.fas " \
+        "gt_extractfeat_mappings_sep2.fas " \
         "-type gene #{$testdata}gt_extractfeat_mappings#{md5}.gff3 "
       run "diff #{last_stdout} " \
         "#{$testdata}gt_extractfeat_mappings_ref#{md5}.fas"
@@ -288,7 +295,7 @@ Test do
       run "diff #{last_stdout} " \
         "#{$testdata}gt_extractfeat_mappings_ref#{md5}.fas"
     end
-    run "env GT_TESTDATA=#{$testdata} #{$memcheck} #{$bin}gt extractfeat " \
+    run "env GT_TESTDATA=./ #{$memcheck} #{$bin}gt extractfeat " \
       "-regionmapping #{$testdata}gt_extractfeat_mappings_seprm.lua " \
       "-type gene #{$testdata}gt_extractfeat_mappings#{md5}.gff3 "
     run "diff #{last_stdout} #{$testdata}gt_extractfeat_mappings_ref#{md5}.fas"
@@ -298,23 +305,25 @@ end
 Name "gt extractfeat -matchdescstart"
 Keywords "gt_extractfeat matchdescstart"
 Test do
+  FileUtils.copy "#{$testdata}gt_extractfeat_matchdescstart_1.fas", "."
+  FileUtils.copy "#{$testdata}gt_extractfeat_matchdescstart_2.fas", "."
   ["-seqfiles","-seqfile"].each do |method|
     run "#{$bin}gt extractfeat #{method} " \
-      "#{$testdata}gt_extractfeat_matchdescstart_1.fas -type gene -matchdesc " \
+      "gt_extractfeat_matchdescstart_1.fas -type gene -matchdesc " \
       "#{$testdata}gt_extractfeat_matchdescstart_1.gff3", :retval => 1
     grep(last_stderr, "could match more than one sequence")
     run "#{$bin}gt extractfeat #{method} " \
-      "#{$testdata}gt_extractfeat_matchdescstart_1.fas -type gene " \
+      "gt_extractfeat_matchdescstart_1.fas -type gene " \
       "-matchdescstart #{$testdata}gt_extractfeat_matchdescstart_1.gff3"
     run "diff #{last_stdout} #{$testdata}gt_extractfeat_matchdescstart_1.out"
     run "#{$bin}gt extractfeat #{method} " \
-      "#{$testdata}gt_extractfeat_matchdescstart_2.fas -type gene " \
+      "gt_extractfeat_matchdescstart_2.fas -type gene " \
       "-matchdescstart #{$testdata}gt_extractfeat_matchdescstart_1.gff3", \
       :retval => 1
     grep(last_stderr, "could match more than one sequence")
   end
   run "#{$bin}gt encseq encode -lossless -indexname foo " \
-    "#{$testdata}gt_extractfeat_matchdescstart_1.fas"
+    "gt_extractfeat_matchdescstart_1.fas"
   run "#{$bin}gt extractfeat -encseq foo " \
     "-type gene -matchdesc #{$testdata}gt_extractfeat_matchdescstart_1.gff3", \
     :retval => 1
@@ -323,7 +332,7 @@ Test do
     "-matchdescstart #{$testdata}gt_extractfeat_matchdescstart_1.gff3"
   run "diff #{last_stdout} #{$testdata}gt_extractfeat_matchdescstart_1.out"
   run "#{$bin}gt encseq encode -lossless -indexname foo " \
-    "#{$testdata}gt_extractfeat_matchdescstart_2.fas"
+    "gt_extractfeat_matchdescstart_2.fas"
   run "#{$bin}gt extractfeat -encseq foo -type gene " \
     "-matchdescstart #{$testdata}gt_extractfeat_matchdescstart_1.gff3", \
     :retval => 1
