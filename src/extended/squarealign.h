@@ -48,6 +48,15 @@ GtUword alignment_in_square_space(LinspaceManagement *spacemanager,
                                   GtUword mismatchcost,
                                   GtUword gapcost);
 
+/*distance only for global alignment (DNA or protein) */
+GtUword distance_only_global_alignment(const GtUchar *useq,
+                                       GtUword ustart,
+                                       GtUword ulen,
+                                       const GtUchar *vseq,
+                                       GtUword vstart,
+                                       GtUword vlen,
+                                       GtScoreHandler *scorehandler);
+
 void gt_print_edist_alignment(const GtUchar *useq, GtUword ustart, GtUword ulen,
                              const GtUchar *vseq, GtUword vstart, GtUword vlen);
 

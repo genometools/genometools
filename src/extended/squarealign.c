@@ -104,6 +104,28 @@ GtUword alignment_in_square_space_generic (LinspaceManagement *spacemanager,
   return distance;
 }
 
+GtUword distance_only_global_alignment(const GtUchar *useq,
+                                       GtUword ustart,
+                                       GtUword ulen,
+                                       const GtUchar *vseq,
+                                       GtUword vstart,
+                                       GtUword vlen,
+                                       GtScoreHandler *scorehandler)
+{
+  GtUword **E, distance;
+  gt_assert(scorehandler);
+
+  gt_array2dim_malloc(E, (ulen+1), (vlen+1));
+
+  fillDPtab_in_square_space(E, useq, ustart, ulen,
+                            vseq, vstart, vlen, scorehandler);
+
+  distance = E[ulen][vlen];
+  gt_array2dim_delete(E);
+
+  return distance;
+}
+
 /* create an global alignment in square space with constant cost values,
  * to use it in linear context you have to generate an spacemanager before,
  * in any other case it can be NULL */
