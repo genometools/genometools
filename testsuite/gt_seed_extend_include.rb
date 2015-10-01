@@ -3,6 +3,17 @@ def build_encseq(indexname, sequencefile)
     "-indexname " + indexname + " " + sequencefile
 end
 
+seeds = [170039800390891361279027638963673934519,
+         189224055964190192145211745471700259490,
+         80497492730600996116307599313171942911,
+         287388662527785534859766605927664912964,
+         296993902622042895065571446462399141014,
+         267703755545645415708106570926631501781,
+         31312989670081360011048989184888532950,
+         54623490901073137545509422160541861122,
+         255642063275935424280602245704332672807,
+         124756200605387950056148243621528752027]
+
 Name "gt seed_extend mirror, check k-mers and seed pairs"
 Keywords "gt_seed_extend seedpair kmer polysequence xdrop extend"
 Test do
@@ -27,19 +38,63 @@ Test do
   grep last_stdout, /...collected and sorted 68577 seed pairs/
 end
 
+Name "gt seed_extend filter options"
+Keywords "gt_seed_extend options"
+Test do
+  run_test build_encseq("gt_bioseq_succ_3", "#{$testdata}gt_bioseq_succ_3.fas")
+  # filter options
+  for seedlength in [5, 32] do
+    for diagbandwidth in [2, 5] do
+      for mincoverage in [10, 50] do
+        for memlimit in ["30MB", "1GB -mirror"] do
+          run_test "#{$bin}gt seed_extend -seedlength #{seedlength} " +
+                   "-diagbandwidth #{diagbandwidth} " +
+                   "-mincoverage #{mincoverage} " +
+                   "-memlimit #{memlimit} -ii gt_bioseq_succ_3", :retval => 0
+        end
+      end
+    end
+  end
+end
+
+Name "gt seed_extend greedy extension options"
+Keywords "gt_seed_extend options"
+Test do
+  run_test build_encseq("at1MB", "#{$testdata}at1MB")
+  # greedy extend options
+  for sensitivity in [90, 100] do
+    for alignlength in [10, 80] do
+      for history in [10, 64] do
+        run_test "#{$bin}gt seed_extend -extendgreedy #{sensitivity} " +
+                 "-history #{history} -l #{alignlength} -a " +
+                 "-seed-display -ii at1MB", :retval => 0
+      end
+    end
+  end
+  run_test "#{$bin}gt seed_extend -extendgreedy -bias-parameters -verify " +
+           "-overlappingseeds -benchmark -a " +
+           "-seed-display -ii at1MB", :retval => 0
+end
+
+Name "gt seed_extend xdrop extension options"
+Keywords "gt_seed_extend options"
+Test do
+  run_test build_encseq("at1MB", "#{$testdata}at1MB")
+  # xdrop extend options
+  for sensitivity in [90, 100] do
+    for xdbelow in [1, 3, 5] do
+      for cam in ["encseq", "encseq_reader"] do
+        run_test "#{$bin}gt seed_extend -extendxdrop #{sensitivity} " +
+                 "-xdropbelow #{xdbelow} -cam #{cam} -overlappingseeds " +
+                 "-ii at1MB", :retval => 0
+      end
+    end
+  end
+end
+
 Name "gt seed_extend artificial sequences"
 Keywords "gt_seed_extend artificial"
 Test do
-  seeds = [170039800390891361279027638963673934519,
-           189224055964190192145211745471700259490,
-           80497492730600996116307599313171942911,
-           287388662527785534859766605927664912964,
-           296993902622042895065571446462399141014,
-           267703755545645415708106570926631501781,
-           31312989670081360011048989184888532950,
-           54623490901073137545509422160541861122,
-           255642063275935424280602245704332672807,
-           124756200605387950056148243621528752027]
   for seed in seeds do
     for minidentity in [80, 90] do
       run "#{$scriptsdir}gen-randseq.rb --minidentity #{minidentity} " +
