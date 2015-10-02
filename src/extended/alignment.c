@@ -525,8 +525,7 @@ void gt_alignment_show_generic(GtUchar *buffer,
 }
 
 void gt_alignment_exact_show(GtUchar *buffer,
-                             const GtUchar *sequence,
-                             GtUword seqlen,
+                             const GtAlignment *alignment,
                              FILE *fp,
                              unsigned int width,
                              const GtUchar *characters)
@@ -535,9 +534,9 @@ void gt_alignment_exact_show(GtUchar *buffer,
   unsigned int pos = 0;
   GtUchar *topbuf = buffer, *midbuf = NULL, *lowbuf = NULL;
 
-  if ((GtUword) width > seqlen)
+  if ((GtUword) width > alignment->ulen)
   {
-    width = (unsigned int) seqlen;
+    width = (unsigned int) alignment->ulen;
   }
   topbuf[width] = '\n';
   midbuf = topbuf + width + 1;
@@ -548,14 +547,14 @@ void gt_alignment_exact_show(GtUchar *buffer,
   midbuf[width] = '\n';
   lowbuf = midbuf + width + 1;
   lowbuf[width] = '\n';
-  for (idx = 0; idx < seqlen; idx++)
+  for (idx = 0; idx < alignment->ulen; idx++)
   {
     if (characters != NULL)
     {
-      lowbuf[pos] = topbuf[pos] = characters[sequence[idx]];
+      lowbuf[pos] = topbuf[pos] = characters[alignment->u[idx]];
     } else
     {
-      lowbuf[pos] = topbuf[pos] = sequence[idx];
+      lowbuf[pos] = topbuf[pos] = alignment->u[idx];
     }
     pos = gt_alignment_show_advance(pos,width,topbuf,fp);
   }
@@ -588,6 +587,37 @@ void gt_alignment_show(const GtAlignment *alignment, FILE *fp,
 
   gt_alignment_show_generic(buffer, alignment, fp, width,NULL,0);
   gt_alignment_buffer_delete(buffer);
+}
+
+void gt_alignment_verifyexact_match(const GtAlignment *alignment,
+                                    const GtUchar *characters)
+{
+  GtUword idx;
+  bool different = false;
+
+  gt_assert(alignment->u != NULL);
+  gt_assert(alignment->v != NULL);
+  gt_assert(alignment->ulen == alignment->vlen);
+  for (idx = 0; idx < alignment->ulen; idx++)
+  {
+    GtUchar cc_u, cc_v;
+    cc_u = alignment->u[idx];
+    cc_v = alignment->v[idx];
+    if (characters != NULL)
+    {
+      cc_u = characters[(int) cc_u];
+      cc_v = characters[(int) cc_v];
+    }
+    if (cc_u != cc_v)
+    {
+      printf("idx = " GT_WU ": cc_u = %c != %c = cc_v\n",idx,cc_u,cc_v);
+      different = true;
+    }
+  }
+  if (different)
+  {
+    exit(EXIT_FAILURE);
+  }
 }
 
 void gt_alignment_show_with_mapped_chars(const GtAlignment *alignment,

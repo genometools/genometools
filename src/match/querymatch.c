@@ -179,7 +179,7 @@ static bool gt_querymatch_okay(const GtQuerymatch *querymatch)
   {
     if ((uint64_t) querymatch->dbseqnum < querymatch->queryseqnum ||
        ((uint64_t) querymatch->dbseqnum == querymatch->queryseqnum &&
-        querymatch->dbstart_relative <= querymatch->querystart_fwdstrand))
+        querymatch->dbstart_relative < querymatch->querystart_fwdstrand))
     {
       return true;
     }

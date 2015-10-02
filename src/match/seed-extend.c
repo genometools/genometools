@@ -184,7 +184,7 @@ static void gt_sesp_from_relative(GtSeedextendSeqpair *sesp,
 
 #undef SKDEBUG
 #ifdef SKDEBUG
-static void gt_se_show_aligned(bool rightextension,
+void gt_se_show_aligned(bool rightextension,
                                const GtXdropmatchinfo *xdropmatchinfo)
 {
   char *uptr = gt_seqabstract_get(rightextension,xdropmatchinfo->useq);
@@ -799,6 +799,9 @@ static const GtQuerymatch *gt_extend_sesp(bool forxdrop,
     }
     if (forxdrop)
     {
+#ifdef SKDEBUG
+      gt_se_show_aligned(!rightextension,xdropmatchinfo);
+#endif
       gt_evalxdroparbitscoresextend(!rightextension,
                                     &xdropmatchinfo->best_left,
                                     xdropmatchinfo->res,

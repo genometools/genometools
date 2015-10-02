@@ -234,8 +234,20 @@ char *gt_seqabstract_get(bool rightextension,const GtSeqabstract *seq)
   {
     GtUchar cc = gt_seqabstract_get_encoded_char(rightextension,seq,idx);
 
-    gt_assert(cc < 4);
-    buffer[idx] = map[cc];
+    if (cc == WILDCARD)
+    {
+      buffer[idx] = '#';
+    } else
+    {
+      if (cc == SEPARATOR)
+      {
+        buffer[idx] = '$';
+      } else
+      {
+        gt_assert(cc < 4);
+        buffer[idx] = map[cc];
+      }
+    }
   }
   buffer[seq->len] = '\0';
   return buffer;
