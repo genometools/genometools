@@ -344,19 +344,27 @@ static bool seededmatch2eoplist(GtQuerymatchoutoptions *querymatchoutoptions,
 }
 
 #ifdef SKDEBUG
-static void check_correct_edist(const GtUchar *useq,
+static void check_correct_edist(GtReadmode query_readmode,
+                                const GtUchar *useq,
                                 GtUword ulen,
                                 const GtUchar *vseq,
                                 GtUword vlen,
                                 GtUword edist)
 {
-  GtUword realedist;
+  GT_UNUSED GtUword realedist;
   GtFrontResource *ftres = gt_frontresource_new(edist);
-  GtSeqabstract *useq_abstract = gt_seqabstract_new_gtuchar(useq, ulen, 0,ulen);
-  GtSeqabstract *vseq_abstract = gt_seqabstract_new_gtuchar(vseq, vlen, 0,vlen);
+  GtSeqabstract *useq_abstract
+    = gt_seqabstract_new_gtuchar(true,GT_READMODE_FORWARD,useq, ulen, 0,ulen);
+  GtSeqabstract *vseq_abstract
+    = gt_seqabstract_new_gtuchar(true,query_readmode,vseq, vlen, 0,vlen);
 
   realedist = greedyunitedist(ftres,useq_abstract,vseq_abstract);
-  gt_assert(realedist <= edist);
+  /*
+  if (realedist > edist)
+  {
+    printf("realedist = " GT_WU " > " GT_WU " = edist\n",realedist,edist);
+  }
+  gt_assert(realedist <= edist);*/
   gt_seqabstract_delete(useq_abstract);
   gt_seqabstract_delete(vseq_abstract);
   gt_frontresource_delete(ftres);
@@ -410,8 +418,6 @@ bool gt_querymatchoutoptions_alignment_prepare(GtQuerymatchoutoptions
                             querymatchoutoptions->useqbuffer,
                             dbstart,
                             dbstart + dblen - 1);
-  if (edist > 0)
-  {
     if ((query == NULL || query_readmode != GT_READMODE_FORWARD) &&
         querylen > querymatchoutoptions->vseqbuffer_size)
     {
@@ -459,6 +465,8 @@ bool gt_querymatchoutoptions_alignment_prepare(GtQuerymatchoutoptions
         }
       }
     }
+  if (edist > 0)
+  {
     if (seededmatch2eoplist(querymatchoutoptions,
                             encseq,
                             query,
@@ -518,13 +526,6 @@ bool gt_querymatchoutoptions_alignment_prepare(GtQuerymatchoutoptions
         /*printf("linedist = " GT_WU " <= " GT_WU "= edist\n",linedist,edist);*/
       }
     }
-#ifdef SKDEBUG
-    check_correct_edist(querymatchoutoptions->useqbuffer,
-                        dblen,
-                        querymatchoutoptions->vseqbuffer,
-                        querylen,
-                        edist);
-#endif
   }
   return seededalignment;
 }
@@ -532,7 +533,9 @@ bool gt_querymatchoutoptions_alignment_prepare(GtQuerymatchoutoptions
 void gt_querymatchoutoptions_alignment_show(const GtQuerymatchoutoptions
                                               *querymatchoutoptions,
                                             GtUword edist,
-                                            GtUword len)
+                                            GtUword dblen,
+                                            GT_UNUSED GtUword querylen,
+                                            GT_UNUSED GtReadmode query_readmode)
 {
   if (querymatchoutoptions != NULL && querymatchoutoptions->alignmentwidth > 0)
   {
@@ -545,15 +548,48 @@ void gt_querymatchoutoptions_alignment_show(const GtQuerymatchoutoptions
                                 querymatchoutoptions->alignmentwidth,
                                 querymatchoutoptions->characters,
                                 querymatchoutoptions->wildcardshow);
+#ifdef SKDEBUG
+      check_correct_edist(query_readmode,
+                          querymatchoutoptions->useqbuffer,
+                          dblen,
+                          querymatchoutoptions->vseqbuffer,
+                          querylen,
+                          edist);
+#endif
       gt_alignment_reset(querymatchoutoptions->alignment);
     } else
     {
+#ifdef SKDEBUG
+      GtUword idx;
+#endif
+
+      gt_assert(dblen == querylen);
       gt_alignment_exact_show(querymatchoutoptions->alignment_show_buffer,
                               querymatchoutoptions->useqbuffer,
-                              len,
+                              dblen,
                               stdout,
                               querymatchoutoptions->alignmentwidth,
                               querymatchoutoptions->characters);
+#ifdef SKDEBUG
+     gt_assert(querymatchoutoptions->vseqbuffer != NULL);
+     for (idx = 0; idx < dblen; idx++)
+     {
+       GtUchar cc_u, cc_v;
+       cc_u = querymatchoutoptions->useqbuffer[idx];
+       cc_v = querymatchoutoptions->vseqbuffer[idx];
+       if (querymatchoutoptions->characters != NULL)
+       {
+         cc_u = querymatchoutoptions->characters[(int) cc_u];
+         cc_v = querymatchoutoptions->characters[(int) cc_v];
+       }
+       if (cc_u != cc_v)
+       {
+         fprintf(stderr,"idx = " GT_WU ": cc_u = %c != %c = cc_v\n",idx,
+                 cc_u,cc_v);
+         exit(EXIT_FAILURE);
+       }
+     }
+#endif
     }
   }
 }

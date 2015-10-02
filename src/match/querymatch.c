@@ -161,12 +161,36 @@ static void gt_verify_exact_selfmatch(const GtEncseq *encseq,
 }
 #endif
 
+static bool gt_querymatch_okay(const GtQuerymatch *querymatch)
+{
+  if (!querymatch->selfmatch)
+  {
+    return true;
+  }
+  if (GT_ISDIRREVERSE(querymatch->query_readmode))
+  {
+    if ((uint64_t) querymatch->dbseqnum < querymatch->queryseqnum ||
+       ((uint64_t) querymatch->dbseqnum == querymatch->queryseqnum &&
+        querymatch->dbstart_relative <= querymatch->querystart_fwdstrand))
+    {
+      return true;
+    }
+  } else
+  {
+    if ((uint64_t) querymatch->dbseqnum < querymatch->queryseqnum ||
+       ((uint64_t) querymatch->dbseqnum == querymatch->queryseqnum &&
+        querymatch->dbstart_relative <= querymatch->querystart_fwdstrand))
+    {
+      return true;
+    }
+  }
+  return false;
+}
+
 void gt_querymatch_prettyprint(const GtQuerymatch *querymatch)
 {
   gt_assert(querymatch != NULL);
-  if (!querymatch->selfmatch ||
-      (uint64_t) querymatch->dbseqnum != querymatch->queryseqnum ||
-      querymatch->dbstart_relative <= querymatch->querystart_fwdstrand)
+  if (gt_querymatch_okay(querymatch))
   {
     const char *outflag = "FRCP";
 
@@ -203,7 +227,9 @@ void gt_querymatch_prettyprint(const GtQuerymatch *querymatch)
     printf("\n");
     gt_querymatchoutoptions_alignment_show(querymatch->ref_querymatchoutoptions,
                                            querymatch->distance,
-                                           querymatch->dblen);
+                                           querymatch->dblen,
+                                           querymatch->querylen,
+                                           querymatch->query_readmode);
   }
 }
 
@@ -308,7 +334,7 @@ bool gt_querymatch_complete(GtQuerymatch *querymatchptr,
       bool seededalignment;
       GtUword querystartabsolute;
 
-      if (query == NULL)
+      if (query == NULL || query->seq == NULL)
       {
         querystartabsolute
           = gt_encseq_seqstartpos(encseq,querymatchptr->queryseqnum) +

@@ -530,7 +530,8 @@ typedef void (*GtXdrop_extend_querymatch_func)(void *,
                                                const GtSeqorEncseq *,
                                                GtUword);
 
-static int gt_callenumquerymatches(const char *indexname,
+static int gt_callenumquerymatches(bool selfmatch,
+                                   const char *indexname,
                                    const GtStrArray *queryfiles,
                                    GtReadmode query_readmode,
                                    unsigned int userdefinedleastlength,
@@ -543,6 +544,7 @@ static int gt_callenumquerymatches(const char *indexname,
   Suffixarray suffixarray;
   GtQuerysubstringmatchiterator *qsmi = NULL;
   bool haserr = false;
+  GtEncseq *query_encseq = NULL;
 
   if (gt_mapsuffixarray(&suffixarray,
                         SARR_ESQTAB | SARR_SUFTAB | SARR_SSPTAB,
@@ -556,13 +558,17 @@ static int gt_callenumquerymatches(const char *indexname,
   {
     GtUword totallength = gt_encseq_total_length(suffixarray.encseq);
 
+    if (queryfiles == NULL)
+    {
+      query_encseq = suffixarray.encseq;
+    }
     qsmi = gt_querysubstringmatchiterator_new(suffixarray.encseq,
                                               totallength,
                                               suffixarray.suftab,
                                               suffixarray.readmode,
                                               totallength + 1,
                                               queryfiles,
-                                              NULL,
+                                              query_encseq,
                                               query_readmode,
                                               userdefinedleastlength,
                                               err);
@@ -595,8 +601,15 @@ static int gt_callenumquerymatches(const char *indexname,
       }
       matchlength = gt_querysubstringmatchiterator_matchlength(qsmi);
       query_seqlen = gt_querysubstringmatchiterator_query_seqlen(qsmi);
-      query_seqorencseq.seq = gt_querysubstringmatchiterator_query(qsmi);
-      query_seqorencseq.encseq = NULL;
+      if (queryfiles != NULL)
+      {
+        query_seqorencseq.seq = gt_querysubstringmatchiterator_query(qsmi);
+        query_seqorencseq.encseq = NULL;
+      } else
+      {
+        query_seqorencseq.seq = NULL;
+        query_seqorencseq.encseq = query_encseq;
+      }
       querystart = gt_querysubstringmatchiterator_querystart(qsmi);
       queryunitnum = gt_querysubstringmatchiterator_queryunitnum(qsmi);
       if (eqmf != NULL)
@@ -608,7 +621,7 @@ static int gt_callenumquerymatches(const char *indexname,
                            dbstart - dbseqstartpos,
                            0, /* score */
                            0, /* edist */
-                           false, /* selfmatch */
+                           selfmatch,
                            queryunitnum,
                            matchlength,
                            querystart,
@@ -624,7 +637,7 @@ static int gt_callenumquerymatches(const char *indexname,
                                    dbstart - dbseqstartpos,
                                    0, /* score */
                                    0, /* edist */
-                                   false, /* selfmatch */
+                                   selfmatch,
                                    queryunitnum,
                                    matchlength,
                                    querystart,
@@ -817,6 +830,8 @@ static int gt_repfind_runner(int argc,
           gt_querymatch_query_readmode_set(
             processinfo_and_querymatchspaceptr.querymatchspaceptr,
             GT_READMODE_REVERSE);
+          /*
+          printf("old matches\n");
           if (gt_callenumselfmatches(gt_str_get(arguments->indexname),
                                      GT_READMODE_REVERSE,
                                      arguments->seedlength,
@@ -824,6 +839,21 @@ static int gt_repfind_runner(int argc,
                                      NULL,
                                      logger,
                                      err) != 0)
+          {
+            haserr = true;
+          }
+          printf("new matches\n");
+          */
+          if (gt_callenumquerymatches(true,
+                                      gt_str_get(arguments->indexname),
+                                      NULL,
+                                      GT_READMODE_REVERSE,
+                                      arguments->seedlength,
+                                      querymatchoutoptions,
+                                      NULL,
+                                      NULL,
+                                      logger,
+                                      err) != 0)
           {
             haserr = true;
           }
@@ -867,7 +897,8 @@ static int gt_repfind_runner(int argc,
             processinfo_and_querymatchspaceptr.querymatchspaceptr,
             GT_READMODE_REVERSE);
       }
-      if (gt_callenumquerymatches(gt_str_get(arguments->indexname),
+      if (gt_callenumquerymatches(false,
+                                  gt_str_get(arguments->indexname),
                                   arguments->queryfiles,
                                   arguments->reverse ? GT_READMODE_REVERSE
                                                      : GT_READMODE_FORWARD,

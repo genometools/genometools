@@ -59,7 +59,10 @@ bool gt_querymatchoutoptions_alignment_prepare(
 void gt_querymatchoutoptions_alignment_show(const GtQuerymatchoutoptions
                                               *querymatchoutoptions,
                                             GtUword edist,
-                                            GtUword len);
+                                            GtUword dblen,
+                                            GT_UNUSED GtUword querylen,
+                                            GT_UNUSED GtReadmode
+                                                        query_readmode);
 
 typedef struct
 {
