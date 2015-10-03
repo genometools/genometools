@@ -61,8 +61,7 @@ void gt_querymatchoutoptions_alignment_show(const GtQuerymatchoutoptions
                                             GtUword edist,
                                             GtUword dblen,
                                             GT_UNUSED GtUword querylen,
-                                            GT_UNUSED GtReadmode
-                                                        query_readmode);
+                                            bool verify_alignment);
 
 typedef struct
 {

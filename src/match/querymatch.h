@@ -99,6 +99,8 @@ bool gt_querymatch_verify(const GtQuerymatch *querymatch,
 void gt_querymatch_query_readmode_set(GtQuerymatch *querymatch,
                                       GtReadmode query_readmode);
 
+void gt_querymatch_verify_alignment_set(GtQuerymatch *querymatch);
+
 GtReadmode gt_querymatch_query_readmode(const GtQuerymatch *querymatch);
 
 GtWord gt_querymatch_distance2score(GtUword distance,GtUword alignedlen);

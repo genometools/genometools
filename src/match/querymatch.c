@@ -47,7 +47,8 @@ struct GtQuerymatch
    GtReadmode query_readmode; /* readmode of query sequence */
    bool selfmatch,       /* true if both instances of the match refer to the
                             same sequence */
-        seed_display;
+        seed_display,
+        verify_alignment;
    GtQuerymatchoutoptions *ref_querymatchoutoptions; /* reference to
         resources needed for alignment output */
 };
@@ -61,6 +62,7 @@ GtQuerymatch *gt_querymatch_new(GtQuerymatchoutoptions *querymatchoutoptions,
   querymatch->ref_querymatchoutoptions = querymatchoutoptions;
   querymatch->seed_display = seed_display;
   querymatch->query_readmode = GT_READMODE_FORWARD;
+  querymatch->verify_alignment = false;
   return querymatch;
 }
 
@@ -229,7 +231,7 @@ void gt_querymatch_prettyprint(const GtQuerymatch *querymatch)
                                            querymatch->distance,
                                            querymatch->dblen,
                                            querymatch->querylen,
-                                           querymatch->query_readmode);
+                                           querymatch->verify_alignment);
   }
 }
 
@@ -404,6 +406,12 @@ void gt_querymatch_query_readmode_set(GtQuerymatch *querymatch,
 {
   gt_assert(querymatch != NULL);
   querymatch->query_readmode = query_readmode;
+}
+
+void gt_querymatch_verify_alignment_set(GtQuerymatch *querymatch)
+{
+  gt_assert(querymatch != NULL);
+  querymatch->verify_alignment = true;
 }
 
 GtReadmode gt_querymatch_query_readmode(const GtQuerymatch *querymatch)

@@ -28,7 +28,8 @@
 #include "core/xansi_api.h"
 #include "core/types_api.h"
 #include "core/chardef.h"
-#include "extended/alignment.h"
+#include "match/greedyedist.h"
+#include "alignment.h"
 
 struct GtAlignment {
   GtRange         aligned_range_u,
@@ -589,8 +590,7 @@ void gt_alignment_show(const GtAlignment *alignment, FILE *fp,
   gt_alignment_buffer_delete(buffer);
 }
 
-void gt_alignment_verifyexact_match(const GtAlignment *alignment,
-                                    const GtUchar *characters)
+static void gt_alignment_check_match(const GtAlignment *alignment)
 {
   GtUword idx;
   bool different = false;
@@ -600,14 +600,8 @@ void gt_alignment_verifyexact_match(const GtAlignment *alignment,
   gt_assert(alignment->ulen == alignment->vlen);
   for (idx = 0; idx < alignment->ulen; idx++)
   {
-    GtUchar cc_u, cc_v;
-    cc_u = alignment->u[idx];
-    cc_v = alignment->v[idx];
-    if (characters != NULL)
-    {
-      cc_u = characters[(int) cc_u];
-      cc_v = characters[(int) cc_v];
-    }
+    GtUchar cc_u = alignment->u[idx];
+    GtUchar cc_v = alignment->v[idx];
     if (cc_u != cc_v)
     {
       printf("idx = " GT_WU ": cc_u = %c != %c = cc_v\n",idx,cc_u,cc_v);
@@ -617,6 +611,42 @@ void gt_alignment_verifyexact_match(const GtAlignment *alignment,
   if (different)
   {
     exit(EXIT_FAILURE);
+  }
+}
+
+void gt_alignment_check_edist(const GtAlignment *alignment,GtUword edist)
+{
+  if (edist == 0)
+  {
+    gt_alignment_check_match(alignment);
+  } else
+  {
+    GtUword realedist;
+    GtFrontResource *ftres = gt_frontresource_new(edist);
+    GtSeqabstract *useq_abstract
+      = gt_seqabstract_new_gtuchar(true,
+                                   GT_READMODE_FORWARD,
+                                   alignment->u,
+                                   alignment->ulen,
+                                   0,
+                                   alignment->ulen);
+    GtSeqabstract *vseq_abstract
+      = gt_seqabstract_new_gtuchar(true,
+                                   GT_READMODE_FORWARD,
+                                   alignment->v,
+                                   alignment->vlen,
+                                   0,
+                                   alignment->vlen);
+
+    realedist = greedyunitedist(ftres,useq_abstract,vseq_abstract);
+    if (realedist > edist)
+    {
+      printf("realedist = " GT_WU " > " GT_WU " = edist\n",realedist,edist);
+    }
+    gt_assert(realedist <= edist);
+    gt_seqabstract_delete(useq_abstract);
+    gt_seqabstract_delete(vseq_abstract);
+    gt_frontresource_delete(ftres);
   }
 }
 

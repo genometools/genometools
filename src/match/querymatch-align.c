@@ -20,10 +20,6 @@
 #include "core/types_api.h"
 #include "extended/alignment.h"
 #include "extended/linearalign.h"
-#define SKDEBUG
-#ifdef SKDEBUG
-#include "match/greedyedist.h"
-#endif
 #include "revcompl.h"
 #include "seed-extend.h"
 #include "querymatch-align.h"
@@ -343,34 +339,6 @@ static bool seededmatch2eoplist(GtQuerymatchoutoptions *querymatchoutoptions,
   return alignment_succeeded;
 }
 
-#ifdef SKDEBUG
-static void gt_querymatch_check_correct_edist(GtReadmode query_readmode,
-                                const GtUchar *useq,
-                                GtUword ulen,
-                                const GtUchar *vseq,
-                                GtUword vlen,
-                                GtUword edist)
-{
-  GT_UNUSED GtUword realedist;
-  GtFrontResource *ftres = gt_frontresource_new(edist);
-  GtSeqabstract *useq_abstract
-    = gt_seqabstract_new_gtuchar(true,GT_READMODE_FORWARD,useq, ulen, 0,ulen);
-  GtSeqabstract *vseq_abstract
-    = gt_seqabstract_new_gtuchar(true,query_readmode,vseq, vlen, 0,vlen);
-
-  realedist = greedyunitedist(ftres,useq_abstract,vseq_abstract);
-  /*
-  if (realedist > edist)
-  {
-    printf("realedist = " GT_WU " > " GT_WU " = edist\n",realedist,edist);
-  }
-  gt_assert(realedist <= edist);*/
-  gt_seqabstract_delete(useq_abstract);
-  gt_seqabstract_delete(vseq_abstract);
-  gt_frontresource_delete(ftres);
-}
-#endif
-
 bool gt_querymatchoutoptions_alignment_prepare(GtQuerymatchoutoptions
                                                 *querymatchoutoptions,
                                                const GtEncseq *encseq,
@@ -546,9 +514,9 @@ bool gt_querymatchoutoptions_alignment_prepare(GtQuerymatchoutoptions
 void gt_querymatchoutoptions_alignment_show(const GtQuerymatchoutoptions
                                               *querymatchoutoptions,
                                             GtUword edist,
-                                            GT_UNUSED GtUword dblen,
+                                            GtUword dblen,
                                             GT_UNUSED GtUword querylen,
-                                            GT_UNUSED GtReadmode query_readmode)
+                                            bool verify_alignment)
 {
   if (querymatchoutoptions != NULL && querymatchoutoptions->alignmentwidth > 0)
   {
@@ -561,14 +529,10 @@ void gt_querymatchoutoptions_alignment_show(const GtQuerymatchoutoptions
                                 querymatchoutoptions->alignmentwidth,
                                 querymatchoutoptions->characters,
                                 querymatchoutoptions->wildcardshow);
-#ifdef SKDEBUG
-      gt_querymatch_check_correct_edist(query_readmode,
-                          querymatchoutoptions->useqbuffer,
-                          dblen,
-                          querymatchoutoptions->vseqbuffer,
-                          querylen,
-                          edist);
-#endif
+      if (verify_alignment)
+      {
+        gt_alignment_check_edist(querymatchoutoptions->alignment,edist);
+      }
       gt_alignment_reset(querymatchoutoptions->alignment);
     } else
     {
@@ -578,10 +542,10 @@ void gt_querymatchoutoptions_alignment_show(const GtQuerymatchoutoptions
                               stdout,
                               querymatchoutoptions->alignmentwidth,
                               querymatchoutoptions->characters);
-#ifdef SKDEBUG
-     gt_alignment_verifyexact_match(querymatchoutoptions->alignment,
-                                    querymatchoutoptions->characters);
-#endif
+      if (verify_alignment)
+      {
+        gt_alignment_check_edist(querymatchoutoptions->alignment,0);
+      }
     }
   }
 }

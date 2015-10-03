@@ -60,7 +60,8 @@ typedef struct
           alignmentwidth; /* 0 for no alignment display and otherwidth number
                              of columns of alignment per line displayed. */
   bool scanfile, beverbose, forward, reverse, searchspm,
-       check_extend_symmetry, silent, trimstat, seed_display, noxpolish;
+       check_extend_symmetry, silent, trimstat, seed_display, noxpolish,
+       verify_alignment;
   GtStr *indexname, *cam_string; /* parse this using
                                     gt_greedy_extend_char_access*/
   GtStrArray *queryfiles;
@@ -217,7 +218,8 @@ static GtOptionParser *gt_repfind_option_parser_new(void *tool_arguments)
            *maxalilendiffoption, *leastlength_option, *char_access_mode_option,
            *check_extend_symmetry_option, *xdropbelowoption, *historyoption,
            *percmathistoryoption, *errorpercentageoption, *optiontrimstat,
-           *withalignmentoption, *optionseed_display, *optionnoxpolish;
+           *withalignmentoption, *optionseed_display, *optionnoxpolish,
+           *verify_alignment_option;
   GtMaxpairsoptions *arguments = tool_arguments;
 
   op = gt_option_parser_new("[options] -ii indexname",
@@ -379,6 +381,12 @@ static GtOptionParser *gt_repfind_option_parser_new(void *tool_arguments)
   gt_option_parser_add_option(op, optionnoxpolish);
   gt_option_is_development_option(optionnoxpolish);
 
+  verify_alignment_option
+    = gt_option_new_bool("verify-alignment","verify correctness of alignments",
+                         &arguments->verify_alignment, false);
+  gt_option_parser_add_option(op, verify_alignment_option);
+  gt_option_is_development_option(verify_alignment_option);
+
   optiontrimstat = gt_option_new_bool("trimstat","show trimming statistics",
                                       &arguments->trimstat, false);
   gt_option_parser_add_option(op, optiontrimstat);
@@ -445,6 +453,7 @@ static GtOptionParser *gt_repfind_option_parser_new(void *tool_arguments)
   gt_option_imply(maxalilendiffoption,extendgreedyoption);
   gt_option_imply(percmathistoryoption,extendgreedyoption);
   gt_option_imply(optiontrimstat,extendgreedyoption);
+  gt_option_imply(verify_alignment_option,withalignmentoption);
   gt_option_imply(optionnoxpolish,extendxdropoption);
   gt_option_imply_either_2(seedlengthoption,extendxdropoption,
                            extendgreedyoption);
@@ -779,6 +788,11 @@ static int gt_repfind_runner(int argc,
     }
     processinfo_and_querymatchspaceptr.querymatchspaceptr
       = gt_querymatch_new(querymatchoutoptions,arguments->seed_display);
+    if (arguments->verify_alignment)
+    {
+      gt_querymatch_verify_alignment_set(
+        processinfo_and_querymatchspaceptr.querymatchspaceptr);
+    }
     if (gt_str_array_size(arguments->queryfiles) == 0)
     {
       if (arguments->samples == 0)
