@@ -255,7 +255,7 @@ int gt_querymatch_output(GT_UNUSED void *info,
   return 0;
 }
 
-bool gt_querymatch_verify(const GtQuerymatch *querymatch,
+bool gt_querymatch_check_final(const GtQuerymatch *querymatch,
                           GtUword errorpercentage,
                           GtUword userdefinedleastlength)
 {

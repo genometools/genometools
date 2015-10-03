@@ -92,9 +92,9 @@ double gt_querymatch_error_rate(GtUword distance,GtUword alignedlen);
 
 void gt_querymatch_prettyprint(const GtQuerymatch *querymatch);
 
-bool gt_querymatch_verify(const GtQuerymatch *querymatch,
-                          GtUword errorpercentage,
-                          GtUword userdefinedleastlength);
+bool gt_querymatch_check_final(const GtQuerymatch *querymatch,
+                               GtUword errorpercentage,
+                               GtUword userdefinedleastlength);
 
 void gt_querymatch_query_readmode_set(GtQuerymatch *querymatch,
                                       GtReadmode query_readmode);

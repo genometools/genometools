@@ -550,8 +550,8 @@ static GtUword gt_diagbandseed_process_seeds(const GtEncseq *aencseq,
           if (querymatch != NULL) {
             firstinrange = false;
             /* show extension results */
-            if (gt_querymatch_verify(querymatch,errorpercentage,
-                                     userdefinedleastlength))
+            if (gt_querymatch_check_final(querymatch,errorpercentage,
+                                          userdefinedleastlength))
             {
               gt_querymatch_prettyprint(querymatch);
             }

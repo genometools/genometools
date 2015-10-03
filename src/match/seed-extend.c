@@ -1013,7 +1013,8 @@ static void gt_extend_prettyprint(bool forxdrop,const GtQuerymatch *querymatch,
     errorpercentage = ggemi->errorpercentage;
     userdefinedleastlength = ggemi->userdefinedleastlength;
   }
-  if (gt_querymatch_verify(querymatch,errorpercentage,userdefinedleastlength))
+  if (gt_querymatch_check_final(querymatch,errorpercentage,
+                                userdefinedleastlength))
   {
     gt_querymatch_prettyprint(querymatch);
   }
