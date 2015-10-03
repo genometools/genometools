@@ -267,9 +267,7 @@ static bool seededmatch2eoplist(GtQuerymatchoutoptions *querymatchoutoptions,
     }
     if (seedpos1 > dbstart && seedpos2 > querystartabsolute)
     {
-      ustart = seedpos1 - 1;
       ulen = seedpos1 - dbstart;
-      vstart = seedpos2 - 1;
       vlen = seedpos2 - querystartabsolute;
       if (gt_align_front_prune_edist(false,
                                      &left_best_polished_point,

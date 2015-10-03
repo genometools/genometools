@@ -184,7 +184,7 @@ static void gt_sesp_from_relative(GtSeedextendSeqpair *sesp,
 
 #undef SKDEBUG
 #ifdef SKDEBUG
-void gt_se_show_aligned(bool rightextension,
+static void gt_se_show_aligned(bool rightextension,
                                const GtXdropmatchinfo *xdropmatchinfo)
 {
   char *uptr = gt_seqabstract_get(rightextension,xdropmatchinfo->useq);
@@ -501,10 +501,11 @@ static void gt_greedy_extend_init(FTsequenceResources *ufsr,
                                               GT_READMODE_FORWARD,
                                               0);
   }
-  if (query == NULL && ggemi->encseq_r_in_v == NULL)
+  if ((query == NULL || query->encseq != NULL) && ggemi->encseq_r_in_v == NULL)
   {
     ggemi->encseq_r_in_v
-      = gt_encseq_create_reader_with_readmode(dbencseq,
+      = gt_encseq_create_reader_with_readmode(query == NULL ? dbencseq
+                                                            : query->encseq,
                                               query_readmode,
                                               0);
   }
