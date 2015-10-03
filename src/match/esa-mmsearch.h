@@ -22,16 +22,7 @@
 #include "sarr-def.h"
 #include "querymatch.h"
 
-typedef int (*GtProcessquerymatch)(void *,
-                                   const GtEncseq *,
-                                   const GtQuerymatch *,
-                                   const GtUchar *query,
-                                   GtUword query_totallength,
-                                   GtError *);
-
-typedef void (*GtProcessquerybeforematching)(void *,const char *,
-                                             const GtUchar *,GtUword,
-                                             bool);
+typedef void (*GtProcessquerymatch)(void *,const GtQuerymatch *);
 
 typedef struct GtMMsearchiterator GtMMsearchiterator;
 

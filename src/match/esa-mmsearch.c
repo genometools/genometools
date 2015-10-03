@@ -410,20 +410,18 @@ static GtUword gt_mmsearch_extendright(const GtEncseq *dbencseq,
   return dbpos - dbend;
 }
 
-int gt_queryuniquematch(bool selfmatch,
+void gt_queryuniquematch(bool selfmatch,
                         const Suffixarray *suffixarray,
                         uint64_t queryunitnum,
                         GtQueryrepresentation *queryrep,
                         GtUword minmatchlength,
                         GtProcessquerymatch processquerymatch,
                         void *processquerymatchinfo,
-                        GtQuerymatch *querymatchspaceptr,
-                        GtError *err)
+                        GtQuerymatch *querymatchspaceptr)
 {
   GtUword offset, totallength = gt_encseq_total_length(suffixarray->encseq),
           localqueryoffset = 0;
   uint64_t localqueryunitnum = queryunitnum;
-  bool haserr = false;
 
   gt_assert(!selfmatch && queryrep->seqlen >= minmatchlength);
   for (offset = 0; offset <= queryrep->seqlen - minmatchlength; offset++)
@@ -461,49 +459,35 @@ int gt_queryuniquematch(bool selfmatch,
                          matchlen,
                          localqueryoffset,
                          queryrep->seqlen);
-      if (processquerymatch(processquerymatchinfo,
-                            suffixarray->encseq,
-                            querymatchspaceptr,
-                            queryrep->sequence,
-                            queryrep->seqlen,
-                            err) != 0)
-      {
-        haserr = true;
-      }
+      processquerymatch(processquerymatchinfo,querymatchspaceptr);
     }
-    if (!haserr)
+    if (queryrep->sequence[offset] == (GtUchar) SEPARATOR)
     {
-      if (queryrep->sequence[offset] == (GtUchar) SEPARATOR)
-      {
-        localqueryunitnum++;
-        localqueryoffset = 0;
-      } else
-      {
-        localqueryoffset++;
-      }
+      localqueryunitnum++;
+      localqueryoffset = 0;
+    } else
+    {
+      localqueryoffset++;
     }
   }
-  return haserr ? -1 : 0;
 }
 
-static int gt_querysubstringmatch(bool selfmatch,
-                                  const GtEncseq *dbencseq,
-                                  const ESASuffixptr *suftabpart,
-                                  GtReadmode readmode,
-                                  GtUword numberofsuffixes,
-                                  uint64_t queryunitnum,
-                                  GtQueryrepresentation *queryrep,
-                                  GtUword minmatchlength,
-                                  GtProcessquerymatch processquerymatch,
-                                  void *processquerymatchinfo,
-                                  GtQuerymatch *querymatchspaceptr,
-                                  GtError *err)
+static void gt_querysubstringmatch(bool selfmatch,
+                                   const GtEncseq *dbencseq,
+                                   const ESASuffixptr *suftabpart,
+                                   GtReadmode readmode,
+                                   GtUword numberofsuffixes,
+                                   uint64_t queryunitnum,
+                                   GtQueryrepresentation *queryrep,
+                                   GtUword minmatchlength,
+                                   GtProcessquerymatch processquerymatch,
+                                   void *processquerymatchinfo,
+                                   GtQuerymatch *querymatchspaceptr)
 {
   GtMMsearchiterator *mmsi;
   GtUword totallength, localqueryoffset = 0;
   uint64_t localqueryunitnum = queryunitnum;
   GtQuerysubstring querysubstring;
-  bool haserr = false;
 
   gt_assert(numberofsuffixes > 0);
   totallength = gt_encseq_total_length(dbencseq);
@@ -522,7 +506,7 @@ static int gt_querysubstringmatch(bool selfmatch,
                                    readmode,
                                    &querysubstring,
                                    minmatchlength);
-    while (!haserr && gt_mmsearchiterator_next(&dbstart,mmsi))
+    while (gt_mmsearchiterator_next(&dbstart,mmsi))
     {
       if (gt_mmsearch_isleftmaximal(dbencseq,
                                     readmode,
@@ -559,33 +543,21 @@ static int gt_querysubstringmatch(bool selfmatch,
                            minmatchlength + extend,
                            localqueryoffset,
                            queryrep->seqlen);
-        if (processquerymatch(processquerymatchinfo,
-                              dbencseq,
-                              querymatchspaceptr,
-                              queryrep->sequence,
-                              queryrep->seqlen,
-                              err) != 0)
-        {
-          haserr = true;
-        }
+        processquerymatch(processquerymatchinfo,querymatchspaceptr);
       }
     }
     gt_mmsearchiterator_delete(mmsi);
     mmsi = NULL;
-    if (!haserr)
+    if (gt_mmsearch_accessquery(queryrep,querysubstring.currentoffset)
+        == (GtUchar) SEPARATOR)
     {
-      if (gt_mmsearch_accessquery(queryrep,querysubstring.currentoffset)
-          == (GtUchar) SEPARATOR)
-      {
-        localqueryunitnum++;
-        localqueryoffset = 0;
-      } else
-      {
-        localqueryoffset++;
-      }
+      localqueryunitnum++;
+      localqueryoffset = 0;
+    } else
+    {
+      localqueryoffset++;
     }
   }
-  return haserr ? -1 : 0;
 }
 
 static int gt_constructsarrandrunmmsearch(
@@ -643,23 +615,18 @@ static int gt_constructsarrandrunmmsearch(
       {
         break;
       }
-      if (gt_querysubstringmatch(false,
-                                 dbencseq,
-                                 (const ESASuffixptr *)
-                                 gt_suffixsortspace_ulong_get(suffixsortspace),
-                                 readmode,
-                                 numberofsuffixes,
-                                 0,
-                                 &queryrep,
-                                 (GtUword) minlength,
-                                 processquerymatch,
-                                 processquerymatchinfo,
-                                 querymatchspaceptr,
-                                 err) != 0)
-      {
-        haserr = true;
-        break;
-      }
+      gt_querysubstringmatch(false,
+                             dbencseq,
+                             (const ESASuffixptr *)
+                             gt_suffixsortspace_ulong_get(suffixsortspace),
+                             readmode,
+                             numberofsuffixes,
+                             0,
+                             &queryrep,
+                             (GtUword) minlength,
+                             processquerymatch,
+                             processquerymatchinfo,
+                             querymatchspaceptr);
     }
     gt_querymatch_delete(querymatchspaceptr);
   }

@@ -177,11 +177,7 @@ static int gt_tir_store_seeds(void *info, const GtGenericEncseq *genericencseq,
   return 0;
 }
 
-static int gt_tir_store_TSDs(void *info, GT_UNUSED const GtEncseq *encseq,
-                             const GtQuerymatch *querymatch,
-                             GT_UNUSED const GtUchar *query,
-                             GT_UNUSED GtUword query_totallength,
-                             GT_UNUSED GtError *err)
+static void gt_tir_store_TSDs(void *info, const GtQuerymatch *querymatch)
 {
   Seed *nextfree;
   TSDinfo *TSDs = (TSDinfo *) info;
@@ -193,7 +189,6 @@ static int gt_tir_store_TSDs(void *info, GT_UNUSED const GtEncseq *encseq,
                        + gt_querymatch_querystart(querymatch)
                        - (nextfree->pos1);
   nextfree->len = gt_querymatch_querylen(querymatch);
-  return 0;
 }
 
 static int gt_tir_compare_TIRs(const void *a, const void *b)

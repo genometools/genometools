@@ -228,13 +228,8 @@ static int gt_simpleexactselfmatchstore(void *info,
   return 0;
 }
 
-static int gt_subsimpleexactselfmatchstore(void *info,
-                                            GT_UNUSED const GtEncseq *encseq,
-                                            const GtQuerymatch *querymatch,
-                                            GT_UNUSED const GtUchar *query,
-                                            GT_UNUSED GtUword
-                                              query_totallength,
-                                            GT_UNUSED GtError *err)
+static void gt_subsimpleexactselfmatchstore(void *info,
+                                            const GtQuerymatch *querymatch)
 {
   Repeat *nextfreerepeatptr;
   SubRepeatInfo *sri = (SubRepeatInfo *) info;
@@ -246,7 +241,6 @@ static int gt_subsimpleexactselfmatchstore(void *info,
                               (sri->offset1 +
                                gt_querymatch_dbstart(querymatch));
   nextfreerepeatptr->len = gt_querymatch_querylen(querymatch);
-  return 0;
 }
 
 static const LTRboundaries **compactboundaries(GtUword *numofboundaries,
