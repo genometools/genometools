@@ -117,16 +117,21 @@ Test do
            "-extendgreedy -ii at1MB -q #{$testdata}Atinsert.fna"
   run "cmp -s #{last_stdout} #{rdir}/at1MB-Atinsert-greedy-15-700-70-4-43"
   run_test "#{$bin}gt repfind -extendxdrop -ii at1MB -seedlength 70 -l 500 " +
-           "-minidentity 90 -a"
+           "-minidentity 90 -a -verify-alignment"
   run "cmp -s #{last_stdout} #{rdir}/at1MB-xdrop-70-500-90-1-39-a"
   run_test "#{$bin}gt repfind -minidentity 75 -l 700 -seedlength 20 " +
-           "-extendgreedy -ii at1MB -q #{$testdata}Atinsert.fna -a"
+           "-extendgreedy -ii at1MB -q #{$testdata}Atinsert.fna -a " +
+           "-verify-alignment"
   run "cmp -s #{last_stdout} #{rdir}/at1MB-Atinsert-greedy-20-700-75-3-39-a"
+  run_test "#{$bin}gt repfind -extendgreedy -ii at1MB -seedlength 14 " +
+           "-a -verify-alignment"
+  run_test "#{$bin}gt repfind -extendxdrop -ii at1MB -seedlength 14 " +
+           "-a -verify-alignment"
   run_test "#{$bin}gt repfind -extendgreedy -ii at1MB -seedlength 70 -l 500 " +
-           "-minidentity 90 -a"
+           "-minidentity 90 -a -verify-alignment"
   run "cmp -s #{last_stdout} #{rdir}/at1MB-greedy-70-500-90-1-39-a"
   run_test "#{$bin}gt repfind -minidentity 80 -l 20 -extendxdrop -ii at1MB " +
-           "-q #{$testdata}U89959_genomic.fas -a"
+           "-q #{$testdata}U89959_genomic.fas -a -verify-alignment"
   run "cmp -s #{last_stdout} #{rdir}/at1MB-U8-xdrop-20-20-80-6-a"
   run_test "#{$bin}gt suffixerator -db #{$testdata}U89959_genomic.fas " +
            "-indexname U8 -dna -tis -suf -lcp"

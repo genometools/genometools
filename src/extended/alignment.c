@@ -595,16 +595,15 @@ static void gt_alignment_check_match(const GtAlignment *alignment)
   GtUword idx;
   bool different = false;
 
-  gt_assert(alignment->u != NULL);
-  gt_assert(alignment->v != NULL);
-  gt_assert(alignment->ulen == alignment->vlen);
+  gt_assert(alignment->u != NULL && alignment->v != NULL &&
+            alignment->ulen == alignment->vlen);
   for (idx = 0; idx < alignment->ulen; idx++)
   {
     GtUchar cc_u = alignment->u[idx];
     GtUchar cc_v = alignment->v[idx];
-    if (cc_u != cc_v)
+    if (ISSPECIAL(cc_u) || ISSPECIAL(cc_v) || cc_u != cc_v)
     {
-      printf("idx = " GT_WU ": cc_u = %c != %c = cc_v\n",idx,cc_u,cc_v);
+      fprintf(stderr,"idx = " GT_WU ": cc_u = %c != %c = cc_v\n",idx,cc_u,cc_v);
       different = true;
     }
   }

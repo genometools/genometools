@@ -386,53 +386,53 @@ bool gt_querymatchoutoptions_alignment_prepare(GtQuerymatchoutoptions
                             querymatchoutoptions->useqbuffer,
                             dbstart,
                             dbstart + dblen - 1);
-    if ((query == NULL || query_readmode != GT_READMODE_FORWARD) &&
-        querylen > querymatchoutoptions->vseqbuffer_size)
+  if ((query == NULL || query_readmode != GT_READMODE_FORWARD) &&
+      querylen > querymatchoutoptions->vseqbuffer_size)
+  {
+    querymatchoutoptions->vseqbuffer
+      = gt_realloc(querymatchoutoptions->vseqbuffer,
+                   sizeof *querymatchoutoptions->vseqbuffer * querylen);
+    querymatchoutoptions->vseqbuffer_size = querylen;
+  }
+  if (query == NULL || query->seq == NULL)
+  {
+    gt_assert(query == NULL || query->encseq != NULL);
+    gt_encseq_extract_encoded_with_reader(
+                            querymatchoutoptions->esr_for_align_show,
+                            query == NULL ? encseq : query->encseq,
+                            querymatchoutoptions->vseqbuffer,
+                            querystartabsolute,
+                            querystartabsolute + querylen - 1);
+  } else
+  {
+    if (query_readmode == GT_READMODE_FORWARD)
     {
       querymatchoutoptions->vseqbuffer
-        = gt_realloc(querymatchoutoptions->vseqbuffer,
-                     sizeof *querymatchoutoptions->vseqbuffer * querylen);
-      querymatchoutoptions->vseqbuffer_size = querylen;
-    }
-    if (query == NULL || query->seq == NULL)
-    {
-      gt_assert(query == NULL || query->encseq != NULL);
-      gt_encseq_extract_encoded_with_reader(
-                              querymatchoutoptions->esr_for_align_show,
-                              query == NULL ? encseq : query->encseq,
-                              querymatchoutoptions->vseqbuffer,
-                              querystartabsolute,
-                              querystartabsolute + querylen - 1);
+        = (GtUchar *) (query->seq + querystartabsolute);
     } else
     {
-      if (query_readmode == GT_READMODE_FORWARD)
-      {
-        querymatchoutoptions->vseqbuffer
-          = (GtUchar *) (query->seq + querystartabsolute);
-      } else
-      {
-        memcpy(querymatchoutoptions->vseqbuffer,
-               query->seq + querystartabsolute,
-               querylen * sizeof *querymatchoutoptions->vseqbuffer);
-      }
+      memcpy(querymatchoutoptions->vseqbuffer,
+             query->seq + querystartabsolute,
+             querylen * sizeof *querymatchoutoptions->vseqbuffer);
     }
-    if (query_readmode == GT_READMODE_REVERSE)
+  }
+  if (query_readmode == GT_READMODE_REVERSE)
+  {
+    gt_inplace_reverse(querymatchoutoptions->vseqbuffer,querylen);
+  } else
+  {
+    if (query_readmode == GT_READMODE_REVCOMPL)
     {
-      gt_inplace_reverse(querymatchoutoptions->vseqbuffer,querylen);
+      gt_inplace_reverse_complement(querymatchoutoptions->vseqbuffer,
+                                    querylen);
     } else
     {
-      if (query_readmode == GT_READMODE_REVCOMPL)
+      if (query_readmode == GT_READMODE_COMPL)
       {
-        gt_inplace_reverse_complement(querymatchoutoptions->vseqbuffer,
-                                      querylen);
-      } else
-      {
-        if (query_readmode == GT_READMODE_COMPL)
-        {
-          gt_inplace_complement(querymatchoutoptions->vseqbuffer,querylen);
-        }
+        gt_inplace_complement(querymatchoutoptions->vseqbuffer,querylen);
       }
     }
+  }
   if (edist > 0)
   {
     if (seededmatch2eoplist(querymatchoutoptions,
@@ -498,9 +498,6 @@ bool gt_querymatchoutoptions_alignment_prepare(GtQuerymatchoutoptions
   {
     if (querymatchoutoptions->alignmentwidth > 0)
     {
-      gt_assert(querymatchoutoptions->alignment != NULL);
-      gt_assert(querymatchoutoptions->useqbuffer != NULL);
-      gt_assert(querymatchoutoptions->vseqbuffer != NULL);
       gt_alignment_set_seqs(querymatchoutoptions->alignment,
                             querymatchoutoptions->useqbuffer,
                             dblen,
