@@ -46,13 +46,6 @@ void gt_querymatch_init(GtQuerymatch *querymatch,
 
 void gt_querymatch_delete(GtQuerymatch *querymatch);
 
-int gt_querymatch_output(GT_UNUSED void *info,
-                         GT_UNUSED const GtEncseq *encseq,
-                         const GtQuerymatch *querymatch,
-                         GT_UNUSED const GtUchar *query,
-                         GT_UNUSED GtUword query_totallength,
-                         GT_UNUSED GtError *err);
-
 bool gt_querymatch_complete(GtQuerymatch *querymatchptr,
                             GtUword dblen,
                             GtUword dbstart,

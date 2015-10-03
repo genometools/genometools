@@ -844,20 +844,6 @@ static int gt_repfind_runner(int argc,
           gt_querymatch_query_readmode_set(
             processinfo_and_querymatchspaceptr.querymatchspaceptr,
             GT_READMODE_REVERSE);
-          /*
-          printf("old matches\n");
-          if (gt_callenumselfmatches(gt_str_get(arguments->indexname),
-                                     GT_READMODE_REVERSE,
-                                     arguments->seedlength,
-                                     gt_querymatch_output,
-                                     NULL,
-                                     logger,
-                                     err) != 0)
-          {
-            haserr = true;
-          }
-          printf("new matches\n");
-          */
           if (gt_callenumquerymatches(true,
                                       gt_str_get(arguments->indexname),
                                       NULL,

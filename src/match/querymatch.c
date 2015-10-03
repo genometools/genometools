@@ -16,14 +16,9 @@
 */
 
 #include "core/ma_api.h"
-#include "core/unused_api.h"
 #include "core/types_api.h"
 #include "core/readmode.h"
 #include "core/format64.h"
-#undef SKDEBUG
-#ifdef SKDEBUG
-#include "greedyedist.h"
-#endif
 #include "querymatch.h"
 #include "querymatch-align.h"
 
@@ -117,52 +112,6 @@ void gt_querymatch_delete(GtQuerymatch *querymatch)
   }
 }
 
-#undef SK_VERIFY_EXACT_SELFMATCH
-#ifdef SK_VERIFY_EXACT_SELFMATCH
-static void gt_verify_exact_selfmatch(const GtEncseq *encseq,
-                                      GtUword len,
-                                      GtUword pos1,
-                                      uint64_t seqnum2,
-                                      GtUword pos2,
-                                      bool selfmatch,
-                                      GtReadmode query_readmode)
-{
-  if (selfmatch && query_readmode == GT_READMODE_REVERSE)
-  {
-    GtUword offset, seqstartpos, totallength = gt_encseq_total_length(encseq);
-    GtUchar cc1, cc2;
-
-    seqstartpos = gt_encseq_seqstartpos(encseq, seqnum2);
-    pos2 += seqstartpos;
-    for (offset = 0; offset < len; offset++)
-    {
-      gt_assert(pos1 + len - 1 < totallength);
-      cc1 = gt_encseq_get_encoded_char(encseq,pos1+offset,GT_READMODE_FORWARD);
-      gt_assert(pos2 + len - 1 >= offset &&
-                pos2 + len - 1 - offset < totallength);
-      cc2 = gt_encseq_get_encoded_char(encseq,pos2+len-1-offset,
-                                       GT_READMODE_FORWARD);
-      gt_assert(cc1 == cc2 && ISNOTSPECIAL(cc1));
-    }
-    if (pos1 + len < totallength)
-    {
-      cc1 = gt_encseq_get_encoded_char(encseq,pos1+len,GT_READMODE_FORWARD);
-    } else
-    {
-      cc1 = SEPARATOR;
-    }
-    if (pos2 > 0)
-    {
-      cc2 = gt_encseq_get_encoded_char(encseq,pos2-1,GT_READMODE_FORWARD);
-    } else
-    {
-      cc2 = SEPARATOR;
-    }
-    gt_assert(cc1 != cc2 || ISSPECIAL(cc1));
-  }
-}
-#endif
-
 static bool gt_querymatch_okay(const GtQuerymatch *querymatch)
 {
   if (!querymatch->selfmatch)
@@ -233,26 +182,6 @@ void gt_querymatch_prettyprint(const GtQuerymatch *querymatch)
                                            querymatch->querylen,
                                            querymatch->verify_alignment);
   }
-}
-
-int gt_querymatch_output(GT_UNUSED void *info,
-                         GT_UNUSED const GtEncseq *encseq,
-                         const GtQuerymatch *querymatch,
-                         GT_UNUSED const GtUchar *query,
-                         GT_UNUSED GtUword query_totallength,
-                         GT_UNUSED GtError *err)
-{
-#ifdef SK_VERIFY_EXACT_SELFMATCH
-   gt_verify_exact_selfmatch(encseq,
-                             querymatch->dblen,
-                             querymatch->dbstart,
-                             querymatch->queryseqnum,
-                             querymatch->querystart_fwdstrand,
-                             querymatch->selfmatch,
-                             querymatch->query_readmode);
-#endif
-  gt_querymatch_prettyprint(querymatch);
-  return 0;
 }
 
 bool gt_querymatch_check_final(const GtQuerymatch *querymatch,

@@ -30,7 +30,6 @@
 #include "sfx-suffixer.h"
 #include "esa-minunique.h"
 #include "esa-mmsearch.h"
-#include "stamp.h"
 
 typedef struct
 {
@@ -589,69 +588,6 @@ static int gt_querysubstringmatch(bool selfmatch,
   return haserr ? -1 : 0;
 }
 
-int gt_callenumselfmatches(const char *indexname,
-                           GtReadmode query_readmode,
-                           unsigned int userdefinedleastlength,
-                           GtProcessquerymatch processquerymatch,
-                           void *processquerymatchinfo,
-                           GtLogger *logger,
-                           GtError *err)
-{
-  Suffixarray suffixarray;
-  bool haserr = false;
-
-  gt_assert(query_readmode != GT_READMODE_FORWARD);
-  if (gt_mapsuffixarray(&suffixarray,
-                        SARR_ESQTAB | SARR_SUFTAB | SARR_SSPTAB,
-                        indexname,
-                        logger,
-                        err) != 0)
-  {
-    haserr = true;
-  } else
-  {
-    GtUword seqnum, numofsequences, seqlength, seqstartpos, totallength;
-    GtQuerymatch *querymatchspaceptr = gt_querymatch_new(NULL,false);
-    GtQueryrepresentation queryrep;
-
-    numofsequences = gt_encseq_num_of_sequences(suffixarray.encseq);
-    totallength = gt_encseq_total_length(suffixarray.encseq);
-    queryrep.sequence = NULL;
-    queryrep.encseq = suffixarray.encseq;
-    queryrep.readmode = query_readmode;
-    gt_querymatch_query_readmode_set(querymatchspaceptr,query_readmode);
-    for (seqnum = 0; seqnum < numofsequences; seqnum++)
-    {
-      seqstartpos = gt_encseq_seqstartpos(suffixarray.encseq, seqnum);
-      seqlength = gt_encseq_seqlength(suffixarray.encseq, seqnum);
-      if (seqlength >= (GtUword) userdefinedleastlength)
-      {
-        queryrep.startpos = seqstartpos;
-        queryrep.seqlen = seqlength;
-        if (gt_querysubstringmatch(true,
-                                   suffixarray.encseq,
-                                   suffixarray.suftab,
-                                   suffixarray.readmode,
-                                   totallength + 1,
-                                   (uint64_t) seqnum,
-                                   &queryrep,
-                                   (GtUword) userdefinedleastlength,
-                                   processquerymatch,
-                                   processquerymatchinfo,
-                                   querymatchspaceptr,
-                                   err) != 0)
-        {
-          haserr = true;
-          break;
-        }
-      }
-    }
-    gt_querymatch_delete(querymatchspaceptr);
-  }
-  gt_freesuffixarray(&suffixarray);
-  return haserr ? -1 : 0;
-}
-
 static int gt_constructsarrandrunmmsearch(
                  const GtEncseq *dbencseq,
                  GtReadmode readmode,
@@ -758,7 +694,6 @@ int gt_sarrquerysubstringmatch(const GtUchar *dbseq,
   gt_encseq_builder_add_multiple_encoded(eb,dbseq,dblen);
   dbencseq = gt_encseq_builder_build(eb, err);
   gt_encseq_builder_delete(eb);
-
   numofchars = gt_alphabet_num_of_chars(alpha);
   recommendedprefixlength
     = gt_recommendedprefixlength(numofchars,dblen,

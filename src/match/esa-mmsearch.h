@@ -56,14 +56,6 @@ void gt_mmsearchiterator_delete(GtMMsearchiterator *mmsi);
 
 GtUword gt_mmsearchiterator_count(const GtMMsearchiterator *mmsi);
 
-int gt_callenumselfmatches(const char *indexname,
-                           GtReadmode query_readmode,
-                           unsigned int userdefinedleastlength,
-                           GtProcessquerymatch processquerymatch,
-                           void *processquerymatchinfo,
-                           GtLogger *logger,
-                           GtError *err);
-
 int gt_sarrquerysubstringmatch(const GtUchar *dbseq,
                                GtUword dblen,
                                const GtUchar *query,
