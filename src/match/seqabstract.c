@@ -203,7 +203,7 @@ GtUword gt_seqabstract_lcp(bool rightextension,
     {
       break;
     }
-    if (useq->read_seq_left2right)
+    if (useq->dir_is_complement)
     {
       u_cc = GT_COMPLEMENTBASE(u_cc);
     }
@@ -212,7 +212,7 @@ GtUword gt_seqabstract_lcp(bool rightextension,
     {
       break;
     }
-    if (vseq->read_seq_left2right)
+    if (vseq->dir_is_complement)
     {
       v_cc = GT_COMPLEMENTBASE(v_cc);
     }

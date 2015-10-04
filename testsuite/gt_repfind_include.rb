@@ -125,17 +125,16 @@ Test do
       run "mv #{last_stdout} db-index.match"
       run "cmp -s db-index.match db-query-index.match"
       grep "db-index.match", /^\d+ \d+ \d+ . \d+ \d+ \d+ \d+ \d+\.\d+$/
+      common = "#{$bin}gt repfind -minidentity #{minid} -extend#{ext} " +
+               "-l #{seedlength} -ii db-index -a"
+      run_test "#{common} -q query.fna"
+      run "grep -v '^[0-9]' #{last_stdout}"
+      run "mv #{last_stdout} db-query.match"
+      run_test "#{common} -q query-r.fna -r"
+      run "grep -v '^[0-9]' #{last_stdout}"
+      run "mv #{last_stdout} db-query-r.match"
+      run "cmp -s db-query.match db-query-r.match"
     end
-    ext="greedy"
-    common = "#{$bin}gt repfind -minidentity #{minid} -extend#{ext} " +
-             "-l #{seedlength} -ii db-index -a"
-    run_test "#{common} -q query.fna"
-    run "grep -v '^[0-9]' #{last_stdout}"
-    run "mv #{last_stdout} db-query.match"
-    run_test "#{common} -q query-r.fna -r"
-    run "grep -v '^[0-9]' #{last_stdout}"
-    run "mv #{last_stdout} db-query-r.match"
-    run "cmp -s db-query.match db-query-r.match"
   end
 end
 
