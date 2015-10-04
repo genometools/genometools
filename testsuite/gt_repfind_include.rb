@@ -101,6 +101,44 @@ Test do
   run "#{$bin}gt repfind -samples 1000 -l 6 -ii sfx",:maxtime => 600
 end
 
+Name "gt repfind extend self vs query"
+Keywords "gt_repfind extend"
+Test do
+  seedlength = 40
+  extendlength = 200
+  minid = 80
+  opts = "-dna -suf -lcp -tis"
+  4.times do
+    run "#{$scriptsdir}gen-randseq.rb --reverse --minidentity #{minid} --seedlength #{seedlength} --length #{extendlength} --mode seeded --namedfiles"
+    run "#{$bin}gt suffixerator -indexname db-query-index -db db.fna query.fna #{opts}"
+    run "#{$bin}gt suffixerator -indexname db-index -db db.fna #{opts}"
+    ["xdrop","greedy"].each do |ext|
+      common = "#{$bin}gt repfind -minidentity #{minid} -extend#{ext} " +
+               "-l #{seedlength}"
+      run_test "#{common} -ii db-query-index"
+      run "cut -f 1-5,7-10 -d ' ' #{last_stdout}"
+      run "sort #{last_stdout}"
+      run "mv #{last_stdout} db-query-index.match"
+      run_test "#{common} -ii db-index -q query.fna"
+      run "cut -f 1-5,7-10 -d ' ' #{last_stdout}"
+      run "sort #{last_stdout}"
+      run "mv #{last_stdout} db-index.match"
+      run "cmp -s db-index.match db-query-index.match"
+      grep "db-index.match", /^\d+ \d+ \d+ . \d+ \d+ \d+ \d+ \d+\.\d+$/
+    end
+    ext="greedy"
+    common = "#{$bin}gt repfind -minidentity #{minid} -extend#{ext} " +
+             "-l #{seedlength} -ii db-index -a"
+    run_test "#{common} -q query.fna"
+    run "grep -v '^[0-9]' #{last_stdout}"
+    run "mv #{last_stdout} db-query.match"
+    run_test "#{common} -q query-r.fna -r"
+    run "grep -v '^[0-9]' #{last_stdout}"
+    run "mv #{last_stdout} db-query-r.match"
+    run "cmp -s db-query.match db-query-r.match"
+  end
+end
+
 Name "gt repfind extend at1MB"
 Keywords "gt_repfind extend"
 Test do
@@ -154,33 +192,6 @@ Test do
      run_test "#{$bin}gt repfind -seedlength #{seedlength} -extendgreedy -ii U8 "
               "-cam encseq_reader"
      run "cmp -s #{last_stdout} U8-selfcompare.matches"
-  end
-end
-
-Name "gt repfind extend self vs query"
-Keywords "gt_repfind extend"
-Test do
-  seedlength = 40
-  extendlength = 200
-  minid = 80
-  opts = "-dna -suf -lcp -tis"
-  1.times do
-    run "#{$scriptsdir}gen-randseq.rb --minidentity #{minid} --seedlength #{seedlength} --length #{extendlength} --mode seeded --namedfiles"
-    run "#{$bin}gt suffixerator -indexname db-query-index -db db.fna query.fna #{opts}"
-    run "#{$bin}gt suffixerator -indexname db-index -db db.fna #{opts}"
-    ["xdrop","greedy"].each do |ext|
-      run_test "#{$bin}gt repfind -minidentity #{minid} -extend#{ext} " +
-               "-ii db-query-index -l #{seedlength}"
-      run "cut -f 1-5,7-10 -d ' ' #{last_stdout}"
-      run "sort #{last_stdout}"
-      run "mv #{last_stdout} db-query-index.match"
-      run_test "#{$bin}gt repfind -minidentity #{minid} -extend#{ext} -ii db-index -l #{seedlength} -q query.fna"
-      run "cut -f 1-5,7-10 -d ' ' #{last_stdout}"
-      run "sort #{last_stdout}"
-      run "mv #{last_stdout} db-index.match"
-      run "cmp -s db-index.match db-query-index.match"
-      grep "db-index.match", /^\d+ \d+ \d+ . \d+ \d+ \d+ \d+ \d+\.\d+$/
-    end
   end
 end
 
