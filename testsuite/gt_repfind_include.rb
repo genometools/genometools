@@ -170,6 +170,17 @@ Test do
   run_test "#{$bin}gt repfind -minidentity 80 -l 20 -extendxdrop -ii at1MB " +
            "-q #{$testdata}U89959_genomic.fas -a -verify-alignment"
   run "cmp -s #{last_stdout} #{rdir}/at1MB-U8-xdrop-20-20-80-6-a"
+  ["xdrop","greedy"].each do |ext|
+    if ext == "xdrop"
+      params = "6"
+    else
+      params = "2-36"
+    end
+    run_test "#{$bin}gt repfind -minidentity 80 -l 30 -seedlength 12 " +
+             "-extend#{ext} -ii at1MB " +
+             "-q #{$testdata}U89959_genomic.fas -r -a -verify-alignment"
+    run "cmp -s #{last_stdout} #{rdir}/at1MB-U8-#{ext}-r-12-30-80-#{params}-a"
+  end
   run_test "#{$bin}gt suffixerator -db #{$testdata}U89959_genomic.fas " +
            "-indexname U8 -dna -tis -suf -lcp"
   ["xdrop","greedy"].each do |ext|
