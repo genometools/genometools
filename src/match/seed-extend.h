@@ -307,7 +307,7 @@ const GtQuerymatch *gt_greedy_extend_selfmatch_relative(void *info,
                                               GtUword querystart_relative,
                                               GtUword len);
 
-GtUword gt_align_front_prune_edist(bool forward,
+GtUword gt_align_front_prune_edist(bool rightextension,
                                    Polished_point *best_polished_point,
                                    Fronttrace *front_trace,
                                    const GtEncseq *encseq,

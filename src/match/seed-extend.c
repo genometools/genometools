@@ -184,15 +184,15 @@ static void gt_sesp_from_relative(GtSeedextendSeqpair *sesp,
 
 #undef SKDEBUG
 #ifdef SKDEBUG
-static void gt_se_show_aligned(bool rightextension,
-                               const GtXdropmatchinfo *xdropmatchinfo)
+static void gt_xdrop_show_context(bool rightextension,
+                                  const GtXdropmatchinfo *xdropmatchinfo)
 {
   char *uptr = gt_seqabstract_get(rightextension,xdropmatchinfo->useq);
   char *vptr = gt_seqabstract_get(rightextension,xdropmatchinfo->vseq);
   printf(">%sextension:\n>%s\n>%s\n",rightextension ? "right" : "left",
          uptr,vptr);
-  free(uptr);
-  free(vptr);
+  gt_free(uptr);
+  gt_free(vptr);
 }
 #endif
 
@@ -560,7 +560,7 @@ static void gt_greedy_extend_init(FTsequenceResources *ufsr,
   }
 }
 
-GtUword gt_align_front_prune_edist(bool forward,
+GtUword gt_align_front_prune_edist(bool rightextension,
                                    Polished_point *best_polished_point,
                                    Fronttrace *front_trace,
                                    const GtEncseq *dbencseq,
@@ -584,8 +584,11 @@ GtUword gt_align_front_prune_edist(bool forward,
   gt_assert(best_polished_point != NULL);
   for (iteration = 0; iteration < maxiterations; iteration++)
   {
+#ifdef SKDEBUG
+    printf("%s: iteration " GT_WU "\n",__func__,iteration);
+#endif
     gt_assert(iteration < ggemi->minmatchnum);
-    distance = front_prune_edist_inplace(forward,
+    distance = front_prune_edist_inplace(rightextension,
                                          &ggemi->frontspace_reservoir,
                                          NULL, /* trimstat */
                                          best_polished_point,
@@ -603,6 +606,16 @@ GtUword gt_align_front_prune_edist(bool forward,
                                          vlen);
     if (distance < ulen + vlen + 1)
     {
+#ifdef SKDEBUG
+      GtUword u_ext = best_polished_point->row, v_ext;
+      gt_assert(best_polished_point->alignedlen >= u_ext);
+      v_ext = best_polished_point->alignedlen - u_ext;
+      printf("greedy(%s): align=" GT_WU ",row=" GT_WU ",distance=" GT_WU "\n",
+          rightextension ? "right" : "left",
+          u_ext + v_ext,
+          u_ext,
+          (GtWord) best_polished_point->distance);
+#endif
       break;
     }
     if (front_trace != NULL)
@@ -801,7 +814,7 @@ static const GtQuerymatch *gt_extend_sesp(bool forxdrop,
     if (forxdrop)
     {
 #ifdef SKDEBUG
-      gt_se_show_aligned(!rightextension,xdropmatchinfo);
+      gt_xdrop_show_context(!rightextension,xdropmatchinfo);
 #endif
       gt_evalxdroparbitscoresextend(!rightextension,
                                     &xdropmatchinfo->best_left,
@@ -898,7 +911,7 @@ static const GtQuerymatch *gt_extend_sesp(bool forxdrop,
                                       sesp->query_totallength);
       }
 #ifdef SKDEBUG
-      gt_se_show_aligned(rightextension,xdropmatchinfo);
+      gt_xdrop_show_context(rightextension,xdropmatchinfo);
 #endif
       gt_evalxdroparbitscoresextend(rightextension,
                                     &xdropmatchinfo->best_right,

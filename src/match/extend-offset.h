@@ -34,7 +34,7 @@
   ((RIGHTEXTENSION)\
         ? (GT_ISDIRREVERSE(READMODE) ? ((TOTALLENGTH) - 1 - (STARTPOS))\
                                      : (STARTPOS))\
-        : (GT_ISDIRREVERSE(readmode) ? (STARTPOS) + (TOTALLENGTH) - (LEN)\
+        : (GT_ISDIRREVERSE(readmode) ? (TOTALLENGTH) - ((STARTPOS) + (LEN))\
                                      : (STARTPOS) + (LEN) - 1))
 
 #endif

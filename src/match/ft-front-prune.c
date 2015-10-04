@@ -56,7 +56,7 @@ typedef struct
           cache_num_positions; /* number of positions in cache */
   GtUword offset;
   bool read_seq_left2right,
-        dir_is_complement;
+       dir_is_complement;
 } Sequenceobject;
 
 static void ft_sequenceobject_init(Sequenceobject *seq,
@@ -139,22 +139,22 @@ static GtUchar gt_twobitencoding_char_at_pos(
           GT_MULT2(GT_UNITSIN2BITENC - 1 - GT_MODBYUNITSIN2BITENC(pos))) & 3;
 }
 
-static GtUchar ft_sequenceobject_get_char(Sequenceobject *seq,GtUword pos)
+static GtUchar ft_sequenceobject_get_char(Sequenceobject *seq,GtUword idx)
 {
   GtUchar cc;
   GtUword accesspos;
 
   if (seq->twobitencoding != NULL)
   {
-    accesspos = seq->read_seq_left2right ? seq->offset + pos
-                                         : seq->offset - pos;
+    accesspos = seq->read_seq_left2right ? seq->offset + idx
+                                         : seq->offset - idx;
     cc = gt_twobitencoding_char_at_pos(seq->twobitencoding, accesspos);
     return seq->dir_is_complement ? GT_COMPLEMENTBASE(cc) : cc;
   }
   if (seq->encseqreader != NULL)
   {
-    gt_assert(pos < seq->substringlength);
-    if (pos >= seq->cache_num_positions)
+    gt_assert(idx < seq->substringlength);
+    if (idx >= seq->cache_num_positions)
     {
       GtUword idx, tostore;
       const GtUword addamount = 256UL;
@@ -176,10 +176,10 @@ static GtUchar ft_sequenceobject_get_char(Sequenceobject *seq,GtUword pos)
       }
       seq->cache_num_positions = tostore;
     }
-    gt_assert(seq->cache_ptr != NULL && pos < seq->cache_num_positions);
-    return seq->cache_ptr[pos];
+    gt_assert(seq->cache_ptr != NULL && idx < seq->cache_num_positions);
+    return seq->cache_ptr[idx];
   }
-  accesspos = seq->read_seq_left2right ? seq->offset + pos : seq->offset - pos;
+  accesspos = seq->read_seq_left2right ? seq->offset + idx : seq->offset - idx;
   if (seq->encseq != NULL)
   {
     cc = gt_encseq_get_encoded_char(seq->encseq,accesspos,
@@ -195,6 +195,50 @@ static GtUchar ft_sequenceobject_get_char(Sequenceobject *seq,GtUword pos)
   }
   return cc;
 }
+
+#ifdef SKDEBUG
+static char *gt_ft_sequencebject_get(Sequenceobject *seq)
+{
+  GtUword idx;
+  char *buffer;
+  char *map = "acgt";
+
+  gt_assert(seq != NULL);
+  buffer = gt_malloc(sizeof *buffer * (seq->substringlength+1));
+  for (idx = 0; idx < seq->substringlength; idx++)
+  {
+    GtUchar cc = ft_sequenceobject_get_char(seq,idx);
+
+    if (cc == WILDCARD)
+    {
+      buffer[idx] = '#';
+    } else
+    {
+      if (cc == SEPARATOR)
+      {
+        buffer[idx] = '$';
+      } else
+      {
+        gt_assert(cc < 4);
+        buffer[idx] = map[cc];
+      }
+    }
+  }
+  buffer[seq->substringlength] = '\0';
+  return buffer;
+}
+
+static void gt_greedy_show_context(bool rightextension,
+                                   Sequenceobject *useq,Sequenceobject *vseq)
+{
+  char *uptr = gt_ft_sequencebject_get(useq);
+  char *vptr = gt_ft_sequencebject_get(vseq);
+  printf(">%sextension:\n>%s\n>%s\n",rightextension ? "right" : "left",
+         uptr,vptr);
+  gt_free(uptr);
+  gt_free(vptr);
+}
+#endif
 
 #else
 typedef struct
@@ -634,6 +678,9 @@ GtUword front_prune_edist_inplace(
                          vfsr->sequence_cache,
                          vfsr->bytesequence,
                          vfsr->totallength);
+#ifdef SKDEBUG
+  gt_greedy_show_context(rightextension,&useq,&vseq);
+#endif
   frontspace->offset = 0;
 #endif
 #ifdef TRIM_INFO_OUT

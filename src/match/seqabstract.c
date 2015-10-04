@@ -227,7 +227,7 @@ GtUword gt_seqabstract_lcp(bool rightextension,
 char *gt_seqabstract_get(bool rightextension,const GtSeqabstract *seq)
 {
   GtUword idx;
-  char *buffer = malloc(sizeof *buffer * (seq->len+1));
+  char *buffer = gt_malloc(sizeof *buffer * (seq->len+1));
   char *map = "acgt";
 
   for (idx = 0; idx < seq->len; idx++)
