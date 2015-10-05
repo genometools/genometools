@@ -214,18 +214,18 @@ static void evaluate_crosspoints_from_2dimtab(GtUword **E,
 
 /* fill crosspointtable ctab for part of seuqneces useq and vseq in square
  * space, use it to combine square calculating with linear calculating */
-void ctab_in_square_space(LinspaceManagement *spacemanager,
-                          GtScoreHandler *scorehandler,
-                          GtUword *Ctab,
-                          const GtUchar *useq,
-                          GtUword ustart,
-                          GtUword ulen,
-                          const GtUchar *vseq,
-                          GtUword vstart,
-                          GtUword vlen,
-                          GtUword rowoffset)
+GtUword ctab_in_square_space(LinspaceManagement *spacemanager,
+                             GtScoreHandler *scorehandler,
+                             GtUword *Ctab,
+                             const GtUchar *useq,
+                             GtUword ustart,
+                             GtUword ulen,
+                             const GtUchar *vseq,
+                             GtUword vstart,
+                             GtUword vlen,
+                             GtUword rowoffset)
 {
-  GtUword **E;
+  GtUword **E, distance;
 
   gt_assert(Ctab && spacemanager && scorehandler);
 
@@ -234,9 +234,11 @@ void ctab_in_square_space(LinspaceManagement *spacemanager,
 
   fillDPtab_in_square_space(E, useq, ustart, ulen,
                             vseq, vstart, vlen, scorehandler);
+  distance = E[ulen][vlen];
 
   evaluate_crosspoints_from_2dimtab(E, Ctab, scorehandler, useq, ustart, ulen,
                                     vseq, vstart, vlen,  rowoffset);
+  return distance;
 }
 
 /*----------------------------local alignment---------------------------------*/

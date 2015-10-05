@@ -48,7 +48,7 @@ GtUword alignment_in_square_space(LinspaceManagement *spacemanager,
                                   GtUword mismatchcost,
                                   GtUword gapcost);
 
-/*distance only for global alignment (DNA or protein) */
+/*distance only for global alignment */
 GtUword distance_only_global_alignment(const GtUchar *useq,
                                        GtUword ustart,
                                        GtUword ulen,
@@ -62,16 +62,16 @@ void gt_print_edist_alignment(const GtUchar *useq, GtUword ustart, GtUword ulen,
 
 /* fill crosspointtable ctab for part of sequences useq and vseq in square
  * space, use it to combine square calculating with linear calculating */
-void ctab_in_square_space(LinspaceManagement *spacemanager,
-                          GtScoreHandler *scorehandler,
-                          GtUword *Ctab,
-                          const GtUchar *useq,
-                          GtUword ustart,
-                          GtUword ulen,
-                          const GtUchar *vseq,
-                          GtUword vstart,
-                          GtUword vlen,
-                          GtUword rowoffset);
+GtUword ctab_in_square_space(LinspaceManagement *spacemanager,
+                             GtScoreHandler *scorehandler,
+                             GtUword *Ctab,
+                             const GtUchar *useq,
+                             GtUword ustart,
+                             GtUword ulen,
+                             const GtUchar *vseq,
+                             GtUword vstart,
+                             GtUword vlen,
+                             GtUword rowoffset);
 
 /* create an local alignment in square space, to use it in linear context you
  * have to generate an spacemanager before, in any other case it can be NULL,
