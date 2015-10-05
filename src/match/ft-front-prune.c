@@ -83,12 +83,12 @@ static void ft_sequenceobject_init(Sequenceobject *seq,
   seq->bytesequenceptr = NULL;
   seq->seqstartpos = seqstartpos;
   gt_assert(seqstartpos <= startpos);
-  seq->offset = seqstartpos + GT_EXTEND_OFFSET(rightextension,
-                                               readmode,
-                                               totallength,
-                                               startpos - seqstartpos,
-                                               len,
-                                               GT_UWORD_MAX);
+  seq->offset = GT_EXTEND_OFFSET(rightextension,
+                                 readmode,
+                                 totallength,
+                                 seqstartpos,
+                                 startpos,
+                                 len);
   seq->read_seq_left2right = GT_EXTEND_READ_SEQ_LEFT2RIGHT(rightextension,
                                                            readmode);
   if (encseq != NULL && extend_char_access_mode == GT_EXTEND_CHAR_ACCESS_ANY &&
@@ -100,13 +100,14 @@ static void ft_sequenceobject_init(Sequenceobject *seq,
       (extend_char_access_mode == GT_EXTEND_CHAR_ACCESS_ANY ||
        extend_char_access_mode == GT_EXTEND_CHAR_ACCESS_ENCSEQ_READER))
   {
+    GtUword full_totallength = gt_encseq_total_length(encseq);
     gt_encseq_reader_reinit_with_readmode(encseq_r, encseq,
                                           seq->read_seq_left2right
                                             ? GT_READMODE_FORWARD
                                             : GT_READMODE_REVERSE,
                                           seq->read_seq_left2right
                                             ?  seq->offset
-                                            : GT_REVERSEPOS(totallength,
+                                            : GT_REVERSEPOS(full_totallength,
                                                             seq->offset));
     seq->encseqreader = encseq_r;
     gt_assert(seq->encseqreader != NULL && sequence_cache != NULL);

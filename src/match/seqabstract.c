@@ -37,7 +37,7 @@ typedef enum GtSeqabstractType {
 
 struct GtSeqabstract
 {
-  GtUword len, offset, totallength;
+  GtUword len, offset, totallength, seqstartpos;
   GtSeqabstractType seqtype;
   bool read_seq_left2right,
        dir_is_complement;
@@ -57,6 +57,7 @@ GtSeqabstract *gt_seqabstract_new_empty(void)
   sa->read_seq_left2right = true;
   sa->dir_is_complement = false;
   sa->totallength = GT_SEQABSTRACT_TOTALLENGTH_UNDEF;
+  sa->seqstartpos = 0;
   sa->seq.string = NULL;
   return sa;
 }
@@ -69,15 +70,30 @@ static void gt_seqabstract_init(GtSeqabstract *sa,
                                 GtUword totallength)
 {
   sa->len = len;
+  gt_assert(startpos >= sa->seqstartpos && (
+            !GT_ISDIRREVERSE(readmode) ||
+            totallength != GT_SEQABSTRACT_TOTALLENGTH_UNDEF));
   sa->offset = GT_EXTEND_OFFSET(rightextension,
                                 readmode,
                                 totallength,
+                                sa->seqstartpos,
                                 startpos,
-                                len,
-                                GT_SEQABSTRACT_TOTALLENGTH_UNDEF);
+                                len);
   sa->read_seq_left2right = GT_EXTEND_READ_SEQ_LEFT2RIGHT(rightextension,
                                                           readmode);
   sa->dir_is_complement = GT_ISDIRCOMPLEMENT(readmode) ? true : false;
+}
+
+void gt_seqabstract_seqstartpos_set(GtSeqabstract *sa,GtUword seqstartpos)
+{
+  gt_assert(sa != NULL);
+  sa->seqstartpos = seqstartpos;
+}
+
+void gt_seqabstract_totallength_set(GtSeqabstract *sa,GtUword totallength)
+{
+  gt_assert(sa != NULL);
+  sa->totallength = totallength;
 }
 
 void gt_seqabstract_reinit_gtuchar(bool rightextension,
@@ -124,7 +140,6 @@ void gt_seqabstract_reinit_encseq(bool rightextension,
 {
   gt_assert(sa != NULL);
   sa->seqtype = GT_SEQABSTRACT_ENCSEQ;
-  sa->totallength = gt_encseq_total_length(encseq);
   sa->seq.encseq = encseq;
   gt_seqabstract_init(sa,
                       rightextension,
@@ -174,7 +189,6 @@ static GtUchar gt_seqabstract_get_encoded_char(GT_UNUSED bool rightextension,
     gt_assert(seq->offset >= idx);
     accesspos = seq->offset - idx;
   }
-  gt_assert(accesspos < seq->totallength);
   if (seq->seqtype == GT_SEQABSTRACT_STRING)
   {
     return seq->seq.string[accesspos];

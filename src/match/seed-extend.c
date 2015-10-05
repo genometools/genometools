@@ -565,7 +565,7 @@ GtUword gt_align_front_prune_edist(bool rightextension,
                                    const GtEncseq *dbencseq,
                                    const GtSeqorEncseq *query,
                                    GtReadmode query_readmode,
-                                   GtUword query_seqstartpos,
+                                   GtUword queryseqstartpos,
                                    GtUword query_totallength,
                                    GtGreedyextendmatchinfo *ggemi,
                                    bool greedyextension,
@@ -602,7 +602,7 @@ GtUword gt_align_front_prune_edist(bool rightextension,
                                          ustart,
                                          ulen,
                                          (query == NULL || query->seq != NULL)
-                                           ? 0 : query_seqstartpos,
+                                           ? 0 : queryseqstartpos,
                                          &vfsr,
                                          vstart,
                                          vlen);
@@ -713,6 +713,7 @@ static void gt_seqabstract_reinit_generic(bool rightextension,
                                           const GtSeqorEncseq *seqorencseq,
                                           GtUword len,
                                           GtUword offset,
+                                          GtUword queryseqstartpos,
                                           GtUword query_totallength)
 {
   if (seqorencseq->seq != NULL)
@@ -726,6 +727,9 @@ static void gt_seqabstract_reinit_generic(bool rightextension,
                                   query_totallength);
   } else
   {
+    /* it is important to set it before the next call */
+    gt_seqabstract_seqstartpos_set(seqabstract,queryseqstartpos);
+    gt_seqabstract_totallength_set(seqabstract,query_totallength);
     gt_seqabstract_reinit_encseq(rightextension,
                                  query_readmode,
                                  seqabstract,
@@ -810,6 +814,7 @@ static const GtQuerymatch *gt_extend_sesp(bool forxdrop,
                                       query,
                                       vlen,
                                       voffset,
+                                      sesp->queryseqstartpos,
                                       sesp->query_totallength);
       }
     }
@@ -894,7 +899,8 @@ static const GtQuerymatch *gt_extend_sesp(bool forxdrop,
       gt_seqabstract_reinit_encseq(rightextension,
                                    GT_READMODE_FORWARD,
                                    xdropmatchinfo->useq,
-                                   dbencseq,ulen,
+                                   dbencseq,
+                                   ulen,
                                    sesp->seedpos1 + sesp->seedlen);
       if (query == NULL)
       {
@@ -912,6 +918,7 @@ static const GtQuerymatch *gt_extend_sesp(bool forxdrop,
                                       query,
                                       vlen,
                                       sesp->seedpos2 + sesp->seedlen,
+                                      sesp->queryseqstartpos,
                                       sesp->query_totallength);
       }
 #ifdef SKDEBUG

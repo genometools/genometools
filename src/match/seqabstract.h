@@ -88,4 +88,8 @@ void gt_seqabstract_readmode_set(GtSeqabstract *sa,GtReadmode readmode);
 
 char *gt_seqabstract_get(bool rightextension,const GtSeqabstract *seq);
 
+void gt_seqabstract_seqstartpos_set(GtSeqabstract *sa,GtUword seqstartpos);
+
+void gt_seqabstract_totallength_set(GtSeqabstract *sa,GtUword totallength);
+
 #endif

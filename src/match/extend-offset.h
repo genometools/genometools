@@ -18,23 +18,21 @@
 #ifndef EXTEND_OFFSET_H
 #define EXTEND_OFFSET_H
 
-#include <stdbool.h>
-#include "core/readmode_api.h"
-#include "core/types_api.h"
-#include "core/unused_api.h"
-#include "core/assert_api.h"
-#include "core/readmode.h"
+#include "core/encseq.h"
 
 #define GT_EXTEND_READ_SEQ_LEFT2RIGHT(RIGHTEXTENSION,READMODE)\
         ((((RIGHTEXTENSION) && !GT_ISDIRREVERSE(READMODE)) ||\
          (!(RIGHTEXTENSION) && GT_ISDIRREVERSE(READMODE))) ? true : false)
 
-#define GT_EXTEND_OFFSET(RIGHTEXTENSION,READMODE,TOTALLENGTH,STARTPOS,LEN,\
-                         TOTALLENGTH_UNDEF)\
-  ((RIGHTEXTENSION)\
-        ? (GT_ISDIRREVERSE(READMODE) ? ((TOTALLENGTH) - 1 - (STARTPOS))\
-                                     : (STARTPOS))\
-        : (GT_ISDIRREVERSE(readmode) ? (TOTALLENGTH) - ((STARTPOS) + (LEN))\
-                                     : (STARTPOS) + (LEN) - 1))
+#define GT_EXTEND_OFFSET(RIGHTEXTENSION,READMODE,TOTALLENGTH,SEQSTARTPOS,\
+                         STARTPOS,LEN)\
+        ((RIGHTEXTENSION)\
+          ? (GT_ISDIRREVERSE(READMODE) ? ((SEQSTARTPOS) << 1) + \
+                                         GT_REVERSEPOS(TOTALLENGTH,STARTPOS)\
+                                       : (STARTPOS))\
+          : (GT_ISDIRREVERSE(readmode) \
+              ? ((SEQSTARTPOS) << 1) + \
+                GT_REVERSEPOS(TOTALLENGTH,(STARTPOS) + (LEN) - 1)\
+              : (STARTPOS) + (LEN) - 1))
 
 #endif
