@@ -183,6 +183,9 @@ Test do
              "-extend#{ext} -ii at1MB " +
              "-q #{$testdata}U89959_genomic.fas -r -a -verify-alignment"
     run "cmp -s #{last_stdout} #{rdir}/at1MB-U8-#{ext}-r-12-30-80-#{params}-a"
+    run_test "#{$bin}gt repfind -seedlength 14 -a -verify-alignment -l 32 -r " +
+             "-extend#{ext} -ii at1MB"
+    run "cmp -s #{last_stdout} #{$testdata}repfind-result/at1MB-#{ext}-r-14-32-80-#{params}-a"
   end
   run_test "#{$bin}gt suffixerator -db #{$testdata}U89959_genomic.fas " +
            "-indexname U8 -dna -tis -suf -lcp"
