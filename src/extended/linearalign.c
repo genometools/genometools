@@ -26,6 +26,9 @@
 #include "core/minmax.h"
 #include "core/array2dim_api.h"
 #include "core/assert_api.h"
+#ifdef GT_THREADS_ENABLED
+#include "core/thread_api.h"
+#endif
 #include "core/unused_api.h"
 #include "core/divmodmul.h"
 #include "match/squarededist.h"
@@ -62,16 +65,17 @@ static void nextEDtabRtabcolumn(GtUword *EDtabcolumn,
                                 const GtUchar *useq,
                                 GtUword ustart,
                                 GtUword ulen,
-                                GtScoreHandler *scorehandler,
-                                GtUword gapcost)
+                                GtScoreHandler *scorehandler)
 {
-  GtUword rowindex, val,
+  GtUword rowindex, val, gapcost,
           northwestEDtabentry,
           westEDtabentry,
           northwestRtabentry,
           westRtabentry = 0;
 
-  gt_assert(EDtabcolumn != NULL);
+  gt_assert(scorehandler);
+  gapcost = gt_scorehandler_get_gapscore(scorehandler);
+
   westEDtabentry = EDtabcolumn[0];
   EDtabcolumn[0] += gapcost;
 
@@ -110,7 +114,8 @@ static void nextEDtabRtabcolumn(GtUword *EDtabcolumn,
   }
 }
 
-static GtUword evaluateallEDtabRtabcolumns(LinspaceManagement *spacemanager,
+static GtUword evaluateallEDtabRtabcolumns(GtUword *EDtabcolumn,
+                                           GtUword *Rtabcolumn,
                                            GtScoreHandler *scorehandler,
                                            GtUword midcol,
                                            const GtUchar *useq,
@@ -120,18 +125,17 @@ static GtUword evaluateallEDtabRtabcolumns(LinspaceManagement *spacemanager,
                                            GtUword vstart,
                                            GtUword vlen)
 {
-  GtUword gapcost, *EDtabcolumn, *Rtabcolumn, colindex;
+  GtUword gapcost, colindex;
+  gt_assert(scorehandler && EDtabcolumn && Rtabcolumn);
 
-  EDtabcolumn = gt_linspaceManagement_get_valueTabspace(spacemanager);
-  Rtabcolumn = gt_linspaceManagement_get_rTabspace(spacemanager);
   gapcost = gt_scorehandler_get_gapscore(scorehandler);
-
   firstEDtabRtabcolumn(EDtabcolumn, Rtabcolumn, ulen, gapcost);
+
   for (colindex = 1UL; colindex <= vlen; colindex++)
   {
     nextEDtabRtabcolumn(EDtabcolumn, Rtabcolumn, colindex, midcol,
                         vseq[vstart+colindex-1], useq, ustart,
-                        ulen, scorehandler, gapcost);
+                        ulen, scorehandler);
   }
   return EDtabcolumn[ulen];
 }
@@ -169,6 +173,75 @@ static void determineCtab0(GtUword *Ctab, GtScoreHandler *scorehandler,
   }
 }
 
+#ifdef GT_THREADS_ENABLED
+typedef struct{
+  LinspaceManagement *spacemanager;
+  GtScoreHandler     *scorehandler;
+  const GtUchar      *useq, *vseq;
+  GtUword            ustart, ulen, vstart, vlen,
+                     *Ctab, rowoffset,
+                     threadidx; /* ensures threads do not overlap */
+}GtLinearCrosspointthreadinfo;
+
+static GtLinearCrosspointthreadinfo
+                set_LinearCrosspointthreadinfo(LinspaceManagement *spacemanager,
+                                               GtScoreHandler *scorehandler,
+                                               const GtUchar *useq,
+                                               GtUword ustart,
+                                               GtUword ulen,
+                                               const GtUchar *vseq,
+                                               GtUword vstart,
+                                               GtUword vlen,
+                                               GtUword *Ctab,
+                                               GtUword rowoffset,
+                                               int threadidx)
+{
+  GtLinearCrosspointthreadinfo threadinfo;
+  threadinfo.spacemanager = spacemanager;
+  threadinfo.scorehandler = scorehandler;
+  threadinfo.useq = useq;
+  threadinfo.ustart = ustart;
+  threadinfo.ulen = ulen;
+  threadinfo.vseq = vseq;
+  threadinfo.vstart = vstart;
+  threadinfo.vlen = vlen;
+  threadinfo.Ctab = Ctab;
+  threadinfo.rowoffset = rowoffset;
+  threadinfo.threadidx = threadidx;
+
+  return threadinfo;
+}
+static GtUword evaluatelinearcrosspoints(LinspaceManagement *spacemanager,
+                                         GtScoreHandler *scorehandler,
+                                         const GtUchar *useq,
+                                         GtUword ustart,
+                                         GtUword ulen,
+                                         const GtUchar *vseq,
+                                         GtUword vstart,
+                                         GtUword vlen,
+                                         GtUword *Ctab,
+                                         GtUword rowoffset,
+                                         GT_UNUSED GtUword threadidx);
+
+static void *evaluatelinearcrosspoints_thread_caller(void *data)
+{
+  GtLinearCrosspointthreadinfo *threadinfo =
+                                         (GtLinearCrosspointthreadinfo *) data;
+  (void) evaluatelinearcrosspoints(threadinfo->spacemanager,
+                                   threadinfo->scorehandler,
+                                   threadinfo->useq,
+                                   threadinfo->ustart,
+                                   threadinfo-> ulen,
+                                   threadinfo->vseq,
+                                   threadinfo->vstart,
+                                   threadinfo->vlen,
+                                   threadinfo->Ctab,
+                                   threadinfo->rowoffset,
+                                   threadinfo->threadidx);
+  return NULL;
+}
+#endif
+
 /* evaluate crosspoints in recursive way */
 static GtUword evaluatelinearcrosspoints(LinspaceManagement *spacemanager,
                                          GtScoreHandler *scorehandler,
@@ -177,9 +250,14 @@ static GtUword evaluatelinearcrosspoints(LinspaceManagement *spacemanager,
                                          const GtUchar *vseq,
                                          GtUword vstart, GtUword vlen,
                                          GtUword *Ctab,
-                                         GtUword rowoffset)
+                                         GtUword rowoffset,
+                                         GT_UNUSED GtUword threadidx)
 {
-  GtUword midrow, midcol, distance, *Rtabcolumn=NULL;
+  GtUword midrow, midcol, distance, *EDtabcolumn = NULL, *Rtabcolumn = NULL;
+#ifdef GT_THREADS_ENABLED
+  GtThread *t1 = NULL, *t2 = NULL;
+  GtLinearCrosspointthreadinfo threadinfo1, threadinfo2;
+#endif
 
   if (vlen >= 2UL)
   {
@@ -188,41 +266,72 @@ static GtUword evaluatelinearcrosspoints(LinspaceManagement *spacemanager,
       GtUword i;
       for (i = 0; i <= vlen; i++)
         Ctab[i] = rowoffset;
+      return rowoffset;
     }
-    else if (gt_linspaceManagement_checksquare(spacemanager, ulen,vlen,
+#ifndef GT_THREADS_ENABLED
+    if (gt_linspaceManagement_checksquare(spacemanager, ulen,vlen,
                                                sizeof (GtUword),
                                                sizeof (Rtabcolumn)))
-    {  /* product of subsquences is lower than space allocated already or
-        * lower than timesquarfactor * ulen*/
-      (void) ctab_in_square_space(spacemanager, scorehandler, Ctab, useq,
+    { /* product of subsquences is lower than space allocated already or
+       * lower than timesquarfactor * ulen*/
+      return ctab_in_square_space(spacemanager, scorehandler, Ctab, useq,
                                   ustart, ulen, vseq, vstart, vlen, rowoffset);
     }
-    else
-    {
-      midcol = GT_DIV2(vlen);
-      Rtabcolumn = gt_linspaceManagement_get_rTabspace(spacemanager);
-      distance = evaluateallEDtabRtabcolumns(spacemanager, scorehandler, midcol,
-                                             useq, ustart, ulen,
-                                             vseq, vstart, vlen);
-      midrow = Rtabcolumn[ulen];
-      Ctab[midcol] = rowoffset + midrow;
+#endif
 
-       /* upper left corner */
-      (void) evaluatelinearcrosspoints(spacemanager, scorehandler,
-                                       useq, ustart, midrow,
-                                       vseq, vstart, midcol,
-                                       Ctab, rowoffset);
+    midcol = GT_DIV2(vlen);
+    Rtabcolumn = gt_linspaceManagement_get_rTabspace(spacemanager);
+    EDtabcolumn = gt_linspaceManagement_get_valueTabspace(spacemanager);
+    Rtabcolumn = Rtabcolumn + rowoffset + threadidx;
+    EDtabcolumn = EDtabcolumn + rowoffset + threadidx;
 
-      /* bottom right corner */
-      (void) evaluatelinearcrosspoints(spacemanager, scorehandler,
-                                       useq, ustart + midrow,
-                                       ulen-midrow,
-                                       vseq, vstart + midcol,
-                                       vlen-midcol,
-                                       Ctab+midcol,
-                                       rowoffset+midrow);
-      return distance;
-    }
+    distance = evaluateallEDtabRtabcolumns(EDtabcolumn, Rtabcolumn,
+                                           scorehandler, midcol,
+                                           useq, ustart, ulen,
+                                           vseq, vstart, vlen);
+    midrow = Rtabcolumn[ulen];
+    Ctab[midcol] = rowoffset + midrow;
+
+#ifndef GT_THREADS_ENABLED
+    /* upper left corner */
+    (void) evaluatelinearcrosspoints(spacemanager, scorehandler,
+                                     useq, ustart, midrow,
+                                     vseq, vstart, midcol,
+                                     Ctab, rowoffset, 0);
+
+    /* bottom right corner */
+    (void) evaluatelinearcrosspoints(spacemanager, scorehandler,
+                                     useq, ustart + midrow,
+                                     ulen - midrow,
+                                     vseq, vstart + midcol,
+                                     vlen - midcol,
+                                     Ctab + midcol,
+                                     rowoffset + midrow, 0);
+#else
+    /* use threads */
+    threadinfo1 = set_LinearCrosspointthreadinfo(spacemanager, scorehandler,
+                                                 useq, ustart, midrow,
+                                                 vseq, vstart, midcol,
+                                                 Ctab, rowoffset, threadidx);
+
+    t1 = gt_thread_new(evaluatelinearcrosspoints_thread_caller,
+                       &threadinfo1, NULL);
+    threadinfo2 = set_LinearCrosspointthreadinfo(spacemanager, scorehandler,
+                                                 useq, ustart + midrow,
+                                                 ulen - midrow,
+                                                 vseq, vstart + midcol,
+                                                 vlen - midcol,
+                                                 Ctab + midcol,
+                                                 rowoffset + midrow,
+                                                 threadidx + GT_DIV2(midcol));
+    t2 = gt_thread_new(evaluatelinearcrosspoints_thread_caller,
+                       &threadinfo2, NULL);
+    gt_thread_join(t1);
+    gt_thread_join(t2);
+    gt_thread_delete(t1);
+    gt_thread_delete(t2);
+#endif
+    return distance;
   }
   return 0;
 }
@@ -269,15 +378,20 @@ GtUword gt_calc_linearalign(LinspaceManagement *spacemanager,
                                              vseq, vstart, vlen, scorehandler);
   }
 
-  gt_linspaceManagement_check(spacemanager,ulen,vlen, sizeof (*EDtabcolumn),
+#ifdef GT_THREADS_ENABLED
+  gt_linspaceManagement_check(spacemanager, ulen + GT_DIV2(vlen), vlen,
+                              sizeof (*EDtabcolumn), sizeof (*Rtabcolumn),
+                              sizeof (*Ctab));
+#else
+  gt_linspaceManagement_check(spacemanager, ulen, vlen, sizeof (*EDtabcolumn),
                               sizeof (*Rtabcolumn), sizeof (*Ctab));
-
+#endif
   Ctab = gt_linspaceManagement_get_crosspointTabspace(spacemanager);
 
   Ctab[vlen] = ulen;
   distance = evaluatelinearcrosspoints(spacemanager, scorehandler,
                                        useq, ustart, ulen,
-                                       vseq, vstart, vlen, Ctab, 0);
+                                       vseq, vstart, vlen, Ctab, 0, 0);
 
   determineCtab0(Ctab, scorehandler, vseq[vstart], useq, ustart);
   reconstructalignment_from_Ctab(align, Ctab, useq, ustart, vseq, vstart,
@@ -637,12 +751,12 @@ void gt_checklinearspace(GT_UNUSED bool forward,
             " = distance_only_global_alignment\n", edist1,edist2);
     exit(GT_EXIT_PROGRAMMING_ERROR);
   }
-
+gt_alignment_show(align,stdout,80);
   edist3 = gt_alignment_eval_with_score(align, matchcost,
                                         mismatchcost, gapcost);
 
   if (edist2 != edist3)
-  {fprintf(stderr," useq %s, vseq %s\n",useq,vseq);
+  {
     fprintf(stderr,"distance_only_global_alignment = "GT_WU" != "GT_WU
             " = gt_alignment_eval_with_score\n", edist2,edist3);
     exit(GT_EXIT_PROGRAMMING_ERROR);
