@@ -54,7 +54,8 @@ typedef struct
           totallength,
           min_access_pos, /* no position accessed will be smaller than this */
           cache_num_positions; /* number of positions in cache */
-  GtUword offset;
+  GtUword offset,
+          seqstartpos;
   bool read_seq_left2right,
        dir_is_complement;
 } Sequenceobject;
@@ -64,6 +65,7 @@ static void ft_sequenceobject_init(Sequenceobject *seq,
                                    const GtEncseq *encseq,
                                    bool rightextension,
                                    GtReadmode readmode,
+                                   GtUword seqstartpos,
                                    GtUword startpos,
                                    GtUword len,
                                    GtEncseqReader *encseq_r,
@@ -79,12 +81,14 @@ static void ft_sequenceobject_init(Sequenceobject *seq,
   seq->cache_ptr = NULL;
   seq->sequence_cache = NULL;
   seq->bytesequenceptr = NULL;
-  seq->offset = GT_EXTEND_OFFSET(rightextension,
-                                 readmode,
-                                 totallength,
-                                 startpos,
-                                 len,
-                                 GT_UWORD_MAX);
+  seq->seqstartpos = seqstartpos;
+  gt_assert(seqstartpos <= startpos);
+  seq->offset = seqstartpos + GT_EXTEND_OFFSET(rightextension,
+                                               readmode,
+                                               totallength,
+                                               startpos - seqstartpos,
+                                               len,
+                                               GT_UWORD_MAX);
   seq->read_seq_left2right = GT_EXTEND_READ_SEQ_LEFT2RIGHT(rightextension,
                                                            readmode);
   if (encseq != NULL && extend_char_access_mode == GT_EXTEND_CHAR_ACCESS_ANY &&
@@ -146,8 +150,10 @@ static GtUchar ft_sequenceobject_get_char(Sequenceobject *seq,GtUword idx)
 
   if (seq->twobitencoding != NULL)
   {
+    gt_assert (seq->read_seq_left2right || seq->offset >= idx);
     accesspos = seq->read_seq_left2right ? seq->offset + idx
                                          : seq->offset - idx;
+    gt_assert(accesspos < seq->seqstartpos + seq->totallength);
     cc = gt_twobitencoding_char_at_pos(seq->twobitencoding, accesspos);
     return seq->dir_is_complement ? GT_COMPLEMENTBASE(cc) : cc;
   }
@@ -196,6 +202,7 @@ static GtUchar ft_sequenceobject_get_char(Sequenceobject *seq,GtUword idx)
   return cc;
 }
 
+#undef SKDEBUG
 #ifdef SKDEBUG
 static char *gt_ft_sequencebject_get(Sequenceobject *seq)
 {
@@ -249,11 +256,12 @@ typedef struct
 
 static void ft_sequenceobject_init(Sequenceobject *seq,
                                    const GtUchar *ptr,
+                                   GtUword seqstartpos,
                                    GtUword startpos,
                                    GtUword len)
 {
   gt_assert(seq != NULL);
-  seq->sequence_ptr = ptr + startpos;
+  seq->sequence_ptr = ptr + seqstartpos + startpos;
   seq->substringlength = len;
 }
 #endif
@@ -627,6 +635,7 @@ GtUword front_prune_edist_inplace(
                          FTsequenceResources *ufsr,
                          GtUword ustart,
                          GtUword ulen,
+                         GtUword vseqstartpos,
                          FTsequenceResources *vfsr,
                          GtUword vstart,
                          GtUword vlen)
@@ -648,8 +657,8 @@ GtUword front_prune_edist_inplace(
   frontspace->space = NULL;
   frontspace->allocated = 0;
   frontspace->offset = 0;
-  ft_sequenceobject_init(&useq,useqptr,ustart,ulen);
-  ft_sequenceobject_init(&vseq,vseqptr,vstart,vlen);
+  ft_sequenceobject_init(&useq,useqptr,0,ustart,ulen);
+  ft_sequenceobject_init(&vseq,vseqptr,vseqstartpos,vstart,vlen);
 #else
   /*
   printf("%sextension:useq->readmode=%s,vseq->readmode=%s\n",
@@ -661,6 +670,7 @@ GtUword front_prune_edist_inplace(
                          ufsr->encseq,
                          rightextension,
                          ufsr->readmode,
+                         0,
                          ustart,
                          ulen,
                          ufsr->encseq_r,
@@ -672,6 +682,7 @@ GtUword front_prune_edist_inplace(
                          vfsr->encseq,
                          rightextension,
                          vfsr->readmode,
+                         vseqstartpos,
                          vstart,
                          vlen,
                          vfsr->encseq_r,

@@ -48,6 +48,7 @@ GtUword front_prune_edist_inplace(
                        FTsequenceResources *ufsr,
                        GtUword ustart,
                        GtUword uulen,
+                       GtUword vseqstartpos,
                        FTsequenceResources *vfsr,
                        GtUword vstart,
                        GtUword vlen);

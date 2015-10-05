@@ -263,19 +263,23 @@ bool gt_querymatch_complete(GtQuerymatch *querymatchptr,
     if (querymatchptr->ref_querymatchoutoptions != NULL)
     {
       bool seededalignment;
+      GtUword query_seqstartpos;
       GtUword abs_querystart_fwdstrand, abs_querystart;
 
       if (query == NULL || query->seq == NULL)
       {
-        GtUword queryseqstart
-            = gt_encseq_seqstartpos(query == NULL ? encseq : query->encseq,
-                                    querymatchptr->queryseqnum);
+        query_seqstartpos = gt_encseq_seqstartpos(query == NULL
+                                                    ? encseq
+                                                    : query->encseq,
+                                                  querymatchptr->queryseqnum);
         abs_querystart_fwdstrand
-           = queryseqstart + querymatchptr->querystart_fwdstrand;
+           = query_seqstartpos + querymatchptr->querystart_fwdstrand;
         abs_querystart
-           = queryseqstart + querymatchptr->querystart;
+           = query_seqstartpos + querymatchptr->querystart;
       } else
       {
+        gt_assert(query != NULL && query->seq != NULL);
+        query_seqstartpos = 0;
         abs_querystart_fwdstrand = querymatchptr->querystart_fwdstrand;
         abs_querystart = querymatchptr->querystart;
       }
@@ -286,6 +290,7 @@ bool gt_querymatch_complete(GtQuerymatch *querymatchptr,
                                                     query,
                                                     querymatchptr->
                                                       query_readmode,
+                                                    query_seqstartpos,
                                                     query_totallength,
                                                     querymatchptr->dbstart,
                                                     querymatchptr->dblen,

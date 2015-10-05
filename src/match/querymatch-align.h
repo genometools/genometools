@@ -45,6 +45,7 @@ bool gt_querymatchoutoptions_alignment_prepare(
                                      const GtEncseq *encseq,
                                      const GtSeqorEncseq *query,
                                      GtReadmode query_readmode,
+                                     GtUword query_seqstartpos,
                                      GtUword query_totallength,
                                      GtUword dbstart,
                                      GtUword dblen,

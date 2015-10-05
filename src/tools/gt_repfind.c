@@ -596,7 +596,7 @@ static int gt_callenumquerymatches(bool selfmatch,
     while (!haserr &&
            (retval = gt_querysubstringmatchiterator_next(qsmi, err)) == 0)
     {
-      GtUword dbstart, dbseqnum, dbseqstartpos, matchlength, query_seqlen,
+      GtUword dbstart, dbseqnum, dbseqstartpos, matchlength, query_totallength,
               querystart;
       uint64_t queryunitnum;
 
@@ -610,7 +610,7 @@ static int gt_callenumquerymatches(bool selfmatch,
         dbseqnum = dbseqstartpos = 0;
       }
       matchlength = gt_querysubstringmatchiterator_matchlength(qsmi);
-      query_seqlen = gt_querysubstringmatchiterator_query_seqlen(qsmi);
+      query_totallength = gt_querysubstringmatchiterator_query_seqlen(qsmi);
       if (queryfiles != NULL)
       {
         query_seqorencseq.seq = gt_querysubstringmatchiterator_query(qsmi);
@@ -635,9 +635,9 @@ static int gt_callenumquerymatches(bool selfmatch,
                            queryunitnum,
                            matchlength,
                            querystart,
-                           query_seqlen);
+                           query_totallength);
         eqmf(eqmf_data,suffixarray.encseq,exactseed,&query_seqorencseq,
-             query_seqlen);
+             query_totallength);
       } else
       {
         if (gt_querymatch_complete(exactseed,
@@ -653,7 +653,7 @@ static int gt_callenumquerymatches(bool selfmatch,
                                    querystart,
                                    suffixarray.encseq,
                                    &query_seqorencseq,
-                                   query_seqlen,
+                                   query_totallength,
                                    dbstart,
                                    querystart,
                                    matchlength,
