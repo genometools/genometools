@@ -360,6 +360,12 @@ GtReadmode gt_querymatch_query_readmode(const GtQuerymatch *querymatch)
   return querymatch->query_readmode;
 }
 
+bool gt_querymatch_selfmatch(const GtQuerymatch *querymatch)
+{
+  gt_assert(querymatch != NULL);
+  return querymatch->selfmatch;
+}
+
 GtWord gt_querymatch_distance2score(GtUword distance,GtUword alignedlen)
 {
   return ((GtWord) alignedlen) - (GtWord) (3 * distance);
