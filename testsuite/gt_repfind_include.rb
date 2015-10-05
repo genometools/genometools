@@ -73,6 +73,46 @@ def checkrepfindwithquery(reffile,queryfile)
   run "cmp -s #{last_stdout} #{$gttestdata}repfind-result/#{reffile}-#{queryfile}.result"
 end
 
+def crosstest(common,opts,key)
+  run_test "#{common} #{opts}"
+  run "mv #{last_stdout} #{key}.match"
+  run "grep '^[0-9]' #{key}.match"
+  run "cut -f 1-3,5,8-10 -d ' ' #{last_stdout}"
+  run "sort #{last_stdout}"
+  run "mv #{last_stdout} #{key}.coords"
+  run "grep -v '^[0-9]' #{key}.match"
+  run "mv #{last_stdout} #{key}.al"
+  grep "#{key}.coords", /^\d+ \d+ \d+ \d+ \d+ \d+ \d+\.\d+$/
+end
+
+Name "gt repfind extend self vs query"
+Keywords "gt_repfind extend"
+Test do
+  seedlength = 40
+  extendlength = 200
+  minid = 80
+  opts = "-dna -suf -lcp -tis"
+  3.times do
+    run "#{$scriptsdir}gen-randseq.rb --number 1 --reverse --minidentity #{minid} --seedlength #{seedlength} --length #{extendlength} --mode seeded --namedfiles"
+    run "#{$bin}gt suffixerator -indexname db-query-index -db db.fna query.fna #{opts}"
+    run "#{$bin}gt suffixerator -indexname db-query-r-index -db db.fna query-r.fna #{opts}"
+    run "#{$bin}gt suffixerator -indexname db-index -db db.fna #{opts}"
+    ["xdrop","greedy"].each do |ext|
+      common = "#{$bin}gt repfind -minidentity #{minid} -extend#{ext} " +
+               "-l #{seedlength} -a -verify-alignment"
+      crosstest(common,"-ii db-query-index","#{ext}-db-query-index")
+      crosstest(common,"-ii db-index -q query.fna","#{ext}-db-index-q")
+      crosstest(common,"-ii db-query-r-index -r","#{ext}-db-query-r-index")
+      crosstest(common,"-ii db-index -r -q query-r.fna","#{ext}-db-index-r-q")
+      ["coords","al"].each do |suffix|
+        run "cmp -s #{ext}-db-query-index.#{suffix} #{ext}-db-index-q.#{suffix}"
+        run "cmp -s #{ext}-db-index-q.#{suffix} #{ext}-db-query-r-index.#{suffix}"
+        run "cmp -s #{ext}-db-query-r-index.#{suffix} #{ext}-db-index-r-q.#{suffix}"
+      end
+    end
+  end
+end
+
 Name "gt repfind mirror symmetric"
 Keywords "gt_repfind"
 Test do
@@ -99,43 +139,6 @@ Test do
   run "diff -w #{last_stdout} #{$testdata}repfind-result/Atinsert-8-8"
   run_test "#{$bin}gt repfind -samples 10 -l 6 -ii sfx",:maxtime => 600
   run "#{$bin}gt repfind -samples 1000 -l 6 -ii sfx",:maxtime => 600
-end
-
-Name "gt repfind extend self vs query"
-Keywords "gt_repfind extend"
-Test do
-  seedlength = 40
-  extendlength = 200
-  minid = 80
-  opts = "-dna -suf -lcp -tis"
-  4.times do
-    run "#{$scriptsdir}gen-randseq.rb --reverse --minidentity #{minid} --seedlength #{seedlength} --length #{extendlength} --mode seeded --namedfiles"
-    run "#{$bin}gt suffixerator -indexname db-query-index -db db.fna query.fna #{opts}"
-    run "#{$bin}gt suffixerator -indexname db-index -db db.fna #{opts}"
-    ["xdrop","greedy"].each do |ext|
-      common = "#{$bin}gt repfind -minidentity #{minid} -extend#{ext} " +
-               "-l #{seedlength}"
-      run_test "#{common} -ii db-query-index"
-      run "cut -f 1-5,7-10 -d ' ' #{last_stdout}"
-      run "sort #{last_stdout}"
-      run "mv #{last_stdout} db-query-index.match"
-      run_test "#{common} -ii db-index -q query.fna"
-      run "cut -f 1-5,7-10 -d ' ' #{last_stdout}"
-      run "sort #{last_stdout}"
-      run "mv #{last_stdout} db-index.match"
-      run "cmp -s db-index.match db-query-index.match"
-      grep "db-index.match", /^\d+ \d+ \d+ . \d+ \d+ \d+ \d+ \d+\.\d+$/
-      common = "#{$bin}gt repfind -minidentity #{minid} -extend#{ext} " +
-               "-l #{seedlength} -ii db-index -a"
-      run_test "#{common} -q query.fna"
-      run "grep -v '^[0-9]' #{last_stdout}"
-      run "mv #{last_stdout} db-query.match"
-      run_test "#{common} -q query-r.fna -r"
-      run "grep -v '^[0-9]' #{last_stdout}"
-      run "mv #{last_stdout} db-query-r.match"
-      run "cmp -s db-query.match db-query-r.match"
-    end
-  end
 end
 
 Name "gt repfind extend at1MB"
