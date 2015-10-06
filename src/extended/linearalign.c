@@ -180,7 +180,8 @@ typedef struct{
   const GtUchar      *useq, *vseq;
   GtUword            ustart, ulen, vstart, vlen,
                      *Ctab, rowoffset,
-                     threadidx; /* ensures threads do not overlap */
+                     threadidx, /* ensures threads do not overlap */
+                     *threadcount;
 }GtLinearCrosspointthreadinfo;
 
 static GtLinearCrosspointthreadinfo
@@ -194,7 +195,8 @@ static GtLinearCrosspointthreadinfo
                                                GtUword vlen,
                                                GtUword *Ctab,
                                                GtUword rowoffset,
-                                               int threadidx)
+                                               GtUword threadidx,
+                                               GtUword *threadcount)
 {
   GtLinearCrosspointthreadinfo threadinfo;
   threadinfo.spacemanager = spacemanager;
@@ -208,6 +210,7 @@ static GtLinearCrosspointthreadinfo
   threadinfo.Ctab = Ctab;
   threadinfo.rowoffset = rowoffset;
   threadinfo.threadidx = threadidx;
+  threadinfo.threadcount = threadcount;
 
   return threadinfo;
 }
@@ -221,7 +224,8 @@ static GtUword evaluatelinearcrosspoints(LinspaceManagement *spacemanager,
                                          GtUword vlen,
                                          GtUword *Ctab,
                                          GtUword rowoffset,
-                                         GT_UNUSED GtUword threadidx);
+                                         GT_UNUSED GtUword threadidx,
+                                         GT_UNUSED GtUword *threadcount);
 
 static void *evaluatelinearcrosspoints_thread_caller(void *data)
 {
@@ -237,7 +241,8 @@ static void *evaluatelinearcrosspoints_thread_caller(void *data)
                                    threadinfo->vlen,
                                    threadinfo->Ctab,
                                    threadinfo->rowoffset,
-                                   threadinfo->threadidx);
+                                   threadinfo->threadidx,
+                                   threadinfo->threadcount);
   return NULL;
 }
 #endif
@@ -251,7 +256,8 @@ static GtUword evaluatelinearcrosspoints(LinspaceManagement *spacemanager,
                                          GtUword vstart, GtUword vlen,
                                          GtUword *Ctab,
                                          GtUword rowoffset,
-                                         GT_UNUSED GtUword threadidx)
+                                         GT_UNUSED GtUword threadidx,
+                                         GT_UNUSED GtUword *threadcount)
 {
   GtUword midrow, midcol, distance, *EDtabcolumn = NULL, *Rtabcolumn = NULL;
 #ifdef GT_THREADS_ENABLED
@@ -292,44 +298,59 @@ static GtUword evaluatelinearcrosspoints(LinspaceManagement *spacemanager,
     midrow = Rtabcolumn[ulen];
     Ctab[midcol] = rowoffset + midrow;
 
-#ifndef GT_THREADS_ENABLED
-    /* upper left corner */
-    (void) evaluatelinearcrosspoints(spacemanager, scorehandler,
-                                     useq, ustart, midrow,
-                                     vseq, vstart, midcol,
-                                     Ctab, rowoffset, 0);
+#ifdef GT_THREADS_ENABLED
+    if (*threadcount + 2 > gt_jobs)
+    {
+#endif
+      /* upper left corner */
+      (void) evaluatelinearcrosspoints(spacemanager, scorehandler,
+                                       useq, ustart, midrow,
+                                       vseq, vstart, midcol,
+                                       Ctab, rowoffset,
+                                       threadidx, threadcount);
 
-    /* bottom right corner */
-    (void) evaluatelinearcrosspoints(spacemanager, scorehandler,
-                                     useq, ustart + midrow,
-                                     ulen - midrow,
-                                     vseq, vstart + midcol,
-                                     vlen - midcol,
-                                     Ctab + midcol,
-                                     rowoffset + midrow, 0);
-#else
-    /* use threads */
-    threadinfo1 = set_LinearCrosspointthreadinfo(spacemanager, scorehandler,
-                                                 useq, ustart, midrow,
-                                                 vseq, vstart, midcol,
-                                                 Ctab, rowoffset, threadidx);
+      /* bottom right corner */
+      (void) evaluatelinearcrosspoints(spacemanager, scorehandler,
+                                       useq, ustart + midrow,
+                                       ulen - midrow,
+                                       vseq, vstart + midcol,
+                                       vlen - midcol,
+                                       Ctab + midcol,
+                                       rowoffset + midrow,
+                                       threadidx, threadcount);
+#ifdef GT_THREADS_ENABLED
+    }
+    else
+    {
+      threadinfo1 = set_LinearCrosspointthreadinfo(spacemanager, scorehandler,
+                                                   useq, ustart, midrow,
+                                                   vseq, vstart, midcol,
+                                                   Ctab, rowoffset,
+                                                   threadidx, threadcount);
+      (*threadcount)++;
+      t1 = gt_thread_new(evaluatelinearcrosspoints_thread_caller,
+                         &threadinfo1, NULL);
 
-    t1 = gt_thread_new(evaluatelinearcrosspoints_thread_caller,
-                       &threadinfo1, NULL);
-    threadinfo2 = set_LinearCrosspointthreadinfo(spacemanager, scorehandler,
-                                                 useq, ustart + midrow,
-                                                 ulen - midrow,
-                                                 vseq, vstart + midcol,
-                                                 vlen - midcol,
-                                                 Ctab + midcol,
-                                                 rowoffset + midrow,
-                                                 threadidx + GT_DIV2(midcol));
-    t2 = gt_thread_new(evaluatelinearcrosspoints_thread_caller,
-                       &threadinfo2, NULL);
-    gt_thread_join(t1);
-    gt_thread_join(t2);
-    gt_thread_delete(t1);
-    gt_thread_delete(t2);
+      threadinfo2 = set_LinearCrosspointthreadinfo(spacemanager, scorehandler,
+                                                   useq, ustart + midrow,
+                                                   ulen - midrow,
+                                                   vseq, vstart + midcol,
+                                                   vlen - midcol,
+                                                   Ctab + midcol,
+                                                   rowoffset + midrow,
+                                                   threadidx + GT_DIV2(midcol),
+                                                   threadcount);
+      (*threadcount)++;
+      t2 = gt_thread_new(evaluatelinearcrosspoints_thread_caller,
+                         &threadinfo2, NULL);
+
+      gt_thread_join(t1);
+      (*threadcount)--;
+      gt_thread_join(t2);
+      (*threadcount)--;
+      gt_thread_delete(t1);
+      gt_thread_delete(t2);
+    }
 #endif
     return distance;
   }
@@ -347,7 +368,7 @@ GtUword gt_calc_linearalign(LinspaceManagement *spacemanager,
                             GtUword vstart,
                             GtUword vlen)
 {
-  GtUword distance, gapcost, *Ctab, *EDtabcolumn, *Rtabcolumn;
+  GtUword distance, gapcost, *Ctab, *EDtabcolumn, *Rtabcolumn, threadcount = 1;
 
   gt_assert(scorehandler);
   gt_linspaceManagement_set_ulen(spacemanager,ulen);
@@ -391,7 +412,8 @@ GtUword gt_calc_linearalign(LinspaceManagement *spacemanager,
   Ctab[vlen] = ulen;
   distance = evaluatelinearcrosspoints(spacemanager, scorehandler,
                                        useq, ustart, ulen,
-                                       vseq, vstart, vlen, Ctab, 0, 0);
+                                       vseq, vstart, vlen,
+                                       Ctab, 0, 0, &threadcount);
 
   determineCtab0(Ctab, scorehandler, vseq[vstart], useq, ustart);
   reconstructalignment_from_Ctab(align, Ctab, useq, ustart, vseq, vstart,

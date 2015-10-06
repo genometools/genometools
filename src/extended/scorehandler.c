@@ -126,8 +126,7 @@ static GtWord Protein_replacement(const GtScoreHandler *scorehandler,
   idx1 = gt_alphabet_encode(scorehandler->alphabet, a);
   idx2 = gt_alphabet_encode(scorehandler->alphabet, b);
 
-  int score=gt_score_matrix_get_score(scorehandler->sm, idx1, idx2);
-  return score;
+  return gt_score_matrix_get_score(scorehandler->sm, idx1, idx2);
 }
 
 GtWord gt_scorehandler_get_replacement(GtScoreHandler *scorehandler,
