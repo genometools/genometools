@@ -15,7 +15,7 @@ else
   touch ${TMPFILE}
   for keyword in $*
   do
-    echo $keyword > ${TMPFILE}
+    echo $keyword >> ${TMPFILE}
   done
 fi
 
