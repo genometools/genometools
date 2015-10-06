@@ -1195,6 +1195,83 @@ static const GtQuerymatch* gt_extend_querymatch(bool forxdrop,
   return gt_extend_sesp(forxdrop, info, dbencseq, query, &sesp);
 }
 
+static const GtQuerymatch* gt_extend_querymatch_relative(bool forxdrop,
+                                                  void *info,
+                                                  const GtEncseq *dbencseq,
+                                                  GtUword dbseqnum,
+                                                  GtUword dbstart_relative,
+                                                  const GtEncseq *queryencseq,
+                                                  GtUword queryseqnum,
+                                                  GtUword querystart_relative,
+                                                  GtUword len,
+                                                  GtReadmode query_readmode)
+{
+  GtSeedextendSeqpair sesp;
+  const GtUword query_totallength = 0;
+  GtSeqorEncseq query;
+
+  gt_sesp_from_relative(&sesp,
+                        dbencseq,
+                        dbseqnum,
+                        dbstart_relative,
+                        queryencseq,
+                        queryseqnum,
+                        querystart_relative,
+                        query_totallength,
+                        len,
+                        dbencseq == queryencseq ? true : false,
+                        query_readmode);
+  query.encseq = queryencseq;
+  query.seq = NULL;
+  return gt_extend_sesp(forxdrop, info, dbencseq, &query, &sesp);
+}
+
+const GtQuerymatch* gt_xdrop_extend_querymatch_relative(
+                                                  void *info,
+                                                  const GtEncseq *dbencseq,
+                                                  GtUword dbseqnum,
+                                                  GtUword dbstart_relative,
+                                                  const GtEncseq *queryencseq,
+                                                  GtUword queryseqnum,
+                                                  GtUword querystart_relative,
+                                                  GtUword len,
+                                                  GtReadmode query_readmode)
+{
+  return gt_extend_querymatch_relative(true,
+                                       info,
+                                       dbencseq,
+                                       dbseqnum,
+                                       dbstart_relative,
+                                       queryencseq,
+                                       queryseqnum,
+                                       querystart_relative,
+                                       len,
+                                       query_readmode);
+}
+
+const GtQuerymatch* gt_greedy_extend_querymatch_relative(
+                                                  void *info,
+                                                  const GtEncseq *dbencseq,
+                                                  GtUword dbseqnum,
+                                                  GtUword dbstart_relative,
+                                                  const GtEncseq *queryencseq,
+                                                  GtUword queryseqnum,
+                                                  GtUword querystart_relative,
+                                                  GtUword len,
+                                                  GtReadmode query_readmode)
+{
+  return gt_extend_querymatch_relative(false,
+                                       info,
+                                       dbencseq,
+                                       dbseqnum,
+                                       dbstart_relative,
+                                       queryencseq,
+                                       queryseqnum,
+                                       querystart_relative,
+                                       len,
+                                       query_readmode);
+}
+
 static void gt_extend_querymatch_with_output(bool forxdrop,
                                              void *info,
                                              const GtEncseq *dbencseq,

@@ -43,13 +43,6 @@ typedef uint32_t GtDiagbandseedPosition;
 typedef uint32_t GtDiagbandseedSeqnum;
 typedef uint32_t GtDiagbandseedScore;
 typedef struct GtDiagbandseedProcKmerInfo GtDiagbandseedProcKmerInfo;
-typedef const GtQuerymatch *(*GtDiagbandseedExtendFunc)(void *,
-                                                        const GtEncseq *,
-                                                        GtUword,
-                                                        GtUword,
-                                                        GtUword,
-                                                        GtUword,
-                                                        GtUword);
 
 struct GtDiagbandseedKmerPos {
   GtCodetype code;            /* only sort criterion */
@@ -440,7 +433,8 @@ static GtUword gt_diagbandseed_process_seeds(const GtEncseq *aencseq,
 {
   GtDiagbandseedScore *score = NULL;
   GtDiagbandseedPosition *lastp = NULL;
-  GtDiagbandseedExtendFunc extend_selfmatch_relative_function = NULL;
+  GtExtendSelfmatchRelativeFunc extend_selfmatch_relative_function = NULL;
+  GtExtendQuerymatchRelativeFunc extend_querymatch_relative_function = NULL;
   GtProcessinfo_and_querymatchspaceptr info_querymatch;
   const GtDiagbandseedSeedPair *lm = NULL, *maxsegm, *nextsegm, *idx;
   const GtUword ndiags = (amaxlen >> logdiagbandwidth) +
@@ -458,15 +452,13 @@ static GtUword gt_diagbandseed_process_seeds(const GtEncseq *aencseq,
   if (extendgreedyinfo != NULL) {
     info_querymatch.processinfo = (void *) extendgreedyinfo;
     extend_selfmatch_relative_function = gt_greedy_extend_selfmatch_relative;
+    extend_querymatch_relative_function = gt_greedy_extend_querymatch_relative;
   } else if (extendxdropinfo != NULL) {
     info_querymatch.processinfo = (void *) extendxdropinfo;
     extend_selfmatch_relative_function = gt_xdrop_extend_selfmatch_relative;
+    extend_querymatch_relative_function = gt_xdrop_extend_querymatch_relative;
   } else { /* no seed extension */
     return 0;
-  }
-
-  if (aencseq != bencseq) {
-    gt_warning("Seed extension of different encseqs not implemented... skip");
   }
 
   if (mlen < minsegmentlen)
@@ -544,9 +536,17 @@ static GtUword gt_diagbandseed_process_seeds(const GtEncseq *aencseq,
                                                             seedlength);
           } else /* seed extension of two encseqs not implemented yet */
           {
-            gt_assert(false);
+            querymatch = extend_querymatch_relative_function(&info_querymatch,
+                                                             aencseq,
+                                                             idx->aseqnum,
+                                                             astart,
+                                                             bencseq,
+                                                             idx->bseqnum,
+                                                             bstart,
+                                                             seedlength,
+                                                             GT_READMODE_FORWARD
+                                                             );
           }
-
           if (querymatch != NULL) {
             firstinrange = false;
             /* show extension results */
