@@ -516,8 +516,6 @@ bool gt_querymatchoutoptions_alignment_prepare(GtQuerymatchoutoptions
 void gt_querymatchoutoptions_alignment_show(const GtQuerymatchoutoptions
                                               *querymatchoutoptions,
                                             GtUword edist,
-                                            GtUword dblen,
-                                            GT_UNUSED GtUword querylen,
                                             bool verify_alignment)
 {
   if (querymatchoutoptions != NULL && querymatchoutoptions->alignmentwidth > 0)
@@ -538,7 +536,6 @@ void gt_querymatchoutoptions_alignment_show(const GtQuerymatchoutoptions
       gt_alignment_reset(querymatchoutoptions->alignment);
     } else
     {
-      gt_assert(dblen == querylen);
       gt_alignment_exact_show(querymatchoutoptions->alignment_show_buffer,
                               querymatchoutoptions->alignment,
                               stdout,

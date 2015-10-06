@@ -178,8 +178,6 @@ void gt_querymatch_prettyprint(const GtQuerymatch *querymatch)
     printf("\n");
     gt_querymatchoutoptions_alignment_show(querymatch->ref_querymatchoutoptions,
                                            querymatch->distance,
-                                           querymatch->dblen,
-                                           querymatch->querylen,
                                            querymatch->verify_alignment);
   }
 }
