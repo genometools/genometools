@@ -223,24 +223,24 @@ static GtOptionParser *gt_repfind_option_parser_new(void *tool_arguments)
   GtMaxpairsoptions *arguments = tool_arguments;
 
   op = gt_option_parser_new("[options] -ii indexname",
-                                  "Compute maximal repeats (and more).");
+                                  "Compute maximal exact matches (and more).");
   gt_option_parser_set_mail_address(op,"<kurtz@zbh.uni-hamburg.de>");
 
   leastlength_option
-    = gt_option_new_uint("l","Specify minimum length of repeats",
+    = gt_option_new_uint("l","Specify minimum length of matches",
                          &arguments->userdefinedleastlength,
                          0U);
   gt_option_parser_add_option(op, leastlength_option);
   arguments->refuserdefinedleastlengthoption
     = gt_option_ref(leastlength_option);
 
-  forwardoption = gt_option_new_bool("f","Compute maximal forward repeats",
+  forwardoption = gt_option_new_bool("f","Compute forward matches",
                                      &arguments->forward,
                                      true);
   gt_option_parser_add_option(op, forwardoption);
   arguments->refforwardoption = gt_option_ref(forwardoption);
 
-  reverseoption = gt_option_new_bool("r","Compute maximal reverse matches",
+  reverseoption = gt_option_new_bool("r","Compute reverse matches",
                                      &arguments->reverse,
                                      false);
   gt_option_parser_add_option(op, reverseoption);
