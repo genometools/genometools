@@ -44,7 +44,6 @@
 #include "sfx-run.h"
 #include "sfx-suffixer.h"
 #include "sfx-suffixgetset.h"
-#include "stamp.h"
 
 #ifndef S_SPLINT_S
 #include "eis-encidxseq.h"

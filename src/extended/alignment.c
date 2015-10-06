@@ -28,7 +28,8 @@
 #include "core/xansi_api.h"
 #include "core/types_api.h"
 #include "core/chardef.h"
-#include "extended/alignment.h"
+#include "match/greedyedist.h"
+#include "alignment.h"
 
 struct GtAlignment {
   GtRange         aligned_range_u,
@@ -525,8 +526,7 @@ void gt_alignment_show_generic(GtUchar *buffer,
 }
 
 void gt_alignment_exact_show(GtUchar *buffer,
-                             const GtUchar *sequence,
-                             GtUword seqlen,
+                             const GtAlignment *alignment,
                              FILE *fp,
                              unsigned int width,
                              const GtUchar *characters)
@@ -535,9 +535,9 @@ void gt_alignment_exact_show(GtUchar *buffer,
   unsigned int pos = 0;
   GtUchar *topbuf = buffer, *midbuf = NULL, *lowbuf = NULL;
 
-  if ((GtUword) width > seqlen)
+  if ((GtUword) width > alignment->ulen)
   {
-    width = (unsigned int) seqlen;
+    width = (unsigned int) alignment->ulen;
   }
   topbuf[width] = '\n';
   midbuf = topbuf + width + 1;
@@ -548,14 +548,14 @@ void gt_alignment_exact_show(GtUchar *buffer,
   midbuf[width] = '\n';
   lowbuf = midbuf + width + 1;
   lowbuf[width] = '\n';
-  for (idx = 0; idx < seqlen; idx++)
+  for (idx = 0; idx < alignment->ulen; idx++)
   {
     if (characters != NULL)
     {
-      lowbuf[pos] = topbuf[pos] = characters[sequence[idx]];
+      lowbuf[pos] = topbuf[pos] = characters[alignment->u[idx]];
     } else
     {
-      lowbuf[pos] = topbuf[pos] = sequence[idx];
+      lowbuf[pos] = topbuf[pos] = alignment->u[idx];
     }
     pos = gt_alignment_show_advance(pos,width,topbuf,fp);
   }
@@ -588,6 +588,65 @@ void gt_alignment_show(const GtAlignment *alignment, FILE *fp,
 
   gt_alignment_show_generic(buffer, alignment, fp, width,NULL,0);
   gt_alignment_buffer_delete(buffer);
+}
+
+static void gt_alignment_check_match(const GtAlignment *alignment)
+{
+  GtUword idx;
+  bool different = false;
+
+  gt_assert(alignment->u != NULL && alignment->v != NULL &&
+            alignment->ulen == alignment->vlen);
+  for (idx = 0; idx < alignment->ulen; idx++)
+  {
+    GtUchar cc_u = alignment->u[idx];
+    GtUchar cc_v = alignment->v[idx];
+    if (ISSPECIAL(cc_u) || ISSPECIAL(cc_v) || cc_u != cc_v)
+    {
+      fprintf(stderr,"idx = " GT_WU ": cc_u = %c != %c = cc_v\n",idx,cc_u,cc_v);
+      different = true;
+    }
+  }
+  if (different)
+  {
+    exit(EXIT_FAILURE);
+  }
+}
+
+void gt_alignment_check_edist(const GtAlignment *alignment,GtUword edist)
+{
+  if (edist == 0)
+  {
+    gt_alignment_check_match(alignment);
+  } else
+  {
+    GtUword realedist;
+    GtFrontResource *ftres = gt_frontresource_new(edist);
+    GtSeqabstract *useq_abstract
+      = gt_seqabstract_new_gtuchar(true,
+                                   GT_READMODE_FORWARD,
+                                   alignment->u,
+                                   alignment->ulen,
+                                   0,
+                                   alignment->ulen);
+    GtSeqabstract *vseq_abstract
+      = gt_seqabstract_new_gtuchar(true,
+                                   GT_READMODE_FORWARD,
+                                   alignment->v,
+                                   alignment->vlen,
+                                   0,
+                                   alignment->vlen);
+
+    realedist = greedyunitedist(ftres,useq_abstract,vseq_abstract);
+    if (realedist > edist)
+    {
+      printf("realedist = " GT_WU " > " GT_WU " = edist\n",realedist,edist);
+    }
+    gt_assert(realedist <= edist);
+    gt_seqabstract_delete(useq_abstract);
+    gt_seqabstract_delete(vseq_abstract);
+    gt_frontresource_delete(ftres);
+  }
 }
 
 void gt_alignment_show_with_mapped_chars(const GtAlignment *alignment,

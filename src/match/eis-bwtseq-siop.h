@@ -21,7 +21,6 @@
 
 #include "match/eis-bwtseq.h"
 #include "match/eis-bwtseq-priv.h"
-#include "stamp.h"
 
 static inline const MRAEnc *
 BWTSeqGetAlphabet(const BWTSeq *seq)

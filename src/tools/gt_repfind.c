@@ -36,6 +36,7 @@
 #include "match/querymatch.h"
 #include "match/test-maxpairs.h"
 #include "match/seed-extend.h"
+#include "match/esa-map.h"
 #include "tools/gt_repfind.h"
 
 typedef struct
@@ -59,15 +60,17 @@ typedef struct
           alignmentwidth; /* 0 for no alignment display and otherwidth number
                              of columns of alignment per line displayed. */
   bool scanfile, beverbose, forward, reverse, searchspm,
-       check_extend_symmetry, silent, trimstat;
-  GtStr *indexname, *cam_string; /* parse this using
+       check_extend_symmetry, silent, trimstat, seed_display, noxpolish,
+       verify_alignment;
+  GtStr *indexname, *query_indexname, *cam_string; /* parse this using
                                     gt_greedy_extend_char_access*/
-  GtStrArray *queryfiles;
-  GtOption *refforwardoption, *refseedlengthoption,
+  GtStrArray *query_files;
+  GtOption *refforwardoption,
+           *refseedlengthoption,
            *refuserdefinedleastlengthoption,
            *refextendxdropoption,
            *refextendgreedyoption,
-           *refalignmentwidthoption;
+           *refalignmentoutoption;
 } GtMaxpairsoptions;
 
 static int gt_exact_selfmatch_with_output(void *info,
@@ -107,8 +110,6 @@ static int gt_exact_selfmatch_with_output(void *info,
                              pos1,
                              dbseqnum,
                              pos1 - dbseqstartpos,
-                             GT_READMODE_FORWARD,
-                             false,
                              0,
                              0,
                              true,
@@ -180,8 +181,9 @@ static void *gt_repfind_arguments_new(void)
 
   arguments = gt_malloc(sizeof (*arguments));
   arguments->indexname = gt_str_new();
+  arguments->query_indexname = gt_str_new();
   arguments->cam_string = gt_str_new();
-  arguments->queryfiles = gt_str_array_new();
+  arguments->query_files = gt_str_array_new();
   return arguments;
 }
 
@@ -194,14 +196,15 @@ static void gt_repfind_arguments_delete(void *tool_arguments)
     return;
   }
   gt_str_delete(arguments->indexname);
+  gt_str_delete(arguments->query_indexname);
   gt_str_delete(arguments->cam_string);
-  gt_str_array_delete(arguments->queryfiles);
+  gt_str_array_delete(arguments->query_files);
   gt_option_delete(arguments->refforwardoption);
   gt_option_delete(arguments->refseedlengthoption);
   gt_option_delete(arguments->refuserdefinedleastlengthoption);
   gt_option_delete(arguments->refextendxdropoption);
   gt_option_delete(arguments->refextendgreedyoption);
-  gt_option_delete(arguments->refalignmentwidthoption);
+  gt_option_delete(arguments->refalignmentoutoption);
   gt_free(arguments);
 }
 
@@ -209,34 +212,35 @@ static GtOptionParser *gt_repfind_option_parser_new(void *tool_arguments)
 {
   const GtUword extension_sensitivity = 97;
   GtOptionParser *op;
-  GtOption *option, *reverseoption, *queryoption, *extendxdropoption,
+  GtOption *option, *reverseoption, *option_query_files, *extendxdropoption,
            *extendgreedyoption, *scanoption, *sampleoption, *forwardoption,
            *spmoption, *seedlengthoption, *minidentityoption,
            *maxalilendiffoption, *leastlength_option, *char_access_mode_option,
            *check_extend_symmetry_option, *xdropbelowoption, *historyoption,
            *percmathistoryoption, *errorpercentageoption, *optiontrimstat,
-           *optionwithalignment;
+           *withalignmentoption, *optionseed_display, *optionnoxpolish,
+           *verify_alignment_option, *option_query_indexname;
   GtMaxpairsoptions *arguments = tool_arguments;
 
   op = gt_option_parser_new("[options] -ii indexname",
-                                  "Compute maximal repeats (and more).");
+                                  "Compute maximal exact matches (and more).");
   gt_option_parser_set_mail_address(op,"<kurtz@zbh.uni-hamburg.de>");
 
   leastlength_option
-    = gt_option_new_uint("l","Specify minimum length of repeats",
+    = gt_option_new_uint("l","Specify minimum length of matches",
                          &arguments->userdefinedleastlength,
                          0U);
   gt_option_parser_add_option(op, leastlength_option);
   arguments->refuserdefinedleastlengthoption
     = gt_option_ref(leastlength_option);
 
-  forwardoption = gt_option_new_bool("f","Compute maximal forward repeats",
+  forwardoption = gt_option_new_bool("f","Compute forward matches",
                                      &arguments->forward,
                                      true);
   gt_option_parser_add_option(op, forwardoption);
   arguments->refforwardoption = gt_option_ref(forwardoption);
 
-  reverseoption = gt_option_new_bool("r","Compute maximal reverse matches",
+  reverseoption = gt_option_new_bool("r","Compute reverse matches",
                                      &arguments->reverse,
                                      false);
   gt_option_parser_add_option(op, reverseoption);
@@ -342,7 +346,7 @@ static GtOptionParser *gt_repfind_option_parser_new(void *tool_arguments)
   gt_option_parser_add_option(op, percmathistoryoption);
   gt_option_is_development_option(percmathistoryoption);
 
-  optionwithalignment
+  withalignmentoption
     = gt_option_new_uword_min("a",
                               "show alignments/sequences for exact matches "
                               "(optional argument is number of columns per "
@@ -350,14 +354,9 @@ static GtOptionParser *gt_repfind_option_parser_new(void *tool_arguments)
                               &arguments->alignmentwidth,
                               70,
                               20);
-  gt_option_argument_is_optional(optionwithalignment);
-  gt_option_parser_add_option(op, optionwithalignment);
-  arguments->refalignmentwidthoption = gt_option_ref(optionwithalignment);
-
-  char_access_mode_option = gt_option_new_string("cam",
-                                                 gt_cam_extendgreedy_comment(),
-                                                 arguments->cam_string,"");
-  gt_option_parser_add_option(op, char_access_mode_option);
+  gt_option_argument_is_optional(withalignmentoption);
+  gt_option_parser_add_option(op, withalignmentoption);
+  arguments->refalignmentoutoption = gt_option_ref(withalignmentoption);
 
   option = gt_option_new_string("ii",
                                 "Specify input index",
@@ -376,18 +375,43 @@ static GtOptionParser *gt_repfind_option_parser_new(void *tool_arguments)
   gt_option_parser_add_option(op, option);
   gt_option_is_development_option(option);
 
+  optionnoxpolish
+    = gt_option_new_bool("noxpolish","do not polish X-drop extensions",
+                         &arguments->noxpolish, false);
+  gt_option_parser_add_option(op, optionnoxpolish);
+  gt_option_is_development_option(optionnoxpolish);
+
+  verify_alignment_option
+    = gt_option_new_bool("verify-alignment","verify correctness of alignments",
+                         &arguments->verify_alignment, false);
+  gt_option_parser_add_option(op, verify_alignment_option);
+  gt_option_is_development_option(verify_alignment_option);
+
   optiontrimstat = gt_option_new_bool("trimstat","show trimming statistics",
                                       &arguments->trimstat, false);
   gt_option_parser_add_option(op, optiontrimstat);
   gt_option_is_development_option(optiontrimstat);
 
+  optionseed_display = gt_option_new_bool("seed-display","display seeds in "
+                                          "#-line",
+                                          &arguments->seed_display, false);
+  gt_option_parser_add_option(op, optionseed_display);
+  gt_option_is_development_option(optionseed_display);
+
+  option_query_indexname = gt_option_new_string("qii",
+                                                "Specify name of query index",
+                                                arguments->query_indexname,
+                                                NULL);
+  gt_option_is_development_option(option_query_indexname);
+  gt_option_parser_add_option(op, option_query_indexname);
+
   /* the following option are options special to repfind */
 
-  queryoption = gt_option_new_filename_array("q",
-                                             "Specify query files",
-                                             arguments->queryfiles);
-  gt_option_is_development_option(queryoption);
-  gt_option_parser_add_option(op, queryoption);
+  option_query_files = gt_option_new_filename_array("q",
+                                                    "Specify query files",
+                                                    arguments->query_files);
+  gt_option_is_development_option(option_query_files);
+  gt_option_parser_add_option(op, option_query_files);
 
   sampleoption = gt_option_new_uword_min("samples","Specify number of samples",
                                          &arguments->samples,
@@ -420,20 +444,24 @@ static GtOptionParser *gt_repfind_option_parser_new(void *tool_arguments)
   option = gt_option_new_verbose(&arguments->beverbose);
   gt_option_parser_add_option(op, option);
 
-  gt_option_exclude(queryoption,sampleoption);
-  gt_option_exclude(queryoption,scanoption);
-  gt_option_exclude(queryoption,reverseoption);
-  gt_option_exclude(queryoption,spmoption);
+  gt_option_exclude(option_query_files,sampleoption);
+  gt_option_exclude(option_query_files,scanoption);
+  gt_option_exclude(option_query_files,spmoption);
+  gt_option_exclude(option_query_files,option_query_indexname);
   gt_option_exclude(sampleoption,spmoption);
   gt_option_exclude(reverseoption,spmoption);
   gt_option_exclude(extendgreedyoption,extendxdropoption);
   gt_option_exclude(errorpercentageoption,minidentityoption);
+  gt_option_exclude(withalignmentoption,sampleoption);
+  gt_option_exclude(withalignmentoption,spmoption);
+  gt_option_exclude(optionnoxpolish,withalignmentoption);
   gt_option_imply(xdropbelowoption,extendxdropoption);
-  gt_option_imply(char_access_mode_option,extendgreedyoption);
   gt_option_imply(historyoption,extendgreedyoption);
   gt_option_imply(maxalilendiffoption,extendgreedyoption);
   gt_option_imply(percmathistoryoption,extendgreedyoption);
   gt_option_imply(optiontrimstat,extendgreedyoption);
+  gt_option_imply(verify_alignment_option,withalignmentoption);
+  gt_option_imply(optionnoxpolish,extendxdropoption);
   gt_option_imply_either_2(seedlengthoption,extendxdropoption,
                            extendgreedyoption);
   gt_option_imply_either_2(minidentityoption,extendxdropoption,
@@ -512,6 +540,174 @@ static int gt_generic_simplegreedyselfmatchoutput(
                                                 err);
 }
 
+typedef void (*GtXdrop_extend_querymatch_func)(void *,
+                                               const GtEncseq *,
+                                               const GtQuerymatch *,
+                                               const GtSeqorEncseq *,
+                                               GtUword);
+
+static int gt_callenumquerymatches(bool selfmatch,
+                                   const char *indexname,
+                                   const GtStrArray *query_files,
+                                   const GtStr *query_indexname,
+                                   GtReadmode query_readmode,
+                                   unsigned int userdefinedleastlength,
+                                   GtQuerymatchoutoptions *querymatchoutoptions,
+                                   GtXdrop_extend_querymatch_func eqmf,
+                                   void *eqmf_data,
+                                   GtLogger *logger,
+                                   GtError *err)
+{
+  Suffixarray suffixarray;
+  GtQuerysubstringmatchiterator *qsmi = NULL;
+  bool haserr = false, query_encseq_own = false;
+  GtEncseq *query_encseq = NULL;
+
+  if (gt_mapsuffixarray(&suffixarray,
+                        SARR_ESQTAB | SARR_SUFTAB | SARR_SSPTAB,
+                        indexname,
+                        logger,
+                        err) != 0)
+  {
+    haserr = true;
+  }
+  if (!haserr)
+  {
+    if (query_files == NULL || gt_str_array_size(query_files) == 0)
+    {
+      if (query_indexname == NULL || gt_str_length(query_indexname) == 0)
+      {
+        query_encseq = suffixarray.encseq;
+      } else
+      {
+        GtEncseqLoader *el = gt_encseq_loader_new();
+
+        gt_encseq_loader_require_ssp_tab(el);
+        gt_encseq_loader_set_logger(el, logger);
+        query_encseq = gt_encseq_loader_load(el, gt_str_get(query_indexname),
+                                             err);
+        gt_encseq_loader_delete(el);
+        query_encseq_own = true;
+        if (query_encseq == NULL)
+        {
+          haserr = true;
+        }
+      }
+    } else
+    {
+      gt_assert(query_indexname == NULL || gt_str_length(query_indexname) == 0);
+    }
+  }
+  if (!haserr)
+  {
+    GtUword totallength = gt_encseq_total_length(suffixarray.encseq);
+    qsmi = gt_querysubstringmatchiterator_new(suffixarray.encseq,
+                                              totallength,
+                                              suffixarray.suftab,
+                                              suffixarray.readmode,
+                                              totallength + 1,
+                                              query_files,
+                                              query_encseq,
+                                              query_readmode,
+                                              userdefinedleastlength,
+                                              err);
+    if (qsmi == NULL)
+    {
+      haserr = true;
+    }
+  }
+  if (!haserr)
+  {
+    int retval;
+    GtSeqorEncseq query_seqorencseq;
+    GtQuerymatch *exactseed = gt_querymatch_new(querymatchoutoptions,false);
+
+    gt_querymatch_query_readmode_set(exactseed,query_readmode);
+    while (!haserr &&
+           (retval = gt_querysubstringmatchiterator_next(qsmi, err)) == 0)
+    {
+      GtUword dbstart, dbseqnum, dbseqstartpos, matchlength, query_totallength,
+              querystart;
+      uint64_t queryunitnum;
+
+      dbstart = gt_querysubstringmatchiterator_dbstart(qsmi);
+      if (gt_encseq_has_multiseq_support(suffixarray.encseq))
+      {
+        dbseqnum = gt_encseq_seqnum(suffixarray.encseq,dbstart);
+        dbseqstartpos = gt_encseq_seqstartpos(suffixarray.encseq, dbseqnum);
+      } else
+      {
+        dbseqnum = dbseqstartpos = 0;
+      }
+      matchlength = gt_querysubstringmatchiterator_matchlength(qsmi);
+      query_totallength = gt_querysubstringmatchiterator_query_seqlen(qsmi);
+      if (query_files == NULL || gt_str_array_size(query_files) == 0)
+      {
+        query_seqorencseq.seq = NULL;
+        query_seqorencseq.encseq = query_encseq;
+      } else
+      {
+        query_seqorencseq.seq = gt_querysubstringmatchiterator_query(qsmi);
+        query_seqorencseq.encseq = NULL;
+      }
+      querystart = gt_querysubstringmatchiterator_querystart(qsmi);
+      queryunitnum = gt_querysubstringmatchiterator_queryunitnum(qsmi);
+      if (eqmf != NULL)
+      {
+        gt_querymatch_init(exactseed,
+                           matchlength,
+                           dbstart,
+                           dbseqnum,
+                           dbstart - dbseqstartpos,
+                           0, /* score */
+                           0, /* edist */
+                           selfmatch,
+                           queryunitnum,
+                           matchlength,
+                           querystart,
+                           query_totallength);
+        eqmf(eqmf_data,suffixarray.encseq,exactseed,&query_seqorencseq,
+             query_totallength);
+      } else
+      {
+        if (gt_querymatch_complete(exactseed,
+                                   matchlength,
+                                   dbstart,
+                                   dbseqnum,
+                                   dbstart - dbseqstartpos,
+                                   0, /* score */
+                                   0, /* edist */
+                                   selfmatch,
+                                   queryunitnum,
+                                   matchlength,
+                                   querystart,
+                                   suffixarray.encseq,
+                                   &query_seqorencseq,
+                                   query_totallength,
+                                   dbstart,
+                                   querystart,
+                                   matchlength,
+                                   false))
+        {
+          gt_querymatch_prettyprint(exactseed);
+        }
+      }
+    }
+    if (retval == -1)
+    {
+      haserr = true;
+    }
+    gt_querymatch_delete(exactseed);
+  }
+  gt_querysubstringmatchiterator_delete(qsmi);
+  gt_freesuffixarray(&suffixarray);
+  if (query_encseq_own)
+  {
+    gt_encseq_delete(query_encseq);
+  }
+  return haserr ? -1 : 0;
+}
+
 static int gt_repfind_runner(int argc,
                              GT_UNUSED const char **argv,
                              int parsed_args,
@@ -537,7 +733,7 @@ static int gt_repfind_runner(int argc,
     gt_error_set(err,"superfluous arguments: \"%s\"",argv[argc-1]);
     haserr = true;
   }
-  if (!haserr && !gt_option_is_set(arguments->refalignmentwidthoption))
+  if (!haserr && !gt_option_is_set(arguments->refalignmentoutoption))
   {
     arguments->alignmentwidth = 0;
   }
@@ -548,89 +744,127 @@ static int gt_repfind_runner(int argc,
                                gt_minidentity2errorpercentage(
                                             arguments->minidentity),
                                arguments->xdropbelowscore,
-                               arguments->extendxdrop,
-                               gt_str_array_size(arguments->queryfiles) == 0
-                                             ? true : false);
+                               arguments->extendxdrop);
     gt_assert(xdropmatchinfo != NULL);
-    if (arguments->beverbose)
-    {
-      gt_xdrop_matchinfo_verbose_set(xdropmatchinfo);
-    }
     if (arguments->silent)
     {
       gt_xdrop_matchinfo_silent_set(xdropmatchinfo);
     }
   }
+  if (!haserr)
+  {
+    if (gt_option_is_set(arguments->refextendgreedyoption) ||
+        arguments->alignmentwidth > 0 ||
+        gt_option_is_set(arguments->refextendxdropoption))
+    {
+      extend_char_access
+        = gt_greedy_extend_char_access(gt_str_get(arguments->cam_string),err);
+
+      if ((int) extend_char_access == -1)
+      {
+        haserr = true;
+      }
+    }
+  }
   if (!haserr && gt_option_is_set(arguments->refextendgreedyoption))
   {
-    extend_char_access
-      = gt_greedy_extend_char_access(gt_str_get(arguments->cam_string),err);
-
-    if ((int) extend_char_access == -1)
+    greedyextendmatchinfo
+      = gt_greedy_extend_matchinfo_new(gt_minidentity2errorpercentage(
+                                           arguments->minidentity),
+                                       arguments->maxalignedlendifference,
+                                       arguments->history,
+                                       arguments->perc_mat_history,
+                                       arguments->userdefinedleastlength,
+                                       extend_char_access,
+                                       arguments->extendgreedy);
+    if (arguments->check_extend_symmetry)
     {
-      haserr = true;
+      gt_greedy_extend_matchinfo_check_extend_symmetry_set(
+                                                greedyextendmatchinfo);
     }
-    if (!haserr)
+    if (arguments->silent)
     {
-      greedyextendmatchinfo
-        = gt_greedy_extend_matchinfo_new(gt_minidentity2errorpercentage(
-                                             arguments->minidentity),
-                                         arguments->maxalignedlendifference,
-                                         arguments->history,
-                                         arguments->perc_mat_history,
-                                         arguments->userdefinedleastlength,
-                                         extend_char_access,
-                                         arguments->extendgreedy);
-      if (arguments->beverbose)
-      {
-        gt_greedy_extend_matchinfo_verbose_set(greedyextendmatchinfo);
-      }
-      if (arguments->check_extend_symmetry)
-      {
-        gt_greedy_extend_matchinfo_check_extend_symmetry_set(
-                                                  greedyextendmatchinfo);
-      }
-      if (arguments->silent)
-      {
-        gt_greedy_extend_matchinfo_silent_set(greedyextendmatchinfo);
-      }
-      if (arguments->trimstat)
-      {
-        gt_greedy_extend_matchinfo_trimstat_set(greedyextendmatchinfo);
-      }
+      gt_greedy_extend_matchinfo_silent_set(greedyextendmatchinfo);
+    }
+    if (arguments->trimstat)
+    {
+      gt_greedy_extend_matchinfo_trimstat_set(greedyextendmatchinfo);
     }
   }
   if (!haserr)
   {
     GtQuerymatchoutoptions *querymatchoutoptions;
     GtProcessinfo_and_querymatchspaceptr processinfo_and_querymatchspaceptr;
-    GtUword sensitivity = gt_option_is_set(arguments->refextendgreedyoption)
-                            ? arguments->extendgreedy
-                            : 100;
+    GtXdrop_extend_querymatch_func eqmf = NULL;
+    void *eqmf_data = NULL;
 
     processinfo_and_querymatchspaceptr.processinfo = NULL;
     if (arguments->alignmentwidth > 0 ||
-        (gt_str_array_size(arguments->queryfiles) == 0 &&
-         gt_option_is_set(arguments->refextendxdropoption)))
+        (gt_option_is_set(arguments->refextendxdropoption) &&
+         !arguments->noxpolish))
     {
       querymatchoutoptions
-        = gt_querymatchoutoptions_new(arguments->alignmentwidth,
-                                      gt_minidentity2errorpercentage(
+        = gt_querymatchoutoptions_new(arguments->alignmentwidth);
+
+      if (gt_option_is_set(arguments->refextendxdropoption) ||
+          gt_option_is_set(arguments->refextendgreedyoption))
+      {
+        const GtUword sensitivity
+          = gt_option_is_set(arguments->refextendgreedyoption)
+              ? arguments->extendgreedy
+              : 100;
+
+        gt_querymatchoutoptions_extend(querymatchoutoptions,
+                                       gt_minidentity2errorpercentage(
                                                arguments->minidentity),
                                       arguments->maxalignedlendifference,
                                       arguments->history,
                                       arguments->perc_mat_history,
                                       extend_char_access,
                                       sensitivity);
+      }
     } else
     {
       querymatchoutoptions = NULL;
     }
     processinfo_and_querymatchspaceptr.querymatchspaceptr
-      = gt_querymatch_new(querymatchoutoptions);
-    if (gt_str_array_size(arguments->queryfiles) == 0)
+      = gt_querymatch_new(querymatchoutoptions,arguments->seed_display);
+    if (arguments->verify_alignment)
     {
-      if (arguments->samples == 0)
+      gt_querymatch_verify_alignment_set(
+        processinfo_and_querymatchspaceptr.querymatchspaceptr);
+    }
+    if (gt_option_is_set(arguments->refextendxdropoption))
+    {
+      eqmf = gt_xdrop_extend_querymatch_with_output;
+      processinfo_and_querymatchspaceptr.processinfo = xdropmatchinfo;
+      eqmf_data = (void *) &processinfo_and_querymatchspaceptr;
+    } else
+    {
+      if (gt_option_is_set(arguments->refextendgreedyoption))
+      {
+        eqmf = gt_greedy_extend_querymatch_with_output;
+        processinfo_and_querymatchspaceptr.processinfo
+          = greedyextendmatchinfo;
+        eqmf_data = (void *) &processinfo_and_querymatchspaceptr;
+      }
+    }
+    if (gt_str_array_size(arguments->query_files) == 0 &&
+        gt_str_length(arguments->query_indexname) == 0)
+    {
+      if (arguments->samples > 0)
+      {
+        if (gt_testmaxpairs(gt_str_get(arguments->indexname),
+                            arguments->samples,
+                            arguments->seedlength,
+                            (GtUword)
+                            (100 * arguments->seedlength),
+                            logger,
+                            err) != 0)
+        {
+          haserr = true;
+        }
+      } else
       {
         if (arguments->forward)
         {
@@ -676,60 +910,43 @@ static int gt_repfind_runner(int argc,
         }
         if (!haserr && arguments->reverse)
         {
-          if (gt_callenumselfmatches(gt_str_get(arguments->indexname),
-                                     GT_READMODE_REVERSE,
-                                     arguments->seedlength,
-                                     gt_querymatch_output,
-                                     NULL,
-                                     logger,
-                                     err) != 0)
+          gt_querymatch_query_readmode_set(
+            processinfo_and_querymatchspaceptr.querymatchspaceptr,
+            GT_READMODE_REVERSE);
+          if (gt_callenumquerymatches(true,
+                                      gt_str_get(arguments->indexname),
+                                      NULL,
+                                      NULL,
+                                      GT_READMODE_REVERSE,
+                                      arguments->seedlength,
+                                      querymatchoutoptions,
+                                      eqmf,
+                                      eqmf_data,
+                                      logger,
+                                      err) != 0)
           {
             haserr = true;
           }
         }
-      } else
-      {
-        if (gt_testmaxpairs(gt_str_get(arguments->indexname),
-                            arguments->samples,
-                            arguments->seedlength,
-                            (GtUword)
-                            (100 * arguments->seedlength),
-                            logger,
-                            err) != 0)
-        {
-          haserr = true;
-        }
       }
     } else
     {
-      GtProcessquerymatch processquerymatch = NULL;
-      void *processquerymatch_data = NULL;
-
-      if (gt_option_is_set(arguments->refextendxdropoption))
+      if (arguments->reverse)
       {
-        processquerymatch = gt_xdrop_extend_querymatch_with_output;
-        processinfo_and_querymatchspaceptr.processinfo = xdropmatchinfo;
-        processquerymatch_data = (void *) &processinfo_and_querymatchspaceptr;
-      } else
-      {
-        if (gt_option_is_set(arguments->refextendgreedyoption))
-        {
-          gt_assert(false);
-        } else
-        {
-          processquerymatch = gt_querymatch_output;
-          processquerymatch_data = NULL;
-        }
+        gt_querymatch_query_readmode_set(
+            processinfo_and_querymatchspaceptr.querymatchspaceptr,
+            GT_READMODE_REVERSE);
       }
-      if (gt_callenumquerymatches(gt_str_get(arguments->indexname),
-                                  arguments->queryfiles,
-                                  false,
-                                  true,
-                                  false,
+      if (gt_callenumquerymatches(false,
+                                  gt_str_get(arguments->indexname),
+                                  arguments->query_files,
+                                  arguments->query_indexname,
+                                  arguments->reverse ? GT_READMODE_REVERSE
+                                                     : GT_READMODE_FORWARD,
                                   arguments->seedlength,
-                                  NULL,
-                                  processquerymatch,
-                                  processquerymatch_data,
+                                  querymatchoutoptions,
+                                  eqmf,
+                                  eqmf_data,
                                   logger,
                                   err) != 0)
       {

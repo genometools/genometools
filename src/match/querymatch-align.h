@@ -20,17 +20,21 @@
 
 #include "core/types_api.h"
 #include "match/ft-front-prune.h"
+#include "match/seq_or_encseq.h"
 
 typedef struct GtQuerymatchoutoptions GtQuerymatchoutoptions;
 
 GtQuerymatchoutoptions *gt_querymatchoutoptions_new(
-                                GtUword alignmentwidth,
-                                GtUword errorpercentage,
-                                GtUword maxalignedlendifference,
-                                GtUword history,
-                                GtUword perc_mat_history,
-                                GtExtendCharAccess extend_char_access,
-                                GtUword sensitivity);
+                                GtUword alignmentwidth);
+
+void gt_querymatchoutoptions_extend(
+                  GtQuerymatchoutoptions *querymatchoutoptions,
+                  GtUword errorpercentage,
+                  GtUword maxalignedlendifference,
+                  GtUword history,
+                  GtUword perc_mat_history,
+                  GtExtendCharAccess extend_char_access,
+                  GtUword sensitivity);
 
 void gt_querymatchoutoptions_delete(
         GtQuerymatchoutoptions *querymatchoutoptions);
@@ -39,9 +43,14 @@ bool gt_querymatchoutoptions_alignment_prepare(
                                      GtQuerymatchoutoptions
                                        *querymatchoutoptions,
                                      const GtEncseq *encseq,
+                                     const GtSeqorEncseq *query,
+                                     GtReadmode query_readmode,
+                                     GtUword query_seqstartpos,
+                                     GtUword query_totallength,
                                      GtUword dbstart,
                                      GtUword dblen,
-                                     GtUword querystartabsolute,
+                                     GtUword querystart,
+                                     GtUword querystart_fwdstrand,
                                      GtUword querylen,
                                      GtUword edist,
                                      GtUword seedpos1,
@@ -51,9 +60,8 @@ bool gt_querymatchoutoptions_alignment_prepare(
 
 void gt_querymatchoutoptions_alignment_show(const GtQuerymatchoutoptions
                                               *querymatchoutoptions,
-                                            bool selfmatch,
                                             GtUword edist,
-                                            GtUword len);
+                                            bool verify_alignment);
 
 typedef struct
 {

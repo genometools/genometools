@@ -106,12 +106,7 @@ typedef struct
   uint64_t queryseqnum;
 } Substringmatch;
 
-static int gt_storemaxmatchquery(void *info,
-                                 GT_UNUSED const GtEncseq *encseq,
-                                 const GtQuerymatch *querymatch,
-                                 GT_UNUSED const GtUchar *query,
-                                 GT_UNUSED GtUword query_totallength,
-                                 GT_UNUSED GtError *err)
+static void gt_storemaxmatchquery(void *info, const GtQuerymatch *querymatch)
 {
   GtArray *tab = (GtArray *) info;
   Substringmatch subm;
@@ -121,7 +116,6 @@ static int gt_storemaxmatchquery(void *info,
   subm.querystart = gt_querymatch_querystart(querymatch);
   subm.queryseqnum = gt_querymatch_queryseqnum(querymatch);
   gt_array_add(tab,subm);
-  return 0;
 }
 
 typedef struct

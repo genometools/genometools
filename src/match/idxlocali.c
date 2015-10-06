@@ -28,7 +28,6 @@
 #include "idxlocalisw.h"
 #include "absdfstrans-def.h"
 #include "esa-map.h"
-#include "stamp.h"
 
 typedef struct
 {

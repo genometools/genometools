@@ -20,8 +20,10 @@
 
 #include "core/types_api.h"
 
-void gt_inplace_reversecomplement(GtUchar *seq,GtUword len);
-void gt_copy_reversecomplement(GtUchar *dest,const GtUchar *src,
+void gt_inplace_reverse_complement(GtUchar *seq,GtUword len);
+void gt_inplace_reverse(GtUchar *seq,GtUword len);
+void gt_inplace_complement(GtUchar *seq,GtUword len);
+void gt_copy_reverse_complement(GtUchar *dest,const GtUchar *src,
                                GtUword len);
 
 #endif

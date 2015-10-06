@@ -85,11 +85,11 @@ void gt_alignment_show_generic(GtUchar *buffer,
                                const GtUchar *characters,
                                GtUchar wildcardshow);
 void gt_alignment_exact_show(GtUchar *buffer,
-                             const GtUchar *sequence,
-                             GtUword seqlen,
+                             const GtAlignment *alignment,
                              FILE *fp,
                              unsigned int width,
                              const GtUchar *characters);
+void gt_alignment_check_edist(const GtAlignment *alignment,GtUword edist);
 void         gt_alignment_show_multieop_list(const GtAlignment *alignment,
                                              FILE *fp);
 int          gt_alignment_unit_test(GtError *err);

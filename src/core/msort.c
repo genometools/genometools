@@ -80,7 +80,7 @@
     } while (--i); \
     a -= size; \
   }
-#define reverse(bot, top) { \
+#define msort_reverse(bot, top) { \
   s = top; \
   do { \
     i = size; \
@@ -173,12 +173,12 @@ setup(unsigned char *list1, unsigned char *list2, size_t n, size_t size,
         if ((cmp(f2-size, f2, cmpinfo) > 0) != sense) {
           p2 = *EVAL(p2) = f2 - list1 + list2;
           if (sense > 0)
-            reverse(f1, f2-size);
+            msort_reverse(f1, f2-size);
           f1 = f2;
         }
       }
       if (sense > 0)
-        reverse (f1, f2-size);
+        msort_reverse (f1, f2-size);
       f1 = f2;
       if (f2 < last || cmp(f2 - size, f2, cmpinfo) > 0)
         p2 = *EVAL(p2) = f2 - list1 + list2;
