@@ -715,7 +715,7 @@ GtQuerysubstringmatchiterator *gt_querysubstringmatchiterator_new(
                                      const ESASuffixptr *suftabpart,
                                      GtReadmode db_readmode,
                                      GtUword numberofsuffixes,
-                                     const GtStrArray *queryfiles,
+                                     const GtStrArray *query_files,
                                      const GtEncseq *query_encseq,
                                      GtReadmode query_readmode,
                                      unsigned int userdefinedleastlength,
@@ -742,10 +742,16 @@ GtQuerysubstringmatchiterator *gt_querysubstringmatchiterator_new(
   qsmi->querysubstring.queryrep = &qsmi->queryrep;
   qsmi->mmsi = gt_mmsearchiterator_new_empty();
   qsmi->mmsi_defined = false;
-  if (queryfiles != NULL)
+  if (query_files == NULL || gt_str_array_size(query_files) == 0)
+  {
+    gt_assert(query_encseq != NULL);
+    qsmi->seqit = NULL;
+    qsmi->query_encseq_numofsequences
+      = (uint64_t) gt_encseq_num_of_sequences(query_encseq);
+  } else
   {
     gt_assert(query_encseq == NULL);
-    qsmi->seqit = gt_seq_iterator_sequence_buffer_new(queryfiles, err);
+    qsmi->seqit = gt_seq_iterator_sequence_buffer_new(query_files, err);
     if (qsmi->seqit == NULL)
     {
       gt_querysubstringmatchiterator_delete(qsmi);
@@ -753,12 +759,6 @@ GtQuerysubstringmatchiterator *gt_querysubstringmatchiterator_new(
     }
     gt_seq_iterator_set_symbolmap(qsmi->seqit,
                         gt_alphabet_symbolmap(gt_encseq_alphabet(dbencseq)));
-  } else
-  {
-    gt_assert(query_encseq != NULL);
-    qsmi->seqit = NULL;
-    qsmi->query_encseq_numofsequences
-      = (uint64_t) gt_encseq_num_of_sequences(query_encseq);
   }
   return qsmi;
 }

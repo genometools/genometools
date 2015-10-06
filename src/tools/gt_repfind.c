@@ -62,15 +62,14 @@ typedef struct
   bool scanfile, beverbose, forward, reverse, searchspm,
        check_extend_symmetry, silent, trimstat, seed_display, noxpolish,
        verify_alignment;
-  GtStr *indexname, *cam_string; /* parse this using
+  GtStr *indexname, *query_indexname, *cam_string; /* parse this using
                                     gt_greedy_extend_char_access*/
-  GtStrArray *queryfiles;
+  GtStrArray *query_files;
   GtOption *refforwardoption,
            *refseedlengthoption,
            *refuserdefinedleastlengthoption,
            *refextendxdropoption,
            *refextendgreedyoption,
-           *refqueryfilesoption,
            *refalignmentoutoption;
 } GtMaxpairsoptions;
 
@@ -182,8 +181,9 @@ static void *gt_repfind_arguments_new(void)
 
   arguments = gt_malloc(sizeof (*arguments));
   arguments->indexname = gt_str_new();
+  arguments->query_indexname = gt_str_new();
   arguments->cam_string = gt_str_new();
-  arguments->queryfiles = gt_str_array_new();
+  arguments->query_files = gt_str_array_new();
   return arguments;
 }
 
@@ -196,14 +196,14 @@ static void gt_repfind_arguments_delete(void *tool_arguments)
     return;
   }
   gt_str_delete(arguments->indexname);
+  gt_str_delete(arguments->query_indexname);
   gt_str_delete(arguments->cam_string);
-  gt_str_array_delete(arguments->queryfiles);
+  gt_str_array_delete(arguments->query_files);
   gt_option_delete(arguments->refforwardoption);
   gt_option_delete(arguments->refseedlengthoption);
   gt_option_delete(arguments->refuserdefinedleastlengthoption);
   gt_option_delete(arguments->refextendxdropoption);
   gt_option_delete(arguments->refextendgreedyoption);
-  gt_option_delete(arguments->refqueryfilesoption);
   gt_option_delete(arguments->refalignmentoutoption);
   gt_free(arguments);
 }
@@ -212,14 +212,14 @@ static GtOptionParser *gt_repfind_option_parser_new(void *tool_arguments)
 {
   const GtUword extension_sensitivity = 97;
   GtOptionParser *op;
-  GtOption *option, *reverseoption, *queryoption, *extendxdropoption,
+  GtOption *option, *reverseoption, *option_query_files, *extendxdropoption,
            *extendgreedyoption, *scanoption, *sampleoption, *forwardoption,
            *spmoption, *seedlengthoption, *minidentityoption,
            *maxalilendiffoption, *leastlength_option, *char_access_mode_option,
            *check_extend_symmetry_option, *xdropbelowoption, *historyoption,
            *percmathistoryoption, *errorpercentageoption, *optiontrimstat,
            *withalignmentoption, *optionseed_display, *optionnoxpolish,
-           *verify_alignment_option;
+           *verify_alignment_option, *option_query_indexname;
   GtMaxpairsoptions *arguments = tool_arguments;
 
   op = gt_option_parser_new("[options] -ii indexname",
@@ -398,14 +398,20 @@ static GtOptionParser *gt_repfind_option_parser_new(void *tool_arguments)
   gt_option_parser_add_option(op, optionseed_display);
   gt_option_is_development_option(optionseed_display);
 
+  option_query_indexname = gt_option_new_string("qii",
+                                                "Specify name of query index",
+                                                arguments->query_indexname,
+                                                NULL);
+  gt_option_is_development_option(option_query_indexname);
+  gt_option_parser_add_option(op, option_query_indexname);
+
   /* the following option are options special to repfind */
 
-  queryoption = gt_option_new_filename_array("q",
-                                             "Specify query files",
-                                             arguments->queryfiles);
-  gt_option_is_development_option(queryoption);
-  gt_option_parser_add_option(op, queryoption);
-  arguments->refqueryfilesoption = gt_option_ref(queryoption);
+  option_query_files = gt_option_new_filename_array("q",
+                                                    "Specify query files",
+                                                    arguments->query_files);
+  gt_option_is_development_option(option_query_files);
+  gt_option_parser_add_option(op, option_query_files);
 
   sampleoption = gt_option_new_uword_min("samples","Specify number of samples",
                                          &arguments->samples,
@@ -438,9 +444,10 @@ static GtOptionParser *gt_repfind_option_parser_new(void *tool_arguments)
   option = gt_option_new_verbose(&arguments->beverbose);
   gt_option_parser_add_option(op, option);
 
-  gt_option_exclude(queryoption,sampleoption);
-  gt_option_exclude(queryoption,scanoption);
-  gt_option_exclude(queryoption,spmoption);
+  gt_option_exclude(option_query_files,sampleoption);
+  gt_option_exclude(option_query_files,scanoption);
+  gt_option_exclude(option_query_files,spmoption);
+  gt_option_exclude(option_query_files,option_query_indexname);
   gt_option_exclude(sampleoption,spmoption);
   gt_option_exclude(reverseoption,spmoption);
   gt_option_exclude(extendgreedyoption,extendxdropoption);
@@ -541,7 +548,8 @@ typedef void (*GtXdrop_extend_querymatch_func)(void *,
 
 static int gt_callenumquerymatches(bool selfmatch,
                                    const char *indexname,
-                                   const GtStrArray *queryfiles,
+                                   const GtStrArray *query_files,
+                                   const GtStr *query_indexname,
                                    GtReadmode query_readmode,
                                    unsigned int userdefinedleastlength,
                                    GtQuerymatchoutoptions *querymatchoutoptions,
@@ -552,7 +560,7 @@ static int gt_callenumquerymatches(bool selfmatch,
 {
   Suffixarray suffixarray;
   GtQuerysubstringmatchiterator *qsmi = NULL;
-  bool haserr = false;
+  bool haserr = false, query_encseq_own = false;
   GtEncseq *query_encseq = NULL;
 
   if (gt_mapsuffixarray(&suffixarray,
@@ -565,18 +573,40 @@ static int gt_callenumquerymatches(bool selfmatch,
   }
   if (!haserr)
   {
-    GtUword totallength = gt_encseq_total_length(suffixarray.encseq);
-
-    if (queryfiles == NULL)
+    if (query_files == NULL || gt_str_array_size(query_files) == 0)
     {
-      query_encseq = suffixarray.encseq;
+      if (query_indexname == NULL || gt_str_length(query_indexname) == 0)
+      {
+        query_encseq = suffixarray.encseq;
+      } else
+      {
+        GtEncseqLoader *el = gt_encseq_loader_new();
+
+        gt_encseq_loader_require_ssp_tab(el);
+        gt_encseq_loader_set_logger(el, logger);
+        query_encseq = gt_encseq_loader_load(el, gt_str_get(query_indexname),
+                                             err);
+        gt_encseq_loader_delete(el);
+        query_encseq_own = true;
+        if (query_encseq == NULL)
+        {
+          haserr = true;
+        }
+      }
+    } else
+    {
+      gt_assert(query_indexname == NULL || gt_str_length(query_indexname) == 0);
     }
+  }
+  if (!haserr)
+  {
+    GtUword totallength = gt_encseq_total_length(suffixarray.encseq);
     qsmi = gt_querysubstringmatchiterator_new(suffixarray.encseq,
                                               totallength,
                                               suffixarray.suftab,
                                               suffixarray.readmode,
                                               totallength + 1,
-                                              queryfiles,
+                                              query_files,
                                               query_encseq,
                                               query_readmode,
                                               userdefinedleastlength,
@@ -611,14 +641,14 @@ static int gt_callenumquerymatches(bool selfmatch,
       }
       matchlength = gt_querysubstringmatchiterator_matchlength(qsmi);
       query_totallength = gt_querysubstringmatchiterator_query_seqlen(qsmi);
-      if (queryfiles != NULL)
-      {
-        query_seqorencseq.seq = gt_querysubstringmatchiterator_query(qsmi);
-        query_seqorencseq.encseq = NULL;
-      } else
+      if (query_files == NULL || gt_str_array_size(query_files) == 0)
       {
         query_seqorencseq.seq = NULL;
         query_seqorencseq.encseq = query_encseq;
+      } else
+      {
+        query_seqorencseq.seq = gt_querysubstringmatchiterator_query(qsmi);
+        query_seqorencseq.encseq = NULL;
       }
       querystart = gt_querysubstringmatchiterator_querystart(qsmi);
       queryunitnum = gt_querysubstringmatchiterator_queryunitnum(qsmi);
@@ -671,6 +701,10 @@ static int gt_callenumquerymatches(bool selfmatch,
   }
   gt_querysubstringmatchiterator_delete(qsmi);
   gt_freesuffixarray(&suffixarray);
+  if (query_encseq_own)
+  {
+    gt_encseq_delete(query_encseq);
+  }
   return haserr ? -1 : 0;
 }
 
@@ -815,7 +849,8 @@ static int gt_repfind_runner(int argc,
         eqmf_data = (void *) &processinfo_and_querymatchspaceptr;
       }
     }
-    if (gt_str_array_size(arguments->queryfiles) == 0)
+    if (gt_str_array_size(arguments->query_files) == 0 &&
+        gt_str_length(arguments->query_indexname) == 0)
     {
       if (arguments->samples > 0)
       {
@@ -881,6 +916,7 @@ static int gt_repfind_runner(int argc,
           if (gt_callenumquerymatches(true,
                                       gt_str_get(arguments->indexname),
                                       NULL,
+                                      NULL,
                                       GT_READMODE_REVERSE,
                                       arguments->seedlength,
                                       querymatchoutoptions,
@@ -903,7 +939,8 @@ static int gt_repfind_runner(int argc,
       }
       if (gt_callenumquerymatches(false,
                                   gt_str_get(arguments->indexname),
-                                  arguments->queryfiles,
+                                  arguments->query_files,
+                                  arguments->query_indexname,
                                   arguments->reverse ? GT_READMODE_REVERSE
                                                      : GT_READMODE_FORWARD,
                                   arguments->seedlength,
