@@ -13,11 +13,6 @@ searchfiles = {"#{$testdata}condenseq/varlen_0.01_50.fas" =>
                "#{$testdata}condenseq/varlen_50.fas" =>
                [100,3000,10000, -1,4]}
 
-largefiles = {}
-if $gttestdata
-  largefiles["#{$gttestdata}condenseq/yeastproteomes.fas"] = [100,3000,10000,-1,-1]
-end
-
 desc_files = {"#{$testdata}condenseq/varlen_200.fas" => [100,3000,10000],
               "#{$testdata}condenseq/varlen_longer_ids_200.fas" =>
                 [100,3000,10000],
@@ -93,7 +88,6 @@ opt_arr.each do |opt|
   Keywords "gt_condenseq compress extract"
   Test do
     files.each_pair &comp_ext
-    largefiles.each_pair &comp_ext
   end
 end
 
@@ -193,7 +187,6 @@ opt_arr.each do |opt|
   Keywords "gt_condenseq ranges extract"
   Test do
     files.each_pair &range_ext
-    largefiles.each_pair &range_ext
   end
 end
 
