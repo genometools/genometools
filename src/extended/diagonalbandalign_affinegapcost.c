@@ -1028,8 +1028,10 @@ static Rnode evaluateaffineDBcrosspoints(LinspaceManagement *spacemanager,
   AffineDiagentry temp_entry;
   Rnode rpoint, temprpoint, lastrpoint;
   AffineAlignEdge prevcp_type,cp_type;
+
   diag = GT_DIV2(left_dist+right_dist);
   gt_assert(vstart == coloffset);
+
   if (ulen == 0)
   {
     switch (edge) {
@@ -1097,7 +1099,8 @@ static Rnode evaluateaffineDBcrosspoints(LinspaceManagement *spacemanager,
       {
         Diagcolumn[0].val_D.currentrowindex = rowoffset;
         Diagcolumn[0].val_D.last_type = from_edge;
-      }}
+      }
+    }
     return (Rnode) {0, edge};
   }
 
@@ -1136,6 +1139,9 @@ static Rnode evaluateaffineDBcrosspoints(LinspaceManagement *spacemanager,
     else
     {
       gt_assert(false); /* there has to be an crosspoint */
+#ifdef NDEBUG
+        exit(GT_EXIT_PROGRAMMING_ERROR);
+#endif
     }
   }
   else
@@ -1158,6 +1164,9 @@ static Rnode evaluateaffineDBcrosspoints(LinspaceManagement *spacemanager,
       break;
     default:
       gt_assert(false);
+#ifdef NDEBUG
+      exit(GT_EXIT_PROGRAMMING_ERROR);
+#endif
     }
   }
 

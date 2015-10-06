@@ -96,10 +96,10 @@ void reconstructalignment_from_Ltab(GtAlignment *align,
                                     Gtmaxcoordvalue *max,
                                     const GtUchar *useq,
                                     GtUword ustart,
-                                    GtUword ulen,
+                                    GT_UNUSED GtUword ulen,
                                     const GtUchar *vseq,
                                     GtUword vstart,
-                                    GtUword vlen,
+                                    GT_UNUSED GtUword vlen,
                                     GtScoreHandler *scorehandler)
 {
   GtUword i, j;
@@ -306,6 +306,9 @@ void reconstructalignment_from_affineDtab(GtAlignment *align,
       break;
     default:
       gt_assert(false);
+#ifdef NDEBUG
+      exit(GT_EXIT_PROGRAMMING_ERROR);
+#endif
   }
 
   for (j = ulen; j > node.currentrowindex; j--)
@@ -330,6 +333,9 @@ void reconstructalignment_from_affineDtab(GtAlignment *align,
         break;
       default:
         gt_assert(false);
+#ifdef NDEBUG
+        exit(GT_EXIT_PROGRAMMING_ERROR);
+#endif
     }
 
     gt_assert(prevnode.currentrowindex != GT_UWORD_MAX);

@@ -67,6 +67,9 @@ static inline Rnode get_Rtabentry(const Rtabentry *rtab,
     return rtab->val_I;
   default:
     gt_assert(false);
+#ifdef NDEBUG
+    exit(GT_EXIT_PROGRAMMING_ERROR);
+#endif
   }
 }
 
