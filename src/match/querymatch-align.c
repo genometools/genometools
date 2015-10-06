@@ -389,7 +389,8 @@ bool gt_querymatchoutoptions_alignment_prepare(GtQuerymatchoutoptions
                             querymatchoutoptions->useqbuffer,
                             dbstart,
                             dbstart + dblen - 1);
-  if ((query == NULL || query_readmode != GT_READMODE_FORWARD) &&
+  if ((query == NULL || query->seq == NULL ||
+       query_readmode != GT_READMODE_FORWARD) &&
       querylen > querymatchoutoptions->vseqbuffer_size)
   {
     querymatchoutoptions->vseqbuffer
