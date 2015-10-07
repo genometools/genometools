@@ -607,10 +607,7 @@ static void gt_alignment_check_match(const GtAlignment *alignment)
       different = true;
     }
   }
-  if (different)
-  {
-    exit(EXIT_FAILURE);
-  }
+  gt_assert(!different);
 }
 
 void gt_alignment_check_edist(const GtAlignment *alignment,GtUword edist)
@@ -638,10 +635,6 @@ void gt_alignment_check_edist(const GtAlignment *alignment,GtUword edist)
                                    alignment->vlen);
 
     realedist = greedyunitedist(ftres,useq_abstract,vseq_abstract);
-    if (realedist > edist)
-    {
-      printf("realedist = " GT_WU " > " GT_WU " = edist\n",realedist,edist);
-    }
     gt_assert(realedist <= edist);
     gt_seqabstract_delete(useq_abstract);
     gt_seqabstract_delete(vseq_abstract);

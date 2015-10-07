@@ -529,11 +529,6 @@ void gt_querymatchoutoptions_alignment_show(const GtQuerymatchoutoptions
                                 querymatchoutoptions->alignmentwidth,
                                 querymatchoutoptions->characters,
                                 querymatchoutoptions->wildcardshow);
-      if (verify_alignment)
-      {
-        gt_alignment_check_edist(querymatchoutoptions->alignment,edist);
-      }
-      gt_alignment_reset(querymatchoutoptions->alignment);
     } else
     {
       gt_alignment_exact_show(querymatchoutoptions->alignment_show_buffer,
@@ -541,11 +536,12 @@ void gt_querymatchoutoptions_alignment_show(const GtQuerymatchoutoptions
                               stdout,
                               querymatchoutoptions->alignmentwidth,
                               querymatchoutoptions->characters);
-      if (verify_alignment)
-      {
-        gt_alignment_check_edist(querymatchoutoptions->alignment,0);
-      }
     }
+    if (verify_alignment)
+    {
+      gt_alignment_check_edist(querymatchoutoptions->alignment,edist);
+    }
+    gt_alignment_reset(querymatchoutoptions->alignment);
   }
 }
 
