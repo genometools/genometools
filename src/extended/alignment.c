@@ -672,6 +672,7 @@ void gt_alignment_show(const GtAlignment *alignment, FILE *fp,
   gt_alignment_buffer_delete(buffer);
 }
 
+#ifndef NDEBUG
 static void gt_alignment_check_match(const GtAlignment *alignment)
 {
   GtUword idx;
@@ -723,6 +724,7 @@ void gt_alignment_check_edist(const GtAlignment *alignment,GtUword edist)
     gt_frontresource_delete(ftres);
   }
 }
+#endif
 
 void gt_alignment_show_with_mapped_chars(const GtAlignment *alignment,
                                          const GtUchar *characters,

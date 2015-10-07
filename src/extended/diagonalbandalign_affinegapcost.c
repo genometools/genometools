@@ -1022,9 +1022,9 @@ static Rnode evaluateaffineDBcrosspoints(LinspaceManagement *spacemanager,
                                          GtWord right_dist)
 {
   GtUword i,new_ulen, new_vlen, col_start, col_end,
-          row_start, row_end;
+          row_start = 0, row_end;
   GtWord new_left, new_right, diag;
-  Diagentry cpoint, prevcpoint;
+  Diagentry cpoint = {0,0,0}, prevcpoint;
   AffineDiagentry temp_entry;
   Rnode rpoint, temprpoint, lastrpoint;
   AffineAlignEdge prevcp_type,cp_type;
@@ -1126,22 +1126,23 @@ static Rnode evaluateaffineDBcrosspoints(LinspaceManagement *spacemanager,
   /* if no crosspoint is found */
   if (col_start == GT_UWORD_MAX)
   {
+    gt_assert(diag != 0);
     if (diag < 0)
+    {
       return evaluateaffineDBcrosspoints(spacemanager, Diagcolumn, scorehandler,
                                          edge, from_edge, to_edge, rowoffset,
                                          coloffset, useq, ustart, ulen, vseq,
                                          vstart, vlen, diag+1, right_dist);
-    else if (diag > 0)
-      return evaluateaffineDBcrosspoints(spacemanager, Diagcolumn, scorehandler,
-                                         edge, from_edge, to_edge, rowoffset,
-                                         coloffset, useq, ustart, ulen, vseq,
-                                         vstart, vlen, left_dist, diag-1);
-    else
+    } else
     {
-      gt_assert(false); /* there has to be an crosspoint */
-#ifdef NDEBUG
-        exit(GT_EXIT_PROGRAMMING_ERROR);
-#endif
+      if (diag > 0)
+      {
+        return evaluateaffineDBcrosspoints(spacemanager, Diagcolumn,
+                                           scorehandler,
+                                           edge, from_edge, to_edge, rowoffset,
+                                           coloffset, useq, ustart, ulen, vseq,
+                                           vstart, vlen, left_dist, diag-1);
+      }
     }
   }
   else
@@ -1157,16 +1158,12 @@ static Rnode evaluateaffineDBcrosspoints(LinspaceManagement *spacemanager,
       cp_type = Affine_D;
       row_start = Diagcolumn[col_start].val_D.currentrowindex;
       break;
-    case Affine_I:
+    default:
+      gt_assert(cp_type == Affine_I);
       cpoint = Diagcolumn[col_start].val_I;
       cp_type = Affine_I;
       row_start = Diagcolumn[col_start].val_I.currentrowindex;
       break;
-    default:
-      gt_assert(false);
-#ifdef NDEBUG
-      exit(GT_EXIT_PROGRAMMING_ERROR);
-#endif
     }
   }
 
@@ -1196,7 +1193,7 @@ static Rnode evaluateaffineDBcrosspoints(LinspaceManagement *spacemanager,
     }
     else
     {
-      new_ulen = ulen - (row_start-rowoffset);
+      new_ulen = ulen - (row_start - rowoffset);
       new_vlen = vlen-col_start-1;
       new_left = -1;
       new_right = MIN((GtWord)right_dist-((GtWord)diag)-1,new_vlen);
@@ -1228,14 +1225,12 @@ static Rnode evaluateaffineDBcrosspoints(LinspaceManagement *spacemanager,
       cp_type = Affine_D;
       row_start = Diagcolumn[col_start].val_D.currentrowindex;
       break;
-    case Affine_I:
+    default:
+      gt_assert(prevcpoint.last_type == Affine_I);
       cpoint = Diagcolumn[col_start].val_I;
       cp_type = Affine_I;
       row_start = Diagcolumn[col_start].val_I.currentrowindex;
       break;
-    default:
-      cp_type = Affine_X;
-      gt_assert(false);
     }
 
     if (prevcp_type == Affine_R ||
@@ -1245,7 +1240,7 @@ static Rnode evaluateaffineDBcrosspoints(LinspaceManagement *spacemanager,
     }
     else if (prevcp_type == Affine_D)
     {
-      new_ulen = row_end-row_start-1;
+      new_ulen = row_end - row_start - 1;
       new_vlen = col_end-col_start-1;
       new_left = -1;
       new_right = MIN(right_dist-diag-1,new_vlen);
@@ -1271,7 +1266,7 @@ static Rnode evaluateaffineDBcrosspoints(LinspaceManagement *spacemanager,
     }
     else if (prevcp_type == Affine_I)
     {
-      new_ulen = row_end-row_start-1;
+      new_ulen = row_end - row_start-1;
       new_left = MAX(left_dist-diag+1,
                         -(GtWord)new_ulen);
       new_right = 0;

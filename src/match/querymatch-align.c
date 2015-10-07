@@ -521,7 +521,7 @@ bool gt_querymatchoutoptions_alignment_prepare(GtQuerymatchoutoptions
 void gt_querymatchoutoptions_alignment_show(const GtQuerymatchoutoptions
                                               *querymatchoutoptions,
                                             GtUword edist,
-                                            bool verify_alignment)
+                                            GT_UNUSED bool verify_alignment)
 {
   if (querymatchoutoptions != NULL && querymatchoutoptions->alignmentwidth > 0)
   {
@@ -542,10 +542,12 @@ void gt_querymatchoutoptions_alignment_show(const GtQuerymatchoutoptions
                               querymatchoutoptions->alignmentwidth,
                               querymatchoutoptions->characters);
     }
+#ifndef NDEBUG
     if (verify_alignment)
     {
       gt_alignment_check_edist(querymatchoutoptions->alignment,edist);
     }
+#endif
     gt_alignment_reset(querymatchoutoptions->alignment);
   }
 }

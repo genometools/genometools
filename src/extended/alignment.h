@@ -123,7 +123,9 @@ void gt_alignment_exact_show(GtUchar *buffer,
                              FILE *fp,
                              unsigned int width,
                              const GtUchar *characters);
+#ifndef NDEBUG
 void gt_alignment_check_edist(const GtAlignment *alignment,GtUword edist);
+#endif
 void         gt_alignment_show_multieop_list(const GtAlignment *alignment,
                                              FILE *fp);
 int          gt_alignment_unit_test(GtError *err);

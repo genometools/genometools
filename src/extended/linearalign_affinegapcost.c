@@ -58,19 +58,16 @@ inline AffineAlignEdge set_edge(GtWord Rdist,
 static inline Rnode get_Rtabentry(const Rtabentry *rtab,
                                   AffineAlignEdge edge)
 {
-  switch (edge) {
-  case Affine_R:
+  if (edge == Affine_R)
+  {
     return rtab->val_R;
-  case Affine_D:
-    return rtab->val_D;
-  case Affine_I:
-    return rtab->val_I;
-  default:
-    gt_assert(false);
-#ifdef NDEBUG
-    exit(GT_EXIT_PROGRAMMING_ERROR);
-#endif
   }
+  if (edge == Affine_D)
+  {
+    return rtab->val_D;
+  }
+  gt_assert(edge == Affine_I);
+  return rtab->val_I;
 }
 
 static inline void firstAtabRtabentry(AffinealignDPentry *Atabcolumn,
