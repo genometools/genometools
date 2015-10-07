@@ -914,7 +914,8 @@ GtNodeStream* gt_ltrdigest_file_out_stream_new(GtNodeStream *in_stream,
                 "rTSD start\trTSD end\trTSD motif\t"
                 "PPT start\tPPT end\tPPT motif\tPPT strand\tPPT offset");
     gt_file_xprintf(ls->tabout_file,
-                "\tPBS start\tPBS end\tPBS strand\ttRNA\ttRNA motif\tPBS offset\t"
+                "\tPBS start\tPBS end\tPBS strand\ttRNA\ttRNA motif\tPBS "
+                "offset\t"
                 "tRNA offset\tPBS/tRNA edist");
   #ifdef HAVE_HMMER
     gt_file_xprintf(ls->tabout_file, "\tProtein domain hits");

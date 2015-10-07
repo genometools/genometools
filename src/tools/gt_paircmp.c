@@ -19,14 +19,19 @@
 #include <string.h>
 #include <inttypes.h>
 #include "core/error.h"
+#include "core/fasta_reader.h"
+#include "core/fasta_reader_rec.h"
 #include "core/ma_api.h"
-#include "core/versionfunc.h"
 #include "core/option_api.h"
 #include "core/str.h"
 #include "core/str_array.h"
 #include "core/types_api.h"
+#include "core/versionfunc.h"
+#include "extended/diagonalbandalign.h"
+#include "extended/diagonalbandalign_affinegapcost.h"
 #include "extended/linearalign_affinegapcost.h"
 #include "extended/linearalign.h"
+#include "extended/squarealign.h"
 #include "match/test-pairwise.h"
 #include "tools/gt_paircmp.h"
 
@@ -39,9 +44,12 @@ typedef struct
 typedef struct
 {
   GtStrArray *strings,
-             *files;
+             *files,
+             *fastasequences0,
+             *fastasequences1;
   Charlistlen *charlistlen;
   GtStr *text;
+  bool fasta;
   bool showedist;
   bool print;
 } Cmppairwiseopt;
@@ -57,6 +65,12 @@ static void showsimpleoptions(const Cmppairwiseopt *opt)
   }
   if (gt_str_array_size(opt->files) > 0)
   {
+    if (opt->fasta)
+    {
+      printf("# two files fasta \"%s\" \"%s\"\n",gt_str_array_get(opt->files,1),
+           gt_str_array_get(opt->files,2UL));
+      return;
+    }
     printf("# two files \"%s\" \"%s\"\n", gt_str_array_get(opt->files,0),
            gt_str_array_get(opt->files,1UL));
     return;
@@ -95,8 +109,11 @@ static GtOPrval parse_options(int *parsed_args,
   pw->files = gt_str_array_new();
   pw->text = gt_str_new();
   pw->charlistlen = NULL;
+  pw->fastasequences0 = NULL;
+  pw->fastasequences1 = NULL;
   pw->showedist = false;
   pw->print = false;
+  pw->fasta = false;
   op = gt_option_parser_new("options", "Apply function to pairs of strings.");
   gt_option_parser_set_mail_address(op, "<kurtz@zbh.uni-hamburg.de>");
 
@@ -150,8 +167,18 @@ static GtOPrval parse_options(int *parsed_args,
       {
         if (gt_str_array_size(pw->files) != 2UL)
         {
-          gt_error_set(err, "option -ff requires two filename arguments");
-          oprval = GT_OPTION_PARSER_ERROR;
+          if (gt_str_array_size(pw->files) == 3UL &&
+              !strcmp(gt_str_array_get(pw->files,0),"fasta"))
+          {
+            pw->fasta = true;
+          }
+          if (!pw->fasta)
+          {
+            gt_error_set(err, "option -ff requires two filename arguments or "
+                              "keyword fasta and two filename arguments in "
+                              "FASTA format");
+            oprval = GT_OPTION_PARSER_ERROR;
+          }
         }
       } else
       {
@@ -210,6 +237,11 @@ static void freesimpleoption(Cmppairwiseopt *cmppairwise)
     gt_str_delete(cmppairwise->charlistlen->charlist);
     gt_free(cmppairwise->charlistlen);
   }
+  if (cmppairwise->fasta)
+  {
+    gt_free(cmppairwise->fastasequences0);
+    gt_free(cmppairwise->fastasequences1);
+  }
 }
 
 static GtUword applycheckfunctiontosimpleoptions(
@@ -236,9 +268,27 @@ static GtUword applycheckfunctiontosimpleoptions(
   }
   if (gt_str_array_size(opt->files) > 0)
   {
-    gt_runcheckfunctionontwofiles(checkfunction,
-                               gt_str_array_get(opt->files,0),
-                               gt_str_array_get(opt->files,1UL));
+    if (opt->fasta)
+    {
+      int i,j;
+      for (i = 0; i < gt_str_array_size(opt->fastasequences0); i++)
+      {
+        for (j = 0; j < gt_str_array_size(opt->fastasequences1); j++)
+        {
+          checkfunction(true,
+                    (const GtUchar *) gt_str_array_get(opt->fastasequences0,i),
+                    (GtUword) strlen(gt_str_array_get(opt->fastasequences0,i)),
+                    (const GtUchar *) gt_str_array_get(opt->fastasequences1,j),
+                    (GtUword) strlen(gt_str_array_get(opt->fastasequences1,j)));
+        }
+      }
+    }
+    else
+    {
+      gt_runcheckfunctionontwofiles(checkfunction,
+                                 gt_str_array_get(opt->files,0),
+                                 gt_str_array_get(opt->files,1UL));
+    }
     return 2UL;
   }
   if (opt->charlistlen != NULL)
@@ -255,6 +305,15 @@ static GtUword applycheckfunctiontosimpleoptions(
   return 0;
 }
 
+static int save_fastaentry(const char *seqpart, GT_UNUSED GtUword length,
+                           void *data, GT_UNUSED GtError* err)
+{
+  gt_error_check(err);
+  GtStrArray *fasta_sequences = (GtStrArray*) data;
+  gt_str_array_add_cstr(fasta_sequences, seqpart);
+  return 0;
+}
+
 typedef struct {
   Checkcmppairfuntype function;
   const char *name;
@@ -267,6 +326,8 @@ int gt_paircmp(int argc, const char **argv, GtError *err)
   int parsed_args;
   Cmppairwiseopt cmppairwise;
   GtOPrval oprval;
+  GtFastaReader *reader0 = NULL,
+                *reader1 = NULL;
 
   gt_error_check(err);
 
@@ -294,13 +355,29 @@ int gt_paircmp(int argc, const char **argv, GtError *err)
     }
     else if (cmppairwise.print)
     {
-      gt_print_edist_alignment(
+        gt_print_edist_alignment(
         (const GtUchar *) gt_str_array_get(cmppairwise.strings,0),0,
         (GtUword) strlen(gt_str_array_get(cmppairwise.strings,0)),
         (const GtUchar *) gt_str_array_get(cmppairwise.strings,1UL),0,
         (GtUword) strlen(gt_str_array_get(cmppairwise.strings,1UL)));
     } else
     {
+      if (cmppairwise.fasta)
+      {
+        gt_assert(gt_str_array_size(cmppairwise.files) == 3);
+        cmppairwise.fastasequences0 = gt_str_array_new();
+        cmppairwise.fastasequences1 = gt_str_array_new();
+
+        reader0 = gt_fasta_reader_rec_new(gt_str_array_get_str(
+                                                        cmppairwise.files,1UL));
+        gt_fasta_reader_run(reader0, NULL, save_fastaentry,
+                            NULL, cmppairwise.fastasequences0, err);
+        reader1 = gt_fasta_reader_rec_new (gt_str_array_get_str(
+                                                        cmppairwise.files,2UL));
+        gt_fasta_reader_run(reader1, NULL, save_fastaentry,
+                            NULL, cmppairwise.fastasequences1, err);
+        gt_error_check(err);
+      }
       size_t idx;
       Checkfunctiontabentry checkfunction_tab[] = {
         MAKECheckfunctiontabentry(gt_checkgreedyunitedist),
@@ -318,6 +395,8 @@ int gt_paircmp(int argc, const char **argv, GtError *err)
         printf("# number of testcases for %s: " GT_WU "\n",
                checkfunction_tab[idx].name,testcases);
       }
+      gt_fasta_reader_delete(reader0);
+      gt_fasta_reader_delete(reader1);
     }
   }
   freesimpleoption(&cmppairwise);

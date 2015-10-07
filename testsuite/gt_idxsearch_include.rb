@@ -84,7 +84,7 @@ Test do
   paircmplist.each do |f1|
     paircmplist.each do |f2|
       if f1 != f2
-        run_test "#{$bin}gt dev paircmp -ff #{$testdata}#{f1} #{$testdata}#{f2}"
+        run_test "#{$bin}gt dev paircmp -ff fasta #{$testdata}#{f1} #{$testdata}#{f2}"
       end
     end
   end

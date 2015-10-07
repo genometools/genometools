@@ -20,6 +20,7 @@
 #include "core/types_api.h"
 #include "extended/alignment.h"
 #include "extended/linearalign.h"
+#include "extended/linspaceManagement.h"
 #include "revcompl.h"
 #include "seed-extend.h"
 #include "querymatch-align.h"
@@ -480,12 +481,15 @@ bool gt_querymatchoutoptions_alignment_prepare(GtQuerymatchoutoptions
                               dblen,
                               querymatchoutoptions->vseqbuffer,
                               querylen);
+        LinspaceManagement *spacemanager = gt_linspaceManagement_new();
 #ifndef NDEBUG
         linedist =
 #else
         (void)
 #endif
-                   gt_computelinearspace(querymatchoutoptions->alignment,
+
+                   gt_computelinearspace(spacemanager,
+                                         querymatchoutoptions->alignment,
                                          querymatchoutoptions->useqbuffer,
                                          0,
                                          dblen,
@@ -495,6 +499,7 @@ bool gt_querymatchoutoptions_alignment_prepare(GtQuerymatchoutoptions
                                          0,
                                          1,
                                          1);
+        gt_linspaceManagement_delete(spacemanager);
         gt_assert(linedist <= edist);
         /*printf("linedist = " GT_WU " <= " GT_WU "= edist\n",linedist,edist);*/
       }
