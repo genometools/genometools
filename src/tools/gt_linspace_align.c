@@ -57,6 +57,7 @@ typedef struct{
              protein,
              costmatrix, /* special case of substituation matrix*/
              showscore,
+             showsequences,
              scoreonly, /* dev option generate alignment, but do not show it*/
              wildcardshow, /* show symbol wildcards in output*/
              spacetime; /* write space peak and time overall on stdout*/
@@ -127,8 +128,9 @@ static GtOptionParser* gt_linspace_align_option_parser_new(void *tool_arguments)
   GtOption *optionstrings, *optionfiles, *optionglobal, *optionlocal,
            *optiondna, *optionprotein, *optioncostmatrix, *optionlinearcosts,
            *optionaffinecosts, *optionoutputfile, *optionshowscore,
-           *optiondiagonal, *optiondiagonalbonds, *optiontsfactor,
-           *optionspacetime, *optionscoreonly, *optionwildcardsymbol;
+           *optionshowsequences, *optiondiagonal, *optiondiagonalbonds,
+           *optiontsfactor, *optionspacetime, *optionscoreonly,
+           *optionwildcardsymbol;
   gt_assert(arguments);
 
   /* init */
@@ -178,6 +180,11 @@ static GtOptionParser* gt_linspace_align_option_parser_new(void *tool_arguments)
                                        "of input ",
                                        &arguments->showscore, false);
   gt_option_parser_add_option(op, optionshowscore);
+
+  optionshowsequences = gt_option_new_bool("showsequences", "show sequences u "
+                                           "and v in fornt of alignment",
+                                       &arguments->showsequences, false);
+  gt_option_parser_add_option(op, optionshowsequences);
 
   optionscoreonly = gt_option_new_bool("showonlyscore", "show only score for "
                                        "generated alignment to compare with "
@@ -237,6 +244,7 @@ static GtOptionParser* gt_linspace_align_option_parser_new(void *tool_arguments)
   gt_option_exclude(optionlocal, optionglobal);
   gt_option_exclude(optionlinearcosts, optionaffinecosts);
   gt_option_exclude(optiondna, optionprotein);
+  gt_option_exclude(optionshowsequences, optionscoreonly);
   gt_option_imply_either_2(optionfiles, optionglobal, optionlocal);
   gt_option_imply_either_2(optiondna, optionstrings, optionfiles);
   gt_option_imply_either_2(optionstrings, optionglobal, optionlocal);
@@ -244,6 +252,7 @@ static GtOptionParser* gt_linspace_align_option_parser_new(void *tool_arguments)
   gt_option_imply_either_2(optionlocal, optionlinearcosts, optionaffinecosts);
   gt_option_imply_either_2(optionglobal, optionlinearcosts, optionaffinecosts);
   gt_option_imply_either_2(optionshowscore,optionlinearcosts,optionaffinecosts);
+  gt_option_imply_either_2(optionshowsequences, optionstrings, optionfiles);
   gt_option_imply_either_2(optionscoreonly,optionlinearcosts,optionaffinecosts);
   gt_option_imply(optiondiagonal, optionglobal);
   gt_option_imply(optiondiagonalbonds, optiondiagonal);
@@ -352,6 +361,7 @@ static void print_sequence(const GtUchar *seq, GtUword len, FILE *fp)
     fprintf(fp, "%.80s\n",seq+i);
     i += 80;
   }while (i < len);
+
 }
 
 /*show sequences, alignment and score*/
@@ -362,6 +372,8 @@ static void alignment_show_with_sequences(GtUchar *useq, GtUword ulen,
                                           GtUchar wildcardshow,
                                           bool showscore,
                                           bool showalign,
+                                          bool showsequences,
+                                          bool global,
                                           GtScoreHandler *scorehandler,
                                           FILE *fp)
 {
@@ -369,17 +381,17 @@ static void alignment_show_with_sequences(GtUchar *useq, GtUword ulen,
 
   if (fp != NULL)
   {
-    if (showalign)
+    if (showsequences)
     {
       print_sequence(useq, ulen, fp);
       print_sequence(vseq, vlen, fp);
-      fprintf(fp, "######\n");
     }
 
     characters = gt_alphabet_characters(alphabet);
-    sequence_encode(useq,ulen,alphabet);
-    sequence_encode(vseq,vlen,alphabet);
+    sequence_encode(useq, ulen, alphabet);
+    sequence_encode(vseq, vlen, alphabet);
 
+    fprintf(fp, "######\n");
     if (showalign && gt_alignment_get_length(align) > 0)
     {
       gt_alignment_show_with_mapped_chars(align, characters,
@@ -392,7 +404,8 @@ static void alignment_show_with_sequences(GtUchar *useq, GtUword ulen,
     {
       GtWord score = gt_scorehandler_eval_alignmentscore(scorehandler,
                                                          align, characters);
-      fprintf(fp, "score: "GT_WD"\n", score);
+
+      fprintf(fp, "%s: "GT_WD"\n", global? "distance":"score", score);
     }
 
     sequence_decode(useq,ulen,alphabet);
@@ -431,7 +444,7 @@ static int save_fastasequence(const char *seqpart, GT_UNUSED GtUword length,
 
   if (fasta_seqs->maxsize == fasta_seqs->size)
   {
-    fasta_seqs->maxsize += 5;
+    fasta_seqs->maxsize += 10;
     fasta_seqs->seqarray = gt_realloc(fasta_seqs->seqarray,
                                       fasta_seqs->maxsize*
                                       sizeof (*fasta_seqs->seqarray));
@@ -477,6 +490,7 @@ static int get_onesequence(GtSequences *sequences, const GtStrArray *strings,
   return had_err;
 }
 
+#ifndef NDEBUG
 /*checks if all character in <seq> are defined in <alphabet>. */
 static inline int check_sequence(GtUchar *seq, GtUword len,
                                  GtAlphabet *alphabet, GtError *err)
@@ -484,11 +498,6 @@ static inline int check_sequence(GtUchar *seq, GtUword len,
   GtUword i;
   for (i = 0; i < len; i++)
   {
-    if (gt_alphabet_is_dna(alphabet))
-      seq[i] = tolower((int)seq[i]);
-    else
-      seq[i] = toupper((int)seq[i]);
-
     if (!gt_alphabet_valid_input(alphabet, seq[i]))
     {
       gt_error_set(err, "found invalid character %c", seq[i]);
@@ -502,6 +511,7 @@ static inline int check_sequence(GtUchar *seq, GtUword len,
   }
   return 0;
 }
+#endif
 
 /*call function with linear gap costs for all given sequences */
 static int alignment_with_linear_gap_costs(GtLinspaceArguments *arguments,
@@ -517,10 +527,11 @@ static int alignment_with_linear_gap_costs(GtLinspaceArguments *arguments,
 {
   GtUchar *useq, *vseq, wildcardshow;
   GtUword i, j, ulen, vlen;
-  bool showscore = false;
+  bool showsequences, showscore = false;
   int had_err = 0;
 
   gt_error_check(err);
+  showsequences = arguments->showsequences;
   GtAlphabet *alphabet = gt_scorehandler_get_alphabet(scorehandler);
   wildcardshow = gt_alphabet_wildcard_show(alphabet);
 
@@ -531,17 +542,21 @@ static int alignment_with_linear_gap_costs(GtLinspaceArguments *arguments,
   {
       ulen = gt_str_length(sequences1->seqarray[i]);
       useq = (GtUchar*) gt_str_get(sequences1->seqarray[i]);
+#ifndef NDEBUG
       had_err = check_sequence(useq, ulen, alphabet, err);
       if (had_err)
         return 1;
+#endif
 
     for (j = 0; j< sequences2->size; j++)
     {
       vlen = gt_str_length(sequences2->seqarray[j]);
       vseq = (GtUchar*) gt_str_get(sequences2->seqarray[j]);
+#ifndef NDEBUG
       had_err = check_sequence(vseq, vlen, alphabet, err);
       if (had_err)
         return 1;
+#endif
 
       gt_alignment_reset(align);
       if (arguments->global)
@@ -596,6 +611,7 @@ static int alignment_with_linear_gap_costs(GtLinspaceArguments *arguments,
         {
           alignment_show_with_sequences(useq, ulen, vseq, vlen, align, alphabet,
                                  wildcardshow, showscore, !arguments->scoreonly,
+                                 showsequences, arguments->global,
                                  scorehandler, stdout);
         }
         else
@@ -605,7 +621,8 @@ static int alignment_with_linear_gap_costs(GtLinspaceArguments *arguments,
           gt_error_check(err);
           alignment_show_with_sequences(useq, ulen, vseq, vlen, align, alphabet,
                                         wildcardshow, showscore,
-                                        !arguments->scoreonly, scorehandler,fp);
+                                        !arguments->scoreonly, showsequences,
+                                        arguments->global, scorehandler,fp);
           gt_fa_fclose(fp);
         }
       }
@@ -615,7 +632,7 @@ static int alignment_with_linear_gap_costs(GtLinspaceArguments *arguments,
     gt_timer_stop(linspacetimer);
 
   if (!had_err && arguments->wildcardshow)
-    printf("wildcards are represented by %c\n", wildcardshow);
+    printf("#wildcards are represented by %c\n", wildcardshow);
 
   return had_err;
 }
@@ -635,9 +652,10 @@ static int alignment_with_affine_gap_costs(GtLinspaceArguments *arguments,
   int had_err = 0;
   GtUchar *useq, *vseq, wildcardshow;
   GtUword i, j, ulen, vlen;
-  bool showscore = false;
+  bool showsequences, showscore = false;
 
   gt_error_check(err);
+  showsequences = arguments->showsequences;
   GtAlphabet *alphabet = gt_scorehandler_get_alphabet(scorehandler);
   wildcardshow =  gt_alphabet_wildcard_show(alphabet);
 
@@ -647,17 +665,21 @@ static int alignment_with_affine_gap_costs(GtLinspaceArguments *arguments,
   {
     ulen = gt_str_length(sequences1->seqarray[i]);
     useq =  (GtUchar*) gt_str_get(sequences1->seqarray[i]);
+#ifndef NDEBUG
     had_err = check_sequence(useq, ulen, alphabet, err);
     if (had_err)
       return 1;
+#endif
 
     for (j = 0; j < sequences2->size; j++)
     {
       vlen = gt_str_length(sequences2->seqarray[j]);
       vseq = (GtUchar*) gt_str_get(sequences2->seqarray[j]);
+#ifndef NDEBUG
       had_err = check_sequence(vseq, vlen, alphabet, err);
       if (had_err)
        return 1;
+#endif
 
       gt_alignment_reset(align);
       if (arguments->global)
@@ -713,7 +735,8 @@ static int alignment_with_affine_gap_costs(GtLinspaceArguments *arguments,
         {
           alignment_show_with_sequences(useq, ulen, vseq, vlen, align, alphabet,
                                  wildcardshow, showscore,
-                                 !arguments->scoreonly, scorehandler, stdout);
+                                 !arguments->scoreonly, showsequences,
+                                 arguments->global, scorehandler, stdout);
         }
         else
         {
@@ -722,7 +745,8 @@ static int alignment_with_affine_gap_costs(GtLinspaceArguments *arguments,
           gt_error_check(err);
           alignment_show_with_sequences(useq, ulen, vseq, vlen, align, alphabet,
                                         wildcardshow, showscore,
-                                        !arguments->scoreonly, scorehandler,fp);
+                                        !arguments->scoreonly, showsequences,
+                                        arguments->global, scorehandler,fp);
           gt_fa_fclose(fp);
         }
       }
