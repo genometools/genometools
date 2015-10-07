@@ -3,6 +3,14 @@ def build_encseq(indexname, sequencefile)
     "-indexname " + indexname + " " + sequencefile
 end
 
+def split_output(key)
+  run "grep '^[0-9]' #{key}.out"
+  run "cut -f 1-3,5,8-10 -d ' ' #{last_stdout}"
+  run "sort #{last_stdout}"
+  run "mv #{last_stdout} #{key}.coords"
+  grep "#{key}.coords", /^\d+ \d+ \d+ \d+ \d+ \d+ \d+\.\d+$/
+end
+
 seeds = [170039800390891361279027638963673934519,
          189224055964190192145211745471700259490,
          80497492730600996116307599313171942911,
@@ -143,4 +151,35 @@ Test do
   grep last_stderr, /too many arguments/
   run_test "#{$bin}gt seed_extend -benchmark", :retval => 1
   grep last_stderr, /option "-ii" is mandatory/
+end
+
+Name "gt seed_extend self vs query"
+Keywords "gt_seed_extend query"
+Test do
+  seedlength = 14
+  extendlength = 100
+  minid = 80
+  for seed in seeds[0..4] do
+    run "#{$scriptsdir}gen-randseq.rb --number 1 --minidentity #{minid} " +
+        "--seedlength #{seedlength} --length #{extendlength} --mode seeded " +
+        "--namedfiles --seed #{seed}"
+    run_test build_encseq("query", "query.fna")
+    run_test build_encseq("db", "db.fna")
+    run_test build_encseq("all", "db.fna query.fna")
+    ["xdrop","greedy"].each do |ext|
+      run_test "#{$bin}gt seed_extend -extend#{ext} 100 -l #{extendlength-20} " +
+               "-minidentity #{minid} -seedlength #{seedlength} " +
+               "-mincoverage #{seedlength} -seed-display -ii all"
+      grep last_stdout, /^\d+ \d+ \d+ . \d+ \d+ \d+ \d+ \d+ \d+/
+      run "mv #{last_stdout} combined.out"
+      split_output("combined")
+      run_test "#{$bin}gt seed_extend -extend#{ext} 100 -l #{extendlength-20} " +
+               "-minidentity #{minid} -seedlength #{seedlength} " +
+               "-mincoverage #{seedlength} -seed-display -ii db -qii query"
+      grep last_stdout, /^\d+ \d+ \d+ . \d+ \d+ \d+ \d+ \d+ \d+/
+      run "mv #{last_stdout} separated.out"
+      split_output("separated")
+      run "cmp -s separated.coords combined.coords"
+    end
+  end
 end
