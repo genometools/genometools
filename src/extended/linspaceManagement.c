@@ -73,7 +73,8 @@ size_t gt_linspaceManagement_get_spacepeak(const LinspaceManagement
 }
 
 /* resize space */
-static void gt_linspaceManagement_check_generic(LinspaceManagement *spacemanager,
+static void gt_linspaceManagement_check_generic(
+                                              LinspaceManagement *spacemanager,
                                                 GtUword ulen, GtUword vlen,
                                                 size_t valuesize,
                                                 size_t rtabsize,

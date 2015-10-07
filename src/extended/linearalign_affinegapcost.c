@@ -1041,7 +1041,8 @@ static GtWord gt_calc_affinealign_linear_local(LinspaceManagement *spacemanager,
 }
 
 /* local alignment with linear gapcosts in linear space */
-GtWord gt_computeaffinelinearspace_local_generic(LinspaceManagement *spacemanager,
+GtWord gt_computeaffinelinearspace_local_generic(
+                                             LinspaceManagement *spacemanager,
                                                  GtScoreHandler *scorehandler,
                                                  GtAlignment *align,
                                                  const GtUchar *useq,

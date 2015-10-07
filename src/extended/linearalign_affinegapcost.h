@@ -73,7 +73,8 @@ GtUword gt_computeaffinelinearspace(LinspaceManagement *spacemanager,
                                     GtUword gap_extension);
 
 /* local alignment with linear gapcosts in linear space */
-GtWord gt_computeaffinelinearspace_local_generic(LinspaceManagement *spacemanager,
+GtWord gt_computeaffinelinearspace_local_generic(
+                                              LinspaceManagement *spacemanager,
                                                  GtScoreHandler *scorehandler,
                                                  GtAlignment *align,
                                                  const GtUchar *useq,
