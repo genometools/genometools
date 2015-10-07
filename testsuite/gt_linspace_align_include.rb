@@ -59,7 +59,7 @@ end
     run_test "#{$bin}gt dev linspace_align -ff "\
              "#{$testdata}gt_linspace_align_test_#{i}.fas "\
              "#{$testdata}gt_linspace_align_test_#{i+1}.fas "\
-             "-dna -local -l 2 \" -2\" \" -1\""
+             "-dna -local -l 2 \" -2\" \" -1\" -showsequences"
     run "diff -i #{last_stdout} #{$testdata}gt_linspace_align_local_test_#{i}.out"
   end
 end
@@ -82,7 +82,7 @@ Test do
   run_test "#{$bin}gt dev linspace_align -ff "\
            "#{$testdata}gt_linspace_align_affine_test_1.fas "\
            "#{$testdata}gt_linspace_align_affine_test_2.fas "\
-           "-dna -local -a 6 \" -2\" \" -5\" \" -1\""
+           "-dna -local -a 6 \" -2\" \" -5\" \" -1\" -showsequences"
   run "diff -i #{last_stdout} #{$testdata}gt_linspace_align_local_affine_test_1.out"
 end
 
@@ -133,7 +133,7 @@ Test do
   run_test "#{$bin}gt dev linspace_align -ff "\
            "#{$testdata}gt_linspace_align_special_cases_test_1.fas "\
            "#{$testdata}gt_linspace_align_special_cases_test_2.fas "\
-           "-dna -local -l 2 \" -2\" \" -1\""
+           "-dna -local -l 2 \" -2\" \" -1\" -showsequences"
   run "diff -i #{last_stdout} #{$testdata}gt_linspace_align_local_linear_special_cases.out"
   run_test "#{$bin}gt dev linspace_align -ff "\
            "#{$testdata}gt_linspace_align_special_cases_test_1.fas "\
@@ -143,7 +143,7 @@ Test do
   run_test "#{$bin}gt dev linspace_align -ff "\
            "#{$testdata}gt_linspace_align_special_cases_test_1.fas "\
            "#{$testdata}gt_linspace_align_special_cases_test_2.fas "\
-           "-dna -local -a  6 \" -2\" \" -5\" \" -1\""
+           "-dna -local -a  6 \" -2\" \" -5\" \" -1\" -showsequences"
   run "diff -i #{last_stdout} #{$testdata}gt_linspace_align_local_affine_special_cases.out"
   run_test "#{$bin}gt dev linspace_align -ff "\
            "#{$testdata}gt_linspace_align_special_cases_test_1.fas "\
