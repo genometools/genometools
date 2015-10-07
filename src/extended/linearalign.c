@@ -773,7 +773,7 @@ void gt_checklinearspace(GT_UNUSED bool forward,
             " = distance_only_global_alignment\n", edist1,edist2);
     exit(GT_EXIT_PROGRAMMING_ERROR);
   }
-gt_alignment_show(align,stdout,80);
+
   edist3 = gt_alignment_eval_with_score(align, matchcost,
                                         mismatchcost, gapcost);
 

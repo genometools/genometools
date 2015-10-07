@@ -1,15 +1,5 @@
 ######
 agcttttcattctgactgcaacgggcaatatgtctctgtgtggattaaaaaaagagtgtctgatagcagcttctgaactg
-gttacctgccgtgagtaaattaaaattttattgacttaggtcactaaatactttaaccaatataggcatagcgcacagac
-agataaaaattacagagtacacaacatccatgaaacgcattagcaccaccattaccaccaccatcaccattaccacaggt
-aacggtgcgggctgacgcgtacaggaaacacagaaaaaag
-######
-ttttcattctgactgcaacgggcaatatgtctctgtgtggattaaaaaaagagtgtctgatagcagcttctgaactggtt
-acctgccgtgagtaaattaaaattttattgacttaggtcactaaatactttaaccaatataggcatagcgcacagacaga
-taaaaattacagagtacacaacatccatgaaacgcattagcaccaccattaccaccaccatcaccattaccacaggtaac
-ggtgcgggctgacgcgtacaggaaacacagaaaaaag
-######
-agcttttcattctgactgcaacgggcaatatgtctctgtgtggattaaaaaaagagtgtctgatagcagcttctgaactg
    |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ---ttttcattctgactgcaacgggcaatatgtctctgtgtggattaaaaaaagagtgtctgatagcagcttctgaactg
 gttacctgccgtgagtaaattaaaattttattgacttaggtcactaaatactttaaccaatataggcatagcgcacagac
@@ -23,13 +13,6 @@ aacggtgcgggctgacgcgtacaggaaacacagaaaaaag
 aacggtgcgggctgacgcgtacaggaaacacagaaaaaag
 ######
 agcttttcattctgactgcaacgggcaatatgtctctgtgtggattaaaaaaagagtgtctgatagcagcttctgaactg
-gttacctgccgtgagtaaattaaaattttattgacttaggtcactaaatactttaaccaatataggcatagcgcacagac
-agataaaaattacagagtacacaacatccatgaaacgcattagcaccaccattaccaccaccatcaccattaccacaggt
-aacggtgcgggctgacgcgtacaggaaacacagaaaaaag
-######
-nttttn
-######
-agcttttcattctgactgcaacgggcaatatgtctctgtgtggattaaaaaaagagtgtctgatagcagcttctgaactg
                                                                                 
 --------------------------------------------------------------------------------
 gttacctgccgtgagtaaattaaaattttattgacttaggtcactaaatactttaaccaatataggcatagcgcacagac
@@ -41,13 +24,6 @@ agataaaaattacagagtacacaacatccatgaaacgcattagcaccaccattaccaccaccatcaccattaccacaggt
 aacggtgcgggctgacgcgtacaggaaacacagaaaaaag
      |      |      |                    
 -----t------t------t-------------------n
-######
-nttttnc
-######
-ttttcattctgactgcaacgggcaatatgtctctgtgtggattaaaaaaagagtgtctgatagcagcttctgaactggtt
-acctgccgtgagtaaattaaaattttattgacttaggtcactaaatactttaaccaatataggcatagcgcacagacaga
-taaaaattacagagtacacaacatccatgaaacgcattagcaccaccattaccaccaccatcaccattaccacaggtaac
-ggtgcgggctgacgcgtacaggaaacacagaaaaaag
 ######
 --------------------------------------------------------------------------------
                                                                                 
@@ -63,10 +39,6 @@ taaaaattacagagtacacaacatccatgaaacgcattagcaccaccattaccaccaccatcaccattaccacaggtaac
 ggtgcgggctgacgcgtacaggaaacacagaaaaaag
 ######
 nttttnc
-######
-nttttn
-######
-nttttnc
  ||||  
 ntttt-n
-wildcards are represented by n
+#wildcards are represented by n
