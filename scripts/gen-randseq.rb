@@ -72,6 +72,7 @@ def parseargs(argv)
   options.reverse = false
   options.number = 1
   options.mems = false
+  options.seedcoverage = 0
   opts = OptionParser.new
   opts.on("-m","--mode STRING","specify mode: mirrored|seeded|pair") do |x|
     mode = x
@@ -109,13 +110,17 @@ def parseargs(argv)
                        (" " * indent) + "generator to make sequences reproducible") do |x|
     options.seednumber = x.to_i
   end
+  opts.on("-c","--seedcoverage NUM","generate multiple seeds that cover the\n" +
+         (" " * indent) + "specified number of bases") do |x|
+    options.seedcoverage = x.to_i
+  end
   rest = opts.parse(argv)
   if rest.length != 0
     STDERR.puts "Usage: #{$0} [options]"
     exit 1
   end
   if mode.nil?
-    STDERR.puts "#{$0}: options -m is mandatory"
+    STDERR.puts "#{$0}: option -m is mandatory"
     exit 1
   end
   if mode == "mirrored"
@@ -146,12 +151,20 @@ def parseargs(argv)
     STDERR.puts "#{$0}: option -mode mirrored and -m seeded imply option -s"
     exit 1
   end
+  if options.seedcoverage != 0 and not options.seeded
+    STDERR.puts "#{$0}: option -c requires option -m seeded"
+    exit 1
+  end
   if not options.seedlength.nil? and options.seedlength >= options.totallength
-    STDERR.puts "#{$0}: totallength must no be larger than seedlength"
+    STDERR.puts "#{$0}: seedlength must not be larger than totallength"
     exit 1
   end
   if options.minidentity < minminid or options.minidentity > maxminid
     STDERR.puts "#{$0}: minidentity must be in range #{minidrange}"
+    exit 1
+  end
+  if options.seedcoverage >= options.totallength
+    STDERR.puts "#{$0}: seedcoverage must not be larger than totallength"
     exit 1
   end
   return options
@@ -215,6 +228,79 @@ def gen_seeded(fpdb,fpquery,fpquery_r,rseq,options,alphabet,errperc)
   end
 end
 
+def gen_seeded_with_coverage(fpdb,fpquery,fpquery_r,rseq,options,alphabet,errperc)
+  # build array with random seed positions covering >= seedcoverage positions
+  pos = Array.new
+  rgen = Random.new(options.seednumber.nil? ? Random.new_seed : options.seednumber)
+  while pos.length < options.seedcoverage
+    idx = rgen.rand * (options.totallength - options.seedlength + 1)
+    idx = idx.to_i
+    pos.concat((idx...idx + options.seedlength).to_a).sort!.uniq!
+  end
+  # convert array to ranges
+  ranges = pos.inject([]) do |spans, n|
+    if spans.empty? || spans.last.last != n - 1
+      spans + [n..n]
+    else
+      spans[0..-2] + [spans.last.first..n]
+    end
+  end
+
+  # generate sequences
+  context1 = Array.new
+  seedstring = Array.new
+  prev = 0
+  for range in ranges
+    context1.push("#{rseq.sequence(range.begin - prev)}")
+    seedstring.push("#{rseq.sequence(range.size)}")
+    prev = range.last + 1
+  end
+  context1.push("#{rseq.sequence(options.totallength - prev)}")
+  context2 = context1.map{|sequence| rseq.mutate(sequence, errperc, alphabet)}
+
+  if options.withwildcards
+    wildcard = "N"
+  else
+    wildcard = ""
+  end
+  if options.mems
+    left1 = "a"
+    left2 = "c"
+    right1 = "g"
+    right2 = "t"
+  else
+    left1 = ""
+    left2 = ""
+    right1 = ""
+    right2 = ""
+  end
+
+  # print sequences
+  extendlength = context1.map{|seq| seq.length}.join("+")
+  fpdb.puts ">db: #{headkey(options,extendlength,errperc)}"
+  dbseq = ""
+  for i in (0...seedstring.length)
+    dbseq += "#{context1[i]}#{wildcard}#{left1}\n#{seedstring[i]}\n#{right1}"
+  end
+  dbseq += "#{context1[seedstring.length]}"
+  fpdb.puts dbseq
+
+  extendlength = context2.map{|seq| seq.length}.join("+")
+  fpquery.puts ">query: #{headkey(options,extendlength,errperc)}"
+  queryseq = ""
+  for i in (0...seedstring.length)
+    queryseq += "#{context2[i]}#{left2}\n#{seedstring[i]}\n#{right2}"
+  end
+  queryseq += "#{context2[seedstring.length]}"
+  fpquery.puts queryseq
+
+  if options.reverse
+    fpquery_r.puts ">query-r: #{headkey(options,extendlength,errperc)}"
+    fpquery_r.puts queryseq.reverse
+  end
+end
+
+
 def openoutfile(filename)
 begin
   fp = File.new(filename,"w")
@@ -247,7 +333,11 @@ if options.mirrored
   gen_mirrored(fpdb,fpquery,rseq,options,alphabet,errperc)
 elsif options.seeded
   options.number.times do
-    gen_seeded(fpdb,fpquery,fpquery_r,rseq,options,alphabet,errperc)
+    if options.seedcoverage == 0
+      gen_seeded(fpdb,fpquery,fpquery_r,rseq,options,alphabet,errperc)
+    else
+      gen_seeded_with_coverage(fpdb,fpquery,fpquery_r,rseq,options,alphabet,errperc)
+    end
   end
 elsif options.pairparam
   seq1 = rseq.sequence(options.totallength)
