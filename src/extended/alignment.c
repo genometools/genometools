@@ -672,11 +672,9 @@ void gt_alignment_show(const GtAlignment *alignment, FILE *fp,
   gt_alignment_buffer_delete(buffer);
 }
 
-#ifndef NDEBUG
-static void gt_alignment_check_match(const GtAlignment *alignment)
+static int gt_alignment_check_match(const GtAlignment *alignment,GtError *err)
 {
   GtUword idx;
-  bool different = false;
 
   gt_assert(alignment->u != NULL && alignment->v != NULL &&
             alignment->ulen == alignment->vlen);
@@ -686,22 +684,33 @@ static void gt_alignment_check_match(const GtAlignment *alignment)
     GtUchar cc_v = alignment->v[idx];
     if (ISSPECIAL(cc_u) || ISSPECIAL(cc_v) || cc_u != cc_v)
     {
-      fprintf(stderr,"idx = " GT_WU ": cc_u = %c != %c = cc_v\n",idx,cc_u,cc_v);
-      different = true;
+      if (err == NULL)
+      {
+        fprintf(stderr,"mismatch at position " GT_WU ": cc_u = %c != %c"
+                         " = cc_v\n",idx,cc_u,cc_v);
+        exit(GT_EXIT_PROGRAMMING_ERROR);
+      } else
+      {
+        gt_error_set(err,"mismatch at position " GT_WU ": cc_u = %c != %c"
+                         " = cc_v",idx,cc_u,cc_v);
+        return -1;
+      }
     }
   }
-  gt_assert(!different);
+  return 0;
 }
 
-void gt_alignment_check_edist(const GtAlignment *alignment,GtUword edist)
+int gt_alignment_check_edist(const GtAlignment *alignment,GtUword distance,
+                             GtError *err)
 {
-  if (edist == 0)
+  if (distance == 0)
   {
-    gt_alignment_check_match(alignment);
+    return gt_alignment_check_match(alignment,err);
   } else
   {
     GtUword realedist;
-    GtFrontResource *ftres = gt_frontresource_new(edist);
+    bool haserr = false;
+    GtFrontResource *ftres = gt_frontresource_new(2 * distance);
     GtSeqabstract *useq_abstract
       = gt_seqabstract_new_gtuchar(true,
                                    GT_READMODE_FORWARD,
@@ -716,15 +725,28 @@ void gt_alignment_check_edist(const GtAlignment *alignment,GtUword edist)
                                    alignment->vlen,
                                    0,
                                    alignment->vlen);
-
     realedist = greedyunitedist(ftres,useq_abstract,vseq_abstract);
-    gt_assert(realedist <= edist);
+    if (distance < realedist)
+    {
+      if (err == NULL)
+      {
+        fprintf(stderr,"invalid alignment: distance = " GT_WU " is smaller "
+                       " than correct edit distance " GT_WU "\n",distance,
+                        realedist);
+        exit(GT_EXIT_PROGRAMMING_ERROR);
+      } else
+      {
+        gt_error_set(err,"invalid alignment: distance = " GT_WU " is smaller "
+                       " than correct edit distance " GT_WU,distance,realedist);
+      }
+      haserr = true;
+    }
     gt_seqabstract_delete(useq_abstract);
     gt_seqabstract_delete(vseq_abstract);
     gt_frontresource_delete(ftres);
+    return haserr ? -1 : 0;
   }
 }
-#endif
 
 void gt_alignment_show_with_mapped_chars(const GtAlignment *alignment,
                                          const GtUchar *characters,

@@ -542,12 +542,11 @@ void gt_querymatchoutoptions_alignment_show(const GtQuerymatchoutoptions
                               querymatchoutoptions->alignmentwidth,
                               querymatchoutoptions->characters);
     }
-#ifndef NDEBUG
     if (verify_alignment)
     {
-      gt_alignment_check_edist(querymatchoutoptions->alignment,edist);
+      (void) gt_alignment_check_edist(querymatchoutoptions->alignment,edist,
+                                      NULL);
     }
-#endif
     gt_alignment_reset(querymatchoutoptions->alignment);
   }
 }
