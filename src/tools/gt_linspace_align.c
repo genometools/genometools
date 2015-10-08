@@ -144,6 +144,7 @@ static GtOptionParser* gt_linspace_align_option_parser_new(void *tool_arguments)
            *optiontsfactor, *optionspacetime, *optionscoreonly,
            *optionwildcardsymbol;
 
+
   gt_assert(arguments);
 
   /* init */
@@ -267,7 +268,6 @@ static GtOptionParser* gt_linspace_align_option_parser_new(void *tool_arguments)
   gt_option_exclude(optiondna, optionprotein);
   gt_option_exclude(optionshowsequences, optionscoreonly);
   gt_option_exclude(optionsimilarity, optiondiagonalbonds);
-
   gt_option_imply_either_2(optionfiles, optionglobal, optionlocal);
   gt_option_imply_either_2(optiondna, optionstrings, optionfiles);
   gt_option_imply_either_2(optionstrings, optionglobal, optionlocal);
