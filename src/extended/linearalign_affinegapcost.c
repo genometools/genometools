@@ -38,12 +38,9 @@ typedef struct {
 } Starttabentry;
 
 /*-------------------------------global linear--------------------------------*/
-inline AffineAlignEdge set_edge(GtWord Rdist,
-                                GtWord Ddist,
-                                GtWord Idist)
+AffineAlignEdge set_edge(GtWord Rdist, GtWord Ddist, GtWord Idist)
 {
-  GtUword minvalue;
-  minvalue = MIN3(Rdist, Ddist, Idist);
+  GtUword minvalue = MIN3(Rdist, Ddist, Idist);
 
   if (Rdist == minvalue)
     return Affine_R;

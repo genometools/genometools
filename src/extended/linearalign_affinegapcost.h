@@ -103,5 +103,5 @@ AffineAlignEdge minAdditionalCosts(const AffinealignDPentry *entry,
                                    const AffineAlignEdge edge,
                                    GtUword gap_opening);
 
-inline AffineAlignEdge set_edge(GtWord Rdist, GtWord Ddist, GtWord Idist);
+AffineAlignEdge set_edge(GtWord Rdist, GtWord Ddist, GtWord Idist);
 #endif
