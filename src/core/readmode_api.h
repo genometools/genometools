@@ -41,4 +41,8 @@ const char* gt_readmode_show(GtReadmode readmode);
    -1 is returned and <err> is set accordingly. */
 int         gt_readmode_parse(const char *string, GtError *err);
 
+/* invert the direction of a readmode: fwd => rev, rev => fwd,
+                                       cpl => rcl, rcl => cpl */
+GtReadmode gt_readmode_inverse_dir(GtReadmode readmode);
+
 #endif

@@ -30,7 +30,6 @@
 #include "core/versionfunc.h"
 #include "match/sfx-opt.h"
 #include "match/sfx-strategy.h"
-#include "match/stamp.h"
 
 static GtOPrval parse_options(int *parsed_args,
                               bool doesa,

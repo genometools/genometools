@@ -18,25 +18,69 @@
 #ifndef RECONSTRUCTALIGNMENT_H
 #define RECONSTRUCTALIGNMENT_H
 #include "core/types_api.h"
+#include "extended/affinealign.h"
 #include "extended/alignment.h"
+#include "extended/diagonalbandalign.h"
+#include "extended/diagonalbandalign_affinegapcost.h"
+#include "extended/maxcoordvalue.h"
+#include "extended/scorehandler.h"
 
+GtUword construct_trivial_deletion_alignment(GtAlignment *align,
+                                             GtUword len,
+                                             GtUword gapcost);
+
+GtUword construct_trivial_insertion_alignment(GtAlignment *align,
+                                              GtUword len,
+                                              GtUword gapcost);
+
+/* reconstruct alignment from square space table ED
+ * use this function for global alignment with linear gapcosts*/
+void reconstructalignment_from_EDtab(GtAlignment *align, GtUword **E,
+                                     const GtUchar *useq,
+                                     GtUword ustart,
+                                     GtUword ulen,
+                                     const GtUchar *vseq,
+                                     GtUword vstart,
+                                     GtUword vlen,
+                                     GtScoreHandler *scorehandler);
+
+/* reconstruct alignment from square space table Ltab
+ * use this function for lcoal alignment with linear gapscores*/
+void reconstructalignment_from_Ltab(GtAlignment *align,
+                                    GtWord **Ltabcolumn,
+                                    Gtmaxcoordvalue *max,
+                                    const GtUchar *useq,
+                                    GtUword ustart,
+                                    GtUword ulen,
+                                    const GtUchar *vseq,
+                                    GtUword vstart,
+                                    GtUword vlen,
+                                    GtScoreHandler *scorehandler);
+
+/* reconstruct alignment from crosspoint table, realting to midcolumn,
+ * use this function for global or local alignment with linear or affine
+ * gapcosts in diagonalband */
 void reconstructalignment_from_Ctab(GtAlignment *align,
                                     const GtUword *Ctab,
                                     const GtUchar *useq,
-                                    const GtUword ustart,
+                                    GtUword ustart,
                                     const GtUchar *vseq,
-                                    const GtUword vstart,
-                                    const GtUword vlen,
-                                    const GtWord matchcost,
-                                    const GtWord mismatchcost,
-                                    const GtWord gap_opening,
-                                    const GtWord gap_extension);
+                                    GtUword vstart,
+                                    GtUword vlen,
+                                    GtScoreHandler *scorehandler);
 
-GtUword construct_trivial_deletion_alignment(GtAlignment *align,
-                                              const GtUword len,
-                                              const GtWord gapcost);
+/* reconstruct alignment from crosspoints, crosspoints relating to diagonalband
+ * use this function for alignment with linear gapcosts in diagonalband */
+void reconstructalignment_from_Dtab(GtAlignment *align,
+                                    const Diagentry *Dtab,GtUword ulen,
+                                    GtUword vlen);
 
-GtUword construct_trivial_insertion_alignment(GtAlignment *align,
-                                              const GtUword len,
-                                              const GtWord gapcost);
+/* reconstruct alignment from crosspoints (affine gapcosts),
+ * crosspointsrelating to diagonalband, use this function for alignment with
+ * affine gapcosts in diagonalband */
+void reconstructalignment_from_affineDtab(GtAlignment *align,
+                                          const AffineDiagentry *Dtab,
+                                          AffineAlignEdge edge,
+                                          const GtUchar *useq, GtUword ulen,
+                                          const GtUchar *vseq, GtUword vlen);
 #endif

@@ -17,14 +17,17 @@ typedef enum
 {
   GT_EXTEND_CHAR_ACCESS_ENCSEQ,
   GT_EXTEND_CHAR_ACCESS_ENCSEQ_READER,
+  GT_EXTEND_CHAR_ACCESS_DIRECT,
   GT_EXTEND_CHAR_ACCESS_ANY
 } GtExtendCharAccess;
 
 typedef struct
 {
   const GtEncseq *encseq;
+  GtReadmode readmode;
   GtAllocatedMemory *sequence_cache;
   GtEncseqReader *encseq_r;
+  const GtUchar *bytesequence;
   GtExtendCharAccess extend_char_access;
   GtUword totallength;
 } FTsequenceResources;
@@ -45,6 +48,7 @@ GtUword front_prune_edist_inplace(
                        FTsequenceResources *ufsr,
                        GtUword ustart,
                        GtUword uulen,
+                       GtUword vseqstartpos,
                        FTsequenceResources *vfsr,
                        GtUword vstart,
                        GtUword vlen);

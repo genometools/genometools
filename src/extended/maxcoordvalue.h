@@ -26,19 +26,26 @@ void gt_max_delete(Gtmaxcoordvalue *max);
 
 GtWord gt_max_get_value(const Gtmaxcoordvalue *max);
 
+void gt_max_set_start(Gtmaxcoordvalue *max, GtUword starta, GtUword startb);
+
 GtUwordPair gt_max_get_start(const Gtmaxcoordvalue *max);
 
-void gt_max_set_end_with_pair(Gtmaxcoordvalue *max, const GtUwordPair end);
+void gt_max_set_end_with_pair(Gtmaxcoordvalue *max, GtUwordPair end);
 
 GtUwordPair gt_max_get_end(const Gtmaxcoordvalue *max);
 
-void gt_max_coord_update(Gtmaxcoordvalue *max, const GtWord value,
-                         const GtUwordPair start,
-                         const GtUword enda, const GtUword endb);
-
+/*use this in linear space context*/
+void gt_max_coord_update(Gtmaxcoordvalue *max, GtWord value,
+                         GtUwordPair start,
+                         GtUword enda, GtUword endb);
+/*use this in square space context*/
+void gt_max_coord_update_without_start (Gtmaxcoordvalue *max, GtWord value,
+                                        GtUword enda, GtUword endb);
 GtUword gt_max_get_row_length(const Gtmaxcoordvalue *max);
 
 GtUword gt_max_get_col_length(const Gtmaxcoordvalue *max);
 
 bool gt_max_get_length_safe(const Gtmaxcoordvalue *max);
+
+void gt_max_reset(Gtmaxcoordvalue *max);
 #endif

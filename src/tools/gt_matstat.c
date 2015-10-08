@@ -29,7 +29,6 @@
 #include "match/greedyfwdmat.h"
 #include "match/optionargmode.h"
 #include "match/sarr-def.h"
-#include "match/stamp.h"
 #include "tools/gt_matstat.h"
 #include "tools/gt_uniquesub.h"
 

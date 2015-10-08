@@ -28,7 +28,6 @@
 #include "core/types_api.h"
 #include "core/unused_api.h"
 #include "extended/alignment.h"
-#include "match/seqabstract.h"
 #include "match/xdrop.h"
 
 typedef struct
@@ -148,10 +147,9 @@ gt_calculatedistancesfromscores(const GtXdropArbitraryscores *arbitscores,
     del = arbitscores->del;
   }
   gt_assert(mat >= mis && mat/2 >= ins && mat/2 >= del);
-  dist->gcd =
-    (int) gt_gcd_uint(gt_gcd_uint((unsigned int) (mat-mis),
-                                  (unsigned int) (mat/2-ins)),
-                      (unsigned int) (mat/2-del));
+  dist->gcd = (int) gt_gcd_uint(gt_gcd_uint((unsigned int) (mat-mis),
+                                            (unsigned int) (mat/2-ins)),
+                                (unsigned int) (mat/2-del));
   dist->mis = (mat - mis) / dist->gcd;
   dist->ins = (mat/2 - ins) / dist->gcd;
   dist->del = (mat/2 - del) / dist->gcd;
@@ -253,13 +251,10 @@ void gt_evalxdroparbitscoresextend(bool forward,
   bool alwaysMININFINITYINT = true;
 
   gt_assert(ulen != 0 && vlen != 0);
-
   res->big_t.nextfreeGtXdropscore = 0;
   res->fronts.nextfreeGtXdropfrontvalue = 0;
   /* phase 0 */
-  idx =  (GtWord) gt_seqabstract_lcp(forward, useq, vseq,
-                                     forward ? 0 : (GtUword) ulen - 1,
-                                     forward ? 0 : (GtUword) vlen - 1);
+  idx =  (GtWord) gt_seqabstract_lcp(forward, useq, vseq,0,0);
   /* alignment already finished */
   if (idx >= ulen || idx >= vlen) {
     lbound =  1L;
@@ -347,9 +342,7 @@ void gt_evalxdroparbitscoresextend(bool forward,
               GtUword lcp;
               gt_assert(forward || (ulen - 1 >= (GtWord) i &&
                                     vlen - 1 >= (GtWord) j));
-              lcp = gt_seqabstract_lcp(forward, useq, vseq,
-                                       (GtUword) (forward ? i : ulen - i - 1),
-                                       (GtUword) (forward ? j : vlen - j - 1));
+              lcp = gt_seqabstract_lcp(forward, useq, vseq,i,j);
               i += lcp;
               j += lcp;
             }
@@ -598,6 +591,7 @@ int gt_xdrop_unit_test(GT_UNUSED GtError *err)
   GtXdropscore dropscore = (GtXdropscore) 12;
   GtMultieoplist *edit_ops = NULL;
   GtAlignment *alignment;
+  bool rightextension = true;
 
   gt_error_check(err);
 
@@ -605,8 +599,10 @@ int gt_xdrop_unit_test(GT_UNUSED GtError *err)
     resources = gt_xdrop_resources_new(&score[s]);
     for (i = 0; i < GT_XDROP_NUM_OF_TESTS && !had_err; ++i) {
       for (j = 0; j < GT_XDROP_NUM_OF_TESTS; ++j) {
-        useq = gt_seqabstract_new_gtuchar(strings[i], lengths[i], 0);
-        vseq = gt_seqabstract_new_gtuchar(strings[j], lengths[j], 0);
+        useq = gt_seqabstract_new_gtuchar(rightextension,GT_READMODE_FORWARD,
+                                          strings[i], lengths[i], 0,lengths[i]);
+        vseq = gt_seqabstract_new_gtuchar(rightextension, GT_READMODE_FORWARD,
+                                          strings[j], lengths[j], 0,lengths[j]);
         gt_evalxdroparbitscoresextend(true, &best, resources, useq, vseq,
                                       dropscore);
 

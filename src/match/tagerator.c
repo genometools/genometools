@@ -35,7 +35,6 @@
 #include "myersapm.h"
 #include "revcompl.h"
 #include "sarr-def.h"
-#include "stamp.h"
 #include "tagerator.h"
 
 #define MAXTAGSIZE GT_INTWORDSIZE
@@ -697,8 +696,8 @@ int gt_runtagerator(const TageratorOptions *tageratoroptions,GtError *err)
           haserr = true;
           break;
         }
-        gt_copy_reversecomplement(twl.rctransformedtag,twl.transformedtag,
-                               twl.taglen);
+        gt_copy_reverse_complement(twl.rctransformedtag,twl.transformedtag,
+                                   twl.taglen);
         twl.tagptr = twl.transformedtag;
         firstitem = true;
         printf("#");

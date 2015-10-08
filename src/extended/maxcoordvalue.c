@@ -58,7 +58,16 @@ GtWord gt_max_get_value(const Gtmaxcoordvalue *max)
   return(max->value);
 }
 
-static void gt_max_set_start(Gtmaxcoordvalue *max, const GtUwordPair start )
+void gt_max_set_start(Gtmaxcoordvalue *max,
+                      GtUword a, GtUword b)
+{
+  gt_assert(max != NULL);
+  max->start.a = a;
+  max->start.b = b ;
+}
+
+static void gt_max_set_start_with_pair(Gtmaxcoordvalue *max,
+                                       const GtUwordPair start )
 {
   gt_assert(max != NULL);
   max->start=start;
@@ -77,7 +86,7 @@ void gt_max_set_end_with_pair(Gtmaxcoordvalue *max, const  GtUwordPair end)
 }
 
 static void gt_max_set_end(Gtmaxcoordvalue *max,
-                           const GtUword a, const GtUword b)
+                           GtUword a, GtUword b)
 {
   gt_assert(max != NULL);
   max->end.a = a;
@@ -90,14 +99,26 @@ GtUwordPair gt_max_get_end(const Gtmaxcoordvalue *max)
   return(max->end);
 }
 
-void gt_max_coord_update(Gtmaxcoordvalue *max, const GtWord value,
-                         const GtUwordPair start,
-                         const GtUword enda, const GtUword endb)
+/*use this in linear space cases*/
+void gt_max_coord_update(Gtmaxcoordvalue *max,
+                         GtWord value,
+                         GtUwordPair start,
+                         GtUword enda, GtUword endb)
 {
   gt_assert(max != NULL);
 
   gt_max_set_value(max, value);
-  gt_max_set_start(max, start);
+  gt_max_set_start_with_pair(max, start);
+  gt_max_set_end(max, enda, endb);
+}
+
+/*use this in square space cases*/
+void gt_max_coord_update_without_start (Gtmaxcoordvalue *max, GtWord value,
+                                        GtUword enda, GtUword endb)
+{
+  gt_assert(max != NULL);
+
+  gt_max_set_value(max, value);
   gt_max_set_end(max, enda, endb);
 }
 
@@ -129,4 +150,15 @@ bool gt_max_get_length_safe(const Gtmaxcoordvalue *max)
       gt_max_get_end(max).b == gt_max_get_start(max).b  )
     return false;
   return true;
+}
+
+void gt_max_reset(Gtmaxcoordvalue *max)
+{
+  gt_assert(max != NULL);
+
+  max->value = 0;
+  max->start.a=0;
+  max->start.b=0;
+  max->end.a=0;
+  max->end.b=0;
 }

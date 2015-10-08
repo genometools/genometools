@@ -31,7 +31,6 @@
 #include "core/encseq.h"
 
 #include "esa-fileend.h"
-#include "stamp.h"
 
 #define PRJSPECIALOUT(VAL)\
         fprintf(outprj,"%s="GT_WU"\n",#VAL,gt_encseq_##VAL(encseq))

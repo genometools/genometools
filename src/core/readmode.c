@@ -44,3 +44,12 @@ int gt_readmode_parse(const char *string, GtError *err)
   gt_error_set(err,"unknown readmode, must be fwd or rev or cpl or rcl");
   return -1;
 }
+
+GtReadmode gt_readmode_inverse_dir(GtReadmode readmode)
+{
+  if ((int) readmode % 2 == 0)
+  {
+    return (GtReadmode) (readmode + 1);
+  }
+  return (GtReadmode) (readmode - 1);
+}
