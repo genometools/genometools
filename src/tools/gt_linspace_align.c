@@ -43,13 +43,23 @@
 
 #include "tools/gt_linspace_align.h"
 
+#define LEFT_DIAGONAL_SHIFT(similarity, ulen, vlen) \
+                                  -((1-similarity)*(MAX(ulen,vlen)) + 1 +\
+                                   ((GtWord)ulen-(GtWord)vlen))
+
+#define RIGHT_DIAGONAL_SHIFT(similarity, ulen, vlen) \
+                                   ((1-similarity)*(MAX(ulen,vlen)) + 1 -\
+                                   ((GtWord)ulen-(GtWord)vlen))
+
 typedef struct{
   GtStr      *outputfile; /*default stdout*/
   GtStrArray *strings,
              *files,
              *linearcosts,
              *affinecosts,
-             *diagonalbonds; /* left and right shift of diagonal*/
+             *diagonalbonds; /*left and right constant value shift of diagonal*/
+  double     similarity; /*left and right shift of diagonal depends on
+                                                                    similarity*/
   bool       global,
              local,
              diagonal, /* call diagonalband algorithm */
@@ -129,8 +139,8 @@ static GtOptionParser* gt_linspace_align_option_parser_new(void *tool_arguments)
            *optiondna, *optionprotein, *optioncostmatrix, *optionlinearcosts,
            *optionaffinecosts, *optionoutputfile, *optionshowscore,
            *optionshowsequences, *optiondiagonal, *optiondiagonalbonds,
-           *optiontsfactor, *optionspacetime, *optionscoreonly,
-           *optionwildcardsymbol;
+           *optionsimilarity, *optiontsfactor, *optionspacetime,
+           *optionscoreonly, *optionwildcardsymbol;
   gt_assert(arguments);
 
   /* init */
@@ -238,6 +248,13 @@ static GtOptionParser* gt_linspace_align_option_parser_new(void *tool_arguments)
                                        &arguments->timesquarefactor,1);
   gt_option_parser_add_option(op, optiontsfactor);
 
+  /* -double */
+  optionsimilarity = gt_option_new_probability("similarity", "specified left "
+                                               "and right shift of diagonal by "
+                                               "similarity of sequences",
+                                               &arguments->similarity, 0);
+  gt_option_parser_add_option(op, optionsimilarity);
+
   /* dependencies */
   gt_option_is_mandatory_either(optionstrings, optionfiles);
   gt_option_is_mandatory_either(optiondna, optionprotein);
@@ -245,6 +262,7 @@ static GtOptionParser* gt_linspace_align_option_parser_new(void *tool_arguments)
   gt_option_exclude(optionlinearcosts, optionaffinecosts);
   gt_option_exclude(optiondna, optionprotein);
   gt_option_exclude(optionshowsequences, optionscoreonly);
+  gt_option_exclude(optionsimilarity, optiondiagonalbonds);
   gt_option_imply_either_2(optionfiles, optionglobal, optionlocal);
   gt_option_imply_either_2(optiondna, optionstrings, optionfiles);
   gt_option_imply_either_2(optionstrings, optionglobal, optionlocal);
@@ -256,6 +274,7 @@ static GtOptionParser* gt_linspace_align_option_parser_new(void *tool_arguments)
   gt_option_imply_either_2(optionscoreonly,optionlinearcosts,optionaffinecosts);
   gt_option_imply(optiondiagonal, optionglobal);
   gt_option_imply(optiondiagonalbonds, optiondiagonal);
+  gt_option_imply(optionsimilarity, optiondiagonal);
   gt_option_imply(optioncostmatrix, optionprotein);
 
   /* extended options */
@@ -565,8 +584,10 @@ static int alignment_with_linear_gap_costs(GtLinspaceArguments *arguments,
          {
            if (gt_str_array_size(arguments->diagonalbonds) == 0)
            {
-             left_dist = -ulen;
-             right_dist = vlen;
+             left_dist =
+                         LEFT_DIAGONAL_SHIFT(arguments->similarity, ulen, vlen);
+             right_dist =
+                        RIGHT_DIAGONAL_SHIFT(arguments->similarity, ulen, vlen);
            }
 
            if ((left_dist > MIN(0, (GtWord)vlen-(GtWord)ulen))||
@@ -586,6 +607,8 @@ static int alignment_with_linear_gap_costs(GtLinspaceArguments *arguments,
                                                  vseq, 0, vlen,
                                                  left_dist, right_dist);
            }
+           else
+             return 1;
          }
          else
          {
@@ -688,8 +711,10 @@ static int alignment_with_affine_gap_costs(GtLinspaceArguments *arguments,
          {
            if (!gt_str_array_size(arguments->diagonalbonds) > 0)
            {
-             left_dist = -ulen;
-             right_dist = vlen;
+             left_dist =
+                         LEFT_DIAGONAL_SHIFT(arguments->similarity, ulen, vlen);
+             right_dist =
+                        RIGHT_DIAGONAL_SHIFT(arguments->similarity, ulen, vlen);
            }
            if ((left_dist > MIN(0, (GtWord)vlen-(GtWord)ulen))||
                (right_dist < MAX(0, (GtWord)vlen-(GtWord)ulen)))
@@ -709,6 +734,8 @@ static int alignment_with_affine_gap_costs(GtLinspaceArguments *arguments,
                                                        vseq, 0, vlen,
                                                        left_dist, right_dist);
            }
+           else
+             return 1;
         }
         else
         {
