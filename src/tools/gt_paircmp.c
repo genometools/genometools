@@ -239,8 +239,8 @@ static void freesimpleoption(Cmppairwiseopt *cmppairwise)
   }
   if (cmppairwise->fasta)
   {
-    gt_free(cmppairwise->fastasequences0);
-    gt_free(cmppairwise->fastasequences1);
+    gt_str_array_delete(cmppairwise->fastasequences0);
+    gt_str_array_delete(cmppairwise->fastasequences1);
   }
 }
 
@@ -355,13 +355,24 @@ int gt_paircmp(int argc, const char **argv, GtError *err)
     }
     else if (cmppairwise.print)
     {
-        gt_print_edist_alignment(
-        (const GtUchar *) gt_str_array_get(cmppairwise.strings,0),0,
-        (GtUword) strlen(gt_str_array_get(cmppairwise.strings,0)),
-        (const GtUchar *) gt_str_array_get(cmppairwise.strings,1UL),0,
-        (GtUword) strlen(gt_str_array_get(cmppairwise.strings,1UL)));
+      const GtStr *str0 = gt_str_array_get_str(cmppairwise.strings,0),
+                  *str1 = gt_str_array_get_str(cmppairwise.strings,1);
+
+      gt_print_edist_alignment((const GtUchar *) gt_str_get(str0),0,
+                               gt_str_length(str0),
+                               (const GtUchar *) gt_str_get(str1),0,
+                               gt_str_length(str1));
     } else
     {
+      size_t idx;
+      Checkfunctiontabentry checkfunction_tab[] = {
+        MAKECheckfunctiontabentry(gt_checkgreedyunitedist),
+        MAKECheckfunctiontabentry(gt_checklinearspace),
+        MAKECheckfunctiontabentry(gt_checklinearspace_local),
+        MAKECheckfunctiontabentry(gt_checkaffinelinearspace),
+        MAKECheckfunctiontabentry(gt_checkaffinelinearspace_local)
+      };
+
       if (cmppairwise.fasta)
       {
         gt_assert(gt_str_array_size(cmppairwise.files) == 3);
@@ -378,14 +389,6 @@ int gt_paircmp(int argc, const char **argv, GtError *err)
                             NULL, cmppairwise.fastasequences1, err);
         gt_error_check(err);
       }
-      size_t idx;
-      Checkfunctiontabentry checkfunction_tab[] = {
-        MAKECheckfunctiontabentry(gt_checkgreedyunitedist),
-        MAKECheckfunctiontabentry(gt_checklinearspace),
-        MAKECheckfunctiontabentry(gt_checklinearspace_local),
-        MAKECheckfunctiontabentry(gt_checkaffinelinearspace),
-        MAKECheckfunctiontabentry(gt_checkaffinelinearspace_local)
-      };
       for (idx = 0; idx < sizeof checkfunction_tab/sizeof checkfunction_tab[0];
            idx++)
       {
