@@ -277,28 +277,3 @@ void gt_linspaceManagement_set_TSfactor(LinspaceManagement *spacemanager,
   gt_assert(spacemanager != NULL);
   spacemanager->timesquarefactor = timesquarefactor;
 }
-
-inline GtWord add_safe(GtWord val1, GtWord val2, GtWord exception)
-{
-  return (val1 != exception) ? val1 + val2 : exception;
-}
-
-inline GtWord add_safe_max(GtWord val1, GtWord val2)
-{
-  return add_safe(val1,val2,GT_WORD_MAX);
-}
-
-inline GtWord add_safe_min(GtWord val1, GtWord val2)
-{
-  return add_safe(val1,val2,GT_WORD_MIN);
-}
-
-inline GtUword add_usafe(GtUword val1, GtUword val2, GtUword exception)
-{
-  return (val1 != exception) ? val1 + val2 : exception;
-}
-
-inline GtUword add_safe_umax(GtUword val1, GtUword val2)
-{
-  return add_usafe(val1, val2, GT_UWORD_MAX);
-}

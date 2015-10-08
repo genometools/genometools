@@ -84,7 +84,14 @@ size_t gt_linspaceManagement_get_valueTabsize(const LinspaceManagement
 void gt_linspaceManagement_set_TSfactor(LinspaceManagement *spacemanager,
                                         GtUword timesquarefactor);
 
-inline GtWord add_safe_max(GtWord val1, GtWord val2);
-inline GtWord add_safe_min(GtWord val1, GtWord val2);
-inline GtUword add_safe_umax(GtUword val1, GtUword val2);
+#define add_safe(val1, val2, exception) (((val1) != (exception))\
+                                           ? (val1) + (val2)\
+                                           : (exception))
+
+#define add_safe_max(val1, val2) add_safe(val1,val2,GT_WORD_MAX)
+
+#define add_safe_min(val1, val2) add_safe(val1,val2,GT_WORD_MIN)
+
+#define add_safe_umax(val1, val2) add_safe(val1,val2,GT_UWORD_MAX)
+
 #endif
