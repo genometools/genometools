@@ -169,7 +169,7 @@ Name "gt extractfeat -translate -gcode"
 Keywords "gt_extractfeat gcode"
 Test do
   FileUtils.copy "#{$testdata}U89959_genomic.fas", "."
-  [1,2,3,4,5,6,9,10,11,12,13,14,16,21,22,23].each do |code|
+  [1,2,3,4,5,6,9,10,11,12,13,14,16,21,22,23,24,25].each do |code|
     run "#{$bin}gt extractfeat -seqfile U89959_genomic.fas " \
     "-matchdesc -type CDS -join -translate -gcode #{code} " \
     "#{$testdata}U89959_cds.gff3"

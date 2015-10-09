@@ -84,7 +84,9 @@ typedef struct GtTranslationScheme
              *startcodon;   /* the start codons */
 } GtTranslationScheme;
 
-/* according to http://www.ncbi.nlm.nih.gov/Taxonomy/Utils/wprintgc.cgi */
+/* according to http://www.ncbi.nlm.nih.gov/Taxonomy/Utils/wprintgc.cgi
+   please use scripts/gc-parse.rb to update this given the text version of the
+   NCBI table */
 static GtTranslationScheme schemetable[] = {
   {"Standard",
    (unsigned int) 1,
@@ -97,7 +99,7 @@ static GtTranslationScheme schemetable[] = {
   {"Yeast Mitochondrial",
    (unsigned int) 3,
    "FFLLSSSSYY**CCWWTTTTPPPPHHQQRRRRIIMMTTTTNNKKSSRRVVVVAAAADDEEGGGG",
-   "-----------------------------------M----------------------------"},
+   "----------------------------------MM----------------------------"},
   {"Mold Mitochondrial; Protozoan Mitochondrial; Coelenterate Mitochondrial; "
    "Mycoplasma; Spiroplasma",
    (unsigned int) 4,
@@ -111,15 +113,15 @@ static GtTranslationScheme schemetable[] = {
    (unsigned int) 6,
    "FFLLSSSSYYQQCC*WLLLLPPPPHHQQRRRRIIIMTTTTNNKKSSRRVVVVAAAADDEEGGGG",
    "-----------------------------------M----------------------------"},
-  {"Echinoderm Mitochondrial",
+  {"Echinoderm Mitochondrial; Flatworm Mitochondrial",
    (unsigned int) 9,
    "FFLLSSSSYY**CCWWLLLLPPPPHHQQRRRRIIIMTTTTNNNKSSSSVVVVAAAADDEEGGGG",
-   "-----------------------------------M----------------------------"},
+   "-----------------------------------M---------------M------------"},
   {"Euplotid Nuclear",
    (unsigned int) 10,
    "FFLLSSSSYY**CCCWLLLLPPPPHHQQRRRRIIIMTTTTNNKKSSRRVVVVAAAADDEEGGGG",
    "-----------------------------------M----------------------------"},
-  {"Bacterial",
+  {"Bacterial, Archaeal and Plant Plastid",
    (unsigned int) 11,
    "FFLLSSSSYY**CC*WLLLLPPPPHHQQRRRRIIIMTTTTNNKKSSRRVVVVAAAADDEEGGGG",
    "---M---------------M------------MMMM---------------M------------"},
@@ -130,8 +132,8 @@ static GtTranslationScheme schemetable[] = {
   {"Ascidian Mitochondrial",
    (unsigned int) 13,
    "FFLLSSSSYY**CCWWLLLLPPPPHHQQRRRRIIMMTTTTNNKKSSGGVVVVAAAADDEEGGGG",
-   "-----------------------------------M----------------------------"},
-  {"Flatworm Mitochondrial",
+   "---M------------------------------MM---------------M------------"},
+  {"Alternative Flatworm Mitochondrial",
    (unsigned int) 14,
    "FFLLSSSSYYY*CCWWLLLLPPPPHHQQRRRRIIIMTTTTNNNKSSSSVVVVAAAADDEEGGGG",
    "-----------------------------------M----------------------------"},
@@ -146,15 +148,23 @@ static GtTranslationScheme schemetable[] = {
   {"Trematode Mitochondrial",
    (unsigned int) 21,
    "FFLLSSSSYY**CCWWLLLLPPPPHHQQRRRRIIMMTTTTNNNKSSSSVVVVAAAADDEEGGGG",
-   "-----------------------------------M----------------------------"},
-  {"Scenedesmus Obliquus Mitochondrial",
+   "-----------------------------------M---------------M------------"},
+  {"Scenedesmus obliquus Mitochondrial",
    (unsigned int) 22,
    "FFLLSS*SYY*LCC*WLLLLPPPPHHQQRRRRIIIMTTTTNNKKSSRRVVVVAAAADDEEGGGG",
    "-----------------------------------M----------------------------"},
   {"Thraustochytrium Mitochondrial",
    (unsigned int) 23,
    "FF*LSSSSYY**CC*WLLLLPPPPHHQQRRRRIIIMTTTTNNKKSSRRVVVVAAAADDEEGGGG",
-   "--------------------------------M--M---------------M------------"}
+   "--------------------------------M--M---------------M------------"},
+  {"Pterobranchia Mitochondrial",
+   (unsigned int) 24,
+   "FFLLSSSSYY**CCWWLLLLPPPPHHQQRRRRIIIMTTTTNNKKSSSKVVVVAAAADDEEGGGG",
+   "---M---------------M---------------M---------------M------------"},
+  {"Candidate Division SR1 and Gracilibacteria",
+   (unsigned int) 25,
+   "FFLLSSSSYY**CCGWLLLLPPPPHHQQRRRRIIIMTTTTNNKKSSRRVVVVAAAADDEEGGGG",
+   "---M-------------------------------M---------------M------------"}
 };
 
 static unsigned int transnum2index[] =
@@ -182,7 +192,9 @@ static unsigned int transnum2index[] =
   GT_UNDEFTRANSNUM,
   14U,
   15U,
-  16U
+  16U,
+  17U,
+  18U
 };
 
 static GtTranslationScheme* getschemetable(unsigned int transnum, GtError *err)
@@ -742,10 +754,8 @@ GtStrArray* gt_trans_table_get_scheme_descriptions()
   GtStr *str;
   GtStrArray *sa = gt_str_array_new();
   str = gt_str_new();
-  for (i = 1UL; i < (GtUword) GT_SIZEOFTRANSRANGE; i++) {
-    if (transnum2index[i] == GT_UNDEFTRANSNUM)
-      continue;
-    scheme = schemetable + transnum2index[i];
+  for (i = 0UL; i < (GtUword) GT_NUMOFTRANSSCHEMES; i++) {
+    scheme = schemetable+i;
     gt_str_reset(str);
     gt_str_append_uint(str, scheme->identity);
     gt_str_append_cstr(str, ": ");
