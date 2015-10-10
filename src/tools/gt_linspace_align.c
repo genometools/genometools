@@ -251,7 +251,8 @@ static GtOptionParser* gt_linspace_align_option_parser_new(void *tool_arguments)
   /* -double */
   optionsimilarity = gt_option_new_probability("similarity", "specified left "
                                                "and right shift of diagonal by "
-                                               "similarity of sequences",
+                                               "similarity of sequences, "
+                                               "0 <= similarty <= 1",
                                                &arguments->similarity, 0);
   gt_option_parser_add_option(op, optionsimilarity);
 
