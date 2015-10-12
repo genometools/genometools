@@ -198,7 +198,9 @@ typedef struct GtGreedyextendmatchinfo GtGreedyextendmatchinfo;
    length of the extension on both sides (including the seed itself).
 
    <extend_char_access> is the mode by which the characters are accessed
-   in the encoded sequence. */
+   in the encoded sequence.
+
+   REMARK: add comment on matchscore_bias */
 
 GtGreedyextendmatchinfo *gt_greedy_extend_matchinfo_new(
                                    GtUword errorpercentage,
@@ -207,7 +209,8 @@ GtGreedyextendmatchinfo *gt_greedy_extend_matchinfo_new(
                                    GtUword perc_mat_history,
                                    GtUword userdefinedleastlength,
                                    GtExtendCharAccess extend_char_access,
-                                   GtUword sensitivity);
+                                   GtUword sensitivity,
+                                   double matchscore_bias);
 
 /* the destructor-method for the gven object. */
 
@@ -380,4 +383,9 @@ void gt_greedy_extend_querymatch_with_output(void *info,
                                              const GtQuerymatch *exactseed,
                                              const GtSeqorEncseq *query,
                                              GtUword query_totallength);
+
+void gt_greedy_at_gc_count(GtUword *atcount,GtUword *gccount,
+                           const GtEncseq *encseq);
+
+double gt_greedy_dna_sequence_bias_get(GtUword atcount,GtUword cgcount);
 #endif

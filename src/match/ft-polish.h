@@ -3,6 +3,8 @@
 #include <stdint.h>
 #include "core/types_api.h"
 
+#define DEFAULT_MATCHSCORE_BIAS 1.0  /* has no effect */
+
 typedef struct
 {
   int16_t score_sum, diff_from_max;
@@ -16,7 +18,8 @@ typedef struct
 } Polishing_info;
 
 Polishing_info *polishing_info_new(GtUword cut_depth,
-                                   double errorpercentage);
+                                   double errorpercentage,
+                                   double matchscore_bias);
 
 void polishing_info_delete(Polishing_info *pol_info);
 

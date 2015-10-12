@@ -5,6 +5,7 @@
 #include "core/assert_api.h"
 #include "core/ma_api.h"
 #include "core/types_api.h"
+#include "core/minmax.h"
 #include "ft-polish.h"
 
 static void fill_polishing_info(Polishing_info *pol_info,
@@ -33,7 +34,8 @@ static void fill_polishing_info(Polishing_info *pol_info,
 }
 
 Polishing_info *polishing_info_new(GtUword cut_depth,
-                                   double errorpercentage)
+                                   double errorpercentage,
+                                   double matchscore_bias)
 {
   Polishing_info *pol_info = gt_malloc(sizeof *pol_info);
   GtUword maxshift_for_INT16 = (GtUword) 15;
@@ -48,7 +50,7 @@ Polishing_info *polishing_info_new(GtUword cut_depth,
   pol_info->values = gt_malloc(sizeof *pol_info->values * pol_info->entries);
   gt_assert(pol_info->values != NULL);
   pol_info->cut_depth = cut_depth;
-  pol_info->match_score = 20.0 * errorpercentage;
+  pol_info->match_score = 20.0 * errorpercentage * matchscore_bias;
   gt_assert(pol_info->match_score <= 1000.0);
   pol_info->difference_score = 1000.0 - pol_info->match_score;
   fill_polishing_info(pol_info,0,0,0,0);
@@ -60,7 +62,7 @@ uint64_t polishing_info_maxvalue(const Polishing_info *pol_info)
   return (((uint64_t) 1) << (2 * pol_info->cut_depth)) - 1;
 }
 
-static char *intbits2string(GtUword bits,GtUword bs)
+static char *polish_intbits2string(GtUword bits,GtUword bs)
 {
   char *csptr;
   GtUword mask;
@@ -83,10 +85,11 @@ void polishing_info_show(const Polishing_info *pol_info)
   printf("pi->entries=" GT_WU "\n",pol_info->entries);
   printf("pi->match_score=" GT_WD "\n",pol_info->match_score);
   printf("pi->difference_score=" GT_WD "\n",pol_info->difference_score);
-  printf("pi->mask=%s\n",intbits2string(pol_info->cut_depth,pol_info->mask));
+  printf("pi->mask=%s\n",
+         polish_intbits2string(pol_info->cut_depth,pol_info->mask));
   for (idx = 0; idx < pol_info->entries; idx++)
   {
-    printf("[%s]=%+hd/%+hd\n",intbits2string(pol_info->cut_depth,idx),
+    printf("[%s]=%+hd/%+hd\n",polish_intbits2string(pol_info->cut_depth,idx),
                               pol_info->values[idx].score_sum,
                               pol_info->values[idx].diff_from_max);
   }

@@ -470,52 +470,36 @@ static int gt_seed_extend_runner(GT_UNUSED int argc,
     }
   }
 
-  /* Use bias dependent parameters, adapted from E. Myers' DALIGNER */
-  if (!had_err && arguments->bias_parameters) {
-    const GtAlphabet *alpha = gt_encseq_alphabet(aencseq);
-    const double bias_factor[10] = {.690, .690, .690, .690, .780,
-                                    .850, .900, .933, .966, 1.000};
-
-    if (gt_alphabet_is_dna(alpha)) {
-      GtUword at, cg;
-      at = gt_encseq_charcount(aencseq, gt_alphabet_encode(alpha, 'a'));
-      at += gt_encseq_charcount(aencseq, gt_alphabet_encode(alpha, 't'));
-      cg = gt_encseq_charcount(aencseq, gt_alphabet_encode(alpha, 'c'));
-      cg += gt_encseq_charcount(aencseq, gt_alphabet_encode(alpha, 'g'));
-      if (at + cg > 0) {
-        const double ratio = (double)MIN(at, cg) / (at + cg);
-        int bias_index = (int)MAX(0.0, (ratio + 0.025) * 20.0 - 1.0);
-        gt_assert(bias_index < 10);
-        arguments->se_maxalilendiff = 30;
-        arguments->se_perc_match_hist = (GtUword)(100.0 - errorpercentage *
-                                                  bias_factor[bias_index]);
-        if (arguments->verbose) {
-          printf("# Base ratio = %4.2lf -> percmathistory = "GT_WU"\n",
-                 ratio, arguments->se_perc_match_hist);
-        }
-      } else {
-        had_err = -1;
-      }
-    } else {
-      had_err = -1;
-    }
-    if (had_err) {
-      gt_error_set(err, "option \"-bias-parameters\" can only be applied to "
-                   "the DNA alphabet");
-      gt_encseq_delete(aencseq);
-      gt_encseq_delete(bencseq);
-    }
-  }
-
   /* Prepare options for greedy extension */
   if (!had_err && gt_option_is_set(arguments->se_option_greedy)) {
+    /* Use bias dependent parameters, adapted from E. Myers' DALIGNER */
+    double matchscore_bias = DEFAULT_MATCHSCORE_BIAS;
+    if (!had_err && arguments->bias_parameters)
+    {
+      GtUword atcount, gccount;
+
+      gt_greedy_at_gc_count(&atcount,&gccount,aencseq);
+      if (atcount + gccount > 0) /* for DNA sequence */
+      {
+        matchscore_bias = gt_greedy_dna_sequence_bias_get(atcount,gccount);
+      }
+      arguments->se_maxalilendiff = 30;
+      arguments->se_perc_match_hist
+        = (GtUword) (100.0 - errorpercentage * matchscore_bias);
+      if (arguments->verbose)
+      {
+        printf("# matchscore_bias = %.2f => percmathistory = "GT_WU"\n",
+                 matchscore_bias, arguments->se_perc_match_hist);
+      }
+    }
     grextinfo = gt_greedy_extend_matchinfo_new(errorpercentage,
                                                arguments->se_maxalilendiff,
                                                arguments->se_historysize,
                                                arguments->se_perc_match_hist,
                                                arguments->se_alignlength,
                                                cam,
-                                               arguments->se_extendgreedy);
+                                               arguments->se_extendgreedy,
+                                               matchscore_bias);
     if (arguments->benchmark) {
       gt_greedy_extend_matchinfo_silent_set(grextinfo);
     }

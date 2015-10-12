@@ -377,6 +377,38 @@ struct GtGreedyextendmatchinfo
   GtAllocatedMemory usequence_cache, vsequence_cache, frontspace_reservoir;
 };
 
+void gt_greedy_at_gc_count(GtUword *atcount,GtUword *gccount,
+                           const GtEncseq *encseq)
+{
+  const GtAlphabet *alpha = gt_encseq_alphabet(encseq);
+
+  gt_assert(gt_encseq_total_length(encseq) > 0);
+  if (gt_alphabet_is_dna(alpha))
+  {
+    *atcount = gt_encseq_charcount(encseq, gt_alphabet_encode(alpha, 'a'));
+    *atcount += gt_encseq_charcount(encseq, gt_alphabet_encode(alpha, 't'));
+    *gccount = gt_encseq_charcount(encseq, gt_alphabet_encode(alpha, 'c'));
+    *gccount += gt_encseq_charcount(encseq, gt_alphabet_encode(alpha, 'g'));
+  } else
+  {
+    *atcount = *gccount = 0;
+  }
+}
+
+double gt_greedy_dna_sequence_bias_get(GtUword atcount,GtUword cgcount)
+{
+  const double bias_factor[] = {.690, .690, .690, .690, .780,
+                                .850, .900, .933, .966, 1.000};
+  double ratio;
+  int bias_index;
+
+  gt_assert(atcount + cgcount > 0);
+  ratio = (double) MIN(atcount, cgcount) / (atcount + cgcount);
+  bias_index = (int) MAX(0.0, (ratio + 0.025) * 20.0 - 1.0);
+  gt_assert(bias_index < sizeof bias_factor/sizeof bias_factor[0]);
+  return bias_factor[bias_index];
+}
+
 GtGreedyextendmatchinfo *gt_greedy_extend_matchinfo_new(
                                    GtUword errorpercentage,
                                    GtUword maxalignedlendifference,
@@ -384,7 +416,8 @@ GtGreedyextendmatchinfo *gt_greedy_extend_matchinfo_new(
                                    GtUword perc_mat_history,
                                    GtUword userdefinedleastlength,
                                    GtExtendCharAccess extend_char_access,
-                                   GtUword sensitivity)
+                                   GtUword sensitivity,
+                                   double matchscore_bias)
 {
   GtGreedyextendmatchinfo *ggemi = gt_malloc(sizeof *ggemi);
 
@@ -400,7 +433,8 @@ GtGreedyextendmatchinfo *gt_greedy_extend_matchinfo_new(
                                             errorpercentage,
                                             sensitivity);
   ggemi->minmatchnum = (ggemi->history * ggemi->perc_mat_history)/100;
-  ggemi->pol_info = polishing_info_new(ggemi->minmatchnum/2,errorpercentage);
+  ggemi->pol_info = polishing_info_new(ggemi->minmatchnum/2,errorpercentage,
+                                       matchscore_bias);
   ggemi->db_totallength = GT_UWORD_MAX;
   ggemi->encseq_r_in_u = NULL;
   ggemi->encseq_r_in_v = NULL;
