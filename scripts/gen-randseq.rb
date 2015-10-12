@@ -44,7 +44,7 @@ class Randomsequence
         s.push(sequence[i])
         i += 1
       end
-      if i == len
+      if i >= len
        break
       end
     end
@@ -68,7 +68,7 @@ def parseargs(argv)
   options.namedfiles = false
   options.withwildcards = false
   options.minidentity = defaultminid
-  options.seednumber = nil
+  options.seednumber = Random.new_seed
   options.reverse = false
   options.number = 1
   options.mems = false
@@ -231,7 +231,7 @@ end
 def gen_seeded_with_coverage(fpdb,fpquery,fpquery_r,rseq,options,alphabet,errperc)
   # build array with random seed positions covering >= seedcoverage positions
   pos = Array.new
-  rgen = Random.new(options.seednumber.nil? ? Random.new_seed : options.seednumber)
+  rgen = Random.new(options.seednumber)
   while pos.length < options.seedcoverage
     idx = rgen.rand * (options.totallength - options.seedlength + 1)
     idx = idx.to_i
