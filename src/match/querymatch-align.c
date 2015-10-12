@@ -170,7 +170,8 @@ void gt_querymatchoutoptions_extend(
                                        perc_mat_history,
                                        0,/* userdefinedleastlength not used */
                                        extend_char_access,
-                                       sensitivity);
+                                       sensitivity,
+                                       DEFAULT_MATCHSCORE_BIAS);
   }
 }
 
