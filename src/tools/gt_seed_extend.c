@@ -43,7 +43,6 @@ typedef struct {
   bool dbs_debug_kmer;
   bool dbs_debug_seedpair;
   bool dbs_verify;
-  bool weakends;
   /* xdrop extension options */
   GtOption *se_option_xdrop;
   GtUword se_extendxdrop;
@@ -98,8 +97,7 @@ static GtOptionParser* gt_seed_extend_option_parser_new(void *tool_arguments)
   GtSeedExtendArguments *arguments = tool_arguments;
   GtOptionParser *op;
   GtOption *option, *op_gre, *op_xdr, *op_cam, *op_his, *op_dif, *op_pmh,
-    *op_len, *op_err, *op_xbe, *op_sup, *op_frq, *op_mem, *op_ali, *op_bia,
-    *op_weakends;
+    *op_len, *op_err, *op_xbe, *op_sup, *op_frq, *op_mem, *op_ali, *op_bia;
   gt_assert(arguments != NULL);
 
   /* init */
@@ -337,15 +335,6 @@ static GtOptionParser* gt_seed_extend_option_parser_new(void *tool_arguments)
   gt_option_is_development_option(option);
   gt_option_parser_add_option(op, option);
 
-  /* -weakends */
-  op_weakends = gt_option_new_bool("weakends",
-                                   "reduce minidentity for ends of seeded "
-                                   "alignments",
-                                   &arguments->weakends,
-                                   false);
-  gt_option_imply_either_2(op_weakends, op_xdr, op_gre);
-  gt_option_parser_add_option(op, op_weakends);
-
   /* -v */
   option = gt_option_new_verbose(&arguments->verbose);
   gt_option_parser_add_option(op, option);
@@ -428,15 +417,6 @@ static int gt_seed_extend_runner(GT_UNUSED int argc,
   gt_assert(arguments->se_minidentity >= GT_EXTEND_MIN_IDENTITY_PERCENTAGE &&
             arguments->se_minidentity <= 100UL);
 
-  if (arguments->dbs_verify || arguments->verbose) {
-    int idx;
-    printf("# Options: ");
-    for (idx = 1; idx < argc; idx++) {
-      printf("%s ", argv[idx]);
-    }
-    printf("\n");
-  }
-
   /* Calculate error percentage from minidentity */
   errorpercentage = 100UL - arguments->se_minidentity;
 
@@ -493,7 +473,7 @@ static int gt_seed_extend_runner(GT_UNUSED int argc,
   /* Prepare options for greedy extension */
   if (!had_err && gt_option_is_set(arguments->se_option_greedy)) {
     /* Use bias dependent parameters, adapted from E. Myers' DALIGNER */
-    double matchscore_bias = GT_DEFAULT_MATCHSCORE_BIAS;
+    double matchscore_bias = DEFAULT_MATCHSCORE_BIAS;
     if (!had_err && arguments->bias_parameters)
     {
       GtUword atcount, gccount;
@@ -506,6 +486,11 @@ static int gt_seed_extend_runner(GT_UNUSED int argc,
       arguments->se_maxalilendiff = 30;
       arguments->se_perc_match_hist
         = (GtUword) (100.0 - errorpercentage * matchscore_bias);
+      if (arguments->verbose)
+      {
+        printf("# matchscore_bias = %.2f => percmathistory = "GT_WU"\n",
+                 matchscore_bias, arguments->se_perc_match_hist);
+      }
     }
     grextinfo = gt_greedy_extend_matchinfo_new(errorpercentage,
                                                arguments->se_maxalilendiff,
@@ -514,7 +499,6 @@ static int gt_seed_extend_runner(GT_UNUSED int argc,
                                                arguments->se_alignlength,
                                                cam,
                                                arguments->se_extendgreedy,
-                                               arguments->weakends,
                                                matchscore_bias);
     if (arguments->benchmark) {
       gt_greedy_extend_matchinfo_silent_set(grextinfo);
@@ -551,7 +535,6 @@ static int gt_seed_extend_runner(GT_UNUSED int argc,
                                      arguments->se_historysize,
                                      arguments->se_perc_match_hist,
                                      cam,
-                                     arguments->weakends,
                                      sensitivity);
     }
   }

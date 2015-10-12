@@ -154,7 +154,6 @@ void gt_querymatchoutoptions_extend(
                   GtUword history,
                   GtUword perc_mat_history,
                   GtExtendCharAccess extend_char_access,
-                  bool weakends,
                   GtUword sensitivity)
 {
   if (errorpercentage > 0)
@@ -172,8 +171,7 @@ void gt_querymatchoutoptions_extend(
                                        0,/* userdefinedleastlength not used */
                                        extend_char_access,
                                        sensitivity,
-                                       weakends,
-                                       GT_DEFAULT_MATCHSCORE_BIAS);
+                                       DEFAULT_MATCHSCORE_BIAS);
   }
 }
 
@@ -242,7 +240,6 @@ static bool seededmatch2eoplist(GtQuerymatchoutoptions *querymatchoutoptions,
                                    query_totallength,
                                    querymatchoutoptions->ggemi,
                                    greedyextension,
-                                   seedlen,
                                    ustart,
                                    ulen,
                                    vstart,
@@ -286,7 +283,6 @@ static bool seededmatch2eoplist(GtQuerymatchoutoptions *querymatchoutoptions,
                                      query_totallength,
                                      querymatchoutoptions->ggemi,
                                      greedyextension,
-                                     seedlen,
                                      dbstart,
                                      ulen,
                                      abs_querystart,
@@ -533,7 +529,6 @@ void gt_querymatchoutoptions_alignment_show(const GtQuerymatchoutoptions
     if (edist > 0)
     {
       gt_alignment_show_generic(querymatchoutoptions->alignment_show_buffer,
-                                false,
                                 querymatchoutoptions->alignment,
                                 stdout,
                                 (unsigned int)

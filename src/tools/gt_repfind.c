@@ -777,8 +777,7 @@ static int gt_repfind_runner(int argc,
                                        arguments->userdefinedleastlength,
                                        extend_char_access,
                                        arguments->extendgreedy,
-                                       false,
-                                       GT_DEFAULT_MATCHSCORE_BIAS);
+                                       DEFAULT_MATCHSCORE_BIAS);
     if (arguments->check_extend_symmetry)
     {
       gt_greedy_extend_matchinfo_check_extend_symmetry_set(
@@ -823,7 +822,6 @@ static int gt_repfind_runner(int argc,
                                       arguments->history,
                                       arguments->perc_mat_history,
                                       extend_char_access,
-                                      false,
                                       sensitivity);
       }
     } else

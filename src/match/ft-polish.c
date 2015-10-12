@@ -2,7 +2,6 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdbool.h>
-#include <limits.h>
 #include "core/assert_api.h"
 #include "core/ma_api.h"
 #include "core/types_api.h"
@@ -34,12 +33,17 @@ static void fill_polishing_info(Polishing_info *pol_info,
   }
 }
 
-Polishing_info *polishing_info_new_with_bias(double errorpercentage,
-                                             double matchscore_bias)
+Polishing_info *polishing_info_new(GtUword cut_depth,
+                                   double errorpercentage,
+                                   double matchscore_bias)
 {
   Polishing_info *pol_info = gt_malloc(sizeof *pol_info);
-  const GtUword cut_depth = (GtUword) 15;
+  GtUword maxshift_for_INT16 = (GtUword) 15;
 
+  if (cut_depth > maxshift_for_INT16)
+  {
+    cut_depth = maxshift_for_INT16;
+  }
   gt_assert(pol_info != NULL);
   pol_info->entries = 1UL << cut_depth;
   pol_info->mask = pol_info->entries - 1;
@@ -53,11 +57,6 @@ Polishing_info *polishing_info_new_with_bias(double errorpercentage,
   return pol_info;
 }
 
-Polishing_info *polishing_info_new(double errorpercentage)
-{
-  return polishing_info_new_with_bias(errorpercentage,1.0);
-}
-
 uint64_t polishing_info_maxvalue(const Polishing_info *pol_info)
 {
   return (((uint64_t) 1) << (2 * pol_info->cut_depth)) - 1;
@@ -69,9 +68,8 @@ static char *polish_intbits2string(GtUword bits,GtUword bs)
   GtUword mask;
   static char cs[64+1];
 
-  gt_assert(bits > 0 && bits <= sizeof (GtUword) * CHAR_BIT);
-  for (csptr = cs, mask = ((GtUword) 1) << (bits-1); mask > 0;
-       mask >>= 1, csptr++)
+  gt_assert(bits > 0);
+  for (csptr = cs, mask = 1 << (bits-1); mask > 0; mask >>= 1, csptr++)
   {
      *csptr = (bs & mask) ? '1' : '0';
   }

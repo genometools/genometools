@@ -53,8 +53,6 @@
   }
 */
 
-#define GT_DEFAULT_MATCHSCORE_BIAS 1.0  /* has no effect */
-
 /* This is the minimum percentage value for extended seeds. */
 #define GT_EXTEND_MIN_IDENTITY_PERCENTAGE 70
 
@@ -212,7 +210,6 @@ GtGreedyextendmatchinfo *gt_greedy_extend_matchinfo_new(
                                    GtUword userdefinedleastlength,
                                    GtExtendCharAccess extend_char_access,
                                    GtUword sensitivity,
-                                   bool weakends,
                                    double matchscore_bias);
 
 /* the destructor-method for the gven object. */
@@ -363,7 +360,6 @@ GtUword gt_align_front_prune_edist(bool rightextension,
                                    GtUword query_totallength,
                                    GtGreedyextendmatchinfo *ggemi,
                                    bool greedyextension,
-                                   GtUword seedlength,
                                    GtUword ustart,
                                    GtUword ulen,
                                    GtUword vstart,
