@@ -200,7 +200,7 @@ gt_condenseq_compress_option_parser_new(void *tool_arguments)
                               "Incompatible with -brute_force yes. "
                               "Disabling both diagonals will result in simple "
                               "filtering of seed positions.",
-                              &arguments->diags, true);
+                              &arguments->diags, false);
   gt_option_is_development_option(option);
   gt_option_parser_add_option(op, option);
 

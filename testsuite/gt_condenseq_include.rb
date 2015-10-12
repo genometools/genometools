@@ -234,7 +234,9 @@ Test do
     ["-indexname foo -kmersize 8 -windowsize 16 -alignlength 32 -initsize 31 " \
      "#{basename}",
      /-initsize.*at least.*-alignlength/],
-    ["-indexname foo -brute_force #{basename}",
+    ["-diagonals yes -indexname foo -brute_force #{basename}",
+     /not compatible/],
+    ["-full_diags yes -indexname foo -brute_force #{basename}",
      /not compatible/],
     ["-indexname foo -kmersize 8 -windowsize 8 -cutoff 0 -disable_prune " \
      "#{basename}", 

@@ -1815,5 +1815,6 @@ int gt_condenseq_creator_create(GtCondenseqCreator *condenseq_creator,
   condenseq_creator->kmer_db = NULL;
   if (gt_showtime_enabled())
     gt_timer_show_progress_final(timer, stderr);
+  gt_timer_delete(timer);
   return had_err;
 }
