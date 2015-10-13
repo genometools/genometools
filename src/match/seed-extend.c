@@ -409,6 +409,24 @@ double gt_greedy_dna_sequence_bias_get(GtUword atcount,GtUword cgcount)
   return bias_factor[bias_index];
 }
 
+void gt_greedy_show_matchscore_table(double matchscore_bias)
+{
+  GtUword errorpercentage;
+
+  for (errorpercentage = 30UL; errorpercentage >= 1UL; errorpercentage--)
+  {
+    GtWord match_score = 10.0 * errorpercentage * matchscore_bias,
+           difference_score;
+    gt_assert(match_score <= 1000.0);
+    difference_score = 1000.0 - match_score;
+    printf("# correlation = %.2f, mscore=%ld, dscore=%ld, bias=%.4f\n",
+            1.0 - (double) errorpercentage/100.0,
+            match_score,
+            difference_score,
+            matchscore_bias);
+  }
+}
+
 GtGreedyextendmatchinfo *gt_greedy_extend_matchinfo_new(
                                    GtUword errorpercentage,
                                    GtUword maxalignedlendifference,
@@ -421,6 +439,7 @@ GtGreedyextendmatchinfo *gt_greedy_extend_matchinfo_new(
 {
   GtGreedyextendmatchinfo *ggemi = gt_malloc(sizeof *ggemi);
 
+  gt_greedy_show_matchscore_table(matchscore_bias);
   ggemi->left_front_trace = NULL;
   ggemi->right_front_trace = NULL;
   ggemi->errorpercentage = errorpercentage;
