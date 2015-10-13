@@ -165,8 +165,13 @@ Test do
     run_test "#{$bin}gt repfind -minidentity 80 -l 23 -extend#{ext} -ii U8 " +
              "-qii at1MB"
     run "cmp -s #{last_stdout} U8-vs-at1MB.#{ext}.matches"
+    if ext == "xdrop"
+      exception="3 4"
+    else
+      exception="15 16"
+    end
     run "#{$scriptsdir}cmp_db_query_exch.rb U8-vs-at1MB.#{ext}.matches " +
-        "at1MB-vs-U8.#{ext}.matches 15 16"
+        "at1MB-vs-U8.#{ext}.matches #{exception}"
   end
   [12,13,14].each do |seedlength|
      run_test "#{$bin}gt repfind -seedlength #{seedlength} -extendgreedy -ii U8"

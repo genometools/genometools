@@ -395,10 +395,11 @@ void gt_greedy_at_gc_count(GtUword *atcount,GtUword *gccount,
   }
 }
 
+static const double bias_factor[] = {.690, .690, .690, .690, .780,
+                                     .850, .900, .933, .966, 1.000};
+
 double gt_greedy_dna_sequence_bias_get(GtUword atcount,GtUword cgcount)
 {
-  const double bias_factor[] = {.690, .690, .690, .690, .780,
-                                .850, .900, .933, .966, 1.000};
   double ratio;
   int bias_index;
 
@@ -409,24 +410,39 @@ double gt_greedy_dna_sequence_bias_get(GtUword atcount,GtUword cgcount)
   return bias_factor[bias_index];
 }
 
-void gt_greedy_show_matchscore_table(double matchscore_bias)
+void gt_greedy_show_matchscore_table(void)
 {
-  GtUword correlation;
+  const int numentries = sizeof bias_factor/sizeof bias_factor[0];
+  int idx;
 
-  for (correlation = 70UL; correlation <= 99UL; correlation++)
+  for (idx = numentries - 1; idx >= 0; idx--)
   {
-    const GtWord match_score = (GtUword) (1000.0 * (1.0 - correlation / 100.0) *
-                                          matchscore_bias);
-    GtUword difference_score;
-    gt_assert(match_score <= 1000.0);
-    difference_score = 1000.0 - match_score;
-    printf("# correlation=%.2f, mscore=%ld, dscore=%ld, minmatchn=%ld, "
-           "bias=%.4f\n",
-           correlation / 100.0,
-           match_score,
-           difference_score,
-           (GtUword)(60 * (1.0 - matchscore_bias * (1.0 - correlation/100.0))),
-           matchscore_bias);
+    if (idx == numentries - 1 || bias_factor[idx] != bias_factor[idx+1])
+    {
+      GtUword correlation;
+      double matchscore_bias = bias_factor[idx];
+
+      for (correlation = 70UL; correlation <= 99UL; correlation++)
+      {
+        GtUword minmatchnum;
+        const GtWord match_score
+          = (GtUword) (1000.0 * (1.0 - correlation / 100.0) * matchscore_bias);
+        GtUword difference_score;
+        gt_assert(match_score <= 1000.0);
+        difference_score = 1000.0 - match_score;
+        minmatchnum
+          = (GtUword) (60 *
+                       (1.0 - matchscore_bias * (1.0 - correlation/100.0))),
+        printf("correlation=%.2f, mscore=" GT_WD ", dscore=" GT_WD
+               ", ave_path=" GT_WU ", bias=%.4f\n",
+               correlation / 100.0,
+               match_score,
+               difference_score,
+               minmatchnum,
+               matchscore_bias);
+      }
+      printf("\n");
+    }
   }
 }
 
@@ -442,7 +458,6 @@ GtGreedyextendmatchinfo *gt_greedy_extend_matchinfo_new(
 {
   GtGreedyextendmatchinfo *ggemi = gt_malloc(sizeof *ggemi);
 
-  gt_greedy_show_matchscore_table(matchscore_bias);
   ggemi->left_front_trace = NULL;
   ggemi->right_front_trace = NULL;
   ggemi->errorpercentage = errorpercentage;
@@ -455,8 +470,9 @@ GtGreedyextendmatchinfo *gt_greedy_extend_matchinfo_new(
                                             errorpercentage,
                                             sensitivity);
   ggemi->minmatchnum = (ggemi->history * ggemi->perc_mat_history)/100;
-  ggemi->pol_info = polishing_info_new(ggemi->minmatchnum/2,errorpercentage,
-                                       matchscore_bias);
+  ggemi->pol_info = polishing_info_new_with_bias(ggemi->minmatchnum/2,
+                                                 errorpercentage,
+                                                 matchscore_bias);
   ggemi->db_totallength = GT_UWORD_MAX;
   ggemi->encseq_r_in_u = NULL;
   ggemi->encseq_r_in_v = NULL;
@@ -629,6 +645,7 @@ GtUword gt_align_front_prune_edist(bool rightextension,
                                    GtUword query_totallength,
                                    GtGreedyextendmatchinfo *ggemi,
                                    bool greedyextension,
+                                   GtUword seedlength,
                                    GtUword ustart,
                                    GtUword ulen,
                                    GtUword vstart,
@@ -658,6 +675,7 @@ GtUword gt_align_front_prune_edist(bool rightextension,
                                          ggemi->minmatchnum - iteration,
                                          ggemi->maxalignedlendifference
                                            + iteration,
+                                         seedlength,
                                          &ufsr,
                                          ustart,
                                          ulen,
@@ -909,6 +927,7 @@ static const GtQuerymatch *gt_extend_sesp(bool forxdrop,
                                        greedyextendmatchinfo->minmatchnum,
                                        greedyextendmatchinfo->
                                           maxalignedlendifference,
+                                       sesp->seedlen,
                                        &ufsr,
                                        uoffset,
                                        ulen,
@@ -1010,6 +1029,7 @@ static const GtQuerymatch *gt_extend_sesp(bool forxdrop,
                                        greedyextendmatchinfo->minmatchnum,
                                        greedyextendmatchinfo->
                                           maxalignedlendifference,
+                                       sesp->seedlen,
                                        &ufsr,
                                        sesp->seedpos1 + sesp->seedlen,
                                        ulen,

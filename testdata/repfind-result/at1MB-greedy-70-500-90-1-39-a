@@ -420,37 +420,37 @@ aatatcatactgttagctga-tttaaacgatgcatcaaaaggatatttggtgaatgatgccattatcttt
 tgaaactgaaatggttaaggtctctgtgaac-aacatantctccncttaaatat
  ||| |||||||||||||||||||| | ||| |||||  ||||| |||||||||
 -gaagctgaaatggttaaggtctctat-aaccaacatcgtctccgcttaaatat
-621 2 5 F 640 16 89 1183 26 95.88
-tgttgatctcaaactctttgtccataatgggaagctacacaaatatttgactgttacagatggcttagtg
+626 2 0 F 645 16 84 1190 27 95.75
+gtgantgttgatctcaaactctttgtccataatgggaagctacacaaatatttgactgttacagatggct
+|||| |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+gtgaatgttgatctcaaactctttgtccataatgggaagctacacaaatatttgactgttacagatggct
+tagtgaagcgatataacaatgcgaaaaaagaatggggtttcggacaattgattcctcgatcaacattcta
 ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-tgttgatctcaaactctttgtccataatgggaagctacacaaatatttgactgttacagatggcttagtg
-aagcgatataacaatgcgaaaaaagaatggggtttcggacaattgattcctcgatcaacattctacaacg
+tagtgaagcgatataacaatgcgaaaaaagaatggggtttcggacaattgattcctcgatcaacattcta
+caacgcgaacgaaggttaccttgaccaggacactggttcttttggtgctgagatctttattgttaaaccg
 ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-aagcgatataacaatgcgaaaaaagaatggggtttcggacaattgattcctcgatcaacattctacaacg
-cgaacgaaggttaccttgaccaggacactggttcttttggtgctgagatctttattgttaaaccggctca
+caacgcgaacgaaggttaccttgaccaggacactggttcttttggtgctgagatctttattgttaaaccg
+gctcaacaacaagagaaagttacattcatatcaaaccctccaaacaatgttttcacttggaagatacttc
 ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-cgaacgaaggttaccttgaccaggacactggttcttttggtgctgagatctttattgttaaaccggctca
-acaacaagagaaagttacattcatatcaaaccctccaaacaatgttttcacttggaagatacttcgtttc
+gctcaacaacaagagaaagttacattcatatcaaaccctccaaacaatgttttcacttggaagatacttc
+gtttctctaccttggaagataaattctattactccgatgattttctcgttgaagaccgatactggagact
+||||||||||||||||||||||||||||||||||||||||| ||||||||||||||||||||||||||||
+gtttctctaccttggaagataaattctattactccgatgatnttctcgttgaagaccgatactggagact
+aggatttaacccgaaaggggatggaggaggaagaccacatgcacttccaatcttcctatttgctcaaggc
 ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-acaacaagagaaagttacattcatatcaaaccctccaaacaatgttttcacttggaagatacttcgtttc
-tctaccttggaagataaattctattactccgatgattttctcgttgaagaccgatactggagactaggat
-|||||||||||||||||||||||||||||||||||| |||||||||||||||||||||||||||||||||
-tctaccttggaagataaattctattactccgatgatnttctcgttgaagaccgatactggagactaggat
-ttaacccgaaaggggatggaggaggaagaccacatgcacttccaatcttcctatttgctcaaggccataa
-||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-ttaacccgaaaggggatggaggaggaagaccacatgcacttccaatcttcctatttgctcaaggccataa
-ggcaaatgcagttgctacaaacacttggggagcggttaatctgcggttaaagaatcaacgaanttctaac
-|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||| | |||||
-ggcaaatgcagttgctacaaacacttggggagcggttaatctgcggttaaagaatcaacgaagtactaac
-catagacaa-tatnt-ctgca-cttggtaccc-attggaaacg-ttatggtntgggant-aaca-tatc-
-||||||||| ||| | ||||| |||||||||| |||||||||| ||||||| ||||| | |||| |||| 
-catagacaaatatattctgcagcttggtacccgattggaaacggttatggtgtgggagtgaacaatatca
-tactgtt-gctgatt-aa-cga-gcatccaaaggat-tttggtga-tga-gccnt-atctt-gaa-ctga
-||||||| ||||||| || ||| ||||||||||||| |||||||| ||| ||| | ||||| ||| ||||
-tactgttagctgatttaaacgatgcatccaaaggatatttggtgaatgatgccattatctttgaagctga
-a-tggttaag
-| ||||||||
-aatggttaag
+aggatttaacccgaaaggggatggaggaggaagaccacatgcacttccaatcttcctatttgctcaaggc
+cataaggcaaatgcagttgctacaaacacttggggagcggttaatctgcggttaaagaatcaacgaantt
+||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||| | 
+cataaggcaaatgcagttgctacaaacacttggggagcggttaatctgcggttaaagaatcaacgaagta
+ctaaccatagacaa-tatnt-ctgca-cttggtaccc-attggaaacg-ttatggtntgggant-aaca-
+|||||||||||||| ||| | ||||| |||||||||| |||||||||| ||||||| ||||| | |||| 
+ctaaccatagacaaatatattctgcagcttggtacccgattggaaacggttatggtgtgggagtgaacaa
+tatc-tactgtt-gctgatt-aa-cga-gcatccaaaggat-tttggtga-tga-gccnt-atctt-gaa
+|||| ||||||| ||||||| || ||| ||||||||||||| |||||||| ||| ||| | ||||| |||
+tatcatactgttagctgatttaaacgatgcatccaaaggatatttggtgaatgatgccattatctttgaa
+-ctgaa-tggttaag
+ ||||| ||||||||
+gctgaaatggttaag
 626 2 0 F 645 16 84 1190 27 95.75
 gtgantgttgatctcaaactctttgtccataatgggaagctacacaaatatttgactgttacagatggct
 |||| |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
