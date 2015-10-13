@@ -171,7 +171,7 @@ void gt_querymatchoutoptions_extend(
                                        0,/* userdefinedleastlength not used */
                                        extend_char_access,
                                        sensitivity,
-                                       DEFAULT_MATCHSCORE_BIAS);
+                                       GT_DEFAULT_MATCHSCORE_BIAS);
   }
 }
 
