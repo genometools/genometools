@@ -53,6 +53,8 @@
   }
 */
 
+#define GT_DEFAULT_MATCHSCORE_BIAS 1.0  /* has no effect */
+
 /* This is the minimum percentage value for extended seeds. */
 #define GT_EXTEND_MIN_IDENTITY_PERCENTAGE 70
 

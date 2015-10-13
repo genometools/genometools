@@ -3,8 +3,6 @@
 #include <stdint.h>
 #include "core/types_api.h"
 
-#define DEFAULT_MATCHSCORE_BIAS 1.0  /* has no effect */
-
 typedef struct
 {
   int16_t score_sum, diff_from_max;
