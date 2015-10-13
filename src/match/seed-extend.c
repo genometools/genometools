@@ -420,11 +420,13 @@ void gt_greedy_show_matchscore_table(double matchscore_bias)
     GtUword difference_score;
     gt_assert(match_score <= 1000.0);
     difference_score = 1000.0 - match_score;
-    printf("# correlation = %.2f, mscore=%ld, dscore=%ld, bias=%.4f\n",
-            correlation / 100.0,
-            match_score,
-            difference_score,
-            matchscore_bias);
+    printf("# correlation=%.2f, mscore=%ld, dscore=%ld, minmatchn=%ld, "
+           "bias=%.4f\n",
+           correlation / 100.0,
+           match_score,
+           difference_score,
+           (GtUword)(60 * (1.0 - matchscore_bias * (1.0 - correlation/100.0))),
+           matchscore_bias);
   }
 }
 
