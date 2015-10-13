@@ -473,7 +473,7 @@ static int gt_seed_extend_runner(GT_UNUSED int argc,
   /* Prepare options for greedy extension */
   if (!had_err && gt_option_is_set(arguments->se_option_greedy)) {
     /* Use bias dependent parameters, adapted from E. Myers' DALIGNER */
-    double matchscore_bias = DEFAULT_MATCHSCORE_BIAS;
+    double matchscore_bias = GT_DEFAULT_MATCHSCORE_BIAS;
     if (!had_err && arguments->bias_parameters)
     {
       GtUword atcount, gccount;
