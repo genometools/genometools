@@ -152,22 +152,26 @@ Test do
              "-extend#{ext} -ii at1MB"
     run "cmp -s #{last_stdout} #{$testdata}repfind-result/at1MB-#{ext}-r-14-32-80-#{params}-a"
   end
-  minlen=24
   ["xdrop","greedy"].each do |ext|
-    run_test "#{$bin}gt repfind -minidentity 80 -l #{minlen} -extend#{ext} " +
+    run_test "#{$bin}gt repfind -minidentity 80 -l 23 -extend#{ext} " +
              "-ii at1MB -q #{$testdata}U89959_genomic.fas"
     run "mv #{last_stdout} at1MB-vs-U8.#{ext}.matches"
-    run_test "#{$bin}gt repfind -minidentity 80 -l #{minlen} -extend#{ext} " +
+    run_test "#{$bin}gt repfind -minidentity 80 -l 23 -extend#{ext} " +
              "-ii at1MB -qii U8"
     run "cmp -s #{last_stdout} at1MB-vs-U8.#{ext}.matches"
-    run_test "#{$bin}gt repfind -minidentity 80 -l #{minlen} -extend#{ext} -ii U8 " +
+    run_test "#{$bin}gt repfind -minidentity 80 -l 23 -extend#{ext} -ii U8 " +
              "-q #{$testdata}/at1MB"
     run "mv #{last_stdout} U8-vs-at1MB.#{ext}.matches"
-    run_test "#{$bin}gt repfind -minidentity 80 -l #{minlen} -extend#{ext} -ii U8 " +
+    run_test "#{$bin}gt repfind -minidentity 80 -l 23 -extend#{ext} -ii U8 " +
              "-qii at1MB"
     run "cmp -s #{last_stdout} U8-vs-at1MB.#{ext}.matches"
+    if ext == "xdrop"
+      exception="3 4"
+    else
+      exception="15 16"
+    end
     run "#{$scriptsdir}cmp_db_query_exch.rb U8-vs-at1MB.#{ext}.matches " +
-        "at1MB-vs-U8.#{ext}.matches"
+        "at1MB-vs-U8.#{ext}.matches #{exception}"
   end
   [12,13,14].each do |seedlength|
      run_test "#{$bin}gt repfind -seedlength #{seedlength} -extendgreedy -ii U8"

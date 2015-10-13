@@ -1,7 +1,3 @@
-31 125 26 F 30 0 5965 49 4 86.89
-ctcttcttcttcttcttcttctccttcctct
-|||||||||||||||||||||  || | |||
-ctcttcttcttcttcttcttcaact-catct
 23 859 207 F 23 0 17268 46 0 100.00
 catatatatatatatatatatat
 |||||||||||||||||||||||
@@ -14,14 +10,6 @@ atcatatatatatatatatatata
 atatatatatatatatatat
 ||||||||||||||||||||
 atatatatatatatatatat
-29 561 415 F 29 0 71281 55 1 96.55
-tcatcatcatcatcatcatcatcatacat
-|||||||||||||||||||||||||| ||
-tcatcatcatcatcatcatcatcatatat
-33 561 411 F 33 0 71279 57 3 90.91
-cct-atcatcatcatcatcatcatcatcatacat
-||| ||||||||||||||||||||||| ||| ||
-cctcatcatcatcatcatcatcatcat-atatat
 333 1265 0 F 330 0 72423 612 17 94.87
 ccttagangg-tgggaaattgcatgagtttggcacatcccttnttctnncggatttnggatcnnagtatg
 ||||||| || ||||||| ||||||||| ||||||||||||| ||||  ||||||| ||| |  ||||||
@@ -121,10 +109,6 @@ atatatatatatatatatatatatatatatatgta
 atatatatatatatatatatagtctttatat
 ||||||||||||||||||||| | | |||||
 atatatatatatatatatata-tatatatat
-43 859 208 F 39 0 77821 58 8 80.49
-atatatatatatatatatatataaagcaaacatgttccagaat
-||||||||||||||||||||||| |  | |  ||| ||| |||
-atatatatatatatatatatatata-tata--tgtacca-aat
 33 1214 205 F 33 0 77821 63 1 96.97
 atatatatatatatatatatatatatatatata
 |||||||||||||||||||||||||||||| ||
@@ -137,18 +121,6 @@ atatatatatatatatatatatatatatgta
 atatatatatatatatatatatatatata
 |||||||||||||||||||||||||| ||
 atatatatatatatatatatatatatgta
-27 1214 205 F 27 0 77827 51 1 96.30
-atatatatatatatatatatatatata
-|||||||||||||||||||||||| ||
-atatatatatatatatatatatatgta
-25 1214 205 F 25 0 77829 47 1 96.00
-atatatatatatatatatatatata
-|||||||||||||||||||||| ||
-atatatatatatatatatatatgta
-23 1214 205 F 23 0 77831 43 1 95.65
-atatatatatatatatatatata
-|||||||||||||||||||| ||
-atatatatatatatatatatgta
 113 1361 1 F 108 0 105325 158 21 81.00
 ttccaantcggggngttttacaanttccatancgggtacttaagntttggnggtncatgccanttaanct
 || ||| ||  || | | |||||  | |||| ||||||| ||||  |||| ||| |||| || |||| ||
