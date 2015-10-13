@@ -1,23 +1,55 @@
-41 31 11 R 39 125 9 56 8 80.00
-tcttcttcttcttcttcttctcattaaaagctg-aaca-caaa
-||||||||||||||||||||||   ||  || | |||| ||||
-tcttcttcttcttcttcttctcg--aa--gcagtaacaacaaa
-33 326 147 R 31 693 324 46 6 81.25
-ttacttaaaaatgttgtnaatttttttgtttgt
-|||  ||||  | |||| |||||||||||||||
-tta--taaatgttttgtcaatttttttgtttgt
-35 466 431 R 34 704 301 51 6 82.61
-tttaatttcgtaaatgcacagattacaatgt-ctct
-|||||||||||||| | | | |||| ||||| ||||
-tttaatttcgtaaa-gaaaaaatta-aatgttctct
+33 31 0 R 33 31 0 48 6 81.82
+ctctgtc-tctttcttcttcttctt-cttct-tctc
+|||| || || |||||||||||||| || || ||||
+ctct-tcttc-ttcttcttcttctttct-ctgtctc
+36 38 50 R 38 90 28 59 5 86.49
+tctctc---tctctctctctctttcactcttgtcttgtc
+||||||   | ||||||||||||||||| ||||||||||
+tctctcanatgtctctctctctttcact-ttgtcttgtc
+32 121 68 R 32 121 68 52 4 87.50
+ctt-cctctctcttccttccttctct-tcccttc
+||| ||| |||||||||||||||||| ||| |||
+cttccct-tctcttccttccttctctctcc-ttc
+33 31 0 R 33 135 79 48 6 81.82
+ctctgtctctt-t-cttcttcttcttcttcttctc
+|||| || ||| | || ||||||||||||||| ||
+ctctttc-cttctcctccttcttcttcttctt-tc
+35 20 6 R 35 524 305 49 7 80.00
+taagaaggaaaagatg-agaagaagaagaagaagaa
+|| | || | |||| | ||||||||||||||| |||
+tatg-agtagaagaagcagaagaagaagaagatgaa
+30 19 553 R 34 554 328 46 6 81.25
+at-tttcccaag-gtggtttttttttgt--ttgt
+|| |||||  || |||||||||||||||  ||||
+atgtttccttagagtggtttttttttgtggttgt
+33 135 70 R 31 632 167 46 6 81.25
+tctctgtccctttcttcttcttcttcctcctct
+|||| ||  | ||||||||||||||| || |||
+tctccgtttc-ttcttcttcttcttcttc-tct
+37 634 285 R 40 693 409 56 7 81.82
+ctgtgt-gtgt-tttttttgttctcttc-a-taattttccc
+|||| | || | |||||||||||||||| | || |||||||
+ctgtatggtttctttttttgttctcttccacta-ttttccc
+37 326 147 R 35 693 320 51 7 80.56
+ttacttaaaaatgttgtnaatttttttgtttgtntgt
+|||  ||||  | |||| ||||||||||||||| |||
+tta--taaatgttttgtcaatttttttgtttgtttgt
+40 466 426 R 40 704 301 56 8 80.00
+taaat-tttaatttcgtaaatgcacagattacaatgt-ctct
+||| | |||||||||||||| | | | |||| ||||| ||||
+taattgtttaatttcgtaaa-gaaaaaatta-aatgttctct
 34 146 200 R 31 904 327 47 6 81.54
 attcttggaatttatttgattttttgttgttgtt
 ||| ||| ||| | | ||| ||||||||||||||
 att-ttgtaatgt-tgtga-tttttgttgttgtt
-33 682 320 R 31 935 372 46 6 81.25
-ttttgtaacatta-tttgcatattgatattaata
-|||| | || ||| ||| | ||||||||||||||
-tttt-t-actttactttac-tattgatattaata
+32 368 268 R 33 913 451 47 6 81.54
+cttcttccaca-tatgtaatcttgtaactttta
+||| ||||  | ||||||||||||||  |||||
+ctttttcctaattatgtaatcttgtagatttta
+40 693 409 R 37 976 295 56 7 81.82
+ccctttt-atcaccttctcttgtttttttctttggtatgtc
+||||||| || | |||||||||||||||| | || | ||||
+cccttttaat-a-cttctcttgttttttt-tgtg-tgtgtc
 32 480 385 R 32 989 330 46 6 81.25
 tttgtataggtttc-tttatcgtgtgttgtatt
 ||||||||||||||  ||| | | |||||| ||
@@ -26,6 +58,26 @@ tttgtataggtttcgatta-cctttgttgtgtt
 ttgtaatttg--ttctta--tttggtttggttgt
 ||||  ||||  ||||||  ||||||||||||||
 ttgtgttttgacttcttagttttggtttggttgt
+35 771 340 R 30 1057 430 47 6 81.54
+tcatttttgagtgatctgctctctttctcttttgt
+|| |||||||||||||| || | | || |||||||
+tc-tttttgagtgatct-ct-t-tgtc-cttttgt
+32 632 173 R 33 1140 72 47 6 81.54
+cttcttcttcttcttctttg-cctcttagctgt
+|| |||||||||||||| || ||||  | ||||
+ctncttcttcttcttctctggcctcaaacctgt
+33 1000 354 R 34 1338 232 52 5 85.07
+acaatgttatggagttttcttttgct-tttagtt
+|| || ||||| |||||||||||||| ||| |||
+acgattttatgaagttttcttttgctattttgtt
+34 314 151 R 30 1403 186 49 5 84.38
+agcaaacgagagagagagagagaaagcagaagaa
+|| ||| |||||||||||||||| || ||| |||
+ag-aaa-gagagagagagagagagag-aga-gaa
+35 138 42 R 34 1584 3 51 6 82.61
+caccttctctctctctctctctatcatct-cttttc
+|| | |||| ||||||||||||||| ||| ||| ||
+caac-tctccctctctctctctatc-tcttcttctc
 35 1657 7 R 35 1803 6 52 6 82.86
 tctctatcttcttc-cattgatcctttcctct-ctct
 |||||||||||||| | || | |||| ||||| ||||

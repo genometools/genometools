@@ -33,9 +33,9 @@ static void fill_polishing_info(Polishing_info *pol_info,
   }
 }
 
-Polishing_info *polishing_info_new(GtUword cut_depth,
-                                   double errorpercentage,
-                                   double matchscore_bias)
+Polishing_info *polishing_info_new_with_bias(GtUword cut_depth,
+                                             double errorpercentage,
+                                             double matchscore_bias)
 {
   Polishing_info *pol_info = gt_malloc(sizeof *pol_info);
   GtUword maxshift_for_INT16 = (GtUword) 15;
@@ -55,6 +55,11 @@ Polishing_info *polishing_info_new(GtUword cut_depth,
   pol_info->difference_score = 1000.0 - pol_info->match_score;
   fill_polishing_info(pol_info,0,0,0,0);
   return pol_info;
+}
+
+Polishing_info *polishing_info_new(GtUword cut_depth,double errorpercentage)
+{
+  return polishing_info_new_with_bias(cut_depth,errorpercentage,1.0);
 }
 
 uint64_t polishing_info_maxvalue(const Polishing_info *pol_info)

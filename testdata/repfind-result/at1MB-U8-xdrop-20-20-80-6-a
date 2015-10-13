@@ -2,10 +2,10 @@
 catatatatatatatatatatat
 |||||||||||||||||||||||
 catatatatatatatatatatat
-21 859 210 F 21 0 17269 42 0 100.00
-atatatatatatatatatata
-|||||||||||||||||||||
-atatatatatatatatatata
+23 859 208 F 24 0 17266 44 1 95.74
+at-atatatatatatatatatata
+|| |||||||||||||||||||||
+atcatatatatatatatatatata
 20 859 208 F 20 0 17271 40 0 100.00
 atatatatatatatatatat
 ||||||||||||||||||||
@@ -26,24 +26,27 @@ gaactatgaaacatatataaagcgcacacatatatttatgcatatcaagcttttggtgattatggtattg
 atagagtcaaattaagctcggtgactatggtattaataagagtactatttcctt
 ||||||||||||||||||||||||||||||||||||||||||||||||||||||
 atagagtcaaattaagctcggtgactatggtattaataagagtactatttcctt
-71 859 7 F 74 0 72595 118 9 87.59
-ttttccttatgatccagctcttccacgcncncatgaactatgaaacatatataangcgcncncat-t-tt
-|||||||||||||||||||||||||||| |  |||||||||||||||||||||| |||| | ||| | ||
-ttttccttatgatccagctcttccacgcacaaatgaactatgaaacatatataaagcgcacacatatatt
--atg
- |||
-tatg
-61 859 0 F 61 0 72588 110 4 93.44
-gtgcttnttttccttatgatccagctcttccacgcncncatgaactatgaaacatatataa
-|||||| |||||||||||||||||||||||||||| |  ||||||||||||||||||||||
-gtgcttcttttccttatgatccagctcttccacgcacaaatgaactatgaaacatatataa
-131 859 88 F 131 0 72655 253 3 97.71
-cacatatatttatgcatatcaagcttttggtgattatggtattgatagagtcaaattaagctcggtgact
-||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-cacatatatttatgcatatcaagcttttggtgattatggtattgatagagtcaaattaagctcggtgact
-atggtattaataagagtactatttccttatctctttgtgaactaaganncatatatatata
-|||||||||||||||||||||||||||| ||||||||||||||||||  ||||||||||||
-atggtattaataagagtactatttccttttctctttgtgaactaagaaacatatatatata
+78 859 0 F 81 0 72588 129 10 87.42
+gtgcttnttttccttatgatccagctcttccacgcncncatgaactatgaaacatatataangcgcncnc
+|||||| |||||||||||||||||||||||||||| |  |||||||||||||||||||||| |||| | |
+gtgcttcttttccttatgatccagctcttccacgcacaaatgaactatgaaacatatataaagcgcacac
+at-t-tt-atg
+|| | || |||
+atatatttatg
+78 859 0 F 81 0 72588 129 10 87.42
+gtgcttnttttccttatgatccagctcttccacgcncncatgaactatgaaacatatataangcgcncnc
+|||||| |||||||||||||||||||||||||||| |  |||||||||||||||||||||| |||| | |
+gtgcttcttttccttatgatccagctcttccacgcacaaatgaactatgaaacatatataaagcgcacac
+at-t-tt-atg
+|| | || |||
+atatatttatg
+135 859 84 F 135 0 72651 258 4 97.04
+cgcncacatatatttatgcatatcaagcttttggtgattatggtattgatagagtcaaattaagctcggt
+||| ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+cgcacacatatatttatgcatatcaagcttttggtgattatggtattgatagagtcaaattaagctcggt
+gactatggtattaataagagtactatttccttatctctttgtgaactaaganncatatatatata
+|||||||||||||||||||||||||||||||| ||||||||||||||||||  ||||||||||||
+gactatggtattaataagagtactatttccttttctctttgtgaactaagaaacatatatatata
 167 859 84 F 155 0 72651 271 17 89.44
 cgcncacatatatttatgcatatcaagcttttggtgattatggtattgatagagtcaaattaagctcggt
 ||| ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
@@ -58,73 +61,73 @@ atatataaagcaaacatgttccagaat
 atatatatatatatatatatatatatatatatatatgt
 ||||||||||||||||||||||||||||||||||||||
 atatatatatatatatatatatatatatatatatatgt
-34 1214 207 F 34 0 77815 68 0 100.00
+36 1214 205 F 37 0 77812 70 1 97.26
+at-atatatatatatatatatatatatatatatatat
+|| ||||||||||||||||||||||||||||||||||
+ataatatatatatatatatatatatatatatatatat
+36 1214 205 F 35 0 77812 68 1 97.18
+atatatatatatatatatatatatatatatatatat
+||| ||||||||||||||||||||||||||||||||
+ata-atatatatatatatatatatatatatatatat
+34 1214 207 F 33 0 77812 64 1 97.01
 atatatatatatatatatatatatatatatatat
-||||||||||||||||||||||||||||||||||
-atatatatatatatatatatatatatatatatat
-32 1214 209 F 32 0 77815 64 0 100.00
+||| ||||||||||||||||||||||||||||||
+ata-atatatatatatatatatatatatatatat
+32 1214 209 F 31 0 77812 60 1 96.83
 atatatatatatatatatatatatatatatat
-||||||||||||||||||||||||||||||||
-atatatatatatatatatatatatatatatat
-30 1214 211 F 30 0 77815 60 0 100.00
-atatatatatatatatatatatatatatat
-||||||||||||||||||||||||||||||
-atatatatatatatatatatatatatatat
-28 1214 213 F 28 0 77815 56 0 100.00
-atatatatatatatatatatatatatat
-||||||||||||||||||||||||||||
-atatatatatatatatatatatatatat
-26 1214 215 F 26 0 77815 52 0 100.00
-atatatatatatatatatatatatat
-||||||||||||||||||||||||||
-atatatatatatatatatatatatat
-24 1214 217 F 24 0 77815 48 0 100.00
-atatatatatatatatatatatat
-||||||||||||||||||||||||
-atatatatatatatatatatatat
-22 1214 219 F 22 0 77815 44 0 100.00
-atatatatatatatatatatat
-||||||||||||||||||||||
-atatatatatatatatatatat
-20 1214 221 F 20 0 77815 40 0 100.00
-atatatatatatatatatat
-||||||||||||||||||||
-atatatatatatatatatat
+||| ||||||||||||||||||||||||||||
+ata-atatatatatatatatatatatatatat
+49 1214 206 F 48 0 77808 70 9 81.44
+tatatatatatatatatatatatatatatatatatgtctct-tctatacc
+|| | ||| |||||||||||||||||||||||||| | | | | | ||||
+ta-agata-atatatatatatatatatatatatatatatatatatgtacc
+33 1214 208 F 31 0 77808 55 3 90.62
+tatatatatatatatatatatatatatatatat
+|| | ||| ||||||||||||||||||||||||
+ta-agata-atatatatatatatatatatatat
+43 1214 210 F 42 0 77808 61 8 81.18
+tatatatatatatatatatatatatatatatgtctct-tctata
+|| | ||| |||||||||||||||||||||| | | | | ||||
+ta-agata-atatatatatatatatatatatatatatatatata
+41 1214 212 F 40 0 77808 57 8 80.25
+tatatatatatatatatatatatatatatgtctct-tctata
+|| | ||| |||||||||||||||||||| | | | | ||||
+ta-agata-atatatatatatatatatatatatatatatata
 34 1214 205 F 34 0 77817 68 0 100.00
 atatatatatatatatatatatatatatatatat
 ||||||||||||||||||||||||||||||||||
 atatatatatatatatatatatatatatatatat
-21 1524 237 F 21 0 77819 42 0 100.00
-atatatatatatatatatata
-|||||||||||||||||||||
-atatatatatatatatatata
-32 1214 205 F 32 0 77819 64 0 100.00
-atatatatatatatatatatatatatatatat
-||||||||||||||||||||||||||||||||
-atatatatatatatatatatatatatatatat
-21 1524 237 F 21 0 77821 42 0 100.00
-atatatatatatatatatata
-|||||||||||||||||||||
-atatatatatatatatatata
-30 1214 205 F 30 0 77821 60 0 100.00
-atatatatatatatatatatatatatatat
-||||||||||||||||||||||||||||||
-atatatatatatatatatatatatatatat
-28 1214 205 F 28 0 77823 56 0 100.00
-atatatatatatatatatatatatatat
-||||||||||||||||||||||||||||
-atatatatatatatatatatatatatat
-26 1214 205 F 26 0 77825 52 0 100.00
-atatatatatatatatatatatatat
-||||||||||||||||||||||||||
-atatatatatatatatatatatatat
-110 1361 1 F 103 0 105325 156 19 82.16
+36 1524 237 F 34 0 77819 58 4 88.57
+atatatatatatatatatatagtctttatataatgt
+||||||||||||||||||||| | | |||||| |||
+atatatatatatatatatata-tatatatata-tgt
+35 1214 205 F 35 0 77819 67 1 97.14
+atatatatatatatatatatatatatatatatata
+|||||||||||||||||||||||||||||||| ||
+atatatatatatatatatatatatatatatatgta
+31 1524 237 F 30 0 77821 52 3 90.16
+atatatatatatatatatatagtctttatat
+||||||||||||||||||||| | | |||||
+atatatatatatatatatata-tatatatat
+33 1214 205 F 33 0 77821 63 1 96.97
+atatatatatatatatatatatatatatatata
+|||||||||||||||||||||||||||||| ||
+atatatatatatatatatatatatatatatgta
+31 1214 205 F 31 0 77823 59 1 96.77
+atatatatatatatatatatatatatatata
+|||||||||||||||||||||||||||| ||
+atatatatatatatatatatatatatatgta
+29 1214 205 F 29 0 77825 55 1 96.55
+atatatatatatatatatatatatatata
+|||||||||||||||||||||||||| ||
+atatatatatatatatatatatatatgta
+113 1361 1 F 108 0 105325 158 21 81.00
 ttccaantcggggngttttacaanttccatancgggtacttaagntttggnggtncatgccanttaanct
 || ||| ||  || | | |||||  | |||| ||||||| ||||  |||| ||| |||| || |||| ||
 ttacaaatca-ggag-tatacaag-tacataacgggtac-taag-attggaggt-catg-cagttaagct
-cattggctggggaacttctgatgacggcgaagattattgg
-||||||||||||||||||||||||||||||||||||||||
-cattggctggggaacttctgatgacggcgaagattattgg
+cattggctggggaacttctgatgacggcgaagattattgg-t-tg
+|||||||||||||||||||||||||||||||||||||||| | ||
+cattggctggggaacttctgatgacggcgaagattattgggtatg
 222 1361 148 F 222 0 105629 435 3 98.65
 gatggttacttcaagatcaggngaggaacgaacgaatgtggcattgaacagagtnttgtagctggtttac
 ||||||||||||||||||||| |||||||||||||||||||||||||||||||| |||||||||||||||

@@ -633,6 +633,7 @@ GtUword front_prune_edist_inplace(
                          GtUword history,
                          GtUword minmatchnum,
                          GtUword maxalignedlendifference,
+                         GtUword seedlength,
                          FTsequenceResources *ufsr,
                          GtUword ustart,
                          GtUword ulen,
@@ -719,8 +720,14 @@ GtUword front_prune_edist_inplace(
     if (distance == 0)
     {
       validbasefront->row = 0;
-      validbasefront->matchhistory = 0;
-      validbasefront->matchhistory_count = 0;
+      if (seedlength >= sizeof (validbasefront->matchhistory) * CHAR_BIT)
+      {
+        validbasefront->matchhistory = ~((uint64_t) 0);
+      } else
+      {
+        validbasefront->matchhistory = (((uint64_t) 1) << seedlength) - 1;
+      }
+      validbasefront->matchhistory_count = MIN(history,seedlength);
       validbasefront->backreference = 0; /* No back reference */
       front_prune_add_matches(validbasefront + distance,validbasefront,mask,
                               &useq,&vseq);

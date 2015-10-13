@@ -45,6 +45,7 @@ GtUword front_prune_edist_inplace(
                        GtUword history,
                        GtUword minmatchnum,
                        GtUword maxalignedlendifference,
+                       GtUword seedlength,
                        FTsequenceResources *ufsr,
                        GtUword ustart,
                        GtUword uulen,

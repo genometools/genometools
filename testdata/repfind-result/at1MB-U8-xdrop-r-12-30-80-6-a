@@ -1,7 +1,47 @@
+32 1013 180 R 30 0 100448 44 6 80.65
+gcaagagtaatcctctattattatctccccca
+|||| | ||||||||||||| || | || |||
+gcaacactaatcctctattacta-c-cctcca
+31 986 284 R 32 0 97954 45 6 80.95
+tatgt-taatatttgtattatggtttgtatta
+||| | ||||||||||||| |  ||| |||||
+tatttataatatttgtattgttttttttatta
+31 139 93 R 30 0 97699 46 5 83.61
+tttcttattcggaaa-aaaaaaatgattggaa
+||||||| |   ||| ||||||||||||||||
+tttctta-t-aaaaataaaaaaatgattggaa
+33 571 310 R 29 0 97107 44 6 80.65
+ttcttcttcttctttcttaaacttttgcatcaa
+|||||||||||||| ||||   | ||||| |||
+ttcttcttcttctt-ctta---tgttgcaccaa
+30 103 64 R 30 0 97114 42 6 80.00
+tcagccatgg-cttcttcttcttcttctctt
+||| || ||  ||||||||||||||| | ||
+tcaacc-tgttcttcttcttcttcttatgtt
+30 479 183 R 31 0 91402 46 5 83.61
+aagaaaaaagaaaaaaaaagcaag-aaacat
+|| ||||||||||||||||   || ||||||
+aataaaaaagaaaaaaaaaattagcaaacat
+32 1134 277 R 28 0 88553 42 6 80.00
+atgtttggatgtggataagtatttgacgatta
+|| | ||| | ||| |||| ||||||||||||
+atttctgg-t-tgg-taag-atttgacgatta
+32 950 310 R 28 0 85878 42 6 80.00
+ttatgtaatgttttatgtggtttgagttgtaa
+||| || | | | ||| |||||||||||||||
+tta-gt-a-g-tctatctggtttgagttgtaa
+32 1041 299 R 28 0 85878 42 6 80.00
+ttatgtaatgttttatgtggtttgagttgtaa
+||| || | | | ||| |||||||||||||||
+tta-gt-a-g-tctatctggtttgagttgtaa
 40 367 309 R 40 0 84804 56 8 80.00
 tttttgtatttcagttttctgaaa-agttttagactttctt
 ||||||| |||   |||| | ||| || |||||||||||||
 tttttgttttttt-ttttgtaaaagagatttagactttctt
+37 965 245 R 38 0 84004 54 7 81.33
+ttttgttctnt-ctttttcaaaaacttatta-agctctt
+||| ||||| | ||||||||||||||| ||| | || ||
+tttcgttctttactttttcaaaaactt-ttacacctatt
 43 1422 249 R 41 0 83361 60 8 80.95
 caactgtttttttaatctttgtttttttagattgaatgatttg
 |||||||||||||  | ||| ||||||| ||||  || |||||
@@ -14,30 +54,274 @@ ctgttttttttttttttttttttttgat-tt-ta-t-atttg
 tgttttttttttctttcttgtattgactctat-tttgg
 |||||||||||| ||| || | |||| | ||| |||||
 tgttttttttttttttttttttttgattttatatttgg
+31 351 283 R 29 0 83369 42 6 80.00
+tgctctttttttttttttgttttaataattt
+|| | ||||||||||||| ||||  | ||||
+tg-t-tttttttttttttttttttttgattt
+31 351 283 R 29 0 83369 42 6 80.00
+tgctctttttttttttttgttttaataattt
+|| | ||||||||||||| ||||  | ||||
+tgtt-ttttttttttttt-tttttttgattt
+31 351 283 R 29 0 83369 42 6 80.00
+tgctctttttttttttttgttttaataattt
+|| | ||||||||||||| ||||  | ||||
+tgtttttttttttttttt-tttt-ttgattt
+30 351 288 R 34 0 83358 46 6 81.25
+tttttttttttttgttttaat---a-atttggtt
+||||||||||||| |||| ||   | ||||||||
+ttttttttttttttttttgattttatatttggtt
+30 351 288 R 33 0 83358 45 6 80.95
+tttttttttttttgttttaat---a-atttggtt
+||||||||||||| |||| ||   | ||||||||
+ttttttttttttt-ttttgattttatatttggtt
+30 351 288 R 32 0 83358 44 6 80.65
+tttttttttttttgtt--tt-aataatttggtt
+||||||||||||| ||  ||  ||| |||||||
+ttttttttttttttttgattttata-tttggtt
+30 351 288 R 31 0 83358 46 5 83.61
+ttttttttttttt--g-ttttaataatttggtt
+|||||||||||||  | ||||| || |||||||
+tttttttttttttttgatttta-ta-tttggtt
+30 351 288 R 30 0 83358 48 4 86.67
+ttttttttttttt-g-ttttaataatttggtt
+||||||||||||| | ||||| || |||||||
+ttttttttttttttgatttta-ta-tttggtt
+34 1701 303 R 36 0 77826 52 6 82.86
+aa-aaatctt-tatatatatatatatatntatntat
+|| ||| | | ||||||||||||||||| ||| |||
+aataaaccatgtatatatatatatatatatatatat
+34 1701 303 R 35 0 77824 51 6 82.61
+aaaa-atctttatatatatatatatatntatntat
+|||  || | ||||||||||||||||| ||| |||
+aaaccatgtatatatatatatatatatatatatat
+30 1701 307 R 30 0 77820 48 4 86.67
+atctttatatatatatatatatntatntat
+|| | ||||||||||||||||| ||| |||
+atatatatatatatatatatatatatatat
+30 1701 307 R 30 0 77818 48 4 86.67
+atctttatatatatatatatatntatntat
+|| | ||||||||||||||||| ||| |||
+atatatatatatatatatatatatatatat
+30 1701 307 R 30 0 77816 48 4 86.67
+atctttatatatatatatatatntatntat
+|| | ||||||||||||||||| ||| |||
+atatatatatatatatatatatatatatat
+34 1214 205 R 32 0 77808 57 3 90.91
+atatatatatatatatatatatatatatatatat
+||||||||||||||||||||||||| ||| | ||
+atatatatatatatatatatatata-ataga-at
+32 1214 205 R 30 0 77808 53 3 90.32
+atatatatatatatatatatatatatatatat
+||||||||||||||||||||||| ||| | ||
+atatatatatatatatatatata-ataga-at
+31 357 287 R 32 0 77145 45 6 80.95
+tga-attttcttcatggtacatttttctaaaa
+||| ||| ||||| |   ||||||||||||||
+tgatattatcttctttaaacatttttctaaaa
+31 1055 285 R 32 0 74770 45 6 80.95
+attgttg--taat-aaacttgtgaaagtgatttt
+||| |||  |||| ||| || |||||||||||||
+att-ttgattaatcaaattt-tgaaagtgatttt
+31 1542 430 R 32 0 74770 45 6 80.95
+attgttg--taat-aaacttgtgaaagtgatttt
+||| |||  |||| ||| || |||||||||||||
+att-ttgattaatcaaattt-tgaaagtgatttt
 36 1565 142 R 34 0 74565 49 7 80.00
 ag-atcttcccaaatgttaagcaagataaaaaaaaca
 || || || |||||  ||||| || ||||||||||||
 agaatttt-ccaaaaattaag-aa-ataaaaaaaaca
+31 335 262 R 31 0 74523 50 4 87.10
+atgaaat-aaagtgttctcaaaatgtttatga
+|| |||| ||||| ||| ||||||||||||||
+ataaaataaaagttttc-caaaatgtttatga
+31 1059 469 R 31 0 74523 50 4 87.10
+atgaaat-aaagtgttctcaaaatgtttatga
+|| |||| ||||| ||| ||||||||||||||
+ataaaataaaagttttc-caaaatgtttatga
+31 1480 383 R 30 0 70767 43 6 80.33
+ttttttactttttatcttttacttaggtctt
+||| | | |||| || || ||||||||||||
+tttataaattttcat-ttatacttaggtctt
+28 635 184 R 32 0 66537 42 6 80.00
+cactaagaaggaga-a-a-tttactggag-gc
+|||||||||||||| | |  || |||||| ||
+cactaagaaggagatagaggttgctggagagc
 34 155 13 R 29 0 63670 45 6 80.95
 gttcatttccttgaaaacggttacagaattaggg
 |||| ||| ||| |||| ||  ||||||||||||
 gttc-ttt-ctt-aaaatgg--acagaattaggg
+35 870 405 R 36 0 52827 53 6 83.10
+atttccctaaaaaataaacaaaaaaaaatgta--taa
+|| | ||||||||| ||| |||||||||||||  |||
+atgtacctaaaaaaaaaa-aaaaaaaaatgtacctaa
 35 1403 175 R 32 0 49812 52 5 85.07
 aaaaaagatcaaagagagagagagagagagagaga
 |||||| |  ||||||| |||| ||||||||||||
 aaaaaa-a--aaagagatagagggagagagagaga
+33 1403 175 R 32 0 49812 47 6 81.54
+aaaaaagatcaaagagagagagagagagagaga
+|||||| |  | ||| |||| ||||||||||||
+aaaaaaaaa-agagatagagggagagagagaga
+37 1403 175 R 34 0 49806 50 7 80.28
+aaaaaagatcaaagagagagagagagagagagagaga
+||||||||  | |||| | |||||||||||| || ||
+aaaaaagag-atagag-g-gagagagagagaaagtga
+37 1403 175 R 34 0 49806 50 7 80.28
+aaaaaagatcaaagagagagagagagagagagagaga
+||||||||  | |||| |||||||||||| | || ||
+aaaaaagag-atagagggagagagagaga-a-agtga
+30 1403 192 R 31 0 43282 52 3 90.16
+gagagagagagagagagagaaaga-aaaaaa
+|||||||||||||||||||  ||| ||||||
+gagagagagagagagagagtcagacaaaaaa
+32 1403 190 R 32 0 43281 52 4 87.50
+gagagagagagagagagagagaaagaaaaaaa
+|||||||||||||||||||  | | |||||||
+gagagagagagagagagagtcagacaaaaaaa
+33 1403 188 R 32 0 43281 53 4 87.69
+gagagagagagagagagagagagaaagaaaaaa
+|||||||||||||||||||  ||| | ||||||
+gagagagagagagagagagtcagaca-aaaaaa
+32 1403 187 R 31 0 43281 51 4 87.30
+agagagagagagagagagagagagaaagaaaa
+||||||||||||||||||  ||| ||| ||||
+agagagagagagagagagtcagacaaa-aaaa
+31 1403 187 R 29 0 43281 45 5 83.33
+agagagagagagagagagagagagaaagaaa
+||||||||||||||||  ||| | ||| |||
+agagagagagagagagtcagaca-aaa-aaa
+32 442 118 R 34 0 43184 48 6 81.82
+ctttcttcttctttgttttggg-gt-tccagtct
+|||||||||||||| | ||||  || || |||||
+ctttcttcttctttttgttggaagtctcaagtct
+31 237 140 R 30 0 42784 43 6 80.33
+gag-aagaaagtggcggctgaggaggagaa-ac
+||| |||||||||||||  | ||| ||||| ||
+gagtaagaaagtggcgg--g-ggaagagaacac
 35 1275 281 R 34 0 40045 54 5 85.51
 tttttttgccattgacaattttt-ccttcttccttc
 |||||||| |||| |  |||||| ||||||||||||
 tttttttgtcatt-a-tatttttgccttcttccttc
-32 1700 127 R 32 0 5075 46 6 81.25
-tgg-acagaagatatggagaa-aagaagaagaag
-||| | |||||| | | |||| ||||||||||||
-tggaagagaaga-a-gaagaagaagaagaagaag
-36 524 288 R 35 0 5068 56 5 85.92
-agaggaagaagttgaggaagtagaagaagaagaaga
-||| |||||||  || |||| |||||||||||||||
-aga-gaagaagaagaagaagaagaagaagaagaaga
+28 1894 15 R 32 0 37196 42 6 80.00
+ataatc-caaaaaaaaaaaccat-a-t-tttt
+|| ||| |||||||||||| ||| | | ||||
+attatcacaaaaaaaaaaaacattaatctttt
+32 1712 5 R 29 0 33440 43 6 80.33
+aggatgataacgtcgtccctaacctcatctct
+|||| | | || | || |||||||||||||||
+agga-g-tcac-tggttcctaacctcatctct
+30 323 367 R 30 0 27210 42 6 80.00
+ttgttgaagaagtttatacata--aaa-agtta
+|| || ||| ||||||||||||  ||| |||||
+tt-tt-aag-agtttatacatatcaaacagtta
+31 573 274 R 29 0 26867 42 6 80.00
+ggttctttggtttggtttgtgtctctt-gatt
+|| | ||||||||||||| | || ||| ||||
+ggct-tttggtttggttt-t-tccctttgatt
+31 71 84 R 33 0 21526 46 6 81.25
+tttgc-tattccttcctcttctctc-gtaaagg
+||||  | |||||||||||| | || |||||||
+tttgtgttttccttcctcttttgtcagtaaagg
+31 323 267 R 29 0 21401 42 6 80.00
+tgtgcgtatcaa-attttggatgggaaatttg
+|||||||||||| || ||  |||  |||||||
+tgtgcgtatcaacatatta-atg--aaatttg
+33 859 211 R 31 0 20269 46 6 81.25
+tatatatatatatatatataaagcaaacatgtt
+|||| ||||||||||||| ||| || | || ||
+tata-atatatatatataaaaaacatatat-tt
+29 38 44 R 33 0 17928 44 6 80.65
+tact-tgtc-tctctctctctctctct-t-tca
+|| | |||| ||| ||||||||||||| | |||
+tagtctgtcgtctgtctctctctctctctctca
+36 1524 238 R 37 0 17254 52 7 80.82
+tatatatatatatatatatagt-ct-ttatat-aatgtc
+|||||||||||||||||||| | || || | | ||| ||
+tatatatatatatatatata-tactattctcttaat-tc
+31 943 155 R 30 0 14498 43 6 80.33
+aaaaaaaaaaaaaaattt-tttaggaaatttg
+|||||||||||| | ||| ||||  | |||||
+aaaaaaaaaaaagattttgttta--atatttg
+36 124 120 R 32 0 8890 50 6 82.35
+ttactatcttcttctccttcttcttcctcctcaatg
+|| |||| ||||||||||||| |||| |||| | ||
+tt-ctat-ttcttctccttctccttc-tcctta-tg
+30 103 74 R 32 0 5954 44 6 80.65
+cttcttcttcttcttct-cttctaatcct-ag
+||||||||||||||||| ||  | ||| | ||
+cttcttcttcttcttcttctcatgatcatcag
+31 31 4 R 33 0 5963 52 4 87.50
+gtct-ct-ttcttcttcttcttcttcttctcat
+|||| ||   |||||||||||||||||||||||
+gtctactcaacttcttcttcttcttcttctcat
+32 632 159 R 33 0 5968 47 6 81.54
+tccaggtgt-ctcttcttcttcttcttcttctt
+|||  || | |||  ||||||||||||||||||
+tccgagtctactcaacttcttcttcttcttctt
+30 1024 109 R 32 0 5070 44 6 80.65
+gagaagaagaagaagna-aaca-gaaggcgaa
+||||||||||||||| | || | ||||  |||
+gagaagaagaagaagaagaagaagaagaagaa
+31 953 116 R 29 0 5076 42 6 80.00
+gataaagaagagaagaagaagaa-aaggagaa
+|| | || | ||||||||||||| ||| ||||
+ga-agag-a-agaagaagaagaagaagaagaa
+31 953 116 R 32 0 5073 48 5 84.13
+gataaagaag-agaagaagaagaa-aaggagaa
+|| | ||||| ||||||||||||| ||| ||||
+ga-agagaagaagaagaagaagaagaagaagaa
+32 953 115 R 33 0 5070 50 5 84.62
+agataaagaag-agaagaagaagaa-aaggagaa
+|||  |||||| ||||||||||||| ||| ||||
+agag-aagaagaagaagaagaagaagaagaagaa
+36 20 7 R 34 0 5070 52 6 82.86
+aagaaggaa-aagatgagaagaagaagaagaagaa-aa
+||| | ||| ||||  ||||||||||||||||||| ||
+aag-a-gaagaaga--agaagaagaagaagaagaagaa
+30 539 304 R 31 0 5078 43 6 80.33
+act--aagag-ggaagattagaagaagaagaag
+|||  |||||  |||||  ||||||||||||||
+actggaagagaagaaga--agaagaagaagaag
+34 1903 3 R 34 0 5071 53 5 85.29
+gaagagaacgaag--gaagaagaagaagaggaacga
+|||||||| ||||  |||||||||||||| ||| ||
+gaagagaa-gaagaagaagaagaagaagaagaa-ga
+37 953 112 R 39 0 5064 55 7 81.58
+agcagata-aagaag-agaagaagaagaa-aaggagaa-ac
+|| ||| | |||||| ||||||||||||| ||| |||| ||
+ag-aga-agaagaagaagaagaagaagaagaagaagaagac
+36 20 7 R 37 0 5067 55 6 83.56
+aagaaggaa-aagatg-agaagaagaagaagaagaa-aa
+||| | ||| |||| | ||||||||||||||||||| ||
+aag-a-gaagaagaagaagaagaagaagaagaagaagaa
+35 1903 2 R 33 0 5068 53 5 85.29
+agaag-agaacgaaggaagaagaagaagaggaacga
+||||| |||| ||| |||||||||||||| ||| ||
+agaagaagaa-gaa-gaagaagaagaagaagaa-ga
+37 20 7 R 42 0 5062 58 7 82.28
+aaga-aggaa-aagatg-agaagaagaagaagaagaa-a-ac
+|||| | ||| |||| | ||||||||||||||||||| | ||
+aagagaagaagaagaagaagaagaagaagaagaagaagacac
+35 1903 2 R 33 0 5065 53 5 85.29
+agaag-agaacgaaggaagaagaagaagaggaacga
+||||| |||| ||| |||||||||||||| ||| ||
+agaagaagaa-gaa-gaagaagaagaagaagaa-ga
+38 20 7 R 39 0 5060 59 6 84.42
+aagaaggaa-aagatg-agaagaagaagaagaagaaaact
+||||| ||| |||| | |||||||||||||||||| | ||
+aagaa-gaagaagaagaagaagaagaagaagaagacacct
+39 524 288 R 38 0 5065 59 6 84.42
+agaggaagaagttgaggaagtagaagaagaagaagacga
+||| |||||||  || |||| ||||||||||||||| ||
+aga-gaagaagaagaagaagaagaagaagaagaagaaga
+33 1903 2 R 33 0 5062 51 5 84.85
+agaag-agaacgaaggaagaagaagaagagga-ac
+||||| |||| ||| |||||||||||||| || ||
+agaagaagaa-gaa-gaagaagaagaagaagacac
+30 20 7 R 31 0 5065 49 4 86.89
+aagaaggaa-aagatg-agaagaagaagaaga
+||||| ||| |||| | |||||||||||||||
+aagaa-gaagaagaagaagaagaagaagaaga
 42 524 283 R 41 0 5064 62 7 83.13
 gatgcagaggaagaagttgaggaagtagaagaagaagaagac
 || | ||| |||||||  || |||| ||||||||||||||||
@@ -46,3 +330,11 @@ gaag-agaagaagaagaagaagaagaagaagaagaagaagac
 gaagaactcagcagataaagaag-agaagaagaaga
 ||||||   || |||  |||||| ||||||||||||
 gaagaaga-agaagaagaagaagaagaagaagaaga
+31 139 87 R 32 0 2624 45 6 80.95
+gttaa--ttttcttattcggaaaaaaaaaatga
+|||||  ||||  || ||||||||||||| |||
+gttaacgttttaataatcggaaaaaaaaa-tga
+31 139 87 R 32 0 2624 45 6 80.95
+gttaa--ttttcttattcggaaaaaaaaaatga
+|||||  ||||  || |||| ||||||||||||
+gttaacgttttaataatcgg-aaaaaaaaatga
