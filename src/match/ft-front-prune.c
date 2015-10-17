@@ -604,6 +604,7 @@ static void update_trace_and_polished(Polished_point *best_polished_point,
   for (frontptr = lowfront; frontptr <= highfront; frontptr++)
   {
     GtUword alignedlen = GT_MULT2(frontptr->row) + FRONT_DIAGONAL(frontptr);
+    uint64_t filled_matchhistory_bits;
 
 #ifndef OUTSIDE_OF_GT
     GtUword currentcol;
@@ -620,8 +621,18 @@ static void update_trace_and_polished(Polished_point *best_polished_point,
       *mincol = currentcol;
     }
 #endif
-    lsb = frontptr->matchhistory_bits & pol_info->mask;
-    if (HISTORY_IS_POLISHED(pol_info,frontptr->matchhistory_bits,lsb) &&
+    if (frontptr->matchhistory_size >= GT_MULT2(pol_info->cut_depth))
+    {
+      filled_matchhistory_bits = frontptr->matchhistory_bits;
+    } else
+    {
+      int shift = GT_MULT2(pol_info->cut_depth) - frontptr->matchhistory_size;
+      uint64_t fill_bits = ((uint64_t) 1 << shift) - 1;
+      filled_matchhistory_bits = frontptr->matchhistory_bits |
+                                 (fill_bits << frontptr->matchhistory_size);
+    }
+    lsb = filled_matchhistory_bits & pol_info->mask;
+    if (HISTORY_IS_POLISHED(pol_info,filled_matchhistory_bits,lsb) &&
         alignedlen > best_polished_point->alignedlen)
     {
       best_polished_point->alignedlen = alignedlen;

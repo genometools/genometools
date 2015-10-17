@@ -22,6 +22,18 @@ tatg-agtagaagaagcagaagaagaagaagatgaa
 at-tttcccaag-gtggtttttttttgt--ttgt
 || |||||  || |||||||||||||||  ||||
 atgtttccttagagtggtttttttttgtggttgt
+31 457 350 R 33 576 203 46 6 81.25
+taga-tttttgtttttgttttttgtttc-tc-tg
+|||  |||||||||||||||||| || | || ||
+tagtgtttttgtttttgtttttt-ttccatcgtg
+41 125 16 R 40 632 167 57 8 80.25
+aatgacgaagct-cttcttcttcttcttcttctccttcctct
+|||| |||  || | | |||||||||||||||| |||| |||
+aatgtcgattctccgt-ttcttcttcttcttcttcttc-tct
+35 125 16 R 38 632 169 52 7 80.82
+aatgacgaagct-c--ttcttcttcttcttcttctcct
+|||| |||  || |  ||||||||||||||||||| ||
+aatgtcgattctccgtttcttcttcttcttcttcttct
 33 135 70 R 31 632 167 46 6 81.25
 tctctgtccctttcttcttcttcttcctcctct
 |||| ||  | ||||||||||||||| || |||
@@ -38,6 +50,10 @@ tta--taaatgttttgtcaatttttttgtttgtttgt
 taaat-tttaatttcgtaaatgcacagattacaatgt-ctct
 ||| | |||||||||||||| | | | |||| ||||| ||||
 taattgtttaatttcgtaaa-gaaaaaatta-aatgttctct
+45 693 362 R 39 758 186 60 8 80.95
+ctactctttgtgatcttctttgtttgtttgtttggtttttttttt
+|| |||| |||| || |||||  ||| || |||||||||||||||
+ct-ctctctgtg-tc-tcttt-cttg-tt-tttggtttttttttt
 34 146 200 R 31 904 327 47 6 81.54
 attcttggaatttatttgattttttgttgttgtt
 ||| ||| ||| | | ||| ||||||||||||||
@@ -50,10 +66,18 @@ ctttttcctaattatgtaatcttgtagatttta
 ccctttt-atcaccttctcttgtttttttctttggtatgtc
 ||||||| || | |||||||||||||||| | || | ||||
 cccttttaat-a-cttctcttgttttttt-tgtg-tgtgtc
+32 926 328 R 32 989 330 46 6 81.25
+tttgtataggtttc-tttatcgtgtgttgtatt
+||||||||||||||  ||| | | |||||| ||
+tttgtataggtttcgatta-cctttgttgtgtt
 32 480 385 R 32 989 330 46 6 81.25
 tttgtataggtttc-tttatcgtgtgttgtatt
 ||||||||||||||  ||| | | |||||| ||
 tttgtataggtttcgatta-cctttgttgtgtt
+34 632 164 R 36 997 219 49 7 80.00
+gtgtctcttcttctt-cttcttctt-ctttgcct-ct
+||||||||||||||| || || |||  ||| ||| ||
+gtgtctcttcttcttact-ctccttagtttacctact
 30 751 341 R 34 1016 185 46 6 81.25
 ttgtaatttg--ttctta--tttggtttggttgt
 ||||  ||||  ||||||  ||||||||||||||
@@ -62,14 +86,46 @@ ttgtgttttgacttcttagttttggtttggttgt
 tcatttttgagtgatctgctctctttctcttttgt
 || |||||||||||||| || | | || |||||||
 tc-tttttgagtgatct-ct-t-tgtc-cttttgt
+31 509 337 R 35 1066 356 48 6 81.82
+tta-at-acaattgatcgtttctactctg--agaa
+||| ||  |||||| ||||||||||||||  ||||
+ttatatctcaattgttcgtttctactctgttagaa
+32 632 173 R 33 1132 164 50 5 84.62
+cttcttcttcttcttctttg-cctcttagctgt
+|| ||||||||||||||||| ||||  | ||||
+ctncttcttcttcttctttggcctcaaacctgt
 32 632 173 R 33 1140 72 47 6 81.54
 cttcttcttcttcttctttg-cctcttagctgt
 || |||||||||||||| || ||||  | ||||
 ctncttcttcttcttctctggcctcaaacctgt
+33 619 454 R 34 1161 198 49 6 82.09
+gtttctttttttctttctttctac-ttt-tc-ttta
+|||| |||||||||||||| || | ||| || ||||
+gttt-tttttttctttctt-cttcgtttatcattta
+32 138 47 R 35 1243 232 49 6 82.09
+tctctctctctctc-tctatcat-ctctttt-ctt
+|||||||||||||| | | | || ||||||| |||
+tctctctctctctcctttttgatactcttttgctt
+36 31 1 R 37 1298 266 52 7 80.82
+tctgtctctttcttcttcttcttcttcttctca-tta
+||| ||| |||| |  |||||||||||||| || |||
+tctatctatttcgttatcttcttcttcttcgcactta
 33 1000 354 R 34 1338 232 52 5 85.07
 acaatgttatggagttttcttttgct-tttagtt
 || || ||||| |||||||||||||| ||| |||
 acgattttatgaagttttcttttgctattttgtt
+32 926 328 R 32 1350 272 46 6 81.25
+tttgtataggtttc-tttatcgtgtgttgtatt
+||||||||||||||  ||| | | |||||| ||
+tttgtataggtttcgatta-cctttgttgtgtt
+32 480 385 R 32 1350 272 46 6 81.25
+tttgtataggtttc-tttatcgtgtgttgtatt
+||||||||||||||  ||| | | |||||| ||
+tttgtataggtttcgatta-cctttgttgtgtt
+31 291 307 R 33 1400 150 46 6 81.25
+gaatactagttttt-tt-tttgtgaattgaatt
+||| | |  ||||| || |||||||||||||||
+gaagagtcatttttcttgtttgtgaattgaatt
 34 314 151 R 30 1403 186 49 5 84.38
 agcaaacgagagagagagagagaaagcagaagaa
 || ||| |||||||||||||||| || ||| |||
@@ -78,6 +134,18 @@ ag-aaa-gagagagagagagagagag-aga-gaa
 caccttctctctctctctctctatcatct-cttttc
 || | |||| ||||||||||||||| ||| ||| ||
 caac-tctccctctctctctctatc-tcttcttctc
+41 1695 59 R 41 1695 59 58 8 80.49
+acaactatggt-t-caacaacaacaacaacctctgg-ctcaaca
+||||||  ||| | |||||||||||||||| | |||  ||||||
+acaactc-ggtctccaacaacaacaacaac-t-tggtatcaaca
+33 1524 237 R 32 1701 304 47 6 81.54
+atatatatatatatatatatagtctttatataa
+|| ||| |||||||||||||| | ||| || ||
+atntatntatatatatatata-tatttctaaaa
+36 1214 206 R 35 1701 298 50 7 80.28
+tatatatatatatatatatatatatatatatatatg
+||| ||||||||||||||||| | || | | || ||
+tatntatatatatatatatatttctaaaaagat-tg
 35 1657 7 R 35 1803 6 52 6 82.86
 tctctatcttcttc-cattgatcctttcctct-ctct
 |||||||||||||| | || | |||| ||||| ||||

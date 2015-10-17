@@ -15,11 +15,9 @@ typedef struct
   Polishing_value *values;
 } Polishing_info;
 
-Polishing_info *polishing_info_new(GtUword cut_depth,
-                                   double errorpercentage);
+Polishing_info *polishing_info_new(double errorpercentage);
 
-Polishing_info *polishing_info_new_with_bias(GtUword cut_depth,
-                                             double errorpercentage,
+Polishing_info *polishing_info_new_with_bias(double errorpercentage,
                                              double matchscore_bias);
 
 void polishing_info_delete(Polishing_info *pol_info);
