@@ -392,7 +392,7 @@ atatctgcncttctttgtctacnancaatccaccttatgaataaaaaaat-tttaatttgatgaatttgt
 aataagaaaacgttaatgtttgtgaattgtgaa
  |||| ||||| ||||||||||| || ||||||
 tataanaaaactttaatgtttgttaaatgtgaa
-610 3 0 F 607 5 38 1094 41 93.26
+582 3 0 F 579 5 38 1056 35 93.97
 gtgaagcgatacaacgatgcaaaaaaagagtggggattcacacaattgatttctcttccaacattctaca
 ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 gtgaagcgatacaacgatgcaaaaaaagagtggggattcacacaattgatttctcttccaacattctaca
@@ -417,9 +417,9 @@ taaccatagacaaatatattctgcagcttggtaccc-gattggaagcggttatggtgtgggagtgaacaa
 tatcatattgatgtcagaagctaaaagatgcatcnaaagggtatatggtgaatgatgccattatcttttg
 ||||||| || |  | ||   |||| |||||||| ||||| ||| ||||||||||||||||||||||| |
 tatcatactgttagctga-tttaaacgatgcatcaaaaggatatttggtgaatgatgccattatcttt-g
-aaactgaaatggttaaggtctctgtgaac-aacatantctccncttaaatat
-|| |||||||||||||||||||| | ||| |||||  ||||| |||||||||
-aagctgaaatggttaaggtctctat-aaccaacatcgtctccgcttaaatat
+aaactgaaatggttaaggtctct
+|| ||||||||||||||||||||
+aagctgaaatggttaaggtctct
 626 2 0 F 645 16 84 1190 27 95.75
 gtgantgttgatctcaaactctttgtccataatgggaagctacacaaatatttgactgttacagatggct
 |||| |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
@@ -544,7 +544,7 @@ ataatattgatgtcaga-gctaaaagatgcatcaaaagggtatatggtgaatgatgccattatcttt-ga
 aactgaaatggttaaggtctctgtgaacaa-catantctccncttaaatat
 | |||||||||||||||||||||||| ||| |||| |||||  ||||||||
 agctgaaatggttaaggtctctgtga-caaacatagtctccgtttaaatat
-610 3 0 F 607 5 38 1094 41 93.26
+582 3 0 F 579 5 38 1056 35 93.97
 gtgaagcgatacaacgatgcaaaaaaagagtggggattcacacaattgatttctcttccaacattctaca
 ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 gtgaagcgatacaacgatgcaaaaaaagagtggggattcacacaattgatttctcttccaacattctaca
@@ -569,6 +569,6 @@ taaccatagacaaatatattctgcagcttggtaccc-gattggaagcggttatggtgtgggagtgaacaa
 tatcatattgatgtcagaagctaaaagatgcatcnaaagggtatatggtgaatgatgccattatcttttg
 ||||||| || |  | ||   |||| |||||||| ||||| ||| ||||||||||||||||||||||| |
 tatcatactgttagctga-tttaaacgatgcatcaaaaggatatttggtgaatgatgccattatcttt-g
-aaactgaaatggttaaggtctctgtgaac-aacatantctccncttaaatat
-|| |||||||||||||||||||| | ||| |||||  ||||| |||||||||
-aagctgaaatggttaaggtctctat-aaccaacatcgtctccgcttaaatat
+aaactgaaatggttaaggtctct
+|| ||||||||||||||||||||
+aagctgaaatggttaaggtctct
