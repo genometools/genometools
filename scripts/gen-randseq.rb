@@ -252,7 +252,8 @@ def gen_seeded_with_coverage(fpdb,fpquery,fpquery_r,rseq,options,alphabet,errper
   prev = 0
   for range in ranges
     context1.push("#{rseq.sequence(range.begin - prev)}")
-    seedstring.push("#{rseq.sequence(range.size)}")
+    range_size = range.last - range.first + 1
+    seedstring.push("#{rseq.sequence(range_size)}")
     prev = range.last + 1
   end
   context1.push("#{rseq.sequence(options.totallength - prev)}")
