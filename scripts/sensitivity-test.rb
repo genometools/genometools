@@ -70,40 +70,38 @@ minidentity_first.upto(minidentity_last).each do |minidentity|
   dafound = 0
   gtcrash = 0
 
-  for length in lengthtab do
+  lengthtab.each_with_index do |length,seqnum|
     # generate random sequences
+    outfile = "#{tempdir}/rand-#{length}-#{seqnum}"
     makesystemcall("ruby scripts/gen-randseq.rb --minidentity #{minidentity} " +
 		   "--seedlength #{seedlength} --length #{length+10} -c 35 " +
-		   "--mode seeded 1> #{tempdir}/rand-#{length}.fas 2>/dev/null")
+		   "--mode seeded 1> #{outfile}.fas 2>/dev/null")
     # convert sequences to PacBio format
     # create db file
     if runda
-      makesystemcall("ruby convert2myersformat.rb " +
-                     "#{tempdir}/rand-#{length}.fas " +
-		     "> #{tempdir}/rand-#{length}.fasta")
-      File.delete("#{tempdir}/rand-#{length}.fas")
-      makesystemcall("../DAZZ_DB/fasta2DB #{tempdir}/rand-#{length}.db " +
-		     "#{tempdir}/rand-#{length}.fasta")
+      makesystemcall("ruby convert2myersformat.rb #{outfile}.fas " +
+		     "> #{outfile}.fasta")
+      File.delete("#{outfile}.fas")
+      makesystemcall("../DAZZ_DB/fasta2DB #{outfile}.db #{outfile}.fasta")
     end
     # create GtEncseq
     if runse
       makesystemcall("#{gtcall} encseq encode -des no -sds no -md5 no " +
-                     "-indexname " +
-		     "#{tempdir}/rand-#{length} #{tempdir}/rand-#{length}.fas")
+                     "-indexname #{outfile} #{outfile}.fas")
       makesystemcall("#{gtcall} seed_extend -t 21 -l #{length} " +
 		    "-seedlength #{seedlength} -minidentity #{minidentity} " +
 		    "-seed-display -bias-parameters -extendgreedy " +
-		    "-overlappingseeds " +
-		    "-ii #{tempdir}/rand-#{length} > " +
-		    "#{tempdir}/gtout#{length}.txt")
-      if matchinfile("#{tempdir}/gtout#{length}.txt")
+		    "-overlappingseeds -ii #{outfile} > " +
+		    "#{tempdir}/gtout#{length}-#{seqnum}.txt")
+      if matchinfile("#{tempdir}/gtout#{length}-#{seqnum}.txt")
 	gtfound = gtfound + 1
       else
 	gtfails = gtfails + 1
       end
       ["esq","ssp"].each do |suffix|
-        if File.exists?("#{tempdir}/rand-#{length}.#{suffix}")
-          File.delete("#{tempdir}/rand-#{length}.#{suffix}")
+        filename = "#{tempdir}/rand-#{length}-#{seqnum}.#{suffix}"
+        if File.exists?(filename)
+          File.delete(filename)
         end
       end
     end
@@ -111,16 +109,16 @@ minidentity_first.upto(minidentity_last).each do |minidentity|
     if runda
       makesystemcall("../DALIGNER/daligner -t21 -I -A -Y -e0.#{minidentity} " +
 		     "-l#{length} -k#{seedlength} " +
-                     "#{tempdir}/rand-#{length}.db " +
-		     "#{tempdir}/rand-#{length}.db > " +
-                     "#{tempdir}/daout#{length}.txt")
-      if matchinfile("#{tempdir}/daout#{length}.txt")
+                     "#{outfile}.db " +
+		     "#{outfile}.db > " +
+                     "#{tempdir}/daout#{length}-#{seqnum}.txt")
+      if matchinfile("#{tempdir}/daout#{length}-#{seqnum}.txt")
 	dafound = dafound + 1
       else
 	dafails = dafails + 1
       end
-      File.delete("#{tempdir}/rand-#{length}.db")
-      File.delete("#{tempdir}/rand-#{length}.las")
+      File.delete("#{tempdir}/rand-#{length}-#{seqnum}.db")
+      File.delete("#{tempdir}/rand-#{length}-#{seqnum}.las")
     end
   end
   if runse
