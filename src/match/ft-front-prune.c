@@ -20,13 +20,20 @@
 #include "ft-polish.h"
 #include "ft-front-generation.h"
 
-#define UPDATE_MATCH_HISTORY(MC,MH)\
-        if ((MH) & mask)\
+#define GT_UPDATE_MATCH_HISTORY(FRONTVAL)\
+        if ((FRONTVAL)->matchhistory_size == max_history)\
         {\
-          gt_assert((MC) > 0);\
-          (MC)--;\
+          if ((FRONTVAL)->matchhistory_bits & leftmostbit)\
+          {\
+            gt_assert((FRONTVAL)->matchhistory_count > 0);\
+            (FRONTVAL)->matchhistory_count--;\
+          }\
+        } else\
+        {\
+          gt_assert((FRONTVAL)->matchhistory_size < max_history);\
+          (FRONTVAL)->matchhistory_size++;\
         }\
-        (MH) <<= 1
+        (FRONTVAL)->matchhistory_bits <<= 1
 
 typedef unsigned int Rowvaluetype;
 typedef uint8_t Matchcounttype;
@@ -34,10 +41,11 @@ typedef uint8_t Backreferencetype;
 
 typedef struct
 {
-  uint64_t matchhistory;
+  uint64_t matchhistory_bits;
   Rowvaluetype row,
                localmatch_count;
-  Matchcounttype matchhistory_count;
+  Matchcounttype matchhistory_count,
+                 matchhistory_size;
   Backreferencetype backreference;
 } Frontvalue;
 
@@ -289,47 +297,55 @@ static bool ft_sequenceobject_symbol_match(Sequenceobject *useq,
 
 static void inline front_prune_add_matches(Frontvalue *midfront,
                                            Frontvalue *fv,
-                                           uint64_t mask,
+                                           uint64_t leftmostbit,
+                                           GtUword max_history,
                                            Sequenceobject *useq,
                                            Sequenceobject *vseq)
 {
   GtUword upos, vpos;
 
-  fv->localmatch_count = 0;
   for (upos = fv->row, vpos = fv->row + FRONT_DIAGONAL(fv);
        upos < useq->substringlength && vpos < vseq->substringlength &&
        ft_sequenceobject_symbol_match(useq,upos,vseq,vpos);
        upos++, vpos++)
   {
-    fv->localmatch_count++;
-    if (!(fv->matchhistory & mask))
+    if (fv->matchhistory_size == max_history)
     {
-      gt_assert(fv->matchhistory_count < INT8_MAX);
+      if (!(fv->matchhistory_bits & leftmostbit))
+      {
+        gt_assert(fv->matchhistory_count < INT8_MAX);
+        fv->matchhistory_count++;
+      }
+    } else
+    {
+      gt_assert(fv->matchhistory_size < max_history);
+      fv->matchhistory_size++;
       fv->matchhistory_count++;
     }
-    fv->matchhistory = (fv->matchhistory << 1) | (uint64_t) 1;
+    fv->matchhistory_bits = (fv->matchhistory_bits << 1) | (uint64_t) 1;
   }
-  fv->row += fv->localmatch_count;
+  fv->localmatch_count = upos - fv->row;
+  fv->row = upos;
 }
 
 static GtUword front_next_inplace(Frontvalue *midfront,
                                   Frontvalue *lowfront,
                                   Frontvalue *highfront,
-                                  GtUword history,
+                                  GtUword max_history,
                                   Sequenceobject *useq,
                                   Sequenceobject *vseq)
 {
   GtUword alignedlen, maxalignedlen;
-  const uint64_t mask = ((uint64_t) 1) << (history-1);
+  const uint64_t leftmostbit = ((uint64_t) 1) << (max_history-1);
   Frontvalue bestfront, insertion_value, replacement_value, *frontptr;
 
   insertion_value = *lowfront; /* from previous diag -(d-1) => -d => DELETION */
   bestfront = insertion_value;
   bestfront.row++;
-  UPDATE_MATCH_HISTORY(bestfront.matchhistory_count,bestfront.matchhistory);
+  GT_UPDATE_MATCH_HISTORY(&bestfront);
   *lowfront = bestfront;
   lowfront->backreference = FT_EOP_DELETION;
-  front_prune_add_matches(midfront,lowfront,mask,useq,vseq);
+  front_prune_add_matches(midfront,lowfront,leftmostbit,max_history,useq,vseq);
   maxalignedlen = GT_MULT2(lowfront->row) + FRONT_DIAGONAL(lowfront);
 
   replacement_value = *(lowfront+1);
@@ -338,7 +354,7 @@ static GtUword front_next_inplace(Frontvalue *midfront,
     bestfront = replacement_value;
     bestfront.backreference = FT_EOP_DELETION;
     bestfront.row++;
-    UPDATE_MATCH_HISTORY(bestfront.matchhistory_count,bestfront.matchhistory);
+    GT_UPDATE_MATCH_HISTORY(&bestfront);
   } else
   {
     bestfront.backreference = FT_EOP_REPLACEMENT;
@@ -348,7 +364,8 @@ static GtUword front_next_inplace(Frontvalue *midfront,
     }
   }
   *(lowfront+1) = bestfront;
-  front_prune_add_matches(midfront,lowfront + 1,mask,useq,vseq);
+  front_prune_add_matches(midfront,lowfront + 1,leftmostbit,max_history,
+                          useq,vseq);
   alignedlen = GT_MULT2((lowfront+1)->row) + FRONT_DIAGONAL(lowfront + 1);
   if (maxalignedlen < alignedlen)
   {
@@ -388,14 +405,15 @@ static GtUword front_next_inplace(Frontvalue *midfront,
         }
       }
     }
-    UPDATE_MATCH_HISTORY(bestfront.matchhistory_count,bestfront.matchhistory);
+    GT_UPDATE_MATCH_HISTORY(&bestfront);
     if (frontptr < highfront)
     {
       insertion_value = replacement_value;
       replacement_value = *frontptr;
     }
     *frontptr = bestfront;
-    front_prune_add_matches(midfront,frontptr,mask,useq,vseq);
+    front_prune_add_matches(midfront,frontptr,leftmostbit,max_history,
+                            useq,vseq);
     alignedlen = GT_MULT2(frontptr->row) + FRONT_DIAGONAL(frontptr);
     if (maxalignedlen < alignedlen)
     {
@@ -407,25 +425,25 @@ static GtUword front_next_inplace(Frontvalue *midfront,
 
 static GtUword front_second_inplace(Frontvalue *midfront,
                                     Frontvalue *lowfront,
-                                    GtUword history,
+                                    GtUword max_history,
                                     Sequenceobject *useq,
                                     Sequenceobject *vseq)
 {
   GtUword alignedlen, maxalignedlen;
-  const uint64_t mask = ((uint64_t) 1) << (history-1);
+  const uint64_t leftmostbit = ((uint64_t) 1) << (max_history-1);
 
   *(lowfront+1) = *(lowfront+2) = *lowfront;
   lowfront->row++;
   lowfront->backreference = FT_EOP_DELETION;
-  UPDATE_MATCH_HISTORY(lowfront->matchhistory_count,lowfront->matchhistory);
-  front_prune_add_matches(midfront,lowfront,mask,useq,vseq);
+  GT_UPDATE_MATCH_HISTORY(lowfront);
+  front_prune_add_matches(midfront,lowfront,leftmostbit,max_history,useq,vseq);
   maxalignedlen = GT_MULT2(lowfront->row) + FRONT_DIAGONAL(lowfront);
 
   (lowfront+1)->row++;
   (lowfront+1)->backreference = FT_EOP_REPLACEMENT;
-  UPDATE_MATCH_HISTORY((lowfront+1)->matchhistory_count,
-                       (lowfront+1)->matchhistory);
-  front_prune_add_matches(midfront,lowfront + 1,mask,useq,vseq);
+  GT_UPDATE_MATCH_HISTORY(lowfront+1);
+  front_prune_add_matches(midfront,lowfront + 1,leftmostbit,max_history,
+                          useq,vseq);
   alignedlen = GT_MULT2((lowfront+1)->row) + FRONT_DIAGONAL(lowfront + 1);
   if (maxalignedlen < alignedlen)
   {
@@ -433,9 +451,9 @@ static GtUword front_second_inplace(Frontvalue *midfront,
   }
 
   (lowfront+2)->backreference = FT_EOP_INSERTION;
-  UPDATE_MATCH_HISTORY((lowfront+2)->matchhistory_count,
-                       (lowfront+2)->matchhistory);
-  front_prune_add_matches(midfront,lowfront + 2,mask,useq,vseq);
+  GT_UPDATE_MATCH_HISTORY(lowfront+2);
+  front_prune_add_matches(midfront,lowfront + 2,leftmostbit,max_history,useq,
+                          vseq);
   alignedlen = GT_MULT2((lowfront+2)->row) + FRONT_DIAGONAL(lowfront + 2);
   if (maxalignedlen < alignedlen)
   {
@@ -449,20 +467,19 @@ static GtUword front_second_inplace(Frontvalue *midfront,
 static bool trimthisentry(GtUword distance,
                           Rowvaluetype row,
                           GtWord diagonal,
-                          GtUword minlenforhistorycheck,
-                          Matchcounttype matchhistory_count,
+                          GtUword max_history,
+                          const Frontvalue *fv,
                           GtUword minmatchnum,
                           GtUword minlenfrommaxdiff)
 {
-  GtUword alignedlen = GT_MULT2(row) + diagonal;
-
-  if (alignedlen >= minlenforhistorycheck && matchhistory_count < minmatchnum)
+  if (fv->matchhistory_size == max_history &&
+      fv->matchhistory_count < minmatchnum)
   {
     printf(GT_WD "&" GT_WU "&%u&1: matches=%d < " GT_WU "=minmatches\n",
               diagonal,distance,row,(int) matchhistory_count,minmatchnum);
     return true;
   }
-  if (alignedlen < minlenfrommaxdiff)
+  if (GT_MULT2(row) + diagonal < minlenfrommaxdiff)
   {
     printf(GT_WD "&" GT_WU "&%u&2: i'+j'=" GT_WU "<" GT_WU "=i+j-lag\n",
               diagonal,distance,row,alignedlen,minlenfrommaxdiff);
@@ -474,18 +491,17 @@ static bool trimthisentry(GtUword distance,
 #else
 static bool trimthisentry(Rowvaluetype row,
                           GtWord diagonal,
-                          GtUword minlenforhistorycheck,
-                          Matchcounttype matchhistory_count,
+                          GtUword max_history,
+                          const Frontvalue *fv,
                           GtUword minmatchnum,
                           GtUword minlenfrommaxdiff)
 {
-  GtUword alignedlen = GT_MULT2(row) + diagonal;
-
-  if (alignedlen >= minlenforhistorycheck && matchhistory_count < minmatchnum)
+  if (fv->matchhistory_size == max_history &&
+      fv->matchhistory_count < minmatchnum)
   {
     return true;
   }
-  if (alignedlen < minlenfrommaxdiff)
+  if (GT_MULT2(row) + diagonal < minlenfrommaxdiff)
   {
     return true;
   }
@@ -499,8 +515,8 @@ static GtUword trim_front(bool upward,
 #endif
                           GtUword ulen,
                           GtUword vlen,
+                          GtUword max_history,
                           GtUword minmatchnum,
-                          GtUword minlenforhistorycheck,
                           GtUword minlenfrommaxdiff,
                           const Frontvalue *midfront,
                           const Frontvalue *from,
@@ -521,8 +537,8 @@ static GtUword trim_front(bool upward,
 #endif
                         frontptr->row,
                         FRONT_DIAGONAL(frontptr),
-                        minlenforhistorycheck,
-                        frontptr->matchhistory_count,
+                        max_history,
+                        frontptr,
                         minmatchnum,
                         minlenfrommaxdiff))
     {
@@ -604,8 +620,8 @@ static void update_trace_and_polished(Polished_point *best_polished_point,
       *mincol = currentcol;
     }
 #endif
-    lsb = frontptr->matchhistory & pol_info->mask;
-    if (HISTORY_IS_POLISHED(pol_info,frontptr->matchhistory,lsb) &&
+    lsb = frontptr->matchhistory_bits & pol_info->mask;
+    if (HISTORY_IS_POLISHED(pol_info,frontptr->matchhistory_bits,lsb) &&
         alignedlen > best_polished_point->alignedlen)
     {
       best_polished_point->alignedlen = alignedlen;
@@ -630,7 +646,7 @@ GtUword front_prune_edist_inplace(
                          Polished_point *best_polished_point,
                          Fronttrace *front_trace,
                          const Polishing_info *pol_info,
-                         GtUword history,
+                         GtUword max_history,
                          GtUword minmatchnum,
                          GtUword maxalignedlendifference,
                          GtUword seedlength,
@@ -643,13 +659,12 @@ GtUword front_prune_edist_inplace(
                          GtUword vlen)
 {
   const GtUword sumseqlength = ulen + vlen,
-                minsizeforshift = sumseqlength/1000,
-                minlenforhistorycheck = GT_MULT2(history);
+                minsizeforshift = sumseqlength/1000;
   /* so the space for allocating the fronts is
      sizeof (Frontvalue) * ((m+n)/1000 + maxvalid), where maxvalid is a small
      constant. */
   GtUword distance, trimleft = 0, valid = 1UL, maxvalid = 0, sumvalid = 0;
-  const uint64_t mask = ((uint64_t) 1) << (history-1);
+  const uint64_t leftmostbit = ((uint64_t) 1) << (max_history-1);
   Frontvalue *validbasefront;
   bool diedout = false;
   Sequenceobject useq, vseq;
@@ -720,17 +735,18 @@ GtUword front_prune_edist_inplace(
     if (distance == 0)
     {
       validbasefront->row = 0;
-      if (seedlength >= sizeof (validbasefront->matchhistory) * CHAR_BIT)
+      if (seedlength >= sizeof (validbasefront->matchhistory_bits) * CHAR_BIT)
       {
-        validbasefront->matchhistory = ~((uint64_t) 0);
+        validbasefront->matchhistory_bits = ~((uint64_t) 0);
       } else
       {
-        validbasefront->matchhistory = (((uint64_t) 1) << seedlength) - 1;
+        validbasefront->matchhistory_bits = (((uint64_t) 1) << seedlength) - 1;
       }
-      validbasefront->matchhistory_count = MIN(history,seedlength);
+      validbasefront->matchhistory_size
+        = validbasefront->matchhistory_count = MIN(max_history,seedlength);
       validbasefront->backreference = 0; /* No back reference */
-      front_prune_add_matches(validbasefront + distance,validbasefront,mask,
-                              &useq,&vseq);
+      front_prune_add_matches(validbasefront + distance,validbasefront,
+                              leftmostbit,max_history,&useq,&vseq);
       maxalignedlen = GT_MULT2(validbasefront->row);
     } else
     {
@@ -748,7 +764,7 @@ GtUword front_prune_edist_inplace(
         maxalignedlen
           = front_second_inplace(validbasefront + distance,
                                  validbasefront + trimleft,
-                                 history,
+                                 max_history,
                                  &useq,
                                  &vseq);
       } else
@@ -757,7 +773,7 @@ GtUword front_prune_edist_inplace(
           = front_next_inplace(validbasefront + distance,
                                validbasefront + trimleft,
                                validbasefront + trimleft + valid - 1,
-                               history,
+                               max_history,
                                &useq,
                                &vseq);
       }
@@ -776,8 +792,8 @@ GtUword front_prune_edist_inplace(
 #endif
                       ulen,
                       vlen,
+                      max_history,
                       minmatchnum,
-                      minlenforhistorycheck,
                       minlenfrommaxdiff,
                       validbasefront + distance,
                       validbasefront + trimleft,
@@ -799,8 +815,8 @@ GtUword front_prune_edist_inplace(
 #endif
                         ulen,
                         vlen,
+                        max_history,
                         minmatchnum,
-                        minlenforhistorycheck,
                         minlenfrommaxdiff,
                         validbasefront + distance,
                         validbasefront + trimleft + valid - 1,
