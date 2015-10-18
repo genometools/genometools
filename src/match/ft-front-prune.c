@@ -476,13 +476,13 @@ static bool trimthisentry(GtUword distance,
       fv->matchhistory_count < minmatchnum)
   {
     printf(GT_WD "&" GT_WU "&%u&1: matches=%d < " GT_WU "=minmatches\n",
-              diagonal,distance,row,(int) matchhistory_count,minmatchnum);
+              diagonal,distance,row,(int) fv->matchhistory_count,minmatchnum);
     return true;
   }
   if (GT_MULT2(row) + diagonal < minlenfrommaxdiff)
   {
     printf(GT_WD "&" GT_WU "&%u&2: i'+j'=" GT_WU "<" GT_WU "=i+j-lag\n",
-              diagonal,distance,row,alignedlen,minlenfrommaxdiff);
+              diagonal,distance,row,GT_MULT2(row) + diagonal,minlenfrommaxdiff);
     return true;
   }
   printf(GT_WD "&" GT_WU "&%u\n", diagonal,distance,row);
