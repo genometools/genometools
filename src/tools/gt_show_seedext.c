@@ -26,9 +26,8 @@
 #include "core/str_api.h"
 #include "core/types_api.h"
 #include "core/unused_api.h"
-#include "match/revcompl.h"
 #include "extended/squarealign.h"
-#include "extended/linspaceManagement.h"
+#include "match/test-pairwise.h"
 #include "tools/gt_show_seedext.h"
 
 typedef struct {
@@ -43,7 +42,7 @@ typedef struct {
   GtUword blen, bseq, bpos;
   GtUword score, distance;
   double correlation;
-} GtShowSeedextCoords;
+} GtShowSeedextAlignment;
 
 static void* gt_show_seedext_arguments_new(void)
 {
@@ -124,6 +123,7 @@ static int gt_show_seedext_get_encseq_index(GtStr *ii,
 {
   const GtUword maxlinelength = 1000;
   FILE *file;
+  char *buffer;
   int had_err = 0;
 
   gt_assert(ii && qii);
@@ -133,8 +133,9 @@ static int gt_show_seedext_get_encseq_index(GtStr *ii,
     gt_error_set(err, "file %s does not exist", filename);
     had_err = -1;
   }
+
+  buffer = gt_malloc(maxlinelength * sizeof *buffer);
   if (!had_err) {
-    char *buffer = gt_malloc(maxlinelength * sizeof *buffer);
     /* read first line and evaluate tokens */
     if (fgets(buffer, maxlinelength, file)) {
       char *tok = strtok(buffer, " ");
@@ -157,12 +158,9 @@ static int gt_show_seedext_get_encseq_index(GtStr *ii,
       gt_error_set(err, "file %s is empty", filename);
       had_err = -1;
     }
-    gt_free(buffer);
   }
-  if (file != NULL)
-  {
-    fclose(file);
-  }
+  fclose(file);
+  gt_free(buffer);
   return had_err;
 }
 
@@ -176,21 +174,20 @@ static int gt_show_seedext_parse_extensions(const GtEncseq *aencseq,
 {
   const GtUword maxlinelength = 10000;
   FILE *file;
-  char *buffer;
-  GtUchar *asequence, *bsequence, *csequence;
-  GtUword apos_ab = 0, bpos_ab = 0, maxseqlen = 0;
+  char *buffer, *asequence, *bsequence, *csequence;
+  GtUword apos_ab = 0, bpos_ab = 0, maxseqlen = 0, edist = 0;
   int num, had_err = 0;
-  GtShowSeedextCoords coords = {0, 0, 0, 'X', 0, 0, 0, 0, 0, 0.0};
-  LinspaceManagement *alignspace;
+  GtShowSeedextAlignment alignment = {0, 0, 0, 'X', 0, 0, 0, 0, 0, 0.0};
 
   gt_assert(aencseq && bencseq && filename);
+
   file = fopen(filename, "r");
   if (file == NULL) {
     gt_error_set(err, "file %s does not exist", filename);
     fclose(file);
     return -1;
   }
-  alignspace = gt_linspaceManagement_new();
+
   /* allocate buffers for alignment string and sequences */
   maxseqlen = MAX(gt_encseq_max_seq_length(aencseq),
                   gt_encseq_max_seq_length(bencseq)) + 1UL;
@@ -209,41 +206,53 @@ static int gt_show_seedext_parse_extensions(const GtEncseq *aencseq,
       }
       continue;
     }
+
     /* parse alignment string */
     num = sscanf(buffer,
                  GT_WU" "GT_WU" "GT_WU" %c "GT_WU" "GT_WU" "GT_WU" "GT_WU" "
                  GT_WU" %lf",
-                 &coords.alen, &coords.aseq, &coords.apos,
-                 &coords.direction, &coords.blen, &coords.bseq,
-                 &coords.bpos, &coords.score, &coords.distance,
-                 &coords.correlation);
+                 &alignment.alen, &alignment.aseq, &alignment.apos,
+                 &alignment.direction, &alignment.blen, &alignment.bseq,
+                 &alignment.bpos, &alignment.score, &alignment.distance,
+                 &alignment.correlation);
     if (num != 10) {
       printf("alignment parse failed: %s", buffer);
       continue;
     }
+
     /* get sequences */
-    apos_ab = gt_encseq_seqstartpos(aencseq, coords.aseq) + coords.apos;
-    bpos_ab = gt_encseq_seqstartpos(bencseq, coords.bseq) + coords.bpos;
-    gt_encseq_extract_encoded(aencseq,
+    apos_ab = alignment.apos + gt_encseq_seqstartpos(aencseq, alignment.aseq);
+    bpos_ab = alignment.bpos + gt_encseq_seqstartpos(bencseq, alignment.bseq);
+    gt_encseq_extract_decoded(aencseq,
                               asequence,
                               apos_ab,
-                              apos_ab + coords.alen - 1);
-    gt_encseq_extract_encoded(bencseq,
+                              apos_ab + alignment.alen - 1);
+    gt_encseq_extract_decoded(bencseq,
                               bsequence,
                               bpos_ab,
-                              bpos_ab + coords.blen - 1);
+                              bpos_ab + alignment.blen - 1);
+    asequence[alignment.alen] = bsequence[alignment.blen] = '\0';
     /* prepare reverse complement of 2nd sequence */
-    if (mirror && coords.direction != 'F') {
-      gt_copy_reverse_complement(csequence,bsequence,coords.blen);
+    if (mirror && alignment.direction != 'F') {
+      char *idx;
+      for (idx = csequence; idx < csequence + alignment.blen; idx++) {
+        gt_complement(idx, bsequence[csequence + alignment.blen -idx-1], NULL);
+      }
+      csequence[alignment.blen] = '\0';
       bsequence = csequence;
     }
-    printf("%s\n",buffer);
+    edist = gt_computegreedyunitedist((const GtUchar *)asequence,
+                                      alignment.alen,
+                                      (const GtUchar *)bsequence,
+                                      alignment.blen);
+    printf("# identity = %5.2lf\n",
+           100.0 - 200.0 * edist / (alignment.alen + alignment.blen));
+
     if (show_alignment) {
-      GtUword edist = 0;
-      gt_print_edist_alignment(asequence, 0, coords.alen,
-                               bsequence, 0, coords.blen);
-      printf("# identity = %5.2lf\n",
-             100.0 - 200.0 * edist / (coords.alen + coords.blen));
+      gt_print_edist_alignment((const GtUchar *)asequence, 0,
+                               alignment.alen,
+                               (const GtUchar *)bsequence, 0,
+                               alignment.blen);
     }
     if (mirror) {
       bsequence = asequence + maxseqlen;
@@ -252,7 +261,6 @@ static int gt_show_seedext_parse_extensions(const GtEncseq *aencseq,
   fclose(file);
   gt_free(asequence);
   gt_free(buffer);
-  gt_linspaceManagement_delete(alignspace);
   return had_err;
 }
 
@@ -278,8 +286,8 @@ static int gt_show_seedext_runner(GT_UNUSED int argc,
                                              &mirror,
                                              gt_str_get(arguments->filename),
                                              err);
-  printf("# file %s: mirror abled%s\n",
-         gt_str_get(arguments->filename), mirror ? "en" : "dis");
+  printf("File %s: mirror %s\n",
+         gt_str_get(arguments->filename), mirror ? "enabled" : "disabled");
 
   /* Load encseqs */
   if (!had_err) {
