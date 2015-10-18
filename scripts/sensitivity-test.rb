@@ -4,6 +4,46 @@ require 'optparse'
 require 'ostruct'
 require 'set'
 
+def indentify_num(s,regexp)
+  if m = s.match(regexp)
+    return m[1].to_i
+  end
+  STDERR.puts "#{$0}: cannot identify #{regexp} in #{s}"
+  exit 1
+end
+
+def fromfilename2keys(filename)
+  minidentity = indentify_num(filename,Regexp.compile(/minid-(\d+)\//))
+  length = indentify_num(filename,Regexp.compile(/-(\d+)-/))
+  seqnum = indentify_num(filename,Regexp.compile(/-\d+-(\d+)\./))
+  return minidentity, length, seqnum
+end
+
+def makesystemcall(argstring,withecho = false)
+  if not system(argstring)
+    STDERR.puts "system \"#{argstring}\" failed: errorcode #{$?}"
+    exit 1
+  elsif withecho
+    puts argstring
+  end
+end
+
+def matchinfile(filename)
+  if open(filename).grep(/^\d+ \d+ \d+ . \d+ \d+ \d+ \d+ \d+ \d+/).length > 0
+    return true
+  else
+    return false
+  end
+end
+
+def makedirname(dir,minidentity)
+  return "#{dir}/minid-#{minidentity}"
+end
+
+def makefilename(dir,minidentity,pref,length,seqnum)
+  return "#{makedirname(dir,minidentity)}/#{pref}-#{length}-#{seqnum}"
+end
+
 def listdirectory(directory)
   # prepare regexp for entries to ignore: saves time for repeated use
   ignore_dirs = Regexp.compile(/^\.\.?$/)  # match . or ..
@@ -32,37 +72,6 @@ def showresult(prog,minidentity,found,fails)
   print "minid=#{minidentity} #{prog} #{found} of #{found+fails}, "
   printf("miss #{fails}, sensitivity %.2f%%\n",
          100.0 * found.to_f/(found+fails).to_f)
-end
-
-def matchinfile(filename)
-  if open(filename).grep(/^\d+ \d+ \d+ . \d+ \d+ \d+ \d+ \d+ \d+/).length > 0
-    return true
-  else
-    return false
-  end
-end
-
-def indentify_num(regexp,s)
-  if m = s.match(regexp)
-    return m[1].to_i
-  end
-  STDERR.puts "#{$0}: cannot identify #{regexp} in #{s}"
-  exit 1
-end
-
-def makesystemcall(argstring)
-  if not system(argstring)
-    STDERR.puts "system \"#{argstring}\" failed: errorcode #{$?}"
-    exit 1
-  end
-end
-
-def makedirname(dir,minidentity)
-  return "#{dir}/minid-#{minidentity}"
-end
-
-def makefilename(dir,minidentity,pref,length,seqnum)
-  return "#{makedirname(dir,minidentity)}/#{pref}-#{length}-#{seqnum}"
 end
 
 def runseedextend(inputdir,targetdir,seedlength,minidentity,length,seqnum)
@@ -108,6 +117,25 @@ def rundaligner(inputdir,targetdir,seedlength,minidentity,length,seqnum)
   return matchinfile("#{destfile}.txt")
 end
 
+def rerun_seedextend(seedlength,filename)
+  if not matchinfile(filename)
+    gtcall = "env -i bin/gt"
+    minidentity, length, seqnum = fromfilename2keys(filename)
+    targetdir = filename.split(/\//)[0]
+    puts "minid=#{minidentity}, length=#{minidentity}, seqnum=#{seqnum}"
+    inputfile = makefilename("#{targetdir}/refdirlink",minidentity,"rand",
+                             length,seqnum)
+    puts "inputfile=#{inputfile}.fas"
+    indexname = "sfx-#{length}-#{seqnum}"
+    makesystemcall("#{gtcall} encseq encode -des no -sds no -md5 no " +
+                   "-indexname #{indexname} #{inputfile}.fas",true)
+    makesystemcall("#{gtcall} seed_extend -t 21 -l #{length} " +
+		   "-seedlength #{seedlength} -minidentity #{minidentity} " +
+		   "-seed-display -bias-parameters -extendgreedy " +
+		   "-overlappingseeds -ii #{indexname} -a",true)
+  end
+end
+
 def parseargs(argv)
   options = OpenStruct.new
   options.runse = nil
@@ -117,6 +145,7 @@ def parseargs(argv)
   options.minid_min = nil
   options.inputdir = ENV["HOME"] + "/dalign-files"
   options.targetdir = "dalign"
+  options.rerun = nil
   options.first = 0
   opts = OptionParser.new
   indent = " " * 37
@@ -155,6 +184,9 @@ def parseargs(argv)
                "\n#{indent}(default: #{options.targetdir})") do |x|
     options.targetdir = x
   end
+  opts.on("-r","--rerun STRING","rerun seed-extend on specific file") do |x|
+    options.rerun = x
+  end
   opts.on("-f","--first NUMBER",
           "specify number of sequences used for\n#{indent}evaluation") do |x|
     options.first = x.to_i
@@ -169,7 +201,7 @@ def parseargs(argv)
   end
   rest = opts.parse(argv)
   if rest.length != 0 or (options.num_tests.nil? and not options.runda and 
-                          not options.runse)
+                          not options.runse and options.rerun.nil?)
     STDERR.puts "#{opts}"
     exit 1
   end
@@ -204,13 +236,13 @@ if options.runse or options.runda
   dafound = Array.new(100) {0}
   dafail = Array.new(100) {0}
   minidset = Set.new()
+  makesystemcall("mkdir -p #{options.targetdir}")
+  makesystemcall("ln -s #{options.inputdir} #{options.targetdir}/refdirlink")
   listdirectory(options.inputdir).each do |filename|
     if filename.match(/\.fas/)
-      seqnum = indentify_num(filename,Regexp.compile(/rand-\d+-(\d+)\./))
+      minidentity, length, seqnum = fromfilename2keys(filename)
       if options.first == 0 or seqnum < options.first
-        minidentity = indentify_num(filename,Regexp.compile(/minid-(\d+)\//))
         minidset.add(minidentity)
-        length = indentify_num(filename,Regexp.compile(/rand-(\d+)-/))
         if options.runse
           if runseedextend(options.inputdir,options.targetdir,seedlength,
                            minidentity,length,seqnum)
@@ -241,4 +273,7 @@ if options.runse or options.runda
                                         dafail[minidentity])
     end
   end
+end
+if not options.rerun.nil?
+  rerun_seedextend(seedlength,options.rerun)
 end
