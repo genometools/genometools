@@ -534,8 +534,7 @@ static GtUword gt_diagbandseed_process_seeds(const GtEncseq *aencseq,
                                                             idx->bseqnum,
                                                             bstart,
                                                             seedlength);
-          } else /* seed extension of two encseqs not implemented yet */
-          {
+          } else {
             querymatch = extend_querymatch_relative_function(&info_querymatch,
                                                              aencseq,
                                                              idx->aseqnum,
@@ -697,7 +696,7 @@ int gt_diagbandseed_run(const GtEncseq *aencseq,
     if (arg->debug_kmer) {
       GtDiagbandseedKmerPos *idx;
       for (idx = alist; idx < alist + alen; idx++) {
-        printf("a) Kmer ("GT_LX",%d,%d)\n", idx->code, idx->endpos,
+        printf("# Kmer (" GT_LX ",%d,%d)\n", idx->code, idx->endpos,
                idx->seqnum);
       }
     }
@@ -770,7 +769,7 @@ int gt_diagbandseed_run(const GtEncseq *aencseq,
       if (arg->debug_kmer) {
         GtDiagbandseedKmerPos *idx;
         for (idx = blist; idx < blist + blen; idx++) {
-          printf("b) Kmer ("GT_LX",%d,%d)\n", idx->code, idx->endpos,
+          printf("# Kmer (" GT_LX ",%d,%d)\n", idx->code, idx->endpos,
                  idx->seqnum);
         }
       }
@@ -891,7 +890,7 @@ int gt_diagbandseed_run(const GtEncseq *aencseq,
     if (arg->debug_seedpair) {
       GtDiagbandseedSeedPair *curr_sp = mlist.spaceGtDiagbandseedSeedPair;
       while (curr_sp < mlist.spaceGtDiagbandseedSeedPair + mlen) {
-        printf("SeedPair (%d,%d,%d,%d)\n", curr_sp->aseqnum, curr_sp->bseqnum,
+        printf("# SeedPair (%d,%d,%d,%d)\n", curr_sp->aseqnum, curr_sp->bseqnum,
                curr_sp->apos, curr_sp->bpos);
         curr_sp++;
       }

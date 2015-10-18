@@ -417,6 +417,15 @@ static int gt_seed_extend_runner(GT_UNUSED int argc,
   gt_assert(arguments->se_minidentity >= GT_EXTEND_MIN_IDENTITY_PERCENTAGE &&
             arguments->se_minidentity <= 100UL);
 
+  if (arguments->dbs_verify || arguments->verbose) {
+    int idx;
+    printf("# Options: ");
+    for (idx = 1; idx < argc; idx++) {
+      printf("%s ", argv[idx]);
+    }
+    printf("\n");
+  }
+
   /* Calculate error percentage from minidentity */
   errorpercentage = 100UL - arguments->se_minidentity;
 
@@ -486,11 +495,6 @@ static int gt_seed_extend_runner(GT_UNUSED int argc,
       arguments->se_maxalilendiff = 30;
       arguments->se_perc_match_hist
         = (GtUword) (100.0 - errorpercentage * matchscore_bias);
-      if (arguments->verbose)
-      {
-        printf("# matchscore_bias = %.2f => percmathistory = "GT_WU"\n",
-                 matchscore_bias, arguments->se_perc_match_hist);
-      }
     }
     grextinfo = gt_greedy_extend_matchinfo_new(errorpercentage,
                                                arguments->se_maxalilendiff,

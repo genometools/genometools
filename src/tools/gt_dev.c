@@ -46,6 +46,7 @@
 #include "tools/gt_seqcorrect.h"
 #include "tools/gt_seqlensort.h"
 #include "tools/gt_sfxmap.h"
+#include "tools/gt_show_seedext.h"
 #include "tools/gt_skproto.h"
 #include "tools/gt_sortbench.h"
 #include "tools/gt_trieins.h"
@@ -84,6 +85,7 @@ static void* gt_dev_arguments_new(void)
   gt_toolbox_add_tool(dev_toolbox, "seqcorrect", gt_seqcorrect());
   gt_toolbox_add_tool(dev_toolbox, "seqlensort", gt_seqlensort());
   gt_toolbox_add_tool(dev_toolbox, "sfxmap", gt_sfxmap());
+  gt_toolbox_add_tool(dev_toolbox, "show_seedext", gt_show_seedext());
   gt_toolbox_add_tool(dev_toolbox, "skproto", gt_skproto());
   gt_toolbox_add_tool(dev_toolbox, "sortbench", gt_sortbench());
   return dev_toolbox;
