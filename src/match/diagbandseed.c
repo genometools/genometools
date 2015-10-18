@@ -1,19 +1,19 @@
 /*
-  Copyright (c) 2015 Joerg Winkler <joerg.winkler@studium.uni-hamburg.de>
-  Copyright (c) 2015 Center for Bioinformatics, University of Hamburg
+ Copyright (c) 2015 Joerg Winkler <joerg.winkler@studium.uni-hamburg.de>
+ Copyright (c) 2015 Center for Bioinformatics, University of Hamburg
 
-  Permission to use, copy, modify, and distribute this software for any
-  purpose with or without fee is hereby granted, provided that the above
-  copyright notice and this permission notice appear in all copies.
+ Permission to use, copy, modify, and distribute this software for any
+ purpose with or without fee is hereby granted, provided that the above
+ copyright notice and this permission notice appear in all copies.
 
-  THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
-  WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
-  MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
-  ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
-  WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
-  ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
-  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
-*/
+ THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+ WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+ MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+ ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+ WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+ ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+ */
 
 #include <limits.h>
 #include <stddef.h>
@@ -534,8 +534,7 @@ static GtUword gt_diagbandseed_process_seeds(const GtEncseq *aencseq,
                                                             idx->bseqnum,
                                                             bstart,
                                                             seedlength);
-          } else /* seed extension of two encseqs not implemented yet */
-          {
+          } else {
             querymatch = extend_querymatch_relative_function(&info_querymatch,
                                                              aencseq,
                                                              idx->aseqnum,
@@ -697,8 +696,7 @@ int gt_diagbandseed_run(const GtEncseq *aencseq,
     if (arg->debug_kmer) {
       GtDiagbandseedKmerPos *idx;
       for (idx = alist; idx < alist + alen; idx++) {
-        printf("a) Kmer ("GT_LX",%d,%d)\n", idx->code, idx->endpos,
-               idx->seqnum);
+        printf("# Kmer (%lX,%d,%d)\n", idx->code, idx->endpos, idx->seqnum);
       }
     }
 
@@ -770,8 +768,7 @@ int gt_diagbandseed_run(const GtEncseq *aencseq,
       if (arg->debug_kmer) {
         GtDiagbandseedKmerPos *idx;
         for (idx = blist; idx < blist + blen; idx++) {
-          printf("b) Kmer ("GT_LX",%d,%d)\n", idx->code, idx->endpos,
-                 idx->seqnum);
+          printf("# Kmer (%lX,%d,%d)\n", idx->code, idx->endpos, idx->seqnum);
         }
       }
 
@@ -891,7 +888,7 @@ int gt_diagbandseed_run(const GtEncseq *aencseq,
     if (arg->debug_seedpair) {
       GtDiagbandseedSeedPair *curr_sp = mlist.spaceGtDiagbandseedSeedPair;
       while (curr_sp < mlist.spaceGtDiagbandseedSeedPair + mlen) {
-        printf("SeedPair (%d,%d,%d,%d)\n", curr_sp->aseqnum, curr_sp->bseqnum,
+        printf("# SeedPair (%d,%d,%d,%d)\n", curr_sp->aseqnum, curr_sp->bseqnum,
                curr_sp->apos, curr_sp->bpos);
         curr_sp++;
       }
