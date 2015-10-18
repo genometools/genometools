@@ -128,17 +128,14 @@ def rundaligner(inputdir,targetdir,seedlength,minidentity,length,seqnum)
 end
 
 def rerun_seedextend(seedlength,filename)
-  if not matchinfile(filename)
-    minidentity, length, seqnum = fromfilename2keys(filename)
-    targetdir = filename.split(/\//)[0]
-    puts "minid=#{minidentity}, length=#{minidentity}, seqnum=#{seqnum}"
-    inputfile = makefilename("#{targetdir}/refdirlink",minidentity,"rand",
-                             length,seqnum)
-    puts "inputfile=#{inputfile}.fas"
-    indexname = "sfx-#{length}-#{seqnum}"
-    callseedextend(indexname,inputfile,"",minidentity,length,seqnum,
-                   seedlength,true)
-  end
+  minidentity, length, seqnum = fromfilename2keys(filename)
+  inputfiledir = ENV["HOME"] + "/dalign-files"
+  puts "minid=#{minidentity}, length=#{minidentity}, seqnum=#{seqnum}"
+  inputfile = makefilename(inputfiledir,minidentity,"rand",length,seqnum)
+  puts "inputfile=#{inputfile}.fas"
+  indexname = "sfx-#{length}-#{seqnum}"
+  callseedextend(indexname,inputfile,"",minidentity,length,seqnum,
+                 seedlength,true)
 end
 
 def parseargs(argv)
@@ -242,7 +239,6 @@ if options.runse or options.runda
   dafail = Array.new(100) {0}
   minidset = Set.new()
   makesystemcall("mkdir -p #{options.targetdir}")
-  makesystemcall("ln -s #{options.inputdir} #{options.targetdir}/refdirlink",true)
   listdirectory(options.inputdir).each do |filename|
     if filename.match(/\.fas/)
       minidentity, length, seqnum = fromfilename2keys(filename)

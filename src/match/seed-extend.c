@@ -470,8 +470,14 @@ GtGreedyextendmatchinfo *gt_greedy_extend_matchinfo_new(
                                             errorpercentage,
                                             sensitivity);
   ggemi->minmatchnum = (ggemi->history * ggemi->perc_mat_history)/100;
-  ggemi->pol_info = polishing_info_new_with_bias(errorpercentage,
-                                                 matchscore_bias);
+  ggemi->pol_info
+    = polishing_info_new_with_bias(
+#ifdef REDUCEPOLISHING_ERR
+                                   MAX(errorpercentage,20),
+#else
+                                   errorpercentage,
+#endif
+                                   matchscore_bias);
   ggemi->db_totallength = GT_UWORD_MAX;
   ggemi->encseq_r_in_u = NULL;
   ggemi->encseq_r_in_v = NULL;
