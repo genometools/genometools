@@ -74,27 +74,37 @@ def showresult(prog,minidentity,found,fails)
          100.0 * found.to_f/(found+fails).to_f)
 end
 
-def runseedextend(inputdir,targetdir,seedlength,minidentity,length,seqnum)
+def callseedextend(indexname,inputfile,destfile,minidentity,length,seqnum,
+                   seedlength,withecho = false)
   gtcall = "env -i bin/gt"
+  makesystemcall("#{gtcall} encseq encode -des no -sds no -md5 no " +
+                 "-indexname #{indexname} #{inputfile}.fas",withecho)
+  makesystemcall("#{gtcall} seed_extend -t 21 -l #{length} " +
+		 "-seedlength #{seedlength} -minidentity #{minidentity} " +
+		 "-seed-display -bias-parameters -extendgreedy " +
+		 "-overlappingseeds -ii #{indexname}" +
+		 if destfile.empty? then "" else " > #{destfile}.txt" end,
+                 withecho)
+  succ = true
+  if destfile != ""
+    succ = matchinfile("#{destfile}.txt")
+    ["esq","ssp"].each do |suffix|
+      filename = "#{indexname}.#{suffix}"
+      if File.exists?(filename)
+        File.delete(filename)
+      end
+    end
+  end
+  return succ
+end
+
+def runseedextend(inputdir,targetdir,seedlength,minidentity,length,seqnum)
   inputfile = makefilename(inputdir,minidentity,"rand",length,seqnum)
   destfile = makefilename(targetdir,minidentity,"gtout",length,seqnum)
   destdir = File.dirname(destfile)
   makesystemcall("mkdir -p #{destdir}")
-  makesystemcall("#{gtcall} encseq encode -des no -sds no -md5 no " +
-                 "-indexname #{inputfile} #{inputfile}.fas")
-  makesystemcall("#{gtcall} seed_extend -t 21 -l #{length} " +
-		 "-seedlength #{seedlength} -minidentity #{minidentity} " +
-		 "-seed-display -bias-parameters -extendgreedy " +
-		 "-overlappingseeds -ii #{inputfile} > " +
-		 "#{destfile}.txt")
-  succ = matchinfile("#{destfile}.txt")
-  ["esq","ssp"].each do |suffix|
-    filename = "#{inputfile}.#{suffix}"
-    if File.exists?(filename)
-      File.delete(filename)
-    end
-  end
-  return succ
+  return callseedextend(inputfile,inputfile,destfile,minidentity,length,seqnum,
+                        seedlength)
 end
 
 def rundaligner(inputdir,targetdir,seedlength,minidentity,length,seqnum)
@@ -119,7 +129,6 @@ end
 
 def rerun_seedextend(seedlength,filename)
   if not matchinfile(filename)
-    gtcall = "env -i bin/gt"
     minidentity, length, seqnum = fromfilename2keys(filename)
     targetdir = filename.split(/\//)[0]
     puts "minid=#{minidentity}, length=#{minidentity}, seqnum=#{seqnum}"
@@ -127,12 +136,8 @@ def rerun_seedextend(seedlength,filename)
                              length,seqnum)
     puts "inputfile=#{inputfile}.fas"
     indexname = "sfx-#{length}-#{seqnum}"
-    makesystemcall("#{gtcall} encseq encode -des no -sds no -md5 no " +
-                   "-indexname #{indexname} #{inputfile}.fas",true)
-    makesystemcall("#{gtcall} seed_extend -t 21 -l #{length} " +
-		   "-seedlength #{seedlength} -minidentity #{minidentity} " +
-		   "-seed-display -bias-parameters -extendgreedy " +
-		   "-overlappingseeds -ii #{indexname} -a",true)
+    callseedextend(indexname,inputfile,"",minidentity,length,seqnum,
+                   seedlength,true)
   end
 end
 
@@ -237,7 +242,7 @@ if options.runse or options.runda
   dafail = Array.new(100) {0}
   minidset = Set.new()
   makesystemcall("mkdir -p #{options.targetdir}")
-  makesystemcall("ln -s #{options.inputdir} #{options.targetdir}/refdirlink")
+  makesystemcall("ln -s #{options.inputdir} #{options.targetdir}/refdirlink",true)
   listdirectory(options.inputdir).each do |filename|
     if filename.match(/\.fas/)
       minidentity, length, seqnum = fromfilename2keys(filename)
