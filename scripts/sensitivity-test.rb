@@ -120,12 +120,21 @@ def parseargs(argv)
   options.first = 0
   opts = OptionParser.new
   indent = " " * 37
+  opts.banner = "Usage: #{$0} [options] \nFirstly, generate sequences using "+
+  "the -g option specifying the number of samples\nand the range of "+
+  "minidentity of the sequences. With -t you should set the target\ndirectory "+
+  "to #{options.inputdir}.\nAfter that, execute this script again to run "+
+  "gt_seed_extend (-s) and/or daligner\n(-d) on the testdata. For a testdata "+
+  "subset specify a number with opton -f.\nThe DALIGNER and DAZZ_DB "+
+  "directories required by -d are expected in ../ but you\ncan specify a "+
+  "different location with environment variable ${PACKAGES}."
+
   opts.on("-g","--generate-seq STRING",
           "generate-sequences argument:" +
           "\n#{indent}argument: num_test,minid_min,minid_max") do |x|
     runseqgen = x.split(/,/).map {|x| x.to_i}
     if runseqgen.length != 3
-      STDERR.puts "#{$0}: need three integer arguments for option -q"
+      STDERR.puts "#{$0}: need three integer arguments for option -g"
       exit 1
     end
     options.num_tests = runseqgen[0]
@@ -143,16 +152,20 @@ def parseargs(argv)
     options.inputdir = x
   end
   opts.on("-t","--targetdir STRING","specify target directory" +
-               "\n#{indent}(default: #{options.targetdir}") do |x|
+               "\n#{indent}(default: #{options.targetdir})") do |x|
     options.targetdir = x
   end
   opts.on("-f","--first NUMBER",
-          "specify number of sequence used for evaluation") do |x|
+          "specify number of sequences used for\n#{indent}evaluation") do |x|
     options.first = x.to_i
     if options.first <= 0
       STDERR.puts "#{$0}: argument of option -f must be positive"
       exit 1
     end
+  end
+  opts.on("-h", "--help", "print this help message") do
+    puts opts
+    exit
   end
   rest = opts.parse(argv)
   if rest.length != 0 or (options.num_tests.nil? and not options.runda and 
