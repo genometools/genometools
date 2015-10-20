@@ -378,9 +378,6 @@ options = parseargs(ARGV)
 alphabet = "acgt"
 errperc = 100 - options.minidentity
 rseq = Randomsequence.new(alphabet,options.seednumber)
-seedpos = Array.new(2){Array.new}
-dbseq = String.new
-queryseq = String.new
 if options.namedfiles
   fpdb = openoutfile("db.fna")
   fpquery = openoutfile("query.fna")
@@ -401,13 +398,17 @@ elsif options.seeded
   options.number.times do
     if options.seedcoverage == 0
       gen_seeded(fpdb,fpquery,fpquery_r,rseq,options,alphabet,errperc)
-    elsif options.long
-      data = gen_long_seeded(rseq,options,alphabet,errperc,dbseq,queryseq,
-                             seedpos)
-      seq_to_fp(fpdb,fpquery,fpquery_r,data)
     else
-      data = gen_seeded_with_coverage(rseq,options,alphabet,errperc,dbseq,
-                                      queryseq,seedpos)
+      seedpos = Array.new(2){Array.new}
+      dbseq = String.new
+      queryseq = String.new
+      if options.long
+        data = gen_long_seeded(rseq,options,alphabet,errperc,dbseq,queryseq,
+                               seedpos)
+      else
+        data = gen_seeded_with_coverage(rseq,options,alphabet,errperc,dbseq,
+                                        queryseq,seedpos)
+      end
       seq_to_fp(fpdb,fpquery,fpquery_r,data)
     end
   end
