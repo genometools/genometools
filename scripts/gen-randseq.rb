@@ -50,6 +50,9 @@ class Randomsequence
     end
     return s.join("")
   end
+  def rgen()
+    return @rgen
+  end
 end
 
 def parseargs(argv)
@@ -73,6 +76,7 @@ def parseargs(argv)
   options.number = 1
   options.mems = false
   options.seedcoverage = 0
+  options.long = false
   opts = OptionParser.new
   opts.on("-m","--mode STRING","specify mode: mirrored|seeded|pair") do |x|
     mode = x
@@ -109,6 +113,10 @@ def parseargs(argv)
   opts.on("--seed NUM","specify the seed for the random number\n" +
                        (" " * indent) + "generator to make sequences reproducible") do |x|
     options.seednumber = x.to_i
+  end
+  opts.on("--long","generate a long sequence with multiple\n" + (" " * indent) +
+          "seeds and noisy areas in between") do |x|
+    options.long = true
   end
   opts.on("-c","--seedcoverage NUM","generate multiple seeds that cover the\n" +
          (" " * indent) + "specified number of bases") do |x|
@@ -153,6 +161,10 @@ def parseargs(argv)
   end
   if options.seedcoverage != 0 and not options.seeded
     STDERR.puts "#{$0}: option -c requires option -m seeded"
+    exit 1
+  end
+  if options.long and options.seedcoverage == 0
+    STDERR.puts "#{$0}: option --long requires option -c"
     exit 1
   end
   if not options.seedlength.nil? and options.seedlength >= options.totallength
@@ -228,12 +240,12 @@ def gen_seeded(fpdb,fpquery,fpquery_r,rseq,options,alphabet,errperc)
   end
 end
 
-def gen_seeded_with_coverage(fpdb,fpquery,fpquery_r,rseq,options,alphabet,errperc)
+def gen_seeded_with_coverage(rseq,options,alphabet,errperc,dbseq,queryseq,
+                             seedpos)
   # build array with random seed positions covering >= seedcoverage positions
   pos = Array.new
-  rgen = Random.new(options.seednumber)
   while pos.length < options.seedcoverage
-    idx = rgen.rand * (options.totallength - options.seedlength + 1)
+    idx = rseq.rgen.rand * (options.totallength - options.seedlength + 1)
     idx = idx.to_i
     pos.concat((idx...idx + options.seedlength).to_a).sort!.uniq!
   end
@@ -276,31 +288,81 @@ def gen_seeded_with_coverage(fpdb,fpquery,fpquery_r,rseq,options,alphabet,errper
     right2 = ""
   end
 
-  # print sequences
-  extendlength = context1.map{|seq| seq.length}.join("+")
-  fpdb.puts ">db: #{headkey(options,extendlength,errperc)}"
-  dbseq = ""
+  # extract sequences
   for i in (0...seedstring.length)
-    dbseq += "#{context1[i]}#{wildcard}#{left1}\n#{seedstring[i]}\n#{right1}"
+    dbseq += "#{context1[i]}#{wildcard}#{left1}"
+    seedpos[0].push((dbseq.length..dbseq.length+seedstring[i].length-1))
+    dbseq += "#{seedstring[i]}#{right1}"
   end
   dbseq += "#{context1[seedstring.length]}"
-  fpdb.puts dbseq
+  dbhead = ">db: #{headkey(options,dbseq.length,errperc)}"
 
-  extendlength = context2.map{|seq| seq.length}.join("+")
-  fpquery.puts ">query: #{headkey(options,extendlength,errperc)}"
-  queryseq = ""
   for i in (0...seedstring.length)
-    queryseq += "#{context2[i]}#{left2}\n#{seedstring[i]}\n#{right2}"
+    queryseq += "#{context2[i]}#{left2}"
+    seedpos[1].push((queryseq.length..queryseq.length+seedstring[i].length-1))
+    queryseq += "#{seedstring[i]}#{right2}"
   end
   queryseq += "#{context2[seedstring.length]}"
-  fpquery.puts queryseq
+  queryhead = ">query: #{headkey(options,queryseq.length,errperc)}"
 
   if options.reverse
-    fpquery_r.puts ">query-r: #{headkey(options,extendlength,errperc)}"
+    query_r = ">query-r: #{headkey(options,queryseq.length,errperc)}"
+  else
+    query_r = nil
+  end
+  return dbhead, dbseq, queryhead, queryseq, query_r, seedpos
+end
+
+def gen_long_seeded(rseq,options,alphabet,errperc,dbinit,queryinit,seedinit)
+  dbseq = dbinit + rseq.sequence((rseq.rgen.rand * 50).to_i)
+  queryseq = queryinit + rseq.sequence((rseq.rgen.rand * 50).to_i)
+  seedpos = seedinit
+  while dbseq.length < 20000
+    data = gen_seeded_with_coverage(rseq,options,alphabet,errperc,dbseq,
+                                    queryseq,seedpos)
+    dbseq = data[1] + rseq.sequence((rseq.rgen.rand * 300 + 100).to_i)
+    queryseq = data[3] + rseq.sequence((rseq.rgen.rand * 300 + 100).to_i)
+    seedpos = data[5]
+  end
+  return data[0], dbseq, data[2], queryseq, data[4], seedpos
+end
+
+def seq_to_fp(fpdb,fpquery,fpquery_r,data)
+  # extract seed positions to string format
+  seedpos = data[5][0]
+  strseedpos = seedpos.map{ |range| "#{range.first}..#{range.last}"}.join("|")
+
+  # write db header and sequence
+  fpdb.puts data[0] + ",seedpos=" + strseedpos
+  dbseq = data[1]
+  seedpos.reverse_each{ |range|
+    dbseq.insert(range.last+1,"\n")
+    dbseq.insert(range.first,"\n")
+  }
+  fpdb.puts dbseq
+
+  # write query header and sequence
+  seedpos = data[5][1]
+  strseedpos = seedpos.map{ |range| "#{range.first}..#{range.last}"}.join("|")
+  fpquery.puts data[2] + ",seedpos=" + strseedpos
+  if not data[4].nil? then
+    strseedpos = seedpos.reverse.map{ |range|
+      "#{data[3].length-range.last-1}..#{data[3].length-range.first-1}"
+    }.join("|")
+  end
+  queryseq = data[3]
+  seedpos.reverse_each{ |range|
+    queryseq.insert(range.last+1,"\n")
+    queryseq.insert(range.first,"\n")
+  }
+  fpquery.puts queryseq
+
+  # write reverse query
+  if not data[4].nil? then
+    fpquery_r.puts data[4] + ",seedpos=" + strseedpos
     fpquery_r.puts queryseq.reverse
   end
 end
-
 
 def openoutfile(filename)
 begin
@@ -316,6 +378,9 @@ options = parseargs(ARGV)
 alphabet = "acgt"
 errperc = 100 - options.minidentity
 rseq = Randomsequence.new(alphabet,options.seednumber)
+seedpos = Array.new(2){Array.new}
+dbseq = String.new
+queryseq = String.new
 if options.namedfiles
   fpdb = openoutfile("db.fna")
   fpquery = openoutfile("query.fna")
@@ -336,8 +401,14 @@ elsif options.seeded
   options.number.times do
     if options.seedcoverage == 0
       gen_seeded(fpdb,fpquery,fpquery_r,rseq,options,alphabet,errperc)
+    elsif options.long
+      data = gen_long_seeded(rseq,options,alphabet,errperc,dbseq,queryseq,
+                             seedpos)
+      seq_to_fp(fpdb,fpquery,fpquery_r,data)
     else
-      gen_seeded_with_coverage(fpdb,fpquery,fpquery_r,rseq,options,alphabet,errperc)
+      data = gen_seeded_with_coverage(rseq,options,alphabet,errperc,dbseq,
+                                      queryseq,seedpos)
+      seq_to_fp(fpdb,fpquery,fpquery_r,data)
     end
   end
 elsif options.pairparam
