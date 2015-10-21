@@ -19,12 +19,12 @@
 #define SPACECALC_H
 
 #define GT_KILOBYTES(V) \
-        ((double) (V)/((1UL << 10) - 1))
+        ((double) (V)/(1UL << 10))
 
 #define GT_MEGABYTES(V) \
-        ((double) (V)/((1UL << 20) - 1))
+        ((double) (V)/(1UL << 20))
 
 #define GT_GIGABYTES(V) \
-        ((double) (V)/((1UL << 30) - 1))
+        ((double) (V)/(1UL << 30))
 
 #endif
