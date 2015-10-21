@@ -959,7 +959,7 @@ static int gt_linspace_align_runner(GT_UNUSED int argc,
   if (!had_err && arguments->spacetime)
   {
     printf("# combined space peak in kilobytes: %f\n",
-            (double)1/1024*(gt_linspaceManagement_get_spacepeak(spacemanager)));
+           GT_KILOBYTES(gt_linspaceManagement_get_spacepeak(spacemanager)));
     printf("# TIME");
 
     gt_timer_show_formatted(linspacetimer," overall " GT_WD ".%02ld\n",stdout);
