@@ -710,7 +710,7 @@ static int alignment_with_affine_gap_costs(GtLinspaceArguments *arguments,
       {
         if (arguments->diagonal)
          {
-           if (!gt_str_array_size(arguments->diagonalbonds) > 0)
+           if (gt_str_array_size(arguments->diagonalbonds) == 0)
            {
              left_dist =
                          LEFT_DIAGONAL_SHIFT(arguments->similarity, ulen, vlen);
