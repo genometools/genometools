@@ -50,8 +50,8 @@ GtMultieoplist *gt_multieoplist_new_with_size(GtUword size)
   multieops = gt_malloc(sizeof (GtMultieoplist));
   multieops->refcount = 0;
   GT_INITARRAY(&multieops->meoplist, Eop);
-  multieops->meoplist.spaceEop = gt_calloc((size_t) size,
-                              sizeof (*(multieops->meoplist.spaceEop)));
+  multieops->meoplist.spaceEop =
+    gt_calloc((size_t) size, sizeof (*(multieops->meoplist.spaceEop)));
   multieops->meoplist.allocatedEop = size;
   return multieops;
 }
