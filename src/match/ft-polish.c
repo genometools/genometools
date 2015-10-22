@@ -68,7 +68,7 @@ static char *polish_intbits2string(GtUword bits,GtUword bs)
   GtUword mask;
   static char cs[64+1];
 
-  gt_assert(bits > 0 && bits <= sizeof(GtUword) * CHAR_BIT);
+  gt_assert(bits > 0 && bits <= sizeof (GtUword) * CHAR_BIT);
   for (csptr = cs, mask = ((GtUword) 1) << (bits-1); mask > 0;
        mask >>= 1, csptr++)
   {

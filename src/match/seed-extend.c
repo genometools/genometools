@@ -454,6 +454,7 @@ GtGreedyextendmatchinfo *gt_greedy_extend_matchinfo_new(
                                    GtUword userdefinedleastlength,
                                    GtExtendCharAccess extend_char_access,
                                    GtUword sensitivity,
+                                   bool weakends,
                                    double matchscore_bias)
 {
   GtGreedyextendmatchinfo *ggemi = gt_malloc(sizeof *ggemi);
@@ -471,12 +472,8 @@ GtGreedyextendmatchinfo *gt_greedy_extend_matchinfo_new(
                                             sensitivity);
   ggemi->minmatchnum = (ggemi->history * ggemi->perc_mat_history)/100;
   ggemi->pol_info
-    = polishing_info_new_with_bias(
-#ifdef REDUCEPOLISHING_ERR
-                                   MAX(errorpercentage,20),
-#else
-                                   errorpercentage,
-#endif
+    = polishing_info_new_with_bias(weakends ? MAX(errorpercentage,20)
+                                            : errorpercentage,
                                    matchscore_bias);
   ggemi->db_totallength = GT_UWORD_MAX;
   ggemi->encseq_r_in_u = NULL;

@@ -82,7 +82,7 @@ def callseedextend(indexname,inputfile,destfile,minidentity,length,seqnum,
   makesystemcall("#{gtcall} seed_extend -t 21 -l #{length} " +
 		 "-seedlength #{seedlength} -minidentity #{minidentity} " +
 		 "-seed-display -bias-parameters -extendgreedy " +
-		 "-overlappingseeds -ii #{indexname}" +
+		 "-overlappingseeds -ii #{indexname} -weakends" +
 		 if destfile.empty? then "" else " > #{destfile}.txt" end,
                  withecho)
   succ = true
