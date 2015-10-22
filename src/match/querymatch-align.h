@@ -34,6 +34,7 @@ void gt_querymatchoutoptions_extend(
                   GtUword history,
                   GtUword perc_mat_history,
                   GtExtendCharAccess extend_char_access,
+                  bool weakends,
                   GtUword sensitivity);
 
 void gt_querymatchoutoptions_delete(
