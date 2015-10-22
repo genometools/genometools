@@ -212,6 +212,7 @@ GtGreedyextendmatchinfo *gt_greedy_extend_matchinfo_new(
                                    GtUword userdefinedleastlength,
                                    GtExtendCharAccess extend_char_access,
                                    GtUword sensitivity,
+                                   bool weakends,
                                    double matchscore_bias);
 
 /* the destructor-method for the gven object. */

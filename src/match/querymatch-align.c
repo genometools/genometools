@@ -154,6 +154,7 @@ void gt_querymatchoutoptions_extend(
                   GtUword history,
                   GtUword perc_mat_history,
                   GtExtendCharAccess extend_char_access,
+                  bool weakends,
                   GtUword sensitivity)
 {
   if (errorpercentage > 0)
@@ -171,6 +172,7 @@ void gt_querymatchoutoptions_extend(
                                        0,/* userdefinedleastlength not used */
                                        extend_char_access,
                                        sensitivity,
+                                       weakends,
                                        GT_DEFAULT_MATCHSCORE_BIAS);
   }
 }

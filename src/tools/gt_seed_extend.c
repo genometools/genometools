@@ -43,6 +43,7 @@ typedef struct {
   bool dbs_debug_kmer;
   bool dbs_debug_seedpair;
   bool dbs_verify;
+  bool weakends;
   /* xdrop extension options */
   GtOption *se_option_xdrop;
   GtUword se_extendxdrop;
@@ -97,7 +98,8 @@ static GtOptionParser* gt_seed_extend_option_parser_new(void *tool_arguments)
   GtSeedExtendArguments *arguments = tool_arguments;
   GtOptionParser *op;
   GtOption *option, *op_gre, *op_xdr, *op_cam, *op_his, *op_dif, *op_pmh,
-    *op_len, *op_err, *op_xbe, *op_sup, *op_frq, *op_mem, *op_ali, *op_bia;
+    *op_len, *op_err, *op_xbe, *op_sup, *op_frq, *op_mem, *op_ali, *op_bia,
+    *op_weakends;
   gt_assert(arguments != NULL);
 
   /* init */
@@ -335,6 +337,15 @@ static GtOptionParser* gt_seed_extend_option_parser_new(void *tool_arguments)
   gt_option_is_development_option(option);
   gt_option_parser_add_option(op, option);
 
+  /* -weakends */
+  op_weakends = gt_option_new_bool("weakends",
+                                   "reduce minidentity for ends of seeded "
+                                   "alignments",
+                                   &arguments->weakends,
+                                   false);
+  gt_option_imply_either_2(op_weakends, op_xdr, op_gre);
+  gt_option_parser_add_option(op, op_weakends);
+
   /* -v */
   option = gt_option_new_verbose(&arguments->verbose);
   gt_option_parser_add_option(op, option);
@@ -503,6 +514,7 @@ static int gt_seed_extend_runner(GT_UNUSED int argc,
                                                arguments->se_alignlength,
                                                cam,
                                                arguments->se_extendgreedy,
+                                               arguments->weakends,
                                                matchscore_bias);
     if (arguments->benchmark) {
       gt_greedy_extend_matchinfo_silent_set(grextinfo);
@@ -539,6 +551,7 @@ static int gt_seed_extend_runner(GT_UNUSED int argc,
                                      arguments->se_historysize,
                                      arguments->se_perc_match_hist,
                                      cam,
+                                     arguments->weakends,
                                      sensitivity);
     }
   }
