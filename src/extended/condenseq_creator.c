@@ -569,7 +569,8 @@ static int ces_c_extend_seeds_window(GtCondenseqCreator *ces_c,
   unsigned int idx_win;
   GtXdropbest empty = {0,0,0,0,0};
   const bool forward = true;
-  match_bounds.end = 0;
+  match_bounds.end =
+    match_bounds.start = 0;
 
   *xdrop->left = empty;
   *xdrop->right = empty;
@@ -711,7 +712,8 @@ static int ces_c_extend_seeds_brute_force(GtCondenseqCreator *ces_c,
   *xdrop->left = empty;
   *xdrop->right = empty;
 
-  match_bounds.end = 0;
+  match_bounds.end =
+    match_bounds.start = 0;
 
   match_positions = win->pos_arrs[GT_CONDENSEQ_CREATOR_LAST_WIN(win)];
 
