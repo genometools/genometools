@@ -80,18 +80,22 @@ void gt_assembly_stats_calculator_set_genome_length(
 #define MAX_NOF_NSTATS 4
 typedef struct
 {
-  GtUword       nvalue[MAX_NOF_NSTATS];
-  GtUword       lvalue[MAX_NOF_NSTATS];
-  GtUint64  min[MAX_NOF_NSTATS];
-  bool                done[MAX_NOF_NSTATS];
-  char                *name[MAX_NOF_NSTATS];
-  GtUint64  limit[NOF_LIMITS];
-  GtUint64  larger_than_limit[NOF_LIMITS];
-  GtUint64  current_len;
-  GtUint64  current_num;
-  unsigned int        nofstats;
-  GtUint64  median;
-  GtUint64  half_num;
+  char         *name[MAX_NOF_NSTATS];
+  bool         done[MAX_NOF_NSTATS];
+  GtUint64     current_len,
+               current_num,
+               first_quartile,
+               fourth_num,
+               half_num,
+               larger_than_limit[NOF_LIMITS],
+               limit[NOF_LIMITS],
+               median,
+               min[MAX_NOF_NSTATS],
+               third_quartile,
+               three_fourth_num;
+  GtUword      nvalue[MAX_NOF_NSTATS],
+               lvalue[MAX_NOF_NSTATS];
+  unsigned int nofstats;
 } Nstats;
 
 static void calcNstats(GtUword key, GtUint64 value,
@@ -106,9 +110,18 @@ static void calcNstats(GtUword key, GtUint64 value,
     if ((GtUint64) key > nstats->limit[i])
       nstats->larger_than_limit[i] = nstats->current_num;
   }
+  if (nstats->third_quartile == 0 && nstats->current_num >= nstats->fourth_num)
+  {
+    nstats->third_quartile = (GtUint64) key;
+  }
   if (nstats->median == 0 && nstats->current_num >= nstats->half_num)
   {
     nstats->median = (GtUint64) key;
+  }
+  if (nstats->first_quartile == 0 && nstats->current_num >=
+      nstats->three_fourth_num)
+  {
+    nstats->first_quartile = (GtUint64) key;
   }
   for (i = 0; i < nstats->nofstats; i++)
   {
@@ -147,7 +160,11 @@ GtUword gt_assembly_stats_calculator_nstat(GtAssemblyStatsCalculator *asc,
   nstats.current_len = 0;
   nstats.current_num = 0;
   nstats.half_num = (GtUint64) (asc->numofseq >> 1);
+  nstats.fourth_num = nstats.half_num >> 1;
+  nstats.three_fourth_num = nstats.fourth_num + nstats.half_num;
   nstats.median = 0;
+  nstats.first_quartile = 0;
+  nstats.third_quartile = 0;
   gt_disc_distri_foreach_in_reverse_order(asc->lengths, calcNstats, &nstats);
   return nstats.nvalue[0];
 }
@@ -176,43 +193,51 @@ void gt_assembly_stats_calculator_show(GtAssemblyStatsCalculator *asc,
   nstats.current_len = 0;
   nstats.current_num = 0;
   nstats.half_num = (GtUint64) (asc->numofseq >> 1);
+  nstats.fourth_num = nstats.half_num >> 1;
+  nstats.three_fourth_num = nstats.fourth_num + nstats.half_num;
   nstats.median = 0;
+  nstats.first_quartile = 0;
+  nstats.third_quartile = 0;
   gt_disc_distri_foreach_in_reverse_order(asc->lengths, calcNstats, &nstats);
 
   gt_logger_log(logger, "number of contigs:     "Formatuint64_t"",
-      PRINTuint64_tcast(asc->numofseq));
+                PRINTuint64_tcast(asc->numofseq));
   if (asc->genome_length > 0)
   {
     gt_logger_log(logger, "genome length:         "GT_WU"",
-        PRINTuint64_tcast(asc->genome_length));
+                  PRINTuint64_tcast(asc->genome_length));
   }
   gt_logger_log(logger, "total contigs length:  "Formatuint64_t"",
-      PRINTuint64_tcast(asc->sumlength));
+                PRINTuint64_tcast(asc->sumlength));
   if (asc->genome_length > 0)
   {
-    gt_logger_log(logger, "   as %% of genome:     %.2f %%",
-        (double) asc->sumlength * 100 / asc->genome_length);
+    gt_logger_log(logger, "   as %% of genome:     %.2f %%", (double)
+                  asc->sumlength * 100 / asc->genome_length);
   }
   gt_logger_log(logger, "mean contig size:      %.2f",
-      (double) asc->sumlength / asc->numofseq);
-  gt_logger_log(logger, "median contig size:    "GT_LLU"", nstats.median);
-  gt_logger_log(logger, "longest contig:        "GT_WU"", asc->maxlength);
-  gt_logger_log(logger, "shortest contig:       "GT_WU"", asc->minlength);
-  gt_logger_log(logger, "contigs > 500 nt:      "GT_LLU" (%.2f %%)",
-      nstats.larger_than_limit[0], (double) nstats.larger_than_limit[0] * 100
-      / asc->numofseq);
-  gt_logger_log(logger, "contigs > 1K nt:       "GT_LLU" (%.2f %%)",
-      nstats.larger_than_limit[1], (double) nstats.larger_than_limit[1] * 100
-      / asc->numofseq);
-  gt_logger_log(logger, "contigs > 10K nt:      "GT_LLU" (%.2f %%)",
-      nstats.larger_than_limit[2], (double) nstats.larger_than_limit[2] * 100
-      / asc->numofseq);
-  gt_logger_log(logger, "contigs > 100K nt:     "GT_LLU" (%.2f %%)",
-      nstats.larger_than_limit[3], (double) nstats.larger_than_limit[3] * 100
-      / asc->numofseq);
-  gt_logger_log(logger, "contigs > 1M nt:       "GT_LLU" (%.2f %%)",
-      nstats.larger_than_limit[4], (double) nstats.larger_than_limit[4] * 100
-      / asc->numofseq);
+                (double) asc->sumlength / asc->numofseq);
+  gt_logger_log(logger, "contig size first quartile: " GT_LLU,
+                nstats.first_quartile);
+  gt_logger_log(logger, "median contig size:         " GT_LLU, nstats.median);
+  gt_logger_log(logger, "contig size third quartile: " GT_LLU,
+                nstats.third_quartile);
+  gt_logger_log(logger, "longest contig:             " GT_WU, asc->maxlength);
+  gt_logger_log(logger, "shortest contig:            " GT_WU, asc->minlength);
+  gt_logger_log(logger, "contigs > 500 nt:           " GT_LLU " (%.2f %%)",
+                nstats.larger_than_limit[0], (double)
+                nstats.larger_than_limit[0] * 100 / asc->numofseq);
+  gt_logger_log(logger, "contigs > 1K nt:            " GT_LLU " (%.2f %%)",
+                nstats.larger_than_limit[1], (double)
+                nstats.larger_than_limit[1] * 100 / asc->numofseq);
+  gt_logger_log(logger, "contigs > 10K nt:           " GT_LLU " (%.2f %%)",
+                nstats.larger_than_limit[2], (double)
+                nstats.larger_than_limit[2] * 100 / asc->numofseq);
+  gt_logger_log(logger, "contigs > 100K nt:          " GT_LLU " (%.2f %%)",
+                nstats.larger_than_limit[3], (double)
+                nstats.larger_than_limit[3] * 100 / asc->numofseq);
+  gt_logger_log(logger, "contigs > 1M nt:            " GT_LLU " (%.2f %%)",
+                nstats.larger_than_limit[4], (double)
+                nstats.larger_than_limit[4] * 100 / asc->numofseq);
   for (i = 0; i < nstats.nofstats ; i++)
   {
     if (nstats.nvalue[i] > 0)

@@ -42,21 +42,23 @@ void                       gt_assembly_stats_calculator_add(
 /* Compute the N statistics <n> for the GtAssemblyStatsCalculator <asc>;
    <n> is an integer between 0 and 100 (extremes excluded);
    e.g. for N50 use n = 50 */
-GtUword gt_assembly_stats_calculator_nstat(GtAssemblyStatsCalculator *asc,
-                                           GtUword n);
+GtUword                    gt_assembly_stats_calculator_nstat(
+                                                 GtAssemblyStatsCalculator *asc,
+                                                 GtUword n);
 
 /* Set the genome length for the GtAssemblyStatsCalculator <asc>;
    this is not necessary, but if the genome length is set;
    then the NG/LG statistics can also be computed;
    to disable NG statistics computation set the genome lenght to 0
    (this is the default) */
-void gt_assembly_stats_calculator_set_genome_length(
+void                       gt_assembly_stats_calculator_set_genome_length(
                                                  GtAssemblyStatsCalculator *asc,
                                                  GtUword genome_length);
 
 /* Print the statistics for GtAssemblyStatsCalculator <asc>
    to the GtLogger <logger> in a pre-formatted table */
-void gt_assembly_stats_calculator_show(GtAssemblyStatsCalculator *asc,
-                                       GtLogger *logger);
+void                       gt_assembly_stats_calculator_show(
+                                                 GtAssemblyStatsCalculator *asc,
+                                                 GtLogger *logger);
 
 #endif
