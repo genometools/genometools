@@ -818,7 +818,7 @@ static void nextAStabcolumn(AffinealignDPentry *Atabcolumn,
   Starttabentry Snw, Swe;
   GtUword rowindex;
   GtWord gap_extension, gap_opening, replacement, temp, val1, val2;
-  GtUwordPair start;
+  GtUwordPair start = {0};
 
   gap_opening = gt_scorehandler_get_gap_opening(scorehandler);
   gap_extension = gt_scorehandler_get_gapscore(scorehandler);

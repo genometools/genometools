@@ -758,7 +758,7 @@ static Rnode evaluateallaffineDBcolumns(LinspaceManagement *spacemanager,
   AffinealignDPentry *Atabcolumn, northwestAffinealignDPentry,
   westAffinealignDPentry = (AffinealignDPentry)
                            {GT_WORD_MAX, GT_WORD_MAX, GT_WORD_MAX};;
-  Rtabentry *Rtabcolumn, northwestRtabentry, westRtabentry;
+  Rtabentry *Rtabcolumn, northwestRtabentry, westRtabentry = {{0}} ;
   Rnode lastcpoint = {GT_UWORD_MAX, Affine_X};
 
   if ((left_dist > MIN(0, (GtWord)vlen-(GtWord)ulen))||
