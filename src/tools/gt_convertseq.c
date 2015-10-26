@@ -228,12 +228,13 @@ static int gt_convertseq_runner(int argc, const char **argv, int parsed_args,
             gt_file_xfputc((int) seq[i], arguments->outfp);
             j++;
           }
-          if ((j % arguments->fastawidth) == 0) {
+          if (arguments->fastawidth > 0 && j % arguments->fastawidth == 0) {
             j = 0;
             gt_file_xprintf(arguments->outfp, "\n");
           }
         }
-        gt_file_xprintf(arguments->outfp, "\n");
+        if (arguments->fastawidth == 0 || len % arguments->fastawidth != 0)
+            gt_file_xprintf(arguments->outfp, "\n");
       }
       if (arguments->revcomp) {
         gt_free(seq);
