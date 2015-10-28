@@ -363,7 +363,6 @@ struct GtGreedyextendmatchinfo
   Fronttrace *left_front_trace, *right_front_trace;
   Polishing_info *pol_info;
   GtUword history,
-          minmatchnum,
           maxalignedlendifference,
           errorpercentage,
           perc_mat_history,
@@ -470,7 +469,6 @@ GtGreedyextendmatchinfo *gt_greedy_extend_matchinfo_new(
                                             perc_mat_history,
                                             errorpercentage,
                                             sensitivity);
-  ggemi->minmatchnum = (ggemi->history * ggemi->perc_mat_history)/100;
   ggemi->pol_info
     = polishing_info_new_with_bias(weakends ? MAX(errorpercentage,20)
                                             : errorpercentage,
@@ -659,14 +657,14 @@ GtUword gt_align_front_prune_edist(bool rightextension,
   gt_assert(ggemi != NULL);
   gt_greedy_extend_init(&ufsr,&vfsr,dbencseq,query,query_readmode,
                         query_totallength,ggemi);
-  maxiterations = greedyextension ? 1 : ggemi->minmatchnum;
+  maxiterations = greedyextension ? 1 : ggemi->perc_mat_history;
   gt_assert(best_polished_point != NULL);
   for (iteration = 0; iteration < maxiterations; iteration++)
   {
 #ifdef SKDEBUG
     printf("%s: iteration " GT_WU "\n",__func__,iteration);
 #endif
-    gt_assert(iteration < ggemi->minmatchnum);
+    gt_assert(iteration < ggemi->perc_mat_history);
     distance = front_prune_edist_inplace(rightextension,
                                          &ggemi->frontspace_reservoir,
                                          NULL, /* trimstat */
@@ -674,7 +672,7 @@ GtUword gt_align_front_prune_edist(bool rightextension,
                                          front_trace,
                                          ggemi->pol_info,
                                          ggemi->history,
-                                         ggemi->minmatchnum - iteration,
+                                         ggemi->perc_mat_history - iteration,
                                          ggemi->maxalignedlendifference
                                            + iteration,
                                          seedlength,
@@ -926,7 +924,7 @@ static const GtQuerymatch *gt_extend_sesp(bool forxdrop,
                                        greedyextendmatchinfo->left_front_trace,
                                        greedyextendmatchinfo->pol_info,
                                        greedyextendmatchinfo->history,
-                                       greedyextendmatchinfo->minmatchnum,
+                                       greedyextendmatchinfo->perc_mat_history,
                                        greedyextendmatchinfo->
                                           maxalignedlendifference,
                                        sesp->seedlen,
@@ -1028,7 +1026,7 @@ static const GtQuerymatch *gt_extend_sesp(bool forxdrop,
                                        greedyextendmatchinfo->right_front_trace,
                                        greedyextendmatchinfo->pol_info,
                                        greedyextendmatchinfo->history,
-                                       greedyextendmatchinfo->minmatchnum,
+                                       greedyextendmatchinfo->perc_mat_history,
                                        greedyextendmatchinfo->
                                           maxalignedlendifference,
                                        sesp->seedlen,

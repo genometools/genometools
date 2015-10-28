@@ -107,7 +107,8 @@ def runseedextend(inputdir,targetdir,seedlength,minidentity,length,seqnum)
                         seedlength)
 end
 
-def rundaligner(inputdir,targetdir,seedlength,minidentity,length,seqnum)
+def rundaligner(inputdir,targetdir,seedlength,minidentity,length,seqnum,
+                tofile = true)
   inputfile = makefilename(inputdir,minidentity,"rand",length,seqnum)
   destfile = makefilename(targetdir,minidentity,"daout",length,seqnum)
   destdir = File.dirname(destfile)
@@ -120,14 +121,24 @@ def rundaligner(inputdir,targetdir,seedlength,minidentity,length,seqnum)
     myersprog = ".."
   end
   makesystemcall("#{myersprog}/DAZZ_DB/fasta2DB #{destfile}.db #{destfile}.fasta")
+  if tofile
+    outputfile = "> #{destfile}.txt"
+  else
+    outputfile = ""
+  end
+  withecho = if tofile then false else true end
+  if withecho
+    puts "daligner result:"
+  end
   makesystemcall("#{myersprog}/DALIGNER/daligner -t21 -I -A -Y " +
                  "-e0.#{minidentity} -l#{length} -k#{seedlength} " +
-                 "#{destfile}.db #{destfile}.db > #{destfile}.txt")
+                 "#{destfile}.db #{destfile}.db #{outputfile}",withecho)
   File.delete("#{destfile}.db")
   return matchinfile("#{destfile}.txt")
 end
 
-def rerun_seedextend(seedlength,filename)
+def rerun_seedextend(options,seedlength)
+  filename = options.rerun
   minidentity, length, seqnum = fromfilename2keys(filename)
   inputfiledir = ENV["HOME"] + "/dalign-files"
   puts "minid=#{minidentity}, length=#{minidentity}, seqnum=#{seqnum}"
@@ -136,6 +147,8 @@ def rerun_seedextend(seedlength,filename)
   indexname = "sfx-#{length}-#{seqnum}"
   callseedextend(indexname,inputfile,"",minidentity,length,seqnum,
                  seedlength,true)
+  rundaligner(options.inputdir,options.targetdir,seedlength,
+              minidentity,length,seqnum,false)
 end
 
 def parseargs(argv)
@@ -202,7 +215,7 @@ def parseargs(argv)
     exit
   end
   rest = opts.parse(argv)
-  if rest.length != 0 or (options.num_tests.nil? and not options.runda and 
+  if rest.length != 0 or (options.num_tests.nil? and not options.runda and
                           not options.runse and options.rerun.nil?)
     STDERR.puts "#{opts}"
     exit 1
@@ -276,5 +289,5 @@ if options.runse or options.runda
   end
 end
 if not options.rerun.nil?
-  rerun_seedextend(seedlength,options.rerun)
+  rerun_seedextend(options,seedlength)
 end
