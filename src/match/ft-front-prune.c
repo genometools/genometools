@@ -462,61 +462,52 @@ static GtUword front_second_inplace(Frontvalue *midfront,
   return maxalignedlen;
 }
 
-#undef TRIM_INFO_OUT
-#ifdef TRIM_INFO_OUT
-static bool trimthisentry(GtUword distance,
+static bool trimthisentry(GT_UNUSED GtUword distance,
                           Rowvaluetype row,
                           GtWord diagonal,
-                          GtUword max_history,
                           const Frontvalue *fv,
-                          GtUword minmatchnum,
+                          GT_UNUSED GtUword max_history,
+                          GtUword minmatchpercentage,
                           GtUword minlenfrommaxdiff)
 {
-  if (fv->matchhistory_size == max_history &&
-      fv->matchhistory_count < minmatchnum)
+  if (fv->matchhistory_count < (fv->matchhistory_size * minmatchpercentage)/100)
   {
-    printf(GT_WD "&" GT_WU "&%u&1: matches=%d < " GT_WU "=minmatches\n",
-              diagonal,distance,row,(int) fv->matchhistory_count,minmatchnum);
+#undef TRIM_INFO_OUT
+#ifdef TRIM_INFO_OUT
+    GtUword alignedlen = GT_MULT2(row) + diagonal;
+    double identity = 100.0 * (1.0 - 2.0 * (double) distance/alignedlen);
+    printf("aligned=" GT_WU ",diagonal=" GT_WD ", distance=" GT_WU
+           "row=%u, identity=%.2f, hist_size=%d, matches=%d "
+           "< " GT_WU "=minmatches\n",
+           alignedlen,
+           diagonal,distance,row,
+           identity,
+           (int) fv->matchhistory_size,
+           (int) fv->matchhistory_count,
+           fv->matchhistory_size * minmatchpercentage/100);
+#endif
     return true;
   }
   if (GT_MULT2(row) + diagonal < minlenfrommaxdiff)
   {
+#ifdef TRIM_INFO_OUT
     printf(GT_WD "&" GT_WU "&%u&2: i'+j'=" GT_WU "<" GT_WU "=i+j-lag\n",
               diagonal,distance,row,GT_MULT2(row) + diagonal,minlenfrommaxdiff);
-    return true;
-  }
-  printf(GT_WD "&" GT_WU "&%u\n", diagonal,distance,row);
-  return false;
-}
-#else
-static bool trimthisentry(Rowvaluetype row,
-                          GtWord diagonal,
-                          GtUword max_history,
-                          const Frontvalue *fv,
-                          GtUword minmatchnum,
-                          GtUword minlenfrommaxdiff)
-{
-  if (fv->matchhistory_size == max_history &&
-      fv->matchhistory_count < minmatchnum)
-  {
-    return true;
-  }
-  if (GT_MULT2(row) + diagonal < minlenfrommaxdiff)
-  {
-    return true;
-  }
-  return false;
-}
 #endif
+    return true;
+  }
+#ifdef TRIM_INFO_OUT
+  printf(GT_WD "&" GT_WU "&%u\n", diagonal,distance,row);
+#endif
+  return false;
+}
 
 static GtUword trim_front(bool upward,
-#ifdef TRIM_INFO_OUT
                           GtUword distance,
-#endif
                           GtUword ulen,
                           GtUword vlen,
                           GtUword max_history,
-                          GtUword minmatchnum,
+                          GtUword minmatchpercentage,
                           GtUword minlenfrommaxdiff,
                           const Frontvalue *midfront,
                           const Frontvalue *from,
@@ -531,16 +522,13 @@ static GtUword trim_front(bool upward,
   {
     if (frontptr->row > ulen ||
         frontptr->row + FRONT_DIAGONAL(frontptr) > vlen ||
-        trimthisentry(
-#ifdef TRIM_INFO_OUT
-                        distance,
-#endif
-                        frontptr->row,
-                        FRONT_DIAGONAL(frontptr),
-                        max_history,
-                        frontptr,
-                        minmatchnum,
-                        minlenfrommaxdiff))
+        trimthisentry(distance,
+                      frontptr->row,
+                      FRONT_DIAGONAL(frontptr),
+                      frontptr,
+                      max_history,
+                      minmatchpercentage,
+                      minlenfrommaxdiff))
     {
       trim++;
     } else
@@ -632,8 +620,8 @@ static void update_trace_and_polished(Polished_point *best_polished_point,
                                  (fill_bits << frontptr->matchhistory_size);
     }
     lsb = filled_matchhistory_bits & pol_info->mask;
-    if (HISTORY_IS_POLISHED(pol_info,filled_matchhistory_bits,lsb) &&
-        alignedlen > best_polished_point->alignedlen)
+    if (alignedlen > best_polished_point->alignedlen &&
+        HISTORY_IS_POLISHED(pol_info,filled_matchhistory_bits,lsb))
     {
       best_polished_point->alignedlen = alignedlen;
       best_polished_point->row = frontptr->row;
@@ -658,7 +646,7 @@ GtUword front_prune_edist_inplace(
                          Fronttrace *front_trace,
                          const Polishing_info *pol_info,
                          GtUword max_history,
-                         GtUword minmatchnum,
+                         GtUword minmatchpercentage,
                          GtUword maxalignedlendifference,
                          GtUword seedlength,
                          FTsequenceResources *ufsr,
@@ -721,9 +709,6 @@ GtUword front_prune_edist_inplace(
   gt_greedy_show_context(rightextension,&useq,&vseq);
 #endif
   frontspace->offset = 0;
-#endif
-#ifdef TRIM_INFO_OUT
-  printf("regionalquality(minmatchnum)=" GT_WU "\n",minmatchnum);
 #endif
   for (distance = 0, valid = 1UL; /* Nothing */; distance++, valid += 2)
   {
@@ -798,13 +783,11 @@ GtUword front_prune_edist_inplace(
            maxalignedlen,minlenfrommaxdiff);
 #endif
     trim = trim_front(true,
-#ifdef TRIM_INFO_OUT
                       distance,
-#endif
                       ulen,
                       vlen,
                       max_history,
-                      minmatchnum,
+                      minmatchpercentage,
                       minlenfrommaxdiff,
                       validbasefront + distance,
                       validbasefront + trimleft,
@@ -821,13 +804,11 @@ GtUword front_prune_edist_inplace(
     if (valid > 0)
     {
       trim = trim_front(false,
-#ifdef TRIM_INFO_OUT
                         distance,
-#endif
                         ulen,
                         vlen,
                         max_history,
-                        minmatchnum,
+                        minmatchpercentage,
                         minlenfrommaxdiff,
                         validbasefront + distance,
                         validbasefront + trimleft + valid - 1,
@@ -870,6 +851,10 @@ GtUword front_prune_edist_inplace(
           distance + vlen - ulen <= trimleft + valid - 1 &&
           validbasefront[distance + vlen - ulen].row == ulen)
       {
+        best_polished_point->row = ulen;
+        best_polished_point->alignedlen = ulen + vlen;
+        best_polished_point->distance = distance;
+        best_polished_point->trimleft = trimleft;
         break;
       }
     }
