@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdbool.h>
+#include <limits.h>
 #include "core/assert_api.h"
 #include "core/ma_api.h"
 #include "core/types_api.h"
