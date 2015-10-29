@@ -123,7 +123,6 @@ static int gt_show_seedext_get_encseq_index(GtStr *ii,
 {
   const GtUword maxlinelength = 1000;
   FILE *file;
-  char *buffer;
   int had_err = 0;
 
   gt_assert(ii && qii);
@@ -133,9 +132,8 @@ static int gt_show_seedext_get_encseq_index(GtStr *ii,
     gt_error_set(err, "file %s does not exist", filename);
     had_err = -1;
   }
-
-  buffer = gt_malloc(maxlinelength * sizeof *buffer);
   if (!had_err) {
+    char *buffer = gt_malloc(maxlinelength * sizeof *buffer);
     /* read first line and evaluate tokens */
     if (fgets(buffer, maxlinelength, file)) {
       char *tok = strtok(buffer, " ");
@@ -158,9 +156,12 @@ static int gt_show_seedext_get_encseq_index(GtStr *ii,
       gt_error_set(err, "file %s is empty", filename);
       had_err = -1;
     }
+    gt_free(buffer);
   }
-  fclose(file);
-  gt_free(buffer);
+  if (file != NULL)
+  {
+    fclose(file);
+  }
   return had_err;
 }
 
