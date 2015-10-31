@@ -99,16 +99,4 @@ GtUword diagonalbandalignment_in_square_space(LinspaceManagement *spacemanager,
                                               GtUword mismatchcost,
                                               GtUword gapcost);
 
-/* calculate only distance with diagonalband in square space */
-GtUword diagonalband_squarespace_distance_only(const GtUchar *useq,
-                                               GtUword ustart,
-                                               GtUword ulen,
-                                               const GtUchar *vseq,
-                                               GtUword vstart,
-                                               GtUword vlen,
-                                               GtWord left_dist,
-                                               GtWord right_dist,
-                                               GtUword matchcost,
-                                               GtUword mismatchcost,
-                                               GtUword gapcost);
 #endif

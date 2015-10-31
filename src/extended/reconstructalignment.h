@@ -42,7 +42,7 @@ void reconstructalignment_from_EDtab(GtAlignment *align, GtUword **E,
                                      const GtUchar *vseq,
                                      GtUword vstart,
                                      GtUword vlen,
-                                     GtScoreHandler *scorehandler);
+                                     const GtScoreHandler *scorehandler);
 
 /* reconstruct alignment from square space table Ltab
  * use this function for lcoal alignment with linear gapscores*/
@@ -55,7 +55,7 @@ void reconstructalignment_from_Ltab(GtAlignment *align,
                                     const GtUchar *vseq,
                                     GtUword vstart,
                                     GtUword vlen,
-                                    GtScoreHandler *scorehandler);
+                                    const GtScoreHandler *scorehandler);
 
 /* reconstruct alignment from crosspoint table, realting to midcolumn,
  * use this function for global or local alignment with linear or affine
@@ -67,7 +67,7 @@ void reconstructalignment_from_Ctab(GtAlignment *align,
                                     const GtUchar *vseq,
                                     GtUword vstart,
                                     GtUword vlen,
-                                    GtScoreHandler *scorehandler);
+                                    const GtScoreHandler *scorehandler);
 
 /* reconstruct alignment from crosspoints, crosspoints relating to diagonalband
  * use this function for alignment with linear gapcosts in diagonalband */

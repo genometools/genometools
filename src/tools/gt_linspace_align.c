@@ -44,12 +44,12 @@
 #include "tools/gt_linspace_align.h"
 
 #define LEFT_DIAGONAL_SHIFT(similarity, ulen, vlen) \
-                                  -((1-similarity)*(MAX(ulen,vlen)) + 1 +\
-                                   ((GtWord)ulen-(GtWord)vlen))
+                            -((1-similarity)*(MAX(ulen,vlen)) + 1 +\
+                            ((GtWord)ulen-(GtWord)vlen))
 
 #define RIGHT_DIAGONAL_SHIFT(similarity, ulen, vlen) \
-                                   ((1-similarity)*(MAX(ulen,vlen)) + 1 -\
-                                   ((GtWord)ulen-(GtWord)vlen))
+                             ((1-similarity)*(MAX(ulen,vlen)) + 1 -\
+                             ((GtWord)ulen-(GtWord)vlen))
 
 typedef struct{
   GtStr      *outputfile; /*default stdout*/
@@ -78,7 +78,7 @@ typedef struct{
 typedef struct {
   GtStr **seqarray;
   GtUword size, maxsize;
-} GtSequences;
+} GtSequenceTable;
 
 static void* gt_linspace_align_arguments_new(void)
 {
@@ -106,28 +106,28 @@ static void gt_linspace_align_arguments_delete(void *tool_arguments)
   }
 }
 
-static GtSequences* gt_sequences_new()
+static GtSequenceTable* gt_sequence_table_new()
 {
-  GtSequences *sequences;
+  GtSequenceTable *sequence_table;
 
-  sequences = gt_malloc(sizeof(*sequences));
-  sequences->seqarray = gt_malloc(sizeof(*sequences->seqarray));
-  sequences->size = 0;
-  sequences->maxsize = 1;
-
-  return sequences;
+  sequence_table = gt_malloc(sizeof(*sequence_table));
+  sequence_table->seqarray = gt_malloc(sizeof(*sequence_table->seqarray));
+  sequence_table->size = 0;
+  sequence_table->maxsize = 1;
+  return sequence_table;
 }
 
-static void gt_sequences_delete(GtSequences *sequences)
+static void gt_sequence_table_delete(GtSequenceTable *sequence_table)
 {
   GtUword i;
-  if (sequences != NULL) {
-   for (i = 0; i < sequences->size ; i++)
+  if (sequence_table != NULL)
+  {
+    for (i = 0; i < sequence_table->size ; i++)
     {
-       gt_str_delete(sequences->seqarray[i]);
+      gt_str_delete(sequence_table->seqarray[i]);
     }
-    gt_free(sequences->seqarray);
-    gt_free(sequences);
+    gt_free(sequence_table->seqarray);
+    gt_free(sequence_table);
   }
 }
 
@@ -164,7 +164,7 @@ static GtOptionParser* gt_linspace_align_option_parser_new(void *tool_arguments)
                                       &arguments->diagonal, false);
   gt_option_parser_add_option(op, optiondiagonal);
 
-  optiondna = gt_option_new_bool("dna", "type of sequences: dna",
+  optiondna = gt_option_new_bool("dna", "type of sequences: DNA",
                                  &arguments->dna, false);
   gt_option_parser_add_option(op, optiondna);
 
@@ -297,9 +297,9 @@ static int gt_linspace_align_arguments_check(int rest_argc,
 {
   GtLinspaceArguments *arguments = tool_arguments;
   int had_err = 0;
-  gt_error_check(err);
-  gt_assert(arguments);
 
+  gt_error_check(err);
+  gt_assert(arguments != NULL);
   if (rest_argc != 0)
   {
     gt_error_set(err,"superfluous arguments");
@@ -354,113 +354,106 @@ static int gt_linspace_align_arguments_check(int rest_argc,
     gt_error_set(err, "option -lr requires left and right shift of diagonal");
     had_err = 1;
   }
-
   return had_err;
 }
 
-static void sequence_encode(GtUchar *seq, GtUword len, GtAlphabet *alphabet)
-{
-  GtUword idx;
-  for (idx = 0; idx < len; idx++)
-   seq[idx] = gt_alphabet_encode(alphabet, seq[idx]);
-}
-
-static void sequence_decode(GtUchar *seq, GtUword len, GtAlphabet *alphabet)
-{
-  GtUword idx;
-  for (idx = 0; idx < len; idx++)
-   seq[idx] = gt_alphabet_decode(alphabet, seq[idx]);
-}
-
 /*show sequence*/
-static void print_sequence(const GtUchar *seq, GtUword len, FILE *fp)
+static void gt_linspace_print_sequence(const GtUchar *characters,
+                                       GtUchar wildcardshow,
+                                       const GtUchar *seq, GtUword len,
+                                       FILE *fp)
 {
-  GtUword i = 0;
-  fprintf(fp, "######\n");
-  do{
-    fprintf(fp, "%.80s\n",seq+i);
-    i += 80;
-  }while (i < len);
+  const GtUword linewidth = 80;
+  GtUword idx;
 
+  fprintf(fp, "######\n");
+  for (idx = 0; idx < len; idx++)
+  {
+    GtUchar cc;
+    if (characters == NULL)
+    {
+      cc = seq[idx];
+    } else
+    {
+      if (ISSPECIAL(seq[idx]))
+      {
+        cc = wildcardshow;
+      } else
+      {
+        cc = characters[seq[idx]];
+      }
+    }
+    fputc(cc,fp);
+    if ((idx + 1) % linewidth == 0)
+    {
+      fputc('\n',fp);
+    }
+  }
+  if (idx % linewidth != 0)
+  {
+    fputc('\n',fp);
+  }
 }
 
 /*show sequences, alignment and score*/
-static void alignment_show_with_sequences(GtUchar *useq, GtUword ulen,
-                                          GtUchar *vseq, GtUword vlen,
+static void alignment_show_with_sequences(const GtUchar *useq, GtUword ulen,
+                                          const GtUchar *vseq, GtUword vlen,
                                           const GtAlignment *align,
-                                          GtAlphabet *alphabet,
+                                          const GtUchar *characters,
                                           GtUchar wildcardshow,
                                           bool showscore,
                                           bool showalign,
                                           bool showsequences,
                                           bool global,
-                                          GtScoreHandler *scorehandler,
+                                          const GtScoreHandler *scorehandler,
                                           FILE *fp)
 {
-  const GtUchar *characters;
-
   if (fp != NULL)
   {
     if (showsequences)
     {
-      print_sequence(useq, ulen, fp);
-      print_sequence(vseq, vlen, fp);
+      gt_linspace_print_sequence(characters,wildcardshow,useq, ulen, fp);
+      gt_linspace_print_sequence(characters,wildcardshow,vseq, vlen, fp);
     }
-
-    characters = gt_alphabet_characters(alphabet);
-    sequence_encode(useq, ulen, alphabet);
-    sequence_encode(vseq, vlen, alphabet);
-
     fprintf(fp, "######\n");
     if (showalign && gt_alignment_get_length(align) > 0)
     {
       gt_alignment_show_with_mapped_chars(align, characters,
                                           wildcardshow, fp, 80);
+    } else
+    {
+      if (showalign)
+      {
+        fprintf(fp, "empty alignment\n");
+      }
     }
-    else if (showalign)
-      fprintf(fp, "empty alignment\n");
 
     if (!showalign || showscore)
     {
       GtWord score = gt_scorehandler_eval_alignmentscore(scorehandler,
                                                          align, characters);
 
-      fprintf(fp, "%s: "GT_WD"\n", global? "distance":"score", score);
+      fprintf(fp, "%s: "GT_WD"\n", global? "distance" : "score", score);
     }
-
-    sequence_decode(useq,ulen,alphabet);
-    sequence_decode(vseq,vlen,alphabet);
   }
 }
 
-static GtWord select_digit_from_string(const char* str,
-                                       bool global, GtError *err)
+static int gt_parse_score_value(int line,GtWord *value,const char* str,
+                                GT_UNUSED bool non_negative, GtError *err)
 {
-  bool haserr = false;
-  GtWord evalue;
-
-  if (sscanf(str ,GT_WD, &evalue) != 1)
+  if (sscanf(str, GT_WD, value) != 1 || (non_negative && *value < 0))
   {
-    gt_error_set(err, "found corrupt cost or score value");
-    haserr = true;
+    gt_error_set(err,"line %d: invalid %s value \"%s\"",line,
+                 non_negative ? "cost" : "score",str);
+    return -1;
   }
-
-  if (global && evalue < 0)/*all costvalues have to be positive or 0*/
-  {
-    gt_error_set(err, "found invalid cost value "GT_WD, evalue);
-    haserr = true;
-  }
-
-  if (haserr)
-    return GT_WORD_MAX;
-
-  return evalue;
+  return 0;
 }
 
 static int save_fastasequence(const char *seqpart, GT_UNUSED GtUword length,
                               void *data, GT_UNUSED GtError* err)
 {
-  GtSequences *fasta_seqs = (GtSequences*) data;
+  GtSequenceTable *fasta_seqs = (GtSequenceTable*) data;
 
   if (fasta_seqs->maxsize == fasta_seqs->size)
   {
@@ -469,163 +462,111 @@ static int save_fastasequence(const char *seqpart, GT_UNUSED GtUword length,
                                       fasta_seqs->maxsize*
                                       sizeof (*fasta_seqs->seqarray));
   }
-  fasta_seqs->seqarray[fasta_seqs->size] = gt_str_new_cstr(seqpart);
-  fasta_seqs->size++;
-
+  fasta_seqs->seqarray[fasta_seqs->size++] = gt_str_new_cstr(seqpart);
   return 0;
 }
 
 /*read fastasequences from file with GtFastaReader (-ff)*/
-static int get_fastasequences(GtSequences *sequences, GtStr *filename,
+static int get_fastasequences(GtSequenceTable *sequence_table,
+                              const GtStr *filename,
                               GtError *err)
 {
   int had_err = 0;
   GtFastaReader *reader;
 
-  gt_assert(sequences != NULL);
+  gt_assert(sequence_table != NULL);
   reader = gt_fasta_reader_rec_new (filename);
   had_err = gt_fasta_reader_run(reader, NULL, save_fastasequence,
-                                NULL, sequences, err);
-  gt_error_check(err);
+                                NULL, sequence_table, err);
   gt_fasta_reader_delete(reader);
-
   return had_err;
 }
 
 /* single sequences (-ss)*/
-static int get_onesequence(GtSequences *sequences, const GtStrArray *strings,
-                           GtUword idx, GtError *err)
+static void get_onesequence(const GtSequenceTable *sequence_table,
+                            const GtStrArray *strings,
+                            GtUword idx)
 {
-  int had_err = 0;
-  gt_assert(sequences != NULL && strings != NULL);
+  gt_assert(sequence_table != NULL && strings != NULL &&
+            idx < gt_str_array_size(strings));
 
-  if (gt_str_array_size(strings) <= idx)
-  {
-    gt_error_set(err, "out of range");
-    return 1;
-  }
-  sequences->seqarray[0] = gt_str_new_cstr(gt_str_array_get(strings,idx));
-  sequences->size++;
-
-  return had_err;
+  sequence_table->seqarray[0] = gt_str_new_cstr(gt_str_array_get(strings,idx));
 }
-
-#ifndef NDEBUG
-/*checks if all character in <seq> are defined in <alphabet>. */
-static inline int check_sequence(GtUchar *seq, GtUword len,
-                                 GtAlphabet *alphabet, GtError *err)
-{
-  GtUword i;
-  for (i = 0; i < len; i++)
-  {
-    if (!gt_alphabet_valid_input(alphabet, seq[i]))
-    {
-      gt_error_set(err, "found invalid character %c", seq[i]);
-      return 1;
-    }
-    /*if (ISSPECIAL(gt_alphabet_encode(alphabet, seq[i])))
-    {
-      gt_error_set(err, "found wildcard character %c", seq[i]);
-      return 1;
-    }*/
-  }
-  return 0;
-}
-#endif
 
 /*call function with linear gap costs for all given sequences */
-static int alignment_with_linear_gap_costs(GtLinspaceArguments *arguments,
-                                           GtError *err,
-                                           GtScoreHandler *scorehandler,
-                                           GtWord left_dist,
-                                           GtWord right_dist,
-                                           GtAlignment *align,
-                                           LinspaceManagement *spacemanager,
-                                           GtSequences *sequences1,
-                                           GtSequences *sequences2,
-                                           GtTimer *linspacetimer)
+static int gt_all_against_all_alignment_check(bool affine,
+                                        GtAlignment *align,
+                                        const GtLinspaceArguments *arguments,
+                                        LinspaceManagement *spacemanager,
+                                        GtScoreHandler *scorehandler,
+                                        const GtUchar *characters,
+                                        GtUchar wildcardshow,
+                                        const GtSequenceTable *sequence_table1,
+                                        const GtSequenceTable *sequence_table2,
+                                        GtWord left_dist,
+                                        GtWord right_dist,
+                                        GtTimer *linspacetimer,
+                                        GtError *err)
 {
-  GtUchar *useq, *vseq, wildcardshow;
-  GtUword i, j, ulen, vlen;
-  bool showsequences, showscore = false;
   int had_err = 0;
+  const GtUchar *useq, *vseq;
+  GtUword i, j, ulen, vlen;
 
   gt_error_check(err);
-  showsequences = arguments->showsequences;
-  GtAlphabet *alphabet = gt_scorehandler_get_alphabet(scorehandler);
-  wildcardshow = gt_alphabet_wildcard_show(alphabet);
-
   if (linspacetimer != NULL)
-    gt_timer_start(linspacetimer);
-
-  for (i = 0; i < sequences1->size; i++)
   {
-      ulen = gt_str_length(sequences1->seqarray[i]);
-      useq = (GtUchar*) gt_str_get(sequences1->seqarray[i]);
-#ifndef NDEBUG
-      had_err = check_sequence(useq, ulen, alphabet, err);
-      if (had_err)
-        return 1;
-#endif
-
-    for (j = 0; j< sequences2->size; j++)
+    gt_timer_start(linspacetimer);
+  }
+  for (i = 0; !had_err && i < sequence_table1->size; i++)
+  {
+    ulen = gt_str_length(sequence_table1->seqarray[i]);
+    useq = (const GtUchar*) gt_str_get(sequence_table1->seqarray[i]);
+    for (j = 0; j< sequence_table2->size; j++)
     {
-      vlen = gt_str_length(sequences2->seqarray[j]);
-      vseq = (GtUchar*) gt_str_get(sequences2->seqarray[j]);
-#ifndef NDEBUG
-      had_err = check_sequence(vseq, vlen, alphabet, err);
-      if (had_err)
-        return 1;
-#endif
-
+      vlen = gt_str_length(sequence_table2->seqarray[j]);
+      vseq = (const GtUchar*) gt_str_get(sequence_table2->seqarray[j]);
       gt_alignment_reset(align);
       if (arguments->global)
       {
-         if (arguments->diagonal)
-         {
-           if (gt_str_array_size(arguments->diagonalbonds) == 0)
-           {
-             left_dist =
-                         LEFT_DIAGONAL_SHIFT(arguments->similarity, ulen, vlen);
-             right_dist =
-                        RIGHT_DIAGONAL_SHIFT(arguments->similarity, ulen, vlen);
-           }
-
-           if ((left_dist > MIN(0, (GtWord)vlen-(GtWord)ulen))||
-               (right_dist < MAX(0, (GtWord)vlen-(GtWord)ulen)))
-           {
-              gt_error_set(err, "ERROR: invalid diagonalband for global "
-                                "alignment (ulen: "GT_WU", vlen: "GT_WU")\n"
-                                "left_dist <= MIN(0, vlen-ulen) and "
-                                "right_dist >= MAX(0, vlen-ulen)", ulen, vlen);
-              had_err = 1;
-           }
-
-           if (!had_err)
-           {
-             gt_computediagonalbandalign_generic(spacemanager, scorehandler,
-                                                 align, useq, 0, ulen,
-                                                 vseq, 0, vlen,
-                                                 left_dist, right_dist);
-           }
-           else
-             return 1;
-         }
-         else
-         {
-            gt_computelinearspace_generic(spacemanager, scorehandler, align,
-                                          useq, 0, ulen, vseq, 0, vlen);
-         }
+        if (arguments->diagonal)
+        {
+          if (gt_str_array_size(arguments->diagonalbonds) == 0)
+          {
+            left_dist = LEFT_DIAGONAL_SHIFT(arguments->similarity, ulen, vlen);
+            right_dist = RIGHT_DIAGONAL_SHIFT(arguments->similarity, ulen,
+                                              vlen);
+          }
+          if ((left_dist > MIN(0, (GtWord)vlen-(GtWord)ulen))||
+              (right_dist < MAX(0, (GtWord)vlen-(GtWord)ulen)))
+          {
+            gt_error_set(err, "ERROR: invalid diagonalband for global "
+                              "alignment (ulen: "GT_WU", vlen: "GT_WU")\n"
+                              "left_dist <= MIN(0, vlen-ulen) and "
+                              "right_dist >= MAX(0, vlen-ulen)", ulen, vlen);
+            had_err = 1;
+          }
+          if (!had_err)
+          {
+            (affine ? gt_computediagonalbandaffinealign_generic
+                    : gt_computediagonalbandalign_generic)
+                       (spacemanager, scorehandler, align,
+                        useq, 0, ulen, vseq, 0, vlen,
+                        left_dist, right_dist);
+          }
+        } else
+        {
+          (affine ? gt_computeaffinelinearspace_generic
+                  : gt_computelinearspace_generic)
+                             (spacemanager, scorehandler, align,
+                              useq, 0, ulen, vseq, 0, vlen);
+        }
       }
       else if (arguments->local)
       {
-          gt_computelinearspace_local_generic(spacemanager, scorehandler, align,
-                                              useq, 0, ulen, vseq, 0, vlen);
-      }
-      /* score */
-      if (arguments->showscore)
-      {
-        showscore = true;
+        (affine ? gt_calc_affinealign_linear_local
+                : gt_computelinearspace_local_generic)
+                    (spacemanager, scorehandler, align,
+                     useq, 0, ulen, vseq, 0, vlen);
       }
       /* show alignment*/
       if (!had_err)
@@ -633,241 +574,162 @@ static int alignment_with_linear_gap_costs(GtLinspaceArguments *arguments,
         gt_assert(align != NULL);
         if (!strcmp(gt_str_get(arguments->outputfile),"stdout"))
         {
-          alignment_show_with_sequences(useq, ulen, vseq, vlen, align, alphabet,
-                                 wildcardshow, showscore, !arguments->scoreonly,
-                                 showsequences, arguments->global,
-                                 scorehandler, stdout);
-        }
-        else
+          alignment_show_with_sequences(useq, ulen, vseq, vlen, align,
+                                        characters,
+                                        wildcardshow, arguments->showscore,
+                                        !arguments->scoreonly,
+                                        arguments->showsequences,
+                                        arguments->global,
+                                        scorehandler, stdout);
+        } else
         {
           FILE *fp = gt_fa_fopen_func(gt_str_get(arguments->outputfile),
                                                  "a", __FILE__,__LINE__,err);
-          gt_error_check(err);
-          alignment_show_with_sequences(useq, ulen, vseq, vlen, align, alphabet,
-                                        wildcardshow, showscore,
-                                        !arguments->scoreonly, showsequences,
-                                        arguments->global, scorehandler,fp);
-          gt_fa_fclose(fp);
+          if (fp == NULL)
+          {
+            had_err = -1;
+          } else
+          {
+            alignment_show_with_sequences(useq, ulen, vseq, vlen, align,
+                                          characters, wildcardshow,
+                                          arguments->showscore,
+                                          !arguments->scoreonly,
+                                          arguments->showsequences,
+                                          arguments->global, scorehandler,fp);
+            gt_fa_fclose(fp);
+          }
         }
       }
     }
   }
   if (linspacetimer != NULL)
-    gt_timer_stop(linspacetimer);
-
-  if (!had_err && arguments->wildcardshow)
-    printf("#wildcards are represented by %c\n", wildcardshow);
-
-  return had_err;
-}
-
-/*call function with affine gap costs for all given sequences */
-static int alignment_with_affine_gap_costs(GtLinspaceArguments *arguments,
-                                           GtError *err,
-                                           GtScoreHandler *scorehandler,
-                                           GtWord left_dist,
-                                           GtWord right_dist,
-                                           GtAlignment *align,
-                                           LinspaceManagement *spacemanager,
-                                           GtSequences *sequences1,
-                                           GtSequences *sequences2,
-                                           GtTimer *linspacetimer)
-{
-  int had_err = 0;
-  GtUchar *useq, *vseq, wildcardshow;
-  GtUword i, j, ulen, vlen;
-  bool showsequences, showscore = false;
-
-  gt_error_check(err);
-  showsequences = arguments->showsequences;
-  GtAlphabet *alphabet = gt_scorehandler_get_alphabet(scorehandler);
-  wildcardshow =  gt_alphabet_wildcard_show(alphabet);
-
-  if (linspacetimer != NULL)
-    gt_timer_start(linspacetimer);
-  for (i = 0; i < sequences1->size; i++)
   {
-    ulen = gt_str_length(sequences1->seqarray[i]);
-    useq =  (GtUchar*) gt_str_get(sequences1->seqarray[i]);
-#ifndef NDEBUG
-    had_err = check_sequence(useq, ulen, alphabet, err);
-    if (had_err)
-      return 1;
-#endif
-
-    for (j = 0; j < sequences2->size; j++)
-    {
-      vlen = gt_str_length(sequences2->seqarray[j]);
-      vseq = (GtUchar*) gt_str_get(sequences2->seqarray[j]);
-#ifndef NDEBUG
-      had_err = check_sequence(vseq, vlen, alphabet, err);
-      if (had_err)
-       return 1;
-#endif
-
-      gt_alignment_reset(align);
-      if (arguments->global)
-      {
-        if (arguments->diagonal)
-         {
-           if (gt_str_array_size(arguments->diagonalbonds) == 0)
-           {
-             left_dist =
-                         LEFT_DIAGONAL_SHIFT(arguments->similarity, ulen, vlen);
-             right_dist =
-                        RIGHT_DIAGONAL_SHIFT(arguments->similarity, ulen, vlen);
-           }
-           if ((left_dist > MIN(0, (GtWord)vlen-(GtWord)ulen))||
-               (right_dist < MAX(0, (GtWord)vlen-(GtWord)ulen)))
-           {
-              gt_error_set(err, "ERROR: invalid diagonalband for global "
-                                "alignment (ulen: "GT_WU", vlen: "GT_WU")\n"
-                                "left_dist <= MIN(0, vlen-ulen) and "
-                                "right_dist >= MAX(0, vlen-ulen)", ulen, vlen);
-              had_err = 1;
-           }
-
-           if (!had_err)
-           {
-             gt_computediagonalbandaffinealign_generic(spacemanager,
-                                                       scorehandler, align,
-                                                       useq, 0, ulen,
-                                                       vseq, 0, vlen,
-                                                       left_dist, right_dist);
-           }
-           else
-             return 1;
-        }
-        else
-        {
-          gt_computeaffinelinearspace_generic(spacemanager, scorehandler, align,
-                                              useq, 0, ulen, vseq, 0, vlen);
-        }
-      }
-      else if (arguments->local)
-      {
-        gt_computeaffinelinearspace_local_generic(spacemanager, scorehandler,
-                                          align, useq, 0, ulen, vseq, 0, vlen);
-      }
-
-      /* score */
-      if (arguments->showscore)
-      {
-        showscore = true;
-      }
-      /* show */
-      if (!had_err)
-      {
-        gt_assert(align != NULL);
-        if (!strcmp(gt_str_get(arguments->outputfile),"stdout"))
-        {
-          alignment_show_with_sequences(useq, ulen, vseq, vlen, align, alphabet,
-                                 wildcardshow, showscore,
-                                 !arguments->scoreonly, showsequences,
-                                 arguments->global, scorehandler, stdout);
-        }
-        else
-        {
-          FILE *fp = gt_fa_fopen_func(gt_str_get(arguments->outputfile),
-                                                 "a", __FILE__,__LINE__,err);
-          gt_error_check(err);
-          alignment_show_with_sequences(useq, ulen, vseq, vlen, align, alphabet,
-                                        wildcardshow, showscore,
-                                        !arguments->scoreonly, showsequences,
-                                        arguments->global, scorehandler,fp);
-          gt_fa_fclose(fp);
-        }
-      }
-    }
-  }
-  if (linspacetimer != NULL)
     gt_timer_stop(linspacetimer);
-
+  }
   if (!had_err && arguments->wildcardshow)
-    printf("wildcards are represented by %c\n", wildcardshow);
-
+  {
+    printf("# wildcards are represented by %c\n", wildcardshow);
+  }
   return had_err;
 }
 
 /* handle score and cost values */
-static int fill_scorehandler(GtScoreHandler **scorehandler,
-                             GtLinspaceArguments *arguments,
+static GtScoreHandler *gt_arguments2scorehandler(
+                             const GtLinspaceArguments *arguments,
                              GtError *err)
 {
-  int had_err = 0;
   GtWord matchscore, mismatchscore, gap_open, gap_extension;
-  GtScoreMatrix *sm = NULL;
+  GtScoreHandler *scorehandler = NULL;
+  GtScoreMatrix *scorematrix = NULL;
+  int had_err = 0;
 
   gt_error_check(err);
-  if (arguments->dna)
+  if (gt_str_array_size(arguments->linearcosts) > 0)
   {
-    if (gt_str_array_size(arguments->linearcosts) > 0)
+    GtUword wordindex = 0;
+
+    if (arguments->protein)
     {
-      matchscore = select_digit_from_string(
-                                     gt_str_array_get(arguments->linearcosts,0),
+      scorematrix
+        = gt_score_matrix_new_read_protein(
+                          gt_str_array_get(arguments->linearcosts,wordindex++),
+                          err);
+      if (scorematrix == NULL)
+      {
+        had_err = -1;
+      }
+      matchscore = 0;
+      mismatchscore = 0;
+    } else
+    {
+      had_err = gt_parse_score_value(__LINE__,&matchscore,
+                                     gt_str_array_get(arguments->linearcosts,
+                                                      wordindex++),
                                      arguments->global,err);
-      mismatchscore = select_digit_from_string(
-                                     gt_str_array_get(arguments->linearcosts,1),
-                                     arguments->global,err);
+      if (!had_err)
+      {
+        had_err = gt_parse_score_value(__LINE__,&mismatchscore,
+                                       gt_str_array_get(arguments->linearcosts,
+                                                        wordindex++),
+                                       arguments->global,err);
+      }
+    }
+    if (!had_err)
+    {
       gap_open = 0;
-      gap_extension = select_digit_from_string(
-                                     gt_str_array_get(arguments->linearcosts,2),
-                                     arguments->global,err);
+      had_err = gt_parse_score_value(__LINE__,&gap_extension,
+                                     gt_str_array_get(arguments->linearcosts,
+                                                      wordindex++),
+                                     false,err);
     }
-    else /*if (gt_str_array_size(arguments->affinecosts) > 0)*/
-    {
-      matchscore = select_digit_from_string(
-                                     gt_str_array_get(arguments->affinecosts,0),
-                                     arguments->global,err);
-      mismatchscore = select_digit_from_string(
-                                     gt_str_array_get(arguments->affinecosts,1),
-                                     arguments->global,err);
-      gap_open = select_digit_from_string(
-                                     gt_str_array_get(arguments->affinecosts,2),
-                                     arguments->global,err);
-      gap_extension = select_digit_from_string(
-                                     gt_str_array_get(arguments->affinecosts,3),
-                                     arguments->global,err);
-    }
-    if (gt_error_is_set(err))
-      return 1;
-    *scorehandler = gt_scorehandler_new_DNA(matchscore, mismatchscore,
-                                            gap_open, gap_extension);
-  }
-  else if (arguments->protein)
+  } else /*if (gt_str_array_size(arguments->affinecosts) > 0)*/
   {
-    if (gt_str_array_size(arguments->linearcosts) > 0)
+    GtUword wordindex = 0;
+
+    if (arguments->protein)
     {
-      sm = gt_score_matrix_new_read_protein(
-                               gt_str_array_get(arguments->linearcosts,0), err);
-      if (gt_error_is_set(err))
-        return 1;
-      gap_open = 0;
-      gap_extension = select_digit_from_string(
-                          gt_str_array_get(arguments->linearcosts,1),false,err);
-
-    }
-    else /*if (gt_str_array_size(arguments->affinecosts) > 0)*/
+      scorematrix = gt_score_matrix_new_read_protein(
+                               gt_str_array_get(arguments->affinecosts,
+                                                wordindex++), err);
+      if (scorematrix == NULL)
+      {
+        had_err = -1;
+      }
+      matchscore = mismatchscore = 0;
+    } else
     {
-      sm = gt_score_matrix_new_read_protein(
-                               gt_str_array_get(arguments->affinecosts,0), err);
-      if (gt_error_is_set(err))
-        return 1;
-      gap_open = select_digit_from_string(
-                          gt_str_array_get(arguments->affinecosts,1),false,err);
-      gap_extension = select_digit_from_string(
-                          gt_str_array_get(arguments->affinecosts,2),false,err);
+      had_err = gt_parse_score_value(__LINE__,&matchscore,
+                                     gt_str_array_get(arguments->affinecosts,
+                                                      wordindex++),
+                                     arguments->global,err);
+      if (!had_err)
+      {
+        had_err = gt_parse_score_value(__LINE__,&mismatchscore,
+                                       gt_str_array_get(arguments->affinecosts,
+                                                        wordindex++),
+                                       arguments->global,err);
+      }
     }
-
-    if (gt_error_is_set(err))
-      return 1;
-    *scorehandler = gt_scorehandler_new_Protein(sm, gap_open, gap_extension);
-
-    /* change score to costs if necessary */
-    if (arguments->global && !arguments->costmatrix)
-      gt_scorehandler_change_score_to_cost_without_costhandler(*scorehandler);
+    if (!had_err)
+    {
+      had_err = gt_parse_score_value(__LINE__,&gap_open,
+                                     gt_str_array_get(arguments->affinecosts,
+                                                      wordindex++),
+                                     false,err);
+    }
+    if (!had_err)
+    {
+      had_err = gt_parse_score_value(__LINE__,&gap_extension,
+                                     gt_str_array_get(arguments->affinecosts,
+                                                      wordindex),
+                                     false,err);
+    }
   }
-  return had_err;
+  if (!had_err)
+  {
+    scorehandler = gt_scorehandler_new(matchscore, mismatchscore,
+                                       gap_open, gap_extension);
+    if (scorematrix != NULL)
+    {
+      gt_scorehandler_add_scorematrix(scorehandler,scorematrix);
+    }
+  }
+  return scorehandler;
+}
+
+static void gt_encode_sequence_table(const GtAlphabet *alphabet,
+                                     GtSequenceTable *sequence_table)
+{
+  GtUword idx;
+
+  for (idx = 0; idx < sequence_table->size; idx++)
+  {
+    GtStr *gt_str = sequence_table->seqarray[idx];
+    GtUchar *seq = (GtUchar*) gt_str_get(gt_str);
+
+    gt_alphabet_encode_seq(alphabet, seq,(const char*) seq,
+                           gt_str_length(gt_str));
+  }
 }
 
 static int gt_linspace_align_runner(GT_UNUSED int argc,
@@ -880,92 +742,124 @@ static int gt_linspace_align_runner(GT_UNUSED int argc,
   int had_err = 0;
   GtAlignment *align;
   GtWord left_dist = 0, right_dist = 0;
-  GtSequences *sequences1, *sequences2;
+  GtSequenceTable *sequence_table1, *sequence_table2;
   LinspaceManagement *spacemanager;
-  GtScoreHandler *scorehandler = NULL;
+  GtScoreHandler *scorehandler = NULL, *costhandler = NULL;
   GtTimer *linspacetimer = NULL;
+  GtAlphabet *alphabet = NULL;
 
   gt_error_check(err);
   gt_assert(arguments);
-
-  sequences1 = gt_sequences_new();
-  sequences2 = gt_sequences_new();
+  sequence_table1 = gt_sequence_table_new();
+  sequence_table2 = gt_sequence_table_new();
   align = gt_alignment_new();
   spacemanager = gt_linspaceManagement_new();
-  gt_linspaceManagement_set_TSfactor(spacemanager,
-                                             arguments->timesquarefactor);
+  gt_linspaceManagement_set_TSfactor(spacemanager,arguments->timesquarefactor);
 
   /* get sequences */
   if (gt_str_array_size(arguments->strings) > 0)
   {
-    get_onesequence(sequences1, arguments->strings, 0, err);
-    gt_error_check(err);
-    get_onesequence(sequences2, arguments->strings, 1, err);
-    gt_error_check(err);
+    get_onesequence(sequence_table1, arguments->strings, 0);
+    sequence_table1->size++;
+    get_onesequence(sequence_table2, arguments->strings, 1);
+    sequence_table2->size++;
   }
   else if (gt_str_array_size(arguments->files) > 0)
   {
-    get_fastasequences(sequences1,gt_str_array_get_str(arguments->files,0),err);
-    gt_error_check(err);
-    get_fastasequences(sequences2,gt_str_array_get_str(arguments->files,1),err);
-    gt_error_check(err);
+    had_err = get_fastasequences(sequence_table1,
+                                 gt_str_array_get_str(arguments->files,0),err);
+    if (!had_err)
+    {
+      had_err = get_fastasequences(sequence_table2,
+                                  gt_str_array_get_str(arguments->files,1),err);
+    }
   }
-
-  /* get costs/scores */
-  had_err = fill_scorehandler(&scorehandler, arguments, err);
-
+  if (arguments->dna)
+  {
+    alphabet = gt_alphabet_new_dna();
+  } else
+  {
+    gt_assert(arguments->protein);
+    alphabet = gt_alphabet_new_protein();
+  }
+  gt_encode_sequence_table(alphabet,sequence_table1);
+  gt_encode_sequence_table(alphabet,sequence_table2);
+  if (!had_err)
+  {
+    scorehandler = gt_arguments2scorehandler(arguments,err);
+    if (scorehandler == NULL)
+    {
+      had_err = -1;
+    } else
+    {
+      if (arguments->global && !arguments->costmatrix)
+      {
+        costhandler = gt_scorehandler2costhandler(scorehandler);
+      }
+    }
+  }
   /* get diagonal band */
   if (!had_err && arguments->diagonal)
   {
     if (gt_str_array_size(arguments->diagonalbonds) > 0)
     {
-       left_dist = select_digit_from_string(
-                      gt_str_array_get(arguments->diagonalbonds,0), false, err);
-       right_dist = select_digit_from_string(
-                      gt_str_array_get(arguments->diagonalbonds,1), false, err);
-       gt_error_check(err);
+      had_err = gt_parse_score_value(__LINE__,&left_dist,
+                                  gt_str_array_get(arguments->diagonalbonds,0),
+                                  false, err);
+      if (!had_err)
+      {
+        had_err = gt_parse_score_value(__LINE__,&right_dist,
+                                  gt_str_array_get(arguments->diagonalbonds,1),
+                                  false, err);
+      }
     }
   }
-
-  if (arguments->spacetime)
+  if (!had_err && arguments->spacetime)
   {
     linspacetimer = gt_timer_new();
   }
 
   /* alignment functions with linear gap costs */
-  if (!had_err && gt_str_array_size(arguments->linearcosts) > 0)
+  if (!had_err)
   {
-    had_err  = alignment_with_linear_gap_costs(arguments, err, scorehandler,
-                                               left_dist, right_dist,
-                                               align, spacemanager,
-                                               sequences1, sequences2,
-                                               linspacetimer);
-  }/* alignment functions with affine gap costs */
-  else if (!had_err && gt_str_array_size(arguments->affinecosts) > 0)
-  {
-    had_err = alignment_with_affine_gap_costs(arguments, err, scorehandler,
-                                              left_dist, right_dist,
-                                              align, spacemanager,
-                                              sequences1, sequences2,
-                                              linspacetimer);
+    bool affine;
+
+    if (gt_str_array_size(arguments->linearcosts) > 0)
+    {
+      affine = false;
+    } else
+    {
+      gt_assert(gt_str_array_size(arguments->affinecosts) > 0);
+      affine = true;
+    }
+    had_err = gt_all_against_all_alignment_check (
+                            affine, align, arguments,
+                            spacemanager,
+                            scorehandler,
+                            gt_alphabet_characters(alphabet),
+                            gt_alphabet_wildcard_show(alphabet),
+                            sequence_table1,
+                            sequence_table2,
+                            left_dist,
+                            right_dist,
+                            linspacetimer,err);
   }
-
-  gt_sequences_delete(sequences1);
-  gt_sequences_delete(sequences2);
-  gt_alignment_delete(align);
-  gt_scorehandler_delete(scorehandler);
-
   /*spacetime option*/
   if (!had_err && arguments->spacetime)
   {
     printf("# combined space peak in kilobytes: %f\n",
            GT_KILOBYTES(gt_linspaceManagement_get_spacepeak(spacemanager)));
-    printf("# TIME");
-
-    gt_timer_show_formatted(linspacetimer," overall " GT_WD ".%02ld\n",stdout);
-    gt_timer_delete(linspacetimer);
+    gt_timer_show_formatted(linspacetimer,"# TIME overall " GT_WD ".%02ld\n",
+                            stdout);
   }
+  gt_timer_delete(linspacetimer);
   gt_linspaceManagement_delete(spacemanager);
+  gt_sequence_table_delete(sequence_table1);
+  gt_sequence_table_delete(sequence_table2);
+  gt_alignment_delete(align);
+  gt_alphabet_delete(alphabet);
+  gt_scorehandler_delete(scorehandler);
+  gt_scorehandler_delete(costhandler);
   return had_err;
 }
 

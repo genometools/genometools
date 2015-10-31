@@ -10,7 +10,7 @@ Keywords "gt_linspace_align"
 Test do
   run "#{$bin}gt dev linspace_align -ss acg acgt -dna -global "\
       "-l \" -1\" 1 1 ", :retval => 1
-  grep last_stderr, "invalid cost value"
+  grep last_stderr, "invalid cost value \" -1\""
 end
 
 Name "gt linspace_align global lin gap dna filelist"

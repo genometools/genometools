@@ -258,7 +258,7 @@ GtWord diagonalbandalignment_in_square_space_affine(LinspaceManagement *space,
                                                     GtUword gap_extension)
 {
   GtWord distance;
-  GtScoreHandler *scorehandler = gt_scorehandler_new_DNA(matchcost,mismatchcost,
+  GtScoreHandler *scorehandler = gt_scorehandler_new(matchcost,mismatchcost,
                                                     gap_opening, gap_extension);
 
   distance = diagonalbandalignment_in_square_space_affine_generic(space,
@@ -1455,10 +1455,10 @@ void gt_computediagonalbandaffinealign(LinspaceManagement *spacemanager,
                                        GtUword gap_opening,
                                        GtUword gap_extension)
 {
-  GtScoreHandler *scorehandler = gt_scorehandler_new_DNA(matchcost,
-                                                         mismatchcost,
-                                                         gap_opening,
-                                                         gap_extension);
+  GtScoreHandler *scorehandler = gt_scorehandler_new(matchcost,
+                                                     mismatchcost,
+                                                     gap_opening,
+                                                     gap_extension);
 
   gt_computediagonalbandaffinealign_generic(spacemanager, scorehandler, align,
                                             useq, ustart, ulen, vseq, vstart,
@@ -1478,8 +1478,6 @@ void gt_checkdiagonalbandaffinealign(GT_UNUSED bool forward,
   GtAlignment *align;
   GtScoreHandler *scorehandler;
   LinspaceManagement *spacemanager;
-  GtUchar *low_useq, *low_vseq;
-  GtAlphabet *alphabet;
 
   if (memchr(useq, LINEAR_EDIST_GAP,ulen) != NULL)
   {
@@ -1492,35 +1490,25 @@ void gt_checkdiagonalbandaffinealign(GT_UNUSED bool forward,
     exit(GT_EXIT_PROGRAMMING_ERROR);
   }
 
-  /* set left and right to set diagonalband to the whole matrix */
   left_dist = -ulen;
   right_dist = vlen;
 
-  scorehandler = gt_scorehandler_new_DNA(matchcost, mismatchcost,
-                                         gap_opening, gap_extension);
-  alphabet = gt_scorehandler_get_alphabet(scorehandler);
-  low_useq = check_dna_sequence(useq, ulen, alphabet);
-  low_vseq = check_dna_sequence(vseq, vlen, alphabet);
-
-  if (low_useq == NULL || low_vseq == NULL)
-  {
-    low_useq? gt_free(low_useq):0;
-    low_vseq? gt_free(low_vseq):0;
-    gt_scorehandler_delete(scorehandler);
-    return;
-  }
+  scorehandler = gt_scorehandler_new(matchcost, mismatchcost,
+                                     gap_opening, gap_extension);
+  gt_scorehandler_plain(scorehandler);
+  gt_scorehandler_downcase(scorehandler);
   affine_cost1 = diagonalband_square_space_affine(useq, 0, ulen, vseq, 0, vlen,
                                            left_dist, right_dist, scorehandler);
 
   align = gt_alignment_new_with_seqs(useq, ulen, vseq, vlen);
   spacemanager = gt_linspaceManagement_new();
 
-   gt_calc_diagonalbandaffinealign(spacemanager, scorehandler, align,
+  gt_calc_diagonalbandaffinealign(spacemanager, scorehandler, align,
                                   useq, 0, ulen, vseq, 0, vlen,
                                   left_dist, right_dist);
 
   gt_linspaceManagement_delete(spacemanager);
-  affine_cost2 = gt_alignment_eval_with_affine_score(align, matchcost,
+  affine_cost2 = gt_alignment_eval_with_affine_score(align, true, matchcost,
                                                      mismatchcost,
                                                      gap_opening,
                                                      gap_extension);
@@ -1543,9 +1531,6 @@ void gt_checkdiagonalbandaffinealign(GT_UNUSED bool forward,
 
     exit(GT_EXIT_PROGRAMMING_ERROR);
   }
-
-  gt_free(low_useq);
-  gt_free(low_vseq);
   gt_scorehandler_delete(scorehandler);
   gt_alignment_delete(align);
 }

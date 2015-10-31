@@ -25,6 +25,7 @@
 typedef struct GtFastaReaderRec GtFastaReaderRec;
 
 const GtFastaReaderClass* gt_fasta_reader_rec_class(void);
-GtFastaReader*            gt_fasta_reader_rec_new(GtStr *sequence_filename);
+GtFastaReader*            gt_fasta_reader_rec_new(const GtStr
+                                                    *sequence_filename);
 
 #endif

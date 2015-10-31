@@ -87,8 +87,4 @@ GtWord gt_computelinearspace_local(LinspaceManagement *spacemanager,
                                    GtWord mismatchscore,
                                    GtWord gapscore);
 
-/* edit distance of sequences useq and vseq in linear space*/
-GtUword gt_calc_linearedist(const GtUchar *useq, GtUword ulen,
-                            const GtUchar *vseq, GtUword vlen);
-
 #endif
