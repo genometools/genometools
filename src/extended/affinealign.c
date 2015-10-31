@@ -581,14 +581,14 @@ GtWord affinealign_in_square_space_local(LinspaceManagement *spacemanager,
                                          GtWord gap_extension)
 {
   GtWord score;
-  GtScoreHandler *scorehandler = gt_scorehandler_new_DNA(matchscore,
-                                                         mismatchscore,
-                                                         gap_opening,
-                                                         gap_extension);
 
-  score =  affinealign_in_square_space_local_generic(spacemanager, scorehandler,
-                                                   align, useq, ustart, ulen,
-                                                   vseq, vstart, vlen);
+  GtScoreHandler *scorehandler = gt_scorehandler_new(matchscore,
+                                                     mismatchscore,
+                                                     gap_opening,
+                                                     gap_extension);
+  score = affinealign_in_square_space_local_generic(spacemanager, scorehandler,
+                                                    align, useq, ustart, ulen,
+                                                    vseq, vstart, vlen);
   gt_scorehandler_delete(scorehandler);
   return score;
 }

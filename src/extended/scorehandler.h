@@ -17,24 +17,23 @@
 
 #ifndef SCOREHANDLER_H
 #define SCOREHANDLER_H
-#include "core/alphabet.h"
 #include "core/score_matrix.h"
 #include "core/types_api.h"
 #include "extended/alignment.h"
 
 typedef struct GtScoreHandler GtScoreHandler;
 
-/* A function to compare chars. */
-typedef GtWord (Scorecomparefunc)(GtScoreHandler*, GtUchar, GtUchar);
+GtScoreHandler* gt_scorehandler_new(GtWord matchscore,
+                                    GtWord mismatchscore,
+                                    GtWord gap_opening,
+                                    GtWord gap_extension);
 
-GtScoreHandler* gt_scorehandler_new_DNA(GtWord matchscore,
-                                        GtWord mismatchscore,
-                                        GtWord gap_opening,
-                                        GtWord gap_extension);
+void gt_scorehandler_add_scorematrix(GtScoreHandler *scorehandler,
+                                     GtScoreMatrix *scorematrix);
 
-GtScoreHandler* gt_scorehandler_new_Protein(GtScoreMatrix *sm,
-                                            GtWord gap_opening,
-                                            GtWord gap_extension);
+void gt_scorehandler_plain(GtScoreHandler *scorehandler);
+
+void gt_scorehandler_downcase(GtScoreHandler *scorehandler);
 
 void gt_scorehandler_delete(GtScoreHandler *scorehandler);
 
@@ -42,23 +41,13 @@ GtWord gt_scorehandler_get_gap_opening(const GtScoreHandler *scorehandler);
 
 GtWord gt_scorehandler_get_gapscore(const GtScoreHandler *scorehandler);
 
-GtWord gt_scorehandler_get_replacement(GtScoreHandler *scorehandler,
+GtWord gt_scorehandler_get_replacement(const GtScoreHandler *scorehandler,
                                        GtUchar a, GtUchar b);
 
-GtScoreHandler *gt_scorehandler_get_costhandler(const GtScoreHandler
-                                                                *scorehandler);
-
-GtAlphabet *gt_scorehandler_get_alphabet(const GtScoreHandler *scorehandler);
-
-void gt_scorehandler_change_score_to_cost(GtScoreHandler *scorehandler);
-
-void gt_scorehandler_change_score_to_cost_without_costhandler(GtScoreHandler
-                                                                 *scorehandler);
+GtScoreHandler *gt_scorehandler2costhandler(const GtScoreHandler *scorehandler);
 
 GtWord gt_scorehandler_eval_alignmentscore(const GtScoreHandler *scorehandler,
                                            const GtAlignment *alignment,
                                            const GtUchar *characters);
 
-GtUchar* check_dna_sequence(const GtUchar *seq,
-                            GtUword len, GtAlphabet *alphabet);
 #endif

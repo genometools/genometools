@@ -73,16 +73,15 @@ GtUword gt_computeaffinelinearspace(LinspaceManagement *spacemanager,
                                     GtUword gap_extension);
 
 /* local alignment with linear gapcosts in linear space */
-GtWord gt_computeaffinelinearspace_local_generic(
-                                              LinspaceManagement *spacemanager,
-                                                 GtScoreHandler *scorehandler,
-                                                 GtAlignment *align,
-                                                 const GtUchar *useq,
-                                                 GtUword ustart,
-                                                 GtUword ulen,
-                                                 const GtUchar *vseq,
-                                                 GtUword vstart,
-                                                 GtUword vlen);
+GtWord gt_calc_affinealign_linear_local(LinspaceManagement *spacemanager,
+                                        GtScoreHandler *scorehandler,
+                                        GtAlignment *align,
+                                        const GtUchar *useq,
+                                        GtUword ustart,
+                                        GtUword ulen,
+                                        const GtUchar *vseq,
+                                        GtUword vstart,
+                                        GtUword vlen);
 
 /* local alignment with constant linear gapcosts in linear space,
  * only useful for DNA sequences */

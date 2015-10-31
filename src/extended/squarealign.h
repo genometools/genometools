@@ -33,7 +33,7 @@ GtUword alignment_in_square_space_generic (LinspaceManagement *spacemanager,
                                            const GtUchar *vseq,
                                            GtUword vstart,
                                            GtUword vlen,
-                                           GtScoreHandler *scorehandler);
+                                           const GtScoreHandler *scorehandler);
 
 /* same with constant cost values, only useful for DNA sequences */
 GtUword alignment_in_square_space(LinspaceManagement *spacemanager,
@@ -55,7 +55,7 @@ GtUword distance_only_global_alignment(const GtUchar *useq,
                                        const GtUchar *vseq,
                                        GtUword vstart,
                                        GtUword vlen,
-                                       GtScoreHandler *scorehandler);
+                                       const GtScoreHandler *scorehandler);
 
 void gt_print_edist_alignment(const GtUchar *useq, GtUword ustart, GtUword ulen,
                              const GtUchar *vseq, GtUword vstart, GtUword vlen);
@@ -63,7 +63,7 @@ void gt_print_edist_alignment(const GtUchar *useq, GtUword ustart, GtUword ulen,
 /* fill crosspointtable ctab for part of sequences useq and vseq in square
  * space, use it to combine square calculating with linear calculating */
 GtUword ctab_in_square_space(LinspaceManagement *spacemanager,
-                             GtScoreHandler *scorehandler,
+                             const GtScoreHandler *scorehandler,
                              GtUword *Ctab,
                              const GtUchar *useq,
                              GtUword ustart,
@@ -84,7 +84,7 @@ GtWord alignment_in_square_space_local_generic(LinspaceManagement *spacemanager,
                                                const GtUchar *vseq,
                                                GtUword vstart,
                                                GtUword vlen,
-                                               GtScoreHandler *scorehandler);
+                                            const GtScoreHandler *scorehandler);
 
 /* same with constant cost values, only useful for DNA sequences */
 GtWord alignment_in_square_space_local(LinspaceManagement *spacemanager,

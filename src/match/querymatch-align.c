@@ -533,6 +533,7 @@ void gt_querymatchoutoptions_alignment_show(const GtQuerymatchoutoptions
     if (edist > 0)
     {
       gt_alignment_show_generic(querymatchoutoptions->alignment_show_buffer,
+                                false,
                                 querymatchoutoptions->alignment,
                                 stdout,
                                 (unsigned int)

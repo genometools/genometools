@@ -59,18 +59,14 @@ void         gt_alignment_remove_last(GtAlignment *alignment);
 void         gt_alignment_reset(GtAlignment *alignment);
 /* returns unit cost */
 GtUword      gt_alignment_eval(const GtAlignment*);
-GtUword      gt_alignment_eval_generic(bool mapped,
-                                      const GtAlignment *alignment);
+GtUword gt_alignment_eval_generic(bool mapped,bool downcase,
+                                  const GtAlignment *alignment);
 /* extended scorefunctions */
-GtWord       gt_alignment_eval_with_score(const GtAlignment *alignment,
-                                          GtWord matchscore,
-                                          GtWord mismatchscore,
-                                          GtWord gapscore);
-
-GtWord       gt_alignment_eval_with_score(const GtAlignment *alignment,
-                                          GtWord matchscore,
-                                          GtWord mismatchscore,
-                                          GtWord gapscore);
+GtWord gt_alignment_eval_with_score(const GtAlignment *alignment,
+                                    bool downcase,
+                                    GtWord matchscore,
+                                    GtWord mismatchscore,
+                                    GtWord gapscore);
 
 GtWord       gt_alignment_eval_with_mapped_score(const GtUchar *character,
                                                  const GtAlignment *alignment,
@@ -80,10 +76,11 @@ GtWord       gt_alignment_eval_with_mapped_score(const GtUchar *character,
 
 GtWord       gt_alignment_eval_with_scorematrix(const GtUchar *character,
                                                 const GtAlignment *alignment,
-                                                GtScoreMatrix *sm,
+                                                const GtScoreMatrix *sm,
                                                 GtWord gapscore);
 
 GtWord       gt_alignment_eval_with_affine_score(const GtAlignment *alignment,
+                                                 bool downcase,
                                                  GtWord matchscore,
                                                  GtWord mismatchscore,
                                                  GtWord gap_opening,
@@ -98,13 +95,13 @@ GtWord      gt_alignment_eval_with_mapped_affine_score(const GtUchar *character,
 
 GtWord      gt_alignment_eval_with_affine_scorematrix(const GtUchar *character,
                                                    const GtAlignment *alignment,
-                                                   GtScoreMatrix *sm,
+                                                   const GtScoreMatrix *sm,
                                                    GtWord gap_opening,
                                                    GtWord gap_extension);
 
 /* print alignment to <fp>. This will break the lines after width characters */
-void         gt_alignment_show(const GtAlignment *alignment, FILE *fp,
-                               unsigned int width);
+void         gt_alignment_show(const GtAlignment *alignment, bool downcase,
+                               FILE *fp, unsigned int width);
 void         gt_alignment_show_with_mapped_chars(const GtAlignment *alignment,
                                                  const GtUchar *characters,
                                                  GtUchar wildcardshow,
@@ -113,6 +110,7 @@ void         gt_alignment_show_with_mapped_chars(const GtAlignment *alignment,
 GtUchar *gt_alignment_buffer_new(unsigned int width);
 void gt_alignment_buffer_delete(GtUchar *buffer);
 void gt_alignment_show_generic(GtUchar *buffer,
+                               bool downcase,
                                const GtAlignment *alignment,
                                FILE *fp,
                                unsigned int width,

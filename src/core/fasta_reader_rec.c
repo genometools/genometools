@@ -157,7 +157,7 @@ const GtFastaReaderClass* gt_fasta_reader_rec_class(void)
   return &frc;
 }
 
-GtFastaReader* gt_fasta_reader_rec_new(GtStr *sequence_filename)
+GtFastaReader* gt_fasta_reader_rec_new(const GtStr *sequence_filename)
 {
   GtFastaReader *fr = gt_fasta_reader_create(gt_fasta_reader_rec_class());
   GtFastaReaderRec *gt_fasta_reader_rec = gt_fasta_reader_rec_cast(fr);

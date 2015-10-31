@@ -56,7 +56,7 @@ void reconstructalignment_from_EDtab(GtAlignment *align, GtUword **E,
                                      const GtUchar *vseq,
                                      GtUword vstart,
                                      GtUword vlen,
-                                     GtScoreHandler *scorehandler)
+                                     const GtScoreHandler *scorehandler)
 {
   GtUword i, j, gapcost;
   gt_assert(align && E && scorehandler);
@@ -100,7 +100,7 @@ void reconstructalignment_from_Ltab(GtAlignment *align,
                                     const GtUchar *vseq,
                                     GtUword vstart,
                                     GT_UNUSED GtUword vlen,
-                                    GtScoreHandler *scorehandler)
+                                    const GtScoreHandler *scorehandler)
 {
   GtUword i, j;
   GtWord gapscore;
@@ -153,7 +153,7 @@ void reconstructalignment_from_Ctab(GtAlignment *align,
                                     const GtUchar *vseq,
                                     GtUword vstart,
                                     GtUword vlen,
-                                    GtScoreHandler *scorehandler)
+                                    const GtScoreHandler *scorehandler)
 {
   GtUword i,j, repl, indel, gap_opening, gap_extension;
   gt_assert(align && Ctab && scorehandler);
