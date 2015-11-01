@@ -180,7 +180,7 @@ static int gt_show_seedext_parse_extensions(const GtEncseq *aencseq,
   char *line_buffer;
   GtUchar *asequence, *bsequence, *csequence;
   GtUword apos_ab = 0, bpos_ab = 0, maxseqlen = 0;
-  int num, had_err = 0;
+  int had_err = 0;
   GtShowSeedextCoords coords = {0, 0, 0, 'X', 0, 0, 0, 0, 0, 0.0};
   LinspaceManagement *linspace_spacemanager;
   GtScoreHandler *linspace_scorehandler;
@@ -214,64 +214,70 @@ static int gt_show_seedext_parse_extensions(const GtEncseq *aencseq,
 
   while (fgets(line_buffer, maxlinelength, file)) {
     /* ignore comment lines; but print seeds if -seed-display is set */
-    if (line_buffer[0] == '#') {
-      if (seed_display && strstr(line_buffer, "seed:") != NULL) {
-        printf("%s", line_buffer);
-      }
-      continue;
-    }
-    /* parse alignment string */
-    num = sscanf(line_buffer,
-                 GT_WU" "GT_WU" "GT_WU" %c "GT_WU" "GT_WU" "GT_WU" "GT_WU" "
-                 GT_WU" %lf",
-                 &coords.alen, &coords.aseq, &coords.apos,
-                 &coords.direction, &coords.blen, &coords.bseq,
-                 &coords.bpos, &coords.score, &coords.distance,
-                 &coords.correlation);
-    if (num != 10) {
-      printf("alignment parse failed: %s", line_buffer);
-      continue;
-    }
-    /* get sequences */
-    apos_ab = gt_encseq_seqstartpos(aencseq, coords.aseq) + coords.apos;
-    bpos_ab = gt_encseq_seqstartpos(bencseq, coords.bseq) + coords.bpos;
-    gt_encseq_extract_encoded(aencseq,
-                              asequence,
-                              apos_ab,
-                              apos_ab + coords.alen - 1);
-    gt_encseq_extract_encoded(bencseq,
-                              bsequence,
-                              bpos_ab,
-                              bpos_ab + coords.blen - 1);
-    /* prepare reverse complement of 2nd sequence */
-    if (mirror && coords.direction != 'F') {
-      gt_copy_reverse_complement(csequence,bsequence,coords.blen);
-      bsequence = csequence;
-    }
-    fputs(line_buffer,stdout);
-    if (show_alignment) {
-      GtUword edist = gt_computelinearspace_generic(linspace_spacemanager,
-                                                    linspace_scorehandler,
-                                                    alignment,
-                                                    asequence, 0, coords.alen,
-                                                    bsequence, 0, coords.blen);
-      if (edist < coords.distance)
+    if (line_buffer[0] != '\n')
+    {
+      if (line_buffer[0] == '#')
       {
-        printf("# edist=" GT_WU "(smaller by " GT_WU ")\n",edist,
+        if (seed_display && strstr(line_buffer, "seed:") != NULL) {
+          printf("%s", line_buffer);
+        }
+      } else
+      {
+        /* parse alignment string */
+        int num = sscanf(line_buffer,
+                         GT_WU " " GT_WU " " GT_WU " %c " GT_WU " " GT_WU " "
+                         GT_WU " " GT_WU " " GT_WU " %lf",
+                         &coords.alen, &coords.aseq, &coords.apos,
+                         &coords.direction, &coords.blen, &coords.bseq,
+                         &coords.bpos, &coords.score, &coords.distance,
+                         &coords.correlation);
+        if (num == 10)
+        {
+          /* get sequences */
+          apos_ab = gt_encseq_seqstartpos(aencseq, coords.aseq) + coords.apos;
+          bpos_ab = gt_encseq_seqstartpos(bencseq, coords.bseq) + coords.bpos;
+          gt_encseq_extract_encoded(aencseq,
+                                    asequence,
+                                    apos_ab,
+                                    apos_ab + coords.alen - 1);
+          gt_encseq_extract_encoded(bencseq,
+                                    bsequence,
+                                    bpos_ab,
+                                    bpos_ab + coords.blen - 1);
+          /* prepare reverse complement of 2nd sequence */
+          if (mirror && coords.direction != 'F') {
+            gt_copy_reverse_complement(csequence,bsequence,coords.blen);
+            bsequence = csequence;
+          }
+          fputs(line_buffer,stdout);
+          if (show_alignment) {
+            GtUword edist = gt_computelinearspace_generic(linspace_spacemanager,
+                                                          linspace_scorehandler,
+                                                          alignment,
+                                                          asequence, 0,
+                                                          coords.alen,
+                                                          bsequence, 0,
+                                                          coords.blen);
+            if (edist < coords.distance)
+            {
+              printf("# edist=" GT_WU "(smaller by " GT_WU ")\n",edist,
                                                    coords.distance - edist);
+            }
+            gt_assert(edist <= coords.distance);
+            gt_alignment_show_generic(alignment_show_buffer,
+                                      false,
+                                      alignment,
+                                      stdout,
+                                      width,
+                                      characters,
+                                      wildcardshow);
+            gt_alignment_reset(alignment);
+          }
+          if (mirror) {
+            bsequence = asequence + maxseqlen;
+          }
+        }
       }
-      gt_assert(edist <= coords.distance);
-      gt_alignment_show_generic(alignment_show_buffer,
-                                false,
-                                alignment,
-                                stdout,
-                                width,
-                                characters,
-                                wildcardshow);
-      gt_alignment_reset(alignment);
-    }
-    if (mirror) {
-      bsequence = asequence + maxseqlen;
     }
   }
   fclose(file);

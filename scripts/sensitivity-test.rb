@@ -24,7 +24,7 @@ def makesystemcall(argstring,withecho = false)
     STDERR.puts "system \"#{argstring}\" failed: errorcode #{$?}"
     exit 1
   elsif withecho
-    puts argstring
+    puts "# #{argstring}"
   end
 end
 
@@ -128,7 +128,7 @@ def rundaligner(inputdir,targetdir,seedlength,minidentity,length,seqnum,
   end
   withecho = if tofile then false else true end
   if withecho
-    puts "daligner result:"
+    puts "# daligner result:"
   end
   makesystemcall("#{myersprog}/DALIGNER/daligner -t21 -I -A -Y " +
                  "-e0.#{minidentity} -l#{length} -k#{seedlength} " +
@@ -141,9 +141,9 @@ def rerun_seedextend(options,seedlength)
   filename = options.rerun
   minidentity, length, seqnum = fromfilename2keys(filename)
   inputfiledir = ENV["HOME"] + "/dalign-files"
-  puts "minid=#{minidentity}, length=#{minidentity}, seqnum=#{seqnum}"
+  puts # "minid=#{minidentity}, length=#{minidentity}, seqnum=#{seqnum}"
   inputfile = makefilename(inputfiledir,minidentity,"rand",length,seqnum)
-  puts "inputfile=#{inputfile}.fas"
+  puts "# inputfile=#{inputfile}.fas"
   indexname = "sfx-#{length}-#{seqnum}"
   callseedextend(indexname,inputfile,"",minidentity,length,seqnum,
                  seedlength,true)
