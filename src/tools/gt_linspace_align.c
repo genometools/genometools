@@ -65,7 +65,7 @@ typedef struct{
              diagonal, /* call diagonalband algorithm */
              dna,
              protein,
-             costmatrix, /* special case of substituation matrix*/
+             has_costmatrix, /* special case of substituation matrix*/
              showscore,
              showsequences,
              scoreonly, /* dev option generate alignment, but do not show it*/
@@ -180,7 +180,7 @@ static GtOptionParser* gt_linspace_align_option_parser_new(void *tool_arguments)
   /* special case, if given matrix includes cost values in place of scores */
   optioncostmatrix = gt_option_new_bool("costmatrix", "describes type of "
                                         "given substituation matrix",
-                                        &arguments->costmatrix, false);
+                                        &arguments->has_costmatrix, false);
   gt_option_parser_add_option(op, optioncostmatrix);
 
   optionshowscore = gt_option_new_bool("showscore", "show score for alignment, "
@@ -744,7 +744,7 @@ static int gt_linspace_align_runner(GT_UNUSED int argc,
   GtWord left_dist = 0, right_dist = 0;
   GtSequenceTable *sequence_table1, *sequence_table2;
   LinspaceManagement *spacemanager;
-  GtScoreHandler *scorehandler = NULL, *costhandler = NULL;
+  GtScoreHandler *scorehandler = NULL;
   GtTimer *linspacetimer = NULL;
   GtAlphabet *alphabet = NULL;
 
@@ -792,9 +792,11 @@ static int gt_linspace_align_runner(GT_UNUSED int argc,
       had_err = -1;
     } else
     {
-      if (arguments->global && !arguments->costmatrix)
+      if (arguments->global && arguments->protein && !arguments->has_costmatrix)
       {
-        costhandler = gt_scorehandler2costhandler(scorehandler);
+        GtScoreHandler *costhandler = gt_scorehandler2costhandler(scorehandler);
+        gt_scorehandler_delete(scorehandler);
+        scorehandler = costhandler;
       }
     }
   }
@@ -859,7 +861,6 @@ static int gt_linspace_align_runner(GT_UNUSED int argc,
   gt_alignment_delete(align);
   gt_alphabet_delete(alphabet);
   gt_scorehandler_delete(scorehandler);
-  gt_scorehandler_delete(costhandler);
   return had_err;
 }
 
