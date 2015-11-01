@@ -583,7 +583,6 @@ static void update_trace_and_polished(Polished_point *best_polished_point,
                                       Frontvalue *highfront)
 {
   const Frontvalue *frontptr;
-  uint64_t lsb;
 
 #ifndef OUTSIDE_OF_GT
   *minrow = GT_UWORD_MAX;
@@ -619,14 +618,17 @@ static void update_trace_and_polished(Polished_point *best_polished_point,
       filled_matchhistory_bits = frontptr->matchhistory_bits |
                                  (fill_bits << frontptr->matchhistory_size);
     }
-    lsb = filled_matchhistory_bits & pol_info->mask;
-    if (alignedlen > best_polished_point->alignedlen &&
-        HISTORY_IS_POLISHED(pol_info,filled_matchhistory_bits,lsb))
+    if (alignedlen > best_polished_point->alignedlen)
     {
-      best_polished_point->alignedlen = alignedlen;
-      best_polished_point->row = frontptr->row;
-      best_polished_point->distance = distance;
-      best_polished_point->trimleft = trimleft;
+      uint64_t lsb = filled_matchhistory_bits & pol_info->mask;
+
+      if (HISTORY_IS_POLISHED(pol_info,filled_matchhistory_bits,lsb))
+      {
+        best_polished_point->alignedlen = alignedlen;
+        best_polished_point->row = frontptr->row;
+        best_polished_point->distance = distance;
+        best_polished_point->trimleft = trimleft;
+      }
     }
     if (front_trace != NULL)
     {
@@ -851,10 +853,6 @@ GtUword front_prune_edist_inplace(
           distance + vlen - ulen <= trimleft + valid - 1 &&
           validbasefront[distance + vlen - ulen].row == ulen)
       {
-        best_polished_point->row = ulen;
-        best_polished_point->alignedlen = ulen + vlen;
-        best_polished_point->distance = distance;
-        best_polished_point->trimleft = trimleft;
         break;
       }
     }

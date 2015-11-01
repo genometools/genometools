@@ -26,8 +26,9 @@
 #include "core/str_api.h"
 #include "core/types_api.h"
 #include "core/unused_api.h"
+#include "core/encseq.h"
 #include "match/revcompl.h"
-#include "extended/squarealign.h"
+#include "extended/linearalign.h"
 #include "extended/linspaceManagement.h"
 #include "tools/gt_show_seedext.h"
 
@@ -134,10 +135,10 @@ static int gt_show_seedext_get_encseq_index(GtStr *ii,
     had_err = -1;
   }
   if (!had_err) {
-    char *buffer = gt_malloc(maxlinelength * sizeof *buffer);
+    char *line_buffer = gt_malloc(maxlinelength * sizeof *line_buffer);
     /* read first line and evaluate tokens */
-    if (fgets(buffer, maxlinelength, file)) {
-      char *tok = strtok(buffer, " ");
+    if (fgets(line_buffer, maxlinelength, file)) {
+      char *tok = strtok(line_buffer, " ");
       while (tok != NULL) {
         if (strcmp(tok, "-ii") == 0) {
           gt_str_set(ii, strtok(NULL, " ")); /* next token contains ii */
@@ -157,7 +158,7 @@ static int gt_show_seedext_get_encseq_index(GtStr *ii,
       gt_error_set(err, "file %s is empty", filename);
       had_err = -1;
     }
-    gt_free(buffer);
+    gt_free(line_buffer);
   }
   if (file != NULL)
   {
@@ -174,14 +175,19 @@ static int gt_show_seedext_parse_extensions(const GtEncseq *aencseq,
                                             bool mirror,
                                             GtError *err)
 {
-  const GtUword maxlinelength = 10000;
+  const GtUword maxlinelength = 10000, width = 70;
   FILE *file;
-  char *buffer;
+  char *line_buffer;
   GtUchar *asequence, *bsequence, *csequence;
   GtUword apos_ab = 0, bpos_ab = 0, maxseqlen = 0;
   int num, had_err = 0;
   GtShowSeedextCoords coords = {0, 0, 0, 'X', 0, 0, 0, 0, 0, 0.0};
-  LinspaceManagement *alignspace;
+  LinspaceManagement *linspace_spacemanager;
+  GtScoreHandler *linspace_scorehandler;
+  GtAlignment *alignment;
+  GtUchar *alignment_show_buffer;
+  const GtUchar *characters;
+  GtUchar wildcardshow;
 
   gt_assert(aencseq && bencseq && filename);
   file = fopen(filename, "r");
@@ -190,27 +196,32 @@ static int gt_show_seedext_parse_extensions(const GtEncseq *aencseq,
     fclose(file);
     return -1;
   }
-  alignspace = gt_linspaceManagement_new();
+  linspace_spacemanager = gt_linspaceManagement_new();
+  linspace_scorehandler = gt_scorehandler_new(0,1,0,1);;
+  alignment = gt_alignment_new();
+  alignment_show_buffer = gt_alignment_buffer_new(width);
+  characters = gt_encseq_alphabetcharacters(aencseq);
+  wildcardshow = gt_encseq_alphabetwildcardshow(aencseq);
   /* allocate buffers for alignment string and sequences */
   maxseqlen = MAX(gt_encseq_max_seq_length(aencseq),
                   gt_encseq_max_seq_length(bencseq)) + 1UL;
-  buffer = gt_malloc(maxlinelength * sizeof *buffer);
+  line_buffer = gt_malloc(maxlinelength * sizeof *line_buffer);
   asequence = gt_malloc((mirror ? 3 : 2) * maxseqlen * sizeof *asequence);
   bsequence = asequence + maxseqlen;
   if (mirror) {
     csequence = bsequence + maxseqlen;
   }
 
-  while (fgets(buffer, maxlinelength, file)) {
+  while (fgets(line_buffer, maxlinelength, file)) {
     /* ignore comment lines; but print seeds if -seed-display is set */
-    if (buffer[0] == '#') {
-      if (seed_display && strstr(buffer, "seed:") != NULL) {
-        printf("%s", buffer);
+    if (line_buffer[0] == '#') {
+      if (seed_display && strstr(line_buffer, "seed:") != NULL) {
+        printf("%s", line_buffer);
       }
       continue;
     }
     /* parse alignment string */
-    num = sscanf(buffer,
+    num = sscanf(line_buffer,
                  GT_WU" "GT_WU" "GT_WU" %c "GT_WU" "GT_WU" "GT_WU" "GT_WU" "
                  GT_WU" %lf",
                  &coords.alen, &coords.aseq, &coords.apos,
@@ -218,7 +229,7 @@ static int gt_show_seedext_parse_extensions(const GtEncseq *aencseq,
                  &coords.bpos, &coords.score, &coords.distance,
                  &coords.correlation);
     if (num != 10) {
-      printf("alignment parse failed: %s", buffer);
+      printf("alignment parse failed: %s", line_buffer);
       continue;
     }
     /* get sequences */
@@ -237,13 +248,27 @@ static int gt_show_seedext_parse_extensions(const GtEncseq *aencseq,
       gt_copy_reverse_complement(csequence,bsequence,coords.blen);
       bsequence = csequence;
     }
-    printf("%s\n",buffer);
+    fputs(line_buffer,stdout);
     if (show_alignment) {
-      GtUword edist = 0;
-      gt_print_edist_alignment(asequence, 0, coords.alen,
-                               bsequence, 0, coords.blen);
-      printf("# identity = %5.2lf\n",
-             100.0 - 200.0 * edist / (coords.alen + coords.blen));
+      GtUword edist = gt_computelinearspace_generic(linspace_spacemanager,
+                                                    linspace_scorehandler,
+                                                    alignment,
+                                                    asequence, 0, coords.alen,
+                                                    bsequence, 0, coords.blen);
+      if (edist < coords.distance)
+      {
+        printf("# edist=" GT_WU "(smaller by " GT_WU ")\n",edist,
+                                                   coords.distance - edist);
+      }
+      gt_assert(edist <= coords.distance);
+      gt_alignment_show_generic(alignment_show_buffer,
+                                false,
+                                alignment,
+                                stdout,
+                                width,
+                                characters,
+                                wildcardshow);
+      gt_alignment_reset(alignment);
     }
     if (mirror) {
       bsequence = asequence + maxseqlen;
@@ -251,8 +276,11 @@ static int gt_show_seedext_parse_extensions(const GtEncseq *aencseq,
   }
   fclose(file);
   gt_free(asequence);
-  gt_free(buffer);
-  gt_linspaceManagement_delete(alignspace);
+  gt_free(line_buffer);
+  gt_alignment_delete(alignment);
+  gt_free(alignment_show_buffer);
+  gt_linspaceManagement_delete(linspace_spacemanager);
+  gt_scorehandler_delete(linspace_scorehandler);
   return had_err;
 }
 
@@ -278,7 +306,7 @@ static int gt_show_seedext_runner(GT_UNUSED int argc,
                                              &mirror,
                                              gt_str_get(arguments->filename),
                                              err);
-  printf("# file %s: mirror abled%s\n",
+  printf("# file %s: mirror %sabled\n",
          gt_str_get(arguments->filename), mirror ? "en" : "dis");
 
   /* Load encseqs */

@@ -116,6 +116,8 @@ struct GtQuerymatchoutoptions
   GtEncseqReader *esr_for_align_show;
   GtUchar wildcardshow;
   GtSeqpaircoordinates correction_info;
+  LinspaceManagement *linspace_spacemanager;
+  GtScoreHandler *linspace_scorehandler;
 };
 
 GtQuerymatchoutoptions *gt_querymatchoutoptions_new(GtUword alignmentwidth)
@@ -135,11 +137,15 @@ GtQuerymatchoutoptions *gt_querymatchoutoptions_new(GtUword alignmentwidth)
   querymatchoutoptions->esr_for_align_show = NULL;
   querymatchoutoptions->characters = NULL;
   querymatchoutoptions->alignment = NULL;
+  querymatchoutoptions->linspace_spacemanager = NULL;
+  querymatchoutoptions->linspace_scorehandler = NULL;
   if (alignmentwidth > 0)
   {
     querymatchoutoptions->alignment_show_buffer
       = gt_alignment_buffer_new(alignmentwidth);
     querymatchoutoptions->alignment = gt_alignment_new();
+    querymatchoutoptions->linspace_spacemanager = gt_linspaceManagement_new();
+    querymatchoutoptions->linspace_scorehandler = gt_scorehandler_new(0,1,0,1);
   } else
   {
     querymatchoutoptions->alignment_show_buffer = NULL;
@@ -193,6 +199,8 @@ void gt_querymatchoutoptions_delete(
     GT_FREEARRAY(&querymatchoutoptions->eoplist,uint8_t);
     gt_alignment_buffer_delete(querymatchoutoptions->alignment_show_buffer);
     gt_encseq_reader_delete(querymatchoutoptions->esr_for_align_show);
+    gt_linspaceManagement_delete(querymatchoutoptions->linspace_spacemanager);
+    gt_scorehandler_delete(querymatchoutoptions->linspace_scorehandler);
     gt_free(querymatchoutoptions);
   }
 }
@@ -486,25 +494,21 @@ bool gt_querymatchoutoptions_alignment_prepare(GtQuerymatchoutoptions
                               dblen,
                               querymatchoutoptions->vseqbuffer,
                               querylen);
-        LinspaceManagement *spacemanager = gt_linspaceManagement_new();
 #ifndef NDEBUG
         linedist =
 #else
         (void)
 #endif
-
-                   gt_computelinearspace(spacemanager,
-                                         querymatchoutoptions->alignment,
-                                         querymatchoutoptions->useqbuffer,
-                                         0,
-                                         dblen,
-                                         querymatchoutoptions->vseqbuffer,
-                                         0,
-                                         querylen,
-                                         0,
-                                         1,
-                                         1);
-        gt_linspaceManagement_delete(spacemanager);
+        gt_computelinearspace_generic(
+                              querymatchoutoptions->linspace_spacemanager,
+                              querymatchoutoptions->linspace_scorehandler,
+                              querymatchoutoptions->alignment,
+                              querymatchoutoptions->useqbuffer,
+                              0,
+                              dblen,
+                              querymatchoutoptions->vseqbuffer,
+                              0,
+                              querylen);
         gt_assert(linedist <= edist);
         /*printf("linedist = " GT_WU " <= " GT_WU "= edist\n",linedist,edist);*/
       }
