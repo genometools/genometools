@@ -5,7 +5,7 @@
   Copyright (C) 2014 Dirk Willrodt, willrodt@zbh.uni-hamburg.de
   Copyright (C) 2010 Sascha Steinbiss, steinbiss@zbh.uni-hamburg.de
   Copyright (c) 2006-2009 Gordon Gremme <gordon@gremme.org>
-  Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2006-2015 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above

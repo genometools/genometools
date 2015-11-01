@@ -178,7 +178,7 @@ if $gttestdata then
   end
 
   Name "gt linspace_align global lin gap protein gttestdata filelist"
-  Keywords "gt_linspace_align edist"
+  Keywords "gt_linspace_align"
   Test do
     run_test "#{$bin}gt dev linspace_align -ff #{$gttestdata}swissprot/swiss10K "\
              "#{$gttestdata}swissprot/swiss10K " \
