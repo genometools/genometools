@@ -74,12 +74,15 @@ def showresult(prog,minidentity,found,fails)
          100.0 * found.to_f/(found+fails).to_f)
 end
 
+def gtcall ()
+  return "env -i bin/gt"
+end
+
 def callseedextend(indexname,inputfile,destfile,minidentity,length,seqnum,
                    seedlength,withecho = false)
-  gtcall = "env -i bin/gt"
-  makesystemcall("#{gtcall} encseq encode -des no -sds no -md5 no " +
+  makesystemcall("#{gtcall()} encseq encode -des no -sds no -md5 no " +
                  "-indexname #{indexname} #{inputfile}.fas",withecho)
-  makesystemcall("#{gtcall} seed_extend -t 21 -l #{length} " +
+  makesystemcall("#{gtcall()} seed_extend -t 21 -l #{length} " +
 		 "-seedlength #{seedlength} -minidentity #{minidentity} " +
 		 "-seed-display -bias-parameters -extendgreedy " +
 		 "-overlappingseeds -ii #{indexname} -weakends" +
@@ -121,18 +124,24 @@ def rundaligner(inputdir,targetdir,seedlength,minidentity,length,seqnum,
     myersprog = ".."
   end
   makesystemcall("#{myersprog}/DAZZ_DB/fasta2DB #{destfile}.db #{destfile}.fasta")
+  withecho = if tofile then false else true end
   if tofile
     outputfile = "> #{destfile}.txt"
   else
     outputfile = ""
+    makesystemcall("#{gtcall()} encseq encode -des no -sds no -md5 no " +
+                   "-indexname #{destfile} #{destfile}.fasta",withecho)
   end
-  withecho = if tofile then false else true end
   if withecho
     puts "# daligner result:"
   end
   makesystemcall("#{myersprog}/DALIGNER/daligner -t21 -I -A -Y " +
                  "-e0.#{minidentity} -l#{length} -k#{seedlength} " +
                  "#{destfile}.db #{destfile}.db #{outputfile}",withecho)
+  if not tofile
+    makesystemcall("#{gtcall()} dev show_seedext -f #{destfile}.txt -a",
+                   withecho)
+  end
   File.delete("#{destfile}.db")
   return matchinfile("#{destfile}.txt")
 end
