@@ -24,6 +24,7 @@
 #include "core/types_api.h"
 #include "core/error_api.h"
 #include "core/score_matrix.h"
+#include "core/unused_api.h"
 #include "extended/multieoplist.h"
 
 /* the GtAlignment class (an object has to be constructed backwards) */
@@ -127,6 +128,11 @@ void         gt_alignment_show_multieop_list(const GtAlignment *alignment,
                                              FILE *fp);
 int          gt_alignment_unit_test(GtError *err);
 void         gt_alignment_delete(GtAlignment *alignment);
+
+int gt_alignment_polished_end(GT_UNUSED bool rightend,
+                              GT_UNUSED const GtAlignment *alignment,
+                              GT_UNUSED GtWord difference_score,
+                              GT_UNUSED GtWord match_score);
 
 void gt_alignment_clone(const GtAlignment *alignment_from,
                               GtAlignment *alignment_to);

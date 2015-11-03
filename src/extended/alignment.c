@@ -277,8 +277,6 @@ static GtWord gt_alignment_eval_generic_with_score(bool mapped,
   gt_assert(gt_alignment_is_valid(alignment));
 #endif
 
-  printf("mapped=%s,downcase=%s\n",mapped ? "true" : "false",
-                                   downcase ? "true" : "false");
   meoplen = gt_multieoplist_get_num_entries(alignment->eops);
   for (i = meoplen; i > 0; i--) {
     meop = gt_multieoplist_get_entry(alignment->eops, i - 1);
@@ -812,7 +810,7 @@ void gt_alignment_delete(GtAlignment *alignment)
 }
 
 void gt_alignment_clone(const GtAlignment *alignment_from,
-                             GtAlignment *alignment_to)
+                        GtAlignment *alignment_to)
 {
   gt_assert(alignment_from != NULL && alignment_to != NULL);
 
@@ -826,6 +824,14 @@ void gt_alignment_clone(const GtAlignment *alignment_from,
   alignment_to->aligned_range_v.end = alignment_from->aligned_range_v.end;
   gt_multieoplist_clone(alignment_to->eops,alignment_from->eops);
   alignment_to->alilen = alignment_from->alilen;
+}
+
+int gt_alignment_polished_end(GT_UNUSED bool rightend,
+                              GT_UNUSED const GtAlignment *alignment,
+                              GT_UNUSED GtWord difference_score,
+                              GT_UNUSED GtWord match_score)
+{
+  return 0;
 }
 
 int gt_alignment_unit_test(GtError *err)

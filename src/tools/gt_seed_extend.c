@@ -430,9 +430,19 @@ static int gt_seed_extend_runner(GT_UNUSED int argc,
 
   if (arguments->dbs_verify || arguments->verbose) {
     int idx;
-    printf("# Options: ");
+    bool minid_out = false;
+
+    printf("# Options:");
     for (idx = 1; idx < argc; idx++) {
-      printf("%s ", argv[idx]);
+      if (strcmp(argv[idx],"-minidentity") == 0)
+      {
+        minid_out = true;
+      }
+      printf(" %s", argv[idx]);
+    }
+    if (!minid_out)
+    {
+      printf(" -minidentity " GT_WU,arguments->se_minidentity);
     }
     printf("\n");
   }
