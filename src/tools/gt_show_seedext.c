@@ -25,6 +25,8 @@
 #include "core/unused_api.h"
 #include "core/encseq.h"
 #include "match/revcompl.h"
+#include "match/ft-polish.h"
+#include "match/seed-extend.h"
 #include "extended/linearalign.h"
 #include "tools/gt_show_seedext.h"
 
@@ -122,6 +124,8 @@ static int gt_show_seedext_arguments_check(GT_UNUSED int rest_argc,
 static int gt_show_seedext_get_encseq_index(GtStr *ii,
                                             GtStr *qii,
                                             bool *mirror,
+                                            bool *bias_parameters,
+                                            GtUword *errorpercentage,
                                             const char *filename,
                                             GtError *err)
 {
@@ -130,6 +134,7 @@ static int gt_show_seedext_get_encseq_index(GtStr *ii,
 
   gt_assert(ii != NULL && qii != NULL);
   file = fopen(filename, "r");
+  *errorpercentage = 0;
   if (file == NULL) {
     gt_error_set(err, "file %s does not exist", filename);
     had_err = -1;
@@ -140,10 +145,23 @@ static int gt_show_seedext_get_encseq_index(GtStr *ii,
     if (gt_str_read_next_line(line_buffer,file) != EOF)
     {
       char *tok, *lineptr = gt_str_get(line_buffer);
-      bool parse_ii = false, parse_qii = false;
+      bool parse_ii = false, parse_qii = false, parse_minid = false;
 
-      while ((tok = strsep(&lineptr," ")) != NULL)
+      while (!had_err && (tok = strsep(&lineptr," ")) != NULL)
       {
+        if (parse_minid)
+        {
+          GtWord minid;
+
+          if (sscanf(tok,GT_WD,&minid) != 1 || minid < 0  || minid > 99)
+          {
+            gt_error_set(err,"cannot parse argument for option -minidentity "
+                             "first line of file %s",filename);
+            had_err = -1;
+          }
+          *errorpercentage = 100 - minid;
+          parse_minid = false;
+        }
         if (parse_ii)
         {
           gt_str_set(ii, tok);
@@ -166,15 +184,33 @@ static int gt_show_seedext_get_encseq_index(GtStr *ii,
           parse_qii = true;
           continue;
         }
+        if (strcmp(tok, "-minidentity") == 0)
+        {
+          parse_minid = true;
+          continue;
+        }
         if (strcmp(tok, "-mirror") == 0)
         {
           *mirror = true; /* found -mirror option */
         }
+        if (strcmp(tok, "-bias_parameters") == 0)
+        {
+          *bias_parameters = true;
+        }
       }
-      if (gt_str_length(ii) == 0UL) {
-        gt_error_set(err, "need output of option string "
-                         "(run gt seed_extend with -v or -verify)");
-        had_err = -1;
+      if (!had_err)
+      {
+        if (gt_str_length(ii) == 0UL) {
+          gt_error_set(err, "need output of option string "
+                            "(run gt seed_extend with -v or -verify)");
+          had_err = -1;
+        }
+        if (*errorpercentage == 0)
+        {
+          gt_error_set(err,"missing option -minidentity in first line of file "
+                           "%s",filename);
+          had_err = -1;
+        }
       }
     } else
     {
@@ -195,6 +231,7 @@ static int gt_show_seedext_parse_extensions(const GtEncseq *aencseq,
                                             const char *filename,
                                             bool show_alignment,
                                             bool seed_display,
+                                            const Polishing_info *pol_info,
                                             bool mirror,
                                             GtError *err)
 {
@@ -233,7 +270,6 @@ static int gt_show_seedext_parse_extensions(const GtEncseq *aencseq,
   if (mirror) {
     csequence = bsequence + maxseqlen;
   }
-
   while (gt_str_read_next_line(line_buffer,file) != EOF)
   {
     const char *line_ptr = gt_str_get(line_buffer);
@@ -295,6 +331,16 @@ static int gt_show_seedext_parse_extensions(const GtEncseq *aencseq,
                                       width,
                                       characters,
                                       wildcardshow);
+            if (pol_info != NULL)
+            {
+              int left_polished = gt_alignment_polished_end(false,alignment,
+                                           pol_info->difference_score,
+                                           pol_info->match_score);
+              int right_polished = gt_alignment_polished_end(true,alignment,
+                                           pol_info->difference_score,
+                                           pol_info->match_score);
+              printf("polished=%d/%d\n", left_polished,right_polished);
+            }
             gt_alignment_reset(alignment);
           }
           if (mirror) {
@@ -326,7 +372,9 @@ static int gt_show_seedext_runner(GT_UNUSED int argc,
   GtEncseqLoader *encseq_loader = NULL;
   GtStr *ii = gt_str_new(),
         *qii = gt_str_new();
-  bool mirror = false;
+  bool mirror = false, bias_parameters = false;
+  GtUword errorpercentage = 0;
+  Polishing_info *pol_info = NULL;
   int had_err = 0;
 
   gt_error_check(err);
@@ -335,6 +383,8 @@ static int gt_show_seedext_runner(GT_UNUSED int argc,
   had_err = gt_show_seedext_get_encseq_index(ii,
                                              qii,
                                              &mirror,
+                                             &bias_parameters,
+                                             &errorpercentage,
                                              gt_str_get(arguments->filename),
                                              err);
   printf("# file %s: mirror %sabled\n",
@@ -363,6 +413,22 @@ static int gt_show_seedext_runner(GT_UNUSED int argc,
   gt_encseq_loader_delete(encseq_loader);
   gt_str_delete(ii);
   gt_str_delete(qii);
+  if (arguments->suffix_positive)
+  {
+    double matchscore_bias = GT_DEFAULT_MATCHSCORE_BIAS;
+
+    if (bias_parameters)
+    {
+      GtUword atcount, gccount;
+
+      gt_greedy_at_gc_count(&atcount,&gccount,aencseq);
+      if (atcount + gccount > 0) /* for DNA sequence */
+      {
+        matchscore_bias = gt_greedy_dna_sequence_bias_get(atcount,gccount);
+      }
+    }
+    pol_info = polishing_info_new_with_bias(errorpercentage,matchscore_bias);
+  }
   /* Parse seed extensions. */
   if (!had_err) {
     had_err = gt_show_seedext_parse_extensions(aencseq,
@@ -370,11 +436,13 @@ static int gt_show_seedext_runner(GT_UNUSED int argc,
                                                gt_str_get(arguments->filename),
                                                arguments->show_alignment,
                                                arguments->seed_display,
+                                               pol_info,
                                                mirror,
                                                err);
   }
   gt_encseq_delete(aencseq);
   gt_encseq_delete(bencseq);
+  polishing_info_delete(pol_info);
   return had_err;
 }
 
