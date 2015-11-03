@@ -31,6 +31,7 @@
 typedef struct {
   bool show_alignment;
   bool seed_display;
+  bool suffix_positive;
   GtStr *filename;
 } GtShowSeedextArguments;
 
@@ -61,7 +62,7 @@ static GtOptionParser* gt_show_seedext_option_parser_new(void *tool_arguments)
 {
   GtShowSeedextArguments *arguments = tool_arguments;
   GtOptionParser *op;
-  GtOption *option;
+  GtOption *option, *option_filename, *option_suffix_positive;
   gt_assert(arguments);
 
   /* init */
@@ -83,29 +84,35 @@ static GtOptionParser* gt_show_seedext_option_parser_new(void *tool_arguments)
                               false);
   gt_option_parser_add_option(op, option);
 
-  /* -f */
-  option = gt_option_new_filename("f",
-                                  "path to seed extension result file",
-                                  arguments->filename);
-  gt_option_is_mandatory(option);
-  gt_option_parser_add_option(op, option);
+  /* -p */
+  option_suffix_positive = gt_option_new_bool("suffix-positive",
+                              "check if alignment is suffix-positive",
+                              &arguments->suffix_positive,
+                              false);
+  gt_option_parser_add_option(op, option_suffix_positive);
 
+  /* -f */
+  option_filename = gt_option_new_filename("f",
+                                          "path to file with match coordinates",
+                                          arguments->filename);
+  gt_option_is_mandatory(option_filename);
+  gt_option_parser_add_option(op, option_filename);
+
+  gt_option_imply(option_suffix_positive, option_filename);
   return op;
 }
 
 static int gt_show_seedext_arguments_check(GT_UNUSED int rest_argc,
-                                       void *tool_arguments,
-                                       GT_UNUSED GtError *err)
+                                           void *tool_arguments,
+                                           GtError *err)
 {
   GtShowSeedextArguments *arguments = tool_arguments;
   int had_err = 0;
 
   gt_error_check(err);
   gt_assert(arguments);
-
   if (arguments->filename == NULL || gt_str_length(arguments->filename) == 0) {
-    gt_error_set(err,
-                 "option -f requires a file name");
+    gt_error_set(err,"option -f requires a file name");
     had_err = -1;
   }
   return had_err;
@@ -132,20 +139,41 @@ static int gt_show_seedext_get_encseq_index(GtStr *ii,
     /* read first line and evaluate tokens */
     if (gt_str_read_next_line(line_buffer,file) != EOF)
     {
-      const char *tok = strtok(gt_str_get(line_buffer), " ");
-      while (tok != NULL) {
-        if (strcmp(tok, "-ii") == 0) {
-          gt_str_set(ii, strtok(NULL, " ")); /* next token contains ii */
-        } else if (strcmp(tok, "-qii") == 0) {
-          gt_str_set(qii, strtok(NULL, " ")); /* next token contains qii */
-        } else if (strcmp(tok, "-mirror") == 0) {
+      char *tok, *lineptr = gt_str_get(line_buffer);
+      bool parse_ii = false, parse_qii = false;
+
+      while ((tok = strsep(&lineptr," ")) != NULL)
+      {
+        if (parse_ii)
+        {
+          gt_str_set(ii, tok);
+          parse_ii = false;
+          continue;
+        }
+        if (parse_qii)
+        {
+          gt_str_set(qii, tok);
+          parse_qii = false;
+          continue;
+        }
+        if (strcmp(tok, "-ii") == 0)
+        {
+          parse_ii = true;
+          continue;
+        }
+        if (strcmp(tok, "-qii") == 0)
+        {
+          parse_qii = true;
+          continue;
+        }
+        if (strcmp(tok, "-mirror") == 0)
+        {
           *mirror = true; /* found -mirror option */
         }
-        tok = strtok(NULL, " "); /* go to next token */
       }
       if (gt_str_length(ii) == 0UL) {
         gt_error_set(err, "need output of option string "
-                     "(run gt seed_extend with -v or -verify)");
+                         "(run gt seed_extend with -v or -verify)");
         had_err = -1;
       }
     } else
@@ -295,6 +323,7 @@ static int gt_show_seedext_runner(GT_UNUSED int argc,
 {
   GtShowSeedextArguments *arguments = tool_arguments;
   GtEncseq *aencseq = NULL, *bencseq = NULL;
+  GtEncseqLoader *encseq_loader = NULL;
   GtStr *ii = gt_str_new(),
         *qii = gt_str_new();
   bool mirror = false;
@@ -302,7 +331,6 @@ static int gt_show_seedext_runner(GT_UNUSED int argc,
 
   gt_error_check(err);
   gt_assert(arguments);
-
   /* Parse option string in first line of file specified by filename. */
   had_err = gt_show_seedext_get_encseq_index(ii,
                                              qii,
@@ -314,29 +342,27 @@ static int gt_show_seedext_runner(GT_UNUSED int argc,
 
   /* Load encseqs */
   if (!had_err) {
-    GtEncseqLoader *encseq_loader = gt_encseq_loader_new();
+    encseq_loader = gt_encseq_loader_new();
     gt_encseq_loader_enable_autosupport(encseq_loader);
     aencseq = gt_encseq_loader_load(encseq_loader, gt_str_get(ii), err);
     if (aencseq == NULL) {
       had_err = -1;
     }
-
-    if (!had_err) {
-      if (gt_str_length(qii) != 0) {
-        bencseq = gt_encseq_loader_load(encseq_loader, gt_str_get(qii), err);
-      } else {
-        bencseq = gt_encseq_ref(aencseq);
-      }
-      if (bencseq == NULL) {
-        had_err = -1;
-        gt_encseq_delete(aencseq);
-      }
-    }
-    gt_encseq_loader_delete(encseq_loader);
   }
+  if (!had_err) {
+    if (gt_str_length(qii) != 0) {
+      bencseq = gt_encseq_loader_load(encseq_loader, gt_str_get(qii), err);
+    } else {
+      bencseq = gt_encseq_ref(aencseq);
+    }
+    if (bencseq == NULL) {
+      had_err = -1;
+      gt_encseq_delete(aencseq);
+    }
+  }
+  gt_encseq_loader_delete(encseq_loader);
   gt_str_delete(ii);
   gt_str_delete(qii);
-
   /* Parse seed extensions. */
   if (!had_err) {
     had_err = gt_show_seedext_parse_extensions(aencseq,
@@ -346,9 +372,9 @@ static int gt_show_seedext_runner(GT_UNUSED int argc,
                                                arguments->seed_display,
                                                mirror,
                                                err);
-    gt_encseq_delete(aencseq);
-    gt_encseq_delete(bencseq);
   }
+  gt_encseq_delete(aencseq);
+  gt_encseq_delete(bencseq);
   return had_err;
 }
 
