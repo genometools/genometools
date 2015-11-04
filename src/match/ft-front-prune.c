@@ -477,7 +477,7 @@ static bool trimthisentry(GT_UNUSED GtUword distance,
     GtUword alignedlen = GT_MULT2(row) + diagonal;
     double identity = 100.0 * (1.0 - 2.0 * (double) distance/alignedlen);
     printf("aligned=" GT_WU ",diagonal=" GT_WD ", distance=" GT_WU
-           "row=%u, identity=%.2f, hist_size=%d, matches=%d "
+           ", row=%u, identity=%.2f, hist_size=%d, matches=%d "
            "< " GT_WU "=minmatches\n",
            alignedlen,
            diagonal,distance,row,
@@ -628,6 +628,10 @@ static void update_trace_and_polished(Polished_point *best_polished_point,
         best_polished_point->row = frontptr->row;
         best_polished_point->distance = distance;
         best_polished_point->trimleft = trimleft;
+#ifdef TRIM_INFO_OUT
+        printf("new polished point (alignlen=" GT_WU ",row=%u,distance=" GT_WU
+                                  ")\n",alignedlen,frontptr->row,distance);
+#endif
       }
     }
     if (front_trace != NULL)

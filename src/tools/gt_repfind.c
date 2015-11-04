@@ -824,7 +824,8 @@ static int gt_repfind_runner(int argc,
                                       arguments->perc_mat_history,
                                       extend_char_access,
                                       false,
-                                      sensitivity);
+                                      sensitivity,
+                                      GT_DEFAULT_MATCHSCORE_BIAS);
       }
     } else
     {

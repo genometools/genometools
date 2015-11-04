@@ -43,7 +43,7 @@ struct GtAlignment {
   GtUword         ulen,
                   vlen,
                   alilen;
-  GtWord difference_score, match_score;
+  GtWord difference_penalty, match_score;
   GtUword pol_size;
 };
 
@@ -58,7 +58,7 @@ GtAlignment* gt_alignment_new(void)
   alignment->eops = gt_multieoplist_new();
   alignment->alilen = 0;
   alignment->pol_size = 0;
-  alignment->difference_score = alignment->match_score = 0;
+  alignment->difference_penalty = alignment->match_score = 0;
   return alignment;
 }
 
@@ -526,19 +526,19 @@ static unsigned int gt_alignment_show_advance(unsigned int pos,
 }
 
 #define GT_UPDATE_POSITIVE_INFO(SCORE)\
-        if (suffix_positive < alignment->pol_size && suffix_positive_sum >= 0)\
+        if (prefix_positive < alignment->pol_size && prefix_positive_sum >= 0)\
          {\
-           suffix_positive_sum += SCORE;\
-           if (suffix_positive_sum >= 0)\
+           prefix_positive_sum += SCORE;\
+           if (prefix_positive_sum >= 0)\
            {\
-             suffix_positive++;\
+             prefix_positive++;\
            }\
          }\
-         if (prefix_bits_used < alignment->pol_size)\
+         if (suffix_bits_used < alignment->pol_size)\
          {\
-           prefix_bits_used++;\
+           suffix_bits_used++;\
          }\
-         prefix_bits >>= 1
+         suffix_bits >>= 1
 
 void gt_alignment_show_generic(GtUchar *buffer,
                                bool downcase,
@@ -550,11 +550,11 @@ void gt_alignment_show_generic(GtUchar *buffer,
 {
   GtMultieop meop;
   GtUword idx_eop, idx_u = 0, idx_v = 0, meoplen, alignmentlength,
-          prefix_bits_used = 0, suffix_positive = 0;
+          suffix_bits_used = 0, prefix_positive = 0;
   unsigned int pos = 0;
   GtUchar *topbuf = buffer, *midbuf = NULL, *lowbuf = NULL;
-  GtWord suffix_positive_sum = 0;
-  uint64_t prefix_bits = 0,
+  GtWord prefix_positive_sum = 0;
+  uint64_t suffix_bits = 0,
            set_mask = (alignment->pol_size == 0)
                         ? 0
                         : ((uint64_t) 1) << (alignment->pol_size-1);
@@ -606,10 +606,10 @@ void gt_alignment_show_generic(GtUchar *buffer,
                                  : (GtUchar) MISMATCHSYMBOL;
           pos = gt_alignment_show_advance(pos,width,topbuf,fp);
           GT_UPDATE_POSITIVE_INFO(is_match ? alignment->match_score
-                                          : alignment->difference_score);
+                                           : alignment->difference_penalty);
           if (is_match)
           {
-            prefix_bits |= set_mask;
+            suffix_bits |= set_mask;
           }
         }
         break;
@@ -628,7 +628,7 @@ void gt_alignment_show_generic(GtUchar *buffer,
           midbuf[pos] = (GtUchar) MISMATCHSYMBOL;
           lowbuf[pos] = (GtUchar) GAPSYMBOL;
           pos = gt_alignment_show_advance(pos,width,topbuf,fp);
-          GT_UPDATE_POSITIVE_INFO(alignment->difference_score);
+          GT_UPDATE_POSITIVE_INFO(alignment->difference_penalty);
         }
         break;
       case Insertion:
@@ -646,7 +646,7 @@ void gt_alignment_show_generic(GtUchar *buffer,
             lowbuf[pos] = b;
           }
           pos = gt_alignment_show_advance(pos,width,topbuf,fp);
-          GT_UPDATE_POSITIVE_INFO(alignment->difference_score);
+          GT_UPDATE_POSITIVE_INFO(alignment->difference_penalty);
         }
         break;
     }
@@ -669,22 +669,24 @@ void gt_alignment_show_generic(GtUchar *buffer,
   }
   if (alignment->pol_size > 0)
   {
-    GtUword prefix_positive;
-    GtWord prefix_positive_sum = 0;
+    GtUword suffix_positive;
+    GtWord suffix_positive_sum = 0;
 
-    for (prefix_positive = 0; prefix_positive < prefix_bits_used;
-         prefix_positive++)
+    for (suffix_positive = 0; suffix_positive < suffix_bits_used;
+         suffix_positive++)
     {
-      prefix_positive_sum += ((prefix_bits & set_mask)
+      suffix_positive_sum += ((suffix_bits & set_mask)
                                 ? alignment->match_score
-                                : alignment->difference_score);
-      set_mask >>= 1;
-      if (prefix_positive_sum < 0)
+                                : alignment->difference_penalty);
+      if (suffix_positive_sum < 0)
       {
         break;
       }
+      set_mask >>= 1;
     }
-    printf("polished: " GT_WU "/" GT_WU "\n",prefix_positive,suffix_positive);
+    printf("polished(m=" GT_WD ",d=" GT_WD "): " GT_WU "/" GT_WU "\n",
+           alignment->match_score,alignment->difference_penalty,
+           prefix_positive,suffix_positive);
   }
 }
 
@@ -880,7 +882,8 @@ void gt_alignment_polished_ends(GtAlignment *alignment,
 {
   gt_assert(pol_size > 0);
   alignment->pol_size = pol_size;
-  alignment->difference_score = difference_score;
+  gt_assert(difference_score > 0);
+  alignment->difference_penalty = -difference_score;
   alignment->match_score = match_score;
 }
 

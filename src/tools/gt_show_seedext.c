@@ -193,7 +193,7 @@ static int gt_show_seedext_get_encseq_index(GtStr *ii,
         {
           *mirror = true; /* found -mirror option */
         }
-        if (strcmp(tok, "-bias_parameters") == 0)
+        if (strcmp(tok, "-bias-parameters") == 0)
         {
           *bias_parameters = true;
         }
