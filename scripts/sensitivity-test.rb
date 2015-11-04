@@ -79,14 +79,16 @@ def gtcall ()
 end
 
 def callseedextend(indexname,inputfile,destfile,minidentity,length,seqnum,
-                   seedlength,withecho = false)
+                   seedlength,weakends,withalignment,withecho = false)
   makesystemcall("#{gtcall()} encseq encode -des no -sds no -md5 no " +
                  "-indexname #{indexname} #{inputfile}.fas",withecho)
   makesystemcall("#{gtcall()} seed_extend -t 21 -l #{length} " +
 		 "-seedlength #{seedlength} -minidentity #{minidentity} " +
 		 "-seed-display -bias-parameters -extendgreedy " +
-		 "-overlappingseeds -ii #{indexname} -weakends" +
-		 if destfile.empty? then "" else " > #{destfile}.txt" end,
+		 "-overlappingseeds -ii #{indexname}" +
+                 (if withalignment then " -a" else "" end) +
+                 (if weakends then " -weakends" else "" end) +
+		 (if destfile.empty? then "" else " > #{destfile}.txt" end),
                  withecho)
   succ = true
   if destfile != ""
@@ -101,13 +103,14 @@ def callseedextend(indexname,inputfile,destfile,minidentity,length,seqnum,
   return succ
 end
 
-def runseedextend(inputdir,targetdir,seedlength,minidentity,length,seqnum)
+def runseedextend(inputdir,targetdir,weakends,withalignment,seedlength,
+                  minidentity,length,seqnum)
   inputfile = makefilename(inputdir,minidentity,"rand",length,seqnum)
   destfile = makefilename(targetdir,minidentity,"gtout",length,seqnum)
   destdir = File.dirname(destfile)
   makesystemcall("mkdir -p #{destdir}")
   return callseedextend(inputfile,inputfile,destfile,minidentity,length,seqnum,
-                        seedlength)
+                        seedlength,weakends,withalignment)
 end
 
 def rundaligner(inputdir,targetdir,seedlength,minidentity,length,seqnum,
@@ -139,7 +142,8 @@ def rundaligner(inputdir,targetdir,seedlength,minidentity,length,seqnum,
                  "-e0.#{minidentity} -l#{length} -k#{seedlength} " +
                  "#{destfile}.db #{destfile}.db #{outputfile}",withecho)
   if not tofile
-    makesystemcall("#{gtcall()} dev show_seedext -f #{destfile}.txt -a",
+    makesystemcall("#{gtcall()} dev show_seedext -f #{destfile}.txt -a " +
+                   " -polished-ends",
                    withecho)
   end
   File.delete("#{destfile}.db")
@@ -149,13 +153,13 @@ end
 def rerun_seedextend(options,seedlength)
   filename = options.rerun
   minidentity, length, seqnum = fromfilename2keys(filename)
-  inputfiledir = ENV["HOME"] + "/dalign-files"
+  inputfiledir = options.inputdir
   puts # "minid=#{minidentity}, length=#{minidentity}, seqnum=#{seqnum}"
   inputfile = makefilename(inputfiledir,minidentity,"rand",length,seqnum)
   puts "# inputfile=#{inputfile}.fas"
   indexname = "sfx-#{length}-#{seqnum}"
   callseedextend(indexname,inputfile,"",minidentity,length,seqnum,
-                 seedlength,true)
+                 seedlength,options.weakends,true,true)
   rundaligner(options.inputdir,options.targetdir,seedlength,
               minidentity,length,seqnum,false)
 end
@@ -171,6 +175,7 @@ def parseargs(argv)
   options.targetdir = "dalign"
   options.rerun = nil
   options.first = 0
+  options.weakends = false
   opts = OptionParser.new
   indent = " " * 37
   opts.banner = "Usage: #{$0} [options] \nFirstly, generate sequences using "+
@@ -200,6 +205,9 @@ def parseargs(argv)
   opts.on("-d","--daligner","run daligner") do |x|
     options.runda = true
   end
+  opts.on("-w","--weakends","use option -weakends of seed_extend") do |x|
+    options.weakends = true
+  end
   opts.on("-i","--inputdir STRING","specify input directory" +
           "\n#{indent}(default: #{options.inputdir})") do |x|
     options.inputdir = x
@@ -227,6 +235,10 @@ def parseargs(argv)
   if rest.length != 0 or (options.num_tests.nil? and not options.runda and
                           not options.runse and options.rerun.nil?)
     STDERR.puts "#{opts}"
+    exit 1
+  end
+  if options.weakends and not options.seed_extend
+    STDERR.puts "option -w/--weakends requires option -s/--seed_extend"
     exit 1
   end
   return options
@@ -267,8 +279,8 @@ if options.runse or options.runda
       if options.first == 0 or seqnum < options.first
         minidset.add(minidentity)
         if options.runse
-          if runseedextend(options.inputdir,options.targetdir,seedlength,
-                           minidentity,length,seqnum)
+          if runseedextend(options.inputdir,options.targetdir,options.weakends,
+                           false,seedlength,minidentity,length,seqnum)
             gtfound[minidentity] += 1
           else
             gtfail[minidentity] += 1
@@ -285,6 +297,7 @@ if options.runse or options.runda
       end
     end
   end
+  puts "# " + ARGV.join(" ")
   minidset.sort.each do |minidentity|
     if options.runse
       showresult("seed_extend",minidentity,gtfound[minidentity],
