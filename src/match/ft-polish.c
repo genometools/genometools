@@ -107,7 +107,8 @@ void polishing_info_delete(Polishing_info *pol_info)
 }
 
 bool history_is_polished_brute_force(const Polishing_info *pol_info,
-                                     uint64_t matchhistory)
+                                     uint64_t matchhistory,
+                                     bool withoutput)
 {
   GtUword idx;
   uint64_t mask;
@@ -122,6 +123,10 @@ bool history_is_polished_brute_force(const Polishing_info *pol_info,
     } else
     {
       sum_score -= pol_info->difference_score;
+    }
+    if (withoutput)
+    {
+      printf(GT_WU ": sum_score=" GT_WD "\n",idx,sum_score);
     }
     if (sum_score < 0)
     {

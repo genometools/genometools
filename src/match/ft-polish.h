@@ -23,7 +23,8 @@ Polishing_info *polishing_info_new_with_bias(double errorpercentage,
 void polishing_info_delete(Polishing_info *pol_info);
 
 bool history_is_polished_brute_force(const Polishing_info *pol_info,
-                                     uint64_t matchhistory);
+                                     uint64_t matchhistory,
+                                     bool withoutput);
 
 uint64_t polishing_info_maxvalue(const Polishing_info *pol_info);
 

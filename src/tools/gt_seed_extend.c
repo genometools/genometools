@@ -421,6 +421,7 @@ static int gt_seed_extend_runner(GT_UNUSED int argc,
   GtTimer *seedextendtimer = NULL;
   GtExtendCharAccess cam = GT_EXTEND_CHAR_ACCESS_ANY;
   GtUword errorpercentage = 0UL;
+  double matchscore_bias = GT_DEFAULT_MATCHSCORE_BIAS;
   int had_err = 0;
 
   gt_error_check(err);
@@ -503,7 +504,6 @@ static int gt_seed_extend_runner(GT_UNUSED int argc,
   /* Prepare options for greedy extension */
   if (!had_err && gt_option_is_set(arguments->se_option_greedy)) {
     /* Use bias dependent parameters, adapted from E. Myers' DALIGNER */
-    double matchscore_bias = GT_DEFAULT_MATCHSCORE_BIAS;
     if (!had_err && arguments->bias_parameters)
     {
       GtUword atcount, gccount;
@@ -562,7 +562,8 @@ static int gt_seed_extend_runner(GT_UNUSED int argc,
                                      arguments->se_perc_match_hist,
                                      cam,
                                      arguments->weakends,
-                                     sensitivity);
+                                     sensitivity,
+                                     matchscore_bias);
     }
   }
 

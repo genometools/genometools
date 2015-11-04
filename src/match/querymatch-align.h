@@ -35,7 +35,8 @@ void gt_querymatchoutoptions_extend(
                   GtUword perc_mat_history,
                   GtExtendCharAccess extend_char_access,
                   bool weakends,
-                  GtUword sensitivity);
+                  GtUword sensitivity,
+                  double matchscore_bias);
 
 void gt_querymatchoutoptions_delete(
         GtQuerymatchoutoptions *querymatchoutoptions);

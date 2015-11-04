@@ -82,13 +82,14 @@ def callseedextend(indexname,inputfile,destfile,minidentity,length,seqnum,
                    seedlength,weakends,withalignment,withecho = false)
   makesystemcall("#{gtcall()} encseq encode -des no -sds no -md5 no " +
                  "-indexname #{indexname} #{inputfile}.fas",withecho)
-  makesystemcall("#{gtcall()} seed_extend -t 21 -l #{length} " +
+  makesystemcall("#{gtcall()} seed_extend -t 21 " +
 		 "-seedlength #{seedlength} -minidentity #{minidentity} " +
 		 "-seed-display -bias-parameters -extendgreedy " +
 		 "-overlappingseeds -ii #{indexname}" +
                  (if withalignment then " -a" else "" end) +
                  (if weakends then " -weakends" else "" end) +
-		 (if destfile.empty? then "" else " > #{destfile}.txt" end),
+		 (if destfile.empty? then "" else " > #{destfile}.txt" end) +
+                 " -l #{length}",
                  withecho)
   succ = true
   if destfile != ""
@@ -175,6 +176,7 @@ def parseargs(argv)
   options.targetdir = "dalign"
   options.rerun = nil
   options.first = 0
+  options.compare = false
   options.weakends = false
   opts = OptionParser.new
   indent = " " * 37
@@ -208,6 +210,9 @@ def parseargs(argv)
   opts.on("-w","--weakends","use option -weakends of seed_extend") do |x|
     options.weakends = true
   end
+  opts.on("-c","--compare","compare daligner and seed_extend results") do |x|
+    options.compare = true
+  end
   opts.on("-i","--inputdir STRING","specify input directory" +
           "\n#{indent}(default: #{options.inputdir})") do |x|
     options.inputdir = x
@@ -229,11 +234,12 @@ def parseargs(argv)
   end
   opts.on("-h", "--help", "print this help message") do
     puts opts
-    exit
+    exit 0
   end
   rest = opts.parse(argv)
   if rest.length != 0 or (options.num_tests.nil? and not options.runda and
-                          not options.runse and options.rerun.nil?)
+                          not options.runse and options.rerun.nil? and 
+                          not options.compare)
     STDERR.puts "#{opts}"
     exit 1
   end
@@ -312,4 +318,50 @@ if options.runse or options.runda
 end
 if not options.rerun.nil?
   rerun_seedextend(options,seedlength)
+end
+if options.compare
+  daonly = Set.new()
+  seonly = Set.new()
+  both = Set.new()
+  none = Set.new()
+  listdirectory(options.inputdir).each do |filename|
+    if filename.match(/\.fas/)
+      minidentity, length, seqnum = fromfilename2keys(filename)
+      if options.first == 0 or seqnum < options.first
+        sedestfile = makefilename(options.targetdir,minidentity,"gtout",length,
+                                  seqnum) + ".txt"
+        sehasmatch = matchinfile(sedestfile)
+        dadestfile = makefilename(options.targetdir,minidentity,"daout",length,
+                                  seqnum) + ".txt"
+        dehasmatch = matchinfile(dadestfile)
+        if sehasmatch
+          if dehasmatch
+            both.add(filename)
+          else
+            seonly.add(makefilename(".",minidentity,"gaout",length,seqnum) + ".txt")
+          end
+        elsif dehasmatch
+          daonly.add(makefilename(".",minidentity,"daout",length,seqnum) + ".txt")
+        else
+          none.add(filename)
+        end
+      end
+    end
+  end
+  puts "both: #{both.length}"
+  both.each do |f|
+    puts f
+  end
+  puts "daonly: #{daonly.length}"
+  daonly.each do |f|
+    puts f
+  end
+  puts "seonly: #{seonly.length}"
+  seonly.each do |f|
+    puts f
+  end
+  puts "none: #{none.length}"
+  none.each do |f|
+    puts f
+  end
 end
