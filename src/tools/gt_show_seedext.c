@@ -33,7 +33,7 @@
 typedef struct {
   bool show_alignment;
   bool seed_display;
-  bool suffix_positive;
+  bool polished_ends;
   GtStr *filename;
 } GtShowSeedextArguments;
 
@@ -64,7 +64,7 @@ static GtOptionParser* gt_show_seedext_option_parser_new(void *tool_arguments)
 {
   GtShowSeedextArguments *arguments = tool_arguments;
   GtOptionParser *op;
-  GtOption *option, *option_filename, *option_suffix_positive;
+  GtOption *option, *option_filename, *option_polished_ends;
   gt_assert(arguments);
 
   /* init */
@@ -87,11 +87,11 @@ static GtOptionParser* gt_show_seedext_option_parser_new(void *tool_arguments)
   gt_option_parser_add_option(op, option);
 
   /* -p */
-  option_suffix_positive = gt_option_new_bool("suffix-positive",
-                              "check if alignment is suffix-positive",
-                              &arguments->suffix_positive,
+  option_polished_ends = gt_option_new_bool("polished-ends",
+                              "output length of polished ends of alignment",
+                              &arguments->polished_ends,
                               false);
-  gt_option_parser_add_option(op, option_suffix_positive);
+  gt_option_parser_add_option(op, option_polished_ends);
 
   /* -f */
   option_filename = gt_option_new_filename("f",
@@ -100,7 +100,7 @@ static GtOptionParser* gt_show_seedext_option_parser_new(void *tool_arguments)
   gt_option_is_mandatory(option_filename);
   gt_option_parser_add_option(op, option_filename);
 
-  gt_option_imply(option_suffix_positive, option_filename);
+  gt_option_imply(option_polished_ends, option_filename);
   return op;
 }
 
@@ -258,6 +258,13 @@ static int gt_show_seedext_parse_extensions(const GtEncseq *aencseq,
   linspace_spacemanager = gt_linspaceManagement_new();
   linspace_scorehandler = gt_scorehandler_new(0,1,0,1);;
   alignment = gt_alignment_new();
+  if (pol_info != NULL)
+  {
+    gt_alignment_polished_ends(alignment,
+                               GT_MULT2(pol_info->cut_depth),
+                               pol_info-> difference_score,
+                               pol_info->match_score);
+  }
   alignment_show_buffer = gt_alignment_buffer_new(width);
   characters = gt_encseq_alphabetcharacters(aencseq);
   wildcardshow = gt_encseq_alphabetwildcardshow(aencseq);
@@ -331,16 +338,6 @@ static int gt_show_seedext_parse_extensions(const GtEncseq *aencseq,
                                       width,
                                       characters,
                                       wildcardshow);
-            if (pol_info != NULL)
-            {
-              int left_polished = gt_alignment_polished_end(false,alignment,
-                                           pol_info->difference_score,
-                                           pol_info->match_score);
-              int right_polished = gt_alignment_polished_end(true,alignment,
-                                           pol_info->difference_score,
-                                           pol_info->match_score);
-              printf("polished=%d/%d\n", left_polished,right_polished);
-            }
             gt_alignment_reset(alignment);
           }
           if (mirror) {
@@ -413,7 +410,7 @@ static int gt_show_seedext_runner(GT_UNUSED int argc,
   gt_encseq_loader_delete(encseq_loader);
   gt_str_delete(ii);
   gt_str_delete(qii);
-  if (arguments->suffix_positive)
+  if (arguments->polished_ends)
   {
     double matchscore_bias = GT_DEFAULT_MATCHSCORE_BIAS;
 

@@ -21,6 +21,8 @@
 
 #include <ctype.h>
 #include <string.h>
+#include <string.h>
+#include <stdint.h>
 #include "core/assert_api.h"
 #include "core/array.h"
 #include "core/chardef.h"
@@ -41,6 +43,8 @@ struct GtAlignment {
   GtUword         ulen,
                   vlen,
                   alilen;
+  GtWord difference_score, match_score;
+  GtUword pol_size;
 };
 
 #define GAPSYMBOL      '-'
@@ -53,6 +57,8 @@ GtAlignment* gt_alignment_new(void)
   alignment = gt_calloc((size_t) 1, sizeof (GtAlignment));
   alignment->eops = gt_multieoplist_new();
   alignment->alilen = 0;
+  alignment->pol_size = 0;
+  alignment->difference_score = alignment->match_score = 0;
   return alignment;
 }
 
@@ -519,6 +525,21 @@ static unsigned int gt_alignment_show_advance(unsigned int pos,
   return 0;
 }
 
+#define GT_UPDATE_POSITIVE_INFO(SCORE)\
+        if (suffix_positive < alignment->pol_size && suffix_positive_sum >= 0)\
+         {\
+           suffix_positive_sum += SCORE;\
+           if (suffix_positive_sum >= 0)\
+           {\
+             suffix_positive++;\
+           }\
+         }\
+         if (prefix_bits_used < alignment->pol_size)\
+         {\
+           prefix_bits_used++;\
+         }\
+         prefix_bits >>= 1
+
 void gt_alignment_show_generic(GtUchar *buffer,
                                bool downcase,
                                const GtAlignment *alignment,
@@ -528,9 +549,15 @@ void gt_alignment_show_generic(GtUchar *buffer,
                                GtUchar wildcardshow)
 {
   GtMultieop meop;
-  GtUword idx_eop, idx_u = 0, idx_v = 0, meoplen, alignmentlength;
+  GtUword idx_eop, idx_u = 0, idx_v = 0, meoplen, alignmentlength,
+          prefix_bits_used = 0, suffix_positive = 0;
   unsigned int pos = 0;
   GtUchar *topbuf = buffer, *midbuf = NULL, *lowbuf = NULL;
+  GtWord suffix_positive_sum = 0;
+  uint64_t prefix_bits = 0,
+           set_mask = (alignment->pol_size == 0)
+                        ? 0
+                        : ((uint64_t) 1) << (alignment->pol_size-1);
 
   gt_assert(alignment != NULL && (characters == NULL || !downcase));
   alignmentlength = gt_alignment_get_length(alignment);
@@ -561,30 +588,29 @@ void gt_alignment_show_generic(GtUchar *buffer,
         {
           GtUchar a = alignment->u[idx_u++];
           GtUchar b = alignment->v[idx_v++];
+          bool is_match;
 
           if (characters != NULL)
           {
             topbuf[pos] = ISSPECIAL(a) ? wildcardshow : characters[a];
-            midbuf[pos] = ISSPECIAL(a) || ISSPECIAL(b) || a != b
-                            ? (GtUchar) MISMATCHSYMBOL
-                            : (GtUchar) MATCHSYMBOL;
+            is_match = (a == b && !ISSPECIAL(a)) ? true : false;
             lowbuf[pos] = ISSPECIAL(b) ? wildcardshow : characters[b];
           } else
           {
             topbuf[pos] = a;
-            if (downcase)
-            {
-              midbuf[pos] = tolower((int) a) == tolower((int) b)
-                              ? (GtUchar) MATCHSYMBOL
-                              : (GtUchar) MISMATCHSYMBOL;
-            } else
-            {
-              midbuf[pos] = (a == b) ? (GtUchar) MATCHSYMBOL
-                                     : (GtUchar) MISMATCHSYMBOL;
-            }
+            is_match = ((downcase && tolower((int) a) == tolower((int) b)) ||
+                        (!downcase && a == b)) ? true : false;
             lowbuf[pos] = b;
           }
+          midbuf[pos] = is_match ? (GtUchar) MATCHSYMBOL
+                                 : (GtUchar) MISMATCHSYMBOL;
           pos = gt_alignment_show_advance(pos,width,topbuf,fp);
+          GT_UPDATE_POSITIVE_INFO(is_match ? alignment->match_score
+                                          : alignment->difference_score);
+          if (is_match)
+          {
+            prefix_bits |= set_mask;
+          }
         }
         break;
       case Deletion:
@@ -602,6 +628,7 @@ void gt_alignment_show_generic(GtUchar *buffer,
           midbuf[pos] = (GtUchar) MISMATCHSYMBOL;
           lowbuf[pos] = (GtUchar) GAPSYMBOL;
           pos = gt_alignment_show_advance(pos,width,topbuf,fp);
+          GT_UPDATE_POSITIVE_INFO(alignment->difference_score);
         }
         break;
       case Insertion:
@@ -619,6 +646,7 @@ void gt_alignment_show_generic(GtUchar *buffer,
             lowbuf[pos] = b;
           }
           pos = gt_alignment_show_advance(pos,width,topbuf,fp);
+          GT_UPDATE_POSITIVE_INFO(alignment->difference_score);
         }
         break;
     }
@@ -638,6 +666,25 @@ void gt_alignment_show_generic(GtUchar *buffer,
     fwrite(midbuf,sizeof *midbuf,pos+1,fp);
     lowbuf[pos] = '\n';
     fwrite(lowbuf,sizeof *lowbuf,pos+1,fp);
+  }
+  if (alignment->pol_size > 0)
+  {
+    GtUword prefix_positive;
+    GtWord prefix_positive_sum = 0;
+
+    for (prefix_positive = 0; prefix_positive < prefix_bits_used;
+         prefix_positive++)
+    {
+      prefix_positive_sum += ((prefix_bits & set_mask)
+                                ? alignment->match_score
+                                : alignment->difference_score);
+      set_mask >>= 1;
+      if (prefix_positive_sum < 0)
+      {
+        break;
+      }
+    }
+    printf("polished: " GT_WU "/" GT_WU "\n",prefix_positive,suffix_positive);
   }
 }
 
@@ -826,12 +873,15 @@ void gt_alignment_clone(const GtAlignment *alignment_from,
   alignment_to->alilen = alignment_from->alilen;
 }
 
-int gt_alignment_polished_end(GT_UNUSED bool rightend,
-                              GT_UNUSED const GtAlignment *alignment,
-                              GT_UNUSED GtWord difference_score,
-                              GT_UNUSED GtWord match_score)
+void gt_alignment_polished_ends(GtAlignment *alignment,
+                                GtUword pol_size,
+                                GtWord difference_score,
+                                GtWord match_score)
 {
-  return 0;
+  gt_assert(pol_size > 0);
+  alignment->pol_size = pol_size;
+  alignment->difference_score = difference_score;
+  alignment->match_score = match_score;
 }
 
 int gt_alignment_unit_test(GtError *err)
