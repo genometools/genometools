@@ -172,8 +172,13 @@ def parseargs(argv)
   options.num_tests = nil
   options.minid_max = nil
   options.minid_min = nil
-  options.inputdir = ENV["HOME"] + "/dalign-files"
-  options.targetdir = "dalign"
+  if ENV.has_key?("LOCAL")
+    localdir = ENV["LOCAL"]
+  else
+    localdir = "."
+  end
+  options.inputdir = "#{localdir}/sense-test-input"
+  options.targetdir = "#{localdir}/sense-test-run"
   options.rerun = nil
   options.first = 0
   options.compare = false
@@ -303,7 +308,7 @@ if options.runse or options.runda
       end
     end
   end
-  puts "# " + ARGV.join(" ")
+  puts "# #{$0}" + ARGV.join(" ")
   minidset.sort.each do |minidentity|
     if options.runse
       showresult("seed_extend",minidentity,gtfound[minidentity],
@@ -348,20 +353,17 @@ if options.compare
       end
     end
   end
-  puts "both: #{both.length}"
-  both.each do |f|
-    puts f
-  end
-  puts "daonly: #{daonly.length}"
-  daonly.each do |f|
-    puts f
-  end
-  puts "seonly: #{seonly.length}"
-  seonly.each do |f|
-    puts f
-  end
-  puts "none: #{none.length}"
-  none.each do |f|
-    puts f
+  setname = ["both","daonly","seonly","none"]
+  [both,daonly,seonly,none].each_with_index do |thisset,idx|
+    filename = "#{setname[idx]}.txt"
+    begin
+      fp = File.new(filename,"w")
+    rescue => err
+      STDERR.puts "#{$0}: #{err}"
+      exit 1
+    end
+    thisset.each do |f|
+      fp.puts f
+    end
   end
 end
