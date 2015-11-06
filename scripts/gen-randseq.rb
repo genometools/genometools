@@ -76,7 +76,7 @@ def parseargs(argv)
   options.number = 1
   options.mems = false
   options.seedcoverage = 0
-  options.long = false
+  options.long = 0
   opts = OptionParser.new
   opts.on("-m","--mode STRING","specify mode: mirrored|seeded|pair") do |x|
     mode = x
@@ -114,9 +114,9 @@ def parseargs(argv)
                        (" " * indent) + "generator to make sequences reproducible") do |x|
     options.seednumber = x.to_i
   end
-  opts.on("--long","generate a long sequence with multiple\n" + (" " * indent) +
+  opts.on("--long NUM","generate a long sequence with multiple\n" + (" " * indent) +
           "seeds and noisy areas in between") do |x|
-    options.long = true
+    options.long = x.to_i
   end
   opts.on("-c","--seedcoverage NUM","generate multiple seeds that cover the\n" +
          (" " * indent) + "specified number of bases") do |x|
@@ -163,7 +163,7 @@ def parseargs(argv)
     STDERR.puts "#{$0}: option -c requires option -m seeded"
     exit 1
   end
-  if options.long and options.seedcoverage == 0
+  if options.long != 0 and options.seedcoverage == 0
     STDERR.puts "#{$0}: option --long requires option -c"
     exit 1
   end
@@ -199,11 +199,19 @@ def gen_mirrored(fpdb,fpquery,rseq,options,alphabet,errperc)
   fpquery.puts "#{leftcontext2.reverse}"
 end
 
-def headkey(options,extendlength,errperc)
+# headkey with 1 seed
+def headkey(options,extendlength,errperc,seedpos)
   return "seedlength=#{options.seedlength},extendlength=#{extendlength}," +
+         "errperc=#{errperc},seedpos=#{seedpos}..#{seedpos+options.seedlength-1}"
+end
+
+# headkey with multiple seeds (-c option)
+def headkey_cov(options,extendlength,errperc)
+  return "seedlength=#{options.seedlength},sequencelength=#{extendlength}," +
          "errperc=#{errperc}"
 end
 
+# generate 1 seed in the middle of a sequence
 def gen_seeded(fpdb,fpquery,fpquery_r,rseq,options,alphabet,errperc)
   extendlength = (options.totallength - options.seedlength)/2
   seedstring = rseq.sequence(options.seedlength)
@@ -216,7 +224,6 @@ def gen_seeded(fpdb,fpquery,fpquery_r,rseq,options,alphabet,errperc)
   else
     wildcard = ""
   end
-  fpdb.puts ">db: #{headkey(options,extendlength,errperc)}"
   if options.mems
     left1 = "a"
     left2 = "c"
@@ -228,18 +235,23 @@ def gen_seeded(fpdb,fpquery,fpquery_r,rseq,options,alphabet,errperc)
     right1 = ""
     right2 = ""
   end
+  seedpos="#{leftcontext1}#{wildcard}#{left1}".length
+  fpdb.puts ">db: #{headkey(options,extendlength,errperc,seedpos)}"
   fpdb.puts "#{leftcontext1}#{wildcard}#{left1}"
   fpdb.puts "#{seedstring}"
   fpdb.puts "#{right1}#{rightcontext1}"
-  fpquery.puts ">query: #{headkey(options,extendlength,errperc)}"
+  seedpos="#{leftcontext2}#{left2}".length
+  fpquery.puts ">query: #{headkey(options,extendlength,errperc,seedpos)}"
   queryseq = "#{leftcontext2}#{left2}\n#{seedstring}\n#{right2}#{rightcontext2}"
   fpquery.puts queryseq
   if options.reverse
-    fpquery_r.puts ">query-r: #{headkey(options,extendlength,errperc)}"
+    seedpos="#{right2}#{rightcontext2}".length
+    fpquery_r.puts ">query-r: #{headkey(options,extendlength,errperc,seedpos)}"
     fpquery_r.puts queryseq.reverse
   end
 end
 
+# distribute several seeds over a sequence
 def gen_seeded_with_coverage(rseq,options,alphabet,errperc,dbseq,queryseq,
                              seedpos)
   # build array with random seed positions covering >= seedcoverage positions
@@ -295,7 +307,7 @@ def gen_seeded_with_coverage(rseq,options,alphabet,errperc,dbseq,queryseq,
     dbseq += "#{seedstring[i]}#{right1}"
   end
   dbseq += "#{context1[seedstring.length]}"
-  dbhead = ">db: #{headkey(options,dbseq.length,errperc)}"
+  dbhead = ">db: #{headkey_cov(options,dbseq.length,errperc)}"
 
   for i in (0...seedstring.length)
     queryseq += "#{context2[i]}#{left2}"
@@ -303,27 +315,30 @@ def gen_seeded_with_coverage(rseq,options,alphabet,errperc,dbseq,queryseq,
     queryseq += "#{seedstring[i]}#{right2}"
   end
   queryseq += "#{context2[seedstring.length]}"
-  queryhead = ">query: #{headkey(options,queryseq.length,errperc)}"
+  queryhead = ">query: #{headkey_cov(options,queryseq.length,errperc)}"
 
   if options.reverse
-    query_r = ">query-r: #{headkey(options,queryseq.length,errperc)}"
+    query_r = ">query-r: #{headkey_cov(options,queryseq.length,errperc)}"
   else
     query_r = nil
   end
   return dbhead, dbseq, queryhead, queryseq, query_r, seedpos
 end
 
+# create 1 long sequence with several alignment regions and noise in between
 def gen_long_seeded(rseq,options,alphabet,errperc,dbinit,queryinit,seedinit)
   dbseq = dbinit + rseq.sequence((rseq.rgen.rand * 50).to_i)
   queryseq = queryinit + rseq.sequence((rseq.rgen.rand * 50).to_i)
   seedpos = seedinit
-  while dbseq.length < 20000
+  while dbseq.length < options.long
     data = gen_seeded_with_coverage(rseq,options,alphabet,errperc,dbseq,
                                     queryseq,seedpos)
     dbseq = data[1] + rseq.sequence((rseq.rgen.rand * 300 + 100).to_i)
     queryseq = data[3] + rseq.sequence((rseq.rgen.rand * 300 + 100).to_i)
     seedpos = data[5]
   end
+  dbhead = ">db: #{headkey_cov(options,dbseq.length,errperc)}"
+  queryhead = ">query: #{headkey_cov(options,queryseq.length,errperc)}"
   return data[0], dbseq, data[2], queryseq, data[4], seedpos
 end
 
@@ -402,7 +417,7 @@ elsif options.seeded
       seedpos = Array.new(2){Array.new}
       dbseq = String.new
       queryseq = String.new
-      if options.long
+      if options.long != 0
         data = gen_long_seeded(rseq,options,alphabet,errperc,dbseq,queryseq,
                                seedpos)
       else
