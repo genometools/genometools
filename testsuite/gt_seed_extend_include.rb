@@ -39,10 +39,10 @@ Keywords "gt_seed_extend seedpair at1MB memlimit maxfreq verbose"
 Test do
   run_test build_encseq("at1MB", "#{$testdata}at1MB")
   run_test "#{$bin}gt seed_extend -verify -debug-seedpair -memlimit 10MB -ii at1MB"
-  grep last_stderr, /Only k-mers occurring <= 3 times will be considered, due to small memlimit. Expect 50496 seed pairs./
+  grep last_stderr, /Only 14-mers occurring <= 3 times will be considered, due to small memlimit. Expect 50496 seed pairs./
   run "cmp -s #{last_stdout} #{$testdata}seedextend2.out"
   run_test "#{$bin}gt seed_extend -v -maxfreq 5 -ii at1MB"
-  grep last_stdout, /...found and sorted 582230 k-mers/
+  grep last_stdout, /...found and sorted 582230 14-mers/
   grep last_stdout, /...collected and sorted 68577 seed pairs/
 end
 
@@ -124,8 +124,6 @@ Keywords "gt_seed_extend fail"
 Test do
   run_test build_encseq("at1MB", "#{$testdata}at1MB")
   run_test build_encseq("foo", "#{$testdata}foo.fas")
-  run_test "#{$bin}gt seed_extend -seedlength 15 -ii at1MB", :retval => 1
-  grep last_stderr, /integer <= 14 if the sequences contain wildcards/
   run_test "#{$bin}gt seed_extend -seedlength 10 -ii foo", :retval => 1
   grep last_stderr, /integer <= 8 \(length of longest sequence\)/
   run_test "#{$bin}gt seed_extend -maxfreq 1 -ii at1MB", :retval => 1

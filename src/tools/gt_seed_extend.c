@@ -27,6 +27,7 @@
 #include "match/diagbandseed.h"
 #include "match/seed-extend.h"
 #include "match/xdrop.h"
+#include "match/initbasepower.h"
 #include "tools/gt_seed_extend.h"
 
 typedef struct {
@@ -570,6 +571,8 @@ static int gt_seed_extend_runner(GT_UNUSED int argc,
   /* Start algorithm */
   if (!had_err) {
     GtDiagbandseed dbsarguments;
+    unsigned int maxseedlength;
+
     dbsarguments.errorpercentage = errorpercentage;
     dbsarguments.userdefinedleastlength = arguments->se_alignlength;
     dbsarguments.seedlength = arguments->dbs_seedlength;
@@ -588,7 +591,40 @@ static int gt_seed_extend_runner(GT_UNUSED int argc,
     dbsarguments.extendxdropinfo = xdropinfo;
     dbsarguments.querymatchoutopt = querymatchoutopt;
 
-    had_err = gt_diagbandseed_run(aencseq, bencseq, &dbsarguments, err);
+    gt_assert(bencseq != NULL);
+    if (gt_encseq_has_twobitencoding(aencseq) &&
+        gt_encseq_wildcards(aencseq) == 0 &&
+        gt_encseq_has_twobitencoding(bencseq) &&
+        gt_encseq_wildcards(bencseq) == 0)
+    {
+      maxseedlength = 32;
+    } else
+    {
+      unsigned int numofchars_a
+        = gt_alphabet_num_of_chars(gt_encseq_alphabet(aencseq));
+      unsigned int numofchars_b
+        = gt_alphabet_num_of_chars(gt_encseq_alphabet(bencseq));
+      if (numofchars_a != numofchars_b)
+      {
+        gt_error_set(err,"encoded sequences have different alphabet "
+                         "sizes %u and %u",numofchars_a,numofchars_b);
+        had_err = -1;
+      }
+      if (!had_err)
+      {
+        maxseedlength = gt_maxbasepower(numofchars_a) - 1;
+        if (dbsarguments.seedlength > maxseedlength)
+        {
+          gt_error_set(err,"maximum seedlength for alphabet of size %u is %u",
+                          numofchars_a,maxseedlength);
+          had_err = -1;
+        }
+      }
+    }
+    if (!had_err)
+    {
+      had_err = gt_diagbandseed_run(aencseq, bencseq, &dbsarguments, err);
+    }
 
     /* clean up */
     gt_encseq_delete(aencseq);

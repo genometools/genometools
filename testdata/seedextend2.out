@@ -1,4 +1,4 @@
-# Options: -verify -debug-seedpair -memlimit 10MB -ii at1MB 
+# Options: -verify -debug-seedpair -memlimit 10MB -ii at1MB -minidentity 80
 # SeedPair (0,8,255,339)
 # SeedPair (0,8,256,340)
 # SeedPair (0,70,255,343)

@@ -1231,9 +1231,9 @@ static void dc_differencecover_sortsample(GtDifferencecover *dcov,
             GT_GETNEXTFREEINARRAY(codeptr,&codelist,Codeatposition,128);
             gt_assert(codelist.spaceCodeatposition != NULL);
             codeptr->position = pos;
-            gt_assert(code <= (GtCodetype) MAXCODEVALUE);
+            gt_assert(code <= (GtCodetype) GT_MAXCODEVALUE);
             codeptr->code = (unsigned int) code;
-            gt_assert(unitsnotspecial <= (unsigned int) MAXPREFIXLENGTH);
+            gt_assert(unitsnotspecial <= (unsigned int) GT_MAXPREFIXLENGTH);
             codeptr->maxprefixindex = unitsnotspecial;
           }
           specials++;

@@ -40,9 +40,6 @@ GtKmercodeiterator *gt_kmercodeiterator_encseq_new(const GtEncseq *encseq,
                                                    unsigned int kmersize,
                                                    GtUword startpos);
 
-GtUword             gt_kmercodeiterator_encseq_get_currentpos(
-                                          GtKmercodeiterator *kmercodeiterator);
-
 void                gt_kmercodeiterator_reset(
                                          GtKmercodeiterator *kmercodeiterator,
                                          GtReadmode readmode, GtUword startpos);

@@ -25,7 +25,7 @@ unsigned int gt_maxbasepower(unsigned int numofchars)
   GtCodetype minfailure, thepower = (GtCodetype) 1;
   unsigned int i;
 
-  minfailure = (~(GtCodetype) 0)/(GtCodetype) numofchars;
+  minfailure = GT_CODETYPE_MAX/(GtCodetype) numofchars;
   for (i=0; thepower < minfailure; i++)
   {
     thepower *= numofchars;
@@ -46,14 +46,14 @@ GtCodetype *gt_initbasepower(unsigned int numofchars,unsigned int prefixlength)
     {
       break;
     }
-    gt_assert(thepower < ((~(GtCodetype) 0)/(GtCodetype) numofchars));
+    gt_assert(thepower < GT_CODETYPE_MAX/(GtCodetype) numofchars);
     thepower *= numofchars;
   }
   return basepower;
 }
 
 GtCodetype *gt_filllargestchartable(unsigned int numofchars,
-                               unsigned int kmersize)
+                                    unsigned int kmersize)
 {
   GtCodetype code, *ptr, *filltable;
 
@@ -62,6 +62,7 @@ GtCodetype *gt_filllargestchartable(unsigned int numofchars,
   for (ptr = filltable + kmersize - 1; ptr >= filltable; ptr--)
   {
     *ptr = code-1;
+    gt_assert(code <= GT_CODETYPE_MAX/(GtCodetype) numofchars);
     code *= numofchars;
   }
   return filltable;
@@ -89,14 +90,16 @@ GtCodetype **gt_initmultimappower(unsigned int numofchars,unsigned int qvalue)
   GtCodetype thepower = (GtCodetype) 1, *mmptr, **multimappower;
 
   gt_array2dim_malloc(multimappower,(GtUword) qvalue,numofchars);
-  for (offset=(int) (qvalue - 1); offset>=0; offset--)
+  for (offset = (int) (qvalue - 1); offset>=0; offset--)
   {
     mmptr = multimappower[offset];
     mmptr[0] = 0;
     for (mapindex = 1U; mapindex < numofchars; mapindex++)
     {
+      gt_assert(mmptr[mapindex-1] <= GT_CODETYPE_MAX - thepower);
       mmptr[mapindex] = mmptr[mapindex-1] + thepower;
     }
+    gt_assert(thepower <= GT_CODETYPE_MAX/(GtUword) numofchars);
     thepower *= numofchars;
   }
   return multimappower;

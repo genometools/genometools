@@ -21,9 +21,13 @@
 
 #include "core/types_api.h"
 
-/* This type is integer codes computed from strings of some fixed length. */
+/* This type is for integer codes computed from strings of some fixed length. */
 
 typedef GtUword GtCodetype;
+
+/* here is the corresponding MAX constant */
+
+#define GT_CODETYPE_MAX GT_UWORD_MAX
 
 /* The following is the format character this the GtCodetype. */
 

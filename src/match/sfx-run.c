@@ -350,7 +350,7 @@ static int detpfxlen(unsigned int *prefixlength,
       = gt_whatisthemaximalprefixlength(numofchars,
                                         totallength,
                                         sfxstrategy.storespecialcodes
-                                          ? (unsigned int) PREFIXLENBITS
+                                          ? (unsigned int) GT_PREFIXLENBITS
                                           : 0,
                                         withspecialsuffixes);
     if (gt_checkprefixlength(maxprefixlen,*prefixlength,err) != 0)

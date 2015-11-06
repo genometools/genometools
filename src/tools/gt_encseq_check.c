@@ -69,7 +69,7 @@ static GtOptionParser* gt_encseq_check_option_parser_new(void *tool_arguments)
   option = gt_option_new_uword_min_max("prefixlength",
                                        "prefix length",
                                        &arguments->prefixlength, 0,
-                                       0, MAXPREFIXLENGTH);
+                                       0, 32);
   gt_option_parser_add_option(op, option);
 
   option = gt_option_new_bool("nocheckunit","do not run checkextractunitatpos",
