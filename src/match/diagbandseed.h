@@ -18,15 +18,12 @@
 #ifndef DIAGBANDSEED_H
 #define DIAGBANDSEED_H
 #include <stdbool.h>
-#include "core/arraydef.h"
 #include "core/encseq_api.h"
 #include "core/error_api.h"
-#include "core/readmode_api.h"
 #include "core/types_api.h"
 #include "match/seed-extend.h"
-#include "match/xdrop.h"
 
-struct GtDiagbandseed {
+typedef struct {
   GtUword errorpercentage,
           userdefinedleastlength;
   unsigned int seedlength;
@@ -44,31 +41,7 @@ struct GtDiagbandseed {
   GtGreedyextendmatchinfo *extendgreedyinfo;
   GtXdropmatchinfo *extendxdropinfo;
   GtQuerymatchoutoptions *querymatchoutopt;
-};
-
-typedef struct GtDiagbandseed GtDiagbandseed;
-typedef struct GtDiagbandseedKmerPos GtDiagbandseedKmerPos;
-typedef struct GtDiagbandseedSeedPair GtDiagbandseedSeedPair;
-GT_DECLAREARRAYSTRUCT(GtDiagbandseedSeedPair);
-
-/* Returns a GtDiagbandseedKmerPos list of k-mers from a given encseq. */
-int gt_diagbandseed_get_kmers(GtDiagbandseedKmerPos *list,
-                              GtUword *listlength,
-                              const GtEncseq *encseq,
-                              unsigned int seedlength,
-                              GtReadmode readmode,
-                              GtError *err);
-
-/* Returns a GtDiagbandseedSeedPair list of equal k-mers from lists a and b. */
-void gt_diagbandseed_merge(GtArrayGtDiagbandseedSeedPair *mlist,
-                           const GtDiagbandseedKmerPos *alist, GtUword alen,
-                           const GtDiagbandseedKmerPos *blist, GtUword blen,
-                           GtUword *maxfreq,
-                           GtUword maxgram,
-                           GtUword memlimit,
-                           GtUword *histogram,
-                           unsigned int endposdiff,
-                           bool selfcomp);
+} GtDiagbandseed;
 
 /* Run the whole algorithm. */
 int gt_diagbandseed_run(const GtEncseq *aencseq,
