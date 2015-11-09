@@ -94,11 +94,13 @@ def replacewildcards(seq)
 end
 
 # read all files and output them verbatim on lines of width 70
-ARGV.each do |filename|
-  id = 0
-  Fasta.read_multi_file(filename) do |entry|
-    puts "#{convert2myersformat(entry.get_header(), entry.get_seqlength(), id)}"
-    print_sequence(entry.get_sequence(),70)
-    id += 1
+if __FILE__ == $0
+  ARGV.each do |filename|
+    id = 0
+    Fasta.read_multi_file(filename) do |entry|
+      puts "#{convert2myersformat(entry.get_header(), entry.get_seqlength(), id)}"
+      print_sequence(entry.get_sequence(),70)
+      id += 1
+    end
   end
 end
