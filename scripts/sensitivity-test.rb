@@ -3,6 +3,15 @@
 require 'optparse'
 require 'ostruct'
 require 'set'
+require_relative 'convert2myersformat'
+
+def min(a,b)
+  return [a,b].sort.first
+end
+
+def max(a,b)
+  return [a,b].sort.last
+end
 
 def indentify_num(s,regexp)
   if m = s.match(regexp)
@@ -19,10 +28,10 @@ def fromfilename2keys(filename)
   return minidentity, length, seqnum
 end
 
-def makesystemcall(argstring,withecho = false)
+def makesystemcall(argstring,withecho = false,proceed = false)
   if not system(argstring)
     STDERR.puts "system \"#{argstring}\" failed: errorcode #{$?}"
-    exit 1
+    exit 1 unless proceed
   elsif withecho
     puts "# #{argstring}"
   end
@@ -39,8 +48,8 @@ def find_expected_matchlength(filename)
       mlenlist.push(m[1].to_i)
     end
   end
-  if mlenlist.length != 2
-    STDERR.puts "expect two lines specifying the sequence length"
+  if mlenlist.length < 2 or mlenlist.length > 3
+    STDERR.puts "expect two or three lines specifying the sequence length"
     exit 1
   end
   return mlenlist[0], mlenlist[1]
@@ -67,6 +76,68 @@ end
 
 def has_matchesinfile(filename)
   if find_matchesinfile(filename) then true else false end
+end
+
+def find_expected_alignmentranges(filename)
+  ranges = Array.new
+  Fasta.read_multi_file(filename) do |entry|   # method from convert2myersformat
+    intervals = entry.get_header().partition(',seedpos=')[2].split('|')
+    intervals.map!{ |interval|
+      bounds = interval.split('..')
+      interval = (bounds[0].to_i..bounds[1].to_i)
+    }
+    ranges.push(intervals)
+  end
+  return ranges
+end
+
+def checkrange(align, dbrange, queryrange)
+  # align is sorted by db.first
+  align_db, align_query = nil, nil
+  align.each {|ali|
+    align_db, align_query = ali[0], ali[1]
+    if align_db.last >= dbrange.first then
+      break
+    end
+  }
+  if align_db.last < dbrange.first or align_db.first > dbrange.last
+    coverage = 0
+  else
+    ovl_db = min(dbrange.last,align_db.last) - max(dbrange.first,
+                                                   align_db.first) + 1
+    ovl_query = min(queryrange.last,align_query.last) - max(queryrange.first,
+                                                          align_query.first) + 1
+    full_len = dbrange.last-dbrange.first + queryrange.last-queryrange.first + 2
+    coverage = (ovl_db + ovl_query) * 100 / full_len
+  end
+  return coverage
+end
+
+def find_multi_overlaps(alignmentranges,matchlist,results)
+  expectrange_db = alignmentranges[0]
+  expectrange_query = alignmentranges[1]
+  # expectrange_queryrev = alignmentranges[2] unless alignmentranges < 2
+
+  # parse alignments from result
+  align = matchlist.map{ |line|
+    elems = line.split()
+    dbrange = (elems[2].to_i..elems[2].to_i+elems[0].to_i-1)
+    queryrange = (elems[6].to_i..elems[6].to_i+elems[4].to_i-1)
+    line = [dbrange, queryrange]
+  }
+  align.sort!{|x,y| x[0].first <=> y[0].first}
+
+  # compare
+  if expectrange_db.length <= expectrange_query.length
+    len = expectrange_db.length
+  else
+    len = expectrange_query.length
+  end
+  for idx in (0...len)
+    coverage = checkrange(align, expectrange_db[idx], expectrange_query[idx])
+    results[coverage] += 1
+  end
+  return results
 end
 
 def makedirname(dir,minidentity)
@@ -101,9 +172,10 @@ def listdirectory(directory)
   return filelist
 end
 
-def showresult(prog,mincoverage,minidentity,result)
+def showresult(prog,mincoverage,identifier,result,lengthdistr=false)
   found = 0
   fails = 0
+  if mincoverage.nil? then mincoverage = 100 end
   result.each_pair do |coverage,manytimes|
     if coverage >= mincoverage
       found += manytimes
@@ -111,7 +183,12 @@ def showresult(prog,mincoverage,minidentity,result)
       fails += manytimes
     end
   end
-  print "minid=#{minidentity} #{prog} #{found} of #{found+fails}, "
+  if lengthdistr
+    category = "score=#{20 * identifier + 10} "
+    else
+    category = "minid=#{identifier} "
+  end
+  print category + "#{prog} #{found} of #{found+fails}, "
   printf("miss #{fails}, sensitivity %.2f%%\n",
          100.0 * found.to_f/(found+fails).to_f)
 end
@@ -127,7 +204,7 @@ def callseedextend(mincoverage,indexname,inputfile,destfile,minidentity,length,
   if mincoverage.nil?
     lenparam = " -l #{length}"
   else
-    lenparam = " -l 14"
+    lenparam = " -l #{seedlength}"
   end
   makesystemcall("#{gtcall()} seed_extend -t 21 " +
 		 "-seedlength #{seedlength} -minidentity #{minidentity} " +
@@ -135,7 +212,7 @@ def callseedextend(mincoverage,indexname,inputfile,destfile,minidentity,length,
 		 "-overlappingseeds -ii #{indexname}" +
                  (if withalignment then " -a" else "" end) +
                  (if weakends then " -weakends" else "" end) +
-		 (if destfile.empty? then "" else " > #{destfile}.txt" end) +
+                 (if destfile.empty? then "" else " > #{destfile}.txt" end) +
                  lenparam,
                  withecho)
   matchlist = []
@@ -154,6 +231,9 @@ end
 def runseedextend(mincoverage,inputdir,targetdir,weakends,withalignment,
                   seedlength,minidentity,length,seqnum)
   inputfile = makefilename(inputdir,minidentity,"rand",length,seqnum)
+  if not File.exists?(inputfile + ".fas")
+    inputfile = makefilename(inputdir,minidentity,"rand-mult",length,seqnum)
+  end
   destfile = makefilename(targetdir,minidentity,"gtout",length,seqnum)
   destdir = File.dirname(destfile)
   makesystemcall("mkdir -p #{destdir}")
@@ -164,6 +244,9 @@ end
 def rundaligner(mincoverage,inputdir,targetdir,seedlength,minidentity,length,
                 seqnum,tofile = true)
   inputfile = makefilename(inputdir,minidentity,"rand",length,seqnum)
+  if not File.exists?(inputfile + ".fas")
+    inputfile = makefilename(inputdir,minidentity,"rand-mult",length,seqnum)
+  end
   destfile = makefilename(targetdir,minidentity,"daout",length,seqnum)
   destdir = File.dirname(destfile)
   makesystemcall("mkdir -p #{destdir}")
@@ -172,9 +255,10 @@ def rundaligner(mincoverage,inputdir,targetdir,seedlength,minidentity,length,
   if ENV.has_key?("PACKAGES")
     myersprog = ENV["PACKAGES"]
   else
-    myersprog = ".."
+    myersprog = "../myers"
   end
-  makesystemcall("#{myersprog}/DAZZ_DB/fasta2DB #{destfile}.db #{destfile}.fasta")
+  makesystemcall("#{myersprog}/DAZZ_DB/fasta2DB #{destfile}.db " +
+                 "#{destfile}.fasta")
   withecho = if tofile then false else true end
   if tofile
     outputfile = "> #{destfile}.txt"
@@ -189,11 +273,11 @@ def rundaligner(mincoverage,inputdir,targetdir,seedlength,minidentity,length,
   if mincoverage.nil?
     lenparam = "-l#{length} "
   else
-    lenparam = "-l14 "
+    lenparam = "-l#{seedlength} "
   end
   makesystemcall("#{myersprog}/DALIGNER/daligner -t21 -I -A -Y " +
                  "-e0.#{minidentity} -k#{seedlength} #{lenparam}" +
-                 "#{destfile}.db #{destfile}.db #{outputfile}",withecho)
+                 "#{destfile}.db #{destfile}.db #{outputfile}",withecho,true)
   if not tofile
     makesystemcall("#{gtcall()} dev show_seedext -f #{destfile}.txt -a " +
                    " -polished-ends",
@@ -209,6 +293,9 @@ def rerun_seedextend(options,seedlength)
   inputfiledir = options.inputdir
   puts # "minid=#{minidentity}, length=#{minidentity}, seqnum=#{seqnum}"
   inputfile = makefilename(inputfiledir,minidentity,"rand",length,seqnum)
+  if not File.exists?(inputfile + ".fas")
+    inputfile = makefilename(inputfiledir,minidentity,"rand-mult",length,seqnum)
+  end
   puts "# inputfile=#{inputfile}.fas"
   indexname = "sfx-#{length}-#{seqnum}"
   callseedextend(options.mincoverage,indexname,inputfile,"",minidentity,length,
@@ -236,6 +323,8 @@ def parseargs(argv)
   options.compare = false
   options.weakends = false
   options.mincoverage = nil
+  options.multi = 0
+  options.lengthdistr = false
   opts = OptionParser.new
   indent = " " * 37
   opts.banner = "Usage: #{$0} [options] \nFirstly, generate sequences using "+
@@ -291,8 +380,22 @@ def parseargs(argv)
     end
   end
   opts.on("-m","--mincoverage NUMBER",
-          "specify how much the expected match should be covered to count a match") do |x|
+          "specify how much the expected match should\n#{indent}" +
+          "be covered to count a match") do |x|
     options.mincoverage = x.to_i
+  end
+  opts.on("-n","--multi NUMBER",
+          "create long sequences of specified length\n#{indent}" +
+          "with multiple alignment regions") do |x|
+    options.multi = x.to_i
+    if options.multi < 1000
+      STDERR.puts "#{$0}: argument of option -n must be at least 1000"
+      exit 1
+    end
+  end
+  opts.on("-l","--lendistr","use range (50...550) for sequence lengths" +
+          "\n#{indent}or create score distribution") do |x|
+    options.lengthdistr = true
   end
   opts.on("-h", "--help", "print this help message") do
     puts opts
@@ -305,8 +408,20 @@ def parseargs(argv)
     STDERR.puts "#{opts}"
     exit 1
   end
-  if options.weakends and not options.seed_extend
+  if options.weakends and not options.runse
     STDERR.puts "option -w/--weakends requires option -s/--seed_extend"
+    exit 1
+  end
+  if options.multi != 0 and options.lengthdistr
+    STDERR.puts "option -l/--lendistr is not compatible with option -n"
+    exit 1
+  end
+  if options.multi != 0 and options.num_tests.nil?
+    STDERR.puts "option -n/--multi requires option -g"
+    exit 1
+  end
+  if not options.mincoverage.nil? and options.mincoverage > 100
+    STDERR.puts "argument to option -m/--mincoverage must be in range 0..100"
     exit 1
   end
   return options
@@ -316,19 +431,22 @@ options = parseargs(ARGV)
 seedlength = 14
 
 if not options.minid_min.nil?
-  if options.num_tests < 20 then
-    lengthtab = [*90..110].sample(options.num_tests)
+  if options.lengthdistr then
+    lengthtab = (0...options.num_tests).to_a
+    lengthtab.map! {|x| x % 500 + 50}
   else
     lengthtab = options.num_tests.times.map{ 90 + Random.rand(21) }
   end
   options.minid_min.upto(options.minid_max).each do |minidentity|
     filedir = makedirname(options.targetdir,minidentity)
     makesystemcall("mkdir -p #{filedir}")
+    mflag = options.multi == 0 ? "" : "mult-"
+    lflag = options.multi == 0 ? "" : "--long #{options.multi} "
     lengthtab.each_with_index do |length,seqnum|
       # generate random sequences
-      outfile = "#{filedir}/rand-#{length}-#{seqnum}"
+      outfile = "#{filedir}/rand-#{mflag}#{length}-#{seqnum}"
       makesystemcall("ruby scripts/gen-randseq.rb " +
-                     "--minidentity #{minidentity} " +
+                     "--minidentity #{minidentity} #{lflag}" +
 		     "--seedlength #{seedlength} --length #{length} -c 35 " +
 		     "--mode seeded 1> #{outfile}.fas 2>/dev/null")
     end
@@ -337,41 +455,64 @@ end
 if options.runse or options.runda
   gtresult = Array.new(100) {Hash.new(0)}
   daresult = Array.new(100) {Hash.new(0)}
-  minidset = Set.new()
+  idset = Set.new()
   makesystemcall("mkdir -p #{options.targetdir}")
   listdirectory(options.inputdir).each do |filename|
     if filename.match(/\.fas/)
-      emlen1, emlen2 = find_expected_matchlength(filename)
       minidentity, length, seqnum = fromfilename2keys(filename)
       if options.first == 0 or seqnum < options.first
-        minidset.add(minidentity)
+        # identifier for result classification is either minidentity or score
+        identifier = minidentity
+        if options.lengthdistr
+          identifier = length * minidentity / 1000
+          if identifier >= 100
+            STDERR.puts "length #{length} too large for histogram"
+            identifier = 99
+          end
+        end
+        multiseeds = filename.match(/-mult-/)
+        idset.add(identifier)
         if options.runse
           matchlist = runseedextend(options.mincoverage,options.inputdir,
                                     options.targetdir,options.weakends,false,
                                     seedlength,minidentity,length,seqnum)
-          coverage = find_overlap(filename,matchlist,emlen1,emlen2)
-          gtresult[minidentity][coverage] += 1
+          if multiseeds
+            ranges = find_expected_alignmentranges(filename)
+            gtresult[identifier] = find_multi_overlaps(ranges,matchlist,
+                                                       gtresult[identifier])
+          else
+            emlen1, emlen2 = find_expected_matchlength(filename)
+            coverage = find_overlap(filename,matchlist,emlen1,emlen2)
+            gtresult[identifier][coverage] += 1
+          end
         end
         if options.runda
           matchlist = rundaligner(options.mincoverage,options.inputdir,
                                   options.targetdir,seedlength,
                                   minidentity,length,seqnum)
-          coverage = find_overlap(filename,matchlist,emlen1,emlen2)
-          daresult[minidentity][coverage] += 1
+          if multiseeds
+            ranges = find_expected_alignmentranges(filename)
+            daresult[identifier] = find_multi_overlaps(ranges,matchlist,
+                                                       daresult[identifier])
+          else
+            emlen1, emlen2 = find_expected_matchlength(filename)
+            coverage = find_overlap(filename,matchlist,emlen1,emlen2)
+            daresult[identifier][coverage] += 1
+          end
         end
       end
     end
   end
   puts "# #{$0}" + ARGV.join(" ")
-  minidset.sort.each do |minidentity|
+  idset.sort.each do |identifier|
     if options.runse
-      showresult("seed_extend",options.mincoverage,minidentity,
-                 gtresult[minidentity])
+      showresult("seed_extend", options.mincoverage, identifier,
+                 gtresult[identifier], options.lengthdistr)
     end
     makesystemcall("rm -f daout-*.daout*.las")
     if options.runda
-      showresult("daligner",options.mincoverage,minidentity,
-                 daresult[minidentity])
+      showresult("daligner",options.mincoverage,identifier,
+                 daresult[identifier], options.lengthdistr)
     end
   end
 end
@@ -397,10 +538,12 @@ if options.compare
           if dehasmatch
             both.add(filename)
           else
-            seonly.add(makefilename(".",minidentity,"gaout",length,seqnum) + ".txt")
+            seonly.add(makefilename(".",minidentity,"gaout",length,seqnum) +
+                       ".txt")
           end
         elsif dehasmatch
-          daonly.add(makefilename(".",minidentity,"daout",length,seqnum) + ".txt")
+          daonly.add(makefilename(".",minidentity,"daout",length,seqnum) +
+                     ".txt")
         else
           none.add(filename)
         end

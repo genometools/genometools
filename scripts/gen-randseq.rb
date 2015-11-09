@@ -303,7 +303,7 @@ def gen_seeded_with_coverage(rseq,options,alphabet,errperc,dbseq,queryseq,
   # extract sequences
   for i in (0...seedstring.length)
     dbseq += "#{context1[i]}#{wildcard}#{left1}"
-    seedpos[0].push((dbseq.length..dbseq.length+seedstring[i].length-1))
+    seedpos[0].push((dbseq.length..dbseq.length+seedstring[i].length-1)) unless seedpos.nil?
     dbseq += "#{seedstring[i]}#{right1}"
   end
   dbseq += "#{context1[seedstring.length]}"
@@ -311,7 +311,7 @@ def gen_seeded_with_coverage(rseq,options,alphabet,errperc,dbseq,queryseq,
 
   for i in (0...seedstring.length)
     queryseq += "#{context2[i]}#{left2}"
-    seedpos[1].push((queryseq.length..queryseq.length+seedstring[i].length-1))
+    seedpos[1].push((queryseq.length..queryseq.length+seedstring[i].length-1)) unless seedpos.nil?
     queryseq += "#{seedstring[i]}#{right2}"
   end
   queryseq += "#{context2[seedstring.length]}"
@@ -332,10 +332,11 @@ def gen_long_seeded(rseq,options,alphabet,errperc,dbinit,queryinit,seedinit)
   seedpos = seedinit
   while dbseq.length < options.long
     data = gen_seeded_with_coverage(rseq,options,alphabet,errperc,dbseq,
-                                    queryseq,seedpos)
+                                    queryseq,nil)
+    seedpos[0].push((dbseq.length+1..data[1].length))
+    seedpos[1].push((queryseq.length+1..data[3].length))
     dbseq = data[1] + rseq.sequence((rseq.rgen.rand * 300 + 100).to_i)
     queryseq = data[3] + rseq.sequence((rseq.rgen.rand * 300 + 100).to_i)
-    seedpos = data[5]
   end
   dbhead = ">db: #{headkey_cov(options,dbseq.length,errperc)}"
   queryhead = ">query: #{headkey_cov(options,queryseq.length,errperc)}"
