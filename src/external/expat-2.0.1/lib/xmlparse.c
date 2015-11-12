@@ -5117,6 +5117,7 @@ storeEntityValue(XML_Parser parser,
             result = XML_ERROR_NO_MEMORY;
             goto endEntityValue;
           }
+          assert(i < XML_ENCODE_MAX);
           *(pool->ptr)++ = buf[i];
         }
       }
