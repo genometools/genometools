@@ -34,7 +34,7 @@ typedef struct {
   bool show_alignment;
   bool seed_display;
   bool polished_ends;
-  GtStr *filename;
+  GtStr *matchfilename;
 } GtShowSeedextArguments;
 
 typedef struct {
@@ -47,7 +47,7 @@ typedef struct {
 static void* gt_show_seedext_arguments_new(void)
 {
   GtShowSeedextArguments *arguments = gt_calloc((size_t) 1, sizeof *arguments);
-  arguments->filename = gt_str_new();
+  arguments->matchfilename = gt_str_new();
   return arguments;
 }
 
@@ -55,7 +55,7 @@ static void gt_show_seedext_arguments_delete(void *tool_arguments)
 {
   GtShowSeedextArguments *arguments = tool_arguments;
   if (arguments != NULL) {
-    gt_str_delete(arguments->filename);
+    gt_str_delete(arguments->matchfilename);
     gt_free(arguments);
   }
 }
@@ -96,7 +96,7 @@ static GtOptionParser* gt_show_seedext_option_parser_new(void *tool_arguments)
   /* -f */
   option_filename = gt_option_new_filename("f",
                                           "path to file with match coordinates",
-                                          arguments->filename);
+                                          arguments->matchfilename);
   gt_option_is_mandatory(option_filename);
   gt_option_parser_add_option(op, option_filename);
 
@@ -113,7 +113,8 @@ static int gt_show_seedext_arguments_check(GT_UNUSED int rest_argc,
 
   gt_error_check(err);
   gt_assert(arguments);
-  if (arguments->filename == NULL || gt_str_length(arguments->filename) == 0) {
+  if (arguments->matchfilename == NULL ||
+      gt_str_length(arguments->matchfilename) == 0) {
     gt_error_set(err,"option -f requires a file name");
     had_err = -1;
   }
@@ -126,23 +127,23 @@ static int gt_show_seedext_get_encseq_index(GtStr *ii,
                                             bool *mirror,
                                             bool *bias_parameters,
                                             GtUword *errorpercentage,
-                                            const char *filename,
+                                            const char *matchfilename,
                                             GtError *err)
 {
-  FILE *file;
+  FILE *inputfileptr;
   int had_err = 0;
 
   gt_assert(ii != NULL && qii != NULL);
-  file = fopen(filename, "r");
+  inputfileptr = fopen(matchfilename, "r");
   *errorpercentage = 0;
-  if (file == NULL) {
-    gt_error_set(err, "file %s does not exist", filename);
+  if (inputfileptr == NULL) {
+    gt_error_set(err, "file %s does not exist", matchfilename);
     had_err = -1;
   }
   if (!had_err) {
     GtStr *line_buffer = gt_str_new();
     /* read first line and evaluate tokens */
-    if (gt_str_read_next_line(line_buffer,file) != EOF)
+    if (gt_str_read_next_line(line_buffer,inputfileptr) != EOF)
     {
       char *tok, *lineptr = gt_str_get(line_buffer);
       bool parse_ii = false, parse_qii = false, parse_minid = false;
@@ -156,7 +157,7 @@ static int gt_show_seedext_get_encseq_index(GtStr *ii,
           if (sscanf(tok,GT_WD,&minid) != 1 || minid < 0  || minid > 99)
           {
             gt_error_set(err,"cannot parse argument for option -minidentity "
-                             "first line of file %s",filename);
+                             "first line of file %s",matchfilename);
             had_err = -1;
           }
           *errorpercentage = 100 - minid;
@@ -208,27 +209,27 @@ static int gt_show_seedext_get_encseq_index(GtStr *ii,
         if (*errorpercentage == 0)
         {
           gt_error_set(err,"missing option -minidentity in first line of file "
-                           "%s",filename);
+                           "%s",matchfilename);
           had_err = -1;
         }
       }
     } else
     {
-      gt_error_set(err, "file %s is empty", filename);
+      gt_error_set(err, "file %s is empty", matchfilename);
       had_err = -1;
     }
     gt_str_delete(line_buffer);
   }
-  if (file != NULL)
+  if (inputfileptr != NULL)
   {
-    fclose(file);
+    fclose(inputfileptr);
   }
   return had_err;
 }
 
 static int gt_show_seedext_parse_extensions(const GtEncseq *aencseq,
                                             const GtEncseq *bencseq,
-                                            const char *filename,
+                                            const char *matchfilename,
                                             bool show_alignment,
                                             bool seed_display,
                                             const Polishing_info *pol_info,
@@ -249,10 +250,10 @@ static int gt_show_seedext_parse_extensions(const GtEncseq *aencseq,
   const GtUchar *characters;
   GtUchar wildcardshow;
 
-  gt_assert(aencseq && bencseq && filename);
-  file = fopen(filename, "r");
+  gt_assert(aencseq && bencseq && matchfilename);
+  file = fopen(matchfilename, "rb");
   if (file == NULL) {
-    gt_error_set(err, "file %s does not exist", filename);
+    gt_error_set(err, "file %s does not exist", matchfilename);
     return -1;
   }
   linspace_spacemanager = gt_linspaceManagement_new();
@@ -369,21 +370,21 @@ static int gt_show_seedext_runner(GT_UNUSED int argc,
   bool mirror = false, bias_parameters = false;
   GtUword errorpercentage = 0;
   Polishing_info *pol_info = NULL;
+  const char *matchfilename;
   int had_err = 0;
 
   gt_error_check(err);
-  gt_assert(arguments);
+  gt_assert(arguments != NULL);
   /* Parse option string in first line of file specified by filename. */
+  matchfilename = gt_str_get(arguments->matchfilename);
   had_err = gt_show_seedext_get_encseq_index(ii,
                                              qii,
                                              &mirror,
                                              &bias_parameters,
                                              &errorpercentage,
-                                             gt_str_get(arguments->filename),
+                                             matchfilename,
                                              err);
-  printf("# file %s: mirror %sabled\n",
-         gt_str_get(arguments->filename), mirror ? "en" : "dis");
-
+  printf("# file %s: mirror %sabled\n", matchfilename, mirror ? "en" : "dis");
   /* Load encseqs */
   if (!had_err) {
     encseq_loader = gt_encseq_loader_new();
@@ -427,7 +428,7 @@ static int gt_show_seedext_runner(GT_UNUSED int argc,
   if (!had_err) {
     had_err = gt_show_seedext_parse_extensions(aencseq,
                                                bencseq,
-                                               gt_str_get(arguments->filename),
+                                               matchfilename,
                                                arguments->show_alignment,
                                                arguments->seed_display,
                                                pol_info,
