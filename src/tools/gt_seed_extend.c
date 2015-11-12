@@ -27,6 +27,7 @@
 #include "match/diagbandseed.h"
 #include "match/seed-extend.h"
 #include "match/xdrop.h"
+#include "match/ft-polish.h"
 #include "match/initbasepower.h"
 #include "tools/gt_seed_extend.h"
 
@@ -57,6 +58,7 @@ typedef struct {
   GtUword se_perc_match_hist;
   GtStr *se_char_access_mode;
   bool bias_parameters;
+  bool relax_polish;
   /* general options */
   GtOption *se_option_withali;
   GtUword se_alignlength;
@@ -100,7 +102,8 @@ static GtOptionParser* gt_seed_extend_option_parser_new(void *tool_arguments)
   GtOptionParser *op;
   GtOption *option, *op_gre, *op_xdr, *op_cam, *op_his, *op_dif, *op_pmh,
     *op_len, *op_err, *op_xbe, *op_sup, *op_frq, *op_mem, *op_ali, *op_bia,
-    *op_weakends;
+    *op_weakends,
+    *op_relax_polish;
   gt_assert(arguments != NULL);
 
   /* init */
@@ -307,6 +310,13 @@ static GtOptionParser* gt_seed_extend_option_parser_new(void *tool_arguments)
   gt_option_parser_add_option(op, op_ali);
   arguments->se_option_withali = gt_option_ref(op_ali);
 
+  op_relax_polish = gt_option_new_bool("relax_polish",
+                                       "when generating alignments do not force"
+                                       " alignment polished ends",
+                                   &arguments->relax_polish,false);
+  gt_option_parser_add_option(op, op_relax_polish);
+  gt_option_imply(op_relax_polish, op_ali);
+
   /* -mirror */
   option = gt_option_new_bool("mirror",
                               "Add reverse complement reads",
@@ -423,6 +433,7 @@ static int gt_seed_extend_runner(GT_UNUSED int argc,
   GtExtendCharAccess cam = GT_EXTEND_CHAR_ACCESS_ANY;
   GtUword errorpercentage = 0UL;
   double matchscore_bias = GT_DEFAULT_MATCHSCORE_BIAS;
+  Polishing_info *pol_info = NULL;
   int had_err = 0;
 
   gt_error_check(err);
@@ -518,6 +529,10 @@ static int gt_seed_extend_runner(GT_UNUSED int argc,
       arguments->se_perc_match_hist
         = (GtUword) (100.0 - errorpercentage * matchscore_bias);
     }
+    pol_info = polishing_info_new_with_bias(arguments->weakends
+                                              ? MAX(errorpercentage,20)
+                                              : errorpercentage,
+                                            matchscore_bias);
     grextinfo = gt_greedy_extend_matchinfo_new(errorpercentage,
                                                arguments->se_maxalilendiff,
                                                arguments->se_historysize,
@@ -525,8 +540,7 @@ static int gt_seed_extend_runner(GT_UNUSED int argc,
                                                arguments->se_alignlength,
                                                cam,
                                                arguments->se_extendgreedy,
-                                               arguments->weakends,
-                                               matchscore_bias);
+                                               pol_info);
     if (arguments->benchmark) {
       gt_greedy_extend_matchinfo_silent_set(grextinfo);
     }
@@ -564,7 +578,8 @@ static int gt_seed_extend_runner(GT_UNUSED int argc,
                                      cam,
                                      arguments->weakends,
                                      sensitivity,
-                                     matchscore_bias);
+                                     matchscore_bias,
+                                     !arguments->relax_polish);
     }
   }
 
@@ -640,6 +655,7 @@ static int gt_seed_extend_runner(GT_UNUSED int argc,
       gt_querymatchoutoptions_delete(querymatchoutopt);
     }
   }
+  polishing_info_delete(pol_info);
 
   if (gt_showtime_enabled()) {
     if (!had_err) {

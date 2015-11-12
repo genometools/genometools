@@ -28,9 +28,10 @@ bool history_is_polished_brute_force(const Polishing_info *pol_info,
 
 uint64_t polishing_info_maxvalue(const Polishing_info *pol_info);
 
-#define HISTORY_IS_POLISHED(POL_INFO,MATCHHISTORY,LSB)\
-        ((POL_INFO)->values[LSB].diff_from_max >= 0 &&\
-         (POL_INFO)->values[LSB].score_sum +\
+#define GT_HISTORY_IS_POLISHED(POL_INFO,MATCHHISTORY)\
+        ((POL_INFO)->values[(MATCHHISTORY) & (POL_INFO)->mask].diff_from_max \
+         >= 0 &&\
+         (POL_INFO)->values[(MATCHHISTORY) & (POL_INFO)->mask].score_sum +\
          (POL_INFO)->values[((MATCHHISTORY) >> (POL_INFO)->cut_depth) &\
                              (POL_INFO)->mask].diff_from_max >= 0)
 

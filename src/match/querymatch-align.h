@@ -36,7 +36,8 @@ void gt_querymatchoutoptions_extend(
                   GtExtendCharAccess extend_char_access,
                   bool weakends,
                   GtUword sensitivity,
-                  double matchscore_bias);
+                  double matchscore_bias,
+                  bool always_polished_ends);
 
 void gt_querymatchoutoptions_delete(
         GtQuerymatchoutoptions *querymatchoutoptions);

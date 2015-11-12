@@ -201,8 +201,7 @@ typedef struct GtGreedyextendmatchinfo GtGreedyextendmatchinfo;
 
    <extend_char_access> is the mode by which the characters are accessed
    in the encoded sequence.
-
-   REMARK: add comment on matchscore_bias */
+   */
 
 GtGreedyextendmatchinfo *gt_greedy_extend_matchinfo_new(
                                    GtUword errorpercentage,
@@ -212,8 +211,7 @@ GtGreedyextendmatchinfo *gt_greedy_extend_matchinfo_new(
                                    GtUword userdefinedleastlength,
                                    GtExtendCharAccess extend_char_access,
                                    GtUword sensitivity,
-                                   bool weakends,
-                                   double matchscore_bias);
+                                   const Polishing_info *pol_info);
 
 /* the destructor-method for the gven object. */
 
@@ -355,7 +353,7 @@ typedef const GtQuerymatch *(*GtExtendQuerymatchRelativeFunc)(void *,
 
 GtUword gt_align_front_prune_edist(bool rightextension,
                                    Polished_point *best_polished_point,
-                                   Fronttrace *front_trace,
+                                   GtFronttrace *front_trace,
                                    const GtEncseq *encseq,
                                    const GtSeqorEncseq *query,
                                    GtReadmode query_readmode,
@@ -392,4 +390,5 @@ void gt_greedy_at_gc_count(GtUword *atcount,GtUword *gccount,
                            const GtEncseq *encseq);
 
 double gt_greedy_dna_sequence_bias_get(GtUword atcount,GtUword cgcount);
+
 #endif

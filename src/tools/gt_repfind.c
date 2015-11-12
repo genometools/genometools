@@ -720,6 +720,7 @@ static int gt_repfind_runner(int argc,
   GtGreedyextendmatchinfo *greedyextendmatchinfo = NULL;
   GtTimer *repfindtimer = NULL;
   GtExtendCharAccess extend_char_access = GT_EXTEND_CHAR_ACCESS_ANY;
+  Polishing_info *pol_info = NULL;
 
   gt_error_check(err);
   logger = gt_logger_new(arguments->beverbose, GT_LOGGER_DEFLT_PREFIX, stdout);
@@ -768,17 +769,19 @@ static int gt_repfind_runner(int argc,
   }
   if (!haserr && gt_option_is_set(arguments->refextendgreedyoption))
   {
+    GtUword errorpercentage = gt_minidentity2errorpercentage(
+                                           arguments->minidentity);
+    pol_info = polishing_info_new_with_bias(errorpercentage,
+                                            GT_DEFAULT_MATCHSCORE_BIAS);
     greedyextendmatchinfo
-      = gt_greedy_extend_matchinfo_new(gt_minidentity2errorpercentage(
-                                           arguments->minidentity),
+      = gt_greedy_extend_matchinfo_new(errorpercentage,
                                        arguments->maxalignedlendifference,
                                        arguments->history,
                                        arguments->perc_mat_history,
                                        arguments->userdefinedleastlength,
                                        extend_char_access,
                                        arguments->extendgreedy,
-                                       false,
-                                       GT_DEFAULT_MATCHSCORE_BIAS);
+                                       pol_info);
     if (arguments->check_extend_symmetry)
     {
       gt_greedy_extend_matchinfo_check_extend_symmetry_set(
@@ -825,7 +828,8 @@ static int gt_repfind_runner(int argc,
                                       extend_char_access,
                                       false,
                                       sensitivity,
-                                      GT_DEFAULT_MATCHSCORE_BIAS);
+                                      GT_DEFAULT_MATCHSCORE_BIAS,
+                                      false);
       }
     } else
     {
@@ -962,6 +966,7 @@ static int gt_repfind_runner(int argc,
   }
   gt_xdrop_matchinfo_delete(xdropmatchinfo);
   gt_greedy_extend_matchinfo_delete(greedyextendmatchinfo);
+  polishing_info_delete(pol_info);
   gt_logger_delete(logger);
   if (repfindtimer != NULL)
   {

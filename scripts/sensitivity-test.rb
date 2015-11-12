@@ -28,12 +28,45 @@ def makesystemcall(argstring,withecho = false)
   end
 end
 
-def matchinfile(filename)
-  if open(filename).grep(/^\d+ \d+ \d+ . \d+ \d+ \d+ \d+ \d+ \d+/).length > 0
-    return true
-  else
-    return false
+def find_matchesinfile(filename)
+  open(filename).grep(/^\d+ \d+ \d+ . \d+ \d+ \d+ \d+ \d+ \d+/)
+end
+
+def find_expected_matchlength(filename)
+  mlenlist = Array.new()
+  open(filename).each do |line|
+    if m = line.match(/sequencelength=(\d+)/)
+      mlenlist.push(m[1].to_i)
+    end
   end
+  if mlenlist.length != 2
+    STDERR.puts "expect two lines specifying the sequence length"
+    exit 1
+  end
+  return mlenlist[0], mlenlist[1]
+end
+
+def find_overlap(filename,matchlist,emlen1,emlen2)
+  if matchlist.length == 0
+    return 0
+  end
+  mlenlist = Array.new
+  matchlist.each do |m|
+    l = m.split(/\s/)
+    sumlen = l[0].to_i + l[4].to_i
+    if sumlen > emlen1 + emlen2
+      STDERR.puts "#{filename}: sumlen = #{sumlen} > #{emlen1} + #{emlen2} " +
+                  "= expectedlen"
+      exit 1
+    end
+    mlenlist.push(sumlen)
+  end
+  longestsumlen = mlenlist.sort.last
+  return (longestsumlen * 100)/(emlen1 + emlen2)
+end
+
+def has_matchesinfile(filename)
+  if find_matchesinfile(filename) then true else false end
 end
 
 def makedirname(dir,minidentity)
@@ -68,7 +101,16 @@ def listdirectory(directory)
   return filelist
 end
 
-def showresult(prog,minidentity,found,fails)
+def showresult(prog,mincoverage,minidentity,result)
+  found = 0
+  fails = 0
+  result.each_pair do |coverage,manytimes|
+    if coverage >= mincoverage
+      found += manytimes
+    else
+      fails += manytimes
+    end
+  end
   print "minid=#{minidentity} #{prog} #{found} of #{found+fails}, "
   printf("miss #{fails}, sensitivity %.2f%%\n",
          100.0 * found.to_f/(found+fails).to_f)
@@ -78,10 +120,15 @@ def gtcall ()
   return "env -i bin/gt"
 end
 
-def callseedextend(indexname,inputfile,destfile,minidentity,length,seqnum,
-                   seedlength,weakends,withalignment,withecho = false)
+def callseedextend(mincoverage,indexname,inputfile,destfile,minidentity,length,
+                   seqnum,seedlength,weakends,withalignment,withecho = false)
   makesystemcall("#{gtcall()} encseq encode -des no -sds no -md5 no " +
                  "-indexname #{indexname} #{inputfile}.fas",withecho)
+  if mincoverage.nil?
+    lenparam = " -l #{length}"
+  else
+    lenparam = " -l 14"
+  end
   makesystemcall("#{gtcall()} seed_extend -t 21 " +
 		 "-seedlength #{seedlength} -minidentity #{minidentity} " +
 		 "-seed-display -bias-parameters -extendgreedy " +
@@ -89,11 +136,11 @@ def callseedextend(indexname,inputfile,destfile,minidentity,length,seqnum,
                  (if withalignment then " -a" else "" end) +
                  (if weakends then " -weakends" else "" end) +
 		 (if destfile.empty? then "" else " > #{destfile}.txt" end) +
-                 " -l #{length}",
+                 lenparam,
                  withecho)
-  succ = true
+  matchlist = []
   if destfile != ""
-    succ = matchinfile("#{destfile}.txt")
+    matchlist = find_matchesinfile("#{destfile}.txt")
     ["esq","ssp"].each do |suffix|
       filename = "#{indexname}.#{suffix}"
       if File.exists?(filename)
@@ -101,21 +148,21 @@ def callseedextend(indexname,inputfile,destfile,minidentity,length,seqnum,
       end
     end
   end
-  return succ
+  return matchlist
 end
 
-def runseedextend(inputdir,targetdir,weakends,withalignment,seedlength,
-                  minidentity,length,seqnum)
+def runseedextend(mincoverage,inputdir,targetdir,weakends,withalignment,
+                  seedlength,minidentity,length,seqnum)
   inputfile = makefilename(inputdir,minidentity,"rand",length,seqnum)
   destfile = makefilename(targetdir,minidentity,"gtout",length,seqnum)
   destdir = File.dirname(destfile)
   makesystemcall("mkdir -p #{destdir}")
-  return callseedextend(inputfile,inputfile,destfile,minidentity,length,seqnum,
-                        seedlength,weakends,withalignment)
+  return callseedextend(mincoverage,inputfile,inputfile,destfile,minidentity,
+                        length,seqnum,seedlength,weakends,withalignment)
 end
 
-def rundaligner(inputdir,targetdir,seedlength,minidentity,length,seqnum,
-                tofile = true)
+def rundaligner(mincoverage,inputdir,targetdir,seedlength,minidentity,length,
+                seqnum,tofile = true)
   inputfile = makefilename(inputdir,minidentity,"rand",length,seqnum)
   destfile = makefilename(targetdir,minidentity,"daout",length,seqnum)
   destdir = File.dirname(destfile)
@@ -139,8 +186,13 @@ def rundaligner(inputdir,targetdir,seedlength,minidentity,length,seqnum,
   if withecho
     puts "# daligner result:"
   end
+  if mincoverage.nil?
+    lenparam = "-l#{length} "
+  else
+    lenparam = "-l14 "
+  end
   makesystemcall("#{myersprog}/DALIGNER/daligner -t21 -I -A -Y " +
-                 "-e0.#{minidentity} -l#{length} -k#{seedlength} " +
+                 "-e0.#{minidentity} -k#{seedlength} #{lenparam}" +
                  "#{destfile}.db #{destfile}.db #{outputfile}",withecho)
   if not tofile
     makesystemcall("#{gtcall()} dev show_seedext -f #{destfile}.txt -a " +
@@ -148,7 +200,7 @@ def rundaligner(inputdir,targetdir,seedlength,minidentity,length,seqnum,
                    withecho)
   end
   File.delete("#{destfile}.db")
-  return matchinfile("#{destfile}.txt")
+  return find_matchesinfile("#{destfile}.txt")
 end
 
 def rerun_seedextend(options,seedlength)
@@ -159,9 +211,9 @@ def rerun_seedextend(options,seedlength)
   inputfile = makefilename(inputfiledir,minidentity,"rand",length,seqnum)
   puts "# inputfile=#{inputfile}.fas"
   indexname = "sfx-#{length}-#{seqnum}"
-  callseedextend(indexname,inputfile,"",minidentity,length,seqnum,
-                 seedlength,options.weakends,true,true)
-  rundaligner(options.inputdir,options.targetdir,seedlength,
+  callseedextend(options.mincoverage,indexname,inputfile,"",minidentity,length,
+                 seqnum,seedlength,options.weakends,true,true)
+  rundaligner(options.mincoverage,options.inputdir,options.targetdir,seedlength,
               minidentity,length,seqnum,false)
 end
 
@@ -183,6 +235,7 @@ def parseargs(argv)
   options.first = 0
   options.compare = false
   options.weakends = false
+  options.mincoverage = nil
   opts = OptionParser.new
   indent = " " * 37
   opts.banner = "Usage: #{$0} [options] \nFirstly, generate sequences using "+
@@ -237,13 +290,17 @@ def parseargs(argv)
       exit 1
     end
   end
+  opts.on("-m","--mincoverage NUMBER",
+          "specify how much the expected match should be covered to count a match") do |x|
+    options.mincoverage = x.to_i
+  end
   opts.on("-h", "--help", "print this help message") do
     puts opts
     exit 0
   end
   rest = opts.parse(argv)
   if rest.length != 0 or (options.num_tests.nil? and not options.runda and
-                          not options.runse and options.rerun.nil? and 
+                          not options.runse and options.rerun.nil? and
                           not options.compare)
     STDERR.puts "#{opts}"
     exit 1
@@ -272,38 +329,35 @@ if not options.minid_min.nil?
       outfile = "#{filedir}/rand-#{length}-#{seqnum}"
       makesystemcall("ruby scripts/gen-randseq.rb " +
                      "--minidentity #{minidentity} " +
-		     "--seedlength #{seedlength} --length #{length+10} -c 35 " +
+		     "--seedlength #{seedlength} --length #{length} -c 35 " +
 		     "--mode seeded 1> #{outfile}.fas 2>/dev/null")
     end
   end
 end
 if options.runse or options.runda
-  gtfound = Array.new(100) {0}
-  gtfail = Array.new(100) {0}
-  dafound = Array.new(100) {0}
-  dafail = Array.new(100) {0}
+  gtresult = Array.new(100) {Hash.new(0)}
+  daresult = Array.new(100) {Hash.new(0)}
   minidset = Set.new()
   makesystemcall("mkdir -p #{options.targetdir}")
   listdirectory(options.inputdir).each do |filename|
     if filename.match(/\.fas/)
+      emlen1, emlen2 = find_expected_matchlength(filename)
       minidentity, length, seqnum = fromfilename2keys(filename)
       if options.first == 0 or seqnum < options.first
         minidset.add(minidentity)
         if options.runse
-          if runseedextend(options.inputdir,options.targetdir,options.weakends,
-                           false,seedlength,minidentity,length,seqnum)
-            gtfound[minidentity] += 1
-          else
-            gtfail[minidentity] += 1
-          end
+          matchlist = runseedextend(options.mincoverage,options.inputdir,
+                                    options.targetdir,options.weakends,false,
+                                    seedlength,minidentity,length,seqnum)
+          coverage = find_overlap(filename,matchlist,emlen1,emlen2)
+          gtresult[minidentity][coverage] += 1
         end
         if options.runda
-          if rundaligner(options.inputdir,options.targetdir,seedlength,
-                         minidentity,length,seqnum)
-            dafound[minidentity] += 1
-          else
-            dafail[minidentity] += 1
-          end
+          matchlist = rundaligner(options.mincoverage,options.inputdir,
+                                  options.targetdir,seedlength,
+                                  minidentity,length,seqnum)
+          coverage = find_overlap(filename,matchlist,emlen1,emlen2)
+          daresult[minidentity][coverage] += 1
         end
       end
     end
@@ -311,13 +365,13 @@ if options.runse or options.runda
   puts "# #{$0}" + ARGV.join(" ")
   minidset.sort.each do |minidentity|
     if options.runse
-      showresult("seed_extend",minidentity,gtfound[minidentity],
-                                           gtfail[minidentity])
+      showresult("seed_extend",options.mincoverage,minidentity,
+                 gtresult[minidentity])
     end
     makesystemcall("rm -f daout-*.daout*.las")
     if options.runda
-      showresult("daligner",minidentity,dafound[minidentity],
-                                        dafail[minidentity])
+      showresult("daligner",options.mincoverage,minidentity,
+                 daresult[minidentity])
     end
   end
 end
@@ -335,10 +389,10 @@ if options.compare
       if options.first == 0 or seqnum < options.first
         sedestfile = makefilename(options.targetdir,minidentity,"gtout",length,
                                   seqnum) + ".txt"
-        sehasmatch = matchinfile(sedestfile)
+        sehasmatch = has_matchesinfile(sedestfile)
         dadestfile = makefilename(options.targetdir,minidentity,"daout",length,
                                   seqnum) + ".txt"
-        dehasmatch = matchinfile(dadestfile)
+        dehasmatch = has_matchesinfile(dadestfile)
         if sehasmatch
           if dehasmatch
             both.add(filename)
