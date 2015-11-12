@@ -574,7 +574,7 @@ static void update_trace_and_polished(Polished_point *best_polished_point,
                                       GtUword *minrow,
                                       GtUword *mincol,
 #endif
-                                      Fronttrace *front_trace,
+                                      GtFronttrace *front_trace,
                                       const Polishing_info *pol_info,
                                       GtUword distance,
                                       GtUword trimleft,
@@ -618,21 +618,17 @@ static void update_trace_and_polished(Polished_point *best_polished_point,
       filled_matchhistory_bits = frontptr->matchhistory_bits |
                                  (fill_bits << frontptr->matchhistory_size);
     }
-    if (alignedlen > best_polished_point->alignedlen)
+    if (alignedlen > best_polished_point->alignedlen &&
+        GT_HISTORY_IS_POLISHED(pol_info,filled_matchhistory_bits))
     {
-      uint64_t lsb = filled_matchhistory_bits & pol_info->mask;
-
-      if (HISTORY_IS_POLISHED(pol_info,filled_matchhistory_bits,lsb))
-      {
-        best_polished_point->alignedlen = alignedlen;
-        best_polished_point->row = frontptr->row;
-        best_polished_point->distance = distance;
-        best_polished_point->trimleft = trimleft;
+      best_polished_point->alignedlen = alignedlen;
+      best_polished_point->row = frontptr->row;
+      best_polished_point->distance = distance;
+      best_polished_point->trimleft = trimleft;
 #ifdef TRIM_INFO_OUT
-        printf("new polished point (alignlen=" GT_WU ",row=%u,distance=" GT_WU
-                                  ")\n",alignedlen,frontptr->row,distance);
+      printf("new polished point (alignlen=" GT_WU ",row=%u,distance=" GT_WU
+                                ")\n",alignedlen,frontptr->row,distance);
 #endif
-      }
     }
     if (front_trace != NULL)
     {
@@ -649,7 +645,7 @@ GtUword front_prune_edist_inplace(
 #endif
                          Trimstat *trimstat,
                          Polished_point *best_polished_point,
-                         Fronttrace *front_trace,
+                         GtFronttrace *front_trace,
                          const Polishing_info *pol_info,
                          GtUword max_history,
                          GtUword minmatchpercentage,

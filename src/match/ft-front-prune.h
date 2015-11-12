@@ -40,7 +40,7 @@ GtUword front_prune_edist_inplace(
 #endif
                        Trimstat *trimstat,
                        Polished_point *best_polished_point,
-                       Fronttrace *fronttrace,
+                       GtFronttrace *fronttrace,
                        const Polishing_info *pol_info,
                        GtUword history,
                        GtUword minmatchnum,

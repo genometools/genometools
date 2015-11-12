@@ -360,8 +360,8 @@ void gt_optimal_maxalilendiff_perc_mat_history(
 
 struct GtGreedyextendmatchinfo
 {
-  Fronttrace *left_front_trace, *right_front_trace;
-  Polishing_info *pol_info;
+  GtFronttrace *left_front_trace, *right_front_trace;
+  const Polishing_info *pol_info;
   GtUword history,
           maxalignedlendifference,
           errorpercentage,
@@ -453,8 +453,7 @@ GtGreedyextendmatchinfo *gt_greedy_extend_matchinfo_new(
                                    GtUword userdefinedleastlength,
                                    GtExtendCharAccess extend_char_access,
                                    GtUword sensitivity,
-                                   bool weakends,
-                                   double matchscore_bias)
+                                   const Polishing_info *pol_info)
 {
   GtGreedyextendmatchinfo *ggemi = gt_malloc(sizeof *ggemi);
 
@@ -469,10 +468,7 @@ GtGreedyextendmatchinfo *gt_greedy_extend_matchinfo_new(
                                             perc_mat_history,
                                             errorpercentage,
                                             sensitivity);
-  ggemi->pol_info
-    = polishing_info_new_with_bias(weakends ? MAX(errorpercentage,20)
-                                            : errorpercentage,
-                                   matchscore_bias);
+  ggemi->pol_info = pol_info;
   ggemi->db_totallength = GT_UWORD_MAX;
   ggemi->encseq_r_in_u = NULL;
   ggemi->encseq_r_in_v = NULL;
@@ -494,7 +490,6 @@ void gt_greedy_extend_matchinfo_delete(GtGreedyextendmatchinfo *ggemi)
 {
   if (ggemi != NULL)
   {
-    polishing_info_delete(ggemi->pol_info);
     front_trace_delete(ggemi->left_front_trace);
     front_trace_delete(ggemi->right_front_trace);
     gt_encseq_reader_delete(ggemi->encseq_r_in_u);
@@ -637,7 +632,7 @@ static void gt_greedy_extend_init(FTsequenceResources *ufsr,
 
 GtUword gt_align_front_prune_edist(bool rightextension,
                                    Polished_point *best_polished_point,
-                                   Fronttrace *front_trace,
+                                   GtFronttrace *front_trace,
                                    const GtEncseq *dbencseq,
                                    const GtSeqorEncseq *query,
                                    GtReadmode query_readmode,
