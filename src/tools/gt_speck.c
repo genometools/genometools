@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2014 Sascha Steinbiss <ss34@sanger.ac.uk>
-  Copyright (c) 2014 Genome Research Ltd.
+  Copyright (c) 2014-2015 Sascha Steinbiss <ss34@sanger.ac.uk>
+  Copyright (c) 2014-2015 Genome Research Ltd.
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -174,18 +174,22 @@ static int gt_speck_runner(int argc, const char **argv, int parsed_args,
   res = gt_spec_results_new();
   gt_assert(res);
 
-  prog = gt_str_new();
-  gt_str_append_cstr_nt(prog, gt_error_get_progname(err),
+  if (gt_file_exists(gt_str_get(arguments->format))) {
+    speclib = gt_str_ref(arguments->format);
+  } else {
+    prog = gt_str_new();
+    gt_str_append_cstr_nt(prog, gt_error_get_progname(err),
                     gt_cstr_length_up_to_char(gt_error_get_progname(err), ' '));
-  speclib = gt_get_gtdata_path(gt_str_get(prog), NULL);
-  gt_str_delete(prog);
-  gt_str_append_cstr(speclib, "/spec/output_drivers/");
-  gt_str_append_str(speclib, arguments->format);
+    speclib = gt_get_gtdata_path(gt_str_get(prog), NULL);
+    gt_str_delete(prog);
+    gt_str_append_cstr(speclib, "/spec/output_drivers/");
+    gt_str_append_str(speclib, arguments->format);
 
-  if (!gt_file_exists(gt_str_get(speclib))) {
-    gt_error_set(err, "output driver file \"%s\" does not exist",
-                 gt_str_get(speclib));
-    had_err = -1;
+    if (!gt_file_exists(gt_str_get(speclib))) {
+      gt_error_set(err, "output driver file \"%s\" does not exist",
+                   gt_str_get(speclib));
+      had_err = -1;
+    }
   }
 
   if (!had_err) {
