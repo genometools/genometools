@@ -534,7 +534,7 @@ static unsigned int gt_alignment_show_advance(unsigned int pos,
 #define GT_UPDATE_POSITIVE_INFO(ISMATCH)\
         if (alignment->pol_info != NULL)\
         {\
-          if (prefix_positive < pol_size && prefix_positive_sum >= 0)\
+          if (prefix_positive < max_history && prefix_positive_sum >= 0)\
           {\
             if (ISMATCH)\
             {\
@@ -548,7 +548,7 @@ static unsigned int gt_alignment_show_advance(unsigned int pos,
               prefix_positive++;\
             }\
           }\
-          if (suffix_bits_used < pol_size)\
+          if (suffix_bits_used < max_history)\
           {\
             suffix_bits_used++;\
           }\
@@ -570,7 +570,8 @@ void gt_alignment_show_generic(GtUchar *buffer,
   GtMultieop meop;
   GtUword idx_eop, idx_u = 0, idx_v = 0, meoplen, alignmentlength = 0,
           suffix_bits_used = 0, prefix_positive = 0, pol_size = 0,
-          firstseedcolumn = GT_UWORD_MAX, lastseedcolumn = GT_UWORD_MAX;
+          max_history = 64, firstseedcolumn = GT_UWORD_MAX,
+          lastseedcolumn = GT_UWORD_MAX;
   unsigned int pos = 0;
   GtUchar *topbuf = buffer, *midbuf = NULL, *lowbuf = NULL;
   GtWord prefix_positive_sum = 0;
@@ -579,7 +580,7 @@ void gt_alignment_show_generic(GtUchar *buffer,
   if (alignment->pol_info != NULL)
   {
     pol_size = GT_MULT2(alignment->pol_info->cut_depth);
-    set_mask = ((uint64_t) 1) << pol_size;
+    set_mask = ((uint64_t) 1) << (max_history - 1);
   }
   gt_assert(alignment != NULL && (characters == NULL || !downcase));
   topbuf[width] = '\n';
@@ -739,13 +740,12 @@ void gt_alignment_show_generic(GtUchar *buffer,
       endpolished = true;
     }
     printf("# polished(m=" GT_WD ",d=" GT_WD ",p=" GT_WU
-           "): " GT_WU "/" GT_WU " okay=%s",
+           "): " GT_WU "/" GT_WU,
            alignment->pol_info->match_score,
            -alignment->pol_info->difference_score,
            pol_size,
            prefix_positive,
-           suffix_positive,
-           (startpolished && endpolished) ? "true" : "false");
+           suffix_positive);
     if (firstseedcolumn < pol_size)
     {
       printf(", seed_on_start");
@@ -755,10 +755,7 @@ void gt_alignment_show_generic(GtUchar *buffer,
       printf(", seed_on_end");
     }
     printf("\n");
-    if (!startpolished || !endpolished)
-    {
-      exit(EXIT_FAILURE);
-    }
+    gt_assert(startpolished && endpolished);
   }
 }
 
