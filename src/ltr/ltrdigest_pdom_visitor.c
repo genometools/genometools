@@ -1,7 +1,7 @@
 /*
-  Copyright (c) 2013-2014 Sascha Steinbiss <ss34@sanger.ac.uk>
+  Copyright (c) 2013      Sascha Steinbiss <ss34@sanger.ac.uk>
   Copyright (c) 2013      Center for Bioinformatics, University of Hamburg
-  Copyright (c)      2014 Genome Research Ltd.
+  Copyright (c) 2014-2015 Genome Research Ltd.
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -17,6 +17,7 @@
 */
 
 #include <ctype.h>
+#include <errno.h>
 #include <signal.h>
 #include <string.h>
 #include <sys/types.h>
@@ -768,6 +769,26 @@ static int gt_ltrdigest_pdom_visitor_choose_strand(GtLTRdigestPdomVisitor *lv)
   return had_err;
 }
 
+static void gt_ltrdigest_checkpipe(int *fdpair)
+{
+  if (pipe(fdpair)) {
+    perror("could not create pipe, please check for number of "
+           "allowed file descriptors");
+    exit(EXIT_FAILURE);
+  }
+}
+
+static int gt_ltrdigest_checkdup(int fd)
+{
+  int rval = dup(fd);
+  if (rval == -1) {
+    perror("could not duplicate file descriptor, please check "
+           "for number of allowed file descriptors");
+    exit(EXIT_FAILURE);
+  }
+  return rval;
+}
+
 static int gt_ltrdigest_pdom_visitor_feature_node(GtNodeVisitor *nv,
                                                   GtFeatureNode *fn,
                                                   GtError *err)
@@ -803,6 +824,7 @@ static int gt_ltrdigest_pdom_visitor_feature_node(GtNodeVisitor *nv,
 #endif
     unsigned int frame;
     GtStr *seq;
+    int pid, pc[2], cp[2];
 
     seq = gt_str_new();
     rng = gt_genome_node_get_range((GtGenomeNode*) lv->ltr_retrotrans);
@@ -853,31 +875,28 @@ static int gt_ltrdigest_pdom_visitor_feature_node(GtNodeVisitor *nv,
 
       /* run HMMER and handle results */
       if (!had_err) {
+        int rstatus = 0, rval = 0;
   #ifndef _WIN32
-        int pid, pc[2], cp[2];
-        GT_UNUSED int rval;
-
-        rval = pipe(pc);
-        gt_assert(rval == 0);
-        rval = pipe(cp);
-        gt_assert(rval == 0);
-
+        gt_ltrdigest_checkpipe(pc);
+        gt_ltrdigest_checkpipe(cp);
         switch ((pid = (int) fork())) {
           case -1:
-            perror("Can't fork");
-            exit(1);   /* XXX: error handling */
+            perror("can't fork");
+            exit(EXIT_FAILURE);   /* XXX: error handling */
           case 0:    /* child */
             (void) close(1);    /* close current stdout. */
-            rval = dup(cp[1]);  /* make stdout go to write end of pipe. */
+            rval = gt_ltrdigest_checkdup(cp[1]);  /* make stdout go to
+                                                   write end of pipe. */
             (void) close(0);    /* close current stdin. */
-            rval = dup(pc[0]);  /* make stdin come from read end of pipe. */
+            rval = gt_ltrdigest_checkdup(pc[0]);  /* make stdin come from
+                                                   read end of pipe. */
             (void) close(pc[0]);
             (void) close(pc[1]);
             (void) close(cp[0]);
             (void) close(cp[1]);
             (void) execvp("hmmscan", lv->args); /* XXX: read path from env */
-            perror("couldn't execute hmmscan!");
-            exit(1);
+            perror("couldn't execute hmmscan");
+            exit(EXIT_FAILURE);
           default:    /* parent */
             for (i = 0UL; i < 3UL; i++) {
               char buf[5];
@@ -901,7 +920,11 @@ static int gt_ltrdigest_pdom_visitor_feature_node(GtNodeVisitor *nv,
             had_err = gt_ltrdigest_pdom_visitor_parse_output(lv, pstatus,
                                                              instream, err);
             (void) fclose(instream);
-            wait(NULL);
+            wait(&rstatus);
+            if (WEXITSTATUS(rstatus) != 0) {
+              had_err = -1;
+              gt_error_set(err, "HMMER child process terminated with error");
+            }
             if (!had_err)
               had_err = gt_ltrdigest_pdom_visitor_process_hits(lv, pstatus,
                                                                err);
