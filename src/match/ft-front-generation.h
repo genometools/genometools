@@ -43,24 +43,17 @@ void front_trace_add_gen(GtFronttrace *front_trace,GtUword trimleft,
 void front_trace_add_trace(GtFronttrace *front_trace,uint8_t backreference,
                            unsigned int lcs);
 
-void front_trace2eoplist(GtArrayuint8_t *eoplist,
-                         const GtFronttrace *front_trace,
+void front_trace2eoplist(bool polished,
+                         GtArrayuint8_t *eoplist,
+                         GtFronttrace *front_trace,
                          const Polished_point *pp,
+                         GtUword pol_size,
+                         GtWord match_score,
+                         GtWord difference_score,
                          const GtUchar *useq,
                          GtUword ulen,
                          const GtUchar *vseq,
                          GtUword vlen);
-
-void front_trace2polished_eoplist(GtArrayuint8_t *eoplist,
-                                  GtFronttrace *front_trace,
-                                  const Polished_point *pp,
-                                  GtUword pol_size,
-                                  GtWord match_score,
-                                  GtWord difference_score,
-                                  const GtUchar *useq,
-                                  GtUword ulen,
-                                  const GtUchar *vseq,
-                                  GtUword vlen);
 
 void front_trace_multireplacement(GtArrayuint8_t *eoplist,GtUword repnum);
 
