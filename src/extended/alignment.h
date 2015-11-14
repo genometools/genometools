@@ -131,7 +131,8 @@ int          gt_alignment_unit_test(GtError *err);
 void         gt_alignment_delete(GtAlignment *alignment);
 
 void gt_alignment_polished_ends(GtAlignment *alignment,
-                                const Polishing_info *pol_info);
+                                const Polishing_info *pol_info,
+                                bool withpolcheck);
 
 void gt_alignment_set_seedoffset(GtAlignment *alignment,
                                  GtUword useedoffset,

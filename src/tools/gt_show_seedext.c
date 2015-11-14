@@ -281,7 +281,7 @@ static int gt_show_seedext_parse_extensions(const GtEncseq *aencseq,
   alignment = gt_alignment_new();
   if (pol_info != NULL)
   {
-    gt_alignment_polished_ends(alignment,pol_info);
+    gt_alignment_polished_ends(alignment,pol_info,false);
   }
   alignment_show_buffer = gt_alignment_buffer_new(width);
   characters = gt_encseq_alphabetcharacters(aencseq);
@@ -345,8 +345,8 @@ static int gt_show_seedext_parse_extensions(const GtEncseq *aencseq,
                                                           coords.blen);
             if (edist < coords.distance)
             {
-              printf("# edist=" GT_WU "(smaller by " GT_WU ")\n",edist,
-                                                   coords.distance - edist);
+              printf("# edist=" GT_WU " (smaller by " GT_WU ")\n",edist,
+                                                coords.distance - edist);
             }
             gt_assert(edist <= coords.distance);
             gt_alignment_show_generic(alignment_show_buffer,
