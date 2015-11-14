@@ -334,13 +334,13 @@ static void gt_check_diagonal_run(GT_UNUSED const GtUchar *useq,
   }
 }
 
-void front_trace2eoplist(GtArrayuint8_t *eoplist,
-                         const GtFronttrace *front_trace,
-                         const Polished_point *pp,
-                         const GtUchar *useq,
-                         GtUword ulen,
-                         const GtUchar *vseq,
-                         GtUword vlen)
+static void front_trace2eoplist_directed(GtArrayuint8_t *eoplist,
+                                         GtFronttrace *front_trace,
+                                         const Polished_point *pp,
+                                         const GtUchar *useq,
+                                         GtUword ulen,
+                                         const GtUchar *vseq,
+                                         GtUword vlen)
 {
   GtUword distance, localoffset, globaloffset, remainingvalidfronts,
           totalrunlength = 0, trimleft;
@@ -671,16 +671,16 @@ static void gt_front_trace_backtracepath2eoplist(GtArrayuint8_t *eoplist,
 }
 #endif
 
-void front_trace2polished_eoplist(GtArrayuint8_t *eoplist,
-                                  GtFronttrace *front_trace,
-                                  const Polished_point *pp,
-                                  GtUword pol_size,
-                                  GtWord match_score,
-                                  GtWord difference_score,
-                                  const GtUchar *useq,
-                                  GtUword ulen,
-                                  const GtUchar *vseq,
-                                  GtUword vlen)
+static void front_trace2polished_eoplist(GtArrayuint8_t *eoplist,
+                                         GtFronttrace *front_trace,
+                                         const Polished_point *pp,
+                                         GtUword pol_size,
+                                         GtWord match_score,
+                                         GtWord difference_score,
+                                         const GtUchar *useq,
+                                         GtUword ulen,
+                                         const GtUchar *vseq,
+                                         GtUword vlen)
 {
   GtUword localoffset, globaloffset, remainingvalidfronts;
   GtBacktraceFrontStackelem *stack_top_ptr;
@@ -783,4 +783,40 @@ void front_trace2polished_eoplist(GtArrayuint8_t *eoplist,
                                        ulen,
                                        vlen);
 #endif
+}
+
+void front_trace2eoplist(bool polished,
+                         GtArrayuint8_t *eoplist,
+                         GtFronttrace *front_trace,
+                         const Polished_point *pp,
+                         GtUword pol_size,
+                         GtWord match_score,
+                         GtWord difference_score,
+                         const GtUchar *useq,
+                         GtUword ulen,
+                         const GtUchar *vseq,
+                         GtUword vlen)
+{
+  if (polished)
+  {
+    front_trace2polished_eoplist(eoplist,
+                                 front_trace,
+                                 pp,
+                                 pol_size,
+                                 match_score,
+                                 difference_score,
+                                 useq,
+                                 ulen,
+                                 vseq,
+                                 vlen);
+  } else
+  {
+    front_trace2eoplist_directed(eoplist,
+                                 front_trace,
+                                 pp,
+                                 useq,
+                                 ulen,
+                                 vseq,
+                                 vlen);
+  }
 }

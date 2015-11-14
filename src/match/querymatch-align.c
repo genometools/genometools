@@ -282,30 +282,17 @@ static bool seededmatch2eoplist(GtQuerymatchoutoptions *querymatchoutoptions,
     {
       if (querymatchoutoptions->front_trace != NULL)
       {
-        if (querymatchoutoptions->always_polished_ends)
-        {
-          front_trace2polished_eoplist(&querymatchoutoptions->eoplist,
-                                       querymatchoutoptions->front_trace,
-                                       &right_best_polished_point,
-                                       pol_size,
-                                       querymatchoutoptions->pol_info->
-                                                             match_score,
-                                       querymatchoutoptions->pol_info->
-                                                             difference_score,
-                                       NULL,
-                                       ulen,
-                                       NULL,
-                                       vlen);
-        } else
-        {
-          front_trace2eoplist(&querymatchoutoptions->eoplist,
-                              querymatchoutoptions->front_trace,
-                              &right_best_polished_point,
-                              NULL,
-                              ulen,
-                              NULL,
-                              vlen);
-        }
+        front_trace2eoplist(querymatchoutoptions->always_polished_ends,
+                            &querymatchoutoptions->eoplist,
+                            querymatchoutoptions->front_trace,
+                            &right_best_polished_point,
+                            pol_size,
+                            querymatchoutoptions->pol_info->match_score,
+                            querymatchoutoptions->pol_info->difference_score,
+                            NULL,
+                            ulen,
+                            NULL,
+                            vlen);
       }
     }
     if (querymatchoutoptions->front_trace != NULL)
@@ -347,30 +334,17 @@ static bool seededmatch2eoplist(GtQuerymatchoutoptions *querymatchoutoptions,
         {
           GtUword eoplistlen = querymatchoutoptions->eoplist.nextfreeuint8_t;
 
-          if (querymatchoutoptions->always_polished_ends)
-          {
-            front_trace2polished_eoplist(&querymatchoutoptions->eoplist,
-                                         querymatchoutoptions->front_trace,
-                                         &left_best_polished_point,
-                                         pol_size,
-                                         querymatchoutoptions->pol_info->
-                                                               match_score,
-                                         querymatchoutoptions->pol_info->
-                                                               difference_score,
-                                         NULL,
-                                         ulen,
-                                         NULL,
-                                         vlen);
-          } else
-          {
-            front_trace2eoplist(&querymatchoutoptions->eoplist,
-                                querymatchoutoptions->front_trace,
-                                &left_best_polished_point,
-                                NULL,
-                                ulen,
-                                NULL,
-                                vlen);
-          }
+          front_trace2eoplist(querymatchoutoptions->always_polished_ends,
+                              &querymatchoutoptions->eoplist,
+                              querymatchoutoptions->front_trace,
+                              &left_best_polished_point,
+                              pol_size,
+                              querymatchoutoptions->pol_info->match_score,
+                              querymatchoutoptions->pol_info->difference_score,
+                              NULL,
+                              ulen,
+                              NULL,
+                              vlen);
           eoplist_reverse_order(querymatchoutoptions->eoplist.spaceuint8_t +
                                  eoplistlen,
                                 querymatchoutoptions->eoplist.spaceuint8_t +
