@@ -46,7 +46,7 @@ struct GtAlignment {
                   alilen;
   const Polishing_info *pol_info;
   GtUword useedoffset, seedlen;
-  bool seed_display;
+  bool seed_display, withpolcheck;
 };
 
 #define GAPSYMBOL      '-'
@@ -570,8 +570,9 @@ void gt_alignment_show_generic(GtUchar *buffer,
   GtMultieop meop;
   GtUword idx_eop, idx_u = 0, idx_v = 0, meoplen, alignmentlength = 0,
           suffix_bits_used = 0, prefix_positive = 0, pol_size = 0,
-          max_history = 64, firstseedcolumn = GT_UWORD_MAX,
+          firstseedcolumn = GT_UWORD_MAX,
           lastseedcolumn = GT_UWORD_MAX;
+  const GtUword max_history = 64;
   unsigned int pos = 0;
   GtUchar *topbuf = buffer, *midbuf = NULL, *lowbuf = NULL;
   GtWord prefix_positive_sum = 0;
@@ -739,7 +740,7 @@ void gt_alignment_show_generic(GtUchar *buffer,
     {
       endpolished = true;
     }
-    printf("# polished(m=" GT_WD ",d=" GT_WD ",p=" GT_WU
+    printf("# polishing(m=" GT_WD ",d=" GT_WD ",p=" GT_WU
            "): " GT_WU "/" GT_WU,
            alignment->pol_info->match_score,
            -alignment->pol_info->difference_score,
@@ -754,8 +755,22 @@ void gt_alignment_show_generic(GtUchar *buffer,
     {
       printf(", seed_on_end");
     }
-    printf("\n");
-    gt_assert(startpolished && endpolished);
+    if (alignment->withpolcheck)
+    {
+      printf("\n");
+      gt_assert(startpolished && endpolished);
+    } else
+    {
+      if (!startpolished)
+      {
+        printf(", start not polished");
+      }
+      if (!endpolished)
+      {
+        printf(", end not polished");
+      }
+      printf("\n");
+    }
   }
 }
 
@@ -953,10 +968,12 @@ void gt_alignment_clone(const GtAlignment *alignment_from,
 }
 
 void gt_alignment_polished_ends(GtAlignment *alignment,
-                                const Polishing_info *pol_info)
+                                const Polishing_info *pol_info,
+                                bool withpolcheck)
 {
   gt_assert(alignment != NULL);
   alignment->pol_info = pol_info;
+  alignment->withpolcheck = withpolcheck;
 }
 
 void gt_alignment_seed_display_set(GtAlignment *alignment)

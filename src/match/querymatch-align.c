@@ -197,7 +197,7 @@ void gt_querymatchoutoptions_extend(
       if (always_polished_ends)
       {
         gt_alignment_polished_ends(querymatchoutoptions->alignment,
-                                   querymatchoutoptions->pol_info);
+                                   querymatchoutoptions->pol_info,true);
       }
       if (seed_display)
       {
