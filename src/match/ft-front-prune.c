@@ -872,5 +872,9 @@ GtUword front_prune_edist_inplace(
                0
 #endif
               );
+#ifdef OUTSIDE_OF_GT
+  gt_free(frontspace->space);
+  gt_free(frontspace);
+#endif
   return diedout ? sumseqlength + 1 : distance;
 }
