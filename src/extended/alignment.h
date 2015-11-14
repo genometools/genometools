@@ -137,6 +137,8 @@ void gt_alignment_set_seedoffset(GtAlignment *alignment,
                                  GtUword useedoffset,
                                  GtUword seedlen);
 
+void gt_alignment_seed_display_set(GtAlignment *alignment);
+
 void gt_alignment_clone(const GtAlignment *alignment_from,
                               GtAlignment *alignment_to);
 

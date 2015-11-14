@@ -102,8 +102,7 @@ static GtOptionParser* gt_seed_extend_option_parser_new(void *tool_arguments)
   GtOptionParser *op;
   GtOption *option, *op_gre, *op_xdr, *op_cam, *op_his, *op_dif, *op_pmh,
     *op_len, *op_err, *op_xbe, *op_sup, *op_frq, *op_mem, *op_ali, *op_bia,
-    *op_weakends,
-    *op_relax_polish;
+    *op_weakends, *op_seed_display, *op_relax_polish;
   gt_assert(arguments != NULL);
 
   /* init */
@@ -240,6 +239,7 @@ static GtOptionParser* gt_seed_extend_option_parser_new(void *tool_arguments)
                                        &arguments->se_historysize,
                                        60UL, 1UL, 64UL);
   gt_option_imply(op_his, op_gre);
+  gt_option_is_development_option(op_his);
   gt_option_parser_add_option(op, op_his);
 
   /* -maxalilendiff */
@@ -320,7 +320,8 @@ static GtOptionParser* gt_seed_extend_option_parser_new(void *tool_arguments)
 
   /* -mirror */
   option = gt_option_new_bool("mirror",
-                              "Add reverse complement reads",
+                              "also compute matches on reverse complemented "
+                              "strand",
                               &arguments->mirror,
                               false);
   gt_option_parser_add_option(op, option);
@@ -342,12 +343,15 @@ static GtOptionParser* gt_seed_extend_option_parser_new(void *tool_arguments)
   gt_option_parser_add_option(op, option);
 
   /* -seed-display */
-  option = gt_option_new_bool("seed-display",
-                              "Display seeds in #-line",
-                              &arguments->seed_display,
-                              false);
-  gt_option_is_development_option(option);
-  gt_option_parser_add_option(op, option);
+  op_seed_display = gt_option_new_bool("seed-display",
+                                       "Display seeds in #-line and by "
+                                       "character s (instead of |) in middle "
+                                       "row of alignment column",
+                                       &arguments->seed_display,
+                                       false);
+  gt_option_is_development_option(op_seed_display);
+  gt_option_imply_either_2(op_seed_display, op_xdr, op_gre);
+  gt_option_parser_add_option(op, op_seed_display);
 
   /* -weakends */
   op_weakends = gt_option_new_bool("weakends",
@@ -356,6 +360,7 @@ static GtOptionParser* gt_seed_extend_option_parser_new(void *tool_arguments)
                                    &arguments->weakends,
                                    false);
   gt_option_imply_either_2(op_weakends, op_xdr, op_gre);
+  gt_option_is_development_option(op_weakends);
   gt_option_parser_add_option(op, op_weakends);
 
   /* -v */
@@ -589,7 +594,8 @@ static int gt_seed_extend_runner(GT_UNUSED int argc,
                                      arguments->weakends,
                                      sensitivity,
                                      matchscore_bias,
-                                     !arguments->relax_polish);
+                                     !arguments->relax_polish,
+                                     arguments->seed_display);
     }
   }
 

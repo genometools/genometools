@@ -168,7 +168,8 @@ void gt_querymatchoutoptions_extend(
                   bool weakends,
                   GtUword sensitivity,
                   double matchscore_bias,
-                  bool always_polished_ends)
+                  bool always_polished_ends,
+                  bool seed_display)
 {
   if (errorpercentage > 0)
   {
@@ -191,10 +192,17 @@ void gt_querymatchoutoptions_extend(
                                        extend_char_access,
                                        sensitivity,
                                        querymatchoutoptions->pol_info);
-    if (querymatchoutoptions->alignment != NULL && always_polished_ends)
+    if (querymatchoutoptions->alignment != NULL)
     {
-      gt_alignment_polished_ends(querymatchoutoptions->alignment,
-                                 querymatchoutoptions->pol_info);
+      if (always_polished_ends)
+      {
+        gt_alignment_polished_ends(querymatchoutoptions->alignment,
+                                   querymatchoutoptions->pol_info);
+      }
+      if (seed_display)
+      {
+        gt_alignment_seed_display_set(querymatchoutoptions->alignment);
+      }
     }
     querymatchoutoptions->always_polished_ends = always_polished_ends;
   }
