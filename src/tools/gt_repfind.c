@@ -830,7 +830,8 @@ static int gt_repfind_runner(int argc,
                                       false,
                                       sensitivity,
                                       GT_DEFAULT_MATCHSCORE_BIAS,
-                                      true);
+                                      true,
+                                      arguments->seed_display);
       }
     } else
     {

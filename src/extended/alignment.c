@@ -46,6 +46,7 @@ struct GtAlignment {
                   alilen;
   const Polishing_info *pol_info;
   GtUword useedoffset, seedlen;
+  bool seed_display;
 };
 
 #define GAPSYMBOL      '-'
@@ -59,6 +60,9 @@ GtAlignment* gt_alignment_new(void)
   alignment->eops = gt_multieoplist_new();
   alignment->alilen = 0;
   alignment->pol_info = NULL;
+  alignment->useedoffset = 0;
+  alignment->seedlen = 0;
+  alignment->seed_display = 0;
   return alignment;
 }
 
@@ -570,7 +574,6 @@ void gt_alignment_show_generic(GtUchar *buffer,
   unsigned int pos = 0;
   GtUchar *topbuf = buffer, *midbuf = NULL, *lowbuf = NULL;
   GtWord prefix_positive_sum = 0;
-  
   uint64_t suffix_bits = 0, set_mask = 0;
 
   if (alignment->pol_info != NULL)
@@ -621,7 +624,13 @@ void gt_alignment_show_generic(GtUchar *buffer,
             if (alignment->useedoffset <= idx_u &&
                 idx_u < alignment->useedoffset + alignment->seedlen)
             {
-              midbuf[pos] = (GtUchar) '+';
+              if (alignment->seed_display)
+              {
+                midbuf[pos] = (GtUchar) '+';
+              } else
+              {
+                midbuf[pos] = (GtUchar) MATCHSYMBOL;
+              }
               if (firstseedcolumn == GT_UWORD_MAX)
               {
                 firstseedcolumn = alignmentlength;
@@ -951,6 +960,12 @@ void gt_alignment_polished_ends(GtAlignment *alignment,
 {
   gt_assert(alignment != NULL);
   alignment->pol_info = pol_info;
+}
+
+void gt_alignment_seed_display_set(GtAlignment *alignment)
+{
+  gt_assert(alignment != NULL);
+  alignment->seed_display = true;
 }
 
 int gt_alignment_unit_test(GtError *err)
