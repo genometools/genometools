@@ -937,8 +937,9 @@ int gt_diagbandseed_run(const GtEncseq *aencseq,
 
     if (!had_err && arg->verbose &&
         (arg->extendgreedyinfo != NULL || arg->extendxdropinfo != NULL)) {
-      printf("# ...finished " GT_WU " seed pair extension ",
-             count_seedextensions);
+      printf("# ...finished " GT_WU " seed pair extension%s ",
+             count_seedextensions,
+             count_seedextensions > 1 ? "s" : "");
       gt_timer_show_formatted(vtimer, "in " GT_WD ".%06ld seconds.\n", stdout);
     }
   }

@@ -191,7 +191,7 @@ void gt_querymatchoutoptions_extend(
                                        extend_char_access,
                                        sensitivity,
                                        querymatchoutoptions->pol_info);
-    if (querymatchoutoptions->alignment != NULL)
+    if (querymatchoutoptions->alignment != NULL && always_polished_ends)
     {
       gt_alignment_polished_ends(querymatchoutoptions->alignment,
                                  querymatchoutoptions->pol_info);
