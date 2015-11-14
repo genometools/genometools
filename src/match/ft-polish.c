@@ -35,17 +35,23 @@ static void fill_polishing_info(Polishing_info *pol_info,
 }
 
 Polishing_info *polishing_info_new_with_bias(double errorpercentage,
-                                             double matchscore_bias)
+                                             double matchscore_bias,
+                                             GtUword history_size)
 {
   Polishing_info *pol_info = gt_malloc(sizeof *pol_info);
-  const GtUword cut_depth = (GtUword) 15;
 
   gt_assert(pol_info != NULL);
-  pol_info->entries = 1UL << cut_depth;
+  if (history_size == 0)
+  {
+    pol_info->cut_depth = (GtUword) 15;
+  } else
+  {
+    pol_info->cut_depth = MIN(history_size/2,(GtUword) 15);
+  }
+  pol_info->entries = 1UL << pol_info->cut_depth;
   pol_info->mask = pol_info->entries - 1;
   pol_info->values = gt_malloc(sizeof *pol_info->values * pol_info->entries);
   gt_assert(pol_info->values != NULL);
-  pol_info->cut_depth = cut_depth;
   pol_info->match_score = 20.0 * errorpercentage * matchscore_bias;
   gt_assert(pol_info->match_score <= 1000.0);
   pol_info->difference_score = 1000.0 - pol_info->match_score;
@@ -53,9 +59,10 @@ Polishing_info *polishing_info_new_with_bias(double errorpercentage,
   return pol_info;
 }
 
-Polishing_info *polishing_info_new(double errorpercentage)
+Polishing_info *polishing_info_new(double errorpercentage,
+                                   GtUword history_size)
 {
-  return polishing_info_new_with_bias(errorpercentage,1.0);
+  return polishing_info_new_with_bias(errorpercentage,1.0,history_size);
 }
 
 uint64_t polishing_info_maxvalue(const Polishing_info *pol_info)

@@ -272,6 +272,7 @@ static const GtQuerymatch *gt_combine_extensions(
                              sesp->seedpos2,
                              sesp->seedlen,
                              false))
+                             /*forxdrop ? false : true*/
   {
     return querymatchspaceptr;
   }
