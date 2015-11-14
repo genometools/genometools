@@ -625,12 +625,12 @@ static GtUword gt_seed_extend_numofkmers(const GtEncseq *encseq,
                                          bool mirror)
 {
   GtUword kmers;
-  const GtUword totallength = gt_encseq_total_length(encseq),
+  const GtUword totallen = gt_encseq_total_length(encseq),
                 min_seq_length = gt_encseq_min_seq_length(encseq),
                 num_of_sequences = gt_encseq_num_of_sequences(encseq),
                 num_specialchar = gt_encseq_specialcharacters(encseq);
-  kmers = totallength - (num_of_sequences * MIN(seedlength - 1, min_seq_length)
-                         + num_specialchar);
+  kmers = totallen - (num_of_sequences * MIN(seedlength - 1, min_seq_length));
+  kmers = MIN(kmers, totallen - (seedlength - 1) - num_specialchar);
   return mirror ? kmers * 2 : kmers;
 }
 
@@ -657,11 +657,9 @@ int gt_diagbandseed_run(const GtEncseq *aencseq,
   amaxlen = gt_encseq_max_seq_length(aencseq);
   bmaxlen = gt_encseq_max_seq_length(bencseq);
   if (MIN(amaxlen, bmaxlen) < arg->seedlength) {
-    gt_error_set(err,
-                 "argument to option \"-seedlength\" must be an integer <= "
-                 GT_WU " (length of longest sequence)",
-                 MIN(amaxlen, bmaxlen));
-    return -1;
+    gt_warning("Argument to option \"-seedlength\" should be an integer <= "
+               GT_WU " (length of longest sequence).", MIN(amaxlen, bmaxlen));
+    return had_err;
   }
 
   /* estimate number of expected kmers */
