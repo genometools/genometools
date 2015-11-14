@@ -122,7 +122,7 @@ GtUword distance_only_global_alignment(const GtUchar *useq,
   return distance;
 }
 
-/* create an global alignment in square space with constant cost values,
+/* create a global alignment in square space with constant cost values,
  * to use it in linear context you have to generate an spacemanager before,
  * in any other case it can be NULL */
 GtUword alignment_in_square_space(LinspaceManagement *spacemanager,
