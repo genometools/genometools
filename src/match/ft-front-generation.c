@@ -462,6 +462,7 @@ typedef struct
   const GtFronttrace *front_trace;
   GtUword ulen, vlen;
   GtWord match_score, difference_score;
+  bool on_polsize_suffix;
 } Backtraceinfo;
 
 static Backtracestackelem *stack_top_ptr_get(Backtracestack *stack)
@@ -503,15 +504,15 @@ static void single_backtrace_step(Backtraceinfo *bti,
   globaloffset -= (GtUword) gen_table[distance].valid;
   stack_top_ptr = stack_top_ptr_get(&bti->stack);
   stack_top_ptr->diagonal = diagonal;
-  stack_top_ptr->scoresum = scoresum;
   stack_top_ptr->distance = distance;
   stack_top_ptr->trace = backref_table[globaloffset + localoffset].bits;
   stack_top_ptr->row = row;
   stack_top_ptr->lcs = backref_table[globaloffset + localoffset].lcs;
   stack_top_ptr->trimleft = trimleft;
   stack_top_ptr->globaloffset = globaloffset;
-  stack_top_ptr->lcs_sum = lcs_sum;
-  stack_top_ptr->pathlength = pathlength;
+  stack_top_ptr->lcs_sum = lcs_sum + stack_top_ptr->lcs;
+  stack_top_ptr->scoresum = scoresum + stack_top_ptr->lcs * bti->match_score;
+  stack_top_ptr->pathlength = pathlength + 1;
   stack_top_ptr->eopcode = eopcode;
 }
 
@@ -529,11 +530,9 @@ static void backtrace_step(Backtraceinfo *bti,
 {
   uint8_t eopcode = 0;
   gt_assert(distance > 0 && trace != 0);
-  if (lcs > 0)
-  {
-    scoresum += bti->match_score * lcs;
-  }
-  if ((trace & FT_EOP_INSERTION) && scoresum >= bti->difference_score)
+
+  if ((trace & FT_EOP_INSERTION) && (!bti->on_polsize_suffix ||
+                                     scoresum >= bti->difference_score))
   {
     gt_assert(-(GtWord) bti->ulen < diagonal);
 #ifndef OUTSIDE_OF_GT
@@ -546,11 +545,16 @@ static void backtrace_step(Backtraceinfo *bti,
                           distance - 1,
                           globaloffset,
                           trimleft,
-                          lcs_sum + lcs,
-                          pathlength + 1,
+                          lcs_sum,
+                          pathlength,
                           eopcode);
+    if (!bti->on_polsize_suffix)
+    {
+      return;
+    }
   }
-  if ((trace & FT_EOP_DELETION) && scoresum >= bti->difference_score)
+  if ((trace & FT_EOP_DELETION) && (!bti->on_polsize_suffix ||
+                                    scoresum >= bti->difference_score))
   {
     gt_assert(diagonal < (GtWord) bti->vlen);
 #ifndef OUTSIDE_OF_GT
@@ -563,11 +567,16 @@ static void backtrace_step(Backtraceinfo *bti,
                           distance - 1,
                           globaloffset,
                           trimleft,
-                          lcs_sum + lcs,
-                          pathlength + 1,
+                          lcs_sum,
+                          pathlength,
                           eopcode);
+    if (!bti->on_polsize_suffix)
+    {
+      return;
+    }
   }
-  if ((trace & FT_EOP_REPLACEMENT) && scoresum >= bti->difference_score)
+  if ((trace & FT_EOP_REPLACEMENT) && (!bti->on_polsize_suffix ||
+                                       scoresum >= bti->difference_score))
   {
 #ifndef OUTSIDE_OF_GT
     eopcode = 0;
@@ -579,8 +588,8 @@ static void backtrace_step(Backtraceinfo *bti,
                           distance - 1,
                           globaloffset,
                           trimleft,
-                          lcs_sum + lcs,
-                          pathlength + 1,
+                          lcs_sum,
+                          pathlength,
                           eopcode);
   }
 }
@@ -589,22 +598,59 @@ static void backtrace_step(Backtraceinfo *bti,
 static void backtracepath2eoplist(GtArrayuint8_t *eoplist,
                                   unsigned int lastlcs,
                                   const Backtracepath *backtracepath,
-                                  GtUword elementsinbacktracepath)
+                                  GtUword elementsinbacktracepath,
+                                  GT_UNUSED GtUword ulen,
+                                  GT_UNUSED GtUword vlen)
 {
-  GtUword idx;
+  GtUword idx, deletions = 0, insertions = 0, mismatches = 0, matches = 0;
 
   if (lastlcs > 0)
   {
     front_trace_multireplacement(eoplist,lastlcs);
+    matches += lastlcs;
   }
   for (idx = 0; idx < elementsinbacktracepath; idx++)
   {
+    if (backtracepath[idx].eopcode == FT_EOPCODE_DELETION)
+    {
+      deletions++;
+    } else
+    {
+      if (backtracepath[idx].eopcode == FT_EOPCODE_INSERTION)
+      {
+        insertions++;
+      } else
+      {
+        mismatches++;
+      }
+    }
     GT_EOPLIST_PUSH(eoplist,backtracepath[idx].eopcode);
     if (backtracepath[idx].lcs > 0)
     {
       front_trace_multireplacement(eoplist,backtracepath[idx].lcs);
+      matches += backtracepath[idx].lcs;
     }
   }
+  /*
+  if (matches + mismatches + deletions != ulen)
+  {
+    fprintf(stderr,
+            "matches=" GT_WU ",mismatches=" GT_WU ",deletions=" GT_WU ","
+            "sum=" GT_WU " != " GT_WU " = ulen\n",
+             matches,mismatches,deletions,
+             matches+mismatches+deletions,
+             ulen);
+  }
+  if (matches + mismatches + insertions != vlen)
+  {
+    fprintf(stderr,
+            "matches=" GT_WU ",mismatches=" GT_WU ",insertions=" GT_WU ","
+            "sum=" GT_WU " " != " GT_WU " = vlen\n",
+             matches,mismatches,insertions,
+             matches+mismatches+insertions,
+             vlen);
+  }
+  */
 }
 #endif
 
@@ -620,11 +666,13 @@ void front_trace2polished_eoplist(GtArrayuint8_t *eoplist,
                                   GtUword vlen)
 {
   GtUword localoffset, globaloffset, remainingvalidfronts;
-  unsigned int lastlcs;
   Backtracestackelem *stack_top_ptr;
   Backtraceinfo bti;
-  GtUword elementsinbacktracepath = 0;
   Backtracepath *backtracepath;
+#ifndef OUTSIDE_OF_GT
+  unsigned int lastlcs;
+#endif
+  GT_UNUSED GtUword elementsinbacktracepath = 0;
 
   bti.stack.space = NULL;
   bti.stack.nextfree = bti.stack.allocated = 0;
@@ -633,7 +681,8 @@ void front_trace2polished_eoplist(GtArrayuint8_t *eoplist,
   bti.vlen = vlen;
   bti.match_score = match_score;
   bti.difference_score = difference_score;
-  backtracepath = gt_malloc(sizeof *backtracepath * (pol_size+1));
+  bti.on_polsize_suffix = true;
+  backtracepath = gt_malloc(sizeof *backtracepath * (pp->distance+1));
   gt_assert(front_trace != NULL && front_trace->gen_nextfree > 0 && pp != NULL);
   localoffset = polished_point2offset(front_trace,pp);
   remainingvalidfronts = valid_total_fronts(front_trace->gen_table,
@@ -648,55 +697,36 @@ void front_trace2polished_eoplist(GtArrayuint8_t *eoplist,
   stack_top_ptr->trace
     = front_trace->backref_table[globaloffset + localoffset].bits;
   stack_top_ptr->row = pp->row;
-  lastlcs = stack_top_ptr->lcs
+#ifndef OUTSIDE_OF_GT
+  lastlcs =
+#endif
+  stack_top_ptr->lcs
     = front_trace->backref_table[globaloffset + localoffset].lcs;
-  stack_top_ptr->scoresum = 0;
+  stack_top_ptr->scoresum = stack_top_ptr->lcs * match_score;
   stack_top_ptr->globaloffset = globaloffset;
   stack_top_ptr->trimleft = pp->trimleft;
-  stack_top_ptr->lcs_sum = 0;
-  stack_top_ptr->pathlength = 0;
+  stack_top_ptr->lcs_sum = stack_top_ptr->lcs;
+  stack_top_ptr->pathlength = 0; /* number of errors */
   stack_top_ptr->eopcode = 0;
   while (bti.stack.nextfree > 0)
   {
     bti.stack.nextfree--;
     stack_top_ptr = bti.stack.space + bti.stack.nextfree;
+    if (bti.on_polsize_suffix &&
+        stack_top_ptr->lcs_sum + stack_top_ptr->pathlength >= pol_size)
+    {
+      bti.on_polsize_suffix = false;
+    }
+    if (stack_top_ptr->pathlength > 0)
+    {
+      gt_assert(stack_top_ptr->pathlength - 1 <= pp->distance);
+      backtracepath[stack_top_ptr->pathlength-1].eopcode
+        = stack_top_ptr->eopcode;
+      backtracepath[stack_top_ptr->pathlength-1].lcs = stack_top_ptr->lcs;
+      elementsinbacktracepath = stack_top_ptr->pathlength;
+    }
     if (stack_top_ptr->trace != 0)
     {
-      if (stack_top_ptr->lcs_sum + elementsinbacktracepath + 1 < pol_size)
-      {
-        if (stack_top_ptr->pathlength > 0)
-        {
-          gt_assert(stack_top_ptr->pathlength - 1 <= pol_size);
-          backtracepath[stack_top_ptr->pathlength-1].eopcode
-            = stack_top_ptr->eopcode;
-          backtracepath[stack_top_ptr->pathlength-1].lcs = stack_top_ptr->lcs;
-          elementsinbacktracepath = stack_top_ptr->pathlength;
-        }
-      } else
-      {
-        Polished_point restart_pp;
-
-#ifndef OUTSIDE_OF_GT
-        backtracepath2eoplist(eoplist,
-                              lastlcs,
-                              backtracepath,
-                              elementsinbacktracepath);
-        GT_EOPLIST_PUSH(eoplist,stack_top_ptr->eopcode);
-#endif
-        restart_pp.alignedlen
-            = stack_top_ptr->diagonal + GT_MULT2(stack_top_ptr->row);
-        restart_pp.row = stack_top_ptr->row;
-        restart_pp.distance = stack_top_ptr->distance;
-        restart_pp.trimleft = stack_top_ptr->trimleft;
-        front_trace2eoplist(eoplist,
-                            front_trace,
-                            &restart_pp,
-                            useq,
-                            ulen,
-                            vseq,
-                            vlen);
-        break;
-      }
       if (eoplist == NULL)
       {
         gt_check_diagonal_run(useq, vseq,
@@ -718,23 +748,17 @@ void front_trace2polished_eoplist(GtArrayuint8_t *eoplist,
                      stack_top_ptr->pathlength);
     } else
     { /* trace == 0 */
-#ifndef OUTSIDE_OF_GT
-      backtracepath2eoplist(eoplist,
-                            lastlcs,
-                            backtracepath,
-                            elementsinbacktracepath);
-      if (stack_top_ptr->pathlength > 0)
-      {
-        GT_EOPLIST_PUSH(eoplist,stack_top_ptr->eopcode);
-        if (stack_top_ptr->lcs > 0)
-        {
-          front_trace_multireplacement(eoplist,stack_top_ptr->lcs);
-        }
-      }
-#endif
       break;
     }
   }
+#ifndef OUTSIDE_OF_GT
+  backtracepath2eoplist(eoplist,
+                        lastlcs,
+                        backtracepath,
+                        elementsinbacktracepath,
+                        ulen,
+                        vlen);
+#endif
   gt_free(backtracepath);
   gt_free(bti.stack.space);
 }

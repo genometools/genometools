@@ -772,7 +772,8 @@ static int gt_repfind_runner(int argc,
     GtUword errorpercentage = gt_minidentity2errorpercentage(
                                            arguments->minidentity);
     pol_info = polishing_info_new_with_bias(errorpercentage,
-                                            GT_DEFAULT_MATCHSCORE_BIAS);
+                                            GT_DEFAULT_MATCHSCORE_BIAS,
+                                            arguments->history);
     greedyextendmatchinfo
       = gt_greedy_extend_matchinfo_new(errorpercentage,
                                        arguments->maxalignedlendifference,
@@ -829,7 +830,7 @@ static int gt_repfind_runner(int argc,
                                       false,
                                       sensitivity,
                                       GT_DEFAULT_MATCHSCORE_BIAS,
-                                      false);
+                                      true);
       }
     } else
     {

@@ -443,7 +443,7 @@ static int gt_seed_extend_runner(GT_UNUSED int argc,
 
   if (arguments->dbs_verify || arguments->verbose) {
     int idx;
-    bool minid_out = false;
+    bool minid_out = false, history_out = false;
 
     printf("# Options:");
     for (idx = 1; idx < argc; idx++) {
@@ -451,11 +451,19 @@ static int gt_seed_extend_runner(GT_UNUSED int argc,
       {
         minid_out = true;
       }
+      if (strcmp(argv[idx],"-history") == 0)
+      {
+        history_out = true;
+      }
       printf(" %s", argv[idx]);
     }
     if (!minid_out)
     {
       printf(" -minidentity " GT_WU,arguments->se_minidentity);
+    }
+    if (!history_out)
+    {
+      printf(" -history " GT_WU,arguments->se_historysize);
     }
     printf("\n");
   }
@@ -532,7 +540,8 @@ static int gt_seed_extend_runner(GT_UNUSED int argc,
     pol_info = polishing_info_new_with_bias(arguments->weakends
                                               ? MAX(errorpercentage,20)
                                               : errorpercentage,
-                                            matchscore_bias);
+                                            matchscore_bias,
+                                            arguments->se_historysize);
     grextinfo = gt_greedy_extend_matchinfo_new(errorpercentage,
                                                arguments->se_maxalilendiff,
                                                arguments->se_historysize,

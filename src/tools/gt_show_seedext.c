@@ -127,6 +127,7 @@ static int gt_show_seedext_get_encseq_index(GtStr *ii,
                                             bool *mirror,
                                             bool *bias_parameters,
                                             GtUword *errorpercentage,
+                                            GtUword *history_size,
                                             const char *matchfilename,
                                             GtError *err)
 {
@@ -146,22 +147,36 @@ static int gt_show_seedext_get_encseq_index(GtStr *ii,
     if (gt_str_read_next_line(line_buffer,inputfileptr) != EOF)
     {
       char *tok, *lineptr = gt_str_get(line_buffer);
-      bool parse_ii = false, parse_qii = false, parse_minid = false;
+      bool parse_ii = false, parse_qii = false, parse_minid = false,
+           parse_history = false;;
 
       while (!had_err && (tok = strsep(&lineptr," ")) != NULL)
       {
-        if (parse_minid)
+        if (parse_minid || parse_history)
         {
-          GtWord minid;
+          GtWord readgtword;
 
-          if (sscanf(tok,GT_WD,&minid) != 1 || minid < 0  || minid > 99)
+          if (sscanf(tok,GT_WD,&readgtword) != 1 ||
+              readgtword < 0  || (parse_minid && readgtword > 99) ||
+              (parse_history && readgtword > 64))
           {
-            gt_error_set(err,"cannot parse argument for option -minidentity "
-                             "first line of file %s",matchfilename);
+            gt_error_set(err,"cannot parse argument for option -%s from "
+                             "first line of file %s",
+                             parse_minid ? "minidentity"
+                                         : "history",
+                             matchfilename);
             had_err = -1;
           }
-          *errorpercentage = 100 - minid;
-          parse_minid = false;
+          if (parse_minid)
+          {
+            *errorpercentage = 100 - readgtword;
+            parse_minid = false;
+          } else
+          {
+            *history_size = (GtUword) readgtword;
+            parse_history = false;
+          }
+          continue;
         }
         if (parse_ii)
         {
@@ -188,6 +203,11 @@ static int gt_show_seedext_get_encseq_index(GtStr *ii,
         if (strcmp(tok, "-minidentity") == 0)
         {
           parse_minid = true;
+          continue;
+        }
+        if (strcmp(tok, "-history") == 0)
+        {
+          parse_history = true;
           continue;
         }
         if (strcmp(tok, "-mirror") == 0)
@@ -368,7 +388,7 @@ static int gt_show_seedext_runner(GT_UNUSED int argc,
   GtStr *ii = gt_str_new(),
         *qii = gt_str_new();
   bool mirror = false, bias_parameters = false;
-  GtUword errorpercentage = 0;
+  GtUword errorpercentage = 0, history_size = 0;
   Polishing_info *pol_info = NULL;
   const char *matchfilename;
   int had_err = 0;
@@ -382,6 +402,7 @@ static int gt_show_seedext_runner(GT_UNUSED int argc,
                                              &mirror,
                                              &bias_parameters,
                                              &errorpercentage,
+                                             &history_size,
                                              matchfilename,
                                              err);
   printf("# file %s: mirror %sabled\n", matchfilename, mirror ? "en" : "dis");
@@ -422,7 +443,8 @@ static int gt_show_seedext_runner(GT_UNUSED int argc,
         matchscore_bias = gt_greedy_dna_sequence_bias_get(atcount,gccount);
       }
     }
-    pol_info = polishing_info_new_with_bias(errorpercentage,matchscore_bias);
+    pol_info = polishing_info_new_with_bias(errorpercentage,matchscore_bias,
+                                            history_size);
   }
   /* Parse seed extensions. */
   if (!had_err) {

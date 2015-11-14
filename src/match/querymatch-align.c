@@ -162,7 +162,7 @@ void gt_querymatchoutoptions_extend(
                   GtQuerymatchoutoptions *querymatchoutoptions,
                   GtUword errorpercentage,
                   GtUword maxalignedlendifference,
-                  GtUword history,
+                  GtUword history_size,
                   GtUword perc_mat_history,
                   GtExtendCharAccess extend_char_access,
                   bool weakends,
@@ -180,11 +180,12 @@ void gt_querymatchoutoptions_extend(
     querymatchoutoptions->pol_info
       = polishing_info_new_with_bias(weakends ? MAX(errorpercentage,20)
                                               : errorpercentage,
-                                    matchscore_bias);
+                                     matchscore_bias,
+                                     history_size);
     querymatchoutoptions->ggemi
       = gt_greedy_extend_matchinfo_new(errorpercentage,
                                        maxalignedlendifference,
-                                       history, /* default value */
+                                       history_size, /* default value */
                                        perc_mat_history,
                                        0,/* userdefinedleastlength not used */
                                        extend_char_access,
@@ -412,37 +413,6 @@ static bool seededmatch2eoplist(GtQuerymatchoutoptions *querymatchoutoptions,
   return alignment_succeeded;
 }
 
-static bool seed_is_on_alignment_start(GtUword pol_size,
-                                       GtUword dbstart,
-                                       GtUword abs_querystart,
-                                       GtUword seedpos1,
-                                       GtUword seedpos2)
-{
-  if (seedpos1 <= dbstart + pol_size &&
-      seedpos2 <= abs_querystart + pol_size)
-  {
-    return true;
-  }
-  return false;
-}
-
-static bool seed_is_on_alignment_end(GtUword pol_size,
-                                     GtUword dbstart,
-                                     GtUword dblen,
-                                     GtUword abs_querystart,
-                                     GtUword querylen,
-                                     GtUword seedpos1,
-                                     GtUword seedpos2)
-{
-  if (pol_size <= dbstart + dblen && dbstart + dblen - pol_size <= seedpos1 &&
-      pol_size <= abs_querystart + querylen &&
-      abs_querystart + querylen - pol_size <= seedpos2)
-  {
-    return true;
-  }
-  return false;
-}
-
 bool gt_querymatchoutoptions_alignment_prepare(GtQuerymatchoutoptions
                                                 *querymatchoutoptions,
                                                const GtEncseq *encseq,
@@ -559,26 +529,11 @@ bool gt_querymatchoutoptions_alignment_prepare(GtQuerymatchoutoptions
     {
       if (querymatchoutoptions->alignmentwidth > 0)
       {
-        GtUword  pol_size = GT_MULT2(querymatchoutoptions->pol_info->cut_depth);
-
-        if (seed_is_on_alignment_start(pol_size,
-                                       dbstart,
-                                       abs_querystart,
-                                       seedpos1,
-                                       seedpos2))
-        {
-          gt_alignment_set_seed_on_start(querymatchoutoptions->alignment);
-        }
-        if (seed_is_on_alignment_end(pol_size,
-                                       dbstart,
-                                       dblen,
-                                       abs_querystart,
-                                       querylen,
-                                       seedpos1,
-                                       seedpos2))
-        {
-          gt_alignment_set_seed_on_end(querymatchoutoptions->alignment);
-        }
+        gt_alignment_reset(querymatchoutoptions->alignment);
+        gt_assert(dbstart <= seedpos1);
+        gt_alignment_set_seedoffset(querymatchoutoptions->alignment,
+                                    seedpos1 - dbstart,
+                                    seedlen);
         gt_alignment_set_seqs(querymatchoutoptions->alignment,
                               querymatchoutoptions->useqbuffer +
                                   querymatchoutoptions->correction_info.uoffset,
