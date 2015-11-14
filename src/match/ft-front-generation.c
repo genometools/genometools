@@ -338,9 +338,9 @@ static void front_trace2eoplist_directed(GtArrayuint8_t *eoplist,
                                          GtFronttrace *front_trace,
                                          const Polished_point *pp,
                                          const GtUchar *useq,
-                                         GtUword ulen,
+                                         GT_UNUSED GtUword ulen,
                                          const GtUchar *vseq,
-                                         GtUword vlen)
+                                         GT_UNUSED GtUword vlen)
 {
   GtUword distance, localoffset, globaloffset, remainingvalidfronts,
           totalrunlength = 0, trimleft;
