@@ -52,7 +52,7 @@ void front_trace2eoplist(GtArrayuint8_t *eoplist,
                          GtUword vlen);
 
 void front_trace2polished_eoplist(GtArrayuint8_t *eoplist,
-                                  const GtFronttrace *front_trace,
+                                  GtFronttrace *front_trace,
                                   const Polished_point *pp,
                                   GtUword pol_size,
                                   GtWord match_score,
