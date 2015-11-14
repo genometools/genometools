@@ -530,8 +530,7 @@ static unsigned int gt_alignment_show_advance(unsigned int pos,
 #define GT_UPDATE_POSITIVE_INFO(ISMATCH)\
         if (alignment->pol_info != NULL)\
         {\
-          if (prefix_positive < GT_MULT2(alignment->pol_info->cut_depth) && \
-              prefix_positive_sum >= 0)\
+          if (prefix_positive < pol_size && prefix_positive_sum >= 0)\
           {\
             if (ISMATCH)\
             {\
@@ -545,7 +544,7 @@ static unsigned int gt_alignment_show_advance(unsigned int pos,
               prefix_positive++;\
             }\
           }\
-          if (suffix_bits_used < GT_MULT2(alignment->pol_info->cut_depth))\
+          if (suffix_bits_used < pol_size)\
           {\
             suffix_bits_used++;\
           }\
@@ -566,17 +565,19 @@ void gt_alignment_show_generic(GtUchar *buffer,
 {
   GtMultieop meop;
   GtUword idx_eop, idx_u = 0, idx_v = 0, meoplen, alignmentlength = 0,
-          suffix_bits_used = 0, prefix_positive = 0,
+          suffix_bits_used = 0, prefix_positive = 0, pol_size = 0,
           firstseedcolumn = GT_UWORD_MAX, lastseedcolumn = GT_UWORD_MAX;
   unsigned int pos = 0;
   GtUchar *topbuf = buffer, *midbuf = NULL, *lowbuf = NULL;
   GtWord prefix_positive_sum = 0;
-  uint64_t suffix_bits = 0,
-           set_mask = (alignment->pol_info == NULL)
-                        ? 0
-                        : ((uint64_t) 1) <<
-                          (GT_MULT2(alignment->pol_info->cut_depth)-1);
+  
+  uint64_t suffix_bits = 0, set_mask = 0;
 
+  if (alignment->pol_info != NULL)
+  {
+    pol_size = GT_MULT2(alignment->pol_info->cut_depth);
+    set_mask = ((uint64_t) 1) << pol_size;
+  }
   gt_assert(alignment != NULL && (characters == NULL || !downcase));
   topbuf[width] = '\n';
   midbuf = topbuf + width + 1;
@@ -699,8 +700,7 @@ void gt_alignment_show_generic(GtUchar *buffer,
   }
   if (alignment->pol_info != NULL)
   {
-    GtUword suffix_positive,
-            pol_size = GT_MULT2(alignment->pol_info->cut_depth);
+    GtUword suffix_positive;
     GtWord suffix_positive_sum = 0;
     bool startpolished = false, endpolished = false;
 

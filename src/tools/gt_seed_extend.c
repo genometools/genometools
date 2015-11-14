@@ -310,11 +310,12 @@ static GtOptionParser* gt_seed_extend_option_parser_new(void *tool_arguments)
   gt_option_parser_add_option(op, op_ali);
   arguments->se_option_withali = gt_option_ref(op_ali);
 
-  op_relax_polish = gt_option_new_bool("relax_polish",
+  op_relax_polish = gt_option_new_bool("relax-polish",
                                        "when generating alignments do not force"
                                        " alignment polished ends",
                                    &arguments->relax_polish,false);
   gt_option_parser_add_option(op, op_relax_polish);
+  gt_option_is_development_option(op_relax_polish);
   gt_option_imply(op_relax_polish, op_ali);
 
   /* -mirror */
