@@ -334,7 +334,6 @@ FILE* gt_xtmpfp_generic_func(GtStr *template_arg, enum tmpfp_flags flags,
     if (template_arg)
       template = template_arg;
     else
-      template = gt_str_new();
     {
       const char *tmpdir = NULL;
       if (!tmpdir)
@@ -352,6 +351,7 @@ FILE* gt_xtmpfp_generic_func(GtStr *template_arg, enum tmpfp_flags flags,
       if (!tmpdir)
         tmpdir = gt_fa_try_tmpdir(".");
       gt_assert(tmpdir);
+      template = gt_str_new();
       gt_str_set(template, tmpdir);
     }
     gt_str_append_cstr(template, genometools_tmptemplate);
