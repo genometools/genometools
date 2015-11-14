@@ -566,21 +566,22 @@ static GtUword evaluateallDBtabcolumns(LinspaceManagement *spacemanager,
       }
     }
 
-    switch (edge) {
-      case Linear_R:
-        set_linear_DiagentryRtabentry(edge, diag, colindex, low_row, offset,
-        &Diagcolumn[colindex],&Rtabcolumn[0],northwestRtabentry);
-        break;
-      case Linear_I:
-        set_linear_DiagentryRtabentry(edge, diag, colindex, low_row, offset,
-        &Diagcolumn[colindex],&Rtabcolumn[0],westRtabentry);
-        break;
-      default:
-        gt_assert(false);
+    if (edge == Linear_R)
+    {
+      set_linear_DiagentryRtabentry(edge, diag, colindex, low_row, offset,
+                                    &Diagcolumn[colindex],&Rtabcolumn[0],
+                                    northwestRtabentry);
+    } else
+    {
+      gt_assert(edge == Linear_I);
+      set_linear_DiagentryRtabentry(edge, diag, colindex, low_row, offset,
+                                    &Diagcolumn[colindex],&Rtabcolumn[0],
+                                    westRtabentry);
     }
 
     for (rowindex = low_row + 1; rowindex <= high_row; rowindex++)
     {
+      GtUword Rtabentry_from;
       northwestEDtabentry = westEDtabentry;
       northwestRtabentry = westRtabentry;
 
@@ -623,20 +624,19 @@ static GtUword evaluateallDBtabcolumns(LinspaceManagement *spacemanager,
         EDtabcolumn[rowindex-low_row] = val;
         edge = Linear_D;
       }
-
-      GtUword Rtabentry_from;
-      switch (edge) {
-        case Linear_R:
-          Rtabentry_from = northwestRtabentry;
-          break;
-        case Linear_D:
+      if (edge == Linear_R)
+      {
+        Rtabentry_from = northwestRtabentry;
+      } else
+      {
+        if (edge == Linear_D)
+        {
           Rtabentry_from = Rtabcolumn[rowindex-low_row-1];
-          break;
-        case Linear_I:
+        } else
+        {
+          gt_assert(edge == Linear_I);
           Rtabentry_from = westRtabentry;
-          break;
-        default:
-          gt_assert(false);
+        }
       }
       set_linear_DiagentryRtabentry(edge, diag, colindex, rowindex, offset,
                            &Diagcolumn[colindex],&Rtabcolumn[rowindex-low_row],
