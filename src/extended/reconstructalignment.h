@@ -35,7 +35,8 @@ GtUword construct_trivial_insertion_alignment(GtAlignment *align,
 
 /* reconstruct alignment from square space table ED
  * use this function for global alignment with linear gapcosts*/
-void reconstructalignment_from_EDtab(GtAlignment *align, GtUword **E,
+void reconstructalignment_from_EDtab(GtAlignment *align,
+                                     GtUword * const *E,
                                      const GtUchar *useq,
                                      GtUword ustart,
                                      GtUword ulen,
