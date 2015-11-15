@@ -208,6 +208,25 @@ void gt_querymatchoutoptions_extend(
   }
 }
 
+void gt_querymatchoutoptions_for_align_only(
+                  GtQuerymatchoutoptions *querymatchoutoptions,
+                  GtUword errorpercentage,
+                  GtUword history_size)
+{
+  gt_querymatchoutoptions_extend(
+                  querymatchoutoptions,
+                  errorpercentage,
+                  1000,
+                  history_size,
+                  1, /* perc_mat_history */
+                  GT_EXTEND_CHAR_ACCESS_ANY,
+                  false,
+                  100,
+                  GT_DEFAULT_MATCHSCORE_BIAS,
+                  true,
+                  true);
+}
+
 void gt_querymatchoutoptions_delete(
         GtQuerymatchoutoptions *querymatchoutoptions)
 {
@@ -575,12 +594,12 @@ bool gt_querymatchoutoptions_alignment_prepare(GtQuerymatchoutoptions
 
 void gt_querymatchoutoptions_alignment_show(const GtQuerymatchoutoptions
                                               *querymatchoutoptions,
-                                            GtUword edist,
+                                            GtUword distance,
                                             GT_UNUSED bool verify_alignment)
 {
   if (querymatchoutoptions != NULL && querymatchoutoptions->alignmentwidth > 0)
   {
-    if (edist > 0)
+    if (distance > 0)
     {
       gt_alignment_show_generic(querymatchoutoptions->alignment_show_buffer,
                                 false,
@@ -600,7 +619,7 @@ void gt_querymatchoutoptions_alignment_show(const GtQuerymatchoutoptions
     }
     if (verify_alignment)
     {
-      (void) gt_alignment_check_edist(querymatchoutoptions->alignment,edist,
+      (void) gt_alignment_check_edist(querymatchoutoptions->alignment,distance,
                                       NULL);
     }
     gt_alignment_reset(querymatchoutoptions->alignment);
