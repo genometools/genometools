@@ -43,7 +43,10 @@ void gt_querymatchoutoptions_extend(
 void gt_querymatchoutoptions_for_align_only(
                   GtQuerymatchoutoptions *querymatchoutoptions,
                   GtUword errorpercentage,
-                  GtUword history_size);
+                  double matchscore_bias,
+                  GtUword history_size,
+                  bool always_polished_ends,
+                  bool seed_display);
 
 void gt_querymatchoutoptions_delete(
         GtQuerymatchoutoptions *querymatchoutoptions);

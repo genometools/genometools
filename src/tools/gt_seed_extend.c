@@ -328,8 +328,8 @@ static GtOptionParser* gt_seed_extend_option_parser_new(void *tool_arguments)
 
   /* -relax-polish */
   op_relax_polish = gt_option_new_bool("relax-polish",
-                                       "when generating alignments do not force"
-                                       " alignment polished ends",
+                                       "do not force alignments to have "
+                                       "polished ends",
                                    &arguments->relax_polish,false);
   gt_option_parser_add_option(op, op_relax_polish);
   gt_option_is_development_option(op_relax_polish);
@@ -362,7 +362,7 @@ static GtOptionParser* gt_seed_extend_option_parser_new(void *tool_arguments)
   /* -seed-display */
   op_seed_display = gt_option_new_bool("seed-display",
                                        "Display seeds in #-line and by "
-                                       "character s (instead of |) in middle "
+                                       "character + (instead of |) in middle "
                                        "row of alignment column",
                                        &arguments->seed_display,
                                        false);

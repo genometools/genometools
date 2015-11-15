@@ -211,20 +211,22 @@ void gt_querymatchoutoptions_extend(
 void gt_querymatchoutoptions_for_align_only(
                   GtQuerymatchoutoptions *querymatchoutoptions,
                   GtUword errorpercentage,
-                  GtUword history_size)
+                  double matchscore_bias,
+                  GtUword history_size,
+                  bool always_polished_ends,
+                  bool seed_display)
 {
-  gt_querymatchoutoptions_extend(
-                  querymatchoutoptions,
-                  errorpercentage,
-                  1000,
-                  history_size,
-                  1, /* perc_mat_history */
-                  GT_EXTEND_CHAR_ACCESS_ANY,
-                  false,
-                  100,
-                  GT_DEFAULT_MATCHSCORE_BIAS,
-                  true,
-                  true);
+  gt_querymatchoutoptions_extend(querymatchoutoptions,
+                                 errorpercentage,
+                                 1000,
+                                 history_size,
+                                 1, /* perc_mat_history */
+                                 GT_EXTEND_CHAR_ACCESS_ANY,
+                                 false,
+                                 100,
+                                 matchscore_bias,
+                                 always_polished_ends,
+                                 seed_display);
 }
 
 void gt_querymatchoutoptions_delete(
