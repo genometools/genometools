@@ -40,6 +40,11 @@ void gt_querymatchoutoptions_extend(
                   bool always_polished_ends,
                   bool seed_display);
 
+void gt_querymatchoutoptions_for_align_only(
+                  GtQuerymatchoutoptions *querymatchoutoptions,
+                  GtUword errorpercentage,
+                  GtUword history_size);
+
 void gt_querymatchoutoptions_delete(
         GtQuerymatchoutoptions *querymatchoutoptions);
 
@@ -64,7 +69,7 @@ bool gt_querymatchoutoptions_alignment_prepare(
 
 void gt_querymatchoutoptions_alignment_show(const GtQuerymatchoutoptions
                                               *querymatchoutoptions,
-                                            GtUword edist,
+                                            GtUword distance,
                                             bool verify_alignment);
 
 typedef struct

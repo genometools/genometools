@@ -27,6 +27,8 @@
 #include "match/revcompl.h"
 #include "match/ft-polish.h"
 #include "match/seed-extend.h"
+#include "match/querymatch-align.h"
+#include "match/seq_or_encseq.h"
 #include "extended/linearalign.h"
 #include "tools/gt_show_seedext.h"
 
@@ -39,8 +41,9 @@ typedef struct {
 
 typedef struct {
   GtUword alen, aseq, apos;
-  char direction;
-  GtUword blen, bseq, bpos, score, distance;
+  GtReadmode readmode;
+  GtUword blen, bseq, bpos, score, distance, seedpos1, seedpos2, seedlen,
+          query_seqstartpos, query_totallength, db_seqstartpos;
   double identity;
 } GtShowSeedextCoords;
 
@@ -247,29 +250,125 @@ static int gt_show_seedext_get_encseq_index(GtStr *ii,
   return had_err;
 }
 
+static void gt_show_seed_extend_plain(LinspaceManagement *linspace_spacemanager,
+                                      GtScoreHandler *linspace_scorehandler,
+                                      GtAlignment *alignment,
+                                      GtUchar *alignment_show_buffer,
+                                      GtUword alignmentwidth,
+                                      const GtUchar *characters,
+                                      GtUchar wildcardshow,
+                                      const GtUchar *asequence,
+                                      const GtUchar *bsequence,
+                                      const GtShowSeedextCoords *coords)
+{
+  GtUword edist = gt_computelinearspace_generic(linspace_spacemanager,
+                                                linspace_scorehandler,
+                                                alignment,
+                                                asequence,
+                                                0,
+                                                coords->alen,
+                                                bsequence,
+                                                0,
+                                                coords->blen);
+  if (edist < coords->distance)
+  {
+    printf("# edist=" GT_WU " (smaller by " GT_WU ")\n",edist,
+            coords->distance - edist);
+  }
+  gt_assert(edist <= coords->distance);
+  gt_alignment_show_generic(alignment_show_buffer,
+                            false,
+                            alignment,
+                            stdout,
+                            alignmentwidth,
+                            characters,
+                            wildcardshow);
+  gt_alignment_reset(alignment);
+}
+
+static void gt_show_seed_extend_encseq(
+                         GtQuerymatchoutoptions *querymatchoutoptions,
+                         const GtEncseq *aencseq,
+                         const GtEncseq *bencseq,
+                         const GtShowSeedextCoords *coords)
+{
+  GT_UNUSED bool seededalignment;
+  GtUword querystart_fwdstrand;
+  GtSeqorEncseq bseqorencseq;
+
+  bseqorencseq.seq = NULL;
+  bseqorencseq.encseq = bencseq;
+  if (GT_ISDIRREVERSE(coords->readmode))
+  {
+    gt_assert(false);
+  } else
+  {
+    querystart_fwdstrand = coords->query_seqstartpos + coords->bpos;
+  }
+  seededalignment
+    = gt_querymatchoutoptions_alignment_prepare(querymatchoutoptions,
+                                     aencseq,
+                                     &bseqorencseq,
+                                     coords->readmode,
+                                     coords->query_seqstartpos,
+                                     coords->query_totallength,
+                                     coords->db_seqstartpos + coords->apos,
+                                     coords->alen,
+                                     coords->query_seqstartpos + coords->bpos,
+                                     querystart_fwdstrand,
+                                     coords->blen,
+                                     coords->distance,
+                                     coords->seedpos1,
+                                     coords->seedpos2,
+                                     coords->seedlen,
+                                     false);
+  gt_assert(coords->distance == 0 || seededalignment);
+  gt_querymatchoutoptions_alignment_show(querymatchoutoptions,
+                                         coords->distance,
+                                         false);
+}
+
+static GtReadmode gt_readmode_character_code_parse(char direction)
+{
+  if (direction == 'F')
+  {
+    return GT_READMODE_FORWARD;
+  }
+  gt_assert(direction == 'R');
+  return GT_READMODE_REVERSE;
+}
+
 static int gt_show_seedext_parse_extensions(const GtEncseq *aencseq,
                                             const GtEncseq *bencseq,
                                             const char *matchfilename,
                                             bool show_alignment,
                                             bool seed_display,
+                                            GtUword errorpercentage,
+                                            GtUword history_size,
                                             const Polishing_info *pol_info,
                                             bool mirror,
                                             GtError *err)
 {
-  const GtUword width = 70;
+  const GtUword alignmentwidth = 70;
   FILE *file;
   GtStr *line_buffer;
-  GtUchar *asequence, *bsequence, *csequence;
-  GtUword apos_ab = 0, bpos_ab = 0, maxseqlen = 0;
+  GtUchar *asequence, *bsequence, *csequence = NULL;
+  GtUword maxseqlen = 0;
   int had_err = 0;
-  GtShowSeedextCoords coords = {0, 0, 0, 'X', 0, 0, 0, 0, 0, 0.0};
-  GtLinspaceManagement *linspace_spacemanager;
+  GtShowSeedextCoords coords
+    = {0, 0, 0, GT_READMODE_FORWARD, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.0};
+  LinspaceManagement *linspace_spacemanager;
   GtScoreHandler *linspace_scorehandler;
   GtAlignment *alignment;
   GtUchar *alignment_show_buffer;
   const GtUchar *characters;
+  bool hasseedline = false;
   GtUchar wildcardshow;
+  GtQuerymatchoutoptions *querymatchoutoptions
+    = gt_querymatchoutoptions_new(alignmentwidth);
 
+  gt_querymatchoutoptions_for_align_only(querymatchoutoptions,
+                                         errorpercentage,history_size);
   gt_assert(aencseq && bencseq && matchfilename);
   file = fopen(matchfilename, "rb");
   if (file == NULL) {
@@ -283,7 +382,7 @@ static int gt_show_seedext_parse_extensions(const GtEncseq *aencseq,
   {
     gt_alignment_polished_ends(alignment,pol_info,false);
   }
-  alignment_show_buffer = gt_alignment_buffer_new(width);
+  alignment_show_buffer = gt_alignment_buffer_new(alignmentwidth);
   characters = gt_encseq_alphabetcharacters(aencseq);
   wildcardshow = gt_encseq_alphabetwildcardshow(aencseq);
   /* allocate buffers for alignment string and sequences */
@@ -295,7 +394,7 @@ static int gt_show_seedext_parse_extensions(const GtEncseq *aencseq,
   if (mirror) {
     csequence = bsequence + maxseqlen;
   }
-  while (gt_str_read_next_line(line_buffer,file) != EOF)
+  while (!had_err && gt_str_read_next_line(line_buffer,file) != EOF)
   {
     const char *line_ptr = gt_str_get(line_buffer);
     /* ignore comment lines; but print seeds if -seed-display is set */
@@ -303,64 +402,92 @@ static int gt_show_seedext_parse_extensions(const GtEncseq *aencseq,
     {
       if (line_ptr[0] == '#')
       {
-        if (seed_display && strstr(line_ptr, "seed:") != NULL) {
-          printf("%s", line_ptr);
+        const char *seedwordptr = strstr(line_ptr, "seed:");
+
+        if (seedwordptr != NULL)
+        {
+          int num = sscanf(seedwordptr + sizeof ("seed:"),
+                           GT_WU " " GT_WU " " GT_WU,
+                           &coords.seedpos1,&coords.seedpos2,&coords.seedlen);
+          if (num != 3)
+          {
+            gt_error_set(err, "cannot correctly parse seedline %s",
+                               line_ptr);
+            had_err = -1;
+          } else
+          {
+            if (seed_display)
+            {
+              printf("%s", line_ptr);
+            }
+            hasseedline = true;
+          }
         }
       } else
       {
+        char direction;
         /* parse alignment string */
         int num = sscanf(line_ptr,
                          GT_WU " " GT_WU " " GT_WU " %c " GT_WU " " GT_WU " "
                          GT_WU " " GT_WU " " GT_WU " %lf",
                          &coords.alen, &coords.aseq, &coords.apos,
-                         &coords.direction, &coords.blen, &coords.bseq,
+                         &direction, &coords.blen, &coords.bseq,
                          &coords.bpos, &coords.score, &coords.distance,
                          &coords.identity);
         if (num == 10)
         {
           /* get sequences */
-          apos_ab = gt_encseq_seqstartpos(aencseq, coords.aseq) + coords.apos;
-          bpos_ab = gt_encseq_seqstartpos(bencseq, coords.bseq) + coords.bpos;
-          gt_encseq_extract_encoded(aencseq,
-                                    asequence,
-                                    apos_ab,
-                                    apos_ab + coords.alen - 1);
-          gt_encseq_extract_encoded(bencseq,
-                                    bsequence,
-                                    bpos_ab,
-                                    bpos_ab + coords.blen - 1);
+          coords.db_seqstartpos
+            = gt_encseq_seqstartpos(aencseq, coords.aseq);
+          coords.query_seqstartpos
+            = gt_encseq_seqstartpos(bencseq, coords.bseq);
+          coords.query_totallength = gt_encseq_total_length(bencseq);
+          coords.readmode = gt_readmode_character_code_parse(direction);
+          if (!hasseedline)
+          {
+            GtUword apos_ab = coords.db_seqstartpos + coords.apos;
+            GtUword bpos_ab = coords.query_seqstartpos + coords.bpos;
+            gt_encseq_extract_encoded(aencseq,
+                                      asequence,
+                                      apos_ab,
+                                      apos_ab + coords.alen - 1);
+            gt_encseq_extract_encoded(bencseq,
+                                      bsequence,
+                                      bpos_ab,
+                                      bpos_ab + coords.blen - 1);
+          }
           /* prepare reverse complement of 2nd sequence */
-          if (mirror && coords.direction != 'F') {
+          if (mirror && coords.readmode != GT_READMODE_FORWARD) {
+            gt_assert(coords.readmode == GT_READMODE_REVCOMPL);
             gt_copy_reverse_complement(csequence,bsequence,coords.blen);
             bsequence = csequence;
           }
           printf("%s\n",line_ptr);
           if (show_alignment) {
-            GtUword edist = gt_computelinearspace_generic(linspace_spacemanager,
-                                                          linspace_scorehandler,
-                                                          alignment,
-                                                          asequence, 0,
-                                                          coords.alen,
-                                                          bsequence, 0,
-                                                          coords.blen);
-            if (edist < coords.distance)
+            if (hasseedline)
             {
-              printf("# edist=" GT_WU " (smaller by " GT_WU ")\n",edist,
-                                                coords.distance - edist);
+              gt_show_seed_extend_encseq(querymatchoutoptions,
+                                         aencseq,
+                                         bencseq,
+                                         &coords);
+            } else
+            {
+              gt_show_seed_extend_plain(linspace_spacemanager,
+                                        linspace_scorehandler,
+                                        alignment,
+                                        alignment_show_buffer,
+                                        alignmentwidth,
+                                        characters,
+                                        wildcardshow,
+                                        asequence,
+                                        bsequence,
+                                        &coords);
             }
-            gt_assert(edist <= coords.distance);
-            gt_alignment_show_generic(alignment_show_buffer,
-                                      false,
-                                      alignment,
-                                      stdout,
-                                      width,
-                                      characters,
-                                      wildcardshow);
-            gt_alignment_reset(alignment);
           }
           if (mirror) {
             bsequence = asequence + maxseqlen;
           }
+          hasseedline = false;
         }
       }
     }
@@ -372,6 +499,7 @@ static int gt_show_seedext_parse_extensions(const GtEncseq *aencseq,
   gt_alignment_delete(alignment);
   gt_free(alignment_show_buffer);
   gt_linspaceManagement_delete(linspace_spacemanager);
+  gt_querymatchoutoptions_delete(querymatchoutoptions);
   gt_scorehandler_delete(linspace_scorehandler);
   return had_err;
 }
@@ -453,6 +581,8 @@ static int gt_show_seedext_runner(GT_UNUSED int argc,
                                                matchfilename,
                                                arguments->show_alignment,
                                                arguments->seed_display,
+                                               errorpercentage,
+                                               history_size,
                                                pol_info,
                                                mirror,
                                                err);
