@@ -44,7 +44,7 @@ typedef struct {
   GtUword alen, aseq, apos;
   GtReadmode readmode;
   GtUword blen, bseq, bpos, score, distance, seedpos1, seedpos2, seedlen,
-          query_seqstartpos, query_totallength, db_seqstartpos;
+          query_totallength, db_seqstartpos;
   double identity;
 } GtShowSeedextCoords;
 
@@ -269,7 +269,8 @@ static void gt_show_seed_extend_plain(LinspaceManagement *linspace_spacemanager,
 {
   GtUword edist;
   const GtUword apos_ab = coords->db_seqstartpos + coords->apos;
-  const GtUword bpos_ab = coords->query_seqstartpos + coords->bpos;
+  const GtUword bpos_ab = gt_encseq_seqstartpos(bencseq, coords->bseq) +
+                          coords->bpos;
 
   gt_encseq_extract_encoded(aencseq, asequence, apos_ab,
                             apos_ab + coords->alen - 1);
@@ -309,6 +310,7 @@ static void gt_show_seed_extend_encseq(GtQuerymatch *querymatchptr,
 
   bseqorencseq.seq = NULL;
   bseqorencseq.encseq = bencseq;
+  gt_querymatch_query_readmode_set(querymatchptr,coords->readmode);
   if (gt_querymatch_complete(querymatchptr,
                              coords->alen,
                              coords->db_seqstartpos + coords->apos,
@@ -456,8 +458,6 @@ static int gt_show_seedext_parse_extensions(const GtEncseq *aencseq,
           {
             coords.db_seqstartpos
               = gt_encseq_seqstartpos(aencseq, coords.aseq);
-            coords.query_seqstartpos
-              = gt_encseq_seqstartpos(bencseq, coords.bseq);
             coords.query_totallength = gt_encseq_total_length(bencseq);
             coords.readmode = gt_readmode_character_code_parse(direction);
             /* prepare reverse complement of 2nd sequence */
