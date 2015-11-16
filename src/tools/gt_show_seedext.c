@@ -28,7 +28,7 @@
 #include "match/revcompl.h"
 #include "match/ft-polish.h"
 #include "match/seed-extend.h"
-#include "match/querymatch-align.h"
+#include "match/querymatch.h"
 #include "match/seq_or_encseq.h"
 #include "extended/linearalign.h"
 #include "tools/gt_show_seedext.h"
@@ -300,46 +300,36 @@ static void gt_show_seed_extend_plain(LinspaceManagement *linspace_spacemanager,
   gt_alignment_reset(alignment);
 }
 
-static void gt_show_seed_extend_encseq(
-                         GtQuerymatchoutoptions *querymatchoutoptions,
-                         const GtEncseq *aencseq,
-                         const GtEncseq *bencseq,
-                         const GtShowSeedextCoords *coords)
+static void gt_show_seed_extend_encseq(GtQuerymatch *querymatchptr,
+                                       const GtEncseq *aencseq,
+                                       const GtEncseq *bencseq,
+                                       const GtShowSeedextCoords *coords)
 {
-  GT_UNUSED bool seededalignment;
-  GtUword querystart_fwdstrand;
   GtSeqorEncseq bseqorencseq;
 
   bseqorencseq.seq = NULL;
   bseqorencseq.encseq = bencseq;
-  if (GT_ISDIRREVERSE(coords->readmode))
+  if (gt_querymatch_complete(querymatchptr,
+                             coords->alen,
+                             coords->db_seqstartpos + coords->apos,
+                             coords->aseq,
+                             coords->apos,
+                             coords->score,
+                             coords->distance,
+                             aencseq == bencseq ? true : false,
+                             (uint64_t) coords->bseq,
+                             coords->blen,
+                             coords->bpos,
+                             aencseq,
+                             &bseqorencseq,
+                             coords->query_totallength,
+                             coords->seedpos1,
+                             coords->seedpos2,
+                             coords->seedlen,
+                             false))
   {
-    gt_assert(false);
-  } else
-  {
-    querystart_fwdstrand = coords->query_seqstartpos + coords->bpos;
+    gt_querymatch_prettyprint(querymatchptr);
   }
-  seededalignment
-    = gt_querymatchoutoptions_alignment_prepare(querymatchoutoptions,
-                                     aencseq,
-                                     &bseqorencseq,
-                                     coords->readmode,
-                                     coords->query_seqstartpos,
-                                     coords->query_totallength,
-                                     coords->db_seqstartpos + coords->apos,
-                                     coords->alen,
-                                     coords->query_seqstartpos + coords->bpos,
-                                     querystart_fwdstrand,
-                                     coords->blen,
-                                     coords->distance,
-                                     coords->seedpos1,
-                                     coords->seedpos2,
-                                     coords->seedlen,
-                                     false);
-  gt_assert(coords->distance == 0 || seededalignment);
-  gt_querymatchoutoptions_alignment_show(querymatchoutoptions,
-                                         coords->distance,
-                                         false);
 }
 
 static GtReadmode gt_readmode_character_code_parse(char direction)
@@ -382,6 +372,7 @@ static int gt_show_seedext_parse_extensions(const GtEncseq *aencseq,
   bool hasseedline = false;
   GtUchar wildcardshow;
   GtQuerymatchoutoptions *querymatchoutoptions;
+  GtQuerymatch *querymatchptr;
 
   gt_assert(aencseq && bencseq && matchfilename);
   file = fopen(matchfilename, "rb");
@@ -396,6 +387,7 @@ static int gt_show_seedext_parse_extensions(const GtEncseq *aencseq,
                                          history_size,
                                          always_polished_ends,
                                          seed_display);
+  querymatchptr = gt_querymatch_new(querymatchoutoptions,seed_display);
   linspace_spacemanager = gt_linspaceManagement_new();
   linspace_scorehandler = gt_scorehandler_new(0,1,0,1);;
   alignment = gt_alignment_new();
@@ -460,7 +452,6 @@ static int gt_show_seedext_parse_extensions(const GtEncseq *aencseq,
         if (num == 10)
         {
           /* get sequences */
-          printf("%s\n",line_ptr);
           if (show_alignment)
           {
             coords.db_seqstartpos
@@ -478,12 +469,11 @@ static int gt_show_seedext_parse_extensions(const GtEncseq *aencseq,
             }
             if (hasseedline)
             {
-              gt_show_seed_extend_encseq(querymatchoutoptions,
-                                         aencseq,
-                                         bencseq,
+              gt_show_seed_extend_encseq(querymatchptr, aencseq, bencseq,
                                          &coords);
             } else
             {
+              printf("%s\n",line_ptr);
               gt_show_seed_extend_plain(linspace_spacemanager,
                                         linspace_scorehandler,
                                         alignment,
@@ -514,6 +504,7 @@ static int gt_show_seedext_parse_extensions(const GtEncseq *aencseq,
   gt_free(alignment_show_buffer);
   gt_linspaceManagement_delete(linspace_spacemanager);
   gt_querymatchoutoptions_delete(querymatchoutoptions);
+  gt_querymatch_delete(querymatchptr);
   gt_scorehandler_delete(linspace_scorehandler);
   return had_err;
 }
