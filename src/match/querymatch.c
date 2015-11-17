@@ -190,6 +190,14 @@ bool gt_querymatch_check_final(const GtQuerymatch *querymatch,
 
   gt_assert(querymatch != NULL);
   total_alignedlen = querymatch->dblen + querymatch->querylen;
+#ifdef SKDEBUG
+  printf("errorrate = %.2f <=? " GT_WU " = errorpercentage\n",
+          gt_querymatch_error_rate(querymatch->distance,total_alignedlen),
+          errorpercentage);
+  printf("total_alignedlen = " GT_WU " >=? " GT_WU
+         " = 2 * userdefinedleastlen\n",
+         total_alignedlen, 2 * userdefinedleastlength);
+#endif
   return (gt_querymatch_error_rate(querymatch->distance,total_alignedlen)
           <= (double) errorpercentage &&
          total_alignedlen >= 2 * userdefinedleastlength) ? true : false;

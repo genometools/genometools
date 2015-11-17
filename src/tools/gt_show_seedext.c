@@ -34,9 +34,10 @@
 #include "tools/gt_show_seedext.h"
 
 typedef struct {
-  bool show_alignment;
-  bool seed_display;
-  bool relax_polish;
+  bool show_alignment,
+       seed_display,
+       relax_polish,
+       seed_extend;
   GtStr *matchfilename;
 } GtShowSeedextArguments;
 
@@ -68,7 +69,8 @@ static GtOptionParser* gt_show_seedext_option_parser_new(void *tool_arguments)
 {
   GtShowSeedextArguments *arguments = tool_arguments;
   GtOptionParser *op;
-  GtOption *option, *op_ali, *option_filename, *op_relax_polish;
+  GtOption *option, *op_ali, *option_filename, *op_relax_polish,
+           *op_seed_extend;
 
   gt_assert(arguments);
   /* init */
@@ -92,6 +94,15 @@ static GtOptionParser* gt_show_seedext_option_parser_new(void *tool_arguments)
                               false);
   gt_option_parser_add_option(op, option);
 
+  /* -seed-extend */
+  op_seed_extend = gt_option_new_bool("seed-extend",
+                              "read the seeds from the # seed: -lines and "
+                              "extend them; match lines are ignored; "
+                              "match coordindates are displayed",
+                              &arguments->seed_extend,
+                              false);
+  gt_option_parser_add_option(op, op_seed_extend);
+
   /* -relax-polish */
   op_relax_polish = gt_option_new_bool("relax-polish",
                                        "do not force alignments to have "
@@ -108,6 +119,7 @@ static GtOptionParser* gt_show_seedext_option_parser_new(void *tool_arguments)
   gt_option_is_mandatory(option_filename);
   gt_option_parser_add_option(op, option_filename);
 
+  gt_option_exclude(op_relax_polish, op_seed_extend);
   return op;
 }
 
@@ -353,6 +365,7 @@ static int gt_show_seedext_parse_extensions(const GtEncseq *aencseq,
                                             GtUword errorpercentage,
                                             double matchscore_bias,
                                             GtUword history_size,
+                                            bool seed_extend,
                                             const Polishing_info *pol_info,
                                             bool mirror,
                                             GtError *err)
@@ -375,6 +388,8 @@ static int gt_show_seedext_parse_extensions(const GtEncseq *aencseq,
   GtUchar wildcardshow;
   GtQuerymatchoutoptions *querymatchoutoptions;
   GtQuerymatch *querymatchptr;
+  GtGreedyextendmatchinfo *greedyextendmatchinfo = NULL;
+  GtProcessinfo_and_querymatchspaceptr processinfo_and_querymatchspaceptr;
 
   gt_assert(aencseq && bencseq && matchfilename);
   file = fopen(matchfilename, "rb");
@@ -396,6 +411,20 @@ static int gt_show_seedext_parse_extensions(const GtEncseq *aencseq,
   if (pol_info != NULL)
   {
     gt_alignment_polished_ends(alignment,pol_info,false);
+  }
+  if (seed_extend)
+  {
+    greedyextendmatchinfo
+      = gt_greedy_extend_matchinfo_new(70,
+                                       GT_MAX_ALI_LEN_DIFF,
+                                       history_size,
+                                       GT_MIN_PERC_MAT_HISTORY,
+                                       0, /* userdefinedleastlength */
+                                       GT_EXTEND_CHAR_ACCESS_ANY,
+                                       100,
+                                       pol_info);
+    processinfo_and_querymatchspaceptr.processinfo = greedyextendmatchinfo;
+    processinfo_and_querymatchspaceptr.querymatchspaceptr = querymatchptr;
   }
   alignment_show_buffer = gt_alignment_buffer_new(alignmentwidth);
   characters = gt_encseq_alphabetcharacters(aencseq);
@@ -433,11 +462,23 @@ static int gt_show_seedext_parse_extensions(const GtEncseq *aencseq,
             had_err = -1;
           } else
           {
-            if (seed_display)
-            {
-              printf("%s\n", line_ptr);
-            }
             hasseedline = true;
+            if (seed_extend)
+            {
+              if (aencseq == bencseq)
+              {
+                had_err = gt_greedy_extend_selfmatch_with_output(
+                                       &processinfo_and_querymatchspaceptr,
+                                       aencseq,
+                                       coords.seedlen,
+                                       coords.seedpos1,
+                                       coords.seedpos2,
+                                       err);
+              } else
+              {
+                gt_assert(false);
+              }
+            }
           }
         }
       } else
@@ -451,7 +492,7 @@ static int gt_show_seedext_parse_extensions(const GtEncseq *aencseq,
                          &direction, &coords.blen, &coords.bseq,
                          &coords.bpos, &coords.score, &coords.distance,
                          &coords.identity);
-        if (num == 10)
+        if (num == 10 && !seed_extend)
         {
           /* get sequences */
           if (show_alignment)
@@ -506,6 +547,7 @@ static int gt_show_seedext_parse_extensions(const GtEncseq *aencseq,
   gt_querymatchoutoptions_delete(querymatchoutoptions);
   gt_querymatch_delete(querymatchptr);
   gt_scorehandler_delete(linspace_scorehandler);
+  gt_greedy_extend_matchinfo_delete(greedyextendmatchinfo);
   return had_err;
 }
 
@@ -589,6 +631,7 @@ static int gt_show_seedext_runner(GT_UNUSED int argc,
                                                errorpercentage,
                                                matchscore_bias,
                                                history_size,
+                                               arguments->seed_extend,
                                                pol_info,
                                                mirror,
                                                err);

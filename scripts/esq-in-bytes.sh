@@ -5,8 +5,8 @@ set -e -x
 
 for filename in `${GTDIR}/scripts/findfasta.rb`
 do
-  len=`cat ${filename} | wc -c`
   ${GTDIR}/bin/gt encseq encode -indexname sfx $filename
   # Now do something with the sequence
-  ${GTDIR}/bin/gt seed_extend -extendgreedy -ii sfx -a -maxfreq 20 -seed-display
+  ${GTDIR}/bin/gt seed_extend -extendgreedy -ii sfx -v -maxfreq 20 -seed-display > sfx.matches
+  ${GTDIR}/bin/gt dev show_seedext -f sfx.matches -a -seed-extend
 done

@@ -218,9 +218,9 @@ void gt_querymatchoutoptions_for_align_only(
 {
   gt_querymatchoutoptions_extend(querymatchoutoptions,
                                  errorpercentage,
-                                 1000,
+                                 GT_MAX_ALI_LEN_DIFF,
                                  history_size,
-                                 1, /* perc_mat_history */
+                                 GT_MIN_PERC_MAT_HISTORY,
                                  GT_EXTEND_CHAR_ACCESS_ANY,
                                  false,
                                  100,
