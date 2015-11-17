@@ -16,10 +16,14 @@
 
 #define BACKTRACEBITS 3
 
+typedef uint16_t GtFrontGenerationValue;
+#define GT_FRONTGENERATION_VALUE_MAX\
+        ((1UL << (sizeof(GtFrontGenerationValue) * CHAR_BIT)) - 1)
+
 typedef struct
 {
-  uint8_t trimleft_diff,
-          valid;
+  GtFrontGenerationValue trimleft_diff,
+                         valid;
 } GtFrontGeneration;
 
 typedef struct
@@ -179,7 +183,7 @@ void front_trace_add_gen(GtFronttrace *front_trace,GtUword trimleft,
 #ifdef WITHDISTRIBUTION
     distribution_add(front_trace->trimleft_diff_dist,trimleft_diff);
 #endif
-    gt_assert(trimleft_diff <= UINT8_MAX);
+    gt_assert(trimleft_diff <= GT_FRONTGENERATION_VALUE_MAX);
     front_trace->gen_table[front_trace->gen_nextfree].trimleft_diff
       = trimleft_diff;
   } else
@@ -188,7 +192,7 @@ void front_trace_add_gen(GtFronttrace *front_trace,GtUword trimleft,
   }
   front_trace->previoustrimleft = trimleft;
   gt_assert(front_trace->gen_nextfree < front_trace->gen_allocated);
-  gt_assert(valid <= UINT8_MAX);
+  gt_assert(valid <= GT_FRONTGENERATION_VALUE_MAX);
   front_trace->gen_table[front_trace->gen_nextfree++].valid = valid;
 }
 
