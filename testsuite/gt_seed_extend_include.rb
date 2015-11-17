@@ -28,7 +28,7 @@ Test do
   run_test build_encseq("small_poly", "#{$testdata}small_poly.fas")
   run_test "#{$bin}gt seed_extend -seedlength 10 -mirror -debug-kmer " +
            "-debug-seedpair -ii small_poly"
-  run "cmp -s #{last_stdout} #{$testdata}seedextend1.out"
+  run "gunzip -c #{$testdata}seedextend1.out.gz | cmp -s #{last_stdout}"
   run_test "#{$bin}gt seed_extend -seedlength 10 -mirror -extendxdrop 97 " +
            "-l 10 -mincoverage 11 -ii small_poly"
   run "cmp -s #{last_stdout} #{$testdata}seedextend3.out"
@@ -38,10 +38,10 @@ Name "gt seed_extend memlimit, use wildcard containing reads"
 Keywords "gt_seed_extend seedpair at1MB memlimit maxfreq verbose"
 Test do
   run_test build_encseq("at1MB", "#{$testdata}at1MB")
-  run_test "#{$bin}gt seed_extend -verify -debug-seedpair -memlimit 10MB -ii at1MB"
+  run_test "#{$bin}gt seed_extend -verify -debug-seedpair -memlimit 10MB -ii at1MB -only-seeds"
   grep last_stderr, /Only 14-mers occurring <= 3 times will be considered, due to small memlimit. Expect 50496 seed pairs./
-  run "cmp -s #{last_stdout} #{$testdata}seedextend2.out"
-  run_test "#{$bin}gt seed_extend -v -maxfreq 5 -ii at1MB"
+  run "gunzip -c #{$testdata}seedextend2.out.gz | cmp -s #{last_stdout}"
+  run_test "#{$bin}gt seed_extend -v -maxfreq 5 -ii at1MB -only-seeds"
   grep last_stdout, /...found and sorted 582230 14-mers/
   grep last_stdout, /...collected and sorted 68577 seed pairs/
 end

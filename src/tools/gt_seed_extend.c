@@ -46,6 +46,7 @@ typedef struct {
   bool dbs_debug_seedpair;
   bool dbs_verify;
   bool weakends;
+  bool onlyseeds;
   /* xdrop extension options */
   GtOption *se_option_xdrop;
   GtUword se_extendxdrop;
@@ -102,7 +103,7 @@ static GtOptionParser* gt_seed_extend_option_parser_new(void *tool_arguments)
   GtOptionParser *op;
   GtOption *option, *op_gre, *op_xdr, *op_cam, *op_his, *op_dif, *op_pmh,
     *op_len, *op_err, *op_xbe, *op_sup, *op_frq, *op_mem, *op_ali, *op_bia,
-    *op_weakends, *op_seed_display, *op_relax_polish;
+    *op_onl, *op_weakends, *op_seed_display, *op_relax_polish;
   gt_assert(arguments != NULL);
 
   /* init */
@@ -232,13 +233,24 @@ static GtOptionParser* gt_seed_extend_option_parser_new(void *tool_arguments)
   gt_option_parser_add_option(op, op_gre);
   arguments->se_option_greedy = gt_option_ref(op_gre);
 
+  /* -only-seeds */
+  op_onl = gt_option_new_bool("only-seeds",
+                              "Calculate seeds and do not extend",
+                              &arguments->onlyseeds,
+                              false);
+  gt_option_exclude(op_onl, op_xdr);
+  gt_option_exclude(op_onl, op_gre);
+  gt_option_is_development_option(op_onl);
+  gt_option_parser_add_option(op, op_onl);
+
   /* -history */
   op_his = gt_option_new_uword_min_max("history",
                                        "Size of (mis)match history in range [1"
                                        "..64] (trimming for greedy extension)",
                                        &arguments->se_historysize,
                                        60UL, 1UL, 64UL);
-  gt_option_imply(op_his, op_gre);
+  gt_option_exclude(op_his, op_onl);
+  gt_option_exclude(op_his, op_xdr);
   gt_option_is_development_option(op_his);
   gt_option_parser_add_option(op, op_his);
 
@@ -247,7 +259,8 @@ static GtOptionParser* gt_seed_extend_option_parser_new(void *tool_arguments)
                                "Maximum difference of alignment length "
                                "(trimming for greedy extension)",
                                &arguments->se_maxalilendiff, 0UL);
-  gt_option_imply(op_dif, op_gre);
+  gt_option_exclude(op_dif, op_onl);
+  gt_option_exclude(op_dif, op_xdr);
   gt_option_is_development_option(op_dif);
   gt_option_parser_add_option(op, op_dif);
 
@@ -257,7 +270,8 @@ static GtOptionParser* gt_seed_extend_option_parser_new(void *tool_arguments)
                                        "history (for greedy extension)",
                                        &arguments->se_perc_match_hist,
                                        0UL, 1UL, 100UL);
-  gt_option_imply(op_pmh, op_gre);
+  gt_option_exclude(op_pmh, op_onl);
+  gt_option_exclude(op_pmh, op_xdr);
   gt_option_is_development_option(op_pmh);
   gt_option_parser_add_option(op, op_pmh);
 
@@ -267,7 +281,8 @@ static GtOptionParser* gt_seed_extend_option_parser_new(void *tool_arguments)
                               "depend on minidentiy and DNA base distribution",
                               &arguments->bias_parameters,
                               false);
-  gt_option_imply(op_bia, op_gre);
+  gt_option_exclude(op_bia, op_onl);
+  gt_option_exclude(op_bia, op_xdr);
   gt_option_exclude(op_bia, op_pmh);
   gt_option_exclude(op_bia, op_dif);
   gt_option_is_development_option(op_bia);
@@ -287,7 +302,7 @@ static GtOptionParser* gt_seed_extend_option_parser_new(void *tool_arguments)
                                    "(for seed extension)",
                                    &arguments->se_alignlength,
                                    20UL, 1UL);
-  gt_option_imply_either_2(op_len, op_xdr, op_gre);
+  gt_option_exclude(op_len, op_onl);
   gt_option_parser_add_option(op, op_len);
 
   /* -minidentity */
@@ -297,7 +312,7 @@ static GtOptionParser* gt_seed_extend_option_parser_new(void *tool_arguments)
                                        &arguments->se_minidentity,
                                        80UL, GT_EXTEND_MIN_IDENTITY_PERCENTAGE,
                                        99UL);
-  gt_option_imply_either_2(op_err, op_xdr, op_gre);
+  gt_option_exclude(op_err, op_onl);
   gt_option_parser_add_option(op, op_err);
 
   /* -a */
@@ -306,10 +321,12 @@ static GtOptionParser* gt_seed_extend_option_parser_new(void *tool_arguments)
                                    "argument is number of columns per line)",
                                    &arguments->se_alignmentwidth,
                                    70, 20);
+  gt_option_exclude(op_ali, op_onl);
   gt_option_argument_is_optional(op_ali);
   gt_option_parser_add_option(op, op_ali);
   arguments->se_option_withali = gt_option_ref(op_ali);
 
+  /* -relax-polish */
   op_relax_polish = gt_option_new_bool("relax-polish",
                                        "when generating alignments do not force"
                                        " alignment polished ends",
@@ -349,8 +366,8 @@ static GtOptionParser* gt_seed_extend_option_parser_new(void *tool_arguments)
                                        "row of alignment column",
                                        &arguments->seed_display,
                                        false);
+  gt_option_exclude(op_seed_display, op_onl);
   gt_option_is_development_option(op_seed_display);
-  gt_option_imply_either_2(op_seed_display, op_xdr, op_gre);
   gt_option_parser_add_option(op, op_seed_display);
 
   /* -weakends */
@@ -359,7 +376,7 @@ static GtOptionParser* gt_seed_extend_option_parser_new(void *tool_arguments)
                                    "alignments",
                                    &arguments->weakends,
                                    false);
-  gt_option_imply_either_2(op_weakends, op_xdr, op_gre);
+  gt_option_exclude(op_weakends, op_onl);
   gt_option_is_development_option(op_weakends);
   gt_option_parser_add_option(op, op_weakends);
 
@@ -439,6 +456,7 @@ static int gt_seed_extend_runner(GT_UNUSED int argc,
   GtExtendCharAccess cam = GT_EXTEND_CHAR_ACCESS_ANY;
   GtUword errorpercentage = 0UL;
   double matchscore_bias = GT_DEFAULT_MATCHSCORE_BIAS;
+  bool extendgreedy = true;
   Polishing_info *pol_info = NULL;
   int had_err = 0;
 
@@ -446,6 +464,10 @@ static int gt_seed_extend_runner(GT_UNUSED int argc,
   gt_assert(arguments != NULL);
   gt_assert(arguments->se_minidentity >= GT_EXTEND_MIN_IDENTITY_PERCENTAGE &&
             arguments->se_minidentity <= 100UL);
+
+  if (arguments->onlyseeds || gt_option_is_set(arguments->se_option_xdrop)) {
+    extendgreedy = false;
+  }
 
   if (arguments->dbs_verify || arguments->verbose) {
     int idx;
@@ -513,8 +535,7 @@ static int gt_seed_extend_runner(GT_UNUSED int argc,
   gt_encseq_loader_delete(encseq_loader);
 
   /* set character access method */
-  if (!had_err && (gt_option_is_set(arguments->se_option_greedy) ||
-                   gt_option_is_set(arguments->se_option_xdrop) ||
+  if (!had_err && (!arguments->onlyseeds ||
                    arguments->se_alignmentwidth > 0))
   {
     cam = gt_greedy_extend_char_access(gt_str_get
@@ -528,7 +549,7 @@ static int gt_seed_extend_runner(GT_UNUSED int argc,
   }
 
   /* Prepare options for greedy extension */
-  if (!had_err && gt_option_is_set(arguments->se_option_greedy)) {
+  if (!had_err && extendgreedy) {
     /* Use bias dependent parameters, adapted from E. Myers' DALIGNER */
     if (!had_err && arguments->bias_parameters)
     {
@@ -579,11 +600,14 @@ static int gt_seed_extend_runner(GT_UNUSED int argc,
     querymatchoutopt
       = gt_querymatchoutoptions_new(arguments->se_alignmentwidth);
 
-    if (gt_option_is_set(arguments->se_option_xdrop) ||
-        gt_option_is_set(arguments->se_option_greedy))
+    if (!arguments->onlyseeds)
     {
-      const GtUword sensitivity = gt_option_is_set(arguments->se_option_greedy)
-                                    ? arguments->se_extendgreedy : 100;
+      GtUword sensitivity = 97UL;
+      if (gt_option_is_set(arguments->se_option_greedy)) {
+        sensitivity = arguments->se_extendgreedy;
+      } else if (gt_option_is_set(arguments->se_option_xdrop)) {
+        sensitivity = 100UL;
+      }
 
       gt_querymatchoutoptions_extend(querymatchoutopt,
                                      errorpercentage,
@@ -660,7 +684,7 @@ static int gt_seed_extend_runner(GT_UNUSED int argc,
     /* clean up */
     gt_encseq_delete(aencseq);
     gt_encseq_delete(bencseq);
-    if (gt_option_is_set(arguments->se_option_greedy)) {
+    if (extendgreedy) {
       gt_greedy_extend_matchinfo_delete(grextinfo);
     }
     if (gt_option_is_set(arguments->se_option_xdrop)) {
@@ -676,8 +700,7 @@ static int gt_seed_extend_runner(GT_UNUSED int argc,
   if (gt_showtime_enabled()) {
     if (!had_err) {
       char *keystring
-        = gt_seed_extend_params_keystring(gt_option_is_set(arguments->
-                                                           se_option_greedy),
+        = gt_seed_extend_params_keystring(extendgreedy,
                                           gt_option_is_set(arguments->
                                                            se_option_xdrop),
                                           arguments->dbs_seedlength,
