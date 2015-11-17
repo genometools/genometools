@@ -124,7 +124,7 @@ Keywords "gt_seed_extend fail"
 Test do
   run_test build_encseq("at1MB", "#{$testdata}at1MB")
   run_test build_encseq("foo", "#{$testdata}foo.fas")
-  run_test "#{$bin}gt seed_extend -seedlength 10 -ii foo", :retval => 1
+  run_test "#{$bin}gt seed_extend -seedlength 10 -ii foo", :retval => 0
   grep last_stderr, /integer <= 8 \(length of longest sequence\)/
   run_test "#{$bin}gt seed_extend -maxfreq 1 -ii at1MB", :retval => 1
   grep last_stderr, /option "-maxfreq" must be >= 2 to find matching k-mers/
