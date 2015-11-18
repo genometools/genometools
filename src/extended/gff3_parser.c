@@ -1669,7 +1669,7 @@ static int parse_first_gff3_line(const char *line, const char *filename,
   directive = line + 2;
   data = strchr(directive, ' ');
   if (!data)
-    data = strchr(line+2, '\t');
+    data = strchr(directive, '\t');
   if (data) {
     data[0] = '\0';
     data++;
