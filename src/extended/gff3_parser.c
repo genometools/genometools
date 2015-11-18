@@ -1640,9 +1640,9 @@ static int parse_first_gff3_line(const char *line, const char *filename,
                                  bool *gvf_mode,
                                  bool tidy, GtError *err)
 {
+  const char *directive = NULL;
+  char *data = NULL;
   int had_err = 0;
-  const char *directive;
-  char *data;
   gt_error_check(err);
   gt_assert(line && filename);
 
@@ -1666,19 +1666,21 @@ static int parse_first_gff3_line(const char *line, const char *filename,
       *gvf_mode = true;
     }
   }
-  directive = line + 2;
-  data = strchr(directive, ' ');
-  if (!data)
-    data = strchr(directive, '\t');
-  if (data) {
-    data[0] = '\0';
-    data++;
-  }
-  else {
-    gt_error_set(err, "version pragma encountered in line %u in file "
-                      "\"%s\" does not have a version number",
-                      (unsigned int) *line_number, filename);
-    had_err = -1;
+  if (!had_err) {
+    directive = line + 2;
+    data = strchr(directive, ' ');
+    if (!data)
+      data = strchr(directive, '\t');
+    if (data) {
+      data[0] = '\0';
+      data++;
+    }
+    else {
+      gt_error_set(err, "version pragma encountered in line %u in file "
+                        "\"%s\" does not have a version number",
+                        (unsigned int) *line_number, filename);
+      had_err = -1;
+    }
   }
   if (!had_err) {
     line += *gvf_mode
@@ -1707,6 +1709,7 @@ static int parse_first_gff3_line(const char *line, const char *filename,
   }
   if (!had_err && *gvf_mode) {
     GtGenomeNode *gn;
+    gt_assert(directive && data);
     gn = gt_meta_node_new(directive, data);
     gt_genome_node_set_origin(gn, filenamestr, (unsigned int) *line_number);
     gt_queue_add(genome_nodes, gn);
