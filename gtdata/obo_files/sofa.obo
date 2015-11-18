@@ -10,6 +10,7 @@ synonymtypedef: dbsnp "dbsnp variant terms"
 synonymtypedef: dbvar "DBVAR" 
 synonymtypedef: ebi_variants "ensembl variant terms" 
 synonymtypedef: RNAMOD "RNA modification" EXACT
+synonymtypedef: VAR "variant annotation term" 
 ontology: so-xp/subsets/SOFA
 
 [Term]
@@ -588,7 +589,6 @@ name: rRNA_primary_transcript
 namespace: sequence
 def: "A primary transcript encoding a ribosomal RNA." [SO:ke]
 subset: SOFA
-synonym: "<new synonym>" RELATED []
 synonym: "ribosomal RNA primary transcript" EXACT []
 synonym: "rRNA primary transcript" EXACT []
 is_a: SO:0000483 ! nc_primary_transcript
@@ -698,13 +698,17 @@ relationship: derives_from SO:0000483 ! nc_primary_transcript
 id: SO:0000276
 name: miRNA
 namespace: sequence
-def: "Small, ~22-nt, RNA molecule that is the endogenous transcript of a miRNA gene. Micro RNAs are produced from precursor molecules (SO:0000647) that can form local hairpin structures, which ordinarily are processed (via the Dicer pathway) such that a single miRNA molecule accumulates from one arm of a hairpin precursor molecule. Micro RNAs may trigger the cleavage of their target molecules or act as translational repressors." [PMID:12592000]
+alt_id: SO:0000649
+def: "Small, ~22-nt, RNA molecule that is the endogenous transcript of a miRNA gene (or the product of other non coding RNA genes. Micro RNAs are produced from precursor molecules (SO:0000647) that can form local hairpin structures, which ordinarily are processed (usually via the Dicer pathway) such that a single miRNA molecule accumulates from one arm of a hairpin precursor molecule. Micro RNAs may trigger the cleavage of their target molecules or act as translational repressors." [PMID:11081512, PMID:12592000]
 subset: SOFA
 synonym: "micro RNA" EXACT []
 synonym: "microRNA" EXACT []
+synonym: "small temporal RNA" EXACT []
+synonym: "stRNA" EXACT []
 xref: http://en.wikipedia.org/wiki/MiRNA "wiki"
+xref: http://en.wikipedia.org/wiki/StRNA "wiki"
 is_a: SO:0000370 ! small_regulatory_ncRNA
-relationship: derives_from SO:0000483 ! nc_primary_transcript
+relationship: part_of SO:0000835 ! primary_transcript_region
 
 [Term]
 id: SO:0000289
@@ -784,7 +788,7 @@ is_a: SO:0001411 ! biological_region
 id: SO:0000314
 name: direct_repeat
 namespace: sequence
-def: "A repeat where the same sequence is repeated in the same direction. Example: GCTGA-----GCTGA." [SO:ke]
+def: "A repeat where the same sequence is repeated in the same direction. Example: GCTGA-followed by-GCTGA." [SO:ke]
 subset: SOFA
 synonym: "direct repeat" EXACT []
 xref: http://en.wikipedia.org/wiki/Direct_repeat "wiki"
@@ -962,6 +966,7 @@ namespace: sequence
 def: "Region of a transcript that regulates splicing." [SO:ke]
 subset: SOFA
 synonym: "splice enhancer" EXACT []
+is_a: SO:0000165 ! enhancer
 is_a: SO:0001056 ! splicing_regulatory_region
 
 [Term]
@@ -1392,7 +1397,7 @@ is_a: SO:0000655 ! ncRNA
 id: SO:0000462
 name: pseudogenic_region
 namespace: sequence
-def: "A non-functional descendent of a functional entity." [SO:cjm]
+def: "A non-functional descendant of a functional entity." [SO:cjm]
 subset: SOFA
 synonym: "pseudogenic region" EXACT []
 is_a: SO:0001411 ! biological_region
@@ -1589,7 +1594,7 @@ is_a: SO:0000655 ! ncRNA
 id: SO:0000603
 name: group_II_intron
 namespace: sequence
-def: "Group II introns are found in rRNA, tRNA and mRNA of organelles in fungi, plants and protists, and also in mRNA in bacteria. They are large self-splicing ribozymes and have 6 structural domains (usually designated dI to dVI). A subset of group II introns also encode essential splicing proteins in intronic ORFs. The length of these introns can therefore be up to 3kb. Splicing occurs in almost identical fashion to nuclear pre-mRNA splicing with two transesterification steps. The 2' hydroxyl of a bulged adenosine in domain VI attacks the 5' splice site, followed by nucleophilic attack on the 3' splice site by the 3' OH of the upstream exon. Protein machinery is required for splicing in vivo, and long range intron-intron and intron-exon interactions are important for splice site positioning. Group II introns are further sub-classified into groups IIA and IIB which differ in splice site consensus, distance of bulged A from 3' splice site, some tertiary interactions, and intronic ORF phylogeny." [http://www.sanger.ac.uk/Software/Rfam/browse/index.shtml]
+def: "Group II introns are found in rRNA, tRNA and mRNA of organelles in fungi, plants and protists, and also in mRNA in bacteria. They are large self-splicing ribozymes and have 6 structural domains (usually designated dI to dVI). A subset of group II introns also encode essential splicing proteins in intronic ORFs. The length of these introns can therefore be up to 3kb. Splicing occurs in almost identical fashion to nuclear pre-mRNA splicing with two transesterification steps. The 2' hydroxyl of a bulged adenosine in domain VI attacks the 5' splice site, followed by nucleophilic attack on the 3' splice site by the 3' OH of the upstream exon. Protein machinery is required for splicing in vivo, and long range intron to intron and intron-exon interactions are important for splice site positioning. Group II introns are further sub-classified into groups IIA and IIB which differ in splice site consensus, distance of bulged A from 3' splice site, some tertiary interactions, and intronic ORF phylogeny." [http://www.sanger.ac.uk/Software/Rfam/browse/index.shtml]
 comment: GO:0000373.
 subset: SOFA
 synonym: "group II intron" EXACT []
@@ -1722,16 +1727,6 @@ def: "A small RNA molecule that is the product of a longer exogenous or endogeno
 subset: SOFA
 synonym: "small interfering RNA" EXACT []
 xref: http://en.wikipedia.org/wiki/SiRNA "wiki"
-is_a: SO:0000655 ! ncRNA
-
-[Term]
-id: SO:0000649
-name: stRNA
-namespace: sequence
-def: "Non-coding RNAs of about 21 nucleotides in length that regulate temporal development; first discovered in C. elegans." [PMID:11081512]
-subset: SOFA
-synonym: "small temporal RNA" EXACT []
-xref: http://en.wikipedia.org/wiki/StRNA "wiki"
 is_a: SO:0000655 ! ncRNA
 
 [Term]
@@ -1983,7 +1978,7 @@ relationship: member_of SO:0005855 ! gene_group
 id: SO:0000705
 name: tandem_repeat
 namespace: sequence
-def: "Two or more adjcent copies of a region (of length greater than 1)." [SO:ke]
+def: "Two or more adjacent copies of a region (of length greater than 1)." [SO:ke]
 subset: SOFA
 synonym: "tandem repeat" EXACT []
 xref: http://en.wikipedia.org/wiki/Tandem_repeat "wiki"
@@ -2055,7 +2050,7 @@ name: transit_peptide
 namespace: sequence
 alt_id: BS:00055
 def: "The transit_peptide is a short region at the N-terminus of the peptide that directs the protein to an organelle (chloroplast, mitochondrion, microbody or cyanelle)." [http://www.ebi.ac.uk/embl/Documentation/FT_definitions/feature_table.html]
-comment: Added to bring SO inline with the embl ddbj genbank feature table. Old definition before biosapiens: The coding sequence for an N-terminal domain of a nuclear-encoded organellar protein. This domain is involved in post translational import of the protein into the organelle.
+comment: Added to bring SO inline with the EMBL, DDBJ, GenBank feature table. Old definition before biosapiens: The coding sequence for an N-terminal domain of a nuclear-encoded organellar protein. This domain is involved in post translational import of the protein into the organelle.
 subset: biosapiens
 subset: SOFA
 synonym: "signal" RELATED []
@@ -2068,7 +2063,7 @@ id: SO:0000727
 name: CRM
 namespace: sequence
 def: "A regulatory region where transcription factor binding sites clustered to regulate various aspects of transcription activities. (CRMs can be located a few kb to hundred kb upstream of the basal promoter, in the coding sequence, within introns, or in the downstream 3'UTR sequences, as well as on different chromosome). A single gene can be regulated by multiple CRMs to give precise control of its spatial and temporal expression. CRMs function as nodes in large, intertwined regulatory network." [PMID:19660565, SO:SG]
-comment: Requested by Stepen Grossmann Dec 2004.
+comment: Requested by Stephen Grossmann Dec 2004.
 subset: SOFA
 synonym: "cis regulatory module" EXACT []
 synonym: "TF module" EXACT []
@@ -2110,7 +2105,7 @@ relationship: part_of SO:0000151 ! clone
 id: SO:0000777
 name: pseudogenic_rRNA
 namespace: sequence
-def: "A non functional descendent of an rRNA." [SO:ke]
+def: "A non functional descendant of an rRNA." [SO:ke]
 comment: Added Jan 2006 to allow the annotation of the pseudogenic rRNA by flybase. Non-functional is defined as its transcription is prevented due to one or more mutatations.
 subset: SOFA
 synonym: "pseudogenic rRNA" EXACT []
@@ -2313,7 +2308,7 @@ is_a: SO:0001059 ! sequence_alteration
 id: SO:0001037
 name: mobile_genetic_element
 namespace: sequence
-def: "A nucleotide region with either intra-genome or intracellular moblity, of varying length, which often carry the information necessary for transfer and recombination with the host genome." [PMID:14681355]
+def: "A nucleotide region with either intra-genome or intracellular mobility, of varying length, which often carry the information necessary for transfer and recombination with the host genome." [PMID:14681355]
 subset: SOFA
 synonym: "MGE" EXACT []
 synonym: "mobile genetic element" EXACT []
@@ -2657,7 +2652,7 @@ is_a: SO:0005855 ! gene_group
 id: SO:2000061
 name: databank_entry
 namespace: sequence
-def: "The sequence referred to by an entry in a databank such as Genbank or SwissProt." [SO:ke]
+def: "The sequence referred to by an entry in a databank such as GenBank or SwissProt." [SO:ke]
 subset: SOFA
 synonym: "accession" RELATED []
 synonym: "databank entry" EXACT []
