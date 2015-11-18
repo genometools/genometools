@@ -1682,14 +1682,6 @@ static int parse_first_gff3_line(const char *line, const char *filename,
       had_err = -1;
     }
   }
-  if (!had_err) {
-    line += *gvf_mode
-              ? strlen(GT_GVF_VERSION_PREFIX)
-              : strlen(GT_GFF_VERSION_PREFIX);
-    /* skip blanks */
-    while (line[0] == ' ')
-      line++;
-  }
   if (!had_err && !(*gvf_mode)) {
     int version;
     had_err = gt_parse_int_line(&version, data, (unsigned int) *line_number,
