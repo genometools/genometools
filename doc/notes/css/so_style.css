@@ -74,11 +74,47 @@ h5 {
      padding: 0;     
 }
 
-.code {
+h6 {
+     font-size: 1em;
+     line-height: 1.3em;
+     font-weight: bold;
+     margin: 0 0 10px 0;
+     padding: 0;     
+}
+
+.pre {
      font-size: 1.3em;
      margin: 20px;
      white-space: pre;     
      font-family: monospace;
+}
+
+.code {
+     font-size: 1.3em;
+     padding:5px;
+     width:100%;
+     overflow:auto;
+     white-space: pre;     
+     font-family: monospace;
+     background-color:lightyellow;
+     border-width: 1px;
+     border-style: dotted;
+     margin: 10px 0px;
+}
+
+.delete {
+     background-color:salmon;
+}
+
+.insert {
+     background-color:lightblue;
+}
+
+.edit {
+     background-color:lightgreen;
+}
+
+div.h_scroll {
 }
 
 .autolist_name {
@@ -102,6 +138,7 @@ table {
 	margin: auto;
 	margin-top: 10px;
 	margin-bottom: 10px;
+	border-collapse:collapse;
       }
 
 th {
@@ -161,6 +198,13 @@ a:hover {
 /* --------------- Ordered/Unordered Lists -------------- */
 
 
+#main_content dl {
+     margin-left: 6px;
+     padding-left: 0px;
+     list-style-type:none;
+     margin-bottom: 15px;
+}
+
 #main_content ul, #left_column ul, #right_column ul {
      margin-left: 6px;
      padding-left: 0px;
@@ -187,6 +231,9 @@ a:hover {
      list-style-position: outside; 
 }
 
+dt {
+    font-weight: bold;
+}
 
 /* ----------------- horizontal menu bar ------------------ */
 
@@ -440,8 +487,22 @@ blockquote p {
  
 .spacer { clear: both; }
 
-div.h_scroll {
-    padding:5px;
-    width:100%;
-    overflow:auto;
-}
+.c  { color: #228B22;} /* comment */
+.cm { color: #000000;} /* comma */
+.co { color: #000000;} /* colon */
+.h  { color: #CD5555; font-weight:bold;} /* here-doc-target */
+.hh { color: #CD5555; font-style:italic;} /* here-doc-text */
+.i  { color: #00688B;} /* identifier */
+.j  { color: #CD5555; font-weight:bold;} /* label */
+.k  { color: #8B008B; font-weight:bold;} /* keyword */
+.m  { color: #FF0000; font-weight:bold;} /* subroutine */
+.n  { color: #B452CD;} /* numeric */
+.p  { color: #000000;} /* paren */
+.pd { color: #228B22; font-style:italic;} /* pod-text */
+.pu { color: #000000;} /* punctuation */
+.q  { color: #CD5555;} /* quote */
+.s  { color: #000000;} /* structure */
+.sc { color: #000000;} /* semicolon */
+.v  { color: #B452CD;} /* v-string */
+.w  { color: #000000;} /* bareword */
+.method-source-code {background-color:lightyellow;} /* source code */

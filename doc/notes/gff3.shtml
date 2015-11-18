@@ -12,7 +12,7 @@
 <link rel="icon" type="image/png" href="/img/so_icon.png" />
 
 <!-- Stylesheet -->
-<style type="text/css" media="all">@import "/css/so_style.css";</style>
+<style type="text/css" media="all">@import "css/so_style.css";</style>
 
 <!-- JavaScript -->
 <script src="/js/jquery-1.2.6.min.js" type="text/javascript"></script>
@@ -102,7 +102,7 @@ $.fn.hoverClass = function(c) {
     <li><a href="/resources/index.html">Resources</a></li>
     <li><a href="/software">Software</a></li>
     <li><a href="/about/index.html">About</a></li>
-    <li><a href="http://sourceforge.net/tracker/?group_id=72703&atid=810408">Request A Term</a></li>
+    <li><a href="https://github.com/The-Sequence-Ontology/SO-Ontologies/issues">Request A Term</a></li>
     <li><a href="/site_map/index.html">Site Map</a></li>
 </ul>
 
@@ -305,15 +305,24 @@ Latin-1 or Unicode are recommended.
 </p>
 
 <ul>
+    <li>tab (%09)
+    <li>newline (%0A)
+    <li>carriage return (%0D)
+    <li>%  percent (%25)
+    <li>control characters (%00 through %1F, %7F)
+</ul>
+
+<p>
+In addition, the following characters have reserved meanings in column
+9 and must be escaped when used in other contexts:
+</p>
+
+<ul>
     <li>;  semicolon (%3B)
     <li>=  equals (%3D)
     <li>&amp;  ampersand (%26)
     <li>,  comma (%2C)
 </ul>
-
-<p>
-
-</p>
 
 <p>
 Note that unescaped spaces are allowed within fields, meaning that
@@ -496,7 +505,8 @@ collinear (e.g. contain gaps).  The alignment format is taken from the
 CIGAR format described in
 the <a href="http://cvs.sanger.ac.uk/cgi-bin/viewvc.cgi/exonerate/?root=ensembl">Exonerate
 documentation</a>.  See "THE GAP ATTRIBUTE" for a description of this
-format.  <dd>
+format.
+<dd>
 
 <dt>Derives_from</dt>
 
@@ -563,7 +573,7 @@ freely by applications.
 <br />
 <h4>The Canonical Gene</h4>
 
-<img src="/img/figure1.png" alt="Figure1" style="padding: 5px; border: 1px solid" />
+<img src="img/figure1.png" alt="Figure1" style="padding: 5px; border: 1px solid" />
 <p>FIGURE 1</p>
 
 <br />
@@ -589,7 +599,7 @@ Here is how this gene should be described using GFF3:
 </p>
 
 <div class="code">
- 0  ##gff-version 3
+ 0  ##gff-version 3.2.1
  1  ##sequence-region   ctg123 1 1497228       
  2  ctg123 . gene            1000  9000  .  +  .  ID=gene00001;Name=EDEN
 
@@ -682,7 +692,7 @@ simplified version of this file would look like this:
 </p>
 
 <div class="code">
-##gff-version 3
+##gff-version 3.2.1
 ##sequence-region   ctg123 1 1497228
 ctg123 . gene            1000  9000  .  +  .  ID=gene00001;Name=EDEN
 ctg123 . TF_binding_site 1000  1012  .  +  .  Parent=gene00001
@@ -725,7 +735,7 @@ short names1 ("mRNA" etc), use the following mappings:
 </table>
 
 <p>
-Other mRNA parts that you might wish to use are
+Other mRNA parts that you might wish to use are:
 </p>
 
 <table>
@@ -734,20 +744,20 @@ Other mRNA parts that you might wish to use are
     <td>SO:0000188 (redundant with exon)</td>
   </tr>
   <tr>
-    <td>polyA</td>
-    <td>_sequence	SO:0000610 (part of the three_prime_UTR)</td>
+    <td>polyA_sequence</td>
+    <td>SO:0000610 (part of the three_prime_UTR)</td>
   </tr>
   <tr>
-    <td>polyA</td>
-    <td>_site		SO:0000553 (part of the gene)</td>
+    <td>polyA_site</td>
+    <td>SO:0000553 (part of the gene)</td>
   </tr>
   <tr>
-    <td>five</td>
-    <td>_prime_UTR	SO:0000204</td>
+    <td>five_prime_UTR</td>
+    <td>SO:0000204</td>
   </tr>
   <tr>
-    <td>three</td>
-    <td>_prime_UTR	SO:0000205</td>
+    <td>three_prime_UTR</td>
+    <td>SO:0000205</td>
   </tr>
 </table>
 </dd>
@@ -811,16 +821,18 @@ three correspond the stop codon.
 <h4>Circular Genomes</h4>
 
 <p>
+
 For a circular genome, the landmark feature should include
 Is_circular=true in column 9.  In the example below, from
 bacteriophage f1, gene II extends across the origin from positions
 6477-831.  The feature end is given as length of the landmark feature,
 J02448, plus the distance from the origin to the end of gene II (6407
 + 831 = 7238).
+
 </p>
 
 <div class="code">
-##gff-version 3
+##gff-version 3.2.1
 # organism Enterobacteria phage f1
 # Note Bacteriophage f1, complete genome.
 J02448	GenBank	region	1   	6407	.	+	.	ID=J02448;Name=J02448;Is_circular=true;
@@ -1000,7 +1012,7 @@ regions of alignment to be exact across the three exons of the second
 spliced transcript (EDEN.2).
 </p>
 
-<img src="/img/figure2.png" alt="Figure2" style="padding: 5px; border: 1px solid" />
+<img src="img/figure2.png" alt="Figure2" style="padding: 5px; border: 1px solid" />
 <p>FIGURE 2</p>
 
 <p>
@@ -1123,7 +1135,7 @@ ctg123 . match_part  1200  3200  2.2e-30  +  .     ID=match00002;Parent=cDNA0000
 ctg123 . match_part  7000  9000  7.4e-32  -  .     ID=match00003;Parent=cDNA00001;Target=mjm1123.3 1 502;Gap=M101 D1499 M401 
 </div>
 
-<img src="/img/figure3.png" alt="Figure3" style="padding: 5px; border: 1px solid" />
+<img src="img/figure3.png" alt="Figure3" style="padding: 5px; border: 1px solid" />
 <p>FIGURE 3</p>
 
 <br />
@@ -1335,26 +1347,26 @@ Here are some common examples:
 <h4>Other Syntax</h4>
 
 <p>
-Comment lines begin with the '#' symbol.
-End-of-line comments (comments preceeded by '#' at the end of and on
-the same line as a feature or directive line) are not allowed.
-Directive lines (sometimes refered to as pragmas or meta-data) are
-preceded by '##'.  Application specific directives are allowed, but
-are not required to be supported by parsers.  The following
-directives are specified:
+Comment lines begin with the '#' symbol.  End-of-line comments
+(comments preceeded by '#' at the end of and on the same line as a
+feature or directive line) are not allowed.  Directive lines
+(sometimes refered to as pragmas or meta-data) are preceded by '##'.
+Application specific directives are allowed, but are not required to
+be supported by parsers.  The following directives are specified:
 </p>
 
 <dl>
-  <dt>##gff-version 3</dt>
+  <dt>##gff-version 3.2.1</dt>
 
   <dd>
-  The GFF version, always 3 in this specification must be present,
-  must be the topmost line of the file and may only appear once in the
-  file.
+  The GFF version follows the format of 3.#.# in this spec.  This
+  directive must be present, must be the topmost line of the file.
+  The version number always begins with 3, the second and third
+  numbers are optional and indicate a major revision and a minor
+  revision respectively.
   </dd>
 
   <dt>##sequence-region seqid start end</dt>
-
   <dd>
   The sequence segment referred to by this file, in the format "seqid
   start end".  This element is optional, but strongly encouraged
@@ -1363,8 +1375,8 @@ directives are specified:
   corresponding to one of the reference sequences referred to in the
   body of the file, however only one ##sequence-region directive may
   be given for any given seqid.  While a ##sequence-region pragma is
-  not required for any or all landmark features, when one is given,
-  all features on that landmark feature (having that seqid) must be
+  not required for any or all landmark features when one is given all
+  features on that landmark feature (having that seqid) must be
   contained within the range defined by that ##sequence-region
   diretive.  An exception to this rule is allowed when a landmark
   feature is marked with the Is_circular attribute.  In that case the
@@ -1510,7 +1522,7 @@ directives are specified:
   Example:
 
 <div class="code">
-##gff-version 3
+##gff-version  3.2.1
 ##sequence-region   ctg123 1 1497228
 ctg123 . gene            1000  9000  .  +  .  ID=gene00001;Name=EDEN
 ctg123 . TF_binding_site 1000  1012  .  +  .  ID=tfbs00001;Parent=gene00001
