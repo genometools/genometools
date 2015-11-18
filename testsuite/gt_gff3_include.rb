@@ -12,6 +12,13 @@ Test do
   grep last_stderr, "unknown option"
 end
 
+Name "gt gff3 revision numbers"
+Keywords "gt_gff3"
+Test do
+  run_test "#{$bin}gt gff3 #{$testdata}revision_numbers.gff3"
+  run "diff #{last_stdout} #{$testdata}revision_numbers.out"
+end
+
 Name "gt gff3 short test (stdin)"
 Keywords "gt_gff3"
 Test do
