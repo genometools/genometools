@@ -1,4 +1,4 @@
-##gff-version   3
+##gff-version 3
 ##sequence-region   chr21 32669578 39739894
 chr21	ENCODE	gene	32669578	32687206	.	-	.	ID=gene1;Name=AP000266.110-001;name2=URB1
 chr21	ENCODE	exon	32669578	32669663	.	-	.	Parent=gene1

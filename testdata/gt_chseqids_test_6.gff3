@@ -1,4 +1,4 @@
-##gff-version   3
+##gff-version 3
 ##sequence-region   ENm001 115404472 2110371766
 ENm001	gth	gene	115422568	117114462	0.766362	+	.	ID=gene1
 ###

@@ -1,4 +1,4 @@
-##gff-version   3
+##gff-version 3
 ##sequence-region   NC_003070 1 4294967295
 NC_003070	gth	gene	5842386	5842719	.	+	.	ID=gene485
 NC_003070	gth	mRNA	5842386	5842719	.	+	.	ID=mRNA517;Parent=gene485

@@ -1,4 +1,4 @@
-##gff-version   3
+##gff-version 3
 ##sequence-region   ENm001 40027 1703041
 ENm001	.	gene	40027	88317	.	+	.	ID=gene1
 ENm001	.	mRNA	40027	88317	.	+	.	ID=mRNA1;Parent=gene1

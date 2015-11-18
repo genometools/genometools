@@ -1,4 +1,4 @@
-##gff-version   3
+##gff-version 3
 ##sequence-region   seq0 1 135606
 # CH478465
 seq0	Genbank	LTR_retrotransposon	3874	4142	.	?	.	.

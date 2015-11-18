@@ -1,4 +1,4 @@
-##gff-version   3
+##gff-version 3
 ##sequence-region   chr7 127471197 127481699
 chr7	.	BED_feature	127471197	127472363	0	+	.	ID=BED_feature1;Name=Pos1
 chr7	.	BED_thick_feature	127471197	127472363	0	+	.	Parent=BED_feature1;Name=Pos1

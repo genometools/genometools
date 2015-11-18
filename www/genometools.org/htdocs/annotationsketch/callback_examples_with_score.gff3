@@ -1,4 +1,4 @@
-##gff-version   3
+##gff-version 3
 ##sequence-region   ctg123 1 10000
 ctg123	.	gene	1000	9000	0.5	+	.	ID=gene00001
 ctg123	.	TF_binding_site	1000	1012	.	+	.	Parent=gene00001

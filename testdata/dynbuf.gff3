@@ -1,4 +1,4 @@
-##gff-version   3
+##gff-version 3
 ##sequence-region   I 1 1000000
 I	gt csa	gene	6908	8661	.	-	.	ID=gene1
 I	gt csa	mRNA	6908	8661	.	-	.	ID=mRNA1;Parent=gene1;Target=yk537b11.3 1 227 +

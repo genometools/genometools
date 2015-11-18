@@ -1,4 +1,4 @@
-##gff-version   3
+##gff-version 3
 ##sequence-region   gDNA 1 1000
 gDNA	.	gene	100	200	.	-	.	ID=gene
 ##sequence-region   cause_prob 1 1000

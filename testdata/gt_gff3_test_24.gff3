@@ -1,4 +1,4 @@
-##gff-version   3
+##gff-version 3
 ##sequence-region   gDNA 1 1000
 gDNA	.	LTR_retrotransposon	100	200	.	-	.	ID=LTR1
 gDNA	.	LTR_retrotransposon	300	400	.	-	.	ID=LTR2

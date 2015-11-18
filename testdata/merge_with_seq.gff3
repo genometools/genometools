@@ -1,4 +1,4 @@
-##gff-version   3
+##gff-version 3
 ##sequence-region   ctg123 1 1497228
 ##sequence-region   seq1 1 10
 ##sequence-region   seq2 1 10

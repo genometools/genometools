@@ -50,7 +50,7 @@ end
 
 def gff3_output(sequences, source)
   gene_number = 1
-  puts "##gff-version   3"
+  puts "##gff-version 3"
   sequences.each do |name, seq|
     puts "##sequence-region #{name} #{seq.start_pos} #{seq.end_pos}"
     seq.genes.each do |gene|

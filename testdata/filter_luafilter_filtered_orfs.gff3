@@ -1,4 +1,4 @@
-##gff-version   3
+##gff-version 3
 ##sequence-region   seq0 1 1237870
 #4 4.3 (Mon 25 Mar 2002)
 seq0	LTRharvest	repeat_region	4883	13250	.	?	.	ID=repeat_region1

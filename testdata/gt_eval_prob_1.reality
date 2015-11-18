@@ -1,4 +1,4 @@
-##gff-version   3
+##gff-version 3
 ##sequence-region   chr8 118886142 119279152
 chr8	ENCODE	gene	118886142	119192762	.	-	.	ID=gene1;Name=AC113188.1-004;name2=EXT1
 chr8	ENCODE	exon	118886142	118886313	.	-	.	Parent=gene1

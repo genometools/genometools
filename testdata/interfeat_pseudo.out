@@ -1,4 +1,4 @@
-##gff-version   3
+##gff-version 3
 ##sequence-region   chr1 2500 5700
 chr1	.	EST_match	2500	3050	.	+	.	ID=EST_match1
 chr1	.	match_gap	3051	3999	.	+	.	.

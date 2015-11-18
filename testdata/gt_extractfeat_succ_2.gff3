@@ -1,4 +1,4 @@
-##gff-version   3
+##gff-version 3
 ##sequence-region foo 1 100
 foo	.	gene	1	100	.	.	.	ID=gene1
 foo	.	exon	1	10	.	.	.	Parent=gene1

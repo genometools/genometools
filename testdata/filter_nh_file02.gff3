@@ -1,4 +1,4 @@
-##gff-version   3
+##gff-version 3
 seq0	LTRharvest	repeat_region	26701	34275	.	?	.	ID=repeat_region1
 seq0	LTRharvest	target_site_duplication	26701	26704	.	?	.	Parent=repeat_region1
 seq0	LTRharvest	LTR_retrotransposon	26705	34271	.	?	.	ID=LTR_retrotransposon1;Parent=repeat_region1

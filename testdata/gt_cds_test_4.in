@@ -1,4 +1,4 @@
-##gff-version   3
+##gff-version 3
 ##sequence-region dna 1 9
 dna	.	gene	1	9	.	+	.	ID=gene1
 dna	.	mRNA	1	9	.	+	.	ID=mRNA1;Parent=gene1

@@ -1,4 +1,4 @@
-##gff-version   3
+##gff-version 3
 ##sequence-region   transcript 1 1000
 transcript	.	gene	1	400	.	+	.	ID=gene00001;Name=AGENE
 transcript	.	mRNA	1	400	.	+	.	ID=mRNA00001;Parent=gene00001;Name=AGENE.1

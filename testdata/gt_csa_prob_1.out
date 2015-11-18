@@ -1,4 +1,4 @@
-##gff-version   3
+##gff-version 3
 ##sequence-region   NC_003070 1 10000000
 NC_003070	gt csa	gene	5414975	5415790	.	+	.	ID=gene1
 NC_003070	gt csa	mRNA	5414975	5415790	.	+	.	ID=mRNA1;Parent=gene1

@@ -1,4 +1,4 @@
-##gff-version   3
+##gff-version 3
 ##sequence-region   I 2064302 12995457
 I	Coding_transcript	gene	2064302	2064690	.	+	.	ID=gene1;Alias=Y37E3.3;Name=WBGene00021347
 I	Coding_transcript	exon	2064302	2064400	.	+	.	Parent=gene1

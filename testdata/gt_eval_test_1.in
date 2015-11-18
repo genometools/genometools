@@ -1,4 +1,4 @@
-##gff-version   3
+##gff-version 3
 ##sequence-region   ENm001 1 1500000
 ENm001	gth	gene	63867	87012	1.000000	+	.	ID=gene1
 ENm001	gth	exon	86827	87012	1.000000	+	.	Parent=gene1

@@ -1,4 +1,4 @@
-##gff-version   3
+##gff-version 3
 ##sequence-region   ENm002 1 1000000
 ENm002	gth	gene	29252	90941	1.000	-	.	ID=gene1;Target=exon_1 1 6539 +
 ENm002	gth	exon	29252	33650	1.000	-	.	Parent=gene1

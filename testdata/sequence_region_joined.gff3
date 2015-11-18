@@ -1,4 +1,4 @@
-##gff-version   3
+##gff-version 3
 ##sequence-region   I 2006120 12995457
 I	Coding_transcript	gene	2006120	2010481	.	-	.	ID=gene1;Alias=Y20F4.3;Name=WBGene00021238
 I	Coding_transcript	exon	2006120	2006306	.	-	.	Parent=gene1

@@ -1,4 +1,4 @@
-##gff-version   3
+##gff-version 3
 ##sequence-region   NC_003070 1 4294967295
 NC_003070	gth	gene	191610	192404	.	-	.	ID=gene19
 NC_003070	gth	mRNA	191610	192404	.	-	.	ID=mRNA19;Parent=gene19
