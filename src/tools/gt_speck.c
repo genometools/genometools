@@ -15,6 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#include <unistd.h>
 #include "core/cstr_api.h"
 #include "core/error.h"
 #include "core/fileutils_api.h"
@@ -135,8 +136,9 @@ static int gt_speck_arguments_check(GT_UNUSED int rest_argc,
   gt_error_check(err);
   gt_assert(arguments);
 
-  if (arguments->outfp && arguments->colored) {
-    gt_warning("file output requested ('-o'), disabling colored output");
+  if ((arguments->outfp || (!arguments->outfp && !isatty(STDOUT_FILENO)))
+      && arguments->colored) {
+    gt_warning("not printing to terminal, disabling colored output");
     arguments->colored = false;
   }
 
