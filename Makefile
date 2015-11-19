@@ -992,9 +992,9 @@ sbgt:${ALLSCANBUILD}
 scgt:
 	src_check src/core/*
 	src_check src/match/*
-	src_check src/ltr/*
 	src_check src/extended/*
 	src_check src/tools/*
+	src_check src/ltr/*
 
 splintclean:
 	find obj -name '*.splint' | xargs rm -f
