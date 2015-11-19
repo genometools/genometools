@@ -147,7 +147,7 @@ static GtOptionParser* gt_seed_extend_option_parser_new(void *tool_arguments)
                                "Minimum coverage in two neighbouring diagonal "
                                "bands (for filter)",
                                &arguments->dbs_mincoverage,
-                               35UL);
+                               GT_UWORD_MAX);
   gt_option_parser_add_option(op, option);
 
   /* -maxfreq */
@@ -546,6 +546,11 @@ static int gt_seed_extend_runner(GT_UNUSED int argc,
       gt_encseq_delete(aencseq);
       gt_encseq_delete(bencseq);
     }
+  }
+
+  /* set mincoverage if option not specified */
+  if (arguments->dbs_mincoverage == GT_UWORD_MAX) {
+    arguments->dbs_mincoverage = (GtUword) (2.5 * arguments->dbs_seedlength);
   }
 
   /* Prepare options for greedy extension */
