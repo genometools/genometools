@@ -58,6 +58,13 @@
 #define GT_WU "%I64u"
 #endif
 
+/* Define the conversion string for '%lX' in platform independent fashion. */
+#ifndef _WIN64
+#define GT_LX "%lX"
+#else
+#define GT_LX "%I64X"
+#endif
+
 /* Define the conversion string for '%zu' in platform independent fashion. */
 #if !defined(_WIN32)
 #define GT_ZU "%zu"

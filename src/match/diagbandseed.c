@@ -697,7 +697,8 @@ int gt_diagbandseed_run(const GtEncseq *aencseq,
     if (arg->debug_kmer) {
       GtDiagbandseedKmerPos *idx;
       for (idx = alist; idx < alist + alen; idx++) {
-        printf("a) Kmer (%lX,%d,%d)\n", idx->code, idx->endpos, idx->seqnum);
+        printf("a) Kmer ("GT_LX",%d,%d)\n", idx->code, idx->endpos,
+               idx->seqnum);
       }
     }
 
@@ -769,7 +770,8 @@ int gt_diagbandseed_run(const GtEncseq *aencseq,
       if (arg->debug_kmer) {
         GtDiagbandseedKmerPos *idx;
         for (idx = blist; idx < blist + blen; idx++) {
-          printf("b) Kmer (%lX,%d,%d)\n", idx->code, idx->endpos, idx->seqnum);
+          printf("b) Kmer ("GT_LX",%d,%d)\n", idx->code, idx->endpos,
+                 idx->seqnum);
         }
       }
 
