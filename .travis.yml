@@ -1,4 +1,4 @@
-chache: apt
+cache: apt
 language: c
 compiler:
   - clang

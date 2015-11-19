@@ -769,6 +769,7 @@ static int gt_ltrdigest_pdom_visitor_choose_strand(GtLTRdigestPdomVisitor *lv)
   return had_err;
 }
 
+#ifndef _WIN32
 static int gt_ltrdigest_checkpipe(int *fdpair, GtError *err)
 {
   int had_err = 0;
@@ -788,6 +789,7 @@ static void gt_ltrdigest_checkdup(int fd)
     exit(EXIT_FAILURE);
   }
 }
+#endif
 
 static int gt_ltrdigest_pdom_visitor_feature_node(GtNodeVisitor *nv,
                                                   GtFeatureNode *fn,
@@ -821,10 +823,10 @@ static int gt_ltrdigest_pdom_visitor_feature_node(GtNodeVisitor *nv,
 #ifndef _WIN32
     FILE *instream;
     GtHMMERParseStatus *pstatus;
+    int pid, pc[2], cp[2], rstatus = 0;
 #endif
     unsigned int frame;
     GtStr *seq;
-    int pid, pc[2], cp[2], rstatus = 0;
 
     seq = gt_str_new();
     rng = gt_genome_node_get_range((GtGenomeNode*) lv->ltr_retrotrans);
@@ -872,7 +874,6 @@ static int gt_ltrdigest_pdom_visitor_feature_node(GtNodeVisitor *nv,
       }
       gt_codon_iterator_delete(ci);
       gt_translator_delete(tr);
-
 
       /* run HMMER and handle results */
       if (!had_err) {
