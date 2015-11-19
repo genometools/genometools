@@ -1,4 +1,4 @@
-##gff-version   3
+##gff-version 3
 seq1	.	gene	1	10	.	+	.	.
 seq2	.	gene	1	10	.	+	.	.
 ##FASTA

@@ -1,4 +1,4 @@
-##gff-version   3
+##gff-version 3
 ##sequence-region   1877523 1 106973
 1877523	gth	gene	30278	31355	.	+	.	ID=gene1
 1877523	gth	mRNA	30278	31355	.	+	.	ID=mRNA1;Parent=gene1;Target=8690080 1 524 +

@@ -69,11 +69,11 @@ static void gff3_version_string(GtNodeVisitor *nv)
   gt_assert(gff3_visitor);
   if (!gff3_visitor->version_string_shown) {
     if (!gff3_visitor->outstr) {
-      gt_file_xprintf(gff3_visitor->outfp, "%s   %u\n", GT_GFF_VERSION_PREFIX,
+      gt_file_xprintf(gff3_visitor->outfp, "%s %u\n", GT_GFF_VERSION_PREFIX,
                       GT_GFF_VERSION);
     } else {
       gt_str_append_cstr(gff3_visitor->outstr, GT_GFF_VERSION_PREFIX);
-      gt_str_append_cstr(gff3_visitor->outstr, "   ");
+      gt_str_append_cstr(gff3_visitor->outstr, " ");
       gt_str_append_uint(gff3_visitor->outstr, GT_GFF_VERSION);
       gt_str_append_char(gff3_visitor->outstr, '\n');
     }

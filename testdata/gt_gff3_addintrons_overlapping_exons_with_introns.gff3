@@ -1,4 +1,4 @@
-##gff-version   3
+##gff-version 3
 ##sequence-region   chr6_ssto_hap7 1832076 30559309
 chr6_ssto_hap7	.	gene	1832076	30559309	.	+	.	ID=gene1;Name=ABCF1
 chr6_ssto_hap7	.	mRNA	1832076	30559309	.	+	.	ID=mRNA1;Parent=gene1;Name=NM_001025091

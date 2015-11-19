@@ -1,4 +1,4 @@
-##gff-version   3
+##gff-version 3
 ##sequence-region dna 11 30
 dna	.	gene	11	30	.	+	.	ID=gene1
 dna	.	exon	11	16	.	+	.	Parent=gene1

@@ -1,4 +1,4 @@
-##gff-version   3
+##gff-version 3
 ##sequence-region   Scaffold_102 6452 6751
 Scaffold_102	EVM	gene	6452	6751	.	+	.	ID=gene906;Name=EVM%20prediction%20Scaffold_102.1
 Scaffold_102	EVM	mRNA	6452	6751	.	+	.	ID=mRNA906;Parent=gene906

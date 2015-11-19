@@ -1,4 +1,4 @@
-##gff-version   3
+##gff-version 3
 ##sequence-region   chr1 11874 14409
 chr1	.	BED_feature	11874	14409	0	+	.	ID=BED_feature1;Name=uc001aaa.3
 chr1	.	BED_block	11874	12227	0	+	.	Parent=BED_feature1;Name=uc001aaa.3

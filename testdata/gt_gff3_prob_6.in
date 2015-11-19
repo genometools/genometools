@@ -1,4 +1,4 @@
-##gff-version   3
+##gff-version 3
 ##sequence-region chrX 122459947 153939754
 chrX	ENCODE	gene	122459947	122480545	.	-	.	ID=gene1;Name=RP5-1189B24.5-003;name2=THOC2
 chrX	ENCODE	exon	122459947	122460724	.	-	.	Parent=gene1

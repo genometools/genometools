@@ -1,4 +1,4 @@
-##gff-version   3
+##gff-version 3
 ##sequence-region ENr213 20563762 20789928
 ENr213	gmap	gene	20563762	20789928	.	-	.	ID=gene1
 ENr213	gmap	exon	20789754	20789928	.	-	.	Parent=gene1

@@ -1,4 +1,4 @@
-##gff-version   3
+##gff-version 3
 ##sequence-region bar 1 100
 ##sequence-region baz 1 100
 ##sequence-region foo 1 100

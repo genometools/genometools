@@ -1,4 +1,4 @@
-##gff-version   3
+##gff-version 3
 ##sequence-region   1877523 1 106973
 1877523	gth	gene	1074	1540	1	+	.	ID=gene1;Target=8721428 1 303 +
 1877523	gth	exon	1074	1171	1	+	.	Parent=gene1

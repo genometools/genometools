@@ -1,4 +1,4 @@
-##gff-version   3
+##gff-version 3
 ##sequence-region   seq 1 290
 seq	.	gene	1	209	.	+	.	ID=gene1
 seq	.	exon	1	90	.	+	.	Parent=gene1

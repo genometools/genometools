@@ -1,4 +1,4 @@
-##gff-version   3
+##gff-version 3
 ##sequence-region   III 1000001 2000000
 III	gt csa	gene	1001124	1001929	.	+	.	ID=gene1
 III	gt csa	mRNA	1001124	1001415	.	+	.	ID=mRNA1;Parent=gene1;Target=CESAC87R 1 276 +,CEESA72R 1 286 +

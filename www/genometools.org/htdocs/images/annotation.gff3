@@ -1,4 +1,4 @@
-##gff-version   3
+##gff-version 3
 ##sequence-region   chr16 4043 26056510
 chr16	ENCODE	gene	4043	9448	.	-	.	ID=gene1;Name=Z84812.2-001;Name2=Z84812.2
 chr16	ENCODE	exon	4043	4511	.	-	.	Parent=gene1

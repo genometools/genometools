@@ -1,4 +1,4 @@
-##gff-version   3
+##gff-version 3
 ##sequence-region   chr22 2001 8000
 chr22	.	BED_feature	2001	6000	960	+	.	ID=BED_feature1;Name=itemA
 chr22	.	BED_block	2001	3567	960	+	.	Parent=BED_feature1;Name=itemA
