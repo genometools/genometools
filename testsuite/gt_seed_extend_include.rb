@@ -42,8 +42,8 @@ Test do
   grep last_stderr, /Only 14-mers occurring <= 3 times will be considered, due to small memlimit. Expect 50496 seed pairs./
   run "gunzip -c #{$testdata}seedextend2.out.gz | cmp -s #{last_stdout}"
   run_test "#{$bin}gt seed_extend -v -maxfreq 5 -ii at1MB -only-seeds"
-  grep last_stdout, /...found and sorted 582230 14-mers/
-  grep last_stdout, /...collected and sorted 68577 seed pairs/
+  grep last_stdout, /...found 582230 14-mers/
+  grep last_stdout, /...collected 68577 seed pairs/
 end
 
 Name "gt seed_extend filter options"

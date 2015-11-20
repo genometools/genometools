@@ -678,6 +678,11 @@ int gt_diagbandseed_run(const GtEncseq *aencseq,
                                    aencseq,
                                    arg->seedlength,
                                    GT_READMODE_FORWARD);
+  if (arg->verbose) {
+    printf("# ...found " GT_WU " %u-mers ", alen, arg->seedlength);
+    gt_timer_show_formatted(vtimer, "in " GT_WD ".%06ld seconds.\n", stdout);
+    gt_timer_start(vtimer);
+  }
 
   /* sort alist */
   rdxinfo = gt_radixsort_new_ulongpair(alen);
@@ -692,7 +697,7 @@ int gt_diagbandseed_run(const GtEncseq *aencseq,
   }
 
   if (arg->verbose) {
-    printf("# ...found and sorted " GT_WU " %u-mers ", alen,arg->seedlength);
+    printf("# ...sorted " GT_WU " %u-mers ", alen, arg->seedlength);
     gt_timer_show_formatted(vtimer, "in " GT_WD ".%06ld seconds.\n", stdout);
   }
 
@@ -740,10 +745,10 @@ int gt_diagbandseed_run(const GtEncseq *aencseq,
       /* selfcomp = true && mirror = true */
       gt_assert(alist != NULL);
       blen = gt_diagbandseed_blist_mirror_self(blist,
-                                              bencseq,
-                                              alist,
-                                              alen,
-                                              arg->seedlength);
+                                               bencseq,
+                                               alist,
+                                               alen,
+                                               arg->seedlength);
     }
 
     /* debug and verbose output for sorted blist */
@@ -860,6 +865,11 @@ int gt_diagbandseed_run(const GtEncseq *aencseq,
       gt_free(blist);
       blist = NULL;
     }
+    if (arg->verbose) {
+      printf("# ...collected " GT_WU " seed pairs ", mlen);
+      gt_timer_show_formatted(vtimer, "in " GT_WD ".%06ld seconds.\n", stdout);
+      gt_timer_start(vtimer);
+    }
 
     /* sort mlist */
     if (mlen > 0) {
@@ -880,7 +890,7 @@ int gt_diagbandseed_run(const GtEncseq *aencseq,
     }
 
     if (arg->verbose) {
-      printf("# ...collected and sorted " GT_WU " seed pairs ", mlen);
+      printf("# ...sorted " GT_WU " seed pairs ", mlen);
       gt_timer_show_formatted(vtimer, "in " GT_WD ".%06ld seconds.\n", stdout);
     }
   }
