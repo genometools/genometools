@@ -55,7 +55,7 @@ GtWord gt_optimalxdropbelowscore(GtUword errorpercentage,GtUword sensitivity)
 {
   gt_assert(errorpercentage <= 100 - GT_EXTEND_MIN_IDENTITY_PERCENTAGE &&
             sensitivity >= 90 && sensitivity - 90 <= 10);
-  return best_xdropbelow[sensitivity - 90][errorpercentage];
+  return best_xdropbelow[MIN(sensitivity - 90,9)][errorpercentage];
 }
 
 GtXdropmatchinfo *gt_xdrop_matchinfo_new(GtUword userdefinedleastlength,
@@ -337,7 +337,7 @@ void gt_optimal_maxalilendiff_perc_mat_history(
 
       gt_assert(errorpercentage <= 100 - GT_EXTEND_MIN_IDENTITY_PERCENTAGE &&
                 sensitivity >= 90 && sensitivity - 90 <= 10);
-      best_value = best_percmathistory_maxalilendiff[sensitivity - 90];
+      best_value = best_percmathistory_maxalilendiff[MIN(sensitivity - 90,9)];
       *maxalignedlendifference = best_value[errorpercentage].maxalilendiff;
       *perc_mat_history = best_value[errorpercentage].percmathistory;
     } else

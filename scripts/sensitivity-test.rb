@@ -198,7 +198,8 @@ def gtcall ()
 end
 
 def callseedextend(mincoverage,indexname,inputfile,destfile,minidentity,length,
-                   seqnum,seedlength,weakends,withalignment,withecho = false)
+                   seqnum,seedlength,weakends,withalignment,bias,
+                   withecho = false)
   makesystemcall("#{gtcall()} encseq encode -des no -sds no -md5 no " +
                  "-indexname #{indexname} #{inputfile}.fas",withecho)
   if mincoverage.nil?
@@ -208,7 +209,8 @@ def callseedextend(mincoverage,indexname,inputfile,destfile,minidentity,length,
   end
   makesystemcall("#{gtcall()} seed_extend -t 21 " +
 		 "-seedlength #{seedlength} -minidentity #{minidentity} " +
-		 "-seed-display -bias-parameters -extendgreedy " +
+		 "-seed-display -extendgreedy " +
+                 (if bias then "-bias-parameters " else "" end) +
 		 "-overlappingseeds -ii #{indexname}" +
                  (if withalignment then " -a" else "" end) +
                  (if weakends then " -weakends" else "" end) +
@@ -229,7 +231,7 @@ def callseedextend(mincoverage,indexname,inputfile,destfile,minidentity,length,
 end
 
 def runseedextend(mincoverage,inputdir,targetdir,weakends,withalignment,
-                  seedlength,minidentity,length,seqnum)
+                  seedlength,minidentity,length,seqnum,bias)
   inputfile = makefilename(inputdir,minidentity,"rand",length,seqnum)
   if not File.exists?(inputfile + ".fas")
     inputfile = makefilename(inputdir,minidentity,"rand-mult",length,seqnum)
@@ -238,7 +240,7 @@ def runseedextend(mincoverage,inputdir,targetdir,weakends,withalignment,
   destdir = File.dirname(destfile)
   makesystemcall("mkdir -p #{destdir}")
   return callseedextend(mincoverage,inputfile,inputfile,destfile,minidentity,
-                        length,seqnum,seedlength,weakends,withalignment)
+                        length,seqnum,seedlength,weakends,withalignment,bias)
 end
 
 def rundaligner(mincoverage,inputdir,targetdir,seedlength,minidentity,length,
@@ -299,7 +301,7 @@ def rerun_seedextend(options,seedlength)
   puts "# inputfile=#{inputfile}.fas"
   indexname = "sfx-#{length}-#{seqnum}"
   callseedextend(options.mincoverage,indexname,inputfile,"",minidentity,length,
-                 seqnum,seedlength,options.weakends,true,true)
+                 seqnum,seedlength,options.weakends,true,options.bias,true)
   rundaligner(options.mincoverage,options.inputdir,options.targetdir,seedlength,
               minidentity,length,seqnum,false)
 end
@@ -325,6 +327,7 @@ def parseargs(argv)
   options.mincoverage = nil
   options.multi = 0
   options.lengthdistr = false
+  options.bias = true
   opts = OptionParser.new
   indent = " " * 37
   opts.banner = "Usage: #{$0} [options] \nFirstly, generate sequences using "+
@@ -354,11 +357,17 @@ def parseargs(argv)
   opts.on("-d","--daligner","run daligner") do |x|
     options.runda = true
   end
-  opts.on("-w","--weakends","use option -weakends of seed_extend") do |x|
+  opts.on("-w","--weakends","use option -weakends for seed_extend") do |x|
     options.weakends = true
   end
   opts.on("-c","--compare","compare daligner and seed_extend results") do |x|
     options.compare = true
+  end
+  opts.on("--no-myers","use default paramaters for perc_mat_history\n" +
+                       "#{indent}and maxalilendiff (i.e. omit option\n" +
+                       "#{indent}-bias-parameters) when calling\n" +
+                       "#{indent}gt seed_extend") do |x|
+    options.bias = false
   end
   opts.on("-i","--inputdir STRING","specify input directory" +
           "\n#{indent}(default: #{options.inputdir})") do |x|
@@ -475,7 +484,8 @@ if options.runse or options.runda
         if options.runse
           matchlist = runseedextend(options.mincoverage,options.inputdir,
                                     options.targetdir,options.weakends,false,
-                                    seedlength,minidentity,length,seqnum)
+                                    seedlength,minidentity,length,seqnum,
+                                    options.bias)
           if multiseeds
             ranges = find_expected_alignmentranges(filename)
             gtresult[identifier] = find_multi_overlaps(ranges,matchlist,
