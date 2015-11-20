@@ -751,7 +751,7 @@ int gt_diagbandseed_run(const GtEncseq *aencseq,
       GtDiagbandseedKmerPos *idx;
       for (idx = blist; idx < blist + blen; idx++) {
         printf("# Kmer (" GT_LX ",%d,%d)\n", idx->code, idx->endpos,
-	       idx->seqnum);
+               idx->seqnum);
       }
     }
 
