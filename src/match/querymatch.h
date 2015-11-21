@@ -28,8 +28,12 @@
 
 typedef struct GtQuerymatch GtQuerymatch;
 
-GtQuerymatch *gt_querymatch_new(GtQuerymatchoutoptions *querymatchoutoptions,
-                                bool seed_display);
+GtQuerymatch *gt_querymatch_new(void);
+
+void gt_querymatch_seed_display_set(GtQuerymatch *querymatch);
+
+void gt_querymatch_outoptions_set(GtQuerymatch *querymatch,
+                GtQuerymatchoutoptions *querymatchoutoptions);
 
 void gt_querymatch_init(GtQuerymatch *querymatch,
                         GtUword dblen,
@@ -43,6 +47,21 @@ void gt_querymatch_init(GtQuerymatch *querymatch,
                         GtUword querylen,
                         GtUword querystart,
                         GtUword query_totallength);
+
+bool gt_querymatch_read_line(GtQuerymatch *querymatchptr,
+                             const char *line_ptr,
+                             bool selfmatch,
+                             GtUword query_totallength,
+                             const GtEncseq *dbencseq);
+
+bool gt_querymatch_process(GtQuerymatch *querymatchptr,
+                           GtUword seedpos1,
+                           GtUword seedpos2,
+                           GtUword seedlen,
+                           const GtEncseq *encseq,
+                           const GtSeqorEncseq *query,
+                           GtUword query_totallength,
+                           bool greedyextension);
 
 void gt_querymatch_delete(GtQuerymatch *querymatch);
 
@@ -79,9 +98,13 @@ GtUword gt_querymatch_querytotallength(const GtQuerymatch *querymatch);
 
 GtUword gt_querymatch_dbseqnum(const GtQuerymatch *querymatch);
 
+GtUword gt_querymatch_dblen(const GtQuerymatch *querymatch);
+
 bool gt_querymatch_queryreverse(const GtQuerymatch *querymatch);
 
 double gt_querymatch_error_rate(GtUword distance,GtUword alignedlen);
+
+GtUword gt_querymatch_distance(const GtQuerymatch *querymatch);
 
 void gt_querymatch_prettyprint(const GtQuerymatch *querymatch);
 

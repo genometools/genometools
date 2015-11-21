@@ -620,8 +620,12 @@ static int gt_callenumquerymatches(bool selfmatch,
   {
     int retval;
     GtSeqorEncseq query_seqorencseq;
-    GtQuerymatch *exactseed = gt_querymatch_new(querymatchoutoptions,false);
+    GtQuerymatch *exactseed = gt_querymatch_new();
 
+    if (querymatchoutoptions != NULL)
+    {
+      gt_querymatch_outoptions_set(exactseed,querymatchoutoptions);
+    }
     gt_querymatch_query_readmode_set(exactseed,query_readmode);
     while (!haserr &&
            (retval = gt_querysubstringmatchiterator_next(qsmi, err)) == 0)
@@ -837,8 +841,18 @@ static int gt_repfind_runner(int argc,
     {
       querymatchoutoptions = NULL;
     }
-    processinfo_and_querymatchspaceptr.querymatchspaceptr
-      = gt_querymatch_new(querymatchoutoptions,arguments->seed_display);
+    processinfo_and_querymatchspaceptr.querymatchspaceptr = gt_querymatch_new();
+    if (arguments->seed_display)
+    {
+      gt_querymatch_seed_display_set(
+              processinfo_and_querymatchspaceptr.querymatchspaceptr);
+    }
+    if (querymatchoutoptions != NULL)
+    {
+      gt_querymatch_outoptions_set(
+              processinfo_and_querymatchspaceptr.querymatchspaceptr,
+              querymatchoutoptions);
+    }
     if (arguments->verify_alignment)
     {
       gt_querymatch_verify_alignment_set(

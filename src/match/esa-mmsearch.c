@@ -600,7 +600,7 @@ static int gt_constructsarrandrunmmsearch(
   {
     const GtSuffixsortspace *suffixsortspace;
     GtUword numberofsuffixes;
-    GtQuerymatch *querymatchspaceptr = gt_querymatch_new(NULL,false);
+    GtQuerymatch *querymatchspaceptr = gt_querymatch_new();
     GtQueryrepresentation queryrep;
 
     queryrep.sequence = query;

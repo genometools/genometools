@@ -463,8 +463,16 @@ static GtUword gt_diagbandseed_process_seeds(const GtEncseq *aencseq,
     return 0;
   gt_assert(aencseq != NULL && bencseq != NULL);
 
-  info_querymatch.querymatchspaceptr = gt_querymatch_new(querymatchoutopt,
-                                                         seed_display);
+  info_querymatch.querymatchspaceptr = gt_querymatch_new();
+  if (seed_display)
+  {
+    gt_querymatch_seed_display_set(info_querymatch.querymatchspaceptr);
+  }
+  if (querymatchoutopt != NULL)
+  {
+    gt_querymatch_outoptions_set(info_querymatch.querymatchspaceptr,
+                                 querymatchoutopt);
+  }
   /* score[0] and score[ndiags+1] remain zero for boundary */
   score = gt_calloc(ndiags + 2, sizeof *score);
   lastp = gt_calloc(ndiags, sizeof *lastp);

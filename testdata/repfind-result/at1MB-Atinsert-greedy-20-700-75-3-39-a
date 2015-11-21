@@ -38,6 +38,7 @@ cttannaattttaacccccnaaannnnnaatnnaannaaanaaaaaacccctttncccnttcccaatcct
 tccctantttgc
 |||||| ||| |
 tccctantttnc
+# polishing(m=500,d=-500,p=30): 64/64
 718 2 1 F 718 2 1 995 147 79.53
 tgantgttgatctcaaactctttgtccataatgggaagctacacaaatatttgactgttacagatggctt
 | | | || |||||||||||||| ||||||||   || |||||||||||||| ||| ||||| ||  |||
@@ -72,6 +73,7 @@ taccactctctccctnaattctccttcttntcncnacatcncnttnataaaaaatttattnataattttt
 tanaaacttatttttnta
 || |||||||||||| ||
 tanaaacttatttttnta
+# polishing(m=500,d=-500,p=30): 64/64
 718 2 1 F 718 2 1 995 147 79.53
 tgantgttgatctcaaactctttgtccataatgggaagctacacaaatatttgactgttacagatggctt
 | | | || |||||||||||||| ||||||||   || |||||||||||||| ||| ||||| ||  |||
@@ -106,6 +108,7 @@ taccactctctccctnaattctccttcttntcncnacatcncnttnataaaaaatttattnataattttt
 tanaaacttatttttnta
 || |||||||||||| ||
 tanaaacttatttttnta
+# polishing(m=500,d=-500,p=30): 64/64
 745 3 1 F 745 3 1 1049 147 80.27
 tgaagcgatacaacgatgcaaaaaaagagtggggattcacacaattgatttctcttccaacattctacaa
 | || | ||||||| || |||||||| | |    |||||||||||| |||||||||||||||||||||||
@@ -140,6 +143,7 @@ ccnnaataaccttacaaanaaaaattnatnatttaatttnttatacnacactttattnatncctntnann
 taaccttgtttccgctccccnaatttccttttttttcctgttttt
 ||||||| ||||| |||||| |||||||||||||||||| |||||
 taaccttntttccnctccccnaatttccttttttttcctnttttt
+# polishing(m=500,d=-500,p=30): 64/64
 745 3 1 F 745 3 1 1049 147 80.27
 tgaagcgatacaacgatgcaaaaaaagagtggggattcacacaattgatttctcttccaacattctacaa
 | || | ||||||| || |||||||| | |    |||||||||||| |||||||||||||||||||||||
@@ -174,6 +178,7 @@ ccnnaataaccttacaaanaaaaattnatnatttaatttnttatacnacactttattnatncctntnann
 taaccttgtttccgctccccnaatttccttttttttcctgttttt
 ||||||| ||||| |||||| |||||||||||||||||| |||||
 taaccttntttccnctccccnaatttccttttttttcctnttttt
+# polishing(m=500,d=-500,p=30): 64/64
 745 3 1 F 745 3 1 1049 147 80.27
 tgaagcgatacaacgatgcaaaaaaagagtggggattcacacaattgatttctcttccaacattctacaa
 | || | ||||||| || |||||||| | |    |||||||||||| |||||||||||||||||||||||
@@ -208,6 +213,7 @@ ccnnaataaccttacaaanaaaaattnatnatttaatttnttatacnacactttattnatncctntnann
 taaccttgtttccgctccccnaatttccttttttttcctgttttt
 ||||||| ||||| |||||| |||||||||||||||||| |||||
 taaccttntttccnctccccnaatttccttttttttcctnttttt
+# polishing(m=500,d=-500,p=30): 64/64
 745 3 1 F 745 3 1 1049 147 80.27
 tgaagcgatacaacgatgcaaaaaaagagtggggattcacacaattgatttctcttccaacattctacaa
 | || | ||||||| || |||||||| | |    |||||||||||| |||||||||||||||||||||||
@@ -242,6 +248,7 @@ ccnnaataaccttacaaanaaaaattnatnatttaatttnttatacnacactttattnatncctntnann
 taaccttgtttccgctccccnaatttccttttttttcctgttttt
 ||||||| ||||| |||||| |||||||||||||||||| |||||
 taaccttntttccnctccccnaatttccttttttttcctnttttt
+# polishing(m=500,d=-500,p=30): 64/64
 745 3 1 F 745 3 1 1049 147 80.27
 tgaagcgatacaacgatgcaaaaaaagagtggggattcacacaattgatttctcttccaacattctacaa
 | || | ||||||| || |||||||| | |    |||||||||||| |||||||||||||||||||||||
@@ -276,6 +283,7 @@ ccnnaataaccttacaaanaaaaattnatnatttaatttnttatacnacactttattnatncctntnann
 taaccttgtttccgctccccnaatttccttttttttcctgttttt
 ||||||| ||||| |||||| |||||||||||||||||| |||||
 taaccttntttccnctccccnaatttccttttttttcctnttttt
+# polishing(m=500,d=-500,p=30): 64/64
 798 5 2 F 798 5 2 1116 160 79.95
 aagttaaagaaatatttgtctgttacagatggaacagtgaagcgatacaacgatgcaaaaaaagagtggg
 || ||||| |||||||| ||| ||||| ||  |||| | || | ||||||| || |||||||| | |   
@@ -313,6 +321,7 @@ ttntaataanaaaacnttaatntttntnaattntnaanttattacttctnttcttctnantttttttatt
 tcaatgaaaataaaactcttaccggttt
 ||||| |||||||||||||||||  |||
 tcaatnaaaataaaactcttaccnnttt
+# polishing(m=500,d=-500,p=30): 64/64
 798 5 2 F 798 5 2 1116 160 79.95
 aagttaaagaaatatttgtctgttacagatggaacagtgaagcgatacaacgatgcaaaaaaagagtggg
 || ||||| |||||||| ||| ||||| ||  |||| | || | ||||||| || |||||||| | |   
@@ -350,6 +359,7 @@ ttntaataanaaaacnttaatntttntnaattntnaanttattacttctnttcttctnantttttttatt
 tcaatgaaaataaaactcttaccggttt
 ||||| |||||||||||||||||  |||
 tcaatnaaaataaaactcttaccnnttt
+# polishing(m=500,d=-500,p=30): 64/64
 798 5 2 F 798 5 2 1116 160 79.95
 aagttaaagaaatatttgtctgttacagatggaacagtgaagcgatacaacgatgcaaaaaaagagtggg
 || ||||| |||||||| ||| ||||| ||  |||| | || | ||||||| || |||||||| | |   
@@ -387,6 +397,7 @@ ttntaataanaaaacnttaatntttntnaattntnaanttattacttctnttcttctnantttttttatt
 tcaatgaaaataaaactcttaccggttt
 ||||| |||||||||||||||||  |||
 tcaatnaaaataaaactcttaccnnttt
+# polishing(m=500,d=-500,p=30): 64/64
 764 39 107 F 760 6 35 960 188 75.33
 attcacacaattgatttctcttccaacattctacaacgcgaacgaagggtaccttgtgcaggacacagct
 |||  ||  ||  || |||||||    |||||    | | ||  ||   |||||| |  |  ||    ||
@@ -420,7 +431,8 @@ tttgttatacgacaacgttgttgatgcttgtgatgtnatcgttgtttctgctctccgagttttcgtttta
 tttnttatacnacaacnttnttnatncttntnatntaatcnttntttctnctctccnanttttcntttta
 ctttttttttcatgttttgctatccaatgaaaataaaaggtttaaaactctcctttggtttttaaa
 ||||||||||||| |||| ||||| ||| ||| ||||   | |||||||||| ||   |||| |||
-ctttttttttcatnttttnctatc-aatnaaa-taaa-nntataaaactctc-ttnn-tttt-aaa
+ctttttttttcatnttttnctatc-aatnaaa-taaa-nntataaaactctc-tt-nntttt-aaa
+# polishing(m=500,d=-500,p=30): 64/64
 762 6 35 F 762 6 35 993 177 76.77
 attnncannatngatntctcttcnnnnattctnnnncgcgaangaagggtaccttgtgnangacnnnnct
 |||  ||  ||  || |||||||    |||||    | | ||  ||   |||||| |  |  ||    ||
@@ -455,6 +467,7 @@ tttnttatacnacaacnttnttnatncttntnatntaatcnttntttctnctctccnanttttcntttta
 ctttttttttcatgttttgctatcaatgaaataaaggtataaaactctcttggttttaaagt
 ||||||||||||| |||| |||||||| |||||||  ||||||||||||||  ||||||| |
 ctttttttttcatnttttnctatcaatnaaataaanntataaaactctcttnnttttaaant
+# polishing(m=500,d=-500,p=30): 64/64
 764 39 107 F 760 6 35 960 188 75.33
 attcacacaattgatttctcttccaacattctacaacgcgaacgaagggtaccttgtgcaggacacagct
 |||  ||  ||  || |||||||    |||||    | | ||  ||   |||||| |  |  ||    ||
@@ -488,7 +501,8 @@ tttgttatacgacaacgttgttgatgcttgtgatgtnatcgttgtttctgctctccgagttttcgtttta
 tttnttatacnacaacnttnttnatncttntnatntaatcnttntttctnctctccnanttttcntttta
 ctttttttttcatgttttgctatccaatgaaaataaaaggtttaaaactctcctttggtttttaaa
 ||||||||||||| |||| ||||| ||| ||| ||||   | |||||||||| ||   |||| |||
-ctttttttttcatnttttnctatc-aatnaaa-taaa-nntataaaactctc-ttnn-tttt-aaa
+ctttttttttcatnttttnctatc-aatnaaa-taaa-nntataaaactctc-tt-nntttt-aaa
+# polishing(m=500,d=-500,p=30): 64/64
 762 6 35 F 762 6 35 993 177 76.77
 attnncannatngatntctcttcnnnnattctnnnncgcgaangaagggtaccttgtgnangacnnnnct
 |||  ||  ||  || |||||||    |||||    | | ||  ||   |||||| |  |  ||    ||
@@ -523,6 +537,7 @@ tttnttatacnacaacnttnttnatncttntnatntaatcnttntttctnctctccnanttttcntttta
 ctttttttttcatgttttgctatcaatgaaataaaggtataaaactctcttggttttaaagt
 ||||||||||||| |||| |||||||| |||||||  ||||||||||||||  ||||||| |
 ctttttttttcatnttttnctatcaatnaaataaanntataaaactctcttnnttttaaant
+# polishing(m=500,d=-500,p=30): 64/64
 762 6 35 F 762 6 35 993 177 76.77
 attnncannatngatntctcttcnnnnattctnnnncgcgaangaagggtaccttgtgnangacnnnnct
 |||  ||  ||  || |||||||    |||||    | | ||  ||   |||||| |  |  ||    ||
@@ -557,6 +572,7 @@ tttnttatacnacaacnttnttnatncttntnatntaatcnttntttctnctctccnanttttcntttta
 ctttttttttcatgttttgctatcaatgaaataaaggtataaaactctcttggttttaaagt
 ||||||||||||| |||| |||||||| |||||||  ||||||||||||||  ||||||| |
 ctttttttttcatnttttnctatcaatnaaataaanntataaaactctcttnnttttaaant
+# polishing(m=500,d=-500,p=30): 64/64
 764 39 107 F 760 6 35 960 188 75.33
 attcacacaattgatttctcttccaacattctacaacgcgaacgaagggtaccttgtgcaggacacagct
 |||  ||  ||  || |||||||    |||||    | | ||  ||   |||||| |  |  ||    ||
@@ -590,7 +606,8 @@ tttgttatacgacaacgttgttgatgcttgtgatgtnatcgttgtttctgctctccgagttttcgtttta
 tttnttatacnacaacnttnttnatncttntnatntaatcnttntttctnctctccnanttttcntttta
 ctttttttttcatgttttgctatccaatgaaaataaaaggtttaaaactctcctttggtttttaaa
 ||||||||||||| |||| ||||| ||| ||| ||||   | |||||||||| ||   |||| |||
-ctttttttttcatnttttnctatc-aatnaaa-taaa-nntataaaactctc-ttnn-tttt-aaa
+ctttttttttcatnttttnctatc-aatnaaa-taaa-nntataaaactctc-tt-nntttt-aaa
+# polishing(m=500,d=-500,p=30): 64/64
 863 16 2 F 863 16 2 1204 174 79.84
 taataaaaacgacggtggaaatgatcatatttccctttacgcaaggatcgaagagacaaactctcttcca
 |||||||||| ||  |  |||| ||||||||||||||||| |||  ||| || | |||||||||||||||
@@ -631,6 +648,7 @@ tttntctacnancaatccaccttatnaataaaaaaattttaatttnatnaatttnttataanaaaacttt
 aatgtttgttaaatgtgaaattt
 ||| ||| |||||| | ||||||
 aatntttnttaaatntnaaattt
+# polishing(m=500,d=-500,p=30): 64/64
 863 16 2 F 863 16 2 1204 174 79.84
 taataaaaacgacggtggaaatgatcatatttccctttacgcaaggatcgaagagacaaactctcttcca
 |||||||||| ||  |  |||| ||||||||||||||||| |||  ||| || | |||||||||||||||
@@ -671,3 +689,4 @@ tttntctacnancaatccaccttatnaataaaaaaattttaatttnatnaatttnttataanaaaacttt
 aatgtttgttaaatgtgaaattt
 ||| ||| |||||| | ||||||
 aatntttnttaaatntnaaattt
+# polishing(m=500,d=-500,p=30): 64/64
