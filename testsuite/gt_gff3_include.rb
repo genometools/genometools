@@ -1560,8 +1560,15 @@ end
 if $gttestdata then
   large_gff3_test("maker", "maker/maker.gff3")
   large_gff3_test("Saccharomyces cerevisiae", "sgd/saccharomyces_cerevisiae.gff")
-  large_gff3_test("Drosophila melanogaster",
-                  "Drosophila_melanogaster.BDGP5.4.50.gff3")
+
+  Name "gt gff3 Drosophila melanogaster BDGP"
+  Keywords "gt_gff3"
+  Test do
+    run_test "#{$bin}gt gff3 -tidy -sort " +
+             "#{$gttestdata}gff3/Drosophila_melanogaster.BDGP5.4.50.gff3",
+             :maxtime => 3600
+    run      "diff #{last_stdout} #{$gttestdata}gff3/Drosophila_melanogaster.BDGP5.4.50.gff3"
+  end
 
   Name "gt gff3 TAIR10"
   Keywords "gt_gff3"
