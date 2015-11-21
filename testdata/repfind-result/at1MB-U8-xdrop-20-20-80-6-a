@@ -1,7 +1,3 @@
-31 125 26 F 30 0 5965 49 4 86.89
-ctcttcttcttcttcttcttctccttcctct
-|||||||||||||||||||||  || | |||
-ctcttcttcttcttcttcttcaact-catct
 23 859 207 F 23 0 17268 46 0 100.00
 catatatatatatatatatatat
 |||||||||||||||||||||||
@@ -10,6 +6,7 @@ catatatatatatatatatatat
 at-atatatatatatatatatata
 || |||||||||||||||||||||
 atcatatatatatatatatatata
+# polishing(m=400,d=-600,p=30): 24/24, seed_on_end
 20 859 208 F 20 0 17271 40 0 100.00
 atatatatatatatatatat
 ||||||||||||||||||||
@@ -18,10 +15,7 @@ atatatatatatatatatat
 tcatcatcatcatcatcatcatcatacat
 |||||||||||||||||||||||||| ||
 tcatcatcatcatcatcatcatcatatat
-33 561 411 F 33 0 71279 57 3 90.91
-cct-atcatcatcatcatcatcatcatcatacat
-||| ||||||||||||||||||||||| ||| ||
-cctcatcatcatcatcatcatcatcat-atatat
+# polishing(m=400,d=-600,p=30): 29/29
 333 1265 0 F 330 0 72423 612 17 94.87
 ccttagangg-tgggaaattgcatgagtttggcacatcccttnttctnncggatttnggatcnnagtatg
 ||||||| || ||||||| ||||||||| ||||||||||||| ||||  ||||||| ||| |  ||||||
@@ -38,6 +32,7 @@ gaactatgaaacatatataaagcgcacacatatatttatgcatatcaagcttttggtgattatggtattg
 atagagtcaaattaagctcggtgactatggtattaataagagtactatttcctt
 ||||||||||||||||||||||||||||||||||||||||||||||||||||||
 atagagtcaaattaagctcggtgactatggtattaataagagtactatttcctt
+# polishing(m=400,d=-600,p=30): 64/64, seed_on_end
 78 859 0 F 81 0 72588 129 10 87.42
 gtgcttnttttccttatgatccagctcttccacgcncncatgaactatgaaacatatataangcgcncnc
 |||||| |||||||||||||||||||||||||||| |  |||||||||||||||||||||| |||| | |
@@ -45,6 +40,7 @@ gtgcttcttttccttatgatccagctcttccacgcacaaatgaactatgaaacatatataaagcgcacac
 at-t-tt-atg
 || | || |||
 atatatttatg
+# polishing(m=400,d=-600,p=30): 64/64, seed_on_start
 78 859 0 F 81 0 72588 129 10 87.42
 gtgcttnttttccttatgatccagctcttccacgcncncatgaactatgaaacatatataangcgcncnc
 |||||| |||||||||||||||||||||||||||| |  |||||||||||||||||||||| |||| | |
@@ -52,6 +48,7 @@ gtgcttcttttccttatgatccagctcttccacgcacaaatgaactatgaaacatatataaagcgcacac
 at-t-tt-atg
 || | || |||
 atatatttatg
+# polishing(m=400,d=-600,p=30): 64/64, seed_on_end
 135 859 84 F 135 0 72651 258 4 97.04
 cgcncacatatatttatgcatatcaagcttttggtgattatggtattgatagagtcaaattaagctcggt
 ||| ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
@@ -59,6 +56,7 @@ cgcacacatatatttatgcatatcaagcttttggtgattatggtattgatagagtcaaattaagctcggt
 gactatggtattaataagagtactatttccttatctctttgtgaactaaganncatatatatata
 |||||||||||||||||||||||||||||||| ||||||||||||||||||  ||||||||||||
 gactatggtattaataagagtactatttccttttctctttgtgaactaagaaacatatatatata
+# polishing(m=400,d=-600,p=30): 64/64, seed_on_start, seed_on_end
 167 859 84 F 155 0 72651 271 17 89.44
 cgcncacatatatttatgcatatcaagcttttggtgattatggtattgatagagtcaaattaagctcggt
 ||| ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
@@ -69,6 +67,7 @@ gactatggtattaataagagtactatttccttttctc-tt-tg---t--ga-ac-ta-aga-a-acatat
 atatataaagcaaacatgttccagaat
 |||||||||||||||||||||||||||
 atatataaagcaaacatgttccagaat
+# polishing(m=400,d=-600,p=30): 64/64, seed_on_end
 38 1214 205 F 38 0 77815 76 0 100.00
 atatatatatatatatatatatatatatatatatatgt
 ||||||||||||||||||||||||||||||||||||||
@@ -77,78 +76,71 @@ atatatatatatatatatatatatatatatatatatgt
 at-atatatatatatatatatatatatatatatatat
 || ||||||||||||||||||||||||||||||||||
 ataatatatatatatatatatatatatatatatatat
+# polishing(m=400,d=-600,p=30): 37/37
 36 1214 205 F 35 0 77812 68 1 97.18
 atatatatatatatatatatatatatatatatatat
 ||| ||||||||||||||||||||||||||||||||
 ata-atatatatatatatatatatatatatatatat
+# polishing(m=400,d=-600,p=30): 36/36
 34 1214 207 F 33 0 77812 64 1 97.01
 atatatatatatatatatatatatatatatatat
 ||| ||||||||||||||||||||||||||||||
 ata-atatatatatatatatatatatatatatat
+# polishing(m=400,d=-600,p=30): 34/34
 32 1214 209 F 31 0 77812 60 1 96.83
 atatatatatatatatatatatatatatatat
 ||| ||||||||||||||||||||||||||||
 ata-atatatatatatatatatatatatatat
+# polishing(m=400,d=-600,p=30): 32/32
 49 1214 206 F 48 0 77808 70 9 81.44
 tatatatatatatatatatatatatatatatatatgtctct-tctatacc
 || | ||| |||||||||||||||||||||||||| | | | | | ||||
 ta-agata-atatatatatatatatatatatatatatatatatatgtacc
+# polishing(m=400,d=-600,p=30): 50/50
 33 1214 208 F 31 0 77808 55 3 90.62
 tatatatatatatatatatatatatatatatat
 || | ||| ||||||||||||||||||||||||
 ta-agata-atatatatatatatatatatatat
+# polishing(m=400,d=-600,p=30): 33/33, seed_on_end
 43 1214 210 F 42 0 77808 61 8 81.18
 tatatatatatatatatatatatatatatatgtctct-tctata
 || | ||| |||||||||||||||||||||| | | | | ||||
 ta-agata-atatatatatatatatatatatatatatatatata
+# polishing(m=400,d=-600,p=30): 44/44, seed_on_end
 41 1214 212 F 40 0 77808 57 8 80.25
 tatatatatatatatatatatatatatatgtctct-tctata
 || | ||| |||||||||||||||||||| | | | | ||||
 ta-agata-atatatatatatatatatatatatatatatata
+# polishing(m=400,d=-600,p=30): 42/42, seed_on_end
 34 1214 205 F 34 0 77817 68 0 100.00
 atatatatatatatatatatatatatatatatat
 ||||||||||||||||||||||||||||||||||
 atatatatatatatatatatatatatatatatat
-36 1524 237 F 34 0 77819 58 4 88.57
-atatatatatatatatatatagtctttatataatgt
-||||||||||||||||||||| | | |||||| |||
-atatatatatatatatatata-tatatatata-tgt
 35 1214 205 F 35 0 77819 67 1 97.14
 atatatatatatatatatatatatatatatatata
 |||||||||||||||||||||||||||||||| ||
 atatatatatatatatatatatatatatatatgta
-31 1524 237 F 30 0 77821 52 3 90.16
-atatatatatatatatatatagtctttatat
-||||||||||||||||||||| | | |||||
-atatatatatatatatatata-tatatatat
+# polishing(m=400,d=-600,p=30): 35/35
 43 859 208 F 39 0 77821 58 8 80.49
 atatatatatatatatatatataaagcaaacatgttccagaat
 ||||||||||||||||||||||| |  | |  ||| ||| |||
 atatatatatatatatatatatata-tata--tgtacca-aat
+# polishing(m=400,d=-600,p=30): 43/43
 33 1214 205 F 33 0 77821 63 1 96.97
 atatatatatatatatatatatatatatatata
 |||||||||||||||||||||||||||||| ||
 atatatatatatatatatatatatatatatgta
+# polishing(m=400,d=-600,p=30): 33/33
 31 1214 205 F 31 0 77823 59 1 96.77
 atatatatatatatatatatatatatatata
 |||||||||||||||||||||||||||| ||
 atatatatatatatatatatatatatatgta
+# polishing(m=400,d=-600,p=30): 31/31
 29 1214 205 F 29 0 77825 55 1 96.55
 atatatatatatatatatatatatatata
 |||||||||||||||||||||||||| ||
 atatatatatatatatatatatatatgta
-27 1214 205 F 27 0 77827 51 1 96.30
-atatatatatatatatatatatatata
-|||||||||||||||||||||||| ||
-atatatatatatatatatatatatgta
-25 1214 205 F 25 0 77829 47 1 96.00
-atatatatatatatatatatatata
-|||||||||||||||||||||| ||
-atatatatatatatatatatatgta
-23 1214 205 F 23 0 77831 43 1 95.65
-atatatatatatatatatatata
-|||||||||||||||||||| ||
-atatatatatatatatatatgta
+# polishing(m=400,d=-600,p=30): 29/29
 113 1361 1 F 108 0 105325 158 21 81.00
 ttccaantcggggngttttacaanttccatancgggtacttaagntttggnggtncatgccanttaanct
 || ||| ||  || | | |||||  | |||| ||||||| ||||  |||| ||| |||| || |||| ||
@@ -156,6 +148,7 @@ ttacaaatca-ggag-tatacaag-tacataacgggtac-taag-attggaggt-catg-cagttaagct
 cattggctggggaacttctgatgacggcgaagattattgg-t-tg
 |||||||||||||||||||||||||||||||||||||||| | ||
 cattggctggggaacttctgatgacggcgaagattattgggtatg
+# polishing(m=400,d=-600,p=30): 64/64, seed_on_end
 222 1361 148 F 222 0 105629 435 3 98.65
 gatggttacttcaagatcaggngaggaacgaacgaatgtggcattgaacagagtnttgtagctggtttac
 ||||||||||||||||||||| |||||||||||||||||||||||||||||||| |||||||||||||||
@@ -169,6 +162,7 @@ acgatgtgtccctacttctgtaatatatcatttgcaactgtgttgtaagtttaatataccattgaaagaa
 tcaccttcaatc
 ||||||||||||
 tcaccttcaatc
+# polishing(m=400,d=-600,p=30): 64/64, seed_on_start
 222 1361 148 F 222 0 105629 435 3 98.65
 gatggttacttcaagatcaggngaggaacgaacgaatgtggcattgaacagagtnttgtagctggtttac
 ||||||||||||||||||||| |||||||||||||||||||||||||||||||| |||||||||||||||
@@ -182,6 +176,7 @@ acgatgtgtccctacttctgtaatatatcatttgcaactgtgttgtaagtttaatataccattgaaagaa
 tcaccttcaatc
 ||||||||||||
 tcaccttcaatc
+# polishing(m=400,d=-600,p=30): 64/64, seed_on_start
 222 1361 148 F 222 0 105629 435 3 98.65
 gatggttacttcaagatcaggngaggaacgaacgaatgtggcattgaacagagtnttgtagctggtttac
 ||||||||||||||||||||| |||||||||||||||||||||||||||||||| |||||||||||||||
@@ -195,6 +190,7 @@ acgatgtgtccctacttctgtaatatatcatttgcaactgtgttgtaagtttaatataccattgaaagaa
 tcaccttcaatc
 ||||||||||||
 tcaccttcaatc
+# polishing(m=400,d=-600,p=30): 64/64
 222 1361 148 F 222 0 105629 435 3 98.65
 gatggttacttcaagatcaggngaggaacgaacgaatgtggcattgaacagagtnttgtagctggtttac
 ||||||||||||||||||||| |||||||||||||||||||||||||||||||| |||||||||||||||
@@ -208,3 +204,4 @@ acgatgtgtccctacttctgtaatatatcatttgcaactgtgttgtaagtttaatataccattgaaagaa
 tcaccttcaatc
 ||||||||||||
 tcaccttcaatc
+# polishing(m=400,d=-600,p=30): 64/64, seed_on_end

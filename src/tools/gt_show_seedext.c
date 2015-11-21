@@ -41,12 +41,22 @@ typedef struct {
   GtStr *matchfilename;
 } GtShowSeedextArguments;
 
-typedef struct {
-  GtUword alen, aseq, apos;
-  GtReadmode readmode;
-  GtUword blen, bseq, bpos, score, distance, seedpos1, seedpos2, seedlen,
-          query_totallength, db_seqstartpos;
-  double identity;
+typedef struct
+{
+  GtUword dblen,
+          querylen,
+          /* dbstart missing */
+          querystart,
+          distance,
+          dbseqnum,
+          dbstart_relative,
+          /* querystart_fwdstrand missing */
+          seedpos1,
+          seedpos2,
+          seedlen;
+  uint64_t queryseqnum;
+  GtWord score;
+  GtReadmode query_readmode;
 } GtShowSeedextCoords;
 
 static void* gt_show_seedext_arguments_new(void)
@@ -145,13 +155,14 @@ struct GtSeedextendMatchIterator
   GtStr *ii, *qii;
   bool mirror, bias_parameters;
   GtEncseq *aencseq, *bencseq;
-  GtUword errorpercentage, history_size;
+  GtUword errorpercentage, history_size, query_totallength;
   const char *matchfilename;
   GtStr *line_buffer;
   uint64_t linenum;
   bool has_seedline;
   GtShowSeedextCoords coords;
   FILE *inputfileptr;
+  GtQuerymatch *querymatchptr;
 };
 
 typedef struct GtSeedextendMatchIterator GtSeedextendMatchIterator;
@@ -167,6 +178,7 @@ void gt_seedextend_match_iterator_delete(GtSeedextendMatchIterator *semi)
   gt_encseq_delete(semi->aencseq);
   gt_encseq_delete(semi->bencseq);
   gt_str_delete(semi->line_buffer);
+  gt_querymatch_delete(semi->querymatchptr);
   if (semi->inputfileptr != NULL)
   {
     fclose(semi->inputfileptr);
@@ -189,12 +201,14 @@ GtSeedextendMatchIterator *gt_seedextend_match_iterator_new(
   semi->mirror = false;
   semi->bias_parameters = false;
   semi->aencseq = semi->bencseq = NULL;
+  semi->query_totallength = 0;
   semi->errorpercentage = 0;
   semi->history_size = 0;
   semi->matchfilename = gt_str_get(matchfilename);
   semi->has_seedline = false;
   semi->line_buffer = NULL;
   semi->inputfileptr = NULL;
+  semi->querymatchptr = gt_querymatch_new();
   options_line_inputfileptr = fopen(semi->matchfilename, "r");
   if (options_line_inputfileptr == NULL) {
     gt_error_set(err, "file %s does not exist", semi->matchfilename);
@@ -329,6 +343,8 @@ GtSeedextendMatchIterator *gt_seedextend_match_iterator_new(
   gt_encseq_loader_delete(encseq_loader);
   if (!had_err)
   {
+    gt_assert(semi->bencseq != NULL);
+    semi->query_totallength = gt_encseq_total_length(semi->bencseq);
     semi->line_buffer = gt_str_new();
     semi->linenum = 0;
     semi->inputfileptr = fopen(semi->matchfilename, "rb");
@@ -356,37 +372,42 @@ static void gt_show_seed_extend_plain(LinspaceManagement *linspace_spacemanager,
                                       GtUchar *asequence,
                                       const GtEncseq *bencseq,
                                       GtUchar *bsequence,
-                                      const GtShowSeedextCoords *coords)
+                                      const GtQuerymatch *querymatchptr)
 {
   GtUword edist;
-  const GtUword apos_ab = coords->db_seqstartpos + coords->apos;
-  const GtUword bpos_ab = gt_encseq_seqstartpos(bencseq, coords->bseq) +
-                          coords->bpos;
+  GtReadmode query_readmode = gt_querymatch_query_readmode(querymatchptr);
+  const GtUword distance = gt_querymatch_distance(querymatchptr),
+                dblen = gt_querymatch_dblen(querymatchptr),
+                queryseqnum = gt_querymatch_queryseqnum(querymatchptr),
+                querystart = gt_querymatch_querystart(querymatchptr),
+                querylen = gt_querymatch_querylen(querymatchptr);
 
-  gt_encseq_extract_encoded(aencseq, asequence, apos_ab,
-                            apos_ab + coords->alen - 1);
+  const GtUword apos_ab = gt_querymatch_dbstart(querymatchptr);
+  const GtUword bpos_ab = gt_encseq_seqstartpos(bencseq, queryseqnum) +
+                          querystart;
+
+  gt_encseq_extract_encoded(aencseq, asequence, apos_ab, apos_ab + dblen - 1);
   gt_encseq_extract_encoded(bencseq, bsequence, bpos_ab,
-                            bpos_ab + coords->blen - 1);
-  if (coords->readmode != GT_READMODE_FORWARD)
+                            bpos_ab + querylen - 1);
+  if (query_readmode != GT_READMODE_FORWARD)
   {
-    gt_assert(coords->readmode == GT_READMODE_REVCOMPL);
-    gt_inplace_reverse_complement(bsequence,coords->blen);
+    gt_assert(query_readmode == GT_READMODE_REVCOMPL);
+    gt_inplace_reverse_complement(bsequence,querylen);
   }
   edist = gt_computelinearspace_generic(linspace_spacemanager,
                                         linspace_scorehandler,
                                         alignment,
                                         asequence,
                                         0,
-                                        coords->alen,
+                                        dblen,
                                         bsequence,
                                         0,
-                                        coords->blen);
-  if (edist < coords->distance)
+                                        querylen);
+  if (edist < distance)
   {
-    printf("# edist=" GT_WU " (smaller by " GT_WU ")\n",edist,
-            coords->distance - edist);
+    printf("# edist=" GT_WU " (smaller by " GT_WU ")\n",edist,distance - edist);
   }
-  gt_assert(edist <= coords->distance);
+  gt_assert(edist <= distance);
   gt_alignment_show_generic(alignment_show_buffer,
                             false,
                             alignment,
@@ -400,55 +421,36 @@ static void gt_show_seed_extend_plain(LinspaceManagement *linspace_spacemanager,
 static void gt_show_seed_extend_encseq(GtQuerymatch *querymatchptr,
                                        const GtEncseq *aencseq,
                                        const GtEncseq *bencseq,
+                                       GtUword query_totallength,
                                        const GtShowSeedextCoords *coords)
 {
   GtSeqorEncseq bseqorencseq;
 
   bseqorencseq.seq = NULL;
   bseqorencseq.encseq = bencseq;
-  gt_querymatch_query_readmode_set(querymatchptr,coords->readmode);
-  if (gt_querymatch_complete(querymatchptr,
-                             coords->alen,
-                             coords->db_seqstartpos + coords->apos,
-                             coords->aseq,
-                             coords->apos,
-                             coords->score,
-                             coords->distance,
-                             aencseq == bencseq ? true : false,
-                             (uint64_t) coords->bseq,
-                             coords->blen,
-                             coords->bpos,
-                             aencseq,
-                             &bseqorencseq,
-                             coords->query_totallength,
-                             coords->seedpos1,
-                             coords->seedpos2,
-                             coords->seedlen,
-                             false))
+  gt_querymatch_query_readmode_set(querymatchptr,coords->query_readmode);
+  if (gt_querymatch_process(querymatchptr,
+                            coords->seedpos1,
+                            coords->seedpos2,
+                            coords->seedlen,
+                            aencseq,
+                            &bseqorencseq,
+                            query_totallength,
+                            false) != 0)
   {
     gt_querymatch_prettyprint(querymatchptr);
   }
-}
-
-static GtReadmode gt_readmode_character_code_parse(char direction)
-{
-  if (direction == 'F')
-  {
-    return GT_READMODE_FORWARD;
-  }
-  gt_assert(direction == 'R');
-  return GT_READMODE_REVERSE;
 }
 
 int gt_seedextend_match_iterator_next(GtSeedextendMatchIterator *semi,
                                       GtError *err)
 {
   int had_err = 0;
+  bool selfmatch = semi->aencseq == semi->bencseq ? true : false;
 
-  semi->has_seedline = false;
   while (!had_err)
   {
-    const char *line_ptr = gt_str_get(semi->line_buffer);
+    const char *line_ptr;
 
     semi->linenum++;
     if (gt_str_read_next_line(semi->line_buffer, semi->inputfileptr) == EOF)
@@ -456,7 +458,9 @@ int gt_seedextend_match_iterator_next(GtSeedextendMatchIterator *semi,
       gt_str_reset(semi->line_buffer);
       return 0;
     }
+    line_ptr = gt_str_get(semi->line_buffer);
     /* ignore comment lines; but print seeds if -seed-display is set */
+    gt_assert(line_ptr != NULL);
     if (line_ptr[0] != '\n')
     {
       if (line_ptr[0] == '#')
@@ -483,25 +487,12 @@ int gt_seedextend_match_iterator_next(GtSeedextendMatchIterator *semi,
         }
       } else
       {
-        char direction;
-        /* parse alignment string */
-        int num = sscanf(line_ptr,
-                         GT_WU " " GT_WU " " GT_WU " %c " GT_WU " " GT_WU " "
-                         GT_WU " " GT_WU " " GT_WU " %lf",
-                         &semi->coords.alen, &semi->coords.aseq,
-                         &semi->coords.apos,
-                         &direction, &semi->coords.blen, &semi->coords.bseq,
-                         &semi->coords.bpos, &semi->coords.score,
-                         &semi->coords.distance,
-                         &semi->coords.identity);
-        if (num == 10)
+        if (gt_querymatch_read_line(semi->querymatchptr,
+                                    line_ptr,
+                                    selfmatch,
+                                    semi->query_totallength,
+                                    semi->aencseq))
         {
-          semi->coords.db_seqstartpos
-            = gt_encseq_seqstartpos(semi->aencseq, semi->coords.aseq);
-          semi->coords.query_totallength
-            = gt_encseq_total_length(semi->bencseq);
-          semi->coords.readmode = gt_readmode_character_code_parse(direction);
-          /* get sequences */
           gt_str_reset(semi->line_buffer);
           return 1;
         }
@@ -554,6 +545,13 @@ bool gt_seedextend_match_iterator_has_seedline(
   return semi->has_seedline;
 }
 
+GtQuerymatch *gt_seedextend_match_iterator_querymatch_ptr(
+                        GtSeedextendMatchIterator *semi)
+{
+  gt_assert(semi != NULL);
+  return semi->querymatchptr;
+}
+
 static int gt_show_seedext_runner(GT_UNUSED int argc,
                                   GT_UNUSED const char **argv,
                                   GT_UNUSED int parsed_args,
@@ -564,15 +562,6 @@ static int gt_show_seedext_runner(GT_UNUSED int argc,
   GtUword alignmentwidth;
   GtShowSeedextArguments *arguments = tool_arguments;
   GtSeedextendMatchIterator *semi;
-  GtUchar *a_sequence = NULL, *b_sequence = NULL;
-  GtUword a_allocated = 0, b_allocated = 0;
-  LinspaceManagement *linspace_spacemanager = NULL;
-  GtScoreHandler *linspace_scorehandler = NULL;
-  GtUchar *alignment_show_buffer = NULL;
-  GtAlignment *alignment = NULL;
-  const GtUchar *characters;
-  double matchscore_bias = GT_DEFAULT_MATCHSCORE_BIAS;
-  GtUchar wildcardshow;
 
   gt_error_check(err);
   gt_assert(arguments != NULL);
@@ -592,14 +581,19 @@ static int gt_show_seedext_runner(GT_UNUSED int argc,
     GtGreedyextendmatchinfo *greedyextendmatchinfo = NULL;
     Polishing_info *pol_info = NULL;
     GtQuerymatchoutoptions *querymatchoutoptions = NULL;
-    GtQuerymatch *querymatchptr = NULL;
+    const GtUchar *characters = gt_encseq_alphabetcharacters(aencseq);
+    const GtUchar wildcardshow = gt_encseq_alphabetwildcardshow(aencseq);
+    GtUchar *alignment_show_buffer = gt_alignment_buffer_new(alignmentwidth);
+    LinspaceManagement *linspace_spacemanager = gt_linspaceManagement_new();
+    GtScoreHandler *linspace_scorehandler = gt_scorehandler_new(0,1,0,1);;
+    GtAlignment *alignment = gt_alignment_new();
+    const GtUword query_totallength = gt_encseq_total_length(bencseq);
+    GtUchar *a_sequence = NULL, *b_sequence = NULL;
+    GtUword a_allocated = 0, b_allocated = 0;
+    double matchscore_bias = GT_DEFAULT_MATCHSCORE_BIAS;
+    GtQuerymatch *querymatchptr
+      = gt_seedextend_match_iterator_querymatch_ptr(semi);
 
-    linspace_spacemanager = gt_linspaceManagement_new();
-    linspace_scorehandler = gt_scorehandler_new(0,1,0,1);;
-    alignment_show_buffer = gt_alignment_buffer_new(alignmentwidth);
-    alignment = gt_alignment_new();
-    characters = gt_encseq_alphabetcharacters(aencseq);
-    wildcardshow = gt_encseq_alphabetwildcardshow(aencseq);
     if (!arguments->relax_polish)
     {
       if (gt_seedextend_match_iterator_bias_parameters(semi))
@@ -618,9 +612,11 @@ static int gt_show_seedext_runner(GT_UNUSED int argc,
                           gt_seedextend_match_iterator_history_size(semi),
                           !arguments->relax_polish,
                           arguments->seed_display);
-    querymatchptr = gt_querymatch_new(querymatchoutoptions,
-                                      arguments->seed_display);
-
+    gt_querymatch_outoptions_set(querymatchptr,querymatchoutoptions);
+    if (arguments->seed_display)
+    {
+      gt_querymatch_seed_display_set(querymatchptr);
+    }
     if (arguments->seed_extend)
     {
       greedyextendmatchinfo
@@ -664,7 +660,7 @@ static int gt_show_seedext_runner(GT_UNUSED int argc,
                                   semi->coords.seedpos1,
                                   semi->coords.seedpos2,
                                   err);
-            if (!had_err)
+            if (had_err)
             {
               break;
             }
@@ -674,22 +670,26 @@ static int gt_show_seedext_runner(GT_UNUSED int argc,
           }
         } else
         {
-          gt_show_seed_extend_encseq(querymatchptr, aencseq, bencseq,
+          gt_show_seed_extend_encseq(querymatchptr,
+                                     aencseq,
+                                     bencseq,
+                                     query_totallength,
                                      &semi->coords);
         }
       } else
       {
-        if (semi->coords.alen >= a_allocated)
+        const GtUword dblen = gt_querymatch_dblen(querymatchptr),
+                      querylen = gt_querymatch_querylen(querymatchptr);
+
+        if (dblen >= a_allocated)
         {
-          a_sequence = gt_realloc(a_sequence,
-                                  sizeof *a_sequence * semi->coords.alen);
-          a_allocated = semi->coords.alen;
+          a_sequence = gt_realloc(a_sequence, sizeof *a_sequence * dblen);
+          a_allocated = dblen;
         }
-        if (semi->coords.blen >= b_allocated)
+        if (querylen >= b_allocated)
         {
-          b_sequence = gt_realloc(b_sequence,
-                                  sizeof *b_sequence * semi->coords.blen);
-          b_allocated = semi->coords.blen;
+          b_sequence = gt_realloc(b_sequence,sizeof *b_sequence * querylen);
+          b_allocated = querylen;
         }
         gt_show_seed_extend_plain(linspace_spacemanager,
                                   linspace_scorehandler,
@@ -702,21 +702,20 @@ static int gt_show_seedext_runner(GT_UNUSED int argc,
                                   a_sequence,
                                   bencseq,
                                   b_sequence,
-                                  &semi->coords);
+                                  querymatchptr);
       }
     }
     polishing_info_delete(pol_info);
     gt_greedy_extend_matchinfo_delete(greedyextendmatchinfo);
     gt_querymatchoutoptions_delete(querymatchoutoptions);
-    gt_querymatch_delete(querymatchptr);
+    gt_free(alignment_show_buffer);
+    gt_scorehandler_delete(linspace_scorehandler);
+    gt_linspaceManagement_delete(linspace_spacemanager);
+    gt_free(a_sequence);
+    gt_free(b_sequence);
+    gt_alignment_delete(alignment);
   }
   gt_seedextend_match_iterator_delete(semi);
-  gt_linspaceManagement_delete(linspace_spacemanager);
-  gt_scorehandler_delete(linspace_scorehandler);
-  gt_free(alignment_show_buffer);
-  gt_free(a_sequence);
-  gt_free(b_sequence);
-  gt_alignment_delete(alignment);
   return had_err;
 }
 
