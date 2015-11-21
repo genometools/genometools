@@ -241,7 +241,6 @@ static int gt_show_seedext_runner(GT_UNUSED int argc,
   {
     const GtEncseq *aencseq = gt_seedextend_match_iterator_aencseq(semi),
                    *bencseq = gt_seedextend_match_iterator_bencseq(semi);
-    GtProcessinfo_and_querymatchspaceptr processinfo_and_querymatchspaceptr;
     GtGreedyextendmatchinfo *greedyextendmatchinfo = NULL;
     Polishing_info *pol_info = NULL;
     GtQuerymatchoutoptions *querymatchoutoptions = NULL;
@@ -255,8 +254,7 @@ static int gt_show_seedext_runner(GT_UNUSED int argc,
     GtUchar *a_sequence = NULL, *b_sequence = NULL;
     GtUword a_allocated = 0, b_allocated = 0;
     double matchscore_bias = GT_DEFAULT_MATCHSCORE_BIAS;
-    GtQuerymatch *querymatchptr
-      = gt_seedextend_match_iterator_querymatch_ptr(semi);
+    GtProcessinfo_and_querymatchspaceptr processinfo_and_querymatchspaceptr;
 
     if (!arguments->relax_polish)
     {
@@ -269,6 +267,10 @@ static int gt_show_seedext_runner(GT_UNUSED int argc,
                           matchscore_bias,
                           gt_seedextend_match_iterator_history_size(semi));
     }
+    if (arguments->seed_display)
+    {
+      gt_seedextend_match_iterator_seed_display_set(semi);
+    }
     querymatchoutoptions = gt_querymatchoutoptions_new(alignmentwidth);
     gt_querymatchoutoptions_for_align_only(querymatchoutoptions,
                           gt_seedextend_match_iterator_errorpercentage(semi),
@@ -276,11 +278,7 @@ static int gt_show_seedext_runner(GT_UNUSED int argc,
                           gt_seedextend_match_iterator_history_size(semi),
                           !arguments->relax_polish,
                           arguments->seed_display);
-    gt_querymatch_outoptions_set(querymatchptr,querymatchoutoptions);
-    if (arguments->seed_display)
-    {
-      gt_querymatch_seed_display_set(querymatchptr);
-    }
+    gt_seedextend_match_iterator_outoptions_set(semi,querymatchoutoptions);
     if (arguments->seed_extend)
     {
       greedyextendmatchinfo
@@ -293,22 +291,16 @@ static int gt_show_seedext_runner(GT_UNUSED int argc,
                               100,
                               pol_info);
     }
-    processinfo_and_querymatchspaceptr.processinfo = greedyextendmatchinfo;
-    processinfo_and_querymatchspaceptr.querymatchspaceptr = querymatchptr;
     if (pol_info != NULL)
     {
       gt_alignment_polished_ends(alignment,pol_info,false);
     }
+    processinfo_and_querymatchspaceptr.processinfo = greedyextendmatchinfo;
     while (true)
     {
-      int ret = gt_seedextend_match_iterator_next(semi,err);
-      if (ret == 0)
+      GtQuerymatch *querymatchptr = gt_seedextend_match_iterator_next(semi);
+      if (querymatchptr == NULL)
       {
-        break;
-      }
-      if (ret < 0)
-      {
-        had_err = -1;
         break;
       }
       if (gt_seedextend_match_iterator_has_seedline(semi))
@@ -321,6 +313,8 @@ static int gt_show_seedext_runner(GT_UNUSED int argc,
         {
           if (aencseq == bencseq)
           {
+            processinfo_and_querymatchspaceptr.querymatchspaceptr
+              = querymatchptr;
             had_err = gt_greedy_extend_selfmatch_with_output(
                                   &processinfo_and_querymatchspaceptr,
                                   aencseq,
