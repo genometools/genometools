@@ -604,13 +604,7 @@ static int gt_show_seedext_runner(GT_UNUSED int argc,
     {
       if (gt_seedextend_match_iterator_bias_parameters(semi))
       {
-        GtUword atcount, gccount;
-
-        gt_greedy_at_gc_count(&atcount,&gccount,aencseq);
-        if (atcount + gccount > 0) /* for DNA sequence */
-        {
-          matchscore_bias = gt_greedy_dna_sequence_bias_get(atcount,gccount);
-        }
+        matchscore_bias = gt_greedy_dna_sequence_bias_get(aencseq);
       }
       pol_info = polishing_info_new_with_bias(
                           gt_seedextend_match_iterator_errorpercentage(semi),

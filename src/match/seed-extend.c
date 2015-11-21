@@ -377,8 +377,8 @@ struct GtGreedyextendmatchinfo
   GtAllocatedMemory usequence_cache, vsequence_cache, frontspace_reservoir;
 };
 
-void gt_greedy_at_gc_count(GtUword *atcount,GtUword *gccount,
-                           const GtEncseq *encseq)
+static void gt_greedy_at_gc_count(GtUword *atcount,GtUword *gccount,
+                                  const GtEncseq *encseq)
 {
   const GtAlphabet *alpha = gt_encseq_alphabet(encseq);
 
@@ -398,16 +398,22 @@ void gt_greedy_at_gc_count(GtUword *atcount,GtUword *gccount,
 static const double bias_factor[] = {.690, .690, .690, .690, .780,
                                      .850, .900, .933, .966, 1.000};
 
-double gt_greedy_dna_sequence_bias_get(GtUword atcount,GtUword cgcount)
+double gt_greedy_dna_sequence_bias_get(const GtEncseq *encseq)
 {
-  double ratio;
-  int bias_index;
+  GtUword atcount, gccount;
 
-  gt_assert(atcount + cgcount > 0);
-  ratio = (double) MIN(atcount, cgcount) / (atcount + cgcount);
-  bias_index = (int) MAX(0.0, (ratio + 0.025) * 20.0 - 1.0);
-  gt_assert(bias_index < sizeof bias_factor/sizeof bias_factor[0]);
-  return bias_factor[bias_index];
+  gt_greedy_at_gc_count(&atcount,&gccount,encseq);
+  if (atcount + gccount > 0) /* for DNA sequence */
+  {
+    double ratio;
+    int bias_index;
+
+    ratio = (double) MIN(atcount, gccount) / (atcount + gccount);
+    bias_index = (int) MAX(0.0, (ratio + 0.025) * 20.0 - 1.0);
+    gt_assert(bias_index < sizeof bias_factor/sizeof bias_factor[0]);
+    return bias_factor[bias_index];
+  }
+  return GT_DEFAULT_MATCHSCORE_BIAS;
 }
 
 void gt_greedy_show_matchscore_table(void)

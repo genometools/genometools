@@ -386,9 +386,6 @@ void gt_greedy_extend_querymatch_with_output(void *info,
                                              const GtSeqorEncseq *query,
                                              GtUword query_totallength);
 
-void gt_greedy_at_gc_count(GtUword *atcount,GtUword *gccount,
-                           const GtEncseq *encseq);
-
-double gt_greedy_dna_sequence_bias_get(GtUword atcount,GtUword cgcount);
+double gt_greedy_dna_sequence_bias_get(const GtEncseq *encseq);
 
 #endif

@@ -558,13 +558,7 @@ static int gt_seed_extend_runner(GT_UNUSED int argc,
     /* Use bias dependent parameters, adapted from E. Myers' DALIGNER */
     if (!had_err && arguments->bias_parameters)
     {
-      GtUword atcount, gccount;
-
-      gt_greedy_at_gc_count(&atcount,&gccount,aencseq);
-      if (atcount + gccount > 0) /* for DNA sequence */
-      {
-        matchscore_bias = gt_greedy_dna_sequence_bias_get(atcount,gccount);
-      }
+      matchscore_bias = gt_greedy_dna_sequence_bias_get(aencseq);
       arguments->se_maxalilendiff = 30;
       arguments->se_perc_match_hist
         = (GtUword) (100.0 - errorpercentage * matchscore_bias);
