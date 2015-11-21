@@ -241,21 +241,18 @@ GtSeedextendMatchIterator *gt_seedextend_match_iterator_new(
   return semi;
 }
 
-int gt_seedextend_match_iterator_next(GtSeedextendMatchIterator *semi,
-                                      GtError *err)
+GtQuerymatch *gt_seedextend_match_iterator_next(GtSeedextendMatchIterator *semi)
 {
-  int had_err = 0;
   bool selfmatch = semi->aencseq == semi->bencseq ? true : false;
 
-  while (!had_err)
+  while (true)
   {
     const char *line_ptr;
 
     semi->linenum++;
     if (gt_str_read_next_line(semi->line_buffer, semi->inputfileptr) == EOF)
     {
-      gt_str_reset(semi->line_buffer);
-      return 0;
+      break;
     }
     line_ptr = gt_str_get(semi->line_buffer);
     /* ignore comment lines; but print seeds if -seed-display is set */
@@ -272,17 +269,10 @@ int gt_seedextend_match_iterator_next(GtSeedextendMatchIterator *semi,
                            GT_WU " " GT_WU " " GT_WU,
                            &semi->seedpos1,&semi->seedpos2,
                            &semi->seedlen);
-          if (num != 3)
-          {
-            gt_error_set(err, "file %s, line %" PRIu64
-                         ": cannot parse 'seed:'-line \"%s\"",
-                         semi->matchfilename,
-                         semi->linenum,line_ptr);
-            had_err = -1;
-          } else
-          {
-            semi->has_seedline = true;
-          }
+          semi->has_seedline = num == 3 ? true : false;
+        } else
+        {
+          semi->has_seedline = false;
         }
       } else
       {
@@ -293,13 +283,14 @@ int gt_seedextend_match_iterator_next(GtSeedextendMatchIterator *semi,
                                     semi->aencseq))
         {
           gt_str_reset(semi->line_buffer);
-          return 1;
+          return semi->querymatchptr;
         }
       }
     }
     gt_str_reset(semi->line_buffer);
   }
-  return had_err;
+  gt_str_reset(semi->line_buffer);
+  return NULL;
 }
 
 const GtEncseq *gt_seedextend_match_iterator_aencseq(
@@ -354,20 +345,35 @@ GtQuerymatch *gt_seedextend_match_iterator_querymatch_ptr(
 GtUword gt_seedextend_match_iterator_seedlen(
                           const GtSeedextendMatchIterator *semi)
 {
-  gt_assert(semi != NULL);
+  gt_assert(semi != NULL && semi->has_seedline);
   return semi->seedlen;
 }
 
 GtUword gt_seedextend_match_iterator_seedpos1(
                          const GtSeedextendMatchIterator *semi)
 {
-  gt_assert(semi != NULL);
+  gt_assert(semi != NULL && semi->has_seedline);
   return semi->seedpos1;
 }
 
 GtUword gt_seedextend_match_iterator_seedpos2(
                         const GtSeedextendMatchIterator *semi)
 {
-  gt_assert(semi != NULL);
+  gt_assert(semi != NULL && semi->has_seedline);
   return semi->seedpos2;
+}
+
+void gt_seedextend_match_iterator_seed_display_set(
+                        GtSeedextendMatchIterator *semi)
+{
+  gt_assert(semi != NULL);
+  gt_querymatch_seed_display_set(semi->querymatchptr);
+}
+
+void gt_seedextend_match_iterator_outoptions_set(
+                        GtSeedextendMatchIterator *semi,
+                        GtQuerymatchoutoptions *querymatchoutoptions)
+{
+  gt_assert(semi != NULL);
+  gt_querymatch_outoptions_set(semi->querymatchptr,querymatchoutoptions);
 }
