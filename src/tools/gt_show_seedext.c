@@ -146,18 +146,10 @@ struct GtSeedextendMatchIterator
   bool mirror, bias_parameters;
   GtEncseq *aencseq, *bencseq;
   GtUword errorpercentage, history_size;
-  Polishing_info *pol_info;
-  double matchscore_bias;
   const char *matchfilename;
-  GtUchar *a_sequence, *b_sequence;
-  GtUword a_allocated, b_allocated;
-  GtQuerymatchoutoptions *querymatchoutoptions;
-  GtQuerymatch *querymatchptr;
-  GtGreedyextendmatchinfo *greedyextendmatchinfo;
-  GtProcessinfo_and_querymatchspaceptr processinfo_and_querymatchspaceptr;
   GtStr *line_buffer;
   uint64_t linenum;
-  bool hasseedline;
+  bool has_seedline;
   GtShowSeedextCoords coords;
   FILE *inputfileptr;
 };
@@ -166,16 +158,14 @@ typedef struct GtSeedextendMatchIterator GtSeedextendMatchIterator;
 
 void gt_seedextend_match_iterator_delete(GtSeedextendMatchIterator *semi)
 {
+  if (semi == NULL)
+  {
+    return;
+  }
   gt_str_delete(semi->ii);
   gt_str_delete(semi->qii);
   gt_encseq_delete(semi->aencseq);
   gt_encseq_delete(semi->bencseq);
-  polishing_info_delete(semi->pol_info);
-  gt_free(semi->a_sequence);
-  gt_free(semi->b_sequence);
-  gt_querymatchoutoptions_delete(semi->querymatchoutoptions);
-  gt_querymatch_delete(semi->querymatchptr);
-  gt_greedy_extend_matchinfo_delete(semi->greedyextendmatchinfo);
   gt_str_delete(semi->line_buffer);
   if (semi->inputfileptr != NULL)
   {
@@ -187,10 +177,6 @@ void gt_seedextend_match_iterator_delete(GtSeedextendMatchIterator *semi)
 /* Parse encseq input indices from -ii and -qii options in 1st line of file. */
 GtSeedextendMatchIterator *gt_seedextend_match_iterator_new(
                                             const GtStr *matchfilename,
-                                            GtUword alignmentwidth,
-                                            bool with_pol_info,
-                                            bool seed_display,
-                                            bool seed_extend,
                                             GtError *err)
 {
   FILE *options_line_inputfileptr;
@@ -200,21 +186,15 @@ GtSeedextendMatchIterator *gt_seedextend_match_iterator_new(
 
   semi->ii = gt_str_new(),
   semi->qii = gt_str_new();
-  semi->history_size = 0;
-  semi->bias_parameters = false;
   semi->mirror = false;
-  semi->hasseedline = false;
-  semi->errorpercentage = 0;
+  semi->bias_parameters = false;
   semi->aencseq = semi->bencseq = NULL;
-  semi->pol_info = NULL;
-  semi->matchscore_bias = GT_DEFAULT_MATCHSCORE_BIAS;
+  semi->errorpercentage = 0;
+  semi->history_size = 0;
   semi->matchfilename = gt_str_get(matchfilename);
-  semi->a_sequence = semi->b_sequence = NULL;
-  semi->a_allocated = semi->b_allocated = 0;
-  semi->querymatchoutoptions = NULL;
-  semi->querymatchptr = NULL;
-  semi->greedyextendmatchinfo = NULL;
+  semi->has_seedline = false;
   semi->line_buffer = NULL;
+  semi->inputfileptr = NULL;
   options_line_inputfileptr = fopen(semi->matchfilename, "r");
   if (options_line_inputfileptr == NULL) {
     gt_error_set(err, "file %s does not exist", semi->matchfilename);
@@ -347,51 +327,8 @@ GtSeedextendMatchIterator *gt_seedextend_match_iterator_new(
     }
   }
   gt_encseq_loader_delete(encseq_loader);
-  if (!had_err && with_pol_info)
-  {
-    if (semi->bias_parameters)
-    {
-      GtUword atcount, gccount;
-
-      gt_greedy_at_gc_count(&atcount,&gccount,semi->aencseq);
-      if (atcount + gccount > 0) /* for DNA sequence */
-      {
-        semi->matchscore_bias
-          = gt_greedy_dna_sequence_bias_get(atcount,gccount);
-      }
-    }
-    semi->pol_info = polishing_info_new_with_bias(semi->errorpercentage,
-                                                  semi->matchscore_bias,
-                                                  semi->history_size);
-  }
   if (!had_err)
   {
-    semi->querymatchoutoptions
-      = gt_querymatchoutoptions_new(alignmentwidth);
-    gt_querymatchoutoptions_for_align_only(semi->querymatchoutoptions,
-                                           semi->errorpercentage,
-                                           semi->matchscore_bias,
-                                           semi->history_size,
-                                           with_pol_info,
-                                           seed_display);
-    semi->querymatchptr = gt_querymatch_new(semi->querymatchoutoptions,
-                                            seed_display);
-    if (seed_extend)
-    {
-      semi->greedyextendmatchinfo
-        = gt_greedy_extend_matchinfo_new(70,
-                                         GT_MAX_ALI_LEN_DIFF,
-                                         semi->history_size,
-                                         GT_MIN_PERC_MAT_HISTORY,
-                                         0, /* userdefinedleastlength */
-                                         GT_EXTEND_CHAR_ACCESS_ANY,
-                                         100,
-                                         semi->pol_info);
-      semi->processinfo_and_querymatchspaceptr.processinfo
-        = semi->greedyextendmatchinfo;
-      semi->processinfo_and_querymatchspaceptr.querymatchspaceptr
-        = semi->querymatchptr;
-    }
     semi->line_buffer = gt_str_new();
     semi->linenum = 0;
     semi->inputfileptr = fopen(semi->matchfilename, "rb");
@@ -508,7 +445,7 @@ int gt_seedextend_match_iterator_next(GtSeedextendMatchIterator *semi,
 {
   int had_err = 0;
 
-  semi->hasseedline = false;
+  semi->has_seedline = false;
   while (!had_err)
   {
     const char *line_ptr = gt_str_get(semi->line_buffer);
@@ -541,7 +478,7 @@ int gt_seedextend_match_iterator_next(GtSeedextendMatchIterator *semi,
             had_err = -1;
           } else
           {
-            semi->hasseedline = true;
+            semi->has_seedline = true;
           }
         }
       } else
@@ -575,6 +512,48 @@ int gt_seedextend_match_iterator_next(GtSeedextendMatchIterator *semi,
   return had_err;
 }
 
+const GtEncseq *gt_seedextend_match_iterator_aencseq(
+                        const GtSeedextendMatchIterator *semi)
+{
+  gt_assert(semi != NULL);
+  return semi->aencseq;
+}
+
+const GtEncseq *gt_seedextend_match_iterator_bencseq(
+                        const GtSeedextendMatchIterator *semi)
+{
+  gt_assert(semi != NULL);
+  return semi->bencseq;
+}
+
+GtUword gt_seedextend_match_iterator_history_size(
+                        const GtSeedextendMatchIterator *semi)
+{
+  gt_assert(semi != NULL);
+  return semi->history_size;
+}
+
+GtUword gt_seedextend_match_iterator_errorpercentage(
+                        const GtSeedextendMatchIterator *semi)
+{
+  gt_assert(semi != NULL);
+  return semi->errorpercentage;
+}
+
+bool gt_seedextend_match_iterator_bias_parameters(
+                        const GtSeedextendMatchIterator *semi)
+{
+  gt_assert(semi != NULL);
+  return semi->bias_parameters;
+}
+
+bool gt_seedextend_match_iterator_has_seedline(
+                        const GtSeedextendMatchIterator *semi)
+{
+  gt_assert(semi != NULL);
+  return semi->has_seedline;
+}
+
 static int gt_show_seedext_runner(GT_UNUSED int argc,
                                   GT_UNUSED const char **argv,
                                   GT_UNUSED int parsed_args,
@@ -590,20 +569,16 @@ static int gt_show_seedext_runner(GT_UNUSED int argc,
   LinspaceManagement *linspace_spacemanager = NULL;
   GtScoreHandler *linspace_scorehandler = NULL;
   GtUchar *alignment_show_buffer = NULL;
-  GtAlignment *alignment = 0;
+  GtAlignment *alignment = NULL;
   const GtUchar *characters;
+  double matchscore_bias = GT_DEFAULT_MATCHSCORE_BIAS;
   GtUchar wildcardshow;
 
   gt_error_check(err);
   gt_assert(arguments != NULL);
   /* Parse option string in first line of file specified by filename. */
   alignmentwidth = arguments->show_alignment ? 70 : 0;
-  semi = gt_seedextend_match_iterator_new(arguments->matchfilename,
-                                          alignmentwidth,
-                                          !arguments->relax_polish,
-                                          arguments->seed_display,
-                                          arguments->seed_extend,
-                                          err);
+  semi = gt_seedextend_match_iterator_new(arguments->matchfilename,err);
   if (semi == NULL)
   {
     had_err = -1;
@@ -611,15 +586,64 @@ static int gt_show_seedext_runner(GT_UNUSED int argc,
   /* Parse seed extensions. */
   if (!had_err)
   {
+    const GtEncseq *aencseq = gt_seedextend_match_iterator_aencseq(semi),
+                   *bencseq = gt_seedextend_match_iterator_bencseq(semi);
+    GtProcessinfo_and_querymatchspaceptr processinfo_and_querymatchspaceptr;
+    GtGreedyextendmatchinfo *greedyextendmatchinfo = NULL;
+    Polishing_info *pol_info = NULL;
+    GtQuerymatchoutoptions *querymatchoutoptions = NULL;
+    GtQuerymatch *querymatchptr = NULL;
+
     linspace_spacemanager = gt_linspaceManagement_new();
     linspace_scorehandler = gt_scorehandler_new(0,1,0,1);;
     alignment_show_buffer = gt_alignment_buffer_new(alignmentwidth);
     alignment = gt_alignment_new();
-    characters = gt_encseq_alphabetcharacters(semi->aencseq);
-    wildcardshow = gt_encseq_alphabetwildcardshow(semi->aencseq);
-    if (semi->pol_info != NULL)
+    characters = gt_encseq_alphabetcharacters(aencseq);
+    wildcardshow = gt_encseq_alphabetwildcardshow(aencseq);
+    if (!arguments->relax_polish)
     {
-      gt_alignment_polished_ends(alignment,semi->pol_info,false);
+      if (gt_seedextend_match_iterator_bias_parameters(semi))
+      {
+        GtUword atcount, gccount;
+
+        gt_greedy_at_gc_count(&atcount,&gccount,aencseq);
+        if (atcount + gccount > 0) /* for DNA sequence */
+        {
+          matchscore_bias = gt_greedy_dna_sequence_bias_get(atcount,gccount);
+        }
+      }
+      pol_info = polishing_info_new_with_bias(
+                          gt_seedextend_match_iterator_errorpercentage(semi),
+                          matchscore_bias,
+                          gt_seedextend_match_iterator_history_size(semi));
+    }
+    querymatchoutoptions = gt_querymatchoutoptions_new(alignmentwidth);
+    gt_querymatchoutoptions_for_align_only(querymatchoutoptions,
+                          gt_seedextend_match_iterator_errorpercentage(semi),
+                          matchscore_bias,
+                          gt_seedextend_match_iterator_history_size(semi),
+                          !arguments->relax_polish,
+                          arguments->seed_display);
+    querymatchptr = gt_querymatch_new(querymatchoutoptions,
+                                      arguments->seed_display);
+
+    if (arguments->seed_extend)
+    {
+      greedyextendmatchinfo
+        = gt_greedy_extend_matchinfo_new(70,
+                              GT_MAX_ALI_LEN_DIFF,
+                              gt_seedextend_match_iterator_history_size(semi),
+                              GT_MIN_PERC_MAT_HISTORY,
+                              0, /* userdefinedleastlength */
+                              GT_EXTEND_CHAR_ACCESS_ANY,
+                              100,
+                              pol_info);
+    }
+    processinfo_and_querymatchspaceptr.processinfo = greedyextendmatchinfo;
+    processinfo_and_querymatchspaceptr.querymatchspaceptr = querymatchptr;
+    if (pol_info != NULL)
+    {
+      gt_alignment_polished_ends(alignment,pol_info,false);
     }
     while (true)
     {
@@ -633,15 +657,15 @@ static int gt_show_seedext_runner(GT_UNUSED int argc,
         had_err = -1;
         break;
       }
-      if (semi->hasseedline)
+      if (gt_seedextend_match_iterator_has_seedline(semi))
       {
         if (arguments->seed_extend)
         {
-          if (semi->aencseq == semi->bencseq)
+          if (aencseq == bencseq)
           {
             had_err = gt_greedy_extend_selfmatch_with_output(
-                                  &semi->processinfo_and_querymatchspaceptr,
-                                  semi->aencseq,
+                                  &processinfo_and_querymatchspaceptr,
+                                  aencseq,
                                   semi->coords.seedlen,
                                   semi->coords.seedpos1,
                                   semi->coords.seedpos2,
@@ -656,9 +680,7 @@ static int gt_show_seedext_runner(GT_UNUSED int argc,
           }
         } else
         {
-          gt_show_seed_extend_encseq(semi->querymatchptr,
-                                     semi->aencseq,
-                                     semi->bencseq,
+          gt_show_seed_extend_encseq(querymatchptr, aencseq, bencseq,
                                      &semi->coords);
         }
       } else
@@ -682,13 +704,17 @@ static int gt_show_seedext_runner(GT_UNUSED int argc,
                                   alignmentwidth,
                                   characters,
                                   wildcardshow,
-                                  semi->aencseq,
+                                  aencseq,
                                   a_sequence,
-                                  semi->bencseq,
+                                  bencseq,
                                   b_sequence,
                                   &semi->coords);
       }
     }
+    polishing_info_delete(pol_info);
+    gt_greedy_extend_matchinfo_delete(greedyextendmatchinfo);
+    gt_querymatchoutoptions_delete(querymatchoutoptions);
+    gt_querymatch_delete(querymatchptr);
   }
   gt_seedextend_match_iterator_delete(semi);
   gt_linspaceManagement_delete(linspace_spacemanager);
