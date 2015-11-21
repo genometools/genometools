@@ -41,24 +41,6 @@ typedef struct {
   GtStr *matchfilename;
 } GtShowSeedextArguments;
 
-typedef struct
-{
-  GtUword dblen,
-          querylen,
-          /* dbstart missing */
-          querystart,
-          distance,
-          dbseqnum,
-          dbstart_relative,
-          /* querystart_fwdstrand missing */
-          seedpos1,
-          seedpos2,
-          seedlen;
-  uint64_t queryseqnum;
-  GtWord score;
-  GtReadmode query_readmode;
-} GtShowSeedextCoords;
-
 static void* gt_show_seedext_arguments_new(void)
 {
   GtShowSeedextArguments *arguments = gt_calloc((size_t) 1, sizeof *arguments);
@@ -160,7 +142,9 @@ struct GtSeedextendMatchIterator
   GtStr *line_buffer;
   uint64_t linenum;
   bool has_seedline;
-  GtShowSeedextCoords coords;
+  GtUword seedpos1,
+          seedpos2,
+          seedlen;
   FILE *inputfileptr;
   GtQuerymatch *querymatchptr;
 };
@@ -422,17 +406,18 @@ static void gt_show_seed_extend_encseq(GtQuerymatch *querymatchptr,
                                        const GtEncseq *aencseq,
                                        const GtEncseq *bencseq,
                                        GtUword query_totallength,
-                                       const GtShowSeedextCoords *coords)
+                                       GtUword seedlen,
+                                       GtUword seedpos1,
+                                       GtUword seedpos2)
 {
   GtSeqorEncseq bseqorencseq;
 
   bseqorencseq.seq = NULL;
   bseqorencseq.encseq = bencseq;
-  gt_querymatch_query_readmode_set(querymatchptr,coords->query_readmode);
   if (gt_querymatch_process(querymatchptr,
-                            coords->seedpos1,
-                            coords->seedpos2,
-                            coords->seedlen,
+                            seedpos1,
+                            seedpos2,
+                            seedlen,
                             aencseq,
                             &bseqorencseq,
                             query_totallength,
@@ -471,8 +456,8 @@ int gt_seedextend_match_iterator_next(GtSeedextendMatchIterator *semi,
         {
           int num = sscanf(seedwordptr + sizeof ("seed:"),
                            GT_WU " " GT_WU " " GT_WU,
-                           &semi->coords.seedpos1,&semi->coords.seedpos2,
-                           &semi->coords.seedlen);
+                           &semi->seedpos1,&semi->seedpos2,
+                           &semi->seedlen);
           if (num != 3)
           {
             gt_error_set(err, "file %s, line %" PRIu64
@@ -550,6 +535,24 @@ GtQuerymatch *gt_seedextend_match_iterator_querymatch_ptr(
 {
   gt_assert(semi != NULL);
   return semi->querymatchptr;
+}
+
+GtUword gt_seedextend_match_iterator_seedlen(GtSeedextendMatchIterator *semi)
+{
+  gt_assert(semi != NULL);
+  return semi->seedlen;
+}
+
+GtUword gt_seedextend_match_iterator_seedpos1(GtSeedextendMatchIterator *semi)
+{
+  gt_assert(semi != NULL);
+  return semi->seedpos1;
+}
+
+GtUword gt_seedextend_match_iterator_seedpos2(GtSeedextendMatchIterator *semi)
+{
+  gt_assert(semi != NULL);
+  return semi->seedpos2;
 }
 
 static int gt_show_seedext_runner(GT_UNUSED int argc,
@@ -649,6 +652,10 @@ static int gt_show_seedext_runner(GT_UNUSED int argc,
       }
       if (gt_seedextend_match_iterator_has_seedline(semi))
       {
+        const GtUword seedlen = gt_seedextend_match_iterator_seedlen(semi),
+                      seedpos1 = gt_seedextend_match_iterator_seedpos1(semi),
+                      seedpos2 = gt_seedextend_match_iterator_seedpos2(semi);
+
         if (arguments->seed_extend)
         {
           if (aencseq == bencseq)
@@ -656,9 +663,9 @@ static int gt_show_seedext_runner(GT_UNUSED int argc,
             had_err = gt_greedy_extend_selfmatch_with_output(
                                   &processinfo_and_querymatchspaceptr,
                                   aencseq,
-                                  semi->coords.seedlen,
-                                  semi->coords.seedpos1,
-                                  semi->coords.seedpos2,
+                                  seedlen,
+                                  seedpos1,
+                                  seedpos2,
                                   err);
             if (had_err)
             {
@@ -674,7 +681,9 @@ static int gt_show_seedext_runner(GT_UNUSED int argc,
                                      aencseq,
                                      bencseq,
                                      query_totallength,
-                                     &semi->coords);
+                                     seedlen,
+                                     seedpos1,
+                                     seedpos2);
         }
       } else
       {
