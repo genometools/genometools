@@ -337,8 +337,9 @@ def parseargs(argv)
   "to #{options.inputdir}.\nAfter that, execute this script again to run "+
   "gt_seed_extend (-s) and/or daligner\n(-d) on the testdata. For a testdata "+
   "subset specify a number with opton -f.\nThe DALIGNER and DAZZ_DB "+
-  "directories required by -d are expected in ../ but you\ncan specify a "+
-  "different location with environment variable ${PACKAGES}."
+  "directories required by -d are expected to be in\n" +
+  "<myerspath>/myers where\n" +
+  "myerspath=if (environment variable PACKAGES is defined) then $PACKAGES else .."
 
   opts.on("-g","--generate-seq STRING",
           "generate-sequences argument:" +
