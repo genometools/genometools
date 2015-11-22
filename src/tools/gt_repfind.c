@@ -15,8 +15,6 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include <inttypes.h>
-#include <stdarg.h>
 #include "core/error_api.h"
 #include "core/format64.h"
 #include "core/log_api.h"
@@ -59,7 +57,7 @@ typedef struct
                            seed-extend-params.h is used */
           alignmentwidth; /* 0 for no alignment display and otherwidth number
                              of columns of alignment per line displayed. */
-  bool scanfile, beverbose, forward, reverse, searchspm,
+  bool scanfile, beverbose, forward, reverse, reversecomplement, searchspm,
        check_extend_symmetry, silent, trimstat, seed_display, noxpolish,
        verify_alignment;
   GtStr *indexname, *query_indexname, *cam_string; /* parse this using
@@ -212,7 +210,8 @@ static GtOptionParser *gt_repfind_option_parser_new(void *tool_arguments)
 {
   const GtUword extension_sensitivity = 97;
   GtOptionParser *op;
-  GtOption *option, *reverseoption, *option_query_files, *extendxdropoption,
+  GtOption *option, *reverseoption, *reversecomplementoption,
+           *option_query_files, *extendxdropoption,
            *extendgreedyoption, *scanoption, *sampleoption, *forwardoption,
            *spmoption, *seedlengthoption, *minidentityoption,
            *maxalilendiffoption, *leastlength_option, *char_access_mode_option,
@@ -244,6 +243,12 @@ static GtOptionParser *gt_repfind_option_parser_new(void *tool_arguments)
                                      &arguments->reverse,
                                      false);
   gt_option_parser_add_option(op, reverseoption);
+
+  reversecomplementoption = gt_option_new_bool("p",
+                                        "Compute matches on reverse strand",
+                                        &arguments->reversecomplement,
+                                        false);
+  gt_option_parser_add_option(op, reversecomplementoption);
 
   seedlengthoption = gt_option_new_uint_min("seedlength",
                                              "Specify minimum length of seed",
@@ -450,6 +455,7 @@ static GtOptionParser *gt_repfind_option_parser_new(void *tool_arguments)
   gt_option_exclude(option_query_files,option_query_indexname);
   gt_option_exclude(sampleoption,spmoption);
   gt_option_exclude(reverseoption,spmoption);
+  gt_option_exclude(reversecomplementoption,spmoption);
   gt_option_exclude(extendgreedyoption,extendxdropoption);
   gt_option_exclude(errorpercentageoption,minidentityoption);
   gt_option_exclude(withalignmentoption,sampleoption);
@@ -477,7 +483,8 @@ static int gt_repfind_arguments_check(GT_UNUSED int rest_argc,
 {
   GtMaxpairsoptions *arguments = tool_arguments;
 
-  if (!gt_option_is_set(arguments->refforwardoption) && arguments->reverse)
+  if (!gt_option_is_set(arguments->refforwardoption) &&
+      (arguments->reverse || arguments->reversecomplement))
   {
     arguments->forward = false;
   }
@@ -807,6 +814,9 @@ static int gt_repfind_runner(int argc,
     GtProcessinfo_and_querymatchspaceptr processinfo_and_querymatchspaceptr;
     GtXdrop_extend_querymatch_func eqmf = NULL;
     void *eqmf_data = NULL;
+    int mode;
+    const int modes[] = {GT_READMODE_REVERSE,GT_READMODE_REVCOMPL};
+    const bool flags[] = {arguments->reverse, arguments->reversecomplement};
 
     processinfo_and_querymatchspaceptr.processinfo = NULL;
     if (arguments->alignmentwidth > 0 ||
@@ -932,24 +942,30 @@ static int gt_repfind_runner(int argc,
             haserr = true;
           }
         }
-        if (!haserr && arguments->reverse)
+        if (!haserr)
         {
-          gt_querymatch_query_readmode_set(
-            processinfo_and_querymatchspaceptr.querymatchspaceptr,
-            GT_READMODE_REVERSE);
-          if (gt_callenumquerymatches(true,
-                                      gt_str_get(arguments->indexname),
-                                      NULL,
-                                      NULL,
-                                      GT_READMODE_REVERSE,
-                                      arguments->seedlength,
-                                      querymatchoutoptions,
-                                      eqmf,
-                                      eqmf_data,
-                                      logger,
-                                      err) != 0)
+          for (mode = 0; !haserr && mode < 2; mode++)
           {
-            haserr = true;
+            if (flags[mode])
+            {
+              gt_querymatch_query_readmode_set(
+                   processinfo_and_querymatchspaceptr.querymatchspaceptr,
+                   modes[mode]);
+              if (gt_callenumquerymatches(true,
+                                          gt_str_get(arguments->indexname),
+                                          NULL,
+                                          NULL,
+                                          modes[mode],
+                                          arguments->seedlength,
+                                          querymatchoutoptions,
+                                          eqmf,
+                                          eqmf_data,
+                                          logger,
+                                          err) != 0)
+              {
+                haserr = true;
+              }
+            }
           }
         }
       }
