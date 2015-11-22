@@ -255,10 +255,11 @@ def rundaligner(mincoverage,inputdir,targetdir,seedlength,minidentity,length,
   makesystemcall("scripts/convert2myersformat.rb #{inputfile}.fas " +
 		 "> #{destfile}.fasta")
   if ENV.has_key?("PACKAGES")
-    myersprog = ENV["PACKAGES"]
+    myerspath = ENV["PACKAGES"]
   else
-    myersprog = "../myers"
+    myerspath = ".."
   end
+  myersprog="#{myerspath}/myers"
   makesystemcall("#{myersprog}/DAZZ_DB/fasta2DB #{destfile}.db " +
                  "#{destfile}.fasta")
   withecho = if tofile then false else true end

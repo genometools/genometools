@@ -174,22 +174,22 @@ end
 def calcdifference(seqnumpair_set1,seqnumpair_set2)
   sum_size = seqnumpair_set1.length + seqnumpair_set2.length
   size_both = (seqnumpair_set1 & seqnumpair_set2).length
-  perc_both = showcomment(2 * size_both,sum_size,"occur in greedy and xdrop")
-  size_only_greedy = (seqnumpair_set1 - seqnumpair_set2).length
-  if size_only_greedy > 0
-    perc_only_greedy = showcomment(size_only_greedy,sum_size,
-                                   "occur in greedy but not xdrop")
+  perc_both = showcomment(2 * size_both,sum_size,"occur in set 1 and set 2")
+  size_only_1 = (seqnumpair_set1 - seqnumpair_set2).length
+  if size_only_1 > 0
+    perc_only_1 = showcomment(size_only_1,sum_size,
+                                   "occur in set 1 but not set 2")
   else
-    perc_only_greedy = 0
+    perc_only_1 = 0
   end
-  size_only_xdrop = (seqnumpair_set2 - seqnumpair_set1).length
-  if size_only_xdrop > 0
-    perc_only_xdrop = showcomment(size_only_xdrop,sum_size,
-                                  "occur in xdrop but not greedy")
+  size_only_2 = (seqnumpair_set2 - seqnumpair_set1).length
+  if size_only_2 > 0
+    perc_only_2 = showcomment(size_only_2,sum_size,
+                                  "occur in set 2 but not set 1")
   else
-    perc_only_xdrop = 0
+    perc_only_2 = 0
   end
-  return [sum_size,perc_both,perc_only_greedy,perc_only_xdrop]
+  return [sum_size,perc_both,perc_only_1,perc_only_2]
 end
 
 def fill_other_hash(h1,h2)
