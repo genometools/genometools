@@ -33,9 +33,10 @@ ${MYERSPROG}/DAZZ_DB/fasta2DB ${TARGET}.db ${TARGET}.fasta
 ${MYERSPROG}/DALIGNER/daligner -t${maxfreq} -I -A -Y -e0.${minidentity} \
                    -k${seedlength} -l${minlen} \
                    ${TARGET}.db ${TARGET}.db > ${TARGET}-da.matches
-rm -f ${TARGET}.db ${TARGET}.${TARGET}*.las .${TARGET}.idx .${TARGET}.bps
-bin/gt encseq encode -sds no -md5 no -des no ${TARGET}.fasta
-bin/gt seed_extend -ii ${TARGET}.fasta -maxfreq ${maxfreq} -l ${minlen} \
+rm -f ${TARGET}.db
+rm -f ${TARGET}.${TARGET}*.las .${TARGET}.idx .${TARGET}.bps
+bin/gt encseq encode -sds no -md5 no -des no -indexname ${TARGET} ${TARGET}.fasta
+bin/gt seed_extend -ii ${TARGET} -maxfreq ${maxfreq} -l ${minlen} \
                     -minidentity ${minidentity} -seed-display -v \
-                    -overlappingseeds > ${TARGET}-se.matches
+                    -overlappingseeds -bias-parameters -history 60 > ${TARGET}-se.matches
 scripts/matched-seqpairs.rb ${TARGET}-da.matches ${TARGET}-se.matches
