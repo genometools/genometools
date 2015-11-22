@@ -2,6 +2,8 @@
 
 # author: Stefan Kurtz, Nov. 2015
 
+set -e -x
+
 if test $# -ne 2
 then
   echo "Usage: $0 <minlen> <inputfile>"
@@ -32,7 +34,7 @@ ${MYERSPROG}/DALIGNER/daligner -t${maxfreq} -I -A -Y -e0.${minidentity} \
                    -k${seedlength} -l${minlen} \
                    ${TARGET}.db ${TARGET}.db > ${TARGET}-da.matches
 rm -f ${TARGET}.db ${TARGET}.${TARGET}*.las .${TARGET}.idx .${TARGET}.bps
-bin/gt encseq encode ${TARGET}.fasta
+bin/gt encseq encode -sds no -md5 no -des no ${TARGET}.fasta
 bin/gt seed_extend -ii ${TARGET}.fasta -maxfreq ${maxfreq} -l ${minlen} \
                     -minidentity ${minidentity} -seed-display -v \
                     -overlappingseeds > ${TARGET}-se.matches
