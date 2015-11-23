@@ -81,7 +81,7 @@ EXP_LDFLAGS+=$(foreach dir, \
 BUILDSTAMP:=$(shell date +'"%Y-%m-%d %H:%M:%S"')
 
 # try to set RANLIB automatically
-SYSTEM:=$(shell uname -s)
+SYSTEM?=$(shell uname -s)
 MACHINE:=$(shell uname -m)
 ifeq ($(SYSTEM),Darwin)
   RANLIB:=ranlib
