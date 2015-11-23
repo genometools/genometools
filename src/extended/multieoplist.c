@@ -25,6 +25,7 @@
 #include "core/ma.h"
 #include "core/xansi_api.h"
 #include "extended/multieoplist.h"
+#include "core/log_api.h"
 
 typedef uint8_t Eop;
 
@@ -402,6 +403,28 @@ GtMultieoplist *gt_multieoplist_io(GtMultieoplist *multieops, FILE *fp,
   return multieops;
 }
 
+int gt_multieoplist_unit_test_2(GtError *err)
+{
+  /* char *u = "attttgatatcgtctctctatgctgtcac", */
+       /* *v = "atttngatatcgtctctctatgctgtcac"; */
+  GtMultieoplist *meop = gt_multieoplist_new();
+  unsigned int i;
+  int had_err = 0;
+
+  for (i = 0; i < 4; ++i) {
+    gt_multieoplist_add_match(meop);
+  }
+  gt_multieoplist_add_mismatch(meop);
+  for (i = 0; i < 24; ++i) {
+    gt_multieoplist_add_match(meop);
+  }
+  gt_ensure(gt_multieoplist_get_length(meop) == 29);
+  gt_log_log("length: " GT_WU, gt_multieoplist_get_length(meop));
+
+  gt_multieoplist_delete(meop);
+  return had_err;
+}
+
 int gt_multieoplist_unit_test(GtError *err)
 {
   int had_err = 0;
@@ -474,5 +497,6 @@ int gt_multieoplist_unit_test(GtError *err)
   gt_multieoplist_delete(list);
   gt_multieoplist_delete(list2);
 
+  had_err = gt_multieoplist_unit_test_2(err);
   return had_err;
 }
