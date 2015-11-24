@@ -3,8 +3,8 @@
 #include <stdint.h>
 #include "core/types_api.h"
 /* The following values are used when no pruning is performed */
-#define GT_MIN_PERC_MAT_HISTORY 70
-#define GT_MAX_ALI_LEN_DIFF     30
+#define GT_MIN_PERC_MAT_HISTORY 1
+#define GT_MAX_ALI_LEN_DIFF     UINT32_MAX
 
 typedef struct
 {

@@ -3,6 +3,12 @@
 require 'optparse'
 require 'ostruct'
 
+class String
+  def reverse_complement
+    return self.reverse.tr("ACGTacgt","TGCAtgca")
+  end
+end
+
 class Randomsequence
   def initialize(alphabet,myseed=nil)
     @alphabet = alphabet
@@ -73,6 +79,7 @@ def parseargs(argv)
   options.minidentity = defaultminid
   options.seednumber = Random.new_seed
   options.reverse = false
+  options.reverse_complement = false
   options.number = 1
   options.mems = false
   options.seedcoverage = 0
@@ -102,6 +109,11 @@ def parseargs(argv)
   opts.on("-r","--reverse","reverse the query sequence in query of\n" +
                            (" " * indent) + "seeded sequence pair") do |x|
     options.reverse = true
+  end
+  opts.on("-p","--reverse-complement","reverse complement the query \n" +
+                           (" " * indent) +
+                           "sequence in query of seeded sequence pair") do |x|
+    options.reverse_complement = true
   end
   opts.on("--mems","generate mems, i.e. the seed are maximal") do |x|
     options.mems = true
@@ -179,6 +191,10 @@ def parseargs(argv)
     STDERR.puts "#{$0}: seedcoverage must not be larger than totallength"
     exit 1
   end
+  if options.reverse and options.reverse_complement
+    STDERR.puts "#{$0}: options -reverse and -reverse_complement exclude each other"
+    exit 1
+  end
   return options
 end
 
@@ -209,6 +225,14 @@ end
 def headkey_cov(options,extendlength,errperc)
   return "seedlength=#{options.seedlength},sequencelength=#{extendlength}," +
          "errperc=#{errperc}"
+end
+
+def namekey(b)
+  if b
+    return "r"
+  else
+    return "p"
+  end
 end
 
 # generate 1 seed in the middle of a sequence
@@ -244,10 +268,15 @@ def gen_seeded(fpdb,fpquery,fpquery_r,rseq,options,alphabet,errperc)
   fpquery.puts ">query: #{headkey(options,extendlength,errperc,seedpos)}"
   queryseq = "#{leftcontext2}#{left2}\n#{seedstring}\n#{right2}#{rightcontext2}"
   fpquery.puts queryseq
-  if options.reverse
+  if options.reverse or options.reverse_complement
     seedpos="#{right2}#{rightcontext2}".length
-    fpquery_r.puts ">query-r: #{headkey(options,extendlength,errperc,seedpos)}"
-    fpquery_r.puts queryseq.reverse
+    key = namekey(options.reverse)
+    fpquery_r.puts ">query-#{key}: #{headkey(options,extendlength,errperc,seedpos)}"
+    if options.reverse
+      fpquery_r.puts queryseq.reverse
+    else
+      fpquery_r.puts queryseq.reverse_complement
+    end
   end
 end
 
@@ -317,8 +346,9 @@ def gen_seeded_with_coverage(rseq,options,alphabet,errperc,dbseq,queryseq,
   queryseq += "#{context2[seedstring.length]}"
   queryhead = ">query: #{headkey_cov(options,queryseq.length,errperc)}"
 
-  if options.reverse
-    query_r = ">query-r: #{headkey_cov(options,queryseq.length,errperc)}"
+  if options.reverse or options.reverse_complement
+    key = namekey(options.reverse)
+    query_r = ">query-#{key}: #{headkey_cov(options,queryseq.length,errperc)}"
   else
     query_r = nil
   end
@@ -397,8 +427,9 @@ rseq = Randomsequence.new(alphabet,options.seednumber)
 if options.namedfiles
   fpdb = openoutfile("db.fna")
   fpquery = openoutfile("query.fna")
-  if options.reverse
-    fpquery_r = openoutfile("query-r.fna")
+  if options.reverse or options.reverse_complement
+    key = namekey(options.reverse)
+    fpquery_r = openoutfile("query-#{key}.fna")
   else
     fpquery_r = nil
   end

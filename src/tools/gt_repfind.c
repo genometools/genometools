@@ -57,7 +57,7 @@ typedef struct
                            seed-extend-params.h is used */
           alignmentwidth; /* 0 for no alignment display and otherwidth number
                              of columns of alignment per line displayed. */
-  bool scanfile, beverbose, forward, reverse, reversecomplement, searchspm,
+  bool scanfile, beverbose, forward, reverse, reverse_complement, searchspm,
        check_extend_symmetry, silent, trimstat, seed_display, noxpolish,
        verify_alignment;
   GtStr *indexname, *query_indexname, *cam_string; /* parse this using
@@ -210,7 +210,7 @@ static GtOptionParser *gt_repfind_option_parser_new(void *tool_arguments)
 {
   const GtUword extension_sensitivity = 97;
   GtOptionParser *op;
-  GtOption *option, *reverseoption, *reversecomplementoption,
+  GtOption *option, *reverseoption, *reverse_complementoption,
            *option_query_files, *extendxdropoption,
            *extendgreedyoption, *scanoption, *sampleoption, *forwardoption,
            *spmoption, *seedlengthoption, *minidentityoption,
@@ -244,11 +244,11 @@ static GtOptionParser *gt_repfind_option_parser_new(void *tool_arguments)
                                      false);
   gt_option_parser_add_option(op, reverseoption);
 
-  reversecomplementoption = gt_option_new_bool("p",
+  reverse_complementoption = gt_option_new_bool("p",
                                         "Compute matches on reverse strand",
-                                        &arguments->reversecomplement,
+                                        &arguments->reverse_complement,
                                         false);
-  gt_option_parser_add_option(op, reversecomplementoption);
+  gt_option_parser_add_option(op, reverse_complementoption);
 
   seedlengthoption = gt_option_new_uint_min("seedlength",
                                              "Specify minimum length of seed",
@@ -455,7 +455,7 @@ static GtOptionParser *gt_repfind_option_parser_new(void *tool_arguments)
   gt_option_exclude(option_query_files,option_query_indexname);
   gt_option_exclude(sampleoption,spmoption);
   gt_option_exclude(reverseoption,spmoption);
-  gt_option_exclude(reversecomplementoption,spmoption);
+  gt_option_exclude(reverse_complementoption,spmoption);
   gt_option_exclude(extendgreedyoption,extendxdropoption);
   gt_option_exclude(errorpercentageoption,minidentityoption);
   gt_option_exclude(withalignmentoption,sampleoption);
@@ -484,7 +484,7 @@ static int gt_repfind_arguments_check(GT_UNUSED int rest_argc,
   GtMaxpairsoptions *arguments = tool_arguments;
 
   if (!gt_option_is_set(arguments->refforwardoption) &&
-      (arguments->reverse || arguments->reversecomplement))
+      (arguments->reverse || arguments->reverse_complement))
   {
     arguments->forward = false;
   }
@@ -815,8 +815,12 @@ static int gt_repfind_runner(int argc,
     GtXdrop_extend_querymatch_func eqmf = NULL;
     void *eqmf_data = NULL;
     int mode;
-    const int modes[] = {GT_READMODE_REVERSE,GT_READMODE_REVCOMPL};
-    const bool flags[] = {arguments->reverse, arguments->reversecomplement};
+    const int modes[] = {GT_READMODE_FORWARD,
+                         GT_READMODE_REVERSE,
+                         GT_READMODE_REVCOMPL};
+    const bool flags[] = {arguments->forward,
+                          arguments->reverse,
+                          arguments->reverse_complement};
 
     processinfo_and_querymatchspaceptr.processinfo = NULL;
     if (arguments->alignmentwidth > 0 ||
@@ -944,7 +948,9 @@ static int gt_repfind_runner(int argc,
         }
         if (!haserr)
         {
-          for (mode = 0; !haserr && mode < 2; mode++)
+          /* only handle reverse and reverse_complement, as forward
+             is handled as selfmatch-mode */
+          for (mode = 1; !haserr && mode < 3; mode++)
           {
             if (flags[mode])
             {
@@ -971,26 +977,28 @@ static int gt_repfind_runner(int argc,
       }
     } else
     {
-      if (arguments->reverse)
+      for (mode = 0; !haserr && mode < 3; mode++)
       {
-        gt_querymatch_query_readmode_set(
+        if (flags[mode])
+        {
+          gt_querymatch_query_readmode_set(
             processinfo_and_querymatchspaceptr.querymatchspaceptr,
-            GT_READMODE_REVERSE);
-      }
-      if (gt_callenumquerymatches(false,
+            modes[mode]);
+          if (gt_callenumquerymatches(false,
                                   gt_str_get(arguments->indexname),
                                   arguments->query_files,
                                   arguments->query_indexname,
-                                  arguments->reverse ? GT_READMODE_REVERSE
-                                                     : GT_READMODE_FORWARD,
+                                  modes[mode],
                                   arguments->seedlength,
                                   querymatchoutoptions,
                                   eqmf,
                                   eqmf_data,
                                   logger,
                                   err) != 0)
-      {
-        haserr = true;
+          {
+            haserr = true;
+          }
+        }
       }
     }
     gt_querymatchoutoptions_delete(querymatchoutoptions);
