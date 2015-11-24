@@ -114,7 +114,7 @@ static void ft_sequenceobject_init(Sequenceobject *seq,
                                             ? GT_READMODE_FORWARD
                                             : GT_READMODE_REVERSE,
                                           seq->read_seq_left2right
-                                            ?  seq->offset
+                                            ? seq->offset
                                             : GT_REVERSEPOS(full_totallength,
                                                             seq->offset));
     seq->encseqreader = encseq_r;
@@ -192,17 +192,20 @@ static GtUchar ft_sequenceobject_get_char(Sequenceobject *seq,GtUword idx)
       seq->cache_num_positions = tostore;
     }
     gt_assert(seq->cache_ptr != NULL && idx < seq->cache_num_positions);
-    return seq->cache_ptr[idx];
-  }
-  accesspos = seq->read_seq_left2right ? seq->offset + idx : seq->offset - idx;
-  if (seq->encseq != NULL)
-  {
-    cc = gt_encseq_get_encoded_char(seq->encseq,accesspos,
-                                    GT_READMODE_FORWARD);
+    cc = seq->cache_ptr[idx];
   } else
   {
-    gt_assert(seq->bytesequenceptr != NULL);
-    cc = seq->bytesequenceptr[accesspos];
+    accesspos = seq->read_seq_left2right ? seq->offset + idx
+                                         : seq->offset - idx;
+    if (seq->encseq != NULL)
+    {
+      cc = gt_encseq_get_encoded_char(seq->encseq,accesspos,
+                                      GT_READMODE_FORWARD);
+    } else
+    {
+      gt_assert(seq->bytesequenceptr != NULL);
+      cc = seq->bytesequenceptr[accesspos];
+    }
   }
   if (seq->dir_is_complement && !ISSPECIAL(cc))
   {
