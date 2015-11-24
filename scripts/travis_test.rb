@@ -16,7 +16,7 @@ if ENV['CC'] == 'gcc' or ENV['GT_BITS'] == '32' or ENV['SYSTEM'] == 'Windows'
     end
   end
   success = $?.success?
-  if success
+  if success and not ENV['SYSTEM'] == 'Windows' #win binaries won't run on linux
     IO.popen(["bin/gt", "-test", :err=>[:child, :out]]) do |io|
       while (line = io.gets)
         print line
