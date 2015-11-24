@@ -2,7 +2,8 @@
 # what to do during travis tests
 
 success = true
-if ENV['CC'] == 'gcc' or ENV['GT_BITS'] == '32'
+puts ENV['CC']
+if ENV['CC'] == 'gcc' or ENV['GT_BITS'] == '32' or ENV['SYSTEM'] == 'Windows'
   env = {}
   if ENV['GT_BITS'] == '32'
     env['32bit' => 'yes']
@@ -15,7 +16,7 @@ if ENV['CC'] == 'gcc' or ENV['GT_BITS'] == '32'
     end
   end
   success = $?.success?
-  if success
+  if success and not ENV['SYSTEM'] == 'Windows' #win binaries won't run on linux
     IO.popen(["bin/gt", "-test", :err=>[:child, :out]]) do |io|
       while (line = io.gets)
         print line
@@ -53,8 +54,5 @@ else
   success = $?.success?
 end
 
-if success
-  exit 0
-else
-  exit 1
-end
+exit 0 if success
+exit 1
