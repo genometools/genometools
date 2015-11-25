@@ -1164,7 +1164,8 @@ static const GtQuerymatch *gt_extend_selfmatch_relative(bool forxdrop,
                                               GtUword dbstart_relative,
                                               GtUword queryseqnum,
                                               GtUword querystart_relative,
-                                              GtUword len)
+                                              GtUword len,
+                                              GtReadmode query_readmode)
 {
   GtSeedextendSeqpair sesp;
   const GtUword query_totallength = 0;
@@ -1174,7 +1175,7 @@ static const GtQuerymatch *gt_extend_selfmatch_relative(bool forxdrop,
                         query_totallength,
                         len,
                         true,
-                        GT_READMODE_FORWARD);
+                        query_readmode);
   return gt_extend_sesp(forxdrop,info, encseq,NULL, &sesp);
 }
 
@@ -1184,7 +1185,8 @@ const GtQuerymatch *gt_xdrop_extend_selfmatch_relative(void *info,
                                               GtUword dbstart_relative,
                                               GtUword queryseqnum,
                                               GtUword querystart_relative,
-                                              GtUword len)
+                                              GtUword len,
+                                              GtReadmode query_readmode)
 {
   return gt_extend_selfmatch_relative(true,
                                       info,
@@ -1193,7 +1195,8 @@ const GtQuerymatch *gt_xdrop_extend_selfmatch_relative(void *info,
                                       dbstart_relative,
                                       queryseqnum,
                                       querystart_relative,
-                                      len);
+                                      len,
+                                      query_readmode);
 }
 
 const GtQuerymatch *gt_greedy_extend_selfmatch_relative(void *info,
@@ -1202,7 +1205,8 @@ const GtQuerymatch *gt_greedy_extend_selfmatch_relative(void *info,
                                               GtUword dbstart_relative,
                                               GtUword queryseqnum,
                                               GtUword querystart_relative,
-                                              GtUword len)
+                                              GtUword len,
+                                              GtReadmode query_readmode)
 {
   return gt_extend_selfmatch_relative(false,
                                       info,
@@ -1211,7 +1215,8 @@ const GtQuerymatch *gt_greedy_extend_selfmatch_relative(void *info,
                                       dbstart_relative,
                                       queryseqnum,
                                       querystart_relative,
-                                      len);
+                                      len,
+                                      query_readmode);
 }
 
 int gt_xdrop_extend_selfmatch_with_output(void *info,
