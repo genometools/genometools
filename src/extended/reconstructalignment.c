@@ -286,8 +286,10 @@ void reconstructalignment_from_Dtab(GtAlignment *align, const Diagentry *Dtab,
 void reconstructalignment_from_affineDtab(GtAlignment *align,
                                           const AffineDiagentry *Dtab,
                                           AffineAlignEdge edge,
-                                          const GtUchar *useq, GtUword ulen,
-                                          const GtUchar *vseq, GtUword vlen)
+                                          GT_UNUSED const GtUchar *useq,
+                                          GtUword ulen,
+                                          GT_UNUSED const GtUchar *vseq,
+                                          GtUword vlen)
 {
   GtUword i,j;
   Diagentry node, prevnode;
@@ -382,7 +384,8 @@ void reconstructalignment_from_affineDtab(GtAlignment *align,
       }
       else
       {
-        for (j = 0; j < prevnode.currentrowindex - node.currentrowindex - 1;
+        gt_assert(false);
+        /*for (j = 0; j < prevnode.currentrowindex - node.currentrowindex - 1;
              j++)
         {
           gt_alignment_add_deletion(align);
@@ -401,7 +404,7 @@ void reconstructalignment_from_affineDtab(GtAlignment *align,
           }
         }
         else
-          gt_alignment_add_replacement(align);
+          gt_alignment_add_replacement(align);*/
       }
     }
     prevedge = prevnode.last_type;
