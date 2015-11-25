@@ -274,14 +274,20 @@ static GtUword evaluatelinearcrosspoints(LinspaceManagement *spacemanager,
         Ctab[i] = rowoffset;
       return rowoffset;
     }
-#ifndef GT_THREADS_ENABLED
-    if (gt_linspaceManagement_checksquare(spacemanager, ulen,vlen,
-                                               sizeof (GtUword),
-                                               sizeof (Rtabcolumn)))
-    { /* product of subsquences is lower than space allocated already or
-       * lower than timesquarfactor * ulen*/
-      return ctab_in_square_space(spacemanager, scorehandler, Ctab, useq,
-                                  ustart, ulen, vseq, vstart, vlen, rowoffset);
+
+#ifdef GT_THREADS_ENABLED
+    if (gt_jobs == 1)
+    {
+#endif
+      if (gt_linspaceManagement_checksquare(spacemanager, ulen,vlen,
+                                                 sizeof (GtUword),
+                                                 sizeof (Rtabcolumn)))
+      { /* product of subsquences is lower than space allocated already or
+         * lower than timesquarfactor * ulen*/
+        return ctab_in_square_space(spacemanager, scorehandler, Ctab, useq,
+                                   ustart, ulen, vseq, vstart, vlen, rowoffset);
+      }
+#ifdef GT_THREADS_ENABLED
     }
 #endif
 

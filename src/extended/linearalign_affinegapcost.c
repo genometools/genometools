@@ -37,7 +37,7 @@ typedef struct {
   GtUwordPair Rstart, Dstart, Istart;
 } Starttabentry;
 
-/*-------------------------------global linear--------------------------------*/
+/*-------------------------------global affine--------------------------------*/
 AffineAlignEdge set_edge(GtWord Rdist, GtWord Ddist, GtWord Idist)
 {
   GtUword minvalue = MIN3(Rdist, Ddist, Idist);
@@ -403,16 +403,21 @@ static GtUword evaluateaffinecrosspoints(LinspaceManagement *spacemanager,
 
   if (vlen >= 2UL)
   {
-#ifndef GT_THREADS_ENABLED
-    if (gt_linspaceManagement_checksquare(spacemanager, ulen, vlen,
-                                          sizeof (*Atabcolumn),
-                                          sizeof (*Rtabcolumn)))
+#ifdef GT_THREADS_ENABLED
+    if (gt_jobs == 1)
     {
-      affine_ctab_in_square_space(spacemanager, scorehandler, Ctab,
-                                  useq, ustart, ulen, vseq, vstart, vlen,
-                                  rowoffset, from_edge, to_edge);
-      return 0;
-    }
+#endif
+      if (gt_linspaceManagement_checksquare(spacemanager, ulen, vlen,
+                                            sizeof (*Atabcolumn),
+                                            sizeof (*Rtabcolumn)))
+      {
+        affine_ctab_in_square_space(spacemanager, scorehandler, Ctab,
+                                    useq, ustart, ulen, vseq, vstart, vlen,
+                                    rowoffset, from_edge, to_edge);
+        return 0;
+      }
+#ifdef GT_THREADS_ENABLED
+   }
 #endif
     Rtabcolumn = gt_linspaceManagement_get_rTabspace(spacemanager);
     Atabcolumn = gt_linspaceManagement_get_valueTabspace(spacemanager);
@@ -719,7 +724,7 @@ GtUword gt_computeaffinelinearspace(LinspaceManagement *spacemanager,
   return distance;
 }
 
-/*------------------------------local linear--------------------------------*/
+/*------------------------------local affine--------------------------------*/
 static void firstAStabcolumn(AffinealignDPentry *Atabcolumn,
                              Starttabentry *Starttabcolumn,
                              GtScoreHandler *scorehandler,
