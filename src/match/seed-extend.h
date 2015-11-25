@@ -142,7 +142,8 @@ const GtQuerymatch *gt_xdrop_extend_selfmatch_relative(void *info,
                                               GtUword dbstart_relative,
                                               GtUword queryseqnum,
                                               GtUword querystart_relative,
-                                              GtUword len);
+                                              GtUword len,
+                                              GtReadmode query_readmode);
 
 /* The following function is used for extending a seed obtained
    in a comparison of the given sequence <query> of length <query_totallength>
@@ -309,7 +310,8 @@ const GtQuerymatch *gt_greedy_extend_selfmatch_relative(void *info,
                                               GtUword dbstart_relative,
                                               GtUword queryseqnum,
                                               GtUword querystart_relative,
-                                              GtUword len);
+                                              GtUword len,
+                                              GtReadmode query_readmode);
 
 typedef const GtQuerymatch *(*GtExtendSelfmatchRelativeFunc)(void *,
                                                              const GtEncseq *,
@@ -317,7 +319,8 @@ typedef const GtQuerymatch *(*GtExtendSelfmatchRelativeFunc)(void *,
                                                              GtUword,
                                                              GtUword,
                                                              GtUword,
-                                                             GtUword);
+                                                             GtUword,
+                                                     GtReadmode query_readmode);
 
 const GtQuerymatch* gt_xdrop_extend_querymatch_relative(
                                                   void *info,

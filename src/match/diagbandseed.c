@@ -69,36 +69,34 @@ struct GtDiagbandseedProcKmerInfo {
   unsigned int seedlength;
   GtReadmode readmode;
   GtSpecialrangeiterator *sri;
+  GtUword totallength;
   GtUword prev_separator;
   GtUword next_separator;
 };
 
 /* Returns the position of the next separator following separatorpos.
    If the end of encseq is reached, the position behind is returned. */
-static void gt_diagbandseed_update_separatorpos(GtUword *separatorpos,
-                                                GtSpecialrangeiterator *sri,
-                                                const GtEncseq *encseq,
-                                                GtReadmode readmode) {
-  gt_assert(separatorpos != NULL);
-
+static GtUword gt_diagbandseed_update_separatorpos(GtUword separatorpos,
+                                                   GtSpecialrangeiterator *sri,
+                                                   const GtEncseq *encseq,
+                                                   GtUword totallength,
+                                                   GtReadmode readmode) {
   if (sri != NULL) {
     GtUword idx;
     GtRange range;
 
-    gt_assert(encseq != NULL && *separatorpos < gt_encseq_total_length(encseq));
-
-    range.start = *separatorpos;
-    range.end = *separatorpos + 1;
+    gt_assert(encseq != NULL && separatorpos < totallength);
+    range.start = separatorpos;
+    range.end = separatorpos + 1;
     while (gt_specialrangeiterator_next(sri, &range)) {
       for (idx = range.start; idx < range.end; idx++) {
         if (gt_encseq_position_is_separator(encseq, idx, readmode)) {
-          *separatorpos = idx;
-          return;
+          return idx;
         }
       }
     }
   }
-  *separatorpos = gt_encseq_total_length(encseq);
+  return totallength;
 }
 
 /* Add given code and its seqnum and position to a list. */
@@ -107,41 +105,41 @@ static void gt_diagbandseed_processkmercode(void *prockmerinfo,
                                             GtUword startpos,
                                             GtCodetype code)
 {
-  GtDiagbandseedProcKmerInfo *arg;
+  GtDiagbandseedProcKmerInfo *pkinfo;
   GtDiagbandseedKmerPos *kmerposptr;
 
   gt_assert(prockmerinfo != NULL);
-  arg = (GtDiagbandseedProcKmerInfo *) prockmerinfo;
-  kmerposptr = arg->list + arg->numberofkmerscollected;
+  pkinfo = (GtDiagbandseedProcKmerInfo *) prockmerinfo;
+  kmerposptr = pkinfo->list + pkinfo->numberofkmerscollected;
 
   /* check separator positions and determine next seqnum and endpos */
   if (firstinrange) {
-    const GtUword endpos = startpos + arg->seedlength - 1;
-    while (endpos >= arg->next_separator) {
-      arg->seqnum++;
-      arg->prev_separator = arg->next_separator + 1;
-      gt_diagbandseed_update_separatorpos(&arg->next_separator,
-                                          arg->sri,
-                                          arg->encseq,
-                                          arg->readmode);
-      gt_assert(arg->next_separator > arg->prev_separator);
+    const GtUword endpos = startpos + pkinfo->seedlength - 1;
+    while (endpos >= pkinfo->next_separator) {
+      pkinfo->seqnum++;
+      pkinfo->prev_separator = pkinfo->next_separator + 1;
+      pkinfo->next_separator
+        = gt_diagbandseed_update_separatorpos(pkinfo->next_separator,
+                                              pkinfo->sri,
+                                              pkinfo->encseq,
+                                              pkinfo->totallength,
+                                              pkinfo->readmode);
+      gt_assert(pkinfo->next_separator > pkinfo->prev_separator);
     }
-    gt_assert(endpos >= arg->prev_separator);
-    arg->endpos = (GtDiagbandseedPosition)(endpos - arg->prev_separator);
+    gt_assert(endpos >= pkinfo->prev_separator);
+    pkinfo->endpos = (GtDiagbandseedPosition) (endpos - pkinfo->prev_separator);
   }
 
   /* save k-mer code */
-  if (arg->readmode == GT_READMODE_FORWARD) {
-    kmerposptr->code = code;
-  } else {
-    kmerposptr->code = gt_kmercode_reverse(code, arg->seedlength);
-  }
-
+  kmerposptr->code
+    = pkinfo->readmode == GT_READMODE_FORWARD
+        ? code
+        : gt_kmercode_reverse(code, pkinfo->seedlength);
   /* save endpos and seqnum */
-  gt_assert(arg->endpos != UINT_MAX);
-  kmerposptr->endpos = arg->endpos++;
-  kmerposptr->seqnum = arg->seqnum;
-  arg->numberofkmerscollected++;
+  gt_assert(pkinfo->endpos != UINT_MAX);
+  kmerposptr->endpos = pkinfo->endpos++;
+  kmerposptr->seqnum = pkinfo->seqnum;
+  pkinfo->numberofkmerscollected++;
 }
 
 /* Uses GtKmercodeiterator for fetching the kmers. */
@@ -158,8 +156,8 @@ static void gt_diagbandseed_get_kmers_kciter(GtDiagbandseedProcKmerInfo *pkinfo)
                                            pkinfo->readmode,
                                            pkinfo->seedlength,
                                            0);
-  if (pkinfo->seedlength <= gt_encseq_total_length(pkinfo->encseq)) {
-    maxpos = gt_encseq_total_length(pkinfo->encseq) + 1 - pkinfo->seedlength;
+  if (pkinfo->seedlength <= pkinfo->totallength) {
+    maxpos = pkinfo->totallength + 1 - pkinfo->seedlength;
   }
 
   /* iterate */
@@ -194,17 +192,19 @@ static GtUword gt_diagbandseed_get_kmers(GtDiagbandseedKmerPos *list,
   pkinfo.encseq = encseq;
   pkinfo.seedlength = seedlength;
   pkinfo.readmode = readmode;
+  pkinfo.totallength = gt_encseq_total_length(encseq);
   pkinfo.sri = NULL;
   if (gt_encseq_has_specialranges(encseq))
   {
     pkinfo.sri = gt_specialrangeiterator_new(encseq, true);
   }
   pkinfo.prev_separator = pkinfo.next_separator = 0;
-  gt_diagbandseed_update_separatorpos(&pkinfo.next_separator,
-                                      pkinfo.sri,
-                                      encseq,
-                                      readmode);
-
+  pkinfo.next_separator
+    = gt_diagbandseed_update_separatorpos(pkinfo.next_separator,
+                                          pkinfo.sri,
+                                          encseq,
+                                          pkinfo.totallength,
+                                          readmode);
   if (gt_encseq_has_twobitencoding(encseq) && gt_encseq_wildcards(encseq) == 0)
   {
     /* Use fast access to encseq, requires 2bit-enc and absence of wildcards. */
@@ -531,6 +531,9 @@ static GtUword gt_diagbandseed_process_seeds(const GtEncseq *aencseq,
         {
           /* extend seed */
           const GtQuerymatch *querymatch = NULL;
+          const GtReadmode query_readmode = GT_READMODE_FORWARD;
+          /* If we have a seed where the second instance is on the reverse
+             strand, set the readmode to GT_READMODE_REVCOMPL */
           if (aencseq == bencseq) {
             count_extensions++;
             querymatch = extend_selfmatch_relative_function(&info_querymatch,
@@ -539,7 +542,8 @@ static GtUword gt_diagbandseed_process_seeds(const GtEncseq *aencseq,
                                                             astart,
                                                             idx->bseqnum,
                                                             bstart,
-                                                            seedlength);
+                                                            seedlength,
+                                                            query_readmode);
           } else {
             querymatch = extend_querymatch_relative_function(&info_querymatch,
                                                              aencseq,
@@ -549,8 +553,7 @@ static GtUword gt_diagbandseed_process_seeds(const GtEncseq *aencseq,
                                                              idx->bseqnum,
                                                              bstart,
                                                              seedlength,
-                                                             GT_READMODE_FORWARD
-                                                             );
+                                                             query_readmode);
           }
           if (querymatch != NULL) {
             firstinrange = false;
@@ -633,12 +636,14 @@ static GtUword gt_seed_extend_numofkmers(const GtEncseq *encseq,
                                          bool mirror)
 {
   GtUword kmers;
-  const GtUword totallen = gt_encseq_total_length(encseq),
+  const GtUword totallength = gt_encseq_total_length(encseq),
                 min_seq_length = gt_encseq_min_seq_length(encseq),
                 num_of_sequences = gt_encseq_num_of_sequences(encseq),
                 num_specialchar = gt_encseq_specialcharacters(encseq);
-  kmers = totallen - (num_of_sequences * MIN(seedlength - 1, min_seq_length));
-  kmers = MIN(kmers, totallen - (seedlength - 1) - num_specialchar);
+  gt_assert(seedlength > 0);
+  kmers = totallength -
+          (num_of_sequences * MIN(seedlength - 1, min_seq_length));
+  kmers = MIN(kmers, totallength - (seedlength - 1) - num_specialchar);
   return mirror ? kmers * 2 : kmers;
 }
 
