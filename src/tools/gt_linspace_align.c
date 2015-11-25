@@ -44,12 +44,12 @@
 #include "tools/gt_linspace_align.h"
 
 #define LEFT_DIAGONAL_SHIFT(similarity, ulen, vlen) \
-                            -((1-similarity)*(MAX(ulen,vlen)) + 1 +\
-                            ((GtWord)ulen-(GtWord)vlen))
+                            -((1-similarity)*(MAX(ulen,vlen)) +\
+                            MIN(((GtWord)ulen-(GtWord)vlen),0))
 
 #define RIGHT_DIAGONAL_SHIFT(similarity, ulen, vlen) \
-                             ((1-similarity)*(MAX(ulen,vlen)) + 1 -\
-                             ((GtWord)ulen-(GtWord)vlen))
+                             ((1-similarity)*(MAX(ulen,vlen)) -\
+                             MAX(((GtWord)ulen-(GtWord)vlen),0))
 
 typedef struct{
   GtStr      *outputfile; /*default stdout*/
@@ -196,13 +196,13 @@ static GtOptionParser* gt_linspace_align_option_parser_new(void *tool_arguments)
   gt_option_parser_add_option(op, optionshowscore);
 
   optionshowsequences = gt_option_new_bool("showsequences", "show sequences u "
-                                           "and v in fornt of alignment",
+                                           "and v in front of alignment",
                                        &arguments->showsequences, false);
   gt_option_parser_add_option(op, optionshowsequences);
 
   optionscoreonly = gt_option_new_bool("showonlyscore", "show only score for "
                                        "generated alignment to compare with "
-                                       "other algorithmen",
+                                       "other algorithms",
                                        &arguments->scoreonly, false);
   gt_option_parser_add_option(op, optionscoreonly);
 
