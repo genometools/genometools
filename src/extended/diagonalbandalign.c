@@ -622,7 +622,7 @@ static GtUword evaluateallDBtabcolumns(LinspaceManagement *spacemanager,
         edge = Linear_D;
       }
 
-      GtUword Rtabentry_from;
+      GtUword Rtabentry_from = 0;
       switch (edge) {
         case Linear_R:
           Rtabentry_from = northwestRtabentry;
