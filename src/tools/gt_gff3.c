@@ -151,8 +151,13 @@ static GtOptionParser* gt_gff3_option_parser_new(void *tool_arguments)
                               "within the scope of each GFF3_file, as required "
                               "by GFF3 specification\n"
                               "(memory consumption is proportional to the "
-                              "input file size(s))", &arguments->checkids,
-                              false);
+                              "input file size(s)).\n"
+                              "If features with the same "GT_GFF_PARENT" "
+                              "attribute are not separated by a '"
+                              GT_GFF_TERMINATOR"' line the GFF3 parser tries "
+                              "to treat them as a multi-line feature. This "
+                              "requires at least matching sequence IDs and "
+                              "types.", &arguments->checkids, false);
   gt_option_parser_add_option(op, option);
 
   /* -addids */
