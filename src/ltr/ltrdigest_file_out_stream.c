@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2008-2013 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
+  Copyright (c) 2008-2015 Sascha Steinbiss <sascha@steinbiss.name>
   Copyright (c) 2008-2013 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -77,9 +77,6 @@ struct GtLTRdigestFileOutStream {
          *ltr5out_file,
          *ltr3out_file,
          *elemout_file;
-  GtHashmap *pdomout_files,
-            *pdomali_files,
-            *pdomaa_files;
   GtLTRVisitor *lv;
   int tests_to_run;
   unsigned int seqnamelen;
@@ -246,58 +243,37 @@ static int write_pdom(GtLTRdigestFileOutStream *ls, GtArray *pdoms,
 {
   int had_err = 0;
   GtFile *seqfile = NULL,
-            *alifile = NULL,
-            *aafile = NULL;
+         *alifile = NULL,
+         *aafile = NULL;
   GtUword i = 0,
                 seq_length = 0;
   GtStr *pdom_seq,
         *pdom_aaseq;
   gt_error_check(err);
+  char buffer[GT_MAXFILENAMELEN];
 
   pdom_seq = gt_str_new();
   pdom_aaseq = gt_str_new();
 
-  /* get protein domain output file */
-  seqfile = (GtFile*) gt_hashmap_get(ls->pdomout_files, pdomname);
-  if (seqfile == NULL)
-  {
-    /* no file opened for this domain yet, do it */
-    char buffer[GT_MAXFILENAMELEN];
-    (void) snprintf(buffer, (size_t) (GT_MAXFILENAMELEN-1), "%s_pdom_%s.fas",
-                    ls->fileprefix, pdomname);
-    seqfile = gt_file_xopen(buffer, "w+");
-    gt_hashmap_add(ls->pdomout_files, gt_cstr_dup(pdomname), seqfile);
-  }
+  (void) snprintf(buffer, (size_t) (GT_MAXFILENAMELEN-1), "%s_pdom_%s.fas",
+                  ls->fileprefix, pdomname);
+  seqfile = gt_file_xopen(buffer, "w+");
 
   /* get protein alignment output file */
   if (ls->write_pdom_alignments)
   {
-    alifile = (GtFile*) gt_hashmap_get(ls->pdomali_files, pdomname);
-    if (alifile == NULL)
-    {
-      /* no file opened for this domain yet, do it */
-      char buffer[GT_MAXFILENAMELEN];
-      (void) snprintf(buffer, (size_t) (GT_MAXFILENAMELEN-1), "%s_pdom_%s.ali",
-                      ls->fileprefix, pdomname);
-      alifile = gt_file_xopen(buffer, "w+");
-      gt_hashmap_add(ls->pdomali_files, gt_cstr_dup(pdomname), alifile);
-    }
+    (void) snprintf(buffer, (size_t) (GT_MAXFILENAMELEN-1), "%s_pdom_%s.ali",
+                    ls->fileprefix, pdomname);
+    alifile = gt_file_xopen(buffer, "w+");
   }
 
   /* get amino acid sequence output file */
   if (ls->write_pdom_aaseqs)
   {
-    aafile = (GtFile*) gt_hashmap_get(ls->pdomaa_files, pdomname);
-    if (aafile == NULL)
-    {
-      /* no file opened for this domain yet, do it */
-      char buffer[GT_MAXFILENAMELEN];
-      (void) snprintf(buffer, (size_t) (GT_MAXFILENAMELEN-1),
-                      "%s_pdom_%s_aa.fas",
-                      ls->fileprefix, pdomname);
-      aafile = gt_file_xopen(buffer, "w+");
-      gt_hashmap_add(ls->pdomaa_files, gt_cstr_dup(pdomname), aafile);
-    }
+    (void) snprintf(buffer, (size_t) (GT_MAXFILENAMELEN-1),
+                    "%s_pdom_%s_aa.fas",
+                    ls->fileprefix, pdomname);
+    aafile = gt_file_xopen(buffer, "w+");
   }
 
   if (gt_array_size(pdoms) > 1UL)
@@ -322,7 +298,6 @@ static int write_pdom(GtLTRdigestFileOutStream *ls, GtArray *pdoms,
     GtStr *ali,
           *aaseq;
     GtFeatureNode *fn;
-    int rval;
 
     fn = *(GtFeatureNode**) gt_array_get(pdoms, i);
 
@@ -330,19 +305,18 @@ static int write_pdom(GtLTRdigestFileOutStream *ls, GtArray *pdoms,
     aaseq = gt_genome_node_get_user_data((GtGenomeNode*) fn, "pdom_aaseq");
     pdom_rng = gt_genome_node_get_range((GtGenomeNode*) fn);
 
-    rval = gt_extract_feature_sequence(pdom_seq, (GtGenomeNode*) fn,
-                                       gt_symbol(gt_ft_protein_match), false,
-                                       NULL, NULL, rmap, err);
-
-    if (rval)
+    if (gt_extract_feature_sequence(pdom_seq, (GtGenomeNode*) fn,
+                                    gt_symbol(gt_ft_protein_match), false,
+                                    NULL, NULL, rmap, err))
     {
       had_err = -1;
       break;
     }
+
     if (ls->write_pdom_alignments && ali)
     {
       char buf[BUFSIZ];
-
+      gt_assert(alifile);
       /* write away alignment */
       (void) snprintf(buf, BUFSIZ-1, "Protein domain alignment in translated "
                                      "sequence for candidate\n'%s':\n\n",
@@ -364,6 +338,7 @@ static int write_pdom(GtLTRdigestFileOutStream *ls, GtArray *pdoms,
 
   if (!had_err)
   {
+    gt_assert(seqfile);
     gt_fasta_show_entry(desc,
                         gt_str_get(pdom_seq),
                         seq_length,
@@ -371,6 +346,7 @@ static int write_pdom(GtLTRdigestFileOutStream *ls, GtArray *pdoms,
                         seqfile);
     if (ls->write_pdom_aaseqs)
     {
+      gt_assert(aafile);
       gt_fasta_show_entry(desc,
                           gt_str_get(pdom_aaseq),
                           gt_str_length(pdom_aaseq),
@@ -380,6 +356,9 @@ static int write_pdom(GtLTRdigestFileOutStream *ls, GtArray *pdoms,
   }
   gt_str_delete(pdom_seq);
   gt_str_delete(pdom_aaseq);
+  gt_file_delete(aafile);
+  gt_file_delete(alifile);
+  gt_file_delete(seqfile);
   return had_err;
 }
 
@@ -663,9 +642,6 @@ void gt_ltrfileout_stream_free(GtNodeStream *ns)
     gt_file_delete(ls->ltr3out_file);
   if (ls->elemout_file != NULL)
     gt_file_delete(ls->elemout_file);
-  gt_hashmap_delete(ls->pdomout_files);
-  gt_hashmap_delete(ls->pdomali_files);
-  gt_hashmap_delete(ls->pdomaa_files);
   gt_node_visitor_delete((GtNodeVisitor*) ls->lv);
   gt_node_stream_delete(ls->in_stream);
 }
@@ -897,14 +873,6 @@ GtNodeStream* gt_ltrdigest_file_out_stream_new(GtNodeStream *in_stream,
   }
 
   if (!had_err) {
-    /* create hashmaps to hold protein domain output files */
-    ls->pdomout_files = gt_hashmap_new(GT_HASH_STRING, gt_free_func,
-                                       (GtFree) gt_file_delete);
-    ls->pdomali_files = gt_hashmap_new(GT_HASH_STRING, gt_free_func,
-                                       (GtFree) gt_file_delete);
-    ls->pdomaa_files  = gt_hashmap_new(GT_HASH_STRING, gt_free_func,
-                                       (GtFree) gt_file_delete);
-
     /* print tabular outfile headline */
     gt_file_xprintf(ls->tabout_file,
                 "element start\telement end\telement length\tsequence\t"
