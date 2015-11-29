@@ -47,7 +47,7 @@ GtUword construct_trivial_insertion_alignment(GtAlignment *align,
   return len * gapcost;
 }
 
-/* reconstruct global alignment from square space table ED */
+/* reconstruct global alignment from square space table E */
 void reconstructalignment_from_EDtab(GtAlignment *align,
                                      GtUword * const *E,
                                      const GtUchar *useq,
@@ -94,7 +94,7 @@ void reconstructalignment_from_EDtab(GtAlignment *align,
 /* reconstruct local alignment from square space table Ltab */
 void reconstructalignment_from_Ltab(GtAlignment *align,
                                     GtWord **Ltabcolumn,
-                                    Gtmaxcoordvalue *max,
+                                    GtMaxcoordvalue *max,
                                     const GtUchar *useq,
                                     GtUword ustart,
                                     GT_UNUSED GtUword ulen,
@@ -144,8 +144,7 @@ void reconstructalignment_from_Ltab(GtAlignment *align,
 }
 
 /* reconstruct alignment from crosspoint table
- * crosspoints relating to midolumn
- */
+   crosspoints relating to midolumn */
 void reconstructalignment_from_Ctab(GtAlignment *align,
                                     const GtUword *Ctab,
                                     const GtUchar *useq,
@@ -385,26 +384,6 @@ void reconstructalignment_from_affineDtab(GtAlignment *align,
       else
       {
         gt_assert(false);
-        /*for (j = 0; j < prevnode.currentrowindex - node.currentrowindex - 1;
-             j++)
-        {
-          gt_alignment_add_deletion(align);
-        }
-        if (prevnode.last_type == Affine_I)
-        {
-          if (tolower((int)vseq[i-1]) ==
-              tolower((int)useq[node.currentrowindex]))
-          {
-            gt_alignment_add_replacement(align);
-          }
-          else
-          {
-            gt_alignment_add_deletion(align);
-            gt_alignment_add_insertion(align);
-          }
-        }
-        else
-          gt_alignment_add_replacement(align);*/
       }
     }
     prevedge = prevnode.last_type;
