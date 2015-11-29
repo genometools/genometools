@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2015 Annika Seidel, annika.seidel@studium.uni-hamburg.de
+  Copyright (C) 2015 Annika Seidel, <annika.seidel@studium.uni-hamburg.de>
   Copyright (c) 2007 Gordon Gremme <gordon@gremme.org>
   Copyright (c) 2007-2015 Center for Bioinformatics, University of Hamburg
 
@@ -31,6 +31,8 @@ typedef enum {
   Affine_X /* unknown */
 } AffineAlignEdge;
 
+/* <AffinealignDPentry> objects describe the information of distance values and
+   backtracing edges relating on last edit operation R,D,I. */
 typedef struct {
   GtWord Rvalue, Dvalue, Ivalue, totalvalue;
   AffineAlignEdge Redge,
@@ -38,28 +40,43 @@ typedef struct {
                   Iedge;
 } AffinealignDPentry;
 
-/* (globally) align u and v (affine gap costs) and return one optimal
-   GtAlignment */
+/* Computes a global alignment with affine gapcosts in square space
+   and constant cost values. Use of this function requires input sequences
+   <useq> and <vseq> and lengths <ulen> and <vlen>. The cost values are
+   specified by <matchcost>, <mismatchcost>, <gap_opening_cost> and
+   <gap_extension_cost>. Returns an object of the <GtAlignment> class. */
 GtAlignment* gt_affinealign(const GtUchar *u, GtUword ulen,
                             const GtUchar *v, GtUword vlen,
                             GtUword matchcost, GtUword mismatchcost,
                             GtUword gap_opening_cost,
                             GtUword gap_extension_cost);
 
-/* globall alignment (DNA or protein)*/
-GtWord gt_affinealign_with_Management(LinspaceManagement *spacemanager,
-                                    GtScoreHandler *scorehandler,
-                                    GtAlignment *align,
-                                    const GtUchar *u, GtUword ulen,
-                                    const GtUchar *v, GtUword vlen);
+/* Computes a global alignment with affine gapcosts in square space. Use of this
+   function requires an initialised <scorehandler> with cost values an
+   initalised <spacemanager>, the target alignment <align> and input sequences
+   <useq> and <vseq> and lengths <ulen> and <vlen>. Returns affine cost
+   value of global alignment. */
+GtWord gt_affinealign_with_Management(GtLinspaceManagement *spacemanager,
+                                      const GtScoreHandler *scorehandler,
+                                      GtAlignment *align,
+                                      const GtUchar *u, GtUword ulen,
+                                      const GtUchar *v, GtUword vlen);
 
 GtWord affinealign_traceback(GtAlignment *a,
-                           AffinealignDPentry * const *dptable,
-                           GtUword i, GtUword j);
+                             AffinealignDPentry * const *dptable,
+                             GtUword i, GtUword j);
 
-/* filling ctab to combine square calculating with linear calculating */
-void affine_ctab_in_square_space(LinspaceManagement *spacemanager,
-                                 GtScoreHandler *scorehandler,
+/* Computes crosspoints for a global alignment with affine gapcosts in square
+   space. Use of this function requires an initialised <spacemanager> an
+   initialised <scorehandler> with cost values, the target crosspoint table
+   <Ctab> and input sequences <useq> and <vseq>, with the regions to align given
+   by their start positions <ustart> and <vstart> and lengths <ulen> and <vlen>.
+   If this function is use in linear context, <rowoffset> is the offset value of
+   the subproblem and <from_edge> and <to_edge> are the in- and outcoming edge
+   of this subproblem. Otherwise set default values 0 and Affine_X. Returns
+   affine distance value of global alignment. */
+void affine_ctab_in_square_space(GtLinspaceManagement *spacemanager,
+                                 const GtScoreHandler *scorehandler,
                                  GtUword *Ctab,
                                  const GtUchar *useq,
                                  GtUword ustart,
@@ -71,11 +88,17 @@ void affine_ctab_in_square_space(LinspaceManagement *spacemanager,
                                  AffineAlignEdge from_edge,
                                  AffineAlignEdge to_edge);
 
-/* create an local alignment in square space, to use it in linear context you
- * have to generate an spacemanager before, in any other case it can be NULL,
- * (DNA or protein) */
-GtWord affinealign_in_square_space_local_generic(LinspaceManagement *space,
-                                                 GtScoreHandler *scorehandler,
+/* Computes a local alignment with linear gapcosts in square space. Use of this
+   function requires an initialised <scorehandler> with score values, the target
+   alignment <align> and input sequences <useq> and <vseq>, with the regions to
+   align given by their start positions <ustart> and <vstart> and lengths <ulen>
+   and <vlen>. An initialised <spacemanager> is required to use this function in
+   linear space context, in any other case it can be NULL. Returns score
+   value of local alignment. */
+GtWord affinealign_in_square_space_local_generic(GtLinspaceManagement
+                                                 *spacemanager,
+                                                 const GtScoreHandler
+                                                 *scorehandler,
                                                  GtAlignment *align,
                                                  const GtUchar *useq,
                                                  GtUword ustart,
@@ -84,8 +107,15 @@ GtWord affinealign_in_square_space_local_generic(LinspaceManagement *space,
                                                  GtUword vstart,
                                                  GtUword vlen);
 
-/* same with constant score values, use it only for DNA sequences! */
-GtWord affinealign_in_square_space_local(LinspaceManagement *spacemanager,
+/* Computes a local alignment with affine gapcosts in square space
+   and constant score values. Use of this function requires the target alignment
+   <align> and input sequences <useq> and <vseq>, with the regions to align
+   given by their start positions <ustart> and <vstart> and lengths <ulen> and
+   <vlen>. The score values are specified by <matchscore>, <mismatchscore>,
+   <gap_opening> and <gap_extension>. An initialised <spacemanager> is required
+   to use this function in linear space context, in any other case it can be
+   NULL. Returns affine score value of local alignment. */
+GtWord affinealign_in_square_space_local(GtLinspaceManagement *spacemanager,
                                          GtAlignment *align,
                                          const GtUchar *useq,
                                          GtUword ustart,

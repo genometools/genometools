@@ -31,61 +31,90 @@ typedef enum {
   Linear_X /* unknown */
 } LinearAlignEdge;
 
+/* <Diagentry> objects are entries of DP-matrix with a diagonal band. */
 typedef struct {
   GtUword lastcpoint, currentrowindex;
   int last_type;
 } Diagentry;
 
 void gt_checkdiagonalbandalign(GT_UNUSED bool forward,
-                                const GtUchar *useq,
-                                GtUword ulen,
-                                const GtUchar *vseq,
-                                GtUword vlen);
+                               const GtUchar *useq,
+                               GtUword ulen,
+                               const GtUchar *vseq,
+                               GtUword vlen);
 
-/* creating global alignment with diagonalband in linear space,
- * (DNA or protein) */
-void gt_computediagonalbandalign_generic(LinspaceManagement *spacemanager,
-                                            GtScoreHandler *scorehandler,
+/* Computes a global alignment within a diagonal band with linear gapcosts in
+   linear space. Use of this function requires an initialised <spacemanager>,
+   the target alignment <align> and input sequences <useq> and <vseq>, with the
+   regions to align given by their start positions <ustart> and <vstart> and
+   lengths <ulen> and <vlen>. The cost values are specified by an initialised
+   <scorehandler>. <left_dist> and <right_dist> give lower and upper bound of
+   which part of DP-matrix is valid in a diagonal band. Returns distance value
+   of calculated global alignment. */
+void gt_computediagonalbandalign_generic(GtLinspaceManagement *spacemanager,
+                                         const GtScoreHandler *scorehandler,
+                                         GtAlignment *align,
+                                         const GtUchar *useq,
+                                         GtUword ustart, GtUword ulen,
+                                         const GtUchar *vseq,
+                                         GtUword vstart, GtUword vlen,
+                                         GtWord left_dist,
+                                         GtWord right_dist);
+
+/* Computes a global alignment within a diaognal band with linear gapcosts in
+   linear space and constant cost values. Use of this function requires an
+   initialised <spacemanager>, the target alignment <align> and input sequences
+   <useq> and <vseq>, with the regions to align given by their start positions
+   <ustart> and <vstart> and lengths <ulen> and <vlen>. The cost values are
+   specified by <matchcost>, <mismatchcost> and <gapcost>. <left_dist> and
+   <right_dist> give lower and upper bound of which part of DP-matrix is valid
+   in a diagonal band. Returns distance value of calculated global alignment. */
+void gt_computediagonalbandalign(GtLinspaceManagement *spacemanager,
+                                 GtAlignment *align,
+                                 const GtUchar *useq,
+                                 GtUword ustart, GtUword ulen,
+                                 const GtUchar *vseq,
+                                 GtUword vstart, GtUword vlen,
+                                 GtWord left_dist,
+                                 GtWord right_dist,
+                                 GtUword matchcost,
+                                 GtUword mismatchcost,
+                                 GtUword gapcost);
+
+/* Computes a global alignment within a diagonal band with linear gapcosts in
+   square space. Use of this function requires an initialised <scorehandler>
+   with cost values, the target alignment <align> and input sequences <useq> and
+   <vseq>, with the regions to align given by their start positions <ustart> and
+   <vstart> and lengths <ulen> and <vlen>. <left_dist> and <right_dist> give
+   lower and upper bound of which part of DP-matrix is valid in a diagonal band.
+   <spacemanager> is required to use this function in linear space context, in
+   any other case it can be NULL. <scorehandler> manages linear gap costs.
+   Returns cost value of global alignment. */
+GtUword diagonalbandalignment_in_square_space_generic(
+                                            GtLinspaceManagement *space,
                                             GtAlignment *align,
                                             const GtUchar *useq,
-                                            GtUword ustart, GtUword ulen,
+                                            GtUword ustart,
+                                            GtUword ulen,
                                             const GtUchar *vseq,
-                                            GtUword vstart, GtUword vlen,
+                                            GtUword vstart,
+                                            GtUword vlen,
                                             GtWord left_dist,
-                                            GtWord right_dist);
+                                            GtWord right_dist,
+                                            const GtScoreHandler *scorehandler);
 
-/* creating alignment with diagonalband in linear space
- * with constant cost values, only useful for DNA sequences */
-void gt_computediagonalbandalign(LinspaceManagement *spacemanager,
-                                    GtAlignment *align,
-                                    const GtUchar *useq,
-                                    GtUword ustart, GtUword ulen,
-                                    const GtUchar *vseq,
-                                    GtUword vstart, GtUword vlen,
-                                    GtWord left_dist,
-                                    GtWord right_dist,
-                                    GtUword matchcost,
-                                    GtUword mismatchcost,
-                                    GtUword gapcost);
-
-/* creating alignment with diagonalband in square space,
- * to use it in linear context you have to generate an spacemanager before,
- * in any other case it can be NULL,
- * (DNA or protein) */
-GtUword diagonalbandalignment_in_square_space_generic(LinspaceManagement *space,
-                                                  GtAlignment *align,
-                                                  const GtUchar *useq,
-                                                  GtUword ustart,
-                                                  GtUword ulen,
-                                                  const GtUchar *vseq,
-                                                  GtUword vstart,
-                                                  GtUword vlen,
-                                                  GtWord left_dist,
-                                                  GtWord right_dist,
-                                                  GtScoreHandler *scorehandler);
-
-/* same with constant cost values, only useful for DNA sequences */
-GtUword diagonalbandalignment_in_square_space(LinspaceManagement *spacemanager,
+/* Computes a global alignment within a diagonal band with linear gapcosts in
+   square space and constant cost values. Use of this function requires the
+   target alignment <align> and input sequences <useq> and <vseq>, with the
+   regions to align given by their start positions <ustart> and <vstart> and
+   lengths <ulen> and <vlen>. <left_dist> and <right_dist> give lower and upper
+   bound of which part of DP-matrix is valid in a diagonal band. The cost values
+   are specified by <matchcost>, <mismatchcost> and <gapcost>.
+   <spacemanager> is required to use this function in linear space context, in
+   any other case it can be NULL. <scorehandler> manages linear gap costs.
+   Returns cost value of global alignment. */
+GtUword diagonalbandalignment_in_square_space(GtLinspaceManagement
+                                              *spacemanager,
                                               GtAlignment *align,
                                               const GtUchar *useq,
                                               GtUword ustart,
