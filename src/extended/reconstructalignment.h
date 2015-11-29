@@ -25,18 +25,16 @@
 #include "extended/maxcoordvalue.h"
 #include "extended/scorehandler.h"
 
-/* Reconstructs a global alignment with linear or affine gapcost, which contains
-   only deletion edit operation. Use of this function requires the target
-   alignment <align>, <gapcost> and <len> as the length of the not empty one
-   sequence. Returns linear cost value of global alignment. */
+/* Add an alignment of length <len> to <align> containing only deletion
+   operations. Returns linear cost value of constructed alignment using
+   specified <gapcost>. */
 GtUword construct_trivial_deletion_alignment(GtAlignment *align,
                                              GtUword len,
                                              GtUword gapcost);
 
-/* Reconstructs a global alignment with linear or affine gapcost, which contains
-   only insertion edit operation. Use of this function requires the target
-   alignment <align>, <gapcost> and <len> as the length of the not empty one
-   sequence. Returns linear cost value of global alignment. */
+/* Add an alignment of length <len> to <align> containing only insertion
+   operations. Returns linear cost value of constructed alignment using
+   specified <gapcost>. */
 GtUword construct_trivial_insertion_alignment(GtAlignment *align,
                                               GtUword len,
                                               GtUword gapcost);
@@ -44,8 +42,8 @@ GtUword construct_trivial_insertion_alignment(GtAlignment *align,
 /* Reconstruct an object <align> from square space table <E>, which describes
    a global alignment between two sequences  <useq> and <vseq>, with the
    regions to align given by their start positions <ustart> and <vstart> and
-   lengths <ulen> and <vlen>. <scorehandler> specify the cost values with them
-   the <E>-matrix was created. */
+   lengths <ulen> and <vlen>. <scorehandler> specifies the cost values with
+   which the <E>-matrix was created. */
 void reconstructalignment_from_EDtab(GtAlignment *align,
                                      GtUword * const *E,
                                      const GtUchar *useq,
@@ -59,8 +57,8 @@ void reconstructalignment_from_EDtab(GtAlignment *align,
 /* Reconstruct an object <align> from square space table <Ltabcolumn>, which
    describes a local alignment between two sequences  <useq> and <vseq>, with
    the regions to align given by their start positions <ustart> and <vstart> and
-   lengths <ulen> and <vlen>. <scorehandler> specify the cost values with them
-   the <Ltabcolumn>-matrix was created. */
+   lengths <ulen> and <vlen>. <scorehandler> specifies the score values with
+   which the <Ltabcolumn>-matrix was created. */
 void reconstructalignment_from_Ltab(GtAlignment *align,
                                     GtWord **Ltabcolumn,
                                     GtMaxcoordvalue *max,
@@ -75,8 +73,8 @@ void reconstructalignment_from_Ltab(GtAlignment *align,
 /* Reconstruct an object <align> from crosspoints in <Ctab> between two
    sequences  <useq> and <vseq>, with the regions to align given by their start
    positions <ustart> and <vstart> and lengths <ulen> and <vlen>. The
-   crosspoints are relating to midcolumn. <scorehandler> specify the cost values
-   with them the <Ctab> was created. */
+   crosspoints are located on midcolumns. <scorehandler> specifies the cost
+   values with which the <Ctab> was created. */
 void reconstructalignment_from_Ctab(GtAlignment *align,
                                     const GtUword *Ctab,
                                     const GtUchar *useq,
@@ -89,7 +87,7 @@ void reconstructalignment_from_Ctab(GtAlignment *align,
 /* Reconstruct an object <align> from crosspoints in <Dtab> between two
    sequences  <useq> and <vseq>, with the regions to align given by their start
    positions <ustart> and <vstart> and lengths <ulen> and <vlen>. The
-   crosspoints are relating to a diagonaland the and the evaluation based on
+   crosspoints are located on diagonals and the evaluation is based on
    linear gap costs. */
 void reconstructalignment_from_Dtab(GtAlignment *align,
                                     const Diagentry *Dtab, GtUword ulen,
@@ -98,7 +96,7 @@ void reconstructalignment_from_Dtab(GtAlignment *align,
 /* Reconstruct an object <align> from crosspoints in <Dtab> between two
    sequences  <useq> and <vseq>, with the regions to align given by their start
    positions <ustart> and <vstart> and lengths <ulen> and <vlen>. The
-   crosspoints are relating to a diagonaland the and the evaluation based on
+   crosspoints are located on diagonals and the and the evaluation is based on
    affine gap costs. */
 void reconstructalignment_from_affineDtab(GtAlignment *align,
                                           const AffineDiagentry *Dtab,

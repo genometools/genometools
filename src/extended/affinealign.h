@@ -71,9 +71,9 @@ GtWord affinealign_traceback(GtAlignment *a,
    initialised <scorehandler> with cost values, the target crosspoint table
    <Ctab> and input sequences <useq> and <vseq>, with the regions to align given
    by their start positions <ustart> and <vstart> and lengths <ulen> and <vlen>.
-   If this function is use in linear context, <rowoffset> is the offset value of
-   the subproblem and <from_edge> and <to_edge> are the in- and outcoming edge
-   of this subproblem. Otherwise set default values 0 and Affine_X. Returns
+   If this function is used in linear context, <rowoffset> is the offset value
+   of the subproblem and <from_edge> and <to_edge> are the in- and outcoming
+   edge of this subproblem. Otherwise set default values 0 and Affine_X. Returns
    affine distance value of global alignment. */
 void affine_ctab_in_square_space(GtLinspaceManagement *spacemanager,
                                  const GtScoreHandler *scorehandler,

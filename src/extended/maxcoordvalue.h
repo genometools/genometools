@@ -37,15 +37,14 @@ GtUwordPair gt_max_get_start(const GtMaxcoordvalue *max);
 void gt_max_set_end_with_pair(GtMaxcoordvalue *max, GtUwordPair end);
 /* Return the end coordinates for the given <max>. */
 GtUwordPair gt_max_get_end(const GtMaxcoordvalue *max);
-/* Set an new maximal <value> and update coordinates for the given <max> in
-   linear space context by calling set-functions for start coordinates <start>
-   and end coordinates <enda> and <endb>. */
+/* Set a new maximum <value> and update coordinates for the given <max> by
+   calling set-functions for start coordinates <start> and end coordinates
+   <enda> and <endb>. */
 void gt_max_coord_update(GtMaxcoordvalue *max, GtWord value,
                          GtUwordPair start,
                          GtUword enda, GtUword endb);
-/* Set an new maximal <value> and update coordinates for the given <max> in
-   square space context by calling set-functions for end coordinates <enda> and
-   <endb>. */
+/* Set a new maximum <value> and update coordinates for the given <max> by
+   calling set-functions for end coordinates <enda> and <endb>. */
 void gt_max_coord_update_without_start (GtMaxcoordvalue *max, GtWord value,
                                         GtUword enda, GtUword endb);
 /* Return the difference between row indices of start and end coordinates of the

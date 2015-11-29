@@ -41,7 +41,7 @@ void gt_checkdiagonalbandaffinealign(GT_UNUSED bool forward,
    regions to align given by their start positions <ustart> and <vstart> and
    lengths <ulen> and <vlen>. The cost values are specified by an initialised
    <scorehandler>. <left_dist> and <right_dist> give lower and upper bound of
-   which part of DP-matrix is valid in a diagonal band. Returns affine cost
+   a diagonal band in which DP-matrix is valid. Returns affine cost
    value of calculated global alignment. */
 void gt_computediagonalbandaffinealign_generic(
                                             GtLinspaceManagement *spacemanager,
@@ -60,9 +60,8 @@ void gt_computediagonalbandaffinealign_generic(
    <useq> and <vseq>, with the regions to align given by their start positions
    <ustart> and <vstart> and lengths <ulen> and <vlen>. The cost values are
    specified by <matchcost>, <mismatchcost> and <gapcost>. <left_dist> and
-   <right_dist> give lower and upper bound of which part of DP-matrix is valid
-   in a diagonal band. Returns affine cost value of calculated global
-   alignment. */
+   <right_dist> give lower and upper bound of a diagonal band in which DP-matrix
+   is valid. Returns affine cost value of calculated global alignment. */
 void gt_computediagonalbandaffinealign(GtLinspaceManagement *spacemanager,
                                           GtAlignment *align,
                                           const GtUchar *useq,
@@ -80,9 +79,9 @@ void gt_computediagonalbandaffinealign(GtLinspaceManagement *spacemanager,
    affine gapcosts in square space. Use of this function requires the input
    sequences <useq> and <vseq>, with the regions to align given by their start
    positions <ustart> and <vstart> and lengths <ulen> and <vlen>. <left_dist>
-   and <right_dist> give lower and upper bound of which part of DP-matrix is
-   valid in a diagonal band. The cost values are specified by <scorehandler>.
-   Returns cost value of global alignment. */
+   and <right_dist> give lower and upper bound of a diagonal band in which
+   DP-matrix is valid. The cost values are specified by <scorehandler>. Returns
+   cost value of global alignment. */
 GtWord diagonalband_square_space_affine(const GtUchar *useq,
                                          GtUword ustart,
                                          GtUword ulen,
@@ -98,7 +97,7 @@ GtWord diagonalband_square_space_affine(const GtUchar *useq,
    with cost values, the target alignment <align> and input sequences <useq> and
    <vseq>, with the regions to align given by their start positions <ustart> and
    <vstart> and lengths <ulen> and <vlen>. <left_dist> and <right_dist> give
-   lower and upper bound of which part of DP-matrix is valid in a diagonal band.
+   lower and upper bound of a diagonal band in which DP-matrix is valid.
    <spacemanager> is required to use this function in linear space context, in
    any other case it can be NULL. <scorehandler> manages linear gap costs.
    Returns cost value of global alignment. */
@@ -120,7 +119,7 @@ GtWord diagonalbandalignment_in_square_space_affine_generic(
    target alignment <align> and input sequences <useq> and <vseq>, with the
    regions to align given by their start positions <ustart> and <vstart> and
    lengths <ulen> and <vlen>. <left_dist> and <right_dist> give lower and upper
-   bound of which part of DP-matrix is valid in a diagonal band. The cost values
+   bound of a diagonal band in which DP-matrix is valid. The cost values
    are specified by <matchcost>, <mismatchcost> and <gapcost>.
    <spacemanager> is required to use this function in linear space context, in
    any other case it can be NULL. <scorehandler> manages linear gap costs.

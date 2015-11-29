@@ -34,19 +34,19 @@ void gt_linspaceManagement_delete(GtLinspaceManagement *spacemanager);
    <spacemanager>*/
 size_t gt_linspaceManagement_get_spacepeak(const GtLinspaceManagement
                                                                  *spacemanager);
-/* Checks if enough space is allocated for the three tabs, whichs are stored in
-   the given <spacemanager> in global case and resize if necessary. The required
-   space is dependent of the size of one entry, given by <valuesize>, <rtabsize>
-   and <crosspointsize> and the count of values given by sequence lengths <ulen>
-   and <vlen>. */
+/* Check if enough space is allocated for the three tabs, whichs are stored in
+   the given <spacemanager> for global alignments and resize if necessary. The
+   required space depends on the size of one entry, given by <valuesize>,
+   <rtabsize>, <crosspointsize> and the count of values given by sequence
+   lengths <ulen> and <vlen>. */
 void gt_linspaceManagement_check(GtLinspaceManagement *spacemanager,
                                  GtUword ulen, GtUword vlen,
                                  size_t valuesize,
                                  size_t rtabsize,
                                  size_t crosspointsize);
-/* Checks if enough space is allocated for the tabs, whichs are stored in
-   the given <spacemanager> in local case and resize if necessary. The required
-   space is dependent of the size of one entry, given by <valuesize> and
+/* Check if enough space is allocated for the two tabs, which are stored in
+   the given <spacemanager> for local alignments and resize if necessary. The
+   required space depends on of the size of one entry, given by <valuesize>,
    <rtabsize> and the count of values given by sequence lengths <ulen>
    and <vlen>. */
 void  gt_linspaceManagement_check_local(GtLinspaceManagement *spacemanager,
@@ -54,7 +54,7 @@ void  gt_linspaceManagement_check_local(GtLinspaceManagement *spacemanager,
                                         size_t valuesize,
                                         size_t rstabsize);
 
-/* Checks if enough space to use square space functions in global case is
+/* Check if enough space to use square space functions in global case is
    allocated in the given <spacemanager>. To use this function <valuesize>,
    <rsize> and the sequence lengths <ulen> and <vlen> are required. If a
    timesquarefactor is set, the function checks also the relation with this
@@ -65,7 +65,7 @@ bool gt_linspaceManagement_checksquare(GtLinspaceManagement *spacemanager,
                                        size_t valuesize,
                                        size_t rsize);
 
-/* Checks if enough space to use square space functions in local case is
+/* Check if enough space to use square space functions in local case is
    allocated in the given <spacemanager>. To use this function <valuesize>,
    <rsize> and the sequence lengths <ulen> and <vlen> are required. If a
    timesquarefactor is set, the function checks also the relation with this

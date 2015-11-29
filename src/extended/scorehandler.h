@@ -21,7 +21,8 @@
 #include "core/types_api.h"
 #include "extended/alignment.h"
 
-/* The <GtScoreHandler> interface.*/
+/* The <GtScoreHandler> interface. A <GtScoreHandler> object sepcifies the cost
+   or score values used for generating an alignment. */
 typedef struct GtScoreHandler GtScoreHandler;
 
 /* Return a <GtScoreHandler> object with constant cost or score values, which
@@ -35,11 +36,11 @@ GtScoreHandler* gt_scorehandler_new(GtWord matchscore,
 /* Add a <scorematrix> to the given <scorehandler>. */
 void gt_scorehandler_add_scorematrix(GtScoreHandler *scorehandler,
                                      GtScoreMatrix *scorematrix);
-/* Set false for mappedsequence value to the given <scorehandler>. */
+/* Set false for mappedsequence value of the given <scorehandler>. */
 void gt_scorehandler_plain(GtScoreHandler *scorehandler);
-/* Set true for downcase value to the given <scorehandler>. */
+/* Set true for downcase value of the given <scorehandler>. */
 void gt_scorehandler_downcase(GtScoreHandler *scorehandler);
-/* Delete the given <scorehandler> */
+/* Delete the given <scorehandler>. */
 void gt_scorehandler_delete(GtScoreHandler *scorehandler);
 /* Return gap_opening score value for the given <scorehandler>. */
 GtWord gt_scorehandler_get_gap_opening(const GtScoreHandler *scorehandler);

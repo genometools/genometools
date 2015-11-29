@@ -49,7 +49,7 @@ void gt_checkdiagonalbandalign(GT_UNUSED bool forward,
    regions to align given by their start positions <ustart> and <vstart> and
    lengths <ulen> and <vlen>. The cost values are specified by an initialised
    <scorehandler>. <left_dist> and <right_dist> give lower and upper bound of
-   which part of DP-matrix is valid in a diagonal band. Returns distance value
+   a diagonal band in which DP-matrix is valid. Returns distance value
    of calculated global alignment. */
 void gt_computediagonalbandalign_generic(GtLinspaceManagement *spacemanager,
                                          const GtScoreHandler *scorehandler,
@@ -67,8 +67,8 @@ void gt_computediagonalbandalign_generic(GtLinspaceManagement *spacemanager,
    <useq> and <vseq>, with the regions to align given by their start positions
    <ustart> and <vstart> and lengths <ulen> and <vlen>. The cost values are
    specified by <matchcost>, <mismatchcost> and <gapcost>. <left_dist> and
-   <right_dist> give lower and upper bound of which part of DP-matrix is valid
-   in a diagonal band. Returns distance value of calculated global alignment. */
+   <right_dist> give lower and upper bound of a diagonal band in which DP-matrix
+   is valid. Returns distance value of calculated global alignment. */
 void gt_computediagonalbandalign(GtLinspaceManagement *spacemanager,
                                  GtAlignment *align,
                                  const GtUchar *useq,
@@ -86,7 +86,7 @@ void gt_computediagonalbandalign(GtLinspaceManagement *spacemanager,
    with cost values, the target alignment <align> and input sequences <useq> and
    <vseq>, with the regions to align given by their start positions <ustart> and
    <vstart> and lengths <ulen> and <vlen>. <left_dist> and <right_dist> give
-   lower and upper bound of which part of DP-matrix is valid in a diagonal band.
+   lower and upper bound of a diagonal band in which DP-matrix is valid.
    <spacemanager> is required to use this function in linear space context, in
    any other case it can be NULL. <scorehandler> manages linear gap costs.
    Returns cost value of global alignment. */
@@ -108,7 +108,7 @@ GtUword diagonalbandalignment_in_square_space_generic(
    target alignment <align> and input sequences <useq> and <vseq>, with the
    regions to align given by their start positions <ustart> and <vstart> and
    lengths <ulen> and <vlen>. <left_dist> and <right_dist> give lower and upper
-   bound of which part of DP-matrix is valid in a diagonal band. The cost values
+   bound of a diagonal band in which DP-matrix is valid. The cost values
    are specified by <matchcost>, <mismatchcost> and <gapcost>.
    <spacemanager> is required to use this function in linear space context, in
    any other case it can be NULL. <scorehandler> manages linear gap costs.
