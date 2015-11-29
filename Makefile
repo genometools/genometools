@@ -114,7 +114,7 @@ GTMAIN_DEP:=$(GTMAIN_SRC:%.c=obj/%.d)
 EXAMPLES_SRC:=src/example.c
 EXAMPLES_DEP:=$(EXAMPLES_SRC:%.c=obj/%.d)
 
-TOOLS_SRC:=$(wildcard src/tools/*.c)
+TOOLS_SRC:=$(sort $(wildcard src/tools/*.c))
 TOOLS_OBJ:=$(TOOLS_SRC:%.c=obj/%.o)
 TOOLS_DEP:=$(TOOLS_SRC:%.c=obj/%.d)
 
@@ -446,7 +446,7 @@ else
 endif
 
 # the GenomeTools library
-LIBGENOMETOOLS_PRESRC:=$(foreach DIR,$(LIBGENOMETOOLS_DIRS),$(wildcard $(DIR)/*.c))
+LIBGENOMETOOLS_PRESRC:=$(foreach DIR,$(LIBGENOMETOOLS_DIRS),$(sort $(wildcard $(DIR)/*.c)))
 # remove AnnotationSketch-only bindings
 LIBGENOMETOOLS_PRESRC:=$(filter-out $(CAIRO_FILTER_OUT),\
                          $(LIBGENOMETOOLS_PRESRC))
@@ -646,7 +646,7 @@ bin/lua: $(LUAMAIN_OBJ)
 	@test -d $(@D) || mkdir -p $(@D)
 	@$(CC) $(EXP_LDFLAGS) $(GT_LDFLAGS) $^ -lm $(LUA_LDLIB) -o $@
 
-API_HEADERS=$(foreach DIR,$(LIBGENOMETOOLS_DIRS),$(wildcard $(DIR)/*_api.h))
+API_HEADERS=$(foreach DIR,$(LIBGENOMETOOLS_DIRS),$(sort $(wildcard $(DIR)/*_api.h)))
 
 obj/public_symbols.lst: $(API_HEADERS) $(LIBGENOMETOOLS_SRC)
 	@echo '[gathering public API symbols to $@]'
@@ -976,8 +976,8 @@ ABEXT=${shell grep -l Blaufelder src/extended/*.c}
 ABTOOLS=${shell grep -l Blaufelder src/tools/*.c}
 
 ALLSPLINT=${addprefix obj/,${notdir ${subst .c,.splint,\
-             ${filter-out ${EISFILES},${wildcard ${CURDIR}/src/match/*.c}}\
-             ${wildcard ${CURDIR}/src/ltr/*.c}\
+             ${filter-out ${EISFILES},${sort ${wildcard ${CURDIR}/src/match/*.c}}}\
+             ${sort ${wildcard ${CURDIR}/src/ltr/*.c}}\
              ${SKTOOLS} ${SKCORE} ${SKEXT} \
 						 ${DWTOOLS} ${DWCORE} ${DWEXT} \
              ${GGTOOLS} ${GGCORE} ${GGEXT} \
