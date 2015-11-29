@@ -22,15 +22,15 @@ seeds = [170039800390891361279027638963673934519,
          255642063275935424280602245704332672807,
          124756200605387950056148243621528752027]
 
-Name "gt seed_extend mirror, check k-mers and seed pairs"
+Name "gt seed_extend reverse, check k-mers and seed pairs"
 Keywords "gt_seed_extend seedpair kmer polysequence xdrop extend"
 Test do
   run_test build_encseq("small_poly", "#{$testdata}small_poly.fas")
-  run_test "#{$bin}gt seed_extend -seedlength 10 -mirror -debug-kmer " +
-           "-debug-seedpair -ii small_poly"
+  run_test "#{$bin}gt seed_extend -seedlength 10 -no-reverse false " +
+           "-debug-kmer -debug-seedpair -ii small_poly"
   run "gunzip -c #{$testdata}seedextend1.out.gz | cmp -s #{last_stdout}"
-  run_test "#{$bin}gt seed_extend -seedlength 10 -mirror -extendxdrop 97 " +
-           "-l 10 -mincoverage 11 -ii small_poly"
+  run_test "#{$bin}gt seed_extend -seedlength 10 -no-reverse false " +
+           "-extendxdrop 97 -l 10 -mincoverage 11 -ii small_poly"
   run "cmp -s #{last_stdout} #{$testdata}seedextend3.out"
 end
 
@@ -51,10 +51,10 @@ Keywords "gt_seed_extend options"
 Test do
   run_test build_encseq("gt_bioseq_succ_3", "#{$testdata}gt_bioseq_succ_3.fas")
   # filter options
-  for seedlength in [5, 32] do
+  for seedlength in [5, 14, 32] do
     for diagbandwidth in [2, 5] do
       for mincoverage in [10, 50] do
-        for memlimit in ["30MB", "1GB -mirror"] do
+        for memlimit in ["30MB", "1GB -no-reverse false"] do
           run_test "#{$bin}gt seed_extend -seedlength #{seedlength} " +
                    "-diagbandwidth #{diagbandwidth} " +
                    "-mincoverage #{mincoverage} " +
