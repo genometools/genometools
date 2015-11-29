@@ -40,7 +40,8 @@ static void diagonalband_fillDPtab_in_square_space(GtUword **EDtabcolumn,
                                                    GtUword vlen,
                                                    GtWord left_dist,
                                                    GtWord right_dist,
-                                                   GtScoreHandler *scorehandler)
+                                                   const GtScoreHandler
+                                                   *scorehandler)
 {
   GtUword i,j, val, low_row, high_row, gapcost;
   gt_assert(EDtabcolumn && scorehandler);
@@ -106,16 +107,16 @@ static void diagonalband_fillDPtab_in_square_space(GtUword **EDtabcolumn,
 }
 /* calculate only distance with diagonalband in square space */
 static GtUword diagonalband_squarespace_distance_only(const GtUchar *useq,
-                                               GtUword ustart,
-                                               GtUword ulen,
-                                               const GtUchar *vseq,
-                                               GtUword vstart,
-                                               GtUword vlen,
-                                               GtWord left_dist,
-                                               GtWord right_dist,
-                                               GtUword matchcost,
-                                               GtUword mismatchcost,
-                                               GtUword gapcost)
+                                                      GtUword ustart,
+                                                      GtUword ulen,
+                                                      const GtUchar *vseq,
+                                                      GtUword vstart,
+                                                      GtUword vlen,
+                                                      GtWord left_dist,
+                                                      GtWord right_dist,
+                                                      GtUword matchcost,
+                                                      GtUword mismatchcost,
+                                                      GtUword gapcost)
 {
   GtUword **EDtabcolumn, distance = GT_UWORD_MAX;
   GtScoreHandler *scorehandler;
@@ -140,17 +141,19 @@ static GtUword diagonalband_squarespace_distance_only(const GtUchar *useq,
 }
 
 /* creating alignment with diagonalband in square space */
-GtUword diagonalbandalignment_in_square_space_generic(LinspaceManagement *space,
-                                                   GtAlignment *align,
-                                                   const GtUchar *useq,
-                                                   GtUword ustart,
-                                                   GtUword ulen,
-                                                   const GtUchar *vseq,
-                                                   GtUword vstart,
-                                                   GtUword vlen,
-                                                   GtWord left_dist,
-                                                   GtWord right_dist,
-                                                   GtScoreHandler *scorehandler)
+GtUword diagonalbandalignment_in_square_space_generic(GtLinspaceManagement
+                                                                   *space,
+                                                      GtAlignment *align,
+                                                      const GtUchar *useq,
+                                                      GtUword ustart,
+                                                      GtUword ulen,
+                                                      const GtUchar *vseq,
+                                                      GtUword vstart,
+                                                      GtUword vlen,
+                                                      GtWord left_dist,
+                                                      GtWord right_dist,
+                                                      const GtScoreHandler
+                                                      *scorehandler)
 {
   GtUword **EDtabcolumn, distance;
 
@@ -190,8 +193,9 @@ GtUword diagonalbandalignment_in_square_space_generic(LinspaceManagement *space,
 }
 
 /* creating alignment with diagonalband in square space
- * with constant cost values */
-GtUword diagonalbandalignment_in_square_space(LinspaceManagement *spacemanager,
+   with constant cost values */
+GtUword diagonalbandalignment_in_square_space(GtLinspaceManagement
+                                              *spacemanager,
                                               GtAlignment *alignment,
                                               const GtUchar *useq,
                                               GtUword ustart,
@@ -221,15 +225,15 @@ GtUword diagonalbandalignment_in_square_space(LinspaceManagement *spacemanager,
 }
 
 static void evaluate_DBcrosspoints_from_2dimtab(GtUword **E,
-                                                Diagentry *Dtab,
-                                                const GtUchar *useq,
-                                                GtUword ustart,
-                                                GtUword ulen,
-                                                const GtUchar *vseq,
-                                                GtUword vstart,
-                                                GtUword vlen,
-                                                GtUword rowoffset,
-                                                GtScoreHandler *scorehandler)
+                                            Diagentry *Dtab,
+                                            const GtUchar *useq,
+                                            GtUword ustart,
+                                            GtUword ulen,
+                                            const GtUchar *vseq,
+                                            GtUword vstart,
+                                            GtUword vlen,
+                                            GtUword rowoffset,
+                                            const GtScoreHandler *scorehandler)
 {
   GtUword idx, jdx, gapcost;
 
@@ -278,7 +282,7 @@ static void evaluate_DBcrosspoints_from_2dimtab(GtUword **E,
 }
 
 /*create DBcrosspointtab to combine square calculating with linear calculating*/
-GT_UNUSED  static void dtab_in_square_space(LinspaceManagement *spacemanager,
+GT_UNUSED  static void dtab_in_square_space(GtLinspaceManagement *spacemanager,
                                  Diagentry *Dtab,
                                  const GtUchar *useq,
                                  GtUword ustart,
@@ -290,7 +294,7 @@ GT_UNUSED  static void dtab_in_square_space(LinspaceManagement *spacemanager,
                                  GtWord right_dist,
                                  GtUword rowoffset,
                                  LinearAlignEdge edge,
-                                 GtScoreHandler *scorehandler)
+                                 const GtScoreHandler *scorehandler)
 {
   GtUword **EDtabcolumn;
   gt_assert(Dtab && scorehandler && spacemanager);
@@ -481,10 +485,10 @@ static inline void set_linear_DiagentryRtabentry(LinearAlignEdge edge,
 }
 
 /* calculate all E- and Rtabcolumns, store crosspoints in  Diagcolumn,
- * return lastcrosspoint from optimal path */
-static GtUword evaluateallDBtabcolumns(LinspaceManagement *spacemanager,
+   return lastcrosspoint from optimal path */
+static GtUword evaluateallDBtabcolumns(GtLinspaceManagement *spacemanager,
                                        Diagentry *Diagcolumn,
-                                       GtScoreHandler *scorehandler,
+                                       const GtScoreHandler *scorehandler,
                                        LinearAlignEdge edge,
                                        GtWord offset,
                                        const GtUchar *useq,
@@ -648,9 +652,9 @@ static GtUword evaluateallDBtabcolumns(LinspaceManagement *spacemanager,
 }
 
 /* calculate crosspoint realting to diagonal in recursive way */
-static void evaluateDBcrosspoints(LinspaceManagement *spacemanager,
+static void evaluateDBcrosspoints(GtLinspaceManagement *spacemanager,
                                   Diagentry *Diagcolumn,
-                                  GtScoreHandler *scorehandler,
+                                  const GtScoreHandler *scorehandler,
                                   LinearAlignEdge edge,
                                   GtUword rowoffset,
                                   GtUword coloffset,
@@ -759,7 +763,7 @@ static void evaluateDBcrosspoints(LinspaceManagement *spacemanager,
   }
 
   /* look at all 'normally' crosspoints,
-   * call segments between pairwise crosspoints*/
+     call segments between pairwise crosspoints*/
   while (Diagcolumn[cpoint].lastcpoint != GT_UWORD_MAX)
   {
     prevcpoint = cpoint;
@@ -849,8 +853,8 @@ static void evaluateDBcrosspoints(LinspaceManagement *spacemanager,
 }
 
 /* calculating alignment in linear space within a specified diagonal band */
-static void gt_calc_diagonalbandalign(LinspaceManagement *spacemanager,
-                                      GtScoreHandler *scorehandler,
+static void gt_calc_diagonalbandalign(GtLinspaceManagement *spacemanager,
+                                      const GtScoreHandler *scorehandler,
                                       GtAlignment *align,
                                       const GtUchar *useq,
                                       GtUword ustart, GtUword ulen,
@@ -887,9 +891,10 @@ static void gt_calc_diagonalbandalign(LinspaceManagement *spacemanager,
                                              sizeof (*Rtabcolumn)))
   {
     (void) diagonalbandalignment_in_square_space_generic(spacemanager,align,
-                                                 useq, ustart, ulen,
-                                                 vseq, vstart, vlen, left_dist,
-                                                 right_dist, scorehandler);
+                                                         useq, ustart, ulen,
+                                                         vseq, vstart, vlen,
+                                                         left_dist, right_dist,
+                                                         scorehandler);
     return;
   }
 
@@ -914,8 +919,8 @@ static void gt_calc_diagonalbandalign(LinspaceManagement *spacemanager,
 }
 
 /* compute alignment within a diagonal band */
-void gt_computediagonalbandalign_generic(LinspaceManagement *spacemanager,
-                                         GtScoreHandler *scorehandler,
+void gt_computediagonalbandalign_generic(GtLinspaceManagement *spacemanager,
+                                         const GtScoreHandler *scorehandler,
                                          GtAlignment *align,
                                          const GtUchar *useq,
                                          GtUword ustart, GtUword ulen,
@@ -933,21 +938,21 @@ void gt_computediagonalbandalign_generic(LinspaceManagement *spacemanager,
 
   gt_alignment_set_seqs(align,useq+ustart, ulen, vseq+vstart, vlen);
   gt_calc_diagonalbandalign(spacemanager, scorehandler, align,
-                                       useq, ustart, ulen, vseq, vstart, vlen,
-                                       left_dist, right_dist);
+                            useq, ustart, ulen, vseq, vstart, vlen,
+                            left_dist, right_dist);
 }
 
-void gt_computediagonalbandalign(LinspaceManagement *spacemanager,
-                                    GtAlignment *align,
-                                    const GtUchar *useq,
-                                    GtUword ustart, GtUword ulen,
-                                    const GtUchar *vseq,
-                                    GtUword vstart, GtUword vlen,
-                                    GtWord left_dist,
-                                    GtWord right_dist,
-                                    GtUword matchcost,
-                                    GtUword mismatchcost,
-                                    GtUword gapcost)
+void gt_computediagonalbandalign(GtLinspaceManagement *spacemanager,
+                                 GtAlignment *align,
+                                 const GtUchar *useq,
+                                 GtUword ustart, GtUword ulen,
+                                 const GtUchar *vseq,
+                                 GtUword vstart, GtUword vlen,
+                                 GtWord left_dist,
+                                 GtWord right_dist,
+                                 GtUword matchcost,
+                                 GtUword mismatchcost,
+                                 GtUword gapcost)
 {
   GtScoreHandler *scorehandler;
   gt_assert(spacemanager && align);
@@ -970,7 +975,7 @@ void gt_checkdiagonalbandalign(GT_UNUSED bool forward,
   GtUword edist1, edist2, edist3, matchcost = 0, mismatchcost = 1, gapcost = 1;
   GtWord left_dist, right_dist;
   GtAlignment *align;
-  LinspaceManagement *spacemanager;
+  GtLinspaceManagement *spacemanager;
   GtScoreHandler *scorehandler;
 
   if (memchr(useq, LINEAR_EDIST_GAP,ulen) != NULL)

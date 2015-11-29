@@ -1,9 +1,9 @@
 /*
-  Copyright (C) 2015 Annika Seidel, annika.seidel@studium.uni-hamburg.de
-  Copyright (C) 2015 Stefan Kurtz, kurtz@zbh.uni-hamburg.de
-  Copyright (C) 2015 Joerg Winkler, joerg.winkler@studium.uni-hamburg.de
-  Copyright (C) 2014 Dirk Willrodt, willrodt@zbh.uni-hamburg.de
-  Copyright (C) 2010 Sascha Steinbiss, steinbiss@zbh.uni-hamburg.de
+  Copyright (C) 2015 Annika Seidel, <annika.seidel@studium.uni-hamburg.de>
+  Copyright (C) 2015 Stefan Kurtz, <kurtz@zbh.uni-hamburg.de>
+  Copyright (C) 2015 Joerg Winkler, <joerg.winkler@studium.uni-hamburg.de>
+  Copyright (C) 2014 Dirk Willrodt, <willrodt@zbh.uni-hamburg.de>
+  Copyright (C) 2010 Sascha Steinbiss, <steinbiss@zbh.uni-hamburg.de>
   Copyright (c) 2006-2009 Gordon Gremme <gordon@gremme.org>
   Copyright (c) 2006-2015 Center for Bioinformatics, University of Hamburg
 
@@ -65,7 +65,7 @@ static void nextEDtabRtabcolumn(GtUword *EDtabcolumn,
                                 const GtUchar *useq,
                                 GtUword ustart,
                                 GtUword ulen,
-                                GtScoreHandler *scorehandler)
+                                const GtScoreHandler *scorehandler)
 {
   GtUword rowindex, val, gapcost,
           northwestEDtabentry,
@@ -116,7 +116,7 @@ static void nextEDtabRtabcolumn(GtUword *EDtabcolumn,
 
 static GtUword evaluateallEDtabRtabcolumns(GtUword *EDtabcolumn,
                                            GtUword *Rtabcolumn,
-                                           GtScoreHandler *scorehandler,
+                                           const GtScoreHandler *scorehandler,
                                            GtUword midcol,
                                            const GtUchar *useq,
                                            GtUword ustart,
@@ -140,7 +140,7 @@ static GtUword evaluateallEDtabRtabcolumns(GtUword *EDtabcolumn,
   return EDtabcolumn[ulen];
 }
 
-static void determineCtab0(GtUword *Ctab, GtScoreHandler *scorehandler,
+static void determineCtab0(GtUword *Ctab, const GtScoreHandler *scorehandler,
                            GtUchar vseq0, const GtUchar *useq, GtUword ustart)
 {
   GtUword rowindex, repl, mincost = GT_UWORD_MAX;
@@ -175,28 +175,28 @@ static void determineCtab0(GtUword *Ctab, GtScoreHandler *scorehandler,
 
 #ifdef GT_THREADS_ENABLED
 typedef struct{
-  LinspaceManagement *spacemanager;
-  GtScoreHandler     *scorehandler;
-  const GtUchar      *useq, *vseq;
-  GtUword            ustart, ulen, vstart, vlen,
-                     *Ctab, rowoffset,
-                     threadidx, /* ensures threads do not overlap */
-                     *threadcount;
+  GtLinspaceManagement *spacemanager;
+  const GtScoreHandler *scorehandler;
+  const GtUchar        *useq, *vseq;
+  GtUword              ustart, ulen, vstart, vlen,
+                       *Ctab, rowoffset,
+                       threadidx, /* ensures threads do not overlap */
+                       *threadcount;
 }GtLinearCrosspointthreadinfo;
 
 static GtLinearCrosspointthreadinfo
-                set_LinearCrosspointthreadinfo(LinspaceManagement *spacemanager,
-                                               GtScoreHandler *scorehandler,
-                                               const GtUchar *useq,
-                                               GtUword ustart,
-                                               GtUword ulen,
-                                               const GtUchar *vseq,
-                                               GtUword vstart,
-                                               GtUword vlen,
-                                               GtUword *Ctab,
-                                               GtUword rowoffset,
-                                               GtUword threadidx,
-                                               GtUword *threadcount)
+            set_LinearCrosspointthreadinfo(GtLinspaceManagement *spacemanager,
+                                           const GtScoreHandler *scorehandler,
+                                           const GtUchar *useq,
+                                           GtUword ustart,
+                                           GtUword ulen,
+                                           const GtUchar *vseq,
+                                           GtUword vstart,
+                                           GtUword vlen,
+                                           GtUword *Ctab,
+                                           GtUword rowoffset,
+                                           GtUword threadidx,
+                                           GtUword *threadcount)
 {
   GtLinearCrosspointthreadinfo threadinfo;
   threadinfo.spacemanager = spacemanager;
@@ -214,8 +214,8 @@ static GtLinearCrosspointthreadinfo
 
   return threadinfo;
 }
-static GtUword evaluatelinearcrosspoints(LinspaceManagement *spacemanager,
-                                         GtScoreHandler *scorehandler,
+static GtUword evaluatelinearcrosspoints(GtLinspaceManagement *spacemanager,
+                                         const GtScoreHandler *scorehandler,
                                          const GtUchar *useq,
                                          GtUword ustart,
                                          GtUword ulen,
@@ -248,8 +248,8 @@ static void *evaluatelinearcrosspoints_thread_caller(void *data)
 #endif
 
 /* evaluate crosspoints in recursive way */
-static GtUword evaluatelinearcrosspoints(LinspaceManagement *spacemanager,
-                                         GtScoreHandler *scorehandler,
+static GtUword evaluatelinearcrosspoints(GtLinspaceManagement *spacemanager,
+                                         const GtScoreHandler *scorehandler,
                                          const GtUchar *useq,
                                          GtUword ustart, GtUword ulen,
                                          const GtUchar *vseq,
@@ -364,8 +364,8 @@ static GtUword evaluatelinearcrosspoints(LinspaceManagement *spacemanager,
 }
 
 /* calculating alignment in linear space */
-GtUword gt_calc_linearalign(LinspaceManagement *spacemanager,
-                            GtScoreHandler *scorehandler,
+GtUword gt_calc_linearalign(GtLinspaceManagement *spacemanager,
+                            const GtScoreHandler *scorehandler,
                             GtAlignment *align,
                             const GtUchar *useq,
                             GtUword ustart,
@@ -429,8 +429,8 @@ GtUword gt_calc_linearalign(LinspaceManagement *spacemanager,
 }
 
 /* global alignment with linear gapcosts in linear space */
-GtUword gt_computelinearspace_generic(LinspaceManagement *spacemanager,
-                                      GtScoreHandler *scorehandler,
+GtUword gt_computelinearspace_generic(GtLinspaceManagement *spacemanager,
+                                      const GtScoreHandler *scorehandler,
                                       GtAlignment *align,
                                       const GtUchar *useq,
                                       GtUword ustart,
@@ -451,8 +451,8 @@ GtUword gt_computelinearspace_generic(LinspaceManagement *spacemanager,
 }
 
 /* global alignment with linear gapcosts in linear space
- * with constant cost values */
-GtUword gt_computelinearspace(LinspaceManagement *spacemanager,
+   with constant cost values */
+GtUword gt_computelinearspace(GtLinspaceManagement *spacemanager,
                               GtAlignment *align,
                               const GtUchar *useq,
                               GtUword ustart,
@@ -546,11 +546,11 @@ static void firstLStabcolumn(GtWord *Ltabcolumn,
 
 static void nextLStabcolumn(GtWord *Ltabcolumn,
                             GtUwordPair *Starttabcolumn,
-                            GtScoreHandler *scorehandler,
+                            const GtScoreHandler *scorehandler,
                             const GtUchar *useq,
                             GtUword ustart, GtUword ulen,
                             const GtUchar b, GtUword colindex,
-                            Gtmaxcoordvalue *max)
+                            GtMaxcoordvalue *max)
 {
   GtUword rowindex;
   GtUwordPair northwestStarttabentry, westStarttabentry;
@@ -603,8 +603,8 @@ static void nextLStabcolumn(GtWord *Ltabcolumn,
   }
 }
 
-static Gtmaxcoordvalue *evaluateallLScolumns(LinspaceManagement *spacemanager,
-                                             GtScoreHandler *scorehandler,
+static GtMaxcoordvalue *evaluateallLScolumns(GtLinspaceManagement *spacemanager,
+                                             const GtScoreHandler *scorehandler,
                                              const GtUchar *useq,
                                              GtUword ustart,
                                              GtUword ulen,
@@ -615,7 +615,7 @@ static Gtmaxcoordvalue *evaluateallLScolumns(LinspaceManagement *spacemanager,
   GtUword colindex;
   GtWord *Ltabcolumn;
   GtUwordPair *Starttabcolumn;
-  Gtmaxcoordvalue *max;
+  GtMaxcoordvalue *max;
 
   Ltabcolumn = gt_linspaceManagement_get_valueTabspace(spacemanager);
   Starttabcolumn = gt_linspaceManagement_get_rTabspace(spacemanager);
@@ -632,8 +632,8 @@ static Gtmaxcoordvalue *evaluateallLScolumns(LinspaceManagement *spacemanager,
 }
 
 /* determining start and end of local alignment and call global function */
-GtWord gt_computelinearspace_local_generic(LinspaceManagement *spacemanager,
-                                           GtScoreHandler *scorehandler,
+GtWord gt_computelinearspace_local_generic(GtLinspaceManagement *spacemanager,
+                                           const GtScoreHandler *scorehandler,
                                            GtAlignment *align,
                                            const GtUchar *useq,
                                            GtUword ustart,
@@ -646,7 +646,7 @@ GtWord gt_computelinearspace_local_generic(LinspaceManagement *spacemanager,
          score = GT_WORD_MAX;
   GtUwordPair *Starttabcolumn;
   GtUword ulen_part, ustart_part, vlen_part, vstart_part;
-  Gtmaxcoordvalue *max;
+  GtMaxcoordvalue *max;
 
   gt_assert(spacemanager && scorehandler && align);
   gt_linspaceManagement_set_ulen(spacemanager,ulen);
@@ -714,7 +714,7 @@ GtWord gt_computelinearspace_local_generic(LinspaceManagement *spacemanager,
   return score;
 }
 
-GtWord gt_computelinearspace_local(LinspaceManagement *spacemanager,
+GtWord gt_computelinearspace_local(GtLinspaceManagement *spacemanager,
                                    GtAlignment *align,
                                    const GtUchar *useq,
                                    GtUword ustart,
@@ -750,7 +750,7 @@ void gt_checklinearspace(GT_UNUSED bool forward,
   GtAlignment *align;
   GtUword edist1, edist2, edist3, edist4,
           matchcost = 0, mismatchcost = 1, gapcost = 1;
-  LinspaceManagement *spacemanager;
+  GtLinspaceManagement *spacemanager;
   GtScoreHandler *scorehandler;
   const bool downcase = true;
 
@@ -812,7 +812,7 @@ void gt_checklinearspace_local(GT_UNUSED bool forward,
   GtAlignment *align;
   GtWord score1, score2, score3, score4,
          matchscore = 2, mismatchscore = -2, gapscore = -1;
-  LinspaceManagement *spacemanager;
+  GtLinspaceManagement *spacemanager;
   GtScoreHandler *scorehandler;
 
   if (memchr(useq, LINEAR_EDIST_GAP,ulen) != NULL)
