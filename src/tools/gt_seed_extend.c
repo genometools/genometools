@@ -65,7 +65,8 @@ typedef struct {
   GtUword se_alignlength;
   GtUword se_minidentity;
   GtUword se_alignmentwidth;
-  bool mirror;
+  bool norev;
+  bool nofwd;
   bool overlappingseeds;
   bool benchmark;
   bool verbose;
@@ -103,7 +104,8 @@ static GtOptionParser* gt_seed_extend_option_parser_new(void *tool_arguments)
   GtOptionParser *op;
   GtOption *option, *op_gre, *op_xdr, *op_cam, *op_his, *op_dif, *op_pmh,
     *op_len, *op_err, *op_xbe, *op_sup, *op_frq, *op_mem, *op_ali, *op_bia,
-    *op_onl, *op_weakends, *op_seed_display, *op_relax_polish;
+    *op_onl, *op_weakends, *op_seed_display, *op_relax_polish,
+    *op_norev, *op_nofwd;
   gt_assert(arguments != NULL);
 
   /* init */
@@ -335,13 +337,21 @@ static GtOptionParser* gt_seed_extend_option_parser_new(void *tool_arguments)
   gt_option_is_development_option(op_relax_polish);
   gt_option_imply(op_relax_polish, op_ali);
 
-  /* -mirror */
-  option = gt_option_new_bool("mirror",
-                              "also compute matches on reverse complemented "
-                              "strand",
-                              &arguments->mirror,
-                              false);
-  gt_option_parser_add_option(op, option);
+  /* -no-reverse */
+  op_norev = gt_option_new_bool("no-reverse",
+                                "do not compute matches on reverse "
+                                "complemented strand",
+                                &arguments->norev,
+                                true);
+  gt_option_parser_add_option(op, op_norev);
+
+  /* -no-forward */
+  op_nofwd = gt_option_new_bool("no-forward",
+                                "do not compute matches on forward strand",
+                                &arguments->nofwd,
+                                false);
+  gt_option_exclude(op_nofwd, op_norev);
+  gt_option_parser_add_option(op, op_nofwd);
 
   /* -overlappingseeds */
   option = gt_option_new_bool("overlappingseeds",
@@ -634,7 +644,8 @@ static int gt_seed_extend_runner(GT_UNUSED int argc,
     dbsarguments.mincoverage = arguments->dbs_mincoverage;
     dbsarguments.maxfreq = arguments->dbs_maxfreq;
     dbsarguments.memlimit = arguments->dbs_memlimit;
-    dbsarguments.mirror = arguments->mirror;
+    dbsarguments.norev = arguments->norev;
+    dbsarguments.nofwd = arguments->nofwd;
     dbsarguments.overlappingseeds = arguments->overlappingseeds;
     dbsarguments.verify = arguments->dbs_verify;
     dbsarguments.verbose = arguments->verbose;

@@ -31,7 +31,8 @@ typedef struct {
   GtUword mincoverage;
   GtUword maxfreq;
   GtUword memlimit;
-  bool mirror;
+  bool norev;
+  bool nofwd;
   bool overlappingseeds;
   bool verify;
   bool verbose;
