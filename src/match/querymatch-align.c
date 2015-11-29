@@ -118,7 +118,7 @@ struct GtQuerymatchoutoptions
   GtEncseqReader *esr_for_align_show;
   GtUchar wildcardshow;
   GtSeqpaircoordinates correction_info;
-  LinspaceManagement *linspace_spacemanager;
+  GtLinspaceManagement *linspace_spacemanager;
   GtScoreHandler *linspace_scorehandler;
   bool always_polished_ends;
   Polishing_info *pol_info;

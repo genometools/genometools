@@ -19,69 +19,87 @@
 #define LINSPACEMANAGEMENT_H
 #include "core/types_api.h"
 
-/* file with all useful uitlities for different algorithms,
- * which work in linear space */
+/* The <GtLinspaceManagement> interface. All useful uitlities for different
+   algorithms, which work in linear space */
 
-/* struct to organize all space allocated */
-typedef struct LinspaceManagement LinspaceManagement;
+/* The following type is to organize all allocated space */
+typedef struct GtLinspaceManagement GtLinspaceManagement;
 
-LinspaceManagement* gt_linspaceManagement_new();
+/* Return a <GtLinspaceManagement> object. */
+GtLinspaceManagement* gt_linspaceManagement_new();
 
-void gt_linspaceManagement_delete(LinspaceManagement *spacemanager);
-
-size_t gt_linspaceManagement_get_spacepeak(const LinspaceManagement
+/* Delete the given <spacemenager>. */
+void gt_linspaceManagement_delete(GtLinspaceManagement *spacemanager);
+/* Return bytes of allocated space for linear space algorithms of the given
+   <spacemanager>*/
+size_t gt_linspaceManagement_get_spacepeak(const GtLinspaceManagement
                                                                  *spacemanager);
-
-/* checks if enough space is allocated in global case and resize if necessary */
-void gt_linspaceManagement_check(LinspaceManagement *spacemanager,
+/* Checks if enough space is allocated for the three tabs, whichs are stored in
+   the given <spacemanager> in global case and resize if necessary. The required
+   space is dependent of the size of one entry, given by <valuesize>, <rtabsize>
+   and <crosspointsize> and the count of values given by sequence lengths <ulen>
+   and <vlen>. */
+void gt_linspaceManagement_check(GtLinspaceManagement *spacemanager,
                                  GtUword ulen, GtUword vlen,
                                  size_t valuesize,
                                  size_t rtabsize,
                                  size_t crosspointsize);
-
-/* checks if enough space is allocated in local case and resize if necessary */
-void  gt_linspaceManagement_check_local(LinspaceManagement *spacemanager,
+/* Checks if enough space is allocated for the tabs, whichs are stored in
+   the given <spacemanager> in local case and resize if necessary. The required
+   space is dependent of the size of one entry, given by <valuesize> and
+   <rtabsize> and the count of values given by sequence lengths <ulen>
+   and <vlen>. */
+void  gt_linspaceManagement_check_local(GtLinspaceManagement *spacemanager,
                                         GtUword ulen, GtUword vlen,
                                         size_t valuesize,
                                         size_t rstabsize);
 
-/* checks if enough space to use square space functions is allocated
- * in global case*/
-bool gt_linspaceManagement_checksquare(LinspaceManagement *spacemanager,
+/* Checks if enough space to use square space functions in global case is
+   allocated in the given <spacemanager>. To use this function <valuesize>,
+   <rsize> and the sequence lengths <ulen> and <vlen> are required. If a
+   timesquarefactor is set, the function checks also the relation with this
+   factor and resize the space of <spacemanager> if is it necessary.
+   */
+bool gt_linspaceManagement_checksquare(GtLinspaceManagement *spacemanager,
                                        GtUword ulen, GtUword vlen,
                                        size_t valuesize,
                                        size_t rsize);
 
-/* checks if enough space to use square space functions is allocated
- * in local case*/
-bool gt_linspaceManagement_checksquare_local(LinspaceManagement *spacemanager,
+/* Checks if enough space to use square space functions in local case is
+   allocated in the given <spacemanager>. To use this function <valuesize>,
+   <rsize> and the sequence lengths <ulen> and <vlen> are required. If a
+   timesquarefactor is set, the function checks also the relation with this
+   factor and resize the space of <spacemanager> if is it necessary. */
+bool gt_linspaceManagement_checksquare_local(GtLinspaceManagement *spacemanager,
                                              GtUword ulen, GtUword vlen,
                                              size_t valuesize,
                                              size_t rsize);
-
-void gt_linspaceManagement_set_ulen(LinspaceManagement *spacemanager,
+/* Set sequence length <ulen> for the given <spacemanager>. */
+void gt_linspaceManagement_set_ulen(GtLinspaceManagement *spacemanager,
                                     GtUword ulen);
-
-void *gt_linspaceManagement_get_valueTabspace(const LinspaceManagement
+/* Return pointer to valueTab space of the given <spacemanager>. */
+void* gt_linspaceManagement_get_valueTabspace(const GtLinspaceManagement
+                                                                 *spacemanager);
+/* Return pointer to rTab space of the given <spacemanager>. */
+void* gt_linspaceManagement_get_rTabspace(const GtLinspaceManagement
+                                                                 *spacemanager);
+/* Return pointer to crosspointTab space of the given <spacemanager>. */
+void* gt_linspaceManagement_get_crosspointTabspace(const GtLinspaceManagement
+                                                                 *spacemanager);
+/* Return pointer to Gtmaxcoordvalue space of the given <spacemanager>. */
+void* gt_linspaceManagement_get_maxspace(const GtLinspaceManagement
                                                                  *spacemanager);
 
-void *gt_linspaceManagement_get_rTabspace(const LinspaceManagement
-                                                                 *spacemanager);
-
-void *gt_linspaceManagement_get_crosspointTabspace(const LinspaceManagement
-                                                                 *spacemanager);
-
-void *gt_linspaceManagement_get_maxspace(const LinspaceManagement
-                                                                 *spacemanager);
-
-/* change allocated linear space in 2dim format */
-GtUword **gt_linspaceManagement_change_to_square(LinspaceManagement
+/* Change allocated linear space of the of given <spacemanager> in 2dim matrix
+   of size (<ulen>+1)*(<vlen>+1) and return pointer to these space. */
+GtUword** gt_linspaceManagement_change_to_square(GtLinspaceManagement
                                                  *spacemanager,
                                                  GtUword ulen, GtUword vlen);
-
-size_t gt_linspaceManagement_get_valueTabsize(const LinspaceManagement
+/* Return size of valueTab space of the given <spacemanager>. */
+size_t gt_linspaceManagement_get_valueTabsize(const GtLinspaceManagement
                                                                  *spacemanager);
-void gt_linspaceManagement_set_TSfactor(LinspaceManagement *spacemanager,
+/* Set <timesquarefactor> for the given <spacemanager>. */
+void gt_linspaceManagement_set_TSfactor(GtLinspaceManagement *spacemanager,
                                         GtUword timesquarefactor);
 
 #define add_safe(val1, val2, exception) (((val1) != (exception))\

@@ -263,7 +263,7 @@ static int gt_show_seedext_parse_extensions(const GtEncseq *aencseq,
   GtUword apos_ab = 0, bpos_ab = 0, maxseqlen = 0;
   int had_err = 0;
   GtShowSeedextCoords coords = {0, 0, 0, 'X', 0, 0, 0, 0, 0, 0.0};
-  LinspaceManagement *linspace_spacemanager;
+  GtLinspaceManagement *linspace_spacemanager;
   GtScoreHandler *linspace_scorehandler;
   GtAlignment *alignment;
   GtUchar *alignment_show_buffer;
