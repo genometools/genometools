@@ -26,10 +26,10 @@ Name "gt seed_extend reverse, check k-mers and seed pairs"
 Keywords "gt_seed_extend seedpair kmer polysequence xdrop extend"
 Test do
   run_test build_encseq("small_poly", "#{$testdata}small_poly.fas")
-  run_test "#{$bin}gt seed_extend -seedlength 10 -no-reverse false " +
+  run_test "#{$bin}gt seed_extend -seedlength 10 " +
            "-debug-kmer -debug-seedpair -ii small_poly"
   run "gunzip -c #{$testdata}seedextend1.out.gz | cmp -s #{last_stdout}"
-  run_test "#{$bin}gt seed_extend -seedlength 10 -no-reverse false " +
+  run_test "#{$bin}gt seed_extend -seedlength 10 " +
            "-extendxdrop 97 -l 10 -mincoverage 11 -ii small_poly"
   run "cmp -s #{last_stdout} #{$testdata}seedextend3.out"
 end
@@ -38,10 +38,12 @@ Name "gt seed_extend memlimit, use wildcard containing reads"
 Keywords "gt_seed_extend seedpair at1MB memlimit maxfreq verbose"
 Test do
   run_test build_encseq("at1MB", "#{$testdata}at1MB")
-  run_test "#{$bin}gt seed_extend -verify -debug-seedpair -memlimit 10MB -ii at1MB -only-seeds"
+  run_test "#{$bin}gt seed_extend -verify -debug-seedpair -memlimit 10MB " +
+           "-ii at1MB -only-seeds -no-reverse"
   grep last_stderr, /Only 14-mers occurring <= 3 times will be considered, due to small memlimit. Expect 50496 seed pairs./
   run "gunzip -c #{$testdata}seedextend2.out.gz | cmp -s #{last_stdout}"
-  run_test "#{$bin}gt seed_extend -v -maxfreq 5 -ii at1MB -only-seeds"
+  run_test "#{$bin}gt seed_extend -v -maxfreq 5 -ii at1MB -only-seeds " +
+           "-no-reverse"
   grep last_stdout, /...found 582230 14-mers/
   grep last_stdout, /...collected 68577 seed pairs/
 end
@@ -54,7 +56,7 @@ Test do
   for seedlength in [5, 14, 32] do
     for diagbandwidth in [2, 5] do
       for mincoverage in [10, 50] do
-        for memlimit in ["30MB", "1GB -no-reverse false"] do
+        for memlimit in ["30MB -no-reverse", "1GB"] do
           run_test "#{$bin}gt seed_extend -seedlength #{seedlength} " +
                    "-diagbandwidth #{diagbandwidth} " +
                    "-mincoverage #{mincoverage} " +
@@ -74,13 +76,13 @@ Test do
     for alignlength in [10, 80] do
       for history in [10, 64] do
         run_test "#{$bin}gt seed_extend -extendgreedy #{sensitivity} " +
-                 "-history #{history} -l #{alignlength} -a " +
+                 "-history #{history} -l #{alignlength} -a -no-reverse " +
                  "-seed-display -ii at1MB", :retval => 0
       end
     end
   end
   run_test "#{$bin}gt seed_extend -extendgreedy -bias-parameters -verify " +
-           "-overlappingseeds -benchmark -a " +
+           "-overlappingseeds -benchmark -a -no-reverse " +
            "-seed-display -ii at1MB", :retval => 0
 end
 
@@ -94,7 +96,7 @@ Test do
       for cam in ["encseq", "encseq_reader"] do
         run_test "#{$bin}gt seed_extend -extendxdrop #{sensitivity} " +
                  "-xdropbelow #{xdbelow} -cam #{cam} -overlappingseeds " +
-                 "-ii at1MB", :retval => 0
+                 "-ii at1MB -no-reverse", :retval => 0
       end
     end
   end
@@ -110,10 +112,10 @@ Test do
           "> artseq.fasta"
       run_test build_encseq("artseq", "artseq.fasta")
       run_test "#{$bin}gt seed_extend -extendxdrop 100 -l 2000 -ii artseq " +
-               "-minidentity #{minidentity-2}"
+               "-minidentity #{minidentity-2} -no-reverse"
       grep last_stdout, /^\d+ \d+ \d+ . \d+ \d+ \d+ \d+ \d+ \d+/
       run_test "#{$bin}gt seed_extend -extendgreedy 100 -l 2000 -ii artseq " +
-               "-minidentity #{minidentity-10}"
+               "-minidentity #{minidentity-10} -no-reverse"
       grep last_stdout, /^\d+ \d+ \d+ . \d+ \d+ \d+ \d+ \d+ \d+/
     end
   end
@@ -166,13 +168,13 @@ Test do
     run_test build_encseq("all", "db.fna query.fna")
     ["xdrop","greedy"].each do |ext|
       run_test "#{$bin}gt seed_extend -extend#{ext} 100 -l #{extendlength-20} " +
-               "-minidentity #{minid} -seedlength #{seedlength} " +
+               "-minidentity #{minid} -seedlength #{seedlength} -no-reverse " +
                "-mincoverage #{seedlength} -seed-display -ii all"
       grep last_stdout, /^\d+ \d+ \d+ . \d+ \d+ \d+ \d+ \d+ \d+/
       run "mv #{last_stdout} combined.out"
       split_output("combined")
       run_test "#{$bin}gt seed_extend -extend#{ext} 100 -l #{extendlength-20} " +
-               "-minidentity #{minid} -seedlength #{seedlength} " +
+               "-minidentity #{minid} -seedlength #{seedlength} -no-reverse " +
                "-mincoverage #{seedlength} -seed-display -ii db -qii query"
       grep last_stdout, /^\d+ \d+ \d+ . \d+ \d+ \d+ \d+ \d+ \d+/
       run "mv #{last_stdout} separated.out"

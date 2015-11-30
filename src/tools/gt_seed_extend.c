@@ -145,11 +145,11 @@ static GtOptionParser* gt_seed_extend_option_parser_new(void *tool_arguments)
   gt_option_parser_add_option(op, option);
 
   /* -mincoverage */
-  option = gt_option_new_uword("mincoverage",
-                               "Minimum coverage in two neighbouring diagonal "
-                               "bands (for filter)",
-                               &arguments->dbs_mincoverage,
-                               GT_UWORD_MAX);
+  option = gt_option_new_uword_min("mincoverage",
+                                   "Minimum coverage in two neighbouring "
+                                   "diagonal bands (for filter)",
+                                   &arguments->dbs_mincoverage,
+                                   GT_UWORD_MAX, 1UL);
   gt_option_parser_add_option(op, option);
 
   /* -maxfreq */
@@ -342,7 +342,7 @@ static GtOptionParser* gt_seed_extend_option_parser_new(void *tool_arguments)
                                 "do not compute matches on reverse "
                                 "complemented strand",
                                 &arguments->norev,
-                                true);
+                                false);
   gt_option_parser_add_option(op, op_norev);
 
   /* -no-forward */

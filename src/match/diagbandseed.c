@@ -126,7 +126,14 @@ static void gt_diagbandseed_processkmercode(void *prockmerinfo,
       gt_assert(pkinfo->next_separator > pkinfo->prev_separator);
     }
     gt_assert(endpos >= pkinfo->prev_separator);
-    pkinfo->endpos = (GtDiagbandseedPosition) (endpos - pkinfo->prev_separator);
+    gt_assert(startpos < pkinfo->next_separator);
+    if (pkinfo->readmode == GT_READMODE_FORWARD) {
+      pkinfo->endpos = (GtDiagbandseedPosition) (endpos -
+                                                 pkinfo->prev_separator);
+    } else {
+      pkinfo->endpos = (GtDiagbandseedPosition) (pkinfo->next_separator - 1 -
+                                                 startpos);
+    }
   }
 
   /* save k-mer code */
@@ -136,7 +143,9 @@ static void gt_diagbandseed_processkmercode(void *prockmerinfo,
         : gt_kmercode_reverse(code, pkinfo->seedlength);
   /* save endpos and seqnum */
   gt_assert(pkinfo->endpos != UINT_MAX);
-  kmerposptr->endpos = pkinfo->endpos++;
+  kmerposptr->endpos = pkinfo->endpos;
+  pkinfo->endpos = (pkinfo->readmode == GT_READMODE_FORWARD
+                    ? pkinfo->endpos + 1 : pkinfo->endpos - 1);
   kmerposptr->seqnum = pkinfo->seqnum;
   pkinfo->numberofkmerscollected++;
 }
@@ -377,11 +386,11 @@ int gt_diagbandseed_verify(const GtEncseq *aencseq,
 
     /* extract decoded k-mers at seed pair positions */
     apos = curr_sp->apos + gt_encseq_seqstartpos(aencseq, curr_sp->aseqnum);
-    bpos = curr_sp->bpos + gt_encseq_seqstartpos(bencseq, curr_sp->bseqnum);
     gt_encseq_extract_decoded(aencseq, buf1, apos + 1 - seedlength, apos);
-    gt_encseq_extract_decoded(bencseq, buf2, bpos + 1 - seedlength, bpos);
 
     if (!reverse) {
+      bpos = curr_sp->bpos + gt_encseq_seqstartpos(bencseq, curr_sp->bseqnum);
+      gt_encseq_extract_decoded(bencseq, buf2, bpos + 1 - seedlength, bpos);
       if (strcmp(buf1, buf2) != 0) {
         gt_error_set(err, "Wrong SeedPair (%d,%d,%d,%d): %s != %s\n",
                      curr_sp->aseqnum, curr_sp->bseqnum, curr_sp->apos,
@@ -392,6 +401,10 @@ int gt_diagbandseed_verify(const GtEncseq *aencseq,
     } else {
       /* get reverse k-mer */
       char *idx;
+      bpos = gt_encseq_seqstartpos(bencseq, curr_sp->bseqnum) +
+             gt_encseq_seqlength(bencseq, curr_sp->bseqnum) - curr_sp->bpos - 1;
+      gt_encseq_extract_decoded(bencseq, buf2, bpos, bpos + seedlength - 1);
+
       for (idx = buf3; idx < buf3 + seedlength; idx++) {
         gt_complement(idx, buf2[seedlength + buf3 - idx - 1], NULL);
       }
@@ -742,7 +755,7 @@ int gt_diagbandseed_run(const GtEncseq *aencseq,
                           maxgram,
                           arg->memlimit,
                           histogram,
-                          endposdiff,
+                          alist_blist_id ? endposdiff : 0,
                           selfcomp);
     mlen = histogram[maxgram];
     gt_free(histogram);
@@ -807,7 +820,7 @@ int gt_diagbandseed_run(const GtEncseq *aencseq,
                           maxgram,
                           arg->memlimit,
                           NULL, /* histogram not needed: save seed pairs */
-                          endposdiff,
+                          alist_blist_id ? endposdiff : 0,
                           selfcomp);
     mlen = mlist.nextfreeGtDiagbandseedSeedPair;
     if (arg->debug_seedpair) {
@@ -882,7 +895,7 @@ int gt_diagbandseed_run(const GtEncseq *aencseq,
                           maxgram,
                           arg->memlimit,
                           NULL, /* histogram not needed: save seed pairs */
-                          endposdiff,
+                          alist_blist_id ? endposdiff : 0,
                           selfcomp);
     mlen_rev = mlist_rev.nextfreeGtDiagbandseedSeedPair;
     if (arg->debug_seedpair) {
@@ -941,7 +954,7 @@ int gt_diagbandseed_run(const GtEncseq *aencseq,
   }
 
   /* verify SeedPairs in the sequences */
-  if (!had_err && mlen > 0 && arg->verify) {
+  if (!had_err && arg->verify) {
     if (arg->verbose) {
       printf("# Start verifying seed pairs...\n");
       gt_timer_start(vtimer);
