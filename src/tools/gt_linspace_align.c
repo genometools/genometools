@@ -141,9 +141,6 @@ static GtOptionParser* gt_linspace_align_option_parser_new(void *tool_arguments)
            *optionshowsequences, *optiondiagonal, *optiondiagonalbonds,
            *optionsimilarity, *optiontsfactor, *optionspacetime,
            *optionscoreonly, *optionwildcardsymbol;
-           *optiontsfactor, *optionspacetime, *optionscoreonly,
-           *optionwildcardsymbol;
-
 
   gt_assert(arguments);
 
