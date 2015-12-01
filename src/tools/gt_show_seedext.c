@@ -134,7 +134,8 @@ static int gt_show_seedext_arguments_check(GT_UNUSED int rest_argc,
   return had_err;
 }
 
-static void gt_show_seed_extend_plain(GtLinspaceManagement *linspace_spacemanager,
+static void gt_show_seed_extend_plain(GtLinspaceManagement
+                                      *linspace_spacemanager,
                                       GtScoreHandler *linspace_scorehandler,
                                       GtAlignment *alignment,
                                       GtUchar *alignment_show_buffer,

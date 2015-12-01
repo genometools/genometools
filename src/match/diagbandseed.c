@@ -262,8 +262,9 @@ static void gt_diagbandseed_processhistogram(GtUword *histogram,
       count += histogram[frequency - 1];
     }
     if (count > mem_avail) {
-      gt_assert(frequency >= 2 && count >= histogram[frequency]);
+      gt_assert(frequency >= 2);
       frequency -= 2;
+      gt_assert(count >= histogram[frequency]);
       count -= histogram[frequency];
     } else if (frequency == maxgram + 1) {
       frequency = GT_UWORD_MAX;

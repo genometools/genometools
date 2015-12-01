@@ -39,11 +39,11 @@ Keywords "gt_seed_extend seedpair at1MB memlimit maxfreq verbose"
 Test do
   run_test build_encseq("at1MB", "#{$testdata}at1MB")
   run_test "#{$bin}gt seed_extend -verify -debug-seedpair -memlimit 10MB " +
-           "-ii at1MB -only-seeds -no-reverse"
+           "-ii at1MB -only-seeds -no-reverse -seedlength 14"
   grep last_stderr, /Only 14-mers occurring <= 3 times will be considered, due to small memlimit. Expect 50496 seed pairs./
   run "gunzip -c #{$testdata}seedextend2.out.gz | cmp -s #{last_stdout}"
   run_test "#{$bin}gt seed_extend -v -maxfreq 5 -ii at1MB -only-seeds " +
-           "-no-reverse"
+           "-no-reverse -seedlength 14"
   grep last_stdout, /...found 582230 14-mers/
   grep last_stdout, /...collected 68577 seed pairs/
 end
@@ -135,7 +135,7 @@ Test do
   run_test "#{$bin}gt seed_extend -memlimit 0MB -ii at1MB", :retval => 1
   grep last_stderr, /argument to option "-memlimit" must be at least 1MB/
   run_test "#{$bin}gt seed_extend -memlimit 1MB -ii at1MB", :retval => 1
-  grep last_stderr, /option -memlimit too strict: need at least 10MB/
+  grep last_stderr, /option -memlimit too strict: need at least 11MB/
   run_test "#{$bin}gt seed_extend -memlimit 1KB -ii at1MB", :retval => 1
   grep last_stderr, /integer argument followed by one of the keywords MB and GB/
   run_test "#{$bin}gt seed_extend -extendgreedy -history 65 -benchmark " +

@@ -21,6 +21,7 @@
 #include "core/encseq_api.h"
 #include "core/error_api.h"
 #include "core/ma_api.h"
+#include "core/mathsupport.h"
 #include "core/minmax.h"
 #include "core/showtime.h"
 #include "core/str_api.h"
@@ -121,6 +122,7 @@ static GtOptionParser* gt_seed_extend_option_parser_new(void *tool_arguments)
                                 arguments->dbs_indexname,
                                 "");
   gt_option_is_mandatory(option);
+  gt_option_hide_default(option);
   gt_option_parser_add_option(op, option);
 
   /* -qii */
@@ -128,13 +130,17 @@ static GtOptionParser* gt_seed_extend_option_parser_new(void *tool_arguments)
                                 "Query input index (encseq)",
                                 arguments->dbs_queryname,
                                 "");
+  gt_option_hide_default(option);
   gt_option_parser_add_option(op, option);
 
   /* -seedlength */
   op_len = gt_option_new_uint_min_max("seedlength",
-                                      "Minimum length of a seed",
+                                      "Minimum length of a seed\n"
+                                      "default: logarithm of input length "
+                                      "to the basis alphabet size",
                                       &arguments->dbs_seedlength,
-                                      14UL, 1UL, 32UL);
+                                      UINT_MAX, 1UL, 32UL);
+  gt_option_hide_default(op_len);
   gt_option_parser_add_option(op, op_len);
 
   /* -diagbandwidth */
@@ -147,9 +153,11 @@ static GtOptionParser* gt_seed_extend_option_parser_new(void *tool_arguments)
   /* -mincoverage */
   option = gt_option_new_uword_min("mincoverage",
                                    "Minimum coverage in two neighbouring "
-                                   "diagonal bands (for filter)",
+                                   "diagonal bands (for filter)\n"
+                                   "default: 2.5 x seedlength",
                                    &arguments->dbs_mincoverage,
                                    GT_UWORD_MAX, 1UL);
+  gt_option_hide_default(option);
   gt_option_parser_add_option(op, option);
 
   /* -maxfreq */
@@ -162,10 +170,12 @@ static GtOptionParser* gt_seed_extend_option_parser_new(void *tool_arguments)
   /* -t */
   op_sup = gt_option_new_uword_min("t",
                                    "Suppress k-mers occurring at least t times "
-                                   "(for filter)",
+                                   "(for filter)\n"
+                                   "alias for maxfreq - 1",
                                    &arguments->dbs_suppress,
                                    GT_UWORD_MAX, 2UL);
   gt_option_exclude(op_sup, op_frq);
+  gt_option_hide_default(op_sup);
   gt_option_is_development_option(op_sup);
   gt_option_parser_add_option(op, op_sup);
 
@@ -206,7 +216,7 @@ static GtOptionParser* gt_seed_extend_option_parser_new(void *tool_arguments)
   /* -extendxdrop */
   op_xdr = gt_option_new_uword_min_max("extendxdrop",
                                        "Extend seed to both sides using xdrop "
-                                       "algorithm, optional parameter "
+                                       "algorithm, /noptional parameter "
                                        "specifies sensitivity",
                                        &arguments->se_extendxdrop,
                                        97UL, 90UL, 100UL);
@@ -226,7 +236,7 @@ static GtOptionParser* gt_seed_extend_option_parser_new(void *tool_arguments)
   /* -extendgreedy */
   op_gre = gt_option_new_uword_min_max("extendgreedy",
                                        "Extend seed to both sides using greedy "
-                                       "algorithm, optional parameter "
+                                       "algorithm, \noptional parameter "
                                        "specifies sensitivity",
                                        &arguments->se_extendgreedy,
                                        97UL, 90UL, 100UL);
@@ -248,7 +258,7 @@ static GtOptionParser* gt_seed_extend_option_parser_new(void *tool_arguments)
   /* -history */
   op_his = gt_option_new_uword_min_max("history",
                                        "Size of (mis)match history in range [1"
-                                       "..64] (trimming for greedy extension)",
+                                       "..64]\n(trimming for greedy extension)",
                                        &arguments->se_historysize,
                                        60UL, 1UL, 64UL);
   gt_option_exclude(op_his, op_onl);
@@ -258,22 +268,24 @@ static GtOptionParser* gt_seed_extend_option_parser_new(void *tool_arguments)
 
   /* -maxalilendiff */
   op_dif = gt_option_new_uword("maxalilendiff",
-                               "Maximum difference of alignment length "
+                               "Maximum difference of alignment length\n"
                                "(trimming for greedy extension)",
                                &arguments->se_maxalilendiff, 0UL);
   gt_option_exclude(op_dif, op_onl);
   gt_option_exclude(op_dif, op_xdr);
+  gt_option_hide_default(op_dif);
   gt_option_is_development_option(op_dif);
   gt_option_parser_add_option(op, op_dif);
 
   /* -percmathistory */
   op_pmh = gt_option_new_uword_min_max("percmathistory",
                                        "percentage of matches required in "
-                                       "history (for greedy extension)",
+                                       "history \n(for greedy extension)",
                                        &arguments->se_perc_match_hist,
                                        0UL, 1UL, 100UL);
   gt_option_exclude(op_pmh, op_onl);
   gt_option_exclude(op_pmh, op_xdr);
+  gt_option_hide_default(op_pmh);
   gt_option_is_development_option(op_pmh);
   gt_option_parser_add_option(op, op_pmh);
 
@@ -295,6 +307,7 @@ static GtOptionParser* gt_seed_extend_option_parser_new(void *tool_arguments)
                                 gt_cam_extendgreedy_comment(),
                                 arguments->se_char_access_mode,
                                 "");
+  gt_option_hide_default(op_cam);
   gt_option_is_development_option(op_cam);
   gt_option_parser_add_option(op, op_cam);
 
@@ -303,7 +316,7 @@ static GtOptionParser* gt_seed_extend_option_parser_new(void *tool_arguments)
                                    "Minimum alignment length "
                                    "(for seed extension)",
                                    &arguments->se_alignlength,
-                                   20UL, 1UL);
+                                   GT_UWORD_MAX, 1UL);
   gt_option_exclude(op_len, op_onl);
   gt_option_parser_add_option(op, op_len);
 
@@ -558,9 +571,24 @@ static int gt_seed_extend_runner(GT_UNUSED int argc,
     }
   }
 
-  /* set mincoverage if option not specified */
-  if (arguments->dbs_mincoverage == GT_UWORD_MAX) {
+  /* set seedlength */
+  if (!had_err && arguments->dbs_seedlength == UINT_MAX) {
+    unsigned int nchars = gt_alphabet_num_of_chars(gt_encseq_alphabet(aencseq));
+    double totallength = 0.5 * (gt_encseq_total_length(aencseq) +
+                                gt_encseq_total_length(bencseq));
+    gt_assert(nchars > 0);
+    arguments->dbs_seedlength
+      = (unsigned int)gt_round_to_long(gt_log_base(totallength,(double)nchars));
+  }
+
+  /* set mincoverage */
+  if (!had_err && arguments->dbs_mincoverage == GT_UWORD_MAX) {
     arguments->dbs_mincoverage = (GtUword) (2.5 * arguments->dbs_seedlength);
+  }
+
+  /* set minimum alignment length */
+  if (!had_err && arguments->se_alignlength == GT_UWORD_MAX) {
+    arguments->se_alignlength = arguments->dbs_mincoverage;
   }
 
   /* Prepare options for greedy extension */
