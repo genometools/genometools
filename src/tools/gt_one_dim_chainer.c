@@ -41,9 +41,22 @@ typedef struct Match {
   GtUword querystart;
   GtUword queryend; 
 
-  GtUword length;
+  GtUword chainlen; /* length of match chain up to this match */
 
 } Match;
+ 
+static int compare_match_ends(const Match *match1, const Match *match2) 
+{
+  if(match1->queryend < match2->queryend) {
+    return -1;
+
+  } else if(match1->queryend == match2->queryend) {
+    return 0;
+
+  } else {
+    return 1;
+  }
+}
 
 static void* gt_one_dim_chainer_arguments_new(void)
 {
@@ -124,18 +137,22 @@ static int gt_one_dim_chainer_runner(int argc, const char **argv, int parsed_arg
     had_err = -1;
   } else
   {
+    GtUword maxchainlen = 0;
+    Match *maxchainend = NULL;
+
     while (true)
     {
-      uint64_t queryseqnum;
-      GtUword querystart, queryend, maxchainlen = 0;
+      Match match;
       GtQuerymatch *querymatchptr = gt_seedextend_match_iterator_next(semi);
       if (querymatchptr == NULL)
       {
         break;
       }
-      queryseqnum = gt_querymatch_queryseqnum(querymatchptr);
-      querystart = gt_querymatch_querystart(querymatchptr);
-      queryend = querystart + gt_querymatch_querylen(querymatchptr) - 1;
+      match.queryseqnum = gt_querymatch_queryseqnum(querymatchptr);
+      match.querystart = gt_querymatch_querystart(querymatchptr);
+      match.queryend = match.querystart + gt_querymatch_querylen(querymatchptr) - 1;
+
+      /* we now have a match to work with */
       
     }
   }
