@@ -126,11 +126,6 @@ static int gt_one_dim_chainer_runner(int argc, const char **argv, int parsed_arg
   gt_error_check(err);
   gt_assert(arguments);
 
-  /* XXX */
-  if (arguments->bool_option_one_dim_chainer)
-    printf("argc=%d, parsed_args=%d\n", argc, parsed_args);
-  printf("argv[0]=%s\n", argv[0]);
-
   GtSeedextendMatchIterator *semi
        = gt_seedextend_match_iterator_new(matchfile,err);
 
@@ -149,32 +144,33 @@ static int gt_one_dim_chainer_runner(int argc, const char **argv, int parsed_arg
     {
       Match *match = gt_malloc(sizeof *match);
       GtQuerymatch *querymatchptr = gt_seedextend_match_iterator_next(semi);
-      if (querymatchptr == NULL)
-      {
-        break;
-      }
-      match->queryseqnum = gt_querymatch_queryseqnum(querymatchptr);
-      match->querystart = gt_querymatch_querystart(querymatchptr);
-      match->queryend = match->querystart + gt_querymatch_querylen(querymatchptr) 
-          - 1;
       /* we now have a match to work with */
       while (!gt_priority_queue_is_empty(pq) && 
+          (querymatchptr == NULL ||
           ((Match*) gt_priority_queue_find_min(pq))->queryend <= 
-          match->querystart)
+          gt_querymatch_querystart(querymatchptr)))
       {
         Match *previousmatch = (Match*) gt_priority_queue_extract_min(pq);
         if (maxchainlen < previousmatch->chainlen)
         {
           maxchainlen = previousmatch->chainlen;
           maxchainend = previousmatch;
-        }
-        else
+        } else
         {
           gt_free(previous_match);
         }
       }
+      if (querymatchptr == NULL)
+      {
+        break;
+      }
+      match->queryseqnum = gt_querymatch_queryseqnum(querymatchptr);
+      match->querystart = gt_querymatch_querystart(querymatchptr);
+      match->queryend = match->querystart + 
+        gt_querymatch_querylen(querymatchptr) - 1;
       match->prec = maxchainend;
       match->chainlen = maxchainlen + match->queryend - match->querystart + 1;
+
       if (gt_priority_queue_is_full(pq)) /* almost never happens */
       {
         maxnumofelements *= 2;
@@ -188,19 +184,6 @@ static int gt_one_dim_chainer_runner(int argc, const char **argv, int parsed_arg
         pq = newpq;
       }
       gt_priority_queue_add(pq, match);
-    }
-    while (!gt_priority_queue_is_empty(pq)) 
-    {
-      Match *previousmatch = (Match*) gt_priority_queue_extract_min(pq);
-      if (maxchainlen < previousmatch->chainlen)
-      {
-        maxchainlen = previousmatch->chainlen;
-        maxchainend = previousmatch;
-      }
-      else
-      {
-        gt_free(previous_match);
-      }
     }
     gt_priority_queue_delete(pq);
   }
