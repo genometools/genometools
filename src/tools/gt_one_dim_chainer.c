@@ -18,6 +18,7 @@
 
 #include "core/ma.h"
 #include "core/unused_api.h"
+#include "match/seed-extend-iter.h"
 #include "tools/gt_one_dim_chainer.h"
 
 typedef struct {
@@ -95,6 +96,31 @@ static int gt_one_dim_chainer_runner(int argc, const char **argv, int parsed_arg
   if (arguments->bool_option_one_dim_chainer)
     printf("argc=%d, parsed_args=%d\n", argc, parsed_args);
   printf("argv[0]=%s\n", argv[0]);
+
+  GtSeedextendMatchIterator *semi
+       = gt_seedextend_match_iterator_new(matchfile,err);
+
+  if (semi == NULL)
+  {
+    had_err = -1;
+  } else
+  {
+    while (true)
+    {
+      uint64_t queryseqnum;
+      GtUword querystart, queryend;
+      GtQuerymatch *querymatchptr = gt_seedextend_match_iterator_next(semi);
+      if (querymatchptr == NULL)
+      {
+        break;
+      }
+      queryseqnum = gt_querymatch_queryseqnum(querymatchptr);
+      querystart = gt_querymatch_querystart(querymatchptr);
+      querend = querystart + gt_querymatch_querylen(querymatchptr) - 1;
+      /* now process match in sequence queryseqnum with relativ
+       *       start and endpositions querystart and queryend */
+    }
+  }
 
   return had_err;
 }
