@@ -22,7 +22,7 @@
 #include "core/unused_api.h"
 #include "extended/priority_queue.h"
 #include "match/seed-extend-iter.h"
-#include "match/querymatch->h"
+#include "match/querymatch.h"
 #include "tools/gt_one_dim_chainer.h"
 
 struct Match;   /* forward declaration */
@@ -47,12 +47,14 @@ typedef struct Match {
 
 } Match;
  
-static int compare_match_ends(const Match *match1, const Match *match2) 
+static int compare_match_ends(const void *match1, const void *match2) 
 {
-  if(match1->queryend < match2->queryend) {
+  const Match *m1 = (Match*) match1;
+  const Match *m2 = (Match*) match2;
+  if(m1->queryend < m2->queryend) {
     return -1;
 
-  } else if(match1->queryend == match2->queryend) {
+  } else if(m1->queryend == m2->queryend) {
     return 0;
 
   } else {
@@ -117,8 +119,9 @@ static int gt_one_dim_chainer_arguments_check(GT_UNUSED int rest_argc,
   return had_err;
 }
 
-static int gt_one_dim_chainer_runner(int argc, const char **argv, int parsed_args,
-                              void *tool_arguments, GT_UNUSED GtError *err)
+static int gt_one_dim_chainer_runner(int argc, const char **argv, 
+                              GT_UNUSED int parsed_args, void *tool_arguments, 
+                              GtError *err)
 {
   GtOneDimChainerArguments *arguments = tool_arguments;
   int had_err = 0;
@@ -127,7 +130,7 @@ static int gt_one_dim_chainer_runner(int argc, const char **argv, int parsed_arg
   gt_assert(arguments);
 
   GtSeedextendMatchIterator *semi
-       = gt_seedextend_match_iterator_new(matchfile,err);
+       = gt_seedextend_match_iterator_new((GtStr*) argv[argc-1], err);
 
   if (semi == NULL)
   {
@@ -143,6 +146,10 @@ static int gt_one_dim_chainer_runner(int argc, const char **argv, int parsed_arg
     while (true)
     {
       Match *match = gt_malloc(sizeof *match);
+      if (match == NULL) {
+        gt_error_set(err, "Could not reserve enough space."); 
+        return -1;
+      }
       GtQuerymatch *querymatchptr = gt_seedextend_match_iterator_next(semi);
       /* we now have a match to work with */
       while (!gt_priority_queue_is_empty(pq) && 
@@ -157,7 +164,7 @@ static int gt_one_dim_chainer_runner(int argc, const char **argv, int parsed_arg
           maxchainend = previousmatch;
         } else
         {
-          gt_free(previous_match);
+          gt_free(previousmatch);
         }
       }
       if (querymatchptr == NULL)
