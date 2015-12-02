@@ -18,6 +18,7 @@
 
 #include "core/ma.h"
 #include "core/unused_api.h"
+#include "extended/priority_queue.h"
 #include "match/seed-extend-iter.h"
 #include "tools/gt_one_dim_chainer.h"
 
@@ -108,7 +109,7 @@ static int gt_one_dim_chainer_runner(int argc, const char **argv, int parsed_arg
     while (true)
     {
       uint64_t queryseqnum;
-      GtUword querystart, queryend;
+      GtUword querystart, queryend, maxchainlen = 0;
       GtQuerymatch *querymatchptr = gt_seedextend_match_iterator_next(semi);
       if (querymatchptr == NULL)
       {
@@ -116,9 +117,8 @@ static int gt_one_dim_chainer_runner(int argc, const char **argv, int parsed_arg
       }
       queryseqnum = gt_querymatch_queryseqnum(querymatchptr);
       querystart = gt_querymatch_querystart(querymatchptr);
-      querend = querystart + gt_querymatch_querylen(querymatchptr) - 1;
-      /* now process match in sequence queryseqnum with relativ
-       *       start and endpositions querystart and queryend */
+      queryend = querystart + gt_querymatch_querylen(querymatchptr) - 1;
+      
     }
   }
 
