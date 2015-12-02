@@ -16,11 +16,13 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#define EXP_MAX_OVERLAPS 20
+
 #include "core/ma.h"
 #include "core/unused_api.h"
 #include "extended/priority_queue.h"
 #include "match/seed-extend-iter.h"
-#include "match/querymatch.h"
+#include "match/querymatch->h"
 #include "tools/gt_one_dim_chainer.h"
 
 struct Match;   /* forward declaration */
@@ -137,24 +139,60 @@ static int gt_one_dim_chainer_runner(int argc, const char **argv, int parsed_arg
     had_err = -1;
   } else
   {
+    GtUword maxnumofelements = EXP_MAX_OVERLAPS;
+    GtPriorityQueue *pq = gt_priority_queue_new(compare_match_ends, 
+           maxnumofelements); 
     GtUword maxchainlen = 0;
     Match *maxchainend = NULL;
 
     while (true)
     {
-      Match match;
+      Match *match = gt_malloc(sizeof *match);
       GtQuerymatch *querymatchptr = gt_seedextend_match_iterator_next(semi);
       if (querymatchptr == NULL)
       {
         break;
       }
-      match.queryseqnum = gt_querymatch_queryseqnum(querymatchptr);
-      match.querystart = gt_querymatch_querystart(querymatchptr);
-      match.queryend = match.querystart + gt_querymatch_querylen(querymatchptr) - 1;
-
+      match->queryseqnum = gt_querymatch_queryseqnum(querymatchptr);
+      match->querystart = gt_querymatch_querystart(querymatchptr);
+      match->queryend = match->querystart + gt_querymatch_querylen(querymatchptr) 
+          - 1;
       /* we now have a match to work with */
-      
+      while (!gt_priority_queue_is_empty(pq) && 
+          ((Match*) gt_priority_queue_find_min(pq))->queryend <= 
+          match->querystart)
+      {
+        Match *previousmatch = (Match*) gt_priority_queue_extract_min(pq);
+        if (maxchainlen < previousmatch->chainlen)
+        {
+          maxchainlen = previousmatch->chainlen;
+          maxchainend = previousmatch;
+        }
+      }
+      match->prec = maxchainend;
+      match->chainlen = maxchainlen + match->queryend - match->querystart + 1;
+      if (gt_priority_queue_is_full(pq)) /* almost never happens */
+      {
+        maxnumofelements *= 2;
+        GtPriorityQueue *newpq = gt_priority_queue_new(compare_match_ends, 
+            maxnumofelements);
+        while (!gt_priority_queue_is_empty(pq))
+          gt_priority_queue_add(newpq, gt_priority_queue_extract_min(pq));
+        gt_priority_queue_delete(pq);
+        pq = newpq;
+      }
+      gt_priority_queue_add(pq, match);
     }
+    while (!gt_priority_queue_is_empty(pq)) 
+    {
+      Match *previousmatch = (Match*) gt_priority_queue_extract_min(pq);
+      if (maxchainlen < previousmatch->chainlen)
+      {
+        maxchainlen = previousmatch->chainlen;
+        maxchainend = previousmatch;
+      }
+    }
+    gt_priority_queue_delete(pq);
   }
 
   return had_err;
