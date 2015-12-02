@@ -18,6 +18,7 @@
 #ifndef SEED_EXTEND_ITER_H
 #define SEED_EXTEND_ITER_H
 
+#include "match/querymatch.h"
 #include "core/str_api.h"
 #include "core/types_api.h"
 #include "core/error_api.h"
@@ -44,34 +45,6 @@ void gt_seedextend_match_iterator_delete(GtSeedextendMatchIterator *semi);
 
 GtQuerymatch *gt_seedextend_match_iterator_next(
                              GtSeedextendMatchIterator *semi);
-
-/* Here is a typical use of the iterator: */
-#ifdef SOBANSKI_KEIL
-  GtSeedextendMatchIterator *semi
-    = gt_seedextend_match_iterator_new(matchfile,err);
-
-  if (semi == NULL)
-  {
-    had_err = -1;
-  } else
-  {
-    while (true)
-    {
-      uint64_t queryseqnum;
-      GtUword querystart, queryend;
-      GtQuerymatch *querymatchptr = gt_seedextend_match_iterator_next(semi);
-      if (querymatchptr == NULL)
-      {
-        break;
-      }
-      queryseqnum = gt_querymatch_queryseqnum(querymatchptr);
-      querystart = gt_querymatch_querystart(querymatchptr);
-      querend = querystart + gt_querymatch_querylen(querymatchptr) - 1;
-      /* now process match in sequence queryseqnum with relativ
-         start and endpositions querystart and queryend */
-    }
-  }
-#endif
 
 /* The following functions set the seed_display flag of the iterators
    querymatch-object. */

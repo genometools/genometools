@@ -20,12 +20,30 @@
 #include "core/unused_api.h"
 #include "extended/priority_queue.h"
 #include "match/seed-extend-iter.h"
+#include "match/querymatch.h"
 #include "tools/gt_one_dim_chainer.h"
+
+struct Match;   /* forward declaration */
 
 typedef struct {
   bool bool_option_one_dim_chainer;
   GtStr  *str_option_one_dim_chainer;
 } GtOneDimChainerArguments;
+
+/* A struct that defines a match object with respective state vars */
+typedef struct Match {
+
+  /* predecessor index */
+  struct Match *prec;
+
+  uint64_t queryseqnum;
+
+  GtUword querystart;
+  GtUword queryend; 
+
+  GtUword length;
+
+} Match;
 
 static void* gt_one_dim_chainer_arguments_new(void)
 {
