@@ -168,6 +168,10 @@ static int gt_one_dim_chainer_runner(int argc, const char **argv, int parsed_arg
           maxchainlen = previousmatch->chainlen;
           maxchainend = previousmatch;
         }
+        else
+        {
+          gt_free(previous_match);
+        }
       }
       match->prec = maxchainend;
       match->chainlen = maxchainlen + match->queryend - match->querystart + 1;
@@ -177,7 +181,9 @@ static int gt_one_dim_chainer_runner(int argc, const char **argv, int parsed_arg
         GtPriorityQueue *newpq = gt_priority_queue_new(compare_match_ends, 
             maxnumofelements);
         while (!gt_priority_queue_is_empty(pq))
+        {
           gt_priority_queue_add(newpq, gt_priority_queue_extract_min(pq));
+        }
         gt_priority_queue_delete(pq);
         pq = newpq;
       }
@@ -190,6 +196,10 @@ static int gt_one_dim_chainer_runner(int argc, const char **argv, int parsed_arg
       {
         maxchainlen = previousmatch->chainlen;
         maxchainend = previousmatch;
+      }
+      else
+      {
+        gt_free(previous_match);
       }
     }
     gt_priority_queue_delete(pq);
