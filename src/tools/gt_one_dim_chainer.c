@@ -34,19 +34,40 @@ typedef struct {
 
 /* A struct that defines a match object with respective state vars */
 typedef struct Match {
-
-  /* predecessor index */
   struct Match *prec;
-
   uint64_t queryseqnum;
+  unsigned refcount;
 
   GtUword querystart;
   GtUword queryend; 
-
   GtUword chainlen; /* length of match chain up to this match */
-
 } Match;
  
+static void match_decrease_refcount(Match *match)
+{
+  while (match != NULL) 
+  {
+    Match *tmp = match->prec;
+    --match->refcount;
+    if (match->refcount == 0)
+    {
+      gt_free(match);
+    } else
+    {
+      break;
+    }
+    match = tmp;
+  }
+}
+
+static void match_increase_refcount(Match *match)
+{
+  if (match != NULL)
+  {
+    ++match->refcount;
+  }
+}
+
 static int compare_match_ends(const void *match1, const void *match2) 
 {
   const Match *m1 = (Match*) match1;
@@ -142,16 +163,11 @@ static int gt_one_dim_chainer_runner(int argc, const char **argv,
   GtPriorityQueue *pq = gt_priority_queue_new(compare_match_ends, 
          maxnumofelements); 
   GtUword maxchainlen = 0;
-  Match *match; 
+  Match *match = NULL; 
   Match *maxchainend = NULL;
 
   while (true)
   {
-    match = gt_malloc(sizeof *match);
-    if (match == NULL) {
-      gt_error_set(err, "Could not reserve enough space."); 
-      return -1;
-    }
     GtQuerymatch *querymatchptr = gt_seedextend_match_iterator_next(semi);
     /* we now have a match to work with */
     while (!gt_priority_queue_is_empty(pq) && 
@@ -163,21 +179,30 @@ static int gt_one_dim_chainer_runner(int argc, const char **argv,
       if (maxchainlen < previousmatch->chainlen)
       {
         maxchainlen = previousmatch->chainlen;
+        match_decrease_refcount(maxchainend);
         maxchainend = previousmatch;
       } else
-      {
-        gt_free(previousmatch);
+      { 
+        match_decrease_refcount(previousmatch);
       }
     }
     if (querymatchptr == NULL)
     {
       break;
     }
+    match_decrease_refcount(match);
+    match = gt_malloc(sizeof *match);
+    if (match == NULL) {
+      gt_error_set(err, "Could not reserve enough space."); 
+      return -1;
+    }
+    match->refcount = 1;
     match->queryseqnum = gt_querymatch_queryseqnum(querymatchptr);
     match->querystart = gt_querymatch_querystart(querymatchptr);
     match->queryend = match->querystart + 
       gt_querymatch_querylen(querymatchptr) - 1;
     match->prec = maxchainend;
+    match_increase_refcount(maxchainend);
     match->chainlen = maxchainlen + match->queryend - match->querystart + 1;
 
     if (gt_priority_queue_is_full(pq)) /* almost never happens */
@@ -192,22 +217,27 @@ static int gt_one_dim_chainer_runner(int argc, const char **argv,
       gt_priority_queue_delete(pq);
       pq = newpq;
     }
+    match_increase_refcount(match);
     gt_priority_queue_add(pq, match);
   }
   gt_priority_queue_delete(pq);
   gt_seedextend_match_iterator_delete(semi);
  
+  match_decrease_refcount(match);
   match = maxchainend; 
+  match_increase_refcount(maxchainend);
   while (match != NULL) 
   {
     Match *nextmatch = match->prec;
+    match_increase_refcount(nextmatch);
     printf("%" PRIu64 "\t%lu\t%lu\n", match->queryseqnum, match->querystart, 
         match->queryend);
-    gt_free(match);
+    match_decrease_refcount(match);
     match = nextmatch;
   }
 
-return had_err;
+  match_decrease_refcount(maxchainend);
+  return had_err;
 }
 
 GtTool* gt_one_dim_chainer(void)
