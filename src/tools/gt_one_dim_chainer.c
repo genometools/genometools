@@ -130,7 +130,7 @@ static int gt_one_dim_chainer_runner(int argc, const char **argv,
   gt_assert(arguments);
 
   GtSeedextendMatchIterator *semi
-       = gt_seedextend_match_iterator_new((GtStr*) argv[argc-1], err);
+       = gt_seedextend_match_iterator_new(gt_str_new_cstr(argv[argc-1]), err);
 
   if (semi == NULL)
   {
