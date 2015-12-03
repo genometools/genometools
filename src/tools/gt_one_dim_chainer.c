@@ -129,8 +129,10 @@ static int gt_one_dim_chainer_runner(int argc, const char **argv,
   gt_error_check(err);
   gt_assert(arguments);
 
+  GtStr *matchfilename = gt_str_new_cstr(argv[argc-1]);
   GtSeedextendMatchIterator *semi
-       = gt_seedextend_match_iterator_new(gt_str_new_cstr(argv[argc-1]), err);
+       = gt_seedextend_match_iterator_new(matchfilename, err);
+  gt_str_delete(matchfilename);
 
   if (semi == NULL)
   {
@@ -193,12 +195,13 @@ static int gt_one_dim_chainer_runner(int argc, const char **argv,
     gt_priority_queue_add(pq, match);
   }
   gt_priority_queue_delete(pq);
+  gt_seedextend_match_iterator_delete(semi);
  
   match = maxchainend; 
   while (match != NULL) 
   {
     Match *nextmatch = match->prec;
-    printf("%" PRIu64 "\t%lu\t%lu", match->queryseqnum, match->querystart, 
+    printf("%" PRIu64 "\t%lu\t%lu\n", match->queryseqnum, match->querystart, 
         match->queryend);
     gt_free(match);
     match = nextmatch;
