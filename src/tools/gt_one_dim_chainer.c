@@ -134,68 +134,77 @@ static int gt_one_dim_chainer_runner(int argc, const char **argv,
 
   if (semi == NULL)
   {
-    had_err = -1;
-  } else
+    return -1;
+  }
+  GtUword maxnumofelements = EXP_MAX_OVERLAPS;
+  GtPriorityQueue *pq = gt_priority_queue_new(compare_match_ends, 
+         maxnumofelements); 
+  GtUword maxchainlen = 0;
+  Match *match; 
+  Match *maxchainend = NULL;
+
+  while (true)
   {
-    GtUword maxnumofelements = EXP_MAX_OVERLAPS;
-    GtPriorityQueue *pq = gt_priority_queue_new(compare_match_ends, 
-           maxnumofelements); 
-    GtUword maxchainlen = 0;
-    Match *maxchainend = NULL;
-
-    while (true)
-    {
-      Match *match = gt_malloc(sizeof *match);
-      if (match == NULL) {
-        gt_error_set(err, "Could not reserve enough space."); 
-        return -1;
-      }
-      GtQuerymatch *querymatchptr = gt_seedextend_match_iterator_next(semi);
-      /* we now have a match to work with */
-      while (!gt_priority_queue_is_empty(pq) && 
-          (querymatchptr == NULL ||
-          ((Match*) gt_priority_queue_find_min(pq))->queryend <= 
-          gt_querymatch_querystart(querymatchptr)))
-      {
-        Match *previousmatch = (Match*) gt_priority_queue_extract_min(pq);
-        if (maxchainlen < previousmatch->chainlen)
-        {
-          maxchainlen = previousmatch->chainlen;
-          maxchainend = previousmatch;
-        } else
-        {
-          gt_free(previousmatch);
-        }
-      }
-      if (querymatchptr == NULL)
-      {
-        break;
-      }
-      match->queryseqnum = gt_querymatch_queryseqnum(querymatchptr);
-      match->querystart = gt_querymatch_querystart(querymatchptr);
-      match->queryend = match->querystart + 
-        gt_querymatch_querylen(querymatchptr) - 1;
-      match->prec = maxchainend;
-      match->chainlen = maxchainlen + match->queryend - match->querystart + 1;
-
-      if (gt_priority_queue_is_full(pq)) /* almost never happens */
-      {
-        maxnumofelements *= 2;
-        GtPriorityQueue *newpq = gt_priority_queue_new(compare_match_ends, 
-            maxnumofelements);
-        while (!gt_priority_queue_is_empty(pq))
-        {
-          gt_priority_queue_add(newpq, gt_priority_queue_extract_min(pq));
-        }
-        gt_priority_queue_delete(pq);
-        pq = newpq;
-      }
-      gt_priority_queue_add(pq, match);
+    match = gt_malloc(sizeof *match);
+    if (match == NULL) {
+      gt_error_set(err, "Could not reserve enough space."); 
+      return -1;
     }
-    gt_priority_queue_delete(pq);
+    GtQuerymatch *querymatchptr = gt_seedextend_match_iterator_next(semi);
+    /* we now have a match to work with */
+    while (!gt_priority_queue_is_empty(pq) && 
+        (querymatchptr == NULL ||
+        ((Match*) gt_priority_queue_find_min(pq))->queryend <= 
+        gt_querymatch_querystart(querymatchptr)))
+    {
+      Match *previousmatch = (Match*) gt_priority_queue_extract_min(pq);
+      if (maxchainlen < previousmatch->chainlen)
+      {
+        maxchainlen = previousmatch->chainlen;
+        maxchainend = previousmatch;
+      } else
+      {
+        gt_free(previousmatch);
+      }
+    }
+    if (querymatchptr == NULL)
+    {
+      break;
+    }
+    match->queryseqnum = gt_querymatch_queryseqnum(querymatchptr);
+    match->querystart = gt_querymatch_querystart(querymatchptr);
+    match->queryend = match->querystart + 
+      gt_querymatch_querylen(querymatchptr) - 1;
+    match->prec = maxchainend;
+    match->chainlen = maxchainlen + match->queryend - match->querystart + 1;
+
+    if (gt_priority_queue_is_full(pq)) /* almost never happens */
+    {
+      maxnumofelements *= 2;
+      GtPriorityQueue *newpq = gt_priority_queue_new(compare_match_ends, 
+          maxnumofelements);
+      while (!gt_priority_queue_is_empty(pq))
+      {
+        gt_priority_queue_add(newpq, gt_priority_queue_extract_min(pq));
+      }
+      gt_priority_queue_delete(pq);
+      pq = newpq;
+    }
+    gt_priority_queue_add(pq, match);
+  }
+  gt_priority_queue_delete(pq);
+ 
+  match = maxchainend; 
+  while (match != NULL) 
+  {
+    Match *nextmatch = match->prec;
+    printf("%" PRIu64 "\t%lu\t%lu", match->queryseqnum, match->querystart, 
+        match->queryend);
+    gt_free(match);
+    match = nextmatch;
   }
 
-  return had_err;
+return had_err;
 }
 
 GtTool* gt_one_dim_chainer(void)
