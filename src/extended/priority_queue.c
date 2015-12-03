@@ -40,13 +40,15 @@ struct GtPriorityQueue
 GtPriorityQueue *gt_priority_queue_new(GtCompare cmpfun,
                                        GtUword maxnumofelements)
 {
+  unsigned i;
   GtPriorityQueue *pq = gt_malloc(sizeof *pq);
   pq->elements = gt_malloc(sizeof (*pq->elements) * (maxnumofelements + 1));
   pq->minelement = NULL;
   pq->cmpfun = cmpfun;
   pq->capacity = maxnumofelements;
   pq->numofelements = 0;
-  pq->elements[0] = NULL;
+  for (i=0; i<maxnumofelements; ++i)
+    pq->elements[i] = NULL;
   return pq;
 }
 
