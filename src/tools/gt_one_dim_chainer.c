@@ -191,10 +191,6 @@ static int gt_one_dim_chainer_runner(int argc, const char **argv,
     }
     match_decrease_refcount(match);
     match = gt_malloc(sizeof *match);
-    if (match == NULL) {
-      gt_error_set(err, "Could not reserve enough space."); 
-      return -1;
-    }
     match->refcount = 1;
     match->seqnum = gt_querymatch_queryseqnum(querymatchptr);
     match->start = gt_querymatch_querystart(querymatchptr);
