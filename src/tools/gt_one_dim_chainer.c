@@ -23,7 +23,7 @@
 #include "match/querymatch.h"
 #include "tools/gt_one_dim_chainer.h"
 
-struct Match;   /* forward declaration */
+struct GtOneDimChainerMatch;   /* forward declaration */
 
 typedef struct {
   bool bool_option_one_dim_chainer;
@@ -31,21 +31,21 @@ typedef struct {
 } GtOneDimChainerArguments;
 
 /* A struct that defines a match object with respective state vars */
-typedef struct Match {
-  struct Match *prec;
+typedef struct GtOneDimChainerMatch {
+  struct GtOneDimChainerMatch *prec;
   uint64_t seqnum;
   unsigned refcount;
 
   GtUword start;
   GtUword end; 
   GtUword chainlen; /* length of match chain up to this match */
-} Match;
+} GtOneDimChainerMatch;
  
-static void match_decrease_refcount(Match *match)
+static void match_decrease_refcount(GtOneDimChainerMatch *match)
 {
   while (match != NULL) 
   {
-    Match *tmp = match->prec;
+    GtOneDimChainerMatch *tmp = match->prec;
     --match->refcount;
     if (match->refcount == 0)
     {
@@ -58,7 +58,7 @@ static void match_decrease_refcount(Match *match)
   }
 }
 
-static void match_increase_refcount(Match *match)
+static void match_increase_refcount(GtOneDimChainerMatch *match)
 {
   if (match != NULL)
   {
@@ -68,8 +68,8 @@ static void match_increase_refcount(Match *match)
 
 static int compare_match_ends(const void *match1, const void *match2) 
 {
-  const Match *m1 = (Match*) match1;
-  const Match *m2 = (Match*) match2;
+  const GtOneDimChainerMatch *m1 = (GtOneDimChainerMatch*) match1;
+  const GtOneDimChainerMatch *m2 = (GtOneDimChainerMatch*) match2;
   if(m1->end < m2->end) {
     return -1;
 
@@ -161,8 +161,8 @@ static int gt_one_dim_chainer_runner(int argc, const char **argv,
   GtPriorityQueue *pq = gt_priority_queue_new(compare_match_ends, 
          maxnumofelements); 
   GtUword maxchainlen = 0;
-  Match *match = NULL; 
-  Match *maxchainend = NULL;
+  GtOneDimChainerMatch *match = NULL; 
+  GtOneDimChainerMatch *maxchainend = NULL;
   uint64_t lastseqnum = 0;
 
   while (true)
@@ -171,10 +171,11 @@ static int gt_one_dim_chainer_runner(int argc, const char **argv,
     /* we now have a match to work with */
     while (!gt_priority_queue_is_empty(pq) && (querymatchptr == NULL ||
           lastseqnum != gt_querymatch_queryseqnum(querymatchptr) ||
-          ((Match*) gt_priority_queue_find_min(pq))->end <= 
+          ((GtOneDimChainerMatch*) gt_priority_queue_find_min(pq))->end <= 
           gt_querymatch_querystart(querymatchptr)))
     {
-      Match *previousmatch = (Match*) gt_priority_queue_extract_min(pq);
+      GtOneDimChainerMatch *previousmatch = 
+        (GtOneDimChainerMatch*) gt_priority_queue_extract_min(pq);
       if (maxchainlen < previousmatch->chainlen)
       {
         maxchainlen = previousmatch->chainlen;
@@ -227,7 +228,7 @@ static int gt_one_dim_chainer_runner(int argc, const char **argv,
   match_increase_refcount(maxchainend);
   while (match != NULL) 
   {
-    Match *nextmatch = match->prec;
+    GtOneDimChainerMatch *nextmatch = match->prec;
     match_increase_refcount(nextmatch);
     printf("%" PRIu64 "\t%lu\t%lu\n", match->seqnum, match->start, 
         match->end);
