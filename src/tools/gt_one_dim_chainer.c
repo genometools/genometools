@@ -165,14 +165,16 @@ static int gt_one_dim_chainer_runner(int argc, const char **argv,
   GtUword maxchainlen = 0;
   Match *match = NULL; 
   Match *maxchainend = NULL;
+  uint64_t lastseqnum = 0;
 
   while (true)
   {
     GtQuerymatch *querymatchptr = gt_seedextend_match_iterator_next(semi);
     /* we now have a match to work with */
     while (!gt_priority_queue_is_empty(pq) && (querymatchptr == NULL ||
-        ((Match*) gt_priority_queue_find_min(pq))->end <= 
-        gt_querymatch_querystart(querymatchptr)))
+          lastseqnum != gt_querymatch_queryseqnum(querymatchptr) ||
+          ((Match*) gt_priority_queue_find_min(pq))->end <= 
+          gt_querymatch_querystart(querymatchptr)))
     {
       Match *previousmatch = (Match*) gt_priority_queue_extract_min(pq);
       if (maxchainlen < previousmatch->chainlen)
@@ -188,6 +190,10 @@ static int gt_one_dim_chainer_runner(int argc, const char **argv,
     if (querymatchptr == NULL)
     {
       break;
+    }
+    if (lastseqnum != gt_querymatch_queryseqnum(querymatchptr))
+    {
+      lastseqnum = gt_querymatch_queryseqnum(querymatchptr);
     }
     match_decrease_refcount(match);
     match = gt_malloc(sizeof *match);
