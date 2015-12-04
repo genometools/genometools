@@ -35,11 +35,11 @@ typedef struct {
 /* A struct that defines a match object with respective state vars */
 typedef struct Match {
   struct Match *prec;
-  uint64_t queryseqnum;
+  uint64_t seqnum;
   unsigned refcount;
 
-  GtUword querystart;
-  GtUword queryend; 
+  GtUword start;
+  GtUword end; 
   GtUword chainlen; /* length of match chain up to this match */
 } Match;
  
@@ -72,10 +72,10 @@ static int compare_match_ends(const void *match1, const void *match2)
 {
   const Match *m1 = (Match*) match1;
   const Match *m2 = (Match*) match2;
-  if(m1->queryend < m2->queryend) {
+  if(m1->end < m2->end) {
     return -1;
 
-  } else if(m1->queryend == m2->queryend) {
+  } else if(m1->end == m2->end) {
     return 0;
 
   } else {
@@ -170,9 +170,8 @@ static int gt_one_dim_chainer_runner(int argc, const char **argv,
   {
     GtQuerymatch *querymatchptr = gt_seedextend_match_iterator_next(semi);
     /* we now have a match to work with */
-    while (!gt_priority_queue_is_empty(pq) && 
-        (querymatchptr == NULL ||
-        ((Match*) gt_priority_queue_find_min(pq))->queryend <= 
+    while (!gt_priority_queue_is_empty(pq) && (querymatchptr == NULL ||
+        ((Match*) gt_priority_queue_find_min(pq))->end <= 
         gt_querymatch_querystart(querymatchptr)))
     {
       Match *previousmatch = (Match*) gt_priority_queue_extract_min(pq);
@@ -197,13 +196,13 @@ static int gt_one_dim_chainer_runner(int argc, const char **argv,
       return -1;
     }
     match->refcount = 1;
-    match->queryseqnum = gt_querymatch_queryseqnum(querymatchptr);
-    match->querystart = gt_querymatch_querystart(querymatchptr);
-    match->queryend = match->querystart + 
+    match->seqnum = gt_querymatch_queryseqnum(querymatchptr);
+    match->start = gt_querymatch_querystart(querymatchptr);
+    match->end = match->start + 
       gt_querymatch_querylen(querymatchptr) - 1;
     match->prec = maxchainend;
     match_increase_refcount(maxchainend);
-    match->chainlen = maxchainlen + match->queryend - match->querystart + 1;
+    match->chainlen = maxchainlen + match->end - match->start + 1;
 
     if (gt_priority_queue_is_full(pq)) /* almost never happens */
     {
@@ -230,8 +229,8 @@ static int gt_one_dim_chainer_runner(int argc, const char **argv,
   {
     Match *nextmatch = match->prec;
     match_increase_refcount(nextmatch);
-    printf("%" PRIu64 "\t%lu\t%lu\n", match->queryseqnum, match->querystart, 
-        match->queryend);
+    printf("%" PRIu64 "\t%lu\t%lu\n", match->seqnum, match->start, 
+        match->end);
     match_decrease_refcount(match);
     match = nextmatch;
   }
