@@ -174,16 +174,16 @@ static int gt_one_dim_chainer_runner(int argc, const char **argv,
           ((GtOneDimChainerMatch*) gt_priority_queue_find_min(pq))->end <= 
           gt_querymatch_querystart(querymatchptr)))
     {
-      GtOneDimChainerMatch *previousmatch = 
+      GtOneDimChainerMatch *candidatematch = 
         (GtOneDimChainerMatch*) gt_priority_queue_extract_min(pq);
-      if (maxchainlen < previousmatch->chainlen)
+      if (maxchainlen < candidatematch->chainlen)
       {
-        maxchainlen = previousmatch->chainlen;
+        maxchainlen = candidatematch->chainlen;
         match_decrease_refcount(maxchainend);
-        maxchainend = previousmatch;
+        maxchainend = candidatematch;
       } else
       { 
-        match_decrease_refcount(previousmatch);
+        match_decrease_refcount(candidatematch);
       }
     }
     if (querymatchptr == NULL)
