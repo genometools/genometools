@@ -37,13 +37,13 @@ typedef struct GtOneDimChainerMatch {
   unsigned refcount;
 
   GtUword start;
-  GtUword end; 
+  GtUword end;
   GtUword chainweight; /* weight of match chain up to this match */
 } GtOneDimChainerMatch;
- 
+
 static void gt_1d_chainer_decr_refcount(GtOneDimChainerMatch *match)
 {
-  while (match != NULL) 
+  while (match != NULL)
   {
     GtOneDimChainerMatch *tmp = match->prec;
     --match->refcount;
@@ -66,14 +66,14 @@ static void gt_1d_chainer_incr_refcount(GtOneDimChainerMatch *match)
   }
 }
 
-static int gt_1d_chainer_compare_ends(const void *match1, const void *match2) 
+static int gt_1d_chainer_compare_ends(const void *match1, const void *match2)
 {
   const GtOneDimChainerMatch *m1 = (GtOneDimChainerMatch*) match1;
   const GtOneDimChainerMatch *m2 = (GtOneDimChainerMatch*) match2;
-  if(m1->end < m2->end) {
+  if (m1->end < m2->end) {
     return -1;
 
-  } else if(m1->end == m2->end) {
+  } else if (m1->end == m2->end) {
     return 0;
 
   } else {
@@ -88,7 +88,8 @@ static GtUword gt_1d_chainer_get_weight(const GtOneDimChainerMatch *match)
 
 static void* gt_one_dim_chainer_arguments_new(void)
 {
-  GtOneDimChainerArguments *arguments = gt_calloc((size_t) 1, sizeof *arguments);
+  GtOneDimChainerArguments *arguments =
+    gt_calloc((size_t) 1, sizeof *arguments);
   arguments->str_option_one_dim_chainer = gt_str_new();
   return arguments;
 }
@@ -102,7 +103,8 @@ static void gt_one_dim_chainer_arguments_delete(void *tool_arguments)
   }
 }
 
-static GtOptionParser* gt_one_dim_chainer_option_parser_new(void *tool_arguments)
+static GtOptionParser* gt_one_dim_chainer_option_parser_new(
+    void *tool_arguments)
 {
   GtOneDimChainerArguments *arguments = tool_arguments;
   GtOptionParser *op;
@@ -143,8 +145,8 @@ static int gt_one_dim_chainer_arguments_check(GT_UNUSED int rest_argc,
   return had_err;
 }
 
-static int gt_one_dim_chainer_runner(int argc, const char **argv, 
-                              GT_UNUSED int parsed_args, void *tool_arguments, 
+static int gt_one_dim_chainer_runner(int argc, const char **argv,
+                              GT_UNUSED int parsed_args, void *tool_arguments,
                               GtError *err)
 {
   GtOneDimChainerArguments *arguments = tool_arguments;
@@ -163,10 +165,10 @@ static int gt_one_dim_chainer_runner(int argc, const char **argv,
     return -1;
   }
   GtUword maxnumofelements = 15;
-  GtPriorityQueue *pq = gt_priority_queue_new(gt_1d_chainer_compare_ends, 
-         maxnumofelements); 
+  GtPriorityQueue *pq = gt_priority_queue_new(gt_1d_chainer_compare_ends,
+         maxnumofelements);
   GtUword maxchainweight = 0;
-  GtOneDimChainerMatch *match = NULL; 
+  GtOneDimChainerMatch *match = NULL;
   GtOneDimChainerMatch *maxchainend = NULL;
   uint64_t lastseqnum = 0;
 
@@ -176,10 +178,10 @@ static int gt_one_dim_chainer_runner(int argc, const char **argv,
     /* we now have a match to work with */
     while (!gt_priority_queue_is_empty(pq) && (querymatchptr == NULL ||
           lastseqnum != gt_querymatch_queryseqnum(querymatchptr) ||
-          ((GtOneDimChainerMatch*) gt_priority_queue_find_min(pq))->end <= 
+          ((GtOneDimChainerMatch*) gt_priority_queue_find_min(pq))->end <=
           gt_querymatch_querystart(querymatchptr)))
     {
-      GtOneDimChainerMatch *candidatematch = 
+      GtOneDimChainerMatch *candidatematch =
         (GtOneDimChainerMatch*) gt_priority_queue_extract_min(pq);
       if (maxchainweight < candidatematch->chainweight)
       {
@@ -187,7 +189,7 @@ static int gt_one_dim_chainer_runner(int argc, const char **argv,
         gt_1d_chainer_decr_refcount(maxchainend);
         maxchainend = candidatematch;
       } else
-      { 
+      {
         gt_1d_chainer_decr_refcount(candidatematch);
       }
     }
@@ -204,7 +206,7 @@ static int gt_one_dim_chainer_runner(int argc, const char **argv,
     match->refcount = 1;
     match->seqnum = gt_querymatch_queryseqnum(querymatchptr);
     match->start = gt_querymatch_querystart(querymatchptr);
-    match->end = match->start + 
+    match->end = match->start +
       gt_querymatch_querylen(querymatchptr) - 1;
     match->prec = maxchainend;
     gt_1d_chainer_incr_refcount(maxchainend);
@@ -213,7 +215,7 @@ static int gt_one_dim_chainer_runner(int argc, const char **argv,
     if (gt_priority_queue_is_full(pq)) /* almost never happens */
     {
       maxnumofelements *= 2;
-      GtPriorityQueue *newpq = gt_priority_queue_new(gt_1d_chainer_compare_ends, 
+      GtPriorityQueue *newpq = gt_priority_queue_new(gt_1d_chainer_compare_ends,
           maxnumofelements);
       while (!gt_priority_queue_is_empty(pq))
       {
@@ -227,15 +229,15 @@ static int gt_one_dim_chainer_runner(int argc, const char **argv,
   }
   gt_priority_queue_delete(pq);
   gt_seedextend_match_iterator_delete(semi);
- 
+
   gt_1d_chainer_decr_refcount(match);
-  match = maxchainend; 
+  match = maxchainend;
   gt_1d_chainer_incr_refcount(maxchainend);
-  while (match != NULL) 
+  while (match != NULL)
   {
     GtOneDimChainerMatch *nextmatch = match->prec;
     gt_1d_chainer_incr_refcount(nextmatch);
-    printf("%" PRIu64 "\t" GT_WU "\t" GT_WU "\n", match->seqnum, match->start, 
+    printf("%" PRIu64 "\t" GT_WU "\t" GT_WU "\n", match->seqnum, match->start,
         match->end);
     gt_1d_chainer_decr_refcount(match);
     match = nextmatch;
