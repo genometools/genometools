@@ -38,7 +38,7 @@ typedef struct GtOneDimChainerMatch {
 
   GtUword start;
   GtUword end; 
-  GtUword chainlen; /* length of match chain up to this match */
+  GtUword chainweight; /* weight of match chain up to this match */
 } GtOneDimChainerMatch;
  
 static void match_decrease_refcount(GtOneDimChainerMatch *match)
@@ -79,6 +79,11 @@ static int compare_match_ends(const void *match1, const void *match2)
   } else {
     return 1;
   }
+}
+
+static GtUword gt_one_dim_chainer_get_weight(const GtOneDimChainerMatch *match)
+{
+  return match->end - match->start + 1;
 }
 
 static void* gt_one_dim_chainer_arguments_new(void)
@@ -160,7 +165,7 @@ static int gt_one_dim_chainer_runner(int argc, const char **argv,
   GtUword maxnumofelements = 15;
   GtPriorityQueue *pq = gt_priority_queue_new(compare_match_ends, 
          maxnumofelements); 
-  GtUword maxchainlen = 0;
+  GtUword maxchainweight = 0;
   GtOneDimChainerMatch *match = NULL; 
   GtOneDimChainerMatch *maxchainend = NULL;
   uint64_t lastseqnum = 0;
@@ -176,9 +181,9 @@ static int gt_one_dim_chainer_runner(int argc, const char **argv,
     {
       GtOneDimChainerMatch *candidatematch = 
         (GtOneDimChainerMatch*) gt_priority_queue_extract_min(pq);
-      if (maxchainlen < candidatematch->chainlen)
+      if (maxchainweight < candidatematch->chainweight)
       {
-        maxchainlen = candidatematch->chainlen;
+        maxchainweight = candidatematch->chainweight;
         match_decrease_refcount(maxchainend);
         maxchainend = candidatematch;
       } else
@@ -203,7 +208,7 @@ static int gt_one_dim_chainer_runner(int argc, const char **argv,
       gt_querymatch_querylen(querymatchptr) - 1;
     match->prec = maxchainend;
     match_increase_refcount(maxchainend);
-    match->chainlen = maxchainlen + match->end - match->start + 1;
+    match->chainweight = maxchainweight + gt_one_dim_chainer_get_weight(match);
 
     if (gt_priority_queue_is_full(pq)) /* almost never happens */
     {
