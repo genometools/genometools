@@ -92,6 +92,9 @@ def find_expected_alignmentranges(filename)
 end
 
 def checkrange(align, dbrange, queryrange)
+  if align.empty?
+    return 0
+  end
   # align is sorted by db.first
   align_db, align_query = nil, nil
   align.each {|ali|
@@ -128,11 +131,7 @@ def find_multi_overlaps(alignmentranges,matchlist,results)
   align.sort!{|x,y| x[0].first <=> y[0].first}
 
   # compare
-  if expectrange_db.length <= expectrange_query.length
-    len = expectrange_db.length
-  else
-    len = expectrange_query.length
-  end
+  len = min(expectrange_db.length, expectrange_query.length)
   for idx in (0...len)
     coverage = checkrange(align, expectrange_db[idx], expectrange_query[idx])
     results[coverage] += 1
@@ -207,11 +206,10 @@ def callseedextend(mincoverage,indexname,inputfile,destfile,minidentity,length,
   else
     lenparam = " -l #{seedlength}"
   end
-  makesystemcall("#{gtcall()} seed_extend -t 21 " +
+  makesystemcall("#{gtcall()} seed_extend -t 21 -no-reverse " +
 		 "-seedlength #{seedlength} -minidentity #{minidentity} " +
-		 "-seed-display -extendgreedy " +
-                 (if bias then "-bias-parameters " else "" end) +
-		 "-overlappingseeds -ii #{indexname}" +
+		 "-seed-display -extendgreedy -overlappingseeds -ii #{indexname}" +
+                 (if bias then " -bias-parameters" else "" end) +
                  (if withalignment then " -a" else "" end) +
                  (if weakends then " -weakends" else "" end) +
                  (if destfile.empty? then "" else " > #{destfile}.txt" end) +
