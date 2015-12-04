@@ -16,8 +16,6 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#define EXP_MAX_OVERLAPS 20
-
 #include "core/ma.h"
 #include "core/unused_api.h"
 #include "extended/priority_queue.h"
@@ -159,7 +157,7 @@ static int gt_one_dim_chainer_runner(int argc, const char **argv,
   {
     return -1;
   }
-  GtUword maxnumofelements = EXP_MAX_OVERLAPS;
+  GtUword maxnumofelements = 20;
   GtPriorityQueue *pq = gt_priority_queue_new(compare_match_ends, 
          maxnumofelements); 
   GtUword maxchainlen = 0;
