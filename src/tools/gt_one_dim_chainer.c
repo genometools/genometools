@@ -235,7 +235,7 @@ static int gt_one_dim_chainer_runner(int argc, const char **argv,
   {
     GtOneDimChainerMatch *nextmatch = match->prec;
     gt_1d_chainer_incr_refcount(nextmatch);
-    printf("%" PRIu64 "\t%lu\t%lu\n", match->seqnum, match->start, 
+    printf("%" PRIu64 "\t" GT_WU "\t" GT_WU "\n", match->seqnum, match->start, 
         match->end);
     gt_1d_chainer_decr_refcount(match);
     match = nextmatch;
