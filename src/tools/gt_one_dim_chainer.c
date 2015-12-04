@@ -157,7 +157,7 @@ static int gt_one_dim_chainer_runner(int argc, const char **argv,
   {
     return -1;
   }
-  GtUword maxnumofelements = 20;
+  GtUword maxnumofelements = 15;
   GtPriorityQueue *pq = gt_priority_queue_new(compare_match_ends, 
          maxnumofelements); 
   GtUword maxchainlen = 0;
