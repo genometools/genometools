@@ -66,9 +66,9 @@ static void gt_1d_chainer_incr_refcount(GtOneDimChainerMatch *match)
   }
 }
 
-static GtUword gt_1d_chainer_get_weight(const GtOneDimChainerMatch *match)
+static GtUword gt_1d_chainer_get_weight(GtUword start, GtUword end)
 {
-  return match->end - match->start + 1;
+  return end - start + 1;
 }
 
 static GtOneDimChainerMatch* gt_1d_chainer_match_new(
@@ -82,7 +82,8 @@ static GtOneDimChainerMatch* gt_1d_chainer_match_new(
   match->end = match->start + gt_querymatch_querylen(querymatchptr) - 1;
   match->prec = maxchainend;
   gt_1d_chainer_incr_refcount(maxchainend);
-  match->chainweight = maxchainweight + gt_1d_chainer_get_weight(match);
+  match->chainweight = maxchainweight + gt_1d_chainer_get_weight(match->start,
+      match->end);
 
   return match;
 }
