@@ -66,6 +66,27 @@ static void gt_1d_chainer_incr_refcount(GtOneDimChainerMatch *match)
   }
 }
 
+static GtUword gt_1d_chainer_get_weight(const GtOneDimChainerMatch *match)
+{
+  return match->end - match->start + 1;
+}
+
+static GtOneDimChainerMatch* gt_1d_chainer_match_new(
+    GtQuerymatch *querymatchptr, GtOneDimChainerMatch *maxchainend,
+    GtUword maxchainweight)
+{
+  GtOneDimChainerMatch *match = gt_malloc(sizeof *match);
+  match->refcount = 1;
+  match->seqnum = gt_querymatch_queryseqnum(querymatchptr);
+  match->start = gt_querymatch_querystart(querymatchptr);
+  match->end = match->start + gt_querymatch_querylen(querymatchptr) - 1;
+  match->prec = maxchainend;
+  gt_1d_chainer_incr_refcount(maxchainend);
+  match->chainweight = maxchainweight + gt_1d_chainer_get_weight(match);
+
+  return match;
+}
+
 static int gt_1d_chainer_compare_ends(const void *match1, const void *match2)
 {
   const GtOneDimChainerMatch *m1 = (GtOneDimChainerMatch*) match1;
@@ -79,11 +100,6 @@ static int gt_1d_chainer_compare_ends(const void *match1, const void *match2)
   } else {
     return 1;
   }
-}
-
-static GtUword gt_1d_chainer_get_weight(const GtOneDimChainerMatch *match)
-{
-  return match->end - match->start + 1;
 }
 
 static void* gt_one_dim_chainer_arguments_new(void)
@@ -202,15 +218,7 @@ static int gt_one_dim_chainer_runner(int argc, const char **argv,
       lastseqnum = gt_querymatch_queryseqnum(querymatchptr);
     }
     gt_1d_chainer_decr_refcount(match);
-    match = gt_malloc(sizeof *match);
-    match->refcount = 1;
-    match->seqnum = gt_querymatch_queryseqnum(querymatchptr);
-    match->start = gt_querymatch_querystart(querymatchptr);
-    match->end = match->start +
-      gt_querymatch_querylen(querymatchptr) - 1;
-    match->prec = maxchainend;
-    gt_1d_chainer_incr_refcount(maxchainend);
-    match->chainweight = maxchainweight + gt_1d_chainer_get_weight(match);
+    match = gt_1d_chainer_match_new(querymatchptr, maxchainend, maxchainweight);
 
     if (gt_priority_queue_is_full(pq)) /* almost never happens */
     {
