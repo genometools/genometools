@@ -1169,6 +1169,7 @@ static const GtQuerymatch *gt_extend_selfmatch_relative(bool forxdrop,
 {
   GtSeedextendSeqpair sesp;
   const GtUword query_totallength = 0;
+  GtSeqorEncseq query;
 
   gt_sesp_from_relative(&sesp,encseq,dbseqnum,dbstart_relative,
                         encseq,queryseqnum,querystart_relative,
@@ -1176,7 +1177,15 @@ static const GtQuerymatch *gt_extend_selfmatch_relative(bool forxdrop,
                         len,
                         true,
                         query_readmode);
-  return gt_extend_sesp(forxdrop,info, encseq,NULL, &sesp);
+  if (query_readmode != GT_READMODE_FORWARD)
+  {
+    query.seq = NULL;
+    query.encseq = encseq;
+  }
+  return gt_extend_sesp(forxdrop,info, encseq,
+                        query_readmode != GT_READMODE_FORWARD ? &query
+                                                              : NULL,
+                        &sesp);
 }
 
 const GtQuerymatch *gt_xdrop_extend_selfmatch_relative(void *info,

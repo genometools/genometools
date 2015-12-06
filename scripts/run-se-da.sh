@@ -4,23 +4,34 @@
 
 set -e -x
 
-if test $# -ne 2
+if test $# -eq 3
 then
-  echo "Usage: $0 <minlen> <inputfile>"
-  exit 1
+  minlen=$1
+  minidentity=$2
+  referencefile=$3
+  queryfile=""
+else
+  if test $# -eq 4
+  then
+    minlen=$1
+    minidentity=$2
+    referencefile=$3
+    queryfile=$4
+  else
+    echo "Usage: $0 <minlen> <minidentity> <referencefile> [queryfile]"
+    exit 1
+  fi
 fi
 
-minlen=$1
-inputfile=$2
-TARGET=`basename $inputfile`
-minidentity=70
+reference=`basename $referencefile`
 seedlength=14
 maxfreq=21
 
 # note that the following script randomly replaces wildcards by
 # characters over the base alphabet. So for the same sequence and parameters
 # the set of matches often varies over different runs.
-scripts/convert2myersformat.rb $inputfile > ${TARGET}.fasta
+scripts/convert2myersformat.rb $referencefile > ${reference}.fasta
+
 if test $PACKAGES != ""
 then
   MYERSPROG="$PACKAGES"/myers
@@ -28,15 +39,38 @@ else
   MYERSPROG="../myers"
 fi
 
-rm -f ${TARGET}.db
-${MYERSPROG}/DAZZ_DB/fasta2DB ${TARGET}.db ${TARGET}.fasta
+rm -f ${reference}.db
+${MYERSPROG}/DAZZ_DB/fasta2DB ${reference}.db ${reference}.fasta
+if test ${queryfile} != ""
+then
+  query=`basename $queryfile`
+  scripts/convert2myersformat.rb ${queryfile} > ${query}.fasta
+  ${MYERSPROG}/DAZZ_DB/fasta2DB ${query}.db ${query}.fasta
+  outputprefix="${reference}-${query}"
+else
+  query=${reference}
+  outputprefix="${reference}"
+fi
+
 ${MYERSPROG}/DALIGNER/daligner -t${maxfreq} -I -A -Y -e0.${minidentity} \
                    -k${seedlength} -l${minlen} \
-                   ${TARGET}.db ${TARGET}.db > ${TARGET}-da.matches
-rm -f ${TARGET}.db
-rm -f ${TARGET}.${TARGET}*.las .${TARGET}.idx .${TARGET}.bps
-bin/gt encseq encode -sds no -md5 no -des no -indexname ${TARGET} ${TARGET}.fasta
-bin/gt seed_extend -ii ${TARGET} -t ${maxfreq} -l ${minlen} \
+                   ${reference}.db ${query}.db > ${outputprefix}-da.matches
+rm -f ${reference}.db ${query}.db
+rm -f ${reference}.${query}*.las .${reference}.idx .${reference}.bps
+
+bin/gt encseq encode -sds no -md5 no -des no -indexname ${reference} \
+                                           ${reference}.fasta
+if test ${queryfile} != ""
+then
+  bin/gt encseq encode -sds no -md5 no -des no -indexname ${query} \
+                                           ${query}.fasta
+  qiioptions="-qii ${query}"
+else
+  qiioptions=""
+fi
+
+bin/gt seed_extend -ii ${reference} ${qiioption} -t ${maxfreq} -l ${minlen} \
                     -minidentity ${minidentity} -seed-display -v \
-                    -overlappingseeds -bias-parameters -history 60 > ${TARGET}-se.matches
-scripts/matched-seqpairs.rb ${TARGET}-da.matches ${TARGET}-se.matches
+                    -overlappingseeds -bias-parameters -no-reverse -history 60 \
+                     > ${outputprefix}-se.matches
+scripts/matched-seqpairs.rb ${outputprefix}-da.matches ${outputprefix}-se.matches
