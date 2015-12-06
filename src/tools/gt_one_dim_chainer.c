@@ -195,7 +195,7 @@ static int gt_one_dim_chainer_runner(int argc, const char **argv,
     /* we now have a match to work with */
     while (!gt_priority_queue_is_empty(pq) && (querymatchptr == NULL ||
           lastseqnum != gt_querymatch_queryseqnum(querymatchptr) ||
-          ((GtOneDimChainerMatch*) gt_priority_queue_find_min(pq))->end <=
+          ((GtOneDimChainerMatch*) gt_priority_queue_find_min(pq))->end <
           gt_querymatch_querystart(querymatchptr)))
     {
       GtOneDimChainerMatch *candidatematch =
