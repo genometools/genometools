@@ -54,9 +54,9 @@ fi
 
 ${MYERSPROG}/DALIGNER/daligner -t${maxfreq} -I -A -Y -e0.${minidentity} \
                    -k${seedlength} -l${minlen} \
-                   ${reference}.db ${query}.db > ${outputprefix}-da.matches
-rm -f ${reference}.db ${query}.db
-rm -f ${reference}.${query}*.las .${reference}.idx .${reference}.bps
+                   ${query}.db ${reference}.db > ${outputprefix}-da.matches
+rm -f ${reference}.db ${query}.db .${reference}.idx .${reference}.bps
+rm -f ${query}.${reference}*.las .${query}.idx .${query}.bps
 
 bin/gt encseq encode -sds no -md5 no -des no -indexname ${reference} \
                                            ${reference}.fasta
@@ -64,13 +64,15 @@ if test ${queryfile} != ""
 then
   bin/gt encseq encode -sds no -md5 no -des no -indexname ${query} \
                                            ${query}.fasta
-  qiioptions="-qii ${query}"
+  qiioption="-qii ${query}"
 else
-  qiioptions=""
+  qiioption=""
 fi
 
 bin/gt seed_extend -ii ${reference} ${qiioption} -t ${maxfreq} -l ${minlen} \
-                    -minidentity ${minidentity} -seed-display -v \
-                    -overlappingseeds -bias-parameters -no-reverse -history 60 \
-                     > ${outputprefix}-se.matches
+                    -seedlength 14 -minidentity ${minidentity} -seed-display \
+                    -v -overlappingseeds -bias-parameters -no-reverse \
+                    -history 60 > ${outputprefix}-se.matches
+rm -f ${query}.ssp ${query}.fasta ${query}.esq
+rm -f ${reference}.ssp ${reference}.fasta ${reference}.esq
 scripts/matched-seqpairs.rb ${outputprefix}-da.matches ${outputprefix}-se.matches
