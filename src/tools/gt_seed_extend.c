@@ -557,7 +557,7 @@ static int gt_seed_extend_runner(GT_UNUSED int argc,
   }
   gt_encseq_loader_delete(encseq_loader);
 
-  if (!gt_alphabet_is_dna(gt_encseq_alphabet(bencseq))) {
+  if (!had_err && !gt_alphabet_is_dna(gt_encseq_alphabet(bencseq))) {
     if (arguments->nofwd) {
       gt_error_set(err, "option -no-forward is only allowed for DNA sequences");
       had_err = -1;
