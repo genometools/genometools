@@ -79,7 +79,7 @@ static GtOneDimChainerMatch* gt_1d_chainer_match_new(
   match->refcount = 1;
   match->seqnum = gt_querymatch_queryseqnum(querymatchptr);
   match->start = gt_querymatch_querystart(querymatchptr);
-  match->end = match->start + gt_querymatch_querylen(querymatchptr) - 1;
+  match->end = match->start + gt_querymatch_querylen(querymatchptr);
   match->prec = maxchainend;
   gt_1d_chainer_incr_refcount(maxchainend);
   match->chainweight = maxchainweight + gt_1d_chainer_get_weight(match->start,
@@ -195,7 +195,7 @@ static int gt_one_dim_chainer_runner(int argc, const char **argv,
     /* we now have a match to work with */
     while (!gt_priority_queue_is_empty(pq) && (querymatchptr == NULL ||
           lastseqnum != gt_querymatch_queryseqnum(querymatchptr) ||
-          ((GtOneDimChainerMatch*) gt_priority_queue_find_min(pq))->end <
+          ((GtOneDimChainerMatch*) gt_priority_queue_find_min(pq))->end <=
           gt_querymatch_querystart(querymatchptr)))
     {
       GtOneDimChainerMatch *candidatematch =
