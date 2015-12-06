@@ -559,6 +559,7 @@ static GtUword gt_diagbandseed_process_seeds(const GtEncseq *aencseq,
                                                             seedlength,
                                                             query_readmode);
           } else {
+            count_extensions++;
             querymatch = extend_querymatch_relative_function(&info_querymatch,
                                                              aencseq,
                                                              idx->aseqnum,
