@@ -452,9 +452,10 @@ static GtUword gt_diagbandseed_process_seeds(const GtEncseq *aencseq,
   GtUword mlen = 0, diag = 0;
   bool firstinrange = true;
   GtUword count_extensions = 0;
-  const GtReadmode query_readmode = (reverse && extendgreedyinfo != NULL
-                                     ? GT_READMODE_REVCOMPL
-                                     : GT_READMODE_FORWARD);
+  const GtReadmode query_readmode
+    = (reverse && (extendgreedyinfo != NULL ||
+                   extendxdropinfo != NULL)) ? GT_READMODE_REVCOMPL
+                                             : GT_READMODE_FORWARD;
 
   gt_assert(mlist != NULL);
   mlen = mlist->nextfreeGtDiagbandseedSeedPair; /* mlist length  */

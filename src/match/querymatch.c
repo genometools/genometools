@@ -322,6 +322,10 @@ static GtReadmode gt_readmode_character_code_parse(char direction)
   {
     return GT_READMODE_FORWARD;
   }
+  if (direction == 'P')
+  {
+    return GT_READMODE_REVCOMPL;
+  }
   gt_assert(direction == 'R');
   return GT_READMODE_REVERSE;
 }
