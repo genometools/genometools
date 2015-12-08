@@ -158,7 +158,7 @@ static inline GtUword
 BWTSeqTerminatorPos(const BWTSeq *bwtSeq);
 
 /**
- * \brief Query BWT sequence for the number of occurences of a symbol in a
+ * \brief Query BWT sequence for the number of occurrences of a symbol in a
  * given prefix.
  * @param bwtSeq reference of object to query
  * @param tSym transformed symbol (as obtained by
@@ -170,7 +170,7 @@ static inline GtUword
 BWTSeqTransformedOcc(const BWTSeq *bwtSeq, Symbol tSym, GtUword pos);
 
 /**
- * \brief Query BWT sequence for the number of occurences of a symbol in a
+ * \brief Query BWT sequence for the number of occurrences of a symbol in a
  * given prefix.
  * @param bwtSeq reference of object to query
  * @param sym symbol (from original alphabet)
@@ -181,7 +181,7 @@ static inline GtUword
 BWTSeqOcc(const BWTSeq *bwtSeq, Symbol sym, GtUword pos);
 
 /**
- * \brief Query BWT sequence for the number of occurences of a symbol
+ * \brief Query BWT sequence for the number of occurrences of a symbol
  * in two given prefixes.
  * @param bwtSeq reference of object to query
  * @param tSym transformed symbol (as obtained by
@@ -196,7 +196,7 @@ BWTSeqTransformedPosPairOcc(const BWTSeq *bwtSeq, Symbol tSym,
                             GtUword posA, GtUword posB);
 
 /**
- * \brief Query BWT sequence for the number of occurences of a symbol
+ * \brief Query BWT sequence for the number of occurrences of a symbol
  * in two given prefixes.
  * @param bwtSeq reference of object to query
  * @param sym symbol (from original alphabet)
@@ -210,7 +210,7 @@ BWTSeqPosPairOcc(const BWTSeq *bwtSeq, Symbol sym,
                  GtUword posA, GtUword posB);
 
 /**
- * \brief Query BWT sequence for the number of occurences of all symbols in a
+ * \brief Query BWT sequence for the number of occurrences of all symbols in a
  * given alphabet range and BWT sequence prefix.
  * @param bwtSeq reference of object to query
  * @param range range of symbols in alphabet to query
@@ -229,7 +229,7 @@ BWTSeqRangeOcc(const BWTSeq *bwtSeq, AlphabetRangeID range, GtUword pos,
    GtUword rangeOcc[4]; */
 
 /**
- * \brief Query BWT sequence for the number of occurences of all symbols in a
+ * \brief Query BWT sequence for the number of occurrences of all symbols in a
  * given alphabet range and two BWT sequence prefixes.
  * @param bwtSeq reference of object to query
  * @param range range of symbols in alphabet to query

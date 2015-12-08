@@ -126,7 +126,7 @@ gt_condenseq_compress_option_parser_new(void *tool_arguments)
                                "it will be ignored for alignment searches. "
                                "Setting this to 0 will disable cutoffs, "
                                "leaving it undefined will use a cutoff based "
-                               "on the mean number of occurences of a k-word.",
+                               "on the mean number of occurrences of a k-word.",
                                &arguments->cutoff_value, GT_UNDEF_UWORD);
   gt_option_is_extended_option(option);
   gt_option_parser_add_option(op, option);

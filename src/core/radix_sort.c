@@ -84,7 +84,7 @@ static void gt_radixsort_lsb_linear_phase(GtUword *count,
 {
   GtUword idx, *cptr, *countptr, *sptr;
 
-  /* count occurences of every byte value */
+  /* count occurrences of every byte value */
   countptr = count;
   for (cptr = countptr; cptr <= countptr + UINT8_MAX; cptr++)
   {
