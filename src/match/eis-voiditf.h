@@ -168,7 +168,7 @@ GtUword gt_pck_get_nonspecial_count(const FMindex *index);
  * that is the number of rows that would be extended with a special. */
 GtUword gt_pck_special_occ_in_nonspecial_intervals(const FMindex *index);
 
-/* counts the exact occurences of pattern in index returns 0 if pattern is not
+/* counts the exact occurrences of pattern in index returns 0 if pattern is not
  found */
 GtUword gt_pck_exact_pattern_count(const FMindex *index,
                                          const GtUchar *pattern,

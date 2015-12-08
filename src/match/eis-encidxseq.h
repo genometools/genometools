@@ -165,7 +165,7 @@ EISGetAlphabet(const EISeq *seq);
  * but not including given position.
  * @param seq sequence index object to query
  * @param sym original alphabet symbol to query occurrences of
- * @param pos occurences are counted up to this position
+ * @param pos occurrences are counted up to this position
  * @param hint provides cache and direction information for queries
  * based on previous queries
  */
@@ -178,7 +178,7 @@ EISRank(EISeq *seq, Symbol sym, GtUword pos, union EISHint *hint);
  * @param seq sequence index object to query
  * @param tSym symbol to query occurrences of, but already transformed
  * by input alphabet
- * @param pos occurences are counted up to this position
+ * @param pos occurrences are counted up to this position
  * @param hint provides cache and direction information for queries
  * based on previous queries
  */
@@ -193,8 +193,8 @@ EISSymTransformedRank(EISeq *seq, Symbol tSym, GtUword pos,
  * precondition: posA <= posB
  * @param seq sequence index object to query
  * @param sym original alphabet symbol to query occurrences of
- * @param posA occurences are counted up to this position
- * @param posB as for posA occurences are counted up to this position
+ * @param posA occurrences are counted up to this position
+ * @param posB as for posA occurrences are counted up to this position
  * @param hint provides cache and direction information for queries
  * based on previous queries
  * @return members a and b of returned struct contain Occ results for
@@ -212,8 +212,8 @@ EISPosPairRank(EISeq *seq, Symbol sym, GtUword posA, GtUword posB,
  * @param seq sequence index object to query
  * @param tSym symbol to query occurrences of, but already transformed
  * by input alphabet
- * @param posA occurences are counted up to this position
- * @param posB as for posA occurences are counted up to this position
+ * @param posA occurrences are counted up to this position
+ * @param posB as for posA occurrences are counted up to this position
  * @param hint provides cache and direction information for queries
  * based on previous queries
  * @return members a and b of returned struct contain Occ results for
@@ -229,7 +229,7 @@ EISSymTransformedPosPairRank(EISeq *seq, Symbol tSym, GtUword posA,
  *
  * @param seq sequence index object to query
  * @param range compute rank counts for all symbols in this range
- * @param pos occurences are counted up to (but not including) this position
+ * @param pos occurrences are counted up to (but not including) this position
  * @param rankCounts ranks for all symbols in range are written to this
  * array. The referenced memory must be sized appropriately to
  * accomodate as many symbols as are in range (MRAEncGetRangeSize if
@@ -248,8 +248,8 @@ EISRangeRank(EISeq *seq, AlphabetRangeID range, GtUword pos,
  *
  * @param seq sequence index object to query
  * @param range compute rank counts for all symbols in this range
- * @param posA occurences are counted up to (but not including) this position
- * @param posB occurences are counted up to (but not including) this position
+ * @param posA occurrences are counted up to (but not including) this position
+ * @param posB occurrences are counted up to (but not including) this position
  * @param rankCounts ranks for all symbols in range are written to this
  * array. The referenced memory must be sized appropriately to
  * accomodate two-times as many positions symbols as are in range
