@@ -1,10 +1,10 @@
->test1 foo bar
+>sequence0 test1 foo bar
 AAAAAAAAAAAAAAAAAAAAAAAAA
->test2 bar baz
+>sequence1 test2 bar baz
 CCCCCCCCCCCCCC
->test3 baz quux
+>sequence2 test3 baz quux
 GGGGGGGGGGGGGGGGGGGGGGG
->test4
+>sequence3 test4
 CGCGCG
-> 
+>sequence4
 ATATTTTTTT
