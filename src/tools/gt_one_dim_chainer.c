@@ -198,7 +198,7 @@ static int gt_one_dim_chainer_runner(int argc, const char **argv,
       }
       if (querymatchptr != NULL &&
           lastseqnum == gt_querymatch_queryseqnum(querymatchptr) &&
-          fmax(candidatematch->end - arguments->overlap, start) + 1 > 
+          fmax(candidatematch->end - arguments->overlap, start + 1) > 
           gt_querymatch_querystart(querymatchptr))
       {
         break;
