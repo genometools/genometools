@@ -26,8 +26,7 @@
 struct GtOneDimChainerMatch;   /* forward declaration */
 
 typedef struct {
-  bool bool_option_one_dim_chainer;
-  GtStr  *str_option_one_dim_chainer;
+  GtUword overlap;
 } GtOneDimChainerArguments;
 
 /* A struct that defines a match object with respective state vars */
@@ -38,7 +37,7 @@ typedef struct GtOneDimChainerMatch {
 
   GtUword start;
   GtUword end;
-  GtUword chainweight; /* weight of match chain up to this match */
+  GtUword chainweight; /* weight of match chain up to, excluding, this match */
 } GtOneDimChainerMatch;
 
 static void gt_1d_chainer_decr_refcount(GtOneDimChainerMatch *match)
@@ -106,7 +105,7 @@ static void* gt_one_dim_chainer_arguments_new(void)
 {
   GtOneDimChainerArguments *arguments =
     gt_calloc((size_t) 1, sizeof *arguments);
-  arguments->str_option_one_dim_chainer = gt_str_new();
+
   return arguments;
 }
 
@@ -114,7 +113,6 @@ static void gt_one_dim_chainer_arguments_delete(void *tool_arguments)
 {
   GtOneDimChainerArguments *arguments = tool_arguments;
   if (arguments != NULL) {
-    gt_str_delete(arguments->str_option_one_dim_chainer);
     gt_free(arguments);
   }
 }
@@ -131,14 +129,10 @@ static GtOptionParser* gt_one_dim_chainer_option_parser_new(
   op = gt_option_parser_new("[option ...] [file]", /* XXX */
                             "DESCRIBE YOUR TOOL IN ONE LINE HERE."); /* XXX */
 
-  /* -bool */
-  option = gt_option_new_bool("bool", "bool option one_dim_chainer",
-                              &arguments->bool_option_one_dim_chainer, false);
-  gt_option_parser_add_option(op, option);
-
-  /* -str */
-  option = gt_option_new_string("str", "str option one_dim_chainer",
-                                arguments->str_option_one_dim_chainer, NULL);
+  /* -overlap */
+  option = gt_option_new_uword("overlap", "number of bases that are allowed"
+                               "to overlap in a chain (default: 0)",
+                               &arguments->overlap, 0);
   gt_option_parser_add_option(op, option);
 
   return op;
@@ -152,11 +146,6 @@ static int gt_one_dim_chainer_arguments_check(GT_UNUSED int rest_argc,
   int had_err = 0;
   gt_error_check(err);
   gt_assert(arguments);
-
-  /* XXX: do some checking after the option have been parsed (usally this is not
-     necessary and this function can be removed completely). */
-  if (gt_str_length(arguments->str_option_one_dim_chainer))
-    printf("%s\n", gt_str_get(arguments->str_option_one_dim_chainer));
 
   return had_err;
 }
