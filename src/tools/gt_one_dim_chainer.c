@@ -174,6 +174,10 @@ static int gt_one_dim_chainer_runner(int argc, const char **argv,
   GtUword maxnumofelements = 15;
   GtPriorityQueue *pq = gt_priority_queue_new(gt_1d_chainer_compare_ends,
          maxnumofelements);
+  if (pq == NULL)
+  {
+    return -1;
+  }
   GtUword maxchainweight = 0;
   GtOneDimChainerMatch *match = NULL;
   GtOneDimChainerMatch *maxchainend = NULL;
@@ -223,12 +227,20 @@ static int gt_one_dim_chainer_runner(int argc, const char **argv,
     }
     gt_1d_chainer_decr_refcount(match);
     match = gt_1d_chainer_match_new(querymatchptr, maxchainend, maxchainweight);
+    if (match == NULL)
+    {
+      return -1; /* We are not able to free previously allocated matches. :( */
+    }
 
     if (gt_priority_queue_is_full(pq)) /* almost never happens */
     {
       maxnumofelements *= 2;
       GtPriorityQueue *newpq = gt_priority_queue_new(gt_1d_chainer_compare_ends,
           maxnumofelements);
+      if (newpq == NULL) 
+      {
+        return -1; /* We are not able to free previously allocated matches. */
+      }
       while (!gt_priority_queue_is_empty(pq))
       {
         gt_priority_queue_add(newpq, gt_priority_queue_extract_min(pq));
