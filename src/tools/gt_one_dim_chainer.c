@@ -16,6 +16,8 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#include <math.h>
+
 #include "core/ma.h"
 #include "core/unused_api.h"
 #include "extended/priority_queue.h"
@@ -131,7 +133,7 @@ static GtOptionParser* gt_one_dim_chainer_option_parser_new(
 
   /* -overlap */
   option = gt_option_new_uword("overlap", "number of bases that are allowed"
-                               "to overlap in a chain (default: 0)",
+                               "to overlap in a chain",
                                &arguments->overlap, 0);
   gt_option_parser_add_option(op, option);
 
@@ -181,23 +183,34 @@ static int gt_one_dim_chainer_runner(int argc, const char **argv,
   {
     GtQuerymatch *querymatchptr = gt_seedextend_match_iterator_next(semi);
     /* we now have a match to work with */
-    while (!gt_priority_queue_is_empty(pq) && (querymatchptr == NULL ||
-          lastseqnum != gt_querymatch_queryseqnum(querymatchptr) ||
-          ((GtOneDimChainerMatch*) gt_priority_queue_find_min(pq))->end <=
-          gt_querymatch_querystart(querymatchptr)))
+    while (!gt_priority_queue_is_empty(pq))
     {
       GtOneDimChainerMatch *candidatematch =
-        (GtOneDimChainerMatch*) gt_priority_queue_extract_min(pq);
-      if (maxchainweight < candidatematch->chainweight +
-          gt_1d_chainer_get_weight(candidatematch->start, candidatematch->end))
+        (GtOneDimChainerMatch*) gt_priority_queue_find_min(pq);
+      GtUword start = candidatematch->start;
+      if (maxchainend != NULL)
       {
-        maxchainweight = candidatematch->chainweight +
-          gt_1d_chainer_get_weight(candidatematch->start, candidatematch->end);
-        gt_1d_chainer_decr_refcount(maxchainend);
-        maxchainend = candidatematch;
-      } else
+        start = fmax(start, maxchainend->end);
+      }
+      if (querymatchptr != NULL &&
+          lastseqnum == gt_querymatch_queryseqnum(querymatchptr) &&
+          fmax(candidatematch->end - arguments->overlap, start) + 1 > 
+          gt_querymatch_querystart(querymatchptr))
       {
-        gt_1d_chainer_decr_refcount(candidatematch);
+        break;
+      } else {
+        gt_priority_queue_extract_min(pq);
+        if (maxchainweight < candidatematch->chainweight +
+            gt_1d_chainer_get_weight(start, candidatematch->end))
+        {
+          maxchainweight = candidatematch->chainweight +
+            gt_1d_chainer_get_weight(start, candidatematch->end);
+          gt_1d_chainer_decr_refcount(maxchainend);
+          maxchainend = candidatematch;
+        } else
+        {
+          gt_1d_chainer_decr_refcount(candidatematch);
+        }
       }
     }
     if (querymatchptr == NULL)
