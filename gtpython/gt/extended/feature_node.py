@@ -40,9 +40,10 @@ class FeatureNode(GenomeNode):
         if not strand in strandchars:
             gterror("Invalid strand '%s' -- must be one of %s" % (strand,
                     strandchars))
-        s = Str(str(seqid.encode("utf-8")))
-        fn = gtlib.gt_feature_node_new(s._as_parameter_, type, start, end, \
-                                       strandchars.index(strand))
+        s = Str(seqid.encode("utf-8"))
+        fn = gtlib.gt_feature_node_new(s._as_parameter_,
+                                       type.encode('UTF-8'), start, end, \
+                                       strandchars.index(str(strand)))
         n = cls.create_from_ptr(fn, True)
         n.depth_first = True
         return n
@@ -51,11 +52,10 @@ class FeatureNode(GenomeNode):
         attribs = {}
 
         def py_collect_func(tag, val, data):
-            attribs[tag] = val
+            attribs[tag.decode('UTF-8')] = val.decode('UTF-8')
 
         collect_func = CollectFunc(py_collect_func)
-        gtlib.gt_feature_node_foreach_attribute(self.gn, collect_func,
-                None)
+        gtlib.gt_feature_node_foreach_attribute(self.gn, collect_func, None)
         return attribs
 
     def add_child(self, node):
@@ -68,7 +68,7 @@ class FeatureNode(GenomeNode):
 
     def from_param(cls, obj):
         if not isinstance(obj, FeatureNode):
-            raise TypeError, "argument must be a FeatureNode"
+            raise TypeError("argument must be a FeatureNode")
         return obj._as_parameter_
 
     from_param = classmethod(from_param)
@@ -83,15 +83,16 @@ class FeatureNode(GenomeNode):
     source = cachedproperty(get_source, set_source)
 
     def get_type(self):
-        return gtlib.gt_feature_node_get_type(self.gn)
+        return gtlib.gt_feature_node_get_type(self.gn).decode('UTF-8')
 
     def set_type(self, type):
-        gtlib.gt_feature_node_set_type(self.gn, type)
+        gtlib.gt_feature_node_set_type(self.gn, type.encode('UTF-8'))
 
     type = cachedproperty(get_type, set_type)
 
     def has_type(self, type):
-        return gtlib.gt_feature_node_has_type(self.gn, type) == 1
+        return gtlib.gt_feature_node_has_type(self.gn, \
+                                              type.encode('UTF-8')) == 1
 
     def set_strand(self, strand):
         from gt.extended.strand import strandchars
@@ -132,16 +133,23 @@ class FeatureNode(GenomeNode):
     score = cachedproperty(get_score, set_score, unset_score)
 
     def get_attribute(self, attrib):
-        return gtlib.gt_feature_node_get_attribute(self.gn, attrib)
+        val = gtlib.gt_feature_node_get_attribute(self.gn, \
+                                                  str(attrib).encode("UTF-8"))
+        if val == None:
+            return None
+        else:
+            return val.decode("UTF-8")
 
     def add_attribute(self, attrib, value):
         if attrib == "" or value == "":
             gterror("attribute keys or values must not be empty!")
-        gtlib.gt_feature_node_add_attribute(self.gn, attrib, value)
+        gtlib.gt_feature_node_add_attribute(self.gn, \
+                                            str(attrib).encode("UTF-8"), \
+                                            str(value).encode("UTF-8"))
 
     def each_attribute(self):
         attribs = self.update_attrs()
-        for (tag, val) in attribs.iteritems():
+        for (tag, val) in list(attribs.items()):
             yield (tag, val)
 
     def get_attribs(self):

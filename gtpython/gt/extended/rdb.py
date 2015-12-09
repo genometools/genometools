@@ -25,8 +25,8 @@ from gt.core.error import Error, gterror
 class RDB:
 
     def __init__(self, *args):
-        raise NotImplementedError, \
-            'Please call the constructor of a RDB implementation.'
+        raise NotImplementedError("Please call the constructor of a " + \
+                                  "RDB implementation.")
 
     def __del__(self):
         try:
@@ -36,7 +36,7 @@ class RDB:
 
     def from_param(cls, obj):
         if not isinstance(obj, RDB):
-            raise TypeError, "argument must be a RDB"
+            raise TypeError("argument must be an RDB")
         return obj._as_parameter_
 
     from_param = classmethod(from_param)
@@ -60,7 +60,7 @@ class RDBSqlite(RDB):
 
     def from_param(cls, obj):
         if not isinstance(obj, RDBSqlite):
-            raise TypeError, "argument must be a RDBSqlite"
+            raise TypeError("argument must be an RDBSqlite")
         return obj._as_parameter_
 
     from_param = classmethod(from_param)

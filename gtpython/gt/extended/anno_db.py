@@ -27,8 +27,8 @@ from gt.annotationsketch.feature_index import FeatureIndexFromPtr
 class AnnoDBSchema:
 
     def __init__(self, *args):
-        raise NotImplementedError, \
-            'Please call the constructor of an AnnoDBSchema implementation.'
+        raise NotImplementedError("Please call the constructor of an " + \
+                                  "AnnoDBSchema implementation.")
 
     def __del__(self):
         try:
@@ -38,7 +38,7 @@ class AnnoDBSchema:
 
     def from_param(cls, obj):
         if not isinstance(obj, AnnoDBSchema):
-            raise TypeError, "argument must be an AnnoDBSchema"
+            raise TypeError("argument must be an AnnoDBSchema")
         return obj._as_parameter_
 
     from_param = classmethod(from_param)
@@ -73,7 +73,7 @@ class AnnoDBGFFLike(AnnoDBSchema):
 
     def from_param(cls, obj):
         if not isinstance(obj, AnnoDBGFFLike):
-            raise TypeError, "argument must be an AnnoDBGFFLike"
+            raise TypeError("argument must be an AnnoDBGFFLike")
         return obj._as_parameter_
 
     from_param = classmethod(from_param)

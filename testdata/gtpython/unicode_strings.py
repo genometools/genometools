@@ -32,7 +32,7 @@ if __name__ == "__main__":
     nodes = []
 
     # construct a gene on the forward strand with two exons
-    G = BetterGeneRegion(113558120L, 113578742L, 'chr7', '+')
+    G = BetterGeneRegion(113558120, 113578742, 'chr7', '+')
     seqid = G.chromosome
 
 

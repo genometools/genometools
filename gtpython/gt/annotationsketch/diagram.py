@@ -58,8 +58,9 @@ class Diagram:
         err = Error()
         if rng.start > rng.end:
             gterror("range.start > range.end")
-        diagram = gtlib.gt_diagram_new(feature_index._as_parameter_, seqid,
-                byref(rng), style._as_parameter_, err._as_parameter_)
+        diagram = gtlib.gt_diagram_new(feature_index, \
+                                       str(seqid).encode('UTF-8'), byref(rng), \
+                                       style, err)
         if err.is_set():
             gterror(err)
         return Diagram(diagram)
@@ -95,7 +96,7 @@ class Diagram:
 
     def from_param(cls, obj):
         if not isinstance(obj, Diagram):
-            raise TypeError, "argument must be a Diagram"
+            raise TypeError("argument must be a Diagram")
         return obj._as_parameter_
 
     from_param = classmethod(from_param)

@@ -17,14 +17,14 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #
 
-from array import *
-from alphabet import *
-from encseq import *
-from error import *
-from gtrange import *
-from gtstr import *
-from str_array import *
-from warning import *
+from .alphabet import *
+from .array import *
+from .encseq import *
+from .error import *
+from .gtrange import *
+from .gtstr import *
+from .str_array import *
+from .warning import *
 
 Alphabet.register(gtlib)
 Array.register(gtlib)

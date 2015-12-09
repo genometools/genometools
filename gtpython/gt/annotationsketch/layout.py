@@ -46,7 +46,7 @@ class Layout:
 
     def from_param(cls, obj):
         if not isinstance(obj, Layout):
-            raise TypeError, "argument must be a Layout"
+            raise TypeError("argument must be a Layout")
         return obj._as_parameter_
 
     from_param = classmethod(from_param)

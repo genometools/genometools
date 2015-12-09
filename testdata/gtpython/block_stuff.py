@@ -31,8 +31,9 @@ class TestFailedError(Exception):
 
 def testfunc(bl):
     b = Block(bl)
-    print "%s %s %s %d" % (b.get_type(), b.get_strand(), b.get_range(),
-                           b.get_size())
+    r = b.get_range()
+    print("%s %s (%dL, %dL) %d"  % (b.get_type(), b.get_strand(), r[0], r[1],
+                                  b.get_size()))
     if not b.get_top_level_feature():
         raise TestFailedError
     return b.get_type()

@@ -51,22 +51,22 @@ class Graphics:
 
     def from_param(cls, obj):
         if not isinstance(obj, Graphics):
-            raise TypeError, "argument must be a Graphics"
+            raise TypeError("argument must be a Graphics")
         return obj._as_parameter_
 
     from_param = classmethod(from_param)
 
     def draw_text(self, x, y, text):
-        gtlib.gt_graphics_draw_text(self.g, x, y, text)
+        gtlib.gt_graphics_draw_text(self.g, x, y, str(text).encode("utf-8"))
 
     def draw_text_centered(self, x, y, text):
-        gtlib.gt_graphics_draw_text_centered(self.g, x, y, text)
+        gtlib.gt_graphics_draw_text_centered(self.g, x, y, str(text).encode("utf-8"))
 
     def draw_text_right(self, x, y, text):
-        gtlib.gt_graphics_draw_text_right(self.g, x, y, text)
+        gtlib.gt_graphics_draw_text_right(self.g, x, y, str(text).encode("utf-8"))
 
     def draw_colored_text(self, x, y, color, text):
-        gtlib.gt_graphics_draw_colored_text(self.g, x, y, color, text)
+        gtlib.gt_graphics_draw_colored_text(self.g, x, y, color, str(text).encode("utf-8"))
 
     def get_image_height(self):
         return gtlib.gt_graphics_get_image_height(self.g)
@@ -225,7 +225,8 @@ class Graphics:
 
     def to_file(self, filename):
         err = Error()
-        if gtlib.gt_graphics_save_to_file(self.g, filename, err._as_parameter_) < 0:
+        if gtlib.gt_graphics_save_to_file(self.g,
+            str(filename).encode("utf-8"), err) < 0:
             gterror(err)
 
     def to_stream(self):
@@ -238,7 +239,7 @@ class Graphics:
         return gtlib.gt_graphics_get_text_height(self.g)
 
     def get_text_width(self, text):
-        return gtlib.gt_graphics_get_text_width(self.g, text)
+        return gtlib.gt_graphics_get_text_width(self.g, str(text).encode("utf-8"))
 
     def register(cls, gtlib):
         from ctypes import c_char_p, c_void_p, c_int, POINTER, c_double, \
@@ -342,16 +343,16 @@ class GraphicsCairo(Graphics):
 
     def from_param(cls, obj):
         if not isinstance(obj, GraphicsCairo):
-            raise TypeError, "argument must be a GraphicsCairo"
+            raise TypeError("argument must be a GraphicsCairo")
         return obj._as_parameter_
 
     from_param = classmethod(from_param)
-    
+
     def register(cls, gtlib):
         from ctypes import c_ulong, c_void_p, c_int
         gtlib.gt_graphics_cairo_new.restype = c_void_p
         gtlib.gt_graphics_cairo_new.argtypes = [c_int, c_ulong, c_ulong]
-    
+
     register = classmethod(register)
 
 
@@ -364,7 +365,7 @@ class GraphicsCairoPNG(GraphicsCairo):
 
     def from_param(cls, obj):
         if not isinstance(obj, GraphicsCairoPNG):
-            raise TypeError, "argument must be a GraphicsCairoPNG"
+            raise TypeError("argument must be a GraphicsCairoPNG")
         return obj._as_parameter_
 
     from_param = classmethod(from_param)
@@ -379,7 +380,7 @@ class GraphicsCairoPDF(GraphicsCairo):
 
     def from_param(cls, obj):
         if not isinstance(obj, GraphicsCairoPDF):
-            raise TypeError, "argument must be a GraphicsCairoPDF"
+            raise TypeError("argument must be a GraphicsCairoPDF")
         return obj._as_parameter_
 
     from_param = classmethod(from_param)
@@ -394,7 +395,7 @@ class GraphicsCairoPS(GraphicsCairo):
 
     def from_param(cls, obj):
         if not isinstance(obj, GraphicsCairoPS):
-            raise TypeError, "argument must be a GraphicsCairoPS"
+            raise TypeError("argument must be a GraphicsCairoPS")
         return obj._as_parameter_
 
     from_param = classmethod(from_param)
@@ -409,7 +410,7 @@ class GraphicsCairoSVG(GraphicsCairo):
 
     def from_param(cls, obj):
         if not isinstance(obj, GraphicsCairoSVG):
-            raise TypeError, "argument must be a GraphicsCairoSVG"
+            raise TypeError("argument must be a GraphicsCairoSVG")
         return obj._as_parameter_
 
     from_param = classmethod(from_param)

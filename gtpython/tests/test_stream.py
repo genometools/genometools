@@ -21,7 +21,7 @@ class StreamTest(unittest.TestCase):
         fi = gt.FeatureIndexMemory()
         gt.FeatureStream(add_introns_stream, fi).pull()
 
-        self.assert_('1877523' in fi.get_seqids())
+        self.assertTrue('1877523' in fi.get_seqids())
 
 class TestDuplicateStream(unittest.TestCase):
     def setUp(self):
@@ -40,7 +40,7 @@ class TestDuplicateStream(unittest.TestCase):
         while f:
             types.update([f.type])
             f = dfi.next()
-        self.assert_('intron' in types, types)
+        self.assertTrue('intron' in types, types)
 
 class TestMergeStream(unittest.TestCase):
     def setUp(self):
@@ -77,7 +77,7 @@ class TestInterFeat(unittest.TestCase):
         while f:
             types.update([f.type])
             f = dfi.next()
-        self.assert_('intron' in types, types)
+        self.assertTrue('intron' in types, types)
 
 class TestCustomExample(unittest.TestCase):
     def setUp(self):
@@ -96,7 +96,7 @@ class TestCustomExample(unittest.TestCase):
         while f:
             types.update([f.type])
             f = dfi.next()
-        self.assert_('bar' in types, types)
+        self.assertTrue('bar' in types, types)
 
 if __name__ == "__main__":
     unittest.main()

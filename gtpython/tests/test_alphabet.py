@@ -71,7 +71,7 @@ class AlphabetTest(unittest.TestCase):
         aas = "LVIFKREDAGSTNQYWPHMC"
         aachars = {}
         for idx, c in enumerate(aas):
-            aachars[idx] = (string.upper(c), string.lower(c))
+            aachars[idx] = (c.upper(), c.lower())
         #print aachars
         wcs = ('X','x','U','u','B','b','Z','z','O','*','-')
         # encoding should yield the correct code independent of case

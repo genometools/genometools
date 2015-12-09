@@ -77,7 +77,7 @@ class CustomTrack(object):
 
     def from_param(cls, obj):
         if not isinstance(obj, CustomTrack):
-            raise TypeError, "argument must be a CustomTrack"
+            raise TypeError("argument must be a CustomTrack")
         return obj._as_parameter_
 
     from_param = classmethod(from_param)

@@ -44,14 +44,19 @@ class CustomStream(GenomeStream):
                 else:
                     nodepp[0] = None
                 return 0
-            except Error, errmsg:
+            except Error:
+                import sys
+                errmsg = sys.exc_info()[1]
                 error.set(str(errmsg))
                 return -1
 
         self.next_cb = NextFunc(next_w)
 
         def free_w(ptr):
-            self.free()
+            try:
+                self.free()
+            except AttributeError:
+                pass
 
         self.free_cb = FreeFunc(free_w)
         self.gs = gtlib.gt_script_wrapper_stream_new(self.next_cb,
@@ -60,7 +65,7 @@ class CustomStream(GenomeStream):
 
     def from_param(cls, obj):
         if not isinstance(obj, CustomStream):
-            raise TypeError, "argument must be a CustomStream"
+            raise TypeError("argument must be a CustomStream")
         return obj._as_parameter_
 
     from_param = classmethod(from_param)

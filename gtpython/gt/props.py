@@ -67,7 +67,7 @@ class cachedproperty(object):
     >>> c.set_x(22)
     setting x with 22
 
-    # but the property cant konw about it...
+    # but the property cant know about it...
     >>> c.x
     \'i am deleted\'
 
@@ -92,19 +92,15 @@ class cachedproperty(object):
 
     def __set__(self, o, value):
         if self.fset is None:
-            raise AttributeError, "unsettable %s (with %s)" % (self.n,
-                    value)
+            raise AttributeError("unsettable %s (with %s)" % (self.n, value))
         else:
-            if o == 22:
-                print self.n, o, value
             if self.n in o.__dict__:
                 del (o.__dict__)[self.n]
             self.fset(o, value)
 
     def __delete__(self, o):
         if self.fdel is None:
-            raise AttributeError, "undeletable %s (with %s)" % (self.n,
-                    value)
+            raise AttributeError("undeletable %s (with %s)" % (self.n, value))
         else:
             if self.n in o.__dict__:
                 del (o.__dict__)[self.n]

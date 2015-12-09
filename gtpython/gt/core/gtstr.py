@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 #
 # Copyright (c) 2014 Daniel Standage <daniel.standage@gmail.com>
-# Copyright (c) 2008 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
+# Copyright (c) 2008,2015 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
 # Copyright (c) 2008 Center for Bioinformatics, University of Hamburg
 #
 # Permission to use, copy, modify, and distribute this software for any
@@ -24,7 +24,13 @@ from gt.dlload import gtlib
 class Str:
 
     def __init__(self, s=None):
-        if s == None or isinstance(s, str):
+        if s == None:
+            self.strg = gtlib.gt_str_new()
+            self.own = True
+        elif isinstance(s, str):
+            self.strg = gtlib.gt_str_new_cstr(str(s).encode('UTF-8'))
+            self.own = True
+        elif isinstance(s, bytes):
             self.strg = gtlib.gt_str_new_cstr(s)
             self.own = True
         else:
@@ -40,20 +46,23 @@ class Str:
                 pass
 
     def __str__(self):
-        return str(gtlib.gt_str_get(self.strg))
+        return str(gtlib.gt_str_get(self.strg).decode('UTF-8'))
+
+    def get(self):
+        return gtlib.gt_str_get(self.strg).decode('UTF-8')
 
     def reset(self):
         gtlib.gt_str_reset(self.strg)
 
     def from_param(cls, obj):
         if not isinstance(obj, Str):
-            raise TypeError, "argument must be a Str"
+            raise TypeError("argument must be a Str")
         return obj._as_parameter_
 
     from_param = classmethod(from_param)
 
     def append_cstr(self, string):
-        gtlib.gt_str_append_cstr(self.strg, string)
+        gtlib.gt_str_append_cstr(self.strg, str(string).encode('UTF-8'))
 
     def length(self):
         return gtlib.gt_str_length(self.strg)

@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 #
 # Copyright (c) 2014 Daniel Standage <daniel.standage@gmail.com>
-# Copyright (c) 2008-2009 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
+# Copyright (c) 2008-2015 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
 # Copyright (c) 2008-2009 Center for Bioinformatics, University of Hamburg
 #
 # Permission to use, copy, modify, and distribute this software for any
@@ -64,7 +64,7 @@ class GenomeNode(object):
 
     def from_param(cls, obj):
         if not isinstance(obj, GenomeNode):
-            raise TypeError, "argument must be a GenomeNode"
+            raise TypeError("argument must be a GenomeNode")
         return obj._as_parameter_
 
     from_param = classmethod(from_param)
@@ -77,7 +77,7 @@ class GenomeNode(object):
     def get_seqid(self):
         strptr = gtlib.gt_genome_node_get_seqid(self.gn)
         if strptr:
-            return str(Str(strptr))
+            return Str(strptr).get()
         else:
             return None
 

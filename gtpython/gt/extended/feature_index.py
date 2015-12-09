@@ -29,8 +29,7 @@ from gt.extended.feature_node import FeatureNode
 class FeatureIndex:
 
     def __init__(self, *args):
-        raise NotImplementedError, \
-            'Please call the constructor of a FeatureIndex implementation.'
+        raise NotImplementedError('Please call the constructor of a FeatureIndex implementation.')
 
     def __del__(self):
         try:
@@ -40,7 +39,7 @@ class FeatureIndex:
 
     def from_param(cls, obj):
         if not isinstance(obj, FeatureIndex):
-            raise TypeError, "argument must be a FeatureIndex"
+            raise TypeError("argument must be a FeatureIndex")
         return obj._as_parameter_
 
     from_param = classmethod(from_param)
@@ -49,7 +48,7 @@ class FeatureIndex:
         err = Error()
         result = []
         rval = gtlib.gt_feature_index_get_features_for_seqid(self.fi,
-                seqid, err._as_parameter_)
+                seqid.encode('UTF-8'), err)
         if rval:
             a = Array(rval, True)
             for i in range(a.size()):
@@ -62,8 +61,8 @@ class FeatureIndex:
 
     def add_gff3file(self, filename):
         err = Error()
-        rval = gtlib.gt_feature_index_add_gff3file(self.fi, filename,
-                err._as_parameter_)
+        rval = gtlib.gt_feature_index_add_gff3file(self.fi,
+                  filename.encode('UTF-8'), err)
         if rval != 0:
             gterror(err)
 
@@ -72,7 +71,7 @@ class FeatureIndex:
         val = c_int()
         err = Error()
         ret = gtlib.gt_feature_index_has_seqid(self.fi, byref(val),
-                seqid, err._as_parameter_)
+                seqid.encode('UTF-8'), err._as_parameter_)
         if ret != 0:
             gterror(err)
         else:
@@ -84,7 +83,7 @@ class FeatureIndex:
         if str == None:
             if err.is_set():
                 gterror(err)
-        return str
+        return str.decode('UTF-8')
 
     def get_seqids(self):
         result = []
@@ -103,7 +102,7 @@ class FeatureIndex:
             gterror("feature_index does not contain seqid")
         range = Range()
         rval = gtlib.gt_feature_index_get_range_for_seqid(self.fi, byref(range),
-                seqid, err)
+                seqid.encode('UTF-8'), err)
         if rval != 0:
             gterror(err)
         return range
@@ -114,7 +113,8 @@ class FeatureIndex:
         err = Error()
         rng = Range(start, end)
         rval = gtlib.gt_feature_index_get_features_for_range(self.fi,
-                a._as_parameter_, seqid, byref(rng), err._as_parameter_)
+                a._as_parameter_, seqid.encode('UTF-8'),
+                byref(rng), err._as_parameter_)
         if rval != 0:
             gterror(err)
         result = []
@@ -158,7 +158,7 @@ class FeatureIndexMemory(FeatureIndex):
 
     def from_param(cls, obj):
         if not isinstance(obj, FeatureIndexMemory):
-            raise TypeError, "argument must be a FeatureIndexMemory"
+            raise TypeError("argument must be a FeatureIndexMemory")
         return obj._as_parameter_
 
     from_param = classmethod(from_param)
@@ -179,7 +179,7 @@ class FeatureIndexFromPtr(FeatureIndex):
 
     def from_param(cls, obj):
         if not isinstance(obj, FeatureIndexFromPtr):
-            raise TypeError, "argument must be a FeatureIndexFromPtr"
+            raise TypeError("argument must be a FeatureIndexFromPtr")
         return obj._as_parameter_
 
     from_param = classmethod(from_param)

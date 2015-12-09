@@ -28,12 +28,12 @@ class CommentNode(GenomeNode):
 
     @classmethod
     def create_new(cls, comment):
-        fn = gtlib.gt_comment_node_new(str(comment))
+        fn = gtlib.gt_comment_node_new(str(comment).encode("UTF-8"))
         n = cls.create_from_ptr(fn, True)
         return n
 
     def get_comment(self):
-        return gtlib.gt_comment_node_get_comment(self.gn)
+        return gtlib.gt_comment_node_get_comment(self.gn).decode("UTF-8")
 
     def register(cls, gtlib):
         from ctypes import c_char_p,  c_void_p

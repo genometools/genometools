@@ -46,9 +46,9 @@ class Alphabet:
 
     def create_from_file(indexname):
         if not os.path.exists(indexname + ".al1"):
-            raise IOError, ("file not found: %s" % (indexname + ".al1"))
+            raise IOError("file not found: %s" % (indexname + ".al1"))
         e = Error()
-        a_ptr = gtlib.gt_alphabet_new_from_file(str(indexname), e._as_parameter_)
+        a_ptr = gtlib.gt_alphabet_new_from_file(str(indexname).encode("UTF-8"), e._as_parameter_)
         a = Alphabet(a_ptr, True)
         if a == None:
           gterror(e)
@@ -59,12 +59,12 @@ class Alphabet:
 
     def create_from_sequence(seqfilenames):
         if not isinstance(seqfilenames, list):
-            raise TypeError, "argument must be a list of strings"
+            raise TypeError("argument must be a list of strings")
         e = Error()
         sa = StrArray()
         for f in seqfilenames:
             if not os.path.exists(f):
-                raise IOError, ("file not found: %s" % f)
+                raise IOError("file not found: %s" % f)
             sa.add(str(f))
         a_ptr = gtlib.gt_alphabet_new_from_sequence(sa._as_parameter_,
                 e._as_parameter_)
@@ -91,7 +91,7 @@ class Alphabet:
 
     def from_param(cls, obj):
         if not isinstance(obj, Alphabet):
-            raise TypeError, "argument must be an Alphabet"
+            raise TypeError("argument must be an Alphabet")
         return obj._as_parameter_
 
     from_param = classmethod(from_param)
@@ -105,19 +105,21 @@ class Alphabet:
     def encode(self, plainchar):
         if not self.valid_input(plainchar):
             gterror("No valid input character: %c" % plainchar)
-        return gtlib.gt_alphabet_encode(self.alpha, plainchar)
+        return gtlib.gt_alphabet_encode(self.alpha, plainchar.encode("UTF-8"))
 
     def decode(self, encodedchar):
-        return gtlib.gt_alphabet_decode(self.alpha, encodedchar)
+        return gtlib.gt_alphabet_decode(self.alpha, encodedchar).decode("UTF-8")
 
     def decode_seq(self, encoded):
         encstr = (c_ubyte*len(encoded))(*encoded)
-        str_p = gtlib.gt_alphabet_decode_seq_to_str(self.alpha, encstr, len(encstr))
+        str_p = gtlib.gt_alphabet_decode_seq_to_str(self.alpha, encstr, \
+                                                    len(encstr))
         s = Str(str_p)
         return str(s)
 
     def valid_input(self, plainchar):
-        return gtlib.gt_alphabet_valid_input(self.alpha, plainchar)
+        return gtlib.gt_alphabet_valid_input(self.alpha, \
+                                         plainchar.encode("UTF-8"))
 
     def is_dna(self):
         return gtlib.gt_alphabet_is_dna(self.alpha)

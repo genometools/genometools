@@ -32,7 +32,7 @@ class FeatureStream(GenomeStream):
 
     def from_param(cls, obj):
         if not isinstance(obj, FeatureStream):
-            raise TypeError, "argument must be a FeatureStream"
+            raise TypeError("argument must be a FeatureStream")
         return obj._as_parameter_
 
     from_param = classmethod(from_param)

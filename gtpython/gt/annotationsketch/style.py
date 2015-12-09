@@ -52,22 +52,22 @@ class Style:
 
     def from_param(cls, obj):
         if not isinstance(obj, Style):
-            raise TypeError, "argument must be a Style"
+            raise TypeError("argument must be a Style")
         return obj._as_parameter_
 
     from_param = classmethod(from_param)
 
     def load_file(self, filename):
         err = Error()
-        rval = gtlib.gt_style_load_file(self.style, filename, err._as_parameter_)
+        rval = gtlib.gt_style_load_file(self.style, \
+                                        str(filename).encode('UTF-8'), err)
         if rval != 0:
             gterror(err)
 
     def load_str(self, string):
         err = Error()
-        strg = Str(str(string.encode("utf-8")))
-        rval = gtlib.gt_style_load_str(self.style, strg._as_parameter_,
-                err._as_parameter_)
+        strg = Str(str(string).encode("utf-8"))
+        rval = gtlib.gt_style_load_str(self.style, strg, err)
         if rval != 0:
             gterror(err)
 
@@ -82,8 +82,9 @@ class Style:
 
     def clone(self):
         sty = Style()
-        str = self.to_str()
-        sty.load_str(str)
+        string = self.to_str()
+        print(string)
+        sty.load_str(str(string))
         return sty
 
     def get_color(self, section, key, gn=None):
@@ -210,7 +211,7 @@ class Style:
                 c_void_p]
         gtlib.gt_style_to_str.restype = int
         gtlib.gt_style_to_str.argtypes = [c_void_p, c_void_p, c_void_p]
-        gtlib.gt_style_unset.restype = None        
+        gtlib.gt_style_unset.restype = None
         gtlib.gt_style_unset.argtypes = [c_void_p, c_char_p, c_char_p]
 
     register = classmethod(register)

@@ -50,7 +50,7 @@ class EncseqEncoder:
 
     def from_param(cls, obj):
         if not isinstance(obj, EncseqEncoder):
-            raise TypeError, "argument must be an EncseqEncoder object"
+            raise TypeError("argument must be an EncseqEncoder object")
         return obj._as_parameter_
 
     from_param = classmethod(from_param)
@@ -99,17 +99,18 @@ class EncseqEncoder:
 
     def encode(self, seqfiles, indexname):
         if not isinstance(seqfiles, list):
-            raise TypeError, "argument must be a list of strings"
+            raise TypeError("argument must be a list of strings")
         if len(seqfiles) == 0:
-            raise Error, "list of input sequence files must be non-empty"
+            raise Error("list of input sequence files must be non-empty")
         sa = StrArray()
         for f in seqfiles:
             if not os.path.exists(str(f)):
-                raise IOError, ("file not found: %s" % str(f))
+                raise IOError("file not found: %s" % str(f))
             sa.add(str(f))
         err = Error()
         esptr = gtlib.gt_encseq_encoder_encode(self.ee, sa.strarr, \
-             str(indexname), err.error)
+                                               str(indexname).encode("UTF-8"), \
+                                               err.error)
         if esptr != 0:
             gterror(err)
 
@@ -153,7 +154,7 @@ class EncseqLoader:
 
     def from_param(cls, obj):
         if not isinstance(obj, EncseqLoader):
-            raise TypeError, "argument must be an EncseqLoader object"
+            raise TypeError("argument must be an EncseqLoader object")
         return obj._as_parameter_
 
     from_param = classmethod(from_param)
@@ -202,16 +203,18 @@ class EncseqLoader:
 
     def load(self, indexname):
         if not os.path.exists(indexname+".esq"):
-            raise IOError, ("file not found: %s" % indexname+".esq")
+            raise IOError("file not found: %s" % indexname+".esq")
         if self.destab and not os.path.exists(indexname+".des"):
-            raise IOError, ("file not found: %s" % indexname+".des")
+            raise IOError("file not found: %s" % indexname+".des")
         # not required in every case (equallength seqs)
         #if self.ssptab and not os.path.exists(indexname+".ssp"):
         #    raise IOError, ("file not found: %s" % indexname+".ssp")
         if self.sdstab and not os.path.exists(indexname+".sds"):
-            raise IOError, ("file not found: %s" % indexname+".sds")
+            raise IOError("file not found: %s" % indexname+".sds")
         err = Error()
-        esptr = gtlib.gt_encseq_loader_load(self.el, str(indexname), err.error)
+        esptr = gtlib.gt_encseq_loader_load(self.el, \
+                                            str(indexname).encode("UTF-8"), \
+                                            err.error)
         if not esptr:
             gterror(err)
         return Encseq(esptr, True)
@@ -237,7 +240,7 @@ class EncseqBuilder:
 
     def from_param(cls, obj):
         if not isinstance(obj, EncseqBuilder):
-            raise TypeError, "argument must be an EncseqBuilder object"
+            raise TypeError("argument must be an EncseqBuilder object")
         return obj._as_parameter_
 
     from_param = classmethod(from_param)
@@ -273,8 +276,9 @@ class EncseqBuilder:
         gtlib.gt_encseq_builder_do_not_create_sds_tab(self.eb)
 
     def add_string(self, string, desc = ''):
-        gtlib.gt_encseq_builder_add_cstr(self.eb, str(string), len(string),
-            str(desc))
+        string = str(string)
+        gtlib.gt_encseq_builder_add_cstr(self.eb, string.encode('UTF-8'), \
+                                         len(string), desc.encode('UTF-8'))
 
     def build(self):
         err = Error()
@@ -320,7 +324,7 @@ class EncseqReader:
 
     def from_param(cls, obj):
         if not isinstance(obj, EncseqReader):
-            raise TypeError, "argument must be an EncseqReader"
+            raise TypeError("argument must be an EncseqReader")
         return obj._as_parameter_
 
     def next_encoded_char(self):
@@ -356,7 +360,7 @@ class Encseq:
 
     def from_param(cls, obj):
         if not isinstance(obj, Encseq):
-            raise TypeError, "argument must be an Encseq"
+            raise TypeError("argument must be an Encseq")
         return obj._as_parameter_
 
     from_param = classmethod(from_param)
@@ -372,7 +376,7 @@ class Encseq:
             gterror("invalid sequence number %d" % num)
         desclen = c_ulong()
         str_addr = gtlib.gt_encseq_description(self.encseq, byref(desclen), num)
-        return str(string_at(str_addr, desclen.value))
+        return str(string_at(str_addr, desclen.value).decode('UTF-8'))
 
     def total_length(self):
         return gtlib.gt_encseq_total_length(self.encseq)
@@ -442,7 +446,7 @@ class Encseq:
                                                       0, self.total_length()-1))
         buf = (c_char * (end-start+1))()
         gtlib.gt_encseq_extract_decoded(self.encseq, buf, start, end)
-        return string_at(buf, end-start+1)
+        return string_at(buf, end-start+1).decode('UTF-8')
 
     def seqnum(self, pos):
         if pos < 0 or pos >= self.total_length():

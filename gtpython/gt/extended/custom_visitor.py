@@ -48,7 +48,9 @@ class CustomVisitor(NodeVisitor):
                 except AttributeError:
                     pass
                 return 0
-            except GTError, errmsg:
+            except GTError:
+                import sys
+                errmsg = sys.exc_info()[1]
                 err.set(str(errmsg))
                 return -1
 
@@ -63,7 +65,9 @@ class CustomVisitor(NodeVisitor):
                 except AttributeError:
                     pass
                 return 0
-            except GTError, errmsg:
+            except GTError:
+                import sys
+                errmsg = sys.exc_info()[1]
                 err.set(str(errmsg))
                 return -1
 
@@ -78,7 +82,9 @@ class CustomVisitor(NodeVisitor):
                 except AttributeError:
                     pass
                 return 0
-            except GTError, errmsg:
+            except GTError:
+                import sys
+                errmsg = sys.exc_info()[1]
                 err.set(str(errmsg))
                 return -1
 
@@ -93,7 +99,9 @@ class CustomVisitor(NodeVisitor):
                 except AttributeError:
                     pass
                 return 0
-            except GTError, errmsg:
+            except GTError:
+                import sys
+                errmsg = sys.exc_info()[1]
                 err.set(str(errmsg))
                 return -1
 
@@ -108,7 +116,9 @@ class CustomVisitor(NodeVisitor):
                 except AttributeError:
                     pass
                 return 0
-            except GTError, errmsg:
+            except GTError:
+                import sys
+                errmsg = sys.exc_info()[1]
                 err.set(str(errmsg))
                 return -1
 
@@ -123,7 +133,9 @@ class CustomVisitor(NodeVisitor):
                 except AttributeError:
                     pass
                 return 0
-            except GTError, errmsg:
+            except GTError:
+                import sys
+                errmsg = sys.exc_info()[1]
                 err.set(str(errmsg))
                 return -1
 

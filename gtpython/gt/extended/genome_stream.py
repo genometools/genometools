@@ -27,8 +27,8 @@ from ctypes import byref, c_void_p
 class GenomeStream:
 
     def __init__(self, *args):
-        raise NotImplementedError, \
-            'Please call the constructor of a GenomeStream implementation.'
+        raise NotImplementedError("Please call the constructor of a " + \
+                                  "GenomeStream implementation.")
 
     def __del__(self):
         try:
@@ -38,7 +38,7 @@ class GenomeStream:
 
     def from_param(cls, obj):
         if not isinstance(obj, GenomeStream):
-            raise TypeError, "argument must be a GenomeStream"
+            raise TypeError("argument must be a GenomeStream")
         return obj._as_parameter_
 
     from_param = classmethod(from_param)

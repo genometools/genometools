@@ -32,8 +32,8 @@ GRAPHICS_SVG = 3
 class Canvas:
 
     def __init__(self, *args):
-        raise NotImplementedError, \
-            'Please call the constructor of a Canvas implementation.'
+        raise NotImplementedError("Please call the constructor of a Canvas " + \
+                                  "implementation.")
 
     def __del__(self):
         try:
@@ -43,7 +43,7 @@ class Canvas:
 
     def from_param(cls, obj):
         if not isinstance(obj, Canvas):
-            raise TypeError, "argument must be a Canvas"
+            raise TypeError("argument must be a Canvas")
         return obj._as_parameter_
 
     from_param = classmethod(from_param)
@@ -52,15 +52,16 @@ class CanvasCairoFileBase(Canvas):
 
     def from_param(cls, obj):
         if not isinstance(obj, CanvasCairoFile):
-            raise TypeError, "argument must be a CanvasCairoFile"
+            raise TypeError("argument must be a CanvasCairoFile")
         return obj._as_parameter_
 
     from_param = classmethod(from_param)
 
     def to_file(self, filename):
         err = Error()
-        rval = gtlib.gt_canvas_cairo_file_to_file(self.canvas, filename,
-                err._as_parameter_)
+        rval = gtlib.gt_canvas_cairo_file_to_file(self.canvas,
+                str(filename).encode('UTF-8'),
+                err)
         if rval != 0:
             gterror(err)
 
@@ -87,7 +88,7 @@ class CanvasCairoFileBase(Canvas):
 
 
 class CanvasCairoFile(CanvasCairoFileBase):
-  
+
     def __init__(self, style, width, height, ii=None):
         Style.from_param(style)
         err = Error()
@@ -103,7 +104,7 @@ class CanvasCairoFile(CanvasCairoFileBase):
 
 
 class CanvasCairoFilePNG(CanvasCairoFileBase):
-  
+
     def __init__(self, style, width, height, ii=None):
         err = Error()
         iip = None
@@ -118,7 +119,7 @@ class CanvasCairoFilePNG(CanvasCairoFileBase):
 
 
 class CanvasCairoFilePDF(CanvasCairoFileBase):
-  
+
     def __init__(self, style, width, height, ii=None):
         err = Error()
         iip = None
@@ -133,7 +134,7 @@ class CanvasCairoFilePDF(CanvasCairoFileBase):
 
 
 class CanvasCairoFilePS(CanvasCairoFileBase):
-  
+
     def __init__(self, style, width, height, ii=None):
         err = Error()
         iip = None
@@ -148,7 +149,7 @@ class CanvasCairoFilePS(CanvasCairoFileBase):
 
 
 class CanvasCairoFileSVG(CanvasCairoFileBase):
-  
+
     def __init__(self, style, width, height, ii=None):
         err = Error()
         iip = None
