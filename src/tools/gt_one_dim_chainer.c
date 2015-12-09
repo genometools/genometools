@@ -31,7 +31,10 @@ typedef struct {
   GtUword overlap;
 } GtOneDimChainerArguments;
 
-/* A struct that defines a match object with respective state vars */
+/* A struct that defines a match object that is part of the chain. 
+It contains the sequence ID <seqnum>, a counter for references <refcount>,
+an index <start> for the beginning of this match, an index <end> for its
+end, as well as a variable <chainweight> describing its weight. */
 typedef struct GtOneDimChainerMatch {
   struct GtOneDimChainerMatch *prec;
   uint64_t seqnum;
@@ -42,6 +45,9 @@ typedef struct GtOneDimChainerMatch {
   GtUword chainweight; /* weight of match chain up to, excluding, this match */
 } GtOneDimChainerMatch;
 
+/* Starts at a given <match>, reduces its reference counter, and if there are no 
+references left the <match> is deleted from memory. Iterates backwards over all 
+matches using the precursor <prec> for each match. */
 static void gt_1d_chainer_decr_refcount(GtOneDimChainerMatch *match)
 {
   while (match != NULL)
@@ -59,6 +65,7 @@ static void gt_1d_chainer_decr_refcount(GtOneDimChainerMatch *match)
   }
 }
 
+/* Increases the reference counter for a given <match>. */
 static void gt_1d_chainer_incr_refcount(GtOneDimChainerMatch *match)
 {
   if (match != NULL)
@@ -67,11 +74,17 @@ static void gt_1d_chainer_incr_refcount(GtOneDimChainerMatch *match)
   }
 }
 
+/* Calculates and returns the weight for a match from its <start> and <end> position.
+The weight equals the length of the match. */
 static GtUword gt_1d_chainer_get_weight(GtUword start, GtUword end)
 {
   return end - start + 1;
 }
 
+/* Allocates memory for a GtOneDimChainerMatch <match> and returns a pointer to it. 
+It assigns important variables from a GtQueryMatch reference provided by the 
+match iterator to the new <match> as well as the currently calculated maximum 
+chain end <maxchainend> and the current maximum chain weight <maxchainweight>.  */
 static GtOneDimChainerMatch* gt_1d_chainer_match_new(
     GtQuerymatch *querymatchptr, GtOneDimChainerMatch *maxchainend,
     GtUword maxchainweight)
@@ -88,6 +101,9 @@ static GtOneDimChainerMatch* gt_1d_chainer_match_new(
   return match;
 }
 
+/* Compare function for the ends of 2 given matches <match1> and <match2>.
+Returns -1 if <match1> is smaller, 0 if they are equal, and 1 if <match2> end
+is smaller. This method is used for creating the priority queue. */
 static int gt_1d_chainer_compare_ends(const void *match1, const void *match2)
 {
   const GtOneDimChainerMatch *m1 = (GtOneDimChainerMatch*) match1;
@@ -103,6 +119,7 @@ static int gt_1d_chainer_compare_ends(const void *match1, const void *match2)
   }
 }
 
+/* Allocates memory and returns a pointer for <arguments> needed for GtOptions. */
 static void* gt_one_dim_chainer_arguments_new(void)
 {
   GtOneDimChainerArguments *arguments =
@@ -111,6 +128,7 @@ static void* gt_one_dim_chainer_arguments_new(void)
   return arguments;
 }
 
+/* Frees memory which has been allocated for <arguments> needed for GtOptions. */
 static void gt_one_dim_chainer_arguments_delete(void *tool_arguments)
 {
   GtOneDimChainerArguments *arguments = tool_arguments;
@@ -119,6 +137,8 @@ static void gt_one_dim_chainer_arguments_delete(void *tool_arguments)
   }
 }
 
+/* Uses the <tool_arguments> to create a GtOptionParser which is used to process
+passed options for running the Gt_one_dim_chainer tool.  */
 static GtOptionParser* gt_one_dim_chainer_option_parser_new(
     void *tool_arguments)
 {
@@ -140,6 +160,8 @@ static GtOptionParser* gt_one_dim_chainer_option_parser_new(
   return op;
 }
 
+/* Checks the <tool_arguments> for errors and handles errors by passing a message
+to the GtError object <err>. Returns -1 if errors have been detected. */
 static int gt_one_dim_chainer_arguments_check(GT_UNUSED int rest_argc,
                                        void *tool_arguments,
                                        GT_UNUSED GtError *err)
@@ -152,6 +174,11 @@ static int gt_one_dim_chainer_arguments_check(GT_UNUSED int rest_argc,
   return had_err;
 }
 
+/* Executes the chaining algorithm and prints the results. 
+The command line arguments <argv> should contain a match file name from which 
+matches are passed to a GtSeedextendMatchIterator. 
+Options are passed via <tool_arguments>. If errors occur, the GtError 
+object <err> is updated with a message and the function returns -1. */
 static int gt_one_dim_chainer_runner(int argc, const char **argv,
                               GT_UNUSED int parsed_args, void *tool_arguments,
                               GtError *err)
@@ -271,6 +298,8 @@ static int gt_one_dim_chainer_runner(int argc, const char **argv,
   return had_err;
 }
 
+/* A wrapper which creates and returns  new GtTool from passed arguments, 
+options and the defined runner method. */
 GtTool* gt_one_dim_chainer(void)
 {
   return gt_tool_new(gt_one_dim_chainer_arguments_new,
