@@ -82,8 +82,7 @@ static GtOneDimChainerMatch* gt_1d_chainer_match_new(
   match->end = match->start + gt_querymatch_querylen(querymatchptr);
   match->prec = maxchainend;
   gt_1d_chainer_incr_refcount(maxchainend);
-  match->chainweight = maxchainweight + gt_1d_chainer_get_weight(match->start,
-      match->end);
+  match->chainweight = maxchainweight;
 
   return match;
 }
@@ -200,9 +199,11 @@ static int gt_one_dim_chainer_runner(int argc, const char **argv,
     {
       GtOneDimChainerMatch *candidatematch =
         (GtOneDimChainerMatch*) gt_priority_queue_extract_min(pq);
-      if (maxchainweight < candidatematch->chainweight)
+      if (maxchainweight < candidatematch->chainweight +
+          gt_1d_chainer_get_weight(candidatematch->start, candidatematch->end))
       {
-        maxchainweight = candidatematch->chainweight;
+        maxchainweight = candidatematch->chainweight +
+          gt_1d_chainer_get_weight(candidatematch->start, candidatematch->end);
         gt_1d_chainer_decr_refcount(maxchainend);
         maxchainend = candidatematch;
       } else
