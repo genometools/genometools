@@ -77,8 +77,8 @@ class Graphics:
     def get_text_height(self):
         return gtlib.gt_graphics_get_text_height(self.g)
 
-    def get_text_width(self, txt):
-        return gtlib.gt_graphics_get_text_width(self.g, txt)
+    def get_text_width(self, text):
+        return gtlib.gt_graphics_get_text_width(self.g, str(text).encode("utf-8"))
 
     def set_margins(self, xmargs, ymargs):
         gtlib.gt_graphics_set_margins(self.g, xmargs, ymargs)
