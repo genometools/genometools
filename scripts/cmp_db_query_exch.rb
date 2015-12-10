@@ -46,19 +46,16 @@ if ARGV.length > 2
   end
 end
 
-lines0 = convertfileinput(openfile(filename0).readlines)
-lines1 = convertfileinput(openfile(filename1).readlines)
+lines0 = convertfileinput(openfile(filename0).readlines.uniq)
+lines1 = convertfileinput(openfile(filename1).readlines.uniq)
 
-if lines0.length != lines1.length
-  STDERR.puts "#{$0}: files have different number of lines"
-  exit 1
-end
 
-lines0.sort! {|a,b| extract(a,[1,2,5,6]) <=> extract(b,[1,2,5,6])}
-lines1.sort! {|a,b| extract(a,[5,6,1,2]) <=> extract(b,[5,6,1,2])}
+lines0.sort! {|a,b| extract(a,[1,2,5,6,9]) <=> extract(b,[1,2,5,6,9])}
+lines1.sort! {|a,b| extract(a,[5,6,1,2,9]) <=> extract(b,[5,6,1,2,9])}
 idxmap = [4,5,6,3,0,1,2,7,8,9]
 
-0.upto(lines0.length-1).each do |linenum|
+minlen = [lines0.length,lines1.length].min
+0.upto(minlen-1).each do |linenum|
   a = lines0[linenum]
   b = lines1[linenum]
   idxmap.each_with_index do |idx,val|
@@ -67,4 +64,9 @@ idxmap = [4,5,6,3,0,1,2,7,8,9]
       exit 1
     end
   end
+end
+
+if lines0.length != lines1.length
+  STDERR.puts "#{$0}: files have length #{lines0.length} and #{line1.length}"
+  exit 1
 end

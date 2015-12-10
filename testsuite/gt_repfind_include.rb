@@ -47,9 +47,9 @@ def checkrepfind(reffile,withextend = false)
              "-minidentity 90 -maxalilendiff 30 -percmathistory 55",
              :maxtime => 600)
     if reffile == "Duplicate.fna"
-      resultfile="#{rdir}/#{reffile}-greedy-8-8-90-30-55"
+      resultfile="#{$testdata}/repfind-result/#{reffile}-greedy-8-8-90-30-55"
     else
-      resultfile="#{rdir}/#{reffile}-gr-ext.result"
+      resultfile="#{$testdata}/repfind-result/#{reffile}-gr-ext.result"
     end
     run "cmp -s #{last_stdout} #{resultfile}"
   end
@@ -152,21 +152,22 @@ Test do
              "-extend#{ext} -ii at1MB"
     run "cmp -s #{last_stdout} #{$testdata}repfind-result/at1MB-#{ext}-r-14-32-80-#{params}-a"
   end
+  minlen=24
   ["xdrop","greedy"].each do |ext|
-    run_test "#{$bin}gt repfind -minidentity 80 -l 23 -extend#{ext} " +
+    run_test "#{$bin}gt repfind -minidentity 80 -l #{minlen} -extend#{ext} " +
              "-ii at1MB -q #{$testdata}U89959_genomic.fas"
     run "mv #{last_stdout} at1MB-vs-U8.#{ext}.matches"
-    run_test "#{$bin}gt repfind -minidentity 80 -l 23 -extend#{ext} " +
+    run_test "#{$bin}gt repfind -minidentity 80 -l #{minlen} -extend#{ext} " +
              "-ii at1MB -qii U8"
     run "cmp -s #{last_stdout} at1MB-vs-U8.#{ext}.matches"
-    run_test "#{$bin}gt repfind -minidentity 80 -l 23 -extend#{ext} -ii U8 " +
+    run_test "#{$bin}gt repfind -minidentity 80 -l #{minlen} -extend#{ext} -ii U8 " +
              "-q #{$testdata}/at1MB"
     run "mv #{last_stdout} U8-vs-at1MB.#{ext}.matches"
-    run_test "#{$bin}gt repfind -minidentity 80 -l 23 -extend#{ext} -ii U8 " +
+    run_test "#{$bin}gt repfind -minidentity 80 -l #{minlen} -extend#{ext} -ii U8 " +
              "-qii at1MB"
     run "cmp -s #{last_stdout} U8-vs-at1MB.#{ext}.matches"
     run "#{$scriptsdir}cmp_db_query_exch.rb U8-vs-at1MB.#{ext}.matches " +
-        "at1MB-vs-U8.#{ext}.matches 15 16"
+        "at1MB-vs-U8.#{ext}.matches"
   end
   [12,13,14].each do |seedlength|
      run_test "#{$bin}gt repfind -seedlength #{seedlength} -extendgreedy -ii U8"

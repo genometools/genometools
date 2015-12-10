@@ -1,7 +1,7 @@
 /*
-  Copyright (C) 2015 Annika Seidel, annika.seidel@studium.uni-hamburg.de
+  Copyright (C) 2015 Annika Seidel, <annika.seidel@studium.uni-hamburg.de>
   Copyright (c) 2007-2009 Gordon Gremme <gordon@gremme.org>
-  Copyright (c) 2007-2008 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2007-2015 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -32,7 +32,7 @@ static void affinealign_fill_table(AffinealignDPentry **dptable,
                                    GtUword matchcost, GtUword mismatchcost,
                                    GtUword gap_opening, GtUword gap_extension,
                                    AffineAlignEdge edge,
-                                   GtScoreHandler *scorehandler)
+                                   const GtScoreHandler *scorehandler)
 {
   GtUword i, j, Rvalue, Dvalue, Ivalue, minvalue,rcost;
   gt_assert(dptable && u && v);
@@ -203,8 +203,8 @@ GtAlignment* gt_affinealign(const GtUchar *u, GtUword ulen,
   return align;
 }
 
-GtWord gt_affinealign_with_Management(LinspaceManagement *spacemanager,
-                                     GtScoreHandler *scorehandler,
+GtWord gt_affinealign_with_Management(GtLinspaceManagement *spacemanager,
+                                     const GtScoreHandler *scorehandler,
                                      GtAlignment *align,
                                      const GtUchar *u, GtUword ulen,
                                      const GtUchar *v, GtUword vlen)
@@ -228,11 +228,11 @@ GtWord gt_affinealign_with_Management(LinspaceManagement *spacemanager,
 }
 
 static void evaluate_affinecrosspoints_from_2dimtab(GtUword *Ctab,
-                                                AffinealignDPentry **Atabcolumn,
-                                                GtScoreHandler *scorehandler,
-                                                GtUword ulen, GtUword vlen,
-                                                GtUword rowoffset,
-                                                AffineAlignEdge edge)
+                                            AffinealignDPentry **Atabcolumn,
+                                            const GtScoreHandler *scorehandler,
+                                            GtUword ulen, GtUword vlen,
+                                            GtUword rowoffset,
+                                            AffineAlignEdge edge)
 {
   GtUword i, j, gap_opening;
   gt_assert(Atabcolumn != NULL);
@@ -269,8 +269,8 @@ static void evaluate_affinecrosspoints_from_2dimtab(GtUword *Ctab,
   }
 }
 
-void affine_ctab_in_square_space(LinspaceManagement *spacemanager,
-                                 GtScoreHandler *scorehandler,
+void affine_ctab_in_square_space(GtLinspaceManagement *spacemanager,
+                                 const GtScoreHandler *scorehandler,
                                  GtUword *Ctab,
                                  const GtUchar *useq,
                                  GtUword ustart,
@@ -305,8 +305,8 @@ void affine_ctab_in_square_space(LinspaceManagement *spacemanager,
 
 /* local */
 static GtWord affinealign_fill_table_local(AffinealignDPentry **Atabcolumn,
-                                           GtScoreHandler *scorehandler,
-                                           Gtmaxcoordvalue *max,
+                                           const GtScoreHandler *scorehandler,
+                                           GtMaxcoordvalue *max,
                                            const GtUchar *useq, GtUword ustart,
                                            GtUword ulen,
                                            const GtUchar *vseq, GtUword vstart,
@@ -450,7 +450,7 @@ static GtWord affinealign_fill_table_local(AffinealignDPentry **Atabcolumn,
 
 static void affinealign_traceback_local(GtAlignment *align,
                                         AffinealignDPentry **dptable,
-                                        Gtmaxcoordvalue *max)
+                                        GtMaxcoordvalue *max)
 {
   GtWord maxvalue;
   GtUword i,j;
@@ -503,22 +503,23 @@ static void affinealign_traceback_local(GtAlignment *align,
   gt_max_set_start(max,i,j);
 }
 
-GtWord affinealign_in_square_space_local_generic(LinspaceManagement *space,
-                                                 GtScoreHandler *scorehandler,
-                                                 GtAlignment *align,
-                                                 const GtUchar *useq,
-                                                 GtUword ustart,
-                                                 GtUword ulen,
-                                                 const GtUchar *vseq,
-                                                 GtUword vstart,
-                                                 GtUword vlen)
+GtWord affinealign_in_square_space_local_generic(GtLinspaceManagement
+                                             *spacemanager,
+                                             const GtScoreHandler *scorehandler,
+                                             GtAlignment *align,
+                                             const GtUchar *useq,
+                                             GtUword ustart,
+                                             GtUword ulen,
+                                             const GtUchar *vseq,
+                                             GtUword vstart,
+                                             GtUword vlen)
 {
   GtWord score = 0;
   AffinealignDPentry **Atabcolumn;
-  Gtmaxcoordvalue *max;
+  GtMaxcoordvalue *max;
 
   gt_assert(align != NULL);
-  if (space == NULL)
+  if (spacemanager == NULL)
   {
     /*use it in normally case*/
     gt_array2dim_malloc(Atabcolumn,(ulen+1),(vlen+1));
@@ -528,15 +529,15 @@ GtWord affinealign_in_square_space_local_generic(LinspaceManagement *space,
   {
     /*use it in lineraspace context*/
     gt_assert((ulen+1)*(vlen+1)*sizeof(**Atabcolumn) <=
-               gt_linspaceManagement_get_valueTabsize(space));
+               gt_linspaceManagement_get_valueTabsize(spacemanager));
 
-    Atabcolumn = gt_linspaceManagement_get_rTabspace(space);
-    *Atabcolumn = gt_linspaceManagement_get_valueTabspace(space);
+    Atabcolumn = gt_linspaceManagement_get_rTabspace(spacemanager);
+    *Atabcolumn = gt_linspaceManagement_get_valueTabspace(spacemanager);
 
     GtUword idx;
     for (idx = 1;idx < ulen+1;idx++)
       Atabcolumn[idx] = Atabcolumn[idx-1] + vlen + 1;
-    max = gt_linspaceManagement_get_maxspace(space);
+    max = gt_linspaceManagement_get_maxspace(spacemanager);
   }
 
   score = affinealign_fill_table_local(Atabcolumn, scorehandler, max,
@@ -559,7 +560,7 @@ GtWord affinealign_in_square_space_local_generic(LinspaceManagement *space,
                                  &vseq[vstart], vlen);
   }
 
-  if (space == NULL)
+  if (spacemanager == NULL)
   {
     gt_array2dim_delete(Atabcolumn);
     gt_max_delete(max);
@@ -567,7 +568,7 @@ GtWord affinealign_in_square_space_local_generic(LinspaceManagement *space,
   return score;
 }
 
-GtWord affinealign_in_square_space_local(LinspaceManagement *spacemanager,
+GtWord affinealign_in_square_space_local(GtLinspaceManagement *spacemanager,
                                          GtAlignment *align,
                                          const GtUchar *useq,
                                          GtUword ustart,
@@ -581,14 +582,14 @@ GtWord affinealign_in_square_space_local(LinspaceManagement *spacemanager,
                                          GtWord gap_extension)
 {
   GtWord score;
-  GtScoreHandler *scorehandler = gt_scorehandler_new_DNA(matchscore,
-                                                         mismatchscore,
-                                                         gap_opening,
-                                                         gap_extension);
 
-  score =  affinealign_in_square_space_local_generic(spacemanager, scorehandler,
-                                                   align, useq, ustart, ulen,
-                                                   vseq, vstart, vlen);
+  GtScoreHandler *scorehandler = gt_scorehandler_new(matchscore,
+                                                     mismatchscore,
+                                                     gap_opening,
+                                                     gap_extension);
+  score = affinealign_in_square_space_local_generic(spacemanager, scorehandler,
+                                                    align, useq, ustart, ulen,
+                                                    vseq, vstart, vlen);
   gt_scorehandler_delete(scorehandler);
   return score;
 }

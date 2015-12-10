@@ -44,6 +44,11 @@ GtScoreMatrix* gt_score_matrix_new(GtAlphabet *alphabet)
   return sm;
 }
 
+GtScoreMatrix* gt_score_matrix_clone_empty(const GtScoreMatrix *scorematrix)
+{
+  return gt_score_matrix_new(scorematrix->alphabet);
+}
+
 static int parse_alphabet_line(GtArray *index_to_alpha_char_mapping,
                                GtTokenizer *tz, GtError *err)
 {

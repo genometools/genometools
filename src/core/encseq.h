@@ -449,6 +449,9 @@ unsigned int  gt_encseq_alphabetnumofchars(const GtEncseq *encseq);
    sequence <encseq>. */
 const GtUchar *gt_encseq_alphabetcharacters(const GtEncseq *encseq);
 
+/* Returns the symbol which stands for a wildcard */
+GtUchar gt_encseq_alphabetwildcardshow(const GtEncseq *encseq);
+
 /* Sets <specialcharinfo> to point to a <GtSpecialcharinfo> for the index
   files specified by <indexname>, even if the encoded sequence is not mapped.
   Returns 0 on success, -1 otherwise. */

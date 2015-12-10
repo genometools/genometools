@@ -34,7 +34,19 @@ void gt_querymatchoutoptions_extend(
                   GtUword history,
                   GtUword perc_mat_history,
                   GtExtendCharAccess extend_char_access,
-                  GtUword sensitivity);
+                  bool weakends,
+                  GtUword sensitivity,
+                  double matchscore_bias,
+                  bool always_polished_ends,
+                  bool seed_display);
+
+void gt_querymatchoutoptions_for_align_only(
+                  GtQuerymatchoutoptions *querymatchoutoptions,
+                  GtUword errorpercentage,
+                  double matchscore_bias,
+                  GtUword history_size,
+                  bool always_polished_ends,
+                  bool seed_display);
 
 void gt_querymatchoutoptions_delete(
         GtQuerymatchoutoptions *querymatchoutoptions);
@@ -60,7 +72,7 @@ bool gt_querymatchoutoptions_alignment_prepare(
 
 void gt_querymatchoutoptions_alignment_show(const GtQuerymatchoutoptions
                                               *querymatchoutoptions,
-                                            GtUword edist,
+                                            GtUword distance,
                                             bool verify_alignment);
 
 typedef struct

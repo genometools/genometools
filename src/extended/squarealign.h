@@ -22,10 +22,14 @@
 #include "extended/linspaceManagement.h"
 #include "extended/scorehandler.h"
 
-/* create an global alignment in square space, to use it in linear context you
- * have to generate an spacemanager before, in any other case it can be NULL,
- * (DNA or protein) */
-GtUword alignment_in_square_space_generic (LinspaceManagement *spacemanager,
+/* Computes a global alignment with linear gapcosts in square space. Use of this
+   function requires an initialised <scorehandler> with cost values, the target
+   alignment <align> and input sequences <useq> and <vseq>, with the regions to
+   align given by their start positions <ustart> and <vstart> and lengths <ulen>
+   and <vlen>. An initialised <spacemanager> is required to use this function in
+   linear space context, in any other case it can be NULL. Returns distance
+   value of global alignment. */
+GtUword alignment_in_square_space_generic (GtLinspaceManagement *spacemanager,
                                            GtAlignment *align,
                                            const GtUchar *useq,
                                            GtUword ustart,
@@ -33,10 +37,17 @@ GtUword alignment_in_square_space_generic (LinspaceManagement *spacemanager,
                                            const GtUchar *vseq,
                                            GtUword vstart,
                                            GtUword vlen,
-                                           GtScoreHandler *scorehandler);
+                                           const GtScoreHandler *scorehandler);
 
-/* same with constant cost values, only useful for DNA sequences */
-GtUword alignment_in_square_space(LinspaceManagement *spacemanager,
+/* Computes a global alignment with linear gapcosts in square space
+   and constant cost values. Use of this function requires the target alignment
+   <align> and input sequences <useq> and <vseq>, with the regions to align
+   given by their start positions <ustart> and <vstart> and lengths <ulen> and
+   <vlen>. The cost values are specified by <matchcost>, <mismatchcost> and
+   <gapcost>. An initialised <spacemanager> is required to use this function in
+   linear space context, in any other case it can be NULL. Returns distance
+   value of global alignment. */
+GtUword alignment_in_square_space(GtLinspaceManagement *spacemanager,
                                   GtAlignment *align,
                                   const GtUchar *useq,
                                   GtUword ustart,
@@ -48,22 +59,35 @@ GtUword alignment_in_square_space(LinspaceManagement *spacemanager,
                                   GtUword mismatchcost,
                                   GtUword gapcost);
 
-/*distance only for global alignment */
+/* Computes only the distance of a global alignment with linear gapcosts in
+   square space. Use of this function requires an initialised <scorehandler>
+   with cost values and input sequences <useq> and <vseq>, with the regions to
+   align given by their start positions <ustart> and <vstart> and lengths <ulen>
+   and <vlen>. */
 GtUword distance_only_global_alignment(const GtUchar *useq,
                                        GtUword ustart,
                                        GtUword ulen,
                                        const GtUchar *vseq,
                                        GtUword vstart,
                                        GtUword vlen,
-                                       GtScoreHandler *scorehandler);
+                                       const GtScoreHandler *scorehandler);
 
+/* Shows a global alignment, which is computed with linear gapcosts in
+   square space. Use of this function requires input sequences <useq> and
+   <vseq>, with the regions to align given by their start positions <ustart> and
+   <vstart> and lengths <ulen> and <vlen>. */
 void gt_print_edist_alignment(const GtUchar *useq, GtUword ustart, GtUword ulen,
                              const GtUchar *vseq, GtUword vstart, GtUword vlen);
 
-/* fill crosspointtable ctab for part of sequences useq and vseq in square
- * space, use it to combine square calculating with linear calculating */
-GtUword ctab_in_square_space(LinspaceManagement *spacemanager,
-                             GtScoreHandler *scorehandler,
+/* Computes crosspoints for a global alignment with linear gapcosts in square
+   space. Use of this function requires an initialised <spacemanager> an
+   initialised <scorehandler> with cost values, the target crosspoint table
+   <Ctab> and input sequences <useq> and <vseq>, with the regions to align given
+   by their start positions <ustart> and <vstart> and lengths <ulen> and <vlen>.
+   If this function is use in linear context, <rowoffset> is the offset value of
+   the subproblem, else zero. Returns distance value of global alignment. */
+GtUword ctab_in_square_space(GtLinspaceManagement *spacemanager,
+                             const GtScoreHandler *scorehandler,
                              GtUword *Ctab,
                              const GtUchar *useq,
                              GtUword ustart,
@@ -73,10 +97,15 @@ GtUword ctab_in_square_space(LinspaceManagement *spacemanager,
                              GtUword vlen,
                              GtUword rowoffset);
 
-/* create an local alignment in square space, to use it in linear context you
- * have to generate an spacemanager before, in any other case it can be NULL,
- * (DNA or protein) */
-GtWord alignment_in_square_space_local_generic(LinspaceManagement *spacemanager,
+/* Computes a local alignment with linear gapcosts in square space. Use of this
+   function requires an initialised <scorehandler> with score values, the target
+   alignment <align> and input sequences <useq> and <vseq>, with the regions to
+   align given by their start positions <ustart> and <vstart> and lengths <ulen>
+   and <vlen>. An initialised <spacemanager> is required to use this function in
+   linear space context, in any other case it can be NULL. Returns score
+   value of local alignment. */
+GtWord alignment_in_square_space_local_generic(GtLinspaceManagement
+                                               *spacemanager,
                                                GtAlignment *align,
                                                const GtUchar *useq,
                                                GtUword ustart,
@@ -84,10 +113,18 @@ GtWord alignment_in_square_space_local_generic(LinspaceManagement *spacemanager,
                                                const GtUchar *vseq,
                                                GtUword vstart,
                                                GtUword vlen,
-                                               GtScoreHandler *scorehandler);
+                                               const GtScoreHandler
+                                               *scorehandler);
 
-/* same with constant cost values, only useful for DNA sequences */
-GtWord alignment_in_square_space_local(LinspaceManagement *spacemanager,
+/* Computes a local alignment with linear gapcosts in square space
+   and constant score values. Use of this function requires the target alignment
+   <align> and input sequences <useq> and <vseq>, with the regions to align
+   given by their start positions <ustart> and <vstart> and lengths <ulen> and
+   <vlen>. The score values are specified by <matchscore>, <mismatchscore> and
+   <gapscore>. An initialised <spacemanager> is required to use this function in
+   linear space context, in any other case it can be NULL. Returns score
+   value of local alignment. */
+GtWord alignment_in_square_space_local(GtLinspaceManagement *spacemanager,
                                        GtAlignment *align,
                                        const GtUchar *useq,
                                        GtUword ustart,

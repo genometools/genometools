@@ -18,11 +18,13 @@
 #include "core/ma_api.h"
 #include "core/unused_api.h"
 #include "core/types_api.h"
+#include "core/minmax.h"
 #include "extended/alignment.h"
 #include "extended/linearalign.h"
 #include "extended/linspaceManagement.h"
 #include "revcompl.h"
 #include "seed-extend.h"
+#include "ft-polish.h"
 #include "querymatch-align.h"
 
 static void eoplist_reverse_order(uint8_t *start,uint8_t *end)
@@ -108,7 +110,7 @@ struct GtQuerymatchoutoptions
           useqbuffer_size,
           vseqbuffer_size;
   GtArrayuint8_t eoplist;
-  Fronttrace *front_trace;
+  GtFronttrace *front_trace;
   GtGreedyextendmatchinfo *ggemi;
   GtUchar *useqbuffer, *vseqbuffer, *alignment_show_buffer;
   const GtUchar *characters;
@@ -116,6 +118,10 @@ struct GtQuerymatchoutoptions
   GtEncseqReader *esr_for_align_show;
   GtUchar wildcardshow;
   GtSeqpaircoordinates correction_info;
+  GtLinspaceManagement *linspace_spacemanager;
+  GtScoreHandler *linspace_scorehandler;
+  bool always_polished_ends;
+  Polishing_info *pol_info;
 };
 
 GtQuerymatchoutoptions *gt_querymatchoutoptions_new(GtUword alignmentwidth)
@@ -135,11 +141,16 @@ GtQuerymatchoutoptions *gt_querymatchoutoptions_new(GtUword alignmentwidth)
   querymatchoutoptions->esr_for_align_show = NULL;
   querymatchoutoptions->characters = NULL;
   querymatchoutoptions->alignment = NULL;
+  querymatchoutoptions->linspace_spacemanager = NULL;
+  querymatchoutoptions->linspace_scorehandler = NULL;
+  querymatchoutoptions->always_polished_ends = true;
   if (alignmentwidth > 0)
   {
     querymatchoutoptions->alignment_show_buffer
       = gt_alignment_buffer_new(alignmentwidth);
     querymatchoutoptions->alignment = gt_alignment_new();
+    querymatchoutoptions->linspace_spacemanager = gt_linspaceManagement_new();
+    querymatchoutoptions->linspace_scorehandler = gt_scorehandler_new(0,1,0,1);
   } else
   {
     querymatchoutoptions->alignment_show_buffer = NULL;
@@ -151,10 +162,14 @@ void gt_querymatchoutoptions_extend(
                   GtQuerymatchoutoptions *querymatchoutoptions,
                   GtUword errorpercentage,
                   GtUword maxalignedlendifference,
-                  GtUword history,
+                  GtUword history_size,
                   GtUword perc_mat_history,
                   GtExtendCharAccess extend_char_access,
-                  GtUword sensitivity)
+                  bool weakends,
+                  GtUword sensitivity,
+                  double matchscore_bias,
+                  bool always_polished_ends,
+                  bool seed_display)
 {
   if (errorpercentage > 0)
   {
@@ -163,15 +178,55 @@ void gt_querymatchoutoptions_extend(
     {
       querymatchoutoptions->front_trace = front_trace_new();
     }
+    querymatchoutoptions->pol_info
+      = polishing_info_new_with_bias(weakends ? MAX(errorpercentage,20)
+                                              : errorpercentage,
+                                     matchscore_bias,
+                                     history_size);
     querymatchoutoptions->ggemi
       = gt_greedy_extend_matchinfo_new(errorpercentage,
                                        maxalignedlendifference,
-                                       history, /* default value */
+                                       history_size, /* default value */
                                        perc_mat_history,
                                        0,/* userdefinedleastlength not used */
                                        extend_char_access,
-                                       sensitivity);
+                                       sensitivity,
+                                       querymatchoutoptions->pol_info);
+    if (querymatchoutoptions->alignment != NULL)
+    {
+      if (always_polished_ends)
+      {
+        gt_alignment_polished_ends(querymatchoutoptions->alignment,
+                                   querymatchoutoptions->pol_info,true);
+      }
+      if (seed_display)
+      {
+        gt_alignment_seed_display_set(querymatchoutoptions->alignment);
+      }
+    }
+    querymatchoutoptions->always_polished_ends = always_polished_ends;
   }
+}
+
+void gt_querymatchoutoptions_for_align_only(
+                  GtQuerymatchoutoptions *querymatchoutoptions,
+                  GtUword errorpercentage,
+                  double matchscore_bias,
+                  GtUword history_size,
+                  bool always_polished_ends,
+                  bool seed_display)
+{
+  gt_querymatchoutoptions_extend(querymatchoutoptions,
+                                 errorpercentage,
+                                 GT_MAX_ALI_LEN_DIFF,
+                                 history_size,
+                                 GT_MIN_PERC_MAT_HISTORY,
+                                 GT_EXTEND_CHAR_ACCESS_ANY,
+                                 false,
+                                 100,
+                                 matchscore_bias,
+                                 always_polished_ends,
+                                 seed_display);
 }
 
 void gt_querymatchoutoptions_delete(
@@ -190,6 +245,9 @@ void gt_querymatchoutoptions_delete(
     GT_FREEARRAY(&querymatchoutoptions->eoplist,uint8_t);
     gt_alignment_buffer_delete(querymatchoutoptions->alignment_show_buffer);
     gt_encseq_reader_delete(querymatchoutoptions->esr_for_align_show);
+    gt_linspaceManagement_delete(querymatchoutoptions->linspace_spacemanager);
+    gt_scorehandler_delete(querymatchoutoptions->linspace_scorehandler);
+    polishing_info_delete(querymatchoutoptions->pol_info);
     gt_free(querymatchoutoptions);
   }
 }
@@ -213,9 +271,12 @@ static bool seededmatch2eoplist(GtQuerymatchoutoptions *querymatchoutoptions,
   bool alignment_succeeded = true;
   Polished_point right_best_polished_point = {0,0,0};
   Polished_point left_best_polished_point = {0,0,0};
+  GtUword pol_size;
   GtSeqpaircoordinates *coords;
 
-  gt_assert(querymatchoutoptions != NULL);
+  gt_assert(querymatchoutoptions != NULL &&
+            querymatchoutoptions->pol_info != NULL);
+  pol_size = GT_MULT2(querymatchoutoptions->pol_info->cut_depth);
   querymatchoutoptions->eoplist.nextfreeuint8_t = 0;
   if (querymatchoutoptions->totallength == GT_UWORD_MAX)
   {
@@ -239,6 +300,7 @@ static bool seededmatch2eoplist(GtQuerymatchoutoptions *querymatchoutoptions,
                                    query_totallength,
                                    querymatchoutoptions->ggemi,
                                    greedyextension,
+                                   seedlen,
                                    ustart,
                                    ulen,
                                    vstart,
@@ -249,10 +311,16 @@ static bool seededmatch2eoplist(GtQuerymatchoutoptions *querymatchoutoptions,
     {
       if (querymatchoutoptions->front_trace != NULL)
       {
-        front_trace2eoplist(&querymatchoutoptions->eoplist,
+        front_trace2eoplist(querymatchoutoptions->always_polished_ends,
+                            &querymatchoutoptions->eoplist,
                             querymatchoutoptions->front_trace,
                             &right_best_polished_point,
+                            pol_size,
+                            querymatchoutoptions->pol_info->match_score,
+                            querymatchoutoptions->pol_info->difference_score,
+                            NULL,
                             ulen,
+                            NULL,
                             vlen);
       }
     }
@@ -282,6 +350,7 @@ static bool seededmatch2eoplist(GtQuerymatchoutoptions *querymatchoutoptions,
                                      query_totallength,
                                      querymatchoutoptions->ggemi,
                                      greedyextension,
+                                     seedlen,
                                      dbstart,
                                      ulen,
                                      abs_querystart,
@@ -294,10 +363,16 @@ static bool seededmatch2eoplist(GtQuerymatchoutoptions *querymatchoutoptions,
         {
           GtUword eoplistlen = querymatchoutoptions->eoplist.nextfreeuint8_t;
 
-          front_trace2eoplist(&querymatchoutoptions->eoplist,
+          front_trace2eoplist(querymatchoutoptions->always_polished_ends,
+                              &querymatchoutoptions->eoplist,
                               querymatchoutoptions->front_trace,
                               &left_best_polished_point,
+                              pol_size,
+                              querymatchoutoptions->pol_info->match_score,
+                              querymatchoutoptions->pol_info->difference_score,
+                              NULL,
                               ulen,
+                              NULL,
                               vlen);
           eoplist_reverse_order(querymatchoutoptions->eoplist.spaceuint8_t +
                                  eoplistlen,
@@ -457,6 +532,11 @@ bool gt_querymatchoutoptions_alignment_prepare(GtQuerymatchoutoptions
     {
       if (querymatchoutoptions->alignmentwidth > 0)
       {
+        gt_alignment_reset(querymatchoutoptions->alignment);
+        gt_assert(dbstart <= seedpos1);
+        gt_alignment_set_seedoffset(querymatchoutoptions->alignment,
+                                    seedpos1 - dbstart,
+                                    seedlen);
         gt_alignment_set_seqs(querymatchoutoptions->alignment,
                               querymatchoutoptions->useqbuffer +
                                   querymatchoutoptions->correction_info.uoffset,
@@ -481,25 +561,21 @@ bool gt_querymatchoutoptions_alignment_prepare(GtQuerymatchoutoptions
                               dblen,
                               querymatchoutoptions->vseqbuffer,
                               querylen);
-        LinspaceManagement *spacemanager = gt_linspaceManagement_new();
 #ifndef NDEBUG
         linedist =
 #else
         (void)
 #endif
-
-                   gt_computelinearspace(spacemanager,
-                                         querymatchoutoptions->alignment,
-                                         querymatchoutoptions->useqbuffer,
-                                         0,
-                                         dblen,
-                                         querymatchoutoptions->vseqbuffer,
-                                         0,
-                                         querylen,
-                                         0,
-                                         1,
-                                         1);
-        gt_linspaceManagement_delete(spacemanager);
+        gt_computelinearspace_generic(
+                              querymatchoutoptions->linspace_spacemanager,
+                              querymatchoutoptions->linspace_scorehandler,
+                              querymatchoutoptions->alignment,
+                              querymatchoutoptions->useqbuffer,
+                              0,
+                              dblen,
+                              querymatchoutoptions->vseqbuffer,
+                              0,
+                              querylen);
         gt_assert(linedist <= edist);
         /*printf("linedist = " GT_WU " <= " GT_WU "= edist\n",linedist,edist);*/
       }
@@ -520,14 +596,15 @@ bool gt_querymatchoutoptions_alignment_prepare(GtQuerymatchoutoptions
 
 void gt_querymatchoutoptions_alignment_show(const GtQuerymatchoutoptions
                                               *querymatchoutoptions,
-                                            GtUword edist,
+                                            GtUword distance,
                                             GT_UNUSED bool verify_alignment)
 {
   if (querymatchoutoptions != NULL && querymatchoutoptions->alignmentwidth > 0)
   {
-    if (edist > 0)
+    if (distance > 0)
     {
       gt_alignment_show_generic(querymatchoutoptions->alignment_show_buffer,
+                                false,
                                 querymatchoutoptions->alignment,
                                 stdout,
                                 (unsigned int)
@@ -544,7 +621,7 @@ void gt_querymatchoutoptions_alignment_show(const GtQuerymatchoutoptions
     }
     if (verify_alignment)
     {
-      (void) gt_alignment_check_edist(querymatchoutoptions->alignment,edist,
+      (void) gt_alignment_check_edist(querymatchoutoptions->alignment,distance,
                                       NULL);
     }
     gt_alignment_reset(querymatchoutoptions->alignment);

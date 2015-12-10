@@ -18,15 +18,15 @@
 #ifndef INTCODE_DEF_H
 #define INTCODE_DEF_H
 
-#define PREFIXLENBITS   4
-#define CODEBITS        (32-PREFIXLENBITS)
-#define MAXPREFIXLENGTH (CODEBITS>>1)
-#define MAXCODEVALUE    ((1U << CODEBITS) - 1)
+#define GT_PREFIXLENBITS   4
+#define GT_CODEBITS        (32 - GT_PREFIXLENBITS)
+#define GT_MAXPREFIXLENGTH ((GT_CODEBITS) >> 1)
+#define GT_MAXCODEVALUE    ((1U << (GT_CODEBITS)) - 1)
 
 typedef struct
 {
-  unsigned int maxprefixindex:PREFIXLENBITS;
-  unsigned int code:CODEBITS;
+  unsigned int maxprefixindex:GT_PREFIXLENBITS;
+  unsigned int code:GT_CODEBITS;
   GtUword position; /* get rid of this by using information from encseq */
 } Codeatposition;
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2015 Annika <annika.seidel@studium.uni-hamburg.de>
+  Copyright (c) 2015 Annika Seidel <annika.seidel@studium.uni-hamburg.de>
   Copyright (c) 2015 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -43,7 +43,7 @@ static void diagonalband_fillDPtab_affine(AffinealignDPentry **Atabcolumn,
                                           GtWord right_dist,
                                           AffineAlignEdge from_edge,
                                           AffineAlignEdge edge,
-                                          GtScoreHandler *scorehandler)
+                                          const GtScoreHandler *scorehandler)
 {
   GtUword i,j, low_row, high_row, gap_opening, gap_extension;
   GtWord rcost, r_dist, d_dist, i_dist, minvalue;
@@ -189,17 +189,17 @@ static void diagonalband_fillDPtab_affine(AffinealignDPentry **Atabcolumn,
 /* calculate alignment with diagonalband in square space with
  * affine gapcosts */
 GtWord diagonalbandalignment_in_square_space_affine_generic(
-                                                  LinspaceManagement *space,
-                                                  GtScoreHandler *scorehandler,
-                                                  GtAlignment *align,
-                                                  const GtUchar *useq,
-                                                  GtUword ustart,
-                                                  GtUword ulen,
-                                                  const GtUchar *vseq,
-                                                  GtUword vstart,
-                                                  GtUword vlen,
-                                                  GtWord left_dist,
-                                                  GtWord right_dist)
+                                            GtLinspaceManagement *space,
+                                            const GtScoreHandler *scorehandler,
+                                            GtAlignment *align,
+                                            const GtUchar *useq,
+                                            GtUword ustart,
+                                            GtUword ulen,
+                                            const GtUchar *vseq,
+                                            GtUword vstart,
+                                            GtUword vlen,
+                                            GtWord left_dist,
+                                            GtWord right_dist)
 {
   GtWord distance;
   GtUword idx;
@@ -215,10 +215,10 @@ GtWord diagonalbandalignment_in_square_space_affine_generic(
     gt_assert((ulen+1)*(vlen+1)*sizeof(**Atabcolumn) <=
                gt_linspaceManagement_get_valueTabsize(space));
 
-    Atabcolumn=gt_linspaceManagement_get_rTabspace(space);
-    *Atabcolumn=gt_linspaceManagement_get_valueTabspace(space);
+    Atabcolumn = gt_linspaceManagement_get_rTabspace(space);
+    *Atabcolumn = gt_linspaceManagement_get_valueTabspace(space);
 
-    for (idx=1;idx<ulen+1;idx++)
+    for (idx=1; idx<ulen+1; idx++)
       Atabcolumn[idx]=Atabcolumn[idx-1]+vlen+1;
   }
 
@@ -242,7 +242,7 @@ GtWord diagonalbandalignment_in_square_space_affine_generic(
 
 /* calculate alignment with diagonalband in square space with
  * affine gapcosts */
-GtWord diagonalbandalignment_in_square_space_affine(LinspaceManagement *space,
+GtWord diagonalbandalignment_in_square_space_affine(GtLinspaceManagement *space,
                                                     GtAlignment *align,
                                                     const GtUchar *useq,
                                                     GtUword ustart,
@@ -258,7 +258,7 @@ GtWord diagonalbandalignment_in_square_space_affine(LinspaceManagement *space,
                                                     GtUword gap_extension)
 {
   GtWord distance;
-  GtScoreHandler *scorehandler = gt_scorehandler_new_DNA(matchcost,mismatchcost,
+  GtScoreHandler *scorehandler = gt_scorehandler_new(matchcost,mismatchcost,
                                                     gap_opening, gap_extension);
 
   distance = diagonalbandalignment_in_square_space_affine_generic(space,
@@ -272,14 +272,14 @@ GtWord diagonalbandalignment_in_square_space_affine(LinspaceManagement *space,
 /* calculate only distance with diagonalband in square space  with
  * affine gapcosts */
 GtWord diagonalband_square_space_affine(const GtUchar *useq,
-                                               GtUword ustart,
-                                               GtUword ulen,
-                                               const GtUchar *vseq,
-                                               GtUword vstart,
-                                               GtUword vlen,
-                                               GtWord left_dist,
-                                               GtWord right_dist,
-                                               GtScoreHandler *scorehandler)
+                                       GtUword ustart,
+                                       GtUword ulen,
+                                       const GtUchar *vseq,
+                                       GtUword vstart,
+                                       GtUword vlen,
+                                       GtWord left_dist,
+                                       GtWord right_dist,
+                                       const GtScoreHandler *scorehandler)
 {
   GtUword  distance;
   AffinealignDPentry **Atabcolumn;
@@ -383,7 +383,7 @@ static Rnode evaluate_affineDBcrosspoints_from_2dimtab(AffineDiagentry *Dtab,
  * previous crosspoint.
  * Returns edge and index of lastcrosspoint in matrix.
  */
-static Rnode affineDtab_in_square_space(LinspaceManagement *space,
+static Rnode affineDtab_in_square_space(GtLinspaceManagement *space,
                                          AffineDiagentry *Dtab,
                                          const GtUchar *useq,
                                          GtUword ustart,
@@ -397,7 +397,7 @@ static Rnode affineDtab_in_square_space(LinspaceManagement *space,
                                          AffineAlignEdge from_edge,
                                          AffineAlignEdge edge,
                                          AffineAlignEdge to_edge,
-                                         GtScoreHandler *scorehandler)
+                                         const GtScoreHandler *scorehandler)
 {
   AffinealignDPentry **Atabcolumn;
   GtUword idx, gap_opening;
@@ -434,7 +434,7 @@ static GtWord diagonalband_linear_affine(const GtUchar *useq,
                                           GtUword vlen,
                                           GtWord left_dist,
                                           GtWord right_dist,
-                                          GtScoreHandler *scorehandler)
+                                          const GtScoreHandler *scorehandler)
 {
   GtUword colindex, rowindex, low_row, high_row, width,
           gap_opening, gap_extension;
@@ -737,9 +737,9 @@ static void firstaffineDBtabcolumn(AffinealignDPentry *Atabcolumn,
 }
 
 /* calculate all columns */
-static Rnode evaluateallaffineDBcolumns(LinspaceManagement *spacemanager,
+static Rnode evaluateallaffineDBcolumns(GtLinspaceManagement *spacemanager,
                                         AffineDiagentry *Diagcolumn,
-                                        GtScoreHandler *scorehandler,
+                                        const GtScoreHandler *scorehandler,
                                         AffineAlignEdge edge,
                                         AffineAlignEdge from_edge,
                                         AffineAlignEdge to_edge,
@@ -1004,9 +1004,9 @@ static Rnode evaluateallaffineDBcolumns(LinspaceManagement *spacemanager,
 }
 
 /* calculate affine crosspoint realting to diagonal in recursive way */
-static Rnode evaluateaffineDBcrosspoints(LinspaceManagement *spacemanager,
+static Rnode evaluateaffineDBcrosspoints(GtLinspaceManagement *spacemanager,
                                          AffineDiagentry *Diagcolumn,
-                                         GtScoreHandler *scorehandler,
+                                         const GtScoreHandler *scorehandler,
                                          AffineAlignEdge edge,
                                          AffineAlignEdge from_edge,
                                          AffineAlignEdge to_edge,
@@ -1348,8 +1348,8 @@ static Rnode evaluateaffineDBcrosspoints(LinspaceManagement *spacemanager,
 
 /* calculating alignment in linear space within a specified diagonal band
  * with affine gapcosts */
-static void gt_calc_diagonalbandaffinealign(LinspaceManagement *spacemanager,
-                                            GtScoreHandler *scorehandler,
+static void gt_calc_diagonalbandaffinealign(GtLinspaceManagement *spacemanager,
+                                            const GtScoreHandler *scorehandler,
                                             GtAlignment *align,
                                             const GtUchar *useq,
                                             GtUword ustart, GtUword ulen,
@@ -1419,8 +1419,10 @@ static void gt_calc_diagonalbandaffinealign(LinspaceManagement *spacemanager,
 }
 
 /* compute alignment with affine gapcosts within a diagonal band */
-void gt_computediagonalbandaffinealign_generic(LinspaceManagement *spacemanager,
-                                               GtScoreHandler *scorehandler,
+void gt_computediagonalbandaffinealign_generic(GtLinspaceManagement
+                                                 *spacemanager,
+                                               const GtScoreHandler
+                                                 *scorehandler,
                                                GtAlignment *align,
                                                const GtUchar *useq,
                                                GtUword ustart, GtUword ulen,
@@ -1442,7 +1444,7 @@ void gt_computediagonalbandaffinealign_generic(LinspaceManagement *spacemanager,
 }
 
 /* compute alignment with affine gapcosts within a diagonal band */
-void gt_computediagonalbandaffinealign(LinspaceManagement *spacemanager,
+void gt_computediagonalbandaffinealign(GtLinspaceManagement *spacemanager,
                                        GtAlignment *align,
                                        const GtUchar *useq,
                                        GtUword ustart, GtUword ulen,
@@ -1455,10 +1457,10 @@ void gt_computediagonalbandaffinealign(LinspaceManagement *spacemanager,
                                        GtUword gap_opening,
                                        GtUword gap_extension)
 {
-  GtScoreHandler *scorehandler = gt_scorehandler_new_DNA(matchcost,
-                                                         mismatchcost,
-                                                         gap_opening,
-                                                         gap_extension);
+  GtScoreHandler *scorehandler = gt_scorehandler_new(matchcost,
+                                                     mismatchcost,
+                                                     gap_opening,
+                                                     gap_extension);
 
   gt_computediagonalbandaffinealign_generic(spacemanager, scorehandler, align,
                                             useq, ustart, ulen, vseq, vstart,
@@ -1477,9 +1479,7 @@ void gt_checkdiagonalbandaffinealign(GT_UNUSED bool forward,
   GtWord left_dist, right_dist;
   GtAlignment *align;
   GtScoreHandler *scorehandler;
-  LinspaceManagement *spacemanager;
-  GtUchar *low_useq, *low_vseq;
-  GtAlphabet *alphabet;
+  GtLinspaceManagement *spacemanager;
 
   if (memchr(useq, LINEAR_EDIST_GAP,ulen) != NULL)
   {
@@ -1492,35 +1492,25 @@ void gt_checkdiagonalbandaffinealign(GT_UNUSED bool forward,
     exit(GT_EXIT_PROGRAMMING_ERROR);
   }
 
-  /* set left and right to set diagonalband to the whole matrix */
   left_dist = -ulen;
   right_dist = vlen;
 
-  scorehandler = gt_scorehandler_new_DNA(matchcost, mismatchcost,
-                                         gap_opening, gap_extension);
-  alphabet = gt_scorehandler_get_alphabet(scorehandler);
-  low_useq = check_dna_sequence(useq, ulen, alphabet);
-  low_vseq = check_dna_sequence(vseq, vlen, alphabet);
-
-  if (low_useq == NULL || low_vseq == NULL)
-  {
-    low_useq? gt_free(low_useq):0;
-    low_vseq? gt_free(low_vseq):0;
-    gt_scorehandler_delete(scorehandler);
-    return;
-  }
+  scorehandler = gt_scorehandler_new(matchcost, mismatchcost,
+                                     gap_opening, gap_extension);
+  gt_scorehandler_plain(scorehandler);
+  gt_scorehandler_downcase(scorehandler);
   affine_cost1 = diagonalband_square_space_affine(useq, 0, ulen, vseq, 0, vlen,
                                            left_dist, right_dist, scorehandler);
 
   align = gt_alignment_new_with_seqs(useq, ulen, vseq, vlen);
   spacemanager = gt_linspaceManagement_new();
 
-   gt_calc_diagonalbandaffinealign(spacemanager, scorehandler, align,
+  gt_calc_diagonalbandaffinealign(spacemanager, scorehandler, align,
                                   useq, 0, ulen, vseq, 0, vlen,
                                   left_dist, right_dist);
 
   gt_linspaceManagement_delete(spacemanager);
-  affine_cost2 = gt_alignment_eval_with_affine_score(align, matchcost,
+  affine_cost2 = gt_alignment_eval_with_affine_score(align, true, matchcost,
                                                      mismatchcost,
                                                      gap_opening,
                                                      gap_extension);
@@ -1543,9 +1533,6 @@ void gt_checkdiagonalbandaffinealign(GT_UNUSED bool forward,
 
     exit(GT_EXIT_PROGRAMMING_ERROR);
   }
-
-  gt_free(low_useq);
-  gt_free(low_vseq);
   gt_scorehandler_delete(scorehandler);
   gt_alignment_delete(align);
 }

@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2015 Annika <annika.seidel@studium.uni-hamburg.de>
+  Copyright (c) 2015 Annika Seidel <annika.seidel@studium.uni-hamburg.de>
   Copyright (c) 2015 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -23,6 +23,8 @@
 #include "extended/alignment.h"
 #include "extended/linspaceManagement.h"
 
+/* <AffineDiagentry> objects are entries of DP-matrix with a diagonal band in
+   context of affine gap costs. */
 typedef struct {
   Diagentry val_R, val_D, val_I;
 } AffineDiagentry;
@@ -33,21 +35,34 @@ void gt_checkdiagonalbandaffinealign(GT_UNUSED bool forward,
                                      const GtUchar *vseq,
                                      GtUword vlen);
 
-/* creating alignment with diagonalband in linear space
- * with affine gapcosts (DNA or protein) */
-void gt_computediagonalbandaffinealign_generic(LinspaceManagement *spacemanager,
-                                              GtScoreHandler *scorehandler,
-                                              GtAlignment *align,
-                                              const GtUchar *useq,
-                                              GtUword ustart, GtUword ulen,
-                                              const GtUchar *vseq,
-                                              GtUword vstart, GtUword vlen,
-                                              GtWord left_dist,
-                                              GtWord right_dist);
+/* Computes a global alignment within a diagonal band with affine gapcosts in
+   linear space. Use of this function requires an initialised <spacemanager>,
+   the target alignment <align> and input sequences <useq> and <vseq>, with the
+   regions to align given by their start positions <ustart> and <vstart> and
+   lengths <ulen> and <vlen>. The cost values are specified by an initialised
+   <scorehandler>. <left_dist> and <right_dist> give lower and upper bound of
+   a diagonal band in which DP-matrix is valid. Returns affine cost
+   value of calculated global alignment. */
+void gt_computediagonalbandaffinealign_generic(
+                                            GtLinspaceManagement *spacemanager,
+                                            const GtScoreHandler *scorehandler,
+                                            GtAlignment *align,
+                                            const GtUchar *useq,
+                                            GtUword ustart, GtUword ulen,
+                                            const GtUchar *vseq,
+                                            GtUword vstart, GtUword vlen,
+                                            GtWord left_dist,
+                                            GtWord right_dist);
 
-/* creating alignment with diagonalband in linear space
- * with constant affine gapcosts, only useful for DNA sequences */
-void gt_computediagonalbandaffinealign(LinspaceManagement *spacemanager,
+/* Computes a global alignment within a diaognal band with affine gapcosts in
+   linear space and constant cost values. Use of this function requires an
+   initialised <spacemanager>, the target alignment <align> and input sequences
+   <useq> and <vseq>, with the regions to align given by their start positions
+   <ustart> and <vstart> and lengths <ulen> and <vlen>. The cost values are
+   specified by <matchcost>, <mismatchcost> and <gapcost>. <left_dist> and
+   <right_dist> give lower and upper bound of a diagonal band in which DP-matrix
+   is valid. Returns affine cost value of calculated global alignment. */
+void gt_computediagonalbandaffinealign(GtLinspaceManagement *spacemanager,
                                           GtAlignment *align,
                                           const GtUchar *useq,
                                           GtUword ustart, GtUword ulen,
@@ -60,8 +75,13 @@ void gt_computediagonalbandaffinealign(LinspaceManagement *spacemanager,
                                           GtUword gap_opening,
                                           GtUword gap_extension);
 
-/* calculate only distance with diagonalband in square space with
- * affine gapcosts */
+/* Computes only the distance of a global alignment within a diagonal band with
+   affine gapcosts in square space. Use of this function requires the input
+   sequences <useq> and <vseq>, with the regions to align given by their start
+   positions <ustart> and <vstart> and lengths <ulen> and <vlen>. <left_dist>
+   and <right_dist> give lower and upper bound of a diagonal band in which
+   DP-matrix is valid. The cost values are specified by <scorehandler>. Returns
+   cost value of global alignment. */
 GtWord diagonalband_square_space_affine(const GtUchar *useq,
                                          GtUword ustart,
                                          GtUword ulen,
@@ -70,26 +90,41 @@ GtWord diagonalband_square_space_affine(const GtUchar *useq,
                                          GtUword vlen,
                                          GtWord left_dist,
                                          GtWord right_dist,
-                                         GtScoreHandler *scorehandler);
+                                         const GtScoreHandler *scorehandler);
 
-/* calculate alignment with diagonalband in square space
- * with affine gapcosts, to use it in linear context you
- * have to generate an spacemanager before, in any other case it can be NULL */
+/* Computes a global alignment within a diagonal band with linear gapcosts in
+   square space. Use of this function requires an initialised <scorehandler>
+   with cost values, the target alignment <align> and input sequences <useq> and
+   <vseq>, with the regions to align given by their start positions <ustart> and
+   <vstart> and lengths <ulen> and <vlen>. <left_dist> and <right_dist> give
+   lower and upper bound of a diagonal band in which DP-matrix is valid.
+   <spacemanager> is required to use this function in linear space context, in
+   any other case it can be NULL. <scorehandler> manages linear gap costs.
+   Returns cost value of global alignment. */
 GtWord diagonalbandalignment_in_square_space_affine_generic(
-                                                   LinspaceManagement *space,
-                                                   GtScoreHandler *scorehandler,
-                                                   GtAlignment *align,
-                                                   const GtUchar *useq,
-                                                   GtUword ustart,
-                                                   GtUword ulen,
-                                                   const GtUchar *vseq,
-                                                   GtUword vstart,
-                                                   GtUword vlen,
-                                                   GtWord left_dist,
-                                                   GtWord right_dist);
+                                             GtLinspaceManagement *space,
+                                             const GtScoreHandler *scorehandler,
+                                             GtAlignment *align,
+                                             const GtUchar *useq,
+                                             GtUword ustart,
+                                             GtUword ulen,
+                                             const GtUchar *vseq,
+                                             GtUword vstart,
+                                             GtUword vlen,
+                                             GtWord left_dist,
+                                             GtWord right_dist);
 
-/* same with constant cost values, only useful for DNA sequences */
-GtWord diagonalbandalignment_in_square_space_affine(LinspaceManagement *space,
+/* Computes a global alignment within a diagonal band with linear gapcosts in
+   square space and constant cost values. Use of this function requires the
+   target alignment <align> and input sequences <useq> and <vseq>, with the
+   regions to align given by their start positions <ustart> and <vstart> and
+   lengths <ulen> and <vlen>. <left_dist> and <right_dist> give lower and upper
+   bound of a diagonal band in which DP-matrix is valid. The cost values
+   are specified by <matchcost>, <mismatchcost> and <gapcost>.
+   <spacemanager> is required to use this function in linear space context, in
+   any other case it can be NULL. <scorehandler> manages linear gap costs.
+   Returns cost value of global alignment. */
+GtWord diagonalbandalignment_in_square_space_affine(GtLinspaceManagement *space,
                                                     GtAlignment *align,
                                                     const GtUchar *useq,
                                                     GtUword ustart,

@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2015 Annika <annika.seidel@studium.uni-hamburg.de>
+  Copyright (c) 2015 Annika Seidel <annika.seidel@studium.uni-hamburg.de>
   Copyright (c) 2015 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -46,9 +46,14 @@ void gt_checkaffinelinearspace_local(GT_UNUSED bool forward,
                                      const GtUchar *vseq,
                                      GtUword vlen);
 
-/* global alignment with affine gapcosts in linear space*/
-GtUword gt_computeaffinelinearspace_generic(LinspaceManagement *spacemanager,
-                                            GtScoreHandler *scorehandler,
+/* Computes a global alignment with affine gapcosts in linear space. Use of this
+   function requires an initialised <spacemanager>, the target alignment <align>
+   and input sequences <useq> and <vseq>, with the regions to align given by
+   their start positions <ustart> and <vstart> and lengths <ulen> and <vlen>.
+   The cost values are specified by an initialised <scorehandler>. Returns
+   affine cost value of calculated global alignment. */
+GtUword gt_computeaffinelinearspace_generic(GtLinspaceManagement *spacemanager,
+                                            const GtScoreHandler *scorehandler,
                                             GtAlignment *align,
                                             const GtUchar *useq,
                                             GtUword ustart,
@@ -57,9 +62,14 @@ GtUword gt_computeaffinelinearspace_generic(LinspaceManagement *spacemanager,
                                             GtUword vstart,
                                             GtUword vlen);
 
-/* global alignment with constant affine gapcosts in linear space,
- * only useful for DNA sequences*/
-GtUword gt_computeaffinelinearspace(LinspaceManagement *spacemanager,
+/* Computes a global alignment with affine gapcosts in linear space
+   and constant cost values. Use of this function requires an initialised
+   <spacemanager>, the target alignment <align> and input sequences <useq> and
+   <vseq>, with the regions to align given by their start positions <ustart> and
+   <vstart> and lengths <ulen> and <vlen>. The cost values are specified by
+   <matchcost>, <mismatchcost>,<gap_opening> and <gap_extension>. Returns
+   affine cost value of calculated global alignment. */
+GtUword gt_computeaffinelinearspace(GtLinspaceManagement *spacemanager,
                                     GtAlignment *align,
                                     const GtUchar *useq,
                                     GtUword ustart,
@@ -72,10 +82,16 @@ GtUword gt_computeaffinelinearspace(LinspaceManagement *spacemanager,
                                     GtUword gap_opening,
                                     GtUword gap_extension);
 
-/* local alignment with linear gapcosts in linear space */
-GtWord gt_computeaffinelinearspace_local_generic(
-                                              LinspaceManagement *spacemanager,
-                                                 GtScoreHandler *scorehandler,
+/* Computes a local alignment with affine gapcosts in linear space. Use of this
+   function requires an initialised <spacemanager>, the target alignment <align>
+   and input sequences <useq> and <vseq>, with the regions to align given by
+   their start positions <ustart> and <vstart> and lengths <ulen> and <vlen>.
+   The score values are specified by an initialised <scorehandler>. Returns
+   affine score value of calculated local alignment. */
+GtWord gt_computeaffinelinearspace_local_generic(GtLinspaceManagement
+                                                 *spacemanager,
+                                                 const GtScoreHandler
+                                                 *scorehandler,
                                                  GtAlignment *align,
                                                  const GtUchar *useq,
                                                  GtUword ustart,
@@ -84,9 +100,14 @@ GtWord gt_computeaffinelinearspace_local_generic(
                                                  GtUword vstart,
                                                  GtUword vlen);
 
-/* local alignment with constant linear gapcosts in linear space,
- * only useful for DNA sequences */
-GtWord gt_computeaffinelinearspace_local(LinspaceManagement *spacemanager,
+/* Computes a local alignment with affine gapcosts in linear space
+   and constant score values. Use of this function requires an initialised
+   <spacemanager>, the target alignment <align> and input sequences <useq> and
+   <vseq>, with the regions to align given by their start positions <ustart> and
+   <vstart> and lengths <ulen> and <vlen>. The score values are specified by
+   <matchscore>, <mismatchscore>, <gap_opening> and <gap_extension>. Returns
+   affine score value of calculated local alignment. */
+GtWord gt_computeaffinelinearspace_local(GtLinspaceManagement *spacemanager,
                                          GtAlignment *align,
                                          const GtUchar *useq,
                                          GtUword ustart,
@@ -99,6 +120,9 @@ GtWord gt_computeaffinelinearspace_local(LinspaceManagement *spacemanager,
                                          GtWord gap_opening,
                                          GtWord gap_extension);
 
+/* Returns an object of class <AffineAlignEdge>, whichs specify the R,D,I type
+   for the minimal value in <entry> dependent on next <edge> and <gap_opening>
+   cost */
 AffineAlignEdge minAdditionalCosts(const AffinealignDPentry *entry,
                                    const AffineAlignEdge edge,
                                    GtUword gap_opening);

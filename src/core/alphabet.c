@@ -938,8 +938,9 @@ void gt_alphabet_encode_seq(const GtAlphabet *alphabet, GtUchar *out,
   GtUword i;
   gt_assert(alphabet && out && in);
   for (i = 0; i < length; i++) {
-    gt_assert(alphabet->symbolmap[(int) in[i]] != (GtUchar) UNDEFCHAR);
-    out[i] = alphabet->symbolmap[(int) in[i]];
+    GtUchar cc = alphabet->symbolmap[(int) in[i]];
+    gt_assert(cc != (GtUchar) UNDEFCHAR);
+    out[i] = cc;
   }
 }
 

@@ -455,13 +455,13 @@ GtBcktab *gt_bcktab_new(unsigned int numofchars,
                                   withspecialsuffixes);
   bcktab->allocated = true;
   if (storespecialcodes && bcktab->numofallcodes > 0 &&
-      bcktab->numofallcodes-1 > (GtUword) MAXCODEVALUE)
+      bcktab->numofallcodes-1 > (GtUword) GT_MAXCODEVALUE)
   {
     gt_error_set(err,"alphasize^prefixlength-1 = " FormatGtCodetype
                      " does not fit into %u"
                      " bits: choose smaller value for prefixlength",
                      bcktab->numofallcodes-1,
-                     CODEBITS);
+                     GT_CODEBITS);
     haserr = true;
   }
   if (!haserr)

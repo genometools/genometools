@@ -30,8 +30,7 @@ GtUword construct_trivial_deletion_alignment(GtAlignment *align,
   {
     gt_alignment_add_deletion(align);
   }
-
-  return (len*gapcost);
+  return len * gapcost;
 }
 
 GtUword construct_trivial_insertion_alignment(GtAlignment *align,
@@ -45,62 +44,64 @@ GtUword construct_trivial_insertion_alignment(GtAlignment *align,
     gt_alignment_add_insertion(align);
   }
 
-  return (len*gapcost);
+  return len * gapcost;
 }
 
-/* reconstruct global alignment from square space table ED */
-void reconstructalignment_from_EDtab(GtAlignment *align, GtUword **E,
+/* reconstruct global alignment from square space table E */
+void reconstructalignment_from_EDtab(GtAlignment *align,
+                                     GtUword * const *E,
                                      const GtUchar *useq,
                                      GtUword ustart,
                                      GtUword ulen,
                                      const GtUchar *vseq,
                                      GtUword vstart,
                                      GtUword vlen,
-                                     GtScoreHandler *scorehandler)
+                                     const GtScoreHandler *scorehandler)
 {
-  GtUword i, j, gapcost;
-  gt_assert(align && E && scorehandler);
-  i = ulen;
-  j = vlen;
+  GtUword i = ulen, j = vlen, gapcost;
+  const GtUchar *uptr = useq + ustart - 1, *vptr = vseq + vstart - 1;
 
+  gt_assert(align && E && scorehandler);
   gapcost = gt_scorehandler_get_gapscore(scorehandler);
   while (i > 0 || j > 0)
   {
     if (i > 0 && j > 0 && E[i][j] == E[i-1][j-1] +
-                                   gt_scorehandler_get_replacement(scorehandler,
-                                            useq[ustart+i-1],vseq[vstart+j-1]))
+                                     gt_scorehandler_get_replacement(
+                                                          scorehandler,
+                                                          uptr[i],vptr[j]))
     {
       gt_alignment_add_replacement(align);
-      i--; j--;
+      i--;
+      j--;
+      continue;
     }
-    else if (j > 0 && E[i][j] == E[i][j-1] + gapcost)
+    if (j > 0 && E[i][j] == E[i][j-1] + gapcost)
     {
       gt_alignment_add_insertion(align);
       j--;
+      continue;
     }
-    else if (i > 0 && E[i][j] == E[i-1][j] + gapcost)
+    if (i > 0 && E[i][j] == E[i-1][j] + gapcost)
     {
       gt_alignment_add_deletion(align);
       i--;
+      continue;
     }
-    else
-    {
-      gt_assert(false);
-    }
+    gt_assert(false);
   }
 }
 
 /* reconstruct local alignment from square space table Ltab */
 void reconstructalignment_from_Ltab(GtAlignment *align,
                                     GtWord **Ltabcolumn,
-                                    Gtmaxcoordvalue *max,
+                                    GtMaxcoordvalue *max,
                                     const GtUchar *useq,
                                     GtUword ustart,
                                     GT_UNUSED GtUword ulen,
                                     const GtUchar *vseq,
                                     GtUword vstart,
                                     GT_UNUSED GtUword vlen,
-                                    GtScoreHandler *scorehandler)
+                                    const GtScoreHandler *scorehandler)
 {
   GtUword i, j;
   GtWord gapscore;
@@ -110,42 +111,40 @@ void reconstructalignment_from_Ltab(GtAlignment *align,
   max_end = gt_max_get_end(max);
   i = max_end.a;
   j = max_end.b;
-
   gt_assert(i <= ulen && j <= vlen);
   gapscore = gt_scorehandler_get_gapscore(scorehandler);
-
-  while (i > 0 || j > 0)
+  while ((i > 0 || j > 0) && Ltabcolumn[i][j] != 0)
   {
-    if (Ltabcolumn[i][j] == 0)
-      break;
-    else if (i > 0 && j > 0 && Ltabcolumn[i][j] == Ltabcolumn[i-1][j-1] +
-                                   gt_scorehandler_get_replacement(scorehandler,
-                                             useq[ustart+i-1],vseq[vstart+j-1]))
+    if (i > 0 && j > 0 && Ltabcolumn[i][j] == Ltabcolumn[i-1][j-1] +
+                                              gt_scorehandler_get_replacement(
+                                                    scorehandler,
+                                                    useq[ustart+i-1],
+                                                    vseq[vstart+j-1]))
     {
       gt_alignment_add_replacement(align);
-      i--; j--;
+      i--;
+      j--;
+      continue;
     }
-    else if (j > 0 && Ltabcolumn[i][j] == Ltabcolumn[i][j-1] + gapscore)
+    if (j > 0 && Ltabcolumn[i][j] == Ltabcolumn[i][j-1] + gapscore)
     {
       gt_alignment_add_insertion(align);
       j--;
+      continue;
     }
-    else if (i > 0 && Ltabcolumn[i][j] == Ltabcolumn[i-1][j] + gapscore)
+    if (i > 0 && Ltabcolumn[i][j] == Ltabcolumn[i-1][j] + gapscore)
     {
       gt_alignment_add_deletion(align);
       i--;
+      continue;
     }
-    else
-    {
-      gt_assert(false);
-    }
+    gt_assert(false);
   }
   gt_max_set_start(max,i,j);
 }
 
 /* reconstruct alignment from crosspoint table
- * crosspoints relating to midolumn
- */
+   crosspoints relating to midolumn */
 void reconstructalignment_from_Ctab(GtAlignment *align,
                                     const GtUword *Ctab,
                                     const GtUchar *useq,
@@ -153,7 +152,7 @@ void reconstructalignment_from_Ctab(GtAlignment *align,
                                     const GtUchar *vseq,
                                     GtUword vstart,
                                     GtUword vlen,
-                                    GtScoreHandler *scorehandler)
+                                    const GtScoreHandler *scorehandler)
 {
   GtUword i,j, repl, indel, gap_opening, gap_extension;
   gt_assert(align && Ctab && scorehandler);
@@ -286,8 +285,10 @@ void reconstructalignment_from_Dtab(GtAlignment *align, const Diagentry *Dtab,
 void reconstructalignment_from_affineDtab(GtAlignment *align,
                                           const AffineDiagentry *Dtab,
                                           AffineAlignEdge edge,
-                                          const GtUchar *useq, GtUword ulen,
-                                          const GtUchar *vseq, GtUword vlen)
+                                          GT_UNUSED const GtUchar *useq,
+                                          GtUword ulen,
+                                          GT_UNUSED const GtUchar *vseq,
+                                          GtUword vlen)
 {
   GtUword i,j;
   Diagentry node, prevnode;
@@ -342,7 +343,9 @@ void reconstructalignment_from_affineDtab(GtAlignment *align,
     if (prevnode.currentrowindex == node.currentrowindex + 1)
     {
       if (prevedge == Affine_R)
-        {gt_alignment_add_replacement(align);}
+      {
+        gt_alignment_add_replacement(align);
+      }
       else if (prevedge == Affine_D)
       {
          gt_alignment_add_deletion(align);
@@ -355,16 +358,17 @@ void reconstructalignment_from_affineDtab(GtAlignment *align,
       }
     }
     else if (prevnode.currentrowindex == node.currentrowindex)
-      {gt_alignment_add_insertion(align);}
-
+    {
+      gt_alignment_add_insertion(align);
+    }
     else if (prevnode.currentrowindex > node.currentrowindex)
     {
       if (prevedge == Affine_R)
       {
         gt_alignment_add_replacement(align);
 
-        for (j = 0; j < (prevnode.currentrowindex -
-                         node.currentrowindex)-1; j++)
+        for (j = 0; j < prevnode.currentrowindex - node.currentrowindex - 1;
+             j++)
         {
           gt_alignment_add_deletion(align);
         }
@@ -372,34 +376,14 @@ void reconstructalignment_from_affineDtab(GtAlignment *align,
       else if (prevedge == Affine_I)
       {
         gt_alignment_add_insertion(align);
-        for (j = 0; j < (prevnode.currentrowindex -
-                         node.currentrowindex); j++)
+        for (j = 0; j < prevnode.currentrowindex - node.currentrowindex; j++)
         {
           gt_alignment_add_deletion(align);
         }
       }
       else
       {
-        for (j = 0; j < (prevnode.currentrowindex -
-                         node.currentrowindex)-1; j++)
-        {
-          gt_alignment_add_deletion(align);
-        }
-        if (prevnode.last_type == Affine_I)
-        {
-          if (tolower((int)vseq[i-1]) ==
-                                      tolower((int)useq[node.currentrowindex]))
-          {
-            gt_alignment_add_replacement(align);
-          }
-          else
-          {
-            gt_alignment_add_deletion(align);
-            gt_alignment_add_insertion(align);
-          }
-        }
-        else
-          gt_alignment_add_replacement(align);
+        gt_assert(false);
       }
     }
     prevedge = prevnode.last_type;

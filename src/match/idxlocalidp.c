@@ -763,7 +763,7 @@ const void *gt_completealignmentfromLocaliTracebackstate(
                         lci->tbs.spaceGtUchardbsubstring,
                         (GtUword) lci->tbs.dbprefixlen);
 #ifndef NDEBUG
-  evalscore = gt_alignment_eval_with_score(lci->tbs.alignment,
+  evalscore = gt_alignment_eval_with_score(lci->tbs.alignment,false,
                                            lci->scorevalues.matchscore,
                                            lci->scorevalues.mismatchscore,
                                            lci->scorevalues.gapextend);

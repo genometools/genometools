@@ -18,34 +18,44 @@
 #define MAXCOORDVALUE_H
 #include "core/types_api.h"
 
-typedef struct Gtmaxcoordvalue Gtmaxcoordvalue;
+/* The <GtMaxcoordvalue> interface. */
 
-Gtmaxcoordvalue* gt_max_new(void);
-
-void gt_max_delete(Gtmaxcoordvalue *max);
-
-GtWord gt_max_get_value(const Gtmaxcoordvalue *max);
-
-void gt_max_set_start(Gtmaxcoordvalue *max, GtUword starta, GtUword startb);
-
-GtUwordPair gt_max_get_start(const Gtmaxcoordvalue *max);
-
-void gt_max_set_end_with_pair(Gtmaxcoordvalue *max, GtUwordPair end);
-
-GtUwordPair gt_max_get_end(const Gtmaxcoordvalue *max);
-
-/*use this in linear space context*/
-void gt_max_coord_update(Gtmaxcoordvalue *max, GtWord value,
+/* The following type is to manage maximal score value and (i,j) coordinates
+   of this value in DP-matrix. */
+typedef struct GtMaxcoordvalue GtMaxcoordvalue;
+/* Return a <GtMaxcoordvalue> object. */
+GtMaxcoordvalue* gt_max_new(void);
+/* Delete the given <max> object. */
+void gt_max_delete(GtMaxcoordvalue *max);
+/* Return the stored maximal value of the given <max>. */
+GtWord gt_max_get_value(const GtMaxcoordvalue *max);
+/* Set start coordinates <starta> and <startb> for the given <max>. */
+void gt_max_set_start(GtMaxcoordvalue *max, GtUword starta, GtUword startb);
+/* Return the start coordinates for the given <max>. */
+GtUwordPair gt_max_get_start(const GtMaxcoordvalue *max);
+/* Set end coordinates <end> for the given <max>. */
+void gt_max_set_end_with_pair(GtMaxcoordvalue *max, GtUwordPair end);
+/* Return the end coordinates for the given <max>. */
+GtUwordPair gt_max_get_end(const GtMaxcoordvalue *max);
+/* Set a new maximum <value> and update coordinates for the given <max> by
+   calling set-functions for start coordinates <start> and end coordinates
+   <enda> and <endb>. */
+void gt_max_coord_update(GtMaxcoordvalue *max, GtWord value,
                          GtUwordPair start,
                          GtUword enda, GtUword endb);
-/*use this in square space context*/
-void gt_max_coord_update_without_start (Gtmaxcoordvalue *max, GtWord value,
+/* Set a new maximum <value> and update coordinates for the given <max> by
+   calling set-functions for end coordinates <enda> and <endb>. */
+void gt_max_coord_update_without_start (GtMaxcoordvalue *max, GtWord value,
                                         GtUword enda, GtUword endb);
-GtUword gt_max_get_row_length(const Gtmaxcoordvalue *max);
-
-GtUword gt_max_get_col_length(const Gtmaxcoordvalue *max);
-
-bool gt_max_get_length_safe(const Gtmaxcoordvalue *max);
-
-void gt_max_reset(Gtmaxcoordvalue *max);
+/* Return the difference between row indices of start and end coordinates of the
+   given <max>. */
+GtUword gt_max_get_row_length(const GtMaxcoordvalue *max);
+/* Return the difference between column indices of start and end coordinates of
+   the given <max>. */
+GtUword gt_max_get_col_length(const GtMaxcoordvalue *max);
+/* Check coordinate values of the given <max>. Return false if start coordinates
+ * are equal to end coordinates, otherwise false.*/
+bool gt_max_get_length_safe(const GtMaxcoordvalue *max);
+/* Reset the given <max>. */
+void gt_max_reset(GtMaxcoordvalue *max);
 #endif

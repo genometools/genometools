@@ -48,7 +48,7 @@ typedef struct
 static GtUchar gt_mmsearch_accessquery(const GtQueryrepresentation *queryrep,
                                        GtUword pos)
 {
-  GtUword abspos;
+  GtUword abspos, cc;
 
   gt_assert(queryrep != NULL);
   gt_assert(pos < queryrep->seqlen);
@@ -57,13 +57,23 @@ static GtUchar gt_mmsearch_accessquery(const GtQueryrepresentation *queryrep,
                                   : GT_REVERSEPOS(queryrep->seqlen,pos));
   if (queryrep->sequence != NULL)
   {
-    gt_assert(!GT_ISDIRCOMPLEMENT(queryrep->readmode)); /* not implemented */
-    return queryrep->sequence[abspos];
+    cc = queryrep->sequence[abspos];
   } else
   {
     gt_assert(queryrep->encseq != NULL);
-    return gt_encseq_get_encoded_char(queryrep->encseq,abspos,
-                                      GT_READMODE_FORWARD);
+    cc = gt_encseq_get_encoded_char(queryrep->encseq,abspos,
+                                    GT_READMODE_FORWARD);
+  }
+  if (GT_ISDIRCOMPLEMENT(queryrep->readmode))
+  {
+    if (ISSPECIAL(cc))
+    {
+      return cc;
+    }
+    return GT_COMPLEMENTBASE(cc);
+  } else
+  {
+    return cc;
   }
 }
 
@@ -600,7 +610,7 @@ static int gt_constructsarrandrunmmsearch(
   {
     const GtSuffixsortspace *suffixsortspace;
     GtUword numberofsuffixes;
-    GtQuerymatch *querymatchspaceptr = gt_querymatch_new(NULL,false);
+    GtQuerymatch *querymatchspaceptr = gt_querymatch_new();
     GtQueryrepresentation queryrep;
 
     queryrep.sequence = query;

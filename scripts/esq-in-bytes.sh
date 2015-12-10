@@ -5,8 +5,11 @@ set -e -x
 
 for filename in `${GTDIR}/scripts/findfasta.rb`
 do
-  gt encseq encode -ssp no -sds no -md5 no -des no -no_esq_header \
-                   -showstats -sat direct -indexname seq $filename
+  ${GTDIR}/bin/gt encseq encode -indexname sfx $filename
   # Now do something with the sequence
-  ls -l seq.esq
+  for mode in greedy xdrop
+  do
+    ${GTDIR}/bin/gt seed_extend -extend${mode} -ii sfx -v -maxfreq 20 -seed-display > sfx.matches
+    ${GTDIR}/bin/gt dev show_seedext -f sfx.matches -a
+  done
 done

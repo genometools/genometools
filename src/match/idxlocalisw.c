@@ -309,7 +309,7 @@ static void swproducealignment(GtAlignment *alignment,
   {
     Scoretype evalscore;
 
-    evalscore = gt_alignment_eval_with_score(alignment,
+    evalscore = gt_alignment_eval_with_score(alignment,false,
                                              scorevalues->matchscore,
                                              scorevalues->mismatchscore,
                                              scorevalues->gapextend);

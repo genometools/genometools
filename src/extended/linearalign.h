@@ -1,8 +1,8 @@
 /*
-  Copyright (c) 2015 Annika <annika.seidel@studium.uni-hamburg.de>
-  Copyright (C) 2015 Joerg Winkler, joerg.winkler@studium.uni-hamburg.de
+  Copyright (c) 2015 Annika Seidel, <annika.seidel@studium.uni-hamburg.de>
+  Copyright (C) 2015 Joerg Winkler, <joerg.winkler@studium.uni-hamburg.de>
   Copyright (c) 2006-2007 Gordon Gremme <gordon@gremme.org>
-  Copyright (c) 2006-2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2006-2015 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -37,9 +37,14 @@ void gt_checklinearspace_local(GT_UNUSED bool forward,
                                const GtUchar *vseq,
                                GtUword vlen);
 
-/* global alignment with linear gapcosts in linear space (DNA or protein)*/
-GtUword gt_computelinearspace_generic(LinspaceManagement *spacemanager,
-                                      GtScoreHandler *scorehandler,
+/* Computes a global alignment with linear gapcosts in linear space. Use of this
+   function requires an initialised <spacemanager>, the target alignment <align>
+   and input sequences <useq> and <vseq>, with the regions to align given by
+   their start positions <ustart> and <vstart> and lengths <ulen> and <vlen>.
+   The cost values are specified by an initialised <scorehandler>. Returns
+   distance value of calculated global alignment. */
+GtUword gt_computelinearspace_generic(GtLinspaceManagement *spacemanager,
+                                      const GtScoreHandler *scorehandler,
                                       GtAlignment *align,
                                       const GtUchar *useq,
                                       GtUword ustart,
@@ -48,9 +53,14 @@ GtUword gt_computelinearspace_generic(LinspaceManagement *spacemanager,
                                       GtUword vstart,
                                       GtUword vlen);
 
-/* global alignment with linear gapcosts in linear space
- * with constant cost values, only useful for DNA sequences */
-GtUword gt_computelinearspace(LinspaceManagement *spacemanager,
+/* Computes a global alignment with linear gapcosts in linear space
+   and constant cost values. Use of this function requires an initialised
+   <spacemanager>, the target alignment <align> and input sequences <useq> and
+   <vseq>, with the regions to align given by their start positions <ustart> and
+   <vstart> and lengths <ulen> and <vlen>. The cost values are specified by
+   <matchcost>, <mismatchcost> and <gapcost>. Returns distance value of
+   calculated global alignment. */
+GtUword gt_computelinearspace(GtLinspaceManagement *spacemanager,
                               GtAlignment *align,
                               const GtUchar *useq,
                               GtUword ustart,
@@ -62,9 +72,14 @@ GtUword gt_computelinearspace(LinspaceManagement *spacemanager,
                               GtUword mismatchcost,
                               GtUword gapcost);
 
-/* local alignment with linear gapcosts in linear space (DNA or protein)*/
-GtWord gt_computelinearspace_local_generic(LinspaceManagement *spacemanager,
-                                           GtScoreHandler *scorehandler,
+/* Computes a local alignment with linear gapcosts in linear space. Use of this
+   function requires an initialised <spacemanager>, the target alignment <align>
+   and input sequences <useq> and <vseq>, with the regions to align given by
+   their start positions <ustart> and <vstart> and lengths <ulen> and <vlen>.
+   The score values are specified by an initialised <scorehandler>. Returns
+   score value of calculated local alignment. */
+GtWord gt_computelinearspace_local_generic(GtLinspaceManagement *spacemanager,
+                                           const GtScoreHandler *scorehandler,
                                            GtAlignment *align,
                                            const GtUchar *useq,
                                            GtUword ustart,
@@ -73,9 +88,14 @@ GtWord gt_computelinearspace_local_generic(LinspaceManagement *spacemanager,
                                            GtUword vstart,
                                            GtUword vlen);
 
-/* local alignment with linear gapcosts in linear space
- * with constant score values, only useful for DNA sequences */
-GtWord gt_computelinearspace_local(LinspaceManagement *spacemanager,
+/* Computes a local alignment with linear gapcosts in linear space
+   and constant score values. Use of this function requires an initialised
+   <spacemanager>, the target alignment <align> and input sequences <useq> and
+   <vseq>, with the regions to align given by their start positions <ustart> and
+   <vstart> and lengths <ulen> and <vlen>. The score values are specified by
+   <matchscore>, <mismatchscore> and <gapscore>. Returns score value of
+   calculated local alignment. */
+GtWord gt_computelinearspace_local(GtLinspaceManagement *spacemanager,
                                    GtAlignment *align,
                                    const GtUchar *useq,
                                    GtUword ustart,
@@ -86,9 +106,5 @@ GtWord gt_computelinearspace_local(LinspaceManagement *spacemanager,
                                    GtWord matchscore,
                                    GtWord mismatchscore,
                                    GtWord gapscore);
-
-/* edit distance of sequences useq and vseq in linear space*/
-GtUword gt_calc_linearedist(const GtUchar *useq, GtUword ulen,
-                            const GtUchar *vseq, GtUword vlen);
 
 #endif

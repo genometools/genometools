@@ -53,6 +53,8 @@
   }
 */
 
+#define GT_DEFAULT_MATCHSCORE_BIAS 1.0  /* has no effect */
+
 /* This is the minimum percentage value for extended seeds. */
 #define GT_EXTEND_MIN_IDENTITY_PERCENTAGE 70
 
@@ -140,7 +142,8 @@ const GtQuerymatch *gt_xdrop_extend_selfmatch_relative(void *info,
                                               GtUword dbstart_relative,
                                               GtUword queryseqnum,
                                               GtUword querystart_relative,
-                                              GtUword len);
+                                              GtUword len,
+                                              GtReadmode query_readmode);
 
 /* The following function is used for extending a seed obtained
    in a comparison of the given sequence <query> of length <query_totallength>
@@ -198,7 +201,8 @@ typedef struct GtGreedyextendmatchinfo GtGreedyextendmatchinfo;
    length of the extension on both sides (including the seed itself).
 
    <extend_char_access> is the mode by which the characters are accessed
-   in the encoded sequence. */
+   in the encoded sequence.
+   */
 
 GtGreedyextendmatchinfo *gt_greedy_extend_matchinfo_new(
                                    GtUword errorpercentage,
@@ -207,7 +211,8 @@ GtGreedyextendmatchinfo *gt_greedy_extend_matchinfo_new(
                                    GtUword perc_mat_history,
                                    GtUword userdefinedleastlength,
                                    GtExtendCharAccess extend_char_access,
-                                   GtUword sensitivity);
+                                   GtUword sensitivity,
+                                   const Polishing_info *pol_info);
 
 /* the destructor-method for the gven object. */
 
@@ -305,7 +310,8 @@ const GtQuerymatch *gt_greedy_extend_selfmatch_relative(void *info,
                                               GtUword dbstart_relative,
                                               GtUword queryseqnum,
                                               GtUword querystart_relative,
-                                              GtUword len);
+                                              GtUword len,
+                                              GtReadmode query_readmode);
 
 typedef const GtQuerymatch *(*GtExtendSelfmatchRelativeFunc)(void *,
                                                              const GtEncseq *,
@@ -313,7 +319,8 @@ typedef const GtQuerymatch *(*GtExtendSelfmatchRelativeFunc)(void *,
                                                              GtUword,
                                                              GtUword,
                                                              GtUword,
-                                                             GtUword);
+                                                             GtUword,
+                                                     GtReadmode query_readmode);
 
 const GtQuerymatch* gt_xdrop_extend_querymatch_relative(
                                                   void *info,
@@ -349,7 +356,7 @@ typedef const GtQuerymatch *(*GtExtendQuerymatchRelativeFunc)(void *,
 
 GtUword gt_align_front_prune_edist(bool rightextension,
                                    Polished_point *best_polished_point,
-                                   Fronttrace *front_trace,
+                                   GtFronttrace *front_trace,
                                    const GtEncseq *encseq,
                                    const GtSeqorEncseq *query,
                                    GtReadmode query_readmode,
@@ -357,6 +364,7 @@ GtUword gt_align_front_prune_edist(bool rightextension,
                                    GtUword query_totallength,
                                    GtGreedyextendmatchinfo *ggemi,
                                    bool greedyextension,
+                                   GtUword seedlength,
                                    GtUword ustart,
                                    GtUword ulen,
                                    GtUword vstart,
@@ -380,4 +388,7 @@ void gt_greedy_extend_querymatch_with_output(void *info,
                                              const GtQuerymatch *exactseed,
                                              const GtSeqorEncseq *query,
                                              GtUword query_totallength);
+
+double gt_greedy_dna_sequence_bias_get(const GtEncseq *encseq);
+
 #endif

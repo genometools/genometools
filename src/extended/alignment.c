@@ -21,6 +21,8 @@
 
 #include <ctype.h>
 #include <string.h>
+#include <string.h>
+#include <stdint.h>
 #include "core/assert_api.h"
 #include "core/array.h"
 #include "core/chardef.h"
@@ -29,6 +31,7 @@
 #include "core/xansi_api.h"
 #include "core/types_api.h"
 #include "core/chardef.h"
+#include "core/divmodmul.h"
 #include "match/greedyedist.h"
 #include "alignment.h"
 
@@ -41,6 +44,9 @@ struct GtAlignment {
   GtUword         ulen,
                   vlen,
                   alilen;
+  const Polishing_info *pol_info;
+  GtUword useedoffset, seedlen;
+  bool seed_display, withpolcheck;
 };
 
 #define GAPSYMBOL      '-'
@@ -53,6 +59,10 @@ GtAlignment* gt_alignment_new(void)
   alignment = gt_calloc((size_t) 1, sizeof (GtAlignment));
   alignment->eops = gt_multieoplist_new();
   alignment->alilen = 0;
+  alignment->pol_info = NULL;
+  alignment->useedoffset = 0;
+  alignment->seedlen = 0;
+  alignment->seed_display = 0;
   return alignment;
 }
 
@@ -161,6 +171,8 @@ void gt_alignment_reset(GtAlignment *alignment)
   gt_assert(alignment != NULL);
   gt_multieoplist_reset(alignment->eops);
   alignment->alilen = 0;
+  alignment->useedoffset = 0;
+  alignment->seedlen = 0;
 }
 
 void gt_alignment_remove_last(GtAlignment *alignment)
@@ -190,12 +202,13 @@ static bool gt_alignment_is_valid(const GtAlignment *alignment)
 }
 #endif
 
-GtUword gt_alignment_eval_generic(bool mapped,const GtAlignment *alignment)
+GtUword gt_alignment_eval_generic(bool mapped,bool downcase,
+                                  const GtAlignment *alignment)
 {
   GtUword i, j, idx_u = 0, idx_v = 0, sumcost = 0, meoplen;
   GtMultieop meop;
 
-  gt_assert(alignment != NULL);
+  gt_assert(alignment != NULL && (!mapped || !downcase));
 #ifndef NDEBUG
   gt_assert(gt_alignment_is_valid(alignment));
 #endif
@@ -212,18 +225,22 @@ GtUword gt_alignment_eval_generic(bool mapped,const GtAlignment *alignment)
       case Match:
       case Replacement:
         for (j = 0; j < meop.steps; j++) {
+          GtUchar a = alignment->u[idx_u],
+                  b = alignment->v[idx_v];
           if (mapped)
           {
-            GtUchar a = alignment->u[idx_u],
-                    b = alignment->v[idx_v];
             if (ISSPECIAL(a) || ISSPECIAL(b) || a != b)
             {
               sumcost++;
             }
           } else
           {
-            if (tolower((int) alignment->u[idx_u]) !=
-                tolower((int) alignment->v[idx_v]))
+            if (downcase)
+            {
+              a = tolower((int) a);
+              b = tolower((int) b);
+            }
+            if (a != b)
             {
               sumcost++;
             }
@@ -247,13 +264,14 @@ GtUword gt_alignment_eval_generic(bool mapped,const GtAlignment *alignment)
 
 GtUword gt_alignment_eval(const GtAlignment *alignment)
 {
-  return gt_alignment_eval_generic(false, alignment);
+  return gt_alignment_eval_generic(false, true, alignment);
 }
 
 static GtWord gt_alignment_eval_generic_with_score(bool mapped,
-                                            const GtUchar *character,
+                                            bool downcase,
+                                            const GtUchar *characters,
                                             const GtAlignment *alignment,
-                                            GtScoreMatrix *sm,
+                                            const GtScoreMatrix *scorematrix,
                                             GtWord matchscore,
                                             GtWord mismatchscore,
                                             GtWord gapscore)
@@ -262,9 +280,11 @@ static GtWord gt_alignment_eval_generic_with_score(bool mapped,
   GtWord sumscore = 0;
   GtMultieop meop;
 
-  gt_assert(alignment != NULL);
+  gt_assert(alignment != NULL && (!mapped || !downcase));
   if (gt_alignment_get_length(alignment) == 0)
+  {
     return 0;
+  }
 #ifndef NDEBUG
   gt_assert(gt_alignment_is_valid(alignment));
 #endif
@@ -277,31 +297,28 @@ static GtWord gt_alignment_eval_generic_with_score(bool mapped,
       case Match:
       case Replacement:
         for (j = 0; j < meop.steps; j++) {
+          GtUchar a = alignment->u[idx_u],
+                  b = alignment->v[idx_v];
           if (mapped)
           {
-            GtUchar a = alignment->u[idx_u],
-                    b = alignment->v[idx_v];
-            if (sm != NULL)
-              sumscore += gt_score_matrix_get_score(sm, a, b);
-            else
+            if (scorematrix != NULL)
             {
-              if (ISSPECIAL(a) || ISSPECIAL(b) || character[a] != character[b])
-              {
-                sumscore += mismatchscore;
-              }
-              else
-                sumscore += matchscore;
+              sumscore += gt_score_matrix_get_score(scorematrix, a, b);
+            } else
+            {
+              sumscore += (ISSPECIAL(a) || ISSPECIAL(b) ||
+                           characters[a] != characters[b]) ? mismatchscore
+                                                           : matchscore;
             }
           }
           else
           {
-            if (tolower((int) alignment->u[idx_u]) !=
-                tolower((int) alignment->v[idx_v]))
+            if (downcase)
             {
-              sumscore += mismatchscore;
+              a = tolower((int) a);
+              b = tolower((int) b);
             }
-            else
-              sumscore += matchscore;
+            sumscore += ((a != b) ? mismatchscore : matchscore);
           }
           idx_u++;
           idx_v++;
@@ -321,49 +338,60 @@ static GtWord gt_alignment_eval_generic_with_score(bool mapped,
 }
 
 GtWord gt_alignment_eval_with_score(const GtAlignment *alignment,
+                                    bool downcase,
                                     GtWord matchscore,
                                     GtWord mismatchscore,
                                     GtWord gapscore)
 {
-  return gt_alignment_eval_generic_with_score(false, NULL,alignment, NULL,
-                                          matchscore, mismatchscore, gapscore);
+  return gt_alignment_eval_generic_with_score(false, downcase, NULL,alignment,
+                                              NULL, matchscore, mismatchscore,
+                                              gapscore);
 }
 
-GtWord gt_alignment_eval_with_mapped_score(const GtUchar *character,
+GtWord gt_alignment_eval_with_mapped_score(const GtUchar *characters,
                                            const GtAlignment *alignment,
                                            GtWord matchscore,
                                            GtWord mismatchscore,
                                            GtWord gapscore)
 {
-  return gt_alignment_eval_generic_with_score(true, character, alignment, NULL,
-                                          matchscore, mismatchscore, gapscore);
+  return gt_alignment_eval_generic_with_score(true, false, characters,
+                                              alignment,
+                                              NULL, matchscore, mismatchscore,
+                                              gapscore);
 }
 
-GtWord gt_alignment_eval_with_scorematrix(const GtUchar *character,
+GtWord gt_alignment_eval_with_scorematrix(const GtUchar *characters,
                                           const GtAlignment *alignment,
-                                          GtScoreMatrix *sm,
+                                          const GtScoreMatrix *scorematrix,
                                           GtWord gapscore)
 {
-  gt_assert(sm);
-  return gt_alignment_eval_generic_with_score(true, character, alignment, sm,
-                                            GT_WORD_MAX, GT_WORD_MAX, gapscore);
+  return gt_alignment_eval_generic_with_score(true,
+                                              false,
+                                              characters,
+                                              alignment,
+                                              scorematrix,
+                                              GT_WORD_MAX,
+                                              GT_WORD_MAX,
+                                              gapscore);
 }
 
-static GtWord gt_alignment_eval_generic_with_affine_score(bool mapped,
-                                                   const GtUchar *character,
-                                                   const GtAlignment *alignment,
-                                                   GtScoreMatrix *sm,
-                                                   GtWord matchscore,
-                                                   GtWord mismatchscore,
-                                                   GtWord gap_opening,
-                                                   GtWord gap_extension)
+static GtWord gt_alignment_eval_generic_with_affine_score(
+                                               bool mapped,
+                                               bool downcase,
+                                               const GtUchar *characters,
+                                               const GtAlignment *alignment,
+                                               const GtScoreMatrix *scorematrix,
+                                               GtWord matchscore,
+                                               GtWord mismatchscore,
+                                               GtWord gap_opening,
+                                               GtWord gap_extension)
 {
   GtUword i, j, idx_u = 0, idx_v = 0, meoplen;
   GtWord sumscore = 0;
   GtMultieop meop;
   AlignmentEoptype next_meop_type = Insertion + 1;
 
-  gt_assert(alignment != NULL);
+  gt_assert(alignment != NULL && (!mapped || !downcase));
   if (gt_alignment_get_length(alignment) == 0)
     return 0;
 #ifndef NDEBUG
@@ -378,31 +406,31 @@ static GtWord gt_alignment_eval_generic_with_affine_score(bool mapped,
       case Match:
       case Replacement:
         for (j = 0; j < meop.steps; j++) {
+          GtUchar a = alignment->u[idx_u],
+                  b = alignment->v[idx_v];
           if (mapped)
           {
-            GtUchar a = alignment->u[idx_u],
-                    b = alignment->v[idx_v];
-            if (sm != NULL)
-              sumscore += gt_score_matrix_get_score(sm, a, b);
-            else
+            if (scorematrix != NULL)
             {
-              if (ISSPECIAL(a) || ISSPECIAL(b) || character[a] != character[b])
+              sumscore += gt_score_matrix_get_score(scorematrix, a, b);
+            } else
+            {
+              if (ISSPECIAL(a) || ISSPECIAL(b) ||
+                  characters[a] != characters[b])
               {
                 sumscore += mismatchscore;
               }
               else
                 sumscore += matchscore;
             }
-          }
-          else
+          } else
           {
-            if (tolower((int) alignment->u[idx_u]) !=
-                tolower((int) alignment->v[idx_v]))
+            if (downcase)
             {
-              sumscore += mismatchscore;
+              a = tolower((int) a);
+              b = tolower((int) b);
             }
-            else
-              sumscore += matchscore;
+            sumscore += (a != b) ? mismatchscore : matchscore;
           }
           idx_u++;
           idx_v++;
@@ -435,43 +463,53 @@ static GtWord gt_alignment_eval_generic_with_affine_score(bool mapped,
 }
 
 GtWord gt_alignment_eval_with_affine_score(const GtAlignment *alignment,
+                                           bool downcase,
                                            GtWord matchscore,
                                            GtWord mismatchscore,
                                            GtWord gap_opening,
                                            GtWord gap_extension)
 {
-  return gt_alignment_eval_generic_with_affine_score(false, NULL,
-                                                     alignment,NULL,
+  return gt_alignment_eval_generic_with_affine_score(false,
+                                                     downcase,
+                                                     NULL,
+                                                     alignment,
+                                                     NULL,
                                                      matchscore,
                                                      mismatchscore,
                                                      gap_opening,
                                                      gap_extension);
 }
 
-GtWord gt_alignment_eval_with_mapped_affine_score(const GtUchar *character,
+GtWord gt_alignment_eval_with_mapped_affine_score(const GtUchar *characters,
                                                   const GtAlignment *alignment,
                                                   GtWord matchscore,
                                                   GtWord mismatchscore,
                                                   GtWord gap_opening,
                                                   GtWord gap_extension)
 {
-  return gt_alignment_eval_generic_with_affine_score(true, character,
-                                                     alignment, NULL,
+  return gt_alignment_eval_generic_with_affine_score(true,
+                                                     false,
+                                                     characters,
+                                                     alignment,
+                                                     NULL,
                                                      matchscore,
                                                      mismatchscore,
                                                      gap_opening,
                                                      gap_extension);
 }
 
-GtWord gt_alignment_eval_with_affine_scorematrix(const GtUchar *character,
-                                                 const GtAlignment *alignment,
-                                                 GtScoreMatrix *sm,
-                                                 GtWord gap_opening,
-                                                 GtWord gap_extension)
+GtWord gt_alignment_eval_with_affine_scorematrix(
+                                      const GtUchar *characters,
+                                      const GtAlignment *alignment,
+                                      const GtScoreMatrix *scorematrix,
+                                      GtWord gap_opening,
+                                      GtWord gap_extension)
 {
-  gt_assert(sm);
-  return gt_alignment_eval_generic_with_affine_score(true, character,
-                                                     alignment, sm,
+  return gt_alignment_eval_generic_with_affine_score(true,
+                                                     false,
+                                                     characters,
+                                                     alignment,
+                                                     scorematrix,
                                                      GT_WORD_MAX,
                                                      GT_WORD_MAX,
                                                      gap_opening,
@@ -493,7 +531,36 @@ static unsigned int gt_alignment_show_advance(unsigned int pos,
   return 0;
 }
 
+#define GT_UPDATE_POSITIVE_INFO(ISMATCH)\
+        if (alignment->pol_info != NULL)\
+        {\
+          if (prefix_positive < max_history && prefix_positive_sum >= 0)\
+          {\
+            if (ISMATCH)\
+            {\
+              prefix_positive_sum += alignment->pol_info->match_score;\
+            } else\
+            {\
+              prefix_positive_sum -= alignment->pol_info->difference_score;\
+            }\
+            if (prefix_positive_sum >= 0)\
+            {\
+              prefix_positive++;\
+            }\
+          }\
+          if (suffix_bits_used < max_history)\
+          {\
+            suffix_bits_used++;\
+          }\
+          suffix_bits >>= 1;\
+          if (ISMATCH)\
+          {\
+            suffix_bits |= set_mask;\
+          }\
+        }
+
 void gt_alignment_show_generic(GtUchar *buffer,
+                               bool downcase,
                                const GtAlignment *alignment,
                                FILE *fp,
                                unsigned int width,
@@ -501,16 +568,22 @@ void gt_alignment_show_generic(GtUchar *buffer,
                                GtUchar wildcardshow)
 {
   GtMultieop meop;
-  GtUword idx_eop, idx_u = 0, idx_v = 0, meoplen, alignmentlength;
+  GtUword idx_eop, idx_u = 0, idx_v = 0, meoplen, alignmentlength = 0,
+          suffix_bits_used = 0, prefix_positive = 0, pol_size = 0,
+          firstseedcolumn = GT_UWORD_MAX,
+          lastseedcolumn = GT_UWORD_MAX;
+  const GtUword max_history = 64;
   unsigned int pos = 0;
   GtUchar *topbuf = buffer, *midbuf = NULL, *lowbuf = NULL;
+  GtWord prefix_positive_sum = 0;
+  uint64_t suffix_bits = 0, set_mask = 0;
 
-  gt_assert(alignment != NULL);
-  alignmentlength = gt_alignment_get_length(alignment);
-  if ((GtUword) width > alignmentlength)
+  if (alignment->pol_info != NULL)
   {
-    width = (unsigned int) alignmentlength;
+    pol_size = GT_MULT2(alignment->pol_info->cut_depth);
+    set_mask = ((uint64_t) 1) << (max_history - 1);
   }
+  gt_assert(alignment != NULL && (characters == NULL || !downcase));
   topbuf[width] = '\n';
   midbuf = topbuf + width + 1;
   midbuf[width] = '\n';
@@ -532,25 +605,52 @@ void gt_alignment_show_generic(GtUchar *buffer,
         for (j = 0; j < meop.steps && idx_u < alignment->ulen &&
                                       idx_v < alignment->vlen; j++)
         {
-          GtUchar a = alignment->u[idx_u++];
-          GtUchar b = alignment->v[idx_v++];
+          GtUchar a = alignment->u[idx_u];
+          GtUchar b = alignment->v[idx_v];
+          bool is_match;
 
           if (characters != NULL)
           {
             topbuf[pos] = ISSPECIAL(a) ? wildcardshow : characters[a];
-            midbuf[pos] = ISSPECIAL(a) || ISSPECIAL(b) || a != b
-                            ? (GtUchar) MISMATCHSYMBOL
-                            : (GtUchar) MATCHSYMBOL;
+            is_match = (a == b && !ISSPECIAL(a)) ? true : false;
             lowbuf[pos] = ISSPECIAL(b) ? wildcardshow : characters[b];
           } else
           {
             topbuf[pos] = a;
-            midbuf[pos] = tolower((int) a) == tolower((int) b)
-                            ? (GtUchar) MATCHSYMBOL
-                            : (GtUchar) MISMATCHSYMBOL;
+            is_match = ((downcase && tolower((int) a) == tolower((int) b)) ||
+                        (!downcase && a == b)) ? true : false;
             lowbuf[pos] = b;
           }
+          if (is_match)
+          {
+            if (alignment->useedoffset <= idx_u &&
+                idx_u < alignment->useedoffset + alignment->seedlen)
+            {
+              if (alignment->seed_display)
+              {
+                midbuf[pos] = (GtUchar) '+';
+              } else
+              {
+                midbuf[pos] = (GtUchar) MATCHSYMBOL;
+              }
+              if (firstseedcolumn == GT_UWORD_MAX)
+              {
+                firstseedcolumn = alignmentlength;
+              }
+              lastseedcolumn = alignmentlength;
+            } else
+            {
+              midbuf[pos] = (GtUchar) MATCHSYMBOL;
+            }
+          } else
+          {
+            midbuf[pos] = (GtUchar) MISMATCHSYMBOL;
+          }
           pos = gt_alignment_show_advance(pos,width,topbuf,fp);
+          GT_UPDATE_POSITIVE_INFO(is_match);
+          alignmentlength++;
+          idx_u++;
+          idx_v++;
         }
         break;
       case Deletion:
@@ -568,6 +668,8 @@ void gt_alignment_show_generic(GtUchar *buffer,
           midbuf[pos] = (GtUchar) MISMATCHSYMBOL;
           lowbuf[pos] = (GtUchar) GAPSYMBOL;
           pos = gt_alignment_show_advance(pos,width,topbuf,fp);
+          GT_UPDATE_POSITIVE_INFO(false);
+          alignmentlength++;
         }
         break;
       case Insertion:
@@ -585,6 +687,8 @@ void gt_alignment_show_generic(GtUchar *buffer,
             lowbuf[pos] = b;
           }
           pos = gt_alignment_show_advance(pos,width,topbuf,fp);
+          GT_UPDATE_POSITIVE_INFO(false);
+          alignmentlength++;
         }
         break;
     }
@@ -604,6 +708,69 @@ void gt_alignment_show_generic(GtUchar *buffer,
     fwrite(midbuf,sizeof *midbuf,pos+1,fp);
     lowbuf[pos] = '\n';
     fwrite(lowbuf,sizeof *lowbuf,pos+1,fp);
+  }
+  if (alignment->pol_info != NULL)
+  {
+    GtUword suffix_positive;
+    GtWord suffix_positive_sum = 0;
+    bool startpolished = false, endpolished = false;
+
+    for (suffix_positive = 0; suffix_positive < suffix_bits_used;
+         suffix_positive++)
+    {
+      suffix_positive_sum += ((suffix_bits & set_mask)
+                                ? alignment->pol_info->match_score
+                                : -alignment->pol_info->difference_score);
+      if (suffix_positive_sum < 0)
+      {
+        break;
+      }
+      set_mask >>= 1;
+    }
+    gt_assert(prefix_positive <= alignmentlength &&
+              prefix_positive <= alignmentlength);
+    if (prefix_positive >= pol_size || prefix_positive == alignmentlength ||
+        firstseedcolumn < pol_size)
+    {
+      startpolished = true;
+    }
+    if (suffix_positive >= pol_size || suffix_positive == alignmentlength ||
+        (lastseedcolumn != GT_UWORD_MAX &&
+        lastseedcolumn + pol_size > alignmentlength))
+    {
+      endpolished = true;
+    }
+    printf("# polishing(m=" GT_WD ",d=" GT_WD ",p=" GT_WU
+           "): " GT_WU "/" GT_WU,
+           alignment->pol_info->match_score,
+           -alignment->pol_info->difference_score,
+           pol_size,
+           prefix_positive,
+           suffix_positive);
+    if (firstseedcolumn < pol_size)
+    {
+      printf(", seed_on_start");
+    }
+    if (lastseedcolumn + pol_size > alignmentlength)
+    {
+      printf(", seed_on_end");
+    }
+    if (alignment->withpolcheck)
+    {
+      printf("\n");
+      gt_assert(startpolished && endpolished);
+    } else
+    {
+      if (!startpolished)
+      {
+        printf(", start not polished");
+      }
+      if (!endpolished)
+      {
+        printf(", end not polished");
+      }
+      printf("\n");
+    }
   }
 }
 
@@ -663,12 +830,12 @@ void gt_alignment_buffer_delete(GtUchar *buffer)
   gt_free(buffer);
 }
 
-void gt_alignment_show(const GtAlignment *alignment, FILE *fp,
+void gt_alignment_show(const GtAlignment *alignment, bool downcase,FILE *fp,
                        unsigned int width)
 {
   GtUchar *buffer = gt_alignment_buffer_new(width);
 
-  gt_alignment_show_generic(buffer, alignment, fp, width,NULL,0);
+  gt_alignment_show_generic(buffer, downcase, alignment, fp, width,NULL,0);
   gt_alignment_buffer_delete(buffer);
 }
 
@@ -756,7 +923,8 @@ void gt_alignment_show_with_mapped_chars(const GtAlignment *alignment,
 {
   GtUchar *buffer = gt_alignment_buffer_new(width);
 
-  gt_alignment_show_generic(buffer,alignment, fp, width, characters,
+  gt_assert(characters != NULL);
+  gt_alignment_show_generic(buffer,false,alignment, fp, width, characters,
                             wildcardshow);
   gt_alignment_buffer_delete(buffer);
 }
@@ -774,8 +942,16 @@ void gt_alignment_delete(GtAlignment *alignment)
   gt_free(alignment);
 }
 
+void gt_alignment_set_seedoffset(GtAlignment *alignment,
+                                 GtUword useedoffset,
+                                 GtUword seedlen)
+{
+  alignment->useedoffset = useedoffset;
+  alignment->seedlen = seedlen;
+}
+
 void gt_alignment_clone(const GtAlignment *alignment_from,
-                             GtAlignment *alignment_to)
+                        GtAlignment *alignment_to)
 {
   gt_assert(alignment_from != NULL && alignment_to != NULL);
 
@@ -789,6 +965,21 @@ void gt_alignment_clone(const GtAlignment *alignment_from,
   alignment_to->aligned_range_v.end = alignment_from->aligned_range_v.end;
   gt_multieoplist_clone(alignment_to->eops,alignment_from->eops);
   alignment_to->alilen = alignment_from->alilen;
+}
+
+void gt_alignment_polished_ends(GtAlignment *alignment,
+                                const Polishing_info *pol_info,
+                                bool withpolcheck)
+{
+  gt_assert(alignment != NULL);
+  alignment->pol_info = pol_info;
+  alignment->withpolcheck = withpolcheck;
+}
+
+void gt_alignment_seed_display_set(GtAlignment *alignment)
+{
+  gt_assert(alignment != NULL);
+  alignment->seed_display = true;
 }
 
 int gt_alignment_unit_test(GtError *err)

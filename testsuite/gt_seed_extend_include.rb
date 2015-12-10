@@ -3,6 +3,14 @@ def build_encseq(indexname, sequencefile)
     "-indexname " + indexname + " " + sequencefile
 end
 
+def split_output(key)
+  run "grep '^[0-9]' #{key}.out"
+  run "cut -f 1-3,5,8-10 -d ' ' #{last_stdout}"
+  run "sort #{last_stdout}"
+  run "mv #{last_stdout} #{key}.coords"
+  grep "#{key}.coords", /^\d+ \d+ \d+ \d+ \d+ \d+ \d+\.\d+$/
+end
+
 seeds = [170039800390891361279027638963673934519,
          189224055964190192145211745471700259490,
          80497492730600996116307599313171942911,
@@ -14,15 +22,15 @@ seeds = [170039800390891361279027638963673934519,
          255642063275935424280602245704332672807,
          124756200605387950056148243621528752027]
 
-Name "gt seed_extend mirror, check k-mers and seed pairs"
+Name "gt seed_extend reverse, check k-mers and seed pairs"
 Keywords "gt_seed_extend seedpair kmer polysequence xdrop extend"
 Test do
   run_test build_encseq("small_poly", "#{$testdata}small_poly.fas")
-  run_test "#{$bin}gt seed_extend -seedlength 10 -mirror -debug-kmer " +
-           "-debug-seedpair -ii small_poly"
-  run "cmp -s #{last_stdout} #{$testdata}seedextend1.out"
-  run_test "#{$bin}gt seed_extend -seedlength 10 -mirror -extendxdrop 97 " +
-           "-l 10 -mincoverage 11 -ii small_poly"
+  run_test "#{$bin}gt seed_extend -seedlength 10 " +
+           "-debug-kmer -debug-seedpair -ii small_poly"
+  run "gunzip -c #{$testdata}seedextend1.out.gz | cmp -s #{last_stdout}"
+  run_test "#{$bin}gt seed_extend -seedlength 10 " +
+           "-extendxdrop 97 -l 10 -mincoverage 11 -ii small_poly"
   run "cmp -s #{last_stdout} #{$testdata}seedextend3.out"
 end
 
@@ -30,12 +38,14 @@ Name "gt seed_extend memlimit, use wildcard containing reads"
 Keywords "gt_seed_extend seedpair at1MB memlimit maxfreq verbose"
 Test do
   run_test build_encseq("at1MB", "#{$testdata}at1MB")
-  run_test "#{$bin}gt seed_extend -verify -debug-seedpair -memlimit 10MB -ii at1MB"
-  grep last_stderr, /Only k-mers occurring <= 3 times will be considered, due to small memlimit. Expect 50496 seed pairs./
-  run "cmp -s #{last_stdout} #{$testdata}seedextend2.out"
-  run_test "#{$bin}gt seed_extend -v -maxfreq 5 -ii at1MB"
-  grep last_stdout, /...found and sorted 582230 k-mers/
-  grep last_stdout, /...collected and sorted 68577 seed pairs/
+  run_test "#{$bin}gt seed_extend -verify -debug-seedpair -memlimit 10MB " +
+           "-ii at1MB -only-seeds -no-reverse -seedlength 14"
+  grep last_stderr, /Only 14-mers occurring <= 3 times will be considered, due to small memlimit. Expect 50496 seed pairs./
+  run "gunzip -c #{$testdata}seedextend2.out.gz | cmp -s #{last_stdout}"
+  run_test "#{$bin}gt seed_extend -v -maxfreq 5 -ii at1MB -only-seeds " +
+           "-no-reverse -seedlength 14"
+  grep last_stdout, /...found 582230 14-mers/
+  grep last_stdout, /...collected 68577 seed pairs/
 end
 
 Name "gt seed_extend filter options"
@@ -43,10 +53,10 @@ Keywords "gt_seed_extend options"
 Test do
   run_test build_encseq("gt_bioseq_succ_3", "#{$testdata}gt_bioseq_succ_3.fas")
   # filter options
-  for seedlength in [5, 32] do
+  for seedlength in [5, 14, 32] do
     for diagbandwidth in [2, 5] do
       for mincoverage in [10, 50] do
-        for memlimit in ["30MB", "1GB -mirror"] do
+        for memlimit in ["30MB -no-reverse", "1GB"] do
           run_test "#{$bin}gt seed_extend -seedlength #{seedlength} " +
                    "-diagbandwidth #{diagbandwidth} " +
                    "-mincoverage #{mincoverage} " +
@@ -66,13 +76,13 @@ Test do
     for alignlength in [10, 80] do
       for history in [10, 64] do
         run_test "#{$bin}gt seed_extend -extendgreedy #{sensitivity} " +
-                 "-history #{history} -l #{alignlength} -a " +
+                 "-history #{history} -l #{alignlength} -a -no-reverse " +
                  "-seed-display -ii at1MB", :retval => 0
       end
     end
   end
   run_test "#{$bin}gt seed_extend -extendgreedy -bias-parameters -verify " +
-           "-overlappingseeds -benchmark -a " +
+           "-overlappingseeds -benchmark -a -no-reverse " +
            "-seed-display -ii at1MB", :retval => 0
 end
 
@@ -86,7 +96,7 @@ Test do
       for cam in ["encseq", "encseq_reader"] do
         run_test "#{$bin}gt seed_extend -extendxdrop #{sensitivity} " +
                  "-xdropbelow #{xdbelow} -cam #{cam} -overlappingseeds " +
-                 "-ii at1MB", :retval => 0
+                 "-ii at1MB -no-reverse", :retval => 0
       end
     end
   end
@@ -102,10 +112,10 @@ Test do
           "> artseq.fasta"
       run_test build_encseq("artseq", "artseq.fasta")
       run_test "#{$bin}gt seed_extend -extendxdrop 100 -l 2000 -ii artseq " +
-               "-minidentity #{minidentity-2}"
+               "-minidentity #{minidentity-2} -no-reverse"
       grep last_stdout, /^\d+ \d+ \d+ . \d+ \d+ \d+ \d+ \d+ \d+/
       run_test "#{$bin}gt seed_extend -extendgreedy 100 -l 2000 -ii artseq " +
-               "-minidentity #{minidentity-10}"
+               "-minidentity #{minidentity-10} -no-reverse"
       grep last_stdout, /^\d+ \d+ \d+ . \d+ \d+ \d+ \d+ \d+ \d+/
     end
   end
@@ -116,9 +126,7 @@ Keywords "gt_seed_extend fail"
 Test do
   run_test build_encseq("at1MB", "#{$testdata}at1MB")
   run_test build_encseq("foo", "#{$testdata}foo.fas")
-  run_test "#{$bin}gt seed_extend -seedlength 15 -ii at1MB", :retval => 1
-  grep last_stderr, /integer <= 14 if the sequences contain wildcards/
-  run_test "#{$bin}gt seed_extend -seedlength 10 -ii foo", :retval => 1
+  run_test "#{$bin}gt seed_extend -seedlength 10 -ii foo", :retval => 0
   grep last_stderr, /integer <= 8 \(length of longest sequence\)/
   run_test "#{$bin}gt seed_extend -maxfreq 1 -ii at1MB", :retval => 1
   grep last_stderr, /option "-maxfreq" must be >= 2 to find matching k-mers/
@@ -127,7 +135,7 @@ Test do
   run_test "#{$bin}gt seed_extend -memlimit 0MB -ii at1MB", :retval => 1
   grep last_stderr, /argument to option "-memlimit" must be at least 1MB/
   run_test "#{$bin}gt seed_extend -memlimit 1MB -ii at1MB", :retval => 1
-  grep last_stderr, /option -memlimit too strict: need at least 10MB/
+  grep last_stderr, /option -memlimit too strict: need at least 11MB/
   run_test "#{$bin}gt seed_extend -memlimit 1KB -ii at1MB", :retval => 1
   grep last_stderr, /integer argument followed by one of the keywords MB and GB/
   run_test "#{$bin}gt seed_extend -extendgreedy -history 65 -benchmark " +
@@ -143,4 +151,35 @@ Test do
   grep last_stderr, /too many arguments/
   run_test "#{$bin}gt seed_extend -benchmark", :retval => 1
   grep last_stderr, /option "-ii" is mandatory/
+end
+
+Name "gt seed_extend self vs query"
+Keywords "gt_seed_extend query"
+Test do
+  seedlength = 14
+  extendlength = 100
+  minid = 80
+  for seed in seeds[0..4] do
+    run "#{$scriptsdir}gen-randseq.rb --number 1 --minidentity #{minid} " +
+        "--seedlength #{seedlength} --length #{extendlength} --mode seeded " +
+        "--namedfiles --seed #{seed}"
+    run_test build_encseq("query", "query.fna")
+    run_test build_encseq("db", "db.fna")
+    run_test build_encseq("all", "db.fna query.fna")
+    ["xdrop","greedy"].each do |ext|
+      run_test "#{$bin}gt seed_extend -extend#{ext} 100 -l #{extendlength-20} " +
+               "-minidentity #{minid} -seedlength #{seedlength} -no-reverse " +
+               "-mincoverage #{seedlength} -seed-display -ii all"
+      grep last_stdout, /^\d+ \d+ \d+ . \d+ \d+ \d+ \d+ \d+ \d+/
+      run "mv #{last_stdout} combined.out"
+      split_output("combined")
+      run_test "#{$bin}gt seed_extend -extend#{ext} 100 -l #{extendlength-20} " +
+               "-minidentity #{minid} -seedlength #{seedlength} -no-reverse " +
+               "-mincoverage #{seedlength} -seed-display -ii db -qii query"
+      grep last_stdout, /^\d+ \d+ \d+ . \d+ \d+ \d+ \d+ \d+ \d+/
+      run "mv #{last_stdout} separated.out"
+      split_output("separated")
+      run "cmp -s separated.coords combined.coords"
+    end
+  end
 end

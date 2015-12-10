@@ -4,6 +4,14 @@
 #include "core/types_api.h"
 #ifndef OUTSIDE_OF_GT
 #include "core/arraydef.h"
+#else
+typedef struct
+{
+  GtUword nextfreeuint8_t,
+          allocateduint8_t;
+  uint8_t *spaceuint8_t;
+} GtArrayuint8_t;
+
 #endif
 
 #define FT_EOP_REPLACEMENT 1
@@ -21,42 +29,32 @@ typedef struct
   GtUword alignedlen, row, distance, trimleft;
 } Polished_point;
 
-typedef struct Fronttrace Fronttrace;
+typedef struct GtFronttrace GtFronttrace;
 
-Fronttrace *front_trace_new(void);
+GtFronttrace *front_trace_new(void);
 
-void front_trace_delete(Fronttrace *front_trace);
+void front_trace_delete(GtFronttrace *front_trace);
 
-void front_trace_reset(Fronttrace *front_trace,GtUword sumseqlen);
+void front_trace_reset(GtFronttrace *front_trace,GtUword sumseqlen);
 
-void front_trace_add_gen(Fronttrace *front_trace,GtUword trimleft,
+void front_trace_add_gen(GtFronttrace *front_trace,GtUword trimleft,
                          GtUword valid);
 
-void front_trace_add_trace(Fronttrace *front_trace,uint8_t backreference,
+void front_trace_add_trace(GtFronttrace *front_trace,uint8_t backreference,
                            unsigned int lcs);
 
-#ifdef OUTSIDE_OF_GT
-void front_trace_verify(const Fronttrace *front_trace,
-                        const Polished_point *pp,
-                        const GtUchar *useq,
-                        GtUword ulen,
-                        const GtUchar *vseq,
-                        GtUword vlen);
+void front_trace2eoplist(bool polished,
+                         GtArrayuint8_t *eoplist,
+                         GtFronttrace *front_trace,
+                         const Polished_point *pp,
+                         GtUword pol_size,
+                         GtWord match_score,
+                         GtWord difference_score,
+                         const GtUchar *useq,
+                         GtUword ulen,
+                         const GtUchar *vseq,
+                         GtUword vlen);
 
-void front_trace_verify_all(const Fronttrace *front_trace,
-                            const Polished_point *pp,
-                            const GtUchar *useq,
-                            GtUword ulen,
-                            const GtUchar *vseq,
-                            GtUword vlen);
-#else
 void front_trace_multireplacement(GtArrayuint8_t *eoplist,GtUword repnum);
 
-void front_trace2eoplist(GtArrayuint8_t *eoplist,
-                         const Fronttrace *front_trace,
-                         const Polished_point *pp,
-                         GT_UNUSED GtUword ulen,
-                         GT_UNUSED GtUword vlen);
-
-#endif
 #endif

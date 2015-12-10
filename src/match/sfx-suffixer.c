@@ -273,10 +273,10 @@ static void updatekmercount(void *processinfo,
           Codeatposition *cp;
 
           cp = sfi->spaceCodeatposition + sfi->nextfreeCodeatposition++;
-          gt_assert(kmercode->code <= (GtCodetype) MAXCODEVALUE);
+          gt_assert(kmercode->code <= (GtCodetype) GT_MAXCODEVALUE);
           cp->code = (unsigned int) kmercode->code;
           gt_assert(kmercode->specialposition
-                    <= (unsigned int) MAXPREFIXLENGTH);
+                    <= (unsigned int) GT_MAXPREFIXLENGTH);
           cp->maxprefixindex = kmercode->specialposition;
           cp->position = position + kmercode->specialposition;
           /*
@@ -1367,10 +1367,10 @@ Sfxiterator *gt_Sfxiterator_new_withadditionalvalues(
   if (sfxstrategy != NULL)
   {
     if (sfxstrategy->storespecialcodes &&
-        prefixlength > (unsigned int) MAXPREFIXLENGTH)
+        prefixlength > (unsigned int) GT_MAXPREFIXLENGTH)
     {
       gt_error_set(err,"argument for option -pl must be in the range [1,%u]",
-                    MAXPREFIXLENGTH);
+                   GT_MAXPREFIXLENGTH);
       haserr = true;
     } else
     {

@@ -270,7 +270,7 @@ static GtUword applycheckfunctiontosimpleoptions(
   {
     if (opt->fasta)
     {
-      int i,j;
+      GtUword  i, j;
       for (i = 0; i < gt_str_array_size(opt->fastasequences0); i++)
       {
         for (j = 0; j < gt_str_array_size(opt->fastasequences1); j++)
@@ -286,8 +286,8 @@ static GtUword applycheckfunctiontosimpleoptions(
     else
     {
       gt_runcheckfunctionontwofiles(checkfunction,
-                                 gt_str_array_get(opt->files,0),
-                                 gt_str_array_get(opt->files,1UL));
+                                    gt_str_array_get(opt->files,0),
+                                    gt_str_array_get(opt->files,1UL));
     }
     return 2UL;
   }
@@ -370,7 +370,9 @@ int gt_paircmp(int argc, const char **argv, GtError *err)
         MAKECheckfunctiontabentry(gt_checklinearspace),
         MAKECheckfunctiontabentry(gt_checklinearspace_local),
         MAKECheckfunctiontabentry(gt_checkaffinelinearspace),
-        MAKECheckfunctiontabentry(gt_checkaffinelinearspace_local)
+        MAKECheckfunctiontabentry(gt_checkaffinelinearspace_local),
+        MAKECheckfunctiontabentry(gt_checkdiagonalbandalign),
+        MAKECheckfunctiontabentry(gt_checkdiagonalbandaffinealign)
       };
 
       if (cmppairwise.fasta)
@@ -392,7 +394,10 @@ int gt_paircmp(int argc, const char **argv, GtError *err)
       for (idx = 0; idx < sizeof checkfunction_tab/sizeof checkfunction_tab[0];
            idx++)
       {
-        GtUword testcases
+        GtUword testcases;
+
+        printf("run %s\n",checkfunction_tab[idx].name);
+        testcases
           = applycheckfunctiontosimpleoptions(checkfunction_tab[idx].function,
                                               &cmppairwise);
         printf("# number of testcases for %s: " GT_WU "\n",
