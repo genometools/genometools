@@ -78,7 +78,7 @@ static void gt_1d_chainer_incr_refcount(GtOneDimChainerMatch *match)
 The weight equals the length of the match. */
 static GtUword gt_1d_chainer_get_weight(GtUword start, GtUword end)
 {
-  return end - start + 1;
+  return end - start;
 }
 
 /* Allocates memory for a GtOneDimChainerMatch <match> and returns a pointer to it. 
