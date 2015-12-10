@@ -43,6 +43,7 @@ typedef struct GtOneDimChainerMatch {
   GtUword start;
   GtUword end;
   GtUword chainweight; /* weight of match chain up to, excluding, this match */
+  GtUword dist;
 } GtOneDimChainerMatch;
 
 /* Starts at a given <match>, reduces its reference counter, and if there are no 
@@ -76,9 +77,9 @@ static void gt_1d_chainer_incr_refcount(GtOneDimChainerMatch *match)
 
 /* Calculates and returns the weight for a match from its <start> and <end> position.
 The weight equals the length of the match. */
-static GtUword gt_1d_chainer_get_weight(GtUword start, GtUword end)
+static GtUword gt_1d_chainer_get_weight(GtUword start, GtUword end, GtUword dist)
 {
-  return end - start;
+  return gt_querymatch_distance2score(dist, end - start);
 }
 
 /* Allocates memory for a GtOneDimChainerMatch <match> and returns a pointer to it. 
@@ -97,6 +98,7 @@ static GtOneDimChainerMatch* gt_1d_chainer_match_new(
   match->prec = maxchainend;
   gt_1d_chainer_incr_refcount(maxchainend);
   match->chainweight = maxchainweight;
+  match->dist = gt_querymatch_distance(querymatchptr);
 
   return match;
 }
@@ -253,10 +255,12 @@ static int gt_one_dim_chainer_runner(int argc, const char **argv,
         /* If the weight of the candidate added to the chain increases
            the maximum chain weight, extend the chain. */
         if (maxchainweight < candidatematch->chainweight +
-            gt_1d_chainer_get_weight(start, candidatematch->end))
+            gt_1d_chainer_get_weight(start, candidatematch->end,
+              candidatematch->dist))
         {
           maxchainweight = candidatematch->chainweight +
-            gt_1d_chainer_get_weight(start, candidatematch->end);
+            gt_1d_chainer_get_weight(start, candidatematch->end,
+                candidatematch->dist);
           gt_1d_chainer_decr_refcount(maxchainend);
           maxchainend = candidatematch;
         } else
