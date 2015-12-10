@@ -51,8 +51,8 @@ void gt_querymatch_init(GtQuerymatch *querymatch,
 bool gt_querymatch_read_line(GtQuerymatch *querymatchptr,
                              const char *line_ptr,
                              bool selfmatch,
-                             GtUword query_totallength,
-                             const GtEncseq *dbencseq);
+                             const GtEncseq *dbencseq,
+                             const GtEncseq *queryencseq);
 
 bool gt_querymatch_process(GtQuerymatch *querymatchptr,
                            GtUword seedpos1,
@@ -107,6 +107,8 @@ double gt_querymatch_error_rate(GtUword distance,GtUword alignedlen);
 GtUword gt_querymatch_distance(const GtQuerymatch *querymatch);
 
 void gt_querymatch_prettyprint(const GtQuerymatch *querymatch);
+
+void gt_querymatch_coordinates_out(const GtQuerymatch *querymatch);
 
 bool gt_querymatch_check_final(const GtQuerymatch *querymatch,
                                GtUword errorpercentage,

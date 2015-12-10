@@ -297,8 +297,8 @@ GtQuerymatch *gt_seedextend_match_iterator_next(GtSeedextendMatchIterator *semi)
         if (gt_querymatch_read_line(semi->querymatchptr,
                                     line_ptr,
                                     selfmatch,
-                                    semi->query_totallength,
-                                    semi->aencseq))
+                                    semi->aencseq,
+                                    semi->bencseq))
         {
           gt_str_reset(semi->line_buffer);
           return semi->querymatchptr;
