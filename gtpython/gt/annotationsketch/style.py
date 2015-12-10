@@ -25,9 +25,10 @@ from gt.core.gtstr import Str
 from gt.core.str_array import StrArray
 from gt.extended.genome_node import GenomeNode
 
-STYLE_OK      = 0
+STYLE_OK = 0
 STYLE_NOT_SET = 1
-STYLE_ERROR   = 2
+STYLE_ERROR = 2
+
 
 class Style:
 
@@ -59,7 +60,7 @@ class Style:
 
     def load_file(self, filename):
         err = Error()
-        rval = gtlib.gt_style_load_file(self.style, \
+        rval = gtlib.gt_style_load_file(self.style,
                                         str(filename).encode('UTF-8'), err)
         if rval != 0:
             gterror(err)
@@ -94,7 +95,7 @@ class Style:
         gnp = None
         if gn:
             gnp = gn._as_parameter_
-        rval = gtlib.gt_style_get_color(self.style, section, key, byref(color),\
+        rval = gtlib.gt_style_get_color(self.style, section, key, byref(color),
                                         gnp, err._as_parameter_)
         if rval == STYLE_OK:
             return color
@@ -114,7 +115,7 @@ class Style:
         if gn:
             gnp = gn._as_parameter_
         rval = gtlib.gt_style_get_str(self.style, section, key,
-                string._as_parameter_, gnp, err._as_parameter_)
+                                      string._as_parameter_, gnp, err._as_parameter_)
         if rval == STYLE_OK:
             return str(string)
         elif rval == STYLE_NOT_SET:
@@ -133,7 +134,7 @@ class Style:
         gnp = None
         if gn:
             gnp = gn._as_parameter_
-        rval = gtlib.gt_style_get_num(self.style, section, key, byref(double), \
+        rval = gtlib.gt_style_get_num(self.style, section, key, byref(double),
                                       gnp, err._as_parameter_)
         if rval == STYLE_OK:
             return double.value
@@ -154,7 +155,7 @@ class Style:
         gnp = None
         if gn:
             gnp = gn._as_parameter_
-        rval = gtlib.gt_style_get_bool(self.style, section, key, byref(bool), \
+        rval = gtlib.gt_style_get_bool(self.style, section, key, byref(bool),
                                        gnp, err._as_parameter_)
         if rval == STYLE_OK:
             if bool.value == 1:
@@ -182,16 +183,16 @@ class Style:
         gtlib.gt_style_delete.argtypes = [c_void_p]
         gtlib.gt_style_get_bool.restype = c_int
         gtlib.gt_style_get_bool.argtypes = [c_void_p, c_char_p, c_char_p,
-                POINTER(c_int), c_void_p, c_void_p]
+                                            POINTER(c_int), c_void_p, c_void_p]
         gtlib.gt_style_get_color.restype = c_int
         gtlib.gt_style_get_color.argtypes = [c_void_p, c_char_p,
-                c_char_p, POINTER(Color), c_void_p, c_void_p]
+                                             c_char_p, POINTER(Color), c_void_p, c_void_p]
         gtlib.gt_style_get_num.restype = c_int
         gtlib.gt_style_get_num.argtypes = [c_void_p, c_char_p, c_char_p,
-                POINTER(c_double), c_void_p, c_void_p]
+                                           POINTER(c_double), c_void_p, c_void_p]
         gtlib.gt_style_get_str.restype = c_int
         gtlib.gt_style_get_str.argtypes = [c_void_p, c_char_p, c_char_p,
-                c_void_p, c_void_p, c_void_p]
+                                           c_void_p, c_void_p, c_void_p]
         gtlib.gt_style_load_file.restype = c_int
         gtlib.gt_style_load_file.argtypes = [c_void_p, c_char_p, c_void_p]
         gtlib.gt_style_load_str.restype = c_int
@@ -199,16 +200,17 @@ class Style:
         gtlib.gt_style_new.restype = c_void_p
         gtlib.gt_style_new.argtypes = [c_void_p]
         gtlib.gt_style_set_bool.restype = None
-        gtlib.gt_style_set_bool.argtypes = [c_void_p, c_char_p, c_char_p, c_int]
+        gtlib.gt_style_set_bool.argtypes = [
+            c_void_p, c_char_p, c_char_p, c_int]
         gtlib.gt_style_set_color.restype = None
         gtlib.gt_style_set_color.argtypes = [c_void_p, c_char_p, c_char_p,
-                POINTER(Color)]
+                                             POINTER(Color)]
         gtlib.gt_style_set_num.restype = None
         gtlib.gt_style_set_num.argtypes = [c_void_p, c_char_p, c_char_p,
-                c_double]
+                                           c_double]
         gtlib.gt_style_set_str.restype = None
         gtlib.gt_style_set_str.argtypes = [c_void_p, c_char_p, c_char_p,
-                c_void_p]
+                                           c_void_p]
         gtlib.gt_style_to_str.restype = int
         gtlib.gt_style_to_str.argtypes = [c_void_p, c_void_p, c_void_p]
         gtlib.gt_style_unset.restype = None

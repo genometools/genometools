@@ -38,7 +38,7 @@ class CustomTrack(object):
 
     def __init__(self):
 
-    # create callbacks to C script wrapper
+        # create callbacks to C script wrapper
 
         def get_title_w(ptr, str):
             s = Str(str)
@@ -66,7 +66,7 @@ class CustomTrack(object):
 
         self.free_cb = FreeFunc(free_w)
         self.ctt = gtlib.gt_custom_track_script_wrapper_new(self.render_cb,
-                self.get_height_cb, self.get_title_cb, self.free_cb)
+                                                            self.get_height_cb, self.get_title_cb, self.free_cb)
         self._as_parameter_ = self.ctt
 
     def __del__(self):
@@ -88,6 +88,6 @@ class CustomTrack(object):
         gtlib.gt_custom_track_delete.argtypes = [c_void_p]
         gtlib.gt_custom_track_script_wrapper_new.restype = c_void_p
         gtlib.gt_custom_track_script_wrapper_new.argtypes = [RenderFunc,
-                HeightFunc, TitleFunc, FreeFunc]
+                                                             HeightFunc, TitleFunc, FreeFunc]
 
     register = classmethod(register)

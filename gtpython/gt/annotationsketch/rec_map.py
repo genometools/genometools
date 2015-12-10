@@ -48,10 +48,10 @@ class RecMap:
 
     def get_genome_feature(self):
 
-    #refcount only this FeatureNode!
+        # refcount only this FeatureNode!
 
         return FeatureNode.create_from_ptr(gtlib.gt_rec_map_get_genome_feature(self.rm),
-                True)
+                                           True)
 
     def has_omitted_children(self):
         return gtlib.gt_rec_map_has_omitted_children(self.rm) == 1
@@ -72,5 +72,3 @@ class RecMap:
         gtlib.gt_rec_map_has_omitted_children.argtypes = [c_void_p]
 
     register = classmethod(register)
-
-

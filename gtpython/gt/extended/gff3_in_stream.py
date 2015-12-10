@@ -57,5 +57,3 @@ class GFF3InStream(GenomeStream):
         gtlib.gt_gff3_in_stream_new_sorted.restype = c_void_p
 
     register = classmethod(register)
-
-

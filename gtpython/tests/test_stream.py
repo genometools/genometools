@@ -7,7 +7,7 @@ import os
 
 op = os.path
 datadir = op.abspath(op.join(op.dirname(__file__), "..", "..",
-                     "testdata"))
+                             "testdata"))
 
 
 class StreamTest(unittest.TestCase):
@@ -23,7 +23,9 @@ class StreamTest(unittest.TestCase):
 
         self.assertTrue('1877523' in fi.get_seqids())
 
+
 class TestDuplicateStream(unittest.TestCase):
+
     def setUp(self):
         self.gff_file = op.join(datadir, "addintrons.gff3")
         self.ins = gt.GFF3InStream(self.gff_file)
@@ -42,7 +44,9 @@ class TestDuplicateStream(unittest.TestCase):
             f = dfi.next()
         self.assertTrue('intron' in types, types)
 
+
 class TestMergeStream(unittest.TestCase):
+
     def setUp(self):
         self.gff_file = op.join(datadir, "mergefeat.gff3")
         self.ins = gt.GFF3InStream(self.gff_file)
@@ -60,7 +64,9 @@ class TestMergeStream(unittest.TestCase):
         self.assertEqual(sub.start, 1000)
         self.assertEqual(sub.end, 10000)
 
+
 class TestInterFeat(unittest.TestCase):
+
     def setUp(self):
         self.gff_file = op.join(datadir, "addintrons.gff3")
         self.ins = gt.GFF3InStream(self.gff_file)
@@ -79,7 +85,9 @@ class TestInterFeat(unittest.TestCase):
             f = dfi.next()
         self.assertTrue('intron' in types, types)
 
+
 class TestCustomExample(unittest.TestCase):
+
     def setUp(self):
         self.gff_file = op.join(datadir, "eden.gff3")
         self.ins = gt.GFF3InStream(self.gff_file)

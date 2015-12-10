@@ -36,6 +36,7 @@ MetaNodeFunc = CFUNCTYPE(c_int, c_void_p, c_void_p)
 EOFNodeFunc = CFUNCTYPE(c_int, c_void_p, c_void_p)
 FreeFunc = CFUNCTYPE(c_void_p, c_void_p)
 
+
 class CustomVisitor(NodeVisitor):
 
     def __init__(self):
@@ -141,20 +142,20 @@ class CustomVisitor(NodeVisitor):
 
         self.meta_node_cb = MetaNodeFunc(meta_node_w)
 
-        self.gv = gtlib.gt_script_wrapper_visitor_new(self.comment_node_cb, \
-                                                      self.feature_node_cb, \
-                                                      self.region_node_cb, \
-                                                      self.sequence_node_cb, \
-                                                      self.meta_node_cb, \
-                                                      self.eof_node_cb, \
+        self.gv = gtlib.gt_script_wrapper_visitor_new(self.comment_node_cb,
+                                                      self.feature_node_cb,
+                                                      self.region_node_cb,
+                                                      self.sequence_node_cb,
+                                                      self.meta_node_cb,
+                                                      self.eof_node_cb,
                                                       None)
         self._as_parameter_ = self.gv
 
     def register(cls, gtlib):
         from ctypes import c_void_p
         gtlib.gt_script_wrapper_visitor_new.argtypes = [c_void_p,
-           c_void_p, c_void_p, c_void_p, c_void_p,
-           c_void_p, c_void_p]
+                                                        c_void_p, c_void_p, c_void_p, c_void_p,
+                                                        c_void_p, c_void_p]
         gtlib.gt_script_wrapper_visitor_new.restype = c_void_p
 
     register = classmethod(register)

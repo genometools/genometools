@@ -46,7 +46,8 @@ class StrArray:
     def to_list(self):
         result = []
         for i in range(gtlib.gt_str_array_size(self.strarr)):
-            result.append(str(gtlib.gt_str_array_get(self.strarr, i).decode('UTF-8')))
+            result.append(str(gtlib.gt_str_array_get(
+                self.strarr, i).decode('UTF-8')))
         return result
 
     def size(self):
@@ -75,5 +76,3 @@ class StrArray:
         gtlib.gt_str_array_delete.argtypes = [c_void_p]
 
     register = classmethod(register)
-
-

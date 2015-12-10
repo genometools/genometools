@@ -23,6 +23,7 @@ import tempfile
 import os
 import string
 
+
 class AlphabetTest(unittest.TestCase):
 
     def setUp(self):
@@ -30,12 +31,13 @@ class AlphabetTest(unittest.TestCase):
         self.dnaseqfile.write(">seq1\nagtccagctgtcagctagcgggcccgatgatatttt")
         self.aaseqfile = tempfile.NamedTemporaryFile(mode="w", delete=False)
         self.aaseqfile.write(">seq1\nMVHFTAEEKAAVTSLWSKMNVEEAGGEALG")
-        self.dnaal1file = tempfile.NamedTemporaryFile(mode="w", suffix=".al1", \
+        self.dnaal1file = tempfile.NamedTemporaryFile(mode="w", suffix=".al1",
                                                       delete=False)
         self.dnaal1file.write("aA\ncC\ngG\ntTuU\nnsywrkvbdhmNSYWRKVBDHM\n")
-        self.aaal1file = tempfile.NamedTemporaryFile(mode="w", suffix=".al1", \
+        self.aaal1file = tempfile.NamedTemporaryFile(mode="w", suffix=".al1",
                                                      delete=False)
-        self.aaal1file.write("L\nV\nI\nF\nK\nR\nE\nD\nA\nG\nS\nT\nN\nQ\nY\nW\nP\nH\nM\nC\nXUBZO*- x\n")
+        self.aaal1file.write(
+            "L\nV\nI\nF\nK\nR\nE\nD\nA\nG\nS\nT\nN\nQ\nY\nW\nP\nH\nM\nC\nXUBZO*- x\n")
         self.dnaseqfile.close()
         self.aaseqfile.close()
         self.dnaal1file.close()
@@ -49,8 +51,8 @@ class AlphabetTest(unittest.TestCase):
 
     def dna_encodedecode(self, a_dna):
         # test DNA alphabet
-        dnachars = { 0 : ('A', 'a'),   1 : ('C','c'), 2 : ('G','g'), \
-                     3 : ('T','t'),  254 : ('N','n')}
+        dnachars = {0: ('A', 'a'),   1: ('C', 'c'), 2: ('G', 'g'),
+                    3: ('T', 't'),  254: ('N', 'n')}
 
         # encoding should yield the correct code independent of case
         for idx, c in dnachars.items():
@@ -72,12 +74,12 @@ class AlphabetTest(unittest.TestCase):
         aachars = {}
         for idx, c in enumerate(aas):
             aachars[idx] = (c.upper(), c.lower())
-        #print aachars
-        wcs = ('X','x','U','u','B','b','Z','z','O','*','-')
+        # print aachars
+        wcs = ('X', 'x', 'U', 'u', 'B', 'b', 'Z', 'z', 'O', '*', '-')
         # encoding should yield the correct code independent of case
         for idx, c in aachars.items():
-                self.assertEqual(a_protein.encode(c[0]), idx)
-                self.assertEqual(a_protein.decode(a_protein.encode(c[0])), c[0])
+            self.assertEqual(a_protein.encode(c[0]), idx)
+            self.assertEqual(a_protein.decode(a_protein.encode(c[0])), c[0])
         # invalid input should raise an exception
         self.assertRaises(GTError, a_protein.encode, '&')
         teststr = "MVHFTAEEKAAVTSLWSKMNVEEAGGEALG"
@@ -95,11 +97,11 @@ class AlphabetTest(unittest.TestCase):
         self.dna_encodedecode(a_dna)
 
     def test_dna_fromsequence_fail(self):
-        self.assertRaises(TypeError, Alphabet.create_from_sequence, \
+        self.assertRaises(TypeError, Alphabet.create_from_sequence,
                           self.dnaseqfile.name)
 
     def test_dna_fromal1file(self):
-        indexname = self.dnaal1file.name.rsplit('.',1)[0]
+        indexname = self.dnaal1file.name.rsplit('.', 1)[0]
         a_dna = Alphabet.create_from_file(indexname)
         self.dna_encodedecode(a_dna)
 
@@ -125,15 +127,15 @@ class AlphabetTest(unittest.TestCase):
         self.protein_encodedecode(a_protein)
 
     def test_aa_fromsequence_fail(self):
-        self.assertRaises(TypeError, Alphabet.create_from_sequence, \
+        self.assertRaises(TypeError, Alphabet.create_from_sequence,
                           self.aaseqfile.name)
 
     def test_aa_fromsequence_fail_2(self):
-        self.assertRaises(IOError, Alphabet.create_from_sequence, \
+        self.assertRaises(IOError, Alphabet.create_from_sequence,
                           ["nonexisting"])
 
     def test_aa_fromal1file(self):
-        indexname = self.aaal1file.name.rsplit('.',1)[0]
+        indexname = self.aaal1file.name.rsplit('.', 1)[0]
         a_protein = Alphabet.create_from_file(indexname)
         self.protein_encodedecode(a_protein)
 

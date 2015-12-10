@@ -21,5 +21,3 @@ import warnings
 warnings.warn("deprecated", DeprecationWarning)
 
 from gt.extended.feature_stream import *
-
-

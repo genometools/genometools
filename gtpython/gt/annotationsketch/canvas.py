@@ -26,13 +26,14 @@ from gt.core.gtstr import Str
 
 GRAPHICS_PDF = 0
 GRAPHICS_PNG = 1
-GRAPHICS_PS  = 2
+GRAPHICS_PS = 2
 GRAPHICS_SVG = 3
+
 
 class Canvas:
 
     def __init__(self, *args):
-        raise NotImplementedError("Please call the constructor of a Canvas " + \
+        raise NotImplementedError("Please call the constructor of a Canvas " +
                                   "implementation.")
 
     def __del__(self):
@@ -48,6 +49,7 @@ class Canvas:
 
     from_param = classmethod(from_param)
 
+
 class CanvasCairoFileBase(Canvas):
 
     def from_param(cls, obj):
@@ -60,8 +62,9 @@ class CanvasCairoFileBase(Canvas):
     def to_file(self, filename):
         err = Error()
         rval = gtlib.gt_canvas_cairo_file_to_file(self.canvas,
-                str(filename).encode('UTF-8'),
-                err)
+                                                  str(filename).encode(
+                                                      'UTF-8'),
+                                                  err)
         if rval != 0:
             gterror(err)
 
@@ -77,12 +80,12 @@ class CanvasCairoFileBase(Canvas):
         gtlib.gt_canvas_delete.argtypes = [c_void_p]
         gtlib.gt_canvas_cairo_file_to_file.restype = c_int
         gtlib.gt_canvas_cairo_file_to_file.argtypes = [c_void_p,
-                c_char_p, c_void_p]
+                                                       c_char_p, c_void_p]
         gtlib.gt_canvas_cairo_file_to_stream.restype = c_char_p
         gtlib.gt_canvas_cairo_file_to_stream.argtypes = [c_void_p, c_void_p]
         gtlib.gt_canvas_cairo_file_new.restype = c_void_p
         gtlib.gt_canvas_cairo_file_new.argtypes = [c_void_p, c_int, c_ulong,
-                c_ulong, c_void_p, c_void_p]
+                                                   c_ulong, c_void_p, c_void_p]
 
     register = classmethod(register)
 
@@ -96,7 +99,7 @@ class CanvasCairoFile(CanvasCairoFileBase):
         if ii:
             iip = ii._as_parameter_
         canvas = gtlib.gt_canvas_cairo_file_new(style._as_parameter_,
-                GRAPHICS_PNG, width, height, iip, err._as_parameter_)
+                                                GRAPHICS_PNG, width, height, iip, err._as_parameter_)
         if canvas == None:
             gterror(err)
         self.canvas = canvas
@@ -111,7 +114,7 @@ class CanvasCairoFilePNG(CanvasCairoFileBase):
         if ii:
             iip = ii._as_parameter_
         canvas = gtlib.gt_canvas_cairo_file_new(style._as_parameter_,
-                GRAPHICS_PNG, width, height, iip, err._as_parameter_)
+                                                GRAPHICS_PNG, width, height, iip, err._as_parameter_)
         if canvas == None:
             gterror(err)
         self.canvas = canvas
@@ -126,7 +129,7 @@ class CanvasCairoFilePDF(CanvasCairoFileBase):
         if ii:
             iip = ii._as_parameter_
         canvas = gtlib.gt_canvas_cairo_file_new(style._as_parameter_,
-                GRAPHICS_PDF, width, height, iip, err._as_parameter_)
+                                                GRAPHICS_PDF, width, height, iip, err._as_parameter_)
         if canvas == None:
             gterror(err)
         self.canvas = canvas
@@ -141,7 +144,7 @@ class CanvasCairoFilePS(CanvasCairoFileBase):
         if ii:
             iip = ii._as_parameter_
         canvas = gtlib.gt_canvas_cairo_file_new(style._as_parameter_,
-                GRAPHICS_PS, width, height, iip, err._as_parameter_)
+                                                GRAPHICS_PS, width, height, iip, err._as_parameter_)
         if canvas == None:
             gterror(err)
         self.canvas = canvas
@@ -156,7 +159,7 @@ class CanvasCairoFileSVG(CanvasCairoFileBase):
         if ii:
             iip = ii._as_parameter_
         canvas = gtlib.gt_canvas_cairo_file_new(style._as_parameter_,
-                GRAPHICS_SVG, width, height, iip, err._as_parameter_)
+                                                GRAPHICS_SVG, width, height, iip, err._as_parameter_)
         if canvas == None:
             gterror(err)
         self.canvas = canvas

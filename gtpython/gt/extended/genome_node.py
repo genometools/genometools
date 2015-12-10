@@ -24,6 +24,7 @@ from gt.extended.node_visitor import NodeVisitor
 from gt.core.gtstr import Str
 from gt.props import cachedproperty
 
+
 class GenomeNode(object):
 
     def __init__(self):
@@ -32,7 +33,7 @@ class GenomeNode(object):
     @classmethod
     def create_from_ptr(cls, node_ptr, newref=False):
         if node_ptr == 0 or node_ptr == None:
-            gterror("GenomeNode pointer cannot be NULL (was: "+ str(node_ptr) +
+            gterror("GenomeNode pointer cannot be NULL (was: " + str(node_ptr) +
                     ")")
         n = cls()
         if newref:
@@ -47,7 +48,7 @@ class GenomeNode(object):
     def __repr__(self):
         c = self.__class__.__name__
         return "%s(start=%i, end=%i, seqid=\"%s\")" % (c, self.start,
-                self.end, self.seqid)
+                                                       self.end, self.seqid)
 
     def __del__(self):
         if self.own:
@@ -112,7 +113,7 @@ class GenomeNode(object):
     def accept(self, visitor):
         err = Error()
         rval = gtlib.gt_genome_node_accept(self.gn, visitor._as_parameter_,
-                 err._as_parameter_)
+                                           err._as_parameter_)
         if rval != 0:
             gterror(err)
 
@@ -136,6 +137,6 @@ class GenomeNode(object):
         gtlib.gt_genome_node_ref.argtypes = [c_void_p]
         gtlib.gt_genome_node_accept.restype = c_int
         gtlib.gt_genome_node_accept.argtypes = [c_void_p, c_void_p,
-                c_void_p]
+                                                c_void_p]
 
     register = classmethod(register)

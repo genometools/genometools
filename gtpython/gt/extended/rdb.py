@@ -25,7 +25,7 @@ from gt.core.error import Error, gterror
 class RDB:
 
     def __init__(self, *args):
-        raise NotImplementedError("Please call the constructor of a " + \
+        raise NotImplementedError("Please call the constructor of a " +
                                   "RDB implementation.")
 
     def __del__(self):
@@ -40,13 +40,14 @@ class RDB:
         return obj._as_parameter_
 
     from_param = classmethod(from_param)
-    
+
     def register(cls, gtlib):
         from ctypes import c_void_p
         gtlib.gt_rdb_delete.restype = None
         gtlib.gt_rdb_delete.argtypes = [c_void_p]
-    
+
     register = classmethod(register)
+
 
 class RDBSqlite(RDB):
 

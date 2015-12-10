@@ -28,6 +28,7 @@ from gt.props import cachedproperty
 
 AttrIterFunc = CFUNCTYPE(c_char_p, c_char_p, c_void_p)
 
+
 class FeatureNode(GenomeNode):
 
     def __init__(self):
@@ -39,10 +40,10 @@ class FeatureNode(GenomeNode):
         from gt.extended.strand import strandchars
         if not strand in strandchars:
             gterror("Invalid strand '%s' -- must be one of %s" % (strand,
-                    strandchars))
+                                                                  strandchars))
         s = Str(seqid.encode("utf-8"))
         fn = gtlib.gt_feature_node_new(s._as_parameter_,
-                                       type.encode('UTF-8'), start, end, \
+                                       type.encode('UTF-8'), start, end,
                                        strandchars.index(str(strand)))
         n = cls.create_from_ptr(fn, True)
         n.depth_first = True
@@ -62,7 +63,8 @@ class FeatureNode(GenomeNode):
         ownid = str(self.get_seqid())
         newid = str(node.get_seqid())
         if (ownid != newid):
-            gterror("cannot add node with sequence region '%s' to node with sequence region '%s'" % (ownid, newid))
+            gterror("cannot add node with sequence region '%s' to node with sequence region '%s'" % (
+                ownid, newid))
         else:
             gtlib.gt_feature_node_add_child(self.gn, node._as_parameter_)
 
@@ -91,14 +93,14 @@ class FeatureNode(GenomeNode):
     type = cachedproperty(get_type, set_type)
 
     def has_type(self, type):
-        return gtlib.gt_feature_node_has_type(self.gn, \
+        return gtlib.gt_feature_node_has_type(self.gn,
                                               type.encode('UTF-8')) == 1
 
     def set_strand(self, strand):
         from gt.extended.strand import strandchars
         if not strand in strandchars:
             gterror("Invalid strand '%s' -- must be one of %s" % (strand,
-                    strandchars))
+                                                                  strandchars))
         gtlib.gt_feature_node_set_strand(self.gn, strandchars.index(strand))
 
     def get_strand(self):
@@ -133,7 +135,7 @@ class FeatureNode(GenomeNode):
     score = cachedproperty(get_score, set_score, unset_score)
 
     def get_attribute(self, attrib):
-        val = gtlib.gt_feature_node_get_attribute(self.gn, \
+        val = gtlib.gt_feature_node_get_attribute(self.gn,
                                                   str(attrib).encode("UTF-8"))
         if val == None:
             return None
@@ -143,8 +145,8 @@ class FeatureNode(GenomeNode):
     def add_attribute(self, attrib, value):
         if attrib == "" or value == "":
             gterror("attribute keys or values must not be empty!")
-        gtlib.gt_feature_node_add_attribute(self.gn, \
-                                            str(attrib).encode("UTF-8"), \
+        gtlib.gt_feature_node_add_attribute(self.gn,
+                                            str(attrib).encode("UTF-8"),
                                             str(value).encode("UTF-8"))
 
     def each_attribute(self):
@@ -162,16 +164,16 @@ class FeatureNode(GenomeNode):
             c_ulong, c_float
         gtlib.gt_feature_node_add_attribute.restype = None
         gtlib.gt_feature_node_add_attribute.argtypes = [c_void_p, c_char_p,
-                c_char_p]
+                                                        c_char_p]
         gtlib.gt_feature_node_add_child.restype = None
         gtlib.gt_feature_node_add_child.argtypes = [c_void_p,
-                c_void_p]
+                                                    c_void_p]
         gtlib.gt_feature_node_foreach_attribute.restype = None
         gtlib.gt_feature_node_foreach_attribute.argtypes = [c_void_p,
-                c_void_p, c_void_p]
+                                                            c_void_p, c_void_p]
         gtlib.gt_feature_node_get_attribute.restype = c_char_p
         gtlib.gt_feature_node_get_attribute.argtypes = [c_void_p,
-                c_char_p]
+                                                        c_char_p]
         gtlib.gt_feature_node_get_phase.restype = c_int
         gtlib.gt_feature_node_get_phase.argtypes = [c_void_p]
         gtlib.gt_feature_node_get_score.restype = c_float
@@ -186,7 +188,7 @@ class FeatureNode(GenomeNode):
         gtlib.gt_feature_node_has_type.argtypes = [c_void_p, c_char_p]
         gtlib.gt_feature_node_new.restype = c_void_p
         gtlib.gt_feature_node_new.argtypes = [c_void_p, c_char_p, c_ulong,
-                c_ulong, c_int]
+                                              c_ulong, c_int]
         gtlib.gt_feature_node_score_is_defined.restype = c_int
         gtlib.gt_feature_node_score_is_defined.argtypes = [c_void_p]
         gtlib.gt_feature_node_set_phase.restype = None
@@ -266,7 +268,6 @@ class FeatureNodeIteratorDepthFirst(FeatureNodeIterator):
     includes the node itself
     """
 
-
     def __init__(self, node):
 
         self.i = gtlib.gt_feature_node_iterator_new(node._as_parameter_)
@@ -278,5 +279,3 @@ class FeatureNodeIteratorDirect(FeatureNodeIterator):
     def __init__(self, node):
         self.i = gtlib.gt_feature_node_iterator_new_direct(node._as_parameter_)
         self._as_parameter_ = self.i
-
-

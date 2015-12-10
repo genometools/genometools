@@ -75,5 +75,3 @@ class Array:
         gtlib.gt_array_delete.argtypes = [c_void_p]
 
     register = classmethod(register)
-
-

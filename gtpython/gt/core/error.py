@@ -58,7 +58,7 @@ class Error(Exception):
             return "undefined error -- please report this as a bug!"
 
     def set(self, errmsg):
-        return gtlib.gt_error_set_nonvariadic(self.error, \
+        return gtlib.gt_error_set_nonvariadic(self.error,
                                               str(errmsg).encode('UTF-8'))
 
     def is_set(self):
@@ -92,5 +92,3 @@ def gterror(err):
         raise GTError("GenomeTools error: " + err.get())
     else:
         raise GTError("GenomeTools error: " + err)
-
-

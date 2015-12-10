@@ -25,19 +25,23 @@ from gt.core.str_array import StrArray
 from gt.core.gtstr import Str
 import os
 from ctypes import Structure, c_ulong, c_uint, c_int, c_char_p, c_void_p, \
-                   POINTER, byref, c_uint32, c_uint64, string_at, \
-                   create_string_buffer, c_ubyte, c_char
+    POINTER, byref, c_uint32, c_uint64, string_at, \
+    create_string_buffer, c_ubyte, c_char
+
 
 def int2bool(val):
-    if  val == 0:
+    if val == 0:
         return False
     else:
         return True
 
+
 class Seqinfo(Structure):
     _fields_ = [("startpos", c_ulong), ("length", c_ulong)]
 
+
 class EncseqEncoder:
+
     def __init__(self):
         self.ee = gtlib.gt_encseq_encoder_new()
         self._as_parameter_ = self.ee
@@ -56,10 +60,12 @@ class EncseqEncoder:
     from_param = classmethod(from_param)
 
     def set_representation_type(self, sat):
-        gtlib.gt_encseq_encoder_set_access_type(self.ee, str(sat.encode("utf-8")))
+        gtlib.gt_encseq_encoder_set_access_type(
+            self.ee, str(sat.encode("utf-8")))
 
     def set_symbolmap_file(self, fn):
-        gtlib.gt_encseq_encoder_use_symbolmap_file(self.ee, str(fn.encode("utf-8")))
+        gtlib.gt_encseq_encoder_use_symbolmap_file(
+            self.ee, str(fn.encode("utf-8")))
 
     def enable_description_support(self):
         gtlib.gt_encseq_encoder_enable_description_support(self.ee)
@@ -108,22 +114,26 @@ class EncseqEncoder:
                 raise IOError("file not found: %s" % str(f))
             sa.add(str(f))
         err = Error()
-        esptr = gtlib.gt_encseq_encoder_encode(self.ee, sa.strarr, \
-                                               str(indexname).encode("UTF-8"), \
+        esptr = gtlib.gt_encseq_encoder_encode(self.ee, sa.strarr,
+                                               str(indexname).encode("UTF-8"),
                                                err.error)
         if esptr != 0:
             gterror(err)
 
     def register(cls, gtlib):
         gtlib.gt_encseq_encoder_new.restype = c_void_p
-        gtlib.gt_encseq_encoder_encode.argtypes = [c_void_p, c_void_p, \
+        gtlib.gt_encseq_encoder_encode.argtypes = [c_void_p, c_void_p,
                                                    c_char_p, c_void_p]
         gtlib.gt_encseq_encoder_encode.restype = c_int
         gtlib.gt_encseq_encoder_delete.argtypes = [c_void_p]
-        gtlib.gt_encseq_encoder_use_representation.argtypes = [c_void_p, c_char_p]
-        gtlib.gt_encseq_encoder_use_symbolmap_file.argtypes = [c_void_p, c_char_p]
-        gtlib.gt_encseq_encoder_enable_description_support.argtypes = [c_void_p]
-        gtlib.gt_encseq_encoder_disable_description_support.argtypes = [c_void_p]
+        gtlib.gt_encseq_encoder_use_representation.argtypes = [
+            c_void_p, c_char_p]
+        gtlib.gt_encseq_encoder_use_symbolmap_file.argtypes = [
+            c_void_p, c_char_p]
+        gtlib.gt_encseq_encoder_enable_description_support.argtypes = [
+            c_void_p]
+        gtlib.gt_encseq_encoder_disable_description_support.argtypes = [
+            c_void_p]
         gtlib.gt_encseq_encoder_enable_multiseq_support.argtypes = [c_void_p]
         gtlib.gt_encseq_encoder_disable_multiseq_support.argtypes = [c_void_p]
         gtlib.gt_encseq_encoder_create_des_tab.argtypes = [c_void_p]
@@ -139,6 +149,7 @@ class EncseqEncoder:
 
 
 class EncseqLoader:
+
     def __init__(self):
         self.el = gtlib.gt_encseq_loader_new()
         self._as_parameter_ = self.el
@@ -148,7 +159,7 @@ class EncseqLoader:
 
     def __del__(self):
         try:
-            pass # FIXME gtlib.gt_encseq_loader_delete(self.el)
+            pass  # FIXME gtlib.gt_encseq_loader_delete(self.el)
         except AttributeError:
             pass
 
@@ -202,18 +213,18 @@ class EncseqLoader:
         gtlib.gt_encseq_loader_do_not_require_sds_tab(self.el)
 
     def load(self, indexname):
-        if not os.path.exists(indexname+".esq"):
-            raise IOError("file not found: %s" % indexname+".esq")
-        if self.destab and not os.path.exists(indexname+".des"):
-            raise IOError("file not found: %s" % indexname+".des")
+        if not os.path.exists(indexname + ".esq"):
+            raise IOError("file not found: %s" % indexname + ".esq")
+        if self.destab and not os.path.exists(indexname + ".des"):
+            raise IOError("file not found: %s" % indexname + ".des")
         # not required in every case (equallength seqs)
-        #if self.ssptab and not os.path.exists(indexname+".ssp"):
+        # if self.ssptab and not os.path.exists(indexname+".ssp"):
         #    raise IOError, ("file not found: %s" % indexname+".ssp")
-        if self.sdstab and not os.path.exists(indexname+".sds"):
-            raise IOError("file not found: %s" % indexname+".sds")
+        if self.sdstab and not os.path.exists(indexname + ".sds"):
+            raise IOError("file not found: %s" % indexname + ".sds")
         err = Error()
-        esptr = gtlib.gt_encseq_loader_load(self.el, \
-                                            str(indexname).encode("UTF-8"), \
+        esptr = gtlib.gt_encseq_loader_load(self.el,
+                                            str(indexname).encode("UTF-8"),
                                             err.error)
         if not esptr:
             gterror(err)
@@ -227,7 +238,9 @@ class EncseqLoader:
 
     register = classmethod(register)
 
+
 class EncseqBuilder:
+
     def __init__(self, a):
         self.eb = gtlib.gt_encseq_builder_new(a.alpha)
         self._as_parameter_ = self.eb
@@ -275,9 +288,9 @@ class EncseqBuilder:
     def do_not_create_sds_tab(self):
         gtlib.gt_encseq_builder_do_not_create_sds_tab(self.eb)
 
-    def add_string(self, string, desc = ''):
+    def add_string(self, string, desc=''):
         string = str(string)
-        gtlib.gt_encseq_builder_add_cstr(self.eb, string.encode('UTF-8'), \
+        gtlib.gt_encseq_builder_add_cstr(self.eb, string.encode('UTF-8'),
                                          len(string), desc.encode('UTF-8'))
 
     def build(self):
@@ -290,10 +303,12 @@ class EncseqBuilder:
     def register(cls, gtlib):
         gtlib.gt_encseq_builder_new.argtypes = [c_void_p]
         gtlib.gt_encseq_builder_new.restype = c_void_p
-        gtlib.gt_encseq_builder_add_cstr.argtypes = [c_void_p, c_char_p, \
+        gtlib.gt_encseq_builder_add_cstr.argtypes = [c_void_p, c_char_p,
                                                      c_ulong, c_char_p]
-        gtlib.gt_encseq_builder_enable_description_support.argtypes = [c_void_p]
-        gtlib.gt_encseq_builder_disable_description_support.argtypes = [c_void_p]
+        gtlib.gt_encseq_builder_enable_description_support.argtypes = [
+            c_void_p]
+        gtlib.gt_encseq_builder_disable_description_support.argtypes = [
+            c_void_p]
         gtlib.gt_encseq_builder_enable_multiseq_support.argtypes = [c_void_p]
         gtlib.gt_encseq_builder_disable_multiseq_support.argtypes = [c_void_p]
         gtlib.gt_encseq_builder_create_des_tab.argtypes = [c_void_p]
@@ -307,6 +322,7 @@ class EncseqBuilder:
         gtlib.gt_encseq_builder_delete.argtypes = [c_void_p]
 
     register = classmethod(register)
+
 
 class EncseqReader:
 
@@ -344,6 +360,7 @@ class EncseqReader:
 
     register = classmethod(register)
 
+
 class Encseq:
 
     def __init__(self, ptr, own=False):
@@ -375,7 +392,8 @@ class Encseq:
         if not num < self.num_of_sequences():
             gterror("invalid sequence number %d" % num)
         desclen = c_ulong()
-        str_addr = gtlib.gt_encseq_description(self.encseq, byref(desclen), num)
+        str_addr = gtlib.gt_encseq_description(
+            self.encseq, byref(desclen), num)
         return str(string_at(str_addr, desclen.value).decode('UTF-8'))
 
     def total_length(self):
@@ -427,7 +445,7 @@ class Encseq:
         if startpos < 0 or startpos >= self.total_length():
             gterror("invalid startposition: %d (allowed: %d-%d)" % (startpos,
                                                                     0,
-                                                                    self.total_length()-1))
+                                                                    self.total_length() - 1))
         er = gtlib.gt_encseq_create_reader_with_readmode(self.encseq, readmode,
                                                          startpos)
         return EncseqReader(er, True)
@@ -435,29 +453,29 @@ class Encseq:
     def extract_encoded(self, start, end):
         if start < 0 or end >= self.total_length():
             gterror("invalid coordinates: %d-%d (allowed: %d-%d)" % (start, end,
-                                                      0, self.total_length()-1))
-        buf = (c_ubyte * (end-start+1))()
+                                                                     0, self.total_length() - 1))
+        buf = (c_ubyte * (end - start + 1))()
         gtlib.gt_encseq_extract_encoded(self.encseq, buf, start, end)
         return buf
 
     def extract_decoded(self, start, end):
         if start < 0 or end >= self.total_length():
             gterror("invalid coordinates: %d-%d (allowed: %d-%d)" % (start, end,
-                                                      0, self.total_length()-1))
-        buf = (c_char * (end-start+1))()
+                                                                     0, self.total_length() - 1))
+        buf = (c_char * (end - start + 1))()
         gtlib.gt_encseq_extract_decoded(self.encseq, buf, start, end)
-        return string_at(buf, end-start+1).decode('UTF-8')
+        return string_at(buf, end - start + 1).decode('UTF-8')
 
     def seqnum(self, pos):
         if pos < 0 or pos >= self.total_length():
             gterror("invalid position: %d (allowed: %d-%d)" % (pos,
-                                                      0, self.total_length()-1))
+                                                               0, self.total_length() - 1))
         return gtlib.gt_encseq_seqnum(self.encseq, pos)
 
     def filenum(self, pos):
         if pos < 0 or pos >= self.total_length():
             gterror("invalid position: %d (allowed: %d-%d)" % (pos,
-                                                      0, self.total_length()-1))
+                                                               0, self.total_length() - 1))
         return gtlib.gt_encseq_filenum(self.encseq, pos)
 
     def mirror(self):
@@ -479,7 +497,8 @@ class Encseq:
 
     def register(cls, gtlib):
         gtlib.gt_encseq_create_reader_with_readmode.restype = c_void_p
-        gtlib.gt_encseq_create_reader_with_readmode.argtypes = [c_void_p, c_int, c_ulong]
+        gtlib.gt_encseq_create_reader_with_readmode.argtypes = [
+            c_void_p, c_int, c_ulong]
         gtlib.gt_encseq_num_of_sequences.restype = c_ulong
         gtlib.gt_encseq_num_of_sequences.argtypes = [c_void_p]
         gtlib.gt_encseq_num_of_files.restype = c_ulong
@@ -487,7 +506,7 @@ class Encseq:
         gtlib.gt_encseq_total_length.restype = c_ulong
         gtlib.gt_encseq_total_length.argtypes = [c_void_p]
         gtlib.gt_encseq_description.restype = c_char_p
-        gtlib.gt_encseq_description.argtypes = [c_void_p, POINTER(c_ulong), \
+        gtlib.gt_encseq_description.argtypes = [c_void_p, POINTER(c_ulong),
                                                 c_ulong]
         gtlib.gt_encseq_get_encoded_char.restype = c_ubyte
         gtlib.gt_encseq_get_encoded_char.argtypes = [c_void_p, c_ulong, c_int]
@@ -501,10 +520,10 @@ class Encseq:
         gtlib.gt_encseq_seqlength.argtypes = [c_void_p, c_ulong]
         gtlib.gt_encseq_effective_filelength.restype = c_uint64
         gtlib.gt_encseq_effective_filelength.argtypes = [c_void_p, c_ulong]
-        gtlib.gt_encseq_extract_encoded.argtypes = [c_void_p, \
-                                                    POINTER(c_ubyte), \
+        gtlib.gt_encseq_extract_encoded.argtypes = [c_void_p,
+                                                    POINTER(c_ubyte),
                                                     c_ulong, c_ulong]
-        gtlib.gt_encseq_extract_decoded.argtypes = [c_void_p, c_char_p, \
+        gtlib.gt_encseq_extract_decoded.argtypes = [c_void_p, c_char_p,
                                                     c_ulong, c_ulong]
         gtlib.gt_encseq_mirror.restype = c_int
         gtlib.gt_encseq_mirror.argtypes = [c_void_p, c_void_p]
@@ -521,7 +540,4 @@ class Encseq:
         gtlib.gt_encseq_filenames.argtypes = [c_void_p]
         gtlib.gt_encseq_delete.argtypes = [c_void_p]
 
-
     register = classmethod(register)
-
-

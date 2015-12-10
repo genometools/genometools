@@ -28,8 +28,10 @@ gtlib.gt_warning_disable.argtypes = []
 gtlib.gt_warning_set_handler.restype = None
 gtlib.gt_warning_set_handler.argtypes = [funcdef, c_void_p]
 
+
 def warning_disable():
     gtlib.gt_warning_disable()
+
 
 def warning_enable_default():
     gtlib.gt_warning_set_handler(addressof(defhand), None)

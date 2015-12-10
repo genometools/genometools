@@ -26,7 +26,7 @@ class Range(Structure):
 
     _fields_ = [("w_start", c_ulong), ("w_end", c_ulong)]
 
-    def __init__(self, start = 0, end = 0):
+    def __init__(self, start=0, end=0):
         if start > end or start < 0 or end < 0:
             gterror("range error: start > end!")
         super(Range, self).__init__(start, end)

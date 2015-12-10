@@ -27,7 +27,7 @@ from gt.annotationsketch.feature_index import FeatureIndexFromPtr
 class AnnoDBSchema:
 
     def __init__(self, *args):
-        raise NotImplementedError("Please call the constructor of an " + \
+        raise NotImplementedError("Please call the constructor of an " +
                                   "AnnoDBSchema implementation.")
 
     def __del__(self):
@@ -46,7 +46,7 @@ class AnnoDBSchema:
     def get_feature_index(self, rdb):
         err = Error()
         fi = gtlib.gt_anno_db_schema_get_feature_index(self.ads, rdb._as_parameter_,
-                err._as_parameter_)
+                                                       err._as_parameter_)
         if fi == None:
             gterror(err)
         return FeatureIndexFromPtr(fi)
@@ -55,11 +55,12 @@ class AnnoDBSchema:
         from ctypes import c_void_p
         gtlib.gt_anno_db_schema_get_feature_index.restype = c_void_p
         gtlib.gt_anno_db_schema_get_feature_index.argtypes = [c_void_p, c_void_p,
-                c_void_p]
+                                                              c_void_p]
         gtlib.gt_anno_db_schema_delete.restype = None
         gtlib.gt_anno_db_schema_delete.argtypes = [c_void_p]
 
     register = classmethod(register)
+
 
 class AnnoDBGFFLike(AnnoDBSchema):
 

@@ -20,6 +20,7 @@
 from gt.dlload import gtlib
 from gt.extended.node_visitor import NodeVisitor
 
+
 class GFF3Visitor(NodeVisitor):
 
     def __init__(self):
@@ -32,4 +33,3 @@ class GFF3Visitor(NodeVisitor):
         gtlib.gt_gff3_visitor_new.argtypes = [c_void_p]
 
     register = classmethod(register)
-

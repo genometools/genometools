@@ -29,7 +29,7 @@ class MetaNode(GenomeNode):
 
     @classmethod
     def create_new(cls, directive, data):
-        fn = gtlib.gt_meta_node_new(str(directive).encode("UTF-8"), \
+        fn = gtlib.gt_meta_node_new(str(directive).encode("UTF-8"),
                                     str(data).encode("UTF-8"))
         n = cls.create_from_ptr(fn, True)
         return n

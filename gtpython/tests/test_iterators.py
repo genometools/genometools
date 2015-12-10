@@ -7,7 +7,7 @@ import os
 
 op = os.path
 datadir = op.abspath(op.join(op.dirname(__file__), "..", "..",
-                     "testdata"))
+                             "testdata"))
 
 """
 ###
@@ -68,4 +68,3 @@ class FeatureNodeIteratorTest(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
-

@@ -65,7 +65,7 @@ class Block(object):
     def set_strand(self, strand):
         if not strand in strandchars:
             gterror("Invalid strand '%s' -- must be one of %s" % (strand,
-                    strandchars))
+                                                                  strandchars))
         gtlib.gt_block_set_strand(self.block, strandchars.index(strand))
 
     def get_strand(self):
@@ -116,7 +116,7 @@ class Block(object):
         gtlib.gt_block_ref.argtypes = [c_void_p]
         gtlib.gt_block_set_caption_visibility.restype = None
         gtlib.gt_block_set_caption_visibility.argtypes = [c_void_p,
-                c_int]
+                                                          c_int]
         gtlib.gt_block_set_strand.restype = None
         gtlib.gt_block_set_strand.argtypes = [c_void_p, c_int]
 

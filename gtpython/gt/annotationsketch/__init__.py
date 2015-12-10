@@ -35,7 +35,7 @@ try:
     CanvasCairoFileBase.register(gtlib)
     CustomTrack.register(gtlib)
     Diagram.register(gtlib)
-    #DiagramFromArray.register(gtlib)
+    # DiagramFromArray.register(gtlib)
     FeatureIndex.register(gtlib)
     Graphics.register(gtlib)
     GraphicsCairo.register(gtlib)

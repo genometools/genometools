@@ -23,7 +23,7 @@ from gt.dlload import gtlib
 class NodeVisitor(object):
 
     def __init__(self):
-        raise NotImplementedError("Please call the constructor of a " + \
+        raise NotImplementedError("Please call the constructor of a " +
                                   "NodeVisitor implementation.")
 
     def __del__(self):
@@ -35,10 +35,10 @@ class NodeVisitor(object):
         return obj._as_parameter_
 
     from_param = classmethod(from_param)
-    
+
     def register(cls, gtlib):
         from ctypes import c_void_p
         gtlib.gt_node_visitor_delete.restype = None
         gtlib.gt_node_visitor_delete.argtypes = [c_void_p]
-    
+
     register = classmethod(register)
