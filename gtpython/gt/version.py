@@ -1,8 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
-# Copyright (c) 2008 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
-# Copyright (c) 2008 Center for Bioinformatics, University of Hamburg
+# Copyright (c) 2015 Sascha Steinbiss <sascha@steinbiss.name>
 #
 # Permission to use, copy, modify, and distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -18,19 +17,8 @@
 #
 
 import sys
+from gt.dlload import gtlib
+from ctypes import c_char_p
 
-try:
-    import ctypes
-except ImportError:
-    sys.stderr.write("The ctypes package could not be found. ")
-    sys.stderr.write("Please make sure it can be imported by Python.")
-    sys.exit(1)
-
-try:
-    from .annotationsketch import *
-except AttributeError:
-    # fail gracefully when AnnotationSketch symbols are not present
-    pass
-from .core import *
-from .extended import *
-from .version import __version__
+gtlib.gt_version.restype = c_char_p
+__version__ = gtlib.gt_version().decode('UTF-8')
