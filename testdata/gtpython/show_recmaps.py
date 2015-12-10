@@ -52,5 +52,5 @@ if __name__ == "__main__":
     canvas.to_file("foo1.png")
 
     for (x1, y1, x2, y2, gn) in image_info.each_hotspot():
-        print "x1=%d, y1=%d, x2=%d, y2=%d, gn.type=%s" % (x1, y1, x2, y2,
-                gn.get_type())
+        print("x1=%d, y1=%d, x2=%d, y2=%d, gn.type=%s" % (x1, y1, x2, y2,
+                gn.get_type()))

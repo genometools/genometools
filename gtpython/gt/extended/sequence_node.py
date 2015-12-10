@@ -31,18 +31,19 @@ class SequenceNode(GenomeNode):
 
     @classmethod
     def create_new(cls, description, sequence):
-        seq_str = Str(str(sequence.encode("utf-8")))
+        seq_str = Str(sequence.encode('UTF-8'))
+        description = description.encode('UTF-8')
         fn = gtlib.gt_sequence_node_new(description, seq_str._as_parameter_)
         n = cls.create_from_ptr(fn, True)
         return n
 
     def get_description(self):
-        return gtlib.gt_sequence_node_get_description(self.gn)
+        return gtlib.gt_sequence_node_get_description(self.gn).decode("UTF-8")
 
     def get_sequence(self):
         seq = gtlib.gt_sequence_node_get_sequence(self.gn)
         if seq:
-            return str(seq)
+            return seq.decode('UTF-8')
         else:
             return ""
 

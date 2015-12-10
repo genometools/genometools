@@ -28,7 +28,7 @@ class SortStream(GenomeStream):
 
     def from_param(cls, obj):
         if not isinstance(obj, SortStream):
-            raise TypeError, "argument must be a SortStream"
+            raise TypeError("argument must be a SortStream")
         return obj._as_parameter_
 
     from_param = classmethod(from_param)

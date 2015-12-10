@@ -27,12 +27,12 @@ class FeatureStream(GenomeStream):
 
     def __init__(self, genome_stream, feature_index):
         self.gs = gtlib.gt_feature_stream_new(genome_stream._as_parameter_,
-                feature_index._as_parameter_)
+                                              feature_index._as_parameter_)
         self._as_parameter_ = self.gs
 
     def from_param(cls, obj):
         if not isinstance(obj, FeatureStream):
-            raise TypeError, "argument must be a FeatureStream"
+            raise TypeError("argument must be a FeatureStream")
         return obj._as_parameter_
 
     from_param = classmethod(from_param)
@@ -41,6 +41,6 @@ class FeatureStream(GenomeStream):
         from ctypes import c_void_p
         gtlib.gt_feature_stream_new.restype = c_void_p
         gtlib.gt_feature_stream_new.argtypes = [c_void_p,
-                c_void_p]
+                                                c_void_p]
 
     register = classmethod(register)

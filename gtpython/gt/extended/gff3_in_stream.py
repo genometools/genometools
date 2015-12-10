@@ -33,12 +33,13 @@ class GFF3InStream(GenomeStream):
             p.close()
         except:
             gterror("File " + filename + " not readable!")
+        filename = filename.encode('UTF-8')
         self.gs = gtlib.gt_gff3_in_stream_new_sorted(filename)
         self._as_parameter_ = self.gs
 
     def from_param(cls, obj):
         if not isinstance(obj, GFF3InStream):
-            raise TypeError, "argument must be a GFF3InStream"
+            raise TypeError("argument must be a GFF3InStream")
         return obj._as_parameter_
 
     from_param = classmethod(from_param)
@@ -56,5 +57,3 @@ class GFF3InStream(GenomeStream):
         gtlib.gt_gff3_in_stream_new_sorted.restype = c_void_p
 
     register = classmethod(register)
-
-

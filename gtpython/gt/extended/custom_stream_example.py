@@ -34,6 +34,8 @@ from gt.extended.feature_node import FeatureNode
 # Please raise a GTError if a user error in the stream is to be signaled.
 # This will ensure that error handling is done properly in the underlying C
 # code.
+
+
 class CustomStreamExample(CustomStream):
 
     def __init__(self, instream):

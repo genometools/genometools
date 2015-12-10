@@ -50,28 +50,28 @@ if __name__ == "__main__":
     try:
         diagram = Diagram.from_index(feature_index, "nonexist", range,
                 style)
-    except GTError, strerr:
+    except GTError as strerr:
         if -1 == str(strerr).find("feature index does not contain "):
             raise TestFailedError
     else:
         raise TestFailedError
     try:
         diagram = Diagram.from_index(feature_index, seqid, range, 42)
-    except TypeError, strerr:
+    except TypeError as strerr:
         if -1 == str(strerr).find("must be a Style"):
             raise TestFailedError
     else:
         raise TestFailedError
     try:
         diagram = Diagram.from_index(feature_index, seqid, 42, style)
-    except AttributeError, strerr:
+    except AttributeError as strerr:
         if -1 == str(strerr).find("object has no attribute 'start'"):
             raise TestFailedError
     else:
         raise TestFailedError
     try:
         diagram = Diagram.from_index(42, seqid, range, style)
-    except TypeError, strerr:
+    except TypeError as strerr:
         if -1 == str(strerr).find("must be a FeatureIndex"):
             raise TestFailedError
     else:
@@ -82,7 +82,7 @@ if __name__ == "__main__":
 
     try:
         layout = Layout(diagram, 70, style)
-    except GTError, strerr:
+    except GTError as strerr:
         if -1 == str(strerr).find("layout width must at least be twice"):
             raise TestFailedError
     else:
@@ -94,7 +94,7 @@ if __name__ == "__main__":
 
     try:
         canvas = CanvasCairoFile(12, 700, height, None)
-    except TypeError, strerr:
+    except TypeError as strerr:
         if -1 == str(strerr).find("must be a Style"):
             raise TestFailedError
     else:

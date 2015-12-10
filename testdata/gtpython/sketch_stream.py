@@ -54,6 +54,6 @@ if __name__ == "__main__":
     layout.sketch(canvas)
 
     pngstream = canvas.to_stream()
-    outfile = open(pngfile, "w")
+    outfile = open(pngfile, "wb")
     outfile.write(pngstream)
     outfile.close()

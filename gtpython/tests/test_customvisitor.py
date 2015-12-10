@@ -3,8 +3,9 @@
 
 import unittest
 from gt import FeatureNode, CommentNode, SequenceNode, RegionNode, \
-               CustomVisitor, MetaNode, EOFNode,FeatureNodeIteratorDepthFirst, \
-               GTError
+    CustomVisitor, MetaNode, EOFNode, FeatureNodeIteratorDepthFirst, \
+    GTError
+
 
 class TestVisitor(CustomVisitor):
 
@@ -17,7 +18,8 @@ class TestVisitor(CustomVisitor):
         self.mn = None
 
     def visit_feature_node(self, fn):
-        new_child = FeatureNode.create_new(fn.get_seqid(), "bar", 100, 1000, "+")
+        new_child = FeatureNode.create_new(
+            fn.get_seqid(), "bar", 100, 1000, "+")
         fn.add_child(new_child)
 
     def visit_region_node(self, rn):
@@ -35,6 +37,7 @@ class TestVisitor(CustomVisitor):
     def visit_eof_node(self, en):
         self.en = en
 
+
 class ErrorTestVisitor(CustomVisitor):
 
     def __init__(self):
@@ -42,6 +45,7 @@ class ErrorTestVisitor(CustomVisitor):
 
     def visit_feature_node(self, fn):
         raise GTError
+
 
 class CustomVisitorTestCase(unittest.TestCase):
 
@@ -97,4 +101,3 @@ class CustomVisitorTestCase(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
-

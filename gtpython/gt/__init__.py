@@ -27,9 +27,10 @@ except ImportError:
     sys.exit(1)
 
 try:
-    from annotationsketch import *
+    from .annotationsketch import *
 except AttributeError:
     # fail gracefully when AnnotationSketch symbols are not present
     pass
-from core import *
-from extended import *
+from .core import *
+from .extended import *
+from .version import __version__

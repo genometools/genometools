@@ -1,8 +1,7 @@
-#!/usr/bin/env python
+#!/usr/bin/python
 # -*- coding: utf-8 -*-
 #
-# Copyright (c) 2013 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
-# Copyright (c) 2013 Center for Bioinformatics, University of Hamburg
+# Copyright (c) 2015 Sascha Steinbiss <sascha@steinbiss.name>
 #
 # Permission to use, copy, modify, and distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -17,7 +16,13 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #
 
-import warnings
-warnings.warn("deprecated", DeprecationWarning)
+import gt
+import unittest
 
-from gt.extended.feature_stream import *
+class VersionTest(unittest.TestCase):
+
+    def test_has_version(self):
+        self.assertIsNotNone(gt.__version__)
+
+if __name__ == "__main__":
+    unittest.main()

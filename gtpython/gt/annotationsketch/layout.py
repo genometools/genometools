@@ -24,16 +24,17 @@ from gt.annotationsketch.diagram import Diagram
 from gt.annotationsketch.style import Style
 from gt.core.error import Error, gterror
 from ctypes import c_ulong, c_void_p, c_int, c_char_p, CFUNCTYPE, byref, \
-                   POINTER, c_double, c_uint
+    POINTER, c_double, c_uint
 
 TrackOrderingFunc = CFUNCTYPE(c_int, c_char_p, c_char_p, c_void_p)
+
 
 class Layout:
 
     def __init__(self, diagram, width, style):
         err = Error()
         self.layout = gtlib.gt_layout_new(diagram._as_parameter_, width,
-                style._as_parameter_, err._as_parameter_)
+                                          style._as_parameter_, err._as_parameter_)
         if err.is_set():
             gterror(err)
         self._as_parameter_ = self.layout
@@ -46,7 +47,7 @@ class Layout:
 
     def from_param(cls, obj):
         if not isinstance(obj, Layout):
-            raise TypeError, "argument must be a Layout"
+            raise TypeError("argument must be a Layout")
         return obj._as_parameter_
 
     from_param = classmethod(from_param)
@@ -54,7 +55,7 @@ class Layout:
     def sketch(self, canvas):
         err = Error()
         had_err = gtlib.gt_layout_sketch(self.layout, canvas._as_parameter_,
-                err._as_parameter_)
+                                         err._as_parameter_)
         if err.is_set():
             gterror(err)
 
@@ -62,7 +63,7 @@ class Layout:
         err = Error()
         height = c_ulong()
         gtlib.gt_layout_get_height(self.layout, byref(height),
-                err._as_parameter_)
+                                   err._as_parameter_)
         if err.is_set():
             gterror(err)
         return height.value
@@ -92,7 +93,7 @@ class Layout:
         gtlib.gt_layout_sketch.restype = c_int
         gtlib.gt_layout_sketch.argtypes = [c_void_p, c_void_p, c_void_p]
         gtlib.gt_layout_set_track_ordering_func.argtypes = [c_void_p,
-                TrackOrderingFunc]
+                                                            TrackOrderingFunc]
         gtlib.gt_layout_get_height.restype = c_int
         gtlib.gt_layout_get_height.argtypes = [c_void_p, POINTER(c_ulong),
                                                c_void_p]

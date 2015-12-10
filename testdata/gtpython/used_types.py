@@ -38,4 +38,4 @@ if __name__ == "__main__":
         gn = in_stream.next_tree()
 
     for type in in_stream.get_used_types():
-        print type
+        print(type)

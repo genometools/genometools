@@ -26,7 +26,7 @@ class GTError(RuntimeError):
     pass
 
 
-class Error:
+class Error(Exception):
 
     def __init__(self, ptr=None):
         if ptr:
@@ -46,19 +46,20 @@ class Error:
 
     def from_param(cls, obj):
         if not isinstance(obj, Error):
-            raise TypeError, "argument must be an Error"
+            raise TypeError("argument must be an Error")
         return obj._as_parameter_
 
     from_param = classmethod(from_param)
 
     def get(self):
         if self.is_set():
-            return gtlib.gt_error_get(self.error)
+            return str(gtlib.gt_error_get(self.error).decode("UTF-8"))
         else:
             return "undefined error -- please report this as a bug!"
 
     def set(self, errmsg):
-        return gtlib.gt_error_set_nonvariadic(self.error, str(errmsg))
+        return gtlib.gt_error_set_nonvariadic(self.error,
+                                              str(errmsg).encode('UTF-8'))
 
     def is_set(self):
         return gtlib.gt_error_is_set(self.error) == 1
@@ -88,8 +89,6 @@ class Error:
 
 def gterror(err):
     if isinstance(err, Error):
-        raise GTError, "GenomeTools error: " + err.get()
+        raise GTError("GenomeTools error: " + err.get())
     else:
-        raise GTError, "GenomeTools error: " + err
-
-
+        raise GTError("GenomeTools error: " + err)

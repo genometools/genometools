@@ -33,6 +33,7 @@ from gt.extended.feature_node import FeatureNode
 
 TrackSelectorFunc = CFUNCTYPE(c_void_p, c_void_p, c_void_p, c_void_p)
 
+
 class Diagram:
 
     def from_array(arr, rng, style):
@@ -45,7 +46,7 @@ class Diagram:
                 gterror("Diagram array must only contain FeatureNodes!")
             gtarr.add(i)
         diagram = gtlib.gt_diagram_new_from_array(gtarr._as_parameter_, byref(rng),
-                style._as_parameter_)
+                                                  style._as_parameter_)
         return Diagram(diagram)
 
     from_array = staticmethod(from_array)
@@ -58,8 +59,9 @@ class Diagram:
         err = Error()
         if rng.start > rng.end:
             gterror("range.start > range.end")
-        diagram = gtlib.gt_diagram_new(feature_index._as_parameter_, seqid,
-                byref(rng), style._as_parameter_, err._as_parameter_)
+        diagram = gtlib.gt_diagram_new(feature_index,
+                                       str(seqid).encode('UTF-8'), byref(rng),
+                                       style, err)
         if err.is_set():
             gterror(err)
         return Diagram(diagram)
@@ -95,7 +97,7 @@ class Diagram:
 
     def from_param(cls, obj):
         if not isinstance(obj, Diagram):
-            raise TypeError, "argument must be a Diagram"
+            raise TypeError("argument must be a Diagram")
         return obj._as_parameter_
 
     from_param = classmethod(from_param)
@@ -104,17 +106,17 @@ class Diagram:
         from ctypes import c_char_p, c_void_p, POINTER
         gtlib.gt_diagram_add_custom_track.restype = None
         gtlib.gt_diagram_add_custom_track.argtypes = [c_void_p,
-                c_void_p]
+                                                      c_void_p]
         gtlib.gt_diagram_delete.restype = None
         gtlib.gt_diagram_delete.argtypes = [c_void_p]
         gtlib.gt_diagram_new.restype = c_void_p
         gtlib.gt_diagram_new.argtypes = [c_void_p, c_char_p, POINTER(Range),
-                c_void_p, c_void_p]
+                                         c_void_p, c_void_p]
         gtlib.gt_diagram_new_from_array.restype = c_void_p
         gtlib.gt_diagram_new_from_array.argtypes = [c_void_p, POINTER(Range),
-                c_void_p]
+                                                    c_void_p]
         gtlib.gt_diagram_set_track_selector_func.restype = None
         gtlib.gt_diagram_set_track_selector_func.argtypes = [c_void_p,
-                TrackSelectorFunc]
+                                                             TrackSelectorFunc]
 
     register = classmethod(register)

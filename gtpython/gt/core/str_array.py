@@ -38,7 +38,7 @@ class StrArray:
 
     def from_param(cls, obj):
         if not isinstance(obj, StrArray):
-            raise TypeError, "argument must be a StrArray"
+            raise TypeError("argument must be a StrArray")
         return obj._as_parameter_
 
     from_param = classmethod(from_param)
@@ -46,17 +46,18 @@ class StrArray:
     def to_list(self):
         result = []
         for i in range(gtlib.gt_str_array_size(self.strarr)):
-            result.append(gtlib.gt_str_array_get(self.strarr, i))
+            result.append(str(gtlib.gt_str_array_get(
+                self.strarr, i).decode('UTF-8')))
         return result
 
     def size(self):
         return gtlib.gt_str_array_size(self.strarr)
 
     def get(self, i):
-        return gtlib.gt_str_array_get(self.strarr, i)
+        return gtlib.gt_str_array_get(self.strarr, i).decode("UTF-8")
 
     def add(self, s):
-        gtlib.gt_str_array_add_cstr(self.strarr, str(s))
+        gtlib.gt_str_array_add_cstr(self.strarr, str(s).encode('UTF-8'))
 
     def register(cls, gtlib):
         from ctypes import c_void_p, c_char_p, c_ulong
@@ -75,5 +76,3 @@ class StrArray:
         gtlib.gt_str_array_delete.argtypes = [c_void_p]
 
     register = classmethod(register)
-
-

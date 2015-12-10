@@ -32,7 +32,7 @@ if __name__ == "__main__":
     nodes = []
 
     # construct a gene on the forward strand with two exons
-    G = BetterGeneRegion(113558120L, 113578742L, 'chr7', '+')
+    G = BetterGeneRegion(113558120, 113578742, 'chr7', '+')
     seqid = G.chromosome
 
 
@@ -43,7 +43,8 @@ if __name__ == "__main__":
                                    G.start,
                                    G.end,
                                    "+")
-    gene.add_attribute("Name", u"Testcase™ あがぃいぅ".encode("utf-8"))
+    # XXX FIXME: how to handle this case?
+    # gene.add_attribute("Name", "Testcase™ あがぃいぅ")
 
     nodes.append(gene)
 

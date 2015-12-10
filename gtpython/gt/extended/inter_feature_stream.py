@@ -22,14 +22,17 @@ from gt.extended.genome_stream import GenomeStream
 
 
 class InterFeatureStream(GenomeStream):
+
     def __init__(self, genome_stream, surround_type, new_type):
         self.gs = gtlib.gt_inter_feature_stream_new(genome_stream._as_parameter_,
-                surround_type, new_type)
+                                                    str(surround_type).encode(
+                                                        'UTF-8'),
+                                                    str(new_type).encode('UTF-8'))
         self._as_parameter_ = self.gs
 
     def from_param(cls, obj):
         if not isinstance(obj, InterFeatureStream):
-            raise TypeError, "argument must be a InterFeatureStream"
+            raise TypeError("argument must be a InterFeatureStream")
         return obj._as_parameter_
 
     from_param = classmethod(from_param)
@@ -38,6 +41,6 @@ class InterFeatureStream(GenomeStream):
         from ctypes import c_void_p, c_char_p
         gtlib.gt_inter_feature_stream_new.restype = c_void_p
         gtlib.gt_inter_feature_stream_new.argtypes = [c_void_p, c_char_p,
-                c_char_p]
+                                                      c_char_p]
 
     register = classmethod(register)

@@ -23,6 +23,33 @@ from gt.annotationsketch.rec_map import RecMap
 import math
 
 
+def cmp_to_key(mycmp):
+    'Convert a cmp= function into a key= function'
+    class K(object):
+
+        def __init__(self, obj, *args):
+            self.obj = obj
+
+        def __lt__(self, other):
+            return mycmp(self.obj, other.obj) < 0
+
+        def __gt__(self, other):
+            return mycmp(self.obj, other.obj) > 0
+
+        def __eq__(self, other):
+            return mycmp(self.obj, other.obj) == 0
+
+        def __le__(self, other):
+            return mycmp(self.obj, other.obj) <= 0
+
+        def __ge__(self, other):
+            return mycmp(self.obj, other.obj) >= 0
+
+        def __ne__(self, other):
+            return mycmp(self.obj, other.obj) != 0
+    return K
+
+
 class ImageInfo:
 
     def __init__(self):
@@ -38,7 +65,7 @@ class ImageInfo:
 
     def from_param(cls, obj):
         if not (isinstance(obj, ImageInfo) or obj == None):
-            raise TypeError, "argument must be an ImageInfo"
+            raise TypeError("argument must be an ImageInfo")
         if obj == None:
             return None
         return obj._as_parameter_
@@ -72,9 +99,11 @@ class ImageInfo:
             for i in range(self.num_of_rec_maps()):
                 rm = RecMap(gtlib.gt_image_info_get_rec_map(self.ii, i))
                 self.hotspots.append([math.floor(rm.get_northwest_x()),
-                        math.floor(rm.get_northwest_y()), math.floor(rm.get_southeast_x()),
-                        math.floor(rm.get_southeast_y()), rm.get_genome_feature()])
-            self.hotspots.sort(ImageInfo.compare_hotspots)
+                                      math.floor(rm.get_northwest_y()),
+                                      math.floor(rm.get_southeast_x()),
+                                      math.floor(rm.get_southeast_y()),
+                                      rm.get_genome_feature()])
+            self.hotspots.sort(key=cmp_to_key(ImageInfo.compare_hotspots))
         for hs in self.hotspots:
             yield (hs[0], hs[1], hs[2], hs[3], hs[4])
 

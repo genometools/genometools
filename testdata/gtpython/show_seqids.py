@@ -41,4 +41,4 @@ if __name__ == "__main__":
 
     seqids = feature_index.get_seqids()
     for seqid in seqids:
-        print seqid
+        print(seqid)

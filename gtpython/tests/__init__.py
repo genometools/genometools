@@ -11,6 +11,7 @@ from test_sequencenode import *
 from test_iterators import *
 from test_stream import *
 from test_range import *
+from test_version import *
 
 import unittest
 unittest.main()

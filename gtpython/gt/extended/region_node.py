@@ -31,7 +31,7 @@ class RegionNode(GenomeNode):
     @classmethod
     def create_new(cls, seqid, start, end):
         if start > end:
-            raise "start > end"
+            raise Error("start > end")
         seq_str = Str(str(seqid))
         fn = gtlib.gt_region_node_new(seq_str._as_parameter_, start, end)
         n = cls.create_from_ptr(fn, True)
