@@ -1,4 +1,4 @@
-ID   sequence0
+ID   sequence0;;;;;; 25 BP.
 XX
 DE   test1 foo bar
 XX
@@ -6,7 +6,7 @@ SQ
      AAAAAAAAAA AAAAAAAAAA AAAAA                                              25
 //
 
-ID   sequence1
+ID   sequence1;;;;;; 14 BP.
 XX
 DE   test2 bar baz
 XX
@@ -14,7 +14,7 @@ SQ
      CCCCCCCCCC CCCC                                                          14
 //
 
-ID   sequence2
+ID   sequence2;;;;;; 23 BP.
 XX
 DE   test3 baz quux
 XX
@@ -22,7 +22,7 @@ SQ
      GGGGGGGGGG GGGGGGGGGG GGG                                                23
 //
 
-ID   sequence3
+ID   sequence3;;;;;; 6 BP.
 XX
 DE   test4
 XX
@@ -30,7 +30,7 @@ SQ
      CGCGCG                                                                    6
 //
 
-ID   sequence4
+ID   sequence4;;;;;; 10 BP.
 XX
 DE   
 XX
