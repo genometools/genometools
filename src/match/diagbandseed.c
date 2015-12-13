@@ -544,8 +544,7 @@ static GtUword gt_diagbandseed_process_seeds(const GtEncseq *aencseq,
         GtUword bstart = (GtUword) (idx->bpos + 1 - seedlength);
 
         if (firstinrange ||
-            gt_querymatch_checkoverlap(info_querymatch.querymatchspaceptr,
-                                       bstart))
+            !gt_querymatch_overlap(info_querymatch.querymatchspaceptr,bstart))
         {
           /* extend seed */
           const GtQuerymatch *querymatch = NULL;
