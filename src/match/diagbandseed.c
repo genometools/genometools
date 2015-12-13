@@ -960,10 +960,11 @@ int gt_diagbandseed_run(const GtEncseq *aencseq,
     }
 
     if (mlen > 0) {
+      GtRadixsortinfo *rdxinfo;
       if (arg->verbose) {
         gt_timer_start(vtimer);
       }
-      GtRadixsortinfo *rdxinfo = gt_radixsort_new_uint64keypair(mlen);
+      rdxinfo = gt_radixsort_new_uint64keypair(mlen);
       gt_radixsort_inplace_Gtuint64keyPair((Gtuint64keyPair*) mlist.
                                            spaceGtDiagbandseedSeedPair,
                                            mlen);
