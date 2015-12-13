@@ -539,13 +539,14 @@ static GtUword gt_diagbandseed_process_seeds(const GtEncseq *aencseq,
       if ((GtUword)MAX(score[diag + 2], score[diag]) + (GtUword)score[diag + 1]
           >= mincoverage)
       {
-        /* relative seed start positions */
-        GtUword astart = (GtUword) (idx->apos + 1 - seedlength);
-        GtUword bstart = (GtUword) (idx->bpos + 1 - seedlength);
+        /* relative seed start position in B */
+        const GtUword bstart = (GtUword) (idx->bpos + 1 - seedlength);
 
         if (firstinrange ||
             !gt_querymatch_overlap(info_querymatch.querymatchspaceptr,bstart))
         {
+          /* relative seed start position in A */
+          const GtUword astart = (GtUword) (idx->apos + 1 - seedlength);
           /* extend seed */
           const GtQuerymatch *querymatch = NULL;
           if (aencseq == bencseq) {
@@ -621,9 +622,9 @@ int gt_diagbandseed_run(const GtEncseq *aencseq,
   GtArrayGtDiagbandseedSeedPair mlist, mlist_rev;
   GtTimer *vtimer = NULL;
   GtRadixsortinfo *rdxinfo;
-  GtUword alen = 0, blen = 0, mlen = 0, mlen_rev = 0, maxfreq = 0,
-          amaxlen = 0, bmaxlen = 0, ankmers = 0;
-  unsigned int endposdiff = 0;
+  GtUword alen, blen = 0, mlen = 0, mlen_rev = 0, maxfreq, amaxlen, bmaxlen,
+          ankmers;
+  unsigned int endposdiff;
   int had_err = 0;
   bool alist_blist_id = false;
   bool both_strands = false;
@@ -638,9 +639,9 @@ int gt_diagbandseed_run(const GtEncseq *aencseq,
   alist_blist_id = (selfcomp && !arg->nofwd) ? true : false;
   both_strands = (arg->norev || arg->nofwd) ? false : true;
   if (MIN(amaxlen, bmaxlen) < arg->seedlength) {
-    gt_warning("Argument to option \"-seedlength\" should be an integer <= "
-               GT_WU " (length of longest sequence).", MIN(amaxlen, bmaxlen));
-    return had_err;
+    gt_error_set(err,"argument to option \"-seedlength\" must be an integer <= "
+                 GT_WU " (length of longest sequence).", MIN(amaxlen, bmaxlen));
+    return -1;
   }
 
   /* estimate number of expected kmers */
