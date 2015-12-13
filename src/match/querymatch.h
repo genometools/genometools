@@ -126,6 +126,6 @@ bool gt_querymatch_selfmatch(const GtQuerymatch *querymatch);
 GtWord gt_querymatch_distance2score(GtUword distance,GtUword alignedlen);
 
 /* Returns true, iff the given seed start position is below the querymatch. */
-bool gt_querymatch_checkoverlap(const GtQuerymatch *querymatch,
-                                GtUword start_relative);
+bool gt_querymatch_overlap(const GtQuerymatch *querymatch,
+                           GtUword start_relative);
 #endif
