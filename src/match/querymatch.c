@@ -491,9 +491,7 @@ bool gt_querymatch_overlap(const GtQuerymatch *querymatch,
                            GtUword start_relative)
 {
   gt_assert(querymatch != NULL);
-  if (querymatch->querystart + querymatch->querylen >= start_relative) {
-    return true; /* overlap with querymatch */
-  } else {
-    return false; /* next seeds starts after curren extension */
-  }
+  return querymatch->querystart + querymatch->querylen >= start_relative
+           ? true /* overlap with querymatch */
+           : false; /* next seeds starts after curren extension */
 }
