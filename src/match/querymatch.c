@@ -168,8 +168,7 @@ void gt_querymatch_coordinates_out(const GtQuerymatch *querymatch)
     printf("# seed:\t" GT_WU "\t" GT_WU "\t" GT_WU "\n",querymatch->seedpos1,
              querymatch->seedpos2,querymatch->seedlen);
   }
-  printf(GT_WU " " GT_WU " " GT_WU " %c " GT_WU " " Formatuint64_t
-                 " " GT_WU,
+  printf(GT_WU " " GT_WU " " GT_WU " %c " GT_WU " " Formatuint64_t " " GT_WU,
          querymatch->dblen,
          querymatch->dbseqnum,
          querymatch->dbstart_relative,
@@ -342,6 +341,7 @@ bool gt_querymatch_read_line(GtQuerymatch *querymatchptr,
 {
   char direction;
   double identity;
+
   if (sscanf(line_ptr,
              GT_WU " " GT_WU " " GT_WU " %c " GT_WU " %"PRIu64 " "
              GT_WU " " GT_WD " " GT_WU " %lf",
@@ -446,11 +446,6 @@ uint64_t gt_querymatch_queryseqnum(const GtQuerymatch *querymatch)
   return querymatch->queryseqnum;
 }
 
-double gt_querymatch_error_rate(GtUword distance,GtUword alignedlen)
-{
-  return 200.0 * (double) distance/alignedlen;
-}
-
 void gt_querymatch_query_readmode_set(GtQuerymatch *querymatch,
                                       GtReadmode query_readmode)
 {
@@ -485,6 +480,11 @@ GtUword gt_querymatch_distance(const GtQuerymatch *querymatch)
 GtWord gt_querymatch_distance2score(GtUword distance,GtUword alignedlen)
 {
   return ((GtWord) alignedlen) - (GtWord) (3 * distance);
+}
+
+double gt_querymatch_error_rate(GtUword distance,GtUword alignedlen)
+{
+  return 200.0 * (double) distance/alignedlen;
 }
 
 bool gt_querymatch_overlap(const GtQuerymatch *querymatch,
