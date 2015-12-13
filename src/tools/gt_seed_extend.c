@@ -72,6 +72,7 @@ typedef struct {
   bool benchmark;
   bool verbose;
   bool seed_display;
+  bool extend_last;
 } GtSeedExtendArguments;
 
 static void* gt_seed_extend_arguments_new(void)
@@ -403,6 +404,15 @@ static GtOptionParser* gt_seed_extend_option_parser_new(void *tool_arguments)
   gt_option_is_development_option(op_weakends);
   gt_option_parser_add_option(op, op_weakends);
 
+  /* -extend-last */
+  option = gt_option_new_bool("extend-last",
+                              "Start extension after all SeedPair lists are "
+                              "created",
+                              &arguments->extend_last,
+                              false);
+  gt_option_is_development_option(option);
+  gt_option_parser_add_option(op, option);
+
   /* -v */
   option = gt_option_new_verbose(&arguments->verbose);
   gt_option_parser_add_option(op, option);
@@ -689,6 +699,7 @@ static int gt_seed_extend_runner(GT_UNUSED int argc,
     dbsarguments.debug_kmer = arguments->dbs_debug_kmer;
     dbsarguments.debug_seedpair = arguments->dbs_debug_seedpair;
     dbsarguments.seed_display = arguments->seed_display;
+    dbsarguments.extend_last = arguments->extend_last;
     dbsarguments.extendgreedyinfo = grextinfo;
     dbsarguments.extendxdropinfo = xdropinfo;
     dbsarguments.querymatchoutopt = querymatchoutopt;
