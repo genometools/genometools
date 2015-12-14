@@ -21,6 +21,7 @@
 #include "core/str_api.h"
 #include "core/types_api.h"
 #include "core/error_api.h"
+#include "match/querymatch.h"
 
 /* This is the class name for the iterator on matches in the output format
    used by gt seed_extend and gt repfind. */
