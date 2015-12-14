@@ -146,9 +146,9 @@ void *gt_priority_queue_extract_min(GtPriorityQueue *pq)
 const void *gt_priority_queue_find_min(const GtPriorityQueue *pq)
 {
   gt_assert(pq != NULL && !gt_priority_queue_is_empty(pq));
-  return pq->elements +
+  return *(pq->elements +
          (pq->capacity < (GtUword) GT_MINPQSIZE ? pq->numofelements-1
-                                                      : 1UL);
+                                                      : 1UL));
 }
 
 void gt_priority_queue_delete(GtPriorityQueue *pq)
