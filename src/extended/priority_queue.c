@@ -41,12 +41,11 @@ GtPriorityQueue *gt_priority_queue_new(GtCompare cmpfun,
                                        GtUword maxnumofelements)
 {
   GtPriorityQueue *pq = gt_malloc(sizeof *pq);
-  pq->elements = gt_malloc(sizeof (*pq->elements) * (maxnumofelements + 1));
+  pq->elements = gt_calloc((maxnumofelements + 1), sizeof (*pq->elements));
   pq->minelement = NULL;
   pq->cmpfun = cmpfun;
   pq->capacity = maxnumofelements;
   pq->numofelements = 0;
-  pq->elements[0] = NULL;
   return pq;
 }
 
@@ -146,9 +145,9 @@ void *gt_priority_queue_extract_min(GtPriorityQueue *pq)
 const void *gt_priority_queue_find_min(const GtPriorityQueue *pq)
 {
   gt_assert(pq != NULL && !gt_priority_queue_is_empty(pq));
-  return pq->elements +
+  return *(pq->elements +
          (pq->capacity < (GtUword) GT_MINPQSIZE ? pq->numofelements-1
-                                                      : 1UL);
+                                                      : 1UL));
 }
 
 void gt_priority_queue_delete(GtPriorityQueue *pq)
