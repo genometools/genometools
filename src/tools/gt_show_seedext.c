@@ -134,7 +134,8 @@ static int gt_show_seedext_arguments_check(GT_UNUSED int rest_argc,
   return had_err;
 }
 
-static void gt_show_seed_extend_plain(LinspaceManagement *linspace_spacemanager,
+static void gt_show_seed_extend_plain(GtLinspaceManagement
+                                      *linspace_spacemanager,
                                       GtScoreHandler *linspace_scorehandler,
                                       GtAlignment *alignment,
                                       GtUchar *alignment_show_buffer,
@@ -247,7 +248,7 @@ static int gt_show_seedext_runner(GT_UNUSED int argc,
     const GtUchar *characters = gt_encseq_alphabetcharacters(aencseq);
     const GtUchar wildcardshow = gt_encseq_alphabetwildcardshow(aencseq);
     GtUchar *alignment_show_buffer = gt_alignment_buffer_new(alignmentwidth);
-    LinspaceManagement *linspace_spacemanager = gt_linspaceManagement_new();
+    GtLinspaceManagement *linspace_spacemanager = gt_linspaceManagement_new();
     GtScoreHandler *linspace_scorehandler = gt_scorehandler_new(0,1,0,1);;
     GtAlignment *alignment = gt_alignment_new();
     const GtUword query_totallength = gt_encseq_total_length(bencseq);

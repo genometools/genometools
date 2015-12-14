@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2015 Annika <annika.seidel@studium.uni-hamburg.de>
+  Copyright (c) 2015 Annika Seidel <annika.seidel@studium.uni-hamburg.de>
   Copyright (c) 2015 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -44,12 +44,12 @@
 #include "tools/gt_linspace_align.h"
 
 #define LEFT_DIAGONAL_SHIFT(similarity, ulen, vlen) \
-                            -((1-similarity)*(MAX(ulen,vlen)) + 1 +\
-                            ((GtWord)ulen-(GtWord)vlen))
+                            -((1-similarity)*(MAX(ulen,vlen)) +\
+                            MIN(((GtWord)ulen-(GtWord)vlen),0))
 
 #define RIGHT_DIAGONAL_SHIFT(similarity, ulen, vlen) \
-                             ((1-similarity)*(MAX(ulen,vlen)) + 1 -\
-                             ((GtWord)ulen-(GtWord)vlen))
+                             ((1-similarity)*(MAX(ulen,vlen)) -\
+                             MAX(((GtWord)ulen-(GtWord)vlen),0))
 
 typedef struct{
   GtStr      *outputfile; /*default stdout*/
@@ -141,6 +141,7 @@ static GtOptionParser* gt_linspace_align_option_parser_new(void *tool_arguments)
            *optionshowsequences, *optiondiagonal, *optiondiagonalbonds,
            *optionsimilarity, *optiontsfactor, *optionspacetime,
            *optionscoreonly, *optionwildcardsymbol;
+
   gt_assert(arguments);
 
   /* init */
@@ -192,13 +193,13 @@ static GtOptionParser* gt_linspace_align_option_parser_new(void *tool_arguments)
   gt_option_parser_add_option(op, optionshowscore);
 
   optionshowsequences = gt_option_new_bool("showsequences", "show sequences u "
-                                           "and v in fornt of alignment",
+                                           "and v in front of alignment",
                                        &arguments->showsequences, false);
   gt_option_parser_add_option(op, optionshowsequences);
 
   optionscoreonly = gt_option_new_bool("showonlyscore", "show only score for "
                                        "generated alignment to compare with "
-                                       "other algorithmen",
+                                       "other algorithms",
                                        &arguments->scoreonly, false);
   gt_option_parser_add_option(op, optionscoreonly);
 
@@ -497,8 +498,8 @@ static void get_onesequence(const GtSequenceTable *sequence_table,
 static int gt_all_against_all_alignment_check(bool affine,
                                         GtAlignment *align,
                                         const GtLinspaceArguments *arguments,
-                                        LinspaceManagement *spacemanager,
-                                        GtScoreHandler *scorehandler,
+                                        GtLinspaceManagement *spacemanager,
+                                        const GtScoreHandler *scorehandler,
                                         const GtUchar *characters,
                                         GtUchar wildcardshow,
                                         const GtSequenceTable *sequence_table1,
@@ -563,7 +564,7 @@ static int gt_all_against_all_alignment_check(bool affine,
       }
       else if (arguments->local)
       {
-        (affine ? gt_calc_affinealign_linear_local
+        (affine ? gt_computeaffinelinearspace_local_generic
                 : gt_computelinearspace_local_generic)
                     (spacemanager, scorehandler, align,
                      useq, 0, ulen, vseq, 0, vlen);
@@ -743,7 +744,7 @@ static int gt_linspace_align_runner(GT_UNUSED int argc,
   GtAlignment *align;
   GtWord left_dist = 0, right_dist = 0;
   GtSequenceTable *sequence_table1, *sequence_table2;
-  LinspaceManagement *spacemanager;
+  GtLinspaceManagement *spacemanager;
   GtScoreHandler *scorehandler = NULL;
   GtTimer *linspacetimer = NULL;
   GtAlphabet *alphabet = NULL;

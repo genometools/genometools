@@ -65,7 +65,7 @@ static void fillDPtab_in_square_space(GtUword **E,
 
 /* create an global alignment in square space, to use it in linear context you
  * have to generate an spacemanager before, in any other case it can be NULL */
-GtUword alignment_in_square_space_generic (LinspaceManagement *spacemanager,
+GtUword alignment_in_square_space_generic (GtLinspaceManagement *spacemanager,
                                            GtAlignment *align,
                                            const GtUchar *useq,
                                            GtUword ustart,
@@ -125,7 +125,7 @@ GtUword distance_only_global_alignment(const GtUchar *useq,
 /* create a global alignment in square space with constant cost values,
  * to use it in linear context you have to generate an spacemanager before,
  * in any other case it can be NULL */
-GtUword alignment_in_square_space(LinspaceManagement *spacemanager,
+GtUword alignment_in_square_space(GtLinspaceManagement *spacemanager,
                                   GtAlignment *align,
                                   const GtUchar *useq,
                                   GtUword ustart,
@@ -209,7 +209,7 @@ static void evaluate_crosspoints_from_2dimtab(
 
 /* fill crosspointtable ctab for part of sequences useq and vseq in square
  * space, use it to combine square calculating with linear calculating */
-GtUword ctab_in_square_space(LinspaceManagement *spacemanager,
+GtUword ctab_in_square_space(GtLinspaceManagement *spacemanager,
                              const GtScoreHandler *scorehandler,
                              GtUword *Ctab,
                              const GtUchar *useq,
@@ -238,7 +238,7 @@ GtUword ctab_in_square_space(LinspaceManagement *spacemanager,
 
 /*----------------------------local alignment---------------------------------*/
 static GtWord fillDPtab_in_square_space_local(GtWord **Ltabcolumn,
-                                              Gtmaxcoordvalue *max,
+                                              GtMaxcoordvalue *max,
                                               const GtUchar *useq,
                                               GtUword ustart,
                                               GtUword ulen,
@@ -293,7 +293,8 @@ static GtWord fillDPtab_in_square_space_local(GtWord **Ltabcolumn,
 
 /* create an local alignment in square space, to use it in linear context you
  * have to generate an spacemanager before, in any other case it can be NULL */
-GtWord alignment_in_square_space_local_generic(LinspaceManagement *spacemanager,
+GtWord alignment_in_square_space_local_generic(GtLinspaceManagement
+                                               *spacemanager,
                                                GtAlignment *align,
                                                const GtUchar *useq,
                                                GtUword ustart,
@@ -301,10 +302,11 @@ GtWord alignment_in_square_space_local_generic(LinspaceManagement *spacemanager,
                                                const GtUchar *vseq,
                                                GtUword vstart,
                                                GtUword vlen,
-                                             const GtScoreHandler *scorehandler)
+                                               const GtScoreHandler
+                                               *scorehandler)
 {
   GtWord score = 0, **Ltabcolumn;
-  Gtmaxcoordvalue *max;
+  GtMaxcoordvalue *max;
 
   gt_assert(align != NULL);
   if (spacemanager == NULL)
@@ -351,7 +353,7 @@ GtWord alignment_in_square_space_local_generic(LinspaceManagement *spacemanager,
 /* create an local alignment in square space with constant score values,
  * to use it in linear context you have to generate an spacemanager before,
  * in any other case it can be NULL */
-GtWord alignment_in_square_space_local(LinspaceManagement *spacemanager,
+GtWord alignment_in_square_space_local(GtLinspaceManagement *spacemanager,
                                        GtAlignment *align,
                                        const GtUchar *useq,
                                        GtUword ustart,

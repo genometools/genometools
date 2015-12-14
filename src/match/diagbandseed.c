@@ -1,19 +1,19 @@
 /*
-  Copyright (c) 2015 Joerg Winkler <joerg.winkler@studium.uni-hamburg.de>
-  Copyright (c) 2015 Center for Bioinformatics, University of Hamburg
+ Copyright (c) 2015 Joerg Winkler <joerg.winkler@studium.uni-hamburg.de>
+ Copyright (c) 2015 Center for Bioinformatics, University of Hamburg
 
-  Permission to use, copy, modify, and distribute this software for any
-  purpose with or without fee is hereby granted, provided that the above
-  copyright notice and this permission notice appear in all copies.
+ Permission to use, copy, modify, and distribute this software for any
+ purpose with or without fee is hereby granted, provided that the above
+ copyright notice and this permission notice appear in all copies.
 
-  THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
-  WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
-  MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
-  ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
-  WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
-  ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
-  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
-*/
+ THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+ WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+ MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+ ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+ WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+ ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+ */
 
 #include <limits.h>
 #include <stddef.h>
@@ -126,7 +126,14 @@ static void gt_diagbandseed_processkmercode(void *prockmerinfo,
       gt_assert(pkinfo->next_separator > pkinfo->prev_separator);
     }
     gt_assert(endpos >= pkinfo->prev_separator);
-    pkinfo->endpos = (GtDiagbandseedPosition) (endpos - pkinfo->prev_separator);
+    gt_assert(startpos < pkinfo->next_separator);
+    if (pkinfo->readmode == GT_READMODE_FORWARD) {
+      pkinfo->endpos = (GtDiagbandseedPosition) (endpos -
+                                                 pkinfo->prev_separator);
+    } else {
+      pkinfo->endpos = (GtDiagbandseedPosition) (pkinfo->next_separator - 1 -
+                                                 startpos);
+    }
   }
 
   /* save k-mer code */
@@ -136,7 +143,9 @@ static void gt_diagbandseed_processkmercode(void *prockmerinfo,
         : gt_kmercode_reverse(code, pkinfo->seedlength);
   /* save endpos and seqnum */
   gt_assert(pkinfo->endpos != UINT_MAX);
-  kmerposptr->endpos = pkinfo->endpos++;
+  kmerposptr->endpos = pkinfo->endpos;
+  pkinfo->endpos = (pkinfo->readmode == GT_READMODE_FORWARD
+                    ? pkinfo->endpos + 1 : pkinfo->endpos - 1);
   kmerposptr->seqnum = pkinfo->seqnum;
   pkinfo->numberofkmerscollected++;
 }
@@ -253,8 +262,9 @@ static void gt_diagbandseed_processhistogram(GtUword *histogram,
       count += histogram[frequency - 1];
     }
     if (count > mem_avail) {
-      gt_assert(frequency >= 2 && count >= histogram[frequency]);
+      gt_assert(frequency >= 2);
       frequency -= 2;
+      gt_assert(count >= histogram[frequency]);
       count -= histogram[frequency];
     } else if (frequency == maxgram + 1) {
       frequency = GT_UWORD_MAX;
@@ -377,11 +387,11 @@ int gt_diagbandseed_verify(const GtEncseq *aencseq,
 
     /* extract decoded k-mers at seed pair positions */
     apos = curr_sp->apos + gt_encseq_seqstartpos(aencseq, curr_sp->aseqnum);
-    bpos = curr_sp->bpos + gt_encseq_seqstartpos(bencseq, curr_sp->bseqnum);
     gt_encseq_extract_decoded(aencseq, buf1, apos + 1 - seedlength, apos);
-    gt_encseq_extract_decoded(bencseq, buf2, bpos + 1 - seedlength, bpos);
 
     if (!reverse) {
+      bpos = curr_sp->bpos + gt_encseq_seqstartpos(bencseq, curr_sp->bseqnum);
+      gt_encseq_extract_decoded(bencseq, buf2, bpos + 1 - seedlength, bpos);
       if (strcmp(buf1, buf2) != 0) {
         gt_error_set(err, "Wrong SeedPair (%d,%d,%d,%d): %s != %s\n",
                      curr_sp->aseqnum, curr_sp->bseqnum, curr_sp->apos,
@@ -392,6 +402,10 @@ int gt_diagbandseed_verify(const GtEncseq *aencseq,
     } else {
       /* get reverse k-mer */
       char *idx;
+      bpos = gt_encseq_seqstartpos(bencseq, curr_sp->bseqnum) +
+             gt_encseq_seqlength(bencseq, curr_sp->bseqnum) - curr_sp->bpos - 1;
+      gt_encseq_extract_decoded(bencseq, buf2, bpos, bpos + seedlength - 1);
+
       for (idx = buf3; idx < buf3 + seedlength; idx++) {
         gt_complement(idx, buf2[seedlength + buf3 - idx - 1], NULL);
       }
@@ -438,9 +452,10 @@ static GtUword gt_diagbandseed_process_seeds(const GtEncseq *aencseq,
   GtUword mlen = 0, diag = 0;
   bool firstinrange = true;
   GtUword count_extensions = 0;
-  const GtReadmode query_readmode = (reverse && extendgreedyinfo != NULL
-                                     ? GT_READMODE_REVCOMPL
-                                     : GT_READMODE_FORWARD);
+  const GtReadmode query_readmode
+    = (reverse && (extendgreedyinfo != NULL ||
+                   extendxdropinfo != NULL)) ? GT_READMODE_REVCOMPL
+                                             : GT_READMODE_FORWARD;
 
   gt_assert(mlist != NULL);
   mlen = mlist->nextfreeGtDiagbandseedSeedPair; /* mlist length  */
@@ -545,6 +560,7 @@ static GtUword gt_diagbandseed_process_seeds(const GtEncseq *aencseq,
                                                             seedlength,
                                                             query_readmode);
           } else {
+            count_extensions++;
             querymatch = extend_querymatch_relative_function(&info_querymatch,
                                                              aencseq,
                                                              idx->aseqnum,
@@ -742,7 +758,7 @@ int gt_diagbandseed_run(const GtEncseq *aencseq,
                           maxgram,
                           arg->memlimit,
                           histogram,
-                          endposdiff,
+                          alist_blist_id ? endposdiff : 0,
                           selfcomp);
     mlen = histogram[maxgram];
     gt_free(histogram);
@@ -807,7 +823,7 @@ int gt_diagbandseed_run(const GtEncseq *aencseq,
                           maxgram,
                           arg->memlimit,
                           NULL, /* histogram not needed: save seed pairs */
-                          endposdiff,
+                          alist_blist_id ? endposdiff : 0,
                           selfcomp);
     mlen = mlist.nextfreeGtDiagbandseedSeedPair;
     if (arg->debug_seedpair) {
@@ -882,7 +898,7 @@ int gt_diagbandseed_run(const GtEncseq *aencseq,
                           maxgram,
                           arg->memlimit,
                           NULL, /* histogram not needed: save seed pairs */
-                          endposdiff,
+                          alist_blist_id ? endposdiff : 0,
                           selfcomp);
     mlen_rev = mlist_rev.nextfreeGtDiagbandseedSeedPair;
     if (arg->debug_seedpair) {
@@ -941,7 +957,7 @@ int gt_diagbandseed_run(const GtEncseq *aencseq,
   }
 
   /* verify SeedPairs in the sequences */
-  if (!had_err && mlen > 0 && arg->verify) {
+  if (!had_err && arg->verify) {
     if (arg->verbose) {
       printf("# Start verifying seed pairs...\n");
       gt_timer_start(vtimer);

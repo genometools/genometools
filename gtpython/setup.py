@@ -9,9 +9,13 @@ if sys.version_info < (2, 6, 0):
 
 from distutils.core import setup
 
+def get_version():
+    VERSIONFILE="../VERSION"
+    return open(VERSIONFILE, "r").read().strip()
+
 setup(
     name='GenomeTools',
-    version='0.1',
+    version=get_version(),
     description= 'Python bindings for GenomeTools',
     author='Sascha Steinbiss',
     author_email='steinbiss@zbh.uni-hamburg.de',

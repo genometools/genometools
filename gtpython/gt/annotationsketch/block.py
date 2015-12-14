@@ -46,7 +46,7 @@ class Block(object):
         return (r.start, r.end)
 
     def get_type(self):
-        return gtlib.gt_block_get_type(self.block)
+        return gtlib.gt_block_get_type(self.block).decode('UTF-8')
 
     def has_only_one_fullsize_element(self):
         return gtlib.gt_block_has_only_one_fullsize_element(self.block) == \
@@ -65,7 +65,7 @@ class Block(object):
     def set_strand(self, strand):
         if not strand in strandchars:
             gterror("Invalid strand '%s' -- must be one of %s" % (strand,
-                    strandchars))
+                                                                  strandchars))
         gtlib.gt_block_set_strand(self.block, strandchars.index(strand))
 
     def get_strand(self):
@@ -79,11 +79,11 @@ class Block(object):
             return None
 
     def get_size(self):
-        return gtlib.gt_block_get_size(self.block)
+        return int(gtlib.gt_block_get_size(self.block))
 
     def from_param(cls, obj):
         if not isinstance(obj, Block):
-            raise TypeError, "argument must be a Block"
+            raise TypeError("argument must be a Block")
         return obj._as_parameter_
 
     from_param = classmethod(from_param)
@@ -116,7 +116,7 @@ class Block(object):
         gtlib.gt_block_ref.argtypes = [c_void_p]
         gtlib.gt_block_set_caption_visibility.restype = None
         gtlib.gt_block_set_caption_visibility.argtypes = [c_void_p,
-                c_int]
+                                                          c_int]
         gtlib.gt_block_set_strand.restype = None
         gtlib.gt_block_set_strand.argtypes = [c_void_p, c_int]
 

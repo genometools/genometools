@@ -29,15 +29,16 @@ class MetaNode(GenomeNode):
 
     @classmethod
     def create_new(cls, directive, data):
-        fn = gtlib.gt_meta_node_new(str(directive), str(data))
+        fn = gtlib.gt_meta_node_new(str(directive).encode("UTF-8"),
+                                    str(data).encode("UTF-8"))
         n = cls.create_from_ptr(fn, True)
         return n
 
     def get_directive(self):
-        return str(gtlib.gt_meta_node_get_directive(self.gn))
+        return str(gtlib.gt_meta_node_get_directive(self.gn).decode("UTF-8"))
 
     def get_data(self):
-        return str(gtlib.gt_meta_node_get_data(self.gn))
+        return str(gtlib.gt_meta_node_get_data(self.gn).decode("UTF-8"))
 
     def register(cls, gtlib):
         from ctypes import c_void_p, c_char_p

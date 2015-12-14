@@ -54,6 +54,7 @@ struct GtSequenceBufferEMBL {
        firstoverallentry,
        nextfile,
        eof_was_set,
+       desc_spacer_was_set,
        description_set;
   GtEMBLParserState state;
 };
@@ -103,6 +104,8 @@ parse_next_line(GtSequenceBuffer *sb, GtEMBLParserLineCode *lc,
     *lc = SEQUENCE;
   else if (memcmp(linecode, EMBL_SPACER,            2*sizeof (char)) == 0)
     *lc = SPACER;
+  else if (memcmp(linecode, EMBL_ID_LINE_STRING,    2*sizeof (char)) == 0)
+    *lc = ID;
   else if (memcmp(linecode, EMBL_ENTRY_TERMINATOR,  2*sizeof (char)) == 0)
     *lc = TERMINATOR;
 
@@ -150,8 +153,23 @@ parse_next_line(GtSequenceBuffer *sb, GtEMBLParserLineCode *lc,
         break;
       case DESCRIPTION:
         /* write description into buffer */
-        if (pvt->descptr)
+        if (pvt->descptr) {
+          if (!(((GtSequenceBufferEMBL*) sb)->desc_spacer_was_set)) {
+            gt_desc_buffer_append_char(pvt->descptr, ' ');
+            ((GtSequenceBufferEMBL*)sb)->desc_spacer_was_set = true;
+          }
           gt_desc_buffer_append_char(pvt->descptr, currentchar);
+        }
+        break;
+      case ID:
+        /* write ID up to ';' into buffer */
+        if (currentchar == ';') {
+          *lc = OTHER;
+          break;
+        }
+        if (pvt->descptr) {
+          gt_desc_buffer_append_char(pvt->descptr, currentchar);
+        }
         break;
       default:
         break;
@@ -231,6 +249,7 @@ static int gt_sequence_buffer_embl_advance(GtSequenceBuffer *sb, GtError *err)
       currentfileadd++;
       pvt->lastspeciallength++;
       sbe->state = EMBL_UNDEFINED;
+      sbe->desc_spacer_was_set = false;
       if (!sbe->description_set && pvt->descptr)
           gt_desc_buffer_finish(pvt->descptr);
       sbe->description_set = false;
@@ -359,6 +378,7 @@ GtSequenceBuffer* gt_sequence_buffer_embl_new(const GtStrArray *sequences)
   sb->pvt->linenum = 0;
   sbe->firstoverallentry = true;
   sbe->firstentryinfile = true;
+  sbe->desc_spacer_was_set = false;
   sbe->nextfile = true;
   sb->pvt->nextread = sb->pvt->nextfree = 0;
   sb->pvt->lastspeciallength = 0;

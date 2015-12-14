@@ -57,6 +57,24 @@ void gt_seedextend_match_iterator_delete(GtSeedextendMatchIterator *semi)
   gt_free(semi);
 }
 
+#if defined(_WIN32) || defined(_WIN64)
+char *strsep(char** stringp, const char *delim)
+{
+  char *p, *start = *stringp;
+
+  p = (start != NULL) ? strpbrk(start, delim) : NULL;
+  if (p == NULL)
+  {
+    *stringp = NULL;
+  } else
+  {
+    *p = '\0';
+    *stringp = p + 1;
+  }
+  return start;
+}
+#endif
+
 /* Parse encseq input indices from -ii and -qii options in 1st line of file. */
 GtSeedextendMatchIterator *gt_seedextend_match_iterator_new(
                                             const GtStr *matchfilename,

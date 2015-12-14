@@ -7,7 +7,7 @@ import os
 
 op = os.path
 datadir = op.abspath(op.join(op.dirname(__file__), "..", "..",
-                     "testdata"))
+                             "testdata"))
 
 
 class StreamTest(unittest.TestCase):
@@ -21,9 +21,11 @@ class StreamTest(unittest.TestCase):
         fi = gt.FeatureIndexMemory()
         gt.FeatureStream(add_introns_stream, fi).pull()
 
-        self.assert_('1877523' in fi.get_seqids())
+        self.assertTrue('1877523' in fi.get_seqids())
+
 
 class TestDuplicateStream(unittest.TestCase):
+
     def setUp(self):
         self.gff_file = op.join(datadir, "addintrons.gff3")
         self.ins = gt.GFF3InStream(self.gff_file)
@@ -40,9 +42,11 @@ class TestDuplicateStream(unittest.TestCase):
         while f:
             types.update([f.type])
             f = dfi.next()
-        self.assert_('intron' in types, types)
+        self.assertTrue('intron' in types, types)
+
 
 class TestMergeStream(unittest.TestCase):
+
     def setUp(self):
         self.gff_file = op.join(datadir, "mergefeat.gff3")
         self.ins = gt.GFF3InStream(self.gff_file)
@@ -60,7 +64,9 @@ class TestMergeStream(unittest.TestCase):
         self.assertEqual(sub.start, 1000)
         self.assertEqual(sub.end, 10000)
 
+
 class TestInterFeat(unittest.TestCase):
+
     def setUp(self):
         self.gff_file = op.join(datadir, "addintrons.gff3")
         self.ins = gt.GFF3InStream(self.gff_file)
@@ -77,9 +83,11 @@ class TestInterFeat(unittest.TestCase):
         while f:
             types.update([f.type])
             f = dfi.next()
-        self.assert_('intron' in types, types)
+        self.assertTrue('intron' in types, types)
+
 
 class TestCustomExample(unittest.TestCase):
+
     def setUp(self):
         self.gff_file = op.join(datadir, "eden.gff3")
         self.ins = gt.GFF3InStream(self.gff_file)
@@ -96,7 +104,7 @@ class TestCustomExample(unittest.TestCase):
         while f:
             types.update([f.type])
             f = dfi.next()
-        self.assert_('bar' in types, types)
+        self.assertTrue('bar' in types, types)
 
 if __name__ == "__main__":
     unittest.main()

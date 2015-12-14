@@ -27,8 +27,8 @@ from ctypes import byref, c_void_p
 class GenomeStream:
 
     def __init__(self, *args):
-        raise NotImplementedError, \
-            'Please call the constructor of a GenomeStream implementation.'
+        raise NotImplementedError("Please call the constructor of a " +
+                                  "GenomeStream implementation.")
 
     def __del__(self):
         try:
@@ -38,7 +38,7 @@ class GenomeStream:
 
     def from_param(cls, obj):
         if not isinstance(obj, GenomeStream):
-            raise TypeError, "argument must be a GenomeStream"
+            raise TypeError("argument must be a GenomeStream")
         return obj._as_parameter_
 
     from_param = classmethod(from_param)
@@ -47,7 +47,7 @@ class GenomeStream:
         err = Error()
         genome_node = c_void_p()
         rval = gtlib.gt_node_stream_next(self.gs, byref(genome_node),
-                err._as_parameter_)
+                                         err._as_parameter_)
         if rval != 0:
             gterror(err)
         if genome_node.value == None:

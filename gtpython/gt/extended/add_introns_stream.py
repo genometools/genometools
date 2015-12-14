@@ -30,7 +30,7 @@ class AddIntronsStream(GenomeStream):
 
     def from_param(cls, obj):
         if not isinstance(obj, AddIntronsStream):
-            raise TypeError, "argument must be a AddIntronsStream"
+            raise TypeError("argument must be a AddIntronsStream")
         return obj._as_parameter_
 
     from_param = classmethod(from_param)

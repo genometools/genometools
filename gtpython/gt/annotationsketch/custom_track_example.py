@@ -39,7 +39,5 @@ class CustomTrackExample(CustomTrack):
         for i in range(0, 120):
             data.append(random())
         graphics.draw_curve_data(graphics.get_xmargins(), ypos, Color(0,
-                                 0, 1, .6), data, 120, Range(0, 1), 40)
+                                                                      0, 1, .6), data, 120, Range(0, 1), 40)
         return 0
-
-

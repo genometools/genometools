@@ -29,8 +29,8 @@ from gt.extended.feature_node import FeatureNode
 class FeatureIndex:
 
     def __init__(self, *args):
-        raise NotImplementedError, \
-            'Please call the constructor of a FeatureIndex implementation.'
+        raise NotImplementedError(
+            'Please call the constructor of a FeatureIndex implementation.')
 
     def __del__(self):
         try:
@@ -40,7 +40,7 @@ class FeatureIndex:
 
     def from_param(cls, obj):
         if not isinstance(obj, FeatureIndex):
-            raise TypeError, "argument must be a FeatureIndex"
+            raise TypeError("argument must be a FeatureIndex")
         return obj._as_parameter_
 
     from_param = classmethod(from_param)
@@ -49,7 +49,7 @@ class FeatureIndex:
         err = Error()
         result = []
         rval = gtlib.gt_feature_index_get_features_for_seqid(self.fi,
-                seqid, err._as_parameter_)
+                                                             seqid.encode('UTF-8'), err)
         if rval:
             a = Array(rval, True)
             for i in range(a.size()):
@@ -62,8 +62,8 @@ class FeatureIndex:
 
     def add_gff3file(self, filename):
         err = Error()
-        rval = gtlib.gt_feature_index_add_gff3file(self.fi, filename,
-                err._as_parameter_)
+        rval = gtlib.gt_feature_index_add_gff3file(self.fi,
+                                                   filename.encode('UTF-8'), err)
         if rval != 0:
             gterror(err)
 
@@ -72,24 +72,26 @@ class FeatureIndex:
         val = c_int()
         err = Error()
         ret = gtlib.gt_feature_index_has_seqid(self.fi, byref(val),
-                seqid, err._as_parameter_)
+                                               seqid.encode('UTF-8'), err._as_parameter_)
         if ret != 0:
             gterror(err)
         else:
-          return (val.value > 0)
+            return (val.value > 0)
 
     def get_first_seqid(self):
         err = Error()
-        str = gtlib.gt_feature_index_get_first_seqid(self.fi, err._as_parameter_)
+        str = gtlib.gt_feature_index_get_first_seqid(
+            self.fi, err._as_parameter_)
         if str == None:
             if err.is_set():
                 gterror(err)
-        return str
+        return str.decode('UTF-8')
 
     def get_seqids(self):
         result = []
         err = Error()
-        stra = StrArray(gtlib.gt_feature_index_get_seqids(self.fi, err._as_parameter_))
+        stra = StrArray(gtlib.gt_feature_index_get_seqids(
+            self.fi, err._as_parameter_))
         if stra == None:
             gterror(err)
         for i in range(stra.size()):
@@ -103,7 +105,7 @@ class FeatureIndex:
             gterror("feature_index does not contain seqid")
         range = Range()
         rval = gtlib.gt_feature_index_get_range_for_seqid(self.fi, byref(range),
-                seqid, err)
+                                                          seqid.encode('UTF-8'), err)
         if rval != 0:
             gterror(err)
         return range
@@ -114,7 +116,9 @@ class FeatureIndex:
         err = Error()
         rng = Range(start, end)
         rval = gtlib.gt_feature_index_get_features_for_range(self.fi,
-                a._as_parameter_, seqid, byref(rng), err._as_parameter_)
+                                                             a._as_parameter_, seqid.encode(
+                                                                 'UTF-8'),
+                                                             byref(rng), err._as_parameter_)
         if rval != 0:
             gterror(err)
         result = []
@@ -127,23 +131,23 @@ class FeatureIndex:
         from ctypes import c_char_p, c_void_p, c_int, POINTER
         gtlib.gt_feature_index_get_features_for_seqid.restype = c_void_p
         gtlib.gt_feature_index_get_features_for_seqid.argtypes = [c_void_p,
-                c_char_p, c_void_p]
+                                                                  c_char_p, c_void_p]
         gtlib.gt_feature_index_add_gff3file.restype = c_int
         gtlib.gt_feature_index_add_gff3file.argtypes = [c_void_p,
-                c_char_p, c_void_p]
+                                                        c_char_p, c_void_p]
         gtlib.gt_feature_index_get_first_seqid.restype = c_char_p
         gtlib.gt_feature_index_get_first_seqid.argtypes = [c_void_p, c_void_p]
         gtlib.gt_feature_index_get_seqids.restype = c_void_p
         gtlib.gt_feature_index_get_seqids.argtypes = [c_void_p, c_void_p]
         gtlib.gt_feature_index_has_seqid.restype = c_int
         gtlib.gt_feature_index_has_seqid.argtypes = [c_void_p, POINTER(c_int),
-                c_char_p, c_void_p]
+                                                     c_char_p, c_void_p]
         gtlib.gt_feature_index_get_range_for_seqid.restype = c_int
         gtlib.gt_feature_index_get_range_for_seqid.argtypes = [c_void_p,
-                POINTER(Range), c_char_p]
+                                                               POINTER(Range), c_char_p]
         gtlib.gt_feature_index_get_features_for_range.restype = c_int
         gtlib.gt_feature_index_get_features_for_range.argtypes = [c_void_p,
-                c_void_p, c_char_p, POINTER(Range), c_void_p]
+                                                                  c_void_p, c_char_p, POINTER(Range), c_void_p]
         gtlib.gt_feature_index_delete.restype = None
         gtlib.gt_feature_index_delete.argtypes = [c_void_p]
 
@@ -158,7 +162,7 @@ class FeatureIndexMemory(FeatureIndex):
 
     def from_param(cls, obj):
         if not isinstance(obj, FeatureIndexMemory):
-            raise TypeError, "argument must be a FeatureIndexMemory"
+            raise TypeError("argument must be a FeatureIndexMemory")
         return obj._as_parameter_
 
     from_param = classmethod(from_param)
@@ -179,7 +183,7 @@ class FeatureIndexFromPtr(FeatureIndex):
 
     def from_param(cls, obj):
         if not isinstance(obj, FeatureIndexFromPtr):
-            raise TypeError, "argument must be a FeatureIndexFromPtr"
+            raise TypeError("argument must be a FeatureIndexFromPtr")
         return obj._as_parameter_
 
     from_param = classmethod(from_param)

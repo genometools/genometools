@@ -38,7 +38,8 @@ class CustomVisitorExample(CustomVisitor):
         CustomVisitor.__init__(self)
 
     def visit_feature_node(self, fn):
-        new_child = FeatureNode.create_new(fn.get_seqid(), "bar", 100, 1000, "+")
+        new_child = FeatureNode.create_new(
+            fn.get_seqid(), "bar", 100, 1000, "+")
         fn.add_child(new_child)
 
     def visit_region_node(self, rn):
@@ -49,4 +50,3 @@ class CustomVisitorExample(CustomVisitor):
 
     def visit_sequence_node(self, sn):
         pass
-

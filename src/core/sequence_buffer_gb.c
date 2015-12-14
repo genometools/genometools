@@ -279,16 +279,32 @@ static int gt_sequence_buffer_gb_advance(GtSequenceBuffer *sb, GtError *err)
     switch (sbe->state) {
       case GB_OUT_OF_ENTRY:
         /* eat everything */
-        had_err = eat_line(sb, &currentfileread);
         if (!had_err && strcmp(gt_str_get(sbe->keywordbuffer),
                                GB_LOCUS_STRING) == 0) {
           sbe->state = GB_AWAITING_DESCRIPTION;
+          gt_str_reset(sbe->keywordbuffer);
+          had_err = eat_whitespace(sb, &currentfileread);
+          if (!had_err) {
+            had_err = get_keyword(sb, sbe->keywordbuffer, &currentfileread);
+          }
+          if (!had_err) {
+            if (sb->pvt->descptr) {
+              GtUword l = 0;
+              const char* b = gt_str_get(sbe->keywordbuffer);
+              for (l = 0; l < gt_str_length(sbe->keywordbuffer); l++) {
+                gt_desc_buffer_append_char(sb->pvt->descptr, b[l]);
+              }
+            }
+          }
         }
+        had_err = eat_line(sb, &currentfileread);
         break;
       case GB_AWAITING_DESCRIPTION:
         if (strcmp(gt_str_get(sbe->keywordbuffer),
                    GB_DEFINITION_STRING) == 0) {
           had_err = eat_whitespace(sb, &currentfileread);
+          if (pvt->descptr && gt_desc_buffer_length(pvt->descptr) > 0)
+            gt_desc_buffer_append_char(pvt->descptr, ' ');
           if (!had_err)
             had_err = get_description(sb, &currentfileread);
           sbe->state = GB_IN_DESCRIPTION;

@@ -20,16 +20,16 @@
 #include "core/ma_api.h"
 #include "extended/maxcoordvalue.h"
 
-struct Gtmaxcoordvalue{
+struct GtMaxcoordvalue{
     GtWord value;
     GtUwordPair start;
     GtUwordPair end;
 };
 
-Gtmaxcoordvalue* gt_max_new(void)
+GtMaxcoordvalue* gt_max_new(void)
 {
-  Gtmaxcoordvalue *max;
-  max = gt_calloc((size_t) 1, sizeof (Gtmaxcoordvalue));
+  GtMaxcoordvalue *max;
+  max = gt_calloc((size_t) 1, sizeof (GtMaxcoordvalue));
   max->value = 0;
 
   max->start.a=0;
@@ -40,25 +40,25 @@ Gtmaxcoordvalue* gt_max_new(void)
   return max;
 }
 
-void gt_max_delete(Gtmaxcoordvalue *max)
+void gt_max_delete(GtMaxcoordvalue *max)
 {
   if (max != NULL)
     gt_free(max);
 }
 
-static void gt_max_set_value(Gtmaxcoordvalue *max, const GtWord value)
+static void gt_max_set_value(GtMaxcoordvalue *max, const GtWord value)
 {
   gt_assert(max != NULL);
   max->value=value;
 }
 
-GtWord gt_max_get_value(const Gtmaxcoordvalue *max)
+GtWord gt_max_get_value(const GtMaxcoordvalue *max)
 {
   gt_assert(max != NULL);
   return(max->value);
 }
 
-void gt_max_set_start(Gtmaxcoordvalue *max,
+void gt_max_set_start(GtMaxcoordvalue *max,
                       GtUword a, GtUword b)
 {
   gt_assert(max != NULL);
@@ -66,26 +66,26 @@ void gt_max_set_start(Gtmaxcoordvalue *max,
   max->start.b = b ;
 }
 
-static void gt_max_set_start_with_pair(Gtmaxcoordvalue *max,
+static void gt_max_set_start_with_pair(GtMaxcoordvalue *max,
                                        const GtUwordPair start )
 {
   gt_assert(max != NULL);
   max->start=start;
 }
 
-GtUwordPair gt_max_get_start(const Gtmaxcoordvalue *max)
+GtUwordPair gt_max_get_start(const GtMaxcoordvalue *max)
 {
   gt_assert(max != NULL);
   return(max->start);
 }
 
-void gt_max_set_end_with_pair(Gtmaxcoordvalue *max, const  GtUwordPair end)
+void gt_max_set_end_with_pair(GtMaxcoordvalue *max, const  GtUwordPair end)
 {
   gt_assert(max != NULL);
   max->end = end;
 }
 
-static void gt_max_set_end(Gtmaxcoordvalue *max,
+static void gt_max_set_end(GtMaxcoordvalue *max,
                            GtUword a, GtUword b)
 {
   gt_assert(max != NULL);
@@ -93,14 +93,14 @@ static void gt_max_set_end(Gtmaxcoordvalue *max,
   max->end.b = b ;
 }
 
-GtUwordPair gt_max_get_end(const Gtmaxcoordvalue *max)
+GtUwordPair gt_max_get_end(const GtMaxcoordvalue *max)
 {
   gt_assert(max != NULL);
   return(max->end);
 }
 
 /*use this in linear space cases*/
-void gt_max_coord_update(Gtmaxcoordvalue *max,
+void gt_max_coord_update(GtMaxcoordvalue *max,
                          GtWord value,
                          GtUwordPair start,
                          GtUword enda, GtUword endb)
@@ -113,7 +113,7 @@ void gt_max_coord_update(Gtmaxcoordvalue *max,
 }
 
 /*use this in square space cases*/
-void gt_max_coord_update_without_start (Gtmaxcoordvalue *max, GtWord value,
+void gt_max_coord_update_without_start (GtMaxcoordvalue *max, GtWord value,
                                         GtUword enda, GtUword endb)
 {
   gt_assert(max != NULL);
@@ -122,7 +122,7 @@ void gt_max_coord_update_without_start (Gtmaxcoordvalue *max, GtWord value,
   gt_max_set_end(max, enda, endb);
 }
 
-GtUword gt_max_get_row_length(const Gtmaxcoordvalue *max)
+GtUword gt_max_get_row_length(const GtMaxcoordvalue *max)
 {
   gt_assert(max != NULL);
 
@@ -133,7 +133,7 @@ GtUword gt_max_get_row_length(const Gtmaxcoordvalue *max)
   return end-start;
 }
 
-GtUword gt_max_get_col_length(const Gtmaxcoordvalue *max)
+GtUword gt_max_get_col_length(const GtMaxcoordvalue *max)
 {
   gt_assert(max != NULL);
 
@@ -144,7 +144,7 @@ GtUword gt_max_get_col_length(const Gtmaxcoordvalue *max)
   return end-start;
 }
 
-bool gt_max_get_length_safe(const Gtmaxcoordvalue *max)
+bool gt_max_get_length_safe(const GtMaxcoordvalue *max)
 {
   if (gt_max_get_end(max).a == gt_max_get_start(max).a &&
       gt_max_get_end(max).b == gt_max_get_start(max).b  )
@@ -152,7 +152,7 @@ bool gt_max_get_length_safe(const Gtmaxcoordvalue *max)
   return true;
 }
 
-void gt_max_reset(Gtmaxcoordvalue *max)
+void gt_max_reset(GtMaxcoordvalue *max)
 {
   gt_assert(max != NULL);
 

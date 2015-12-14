@@ -35,9 +35,16 @@ matrix:
       env: amalgamation=yes
     - compiler: gcc
       env: opt=no cairo=no
+    - compiler: i686-w64-mingw32-gcc
+      env: SYSTEM=Windows MACHINE=i686 GT_BITS=32 AR=i686-w64-mingw32-ar fpic=no cairo=no sharedlib=no CFLAGS='-Wno-error=attributes -Wno-error=unused-parameter -DSQLITE_MALLOCSIZE=_msize'
+    - compiler: x86_64-w64-mingw32-gcc
+      env: SYSTEM=Windows MACHINE=i686 GT_BITS=64 AR=x86_64-w64-mingw32-ar fpic=no cairo=no sharedlib=no CFLAGS='-Wno-error=attributes -Wno-error=unused-parameter -DSQLITE_MALLOCSIZE=_msize'
 
-before_install: sudo apt-get update
-install: sudo apt-get install ncbi-blast+ gcc-multilib
+before_install:
+  - sudo apt-get update -q
+  - sudo apt-get install ncbi-blast+ gcc-multilib -y
+  - sudo apt-get install binutils-mingw-w64-i686 gcc-mingw-w64-i686 -y
+  - sudo apt-get install binutils-mingw-w64-x86-64 gcc-mingw-w64-x86-64 -y
 before_script:
   - blastn -version
   - blastp -version

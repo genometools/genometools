@@ -47,9 +47,9 @@ def checkrepfind(reffile,withextend = false)
              "-minidentity 90 -maxalilendiff 30 -percmathistory 55",
              :maxtime => 600)
     if reffile == "Duplicate.fna"
-      resultfile="#{rdir}/#{reffile}-greedy-8-8-90-30-55"
+      resultfile="#{$testdata}/repfind-result/#{reffile}-greedy-8-8-90-30-55"
     else
-      resultfile="#{rdir}/#{reffile}-gr-ext.result"
+      resultfile="#{$testdata}/repfind-result/#{reffile}-gr-ext.result"
     end
     run "cmp -s #{last_stdout} #{resultfile}"
   end

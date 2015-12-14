@@ -39,7 +39,7 @@ char**  gt_cstr_split(const char *cstr, char sep);
    be given. */
 char*   gt_cstr_dup_nt(const char *cstr, GtUword length);
 
-/* Replace each occurence of <f> in <cstr> to <t>. */
+/* Replace each occurrence of <f> in <cstr> to <t>. */
 void    gt_cstr_rep(char *cstr, char f, char t);
 
 /* Outputs the first <length> characters of the string <cstr> to file pointer

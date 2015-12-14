@@ -37,6 +37,7 @@ class RangeTestCase(unittest.TestCase):
         # change start/end to invalid value
         def setend(rng, val):
             rng.end = val
+
         def setstart(rng, val):
             rng.start = val
         # 20 > 10
@@ -50,4 +51,3 @@ class RangeTestCase(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
-

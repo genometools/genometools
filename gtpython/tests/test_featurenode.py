@@ -16,19 +16,19 @@ class FeatureNodeTestCase(unittest.TestCase):
 
     def test_score(self):
         fn = self.fn
-        self.assert_(not fn.score_is_defined())
+        self.assertTrue(not fn.score_is_defined())
 
         fn.set_score(2)
-        self.assert_(fn.score_is_defined())
+        self.assertTrue(fn.score_is_defined())
         self.assertEqual(2, fn.get_score())
 
         fn.unset_score()
-        self.assert_(not fn.score_is_defined())
+        self.assertTrue(not fn.score_is_defined())
 
     def test_type(self):
         fn = self.fn
-        self.assert_(not fn.has_type("foo"))
-        self.assert_(fn.has_type("type"))
+        self.assertTrue(not fn.has_type("foo"))
+        self.assertTrue(fn.has_type("type"))
 
     def test_strand(self):
         fn = self.fn
@@ -48,8 +48,8 @@ class FeatureNodeTestCase(unittest.TestCase):
         fn.add_attribute("test", "testval")
         fn.add_attribute("test2", "testval2")
 
-        self.assert_("test" in fn.attribs)
-        self.assert_("test2" in fn.attribs)
+        self.assertTrue("test" in fn.attribs)
+        self.assertTrue("test2" in fn.attribs)
 
         nattrs = 0
         for (tag, val) in fn.each_attribute():
@@ -105,36 +105,36 @@ class TestFeatureNodeChildren(unittest.TestCase):
         for i, f in enumerate(fn):
             types.append(f.type)
         self.assertEqual(types, ["type", "type2", "type3", "type4"], types)
-        self.assert_(i == 3, i)
+        self.assertTrue(i == 3, i)
         # try iterator method
         types = []
         for i, f in enumerate(fn.traverse_dfs()):
             types.append(f.type)
         self.assertEqual(types, ["type", "type2", "type3", "type4"], types)
-        self.assert_(i == 3, i)
+        self.assertTrue(i == 3, i)
         # try callable object as iterator
         types = []
         for i, f in enumerate(fn(method="depth_first")):
             types.append(f.type)
         self.assertEqual(types, ["type", "type2", "type3", "type4"], types)
-        self.assert_(i == 3, i)
+        self.assertTrue(i == 3, i)
         # direct
         types = []
         for i, f in enumerate(fn(method="direct")):
             types.append(f.type)
         self.assertEqual(types, ["type2", "type3", "type4"], types)
-        self.assert_(i == 2, i)
+        self.assertTrue(i == 2, i)
         types = []
         for i, f in enumerate(fn.traverse_direct()):
             types.append(f.type)
         self.assertEqual(types, ["type2", "type3", "type4"], types)
-        self.assert_(i == 2, i)
+        self.assertTrue(i == 2, i)
         fn.depth_first = False
         types = []
         for i, f in enumerate(fn):
             types.append(f.type)
         self.assertEqual(types, ["type2", "type3", "type4"], types)
-        self.assert_(i == 2, i)
+        self.assertTrue(i == 2, i)
 
 
 class TestFeatureNodeProperties(unittest.TestCase):
@@ -150,9 +150,9 @@ class TestFeatureNodeProperties(unittest.TestCase):
 
     def test_score(self):
         fn = self.fn
-        self.assert_(not fn.score_is_defined())
+        self.assertTrue(not fn.score_is_defined())
         fn.score = 2
-        self.assert_(fn.score_is_defined())
+        self.assertTrue(fn.score_is_defined())
         self.assertEqual(2, fn.get_score())
         self.assertEqual(2, fn.score)
 
@@ -175,4 +175,3 @@ class TestFeatureNodeProperties(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
-

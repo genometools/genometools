@@ -7,7 +7,7 @@ import os
 
 op = os.path
 datadir = op.abspath(op.join(op.dirname(__file__), "..", "..",
-                     "testdata"))
+                             "testdata"))
 
 """
 ###
@@ -57,15 +57,14 @@ class FeatureNodeIteratorTest(unittest.TestCase):
             types[found.type] = 1
             found = di.next()
 
-        #self.assert_('gene' in types)
+        #self.assertTrue('gene' in types)
 
-        self.assert_('exon' in types)
-        self.assert_('five_prime_cis_splice_site' in types)
-        self.assert_('three_prime_cis_splice_site' in types)
+        self.assertTrue('exon' in types)
+        self.assertTrue('five_prime_cis_splice_site' in types)
+        self.assertTrue('three_prime_cis_splice_site' in types)
 
         self.assertEqual(found, None)
 
 
 if __name__ == "__main__":
     unittest.main()
-

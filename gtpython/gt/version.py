@@ -1,9 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
-# Copyright (c) 2014 Daniel Standage <daniel.standage@gmail.com>
-# Copyright (c) 2010 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
-# Copyright (c) 2010 Center for Bioinformatics, University of Hamburg
+# Copyright (c) 2015 Sascha Steinbiss <sascha@steinbiss.name>
 #
 # Permission to use, copy, modify, and distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -19,19 +17,7 @@
 #
 
 from gt.dlload import gtlib
-from ctypes import CFUNCTYPE, c_void_p, c_char_p, addressof
+from ctypes import c_char_p
 
-funcdef = CFUNCTYPE(None, c_void_p, c_char_p, c_char_p)
-defhand = funcdef.in_dll(gtlib, "gt_warning_default_handler")
-gtlib.gt_warning_disable.restype = None
-gtlib.gt_warning_disable.argtypes = []
-gtlib.gt_warning_set_handler.restype = None
-gtlib.gt_warning_set_handler.argtypes = [funcdef, c_void_p]
-
-
-def warning_disable():
-    gtlib.gt_warning_disable()
-
-
-def warning_enable_default():
-    gtlib.gt_warning_set_handler(addressof(defhand), None)
+gtlib.gt_version.restype = c_char_p
+__version__ = gtlib.gt_version().decode('UTF-8')
