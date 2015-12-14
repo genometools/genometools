@@ -218,18 +218,13 @@ static int gt_one_dim_chainer_runner(int argc, const char **argv,
   GtOneDimChainerMatch *match = NULL;
   GtOneDimChainerMatch *maxchainend = NULL;
   uint64_t lastseqnum = 0;
-  GtUword laststart = 0;
-
+  
   /* Begin iteration over given matches */
   while (true)
   {
     /* Get new match from iterator */
     GtQuerymatch *querymatchptr = gt_seedextend_match_iterator_next(semi);
-    if (querymatchptr && laststart > gt_querymatch_querystart(querymatchptr) && lastseqnum==gt_querymatch_queryseqnum(querymatchptr))
-      printf(":(\n");
-    if (querymatchptr)
-      laststart = gt_querymatch_querystart(querymatchptr);
-      
+    
     /* Iterate over priority queue */
     while (!gt_priority_queue_is_empty(pq))
     {
