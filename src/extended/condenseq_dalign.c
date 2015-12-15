@@ -15,8 +15,11 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "extended/condenseq_dalign.h"
+#include "core/encseq.h"
 #include "core/ma.h"
+#include "core/str_api.h"
+#include "extended/condenseq_dalign.h"
+#include "extended/condenseq_rep.h"
 
 struct GtCondenseqDalign
 {
@@ -32,4 +35,13 @@ GtCondenseqDalign *gt_condenseq_dalign_new(void)
 void gt_condenseq_dalign_delete(GtCondenseqDalign *condenseq_dalign)
 {
   gt_free(condenseq_dalign);
+}
+
+int gt_condenseq_dalign_create(GtCondenseqDalign *condenseq_dalign,
+                               GtStr *basename,
+                               GtEncseq *encseq)
+{
+  int had_err = 0;
+
+  return had_err;
 }

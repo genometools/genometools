@@ -22,5 +22,8 @@ typedef struct GtCondenseqDalign GtCondenseqDalign;
 
 GtCondenseqDalign *gt_condenseq_dalign_new(void);
 void gt_condenseq_dalign_delete(GtCondenseqDalign *condenseq_dalign);
+int gt_condenseq_dalign_create(GtCondenseqDalign *condenseq_dalign,
+                               GtStr *basename,
+                               GtEncseq *encseq);
 
 #endif

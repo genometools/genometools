@@ -363,7 +363,7 @@ static int gt_condenseq_compress_runner(GT_UNUSED int argc, const char **argv,
     had_err = -1;
   }
 
-  if (!had_err) {
+  if (!had_err && !arguments->dalign) {
     GtCondenseqCreator *ces_c;
 
     ces_c = gt_condenseq_creator_new(arguments->initsize,
@@ -404,6 +404,14 @@ static int gt_condenseq_compress_runner(GT_UNUSED int argc, const char **argv,
 
       gt_condenseq_creator_delete(ces_c);
     }
+  }
+
+  if (!had_err && arguments->dalign) {
+    GtCondenseqDalign *ces_d;
+
+    ces_d = gt_condenseq_dalign_new();
+    had_err = gt_condenseq_dalign_create(ces_d, arguments->indexname,
+                                         arguments->input_es);
   }
 
   gt_logger_delete(logger);
