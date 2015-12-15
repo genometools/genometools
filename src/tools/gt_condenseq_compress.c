@@ -306,13 +306,11 @@ static int gt_condenseq_compress_runner(GT_UNUSED int argc, const char **argv,
     gt_free(basenameptr);
   }
 
-  if (!had_err) {
-    GtEncseqLoader *es_l = gt_encseq_loader_new();
-    arguments->input_es = gt_encseq_loader_load(es_l, argv[parsed_args], err);
-    if (arguments->input_es == NULL)
-      had_err = -1;
-    gt_encseq_loader_delete(es_l);
-  }
+  GtEncseqLoader *es_l = gt_encseq_loader_new();
+  arguments->input_es = gt_encseq_loader_load(es_l, argv[parsed_args], err);
+  if (arguments->input_es == NULL)
+    had_err = -1;
+  gt_encseq_loader_delete(es_l);
 
   if (!had_err) {
     if (arguments->minalignlength == GT_UNDEF_UWORD)
@@ -368,18 +366,17 @@ static int gt_condenseq_compress_runner(GT_UNUSED int argc, const char **argv,
   if (!had_err) {
     GtCondenseqCreator *ces_c;
 
-    if (!had_err) {
-      ces_c = gt_condenseq_creator_new(arguments->initsize,
-                                       arguments->minalignlength,
-                                       arguments->xdrop,
-                                       &(arguments->scores),
-                                       arguments->kmersize,
-                                       arguments->windowsize,
-                                       logger,
-                                       err);
-      if (ces_c == NULL)
-        had_err = -1;
-    }
+    ces_c = gt_condenseq_creator_new(arguments->initsize,
+                                     arguments->minalignlength,
+                                     arguments->xdrop,
+                                     &(arguments->scores),
+                                     arguments->kmersize,
+                                     arguments->windowsize,
+                                     logger,
+                                     err);
+    if (ces_c == NULL)
+      had_err = -1;
+
     if (!had_err) {
       if (arguments->cutoff_value == GT_UNDEF_UWORD)
         gt_condenseq_creator_use_mean_cutoff(ces_c);
