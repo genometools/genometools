@@ -135,7 +135,7 @@ Test do
   run_test "#{$bin}gt seed_extend -memlimit 0MB -ii at1MB", :retval => 1
   grep last_stderr, /argument to option "-memlimit" must be at least 1MB/
   run_test "#{$bin}gt seed_extend -memlimit 1MB -ii at1MB", :retval => 1
-  grep last_stderr, /option -memlimit too strict: need at least 11MB/
+  grep last_stderr, /option -memlimit too strict: need at least 21MB/
   run_test "#{$bin}gt seed_extend -memlimit 1KB -ii at1MB", :retval => 1
   grep last_stderr, /integer argument followed by one of the keywords MB and GB/
   run_test "#{$bin}gt seed_extend -extendgreedy -history 65 -benchmark " +
