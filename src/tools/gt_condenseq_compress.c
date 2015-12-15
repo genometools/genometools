@@ -48,7 +48,8 @@ typedef struct {
                          brute,
                          verbose,
                          kdb,
-                         prune;
+                         prune,
+                         dalign;
 } GtCondenseqCompressArguments;
 
 static void* gt_condenseq_compress_arguments_new(void)
@@ -233,6 +234,13 @@ gt_condenseq_compress_option_parser_new(void *tool_arguments)
                               "of each kmer), if -verbose each startposition "
                               "will be shown instead",
                               &arguments->kdb, false);
+  gt_option_parser_add_option(op, option);
+
+  /* -dalign */
+  option = gt_option_new_bool("dalign", "Use daligner tool instead of kmer
+                              seeds to find matches.", &arguments->dalign,
+                              false);
+  gt_option_is_development_option(option);
   gt_option_parser_add_option(op, option);
 
   return op;
