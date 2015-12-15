@@ -1,7 +1,7 @@
 #!/bin/sh
 
 set -e -x
-# set GTDIR as paht of genometools directory
+# set GTDIR as path of genometools directory
 
 for filename in `${GTDIR}/scripts/findfasta.rb`
 do
