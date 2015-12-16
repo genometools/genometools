@@ -114,8 +114,8 @@ static int gt_one_dim_chainer_runner(int argc, const char **argv,
   while (match != NULL)
   {
     GtOneDimChainerMatch *nextmatch = match->prec;
-    printf("%" PRIu64 "\t" GT_WU "\t" GT_WU "\n", match->seqnum, match->start,
-        match->end);
+    printf("%" PRIu64 "\t" GT_WU "\t" GT_WU "\n", match->queryseqnum, 
+        match->querystart, match->queryend);
     match = nextmatch;
   }
 

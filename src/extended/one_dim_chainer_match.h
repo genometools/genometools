@@ -26,16 +26,16 @@
 struct GtOneDimChainerMatch;
 
 /* A struct that defines a match object that mightbecome part of the chain.
-It contains the sequence ID <seqnum>, a counter for references <refcount>,
-an index <start> for the beginning of this match, an index <end> for its
+It contains the sequence ID <queryseqnum>, a counter for references <refcount>,
+an index <querystart> for the beginning of this match, an index <queryend> for its
 end, as well as a variable <chainweight>. */
 typedef struct GtOneDimChainerMatch {
   struct GtOneDimChainerMatch *prec;
-  uint64_t seqnum;
+  uint64_t queryseqnum;
   unsigned refcount;
 
-  GtUword start;
-  GtUword end;
+  GtUword querystart;
+  GtUword queryend;
   GtUword chainweight; /* weight of max chain up to, excluding, this match */
   GtUword dist;
 } GtOneDimChainerMatch;

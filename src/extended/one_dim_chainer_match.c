@@ -68,9 +68,9 @@ GtOneDimChainerMatch* gt_1d_chainer_match_new(
 {
   GtOneDimChainerMatch *match = gt_malloc(sizeof *match);
   match->refcount = 1;
-  match->seqnum = gt_querymatch_queryseqnum(querymatchptr);
-  match->start = gt_querymatch_querystart(querymatchptr);
-  match->end = match->start + gt_querymatch_querylen(querymatchptr);
+  match->queryseqnum = gt_querymatch_queryseqnum(querymatchptr);
+  match->querystart = gt_querymatch_querystart(querymatchptr);
+  match->queryend = match->querystart + gt_querymatch_querylen(querymatchptr);
   match->prec = maxchainend;
   gt_1d_chainer_incr_refcount(maxchainend);
   match->chainweight = chainweight;
@@ -79,26 +79,25 @@ GtOneDimChainerMatch* gt_1d_chainer_match_new(
   return match;
 }
 
-/* Calculates and returns the weight for a match from its <start> and <end>
-position.
-The weight equals the length of the match. */
-GtUword gt_1d_chainer_get_weight(GtUword start, GtUword end,
+/* Calculates and returns the weight for a match from its <querystart> and
+<queryend> position. The weight equals the length of the match. */
+GtUword gt_1d_chainer_get_weight(GtUword querystart, GtUword queryend,
     GtUword dist)
 {
-  return gt_querymatch_distance2score(dist, end - start);
+  return gt_querymatch_distance2score(dist, queryend - querystart);
 }
 
-/* Compare function for the ends of 2 given matches <match1> and <match2>.
-Returns -1 if <match1> is smaller, 0 if they are equal, and 1 if <match2> end
+/* Compare function for the queryends of 2 given matches <match1> and <match2>.
+Returns -1 if <match1> is smaller, 0 if they are equal, and 1 if <match2>
 is smaller. This method is used for creating the priority queue. */
 int gt_1d_chainer_compare_ends(const void *match1, const void *match2)
 {
   const GtOneDimChainerMatch *m1 = (GtOneDimChainerMatch*) match1;
   const GtOneDimChainerMatch *m2 = (GtOneDimChainerMatch*) match2;
-  if (m1->end < m2->end) {
+  if (m1->queryend < m2->queryend) {
     return -1;
 
-  } else if (m1->end == m2->end) {
+  } else if (m1->queryend == m2->queryend) {
     return 0;
 
   } else {
@@ -144,14 +143,14 @@ int gt_1d_chainer_calc_chain(const GtStr *matchfilename, GtUword overlap,
     /* Iterate over priority queue */
     while (!gt_priority_queue_is_empty(pq))
     {
-      /* Match with the minimum start position is a candidate */
+      /* Match with the minimum querystart position is a candidate */
       GtOneDimChainerMatch *candidatematch =
         (GtOneDimChainerMatch*) gt_priority_queue_find_min(pq);
-      GtUword start = candidatematch->start;
+      GtUword querystart = candidatematch->querystart;
 
       if (maxchainend != NULL)
       {
-        start = fmax(start, maxchainend->end);
+        querystart = fmax(querystart, maxchainend->queryend);
       }
 
       /* Continue only if <querymatchptr> is defined, we are comparing
@@ -159,7 +158,7 @@ int gt_1d_chainer_calc_chain(const GtStr *matchfilename, GtUword overlap,
          more than allowed with the match from the iterator. */
       if (querymatchptr != NULL &&
           lastseqnum == gt_querymatch_queryseqnum(querymatchptr) &&
-          fmax(candidatematch->end - overlap, start + 1) >
+          fmax(candidatematch->queryend - overlap, querystart + 1) >
           gt_querymatch_querystart(querymatchptr))
       {
         break;
@@ -171,11 +170,11 @@ int gt_1d_chainer_calc_chain(const GtStr *matchfilename, GtUword overlap,
         /* If the weight of the candidate added to the chain increases
            the maximum chain weight, extend the chain. */
         if (chainweight < candidatematch->chainweight +
-            gt_1d_chainer_get_weight(start, candidatematch->end,
+            gt_1d_chainer_get_weight(querystart, candidatematch->queryend,
               candidatematch->dist))
         {
           chainweight = candidatematch->chainweight +
-            gt_1d_chainer_get_weight(start, candidatematch->end,
+            gt_1d_chainer_get_weight(querystart, candidatematch->queryend,
                 candidatematch->dist);
           gt_1d_chainer_decr_refcount(maxchainend);
           maxchainend = candidatematch;
