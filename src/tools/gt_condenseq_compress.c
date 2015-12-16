@@ -28,6 +28,7 @@
 #include "core/unused_api.h"
 #include "extended/condenseq.h"
 #include "extended/condenseq_creator.h"
+#include "extended/condenseq_dalign.h"
 #include "match/xdrop.h"
 #include "tools/gt_condenseq_compress.h"
 
@@ -237,8 +238,8 @@ gt_condenseq_compress_option_parser_new(void *tool_arguments)
   gt_option_parser_add_option(op, option);
 
   /* -dalign */
-  option = gt_option_new_bool("dalign", "Use daligner tool instead of kmer
-                              seeds to find matches.", &arguments->dalign,
+  option = gt_option_new_bool("dalign", "Use daligner tool instead of kmer "
+                              "seeds to find matches.", &arguments->dalign,
                               false);
   gt_option_is_development_option(option);
   gt_option_parser_add_option(op, option);

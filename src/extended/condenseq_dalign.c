@@ -37,9 +37,9 @@ void gt_condenseq_dalign_delete(GtCondenseqDalign *condenseq_dalign)
   gt_free(condenseq_dalign);
 }
 
-int gt_condenseq_dalign_create(GtCondenseqDalign *condenseq_dalign,
-                               GtStr *basename,
-                               GtEncseq *encseq)
+int gt_condenseq_dalign_create(GT_UNUSED GtCondenseqDalign *condenseq_dalign,
+                               GT_UNUSED GtStr *basename,
+                               GT_UNUSED GtEncseq *encseq)
 {
   int had_err = 0;
 
