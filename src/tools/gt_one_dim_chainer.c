@@ -20,109 +20,12 @@
 
 #include "core/ma.h"
 #include "core/unused_api.h"
-#include "extended/priority_queue.h"
-#include "match/seed-extend-iter.h"
-#include "match/querymatch.h"
+#include "extended/one_dim_chainer_match.h"
 #include "tools/gt_one_dim_chainer.h"
-
-struct GtOneDimChainerMatch;   /* forward declaration */
 
 typedef struct {
   GtUword overlap;
 } GtOneDimChainerArguments;
-
-/* A struct that defines a match object that mightbecome part of the chain.
-It contains the sequence ID <seqnum>, a counter for references <refcount>,
-an index <start> for the beginning of this match, an index <end> for its
-end, as well as a variable <chainweight>. */
-typedef struct GtOneDimChainerMatch {
-  struct GtOneDimChainerMatch *prec;
-  uint64_t seqnum;
-  unsigned refcount;
-
-  GtUword start;
-  GtUword end;
-  GtUword chainweight; /* weight of max chain up to, excluding, this match */
-  GtUword dist;
-} GtOneDimChainerMatch;
-
-/* Starts at a given <match>, reduces its reference counter, and if there are no
-references left the <match> is deleted from memory. Iterates backwards over all
-matches using the precursor <prec> for each match. */
-static void gt_1d_chainer_decr_refcount(GtOneDimChainerMatch *match)
-{
-  while (match != NULL)
-  {
-    GtOneDimChainerMatch *tmp = match->prec;
-    --match->refcount;
-    if (match->refcount == 0)
-    {
-      gt_free(match);
-    } else
-    {
-      break;
-    }
-    match = tmp;
-  }
-}
-
-/* Increases the reference counter for a given <match>. */
-static void gt_1d_chainer_incr_refcount(GtOneDimChainerMatch *match)
-{
-  if (match != NULL)
-  {
-    ++match->refcount;
-  }
-}
-
-/* Calculates and returns the weight for a match from its <start> and <end>
-position.
-The weight equals the length of the match. */
-static GtUword gt_1d_chainer_get_weight(GtUword start, GtUword end,
-    GtUword dist)
-{
-  return gt_querymatch_distance2score(dist, end - start);
-}
-
-/* Allocates memory for a GtOneDimChainerMatch <match> and returns a pointer to
-it. It assigns important variables from a GtQueryMatch reference provided by the
-match iterator to the new <match> as well as the currently calculated maximum
-chain end <maxchainend> and the current maximum chain weight <maxchainweight>.
-*/
-static GtOneDimChainerMatch* gt_1d_chainer_match_new(
-    GtQuerymatch *querymatchptr, GtOneDimChainerMatch *maxchainend,
-    GtUword maxchainweight)
-{
-  GtOneDimChainerMatch *match = gt_malloc(sizeof *match);
-  match->refcount = 1;
-  match->seqnum = gt_querymatch_queryseqnum(querymatchptr);
-  match->start = gt_querymatch_querystart(querymatchptr);
-  match->end = match->start + gt_querymatch_querylen(querymatchptr);
-  match->prec = maxchainend;
-  gt_1d_chainer_incr_refcount(maxchainend);
-  match->chainweight = maxchainweight;
-  match->dist = gt_querymatch_distance(querymatchptr);
-
-  return match;
-}
-
-/* Compare function for the ends of 2 given matches <match1> and <match2>.
-Returns -1 if <match1> is smaller, 0 if they are equal, and 1 if <match2> end
-is smaller. This method is used for creating the priority queue. */
-static int gt_1d_chainer_compare_ends(const void *match1, const void *match2)
-{
-  const GtOneDimChainerMatch *m1 = (GtOneDimChainerMatch*) match1;
-  const GtOneDimChainerMatch *m2 = (GtOneDimChainerMatch*) match2;
-  if (m1->end < m2->end) {
-    return -1;
-
-  } else if (m1->end == m2->end) {
-    return 0;
-
-  } else {
-    return 1;
-  }
-}
 
 /* Allocates memory and returns a pointer for <arguments> needed for GtOptions.
 */
@@ -198,146 +101,26 @@ static int gt_one_dim_chainer_runner(int argc, const char **argv,
 
   /* Read in match file */
   GtStr *matchfilename = gt_str_new_cstr(argv[argc-1]);
+  GtOneDimChainerMatch *match = NULL;
+  GtOneDimChainerMatch *chainend = gt_malloc(sizeof *chainend);
 
-  /* Set up match iterator */
-  GtSeedextendMatchIterator *semi
-       = gt_seedextend_match_iterator_new(matchfilename, err);
+  had_err = gt_1d_chainer_calc_chain(matchfilename,
+                                     arguments->overlap,
+                                     chainend, err);
   gt_str_delete(matchfilename);
 
-  if (semi == NULL)
-  {
-    return -1;
-  }
-
-  /* Set up the priority queue for match iteration */
-  GtUword maxnumofelements = 15;
-  GtPriorityQueue *pq = gt_priority_queue_new(gt_1d_chainer_compare_ends,
-         maxnumofelements);
-  if (pq == NULL)
-  {
-    return -1;
-  }
-
-  /* Initialize important chaining variables */
-  GtUword maxchainweight = 0;
-  GtOneDimChainerMatch *match = NULL;
-  GtOneDimChainerMatch *maxchainend = NULL;
-  uint64_t lastseqnum = 0;
-
-  /* Begin iteration over given matches */
-  while (true)
-  {
-    /* Get new match from iterator */
-    GtQuerymatch *querymatchptr = gt_seedextend_match_iterator_next(semi);
-
-    /* Iterate over priority queue */
-    while (!gt_priority_queue_is_empty(pq))
-    {
-      /* Match with the minimum start position is a candidate */
-      GtOneDimChainerMatch *candidatematch =
-        (GtOneDimChainerMatch*) gt_priority_queue_find_min(pq);
-      GtUword start = candidatematch->start;
-
-      if (maxchainend != NULL)
-      {
-        start = fmax(start, maxchainend->end);
-      }
-
-      /* Continue only if <querymatchptr> is defined, we are comparing
-         matches from the same genome, and the candidate does not overlap
-         more than allowed with the match from the iterator. */
-      if (querymatchptr != NULL &&
-          lastseqnum == gt_querymatch_queryseqnum(querymatchptr) &&
-          fmax(candidatematch->end - arguments->overlap, start + 1) >
-          gt_querymatch_querystart(querymatchptr))
-      {
-        break;
-      } else
-      {
-        /* Remove candidate from priority queue */
-        gt_priority_queue_extract_min(pq);
-
-        /* If the weight of the candidate added to the chain increases
-           the maximum chain weight, extend the chain. */
-        if (maxchainweight < candidatematch->chainweight +
-            gt_1d_chainer_get_weight(start, candidatematch->end,
-              candidatematch->dist))
-        {
-          maxchainweight = candidatematch->chainweight +
-            gt_1d_chainer_get_weight(start, candidatematch->end,
-                candidatematch->dist);
-          gt_1d_chainer_decr_refcount(maxchainend);
-          maxchainend = candidatematch;
-        } else
-        {
-          gt_1d_chainer_decr_refcount(candidatematch);
-        }
-      }
-    }
-
-    if (querymatchptr == NULL)
-    {
-      break;
-    }
-
-    /* Update the sequence ID if necessary */
-    if (lastseqnum != gt_querymatch_queryseqnum(querymatchptr))
-    {
-      lastseqnum = gt_querymatch_queryseqnum(querymatchptr);
-    }
-
-    /* Create a new chain match object from the given iterator match */
-    gt_1d_chainer_decr_refcount(match);
-    match = gt_1d_chainer_match_new(querymatchptr, maxchainend, maxchainweight);
-    if (match == NULL)
-    {
-      return -1; /* We are not able to free previously allocated matches. :( */
-    }
-
-    /* Extend priority queue in case capacity is not enough. i
-       Almost never happens.*/
-    if (gt_priority_queue_is_full(pq))
-    {
-      maxnumofelements *= 2;
-      GtPriorityQueue *newpq = gt_priority_queue_new(gt_1d_chainer_compare_ends,
-          maxnumofelements);
-      if (newpq == NULL)
-      {
-        return -1; /* We are not able to free previously allocated matches. */
-      }
-      while (!gt_priority_queue_is_empty(pq))
-      {
-        gt_priority_queue_add(newpq, gt_priority_queue_extract_min(pq));
-      }
-      gt_priority_queue_delete(pq);
-      pq = newpq;
-    }
-    gt_1d_chainer_incr_refcount(match);
-    gt_priority_queue_add(pq, match);
-  }
-
-  /* Delete priority queue and iterator after chain has been created */
-  gt_priority_queue_delete(pq);
-  gt_seedextend_match_iterator_delete(semi);
-
-  /* Set the match which defines the end of the chain */
-  gt_1d_chainer_decr_refcount(match);
-  match = maxchainend;
-  gt_1d_chainer_incr_refcount(maxchainend);
-
+  match = chainend;
   /* Print the chain of matches */
   while (match != NULL)
   {
     GtOneDimChainerMatch *nextmatch = match->prec;
-    gt_1d_chainer_incr_refcount(nextmatch);
     printf("%" PRIu64 "\t" GT_WU "\t" GT_WU "\n", match->seqnum, match->start,
         match->end);
-    gt_1d_chainer_decr_refcount(match);
     match = nextmatch;
   }
 
   /* Delete the chain of matches from memory */
-  gt_1d_chainer_decr_refcount(maxchainend);
+  gt_1d_chainer_match_delete(chainend);
   return had_err;
 }
 
