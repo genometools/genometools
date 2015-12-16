@@ -1,6 +1,5 @@
 /*
-  Copyright (c) 2014 Sascha Steinbiss <ss34@sanger.ac.uk>
-  Copyright (c) 2014 Genome Research Ltd.
+  Copyright (c) 2014-2015 Genome Research Ltd.
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -37,6 +36,8 @@
 #include "extended/gff3_linesorted_out_stream.h"
 #include "extended/gff3_visitor.h"
 
+#define GT_LINESORTED_SEP '\t'
+
 struct GtGFF3LinesortedOutStream {
   const GtNodeStream parent_instance;
   GtNodeStream *in_stream;
@@ -54,51 +55,89 @@ struct GtGFF3LinesortedOutStream {
 #define gt_gff3_linesorted_out_stream_cast(GS)\
         gt_node_stream_cast(gt_gff3_linesorted_out_stream_class(), GS);
 
+/* this is parsing self-generated content, so we reasonably expect enough
+   fields -- fail assertion if there is a parsing problem */
+static inline void gt_linesorted_gff3_next_token_pair(const char **s1,
+                                                      const char **s2,
+                                                      char *buf1, size_t len1,
+                                                      char *buf2, size_t len2,
+                                                      char sep)
+{
+  const char *tokend1, *tokend2;
+  size_t idlength1, idlength2;
+
+  tokend1 = strchr(*s1, sep);
+  gt_assert(tokend1 && tokend1 >= *s1);
+  tokend2 = strchr(*s2, sep);
+  gt_assert(tokend2 && tokend2 >= *s2);
+  idlength1 = MIN((tokend1 - *s1), len1 - 1);
+  gt_assert(idlength1 > 0);
+  idlength2 = MIN((tokend2 - *s2), len2 - 1);
+  gt_assert(idlength2 > 0);
+  (void) strncpy(buf1, *s1, idlength1);
+  (void) strncpy(buf2, *s2, idlength2);
+  buf1[idlength1] = '\0';
+  buf2[idlength2] = '\0';
+  *s1 = tokend1 + 1;
+  *s2 = tokend2 + 1;
+}
+
+/* this is comparing self-generated content, so we reasonably expect enough
+   fields -- fail assertion if there is a parsing problem */
 static int gt_linesorted_gff3_cmp(const void *val1, const void *val2,
                                   GT_UNUSED void *data)
 {
-  GtUword p1s = 0, p1e = 0,
-          p2s = 0, p2e = 0,
-          idlength1, idlength2;
-  GT_UNUSED int p1scanned = 0,
-                p2scanned = 0;
+  GtUword p1 = 0, p2 = 0;
   const char *s1 = *(const char**) val1,
              *s2 = *(const char**) val2,
-             *seqidend1, *seqidend2;
+             *reststart1 = s1, *reststart2 = s2;
+  int str_cmp_result,
+      GT_UNUSED rval = 0;
   char buf1[BUFSIZ], buf2[BUFSIZ];
-  int str_cmp_result;
 
   if (s1[0] == '#' || s2[0] == '\0')
     return 1;
   if (s2[0] == '#' || s1[0] == '\0')
     return -1;
 
-  seqidend1 = strchr(s1, '\t');
-  gt_assert(seqidend1 && seqidend1 >= s1);
-  seqidend2 = strchr(s2, '\t');
-  gt_assert(seqidend2 && seqidend2 >= s2);
-  idlength1 = MIN((seqidend1 - s1), BUFSIZ);
-  gt_assert(idlength1 > 0);
-  idlength2 = MIN((seqidend2 - s2), BUFSIZ);
-  gt_assert(idlength2 > 0);
-  (void) strncpy(buf1, s1, idlength1);
-  (void) strncpy(buf2, s2, idlength2);
-  buf1[idlength1] = '\0';
-  buf2[idlength2] = '\0';
+  /* parse seqid */
+  gt_linesorted_gff3_next_token_pair(&reststart1, &reststart2, buf1, BUFSIZ,
+                                     buf2, BUFSIZ, GT_LINESORTED_SEP);
   str_cmp_result = strcmp(buf1, buf2);
   if (str_cmp_result != 0)
     return str_cmp_result;
 
-  p1scanned = sscanf(s1, "%*s\t%*s\t%*s\t"GT_WU"\t"GT_WU, &p1s, &p1e);
-  gt_assert(p1s != 0);
-  gt_assert(p1scanned == 2);
-  p2scanned = sscanf(s2, "%*s\t%*s\t%*s\t"GT_WU"\t"GT_WU, &p2s, &p2e);
-  gt_assert(p2s != 0);
-  gt_assert(p2scanned == 2);
+  /* parse source */
+  gt_linesorted_gff3_next_token_pair(&reststart1, &reststart2, buf1, BUFSIZ,
+                                     buf2, BUFSIZ, GT_LINESORTED_SEP);
+  /* parse type */
+  gt_linesorted_gff3_next_token_pair(&reststart1, &reststart2, buf1, BUFSIZ,
+                                     buf2, BUFSIZ, GT_LINESORTED_SEP);
 
-  if (p1s == p2s)
-    return strcmp(s1, s2);
-  if (p1s > p2s)
+  /* parse start */
+  gt_linesorted_gff3_next_token_pair(&reststart1, &reststart2, buf1, BUFSIZ,
+                                     buf2, BUFSIZ, GT_LINESORTED_SEP);
+  rval = gt_parse_uword(&p1, buf1);
+  gt_assert(rval == 0);
+  rval = gt_parse_uword(&p2, buf2);
+  gt_assert(rval == 0);
+
+  if (p1 == p2) {
+    /* parse end */
+    gt_linesorted_gff3_next_token_pair(&reststart1, &reststart2, buf1, BUFSIZ,
+                                       buf2, BUFSIZ, GT_LINESORTED_SEP);
+    rval = gt_parse_uword(&p1, buf1);
+    gt_assert(rval == 0);
+    rval = gt_parse_uword(&p2, buf2);
+    gt_assert(rval == 0);
+    if (p1 == p2)
+      return 0;
+    if (p1 > p2)
+      return 1;
+    else
+      return -1;
+  }
+  if (p1 > p2)
     return 1;
   else
     return -1;
