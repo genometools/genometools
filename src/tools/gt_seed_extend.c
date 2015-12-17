@@ -655,7 +655,7 @@ static int gt_seed_extend_runner(GT_UNUSED int argc,
                    gt_option_is_set(arguments->se_option_xdrop)))
   {
     querymatchoutopt
-      = gt_querymatchoutoptions_new(arguments->se_alignmentwidth);
+      = gt_querymatchoutoptions_new(true,false,arguments->se_alignmentwidth);
 
     if (!arguments->onlyseeds)
     {

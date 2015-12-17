@@ -114,6 +114,7 @@ static GtOptionParser* gt_show_seedext_option_parser_new(void *tool_arguments)
                                       &arguments->sortmatches,false);
   gt_option_parser_add_option(op, op_sortmatches);
 
+  /* -e */
   op_showeoplist = gt_option_new_bool("e","show list of edit operations",
                                       &arguments->showeoplist,false);
   gt_option_parser_add_option(op, op_showeoplist);
@@ -161,6 +162,7 @@ static void gt_show_seed_extend_plain(GtSequencepairbuffer *seqpairbuf,
                                       GtAlignment *alignment,
                                       GtUchar *alignment_show_buffer,
                                       GtUword alignmentwidth,
+                                      bool showeoplist,
                                       const GtUchar *characters,
                                       GtUchar wildcardshow,
                                       const GtEncseq *aencseq,
@@ -226,6 +228,13 @@ static void gt_show_seed_extend_plain(GtSequencepairbuffer *seqpairbuf,
                               alignmentwidth,
                               characters,
                               wildcardshow);
+  }
+  if (showeoplist && distance > 0)
+  {
+    gt_alignment_show_multieop_list(alignment, stdout);
+  }
+  if (alignmentwidth > 0 || showeoplist)
+  {
     gt_alignment_reset(alignment);
   }
 }
@@ -233,8 +242,7 @@ static void gt_show_seed_extend_plain(GtSequencepairbuffer *seqpairbuf,
 static void gt_show_seed_extend_encseq(GtQuerymatch *querymatchptr,
                                        const GtEncseq *aencseq,
                                        const GtEncseq *bencseq,
-                                       GtUword query_totallength,
-                                       bool showeoplist)
+                                       GtUword query_totallength)
 {
   GtSeqorEncseq bseqorencseq;
 
@@ -246,12 +254,6 @@ static void gt_show_seed_extend_encseq(GtQuerymatch *querymatchptr,
                             query_totallength,
                             false) != 0)
   {
-    if (showeoplist)
-    {
-      const GtAlignment *al = gt_querymatch_alignment_get(querymatchptr);
-
-      gt_alignment_show_multieop_list(al, stdout);
-    }
     gt_querymatch_prettyprint(querymatchptr);
   }
 }
@@ -292,7 +294,9 @@ static int gt_show_seedext_runner(GT_UNUSED int argc,
     GtProcessinfo_and_querymatchspaceptr processinfo_and_querymatchspaceptr;
     const GtUchar *characters = gt_encseq_alphabetcharacters(aencseq);
     const GtUchar wildcardshow = gt_encseq_alphabetwildcardshow(aencseq);
-    GtUchar *alignment_show_buffer = gt_alignment_buffer_new(alignmentwidth);
+    GtUchar *alignment_show_buffer
+      = arguments->show_alignment ? gt_alignment_buffer_new(alignmentwidth)
+                                  : NULL;
     GtLinspaceManagement *linspace_spacemanager = gt_linspaceManagement_new();
     GtScoreHandler *linspace_scorehandler = gt_scorehandler_new(0,1,0,1);;
 
@@ -311,9 +315,11 @@ static int gt_show_seedext_runner(GT_UNUSED int argc,
     {
       gt_seedextend_match_iterator_seed_display_set(semi);
     }
-    if (arguments->show_alignment)
+    if (arguments->show_alignment || arguments->showeoplist)
     {
-      querymatchoutoptions = gt_querymatchoutoptions_new(alignmentwidth);
+      querymatchoutoptions = gt_querymatchoutoptions_new(true,
+                                                         arguments->showeoplist,
+                                                         alignmentwidth);
       gt_querymatchoutoptions_for_align_only(querymatchoutoptions,
                             gt_seedextend_match_iterator_errorpercentage(semi),
                             matchscore_bias,
@@ -387,8 +393,7 @@ static int gt_show_seedext_runner(GT_UNUSED int argc,
           gt_show_seed_extend_encseq(querymatchptr,
                                      aencseq,
                                      bencseq,
-                                     query_totallength,
-                                     arguments->showeoplist);
+                                     query_totallength);
         }
       } else
       {
@@ -398,6 +403,7 @@ static int gt_show_seedext_runner(GT_UNUSED int argc,
                                   alignment,
                                   alignment_show_buffer,
                                   alignmentwidth,
+                                  arguments->showeoplist,
                                   characters,
                                   wildcardshow,
                                   aencseq,

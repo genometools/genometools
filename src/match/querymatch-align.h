@@ -25,8 +25,9 @@
 
 typedef struct GtQuerymatchoutoptions GtQuerymatchoutoptions;
 
-GtQuerymatchoutoptions *gt_querymatchoutoptions_new(
-                                GtUword alignmentwidth);
+GtQuerymatchoutoptions *gt_querymatchoutoptions_new(bool generatealignment,
+                                                    bool showeoplist,
+                                                    GtUword alignmentwidth);
 
 void gt_querymatchoutoptions_extend(
                   GtQuerymatchoutoptions *querymatchoutoptions,
