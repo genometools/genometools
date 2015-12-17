@@ -149,4 +149,28 @@ GtUword gt_seedextend_match_iterator_seedpos2(
          start and endpositions querystart and queryend */
     }
   }
+
+  /* When processing the chain first declare the following: */
+
+  GtSeqorEncseq bseqorencseq;
+
+  bseqorencseq.seq = NULL;
+  bseqorencseq.encseq = bencseq;
+
+  /* for each match in the chain */
+
+  idx = chainelem->indexintableofallmatches;
+  querymatchptr = gt_seedextend_match_iterator_get(semi,idx);
+
+  if (gt_querymatch_process(querymatchptr,
+                            aencseq,
+                            &bseqorencseq,
+                            query_totallength,
+                            false) != 0)
+  {
+    GtAlignment *alignment = gt_querymatch_alignment_get(querymatchptr);
+
+    /* now use feed the eoplist of the alignment with the required
+       coordinates into the condenser */
+  }
 #endif
