@@ -166,12 +166,13 @@ static void gt_show_seed_extend_plain(GtSequencepairbuffer *seqpairbuf,
   const GtUword distance = gt_querymatch_distance(querymatchptr),
                 dblen = gt_querymatch_dblen(querymatchptr),
                 queryseqnum = gt_querymatch_queryseqnum(querymatchptr),
-                querystart = gt_querymatch_querystart(querymatchptr),
+                querystart_fwdstrand
+                  = gt_querymatch_querystart_fwdstrand(querymatchptr),
                 querylen = gt_querymatch_querylen(querymatchptr);
 
   const GtUword apos_ab = gt_querymatch_dbstart(querymatchptr);
   const GtUword bpos_ab = gt_encseq_seqstartpos(bencseq, queryseqnum) +
-                          querystart;
+                          querystart_fwdstrand;
 
   gt_querymatch_coordinates_out(querymatchptr);
   if (dblen >= seqpairbuf->a_allocated)

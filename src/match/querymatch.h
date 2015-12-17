@@ -134,4 +134,6 @@ bool gt_querymatch_overlap(const GtQuerymatch *querymatch,
 int gt_querymatch_compare(const void *va,const void *vb);
 
 bool gt_querymatch_has_seed(const GtQuerymatch *querymatch);
+
+GtUword gt_querymatch_querystart_fwdstrand(const GtQuerymatch *querymatch);
 #endif

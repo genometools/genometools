@@ -448,6 +448,12 @@ GtUword gt_querymatch_querystart(const GtQuerymatch *querymatch)
   return querymatch->querystart;
 }
 
+GtUword gt_querymatch_querystart_fwdstrand(const GtQuerymatch *querymatch)
+{
+  gt_assert(querymatch != NULL);
+  return querymatch->querystart_fwdstrand;
+}
+
 uint64_t gt_querymatch_queryseqnum(const GtQuerymatch *querymatch)
 {
   gt_assert(querymatch != NULL);
