@@ -51,8 +51,8 @@ void gt_querymatch_init(GtQuerymatch *querymatch,
 bool gt_querymatch_read_line(GtQuerymatch *querymatchptr,
                              const char *line_ptr,
                              bool selfmatch,
-                             GtUword query_totallength,
-                             const GtEncseq *dbencseq);
+                             const GtEncseq *dbencseq,
+                             const GtEncseq *queryencseq);
 
 bool gt_querymatch_process(GtQuerymatch *querymatchptr,
                            GtUword seedpos1,
@@ -108,6 +108,8 @@ GtUword gt_querymatch_distance(const GtQuerymatch *querymatch);
 
 void gt_querymatch_prettyprint(const GtQuerymatch *querymatch);
 
+void gt_querymatch_coordinates_out(const GtQuerymatch *querymatch);
+
 bool gt_querymatch_check_final(const GtQuerymatch *querymatch,
                                GtUword errorpercentage,
                                GtUword userdefinedleastlength);
@@ -124,6 +126,6 @@ bool gt_querymatch_selfmatch(const GtQuerymatch *querymatch);
 GtWord gt_querymatch_distance2score(GtUword distance,GtUword alignedlen);
 
 /* Returns true, iff the given seed start position is below the querymatch. */
-bool gt_querymatch_checkoverlap(const GtQuerymatch *querymatch,
-                                GtUword start_relative);
+bool gt_querymatch_overlap(const GtQuerymatch *querymatch,
+                           GtUword start_relative);
 #endif

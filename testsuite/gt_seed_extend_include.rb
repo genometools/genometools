@@ -126,7 +126,7 @@ Keywords "gt_seed_extend fail"
 Test do
   run_test build_encseq("at1MB", "#{$testdata}at1MB")
   run_test build_encseq("foo", "#{$testdata}foo.fas")
-  run_test "#{$bin}gt seed_extend -seedlength 10 -ii foo", :retval => 0
+  run_test "#{$bin}gt seed_extend -seedlength 10 -ii foo", :retval => 1
   grep last_stderr, /integer <= 8 \(length of longest sequence\)/
   run_test "#{$bin}gt seed_extend -maxfreq 1 -ii at1MB", :retval => 1
   grep last_stderr, /option "-maxfreq" must be >= 2 to find matching k-mers/
@@ -135,7 +135,7 @@ Test do
   run_test "#{$bin}gt seed_extend -memlimit 0MB -ii at1MB", :retval => 1
   grep last_stderr, /argument to option "-memlimit" must be at least 1MB/
   run_test "#{$bin}gt seed_extend -memlimit 1MB -ii at1MB", :retval => 1
-  grep last_stderr, /option -memlimit too strict: need at least 11MB/
+  grep last_stderr, /option -memlimit too strict: need at least 21MB/
   run_test "#{$bin}gt seed_extend -memlimit 1KB -ii at1MB", :retval => 1
   grep last_stderr, /integer argument followed by one of the keywords MB and GB/
   run_test "#{$bin}gt seed_extend -extendgreedy -history 65 -benchmark " +

@@ -182,14 +182,17 @@ static void gt_show_seed_extend_plain(GtLinspaceManagement
     printf("# edist=" GT_WU " (smaller by " GT_WU ")\n",edist,distance - edist);
   }
   gt_assert(edist <= distance);
-  gt_alignment_show_generic(alignment_show_buffer,
-                            false,
-                            alignment,
-                            stdout,
-                            alignmentwidth,
-                            characters,
-                            wildcardshow);
-  gt_alignment_reset(alignment);
+  if (alignmentwidth > 0)
+  {
+    gt_alignment_show_generic(alignment_show_buffer,
+                              false,
+                              alignment,
+                              stdout,
+                              alignmentwidth,
+                              characters,
+                              wildcardshow);
+    gt_alignment_reset(alignment);
+  }
 }
 
 static void gt_show_seed_extend_encseq(GtQuerymatch *querymatchptr,
@@ -251,7 +254,6 @@ static int gt_show_seedext_runner(GT_UNUSED int argc,
     GtLinspaceManagement *linspace_spacemanager = gt_linspaceManagement_new();
     GtScoreHandler *linspace_scorehandler = gt_scorehandler_new(0,1,0,1);;
     GtAlignment *alignment = gt_alignment_new();
-    const GtUword query_totallength = gt_encseq_total_length(bencseq);
     GtUchar *a_sequence = NULL, *b_sequence = NULL;
     GtUword a_allocated = 0, b_allocated = 0;
     double matchscore_bias = GT_DEFAULT_MATCHSCORE_BIAS;
@@ -272,14 +274,17 @@ static int gt_show_seedext_runner(GT_UNUSED int argc,
     {
       gt_seedextend_match_iterator_seed_display_set(semi);
     }
-    querymatchoutoptions = gt_querymatchoutoptions_new(alignmentwidth);
-    gt_querymatchoutoptions_for_align_only(querymatchoutoptions,
-                          gt_seedextend_match_iterator_errorpercentage(semi),
-                          matchscore_bias,
-                          gt_seedextend_match_iterator_history_size(semi),
-                          !arguments->relax_polish,
-                          arguments->seed_display);
-    gt_seedextend_match_iterator_outoptions_set(semi,querymatchoutoptions);
+    if (arguments->show_alignment)
+    {
+      querymatchoutoptions = gt_querymatchoutoptions_new(alignmentwidth);
+      gt_querymatchoutoptions_for_align_only(querymatchoutoptions,
+                            gt_seedextend_match_iterator_errorpercentage(semi),
+                            matchscore_bias,
+                            gt_seedextend_match_iterator_history_size(semi),
+                            !arguments->relax_polish,
+                            arguments->seed_display);
+      gt_seedextend_match_iterator_outoptions_set(semi,querymatchoutoptions);
+    }
     if (arguments->seed_extend)
     {
       greedyextendmatchinfo
@@ -333,6 +338,9 @@ static int gt_show_seedext_runner(GT_UNUSED int argc,
           }
         } else
         {
+          const GtUword query_totallength
+            = gt_encseq_seqlength(bencseq,
+                                  gt_querymatch_queryseqnum(querymatchptr));
           gt_show_seed_extend_encseq(querymatchptr,
                                      aencseq,
                                      bencseq,
@@ -356,6 +364,7 @@ static int gt_show_seedext_runner(GT_UNUSED int argc,
           b_sequence = gt_realloc(b_sequence,sizeof *b_sequence * querylen);
           b_allocated = querylen;
         }
+        gt_querymatch_coordinates_out(querymatchptr);
         gt_show_seed_extend_plain(linspace_spacemanager,
                                   linspace_scorehandler,
                                   alignment,
