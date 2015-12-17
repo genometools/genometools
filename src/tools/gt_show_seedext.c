@@ -38,6 +38,7 @@ typedef struct
   bool show_alignment,
        seed_display,
        relax_polish,
+       sortmatches,
        seed_extend;
   GtStr *matchfilename;
 } GtShowSeedextArguments;
@@ -63,7 +64,7 @@ static GtOptionParser* gt_show_seedext_option_parser_new(void *tool_arguments)
   GtShowSeedextArguments *arguments = tool_arguments;
   GtOptionParser *op;
   GtOption *option, *op_ali, *option_filename, *op_relax_polish,
-           *op_seed_extend;
+           *op_seed_extend, *op_sortmatches;
 
   gt_assert(arguments);
   /* init */
@@ -104,6 +105,13 @@ static GtOptionParser* gt_show_seedext_option_parser_new(void *tool_arguments)
   gt_option_parser_add_option(op, op_relax_polish);
   gt_option_is_development_option(op_relax_polish);
   gt_option_imply(op_relax_polish, op_ali);
+
+  /* -sort */
+  op_sortmatches = gt_option_new_bool("sort","sort matches in ascending order "
+                                             "of their end positon on the "
+                                             "query",
+                                      &arguments->sortmatches,false);
+  gt_option_parser_add_option(op, op_sortmatches);
 
   /* -f */
   option_filename = gt_option_new_filename("f",
@@ -198,19 +206,13 @@ static void gt_show_seed_extend_plain(GtLinspaceManagement
 static void gt_show_seed_extend_encseq(GtQuerymatch *querymatchptr,
                                        const GtEncseq *aencseq,
                                        const GtEncseq *bencseq,
-                                       GtUword query_totallength,
-                                       GtUword seedlen,
-                                       GtUword seedpos1,
-                                       GtUword seedpos2)
+                                       GtUword query_totallength)
 {
   GtSeqorEncseq bseqorencseq;
 
   bseqorencseq.seq = NULL;
   bseqorencseq.encseq = bencseq;
   if (gt_querymatch_process(querymatchptr,
-                            seedpos1,
-                            seedpos2,
-                            seedlen,
                             aencseq,
                             &bseqorencseq,
                             query_totallength,
@@ -219,6 +221,10 @@ static void gt_show_seed_extend_encseq(GtQuerymatch *querymatchptr,
     gt_querymatch_prettyprint(querymatchptr);
   }
 }
+
+typedef GtQuerymatch * GtQuerymatchptr;
+
+GT_DECLAREARRAYSTRUCT(GtQuerymatchptr);
 
 static int gt_show_seedext_runner(GT_UNUSED int argc,
                                   GT_UNUSED const char **argv,
@@ -255,10 +261,12 @@ static int gt_show_seedext_runner(GT_UNUSED int argc,
     GtScoreHandler *linspace_scorehandler = gt_scorehandler_new(0,1,0,1);;
     GtAlignment *alignment = gt_alignment_new();
     GtUchar *a_sequence = NULL, *b_sequence = NULL;
-    GtUword a_allocated = 0, b_allocated = 0;
+    GtUword idx, a_allocated = 0, b_allocated = 0;
     double matchscore_bias = GT_DEFAULT_MATCHSCORE_BIAS;
     GtProcessinfo_and_querymatchspaceptr processinfo_and_querymatchspaceptr;
+    GtArrayGtQuerymatchptr querymatchptrtable;
 
+    GT_INITARRAY(&querymatchptrtable,GtQuerymatchptr);
     if (!arguments->relax_polish)
     {
       if (gt_seedextend_match_iterator_bias_parameters(semi))
@@ -311,14 +319,15 @@ static int gt_show_seedext_runner(GT_UNUSED int argc,
       }
       if (gt_seedextend_match_iterator_has_seedline(semi))
       {
-        const GtUword seedlen = gt_seedextend_match_iterator_seedlen(semi),
-                      seedpos1 = gt_seedextend_match_iterator_seedpos1(semi),
-                      seedpos2 = gt_seedextend_match_iterator_seedpos2(semi);
-
         if (arguments->seed_extend)
         {
           if (aencseq == bencseq)
           {
+            const GtUword
+              seedlen = gt_seedextend_match_iterator_seedlen(semi),
+              seedpos1 = gt_seedextend_match_iterator_seedpos1(semi),
+              seedpos2 = gt_seedextend_match_iterator_seedpos2(semi);
+
             processinfo_and_querymatchspaceptr.querymatchspaceptr
               = querymatchptr;
             had_err = gt_greedy_extend_selfmatch_with_output(
@@ -338,16 +347,24 @@ static int gt_show_seedext_runner(GT_UNUSED int argc,
           }
         } else
         {
-          const GtUword query_totallength
-            = gt_encseq_seqlength(bencseq,
-                                  gt_querymatch_queryseqnum(querymatchptr));
-          gt_show_seed_extend_encseq(querymatchptr,
-                                     aencseq,
-                                     bencseq,
-                                     query_totallength,
-                                     seedlen,
-                                     seedpos1,
-                                     seedpos2);
+          if (arguments->sortmatches)
+          {
+            GtQuerymatch *querymatch = gt_querymatch_dup(querymatchptr);
+            GT_STOREINARRAY(&querymatchptrtable,
+                            GtQuerymatchptr,
+                            querymatchptrtable.allocatedGtQuerymatchptr
+                                    * 0.2 + 256,
+                            querymatch);
+          } else
+          {
+            const GtUword query_totallength
+              = gt_encseq_seqlength(bencseq,
+                                    gt_querymatch_queryseqnum(querymatchptr));
+            gt_show_seed_extend_encseq(querymatchptr,
+                                       aencseq,
+                                       bencseq,
+                                       query_totallength);
+          }
         }
       } else
       {
@@ -378,6 +395,25 @@ static int gt_show_seedext_runner(GT_UNUSED int argc,
                                   b_sequence,
                                   querymatchptr);
       }
+    }
+    if (arguments->sortmatches)
+    {
+      qsort(querymatchptrtable.spaceGtQuerymatchptr,
+            querymatchptrtable.nextfreeGtQuerymatchptr,
+            sizeof *querymatchptrtable.spaceGtQuerymatchptr,
+            gt_querymatch_compare);
+      for (idx = 0; idx < querymatchptrtable.nextfreeGtQuerymatchptr; idx++)
+      {
+        GtQuerymatch *qptr = querymatchptrtable.spaceGtQuerymatchptr[idx];
+        const GtUword query_totallength
+         = gt_encseq_seqlength(bencseq,gt_querymatch_queryseqnum(qptr));
+        gt_show_seed_extend_encseq(qptr,
+                                   aencseq,
+                                   bencseq,
+                                   query_totallength);
+        gt_querymatch_delete(qptr);
+      }
+      GT_FREEARRAY(&querymatchptrtable,GtQuerymatchptr);
     }
     polishing_info_delete(pol_info);
     gt_greedy_extend_matchinfo_delete(greedyextendmatchinfo);

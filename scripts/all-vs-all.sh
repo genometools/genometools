@@ -10,7 +10,7 @@ do
   for query in `${GTDIR}/scripts/findfasta.rb -n -e ${excludelist}`
   do
     bin/gt encseq encode -indexname query-index ${query}
-    bin/gt seed_extend -v -ii ref-index -maxfreq 20 -qii query-index > tmp.matches
-    scripts/ascQorder.rb tmp.matches | scripts/ascQorder.rb -c
+    bin/gt seed_extend -v -ii ref-index -seed-display -maxfreq 20 -qii query-index > tmp.matches
+    bin/gt dev show_seedext -f tmp.matches -sort | ascQorder.rb -c
   done
 done

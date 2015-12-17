@@ -30,6 +30,8 @@ typedef struct GtQuerymatch GtQuerymatch;
 
 GtQuerymatch *gt_querymatch_new(void);
 
+GtQuerymatch *gt_querymatch_dup(const GtQuerymatch *querymatch_src);
+
 void gt_querymatch_seed_display_set(GtQuerymatch *querymatch);
 
 void gt_querymatch_outoptions_set(GtQuerymatch *querymatch,
@@ -51,13 +53,13 @@ void gt_querymatch_init(GtQuerymatch *querymatch,
 bool gt_querymatch_read_line(GtQuerymatch *querymatchptr,
                              const char *line_ptr,
                              bool selfmatch,
+                             GtUword seedpos1,
+                             GtUword seedpos2,
+                             GtUword seedlen,
                              const GtEncseq *dbencseq,
                              const GtEncseq *queryencseq);
 
 bool gt_querymatch_process(GtQuerymatch *querymatchptr,
-                           GtUword seedpos1,
-                           GtUword seedpos2,
-                           GtUword seedlen,
                            const GtEncseq *encseq,
                            const GtSeqorEncseq *query,
                            GtUword query_totallength,
@@ -128,4 +130,6 @@ GtWord gt_querymatch_distance2score(GtUword distance,GtUword alignedlen);
 /* Returns true, iff the given seed start position is below the querymatch. */
 bool gt_querymatch_overlap(const GtQuerymatch *querymatch,
                            GtUword start_relative);
+
+int gt_querymatch_compare(const void *va,const void *vb);
 #endif

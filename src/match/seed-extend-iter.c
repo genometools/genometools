@@ -98,6 +98,7 @@ GtSeedextendMatchIterator *gt_seedextend_match_iterator_new(
   semi->line_buffer = NULL;
   semi->inputfileptr = NULL;
   semi->querymatchptr = gt_querymatch_new();
+  semi->seedpos1 = semi->seedpos2 = semi->seedlen = 0;
   options_line_inputfileptr = fopen(semi->matchfilename, "r");
   if (options_line_inputfileptr == NULL)
   {
@@ -297,6 +298,9 @@ GtQuerymatch *gt_seedextend_match_iterator_next(GtSeedextendMatchIterator *semi)
         if (gt_querymatch_read_line(semi->querymatchptr,
                                     line_ptr,
                                     selfmatch,
+                                    semi->seedpos1,
+                                    semi->seedpos2,
+                                    semi->seedlen,
                                     semi->aencseq,
                                     semi->bencseq))
         {
