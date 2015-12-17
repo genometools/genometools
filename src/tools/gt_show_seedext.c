@@ -120,6 +120,7 @@ static GtOptionParser* gt_show_seedext_option_parser_new(void *tool_arguments)
   gt_option_is_mandatory(option_filename);
   gt_option_parser_add_option(op, option_filename);
 
+  gt_option_exclude(op_seed_extend, op_sortmatches);
   gt_option_exclude(op_relax_polish, op_seed_extend);
   return op;
 }
@@ -243,10 +244,6 @@ static void gt_show_seed_extend_encseq(GtQuerymatch *querymatchptr,
   }
 }
 
-typedef GtQuerymatch * GtQuerymatchptr;
-
-GT_DECLAREARRAYSTRUCT(GtQuerymatchptr);
-
 static int gt_show_seedext_runner(GT_UNUSED int argc,
                                   GT_UNUSED const char **argv,
                                   GT_UNUSED int parsed_args,
@@ -282,12 +279,9 @@ static int gt_show_seedext_runner(GT_UNUSED int argc,
     GtScoreHandler *linspace_scorehandler = gt_scorehandler_new(0,1,0,1);;
     GtAlignment *alignment = gt_alignment_new();
     GtSequencepairbuffer seqpairbuf = {NULL,NULL,0,0};
-    GtUword idx;
     double matchscore_bias = GT_DEFAULT_MATCHSCORE_BIAS;
     GtProcessinfo_and_querymatchspaceptr processinfo_and_querymatchspaceptr;
-    GtArrayGtQuerymatchptr querymatchptrtable;
 
-    GT_INITARRAY(&querymatchptrtable,GtQuerymatchptr);
     if (!arguments->relax_polish)
     {
       if (gt_seedextend_match_iterator_bias_parameters(semi))
@@ -331,97 +325,14 @@ static int gt_show_seedext_runner(GT_UNUSED int argc,
       gt_alignment_polished_ends(alignment,pol_info,false);
     }
     processinfo_and_querymatchspaceptr.processinfo = greedyextendmatchinfo;
-    while (true)
-    {
-      GtQuerymatch *querymatchptr = gt_seedextend_match_iterator_next(semi);
-      if (querymatchptr == NULL)
-      {
-        break;
-      }
-      if (gt_seedextend_match_iterator_has_seedline(semi))
-      {
-        if (arguments->seed_extend)
-        {
-          if (aencseq == bencseq)
-          {
-            const GtUword
-              seedlen = gt_seedextend_match_iterator_seedlen(semi),
-              seedpos1 = gt_seedextend_match_iterator_seedpos1(semi),
-              seedpos2 = gt_seedextend_match_iterator_seedpos2(semi);
-
-            processinfo_and_querymatchspaceptr.querymatchspaceptr
-              = querymatchptr;
-            had_err = gt_greedy_extend_selfmatch_with_output(
-                                  &processinfo_and_querymatchspaceptr,
-                                  aencseq,
-                                  seedlen,
-                                  seedpos1,
-                                  seedpos2,
-                                  err);
-            if (had_err)
-            {
-              break;
-            }
-          } else
-          {
-            gt_assert(false);
-          }
-        } else
-        {
-          if (arguments->sortmatches)
-          {
-            GtQuerymatch *querymatch = gt_querymatch_dup(querymatchptr);
-            GT_STOREINARRAY(&querymatchptrtable,
-                            GtQuerymatchptr,
-                            querymatchptrtable.allocatedGtQuerymatchptr
-                                    * 0.2 + 256,
-                            querymatch);
-          } else
-          {
-            const GtUword query_totallength
-              = gt_encseq_seqlength(bencseq,
-                                    gt_querymatch_queryseqnum(querymatchptr));
-            gt_show_seed_extend_encseq(querymatchptr,
-                                       aencseq,
-                                       bencseq,
-                                       query_totallength);
-          }
-        }
-      } else
-      {
-        if (arguments->sortmatches)
-        {
-            GtQuerymatch *querymatch = gt_querymatch_dup(querymatchptr);
-            GT_STOREINARRAY(&querymatchptrtable,
-                            GtQuerymatchptr,
-                            querymatchptrtable.allocatedGtQuerymatchptr
-                                    * 0.2 + 256,
-                            querymatch);
-        } else
-        {
-          gt_show_seed_extend_plain(&seqpairbuf,
-                                    linspace_spacemanager,
-                                    linspace_scorehandler,
-                                    alignment,
-                                    alignment_show_buffer,
-                                    alignmentwidth,
-                                    characters,
-                                    wildcardshow,
-                                    aencseq,
-                                    bencseq,
-                                    querymatchptr);
-        }
-      }
-    }
     if (arguments->sortmatches)
     {
-      qsort(querymatchptrtable.spaceGtQuerymatchptr,
-            querymatchptrtable.nextfreeGtQuerymatchptr,
-            sizeof *querymatchptrtable.spaceGtQuerymatchptr,
-            gt_querymatch_compare);
-      for (idx = 0; idx < querymatchptrtable.nextfreeGtQuerymatchptr; idx++)
+      GtUword idx,
+              numberofmatches = gt_seedextend_match_iterator_all_sorted(semi);
+
+      for (idx = 0; idx < numberofmatches; idx++)
       {
-        GtQuerymatch *qptr = querymatchptrtable.spaceGtQuerymatchptr[idx];
+        GtQuerymatch *qptr = gt_seedextend_match_iterator_get(semi,idx);
         if (gt_querymatch_has_seed(qptr))
         {
           const GtUword query_totallength
@@ -442,9 +353,70 @@ static int gt_show_seedext_runner(GT_UNUSED int argc,
                                     bencseq,
                                     qptr);
         }
-        gt_querymatch_delete(qptr);
       }
-      GT_FREEARRAY(&querymatchptrtable,GtQuerymatchptr);
+    } else
+    {
+      while (true)
+      {
+        GtQuerymatch *querymatchptr = gt_seedextend_match_iterator_next(semi);
+
+        if (querymatchptr == NULL)
+        {
+          break;
+        }
+        if (gt_seedextend_match_iterator_has_seedline(semi))
+        {
+          if (arguments->seed_extend)
+          {
+            if (aencseq == bencseq)
+            {
+              const GtUword
+                seedlen = gt_seedextend_match_iterator_seedlen(semi),
+                seedpos1 = gt_seedextend_match_iterator_seedpos1(semi),
+                seedpos2 = gt_seedextend_match_iterator_seedpos2(semi);
+
+              processinfo_and_querymatchspaceptr.querymatchspaceptr
+                = querymatchptr;
+              had_err = gt_greedy_extend_selfmatch_with_output(
+                                    &processinfo_and_querymatchspaceptr,
+                                    aencseq,
+                                    seedlen,
+                                    seedpos1,
+                                    seedpos2,
+                                    err);
+              if (had_err)
+              {
+                break;
+              }
+            } else
+            {
+              gt_assert(false);
+            }
+          } else
+          {
+            const GtUword query_totallength
+              = gt_encseq_seqlength(bencseq,
+                                    gt_querymatch_queryseqnum(querymatchptr));
+            gt_show_seed_extend_encseq(querymatchptr,
+                                       aencseq,
+                                       bencseq,
+                                       query_totallength);
+          }
+        } else
+        {
+          gt_show_seed_extend_plain(&seqpairbuf,
+                                    linspace_spacemanager,
+                                    linspace_scorehandler,
+                                    alignment,
+                                    alignment_show_buffer,
+                                    alignmentwidth,
+                                    characters,
+                                    wildcardshow,
+                                    aencseq,
+                                    bencseq,
+                                    querymatchptr);
+        }
+      }
     }
     polishing_info_delete(pol_info);
     gt_greedy_extend_matchinfo_delete(greedyextendmatchinfo);

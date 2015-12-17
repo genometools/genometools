@@ -116,4 +116,10 @@ GtUword gt_seedextend_match_iterator_seedpos1(
 GtUword gt_seedextend_match_iterator_seedpos2(
                             const GtSeedextendMatchIterator *semi);
 
+GtUword gt_seedextend_match_iterator_all_sorted(
+                                         GtSeedextendMatchIterator *semi);
+
+GtQuerymatch *gt_seedextend_match_iterator_get(
+                            const GtSeedextendMatchIterator *semi,
+                            GtUword idx);
 #endif

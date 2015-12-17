@@ -36,6 +36,7 @@ struct GtSeedextendMatchIterator
           seedlen;
   FILE *inputfileptr;
   GtQuerymatch *querymatchptr;
+  GtArrayGtQuerymatch querymatch_table;
 };
 
 void gt_seedextend_match_iterator_delete(GtSeedextendMatchIterator *semi)
@@ -50,6 +51,7 @@ void gt_seedextend_match_iterator_delete(GtSeedextendMatchIterator *semi)
   gt_encseq_delete(semi->bencseq);
   gt_str_delete(semi->line_buffer);
   gt_querymatch_delete(semi->querymatchptr);
+  GT_FREEARRAY(&semi->querymatch_table,GtQuerymatch);
   if (semi->inputfileptr != NULL)
   {
     fclose(semi->inputfileptr);
@@ -99,6 +101,7 @@ GtSeedextendMatchIterator *gt_seedextend_match_iterator_new(
   semi->inputfileptr = NULL;
   semi->querymatchptr = gt_querymatch_new();
   semi->seedpos1 = semi->seedpos2 = semi->seedlen = GT_UWORD_MAX;
+  GT_INITARRAY(&semi->querymatch_table,GtQuerymatch);
   options_line_inputfileptr = fopen(semi->matchfilename, "r");
   if (options_line_inputfileptr == NULL)
   {
@@ -398,4 +401,27 @@ void gt_seedextend_match_iterator_outoptions_set(
 {
   gt_assert(semi != NULL);
   gt_querymatch_outoptions_set(semi->querymatchptr,querymatchoutoptions);
+}
+
+GtUword gt_seedextend_match_iterator_all_sorted(GtSeedextendMatchIterator *semi)
+
+{
+  GtQuerymatch *querymatchptr;
+  gt_assert(semi != NULL);
+
+  while ((querymatchptr = gt_seedextend_match_iterator_next(semi)) != NULL)
+  {
+    gt_querymatch_table_add(&semi->querymatch_table,querymatchptr);
+  }
+  gt_querymatch_table_sort(&semi->querymatch_table);
+  return semi->querymatch_table.nextfreeGtQuerymatch;
+}
+
+GtQuerymatch *gt_seedextend_match_iterator_get(
+                            const GtSeedextendMatchIterator *semi,
+                            GtUword idx)
+{
+  gt_assert(semi != NULL && idx < semi->querymatch_table.nextfreeGtQuerymatch);
+
+  return gt_querymatch_table_get(&semi->querymatch_table,idx);
 }

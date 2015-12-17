@@ -23,10 +23,13 @@
 #include "core/readmode.h"
 #include "core/encseq.h"
 #include "core/unused_api.h"
+#include "core/arraydef.h"
 #include "querymatch-align.h"
 #include "seq_or_encseq.h"
 
 typedef struct GtQuerymatch GtQuerymatch;
+
+GT_DECLAREARRAYSTRUCT(GtQuerymatch);
 
 GtQuerymatch *gt_querymatch_new(void);
 
@@ -136,4 +139,12 @@ int gt_querymatch_compare(const void *va,const void *vb);
 bool gt_querymatch_has_seed(const GtQuerymatch *querymatch);
 
 GtUword gt_querymatch_querystart_fwdstrand(const GtQuerymatch *querymatch);
+
+void gt_querymatch_table_add(GtArrayGtQuerymatch *querymatch_table,
+                             const GtQuerymatch *querymatch);
+
+void gt_querymatch_table_sort(GtArrayGtQuerymatch *querymatch_table);
+
+GtQuerymatch *gt_querymatch_table_get(const GtArrayGtQuerymatch
+                                        *querymatch_table,GtUword idx);
 #endif

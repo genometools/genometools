@@ -68,6 +68,15 @@ GtQuerymatch *gt_querymatch_dup(const GtQuerymatch *querymatch_src)
   return querymatch_dest;
 }
 
+void gt_querymatch_table_add(GtArrayGtQuerymatch *querymatch_table,
+                             const GtQuerymatch *querymatch)
+{
+  GT_STOREINARRAY(querymatch_table,
+                  GtQuerymatch,
+                  querymatch_table->allocatedGtQuerymatch * 0.2 + 256,
+                  *querymatch);
+}
+
 void gt_querymatch_outoptions_set(GtQuerymatch *querymatch,
                 GtQuerymatchoutoptions *querymatchoutoptions)
 {
@@ -526,8 +535,39 @@ int gt_querymatch_compare(const void *va,const void *vb)
   return 1;
 }
 
+static int gt_querymatch_compare2(const void *va,const void *vb)
+{
+  const GtQuerymatch *a = (const GtQuerymatch *) va;
+  const GtQuerymatch *b = (const GtQuerymatch *) vb;
+
+  gt_assert(a != NULL && b != NULL);
+  if (a->queryseqnum < b->queryseqnum ||
+       (a->queryseqnum == b->queryseqnum &&
+        a->querystart_fwdstrand + a->querylen <=
+        b->querystart_fwdstrand + b->querylen))
+  {
+    return -1;
+  }
+  return 1;
+}
+
+void gt_querymatch_table_sort(GtArrayGtQuerymatch *querymatch_table)
+{
+  qsort(querymatch_table->spaceGtQuerymatch,
+        querymatch_table->nextfreeGtQuerymatch,
+        sizeof *querymatch_table->spaceGtQuerymatch,
+        gt_querymatch_compare2);
+}
+
 bool gt_querymatch_has_seed(const GtQuerymatch *querymatch)
 {
   gt_assert(querymatch != NULL);
   return querymatch->seedpos1 != GT_UWORD_MAX ? true : false;
+}
+
+GtQuerymatch *gt_querymatch_table_get(const GtArrayGtQuerymatch
+                                        *querymatch_table,GtUword idx)
+{
+  gt_assert(querymatch_table != NULL);
+  return querymatch_table->spaceGtQuerymatch + idx;
 }
