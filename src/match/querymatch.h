@@ -33,8 +33,6 @@ GT_DECLAREARRAYSTRUCT(GtQuerymatch);
 
 GtQuerymatch *gt_querymatch_new(void);
 
-GtQuerymatch *gt_querymatch_dup(const GtQuerymatch *querymatch_src);
-
 void gt_querymatch_seed_display_set(GtQuerymatch *querymatch);
 
 void gt_querymatch_outoptions_set(GtQuerymatch *querymatch,
@@ -134,8 +132,6 @@ GtWord gt_querymatch_distance2score(GtUword distance,GtUword alignedlen);
 bool gt_querymatch_overlap(const GtQuerymatch *querymatch,
                            GtUword start_relative);
 
-int gt_querymatch_compare(const void *va,const void *vb);
-
 bool gt_querymatch_has_seed(const GtQuerymatch *querymatch);
 
 GtUword gt_querymatch_querystart_fwdstrand(const GtQuerymatch *querymatch);
@@ -143,7 +139,8 @@ GtUword gt_querymatch_querystart_fwdstrand(const GtQuerymatch *querymatch);
 void gt_querymatch_table_add(GtArrayGtQuerymatch *querymatch_table,
                              const GtQuerymatch *querymatch);
 
-void gt_querymatch_table_sort(GtArrayGtQuerymatch *querymatch_table);
+void gt_querymatch_table_sort(GtArrayGtQuerymatch *querymatch_table,
+                              bool ascending);
 
 GtQuerymatch *gt_querymatch_table_get(const GtArrayGtQuerymatch
                                         *querymatch_table,GtUword idx);

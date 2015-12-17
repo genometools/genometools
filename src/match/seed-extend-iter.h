@@ -55,6 +55,8 @@ GtQuerymatch *gt_seedextend_match_iterator_next(
     had_err = -1;
   } else
   {
+    const bool ascending = false;
+    (void) gt_seedextend_match_iterator_all_sorted(semi,ascending);
     while (true)
     {
       uint64_t queryseqnum;
@@ -86,6 +88,23 @@ void gt_seedextend_match_iterator_outoptions_set(
                         GtSeedextendMatchIterator *semi,
                         GtQuerymatchoutoptions *querymatchoutoptions);
 
+/* The following function reads all matches into an arrays and sorts the,. If
+   <ascending is true, then all matches are sorted in ascending order of
+   the query position they occur at. Otherwise, all matches are sorted in
+   descending order of the query position they occur at. */
+
+GtUword gt_seedextend_match_iterator_all_sorted(
+                                         GtSeedextendMatchIterator *semi,
+                                         bool ascending);
+
+/* If the previous function has been called, the matches are stored in a table
+   (in sorted order) and the following function allows to obtain the
+   <querymatch> stored at a given index in this table */
+
+GtQuerymatch *gt_seedextend_match_iterator_get(
+                            const GtSeedextendMatchIterator *semi,
+                            GtUword idx);
+
 /* The following function return different component of the iterator
    object. */
 
@@ -116,10 +135,4 @@ GtUword gt_seedextend_match_iterator_seedpos1(
 GtUword gt_seedextend_match_iterator_seedpos2(
                             const GtSeedextendMatchIterator *semi);
 
-GtUword gt_seedextend_match_iterator_all_sorted(
-                                         GtSeedextendMatchIterator *semi);
-
-GtQuerymatch *gt_seedextend_match_iterator_get(
-                            const GtSeedextendMatchIterator *semi,
-                            GtUword idx);
 #endif

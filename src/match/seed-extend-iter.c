@@ -35,7 +35,8 @@ struct GtSeedextendMatchIterator
           seedpos2,
           seedlen;
   FILE *inputfileptr;
-  GtQuerymatch *querymatchptr;
+  GtUword currentmatchindex;
+  GtQuerymatch *currentmatch, *querymatchptr;
   GtArrayGtQuerymatch querymatch_table;
 };
 
@@ -100,6 +101,8 @@ GtSeedextendMatchIterator *gt_seedextend_match_iterator_new(
   semi->line_buffer = NULL;
   semi->inputfileptr = NULL;
   semi->querymatchptr = gt_querymatch_new();
+  semi->currentmatchindex = GT_UWORD_MAX;
+  semi->currentmatch = NULL;
   semi->seedpos1 = semi->seedpos2 = semi->seedlen = GT_UWORD_MAX;
   GT_INITARRAY(&semi->querymatch_table,GtQuerymatch);
   options_line_inputfileptr = fopen(semi->matchfilename, "r");
@@ -265,8 +268,21 @@ GtSeedextendMatchIterator *gt_seedextend_match_iterator_new(
 
 GtQuerymatch *gt_seedextend_match_iterator_next(GtSeedextendMatchIterator *semi)
 {
-  bool selfmatch = semi->aencseq == semi->bencseq ? true : false;
+  bool selfmatch;
 
+  if (semi->currentmatchindex < GT_UWORD_MAX)
+  {
+    if (semi->currentmatchindex == semi->querymatch_table.nextfreeGtQuerymatch)
+    {
+      semi->currentmatch = NULL;
+    } else
+    {
+      semi->currentmatch = gt_querymatch_table_get(&semi->querymatch_table,
+                                                   semi->currentmatchindex++);
+    }
+    return semi->currentmatch;
+  }
+  selfmatch = semi->aencseq == semi->bencseq ? true : false;
   while (true)
   {
     const char *line_ptr;
@@ -295,6 +311,7 @@ GtQuerymatch *gt_seedextend_match_iterator_next(GtSeedextendMatchIterator *semi)
         } else
         {
           semi->has_seedline = false;
+          semi->seedpos1 = semi->seedpos2 = semi->seedlen = GT_UWORD_MAX;
         }
       } else
       {
@@ -308,13 +325,14 @@ GtQuerymatch *gt_seedextend_match_iterator_next(GtSeedextendMatchIterator *semi)
                                     semi->bencseq))
         {
           gt_str_reset(semi->line_buffer);
+          semi->seedpos1 = semi->seedpos2 = semi->seedlen = GT_UWORD_MAX;
           return semi->querymatchptr;
         }
       }
+      gt_str_reset(semi->line_buffer);
     }
     gt_str_reset(semi->line_buffer);
   }
-  gt_str_reset(semi->line_buffer);
   return NULL;
 }
 
@@ -357,6 +375,10 @@ bool gt_seedextend_match_iterator_has_seedline(
                         const GtSeedextendMatchIterator *semi)
 {
   gt_assert(semi != NULL);
+  if (semi->currentmatch != NULL)
+  {
+    return gt_querymatch_has_seed(semi->currentmatch);
+  }
   return semi->has_seedline;
 }
 
@@ -403,7 +425,8 @@ void gt_seedextend_match_iterator_outoptions_set(
   gt_querymatch_outoptions_set(semi->querymatchptr,querymatchoutoptions);
 }
 
-GtUword gt_seedextend_match_iterator_all_sorted(GtSeedextendMatchIterator *semi)
+GtUword gt_seedextend_match_iterator_all_sorted(GtSeedextendMatchIterator *semi,
+                                                bool ascending)
 
 {
   GtQuerymatch *querymatchptr;
@@ -413,7 +436,9 @@ GtUword gt_seedextend_match_iterator_all_sorted(GtSeedextendMatchIterator *semi)
   {
     gt_querymatch_table_add(&semi->querymatch_table,querymatchptr);
   }
-  gt_querymatch_table_sort(&semi->querymatch_table);
+  gt_querymatch_table_sort(&semi->querymatch_table,ascending);
+  semi->currentmatchindex = 0;
+  semi->currentmatch = NULL;
   return semi->querymatch_table.nextfreeGtQuerymatch;
 }
 

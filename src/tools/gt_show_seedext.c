@@ -327,95 +327,67 @@ static int gt_show_seedext_runner(GT_UNUSED int argc,
     processinfo_and_querymatchspaceptr.processinfo = greedyextendmatchinfo;
     if (arguments->sortmatches)
     {
-      GtUword idx,
-              numberofmatches = gt_seedextend_match_iterator_all_sorted(semi);
-
-      for (idx = 0; idx < numberofmatches; idx++)
-      {
-        GtQuerymatch *qptr = gt_seedextend_match_iterator_get(semi,idx);
-        if (gt_querymatch_has_seed(qptr))
-        {
-          const GtUword query_totallength
-
-           = gt_encseq_seqlength(bencseq,gt_querymatch_queryseqnum(qptr));
-          gt_show_seed_extend_encseq(qptr, aencseq, bencseq, query_totallength);
-        } else
-        {
-          gt_show_seed_extend_plain(&seqpairbuf,
-                                    linspace_spacemanager,
-                                    linspace_scorehandler,
-                                    alignment,
-                                    alignment_show_buffer,
-                                    alignmentwidth,
-                                    characters,
-                                    wildcardshow,
-                                    aencseq,
-                                    bencseq,
-                                    qptr);
-        }
-      }
-    } else
+      (void) gt_seedextend_match_iterator_all_sorted(semi,true);
+    }
+    while (true)
     {
-      while (true)
+      GtQuerymatch *querymatchptr = gt_seedextend_match_iterator_next(semi);
+
+      if (querymatchptr == NULL)
       {
-        GtQuerymatch *querymatchptr = gt_seedextend_match_iterator_next(semi);
-
-        if (querymatchptr == NULL)
+        break;
+      }
+      if (gt_seedextend_match_iterator_has_seedline(semi))
+      {
+        if (arguments->seed_extend)
         {
-          break;
-        }
-        if (gt_seedextend_match_iterator_has_seedline(semi))
-        {
-          if (arguments->seed_extend)
+          if (aencseq == bencseq)
           {
-            if (aencseq == bencseq)
-            {
-              const GtUword
-                seedlen = gt_seedextend_match_iterator_seedlen(semi),
-                seedpos1 = gt_seedextend_match_iterator_seedpos1(semi),
-                seedpos2 = gt_seedextend_match_iterator_seedpos2(semi);
+            const GtUword
+              seedlen = gt_seedextend_match_iterator_seedlen(semi),
+              seedpos1 = gt_seedextend_match_iterator_seedpos1(semi),
+              seedpos2 = gt_seedextend_match_iterator_seedpos2(semi);
 
-              processinfo_and_querymatchspaceptr.querymatchspaceptr
-                = querymatchptr;
-              had_err = gt_greedy_extend_selfmatch_with_output(
-                                    &processinfo_and_querymatchspaceptr,
-                                    aencseq,
-                                    seedlen,
-                                    seedpos1,
-                                    seedpos2,
-                                    err);
-              if (had_err)
-              {
-                break;
-              }
-            } else
+            processinfo_and_querymatchspaceptr.querymatchspaceptr
+              = querymatchptr;
+            had_err = gt_greedy_extend_selfmatch_with_output(
+                                  &processinfo_and_querymatchspaceptr,
+                                  aencseq,
+                                  seedlen,
+                                  seedpos1,
+                                  seedpos2,
+                                  err);
+            if (had_err)
             {
-              gt_assert(false);
+              break;
             }
           } else
           {
-            const GtUword query_totallength
-              = gt_encseq_seqlength(bencseq,
-                                    gt_querymatch_queryseqnum(querymatchptr));
-            gt_show_seed_extend_encseq(querymatchptr,
-                                       aencseq,
-                                       bencseq,
-                                       query_totallength);
+            gt_assert(false);
           }
         } else
         {
-          gt_show_seed_extend_plain(&seqpairbuf,
-                                    linspace_spacemanager,
-                                    linspace_scorehandler,
-                                    alignment,
-                                    alignment_show_buffer,
-                                    alignmentwidth,
-                                    characters,
-                                    wildcardshow,
-                                    aencseq,
-                                    bencseq,
-                                    querymatchptr);
+          const GtUword query_totallength
+            = gt_encseq_seqlength(bencseq,
+                                  gt_querymatch_queryseqnum(querymatchptr));
+          gt_show_seed_extend_encseq(querymatchptr,
+                                     aencseq,
+                                     bencseq,
+                                     query_totallength);
         }
+      } else
+      {
+        gt_show_seed_extend_plain(&seqpairbuf,
+                                  linspace_spacemanager,
+                                  linspace_scorehandler,
+                                  alignment,
+                                  alignment_show_buffer,
+                                  alignmentwidth,
+                                  characters,
+                                  wildcardshow,
+                                  aencseq,
+                                  bencseq,
+                                  querymatchptr);
       }
     }
     polishing_info_delete(pol_info);
