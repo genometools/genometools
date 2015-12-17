@@ -509,6 +509,7 @@ int gt_querymatch_compare(const void *va,const void *vb)
   const GtQuerymatch *a = *((const GtQuerymatch **) va);
   const GtQuerymatch *b = *((const GtQuerymatch **) vb);
 
+  gt_assert(a != NULL && b != NULL);
   if (a->queryseqnum < b->queryseqnum ||
        (a->queryseqnum == b->queryseqnum &&
         a->querystart_fwdstrand + a->querylen <=
@@ -517,4 +518,10 @@ int gt_querymatch_compare(const void *va,const void *vb)
     return -1;
   }
   return 1;
+}
+
+bool gt_querymatch_has_seed(const GtQuerymatch *querymatch)
+{
+  gt_assert(querymatch != NULL);
+  return querymatch->seedpos1 != GT_UWORD_MAX ? true : false;
 }

@@ -98,7 +98,7 @@ GtSeedextendMatchIterator *gt_seedextend_match_iterator_new(
   semi->line_buffer = NULL;
   semi->inputfileptr = NULL;
   semi->querymatchptr = gt_querymatch_new();
-  semi->seedpos1 = semi->seedpos2 = semi->seedlen = 0;
+  semi->seedpos1 = semi->seedpos2 = semi->seedlen = GT_UWORD_MAX;
   options_line_inputfileptr = fopen(semi->matchfilename, "r");
   if (options_line_inputfileptr == NULL)
   {
