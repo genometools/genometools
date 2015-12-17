@@ -144,4 +144,6 @@ void gt_querymatch_table_sort(GtArrayGtQuerymatch *querymatch_table,
 
 GtQuerymatch *gt_querymatch_table_get(const GtArrayGtQuerymatch
                                         *querymatch_table,GtUword idx);
+
+const GtAlignment *gt_querymatch_alignment_get(const GtQuerymatch *querymatch);
 #endif

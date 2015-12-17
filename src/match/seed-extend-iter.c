@@ -26,7 +26,7 @@ struct GtSeedextendMatchIterator
   GtStr *ii, *qii;
   bool mirror, bias_parameters;
   GtEncseq *aencseq, *bencseq;
-  GtUword errorpercentage, history_size, query_totallength;
+  GtUword errorpercentage, history_size;
   const char *matchfilename;
   GtStr *line_buffer;
   uint64_t linenum;
@@ -93,7 +93,6 @@ GtSeedextendMatchIterator *gt_seedextend_match_iterator_new(
   semi->mirror = false;
   semi->bias_parameters = false;
   semi->aencseq = semi->bencseq = NULL;
-  semi->query_totallength = 0;
   semi->errorpercentage = 0;
   semi->history_size = 0;
   semi->matchfilename = gt_str_get(matchfilename);
@@ -248,7 +247,6 @@ GtSeedextendMatchIterator *gt_seedextend_match_iterator_new(
   if (!had_err)
   {
     gt_assert(semi->bencseq != NULL);
-    semi->query_totallength = gt_encseq_total_length(semi->bencseq);
     semi->line_buffer = gt_str_new();
     semi->linenum = 0;
     semi->inputfileptr = fopen(semi->matchfilename, "rb");

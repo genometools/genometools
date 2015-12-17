@@ -39,6 +39,7 @@ typedef struct
        seed_display,
        relax_polish,
        sortmatches,
+       showeoplist,
        seed_extend;
   GtStr *matchfilename;
 } GtShowSeedextArguments;
@@ -64,7 +65,7 @@ static GtOptionParser* gt_show_seedext_option_parser_new(void *tool_arguments)
   GtShowSeedextArguments *arguments = tool_arguments;
   GtOptionParser *op;
   GtOption *option, *op_ali, *option_filename, *op_relax_polish,
-           *op_seed_extend, *op_sortmatches;
+           *op_seed_extend, *op_sortmatches, *op_showeoplist;
 
   gt_assert(arguments);
   /* init */
@@ -112,6 +113,10 @@ static GtOptionParser* gt_show_seedext_option_parser_new(void *tool_arguments)
                                              "query",
                                       &arguments->sortmatches,false);
   gt_option_parser_add_option(op, op_sortmatches);
+
+  op_showeoplist = gt_option_new_bool("e","show list of edit operations",
+                                      &arguments->showeoplist,false);
+  gt_option_parser_add_option(op, op_showeoplist);
 
   /* -f */
   option_filename = gt_option_new_filename("f",
@@ -228,7 +233,8 @@ static void gt_show_seed_extend_plain(GtSequencepairbuffer *seqpairbuf,
 static void gt_show_seed_extend_encseq(GtQuerymatch *querymatchptr,
                                        const GtEncseq *aencseq,
                                        const GtEncseq *bencseq,
-                                       GtUword query_totallength)
+                                       GtUword query_totallength,
+                                       bool showeoplist)
 {
   GtSeqorEncseq bseqorencseq;
 
@@ -240,6 +246,12 @@ static void gt_show_seed_extend_encseq(GtQuerymatch *querymatchptr,
                             query_totallength,
                             false) != 0)
   {
+    if (showeoplist)
+    {
+      const GtAlignment *al = gt_querymatch_alignment_get(querymatchptr);
+
+      gt_alignment_show_multieop_list(al, stdout);
+    }
     gt_querymatch_prettyprint(querymatchptr);
   }
 }
@@ -269,18 +281,20 @@ static int gt_show_seedext_runner(GT_UNUSED int argc,
   {
     const GtEncseq *aencseq = gt_seedextend_match_iterator_aencseq(semi),
                    *bencseq = gt_seedextend_match_iterator_bencseq(semi);
-    GtGreedyextendmatchinfo *greedyextendmatchinfo = NULL;
+    GtAlignment *alignment = gt_alignment_new();
     Polishing_info *pol_info = NULL;
+    GtSequencepairbuffer seqpairbuf = {NULL,NULL,0,0};
+    double matchscore_bias = GT_DEFAULT_MATCHSCORE_BIAS;
     GtQuerymatchoutoptions *querymatchoutoptions = NULL;
+
+    /* the following are used if seed_extend is set */
+    GtGreedyextendmatchinfo *greedyextendmatchinfo = NULL;
+    GtProcessinfo_and_querymatchspaceptr processinfo_and_querymatchspaceptr;
     const GtUchar *characters = gt_encseq_alphabetcharacters(aencseq);
     const GtUchar wildcardshow = gt_encseq_alphabetwildcardshow(aencseq);
     GtUchar *alignment_show_buffer = gt_alignment_buffer_new(alignmentwidth);
     GtLinspaceManagement *linspace_spacemanager = gt_linspaceManagement_new();
     GtScoreHandler *linspace_scorehandler = gt_scorehandler_new(0,1,0,1);;
-    GtAlignment *alignment = gt_alignment_new();
-    GtSequencepairbuffer seqpairbuf = {NULL,NULL,0,0};
-    double matchscore_bias = GT_DEFAULT_MATCHSCORE_BIAS;
-    GtProcessinfo_and_querymatchspaceptr processinfo_and_querymatchspaceptr;
 
     if (!arguments->relax_polish)
     {
@@ -373,7 +387,8 @@ static int gt_show_seedext_runner(GT_UNUSED int argc,
           gt_show_seed_extend_encseq(querymatchptr,
                                      aencseq,
                                      bencseq,
-                                     query_totallength);
+                                     query_totallength,
+                                     arguments->showeoplist);
         }
       } else
       {

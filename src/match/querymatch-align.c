@@ -634,3 +634,10 @@ const GtSeqpaircoordinates *gt_querymatchoutoptions_correction_get(
   gt_assert(querymatchoutoptions != NULL);
   return &querymatchoutoptions->correction_info;
 }
+
+const GtAlignment *gt_querymatchoutoptions_alignment_get(
+              const GtQuerymatchoutoptions *querymatchoutoptions)
+{
+  gt_assert(querymatchoutoptions != NULL);
+  return querymatchoutoptions->alignment;
+}
