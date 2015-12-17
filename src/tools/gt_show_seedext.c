@@ -286,8 +286,6 @@ static int gt_show_seedext_runner(GT_UNUSED int argc,
     GtAlignment *alignment = gt_alignment_new();
     Polishing_info *pol_info = NULL;
     GtSequencepairbuffer seqpairbuf = {NULL,NULL,0,0};
-    double matchscore_bias = GT_DEFAULT_MATCHSCORE_BIAS;
-    GtQuerymatchoutoptions *querymatchoutoptions = NULL;
 
     /* the following are used if seed_extend is set */
     GtGreedyextendmatchinfo *greedyextendmatchinfo = NULL;
@@ -302,6 +300,7 @@ static int gt_show_seedext_runner(GT_UNUSED int argc,
 
     if (!arguments->relax_polish)
     {
+      double matchscore_bias = GT_DEFAULT_MATCHSCORE_BIAS;
       if (gt_seedextend_match_iterator_bias_parameters(semi))
       {
         matchscore_bias = gt_greedy_dna_sequence_bias_get(aencseq);
@@ -317,16 +316,12 @@ static int gt_show_seedext_runner(GT_UNUSED int argc,
     }
     if (arguments->show_alignment || arguments->showeoplist)
     {
-      querymatchoutoptions = gt_querymatchoutoptions_new(true,
-                                                         arguments->showeoplist,
-                                                         alignmentwidth);
-      gt_querymatchoutoptions_for_align_only(querymatchoutoptions,
-                            gt_seedextend_match_iterator_errorpercentage(semi),
-                            matchscore_bias,
-                            gt_seedextend_match_iterator_history_size(semi),
-                            !arguments->relax_polish,
-                            arguments->seed_display);
-      gt_seedextend_match_iterator_outoptions_set(semi,querymatchoutoptions);
+      gt_seedextend_match_iterator_querymatchoutoptions_set(semi,
+                                                       true,
+                                                       arguments->showeoplist,
+                                                       alignmentwidth,
+                                                       !arguments->relax_polish,
+                                                       arguments->seed_display);
     }
     if (arguments->seed_extend)
     {
@@ -413,7 +408,6 @@ static int gt_show_seedext_runner(GT_UNUSED int argc,
     }
     polishing_info_delete(pol_info);
     gt_greedy_extend_matchinfo_delete(greedyextendmatchinfo);
-    gt_querymatchoutoptions_delete(querymatchoutoptions);
     gt_free(alignment_show_buffer);
     gt_scorehandler_delete(linspace_scorehandler);
     gt_linspaceManagement_delete(linspace_spacemanager);

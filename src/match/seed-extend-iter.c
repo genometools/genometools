@@ -19,6 +19,7 @@
 #include "core/str_api.h"
 #include "core/encseq.h"
 #include "match/querymatch.h"
+#include "match/seed-extend.h"
 #include "match/seed-extend-iter.h"
 
 struct GtSeedextendMatchIterator
@@ -37,6 +38,7 @@ struct GtSeedextendMatchIterator
   FILE *inputfileptr;
   GtUword currentmatchindex;
   GtQuerymatch *currentmatch, *querymatchptr;
+  GtQuerymatchoutoptions *querymatchoutoptions;
   GtArrayGtQuerymatch querymatch_table;
 };
 
@@ -53,6 +55,7 @@ void gt_seedextend_match_iterator_delete(GtSeedextendMatchIterator *semi)
   gt_str_delete(semi->line_buffer);
   gt_querymatch_delete(semi->querymatchptr);
   GT_FREEARRAY(&semi->querymatch_table,GtQuerymatch);
+  gt_querymatchoutoptions_delete(semi->querymatchoutoptions);
   if (semi->inputfileptr != NULL)
   {
     fclose(semi->inputfileptr);
@@ -102,6 +105,7 @@ GtSeedextendMatchIterator *gt_seedextend_match_iterator_new(
   semi->querymatchptr = gt_querymatch_new();
   semi->currentmatchindex = GT_UWORD_MAX;
   semi->currentmatch = NULL;
+  semi->querymatchoutoptions = NULL;
   semi->seedpos1 = semi->seedpos2 = semi->seedlen = GT_UWORD_MAX;
   GT_INITARRAY(&semi->querymatch_table,GtQuerymatch);
   options_line_inputfileptr = fopen(semi->matchfilename, "r");
@@ -415,14 +419,6 @@ void gt_seedextend_match_iterator_seed_display_set(
   gt_querymatch_seed_display_set(semi->querymatchptr);
 }
 
-void gt_seedextend_match_iterator_outoptions_set(
-                        GtSeedextendMatchIterator *semi,
-                        GtQuerymatchoutoptions *querymatchoutoptions)
-{
-  gt_assert(semi != NULL);
-  gt_querymatch_outoptions_set(semi->querymatchptr,querymatchoutoptions);
-}
-
 GtUword gt_seedextend_match_iterator_all_sorted(GtSeedextendMatchIterator *semi,
                                                 bool ascending)
 
@@ -447,4 +443,29 @@ GtQuerymatch *gt_seedextend_match_iterator_get(
   gt_assert(semi != NULL && idx < semi->querymatch_table.nextfreeGtQuerymatch);
 
   return gt_querymatch_table_get(&semi->querymatch_table,idx);
+}
+
+void gt_seedextend_match_iterator_querymatchoutoptions_set(
+                    GtSeedextendMatchIterator *semi,
+                    bool generatealignment,
+                    bool showeoplist,
+                    GtUword alignmentwidth,
+                    bool always_polished_ends,
+                    bool seed_display)
+{
+  double matchscore_bias = GT_DEFAULT_MATCHSCORE_BIAS;
+
+  semi->querymatchoutoptions
+    = gt_querymatchoutoptions_new(generatealignment,showeoplist,alignmentwidth);
+  if (gt_seedextend_match_iterator_bias_parameters(semi))
+  {
+    matchscore_bias = gt_greedy_dna_sequence_bias_get(semi->aencseq);
+  }
+  gt_querymatchoutoptions_for_align_only(semi->querymatchoutoptions,
+                            semi->errorpercentage,
+                            matchscore_bias,
+                            gt_seedextend_match_iterator_history_size(semi),
+                            always_polished_ends,
+                            seed_display);
+  gt_querymatch_outoptions_set(semi->querymatchptr,semi->querymatchoutoptions);
 }
