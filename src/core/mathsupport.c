@@ -127,7 +127,7 @@ unsigned int gt_determinebitspervalue(GtUword maxvalue)
 {
   unsigned int bits = 0;
 #ifndef USEbuiltin_clzl
-  GtUword value, mask = (~0) << CHAR_BIT;
+  GtUword value, mask = (~((GtUword) 0)) << CHAR_BIT;
 
   for (value = maxvalue; (value & mask) != 0; value >>= CHAR_BIT) {
     bits += CHAR_BIT;
