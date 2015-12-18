@@ -1455,18 +1455,6 @@ Test do
   run "diff 1 3"
 end
 
-Name "gt gff3 -sortlines (three partially overlapping genes)"
-Keywords "gt_gff3 linesorting"
-Test do
-  run "#{$bin}gt #{$testdata}/gtscripts/check_linesorting.lua #{$testdata}gt_gff3_linesort2.in.gff3", :retval => 1
-  run_test "#{$bin}gt gff3 -sort -retainids #{$testdata}gt_gff3_linesort2.in.gff3 > 1"
-  run "#{$bin}gt #{$testdata}/gtscripts/check_linesorting.lua 1", :retval => 1
-  run_test "#{$bin}gt gff3 -sort -retainids -sortlines #{$testdata}gt_gff3_linesort2.in.gff3 > 2"
-  run "#{$bin}gt #{$testdata}/gtscripts/check_linesorting.lua 2"
-  run_test "#{$bin}gt gff3 -sort -retainids 2 > 3"
-  run "diff 1 3"
-end
-
 Name "gt gff3 -sortlines (multiple sequences)"
 Keywords "gt_gff3 linesorting"
 Test do
@@ -1495,6 +1483,15 @@ Test do
   run "#{$bin}gt #{$testdata}/gtscripts/check_linesorting.lua 2"
   run_test "#{$bin}gt gff3 -sort -retainids 2 > 3"
   run "diff 1 3"
+end
+
+Name "gt gff3 -sortlines (spaces)"
+Keywords "gt_gff3 linesorting"
+Test do
+  1.upto(3) do |i|
+    run_test "#{$bin}gt gff3 -sortlines #{$testdata}linesort_test_#{i}.gff3"
+    run "diff #{last_stdout} #{$testdata}linesort_test_#{i}.out"
+  end
 end
 
 Name "gt gff3 -sortnum (standard gene)"

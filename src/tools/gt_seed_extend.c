@@ -598,6 +598,7 @@ static int gt_seed_extend_runner(GT_UNUSED int argc,
     gt_assert(nchars > 0);
     arguments->dbs_seedlength
       = (unsigned int)gt_round_to_long(gt_log_base(totallength,(double)nchars));
+    GT_UPDATE_MAX(arguments->dbs_seedlength, 2);
   }
 
   /* set mincoverage */
