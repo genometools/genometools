@@ -290,6 +290,11 @@ void gt_multieoplist_show(GtMultieoplist *multieops, FILE *fp)
           num = multieops->meoplist.nextfreeEop;
   Eop *space, *last, *next;
 
+  if (num == 0)
+  {
+    gt_xfputs("[]\n", fp);
+    return;
+  }
   gt_assert(multieops != NULL);
   space = multieops->meoplist.spaceEop;
 
@@ -324,8 +329,9 @@ void gt_multieoplist_show(GtMultieoplist *multieops, FILE *fp)
       stepssum = (GtUword) (*last & GT_MEOPS_STEPS_MASK);
       next = last - 1;
     }
+    gt_assert(next + 1 == last);
   }
-  gt_assert(last == space);
+  gt_assert(num == 0 || last == space);
   switch (*last >> GT_MEOPS_STEPS_BITS) {
     case GT_MEOPS_MATCH:
       gt_xfputc('M', fp);

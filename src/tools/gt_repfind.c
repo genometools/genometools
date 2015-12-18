@@ -828,7 +828,7 @@ static int gt_repfind_runner(int argc,
          !arguments->noxpolish))
     {
       querymatchoutoptions
-        = gt_querymatchoutoptions_new(arguments->alignmentwidth);
+        = gt_querymatchoutoptions_new(true, false,arguments->alignmentwidth);
 
       if (gt_option_is_set(arguments->refextendxdropoption) ||
           gt_option_is_set(arguments->refextendgreedyoption))
