@@ -21,11 +21,13 @@
 #include "core/types_api.h"
 #include "match/ft-front-prune.h"
 #include "match/seq_or_encseq.h"
+#include "extended/alignment.h"
 
 typedef struct GtQuerymatchoutoptions GtQuerymatchoutoptions;
 
-GtQuerymatchoutoptions *gt_querymatchoutoptions_new(
-                                GtUword alignmentwidth);
+GtQuerymatchoutoptions *gt_querymatchoutoptions_new(bool generatealignment,
+                                                    bool showeoplist,
+                                                    GtUword alignmentwidth);
 
 void gt_querymatchoutoptions_extend(
                   GtQuerymatchoutoptions *querymatchoutoptions,
@@ -81,6 +83,9 @@ typedef struct
 } GtSeqpaircoordinates;
 
 const GtSeqpaircoordinates *gt_querymatchoutoptions_correction_get(
+              const GtQuerymatchoutoptions *querymatchoutoptions);
+
+const GtAlignment *gt_querymatchoutoptions_alignment_get(
               const GtQuerymatchoutoptions *querymatchoutoptions);
 
 #endif

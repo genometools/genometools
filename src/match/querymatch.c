@@ -60,6 +60,15 @@ GtQuerymatch *gt_querymatch_new(void)
   return querymatch;
 }
 
+void gt_querymatch_table_add(GtArrayGtQuerymatch *querymatch_table,
+                             const GtQuerymatch *querymatch)
+{
+  GT_STOREINARRAY(querymatch_table,
+                  GtQuerymatch,
+                  querymatch_table->allocatedGtQuerymatch * 0.2 + 256,
+                  *querymatch);
+}
+
 void gt_querymatch_outoptions_set(GtQuerymatch *querymatch,
                 GtQuerymatchoutoptions *querymatchoutoptions)
 {
@@ -252,9 +261,6 @@ static void gt_querymatch_applycorrection(GtQuerymatch *querymatch,
 }
 
 bool gt_querymatch_process(GtQuerymatch *querymatchptr,
-                           GtUword seedpos1,
-                           GtUword seedpos2,
-                           GtUword seedlen,
                            const GtEncseq *encseq,
                            const GtSeqorEncseq *query,
                            GtUword query_totallength,
@@ -264,9 +270,6 @@ bool gt_querymatch_process(GtQuerymatch *querymatchptr,
       (uint64_t) querymatchptr->dbseqnum != querymatchptr->queryseqnum ||
       querymatchptr->dbstart_relative <= querymatchptr->querystart_fwdstrand)
   {
-    querymatchptr->seedpos1 = seedpos1;
-    querymatchptr->seedpos2 = seedpos2;
-    querymatchptr->seedlen = seedlen;
     if (querymatchptr->ref_querymatchoutoptions != NULL)
     {
       bool seededalignment;
@@ -305,9 +308,9 @@ bool gt_querymatch_process(GtQuerymatch *querymatchptr,
                                                     abs_querystart_fwdstrand,
                                                     querymatchptr->querylen,
                                                     querymatchptr->distance,
-                                                    seedpos1,
-                                                    seedpos2,
-                                                    seedlen,
+                                                    querymatchptr->seedpos1,
+                                                    querymatchptr->seedpos2,
+                                                    querymatchptr->seedlen,
                                                     greedyextension);
       if (seededalignment && !greedyextension)
       {
@@ -336,6 +339,9 @@ static GtReadmode gt_readmode_character_code_parse(char direction)
 bool gt_querymatch_read_line(GtQuerymatch *querymatchptr,
                              const char *line_ptr,
                              bool selfmatch,
+                             GtUword seedpos1,
+                             GtUword seedpos2,
+                             GtUword seedlen,
                              const GtEncseq *dbencseq,
                              const GtEncseq *queryencseq)
 {
@@ -364,6 +370,9 @@ bool gt_querymatch_read_line(GtQuerymatch *querymatchptr,
       = gt_encseq_seqstartpos(dbencseq,querymatchptr->dbseqnum) +
         querymatchptr->dbstart_relative;
     querymatchptr->selfmatch = selfmatch;
+    querymatchptr->seedpos1 = seedpos1;
+    querymatchptr->seedpos2 = seedpos2;
+    querymatchptr->seedlen = seedlen;
     querymatchptr->querystart
       = gt_querymatch_querystart_derive(querymatchptr->query_readmode,
                                         querymatchptr->querylen,
@@ -406,10 +415,10 @@ bool gt_querymatch_complete(GtQuerymatch *querymatchptr,
                      querylen,
                      querystart,
                      query_totallength);
+  querymatchptr->seedpos1 = seedpos1;
+  querymatchptr->seedpos2 = seedpos2;
+  querymatchptr->seedlen = seedlen;
   return gt_querymatch_process(querymatchptr,
-                               seedpos1,
-                               seedpos2,
-                               seedlen,
                                encseq,
                                query,
                                query_totallength,
@@ -438,6 +447,12 @@ GtUword gt_querymatch_querystart(const GtQuerymatch *querymatch)
 {
   gt_assert(querymatch != NULL);
   return querymatch->querystart;
+}
+
+GtUword gt_querymatch_querystart_fwdstrand(const GtQuerymatch *querymatch)
+{
+  gt_assert(querymatch != NULL);
+  return querymatch->querystart_fwdstrand;
 }
 
 uint64_t gt_querymatch_queryseqnum(const GtQuerymatch *querymatch)
@@ -494,4 +509,69 @@ bool gt_querymatch_overlap(const GtQuerymatch *querymatch,
   return querymatch->querystart + querymatch->querylen >= start_relative
            ? true /* overlap with querymatch */
            : false; /* next seeds starts after curren extension */
+}
+
+static int gt_querymatch_compare_ascending(const void *va,const void *vb)
+{
+  const GtQuerymatch *a = (const GtQuerymatch *) va;
+  const GtQuerymatch *b = (const GtQuerymatch *) vb;
+
+  gt_assert(a != NULL && b != NULL);
+  if (a->queryseqnum < b->queryseqnum ||
+       (a->queryseqnum == b->queryseqnum &&
+        a->querystart_fwdstrand + a->querylen <=
+        b->querystart_fwdstrand + b->querylen))
+  {
+    return -1;
+  }
+  return 1;
+}
+
+static int gt_querymatch_compare_descending(const void *va,const void *vb)
+{
+  const GtQuerymatch *a = (const GtQuerymatch *) va;
+  const GtQuerymatch *b = (const GtQuerymatch *) vb;
+
+  gt_assert(a != NULL && b != NULL);
+  if (a->queryseqnum < b->queryseqnum ||
+       (a->queryseqnum == b->queryseqnum &&
+        a->querystart_fwdstrand + a->querylen <=
+        b->querystart_fwdstrand + b->querylen))
+  {
+    return 1;
+  }
+  return -1;
+}
+
+void gt_querymatch_table_sort(GtArrayGtQuerymatch *querymatch_table,
+                              bool ascending)
+{
+  if (querymatch_table->nextfreeGtQuerymatch >= 2)
+  {
+    qsort(querymatch_table->spaceGtQuerymatch,
+          querymatch_table->nextfreeGtQuerymatch,
+          sizeof *querymatch_table->spaceGtQuerymatch,
+          ascending ? gt_querymatch_compare_ascending
+                    : gt_querymatch_compare_descending);
+  }
+}
+
+bool gt_querymatch_has_seed(const GtQuerymatch *querymatch)
+{
+  gt_assert(querymatch != NULL);
+  return querymatch->seedpos1 != GT_UWORD_MAX ? true : false;
+}
+
+GtQuerymatch *gt_querymatch_table_get(const GtArrayGtQuerymatch
+                                        *querymatch_table,GtUword idx)
+{
+  gt_assert(querymatch_table != NULL);
+  return querymatch_table->spaceGtQuerymatch + idx;
+}
+
+const GtAlignment *gt_querymatch_alignment_get(const GtQuerymatch *querymatch)
+{
+  gt_assert(querymatch != NULL);
+  return gt_querymatchoutoptions_alignment_get(
+                  querymatch->ref_querymatchoutoptions);
 }

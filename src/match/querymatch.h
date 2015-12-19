@@ -23,10 +23,13 @@
 #include "core/readmode.h"
 #include "core/encseq.h"
 #include "core/unused_api.h"
+#include "core/arraydef.h"
 #include "querymatch-align.h"
 #include "seq_or_encseq.h"
 
 typedef struct GtQuerymatch GtQuerymatch;
+
+GT_DECLAREARRAYSTRUCT(GtQuerymatch);
 
 GtQuerymatch *gt_querymatch_new(void);
 
@@ -51,13 +54,13 @@ void gt_querymatch_init(GtQuerymatch *querymatch,
 bool gt_querymatch_read_line(GtQuerymatch *querymatchptr,
                              const char *line_ptr,
                              bool selfmatch,
+                             GtUword seedpos1,
+                             GtUword seedpos2,
+                             GtUword seedlen,
                              const GtEncseq *dbencseq,
                              const GtEncseq *queryencseq);
 
 bool gt_querymatch_process(GtQuerymatch *querymatchptr,
-                           GtUword seedpos1,
-                           GtUword seedpos2,
-                           GtUword seedlen,
                            const GtEncseq *encseq,
                            const GtSeqorEncseq *query,
                            GtUword query_totallength,
@@ -128,4 +131,19 @@ GtWord gt_querymatch_distance2score(GtUword distance,GtUword alignedlen);
 /* Returns true, iff the given seed start position is below the querymatch. */
 bool gt_querymatch_overlap(const GtQuerymatch *querymatch,
                            GtUword start_relative);
+
+bool gt_querymatch_has_seed(const GtQuerymatch *querymatch);
+
+GtUword gt_querymatch_querystart_fwdstrand(const GtQuerymatch *querymatch);
+
+void gt_querymatch_table_add(GtArrayGtQuerymatch *querymatch_table,
+                             const GtQuerymatch *querymatch);
+
+void gt_querymatch_table_sort(GtArrayGtQuerymatch *querymatch_table,
+                              bool ascending);
+
+GtQuerymatch *gt_querymatch_table_get(const GtArrayGtQuerymatch
+                                        *querymatch_table,GtUword idx);
+
+const GtAlignment *gt_querymatch_alignment_get(const GtQuerymatch *querymatch);
 #endif
