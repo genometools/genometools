@@ -102,25 +102,25 @@ static int gt_one_dim_chainer_runner(int argc, const char **argv,
   /* Read in match file */
   GtStr *matchfilename = gt_str_new_cstr(argv[argc-1]);
   GtOneDimChainerMatch *match = NULL;
-  GtOneDimChainerMatch *chainend = gt_malloc(sizeof *chainend);
+  GtOneDimChainerMatch *chainstart = gt_malloc(sizeof *chainstart);
 
   had_err = gt_1d_chainer_calc_chain(matchfilename,
                                      arguments->overlap,
-                                     chainend, err);
+                                     chainstart, err);
   gt_str_delete(matchfilename);
 
-  match = chainend;
+  match = chainstart;
   /* Print the chain of matches */
   while (match != NULL)
   {
-    GtOneDimChainerMatch *nextmatch = match->prec;
-    printf("%" PRIu64 "\t" GT_WU "\t" GT_WU "\n", match->queryseqnum, 
+    GtOneDimChainerMatch *nextmatch = match->suc;
+    printf("%" PRIu64 "\t" GT_WU "\t" GT_WU "\n", match->queryseqnum,
         match->querystart, match->queryend);
     match = nextmatch;
   }
 
   /* Delete the chain of matches from memory */
-  gt_1d_chainer_match_delete(chainend);
+  gt_1d_chainer_match_delete(chainstart);
   return had_err;
 }
 

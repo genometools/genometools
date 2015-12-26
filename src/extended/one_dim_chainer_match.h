@@ -26,11 +26,12 @@
 struct GtOneDimChainerMatch;
 
 /* A struct that defines a match object that mightbecome part of the chain.
-It contains the sequence ID <queryseqnum>, a counter for references <refcount>,
-an index <querystart> for the beginning of this match, an index <queryend> for its
-end, as well as a variable <chainweight>. */
+It contains its succesor <suc> in the maximal chain. <suc> is NULL if this
+match is the last in the chain. the sequence ID <queryseqnum>, a counter for
+references <refcount>, an index <querystart> for the beginning of this match,
+an index <queryend> for its end, as well as a variable <chainweight>. */
 typedef struct GtOneDimChainerMatch {
-  struct GtOneDimChainerMatch *prec;
+  struct GtOneDimChainerMatch *suc;
   uint64_t queryseqnum;
   unsigned refcount;
 
@@ -43,21 +44,21 @@ typedef struct GtOneDimChainerMatch {
 /* Allocates memory for a GtOneDimChainerMatch <match> and returns a pointer to
 it. It assigns important variables from a GtQueryMatch reference provided by the
 match iterator to the new <match> as well as the currently calculated maximum
-chain end <chainend> and the current maximum chain weight <chainweight>.
+chain start <maxchainstart> and the current maximum chain weight <chainweight>.
 */
 GtOneDimChainerMatch *gt_1d_chainer_match_new(
-    GtQuerymatch *querymatchptr, GtOneDimChainerMatch *maxchainend,
+    GtQuerymatch *querymatchptr, GtOneDimChainerMatch *maxchainstart,
     GtUword chainweight);
 
 void gt_1d_chainer_match_delete(GtOneDimChainerMatch *one_dim_chainer_match);
 
 /*
  * in: matchfilename, overlap
- * out: chainend, err
+ * out: chainstart, err
  * returns: had_err
  */
 int gt_1d_chainer_calc_chain(const GtStr *matchfilename, GtUword overlap,
-                             GtOneDimChainerMatch *chainend,
+                             GtOneDimChainerMatch *chainstart,
                              GtError *err);
 
 #endif
