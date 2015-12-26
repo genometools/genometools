@@ -101,26 +101,38 @@ static int gt_one_dim_chainer_runner(int argc, const char **argv,
 
   /* Read in match file */
   GtStr *matchfilename = gt_str_new_cstr(argv[argc-1]);
-  GtOneDimChainerMatch *match = NULL;
-  GtOneDimChainerMatch *chainstart = gt_malloc(sizeof *chainstart);
+  GtOneDimChainerMatch *match,
+                       *chainstart = gt_malloc(sizeof *chainstart);
 
-  had_err = gt_1d_chainer_calc_chain(matchfilename,
-                                     arguments->overlap,
-                                     chainstart, err);
+  /* Set up match iterator */
+  GtSeedextendMatchIterator *semi
+       = gt_seedextend_match_iterator_new(matchfilename, err);
   gt_str_delete(matchfilename);
-
-  match = chainstart;
-  /* Print the chain of matches */
-  while (match != NULL)
+  if (semi == NULL)
   {
-    GtOneDimChainerMatch *nextmatch = match->suc;
-    printf("%" PRIu64 "\t" GT_WU "\t" GT_WU "\n", match->queryseqnum,
-        match->querystart, match->queryend);
-    match = nextmatch;
+    return -1;
+  }
+  gt_seedextend_match_iterator_querymatchoutoptions_set(
+      semi, true, false, 0, false, false);
+  (void) gt_seedextend_match_iterator_all_sorted(semi, false);
+
+  had_err = gt_1d_chainer_calc_chain(arguments->overlap,
+                                     chainstart, semi, err);
+
+  /* Print the chain of matches */
+  for (match = chainstart; match != NULL; match = match->suc)
+  {
+    GtQuerymatch *querymatch = match->querymatch;
+    printf("%" PRIu64 "\t" GT_WU "\t" GT_WU "\n",
+           gt_querymatch_queryseqnum(querymatch),
+           gt_querymatch_querystart(querymatch),
+           gt_querymatch_querystart(querymatch) +
+           gt_querymatch_querylen(querymatch));
   }
 
-  /* Delete the chain of matches from memory */
+  /* Delete the chain of matches and the iterator from memory */
   gt_1d_chainer_match_delete(chainstart);
+  gt_seedextend_match_iterator_delete(semi);
   return had_err;
 }
 
