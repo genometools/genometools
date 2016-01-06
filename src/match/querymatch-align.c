@@ -21,7 +21,7 @@
 #include "core/minmax.h"
 #include "extended/alignment.h"
 #include "extended/linearalign.h"
-#include "extended/linspaceManagement.h"
+#include "extended/linspace_management.h"
 #include "revcompl.h"
 #include "seed-extend.h"
 #include "ft-polish.h"

@@ -15,8 +15,9 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef LINSPACEMANAGEMENT_H
-#define LINSPACEMANAGEMENT_H
+#ifndef LINSPACE_MANAGEMENT_H
+#define LINSPACE_MANAGEMENT_H
+
 #include "core/types_api.h"
 
 /* The <GtLinspaceManagement> interface. All useful uitlities for different

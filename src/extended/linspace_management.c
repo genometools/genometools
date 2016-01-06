@@ -19,8 +19,8 @@
 #include <string.h>
 #include "core/ma.h"
 #include "extended/maxcoordvalue.h"
+#include "extended/linspace_management.h"
 
-#include "extended/linspaceManagement.h"
 struct GtLinspaceManagement{
   void             *valueTabspace,
                    *rTabspace,

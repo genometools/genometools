@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2015 Annika <annika.seidel@studium.uni-hamburg.de>
+  Copyright (c) 2015 Annika Seidel <annika.seidel@studium.uni-hamburg.de>
   Copyright (c) 2015 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -17,9 +17,10 @@
 
 #ifndef SQUAREALIGN_H
 #define SQUAREALIGN_H
+
 #include "core/types_api.h"
 #include "extended/alignment.h"
-#include "extended/linspaceManagement.h"
+#include "extended/linspace_management.h"
 #include "extended/scorehandler.h"
 
 /* Computes a global alignment with linear gapcosts in square space. Use of this

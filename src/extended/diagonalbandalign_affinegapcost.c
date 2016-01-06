@@ -24,12 +24,11 @@
 #include "core/ma_api.h"
 #include "extended/affinealign.h"
 #include "extended/diagonalbandalign.h"
+#include "extended/diagonalbandalign_affinegapcost.h"
 #include "extended/linearalign_affinegapcost.h"
-#include "extended/linspaceManagement.h"
-#include "extended/linearalign_affinegapcost.h"
+#include "extended/linspace_management.h"
 #include "extended/reconstructalignment.h"
 
-#include "extended/diagonalbandalign_affinegapcost.h"
 #define LINEAR_EDIST_GAP          ((GtUchar) UCHAR_MAX)
 
 static void diagonalband_fillDPtab_affine(AffinealignDPentry **Atabcolumn,

@@ -22,7 +22,7 @@
 #include "core/types_api.h"
 #include "extended/affinealign.h"
 #include "extended/alignment.h"
-#include "extended/linspaceManagement.h"
+#include "extended/linspace_management.h"
 #include "extended/scorehandler.h"
 
 typedef struct {

@@ -17,11 +17,12 @@
 
 #ifndef DIAGONALBANDALIGN_AFFINEGAPCOST_H
 #define DIAGONALBANDALIGN_AFFINEGAPCOST_H
+
 #include "core/error.h"
 #include "core/types_api.h"
 #include "core/unused_api.h"
 #include "extended/alignment.h"
-#include "extended/linspaceManagement.h"
+#include "extended/linspace_management.h"
 
 /* <AffineDiagentry> objects are entries of DP-matrix with a diagonal band in
    context of affine gap costs. */
