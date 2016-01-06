@@ -1,6 +1,13 @@
-changes in version 1.5.8 (2015-09-12)
+changes in version 1.5.8 (2016-01-06)
 
--
+- bugfixes and cleanups
+- change number of spaces in GFF3 header
+- improve documentation of 'gt gff3 -checkids'
+- change GenBank and EMBL parsers to name sequences after LOCUS/ID fields
+- add Python 3 support for Python bindings
+- make build reproducible
+- allow speck templates to be given as files
+- updated genetic code table to most recent NCBI revision
 
 
 changes in version 1.5.7 (2015-09-11)
@@ -11,6 +18,7 @@ changes in version 1.5.7 (2015-09-11)
 - rework of TIRvish code
 - allow execution of 'gt-<name>' user scripts in $PATH by calling
   `gt <name>' (git-style)
+
 
 changes in version 1.5.6 (2015-06-21)
 
