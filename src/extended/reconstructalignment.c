@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2015 Annika <annika.seidel@studium.uni-hamburg.de>
+  Copyright (c) 2015 Annika Seidel <annika.seidel@studium.uni-hamburg.de>
   Copyright (c) 2015 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -14,10 +14,10 @@
   ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
+
 #include <ctype.h>
 #include "extended/alignment.h"
-#include "extended/linspaceManagement.h"
-
+#include "extended/linspace_management.h"
 #include "extended/reconstructalignment.h"
 
 GtUword construct_trivial_deletion_alignment(GtAlignment *align,

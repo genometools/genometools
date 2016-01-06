@@ -38,9 +38,8 @@
 #include "extended/diagonalbandalign_affinegapcost.h"
 #include "extended/linearalign.h"
 #include "extended/linearalign_affinegapcost.h"
-#include "extended/linspaceManagement.h"
+#include "extended/linspace_management.h"
 #include "extended/scorehandler.h"
-
 #include "tools/gt_linspace_align.h"
 
 #define LEFT_DIAGONAL_SHIFT(similarity, ulen, vlen) \

@@ -14,6 +14,7 @@
   ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
+
 #include <ctype.h>
 #include <string.h>
 #include "core/array2dim_api.h"
@@ -24,11 +25,11 @@
 #include "core/types_api.h"
 #include "core/divmodmul.h"
 #include "core/unused_api.h"
-#include "extended/linspaceManagement.h"
+#include "extended/diagonalbandalign.h"
+#include "extended/linspace_management.h"
 #include "extended/reconstructalignment.h"
 #include "match/squarededist.h"
 
-#include "extended/diagonalbandalign.h"
 #define LINEAR_EDIST_GAP          ((GtUchar) UCHAR_MAX)
 
 static void diagonalband_fillDPtab_in_square_space(GtUword **EDtabcolumn,

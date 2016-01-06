@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2015 Annika Seidel, <annika.seidel@studium.uni-hamburg.de>
+  Copyright (C) 2015 Annika Seidel <annika.seidel@studium.uni-hamburg.de>
   Copyright (c) 2007 Gordon Gremme <gordon@gremme.org>
   Copyright (c) 2007-2015 Center for Bioinformatics, University of Hamburg
 
@@ -19,10 +19,9 @@
 #ifndef AFFINEALIGN_H
 #define AFFINEALIGN_H
 
-#include "extended/linspaceManagement.h"
-#include "extended/scorehandler.h"
-
 #include "extended/alignment.h"
+#include "extended/linspace_management.h"
+#include "extended/scorehandler.h"
 
 typedef enum {
   Affine_R,

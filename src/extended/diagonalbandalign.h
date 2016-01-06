@@ -17,11 +17,12 @@
 
 #ifndef DIAGONALBANDALIGN_H
 #define DIAGONALBANDALIGN_H
+
 #include "core/error.h"
 #include "core/types_api.h"
 #include "core/unused_api.h"
 #include "extended/alignment.h"
-#include "extended/linspaceManagement.h"
+#include "extended/linspace_management.h"
 #include "extended/scorehandler.h"
 
 typedef enum {
