@@ -28,6 +28,7 @@
 #include "core/safearith.h"
 #include "core/undef_api.h"
 #include "core/unused_api.h"
+#include "core/warning_api.h"
 #include "extended/condenseq.h"
 #include "extended/condenseq_rep.h"
 #include "extended/gff3_visitor_api.h"
@@ -462,7 +463,11 @@ static int condenseq_io(GtCondenseq *condenseq,
   if (!had_err)
     had_err = gt_condenseq_io_one(condenseq->ldb_nelems);
   if (!had_err) {
-    gt_assert(condenseq->ldb_nelems > 0);
+    if (condenseq->ldb_nelems == 0) {
+      gt_warning("compression of condenseq did not succeed in finding any "
+                 "compressable similarities, maybe the input is to small or "
+                 "the chosen parameters should be reconsidered.");
+    }
     if (condenseq->links == NULL) {
       condenseq->links = gt_calloc((size_t) condenseq->ldb_nelems,
                                    sizeof (*condenseq->links));
