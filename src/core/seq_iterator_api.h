@@ -40,7 +40,7 @@ void            gt_seq_iterator_set_sequence_output(GtSeqIterator*, bool);
 /* Get next <sequence> (of length <len>) and <description> from <seqit>.
    Note that <seqit> retains ownership of the <sequence> and <description>.
    Returns 1 if another sequence could be parsed, 0 if all given sequence
-   files are exhausted, And -1 if an error occured (<err> is set
+   files are exhausted, And -1 if an error occurred (<err> is set
    accordingly). */
 int             gt_seq_iterator_next(GtSeqIterator *seqit,
                                      const GtUchar **sequence,

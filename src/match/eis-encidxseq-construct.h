@@ -118,7 +118,7 @@ gt_createEncIdxSeqFromSA(Suffixarray *sa,
  * suffix-array data structure to read construction from and progress
  * information
  * @param alphabet encoding to use for the built sequence, "ownership"
- * of alphabet will pass to the returned object if no error occured.
+ * of alphabet will pass to the returned object if no error occurred.
  * @param totalLen length of indexed sequence (including terminator
  * and separators)
  * @param projectName base name of corresponding suffixerator project

@@ -26,7 +26,7 @@
    This class is used for the handling of ___user errors___ in __GenomeTools__.
    Thereby, the actual <GtError> object is used to store the __error message__
    while it is signaled by the return value of the called function, if an error
-   occured.
+   occurred.
 
    By convention in __GenomeTools__, the <GtError> object is always passed into
    a function as the last parameter and -1 (or <NULL> for constructors) is used

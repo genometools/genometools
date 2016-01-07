@@ -515,7 +515,7 @@ int gt_parse_intermediate_output(GthInput *input,
     if (XML_Parse(parser, gt_str_get(line), gt_str_length(line), false) ==
         XML_STATUS_ERROR) {
       error = XML_GetErrorCode(parser);
-      gt_error_set(err, "an error occured parsing line "GT_WU
+      gt_error_set(err, "an error occurred parsing line "GT_WU
                    " of file \"%s\": %s",
                    parseinfo.linenumber, outputfilename,
                    XML_ErrorString(error));
@@ -530,7 +530,7 @@ int gt_parse_intermediate_output(GthInput *input,
     /* finish parsing */
     if (XML_Parse(parser, NULL, 0, true) == XML_STATUS_ERROR) {
       error = XML_GetErrorCode(parser);
-      gt_error_set(err, "an error occured while finishing the parsing of file "
+      gt_error_set(err, "an error occurred while finishing the parsing of file "
                         "\"%s\": %s", outputfilename, XML_ErrorString(error));
       had_err = -1;
     }

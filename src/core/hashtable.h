@@ -81,14 +81,14 @@ int          gt_hashtable_remove(GtHashtable*, const void *elem);
 /**
  * @brief iterate over the hashtable in key order given by compare
  * function <cmp>
- * @return 0 => no error, -1 => error occured
+ * @return 0 => no error, -1 => error occurred
  */
 int          gt_hashtable_foreach_ordered(GtHashtable *ht, Elemvisitfunc iter,
                                           void *data, GtCompare cmp,
                                           GtError *err);
 /**
  * @brief iterate over the hashtable in implementation-defined order
- * @return 0 => no error, -1 => error occured
+ * @return 0 => no error, -1 => error occurred
  */
 int          gt_hashtable_foreach(GtHashtable *ht, Elemvisitfunc iter,
                                   void *data, GtError *err);

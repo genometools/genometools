@@ -35,7 +35,7 @@ GtNodeStream* gt_node_stream_ref(GtNodeStream *node_stream);
    If no error occurs, 0 is returned and <genome_node> contains either the next
    <GtGenomeNode> or <NULL>, if the <node_stream> is exhausted.
    If an error occurs, -1 is returned and <err> is set accordingly (the status
-   of <genome_node> is undefined, but no ownership transfer occured). */
+   of <genome_node> is undefined, but no ownership transfer occurred). */
 int           gt_node_stream_next(GtNodeStream *node_stream,
                                   GtGenomeNode **genome_node,
                                   GtError *err);
