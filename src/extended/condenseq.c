@@ -462,6 +462,7 @@ static int condenseq_io(GtCondenseq *condenseq,
   if (!had_err)
     had_err = gt_condenseq_io_one(condenseq->ldb_nelems);
   if (!had_err) {
+    gt_assert(condenseq->ldb_nelems > 0);
     if (condenseq->links == NULL) {
       condenseq->links = gt_calloc((size_t) condenseq->ldb_nelems,
                                    sizeof (*condenseq->links));
