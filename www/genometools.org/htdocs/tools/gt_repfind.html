@@ -32,7 +32,7 @@
 <div class="sect1">
 <h2 id="_name">NAME</h2>
 <div class="sectionbody">
-<div class="paragraph"><p>gt-repfind - Compute maximal repeats (and more).</p></div>
+<div class="paragraph"><p>gt-repfind - Compute maximal exact matches (and more).</p></div>
 </div>
 </div>
 <div class="sect1">
@@ -50,7 +50,7 @@
 </dt>
 <dd>
 <p>
-Specify minimum length of repeats (default: 0)
+Specify minimum length of matches (default: 0)
 </p>
 </dd>
 <dt class="hdlist1">
@@ -58,7 +58,7 @@ Specify minimum length of repeats (default: 0)
 </dt>
 <dd>
 <p>
-Compute maximal forward repeats (default: yes)
+Compute forward matches (default: yes)
 </p>
 </dd>
 <dt class="hdlist1">
@@ -66,7 +66,15 @@ Compute maximal forward repeats (default: yes)
 </dt>
 <dd>
 <p>
-Compute maximal reverse matches (default: no)
+Compute reverse matches (default: no)
+</p>
+</dd>
+<dt class="hdlist1">
+<strong>-p</strong> [<em>yes|no</em>]
+</dt>
+<dd>
+<p>
+Compute matches on reverse strand (default: no)
 </p>
 </dd>
 <dt class="hdlist1">
@@ -124,14 +132,6 @@ as integer in the range from 70 to 99 (for xdrop and greedy extension) (default:
 <dd>
 <p>
 show alignments/sequences for exact matches (optional argument is number of columns per line) (default: 70)
-</p>
-</dd>
-<dt class="hdlist1">
-<strong>-cam</strong> [<em>string</em>]
-</dt>
-<dd>
-<p>
-specify character access mode: possible values: encseq, encseq_reader (default: undefined)
 </p>
 </dd>
 <dt class="hdlist1">

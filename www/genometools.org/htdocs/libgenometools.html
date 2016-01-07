@@ -351,6 +351,17 @@ interfaces.
 
 </ul>
 <h2>Sole functions</h2>
+<a name="gt_feature_index_gfflike_get_all_features"></a>
+
+<code>int              gt_feature_index_gfflike_get_all_features(GtFeatureIndex *gfi,
+                                                          GtArray *results,
+                                                          GtError *err)</code>
+<p>
+Retrieves all features contained in <code>gfi</code> into <code>results</code>. Returns 0 on
+   success, a negative value otherwise. The message in <code>err</code> is set
+   accordingly.
+</p>
+<hr>
 <a name="gt_dup_feature_stream_new"></a>
 
 <code>GtNodeStream*  gt_dup_feature_stream_new(GtNodeStream*, const char *dest_type,
@@ -3449,17 +3460,6 @@ Calls the save function for the given <code>feature_index</code>. The save funct
 <code>void         gt_feature_index_delete(GtFeatureIndex*)</code>
 <p>
 Deletes the <code>feature_index</code> and all its referenced features.
-</p>
-<hr>
-<a name="gt_feature_index_gfflike_get_all_features"></a>
-
-<code>int              gt_feature_index_gfflike_get_all_features(GtFeatureIndex *gfi,
-                                                          GtArray *results,
-                                                          GtError *err)</code>
-<p>
-Retrieves all features contained in <code>gfi</code> into <code>results</code>. Returns 0 on
-   success, a negative value otherwise. The message in <code>err</code> is set
-   accordingly.
 </p>
 <hr>
 <a name="GtFeatureIndexMemory"></a>
@@ -7046,6 +7046,14 @@ Returns the descriptive string for <code>readmode</code>.
 Returns the <code>GtReadmode</code> for the description <code>string</code>, which must be one
    of "fwd","rev","cpl" or "rcl". If <code>string</code> does not equal any of them,
    -1 is returned and <code>err</code> is set accordingly.
+</p>
+<hr>
+<a name="gt_readmode_inverse_dir"></a>
+
+<code>GtReadmode  gt_readmode_inverse_dir(GtReadmode readmode)</code>
+<p>
+invert the direction of a readmode: fwd => rev, rev => fwd,
+                                       cpl => rcl, rcl => cpl
 </p>
 <hr>
 <a name="GtRecMap"></a>
@@ -11623,6 +11631,8 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
 
   <a href="#gt_rdb_visitor_visit_sqlite"><code>gt_rdb_visitor_visit_sqlite</code></a><br>
 
+  <a href="#gt_readmode_inverse_dir"><code>gt_readmode_inverse_dir</code></a><br>
+
   <a href="#gt_readmode_parse"><code>gt_readmode_parse</code></a><br>
 
   <a href="#gt_readmode_show"><code>gt_readmode_show</code></a><br>
@@ -12066,7 +12076,7 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
 <div id="footer">
 Copyright &copy; 2008-2013
 The <i>GenomeTools</i> authors.
-Last update: 2015-09-30
+Last update: 2016-01-07
 </div>
 </div>
 <!-- Piwik -->

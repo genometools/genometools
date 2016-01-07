@@ -92,7 +92,8 @@ when available, use the original IDs provided in the source file
 <dd>
 <p>
 make sure the ID attributes are unique within the scope of each GFF3_file, as required by GFF3 specification
-(memory consumption is proportional to the input file size(s)) (default: no)
+(memory consumption is proportional to the input file size(s)).
+If features with the same Parent attribute are not separated by a <em>#</em> line the GFF3 parser tries to treat them as a multi-line feature. This requires at least matching sequence IDs and types. (default: no)
 </p>
 </dd>
 <dt class="hdlist1">
