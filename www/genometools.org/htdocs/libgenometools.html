@@ -3197,7 +3197,7 @@ Deletes <code>esr</code>, freeing all associated space.
    This class is used for the handling of <strong>user errors</strong> in <em>GenomeTools</em>.
    Thereby, the actual <code>GtError</code> object is used to store the <em>error message</em>
    while it is signaled by the return value of the called function, if an error
-   occured.</p><p>   By convention in <em>GenomeTools</em>, the <code>GtError</code> object is always passed into
+   occurred.</p><p>   By convention in <em>GenomeTools</em>, the <code>GtError</code> object is always passed into
    a function as the last parameter and -1 (or <code>NULL</code> for constructors) is used
    as return value to indicate that an error occurred.
    Success is usually indicated by 0 as return value or via a non-<code>NULL</code> object
@@ -5879,7 +5879,7 @@ Try to get the the next <code>GtGenomeNode</code> from <code>node_stream</code> 
    If no error occurs, 0 is returned and <code>genome_node</code> contains either the next
    <code>GtGenomeNode</code> or <code>NULL</code>, if the <code>node_stream</code> is exhausted.
    If an error occurs, -1 is returned and <code>err</code> is set accordingly (the status
-   of <code>genome_node</code> is undefined, but no ownership transfer occured).
+   of <code>genome_node</code> is undefined, but no ownership transfer occurred).
 </p>
 <hr>
 <a name="gt_node_stream_pull"></a>
@@ -7430,7 +7430,7 @@ If set to <code>true</code>, sequences and descriptions are processed (otherwise
 Get next <code>sequence</code> (of length <code>len</code>) and <code>description</code> from <code>seqit</code>.
    Note that <code>seqit</code> retains ownership of the <code>sequence</code> and <code>description</code>.
    Returns 1 if another sequence could be parsed, 0 if all given sequence
-   files are exhausted, And -1 if an error occured (<code>err</code> is set
+   files are exhausted, And -1 if an error occurred (<code>err</code> is set
    accordingly).
 </p>
 <hr>

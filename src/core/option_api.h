@@ -34,14 +34,14 @@ typedef struct GtOption GtOption;
 
 enum GtOPrval {
   GT_OPTION_PARSER_OK,           /* Everything went fine. */
-  GT_OPTION_PARSER_ERROR,        /* An error occured during option parsing. */
+  GT_OPTION_PARSER_ERROR,        /* An error occurred during option parsing. */
   GT_OPTION_PARSER_REQUESTS_EXIT /* The option parser requests an exit, because
                                     option -help, -help+, -helpdev, or -version
                                     was used. */
 };
 
 /* Possible option parser return values. <GT_OPTION_PARSER_OK> denotes that
-   everything went fine, <GT_OPTION_PARSER_ERROR> that an error occured during
+   everything went fine, <GT_OPTION_PARSER_ERROR> that an error occurred during
    option parsing, and <GT_OPTION_PARSER_REQUESTS_EXIT> that the option parser
    requests an exit, because option <-help>, <-help+>, <-helpdev> or <-version>
    was used. */

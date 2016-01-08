@@ -36,5 +36,5 @@ Return values
 
 - 0  everything went fine ('-check': the comparison was successful;
                            '-duplicates': no duplicates found)
-- 1  an error occured     ('-check': the comparison was not successful;
+- 1  an error occurred     ('-check': the comparison was not successful;
                            '-duplicates': duplicates found)]])

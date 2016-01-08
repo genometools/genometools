@@ -50,7 +50,7 @@
  * pass information that is kept across individual calls
  * @param err genometools error object reference
  * @return number of bits actually written, or (BitOffset)-1 if an
- * error occured
+ * error occurred
  */
 typedef BitOffset (*bitInsertFunc)(BitString cwDest, BitOffset cwOffset,
                                    BitString varDest, BitOffset varOffset,
@@ -436,7 +436,7 @@ EISSeekToHeader(const EISeq *seqIdx, uint16_t headerID,
  * @param pos position for which to print context
  * @param fp print diagnostics to this file pointer
  * @param hint use this structure for hinting
- * @return 0 if an I/O error occured wrt fp
+ * @return 0 if an I/O error occurred wrt fp
  */
 static inline int
 EISPrintDiagsForPos(const EISeq *seqIdx, GtUword pos, FILE *fp,
