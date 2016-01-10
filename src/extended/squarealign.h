@@ -77,8 +77,9 @@ GtUword distance_only_global_alignment(const GtUchar *useq,
    square space. Use of this function requires input sequences <useq> and
    <vseq>, with the regions to align given by their start positions <ustart> and
    <vstart> and lengths <ulen> and <vlen>. */
-void gt_print_edist_alignment(const GtUchar *useq, GtUword ustart, GtUword ulen,
-                             const GtUchar *vseq, GtUword vstart, GtUword vlen);
+void    gt_print_edist_alignment(const GtUchar *useq, GtUword ustart,
+                                 GtUword ulen, const GtUchar *vseq,
+                                 GtUword vstart, GtUword vlen);
 
 /* Computes crosspoints for a global alignment with linear gapcosts in square
    space. Use of this function requires an initialised <spacemanager> an
@@ -105,17 +106,17 @@ GtUword ctab_in_square_space(GtLinspaceManagement *spacemanager,
    and <vlen>. An initialised <spacemanager> is required to use this function in
    linear space context, in any other case it can be NULL. Returns score
    value of local alignment. */
-GtWord alignment_in_square_space_local_generic(GtLinspaceManagement
-                                               *spacemanager,
-                                               GtAlignment *align,
-                                               const GtUchar *useq,
-                                               GtUword ustart,
-                                               GtUword ulen,
-                                               const GtUchar *vseq,
-                                               GtUword vstart,
-                                               GtUword vlen,
-                                               const GtScoreHandler
-                                               *scorehandler);
+GtWord  alignment_in_square_space_local_generic(GtLinspaceManagement
+                                                *spacemanager,
+                                                GtAlignment *align,
+                                                const GtUchar *useq,
+                                                GtUword ustart,
+                                                GtUword ulen,
+                                                const GtUchar *vseq,
+                                                GtUword vstart,
+                                                GtUword vlen,
+                                                const GtScoreHandler
+                                                *scorehandler);
 
 /* Computes a local alignment with linear gapcosts in square space
    and constant score values. Use of this function requires the target alignment
@@ -125,15 +126,15 @@ GtWord alignment_in_square_space_local_generic(GtLinspaceManagement
    <gapscore>. An initialised <spacemanager> is required to use this function in
    linear space context, in any other case it can be NULL. Returns score
    value of local alignment. */
-GtWord alignment_in_square_space_local(GtLinspaceManagement *spacemanager,
-                                       GtAlignment *align,
-                                       const GtUchar *useq,
-                                       GtUword ustart,
-                                       GtUword ulen,
-                                       const GtUchar *vseq,
-                                       GtUword vstart,
-                                       GtUword vlen,
-                                       GtWord matchscore,
-                                       GtWord mismatchscore,
-                                       GtWord gapscore);
+GtWord  alignment_in_square_space_local(GtLinspaceManagement *spacemanager,
+                                        GtAlignment *align,
+                                        const GtUchar *useq,
+                                        GtUword ustart,
+                                        GtUword ulen,
+                                        const GtUchar *vseq,
+                                        GtUword vstart,
+                                        GtUword vlen,
+                                        GtWord matchscore,
+                                        GtWord mismatchscore,
+                                        GtWord gapscore);
 #endif
