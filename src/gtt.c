@@ -133,6 +133,7 @@
 #include "tools/gt_mkfeatureindex.h"
 #include "tools/gt_mkfmindex.h"
 #include "tools/gt_mmapandread.h"
+#include "tools/gt_one_dim_chainer.h"
 #include "tools/gt_orffinder.h"
 #include "tools/gt_packedindex.h"
 #include "tools/gt_prebwt.h"
@@ -230,6 +231,7 @@ GtToolbox* gtt_tools(void)
   gt_toolbox_add_tool(tools, "merge", gt_merge());
   gt_toolbox_add_tool(tools, "mergefeat", gt_mergefeat());
   gt_toolbox_add_tool(tools, "mmapandread", gt_mmapandread());
+  gt_toolbox_add_tool(tools, "one_dim_chainer", gt_one_dim_chainer());
   gt_toolbox_add_tool(tools, "orffinder", gt_orffinder());
   gt_toolbox_add_tool(tools, "packedindex", gt_packedindex());
   gt_toolbox_add_tool(tools, "prebwt", gt_prebwt());

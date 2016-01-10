@@ -1062,9 +1062,9 @@ GtWord gt_computeaffinelinearspace_local(GtLinspaceManagement *spacemanager,
                                                      gap_extension);
 
   score = gt_computeaffinelinearspace_local_generic(spacemanager, scorehandler,
-                                                    align,
-                                                    useq, ustart, ulen,
-                                                    vseq, vstart, vlen);
+                                                   align,
+                                                   useq, ustart, ulen,
+                                                   vseq, vstart, vlen);
   gt_scorehandler_delete(scorehandler);
   return score;
 }
