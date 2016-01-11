@@ -382,11 +382,11 @@ GtUword gt_calc_linearalign(GtLinspaceManagement *spacemanager,
 
   if (ulen == 0UL)
   {
-    return construct_trivial_insertion_alignment(align,vlen,gapcost);
+    return gt_reconstructalignment_trivial_insertion(align, vlen, gapcost);
   }
   else if (vlen == 0UL)
   {
-    return construct_trivial_deletion_alignment(align,ulen,gapcost);
+    return gt_reconstructalignment_trivial_deletion(align, ulen, gapcost);
   }
   else if (vlen == 1UL)
   {
@@ -422,8 +422,8 @@ GtUword gt_calc_linearalign(GtLinspaceManagement *spacemanager,
                                        Ctab, 0, 0, &threadcount);
 
   determineCtab0(Ctab, scorehandler, vseq[vstart], useq, ustart);
-  reconstructalignment_from_Ctab(align, Ctab, useq, ustart, vseq, vstart,
-                                 vlen, scorehandler);
+  gt_reconstructalignment_from_Ctab(align, Ctab, useq, ustart, vseq, vstart,
+                                    vlen, scorehandler);
 
   return distance;
 }

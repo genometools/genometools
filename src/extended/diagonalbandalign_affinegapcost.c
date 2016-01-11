@@ -1375,13 +1375,15 @@ static void gt_calc_diagonalbandaffinealign(GtLinspaceManagement *spacemanager,
 
   if (ulen == 0UL)
   {
-    (void) construct_trivial_insertion_alignment(align,vlen,gap_extension);
+    (void) gt_reconstructalignment_trivial_insertion(align, vlen,
+                                                     gap_extension);
     return;
 
   }
   else if (vlen == 0UL)
   {
-    (void) construct_trivial_deletion_alignment(align,ulen, gap_extension);
+    (void) gt_reconstructalignment_trivial_deletion(align, ulen,
+                                                    gap_extension);
      return;
   }
   if (gt_linspace_management_checksquare(spacemanager, ulen, vlen,
@@ -1413,8 +1415,8 @@ static void gt_calc_diagonalbandaffinealign(GtLinspaceManagement *spacemanager,
                                          useq, ustart, ulen, vseq, vstart, vlen,
                                          left_dist, right_dist);
   /* reconstruct alignment */
-  reconstructalignment_from_affineDtab(align, Diagcolumn, lastnode.edge,
-                                       useq, ulen, vseq, vlen);
+  gt_reconstructalignment_from_affineDtab(align, Diagcolumn, lastnode.edge,
+                                          useq, ulen, vseq, vlen);
 }
 
 /* compute alignment with affine gapcosts within a diagonal band */

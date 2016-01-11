@@ -626,15 +626,15 @@ GtUword gt_calc_affinealign_linear(GtLinspaceManagement *spacemanager,
   gap_opening = gt_scorehandler_get_gap_opening(scorehandler);
   if (ulen == 0UL)
   {
-      distance = construct_trivial_insertion_alignment(align, vlen,
-                                                      gap_extension);
+      distance = gt_reconstructalignment_trivial_insertion(align, vlen,
+                                                           gap_extension);
       distance += gap_opening;
       return distance;
   }
   else if (vlen == 0UL)
   {
-      distance = construct_trivial_deletion_alignment(align, ulen,
-                                                      gap_extension);
+      distance = gt_reconstructalignment_trivial_deletion(align, ulen,
+                                                          gap_extension);
       distance += gap_opening;
       return distance;
   }
@@ -667,8 +667,8 @@ GtUword gt_calc_affinealign_linear(GtLinspaceManagement *spacemanager,
     affine_determineCtab0(Ctab, spacemanager, scorehandler,
                           useq, ustart, vseq, vstart);
 
-    reconstructalignment_from_Ctab(align,Ctab,useq,ustart,vseq,
-                                   vstart,vlen,scorehandler);
+    gt_reconstructalignment_from_Ctab(align, Ctab, useq, ustart, vseq,
+                                      vstart, vlen, scorehandler);
 
   }
   return distance;

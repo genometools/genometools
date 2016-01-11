@@ -93,8 +93,8 @@ GtUword alignment_in_square_space_generic (GtLinspaceManagement *spacemanager,
 
   distance = E[ulen][vlen];
   /* reconstruct alignment from 2dimarray E */
-  reconstructalignment_from_EDtab(align, E, useq, ustart, ulen, vseq, vstart,
-                                  vlen, scorehandler);
+  gt_reconstructalignment_from_EDtab(align, E, useq, ustart, ulen, vseq, vstart,
+                                     vlen, scorehandler);
   if (spacemanager == NULL)
   {
     gt_array2dim_delete(E);
@@ -328,9 +328,10 @@ GtWord alignment_in_square_space_local_generic(GtLinspaceManagement
                                           vseq, vstart, vlen, scorehandler);
 
   /* reconstruct local alignment from 2dimarray Ltabcolumn */
-  reconstructalignment_from_Ltab(align, Ltabcolumn, max,
-                                 useq, ustart, ulen,
-                                 vseq,vstart,vlen,scorehandler);
+  gt_reconstructalignment_from_Ltab(align, Ltabcolumn, max,
+                                    useq, ustart, ulen,
+                                    vseq, vstart, vlen,
+                                    scorehandler);
 
   if (gt_maxcoordvalue_get_length_safe(max))
   {
