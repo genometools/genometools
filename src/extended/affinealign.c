@@ -214,10 +214,10 @@ GtWord gt_affinealign_with_Management(GtLinspaceManagement *spacemanager,
   gt_assert(u && v && spacemanager && scorehandler);
 
   gt_assert((ulen+1)*(vlen+1)*sizeof(**dptable) <=
-             gt_linspaceManagement_get_valueTabsize(spacemanager));
+             gt_linspace_management_get_valueTabsize(spacemanager));
 
-  dptable = gt_linspaceManagement_get_rTabspace(spacemanager);
-  *dptable = gt_linspaceManagement_get_valueTabspace(spacemanager);
+  dptable = gt_linspace_management_get_rTabspace(spacemanager);
+  *dptable = gt_linspace_management_get_valueTabspace(spacemanager);
 
   for (idx = 1; idx < ulen + 1; idx++)
     dptable[idx] = dptable[idx-1] + vlen + 1;
@@ -286,10 +286,10 @@ void affine_ctab_in_square_space(GtLinspaceManagement *spacemanager,
   GtUword idx;
   gt_assert(Ctab && spacemanager && scorehandler);
   gt_assert((ulen+1)*(vlen+1)*sizeof(**dptable) <=
-             gt_linspaceManagement_get_valueTabsize(spacemanager));
+             gt_linspace_management_get_valueTabsize(spacemanager));
 
-  dptable = gt_linspaceManagement_get_rTabspace(spacemanager);
-  *dptable = gt_linspaceManagement_get_valueTabspace(spacemanager);
+  dptable = gt_linspace_management_get_rTabspace(spacemanager);
+  *dptable = gt_linspace_management_get_valueTabspace(spacemanager);
 
   for (idx = 1; idx < ulen+1; idx++)
     dptable[idx] = dptable[idx-1] + vlen + 1;
@@ -529,15 +529,15 @@ GtWord affinealign_in_square_space_local_generic(GtLinspaceManagement
   {
     /*use it in lineraspace context*/
     gt_assert((ulen+1)*(vlen+1)*sizeof(**Atabcolumn) <=
-               gt_linspaceManagement_get_valueTabsize(spacemanager));
+               gt_linspace_management_get_valueTabsize(spacemanager));
 
-    Atabcolumn = gt_linspaceManagement_get_rTabspace(spacemanager);
-    *Atabcolumn = gt_linspaceManagement_get_valueTabspace(spacemanager);
+    Atabcolumn = gt_linspace_management_get_rTabspace(spacemanager);
+    *Atabcolumn = gt_linspace_management_get_valueTabspace(spacemanager);
 
     GtUword idx;
     for (idx = 1;idx < ulen+1;idx++)
       Atabcolumn[idx] = Atabcolumn[idx-1] + vlen + 1;
-    max = gt_linspaceManagement_get_maxspace(spacemanager);
+    max = gt_linspace_management_get_maxspace(spacemanager);
   }
 
   score = affinealign_fill_table_local(Atabcolumn, scorehandler, max,

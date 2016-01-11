@@ -212,10 +212,10 @@ GtWord diagonalbandalignment_in_square_space_affine_generic(
   else
   {
     gt_assert((ulen+1)*(vlen+1)*sizeof(**Atabcolumn) <=
-               gt_linspaceManagement_get_valueTabsize(space));
+               gt_linspace_management_get_valueTabsize(space));
 
-    Atabcolumn = gt_linspaceManagement_get_rTabspace(space);
-    *Atabcolumn = gt_linspaceManagement_get_valueTabspace(space);
+    Atabcolumn = gt_linspace_management_get_rTabspace(space);
+    *Atabcolumn = gt_linspace_management_get_valueTabspace(space);
 
     for (idx=1; idx<ulen+1; idx++)
       Atabcolumn[idx]=Atabcolumn[idx-1]+vlen+1;
@@ -404,10 +404,10 @@ static Rnode affineDtab_in_square_space(GtLinspaceManagement *space,
   gt_assert(Dtab && space && scorehandler);
 
   gt_assert((ulen+1)*(vlen+1)*sizeof(**Atabcolumn) <=
-               gt_linspaceManagement_get_valueTabsize(space));
+               gt_linspace_management_get_valueTabsize(space));
 
-  Atabcolumn=gt_linspaceManagement_get_rTabspace(space);
-  *Atabcolumn=gt_linspaceManagement_get_valueTabspace(space);
+  Atabcolumn = gt_linspace_management_get_rTabspace(space);
+  *Atabcolumn = gt_linspace_management_get_valueTabspace(space);
 
   for (idx=1;idx<ulen+1;idx++)
     Atabcolumn[idx]=Atabcolumn[idx-1]+vlen+1;
@@ -766,8 +766,8 @@ static Rnode evaluateallaffineDBcolumns(GtLinspaceManagement *spacemanager,
     gt_assert(false);
   }
 
-  Atabcolumn = gt_linspaceManagement_get_valueTabspace(spacemanager);
-  Rtabcolumn = gt_linspaceManagement_get_rTabspace(spacemanager);
+  Atabcolumn = gt_linspace_management_get_valueTabspace(spacemanager);
+  Rtabcolumn = gt_linspace_management_get_rTabspace(spacemanager);
 
   diag = GT_DIV2(left_dist + right_dist);
   low_row = 0;
@@ -1103,9 +1103,9 @@ static Rnode evaluateaffineDBcrosspoints(GtLinspaceManagement *spacemanager,
     return (Rnode) {0, edge};
   }
 
-  if (gt_linspaceManagement_checksquare(spacemanager, ulen, vlen,
-                                        sizeof (AffinealignDPentry),
-                                        sizeof (Rtabentry)))
+  if (gt_linspace_management_checksquare(spacemanager, ulen, vlen,
+                                         sizeof (AffinealignDPentry),
+                                         sizeof (Rtabentry)))
   { /* call square function */
     return affineDtab_in_square_space(spacemanager, Diagcolumn,
                                       useq, ustart, ulen, vseq, vstart, vlen,
@@ -1370,7 +1370,7 @@ static void gt_calc_diagonalbandaffinealign(GtLinspaceManagement *spacemanager,
     gt_assert(false); /* no global alignment */
   }
 
-  gt_linspaceManagement_set_ulen(spacemanager, ulen);
+  gt_linspace_management_set_ulen(spacemanager, ulen);
   gap_extension = gt_scorehandler_get_gapscore(scorehandler);
 
   if (ulen == 0UL)
@@ -1384,9 +1384,9 @@ static void gt_calc_diagonalbandaffinealign(GtLinspaceManagement *spacemanager,
     (void) construct_trivial_deletion_alignment(align,ulen, gap_extension);
      return;
   }
-  if (gt_linspaceManagement_checksquare(spacemanager, ulen, vlen,
-                                             sizeof (*Atabcolumn),
-                                             sizeof (*Rtabcolumn)))
+  if (gt_linspace_management_checksquare(spacemanager, ulen, vlen,
+                                         sizeof (*Atabcolumn),
+                                         sizeof (*Rtabcolumn)))
   {
     (void) diagonalbandalignment_in_square_space_affine_generic(spacemanager,
                                                          scorehandler, align,
@@ -1395,10 +1395,10 @@ static void gt_calc_diagonalbandaffinealign(GtLinspaceManagement *spacemanager,
                                                          left_dist, right_dist);
     return;
   }
-  gt_linspaceManagement_check(spacemanager, MIN(right_dist-left_dist,ulen),vlen,
-                              sizeof (*Atabcolumn), sizeof (*Rtabcolumn),
-                              sizeof (*Diagcolumn));
-  Diagcolumn = gt_linspaceManagement_get_crosspointTabspace(spacemanager);
+  gt_linspace_management_check(spacemanager, MIN(right_dist-left_dist,ulen),vlen,
+                               sizeof (*Atabcolumn), sizeof (*Rtabcolumn),
+                               sizeof (*Diagcolumn));
+  Diagcolumn = gt_linspace_management_get_crosspointTabspace(spacemanager);
 
   /* initialize Diagcolumn */
   for (idx = 0; idx <= vlen; idx++)
@@ -1502,13 +1502,13 @@ void gt_checkdiagonalbandaffinealign(GT_UNUSED bool forward,
                                            left_dist, right_dist, scorehandler);
 
   align = gt_alignment_new_with_seqs(useq, ulen, vseq, vlen);
-  spacemanager = gt_linspaceManagement_new();
+  spacemanager = gt_linspace_management_new();
 
   gt_calc_diagonalbandaffinealign(spacemanager, scorehandler, align,
                                   useq, 0, ulen, vseq, 0, vlen,
                                   left_dist, right_dist);
 
-  gt_linspaceManagement_delete(spacemanager);
+  gt_linspace_management_delete(spacemanager);
   affine_cost2 = gt_alignment_eval_with_affine_score(align, true, matchcost,
                                                      mismatchcost,
                                                      gap_opening,
