@@ -594,11 +594,11 @@ static void nextLStabcolumn(GtWord *Ltabcolumn,
       Starttabcolumn[rowindex].a = rowindex;
       Starttabcolumn[rowindex].b = colindex;
     }
-    if (Ltabcolumn[rowindex] > gt_max_get_value(max))
+    if (Ltabcolumn[rowindex] > gt_maxcoordvalue_get_value(max))
     {
-      gt_max_coord_update(max, Ltabcolumn[rowindex],
-                               Starttabcolumn[rowindex],
-                               rowindex, colindex);
+      gt_maxcoordvalue_coord_update(max, Ltabcolumn[rowindex],
+                                    Starttabcolumn[rowindex],
+                                    rowindex, colindex);
     }
   }
 }
@@ -687,15 +687,15 @@ GtWord gt_computelinearspace_local_generic(GtLinspaceManagement *spacemanager,
                              useq, ustart, ulen,
                              vseq, vstart, vlen);
 
-  if (gt_max_get_length_safe(max))
+  if (gt_maxcoordvalue_get_length_safe(max))
   {
     GtScoreHandler *costhandler;
 
-    ustart_part = ustart+(gt_max_get_start(max)).a;
-    vstart_part = vstart+(gt_max_get_start(max)).b;
-    ulen_part = gt_max_get_row_length(max);
-    vlen_part = gt_max_get_col_length(max);
-    score = gt_max_get_value(max);
+    ustart_part = ustart+(gt_maxcoordvalue_get_start(max)).a;
+    vstart_part = vstart+(gt_maxcoordvalue_get_start(max)).b;
+    ulen_part = gt_maxcoordvalue_get_row_length(max);
+    vlen_part = gt_maxcoordvalue_get_col_length(max);
+    score = gt_maxcoordvalue_get_value(max);
 
     gt_alignment_set_seqs(align, useq + ustart_part, ulen_part,
                                  vseq + vstart_part, vlen_part);

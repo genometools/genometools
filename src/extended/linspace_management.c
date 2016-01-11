@@ -59,7 +59,7 @@ void gt_linspace_management_delete(GtLinspaceManagement *spacemanager)
     gt_free(spacemanager->rTabspace);
     if (spacemanager->crosspointTabspace != NULL)
       gt_free(spacemanager->crosspointTabspace);
-    gt_max_delete(spacemanager->maxscoordvaluespace);
+    gt_maxcoordvalue_delete(spacemanager->maxscoordvaluespace);
     gt_free(spacemanager);
   }
 }
@@ -109,9 +109,9 @@ static void gt_linspace_management_check_generic(GtLinspaceManagement
   if (local)
   {
     if (spacemanager->maxscoordvaluespace == NULL)
-      spacemanager->maxscoordvaluespace = gt_max_new();
+      spacemanager->maxscoordvaluespace = gt_maxcoordvalue_new();
     else
-      gt_max_reset(spacemanager->maxscoordvaluespace);
+      gt_maxcoordvalue_reset(spacemanager->maxscoordvaluespace);
   }
   if (spacemanager->maxscoordvaluespace != NULL)
     localspace = 2 * sizeof (GtUwordPair) + sizeof (GtWord);
@@ -164,7 +164,7 @@ static bool checksquare(GtLinspaceManagement *spacemanager,
   if ((ulen+1)*(vlen+1)*valuesize <= spacemanager->valueTabsize)
   {
     if (local)
-      gt_max_reset(spacemanager->maxscoordvaluespace);
+      gt_maxcoordvalue_reset(spacemanager->maxscoordvaluespace);
     return true;
   }
   else if ((ulen+1)*(vlen+1) <= (spacemanager->ulen+1)*TSfactor)

@@ -359,9 +359,11 @@ static GtWord affinealign_fill_table_local(AffinealignDPentry **Atabcolumn,
     Atabcolumn[0][j].Dedge = Affine_X;
     Atabcolumn[0][j].Iedge = Affine_I;
 
-    if (Atabcolumn[0][j].totalvalue > gt_max_get_value(max))
+    if (Atabcolumn[0][j].totalvalue > gt_maxcoordvalue_get_value(max))
     {
-      gt_max_coord_update_without_start(max, Atabcolumn[0][j].totalvalue, 0, j);
+      gt_maxcoordvalue_coord_update_without_start(max,
+                                                  Atabcolumn[0][j].totalvalue,
+                                                  0, j);
     }
     for (i = 1; i <= ulen; i++)
     {
@@ -438,14 +440,16 @@ static GtWord affinealign_fill_table_local(AffinealignDPentry **Atabcolumn,
       Atabcolumn[i][j].totalvalue = temp > 0 ? temp : 0;
 
       /*set new max*/
-      if (Atabcolumn[i][j].totalvalue > gt_max_get_value(max))
+      if (Atabcolumn[i][j].totalvalue > gt_maxcoordvalue_get_value(max))
       {
-        gt_max_coord_update_without_start(max,Atabcolumn[i][j].totalvalue,i,j);
+        gt_maxcoordvalue_coord_update_without_start(max,
+                                                    Atabcolumn[i][j].totalvalue,
+                                                    i,j);
       }
     }
   }
 
-  return gt_max_get_value(max);
+  return gt_maxcoordvalue_get_value(max);
 }
 
 static void affinealign_traceback_local(GtAlignment *align,
@@ -458,13 +462,13 @@ static void affinealign_traceback_local(GtAlignment *align,
   AffineAlignEdge edge;
   gt_assert(align && dptable);
 
-  max_end = gt_max_get_end(max);
+  max_end = gt_maxcoordvalue_get_end(max);
   i = max_end.a;
   j = max_end.b;
 
   maxvalue = MAX(MAX(dptable[i][j].Rvalue, dptable[i][j].Dvalue),
                   MAX(dptable[i][j].Ivalue,dptable[i][j].totalvalue));
-  gt_assert(gt_max_get_value(max) == maxvalue);
+  gt_assert(gt_maxcoordvalue_get_value(max) == maxvalue);
 
   if (dptable[i][j].Rvalue == maxvalue)
     edge = Affine_R;
@@ -500,7 +504,7 @@ static void affinealign_traceback_local(GtAlignment *align,
         gt_assert(false);
     }
   }
-  gt_max_set_start(max,i,j);
+  gt_maxcoordvalue_set_start(max,i,j);
 }
 
 GtWord affinealign_in_square_space_local_generic(GtLinspaceManagement
@@ -523,7 +527,7 @@ GtWord affinealign_in_square_space_local_generic(GtLinspaceManagement
   {
     /*use it in normally case*/
     gt_array2dim_malloc(Atabcolumn,(ulen+1),(vlen+1));
-    max = gt_max_new();
+    max = gt_maxcoordvalue_new();
   }
   else
   {
@@ -549,12 +553,12 @@ GtWord affinealign_in_square_space_local_generic(GtLinspaceManagement
   /* reconstruct local alignment from 2dimarray Atabcolumn */
   affinealign_traceback_local(align, Atabcolumn, max);
 
-  if (gt_max_get_length_safe(max))
+  if (gt_maxcoordvalue_get_length_safe(max))
   {
-    ustart = ustart+(gt_max_get_start(max)).a;
-    vstart = vstart+(gt_max_get_start(max)).b;
-    ulen = gt_max_get_row_length(max);
-    vlen = gt_max_get_col_length(max);
+    ustart = ustart + (gt_maxcoordvalue_get_start(max)).a;
+    vstart = vstart + (gt_maxcoordvalue_get_start(max)).b;
+    ulen = gt_maxcoordvalue_get_row_length(max);
+    vlen = gt_maxcoordvalue_get_col_length(max);
 
     gt_alignment_set_seqs(align, &useq[ustart], ulen,
                                  &vseq[vstart], vlen);
@@ -563,7 +567,7 @@ GtWord affinealign_in_square_space_local_generic(GtLinspaceManagement
   if (spacemanager == NULL)
   {
     gt_array2dim_delete(Atabcolumn);
-    gt_max_delete(max);
+    gt_maxcoordvalue_delete(max);
   }
   return score;
 }

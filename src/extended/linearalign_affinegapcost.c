@@ -848,7 +848,7 @@ static void nextAStabcolumn(AffinealignDPentry *Atabcolumn,
     Starttabcolumn[0].Istart.b = colindex;
   }
 
-  if (Atabcolumn[0].totalvalue > gt_max_get_value(max))
+  if (Atabcolumn[0].totalvalue > gt_maxcoordvalue_get_value(max))
     {
       if (Atabcolumn[0].totalvalue == Atabcolumn[0].Rvalue)
          start = Starttabcolumn[0].Rstart;
@@ -857,8 +857,8 @@ static void nextAStabcolumn(AffinealignDPentry *Atabcolumn,
       else if (Atabcolumn[0].totalvalue == Atabcolumn[0].Ivalue)
          start = Starttabcolumn[0].Istart;
 
-      gt_max_coord_update(max, Atabcolumn[0].totalvalue,
-                          start, 0, colindex);
+      gt_maxcoordvalue_coord_update(max, Atabcolumn[0].totalvalue,
+                                    start, 0, colindex);
     }
   for (rowindex = 1; rowindex <= ulen; rowindex++)
   {
@@ -912,7 +912,7 @@ static void nextAStabcolumn(AffinealignDPentry *Atabcolumn,
     }
 
     /*set new max*/
-    if (Atabcolumn[rowindex].totalvalue > gt_max_get_value(max))
+    if (Atabcolumn[rowindex].totalvalue > gt_maxcoordvalue_get_value(max))
     {
       if (Atabcolumn[rowindex].totalvalue == Atabcolumn[rowindex].Rvalue)
          start = Starttabcolumn[rowindex].Rstart;
@@ -921,8 +921,8 @@ static void nextAStabcolumn(AffinealignDPentry *Atabcolumn,
       else if (Atabcolumn[rowindex].totalvalue == Atabcolumn[rowindex].Ivalue)
          start = Starttabcolumn[rowindex].Istart;
 
-      gt_max_coord_update(max, Atabcolumn[rowindex].totalvalue,
-                          start, rowindex, colindex);
+      gt_maxcoordvalue_coord_update(max, Atabcolumn[rowindex].totalvalue,
+                                    start, rowindex, colindex);
     }
     northwestAffinealignDPentry=westAffinealignDPentry;
     Snw=Swe;
@@ -1011,16 +1011,16 @@ GtWord gt_computeaffinelinearspace_local_generic(
                                 useq, ustart, ulen,
                                 vseq, vstart, vlen);
 
-  score = gt_max_get_value(max);
+  score = gt_maxcoordvalue_get_value(max);
 
-  if (gt_max_get_length_safe(max))
+  if (gt_maxcoordvalue_get_length_safe(max))
   {
     GtScoreHandler *costhandler = gt_scorehandler2costhandler(scorehandler);
 
-    ustart_part = ustart+(gt_max_get_start(max)).a;
-    vstart_part = vstart+(gt_max_get_start(max)).b;
-    ulen_part = gt_max_get_row_length(max);
-    vlen_part = gt_max_get_col_length(max);
+    ustart_part = ustart+(gt_maxcoordvalue_get_start(max)).a;
+    vstart_part = vstart+(gt_maxcoordvalue_get_start(max)).b;
+    ulen_part = gt_maxcoordvalue_get_row_length(max);
+    vlen_part = gt_maxcoordvalue_get_col_length(max);
 
     gt_alignment_set_seqs(align,useq + ustart_part,ulen_part,
                                 vseq + vstart_part,vlen_part);
