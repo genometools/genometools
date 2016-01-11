@@ -183,8 +183,8 @@ GtUword diagonalbandalignment_in_square_space_generic(GtLinspaceManagement
 
   distance = EDtabcolumn[ulen][vlen];
   /* reconstruct alignment from 2dimarray EDtabcolumn */
-  reconstructalignment_from_EDtab(align, EDtabcolumn, useq, ustart, ulen,
-                                  vseq, vstart, vlen, scorehandler);
+  gt_reconstructalignment_from_EDtab(align, EDtabcolumn, useq, ustart, ulen,
+                                     vseq, vstart, vlen, scorehandler);
 
   if (space == NULL)
   {
@@ -879,12 +879,12 @@ static void gt_calc_diagonalbandalign(GtLinspaceManagement *spacemanager,
   gapcost = gt_scorehandler_get_gapscore(scorehandler);
   if (ulen == 0UL)
   {
-    (void) construct_trivial_insertion_alignment(align,vlen,gapcost);
+    (void) gt_reconstructalignment_trivial_insertion(align, vlen, gapcost);
     return;
   }
   else if (vlen == 0UL)
   {
-    (void) construct_trivial_deletion_alignment(align,ulen,gapcost);
+    (void) gt_reconstructalignment_trivial_deletion(align, ulen, gapcost);
     return;
   }
   else if (gt_linspace_management_checksquare(spacemanager, ulen, vlen,
@@ -916,7 +916,7 @@ static void gt_calc_diagonalbandalign(GtLinspaceManagement *spacemanager,
                         Linear_X, 0, 0,  useq, ustart, ulen,
                         vseq, vstart, vlen, left_dist, right_dist);
 
-  reconstructalignment_from_Dtab(align,Diagcolumn,ulen, vlen);
+  gt_reconstructalignment_from_Dtab(align, Diagcolumn, ulen, vlen);
 }
 
 /* compute alignment within a diagonal band */
