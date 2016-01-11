@@ -26,7 +26,7 @@ struct GtMaxcoordvalue{
     GtUwordPair end;
 };
 
-GtMaxcoordvalue* gt_max_new(void)
+GtMaxcoordvalue* gt_maxcoordvalue_new(void)
 {
   GtMaxcoordvalue *max;
   max = gt_calloc((size_t) 1, sizeof (GtMaxcoordvalue));
@@ -40,119 +40,122 @@ GtMaxcoordvalue* gt_max_new(void)
   return max;
 }
 
-void gt_max_delete(GtMaxcoordvalue *max)
+void gt_maxcoordvalue_delete(GtMaxcoordvalue *max)
 {
   if (max != NULL)
     gt_free(max);
 }
 
-static void gt_max_set_value(GtMaxcoordvalue *max, const GtWord value)
+static void gt_maxcoordvalue_set_value(GtMaxcoordvalue *max, const GtWord value)
 {
   gt_assert(max != NULL);
   max->value=value;
 }
 
-GtWord gt_max_get_value(const GtMaxcoordvalue *max)
+GtWord gt_maxcoordvalue_get_value(const GtMaxcoordvalue *max)
 {
   gt_assert(max != NULL);
   return(max->value);
 }
 
-void gt_max_set_start(GtMaxcoordvalue *max,
-                      GtUword a, GtUword b)
+void gt_maxcoordvalue_set_start(GtMaxcoordvalue *max,
+                                GtUword a, GtUword b)
 {
   gt_assert(max != NULL);
   max->start.a = a;
   max->start.b = b ;
 }
 
-static void gt_max_set_start_with_pair(GtMaxcoordvalue *max,
-                                       const GtUwordPair start )
+static void gt_maxcoordvalue_set_start_with_pair(GtMaxcoordvalue *max,
+                                                 const GtUwordPair start )
 {
   gt_assert(max != NULL);
   max->start=start;
 }
 
-GtUwordPair gt_max_get_start(const GtMaxcoordvalue *max)
+GtUwordPair gt_maxcoordvalue_get_start(const GtMaxcoordvalue *max)
 {
   gt_assert(max != NULL);
   return(max->start);
 }
 
-void gt_max_set_end_with_pair(GtMaxcoordvalue *max, const  GtUwordPair end)
+void gt_maxcoordvalue_set_end_with_pair(GtMaxcoordvalue *max,
+                                        const GtUwordPair end)
 {
   gt_assert(max != NULL);
   max->end = end;
 }
 
-static void gt_max_set_end(GtMaxcoordvalue *max,
-                           GtUword a, GtUword b)
+static void gt_maxcoordvalue_set_end(GtMaxcoordvalue *max,
+                                     GtUword a, GtUword b)
 {
   gt_assert(max != NULL);
   max->end.a = a;
   max->end.b = b ;
 }
 
-GtUwordPair gt_max_get_end(const GtMaxcoordvalue *max)
+GtUwordPair gt_maxcoordvalue_get_end(const GtMaxcoordvalue *max)
 {
   gt_assert(max != NULL);
   return(max->end);
 }
 
 /*use this in linear space cases*/
-void gt_max_coord_update(GtMaxcoordvalue *max,
-                         GtWord value,
-                         GtUwordPair start,
-                         GtUword enda, GtUword endb)
+void gt_maxcoordvalue_coord_update(GtMaxcoordvalue *max,
+                                   GtWord value,
+                                   GtUwordPair start,
+                                   GtUword enda, GtUword endb)
 {
   gt_assert(max != NULL);
 
-  gt_max_set_value(max, value);
-  gt_max_set_start_with_pair(max, start);
-  gt_max_set_end(max, enda, endb);
+  gt_maxcoordvalue_set_value(max, value);
+  gt_maxcoordvalue_set_start_with_pair(max, start);
+  gt_maxcoordvalue_set_end(max, enda, endb);
 }
 
 /*use this in square space cases*/
-void gt_max_coord_update_without_start (GtMaxcoordvalue *max, GtWord value,
-                                        GtUword enda, GtUword endb)
+void gt_maxcoordvalue_coord_update_without_start (GtMaxcoordvalue *max,
+                                                  GtWord value,
+                                                  GtUword enda,
+                                                  GtUword endb)
 {
   gt_assert(max != NULL);
 
-  gt_max_set_value(max, value);
-  gt_max_set_end(max, enda, endb);
+  gt_maxcoordvalue_set_value(max, value);
+  gt_maxcoordvalue_set_end(max, enda, endb);
 }
 
-GtUword gt_max_get_row_length(const GtMaxcoordvalue *max)
+GtUword gt_maxcoordvalue_get_row_length(const GtMaxcoordvalue *max)
 {
   gt_assert(max != NULL);
 
-  GtUword end = (gt_max_get_end(max)).a;
-  GtUword start = (gt_max_get_start(max)).a;
+  GtUword end = (gt_maxcoordvalue_get_end(max)).a;
+  GtUword start = (gt_maxcoordvalue_get_start(max)).a;
 
   gt_assert(end >= start);
   return end-start;
 }
 
-GtUword gt_max_get_col_length(const GtMaxcoordvalue *max)
+GtUword gt_maxcoordvalue_get_col_length(const GtMaxcoordvalue *max)
 {
   gt_assert(max != NULL);
 
-  GtUword end = (gt_max_get_end(max)).b;
-  GtUword start = (gt_max_get_start(max)).b;
+  GtUword end = (gt_maxcoordvalue_get_end(max)).b;
+  GtUword start = (gt_maxcoordvalue_get_start(max)).b;
 
   gt_assert(end >= start);
   return end-start;
 }
 
-bool gt_max_get_length_safe(const GtMaxcoordvalue *max)
+bool gt_maxcoordvalue_get_length_safe(const GtMaxcoordvalue *max)
 {
-  if (gt_max_get_end(max).a == gt_max_get_start(max).a &&
-      gt_max_get_end(max).b == gt_max_get_start(max).b  )
+  if (gt_maxcoordvalue_get_end(max).a == gt_maxcoordvalue_get_start(max).a &&
+      gt_maxcoordvalue_get_end(max).b == gt_maxcoordvalue_get_start(max).b  )
     return false;
   return true;
 }
 
-void gt_max_reset(GtMaxcoordvalue *max)
+void gt_maxcoordvalue_reset(GtMaxcoordvalue *max)
 {
   gt_assert(max != NULL);
 

@@ -108,7 +108,7 @@ void reconstructalignment_from_Ltab(GtAlignment *align,
   GtUwordPair max_end;
 
   gt_assert(align && Ltabcolumn && scorehandler);
-  max_end = gt_max_get_end(max);
+  max_end = gt_maxcoordvalue_get_end(max);
   i = max_end.a;
   j = max_end.b;
   gt_assert(i <= ulen && j <= vlen);
@@ -140,7 +140,7 @@ void reconstructalignment_from_Ltab(GtAlignment *align,
     }
     gt_assert(false);
   }
-  gt_max_set_start(max,i,j);
+  gt_maxcoordvalue_set_start(max,i,j);
 }
 
 /* reconstruct alignment from crosspoint table

@@ -283,7 +283,7 @@ static GtWord fillDPtab_in_square_space_local(GtWord **Ltabcolumn,
         if (maxscore > (GtWord) overall_maxscore)
         {
           overall_maxscore = maxscore;
-          gt_max_coord_update_without_start (max, maxscore,i,j);
+          gt_maxcoordvalue_coord_update_without_start (max, maxscore, i, j);
         }
      }
   }
@@ -313,7 +313,7 @@ GtWord alignment_in_square_space_local_generic(GtLinspaceManagement
   {
     /*use it in normally case*/
     gt_array2dim_malloc(Ltabcolumn, (ulen+1), (vlen+1));
-    max = gt_max_new();
+    max = gt_maxcoordvalue_new();
   }
   else
   {
@@ -332,12 +332,12 @@ GtWord alignment_in_square_space_local_generic(GtLinspaceManagement
                                  useq, ustart, ulen,
                                  vseq,vstart,vlen,scorehandler);
 
-  if (gt_max_get_length_safe(max))
+  if (gt_maxcoordvalue_get_length_safe(max))
   {
-    ustart = ustart+(gt_max_get_start(max)).a;
-    vstart = vstart+(gt_max_get_start(max)).b;
-    ulen = gt_max_get_row_length(max);
-    vlen = gt_max_get_col_length(max);
+    ustart = ustart + (gt_maxcoordvalue_get_start(max)).a;
+    vstart = vstart + (gt_maxcoordvalue_get_start(max)).b;
+    ulen = gt_maxcoordvalue_get_row_length(max);
+    vlen = gt_maxcoordvalue_get_col_length(max);
 
     gt_alignment_set_seqs(align, &useq[ustart], ulen,
                                  &vseq[vstart], vlen);
@@ -346,7 +346,7 @@ GtWord alignment_in_square_space_local_generic(GtLinspaceManagement
   if (spacemanager == NULL)
   {
     gt_array2dim_delete(Ltabcolumn);
-    gt_max_delete(max);
+    gt_maxcoordvalue_delete(max);
   }
   return score;
 }
