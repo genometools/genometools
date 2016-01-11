@@ -55,15 +55,15 @@ GtAlignment* gt_affinealign(const GtUchar *u, GtUword ulen,
    initalised <spacemanager>, the target alignment <align> and input sequences
    <useq> and <vseq> and lengths <ulen> and <vlen>. Returns affine cost
    value of global alignment. */
-GtWord gt_affinealign_with_Management(GtLinspaceManagement *spacemanager,
-                                      const GtScoreHandler *scorehandler,
-                                      GtAlignment *align,
-                                      const GtUchar *u, GtUword ulen,
-                                      const GtUchar *v, GtUword vlen);
-
-GtWord affinealign_traceback(GtAlignment *a,
-                             AffinealignDPentry * const *dptable,
-                             GtUword i, GtUword j);
+GtWord       gt_affinealign_with_Management(GtLinspaceManagement *spacemanager,
+                                            const GtScoreHandler *scorehandler,
+                                            GtAlignment *align,
+                                            const GtUchar *u, GtUword ulen,
+                                            const GtUchar *v, GtUword vlen);
+      
+GtWord       affinealign_traceback(GtAlignment *a,
+                                   AffinealignDPentry * const *dptable,
+                                   GtUword i, GtUword j);
 
 /* Computes crosspoints for a global alignment with affine gapcosts in square
    space. Use of this function requires an initialised <spacemanager> an
@@ -74,18 +74,18 @@ GtWord affinealign_traceback(GtAlignment *a,
    of the subproblem and <from_edge> and <to_edge> are the in- and outcoming
    edge of this subproblem. Otherwise set default values 0 and Affine_X. Returns
    affine distance value of global alignment. */
-void affine_ctab_in_square_space(GtLinspaceManagement *spacemanager,
-                                 const GtScoreHandler *scorehandler,
-                                 GtUword *Ctab,
-                                 const GtUchar *useq,
-                                 GtUword ustart,
-                                 GtUword ulen,
-                                 const GtUchar *vseq,
-                                 GtUword vstart,
-                                 GtUword vlen,
-                                 GtUword rowoffset,
-                                 AffineAlignEdge from_edge,
-                                 AffineAlignEdge to_edge);
+void         affine_ctab_in_square_space(GtLinspaceManagement *spacemanager,
+                                         const GtScoreHandler *scorehandler,
+                                         GtUword *Ctab,
+                                         const GtUchar *useq,
+                                         GtUword ustart,
+                                         GtUword ulen,
+                                         const GtUchar *vseq,
+                                         GtUword vstart,
+                                         GtUword vlen,
+                                         GtUword rowoffset,
+                                         AffineAlignEdge from_edge,
+                                         AffineAlignEdge to_edge);
 
 /* Computes a local alignment with linear gapcosts in square space. Use of this
    function requires an initialised <scorehandler> with score values, the target
@@ -94,17 +94,17 @@ void affine_ctab_in_square_space(GtLinspaceManagement *spacemanager,
    and <vlen>. An initialised <spacemanager> is required to use this function in
    linear space context, in any other case it can be NULL. Returns score
    value of local alignment. */
-GtWord affinealign_in_square_space_local_generic(GtLinspaceManagement
-                                                 *spacemanager,
-                                                 const GtScoreHandler
-                                                 *scorehandler,
-                                                 GtAlignment *align,
-                                                 const GtUchar *useq,
-                                                 GtUword ustart,
-                                                 GtUword ulen,
-                                                 const GtUchar *vseq,
-                                                 GtUword vstart,
-                                                 GtUword vlen);
+GtWord       affinealign_in_square_space_local_generic(GtLinspaceManagement
+                                                       *spacemanager,
+                                                       const GtScoreHandler
+                                                       *scorehandler,
+                                                       GtAlignment *align,
+                                                       const GtUchar *useq,
+                                                       GtUword ustart,
+                                                       GtUword ulen,
+                                                       const GtUchar *vseq,
+                                                       GtUword vstart,
+                                                       GtUword vlen);
 
 /* Computes a local alignment with affine gapcosts in square space
    and constant score values. Use of this function requires the target alignment
@@ -114,17 +114,18 @@ GtWord affinealign_in_square_space_local_generic(GtLinspaceManagement
    <gap_opening> and <gap_extension>. An initialised <spacemanager> is required
    to use this function in linear space context, in any other case it can be
    NULL. Returns affine score value of local alignment. */
-GtWord affinealign_in_square_space_local(GtLinspaceManagement *spacemanager,
-                                         GtAlignment *align,
-                                         const GtUchar *useq,
-                                         GtUword ustart,
-                                         GtUword ulen,
-                                         const GtUchar *vseq,
-                                         GtUword vstart,
-                                         GtUword vlen,
-                                         GtWord matchscore,
-                                         GtWord mismatchscore,
-                                         GtWord gap_opening,
-                                         GtWord gap_extension);
+GtWord       affinealign_in_square_space_local(GtLinspaceManagement
+                                               *spacemanager,
+                                               GtAlignment *align,
+                                               const GtUchar *useq,
+                                               GtUword ustart,
+                                               GtUword ulen,
+                                               const GtUchar *vseq,
+                                               GtUword vstart,
+                                               GtUword vlen,
+                                               GtWord matchscore,
+                                               GtWord mismatchscore,
+                                               GtWord gap_opening,
+                                               GtWord gap_extension);
 
 #endif

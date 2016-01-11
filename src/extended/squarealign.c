@@ -86,7 +86,7 @@ GtUword alignment_in_square_space_generic (GtLinspaceManagement *spacemanager,
   else
   {
     /*use it in lineraspace context*/
-    E = gt_linspaceManagement_change_to_square(spacemanager,ulen,vlen);
+    E = gt_linspace_management_change_to_square(spacemanager,ulen,vlen);
   }
   fillDPtab_in_square_space(E, useq, ustart, ulen,
                             vseq, vstart, vlen, scorehandler);
@@ -224,8 +224,8 @@ GtUword ctab_in_square_space(GtLinspaceManagement *spacemanager,
 
   gt_assert(Ctab && spacemanager && scorehandler);
 
-  E = gt_linspaceManagement_change_to_square(spacemanager,ulen,vlen);
-  E = gt_linspaceManagement_change_to_square(spacemanager,ulen, vlen);
+  E = gt_linspace_management_change_to_square(spacemanager,ulen,vlen);
+  E = gt_linspace_management_change_to_square(spacemanager,ulen, vlen);
 
   fillDPtab_in_square_space(E, useq, ustart, ulen,
                             vseq, vstart, vlen, scorehandler);
@@ -319,8 +319,9 @@ GtWord alignment_in_square_space_local_generic(GtLinspaceManagement
   {
     /*use it in lineraspace context*/
     Ltabcolumn = (GtWord **)
-                 gt_linspaceManagement_change_to_square(spacemanager,ulen,vlen);
-    max = gt_linspaceManagement_get_maxspace(spacemanager);
+                 gt_linspace_management_change_to_square(spacemanager,
+                                                         ulen, vlen);
+    max = gt_linspace_management_get_maxspace(spacemanager);
   }
 
   score = fillDPtab_in_square_space_local(Ltabcolumn, max, useq, ustart, ulen,

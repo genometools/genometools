@@ -407,9 +407,9 @@ static GtUword evaluateaffinecrosspoints(GtLinspaceManagement *spacemanager,
     if (gt_jobs == 1)
     {
 #endif
-      if (gt_linspaceManagement_checksquare(spacemanager, ulen, vlen,
-                                            sizeof (*Atabcolumn),
-                                            sizeof (*Rtabcolumn)))
+      if (gt_linspace_management_checksquare(spacemanager, ulen, vlen,
+                                             sizeof (*Atabcolumn),
+                                             sizeof (*Rtabcolumn)))
       {
         affine_ctab_in_square_space(spacemanager, scorehandler, Ctab,
                                     useq, ustart, ulen, vseq, vstart, vlen,
@@ -419,8 +419,8 @@ static GtUword evaluateaffinecrosspoints(GtLinspaceManagement *spacemanager,
 #ifdef GT_THREADS_ENABLED
    }
 #endif
-    Rtabcolumn = gt_linspaceManagement_get_rTabspace(spacemanager);
-    Atabcolumn = gt_linspaceManagement_get_valueTabspace(spacemanager);
+    Rtabcolumn = gt_linspace_management_get_rTabspace(spacemanager);
+    Atabcolumn = gt_linspace_management_get_valueTabspace(spacemanager);
     Rtabcolumn = Rtabcolumn + rowoffset;
     Atabcolumn = Atabcolumn + rowoffset;
 
@@ -591,8 +591,8 @@ static void affine_determineCtab0(GtUword *Ctab,
       Ctab[0] = 0;
     else
     {
-      gt_linspaceManagement_check(spacemanager,2*(Ctab[1]+1),Ctab[1],
-                                  sizeof (*Atabcolumn),sizeof (Atabcolumn),0);
+      gt_linspace_management_check(spacemanager,2*(Ctab[1]+1),Ctab[1],
+                                   sizeof (*Atabcolumn),sizeof (Atabcolumn),0);
       /*gt_assert(vlen > 1);*/
       AffineAlignEdge to_edge_test = Affine_X;
       if (Ctab[1] == Ctab[2])
@@ -621,7 +621,7 @@ GtUword gt_calc_affinealign_linear(GtLinspaceManagement *spacemanager,
   AffinealignDPentry *Atabcolumn;
   Rtabentry *Rtabcolumn;
 
-  gt_linspaceManagement_set_ulen(spacemanager, ulen);
+  gt_linspace_management_set_ulen(spacemanager, ulen);
   gap_extension = gt_scorehandler_get_gapscore(scorehandler);
   gap_opening = gt_scorehandler_get_gap_opening(scorehandler);
   if (ulen == 0UL)
@@ -640,22 +640,23 @@ GtUword gt_calc_affinealign_linear(GtLinspaceManagement *spacemanager,
   }
   else if (vlen == 1UL)
   {
-     gt_linspaceManagement_check(spacemanager, (ulen+1)*(vlen+1)-1, ulen,
-                                 sizeof (*Atabcolumn), sizeof (Atabcolumn), 0);
+     gt_linspace_management_check(spacemanager, (ulen+1)*(vlen+1)-1, ulen,
+                                  sizeof (*Atabcolumn), sizeof (Atabcolumn), 0);
     return gt_affinealign_with_Management(spacemanager, scorehandler, align,
                                    useq+ustart, ulen, vseq+vstart, vlen);
   }
-  if (gt_linspaceManagement_checksquare(spacemanager, ulen, vlen,
-                                     sizeof (*Atabcolumn),sizeof (*Rtabcolumn)))
+  if (gt_linspace_management_checksquare(spacemanager, ulen, vlen,
+                                         sizeof (*Atabcolumn),
+                                         sizeof (*Rtabcolumn)))
   {
     return gt_affinealign_with_Management(spacemanager, scorehandler, align,
                                    useq+ustart, ulen, vseq+vstart, vlen);
   }
   else
   {
-    gt_linspaceManagement_check(spacemanager, ulen, vlen, sizeof (*Atabcolumn),
-                                sizeof (*Rtabcolumn), sizeof (*Ctab));
-    Ctab = gt_linspaceManagement_get_crosspointTabspace(spacemanager);
+    gt_linspace_management_check(spacemanager, ulen, vlen, sizeof (*Atabcolumn),
+                                 sizeof (*Rtabcolumn), sizeof (*Ctab));
+    Ctab = gt_linspace_management_get_crosspointTabspace(spacemanager);
     Ctab[vlen] = ulen;
     distance = evaluateaffinecrosspoints(spacemanager, scorehandler,
                                          useq, ustart, ulen,
@@ -942,12 +943,12 @@ static GtMaxcoordvalue *evaluateallAStabcolumns(GtLinspaceManagement *space,
   AffinealignDPentry *Atabcolumn;
   Starttabentry *Starttabcolumn;
 
-  Atabcolumn = gt_linspaceManagement_get_valueTabspace(space);
-  Starttabcolumn = gt_linspaceManagement_get_rTabspace(space);
+  Atabcolumn = gt_linspace_management_get_valueTabspace(space);
+  Starttabcolumn = gt_linspace_management_get_rTabspace(space);
 
   firstAStabcolumn(Atabcolumn, Starttabcolumn, scorehandler, ulen);
 
-  max = gt_linspaceManagement_get_maxspace(space);
+  max = gt_linspace_management_get_maxspace(space);
   for (colindex = 1UL; colindex <= vlen; colindex++)
   {
     nextAStabcolumn(Atabcolumn, Starttabcolumn, scorehandler, useq, ustart,
@@ -974,7 +975,7 @@ GtWord gt_computeaffinelinearspace_local_generic(
   Starttabentry *Starttabcolumn;
   GtMaxcoordvalue *max;
 
-  gt_linspaceManagement_set_ulen(spacemanager, ulen);
+  gt_linspace_management_set_ulen(spacemanager, ulen);
   if (ulen == 0UL || vlen == 0UL)
   {
      /* empty alignment */
@@ -982,19 +983,19 @@ GtWord gt_computeaffinelinearspace_local_generic(
   }
   else if (vlen == 1UL)
   {
-    gt_linspaceManagement_check_local(spacemanager,
-                                    (ulen+1)*(vlen+1)-1, ulen,
-                                    sizeof (*Atabcolumn),
-                                    sizeof (Atabcolumn));
+    gt_linspace_management_check_local(spacemanager,
+                                       (ulen+1)*(vlen+1)-1, ulen,
+                                       sizeof (*Atabcolumn),
+                                       sizeof (Atabcolumn));
     return affinealign_in_square_space_local_generic(spacemanager,scorehandler,
                                                    align,
                                                    useq, ustart, ulen,
                                                    vseq, vstart, vlen
                                                    );
   }
-  else if (gt_linspaceManagement_checksquare_local(spacemanager, ulen, vlen,
-                                                   sizeof (*Atabcolumn),
-                                                   sizeof (*Starttabcolumn)))
+  else if (gt_linspace_management_checksquare_local(spacemanager, ulen, vlen,
+                                                    sizeof (*Atabcolumn),
+                                                    sizeof (*Starttabcolumn)))
   {
     /* call alignment function for square space */
     return affinealign_in_square_space_local_generic(spacemanager, scorehandler,
@@ -1002,9 +1003,9 @@ GtWord gt_computeaffinelinearspace_local_generic(
                                                      vseq, vstart, vlen);
   }
 
-  gt_linspaceManagement_check_local(spacemanager, ulen, vlen,
-                                    sizeof (*Atabcolumn),
-                                    sizeof (*Starttabcolumn));
+  gt_linspace_management_check_local(spacemanager, ulen, vlen,
+                                     sizeof (*Atabcolumn),
+                                     sizeof (*Starttabcolumn));
 
   max = evaluateallAStabcolumns(spacemanager, scorehandler,
                                 useq, ustart, ulen,
@@ -1099,12 +1100,12 @@ void gt_checkaffinelinearspace(GT_UNUSED bool forward,
                                      gap_opening, gap_extension);
   gt_scorehandler_plain(scorehandler);
   align = gt_alignment_new_with_seqs(useq, ulen, vseq, vlen);
-  spacemanager = gt_linspaceManagement_new();
+  spacemanager = gt_linspace_management_new();
 
   affine_score1 = gt_calc_affinealign_linear(spacemanager, scorehandler, align,
                                              useq, 0, ulen,
                                              vseq, 0, vlen);
-  gt_linspaceManagement_delete(spacemanager);
+  gt_linspace_management_delete(spacemanager);
   affine_score2 = gt_alignment_eval_with_affine_score(align,  true,matchcost,
                                                       mismatchcost, gap_opening,
                                                       gap_extension);
@@ -1162,12 +1163,12 @@ void gt_checkaffinelinearspace_local(GT_UNUSED bool forward,
   scorehandler = gt_scorehandler_new(matchscore, mismatchscore,
                                      gap_opening, gap_extension);
   align = gt_alignment_new();
-  spacemanager = gt_linspaceManagement_new();
+  spacemanager = gt_linspace_management_new();
   affine_score1 = gt_computeaffinelinearspace_local_generic(spacemanager,
                                                             scorehandler, align,
                                                             useq, 0, ulen,
                                                             vseq,  0, vlen);
-  gt_linspaceManagement_delete(spacemanager);
+  gt_linspace_management_delete(spacemanager);
   gt_scorehandler_delete(scorehandler);
 
   affine_score2 = gt_alignment_eval_with_affine_score(align, true, matchscore,

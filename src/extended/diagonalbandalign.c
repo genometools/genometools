@@ -174,7 +174,7 @@ GtUword diagonalbandalignment_in_square_space_generic(GtLinspaceManagement
   else
   {
     /*use it in lineraspace context*/
-    EDtabcolumn = gt_linspaceManagement_change_to_square(space, ulen, vlen);
+    EDtabcolumn = gt_linspace_management_change_to_square(space, ulen, vlen);
   }
 
   diagonalband_fillDPtab_in_square_space(EDtabcolumn, useq, ustart, ulen,
@@ -306,7 +306,7 @@ GT_UNUSED  static void dtab_in_square_space(GtLinspaceManagement *spacemanager,
     gt_assert(false);
   }
 
-  EDtabcolumn = gt_linspaceManagement_change_to_square(spacemanager,ulen,vlen);
+  EDtabcolumn = gt_linspace_management_change_to_square(spacemanager,ulen,vlen);
   diagonalband_fillDPtab_in_square_space(EDtabcolumn, useq, ustart, ulen,
                                          vseq, vstart, vlen, left_dist,
                                          right_dist, scorehandler);
@@ -514,8 +514,8 @@ static GtUword evaluateallDBtabcolumns(GtLinspaceManagement *spacemanager,
     gt_assert(false);
   }
 
-  EDtabcolumn = gt_linspaceManagement_get_valueTabspace(spacemanager);
-  Rtabcolumn = gt_linspaceManagement_get_rTabspace(spacemanager);
+  EDtabcolumn = gt_linspace_management_get_valueTabspace(spacemanager);
+  Rtabcolumn = gt_linspace_management_get_rTabspace(spacemanager);
 
   gapcost = gt_scorehandler_get_gapscore(scorehandler);
   diag = GT_DIV2(left_dist + right_dist);
@@ -690,8 +690,8 @@ static void evaluateDBcrosspoints(GtLinspaceManagement *spacemanager,
     return;
   }
 
-  if (gt_linspaceManagement_checksquare(spacemanager,ulen,vlen,
-                                        sizeof (GtUword),sizeof(GtUword)))
+  if (gt_linspace_management_checksquare(spacemanager,ulen,vlen,
+                                         sizeof (GtUword),sizeof(GtUword)))
   {
     dtab_in_square_space(spacemanager, Diagcolumn,
                          useq, ustart, ulen,
@@ -875,7 +875,7 @@ static void gt_calc_diagonalbandalign(GtLinspaceManagement *spacemanager,
     gt_assert(false); /* no global alignment */
   }
 
-  gt_linspaceManagement_set_ulen(spacemanager,ulen);
+  gt_linspace_management_set_ulen(spacemanager,ulen);
   gapcost = gt_scorehandler_get_gapscore(scorehandler);
   if (ulen == 0UL)
   {
@@ -887,9 +887,9 @@ static void gt_calc_diagonalbandalign(GtLinspaceManagement *spacemanager,
     (void) construct_trivial_deletion_alignment(align,ulen,gapcost);
     return;
   }
-  else if (gt_linspaceManagement_checksquare(spacemanager, ulen, vlen,
-                                             sizeof (*EDtabcolumn),
-                                             sizeof (*Rtabcolumn)))
+  else if (gt_linspace_management_checksquare(spacemanager, ulen, vlen,
+                                              sizeof (*EDtabcolumn),
+                                              sizeof (*Rtabcolumn)))
   {
     (void) diagonalbandalignment_in_square_space_generic(spacemanager,align,
                                                          useq, ustart, ulen,
@@ -899,12 +899,12 @@ static void gt_calc_diagonalbandalign(GtLinspaceManagement *spacemanager,
     return;
   }
 
-  gt_linspaceManagement_check(spacemanager, MIN(right_dist-left_dist,ulen),vlen,
-                              sizeof (*EDtabcolumn),
-                              sizeof (*Rtabcolumn),
-                              sizeof (*Diagcolumn));
+  gt_linspace_management_check(spacemanager, MIN(right_dist-left_dist,ulen),vlen,
+                               sizeof (*EDtabcolumn),
+                               sizeof (*Rtabcolumn),
+                               sizeof (*Diagcolumn));
 
-  Diagcolumn = gt_linspaceManagement_get_crosspointTabspace(spacemanager);
+  Diagcolumn = gt_linspace_management_get_crosspointTabspace(spacemanager);
   /* initialize Diagcolumn */
   for (idx = 0; idx <= vlen; idx++)
   {
@@ -1019,7 +1019,7 @@ void gt_checkdiagonalbandalign(GT_UNUSED bool forward,
     exit(GT_EXIT_PROGRAMMING_ERROR);
   }
 
-  spacemanager = gt_linspaceManagement_new();
+  spacemanager = gt_linspace_management_new();
   align = gt_alignment_new_with_seqs(useq, ulen, vseq, vlen);
 
   gt_calc_diagonalbandalign(spacemanager, scorehandler, align,
@@ -1035,6 +1035,6 @@ void gt_checkdiagonalbandalign(GT_UNUSED bool forward,
     exit(GT_EXIT_PROGRAMMING_ERROR);
   }
   gt_alignment_delete(align);
-  gt_linspaceManagement_delete(spacemanager);
+  gt_linspace_management_delete(spacemanager);
   gt_scorehandler_delete(scorehandler);
 }
