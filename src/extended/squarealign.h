@@ -30,15 +30,15 @@
    and <vlen>. An initialised <spacemanager> is required to use this function in
    linear space context, in any other case it can be NULL. Returns distance
    value of global alignment. */
-GtUword alignment_in_square_space_generic (GtLinspaceManagement *spacemanager,
-                                           GtAlignment *align,
-                                           const GtUchar *useq,
-                                           GtUword ustart,
-                                           GtUword ulen,
-                                           const GtUchar *vseq,
-                                           GtUword vstart,
-                                           GtUword vlen,
-                                           const GtScoreHandler *scorehandler);
+GtUword gt_squarealign_calculate_generic(GtLinspaceManagement *spacemanager,
+                                         GtAlignment *align,
+                                         const GtUchar *useq,
+                                         GtUword ustart,
+                                         GtUword ulen,
+                                         const GtUchar *vseq,
+                                         GtUword vstart,
+                                         GtUword vlen,
+                                         const GtScoreHandler *scorehandler);
 
 /* Computes a global alignment with linear gapcosts in square space
    and constant cost values. Use of this function requires the target alignment
@@ -48,38 +48,38 @@ GtUword alignment_in_square_space_generic (GtLinspaceManagement *spacemanager,
    <gapcost>. An initialised <spacemanager> is required to use this function in
    linear space context, in any other case it can be NULL. Returns distance
    value of global alignment. */
-GtUword alignment_in_square_space(GtLinspaceManagement *spacemanager,
-                                  GtAlignment *align,
-                                  const GtUchar *useq,
-                                  GtUword ustart,
-                                  GtUword ulen,
-                                  const GtUchar *vseq,
-                                  GtUword vstart,
-                                  GtUword vlen,
-                                  GtUword matchcost,
-                                  GtUword mismatchcost,
-                                  GtUword gapcost);
+GtUword gt_squarealign_calculate(GtLinspaceManagement *spacemanager,
+                                 GtAlignment *align,
+                                 const GtUchar *useq,
+                                 GtUword ustart,
+                                 GtUword ulen,
+                                 const GtUchar *vseq,
+                                 GtUword vstart,
+                                 GtUword vlen,
+                                 GtUword matchcost,
+                                 GtUword mismatchcost,
+                                 GtUword gapcost);
 
 /* Computes only the distance of a global alignment with linear gapcosts in
    square space. Use of this function requires an initialised <scorehandler>
    with cost values and input sequences <useq> and <vseq>, with the regions to
    align given by their start positions <ustart> and <vstart> and lengths <ulen>
    and <vlen>. */
-GtUword distance_only_global_alignment(const GtUchar *useq,
-                                       GtUword ustart,
-                                       GtUword ulen,
-                                       const GtUchar *vseq,
-                                       GtUword vstart,
-                                       GtUword vlen,
-                                       const GtScoreHandler *scorehandler);
+GtUword gt_squarealign_global_distance_only(const GtUchar *useq,
+                                            GtUword ustart,
+                                            GtUword ulen,
+                                            const GtUchar *vseq,
+                                            GtUword vstart,
+                                            GtUword vlen,
+                                            const GtScoreHandler *scorehandler);
 
 /* Shows a global alignment, which is computed with linear gapcosts in
    square space. Use of this function requires input sequences <useq> and
    <vseq>, with the regions to align given by their start positions <ustart> and
    <vstart> and lengths <ulen> and <vlen>. */
-void    gt_print_edist_alignment(const GtUchar *useq, GtUword ustart,
-                                 GtUword ulen, const GtUchar *vseq,
-                                 GtUword vstart, GtUword vlen);
+void    gt_squarealign_print_edit_alignment(const GtUchar *useq, GtUword ustart,
+                                            GtUword ulen, const GtUchar *vseq,
+                                            GtUword vstart, GtUword vlen);
 
 /* Computes crosspoints for a global alignment with linear gapcosts in square
    space. Use of this function requires an initialised <spacemanager> an
@@ -88,16 +88,16 @@ void    gt_print_edist_alignment(const GtUchar *useq, GtUword ustart,
    by their start positions <ustart> and <vstart> and lengths <ulen> and <vlen>.
    If this function is use in linear context, <rowoffset> is the offset value of
    the subproblem, else zero. Returns distance value of global alignment. */
-GtUword ctab_in_square_space(GtLinspaceManagement *spacemanager,
-                             const GtScoreHandler *scorehandler,
-                             GtUword *Ctab,
-                             const GtUchar *useq,
-                             GtUword ustart,
-                             GtUword ulen,
-                             const GtUchar *vseq,
-                             GtUword vstart,
-                             GtUword vlen,
-                             GtUword rowoffset);
+GtUword gt_squarealign_ctab(GtLinspaceManagement *spacemanager,
+                            const GtScoreHandler *scorehandler,
+                            GtUword *Ctab,
+                            const GtUchar *useq,
+                            GtUword ustart,
+                            GtUword ulen,
+                            const GtUchar *vseq,
+                            GtUword vstart,
+                            GtUword vlen,
+                            GtUword rowoffset);
 
 /* Computes a local alignment with linear gapcosts in square space. Use of this
    function requires an initialised <scorehandler> with score values, the target
@@ -106,17 +106,17 @@ GtUword ctab_in_square_space(GtLinspaceManagement *spacemanager,
    and <vlen>. An initialised <spacemanager> is required to use this function in
    linear space context, in any other case it can be NULL. Returns score
    value of local alignment. */
-GtWord  alignment_in_square_space_local_generic(GtLinspaceManagement
-                                                *spacemanager,
-                                                GtAlignment *align,
-                                                const GtUchar *useq,
-                                                GtUword ustart,
-                                                GtUword ulen,
-                                                const GtUchar *vseq,
-                                                GtUword vstart,
-                                                GtUword vlen,
-                                                const GtScoreHandler
-                                                *scorehandler);
+GtWord  gt_squarealign_calculate_local_generic(GtLinspaceManagement
+                                               *spacemanager,
+                                               GtAlignment *align,
+                                               const GtUchar *useq,
+                                               GtUword ustart,
+                                               GtUword ulen,
+                                               const GtUchar *vseq,
+                                               GtUword vstart,
+                                               GtUword vlen,
+                                               const GtScoreHandler
+                                               *scorehandler);
 
 /* Computes a local alignment with linear gapcosts in square space
    and constant score values. Use of this function requires the target alignment
@@ -126,15 +126,15 @@ GtWord  alignment_in_square_space_local_generic(GtLinspaceManagement
    <gapscore>. An initialised <spacemanager> is required to use this function in
    linear space context, in any other case it can be NULL. Returns score
    value of local alignment. */
-GtWord  alignment_in_square_space_local(GtLinspaceManagement *spacemanager,
-                                        GtAlignment *align,
-                                        const GtUchar *useq,
-                                        GtUword ustart,
-                                        GtUword ulen,
-                                        const GtUchar *vseq,
-                                        GtUword vstart,
-                                        GtUword vlen,
-                                        GtWord matchscore,
-                                        GtWord mismatchscore,
-                                        GtWord gapscore);
+GtWord  gt_squarealign_calculate_local(GtLinspaceManagement *spacemanager,
+                                       GtAlignment *align,
+                                       const GtUchar *useq,
+                                       GtUword ustart,
+                                       GtUword ulen,
+                                       const GtUchar *vseq,
+                                       GtUword vstart,
+                                       GtUword vlen,
+                                       GtWord matchscore,
+                                       GtWord mismatchscore,
+                                       GtWord gapscore);
 #endif

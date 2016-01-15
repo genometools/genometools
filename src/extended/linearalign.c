@@ -284,7 +284,7 @@ static GtUword evaluatelinearcrosspoints(GtLinspaceManagement *spacemanager,
                                              sizeof (Rtabcolumn)))
       { /* product of subsquences is lower than space allocated already or
          * lower than timesquarfactor * ulen*/
-        return ctab_in_square_space(spacemanager, scorehandler, Ctab, useq,
+        return gt_squarealign_ctab(spacemanager, scorehandler, Ctab, useq,
                                    ustart, ulen, vseq, vstart, vlen, rowoffset);
       }
 #ifdef GT_THREADS_ENABLED
@@ -392,17 +392,17 @@ GtUword gt_calc_linearalign(GtLinspaceManagement *spacemanager,
   {
     gt_linspace_management_check(spacemanager,(ulen+1)*(vlen+1)-1,ulen,
                                  sizeof (*EDtabcolumn), sizeof (EDtabcolumn), 0);
-    return alignment_in_square_space_generic(spacemanager, align,
-                                             useq, ustart, ulen,
-                                             vseq, vstart, vlen, scorehandler);
+    return gt_squarealign_calculate_generic(spacemanager, align,
+                                            useq, ustart, ulen,
+                                            vseq, vstart, vlen, scorehandler);
   }
   else if (gt_linspace_management_checksquare(spacemanager, ulen, vlen,
                                               sizeof (*EDtabcolumn),
                                               sizeof (*Rtabcolumn)))
   { /* call 2dim */
-    return alignment_in_square_space_generic(spacemanager, align,
-                                             useq, ustart, ulen,
-                                             vseq, vstart, vlen, scorehandler);
+    return gt_squarealign_calculate_generic(spacemanager, align,
+                                            useq, ustart, ulen,
+                                            vseq, vstart, vlen, scorehandler);
   }
 
 #ifdef GT_THREADS_ENABLED
@@ -662,20 +662,20 @@ GtWord gt_computelinearspace_local_generic(GtLinspaceManagement *spacemanager,
                                        (ulen+1)*(vlen+1)-1, ulen,
                                        sizeof (GtWord),
                                        sizeof (GtWord *));
-    return alignment_in_square_space_local_generic(spacemanager, align,
-                                                   useq, ustart, ulen,
-                                                   vseq, vstart, vlen,
-                                                   scorehandler);
+    return gt_squarealign_calculate_local_generic(spacemanager, align,
+                                                  useq, ustart, ulen,
+                                                  vseq, vstart, vlen,
+                                                  scorehandler);
   }
   else if (gt_linspace_management_checksquare_local(spacemanager, ulen, vlen,
                                                     sizeof (*Ltabcolumn),
                                                     sizeof (*Starttabcolumn)))
   {
     /* call 2dim */
-    return alignment_in_square_space_local_generic(spacemanager, align,
-                                                   useq, ustart, ulen,
-                                                   vseq, vstart, vlen,
-                                                   scorehandler);
+    return gt_squarealign_calculate_local_generic(spacemanager, align,
+                                                  useq, ustart, ulen,
+                                                  vseq, vstart, vlen,
+                                                  scorehandler);
   }
 
   gt_linspace_management_check_local(spacemanager,
@@ -773,8 +773,8 @@ void gt_checklinearspace(GT_UNUSED bool forward,
   edist1 = gt_calc_linearalign(spacemanager, scorehandler, align,
                                useq, 0, ulen,
                                vseq, 0, vlen);
-  edist2 = distance_only_global_alignment(useq, 0, ulen, vseq, 0, vlen,
-                                          scorehandler);
+  edist2 = gt_squarealign_global_distance_only(useq, 0, ulen, vseq, 0, vlen,
+                                               scorehandler);
 
   if (edist1 != edist2)
   {
@@ -845,9 +845,9 @@ void gt_checklinearspace_local(GT_UNUSED bool forward,
   }
 
   gt_alignment_reset(align);
-  score3 = alignment_in_square_space_local(NULL, align, useq, 0, ulen,
-                                           vseq, 0, vlen, matchscore,
-                                           mismatchscore, gapscore);
+  score3 = gt_squarealign_calculate_local(NULL, align, useq, 0, ulen,
+                                          vseq, 0, vlen, matchscore,
+                                          mismatchscore, gapscore);
 
   if (score1 != score3)
   {
