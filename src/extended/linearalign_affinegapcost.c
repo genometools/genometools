@@ -411,9 +411,9 @@ static GtUword evaluateaffinecrosspoints(GtLinspaceManagement *spacemanager,
                                              sizeof (*Atabcolumn),
                                              sizeof (*Rtabcolumn)))
       {
-        affine_ctab_in_square_space(spacemanager, scorehandler, Ctab,
-                                    useq, ustart, ulen, vseq, vstart, vlen,
-                                    rowoffset, from_edge, to_edge);
+        gt_affinealign_ctab(spacemanager, scorehandler, Ctab,
+                            useq, ustart, ulen, vseq, vstart, vlen,
+                            rowoffset, from_edge, to_edge);
         return 0;
       }
 #ifdef GT_THREADS_ENABLED
@@ -599,9 +599,9 @@ static void affine_determineCtab0(GtUword *Ctab,
         to_edge_test = Affine_I;
       else
         to_edge_test = Affine_R;
-      affine_ctab_in_square_space(spacemanager, scorehandler, Ctab,
-                                  useq, ustart, Ctab[1], vseq, vstart,
-                                  1, 0, Affine_X, to_edge_test);
+      gt_affinealign_ctab(spacemanager, scorehandler, Ctab,
+                          useq, ustart, Ctab[1], vseq, vstart,
+                          1, 0, Affine_X, to_edge_test);
     }
 }
 
@@ -987,20 +987,19 @@ GtWord gt_computeaffinelinearspace_local_generic(
                                        (ulen+1)*(vlen+1)-1, ulen,
                                        sizeof (*Atabcolumn),
                                        sizeof (Atabcolumn));
-    return affinealign_in_square_space_local_generic(spacemanager,scorehandler,
-                                                   align,
-                                                   useq, ustart, ulen,
-                                                   vseq, vstart, vlen
-                                                   );
+    return gt_affinealign_calculate_local_generic(spacemanager,scorehandler,
+                                                  align,
+                                                  useq, ustart, ulen,
+                                                  vseq, vstart, vlen);
   }
   else if (gt_linspace_management_checksquare_local(spacemanager, ulen, vlen,
                                                     sizeof (*Atabcolumn),
                                                     sizeof (*Starttabcolumn)))
   {
     /* call alignment function for square space */
-    return affinealign_in_square_space_local_generic(spacemanager, scorehandler,
-                                                     align, useq, ustart, ulen,
-                                                     vseq, vstart, vlen);
+    return gt_affinealign_calculate_local_generic(spacemanager, scorehandler,
+                                                  align, useq, ustart, ulen,
+                                                  vseq, vstart, vlen);
   }
 
   gt_linspace_management_check_local(spacemanager, ulen, vlen,
@@ -1182,10 +1181,10 @@ void gt_checkaffinelinearspace_local(GT_UNUSED bool forward,
     exit(GT_EXIT_PROGRAMMING_ERROR);
   }
   gt_alignment_reset(align);
-  affine_score3 = affinealign_in_square_space_local(NULL, align, useq, 0,
-                                                    ulen, vseq, 0, vlen,
-                                                    matchscore, mismatchscore,
-                                                    gap_opening, gap_extension);
+  affine_score3 = gt_affinealign_calculate_local(NULL, align, useq, 0,
+                                                 ulen, vseq, 0, vlen,
+                                                 matchscore, mismatchscore,
+                                                 gap_opening, gap_extension);
 
   if (affine_score1 != affine_score3)
   {

@@ -230,7 +230,7 @@ GtWord diagonalbandalignment_in_square_space_affine_generic(
                   Atabcolumn[ulen][vlen].Ivalue);
 
   /* reconstruct alignment from 2dimarray Atabcolumn */
-  affinealign_traceback(align, Atabcolumn, ulen, vlen);
+  gt_affinealign_traceback(align, Atabcolumn, ulen, vlen);
 
   if (space == NULL)
   {

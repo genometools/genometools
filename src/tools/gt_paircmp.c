@@ -358,10 +358,10 @@ int gt_paircmp(int argc, const char **argv, GtError *err)
       const GtStr *str0 = gt_str_array_get_str(cmppairwise.strings,0),
                   *str1 = gt_str_array_get_str(cmppairwise.strings,1);
 
-      gt_print_edist_alignment((const GtUchar *) gt_str_get(str0),0,
-                               gt_str_length(str0),
-                               (const GtUchar *) gt_str_get(str1),0,
-                               gt_str_length(str1));
+      gt_squarealign_print_edit_alignment((const GtUchar *) gt_str_get(str0),0,
+                                          gt_str_length(str0),
+                                          (const GtUchar *) gt_str_get(str1),0,
+                                          gt_str_length(str1));
     } else
     {
       size_t idx;
