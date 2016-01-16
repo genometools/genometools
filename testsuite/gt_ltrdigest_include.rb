@@ -187,6 +187,15 @@ def check_amino_acid_output(gff3file, chr, pdoms)
   end
 end
 
+Name "gt ltrdigest using -encseq"
+Keywords "gt_ltrdigest encseqcol"
+Test do
+  run "cp #{$testdata}/gt_encseq_col_test1.fasta in.fasta"
+  run_test "#{$bin}gt suffixerator -lossless -suf -lcp -dna -des -ssp -tis -v -db in.fasta"
+  run_test "#{$bin}gt ltrharvest -tabout no -seqids yes -index in.fasta > out.gff3"
+  run_test "#{$bin}gt ltrdigest -matchdescstart -outfileprefix foo -encseq in.fasta < out.gff3"
+end
+
 if $gttestdata then
   Name "gt ltrdigest missing input GFF"
   Keywords "gt_ltrdigest"
