@@ -199,7 +199,7 @@ static int gt_encseq_col_grep_desc_md5(GtSeqCol *sc, const char **md5,
   gt_assert(esc && md5 && seqid);
   had_err = gt_encseq_col_do_grep_desc(esc, &filenum, &seqnum, seqid, err);
   if (!had_err)
-    *md5 = gt_seq_col_get_md5_fingerprint(sc, seqnum, filenum);
+    *md5 = gt_seq_col_get_md5_fingerprint(sc, filenum, seqnum);
   return had_err;
 }
 
@@ -214,7 +214,7 @@ static int gt_encseq_col_grep_desc_desc(GtSeqCol *sc, GtStr *desc,
   gt_assert(esc && desc && seqid);
   had_err = gt_encseq_col_do_grep_desc(esc, &filenum, &seqnum, seqid, err);
   if (!had_err) {
-    const char *mydesc = gt_seq_col_get_description(sc, seqnum, filenum);
+    const char *mydesc = gt_seq_col_get_description(sc, filenum, seqnum);
     if (mydesc)
       gt_str_append_cstr(desc, mydesc);
   }
@@ -234,7 +234,7 @@ static int gt_encseq_col_grep_desc_sequence_length(GtSeqCol *sc,
   gt_assert(esc && length && seqid);
   had_err = gt_encseq_col_do_grep_desc(esc, &filenum, &seqnum, seqid, err);
   if (!had_err)
-    *length = gt_seq_col_get_sequence_length(sc, seqnum, filenum);
+    *length = gt_seq_col_get_sequence_length(sc, filenum, seqnum);
   return had_err;
 }
 
