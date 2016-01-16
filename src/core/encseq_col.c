@@ -25,6 +25,7 @@
 #include "core/md5_seqid.h"
 #include "core/seq_col_rep.h"
 #include "core/seq_info_cache.h"
+#include "core/str.h"
 #include "core/undef_api.h"
 
 struct GtEncseqCol {
@@ -126,11 +127,9 @@ static void gt_encseq_col_enable_match_desc_start(GtSeqCol *sc)
   GtEncseqCol *esc;
   GtUword j;
   GtSeqInfo seq_info;
-  char buf[BUFSIZ], fmt[32];
-  gt_assert(sc);
+  GtStr *descbuf = gt_str_new();
   esc = gt_encseq_col_cast(sc);
   esc->matchstart = true;
-  (void) sprintf(fmt, "%%%ds", BUFSIZ-1);
   /* pre-cache seqids for faster search */
   if (!esc->grep_cache)
     esc->grep_cache = gt_seq_info_cache_new();
@@ -139,21 +138,21 @@ static void gt_encseq_col_enable_match_desc_start(GtSeqCol *sc)
     GtUword desc_len;
     desc = gt_encseq_description(esc->encseq, &desc_len, j);
     gt_assert(desc);
-    strncpy(buf, desc, desc_len * sizeof (char));
-    buf[desc_len] = '\0';
-    (void) sscanf(desc, fmt, buf);
+    gt_str_reset(descbuf);
+    gt_str_append_cstr_nt(descbuf, desc, desc_len);
     seq_info.filenum = gt_encseq_filenum(esc->encseq,
                                          gt_encseq_seqstartpos(esc->encseq, j));
     seq_info.seqnum = j - gt_encseq_filenum_first_seqnum(esc->encseq,
                                                          seq_info.filenum);
-    if (!gt_seq_info_cache_get(esc->grep_cache, buf))
-      gt_seq_info_cache_add(esc->grep_cache, buf, &seq_info);
+    if (!gt_seq_info_cache_get(esc->grep_cache, gt_str_get(descbuf)))
+      gt_seq_info_cache_add(esc->grep_cache, gt_str_get(descbuf), &seq_info);
     else {
       if (!esc->duplicates)
         esc->duplicates = gt_hashmap_new(GT_HASH_STRING, NULL, NULL);
-      gt_hashmap_add(esc->duplicates, buf, (void*) 1);
+      gt_hashmap_add(esc->duplicates, gt_str_get(descbuf), (void*) 1);
     }
   }
+  gt_str_delete(descbuf);
 }
 
 static GtUword gt_encseq_col_get_sequence_length(const GtSeqCol *sc,
