@@ -577,7 +577,7 @@ bool gt_querymatchoutoptions_alignment_prepare(GtQuerymatchoutoptions
 #else
         (void)
 #endif
-        gt_computelinearspace_generic(
+        gt_linearalign_compute_generic(
                               querymatchoutoptions->linspace_spacemanager,
                               querymatchoutoptions->linspace_scorehandler,
                               querymatchoutoptions->alignment,

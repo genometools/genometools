@@ -240,7 +240,8 @@ static void evaluate_affinecrosspoints_from_2dimtab(GtUword *Ctab,
 
   i = ulen;
   j = vlen;
-  edge = minAdditionalCosts(&Atabcolumn[i][j], edge, gap_opening);
+  edge = gt_linearalign_affinegapcost_minAdditionalCosts(&Atabcolumn[i][j],
+                                                         edge, gap_opening);
 
   while (i > 0 || j > 1) {
     switch (edge) {
