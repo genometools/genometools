@@ -547,24 +547,24 @@ static int gt_all_against_all_alignment_check(bool affine,
           }
           if (!had_err)
           {
-            (affine ? gt_computediagonalbandaffinealign_generic
-                    : gt_computediagonalbandalign_generic)
+            (affine ? gt_diagonalbandalign_affinegapcost_compute_generic
+                    : gt_diagonalbandalign_compute_generic)
                        (spacemanager, scorehandler, align,
                         useq, 0, ulen, vseq, 0, vlen,
                         left_dist, right_dist);
           }
         } else
         {
-          (affine ? gt_computeaffinelinearspace_generic
-                  : gt_computelinearspace_generic)
+          (affine ? gt_linearalign_affinegapcost_compute_generic
+                  : gt_linearalign_compute_generic)
                              (spacemanager, scorehandler, align,
                               useq, 0, ulen, vseq, 0, vlen);
         }
       }
       else if (arguments->local)
       {
-        (affine ? gt_computeaffinelinearspace_local_generic
-                : gt_computelinearspace_local_generic)
+        (affine ? gt_linearalign_affinegapcost_compute_local_generic
+                : gt_linearalign_compute_local_generic)
                     (spacemanager, scorehandler, align,
                      useq, 0, ulen, vseq, 0, vlen);
       }

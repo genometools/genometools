@@ -142,19 +142,19 @@ static GtUword diagonalband_squarespace_distance_only(const GtUchar *useq,
 }
 
 /* creating alignment with diagonalband in square space */
-GtUword diagonalbandalignment_in_square_space_generic(GtLinspaceManagement
-                                                                   *space,
-                                                      GtAlignment *align,
-                                                      const GtUchar *useq,
-                                                      GtUword ustart,
-                                                      GtUword ulen,
-                                                      const GtUchar *vseq,
-                                                      GtUword vstart,
-                                                      GtUword vlen,
-                                                      GtWord left_dist,
-                                                      GtWord right_dist,
-                                                      const GtScoreHandler
-                                                      *scorehandler)
+GtUword gt_diagonalbandalignment_in_square_space_generic(GtLinspaceManagement
+                                                         *space,
+                                                         GtAlignment *align,
+                                                         const GtUchar *useq,
+                                                         GtUword ustart,
+                                                         GtUword ulen,
+                                                         const GtUchar *vseq,
+                                                         GtUword vstart,
+                                                         GtUword vlen,
+                                                         GtWord left_dist,
+                                                         GtWord right_dist,
+                                                         const GtScoreHandler
+                                                         *scorehandler)
 {
   GtUword **EDtabcolumn, distance;
 
@@ -195,26 +195,26 @@ GtUword diagonalbandalignment_in_square_space_generic(GtLinspaceManagement
 
 /* creating alignment with diagonalband in square space
    with constant cost values */
-GtUword diagonalbandalignment_in_square_space(GtLinspaceManagement
-                                              *spacemanager,
-                                              GtAlignment *alignment,
-                                              const GtUchar *useq,
-                                              GtUword ustart,
-                                              GtUword ulen,
-                                              const GtUchar *vseq,
-                                              GtUword vstart,
-                                              GtUword vlen,
-                                              GtWord left_dist,
-                                              GtWord right_dist,
-                                              GtUword matchcost,
-                                              GtUword mismatchcost,
-                                              GtUword gapcost)
+GtUword gt_diagonalbandalignment_in_square_space(GtLinspaceManagement
+                                                 *spacemanager,
+                                                 GtAlignment *alignment,
+                                                 const GtUchar *useq,
+                                                 GtUword ustart,
+                                                 GtUword ulen,
+                                                 const GtUchar *vseq,
+                                                 GtUword vstart,
+                                                 GtUword vlen,
+                                                 GtWord left_dist,
+                                                 GtWord right_dist,
+                                                 GtUword matchcost,
+                                                 GtUword mismatchcost,
+                                                 GtUword gapcost)
 {
   GtUword distance;
   GtScoreHandler *scorehandler;
 
   scorehandler = gt_scorehandler_new(matchcost, mismatchcost, 0, gapcost);
-  distance = diagonalbandalignment_in_square_space_generic(spacemanager,
+  distance = gt_diagonalbandalignment_in_square_space_generic(spacemanager,
                                                            alignment,
                                                            useq, ustart, ulen,
                                                            vseq, vstart, vlen,
@@ -891,15 +891,17 @@ static void gt_calc_diagonalbandalign(GtLinspaceManagement *spacemanager,
                                               sizeof (*EDtabcolumn),
                                               sizeof (*Rtabcolumn)))
   {
-    (void) diagonalbandalignment_in_square_space_generic(spacemanager,align,
-                                                         useq, ustart, ulen,
-                                                         vseq, vstart, vlen,
-                                                         left_dist, right_dist,
-                                                         scorehandler);
+    (void) gt_diagonalbandalignment_in_square_space_generic(spacemanager,align,
+                                                            useq, ustart, ulen,
+                                                            vseq, vstart, vlen,
+                                                            left_dist,
+                                                            right_dist,
+                                                            scorehandler);
     return;
   }
 
-  gt_linspace_management_check(spacemanager, MIN(right_dist-left_dist,ulen),vlen,
+  gt_linspace_management_check(spacemanager, MIN(right_dist-left_dist,ulen),
+                               vlen,
                                sizeof (*EDtabcolumn),
                                sizeof (*Rtabcolumn),
                                sizeof (*Diagcolumn));
@@ -920,15 +922,15 @@ static void gt_calc_diagonalbandalign(GtLinspaceManagement *spacemanager,
 }
 
 /* compute alignment within a diagonal band */
-void gt_computediagonalbandalign_generic(GtLinspaceManagement *spacemanager,
-                                         const GtScoreHandler *scorehandler,
-                                         GtAlignment *align,
-                                         const GtUchar *useq,
-                                         GtUword ustart, GtUword ulen,
-                                         const GtUchar *vseq,
-                                         GtUword vstart, GtUword vlen,
-                                         GtWord left_dist,
-                                         GtWord right_dist)
+void gt_diagonalbandalign_compute_generic(GtLinspaceManagement *spacemanager,
+                                          const GtScoreHandler *scorehandler,
+                                          GtAlignment *align,
+                                          const GtUchar *useq,
+                                          GtUword ustart, GtUword ulen,
+                                          const GtUchar *vseq,
+                                          GtUword vstart, GtUword vlen,
+                                          GtWord left_dist,
+                                          GtWord right_dist)
 {
 
   gt_assert(useq && vseq && align && spacemanager && scorehandler);
@@ -943,35 +945,35 @@ void gt_computediagonalbandalign_generic(GtLinspaceManagement *spacemanager,
                             left_dist, right_dist);
 }
 
-void gt_computediagonalbandalign(GtLinspaceManagement *spacemanager,
-                                 GtAlignment *align,
-                                 const GtUchar *useq,
-                                 GtUword ustart, GtUword ulen,
-                                 const GtUchar *vseq,
-                                 GtUword vstart, GtUword vlen,
-                                 GtWord left_dist,
-                                 GtWord right_dist,
-                                 GtUword matchcost,
-                                 GtUword mismatchcost,
-                                 GtUword gapcost)
+void gt_diagonalbandalign_compute(GtLinspaceManagement *spacemanager,
+                                  GtAlignment *align,
+                                  const GtUchar *useq,
+                                  GtUword ustart, GtUword ulen,
+                                  const GtUchar *vseq,
+                                  GtUword vstart, GtUword vlen,
+                                  GtWord left_dist,
+                                  GtWord right_dist,
+                                  GtUword matchcost,
+                                  GtUword mismatchcost,
+                                  GtUword gapcost)
 {
   GtScoreHandler *scorehandler;
   gt_assert(spacemanager && align);
 
   scorehandler = gt_scorehandler_new(matchcost, mismatchcost, 0, gapcost);
 
-  gt_computediagonalbandalign_generic(spacemanager, scorehandler, align,
-                                      useq, ustart, ulen,
-                                      vseq, vstart, vlen,
-                                      left_dist, right_dist);
+  gt_diagonalbandalign_compute_generic(spacemanager, scorehandler, align,
+                                       useq, ustart, ulen,
+                                       vseq, vstart, vlen,
+                                       left_dist, right_dist);
   gt_scorehandler_delete(scorehandler);
 }
 
-void gt_checkdiagonalbandalign(GT_UNUSED bool forward,
-                               const GtUchar *useq,
-                               GtUword ulen,
-                               const GtUchar *vseq,
-                               GtUword vlen)
+void gt_diagonalbandalign_check(GT_UNUSED bool forward,
+                                const GtUchar *useq,
+                                GtUword ulen,
+                                const GtUchar *vseq,
+                                GtUword vlen)
 {
   GtUword edist1, edist2, edist3, matchcost = 0, mismatchcost = 1, gapcost = 1;
   GtWord left_dist, right_dist;

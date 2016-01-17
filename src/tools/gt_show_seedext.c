@@ -205,15 +205,15 @@ static void gt_show_seed_extend_plain(GtSequencepairbuffer *seqpairbuf,
     gt_assert(query_readmode == GT_READMODE_REVCOMPL);
     gt_inplace_reverse_complement(seqpairbuf->b_sequence,querylen);
   }
-  edist = gt_computelinearspace_generic(linspace_spacemanager,
-                                        linspace_scorehandler,
-                                        alignment,
-                                        seqpairbuf->a_sequence,
-                                        0,
-                                        dblen,
-                                        seqpairbuf->b_sequence,
-                                        0,
-                                        querylen);
+  edist = gt_linearalign_compute_generic(linspace_spacemanager,
+                                         linspace_scorehandler,
+                                         alignment,
+                                         seqpairbuf->a_sequence,
+                                         0,
+                                         dblen,
+                                         seqpairbuf->b_sequence,
+                                         0,
+                                         querylen);
   if (edist < distance)
   {
     printf("# edist=" GT_WU " (smaller by " GT_WU ")\n",edist,distance - edist);

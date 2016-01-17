@@ -31,15 +31,15 @@
    their start positions <ustart> and <vstart> and lengths <ulen> and <vlen>.
    The cost values are specified by an initialised <scorehandler>. Returns
    distance value of calculated global alignment. */
-GtUword gt_computelinearspace_generic(GtLinspaceManagement *spacemanager,
-                                      const GtScoreHandler *scorehandler,
-                                      GtAlignment *align,
-                                      const GtUchar *useq,
-                                      GtUword ustart,
-                                      GtUword ulen,
-                                      const GtUchar *vseq,
-                                      GtUword vstart,
-                                      GtUword vlen);
+GtUword gt_linearalign_compute_generic(GtLinspaceManagement *spacemanager,
+                                       const GtScoreHandler *scorehandler,
+                                       GtAlignment *align,
+                                       const GtUchar *useq,
+                                       GtUword ustart,
+                                       GtUword ulen,
+                                       const GtUchar *vseq,
+                                       GtUword vstart,
+                                       GtUword vlen);
 
 /* Computes a global alignment with linear gapcosts in linear space
    and constant cost values. Use of this function requires an initialised
@@ -48,17 +48,17 @@ GtUword gt_computelinearspace_generic(GtLinspaceManagement *spacemanager,
    <vstart> and lengths <ulen> and <vlen>. The cost values are specified by
    <matchcost>, <mismatchcost> and <gapcost>. Returns distance value of
    calculated global alignment. */
-GtUword gt_computelinearspace(GtLinspaceManagement *spacemanager,
-                              GtAlignment *align,
-                              const GtUchar *useq,
-                              GtUword ustart,
-                              GtUword ulen,
-                              const GtUchar *vseq,
-                              GtUword vstart,
-                              GtUword vlen,
-                              GtUword matchcost,
-                              GtUword mismatchcost,
-                              GtUword gapcost);
+GtUword gt_linearalign_compute(GtLinspaceManagement *spacemanager,
+                               GtAlignment *align,
+                               const GtUchar *useq,
+                               GtUword ustart,
+                               GtUword ulen,
+                               const GtUchar *vseq,
+                               GtUword vstart,
+                               GtUword vlen,
+                               GtUword matchcost,
+                               GtUword mismatchcost,
+                               GtUword gapcost);
 
 /* Computes a local alignment with linear gapcosts in linear space. Use of this
    function requires an initialised <spacemanager>, the target alignment <align>
@@ -66,15 +66,15 @@ GtUword gt_computelinearspace(GtLinspaceManagement *spacemanager,
    their start positions <ustart> and <vstart> and lengths <ulen> and <vlen>.
    The score values are specified by an initialised <scorehandler>. Returns
    score value of calculated local alignment. */
-GtWord  gt_computelinearspace_local_generic(GtLinspaceManagement *spacemanager,
-                                            const GtScoreHandler *scorehandler,
-                                            GtAlignment *align,
-                                            const GtUchar *useq,
-                                            GtUword ustart,
-                                            GtUword ulen,
-                                            const GtUchar *vseq,
-                                            GtUword vstart,
-                                            GtUword vlen);
+GtWord  gt_linearalign_compute_local_generic(GtLinspaceManagement *spacemanager,
+                                             const GtScoreHandler *scorehandler,
+                                             GtAlignment *align,
+                                             const GtUchar *useq,
+                                             GtUword ustart,
+                                             GtUword ulen,
+                                             const GtUchar *vseq,
+                                             GtUword vstart,
+                                             GtUword vlen);
 
 /* Computes a local alignment with linear gapcosts in linear space
    and constant score values. Use of this function requires an initialised
@@ -83,27 +83,27 @@ GtWord  gt_computelinearspace_local_generic(GtLinspaceManagement *spacemanager,
    <vstart> and lengths <ulen> and <vlen>. The score values are specified by
    <matchscore>, <mismatchscore> and <gapscore>. Returns score value of
    calculated local alignment. */
-GtWord  gt_computelinearspace_local(GtLinspaceManagement *spacemanager,
-                                    GtAlignment *align,
-                                    const GtUchar *useq,
-                                    GtUword ustart,
-                                    GtUword ulen,
-                                    const GtUchar *vseq,
-                                    GtUword vstart,
-                                    GtUword vlen,
-                                    GtWord matchscore,
-                                    GtWord mismatchscore,
-                                    GtWord gapscore);
+GtWord  gt_linearalign_compute_local(GtLinspaceManagement *spacemanager,
+                                     GtAlignment *align,
+                                     const GtUchar *useq,
+                                     GtUword ustart,
+                                     GtUword ulen,
+                                     const GtUchar *vseq,
+                                     GtUword vstart,
+                                     GtUword vlen,
+                                     GtWord matchscore,
+                                     GtWord mismatchscore,
+                                     GtWord gapscore);
 
-void    gt_checklinearspace(GT_UNUSED bool forward,
-                            const GtUchar *useq,
-                            GtUword ulen,
-                            const GtUchar *vseq,
-                            GtUword vlen);
+void    gt_linearalign_check(GT_UNUSED bool forward,
+                             const GtUchar *useq,
+                             GtUword ulen,
+                             const GtUchar *vseq,
+                             GtUword vlen);
 
-void    gt_checklinearspace_local(GT_UNUSED bool forward,
-                                 const GtUchar *useq,
-                                 GtUword ulen,
-                                 const GtUchar *vseq,
-                                 GtUword vlen);
+void    gt_linearalign_check_local(GT_UNUSED bool forward,
+                                   const GtUchar *useq,
+                                   GtUword ulen,
+                                   const GtUchar *vseq,
+                                   GtUword vlen);
 #endif
