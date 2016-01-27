@@ -193,11 +193,12 @@ bool gt_linspace_management_checksquare(GtLinspaceManagement *spacemanager,
   return checksquare(spacemanager, ulen, vlen, valuesize, rsize,false);
 }
 
-bool gt_linspace_management_checksquare_local(GtLinspaceManagement *spacemanager,
-                                              GtUword ulen,
-                                              GtUword vlen,
-                                              size_t valuesize,
-                                              size_t rsize)
+bool gt_linspace_management_checksquare_local(
+                                             GtLinspaceManagement *spacemanager,
+                                             GtUword ulen,
+                                             GtUword vlen,
+                                             size_t valuesize,
+                                             size_t rsize)
 {
   return checksquare(spacemanager, ulen, vlen, valuesize, rsize,true);
 }

@@ -60,7 +60,7 @@ GtWord       gt_affinealign_with_Management(GtLinspaceManagement *spacemanager,
                                             GtAlignment *align,
                                             const GtUchar *u, GtUword ulen,
                                             const GtUchar *v, GtUword vlen);
-      
+
 GtWord       gt_affinealign_traceback(GtAlignment *a,
                                       AffinealignDPentry * const *dptable,
                                       GtUword i, GtUword j);
