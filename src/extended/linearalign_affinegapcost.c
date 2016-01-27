@@ -38,9 +38,9 @@ typedef struct {
 } Starttabentry;
 
 /*-------------------------------global affine--------------------------------*/
-AffineAlignEdge gt_linearalign_affinegapcost_set_edge(GtWord Rdist,
-                                        GtWord Ddist,
-                                        GtWord Idist)
+GtAffineAlignEdge gt_linearalign_affinegapcost_set_edge(GtWord Rdist,
+                                                        GtWord Ddist,
+                                                        GtWord Idist)
 {
   GtUword minvalue = MIN3(Rdist, Ddist, Idist);
 
@@ -54,8 +54,8 @@ AffineAlignEdge gt_linearalign_affinegapcost_set_edge(GtWord Rdist,
   return Affine_X;
 }
 
-static inline Rnode get_Rtabentry(const Rtabentry *rtab,
-                                  AffineAlignEdge edge)
+static inline GtAffineAlignRnode get_Rtabentry(const GtAffineAlignRtabentry
+                                                *rtab, GtAffineAlignEdge edge)
 {
   if (edge == Affine_R)
   {
@@ -69,9 +69,9 @@ static inline Rnode get_Rtabentry(const Rtabentry *rtab,
   return rtab->val_I;
 }
 
-static inline void firstAtabRtabentry(AffinealignDPentry *Atabcolumn,
+static inline void firstAtabRtabentry(GtAffinealignDPentry *Atabcolumn,
                                       GtUword gap_opening,
-                                      AffineAlignEdge edge)
+                                      GtAffineAlignEdge edge)
 {
   Atabcolumn[0].Redge = Affine_X;
   Atabcolumn[0].Dedge = Affine_X;
@@ -100,12 +100,12 @@ static inline void firstAtabRtabentry(AffinealignDPentry *Atabcolumn,
   }
 }
 
-static void firstAtabRtabcolumn(AffinealignDPentry *Atabcolumn,
-                                Rtabentry *Rtabcolumn,
+static void firstAtabRtabcolumn(GtAffinealignDPentry *Atabcolumn,
+                                GtAffineAlignRtabentry *Rtabcolumn,
                                 GtUword ulen,
                                 GtUword gap_opening,
                                 GtUword gap_extension,
-                                AffineAlignEdge edge)
+                                GtAffineAlignEdge edge)
 {
   GtUword rowindex;
   GtWord rdist, ddist,idist;
@@ -146,8 +146,8 @@ static void firstAtabRtabcolumn(AffinealignDPentry *Atabcolumn,
   }
 }
 
-static void nextAtabRtabcolumn(AffinealignDPentry *Atabcolumn,
-                               Rtabentry *Rtabcolumn,
+static void nextAtabRtabcolumn(GtAffinealignDPentry *Atabcolumn,
+                               GtAffineAlignRtabentry *Rtabcolumn,
                                const GtScoreHandler *scorehandler,
                                const GtUchar *useq,
                                GtUword ustart,
@@ -156,8 +156,8 @@ static void nextAtabRtabcolumn(AffinealignDPentry *Atabcolumn,
                                GtUword midcolumn,
                                GtUword colindex)
 {
-  AffinealignDPentry northwestAffinealignDPentry, westAffinealignDPentry;
-  Rtabentry northwestRtabentry, westRtabentry;
+  GtAffinealignDPentry northwestAffinealignDPentry, westAffinealignDPentry;
+  GtAffineAlignRtabentry northwestRtabentry, westRtabentry;
   GtWord rowindex, rcost, rdist, ddist, idist, minvalue;
   GtUword gap_opening, gap_extension;
 
@@ -248,8 +248,8 @@ static void nextAtabRtabcolumn(AffinealignDPentry *Atabcolumn,
   }
 }
 
-static GtUword evaluateallAtabRtabcolumns(AffinealignDPentry *Atabcolumn,
-                                          Rtabentry *Rtabcolumn,
+static GtUword evaluateallAtabRtabcolumns(GtAffinealignDPentry *Atabcolumn,
+                                          GtAffineAlignRtabentry *Rtabcolumn,
                                           const GtScoreHandler *scorehandler,
                                           const GtUchar *useq,
                                           GtUword ustart,
@@ -258,7 +258,7 @@ static GtUword evaluateallAtabRtabcolumns(AffinealignDPentry *Atabcolumn,
                                           GtUword vstart,
                                           GtUword vlen,
                                           GtUword midcolumn,
-                                          AffineAlignEdge edge)
+                                          GtAffineAlignEdge edge)
 {
   GtUword colindex, gap_opening, gap_extension;
 
@@ -284,10 +284,10 @@ static GtUword evaluateallAtabRtabcolumns(AffinealignDPentry *Atabcolumn,
               Atabcolumn[ulen].Ivalue);
 }
 
-AffineAlignEdge gt_linearalign_affinegapcost_minAdditionalCosts(
-                                               const AffinealignDPentry *entry,
-                                               const AffineAlignEdge edge,
-                                               GtUword gap_opening)
+GtAffineAlignEdge gt_linearalign_affinegapcost_minAdditionalCosts(
+                                              const GtAffinealignDPentry *entry,
+                                              const GtAffineAlignEdge edge,
+                                              GtUword gap_opening)
 {
   GtUword rdist, ddist, idist;
 
@@ -318,7 +318,7 @@ typedef struct{
   const GtUchar *useq, * vseq;
   GtUword ustart, ulen, vstart, vlen,
           *Ctab, rowoffset, *threadcount;
-  AffineAlignEdge from_edge, to_edge;
+  GtAffineAlignEdge from_edge, to_edge;
 }GtAffineCrosspointthreadinfo;
 
 static GtAffineCrosspointthreadinfo
@@ -332,8 +332,8 @@ static GtAffineCrosspointthreadinfo
                                              GtUword vlen,
                                              GtUword *Ctab,
                                              GtUword rowoffset,
-                                             AffineAlignEdge from_edge,
-                                             AffineAlignEdge to_edge,
+                                             GtAffineAlignEdge from_edge,
+                                             GtAffineAlignEdge to_edge,
                                              GtUword *threadcount)
 {
   GtAffineCrosspointthreadinfo threadinfo;
@@ -363,8 +363,8 @@ static GtUword evaluateaffinecrosspoints(GtLinspaceManagement *spacemanager,
                                          GtUword vlen,
                                          GtUword *Ctab,
                                          GtUword rowoffset,
-                                         AffineAlignEdge from_edge,
-                                         AffineAlignEdge to_edge,
+                                         GtAffineAlignEdge from_edge,
+                                         GtAffineAlignEdge to_edge,
                                          GtUword *threadcount);
 
 static void *evaluateaffinecrosspoints_thread_caller(void *data)
@@ -399,14 +399,14 @@ static GtUword evaluateaffinecrosspoints(GtLinspaceManagement *spacemanager,
                                          GtUword vlen,
                                          GtUword *Ctab,
                                          GtUword rowoffset,
-                                         AffineAlignEdge from_edge,
-                                         AffineAlignEdge to_edge,
+                                         GtAffineAlignEdge from_edge,
+                                         GtAffineAlignEdge to_edge,
                                          GT_UNUSED GtUword *threadcount)
 {
   GtUword  midrow = 0, midcol = GT_DIV2(vlen), distance, colindex;
-  AffineAlignEdge bottomtype, midtype = Affine_X;
-  AffinealignDPentry *Atabcolumn = NULL;
-  Rtabentry *Rtabcolumn = NULL;
+  GtAffineAlignEdge bottomtype, midtype = Affine_X;
+  GtAffinealignDPentry *Atabcolumn = NULL;
+  GtAffineAlignRtabentry *Rtabcolumn = NULL;
 
 #ifdef GT_THREADS_ENABLED
   GtThread *t1 = NULL, *t2 = NULL;
@@ -598,7 +598,7 @@ static void affine_determineCtab0(GtUword *Ctab,
                                   const GtUchar *vseq,
                                   GtUword vstart)
 {
-  AffinealignDPentry *Atabcolumn;
+  GtAffinealignDPentry *Atabcolumn;
 
     if (Ctab[1]== 1 || Ctab[1] == 0)
       Ctab[0] = 0;
@@ -607,7 +607,7 @@ static void affine_determineCtab0(GtUword *Ctab,
       gt_linspace_management_check(spacemanager,2*(Ctab[1]+1),Ctab[1],
                                    sizeof (*Atabcolumn),sizeof (Atabcolumn),0);
       /*gt_assert(vlen > 1);*/
-      AffineAlignEdge to_edge_test = Affine_X;
+      GtAffineAlignEdge to_edge_test = Affine_X;
       if (Ctab[1] == Ctab[2])
         to_edge_test = Affine_I;
       else
@@ -631,8 +631,8 @@ GtUword gt_calc_affinealign_linear(GtLinspaceManagement *spacemanager,
 {
   GtUword distance, *Ctab, threadcount = 1;
   GtWord gap_extension, gap_opening;
-  AffinealignDPentry *Atabcolumn;
-  Rtabentry *Rtabcolumn;
+  GtAffinealignDPentry *Atabcolumn;
+  GtAffineAlignRtabentry *Rtabcolumn;
 
   gt_linspace_management_set_ulen(spacemanager, ulen);
   gap_extension = gt_scorehandler_get_gapscore(scorehandler);
@@ -740,7 +740,7 @@ GtUword gt_linearalign_affinegapcost_compute(GtLinspaceManagement *spacemanager,
 }
 
 /*------------------------------local affine--------------------------------*/
-static void firstAStabcolumn(AffinealignDPentry *Atabcolumn,
+static void firstAStabcolumn(GtAffinealignDPentry *Atabcolumn,
                              Starttabentry *Starttabcolumn,
                              const GtScoreHandler *scorehandler,
                              GtUword ulen)
@@ -779,12 +779,12 @@ static void firstAStabcolumn(AffinealignDPentry *Atabcolumn,
   }
 }
 
-static GtUwordPair setStarttabentry(GtWord entry, AffinealignDPentry *Atab,
+static GtUwordPair setStarttabentry(GtWord entry, GtAffinealignDPentry *Atab,
                                     Starttabentry *Stab,
                                     GtWord replacement,
                                     GtWord gap_opening,
                                     GtWord gap_extension,
-                                    const AffineAlignEdge edge)
+                                    const GtAffineAlignEdge edge)
 {
   GtUwordPair start;
   switch (edge) {
@@ -825,7 +825,7 @@ static GtUwordPair setStarttabentry(GtWord entry, AffinealignDPentry *Atab,
   return start;
 }
 
-static void nextAStabcolumn(AffinealignDPentry *Atabcolumn,
+static void nextAStabcolumn(GtAffinealignDPentry *Atabcolumn,
                             Starttabentry *Starttabcolumn,
                             const GtScoreHandler *scorehandler,
                             const GtUchar *useq, GtUword ustart,
@@ -834,7 +834,7 @@ static void nextAStabcolumn(AffinealignDPentry *Atabcolumn,
                             GtUword colindex,
                             GtMaxcoordvalue *max)
 {
-  AffinealignDPentry northwestAffinealignDPentry, westAffinealignDPentry;
+  GtAffinealignDPentry northwestAffinealignDPentry, westAffinealignDPentry;
   Starttabentry Snw, Swe;
   GtUword rowindex;
   GtWord gap_extension, gap_opening, replacement, temp, val1, val2;
@@ -938,7 +938,7 @@ static void nextAStabcolumn(AffinealignDPentry *Atabcolumn,
       gt_maxcoordvalue_coord_update(max, Atabcolumn[rowindex].totalvalue,
                                     start, rowindex, colindex);
     }
-    northwestAffinealignDPentry=westAffinealignDPentry;
+    northwestAffinealignDPentry = westAffinealignDPentry;
     Snw=Swe;
   }
 }
@@ -954,7 +954,7 @@ static GtMaxcoordvalue *evaluateallAStabcolumns(GtLinspaceManagement *space,
 {
   GtUword colindex;
   GtMaxcoordvalue *max;
-  AffinealignDPentry *Atabcolumn;
+  GtAffinealignDPentry *Atabcolumn;
   Starttabentry *Starttabcolumn;
 
   Atabcolumn = gt_linspace_management_get_valueTabspace(space);
@@ -985,7 +985,7 @@ GtWord gt_linearalign_affinegapcost_compute_local_generic(
 {
   GtUword ulen_part, ustart_part, vlen_part, vstart_part;
   GtWord score;
-  AffinealignDPentry *Atabcolumn;
+  GtAffinealignDPentry *Atabcolumn;
   Starttabentry *Starttabcolumn;
   GtMaxcoordvalue *max;
 

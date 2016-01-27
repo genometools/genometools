@@ -210,7 +210,7 @@ void gt_reconstructalignment_from_Ctab(GtAlignment *align,
 
 /*reconstruct alignment from crosspoints, crosspoints relating to diagonalband*/
 void gt_reconstructalignment_from_Dtab(GtAlignment *align,
-                                       const Diagentry *Dtab,
+                                       const GtDiagAlignentry *Dtab,
                                        GtUword ulen, GtUword vlen)
 {
   GtUword i,j;
@@ -284,16 +284,16 @@ void gt_reconstructalignment_from_Dtab(GtAlignment *align,
 /* reconstruct alignment from crosspoints (affine gapcosts),
  * crosspoints relating to diagonalband */
 void gt_reconstructalignment_from_affineDtab(GtAlignment *align,
-                                             const AffineDiagentry *Dtab,
-                                             AffineAlignEdge edge,
+                                             const GtAffineDiagAlignentry *Dtab,
+                                             GtAffineAlignEdge edge,
                                              GT_UNUSED const GtUchar *useq,
                                              GtUword ulen,
                                              GT_UNUSED const GtUchar *vseq,
                                              GtUword vlen)
 {
   GtUword i,j;
-  Diagentry node, prevnode;
-  AffineAlignEdge prevedge;
+  GtDiagAlignentry node, prevnode;
+  GtAffineAlignEdge prevedge;
   gt_assert(align != NULL && Dtab != NULL);
 
   switch (edge) {

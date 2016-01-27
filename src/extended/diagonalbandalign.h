@@ -36,7 +36,7 @@ typedef enum {
 typedef struct {
   GtUword lastcpoint, currentrowindex;
   int last_type;
-} Diagentry;
+} GtDiagAlignentry;
 
 /* Computes a global alignment within a diagonal band with linear gapcosts in
    linear space. Use of this function requires an initialised <spacemanager>,

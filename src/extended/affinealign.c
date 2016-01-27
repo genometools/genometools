@@ -26,12 +26,12 @@
 
 #include "extended/affinealign.h"
 
-static void affinealign_fill_table(AffinealignDPentry **dptable,
+static void affinealign_fill_table(GtAffinealignDPentry **dptable,
                                    const GtUchar *u, GtUword ulen,
                                    const GtUchar *v, GtUword vlen,
                                    GtUword matchcost, GtUword mismatchcost,
                                    GtUword gap_opening, GtUword gap_extension,
-                                   AffineAlignEdge edge,
+                                   GtAffineAlignEdge edge,
                                    const GtScoreHandler *scorehandler)
 {
   GtUword i, j, Rvalue, Dvalue, Ivalue, minvalue,rcost;
@@ -139,11 +139,11 @@ static void affinealign_fill_table(AffinealignDPentry **dptable,
 }
 
 GtWord gt_affinealign_traceback(GtAlignment *align,
-                                AffinealignDPentry * const *dptable,
+                                GtAffinealignDPentry * const *dptable,
                                 GtUword i, GtUword j)
 {
   GtWord minvalue;
-  AffineAlignEdge edge;
+  GtAffineAlignEdge edge;
   gt_assert(align && dptable);
   /* determine min{A_affine(m,n,x) | x in {R,D,I}} */
   minvalue = MIN3(dptable[i][j].Rvalue, dptable[i][j].Dvalue,
@@ -190,7 +190,7 @@ GtAlignment* gt_affinealign(const GtUchar *u, GtUword ulen,
                             GtUword gap_opening,
                             GtUword gap_extension)
 {
-  AffinealignDPentry **dptable;
+  GtAffinealignDPentry **dptable;
   GtAlignment *align;
 
   gt_assert(u && v);
@@ -209,7 +209,7 @@ GtWord gt_affinealign_with_Management(GtLinspaceManagement *spacemanager,
                                      const GtUchar *u, GtUword ulen,
                                      const GtUchar *v, GtUword vlen)
 {
-  AffinealignDPentry **dptable;
+  GtAffinealignDPentry **dptable;
   GtUword idx;
   gt_assert(u && v && spacemanager && scorehandler);
 
@@ -228,11 +228,11 @@ GtWord gt_affinealign_with_Management(GtLinspaceManagement *spacemanager,
 }
 
 static void evaluate_affinecrosspoints_from_2dimtab(GtUword *Ctab,
-                                            AffinealignDPentry **Atabcolumn,
+                                            GtAffinealignDPentry **Atabcolumn,
                                             const GtScoreHandler *scorehandler,
                                             GtUword ulen, GtUword vlen,
                                             GtUword rowoffset,
-                                            AffineAlignEdge edge)
+                                            GtAffineAlignEdge edge)
 {
   GtUword i, j, gap_opening;
   gt_assert(Atabcolumn != NULL);
@@ -280,10 +280,10 @@ void gt_affinealign_ctab(GtLinspaceManagement *spacemanager,
                          GtUword vstart,
                          GtUword vlen,
                          GtUword rowoffset,
-                         AffineAlignEdge from_edge,
-                         AffineAlignEdge to_edge)
+                         GtAffineAlignEdge from_edge,
+                         GtAffineAlignEdge to_edge)
 {
-  AffinealignDPentry **dptable;
+  GtAffinealignDPentry **dptable;
   GtUword idx;
   gt_assert(Ctab && spacemanager && scorehandler);
   gt_assert((ulen+1)*(vlen+1)*sizeof(**dptable) <=
@@ -305,7 +305,7 @@ void gt_affinealign_ctab(GtLinspaceManagement *spacemanager,
 }
 
 /* local */
-static GtWord affinealign_fill_table_local(AffinealignDPentry **Atabcolumn,
+static GtWord affinealign_fill_table_local(GtAffinealignDPentry **Atabcolumn,
                                            const GtScoreHandler *scorehandler,
                                            GtMaxcoordvalue *max,
                                            const GtUchar *useq, GtUword ustart,
@@ -454,13 +454,13 @@ static GtWord affinealign_fill_table_local(AffinealignDPentry **Atabcolumn,
 }
 
 static void affinealign_traceback_local(GtAlignment *align,
-                                        AffinealignDPentry **dptable,
+                                        GtAffinealignDPentry **dptable,
                                         GtMaxcoordvalue *max)
 {
   GtWord maxvalue;
   GtUword i,j;
   GtUwordPair max_end;
-  AffineAlignEdge edge;
+  GtAffineAlignEdge edge;
   gt_assert(align && dptable);
 
   max_end = gt_maxcoordvalue_get_end(max);
@@ -520,7 +520,7 @@ GtWord gt_affinealign_calculate_local_generic(GtLinspaceManagement
                                              GtUword vlen)
 {
   GtWord score = 0;
-  AffinealignDPentry **Atabcolumn;
+  GtAffinealignDPentry **Atabcolumn;
   GtMaxcoordvalue *max;
 
   gt_assert(align != NULL);

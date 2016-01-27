@@ -27,12 +27,12 @@
 
 typedef struct {
   GtUword idx;
-  AffineAlignEdge edge;
-} Rnode;
+  GtAffineAlignEdge edge;
+} GtAffineAlignRnode;
 
 typedef struct {
-  Rnode val_R, val_D, val_I;
-} Rtabentry;
+  GtAffineAlignRnode val_R, val_D, val_I;
+} GtAffineAlignRtabentry;
 
 /* Computes a global alignment with affine gapcosts in linear space. Use of this
    function requires an initialised <spacemanager>, the target alignment <align>
@@ -112,17 +112,17 @@ GtWord          gt_linearalign_affinegapcost_compute_local(
                                             GtWord gap_opening,
                                             GtWord gap_extension);
 
-/* Returns an object of class <AffineAlignEdge>, whichs specify the R,D,I type
+/* Returns an object of class <GtAffineAlignEdge>, whichs specify the R,D,I type
    for the minimal value in <entry> dependent on next <edge> and <gap_opening>
    cost */
-AffineAlignEdge gt_linearalign_affinegapcost_minAdditionalCosts(
-                                               const AffinealignDPentry *entry,
-                                               const AffineAlignEdge edge,
-                                               GtUword gap_opening);
+GtAffineAlignEdge gt_linearalign_affinegapcost_minAdditionalCosts(
+                                              const GtAffinealignDPentry *entry,
+                                              const GtAffineAlignEdge edge,
+                                              GtUword gap_opening);
 
-AffineAlignEdge gt_linearalign_affinegapcost_set_edge(GtWord Rdist,
-                                                      GtWord Ddist,
-                                                      GtWord Idist);
+GtAffineAlignEdge gt_linearalign_affinegapcost_set_edge(GtWord Rdist,
+                                                        GtWord Ddist,
+                                                        GtWord Idist);
 
 void            gt_linearalign_affinegapcost_check(GT_UNUSED bool forward,
                                                    const GtUchar *useq,

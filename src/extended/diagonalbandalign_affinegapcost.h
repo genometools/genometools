@@ -27,8 +27,8 @@
 /* <AffineDiagentry> objects are entries of DP-matrix with a diagonal band in
    context of affine gap costs. */
 typedef struct {
-  Diagentry val_R, val_D, val_I;
-} AffineDiagentry;
+  GtDiagAlignentry val_R, val_D, val_I;
+} GtAffineDiagAlignentry;
 
 /* Computes a global alignment within a diagonal band with affine gapcosts in
    linear space. Use of this function requires an initialised <spacemanager>,

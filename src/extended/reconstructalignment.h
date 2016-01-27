@@ -90,7 +90,8 @@ void    gt_reconstructalignment_from_Ctab(GtAlignment *align,
    crosspoints are located on diagonals and the evaluation is based on
    linear gap costs. */
 void    gt_reconstructalignment_from_Dtab(GtAlignment *align,
-                                          const Diagentry *Dtab, GtUword ulen,
+                                          const GtDiagAlignentry *Dtab,
+                                          GtUword ulen,
                                           GtUword vlen);
 
 /* Reconstruct an object <align> from crosspoints in <Dtab> between two
@@ -99,10 +100,10 @@ void    gt_reconstructalignment_from_Dtab(GtAlignment *align,
    crosspoints are located on diagonals and the and the evaluation is based on
    affine gap costs. */
 void     gt_reconstructalignment_from_affineDtab(GtAlignment *align,
-                                                 const AffineDiagentry *Dtab,
-                                                 AffineAlignEdge edge,
-                                                 const GtUchar *useq,
-                                                 GtUword ulen,
-                                                 const GtUchar *vseq,
-                                                 GtUword vlen);
+                                             const GtAffineDiagAlignentry *Dtab,
+                                             GtAffineAlignEdge edge,
+                                             const GtUchar *useq,
+                                             GtUword ulen,
+                                             const GtUchar *vseq,
+                                             GtUword vlen);
 #endif

@@ -28,16 +28,16 @@ typedef enum {
   Affine_D,
   Affine_I,
   Affine_X /* unknown */
-} AffineAlignEdge;
+} GtAffineAlignEdge;
 
 /* <AffinealignDPentry> objects describe the information of distance values and
    backtracing edges relating on last edit operation R,D,I. */
 typedef struct {
   GtWord Rvalue, Dvalue, Ivalue, totalvalue;
-  AffineAlignEdge Redge,
-                  Dedge,
-                  Iedge;
-} AffinealignDPentry;
+  GtAffineAlignEdge Redge,
+                    Dedge,
+                    Iedge;
+} GtAffinealignDPentry;
 
 /* Computes a global alignment with affine gapcosts in square space
    and constant cost values. Use of this function requires input sequences
@@ -61,8 +61,8 @@ GtWord       gt_affinealign_with_Management(GtLinspaceManagement *spacemanager,
                                             const GtUchar *u, GtUword ulen,
                                             const GtUchar *v, GtUword vlen);
 
-GtWord       gt_affinealign_traceback(GtAlignment *a,
-                                      AffinealignDPentry * const *dptable,
+GtWord       gt_affinealign_traceback(GtAlignment *align,
+                                      GtAffinealignDPentry * const *dptable,
                                       GtUword i, GtUword j);
 
 /* Computes crosspoints for a global alignment with affine gapcosts in square
@@ -84,8 +84,8 @@ void         gt_affinealign_ctab(GtLinspaceManagement *spacemanager,
                                  GtUword vstart,
                                  GtUword vlen,
                                  GtUword rowoffset,
-                                 AffineAlignEdge from_edge,
-                                 AffineAlignEdge to_edge);
+                                 GtAffineAlignEdge from_edge,
+                                 GtAffineAlignEdge to_edge);
 
 /* Computes a local alignment with linear gapcosts in square space. Use of this
    function requires an initialised <scorehandler> with score values, the target
