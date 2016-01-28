@@ -11,5 +11,5 @@ gordon@gremme.org I left someone out or missed something.
 - Brent Pedersen (python bindings, patches)
 - Christin Schaerfer (AnnotationSketch, sketch tool)
 - David Schmitz-Huebsch (mgth/ subdirectory, mgth tool)
-- Dirk Willrodt (genomediff tool, SAM/BAM, patches)
+- Dirk Willrodt (genomediff, condenseq tool, SAM/BAM, wavelet tree, patches)
 - Daniel Standage (GtSetSourceVisitor, GtFeatureInStream, python bindings, patches)
