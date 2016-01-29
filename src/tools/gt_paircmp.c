@@ -358,21 +358,21 @@ int gt_paircmp(int argc, const char **argv, GtError *err)
       const GtStr *str0 = gt_str_array_get_str(cmppairwise.strings,0),
                   *str1 = gt_str_array_get_str(cmppairwise.strings,1);
 
-      gt_print_edist_alignment((const GtUchar *) gt_str_get(str0),0,
-                               gt_str_length(str0),
-                               (const GtUchar *) gt_str_get(str1),0,
-                               gt_str_length(str1));
+      gt_squarealign_print_edit_alignment((const GtUchar *) gt_str_get(str0),0,
+                                          gt_str_length(str0),
+                                          (const GtUchar *) gt_str_get(str1),0,
+                                          gt_str_length(str1));
     } else
     {
       size_t idx;
       Checkfunctiontabentry checkfunction_tab[] = {
         MAKECheckfunctiontabentry(gt_checkgreedyunitedist),
-        MAKECheckfunctiontabentry(gt_checklinearspace),
-        MAKECheckfunctiontabentry(gt_checklinearspace_local),
-        MAKECheckfunctiontabentry(gt_checkaffinelinearspace),
-        MAKECheckfunctiontabentry(gt_checkaffinelinearspace_local),
-        MAKECheckfunctiontabentry(gt_checkdiagonalbandalign),
-        MAKECheckfunctiontabentry(gt_checkdiagonalbandaffinealign)
+        MAKECheckfunctiontabentry(gt_linearalign_check),
+        MAKECheckfunctiontabentry(gt_linearalign_check_local),
+        MAKECheckfunctiontabentry(gt_linearalign_affinegapcost_check),
+        MAKECheckfunctiontabentry(gt_linearalign_affinegapcost_check_local),
+        MAKECheckfunctiontabentry(gt_diagonalbandalign_check),
+        MAKECheckfunctiontabentry(gt_diagonalbandalign_affinegapcost_check)
       };
 
       if (cmppairwise.fasta)

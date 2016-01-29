@@ -547,24 +547,24 @@ static int gt_all_against_all_alignment_check(bool affine,
           }
           if (!had_err)
           {
-            (affine ? gt_computediagonalbandaffinealign_generic
-                    : gt_computediagonalbandalign_generic)
+            (affine ? gt_diagonalbandalign_affinegapcost_compute_generic
+                    : gt_diagonalbandalign_compute_generic)
                        (spacemanager, scorehandler, align,
                         useq, 0, ulen, vseq, 0, vlen,
                         left_dist, right_dist);
           }
         } else
         {
-          (affine ? gt_computeaffinelinearspace_generic
-                  : gt_computelinearspace_generic)
+          (affine ? gt_linearalign_affinegapcost_compute_generic
+                  : gt_linearalign_compute_generic)
                              (spacemanager, scorehandler, align,
                               useq, 0, ulen, vseq, 0, vlen);
         }
       }
       else if (arguments->local)
       {
-        (affine ? gt_computeaffinelinearspace_local_generic
-                : gt_computelinearspace_local_generic)
+        (affine ? gt_linearalign_affinegapcost_compute_local_generic
+                : gt_linearalign_compute_local_generic)
                     (spacemanager, scorehandler, align,
                      useq, 0, ulen, vseq, 0, vlen);
       }
@@ -753,8 +753,8 @@ static int gt_linspace_align_runner(GT_UNUSED int argc,
   sequence_table1 = gt_sequence_table_new();
   sequence_table2 = gt_sequence_table_new();
   align = gt_alignment_new();
-  spacemanager = gt_linspaceManagement_new();
-  gt_linspaceManagement_set_TSfactor(spacemanager,arguments->timesquarefactor);
+  spacemanager = gt_linspace_management_new();
+  gt_linspace_management_set_TSfactor(spacemanager,arguments->timesquarefactor);
 
   /* get sequences */
   if (gt_str_array_size(arguments->strings) > 0)
@@ -850,12 +850,12 @@ static int gt_linspace_align_runner(GT_UNUSED int argc,
   if (!had_err && arguments->spacetime)
   {
     printf("# combined space peak in kilobytes: %f\n",
-           GT_KILOBYTES(gt_linspaceManagement_get_spacepeak(spacemanager)));
+           GT_KILOBYTES(gt_linspace_management_get_spacepeak(spacemanager)));
     gt_timer_show_formatted(linspacetimer,"# TIME overall " GT_WD ".%02ld\n",
                             stdout);
   }
   gt_timer_delete(linspacetimer);
-  gt_linspaceManagement_delete(spacemanager);
+  gt_linspace_management_delete(spacemanager);
   gt_sequence_table_delete(sequence_table1);
   gt_sequence_table_delete(sequence_table2);
   gt_alignment_delete(align);

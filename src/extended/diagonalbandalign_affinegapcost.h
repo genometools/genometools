@@ -27,14 +27,8 @@
 /* <AffineDiagentry> objects are entries of DP-matrix with a diagonal band in
    context of affine gap costs. */
 typedef struct {
-  Diagentry val_R, val_D, val_I;
-} AffineDiagentry;
-
-void gt_checkdiagonalbandaffinealign(GT_UNUSED bool forward,
-                                     const GtUchar *useq,
-                                     GtUword ulen,
-                                     const GtUchar *vseq,
-                                     GtUword vlen);
+  GtDiagAlignentry val_R, val_D, val_I;
+} GtAffineDiagAlignentry;
 
 /* Computes a global alignment within a diagonal band with affine gapcosts in
    linear space. Use of this function requires an initialised <spacemanager>,
@@ -44,7 +38,7 @@ void gt_checkdiagonalbandaffinealign(GT_UNUSED bool forward,
    <scorehandler>. <left_dist> and <right_dist> give lower and upper bound of
    a diagonal band in which DP-matrix is valid. Returns affine cost
    value of calculated global alignment. */
-void gt_computediagonalbandaffinealign_generic(
+void   gt_diagonalbandalign_affinegapcost_compute_generic(
                                             GtLinspaceManagement *spacemanager,
                                             const GtScoreHandler *scorehandler,
                                             GtAlignment *align,
@@ -63,18 +57,19 @@ void gt_computediagonalbandaffinealign_generic(
    specified by <matchcost>, <mismatchcost> and <gapcost>. <left_dist> and
    <right_dist> give lower and upper bound of a diagonal band in which DP-matrix
    is valid. Returns affine cost value of calculated global alignment. */
-void gt_computediagonalbandaffinealign(GtLinspaceManagement *spacemanager,
-                                          GtAlignment *align,
-                                          const GtUchar *useq,
-                                          GtUword ustart, GtUword ulen,
-                                          const GtUchar *vseq,
-                                          GtUword vstart, GtUword vlen,
-                                          GtWord left_dist,
-                                          GtWord right_dist,
-                                          GtUword matchcost,
-                                          GtUword mismatchcost,
-                                          GtUword gap_opening,
-                                          GtUword gap_extension);
+void   gt_diagonalbandalign_affinegapcost_compute(
+                                            GtLinspaceManagement *spacemanager,
+                                            GtAlignment *align,
+                                            const GtUchar *useq,
+                                            GtUword ustart, GtUword ulen,
+                                            const GtUchar *vseq,
+                                            GtUword vstart, GtUword vlen,
+                                            GtWord left_dist,
+                                            GtWord right_dist,
+                                            GtUword matchcost,
+                                            GtUword mismatchcost,
+                                            GtUword gap_opening,
+                                            GtUword gap_extension);
 
 /* Computes only the distance of a global alignment within a diagonal band with
    affine gapcosts in square space. Use of this function requires the input
@@ -83,15 +78,17 @@ void gt_computediagonalbandaffinealign(GtLinspaceManagement *spacemanager,
    and <right_dist> give lower and upper bound of a diagonal band in which
    DP-matrix is valid. The cost values are specified by <scorehandler>. Returns
    cost value of global alignment. */
-GtWord diagonalband_square_space_affine(const GtUchar *useq,
-                                         GtUword ustart,
-                                         GtUword ulen,
-                                         const GtUchar *vseq,
-                                         GtUword vstart,
-                                         GtUword vlen,
-                                         GtWord left_dist,
-                                         GtWord right_dist,
-                                         const GtScoreHandler *scorehandler);
+GtWord gt_diagonalbandalign_affinegapcost_square_space_distance_only(
+                                                           const GtUchar *useq,
+                                                           GtUword ustart,
+                                                           GtUword ulen,
+                                                           const GtUchar *vseq,
+                                                           GtUword vstart,
+                                                           GtUword vlen,
+                                                           GtWord left_dist,
+                                                           GtWord right_dist,
+                                                           const GtScoreHandler
+                                                           *scorehandler);
 
 /* Computes a global alignment within a diagonal band with linear gapcosts in
    square space. Use of this function requires an initialised <scorehandler>
@@ -102,7 +99,7 @@ GtWord diagonalband_square_space_affine(const GtUchar *useq,
    <spacemanager> is required to use this function in linear space context, in
    any other case it can be NULL. <scorehandler> manages linear gap costs.
    Returns cost value of global alignment. */
-GtWord diagonalbandalignment_in_square_space_affine_generic(
+GtWord gt_diagonalbandalign_affinegapcost_in_square_space_generic(
                                              GtLinspaceManagement *space,
                                              const GtScoreHandler *scorehandler,
                                              GtAlignment *align,
@@ -125,18 +122,25 @@ GtWord diagonalbandalignment_in_square_space_affine_generic(
    <spacemanager> is required to use this function in linear space context, in
    any other case it can be NULL. <scorehandler> manages linear gap costs.
    Returns cost value of global alignment. */
-GtWord diagonalbandalignment_in_square_space_affine(GtLinspaceManagement *space,
-                                                    GtAlignment *align,
-                                                    const GtUchar *useq,
-                                                    GtUword ustart,
-                                                    GtUword ulen,
-                                                    const GtUchar *vseq,
-                                                    GtUword vstart,
-                                                    GtUword vlen,
-                                                    GtWord left_dist,
-                                                    GtWord right_dist,
-                                                    GtUword matchcost,
-                                                    GtUword mismatchcost,
-                                                    GtUword gap_opening,
-                                                    GtUword gap_extension);
+GtWord gt_diagonalbandalign_affinegapcost_in_square_space(GtLinspaceManagement
+                                                        *space,
+                                                        GtAlignment *align,
+                                                        const GtUchar *useq,
+                                                        GtUword ustart,
+                                                        GtUword ulen,
+                                                        const GtUchar *vseq,
+                                                        GtUword vstart,
+                                                        GtUword vlen,
+                                                        GtWord left_dist,
+                                                        GtWord right_dist,
+                                                        GtUword matchcost,
+                                                        GtUword mismatchcost,
+                                                        GtUword gap_opening,
+                                                        GtUword gap_extension);
+
+void   gt_diagonalbandalign_affinegapcost_check(GT_UNUSED bool forward,
+                                                const GtUchar *useq,
+                                                GtUword ulen,
+                                                const GtUchar *vseq,
+                                                GtUword vlen);
 #endif

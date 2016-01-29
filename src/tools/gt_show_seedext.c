@@ -205,15 +205,15 @@ static void gt_show_seed_extend_plain(GtSequencepairbuffer *seqpairbuf,
     gt_assert(query_readmode == GT_READMODE_REVCOMPL);
     gt_inplace_reverse_complement(seqpairbuf->b_sequence,querylen);
   }
-  edist = gt_computelinearspace_generic(linspace_spacemanager,
-                                        linspace_scorehandler,
-                                        alignment,
-                                        seqpairbuf->a_sequence,
-                                        0,
-                                        dblen,
-                                        seqpairbuf->b_sequence,
-                                        0,
-                                        querylen);
+  edist = gt_linearalign_compute_generic(linspace_spacemanager,
+                                         linspace_scorehandler,
+                                         alignment,
+                                         seqpairbuf->a_sequence,
+                                         0,
+                                         dblen,
+                                         seqpairbuf->b_sequence,
+                                         0,
+                                         querylen);
   if (edist < distance)
   {
     printf("# edist=" GT_WU " (smaller by " GT_WU ")\n",edist,distance - edist);
@@ -295,7 +295,7 @@ static int gt_show_seedext_runner(GT_UNUSED int argc,
     GtUchar *alignment_show_buffer
       = arguments->show_alignment ? gt_alignment_buffer_new(alignmentwidth)
                                   : NULL;
-    GtLinspaceManagement *linspace_spacemanager = gt_linspaceManagement_new();
+    GtLinspaceManagement *linspace_spacemanager = gt_linspace_management_new();
     GtScoreHandler *linspace_scorehandler = gt_scorehandler_new(0,1,0,1);;
 
     if (!arguments->relax_polish)
@@ -410,7 +410,7 @@ static int gt_show_seedext_runner(GT_UNUSED int argc,
     gt_greedy_extend_matchinfo_delete(greedyextendmatchinfo);
     gt_free(alignment_show_buffer);
     gt_scorehandler_delete(linspace_scorehandler);
-    gt_linspaceManagement_delete(linspace_spacemanager);
+    gt_linspace_management_delete(linspace_spacemanager);
     gt_free(seqpairbuf.a_sequence);
     gt_free(seqpairbuf.b_sequence);
     gt_alignment_delete(alignment);

@@ -20,9 +20,9 @@
 #include "extended/linspace_management.h"
 #include "extended/reconstructalignment.h"
 
-GtUword construct_trivial_deletion_alignment(GtAlignment *align,
-                                             GtUword len,
-                                             GtUword gapcost)
+GtUword gt_reconstructalignment_trivial_deletion(GtAlignment *align,
+                                                 GtUword len,
+                                                 GtUword gapcost)
 {
   GtUword idx;
 
@@ -33,9 +33,9 @@ GtUword construct_trivial_deletion_alignment(GtAlignment *align,
   return len * gapcost;
 }
 
-GtUword construct_trivial_insertion_alignment(GtAlignment *align,
-                                              GtUword len,
-                                              GtUword gapcost)
+GtUword gt_reconstructalignment_trivial_insertion(GtAlignment *align,
+                                                  GtUword len,
+                                                  GtUword gapcost)
 {
   GtUword idx;
 
@@ -48,15 +48,15 @@ GtUword construct_trivial_insertion_alignment(GtAlignment *align,
 }
 
 /* reconstruct global alignment from square space table E */
-void reconstructalignment_from_EDtab(GtAlignment *align,
-                                     GtUword * const *E,
-                                     const GtUchar *useq,
-                                     GtUword ustart,
-                                     GtUword ulen,
-                                     const GtUchar *vseq,
-                                     GtUword vstart,
-                                     GtUword vlen,
-                                     const GtScoreHandler *scorehandler)
+void gt_reconstructalignment_from_EDtab(GtAlignment *align,
+                                        GtUword * const *E,
+                                        const GtUchar *useq,
+                                        GtUword ustart,
+                                        GtUword ulen,
+                                        const GtUchar *vseq,
+                                        GtUword vstart,
+                                        GtUword vlen,
+                                        const GtScoreHandler *scorehandler)
 {
   GtUword i = ulen, j = vlen, gapcost;
   const GtUchar *uptr = useq + ustart - 1, *vptr = vseq + vstart - 1;
@@ -92,23 +92,23 @@ void reconstructalignment_from_EDtab(GtAlignment *align,
 }
 
 /* reconstruct local alignment from square space table Ltab */
-void reconstructalignment_from_Ltab(GtAlignment *align,
-                                    GtWord **Ltabcolumn,
-                                    GtMaxcoordvalue *max,
-                                    const GtUchar *useq,
-                                    GtUword ustart,
-                                    GT_UNUSED GtUword ulen,
-                                    const GtUchar *vseq,
-                                    GtUword vstart,
-                                    GT_UNUSED GtUword vlen,
-                                    const GtScoreHandler *scorehandler)
+void gt_reconstructalignment_from_Ltab(GtAlignment *align,
+                                       GtWord **Ltabcolumn,
+                                       GtMaxcoordvalue *max,
+                                       const GtUchar *useq,
+                                       GtUword ustart,
+                                       GT_UNUSED GtUword ulen,
+                                       const GtUchar *vseq,
+                                       GtUword vstart,
+                                       GT_UNUSED GtUword vlen,
+                                       const GtScoreHandler *scorehandler)
 {
   GtUword i, j;
   GtWord gapscore;
   GtUwordPair max_end;
 
   gt_assert(align && Ltabcolumn && scorehandler);
-  max_end = gt_max_get_end(max);
+  max_end = gt_maxcoordvalue_get_end(max);
   i = max_end.a;
   j = max_end.b;
   gt_assert(i <= ulen && j <= vlen);
@@ -140,19 +140,19 @@ void reconstructalignment_from_Ltab(GtAlignment *align,
     }
     gt_assert(false);
   }
-  gt_max_set_start(max,i,j);
+  gt_maxcoordvalue_set_start(max,i,j);
 }
 
 /* reconstruct alignment from crosspoint table
    crosspoints relating to midolumn */
-void reconstructalignment_from_Ctab(GtAlignment *align,
-                                    const GtUword *Ctab,
-                                    const GtUchar *useq,
-                                    GtUword ustart,
-                                    const GtUchar *vseq,
-                                    GtUword vstart,
-                                    GtUword vlen,
-                                    const GtScoreHandler *scorehandler)
+void gt_reconstructalignment_from_Ctab(GtAlignment *align,
+                                       const GtUword *Ctab,
+                                       const GtUchar *useq,
+                                       GtUword ustart,
+                                       const GtUchar *vseq,
+                                       GtUword vstart,
+                                       GtUword vlen,
+                                       const GtScoreHandler *scorehandler)
 {
   GtUword i,j, repl, indel, gap_opening, gap_extension;
   gt_assert(align && Ctab && scorehandler);
@@ -209,8 +209,9 @@ void reconstructalignment_from_Ctab(GtAlignment *align,
 }
 
 /*reconstruct alignment from crosspoints, crosspoints relating to diagonalband*/
-void reconstructalignment_from_Dtab(GtAlignment *align, const Diagentry *Dtab,
-                                    GtUword ulen, GtUword vlen)
+void gt_reconstructalignment_from_Dtab(GtAlignment *align,
+                                       const GtDiagAlignentry *Dtab,
+                                       GtUword ulen, GtUword vlen)
 {
   GtUword i,j;
 
@@ -282,17 +283,17 @@ void reconstructalignment_from_Dtab(GtAlignment *align, const Diagentry *Dtab,
 
 /* reconstruct alignment from crosspoints (affine gapcosts),
  * crosspoints relating to diagonalband */
-void reconstructalignment_from_affineDtab(GtAlignment *align,
-                                          const AffineDiagentry *Dtab,
-                                          AffineAlignEdge edge,
-                                          GT_UNUSED const GtUchar *useq,
-                                          GtUword ulen,
-                                          GT_UNUSED const GtUchar *vseq,
-                                          GtUword vlen)
+void gt_reconstructalignment_from_affineDtab(GtAlignment *align,
+                                             const GtAffineDiagAlignentry *Dtab,
+                                             GtAffineAlignEdge edge,
+                                             GT_UNUSED const GtUchar *useq,
+                                             GtUword ulen,
+                                             GT_UNUSED const GtUchar *vseq,
+                                             GtUword vlen)
 {
   GtUword i,j;
-  Diagentry node, prevnode;
-  AffineAlignEdge prevedge;
+  GtDiagAlignentry node, prevnode;
+  GtAffineAlignEdge prevedge;
   gt_assert(align != NULL && Dtab != NULL);
 
   switch (edge) {

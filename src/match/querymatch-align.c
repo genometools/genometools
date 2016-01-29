@@ -160,7 +160,7 @@ GtQuerymatchoutoptions *gt_querymatchoutoptions_new(bool generatealignment,
   {
     querymatchoutoptions->alignment_show_buffer
       = gt_alignment_buffer_new(alignmentwidth);
-    querymatchoutoptions->linspace_spacemanager = gt_linspaceManagement_new();
+    querymatchoutoptions->linspace_spacemanager = gt_linspace_management_new();
     querymatchoutoptions->linspace_scorehandler = gt_scorehandler_new(0,1,0,1);
   }
   return querymatchoutoptions;
@@ -253,7 +253,7 @@ void gt_querymatchoutoptions_delete(
     GT_FREEARRAY(&querymatchoutoptions->eoplist,uint8_t);
     gt_alignment_buffer_delete(querymatchoutoptions->alignment_show_buffer);
     gt_encseq_reader_delete(querymatchoutoptions->esr_for_align_show);
-    gt_linspaceManagement_delete(querymatchoutoptions->linspace_spacemanager);
+    gt_linspace_management_delete(querymatchoutoptions->linspace_spacemanager);
     gt_scorehandler_delete(querymatchoutoptions->linspace_scorehandler);
     polishing_info_delete(querymatchoutoptions->pol_info);
     gt_free(querymatchoutoptions);
@@ -577,7 +577,7 @@ bool gt_querymatchoutoptions_alignment_prepare(GtQuerymatchoutoptions
 #else
         (void)
 #endif
-        gt_computelinearspace_generic(
+        gt_linearalign_compute_generic(
                               querymatchoutoptions->linspace_spacemanager,
                               querymatchoutoptions->linspace_scorehandler,
                               querymatchoutoptions->alignment,

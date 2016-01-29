@@ -34,7 +34,7 @@ struct GtLinspaceManagement{
   GtMaxcoordvalue *maxscoordvaluespace;
 };
 
-GtLinspaceManagement* gt_linspaceManagement_new()
+GtLinspaceManagement* gt_linspace_management_new()
 {
   GtLinspaceManagement *spacemanager;
   spacemanager = gt_malloc(sizeof(*spacemanager));
@@ -51,7 +51,7 @@ GtLinspaceManagement* gt_linspaceManagement_new()
   return spacemanager;
 }
 
-void gt_linspaceManagement_delete(GtLinspaceManagement *spacemanager)
+void gt_linspace_management_delete(GtLinspaceManagement *spacemanager)
 {
   if (spacemanager != NULL)
   {
@@ -59,13 +59,13 @@ void gt_linspaceManagement_delete(GtLinspaceManagement *spacemanager)
     gt_free(spacemanager->rTabspace);
     if (spacemanager->crosspointTabspace != NULL)
       gt_free(spacemanager->crosspointTabspace);
-    gt_max_delete(spacemanager->maxscoordvaluespace);
+    gt_maxcoordvalue_delete(spacemanager->maxscoordvaluespace);
     gt_free(spacemanager);
   }
 }
 
 /* space in bytes */
-size_t gt_linspaceManagement_get_spacepeak(const GtLinspaceManagement
+size_t gt_linspace_management_get_spacepeak(const GtLinspaceManagement
                                                                   *spacemanager)
 {
   gt_assert(spacemanager != NULL);
@@ -73,17 +73,17 @@ size_t gt_linspaceManagement_get_spacepeak(const GtLinspaceManagement
 }
 
 /* resize space */
-static void gt_linspaceManagement_check_generic(GtLinspaceManagement
-                                                *spacemanager,
-                                                GtUword ulen, GtUword vlen,
-                                                size_t valuesize,
-                                                size_t rtabsize,
-                                                size_t crosspointsize,
-                                                bool local)
+static void gt_linspace_management_check_generic(GtLinspaceManagement
+                                                 *spacemanager,
+                                                 GtUword ulen, GtUword vlen,
+                                                 size_t valuesize,
+                                                 size_t rtabsize,
+                                                 size_t crosspointsize,
+                                                 bool local)
 {
   size_t space = 0, localspace = 0; /* space in bytes */
   /*if (spacemanager == NULL)
-    spacemanager = gt_new_linspaceManagement();*/
+    spacemanager = gt_new_linspace_management();*/
 
   gt_assert(spacemanager != NULL);
 
@@ -109,9 +109,9 @@ static void gt_linspaceManagement_check_generic(GtLinspaceManagement
   if (local)
   {
     if (spacemanager->maxscoordvaluespace == NULL)
-      spacemanager->maxscoordvaluespace = gt_max_new();
+      spacemanager->maxscoordvaluespace = gt_maxcoordvalue_new();
     else
-      gt_max_reset(spacemanager->maxscoordvaluespace);
+      gt_maxcoordvalue_reset(spacemanager->maxscoordvaluespace);
   }
   if (spacemanager->maxscoordvaluespace != NULL)
     localspace = 2 * sizeof (GtUwordPair) + sizeof (GtWord);
@@ -125,13 +125,13 @@ static void gt_linspaceManagement_check_generic(GtLinspaceManagement
     spacemanager->spacepeak = space;
 }
 
-void gt_linspaceManagement_check(GtLinspaceManagement *spacemanager,
-                                 GtUword ulen, GtUword vlen,
-                                 size_t valuesize,
-                                 size_t rtabsize,
-                                 size_t crosspointsize)
+void gt_linspace_management_check(GtLinspaceManagement *spacemanager,
+                                  GtUword ulen, GtUword vlen,
+                                  size_t valuesize,
+                                  size_t rtabsize,
+                                  size_t crosspointsize)
 {
-  gt_linspaceManagement_check_generic(spacemanager,
+  gt_linspace_management_check_generic(spacemanager,
                               ulen, vlen,
                               valuesize,
                               rtabsize,
@@ -140,15 +140,15 @@ void gt_linspaceManagement_check(GtLinspaceManagement *spacemanager,
   spacemanager->ulen = ulen;
 }
 
-void  gt_linspaceManagement_check_local(GtLinspaceManagement *spacemanager,
-                                        GtUword ulen, GtUword vlen,
-                                        size_t valuesize, size_t rstabsize)
+void  gt_linspace_management_check_local(GtLinspaceManagement *spacemanager,
+                                         GtUword ulen, GtUword vlen,
+                                         size_t valuesize, size_t rstabsize)
 {
-  gt_linspaceManagement_check_generic(spacemanager,
-                              ulen, vlen,
-                              valuesize,
-                              rstabsize,
-                              0, true);
+  gt_linspace_management_check_generic(spacemanager,
+                                       ulen, vlen,
+                                       valuesize,
+                                       rstabsize,
+                                       0, true);
   spacemanager->ulen = ulen;
 }
 
@@ -164,36 +164,37 @@ static bool checksquare(GtLinspaceManagement *spacemanager,
   if ((ulen+1)*(vlen+1)*valuesize <= spacemanager->valueTabsize)
   {
     if (local)
-      gt_max_reset(spacemanager->maxscoordvaluespace);
+      gt_maxcoordvalue_reset(spacemanager->maxscoordvaluespace);
     return true;
   }
   else if ((ulen+1)*(vlen+1) <= (spacemanager->ulen+1)*TSfactor)
   {
     if (!local)
     {
-      gt_linspaceManagement_check_generic(spacemanager,(ulen+1)*(vlen+1)-1,
-                                          vlen,valuesize,rsize,0,false);
+      gt_linspace_management_check_generic(spacemanager,(ulen+1)*(vlen+1)-1,
+                                           vlen,valuesize,rsize,0,false);
     }
     else
     {
-       gt_linspaceManagement_check_generic(spacemanager,(ulen+1)*(vlen+1)-1,
-                                           vlen,valuesize,rsize,0,true);
+       gt_linspace_management_check_generic(spacemanager,(ulen+1)*(vlen+1)-1,
+                                            vlen,valuesize,rsize,0,true);
     }
     return true;
   }
   return false;
 }
 
-bool gt_linspaceManagement_checksquare(GtLinspaceManagement *spacemanager,
-                                       GtUword ulen,
-                                       GtUword vlen,
-                                       size_t valuesize,
-                                       size_t rsize)
+bool gt_linspace_management_checksquare(GtLinspaceManagement *spacemanager,
+                                        GtUword ulen,
+                                        GtUword vlen,
+                                        size_t valuesize,
+                                        size_t rsize)
 {
   return checksquare(spacemanager, ulen, vlen, valuesize, rsize,false);
 }
 
-bool gt_linspaceManagement_checksquare_local(GtLinspaceManagement *spacemanager,
+bool gt_linspace_management_checksquare_local(
+                                             GtLinspaceManagement *spacemanager,
                                              GtUword ulen,
                                              GtUword vlen,
                                              size_t valuesize,
@@ -202,14 +203,14 @@ bool gt_linspaceManagement_checksquare_local(GtLinspaceManagement *spacemanager,
   return checksquare(spacemanager, ulen, vlen, valuesize, rsize,true);
 }
 
-void gt_linspaceManagement_set_ulen(GtLinspaceManagement *spacemanager,
-                                    GtUword ulen)
+void gt_linspace_management_set_ulen(GtLinspaceManagement *spacemanager,
+                                     GtUword ulen)
 {
   gt_assert(spacemanager != NULL);
   spacemanager->ulen = ulen;
 }
 
-void *gt_linspaceManagement_get_valueTabspace(const GtLinspaceManagement
+void *gt_linspace_management_get_valueTabspace(const GtLinspaceManagement
                                                                   *spacemanager)
 {
   if (spacemanager != NULL)
@@ -217,7 +218,7 @@ void *gt_linspaceManagement_get_valueTabspace(const GtLinspaceManagement
   return NULL;
 }
 
-void *gt_linspaceManagement_get_rTabspace(const GtLinspaceManagement
+void *gt_linspace_management_get_rTabspace(const GtLinspaceManagement
                                                                   *spacemanager)
 {
   if (spacemanager != NULL)
@@ -225,7 +226,7 @@ void *gt_linspaceManagement_get_rTabspace(const GtLinspaceManagement
   return NULL;
 }
 
-void *gt_linspaceManagement_get_crosspointTabspace(const GtLinspaceManagement
+void *gt_linspace_management_get_crosspointTabspace(const GtLinspaceManagement
                                                                   *spacemanager)
 {
   if (spacemanager != NULL)
@@ -233,7 +234,7 @@ void *gt_linspaceManagement_get_crosspointTabspace(const GtLinspaceManagement
   return NULL;
 }
 
-size_t gt_linspaceManagement_get_valueTabsize(const GtLinspaceManagement
+size_t gt_linspace_management_get_valueTabsize(const GtLinspaceManagement
                                                                   *spacemanager)
 {
   gt_assert(spacemanager != NULL);
@@ -241,7 +242,7 @@ size_t gt_linspaceManagement_get_valueTabsize(const GtLinspaceManagement
 }
 
 /* space for GtMaxcoordvalue struct */
-void *gt_linspaceManagement_get_maxspace(const GtLinspaceManagement
+void *gt_linspace_management_get_maxspace(const GtLinspaceManagement
                                                                  *spacemanager)
 {
   if (spacemanager != NULL)
@@ -255,7 +256,7 @@ static inline bool check(const GtLinspaceManagement *spacemanager,
   return ((ulen+1)*(vlen+1)*sizeof(GtUword) <= spacemanager->valueTabsize);
 }
 
-GtUword **gt_linspaceManagement_change_to_square(GtLinspaceManagement
+GtUword **gt_linspace_management_change_to_square(GtLinspaceManagement
                                                  *spacemanager,
                                                  GtUword ulen, GtUword vlen)
 {
@@ -263,8 +264,8 @@ GtUword **gt_linspaceManagement_change_to_square(GtLinspaceManagement
   GtUword idx;
   gt_assert(check(spacemanager, ulen, vlen));
 
-  E = gt_linspaceManagement_get_rTabspace(spacemanager);
-  *E = gt_linspaceManagement_get_valueTabspace(spacemanager);
+  E = gt_linspace_management_get_rTabspace(spacemanager);
+  *E = gt_linspace_management_get_valueTabspace(spacemanager);
 
   for (idx=1;idx<ulen+1;idx++)
     E[idx]=E[idx-1]+vlen+1;
@@ -272,7 +273,7 @@ GtUword **gt_linspaceManagement_change_to_square(GtLinspaceManagement
   return E;
 }
 
-void gt_linspaceManagement_set_TSfactor(GtLinspaceManagement *spacemanager,
+void gt_linspace_management_set_TSfactor(GtLinspaceManagement *spacemanager,
                                         GtUword timesquarefactor)
 {
   gt_assert(spacemanager != NULL);
