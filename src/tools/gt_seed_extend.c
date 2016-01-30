@@ -502,7 +502,7 @@ static int gt_seed_extend_runner(GT_UNUSED int argc,
     extendgreedy = false;
   }
 
-  if (arguments->dbs_verify || arguments->verbose) {
+  if (arguments->verbose) {
     int idx;
     bool minid_out = false, history_out = false;
 
