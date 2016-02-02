@@ -257,14 +257,14 @@ static int write_pdom(GtLTRdigestFileOutStream *ls, GtArray *pdoms,
 
   (void) snprintf(buffer, (size_t) (GT_MAXFILENAMELEN-1), "%s_pdom_%s.fas",
                   ls->fileprefix, pdomname);
-  seqfile = gt_file_xopen(buffer, "w+");
+  seqfile = gt_file_xopen(buffer, "a+");
 
   /* get protein alignment output file */
   if (ls->write_pdom_alignments)
   {
     (void) snprintf(buffer, (size_t) (GT_MAXFILENAMELEN-1), "%s_pdom_%s.ali",
                     ls->fileprefix, pdomname);
-    alifile = gt_file_xopen(buffer, "w+");
+    alifile = gt_file_xopen(buffer, "a+");
   }
 
   /* get amino acid sequence output file */
@@ -273,7 +273,7 @@ static int write_pdom(GtLTRdigestFileOutStream *ls, GtArray *pdoms,
     (void) snprintf(buffer, (size_t) (GT_MAXFILENAMELEN-1),
                     "%s_pdom_%s_aa.fas",
                     ls->fileprefix, pdomname);
-    aafile = gt_file_xopen(buffer, "w+");
+    aafile = gt_file_xopen(buffer, "a+");
   }
 
   if (gt_array_size(pdoms) > 1UL)

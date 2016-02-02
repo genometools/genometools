@@ -459,6 +459,9 @@ if $gttestdata then
       if !File.exists?("result4_pdom_RVT_1_aa.fas") then
         raise TestFailed, "file \"result4_pdom_RVT_1_aa.fas\" does not exist"
       end
+      if !(`grep ">" result4_pdom_RVT_1_aa.fas | wc -l`.to_i > 1) then
+        raise TestFailed, "file \"result4_pdom_RVT_1_aa.fas\" only contains one sequence"
+      end
     end
   end
 
