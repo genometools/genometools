@@ -440,7 +440,8 @@ static GtUword gt_diagbandseed_process_seeds(const GtEncseq *aencseq,
                                   GtUword mincoverage,
                                   GtUword amaxlen,
                                   GtUword bmaxlen,
-                                  bool reverse)
+                                  bool reverse,
+                                  bool use_apos)
 {
   GtDiagbandseedScore *score = NULL;
   GtDiagbandseedPosition *lastp = NULL;
@@ -541,14 +542,14 @@ static GtUword gt_diagbandseed_process_seeds(const GtEncseq *aencseq,
       if ((GtUword)MAX(score[diag + 2], score[diag]) + (GtUword)score[diag + 1]
           >= mincoverage)
       {
-        /* relative seed start position in B */
+        /* relative seed start position in A and B */
         const GtUword bstart = (GtUword) (idx->bpos + 1 - seedlength);
+        const GtUword astart = (GtUword) (idx->apos + 1 - seedlength);
 
         if (firstinrange ||
-            !gt_querymatch_overlap(info_querymatch.querymatchspaceptr,bstart))
+            !gt_querymatch_overlap(info_querymatch.querymatchspaceptr,
+                                   astart, bstart, use_apos))
         {
-          /* relative seed start position in A */
-          const GtUword astart = (GtUword) (idx->apos + 1 - seedlength);
           /* extend seed */
           const GtQuerymatch *querymatch = NULL;
           if (aencseq == bencseq) {
@@ -1070,7 +1071,8 @@ int gt_diagbandseed_run(const GtEncseq *aencseq,
                                       arg->mincoverage,
                                       amaxlen,
                                       bmaxlen,
-                                      arg->nofwd);
+                                      arg->nofwd,
+                                      arg->use_apos);
     GT_FREEARRAY(&mlist, GtDiagbandseedSeedPair);
     if (!had_err && arg->verbose &&
         (arg->extendgreedyinfo != NULL || arg->extendxdropinfo != NULL)) {
@@ -1119,7 +1121,8 @@ int gt_diagbandseed_run(const GtEncseq *aencseq,
                                       arg->mincoverage,
                                       amaxlen,
                                       bmaxlen,
-                                      true);
+                                      true,
+                                      arg->use_apos);
     GT_FREEARRAY(&mlist_rev, GtDiagbandseedSeedPair);
     if (!had_err && arg->verbose &&
         (arg->extendgreedyinfo != NULL || arg->extendxdropinfo != NULL)) {

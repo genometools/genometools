@@ -52,8 +52,11 @@ def calculateratio(repfindmatches, seedextmatches)
 end
 
 if __FILE__ == $0
-  if ARGV.size != 3 then
-    puts "Usage: #{$0} <referencefile> <queryfile> <leastlen>"
+  use_apos = ""
+  if ARGV.size == 4 and ARGV[3] == "a" then
+    use_apos = "-use-apos "
+  elsif ARGV.size != 3 then
+    puts "Usage: #{$0} <referencefile> <queryfile> <leastlen> [a]"
     exit 1
   end
   referencefile = ARGV[0]
@@ -70,11 +73,11 @@ if __FILE__ == $0
                  "#{filedir}/query #{queryfile}")
   # run repfind and seed_extend
   makesystemcall("bin/gt repfind -ii #{filedir}/reference -q #{queryfile} " +
-                 "-l #{leastlen} > #{filedir}/repfind.out")
+                 "-l #{leastlen} -p -f > #{filedir}/repfind.out")
   makesystemcall("bin/gt seed_extend -ii #{filedir}/reference " +
                  "-qii #{filedir}/query -l #{leastlen} -mincoverage 1 " +
                  "-seedlength #{[leastlen, 32].min} -minidentity 99 " +
-                 "> #{filedir}/seedext.out")
+                 "#{use_apos} > #{filedir}/seedext.out")
   # compare results
   repfindmatches = readmatchesfromfile("#{filedir}/repfind.out")
   seedextmatches = readmatchesfromfile("#{filedir}/seedext.out")
