@@ -12,39 +12,46 @@ def makesystemcall(argstring, proceed=false)
   end
 end
 
-# sort criteria for alignment list
-def matchsortfunc(a, b)
-  if a[:seq1] != b[:seq1] then return a[:seq1] <=> b[:seq1] end
-  if a[:seq2] != b[:seq2] then return a[:seq2] <=> b[:seq2] end
-  if a[:start1] != b[:start1] then
-    return a[:start1] <=> b[:start1]
+# binary search and sort decisions
+def comparefunc(mem, ali, sorting=false)
+  if mem[:seq1] != ali[:seq1] then return mem[:seq1] <=> ali[:seq1] end
+  if mem[:seq2] != ali[:seq2] then return mem[:seq2] <=> ali[:seq2] end
+  if sorting then
+    return mem[:start1] <=> ali[:start1]
+  elsif mem[:start1] < ali[:start1] then  # alignment starts behind MEM
+    return -1
   else
-    return a[:start2] <=> b[:start2]
+    return 0
   end
-end
-
-# binary search decisions
-def intervalsearchfunc(a, b)
-  if a[:seq1] != b[:seq1] then return -1 * (a[:seq1] <=> b[:seq1]) end
-  if a[:seq2] != b[:seq2] then return -1 * (a[:seq2] <=> b[:seq2]) end
-  if a[:start1] > b[:start1] then return +1 end # too large
-  if a[:start1]+a[:len1] < b[:start1]+b[:len1] then return -1 end # too small
-  if a[:start2] > b[:start2] then return +1 end # too large
-  if a[:start2]+a[:len2] < b[:start2]+b[:len2] then return -1 end # too small
-  return 0 # a contains b
 end
 
 def calculateratio(repfindmatches, seedextmatches)
   miss = 0
   succ = 0
-  alignments = seedextmatches.values.sort{|a,b|matchsortfunc(a,b)}
+  alignments = seedextmatches.values.sort{|a,b|comparefunc(a,b,true)}
   repfindmatches.each_value{|mem|
-    found = alignments.bsearch{|ali| intervalsearchfunc(ali, mem)}
-    if found.nil? then
-      miss += 1
-      #puts "miss(#{mem[:seq1]},#{mem[:seq2]},#{mem[:start1]},#{mem[:start2]})"
-    else
+    found = false
+    idx = (0...alignments.size).bsearch{|ali| comparefunc(mem, alignments[ali])}
+    if not idx.nil? then
+      while idx >= 0 and comparefunc(mem, alignments[idx]) == 0
+        idx -= 1
+      end
+      idx += 1
+      while not found and comparefunc(mem, alignments[idx]) == 0
+        found = (alignments[idx][:start1] + alignments[idx][:len1] >=
+                 mem[:start1] + mem[:len1] and
+                 alignments[idx][:start2] <= mem[:start2] and
+                 alignments[idx][:start2] + alignments[idx][:len2] >=
+                 mem[:start2] + mem[:len2])
+        idx += 1
+      end
+    end
+    if found then
       succ += 1
+    else
+      miss += 1
+      puts "MEM not found (#{mem[:seq1]}, #{mem[:seq2]}, " +
+           "#{mem[:start1]}+#{mem[:len1]}, #{mem[:start2]}+#{mem[:len2]})"
     end
   }
   puts "success=#{succ}  miss=#{miss}  total=#{repfindmatches.size}  " +
@@ -80,7 +87,11 @@ if __FILE__ == $0
                  "#{use_apos} > #{filedir}/seedext.out")
   # compare results
   repfindmatches = readmatchesfromfile("#{filedir}/repfind.out")
-  seedextmatches = readmatchesfromfile("#{filedir}/seedext.out")
-  calculateratio(repfindmatches, seedextmatches)
+  if repfindmatches.size > 0 then
+    seedextmatches = readmatchesfromfile("#{filedir}/seedext.out")
+    calculateratio(repfindmatches, seedextmatches)
+  else
+    puts "no results"
+  end
 end
 

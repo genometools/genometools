@@ -177,7 +177,7 @@ end
 Name "gt seed_extend: artificial sequences"
 Keywords "gt_seed_extend artificial"
 Test do
-  for seed in seeds do
+  for seed in seeds[0..6] do
     for minidentity in [90, 80] do
       run "#{$scriptsdir}gen-randseq.rb --minidentity #{minidentity} " +
       "--seedlength 14 --length 1000 --mode seeded --seed #{seed} " +

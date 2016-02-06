@@ -503,17 +503,17 @@ double gt_querymatch_error_rate(GtUword distance,GtUword alignedlen)
 }
 
 bool gt_querymatch_overlap(const GtQuerymatch *querymatch,
-                           GtUword nextseed_db_start_relative,
-                           GtUword nextseed_query_start_relative,
+                           GtUword nextseed_db_end_relative,
+                           GtUword nextseed_query_end_relative,
                            bool use_db_pos)
 {
   gt_assert(querymatch != NULL);
-  return querymatch->querystart + querymatch->querylen >=
-         nextseed_query_start_relative && (!use_db_pos ||
-         querymatch->dbstart_relative + querymatch->dblen >=
-         nextseed_db_start_relative)
-           ? true /* overlap with querymatch */
-           : false; /* next seeds starts after curren extension */
+  return querymatch->querystart + querymatch->querylen >
+         nextseed_query_end_relative && (!use_db_pos ||
+         querymatch->dbstart_relative + querymatch->dblen >
+         nextseed_db_end_relative)
+           ? true   /* overlap with querymatch */
+           : false; /* next seed ends after current extension */
 }
 
 static int gt_querymatch_compare_ascending(const void *va,const void *vb)
