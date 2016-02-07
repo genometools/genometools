@@ -119,7 +119,7 @@ gt_compreads_decompress_option_parser_new(void *tool_arguments)
   gt_option_parser_add_option(op, option);
 
   option = gt_option_new_uword("width",
-                               "set width of output, 0 disables formating. "
+                               "set width of output, 0 disables formatting. "
                                "line breaks in quality strings can cause "
                                "problems with parsers, use with care",
                                &arguments->width, 0);

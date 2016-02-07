@@ -109,7 +109,7 @@ static GtOptionParser* gt_kmer_database_option_parser_new(void *tool_arguments)
   gt_option_imply(option_use_cutoff, option);
 
   /* -set_cutoff */
-  option = gt_option_new_uword_min("set_cutoff", "kmers occuring more often "
+  option = gt_option_new_uword_min("set_cutoff", "kmers occurring more often "
                                    "than this value won't be saved",
                                    &arguments->cutoff_value, (GtUword) 30,
                                    (GtUword) 1);
