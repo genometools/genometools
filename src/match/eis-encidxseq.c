@@ -50,7 +50,7 @@ const char *EISIntegrityCheckResultStrings[] =
   {                                                              \
     switch (retcode) {                                           \
     case EIS_INTEGRITY_CHECK_INVALID_SYMBOL:                     \
-      fprintf(stderr, "Comparision failed at position "GT_WU""   \
+      fprintf(stderr, "Comparison failed at position "GT_WU""   \
               ", reference symbol: %u, symbol read: %u\n",       \
               pos, symOrig, symEnc);                             \
       gt_error_set(err, "Invalid symbol encountered.");          \
