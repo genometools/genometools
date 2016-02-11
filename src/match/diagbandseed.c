@@ -38,6 +38,7 @@
 #include "match/sfx-suffixer.h"
 
 #define GT_DIAGBANDSEED_SEQNUM_UNDEF UINT_MAX
+/* #define GT_DIAGBANDSEED_SEEDHISTOGRAM 100 */
 
 typedef uint32_t GtDiagbandseedPosition;
 typedef uint32_t GtDiagbandseedSeqnum;
@@ -459,6 +460,11 @@ static GtUword gt_diagbandseed_process_seeds(const GtEncseq *aencseq,
     = (reverse && (extendgreedyinfo != NULL ||
                    extendxdropinfo != NULL)) ? GT_READMODE_REVCOMPL
                                              : GT_READMODE_FORWARD;
+#ifdef GT_DIAGBANDSEED_SEEDHISTOGRAM
+  GtUword *seedhistogram = (GtUword *)gt_calloc(GT_DIAGBANDSEED_SEEDHISTOGRAM,
+                                                sizeof *seedhistogram);
+  GtUword seedcount = 0;
+#endif
 
   gt_assert(mlist != NULL);
   mlen = mlist->nextfreeGtDiagbandseedSeedPair; /* mlist length  */
@@ -545,6 +551,9 @@ static GtUword gt_diagbandseed_process_seeds(const GtEncseq *aencseq,
         /* relative seed start position in A and B */
         const GtUword bstart = (GtUword) (idx->bpos + 1 - seedlength);
         const GtUword astart = (GtUword) (idx->apos + 1 - seedlength);
+#ifdef GT_DIAGBANDSEED_SEEDHISTOGRAM
+        seedcount++;
+#endif
 
         if (firstinrange ||
             !gt_querymatch_overlap(info_querymatch.querymatchspaceptr,
@@ -594,10 +603,27 @@ static GtUword gt_diagbandseed_process_seeds(const GtEncseq *aencseq,
       score[diag + 1] = 0;
       lastp[diag] = 0;
     }
+    
+#ifdef GT_DIAGBANDSEED_SEEDHISTOGRAM
+    seedhistogram[MIN(GT_DIAGBANDSEED_SEEDHISTOGRAM - 1, seedcount)]++;
+    seedcount = 0;
+#endif
   }
   gt_querymatch_delete(info_querymatch.querymatchspaceptr);
   gt_free(score);
   gt_free(lastp);
+
+#ifdef GT_DIAGBANDSEED_SEEDHISTOGRAM
+  printf("# seed histogram:");
+  for (seedcount = 0; seedcount < GT_DIAGBANDSEED_SEEDHISTOGRAM; seedcount++) {
+    if (seedcount % 10 == 0) {
+      printf("\n#\t");
+    }
+    printf(GT_WU "\t", seedhistogram[seedcount]);
+  }
+  printf("\n");
+  gt_free(seedhistogram);
+#endif
   return count_extensions;
 }
 
