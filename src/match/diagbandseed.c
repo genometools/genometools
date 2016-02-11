@@ -327,28 +327,33 @@ static void gt_diagbandseed_merge(GtArrayGtDiagbandseedSeedPair *mlist,
         const GtDiagbandseedKmerPos *asegm_end = aiter, *bsegm_end = biter;
         frequency = MIN(maxgram, frequency);
         gt_assert(frequency > 0);
-        for (aiter = aptr; aiter < asegm_end; aiter++) {
-          for (biter = bptr; biter < bsegm_end; biter++) {
-            if (!selfcomp ||
-                aiter->seqnum < biter->seqnum ||
-                (aiter->seqnum == biter->seqnum &&
-                 aiter->endpos + endposdiff <= biter->endpos)) {
-              /* no duplicates from the same dataset */
-              if (histogram == NULL) {
-                /* save SeedPair in mlist */
-                GtDiagbandseedSeedPair *seedptr = NULL;
-                GT_GETNEXTFREEINARRAY(seedptr,
-                                      mlist,
-                                      GtDiagbandseedSeedPair,
-                                      array_incr + 0.2 *
-                                      mlist->allocatedGtDiagbandseedSeedPair);
-                seedptr->bseqnum = biter->seqnum;
-                seedptr->aseqnum = aiter->seqnum;
-                seedptr->bpos = biter->endpos;
-                seedptr->apos = aiter->endpos;
-              } else {
-                /* count seed pair frequency in histogram */
-                histogram[frequency - 1]++;
+        if (histogram != NULL && !selfcomp) {
+          histogram[frequency - 1] += (GtUword)(asegm_end - aptr) *
+                                      (GtUword)(bsegm_end - bptr);
+        } else {
+          for (aiter = aptr; aiter < asegm_end; aiter++) {
+            for (biter = bptr; biter < bsegm_end; biter++) {
+              if (!selfcomp ||
+                  aiter->seqnum < biter->seqnum ||
+                  (aiter->seqnum == biter->seqnum &&
+                   aiter->endpos + endposdiff <= biter->endpos)) {
+                /* no duplicates from the same dataset */
+                if (histogram == NULL) {
+                  /* save SeedPair in mlist */
+                  GtDiagbandseedSeedPair *seedptr = NULL;
+                  GT_GETNEXTFREEINARRAY(seedptr,
+                                        mlist,
+                                        GtDiagbandseedSeedPair,
+                                        array_incr + 0.2 *
+                                        mlist->allocatedGtDiagbandseedSeedPair);
+                  seedptr->bseqnum = biter->seqnum;
+                  seedptr->aseqnum = aiter->seqnum;
+                  seedptr->bpos = biter->endpos;
+                  seedptr->apos = aiter->endpos;
+                } else {
+                  /* count seed pair frequency in histogram */
+                  histogram[frequency - 1]++;
+                }
               }
             }
           }
@@ -603,7 +608,7 @@ static GtUword gt_diagbandseed_process_seeds(const GtEncseq *aencseq,
       score[diag + 1] = 0;
       lastp[diag] = 0;
     }
-    
+
 #ifdef GT_DIAGBANDSEED_SEEDHISTOGRAM
     seedhistogram[MIN(GT_DIAGBANDSEED_SEEDHISTOGRAM - 1, seedcount)]++;
     seedcount = 0;

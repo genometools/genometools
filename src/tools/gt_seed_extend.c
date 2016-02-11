@@ -413,8 +413,8 @@ static GtOptionParser* gt_seed_extend_option_parser_new(void *tool_arguments)
                               false);
   gt_option_is_development_option(option);
   gt_option_parser_add_option(op, option);
-  
-  /* -no-dboverlap */
+
+  /* -use-apos */
   option = gt_option_new_bool("use-apos",
                               "Discard a seed only if both apos and bpos "
                               "overlap with previous alignment",
