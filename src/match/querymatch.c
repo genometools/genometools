@@ -510,8 +510,9 @@ bool gt_querymatch_overlap(const GtQuerymatch *querymatch,
   gt_assert(querymatch != NULL);
   return querymatch->querystart + querymatch->querylen >
          nextseed_query_end_relative && (!use_db_pos ||
-         querymatch->dbstart_relative + querymatch->dblen >
-         nextseed_db_end_relative)
+         (querymatch->dbstart_relative + querymatch->dblen >
+          nextseed_db_end_relative && nextseed_db_end_relative >=
+          querymatch->dbstart_relative + querymatch->seedlen))
            ? true   /* overlap with querymatch */
            : false; /* next seed ends after current extension */
 }
