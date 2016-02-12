@@ -177,7 +177,7 @@ end
 Name "gt seed_extend: artificial sequences"
 Keywords "gt_seed_extend artificial"
 Test do
-  for seed in seeds[0..6] do
+  for seed in seeds do
     for minidentity in [90, 80] do
       run "#{$scriptsdir}gen-randseq.rb --minidentity #{minidentity} " +
       "--seedlength 14 --length 1000 --mode seeded --seed #{seed} " +
@@ -186,9 +186,12 @@ Test do
       run_test "#{$bin}gt seed_extend -extendgreedy -l 900 " +
                "-minidentity #{minidentity} -ii longseeded"
       # Check whether the correct number of alignments are found.
+      numalignments = `cat #{last_stdout} | wc -l`.to_i
       # (split db fasta header by '|' and add 1)
-      run "(( $(($(grep -o '|' <<< $(head -1 longseeded.fasta)|wc -l) + 1 )) " +
-          "== $(cat #{last_stdout} | wc -l) ))"
+      numseeds =  `grep -o '|' <<< $(head -1 longseeded.fasta) | wc -l`.to_i + 1
+      if numalignments < numseeds then
+        raise TestFailed, "did not find all alignments"
+      end
     end
   end
 end
