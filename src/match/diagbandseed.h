@@ -40,6 +40,7 @@ typedef struct {
   bool debug_seedpair;
   bool seed_display;
   bool extend_last;
+  bool use_apos;
   GtGreedyextendmatchinfo *extendgreedyinfo;
   GtXdropmatchinfo *extendxdropinfo;
   GtQuerymatchoutoptions *querymatchoutopt;

@@ -73,6 +73,7 @@ typedef struct {
   bool verbose;
   bool seed_display;
   bool extend_last;
+  bool use_apos;
 } GtSeedExtendArguments;
 
 static void* gt_seed_extend_arguments_new(void)
@@ -413,6 +414,15 @@ static GtOptionParser* gt_seed_extend_option_parser_new(void *tool_arguments)
   gt_option_is_development_option(option);
   gt_option_parser_add_option(op, option);
 
+  /* -use-apos */
+  option = gt_option_new_bool("use-apos",
+                              "Discard a seed only if both apos and bpos "
+                              "overlap with previous alignment",
+                              &arguments->use_apos,
+                              false);
+  gt_option_is_development_option(option);
+  gt_option_parser_add_option(op, option);
+
   /* -v */
   option = gt_option_new_verbose(&arguments->verbose);
   gt_option_parser_add_option(op, option);
@@ -502,7 +512,7 @@ static int gt_seed_extend_runner(GT_UNUSED int argc,
     extendgreedy = false;
   }
 
-  if (arguments->dbs_verify || arguments->verbose) {
+  if (arguments->verbose) {
     int idx;
     bool minid_out = false, history_out = false;
 
@@ -701,6 +711,7 @@ static int gt_seed_extend_runner(GT_UNUSED int argc,
     dbsarguments.debug_seedpair = arguments->dbs_debug_seedpair;
     dbsarguments.seed_display = arguments->seed_display;
     dbsarguments.extend_last = arguments->extend_last;
+    dbsarguments.use_apos = arguments->use_apos;
     dbsarguments.extendgreedyinfo = grextinfo;
     dbsarguments.extendxdropinfo = xdropinfo;
     dbsarguments.querymatchoutopt = querymatchoutopt;
