@@ -7,6 +7,26 @@ Test do
   run "diff #{last_stdout} #{$testdata}gt_seqorder_test_sort.fas"
 end
 
+Name "gt seqorder -sorthdr test"
+Keywords "gt_seqorder"
+Test do
+  seq = "gt_seqorder_test.fas"
+  run "#{$bin}gt encseq encode #$testdata#{seq}"
+  run_test "#{$bin}gt seqorder -sorthdr #{seq}"
+  run "diff #{last_stdout} #{$testdata}gt_seqorder_test_sorthdr.fas"
+end
+
+Name "gt seqorder -sorthdrnum test"
+Keywords "gt_seqorder"
+Test do
+  seq = "gt_seqorder_test.fas"
+  run "#{$bin}gt encseq encode #$testdata#{seq}"
+  run_test "#{$bin}gt seqorder -shuffle #{seq} > out"
+  run "#{$bin}gt encseq encode out"
+  run_test "#{$bin}gt seqorder -sorthdrnum #{seq}"
+  run "diff #{last_stdout} #{$testdata}gt_seqorder_test.fas"
+end
+
 Name "gt seqorder -revsort test"
 Keywords "gt_seqorder"
 Test do
