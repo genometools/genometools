@@ -17,8 +17,11 @@
 
 #include "core/encseq.h"
 #include "core/fasta_separator.h"
+#include "core/qsort_r_api.h"
 #include "core/ma.h"
 #include "core/mathsupport.h"
+#include "core/minmax.h"
+#include "core/parseutils.h"
 #include "core/unused_api.h"
 #include "core/warning_api.h"
 #include "core/xansi_api.h"
@@ -28,7 +31,7 @@
 #include "tools/gt_seqorder.h"
 
 typedef struct {
-  bool invert, sort, revsort, shuffle;
+  bool invert, sort, revsort, shuffle, sorthdr, sorthdrnum;
 } GtSeqorderArguments;
 
 static void* gt_seqorder_arguments_new(void)
@@ -48,11 +51,13 @@ static GtOptionParser* gt_seqorder_option_parser_new(void *tool_arguments)
 {
   GtSeqorderArguments *arguments = tool_arguments;
   GtOptionParser *op;
-  GtOption *invert_option, *sort_option, *revsort_option, *shuffle_option;
+  GtOption *invert_option, *sort_option, *sorthdr_option, *sorthdrnum_option,
+           *revsort_option, *shuffle_option;
   gt_assert(arguments);
 
   /* init */
-  op = gt_option_parser_new("(-invert|-sort|-revsort|-shuffle) encseq",
+  op = gt_option_parser_new("(-invert|-sort|-revsort|-shuffle|-sorthdr"
+                            "|-sorthdrnum) encseq",
                             "Output sequences as MultiFasta in specified "
                             "order.");
 
@@ -76,6 +81,27 @@ static GtOptionParser* gt_seqorder_option_parser_new(void *tool_arguments)
   gt_option_exclude(revsort_option, invert_option);
   gt_option_exclude(revsort_option, sort_option);
   gt_option_parser_add_option(op, revsort_option);
+
+  /* -sorthdr */
+  sorthdr_option = gt_option_new_bool("sorthdr",
+                                      "sort sequences lexicographically "
+                                      "by sequence header",
+                                      &arguments->sorthdr, false);
+  gt_option_exclude(sorthdr_option, sort_option);
+  gt_option_exclude(sorthdr_option, invert_option);
+  gt_option_exclude(sorthdr_option, revsort_option);
+  gt_option_parser_add_option(op, sorthdr_option);
+
+    /* -sorthdrnum */
+  sorthdrnum_option = gt_option_new_bool("sorthdrnum",
+                                         "sort sequences numerically "
+                                         "by sequence header",
+                                         &arguments->sorthdrnum, false);
+  gt_option_exclude(sorthdrnum_option, sort_option);
+  gt_option_exclude(sorthdrnum_option, invert_option);
+  gt_option_exclude(sorthdrnum_option, revsort_option);
+  gt_option_exclude(sorthdrnum_option, sorthdr_option);
+  gt_option_parser_add_option(op, sorthdrnum_option);
 
   /* -shuffle */
   shuffle_option = gt_option_new_bool("shuffle", "shuffle sequences "
@@ -101,10 +127,11 @@ static int gt_seqorder_arguments_check(GT_UNUSED int rest_argc,
   gt_assert(arguments != NULL);
 
   if (!(arguments->invert || arguments->sort || arguments->revsort ||
-        arguments->shuffle))
+        arguments->shuffle || arguments->sorthdr || arguments->sorthdrnum))
   {
     had_err = 1;
-    gt_error_set(err, "order option needed: -invert|-sort|-revsort|-shuffle");
+    gt_error_set(err, "order option needed: -invert|-sort|-revsort|-shuffle|"
+                      "-sorthdr|-sorthdrnum");
   }
 
   return had_err;
@@ -136,6 +163,62 @@ static void gt_seqorder_get_shuffled_seqnums(GtUword nofseqs,
     seqnums[i] = seqnums[j];
     seqnums[j] = i;
   }
+}
+
+static int seqorder_str_compare_lex(const void *v1, const void *v2, void *data)
+{
+  GtUword n1 = *(GtUword*) v1,
+          n2 = *(GtUword*) v2,
+          desclen1, desclen2;
+  const char *desc1, *desc2;
+  int rval = 0;
+  desc1 = gt_encseq_description((GtEncseq*) data, &desclen1, n1);
+  desc2 = gt_encseq_description((GtEncseq*) data, &desclen2, n2);
+  rval = strncmp(desc1, desc2, MIN(desclen1, desclen2) * sizeof (char));
+  if (rval == 0)
+    rval = desclen1-desclen2;
+  return rval;
+}
+
+static int seqorder_str_compare_num(const void *v1, const void *v2, void *data)
+{
+  GtUword n1 = *(GtUword*) v1,
+          n2 = *(GtUword*) v2,
+          desclen1, desclen2,
+          anum, bnum;
+  int arval, brval, rval = 0;
+  const char *desc1, *desc2;
+  char buf[BUFSIZ];
+  desc1 = gt_encseq_description((GtEncseq*) data, &desclen1, n1);
+  desc2 = gt_encseq_description((GtEncseq*) data, &desclen2, n2);
+  (void) strncpy(buf, desc1, MIN(BUFSIZ, desclen1) * sizeof (char));
+  buf[desclen1] = '\0';
+  arval = gt_parse_uword(&anum, buf);
+  (void) strncpy(buf, desc2, MIN(BUFSIZ, desclen2) * sizeof (char));
+  buf[desclen2] = '\0';
+  brval = gt_parse_uword(&bnum, buf);
+  if (arval == 0 && brval == 0)
+    rval = anum-bnum;
+  else if (arval == 0)
+    return -1;
+  else if (brval == 0)
+    return 1;
+  else
+    rval = 0;
+  return rval;
+}
+
+static void gt_seqorder_get_hdrsorted_seqnums(const GtEncseq *encseq,
+                                              GtUword *seqnums,
+                                              GtCompareWithData cmpfunc)
+{
+  GtUword i;
+  gt_assert(encseq != NULL);
+
+  for (i = 0UL; i < gt_encseq_num_of_sequences(encseq); i++)
+    seqnums[i] = i;
+  (void) gt_qsort_r(seqnums, gt_encseq_num_of_sequences(encseq),
+                    sizeof (GtUword), (void*) encseq, cmpfunc);
 }
 
 static void gt_seqorder_output(GtUword seqnum, GtEncseq *encseq)
@@ -199,6 +282,26 @@ static int gt_seqorder_runner(GT_UNUSED int argc,
       GtUword *seqnums;
       seqnums = gt_malloc(sizeof (GtUword) * nofseqs);
       gt_seqorder_get_shuffled_seqnums(nofseqs, seqnums);
+      for (i = 0; i < nofseqs; i++)
+        gt_seqorder_output(seqnums[i], encseq);
+      gt_free(seqnums);
+    }
+    else if (arguments->sorthdr)
+    {
+      GtUword *seqnums;
+      seqnums = gt_malloc(sizeof (GtUword) * nofseqs);
+      gt_seqorder_get_hdrsorted_seqnums(encseq, seqnums,
+                                        seqorder_str_compare_lex);
+      for (i = 0; i < nofseqs; i++)
+        gt_seqorder_output(seqnums[i], encseq);
+      gt_free(seqnums);
+    }
+    else if (arguments->sorthdrnum)
+    {
+      GtUword *seqnums;
+      seqnums = gt_malloc(sizeof (GtUword) * nofseqs);
+      gt_seqorder_get_hdrsorted_seqnums(encseq, seqnums,
+                                        seqorder_str_compare_num);
       for (i = 0; i < nofseqs; i++)
         gt_seqorder_output(seqnums[i], encseq);
       gt_free(seqnums);
