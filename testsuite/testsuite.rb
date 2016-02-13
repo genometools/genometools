@@ -127,9 +127,10 @@ def with_environment(variables={})
 end
 
 def python_tests_runnable?
-  if `which python`.empty? then
-    return false
-  end
+  return false unless
+    ENV['PATH'].split(File::PATH_SEPARATOR).any? do |directory|
+      File.executable?(File.join(directory, "python"))
+    end
   require "open3"
   runline = "python #{$gtpython}/gt/dlload.py"
   with_environment({"PYTHONPATH" => $gtpython, \
