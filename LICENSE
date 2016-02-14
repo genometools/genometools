@@ -1,5 +1,5 @@
 All code of GenomeTools except src/core/msort.[ch], src/core/yarandom.[ch],
-and src/external/* is released under the following ICS license.
+and src/external/* is released under the following ISC license.
 It is functionally equivalent to a two-term BSD copyright with
 language removed that is made unnecessary by the Berne convention.
 See http://openbsd.org/policy.html for more information on copyrights.
