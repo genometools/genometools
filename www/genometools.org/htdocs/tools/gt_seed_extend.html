@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta http-equiv="Content-Type" content="application/xhtml+xml; charset=UTF-8" />
-<title>GenomeTools - manual page for GT-GTF_TO_GFF3(1)</title>
+<title>GenomeTools - manual page for GT-SEED_EXTEND(1)</title>
 <link rel="stylesheet" type="text/css" href="style.css">
 <link rel="stylesheet" href="..//style.css" type="text/css" />
 </head>
@@ -32,13 +32,13 @@
 <div class="sect1">
 <h2 id="_name">NAME</h2>
 <div class="sectionbody">
-<div class="paragraph"><p>gt-gtf_to_gff3 - Parse GTF2.2 file and convert it to GFF3.</p></div>
+<div class="paragraph"><p>gt-seed_extend - Calculate local alignments using the seed and extend algorithm.</p></div>
 </div>
 </div>
 <div class="sect1">
 <h2 id="_synopsis">SYNOPSIS</h2>
 <div class="sectionbody">
-<div class="paragraph"><p><strong>gt gtf_to_gff3</strong> [GTF_file]</p></div>
+<div class="paragraph"><p><strong>gt seed_extend</strong> [option &#8230;] encseq_basename [encseq_basename]</p></div>
 </div>
 </div>
 <div class="sect1">
@@ -46,43 +46,134 @@
 <div class="sectionbody">
 <div class="dlist"><dl>
 <dt class="hdlist1">
-<strong>-tidy</strong> [<em>yes|no</em>]
+<strong>-ii</strong> [<em>string</em>]
 </dt>
 <dd>
 <p>
-try to tidy the GTF file up during parsing (default: no)
+Input index for encseq encoded sequences
 </p>
 </dd>
 <dt class="hdlist1">
-<strong>-o</strong> [<em>filename</em>]
+<strong>-qii</strong> [<em>string</em>]
 </dt>
 <dd>
 <p>
-redirect output to specified file (default: undefined)
+Query input index (encseq)
 </p>
 </dd>
 <dt class="hdlist1">
-<strong>-gzip</strong> [<em>yes|no</em>]
+<strong>-seedlength</strong> [<em>value</em>]
 </dt>
 <dd>
 <p>
-write gzip compressed output file (default: no)
+Minimum length of a seed
+default: logarithm of input length to the basis alphabet size
 </p>
 </dd>
 <dt class="hdlist1">
-<strong>-bzip2</strong> [<em>yes|no</em>]
+<strong>-diagbandwidth</strong> [<em>value</em>]
 </dt>
 <dd>
 <p>
-write bzip2 compressed output file (default: no)
+Logarithm of diagonal band width (for filter) (default: 6)
 </p>
 </dd>
 <dt class="hdlist1">
-<strong>-force</strong> [<em>yes|no</em>]
+<strong>-mincoverage</strong> [<em>value</em>]
 </dt>
 <dd>
 <p>
-force writing to output file (default: no)
+Minimum coverage in two neighbouring diagonal bands (for filter)
+default: 2.5 x seedlength
+</p>
+</dd>
+<dt class="hdlist1">
+<strong>-maxfreq</strong> [<em>value</em>]
+</dt>
+<dd>
+<p>
+Maximum frequency of a k-mer (for filter) (default: undefined)
+</p>
+</dd>
+<dt class="hdlist1">
+<strong>-memlimit</strong> [<em>string</em>]
+</dt>
+<dd>
+<p>
+Maximum memory usage to determine the maximum frequency of a k-mer (for filter) (default: undefined)
+</p>
+</dd>
+<dt class="hdlist1">
+<strong>-extendxdrop</strong> [<em>value</em>]
+</dt>
+<dd>
+<p>
+Extend seed to both sides using xdrop algorithm, /noptional parameter specifies sensitivity (default: 97)
+</p>
+</dd>
+<dt class="hdlist1">
+<strong>-xdropbelow</strong> [<em>value</em>]
+</dt>
+<dd>
+<p>
+Specify xdrop cutoff score (0 means automatically defined depending on minidentity)
+</p>
+</dd>
+<dt class="hdlist1">
+<strong>-extendgreedy</strong> [<em>value</em>]
+</dt>
+<dd>
+<p>
+Extend seed to both sides using greedy algorithm,
+optional parameter specifies sensitivity (default: 97)
+</p>
+</dd>
+<dt class="hdlist1">
+<strong>-l</strong> [<em>value</em>]
+</dt>
+<dd>
+<p>
+Minimum alignment length (for seed extension) (default: undefined)
+</p>
+</dd>
+<dt class="hdlist1">
+<strong>-minidentity</strong> [<em>value</em>]
+</dt>
+<dd>
+<p>
+Minimum identity of matches (for seed extension) (default: 80)
+</p>
+</dd>
+<dt class="hdlist1">
+<strong>-a</strong> [<em>value</em>]
+</dt>
+<dd>
+<p>
+show alignments/sequences (optional argument is number of columns per line) (default: 70)
+</p>
+</dd>
+<dt class="hdlist1">
+<strong>-no-reverse</strong> [<em>yes|no</em>]
+</dt>
+<dd>
+<p>
+do not compute matches on reverse complemented strand (default: no)
+</p>
+</dd>
+<dt class="hdlist1">
+<strong>-no-forward</strong> [<em>yes|no</em>]
+</dt>
+<dd>
+<p>
+do not compute matches on forward strand (default: no)
+</p>
+</dd>
+<dt class="hdlist1">
+<strong>-v</strong> [<em>yes|no</em>]
+</dt>
+<dd>
+<p>
+be verbose (default: no)
 </p>
 </dd>
 <dt class="hdlist1">
