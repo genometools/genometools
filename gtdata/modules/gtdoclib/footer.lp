@@ -1,5 +1,5 @@
 <div id="footer">
-Copyright &copy; 2008-2013
+Copyright &copy; 2008-2016
 The <i>GenomeTools</i> authors.
 Last update: <%=os.date("%Y-%m-%d")%>
 </div>
