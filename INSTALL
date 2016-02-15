@@ -65,8 +65,8 @@ $ brew install pango
 To start the build process, invoke make as stated above.
 
 
-Building GenomeTools as a Universal Binary (on Mac OS X < v10.6):
------------------------------------------------------------------
+Building GenomeTools as a Universal Binary (on PPC systems with Mac OS X < v10.6):
+----------------------------------------------------------------------------------
 
 Invoke make as above with the argument universal=yes.
 Note that on later Mac OS X systems (those with an Intel CPU) the universal=yes
