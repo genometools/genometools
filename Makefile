@@ -16,17 +16,7 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #
 
-INCLUDEOPT:=-I$(CURDIR)/src -I$(CURDIR)/obj \
-            -I$(CURDIR)/src/external/zlib-1.2.8 \
-            -I$(CURDIR)/src/external/md5-1.1.2/src \
-            -I$(CURDIR)/src/external/lua-5.1.5/src \
-            -I$(CURDIR)/src/external/luafilesystem-1.5.0/src \
-            -I$(CURDIR)/src/external/lpeg-0.10.2 \
-            -I$(CURDIR)/src/external/expat-2.0.1/lib \
-            -I$(CURDIR)/src/external/bzip2-1.0.6 \
-            -I$(CURDIR)/src/external/samtools-0.1.18 \
-            -I$(CURDIR)/src/external/sqlite-3.8.7.1 \
-            -I$(CURDIR)/src/external/tre/include
+INCLUDEOPT:=-I$(CURDIR)/src -I$(CURDIR)/obj
 
 ifeq ($(shell pkg-config --version > /dev/null 2> /dev/null; echo $$?),0)
   HAS_PKGCONFIG:=yes
@@ -35,6 +25,48 @@ ifeq ($(shell pkg-config --version > /dev/null 2> /dev/null; echo $$?),0)
   OVERRIDE_PC_PATH:=PKG_CONFIG_PATH=$(OLD_PKG_CONFIG_PATH):/usr/local/lib/pkgconfig:/opt/X11/lib/pkgconfig
 else
   HAS_PKGCONFIG:=no
+endif
+
+# add necessary shared lib dependencies instead of building them ourselves
+ifeq ($(useshared),yes)
+  ifeq ($(HAS_PKGCONFIG),yes)
+    DEPLIBS:=-lbz2 \
+             $(shell $(OVERRIDE_PC_PATH) pkg-config --libs zlib) \
+             $(shell $(OVERRIDE_PC_PATH) pkg-config --libs expat) \
+             $(shell $(OVERRIDE_PC_PATH) pkg-config --libs lua-5.1) \
+             $(shell $(OVERRIDE_PC_PATH) pkg-config --libs lua5.1-lpeg) \
+             $(shell $(OVERRIDE_PC_PATH) pkg-config --libs lua5.1-md5) \
+             $(shell $(OVERRIDE_PC_PATH) pkg-config --libs lua5.1-filesystem) \
+             $(shell $(OVERRIDE_PC_PATH) pkg-config --libs lua5.1-des56) \
+             -lbam \
+             $(shell $(OVERRIDE_PC_PATH) pkg-config --libs tre) \
+             -lm -lpthread
+    INCLUDEOPT+=$(shell $(OVERRIDE_PC_PATH) pkg-config --cflags zlib) \
+                $(shell $(OVERRIDE_PC_PATH) pkg-config --cflags expat) \
+                $(shell $(OVERRIDE_PC_PATH) pkg-config --cflags lua-5.1) \
+                $(shell $(OVERRIDE_PC_PATH) pkg-config --cflags lua5.1-lpeg) \
+                $(shell $(OVERRIDE_PC_PATH) pkg-config --cflags lua5.1-md5) \
+                $(shell $(OVERRIDE_PC_PATH) pkg-config --cflags lua5.1-filesystem) \
+                $(shell $(OVERRIDE_PC_PATH) pkg-config --cflags lua5.1-des56) \
+                $(shell $(OVERRIDE_PC_PATH) pkg-config --cflags tre)
+  else
+    # Requested the use of shared libraries without having pkg-config.
+    # You are on your own.  Good luck.
+    DEPLIBS:=-lbz2 -lz -lexpat -llua5.1-lpeg -llua5.1 -llua5.1-md5 \
+             -llua5.1-filesystem -llua5.1-des56 -lbam -ltre -lm -lpthread
+  endif
+else
+  DEPLIBS:=
+  INCLUDEOPT+=-I$(CURDIR)/src/external/zlib-1.2.8 \
+              -I$(CURDIR)/src/external/md5-1.1.2/src \
+              -I$(CURDIR)/src/external/lua-5.1.5/src \
+              -I$(CURDIR)/src/external/luafilesystem-1.5.0/src \
+              -I$(CURDIR)/src/external/lpeg-0.10.2 \
+              -I$(CURDIR)/src/external/expat-2.0.1/lib \
+              -I$(CURDIR)/src/external/bzip2-1.0.6 \
+              -I$(CURDIR)/src/external/samtools-0.1.18 \
+              -I$(CURDIR)/src/external/sqlite-3.8.7.1 \
+              -I$(CURDIR)/src/external/tre/include
 endif
 
 ifneq ($(cairo),no)
@@ -192,13 +224,6 @@ SAMTOOLS_SRC:=$(SAMTOOLS_DIR)/bgzf.c \
 SAMTOOLS_OBJ:=$(SAMTOOLS_SRC:%.c=obj/%.o)
 SAMTOOLS_DEP:=$(SAMTOOLS_SRC:%.c=obj/%.d)
 
-# add necessary shared lib dependencies instead of building them ourselves
-ifeq ($(useshared),yes)
-  DEPLIBS:=-lbz2 -lz -lexpat -llua5.1-lpeg -llua5.1 -llua5.1-md5 \
-           -llua5.1-filesystem -llua5.1-des56 -lbam -ltre -lm -lpthread
-else
-  DEPLIBS:=
-endif
 EXP_LDLIBS += $(DEPLIBS)
 GTSHAREDLIB_LIBDEP += $(DEPLIBS)
 
