@@ -22,6 +22,8 @@ Possible arguments:
 - cairo=no         to disable AnnotationSketch, dropping Cairo/Pango deps
 - errorcheck=no    to disable the handling of compiler warnings as errors
 - universal=yes    to build a universal binary
+- useshared=yes    to use the system's shared libraries
+
 
 Example call to build GenomeTools without assertions on a system where GNU make
 is called ``gmake'':
@@ -82,6 +84,24 @@ Building GenomeTools with gcc on Windows occasionally results in a warning
 regarding the '-fPIC' parameter. This can be ignored without problems. To ignore
 this warning, please append the errorcheck=no option to your make call. All
 other options given in this file can still be used.
+
+
+Building GenomeTools using external shared libraries:
+-----------------------------------------------------
+
+The GenomeTools source distribution comes with the source code for some of the
+external software it uses internally. This makes it easier to build a stand-alone
+version of GenomeTools on a system that does not have these installed system-wide.
+Another approach is to use the system provided copies of these libraries. This
+makes any updates to these libraries, e.g. fixing bugs and security issues,
+immediately available to GenomeTools without the need to recompile. For packaging
+GenomeTools into distributions and pipeline containers, this should be the
+preferred option.
+Use the 'useshared=yes' make option to ignore the embedded code copies in the
+GenomeTools source distribution and to use the system-wide versions. The following
+libraries (and their development headers) are required to be present:
+zlib, bzlib2, liblua5.1, lua-filesystem, lua-lpeg, lua-md5, libexpat, libtre,
+libcairo + libpango (only unless 'cairo=no' is used), libsqlite3 and libbam.
 
 
 Testing GenomeTools (optional)
