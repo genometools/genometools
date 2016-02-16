@@ -23,6 +23,7 @@
 #include "core/ma_api.h"
 #include "core/mathsupport.h"
 #include "core/minmax.h"
+#include "core/range_api.h"
 #include "core/showtime.h"
 #include "core/str_api.h"
 #include "match/diagbandseed.h"
@@ -715,6 +716,10 @@ static int gt_seed_extend_runner(GT_UNUSED int argc,
     dbsarguments.extendgreedyinfo = grextinfo;
     dbsarguments.extendxdropinfo = xdropinfo;
     dbsarguments.querymatchoutopt = querymatchoutopt;
+    dbsarguments.aseqrange.start = 0;
+    dbsarguments.bseqrange.start = 0;
+    dbsarguments.aseqrange.end = gt_encseq_num_of_sequences(aencseq) - 1;
+    dbsarguments.bseqrange.end = gt_encseq_num_of_sequences(bencseq) - 1;
 
     gt_assert(bencseq != NULL);
     if (gt_encseq_has_twobitencoding(aencseq) &&

@@ -20,6 +20,7 @@
 #include <stdbool.h>
 #include "core/encseq_api.h"
 #include "core/error_api.h"
+#include "core/range_api.h"
 #include "core/types_api.h"
 #include "match/seed-extend.h"
 
@@ -31,6 +32,8 @@ typedef struct {
   GtUword mincoverage;
   GtUword maxfreq;
   GtUword memlimit;
+  GtRange aseqrange;
+  GtRange bseqrange;
   bool norev;
   bool nofwd;
   bool overlappingseeds;
