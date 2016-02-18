@@ -35,7 +35,7 @@
 \title{The \Gt Developer's Guide}
 \author{Sascha Steinbiss, Gordon Gremme and Stefan
         Kurtz\thanks{please send comments to:
-        \texttt{steinbiss@zbh.uni-hamburg.de}}}
+        \texttt{sascha@steinbiss.name}}}
 
 
 \begin{document}
@@ -1781,9 +1781,9 @@ $ gt -debug mytool
 
 \subsection{Additional targets}
 Simply running \emph{make} builds both the \keyword{gt} executable and the
-\Gt shared library. However, there are also other targets (besides the ones
-mentioned in the respective sections above) which can be built using the \Gt
-Makefile:
+\Gt shared library as 64 bit binaries. However, there are also other targets
+(besides the ones mentioned in the respective sections above) which can be
+built using the \Gt Makefile:
 \begin{itemize}
 \item
 \keyword{docs}, which builds API documentation as web pages in \keyword{www} and
@@ -1841,6 +1841,17 @@ This option is enabled by default.
 \item
 The option \keyword{static=yes} tries to link all dependencies of \Gt
 statically. This option is disabled by default.
+\item
+The option \keyword{useshared=yes} ensures the \Gt build process does not use
+the copies of the external \Gt dependencies included with the \Gt distribution
+but rather relies on them being available system-wide on the build system.
+This is a recommended option for building on a system where the building user
+controls package management and can install/update system-wide libraries at will.
+This option is disabled by default.
+\item
+The option \keyword{32bit=yes} (or likewise \keyword{64bit=no}) makes the build
+system create a 32-bit version of the \Gt binaries. This option is disabled by
+default.
 \end{itemize}
 
 \section{Contributing code}
@@ -1871,6 +1882,7 @@ To get started with \Gt development, we recommend the following:
   \item Familiarize yourself with the \Gt development process at \url{http://genometools.org/contract.html}.
   \item Install the Git version control system.
   \item Read the Git documentation.
+  \item Register a user account on GitHub (\url{https://github.com}).
   \item Fork the \Gt Git repository on GitHub at \url{https://github.com/genometools/genometools}.
   \item Clone a local version of your forked repo:
     \begin{lstlisting}[language=sh]
@@ -1954,7 +1966,11 @@ To get your source code (which we assume to reside in your personal forked
 GitHub repository) to be considered for inclusion into the \Gt official source
 tree, file an issue in the \Gt issue
 tracker\footnote{\url{https://github.com/genometools/genometools/issues}}
-describing your proposed changes. Then issue a pull request from your repository against the official \Gt repository. A maintainer will review your contribution and merge it. After providing a working patch or feature, you will eventually obtain maintainer status yourself and will be able (but not required to) to review and merge pull requests from other contributors.
+describing your proposed changes. Then issue a pull request from your
+repository against the official \Gt repository. A maintainer will review your
+contribution and merge it. After providing a working patch or feature, you will
+eventually obtain maintainer status yourself and will be able (but not required
+to) to review and merge pull requests from other contributors.
 
 \textbf{Important:} Always rebase your code against the current
 official \Gt master before requesting a pull (see above). Also, please check
