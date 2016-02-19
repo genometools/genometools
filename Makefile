@@ -26,7 +26,7 @@ INCLUDEOPT:=-I$(CURDIR)/src -I$(CURDIR)/obj \
             -I$(CURDIR)/src/external/bzip2-1.0.6 \
             -I$(CURDIR)/src/external/samtools-0.1.18 \
             -I$(CURDIR)/src/external/sqlite-3.8.7.1 \
-            -I$(CURDIR)/src/external/tre/include/tre
+            -I$(CURDIR)/src/external/tre/include
 
 ifeq ($(shell pkg-config --version > /dev/null 2> /dev/null; echo $$?),0)
   HAS_PKGCONFIG:=yes
@@ -125,6 +125,7 @@ LIBEXPAT_OBJ:=$(LIBEXPAT_SRC:%.c=obj/%.o)
 LIBEXPAT_DEP:=$(LIBEXPAT_SRC:%.c=obj/%.d)
 
 TRE_DIR:=src/external/tre/lib
+TRE_CPPFLAGS=-I$(CURDIR)/src/external/tre/include/tre
 LIBTRE_SRC:=$(TRE_DIR)/regcomp.c $(TRE_DIR)/regerror.c $(TRE_DIR)/regexec.c \
             $(TRE_DIR)/tre-ast.c $(TRE_DIR)/tre-compile.c \
             $(TRE_DIR)/tre-filter.c $(TRE_DIR)/tre-match-backtrack.c \
@@ -751,6 +752,15 @@ obj/$(SQLITE3_DIR)/%.o: $(SQLITE3_DIR)/%.c
 	  $(GT_CPPFLAGS) $(EXP_CFLAGS) $(SQLITE_CFLAGS) -DSQLITE_ENABLE_UNLOCK_NOTIFY $(FPIC)
 	$(V_DO)$(CC) -c $< -o $(@:.o=.d) -DHAVE_MALLOC_USABLE_SIZE $(EXP_CPPFLAGS) \
 	  $(GT_CPPFLAGS) -MM -MP -MT $@ $(FPIC)
+
+# TRE needs special attention
+obj/$(TRE_DIR)/%.o: $(TRE_DIR)/%.c
+	$(V_ECHO) "[compile $(@F)]"
+	$(V_DO)test -d $(@D) || mkdir -p $(@D)
+	$(V_DO)$(CC) -c $< -o $@ $(EXP_CPPFLAGS) \
+	  $(GT_CPPFLAGS) $(EXP_CFLAGS) $(TRE_CPPFLAGS) $(FPIC)
+	$(V_DO)$(CC) -c $< -o $(@:.o=.d) $(EXP_CPPFLAGS) \
+	  $(GT_CPPFLAGS)  $(TRE_CPPFLAGS) -MM -MP -MT $@ $(FPIC)
 
 define COMPILE_template
 $(1): $(2)
