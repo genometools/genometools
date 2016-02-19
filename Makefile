@@ -517,6 +517,15 @@ else
   ADDITIONAL_BINARIES:=
 endif
 
+V ?= 0
+ifeq ($(V),0)
+  V_ECHO=@echo
+  V_DO=@
+else
+  V_ECHO=@true
+  V_DO=
+endif
+
 all: lib/libgenometools.a $(SHARED_LIBGENOMETOOLS) \
      bin/gt bin/examples/custom_stream \
      bin/examples/gff3sort bin/examples/gff3validator bin/examples/noop \
@@ -524,51 +533,51 @@ all: lib/libgenometools.a $(SHARED_LIBGENOMETOOLS) \
      $(ADDITIONAL_BINARIES)
 
 lib/libexpat.a: $(LIBEXPAT_OBJ)
-	@echo "[link $(@F)]"
-	@test -d $(@D) || mkdir -p $(@D)
-	@$(AR) ru $@ $(LIBEXPAT_OBJ)
+	$(V_ECHO) "[link $(@F)]"
+	$(V_DO)test -d $(@D) || mkdir -p $(@D)
+	$(V_DO)$(AR) ru $@ $(LIBEXPAT_OBJ)
 ifdef RANLIB
-	@$(RANLIB) $@
+	$(V_DO)$(RANLIB) $@
 endif
 
 lib/libtre.a: $(LIBTRE_OBJ)
-	@echo "[link $(@F)]"
-	@test -d $(@D) || mkdir -p $(@D)
-	@$(AR) ru $@ $(LIBTRE_OBJ)
+	$(V_ECHO) "[link $(@F)]"
+	$(V_DO)test -d $(@D) || mkdir -p $(@D)
+	$(V_DO)$(AR) ru $@ $(LIBTRE_OBJ)
 ifdef RANLIB
-	@$(RANLIB) $@
+	$(V_DO)$(RANLIB) $@
 endif
 
 lib/libsqlite.a: $(SQLITE3_OBJ)
-	@echo "[link $(@F)]"
-	@test -d $(@D) || mkdir -p $(@D)
-	@$(AR) ru $@ $(SQLITE3_OBJ)
+	$(V_ECHO) "[link $(@F)]"
+	$(V_DO)test -d $(@D) || mkdir -p $(@D)
+	$(V_DO)$(AR) ru $@ $(SQLITE3_OBJ)
 ifdef RANLIB
-	@$(RANLIB) $@
+	$(V_DO)$(RANLIB) $@
 endif
 
 lib/libbz2.a: $(LIBBZ2_OBJ)
-	@echo "[link $(@F)]"
-	@test -d $(@D) || mkdir -p $(@D)
-	@$(AR) ru $@ $(LIBBZ2_OBJ)
+	$(V_ECHO) "[link $(@F)]"
+	$(V_DO)test -d $(@D) || mkdir -p $(@D)
+	$(V_DO)$(AR) ru $@ $(LIBBZ2_OBJ)
 ifdef RANLIB
-	@$(RANLIB) $@
+	$(V_DO)$(RANLIB) $@
 endif
 
 lib/libz.a: $(ZLIB_OBJ)
-	@echo "[link $(@F)]"
-	@test -d $(@D) || mkdir -p $(@D)
-	@$(AR) ru $@ $(ZLIB_OBJ)
+	$(V_ECHO) "[link $(@F)]"
+	$(V_DO)test -d $(@D) || mkdir -p $(@D)
+	$(V_DO)$(AR) ru $@ $(ZLIB_OBJ)
 ifdef RANLIB
-	@$(RANLIB) $@
+	$(V_DO)$(RANLIB) $@
 endif
 
 lib/libgenometools.a: obj/gt_config.h  $(LIBGENOMETOOLS_OBJ)
-	@echo "[link $(@F)]"
-	@test -d $(@D) || mkdir -p $(@D)
-	@$(AR) r $@ $(LIBGENOMETOOLS_OBJ)
+	$(V_ECHO) "[link $(@F)]"
+	$(V_DO)test -d $(@D) || mkdir -p $(@D)
+	$(V_DO)$(AR) r $@ $(LIBGENOMETOOLS_OBJ)
 ifdef RANLIB
-	@$(RANLIB) $@
+	$(V_DO)$(RANLIB) $@
 endif
 
 ifneq ($(useshared),yes)
@@ -582,17 +591,17 @@ lib/libgenometools$(SHARED_OBJ_NAME_EXT): obj/gt_config.h \
                                           $(ADDITIONAL_SO_DEPS) \
                                           $(ADDITIONAL_ZLIBS) \
                                           $(VERSION_SCRIPT)
-	@echo "[link $(@F)]"
-	@test -d $(@D) || mkdir -p $(@D)
-	@$(CC) $(EXP_LDFLAGS) $(VERSION_SCRIPT_PARAM) \
+	$(V_ECHO) "[link $(@F)]"
+	$(V_DO)test -d $(@D) || mkdir -p $(@D)
+	$(V_DO)$(CC) $(EXP_LDFLAGS) $(VERSION_SCRIPT_PARAM) \
 	  $(GT_LDFLAGS) $(ADDITIONAL_SO_DEPS) $(SHARED) $(LIBGENOMETOOLS_OBJ) \
 	  -o $@ $(GTSHAREDLIB_LIBDEP)
 
 define PROGRAM_template
 $(1): $(2)
-	@echo "[link $$(@F)]"
-	@test -d $$(@D) || mkdir -p $$(@D)
-	@$$(CC) $$(EXP_LDFLAGS) $$(GT_LDFLAGS) $$(filter-out $$(OVERRIDELIBS),$$^) \
+	$(V_ECHO) "[link $$(@F)]"
+	$(V_DO)test -d $$(@D) || mkdir -p $$(@D)
+	$(V_DO)$$(CC) $$(EXP_LDFLAGS) $$(GT_LDFLAGS) $$(filter-out $$(OVERRIDELIBS),$$^) \
 	  $$(filter-out $$(patsubst lib%.a,-l%,$$(notdir $$(OVERRIDELIBS))),\
 	  $$(EXP_LDLIBS)) $$(OVERRIDELIBS) $$(EXP_LDLIBS) -o $$@
 endef
@@ -642,32 +651,32 @@ $(eval $(call PROGRAM_template, bin/examples/sketch_parsed_with_ordering, \
                                 $(ADDITIONAL_ZLIBS)))
 
 bin/lua: $(LUAMAIN_OBJ)
-	@echo "[link $(@F)]"
-	@test -d $(@D) || mkdir -p $(@D)
-	@$(CC) $(EXP_LDFLAGS) $(GT_LDFLAGS) $^ -lm $(LUA_LDLIB) -o $@
+	$(V_ECHO) "[link $(@F)]"
+	$(V_DO)test -d $(@D) || mkdir -p $(@D)
+	$(V_DO)$(CC) $(EXP_LDFLAGS) $(GT_LDFLAGS) $^ -lm $(LUA_LDLIB) -o $@
 
 API_HEADERS=$(foreach DIR,$(LIBGENOMETOOLS_DIRS),$(sort $(wildcard $(DIR)/*_api.h)))
 
 obj/public_symbols.lst: $(API_HEADERS) $(LIBGENOMETOOLS_SRC)
-	@echo '[gathering public API symbols to $@]'
-	@printf "VERSION {\n\tglobal:\n" > $@
-	@cat $(API_HEADERS) | tr ' ' '\n' \
+	$(V_DO)echo '[gathering public API symbols to $@]'
+	$(V_DO)printf "VERSION {\n\tglobal:\n" > $@
+	$(V_DO)cat $(API_HEADERS) | tr ' ' '\n' \
 	 | grep -E '^(gt_[0-9a-zA-Z_]+)(\[|\()' \
 	 | cut -d'[' -f1 | cut -d'(' -f1 | sort | uniq > $@.src
-	@cat $(LIBGENOMETOOLS_PRESRC) | tr ' ' '\n' \
+	$(V_DO)cat $(LIBGENOMETOOLS_PRESRC) | tr ' ' '\n' \
 	 | grep -E '(gt_[0-9a-zA-Z_]+_p)(\[|\()' \
 	 | cut -d'(' -f1 >> $@.src
-	@for L in `cat $@.src`; do \
+	$(V_DO)for L in `cat $@.src`; do \
 	  printf "\t\t$$L;\n" >> $@; \
 	done;
-	@printf "\t\tgt_array_add_ptr;\n" >> $@
-	@printf "\t\tgt_str_get_mem;\n" >> $@
-	@printf '\tlocal: *;\n\t};\n' >> $@
+	$(V_DO)printf "\t\tgt_array_add_ptr;\n" >> $@
+	$(V_DO)printf "\t\tgt_str_get_mem;\n" >> $@
+	$(V_DO)printf '\tlocal: *;\n\t};\n' >> $@
 
 obj/gt_config.h: VERSION
-	@echo '[create $@]'
-	@test -d $(@D) || mkdir -p $(@D)
-	@(echo '#ifndef GT_CONFIG_H' ;\
+	$(V_DO)echo '[create $@]'
+	$(V_DO)test -d $(@D) || mkdir -p $(@D)
+	$(V_DO)(echo '#ifndef GT_CONFIG_H' ;\
 	echo '#define GT_CONFIG_H' ;\
 	echo '#define GT_CC "'`$(CC) --version | head -n 1`\" ;\
 	echo '#define GT_CFLAGS "$(EXP_CFLAGS) $(GT_CFLAGS)"' ;\
@@ -675,18 +684,18 @@ obj/gt_config.h: VERSION
 	sed -e 's/\([^\]\)"/\1\\"/g' -e 's/^"/\\"/g' -e 's/$$/"/' \
 	    -e 's/^/#define GT_CPPFLAGS "/'; \
 	  echo '#define GT_VERSION "'`cat VERSION`\" ) > $@
-	@cat VERSION | \
+	$(V_DO)cat VERSION | \
           sed 's/\([0-9]*\)\.[0-9]*\.[0-9]*/#define GT_MAJOR_VERSION \1/' >> $@
-	@cat VERSION | \
+	$(V_DO)cat VERSION | \
           sed 's/[0-9]*\.\([0-9]*\)\.[0-9]*/#define GT_MINOR_VERSION \1/' >> $@
-	@cat VERSION | \
+	$(V_DO)cat VERSION | \
           sed 's/[0-9]*\.[0-9]*\.\([0-9]*\)/#define GT_MICRO_VERSION \1/' >> $@
-	@echo '#endif' >> $@
+	$(V_DO)echo '#endif' >> $@
 
 obj/amalgamation.c: $(LIBGENOMETOOLS_PRESRC)
-	@echo '[create $@]'
-	@test -d $(@D) || mkdir -p $(@D)
-	@scripts/create_amalgamation $(LIBGENOMETOOLS_PRESRC) > $@
+	$(V_ECHO) '[create $@]'
+	$(V_DO)test -d $(@D) || mkdir -p $(@D)
+	$(V_DO)scripts/create_amalgamation $(LIBGENOMETOOLS_PRESRC) > $@
 
 bitpackstringop_Dependencies=src/core/bitpackstringop.template \
 	 src/core/bitpackstringvectorreadop.gen \
@@ -694,89 +703,89 @@ bitpackstringop_Dependencies=src/core/bitpackstringop.template \
 	 scripts/template2c.pl
 
 src/core/bitpackstringop8.c: $(bitpackstringop_Dependencies)
-	@echo '[rebuild $@]'
-	@scripts/template2c.pl 8 $<
+	$(V_ECHO) '[rebuild $@]'
+	$(V_DO)scripts/template2c.pl 8 $<
 
 src/core/checkbitpackstring8.c: \
  src/core/checkbitpackstring.template scripts/template2c.pl
-	@echo '[rebuild $@]'
-	@scripts/template2c.pl 8 $<
+	$(V_ECHO) '[rebuild $@]'
+	$(V_DO)scripts/template2c.pl 8 $<
 
 src/core/bitpackstringop16.c: $(bitpackstringop_Dependencies)
-	@echo '[rebuild $@]'
-	@scripts/template2c.pl 16 $<
+	$(V_ECHO) '[rebuild $@]'
+	$(V_DO)scripts/template2c.pl 16 $<
 
 src/core/checkbitpackstring16.c: \
  src/core/checkbitpackstring.template scripts/template2c.pl
-	@echo '[rebuild $@]'
-	@scripts/template2c.pl 16 $<
+	$(V_ECHO) '[rebuild $@]'
+	$(V_DO)scripts/template2c.pl 16 $<
 
 src/core/bitpackstringop32.c: $(bitpackstringop_Dependencies)
-	@echo '[rebuild $@]'
-	@scripts/template2c.pl 32 $<
+	$(V_ECHO) '[rebuild $@]'
+	$(V_DO)scripts/template2c.pl 32 $<
 
 src/core/checkbitpackstring32.c: \
  src/core/checkbitpackstring.template scripts/template2c.pl
-	@echo '[rebuild $@]'
-	@scripts/template2c.pl 32 $<
+	$(V_ECHO) '[rebuild $@]'
+	$(V_DO)scripts/template2c.pl 32 $<
 
 src/core/bitpackstringop64.c: $(bitpackstringop_Dependencies)
-	@echo '[rebuild $@]'
-	@scripts/template2c.pl 64 $<
+	$(V_ECHO) '[rebuild $@]'
+	$(V_DO)scripts/template2c.pl 64 $<
 
 src/core/checkbitpackstring64.c: \
  src/core/checkbitpackstring.template scripts/template2c.pl
-	@echo '[rebuild $@]'
-	@scripts/template2c.pl 64 $<
+	$(V_ECHO) '[rebuild $@]'
+	$(V_DO)scripts/template2c.pl 64 $<
 
 src/core/checkbitpackstring-int.c: \
  src/core/checkbitpackstring.template scripts/template2c.pl
-	@echo '[rebuild $@]'
-	@scripts/template2c.pl '-int' $<
+	$(V_ECHO) '[rebuild $@]'
+	$(V_DO)scripts/template2c.pl '-int' $<
 
 # SQLite needs special attention
 obj/$(SQLITE3_DIR)/%.o: $(SQLITE3_DIR)/%.c
-	@echo "[compile $(@F)]"
-	@test -d $(@D) || mkdir -p $(@D)
-	@$(CC) -c $< -o $@ -DHAVE_MALLOC_USABLE_SIZE $(EXP_CPPFLAGS) \
+	$(V_ECHO) "[compile $(@F)]"
+	$(V_DO)test -d $(@D) || mkdir -p $(@D)
+	$(V_DO)$(CC) -c $< -o $@ -DHAVE_MALLOC_USABLE_SIZE $(EXP_CPPFLAGS) \
 	  $(GT_CPPFLAGS) $(EXP_CFLAGS) $(SQLITE_CFLAGS) -DSQLITE_ENABLE_UNLOCK_NOTIFY  $(3) $(FPIC)
-	@$(CC) -c $< -o $(@:.o=.d) -DHAVE_MALLOC_USABLE_SIZE $(EXP_CPPFLAGS) \
+	$(V_DO)$(CC) -c $< -o $(@:.o=.d) -DHAVE_MALLOC_USABLE_SIZE $(EXP_CPPFLAGS) \
 	  $(GT_CPPFLAGS) $(3) -MM -MP -MT $@ $(FPIC)
 
 define COMPILE_template
 $(1): $(2)
-	@echo "[compile $$(@F)]"
-	@test -d $$(@D) || mkdir -p $$(@D)
-	@$$(CC) -c $$< -o $$@ $$(EXP_CPPFLAGS) $$(GT_CPPFLAGS) $$(EXP_CFLAGS) \
+	$(V_ECHO) "[compile $$(@F)]"
+	$(V_DO)test -d $$(@D) || mkdir -p $$(@D)
+	$(V_DO)$$(CC) -c $$< -o $$@ $$(EXP_CPPFLAGS) $$(GT_CPPFLAGS) $$(EXP_CFLAGS) \
 	  $$(GT_CFLAGS) $(3)
-	@$$(CC) -c $$< -o $$(@:.o=.d) $$(EXP_CPPFLAGS) $$(GT_CPPFLAGS) $$(EXP_CFLAGS) \
+	$(V_DO)$$(CC) -c $$< -o $$(@:.o=.d) $$(EXP_CPPFLAGS) $$(GT_CPPFLAGS) $$(EXP_CFLAGS) \
         $(3) -MM -MP -MT $$@
 endef
 
 obj/$(SAMTOOLS_DIR)/%.o: $(SAMTOOLS_DIR)/%.c
-	@echo "[compile $(notdir $@)]"
-	@test -d $(@D) || mkdir -p $(@D)
-	@$(CC) -c $< -o $@ $(EXP_CPPFLAGS) $(GT_CPPFLAGS) \
+	$(V_ECHO) "[compile $(notdir $@)]"
+	$(V_DO)test -d $(@D) || mkdir -p $(@D)
+	$(V_DO)$(CC) -c $< -o $@ $(EXP_CPPFLAGS) $(GT_CPPFLAGS) \
 	  $(EXP_CFLAGS) $(GT_CFLAGS_NO_WERROR)
-	@$(CC) -c $< -o $(@:.o=.d) $(EXP_CPPFLAGS) $(GT_CPPFLAGS) -MM -MP \
+	$(V_DO)$(CC) -c $< -o $(@:.o=.d) $(EXP_CPPFLAGS) $(GT_CPPFLAGS) -MM -MP \
 	  -MT $@
 
 $(eval $(call COMPILE_template, obj/%.o, %.c))
 
 obj/%.o: %.cxx
-	@echo "[compile $@]"
-	@test -d $(@D) || mkdir -p $(@D)
-	@$(CXX) -c $< -o $@ $(EXP_CPPFLAGS) $(GT_CPPFLAGS) \
+	$(V_ECHO) "[compile $@]"
+	$(V_DO)test -d $(@D) || mkdir -p $(@D)
+	$(V_DO)$(CXX) -c $< -o $@ $(EXP_CPPFLAGS) $(GT_CPPFLAGS) \
 	  $(EXP_CXXFLAGS) $(GT_CXXFLAGS)
-	@$(CXX) -c $< -o $(@:.o=.d) $(EXP_CPPFLAGS) $(GT_CPPFLAGS) -MM -MP \
+	$(V_DO)$(CXX) -c $< -o $(@:.o=.d) $(EXP_CPPFLAGS) $(GT_CPPFLAGS) -MM -MP \
 	  -MT $@
 
 obj/%.o: %.cpp
-	@echo "[compile $@]"
-	@test -d $(@D) || mkdir -p $(@D)
-	@$(CXX) -c $< -o $@ $(EXP_CPPFLAGS) $(GT_CPPFLAGS) \
+	$(V_ECHO) "[compile $@]"
+	$(V_DO)test -d $(@D) || mkdir -p $(@D)
+	$(V_DO)$(CXX) -c $< -o $@ $(EXP_CPPFLAGS) $(GT_CPPFLAGS) \
 	  $(EXP_CXXFLAGS) $(GT_CXXFLAGS)
-	@$(CXX) -c $< -o $(@:.o=.d) $(EXP_CPPFLAGS) $(GT_CPPFLAGS) -MM -MP \
+	$(V_DO)$(CXX) -c $< -o $(@:.o=.d) $(EXP_CPPFLAGS) $(GT_CPPFLAGS) -MM -MP \
 	  -MT $@
 
 obj/src/core/versionfunc.o: obj/gt_config.h
@@ -811,30 +820,30 @@ GTDISTDIR:="$(DISTDIR)/$(GTDISTBASENAME)"
 STRIP:=strip
 
 dist: all
-	@echo "[build distribution]"
-	@rm -rf $(GTDISTDIR)
+	$(V_ECHO) "[build distribution]"
+	$(V_DO)rm -rf $(GTDISTDIR)
 ifeq ($(SYSTEM),Windows)
-	@rm -f $(DISTDIR)/$(GTDISTBASENAME).zip
+	$(V_DO)rm -f $(DISTDIR)/$(GTDISTBASENAME).zip
 else
-	@rm -f $(DISTDIR)/$(GTDISTBASENAME).tar.gz
+	$(V_DO)rm -f $(DISTDIR)/$(GTDISTBASENAME).tar.gz
 endif
-	@mkdir -p $(GTDISTDIR)/bin $(GTDISTDIR)/doc
-	@cp $(CURDIR)/doc/dist_readme.txt $(GTDISTDIR)/README
-	@cp $(CURDIR)/LICENSE $(GTDISTDIR)
-	@cp $(CURDIR)/CONTRIBUTORS $(GTDISTDIR)
-	@cp $(CURDIR)/CHANGELOG $(GTDISTDIR)
-	@cp $(CURDIR)/doc/manuals/*.pdf $(GTDISTDIR)/doc
-	@cp -r $(CURDIR)/gtdata $(GTDISTDIR)
-	@cp -r $(CURDIR)/gtpython $(GTDISTDIR)
-	@cp -r $(CURDIR)/gtruby $(GTDISTDIR)
-	@$(MAKE) prefix=$(GTDISTDIR) install
+	$(V_DO)mkdir -p $(GTDISTDIR)/bin $(GTDISTDIR)/doc
+	$(V_DO)cp $(CURDIR)/doc/dist_readme.txt $(GTDISTDIR)/README
+	$(V_DO)cp $(CURDIR)/LICENSE $(GTDISTDIR)
+	$(V_DO)cp $(CURDIR)/CONTRIBUTORS $(GTDISTDIR)
+	$(V_DO)cp $(CURDIR)/CHANGELOG $(GTDISTDIR)
+	$(V_DO)cp $(CURDIR)/doc/manuals/*.pdf $(GTDISTDIR)/doc
+	$(V_DO)cp -r $(CURDIR)/gtdata $(GTDISTDIR)
+	$(V_DO)cp -r $(CURDIR)/gtpython $(GTDISTDIR)
+	$(V_DO)cp -r $(CURDIR)/gtruby $(GTDISTDIR)
+	$(V_DO)$(MAKE) prefix=$(GTDISTDIR) install
 ifeq ($(SYSTEM),Windows)
-	@cd $(DISTDIR) && 7z a -tzip $(GTDISTBASENAME).zip $(GTDISTBASENAME)
-	@echo "$(DISTDIR)/$(GTDISTBASENAME).zip"
+	$(V_DO)cd $(DISTDIR) && 7z a -tzip $(GTDISTBASENAME).zip $(GTDISTBASENAME)
+	$(V_ECHO) "$(DISTDIR)/$(GTDISTBASENAME).zip"
 else
-	@cd $(DISTDIR) && $(SCRIPTSDIR)/tar_root.sh $(GTDISTBASENAME)
-	@cd $(DISTDIR) && gzip -f -9 $(GTDISTBASENAME).tar
-	@echo "$(DISTDIR)/$(GTDISTBASENAME).tar.gz"
+	$(V_DO)cd $(DISTDIR) && $(SCRIPTSDIR)/tar_root.sh $(GTDISTBASENAME)
+	$(V_DO)cd $(DISTDIR) && gzip -f -9 $(GTDISTBASENAME).tar
+	$(V_ECHO) "$(DISTDIR)/$(GTDISTBASENAME).tar.gz"
 endif
 
 srcdist:
@@ -942,7 +951,7 @@ endif
 ifneq ($(sharedlib),no)
 	cp lib/libgenometools$(SHARED_OBJ_NAME_EXT) $(prefix)/lib
 endif
-	@echo '[build config script $(@F)]'
+	$(V_ECHO) '[build config script $(@F)]'
 	sed -e 's!@CC@!$(CC)!' -e 's!@CFLAGS@!$(EXP_CFLAGS)!' \
 	  -e 's!@CPPFLAGS@!$(subst ",\\",-I"$(prefix)/include" $(EXP_CPPFLAGS))!' \
 	  -e 's!@CXX@!$(CXX)!' -e 's!@CXXFLAGS@!$(EXP_CXXFLAGS)!' \
@@ -959,7 +968,7 @@ installmanpages: manpages
 	    && cp $(CURDIR)/doc/manpages/* $(prefix)/share/man/man1)
 
 cflags:
-	@echo ${GT_CFLAGS}
+	$(V_DO)echo ${GT_CFLAGS}
 
 EISFILES=${shell ls ${CURDIR}/src/match/*.c | grep eis-}
 
@@ -1003,59 +1012,59 @@ sbclean:
 	find obj -name '*.sb' | xargs rm -f
 
 obj/%.sb: src/match/%.c
-	@echo "scan-build $<"
-	@scan-build -analyze-headers --status-bugs --use-cc $(CC) $(CC) -c $< $(EXP_CPPFLAGS) $(GT_CPPFLAGS) $(EXP_CFLAGS) \
+	$(V_ECHO) "scan-build $<"
+	$(V_DO)scan-build -analyze-headers --status-bugs --use-cc $(CC) $(CC) -c $< $(EXP_CPPFLAGS) $(GT_CPPFLAGS) $(EXP_CFLAGS) \
 	  $(GT_CFLAGS) -o obj/${subst .c,.o,$<} > /dev/null
-	@touch $@
+	$(V_DO)touch $@
 
 obj/%.sb: src/ltr/%.c
-	@echo "scan-build $<"
-	@scan-build -analyze-headers --status-bugs --use-cc $(CC) $(CC) -c $< $(EXP_CPPFLAGS) $(GT_CPPFLAGS) $(EXP_CFLAGS) \
+	$(V_ECHO) "scan-build $<"
+	$(V_DO)scan-build -analyze-headers --status-bugs --use-cc $(CC) $(CC) -c $< $(EXP_CPPFLAGS) $(GT_CPPFLAGS) $(EXP_CFLAGS) \
 	  $(GT_CFLAGS) -o obj/${subst .c,.o,$<} > /dev/null
-	@touch $@
+	$(V_DO)touch $@
 
 obj/%.sb: src/tools/%.c
-	@echo "scan-build $<"
-	@scan-build -analyze-headers --status-bugs --use-cc $(CC) $(CC) -c $< $(EXP_CPPFLAGS) $(GT_CPPFLAGS) $(EXP_CFLAGS) \
+	$(V_ECHO) "scan-build $<"
+	$(V_DO)scan-build -analyze-headers --status-bugs --use-cc $(CC) $(CC) -c $< $(EXP_CPPFLAGS) $(GT_CPPFLAGS) $(EXP_CFLAGS) \
 	  $(GT_CFLAGS) -o obj/${subst .c,.o,$<} > /dev/null
-	@touch $@
+	$(V_DO)touch $@
 
 obj/%.sb: src/core/%.c
-	@echo "scan-build $<"
-	@scan-build -analyze-headers --status-bugs --use-cc $(CC) $(CC) -c $< $(EXP_CPPFLAGS) $(GT_CPPFLAGS) $(EXP_CFLAGS) \
+	$(V_ECHO) "scan-build $<"
+	$(V_DO)scan-build -analyze-headers --status-bugs --use-cc $(CC) $(CC) -c $< $(EXP_CPPFLAGS) $(GT_CPPFLAGS) $(EXP_CFLAGS) \
 	  $(GT_CFLAGS) -o obj/${subst .c,.o,$<} > /dev/null
-	@touch $@
+	$(V_DO)touch $@
 
 obj/%.sb: src/extended/%.c
-	@echo "scan-build $<"
-	@scan-build -analyze-headers --status-bugs --use-cc $(CC) $(CC) -c $< $(EXP_CPPFLAGS) $(GT_CPPFLAGS) $(EXP_CFLAGS) \
+	$(V_ECHO) "scan-build $<"
+	$(V_DO)scan-build -analyze-headers --status-bugs --use-cc $(CC) $(CC) -c $< $(EXP_CPPFLAGS) $(GT_CPPFLAGS) $(EXP_CFLAGS) \
 	  $(GT_CFLAGS) -o obj/${subst .c,.o,$<} > /dev/null
-	@touch $@
+	$(V_DO)touch $@
 
 obj/%.splint: ${CURDIR}/src/match/%.c
-	@echo "splint $<"
-	@splint $(SPLINTD) $(EXP_CPPFLAGS) $(INCLUDEOPT) -f $(CURDIR)/testdata/Splintoptions $<
-	@touch $@
+	$(V_ECHO) "splint $<"
+	$(V_DO)splint $(SPLINTD) $(EXP_CPPFLAGS) $(INCLUDEOPT) -f $(CURDIR)/testdata/Splintoptions $<
+	$(V_DO)touch $@
 
 obj/%.splint: ${CURDIR}/src/tools/%.c
-	@echo "splint $<"
-	@splint $(SPLINTD) $(EXP_CPPFLAGS) $(INCLUDEOPT) -f $(CURDIR)/testdata/Splintoptions $<
-	@touch $@
+	$(V_ECHO) "splint $<"
+	$(V_DO)splint $(SPLINTD) $(EXP_CPPFLAGS) $(INCLUDEOPT) -f $(CURDIR)/testdata/Splintoptions $<
+	$(V_DO)touch $@
 
 obj/%.splint: ${CURDIR}/src/ltr/%.c
-	@echo "splint $<"
-	@splint $(SPLINTD) $(EXP_CPPFLAGS) $(INCLUDEOPT) -f $(CURDIR)/testdata/Splintoptions $<
-	@touch $@
+	$(V_ECHO) "splint $<"
+	$(V_DO)splint $(SPLINTD) $(EXP_CPPFLAGS) $(INCLUDEOPT) -f $(CURDIR)/testdata/Splintoptions $<
+	$(V_DO)touch $@
 
 obj/%.splint: ${CURDIR}/src/core/%.c
-	@echo "splint $<"
-	@splint $(SPLINTD) $(EXP_CPPFLAGS) $(INCLUDEOPT) -f $(CURDIR)/testdata/Splintoptions $<
-	@touch $@
+	$(V_ECHO) "splint $<"
+	$(V_DO)splint $(SPLINTD) $(EXP_CPPFLAGS) $(INCLUDEOPT) -f $(CURDIR)/testdata/Splintoptions $<
+	$(V_DO)touch $@
 
 obj/%.splint: ${CURDIR}/src/extended/%.c
-	@echo "splint $<"
-	@splint $(SPLINTD) $(EXP_CPPFLAGS) $(INCLUDEOPT) -f $(CURDIR)/testdata/Splintoptions $<
-	@touch $@
+	$(V_ECHO) "splint $<"
+	$(V_DO)splint $(SPLINTD) $(EXP_CPPFLAGS) $(INCLUDEOPT) -f $(CURDIR)/testdata/Splintoptions $<
+	$(V_DO)touch $@
 
 
 DWHEADER=${filter-out %impl.h, ${shell find ${CURDIR} -name '*.h' | \
@@ -1069,50 +1078,50 @@ headerclean:
 	find obj -name '*.check' | xargs rm -f
 
 obj/%.check: ${CURDIR}/src/match/%.h
-	@echo "check include $<"
-	@src_check_header.rb $<
-	@touch $@
+	$(V_ECHO) "check include $<"
+	$(V_DO)src_check_header.rb $<
+	$(V_DO)touch $@
 
 obj/%.check: ${CURDIR}/src/tools/%.h
-	@echo "check include $<"
-	@src_check_header.rb $<
-	@touch $@
+	$(V_ECHO) "check include $<"
+	$(V_DO)src_check_header.rb $<
+	$(V_DO)touch $@
 
 obj/%.check: ${CURDIR}/src/ltr/%.h
-	@echo "check include $<"
-	@src_check_header.rb $<
-	@touch $@
+	$(V_ECHO) "check include $<"
+	$(V_DO)src_check_header.rb $<
+	$(V_DO)touch $@
 
 obj/%.check: ${CURDIR}/src/core/%.h
-	@echo "check include $<"
-	@src_check_header.rb $<
-	@touch $@
+	$(V_ECHO) "check include $<"
+	$(V_DO)src_check_header.rb $<
+	$(V_DO)touch $@
 
 obj/%.check: ${CURDIR}/src/extended/%.h
-	@echo "check include $<"
-	@src_check_header.rb $<
-	@touch $@
+	$(V_ECHO) "check include $<"
+	$(V_DO)src_check_header.rb $<
+	$(V_DO)touch $@
 
 obj/%.prepro: ${CURDIR}/src/match/%.c
-	@echo "[generate $@]"
+	$(V_ECHO) "[generate $@]"
 	$(CC) -c $< -o $@ $(EXP_CPPFLAGS) $(GT_CPPFLAGS) \
 	  $(EXP_CFLAGS) $(GT_CFLAGS) -E -g3
 	indent $@
 
 obj/%.prepro: ${CURDIR}/src/tools/%.c
-	@echo "[generate $@]"
+	$(V_ECHO) "[generate $@]"
 	$(CC) -c $< -o $@ $(EXP_CPPFLAGS) $(GT_CPPFLAGS) \
 	  $(EXP_CFLAGS) $(GT_CFLAGS) -E -g3
 	indent $@
 
 obj/%.prepro: ${CURDIR}/src/core/%.c
-	@echo "[generate $@]"
+	$(V_ECHO) "[generate $@]"
 	$(CC) -c $< -o $@ $(EXP_CPPFLAGS) $(GT_CPPFLAGS) \
 	  $(EXP_CFLAGS) $(GT_CFLAGS) -E -g3
 	indent $@
 
 obj/%.prepro: ${CURDIR}/src/extended/%.c
-	@echo "[generate $@]"
+	$(V_ECHO) "[generate $@]"
 	$(CC) -c $< -o $@ $(EXP_CPPFLAGS) $(GT_CPPFLAGS) \
 	  $(EXP_CFLAGS) $(GT_CFLAGS) -E -g3
 	indent $@
@@ -1158,8 +1167,8 @@ cleanindexes:
 	   -a ! \( -name 'foo.[36][24].*' \) -delete
 
 gtkviewer:
-	@echo "[compile $(notdir $@)]"
-	@$(CC) -o bin/examples/gtkviewer $(GT_CPPFLAGS) $(GT_LDFLAGS) \
+	$(V_ECHO) "[compile $(notdir $@)]"
+	$(V_DO)$(CC) -o bin/examples/gtkviewer $(GT_CPPFLAGS) $(GT_LDFLAGS) \
   src/examples/gtkviewer.c \
   -lcairo `$(OVERRIDE_PC_PATH) pkg-config --silence-errors --cflags --libs gtk+-2.0` \
   -lgenometools

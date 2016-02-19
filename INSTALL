@@ -23,6 +23,7 @@ Possible arguments:
 - errorcheck=no    to disable the handling of compiler warnings as errors
 - universal=yes    to build a universal binary
 - useshared=yes    to use the system's shared libraries
+- V=1              to make the build more verbose
 
 
 Example call to build GenomeTools without assertions on a system where GNU make
