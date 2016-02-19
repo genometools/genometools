@@ -1006,10 +1006,10 @@ scgt:
 	src_check src/ltr/*
 
 splintclean:
-	find obj -name '*.splint' | xargs rm -f
+	find obj -name '*.splint' -delete
 
 sbclean:
-	find obj -name '*.sb' | xargs rm -f
+	find obj -name '*.sb' -delete
 
 obj/%.sb: src/match/%.c
 	$(V_ECHO) "scan-build $<"
@@ -1075,7 +1075,7 @@ ALLHEADER=${addprefix obj/,${notdir ${subst .h,.check,\
 headercheck:${ALLHEADER}
 
 headerclean:
-	find obj -name '*.check' | xargs rm -f
+	find obj -name '*.check' -delete
 
 obj/%.check: ${CURDIR}/src/match/%.h
 	$(V_ECHO) "check include $<"
@@ -1144,7 +1144,7 @@ test: all
 
 clean:
 	rm -rf lib
-	find obj -name '*.o' |xargs rm -f
+	find obj -name '*.o' -delete
 	rm -f obj/amalgamation.c
 	rm -rf testsuite/stest_testsuite testsuite/stest_stest_tests
 	$(MAKE) -s -C $(CURDIR)/doc/devguide clean
