@@ -127,6 +127,9 @@ def with_environment(variables={})
 end
 
 def python_tests_runnable?
+  if not ENV.has_key?("PATH")
+    return false
+  end
   return false unless
     ENV['PATH'].split(File::PATH_SEPARATOR).any? do |directory|
       File.executable?(File.join(directory, "python"))
