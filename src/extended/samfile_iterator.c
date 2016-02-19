@@ -15,7 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include <sam.h>
+#include <samtools/sam.h>
 #include "core/cstr_api.h"
 #include "core/ensure.h"
 #include "core/error_api.h"

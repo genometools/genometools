@@ -16,7 +16,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include <sam.h>
+#include <samtools/sam.h>
 #include "core/alphabet_api.h"
 #include "core/ensure.h"
 #include "core/ma_api.h"
