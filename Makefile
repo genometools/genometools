@@ -748,9 +748,9 @@ obj/$(SQLITE3_DIR)/%.o: $(SQLITE3_DIR)/%.c
 	$(V_ECHO) "[compile $(@F)]"
 	$(V_DO)test -d $(@D) || mkdir -p $(@D)
 	$(V_DO)$(CC) -c $< -o $@ -DHAVE_MALLOC_USABLE_SIZE $(EXP_CPPFLAGS) \
-	  $(GT_CPPFLAGS) $(EXP_CFLAGS) $(SQLITE_CFLAGS) -DSQLITE_ENABLE_UNLOCK_NOTIFY  $(3) $(FPIC)
+	  $(GT_CPPFLAGS) $(EXP_CFLAGS) $(SQLITE_CFLAGS) -DSQLITE_ENABLE_UNLOCK_NOTIFY $(FPIC)
 	$(V_DO)$(CC) -c $< -o $(@:.o=.d) -DHAVE_MALLOC_USABLE_SIZE $(EXP_CPPFLAGS) \
-	  $(GT_CPPFLAGS) $(3) -MM -MP -MT $@ $(FPIC)
+	  $(GT_CPPFLAGS) -MM -MP -MT $@ $(FPIC)
 
 define COMPILE_template
 $(1): $(2)
