@@ -783,7 +783,7 @@ obj/$(TRE_DIR)/%.o: $(TRE_DIR)/%.c
 	$(V_ECHO) "[compile $(@F)]"
 	$(V_DO)test -d $(@D) || mkdir -p $(@D)
 	$(V_DO)$(CC) -c $< -o $@ $(EXP_CPPFLAGS) \
-	  $(GT_CPPFLAGS) $(EXP_CFLAGS) $(TRE_CPPFLAGS) $(FPIC)
+	  $(GT_CPPFLAGS) $(EXP_CFLAGS) $(TRE_CPPFLAGS) $(GT_CFLAGS) $(FPIC)
 	$(V_DO)$(CC) -c $< -o $(@:.o=.d) $(EXP_CPPFLAGS) \
 	  $(GT_CPPFLAGS)  $(TRE_CPPFLAGS) -MM -MP -MT $@ $(FPIC)
 
