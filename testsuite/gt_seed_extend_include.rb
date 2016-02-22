@@ -28,7 +28,7 @@ Test do
   run_test build_encseq("small_poly", "#{$testdata}small_poly.fas")
   run_test "#{$bin}gt seed_extend -only-seeds -verify -seedlength 10 " +
            "-debug-kmer -debug-seedpair -ii small_poly"
-  run "gunzip -c #{$testdata}seedextend1.out.gz | cmp -s #{last_stdout}"
+  run "gunzip -c #{$testdata}seedextend1.out.gz | cmp #{last_stdout}"
   run_test "#{$bin}gt seed_extend -only-seeds -verify " +
            "-debug-kmer -debug-seedpair -ii small_poly | wc -l | grep 792"
   run_test "#{$bin}gt seed_extend -only-seeds -verify -seedlength 13 " +
@@ -44,10 +44,10 @@ Test do
   run_test build_encseq("small_poly", "#{$testdata}small_poly.fas")
   run_test "#{$bin}gt seed_extend -extendxdrop 97 " +
            "-l 10 -ii small_poly"
-  run "cmp -s #{last_stdout} #{$testdata}seedextend3.out"
+  run "cmp #{last_stdout} #{$testdata}seedextend3.out"
   run_test "#{$bin}gt seed_extend -extendgreedy 97 " +
            "-l 10 -ii small_poly"
-  run "cmp -s #{last_stdout} #{$testdata}seedextend3.out"
+  run "cmp #{last_stdout} #{$testdata}seedextend3.out"
 end
 
 # Memlimit and maxfreq options (filter)
@@ -59,7 +59,7 @@ Test do
            "-ii at1MB -only-seeds -no-reverse -seedlength 14"
   grep last_stderr, /Only 14-mers occurring <= 3 times will be considered, /
     /due to small memlimit. Expect 50496 seed pairs./
-  run "gunzip -c #{$testdata}seedextend2.out.gz | cmp -s #{last_stdout}"
+  run "gunzip -c #{$testdata}seedextend2.out.gz | cmp #{last_stdout}"
   run_test "#{$bin}gt seed_extend -only-seeds -v -maxfreq 5 -ii at1MB"
   grep last_stdout, /...found 622939 10-mers/
   grep last_stdout, /...collected 305756 seed pairs/
@@ -223,7 +223,7 @@ Test do
       grep last_stdout, /^\d+ \d+ \d+ . \d+ \d+ \d+ \d+ \d+ \d+/
       run "mv #{last_stdout} separated.out"
       split_output("separated")
-      run "cmp -s separated.coords combined.coords"
+      run "cmp separated.coords combined.coords"
     end
   end
 end

@@ -24,7 +24,7 @@ def checktallymer(reffile,mersize)
            :maxtime => 360)
   suffix="tyrmkiout"
   run "mv #{last_stdout} #{reffile}.gt#{suffix}"
-  run "cmp -s #{reffile}.gt#{suffix} #{reftestdir}/#{reffile}.#{suffix}"
+  run "cmp #{reffile}.gt#{suffix} #{reftestdir}/#{reffile}.#{suffix}"
   run_test "#{$bin}gt tallymer mkindex #{outoptions} " + 
            "-indexname tyr-index -esa sfxidx", :maxtime => 360
   if not File.zero?("tyr-index.mct")
@@ -32,7 +32,7 @@ def checktallymer(reffile,mersize)
     run_test "#{$bin}gt tallymer search -strand fp -output qseqnum qpos " + 
              "counts sequence -test -tyr tyr-index -q #{query}", :maxtime => 360
     run "mv #{last_stdout} #{reffile}.gt#{suffix}"
-    run "cmp -s #{reffile}.gt#{suffix} #{reftestdir}/#{reffile}.#{suffix}"
+    run "cmp #{reffile}.gt#{suffix} #{reftestdir}/#{reffile}.#{suffix}"
   end
 end
 

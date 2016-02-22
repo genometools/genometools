@@ -13,9 +13,9 @@ def runmerge(queryfile,referencefiles)
   end
   run_test "#{$bin}gt dev mergeesa -indexname midx-all " +
            "-ii #{indexlist.join(" ")}"
-  run "cmp -s midx-all.suf all.suf"
-  run "cmp -s midx-all.lcp all.lcp"
-  run "cmp -s midx-all.llv all.llv"
+  run "cmp midx-all.suf all.suf"
+  run "cmp midx-all.lcp all.lcp"
+  run "cmp midx-all.llv all.llv"
   run_test "#{$bin}gt mkfmindex -noindexpos -fmout fm-all " + 
            "-ii #{indexlist.join(" ")}"
   run_test "#{$bin}gt suffixerator -indexname fm-all -plain -des no -ssp no" +
