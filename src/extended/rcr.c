@@ -48,7 +48,7 @@
 #include "extended/sam_alignment.h"
 #include "extended/sam_query_name_iterator.h"
 #include "extended/samfile_iterator.h"
-#include "sam.h"
+#include <samtools/sam.h>
 
 #define BAMBASEA 1
 #define BAMBASEC 2

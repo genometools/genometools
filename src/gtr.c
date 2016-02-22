@@ -24,7 +24,7 @@
 #include "lauxlib.h"
 #include "lualib.h"
 #include "lfs.h"
-#include "lpeg.h"
+#include "lua-lpeg.h"
 #include "md5.h"
 #include "ldes56.h"
 #include "core/compat.h"

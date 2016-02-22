@@ -23,7 +23,7 @@
 #include "core/ma.h"
 #include "core/str.h"
 #include "core/unused_api.h"
-#include "tre.h"
+#include <tre/tre.h>
 
 static void grep_error(int errcode, regex_t *matcher, GtError *err)
 {

@@ -23,7 +23,7 @@
 /* The contents of this file is to be considered private implementation detail.
 */
 
-#include <sam.h>
+#include <samtools/sam.h>
 #include "core/alphabet_api.h"
 
 struct GtSamAlignment{
