@@ -517,8 +517,8 @@ else
   ADDITIONAL_BINARIES:=
 endif
 
-V ?= 0
-ifeq ($(V),0)
+verbose ?= no
+ifeq ($(verbose),no)
   V_ECHO=@echo
   V_DO=@
 else
