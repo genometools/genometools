@@ -33,10 +33,11 @@
 typedef struct {
   GtStr  *readset;
   bool limits, verbose, quiet, errors, redtrans, eld,
-       save, dot, mdot, adj, spm, subgraph_mono, subgraph_extend;
+       save, dot, mdot, adj, spm, subgraph_mono, subgraph_extend,
+       firstonly, fromB, toB, fromE, toE;
   unsigned int deadend, bubble, deadend_depth;
   GtStrArray *subgraph, *subgraph_other;
-  GtUword subgraph_depth;
+  GtUword subgraph_depth, from, to, minlen, maxlen;
 } GtReadjoinerGraphArguments;
 
 static void* gt_readjoiner_graph_arguments_new(void)
@@ -67,7 +68,8 @@ static GtOptionParser* gt_readjoiner_graph_option_parser_new(
   GtOptionParser *op;
   GtOption *option, *errors_option, *deadend_option, *v_option,
            *q_option, *bubble_option, *deadend_depth_option,
-           *subgraph_option, *sother_option;
+           *subgraph_option, *sother_option, *from_option,
+           *to_option, *fromb_option, *tob_option;
   gt_assert(arguments);
 
   /* init */
@@ -172,6 +174,70 @@ static GtOptionParser* gt_readjoiner_graph_option_parser_new(
   gt_option_is_extended_option(bubble_option);
   gt_option_imply(bubble_option, errors_option);
   gt_option_parser_add_option(op, bubble_option);
+
+  /* -from/-to */
+  from_option = gt_option_new_uword("from", "find connecting path from->to\n"
+      "requires -to; optional -minlen/-maxlen/-firstonly",
+      &(arguments->from), 0);
+  to_option = gt_option_new_uword("to", "find connecting path from->to\n"
+      "requires -from; optional -minlen/-maxlen/-firstonly",
+      &(arguments->to), 0);
+  gt_option_imply(to_option, from_option);
+  gt_option_imply(from_option, to_option);
+  gt_option_parser_add_option(op, from_option);
+  gt_option_parser_add_option(op, to_option);
+
+  /* -fromB */
+  fromb_option = gt_option_new_bool("fromB",
+      "use only B vertex of origin read\n"
+      "requires -from", &arguments->fromB, false);
+  gt_option_imply(fromb_option, from_option);
+  gt_option_parser_add_option(op, fromb_option);
+
+  /* -fromE */
+  option = gt_option_new_bool("fromE",
+      "use only E vertex of origin read\n"
+      "requires -from", &arguments->fromE, false);
+  gt_option_imply(option, from_option);
+  gt_option_exclude(option, fromb_option);
+  gt_option_parser_add_option(op, option);
+
+  /* -toB */
+  tob_option = gt_option_new_bool("toB",
+      "use only B vertex of origin read\n"
+      "requires -to", &arguments->toB, false);
+  gt_option_imply(tob_option, to_option);
+  gt_option_parser_add_option(op, tob_option);
+
+  /* -toE */
+  option = gt_option_new_bool("toE",
+      "use only E vertex of origin read\n"
+      "requires -to", &arguments->toE, false);
+  gt_option_imply(option, to_option);
+  gt_option_exclude(option, tob_option);
+  gt_option_parser_add_option(op, option);
+
+  /* -minlen */
+  option = gt_option_new_uword("minlen",
+      "minimum string length of path from->to\n"
+      "requires -from and -to",
+      &(arguments->minlen), 0);
+  gt_option_imply(option, from_option);
+  gt_option_parser_add_option(op, option);
+
+  /* -maxlen */
+  option = gt_option_new_uword("maxlen",
+      "maximum string length of path from->to\n"
+      "requires -from and -to",
+      &(arguments->maxlen), 1000);
+  gt_option_imply(option, from_option);
+  gt_option_parser_add_option(op, option);
+
+  /* -firstonly */
+  option = gt_option_new_bool("firstonly",
+      "output only first path from->to",
+      &arguments->firstonly, false);
+  gt_option_parser_add_option(op, option);
 
   /* -deadend */
   deadend_option = gt_option_new_uint("deadend", "number of rounds of "
@@ -433,6 +499,29 @@ static int gt_readjoiner_graph_runner(GT_UNUSED int argc,
           GT_READJOINER_SUFFIX_SG_ELEN_DISTRI);
     gt_strgraph_log_stats(strgraph, verbose_logger);
     gt_strgraph_log_space(strgraph);
+  }
+
+  if (had_err == 0 && arguments->from)
+  {
+    GtStrgraphVtype from_vt, to_vt;
+    gt_assert(eqlen || (reads != NULL));
+    gt_encseq_mirror(reads, err);
+    if (arguments->fromB)
+      from_vt = GT_STRGRAPH_VTYPE_B;
+    else if (arguments->fromE)
+      from_vt = GT_STRGRAPH_VTYPE_E;
+    else
+      from_vt = GT_STRGRAPH_VTYPE_A;
+    if (arguments->toB)
+      to_vt = GT_STRGRAPH_VTYPE_B;
+    else if (arguments->toE)
+      to_vt = GT_STRGRAPH_VTYPE_E;
+    else
+      to_vt = GT_STRGRAPH_VTYPE_A;
+    had_err = gt_strgraph_find_connecting_path(strgraph, arguments->from,
+        from_vt, arguments->to, to_vt, arguments->minlen, arguments->maxlen,
+        arguments->firstonly, readset, GT_READJOINER_SUFFIX_CONNECTING_PATHS,
+        verbose_logger, err);
   }
 
   if (!eqlen && reads != NULL && !arguments->errors)

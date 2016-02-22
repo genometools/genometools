@@ -208,6 +208,12 @@ typedef uint64_t GtStrgraphVnum;
 #include "match/rdj-strgraph-edges-bitfield-def.h"
 #endif
 
+/* seqnum where to read label for edge/vertex in mirrored encseq */
+
+#define GT_STRGRAPH_V_MIRROR_SEQNUM(NOFV, V) (GT_STRGRAPH_V_IS_E(V) \
+    ? GT_STRGRAPH_V_READNUM(V) \
+    : ((GtUword)NOFV - GT_STRGRAPH_V_READNUM(V) - 1))
+
 void gt_strgraph_show_limits_debug_log(void)
 {
   gt_log_log("string graph representation: vertices=%s edges=%s",
@@ -1621,6 +1627,284 @@ static int gt_strgraph_dot_show_context(GtStrgraph *strgraph,
   return had_err;
 }
 
+static void gt_strgraph_output_connecting_path(GtStrgraph *strgraph,
+    GtArray *path, GtContigsWriter *cw)
+{
+  GtUword path_size, i;
+  GtStrgraphVnumAndDepth *vd;
+  path_size = gt_array_size(path);
+  vd = gt_array_get(path, 0);
+  gt_contigs_writer_start(cw,
+      GT_STRGRAPH_V_MIRROR_SEQNUM(GT_STRGRAPH_NOFVERTICES(strgraph), vd->v));
+  for (i = (GtUword)1UL; i < path_size; i++)
+  {
+    vd = gt_array_get(path, i);
+    gt_contigs_writer_append(cw, GT_STRGRAPH_V_MIRROR_SEQNUM(
+          GT_STRGRAPH_NOFVERTICES(strgraph), vd->v), (GtUword)vd->d);
+  }
+  gt_contigs_writer_write(cw);
+}
+
+/* return code: 0 if goal_sn was found, -1 otherwise */
+static int gt_strgraph_add_edge_to_connecting_path(GtStrgraph *strgraph,
+    GtStrgraphVnum from, GtStrgraphVEdgenum j, GtUword goal_sn,
+    GtStrgraphVtype goal_vt, GtUword current_length, GtUword minlen,
+    GtUword maxlen, GtArray *path, bool first_path_only,
+    GtUword *count_too_long, GtUword *count_too_short, GtUword *count_found,
+    GtUword *count_circular, GtUword *count_redundant, GtContigsWriter *cw,
+    GtLogger *logger)
+{
+  GtStrgraphVnumAndDepth wl;
+  GtStrgraphVEdgenum e;
+  wl.v = GT_STRGRAPH_EDGE_DEST(strgraph, from, j);
+  wl.d = GT_STRGRAPH_EDGE_LEN(strgraph, from, j);
+  current_length += wl.d;
+  if (current_length > maxlen)
+  {
+    (*count_too_long)++;
+    return -1;
+  }
+  if ((GT_STRGRAPH_V_READNUM(wl.v) == goal_sn) &&
+      ((goal_vt == GT_STRGRAPH_VTYPE_A) ||
+       ((goal_vt == GT_STRGRAPH_VTYPE_E) && GT_STRGRAPH_V_IS_E(wl.v)) ||
+       ((goal_vt == GT_STRGRAPH_VTYPE_B) && GT_STRGRAPH_V_IS_B(wl.v))))
+  {
+    if (current_length <= minlen)
+    {
+      (*count_too_short)++;
+      return -1;
+    }
+    else
+    {
+      (*count_found)++;
+      gt_array_add(path, wl);
+      gt_logger_log(logger, "Path found, length: "GT_WU, current_length);
+      gt_strgraph_output_connecting_path(strgraph, path, cw);
+      gt_array_pop(path);
+      return 0;
+    }
+  }
+  if (GT_STRGRAPH_V_MARK(strgraph, wl.v) == GT_STRGRAPH_V_MARKED)
+  {
+    (*count_circular)++;
+    return -1;
+  }
+  else if (GT_STRGRAPH_V_MARK(strgraph, wl.v) == GT_STRGRAPH_V_INPLAY)
+  {
+    (*count_redundant)++;
+    return -1;
+  }
+  else
+  {
+    int found = -1;
+    GT_STRGRAPH_V_SET_MARK(strgraph, wl.v, GT_STRGRAPH_V_MARKED);
+    for (e = 0; e < GT_STRGRAPH_V_NOFEDGES(strgraph, wl.v); e++)
+    {
+      if (!GT_STRGRAPH_EDGE_IS_REDUCED(strgraph, wl.v, e))
+      {
+        int retcode;
+        gt_array_add(path, wl);
+        retcode = gt_strgraph_add_edge_to_connecting_path(strgraph, wl.v, e,
+            goal_sn, goal_vt, current_length, minlen, maxlen, path,
+            first_path_only, count_too_long, count_too_short, count_found,
+            count_circular, count_redundant, cw, logger);
+        gt_array_pop(path);
+        if (retcode == 0)
+        {
+          if (first_path_only)
+            return retcode;
+          found = retcode;
+        }
+      }
+    }
+    GT_STRGRAPH_V_SET_MARK(strgraph, wl.v, GT_STRGRAPH_V_INPLAY);
+    return found;
+  }
+}
+
+/* return code: 0 if goal_sn was found, -1 otherwise */
+static int gt_strgraph_find_connecting_path_from_vertex(GtStrgraph *strgraph,
+    GtStrgraphVnumAndDepth vd, GtStrgraphVEdgenum nofedges, GtUword to,
+    GtStrgraphVtype to_vt, GtUword minlen, GtUword maxlen, bool first_path_only,
+    GtContigsWriter *cw, GtLogger *logger)
+{
+  GtArray *path;
+  GtStrgraphVEdgenum j;
+  int found = -1;
+  GtUword count_too_long = 0, count_too_short = 0,
+          count_found = 0, count_circular = 0,
+          count_redundant = 0;
+
+  path = gt_array_new(sizeof (GtStrgraphVnumAndDepth));
+  gt_array_add(path, vd);
+  for (j = 0; j < nofedges; j++)
+  {
+    if (!GT_STRGRAPH_EDGE_IS_REDUCED(strgraph, vd.v, j))
+    {
+      int retcode;
+      retcode = gt_strgraph_add_edge_to_connecting_path(strgraph, vd.v, j,
+          to, to_vt, vd.d, minlen, maxlen, path, first_path_only,
+          &count_too_long, &count_too_short, &count_found, &count_circular,
+          &count_redundant, cw, logger);
+      if (retcode == 0)
+      {
+        found = retcode;
+        if (first_path_only)
+          break;
+      }
+    }
+  }
+  gt_array_delete(path);
+  gt_logger_log(logger, "Paths interrupted as too long:  "GT_WU,
+      count_too_long);
+  gt_logger_log(logger, "Paths interrupted as circular:  "GT_WU,
+      count_circular);
+  gt_logger_log(logger, "Paths interrupted as redundant: "GT_WU,
+      count_redundant);
+  gt_logger_log(logger, "Paths discarded as too short:   "GT_WU,
+      count_too_short);
+  gt_logger_log(logger, "Paths output:                   "GT_WU,
+      count_found);
+  return found;
+}
+
+/* note: the algorithm is heuristic and generally will not find all
+   connecting paths; e.g. if a vertex vA is reached by some path P1
+   of length L1 and all paths from vA to the goal have a length
+   > maxlen - L1, the vertex vA will be marked and not visited anymore;
+   however, it could be that arriving later to vA through some other
+   path P2 of length L2 < L1, the same paths would not be too long
+   anymore - but it's too late, as vA has been marked; to fix this
+   one would have to use, instead of a mark, a length value (which would
+   make the algorithm similar to Dijekstra shortest paths)
+*/
+int gt_strgraph_find_connecting_path(GtStrgraph *strgraph, GtUword from,
+    GtStrgraphVtype from_vt, GtUword to, GtStrgraphVtype to_vt,
+    GtUword minlen, GtUword maxlen, bool first_path_only,
+    const char *indexname, const char *suffix,
+    GtLogger *logger, GtError *err)
+{
+  int had_err = 0;
+
+  if (from >= (GtUword)GT_STRGRAPH_NOFREADS(strgraph))
+  {
+    had_err = -1;
+    gt_error_set(err, "Can't search path from read "GT_WU" "
+        "because the readset has "FormatGtStrgraphVnum" reads", from,
+        GT_STRGRAPH_NOFREADS(strgraph));
+  }
+  if (to >= (GtUword)GT_STRGRAPH_NOFREADS(strgraph))
+  {
+    had_err = -1;
+    gt_error_set(err, "Can't search path from read "GT_WU" "
+        "because the readset has "FormatGtStrgraphVnum" reads", to,
+        GT_STRGRAPH_NOFREADS(strgraph));
+  }
+  if (!had_err)
+  {
+    GtStrgraphVnumAndDepth vd;
+    GtStrgraphVEdgenum nofedges, nofedges_sum = 0;
+    GtStrgraphVnum i;
+    GtContigsWriter *cw;
+    GtFile *outfp;
+    GtStr *complete_suffix;
+    bool unreachable = false;
+    int found = -1;
+
+    /* check if "to" is reachable */
+    if (to_vt == GT_STRGRAPH_VTYPE_B || to_vt == GT_STRGRAPH_VTYPE_A)
+    {
+      nofedges = GT_STRGRAPH_V_NOFEDGES(strgraph, GT_STRGRAPH_V_B(to));
+      nofedges_sum = nofedges;
+      if (nofedges == 0)
+      {
+        gt_logger_log(logger, "Destination read has no edges from B vertex");
+        if (to_vt == GT_STRGRAPH_VTYPE_B)
+          unreachable = true;
+      }
+    }
+    if (to_vt == GT_STRGRAPH_VTYPE_E || to_vt == GT_STRGRAPH_VTYPE_A)
+    {
+      nofedges = GT_STRGRAPH_V_NOFEDGES(strgraph, GT_STRGRAPH_V_E(to));
+      nofedges_sum += nofedges;
+      if (nofedges == 0)
+      {
+        gt_logger_log(logger, "Destination read has no edges from E vertex");
+        if (to_vt == GT_STRGRAPH_VTYPE_E || nofedges_sum == 0)
+          unreachable = true;
+      }
+    }
+    if (unreachable)
+    {
+      gt_logger_log(logger, "Destination read unreachable");
+      return 0;
+    }
+
+    gt_assert(strgraph->encseq != NULL);
+    gt_assert(gt_encseq_is_mirrored(strgraph->encseq));
+    complete_suffix = gt_str_new();
+    gt_str_append_char(complete_suffix, '.');
+    gt_str_append_uword(complete_suffix, from);
+    gt_str_append_char(complete_suffix, '.');
+    gt_str_append_uword(complete_suffix, to);
+    gt_str_append_cstr(complete_suffix, suffix);
+    outfp = gt_strgraph_get_file(indexname, gt_str_get(complete_suffix),
+        true, false);
+    gt_logger_log(logger, "Connecting paths output filename: %s%s", indexname,
+        gt_str_get(complete_suffix));
+    cw = gt_contigs_writer_new(strgraph->encseq, outfp);
+    gt_contigs_writer_enable_complete_path_output(cw);
+
+    /* reset vertex marks */
+    for (i = 0; i < GT_STRGRAPH_NOFVERTICES(strgraph); i++)
+      GT_STRGRAPH_V_SET_MARK(strgraph, i, GT_STRGRAPH_V_VACANT);
+
+    vd.d = GT_STRGRAPH_SEQLEN(strgraph, from);
+
+    /* disallow returning to origin read in any orientation
+       (however, from == to should still work) */
+    GT_STRGRAPH_V_SET_MARK(strgraph, GT_STRGRAPH_V_B(from),
+        GT_STRGRAPH_V_MARKED);
+    GT_STRGRAPH_V_SET_MARK(strgraph, GT_STRGRAPH_V_E(from),
+        GT_STRGRAPH_V_MARKED);
+
+    /* search path from B vertex */
+    if (from_vt == GT_STRGRAPH_VTYPE_B || from_vt == GT_STRGRAPH_VTYPE_A)
+    {
+      vd.v = GT_STRGRAPH_V_B(from);
+      nofedges = GT_STRGRAPH_V_NOFEDGES(strgraph, vd.v);
+      if (nofedges == 0)
+        gt_logger_log(logger, "Origin read has no edges from B vertex");
+      else
+      {
+        gt_logger_log(logger, "Computing paths starting from B vertex...");
+        found = gt_strgraph_find_connecting_path_from_vertex(strgraph, vd,
+            nofedges, to, to_vt, minlen, maxlen, first_path_only, cw, logger);
+      }
+    }
+
+    if ((from_vt == GT_STRGRAPH_VTYPE_E || from_vt == GT_STRGRAPH_VTYPE_A) &&
+        ((found != 0) || !first_path_only))
+    {
+      /* search path from E vertex */
+      vd.v = GT_STRGRAPH_V_E(from);
+      nofedges = GT_STRGRAPH_V_NOFEDGES(strgraph, vd.v);
+      if (nofedges == 0)
+        gt_logger_log(logger, "Origin read has no edges from E vertex");
+      else
+      {
+        gt_logger_log(logger, "Computing paths starting from E vertex...");
+        gt_strgraph_find_connecting_path_from_vertex(strgraph, vd, nofedges,
+            to, to_vt, minlen, maxlen, first_path_only, cw, logger);
+      }
+    }
+    gt_str_delete(complete_suffix);
+    gt_contigs_writer_delete(cw);
+    gt_file_delete(outfp);
+  }
+  return had_err;
+}
+
 /* format: read[E|B] [numofedges]: neighbor1[E|B], neighbor2[E|B]... */
 static void gt_strgraph_adjlist_show(const GtStrgraph *strgraph, GtFile *outfp)
 {
@@ -2146,12 +2430,6 @@ static void gt_strgraph_traverse(GtStrgraph *strgraph,
 }
 
 #define GT_STRGRAPH_CONTIG_INC 16384UL
-
-/* seqnum where to read label for edge/vertex in mirrored encseq */
-
-#define GT_STRGRAPH_V_MIRROR_SEQNUM(NOFV, V) (GT_STRGRAPH_V_IS_E(V) \
-    ? GT_STRGRAPH_V_READNUM(V) \
-    : ((GtUword)NOFV - GT_STRGRAPH_V_READNUM(V) - 1))
 
 /* --- Contig Paths Output --- */
 
