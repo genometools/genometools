@@ -200,10 +200,10 @@ if $gttestdata then
     run("mv #{last_stdout} trembl-section.random-keylist")
     run_test("#{$bin}gt extractseq -keys trembl-section.keylist -width 60 " +
              "trembl-section.fsa.gz")
-    run("cmp -s #{last_stdout} trembl-section.fsa")
+    run("cmp #{last_stdout} trembl-section.fsa")
     run_test("#{$bin}gt extractseq -keys #{$testdata}trkeys.txt -width 60 " +
              "trembl-section.fsa.gz")
-    run("cmp -s #{last_stdout} #{$testdata}trkeys-result.txt")
+    run("cmp #{last_stdout} #{$testdata}trkeys-result.txt")
     run_test("#{$bin}gt extractseq -keys #{last_stdout} " +
              "trembl-section.fsa.gz",:retval => 1)
     run_test("#{$bin}gt extractseq -keys #{$testdata}trembl-wrongkey.txt " +
@@ -219,6 +219,6 @@ if $gttestdata then
     run("mv #{last_stdout} trembl-section-sorted.keylist")
     run_test("#{$bin}gt extractseq -keys trembl-section-sorted.keylist " +
              "-width 60 trembl-section-sorted.fna")
-    run("cmp -s #{last_stdout} trembl-section-sorted.fna")
+    run("cmp #{last_stdout} trembl-section-sorted.fna")
   end
 end

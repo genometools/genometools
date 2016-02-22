@@ -12,7 +12,7 @@ def runchain2dim(args,matchfile)
   Test do
     run_test "#{$bin}gt chain2dim -m #{matchfile} " + args
     argstring = args.gsub(/[ ]/,"")
-    run "cmp -s #{last_stdout} #{$testdata}chaindata/chain#{argstring}"
+    run "cmp #{last_stdout} #{$testdata}chaindata/chain#{argstring}"
   end
 end
 
@@ -26,7 +26,7 @@ Name "gt chain2dim small all"
 Keywords "gt_chain2dim all"
 Test do
   run_test "#{$bin}gt chain2dim -global all -m #{$testdata}chaindata/matches-nd.txt"
-  run "cmp -s #{last_stdout} #{$testdata}chaindata/matches-nd.chains"
+  run "cmp #{last_stdout} #{$testdata}chaindata/matches-nd.chains"
 end
 
 Name "gt chain2dim ecoli all"
