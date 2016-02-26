@@ -17,12 +17,15 @@
 
 #include <limits.h>
 #include "core/alphabet_api.h"
+#include "core/cstr_api.h"
+#include "core/cstr_array.h"
 #include "core/encseq.h"
 #include "core/encseq_api.h"
 #include "core/error_api.h"
 #include "core/ma_api.h"
 #include "core/mathsupport.h"
 #include "core/minmax.h"
+#include "core/parseutils_api.h"
 #include "core/range_api.h"
 #include "core/showtime.h"
 #include "core/str_api.h"
@@ -43,6 +46,8 @@ typedef struct {
   GtUword dbs_maxfreq;
   GtUword dbs_suppress;
   GtUword dbs_memlimit;
+  GtUword dbs_parts;
+  GtStr *dbs_pick_str;
   GtStr *dbs_memlimit_str;
   bool dbs_debug_kmer;
   bool dbs_debug_seedpair;
@@ -82,6 +87,7 @@ static void* gt_seed_extend_arguments_new(void)
   GtSeedExtendArguments *arguments = gt_calloc((size_t) 1, sizeof *arguments);
   arguments->dbs_indexname = gt_str_new();
   arguments->dbs_queryname = gt_str_new();
+  arguments->dbs_pick_str = gt_str_new();
   arguments->dbs_memlimit_str = gt_str_new();
   arguments->se_char_access_mode = gt_str_new();
   return arguments;
@@ -93,6 +99,7 @@ static void gt_seed_extend_arguments_delete(void *tool_arguments)
   if (arguments != NULL) {
     gt_str_delete(arguments->dbs_indexname);
     gt_str_delete(arguments->dbs_queryname);
+    gt_str_delete(arguments->dbs_pick_str);
     gt_str_delete(arguments->dbs_memlimit_str);
     gt_str_delete(arguments->se_char_access_mode);
     gt_option_delete(arguments->se_option_greedy);
@@ -109,7 +116,7 @@ static GtOptionParser* gt_seed_extend_option_parser_new(void *tool_arguments)
   GtOption *option, *op_gre, *op_xdr, *op_cam, *op_his, *op_dif, *op_pmh,
     *op_len, *op_err, *op_xbe, *op_sup, *op_frq, *op_mem, *op_ali, *op_bia,
     *op_onl, *op_weakends, *op_seed_display, *op_relax_polish,
-    *op_norev, *op_nofwd;
+    *op_norev, *op_nofwd, *op_part, *op_pick;
   gt_assert(arguments != NULL);
 
   /* init */
@@ -424,6 +431,23 @@ static GtOptionParser* gt_seed_extend_option_parser_new(void *tool_arguments)
   gt_option_is_development_option(option);
   gt_option_parser_add_option(op, option);
 
+  /* -part */
+  op_part = gt_option_new_uword_min("part",
+                                    "Divide data into specified number of "
+                                    "parts",
+                                    &arguments->dbs_parts,
+                                    1, 1UL);
+  gt_option_parser_add_option(op, op_part);
+
+  /* -pick */
+  op_pick = gt_option_new_string("pick",
+                                 "Choose parts for 1st/2nd sequence set. "
+                                 "Format: i,j",
+                                 arguments->dbs_pick_str,
+                                 "use all combinations successively");
+  gt_option_imply(op_pick, op_part);
+  gt_option_parser_add_option(op, op_pick);
+
   /* -v */
   option = gt_option_new_verbose(&arguments->verbose);
   gt_option_parser_add_option(op, option);
@@ -509,10 +533,12 @@ static int gt_seed_extend_runner(GT_UNUSED int argc,
   gt_assert(arguments->se_minidentity >= GT_EXTEND_MIN_IDENTITY_PERCENTAGE &&
             arguments->se_minidentity <= 100UL);
 
+  /* Define, whether greedy extension will be performed */
   if (arguments->onlyseeds || gt_option_is_set(arguments->se_option_xdrop)) {
     extendgreedy = false;
   }
 
+  /* Print verbose option string */
   if (arguments->verbose) {
     int idx;
     bool minid_out = false, history_out = false;
@@ -695,6 +721,8 @@ static int gt_seed_extend_runner(GT_UNUSED int argc,
   if (!had_err) {
     GtDiagbandseed dbsarguments;
     unsigned int maxseedlength;
+    gt_assert(gt_encseq_num_of_sequences(aencseq) > 0);
+    gt_assert(gt_encseq_num_of_sequences(bencseq) > 0);
 
     dbsarguments.errorpercentage = errorpercentage;
     dbsarguments.userdefinedleastlength = arguments->se_alignlength;
@@ -716,10 +744,6 @@ static int gt_seed_extend_runner(GT_UNUSED int argc,
     dbsarguments.extendgreedyinfo = grextinfo;
     dbsarguments.extendxdropinfo = xdropinfo;
     dbsarguments.querymatchoutopt = querymatchoutopt;
-    dbsarguments.aseqrange.start = 0;
-    dbsarguments.bseqrange.start = 0;
-    dbsarguments.aseqrange.end = gt_encseq_num_of_sequences(aencseq) - 1;
-    dbsarguments.bseqrange.end = gt_encseq_num_of_sequences(bencseq) - 1;
 
     gt_assert(bencseq != NULL);
     if (gt_encseq_has_twobitencoding(aencseq) &&
@@ -751,9 +775,62 @@ static int gt_seed_extend_runner(GT_UNUSED int argc,
         }
       }
     }
-    if (!had_err)
-    {
-      had_err = gt_diagbandseed_run(aencseq, bencseq, &dbsarguments, err);
+
+    if (!had_err) {
+      GtUword aseq, bseq;
+      const bool self = aencseq == bencseq ? true : false;
+      const GtUword amax = gt_encseq_num_of_sequences(aencseq) - 1,
+                    bmax = gt_encseq_num_of_sequences(bencseq) - 1,
+                    asize = amax / arguments->dbs_parts + 1,
+                    bsize = bmax / arguments->dbs_parts + 1;
+
+      /* Parse pick option */
+      if (strcmp(gt_str_get(arguments->dbs_pick_str),
+                 "use all combinations successively") == 0) {
+        for (aseq = 0; aseq <= amax; aseq += asize) {
+          for (bseq = self ? aseq : 0; bseq <= bmax && !had_err; bseq += bsize)
+          {
+            dbsarguments.aseqrange.start = aseq;
+            dbsarguments.aseqrange.end = MIN(aseq + asize - 1, amax);
+            dbsarguments.bseqrange.start = bseq;
+            dbsarguments.bseqrange.end = MIN(bseq + bsize - 1, bmax);
+            had_err = gt_diagbandseed_run(aencseq, bencseq, &dbsarguments, err);
+          }
+        }
+      } else {
+        GtUword apick = 0, bpick = 0;
+        char **items = gt_cstr_split(gt_str_get(arguments->dbs_pick_str), ',');
+        if (gt_cstr_array_size((const char **)items) != 2 ||
+            gt_parse_uword(&apick, items[0]) != 0 ||
+            gt_parse_uword(&bpick, items[1]) != 0) {
+          gt_error_set(err, "argument to option -pick must satisfy format i,j");
+          had_err = -1;
+        }
+        else if (apick > arguments->dbs_parts || bpick > arguments->dbs_parts) {
+          gt_error_set(err, "arguments to option -pick must not exceed " GT_WU
+                       " (number of parts)", arguments->dbs_parts);
+          had_err = -1;
+        }
+        else if (apick < 1 || bpick < 1) {
+          gt_error_set(err, "arguments to option -pick must be at least 1");
+          had_err = -1;
+        }
+        else {
+          apick--;
+          bpick--;
+          if (self && apick > bpick) {
+            GtUword tmp = apick;
+            apick = bpick;
+            bpick = tmp;
+          }
+          dbsarguments.aseqrange.start = apick * asize;
+          dbsarguments.aseqrange.end = MIN((apick + 1) * asize - 1, amax);
+          dbsarguments.bseqrange.start = bpick * bsize;
+          dbsarguments.bseqrange.end = MIN((bpick + 1) * bsize - 1, bmax);
+          had_err = gt_diagbandseed_run(aencseq, bencseq, &dbsarguments, err);
+        }
+        gt_cstr_array_delete(items);
+      }
     }
 
     /* clean up */

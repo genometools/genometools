@@ -251,11 +251,11 @@ static GtUword gt_diagbandseed_get_kmers(GtArrayGtDiagbandseedKmerPos *list,
   if (gt_encseq_has_specialranges(encseq)) {
     gt_specialrangeiterator_delete(pkinfo.sri);
   }
-  /* reduce size of array to number of entries */
   numberofkmerscollected = list->nextfreeGtDiagbandseedKmerPos;
-  list->allocatedGtDiagbandseedKmerPos = numberofkmerscollected;
+  /* reduce size of array to number of entries */
+  /* list->allocatedGtDiagbandseedKmerPos = numberofkmerscollected;
   gt_realloc(list->spaceGtDiagbandseedKmerPos,
-             numberofkmerscollected * sizeof (GtDiagbandseedKmerPos));
+             numberofkmerscollected * sizeof (GtDiagbandseedKmerPos)); */
   return numberofkmerscollected;
 }
 
@@ -1043,16 +1043,17 @@ int gt_diagbandseed_run(const GtEncseq *aencseq,
                           selfcomp,
                           0);   /* len_used not needed */
     mlen = mlist.nextfreeGtDiagbandseedSeedPair;
+
+    if (arg->verbose) {
+      printf("# ...collected " GT_WU " seed pairs ", mlen);
+      gt_timer_show_formatted(vtimer, "in " GT_WD ".%06ld seconds.\n", stdout);
+    }
+
     if (!both_strands) {
       GT_FREEARRAY(&alist, GtDiagbandseedKmerPos);
     }
     if (!alist_blist_id) {
       GT_FREEARRAY(&blist, GtDiagbandseedKmerPos);
-    }
-
-    if (arg->verbose) {
-      printf("# ...collected " GT_WU " seed pairs ", mlen);
-      gt_timer_show_formatted(vtimer, "in " GT_WD ".%06ld seconds.\n", stdout);
     }
 
     if (mlen > 0) {
