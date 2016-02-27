@@ -507,14 +507,18 @@ bool gt_querymatch_overlap(const GtQuerymatch *querymatch,
                            GtUword nextseed_query_end_relative,
                            bool use_db_pos)
 {
+  bool queryoverlap, dboverlap, dboverlap_at_end, dboverlap_at_start;
   gt_assert(querymatch != NULL);
-  return querymatch->querystart + querymatch->querylen >
-         nextseed_query_end_relative && (!use_db_pos ||
-         (querymatch->dbstart_relative + querymatch->dblen >
-          nextseed_db_end_relative && nextseed_db_end_relative >=
-          querymatch->dbstart_relative + querymatch->seedlen))
-           ? true   /* overlap with querymatch */
-           : false; /* next seed ends after current extension */
+
+  queryoverlap = (querymatch->querystart + querymatch->querylen >
+                  nextseed_query_end_relative ? true : false);
+  dboverlap_at_end = (querymatch->dbstart_relative + querymatch->dblen >
+                      nextseed_db_end_relative ? true : false);
+  dboverlap_at_start = (querymatch->dbstart_relative + querymatch->seedlen <=
+                        nextseed_db_end_relative ? true : false);
+  dboverlap = !use_db_pos || (dboverlap_at_end && dboverlap_at_start);
+
+  return queryoverlap && dboverlap ? true : false;
 }
 
 static int gt_querymatch_compare_ascending(const void *va,const void *vb)
