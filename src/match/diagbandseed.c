@@ -76,6 +76,28 @@ struct GtDiagbandseedProcKmerInfo {
   GtRange *specialrange;
 };
 
+static GtUword gt_seed_extend_numofkmers(const GtEncseq *encseq,
+                                         unsigned int seedlength,
+                                         GtRange seqrange)
+{
+  GtUword lastpos, numofpos, subtract, ratioofspecial;
+
+  const GtUword totalnumofspecial = gt_encseq_specialcharacters(encseq),
+                totalnumofpos = gt_encseq_total_length(encseq),
+                firstpos = gt_encseq_seqstartpos(encseq, seqrange.start),
+                numofseq = gt_range_length(&seqrange);
+  lastpos = (seqrange.end + 1 == gt_encseq_num_of_sequences(encseq)
+             ? totalnumofpos
+             : gt_encseq_seqstartpos(encseq, seqrange.end + 1) - 1);
+  gt_assert(lastpos >= firstpos);
+  numofpos = lastpos - firstpos;
+
+  subtract = MIN(seedlength - 1, gt_encseq_min_seq_length(encseq)) + 1;
+  gt_assert(numofpos + 1 >= numofseq * subtract);
+  ratioofspecial = MIN(totalnumofspecial * numofpos / totalnumofpos, numofpos);
+  return numofpos - MAX(numofseq * subtract - 1, ratioofspecial);
+}
+
 /* Returns the position of the next separator following specialrange.start.
    If the end of encseq is reached, the position behind is returned. */
 static GtUword gt_diagbandseed_update_separatorpos(GtRange *specialrange,
@@ -186,31 +208,41 @@ static void gt_diagbandseed_get_kmers_kciter(GtDiagbandseedProcKmerInfo *pkinfo)
 }
 
 /* Returns a GtDiagbandseedKmerPos list of k-mers from a given encseq. */
-static GtUword gt_diagbandseed_get_kmers(GtArrayGtDiagbandseedKmerPos *list,
-                                         const GtEncseq *encseq,
-                                         unsigned int seedlength,
-                                         GtReadmode readmode,
-                                         GtRange seqrange,
-                                         bool debug_kmer,
-                                         bool verbose)
+GtArrayGtDiagbandseedKmerPos gt_diagbandseed_get_kmers(const GtEncseq *encseq,
+                                                       unsigned int seedlength,
+                                                       GtReadmode readmode,
+                                                       GtRange seqrange,
+                                                       bool debug_kmer,
+                                                       bool verbose,
+                                                       GtUword known_size)
 {
+  GtArrayGtDiagbandseedKmerPos list;
   GtDiagbandseedProcKmerInfo pkinfo;
   GtRadixsortinfo *rdxinfo;
   GtRange specialrange;
-  GtUword listlen;
   GtTimer *timer = NULL;
+  GtUword listlen = known_size;
 
-  gt_assert(list != NULL && encseq != NULL);
+  gt_assert(encseq != NULL);
   gt_assert(seqrange.start <= seqrange.end);
   gt_assert(seqrange.end < gt_encseq_num_of_sequences(encseq));
 
+  if (known_size == 0) {
+    listlen = gt_seed_extend_numofkmers(encseq, seedlength, seqrange);
+  }
+
   if (verbose) {
     timer = gt_timer_new();
-    printf("# Start fetching %u-mers...\n", seedlength);
+    printf("# Start fetching %u-mers (expect " GT_WU ")...\n",
+           seedlength,
+           listlen);
     gt_timer_start(timer);
   }
 
-  pkinfo.list = list;
+  GT_INITARRAY(&list, GtDiagbandseedKmerPos);
+  GT_CHECKARRAYSPACEMULTI(&list, GtDiagbandseedKmerPos, listlen);
+
+  pkinfo.list = &list;
   pkinfo.seqnum = seqrange.start;
   pkinfo.endpos = 0;
   pkinfo.encseq = encseq;
@@ -262,15 +294,15 @@ static GtUword gt_diagbandseed_get_kmers(GtArrayGtDiagbandseedKmerPos *list,
   if (gt_encseq_has_specialranges(encseq)) {
     gt_specialrangeiterator_delete(pkinfo.sri);
   }
-  listlen = list->nextfreeGtDiagbandseedKmerPos;
+  listlen = list.nextfreeGtDiagbandseedKmerPos;
 
   /* reduce size of array to number of entries */
-  /* list->allocatedGtDiagbandseedKmerPos = listlen;
-  gt_realloc(list->spaceGtDiagbandseedKmerPos,
+  /* list.allocatedGtDiagbandseedKmerPos = listlen;
+  gt_realloc(list.spaceGtDiagbandseedKmerPos,
              listlen * sizeof (GtDiagbandseedKmerPos)); */
 
   if (debug_kmer) {
-    GtDiagbandseedKmerPos *idx = list->spaceGtDiagbandseedKmerPos;
+    GtDiagbandseedKmerPos *idx = list.spaceGtDiagbandseedKmerPos;
     GtDiagbandseedKmerPos *end = idx + listlen;
     while (idx < end) {
       printf("# Kmer (" GT_LX ",%d,%d)\n", idx->code, idx->endpos, idx->seqnum);
@@ -287,7 +319,7 @@ static GtUword gt_diagbandseed_get_kmers(GtArrayGtDiagbandseedKmerPos *list,
   /* sort list */
   rdxinfo = gt_radixsort_new_ulongpair(listlen);
   gt_radixsort_inplace_GtUwordPair((GtUwordPair *)
-                                   list->spaceGtDiagbandseedKmerPos,
+                                   list.spaceGtDiagbandseedKmerPos,
                                    listlen);
   gt_radixsort_delete(rdxinfo);
 
@@ -297,7 +329,7 @@ static GtUword gt_diagbandseed_get_kmers(GtArrayGtDiagbandseedKmerPos *list,
     gt_timer_delete(timer);
   }
 
-  return listlen;
+  return list;
 }
 
 static void gt_diagbandseed_processhistogram(GtUword *histogram,
@@ -506,8 +538,6 @@ static GtUword gt_diagbandseed_process_seeds(const GtEncseq *aencseq,
                                   GtUword userdefinedleastlength,
                                   GtUword logdiagbandwidth,
                                   GtUword mincoverage,
-                                  GtUword amaxlen,
-                                  GtUword bmaxlen,
                                   bool reverse,
                                   bool use_apos)
 {
@@ -516,6 +546,8 @@ static GtUword gt_diagbandseed_process_seeds(const GtEncseq *aencseq,
   GtExtendSelfmatchRelativeFunc extend_selfmatch_relative_function = NULL;
   GtExtendQuerymatchRelativeFunc extend_querymatch_relative_function = NULL;
   GtProcessinfo_and_querymatchspaceptr info_querymatch;
+  const GtUword amaxlen = gt_encseq_max_seq_length(aencseq),
+                bmaxlen = gt_encseq_max_seq_length(bencseq);
   const GtDiagbandseedSeedPair *lm = NULL, *maxsegm, *nextsegm, *idx;
   const GtUword ndiags = (amaxlen >> logdiagbandwidth) +
                          (bmaxlen >> logdiagbandwidth) + 2;
@@ -694,30 +726,6 @@ static GtUword gt_diagbandseed_process_seeds(const GtEncseq *aencseq,
   return count_extensions;
 }
 
-static GtUword gt_seed_extend_numofkmers(const GtEncseq *encseq,
-                                         unsigned int seedlength,
-                                         GtRange seqrange)
-{
-  GtUword kmers;
-  const GtUword totallength = gt_encseq_total_length(encseq),
-                min_seq_length = gt_encseq_min_seq_length(encseq),
-                num_of_sequences = gt_encseq_num_of_sequences(encseq),
-                num_specialchar = gt_encseq_specialcharacters(encseq),
-                rangelength = gt_range_length(&seqrange);
-  gt_assert(seedlength > 0);
-  kmers = totallength -
-          (num_of_sequences * MIN(seedlength, min_seq_length + 1) - 1);
-  kmers = MIN(kmers, totallength - (seedlength - 1 + num_specialchar));
-  if (rangelength == num_of_sequences) {
-    return kmers;
-  } else if (rangelength > 0 && kmers > 0) {
-    /* allocate 1.3 times the sequence ratio */
-    return (GtUword)MIN(kmers * rangelength * 1.3 / num_of_sequences, kmers);
-  } else {
-    return 0;
-  }
-}
-
 /* if both strands are required: get rev.compl. clist and merge with alist */
 static int gt_diagbandseed_prepare_mlist2(GtArrayGtDiagbandseedSeedPair *mlist,
                                           GtArrayGtDiagbandseedKmerPos *alist,
@@ -733,19 +741,17 @@ static int gt_diagbandseed_prepare_mlist2(GtArrayGtDiagbandseedSeedPair *mlist,
   GtArrayGtDiagbandseedKmerPos clist;
   GtRadixsortinfo *rdxinfo;
   GtTimer *timer = NULL;
-  GtUword mlen, clen;
+  GtUword mlen;
   int had_err = 0;
 
-  GT_INITARRAY(&clist, GtDiagbandseedKmerPos);
-  GT_CHECKARRAYSPACEMULTI(&clist, GtDiagbandseedKmerPos, blen);
-  clen = gt_diagbandseed_get_kmers(&clist,
-                                   bencseq,
-                                   arg->seedlength,
-                                   GT_READMODE_COMPL,
-                                   arg->bseqrange,
-                                   arg->debug_kmer,
-                                   arg->verbose);
-  gt_assert(blen == clen);
+  clist = gt_diagbandseed_get_kmers(bencseq,
+                                    arg->seedlength,
+                                    GT_READMODE_COMPL,
+                                    arg->bseqrange,
+                                    arg->debug_kmer,
+                                    arg->verbose,
+                                    blen);
+  gt_assert(blen == clist.nextfreeGtDiagbandseedKmerPos);
 
   if (arg->verbose) {
     timer = gt_timer_new();
@@ -759,7 +765,7 @@ static int gt_diagbandseed_prepare_mlist2(GtArrayGtDiagbandseedSeedPair *mlist,
                         alist->spaceGtDiagbandseedKmerPos,
                         alen,
                         clist.spaceGtDiagbandseedKmerPos,
-                        clen,
+                        clist.nextfreeGtDiagbandseedKmerPos,
                         &maxfreq,
                         1,    /* maxgram not needed */
                         arg->memlimit,
@@ -836,7 +842,7 @@ int gt_diagbandseed_run(const GtEncseq *aencseq,
   GtArrayGtDiagbandseedKmerPos alist, blist;
   GtArrayGtDiagbandseedSeedPair mlist, mlist_rev;
   GtTimer *timer = NULL;
-  GtUword alen, blen = 0, mlen = 0, maxfreq, amaxlen, bmaxlen, ankmers;
+  GtUword alen, blen = 0, mlen = 0, maxfreq;
   unsigned int endposdiff;
   int had_err = 0;
   bool alist_blist_id, both_strands, selfcomp;
@@ -846,8 +852,6 @@ int gt_diagbandseed_run(const GtEncseq *aencseq,
 
   maxfreq = arg->maxfreq;
   endposdiff = !arg->overlappingseeds ? arg->seedlength : 1;
-  amaxlen = gt_encseq_max_seq_length(aencseq);
-  bmaxlen = gt_encseq_max_seq_length(bencseq);
   selfcomp = (bencseq == aencseq &&
               gt_range_overlap(&arg->aseqrange, &arg->bseqrange)
               ? true : false);
@@ -856,24 +860,14 @@ int gt_diagbandseed_run(const GtEncseq *aencseq,
                     ? true : false);
   both_strands = (arg->norev || arg->nofwd) ? false : true;
 
-  if (MIN(amaxlen, bmaxlen) < arg->seedlength) {
-    gt_error_set(err,"argument to option \"-seedlength\" must be an integer <= "
-                 GT_WU " (length of longest sequence).", MIN(amaxlen, bmaxlen));
-    return -1;
-  }
-
-  /* estimate number of expected kmers */
-  ankmers = gt_seed_extend_numofkmers(aencseq, arg->seedlength, arg->aseqrange);
-
-  GT_INITARRAY(&alist, GtDiagbandseedKmerPos);
-  GT_CHECKARRAYSPACEMULTI(&alist, GtDiagbandseedKmerPos, ankmers);
-  alen = gt_diagbandseed_get_kmers(&alist,
-                                   aencseq,
-                                   arg->seedlength,
-                                   GT_READMODE_FORWARD,
-                                   arg->aseqrange,
-                                   arg->debug_kmer,
-                                   arg->verbose);
+  alist = gt_diagbandseed_get_kmers(aencseq,
+                                    arg->seedlength,
+                                    GT_READMODE_FORWARD,
+                                    arg->aseqrange,
+                                    arg->debug_kmer,
+                                    arg->verbose,
+                                    0);
+  alen = alist.nextfreeGtDiagbandseedKmerPos;
 
   /* if necessary: prepare list of kmers from bencseq */
   if (alist_blist_id) {
@@ -883,27 +877,18 @@ int gt_diagbandseed_run(const GtEncseq *aencseq,
   } else {
     const GtReadmode readmode = arg->nofwd ? GT_READMODE_COMPL
                                            : GT_READMODE_FORWARD;
-    GtUword bnkmers = 0;
-
-    /* estimate number of expected kmers */
+    GtUword known_size = 0;
     if (selfcomp && gt_range_compare(&arg->aseqrange, &arg->bseqrange) == 0) {
-      bnkmers = alen;
-    } else {
-      bnkmers = gt_seed_extend_numofkmers(bencseq,
-                                          arg->seedlength,
-                                          arg->bseqrange);
+      known_size = alen;
     }
-
-    /* fill blist */
-    GT_INITARRAY(&blist, GtDiagbandseedKmerPos);
-    GT_CHECKARRAYSPACEMULTI(&blist, GtDiagbandseedKmerPos, bnkmers);
-    blen = gt_diagbandseed_get_kmers(&blist,
-                                     bencseq,
-                                     arg->seedlength,
-                                     readmode,
-                                     arg->bseqrange,
-                                     arg->debug_kmer,
-                                     arg->verbose);
+    blist = gt_diagbandseed_get_kmers(bencseq,
+                                      arg->seedlength,
+                                      readmode,
+                                      arg->bseqrange,
+                                      arg->debug_kmer,
+                                      arg->verbose,
+                                      known_size);
+    blen = blist.nextfreeGtDiagbandseedKmerPos;
   }
 
   timer = gt_timer_new();
@@ -1099,8 +1084,6 @@ int gt_diagbandseed_run(const GtEncseq *aencseq,
                                       arg->userdefinedleastlength,
                                       arg->logdiagbandwidth,
                                       arg->mincoverage,
-                                      amaxlen,
-                                      bmaxlen,
                                       arg->nofwd,
                                       arg->use_apos);
     GT_FREEARRAY(&mlist, GtDiagbandseedSeedPair);
@@ -1149,8 +1132,6 @@ int gt_diagbandseed_run(const GtEncseq *aencseq,
                                       arg->userdefinedleastlength,
                                       arg->logdiagbandwidth,
                                       arg->mincoverage,
-                                      amaxlen,
-                                      bmaxlen,
                                       true,
                                       arg->use_apos);
     GT_FREEARRAY(&mlist_rev, GtDiagbandseedSeedPair);

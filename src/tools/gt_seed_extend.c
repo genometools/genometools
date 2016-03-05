@@ -80,6 +80,7 @@ typedef struct {
   bool seed_display;
   bool extend_last;
   bool use_apos;
+  bool histogram;
 } GtSeedExtendArguments;
 
 static void* gt_seed_extend_arguments_new(void)
@@ -446,7 +447,16 @@ static GtOptionParser* gt_seed_extend_option_parser_new(void *tool_arguments)
                                  arguments->dbs_pick_str,
                                  "use all combinations successively");
   gt_option_imply(op_pick, op_part);
+  gt_option_is_development_option(op_pick);
   gt_option_parser_add_option(op, op_pick);
+
+  /* -histogram */
+  option = gt_option_new_bool("histogram",
+                              "Calculate histogram to determine size of mlist",
+                              &arguments->histogram,
+                              true);
+  gt_option_is_development_option(option);
+  gt_option_parser_add_option(op, option);
 
   /* -v */
   option = gt_option_new_verbose(&arguments->verbose);
@@ -475,6 +485,9 @@ static int gt_seed_extend_arguments_check(int rest_argc, void *tool_arguments,
 
   /* parse memlimit argument */
   arguments->dbs_memlimit = GT_UWORD_MAX;
+  if (arguments->histogram == true) {
+    arguments->dbs_memlimit -= 1;
+  }
   if (strcmp(gt_str_get(arguments->dbs_memlimit_str), "") != 0) {
     had_err = gt_option_parse_spacespec(&arguments->dbs_memlimit,
                                         "memlimit",
@@ -567,6 +580,7 @@ static int gt_seed_extend_runner(GT_UNUSED int argc,
   bool extendgreedy = true;
   Polishing_info *pol_info = NULL;
   GtUword apick = GT_UWORD_MAX, bpick = GT_UWORD_MAX;
+  GtUword maxsequencelength;
   int had_err = 0;
 
   gt_error_check(err);
@@ -644,6 +658,8 @@ static int gt_seed_extend_runner(GT_UNUSED int argc,
     }
   }
   gt_encseq_loader_delete(encseq_loader);
+  maxsequencelength = MIN(gt_encseq_max_seq_length(aencseq),
+                          gt_encseq_max_seq_length(bencseq));
 
   if (!had_err && !gt_alphabet_is_dna(gt_encseq_alphabet(bencseq))) {
     if (arguments->nofwd) {
@@ -670,13 +686,21 @@ static int gt_seed_extend_runner(GT_UNUSED int argc,
 
   /* set seedlength */
   if (!had_err && arguments->dbs_seedlength == UINT_MAX) {
+    unsigned int seedlength;
     unsigned int nchars = gt_alphabet_num_of_chars(gt_encseq_alphabet(aencseq));
     double totallength = 0.5 * (gt_encseq_total_length(aencseq) +
                                 gt_encseq_total_length(bencseq));
     gt_assert(nchars > 0);
-    arguments->dbs_seedlength
-      = (unsigned int)gt_round_to_long(gt_log_base(totallength,(double)nchars));
-    GT_UPDATE_MAX(arguments->dbs_seedlength, 2);
+    seedlength = (unsigned int)gt_round_to_long(gt_log_base(totallength,
+                                                            (double)nchars));
+    seedlength = (unsigned int)MIN(seedlength, maxsequencelength);
+    arguments->dbs_seedlength = MAX(seedlength, 2);
+  } else if (!had_err && arguments->dbs_seedlength > maxsequencelength) {
+    gt_error_set(err,"argument to option \"-seedlength\" must be an integer <= "
+                 GT_WU " (length of longest sequence).", maxsequencelength);
+    had_err = -1;
+    gt_encseq_delete(aencseq);
+    gt_encseq_delete(bencseq);
   }
 
   /* set mincoverage */
