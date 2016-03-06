@@ -17,6 +17,7 @@
 
 #include <limits.h>
 #include "core/alphabet_api.h"
+#include "core/arraydef.h"
 #include "core/cstr_api.h"
 #include "core/cstr_array.h"
 #include "core/encseq.h"
@@ -887,12 +888,26 @@ static int gt_seed_extend_runner(GT_UNUSED int argc,
       }
       if (!had_err) {
         GtUword aidx, bidx;
+        GtArrayGtDiagbandseedKmerPos alist;
         for (aidx = 0; aidx < anum; aidx++) {
+          dbsarguments.aseqrange = aseqranges[aidx];
+          alist = gt_diagbandseed_get_kmers(aencseq,
+                                            arguments->dbs_seedlength,
+                                            GT_READMODE_FORWARD,
+                                            aseqranges[aidx],
+                                            arguments->dbs_debug_kmer,
+                                            arguments->verbose,
+                                            0);
+          dbsarguments.alist = &alist;
           for (bidx = self ? aidx : 0; bidx < bnum && !had_err; bidx++) {
-            dbsarguments.aseqrange = aseqranges[aidx];
             dbsarguments.bseqrange = bseqranges[bidx];
+            if (arguments->verbose && arguments->dbs_parts > 1) {
+              printf("# Compare part " GT_WU " vs. " GT_WU "\n",
+                     aidx + 1, bidx + 1);
+            }
             had_err = gt_diagbandseed_run(aencseq, bencseq, &dbsarguments, err);
           }
+          GT_FREEARRAY(&alist, GtDiagbandseedKmerPos);
         }
       }
       gt_free(aseqranges);

@@ -18,11 +18,22 @@
 #ifndef DIAGBANDSEED_H
 #define DIAGBANDSEED_H
 #include <stdbool.h>
+#include "core/arraydef.h"
 #include "core/encseq_api.h"
 #include "core/error_api.h"
 #include "core/range_api.h"
 #include "core/types_api.h"
 #include "match/seed-extend.h"
+
+typedef uint32_t GtDiagbandseedPosition;
+typedef uint32_t GtDiagbandseedSeqnum;
+
+typedef struct {
+  GtCodetype code;            /* only sort criterion */
+  GtDiagbandseedSeqnum seqnum;
+  GtDiagbandseedPosition endpos;
+} GtDiagbandseedKmerPos;
+GT_DECLAREARRAYSTRUCT(GtDiagbandseedKmerPos);
 
 typedef struct {
   GtUword errorpercentage,
@@ -47,6 +58,7 @@ typedef struct {
   GtGreedyextendmatchinfo *extendgreedyinfo;
   GtXdropmatchinfo *extendxdropinfo;
   GtQuerymatchoutoptions *querymatchoutopt;
+  GtArrayGtDiagbandseedKmerPos *alist;
 } GtDiagbandseed;
 
 /* Run the whole algorithm. */
@@ -54,4 +66,15 @@ int gt_diagbandseed_run(const GtEncseq *aencseq,
                         const GtEncseq *bencseq,
                         const GtDiagbandseed *arg,
                         GtError *err);
+
+/* Return a sorted list of k-mers of given seedlength from specified encseq.
+ * Only sequences in seqrange will be taken into account.
+ * The caller is responsible for freeing the result. */
+GtArrayGtDiagbandseedKmerPos gt_diagbandseed_get_kmers(const GtEncseq *encseq,
+                                                       unsigned int seedlength,
+                                                       GtReadmode readmode,
+                                                       GtRange seqrange,
+                                                       bool debug_kmer,
+                                                       bool verbose,
+                                                       GtUword known_size);
 #endif
