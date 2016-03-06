@@ -804,31 +804,36 @@ static int gt_seed_extend_runner(GT_UNUSED int argc,
 
   /* Fill struct of algorithm arguments */
   if (!had_err) {
-    GtDiagbandseed dbsarguments;
+    GtDiagbandseedInfo *info;
+    GtDiagbandseedExtendParams *extp;
     unsigned int maxseedlength;
     gt_assert(gt_encseq_num_of_sequences(aencseq) > 0);
     gt_assert(gt_encseq_num_of_sequences(bencseq) > 0);
 
-    dbsarguments.errorpercentage = errorpercentage;
-    dbsarguments.userdefinedleastlength = arguments->se_alignlength;
-    dbsarguments.seedlength = arguments->dbs_seedlength;
-    dbsarguments.logdiagbandwidth = arguments->dbs_logdiagbandwidth;
-    dbsarguments.mincoverage = arguments->dbs_mincoverage;
-    dbsarguments.maxfreq = arguments->dbs_maxfreq;
-    dbsarguments.memlimit = arguments->dbs_memlimit;
-    dbsarguments.norev = arguments->norev;
-    dbsarguments.nofwd = arguments->nofwd;
-    dbsarguments.overlappingseeds = arguments->overlappingseeds;
-    dbsarguments.verify = arguments->dbs_verify;
-    dbsarguments.verbose = arguments->verbose;
-    dbsarguments.debug_kmer = arguments->dbs_debug_kmer;
-    dbsarguments.debug_seedpair = arguments->dbs_debug_seedpair;
-    dbsarguments.seed_display = arguments->seed_display;
-    dbsarguments.extend_last = arguments->extend_last;
-    dbsarguments.use_apos = arguments->use_apos;
-    dbsarguments.extendgreedyinfo = grextinfo;
-    dbsarguments.extendxdropinfo = xdropinfo;
-    dbsarguments.querymatchoutopt = querymatchoutopt;
+    extp = gt_diagbandseed_extend_params_new(errorpercentage,
+                                             arguments->se_alignlength,
+                                             arguments->dbs_logdiagbandwidth,
+                                             arguments->dbs_mincoverage,
+                                             arguments->seed_display,
+                                             arguments->use_apos,
+                                             grextinfo,
+                                             xdropinfo,
+                                             querymatchoutopt);
+
+    info = gt_diagbandseed_info_new(aencseq,
+                                    bencseq,
+                                    arguments->dbs_maxfreq,
+                                    arguments->dbs_memlimit,
+                                    arguments->dbs_seedlength,
+                                    arguments->norev,
+                                    arguments->nofwd,
+                                    arguments->overlappingseeds,
+                                    arguments->dbs_verify,
+                                    arguments->verbose,
+                                    arguments->dbs_debug_kmer,
+                                    arguments->dbs_debug_seedpair,
+                                    arguments->extend_last,
+                                    extp);
 
     /* Check alphabet */
     gt_assert(bencseq != NULL);
@@ -847,16 +852,16 @@ static int gt_seed_extend_runner(GT_UNUSED int argc,
       if (numofchars_a != numofchars_b)
       {
         gt_error_set(err,"encoded sequences have different alphabet "
-                         "sizes %u and %u",numofchars_a,numofchars_b);
+                         "sizes %u and %u", numofchars_a, numofchars_b);
         had_err = -1;
       }
       if (!had_err)
       {
         maxseedlength = gt_maxbasepower(numofchars_a) - 1;
-        if (dbsarguments.seedlength > maxseedlength)
+        if (arguments->dbs_seedlength > maxseedlength)
         {
           gt_error_set(err,"maximum seedlength for alphabet of size %u is %u",
-                          numofchars_a,maxseedlength);
+                          numofchars_a, maxseedlength);
           had_err = -1;
         }
       }
@@ -864,15 +869,10 @@ static int gt_seed_extend_runner(GT_UNUSED int argc,
 
     /* Get sequence ranges and start algorithm */
     if (!had_err) {
-      GtRange *aseqranges, *bseqranges;
-      GtUword anum = arguments->dbs_parts,
-              bnum = arguments->dbs_parts;
-      const bool self = (aencseq == bencseq &&
-                         apick == GT_UWORD_MAX &&
-                         bpick == GT_UWORD_MAX) ? true : false;
-
-      aseqranges = (GtRange *)gt_malloc(anum * sizeof *aseqranges);
-      bseqranges = (GtRange *)gt_malloc(bnum * sizeof *bseqranges);
+      GtUword anum = arguments->dbs_parts;
+      GtUword bnum = arguments->dbs_parts;
+      GtRange *aseqranges = (GtRange *)gt_malloc(anum * sizeof *aseqranges);
+      GtRange *bseqranges = (GtRange *)gt_malloc(bnum * sizeof *bseqranges);
 
       had_err = gt_seed_extend_compute_parts(aseqranges,
                                              &anum,
@@ -887,46 +887,19 @@ static int gt_seed_extend_runner(GT_UNUSED int argc,
                                                err);
       }
       if (!had_err) {
-        GtUword aidx, bidx;
-        GtArrayGtDiagbandseedKmerPos alist;
-        for (aidx = 0; aidx < anum; aidx++) {
-          dbsarguments.aseqrange = aseqranges[aidx];
-          alist = gt_diagbandseed_get_kmers(aencseq,
-                                            arguments->dbs_seedlength,
-                                            GT_READMODE_FORWARD,
-                                            aseqranges[aidx],
-                                            arguments->dbs_debug_kmer,
-                                            arguments->verbose,
-                                            0);
-          dbsarguments.alist = &alist;
-          for (bidx = self ? aidx : 0; bidx < bnum && !had_err; bidx++) {
-            dbsarguments.bseqrange = bseqranges[bidx];
-            if (arguments->verbose && arguments->dbs_parts > 1) {
-              printf("# Compare part " GT_WU " vs. " GT_WU "\n",
-                     aidx + 1, bidx + 1);
-            }
-            had_err = gt_diagbandseed_run(aencseq, bencseq, &dbsarguments, err);
-          }
-          GT_FREEARRAY(&alist, GtDiagbandseedKmerPos);
-        }
+        had_err = gt_diagbandseed_run(info,
+                                      aseqranges,
+                                      bseqranges,
+                                      anum,
+                                      bnum,
+                                      err);
       }
       gt_free(aseqranges);
       gt_free(bseqranges);
     }
 
     /* clean up */
-    gt_encseq_delete(aencseq);
-    gt_encseq_delete(bencseq);
-    if (extendgreedy) {
-      gt_greedy_extend_matchinfo_delete(grextinfo);
-    }
-    if (gt_option_is_set(arguments->se_option_xdrop)) {
-      gt_xdrop_matchinfo_delete(xdropinfo);
-    }
-    if (arguments->se_alignmentwidth > 0 ||
-        gt_option_is_set(arguments->se_option_xdrop)) {
-      gt_querymatchoutoptions_delete(querymatchoutopt);
-    }
+    gt_diagbandseed_info_delete(info);
   }
   polishing_info_delete(pol_info);
 
