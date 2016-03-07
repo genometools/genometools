@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2015 Joerg Winkler <joerg.winkler@studium.uni-hamburg.de>
-  Copyright (c) 2015 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2015-2016 Joerg Winkler <joerg.winkler@studium.uni-hamburg.de>
+  Copyright (c) 2015-2016 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -24,34 +24,46 @@
 #include "core/types_api.h"
 #include "match/seed-extend.h"
 
-typedef struct {
-  GtUword errorpercentage,
-          userdefinedleastlength;
-  unsigned int seedlength;
-  GtUword logdiagbandwidth;
-  GtUword mincoverage;
-  GtUword maxfreq;
-  GtUword memlimit;
-  GtRange aseqrange;
-  GtRange bseqrange;
-  bool norev;
-  bool nofwd;
-  bool overlappingseeds;
-  bool verify;
-  bool verbose;
-  bool debug_kmer;
-  bool debug_seedpair;
-  bool seed_display;
-  bool extend_last;
-  bool use_apos;
-  GtGreedyextendmatchinfo *extendgreedyinfo;
-  GtXdropmatchinfo *extendxdropinfo;
-  GtQuerymatchoutoptions *querymatchoutopt;
-} GtDiagbandseed;
+typedef struct GtDiagbandseedInfo GtDiagbandseedInfo;
+typedef struct GtDiagbandseedExtendParams GtDiagbandseedExtendParams;
 
 /* Run the whole algorithm. */
-int gt_diagbandseed_run(const GtEncseq *aencseq,
-                        const GtEncseq *bencseq,
-                        const GtDiagbandseed *arg,
+int gt_diagbandseed_run(const GtDiagbandseedInfo *arg,
+                        const GtRange *aseqranges,
+                        const GtRange *bseqranges,
+                        GtUword anumseqranges,
+                        GtUword bnumseqranges,
                         GtError *err);
+
+/* The constructor */
+GtDiagbandseedInfo *gt_diagbandseed_info_new(GtEncseq *aencseq,
+                                             GtEncseq *bencseq,
+                                             GtUword maxfreq,
+                                             GtUword memlimit,
+                                             unsigned int seedlength,
+                                             bool norev,
+                                             bool nofwd,
+                                             bool overlappingseeds,
+                                             bool verify,
+                                             bool verbose,
+                                             bool debug_kmer,
+                                             bool debug_seedpair,
+                                             bool extend_last,
+                                             GtDiagbandseedExtendParams *extp);
+
+/* The destructor */
+void gt_diagbandseed_info_delete(GtDiagbandseedInfo *info);
+
+GtDiagbandseedExtendParams *gt_diagbandseed_extend_params_new(
+                              GtUword errorpercentage,
+                              GtUword userdefinedleastlength,
+                              GtUword logdiagbandwidth,
+                              GtUword mincoverage,
+                              bool seed_display,
+                              bool use_apos,
+                              GtGreedyextendmatchinfo *extendgreedyinfo,
+                              GtXdropmatchinfo *extendxdropinfo,
+                              GtQuerymatchoutoptions *querymatchoutopt);
+
+void gt_diagbandseed_extend_params_delete(GtDiagbandseedExtendParams *extp);
 #endif

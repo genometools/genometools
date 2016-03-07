@@ -57,13 +57,13 @@ Test do
   run_test build_encseq("at1MB", "#{$testdata}at1MB")
   run_test "#{$bin}gt seed_extend -verify -debug-seedpair -memlimit 10MB " +
            "-ii at1MB -only-seeds -no-reverse -seedlength 14"
-  grep last_stderr, /Only 14-mers occurring <= 3 times will be considered, /
+  grep last_stderr, /Only k-mers occurring <= 3 times will be considered, /
     /due to small memlimit. Expect 50496 seed pairs./
   run "gunzip -c #{$testdata}seedextend2.out.gz | cmp #{last_stdout}"
   run_test "#{$bin}gt seed_extend -only-seeds -v -maxfreq 5 -ii at1MB"
   grep last_stdout, /...found 622939 10-mers/
   grep last_stdout, /...collected 305756 seed pairs/
-  grep last_stdout, /...collected 235705 rev.compl. seed pairs/
+  grep last_stdout, /...collected 235705 seed pairs/
   run_test "#{$bin}gt seed_extend -only-seeds -v -maxfreq 11 -memlimit 1GB " +
            "-ii at1MB"
   grep last_stdout, /Set k-mer maximum frequency to 11, expect 460986 seed/
@@ -172,10 +172,10 @@ Test do
   grep last_stderr, /option "-no-reverse" and option "-no-forward" exclude /
                     /each other/
   run_test "#{$bin}gt seed_extend -ii at1MB -pick 1,2", :retval => 1
-  grep last_stderr, /option "-pick" requires option "-part"/
-  run_test "#{$bin}gt seed_extend -ii at1MB -part 5 -pick 1,6", :retval => 1
+  grep last_stderr, /option "-pick" requires option "-parts"/
+  run_test "#{$bin}gt seed_extend -ii at1MB -parts 5 -pick 1,6", :retval => 1
   grep last_stderr, /option -pick must not exceed 5 \(number of parts\)/
-  run_test "#{$bin}gt seed_extend -ii at1MB -part 5 -pick 3", :retval => 1
+  run_test "#{$bin}gt seed_extend -ii at1MB -parts 5 -pick 3", :retval => 1
   grep last_stderr, /argument to option -pick must satisfy format i,j/
 end
 
@@ -235,16 +235,16 @@ Test do
 end
 
 # Part of encseq
-Name "gt seed_extend: part"
-Keywords "gt_seed_extend part pick"
+Name "gt seed_extend: parts"
+Keywords "gt_seed_extend parts pick"
 Test do
   run_test build_encseq("at1MB", "#{$testdata}at1MB")
   run_test build_encseq("gt_bioseq_succ_3", "#{$testdata}gt_bioseq_succ_3.fas")
   run_test "#{$bin}gt seed_extend -ii at1MB | sort > default.txt"
-  run_test "#{$bin}gt seed_extend -ii at1MB | sort > parts.txt"
+  run_test "#{$bin}gt seed_extend -ii at1MB -parts 4 | sort > parts.txt"
   run "cmp -s default.txt parts.txt"
   run_test "#{$bin}gt seed_extend -ii at1MB -qii gt_bioseq_succ_3 " +
-           "-part 2 -pick 1,2"
+           "-parts 2 -pick 1,2"
   grep last_stdout, /24 209 15 P 26 2 248 35 5 80.00/
   grep last_stdout, /23 418 127 P 24 2 68 35 4 82.98/
 end
