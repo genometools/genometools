@@ -381,7 +381,7 @@ GtOPrval gth_parse_options(GthCallInfo *call_info, GthInput *input,
   gt_option_parser_add_option(op, optverbose);
 
   /* -verboseseqs */
-  optverboseseqs = gt_option_new_bool("verboseseqs", "show additonal sequence "
+  optverboseseqs = gt_option_new_bool("verboseseqs", "show additional sequence "
                                    "information\n(for debugging purposes)",
                                    &call_info->out->verboseseqs, false);
   gt_option_is_development_option(optverboseseqs);
