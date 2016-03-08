@@ -46,7 +46,7 @@ If the sequence input comes from a fasta index (see below), the following holds:
 
 If the end of the argument list only contains one filename, say fastaindex, then
 it is checked if there is a file `fastaindex.kys`. This makes up part of the
-fasta index, which is contructed by calling the suffixerator tool as follows:
+fasta index, which is constructed by calling the suffixerator tool as follows:
 
   gt suffixerator -protein -ssp -tis -des -sds -kys -indexname fastaindex \
     -db inputfile1 [inputfile2 ..]
