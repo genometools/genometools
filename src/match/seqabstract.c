@@ -62,6 +62,17 @@ GtSeqabstract *gt_seqabstract_new_empty(void)
   return sa;
 }
 
+void gt_seqabstract_reset(GtSeqabstract *sa)
+{
+  sa->seqtype = GT_SEQABSTRACT_UNDEF;
+  sa->len = sa->offset = 0;
+  sa->read_seq_left2right = true;
+  sa->dir_is_complement = false;
+  sa->totallength = GT_SEQABSTRACT_TOTALLENGTH_UNDEF;
+  sa->seqstartpos = 0;
+  sa->seq.string = NULL;
+}
+
 static void gt_seqabstract_init(GtSeqabstract *sa,
                                 bool rightextension,
                                 GtReadmode readmode,

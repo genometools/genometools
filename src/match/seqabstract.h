@@ -28,6 +28,9 @@ typedef struct GtSeqabstract GtSeqabstract;
 
 GtSeqabstract* gt_seqabstract_new_empty(void);
 
+/* Reset <GtSeqabstract> object to initial values */
+void gt_seqabstract_reset(GtSeqabstract *sa);
+
 /* Creates new <GtSeqabstract> object from <string>, starting at <startpos> with
    length <len>, <string> should be long enough and <startpos> within <string>.
    Ownership of <string> stays with the caller. */
