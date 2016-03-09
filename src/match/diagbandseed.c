@@ -1235,6 +1235,9 @@ int gt_diagbandseed_algorithm(const GtDiagbandseedInfo *arg,
                                   true,
                                   arg->verbose);
   }
+  if (!had_err && arg->extp->extendxdropinfo != NULL) {
+    gt_xdrop_matchinfo_reset_seqabstract(arg->extp->extendxdropinfo);
+  }
   return had_err;
 }
 

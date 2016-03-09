@@ -84,6 +84,10 @@ GtXdropmatchinfo *gt_xdrop_matchinfo_new(GtUword userdefinedleastlength,
                                          GtXdropscore xdropbelowscore,
                                          GtUword sensitivity);
 
+/* reset seqabstract objects for a new run */
+
+void gt_xdrop_matchinfo_reset_seqabstract(GtXdropmatchinfo *xdropmatchinfo);
+
 /* The destructor-method. */
 
 void gt_xdrop_matchinfo_delete(GtXdropmatchinfo *xdropmatchinfo);

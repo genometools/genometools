@@ -86,6 +86,14 @@ GtXdropmatchinfo *gt_xdrop_matchinfo_new(GtUword userdefinedleastlength,
   return xdropmatchinfo;
 }
 
+void gt_xdrop_matchinfo_reset_seqabstract(GtXdropmatchinfo *xdropmatchinfo)
+{
+  if (xdropmatchinfo != NULL) {
+    gt_seqabstract_reset(xdropmatchinfo->useq);
+    gt_seqabstract_reset(xdropmatchinfo->vseq);
+  }
+}
+
 void gt_xdrop_matchinfo_delete(GtXdropmatchinfo *xdropmatchinfo)
 {
   if (xdropmatchinfo != NULL)

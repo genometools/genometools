@@ -9,7 +9,8 @@ do
   # Now do something with the sequence
   for mode in greedy xdrop
   do
-    ${GTDIR}/bin/gt seed_extend -seedlength 14 -extend${mode} -ii sfx -v -maxfreq 20 -seed-display > sfx.matches
+    echo $filename
+    ${GTDIR}/bin/gt seed_extend -parts 2 -extend${mode} -ii sfx -v -maxfreq 20 -seed-display > sfx.matches
     ${GTDIR}/bin/gt dev show_seedext -f sfx.matches -a
   done
 done
