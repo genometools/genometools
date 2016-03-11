@@ -40,6 +40,7 @@
 #include "core/undef_api.h"
 #include "core/unused_api.h"
 #include "core/xansi_api.h"
+#include "core/basename_api.h"
 #include "core/xposix.h"
 
 struct GtBioseq {
@@ -162,7 +163,11 @@ static int bioseq_fill(GtBioseq *bs, bool recreate, GtError *err)
     /* assign a unique name */
     gt_str_append_uword(bioseq_basename, (GtUword) bs);
   } else
-    bioseq_basename = bs->sequence_file;
+  {
+    char *basename = gt_basename(gt_str_get(bs->sequence_file));
+    bioseq_basename = gt_str_new_cstr(basename);
+    gt_free(basename);
+  }
 
   /* construct file names */
   bioseq_index_file = gt_str_clone(bioseq_basename);
@@ -207,8 +212,7 @@ static int bioseq_fill(GtBioseq *bs, bool recreate, GtError *err)
   }
 
   /* free */
-  if (bs->use_stdin)
-    gt_str_delete(bioseq_basename);
+  gt_str_delete(bioseq_basename);
   gt_str_delete(bioseq_index_file);
   gt_str_delete(bioseq_ois_file);
   gt_str_delete(bioseq_md5_file);

@@ -21,6 +21,7 @@
 #include "core/option_api.h"
 #include "core/output_file_api.h"
 #include "core/undef_api.h"
+#include "core/eansi.h"
 #include "tools/gt_seq.h"
 
 typedef struct {
@@ -28,10 +29,11 @@ typedef struct {
        showfasta,
        gc_content,
        stat,
-       seqlengthdistri;
+       seqlengthdistri,
+       seqnum_from_0;
   GtUword showseqnum,
                 width;
-  GtStr *reader;
+  GtStr *showseqnum_inputfile;
   GtOutputFileInfo *ofi;
   GtFile *outfp;
 } SeqArguments;
@@ -39,8 +41,8 @@ typedef struct {
 static void* gt_seq_arguments_new(void)
 {
   SeqArguments *arguments = gt_calloc(1, sizeof *arguments);
-  arguments->reader = gt_str_new();
   arguments->ofi = gt_output_file_info_new();
+  arguments->showseqnum_inputfile = gt_str_new();
   return arguments;
 }
 
@@ -50,7 +52,7 @@ static void gt_seq_arguments_delete(void *tool_arguments)
   if (!arguments) return;
   gt_file_delete(arguments->outfp);
   gt_output_file_info_delete(arguments->ofi);
-  gt_str_delete(arguments->reader);
+  gt_str_delete(arguments->showseqnum_inputfile);
   gt_free(arguments);
 }
 
@@ -58,7 +60,8 @@ static GtOptionParser* gt_seq_option_parser_new(void *tool_arguments)
 {
   SeqArguments *arguments = tool_arguments;
   GtOption *option, *option_recreate, *option_showfasta, *option_showseqnum,
-           *option_width, *option_stat;
+           *option_width, *option_stat, *option_showseqnum_inputfile,
+           *option_seqnum_from_0;
   GtOptionParser *op;
   gt_assert(arguments);
 
@@ -79,11 +82,29 @@ static GtOptionParser* gt_seq_option_parser_new(void *tool_arguments)
   gt_option_parser_add_option(op, option_showfasta);
 
   /* -showseqnum */
-  option_showseqnum = gt_option_new_uword_min("showseqnum", "show sequence "
-                                              "with given number (in FASTA "
-                                              "format)", &arguments->showseqnum,
-                                              GT_UNDEF_UWORD, 1);
+#define GT_COMMENT_COUNTED_FROM_0\
+        "(sequences are counted from 1 unless -seqnum_from_0 is specified)"
+  option_showseqnum = gt_option_new_uword_min("showseqnum",
+                      "show sequence with given number "
+                      GT_COMMENT_COUNTED_FROM_0,
+                      &arguments->showseqnum,
+                      GT_UNDEF_UWORD, 0);
   gt_option_parser_add_option(op, option_showseqnum);
+
+  /* -showseqnum_inputfile */
+  option_showseqnum_inputfile = gt_option_new_filename("showseqnum_inputfile",
+                                "show sequence with given numbers "
+                                "specified line by line in given file "
+                                GT_COMMENT_COUNTED_FROM_0,
+                                arguments->showseqnum_inputfile);
+  gt_option_parser_add_option(op, option_showseqnum_inputfile);
+
+  /* -seqnum_from_0 */
+  option_seqnum_from_0 = gt_option_new_bool("seqnum_from_0",
+                        "for options -showseqnum and -showseqnum_inputfile: "
+                        "count sequence numbers from 0 instead of 1",
+                        &arguments->seqnum_from_0, false);
+  gt_option_parser_add_option(op, option_seqnum_from_0);
 
   /* -gc-content */
   option = gt_option_new_bool("gc-content", "print GC-content (for DNA files)",
@@ -102,6 +123,7 @@ static GtOptionParser* gt_seq_option_parser_new(void *tool_arguments)
   gt_option_parser_add_option(op, option);
 
   /* -width */
+
   option_width = gt_option_new_width(&arguments->width);
   gt_option_parser_add_option(op, option_width);
 
@@ -109,12 +131,16 @@ static GtOptionParser* gt_seq_option_parser_new(void *tool_arguments)
   gt_output_file_info_register_options(arguments->ofi, op, &arguments->outfp);
 
   /* option implications */
-  gt_option_imply_either_2(option_width, option_showfasta, option_showseqnum);
+  gt_option_imply_either_3(option_width, option_showfasta, option_showseqnum,
+                           option_showseqnum_inputfile);
+  gt_option_imply_either_2(option_seqnum_from_0, option_showseqnum,
+                           option_showseqnum_inputfile);
 
   /* option exclusions */
   gt_option_exclude(option_showfasta, option_stat);
   gt_option_exclude(option_showfasta, option_showseqnum);
   gt_option_exclude(option_showseqnum, option_stat);
+  gt_option_exclude(option_showseqnum, option_showseqnum_inputfile);
 
   /* set minimal arguments */
   gt_option_parser_set_min_args(op, 1);
@@ -129,10 +155,20 @@ static int gt_seq_arguments_check(int rest_argc, void *tool_arguments,
   gt_error_check(err);
   gt_assert(arguments);
   /* option -showseqnum makes only sense if we got a single sequence file */
-  if (arguments->showseqnum != GT_UNDEF_UWORD && rest_argc > 1) {
-    gt_error_set(err, "option '-showseqnum' makes only sense with a single "
-                      "sequence_file");
-    return -1;
+  if (arguments->showseqnum != GT_UNDEF_UWORD)
+  {
+    if (rest_argc > 1)
+    {
+      gt_error_set(err, "option '-showseqnum' makes only sense with a single "
+                        "sequence_file");
+      return -1;
+    }
+    if (arguments->showseqnum == 0 && !arguments->seqnum_from_0)
+    {
+      gt_error_set(err, "argument to option '-showseqnum' must be >= 1 if "
+                        "option -seqnum_from_0 is not used");
+      return -1;
+    }
   }
   return 0;
 }
@@ -159,18 +195,67 @@ static int gt_seq_runner(int argc, const char **argv, int parsed_args,
     if (!had_err && arguments->showfasta)
       gt_bioseq_show_as_fasta(bioseq, arguments->width, arguments->outfp);
 
-    if (!had_err && arguments->showseqnum != GT_UNDEF_UWORD) {
-      if (arguments->showseqnum > gt_bioseq_number_of_sequences(bioseq)) {
-        gt_error_set(err, "argument '"GT_WU"' to option '-showseqnum' is too "
-                     "large. The sequence index contains only '"GT_WU"' "
-                     "sequences.",
-                     arguments->showseqnum,
-                     gt_bioseq_number_of_sequences(bioseq));
-        had_err = -1;
+    if (!had_err && (arguments->showseqnum != GT_UNDEF_UWORD ||
+                     gt_str_length(arguments->showseqnum_inputfile) > 0))
+    {
+      GtUword maxseqnum = gt_bioseq_number_of_sequences(bioseq);
+      if (arguments->seqnum_from_0)
+      {
+        gt_assert(maxseqnum > 0);
+        maxseqnum--;
       }
-      if (!had_err) {
-        gt_bioseq_show_sequence_as_fasta(bioseq, arguments->showseqnum - 1,
-                                         arguments->width, arguments->outfp);
+      if (arguments->showseqnum != GT_UNDEF_UWORD)
+      {
+        if (arguments->showseqnum > maxseqnum) {
+          gt_error_set(err, "argument '" GT_WU "' to option '-showseqnum' "
+                            "is too large. The largest possible number is '"
+                            GT_WU "'",
+                     arguments->showseqnum,
+                     maxseqnum);
+          had_err = -1;
+        }
+        if (!had_err) {
+          gt_bioseq_show_sequence_as_fasta(bioseq,
+                                           arguments->seqnum_from_0
+                                             ? arguments->showseqnum
+                                             : arguments->showseqnum - 1,
+                                           arguments->width, arguments->outfp);
+        }
+      } else
+      {
+        FILE *fpin;
+        gt_assert(gt_str_length(arguments->showseqnum_inputfile) > 0);
+        fpin = gt_efopen(gt_str_get(arguments->showseqnum_inputfile),"rb",err);
+        if (fpin == NULL)
+        {
+          had_err = -1;
+        } else
+        {
+          GtWord seqnum_input;
+          while (fscanf(fpin,GT_WD,&seqnum_input) == 1)
+          {
+            if (seqnum_input < 0 ||
+                (!arguments->seqnum_from_0 && seqnum_input == 0) ||
+                (GtUword) seqnum_input > maxseqnum)
+            {
+              gt_error_set(err, "sequence number '" GT_WD "' is not in range "
+                                "[%d," GT_WU "]",
+                                 seqnum_input,
+                                 arguments->seqnum_from_0 ? 0 : 1,
+                                 maxseqnum);
+              had_err = -1;
+            }
+            if (!had_err)
+            {
+              gt_bioseq_show_sequence_as_fasta(bioseq,
+                                           arguments->seqnum_from_0
+                                             ? (GtUword) seqnum_input
+                                             : (GtUword) seqnum_input - 1,
+                                           arguments->width, arguments->outfp);
+            }
+          }
+          fclose(fpin);
+        }
       }
     }
 
