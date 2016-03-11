@@ -31,7 +31,6 @@ typedef struct {
        seqlengthdistri;
   GtUword showseqnum,
                 width;
-  GtStr *reader;
   GtOutputFileInfo *ofi;
   GtFile *outfp;
 } SeqArguments;
@@ -39,7 +38,6 @@ typedef struct {
 static void* gt_seq_arguments_new(void)
 {
   SeqArguments *arguments = gt_calloc(1, sizeof *arguments);
-  arguments->reader = gt_str_new();
   arguments->ofi = gt_output_file_info_new();
   return arguments;
 }
@@ -50,7 +48,6 @@ static void gt_seq_arguments_delete(void *tool_arguments)
   if (!arguments) return;
   gt_file_delete(arguments->outfp);
   gt_output_file_info_delete(arguments->ofi);
-  gt_str_delete(arguments->reader);
   gt_free(arguments);
 }
 
