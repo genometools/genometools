@@ -114,7 +114,8 @@ static GtOptionParser* gt_speck_option_parser_new(void *tool_arguments)
 
   /* -format */
   option = gt_option_new_string("output", "output format\n"
-                                "choose from: json, text, html, statsonly",
+                                "choose from: [json, text, html, statsonly, "
+                                "tabular] or give path to output driver",
                                 arguments->format, "text");
   gt_option_parser_add_option(op, option);
 
