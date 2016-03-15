@@ -109,7 +109,7 @@ void gt_type_node_add_is_a_vertex(GtTypeNode *src, const GtTypeNode *dst)
 
    That is, if X is_a Y and Z part_of Y, then Z part_of X.
 
-   The method maintains a <node_stack> containing the inital <node> and all
+   The method maintains a <node_stack> containing the initial <node> and all
    its 'is_a' children.
 
    Example from Sequence Ontology (we are looking at mRNA and exon, see

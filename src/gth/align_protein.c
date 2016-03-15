@@ -188,7 +188,7 @@ static const char* showretracenames(Retrace retrace)
   return retracenames[retrace];
 }
 
-/* the following function initalizes the input structure */
+/* the following function initializes the input structure */
 static void initinput(GthAlignInputProtein *input,
                       const unsigned char *ref_seq_orig,
                       GthInput *gth_input)

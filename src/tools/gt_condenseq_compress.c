@@ -108,7 +108,7 @@ gt_condenseq_compress_option_parser_new(void *tool_arguments)
 
   /* -initsize */
   option = gt_option_new_uword("initsize",
-                               "length of inital unique database in bases, "
+                               "length of initial unique database in bases, "
                                "should be larger than -alignlength",
                                &arguments->initsize, GT_UNDEF_UWORD);
   gt_option_parser_add_option(op, option);
