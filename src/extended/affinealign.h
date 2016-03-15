@@ -52,7 +52,7 @@ GtAlignment* gt_affinealign(const GtUchar *u, GtUword ulen,
 
 /* Computes a global alignment with affine gapcosts in square space. Use of this
    function requires an initialised <scorehandler> with cost values an
-   initalised <spacemanager>, the target alignment <align> and input sequences
+   initialised <spacemanager>, the target alignment <align> and input sequences
    <useq> and <vseq> and lengths <ulen> and <vlen>. Returns affine cost
    value of global alignment. */
 GtWord       gt_affinealign_with_Management(GtLinspaceManagement *spacemanager,

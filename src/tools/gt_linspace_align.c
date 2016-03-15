@@ -186,7 +186,7 @@ static GtOptionParser* gt_linspace_align_option_parser_new(void *tool_arguments)
   optionshowscore = gt_option_new_bool("showscore", "show score for alignment, "
                                        "please note it will calculate costs "
                                        "for global alignments and scores for "
-                                       "local alignemnts always, independtly "
+                                       "local alignments always, independently "
                                        "of input ",
                                        &arguments->showscore, false);
   gt_option_parser_add_option(op, optionshowscore);
