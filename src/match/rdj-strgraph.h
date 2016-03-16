@@ -144,6 +144,19 @@ GtUword gt_strgraph_redpbubbles(GtStrgraph *strgraph,
 /* remove marked edges and realloc edges list */
 void gt_strgraph_compact(GtStrgraph *strgraph, bool show_progressbar);
 
+/* allows to specify required vertex type; A = B/E (any) */
+typedef enum {
+  GT_STRGRAPH_VTYPE_B,
+  GT_STRGRAPH_VTYPE_E,
+  GT_STRGRAPH_VTYPE_A,
+} GtStrgraphVtype;
+
+/* find path(s) from-->to of string length l: minlen <= l <= maxlen */
+int gt_strgraph_find_connecting_path(GtStrgraph *strgraph, GtUword from,
+    GtStrgraphVtype from_vt, GtUword to, GtStrgraphVtype to_vt, GtUword minlen,
+    GtUword maxlen, bool first_path_only, const char *indexname,
+    const char *suffix, GtLogger *logger, GtError *err);
+
 /* --- spell contigs --- */
 
 void gt_strgraph_spell(GtStrgraph *strgraph, GtUword min_path_depth,

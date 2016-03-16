@@ -31,6 +31,7 @@
 #define GT_READJOINER_SUFFIX_PREFILTERED_FAS    ".p.fas"
 #define GT_READJOINER_SUFFIX_SEQNUMS            ".sn"
 #define GT_READJOINER_SUFFIX_CNTLIST            ".cnt"
+#define GT_READJOINER_SUFFIX_CONNECTING_PATHS   ".connect.fas"
 
 /* string graph */
 #define GT_READJOINER_SUFFIX_SG                 ".sg"
