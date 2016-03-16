@@ -224,8 +224,16 @@ static int gt_seq_runner(int argc, const char **argv, int parsed_args,
       } else
       {
         FILE *fpin;
+
         gt_assert(gt_str_length(arguments->showseqnum_inputfile) > 0);
-        fpin = gt_efopen(gt_str_get(arguments->showseqnum_inputfile),"rb",err);
+        if (strcmp(gt_str_get(arguments->showseqnum_inputfile),"-") == 0)
+        {
+          fpin = stdin;
+        } else
+        {
+          fpin = gt_efopen(gt_str_get(arguments->showseqnum_inputfile),
+                           "rb",err);
+        }
         if (fpin == NULL)
         {
           had_err = -1;
@@ -254,7 +262,10 @@ static int gt_seq_runner(int argc, const char **argv, int parsed_args,
                                            arguments->width, arguments->outfp);
             }
           }
-          fclose(fpin);
+          if (strcmp(gt_str_get(arguments->showseqnum_inputfile),"-") == 0)
+          {
+            fclose(fpin);
+          }
         }
       }
     }
