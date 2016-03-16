@@ -838,30 +838,36 @@ static GtCodetype getencseqkmers_nospecialtwobitencoding(
   return code;
 }
 
-static void getencseqkmers_rangetwobitencoding(
-                                      const GtTwobitencoding *twobitencoding,
-                                      GtUword totallength,
-                                      GtUword realtotallength,
-                                      bool mirrored,
-                                      GtCodetype maskright,
-                                      GtReadmode readmode,
-                                      unsigned int kmersize,
-                                      unsigned int upperkmersize,
-                                      bool onlyfirst,
-                                      void(*processkmercode)(void *,
-                                                             bool,
-                                                             GtUword,
-                                                             GtCodetype),
-                                      void *processkmercodeinfo,
-                                      void(*processkmerspecial)(void *,
-                                                                unsigned int,
-                                                                unsigned int,
-                                                                GtUword),
-                                      void *processkmerspecialinfo,
-                                      GtUword startpos,
-                                      GtUword endpos)
+static
+void getencseqkmers_rangetwobitencoding(const GtEncseq *encseq,
+                                        GtReadmode readmode,
+                                        unsigned int kmersize,
+                                        unsigned int upperkmersize,
+                                        bool onlyfirst,
+                                        void(*processkmercode)(void *,
+                                                               bool,
+                                                               GtUword,
+                                                               GtCodetype),
+                                        void *processkmercodeinfo,
+                                        void(*processkmerspecial)(void *,
+                                                                  unsigned int,
+                                                                  unsigned int,
+                                                                  GtUword),
+                                        void *processkmerspecialinfo,
+                                        GtUword startpos,
+                                        GtUword endpos)
 {
-  GtCodetype lastcode, newcode;
+  GtCodetype lastcode, newcode, realtotallength;
+  const GtTwobitencoding *twobitencoding
+          = gt_encseq_twobitencoding_export(encseq);
+  const GtCodetype maskright = GT_MASKRIGHT(kmersize);
+  bool mirrored = gt_encseq_is_mirrored(encseq);
+  const GtUword totallength = gt_encseq_total_length(encseq);
+  realtotallength = totallength;
+  if (mirrored) {
+    gt_assert((totallength & 1) == 1UL);
+    realtotallength = ((totallength - 1) / 2);
+  }
 
   if (mirrored && startpos >= realtotallength) {
     gt_readmode_invert(readmode);
@@ -936,6 +942,97 @@ static void getencseqkmers_rangetwobitencoding(
   }
 }
 
+void getencseqkmers_twobitencoding_slice(const GtEncseq *encseq,
+                                         GtReadmode readmode,
+                                         unsigned int kmersize,
+                                         unsigned int upperkmersize,
+                                         bool onlyfirst,
+                                         void(*processkmercode)(void *,
+                                                                bool,
+                                                                GtUword,
+                                                                GtCodetype),
+                                         void *processkmercodeinfo,
+                                         void(*processkmerspecial)(void *,
+                                                                   unsigned int,
+                                                                   unsigned int,
+                                                                   GtUword),
+                                         void *processkmerspecialinfo,
+                                         GtUword slice_startpos,
+                                         GtUword slice_endpos)
+{
+  GtUword laststart = slice_startpos,
+          lastend = slice_endpos;
+
+  if (gt_encseq_has_specialranges(encseq))
+  {
+    GtSpecialrangeiterator *sri;
+    GtRange range;
+
+    if (GT_ISDIRREVERSE(readmode))
+    {
+      sri = gt_specialrangeiterator_new(encseq,false);
+      while (gt_specialrangeiterator_next(sri,&range))
+      {
+        if (range.end <= lastend) {
+          getencseqkmers_rangetwobitencoding(encseq,
+                                             readmode,
+                                             kmersize,
+                                             upperkmersize,
+                                             onlyfirst,
+                                             processkmercode,
+                                             processkmercodeinfo,
+                                             processkmerspecial,
+                                             processkmerspecialinfo,
+                                             range.end,
+                                             lastend);
+          lastend = range.start;
+        }
+        if (laststart > range.start) {
+          break;
+        }
+      }
+    } else
+    {
+      sri = gt_specialrangeiterator_new(encseq,true);
+      while (gt_specialrangeiterator_next(sri,&range))
+      {
+        if (range.start >= laststart) {
+          getencseqkmers_rangetwobitencoding(encseq,
+                                             readmode,
+                                             kmersize,
+                                             upperkmersize,
+                                             onlyfirst,
+                                             processkmercode,
+                                             processkmercodeinfo,
+                                             processkmerspecial,
+                                             processkmerspecialinfo,
+                                             laststart,
+                                             range.start);
+          laststart = range.end;
+        }
+        if (lastend < range.end) {
+          break;
+        }
+      }
+    }
+    gt_assert(gt_encseq_total_length(encseq) >= laststart);
+    gt_specialrangeiterator_delete(sri);
+  }
+  getencseqkmers_rangetwobitencoding(encseq,
+                                     readmode,
+                                     kmersize,
+                                     upperkmersize,
+                                     onlyfirst,
+                                     processkmercode,
+                                     processkmercodeinfo,
+                                     processkmerspecial,
+                                     processkmerspecialinfo,
+                                     GT_ISDIRREVERSE(readmode) ? slice_startpos
+                                     : laststart,
+                                     GT_ISDIRREVERSE(readmode) ? lastend
+                                     : slice_endpos);
+}
+
 void getencseqkmers_twobitencoding(const GtEncseq *encseq,
                                    GtReadmode readmode,
                                    unsigned int kmersize,
@@ -952,91 +1049,17 @@ void getencseqkmers_twobitencoding(const GtEncseq *encseq,
                                                              GtUword),
                                    void *processkmerspecialinfo)
 {
-  GtUword laststart = 0, lastend,
-                totallength,
-                realtotallength;
-  const GtTwobitencoding *twobitencoding
-    = gt_encseq_twobitencoding_export(encseq);
-  const GtCodetype maskright = GT_MASKRIGHT(kmersize);
-  bool mirrored = gt_encseq_is_mirrored(encseq);
-
-  lastend = totallength = realtotallength = gt_encseq_total_length(encseq);
-  if (mirrored) {
-    gt_assert((totallength & 1) == 1UL);
-    realtotallength = ((realtotallength - 1) / 2);
-  }
-  if (gt_encseq_has_specialranges(encseq))
-  {
-    GtSpecialrangeiterator *sri;
-    GtRange range;
-
-    if (GT_ISDIRREVERSE(readmode))
-    {
-      sri = gt_specialrangeiterator_new(encseq,false);
-      while (gt_specialrangeiterator_next(sri,&range))
-      {
-        gt_assert(range.end <= lastend);
-        getencseqkmers_rangetwobitencoding(twobitencoding,
-                                           totallength,
-                                           realtotallength,
-                                           mirrored,
-                                           maskright,
-                                           readmode,
-                                           kmersize,
-                                           upperkmersize,
-                                           onlyfirst,
-                                           processkmercode,
-                                           processkmercodeinfo,
-                                           processkmerspecial,
-                                           processkmerspecialinfo,
-                                           range.end,
-                                           lastend);
-        lastend = range.start;
-      }
-    } else
-    {
-      sri = gt_specialrangeiterator_new(encseq,true);
-      while (gt_specialrangeiterator_next(sri,&range))
-      {
-        gt_assert(range.start >= laststart);
-        getencseqkmers_rangetwobitencoding(twobitencoding,
-                                           totallength,
-                                           realtotallength,
-                                           mirrored,
-                                           maskright,
-                                           readmode,
-                                           kmersize,
-                                           upperkmersize,
-                                           onlyfirst,
-                                           processkmercode,
-                                           processkmercodeinfo,
-                                           processkmerspecial,
-                                           processkmerspecialinfo,
-                                           laststart,
-                                           range.start);
-        laststart = range.end;
-      }
-    }
-    gt_assert(totallength >= laststart);
-    gt_specialrangeiterator_delete(sri);
-  }
-  getencseqkmers_rangetwobitencoding(twobitencoding,
-                                     totallength,
-                                     realtotallength,
-                                     mirrored,
-                                     maskright,
-                                     readmode,
-                                     kmersize,
-                                     upperkmersize,
-                                     onlyfirst,
-                                     processkmercode,
-                                     processkmercodeinfo,
-                                     processkmerspecial,
-                                     processkmerspecialinfo,
-                                     GT_ISDIRREVERSE(readmode) ? 0
-                                                               : laststart,
-                                     GT_ISDIRREVERSE(readmode) ? lastend
-                                                               : totallength);
+  getencseqkmers_twobitencoding_slice(encseq,
+                                      readmode,
+                                      kmersize,
+                                      upperkmersize,
+                                      onlyfirst,
+                                      processkmercode,
+                                      processkmercodeinfo,
+                                      processkmerspecial,
+                                      processkmerspecialinfo,
+                                      0,
+                                      gt_encseq_total_length(encseq));
 }
 
 static void gt_updateleftborderforkmer(Sfxiterator *sfi,

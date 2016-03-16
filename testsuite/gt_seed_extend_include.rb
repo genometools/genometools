@@ -177,6 +177,8 @@ Test do
   grep last_stderr, /option -pick must not exceed 5 \(number of parts\)/
   run_test "#{$bin}gt seed_extend -ii at1MB -parts 5 -pick 3", :retval => 1
   grep last_stderr, /argument to option -pick must satisfy format i,j/
+  run_test "#{$bin}gt seed_extend -ii not-existing-file", :retval => 1
+  grep last_stderr, /cannot open file 'not-existing-file.esq': No such file/
 end
 
 # Find synthetic alignments

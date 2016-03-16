@@ -595,7 +595,7 @@ static int gt_seed_extend_runner(GT_UNUSED int argc,
   unsigned int display_flag = 0;
   Polishing_info *pol_info = NULL;
   GtUword apick = GT_UWORD_MAX, bpick = GT_UWORD_MAX;
-  GtUword maxsequencelength;
+  GtUword maxsequencelength = 0;
   int had_err = 0;
 
   gt_error_check(err);
@@ -673,8 +673,6 @@ static int gt_seed_extend_runner(GT_UNUSED int argc,
     }
   }
   gt_encseq_loader_delete(encseq_loader);
-  maxsequencelength = MIN(gt_encseq_max_seq_length(aencseq),
-                          gt_encseq_max_seq_length(bencseq));
 
   if (!had_err && !gt_alphabet_is_dna(gt_encseq_alphabet(bencseq))) {
     if (arguments->nofwd) {
@@ -700,6 +698,10 @@ static int gt_seed_extend_runner(GT_UNUSED int argc,
   }
 
   /* set seedlength */
+  if (!had_err) {
+    maxsequencelength = MIN(gt_encseq_max_seq_length(aencseq),
+                            gt_encseq_max_seq_length(bencseq));
+  }
   if (!had_err && arguments->dbs_seedlength == UINT_MAX) {
     unsigned int seedlength;
     unsigned int nchars = gt_alphabet_num_of_chars(gt_encseq_alphabet(aencseq));
@@ -862,7 +864,7 @@ static int gt_seed_extend_runner(GT_UNUSED int argc,
         gt_encseq_has_twobitencoding(bencseq) &&
         gt_encseq_wildcards(bencseq) == 0)
     {
-      maxseedlength = arguments->dbs_parts > 1 ? 30 : 32;
+      maxseedlength = 32;
     } else
     {
       unsigned int numofchars_a
