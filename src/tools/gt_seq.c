@@ -32,6 +32,7 @@ typedef struct {
        seqlengthdistri,
        seqnum_from_0;
   GtUword showseqnum,
+          showseqlength,
                 width;
   GtStr *showseqnum_inputfile;
   GtOutputFileInfo *ofi;
@@ -61,7 +62,7 @@ static GtOptionParser* gt_seq_option_parser_new(void *tool_arguments)
   SeqArguments *arguments = tool_arguments;
   GtOption *option, *option_recreate, *option_showfasta, *option_showseqnum,
            *option_width, *option_stat, *option_showseqnum_inputfile,
-           *option_seqnum_from_0;
+           *option_seqnum_from_0, *option_showseqlength;
   GtOptionParser *op;
   gt_assert(arguments);
 
@@ -90,6 +91,13 @@ static GtOptionParser* gt_seq_option_parser_new(void *tool_arguments)
                       &arguments->showseqnum,
                       GT_UNDEF_UWORD, 0);
   gt_option_parser_add_option(op, option_showseqnum);
+
+  option_showseqlength = gt_option_new_uword_min("showseqlength",
+                      "show length of sequence with given number "
+                      GT_COMMENT_COUNTED_FROM_0,
+                      &arguments->showseqlength,
+                      GT_UNDEF_UWORD, 0);
+  gt_option_parser_add_option(op, option_showseqlength);
 
   /* -showseqnum_inputfile */
   option_showseqnum_inputfile = gt_option_new_filename("showseqnum_inputfile",
@@ -133,7 +141,8 @@ static GtOptionParser* gt_seq_option_parser_new(void *tool_arguments)
   /* option implications */
   gt_option_imply_either_3(option_width, option_showfasta, option_showseqnum,
                            option_showseqnum_inputfile);
-  gt_option_imply_either_2(option_seqnum_from_0, option_showseqnum,
+  gt_option_imply_either_3(option_seqnum_from_0, option_showseqnum,
+                           option_showseqlength,
                            option_showseqnum_inputfile);
 
   /* option exclusions */
@@ -141,6 +150,9 @@ static GtOptionParser* gt_seq_option_parser_new(void *tool_arguments)
   gt_option_exclude(option_showfasta, option_showseqnum);
   gt_option_exclude(option_showseqnum, option_stat);
   gt_option_exclude(option_showseqnum, option_showseqnum_inputfile);
+  gt_option_exclude(option_showseqlength, option_stat);
+  gt_option_exclude(option_showseqlength, option_showseqnum);
+  gt_option_exclude(option_showseqlength, option_showseqnum_inputfile);
 
   /* set minimal arguments */
   gt_option_parser_set_min_args(op, 1);
@@ -155,18 +167,24 @@ static int gt_seq_arguments_check(int rest_argc, void *tool_arguments,
   gt_error_check(err);
   gt_assert(arguments);
   /* option -showseqnum makes only sense if we got a single sequence file */
-  if (arguments->showseqnum != GT_UNDEF_UWORD)
+  if (arguments->showseqnum != GT_UNDEF_UWORD ||
+      arguments->showseqlength != GT_UNDEF_UWORD)
   {
     if (rest_argc > 1)
     {
-      gt_error_set(err, "option '-showseqnum' makes only sense with a single "
-                        "sequence_file");
+      gt_error_set(err, "option '-showseq%s' only makes sense with a single "
+                        "sequence_file",
+                        arguments->showseqnum != GT_UNDEF_UWORD ? "num"
+                                                                : "length");
       return -1;
     }
-    if (arguments->showseqnum == 0 && !arguments->seqnum_from_0)
+    if ((arguments->showseqnum == 0 || arguments->showseqlength == 0) &&
+        !arguments->seqnum_from_0)
     {
-      gt_error_set(err, "argument to option '-showseqnum' must be >= 1 if "
-                        "option -seqnum_from_0 is not used");
+      gt_error_set(err, "argument to option '-showseq%s' must be >= 1 if "
+                        "option -seqnum_from_0 is not used",
+                        arguments->showseqnum == 0 ? "num"
+                                                   : "length");
       return -1;
     }
   }
@@ -196,6 +214,7 @@ static int gt_seq_runner(int argc, const char **argv, int parsed_args,
       gt_bioseq_show_as_fasta(bioseq, arguments->width, arguments->outfp);
 
     if (!had_err && (arguments->showseqnum != GT_UNDEF_UWORD ||
+                     arguments->showseqlength != GT_UNDEF_UWORD ||
                      gt_str_length(arguments->showseqnum_inputfile) > 0))
     {
       GtUword maxseqnum = gt_bioseq_number_of_sequences(bioseq);
@@ -204,22 +223,40 @@ static int gt_seq_runner(int argc, const char **argv, int parsed_args,
         gt_assert(maxseqnum > 0);
         maxseqnum--;
       }
-      if (arguments->showseqnum != GT_UNDEF_UWORD)
+      if (arguments->showseqnum != GT_UNDEF_UWORD ||
+          arguments->showseqlength != GT_UNDEF_UWORD)
       {
-        if (arguments->showseqnum > maxseqnum) {
-          gt_error_set(err, "argument '" GT_WU "' to option '-showseqnum' "
+        if ((arguments->showseqnum != GT_UNDEF_UWORD &&
+             arguments->showseqnum > maxseqnum) ||
+            (arguments->showseqlength != GT_UNDEF_UWORD &&
+             arguments->showseqlength > maxseqnum))
+        {
+          gt_error_set(err, "argument '" GT_WU "' to option '-showseq%s' "
                             "is too large. The largest possible number is '"
                             GT_WU "'",
                      arguments->showseqnum,
+                     arguments->showseqnum != GT_UNDEF_UWORD ? "num"
+                                                             : "length",
                      maxseqnum);
           had_err = -1;
         }
         if (!had_err) {
-          gt_bioseq_show_sequence_as_fasta(bioseq,
-                                           arguments->seqnum_from_0
-                                             ? arguments->showseqnum
-                                             : arguments->showseqnum - 1,
-                                           arguments->width, arguments->outfp);
+          if (arguments->showseqnum != GT_UNDEF_UWORD)
+          {
+            gt_bioseq_show_sequence_as_fasta(bioseq,
+                                             arguments->seqnum_from_0
+                                               ? arguments->showseqnum
+                                               : arguments->showseqnum - 1,
+                                             arguments->width,
+                                             arguments->outfp);
+          } else
+          {
+            GtUword seqnum = arguments->seqnum_from_0
+                               ? arguments->showseqlength
+                               : arguments->showseqlength - 1;
+            gt_file_xprintf(arguments->outfp,GT_WU "\n",
+                            gt_bioseq_get_sequence_length(bioseq, seqnum));
+          }
         }
       } else
       {
