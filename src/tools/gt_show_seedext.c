@@ -37,6 +37,7 @@ typedef struct
 {
   bool show_alignment,
        seed_display,
+       seqlength_display,
        relax_polish,
        sortmatches,
        showeoplist,
@@ -87,6 +88,15 @@ static GtOptionParser* gt_show_seedext_option_parser_new(void *tool_arguments)
                               "row of alignment column",
                               &arguments->seed_display,
                               false);
+  gt_option_parser_add_option(op, option);
+
+  /* -seqlength-display */
+  option = gt_option_new_bool("seqlength-display",
+                              "Display length of sequences in which "
+                              "the two match-instances occur",
+                              &arguments->seqlength_display,
+                              false);
+  gt_option_is_development_option(option);
   gt_option_parser_add_option(op, option);
 
   /* -seed-extend */
@@ -297,6 +307,9 @@ static int gt_show_seedext_runner(GT_UNUSED int argc,
                                   : NULL;
     GtLinspaceManagement *linspace_spacemanager = gt_linspace_management_new();
     GtScoreHandler *linspace_scorehandler = gt_scorehandler_new(0,1,0,1);;
+    const unsigned int display_flag
+      = gt_querymatch_bool2display_flag(arguments->seed_display,
+                                        arguments->seqlength_display);
 
     if (!arguments->relax_polish)
     {
@@ -310,10 +323,7 @@ static int gt_show_seedext_runner(GT_UNUSED int argc,
                           matchscore_bias,
                           gt_seedextend_match_iterator_history_size(semi));
     }
-    if (arguments->seed_display)
-    {
-      gt_seedextend_match_iterator_seed_display_set(semi);
-    }
+    gt_seedextend_match_iterator_display_set(semi,display_flag);
     if (arguments->show_alignment || arguments->showeoplist)
     {
       gt_seedextend_match_iterator_querymatchoutoptions_set(semi,
@@ -321,7 +331,7 @@ static int gt_show_seedext_runner(GT_UNUSED int argc,
                                                        arguments->showeoplist,
                                                        alignmentwidth,
                                                        !arguments->relax_polish,
-                                                       arguments->seed_display);
+                                                       display_flag);
     }
     if (arguments->seed_extend)
     {

@@ -177,7 +177,7 @@ void gt_querymatchoutoptions_extend(
                   GtUword sensitivity,
                   double matchscore_bias,
                   bool always_polished_ends,
-                  bool seed_display)
+                  unsigned int display_flag)
 {
   if (errorpercentage > 0)
   {
@@ -207,7 +207,7 @@ void gt_querymatchoutoptions_extend(
         gt_alignment_polished_ends(querymatchoutoptions->alignment,
                                    querymatchoutoptions->pol_info,true);
       }
-      if (seed_display)
+      if (gt_querymatch_seed_display(display_flag))
       {
         gt_alignment_seed_display_set(querymatchoutoptions->alignment);
       }
@@ -222,7 +222,7 @@ void gt_querymatchoutoptions_for_align_only(
                   double matchscore_bias,
                   GtUword history_size,
                   bool always_polished_ends,
-                  bool seed_display)
+                  unsigned int display_flag)
 {
   gt_querymatchoutoptions_extend(querymatchoutoptions,
                                  errorpercentage,
@@ -234,7 +234,7 @@ void gt_querymatchoutoptions_for_align_only(
                                  100,
                                  matchscore_bias,
                                  always_polished_ends,
-                                 seed_display);
+                                 display_flag);
 }
 
 void gt_querymatchoutoptions_delete(

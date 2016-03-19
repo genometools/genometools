@@ -40,7 +40,7 @@ void gt_querymatchoutoptions_extend(
                   GtUword sensitivity,
                   double matchscore_bias,
                   bool always_polished_ends,
-                  bool seed_display);
+                  unsigned int display_flag);
 
 void gt_querymatchoutoptions_for_align_only(
                   GtQuerymatchoutoptions *querymatchoutoptions,
@@ -48,7 +48,7 @@ void gt_querymatchoutoptions_for_align_only(
                   double matchscore_bias,
                   GtUword history_size,
                   bool always_polished_ends,
-                  bool seed_display);
+                  unsigned int display_flag);
 
 void gt_querymatchoutoptions_delete(
         GtQuerymatchoutoptions *querymatchoutoptions);

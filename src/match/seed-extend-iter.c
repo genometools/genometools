@@ -412,11 +412,11 @@ GtUword gt_seedextend_match_iterator_seedpos2(
   return semi->seedpos2;
 }
 
-void gt_seedextend_match_iterator_seed_display_set(
-                        GtSeedextendMatchIterator *semi)
+void gt_seedextend_match_iterator_display_set(GtSeedextendMatchIterator *semi,
+                                              unsigned int display_flag)
 {
   gt_assert(semi != NULL);
-  gt_querymatch_seed_display_set(semi->querymatchptr);
+  gt_querymatch_display_set(semi->querymatchptr,display_flag);
 }
 
 GtUword gt_seedextend_match_iterator_all_sorted(GtSeedextendMatchIterator *semi,
@@ -451,7 +451,7 @@ void gt_seedextend_match_iterator_querymatchoutoptions_set(
                     bool showeoplist,
                     GtUword alignmentwidth,
                     bool always_polished_ends,
-                    bool seed_display)
+                    unsigned int display_flag)
 {
   double matchscore_bias = GT_DEFAULT_MATCHSCORE_BIAS;
 
@@ -466,6 +466,6 @@ void gt_seedextend_match_iterator_querymatchoutoptions_set(
                             matchscore_bias,
                             gt_seedextend_match_iterator_history_size(semi),
                             always_polished_ends,
-                            seed_display);
+                            display_flag);
   gt_querymatch_outoptions_set(semi->querymatchptr,semi->querymatchoutoptions);
 }
