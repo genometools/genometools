@@ -651,7 +651,7 @@ static int gt_seed_extend_runner(GT_UNUSED int argc,
 
   /* Load encseq A */
   encseq_loader = gt_encseq_loader_new();
-  gt_encseq_loader_enable_autosupport(encseq_loader);
+  gt_encseq_loader_require_multiseq_support(encseq_loader);
   aencseq = gt_encseq_loader_load(encseq_loader,
                                   gt_str_get(arguments->dbs_indexname),
                                   err);
