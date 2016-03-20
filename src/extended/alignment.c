@@ -36,16 +36,17 @@
 #include "alignment.h"
 
 struct GtAlignment {
-  GtRange         aligned_range_u,
-                  aligned_range_v;
+  GtRange aligned_range_u,
+          aligned_range_v;
   const GtUchar  *u,
                  *v;
   GtMultieoplist *eops;
-  GtUword         ulen,
-                  vlen,
-                  alilen;
   const Polishing_info *pol_info;
-  GtUword useedoffset, seedlen;
+  GtUword ulen,
+          vlen,
+          alilen,
+          useedoffset,
+          seedlen;
   bool seed_display, withpolcheck;
 };
 
@@ -57,12 +58,16 @@ GtAlignment* gt_alignment_new(void)
 {
   GtAlignment *alignment;
   alignment = gt_calloc((size_t) 1, sizeof (GtAlignment));
+  alignment->aligned_range_u.start = 0;
+  alignment->aligned_range_u.end = 0;
+  alignment->aligned_range_v.start = 0;
+  alignment->aligned_range_v.end = 0;
   alignment->eops = gt_multieoplist_new();
-  alignment->alilen = 0;
+  alignment->u = alignment->v = NULL;
   alignment->pol_info = NULL;
-  alignment->useedoffset = 0;
-  alignment->seedlen = 0;
-  alignment->seed_display = 0;
+  alignment->alilen = alignment->ulen = alignment->vlen = 0;
+  alignment->useedoffset = alignment->seedlen = 0;
+  alignment->seed_display = alignment->withpolcheck = false;
   return alignment;
 }
 
@@ -121,8 +126,7 @@ GtUword gt_alignment_get_length(const GtAlignment *alignment)
 void gt_alignment_set_urange(GtAlignment *alignment, GtRange range)
 {
   gt_assert(alignment != NULL && range.start <= range.end);
-  alignment->aligned_range_u.start = range.start;
-  alignment->aligned_range_u.end = range.end;
+  alignment->aligned_range_u = range;
 }
 
 GtRange gt_alignment_get_vrange(const GtAlignment *alignment)
@@ -134,8 +138,7 @@ GtRange gt_alignment_get_vrange(const GtAlignment *alignment)
 void gt_alignment_set_vrange(GtAlignment *alignment, GtRange range)
 {
   gt_assert(alignment != NULL && range.start <= range.end);
-  alignment->aligned_range_v.start = range.start;
-  alignment->aligned_range_v.end = range.end;
+  alignment->aligned_range_v = range;
 }
 
 void gt_alignment_add_replacement_multi(GtAlignment *alignment,GtUword num)
@@ -959,10 +962,8 @@ void gt_alignment_clone(const GtAlignment *alignment_from,
   alignment_to->v = alignment_from->v;
   alignment_to->ulen = alignment_from->ulen;
   alignment_to->vlen = alignment_from->vlen;
-  alignment_to->aligned_range_u.start = alignment_from->aligned_range_u.start;
-  alignment_to->aligned_range_v.start = alignment_from->aligned_range_v.start;
-  alignment_to->aligned_range_u.end = alignment_from->aligned_range_u.end;
-  alignment_to->aligned_range_v.end = alignment_from->aligned_range_v.end;
+  alignment_to->aligned_range_u = alignment_from->aligned_range_u;
+  alignment_to->aligned_range_v = alignment_from->aligned_range_v;
   gt_multieoplist_clone(alignment_to->eops,alignment_from->eops);
   alignment_to->alilen = alignment_from->alilen;
 }

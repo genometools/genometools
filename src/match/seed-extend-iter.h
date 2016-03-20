@@ -45,11 +45,11 @@ void gt_seedextend_match_iterator_delete(GtSeedextendMatchIterator *semi);
 GtQuerymatch *gt_seedextend_match_iterator_next(
                              GtSeedextendMatchIterator *semi);
 
-/* The following functions set the seed_display flag of the iterators
+/* The following functions set the display flag of the iterators
    querymatch-object. */
 
-void gt_seedextend_match_iterator_seed_display_set(
-                        GtSeedextendMatchIterator *semi);
+void gt_seedextend_match_iterator_display_set(GtSeedextendMatchIterator *semi,
+                                              unsigned int display_flag);
 
 /* The following function reads all matches into an arrays and sorts the,. If
    <ascending is true, then all matches are sorted in ascending order of
@@ -79,7 +79,7 @@ void gt_seedextend_match_iterator_querymatchoutoptions_set(
                     bool showeoplist,
                     GtUword alignmentwidth,
                     bool always_polished_ends,
-                    bool seed_display);
+                    unsigned int display_flag);
 
 /* The following function return different components of the iterator
    object. */

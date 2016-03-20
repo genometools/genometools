@@ -59,7 +59,7 @@ GtDiagbandseedExtendParams *gt_diagbandseed_extend_params_new(
                               GtUword userdefinedleastlength,
                               GtUword logdiagbandwidth,
                               GtUword mincoverage,
-                              bool seed_display,
+                              unsigned int display_flag,
                               bool use_apos,
                               GtGreedyextendmatchinfo *extendgreedyinfo,
                               GtXdropmatchinfo *extendxdropinfo,

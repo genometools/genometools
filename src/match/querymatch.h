@@ -33,7 +33,13 @@ GT_DECLAREARRAYSTRUCT(GtQuerymatch);
 
 GtQuerymatch *gt_querymatch_new(void);
 
-void gt_querymatch_seed_display_set(GtQuerymatch *querymatch);
+void gt_querymatch_display_set(GtQuerymatch *querymatch,
+                               unsigned int display_flag);
+
+unsigned int gt_querymatch_bool2display_flag(bool seed_display,
+                                             bool seqlength_display);
+
+bool gt_querymatch_seed_display(unsigned int display_flag);
 
 void gt_querymatch_outoptions_set(GtQuerymatch *querymatch,
                 GtQuerymatchoutoptions *querymatchoutoptions);
@@ -43,6 +49,7 @@ void gt_querymatch_init(GtQuerymatch *querymatch,
                         GtUword dbstart,
                         GtUword dbseqnum,
                         GtUword dbstart_relative,
+                        GtUword dbseqlen,
                         GtWord score,
                         GtUword distance,
                         bool selfmatch,
@@ -73,6 +80,7 @@ bool gt_querymatch_complete(GtQuerymatch *querymatchptr,
                             GtUword dbstart,
                             GtUword dbseqnum,
                             GtUword dbstart_relative,
+                            GtUword dbseqlen,
                             GtWord score,
                             GtUword distance,
                             bool selfmatch,

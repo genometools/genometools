@@ -84,7 +84,7 @@ struct GtDiagbandseedExtendParams {
   GtUword userdefinedleastlength;
   GtUword logdiagbandwidth;
   GtUword mincoverage;
-  bool seed_display;
+  unsigned int display_flag;
   bool use_apos;
   GtGreedyextendmatchinfo *extendgreedyinfo;
   GtXdropmatchinfo *extendxdropinfo;
@@ -155,7 +155,7 @@ GtDiagbandseedExtendParams *gt_diagbandseed_extend_params_new(
                                 GtUword userdefinedleastlength,
                                 GtUword logdiagbandwidth,
                                 GtUword mincoverage,
-                                bool seed_display,
+                                unsigned int display_flag,
                                 bool use_apos,
                                 GtGreedyextendmatchinfo *extendgreedyinfo,
                                 GtXdropmatchinfo *extendxdropinfo,
@@ -166,7 +166,7 @@ GtDiagbandseedExtendParams *gt_diagbandseed_extend_params_new(
   extp->userdefinedleastlength = userdefinedleastlength;
   extp->logdiagbandwidth = logdiagbandwidth;
   extp->mincoverage = mincoverage;
-  extp->seed_display = seed_display;
+  extp->display_flag = display_flag;
   extp->use_apos = use_apos;
   extp->extendgreedyinfo = extendgreedyinfo;
   extp->extendxdropinfo = extendxdropinfo;
@@ -918,9 +918,8 @@ static void gt_diagbandseed_process_seeds(GtArrayGtDiagbandseedSeedPair *mlist,
   }
 
   info_querymatch.querymatchspaceptr = gt_querymatch_new();
-  if (arg->seed_display) {
-    gt_querymatch_seed_display_set(info_querymatch.querymatchspaceptr);
-  }
+  gt_querymatch_display_set(info_querymatch.querymatchspaceptr,
+                            arg->display_flag);
   if (arg->querymatchoutopt != NULL) {
     gt_querymatch_outoptions_set(info_querymatch.querymatchspaceptr,
                                  arg->querymatchoutopt);

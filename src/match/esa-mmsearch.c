@@ -455,13 +455,15 @@ void gt_queryuniquematch(bool selfmatch,
     {
       GtUword dbseqnum = gt_encseq_seqnum(suffixarray->encseq,dbstart),
               dbseqstartpos = gt_encseq_seqstartpos(suffixarray->encseq,
-                                                    dbseqnum);
+                                                    dbseqnum),
+              dbseqlen = gt_encseq_seqlength(suffixarray->encseq,dbseqnum);
 
       gt_querymatch_init(querymatchspaceptr,
                          matchlen,
                          dbstart,
                          dbseqnum,
                          dbstart - dbseqstartpos,
+                         dbseqlen,
                          0, /* score */
                          0, /* edist */
                          selfmatch,
@@ -523,7 +525,7 @@ static void gt_querysubstringmatch(bool selfmatch,
                                     dbstart,
                                     &querysubstring))
       {
-        GtUword dbseqnum, dbseqstartpos, extend;
+        GtUword dbseqnum, dbseqstartpos, dbseqlen, extend;
 
         extend = gt_mmsearch_extendright(dbencseq,
                                          mmsi->esr,
@@ -537,15 +539,17 @@ static void gt_querysubstringmatch(bool selfmatch,
         {
           dbseqnum = gt_encseq_seqnum(dbencseq,dbstart);
           dbseqstartpos = gt_encseq_seqstartpos(dbencseq,dbseqnum);
+          dbseqlen = gt_encseq_seqlength(dbencseq,dbseqnum);
         } else
         {
-          dbseqnum = dbseqstartpos = 0;
+          dbseqnum = dbseqstartpos = dbseqlen = 0;
         }
         gt_querymatch_init(querymatchspaceptr,
                            minmatchlength + extend,
                            dbstart,
                            dbseqnum,
                            dbstart - dbseqstartpos,
+                           dbseqlen,
                            0, /* score */
                            0, /* edist */
                            selfmatch,

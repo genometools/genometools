@@ -236,7 +236,7 @@ static const GtQuerymatch *gt_combine_extensions(
          GtUword total_distance,
          bool silent)
 {
-  GtUword dblen, querylen, total_alignedlen, dbstart, querystart;
+  GtUword dblen, dbseqlen, querylen, total_alignedlen, dbstart, querystart;
 
   dblen = sesp->seedlen + u_left_ext + u_right_ext;
   querylen = sesp->seedlen + v_left_ext + v_right_ext;
@@ -262,11 +262,13 @@ static const GtQuerymatch *gt_combine_extensions(
   {
     return NULL;
   }
+  dbseqlen = gt_encseq_seqlength(dbencseq,sesp->dbseqnum);
   if (gt_querymatch_complete(querymatchspaceptr,
                              dblen,
                              dbstart,
                              sesp->dbseqnum,
                              dbstart - sesp->dbseqstartpos,
+                             dbseqlen,
                              score,
                              total_distance,
                              query == NULL ? true : false,

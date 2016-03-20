@@ -79,6 +79,7 @@ typedef struct {
   bool benchmark;
   bool verbose;
   bool seed_display;
+  bool seqlength_display;
   bool extend_last;
   bool use_apos;
   bool histogram;
@@ -118,7 +119,8 @@ static GtOptionParser* gt_seed_extend_option_parser_new(void *tool_arguments)
   GtOption *option, *op_gre, *op_xdr, *op_cam, *op_his, *op_dif, *op_pmh,
     *op_len, *op_err, *op_xbe, *op_sup, *op_frq, *op_mem, *op_ali, *op_bia,
     *op_onl, *op_weakends, *op_seed_display, *op_relax_polish,
-    *op_norev, *op_nofwd, *op_part, *op_pick;
+    *op_norev, *op_nofwd, *op_part, *op_pick, *op_seqlength_display;
+
   gt_assert(arguments != NULL);
 
   /* init */
@@ -342,6 +344,8 @@ static GtOptionParser* gt_seed_extend_option_parser_new(void *tool_arguments)
   gt_option_exclude(op_err, op_onl);
   gt_option_parser_add_option(op, op_err);
 
+  /* OUTPUT OPTIONS */
+
   /* -a */
   op_ali = gt_option_new_uword_min("a",
                                    "show alignments/sequences (optional "
@@ -361,6 +365,26 @@ static GtOptionParser* gt_seed_extend_option_parser_new(void *tool_arguments)
   gt_option_parser_add_option(op, op_relax_polish);
   gt_option_is_development_option(op_relax_polish);
   gt_option_imply(op_relax_polish, op_ali);
+
+  /* -seed-display */
+  op_seed_display = gt_option_new_bool("seed-display",
+                                       "Display seeds in #-line and by "
+                                       "character + (instead of |) in middle "
+                                       "row of alignment column",
+                                       &arguments->seed_display,
+                                       false);
+  gt_option_exclude(op_seed_display, op_onl);
+  gt_option_is_development_option(op_seed_display);
+  gt_option_parser_add_option(op, op_seed_display);
+
+  /* -seqlength-display */
+  op_seqlength_display = gt_option_new_bool("seqlength-display",
+                                       "Display length of sequences in which "
+                                       "which the two match-instances occur",
+                                       &arguments->seqlength_display,
+                                       false);
+  gt_option_is_development_option(op_seqlength_display);
+  gt_option_parser_add_option(op, op_seqlength_display);
 
   /* -no-reverse */
   op_norev = gt_option_new_bool("no-reverse",
@@ -393,17 +417,6 @@ static GtOptionParser* gt_seed_extend_option_parser_new(void *tool_arguments)
                               false);
   gt_option_is_development_option(option);
   gt_option_parser_add_option(op, option);
-
-  /* -seed-display */
-  op_seed_display = gt_option_new_bool("seed-display",
-                                       "Display seeds in #-line and by "
-                                       "character + (instead of |) in middle "
-                                       "row of alignment column",
-                                       &arguments->seed_display,
-                                       false);
-  gt_option_exclude(op_seed_display, op_onl);
-  gt_option_is_development_option(op_seed_display);
-  gt_option_parser_add_option(op, op_seed_display);
 
   /* -weakends */
   op_weakends = gt_option_new_bool("weakends",
@@ -579,6 +592,7 @@ static int gt_seed_extend_runner(GT_UNUSED int argc,
   GtUword errorpercentage = 0UL;
   double matchscore_bias = GT_DEFAULT_MATCHSCORE_BIAS;
   bool extendgreedy = true;
+  unsigned int display_flag = 0;
   Polishing_info *pol_info = NULL;
   GtUword apick = GT_UWORD_MAX, bpick = GT_UWORD_MAX;
   GtUword maxsequencelength;
@@ -771,6 +785,12 @@ static int gt_seed_extend_runner(GT_UNUSED int argc,
       gt_xdrop_matchinfo_silent_set(xdropinfo);
     }
   }
+  if (!had_err)
+  {
+    display_flag
+      = gt_querymatch_bool2display_flag(arguments->seed_display,
+                                        arguments->seqlength_display);
+  }
 
   /* Prepare output options */
   if (!had_err && (arguments->se_alignmentwidth > 0 ||
@@ -798,7 +818,7 @@ static int gt_seed_extend_runner(GT_UNUSED int argc,
                                      sensitivity,
                                      matchscore_bias,
                                      !arguments->relax_polish,
-                                     arguments->seed_display);
+                                     display_flag);
     }
   }
 
@@ -814,7 +834,7 @@ static int gt_seed_extend_runner(GT_UNUSED int argc,
                                              arguments->se_alignlength,
                                              arguments->dbs_logdiagbandwidth,
                                              arguments->dbs_mincoverage,
-                                             arguments->seed_display,
+                                             display_flag,
                                              arguments->use_apos,
                                              grextinfo,
                                              xdropinfo,
