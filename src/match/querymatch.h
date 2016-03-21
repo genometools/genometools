@@ -71,7 +71,6 @@ bool gt_querymatch_read_line(GtQuerymatch *querymatchptr,
 bool gt_querymatch_process(GtQuerymatch *querymatchptr,
                            const GtEncseq *encseq,
                            const GtSeqorEncseq *query,
-                           GtUword query_totallength,
                            bool greedyextension);
 
 void gt_querymatch_delete(GtQuerymatch *querymatch);

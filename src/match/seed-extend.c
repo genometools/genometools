@@ -1274,8 +1274,7 @@ static const GtQuerymatch* gt_extend_querymatch(bool forxdrop,
                                                 void *info,
                                                 const GtEncseq *dbencseq,
                                                 const GtQuerymatch *exactseed,
-                                                const GtSeqorEncseq *query,
-                                                GtUword query_totallength)
+                                                const GtSeqorEncseq *query)
 {
   GtSeedextendSeqpair sesp;
   GtUword dbseqnum = gt_querymatch_dbseqnum(exactseed),
@@ -1283,7 +1282,6 @@ static const GtQuerymatch* gt_extend_querymatch(bool forxdrop,
           dbseqstartpos = gt_encseq_seqstartpos(dbencseq,dbseqnum);
 
   gt_assert(query != NULL);
-  gt_assert(gt_querymatch_query_totallength(exactseed) == query_totallength);
   gt_sesp_from_relative(&sesp,
                         dbencseq,
                         dbseqnum,
@@ -1291,7 +1289,7 @@ static const GtQuerymatch* gt_extend_querymatch(bool forxdrop,
                         query->encseq,
                         gt_querymatch_queryseqnum(exactseed),
                         gt_querymatch_querystart(exactseed),
-                        query_totallength,
+                        gt_querymatch_query_totallength(exactseed),
                         gt_querymatch_querylen(exactseed),
                         gt_querymatch_selfmatch(exactseed),
                         gt_querymatch_query_readmode(exactseed));
@@ -1379,12 +1377,10 @@ static void gt_extend_querymatch_with_output(bool forxdrop,
                                              void *info,
                                              const GtEncseq *dbencseq,
                                              const GtQuerymatch *exactseed,
-                                             const GtSeqorEncseq *query,
-                                             GtUword query_totallength)
+                                             const GtSeqorEncseq *query)
 {
   const GtQuerymatch *querymatch
-    = gt_extend_querymatch(forxdrop,info, dbencseq, exactseed, query,
-                           query_totallength);
+    = gt_extend_querymatch(forxdrop,info, dbencseq, exactseed, query);
   if (querymatch != NULL)
   {
     gt_extend_prettyprint(forxdrop,querymatch,info);
@@ -1394,27 +1390,23 @@ static void gt_extend_querymatch_with_output(bool forxdrop,
 void gt_xdrop_extend_querymatch_with_output(void *info,
                                             const GtEncseq *dbencseq,
                                             const GtQuerymatch *exactseed,
-                                            const GtSeqorEncseq *query,
-                                            GtUword query_totallength)
+                                            const GtSeqorEncseq *query)
 {
   gt_extend_querymatch_with_output(true,
                                    info,
                                    dbencseq,
                                    exactseed,
-                                   query,
-                                   query_totallength);
+                                   query);
 }
 
 void gt_greedy_extend_querymatch_with_output(void *info,
                                              const GtEncseq *dbencseq,
                                              const GtQuerymatch *exactseed,
-                                             const GtSeqorEncseq *query,
-                                             GtUword query_totallength)
+                                             const GtSeqorEncseq *query)
 {
   gt_extend_querymatch_with_output(false,
                                    info,
                                    dbencseq,
                                    exactseed,
-                                   query,
-                                   query_totallength);
+                                   query);
 }

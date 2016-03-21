@@ -261,14 +261,12 @@ bool gt_querymatch_check_final(const GtQuerymatch *querymatch,
          total_alignedlen >= 2 * userdefinedleastlength) ? true : false;
 }
 
-static void gt_querymatch_applycorrection(GtQuerymatch *querymatch,
-                                          GtUword query_totallength)
+static void gt_querymatch_applycorrection(GtQuerymatch *querymatch)
 {
   const GtSeqpaircoordinates *coords;
 
   gt_assert(querymatch != NULL && querymatch->ref_querymatchoutoptions != NULL
             && querymatch->distance > 0);
-  gt_assert(querymatch->query_totallength == query_totallength);
   coords = gt_querymatchoutoptions_correction_get(querymatch->
                                                   ref_querymatchoutoptions);
   gt_querymatch_init(querymatch,
@@ -284,13 +282,12 @@ static void gt_querymatch_applycorrection(GtQuerymatch *querymatch,
                      querymatch->queryseqnum,
                      coords->vlen,
                      querymatch->querystart + coords->voffset,
-                     query_totallength);
+                     querymatch->query_totallength);
 }
 
 bool gt_querymatch_process(GtQuerymatch *querymatchptr,
                            const GtEncseq *encseq,
                            const GtSeqorEncseq *query,
-                           GtUword query_totallength,
                            bool greedyextension)
 {
   if (!querymatchptr->selfmatch ||
@@ -320,7 +317,6 @@ bool gt_querymatch_process(GtQuerymatch *querymatchptr,
         abs_querystart_fwdstrand = querymatchptr->querystart_fwdstrand;
         abs_querystart = querymatchptr->querystart;
       }
-      gt_assert(querymatchptr->query_totallength == query_totallength);
       seededalignment
         = gt_querymatchoutoptions_alignment_prepare(querymatchptr->
                                                       ref_querymatchoutoptions,
@@ -329,7 +325,8 @@ bool gt_querymatch_process(GtQuerymatch *querymatchptr,
                                                     querymatchptr->
                                                       query_readmode,
                                                     query_seqstartpos,
-                                                    query_totallength,
+                                                    querymatchptr->
+                                                      query_totallength,
                                                     querymatchptr->dbstart,
                                                     querymatchptr->dblen,
                                                     abs_querystart,
@@ -342,7 +339,7 @@ bool gt_querymatch_process(GtQuerymatch *querymatchptr,
                                                     greedyextension);
       if (seededalignment && !greedyextension)
       {
-        gt_querymatch_applycorrection(querymatchptr,query_totallength);
+        gt_querymatch_applycorrection(querymatchptr);
       }
     }
     return true;
@@ -396,7 +393,6 @@ bool gt_querymatch_read_line(GtQuerymatch *querymatchptr,
                &identity,
                &querymatchptr->dbseqlen,
                &querymatchptr->query_totallength);
-    printf("parsed seqlength\n");
   } else
   {
     parsed_items
@@ -431,7 +427,6 @@ bool gt_querymatch_read_line(GtQuerymatch *querymatchptr,
         = gt_encseq_seqlength(queryencseq,querymatchptr->queryseqnum);
       querymatchptr->dbseqlen
         = gt_encseq_seqlength(dbencseq,querymatchptr->dbseqnum);
-      printf("recomputed seqlength\n");
     }
     querymatchptr->querystart
       = gt_querymatch_querystart_derive(querymatchptr->query_readmode,
@@ -483,7 +478,6 @@ bool gt_querymatch_complete(GtQuerymatch *querymatchptr,
   return gt_querymatch_process(querymatchptr,
                                encseq,
                                query,
-                               query_totallength,
                                greedyextension);
 }
 
