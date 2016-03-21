@@ -393,19 +393,20 @@ GtArrayGtDiagbandseedKmerPos gt_diagbandseed_get_kmers(const GtEncseq *encseq,
     pkinfo.next_separator = pkinfo.totallength;
   }
 
-  if (gt_encseq_has_twobitencoding(encseq)
-      && gt_encseq_wildcards(encseq) == 0
-      && gt_range_length(seqrange) == gt_encseq_num_of_sequences(encseq)) {
+  if (gt_encseq_has_twobitencoding(encseq) && gt_encseq_wildcards(encseq) == 0)
+  {
     /* Use fast access to encseq, requires 2bit-enc and absence of wildcards. */
-    getencseqkmers_twobitencoding(encseq,
-                                  readmode,
-                                  seedlength,
-                                  seedlength,
-                                  false,
-                                  gt_diagbandseed_processkmercode,
-                                  (void *) &pkinfo,
-                                  NULL,
-                                  NULL);
+    getencseqkmers_twobitencoding_slice(encseq,
+                                        readmode,
+                                        seedlength,
+                                        seedlength,
+                                        false,
+                                        gt_diagbandseed_processkmercode,
+                                        (void *) &pkinfo,
+                                        NULL,
+                                        NULL,
+                                        pkinfo.prev_separator,
+                                        pkinfo.totallength);
   } else {
     /* Use GtKmercodeiterator for encseq access */
     gt_diagbandseed_get_kmers_kciter(&pkinfo);
@@ -1264,7 +1265,8 @@ int gt_diagbandseed_run(const GtDiagbandseedInfo *arg,
                                       0);
     for (bidx = self ? aidx : 0; bidx < bnumseqranges && !had_err; bidx++) {
       if (arg->verbose && (anumseqranges > 1 || bnumseqranges > 1)) {
-        printf("# Consider parts " GT_WU " vs " GT_WU "\n", aidx + 1, bidx + 1);
+        printf("# Process part " GT_WU " vs part " GT_WU "\n",
+               aidx + 1, bidx + 1);
       }
       /* start algorithm with chosen sequence ranges */
       had_err = gt_diagbandseed_algorithm(arg,
