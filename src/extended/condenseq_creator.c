@@ -1165,7 +1165,7 @@ static CesCState ces_c_reset_pos_and_iter(GtCondenseqCreator *ces_c,
                                           GtUword pos)
 {
   unsigned int idx;
-  if (pos >= ces_c->ces->orig_length) {
+  if (pos >= ces_c->ces->orig_len) {
     return GT_CONDENSEQ_CREATOR_EOD;
   }
   ces_c->current_orig_start =
@@ -1538,7 +1538,7 @@ static int ces_c_analyse(GtCondenseqCreator *ces_c, GtTimer *timer,
   if (!had_err &&
       !gt_kmercodeiterator_inputexhausted(ces_c->main_kmer_iter)) {
     GtUword percentile;
-    const GtUword percent = ces_c->ces->orig_length / 100;
+    const GtUword percent = ces_c->ces->orig_len / 100;
     gt_log_log(GT_WU " initial kmer positions in kmer_db",
                gt_kmer_database_get_kmer_count(ces_c->kmer_db));
     gt_log_log(GT_WU " initial bytes for kmer_db",

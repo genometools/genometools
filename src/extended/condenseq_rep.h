@@ -60,8 +60,8 @@ struct GtCondenseq {
   GtCondenseqLink   *links;
   GtCondenseqUnique *uniques;
   GtEncseq          *unique_es;
-  GtIntset          *sdstab;
-  GtIntset          *ssptab;
+  GtIntset          *sdstab,
+                    *ssptab;
   GtUchar           *ubuffer;
   char              *buffer,
                     *filename,
@@ -71,7 +71,7 @@ struct GtCondenseq {
           ids_total_len,
           ldb_allocated,
           ldb_nelems,
-          orig_length,
+          orig_len,
           orig_num_seq,
           ubuffsize,
           udb_allocated,

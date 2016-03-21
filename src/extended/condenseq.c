@@ -55,7 +55,7 @@ static inline GtUword condenseq_seqlength_help(const GtCondenseq *condenseq,
                                                GtUword seqnum,
                                                GtUword seqstart)
 {
-  GtUword end = condenseq->orig_length;
+  GtUword end = condenseq->orig_len;
   if (seqnum < condenseq->orig_num_seq - 1)
     end = gt_intset_get(condenseq->ssptab, seqnum);
   return end - seqstart;
@@ -226,7 +226,7 @@ static GtCondenseq *condenseq_new_empty(const GtAlphabet *alph)
   condenseq->buffsize =
     condenseq->ldb_allocated =
     condenseq->ldb_nelems =
-    condenseq->orig_length =
+    condenseq->orig_len =
     condenseq->orig_num_seq =
     condenseq->ubuffsize =
     condenseq->udb_allocated =
@@ -255,7 +255,7 @@ GtCondenseq *gt_condenseq_new(const GtEncseq *orig_es, GtLogger *logger)
   condenseq->orig_num_seq = gt_encseq_num_of_sequences(orig_es);
 
   condenseq->ssptab = condenseq_fill_tab(condenseq, orig_es);
-  condenseq->orig_length = gt_encseq_total_length(orig_es);
+  condenseq->orig_len = gt_encseq_total_length(orig_es);
 
   condenseq_process_descriptions(condenseq, orig_es, logger);
   return condenseq;
@@ -289,7 +289,7 @@ GtUword gt_condenseq_total_unique_len(const GtCondenseq *condenseq)
 }
 
 GtUword gt_condenseq_total_length(GtCondenseq *condenseq) {
-  return condenseq->orig_length;
+  return condenseq->orig_len;
 }
 
 GtUword gt_condenseq_num_of_sequences(GtCondenseq *condenseq)
@@ -449,7 +449,7 @@ static int condenseq_io(GtCondenseq *condenseq,
   int had_err = 0;
   int file_format = GT_CONDENSEQ_VERSION;
   GtUword idx;
-  had_err = gt_condenseq_io_one(condenseq->orig_length);
+  had_err = gt_condenseq_io_one(condenseq->orig_len);
   if (!had_err)
     had_err = gt_condenseq_io_one(file_format);
   if (!had_err && file_format != GT_CONDENSEQ_VERSION) {
@@ -741,7 +741,7 @@ const GtUchar *gt_condenseq_extract_encoded_range(GtCondenseq *condenseq,
   gt_assert(condenseq && condenseq->udb_nelems != 0);
   gt_assert(condenseq->uniques[0].orig_startpos == 0);
   gt_assert(range.start <= range.end);
-  gt_assert(range.end < condenseq->orig_length);
+  gt_assert(range.end < condenseq->orig_len);
 
   nextsep = condenseq_next_sep(condenseq, range.start);
   uniqueid = gt_condenseq_uniques_position_binsearch(condenseq,
@@ -835,7 +835,7 @@ const GtUchar *gt_condenseq_extract_encoded(GtCondenseq *condenseq,
     /* -2 because of seperator */
     range.end = gt_condenseq_seqstartpos(condenseq, id + 1) - 2;
   else
-    range.end = condenseq->orig_length - 1;
+    range.end = condenseq->orig_len - 1;
   *length = range.end - range.start + 1;
   return gt_condenseq_extract_encoded_range(condenseq, range);
 }
@@ -877,7 +877,7 @@ const char *gt_condenseq_extract_decoded(GtCondenseq *condenseq,
     /* -2 because of seperator */
     range.end = gt_condenseq_seqstartpos(condenseq, id + 1) - 2;
   else
-    range.end = condenseq->orig_length - 1;
+    range.end = condenseq->orig_len - 1;
   *length = range.end - range.start + 1;
   return gt_condenseq_extract_decoded_range(condenseq, range, '\0');
 }
