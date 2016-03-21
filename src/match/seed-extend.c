@@ -1283,6 +1283,7 @@ static const GtQuerymatch* gt_extend_querymatch(bool forxdrop,
           dbseqstartpos = gt_encseq_seqstartpos(dbencseq,dbseqnum);
 
   gt_assert(query != NULL);
+  gt_assert(gt_querymatch_query_totallength(exactseed) == query_totallength);
   gt_sesp_from_relative(&sesp,
                         dbencseq,
                         dbseqnum,

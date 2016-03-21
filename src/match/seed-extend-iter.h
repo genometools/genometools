@@ -165,6 +165,7 @@ GtUword gt_seedextend_match_iterator_seedpos2(
   idx = chainelem->indexintableofallmatches;
   querymatchptr = gt_seedextend_match_iterator_get(semi,idx);
 
+  gt_assert(querymatchptr->query_totallength == query_totallength);
   if (gt_querymatch_process(querymatchptr,
                             aencseq,
                             &bseqorencseq,

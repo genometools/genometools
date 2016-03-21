@@ -395,6 +395,8 @@ static int gt_show_seedext_runner(GT_UNUSED int argc,
           const GtUword query_totallength
             = gt_encseq_seqlength(bencseq,
                                   gt_querymatch_queryseqnum(querymatchptr));
+          gt_assert(gt_querymatch_query_totallength(querymatchptr) ==
+                    query_totallength);
           gt_show_seed_extend_encseq(querymatchptr,
                                      aencseq,
                                      bencseq,

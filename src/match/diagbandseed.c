@@ -849,7 +849,7 @@ GtArrayGtDiagbandseedSeedPair gt_diagbandseed_get_seedpairs(
 
 /* start seed extension for seed pairs in mlist */
 static void gt_diagbandseed_process_seeds(GtArrayGtDiagbandseedSeedPair *mlist,
-                                          GtDiagbandseedExtendParams *arg,
+                                          const GtDiagbandseedExtendParams *arg,
                                           const GtEncseq *aencseq,
                                           const GtEncseq *bencseq,
                                           unsigned int seedlength,
@@ -989,8 +989,8 @@ static void gt_diagbandseed_process_seeds(GtArrayGtDiagbandseedSeedPair *mlist,
         {
           /* extend seed */
           const GtQuerymatch *querymatch = NULL;
+
           if (aencseq == bencseq) {
-            count_extensions++;
             querymatch = extend_selfmatch_relative_function(&info_querymatch,
                                                             aencseq,
                                                             idx->aseqnum,
@@ -1000,7 +1000,6 @@ static void gt_diagbandseed_process_seeds(GtArrayGtDiagbandseedSeedPair *mlist,
                                                             seedlength,
                                                             query_readmode);
           } else {
-            count_extensions++;
             querymatch = extend_querymatch_relative_function(&info_querymatch,
                                                              aencseq,
                                                              idx->aseqnum,
@@ -1011,6 +1010,7 @@ static void gt_diagbandseed_process_seeds(GtArrayGtDiagbandseedSeedPair *mlist,
                                                              seedlength,
                                                              query_readmode);
           }
+          count_extensions++;
           if (querymatch != NULL) {
             firstinrange = false;
             /* show extension results */
@@ -1060,7 +1060,6 @@ static void gt_diagbandseed_process_seeds(GtArrayGtDiagbandseedSeedPair *mlist,
     gt_timer_delete(timer);
   }
   GT_FREEARRAY(mlist, GtDiagbandseedSeedPair);
-  return;
 }
 
 /* * * * * ALGORITHM STEPS * * * * */
@@ -1085,8 +1084,8 @@ int gt_diagbandseed_algorithm(const GtDiagbandseedInfo *arg,
   maxfreq = arg->maxfreq;
   endposdiff = !arg->overlappingseeds ? arg->seedlength : 1;
   selfcomp = (arg->bencseq == arg->aencseq &&
-              gt_range_overlap(aseqrange, bseqrange)
-              ? true : false);
+              gt_range_overlap(aseqrange, bseqrange))
+              ? true : false;
   equalranges = gt_range_compare(aseqrange, bseqrange) == 0 ? true : false;
   alist_blist_id = selfcomp && !arg->nofwd && equalranges ? true : false;
   both_strands = (arg->norev || arg->nofwd) ? false : true;

@@ -106,7 +106,7 @@ uint64_t gt_querymatch_queryseqnum(const GtQuerymatch *querymatch);
 
 const GtUchar *gt_querymatch_querysequence(const GtQuerymatch *querymatch);
 
-GtUword gt_querymatch_querytotallength(const GtQuerymatch *querymatch);
+GtUword gt_querymatch_query_totallength(const GtQuerymatch *querymatch);
 
 GtUword gt_querymatch_dbseqnum(const GtQuerymatch *querymatch);
 

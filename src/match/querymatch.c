@@ -241,8 +241,8 @@ void gt_querymatch_prettyprint(const GtQuerymatch *querymatch)
 }
 
 bool gt_querymatch_check_final(const GtQuerymatch *querymatch,
-                          GtUword errorpercentage,
-                          GtUword userdefinedleastlength)
+                               GtUword errorpercentage,
+                               GtUword userdefinedleastlength)
 {
   GtUword total_alignedlen;
 
@@ -268,6 +268,7 @@ static void gt_querymatch_applycorrection(GtQuerymatch *querymatch,
 
   gt_assert(querymatch != NULL && querymatch->ref_querymatchoutoptions != NULL
             && querymatch->distance > 0);
+  gt_assert(querymatch->query_totallength == query_totallength);
   coords = gt_querymatchoutoptions_correction_get(querymatch->
                                                   ref_querymatchoutoptions);
   gt_querymatch_init(querymatch,
@@ -319,6 +320,7 @@ bool gt_querymatch_process(GtQuerymatch *querymatchptr,
         abs_querystart_fwdstrand = querymatchptr->querystart_fwdstrand;
         abs_querystart = querymatchptr->querystart;
       }
+      gt_assert(querymatchptr->query_totallength == query_totallength);
       seededalignment
         = gt_querymatchoutoptions_alignment_prepare(querymatchptr->
                                                       ref_querymatchoutoptions,
@@ -519,6 +521,12 @@ uint64_t gt_querymatch_queryseqnum(const GtQuerymatch *querymatch)
 {
   gt_assert(querymatch != NULL);
   return querymatch->queryseqnum;
+}
+
+GtUword gt_querymatch_query_totallength(const GtQuerymatch *querymatch)
+{
+  gt_assert(querymatch != NULL);
+  return querymatch->query_totallength;
 }
 
 void gt_querymatch_query_readmode_set(GtQuerymatch *querymatch,
