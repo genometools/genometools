@@ -363,6 +363,7 @@ static GtReadmode gt_readmode_character_code_parse(char direction)
 }
 
 bool gt_querymatch_read_line(GtQuerymatch *querymatchptr,
+                             bool withseqlength,
                              const char *line_ptr,
                              bool selfmatch,
                              GtUword seedpos1,
@@ -373,24 +374,47 @@ bool gt_querymatch_read_line(GtQuerymatch *querymatchptr,
 {
   char direction;
   double identity;
+  int parsed_items;
 
-  if (sscanf(line_ptr,
-             GT_WU " " GT_WU " " GT_WU " %c " GT_WU " %"PRIu64 " "
-             GT_WU " " GT_WD " " GT_WU " %lf",
-             &querymatchptr->dblen,
-             &querymatchptr->dbseqnum,
-             &querymatchptr->dbstart_relative,
-             &direction,
-             &querymatchptr->querylen,
-             &querymatchptr->queryseqnum,
-             &querymatchptr->querystart_fwdstrand,
-             &querymatchptr->score,
-             &querymatchptr->distance,
-             &identity) == 10)
+  if (withseqlength)
   {
-    GtUword query_totallength = gt_encseq_seqlength(queryencseq,
-                                                    querymatchptr->queryseqnum);
-
+    parsed_items
+      = sscanf(line_ptr,
+               GT_WU " " GT_WU " " GT_WU " %c " GT_WU " %"PRIu64 " "
+               GT_WU " " GT_WD " " GT_WU " %lf " GT_WU " " GT_WU,
+               &querymatchptr->dblen,
+               &querymatchptr->dbseqnum,
+               &querymatchptr->dbstart_relative,
+               &direction,
+               &querymatchptr->querylen,
+               &querymatchptr->queryseqnum,
+               &querymatchptr->querystart_fwdstrand,
+               &querymatchptr->score,
+               &querymatchptr->distance,
+               &identity,
+               &querymatchptr->dbseqlen,
+               &querymatchptr->query_totallength);
+    printf("parsed seqlength\n");
+  } else
+  {
+    parsed_items
+      = sscanf(line_ptr,
+               GT_WU " " GT_WU " " GT_WU " %c " GT_WU " %"PRIu64 " "
+               GT_WU " " GT_WD " " GT_WU " %lf",
+               &querymatchptr->dblen,
+               &querymatchptr->dbseqnum,
+               &querymatchptr->dbstart_relative,
+               &direction,
+               &querymatchptr->querylen,
+               &querymatchptr->queryseqnum,
+               &querymatchptr->querystart_fwdstrand,
+               &querymatchptr->score,
+               &querymatchptr->distance,
+               &identity);
+  }
+  if ((withseqlength && parsed_items == 12) ||
+      (!withseqlength && parsed_items == 10))
+  {
     querymatchptr->query_readmode = gt_readmode_character_code_parse(direction);
     querymatchptr->dbstart
       = gt_encseq_seqstartpos(dbencseq,querymatchptr->dbseqnum) +
@@ -399,14 +423,19 @@ bool gt_querymatch_read_line(GtQuerymatch *querymatchptr,
     querymatchptr->seedpos1 = seedpos1;
     querymatchptr->seedpos2 = seedpos2;
     querymatchptr->seedlen = seedlen;
+    if (!withseqlength)
+    {
+      querymatchptr->query_totallength
+        = gt_encseq_seqlength(queryencseq,querymatchptr->queryseqnum);
+      querymatchptr->dbseqlen
+        = gt_encseq_seqlength(dbencseq,querymatchptr->dbseqnum);
+      printf("recomputed seqlength\n");
+    }
     querymatchptr->querystart
       = gt_querymatch_querystart_derive(querymatchptr->query_readmode,
                                         querymatchptr->querylen,
-                                        query_totallength,
+                                        querymatchptr->query_totallength,
                                         querymatchptr->querystart_fwdstrand);
-    querymatchptr->query_totallength = query_totallength;
-    querymatchptr->dbseqlen
-      = gt_encseq_seqlength(dbencseq,querymatchptr->dbseqnum);
     return true;
   }
   return false;

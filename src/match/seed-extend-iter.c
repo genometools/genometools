@@ -25,7 +25,7 @@
 struct GtSeedextendMatchIterator
 {
   GtStr *ii, *qii;
-  bool mirror, bias_parameters;
+  bool mirror, bias_parameters, seqlength_display;
   GtEncseq *aencseq, *bencseq;
   GtUword errorpercentage, history_size;
   const char *matchfilename;
@@ -95,6 +95,7 @@ GtSeedextendMatchIterator *gt_seedextend_match_iterator_new(
   semi->qii = gt_str_new();
   semi->mirror = false;
   semi->bias_parameters = false;
+  semi->seqlength_display = false;
   semi->aencseq = semi->bencseq = NULL;
   semi->errorpercentage = 0;
   semi->history_size = 0;
@@ -192,6 +193,10 @@ GtSeedextendMatchIterator *gt_seedextend_match_iterator_new(
         if (strcmp(tok, "-bias-parameters") == 0)
         {
           semi->bias_parameters = true;
+        }
+        if (strcmp(tok, "-seqlength-display") == 0)
+        {
+          semi->seqlength_display = true;
         }
       }
       if (!had_err)
@@ -318,6 +323,7 @@ GtQuerymatch *gt_seedextend_match_iterator_next(GtSeedextendMatchIterator *semi)
       } else
       {
         if (gt_querymatch_read_line(semi->querymatchptr,
+                                    semi->seqlength_display,
                                     line_ptr,
                                     selfmatch,
                                     semi->seedpos1,
@@ -371,6 +377,13 @@ bool gt_seedextend_match_iterator_bias_parameters(
 {
   gt_assert(semi != NULL);
   return semi->bias_parameters;
+}
+
+bool gt_seedextend_match_iterator_seqlength_display(
+                        const GtSeedextendMatchIterator *semi)
+{
+  gt_assert(semi != NULL);
+  return semi->seqlength_display;
 }
 
 bool gt_seedextend_match_iterator_has_seedline(

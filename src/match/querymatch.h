@@ -59,6 +59,7 @@ void gt_querymatch_init(GtQuerymatch *querymatch,
                         GtUword query_totallength);
 
 bool gt_querymatch_read_line(GtQuerymatch *querymatchptr,
+                             bool withseqlength,
                              const char *line_ptr,
                              bool selfmatch,
                              GtUword seedpos1,
