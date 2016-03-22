@@ -150,7 +150,7 @@ const GtQuerymatch *gt_xdrop_extend_selfmatch_relative(void *info,
                                               GtReadmode query_readmode);
 
 /* The following function is used for extending a seed obtained
-   in a comparison of the given sequence <query> of length <query_totallength>
+   in a comparison of the given sequence <query>
    against <encseq>. So here a byte sequence is compared against an
    encoded sequence and the seed is specified by <exactseed>.
    A <GtProcessinfo_and_querymatchspaceptr>-object is passed via the
@@ -162,8 +162,7 @@ const GtQuerymatch *gt_xdrop_extend_selfmatch_relative(void *info,
 const GtQuerymatch *gt_xdrop_extend_querymatch(void *info,
                                                const GtEncseq *encseq,
                                                const GtQuerymatch *exactseed,
-                                               const GtSeqorEncseq *query,
-                                               GtUword query_totallength);
+                                               const GtSeqorEncseq *query);
 
 /*
    The following function performs an xdrop extension (as the previous function)
@@ -174,8 +173,7 @@ const GtQuerymatch *gt_xdrop_extend_querymatch(void *info,
 void gt_xdrop_extend_querymatch_with_output(void *info,
                                             const GtEncseq *encseq,
                                             const GtQuerymatch *exactseed,
-                                            const GtSeqorEncseq *query,
-                                            GtUword query_totallength);
+                                            const GtSeqorEncseq *query);
 
 /* The following functions are used for the greedy extension. */
 
@@ -390,8 +388,7 @@ char *gt_seed_extend_params_keystring(bool use_greedy,
 void gt_greedy_extend_querymatch_with_output(void *info,
                                              const GtEncseq *dbencseq,
                                              const GtQuerymatch *exactseed,
-                                             const GtSeqorEncseq *query,
-                                             GtUword query_totallength);
+                                             const GtSeqorEncseq *query);
 
 double gt_greedy_dna_sequence_bias_get(const GtEncseq *encseq);
 

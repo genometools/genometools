@@ -99,6 +99,9 @@ GtUword gt_seedextend_match_iterator_errorpercentage(
 bool gt_seedextend_match_iterator_bias_parameters(
                         const GtSeedextendMatchIterator *semi);
 
+bool gt_seedextend_match_iterator_seqlength_display(
+                        const GtSeedextendMatchIterator *semi);
+
 bool gt_seedextend_match_iterator_has_seedline(
                         const GtSeedextendMatchIterator *semi);
 
@@ -165,7 +168,6 @@ GtUword gt_seedextend_match_iterator_seedpos2(
   if (gt_querymatch_process(querymatchptr,
                             aencseq,
                             &bseqorencseq,
-                            query_totallength,
                             false) != 0)
   {
     GtAlignment *alignment = gt_querymatch_alignment_get(querymatchptr);

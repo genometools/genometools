@@ -59,6 +59,7 @@ void gt_querymatch_init(GtQuerymatch *querymatch,
                         GtUword query_totallength);
 
 bool gt_querymatch_read_line(GtQuerymatch *querymatchptr,
+                             bool withseqlength,
                              const char *line_ptr,
                              bool selfmatch,
                              GtUword seedpos1,
@@ -70,7 +71,6 @@ bool gt_querymatch_read_line(GtQuerymatch *querymatchptr,
 bool gt_querymatch_process(GtQuerymatch *querymatchptr,
                            const GtEncseq *encseq,
                            const GtSeqorEncseq *query,
-                           GtUword query_totallength,
                            bool greedyextension);
 
 void gt_querymatch_delete(GtQuerymatch *querymatch);
@@ -105,7 +105,7 @@ uint64_t gt_querymatch_queryseqnum(const GtQuerymatch *querymatch);
 
 const GtUchar *gt_querymatch_querysequence(const GtQuerymatch *querymatch);
 
-GtUword gt_querymatch_querytotallength(const GtQuerymatch *querymatch);
+GtUword gt_querymatch_query_totallength(const GtQuerymatch *querymatch);
 
 GtUword gt_querymatch_dbseqnum(const GtQuerymatch *querymatch);
 

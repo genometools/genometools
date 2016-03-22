@@ -561,8 +561,7 @@ static int gt_generic_simplegreedyselfmatchoutput(
 typedef void (*GtXdrop_extend_querymatch_func)(void *,
                                                const GtEncseq *,
                                                const GtQuerymatch *,
-                                               const GtSeqorEncseq *,
-                                               GtUword);
+                                               const GtSeqorEncseq *);
 
 static int gt_callenumquerymatches(bool selfmatch,
                                    const char *indexname,
@@ -690,8 +689,7 @@ static int gt_callenumquerymatches(bool selfmatch,
                            matchlength,
                            querystart,
                            query_totallength);
-        eqmf(eqmf_data,suffixarray.encseq,exactseed,&query_seqorencseq,
-             query_totallength);
+        eqmf(eqmf_data,suffixarray.encseq,exactseed,&query_seqorencseq);
       } else
       {
         if (gt_querymatch_complete(exactseed,
