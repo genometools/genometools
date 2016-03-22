@@ -444,7 +444,7 @@ static void ces_c_xdrop_init(GtXdropArbitraryscores *scores,
       gt_error_set(err, "length of element (" GT_WU ") exceedes range for " \
                    "lengths stored in GtCondenseq (" GT_WU "), maybe "      \
                    "recompile with GT_CONDENSEQ_64_BIT enabled",            \
-                   (GtUword) (TO_STORE), (GtUword) CES_UNSIGNED_MAX);      \
+                   (GtUword) (TO_STORE), (GtUword) CES_UNSIGNED_MAX);       \
       had_err = -1;                                                         \
     }                                                                       \
   }                                                                         \
