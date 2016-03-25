@@ -41,7 +41,7 @@ fi
 
 rm -f ${reference}.db
 ${MYERSPROG}/DAZZ_DB/fasta2DB ${reference}.db ${reference}.fasta
-if test ${queryfile} != ""
+if test "${queryfile}" != ""
 then
   query=`basename $queryfile`
   scripts/convert2myersformat.rb ${queryfile} > ${query}.fasta
