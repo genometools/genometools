@@ -1341,7 +1341,7 @@ static int encdesc_next_desc(GtEncdesc *encdesc, GtStr *desc, GtError *err)
           tmp += cur_field->min_value;
       }
       if (!had_err) {
-        if (!encdesc->cur_desc == 0 && !sampled) {
+        if (!(encdesc->cur_desc == 0) && !sampled) {
           if (cur_field->is_delta_negative)
             gt_assert(tmp < cur_field->prev_value);
           if (cur_field->is_delta_positive)
