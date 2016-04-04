@@ -27,12 +27,14 @@
 
 #include "extended/condenseq.h"
 
+/* this switch is meant to test performance differences and memory consumption
+   issues */
 #ifdef GT_CONDENSEQ_64_BIT
-typedef GtUword ces_unsigned;
-#define CES_UNSIGNED_MAX ((ces_unsigned) GT_UWORD_MAX)
+typedef uint64_t ces_unsigned;
+#define CES_UNSIGNED_MAX ((ces_unsigned) UINT64_MAX)
 #else
-typedef unsigned int ces_unsigned;
-#define CES_UNSIGNED_MAX ((ces_unsigned) UINT_MAX)
+typedef uint32_t ces_unsigned;
+#define CES_UNSIGNED_MAX ((ces_unsigned) UINT32_MAX)
 #endif
 
 /*
@@ -60,8 +62,8 @@ struct GtCondenseq {
   GtCondenseqLink   *links;
   GtCondenseqUnique *uniques;
   GtEncseq          *unique_es;
-  GtIntset          *sdstab;
-  GtIntset          *ssptab;
+  GtIntset          *sdstab,
+                    *ssptab;
   GtUchar           *ubuffer;
   char              *buffer,
                     *filename,
@@ -71,7 +73,7 @@ struct GtCondenseq {
           ids_total_len,
           ldb_allocated,
           ldb_nelems,
-          orig_length,
+          orig_len,
           orig_num_seq,
           ubuffsize,
           udb_allocated,

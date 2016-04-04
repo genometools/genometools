@@ -1,6 +1,6 @@
 /*
   Copyright (c) 2013 Ole Eigenbrod <ole.eigenbrod@gmx.de>
-  Copyright (c) 2013 Dirk Willrodt <willrodt@zbh.uni-hamburg.de>
+  Copyright (c) 2013-2016 Dirk Willrodt <willrodt@zbh.uni-hamburg.de>
   Copyright (c) 2013 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -43,52 +43,50 @@ do {                                                \
 } while (false)
 
 typedef struct GtEditscriptPos {
-  unsigned int cur_word,
-               bitsleft;
+  uint32_t cur_word,
+           bitsleft;
 } GtEditscriptPos;
 
 struct GtEditscript {
-  GtBitsequence      *space;
-  unsigned int        size,
-                      num_elems,
-                      trailing_matches;
-  unsigned char       del,
-                      entry_size;
+  GtBitsequence *space;
+  uint32_t       size,
+                 num_elems,
+                 trailing_matches;
+  uint8_t        del,
+                 entry_size;
 };
 
 struct GtEditscriptBuilder {
   GtEditscript    *es;
   GtEditscriptPos  fillpos;
-  unsigned char    last_op;
+  uint8_t          last_op;
 };
 
 static inline void editscript_pos_reset(GtEditscriptPos *pos)
 {
   pos->cur_word = 0;
-  pos->bitsleft = (unsigned int) GT_INTWORDSIZE;
+  pos->bitsleft = (uint32_t) GT_INTWORDSIZE;
 }
 
 #define GT_EDITSCRIPT_FULLMASK(es) ((GtBitsequence) \
-                                ((GtUword) 1 << es->entry_size) - (GtUword) 1)
+                                  ((GtUword) 1 << es->entry_size) - (GtUword) 1)
 #define GT_EDITSCRIPT_FIRSTMASK(es) ((GtBitsequence) \
-                                 ((GtUword) 1 << (es->entry_size - \
-                                                  (GtUword) 1)))
+                                ((GtUword) 1 << (es->entry_size - (GtUword) 1)))
 #define GT_EDITSCRIPT_MISDEL_SYM(es) ((GtBitsequence) es->del + 1)
 #define GT_EDITSCRIPT_INS_SYM(es) ((GtBitsequence) es->del + 2)
 
 GtEditscript *gt_editscript_new(GtAlphabet *alphabet)
 {
-  unsigned int alphabet_size;
+  uint32_t alphabet_size;
   GtEditscript *es;
   es = gt_calloc((size_t) 1, sizeof (*es));
   alphabet_size = gt_alphabet_size(alphabet);
   es->entry_size =
     gt_determinebitspervalue((GtUword) alphabet_size + 3);
-  gt_assert(es->entry_size <=
-            (unsigned char) (sizeof (unsigned char) * CHAR_BIT));
+  gt_assert(es->entry_size <= (uint8_t) (sizeof (uint8_t) * CHAR_BIT));
   es->size = 0U;
   es->space = NULL;
-  es->del = (unsigned char) alphabet_size;
+  es->del = (uint8_t) alphabet_size;
   es->num_elems = 0;
   return es;
 }
@@ -105,11 +103,11 @@ static inline void editscript_space_add_next(GtEditscript *es,
                                              GtEditscriptPos *fillpos,
                                              GtBitsequence elem)
 {
-  unsigned int cur_word = fillpos->cur_word,
-               remaining = fillpos->bitsleft,
-               bits2store = (unsigned int) es->entry_size;
+  uint32_t cur_word = fillpos->cur_word,
+           remaining = fillpos->bitsleft,
+           bits2store = (uint32_t) es->entry_size;
   if (es->size == 0) {
-    es->size = (unsigned int) (GT_INTWORDSIZE / es->entry_size) + 1U;
+    es->size = (uint32_t) (GT_INTWORDSIZE / es->entry_size) + 1U;
     es->space = gt_malloc(es->size * sizeof (*es->space));
     es->space[0] = 0;
   }
@@ -128,7 +126,7 @@ static inline void editscript_space_add_next(GtEditscript *es,
     cur_word++;
     es->space[cur_word] = 0;
     bits2store -= remaining;
-    remaining = (unsigned int) GT_INTWORDSIZE;
+    remaining = (uint32_t) GT_INTWORDSIZE;
     /* this has to be checked because (uint64_t << 64) is not defined */
     if (bits2store != 0) {
       es->space[cur_word] |= elem << (remaining - bits2store);
@@ -143,11 +141,11 @@ static inline GtBitsequence editscript_space_get_next(const GtEditscript *es,
                                                       GtEditscriptPos *pos)
 {
   GtBitsequence elem = 0;
-  unsigned int shift;
+  uint32_t shift;
 
   if (pos->bitsleft == 0) {
     pos->cur_word++;
-    pos->bitsleft = (unsigned int) GT_INTWORDSIZE;
+    pos->bitsleft = (uint32_t) GT_INTWORDSIZE;
   }
   shift = pos->bitsleft;
 
@@ -155,7 +153,7 @@ static inline GtBitsequence editscript_space_get_next(const GtEditscript *es,
   if (shift < es->entry_size) {
     pos->cur_word++;
     elem |= es->space[pos->cur_word] >> (GtBitsequence) shift;
-    pos->bitsleft = (unsigned int) (GT_INTWORDSIZE - (es->entry_size - shift));
+    pos->bitsleft = (uint32_t) (GT_INTWORDSIZE - (es->entry_size - shift));
   }
   else {
     pos->bitsleft -= es->entry_size;
@@ -171,8 +169,8 @@ static inline void editscript_space_add_length(GtEditscript *es,
   /* scheme: [1111][x][x][x][x] first store consecutive ones for each element
      needed, (like elias gamma) then store the value split up to chunks of
      element size */
-  unsigned int num_elems = 0,
-               shift;
+  uint32_t num_elems = 0,
+           shift;
   GtBitsequence tmp = value;
 
   /* needs just one element not starting with 1, store it */
@@ -214,7 +212,7 @@ static inline void editscript_space_add_length(GtEditscript *es,
 static inline GtBitsequence
 editscript_space_get_length(const GtEditscript *es,
                             GtEditscriptPos *pos,
-                            unsigned int *elems_used)
+                            uint32_t *elems_used)
 {
   GtBitsequence ret = 0,
                 elem = 0,
@@ -322,7 +320,7 @@ void gt_editscript_get_stats(const GtEditscript *editscript,
                              GtUword *insertion,
                              GtUword *deletion)
 {
-  unsigned int elems_served = 0;
+  uint32_t elems_served = 0;
   bool misdel = true; /* shut up scan-build */
   GtBitsequence elem;
   GtEditscriptPos getpos;
@@ -333,7 +331,7 @@ void gt_editscript_get_stats(const GtEditscript *editscript,
   *match = *mismatch = *insertion = *deletion = 0;
   if (editscript->num_elems != 0) {
     elem = editscript_space_get_next(editscript, &getpos);
-    gt_assert(editscript->del < (unsigned char) elem);
+    gt_assert(editscript->del < (uint8_t) elem);
     elems_served++;
     if (elem == GT_EDITSCRIPT_MISDEL_SYM(editscript)) {
       misdel = true;
@@ -376,7 +374,7 @@ GtUword gt_editscript_get_source_len(const GtEditscript *editscript)
   GtEditscriptPos pos;
   GtBitsequence elem;
   GtUword length = 0;
-  unsigned int served = 0;
+  uint32_t served = 0;
   bool skip = false;
 
   gt_assert(editscript != NULL);
@@ -409,7 +407,7 @@ GtUword gt_editscript_get_target_len(const GtEditscript *editscript)
   GtEditscriptPos pos;
   GtBitsequence elem;
   GtUword length = 0;
-  unsigned int served = 0;
+  uint32_t served = 0;
 
   gt_assert(editscript != NULL);
   editscript_pos_reset(&pos);
@@ -440,7 +438,7 @@ GtUword gt_editscript_get_target_subseq_len(const GtEditscript *editscript,
   GtBitsequence elem;
   GtUword upos = 0,
           vlength = 0;
-  unsigned int served = 0;
+  uint32_t served = 0;
 
   gt_assert(editscript != NULL);
   editscript_pos_reset(&pos);
@@ -519,8 +517,9 @@ GtUword gt_editscript_get_sub_sequence_u(const GtEditscript *editscript,
   GtUword vidx = 0,
           uidx,
           bufidx = 0;
-  unsigned int j,elems_served = 0,
-               matchcount;
+  uint32_t j,
+           elems_served = 0,
+           matchcount;
 
   gt_assert(encseq != NULL && editscript != NULL);
 
@@ -544,8 +543,8 @@ GtUword gt_editscript_get_sub_sequence_u(const GtEditscript *editscript,
     elems_served++;
     while (elems_served < editscript->num_elems && uidx <= start + utopos) {
       gt_assert(elem <= GT_EDITSCRIPT_INS_SYM(editscript));
-      matchcount = (unsigned int) editscript_space_get_length(editscript, &pos,
-                                                              &elems_served);
+      matchcount = (uint32_t) editscript_space_get_length(editscript, &pos,
+                                                          &elems_served);
       for (j = 0;
            uidx <= start + utopos &&
            j < matchcount;
@@ -588,7 +587,7 @@ GtUword gt_editscript_get_sub_sequence_u(const GtEditscript *editscript,
   }
   for (j = 0;
        uidx <= start + utopos &&
-         j < (unsigned int) editscript->trailing_matches;
+         j < (uint32_t) editscript->trailing_matches;
        ++j) {
     (*buffer)[bufidx++] = gt_encseq_get_encoded_char(encseq, uidx, dir);
     vidx++;
@@ -611,8 +610,8 @@ GtUword gt_editscript_get_sub_sequence_v(const GtEditscript *editscript,
   GtUword vidx = 0,
           uidx,
           bufidx = 0;
-  unsigned int j,elems_served = 0,
-               matchcount;
+  uint32_t j, elems_served = 0,
+           matchcount;
 
   editscript_pos_reset(&pos);
 
@@ -626,8 +625,8 @@ GtUword gt_editscript_get_sub_sequence_v(const GtEditscript *editscript,
     elems_served++;
     while (elems_served < editscript->num_elems && vidx <= vtopos) {
       gt_assert(elem <= GT_EDITSCRIPT_INS_SYM(editscript));
-      matchcount = (unsigned int) editscript_space_get_length(editscript, &pos,
-                                                              &elems_served);
+      matchcount = (uint32_t) editscript_space_get_length(editscript, &pos,
+                                                          &elems_served);
       for (j = 0; vidx <= vtopos && j < matchcount; ++j) {
         if (vidx >= vfrompos) {
           buffer[bufidx++] =
@@ -657,7 +656,7 @@ GtUword gt_editscript_get_sub_sequence_v(const GtEditscript *editscript,
     }
   }
   for (j = 0;
-       vidx <= vtopos && j < (unsigned int) editscript->trailing_matches;
+       vidx <= vtopos && j < (uint32_t) editscript->trailing_matches;
        ++j) {
     if (vidx >= vfrompos) {
       buffer[bufidx++] = gt_encseq_get_encoded_char(encseq, uidx, dir);
@@ -717,7 +716,7 @@ static GtEditscript *editscript_io_fp(GtEditscript *editscript, FILE *fp,
     had_err = EDITSCRIPT_IO_ONE(&editscript->num_elems);
   if (!had_err && editscript->num_elems != 0) {
     bits = (GtUword) editscript->num_elems * (GtUword) editscript->entry_size;
-    editscript->size = (unsigned int) (bits / (GT_INTWORDSIZE));
+    editscript->size = (uint32_t) (bits / (GT_INTWORDSIZE));
     if (bits % GT_INTWORDSIZE) {
       editscript->size++;
     }
@@ -754,8 +753,8 @@ void gt_editscript_show(const GtEditscript *editscript, GtAlphabet *alphabet)
 {
   GtEditscriptPos pos;
   GtBitsequence elem;
-  unsigned int matchcount,
-               elems_served = 0;
+  uint32_t matchcount,
+           elems_served = 0;
 
   editscript_pos_reset(&pos);
 
@@ -765,8 +764,8 @@ void gt_editscript_show(const GtEditscript *editscript, GtAlphabet *alphabet)
     elems_served++;
     while (elems_served < editscript->num_elems) {
       gt_assert(elem <= GT_EDITSCRIPT_INS_SYM(editscript));
-      matchcount = (unsigned int) editscript_space_get_length(editscript, &pos,
-                                                              &elems_served);
+      matchcount = (uint32_t) editscript_space_get_length(editscript, &pos,
+                                                          &elems_served);
       if (elem == GT_EDITSCRIPT_INS_SYM(editscript)) {
         if (matchcount != 0) {
           printf("M(%u)|Ins:|", matchcount);
@@ -785,7 +784,7 @@ void gt_editscript_show(const GtEditscript *editscript, GtAlphabet *alphabet)
             (GtBitsequence) WILDCARD :
             elem;
           printf("%c|", (int) gt_alphabet_pretty_symbol(alphabet,
-                                                        (unsigned int) elem));
+                                                        (uint32_t) elem));
         }
       }
       else {
@@ -807,7 +806,7 @@ void gt_editscript_show(const GtEditscript *editscript, GtAlphabet *alphabet)
               (GtBitsequence) WILDCARD :
               elem;
             printf("%c|", (int) gt_alphabet_pretty_symbol(alphabet,
-                                                          (unsigned int) elem));
+                                                          (uint32_t) elem));
           }
           else
             printf("-|");
@@ -861,8 +860,8 @@ void gt_editscript_builder_add_mismatch(GtEditscriptBuilder *es_builder,
   if (c == (GtUchar) WILDCARD) {
     c = (GtUchar) es->del - 1;
   }
-  if (es_builder->last_op != (unsigned char) GT_EDITSCRIPT_MISDEL_SYM(es)) {
-    es_builder->last_op = (unsigned char) GT_EDITSCRIPT_MISDEL_SYM(es);
+  if (es_builder->last_op != (uint8_t) GT_EDITSCRIPT_MISDEL_SYM(es)) {
+    es_builder->last_op = (uint8_t) GT_EDITSCRIPT_MISDEL_SYM(es);
     editscript_space_add_next(es, &es_builder->fillpos,
                               GT_EDITSCRIPT_MISDEL_SYM(es));
     editscript_space_add_length(es, &es_builder->fillpos,
@@ -878,8 +877,8 @@ void gt_editscript_builder_add_deletion(GtEditscriptBuilder *es_builder)
   gt_assert(es_builder);
   es = es_builder->es;
 
-  if (es_builder->last_op != (unsigned char) GT_EDITSCRIPT_MISDEL_SYM(es)) {
-    es_builder->last_op = (unsigned char) GT_EDITSCRIPT_MISDEL_SYM(es);
+  if (es_builder->last_op != (uint8_t) GT_EDITSCRIPT_MISDEL_SYM(es)) {
+    es_builder->last_op = (uint8_t) GT_EDITSCRIPT_MISDEL_SYM(es);
     editscript_space_add_next(es, &es_builder->fillpos,
                               GT_EDITSCRIPT_MISDEL_SYM(es));
     editscript_space_add_length(es, &es_builder->fillpos,
@@ -900,8 +899,8 @@ void gt_editscript_builder_add_insertion(GtEditscriptBuilder *es_builder,
   if (c == (GtUchar) WILDCARD) {
     c = (GtUchar) es->del - 1;
   }
-  if (es_builder->last_op != (unsigned char) GT_EDITSCRIPT_INS_SYM(es)) {
-    es_builder->last_op = (unsigned char) GT_EDITSCRIPT_INS_SYM(es);
+  if (es_builder->last_op != (uint8_t) GT_EDITSCRIPT_INS_SYM(es)) {
+    es_builder->last_op = (uint8_t) GT_EDITSCRIPT_INS_SYM(es);
     editscript_space_add_next(es, &es_builder->fillpos,
                               GT_EDITSCRIPT_INS_SYM(es));
     editscript_space_add_length(es, &es_builder->fillpos,
@@ -964,7 +963,7 @@ meops(reverse) MIMDMmMmmMDDMIIMmMMMIMMDMmMM
     gt_ensure(i == (GtUword) ist);
   }
   if (!had_err) {
-    unsigned int served = 0;
+    uint32_t served = 0;
     editscript_pos_reset(&get_pos);
     editscript_pos_reset(&fill_pos);
     gt_editscript_reset(es);

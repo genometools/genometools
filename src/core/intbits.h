@@ -192,7 +192,7 @@ static inline void gt_bitsequence_tostring_units(char *buffer,
 }
 
 /*@unused@*/ static inline GtUword gt_unitsoftwobitencoding(GtUword
-                                                                  totallength)
+                                                            totallength)
 {
   uint64_t unitsoftwobitencoding;
 
