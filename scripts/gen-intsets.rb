@@ -260,7 +260,7 @@ void gt_intset_<%=bits%>_add(GtIntset *intset, GtUword elem)
   members->previouselem = elem;
 }
 
-static GtUword gt_intset_<%=bits%>_sec_idx_largest_seq(GtUword *sectionstart,
+static GtUword gt_intset_<%=bits%>_sec_idx_largest_leq(GtUword *sectionstart,
                                                \
 <% if bits != 8 %> <% end %>GtUword idx)
 {
@@ -271,7 +271,7 @@ static GtUword gt_intset_<%=bits%>_sec_idx_largest_seq(GtUword *sectionstart,
 }
 
 static GtUword
-gt_intset_<%=bits%>_binarysearch_sec_idx_largest_seq(GtUword *secstart_begin,
+gt_intset_<%=bits%>_binarysearch_sec_idx_largest_leq(GtUword *secstart_begin,
                                              \
 <% if bits != 8 %> <% end %>GtUword *secstart_end,
                                              \
@@ -307,7 +307,7 @@ static GtUword gt_intset_<%=bits%>_get_test(GtIntset *intset, GtUword idx)
   GtUword *sectionstart = members->sectionstart;
   gt_assert(idx < members->nextfree);
 
-  return (gt_intset_<%=bits%>_sec_idx_largest_seq(sectionstart, idx) <<
+  return (gt_intset_<%=bits%>_sec_idx_largest_leq(sectionstart, idx) <<
          members->logsectionsize) + intset_<%=bits%>->elements[idx];
 }
 
@@ -319,7 +319,7 @@ GtUword gt_intset_<%=bits%>_get(GtIntset *intset, GtUword idx)
   GtUword *sectionstart = members->sectionstart;
   gt_assert(idx < members->nextfree);
 
-  quotient = gt_intset_<%=bits%>_binarysearch_sec_idx_largest_seq(
+  quotient = gt_intset_<%=bits%>_binarysearch_sec_idx_largest_leq(
                                       sectionstart,
                                       sectionstart + members->numofsections - 1,
                                       idx);
