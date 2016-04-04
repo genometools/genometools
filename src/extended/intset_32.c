@@ -1,6 +1,6 @@
 /*
   Copyright (c) 2014 Dirk Willrodt <willrodt@zbh.uni-hamburg.de>
-  Copyright (c) 2014-2015 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2014-2016 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -238,25 +238,25 @@ static GtUword gt_intset_32_sec_idx_largest_seq(GtUword *sectionstart,
 }
 
 static GtUword
-gt_intset_32_binarysearch_sec_idx_largest_seq(GtUword *sectionstart,
-                                              GtUword *secend,
+gt_intset_32_binarysearch_sec_idx_largest_seq(GtUword *secstart_begin,
+                                              GtUword *secstart_end,
                                               GtUword idx)
 {
   GtUword *midptr = NULL, *found = NULL,
-          *startorig = sectionstart;
-  if (*sectionstart <= idx)
-    found = sectionstart;
-  while (sectionstart < secend) {
-    midptr = sectionstart + (GtUword) GT_DIV2(secend - sectionstart);
+          *startorig = secstart_begin;
+  if (*secstart_begin <= idx)
+    found = secstart_begin;
+  while (secstart_begin < secstart_end) {
+    midptr = secstart_begin + (GtUword) GT_DIV2(secstart_end - secstart_begin);
     if (*midptr < idx) {
       found = midptr;
       if (*midptr == idx) {
         break;
       }
-      sectionstart = midptr + 1;
+      secstart_begin = midptr + 1;
     }
     else {
-      secend = midptr - 1;
+      secstart_end = midptr - 1;
     }
   }
   gt_assert(found != NULL);
