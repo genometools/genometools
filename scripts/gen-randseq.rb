@@ -3,6 +3,40 @@
 require 'optparse'
 require 'ostruct'
 
+# Add code to check whether a class is already defined
+def class_exists?(class_name)
+  klass = Module.const_get(class_name)
+  return klass.is_a?(Class)
+rescue NameError
+  return false
+end
+
+# Ruby < 1.9.2 does not have the Random class.
+# Add a small substitute that does something similar.
+if !(class_exists?('Random')) then
+  class Random
+    def initialize(seed = nil)
+      if seed.nil? then
+        seed = self.new_seed
+      end
+      @seed = seed
+      Kernel.srand(seed)
+    end
+
+    def self.new_seed
+      return Kernel.srand()
+    end
+
+    def rand(vmax = nil)
+      if vmax.nil? then
+        return Kernel.rand()
+      else
+        return (vmax * Kernel.rand()).to_i
+      end
+    end
+  end
+end
+
 class String
   def reverse_complement
     return self.reverse.tr("ACGTacgt","TGCAtgca")
@@ -24,7 +58,7 @@ class Randomsequence
   def sequence(len)
     s = Array.new()
     0.upto(len-1).each do
-      s.push(@alphabet[@rgen.rand * @asize])
+      s.push(@alphabet[@rgen.rand * @asize, 1])
     end
     return s.join
   end
@@ -39,15 +73,15 @@ class Randomsequence
       if r <= err_prob
         r = @rgen.rand
         if r <= 0.8
-          s.push(alphabet[@rgen.rand * asize])
+          s.push(alphabet[@rgen.rand * asize, 1])
           i += 1
         elsif r <= 0.9
-          s.push(alphabet[@rgen.rand * asize])
+          s.push(alphabet[@rgen.rand * asize, 1])
         else
           i += 1
         end
       else
-        s.push(sequence[i])
+        s.push(sequence[i, 1])
         i += 1
       end
       if i >= len
