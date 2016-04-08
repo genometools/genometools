@@ -65,7 +65,7 @@ typedef struct {
   GtUword se_historysize;
   GtUword se_maxalilendiff;
   GtUword se_perc_match_hist;
-  GtStr *se_char_access_mode;
+  GtStr *char_access_mode;
   bool bias_parameters;
   bool relax_polish;
   /* general options */
@@ -92,7 +92,7 @@ static void* gt_seed_extend_arguments_new(void)
   arguments->dbs_queryname = gt_str_new();
   arguments->dbs_pick_str = gt_str_new();
   arguments->dbs_memlimit_str = gt_str_new();
-  arguments->se_char_access_mode = gt_str_new();
+  arguments->char_access_mode = gt_str_new();
   return arguments;
 }
 
@@ -104,7 +104,7 @@ static void gt_seed_extend_arguments_delete(void *tool_arguments)
     gt_str_delete(arguments->dbs_queryname);
     gt_str_delete(arguments->dbs_pick_str);
     gt_str_delete(arguments->dbs_memlimit_str);
-    gt_str_delete(arguments->se_char_access_mode);
+    gt_str_delete(arguments->char_access_mode);
     gt_option_delete(arguments->se_option_greedy);
     gt_option_delete(arguments->se_option_xdrop);
     gt_option_delete(arguments->se_option_withali);
@@ -319,7 +319,7 @@ static GtOptionParser* gt_seed_extend_option_parser_new(void *tool_arguments)
   /* -cam */
   op_cam = gt_option_new_string("cam",
                                 gt_cam_extendgreedy_comment(),
-                                arguments->se_char_access_mode,
+                                arguments->char_access_mode,
                                 "");
   gt_option_hide_default(op_cam);
   gt_option_is_development_option(op_cam);
@@ -575,27 +575,23 @@ static int gt_seed_extend_compute_parts(GtRange *seqranges,
   return had_err;
 }
 
-static int gt_seed_extend_runner(GT_UNUSED int argc,
-                                 GT_UNUSED const char **argv,
+static int gt_seed_extend_runner(int argc,
+                                 const char **argv,
                                  GT_UNUSED int parsed_args,
                                  void *tool_arguments,
                                  GtError *err)
 {
   GtSeedExtendArguments *arguments = tool_arguments;
-  GtEncseqLoader *encseq_loader = NULL;
   GtEncseq *aencseq = NULL, *bencseq = NULL;
-  GtGreedyextendmatchinfo *grextinfo = NULL;
-  GtXdropmatchinfo *xdropinfo = NULL;
-  GtQuerymatchoutoptions *querymatchoutopt = NULL;
   GtTimer *seedextendtimer = NULL;
   GtExtendCharAccess cam = GT_EXTEND_CHAR_ACCESS_ANY;
   GtUword errorpercentage = 0UL;
   double matchscore_bias = GT_DEFAULT_MATCHSCORE_BIAS;
-  bool extendgreedy = true;
+  bool extendxdrop, extendgreedy = true;
   unsigned int display_flag = 0;
-  Polishing_info *pol_info = NULL;
+  unsigned int maxseedlength = 0, nchars = 0;
   GtUword apick = GT_UWORD_MAX, bpick = GT_UWORD_MAX;
-  GtUword maxsequencelength = 0;
+  GtUword maxseqlength = 0;
   int had_err = 0;
 
   gt_error_check(err);
@@ -604,7 +600,8 @@ static int gt_seed_extend_runner(GT_UNUSED int argc,
             arguments->se_minidentity <= 100UL);
 
   /* Define, whether greedy extension will be performed */
-  if (arguments->onlyseeds || gt_option_is_set(arguments->se_option_xdrop)) {
+  extendxdrop = gt_option_is_set(arguments->se_option_xdrop);
+  if (arguments->onlyseeds || extendxdrop) {
     extendgreedy = false;
   }
 
@@ -615,22 +612,18 @@ static int gt_seed_extend_runner(GT_UNUSED int argc,
 
     printf("# Options:");
     for (idx = 1; idx < argc; idx++) {
-      if (strcmp(argv[idx],"-minidentity") == 0)
-      {
+      if (strcmp(argv[idx],"-minidentity") == 0) {
         minid_out = true;
       }
-      if (strcmp(argv[idx],"-history") == 0)
-      {
+      if (strcmp(argv[idx],"-history") == 0) {
         history_out = true;
       }
       printf(" %s", argv[idx]);
     }
-    if (!minid_out)
-    {
+    if (!minid_out) {
       printf(" -minidentity " GT_WU,arguments->se_minidentity);
     }
-    if (!history_out)
-    {
+    if (!history_out) {
       printf(" -history " GT_WU,arguments->se_historysize);
     }
     printf("\n");
@@ -649,85 +642,119 @@ static int gt_seed_extend_runner(GT_UNUSED int argc,
     gt_timer_start(seedextendtimer);
   }
 
-  /* Load encseq A */
-  encseq_loader = gt_encseq_loader_new();
-  gt_encseq_loader_require_multiseq_support(encseq_loader);
-  aencseq = gt_encseq_loader_load(encseq_loader,
-                                  gt_str_get(arguments->dbs_indexname),
-                                  err);
-  if (aencseq == NULL)
-    had_err = -1;
+  /* Set display flag */
+  display_flag = gt_querymatch_bool2display_flag(arguments->seed_display,
+                                                 arguments->seqlength_display);
 
-  /* If there is a 2nd read set: Load encseq B */
-  if (!had_err) {
-    if (strcmp(gt_str_get(arguments->dbs_queryname), "") != 0) {
-      bencseq = gt_encseq_loader_load(encseq_loader,
-                                      gt_str_get(arguments->dbs_queryname),
-                                      err);
-    } else {
-      bencseq = gt_encseq_ref(aencseq);
-    }
-    if (bencseq == NULL) {
-      had_err = -1;
-      gt_encseq_delete(aencseq);
-    }
-  }
-  gt_encseq_loader_delete(encseq_loader);
-
-  if (!had_err && !gt_alphabet_is_dna(gt_encseq_alphabet(bencseq))) {
-    if (arguments->nofwd) {
-      gt_error_set(err, "option -no-forward is only allowed for DNA sequences");
-      had_err = -1;
-    } else {
-      arguments->norev = true;
-    }
-  }
-
-  /* set character access method */
-  if (!had_err && (!arguments->onlyseeds ||
-                   arguments->se_alignmentwidth > 0))
-  {
-    cam = gt_greedy_extend_char_access(gt_str_get
-                                       (arguments->se_char_access_mode),
+  /* Set character access method */
+  if (!arguments->onlyseeds || arguments->se_alignmentwidth > 0) {
+    cam = gt_greedy_extend_char_access(gt_str_get(arguments->char_access_mode),
                                        err);
     if ((int) cam == -1) {
       had_err = -1;
-      gt_encseq_delete(aencseq);
-      gt_encseq_delete(bencseq);
     }
   }
 
-  /* set seedlength */
   if (!had_err) {
-    maxsequencelength = MIN(gt_encseq_max_seq_length(aencseq),
-                            gt_encseq_max_seq_length(bencseq));
+    GtEncseqLoader *encseq_loader = gt_encseq_loader_new();
+    gt_encseq_loader_require_multiseq_support(encseq_loader);
+
+    /* Load encseq A */
+    aencseq = gt_encseq_loader_load(encseq_loader,
+                                    gt_str_get(arguments->dbs_indexname),
+                                    err);
+    if (aencseq == NULL) {
+      had_err = -1;
+    } else {
+      /* If there is a 2nd read set: Load encseq B */
+      if (strcmp(gt_str_get(arguments->dbs_queryname), "") != 0) {
+        bencseq = gt_encseq_loader_load(encseq_loader,
+                                        gt_str_get(arguments->dbs_queryname),
+                                        err);
+      } else {
+        bencseq = gt_encseq_ref(aencseq);
+      }
+      if (bencseq == NULL) {
+        had_err = -1;
+        gt_encseq_delete(aencseq);
+      }
+    }
+    gt_encseq_loader_delete(encseq_loader);
   }
-  if (!had_err && arguments->dbs_seedlength == UINT_MAX) {
+
+  /* Check alphabet sizes */
+  if (!had_err) {
+    unsigned int nchars_b;
+    nchars = gt_alphabet_num_of_chars(gt_encseq_alphabet(aencseq));
+    nchars_b = gt_alphabet_num_of_chars(gt_encseq_alphabet(bencseq));
+    if (nchars != nchars_b) {
+      gt_error_set(err,"encoded sequences have different alphabet "
+                   "sizes %u and %u", nchars, nchars_b);
+      gt_encseq_delete(aencseq);
+      gt_encseq_delete(bencseq);
+      had_err = -1;
+    }
+  }
+
+  if (had_err) {
+    if (gt_showtime_enabled()) {
+      gt_timer_delete(seedextendtimer);
+    }
+    return had_err;
+  }
+
+  /* Set seedlength */
+  gt_assert(aencseq != NULL && bencseq != NULL);
+  if (gt_encseq_has_twobitencoding(aencseq) &&
+      gt_encseq_wildcards(aencseq) == 0 &&
+      gt_encseq_has_twobitencoding(bencseq) &&
+      gt_encseq_wildcards(bencseq) == 0) {
+    maxseedlength = 32;
+  } else {
+    maxseedlength = gt_maxbasepower(nchars) - 1;
+  }
+  maxseqlength = MIN(gt_encseq_max_seq_length(aencseq),
+                     gt_encseq_max_seq_length(bencseq));
+
+  if (arguments->dbs_seedlength == UINT_MAX) {
     unsigned int seedlength;
-    unsigned int nchars = gt_alphabet_num_of_chars(gt_encseq_alphabet(aencseq));
     double totallength = 0.5 * (gt_encseq_total_length(aencseq) +
                                 gt_encseq_total_length(bencseq));
     gt_assert(nchars > 0);
     seedlength = (unsigned int)gt_round_to_long(gt_log_base(totallength,
                                                             (double)nchars));
-    seedlength = (unsigned int)MIN(seedlength, maxsequencelength);
+    seedlength = (unsigned int)MIN3(seedlength, maxseqlength, maxseedlength);
     arguments->dbs_seedlength = MAX(seedlength, 2);
-  } else if (!had_err && arguments->dbs_seedlength > maxsequencelength) {
-    gt_error_set(err,"argument to option \"-seedlength\" must be an integer <= "
-                 GT_WU " (length of longest sequence).", maxsequencelength);
+  }
+  if (arguments->dbs_seedlength > MIN(maxseedlength, maxseqlength)) {
+    if (maxseedlength <= maxseqlength) {
+      gt_error_set(err, "maximum seedlength for alphabet of size %u is %u",
+                   nchars, maxseedlength);
+    } else {
+      gt_error_set(err, "argument to option \"-seedlength\" must be an integer "
+                   "<= " GT_WU " (length of longest sequence).", maxseqlength);
+    }
     had_err = -1;
-    gt_encseq_delete(aencseq);
-    gt_encseq_delete(bencseq);
   }
 
-  /* set mincoverage */
+  /* Set mincoverage */
   if (!had_err && arguments->dbs_mincoverage == GT_UWORD_MAX) {
     arguments->dbs_mincoverage = (GtUword) (2.5 * arguments->dbs_seedlength);
   }
 
-  /* set minimum alignment length */
+  /* Set minimum alignment length */
   if (!had_err && arguments->se_alignlength == GT_UWORD_MAX) {
     arguments->se_alignlength = arguments->dbs_mincoverage;
+  }
+
+  /* Check alphabet and direction compatibility */
+  if (!had_err && !gt_alphabet_is_dna(gt_encseq_alphabet(bencseq))) {
+    if (arguments->nofwd) {
+      gt_error_set(err, "option -no-forward is only allowed for DNA sequences");
+      had_err = -1;
+    } else {
+      arguments->norev = true; /* reverse is just for DNA */
+    }
   }
 
   /* Parse pick option */
@@ -739,8 +766,6 @@ static int gt_seed_extend_runner(GT_UNUSED int argc,
         gt_parse_uword(&bpick, items[1]) != 0) {
       gt_error_set(err, "argument to option -pick must satisfy format i,j");
       had_err = -1;
-      gt_encseq_delete(aencseq);
-      gt_encseq_delete(bencseq);
     } else if (aencseq == bencseq && apick > bpick) {
       GtUword tmp = apick;
       apick = bpick;
@@ -749,86 +774,30 @@ static int gt_seed_extend_runner(GT_UNUSED int argc,
     gt_cstr_array_delete(items);
   }
 
-  /* Prepare options for greedy extension */
-  if (!had_err && extendgreedy) {
-    /* Use bias dependent parameters, adapted from E. Myers' DALIGNER */
-    if (!had_err && arguments->bias_parameters)
-    {
-      matchscore_bias = gt_greedy_dna_sequence_bias_get(aencseq);
-      arguments->se_maxalilendiff = 30;
-      arguments->se_perc_match_hist
-        = (GtUword) (100.0 - errorpercentage * matchscore_bias);
-    }
-    pol_info = polishing_info_new_with_bias(arguments->weakends
-                                              ? MAX(errorpercentage,20)
-                                              : errorpercentage,
-                                            matchscore_bias,
-                                            arguments->se_historysize);
-    grextinfo = gt_greedy_extend_matchinfo_new(errorpercentage,
-                                               arguments->se_maxalilendiff,
-                                               arguments->se_historysize,
-                                               arguments->se_perc_match_hist,
-                                               arguments->se_alignlength,
-                                               cam,
-                                               arguments->se_extendgreedy,
-                                               pol_info);
-    if (arguments->benchmark) {
-      gt_greedy_extend_matchinfo_silent_set(grextinfo);
-    }
-  }
-
-  /* Prepare options for xdrop extension */
-  if (!had_err && gt_option_is_set(arguments->se_option_xdrop)) {
-    xdropinfo = gt_xdrop_matchinfo_new(arguments->se_alignlength,
-                                       errorpercentage,
-                                       arguments->se_xdropbelowscore,
-                                       arguments->se_extendxdrop);
-    if (arguments->benchmark) {
-      gt_xdrop_matchinfo_silent_set(xdropinfo);
-    }
-  }
-  if (!had_err)
-  {
-    display_flag
-      = gt_querymatch_bool2display_flag(arguments->seed_display,
-                                        arguments->seqlength_display);
-  }
-
-  /* Prepare output options */
-  if (!had_err && (arguments->se_alignmentwidth > 0 ||
-                   gt_option_is_set(arguments->se_option_xdrop)))
-  {
-    querymatchoutopt
-      = gt_querymatchoutoptions_new(true,false,arguments->se_alignmentwidth);
-
-    if (!arguments->onlyseeds)
-    {
-      GtUword sensitivity = 97UL;
-      if (gt_option_is_set(arguments->se_option_greedy)) {
-        sensitivity = arguments->se_extendgreedy;
-      } else if (gt_option_is_set(arguments->se_option_xdrop)) {
-        sensitivity = 100UL;
-      }
-
-      gt_querymatchoutoptions_extend(querymatchoutopt,
-                                     errorpercentage,
-                                     arguments->se_maxalilendiff,
-                                     arguments->se_historysize,
-                                     arguments->se_perc_match_hist,
-                                     cam,
-                                     arguments->weakends,
-                                     sensitivity,
-                                     matchscore_bias,
-                                     !arguments->relax_polish,
-                                     display_flag);
-    }
+  /* Use bias dependent parameters, adapted from E. Myers' DALIGNER */
+  if (!had_err && extendgreedy && arguments->bias_parameters) {
+    matchscore_bias = gt_greedy_dna_sequence_bias_get(aencseq);
+    arguments->se_maxalilendiff = 30;
+    arguments->se_perc_match_hist = (GtUword) (100.0 - errorpercentage *
+                                               matchscore_bias);
   }
 
   /* Fill struct of algorithm arguments */
   if (!had_err) {
-    GtDiagbandseedInfo *info;
     GtDiagbandseedExtendParams *extp;
-    unsigned int maxseedlength;
+    GtDiagbandseedInfo *info;
+    GtUword sensitivity = 0;
+    GtUword anum = arguments->dbs_parts;
+    GtUword bnum = arguments->dbs_parts;
+    GtRange *aseqranges = (GtRange *)gt_malloc(anum * sizeof *aseqranges);
+    GtRange *bseqranges = (GtRange *)gt_malloc(bnum * sizeof *bseqranges);
+
+    if (extendgreedy) {
+      sensitivity = arguments->se_extendgreedy;
+    } else if (extendxdrop) {
+      sensitivity = arguments->se_extendxdrop;
+    }
+
     gt_assert(gt_encseq_num_of_sequences(aencseq) > 0);
     gt_assert(gt_encseq_num_of_sequences(bencseq) > 0);
 
@@ -838,9 +807,19 @@ static int gt_seed_extend_runner(GT_UNUSED int argc,
                                              arguments->dbs_mincoverage,
                                              display_flag,
                                              arguments->use_apos,
-                                             grextinfo,
-                                             xdropinfo,
-                                             querymatchoutopt);
+                                             arguments->se_xdropbelowscore,
+                                             extendgreedy,
+                                             extendxdrop,
+                                             arguments->se_maxalilendiff,
+                                             arguments->se_historysize,
+                                             arguments->se_perc_match_hist,
+                                             cam,
+                                             sensitivity,
+                                             matchscore_bias,
+                                             arguments->weakends,
+                                             arguments->benchmark,
+                                             arguments->se_alignmentwidth,
+                                             !arguments->relax_polish);
 
     info = gt_diagbandseed_info_new(aencseq,
                                     bencseq,
@@ -857,94 +836,55 @@ static int gt_seed_extend_runner(GT_UNUSED int argc,
                                     arguments->extend_last,
                                     extp);
 
-    /* Check alphabet */
-    gt_assert(bencseq != NULL);
-    if (gt_encseq_has_twobitencoding(aencseq) &&
-        gt_encseq_wildcards(aencseq) == 0 &&
-        gt_encseq_has_twobitencoding(bencseq) &&
-        gt_encseq_wildcards(bencseq) == 0)
-    {
-      maxseedlength = 32;
-    } else
-    {
-      unsigned int numofchars_a
-        = gt_alphabet_num_of_chars(gt_encseq_alphabet(aencseq));
-      unsigned int numofchars_b
-        = gt_alphabet_num_of_chars(gt_encseq_alphabet(bencseq));
-      if (numofchars_a != numofchars_b)
-      {
-        gt_error_set(err,"encoded sequences have different alphabet "
-                         "sizes %u and %u", numofchars_a, numofchars_b);
-        had_err = -1;
-      }
-      if (!had_err)
-      {
-        maxseedlength = gt_maxbasepower(numofchars_a) - 1;
-        if (arguments->dbs_seedlength > maxseedlength)
-        {
-          gt_error_set(err,"maximum seedlength for alphabet of size %u is %u",
-                          numofchars_a, maxseedlength);
-          had_err = -1;
-        }
-      }
-    }
-
     /* Get sequence ranges and start algorithm */
+    had_err = gt_seed_extend_compute_parts(aseqranges,
+                                           &anum,
+                                           aencseq,
+                                           apick,
+                                           err);
     if (!had_err) {
-      GtUword anum = arguments->dbs_parts;
-      GtUword bnum = arguments->dbs_parts;
-      GtRange *aseqranges = (GtRange *)gt_malloc(anum * sizeof *aseqranges);
-      GtRange *bseqranges = (GtRange *)gt_malloc(bnum * sizeof *bseqranges);
-
-      had_err = gt_seed_extend_compute_parts(aseqranges,
-                                             &anum,
-                                             aencseq,
-                                             apick,
+      had_err = gt_seed_extend_compute_parts(bseqranges,
+                                             &bnum,
+                                             bencseq,
+                                             bpick,
                                              err);
-      if (!had_err) {
-        had_err = gt_seed_extend_compute_parts(bseqranges,
-                                               &bnum,
-                                               bencseq,
-                                               bpick,
-                                               err);
-      }
-      if (!had_err) {
-        had_err = gt_diagbandseed_run(info,
-                                      aseqranges,
-                                      bseqranges,
-                                      anum,
-                                      bnum,
-                                      err);
-      }
-      gt_free(aseqranges);
-      gt_free(bseqranges);
+    }
+    if (!had_err) {
+      had_err = gt_diagbandseed_run(info,
+                                    aseqranges,
+                                    bseqranges,
+                                    anum,
+                                    bnum,
+                                    err);
     }
 
     /* clean up */
+    gt_free(aseqranges);
+    gt_free(bseqranges);
     gt_diagbandseed_info_delete(info);
+  } else {
+    gt_encseq_delete(aencseq);
+    gt_encseq_delete(bencseq);
   }
-  polishing_info_delete(pol_info);
 
-  if (gt_showtime_enabled()) {
-    if (!had_err) {
-      char *keystring
-        = gt_seed_extend_params_keystring(extendgreedy,
-                                          gt_option_is_set(arguments->
-                                                           se_option_xdrop),
-                                          arguments->dbs_seedlength,
-                                          arguments->se_alignlength,
-                                          arguments->se_minidentity,
-                                          arguments->se_maxalilendiff,
-                                          arguments->se_perc_match_hist,
-                                          arguments->se_extendgreedy,
-                                          arguments->se_extendxdrop,
-                                          arguments->se_xdropbelowscore);
-      printf("# TIME seedextend-%s", keystring);
-      gt_free(keystring);
-      gt_timer_show_formatted(seedextendtimer,
-                              " overall " GT_WD ".%06ld\n",
-                              stdout);
-    }
+  if (!had_err && gt_showtime_enabled()) {
+    char *keystring;
+    keystring = gt_seed_extend_params_keystring(extendgreedy,
+                                                extendxdrop,
+                                                arguments->dbs_seedlength,
+                                                arguments->se_alignlength,
+                                                arguments->se_minidentity,
+                                                arguments->se_maxalilendiff,
+                                                arguments->se_perc_match_hist,
+                                                arguments->se_extendgreedy,
+                                                arguments->se_extendxdrop,
+                                                arguments->se_xdropbelowscore);
+    printf("# TIME seedextend-%s", keystring);
+    gt_free(keystring);
+    gt_timer_show_formatted(seedextendtimer,
+                            " overall " GT_WD ".%06ld\n", stdout);
+  }
+  if(gt_showtime_enabled()) {
     gt_timer_delete(seedextendtimer);
   }
   return had_err;

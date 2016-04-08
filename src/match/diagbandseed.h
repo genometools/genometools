@@ -35,7 +35,7 @@ int gt_diagbandseed_run(const GtDiagbandseedInfo *arg,
                         GtUword bnumseqranges,
                         GtError *err);
 
-/* The constructor */
+/* The constructor for GtDiagbandseedInfo*/
 GtDiagbandseedInfo *gt_diagbandseed_info_new(GtEncseq *aencseq,
                                              GtEncseq *bencseq,
                                              GtUword maxfreq,
@@ -51,9 +51,7 @@ GtDiagbandseedInfo *gt_diagbandseed_info_new(GtEncseq *aencseq,
                                              bool extend_last,
                                              GtDiagbandseedExtendParams *extp);
 
-/* The destructor */
-void gt_diagbandseed_info_delete(GtDiagbandseedInfo *info);
-
+/* The constructor for GtDiagbandseedExtendParams*/
 GtDiagbandseedExtendParams *gt_diagbandseed_extend_params_new(
                               GtUword errorpercentage,
                               GtUword userdefinedleastlength,
@@ -61,9 +59,22 @@ GtDiagbandseedExtendParams *gt_diagbandseed_extend_params_new(
                               GtUword mincoverage,
                               unsigned int display_flag,
                               bool use_apos,
-                              GtGreedyextendmatchinfo *extendgreedyinfo,
-                              GtXdropmatchinfo *extendxdropinfo,
-                              GtQuerymatchoutoptions *querymatchoutopt);
+                              GtXdropscore xdropbelowscore,
+                              bool extendgreedy,
+                              bool extendxdrop,
+                              GtUword maxalignedlendifference,
+                              GtUword history_size,
+                              GtUword perc_mat_history,
+                              GtExtendCharAccess extend_char_access,
+                              GtUword sensitivity,
+                              double matchscore_bias,
+                              bool weakends,
+                              bool benchmark,
+                              GtUword alignmentwidth,
+                              bool always_polished_ends);
+
+/* The destructors */
+void gt_diagbandseed_info_delete(GtDiagbandseedInfo *info);
 
 void gt_diagbandseed_extend_params_delete(GtDiagbandseedExtendParams *extp);
 #endif

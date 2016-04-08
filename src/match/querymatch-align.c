@@ -607,7 +607,8 @@ bool gt_querymatchoutoptions_alignment_prepare(GtQuerymatchoutoptions
 void gt_querymatchoutoptions_alignment_show(const GtQuerymatchoutoptions
                                               *querymatchoutoptions,
                                             GtUword distance,
-                                            GT_UNUSED bool verify_alignment)
+                                            GT_UNUSED bool verify_alignment,
+                                            FILE *fp)
 {
   if (querymatchoutoptions != NULL)
   {
@@ -618,7 +619,7 @@ void gt_querymatchoutoptions_alignment_show(const GtQuerymatchoutoptions
         gt_alignment_show_generic(querymatchoutoptions->alignment_show_buffer,
                                   false,
                                   querymatchoutoptions->alignment,
-                                  stdout,
+                                  fp,
                                   (unsigned int)
                                   querymatchoutoptions->alignmentwidth,
                                   querymatchoutoptions->characters,
@@ -627,7 +628,7 @@ void gt_querymatchoutoptions_alignment_show(const GtQuerymatchoutoptions
       {
         gt_alignment_exact_show(querymatchoutoptions->alignment_show_buffer,
                                 querymatchoutoptions->alignment,
-                                stdout,
+                                fp,
                                 querymatchoutoptions->alignmentwidth,
                                 querymatchoutoptions->characters);
       }
@@ -641,11 +642,10 @@ void gt_querymatchoutoptions_alignment_show(const GtQuerymatchoutoptions
     {
       if (distance > 0)
       {
-        gt_alignment_show_multieop_list(querymatchoutoptions->alignment,
-                                        stdout);
+        gt_alignment_show_multieop_list(querymatchoutoptions->alignment, fp);
       } else
       {
-        printf("[]\n");
+        fprintf(fp, "[]\n");
       }
     }
     if (querymatchoutoptions->alignmentwidth > 0 ||

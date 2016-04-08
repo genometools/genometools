@@ -27,28 +27,29 @@
 
 struct GtQuerymatch
 {
-   GtUword
-      dblen, /* length of match in dbsequence */
-      querylen, /* same as dblen for exact matches */
-      dbstart, /* absolute start position of match in database seq */
-      querystart, /* start of match in query, relative to start of query */
-      distance, /* 0 for exact match, upper bound on optimal distance */
-      dbseqnum, /* sequence number of dbstart */
-      dbstart_relative, /* start position of match in dbsequence
-                           relative to start of sequence */
-      querystart_fwdstrand, /* relative start of query on forward strand */
-      query_totallength, /* length of single query sequence */
-      dbseqlen, /* length of single database sequence */
-      seedpos1,
-      seedpos2,
-      seedlen;
-   GtWord score; /* 0 for exact match */
-   uint64_t queryseqnum; /* ordinal number of match in query */
-   GtReadmode query_readmode; /* readmode of query sequence */
-   bool selfmatch, verify_alignment;
-   unsigned int display_flag;
-   GtQuerymatchoutoptions *ref_querymatchoutoptions; /* reference to
-        resources needed for alignment output */
+  GtUword
+    dblen, /* length of match in dbsequence */
+    querylen, /* same as dblen for exact matches */
+    dbstart, /* absolute start position of match in database seq */
+    querystart, /* start of match in query, relative to start of query */
+    distance, /* 0 for exact match, upper bound on optimal distance */
+    dbseqnum, /* sequence number of dbstart */
+    dbstart_relative, /* start position of match in dbsequence
+                         relative to start of sequence */
+    querystart_fwdstrand, /* relative start of query on forward strand */
+    query_totallength, /* length of single query sequence */
+    dbseqlen, /* length of single database sequence */
+    seedpos1,
+    seedpos2,
+    seedlen;
+  GtWord score; /* 0 for exact match */
+  uint64_t queryseqnum; /* ordinal number of match in query */
+  GtReadmode query_readmode; /* readmode of query sequence */
+  bool selfmatch, verify_alignment;
+  unsigned int display_flag;
+  GtQuerymatchoutoptions *ref_querymatchoutoptions; /* reference to
+      resources needed for alignment output */
+  FILE *fp;
 };
 
 GtQuerymatch *gt_querymatch_new(void)
@@ -60,6 +61,7 @@ GtQuerymatch *gt_querymatch_new(void)
   querymatch->display_flag = 0;
   querymatch->verify_alignment = false;
   querymatch->query_readmode = GT_READMODE_FORWARD;
+  querymatch->fp = stdout;
   return querymatch;
 }
 
@@ -77,6 +79,12 @@ void gt_querymatch_outoptions_set(GtQuerymatch *querymatch,
 {
   gt_assert(querymatch != NULL);
   querymatch->ref_querymatchoutoptions = querymatchoutoptions;
+}
+
+void gt_querymatch_file_set(GtQuerymatch *querymatch, FILE *fp)
+{
+  gt_assert(querymatch != NULL);
+  querymatch->fp = fp;
 }
 
 void gt_querymatch_display_set(GtQuerymatch *querymatch,
@@ -194,17 +202,18 @@ void gt_querymatch_coordinates_out(const GtQuerymatch *querymatch)
   gt_assert(querymatch != NULL);
   if (querymatch->display_flag & GT_QUERYMATCH_SEED_DISPLAY_FLAG)
   {
-    printf("# seed:\t" GT_WU "\t" GT_WU "\t" GT_WU "\n",querymatch->seedpos1,
-             querymatch->seedpos2,querymatch->seedlen);
+    fprintf(querymatch->fp, "# seed:\t" GT_WU "\t" GT_WU "\t" GT_WU "\n",
+            querymatch->seedpos1, querymatch->seedpos2, querymatch->seedlen);
   }
-  printf(GT_WU " " GT_WU " " GT_WU " %c " GT_WU " " Formatuint64_t " " GT_WU,
-         querymatch->dblen,
-         querymatch->dbseqnum,
-         querymatch->dbstart_relative,
-         outflag[querymatch->query_readmode],
-         querymatch->querylen,
-         PRINTuint64_tcast(querymatch->queryseqnum),
-         querymatch->querystart_fwdstrand);
+  fprintf(querymatch->fp,
+          GT_WU " " GT_WU " " GT_WU " %c " GT_WU " " Formatuint64_t " " GT_WU,
+          querymatch->dblen,
+          querymatch->dbseqnum,
+          querymatch->dbstart_relative,
+          outflag[querymatch->query_readmode],
+          querymatch->querylen,
+          PRINTuint64_tcast(querymatch->queryseqnum),
+          querymatch->querystart_fwdstrand);
   if (querymatch->score > 0)
   {
     double similarity;
@@ -218,15 +227,15 @@ void gt_querymatch_coordinates_out(const GtQuerymatch *querymatch)
                                                     querymatch->dblen +
                                                     querymatch->querylen);
     }
-    printf(" " GT_WD " " GT_WU " %.2f",
-           querymatch->score,querymatch->distance,similarity);
+    fprintf(querymatch->fp, " " GT_WD " " GT_WU " %.2f",
+            querymatch->score, querymatch->distance, similarity);
   }
   if (querymatch->display_flag & GT_QUERYMATCH_SEQLENGTH_DISPLAY_FLAG)
   {
-    printf(" " GT_WU " " GT_WU,querymatch->dbseqlen,
-                               querymatch->query_totallength);
+    fprintf(querymatch->fp, " " GT_WU " " GT_WU,
+            querymatch->dbseqlen, querymatch->query_totallength);
   }
-  printf("\n");
+  fprintf(querymatch->fp, "\n");
 }
 
 void gt_querymatch_prettyprint(const GtQuerymatch *querymatch)
@@ -236,7 +245,8 @@ void gt_querymatch_prettyprint(const GtQuerymatch *querymatch)
     gt_querymatch_coordinates_out(querymatch);
     gt_querymatchoutoptions_alignment_show(querymatch->ref_querymatchoutoptions,
                                            querymatch->distance,
-                                           querymatch->verify_alignment);
+                                           querymatch->verify_alignment,
+                                           querymatch->fp);
   }
 }
 
@@ -249,10 +259,10 @@ bool gt_querymatch_check_final(const GtQuerymatch *querymatch,
   gt_assert(querymatch != NULL);
   total_alignedlen = querymatch->dblen + querymatch->querylen;
 #ifdef SKDEBUG
-  printf("errorrate = %.2f <=? " GT_WU " = errorpercentage\n",
+  fprintf(querymatch->fp, "errorrate = %.2f <=? " GT_WU " = errorpercentage\n",
           gt_querymatch_error_rate(querymatch->distance,total_alignedlen),
           errorpercentage);
-  printf("total_alignedlen = " GT_WU " >=? " GT_WU
+  fprintf(querymatch->fp, "total_alignedlen = " GT_WU " >=? " GT_WU
          " = 2 * userdefinedleastlen\n",
          total_alignedlen, 2 * userdefinedleastlength);
 #endif
