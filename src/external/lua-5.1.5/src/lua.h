@@ -5,6 +5,7 @@
 ** See Copyright Notice at the end of this file
 */
 
+#pragma clang diagnostic ignored "-Wparentheses-equality"
 
 #ifndef lua_h
 #define lua_h
