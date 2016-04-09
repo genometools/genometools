@@ -194,9 +194,11 @@ Test do
       run_test "#{$bin}gt seed_extend -extendgreedy -l 900 " +
                "-minidentity #{minidentity} -ii longseeded"
       # Check whether the correct number of alignments are found.
-      numalignments = `cat #{last_stdout} | wc -l`.to_i
-      # (split db fasta header by '|' and add 1)
-      numseeds =  `grep -o '|' <<< $(head -1 longseeded.fasta) | wc -l`.to_i + 1
+      numalignments = `wc -l #{last_stdout}`.to_i
+      # split db fasta header by '|' and add 1 for number of seeds
+      run "head -1 longseeded.fasta"
+      run "grep -o '|' #{last_stdout}"
+      numseeds = `wc -l #{last_stdout}`.to_i + 1
       if numalignments < numseeds then
         raise TestFailed, "did not find all alignments"
       end
