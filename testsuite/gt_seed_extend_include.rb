@@ -219,14 +219,14 @@ Test do
     run_test build_encseq("db", "db.fna")
     run_test build_encseq("all", "db.fna query.fna")
     ["xdrop","greedy"].each do |ext|
-      run_test "#{$bin}gt seed_extend -extend#{ext} 100 -l #{extendlength-20} " +
-               "-minidentity #{minid} -seedlength #{seedlength} -no-reverse " +
+      run_test "#{$bin}gt seed_extend -extend#{ext} 100 -l #{extendlength-20}" +
+               " -minidentity #{minid} -seedlength #{seedlength} -no-reverse " +
                "-mincoverage #{seedlength} -seed-display -ii all"
       grep last_stdout, /^\d+ \d+ \d+ . \d+ \d+ \d+ \d+ \d+ \d+/
       run "mv #{last_stdout} combined.out"
       split_output("combined")
-      run_test "#{$bin}gt seed_extend -extend#{ext} 100 -l #{extendlength-20} " +
-               "-minidentity #{minid} -seedlength #{seedlength} -no-reverse " +
+      run_test "#{$bin}gt seed_extend -extend#{ext} 100 -l #{extendlength-20}" +
+               " -minidentity #{minid} -seedlength #{seedlength} -no-reverse " +
                "-mincoverage #{seedlength} -seed-display -ii db -qii query"
       grep last_stdout, /^\d+ \d+ \d+ . \d+ \d+ \d+ \d+ \d+ \d+/
       run "mv #{last_stdout} separated.out"
@@ -242,11 +242,43 @@ Keywords "gt_seed_extend parts pick"
 Test do
   run_test build_encseq("at1MB", "#{$testdata}at1MB")
   run_test build_encseq("gt_bioseq_succ_3", "#{$testdata}gt_bioseq_succ_3.fas")
-  run_test "#{$bin}gt seed_extend -ii at1MB | sort > default.txt"
-  run_test "#{$bin}gt seed_extend -ii at1MB -parts 4 | sort > parts.txt"
-  run "cmp -s default.txt parts.txt"
+  run_test "#{$bin}gt seed_extend -ii at1MB"
+  run "sort #{last_stdout}"
+  run "mv #{last_stdout} default.out"
+  run_test "#{$bin}gt seed_extend -ii at1MB -parts 4"
+  run "sort #{last_stdout}"
+  run "cmp -s default.out #{last_stdout}"
   run_test "#{$bin}gt seed_extend -ii at1MB -qii gt_bioseq_succ_3 " +
            "-parts 2 -pick 1,2"
   grep last_stdout, /24 209 15 P 26 2 248 35 5 80.00/
   grep last_stdout, /23 418 127 P 24 2 68 35 4 82.98/
+end
+
+# Threading
+Name "gt seed_extend: threading"
+Keywords "gt_seed_extend thread"
+Test do
+  run_test build_encseq("at1MB", "#{$testdata}at1MB")
+  run_test build_encseq("fastq_long", "#{$testdata}fastq_long.fastq")
+  run_test build_encseq("paired", "#{$testdata}readjoiner/paired_reads_1.fas")
+  run_test build_encseq("U89959_genomic", "#{$testdata}U89959_genomic.fas")
+  for dataset in ["at1MB", "paired", "fastq_long"] do
+    for query in ["", " -qii U89959_genomic"]
+      run_test "#{$bin}gt seed_extend -ii #{dataset}#{query}"
+      run "sort #{last_stdout}"
+      run "mv #{last_stdout} default_run.out"
+      run_test "#{$bin}gt -j 4 seed_extend -ii #{dataset}#{query} -parts 4"
+      run "sort #{last_stdout}"
+      run "cmp -s default_run.out #{last_stdout}"
+      run_test "#{$bin}gt -j 2 seed_extend -ii #{dataset}#{query} -parts 5"
+      run "sort #{last_stdout}"
+      run "cmp -s default_run.out #{last_stdout}"
+      run_test "#{$bin}gt -j 8 seed_extend -ii #{dataset}#{query} -parts 2"
+      run "sort #{last_stdout}"
+      run "cmp -s default_run.out #{last_stdout}"
+      run_test "#{$bin}gt -j 3 seed_extend -ii #{dataset}#{query}"
+      run "sort #{last_stdout}"
+      run "cmp -s default_run.out #{last_stdout}"
+    end
+  end
 end
