@@ -1841,13 +1841,13 @@ typedef struct CapState {
 } CapState;
 
 
-#define captype(cap)	(cap)->kind
+#define captype(cap)	((cap)->kind)
 
-#define isclosecap(cap)	captype(cap) == Cclose
+#define isclosecap(cap)	(captype(cap) == Cclose)
 
 #define closeaddr(c)	((c)->s + (c)->siz - 1)
 
-#define isfullcap(cap)	(cap)->siz != 0
+#define isfullcap(cap)	((cap)->siz != 0)
 
 #define getfromenv(cs,v)	lua_rawgeti((cs)->L, penvidx((cs)->ptop), v)
 #define pushluaval(cs)		getfromenv(cs, (cs)->cap->idx)

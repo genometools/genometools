@@ -76,15 +76,15 @@ typedef struct lua_TValue {
 
 
 /* Macros to test type */
-#define ttisnil(o)	ttype(o) == LUA_TNIL
-#define ttisnumber(o)	ttype(o) == LUA_TNUMBER
-#define ttisstring(o)	ttype(o) == LUA_TSTRING
-#define ttistable(o)	ttype(o) == LUA_TTABLE
-#define ttisfunction(o)	ttype(o) == LUA_TFUNCTION
-#define ttisboolean(o)	ttype(o) == LUA_TBOOLEAN
-#define ttisuserdata(o)	ttype(o) == LUA_TUSERDATA
-#define ttisthread(o)	ttype(o) == LUA_TTHREAD
-#define ttislightuserdata(o)	ttype(o) == LUA_TLIGHTUSERDATA
+#define ttisnil(o)	(ttype(o) == LUA_TNIL)
+#define ttisnumber(o)	(ttype(o) == LUA_TNUMBER)
+#define ttisstring(o)	(ttype(o) == LUA_TSTRING)
+#define ttistable(o)	(ttype(o) == LUA_TTABLE)
+#define ttisfunction(o)	(ttype(o) == LUA_TFUNCTION)
+#define ttisboolean(o)	(ttype(o) == LUA_TBOOLEAN)
+#define ttisuserdata(o)	(ttype(o) == LUA_TUSERDATA)
+#define ttisthread(o)	(ttype(o) == LUA_TTHREAD)
+#define ttislightuserdata(o)	(ttype(o) == LUA_TLIGHTUSERDATA)
 
 /* Macros to access values */
 #define ttype(o)	((o)->tt)
