@@ -962,6 +962,7 @@ void getencseqkmers_twobitencoding_slice(const GtEncseq *encseq,
 {
   GtUword laststart = slice_startpos,
           lastend = slice_endpos;
+  gt_assert(laststart <= lastend);
 
   if (gt_encseq_has_specialranges(encseq))
   {
@@ -1018,19 +1019,23 @@ void getencseqkmers_twobitencoding_slice(const GtEncseq *encseq,
     gt_assert(gt_encseq_total_length(encseq) >= laststart);
     gt_specialrangeiterator_delete(sri);
   }
-  getencseqkmers_rangetwobitencoding(encseq,
-                                     readmode,
-                                     kmersize,
-                                     upperkmersize,
-                                     onlyfirst,
-                                     processkmercode,
-                                     processkmercodeinfo,
-                                     processkmerspecial,
-                                     processkmerspecialinfo,
-                                     GT_ISDIRREVERSE(readmode) ? slice_startpos
-                                     : laststart,
-                                     GT_ISDIRREVERSE(readmode) ? lastend
-                                     : slice_endpos);
+
+  if (laststart <= slice_endpos && slice_startpos <= lastend) {
+    GtUword startpos = GT_ISDIRREVERSE(readmode) ? slice_startpos : laststart;
+    GtUword endpos = GT_ISDIRREVERSE(readmode) ? lastend : slice_endpos;
+
+    getencseqkmers_rangetwobitencoding(encseq,
+                                       readmode,
+                                       kmersize,
+                                       upperkmersize,
+                                       onlyfirst,
+                                       processkmercode,
+                                       processkmercodeinfo,
+                                       processkmerspecial,
+                                       processkmerspecialinfo,
+                                       startpos,
+                                       endpos);
+  }
 }
 
 void getencseqkmers_twobitencoding(const GtEncseq *encseq,

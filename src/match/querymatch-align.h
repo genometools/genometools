@@ -75,7 +75,8 @@ bool gt_querymatchoutoptions_alignment_prepare(
 void gt_querymatchoutoptions_alignment_show(const GtQuerymatchoutoptions
                                               *querymatchoutoptions,
                                             GtUword distance,
-                                            bool verify_alignment);
+                                            bool verify_alignment,
+                                            FILE *fp);
 
 typedef struct
 {

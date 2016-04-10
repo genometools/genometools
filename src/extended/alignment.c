@@ -743,36 +743,36 @@ void gt_alignment_show_generic(GtUchar *buffer,
     {
       endpolished = true;
     }
-    printf("# polishing(m=" GT_WD ",d=" GT_WD ",p=" GT_WU
-           "): " GT_WU "/" GT_WU,
-           alignment->pol_info->match_score,
-           -alignment->pol_info->difference_score,
-           pol_size,
-           prefix_positive,
-           suffix_positive);
+    fprintf(fp, "# polishing(m=" GT_WD ",d=" GT_WD ",p=" GT_WU
+            "): " GT_WU "/" GT_WU,
+            alignment->pol_info->match_score,
+            -alignment->pol_info->difference_score,
+            pol_size,
+            prefix_positive,
+            suffix_positive);
     if (firstseedcolumn < pol_size)
     {
-      printf(", seed_on_start");
+      fprintf(fp, ", seed_on_start");
     }
     if (lastseedcolumn + pol_size > alignmentlength)
     {
-      printf(", seed_on_end");
+      fprintf(fp, ", seed_on_end");
     }
     if (alignment->withpolcheck)
     {
-      printf("\n");
+      fprintf(fp, "\n");
       gt_assert(startpolished && endpolished);
     } else
     {
       if (!startpolished)
       {
-        printf(", start not polished");
+        fprintf(fp, ", start not polished");
       }
       if (!endpolished)
       {
-        printf(", end not polished");
+        fprintf(fp, ", end not polished");
       }
-      printf("\n");
+      fprintf(fp, "\n");
     }
   }
 }

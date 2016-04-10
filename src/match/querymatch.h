@@ -19,6 +19,7 @@
 #define QUERYMATCH_H
 
 #include <inttypes.h>
+#include <stdio.h>
 #include "core/error_api.h"
 #include "core/readmode.h"
 #include "core/encseq.h"
@@ -32,6 +33,8 @@ typedef struct GtQuerymatch GtQuerymatch;
 GT_DECLAREARRAYSTRUCT(GtQuerymatch);
 
 GtQuerymatch *gt_querymatch_new(void);
+
+void gt_querymatch_file_set(GtQuerymatch *querymatch, FILE *fp);
 
 void gt_querymatch_display_set(GtQuerymatch *querymatch,
                                unsigned int display_flag);
