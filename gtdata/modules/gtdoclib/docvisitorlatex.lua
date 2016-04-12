@@ -44,6 +44,7 @@ local function include(template, env)
 end
 
 local function trim(s)
+  assert(s)
   return (string.gsub(s, "^%s*(.-)%s*$", "%1"))
 end
 
@@ -123,15 +124,20 @@ end
 function DocVisitorLaTeX:visit_method(desc)
   assert(desc)
   local name
+  local args
   if desc.rval then
     name = trim(desc.rval) .. " " .. trim(desc.name)
   else
     name = trim(desc.name)
   end
   local aligncol = string.len(name) + 1
+  if desc.args then
+    args = align(trim(desc.args),aligncol)
+  else
+    args=""
+  end
   include("method_latex.lp",
-          { name = name,
-          args = align(trim(desc.args),aligncol),
+          { name = name, args = args,
           comment = paragraphify(codify(desc.comment)) })
 end
 
