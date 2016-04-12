@@ -66,7 +66,31 @@ show all sequences (in FASTA format) (default: no)
 </dt>
 <dd>
 <p>
-show sequence with given number (in FASTA format) (default: undefined)
+show sequence with given number (sequences are counted from 1 unless -seqnum_from_0 is specified) (default: undefined)
+</p>
+</dd>
+<dt class="hdlist1">
+<strong>-showseqlength</strong> [<em>value</em>]
+</dt>
+<dd>
+<p>
+show length of sequence with given number (sequences are counted from 1 unless -seqnum_from_0 is specified) (default: undefined)
+</p>
+</dd>
+<dt class="hdlist1">
+<strong>-showseqnum_inputfile</strong> [<em>filename</em>]
+</dt>
+<dd>
+<p>
+show sequence with given numbers specified line by line in given file (sequences are counted from 1 unless -seqnum_from_0 is specified) (default: undefined)
+</p>
+</dd>
+<dt class="hdlist1">
+<strong>-seqnum_from_0</strong> [<em>yes|no</em>]
+</dt>
+<dd>
+<p>
+for options -showseqnum and -showseqnum_inputfile: count sequence numbers from 0 instead of 1 (default: no)
 </p>
 </dd>
 <dt class="hdlist1">
