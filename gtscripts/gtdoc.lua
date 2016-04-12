@@ -104,6 +104,20 @@ local function process_file(filename, be_verbose, is_lua)
   end
 end
 
+local function process_single_file(filename, be_verbose, is_lua)
+  assert(filename)
+  if (is_header(filename) or is_lua_file(filename)) then
+    local ast = doc_parser:parse(filename, be_verbose, is_lua)
+    if ast and be_verbose then
+      print("showing ast:")
+      show_rec_array(ast, 0)
+    end
+    if ast then
+      doc_base:process_ast(ast, be_verbose)
+    end
+  end
+end
+
 local export = nil
 local is_lua = nil
 
@@ -121,7 +135,7 @@ assert(export)
 if file_mode then
   for _, f in ipairs(file_list) do
     local filename = gt_home .. "/" .. f
-    process_file(filename, be_verbose, is_lua)
+    process_single_file(filename, be_verbose, is_lua)
   end
 else
   for _, v in ipairs(export) do
