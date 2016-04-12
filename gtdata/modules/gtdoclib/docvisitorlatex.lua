@@ -117,14 +117,14 @@ end
 
 function DocVisitorLaTeX:visit_method(desc)
   assert(desc)
-  local name
+  -- local name
   local prototype = desc.name
-  if desc.rval then
-    name = desc.rval .. " " .. desc.name
-  else
-    name = desc.rval
-  end
-  include("method_latex.lp", { name = codify(name), args = codify(desc.args),
+  -- if desc.rval then
+    -- name = desc.rval .. " " .. desc.name
+  -- else
+    -- name = desc.rval
+  -- end
+  include("method_latex.lp", { ret = trim(desc.rval), name = trim(desc.name), args = trim(desc.args),
                          comment = paragraphify(codify(desc.comment)),
                          prototype = codify(prototype) })
 end

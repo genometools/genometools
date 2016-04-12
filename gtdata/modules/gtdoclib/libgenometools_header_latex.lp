@@ -1,1 +1,1 @@
-\chapter{API Reference}
+\chapter*{API Reference}

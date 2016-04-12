@@ -1,2 +1,2 @@
-\section{Module <%=modulename%>}
+\section*{Module <%=modulename%>}
 \label{<%=modulename%>}
