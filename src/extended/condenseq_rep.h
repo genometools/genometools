@@ -41,7 +41,7 @@ typedef uint32_t ces_unsigned;
   The contents of this file is to be considered private implementation detail.
 */
 
-/* TODO DW: maybe unsigned int for len, unique_id and offset would be all right?
+/* TODO DW: maybe uint32_t for len, unique_id and offset would be all right?
    */
 typedef struct {
   GtEditscript *editscript;
@@ -82,19 +82,21 @@ struct GtCondenseq {
 
 /* Returns a new GtCondenseq object, which is empty and can be filled by
    GtCondenseqCreator */
-GtCondenseq *gt_condenseq_new(const GtEncseq *orig_es, GtLogger *logger);
+GtCondenseq* gt_condenseq_new(const GtEncseq *orig_es, GtLogger *logger);
 
 /* Returns index of the unique element with the biggest orig_startpos smaller
    than <position>. if smallest is larger: return first. */
-GtUword gt_condenseq_uniques_position_binsearch(const GtCondenseq *condenseq,
-                                                GtUword position);
+GtUword      gt_condenseq_uniques_position_binsearch(
+                                                   const GtCondenseq *condenseq,
+                                                   GtUword position);
 
 /* Add <link> to <condenseq>, fails if links are not added in a sorted (by
    position) manner. */
-void gt_condenseq_add_link_to_db(GtCondenseq *condenseq, GtCondenseqLink link);
+void         gt_condenseq_add_link_to_db(GtCondenseq *condenseq,
+                                         GtCondenseqLink link);
 
 /* Add unique substring to <condenseq>. */
-void gt_condenseq_add_unique_to_db(GtCondenseq *condenseq,
-                                   GtUword orig_startpos,
-                                   ces_unsigned len);
+void         gt_condenseq_add_unique_to_db(GtCondenseq *condenseq,
+                                           GtUword orig_startpos,
+                                           ces_unsigned len);
 #endif

@@ -44,7 +44,13 @@ local function include(template, env)
 end
 
 local function trim(s)
+  assert(s)
   return (string.gsub(s, "^%s*(.-)%s*$", "%1"))
+end
+
+local function align(s,count)
+  local replace = string.rep(" ", count)
+  return (string.gsub(s, ",%s+", ",\n" .. replace))
 end
 
 local function codify(str)
@@ -118,15 +124,21 @@ end
 function DocVisitorLaTeX:visit_method(desc)
   assert(desc)
   local name
-  local prototype = desc.name
+  local args
   if desc.rval then
-    name = desc.rval .. " " .. desc.name
+    name = trim(desc.rval) .. " " .. trim(desc.name)
   else
-    name = desc.rval
+    name = trim(desc.name)
   end
-  include("method_latex.lp", { name = codify(name), args = codify(desc.args),
-                         comment = paragraphify(codify(desc.comment)),
-                         prototype = codify(prototype) })
+  local aligncol = string.len(name) + 1
+  if desc.args then
+    args = align(trim(desc.args),aligncol)
+  else
+    args=""
+  end
+  include("method_latex.lp",
+          { name = name, args = args,
+          comment = paragraphify(codify(desc.comment)) })
 end
 
 function DocVisitorLaTeX:visit_variable(desc)
@@ -139,8 +151,7 @@ function DocVisitorLaTeX:visit_variable(desc)
     name = desc.name
   end
   include("variable_latex.lp", { name = codify(name),
-                         comment = paragraphify(codify(desc.comment)),
-                         prototype = codify(prototype) })
+                         comment = paragraphify(codify(desc.comment)) })
 end
 
 function DocVisitorLaTeX:visit_funcdef(desc)

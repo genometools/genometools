@@ -1,6 +1,8 @@
 \begin{minipage}{\textwidth}
 \vspace{3mm}
-\texttt{<%=name%><%if args ~= "" then %>(\textcolor{arggrey}{<%=args%>})<%end%>}\\[-.4cm]
+\begin{lstlisting}
+<%=name%><%if args ~= "" then %>(<%=args%>)<%end%>
+\end{lstlisting}
 
 \hangindent3em
 \hangafter=0
