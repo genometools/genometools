@@ -867,7 +867,7 @@ void gt_editscript_builder_add_mismatch(GtEditscriptBuilder *es_builder,
   GtEditscript *es;
   gt_assert(es_builder != NULL);
   es = es_builder->es;
-  gt_assert(c < (GtUchar) es->del || c == (GtUchar) WILDCARD);
+  gt_assert(c <= (GtUchar) es->del || c == (GtUchar) WILDCARD);
   if (c == (GtUchar) WILDCARD) {
     c = (GtUchar) es->del - 1;
   }
@@ -880,15 +880,7 @@ void gt_editscript_builder_add_mismatch(GtEditscriptBuilder *es_builder,
 
 void gt_editscript_builder_add_deletion(GtEditscriptBuilder *es_builder)
 {
-  GtEditscript *es;
-  gt_assert(es_builder);
-  es = es_builder->es;
-
-  if (es_builder->last_op != (uint8_t) GT_EDITSCRIPT_MISDEL_SYM(es)) {
-    gt_editscript_builder_start_group(es_builder,
-                                      (uint8_t) GT_EDITSCRIPT_MISDEL_SYM(es));
-  }
-  editscript_space_add_next(es, &es_builder->fillpos, (GtBitsequence) es->del);
+  gt_editscript_builder_add_mismatch(es_builder, es_builder->es->del);
 }
 
 void gt_editscript_builder_add_insertion(GtEditscriptBuilder *es_builder,
