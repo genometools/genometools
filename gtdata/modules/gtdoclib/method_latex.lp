@@ -1,7 +1,8 @@
 \begin{minipage}{\textwidth}
 \vspace{3mm}
 \begin{lstlisting}
-<%=name%><%if args ~= "" then %>(<%=args%>)<%end%>
+<%=name%><%if args ~= "" then %>(
+<%=args%>)<%end%>
 \end{lstlisting}
 
 \hangindent3em
