@@ -851,12 +851,6 @@ void gt_encdesc_encoder_set_timer(GtEncdescEncoder *ee, GtTimer *timer)
   ee->timer = timer;
 }
 
-GtTimer* gt_encdesc_encoder_get_timer(GtEncdescEncoder *ee)
-{
-  gt_assert(ee);
-  return ee->timer;
-}
-
 void gt_encdesc_encoder_set_sampling_none(GtEncdescEncoder *ee)
 {
   gt_assert(ee);
@@ -896,7 +890,7 @@ void gt_encdesc_encoder_set_sampling_rate(GtEncdescEncoder *ee,
   ee->sampling_rate = sampling_rate;
 }
 
-GtUword gt_encdesc_encoder_get_sampling_rate(GtEncdescEncoder *ee)
+GtUword gt_encdesc_encoder_get_sampling_rate(const GtEncdescEncoder *ee)
 {
   gt_assert(ee);
   return ee->sampling_rate;
@@ -1420,7 +1414,7 @@ static int encdesc_next_desc(GtEncdesc *encdesc, GtStr *desc, GtError *err)
   return had_err;
 }
 
-GtUword gt_encdesc_num_of_descriptions(GtEncdesc *encdesc)
+GtUword gt_encdesc_num_of_descriptions(const GtEncdesc *encdesc)
 {
   gt_assert(encdesc);
   return encdesc->num_of_descs;

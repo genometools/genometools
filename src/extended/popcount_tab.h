@@ -67,7 +67,7 @@ unsigned int   gt_popcount_tab_rank_0(GtPopcountTab *popcount_tab,
 
 /* Return the offset of a <block> within its class. Note that
    <block> < 2^<blocksize> of <popcount_tab> */
-GtUword  gt_popcount_tab_get_offset_for_block(GtPopcountTab *popcount_tab,
+GtUword        gt_popcount_tab_get_offset_for_block(GtPopcountTab *popcount_tab,
                                                     GtUword block);
 
 /* Return size of a <GtPopcountTab> with <blocksize> in bytes. */

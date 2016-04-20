@@ -46,11 +46,11 @@ int                gt_condenseq_write(GtCondenseq *condenseq, FILE* fp,
                                       GtError *err);
 /* Return the number of sequences contained in the original sequence collection.
  */
-GtUword            gt_condenseq_num_of_sequences(GtCondenseq *condenseq);
+GtUword            gt_condenseq_num_of_sequences(const GtCondenseq *condenseq);
 
 /* Return the total length of the original sequence collection, including
    separators (like <GtEncseq>). */
-GtUword            gt_condenseq_total_length(GtCondenseq *condenseq);
+GtUword            gt_condenseq_total_length(const GtCondenseq *condenseq);
 
 /* Return the number of links of <condenseq> */
 GtUword            gt_condenseq_num_links(const GtCondenseq *condenseq);
@@ -135,7 +135,7 @@ typedef int        (GtCondenseqProcessExtractedRange)(void *data,
    Returns 0 on error as there is at least one similar range, the input range
    itself. */
 GtUword             gt_condenseq_each_redundant_range(
-                                      GtCondenseq *condenseq,
+                                      const GtCondenseq *condenseq,
                                       GtUword uid,
                                       GtRange urange,
                                       GtUword left_extend,
@@ -184,9 +184,9 @@ GtDiscDistri*       gt_condenseq_link_comp_dist(const GtCondenseq *condenseq);
    urange (which has coordinate relative to that unique) so it represents the
    same range but relative to the sequence collection. */
 GtUword             gt_condenseq_unique_range_to_seqrange(
-                                                         GtCondenseq *condenseq,
-                                                         GtUword uid,
-                                                         GtRange *urange);
+                                                   const GtCondenseq *condenseq,
+                                                   GtUword uid,
+                                                   GtRange *urange);
 /* Returns a pointer to the editscript corresponding to <lid> in <condenseq>,
    <condenseq> retains ownership of that editscript. */
 const GtEditscript* gt_condenseq_link_editscript(const GtCondenseq *condenseq,
