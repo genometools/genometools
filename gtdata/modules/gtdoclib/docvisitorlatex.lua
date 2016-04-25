@@ -70,6 +70,7 @@ local function codify(str)
   res = string.gsub(res, "__(.-)__", "\\emph{%1}")
   res = string.gsub(res, "_", "\\_")
   res = string.gsub(res, "#", "\\#")
+  res = string.gsub(res, "(%w+%^)%s*([%w\\{}]+)", "$%1{%2}$")
   return res
 end
 
