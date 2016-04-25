@@ -44,14 +44,14 @@ unsigned int   gt_popcount_tab_offset_bits(GtPopcountTab *popcount_tab,
                                            unsigned int class);
 
 /* Return the <i>-th value from <popcount_tab> with <popcount_c> bits set, <i>
-   has to be in range 0..(blocksize choose popcount). */
+   has to be in range 0...(<blocksize> choose popcount). */
 GtUword        gt_popcount_tab_get(GtPopcountTab *popcount_tab,
                                    unsigned int popcount_c,
                                    GtUword i);
 
 /* Return rank of 1s in <i>-th block given for <popcount_c> bits set
    up to and including <pos>, which is a relative bit position within that
-   block. Note that <pos> <= blocksize of <popcount_tab>. */
+   block. Note that <pos> <= <blocksize> of <popcount_tab>. */
 unsigned int   gt_popcount_tab_rank_1(GtPopcountTab *popcount_tab,
                                       unsigned int popcount_c,
                                       GtUword i,
@@ -59,21 +59,21 @@ unsigned int   gt_popcount_tab_rank_1(GtPopcountTab *popcount_tab,
 
 /* Return rank of 0s in <i>-th block given for <popcount_c> bits set
    up to and including <pos>, which is a relative bit position within that
-   block.  Note that <pos> <= blocksize of <popcount_tab>. */
+   block.  Note that <pos> <= <blocksize> of <popcount_tab>. */
 unsigned int   gt_popcount_tab_rank_0(GtPopcountTab *popcount_tab,
                                       unsigned int popcount_c,
                                       GtUword i,
                                       unsigned int pos);
 
 /* Return the offset of a <block> within its class. Note that
-   <block> < 2^blocksize of <popcount_tab> */
+   <block> < 2^<blocksize> of <popcount_tab> */
 GtUword  gt_popcount_tab_get_offset_for_block(GtPopcountTab *popcount_tab,
                                                     GtUword block);
 
 /* Return size of a <GtPopcountTab> with <blocksize> in bytes. */
 size_t         gt_popcount_tab_calculate_size(unsigned int blocksize);
 
-/* writes a bitstring to buffer, has to be of length blocksize + 1, will be
+/* writes a bitstring to buffer, has to be of length <blocksize> + 1, will be
    \0-terminated */
 void           gt_popcount_tab_block_to_str(GtPopcountTab *popcount_tab,
                                             GtUword block,
