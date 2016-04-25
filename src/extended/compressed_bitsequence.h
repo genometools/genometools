@@ -70,10 +70,10 @@ GtUword                  gt_compressed_bitsequence_select_0(
                                                    GtUword num);
 
 size_t                   gt_compressed_bitsequence_file_size(
-                                                  GtCompressedBitsequence *cbs);
+                                            const GtCompressedBitsequence *cbs);
 
 size_t                   gt_compressed_bitsequence_size(
-                                                  GtCompressedBitsequence *cbs);
+                                            const GtCompressedBitsequence *cbs);
 /* Write <cbs> to file with name <filename>. */
 int                      gt_compressed_bitsequence_write(
                                                    GtCompressedBitsequence *cbs,
@@ -89,5 +89,5 @@ GtCompressedBitsequence* gt_compressed_bitsequence_new_from_file(
 void                     gt_compressed_bitsequence_delete(
                                                   GtCompressedBitsequence *cbs);
 
-int                      gt_compressed_bitsequence_unit_test(GtError *err);
+int gt_compressed_bitsequence_unit_test(GtError *err);
 #endif

@@ -889,7 +889,7 @@ GtUword gt_compressed_bitsequence_select_0(GtCompressedBitsequence *cbs,
 }
 
 static size_t
-gt_compressed_bitsequence_header_size(GtCompressedBitsequence *cbs)
+gt_compressed_bitsequence_header_size(const GtCompressedBitsequence *cbs)
 {
   size_t size = 0;
   gt_assert(cbs != NULL);
@@ -911,7 +911,7 @@ gt_compressed_bitsequence_header_size(GtCompressedBitsequence *cbs)
   return size;
 }
 
-size_t gt_compressed_bitsequence_file_size(GtCompressedBitsequence *cbs)
+size_t gt_compressed_bitsequence_file_size(const GtCompressedBitsequence *cbs)
 {
   size_t size = gt_compressed_bitsequence_header_size(cbs);
 
@@ -923,7 +923,7 @@ size_t gt_compressed_bitsequence_file_size(GtCompressedBitsequence *cbs)
   return size;
 }
 
-size_t gt_compressed_bitsequence_size(GtCompressedBitsequence *cbs)
+size_t gt_compressed_bitsequence_size(const GtCompressedBitsequence *cbs)
 {
   size_t size =  sizeof (cbs) +
     gt_popcount_tab_calculate_size(cbs->blocksize) +

@@ -40,7 +40,7 @@ size_t               gt_compact_ulong_store_size(GtUword numofentries,
                                                  unsigned int bitsperentry);
 
 /* Return element stored in <cus> at position <idx> cast to GtUword */
-GtUword        gt_compact_ulong_store_get(const GtCompactUlongStore *cus,
+GtUword              gt_compact_ulong_store_get(const GtCompactUlongStore *cus,
                                                 GtUword idx);
 
 /* Set element at position <idx> in <cus> to <value> */

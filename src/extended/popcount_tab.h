@@ -45,7 +45,7 @@ unsigned int   gt_popcount_tab_offset_bits(GtPopcountTab *popcount_tab,
 
 /* Return the <i>-th value from <popcount_tab> with <popcount_c> bits set, <i>
    has to be in range 0..(blocksize choose popcount). */
-GtUword  gt_popcount_tab_get(GtPopcountTab *popcount_tab,
+GtUword        gt_popcount_tab_get(GtPopcountTab *popcount_tab,
                                    unsigned int popcount_c,
                                    GtUword i);
 
