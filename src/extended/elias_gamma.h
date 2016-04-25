@@ -49,6 +49,6 @@ int                         gt_elias_gamma_bitwise_decoder_next(
 void                        gt_elias_gamma_bitwise_decoder_delete(
                                               GtEliasGammaBitwiseDecoder *egbd);
 
-int                         gt_elias_gamma_unit_test(GtError *err);
+int gt_elias_gamma_unit_test(GtError *err);
 
 #endif

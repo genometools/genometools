@@ -1,7 +1,7 @@
 /*
   Copyright (c) 2011 Joachim Bonnet <joachim.bonnet@studium.uni-hamburg.de>
-  Copyright (c) 2012 Dirk Willrodt <willrodt@zbh.uni-hamburg.de>
-  Copyright (c) 2010-2012 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2012-2015 Dirk Willrodt <willrodt@zbh.uni-hamburg.de>
+  Copyright (c) 2011-2015 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -55,7 +55,7 @@ GtHcrEncoder* gt_hcr_encoder_new(GtStrArray *files, GtAlphabet *alpha,
                                  GtTimer *timer, GtError *err);
 
 /* Returns true if <hcr_enc> was initialized with <descs> = true. */
-bool          gt_hcr_encoder_has_descs_support(GtHcrEncoder *hcr_enc);
+bool          gt_hcr_encoder_has_descs_support(const GtHcrEncoder *hcr_enc);
 
 /* Sets the applied sampling method to <method> for <hcr_enc>. Default is
    pagewise. */
@@ -63,15 +63,12 @@ void          gt_hcr_encoder_set_sampling_none(GtHcrEncoder *hcr_enc);
 void          gt_hcr_encoder_set_sampling_regular(GtHcrEncoder *hcr_enc);
 void          gt_hcr_encoder_set_sampling_page(GtHcrEncoder *hcr_enc);
 
-bool          gt_hcr_encoder_sampling_is_regular(GtHcrEncoder *hcr_enc);
-bool          gt_hcr_encoder_sampling_is_page(GtHcrEncoder *hcr_enc);
-
 /* Sets sampling rate to <srate> for the object <hcr_enc>. */
 void          gt_hcr_encoder_set_sampling_rate(GtHcrEncoder *hcr_enc,
                                                GtUword srate);
 
 /* Returns the sampling rate of the object <hcr_enc>. */
-GtUword gt_hcr_encoder_get_sampling_rate(GtHcrEncoder *hcr_enc);
+GtUword       gt_hcr_encoder_get_sampling_rate(const GtHcrEncoder *hcr_enc);
 
 /* Encodes <hcr_enc> and writes the encoding to a file with base name <name>. */
 int           gt_hcr_encoder_encode(GtHcrEncoder *hcr_enc, const char *name,
@@ -84,7 +81,7 @@ GtHcrDecoder* gt_hcr_decoder_new(const char *name, GtAlphabet *alpha,
                                  bool descs, GtTimer *timer, GtError *err);
 
 /* Returns true if <hcr_dec> was initialized with <descs> = true. */
-bool          gt_hcr_decoder_has_descs_support(GtHcrDecoder *hcr_dec);
+bool          gt_hcr_decoder_has_descs_support(const GtHcrDecoder *hcr_dec);
 
 /* Decodes read with number <readnum> and writes decoding to the three char
    pointers. The addresses of the pointer must be allocated with sufficient
@@ -103,10 +100,10 @@ int           gt_hcr_decoder_decode_range(GtHcrDecoder *hcr_dec,
                                           GtTimer *timer, GtError *err);
 
 /* Returns the total number of reads in <hcr_dec>. */
-GtUword gt_hcr_decoder_num_of_reads(GtHcrDecoder *hcr_dec);
+GtUword       gt_hcr_decoder_num_of_reads(const GtHcrDecoder *hcr_dec);
 
 /* Returns the read length of the reads in file with filenumber <filenum>. */
-GtUword gt_hcr_decoder_readlength(GtHcrDecoder *hcr_dec,
+GtUword       gt_hcr_decoder_readlength(const GtHcrDecoder *hcr_dec,
                                         GtUword filenum);
 
 void          gt_hcr_encoder_delete(GtHcrEncoder *hcr_enc);

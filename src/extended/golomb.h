@@ -33,14 +33,17 @@ typedef struct GtGolombBitwiseDecoder GtGolombBitwiseDecoder;
 /* Returns a new <GtGolomb> object. The parameter <median> influences the length
    of generated code words. Identical values are needed for correct encoding and
    decoding. */
-GtGolomb*               gt_golomb_new(GtUword median);
+GtGolomb* gt_golomb_new(GtUword median);
 
 /* Encodes the non negative integer <x> for the given <golomb>, writes it to a
    new <GtBittab> object and returns it. */
-GtBittab*               gt_golomb_encode(GtGolomb *golomb, GtUword x);
+GtBittab* gt_golomb_encode(const GtGolomb *golomb, GtUword x);
 
 /* Returns the parameter <median>, <golomb> was initialized with. */
-GtUword           gt_golomb_get_m(GtGolomb *golomb);
+GtUword   gt_golomb_get_m(const GtGolomb *golomb);
+
+/* Deletes <golomb>. */
+void      gt_golomb_delete(GtGolomb *golomb);
 
 /* Returns a new <GtGolombBitwiseDecoder> object. This decoder is meant to
    decode a code word bit by bit.*/
@@ -53,9 +56,6 @@ GtGolombBitwiseDecoder* gt_golomb_bitwise_decoder_new(GtGolomb *golomb);
 int                     gt_golomb_bitwise_decoder_next(
                                                    GtGolombBitwiseDecoder *gbwd,
                                                    bool bit, GtUword *x);
-
-/* Deletes <golomb>. */
-void                    gt_golomb_delete(GtGolomb *golomb);
 
 /* Deletes <gcbd>. */
 void                    gt_golomb_bitwise_decoder_delete(

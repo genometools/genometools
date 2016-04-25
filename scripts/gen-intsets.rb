@@ -1,6 +1,6 @@
 #!/usr/bin/env ruby
-# Copyright (c) 2014 Dirk Willrodt <willrodt@zbh.uni-hamburg.de>
-# Copyright (c) 2014 Center for Bioinformatics, University of Hamburg
+# Copyright (c) 2014-2016 Dirk Willrodt <willrodt@zbh.uni-hamburg.de>
+# Copyright (c) 2014-2016 Center for Bioinformatics, University of Hamburg
 
 # Permission to use, copy, modify, and distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -260,7 +260,7 @@ void gt_intset_<%=bits%>_add(GtIntset *intset, GtUword elem)
   members->previouselem = elem;
 }
 
-static GtUword gt_intset_<%=bits%>_sec_idx_largest_seq(GtUword *sectionstart,
+static GtUword gt_intset_<%=bits%>_sec_idx_largest_leq(GtUword *sectionstart,
                                                \
 <% if bits != 8 %> <% end %>GtUword idx)
 {
@@ -271,27 +271,27 @@ static GtUword gt_intset_<%=bits%>_sec_idx_largest_seq(GtUword *sectionstart,
 }
 
 static GtUword
-gt_intset_<%=bits%>_binarysearch_sec_idx_largest_seq(GtUword *sectionstart,
+gt_intset_<%=bits%>_binarysearch_sec_idx_largest_leq(GtUword *secstart_begin,
                                              \
-<% if bits != 8 %> <% end %>GtUword *secend,
+<% if bits != 8 %> <% end %>GtUword *secstart_end,
                                              \
 <% if bits != 8 %> <% end %>GtUword idx)
 {
   GtUword *midptr = NULL, *found = NULL,
-          *startorig = sectionstart;
-  if (*sectionstart <= idx)
-    found = sectionstart;
-  while (sectionstart < secend) {
-    midptr = sectionstart + (GtUword) GT_DIV2(secend - sectionstart);
+          *startorig = secstart_begin;
+  if (*secstart_begin <= idx)
+    found = secstart_begin;
+  while (secstart_begin < secstart_end) {
+    midptr = secstart_begin + (GtUword) GT_DIV2(secstart_end - secstart_begin);
     if (*midptr < idx) {
       found = midptr;
       if (*midptr == idx) {
         break;
       }
-      sectionstart = midptr + 1;
+      secstart_begin = midptr + 1;
     }
     else {
-      secend = midptr - 1;
+      secstart_end = midptr - 1;
     }
   }
   gt_assert(found != NULL);
@@ -307,7 +307,7 @@ static GtUword gt_intset_<%=bits%>_get_test(GtIntset *intset, GtUword idx)
   GtUword *sectionstart = members->sectionstart;
   gt_assert(idx < members->nextfree);
 
-  return (gt_intset_<%=bits%>_sec_idx_largest_seq(sectionstart, idx) <<
+  return (gt_intset_<%=bits%>_sec_idx_largest_leq(sectionstart, idx) <<
          members->logsectionsize) + intset_<%=bits%>->elements[idx];
 }
 
@@ -319,7 +319,7 @@ GtUword gt_intset_<%=bits%>_get(GtIntset *intset, GtUword idx)
   GtUword *sectionstart = members->sectionstart;
   gt_assert(idx < members->nextfree);
 
-  quotient = gt_intset_<%=bits%>_binarysearch_sec_idx_largest_seq(
+  quotient = gt_intset_<%=bits%>_binarysearch_sec_idx_largest_leq(
                                       sectionstart,
                                       sectionstart + members->numofsections - 1,
                                       idx);

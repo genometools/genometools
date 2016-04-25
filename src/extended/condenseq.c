@@ -288,11 +288,11 @@ GtUword gt_condenseq_total_unique_len(const GtCondenseq *condenseq)
   return gt_encseq_total_length(condenseq->unique_es);
 }
 
-GtUword gt_condenseq_total_length(GtCondenseq *condenseq) {
+GtUword gt_condenseq_total_length(const GtCondenseq *condenseq) {
   return condenseq->orig_len;
 }
 
-GtUword gt_condenseq_num_of_sequences(GtCondenseq *condenseq)
+GtUword gt_condenseq_num_of_sequences(const GtCondenseq *condenseq)
 {
   return condenseq->orig_num_seq;
 }
@@ -749,6 +749,8 @@ const GtUchar *gt_condenseq_extract_encoded_range(GtCondenseq *condenseq,
 
   length = range.end - range.start + 1;
 
+  /* TODO DW check if there is another way than using this buffer, so we could
+     use const for condenseq here. */
   if (condenseq->ubuffer == NULL || condenseq->ubuffsize < length) {
     condenseq->ubuffer = gt_realloc(condenseq->ubuffer,
                                     sizeof (*condenseq->ubuffer) * length);
@@ -928,7 +930,7 @@ GtUword gt_condenseq_each_redundant_seq(
 }
 
 GtUword gt_condenseq_each_redundant_range(
-                                      GtCondenseq *condenseq,
+                                      const GtCondenseq *condenseq,
                                       GtUword uid,
                                       GtRange urange,
                                       GtUword left_extend,
@@ -1176,7 +1178,7 @@ GtDiscDistri *gt_condenseq_link_comp_dist(const GtCondenseq *condenseq)
   return res;
 }
 
-GtUword gt_condenseq_unique_range_to_seqrange(GtCondenseq *condenseq,
+GtUword gt_condenseq_unique_range_to_seqrange(const GtCondenseq *condenseq,
                                               GtUword uid,
                                               GtRange *urange)
 {

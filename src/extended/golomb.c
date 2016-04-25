@@ -55,13 +55,13 @@ GtGolomb* gt_golomb_new(GtUword median)
   return golomb;
 }
 
-GtUword gt_golomb_get_m(GtGolomb *golomb)
+GtUword gt_golomb_get_m(const GtGolomb *golomb)
 {
   gt_assert(golomb);
   return golomb->median;
 }
 
-GtBittab* gt_golomb_encode(GtGolomb *golomb, GtUword x)
+GtBittab* gt_golomb_encode(const GtGolomb *golomb, GtUword x)
 {
   GtUword quotient,
                 remain,

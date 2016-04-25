@@ -1,6 +1,7 @@
 /*
   Copyright (c) 2011-2012 Joachim Bonnet <joachim.bonnet@studium.uni-hamburg.de>
-  Copyright (c) 2012 Dirk Willrodt <willrodt@zbh.uni-hamburg.de>
+  Copyright (c) 2012-2015 Dirk Willrodt <willrodt@zbh.uni-hamburg.de>
+  Copyright (c) 2011-2015 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -851,7 +852,7 @@ GtHcrDecoder *gt_hcr_decoder_new(const char *name, GtAlphabet *alpha,
   return NULL;
 }
 
-bool gt_hcr_decoder_has_descs_support(GtHcrDecoder *hcr_dec)
+bool gt_hcr_decoder_has_descs_support(const GtHcrDecoder *hcr_dec)
 {
   gt_assert(hcr_dec);
   if (!hcr_dec->encdesc)
@@ -1083,14 +1084,14 @@ int gt_hcr_decoder_decode_range(GtHcrDecoder *hcr_dec, const char *name,
   return had_err;
 }
 
-GtUword gt_hcr_decoder_num_of_reads(GtHcrDecoder *hcr_dec)
+GtUword gt_hcr_decoder_num_of_reads(const GtHcrDecoder *hcr_dec)
 {
   gt_assert(hcr_dec);
   return hcr_dec->seq_dec->num_of_reads;
 }
 
-GtUword gt_hcr_decoder_readlength(GtHcrDecoder *hcr_dec,
-                                        GtUword filenum)
+GtUword gt_hcr_decoder_readlength(const GtHcrDecoder *hcr_dec,
+                                  GtUword filenum)
 {
   gt_assert(hcr_dec);
   gt_assert(hcr_dec->seq_dec->num_of_files > filenum);
@@ -1221,7 +1222,7 @@ GtHcrEncoder *gt_hcr_encoder_new(GtStrArray *files, GtAlphabet *alpha,
   return NULL;
 }
 
-bool gt_hcr_encoder_has_descs_support(GtHcrEncoder *hcr_enc)
+bool gt_hcr_encoder_has_descs_support(const GtHcrEncoder *hcr_enc)
 {
   gt_assert(hcr_enc);
   if (!hcr_enc->encdesc_encoder)
@@ -1266,7 +1267,7 @@ void gt_hcr_encoder_set_sampling_rate(GtHcrEncoder *hcr_enc,
     gt_encdesc_encoder_set_sampling_rate(hcr_enc->encdesc_encoder, srate);
 }
 
-GtUword gt_hcr_encoder_get_sampling_rate(GtHcrEncoder *hcr_enc)
+GtUword gt_hcr_encoder_get_sampling_rate(const GtHcrEncoder *hcr_enc)
 {
   gt_assert(hcr_enc);
   return hcr_enc->sampling_rate;

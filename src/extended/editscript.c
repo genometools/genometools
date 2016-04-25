@@ -850,42 +850,37 @@ void gt_editscript_builder_add_match(GtEditscriptBuilder *es_builder)
             "trailing matches overflow");
 }
 
+static inline void gt_editscript_builder_start_group(GtEditscriptBuilder *es_b,
+                                                     uint8_t type)
+{
+  GtEditscript *es = es_b->es;
+  es_b->last_op = type;
+  editscript_space_add_next(es, &es_b->fillpos, type);
+  editscript_space_add_length(es, &es_b->fillpos,
+                              (GtBitsequence) es->trailing_matches);
+  es->trailing_matches = 0;
+}
+
 void gt_editscript_builder_add_mismatch(GtEditscriptBuilder *es_builder,
                                         GtUchar c)
 {
   GtEditscript *es;
   gt_assert(es_builder != NULL);
   es = es_builder->es;
-  gt_assert(c < (GtUchar) es->del || c == (GtUchar) WILDCARD);
+  gt_assert(c <= (GtUchar) es->del || c == (GtUchar) WILDCARD);
   if (c == (GtUchar) WILDCARD) {
     c = (GtUchar) es->del - 1;
   }
   if (es_builder->last_op != (uint8_t) GT_EDITSCRIPT_MISDEL_SYM(es)) {
-    es_builder->last_op = (uint8_t) GT_EDITSCRIPT_MISDEL_SYM(es);
-    editscript_space_add_next(es, &es_builder->fillpos,
-                              GT_EDITSCRIPT_MISDEL_SYM(es));
-    editscript_space_add_length(es, &es_builder->fillpos,
-                                (GtBitsequence) es->trailing_matches);
-    es->trailing_matches = 0;
+    gt_editscript_builder_start_group(es_builder,
+                                      (uint8_t) GT_EDITSCRIPT_MISDEL_SYM(es));
   }
   editscript_space_add_next(es, &es_builder->fillpos, (GtBitsequence) c);
 }
 
 void gt_editscript_builder_add_deletion(GtEditscriptBuilder *es_builder)
 {
-  GtEditscript *es;
-  gt_assert(es_builder);
-  es = es_builder->es;
-
-  if (es_builder->last_op != (uint8_t) GT_EDITSCRIPT_MISDEL_SYM(es)) {
-    es_builder->last_op = (uint8_t) GT_EDITSCRIPT_MISDEL_SYM(es);
-    editscript_space_add_next(es, &es_builder->fillpos,
-                              GT_EDITSCRIPT_MISDEL_SYM(es));
-    editscript_space_add_length(es, &es_builder->fillpos,
-                                (GtBitsequence) es->trailing_matches);
-    es->trailing_matches = 0;
-  }
-  editscript_space_add_next(es, &es_builder->fillpos, (GtBitsequence) es->del);
+  gt_editscript_builder_add_mismatch(es_builder, es_builder->es->del);
 }
 
 void gt_editscript_builder_add_insertion(GtEditscriptBuilder *es_builder,
@@ -900,12 +895,8 @@ void gt_editscript_builder_add_insertion(GtEditscriptBuilder *es_builder,
     c = (GtUchar) es->del - 1;
   }
   if (es_builder->last_op != (uint8_t) GT_EDITSCRIPT_INS_SYM(es)) {
-    es_builder->last_op = (uint8_t) GT_EDITSCRIPT_INS_SYM(es);
-    editscript_space_add_next(es, &es_builder->fillpos,
-                              GT_EDITSCRIPT_INS_SYM(es));
-    editscript_space_add_length(es, &es_builder->fillpos,
-                                (GtBitsequence) es->trailing_matches);
-    es->trailing_matches = 0;
+    gt_editscript_builder_start_group(es_builder,
+                                      (uint8_t) GT_EDITSCRIPT_INS_SYM(es));
   }
   editscript_space_add_next(es, &es_builder->fillpos, (GtBitsequence) c);
 }
