@@ -50,7 +50,7 @@ end
 
 local function align(s,count)
   local replace = string.rep(" ", count)
-  return (string.gsub(s, ",%s+", ",\n" .. replace))
+  return (replace .. string.gsub(s, ",%s+", ",\n" .. replace))
 end
 
 local function codify(str)
@@ -70,6 +70,7 @@ local function codify(str)
   res = string.gsub(res, "__(.-)__", "\\emph{%1}")
   res = string.gsub(res, "_", "\\_")
   res = string.gsub(res, "#", "\\#")
+  res = string.gsub(res, "(%w+%^)%s*([%w\\{}]+)", "$%1{%2}$")
   return res
 end
 
@@ -130,7 +131,7 @@ function DocVisitorLaTeX:visit_method(desc)
   else
     name = trim(desc.name)
   end
-  local aligncol = string.len(name) + 1
+  local aligncol = string.find(name, '_') - 1
   if desc.args then
     args = align(trim(desc.args),aligncol)
   else

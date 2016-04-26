@@ -1,2 +1,2 @@
 \section*{Class <%=classname%>}
-\label{<%=classname%>}
+\label{sec:class_<%=classname%>}
