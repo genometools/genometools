@@ -23,6 +23,8 @@
 #include "core/codetype.h"
 #include "core/complement.h"
 #include "core/encseq.h"
+#include "core/fa.h"
+#include "core/fileutils_api.h"
 #include "core/ma_api.h"
 #include "core/minmax.h"
 #include "core/radix_sort.h"
@@ -81,6 +83,7 @@ struct GtDiagbandseedInfo {
   bool debug_kmer;
   bool debug_seedpair;
   bool extend_last;
+  bool use_kmerfile;
   GtDiagbandseedExtendParams *extp;
 };
 
@@ -135,6 +138,7 @@ GtDiagbandseedInfo *gt_diagbandseed_info_new(GtEncseq *aencseq,
                                              bool debug_kmer,
                                              bool debug_seedpair,
                                              bool extend_last,
+                                             bool use_kmerfile,
                                              GtDiagbandseedExtendParams *extp)
 {
   GtDiagbandseedInfo *info = gt_malloc(sizeof *info);
@@ -151,6 +155,7 @@ GtDiagbandseedInfo *gt_diagbandseed_info_new(GtEncseq *aencseq,
   info->debug_kmer = debug_kmer;
   info->debug_seedpair = debug_seedpair;
   info->extend_last = extend_last;
+  info->use_kmerfile = use_kmerfile;
   info->extp = extp;
   return info;
 }
@@ -1418,6 +1423,84 @@ static void *gt_diagbandseed_thread_algorithm(void *thread_info)
 }
 #endif
 
+static GtStr *gt_diagbandseed_kmer_filename(const char *basename,
+                                            unsigned int seedlength,
+                                            bool forward,
+                                            unsigned int numparts,
+                                            unsigned int partindex)
+{
+  GtStr *str = gt_str_new_cstr(basename);
+  gt_str_append_char(str, '.');
+  gt_str_append_uint(str, seedlength);
+  gt_str_append_char(str, forward ? 'f' : 'r');
+  gt_str_append_uint(str, numparts);
+  gt_str_append_char(str, '-');
+  gt_str_append_uint(str, partindex);
+  gt_str_append_cstr(str, ".kmer");
+  return str;
+}
+
+static int gt_diagbandseed_write_kmers(const GtArrayGtDiagbandseedKmerPos *list,
+                                       const GtStr *filename,
+                                       unsigned int seedlength,
+                                       bool verbose,
+                                       GtError *err)
+{
+  FILE *stream;
+  const size_t nmemb = (size_t)(list->nextfreeGtDiagbandseedKmerPos);
+  const void *contents = (const void *)(list->spaceGtDiagbandseedKmerPos);
+
+  if (verbose) {
+    printf("# Write " GT_WU " %u-mers to file %s\n",
+           (GtUword)nmemb,
+           seedlength,
+           gt_str_get(filename));
+  }
+
+  stream = gt_fa_fopen(gt_str_get(filename), "w", err);
+  if (stream != NULL) {
+    gt_xfwrite(contents, sizeof (GtDiagbandseedKmerPos), nmemb, stream);
+    gt_fa_fclose(stream);
+    return 0;
+  } else {
+    return -1;
+  }
+}
+
+static int gt_diagbandseed_read_kmers(GtArrayGtDiagbandseedKmerPos *list,
+                                      const GtStr *filename,
+                                      unsigned int seedlength,
+                                      bool verbose,
+                                      GtError *err)
+{
+  FILE *stream;
+  const off_t filesize = gt_file_size(gt_str_get(filename));
+  const size_t nmemb = filesize / sizeof (GtDiagbandseedKmerPos);
+
+  if (verbose) {
+    printf("# Read " GT_WU " %u-mers from file %s\n",
+           (GtUword)nmemb,
+           seedlength,
+           gt_str_get(filename));
+  }
+
+  GT_INITARRAY(list, GtDiagbandseedKmerPos);
+  GT_CHECKARRAYSPACEMULTI(list, GtDiagbandseedKmerPos, nmemb);
+  list->nextfreeGtDiagbandseedKmerPos = nmemb;
+
+  stream = gt_fa_fopen(gt_str_get(filename), "r", err);
+  if (stream != NULL) {
+    gt_xfread(list->spaceGtDiagbandseedKmerPos,
+              sizeof (GtDiagbandseedKmerPos),
+              nmemb,
+              stream);
+    gt_fa_fclose(stream);
+    return 0;
+  } else {
+    return -1;
+  }
+}
+
 /* Run the algorithm by iterating over all combinations of sequence ranges. */
 int gt_diagbandseed_run(const GtDiagbandseedInfo *arg,
                         const GtRange *aseqranges,
@@ -1440,29 +1523,55 @@ int gt_diagbandseed_run(const GtDiagbandseedInfo *arg,
 
   /* create output streams */
   stream[0] = stdout;
-  for (tidx = 1; tidx < gt_jobs; tidx++) {
+  for (tidx = 1; !had_err && tidx < gt_jobs; tidx++) {
     gt_str_append_cstr(str, "thread");
     gt_str_append_uint(str, tidx);
     gt_str_append_cstr(str, ".tmp");
     gt_str_array_add(files, str);
     gt_str_reset(str);
-    stream[tidx] = gt_xfopen(gt_str_array_get(files, gt_str_array_size(files)
-                                              - 1), "w+");
+    stream[tidx] = gt_fa_fopen(gt_str_array_get(files, gt_str_array_size(files)
+                                              - 1), "w+", err);
+    if (stream[tidx] == NULL) {
+      had_err = -1;
+    }
   }
   gt_str_delete(str);
 #endif
 
   for (aidx = 0; !had_err && aidx < anumseqranges; aidx++) {
     /* create alist here to prevent redundant calculations */
-    alist = gt_diagbandseed_get_kmers(arg->aencseq,
-                                      arg->seedlength,
-                                      GT_READMODE_FORWARD,
-                                      aseqranges + aidx,
-                                      arg->debug_kmer,
-                                      arg->verbose,
-                                      0,
-                                      stdout);
+    GtStr *filename;
     bidx = self ? aidx : 0;
+    filename = gt_diagbandseed_kmer_filename(gt_encseq_indexname(arg->aencseq),
+                                             arg->seedlength,
+                                             true,
+                                             anumseqranges,
+                                             aidx);
+
+    if (arg->use_kmerfile && gt_file_exists(gt_str_get(filename))) {
+      had_err = gt_diagbandseed_read_kmers(&alist,
+                                           filename,
+                                           arg->seedlength,
+                                           arg->verbose,
+                                           err);
+    } else {
+      alist = gt_diagbandseed_get_kmers(arg->aencseq,
+                                        arg->seedlength,
+                                        GT_READMODE_FORWARD,
+                                        aseqranges + aidx,
+                                        arg->debug_kmer,
+                                        arg->verbose,
+                                        0,
+                                        stdout);
+      if (arg->use_kmerfile) {
+        had_err = gt_diagbandseed_write_kmers(&alist,
+                                              filename,
+                                              arg->seedlength,
+                                              arg->verbose,
+                                              err);
+      }
+    }
+    gt_str_delete(filename);
 
 #ifdef GT_THREADS_ENABLED
     if (gt_jobs <= 1) {
@@ -1549,7 +1658,7 @@ int gt_diagbandseed_run(const GtDiagbandseedInfo *arg,
   gt_free(tinfo);
   gt_free(t_errors);
   for (tidx = 1; tidx < gt_jobs; tidx++) {
-    gt_xfclose(stream[tidx]);
+    gt_fa_fclose(stream[tidx]);
   }
   /* print the threads' output to stdout */
   if (!had_err) {
@@ -1557,12 +1666,16 @@ int gt_diagbandseed_run(const GtDiagbandseedInfo *arg,
     size_t size;
     char buffer[block];
     FILE *stream;
-    for (tidx = 0; tidx < gt_str_array_size(files); tidx++) {
-      stream = gt_xfopen(gt_str_array_get(files, tidx), "r");
-      while ((size = gt_xfread(buffer, sizeof (char), block, stream)) > 0) {
-        gt_xfwrite(buffer, sizeof (char), size, stdout);
+    for (tidx = 0; !had_err && tidx < gt_str_array_size(files); tidx++) {
+      stream = gt_fa_fopen(gt_str_array_get(files, tidx), "r", err);
+      if (stream != NULL) {
+        while ((size = gt_xfread(buffer, sizeof (char), block, stream)) > 0) {
+          gt_xfwrite(buffer, sizeof (char), size, stdout);
+        }
+        gt_fa_fclose(stream);
+      } else {
+        had_err = -1;
       }
-      gt_xfclose(stream);
     }
   }
   /* remove temporary files */

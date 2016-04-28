@@ -83,6 +83,7 @@ typedef struct {
   bool extend_last;
   bool use_apos;
   bool histogram;
+  bool use_kmerfile;
 } GtSeedExtendArguments;
 
 static void* gt_seed_extend_arguments_new(void)
@@ -472,6 +473,13 @@ static GtOptionParser* gt_seed_extend_option_parser_new(void *tool_arguments)
   gt_option_is_development_option(option);
   gt_option_parser_add_option(op, option);
 
+  /* -kmerfile */
+  option = gt_option_new_bool("kmerfile",
+                              "Use pre-calculated k-mers from file (if exist)",
+                              &arguments->use_kmerfile,
+                              true);
+  gt_option_parser_add_option(op, option);
+
   /* -v */
   option = gt_option_new_verbose(&arguments->verbose);
   gt_option_parser_add_option(op, option);
@@ -834,6 +842,7 @@ static int gt_seed_extend_runner(int argc,
                                     arguments->dbs_debug_kmer,
                                     arguments->dbs_debug_seedpair,
                                     arguments->extend_last,
+                                    arguments->use_kmerfile,
                                     extp);
 
     /* Get sequence ranges and start algorithm */
@@ -884,7 +893,7 @@ static int gt_seed_extend_runner(int argc,
     gt_timer_show_formatted(seedextendtimer,
                             " overall " GT_WD ".%06ld\n", stdout);
   }
-  if(gt_showtime_enabled()) {
+  if (gt_showtime_enabled()) {
     gt_timer_delete(seedextendtimer);
   }
   return had_err;

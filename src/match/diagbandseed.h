@@ -49,6 +49,7 @@ GtDiagbandseedInfo *gt_diagbandseed_info_new(GtEncseq *aencseq,
                                              bool debug_kmer,
                                              bool debug_seedpair,
                                              bool extend_last,
+                                             bool use_kmerfile,
                                              GtDiagbandseedExtendParams *extp);
 
 /* The constructor for GtDiagbandseedExtendParams*/
