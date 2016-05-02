@@ -486,6 +486,103 @@ GtArrayGtDiagbandseedKmerPos gt_diagbandseed_get_kmers(const GtEncseq *encseq,
 
 /* * * * * SEEDPAIR LIST CREATION * * * * */
 
+typedef struct {
+  GtArrayGtDiagbandseedKmerPos segment;
+  const GtArrayGtDiagbandseedKmerPos *list;
+  FILE *stream;
+  GtDiagbandseedKmerPos *buffer;
+  GtUword listlen;
+} GtDiagbandseedKmerIterator;
+
+static void gt_diagbandseed_kmer_iter_reset(GtDiagbandseedKmerIterator *ki)
+{
+  gt_assert(ki != NULL);
+  if (ki->stream != NULL) {
+    size_t size;
+    gt_assert(ki->list == NULL && ki->buffer != NULL);
+    ki->listlen = 1;
+    rewind(ki->stream);
+    size = gt_xfread(ki->buffer, sizeof (GtDiagbandseedKmerPos), 1, ki->stream);
+    if (size != sizeof (GtDiagbandseedKmerPos)) {
+      ki->listlen = 0;
+    }
+  } else {
+    gt_assert(ki->list != NULL);
+    GtDiagbandseedKmerPos *listptr = ki->list->spaceGtDiagbandseedKmerPos;
+    ki->segment.spaceGtDiagbandseedKmerPos = listptr;
+    ki->buffer = ki->segment.spaceGtDiagbandseedKmerPos;
+    ki->listlen = ki->list->nextfreeGtDiagbandseedKmerPos;
+  }
+}
+
+static GtDiagbandseedKmerIterator *gt_diagbandseed_kmer_iter_new(
+                                          FILE *stream,
+                                          GtArrayGtDiagbandseedKmerPos *list)
+{
+  GtDiagbandseedKmerIterator *ki = gt_malloc(sizeof *ki);
+  GT_INITARRAY(&ki->segment, GtDiagbandseedKmerPos);
+  if (stream != NULL) {
+    ki->list = NULL;
+    ki->stream = stream;
+    ki->buffer = gt_malloc(sizeof *ki->buffer);
+  } else {
+    ki->list = list;
+    ki->stream = NULL;
+  }
+  gt_diagbandseed_kmer_iter_reset(ki);
+  return ki;
+}
+
+static void gt_diagbandseed_kmer_iter_delete(GtDiagbandseedKmerIterator *ki)
+{
+  if (ki != NULL) {
+    if (ki->stream != NULL) {
+      gt_free(ki->buffer);
+      GT_FREEARRAY(&ki->segment, GtDiagbandseedKmerPos);
+    }
+    gt_free(ki);
+  }
+}
+
+static const GtArrayGtDiagbandseedKmerPos *gt_diagbandseed_kmer_iter_next(
+                                              GtDiagbandseedKmerIterator *ki)
+{
+  GtCodetype code;
+  if (ki->listlen == 0) {
+    return NULL;
+  }
+
+  /* reset segment list */
+  ki->segment.nextfreeGtDiagbandseedKmerPos = 0;
+  gt_assert(ki->buffer != NULL);
+  code = ki->buffer->code;
+
+  if (ki->stream != NULL) {
+    size_t size;
+    /* fill segment list from file, stop when code changes */
+    do {
+      GT_STOREINARRAY(&ki->segment, GtDiagbandseedKmerPos, 20, *ki->buffer);
+      size = gt_xfread(ki->buffer,
+                       sizeof (GtDiagbandseedKmerPos),
+                       1,
+                       ki->stream);
+    } while (size == sizeof (GtDiagbandseedKmerPos) &&
+             code == ki->buffer->code);
+    if (size != sizeof (GtDiagbandseedKmerPos)) {
+      ki->listlen = 0;
+    }
+  } else {
+    ki->segment.spaceGtDiagbandseedKmerPos = ki->buffer;
+    /* add element to segment list until code differs */
+    do {
+      ki->buffer++;
+      ki->segment.nextfreeGtDiagbandseedKmerPos++;
+      ki->listlen--;
+    } while (ki->listlen > 0 && code == ki->buffer->code);
+  }
+  return &ki->segment;
+}
+
 /* Evaluate the results of the seed pair count histogram */
 static void gt_diagbandseed_processhistogram(GtUword *histogram,
                                              GtUword *maxfreq,
@@ -533,59 +630,54 @@ static void gt_diagbandseed_processhistogram(GtUword *histogram,
   histogram[maxgram] = count;
 }
 
-/* Returns a GtDiagbandseedSeedPair list of equal kmers from lists a and b. */
+/* Returns a GtDiagbandseedSeedPair list of equal kmers from the iterators. */
 static void gt_diagbandseed_merge(GtArrayGtDiagbandseedSeedPair *mlist,
-                                  const GtDiagbandseedKmerPos *alist,
-                                  GtUword alen,
-                                  const GtDiagbandseedKmerPos *blist,
-                                  GtUword blen,
+                                  GtDiagbandseedKmerIterator *aiter,
+                                  GtDiagbandseedKmerIterator *biter,
                                   GtUword *maxfreq,
                                   GtUword maxgram,
                                   GtUword memlimit,
                                   GtUword *histogram,
                                   unsigned int endposdiff,
                                   bool selfcomp,
+                                  bool alist_blist_id,
                                   GtUword len_used)
 {
-  const GtDiagbandseedKmerPos *aptr = alist, *bptr = blist, *aend, *bend;
+  const GtArrayGtDiagbandseedKmerPos *alist = NULL, *blist = NULL;
+  GtDiagbandseedKmerPos *asegment = NULL, *bsegment = NULL;
+  GtUword alen, blen;
   const GtUword array_incr = 256;
   GtUword frequency = 0;
 
-  gt_assert(alist != NULL && blist != NULL && maxfreq != NULL);
+  gt_assert(aiter != NULL && biter != NULL && maxfreq != NULL);
   gt_assert((histogram == NULL && mlist != NULL) ||
             (histogram != NULL && mlist == NULL));
-  aend = aptr + alen;
-  bend = bptr + blen;
-  while (aptr < aend && bptr < bend) {
-    if (aptr->code < bptr->code) {
-      aptr++;
-    } else if (aptr->code > bptr->code) {
-      bptr++;
+  alist = gt_diagbandseed_kmer_iter_next(aiter);
+  blist = gt_diagbandseed_kmer_iter_next(biter);
+  while (alist != NULL && blist != NULL) {
+    asegment = alist->spaceGtDiagbandseedKmerPos;
+    bsegment = blist->spaceGtDiagbandseedKmerPos;
+    alen = alist->nextfreeGtDiagbandseedKmerPos;
+    blen = blist->nextfreeGtDiagbandseedKmerPos;
+    if (asegment->code < bsegment->code) {
+      alist = gt_diagbandseed_kmer_iter_next(aiter);
+    } else if (asegment->code > bsegment->code) {
+      blist = gt_diagbandseed_kmer_iter_next(biter);
     } else {
-      /* equality: count frequency of current k-mer in both lists */
-      const GtDiagbandseedKmerPos *aiter, *biter;
-      for (aiter = aptr; aiter < aend && aiter->code == bptr->code; aiter++) {
-        /* nothing */
-      }
-      for (biter = bptr; biter < bend && biter->code == aptr->code; biter++) {
-        /* nothing */
-      }
-      frequency = (GtUword) MAX(aiter - aptr, biter - bptr);
+      frequency = MAX(alen, blen);
       if (frequency <= *maxfreq) {
         /* add all equal k-mers */
-        const GtDiagbandseedKmerPos *asegm_end = aiter, *bsegm_end = biter;
         frequency = MIN(maxgram, frequency);
         gt_assert(frequency > 0);
         if (histogram != NULL && !selfcomp) {
-          histogram[frequency - 1] += (GtUword)(asegm_end - aptr) *
-                                      (GtUword)(bsegm_end - bptr);
+          histogram[frequency - 1] += alen * blen;
         } else {
-          for (aiter = aptr; aiter < asegm_end; aiter++) {
-            for (biter = bptr; biter < bsegm_end; biter++) {
-              if (!selfcomp ||
-                  aiter->seqnum < biter->seqnum ||
-                  (aiter->seqnum == biter->seqnum &&
-                   aiter->endpos + endposdiff <= biter->endpos)) {
+          GtDiagbandseedKmerPos *aptr, *bptr;
+          for (aptr = asegment; aptr < asegment + alen; aptr++) {
+            for (bptr = bsegment; bptr < bsegment + blen; bptr++) {
+              if (!selfcomp || aptr->seqnum < bptr->seqnum ||
+                  (aptr->seqnum == bptr->seqnum &&
+                   aptr->endpos + endposdiff <= bptr->endpos)) {
                 /* no duplicates from the same dataset */
                 if (histogram == NULL) {
                   /* save SeedPair in mlist */
@@ -595,10 +687,10 @@ static void gt_diagbandseed_merge(GtArrayGtDiagbandseedSeedPair *mlist,
                                         GtDiagbandseedSeedPair,
                                         array_incr + 0.2 *
                                         mlist->allocatedGtDiagbandseedSeedPair);
-                  seedptr->bseqnum = biter->seqnum;
-                  seedptr->aseqnum = aiter->seqnum;
-                  seedptr->bpos = biter->endpos;
-                  seedptr->apos = aiter->endpos;
+                  seedptr->bseqnum = bptr->seqnum;
+                  seedptr->aseqnum = aptr->seqnum;
+                  seedptr->bpos = bptr->endpos;
+                  seedptr->apos = aptr->endpos;
                 } else {
                   /* count seed pair frequency in histogram */
                   histogram[frequency - 1]++;
@@ -608,8 +700,8 @@ static void gt_diagbandseed_merge(GtArrayGtDiagbandseedSeedPair *mlist,
           }
         }
       } /* else: ignore all equal elements */
-      aptr = aiter;
-      bptr = biter;
+      alist = gt_diagbandseed_kmer_iter_next(aiter);
+      blist = gt_diagbandseed_kmer_iter_next(biter);
     }
   }
   if (histogram != NULL) {
@@ -617,20 +709,20 @@ static void gt_diagbandseed_merge(GtArrayGtDiagbandseedSeedPair *mlist,
                                      maxfreq,
                                      maxgram,
                                      memlimit,
-                                     len_used * sizeof *alist,
-                                     alist == blist);
+                                     len_used * sizeof (GtDiagbandseedKmerPos),
+                                     alist_blist_id);
   }
 }
 
 /* Verify seed pairs in the original sequences */
-int gt_diagbandseed_verify(const GtEncseq *aencseq,
-                           const GtEncseq *bencseq,
-                           GtArrayGtDiagbandseedSeedPair *mlist,
-                           unsigned int seedlength,
-                           bool reverse,
-                           bool verbose,
-                           FILE *stream,
-                           GtError *err) {
+static int gt_diagbandseed_verify(const GtEncseq *aencseq,
+                                  const GtEncseq *bencseq,
+                                  GtArrayGtDiagbandseedSeedPair *mlist,
+                                  unsigned int seedlength,
+                                  bool reverse,
+                                  bool verbose,
+                                  FILE *stream,
+                                  GtError *err) {
   GtTimer *timer = gt_timer_new();
   GtDiagbandseedSeedPair *curr_sp, *max_sp;
   char *buf1 = gt_malloc(3 * (seedlength + 1) * sizeof *buf1);
@@ -698,20 +790,22 @@ int gt_diagbandseed_verify(const GtEncseq *aencseq,
 }
 
 /* Return estimated length of mlist, and maxfreq w.r.t. the given memlimit */
-int gt_diagbandseed_get_mlen_maxfreq(GtUword *mlen,
-                                     GtUword *maxfreq,
-                                     GtArrayGtDiagbandseedKmerPos *alist,
-                                     GtArrayGtDiagbandseedKmerPos *blist,
-                                     GtUword memlimit,
-                                     unsigned int endposdiff,
-                                     bool norev,
-                                     bool nofwd,
-                                     bool extend_last,
-                                     bool selfcomp,
-                                     bool alist_blist_id,
-                                     bool verbose,
-                                     FILE *stream,
-                                     GtError *err)
+static int gt_diagbandseed_get_mlen_maxfreq(GtUword *mlen,
+                                            GtUword *maxfreq,
+                                            GtArrayGtDiagbandseedKmerPos *alist,
+                                            GtArrayGtDiagbandseedKmerPos *blist,
+                                            GtDiagbandseedKmerIterator *aiter,
+                                            GtDiagbandseedKmerIterator *biter,
+                                            GtUword memlimit,
+                                            unsigned int endposdiff,
+                                            bool norev,
+                                            bool nofwd,
+                                            bool extend_last,
+                                            bool selfcomp,
+                                            bool alist_blist_id,
+                                            bool verbose,
+                                            FILE *stream,
+                                            GtError *err)
 {
   const GtUword maxgram = MIN(*maxfreq, 8190) + 1; /* Cap on k-mer count */
   const GtUword alen = alist->nextfreeGtDiagbandseedKmerPos;
@@ -743,16 +837,15 @@ int gt_diagbandseed_get_mlen_maxfreq(GtUword *mlen,
   /* build histogram; histogram[maxgram] := estimation for mlen */
   histogram = gt_calloc(maxgram + 1, sizeof *histogram);
   gt_diagbandseed_merge(NULL, /* mlist not needed: just count */
-                        alist->spaceGtDiagbandseedKmerPos,
-                        alen,
-                        blist->spaceGtDiagbandseedKmerPos,
-                        blen,
+                        aiter,
+                        biter,
                         maxfreq,
                         maxgram,
                         memlimit,
                         histogram,
                         alist_blist_id ? endposdiff : 0,
                         selfcomp,
+                        alist_blist_id,
                         len_used);
   *mlen = histogram[maxgram];
   gt_free(histogram);
@@ -787,17 +880,16 @@ int gt_diagbandseed_get_mlen_maxfreq(GtUword *mlen,
   return had_err;
 }
 
-/* Return a sorted list of SeedPairs from given alist and blist.
+/* Return a sorted list of SeedPairs from given Kmer-Iterators.
  * Parameter known_size > 0 can be given to allocate the memory beforehand.
  * The caller is responsible for freeing the result. */
-GtArrayGtDiagbandseedSeedPair gt_diagbandseed_get_seedpairs(
-                                  GtArrayGtDiagbandseedKmerPos *alist,
-                                  GtArrayGtDiagbandseedKmerPos *blist,
+static GtArrayGtDiagbandseedSeedPair gt_diagbandseed_get_seedpairs(
+                                  GtDiagbandseedKmerIterator *aiter,
+                                  GtDiagbandseedKmerIterator *biter,
                                   GtUword maxfreq,
                                   GtUword known_size,
                                   unsigned int endposdiff,
                                   bool selfcomp,
-                                  bool delete_blist,
                                   bool debug_seedpair,
                                   bool verbose,
                                   FILE *stream)
@@ -825,23 +917,17 @@ GtArrayGtDiagbandseedSeedPair gt_diagbandseed_get_seedpairs(
 
   /* create mlist */
   gt_diagbandseed_merge(&mlist,
-                        alist->spaceGtDiagbandseedKmerPos,
-                        alist->nextfreeGtDiagbandseedKmerPos,
-                        blist->spaceGtDiagbandseedKmerPos,
-                        blist->nextfreeGtDiagbandseedKmerPos,
+                        aiter,
+                        biter,
                         &maxfreq,
                         GT_UWORD_MAX, /* maxgram not needed */
                         GT_UWORD_MAX, /* memlimit not needed */
                         NULL, /* histogram not needed: save seed pairs */
                         endposdiff,
                         selfcomp,
+                        false, /* not needed */
                         0); /* len_used not needed */
   mlen = mlist.nextfreeGtDiagbandseedSeedPair;
-
-  if (delete_blist) {
-    GT_FREEARRAY(blist, GtDiagbandseedKmerPos);
-    blist = NULL;
-  }
 
   if (verbose) {
     fprintf(stream, "# ...collected " GT_WU " seed pairs ", mlen);
@@ -1114,6 +1200,7 @@ static int gt_diagbandseed_algorithm(const GtDiagbandseedInfo *arg,
 {
   GtArrayGtDiagbandseedKmerPos blist, clist;
   GtArrayGtDiagbandseedSeedPair mlist, mrevlist;
+  GtDiagbandseedKmerIterator *aiter, *biter;
   GtUword alen, blen = 0, mlen = 0, mrevlen = 0, maxfreq;
   unsigned int endposdiff;
   int had_err = 0;
@@ -1156,10 +1243,14 @@ static int gt_diagbandseed_algorithm(const GtDiagbandseedInfo *arg,
     blen = blist.nextfreeGtDiagbandseedKmerPos;
   }
 
+  aiter = gt_diagbandseed_kmer_iter_new(NULL, alist);
+  biter = gt_diagbandseed_kmer_iter_new(NULL, &blist);
   had_err = gt_diagbandseed_get_mlen_maxfreq(&mlen,
                                              &maxfreq,
                                              alist,
                                              &blist,
+                                             aiter,
+                                             biter,
                                              arg->memlimit,
                                              endposdiff,
                                              arg->norev,
@@ -1175,16 +1266,20 @@ static int gt_diagbandseed_algorithm(const GtDiagbandseedInfo *arg,
   }
 
   if (!had_err) {
-    mlist = gt_diagbandseed_get_seedpairs(alist,
-                                          &blist,
+    gt_diagbandseed_kmer_iter_reset(aiter);
+    gt_diagbandseed_kmer_iter_reset(biter);
+    mlist = gt_diagbandseed_get_seedpairs(aiter,
+                                          biter,
                                           maxfreq,
                                           mlen,
                                           alist_blist_id ? endposdiff : 0,
                                           selfcomp,
-                                          !alist_blist_id, /* delete_blist */
                                           arg->debug_seedpair,
                                           arg->verbose,
                                           stream);
+    if (!alist_blist_id) {
+      GT_FREEARRAY(&blist, GtDiagbandseedKmerPos);
+    }
     mlen = mlist.nextfreeGtDiagbandseedSeedPair;
 
     if (arg->verify && mlen > 0) {
@@ -1198,6 +1293,8 @@ static int gt_diagbandseed_algorithm(const GtDiagbandseedInfo *arg,
                                        err);
     }
   }
+  gt_diagbandseed_kmer_iter_delete(aiter);
+  gt_diagbandseed_kmer_iter_delete(biter);
 
   if (had_err) {
     return had_err;
@@ -1284,10 +1381,14 @@ static int gt_diagbandseed_algorithm(const GtDiagbandseedInfo *arg,
                                       stream);
     gt_assert(blen == clist.nextfreeGtDiagbandseedKmerPos);
 
+    aiter = gt_diagbandseed_kmer_iter_new(NULL, alist);
+    biter = gt_diagbandseed_kmer_iter_new(NULL, &clist);
     had_err = gt_diagbandseed_get_mlen_maxfreq(&mrevlen,
                                                &maxfreq,
                                                alist,
                                                &clist,
+                                               aiter,
+                                               biter,
                                                arg->memlimit,
                                                0, /*endposdiff */
                                                arg->norev,
@@ -1301,16 +1402,18 @@ static int gt_diagbandseed_algorithm(const GtDiagbandseedInfo *arg,
     if (had_err) {
       GT_FREEARRAY(&clist, GtDiagbandseedKmerPos);
     } else {
-      mrevlist = gt_diagbandseed_get_seedpairs(alist,
-                                               &clist,
+      gt_diagbandseed_kmer_iter_reset(aiter);
+      gt_diagbandseed_kmer_iter_reset(biter);
+      mrevlist = gt_diagbandseed_get_seedpairs(aiter,
+                                               biter,
                                                maxfreq,
                                                mrevlen,
                                                0, /* endposdiff */
                                                selfcomp,
-                                               true, /* delete_clist */
                                                arg->debug_seedpair,
                                                arg->verbose,
                                                stream);
+      GT_FREEARRAY(&clist, GtDiagbandseedKmerPos);
       mrevlen = mrevlist.nextfreeGtDiagbandseedSeedPair;
 
       if (arg->verify && mrevlen > 0) {
@@ -1324,6 +1427,8 @@ static int gt_diagbandseed_algorithm(const GtDiagbandseedInfo *arg,
                                          err);
       }
     }
+    gt_diagbandseed_kmer_iter_delete(aiter);
+    gt_diagbandseed_kmer_iter_delete(biter);
   }
 
   /* Process first mlist, unless already done */
