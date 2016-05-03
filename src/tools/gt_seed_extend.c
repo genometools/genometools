@@ -792,8 +792,8 @@ static int gt_seed_extend_runner(int argc,
 
   /* Fill struct of algorithm arguments */
   if (!had_err) {
-    GtDiagbandseedExtendParams *extp;
-    GtDiagbandseedInfo *info;
+    GtDiagbandseedExtendParams *extp = NULL;
+    GtDiagbandseedInfo *info = NULL;
     GtUword sensitivity = 0;
     GtUword anum = arguments->dbs_parts;
     GtUword bnum = arguments->dbs_parts;
@@ -808,6 +808,20 @@ static int gt_seed_extend_runner(int argc,
 
     gt_assert(gt_encseq_num_of_sequences(aencseq) > 0);
     gt_assert(gt_encseq_num_of_sequences(bencseq) > 0);
+
+    /* Get sequence ranges */
+    had_err = gt_seed_extend_compute_parts(aseqranges,
+                                           &anum,
+                                           aencseq,
+                                           apick,
+                                           err);
+    if (!had_err) {
+      had_err = gt_seed_extend_compute_parts(bseqranges,
+                                             &bnum,
+                                             bencseq,
+                                             bpick,
+                                             err);
+    }
 
     extp = gt_diagbandseed_extend_params_new(errorpercentage,
                                              arguments->se_alignlength,
@@ -843,27 +857,15 @@ static int gt_seed_extend_runner(int argc,
                                     arguments->dbs_debug_seedpair,
                                     arguments->extend_last,
                                     arguments->use_kmerfile,
-                                    extp);
+                                    extp,
+                                    anum,
+                                    bnum);
 
-    /* Get sequence ranges and start algorithm */
-    had_err = gt_seed_extend_compute_parts(aseqranges,
-                                           &anum,
-                                           aencseq,
-                                           apick,
-                                           err);
-    if (!had_err) {
-      had_err = gt_seed_extend_compute_parts(bseqranges,
-                                             &bnum,
-                                             bencseq,
-                                             bpick,
-                                             err);
-    }
+    /* Start algorithm */
     if (!had_err) {
       had_err = gt_diagbandseed_run(info,
                                     aseqranges,
                                     bseqranges,
-                                    anum,
-                                    bnum,
                                     err);
     }
 

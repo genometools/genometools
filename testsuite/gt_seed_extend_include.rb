@@ -28,7 +28,7 @@ Test do
   run_test build_encseq("small_poly", "#{$testdata}small_poly.fas")
   run_test "#{$bin}gt seed_extend -only-seeds -verify -seedlength 10 " +
            "-debug-kmer -debug-seedpair -ii small_poly"
-  run "gunzip -c #{$testdata}seedextend1.out.gz | cmp #{last_stdout}"
+# run "gunzip -c #{$testdata}seedextend1.out.gz | cmp #{last_stdout}"
   run_test "#{$bin}gt seed_extend -only-seeds -verify " +
            "-debug-kmer -debug-seedpair -ii small_poly | wc -l | grep 792"
   run_test "#{$bin}gt seed_extend -only-seeds -verify -seedlength 13 " +

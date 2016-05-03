@@ -31,8 +31,6 @@ typedef struct GtDiagbandseedExtendParams GtDiagbandseedExtendParams;
 int gt_diagbandseed_run(const GtDiagbandseedInfo *arg,
                         const GtRange *aseqranges,
                         const GtRange *bseqranges,
-                        GtUword anumseqranges,
-                        GtUword bnumseqranges,
                         GtError *err);
 
 /* The constructor for GtDiagbandseedInfo*/
@@ -50,7 +48,9 @@ GtDiagbandseedInfo *gt_diagbandseed_info_new(GtEncseq *aencseq,
                                              bool debug_seedpair,
                                              bool extend_last,
                                              bool use_kmerfile,
-                                             GtDiagbandseedExtendParams *extp);
+                                             GtDiagbandseedExtendParams *extp,
+                                             GtUword anumseqranges,
+                                             GtUword bnumseqranges);
 
 /* The constructor for GtDiagbandseedExtendParams*/
 GtDiagbandseedExtendParams *gt_diagbandseed_extend_params_new(
