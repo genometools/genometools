@@ -22,7 +22,8 @@
 #include "core/error_api.h"
 #include "core/range_api.h"
 #include "core/types_api.h"
-#include "match/seed-extend.h"
+#include "match/ft-front-prune.h"
+#include "match/xdrop.h"
 
 typedef struct GtDiagbandseedInfo GtDiagbandseedInfo;
 typedef struct GtDiagbandseedExtendParams GtDiagbandseedExtendParams;

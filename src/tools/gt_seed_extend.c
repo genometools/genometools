@@ -872,11 +872,11 @@ static int gt_seed_extend_runner(int argc,
     /* clean up */
     gt_free(aseqranges);
     gt_free(bseqranges);
+    gt_diagbandseed_extend_params_delete(extp);
     gt_diagbandseed_info_delete(info);
-  } else {
-    gt_encseq_delete(aencseq);
-    gt_encseq_delete(bencseq);
   }
+  gt_encseq_delete(aencseq);
+  gt_encseq_delete(bencseq);
 
   if (!had_err && gt_showtime_enabled()) {
     char *keystring;
