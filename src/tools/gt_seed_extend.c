@@ -80,7 +80,6 @@ typedef struct {
   bool verbose;
   bool seed_display;
   bool seqlength_display;
-  bool extend_last;
   bool use_apos;
   bool histogram;
   bool use_kmerfile;
@@ -428,15 +427,6 @@ static GtOptionParser* gt_seed_extend_option_parser_new(void *tool_arguments)
   gt_option_exclude(op_weakends, op_onl);
   gt_option_is_development_option(op_weakends);
   gt_option_parser_add_option(op, op_weakends);
-
-  /* -extend-last */
-  option = gt_option_new_bool("extend-last",
-                              "Start extension after all SeedPair lists are "
-                              "created",
-                              &arguments->extend_last,
-                              false);
-  gt_option_is_development_option(option);
-  gt_option_parser_add_option(op, option);
 
   /* -use-apos */
   option = gt_option_new_bool("use-apos",
@@ -855,7 +845,6 @@ static int gt_seed_extend_runner(int argc,
                                     arguments->verbose,
                                     arguments->dbs_debug_kmer,
                                     arguments->dbs_debug_seedpair,
-                                    arguments->extend_last,
                                     arguments->use_kmerfile,
                                     extp,
                                     anum,

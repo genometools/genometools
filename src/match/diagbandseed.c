@@ -85,7 +85,6 @@ struct GtDiagbandseedInfo {
   bool verbose;
   bool debug_kmer;
   bool debug_seedpair;
-  bool extend_last;
   bool use_kmerfile;
   GtDiagbandseedExtendParams *extp;
   GtUword anumseqranges;
@@ -142,7 +141,6 @@ GtDiagbandseedInfo *gt_diagbandseed_info_new(GtEncseq *aencseq,
                                              bool verbose,
                                              bool debug_kmer,
                                              bool debug_seedpair,
-                                             bool extend_last,
                                              bool use_kmerfile,
                                              GtDiagbandseedExtendParams *extp,
                                              GtUword anumseqranges,
@@ -161,7 +159,6 @@ GtDiagbandseedInfo *gt_diagbandseed_info_new(GtEncseq *aencseq,
   info->verbose = verbose;
   info->debug_kmer = debug_kmer;
   info->debug_seedpair = debug_seedpair;
-  info->extend_last = extend_last;
   info->use_kmerfile = use_kmerfile;
   info->extp = extp;
   info->anumseqranges = anumseqranges;
@@ -1287,7 +1284,6 @@ static int gt_diagbandseed_algorithm(const GtDiagbandseedInfo *arg,
 
   len_used = alen;
   if (!selfcomp || !arg->norev) len_used += blen;
-  if (!selfcomp && both_strands && arg->extend_last) len_used += blen;
   had_err = gt_diagbandseed_get_mlen_maxfreq(&mlen,
                                              &maxfreq,
                                              aiter,
@@ -1393,20 +1389,18 @@ static int gt_diagbandseed_algorithm(const GtDiagbandseedInfo *arg,
     }
   }
 
-  /* process first mlist, unless extend_last */
-  if (!arg->extend_last) {
-    gt_diagbandseed_process_seeds(&mlist,
-                                  arg->extp,
-                                  processinfo,
-                                  querymoutopt,
-                                  arg->aencseq,
-                                  arg->bencseq,
-                                  arg->seedlength,
-                                  arg->nofwd,
-                                  arg->verbose,
-                                  stream);
-    GT_FREEARRAY(&mlist, GtDiagbandseedSeedPair);
-  }
+  /* process first mlist */
+  gt_diagbandseed_process_seeds(&mlist,
+                                arg->extp,
+                                processinfo,
+                                querymoutopt,
+                                arg->aencseq,
+                                arg->bencseq,
+                                arg->seedlength,
+                                arg->nofwd,
+                                arg->verbose,
+                                stream);
+  GT_FREEARRAY(&mlist, GtDiagbandseedSeedPair);
 
   /* Third (reverse) k-mer list */
   if (both_strands) {
@@ -1490,23 +1484,6 @@ static int gt_diagbandseed_algorithm(const GtDiagbandseedInfo *arg,
     gt_diagbandseed_kmer_iter_delete(biter);
   }
   gt_diagbandseed_kmer_iter_delete(aiter);
-
-  /* Process first mlist, unless already done */
-  if (arg->extend_last) {
-    if (!had_err) {
-      gt_diagbandseed_process_seeds(&mlist,
-                                    arg->extp,
-                                    processinfo,
-                                    querymoutopt,
-                                    arg->aencseq,
-                                    arg->bencseq,
-                                    arg->seedlength,
-                                    arg->nofwd,
-                                    arg->verbose,
-                                    stream);
-    }
-    GT_FREEARRAY(&mlist, GtDiagbandseedSeedPair);
-  }
 
   /* Process second (reverse) mlist */
   if (!had_err && both_strands) {
