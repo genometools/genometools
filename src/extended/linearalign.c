@@ -1,7 +1,7 @@
 /*
   Copyright (C) 2015 Annika Seidel, <annika.seidel@studium.uni-hamburg.de>
   Copyright (C) 2015 Stefan Kurtz, <kurtz@zbh.uni-hamburg.de>
-  Copyright (C) 2015 Joerg Winkler, <joerg.winkler@studium.uni-hamburg.de>
+  Copyright (C) 2015 Joerg Winkler, <j.winkler@posteo.de>
   Copyright (C) 2014 Dirk Willrodt, <willrodt@zbh.uni-hamburg.de>
   Copyright (C) 2010 Sascha Steinbiss, <steinbiss@zbh.uni-hamburg.de>
   Copyright (c) 2006-2009 Gordon Gremme <gordon@gremme.org>
