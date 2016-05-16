@@ -27,9 +27,9 @@ Keywords "gt_seed_extend only-seeds verify debug-kmer debug-seedpair small_poly"
 Test do
   run_test build_encseq("small_poly", "#{$testdata}small_poly.fas")
   run_test "#{$bin}gt seed_extend -only-seeds -verify -seedlength 10 " +
-           "-debug-kmer -debug-seedpair -ii small_poly"
+           "-debug-kmer -debug-seedpair -ii small_poly -kmerfile no"
   run "gunzip -c #{$testdata}seedextend1.out.gz | cmp #{last_stdout}"
-  run_test "#{$bin}gt seed_extend -only-seeds -verify " +
+  run_test "#{$bin}gt seed_extend -only-seeds -verify -kmerfile no " +
            "-debug-kmer -debug-seedpair -ii small_poly | wc -l | grep 792"
   run_test "#{$bin}gt seed_extend -only-seeds -verify -seedlength 13 " +
            "-debug-seedpair -ii small_poly"
@@ -192,7 +192,7 @@ Test do
       "--seedcoverage 35 --long 10000  --reverse-complement > longseeded.fasta"
       run_test build_encseq("longseeded", "longseeded.fasta")
       run_test "#{$bin}gt seed_extend -extendgreedy -l 900 " +
-               "-minidentity #{minidentity} -ii longseeded"
+               "-minidentity #{minidentity} -ii longseeded -kmerfile no"
       # Check whether the correct number of alignments are found.
       numalignments = `wc -l #{last_stdout}`.to_i
       # split db fasta header by '|' and add 1 for number of seeds
@@ -223,13 +223,14 @@ Test do
     ["xdrop","greedy"].each do |ext|
       run_test "#{$bin}gt seed_extend -extend#{ext} 100 -l #{extendlength-20}" +
                " -minidentity #{minid} -seedlength #{seedlength} -no-reverse " +
-               "-mincoverage #{seedlength} -seed-display -ii all"
+               "-mincoverage #{seedlength} -seed-display -ii all -kmerfile no"
       grep last_stdout, /^\d+ \d+ \d+ . \d+ \d+ \d+ \d+ \d+ \d+/
       run "mv #{last_stdout} combined.out"
       split_output("combined")
       run_test "#{$bin}gt seed_extend -extend#{ext} 100 -l #{extendlength-20}" +
                " -minidentity #{minid} -seedlength #{seedlength} -no-reverse " +
-               "-mincoverage #{seedlength} -seed-display -ii db -qii query"
+               "-mincoverage #{seedlength} -seed-display -ii db -qii query " +
+               "-kmerfile no"
       grep last_stdout, /^\d+ \d+ \d+ . \d+ \d+ \d+ \d+ \d+ \d+/
       run "mv #{last_stdout} separated.out"
       split_output("separated")

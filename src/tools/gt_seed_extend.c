@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2015-2016 Joerg Winkler <joerg.winkler@studium.uni-hamburg.de>
+  Copyright (c) 2015-2016 Joerg Winkler <j.winkler@posteo.de>
   Copyright (c) 2015-2016 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -80,9 +80,9 @@ typedef struct {
   bool verbose;
   bool seed_display;
   bool seqlength_display;
-  bool extend_last;
   bool use_apos;
   bool histogram;
+  bool use_kmerfile;
 } GtSeedExtendArguments;
 
 static void* gt_seed_extend_arguments_new(void)
@@ -428,15 +428,6 @@ static GtOptionParser* gt_seed_extend_option_parser_new(void *tool_arguments)
   gt_option_is_development_option(op_weakends);
   gt_option_parser_add_option(op, op_weakends);
 
-  /* -extend-last */
-  option = gt_option_new_bool("extend-last",
-                              "Start extension after all SeedPair lists are "
-                              "created",
-                              &arguments->extend_last,
-                              false);
-  gt_option_is_development_option(option);
-  gt_option_parser_add_option(op, option);
-
   /* -use-apos */
   option = gt_option_new_bool("use-apos",
                               "Discard a seed only if both apos and bpos "
@@ -470,6 +461,13 @@ static GtOptionParser* gt_seed_extend_option_parser_new(void *tool_arguments)
                               &arguments->histogram,
                               true);
   gt_option_is_development_option(option);
+  gt_option_parser_add_option(op, option);
+
+  /* -kmerfile */
+  option = gt_option_new_bool("kmerfile",
+                              "Use pre-calculated k-mers from file (if exist)",
+                              &arguments->use_kmerfile,
+                              true);
   gt_option_parser_add_option(op, option);
 
   /* -v */
@@ -784,8 +782,8 @@ static int gt_seed_extend_runner(int argc,
 
   /* Fill struct of algorithm arguments */
   if (!had_err) {
-    GtDiagbandseedExtendParams *extp;
-    GtDiagbandseedInfo *info;
+    GtDiagbandseedExtendParams *extp = NULL;
+    GtDiagbandseedInfo *info = NULL;
     GtUword sensitivity = 0;
     GtUword anum = arguments->dbs_parts;
     GtUword bnum = arguments->dbs_parts;
@@ -800,6 +798,20 @@ static int gt_seed_extend_runner(int argc,
 
     gt_assert(gt_encseq_num_of_sequences(aencseq) > 0);
     gt_assert(gt_encseq_num_of_sequences(bencseq) > 0);
+
+    /* Get sequence ranges */
+    had_err = gt_seed_extend_compute_parts(aseqranges,
+                                           &anum,
+                                           aencseq,
+                                           apick,
+                                           err);
+    if (!had_err) {
+      had_err = gt_seed_extend_compute_parts(bseqranges,
+                                             &bnum,
+                                             bencseq,
+                                             bpick,
+                                             err);
+    }
 
     extp = gt_diagbandseed_extend_params_new(errorpercentage,
                                              arguments->se_alignlength,
@@ -833,39 +845,27 @@ static int gt_seed_extend_runner(int argc,
                                     arguments->verbose,
                                     arguments->dbs_debug_kmer,
                                     arguments->dbs_debug_seedpair,
-                                    arguments->extend_last,
-                                    extp);
+                                    arguments->use_kmerfile,
+                                    extp,
+                                    anum,
+                                    bnum);
 
-    /* Get sequence ranges and start algorithm */
-    had_err = gt_seed_extend_compute_parts(aseqranges,
-                                           &anum,
-                                           aencseq,
-                                           apick,
-                                           err);
-    if (!had_err) {
-      had_err = gt_seed_extend_compute_parts(bseqranges,
-                                             &bnum,
-                                             bencseq,
-                                             bpick,
-                                             err);
-    }
+    /* Start algorithm */
     if (!had_err) {
       had_err = gt_diagbandseed_run(info,
                                     aseqranges,
                                     bseqranges,
-                                    anum,
-                                    bnum,
                                     err);
     }
 
     /* clean up */
     gt_free(aseqranges);
     gt_free(bseqranges);
+    gt_diagbandseed_extend_params_delete(extp);
     gt_diagbandseed_info_delete(info);
-  } else {
-    gt_encseq_delete(aencseq);
-    gt_encseq_delete(bencseq);
   }
+  gt_encseq_delete(aencseq);
+  gt_encseq_delete(bencseq);
 
   if (!had_err && gt_showtime_enabled()) {
     char *keystring;
@@ -884,7 +884,7 @@ static int gt_seed_extend_runner(int argc,
     gt_timer_show_formatted(seedextendtimer,
                             " overall " GT_WD ".%06ld\n", stdout);
   }
-  if(gt_showtime_enabled()) {
+  if (gt_showtime_enabled()) {
     gt_timer_delete(seedextendtimer);
   }
   return had_err;

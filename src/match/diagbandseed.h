@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2015-2016 Joerg Winkler <joerg.winkler@studium.uni-hamburg.de>
+  Copyright (c) 2015-2016 Joerg Winkler <j.winkler@posteo.de>
   Copyright (c) 2015-2016 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -22,7 +22,8 @@
 #include "core/error_api.h"
 #include "core/range_api.h"
 #include "core/types_api.h"
-#include "match/seed-extend.h"
+#include "match/ft-front-prune.h"
+#include "match/xdrop.h"
 
 typedef struct GtDiagbandseedInfo GtDiagbandseedInfo;
 typedef struct GtDiagbandseedExtendParams GtDiagbandseedExtendParams;
@@ -31,8 +32,6 @@ typedef struct GtDiagbandseedExtendParams GtDiagbandseedExtendParams;
 int gt_diagbandseed_run(const GtDiagbandseedInfo *arg,
                         const GtRange *aseqranges,
                         const GtRange *bseqranges,
-                        GtUword anumseqranges,
-                        GtUword bnumseqranges,
                         GtError *err);
 
 /* The constructor for GtDiagbandseedInfo*/
@@ -48,8 +47,10 @@ GtDiagbandseedInfo *gt_diagbandseed_info_new(GtEncseq *aencseq,
                                              bool verbose,
                                              bool debug_kmer,
                                              bool debug_seedpair,
-                                             bool extend_last,
-                                             GtDiagbandseedExtendParams *extp);
+                                             bool use_kmerfile,
+                                             GtDiagbandseedExtendParams *extp,
+                                             GtUword anumseqranges,
+                                             GtUword bnumseqranges);
 
 /* The constructor for GtDiagbandseedExtendParams*/
 GtDiagbandseedExtendParams *gt_diagbandseed_extend_params_new(

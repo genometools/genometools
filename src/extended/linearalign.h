@@ -1,6 +1,6 @@
 /*
   Copyright (c) 2015 Annika Seidel <annika.seidel@studium.uni-hamburg.de>
-  Copyright (C) 2015 Joerg Winkler <joerg.winkler@studium.uni-hamburg.de>
+  Copyright (C) 2015 Joerg Winkler <j.winkler@posteo.de>
   Copyright (c) 2006-2007 Gordon Gremme <gordon@gremme.org>
   Copyright (c) 2006-2015 Center for Bioinformatics, University of Hamburg
 

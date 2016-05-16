@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2014 Joerg Winkler <joerg.winkler@studium.uni-hamburg.de>
+  Copyright (c) 2014 Joerg Winkler <j.winkler@posteo.de>
   Copyright (c) 2014 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any

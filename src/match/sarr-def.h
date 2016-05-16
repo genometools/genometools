@@ -24,11 +24,10 @@
 #include "core/types_api.h"
 #include "core/unused_api.h"
 #include "core/codetype.h"
+#include "match/declare-readfunc.h"
 
 #include "lcpoverflow.h"
 #include "bcktab.h"
-
-#define FILEBUFFERSIZE 4096
 
 #define SARR_ESQTAB 1U
 #define SARR_SUFTAB (1U << 1)
@@ -45,40 +44,6 @@
                      SARR_BWTTAB |\
                      SARR_DESTAB |\
                      SARR_SSPTAB)
-
-#define DECLAREBufferedfiletype(TYPE)\
-        typedef struct\
-        {\
-          unsigned int nextfree,\
-                       nextread;\
-          TYPE *bufferedfilespace;\
-          FILE *fp;\
-        } GtBufferedfile_ ## TYPE
-
-#define DECLAREREADFUNCTION(TYPE)\
-        GT_UNUSED static int gt_readnextfromstream_ ## TYPE (TYPE *val,\
-                                                  GtBufferedfile_ ## TYPE *buf)\
-        {\
-          if (buf->nextread >= buf->nextfree)\
-          {\
-            buf->nextfree = (unsigned int) fread(buf->bufferedfilespace,\
-                                                 sizeof (TYPE),\
-                                                 (size_t) FILEBUFFERSIZE,\
-                                                 buf->fp);\
-            if (ferror(buf->fp))\
-            {\
-              fprintf(stderr,"error when trying to read next %s",#TYPE);\
-              exit(GT_EXIT_PROGRAMMING_ERROR);\
-            }\
-            buf->nextread = 0;\
-            if (buf->nextfree == 0)\
-            {\
-              return 0;\
-            }\
-          }\
-          *val = buf->bufferedfilespace[buf->nextread++];\
-          return 1;\
-        }
 
 DECLAREBufferedfiletype(GtUword);
 DECLAREREADFUNCTION(GtUword);
