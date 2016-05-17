@@ -22,7 +22,7 @@ import unittest
 class VersionTest(unittest.TestCase):
 
     def test_has_version(self):
-        self.assertIsNotNone(gt.__version__)
+        self.assertNotEqual(gt.__version__, None)
 
 if __name__ == "__main__":
     unittest.main()
