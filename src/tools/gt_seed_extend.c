@@ -48,6 +48,7 @@ typedef struct {
   GtUword dbs_suppress;
   GtUword dbs_memlimit;
   GtUword dbs_parts;
+  GtRange seedpairdistance;
   GtStr *dbs_pick_str;
   GtStr *dbs_memlimit_str;
   bool dbs_debug_kmer;
@@ -55,6 +56,7 @@ typedef struct {
   bool dbs_verify;
   bool weakends;
   bool onlyseeds;
+  bool overlappingseeds;
   /* xdrop extension options */
   GtOption *se_option_xdrop;
   GtUword se_extendxdrop;
@@ -75,7 +77,6 @@ typedef struct {
   GtUword se_alignmentwidth;
   bool norev;
   bool nofwd;
-  bool overlappingseeds;
   bool benchmark;
   bool verbose;
   bool seed_display;
@@ -118,9 +119,10 @@ static GtOptionParser* gt_seed_extend_option_parser_new(void *tool_arguments)
   GtOptionParser *op;
   GtOption *option, *op_gre, *op_xdr, *op_cam, *op_his, *op_dif, *op_pmh,
     *op_len, *op_err, *op_xbe, *op_sup, *op_frq, *op_mem, *op_ali, *op_bia,
-    *op_onl, *op_weakends, *op_seed_display, *op_relax_polish,
-    *op_norev, *op_nofwd, *op_part, *op_pick, *op_seqlength_display;
+    *op_onl, *op_weakends, *op_seed_display, *op_relax_polish, *op_spdist,
+    *op_norev, *op_nofwd, *op_part, *op_pick, *op_seqlength_display, *op_overl;
 
+  static GtRange seedpairdistance_defaults = {1UL, GT_UWORD_MAX};
   gt_assert(arguments != NULL);
 
   /* init */
@@ -403,12 +405,23 @@ static GtOptionParser* gt_seed_extend_option_parser_new(void *tool_arguments)
   gt_option_parser_add_option(op, op_nofwd);
 
   /* -overlappingseeds */
-  option = gt_option_new_bool("overlappingseeds",
-                              "Allow overlapping SeedPairs",
-                              &arguments->overlappingseeds,
-                              false);
-  gt_option_is_development_option(option);
-  gt_option_parser_add_option(op, option);
+  op_overl = gt_option_new_bool("overlappingseeds",
+                                "Allow overlapping SeedPairs",
+                                &arguments->overlappingseeds,
+                                false);
+  gt_option_is_development_option(op_overl);
+  gt_option_parser_add_option(op, op_overl);
+
+  /* -seedpairdistance */
+  op_spdist = gt_option_new_range("seedpairdistance",
+                                  "Only use SeedPairs whose positions differ "
+                                  "in accordance with the specified range",
+                                  &arguments->seedpairdistance,
+                                  &seedpairdistance_defaults);
+  gt_option_exclude(op_spdist, op_overl);
+  gt_option_is_development_option(op_spdist);
+  gt_option_hide_default(op_spdist);
+  gt_option_parser_add_option(op, op_spdist);
 
   /* -benchmark */
   option = gt_option_new_bool("benchmark",
@@ -780,6 +793,15 @@ static int gt_seed_extend_runner(int argc,
                                                matchscore_bias);
   }
 
+  /* Set SeedPair distance according to overlappingseeds flag */
+  if (!had_err && arguments->seedpairdistance.end == GT_UWORD_MAX) {
+    arguments->seedpairdistance.end -= gt_encseq_max_seq_length(aencseq);
+    if (!arguments->overlappingseeds &&
+        arguments->seedpairdistance.start == 1UL) {
+      arguments->seedpairdistance.start = (GtUword)arguments->dbs_seedlength;
+    }
+  }
+
   /* Fill struct of algorithm arguments */
   if (!had_err) {
     GtDiagbandseedExtendParams *extp = NULL;
@@ -840,7 +862,7 @@ static int gt_seed_extend_runner(int argc,
                                     arguments->dbs_seedlength,
                                     arguments->norev,
                                     arguments->nofwd,
-                                    arguments->overlappingseeds,
+                                    &arguments->seedpairdistance,
                                     arguments->dbs_verify,
                                     arguments->verbose,
                                     arguments->dbs_debug_kmer,

@@ -118,7 +118,7 @@ Test do
       end
     end
   end
-  run_test "#{$bin}gt seed_extend -bias-parameters -overlappingseeds " +
+  run_test "#{$bin}gt seed_extend -bias-parameters -seedpairdistance 10 20 " +
   "-seed-display -ii at1MB", :retval => 0
 end
 

@@ -80,7 +80,7 @@ struct GtDiagbandseedInfo {
   unsigned int seedlength;
   bool norev;
   bool nofwd;
-  bool overlappingseeds;
+  GtRange *seedpairdistance;
   bool verify;
   bool verbose;
   bool debug_kmer;
@@ -136,7 +136,7 @@ GtDiagbandseedInfo *gt_diagbandseed_info_new(GtEncseq *aencseq,
                                              unsigned int seedlength,
                                              bool norev,
                                              bool nofwd,
-                                             bool overlappingseeds,
+                                             GtRange *seedpairdistance,
                                              bool verify,
                                              bool verbose,
                                              bool debug_kmer,
@@ -154,7 +154,7 @@ GtDiagbandseedInfo *gt_diagbandseed_info_new(GtEncseq *aencseq,
   info->seedlength = seedlength;
   info->norev = norev;
   info->nofwd = nofwd;
-  info->overlappingseeds = overlappingseeds;
+  info->seedpairdistance = seedpairdistance;
   info->verify = verify;
   info->verbose = verbose;
   info->debug_kmer = debug_kmer;
@@ -646,7 +646,7 @@ static void gt_diagbandseed_merge(GtArrayGtDiagbandseedSeedPair *mlist,
                                   GtUword maxgram,
                                   GtUword memlimit,
                                   GtUword *histogram,
-                                  unsigned int endposdiff,
+                                  GtRange *seedpairdistance,
                                   bool selfcomp,
                                   bool alist_blist_id,
                                   GtUword len_used)
@@ -685,7 +685,8 @@ static void gt_diagbandseed_merge(GtArrayGtDiagbandseedSeedPair *mlist,
             for (bptr = bsegment; bptr < bsegment + blen; bptr++) {
               if (!selfcomp || aptr->seqnum < bptr->seqnum ||
                   (aptr->seqnum == bptr->seqnum &&
-                   aptr->endpos + endposdiff <= bptr->endpos)) {
+                   aptr->endpos + seedpairdistance->start <= bptr->endpos &&
+                   aptr->endpos + seedpairdistance->end >= bptr->endpos)) {
                 /* no duplicates from the same dataset */
                 if (histogram == NULL) {
                   /* save SeedPair in mlist */
@@ -801,7 +802,7 @@ static int gt_diagbandseed_get_mlen_maxfreq(GtUword *mlen,
                                             GtDiagbandseedKmerIterator *aiter,
                                             GtDiagbandseedKmerIterator *biter,
                                             GtUword memlimit,
-                                            unsigned int endposdiff,
+                                            GtRange *seedpairdistance,
                                             GtUword len_used,
                                             bool selfcomp,
                                             bool alist_blist_id,
@@ -833,7 +834,7 @@ static int gt_diagbandseed_get_mlen_maxfreq(GtUword *mlen,
                         maxgram,
                         memlimit,
                         histogram,
-                        alist_blist_id ? endposdiff : 0,
+                        seedpairdistance,
                         selfcomp,
                         alist_blist_id,
                         len_used);
@@ -877,7 +878,7 @@ static GtArrayGtDiagbandseedSeedPair gt_diagbandseed_get_seedpairs(
                                   GtDiagbandseedKmerIterator *biter,
                                   GtUword maxfreq,
                                   GtUword known_size,
-                                  unsigned int endposdiff,
+                                  GtRange *seedpairdistance,
                                   bool selfcomp,
                                   bool debug_seedpair,
                                   bool verbose,
@@ -912,7 +913,7 @@ static GtArrayGtDiagbandseedSeedPair gt_diagbandseed_get_seedpairs(
                         GT_UWORD_MAX, /* maxgram not needed */
                         GT_UWORD_MAX, /* memlimit not needed */
                         NULL, /* histogram not needed: save seed pairs */
-                        endposdiff,
+                        seedpairdistance,
                         selfcomp,
                         false, /* not needed */
                         0); /* len_used not needed */
@@ -1207,7 +1208,7 @@ static int gt_diagbandseed_algorithm(const GtDiagbandseedInfo *arg,
   GtArrayGtDiagbandseedSeedPair mlist, mrevlist;
   GtDiagbandseedKmerIterator *aiter = NULL, *biter = NULL;
   GtUword alen = 0, blen = 0, mlen = 0, mrevlen = 0, maxfreq, len_used;
-  unsigned int endposdiff;
+  GtRange seedpairdistance = *arg->seedpairdistance;
   const char *blist_file = NULL;
   int had_err = 0;
   bool alist_blist_id, both_strands, selfcomp, equalranges, use_blist = false;
@@ -1219,13 +1220,13 @@ static int gt_diagbandseed_algorithm(const GtDiagbandseedInfo *arg,
   gt_assert(arg != NULL && aseqrange != NULL && bseqrange != NULL);
 
   maxfreq = arg->maxfreq;
-  endposdiff = !arg->overlappingseeds ? arg->seedlength : 1;
   selfcomp = (arg->bencseq == arg->aencseq &&
               gt_range_overlap(aseqrange, bseqrange))
               ? true : false;
   equalranges = gt_range_compare(aseqrange, bseqrange) == 0 ? true : false;
   alist_blist_id = selfcomp && !arg->nofwd && equalranges ? true : false;
   both_strands = (arg->norev || arg->nofwd) ? false : true;
+  if (!alist_blist_id) seedpairdistance.start = 0UL;
 
   if (arg->verbose && (arg->anumseqranges > 1 || arg->bnumseqranges > 1)) {
     fprintf(stream, "# Process part " GT_WU " vs part " GT_WU "\n",
@@ -1299,7 +1300,7 @@ static int gt_diagbandseed_algorithm(const GtDiagbandseedInfo *arg,
                                              aiter,
                                              biter,
                                              arg->memlimit,
-                                             endposdiff,
+                                             &seedpairdistance,
                                              len_used,
                                              selfcomp,
                                              alist_blist_id,
@@ -1314,7 +1315,7 @@ static int gt_diagbandseed_algorithm(const GtDiagbandseedInfo *arg,
                                           biter,
                                           maxfreq,
                                           mlen,
-                                          alist_blist_id ? endposdiff : 0,
+                                          &seedpairdistance,
                                           selfcomp,
                                           arg->debug_seedpair,
                                           arg->verbose,
@@ -1416,6 +1417,7 @@ static int gt_diagbandseed_algorithm(const GtDiagbandseedInfo *arg,
   if (both_strands) {
     GtArrayGtDiagbandseedKmerPos clist;
     gt_assert(blist_file == NULL && !use_blist);
+    seedpairdistance.start = 0UL;
     if (arg->use_kmerfile) {
       blist_file = gt_diagbandseed_kmer_filename(arg->bencseq, arg->seedlength,
                                                  false, arg->bnumseqranges,
@@ -1453,7 +1455,7 @@ static int gt_diagbandseed_algorithm(const GtDiagbandseedInfo *arg,
                                                  aiter,
                                                  biter,
                                                  arg->memlimit,
-                                                 0, /*endposdiff */
+                                                 &seedpairdistance,
                                                  len_used,
                                                  selfcomp,
                                                  alist_blist_id,
@@ -1469,7 +1471,7 @@ static int gt_diagbandseed_algorithm(const GtDiagbandseedInfo *arg,
                                                biter,
                                                maxfreq,
                                                mrevlen,
-                                               0, /* endposdiff */
+                                               &seedpairdistance,
                                                selfcomp,
                                                arg->debug_seedpair,
                                                arg->verbose,
