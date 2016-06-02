@@ -211,3 +211,17 @@ matchers = {
   end;
 }
 matchers.should_equal = matchers.should_be
+
+-- also make matchers available as expect(foo).to_X() instead of
+-- expect(foo).should_X() to make them more similar to natural language
+_matchers = {}
+for m, f in pairs(matchers) do
+  if m:match('^should_') then
+    if m:match('^should_not_') then
+      _matchers[m:gsub('should_not_', 'not_to_')] = f
+    end
+    _matchers[m:gsub('should_', 'to_')] = f
+  end
+  _matchers[m] = f
+end
+matchers = _matchers
