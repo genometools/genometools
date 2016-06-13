@@ -37,9 +37,9 @@ struct GtKarlinAltschulStat
 typedef struct{
   double *sprob;
   GtWord low_score,
-         high_score,
-         min_score,
-         max_score;
+         high_score;
+         /*min_score,
+         max_score;*/
 } ScoringFrequency;
 
 typedef struct{
@@ -150,17 +150,45 @@ static double gt_karlin_altschul_stat_calculate_H(const ScoringFrequency *sf,
    return H;
 }
 
-static double gt_karlin_altschul_stat_calculate_ungapped_K(GT_UNUSED const ScoringFrequency *sf,
-                                                           GT_UNUSED double lambda)
+static double gt_karlin_altschul_stat_calculate_ungapped_K(const ScoringFrequency *sf,
+                                                           double lambda)
 {
   double H, K = 0;
+  GtWord low, high, range, div;
 
   /* TODO: GT_Error object?
-   * karlin-altschul theory works only if lambda >0 && H > 0*/
+   * karlin-altschul theory works only if lambda > 0 && H > 0*/
 
   /* TODO: check score_average */
 
   H = gt_karlin_altschul_stat_calculate_H(sf, lambda);
+
+  low = sf->low_score;
+  high = sf->high_score;
+  range = high - low;
+
+  div = 1; /* TODO: greatest common divisor */
+
+  low /= div;
+  high /= div;
+  lambda *= div;
+
+  if (low == -1 && high == 1)
+  {
+    //TODO case 1
+  }
+
+  if (low == -1 || high == 1)
+  {
+    if (high != 1)
+    {
+      //Todo: case 3
+    }
+
+    //Todo: case 2
+  }
+
+  //TODO: otherwise case
 
    return K;
 }
