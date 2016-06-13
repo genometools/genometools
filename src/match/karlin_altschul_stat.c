@@ -120,11 +120,42 @@ static ScoringFrequency *gt_karlin_altschul_stat_scoring_freuqnecy(
 }
 
 static double gt_karlin_altschul_stat_calculate_ungapped_lambda(
-                                           GT_UNUSED const ScoringFrequency *sf)
+                                                     const ScoringFrequency *sf)
 {
-   double lambda = 0;
+  double x0, x, lambda, tolerance, phi, dphi;
+  GtWord i, low, high;
 
-   /* TODO solve phi(lambda) = -1 + sum_{i=l}^{u} sprob(i)*exp(i*lambda) = 0 */
+  /* solve phi(lambda) = -1 + sum_{i=l}^{u} sprob(i)*exp(i*lambda) = 0 */
+
+  x0 = 0.5; /* x0 in (0,1) */
+  tolerance = 1.e-5;
+  GtWord kMaxIterations = 20;
+
+  low = sf->low_score;
+  high = sf->high_score;
+
+  for (i = 0; i < kMaxIterations; i++)
+  {
+    phi = -1;
+    for (i = low; i <= high; i++)
+      phi += sf->sprob[i-low] * exp(i*x);
+
+    dphi = 0;
+    for (i = low; i <= high; i++)
+      dphi += sf->sprob[i-low] * exp(i*x) * i;
+
+    x = x0 - (phi)/(dphi);
+
+    if (abs(x-x0) < tolerance)
+      break;
+
+    x0 = x;
+  }
+
+  lambda = x;
+
+  /* TODO: better solution would be to apply newton's method to
+   * polynomial (s. blast)*/
 
    return lambda;
 }

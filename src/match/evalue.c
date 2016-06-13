@@ -49,6 +49,7 @@ double gt_evalue_calculate_bit_score(double raw_score,
   return bit_score;
 }
 
+/* TODO: reference to blast */
 static GtUword gt_evalue_calculate_length_adjustment(GtUword query_length,
                                                      GtUword db_length,
                                                      GtUword num_of_db_seqs,
