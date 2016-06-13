@@ -29,7 +29,9 @@ struct GtKarlinAltschulStat
   double lambda,
          K,
          logK,
-         H;
+         H,
+         alpha_div_lambda, /* TODO: evt alpha und beta nicht hier speichern*/
+         beta;
 };
 
 typedef struct{
@@ -61,6 +63,8 @@ GtKarlinAltschulStat *gt_ka_new(void)
   ka->K = 0;
   ka->logK = 0;
   ka->H = 0;
+  ka->alpha_div_lambda = 0;
+  ka->beta = 0;
   return ka;
 }
 
@@ -82,9 +86,9 @@ double gt_ka_get_logK(const GtKarlinAltschulStat *ka)
 }
 
 /* calculate probabilities of scores */
-ScoringFrequency *gt_karlin_altschul_stat_scoring_freuqnecy(
-                                            const GtAlphabet *alphabet,
-                                            const GtScoreHandler *scorehandler)
+static ScoringFrequency *gt_karlin_altschul_stat_scoring_freuqnecy(
+                                             const GtAlphabet *alphabet,
+                                             const GtScoreHandler *scorehandler)
 {
   unsigned int i, j, numofchars;
   GtWord score, range;
@@ -113,4 +117,58 @@ ScoringFrequency *gt_karlin_altschul_stat_scoring_freuqnecy(
   }
 
   return sf;
+}
+
+static double gt_karlin_altschul_stat_calculate_ungapped_lambda(
+                                           GT_UNUSED const ScoringFrequency *sf)
+{
+   double lambda = 0;
+
+   /* TODO solve phi(lambda) = -1 + sum_{i=l}^{u} sprob(i)*exp(i*lambda) = 0 */
+
+   return lambda;
+}
+
+static double gt_karlin_altschul_stat_calculate_H(GT_UNUSED const ScoringFrequency *sf,
+                                                  GT_UNUSED double lambda)
+{
+   double H = 0;
+
+   return H;
+}
+
+static double gt_karlin_altschul_stat_calculate_ungapped_K(GT_UNUSED const ScoringFrequency *sf,
+                                                           GT_UNUSED double lambda)
+{
+  double H, K = 0;
+
+  /* TODO: GT_Error object?
+   * karlin-altschul theory works only if lambda >0 && H > 0*/
+
+  /* TODO: check score_average */
+
+  H = gt_karlin_altschul_stat_calculate_H(sf, lambda);
+
+   return K;
+}
+
+//TODO:new+fill oder trennen?
+void gt_karlin_altschul_stat_calculate_params(GtKarlinAltschulStat *ka,
+                                         GT_UNUSED bool ungapped_alignment,
+                                         GT_UNUSED GtAlphabet *alphabet,
+                                         GT_UNUSED GtScoreHandler *scorehandler)
+{
+  /* New ScoringFrequency */
+  ScoringFrequency *sf =
+                        gt_karlin_altschul_stat_scoring_freuqnecy(alphabet,
+                                                                  scorehandler);
+
+  /* karlin altschul parameters for ungapped alignments */
+  ka->lambda = gt_karlin_altschul_stat_calculate_ungapped_lambda(sf);
+  ka->K = gt_karlin_altschul_stat_calculate_ungapped_K(sf, ka->lambda);
+  ka->logK = log(ka->K);
+  ka->alpha_div_lambda = (1/ka->H);
+  ka->beta = 0;
+
+  /*TODO: gapped alignments*/
 }
