@@ -129,10 +129,23 @@ static double gt_karlin_altschul_stat_calculate_ungapped_lambda(
    return lambda;
 }
 
-static double gt_karlin_altschul_stat_calculate_H(GT_UNUSED const ScoringFrequency *sf,
-                                                  GT_UNUSED double lambda)
+static double gt_karlin_altschul_stat_calculate_H(const ScoringFrequency *sf,
+                                                  double lambda)
 {
-   double H = 0;
+  double H, sum, etonlambda;
+  GtWord i, low, high;
+  gt_assert(sf->sprob);
+
+  low = sf->low_score;
+  high = sf->high_score;
+
+  etonlambda = exp(-lambda);
+  sum = low * sf->sprob[low];
+  for (i = low + 1; i <= high; i++)
+    sum = i * sf->sprob[i-low] + etonlambda * sum;
+
+  H = lambda * sum/pow(etonlambda,high);
+  /*TODO: case underflow*/
 
    return H;
 }
