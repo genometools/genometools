@@ -36,6 +36,19 @@
  *
  */
 
+double gt_evalue_calculate_bit_score(double raw_score,
+                                     const GtKarlinAltschulStat *ka)
+{
+  double bit_score, lambda, logK;
+  gt_assert(ka);
+
+  lambda = gt_karlin_altschul_stat_get_lambda(ka);
+  logK = gt_karlin_altschul_stat_get_logK(ka);
+
+  bit_score =  (raw_score * lambda - logK)/log(2);
+  return bit_score;
+}
+
 double gt_evalue_calculate(const GtKarlinAltschulStat *ka,
                            GtUword searchspace,
                            double bit_score)
