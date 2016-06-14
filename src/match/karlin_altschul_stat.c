@@ -122,40 +122,46 @@ static ScoringFrequency *gt_karlin_altschul_stat_scoring_freuqnecy(
 static double gt_karlin_altschul_stat_calculate_ungapped_lambda(
                                                      const ScoringFrequency *sf)
 {
-  double x0, x, lambda, tolerance, phi, dphi;
-  GtWord i, low, high;
+  double x0, x, lambda, tolerance, q, dq;
+  GtWord low, high;
+  GtUword i,j;
 
   /* solve phi(lambda) = -1 + sum_{i=l}^{u} sprob(i)*exp(i*lambda) = 0 */
 
   x0 = 0.5; /* x0 in (0,1) */
   tolerance = 1.e-5;
-  GtWord kMaxIterations = 20;
+  GtUword kMaxIterations = 20;
 
   low = sf->low_score;
   high = sf->high_score;
 
+ /* write phi as phi(lambda) = exp(u*lambda) * q(exp(-lambda)) and solve the
+  * polynomial q by apply newton's method
+  *
+  * q(x) = -x^u + sum_{k=0}^{u-l} sprob(u-k)* x^k
+  */
   for (i = 0; i < kMaxIterations; i++)
   {
-    phi = -1;
-    for (i = low; i <= high; i++)
-      phi += sf->sprob[i-low] * exp(i*x);
+    q = -pow(x0,high);
+    for (j = 0; j <= high-low; j++)
+      q += sf->sprob[high-low-j] * pow(x0,j);
 
-    dphi = 0;
-    for (i = low; i <= high; i++)
-      dphi += sf->sprob[i-low] * exp(i*x) * i;
+    dq = -high*pow(x0,(high-1));
+    for (j = 1; j <= high-low; j++)
+      dq += sf->sprob[high-low-j]*j*pow(x0,j-1);
 
-    x = x0 - (phi)/(dphi);
+    x = x0 - (q/dq);
 
-    if (abs(x-x0) < tolerance)
+    if (fabs(x-x0) < tolerance)
       break;
 
     x0 = x;
   }
 
-  lambda = x;
+  lambda = -log(x);
 
-  /* TODO: better solution would be to apply newton's method to
-   * polynomial (s. blast)*/
+  /* better solution would be to apply Horner's rule for evaluating a
+     polynomial and its derivative (s. blast), but for the moment it works */
 
    return lambda;
 }
