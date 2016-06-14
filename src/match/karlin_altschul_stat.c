@@ -177,7 +177,7 @@ static double gt_karlin_altschul_stat_calculate_H(const ScoringFrequency *sf,
   high = sf->high_score;
 
   etonlambda = exp(-lambda);
-  sum = low * sf->sprob[low];
+  sum = low * sf->sprob[0];
   for (i = low + 1; i <= high; i++)
     sum = i * sf->sprob[i-low] + etonlambda * sum;
 
