@@ -35,11 +35,10 @@ struct GtKarlinAltschulStat
 };
 
 typedef struct{
-  double *sprob;
+  double *sprob,
+         score_avg;
   GtWord low_score,
          high_score;
-         /*min_score,
-         max_score;*/
 } ScoringFrequency;
 
 typedef struct{
@@ -49,11 +48,11 @@ typedef struct{
 
 /* provisional solution */
 static LetterProb nt_prob[] = {
-  { 'A', 25.00 },
-  { 'C', 25.00 },
-  { 'G', 25.00 },
-  { 'T', 25.00 }
-};
+  { 'A', 0.25 },
+  { 'C', 0.25 },
+  { 'G', 0.25 },
+  { 'T', 0.25 }
+};/* TODO: in generale normalize */
 
 GtKarlinAltschulStat *gt_ka_new(void)
 {
@@ -91,17 +90,18 @@ static ScoringFrequency *gt_karlin_altschul_stat_scoring_freuqnecy(
                                              const GtScoreHandler *scorehandler)
 {
   unsigned int i, j, numofchars;
-  GtWord score, range;
+  GtWord score, low_score, high_score, score_sum, range;
+  double score_avg;
 
   ScoringFrequency *sf = gt_malloc(sizeof(*sf));
   gt_assert(sf);
 
   /* TODO: make generalizations of score/cost functionn,
    * min/max in scorehandler? */
-  sf->low_score = -2;
-  sf->high_score = 2;
+  low_score  = -2;  //= scorehandler->low_score
+  high_score = 2; //scorehandler->high_score
   range = 2 - (-2) + 1; /*TODO: range = score_max-score_min+1*/
-  sf->sprob = gt_malloc(range * sizeof (*sf->sprob));
+  sf->sprob = gt_calloc(range, sizeof (*sf->sprob));
 
   numofchars = gt_alphabet_num_of_chars(alphabet);
 
@@ -110,11 +110,36 @@ static ScoringFrequency *gt_karlin_altschul_stat_scoring_freuqnecy(
     for (j = 0; j < numofchars; j++)
       score = gt_scorehandler_get_replacement(scorehandler, i, j);
 
-      if (score >= sf->low_score) /* TODO: error check */
-        sf->sprob[score-sf->low_score] += nt_prob[i].p * nt_prob[j].p;
+      if (score >= low_score) /* TODO: error check */
+        sf->sprob[score-low_score] += nt_prob[i].p * nt_prob[j].p;
         /* TODO: make generalizations of alphabet probabilities,
            for now nt_prob */
   }
+  
+
+  bool set_low = true;
+  score_sum = 0;
+  for (score = low_score; score <= high_score; score++)
+  {
+    if (sf->sprob[score-low_score] > 0)
+    {
+      score_sum += score;
+      sf->high_score = score;
+      if (set_low)
+      {
+        sf->low_score = score;
+        set_low = false;
+      }
+    }
+  }
+  
+  score_avg = 0;
+  for (score = sf->low_score; score <= sf->high_score; score++) 
+  {
+    sf->sprob[score-low_score] /= score_sum;
+    score_avg += score * sf->sprob[score-low_score];
+  }
+  sf->score_avg = score_avg;
 
   return sf;
 }
