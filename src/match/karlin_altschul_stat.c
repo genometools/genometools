@@ -213,46 +213,51 @@ static double gt_karlin_altschul_stat_calculate_H(const ScoringFrequency *sf,
 }
 
 static double gt_karlin_altschul_stat_calculate_ungapped_K(const ScoringFrequency *sf,
-                                                           double lambda)
+                                                           double lambda, double H)
 {
-  double H, K = 0;
-  GtWord low, high, range, div;
+  GtWord low, high, div;
+  double score_avg, score_avg_div, one_minus_expnlambda, K;
 
-  /* TODO: GT_Error object?
-   * karlin-altschul theory works only if lambda > 0 && H > 0*/
+  gt_assert(lambda > 0 && H > 0);
 
-  /* TODO: check score_average */
-
-  H = gt_karlin_altschul_stat_calculate_H(sf, lambda);
-
-  low = sf->low_score;
-  high = sf->high_score;
-  range = high - low;
+  score_avg = sf->score_avg;
+  gt_assert(score_avg >= 0.0);
 
   div = 1; /* TODO: greatest common divisor */
 
-  low /= div;
-  high /= div;
+  low = sf->low_score/div;
+  high = sf->high_score/div;
   lambda *= div;
+  
+  /* range = high - low; */
 
   if (low == -1 && high == 1)
   {
-    //TODO case 1
+      K = (sf->sprob[0] - sf->sprob[sf->high_score-sf->low_score]) *
+          (sf->sprob[0] - sf->sprob[sf->high_score-sf->low_score]) / sf->sprob[0];
   }
-
-  if (low == -1 || high == 1)
+  else if (low == -1 || high == 1)
   {
+    one_minus_expnlambda = 1-exp(-lambda);
     if (high != 1)
     {
-      //Todo: case 3
+      score_avg_div = score_avg / div;
+      K = lambda * one_minus_expnlambda / H *(score_avg_div * score_avg_div);
     }
-
-    //Todo: case 2
+    else
+    {
+      K = H/lambda * one_minus_expnlambda;
+    }
+  }
+  else
+  {
+    //TODO: otherwise case
+    
+    /* K = lambda*exp(-2*sigma)/(H*(1-exp(-lambda)) */
+    gt_assert(false); /* not implemented yet */
   }
 
-  //TODO: otherwise case
-
-   return K;
+  return K;
 }
 
 //TODO:new+fill oder trennen?
@@ -268,7 +273,8 @@ void gt_karlin_altschul_stat_calculate_params(GtKarlinAltschulStat *ka,
 
   /* karlin altschul parameters for ungapped alignments */
   ka->lambda = gt_karlin_altschul_stat_calculate_ungapped_lambda(sf);
-  ka->K = gt_karlin_altschul_stat_calculate_ungapped_K(sf, ka->lambda);
+  ka->H = gt_karlin_altschul_stat_calculate_H(sf, ka->lambda);
+  ka->K = gt_karlin_altschul_stat_calculate_ungapped_K(sf, ka->lambda, ka->H);
   ka->logK = log(ka->K);
   ka->alpha_div_lambda = (1/ka->H);
   ka->beta = 0;
