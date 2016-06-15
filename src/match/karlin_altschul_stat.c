@@ -262,9 +262,9 @@ static double gt_karlin_altschul_stat_calculate_ungapped_K(const ScoringFrequenc
 
 //TODO:new+fill oder trennen?
 void gt_karlin_altschul_stat_calculate_params(GtKarlinAltschulStat *ka,
-                                         GT_UNUSED bool ungapped_alignment,
-                                         GT_UNUSED GtAlphabet *alphabet,
-                                         GT_UNUSED GtScoreHandler *scorehandler)
+                                              GT_UNUSED bool ungapped_alignment,
+                                              GtAlphabet *alphabet,
+                                              GtScoreHandler *scorehandler)
 {
   /* New ScoringFrequency */
   ScoringFrequency *sf =

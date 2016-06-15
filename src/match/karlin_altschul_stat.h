@@ -18,11 +18,17 @@
 #ifndef KARLIN_ALTSCHUL_STAT_H
 #define KARLIN_ALTSCHUL_STAT_H
 
+#include "core/alphabet.h"
+#include "extended/scorehandler.h"
 typedef struct GtKarlinAltschulStat GtKarlinAltschulStat;
 
 GtKarlinAltschulStat *gt_karlin_altschul_stat_new(void);
 void gt_karlin_altschul_stat_delete(GtKarlinAltschulStat *ka);
 double gt_karlin_altschul_stat_get_lambda(const GtKarlinAltschulStat *ka);
 double gt_karlin_altschul_stat_get_logK(const GtKarlinAltschulStat *ka);
+void gt_karlin_altschul_stat_calculate_params(GtKarlinAltschulStat *ka,
+                                              bool ungapped_alignment,
+                                              GtAlphabet *alphabet,
+                                              GtScoreHandler *scorehandler);
 
 #endif
