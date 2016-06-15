@@ -18,6 +18,7 @@
 #include <math.h>
 #include "core/ma.h"
 #include "core/minmax.h"
+#include "core/safearith.h"
 #include "core/types_api.h"
 #include "match/evalue.h"
 #include "match/karlin_altschul_stat.h"
@@ -57,16 +58,17 @@ static GtUword gt_evalue_calculate_length_adjustment(GtUword query_length,
                                                      double beta,
                                                      double K)
 {
-  unsigned int i;
+  unsigned int idx;
   const int kMaxIterations = 20;
-  double l_min, l_max, l_next, l, l_bar;
+  double l_min = 0, l_max, l_next, l, l_bar;
   GtUword length_adjustment;
   bool converged = false;
 
   /* l_max is the largest nonnegative solution of
      K * (m - l) * (n - N * l) > MAX(m,n) */
 
-  double c = db_length * query_length - MAX(query_length, db_length)/K;
+  
+  double c = gt_safe_mult_ulong(db_length, query_length) - MAX(query_length, db_length)/K;
   if (c < 0)
     return 0; /* length_adjustnment = 0 */
 
@@ -75,7 +77,7 @@ static GtUword gt_evalue_calculate_length_adjustment(GtUword query_length,
   l_max = 2 * c / (mb + sqrt(mb * mb - 4 * a * c));  /* quadratic formula */
 
   l_next = 0;
-  for (i = 0; i < kMaxIterations; i++)
+  for (idx = 0; idx < kMaxIterations; idx++)
   {
     l = l_next;
     l_bar = beta + alpha_div_lambda *
@@ -97,7 +99,7 @@ static GtUword gt_evalue_calculate_length_adjustment(GtUword query_length,
     }
     if (l_min <= l_bar && l_bar <= l_max)
       l_next = l_bar;
-    else if (i == 0)
+    else if (idx == 0)
       l_next = l_max;
     else
       l_next = (l_min+l_max)/2;
@@ -150,7 +152,7 @@ GtUword gt_evalue_calculate_searchspace(const GtQuerymatch *querymatch,
   effective_db_length = actual_db_length -
                                       (num_of_db_seqs * length_adjustment);
 
-  return effective_query_length * effective_db_length;
+  return gt_safe_mult_ulong(effective_query_length, effective_db_length);
 }
 
 double gt_evalue_calculate(const GtKarlinAltschulStat *ka,

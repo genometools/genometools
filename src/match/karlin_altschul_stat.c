@@ -89,7 +89,7 @@ static ScoringFrequency *gt_karlin_altschul_stat_scoring_freuqnecy(
                                              const GtAlphabet *alphabet,
                                              const GtScoreHandler *scorehandler)
 {
-  unsigned int i, j, numofchars;
+  unsigned int idx, jdx, numofchars;
   GtWord score, low_score, high_score, score_sum, range;
   double score_avg;
 
@@ -105,13 +105,13 @@ static ScoringFrequency *gt_karlin_altschul_stat_scoring_freuqnecy(
 
   numofchars = gt_alphabet_num_of_chars(alphabet);
 
-  for (i = 0; i < numofchars; i++)
+  for (idx = 0; idx < numofchars; idx++)
   {
-    for (j = 0; j < numofchars; j++)
-      score = gt_scorehandler_get_replacement(scorehandler, i, j);
+    for (jdx = 0; jdx < numofchars; jdx++)
+      score = gt_scorehandler_get_replacement(scorehandler, idx, jdx);
 
       if (score >= low_score) /* TODO: error check */
-        sf->sprob[score-low_score] += nt_prob[i].p * nt_prob[j].p;
+        sf->sprob[score-low_score] += nt_prob[idx].p * nt_prob[jdx].p;
         /* TODO: make generalizations of alphabet probabilities,
            for now nt_prob */
   }
@@ -149,7 +149,7 @@ static double gt_karlin_altschul_stat_calculate_ungapped_lambda(
 {
   double x0, x, lambda, tolerance, q, dq;
   GtWord low, high;
-  GtUword i,j;
+  GtUword idx, jdx;
 
   /* solve phi(lambda) = -1 + sum_{i=l}^{u} sprob(i)*exp(i*lambda) = 0 */
 
@@ -165,15 +165,15 @@ static double gt_karlin_altschul_stat_calculate_ungapped_lambda(
   *
   * q(x) = -x^u + sum_{k=0}^{u-l} sprob(u-k)* x^k
   */
-  for (i = 0; i < kMaxIterations; i++)
+  for (idx = 0; idx < kMaxIterations; idx++)
   {
     q = -pow(x0,high);
-    for (j = 0; j <= high-low; j++)
-      q += sf->sprob[high-low-j] * pow(x0,j);
+    for (jdx = 0; jdx <= high-low; jdx++)
+      q += sf->sprob[high-low-jdx] * pow(x0,jdx);
 
     dq = -high*pow(x0,(high-1));
-    for (j = 1; j <= high-low; j++)
-      dq += sf->sprob[high-low-j]*j*pow(x0,j-1);
+    for (jdx = 1; jdx <= high-low; jdx++)
+      dq += sf->sprob[high-low-jdx] * jdx * pow(x0,jdx-1);
 
     x = x0 - (q/dq);
 
@@ -195,7 +195,7 @@ static double gt_karlin_altschul_stat_calculate_H(const ScoringFrequency *sf,
                                                   double lambda)
 {
   double H, sum, etonlambda;
-  GtWord i, low, high;
+  GtWord idx, low, high;
   gt_assert(sf->sprob);
 
   low = sf->low_score;
@@ -203,8 +203,8 @@ static double gt_karlin_altschul_stat_calculate_H(const ScoringFrequency *sf,
 
   etonlambda = exp(-lambda);
   sum = low * sf->sprob[0];
-  for (i = low + 1; i <= high; i++)
-    sum = i * sf->sprob[i-low] + etonlambda * sum;
+  for (idx = low + 1; idx <= high; idx++)
+    sum = idx * sf->sprob[idx-low] + etonlambda * sum;
 
   H = lambda * sum/pow(etonlambda,high);
   /*TODO: case underflow*/
