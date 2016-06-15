@@ -23,16 +23,7 @@
 #include "querymatch.h"
 
 double gt_evalue_calculate(const GtKarlinAltschulStat *ka,
-                           GtUword searchspace,
-                           double bit_score);
-                           
-double gt_evalue_calculate_bit_score(double raw_score,
-                                     const GtKarlinAltschulStat *ka);
-                                     
-GtUword gt_evalue_calculate_searchspace(const GtQuerymatch *querymatch,
-                                        const GtEncseq *encseq,
-                                        double alpha_div_lambda,
-                                        double beta,
-                                        double K);
+                           const GtQuerymatch *querymatch,
+                           const GtEncseq *encseq);
 
 #endif

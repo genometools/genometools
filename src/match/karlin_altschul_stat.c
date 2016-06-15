@@ -54,7 +54,7 @@ static LetterProb nt_prob[] = {
   { 'T', 0.25 }
 };/* TODO: in generale normalize */
 
-GtKarlinAltschulStat *gt_ka_new(void)
+GtKarlinAltschulStat *gt_karlin_altschul_stat_new(void)
 {
   GtKarlinAltschulStat *ka;
   ka = gt_malloc(sizeof (GtKarlinAltschulStat));
@@ -67,21 +67,39 @@ GtKarlinAltschulStat *gt_ka_new(void)
   return ka;
 }
 
-void gt_ka_delete(GtKarlinAltschulStat *ka)
+void gt_karlin_altschul_stat_delete(GtKarlinAltschulStat *ka)
 {
   gt_free(ka);
 }
 
-double gt_ka_get_lambda(const GtKarlinAltschulStat *ka)
+double gt_karlin_altschul_stat_get_lambda(const GtKarlinAltschulStat *ka)
 {
   gt_assert(ka);
   return ka->lambda;
 }
 
-double gt_ka_get_logK(const GtKarlinAltschulStat *ka)
+double gt_karlin_altschul_stat_get_logK(const GtKarlinAltschulStat *ka)
 {
   gt_assert(ka);
   return ka->logK;
+}
+
+double gt_karlin_altschul_stat_get_K(const GtKarlinAltschulStat *ka)
+{
+  gt_assert(ka);
+  return ka->K;
+}
+
+double gt_karlin_altschul_stat_get_alpha(const GtKarlinAltschulStat *ka)
+{
+  gt_assert(ka);
+  return 1/ka->H; /* TODO: for ungapped */
+}
+
+double gt_karlin_altschul_stat_get_beta(const GtKarlinAltschulStat *ka)
+{
+  gt_assert(ka);
+  return 0; /* TODO: for ungapped */
 }
 
 /* calculate probabilities of scores */
@@ -276,8 +294,6 @@ void gt_karlin_altschul_stat_calculate_params(GtKarlinAltschulStat *ka,
   ka->H = gt_karlin_altschul_stat_calculate_H(sf, ka->lambda);
   ka->K = gt_karlin_altschul_stat_calculate_ungapped_K(sf, ka->lambda, ka->H);
   ka->logK = log(ka->K);
-  ka->alpha_div_lambda = (1/ka->H);
-  ka->beta = 0;
 
   /*TODO: gapped alignments*/
 }

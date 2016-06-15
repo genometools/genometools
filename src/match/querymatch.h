@@ -120,6 +120,8 @@ double gt_querymatch_error_rate(GtUword distance,GtUword alignedlen);
 
 GtUword gt_querymatch_distance(const GtQuerymatch *querymatch);
 
+GtWord gt_querymatch_score(const GtQuerymatch *querymatch);
+
 void gt_querymatch_prettyprint(const GtQuerymatch *querymatch);
 
 void gt_querymatch_coordinates_out(const GtQuerymatch *querymatch);

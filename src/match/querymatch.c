@@ -564,6 +564,12 @@ GtUword gt_querymatch_distance(const GtQuerymatch *querymatch)
   return querymatch->distance;
 }
 
+GtWord gt_querymatch_score(const GtQuerymatch *querymatch)
+{
+  gt_assert(querymatch != NULL);
+  return querymatch->score;
+}
+
 GtWord gt_querymatch_distance2score(GtUword distance,GtUword alignedlen)
 {
   return ((GtWord) alignedlen) - (GtWord) (3 * distance);
