@@ -221,7 +221,7 @@ static double gt_karlin_altschul_stat_calculate_ungapped_K(const ScoringFrequenc
   gt_assert(lambda > 0 && H > 0);
 
   score_avg = sf->score_avg;
-  gt_assert(score_avg >= 0.0);
+  gt_assert(score_avg < 0.0);
 
   div = 1; /* TODO: greatest common divisor */
 
