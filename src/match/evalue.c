@@ -58,60 +58,60 @@ static GtUword gt_evalue_calculate_length_adjustment(GtUword query_length,
 {
   unsigned int idx;
   const int kMaxIterations = 20;
-  double l_min = 0, l_max, l_next, l, l_bar;
+  double len_min = 0, len_max, len_next, len, len_bar;
   GtUword length_adjustment;
   bool converged = false;
+  double space, nNm;
 
   /* l_max is the largest nonnegative solution of
      K * (m - l) * (n - N * l) > MAX(m,n) */
 
   
-  double c = gt_safe_mult_ulong(db_length, query_length) - MAX(query_length, db_length)/K;
-  if (c < 0)
+  space = gt_safe_mult_ulong(db_length, query_length) - MAX(query_length, db_length)/K;
+  if (space < 0)
     return 0; /* length_adjustnment = 0 */
 
-  double a = num_of_db_seqs;
-  double mb = query_length * num_of_db_seqs + db_length;
-  l_max = 2 * c / (mb + sqrt(mb * mb - 4 * a * c));  /* quadratic formula */
+  nNm = query_length * num_of_db_seqs + db_length;
+  len_max = 2 * space / (nNm + sqrt(nNm * nNm - 4 * num_of_db_seqs * space));  /* quadratic formula */
 
-  l_next = 0;
+  len_next = 0;
   for (idx = 0; idx < kMaxIterations; idx++)
   {
-    l = l_next;
-    l_bar = beta + alpha_div_lambda *
-            (log(K) + log((query_length-l)*(db_length-num_of_db_seqs*l)));
-    if (l_bar >= l)
+    len = len_next;
+    len_bar = beta + alpha_div_lambda *
+            (log(K) + log((query_length-len)*(db_length-num_of_db_seqs*len)));
+    if (len_bar >= len)
     {
-      l_min = l;
-      if (l_bar -l_min <= 1.0)
+      len_min = len;
+      if (len_bar -len_min <= 1.0)
       {
         converged = true;
         break;
       }
-      if (l_min == l_max)
+      if (len_min == len_max)
         break;
     }
     else
     {
-      l_max = l;
+      len_max = len;
     }
-    if (l_min <= l_bar && l_bar <= l_max)
-      l_next = l_bar;
+    if (len_min <= len_bar && len_bar <= len_max)
+      len_next = len_bar;
     else if (idx == 0)
-      l_next = l_max;
+      len_next = len_max;
     else
-      l_next = (l_min+l_max)/2;
+      len_next = (len_min+len_max)/2;
   }
 
-  length_adjustment = (GtUword) l_min; /* floor(fixed point ) */
+  length_adjustment = (GtUword) len_min; /* floor(fixed point ) */
   if (converged)
   {
-    l = ceil(l_min);
-    if (l <= l_max)
+    len = ceil(len_min);
+    if (len <= len_max)
     {
-      if (alpha_div_lambda * (log(K) + log((query_length-l) *
-                             (db_length-num_of_db_seqs*l))) + beta >= l)
-        length_adjustment = (GtUword) l;
+      if (alpha_div_lambda * (log(K) + log((query_length-len) *
+                             (db_length-num_of_db_seqs*len))) + beta >= len)
+        length_adjustment = (GtUword) len;
     }
   }
 
