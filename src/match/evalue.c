@@ -168,8 +168,7 @@ double gt_evalue_calculate(const GtKarlinAltschulStat *ka,
   gt_assert(ka);
   
   raw_score = gt_querymatch_score(querymatch);
-  bit_score = gt_evalue_calculate_bit_score(ka, raw_score);
-  
+  bit_score = gt_evalue_calculate_bit_score(ka, raw_score); 
   searchspace = gt_evalue_calculate_searchspace(querymatch,
                                                 encseq,
                                                 ka);

@@ -18,6 +18,7 @@
 #include <math.h>
 #include "core/alphabet.h"
 #include "core/ma.h"
+#include "core/minmax.h"
 #include "core/types_api.h"
 #include "match/karlin_altschul_stat.h"
 #include "extended/scorehandler.h"
@@ -104,20 +105,32 @@ static ScoringFrequency *gt_karlin_altschul_stat_scoring_freuqnecy(
                                              const GtScoreHandler *scorehandler)
 {
   unsigned int idx, jdx, numofchars;
-  GtWord score, low_score, high_score, score_sum, range;
+  GtWord score, obs_min = 0, obs_max = 0, score_sum, range;
   double score_avg;
+  
+  gt_assert(alphabet && scorehandler);
 
   ScoringFrequency *sf = gt_malloc(sizeof(*sf));
   gt_assert(sf);
 
-  /* TODO: make generalizations of score/cost functionn,
-   * min/max in scorehandler? */
-  low_score  = -2;  //= scorehandler->low_score for match/mismatch
-  high_score = 2; //scorehandler->high_score for match/mismatch
-  range = 2 - (-2) + 1; /*TODO: range = score_max-score_min+1*/
-  sf->sprob = gt_calloc(range, sizeof (*sf->sprob));
-
   numofchars = gt_alphabet_num_of_chars(alphabet);
+  for (idx = 0; idx < numofchars; idx++)
+  {
+    for (jdx = 0; jdx < numofchars; jdx++)
+    {
+      score = gt_scorehandler_get_replacement(scorehandler, idx, jdx);
+      obs_min = MIN(obs_min, score);
+      obs_max = MAX(obs_max, score);
+    }
+  }
+
+  /* for theoretically valid scoring systems */
+  gt_assert(obs_min <= 0 && obs_max >= 0);
+  sf->low_score = obs_min;
+  sf->high_score = obs_max;
+  
+  range = obs_max - obs_min + 1;
+  sf->sprob = gt_calloc(range, sizeof (*sf->sprob));
 
   for (idx = 0; idx < numofchars; idx++)
   {
@@ -125,37 +138,25 @@ static ScoringFrequency *gt_karlin_altschul_stat_scoring_freuqnecy(
     {
       score = gt_scorehandler_get_replacement(scorehandler, idx, jdx);
 
-      if (score >= low_score) /* TODO: error check */
-        sf->sprob[score-low_score] += nt_prob[idx].p * nt_prob[jdx].p;
+      if (score >= sf->low_score)
+        sf->sprob[score-sf->low_score] += nt_prob[idx].p * nt_prob[jdx].p;
         /* TODO: make generalizations of alphabet probabilities,
            for now nt_prob */
     }
   }
 
-  bool set_low = true;
   score_sum = 0;
-  for (score = low_score; score <= high_score; score++)
+  for (score = obs_min; score <= obs_max; score++)
   {
-    if (sf->sprob[score-low_score] > 0)
-    {
+    if (sf->sprob[score-obs_min] > 0)
       score_sum += score;
-      //sf->high_score = score; TODO
-      if (set_low)
-      {
-        //sf->low_score = score; TODO
-        set_low = false;
-      }
-    }
   }
-/*TODO: change logik */  
-  sf->high_score = high_score;
-  sf->low_score = low_score;
   
   score_avg = 0;
-  for (score = sf->low_score; score <= sf->high_score; score++) 
+  for (score = obs_min; score <= obs_max; score++)
   {
-    sf->sprob[score-low_score] /= score_sum;
-    score_avg += score * sf->sprob[score-low_score];
+    sf->sprob[score-obs_min] /= score_sum;
+    score_avg += score * sf->sprob[score-obs_min];
   }
   sf->score_avg = score_avg;
 
@@ -167,13 +168,13 @@ static double gt_karlin_altschul_stat_calculate_ungapped_lambda(
 {
   double x0, x, lambda, tolerance, q, dq;
   GtWord low, high;
-  GtUword idx, jdx;
+  GtUword kMaxIterations, idx, jdx;
 
   /* solve phi(lambda) = -1 + sum_{i=l}^{u} sprob(i)*exp(i*lambda) = 0 */
 
   x0 = 0.5; /* x0 in (0,1) */
   tolerance = 1.e-5;
-  GtUword kMaxIterations = 20;
+  kMaxIterations = 20;
 
   low = sf->low_score;
   high = sf->high_score;
