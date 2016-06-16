@@ -29,9 +29,7 @@ struct GtKarlinAltschulStat
   double lambda,
          K,
          logK,
-         H,
-         alpha_div_lambda, /* TODO: evt alpha und beta nicht hier speichern*/
-         beta;
+         H;
 };
 
 typedef struct{
@@ -62,8 +60,6 @@ GtKarlinAltschulStat *gt_karlin_altschul_stat_new(void)
   ka->K = 0;
   ka->logK = 0;
   ka->H = 0;
-  ka->alpha_div_lambda = 0;
-  ka->beta = 0;
   return ka;
 }
 
@@ -116,8 +112,8 @@ static ScoringFrequency *gt_karlin_altschul_stat_scoring_freuqnecy(
 
   /* TODO: make generalizations of score/cost functionn,
    * min/max in scorehandler? */
-  low_score  = -2;  //= scorehandler->low_score
-  high_score = 2; //scorehandler->high_score
+  low_score  = -2;  //= scorehandler->low_score for match/mismatch
+  high_score = 2; //scorehandler->high_score for match/mismatch
   range = 2 - (-2) + 1; /*TODO: range = score_max-score_min+1*/
   sf->sprob = gt_calloc(range, sizeof (*sf->sprob));
 
@@ -126,14 +122,15 @@ static ScoringFrequency *gt_karlin_altschul_stat_scoring_freuqnecy(
   for (idx = 0; idx < numofchars; idx++)
   {
     for (jdx = 0; jdx < numofchars; jdx++)
+    {
       score = gt_scorehandler_get_replacement(scorehandler, idx, jdx);
 
       if (score >= low_score) /* TODO: error check */
         sf->sprob[score-low_score] += nt_prob[idx].p * nt_prob[jdx].p;
         /* TODO: make generalizations of alphabet probabilities,
            for now nt_prob */
+    }
   }
-  
 
   bool set_low = true;
   score_sum = 0;
@@ -142,14 +139,17 @@ static ScoringFrequency *gt_karlin_altschul_stat_scoring_freuqnecy(
     if (sf->sprob[score-low_score] > 0)
     {
       score_sum += score;
-      sf->high_score = score;
+      //sf->high_score = score; TODO
       if (set_low)
       {
-        sf->low_score = score;
+        //sf->low_score = score; TODO
         set_low = false;
       }
     }
   }
+/*TODO: change logik */  
+  sf->high_score = high_score;
+  sf->low_score = low_score;
   
   score_avg = 0;
   for (score = sf->low_score; score <= sf->high_score; score++) 
