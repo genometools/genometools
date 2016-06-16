@@ -5,6 +5,16 @@ repfindtestfiles=["Duplicate.fna",
                   "mpomtcg.fna",
                   "at1MB",
                   "ychrIII.fna"]
+seeds = [170039800390891361279027638963673934519,
+         189224055964190192145211745471700259490,
+         80497492730600996116307599313171942911,
+         287388662527785534859766605927664912964,
+         296993902622042895065571446462399141014,
+         267703755545645415708106570926631501781,
+         31312989670081360011048989184888532950,
+         54623490901073137545509422160541861122,
+         255642063275935424280602245704332672807,
+         154944791630888166287160428655840885636]
 
 def testdatadir(filename)
   if filename == 'Duplicate.fna' or filename == 'at1MB'
@@ -189,8 +199,8 @@ Test do
   extendlength = 200
   minid = 80
   opts = "-dna -suf -lcp -tis"
-  3.times do
-    run "#{$scriptsdir}gen-randseq.rb --number 1 --reverse --minidentity #{minid} --seedlength #{seedlength} --length #{extendlength} --mode seeded --namedfiles"
+  for seed in seeds[0..2] do
+    run "#{$scriptsdir}gen-randseq.rb --number 1 --reverse --minidentity #{minid} --seedlength #{seedlength} --length #{extendlength} --mode seeded --namedfiles --seed #{seed}"
     run "#{$bin}gt suffixerator -indexname db-query-index -db db.fna query.fna #{opts}"
     run "#{$bin}gt suffixerator -indexname db-query-r-index -db db.fna query-r.fna #{opts}"
     run "#{$bin}gt suffixerator -indexname db-index -db db.fna #{opts}"
@@ -213,8 +223,8 @@ end
 Name "gt repfind mirror symmetric"
 Keywords "gt_repfind"
 Test do
-  10.times.each do
-    run "#{$scriptsdir}gen-randseq.rb --seedlength 200 --length 2200 --mode mirrored"
+  for seed in seeds do
+    run "#{$scriptsdir}gen-randseq.rb --seedlength 200 --length 2200 --mode mirrored --seed #{seed}"
     run_test "#{$bin}gt suffixerator -suftabuint -db #{last_stdout} " +
              "-dna -suf -tis -lcp -md5 no -des no -sds no -indexname sfx"
     run_test "#{$bin}gt repfind -minidentity 90 -percmathistory 55 " +
