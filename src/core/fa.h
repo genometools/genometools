@@ -89,7 +89,7 @@ enum tmpfp_flags
   TMPFP_DEFAULT_FLAGS = 0,
 };
 #define gt_xtmpfp_generic(template_code, flags) \
-        gt_xtmpfp_generic_func(template_code, TMPFP_DEFAULT_FLAGS, \
+        gt_xtmpfp_generic_func(template_code, flags, \
                                __FILE__, __LINE__)
 FILE*   gt_xtmpfp_generic_func(GtStr *template_code, enum tmpfp_flags flags,
                                const char*, int);
