@@ -107,7 +107,7 @@ double gt_karlin_altschul_stat_get_beta(const GtKarlinAltschulStat *ka)
 }
 
 /* calculate probabilities of scores */
-static ScoringFrequency *gt_karlin_altschul_stat_scoring_freuqnecy(
+static ScoringFrequency *gt_karlin_altschul_stat_scoring_frequency(
                                              const GtAlphabet *alphabet,
                                              const GtScoreHandler *scorehandler)
 {
@@ -294,7 +294,7 @@ void gt_karlin_altschul_stat_calculate_params(GtKarlinAltschulStat *ka,
 {
   /* New ScoringFrequency */
   ScoringFrequency *sf =
-                        gt_karlin_altschul_stat_scoring_freuqnecy(alphabet,
+                        gt_karlin_altschul_stat_scoring_frequency(alphabet,
                                                                   scorehandler);
 
   /* karlin altschul parameters for ungapped alignments */
