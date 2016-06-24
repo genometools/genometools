@@ -24,6 +24,7 @@
 
 double gt_evalue_calculate(const GtKarlinAltschulStat *ka,
                            const GtQuerymatch *querymatch,
-                           const GtEncseq *encseq);
+                           const GtEncseq *dbencseq,
+                           const GtEncseq *queryencseq);
 
 #endif

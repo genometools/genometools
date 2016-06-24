@@ -118,12 +118,14 @@ static GtUword gt_evalue_calculate_length_adjustment(GtUword query_length,
   return length_adjustment;
 }
 
-static GtUword gt_evalue_calculate_searchspace(const GtQuerymatch *querymatch,
-                                               const GtEncseq *encseq,
+static GtUword gt_evalue_calculate_searchspace(const GtEncseq *dbencseq,
+                                               const GtEncseq *queryencseq,
                                                const GtKarlinAltschulStat *ka)
 {
   GtUword total_length_of_db,
+          total_length_of_query,
           num_of_db_seqs,
+          num_of_query_seqs,
           actual_db_length,
           actual_query_length,
           effective_db_length,
@@ -136,12 +138,17 @@ static GtUword gt_evalue_calculate_searchspace(const GtQuerymatch *querymatch,
   beta = gt_karlin_altschul_stat_get_beta(ka);
   K = gt_karlin_altschul_stat_get_K(ka);
 
-  total_length_of_db = gt_encseq_total_length(encseq);
-  num_of_db_seqs = gt_encseq_num_of_sequences(encseq);
+  /* db length */
+  total_length_of_db = gt_encseq_total_length(dbencseq);
+  num_of_db_seqs = gt_encseq_num_of_sequences(dbencseq);
   /* db length without seperators */
   actual_db_length = total_length_of_db - (num_of_db_seqs - 1);
 
-  actual_query_length = gt_querymatch_querylen(querymatch);
+  /* query length */
+  total_length_of_query = gt_encseq_total_length(queryencseq);
+  num_of_query_seqs = gt_encseq_num_of_sequences(queryencseq);
+  /* query length without seperators */
+  actual_query_length = total_length_of_query - (num_of_query_seqs - 1);
 
   length_adjustment = gt_evalue_calculate_length_adjustment(actual_query_length,
                                                             actual_db_length,
@@ -159,7 +166,8 @@ static GtUword gt_evalue_calculate_searchspace(const GtQuerymatch *querymatch,
 
 double gt_evalue_calculate(const GtKarlinAltschulStat *ka,
                            const GtQuerymatch *querymatch,
-                           const GtEncseq *encseq)
+                           const GtEncseq *dbencseq,
+                           const GtEncseq *queryencseq)
 {
   GtUword searchspace;
   GtWord raw_score;
@@ -169,8 +177,8 @@ double gt_evalue_calculate(const GtKarlinAltschulStat *ka,
   
   raw_score = gt_querymatch_score(querymatch);
   bit_score = gt_evalue_calculate_bit_score(ka, raw_score); 
-  searchspace = gt_evalue_calculate_searchspace(querymatch,
-                                                encseq,
+  searchspace = gt_evalue_calculate_searchspace(dbencseq,
+                                                queryencseq,
                                                 ka);
 
   return searchspace * pow(2, -bit_score);
