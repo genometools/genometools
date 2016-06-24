@@ -87,10 +87,17 @@ double gt_karlin_altschul_stat_get_K(const GtKarlinAltschulStat *ka)
   return ka->K;
 }
 
-double gt_karlin_altschul_stat_get_alpha(const GtKarlinAltschulStat *ka)
+double gt_karlin_altschul_stat_get_alpha_div_lambda(const GtKarlinAltschulStat *ka,
+                                                    GtWord matchscore,
+                                                    GtWord mismatchscore)
 {
   gt_assert(ka);
-  return 1/ka->H; /* TODO: for ungapped */
+  if (matchscore == 1 && mismatchscore == 0)
+    return 0;
+  else
+    return ka->lambda/ka->H;
+  
+  /* TODO: for ungapped */
 }
 
 double gt_karlin_altschul_stat_get_beta(const GtKarlinAltschulStat *ka)
