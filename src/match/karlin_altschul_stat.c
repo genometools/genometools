@@ -119,6 +119,9 @@ static ScoringFrequency *gt_karlin_altschul_stat_scoring_frequency(
   double score_avg;
   
   gt_assert(alphabet && scorehandler);
+  
+  /* TODO: make generalizations of alphabet probabilities, for now nt_prob */
+  gt_assert(gt_alphabet_is_dna(alphabet));
 
   ScoringFrequency *sf = gt_malloc(sizeof(*sf));
   gt_assert(sf);
@@ -150,8 +153,6 @@ static ScoringFrequency *gt_karlin_altschul_stat_scoring_frequency(
 
       if (score >= sf->low_score)
         sf->sprob[score-sf->low_score] += nt_prob[idx].p * nt_prob[jdx].p;
-        /* TODO: make generalizations of alphabet probabilities,
-           for now nt_prob */
     }
   }
 
