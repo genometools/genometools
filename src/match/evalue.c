@@ -54,7 +54,8 @@ static GtUword gt_evalue_calculate_length_adjustment(GtUword query_length,
                                                      GtUword num_of_db_seqs,
                                                      double alpha_div_lambda,
                                                      double beta,
-                                                     double K)
+                                                     double K,
+                                                     double logK)
 {
   unsigned int idx;
   const int kMaxIterations = 20;
@@ -80,7 +81,7 @@ static GtUword gt_evalue_calculate_length_adjustment(GtUword query_length,
   {
     len = len_next;
     len_bar = beta + alpha_div_lambda *
-            (log(K) + log((query_length-len)*(db_length-num_of_db_seqs*len)));
+            (logK + log((query_length-len)*(db_length-num_of_db_seqs*len)));
     if (len_bar >= len)
     {
       len_min = len;
@@ -132,13 +133,14 @@ GtUword gt_evalue_calculate_searchspace(const GtEncseq *dbencseq,
           effective_db_length,
           effective_query_length,
           length_adjustment;
-  double alpha_div_lambda, beta, K;
+  double alpha_div_lambda, beta, K, logK;
 
   gt_assert(ka);
   alpha_div_lambda = gt_karlin_altschul_stat_get_alpha_div_lambda(ka,1,0);
   /* 1,0 only useful for unit cost, TODO: generalize */
   beta = gt_karlin_altschul_stat_get_beta(ka);
   K = gt_karlin_altschul_stat_get_K(ka);
+  logK = gt_karlin_altschul_stat_get_logK(ka);
 
   /* db length */
   total_length_of_db = gt_encseq_total_length(dbencseq);
@@ -157,7 +159,7 @@ GtUword gt_evalue_calculate_searchspace(const GtEncseq *dbencseq,
                                                             num_of_db_seqs,
                                                             alpha_div_lambda,
                                                             beta,
-                                                            K);
+                                                            K, logK);
 
   effective_query_length = actual_query_length - length_adjustment;
   effective_db_length = actual_db_length -
