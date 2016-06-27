@@ -119,9 +119,9 @@ static GtUword gt_evalue_calculate_length_adjustment(GtUword query_length,
   return length_adjustment;
 }
 
-static GtUword gt_evalue_calculate_searchspace(const GtEncseq *dbencseq,
-                                               const GtEncseq *queryencseq,
-                                               const GtKarlinAltschulStat *ka)
+GtUword gt_evalue_calculate_searchspace(const GtEncseq *dbencseq,
+                                        const GtEncseq *queryencseq,
+                                        const GtKarlinAltschulStat *ka)
 {
   GtUword total_length_of_db,
           total_length_of_query,
@@ -168,10 +168,8 @@ static GtUword gt_evalue_calculate_searchspace(const GtEncseq *dbencseq,
 
 double gt_evalue_calculate(const GtKarlinAltschulStat *ka,
                            const GtQuerymatch *querymatch,
-                           const GtEncseq *dbencseq,
-                           const GtEncseq *queryencseq)
+                           GtUword searchspace)
 {
-  GtUword searchspace;
   GtWord raw_score;
   double bit_score;
   
@@ -179,9 +177,7 @@ double gt_evalue_calculate(const GtKarlinAltschulStat *ka,
   
   raw_score = gt_querymatch_score(querymatch);
   bit_score = gt_evalue_calculate_bit_score(ka, raw_score); 
-  searchspace = gt_evalue_calculate_searchspace(dbencseq,
-                                                queryencseq,
-                                                ka);
-//TODO: auslagern searchspace berechnung, match, mismatch ergaenzen
+
+//TODO: berechnung, match, mismatch ergaenzen
   return searchspace * pow(2, -bit_score);
 }

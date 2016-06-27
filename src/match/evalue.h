@@ -24,7 +24,10 @@
 
 double gt_evalue_calculate(const GtKarlinAltschulStat *ka,
                            const GtQuerymatch *querymatch,
-                           const GtEncseq *dbencseq,
-                           const GtEncseq *queryencseq);
+                           GtUword searchspace);
+                           
+GtUword gt_evalue_calculate_searchspace(const GtEncseq *dbencseq,
+                                        const GtEncseq *queryencseq,
+                                        const GtKarlinAltschulStat *ka);
 
 #endif
