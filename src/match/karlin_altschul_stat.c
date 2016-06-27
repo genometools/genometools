@@ -95,7 +95,10 @@ double gt_karlin_altschul_stat_get_alpha_div_lambda(const GtKarlinAltschulStat *
   if (matchscore == 1 && mismatchscore == 0)
     return 0;
   else
+  {
+    gt_assert(ka->H != 0.0);
     return ka->lambda/ka->H;
+  }
   
   /* TODO: for ungapped */
 }

@@ -15,6 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#include <float.h>
 #include <math.h>
 #include "core/ma.h"
 #include "core/minmax.h"
@@ -76,7 +77,7 @@ static GtUword gt_evalue_calculate_length_adjustment(GtUword query_length,
   len_max = 2 * space / (nNm + sqrt(nNm * nNm - 4 * num_of_db_seqs * space));  /* quadratic formula */
 
   len_next = 0;
-  //TODO:log K nicht immer wieder neu bestimmen
+
   for (idx = 0; idx < kMaxIterations; idx++)
   {
     len = len_next;
@@ -136,8 +137,10 @@ GtUword gt_evalue_calculate_searchspace(const GtEncseq *dbencseq,
   double alpha_div_lambda, beta, K, logK;
 
   gt_assert(ka);
+  //TODO: berechnung, match, mismatch ergaenzen
   alpha_div_lambda = gt_karlin_altschul_stat_get_alpha_div_lambda(ka,1,0);
   /* 1,0 only useful for unit cost, TODO: generalize */
+
   beta = gt_karlin_altschul_stat_get_beta(ka);
   K = gt_karlin_altschul_stat_get_K(ka);
   logK = gt_karlin_altschul_stat_get_logK(ka);
@@ -173,13 +176,16 @@ double gt_evalue_calculate(const GtKarlinAltschulStat *ka,
                            GtUword searchspace)
 {
   GtWord raw_score;
-  double bit_score;
+  double bit_score,
+         pow2Nbitscore;
   
   gt_assert(ka);
   
   raw_score = gt_querymatch_score(querymatch);
   bit_score = gt_evalue_calculate_bit_score(ka, raw_score); 
 
-//TODO: berechnung, match, mismatch ergaenzen
-  return searchspace * pow(2, -bit_score);
+  pow2Nbitscore = pow(2, -bit_score);
+  gt_assert(pow2Nbitscore > DBL_MAX/searchspace);
+
+  return searchspace * pow2Nbitscore;
 }
