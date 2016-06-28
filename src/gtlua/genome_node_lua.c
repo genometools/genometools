@@ -1,6 +1,7 @@
 /*
   Copyright (c) 2007-2008 Gordon Gremme <gordon@gremme.org>
   Copyright (c) 2014 Sascha Steinbiss <ss34@sanger.ac.uk>
+  Copyright (c) 2016 Daniel Standage <daniel.standage@gmail.com>
   Copyright (c) 2007-2008 Center for Bioinformatics, University of Hamburg
   Copyright (c) 2014 Genome Research Ltd.
 
@@ -792,6 +793,33 @@ static int feature_node_lua_has_child_of_type(lua_State *L)
   return 1;
 }
 
+static int feature_node_lua_count_children_of_type(lua_State *L)
+{
+  GtGenomeNode **gn;
+  GtFeatureNode *fn, GT_UNUSED *fn2 = NULL;
+  GtFeatureNodeIterator *it;
+  bool count = 0;
+  const char *type;
+
+  gn = check_genome_node(L, 1);
+  /* make sure we get a feature node */
+  fn = gt_feature_node_try_cast(*gn);
+  luaL_argcheck(L, fn, 1, "not a feature node");
+  type = gt_symbol(luaL_checkstring(L, 2));
+  it = gt_feature_node_iterator_new(fn);
+  /* skip parent node itself */
+  fn2 = gt_feature_node_iterator_next(it);
+  gt_assert(fn2);
+  while ((fn2 = gt_feature_node_iterator_next(it))) {
+    if (gt_feature_node_get_type(fn2) == type) {
+      count++;
+    }
+  }
+  gt_feature_node_iterator_delete(it);
+  lua_pushnumber(L, count);
+  return 1;
+}
+
 static int genome_node_lua_tostring (lua_State *L)
 {
   GtGenomeNode **gn;
@@ -878,6 +906,7 @@ static const struct luaL_Reg genome_node_lib_m [] = {
   { "direct_children", feature_node_lua_get_direct_children },
   { "attribute_pairs", feature_node_lua_each_attribute },
   { "has_child_of_type", feature_node_lua_has_child_of_type },
+  { "count_children_of_type", feature_node_lua_count_children_of_type },
   { "extract_sequence", feature_node_lua_extract_sequence },
   { "extract_and_translate_sequence",
                               feature_node_lua_extract_and_translate_sequence },
