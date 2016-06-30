@@ -1,5 +1,6 @@
 /*
   Copyright (c) 2008 Gordon Gremme <gordon@gremme.org>
+  Copyright (c) 2016 Sascha Steinbiss <sascha@steinbiss.name>
   Copyright (c) 2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -26,6 +27,23 @@
    -- Returns a new region mapping which maps everything onto sequence file
    -- <seqfile>.
    function region_mapping_new_seqfile(seqfile)
+
+   -- Use <region_mapping> to extract the sequence from <start> to <end> of the
+   -- given sequence ID <seqid>.
+   function region_mapping:get_sequence(seqid, start, end)
+
+   -- Use <region_mapping> to retrieve the sequence length of the given
+   sequence ID <seqid>.
+   function region_mapping:get_sequence_length(seqid)
+
+   -- Use <region_mapping> to get the description of the MD5 sequence ID
+   -- <seqid>.
+   function region_mapping:get_description(seqid)
+
+   -- Use <region_mapping> to return the MD5 fingerprint of the sequence with
+   -- the sequence ID <seqid> and its corresponding <range> (optional).
+   -- Returns both the MD5 fingerprint as a string and the offset.
+   function region_mapping:get_md5_fingerprint(seqid, range)
 */
 int gt_lua_open_region_mapping(lua_State*);
 
