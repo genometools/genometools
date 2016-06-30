@@ -108,6 +108,32 @@ static int region_mapping_lua_get_sequence_length(lua_State *L)
   return 1;
 }
 
+static int region_mapping_lua_get_sequence(lua_State *L)
+{
+  GtRegionMapping **region_mapping;
+  GtError *err;
+  GtStr *seqidstr;
+  char *result;
+  GtUword start, end;
+  const char *seqid;
+  int had_err = 0;
+  gt_assert(L);
+  region_mapping = check_region_mapping(L, 1);
+  err = gt_error_new();
+  seqid = luaL_checkstring(L, 2);
+  start = luaL_checknumber(L, 3);
+  end = luaL_checknumber(L, 4);
+  seqidstr = gt_str_new_cstr(seqid);
+  had_err = gt_region_mapping_get_sequence(*region_mapping, &result, seqidstr,
+                                           start, end, err);
+  gt_str_delete(seqidstr);
+  if (had_err)
+    return gt_lua_error(L, err);
+  gt_error_delete(err);
+  lua_pushstring(L, result);
+  return 1;
+}
+
 static int region_mapping_lua_delete(lua_State *L)
 {
   GtRegionMapping **region_mapping;
@@ -139,6 +165,7 @@ static const struct luaL_Reg region_mapping_lib_f [] = {
 
 static const struct luaL_Reg region_mapping_lib_m [] = {
   { "get_sequence_length", region_mapping_lua_get_sequence_length },
+  { "get_sequence", region_mapping_lua_get_sequence },
   { NULL, NULL }
 };
 
