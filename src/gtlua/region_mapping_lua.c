@@ -179,8 +179,8 @@ static int region_mapping_lua_get_md5_fingerprint(lua_State *L)
     rng = check_range(L, 3);
   seqidstr = gt_str_new_cstr(seqid);
   err = gt_error_new();
-  md5   = gt_region_mapping_get_md5_fingerprint(*region_mapping, seqidstr,
-                                                rng, &offset, err);
+  md5 = gt_region_mapping_get_md5_fingerprint(*region_mapping, seqidstr,
+                                              rng, &offset, err);
   gt_str_delete(seqidstr);
   if (!md5)
     return gt_lua_error(L, err);
