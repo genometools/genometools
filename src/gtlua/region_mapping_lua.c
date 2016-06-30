@@ -1,5 +1,6 @@
 /*
   Copyright (c) 2008 Gordon Gremme <gordon@gremme.org>
+  Copyright (c) 2016 Sascha Steinbiss <sascha@steinbiss.name>
   Copyright (c) 2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
