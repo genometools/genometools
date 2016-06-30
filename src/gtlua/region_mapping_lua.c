@@ -84,6 +84,29 @@ static int region_mapping_lua_new_seqfile(lua_State *L)
   return region_mapping_lua_new_seqfile_matchdesc(L);
 }
 
+static int region_mapping_lua_get_sequence_length(lua_State *L)
+{
+  GtRegionMapping **region_mapping;
+  GtError *err;
+  GtStr *seqidstr;
+  GtUword length;
+  const char *seqid;
+  int had_err = 0;
+  gt_assert(L);
+  region_mapping = check_region_mapping(L, 1);
+  err = gt_error_new();
+  seqid = luaL_checkstring(L, 2);
+  seqidstr = gt_str_new_cstr(seqid);
+  had_err = gt_region_mapping_get_sequence_length(*region_mapping, &length,
+                                                  seqidstr, err);
+  gt_str_delete(seqidstr);
+  if (had_err)
+    return gt_lua_error(L, err);
+  gt_error_delete(err);
+  lua_pushnumber(L, length);
+  return 1;
+}
+
 static int region_mapping_lua_delete(lua_State *L)
 {
   GtRegionMapping **region_mapping;
@@ -113,6 +136,11 @@ static const struct luaL_Reg region_mapping_lib_f [] = {
   { NULL, NULL }
 };
 
+static const struct luaL_Reg region_mapping_lib_m [] = {
+  { "get_sequence_length", region_mapping_lua_get_sequence_length },
+  { NULL, NULL }
+};
+
 int gt_lua_open_region_mapping(lua_State *L)
 {
 #ifndef NDEBUG
@@ -130,8 +158,9 @@ int gt_lua_open_region_mapping(lua_State *L)
   lua_pushstring(L, "__gc");
   lua_pushcfunction(L, region_mapping_lua_delete);
   lua_settable(L, -3);
-  lua_pop(L, 1);
   /* register functions */
+  luaL_register(L, NULL, region_mapping_lib_m);
+  lua_pop(L, 1);
   luaL_register(L, "gt", region_mapping_lib_f);
   lua_pop(L, 1);
   gt_assert(lua_gettop(L) == stack_size);
