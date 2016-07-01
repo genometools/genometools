@@ -1,0 +1,10 @@
+##gff-version   3
+##sequence-region Chr1 1 20
+Chr1	foo	gene	1	20	.	-	.	ID=gene1;
+Chr1	foo	mRNA	1	20	.	-	.	ID=transcript1;Parent=gene1;
+Chr1	foo	CDS	1	1	.	-	2	Parent=transcript1;
+Chr1	foo	CDS	3	3	.	-	0	Parent=transcript1;
+Chr1	foo	CDS	5	5	.	-	1	Parent=transcript1;
+Chr1	foo	CDS	10	10	.	-	2	Parent=transcript1;
+Chr1	foo	CDS	17	17	.	-	0	Parent=transcript1;
+Chr1	foo	CDS	19	20	.	-	2	Parent=transcript1;
