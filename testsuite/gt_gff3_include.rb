@@ -1120,6 +1120,28 @@ Test do
   run "diff #{last_stdout} #{$testdata}cds_check_succ_12.gff3"
 end
 
+Name "gt gff3 (CDS check with short exons 1)"
+Keywords "gt_gff3 cds_check"
+Test do
+  run_test "#{$bin}gt gff3 #{$testdata}gt_gff3_phases1.gff3"
+  run "diff #{last_stdout} #{$testdata}gt_gff3_phases1.out"
+end
+
+Name "gt gff3 (CDS check with short exons 2)"
+Keywords "gt_gff3 cds_check"
+Test do
+  run_test "#{$bin}gt gff3 -tidy #{$testdata}gt_gff3_phases2.gff3 > out"
+  grep last_stderr, /has the wrong phase 0 -> correcting it to 1/
+  run "diff out #{$testdata}gt_gff3_phases1.out"
+end
+
+Name "gt gff3 (CDS check with short exons 3)"
+Keywords "gt_gff3 cds_check"
+Test do
+  run_test "#{$bin}gt gff3 -tidy -retainids #{$testdata}gt_gff3_phases3.gff3"
+  run "diff #{last_stdout} #{$testdata}gt_gff3_phases3.out"
+end
+
 Name "gt gff3 (-addids no)"
 Keywords "gt_gff3 addids"
 Test do
