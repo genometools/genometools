@@ -74,7 +74,9 @@ struct GtSpecResults {
        seen_meta,
        seen_region,
        seen_comment,
-       seen_sequence;
+       seen_sequence,
+       has_failures,
+       has_runtime_errors;
   GtUword checked_types,
           checked_aspects,
           checked_ccs,
@@ -159,6 +161,7 @@ GtSpecResults *gt_spec_results_new(void)
   spec_results->comment_aspects = gt_hashmap_new(GT_HASH_STRING, NULL,
                                                (GtFree) gt_spec_aspect_delete);
   spec_results->warnings = gt_str_array_new();
+  spec_results->has_runtime_errors = spec_results->has_failures = false;
   return spec_results;
 }
 
@@ -246,6 +249,8 @@ void gt_spec_results_add_result(GtSpecResults *sr,
       }
       gt_assert(sanr);
       gt_str_array_add_cstr(sanr->failure_messages, error_string);
+      if (!sr->has_failures)
+        sr->has_failures = true;
       break;
     case GT_SPEC_RUNTIME_ERROR:
       if (!(sanr = gt_hashmap_get(sa->aspect_node_results, node))) {
@@ -255,6 +260,8 @@ void gt_spec_results_add_result(GtSpecResults *sr,
       }
       gt_assert(sanr);
       gt_str_array_add_cstr(sanr->runtime_error_messages, error_string);
+      if (!sr->has_runtime_errors)
+        sr->has_runtime_errors = true;
       break;
   }
   sa->last_node = node;
@@ -413,6 +420,18 @@ static int gt_spec_results_lua_print(lua_State* L) {
     }
 
     return 0;
+}
+
+bool gt_spec_results_has_runtime_errors(GtSpecResults *sr)
+{
+  gt_assert(sr);
+  return sr->has_runtime_errors;
+}
+
+bool gt_spec_results_has_failures(GtSpecResults *sr)
+{
+  gt_assert(sr);
+  return sr->has_failures;
 }
 
 int gt_spec_results_render_template(GtSpecResults *sr, const char *template,

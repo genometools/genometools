@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2014-2015 Sascha Steinbiss <ss34@sanger.ac.uk>
-  Copyright (c) 2014-2015 Genome Research Ltd.
+  Copyright (c) 2014-2016 Sascha Steinbiss <ss34@sanger.ac.uk>
+  Copyright (c) 2014-2016 Genome Research Ltd.
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -301,6 +301,11 @@ static int gt_speck_runner(int argc, const char **argv, int parsed_args,
                                                 arguments->colored,
                                                 gt_str_get(runtime), err);
       gt_str_delete(runtime);
+    }
+
+    if (gt_spec_results_has_runtime_errors(res)
+          || gt_spec_results_has_failures(res)) {
+      had_err = -2;
     }
   }
 
