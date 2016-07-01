@@ -1142,6 +1142,14 @@ Test do
   run "diff #{last_stdout} #{$testdata}gt_gff3_phases3.out"
 end
 
+4.upto(7) do |i|
+  Name "gt gff3 (CDS check with short exons #{i})"
+  Keywords "gt_gff3 cds_check"
+  Test do
+    run_test "#{$bin}gt gff3 #{$testdata}gt_gff3_phases#{i}.gff3"
+  end
+end
+
 Name "gt gff3 (-addids no)"
 Keywords "gt_gff3 addids"
 Test do

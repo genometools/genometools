@@ -44,7 +44,6 @@ static int check_cds_phases(GtArray *cds_features, GtCDSCheckVisitor *v,
   GtStrand strand;
   bool first = true;
   GtUword i,
-          current_length = 0,
           total_length = 0;
   int had_err = 0;
   gt_error_check(err);
@@ -108,16 +107,26 @@ static int check_cds_phases(GtArray *cds_features, GtCDSCheckVisitor *v,
       }
     }
     if (!had_err) {
-      current_length = gt_genome_node_get_length((GtGenomeNode*) fn);
+      GtUword current_length = gt_genome_node_get_length((GtGenomeNode*) fn);
       if (first) {
-        gt_assert(current_length >= ((GtUword) gt_feature_node_get_phase(fn)));
-        current_length -= ((GtUword) gt_feature_node_get_phase(fn));
-        first = false;
-        total_length = current_length;
+        /* this handles the case of 5' partial genes, where CDS might not start
+           on codon boundaries */
+        GtUword current_phase = (GtUword) gt_feature_node_get_phase(fn);
+        if (current_length >= current_phase) {
+          /* we simply skip the amount of bases defined by phase */
+          current_length -= current_phase;
+          first = false;
+          total_length = current_length;
+          correct_phase = (3 - (total_length) % 3) % 3;
+        } else {
+          /* corner case: first CDS is single base */
+          gt_assert(current_length == 1 && current_phase == 2);
+          correct_phase = 1;
+        }
       } else {
         total_length += current_length;
+        correct_phase = (3 - (total_length) % 3) % 3;
       }
-      correct_phase = (3 - (total_length) % 3) % 3;
       gt_hashmap_add(v->cds_features, fn, fn); /* record CDS feature */
     }
   }
