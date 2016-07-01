@@ -303,8 +303,8 @@ static int gt_speck_runner(int argc, const char **argv, int parsed_args,
       gt_str_delete(runtime);
     }
 
-    if (gt_spec_results_has_runtime_errors(res)
-          || gt_spec_results_has_failures(res)) {
+    if (!had_err && (gt_spec_results_has_runtime_errors(res)
+          || gt_spec_results_has_failures(res))) {
       had_err = -2;
     }
   }
