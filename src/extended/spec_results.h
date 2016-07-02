@@ -18,6 +18,7 @@
 #ifndef SPEC_RESULTS_H
 #define SPEC_RESULTS_H
 
+#include <stdbool.h>
 #include "core/error_api.h"
 #include "core/file_api.h"
 #include "extended/genome_node_api.h"
@@ -39,6 +40,8 @@ void           gt_spec_results_add_result(GtSpecResults *sr,
 void           gt_spec_results_add_cc(GtSpecResults *sr);
 void           gt_spec_results_record_warning(GtSpecResults *sr, const char *w);
 void           gt_spec_results_record_per_node(GtSpecResults *sr);
+bool           gt_spec_results_has_failures(GtSpecResults *sr);
+bool           gt_spec_results_has_runtime_errors(GtSpecResults *sr);
 
 void           gt_spec_results_report(GtSpecResults *sr, GtFile *outfile,
                                       const char *specfile, bool details,
