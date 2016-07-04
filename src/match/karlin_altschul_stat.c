@@ -91,8 +91,9 @@ double gt_karlin_altschul_stat_get_alpha_div_lambda(const GtKarlinAltschulStat *
                                                     GT_UNUSED GtWord matchscore,
                                                     GT_UNUSED GtWord mismatchscore)
 {
-  gt_assert(ka &&ka->H != 0.0);
+  gt_assert(ka  && ka->H != 0.0);
   return 1/ka->H;
+
   
   /* TODO: for ungapped */
 }
@@ -109,8 +110,8 @@ static ScoringFrequency *gt_karlin_altschul_stat_scoring_frequency(
                                              const GtScoreHandler *scorehandler)
 {
   unsigned int idx, jdx, numofchars;
-  GtWord score, obs_min = 0, obs_max = 0, score_sum, range;
-  double score_avg;
+  GtWord score, obs_min = 0, obs_max = 0, range;
+  double score_avg, score_sum;
   
   gt_assert(alphabet && scorehandler);
   
@@ -150,14 +151,14 @@ static ScoringFrequency *gt_karlin_altschul_stat_scoring_frequency(
     }
   }
 
-  score_sum = 0;
+  score_sum = 0.0;
   for (score = obs_min; score <= obs_max; score++)
   {
     if (sf->sprob[score-obs_min] > 0)
       score_sum += sf->sprob[score-obs_min];
   }
   
-  score_avg = 0;
+  score_avg = 0.0;
   for (score = obs_min; score <= obs_max; score++)
   {
     sf->sprob[score-obs_min] /= score_sum;
