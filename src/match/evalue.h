@@ -22,10 +22,14 @@
 #include "match/karlin_altschul_stat.h"
 #include "querymatch.h"
 
-double gt_evalue_calculate(const GtKarlinAltschulStat *ka,
-                           const GtQuerymatch *querymatch,
-                           GtUword searchspace);
+double gt_evalue_calculate_for_qmatch(const GtKarlinAltschulStat *ka,
+                                      const GtQuerymatch *querymatch,
+                                      GtUword searchspace);
                            
+double gt_evalue_calculate(const GtKarlinAltschulStat *ka,
+                           double bit_score,
+                           GtUword searchspace);
+  
 GtUword gt_evalue_calculate_searchspace(const GtEncseq *dbencseq,
                                         const GtEncseq *queryencseq,
                                         const GtKarlinAltschulStat *ka);

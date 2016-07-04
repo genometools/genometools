@@ -36,6 +36,7 @@
  *
  */
 
+/*
 static double gt_evalue_calculate_bit_score(const GtKarlinAltschulStat *ka,
                                             double raw_score)
 {
@@ -47,6 +48,19 @@ static double gt_evalue_calculate_bit_score(const GtKarlinAltschulStat *ka,
 
   bit_score =  (raw_score * lambda - logK)/log(2);
   return bit_score;
+}*/
+
+static GtUword gt_evalue_calculate_raw_score(const GtKarlinAltschulStat *ka,
+                                             double bit_score)
+{
+  double raw_score, lambda, logK;
+  gt_assert(ka);
+
+  lambda = gt_karlin_altschul_stat_get_lambda(ka);
+  logK = gt_karlin_altschul_stat_get_logK(ka);
+
+  raw_score =  (bit_score *log(2) + logK)/lambda;
+  return round(raw_score);
 }
 
 /* TODO: reference to blast */
@@ -138,7 +152,7 @@ GtUword gt_evalue_calculate_searchspace(const GtEncseq *dbencseq,
 
   gt_assert(ka);
   //TODO: berechnung, match, mismatch ergaenzen
-  alpha_div_lambda = gt_karlin_altschul_stat_get_alpha_div_lambda(ka,1,0);
+  alpha_div_lambda = gt_karlin_altschul_stat_get_alpha_div_lambda(ka,-1,4);
   /* 1,0 only useful for unit cost, TODO: generalize */
 
   beta = gt_karlin_altschul_stat_get_beta(ka);
@@ -150,6 +164,7 @@ GtUword gt_evalue_calculate_searchspace(const GtEncseq *dbencseq,
   num_of_db_seqs = gt_encseq_num_of_sequences(dbencseq);
   /* db length without seperators */
   actual_db_length = total_length_of_db - (num_of_db_seqs - 1);
+
 
   /* query length */
   total_length_of_query = gt_encseq_total_length(queryencseq);
@@ -171,21 +186,33 @@ GtUword gt_evalue_calculate_searchspace(const GtEncseq *dbencseq,
   return gt_safe_mult_ulong(effective_query_length, effective_db_length);
 }
 
-double gt_evalue_calculate(const GtKarlinAltschulStat *ka,
-                           const GtQuerymatch *querymatch,
-                           GtUword searchspace)
+double gt_evalue_calculate_for_qmatch(const GtKarlinAltschulStat *ka,
+                                      const GtQuerymatch *querymatch,
+                                      GtUword searchspace)
 {
-  GtWord raw_score;
-  double bit_score,
-         pow2Nbitscore;
-  
+  double evalue, logK, lambda;
+  GtUword raw_score;
   gt_assert(ka);
   
   raw_score = gt_querymatch_score(querymatch);
-  bit_score = gt_evalue_calculate_bit_score(ka, raw_score); 
+  logK = gt_karlin_altschul_stat_get_logK(ka);
+  lambda = gt_karlin_altschul_stat_get_lambda(ka);
+  evalue = searchspace*exp(-lambda*raw_score+logK);
+  return evalue;
+}
 
-  pow2Nbitscore = pow(2, -bit_score);
-  gt_assert(pow2Nbitscore > DBL_MAX/searchspace);
-
-  return searchspace * pow2Nbitscore;
+double gt_evalue_calculate(const GtKarlinAltschulStat *ka,
+                           double bit_score,
+                           GtUword searchspace)
+{
+  double evalue, logK, lambda;
+  GtUword raw_score;
+  
+  gt_assert(ka);
+  raw_score = gt_evalue_calculate_raw_score(ka, bit_score);
+  
+  logK = gt_karlin_altschul_stat_get_logK(ka);
+  lambda = gt_karlin_altschul_stat_get_lambda(ka);
+  evalue = searchspace*exp(-lambda*raw_score+logK);
+  return evalue;
 }
