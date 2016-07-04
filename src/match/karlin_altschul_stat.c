@@ -154,7 +154,7 @@ static ScoringFrequency *gt_karlin_altschul_stat_scoring_frequency(
   for (score = obs_min; score <= obs_max; score++)
   {
     if (sf->sprob[score-obs_min] > 0)
-      score_sum += score;
+      score_sum += sf->sprob[score-obs_min];
   }
   
   score_avg = 0;
