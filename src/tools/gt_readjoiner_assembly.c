@@ -469,7 +469,7 @@ static int gt_readjoiner_assembly_build_contained_reads_list(
     gt_str_append_cstr(filename, GT_READJOINER_SUFFIX_CNTLIST);
     had_err = gt_cntlist_parse(gt_str_get(filename), false, contained,
         &nofreads_i, err);
-    gt_assert(nofreads == nofreads_i);
+    gt_assert(had_err || nofreads == nofreads_i);
   }
   gt_str_delete(filename);
   return had_err;
