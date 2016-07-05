@@ -301,6 +301,12 @@ void gt_karlin_altschul_stat_calculate_params(GtKarlinAltschulStat *ka,
   ka->H = gt_karlin_altschul_stat_calculate_H(sf, ka->lambda);
   ka->K = gt_karlin_altschul_stat_calculate_ungapped_K(sf, ka->lambda, ka->H);
   ka->logK = log(ka->K);
+  
+  if (sf != NULL)
+  {
+    gt_free(sf->sprob);
+    gt_free(sf);
+  }
 
   /*TODO: gapped alignments*/
 }
