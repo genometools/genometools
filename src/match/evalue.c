@@ -135,9 +135,11 @@ static GtUword gt_evalue_calculate_length_adjustment(GtUword query_length,
   return length_adjustment;
 }
 
-GtUword gt_evalue_calculate_searchspace(const GtEncseq *dbencseq,
-                                        const GtEncseq *queryencseq,
-                                        const GtKarlinAltschulStat *ka)
+/* deprecated */
+GtUword gt_evalue_calculate_searchspace_by_encseqs(
+                                                 const GtKarlinAltschulStat *ka,
+                                                 const GtEncseq *dbencseq,
+                                                 const GtEncseq *queryencseq)
 {
   GtUword total_length_of_db,
           total_length_of_query,
@@ -171,6 +173,51 @@ GtUword gt_evalue_calculate_searchspace(const GtEncseq *dbencseq,
   num_of_query_seqs = gt_encseq_num_of_sequences(queryencseq);
   /* query length without seperators */
   actual_query_length = total_length_of_query - (num_of_query_seqs - 1);
+
+  length_adjustment = gt_evalue_calculate_length_adjustment(actual_query_length,
+                                                            actual_db_length,
+                                                            num_of_db_seqs,
+                                                            alpha_div_lambda,
+                                                            beta,
+                                                            K, logK);
+
+  effective_query_length = actual_query_length - length_adjustment;
+  effective_db_length = actual_db_length -
+                                      (num_of_db_seqs * length_adjustment);
+
+  return gt_safe_mult_ulong(effective_query_length, effective_db_length);
+}
+
+GtUword gt_evalue_calculate_searchspace(const GtKarlinAltschulStat *ka,
+                                        const GtEncseq *dbencseq,
+                                        GtUword query_idx_length)
+{
+  GtUword total_length_of_db,
+          num_of_db_seqs,
+          actual_db_length,
+          actual_query_length,
+          effective_db_length,
+          effective_query_length,
+          length_adjustment;
+  double alpha_div_lambda, beta, K, logK;
+
+  gt_assert(ka);
+  //TODO: berechnung, match, mismatch ergaenzen
+  alpha_div_lambda = gt_karlin_altschul_stat_get_alpha_div_lambda(ka,-1,4);
+  /* 1,0 only useful for unit cost, TODO: generalize */
+
+  beta = gt_karlin_altschul_stat_get_beta(ka);
+  K = gt_karlin_altschul_stat_get_K(ka);
+  logK = gt_karlin_altschul_stat_get_logK(ka);
+
+  /* db length */
+  total_length_of_db = gt_encseq_total_length(dbencseq);
+  num_of_db_seqs = gt_encseq_num_of_sequences(dbencseq);
+  /* db length without seperators */
+  actual_db_length = total_length_of_db - (num_of_db_seqs - 1);
+
+  /* query length */
+  actual_query_length = query_idx_length;
 
   length_adjustment = gt_evalue_calculate_length_adjustment(actual_query_length,
                                                             actual_db_length,

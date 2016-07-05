@@ -29,9 +29,16 @@ double gt_evalue_calculate_for_qmatch(const GtKarlinAltschulStat *ka,
 double gt_evalue_calculate(const GtKarlinAltschulStat *ka,
                            double bit_score,
                            GtUword searchspace);
-  
-GtUword gt_evalue_calculate_searchspace(const GtEncseq *dbencseq,
-                                        const GtEncseq *queryencseq,
-                                        const GtKarlinAltschulStat *ka);
+
+GtUword gt_evalue_calculate_searchspace(const GtKarlinAltschulStat *ka,
+                                        const GtEncseq *dbencseq,
+                                        GtUword query_idx_length);
+
+/* use it only if the total number of sequences contained in <queryencseq>
+ * is one, better use  gt_evalue_calculate_searchspace instead */
+GtUword gt_evalue_calculate_searchspace_by_encseqs(
+                                                 const GtKarlinAltschulStat *ka,
+                                                 const GtEncseq *dbencseq,
+                                                 const GtEncseq *queryencseq);
 
 #endif
