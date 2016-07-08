@@ -693,7 +693,16 @@ bool gt_encseq_contains_special(const GtEncseq *encseq,
                                 GtUword len)
 {
   gt_assert(len >= 1UL && encseq != NULL &&
-            startpos + len <= encseq->totallength);
+            startpos + len <= encseq->logicaltotallength);
+  if (encseq->hasmirror) {
+    if (startpos > encseq->totallength) {
+      gt_readmode_invert(readmode);
+      startpos = GT_REVERSEPOS(encseq->totallength,
+                               startpos - encseq->totallength - 1);
+    } else if (startpos == encseq->totallength) {
+        return true;
+    }
+  }
   return encseq->delivercontainsspecial(encseq, readmode, esr, startpos, len);
 }
 
