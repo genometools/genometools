@@ -3298,7 +3298,7 @@ void gt_specialrangeiterator_reinit_with_startpos(GtSpecialrangeiterator *sri,
   sri->lengthofspecialrange = 0;
   if (sri->esr != NULL)
     gt_encseq_reader_delete(sri->esr);
-    sri->esr = gt_encseq_create_reader_with_readmode(encseq,
+  sri->esr = gt_encseq_create_reader_with_readmode(encseq,
                                                    moveforward
                                                      ? GT_READMODE_FORWARD
                                                      : GT_READMODE_REVERSE,
