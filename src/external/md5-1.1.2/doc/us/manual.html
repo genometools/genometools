@@ -3,7 +3,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
     <title>MD5: Cryptographic Library for Lua</title>
-    <link rel="stylesheet" href="http://www.keplerproject.org/doc.css" type="text/css"/>
+    <link rel="stylesheet" href="doc.css" type="text/css"/>
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
 </head>
 
@@ -62,7 +62,7 @@
 <h2><a name="introduction"></a>Introduction</h2>
 
 <p>
-MD5 offers basic cryptographic facilities for Lua 5.1:
+MD5 offers basic cryptographic facilities for Lua 5.X:
 a hash (digest) function, a pair crypt/decrypt based on MD5 and CFB,
 and a pair crypt/decrypt based on DES with 56-bit keys.
 </p>
@@ -153,7 +153,14 @@ In both Unix and Windows systems the file <code>md5.lua</code> should be copied 
         beginning of the encrypted message.<br />
         
         The length of the cyphertext is the length of the message plus the
-        length of the seed plus one.
+        length of the seed plus one.<br />
+		
+		Note that MD5 based encryption should not be considered a strong solution.
+		MD5 collision can cause to messages with different keys and the same seed
+		to encrypt to the same value, which can then be decrypted with either key.
+		The bigger the key the lesser the chance of this happening. More details
+		about the weaknesses involved can be found
+		<a href="http://pajhome.org.uk/crypt/md5/">here</a>.
     </dd>
 
     <dt><strong>md5.decrypt (message, key)</strong></dt>
@@ -220,7 +227,7 @@ In both Unix and Windows systems the file <code>md5.lua</code> should be copied 
 
 <div id="about">
     <p><a href="http://validator.w3.org/check?uri=referer">Valid XHTML 1.0!</a></p>
-    <p><small>$Id: manual.html,v 1.14 2008/05/12 20:51:27 carregal Exp $</small></p>
+    <p><small>$Id: manual.html,v 1.15 2009/03/03 21:00:56 carregal Exp $</small></p>
 </div> <!-- id="about" -->
 
 </div> <!-- id="container" -->

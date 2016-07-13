@@ -4,11 +4,9 @@ CONFIG= ./config
 
 include $(CONFIG)
 
-ifeq "$(LUA_VERSION_NUM)" "500"
-COMPAT_O= $(COMPAT_DIR)/compat-5.1.o
-endif
+COMPAT52_OBJS= src/compat-5.2.o
 
-MD5_OBJS= src/md5.o src/md5lib.o $(COMPAT_O)
+MD5_OBJS= src/md5.o src/md5lib.o
 MD5_LUAS= src/md5.lua
 MD5_LIBNAME = core.so
 
@@ -17,14 +15,11 @@ DES56_LIBNAME= des56.so
 
 all: src/$(MD5_LIBNAME) src/$(DES56_LIBNAME)
 
-src/$(MD5_LIBNAME) : $(MD5_OBJS)
-	export MACOSX_DEPLOYMENT_TARGET="10.3"; $(CC) $(CFLAGS) $(LIB_OPTION) -o src/$(MD5_LIBNAME) $(MD5_OBJS)
+src/$(MD5_LIBNAME) : $(MD5_OBJS) $(COMPAT52_OBJS)
+	$(CC) $(CFLAGS) $(LIB_OPTION) -o src/$(MD5_LIBNAME) $(MD5_OBJS) $(COMPAT52_OBJS)
 
-src/$(DES56_LIBNAME) : $(DES56_OBJS)
-	export MACOSX_DEPLOYMENT_TARGET="10.3"; $(CC) $(CFLAGS) $(LIB_OPTION) -o src/$(DES56_LIBNAME) $(DES56_OBJS)
-
-$(COMPAT_DIR)/compat-5.1.o: $(COMPAT_DIR)/compat-5.1.c
-	$(CC) -c $(CFLAGS) -o $@ $(COMPAT_DIR)/compat-5.1.c
+src/$(DES56_LIBNAME) : $(DES56_OBJS) $(COMPAT52_OBJS)
+	$(CC) $(CFLAGS) $(LIB_OPTION) -o src/$(DES56_LIBNAME) $(DES56_OBJS) $(COMPAT52_OBJS)
 
 install: src/$(MD5_LIBNAME) src/$(DES56_LIBNAME)
 	mkdir -p $(LUA_LIBDIR)/md5
@@ -34,4 +29,4 @@ install: src/$(MD5_LIBNAME) src/$(DES56_LIBNAME)
 	cp src/$(DES56_LIBNAME) $(LUA_LIBDIR)
 
 clean:
-	rm -f $(MD5_OBJS) src/$(MD5_LIBNAME) $(DES56_OBJS) src/$(DES56_LIBNAME)
+	rm -f $(MD5_OBJS) src/$(MD5_LIBNAME) $(DES56_OBJS) src/$(DES56_LIBNAME) $(COMPAT52_OBJS)

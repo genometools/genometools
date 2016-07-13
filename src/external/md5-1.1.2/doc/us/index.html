@@ -3,7 +3,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
     <title>MD5: Cryptographic Library for Lua</title>
-    <link rel="stylesheet" href="http://www.keplerproject.org/doc.css" type="text/css"/>
+    <link rel="stylesheet" href="doc.css" type="text/css"/>
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
 </head>
 <body>
@@ -63,9 +63,11 @@
 
 <p>
 MD5 offers basic cryptographic facilities for 
-<a href="http://www.lua.org">Lua</a> 5.1:
-a hash (digest) function, a pair crypt/decrypt based on MD5 and CFB,
-and a pair crypt/decrypt based on DES with 56-bit keys.
+<a href="http://www.lua.org">Lua</a> 5.0, 5.1 or 5.2:
+a hash (digest) function, a pair crypt/decrypt based on
+<a href="http://en.wikipedia.org/wiki/MD5">MD5</a> and CFB,
+and a pair crypt/decrypt based on
+<a href="http://en.wikipedia.org/wiki/Data_Encryption_Standard">DES</a> with 56-bit keys.
 </p>
 
 <p>
@@ -75,16 +77,15 @@ as Lua.
 
 <h2><a name="status"></a>Status</h2>
 
-<p>MD5 version 1.1.2 for Lua 5.1 is now available for
+<p>MD5 version 1.2 is now available for
 <a href="#download">download</a>.</p>
 
 <h2><a name="download"></a>Download</h2>
 
 <p>
 MD5 can be downloaded in source code from its
-<a href="http://luaforge.net/projects/md5/files">LuaForge</a>
-page. If you are using LuaBinaries 5.1.x, a Windows
-precompiled version of MD5 can also be found at the same LuaForge page.
+<a href="https://github.com/keplerproject/md5">GitHub</a>
+page.
 </p>
 
 <p>You can also install MD5 using <a href="http://www.luarocks.org">LuaRocks</a>:</p>
@@ -96,6 +97,11 @@ luarocks install md5
 <h2><a name="history"></a>History</h2>
 
 <dl class="history">
+    <dt><strong>Version 1.2</strong> [??/???/2013]</dt>
+    <dd><ul>
+        <li>Code adapted to compile for Lua 5.0, 5.1 and 5.2</li>
+    </ul></dd>
+
     <dt><strong>Version 1.1.2</strong> [12/May/2008]</dt>
 	<dd><ul>
 		<li>Fixed bug in 64-bit systems</li>
@@ -142,8 +148,10 @@ luarocks install md5
 
 <h2><a name="credits"></a>Credits</h2>
 
-<p>MD5 was designed and implemented by
-Roberto Ierusalimschy and Marcela Oz&oacute;rio Suarez. The DES 56 C library was implemented by Stuart Levy
+<p>This Lua version of MD5 was designed and implemented by
+Roberto Ierusalimschy and Marcela Oz&oacute;rio Suarez (based on the original
+<a href="http://en.wikipedia.org/wiki/MD5">MD5</a> by Ron Rivest).
+The DES 56 C library was implemented by Stuart Levy
 and uses a MIT license too.
 The current distribution was packed by Tom&aacute;s Guisasola and F&aacute;bio Mascarenhas
 as part of the <a href="http://www.keplerproject.org">Kepler Project</a>.</p>
@@ -163,7 +171,7 @@ Comments are welcome!</p>
 
 <div id="about">
     <p><a href="http://validator.w3.org/check?uri=referer">Valid XHTML 1.0!</a></p>
-    <p><small>$Id: index.html,v 1.20 2008/05/12 20:51:27 carregal Exp $</small></p>
+    <p><small>$Id: index.html,v 1.21 2008/09/07 18:37:00 carregal Exp $</small></p>
 </div> <!-- id="about" -->
 
 </div> <!-- id="container" -->
