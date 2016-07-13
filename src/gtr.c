@@ -114,13 +114,15 @@ GtR* gtr_new(GtError *err)
     lua_call(gtr->L, 1, 0);   /* open LPeg library */
     lua_pushcfunction(gtr->L, luaopen_md5_core);
     lua_pushstring(gtr->L, "md5");
-    lua_call(gtr->L, 1, 0);   /* open MD5 library */
+    lua_call(gtr->L, 1, 1);   /* open MD5 library */
+    lua_setglobal(gtr->L, "md5"); /* now it's our responsibility to bind */
     lua_pushcfunction(gtr->L, luaopen_lfs);
     lua_pushstring(gtr->L, "lfs");
     lua_call(gtr->L, 1, 0);   /* open Lua filesystem */
     lua_pushcfunction(gtr->L, luaopen_des56);
     lua_pushstring(gtr->L, "des56");
-    lua_call(gtr->L, 1, 0);   /* open DES56 library */
+    lua_call(gtr->L, 1, 1);   /* open DES56 library */
+    lua_setglobal(gtr->L, "des56"); /* now it's our responsibility to bind */
     had_err = gt_lua_set_modules_path(gtr->L, err);
   }
 #ifndef WITHOUT_CAIRO
