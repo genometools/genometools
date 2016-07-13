@@ -152,11 +152,12 @@ static void dotty(lua_State *L) {
     if (status == 0 && lua_gettop(L) > 0) {  /* any result to print? */
       lua_getglobal(L, "print");
       lua_insert(L, 1);
-      if (lua_pcall(L, lua_gettop(L)-1, 0, 0) != 0)
+      if (lua_pcall(L, lua_gettop(L)-1, 0, 0) != 0) {
         fprintf(stderr, "%s\n", lua_pushfstring(L,
                                "error calling " LUA_QL("print") " (%s)",
                                lua_tostring(L, -1)));
         fflush(stderr);
+      }
     }
   }
   lua_settop(L, 0);  /* clear stack */
