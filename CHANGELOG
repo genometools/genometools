@@ -1,6 +1,17 @@
-changes in version 1.5.9 (2016-01-07)
+changes in version 1.5.9 (2016-07-XX)
 
--
+- bugfixes and cleanups
+- update MD5 module to upstream version 1.2
+- set verbatim dates in documentation files
+- add support for GCC 6
+- gtlua: complete GtRegionMapping bindings
+- extend wording options for speck matchers
+- add tabular output format for speck
+- make unit tests compatible with Python 2.6
+- improvements on `gt seed_extend'
+- improve compatibility with Ruby <1.9.2
+- several changes to build system (verbosity etc.)
+- allow to sort sequences by header (`gt seqorder')
 
 
 changes in version 1.5.8 (2016-01-06)
