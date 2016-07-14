@@ -12,11 +12,8 @@
 #include <lua.h>
 #include <lauxlib.h>
 
-#if ! defined (LUA_VERSION_NUM) || LUA_VERSION_NUM < 501
-#include "compat-5.1.h"
-#endif
-
 #include "md5.h"
+#include "compat-5.2.h"
 
 
 /**
@@ -48,7 +45,7 @@ static int ex_or (lua_State *L) {
   luaL_Buffer b;
   luaL_argcheck( L, l1 == l2, 2, "lengths must be equal" );
   luaL_buffinit(L, &b);
-  while (l1--) luaL_putchar(&b, (*s1++)^(*s2++));
+  while (l1--) luaL_addchar(&b, (*s1++)^(*s2++));
   luaL_pushresult(&b);
   return 1;
 }
@@ -175,18 +172,18 @@ static int decrypt (lua_State *L) {
 */
 static void set_info (lua_State *L) {
 	lua_pushliteral (L, "_COPYRIGHT");
-	lua_pushliteral (L, "Copyright (C) 2003 PUC-Rio");
+	lua_pushliteral (L, "Copyright (C) 2003-2013 PUC-Rio");
 	lua_settable (L, -3);
 	lua_pushliteral (L, "_DESCRIPTION");
 	lua_pushliteral (L, "Basic cryptographic facilities");
 	lua_settable (L, -3);
 	lua_pushliteral (L, "_VERSION");
-	lua_pushliteral (L, "MD5 1.1.2");
+	lua_pushliteral (L, "MD5 1.2");
 	lua_settable (L, -3);
 }
 
 
-static struct luaL_reg md5lib[] = {
+static struct luaL_Reg md5lib[] = {
   {"sum", lmd5},
   {"exor", ex_or},
   {"crypt", crypt},
@@ -196,8 +193,8 @@ static struct luaL_reg md5lib[] = {
 
 
 int luaopen_md5_core (lua_State *L) {
-  luaL_openlib(L, "md5.core", md5lib, 0);
+  lua_newtable(L);
+  luaL_setfuncs(L, md5lib, 0);
   set_info (L);
   return 1;
 }
-

@@ -6,6 +6,7 @@
 #include "lua.h"
 #include "lauxlib.h"
 
+#include "compat-5.2.h"
 #include "ldes56.h"
 
 static int des56_decrypt( lua_State *L )
@@ -127,26 +128,25 @@ static int des56_crypt( lua_State *L )
 */
 static void set_info (lua_State *L) {
 	lua_pushliteral (L, "_COPYRIGHT");
-	lua_pushliteral (L, "Copyright (C) 2007 PUC-Rio");
+	lua_pushliteral (L, "Copyright (C) 2007-2013 PUC-Rio");
 	lua_settable (L, -3);
 	lua_pushliteral (L, "_DESCRIPTION");
 	lua_pushliteral (L, "DES 56 cryptographic facilities for Lua");
 	lua_settable (L, -3);
 	lua_pushliteral (L, "_VERSION");
-	lua_pushliteral (L, "DES56 1.1.2");
+	lua_pushliteral (L, "DES56 1.2");
 	lua_settable (L, -3);
 }
 
-static const struct luaL_reg des56lib[] = {
+static const struct luaL_Reg des56lib[] = {
   {"crypt", des56_crypt},
   {"decrypt", des56_decrypt},
   {NULL, NULL},
 };
 
 int luaopen_des56 (lua_State *L) {
-  luaL_openlib (L, "des56", des56lib, 0);
+  lua_newtable(L);
+  luaL_setfuncs(L, des56lib, 0);
   set_info (L);
   return 1;
 }
-
-

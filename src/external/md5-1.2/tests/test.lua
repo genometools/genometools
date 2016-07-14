@@ -2,7 +2,11 @@
 
 -- Testing MD5
 
-require"md5"
+if string.find(_VERSION, "Lua 5.0") then
+	LUA_PATH = "?;?.lua;/usr/local/share/lua/5.0/?.lua"
+	string.gmatch = string.gfind
+end
+local md5 = require"md5"
 
 
 assert(md5.exor('', '') == '')
@@ -55,7 +59,7 @@ local tolerance = 1.12
 local function contchars (s)
   local a = {}
   for i=0,255 do a[string.char(i)] = 0 end
-  for c in string.gfind(s, '.') do
+  for c in string.gmatch(s, '.') do
     a[c] = a[c] + 1
   end
   local av = string.len(s)/256
@@ -75,13 +79,20 @@ local code = md5.crypt(msg, key, "seed")
 assert(md5.decrypt(code, key) == msg)
 contchars(code)
 
-assert(md5.crypt('a', 'a') ~= md5.crypt('a', 'b'))
+local seed = 'some_seed'
+assert(md5.crypt('a','a',seed) ~= md5.crypt('a','b',seed))
 
 print"MD5 OK"
 
 
 -- Testing DES 56
-require 'des56'
+local des56
+if string.find(_VERSION, "Lua 5.0") then
+	local cpath = os.getenv"LUA_CPATH" or "/usr/local/lib/lua/5.0/"
+	des56 = loadlib(cpath.."des56.so", "luaopen_des56")()
+else
+	des56 = require 'des56'
+end
 
 local key = '&3g4&gs*&3'
 

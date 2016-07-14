@@ -58,7 +58,7 @@ ifeq ($(useshared),yes)
 else
   DEPLIBS:=
   INCLUDEOPT+=-I$(CURDIR)/src/external/zlib-1.2.8 \
-              -I$(CURDIR)/src/external/md5-1.1.2/src \
+              -I$(CURDIR)/src/external/md5-1.2/src \
               -I$(CURDIR)/src/external/lua-5.1.5/src \
               -I$(CURDIR)/src/external/luafilesystem-1.5.0/src \
               -I$(CURDIR)/src/external/lpeg-0.10.2 \
@@ -167,10 +167,11 @@ LIBTRE_OBJ:=$(LIBTRE_SRC:%.c=obj/%.o)
 LIBTRE_DEP:=$(LIBTRE_SRC:%.c=obj/%.d)
 
 LIBLUA_SRC=src/lualib.c\
-           src/external/md5-1.1.2/src/md5.c\
-           src/external/md5-1.1.2/src/md5lib.c\
-           src/external/md5-1.1.2/src/des56.c\
-           src/external/md5-1.1.2/src/ldes56.c\
+           src/external/md5-1.2/src/md5.c\
+           src/external/md5-1.2/src/md5lib.c\
+           src/external/md5-1.2/src/des56.c\
+           src/external/md5-1.2/src/ldes56.c\
+					 src/external/md5-1.2/src/compat-5.2.c\
            src/external/luafilesystem-1.5.0/src/lfs.c\
            src/external/lpeg-0.10.2/lpeg.c
 LIBLUA_OBJ:=$(LIBLUA_SRC:%.c=obj/%.o)

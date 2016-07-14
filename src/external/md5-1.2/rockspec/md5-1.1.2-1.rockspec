@@ -1,7 +1,7 @@
 package = "MD5"
 version = "1.1.2-1"
 source = {
-   url = ""
+   url = "http://luaforge.net/frs/download.php/3355/md5-1.1.2.tar.gz"
 }
 description = {
    summary = "Basic cryptographic library",
