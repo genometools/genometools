@@ -577,12 +577,10 @@ static int ces_c_extend_seeds_window(GtCondenseqCreator *ces_c,
 
   match_positions = win->pos_arrs[GT_CONDENSEQ_CREATOR_WINDOWIDX(win, 0)];
 
-  /* nothing there or window not full */
+  /* nothing there or window not full -> do nothing */
   if (match_positions.no_positions == 0 ||
       ces_c->window.count != ces_c->windowsize)
     return had_err;
-  /* make sure the mean is not from one value (only one kmer has positions in
-     db) */
 
   /* get bounds for current .end is exclusive */
   seed_bounds.start = ces_c->current_orig_start;
