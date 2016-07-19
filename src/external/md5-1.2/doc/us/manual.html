@@ -12,16 +12,16 @@
 
 <div id="product">
 	<div id="product_logo">
-        <a href="http://www.keplerproject.org"><img alt="MD5 logo" src="md5.png"/></a>
+        <a href="http://keplerproject.github.io/md5/"><img alt="MD5 logo" src="md5.png"/></a>
     </div>
 	<div id="product_name"><big><strong>MD5</strong></big></div>
 	<div id="product_description">Cryptographic Library for Lua</div>
 </div> <!-- id="product" -->
 
-
 <div id="main">
 
 <div id="navigation">
+
 <h1>MD5</h1>
 	<ul>
 		<li><a href="index.html">Home</a>
@@ -31,7 +31,6 @@
 				<li><a href="index.html#download">Download</a></li>
 				<li><a href="index.html#history">History</a></li>
 				<li><a href="index.html#credits">Credits</a></li>
-				<li><a href="index.html#contact">Contact us</a></li>
 			</ul>
 		</li>
 		<li><strong>Manual</strong>
@@ -47,10 +46,10 @@
                 </li>
 			</ul>
 		</li>
-        <li><a href="http://luaforge.net/projects/md5/">Project</a>
+        <li><a href="https://github.com/keplerproject/md5">Project</a>
             <ul>
-                <li><a href="http://luaforge.net/tracker/?group_id=155">Bug Tracker</a></li>
-                <li><a href="http://luaforge.net/scm/?group_id=155">CVS</a></li>
+                <li><a href="https://github.com/keplerproject/md5/issues">Bug Tracker</a></li>
+                <li><a href="https://github.com/keplerproject/md5">Git</a></li>
             </ul>
         </li>
 		<li><a href="license.html">License</a></li>
@@ -69,7 +68,7 @@ and a pair crypt/decrypt based on DES with 56-bit keys.
 
 <p>
 MD5 is free software and uses the same <a href="license.html">license</a>
-as Lua.
+as Lua (MIT).
 </p>
 
 <h2><a name="building"></a>Building</h2>
@@ -107,10 +106,6 @@ Just copy the second to a directory in your Lua C path.
 </p>
 
 <p>
-Windows users can use the binary version of MD5 available at
-<a href="http://luaforge.net/projects/md5/files">LuaForge</a>.</p>
-
-<p>
 In both Unix and Windows systems the file <code>md5.lua</code> should be copied to a directory in your
 <a href="http://www.lua.org/manual/5.1/manual.html#pdf-package.path">Lua path</a>.
 </p>
@@ -119,7 +114,7 @@ In both Unix and Windows systems the file <code>md5.lua</code> should be copied 
 
 <h3><a name="lua_api"></a>Lua API</h3>
 
-<p>All MD5-based functions are registered inside a table <code>md5</code>.</p>
+<p>All MD5-based functions are registered inside <code>md5</code> module.</p>
 
 <dl>
     <dt><strong>md5.sum (message)</strong></dt>
@@ -127,11 +122,11 @@ In both Unix and Windows systems the file <code>md5.lua</code> should be copied 
         This function takes as input a message of arbitrary length and content
         and returns as output a 128-bit "fingerprint" (or "message digest")
         of the input.<br />
-        The output is formated as a binary string with 16 characters.
+        The output is formatted as a binary string with 16 characters.
         It is conjectured that it is computationally infeasible to produce
         two messages having the same message digest, or to produce any
         message having a given pre-specified target message digest.
-        (see <a href="ftp://ftp.isi.edu/in-notes/rfc1321.txt">RFC 1321</a>)
+        (see <a href="https://www.ietf.org/rfc/rfc1321.txt">RFC 1321</a>)
     </dd>
 
     <dt><strong>md5.sumhexa (message)</strong></dt>
@@ -177,7 +172,7 @@ In both Unix and Windows systems the file <code>md5.lua</code> should be copied 
     </dd>
 </dl>
 
-<p>The DES-based functions are registered inside a table <code>des56</code>.</p>
+<p>The DES-based functions are registered inside <code>des56</code> module.</p>
 
 <dl>
     <dt><strong>des56.crypt (message, key)</strong></dt>
@@ -227,7 +222,6 @@ In both Unix and Windows systems the file <code>md5.lua</code> should be copied 
 
 <div id="about">
     <p><a href="http://validator.w3.org/check?uri=referer">Valid XHTML 1.0!</a></p>
-    <p><small>$Id: manual.html,v 1.15 2009/03/03 21:00:56 carregal Exp $</small></p>
 </div> <!-- id="about" -->
 
 </div> <!-- id="container" -->
