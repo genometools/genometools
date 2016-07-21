@@ -131,7 +131,10 @@ function DocVisitorLaTeX:visit_method(desc)
   else
     name = trim(desc.name)
   end
-  local aligncol = string.find(name, '_') - 1
+  local aligncol = string.len(name) + 1
+  if string.find(name, '_') then
+    aligncol = string.find(name, '_') - 1
+  end
   if desc.args then
     args = align(trim(desc.args),aligncol)
   else
