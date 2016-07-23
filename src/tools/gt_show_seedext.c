@@ -119,7 +119,7 @@ static GtOptionParser* gt_show_seedext_option_parser_new(void *tool_arguments)
 
   /* -sort */
   op_sortmatches = gt_option_new_bool("sort","sort matches in ascending order "
-                                             "of their end positon on the "
+                                             "of their end position on the "
                                              "query",
                                       &arguments->sortmatches,false);
   gt_option_parser_add_option(op, op_sortmatches);

@@ -491,7 +491,7 @@ static GtUword dc_derivespecialcodesonthefly(GtDifferencecover *dcov,
   return countderived;
 }
 
-static int dc_compareCodeatpositon(const void *vala,const void *valb)
+static int dc_compareCodeatposition(const void *vala,const void *valb)
 {
   const Codeatposition *a = (const Codeatposition *) vala;
   const Codeatposition *b = (const Codeatposition *) valb;
@@ -516,7 +516,7 @@ static int dc_compareCodeatpositon(const void *vala,const void *valb)
   return 0;
 }
 
-static void dc_validate_samplepositons(const GtDifferencecover *dcov)
+static void dc_validate_samplepositions(const GtDifferencecover *dcov)
 {
   GtUword pos;
   unsigned int modvalue;
@@ -1268,7 +1268,7 @@ static void dc_differencecover_sortsample(GtDifferencecover *dcov,
     gt_assert(codelist.spaceCodeatposition != NULL);
     qsort(codelist.spaceCodeatposition,
           (size_t) codelist.nextfreeCodeatposition,
-          sizeof (*codelist.spaceCodeatposition),dc_compareCodeatpositon);
+          sizeof (*codelist.spaceCodeatposition),dc_compareCodeatposition);
   }
   if (dcov->effectivesamplesize > 0)
   {
@@ -1690,7 +1690,7 @@ void gt_differencecover_check(const GtEncseq *encseq,GtReadmode readmode)
     printf("v=%u (size=%u)\n",dcov->vparam,dcov->size);
     if (withcheck)
     {
-      dc_validate_samplepositons(dcov);
+      dc_validate_samplepositions(dcov);
     }
     dc_differencecover_sortsample(dcov,NULL,NULL,NULL,withcheck);
     gt_differencecover_delete(dcov);
