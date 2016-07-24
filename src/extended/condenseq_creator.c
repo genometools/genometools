@@ -1723,7 +1723,7 @@ int gt_condenseq_creator_create(GtCondenseqCreator *condenseq_creator,
   if (!had_err) {
     if (gt_showtime_enabled())
       gt_timer_show_progress(timer, "write data, alphabet", stderr);
-    gt_log_log(GT_WU " kmer positons in final kmer_db",
+    gt_log_log(GT_WU " kmer positions in final kmer_db",
                gt_kmer_database_get_kmer_count(condenseq_creator->kmer_db));
     gt_log_log(GT_WU " xdrop calls.", ces_c_xdrops);
     gt_log_log(GT_WU " uniques", condenseq_creator->ces->udb_nelems);

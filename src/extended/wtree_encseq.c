@@ -84,7 +84,7 @@ static GtWtreeSymbol gt_wtree_encseq_access_rec(GtWtreeEncseq *we,
 
     if (bit == 0) {
       pos = gt_compressed_bitsequence_rank_0(we->c_bits, node_start + pos) -
-        zero_rank_prefix - 1; /*convert count (rank) to positon */
+        zero_rank_prefix - 1; /*convert count (rank) to position */
       alpha_end = middle;
       node_start += we->parent_instance.members->length;
       node_size = left_child_size;
@@ -96,7 +96,7 @@ static GtWtreeSymbol gt_wtree_encseq_access_rec(GtWtreeEncseq *we,
         one_rank_prefix =
           gt_compressed_bitsequence_rank_1(we->c_bits, node_start - 1);
       pos = gt_compressed_bitsequence_rank_1(we->c_bits, node_start + pos) -
-        one_rank_prefix - 1; /*convert count (rank) to positon */
+        one_rank_prefix - 1; /*convert count (rank) to position */
       alpha_start = middle + 1;
       node_size =
         gt_compressed_bitsequence_rank_1(we->c_bits,

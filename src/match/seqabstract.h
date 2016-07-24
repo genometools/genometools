@@ -71,7 +71,7 @@ void           gt_seqabstract_reinit_encseq(bool rightextension,
 /* return the length of <sa> */
 GtUword        gt_seqabstract_length(const GtSeqabstract *sa);
 
-/* return character at positon <idx> (relative to <startpos>) of <sa> */
+/* return character at position <idx> (relative to <startpos>) of <sa> */
 GtUchar        gt_seqabstract_encoded_char(const GtSeqabstract *sa,
                                            GtUword idx);
 
