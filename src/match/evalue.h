@@ -25,7 +25,7 @@
 double gt_evalue_calculate_for_qmatch(const GtKarlinAltschulStat *ka,
                                       const GtQuerymatch *querymatch,
                                       GtUword searchspace);
-                           
+
 double gt_evalue_calculate(const GtKarlinAltschulStat *ka,
                            double bit_score,
                            GtUword searchspace);

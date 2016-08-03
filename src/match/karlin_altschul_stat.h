@@ -34,6 +34,6 @@ double gt_karlin_altschul_stat_get_beta(const GtKarlinAltschulStat *ka);
 void gt_karlin_altschul_stat_calculate_params(GtKarlinAltschulStat *ka,
                                               bool ungapped_alignment,
                                               GtAlphabet *alphabet,
-                                              GtScoreHandler *scorehandler);
+                                              GtScoreHandler *costhandler);
 
 #endif
