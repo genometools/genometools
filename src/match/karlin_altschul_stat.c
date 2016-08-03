@@ -17,6 +17,7 @@
 
 #include <math.h>
 #include "core/alphabet.h"
+#include "core/error.h"
 #include "core/ma.h"
 #include "core/minmax.h"
 #include "core/types_api.h"
@@ -80,7 +81,6 @@ GtKarlinAltschulStat *gt_karlin_altschul_stat_new(void)
  * 7. Beta,
  * 8. Theta
  */
-typedef double GA_Values[NUMOF_VALUES];
 #define gapopidx 0
 #define gapextdidx 1
 #define lambdaidx 2
@@ -88,6 +88,7 @@ typedef double GA_Values[NUMOF_VALUES];
 #define Hidx 4
 #define alphaidx 5
 #define betaidx 6
+typedef double GA_Values[NUMOF_VALUES];
 static const GA_Values ga_matrix_1_5[] = {
     { 0, 0, 1.39, 0.747, 1.38, 1.00,  0, 100 }
 };
@@ -343,11 +344,12 @@ static double gt_karlin_altschul_stat_calculate_ungapped_K(const ScoringFrequenc
   return K;
 }
 
-int get_values_from_matrix(GtKarlinAltschulStat *ka,
-                           GA_Values *matrix,
-                           GtUword length,
-                           GtWord gap_extension,
-                           GT_UNUSED GtWord gap_open)
+static int get_values_from_matrix(GtKarlinAltschulStat *ka,
+                                  GA_Values *matrix,
+                                  GtUword length,
+                                  GtWord gap_extension,
+                                  GT_UNUSED GtWord gap_open,
+                                  GtError *err)
 {
   GtUword idx;
 
@@ -361,6 +363,7 @@ int get_values_from_matrix(GtKarlinAltschulStat *ka,
       }
       ka->lambda = matrix[idx][lambdaidx];
       ka->K = matrix[idx][Kidx];
+      printf("K:%f\n", ka->K);
       ka->logK = log(ka->K);
       ka->H = matrix[idx][Hidx];
 
@@ -371,13 +374,15 @@ int get_values_from_matrix(GtKarlinAltschulStat *ka,
     }
   }
   
-  //todo: gterror obj
-  gt_assert(false);
+  /* not found */
+  gt_error_set(err, "no precomputed values for ungapped alignment parameters "
+                    "were found\n");
   return 1;
 }
 
-int gt_karlin_altschul_stat_get_gapped_params(GtKarlinAltschulStat *ka,
-                                              const GtScoreHandler *scorehandler)
+static int gt_karlin_altschul_stat_get_gapped_params(GtKarlinAltschulStat *ka,
+                                                     const GtScoreHandler *scorehandler,
+                                                     GtError *err)
 {
   GtWord gap_open, gap_extension, matchscore, mismatchscore;
   GA_Values *ga_matrix = NULL;
@@ -426,27 +431,34 @@ int gt_karlin_altschul_stat_get_gapped_params(GtKarlinAltschulStat *ka,
   }
   else
   {
-    gt_assert(false);
-    //TODO:use GtError obj
+    gt_error_set(err, "no precomputed values for combination matchscore "
+                      GT_WD" and mismatchscore "GT_WD" in evalue calculation "
+                      "of gapped alignments\n",
+                      matchscore, mismatchscore);
     return 1;
   }
 
   gap_extension = gt_scorehandler_get_gapscore(scorehandler);
   gap_open = gt_scorehandler_get_gap_opening(scorehandler);
-  get_values_from_matrix(ka,
+  if (get_values_from_matrix(ka,
                          ga_matrix,
                          length,
                          gap_extension,
-                         gap_open);
+                         gap_open,
+                         err))
+  {
+    return 1;
+  }
 
   return 0;
 }
 
 //TODO:new+fill oder trennen?
-void gt_karlin_altschul_stat_calculate_params(GtKarlinAltschulStat *ka,
+int gt_karlin_altschul_stat_calculate_params(GtKarlinAltschulStat *ka,
                                               bool ungapped_alignment,
                                               GtAlphabet *alphabet,
-                                              GtScoreHandler *scorehandler)
+                                              GtScoreHandler *scorehandler,
+                                              GtError *err)
 {
   if (ungapped_alignment)
   {
@@ -471,10 +483,10 @@ void gt_karlin_altschul_stat_calculate_params(GtKarlinAltschulStat *ka,
       gt_free(sf);
     }
   }
-  else
+  else /* gapped alignments */
   {
-    /* gapped alignments */
-    gt_karlin_altschul_stat_get_gapped_params(ka, scorehandler);
-    //TODO: check return
+    if (gt_karlin_altschul_stat_get_gapped_params(ka, scorehandler, err))
+      return 1;
   }
+  return 0;
 }

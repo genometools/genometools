@@ -231,6 +231,7 @@ GtUword gt_evalue_calculate_searchspace(const GtKarlinAltschulStat *ka,
   return gt_safe_mult_ulong(effective_query_length, effective_db_length);
 }
 
+/*
 double gt_evalue_calculate_for_qmatch(const GtKarlinAltschulStat *ka,
                                       const GtQuerymatch *querymatch,
                                       GtUword searchspace)
@@ -238,8 +239,23 @@ double gt_evalue_calculate_for_qmatch(const GtKarlinAltschulStat *ka,
   double evalue, logK, lambda;
   GtUword raw_score;
   gt_assert(ka);
+  raw_score = gt_querymatch_score(querymatch); // seems to be a score only for edit distance?/
+  logK = gt_karlin_altschul_stat_get_logK(ka);
+  lambda = gt_karlin_altschul_stat_get_lambda(ka);
+  evalue = searchspace*exp(-lambda*raw_score+logK);
+  return evalue;
+}*/
+
+
+double gt_evalue_calculate_on_bitscore(const GtKarlinAltschulStat *ka,
+                                       double bit_score,
+                                       GtUword searchspace)
+{
+  double evalue, logK, lambda;
+  GtUword raw_score;
   
-  raw_score = gt_querymatch_score(querymatch);
+  gt_assert(ka);
+  raw_score = gt_evalue_calculate_raw_score(ka, bit_score);
   logK = gt_karlin_altschul_stat_get_logK(ka);
   lambda = gt_karlin_altschul_stat_get_lambda(ka);
   evalue = searchspace*exp(-lambda*raw_score+logK);
@@ -247,15 +263,28 @@ double gt_evalue_calculate_for_qmatch(const GtKarlinAltschulStat *ka,
 }
 
 double gt_evalue_calculate(const GtKarlinAltschulStat *ka,
-                           double bit_score,
+                           const GtScoreHandler *scorehandler,
+                           GtUword ma,
+                           GtUword mm,
+                           GtUword id,
                            GtUword searchspace)
 {
   double evalue, logK, lambda;
-  GtUword raw_score;
+  GtUword matchscore, mismatchscore, gapscore, raw_score;
   
-  gt_assert(ka);
-  raw_score = gt_evalue_calculate_raw_score(ka, bit_score);
+  gt_assert(ka && scorehandler);
   
+  gt_assert(gt_scorehandler_get_gap_opening(scorehandler) == 0);
+  /* only implemented for linear */
+
+  matchscore = gt_scorehandler_get_matchscore(scorehandler);
+  mismatchscore = gt_scorehandler_get_mismatchscore(scorehandler);
+  gapscore = gt_scorehandler_get_gapscore(scorehandler);
+  
+
+  raw_score = gt_safe_mult_ulong(mm, matchscore) + 
+              gt_safe_mult_ulong(ma, mismatchscore) +
+              gt_safe_mult_ulong(id, gapscore);
   logK = gt_karlin_altschul_stat_get_logK(ka);
   lambda = gt_karlin_altschul_stat_get_lambda(ka);
   evalue = searchspace*exp(-lambda*raw_score+logK);

@@ -29,9 +29,10 @@ double gt_karlin_altschul_stat_get_K(const GtKarlinAltschulStat *ka);
 double gt_karlin_altschul_stat_get_logK(const GtKarlinAltschulStat *ka);
 double gt_karlin_altschul_stat_get_alpha_div_lambda(const GtKarlinAltschulStat *ka);
 double gt_karlin_altschul_stat_get_beta(const GtKarlinAltschulStat *ka);
-void gt_karlin_altschul_stat_calculate_params(GtKarlinAltschulStat *ka,
-                                              bool ungapped_alignment,
-                                              GtAlphabet *alphabet,
-                                              GtScoreHandler *scorehandler);
+int gt_karlin_altschul_stat_calculate_params(GtKarlinAltschulStat *ka,
+                                             bool ungapped_alignment,
+                                             GtAlphabet *alphabet,
+                                             GtScoreHandler *scorehandler,
+                                             GtError *err);
 
 #endif

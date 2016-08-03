@@ -19,16 +19,30 @@
 #define EVALUE_H
 
 #include "core/types_api.h"
+#include "extended/scorehandler.h"
 #include "match/karlin_altschul_stat.h"
 #include "querymatch.h"
 
+/* 
+ * calculate evalue
+ * <ma> = number of matches
+ * <mm> = number of mismatches 
+ * <id> = number of indels
+ */
+double gt_evalue_calculate(const GtKarlinAltschulStat *ka,
+                           const GtScoreHandler *scorehandler,
+                           GtUword ma,
+                           GtUword mm,
+                           GtUword id,
+                           GtUword searchspace);
+/*
 double gt_evalue_calculate_for_qmatch(const GtKarlinAltschulStat *ka,
                                       const GtQuerymatch *querymatch,
                                       GtUword searchspace);
-
-double gt_evalue_calculate(const GtKarlinAltschulStat *ka,
-                           double bit_score,
-                           GtUword searchspace);
+*/
+double gt_evalue_calculate_on_bitscore(const GtKarlinAltschulStat *ka,
+                                       double bit_score,
+                                       GtUword searchspace);
 
 GtUword gt_evalue_calculate_searchspace(const GtKarlinAltschulStat *ka,
                                         const GtEncseq *dbencseq,
