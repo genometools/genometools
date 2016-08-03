@@ -27,13 +27,11 @@ void gt_karlin_altschul_stat_delete(GtKarlinAltschulStat *ka);
 double gt_karlin_altschul_stat_get_lambda(const GtKarlinAltschulStat *ka);
 double gt_karlin_altschul_stat_get_K(const GtKarlinAltschulStat *ka);
 double gt_karlin_altschul_stat_get_logK(const GtKarlinAltschulStat *ka);
-double gt_karlin_altschul_stat_get_alpha_div_lambda(const GtKarlinAltschulStat *ka,
-                                                    GtWord matchscore,
-                                                    GtWord mismatchscore);
+double gt_karlin_altschul_stat_get_alpha_div_lambda(const GtKarlinAltschulStat *ka);
 double gt_karlin_altschul_stat_get_beta(const GtKarlinAltschulStat *ka);
 void gt_karlin_altschul_stat_calculate_params(GtKarlinAltschulStat *ka,
                                               bool ungapped_alignment,
                                               GtAlphabet *alphabet,
-                                              GtScoreHandler *costhandler);
+                                              GtScoreHandler *scorehandler);
 
 #endif

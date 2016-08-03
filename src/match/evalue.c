@@ -154,7 +154,7 @@ GtUword gt_evalue_calculate_searchspace_by_encseqs(
 
   gt_assert(ka);
   //TODO: berechnung, match, mismatch ergaenzen
-  alpha_div_lambda = gt_karlin_altschul_stat_get_alpha_div_lambda(ka,-1,4);
+  alpha_div_lambda = gt_karlin_altschul_stat_get_alpha_div_lambda(ka);
   /*TODO: generalize */
 
   beta = gt_karlin_altschul_stat_get_beta(ka);
@@ -202,9 +202,7 @@ GtUword gt_evalue_calculate_searchspace(const GtKarlinAltschulStat *ka,
   double alpha_div_lambda, beta, K, logK;
 
   gt_assert(ka);
-  //TODO: berechnung, match, mismatch ergaenzen
-  alpha_div_lambda = gt_karlin_altschul_stat_get_alpha_div_lambda(ka,-1,4);
-  /* 1,0 only useful for unit cost, TODO: generalize */
+  alpha_div_lambda = gt_karlin_altschul_stat_get_alpha_div_lambda(ka);
 
   beta = gt_karlin_altschul_stat_get_beta(ka);
   K = gt_karlin_altschul_stat_get_K(ka);
