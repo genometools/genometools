@@ -552,6 +552,20 @@ static int ces_c_xdrop(GtCondenseqCreator *ces_c,
 
 #define GT_CES_C_MIN_POS_NUM_CUTOFF (GtUword) 30
 
+/*
+          i
+   ┌──────────────→ query
+   │
+   │
+ j │      ╲   k-mer
+   │       ╲
+   │        ╲
+   │
+   ↓
+   subject
+   second k-mer-hit: i',j'
+   i = querypos, j = subjectpos
+*/
 static int ces_c_extend_seeds_window(GtCondenseqCreator *ces_c,
                                      GtCondenseqLink *best_link,
                                      GtError *err)
@@ -577,10 +591,12 @@ static int ces_c_extend_seeds_window(GtCondenseqCreator *ces_c,
 
   match_positions = win->pos_arrs[GT_CONDENSEQ_CREATOR_WINDOWIDX(win, 0)];
 
-  /* nothing there or window not full -> do nothing */
+  /* nothing there or window not full */
   if (match_positions.no_positions == 0 ||
       ces_c->window.count != ces_c->windowsize)
     return had_err;
+  /* make sure the mean is not from one value (only one kmer has positions in
+     db) */
 
   /* get bounds for current .end is exclusive */
   seed_bounds.start = ces_c->current_orig_start;
@@ -644,37 +660,39 @@ static int ces_c_extend_seeds_window(GtCondenseqCreator *ces_c,
       for (idx_win = ces_c->windowsize - 1;
            !had_err && !found && idx_win >= ces_c->kmersize;
            idx_win--) {
-        GtKmerStartpos i_primes;
-        i_primes.startpos =
+        GtKmerStartpos j_primes;
+        j_primes.startpos =
           win->pos_arrs[GT_CONDENSEQ_CREATOR_WINDOWIDX(win, idx_win)].startpos;
-        i_primes.no_positions =
+        j_primes.no_positions =
           win->pos_arrs[GT_CONDENSEQ_CREATOR_WINDOWIDX(win,
                                                        idx_win)].no_positions;
         /* If 0, there are no known match_positions for kmer at this window
            position. */
-        if (i_primes.no_positions != 0) {
-          GtUword i_prime_idx;
+        if (j_primes.no_positions != 0) {
+          GtUword j_prime_idx = win->idxs[idx_win],
+                  j_prime = j_primes.startpos[j_prime_idx];
+          /* advance to at least the window */
+          while (j_prime_idx < j_primes.no_positions &&
+                 subjectpos + ces_c->kmersize - 1 > j_prime) {
+            j_prime_idx++;
+            j_prime = j_primes.startpos[j_prime_idx];
+          }
+          /* hit within window? */
+          if (j_prime_idx < j_primes.no_positions &&
+              subjectpos + ces_c->windowsize > j_prime) {
+            found = true;
+            had_err = ces_c_xdrop(ces_c,
+                                  subjectpos, querypos,
+                                  seed_bounds,
+                                  match_bounds,
+                                  new_uid,
+                                  best_link,
+                                  &best_match,
+                                  err);
+          }
           /* within each position array, remember last highest position, start
              there, because subjectpos increases each iteration */
-          for (i_prime_idx = win->idxs[idx_win];
-               !had_err && !found && i_prime_idx < i_primes.no_positions;
-               i_prime_idx++) {
-            GtUword i_prime = i_primes.startpos[i_prime_idx];
-            if (i_prime > subjectpos + ces_c->windowsize)
-              break;
-            if (i_prime > subjectpos + ces_c->kmersize - 1) {
-              found = true;
-              had_err = ces_c_xdrop(ces_c,
-                                    subjectpos, querypos,
-                                    seed_bounds,
-                                    match_bounds,
-                                    new_uid,
-                                    best_link,
-                                    &best_match,
-                                    err);
-            }
-          }
-          win->idxs[idx_win] = i_prime_idx;
+          win->idxs[idx_win] = j_prime_idx;
         }
       }
     }
