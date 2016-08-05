@@ -27,6 +27,7 @@
 #define NUMOF_VALUES 8
 /* TODO:reference, analog to blast */
 
+/* stores karlin altschul parameters */
 struct GtKarlinAltschulStat
 {
   double lambda,
@@ -44,12 +45,13 @@ typedef struct{
          high_score;
 } ScoringFrequency;
 
+/* stores letter propabilities */ 
 typedef struct{
   char   ch;
   double p;
 } LetterProb;
 
-/* provisional solution */
+/* provisional solution only dna alphabet */
 static LetterProb nt_prob[] = {
   { 'A', 0.25 },
   { 'C', 0.25 },
@@ -455,10 +457,10 @@ static int gt_karlin_altschul_stat_get_gapped_params(GtKarlinAltschulStat *ka,
 
 //TODO:new+fill oder trennen?
 int gt_karlin_altschul_stat_calculate_params(GtKarlinAltschulStat *ka,
-                                              bool ungapped_alignment,
-                                              GtAlphabet *alphabet,
-                                              GtScoreHandler *scorehandler,
-                                              GtError *err)
+                                             bool ungapped_alignment,
+                                             GtAlphabet *alphabet,
+                                             GtScoreHandler *scorehandler,
+                                             GtError *err)
 {
   if (ungapped_alignment)
   {

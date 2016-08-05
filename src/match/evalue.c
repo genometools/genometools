@@ -29,10 +29,11 @@
 
 /*
  * information for invoking procedure:
- * new GtKarlinAltschulStat,
- * calculate GtKarlinAltschulStat params (1+2 together?)
- * -> calculate evalue
- * delete GtKarlinAltschulStat
+ * -gt_karlin_altschul_stat_new
+ * -gt_karlin_altschul_stat_calculate_params
+ * -gt_evalue_calculate_searchspace
+ * -gt_evalue_calculate -> evalue
+ * -gt_karlin_altschul_stat_delete
  *
  */
 
@@ -153,9 +154,7 @@ GtUword gt_evalue_calculate_searchspace_by_encseqs(
   double alpha_div_lambda, beta, K, logK;
 
   gt_assert(ka);
-  //TODO: berechnung, match, mismatch ergaenzen
   alpha_div_lambda = gt_karlin_altschul_stat_get_alpha_div_lambda(ka);
-  /*TODO: generalize */
 
   beta = gt_karlin_altschul_stat_get_beta(ka);
   K = gt_karlin_altschul_stat_get_K(ka);

@@ -24,7 +24,7 @@
 #include "querymatch.h"
 
 /* 
- * calculate evalue
+ * calculates evalue for an alignment
  * <ma> = number of matches
  * <mm> = number of mismatches 
  * <id> = number of indels
@@ -36,7 +36,7 @@ double gt_evalue_calculate(const GtKarlinAltschulStat *ka,
                            GtUword id,
                            GtUword searchspace);
 /*
-double gt_evalue_calculate_for_qmatch(const GtKarlinAltschulStat *ka,
+ double gt_evalue_calculate_for_qmatch(const GtKarlinAltschulStat *ka,
                                       const GtQuerymatch *querymatch,
                                       GtUword searchspace);
 */

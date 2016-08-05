@@ -29,6 +29,16 @@ double gt_karlin_altschul_stat_get_K(const GtKarlinAltschulStat *ka);
 double gt_karlin_altschul_stat_get_logK(const GtKarlinAltschulStat *ka);
 double gt_karlin_altschul_stat_get_alpha_div_lambda(const GtKarlinAltschulStat *ka);
 double gt_karlin_altschul_stat_get_beta(const GtKarlinAltschulStat *ka);
+
+/* determine karlin altschul parameters lambda, H, K, alpha and beta for 
+ * a given <alphabet> and scorefunction given as <scorehandler>
+ * 
+ * If <ungapped_alignments> is set, paraemters are calculated by using scoring 
+ * frequency statistics for ungapped alignments,
+ * else precomputed values are used for gapped alignment
+ * 
+ * analog to BLAST
+ */
 int gt_karlin_altschul_stat_calculate_params(GtKarlinAltschulStat *ka,
                                              bool ungapped_alignment,
                                              GtAlphabet *alphabet,
