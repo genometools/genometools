@@ -393,9 +393,12 @@ static int gt_karlin_altschul_stat_get_gapped_params(GtKarlinAltschulStat *ka,
   gt_assert(ka && scorehandler);
   matchscore = gt_scorehandler_get_matchscore(scorehandler);
   mismatchscore = gt_scorehandler_get_mismatchscore(scorehandler);
-  
+
   if (matchscore == 1 && mismatchscore == -5)
+  {
+    length = sizeof(ga_matrix_1_5)/sizeof(GA_Values);
     ga_matrix = (GA_Values*) ga_matrix_1_5;
+  }
   else if (matchscore == 1 && mismatchscore == -4)
   {
     length = sizeof(ga_matrix_1_4)/sizeof(GA_Values);
