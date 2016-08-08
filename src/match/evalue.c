@@ -255,6 +255,7 @@ double gt_evalue_calculate_on_bitscore(const GtKarlinAltschulStat *ka,
   
   gt_assert(ka);
   raw_score = gt_evalue_calculate_raw_score(ka, bit_score);
+
   logK = gt_karlin_altschul_stat_get_logK(ka);
   lambda = gt_karlin_altschul_stat_get_lambda(ka);
   evalue = searchspace*exp(-lambda*raw_score+logK);
@@ -269,7 +270,8 @@ double gt_evalue_calculate(const GtKarlinAltschulStat *ka,
                            GtUword searchspace)
 {
   double evalue, logK, lambda;
-  GtUword matchscore, mismatchscore, gapscore, raw_score;
+  GtWord matchscore, mismatchscore, gapscore;
+  GtUword raw_score;
   
   gt_assert(ka && scorehandler);
   
@@ -280,10 +282,8 @@ double gt_evalue_calculate(const GtKarlinAltschulStat *ka,
   mismatchscore = gt_scorehandler_get_mismatchscore(scorehandler);
   gapscore = gt_scorehandler_get_gapscore(scorehandler);
   
+  raw_score = ma*matchscore + mm*mismatchscore + id*gapscore;
 
-  raw_score = gt_safe_mult_ulong(mm, matchscore) + 
-              gt_safe_mult_ulong(ma, mismatchscore) +
-              gt_safe_mult_ulong(id, gapscore);
   logK = gt_karlin_altschul_stat_get_logK(ka);
   lambda = gt_karlin_altschul_stat_get_lambda(ka);
   evalue = searchspace*exp(-lambda*raw_score+logK);
