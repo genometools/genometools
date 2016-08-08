@@ -33,8 +33,8 @@
 #include "extended/match_iterator_blast.h"
 #include "extended/match_iterator_rep.h"
 
-#define READNUMS 5
-#define READVALUES 10
+#define READNUMS 7
+#define READVALUES 12
 
 #define GT_MATCHER_BLAST_CANNOTPARSECOLUMN(S)\
         gt_error_set(err, "file %s, line " GT_WU ", column " GT_WU ": %s", \
@@ -90,9 +90,10 @@ static GtMatchIteratorStatus gt_match_iterator_blast_next(GtMatchIterator *mi,
     if (!mib->pvt->process)
       fseek(mib->pvt->matchfilep, -1, SEEK_CUR);
     readvalues = fscanf(mib->pvt->matchfilep,
-                        "%s %s %f " GT_WD " %*d %*d " GT_WD " " GT_WD " " GT_WD
-                        " " GT_WD " %lg %f\n", query_seq, db_seq, &identity,
-                        &storeinteger[0],
+                        "%s %s %f " GT_WD " " GT_WD " " GT_WD " " GT_WD " "
+                        GT_WD " " GT_WD " " GT_WD " %lg %f\n",
+                        query_seq, db_seq, &identity,
+                        &storeinteger[0], &storeinteger[5], &storeinteger[6],
                         &storeinteger[1], &storeinteger[2], &storeinteger[3],
                         &storeinteger[4], &e_value, &bitscore);
     if (readvalues == EOF)
@@ -115,10 +116,10 @@ static GtMatchIteratorStatus gt_match_iterator_blast_next(GtMatchIterator *mi,
         i = 0;
       } else break;
     }
-    if ((readvalues = sscanf(buffer, "%s %s %f " GT_WD " %*d %*d " GT_WD " "
-                             GT_WD " " GT_WD " " GT_WD " %lg " "%f\n",
-                             query_seq, db_seq, &identity,
-                             &storeinteger[0],
+    if ((readvalues = sscanf(buffer, "%s %s %f " GT_WD " " GT_WD " " GT_WD " "
+                             GT_WD " " GT_WD " " GT_WD " " GT_WD " %lg " "%f\n",
+                             query_seq, db_seq, &identity, &storeinteger[0],
+                             &storeinteger[5], &storeinteger[6],
                              &storeinteger[1], &storeinteger[2],
                              &storeinteger[3], &storeinteger[4], &e_value,
                              &bitscore)) != READVALUES) {
@@ -160,6 +161,8 @@ static GtMatchIteratorStatus gt_match_iterator_blast_next(GtMatchIterator *mi,
                                 bitscore,
                                 storeinteger[0],
                                 identity,
+                                storeinteger[5],
+                                storeinteger[6],
                                 reverse ? GT_MATCH_REVERSE : GT_MATCH_DIRECT);
     mib->pvt->curpos++;
     return GT_MATCHER_STATUS_OK;

@@ -1,6 +1,7 @@
 /*
   Copyright (c) 2011 Sascha Kastens <mail@skastens.de>
-  Copyright (c) 2011 Center for Bioinformatics, University of Hamburg
+  Copyright (c)      2016 Annika Seidel <annika.seidel@studium.uni-hamburg.de>
+  Copyright (c) 2011-2016 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -37,6 +38,8 @@ GtMatch* gt_match_blast_new(char *seqid1,
                             float bitscore,
                             GtUword ali_l,
                             double similarity,
+                            GtUword mm_num,
+                            GtUword gap_open_num,
                             GtMatchDirection dir);
 
 /* Sets <evalue> to be the E-value in <mb>. */
@@ -51,6 +54,12 @@ void gt_match_blast_set_align_length(GtMatchBlast *mb, GtUword length);
 /* Sets <similarity> to be the match similarity in <mb>. */
 void gt_match_blast_set_similarity(GtMatchBlast *mb, double similarity);
 
+/* Sets <num to be the number of mismatches in <mb>. */
+void gt_match_blast_set_mismatches(GtMatchBlast *mb, GtUword mm_num);
+
+/* Sets <num> to be the number of gap openings in <mb>. */
+void gt_match_blast_set_gapopen(GtMatchBlast *mb, GtUword gap_open_num);
+
 /* Returns the E-value stored in <mb>. */
 double gt_match_blast_get_evalue(GtMatchBlast *mb);
 
@@ -63,4 +72,9 @@ GtUword gt_match_blast_get_align_length(GtMatchBlast *mb);
 /* Returns the alignment similarity stored in <mb>. */
 double gt_match_blast_get_similarity(GtMatchBlast *mb);
 
+/* Returns the number of mismatches stored in <mb>. */
+GtUword gt_match_blast_get_mismatches(GtMatchBlast *mb);
+
+/* Returns the number of gap openings stored in <mb>. */
+GtUword gt_match_blast_get_gapopen(GtMatchBlast *mb);
 #endif

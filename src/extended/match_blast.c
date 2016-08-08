@@ -1,6 +1,7 @@
 /*
   Copyright (c) 2011 Sascha Kastens <mail@skastens.de>
-  Copyright (c) 2011 Center for Bioinformatics, University of Hamburg
+  Copyright (c)      2016 Annika Seidel <annika.seidel@studium.uni-hamburg.de>
+  Copyright (c) 2011-2016 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -31,7 +32,9 @@ struct GtMatchBlast {
   GtMatch parent_instance;
   double evalue;
   float bitscore;
-  GtUword ali_length;
+  GtUword ali_length,
+          mm_num,
+          gap_open_num;
   double similarity;
 };
 
@@ -73,6 +76,8 @@ GtMatch* gt_match_blast_new(char *seqid1,
                             float bitscore,
                             GtUword length,
                             double similarity,
+                            GtUword mm_num,
+                            GtUword gap_open_num,
                             GtMatchDirection dir)
 {
   GtMatch *match;
@@ -84,6 +89,8 @@ GtMatch* gt_match_blast_new(char *seqid1,
   matchb->bitscore = bitscore;
   matchb->ali_length = length;
   matchb->similarity = similarity;
+  matchb->mm_num = mm_num;
+  matchb->gap_open_num = gap_open_num;
   return match;
 }
 
@@ -111,6 +118,18 @@ void gt_match_blast_set_similarity(GtMatchBlast *mb, double similarity)
   mb->similarity = similarity;
 }
 
+void gt_match_blast_set_mismatches(GtMatchBlast *mb, GtUword mm_num)
+{
+  gt_assert(mb);
+  mb->mm_num = mm_num;
+}
+
+void gt_match_blast_set_gapopen(GtMatchBlast *mb, GtUword gap_open_num)
+{
+  gt_assert(mb);
+  mb->gap_open_num = gap_open_num;
+}
+
 double gt_match_blast_get_evalue(GtMatchBlast *mb)
 {
   gt_assert(mb);
@@ -133,4 +152,16 @@ double gt_match_blast_get_similarity(GtMatchBlast *mb)
 {
   gt_assert(mb);
   return mb->similarity;
+}
+
+GtUword gt_match_blast_get_mismatches(GtMatchBlast *mb)
+{
+  gt_assert(mb);
+  return mb->mm_num;
+}
+
+GtUword gt_match_blast_get_gapopen(GtMatchBlast *mb)
+{
+  gt_assert(mb);
+  return mb->gap_open_num;
 }
