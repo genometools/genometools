@@ -189,7 +189,7 @@ static inline GtUword ces_c_diags_get(CesCDiags *diags, GtUword d,
   }
   if (diags->sparse != NULL) {
     CesCDiag *overwrite = NULL,
-               *ow_tree = NULL;
+             *ow_tree   = NULL;
     CesCDiag key;
     key.d = d;
     overwrite = ces_c_diags_bs_lseq(diags->sparse, d);
@@ -354,8 +354,6 @@ static void ces_c_sparse_diags_clean(GtCondenseqCreator *ces_c)
   diags->marked = 0;
 }
 
-/* TODO DW: split this up, use functional programming to use the different
-   methods */
 static inline void ces_c_diags_set(GtCondenseqCreator *ces_c,
                                    GtUword d,
                                    GtUword i, GtUword i_min,
