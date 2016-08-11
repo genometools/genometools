@@ -60,7 +60,7 @@ static GtUword ces_c_xdrops = 0;
   }
 
 typedef struct GtCondenseqCreatorDiagonal {
-  GtUword d, i;
+  GtUword d, j;
 } CesCDiag;
 
 typedef struct GtCondenseqCreatorFullDiags {
@@ -196,15 +196,15 @@ static inline GtUword ces_c_diags_get(CesCDiags *diags, GtUword d,
     if (overwrite >= diags->sparse->space) {
       if (overwrite->d == d) {
         *diag = overwrite;
-        s_ret = overwrite->i;
+        s_ret = overwrite->j;
       }
       else {
-        if (overwrite->i == GT_UNDEF_UWORD)
+        if (overwrite->j == GT_UNDEF_UWORD)
           *diag = overwrite;
         ow_tree = gt_rbtree_find(diags->sparse->add_tree, &key);
         if (ow_tree != NULL) {
           gt_assert(ow_tree->d == d);
-          s_ret = ow_tree->i;
+          s_ret = ow_tree->j;
           *diag = ow_tree;
         }
       }
@@ -213,7 +213,7 @@ static inline GtUword ces_c_diags_get(CesCDiags *diags, GtUword d,
       ow_tree = gt_rbtree_find(diags->sparse->add_tree, &key);
       if (ow_tree != NULL) {
         gt_assert(ow_tree->d == d);
-        s_ret = ow_tree->i;
+        s_ret = ow_tree->j;
         *diag = ow_tree;
       }
     }
@@ -255,7 +255,7 @@ static inline void ces_c_sparse_diags_add(CesCSparseDiags *diags)
     gt_assert(d_src < diags->space || d_src->d < diag->d);
     /* insert */
     d_dest->d = diag->d;
-    d_dest->i = diag->i;
+    d_dest->j = diag->j;
     d_dest--;
     diags->add_nextfree--;
     diag = gt_rbtree_iter_prev(diags->add_iterator);
@@ -339,7 +339,7 @@ static void ces_c_sparse_diags_clean(GtCondenseqCreator *ces_c)
                       *d_src = diags->space,
                       *end = diags->space + diags->nextfree;
   while (d_src < end) {
-    if (d_src->i != GT_UNDEF_UWORD) {
+    if (d_src->j != GT_UNDEF_UWORD) {
       *d_dest = *d_src;
       d_dest++;
     }
@@ -356,7 +356,7 @@ static void ces_c_sparse_diags_clean(GtCondenseqCreator *ces_c)
 
 static inline void ces_c_diags_set(GtCondenseqCreator *ces_c,
                                    GtUword d,
-                                   GtUword i, GtUword i_min,
+                                   GtUword j, GtUword j_min,
                                    CesCDiag *overwrite)
 {
   CesCDiags *diags = ces_c->diagonals;
@@ -367,18 +367,18 @@ static inline void ces_c_diags_set(GtCondenseqCreator *ces_c,
   if (diags->full != NULL) {
     CesCFullDiags *fdiags = diags->full;
     if (fdiags->space[d] == GT_UNDEF_UWORD ||
-        fdiags->space[d] < i_min ||
-        fdiags->space[d] + ces_c->kmersize - 1 < i)
-      fdiags->space[d] = i;
+        fdiags->space[d] < j_min ||
+        fdiags->space[d] + ces_c->kmersize - 1 < j)
+      fdiags->space[d] = j;
   }
   if (diags->sparse != NULL) {
     CesCSparseDiags *sdiags = diags->sparse;
     if (overwrite != NULL) {
       overwrite->d = d;
-      if (overwrite->i == GT_UNDEF_UWORD ||
-          overwrite->i < i_min ||
-          overwrite->i + ces_c->kmersize - 1 < i)
-      overwrite->i = i;
+      if (overwrite->j == GT_UNDEF_UWORD ||
+          overwrite->j < j_min ||
+          overwrite->j + ces_c->kmersize - 1 < j)
+      overwrite->j = j;
     }
     else {
       GT_UNUSED bool nodecreated;
@@ -388,7 +388,7 @@ static inline void ces_c_diags_set(GtCondenseqCreator *ces_c,
           ces_c_sparse_diags_clean(ces_c);
         ces_c_sparse_diags_add(sdiags);
       }
-      sdiags->add_space[sdiags->add_nextfree].i = i;
+      sdiags->add_space[sdiags->add_nextfree].j = j;
       sdiags->add_space[sdiags->add_nextfree].d = d;
       (void) gt_rbtree_search(sdiags->add_tree,
                               &sdiags->add_space[sdiags->add_nextfree],
@@ -402,7 +402,7 @@ static inline void ces_c_diags_set(GtCondenseqCreator *ces_c,
 }
 
 static void ces_c_sparse_diags_mark(CesCSparseDiags *diags,
-                                    GtUword i_max,
+                                    GtUword j_max,
                                     GtUword d_min,
                                     GtUword d)
 {
@@ -415,8 +415,8 @@ static void ces_c_sparse_diags_mark(CesCSparseDiags *diags,
     /* do not cross current d! */
     while (d_ptr >= diags->space &&
            d_ptr->d > d &&
-           d_ptr->i <= i_max) {/* old diag of last block */
-      d_ptr->i = GT_UNDEF_UWORD;
+           d_ptr->j <= j_max) {/* old diag of last block */
+      d_ptr->j = GT_UNDEF_UWORD;
       diags->marked++;
       d_ptr--;
     }
@@ -935,17 +935,17 @@ static int ces_c_extend_seeds_diags(GtCondenseqCreator *ces_c,
     for (subject_idx = 0;
          subject_idx < diags->sparse->nextfree;
          subject_idx++) {
-      if (diags->sparse->space[subject_idx].i != GT_UNDEF_UWORD)
+      if (diags->sparse->space[subject_idx].j != GT_UNDEF_UWORD)
         gt_log_log("D: " GT_WU ", J: " GT_WU,
                    diags->sparse->space[subject_idx].d,
-                   diags->sparse->space[subject_idx].i);
+                   diags->sparse->space[subject_idx].j);
       else
         gt_log_log("D: " GT_WU ", J: X", diags->sparse->space[subject_idx].d);
     }
     gt_log_log("tree:");
     diag = gt_rbtree_iter_data(iter);
     while (diag != NULL) {
-      gt_log_log("D: " GT_WU ", J: " GT_WU, diag->d, diag->i);
+      gt_log_log("D: " GT_WU ", J: " GT_WU, diag->d, diag->j);
       diag = gt_rbtree_iter_next(iter);
     }
   }
