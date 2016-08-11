@@ -190,7 +190,7 @@ gt_condenseq_compress_option_parser_new(void *tool_arguments)
   /* -brute_force */
   option = gt_option_new_bool("brute_force", "disable filtering of seeds. "
                               "Incompatible with -diagonals yes "
-                              "or -full_diags yes",
+                              "or -full_diags yes. For benchmarking use.",
                               &arguments->brute, false);
   gt_option_is_development_option(option);
   gt_option_parser_add_option(op, option);

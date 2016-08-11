@@ -29,7 +29,7 @@
 typedef struct GtEliasGammaBitwiseDecoder GtEliasGammaBitwiseDecoder;
 
 /* Encodes the given positive integer <x>, writes it to a new <GtBittab> object
-   and returns it. Expects x > 0. To encode 0 just add 1 to all numbers to
+   and returns it. Expects <x> > 0. To encode 0 just add 1 to all numbers to
    encode. */
 GtBittab*                   gt_elias_gamma_encode(GtUword x);
 

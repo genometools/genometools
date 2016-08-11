@@ -30,6 +30,8 @@
 typedef struct GtRcrEncoder GtRcrEncoder;
 typedef struct GtRcrDecoder GtRcrDecoder;
 
+/* TODO DW move the bool switches to setter functions like for verbosity */
+
 /* Returns a new GtRcrEncoder object. <ref> points to a reference genome,
    <filename> is a BAM file containing alignments of short reads to
    the reference genome. If <vquals> is true, quality values of read

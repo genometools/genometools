@@ -23,7 +23,9 @@
 /* Abstract class GtWtree,
    Used to store sequences or Permutations.
    Each implementation must implement a function for mapping <GtWtreeSymbol> to
-   the implementation-specific alphabet symbol. */
+   the implementation-specific alphabet symbol.
+   Based on R. Grossi and A. Gupta and J. Vitter: High-Order Entropy-Compressed
+   Text Indexes. */
 typedef struct GtWtree GtWtree;
 
 /* Type used by GtWtree to represent symbols */

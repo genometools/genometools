@@ -127,14 +127,14 @@ void            gt_multieoplist_show(GtMultieoplist *multieops, FILE *fp);
 /* Returns the combination of two <GtMultieoplist>s. Adds <multieops_to_add> to
    the end of <multieops> (which is usualy the start of the alignment).
    <forward> defines if <multieops_to_add> should be read in forward or reverse
-   direction.  If <multieops_to_add> and <multieops> are from consequtive
+   direction. If <multieops_to_add> and <multieops> are from consequtive
    alignments:
    [...<-...][...<-...] or [...->...][...->...]
-   use true
-   if they ar from alignments with the same startpoint:
+   use true.
+   If they ar from alignments with the same startpoint:
    [...->...][...<-...]
-   use false
-   if the layout is like this:
+   use false.
+   If the layout is like this:
    [...<-...][...->...]
    none of them can be added to the end of the other without reversing one
    beforehand. */

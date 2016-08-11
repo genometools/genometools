@@ -40,7 +40,7 @@ GtCompressedBitsequence* gt_compressed_bitsequence_new(GtBitsequence *bitseq,
                                                        GtUword num_of_bits);
 
 /* Returns 0 or 1 according to the bit at <position> in <cbs>. Note that
-   <position> has to be smaller than the length  of <cbs>. */
+   <position> has to be smaller than the length of <cbs>. */
 int                      gt_compressed_bitsequence_access(
                                                    GtCompressedBitsequence *cbs,
                                                    GtUword position);

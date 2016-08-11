@@ -60,7 +60,7 @@ static GtUword ces_c_xdrops = 0;
   }
 
 typedef struct GtCondenseqCreatorDiagonal {
-  GtUword d, i;
+  GtUword d, j;
 } CesCDiag;
 
 typedef struct GtCondenseqCreatorFullDiags {
@@ -189,22 +189,22 @@ static inline GtUword ces_c_diags_get(CesCDiags *diags, GtUword d,
   }
   if (diags->sparse != NULL) {
     CesCDiag *overwrite = NULL,
-               *ow_tree = NULL;
+             *ow_tree   = NULL;
     CesCDiag key;
     key.d = d;
     overwrite = ces_c_diags_bs_lseq(diags->sparse, d);
     if (overwrite >= diags->sparse->space) {
       if (overwrite->d == d) {
         *diag = overwrite;
-        s_ret = overwrite->i;
+        s_ret = overwrite->j;
       }
       else {
-        if (overwrite->i == GT_UNDEF_UWORD)
+        if (overwrite->j == GT_UNDEF_UWORD)
           *diag = overwrite;
         ow_tree = gt_rbtree_find(diags->sparse->add_tree, &key);
         if (ow_tree != NULL) {
           gt_assert(ow_tree->d == d);
-          s_ret = ow_tree->i;
+          s_ret = ow_tree->j;
           *diag = ow_tree;
         }
       }
@@ -213,7 +213,7 @@ static inline GtUword ces_c_diags_get(CesCDiags *diags, GtUword d,
       ow_tree = gt_rbtree_find(diags->sparse->add_tree, &key);
       if (ow_tree != NULL) {
         gt_assert(ow_tree->d == d);
-        s_ret = ow_tree->i;
+        s_ret = ow_tree->j;
         *diag = ow_tree;
       }
     }
@@ -255,7 +255,7 @@ static inline void ces_c_sparse_diags_add(CesCSparseDiags *diags)
     gt_assert(d_src < diags->space || d_src->d < diag->d);
     /* insert */
     d_dest->d = diag->d;
-    d_dest->i = diag->i;
+    d_dest->j = diag->j;
     d_dest--;
     diags->add_nextfree--;
     diag = gt_rbtree_iter_prev(diags->add_iterator);
@@ -339,7 +339,7 @@ static void ces_c_sparse_diags_clean(GtCondenseqCreator *ces_c)
                       *d_src = diags->space,
                       *end = diags->space + diags->nextfree;
   while (d_src < end) {
-    if (d_src->i != GT_UNDEF_UWORD) {
+    if (d_src->j != GT_UNDEF_UWORD) {
       *d_dest = *d_src;
       d_dest++;
     }
@@ -356,7 +356,7 @@ static void ces_c_sparse_diags_clean(GtCondenseqCreator *ces_c)
 
 static inline void ces_c_diags_set(GtCondenseqCreator *ces_c,
                                    GtUword d,
-                                   GtUword i, GtUword i_min,
+                                   GtUword j, GtUword j_min,
                                    CesCDiag *overwrite)
 {
   CesCDiags *diags = ces_c->diagonals;
@@ -367,18 +367,18 @@ static inline void ces_c_diags_set(GtCondenseqCreator *ces_c,
   if (diags->full != NULL) {
     CesCFullDiags *fdiags = diags->full;
     if (fdiags->space[d] == GT_UNDEF_UWORD ||
-        fdiags->space[d] < i_min ||
-        fdiags->space[d] + ces_c->kmersize - 1 < i)
-      fdiags->space[d] = i;
+        fdiags->space[d] < j_min ||
+        fdiags->space[d] + ces_c->kmersize - 1 < j)
+      fdiags->space[d] = j;
   }
   if (diags->sparse != NULL) {
     CesCSparseDiags *sdiags = diags->sparse;
     if (overwrite != NULL) {
       overwrite->d = d;
-      if (overwrite->i == GT_UNDEF_UWORD ||
-          overwrite->i < i_min ||
-          overwrite->i + ces_c->kmersize - 1 < i)
-      overwrite->i = i;
+      if (overwrite->j == GT_UNDEF_UWORD ||
+          overwrite->j < j_min ||
+          overwrite->j + ces_c->kmersize - 1 < j)
+      overwrite->j = j;
     }
     else {
       GT_UNUSED bool nodecreated;
@@ -388,7 +388,7 @@ static inline void ces_c_diags_set(GtCondenseqCreator *ces_c,
           ces_c_sparse_diags_clean(ces_c);
         ces_c_sparse_diags_add(sdiags);
       }
-      sdiags->add_space[sdiags->add_nextfree].i = i;
+      sdiags->add_space[sdiags->add_nextfree].j = j;
       sdiags->add_space[sdiags->add_nextfree].d = d;
       (void) gt_rbtree_search(sdiags->add_tree,
                               &sdiags->add_space[sdiags->add_nextfree],
@@ -402,22 +402,24 @@ static inline void ces_c_diags_set(GtCondenseqCreator *ces_c,
 }
 
 static void ces_c_sparse_diags_mark(CesCSparseDiags *diags,
-                                    GtUword i_max,
+                                    GtUword j_max,
                                     GtUword d_min,
                                     GtUword d)
 {
-  /* move to end of block (last diagonal that was valid for this j or
-     smaller) only a few steps? Do not cross current d! */
-  CesCDiag *d_ptr = ces_c_diags_bs_lseq(diags, d_min);
+  if (diags != NULL) {
+    /* move to end of block (last diagonal that was valid for this j or
+       smaller) only a few steps? Do not cross current d! */
+    CesCDiag *d_ptr = ces_c_diags_bs_lseq(diags, d_min);
 
-  /* mark all within same i-range after block as deleted */
-  /* do not cross current d! */
-  while (d_ptr >= diags->space &&
-         d_ptr->d > d &&
-         d_ptr->i <= i_max) {/* old diag of last block */
-    d_ptr->i = GT_UNDEF_UWORD;
-    diags->marked++;
-    d_ptr--;
+    /* mark all within same i-range after block as deleted */
+    /* do not cross current d! */
+    while (d_ptr >= diags->space &&
+           d_ptr->d > d &&
+           d_ptr->j <= j_max) {/* old diag of last block */
+      d_ptr->j = GT_UNDEF_UWORD;
+      diags->marked++;
+      d_ptr--;
+    }
   }
 }
 
@@ -450,12 +452,14 @@ static void ces_c_xdrop_init(GtXdropArbitraryscores *scores,
   }                                                                         \
   while (false)
 
-/* .end is exclusive!!! */
+/* .end is exclusive!!!
+   i and j are somewhat reversed. i is the subject, j is the query
+*/
 static int ces_c_xdrop(GtCondenseqCreator *ces_c,
                        GtUword i,
                        GtUword j,
-                       GtRange seed_bounds,
-                       GtRange match_bounds,
+                       GtRange query_bounds,
+                       GtRange subject_bounds,
                        GtUword unique_id,
                        GtCondenseqLink *best_link,
                        GtUword *best_match,
@@ -466,17 +470,17 @@ static int ces_c_xdrop(GtCondenseqCreator *ces_c,
   GtCondenseqCreatorXdrop *xdrop = &ces_c->xdrop;
   const bool forward = true;
 
-  gt_assert(match_bounds.start <= i);
-  gt_assert(i + ces_c->kmersize - 1 < match_bounds.end);
+  gt_assert(subject_bounds.start <= i);
+  gt_assert(i + ces_c->kmersize - 1 < subject_bounds.end);
 
   /* left xdrop */
-  if (seed_bounds.start < j && match_bounds.start < i) {
+  if (query_bounds.start < j && subject_bounds.start < i) {
     gt_seqabstract_reinit_encseq(!forward,
                                  GT_READMODE_FORWARD,
                                  xdrop->unique_seq_bwd,
                                  ces_c->input_es,
-                                 i - match_bounds.start,
-                                 match_bounds.start);
+                                 i - subject_bounds.start,
+                                 subject_bounds.start);
     ces_c_xdrops++;
     gt_evalxdroparbitscoresextend(!forward,
                                   &left_xdrop,
@@ -485,13 +489,13 @@ static int ces_c_xdrop(GtCondenseqCreator *ces_c,
                                   xdrop->current_seq_bwd,
                                   xdrop->xdropscore);
   }
-  /* right xdrop (i < match_bounds.end by assertion) */
-  if (j < seed_bounds.end) {
+  /* right xdrop (i < subject_bounds.end by assertion) */
+  if (j < query_bounds.end) {
     gt_seqabstract_reinit_encseq(forward,
                                  GT_READMODE_FORWARD,
                                  xdrop->unique_seq_fwd,
                                  ces_c->input_es,
-                                 match_bounds.end - i,
+                                 subject_bounds.end - i,
                                  i);
     ces_c_xdrops++;
     gt_evalxdroparbitscoresextend(forward,
@@ -520,10 +524,10 @@ static int ces_c_xdrop(GtCondenseqCreator *ces_c,
     xdrop->best_right_res = xdrop->right_xdrop_res;
     xdrop->right_xdrop_res = swap;
 
-    GT_CES_LENCHECK((i - left_xdrop.ivalue) - match_bounds.start);
+    GT_CES_LENCHECK((i - left_xdrop.ivalue) - subject_bounds.start);
     if (!had_err) {
       /* left started att i-1 */
-      best_link->unique_offset = (i - left_xdrop.ivalue) - match_bounds.start;
+      best_link->unique_offset = (i - left_xdrop.ivalue) - subject_bounds.start;
       GT_CES_LENCHECK(xdrop->left->jvalue + xdrop->right->jvalue);
     }
     if (!had_err) {
@@ -552,13 +556,27 @@ static int ces_c_xdrop(GtCondenseqCreator *ces_c,
 
 #define GT_CES_C_MIN_POS_NUM_CUTOFF (GtUword) 30
 
+/*
+          i
+   ┌──────────────→ query
+   │
+   │
+ j │      ╲   k-mer
+   │       ╲
+   │        ╲
+   │
+   ↓
+   subject
+   second k-mer-hit: i',j'
+   i = querypos, j = subjectpos
+*/
 static int ces_c_extend_seeds_window(GtCondenseqCreator *ces_c,
                                      GtCondenseqLink *best_link,
                                      GtError *err)
 {
   int had_err = 0;
-  GtRange seed_bounds,
-          match_bounds;
+  GtRange query_bounds,
+          subject_bounds;
   GtKmerStartpos match_positions;
   GtCondenseqCreatorWindow *win = &ces_c->window;
   GtCondenseqCreatorXdrop *xdrop = &ces_c->xdrop;
@@ -569,8 +587,8 @@ static int ces_c_extend_seeds_window(GtCondenseqCreator *ces_c,
   unsigned int idx_win;
   GtXdropbest empty = {0,0,0,0,0};
   const bool forward = true;
-  match_bounds.end =
-    match_bounds.start = 0;
+  subject_bounds.end =
+    subject_bounds.start = 0;
 
   *xdrop->left = empty;
   *xdrop->right = empty;
@@ -581,18 +599,16 @@ static int ces_c_extend_seeds_window(GtCondenseqCreator *ces_c,
   if (match_positions.no_positions == 0 ||
       ces_c->window.count != ces_c->windowsize)
     return had_err;
-  /* make sure the mean is not from one value (only one kmer has positions in
-     db) */
 
-  /* get bounds for current .end is exclusive */
-  seed_bounds.start = ces_c->current_orig_start;
-  seed_bounds.end = ces_c->current_seq_start + ces_c->current_seq_len;
-  gt_assert(seed_bounds.start <= querypos);
-  if (!(querypos <= seed_bounds.end - ces_c->windowsize)) {
+  /* get bounds for current, .end is exclusive */
+  query_bounds.start = ces_c->current_orig_start;
+  query_bounds.end = ces_c->current_seq_start + ces_c->current_seq_len;
+  gt_assert(query_bounds.start <= querypos);
+  if (!(querypos <= query_bounds.end - ces_c->windowsize)) {
     gt_error_set(err, "querypos: " GT_WU ", not smaller end (" GT_WU
                  ") - windowsize (%u) (xdrop calls: " GT_WU " )",
                  querypos,
-                 seed_bounds.end,
+                 query_bounds.end,
                  ces_c->windowsize,
                  ces_c_xdrops);
     had_err = -1;
@@ -603,20 +619,20 @@ static int ces_c_extend_seeds_window(GtCondenseqCreator *ces_c,
       win->idxs[idx_win] = 0;
     }
 
-    if (seed_bounds.start < querypos) {
+    if (query_bounds.start < querypos) {
       gt_seqabstract_reinit_encseq(!forward,
                                    GT_READMODE_FORWARD,
                                    xdrop->current_seq_bwd,
                                    ces_c->input_es,
-                                   querypos - seed_bounds.start,
-                                   seed_bounds.start);
+                                   querypos - query_bounds.start,
+                                   query_bounds.start);
     }
-    if (querypos < seed_bounds.end) {
+    if (querypos < query_bounds.end) {
       gt_seqabstract_reinit_encseq(forward,
                                    GT_READMODE_FORWARD,
                                    xdrop->current_seq_fwd,
                                    ces_c->input_es,
-                                   seed_bounds.end - querypos,
+                                   query_bounds.end - querypos,
                                    querypos);
     }
   }
@@ -630,53 +646,56 @@ static int ces_c_extend_seeds_window(GtCondenseqCreator *ces_c,
     GtUword subjectpos = match_positions.startpos[idx_cur],
             new_uid = match_positions.unique_ids[idx_cur];
     /* end == subjectpos should not be possible as this would be a separator */
-    if (match_bounds.end <= subjectpos || match_bounds.end == 0) {
+    if (subject_bounds.end <= subjectpos || subject_bounds.end == 0) {
       gt_assert(new_uid != ces_c->ces->udb_nelems);
-      match_bounds.start = ces_c->ces->uniques[new_uid].orig_startpos;
-      match_bounds.end = match_bounds.start +
+      subject_bounds.start = ces_c->ces->uniques[new_uid].orig_startpos;
+      subject_bounds.end = subject_bounds.start +
         ces_c->ces->uniques[new_uid].len;
-      gt_assert(match_bounds.start <= subjectpos &&
-                subjectpos + ces_c->kmersize <= match_bounds.end);
+      gt_assert(subject_bounds.start <= subjectpos &&
+                subjectpos + ces_c->kmersize <= subject_bounds.end);
     }
     /* check if new position is already covered by current best alignment */
     if (best_match == GT_UNDEF_UWORD ||
-        /* ivalue is a length -> best + ivalue is outside of best alignment */
+        /* ivalue is a length (within unique) -> best + ivalue is outside of
+           best alignment */
         subjectpos >= best_match + xdrop->right->ivalue) {
       /* start with search for right hit at end of window */
       for (idx_win = ces_c->windowsize - 1;
            !had_err && !found && idx_win >= ces_c->kmersize;
            idx_win--) {
-        GtKmerStartpos i_primes;
-        i_primes.startpos =
+        GtKmerStartpos j_primes;
+        j_primes.startpos =
           win->pos_arrs[GT_CONDENSEQ_CREATOR_WINDOWIDX(win, idx_win)].startpos;
-        i_primes.no_positions =
+        j_primes.no_positions =
           win->pos_arrs[GT_CONDENSEQ_CREATOR_WINDOWIDX(win,
                                                        idx_win)].no_positions;
         /* If 0, there are no known match_positions for kmer at this window
            position. */
-        if (i_primes.no_positions != 0) {
-          GtUword i_prime_idx;
+        if (j_primes.no_positions != 0) {
+          GtUword j_prime_idx = win->idxs[idx_win],
+                  j_prime = j_primes.startpos[j_prime_idx];
+          /* advance to at least the window */
+          while (j_prime_idx < j_primes.no_positions &&
+                 subjectpos + ces_c->kmersize - 1 > j_prime) {
+            j_prime_idx++;
+            j_prime = j_primes.startpos[j_prime_idx];
+          }
+          /* hit within window? */
+          if (j_prime_idx < j_primes.no_positions &&
+              subjectpos + ces_c->windowsize > j_prime) {
+            found = true;
+            had_err = ces_c_xdrop(ces_c,
+                                  subjectpos, querypos,
+                                  query_bounds,
+                                  subject_bounds,
+                                  new_uid,
+                                  best_link,
+                                  &best_match,
+                                  err);
+          }
           /* within each position array, remember last highest position, start
              there, because subjectpos increases each iteration */
-          for (i_prime_idx = win->idxs[idx_win];
-               !had_err && !found && i_prime_idx < i_primes.no_positions;
-               i_prime_idx++) {
-            GtUword i_prime = i_primes.startpos[i_prime_idx];
-            if (i_prime > subjectpos + ces_c->windowsize)
-              break;
-            if (i_prime > subjectpos + ces_c->kmersize - 1) {
-              found = true;
-              had_err = ces_c_xdrop(ces_c,
-                                    subjectpos, querypos,
-                                    seed_bounds,
-                                    match_bounds,
-                                    new_uid,
-                                    best_link,
-                                    &best_match,
-                                    err);
-            }
-          }
-          win->idxs[idx_win] = i_prime_idx;
+          win->idxs[idx_win] = j_prime_idx;
         }
       }
     }
@@ -686,8 +705,8 @@ static int ces_c_extend_seeds_window(GtCondenseqCreator *ces_c,
     if (best_link->len < ces_c->min_align_len)
       best_link->len = 0;
     else {
-      gt_assert(best_link->orig_startpos >= seed_bounds.start);
-      gt_assert(best_link->orig_startpos + best_link->len <= seed_bounds.end);
+      gt_assert(best_link->orig_startpos >= query_bounds.start);
+      gt_assert(best_link->orig_startpos + best_link->len <= query_bounds.end);
     }
   }
   return had_err;
@@ -698,22 +717,22 @@ static int ces_c_extend_seeds_brute_force(GtCondenseqCreator *ces_c,
                                           GtError *err)
 {
   int had_err = 0;
-  GtRange seed_bounds,
-          match_bounds;
+  GtRange query_bounds,
+          subject_bounds;
   GtKmerStartpos match_positions;
   GtCondenseqCreatorWindow *win = &ces_c->window;
   GtCondenseqCreatorXdrop *xdrop = &ces_c->xdrop;
   GtUword best_match = GT_UNDEF_UWORD,
           idx_cur,
-          j = ces_c->main_pos;
+          querypos = ces_c->main_pos;
   const bool forward = true;
   GtXdropbest empty = {0,0,0,0,0};
 
   *xdrop->left = empty;
   *xdrop->right = empty;
 
-  match_bounds.end =
-    match_bounds.start = 0;
+  subject_bounds.end =
+    subject_bounds.start = 0;
 
   match_positions = win->pos_arrs[GT_CONDENSEQ_CREATOR_LAST_WIN(win)];
 
@@ -721,43 +740,43 @@ static int ces_c_extend_seeds_brute_force(GtCondenseqCreator *ces_c,
     return had_err;
 
   /* get bounds for current */
-  seed_bounds.start = ces_c->current_orig_start;
-  seed_bounds.end = ces_c->current_seq_start + ces_c->current_seq_len;
+  query_bounds.start = ces_c->current_orig_start;
+  query_bounds.end = ces_c->current_seq_start + ces_c->current_seq_len;
 
-  if (seed_bounds.start < j) {
+  if (query_bounds.start < querypos) {
     gt_seqabstract_reinit_encseq(!forward,
                                  GT_READMODE_FORWARD,
                                  xdrop->current_seq_bwd,
                                  ces_c->input_es,
-                                 j - seed_bounds.start,
-                                 seed_bounds.start);
+                                 querypos - query_bounds.start,
+                                 query_bounds.start);
   }
-  if (j < seed_bounds.end) {
+  if (querypos < query_bounds.end) {
     gt_seqabstract_reinit_encseq(forward,
                                  GT_READMODE_FORWARD,
                                  xdrop->current_seq_fwd,
                                  ces_c->input_es,
-                                 seed_bounds.end - j,
-                                 j);
+                                 query_bounds.end - querypos,
+                                 querypos);
   }
 
   for (idx_cur = 0;
        !had_err && idx_cur < match_positions.no_positions;
        ++idx_cur) {
-    GtUword i = match_positions.startpos[idx_cur],
+    GtUword subjectpos = match_positions.startpos[idx_cur],
             new_id = match_positions.unique_ids[idx_cur];
-    if (match_bounds.end < i || match_bounds.end == 0) {
+    if (subject_bounds.end < subjectpos || subject_bounds.end == 0) {
       gt_assert(new_id != ces_c->ces->udb_nelems);
-      match_bounds.start = ces_c->ces->uniques[new_id].orig_startpos;
-      match_bounds.end = match_bounds.start +
+      subject_bounds.start = ces_c->ces->uniques[new_id].orig_startpos;
+      subject_bounds.end = subject_bounds.start +
         ces_c->ces->uniques[new_id].len;
-      gt_assert(match_bounds.start <= i &&
-                i + ces_c->kmersize <= match_bounds.end);
+      gt_assert(subject_bounds.start <= subjectpos &&
+                subjectpos + ces_c->kmersize <= subject_bounds.end);
     }
     had_err = ces_c_xdrop(ces_c,
-                          i, j,
-                          seed_bounds,
-                          match_bounds,
+                          subjectpos, querypos,
+                          query_bounds,
+                          subject_bounds,
                           new_id,
                           best_link,
                           &best_match,
@@ -768,8 +787,8 @@ static int ces_c_extend_seeds_brute_force(GtCondenseqCreator *ces_c,
     if (best_link->len < ces_c->min_align_len)
       best_link->len = 0;
     else {
-      gt_assert(best_link->orig_startpos >= seed_bounds.start);
-      gt_assert(best_link->orig_startpos + best_link->len <= seed_bounds.end);
+      gt_assert(best_link->orig_startpos >= query_bounds.start);
+      gt_assert(best_link->orig_startpos + best_link->len <= query_bounds.end);
     }
   }
   return had_err;
@@ -780,124 +799,111 @@ static int ces_c_extend_seeds_diags(GtCondenseqCreator *ces_c,
                                     GtError *err)
 {
   int had_err = 0;
-  GtRange seed_bounds,
-          match_bounds = {0,0};
-  GtKmerStartpos match_positions;
+  GtRange query_bounds,
+          subject_bounds = {0,0};
+  GtKmerStartpos subject_positions;
   GtCondenseqCreatorWindow *win = &ces_c->window;
   GtCondenseqCreatorXdrop *xdrop = &ces_c->xdrop;
   CesCDiags *diags = ces_c->diagonals;
   GtUword best_match = GT_UNDEF_UWORD,
-          i_idx, j,
-          old_mid_i = GT_UNDEF_UWORD;
+          subject_idx, querypos;
   GtXdropbest empty = {0,0,0,0,0};
   const bool forward = true;
 
   *xdrop->left = empty;
   *xdrop->right = empty;
 
-  match_bounds.end = 0;
+  subject_bounds.end = 0;
 
-  match_positions = win->pos_arrs[GT_CONDENSEQ_CREATOR_LAST_WIN(win)];
+  subject_positions = win->pos_arrs[GT_CONDENSEQ_CREATOR_LAST_WIN(win)];
 
-  if (match_positions.no_positions == 0)
+  /* nothing there or window not full */
+  if (subject_positions.no_positions == 0 ||
+      ces_c->window.count != ces_c->windowsize)
     return had_err;
 
-  j = ces_c->main_pos;
+  querypos = ces_c->main_pos;
 
   /* get bounds for current */
-  seed_bounds.start = ces_c->current_orig_start;
-  seed_bounds.end = ces_c->current_seq_start + ces_c->current_seq_len;
+  query_bounds.start = ces_c->current_orig_start;
+  query_bounds.end = ces_c->current_seq_start + ces_c->current_seq_len;
 
 #ifdef GT_CONDENSEQ_LIMIT
-  match_positions.no_positions =
-    match_positions.no_positions > GT_CONDENSEQ_LIMIT ?
+  subject_positions.no_positions =
+    subject_positions.no_positions > GT_CONDENSEQ_LIMIT ?
     GT_CONDENSEQ_LIMIT :
-    match_positions.no_positions;
+    subject_positions.no_positions;
 #endif
 
-  for (i_idx = 0;
-       !had_err && i_idx < match_positions.no_positions;
-       ++i_idx) {
-    /* j = current position, i match positions in uniques, right part of seed
-       pair */
+  for (subject_idx = 0;
+       !had_err && subject_idx < subject_positions.no_positions;
+       ++subject_idx) {
     GtUword d,
-            i = match_positions.startpos[i_idx],
-            new_id = match_positions.unique_ids[i_idx],
-            i_prime;
+            subjectpos = subject_positions.startpos[subject_idx],
+            new_id = subject_positions.unique_ids[subject_idx],
+            j_prime;
     CesCDiag *overwrite_diag = NULL;
-    gt_assert(i < j);
 
-    d = j - i;
+    gt_assert(subjectpos < querypos);
+    d = querypos - subjectpos;
 
-    if (match_bounds.end < i || match_bounds.end == 0) {
-      if (match_bounds.end != 0 && diags->sparse != NULL) {
+    if (subject_bounds.end < subjectpos || subject_bounds.end == 0) {
+      if (subject_bounds.end != 0) {
         ces_c_sparse_diags_mark(diags->sparse,
-                                match_bounds.end,
-                                j - match_bounds.end,
+                                subject_bounds.end,
+                                querypos - subject_bounds.end,
                                 d);
       }
       gt_assert(new_id != ces_c->ces->udb_nelems);
-      match_bounds.start = ces_c->ces->uniques[new_id].orig_startpos;
-      match_bounds.end = match_bounds.start +
+      subject_bounds.start = ces_c->ces->uniques[new_id].orig_startpos;
+      subject_bounds.end = subject_bounds.start +
         ces_c->ces->uniques[new_id].len;
-      gt_assert(match_bounds.start <= i &&
-                i + ces_c->kmersize <= match_bounds.end);
+      gt_assert(subject_bounds.start <= subjectpos &&
+                subjectpos + ces_c->kmersize <= subject_bounds.end);
     }
 
-    /* check for previous hit on diagonal within this block. */
-    if ((i_prime = ces_c_diags_get(diags, d,
+    if ((j_prime = ces_c_diags_get(diags, d,
                                    &overwrite_diag)) != GT_UNDEF_UWORD &&
-        i_prime >= match_bounds.start &&
-        seed_bounds.start + ces_c->windowsize <= j) {
+        j_prime >= subject_bounds.start) {
       GtUword distance;
-
-      gt_assert(i_prime < i);
-      distance = i - i_prime;
+      gt_assert(j_prime < subjectpos);
+      distance = subjectpos - j_prime;
 
       if (distance > (GtUword) ces_c->kmersize &&
           distance <= (GtUword) ces_c->windowsize) {
-        GtUword j_prime,
-                midpoint_seed_i,
-                midpoint_seed_j,
-                midpoint_offset = GT_DIV2(distance);
+        GtUword i_prime;
 
-        /* as j > j' and d = j - i = j' - i', j' = d + i' can not overflow */
-        j_prime = d + i_prime;
+        /* as querypos > i' and d = querypos - subjectpos = i' - j',
+           i' = d + j' can not overflow */
+        i_prime = d + j_prime;
+        gt_assert(i_prime >= query_bounds.start);
+        gt_assert(i_prime <= query_bounds.end);
 
-        midpoint_seed_j = j_prime + midpoint_offset;
-        midpoint_seed_i = i_prime + midpoint_offset;
-        /* i and i_prime are from the same unique sequences.
-           midpoint_seed_j position has to be outside of the current
-           best alignment. (only checks for '>' because the previous j was
-           smaller) */
+        /* subjectpos and j_prime are from the same unique sequences.
+           j' position has to be outside of the current best alignment. (only
+           checks for '>' because the previous querypos was smaller) */
         if (best_match == GT_UNDEF_UWORD ||
-            midpoint_seed_j > best_match + xdrop->right->jvalue) {
-          gt_assert(midpoint_seed_j >= seed_bounds.start);
-          gt_assert(midpoint_seed_j <= seed_bounds.end);
-          if (old_mid_i != midpoint_seed_i) {
-            old_mid_i = midpoint_seed_i;
-            if (seed_bounds.start < midpoint_seed_j) {
-              gt_seqabstract_reinit_encseq(!forward,
-                                           GT_READMODE_FORWARD,
-                                           xdrop->current_seq_bwd,
-                                           ces_c->input_es,
-                                           midpoint_seed_j -
-                                           seed_bounds.start,
-                                           seed_bounds.start);
-            }
-            if (midpoint_seed_j < seed_bounds.end) {
-              gt_seqabstract_reinit_encseq(forward,
-                                           GT_READMODE_FORWARD,
-                                           xdrop->current_seq_fwd,
-                                           ces_c->input_es,
-                                           seed_bounds.end - midpoint_seed_j,
-                                           midpoint_seed_j);
-            }
+            j_prime > best_match + xdrop->right->ivalue) {
+          if (query_bounds.start < i_prime) {
+            gt_seqabstract_reinit_encseq(!forward,
+                                         GT_READMODE_FORWARD,
+                                         xdrop->current_seq_bwd,
+                                         ces_c->input_es,
+                                         i_prime - query_bounds.start,
+                                         query_bounds.start);
+          }
+          if (i_prime < query_bounds.end) {
+            gt_seqabstract_reinit_encseq(forward,
+                                         GT_READMODE_FORWARD,
+                                         xdrop->current_seq_fwd,
+                                         ces_c->input_es,
+                                         query_bounds.end - i_prime,
+                                         i_prime);
           }
           had_err = ces_c_xdrop(ces_c,
-                                midpoint_seed_i, midpoint_seed_j,
-                                seed_bounds,
-                                match_bounds,
+                                j_prime, i_prime,
+                                query_bounds,
+                                subject_bounds,
                                 new_id,
                                 best_link,
                                 &best_match,
@@ -905,16 +911,16 @@ static int ces_c_extend_seeds_diags(GtCondenseqCreator *ces_c,
         }
       }
     }
-    ces_c_diags_set(ces_c, d, i, match_bounds.start, overwrite_diag);
+    ces_c_diags_set(ces_c, d, subjectpos, subject_bounds.start, overwrite_diag);
   }
 
 #ifdef GT_CONDENSEQ_CREATOR_DIAGS_DEBUG
   if (diags->full != NULL) {
-    gt_log_log("J: " GT_WU " FULL", j);
-    for (i_idx = 0; i_idx < diags->full->nextfree; i_idx++) {
-      if (diags->full->space[i_idx] != GT_UNDEF_UWORD)
+    gt_log_log("I: " GT_WU " FULL", querypos);
+    for (subject_idx = 0; subject_idx < diags->full->nextfree; subject_idx++) {
+      if (diags->full->space[subject_idx] != GT_UNDEF_UWORD)
         gt_log_log("D: " GT_WU ", I: " GT_WU,
-                   i_idx, diags->full->space[i_idx]);
+                   subject_idx, diags->full->space[subject_idx]);
     }
   }
   if (diags->sparse != NULL) {
@@ -925,19 +931,21 @@ static int ces_c_extend_seeds_diags(GtCondenseqCreator *ces_c,
         gt_rbtree_iter_new_from_first(diags->sparse->add_tree);
     gt_rbtree_iter_reset_from_first(diags->sparse->add_iterator);
     iter = diags->sparse->add_iterator;
-    gt_log_log("J: " GT_WU " array:", j);
-    for (i_idx = 0; i_idx < diags->sparse->nextfree; i_idx++) {
-      if (diags->sparse->space[i_idx].i != GT_UNDEF_UWORD)
-        gt_log_log("D: " GT_WU ", I: " GT_WU,
-                   diags->sparse->space[i_idx].d,
-                   diags->sparse->space[i_idx].i);
+    gt_log_log("I: " GT_WU " array:", querypos);
+    for (subject_idx = 0;
+         subject_idx < diags->sparse->nextfree;
+         subject_idx++) {
+      if (diags->sparse->space[subject_idx].j != GT_UNDEF_UWORD)
+        gt_log_log("D: " GT_WU ", J: " GT_WU,
+                   diags->sparse->space[subject_idx].d,
+                   diags->sparse->space[subject_idx].j);
       else
-        gt_log_log("D: " GT_WU ", I: X", diags->sparse->space[i_idx].d);
+        gt_log_log("D: " GT_WU ", J: X", diags->sparse->space[subject_idx].d);
     }
     gt_log_log("tree:");
     diag = gt_rbtree_iter_data(iter);
     while (diag != NULL) {
-      gt_log_log("D: " GT_WU ", I: " GT_WU, diag->d, diag->i);
+      gt_log_log("D: " GT_WU ", J: " GT_WU, diag->d, diag->j);
       diag = gt_rbtree_iter_next(iter);
     }
   }
@@ -947,8 +955,8 @@ static int ces_c_extend_seeds_diags(GtCondenseqCreator *ces_c,
     if (best_link->len < ces_c->min_align_len)
       best_link->len = 0;
     else {
-      gt_assert(best_link->orig_startpos >= seed_bounds.start);
-      gt_assert(best_link->orig_startpos + best_link->len <= seed_bounds.end);
+      gt_assert(best_link->orig_startpos >= query_bounds.start);
+      gt_assert(best_link->orig_startpos + best_link->len <= query_bounds.end);
     }
   }
   return had_err;
