@@ -24,7 +24,8 @@
 /* The <GtPopcountTab> class represents a table of values of a fixed bit
    width sorted by their popcount (number of bits set to 1). Values are sorted
    by increasing value within one popcount class (set of values with the
-   same popcount). */
+   same popcount).
+   The idea was copied from: http://alexbowe.com/popcount-permutations/ */
 typedef struct GtPopcountTab GtPopcountTab;
 
 /* Returns <GtPopcountTab> object with tables for unsigned values of
