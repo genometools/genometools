@@ -998,10 +998,27 @@ static int compare_other_attribute(const char *attr_name, GtFeatureNode *new_gf,
                                    GtFeatureNode *old_gf, const char *id,
                                    GtGFF3Parser *parser, GtError *err)
 {
+  const char *old_attr_val = NULL,
+             *new_attr_val = NULL;
   gt_error_check(err);
   gt_assert(attr_name && new_gf && old_gf && parser);
-  if (strcmp(gt_feature_node_get_attribute(new_gf, attr_name),
-             gt_feature_node_get_attribute(old_gf, attr_name))) {
+  old_attr_val = gt_feature_node_get_attribute(old_gf, attr_name);
+  new_attr_val = gt_feature_node_get_attribute(new_gf, attr_name);
+  if (!old_attr_val || !new_attr_val) {
+    gt_error_set(err, "the multi-feature with %s \"%s\" on line %u in file "
+                 "\"%s\" does not share attribute '%s' with its counterpart "
+                 "on line %u ('%s' vs. '%s')",
+                 GT_GFF_ID, id,
+                 gt_genome_node_get_line_number((GtGenomeNode*) new_gf),
+                 gt_genome_node_get_filename((GtGenomeNode*) new_gf),
+                 attr_name,
+                 gt_genome_node_get_line_number((GtGenomeNode*) old_gf),
+                 (new_attr_val ? new_attr_val : "<missing>"),
+                 (old_attr_val ? old_attr_val : "<missing>"));
+    return -1;
+  }
+  gt_assert(new_attr_val && old_attr_val);
+  if (strcmp(new_attr_val, old_attr_val)) {
     if (parser->tidy && !strcmp(attr_name, GT_GFF_PARENT)) {
       tidy_multi_feature_with_different_parent(new_gf, old_gf, id,
                                                parser->feature_info);
