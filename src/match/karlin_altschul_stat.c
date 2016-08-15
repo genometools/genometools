@@ -91,43 +91,31 @@ GtKarlinAltschulStat *gt_karlin_altschul_stat_new(void)
 #define alphaidx 5
 #define betaidx 6
 typedef double GA_Values[NUMOF_VALUES];
-static const GA_Values ga_matrix_1_5[] = {
-    { 0, 0, 1.39, 0.747, 1.38, 1.00,  0, 100 }
-};
 
 static const GA_Values ga_matrix_1_4[] = {
-    { 0, 0, 1.383, 0.738, 1.36, 1.02,  0, 100 },
     { 0, -2,  1.26,  0.43, 0.90,  1.4, -1,  91 }
 };
 
 static const GA_Values ga_matrix_2_7[] = {
-    { 0, 0,  0.69, 0.73, 1.34, 0.515,  0, 100 },
     { 0, -4,  0.63, 0.43, 0.90,   0.7, -1,  91 }
 };
 
 static const GA_Values ga_matrix_1_3[] = {
-    { 0, 0, 1.374, 0.711, 1.31, 1.05,  0, 100 },
     { 0, -2,  1.25,  0.42, 0.83,  1.5, -2,  91 }
 };
 
 static const GA_Values ga_matrix_2_5[] = {
-    { 0, 0, 0.675, 0.65,  1.1,  0.6, -1, 99 },
     { 0, -4,  0.62, 0.39, 0.78,  0.8, -2, 91 }
 };
 
 static const GA_Values ga_matrix_1_2[] = {
-    { 0, 0, 1.28, 0.46, 0.85, 1.5, -2, 96 },
     { 0, -2, 1.19, 0.34, 0.66, 1.8, -3, 89 }
 };
 
 static const GA_Values ga_matrix_2_3[] = {
-    { 0, 0,  0.55, 0.21, 0.46,  1.2, -5, 87 },
     { 0, -4,  0.55, 0.21, 0.46,  1.2, -5, 87 }
 };
 
-static const GA_Values ga_matrix_4_5[] = {
-    { 0, 0, 0.22, 0.061, 0.22, 1.0, -15, 74 }
-};
 
 
 void gt_karlin_altschul_stat_delete(GtKarlinAltschulStat *ka)
@@ -197,7 +185,7 @@ static ScoringFrequency *gt_karlin_altschul_stat_scoring_frequency(
   gt_assert(obs_min <= 0 && obs_max >= 0);
   sf->low_score = obs_min;
   sf->high_score = obs_max;
-  
+
   range = obs_max - obs_min + 1;
   sf->sprob = gt_calloc(range, sizeof (*sf->sprob));
 
@@ -314,7 +302,7 @@ static double gt_karlin_altschul_stat_calculate_ungapped_K(const ScoringFrequenc
   low = sf->low_score/div;
   high = sf->high_score/div;
   lambda *= div;
-  
+
   /* range = high - low; */
 
   if (low == -1 && high == 1)
@@ -365,7 +353,6 @@ static int get_values_from_matrix(GtKarlinAltschulStat *ka,
       }
       ka->lambda = matrix[idx][lambdaidx];
       ka->K = matrix[idx][Kidx];
-      printf("K:%f\n", ka->K);
       ka->logK = log(ka->K);
       ka->H = matrix[idx][Hidx];
 
@@ -375,7 +362,7 @@ static int get_values_from_matrix(GtKarlinAltschulStat *ka,
       return 0;
     }
   }
-  
+
   /* not found */
   gt_error_set(err, "no precomputed values for ungapped alignment parameters "
                     "were found\n");
@@ -394,12 +381,7 @@ static int gt_karlin_altschul_stat_get_gapped_params(GtKarlinAltschulStat *ka,
   matchscore = gt_scorehandler_get_matchscore(scorehandler);
   mismatchscore = gt_scorehandler_get_mismatchscore(scorehandler);
 
-  if (matchscore == 1 && mismatchscore == -5)
-  {
-    length = sizeof(ga_matrix_1_5)/sizeof(GA_Values);
-    ga_matrix = (GA_Values*) ga_matrix_1_5;
-  }
-  else if (matchscore == 1 && mismatchscore == -4)
+  if (matchscore == 1 && mismatchscore == -4)
   {
     length = sizeof(ga_matrix_1_4)/sizeof(GA_Values);
     ga_matrix = (GA_Values*) ga_matrix_1_4;
@@ -428,11 +410,6 @@ static int gt_karlin_altschul_stat_get_gapped_params(GtKarlinAltschulStat *ka,
   {
     length = sizeof(ga_matrix_2_3)/sizeof(GA_Values);
     ga_matrix = (GA_Values*) ga_matrix_2_3;
-  }
-  else if (matchscore == 4 && mismatchscore == -5)
-  {
-    length = sizeof(ga_matrix_4_5)/sizeof(GA_Values);
-    ga_matrix = (GA_Values*) ga_matrix_4_5;
   }
   else
   {
@@ -471,7 +448,7 @@ int gt_karlin_altschul_stat_calculate_params(GtKarlinAltschulStat *ka,
     ScoringFrequency *sf =
                           gt_karlin_altschul_stat_scoring_frequency(alphabet,
                                                                     scorehandler);
-  
+
     /* karlin altschul parameters for ungapped alignments */
     ka->lambda = gt_karlin_altschul_stat_calculate_ungapped_lambda(sf);
     ka->H = gt_karlin_altschul_stat_calculate_H(sf, ka->lambda);
@@ -481,7 +458,7 @@ int gt_karlin_altschul_stat_calculate_params(GtKarlinAltschulStat *ka,
     gt_assert(ka->H != 0.0);
     ka->alpha_div_lambda = 1/ka->H;
     ka->beta = 0;
-    
+
     if (sf != NULL)
     {
       gt_free(sf->sprob);

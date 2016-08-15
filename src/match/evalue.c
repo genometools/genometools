@@ -283,7 +283,6 @@ double gt_evalue_calculate(const GtKarlinAltschulStat *ka,
   gapscore = gt_scorehandler_get_gapscore(scorehandler);
   
   raw_score = ma*matchscore + mm*mismatchscore + id*gapscore;
-
   logK = gt_karlin_altschul_stat_get_logK(ka);
   lambda = gt_karlin_altschul_stat_get_lambda(ka);
   evalue = searchspace*exp(-lambda*raw_score+logK);
