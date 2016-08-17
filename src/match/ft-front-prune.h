@@ -12,6 +12,13 @@ typedef struct
   GtUword offset, allocated;
 } GtAllocatedMemory;
 
+typedef enum
+{
+  GT_OUTSENSE_TRIM_ALWAYS,
+  GT_OUTSENSE_TRIM_ON_NEW_PP,
+  GT_OUTSENSE_TRIM_NEVER
+} GtTrimmingStrategy;
+
 #ifndef OUTSIDE_OF_GT
 typedef enum
 {
@@ -42,9 +49,11 @@ GtUword front_prune_edist_inplace(
                        Polished_point *best_polished_point,
                        GtFronttrace *fronttrace,
                        const Polishing_info *pol_info,
+                       GtTrimmingStrategy trimstrategy,
                        GtUword history,
                        GtUword minmatchnum,
                        GtUword maxalignedlendifference,
+                       bool showfrontinfo,
                        GtUword seedlength,
                        FTsequenceResources *ufsr,
                        GtUword ustart,
