@@ -62,7 +62,7 @@ GtUword         gt_sam_alignment_mapping_quality(GtSamAlignment *sam_alignment);
 const GtUchar*  gt_sam_alignment_sequence(GtSamAlignment *sam_alignment);
 
 /* Lower level version of <gt_sam_alignment_sequence> using an external
- * buffer to save the sequence information */
+   buffer to save the sequence information */
 void            gt_sam_alignment_sequence_external_buffer(
                                                   GtSamAlignment *sam_alignment,
                                                   GtUchar **seq_buffer,
@@ -76,7 +76,7 @@ const GtUchar*  gt_sam_alignment_qualitystring(GtSamAlignment *sam_alignment);
 uint16_t        gt_sam_alignment_cigar_length(GtSamAlignment *sam_alignment);
 
 /* lower level version of <gt_sam_alignment_qualitystring> using an external
- * buffer to save the sequence information */
+   buffer to save the sequence information */
 void            gt_sam_alignment_qualitystring_external_buffer(
                                                   GtSamAlignment *sam_alignment,
                                                   GtUchar **qual_buffer,
