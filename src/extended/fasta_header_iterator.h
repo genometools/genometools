@@ -21,14 +21,18 @@
 #include "core/str_array_api.h"
 #include "extended/cstr_iterator_rep.h"
 
-/* implements <GtCstrIterator> */
+/* The <GtFastaHeaderIterator> class, implements <GtCstrIterator> */
 typedef struct GtFastaHeaderIterator GtFastaHeaderIterator;
 
 const GtCstrIteratorClass* gt_fasta_header_iterator_class(void);
 
+/* Returns new <GtCstrIterator> which will allow to iterate over the fasta
+   headers of file(s) <filenametab>. Returns <NULL> on error. */
 GtCstrIterator*            gt_fasta_header_iterator_new(GtStrArray *filenametab,
                                                         GtError *err);
 
+/* Tests if <GSI> is a <GtFastaHeaderIterator> and returns the meta class object
+   or <NULL> if the class is not a <GtFastaHeaderIterator>. */
 #define                    gt_fasta_header_iterator_cast(GSI) \
   gt_cstr_iterator_cast(gt_fasta_header_iterator_class(), GSI)
 #endif

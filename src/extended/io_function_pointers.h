@@ -23,8 +23,12 @@
 
 #include "core/error_api.h"
 
+/* The <GtIOFunctionPointer> module */
+
 /* IO function, either reads or writes to file <stream>. Either one of the two
-   functions below. */
+   functions below. Used for defining file types or headers using one
+   metafunction for reading and writing, switching the mode depending on which
+   of the functions is used. */
 typedef int (*GtIOFunc)(void *ptr, size_t size, size_t nmemb, FILE *stream,
                         GtError *err);
 
