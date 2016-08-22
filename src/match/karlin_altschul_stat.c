@@ -286,6 +286,34 @@ static double gt_karlin_altschul_stat_calculate_H(const ScoringFrequency *sf,
    return H;
 }
 
+static GtWord gt_karlin_altschul_stat_gcd(const ScoringFrequency *sf)
+{
+  GtUword idx, range, div, val, tmp;
+
+  range = sf->high_score-sf->low_score+1;
+  div = -sf->low_score;
+  for (idx = 1; idx < range && div > 1; idx++)
+  {
+    if(sf->sprob[idx] != 0.0)
+    {
+      val = abs(idx+sf->low_score);
+      if (val > div)
+      {
+        tmp = div;
+        div = val;
+        val = tmp;
+      }
+      while (val != 0)
+      {
+        tmp = div % val;
+        div = val;
+        val = tmp;
+      }
+    }
+  }
+  return div;
+}
+
 static double gt_karlin_altschul_stat_calculate_ungapped_K(const ScoringFrequency *sf,
                                                            double lambda, double H)
 {
@@ -297,7 +325,8 @@ static double gt_karlin_altschul_stat_calculate_ungapped_K(const ScoringFrequenc
   score_avg = sf->score_avg;
   gt_assert(score_avg < 0.0);
 
-  div = 1; /* TODO: greatest common divisor */
+  /*greatest common divisor */
+  div = gt_karlin_altschul_stat_gcd(sf);
 
   low = sf->low_score/div;
   high = sf->high_score/div;
