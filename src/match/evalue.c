@@ -25,7 +25,13 @@
 #include "match/karlin_altschul_stat.h"
 #include "querymatch.h"
 
-/* TODO:reference, analog to blast */
+/* 
+ * this library implements calculation of E-value of Alignments analog to NCBI
+ * tool BLAST:
+ * 
+ *   Altschul S.F., Gish W., Miller W., Myers E.W. and Lipman D.J. (1990)
+ *   Basic local alignment search tool. J. Mol. Biol. 215: 403-410.
+ */
 
 /*
  * information for invoking procedure:
@@ -36,6 +42,21 @@
  * -gt_karlin_altschul_stat_delete
  *
  */
+
+
+static GtUword gt_evalue_calculate_raw_score(const GtKarlinAltschulStat *ka,
+                                             double bit_score)
+{
+  double raw_score, lambda, logK;
+  gt_assert(ka);
+
+  lambda = gt_karlin_altschul_stat_get_lambda(ka);
+  logK = gt_karlin_altschul_stat_get_logK(ka);
+
+  raw_score =  (bit_score *log(2) + logK)/lambda;
+  return round(raw_score);
+}
+
 
 /*
 static double gt_evalue_calculate_bit_score(const GtKarlinAltschulStat *ka,
@@ -51,20 +72,6 @@ static double gt_evalue_calculate_bit_score(const GtKarlinAltschulStat *ka,
   return bit_score;
 }*/
 
-static GtUword gt_evalue_calculate_raw_score(const GtKarlinAltschulStat *ka,
-                                             double bit_score)
-{
-  double raw_score, lambda, logK;
-  gt_assert(ka);
-
-  lambda = gt_karlin_altschul_stat_get_lambda(ka);
-  logK = gt_karlin_altschul_stat_get_logK(ka);
-
-  raw_score =  (bit_score *log(2) + logK)/lambda;
-  return round(raw_score);
-}
-
-/* TODO: reference to blast */
 static GtUword gt_evalue_calculate_length_adjustment(GtUword query_length,
                                                      GtUword db_length,
                                                      GtUword num_of_db_seqs,

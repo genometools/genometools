@@ -25,7 +25,14 @@
 #include "extended/scorehandler.h"
 
 #define NUMOF_VALUES 8
-/* TODO:reference, analog to blast */
+
+/* 
+ * this library implements calculation of karlin-altschul parameter for E-value
+ * of Alignments analog to NCBI tool BLAST:
+ * 
+ *   Altschul S.F., Gish W., Miller W., Myers E.W. and Lipman D.J. (1990)
+ *   Basic local alignment search tool. J. Mol. Biol. 215: 403-410.
+ */
 
 /* stores karlin altschul parameters */
 struct GtKarlinAltschulStat
@@ -325,7 +332,7 @@ static double gt_karlin_altschul_stat_calculate_ungapped_K(const ScoringFrequenc
   score_avg = sf->score_avg;
   gt_assert(score_avg < 0.0);
 
-  /*greatest common divisor */
+  /* greatest common divisor */
   div = gt_karlin_altschul_stat_gcd(sf);
 
   low = sf->low_score/div;
@@ -464,7 +471,6 @@ static int gt_karlin_altschul_stat_get_gapped_params(GtKarlinAltschulStat *ka,
   return 0;
 }
 
-//TODO:new+fill oder trennen?
 int gt_karlin_altschul_stat_calculate_params(GtKarlinAltschulStat *ka,
                                              bool ungapped_alignment,
                                              GtAlphabet *alphabet,
