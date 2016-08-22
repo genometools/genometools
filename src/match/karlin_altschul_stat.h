@@ -37,6 +37,7 @@ double gt_karlin_altschul_stat_get_beta(const GtKarlinAltschulStat *ka);
  * frequency statistics for ungapped alignments,
  * else precomputed values are used for gapped alignment
  * 
+ * returns 0 if no error occured, otherwise returns 1
  * analog to BLAST
  */
 int gt_karlin_altschul_stat_calculate_params(GtKarlinAltschulStat *ka,

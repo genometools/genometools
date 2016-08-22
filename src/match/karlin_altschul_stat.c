@@ -99,31 +99,35 @@ GtKarlinAltschulStat *gt_karlin_altschul_stat_new(void)
 #define betaidx 6
 typedef double GA_Values[NUMOF_VALUES];
 
+/* matchscore = 1 && mismatchscore = -4 */
 static const GA_Values ga_matrix_1_4[] = {
     { 0, -2,  1.26,  0.43, 0.90,  1.4, -1,  91 }
 };
 
+/* matchscore = 2 && mismatchscore = -7 */
 static const GA_Values ga_matrix_2_7[] = {
     { 0, -4,  0.63, 0.43, 0.90,   0.7, -1,  91 }
 };
 
+/* matchscore = 1 && mismatchscore = -3 */
 static const GA_Values ga_matrix_1_3[] = {
     { 0, -2,  1.25,  0.42, 0.83,  1.5, -2,  91 }
 };
 
+/* matchscore = 2 && mismatchscore = -5 */
 static const GA_Values ga_matrix_2_5[] = {
     { 0, -4,  0.62, 0.39, 0.78,  0.8, -2, 91 }
 };
 
+/* matchscore = 1 && mismatchscore = -2 */
 static const GA_Values ga_matrix_1_2[] = {
     { 0, -2, 1.19, 0.34, 0.66, 1.8, -3, 89 }
 };
 
+/* matchscore = 2 && mismatchscore = -3 */
 static const GA_Values ga_matrix_2_3[] = {
     { 0, -4,  0.55, 0.21, 0.46,  1.2, -5, 87 }
 };
-
-
 
 void gt_karlin_altschul_stat_delete(GtKarlinAltschulStat *ka)
 {
