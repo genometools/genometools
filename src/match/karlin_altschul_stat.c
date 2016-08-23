@@ -476,12 +476,12 @@ static int gt_karlin_altschul_stat_get_gapped_params(GtKarlinAltschulStat *ka,
 }
 
 int gt_karlin_altschul_stat_calculate_params(GtKarlinAltschulStat *ka,
-                                             bool ungapped_alignment,
+                                             bool gapped_alignment,
                                              GtAlphabet *alphabet,
                                              GtScoreHandler *scorehandler,
                                              GtError *err)
 {
-  if (ungapped_alignment)
+  if (!gapped_alignment)
   {
     /* New ScoringFrequency */
     ScoringFrequency *sf =
