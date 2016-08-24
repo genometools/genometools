@@ -72,6 +72,21 @@ bool gt_querymatchoutoptions_alignment_prepare(
                                      GtUword seedlen,
                                      GT_UNUSED bool greedyextension);
 
+bool frontprune2eoplist(GtQuerymatchoutoptions *querymatchoutoptions,
+                        const GtEncseq *encseq,
+                        const GtSeqorEncseq *query,
+                        GtReadmode query_readmode,
+                        GtUword query_seqstartpos,
+                        GtUword query_totallength,
+                        GtUword dbstart,
+                        GtUword dblen,
+                        GtUword abs_querystart,
+                        GtUword querylen,
+                        GtUword ustart,
+                        GtUword ulen,
+                        GtUword vstart,
+                        GtUword vlen);
+
 void gt_querymatchoutoptions_alignment_show(const GtQuerymatchoutoptions
                                               *querymatchoutoptions,
                                             GtUword distance,
