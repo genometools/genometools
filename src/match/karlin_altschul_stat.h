@@ -42,8 +42,8 @@ double gt_karlin_altschul_stat_get_beta(const GtKarlinAltschulStat *ka);
  */
 int gt_karlin_altschul_stat_calculate_params(GtKarlinAltschulStat *ka,
                                              bool gapped_alignment,
-                                             GtAlphabet *alphabet,
-                                             GtScoreHandler *scorehandler,
+                                             const GtAlphabet *alphabet,
+                                             const GtScoreHandler *scorehandler,
                                              GtError *err);
 
 #endif

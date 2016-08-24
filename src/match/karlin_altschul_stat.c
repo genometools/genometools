@@ -477,8 +477,8 @@ static int gt_karlin_altschul_stat_get_gapped_params(GtKarlinAltschulStat *ka,
 
 int gt_karlin_altschul_stat_calculate_params(GtKarlinAltschulStat *ka,
                                              bool gapped_alignment,
-                                             GtAlphabet *alphabet,
-                                             GtScoreHandler *scorehandler,
+                                             const GtAlphabet *alphabet,
+                                             const GtScoreHandler *scorehandler,
                                              GtError *err)
 {
   if (!gapped_alignment)
