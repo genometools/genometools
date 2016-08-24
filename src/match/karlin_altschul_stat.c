@@ -66,17 +66,6 @@ static LetterProb nt_prob[] = {
   { 'T', 0.25 }
 };/* TODO: in generale normalize */
 
-GtKarlinAltschulStat *gt_karlin_altschul_stat_new(void)
-{
-  GtKarlinAltschulStat *ka;
-  ka = gt_malloc(sizeof (GtKarlinAltschulStat));
-  ka->lambda = 0;
-  ka->K = 0;
-  ka->logK = 0;
-  ka->H = 0;
-  return ka;
-}
-
 /*
  * precomputed values
  * analog to BLAST
@@ -152,7 +141,7 @@ double gt_karlin_altschul_stat_get_K(const GtKarlinAltschulStat *ka)
   return ka->K;
 }
 
-double gt_karlin_altschul_stat_get_alpha_div_lambda(const GtKarlinAltschulStat *ka)
+double gt_karlin_altschul_stat_get_alphadlambda(const GtKarlinAltschulStat *ka)
 {
   gt_assert(ka);
   return ka->alpha_div_lambda;
@@ -325,8 +314,10 @@ static GtWord gt_karlin_altschul_stat_gcd(const ScoringFrequency *sf)
   return div;
 }
 
-static double gt_karlin_altschul_stat_calculate_ungapped_K(const ScoringFrequency *sf,
-                                                           double lambda, double H)
+static double gt_karlin_altschul_stat_calculate_ungapped_K(
+                                                     const ScoringFrequency *sf,
+                                                     double lambda,
+                                                     double H)
 {
   GtWord low, high, div;
   double score_avg, score_avg_div, one_minus_expnlambda, K;
@@ -410,7 +401,8 @@ static int get_values_from_matrix(GtKarlinAltschulStat *ka,
 }
 
 static int gt_karlin_altschul_stat_get_gapped_params(GtKarlinAltschulStat *ka,
-                                                     const GtScoreHandler *scorehandler,
+                                                     const GtScoreHandler
+                                                           *scorehandler,
                                                      GtError *err)
 {
   GtWord gap_open, gap_extension, matchscore, mismatchscore;
@@ -475,39 +467,50 @@ static int gt_karlin_altschul_stat_get_gapped_params(GtKarlinAltschulStat *ka,
   return 0;
 }
 
-int gt_karlin_altschul_stat_calculate_params(GtKarlinAltschulStat *ka,
-                                             bool gapped_alignment,
-                                             const GtAlphabet *alphabet,
-                                             const GtScoreHandler *scorehandler,
-                                             GtError *err)
+GtKarlinAltschulStat *gt_karlin_altschul_stat_new(bool gapped_alignment,
+                                                  const GtAlphabet *alphabet,
+                                                  const GtScoreHandler
+                                                        *scorehandler,
+                                                  GtError *err)
 {
+  GtKarlinAltschulStat *ka;
+  ka = gt_malloc(sizeof (GtKarlinAltschulStat));
+  gt_assert(ka);
+
+  ka->lambda = 0;
+  ka->K = 0;
+  ka->logK = 0;
+  ka->H = 0;
+
   if (!gapped_alignment)
   {
     /* New ScoringFrequency */
     ScoringFrequency *sf =
-                          gt_karlin_altschul_stat_scoring_frequency(alphabet,
-                                                                    scorehandler);
+                        gt_karlin_altschul_stat_scoring_frequency(alphabet,
+                                                                  scorehandler);
+    gt_assert(sf != NULL);
 
     /* karlin altschul parameters for ungapped alignments */
     ka->lambda = gt_karlin_altschul_stat_calculate_ungapped_lambda(sf);
     ka->H = gt_karlin_altschul_stat_calculate_H(sf, ka->lambda);
     ka->K = gt_karlin_altschul_stat_calculate_ungapped_K(sf, ka->lambda, ka->H);
     ka->logK = log(ka->K);
-
     gt_assert(ka->H != 0.0);
     ka->alpha_div_lambda = 1/ka->H;
     ka->beta = 0;
 
-    if (sf != NULL)
-    {
-      gt_free(sf->sprob);
-      gt_free(sf);
-    }
+    gt_free(sf->sprob);
+    gt_free(sf);
+
   }
   else /* gapped alignments */
   {
     if (gt_karlin_altschul_stat_get_gapped_params(ka, scorehandler, err))
-      return 1;
+    {
+      gt_karlin_altschul_stat_delete(ka);
+      return NULL;
+    }
   }
-  return 0;
+
+  return ka;
 }

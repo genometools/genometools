@@ -161,7 +161,7 @@ GtUword gt_evalue_calculate_searchspace_by_encseqs(
   double alpha_div_lambda, beta, K, logK;
 
   gt_assert(ka);
-  alpha_div_lambda = gt_karlin_altschul_stat_get_alpha_div_lambda(ka);
+  alpha_div_lambda = gt_karlin_altschul_stat_get_alphadlambda(ka);
 
   beta = gt_karlin_altschul_stat_get_beta(ka);
   K = gt_karlin_altschul_stat_get_K(ka);
@@ -208,7 +208,7 @@ GtUword gt_evalue_calculate_searchspace(const GtKarlinAltschulStat *ka,
   double alpha_div_lambda, beta, K, logK;
 
   gt_assert(ka);
-  alpha_div_lambda = gt_karlin_altschul_stat_get_alpha_div_lambda(ka);
+  alpha_div_lambda = gt_karlin_altschul_stat_get_alphadlambda(ka);
 
   beta = gt_karlin_altschul_stat_get_beta(ka);
   K = gt_karlin_altschul_stat_get_K(ka);

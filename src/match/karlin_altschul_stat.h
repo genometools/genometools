@@ -22,14 +22,6 @@
 #include "extended/scorehandler.h"
 typedef struct GtKarlinAltschulStat GtKarlinAltschulStat;
 
-GtKarlinAltschulStat *gt_karlin_altschul_stat_new(void);
-void gt_karlin_altschul_stat_delete(GtKarlinAltschulStat *ka);
-double gt_karlin_altschul_stat_get_lambda(const GtKarlinAltschulStat *ka);
-double gt_karlin_altschul_stat_get_K(const GtKarlinAltschulStat *ka);
-double gt_karlin_altschul_stat_get_logK(const GtKarlinAltschulStat *ka);
-double gt_karlin_altschul_stat_get_alpha_div_lambda(const GtKarlinAltschulStat *ka);
-double gt_karlin_altschul_stat_get_beta(const GtKarlinAltschulStat *ka);
-
 /* determine karlin altschul parameters lambda, H, K, alpha and beta for 
  * a given <alphabet> and scorefunction given as <scorehandler>
  * 
@@ -37,13 +29,20 @@ double gt_karlin_altschul_stat_get_beta(const GtKarlinAltschulStat *ka);
  * frequency statistics for ungapped alignments,
  * else precomputed values are used for gapped alignment
  * 
- * returns 0 if no error occured, otherwise returns 1
- * analog to BLAST
+ * returns a GtKarlinAltschulStat object if no error occured, otherwise returns
+ * NULL and <err> is set
+ * 
  */
-int gt_karlin_altschul_stat_calculate_params(GtKarlinAltschulStat *ka,
-                                             bool gapped_alignment,
+GtKarlinAltschulStat *gt_karlin_altschul_stat_new(bool gapped_alignment,
                                              const GtAlphabet *alphabet,
                                              const GtScoreHandler *scorehandler,
                                              GtError *err);
+                                             
+void gt_karlin_altschul_stat_delete(GtKarlinAltschulStat *ka);
+double gt_karlin_altschul_stat_get_lambda(const GtKarlinAltschulStat *ka);
+double gt_karlin_altschul_stat_get_K(const GtKarlinAltschulStat *ka);
+double gt_karlin_altschul_stat_get_logK(const GtKarlinAltschulStat *ka);
+double gt_karlin_altschul_stat_get_alphadlambda(const GtKarlinAltschulStat *ka);
+double gt_karlin_altschul_stat_get_beta(const GtKarlinAltschulStat *ka);
 
 #endif
