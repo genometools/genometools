@@ -23,12 +23,11 @@
 #include "core/types_api.h"
 #include "match/evalue.h"
 #include "match/karlin_altschul_stat.h"
-#include "querymatch.h"
 
-/* 
+/*
  * this library implements calculation of E-value of Alignments analog to NCBI
  * tool BLAST:
- * 
+ *
  *   Altschul S.F., Gish W., Miller W., Myers E.W. and Lipman D.J. (1990)
  *   Basic local alignment search tool. J. Mol. Biol. 215: 403-410.
  */
@@ -36,13 +35,10 @@
 /*
  * information for invoking procedure:
  * -gt_karlin_altschul_stat_new
- * -gt_karlin_altschul_stat_calculate_params
  * -gt_evalue_calculate_searchspace
  * -gt_evalue_calculate -> evalue
  * -gt_karlin_altschul_stat_delete
- *
  */
-
 
 static GtUword gt_evalue_calculate_raw_score(const GtKarlinAltschulStat *ka,
                                              double bit_score)
@@ -56,7 +52,6 @@ static GtUword gt_evalue_calculate_raw_score(const GtKarlinAltschulStat *ka,
   raw_score =  (bit_score *log(2) + logK)/lambda;
   return round(raw_score);
 }
-
 
 /*
 static double gt_evalue_calculate_bit_score(const GtKarlinAltschulStat *ka,
@@ -90,13 +85,14 @@ static GtUword gt_evalue_calculate_length_adjustment(GtUword query_length,
   /* l_max is the largest nonnegative solution of
      K * (m - l) * (n - N * l) > MAX(m,n) */
 
-  
-  space = gt_safe_mult_ulong(db_length, query_length) - MAX(query_length, db_length)/K;
+  space = gt_safe_mult_ulong(db_length, query_length)
+                                              - MAX(query_length, db_length)/K;
   if (space < 0)
     return 0; /* length_adjustnment = 0 */
 
   nNm = query_length * num_of_db_seqs + db_length;
-  len_max = 2 * space / (nNm + sqrt(nNm * nNm - 4 * num_of_db_seqs * space));  /* quadratic formula */
+  /* quadratic formula */
+  len_max = 2 * space / (nNm + sqrt(nNm * nNm - 4 * num_of_db_seqs * space));
 
   len_next = 0;
 
@@ -173,7 +169,6 @@ GtUword gt_evalue_calculate_searchspace_by_encseqs(
   /* db length without seperators */
   actual_db_length = total_length_of_db - (num_of_db_seqs - 1);
 
-
   /* query length */
   total_length_of_query = gt_encseq_total_length(queryencseq);
   num_of_query_seqs = gt_encseq_num_of_sequences(queryencseq);
@@ -237,29 +232,13 @@ GtUword gt_evalue_calculate_searchspace(const GtKarlinAltschulStat *ka,
   return gt_safe_mult_ulong(effective_query_length, effective_db_length);
 }
 
-/*
-double gt_evalue_calculate_for_qmatch(const GtKarlinAltschulStat *ka,
-                                      const GtQuerymatch *querymatch,
-                                      GtUword searchspace)
-{
-  double evalue, logK, lambda;
-  GtUword raw_score;
-  gt_assert(ka);
-  raw_score = gt_querymatch_score(querymatch); // seems to be a score only for edit distance?/
-  logK = gt_karlin_altschul_stat_get_logK(ka);
-  lambda = gt_karlin_altschul_stat_get_lambda(ka);
-  evalue = searchspace*exp(-lambda*raw_score+logK);
-  return evalue;
-}*/
-
-
 double gt_evalue_calculate_on_bitscore(const GtKarlinAltschulStat *ka,
                                        double bit_score,
                                        GtUword searchspace)
 {
   double evalue, logK, lambda;
   GtUword raw_score;
-  
+
   gt_assert(ka);
   raw_score = gt_evalue_calculate_raw_score(ka, bit_score);
 
@@ -279,16 +258,16 @@ double gt_evalue_calculate(const GtKarlinAltschulStat *ka,
   double evalue, logK, lambda;
   GtWord matchscore, mismatchscore, gapscore;
   GtUword raw_score;
-  
+
   gt_assert(ka && scorehandler);
-  
+
   gt_assert(gt_scorehandler_get_gap_opening(scorehandler) == 0);
   /* only implemented for linear */
 
   matchscore = gt_scorehandler_get_matchscore(scorehandler);
   mismatchscore = gt_scorehandler_get_mismatchscore(scorehandler);
   gapscore = gt_scorehandler_get_gapscore(scorehandler);
-  
+
   raw_score = ma*matchscore + mm*mismatchscore + id*gapscore;
   logK = gt_karlin_altschul_stat_get_logK(ka);
   lambda = gt_karlin_altschul_stat_get_lambda(ka);

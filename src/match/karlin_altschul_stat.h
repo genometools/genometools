@@ -22,22 +22,21 @@
 #include "extended/scorehandler.h"
 typedef struct GtKarlinAltschulStat GtKarlinAltschulStat;
 
-/* determine karlin altschul parameters lambda, H, K, alpha and beta for 
+/* determine karlin altschul parameters lambda, H, K, alpha and beta for
  * a given <alphabet> and scorefunction given as <scorehandler>
- * 
- * If <gapped_alignments> is not set, paraemters are calculated by using scoring 
+ *
+ * If <gapped_alignments> is not set, paraemters are calculated by using scoring
  * frequency statistics for ungapped alignments,
  * else precomputed values are used for gapped alignment
- * 
+ *
  * returns a GtKarlinAltschulStat object if no error occured, otherwise returns
  * NULL and <err> is set
- * 
+ *
  */
 GtKarlinAltschulStat *gt_karlin_altschul_stat_new(bool gapped_alignment,
                                              const GtAlphabet *alphabet,
                                              const GtScoreHandler *scorehandler,
                                              GtError *err);
-                                             
 void gt_karlin_altschul_stat_delete(GtKarlinAltschulStat *ka);
 double gt_karlin_altschul_stat_get_lambda(const GtKarlinAltschulStat *ka);
 double gt_karlin_altschul_stat_get_K(const GtKarlinAltschulStat *ka);

@@ -23,10 +23,10 @@
 #include "match/karlin_altschul_stat.h"
 #include "querymatch.h"
 
-/* 
+/*
  * calculates evalue for an alignment
  * <ma> = number of matches
- * <mm> = number of mismatches 
+ * <mm> = number of mismatches
  * <id> = number of indels
  */
 double gt_evalue_calculate(const GtKarlinAltschulStat *ka,
@@ -35,11 +35,7 @@ double gt_evalue_calculate(const GtKarlinAltschulStat *ka,
                            GtUword mm,
                            GtUword id,
                            GtUword searchspace);
-/*
- double gt_evalue_calculate_for_qmatch(const GtKarlinAltschulStat *ka,
-                                      const GtQuerymatch *querymatch,
-                                      GtUword searchspace);
-*/
+
 double gt_evalue_calculate_on_bitscore(const GtKarlinAltschulStat *ka,
                                        double bit_score,
                                        GtUword searchspace);

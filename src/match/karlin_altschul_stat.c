@@ -26,10 +26,10 @@
 
 #define NUMOF_VALUES 8
 
-/* 
+/*
  * this library implements calculation of karlin-altschul parameter for E-value
  * of Alignments analog to NCBI tool BLAST:
- * 
+ *
  *   Altschul S.F., Gish W., Miller W., Myers E.W. and Lipman D.J. (1990)
  *   Basic local alignment search tool. J. Mol. Biol. 215: 403-410.
  */
@@ -52,7 +52,7 @@ typedef struct{
          high_score;
 } ScoringFrequency;
 
-/* stores letter propabilities */ 
+/* stores letter propabilities */
 typedef struct{
   char   ch;
   double p;
@@ -69,7 +69,7 @@ static LetterProb nt_prob[] = {
 /*
  * precomputed values
  * analog to BLAST
- * 
+ *
  * 1. Gap opening score,
  * 2. Gap extension score,
  * 3. Lambda,
@@ -161,9 +161,9 @@ static ScoringFrequency *gt_karlin_altschul_stat_scoring_frequency(
   unsigned int idx, jdx, numofchars;
   GtWord score, obs_min = 0, obs_max = 0, range;
   double score_avg, score_sum;
-  
+
   gt_assert(alphabet && scorehandler);
-  
+
   /* TODO: make generalizations of alphabet probabilities, for now nt_prob */
   gt_assert(gt_alphabet_is_dna(alphabet));
 
@@ -206,7 +206,7 @@ static ScoringFrequency *gt_karlin_altschul_stat_scoring_frequency(
     if (sf->sprob[score-obs_min] > 0)
       score_sum += sf->sprob[score-obs_min];
   }
-  
+
   score_avg = 0.0;
   for (score = obs_min; score <= obs_max; score++)
   {
@@ -294,7 +294,7 @@ static GtWord gt_karlin_altschul_stat_gcd(const ScoringFrequency *sf)
   div = -sf->low_score;
   for (idx = 1; idx < range && div > 1; idx++)
   {
-    if(sf->sprob[idx] != 0.0)
+    if (sf->sprob[idx] != 0.0)
     {
       val = abs(idx+sf->low_score);
       if (val > div)
@@ -339,7 +339,7 @@ static double gt_karlin_altschul_stat_calculate_ungapped_K(
   if (low == -1 && high == 1)
   {
       K = (sf->sprob[0] - sf->sprob[sf->high_score-sf->low_score]) *
-          (sf->sprob[0] - sf->sprob[sf->high_score-sf->low_score]) / sf->sprob[0];
+          (sf->sprob[0] - sf->sprob[sf->high_score-sf->low_score])/sf->sprob[0];
   }
   else if (low == -1 || high == 1)
   {
@@ -356,8 +356,8 @@ static double gt_karlin_altschul_stat_calculate_ungapped_K(
   }
   else
   {
-    //TODO: otherwise case
-    
+    /* TODO: otherwise case */
+
     /* K = lambda*exp(-2*sigma)/(H*(1-exp(-lambda)) */
     gt_assert(false); /* not implemented yet */
   }
@@ -378,7 +378,7 @@ static int get_values_from_matrix(GtKarlinAltschulStat *ka,
   {
     if (matrix[idx][gapextdidx] == gap_extension)
     {
-      if(matrix[idx][gapopidx] != 0)
+      if (matrix[idx][gapopidx] != 0)
       {
         gt_assert(false); /* not implemented: linear scores only */
       }
@@ -408,39 +408,39 @@ static int gt_karlin_altschul_stat_get_gapped_params(GtKarlinAltschulStat *ka,
   GtWord gap_open, gap_extension, matchscore, mismatchscore;
   GA_Values *ga_matrix = NULL;
   GtUword length = 0;
-  
+
   gt_assert(ka && scorehandler);
   matchscore = gt_scorehandler_get_matchscore(scorehandler);
   mismatchscore = gt_scorehandler_get_mismatchscore(scorehandler);
 
   if (matchscore == 1 && mismatchscore == -4)
   {
-    length = sizeof(ga_matrix_1_4)/sizeof(GA_Values);
+    length = sizeof (ga_matrix_1_4) / sizeof (GA_Values);
     ga_matrix = (GA_Values*) ga_matrix_1_4;
   }
   else if (matchscore == 2 && mismatchscore == -7)
   {
-    length = sizeof(ga_matrix_2_7)/sizeof(GA_Values);
+    length = sizeof (ga_matrix_2_7) / sizeof (GA_Values);
     ga_matrix = (GA_Values*) ga_matrix_2_7;
   }
   else if (matchscore == 1 && mismatchscore == -3)
   {
-    length = sizeof(ga_matrix_1_3)/sizeof(GA_Values);
+    length = sizeof (ga_matrix_1_3) / sizeof (GA_Values);
     ga_matrix = (GA_Values*) ga_matrix_1_3;
   }
   else if (matchscore == 2 && mismatchscore == -5)
   {
-    length = sizeof(ga_matrix_2_5)/sizeof(GA_Values);
+    length = sizeof (ga_matrix_2_5) / sizeof (GA_Values);
     ga_matrix = (GA_Values*) ga_matrix_2_5;
   }
   else if (matchscore == 1 && mismatchscore == -2)
   {
-    length = sizeof(ga_matrix_1_2)/sizeof(GA_Values);
+    length = sizeof (ga_matrix_1_2) / sizeof (GA_Values);
     ga_matrix = (GA_Values*) ga_matrix_1_2;
   }
   else if (matchscore == 2 && mismatchscore == -3)
   {
-    length = sizeof(ga_matrix_2_3)/sizeof(GA_Values);
+    length = sizeof (ga_matrix_2_3) / sizeof (GA_Values);
     ga_matrix = (GA_Values*) ga_matrix_2_3;
   }
   else
