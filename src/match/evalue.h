@@ -40,15 +40,20 @@ double gt_evalue_calculate_on_bitscore(const GtKarlinAltschulStat *ka,
                                        double bit_score,
                                        GtUword searchspace);
 
+/*
+ * calculates effective searchspace for query sequence of length
+ * <query_idx_length> and a set of datenbank sequences.
+ * <total_length_of_db> is the total number of characters in all db sequences
+ * including separators and wildcards
+ */
 GtUword gt_evalue_calculate_searchspace(const GtKarlinAltschulStat *ka,
-                                        const GtEncseq *dbencseq,
+                                        GtUword total_length_of_db,
+                                        GtUword num_of_db_seqs,
                                         GtUword query_idx_length);
 
-/* use it only if the total number of sequences contained in <queryencseq>
- * is one, better use  gt_evalue_calculate_searchspace instead */
-GtUword gt_evalue_calculate_searchspace_by_encseqs(
-                                                 const GtKarlinAltschulStat *ka,
+/* deprecated */
+GtUword gt_evalue_calculate_searchspace_dbencseq(const GtKarlinAltschulStat *ka,
                                                  const GtEncseq *dbencseq,
-                                                 const GtEncseq *queryencseq);
+                                                 GtUword query_idx_length);
 
 #endif

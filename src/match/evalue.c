@@ -140,15 +140,12 @@ static GtUword gt_evalue_calculate_length_adjustment(GtUword query_length,
 }
 
 /* deprecated */
-GtUword gt_evalue_calculate_searchspace_by_encseqs(
-                                                 const GtKarlinAltschulStat *ka,
+GtUword gt_evalue_calculate_searchspace_dbencseq(const GtKarlinAltschulStat *ka,
                                                  const GtEncseq *dbencseq,
-                                                 const GtEncseq *queryencseq)
+                                                 GtUword query_idx_length)
 {
   GtUword total_length_of_db,
-          total_length_of_query,
           num_of_db_seqs,
-          num_of_query_seqs,
           actual_db_length,
           actual_query_length,
           effective_db_length,
@@ -170,10 +167,7 @@ GtUword gt_evalue_calculate_searchspace_by_encseqs(
   actual_db_length = total_length_of_db - (num_of_db_seqs - 1);
 
   /* query length */
-  total_length_of_query = gt_encseq_total_length(queryencseq);
-  num_of_query_seqs = gt_encseq_num_of_sequences(queryencseq);
-  /* query length without seperators */
-  actual_query_length = total_length_of_query - (num_of_query_seqs - 1);
+  actual_query_length = query_idx_length;
 
   length_adjustment = gt_evalue_calculate_length_adjustment(actual_query_length,
                                                             actual_db_length,
@@ -190,12 +184,11 @@ GtUword gt_evalue_calculate_searchspace_by_encseqs(
 }
 
 GtUword gt_evalue_calculate_searchspace(const GtKarlinAltschulStat *ka,
-                                        const GtEncseq *dbencseq,
+                                        GtUword total_length_of_db,
+                                        GtUword num_of_db_seqs,
                                         GtUword query_idx_length)
 {
-  GtUword total_length_of_db,
-          num_of_db_seqs,
-          actual_db_length,
+  GtUword actual_db_length,
           actual_query_length,
           effective_db_length,
           effective_query_length,
@@ -209,9 +202,6 @@ GtUword gt_evalue_calculate_searchspace(const GtKarlinAltschulStat *ka,
   K = gt_karlin_altschul_stat_get_K(ka);
   logK = gt_karlin_altschul_stat_get_logK(ka);
 
-  /* db length */
-  total_length_of_db = gt_encseq_total_length(dbencseq);
-  num_of_db_seqs = gt_encseq_num_of_sequences(dbencseq);
   /* db length without seperators */
   actual_db_length = total_length_of_db - (num_of_db_seqs - 1);
 
