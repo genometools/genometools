@@ -53,20 +53,6 @@ static GtUword gt_evalue_calculate_raw_score(const GtKarlinAltschulStat *ka,
   return round(raw_score);
 }
 
-/*
-static double gt_evalue_calculate_bit_score(const GtKarlinAltschulStat *ka,
-                                            double raw_score)
-{
-  double bit_score, lambda, logK;
-  gt_assert(ka);
-
-  lambda = gt_karlin_altschul_stat_get_lambda(ka);
-  logK = gt_karlin_altschul_stat_get_logK(ka);
-
-  bit_score =  (raw_score * lambda - logK)/log(2);
-  return bit_score;
-}*/
-
 static GtUword gt_evalue_calculate_length_adjustment(GtUword query_length,
                                                      GtUword db_length,
                                                      GtUword num_of_db_seqs,
