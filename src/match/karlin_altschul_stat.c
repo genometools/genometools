@@ -25,6 +25,8 @@
 #include "extended/scorehandler.h"
 
 #define NUMOF_VALUES 8
+#define K_ITER_MAX 100
+#define K_SUMLIMIT_DEFAULT 0.0001
 
 /*
  * this library implements calculation of karlin-altschul parameter for E-value
@@ -48,8 +50,8 @@ struct GtKarlinAltschulStat
 typedef struct{
   double *sprob,
          score_avg;
-  GtWord low_score,
-         high_score;
+  GtWord low_align_score,
+         high_align_score;
 } ScoringFrequency;
 
 /* stores letter propabilities */
@@ -183,8 +185,8 @@ static ScoringFrequency *gt_karlin_altschul_stat_scoring_frequency(
 
   /* for theoretically valid scoring systems */
   gt_assert(obs_min <= 0 && obs_max >= 0);
-  sf->low_score = obs_min;
-  sf->high_score = obs_max;
+  sf->low_align_score = obs_min;
+  sf->high_align_score = obs_max;
 
   range = obs_max - obs_min + 1;
   sf->sprob = gt_calloc(range, sizeof (*sf->sprob));
@@ -195,8 +197,8 @@ static ScoringFrequency *gt_karlin_altschul_stat_scoring_frequency(
     {
       score = gt_scorehandler_get_replacement(scorehandler, idx, jdx);
 
-      if (score >= sf->low_score)
-        sf->sprob[score-sf->low_score] += nt_prob[idx].p * nt_prob[jdx].p;
+      if (score >= sf->low_align_score)
+        sf->sprob[score-sf->low_align_score] += nt_prob[idx].p * nt_prob[jdx].p;
     }
   }
 
@@ -231,8 +233,8 @@ static double gt_karlin_altschul_stat_calculate_ungapped_lambda(
   tolerance = 1.e-5;
   kMaxIterations = 20;
 
-  low = sf->low_score;
-  high = sf->high_score;
+  low = sf->low_align_score;
+  high = sf->high_align_score;
 
  /* write phi as phi(lambda) = exp(u*lambda) * q(exp(-lambda)) and solve the
   * polynomial q by apply newton's method
@@ -272,8 +274,8 @@ static double gt_karlin_altschul_stat_calculate_H(const ScoringFrequency *sf,
   GtWord idx, low, high, scale;
   gt_assert(sf->sprob);
 
-  low = sf->low_score;
-  high = sf->high_score;
+  low = sf->low_align_score;
+  high = sf->high_align_score;
 
   etonlambda = exp(-lambda);
   sum = low * sf->sprob[0];
@@ -293,13 +295,13 @@ static GtWord gt_karlin_altschul_stat_gcd(const ScoringFrequency *sf)
 {
   GtUword idx, range, div, val, tmp;
 
-  range = sf->high_score-sf->low_score+1;
-  div = -sf->low_score;
+  range = sf->high_align_score-sf->low_align_score+1;
+  div = -sf->low_align_score;
   for (idx = 1; idx < range && div > 1; idx++)
   {
     if (sf->sprob[idx] != 0.0)
     {
-      val = abs(idx+sf->low_score);
+      val = abs(idx+sf->low_align_score);
       if (val > div)
       {
         tmp = div;
@@ -322,8 +324,25 @@ static double gt_karlin_altschul_stat_calculate_ungapped_K(
                                                      double lambda,
                                                      double H)
 {
-  GtWord low, high, div;
-  double score_avg, score_avg_div, one_minus_expnlambda, K;
+  GtWord  low,
+          high,
+          div,
+          low_align_score,
+          high_align_score,
+          count, idx, jdx, firstidx, lastidx, secondix,
+          first, last;
+  GtUword range,
+          iterlimit,
+          size,
+          sigma = 0;
+  double  score_avg,
+          score_avg_div,
+          one_minus_expnlambda,
+          *alignnment_score_probs,
+          expnlambda,
+          K,
+          sumlimit,
+          innerSum;
 
   gt_assert(lambda > 0 && H > 0);
 
@@ -333,16 +352,18 @@ static double gt_karlin_altschul_stat_calculate_ungapped_K(
   /* greatest common divisor */
   div = gt_karlin_altschul_stat_gcd(sf);
 
-  low = sf->low_score/div;
-  high = sf->high_score/div;
+  low = sf->low_align_score/div;
+  high = sf->high_align_score/div;
   lambda *= div;
 
-  /* range = high - low; */
+  range = high - low;
+  expnlambda = exp(-lambda);
 
   if (low == -1 && high == 1)
   {
-      K = (sf->sprob[0] - sf->sprob[sf->high_score-sf->low_score]) *
-          (sf->sprob[0] - sf->sprob[sf->high_score-sf->low_score])/sf->sprob[0];
+      K = (sf->sprob[0] - sf->sprob[sf->high_align_score-sf->low_align_score]) *
+          (sf->sprob[0] - sf->sprob[sf->high_align_score-sf->low_align_score])/
+           sf->sprob[0];
   }
   else if (low == -1 || high == 1)
   {
@@ -358,11 +379,70 @@ static double gt_karlin_altschul_stat_calculate_ungapped_K(
     }
   }
   else
-  {
-    /* TODO: otherwise case */
-
+  {printf("OTHERWISE\n");
     /* K = lambda*exp(-2*sigma)/(H*(1-exp(-lambda)) */
-    gt_assert(false); /* not implemented yet */
+
+    sumlimit = K_SUMLIMIT_DEFAULT;
+    iterlimit = K_ITER_MAX;
+
+    size = iterlimit*range+1;
+    alignnment_score_probs = gt_calloc(size, sizeof (*alignnment_score_probs));
+    gt_assert(alignnment_score_probs);
+
+    low_align_score = 0;
+    high_align_score = 0;
+    innerSum = 1.0;
+    alignnment_score_probs[0] = 1.0;
+
+    for (count = 0; count < iterlimit && innerSum > sumlimit; count++)
+    {
+      if (count > 0)
+      {
+        innerSum /= count;
+        sigma += innerSum;
+      }
+
+      first = last = range;
+      low_align_score += low;
+      high_align_score += high;
+      for (idx = high_align_score-low_align_score; idx >= 0; idx--)
+      {
+        firstidx = idx-first;
+        lastidx = idx-last;
+        secondix = sf->sprob[low] + first;
+        for (innerSum = 0.; firstidx >= lastidx; )
+        {
+          innerSum += alignnment_score_probs[firstidx] *
+                      alignnment_score_probs[secondix];
+          firstidx--;
+          secondix++;
+        }
+
+        if (first > 0)
+          --first;
+        if (idx <= range)
+          --last;
+
+        alignnment_score_probs[idx] = innerSum;
+        if (idx == 0)
+          break;
+      }
+
+      innerSum = alignnment_score_probs[++idx];
+      for (jdx = low_align_score + 1; jdx < 0; jdx++)
+      {
+        innerSum = alignnment_score_probs[++idx] + innerSum * expnlambda;
+      }
+      innerSum *= expnlambda;
+      for (; jdx <= high_align_score; ++jdx)
+        innerSum += alignnment_score_probs[++jdx];
+
+    }
+    /* no terms of geometric progression are necessary for actuell tables of
+     * precomputed GA_Values, check to add these terms for correction
+     * if new tables of GA_Values will be added in future */
+
+     K = -exp(-2.0*sigma)/(H/lambda*expnlambda);
   }
 
   return K;
