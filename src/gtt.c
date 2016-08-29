@@ -322,7 +322,7 @@ GtHashmap* gtt_unit_tests(void)
                                                    gt_encseq_builder_unit_test);
   gt_hashmap_add(unit_tests, "encseq gc module", gt_encseq_gc_unit_test);
   gt_hashmap_add(unit_tests, "evaluator class", gt_evaluator_unit_test);
-  gt_hashmap_add(unit_tests, "evalue class", gt_evalue_unit_test);
+  gt_hashmap_add(unit_tests, "evalue module", gt_evalue_unit_test);
   gt_hashmap_add(unit_tests, "feature node iterator example",
                                              gt_feature_node_iterator_example);
   gt_hashmap_add(unit_tests, "feature node class", gt_feature_node_unit_test);
