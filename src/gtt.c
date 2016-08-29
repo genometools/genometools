@@ -87,6 +87,8 @@
 #include "ltr/gt_ltrdigest.h"
 #include "ltr/gt_ltrharvest.h"
 #include "ltr/ltrdigest_pbs_visitor.h"
+#include "match/evalue.h"
+#include "match/karlin_altschul_stat.h"
 #include "match/rdj-spmlist.h"
 #include "match/rdj-strgraph.h"
 #include "match/shu-encseq-gc.h"
@@ -320,6 +322,7 @@ GtHashmap* gtt_unit_tests(void)
                                                    gt_encseq_builder_unit_test);
   gt_hashmap_add(unit_tests, "encseq gc module", gt_encseq_gc_unit_test);
   gt_hashmap_add(unit_tests, "evaluator class", gt_evaluator_unit_test);
+  gt_hashmap_add(unit_tests, "evalue class", gt_evalue_unit_test);
   gt_hashmap_add(unit_tests, "feature node iterator example",
                                              gt_feature_node_iterator_example);
   gt_hashmap_add(unit_tests, "feature node class", gt_feature_node_unit_test);
@@ -336,6 +339,8 @@ GtHashmap* gtt_unit_tests(void)
   gt_hashmap_add(unit_tests, "huffman coding class", gt_huffman_unit_test);
   gt_hashmap_add(unit_tests, "interval tree class", gt_interval_tree_unit_test);
   gt_hashmap_add(unit_tests, "intset classes", gt_intset_unit_test);
+  gt_hashmap_add(unit_tests, "karlin altschul class",
+                                             gt_karlin_altschul_stat_unit_test);
   gt_hashmap_add(unit_tests, "kmer_database class", gt_kmer_database_unit_test);
   gt_hashmap_add(unit_tests, "Lua serializer module",
                                                    gt_lua_serializer_unit_test);

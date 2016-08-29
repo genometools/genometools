@@ -44,5 +44,6 @@ double gt_karlin_altschul_stat_get_K(const GtKarlinAltschulStat *ka);
 double gt_karlin_altschul_stat_get_logK(const GtKarlinAltschulStat *ka);
 double gt_karlin_altschul_stat_get_alphadlambda(const GtKarlinAltschulStat *ka);
 double gt_karlin_altschul_stat_get_beta(const GtKarlinAltschulStat *ka);
+int gt_karlin_altschul_stat_unit_test(GtError *err);
 
 #endif

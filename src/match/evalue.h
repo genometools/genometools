@@ -55,5 +55,5 @@ GtUword gt_evalue_calculate_searchspace(const GtKarlinAltschulStat *ka,
 GtUword gt_evalue_calculate_searchspace_dbencseq(const GtKarlinAltschulStat *ka,
                                                  const GtEncseq *dbencseq,
                                                  GtUword query_idx_length);
-
+int gt_evalue_unit_test(GtError *err);
 #endif

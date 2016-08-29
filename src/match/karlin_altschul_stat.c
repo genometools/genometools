@@ -17,6 +17,7 @@
 
 #include <math.h>
 #include "core/alphabet.h"
+#include "core/ensure.h"
 #include "core/error.h"
 #include "core/ma.h"
 #include "core/minmax.h"
@@ -437,6 +438,8 @@ static double gt_karlin_altschul_stat_calculate_ungapped_K(
       for (; jdx <= high_align_score; ++jdx)
         innerSum += alignnment_score_probs[++jdx];
 
+      gt_free(alignnment_score_probs);
+
     }
     /* no terms of geometric progression are necessary for actuell tables of
      * precomputed GA_Values, check to add these terms for correction
@@ -596,4 +599,26 @@ GtKarlinAltschulStat *gt_karlin_altschul_stat_new(bool gapped_alignment,
   }
 
   return ka;
+}
+
+int gt_karlin_altschul_stat_unit_test(GtError *err)
+{
+  GtKarlinAltschulStat *ka;
+  GtScoreHandler *scorehandler;
+
+  int had_err = 0;
+  gt_error_check(err);
+
+  scorehandler = gt_scorehandler_new(1,-2,0,-2);
+
+  /* check function for gapped alignments */
+  ka = gt_karlin_altschul_stat_new(true, NULL, scorehandler, err);
+  gt_ensure(ka->lambda == 1.19);
+  gt_ensure(ka->H == 0.66);
+  gt_ensure(ka->K == 0.34);
+
+  gt_scorehandler_delete(scorehandler);
+  gt_karlin_altschul_stat_delete(ka);
+
+  return had_err;
 }
