@@ -37,6 +37,7 @@ GtKarlinAltschulStat *gt_karlin_altschul_stat_new(bool gapped_alignment,
                                              const GtAlphabet *alphabet,
                                              const GtScoreHandler *scorehandler,
                                              GtError *err);
+
 void gt_karlin_altschul_stat_delete(GtKarlinAltschulStat *ka);
 double gt_karlin_altschul_stat_get_lambda(const GtKarlinAltschulStat *ka);
 double gt_karlin_altschul_stat_get_K(const GtKarlinAltschulStat *ka);

@@ -329,7 +329,7 @@ static double gt_karlin_altschul_stat_calculate_ungapped_K(
           div,
           low_align_score,
           high_align_score,
-          count, idx, jdx, firstidx, lastidx, secondix,
+          count, idx, jdx, firstidx, lastidx, secondidx,
           first, last;
   GtUword range,
           iterlimit,
@@ -379,7 +379,7 @@ static double gt_karlin_altschul_stat_calculate_ungapped_K(
     }
   }
   else
-  {printf("OTHERWISE\n");
+  {
     /* K = lambda*exp(-2*sigma)/(H*(1-exp(-lambda)) */
 
     sumlimit = K_SUMLIMIT_DEFAULT;
@@ -409,13 +409,13 @@ static double gt_karlin_altschul_stat_calculate_ungapped_K(
       {
         firstidx = idx-first;
         lastidx = idx-last;
-        secondix = sf->sprob[low] + first;
+        secondidx = sf->sprob[low] + first;
         for (innerSum = 0.; firstidx >= lastidx; )
         {
           innerSum += alignnment_score_probs[firstidx] *
-                      alignnment_score_probs[secondix];
+                      alignnment_score_probs[secondidx];
           firstidx--;
-          secondix++;
+          secondidx++;
         }
 
         if (first > 0)
