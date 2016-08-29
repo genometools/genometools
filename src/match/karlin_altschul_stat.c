@@ -441,9 +441,8 @@ static double gt_karlin_altschul_stat_calculate_ungapped_K(
       gt_free(alignnment_score_probs);
 
     }
-    /* no terms of geometric progression are necessary for actuell tables of
-     * precomputed GA_Values, check to add these terms for correction
-     * if new tables of GA_Values will be added in future */
+    /* no terms of geometric progression, check to add these terms for
+     * correction in future */
 
      K = -exp(-2.0*sigma)/(H/lambda*expnlambda);
   }
