@@ -42,7 +42,7 @@ double gt_evalue_calculate_on_bitscore(const GtKarlinAltschulStat *ka,
 
 /*
  * calculates effective searchspace for query sequence of length
- * <query_idx_length> and a set of datenbank sequences.
+ * <query_idx_length> and a set of database sequences.
  * <total_length_of_db> is the total number of characters in all db sequences
  * including separators and wildcards
  */
