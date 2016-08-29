@@ -269,7 +269,7 @@ static double gt_karlin_altschul_stat_calculate_H(const ScoringFrequency *sf,
                                                   double lambda)
 {
   double H, sum, etonlambda;
-  GtWord idx, low, high;
+  GtWord idx, low, high, scale;
   gt_assert(sf->sprob);
 
   low = sf->low_score;
@@ -280,8 +280,11 @@ static double gt_karlin_altschul_stat_calculate_H(const ScoringFrequency *sf,
   for (idx = low + 1; idx <= high; idx++)
     sum = idx * sf->sprob[idx-low] + etonlambda * sum;
 
-  H = lambda * sum/pow(etonlambda,high);
-  /*TODO: case underflow*/
+  scale = pow(etonlambda,high);
+  if (scale > 0.0)
+    H = lambda * sum/scale;
+  else /* case underflow */
+    H = lambda * exp(lambda * high + log(sum));
 
    return H;
 }
