@@ -16,7 +16,7 @@
 */
 
 #include <math.h>
-#include "core/alphabet.h"
+#include "core/alphabet_api.h"
 #include "core/ensure.h"
 #include "core/error.h"
 #include "core/ma.h"
@@ -604,6 +604,8 @@ int gt_karlin_altschul_stat_unit_test(GtError *err)
 {
   GtKarlinAltschulStat *ka;
   GtScoreHandler *scorehandler;
+  GtAlphabet *alphabet;
+  double q;
 
   int had_err = 0;
   gt_error_check(err);
@@ -615,9 +617,19 @@ int gt_karlin_altschul_stat_unit_test(GtError *err)
   gt_ensure(ka->lambda == 1.19);
   gt_ensure(ka->H == 0.66);
   gt_ensure(ka->K == 0.34);
-
-  gt_scorehandler_delete(scorehandler);
   gt_karlin_altschul_stat_delete(ka);
 
+  /* check function for ungapped alignments */
+  alphabet = gt_alphabet_new_dna();
+  ka = gt_karlin_altschul_stat_new(false, alphabet, scorehandler, err);
+  q = ka->lambda/1.33; /* lambda = 1.33 */
+  gt_ensure(0.99 < q && q < 1.01);
+  q = ka->H/1.12; /* H = 1.12 */
+  gt_ensure(0.99 < q && q < 1.01);
+  q = ka->K/0.621; /* K = 0.621 */
+  gt_ensure(0.99 < q && q < 1.01);
+  gt_karlin_altschul_stat_delete(ka);
+
+  gt_scorehandler_delete(scorehandler);
   return had_err;
 }
