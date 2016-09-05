@@ -22,7 +22,7 @@
 #include "core/types_api.h"
 #include "chain2dim.h"
 
-#define READNUMS 5
+#define GT_CHAININPUT_READNUMS 5
 
 #define CANNOTPARSELINE(S)\
         gt_error_set(err,"matchfile \"%s\", line "GT_WU", column "GT_WU": %s",\
@@ -58,7 +58,7 @@ GtChain2Dimmatchtable *gt_chain_analyzeopenformatfile(double weightfactor,
 {
   GtChain2Dimmatchtable *matchtable;
   GtUword linenum;
-  GtWord storeinteger[READNUMS];
+  GtWord storeinteger[GT_CHAININPUT_READNUMS];
   FILE *matchfp;
   bool haserr = false;
   GtChain2Dimmatchvalues fragment;
@@ -78,11 +78,12 @@ GtChain2Dimmatchtable *gt_chain_analyzeopenformatfile(double weightfactor,
                            &storeinteger[1],
                            &storeinteger[2],
                            &storeinteger[3],
-                           &storeinteger[4]) == READNUMS; linenum++)
+                           &storeinteger[4]) == GT_CHAININPUT_READNUMS;
+                    linenum++)
   {
     GtUword countcolumns;
 
-    for (countcolumns = 0; countcolumns < (GtUword) (READNUMS-1);
+    for (countcolumns = 0; countcolumns < (GtUword) (GT_CHAININPUT_READNUMS-1);
          countcolumns++)
     {
       if (storeinteger[countcolumns] < 0)

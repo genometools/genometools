@@ -30,7 +30,7 @@
 #include "extended/match_iterator_open.h"
 #include "extended/match_iterator_rep.h"
 
-#define READNUMS 5
+#define GT_MATCHITER_READNUMS 5
 
 #define GT_MATCHER_OPEN_CANNOTPARSECOLUMN(S)\
         gt_error_set(err, "file %s, line " GT_WU ", column " GT_WU ": %s", \
@@ -63,7 +63,7 @@ static GtMatchIteratorStatus gt_match_iterator_open_next(GtMatchIterator *gmpi,
 {
   GtUword columncount = 0;
   int readnums;
-  GtWord storeinteger[READNUMS];
+  GtWord storeinteger[GT_MATCHITER_READNUMS];
   int had_err = 0, i = 0;
   char buffer[BUFSIZ], seqid1[BUFSIZ], seqid2[BUFSIZ], matchtype;
   GtMatchIteratorOpen *mpi = gt_match_iterator_open_cast(gmpi);
@@ -89,7 +89,7 @@ static GtMatchIteratorStatus gt_match_iterator_open_next(GtMatchIterator *gmpi,
                       &storeinteger[4]);
     if (readnums == EOF)
       return GT_MATCHER_STATUS_END;
-    if (readnums != READNUMS + 3)
+    if (readnums != GT_MATCHITER_READNUMS + 3)
     {
       GT_MATCHER_OPEN_CANNOTPARSELINE("invalid format");
       had_err = -1;
@@ -116,13 +116,14 @@ static GtMatchIteratorStatus gt_match_iterator_open_next(GtMatchIterator *gmpi,
                seqid2,
                &storeinteger[3],
                &storeinteger[4])
-               != READNUMS + 2) {
+               != GT_MATCHITER_READNUMS + 2) {
       GT_MATCHER_OPEN_CANNOTPARSELINE("invalid format");
       had_err = -1;
     }
   }
 
-  for (columncount = 0; !had_err && columncount < (GtUword) (READNUMS);
+  for (columncount = 0; !had_err &&
+                        columncount < (GtUword) GT_MATCHITER_READNUMS;
        columncount++) {
     if (storeinteger[columncount] < 0) {
          GT_MATCHER_OPEN_CANNOTPARSECOLUMN("non-negative integer expected");

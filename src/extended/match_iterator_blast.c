@@ -33,8 +33,8 @@
 #include "extended/match_iterator_blast.h"
 #include "extended/match_iterator_rep.h"
 
-#define READNUMS 7
-#define READVALUES 12
+#define GT_BLASTITER_READNUMS 7
+#define GT_BLASTITER_READVALUES 12
 
 #define GT_MATCHER_BLAST_CANNOTPARSECOLUMN(S)\
         gt_error_set(err, "file %s, line " GT_WU ", column " GT_WU ": %s", \
@@ -70,7 +70,7 @@ static GtMatchIteratorStatus gt_match_iterator_blast_next(GtMatchIterator *mi,
 {
   gt_assert(mi);
   GtUword columncount = 0;
-  GtWord storeinteger[READNUMS], tmp;
+  GtWord storeinteger[GT_BLASTITER_READNUMS], tmp;
   double e_value;
   float bitscore, identity;
   bool reverse = false;
@@ -98,7 +98,7 @@ static GtMatchIteratorStatus gt_match_iterator_blast_next(GtMatchIterator *mi,
                         &storeinteger[4], &e_value, &bitscore);
     if (readvalues == EOF)
       return GT_MATCHER_STATUS_END;
-    if (readvalues != READVALUES)
+    if (readvalues != GT_BLASTITER_READVALUES)
     {
       GT_MATCHER_BLAST_CANNOTPARSELINE("invalid format");
       had_err = -1;
@@ -122,13 +122,14 @@ static GtMatchIteratorStatus gt_match_iterator_blast_next(GtMatchIterator *mi,
                              &storeinteger[5], &storeinteger[6],
                              &storeinteger[1], &storeinteger[2],
                              &storeinteger[3], &storeinteger[4], &e_value,
-                             &bitscore)) != READVALUES) {
+                             &bitscore)) != GT_BLASTITER_READVALUES) {
       GT_MATCHER_BLAST_CANNOTPARSELINE("invalid format");
       had_err = -1;
     }
   }
 
-  for (columncount = 0; !had_err && columncount < (GtUword) (READNUMS);
+  for (columncount = 0; !had_err &&
+                        columncount < (GtUword) (GT_BLASTITER_READNUMS);
        columncount++) {
     if (storeinteger[columncount] < 0) {
          GT_MATCHER_BLAST_CANNOTPARSECOLUMN("non-negative integer expected");
