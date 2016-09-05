@@ -46,6 +46,7 @@
 #endif
 
 #define GT_DIAGBANDSEED_SEQNUM_UNDEF UINT_MAX
+#define GT_DIAGBANDSEED_FMT          "in " GT_WD ".%06ld seconds.\n"
 /* #define GT_DIAGBANDSEED_SEEDHISTOGRAM 100 */
 
 typedef uint32_t GtDiagbandseedPosition;
@@ -467,7 +468,7 @@ GtArrayGtDiagbandseedKmerPos gt_diagbandseed_get_kmers(const GtEncseq *encseq,
 
   if (verbose) {
     fprintf(stream, "# ...found " GT_WU " %u-mers ", listlen, seedlength);
-    gt_timer_show_formatted(timer, "in " GT_WD ".%06ld seconds.\n", stream);
+    gt_timer_show_formatted(timer, GT_DIAGBANDSEED_FMT, stream);
     gt_timer_start(timer);
   }
 
@@ -480,7 +481,7 @@ GtArrayGtDiagbandseedKmerPos gt_diagbandseed_get_kmers(const GtEncseq *encseq,
 
   if (verbose) {
     fprintf(stream, "# ...sorted " GT_WU " %u-mers ", listlen, seedlength);
-    gt_timer_show_formatted(timer, "in " GT_WD ".%06ld seconds.\n", stream);
+    gt_timer_show_formatted(timer, GT_DIAGBANDSEED_FMT, stream);
     gt_timer_delete(timer);
   }
 
@@ -798,8 +799,8 @@ static int gt_diagbandseed_verify(const GtEncseq *aencseq,
     curr_sp++;
   }
   if (verbose) {
-    fprintf(stream, "# ...successfully verified each seed pair in ");
-    gt_timer_show_formatted(timer, GT_WD ".%06ld seconds.\n", stream);
+    fprintf(stream, "# ...successfully verified each seed pair ");
+    gt_timer_show_formatted(timer, GT_DIAGBANDSEED_FMT, stream);
   }
   gt_free(buf1);
   gt_timer_delete(timer);
@@ -853,7 +854,7 @@ static int gt_diagbandseed_get_mlen_maxfreq(GtUword *mlen,
 
   if (verbose) {
     gt_timer_show_formatted(timer,
-                            "# ...finished in " GT_WD ".%06ld seconds.\n",
+                            "# ...finished histogram " GT_DIAGBANDSEED_FMT,
                             stream);
     gt_timer_delete(timer);
   }
@@ -931,7 +932,7 @@ static GtArrayGtDiagbandseedSeedPair gt_diagbandseed_get_seedpairs(
 
   if (verbose) {
     fprintf(stream, "# ...collected " GT_WU " seed pairs ", mlen);
-    gt_timer_show_formatted(timer, "in " GT_WD ".%06ld seconds.\n", stream);
+    gt_timer_show_formatted(timer, GT_DIAGBANDSEED_FMT, stream);
   }
 
   /* sort mlist */
@@ -948,8 +949,8 @@ static GtArrayGtDiagbandseedSeedPair gt_diagbandseed_get_seedpairs(
     gt_radixsort_delete(rdxinfo);
 
     if (verbose) {
-      fprintf(stream, "# ...sorted " GT_WU " seed pairs in ", mlen);
-      gt_timer_show_formatted(timer, GT_WD ".%06ld seconds.\n", stream);
+      fprintf(stream, "# ...sorted " GT_WU " seed pairs ", mlen);
+      gt_timer_show_formatted(timer, GT_DIAGBANDSEED_FMT, stream);
     }
 
     if (debug_seedpair) {
@@ -1180,7 +1181,7 @@ static void gt_diagbandseed_process_seeds(GtArrayGtDiagbandseedSeedPair *mlist,
   if (verbose) {
     fprintf(stream, "# ...finished " GT_WU " seed pair extension%s ",
             count_extensions, count_extensions > 1 ? "s" : "");
-    gt_timer_show_formatted(timer, "in " GT_WD ".%06ld seconds.\n", stream);
+    gt_timer_show_formatted(timer, GT_DIAGBANDSEED_FMT, stream);
     gt_timer_delete(timer);
   }
 }
