@@ -58,18 +58,16 @@ typedef struct{
   precomputed values
   analog to BLAST
 
-  1. Gap opening score,
-  2. Gap extension score,
-  3. Lambda,
-  4. K,
-  5. H,
-  6. Alpha,
-  7. Beta,
+  1. Gap score,
+  2. Lambda,
+  3. K,
+  4. H,
+  5. Alpha,
+  6. Beta,
  */
 
 typedef enum
 {
-  gapopidx,
   gapextdidx,
   lambdaidx,
   Kidx,
@@ -78,36 +76,34 @@ typedef enum
   betaidx
 } GT_ValuesindeX;
 
-typedef double GA_Values[(int) (betaidx+1)];
-
 /* matchscore = 1 && mismatchscore = -4 */
-static const GA_Values ga_matrix_1_4[] = {
-    { 0, -2,  1.26,  0.43, 0.90,  1.4, -1}
+static const double ga_vector_1_4[] = {
+    -2,  1.26,  0.43, 0.90,  1.4, -1
 };
 
 /* matchscore = 2 && mismatchscore = -7 */
-static const GA_Values ga_matrix_2_7[] = {
-    { 0, -4,  0.63, 0.43, 0.90,   0.7, -1}
+static const double ga_vector_2_7[] = {
+    -4,  0.63, 0.43, 0.90,   0.7, -1
 };
 
 /* matchscore = 1 && mismatchscore = -3 */
-static const GA_Values ga_matrix_1_3[] = {
-    { 0, -2,  1.25,  0.42, 0.83,  1.5, -2}
+static const double ga_vector_1_3[] = {
+    -2,  1.25,  0.42, 0.83,  1.5, -2
 };
 
 /* matchscore = 2 && mismatchscore = -5 */
-static const GA_Values ga_matrix_2_5[] = {
-    { 0, -4,  0.62, 0.39, 0.78,  0.8, -2}
+static const double ga_vector_2_5[] = {
+    -4,  0.62, 0.39, 0.78,  0.8, -2
 };
 
 /* matchscore = 1 && mismatchscore = -2 */
-static const GA_Values ga_matrix_1_2[] = {
-    { 0, -2, 1.19, 0.34, 0.66, 1.8, -3}
+static const double ga_vector_1_2[] = {
+    -2, 1.19, 0.34, 0.66, 1.8, -3
 };
 
 /* matchscore = 2 && mismatchscore = -3 */
-static const GA_Values ga_matrix_2_3[] = {
-    { 0, -4,  0.55, 0.21, 0.46,  1.2, -5}
+static const double ga_vector_2_3[] = {
+    0, -4,  0.55, 0.21, 0.46,  1.2, -5
 };
 
 void gt_karlin_altschul_stat_delete(GtKarlinAltschulStat *ka)
@@ -443,95 +439,61 @@ static double gt_karlin_altschul_stat_calculate_ungapped_K(
   return K;
 }
 
-static int get_values_from_matrix(GtKarlinAltschulStat *ka,
-                                  const GA_Values *matrix,
-                                  GtUword length,
-                                  GtWord gap_extension,
-                                  GtError *err)
+static void get_values_from_vector(GtKarlinAltschulStat *ka,
+                                  const double *matrix,
+                                  GtWord gap_extension)
 {
-  GtUword idx;
+  gt_assert(matrix[gapextdidx] == gap_extension);
+  ka->lambda = matrix[lambdaidx];
+  ka->K = matrix[Kidx];
+  ka->logK = log(ka->K);
+  ka->H = matrix[Hidx];
 
-  for (idx = 0; idx < length; idx++)
-  {
-    if (matrix[idx][gapextdidx] == gap_extension)
-    {
-      if (matrix[idx][gapopidx] != 0)
-      {
-        gt_assert(false); /* not implemented: linear scores only */
-      }
-      ka->lambda = matrix[idx][lambdaidx];
-      ka->K = matrix[idx][Kidx];
-      ka->logK = log(ka->K);
-      ka->H = matrix[idx][Hidx];
-
-      gt_assert(ka->lambda != 0.0);
-      ka->alpha_div_lambda = matrix[idx][alphaidx]/ka->lambda;
-      ka->beta = matrix[idx][betaidx];
-      return 0;
-    }
-  }
-
-  /* not found */
-  gt_error_set(err, "no precomputed values for ungapped alignment parameters "
-                    "were found\n");
-  return -1;
+  gt_assert(ka->lambda != 0.0);
+  ka->alpha_div_lambda = matrix[alphaidx]/ka->lambda;
+  ka->beta = matrix[betaidx];
 }
 
 static int gt_karlin_altschul_stat_get_gapped_params(GtKarlinAltschulStat *ka,
                                                      GtError *err)
 {
-  const GA_Values *ga_matrix = NULL;
-  GtUword length = 0;
+  const double *ga_vector = NULL;
 
   gt_assert(ka != NULL);
   if (ka->matchscore == 1 && ka->mismatchscore == -4)
   {
-    length = sizeof (ga_matrix_1_4) / sizeof (GA_Values);
-    ga_matrix = ga_matrix_1_4;
+    ga_vector = ga_vector_1_4;
   }
   else if (ka->matchscore == 2 && ka->mismatchscore == -7)
   {
-    length = sizeof (ga_matrix_2_7) / sizeof (GA_Values);
-    ga_matrix = ga_matrix_2_7;
+    ga_vector = ga_vector_2_7;
   }
   else if (ka->matchscore == 1 && ka->mismatchscore == -3)
   {
-    length = sizeof (ga_matrix_1_3) / sizeof (GA_Values);
-    ga_matrix = ga_matrix_1_3;
+    ga_vector = ga_vector_1_3;
   }
   else if (ka->matchscore == 2 && ka->mismatchscore == -5)
   {
-    length = sizeof (ga_matrix_2_5) / sizeof (GA_Values);
-    ga_matrix = ga_matrix_2_5;
+    ga_vector = ga_vector_2_5;
   }
   else if (ka->matchscore == 1 && ka->mismatchscore == -2)
   {
-    length = sizeof (ga_matrix_1_2) / sizeof (GA_Values);
-    ga_matrix = ga_matrix_1_2;
+    ga_vector = ga_vector_1_2;
   }
   else if (ka->matchscore == 2 && ka->mismatchscore == -3)
   {
-    length = sizeof (ga_matrix_2_3) / sizeof (GA_Values);
-    ga_matrix = ga_matrix_2_3;
+    ga_vector = ga_vector_2_3;
   }
   else
   {
     gt_error_set(err, "no precomputed values for combination matchscore "
-                      GT_WD" and mismatchscore "GT_WD" in evalue calculation "
-                      "of gapped alignments\n",
+                      GT_WD " and mismatchscore " GT_WD
+                      " in evalue calculation "
+                      "of gapped alignments",
                       ka->matchscore, ka->mismatchscore);
     return -1;
   }
-  gt_assert(length == 1);
-
-  if (get_values_from_matrix(ka,
-                             ga_matrix,
-                             length,
-                             ka->gapscore,
-                             err) != 0)
-  {
-    return -1;
-  }
+  get_values_from_vector(ka, ga_vector, ka->gapscore);
   return 0;
 }
 
