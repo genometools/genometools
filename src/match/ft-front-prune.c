@@ -809,24 +809,15 @@ GtUword front_prune_edist_inplace(
     if (distance == 0)
     {
       validbasefront->row = 0;
-      if (seedlength == 0)
+      if (seedlength >= sizeof (validbasefront->matchhistory_bits) * CHAR_BIT)
       {
-        validbasefront->matchhistory_bits = 0;
-        validbasefront->matchhistory_size
-          = validbasefront->matchhistory_count = max_history;
+        validbasefront->matchhistory_bits = ~((uint64_t) 0);
       } else
       {
-        if (seedlength >= sizeof (validbasefront->matchhistory_bits) * CHAR_BIT)
-        {
-          validbasefront->matchhistory_bits = ~((uint64_t) 0);
-        } else
-        {
-          validbasefront->matchhistory_bits
-            = (((uint64_t) 1) << seedlength) - 1;
-        }
-        validbasefront->matchhistory_size
-          = validbasefront->matchhistory_count = MIN(max_history,seedlength);
+        validbasefront->matchhistory_bits = (((uint64_t) 1) << seedlength) - 1;
       }
+      validbasefront->matchhistory_size
+        = validbasefront->matchhistory_count = MIN(max_history,seedlength);
       validbasefront->backreference = 0; /* No back reference */
       front_prune_add_matches(validbasefront + distance,validbasefront,
                               leftmostbit,max_history,&useq,&vseq);

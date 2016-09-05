@@ -51,9 +51,7 @@ typedef struct
           pathlength;
   unsigned int row, lcs;
   uint8_t trace;
-#ifndef OUTSIDE_OF_GT
   uint8_t eopcode;
-#endif
 } GtBacktraceFrontStackelem;
 
 typedef struct
@@ -252,7 +250,6 @@ static GtUword valid_total_fronts(const GtFrontGeneration *gen_table,
 
 char show_eopcode(GT_UNUSED uint8_t eopcode)
 {
-#ifndef OUTSIDE_OF_GT
   if (eopcode == FT_EOPCODE_DELETION)
   {
     return 'D';
@@ -266,16 +263,13 @@ char show_eopcode(GT_UNUSED uint8_t eopcode)
       return 'R';
     }
   }
-#else
-  return '\0';
-#endif
 }
 
-#ifndef OUTSIDE_OF_GT
 void eoplist_show(const GtArrayuint8_t *eoplist)
 {
   GtUword idx;
 
+  gt_assert(eoplist != NULL);
   printf("[");
   for (idx = 0; idx < eoplist->nextfreeuint8_t; idx++)
   {
@@ -300,6 +294,26 @@ void eoplist_show(const GtArrayuint8_t *eoplist)
   printf("]\n");
 }
 
+#ifdef OUTSIDE_OF_GT
+#define GT_CHECKARRAYSPACE(A,TYPE,L)\
+        do {\
+          if ((A)->nextfree##TYPE >= (A)->allocated##TYPE)\
+          {\
+            (A)->allocated##TYPE += L;\
+            (A)->space##TYPE = (TYPE *) gt_realloc((A)->space##TYPE,\
+                                              sizeof (TYPE) *\
+                                              (A)->allocated##TYPE);\
+          }\
+          gt_assert((A)->space##TYPE != NULL);\
+        } while (false)
+
+#define GT_STOREINARRAY(A,TYPE,L,VAL)\
+        do {\
+          GT_CHECKARRAYSPACE(A,TYPE,L);\
+          (A)->space##TYPE[(A)->nextfree##TYPE++] = VAL;\
+        } while (false)
+#endif
+
 #define GT_EOPLIST_PUSH(EOPLIST,EOP)\
         {\
           const GtUword addamount = (EOPLIST)->allocateduint8_t * 0.2 + 128;\
@@ -308,20 +322,20 @@ void eoplist_show(const GtArrayuint8_t *eoplist)
 
 void front_trace_multireplacement(GtArrayuint8_t *eoplist,GtUword repnum)
 {
-  gt_assert(eoplist != NULL && repnum > 0);
+  gt_assert(eoplist != NULL);
+  gt_assert(repnum > 0);
   while (true)
   {
     if (repnum <= FT_EOPCODE_MAXREPLACEMENT)
     {
       gt_assert(repnum > 0);
-      GT_EOPLIST_PUSH(eoplist,repnum - 1);
+      GT_EOPLIST_PUSH(eoplist,(uint8_t) (repnum - 1)); /* R repnum */
       break;
     }
-    GT_EOPLIST_PUSH(eoplist,FT_EOPCODE_MAXREPLACEMENT - 1);
+    GT_EOPLIST_PUSH(eoplist,FT_EOPCODE_MAXREPLACEMENT - 1); /* R max */
     repnum -= FT_EOPCODE_MAXREPLACEMENT;
   }
 }
-#endif
 
 static void gt_check_diagonal_run(GT_UNUSED const GtUchar *useq,
                                   GT_UNUSED const GtUchar *vseq,
@@ -373,12 +387,10 @@ static void front_trace2eoplist_directed(GtArrayuint8_t *eoplist,
 
     if (eoplist != NULL)
     {
-#ifndef OUTSIDE_OF_GT
       if (lcs > 0)
       {
         front_trace_multireplacement(eoplist,lcs);
       }
-#endif
     } else
     {
       gt_check_diagonal_run(useq, vseq, diagonal, row - lcs, row);
@@ -428,7 +440,6 @@ static void front_trace2eoplist_directed(GtArrayuint8_t *eoplist,
         }
       }
     }
-#ifndef OUTSIDE_OF_GT
     if (eoplist != NULL)
     {
       if (preferred_eop == FT_EOP_DELETION)
@@ -441,11 +452,10 @@ static void front_trace2eoplist_directed(GtArrayuint8_t *eoplist,
           GT_EOPLIST_PUSH(eoplist,FT_EOPCODE_INSERTION);
         } else
         {
-          GT_EOPLIST_PUSH(eoplist,0);
+          GT_EOPLIST_PUSH(eoplist,0); /* R 1 */
         }
       }
     }
-#endif
     gt_assert(trimleft >=
               (GtUword) front_trace->gen_table[distance].trimleft_diff);
     trimleft -= (GtUword) front_trace->gen_table[distance].trimleft_diff;
@@ -465,12 +475,10 @@ static void front_trace2eoplist_directed(GtArrayuint8_t *eoplist,
   }
   /*printf("avg runlength=%.2f\n",(double) pp->distance/totalrunlength);*/
   gt_assert(globaloffset + localoffset == 0 && trace == 0);
-#ifndef OUTSIDE_OF_GT
   if (eoplist != NULL && lcs > 0)
   {
     front_trace_multireplacement(eoplist,lcs);
   }
-#endif
 }
 
 typedef struct
@@ -502,9 +510,7 @@ static void gt_front_trace_single_push(GtFronttrace *front_trace,
                                        GtUword globaloffset,
                                        GtUword trimleft,
                                        GtUword lcs_sum,
-#ifndef OUTSIDE_OF_GT
                                        uint8_t eopcode,
-#endif
                                        GtUword pathlength)
 {
   GtUword localoffset;
@@ -532,9 +538,7 @@ static void gt_front_trace_single_push(GtFronttrace *front_trace,
   stack_top_ptr->lcs_sum = lcs_sum + stack_top_ptr->lcs;
   stack_top_ptr->scoresum = scoresum + stack_top_ptr->lcs * match_score;
   stack_top_ptr->pathlength = pathlength + 1;
-#ifndef OUTSIDE_OF_GT
   stack_top_ptr->eopcode = eopcode;
-#endif
 }
 
 static void gt_front_trace_backtrace_step(GtBacktraceFrontInfo *bti,
@@ -564,9 +568,7 @@ static void gt_front_trace_backtrace_step(GtBacktraceFrontInfo *bti,
                                globaloffset,
                                trimleft,
                                lcs_sum,
-#ifndef OUTSIDE_OF_GT
                                FT_EOPCODE_INSERTION,
-#endif
                                pathlength);
     if (!bti->on_polsize_suffix)
     {
@@ -586,9 +588,7 @@ static void gt_front_trace_backtrace_step(GtBacktraceFrontInfo *bti,
                                globaloffset,
                                trimleft,
                                lcs_sum,
-#ifndef OUTSIDE_OF_GT
                                FT_EOPCODE_DELETION,
-#endif
                                pathlength);
     if (!bti->on_polsize_suffix)
     {
@@ -607,14 +607,11 @@ static void gt_front_trace_backtrace_step(GtBacktraceFrontInfo *bti,
                                globaloffset,
                                trimleft,
                                lcs_sum,
-#ifndef OUTSIDE_OF_GT
-                               0,
-#endif
+                               0, /* R 1 */
                                pathlength);
   }
 }
 
-#ifndef OUTSIDE_OF_GT
 static void gt_front_trace_backtracepath2eoplist(GtArrayuint8_t *eoplist,
                                                  unsigned int lastlcs,
                                                  const GtBacktraceFrontpath
@@ -630,6 +627,7 @@ static void gt_front_trace_backtracepath2eoplist(GtArrayuint8_t *eoplist,
     front_trace_multireplacement(eoplist,lastlcs);
     matches += lastlcs;
   }
+  gt_assert(eoplist != NULL);
   for (idx = 0; idx < elementsinbacktracepath; idx++)
   {
     if (backtracepath[idx].eopcode == FT_EOPCODE_DELETION)
@@ -673,7 +671,6 @@ static void gt_front_trace_backtracepath2eoplist(GtArrayuint8_t *eoplist,
   }
   */
 }
-#endif
 
 static void front_trace2polished_eoplist(GtArrayuint8_t *eoplist,
                                          GtFronttrace *front_trace,
@@ -689,9 +686,8 @@ static void front_trace2polished_eoplist(GtArrayuint8_t *eoplist,
   GtUword localoffset, globaloffset, remainingvalidfronts;
   GtBacktraceFrontStackelem *stack_top_ptr;
   GtBacktraceFrontInfo bti;
-#ifndef OUTSIDE_OF_GT
   unsigned int lastlcs;
-#endif
+
   bti.ulen = ulen;
   bti.vlen = vlen;
   bti.match_score = match_score;
@@ -719,12 +715,9 @@ static void front_trace2polished_eoplist(GtArrayuint8_t *eoplist,
   stack_top_ptr->trace
     = front_trace->backref_table[globaloffset + localoffset].bits;
   stack_top_ptr->row = pp->row;
-#ifndef OUTSIDE_OF_GT
   stack_top_ptr->eopcode = 0;
-  lastlcs =
-#endif
-  stack_top_ptr->lcs
-    = front_trace->backref_table[globaloffset + localoffset].lcs;
+  lastlcs = stack_top_ptr->lcs
+          = front_trace->backref_table[globaloffset + localoffset].lcs;
   stack_top_ptr->scoresum = stack_top_ptr->lcs * match_score;
   stack_top_ptr->globaloffset = globaloffset;
   stack_top_ptr->trimleft = pp->trimleft;
@@ -740,7 +733,6 @@ static void front_trace2polished_eoplist(GtArrayuint8_t *eoplist,
     {
       bti.on_polsize_suffix = false;
     }
-#ifndef OUTSIDE_OF_GT
     if (stack_top_ptr->pathlength > 0)
     {
       gt_assert(stack_top_ptr->pathlength - 1 <= pp->distance);
@@ -749,7 +741,6 @@ static void front_trace2polished_eoplist(GtArrayuint8_t *eoplist,
       front_trace->backtracepath[stack_top_ptr->pathlength-1].lcs
         = stack_top_ptr->lcs;
     }
-#endif
     if (stack_top_ptr->trace != 0)
     {
       if (eoplist == NULL)
@@ -778,15 +769,16 @@ static void front_trace2polished_eoplist(GtArrayuint8_t *eoplist,
       break;
     }
   }
-#ifndef OUTSIDE_OF_GT
   gt_assert(stack_top_ptr != NULL);
-  gt_front_trace_backtracepath2eoplist(eoplist,
-                                       lastlcs,
-                                       front_trace->backtracepath,
-                                       stack_top_ptr->pathlength,
-                                       ulen,
-                                       vlen);
-#endif
+  if (eoplist != NULL)
+  {
+    gt_front_trace_backtracepath2eoplist(eoplist,
+                                         lastlcs,
+                                         front_trace->backtracepath,
+                                         stack_top_ptr->pathlength,
+                                         ulen,
+                                         vlen);
+  }
 }
 
 void front_trace2eoplist(bool polished,

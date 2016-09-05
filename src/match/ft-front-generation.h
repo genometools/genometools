@@ -1,6 +1,7 @@
 #ifndef FT_FRONT_GENERATION_H
 #define FT_FRONT_GENERATION_H
 #include <stdint.h>
+#include <stdbool.h>
 #include "core/types_api.h"
 #ifndef OUTSIDE_OF_GT
 #include "core/arraydef.h"
@@ -18,11 +19,9 @@ typedef struct
 #define FT_EOP_INSERTION   (1 << 1)
 #define FT_EOP_DELETION    (1 << 2)
 
-#ifndef OUTSIDE_OF_GT
 #define FT_EOPCODE_MAXREPLACEMENT 254
 #define FT_EOPCODE_DELETION       254
 #define FT_EOPCODE_INSERTION      255
-#endif
 
 typedef struct
 {
