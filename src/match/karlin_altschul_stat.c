@@ -298,7 +298,7 @@ static double gt_karlin_altschul_stat_calculate_H(const ScoringFrequency *sf,
 
 static GtWord gt_karlin_altschul_stat_gcd(const ScoringFrequency *sf)
 {
-  GtUword idx, range, div;
+  GtWord idx, range, div;
 
   range = sf->high_align_score - sf->low_align_score+1;
   div = -sf->low_align_score;
@@ -306,16 +306,16 @@ static GtWord gt_karlin_altschul_stat_gcd(const ScoringFrequency *sf)
   {
     if (sf->sprob[idx] != 0.0)
     {
-      GtUword val = abs(idx+sf->low_align_score);
+      GtWord val = labs(idx+sf->low_align_score);
       if (val > div)
       {
-        GtUword tmp = div;
+        GtWord tmp = div;
         div = val;
         val = tmp;
       }
       while (val != 0)
       {
-        GtUword tmp = div % val;
+        GtWord tmp = div % val;
         div = val;
         val = tmp;
       }
