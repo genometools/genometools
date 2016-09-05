@@ -26,19 +26,19 @@
 #include "match/karlin_altschul_stat.h"
 
 /*
- * this library implements calculation of E-value of Alignments analog to NCBI
- * tool BLAST:
- *
- *   Altschul S.F., Gish W., Miller W., Myers E.W. and Lipman D.J. (1990)
- *   Basic local alignment search tool. J. Mol. Biol. 215: 403-410.
+  this library implements calculation of E-value of Alignments analog to NCBI
+  tool BLAST:
+
+    Altschul S.F., Gish W., Miller W., Myers E.W. and Lipman D.J. (1990)
+    Basic local alignment search tool. J. Mol. Biol. 215: 403-410.
  */
 
 /*
- * information for invoking procedure:
- * -gt_karlin_altschul_stat_new
- * -gt_evalue_calculate_searchspace
- * -gt_evalue_calculate -> evalue
- * -gt_karlin_altschul_stat_delete
+  information for invoking procedure:
+  -gt_karlin_altschul_stat_new
+  -gt_evalue_calculate_searchspace
+  -gt_evalue_calculate -> evalue
+  -gt_karlin_altschul_stat_delete
  */
 
 static GtUword gt_evalue_calculate_raw_score(const GtKarlinAltschulStat *ka,
@@ -50,7 +50,7 @@ static GtUword gt_evalue_calculate_raw_score(const GtKarlinAltschulStat *ka,
   lambda = gt_karlin_altschul_stat_get_lambda(ka);
   logK = gt_karlin_altschul_stat_get_logK(ka);
 
-  raw_score =  (bit_score *log(2) + logK)/lambda;
+  raw_score =  (bit_score * log(2) + logK)/lambda;
   return round(raw_score);
 }
 
@@ -87,7 +87,7 @@ static GtUword gt_evalue_calculate_length_adjustment(GtUword query_length,
   {
     len = len_next;
     len_bar = beta + alpha_div_lambda *
-            (logK + log((query_length-len)*(db_length-num_of_db_seqs*len)));
+              (logK + log((query_length-len)*(db_length-num_of_db_seqs*len)));
     if (len_bar >= len)
     {
       len_min = len;
@@ -221,7 +221,7 @@ double gt_evalue_calculate_on_bitscore(const GtKarlinAltschulStat *ka,
 
   logK = gt_karlin_altschul_stat_get_logK(ka);
   lambda = gt_karlin_altschul_stat_get_lambda(ka);
-  evalue = searchspace*exp(-lambda*raw_score+logK);
+  evalue = searchspace * exp(-lambda*raw_score+logK);
   return evalue;
 }
 

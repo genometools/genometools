@@ -24,10 +24,10 @@
 #include "querymatch.h"
 
 /*
- * calculates evalue for an alignment
- * <ma> = number of matches
- * <mm> = number of mismatches
- * <id> = number of indels
+  calculates evalue for an alignment
+  <ma> = number of matches
+  <mm> = number of mismatches
+  <id> = number of indels
  */
 double gt_evalue_calculate(const GtKarlinAltschulStat *ka,
                            const GtScoreHandler *scorehandler,
@@ -41,10 +41,10 @@ double gt_evalue_calculate_on_bitscore(const GtKarlinAltschulStat *ka,
                                        GtUword searchspace);
 
 /*
- * calculates effective searchspace for query sequence of length
- * <query_idx_length> and a set of database sequences.
- * <total_length_of_db> is the total number of characters in all db sequences
- * including separators and wildcards
+  calculates effective searchspace for query sequence of length
+  <query_idx_length> and a set of database sequences.
+  <total_length_of_db> is the total number of characters in all db sequences
+  including separators and wildcards
  */
 GtUword gt_evalue_calculate_searchspace(const GtKarlinAltschulStat *ka,
                                         GtUword total_length_of_db,

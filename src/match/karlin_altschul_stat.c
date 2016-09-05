@@ -30,11 +30,11 @@
 #define K_SUMLIMIT_DEFAULT 0.0001
 
 /*
- * this library implements calculation of karlin-altschul parameter for E-value
- * of Alignments analog to NCBI tool BLAST:
- *
- *   Altschul S.F., Gish W., Miller W., Myers E.W. and Lipman D.J. (1990)
- *   Basic local alignment search tool. J. Mol. Biol. 215: 403-410.
+  this library implements calculation of karlin-altschul parameter for E-value
+  of Alignments analog to NCBI tool BLAST:
+
+  Altschul S.F., Gish W., Miller W., Myers E.W. and Lipman D.J. (1990)
+  Basic local alignment search tool. J. Mol. Biol. 215: 403-410.
  */
 
 /* stores karlin altschul parameters */
@@ -67,20 +67,20 @@ static LetterProb nt_prob[] = {
   { 'C', 0.25 },
   { 'G', 0.25 },
   { 'T', 0.25 }
-};/* TODO: in generale normalize */
+};
 
 /*
- * precomputed values
- * analog to BLAST
- *
- * 1. Gap opening score,
- * 2. Gap extension score,
- * 3. Lambda,
- * 4. K,
- * 5. H,
- * 6. Alpha,
- * 7. Beta,
- * 8. Theta
+  precomputed values
+  analog to BLAST
+
+  1. Gap opening score,
+  2. Gap extension score,
+  3. Lambda,
+  4. K,
+  5. H,
+  6. Alpha,
+  7. Beta,
+  8. Theta
  */
 #define gapopidx 0
 #define gapextdidx 1
@@ -167,10 +167,10 @@ static ScoringFrequency *gt_karlin_altschul_stat_scoring_frequency(
 
   gt_assert(alphabet && scorehandler);
 
-  /* TODO: make generalizations of alphabet probabilities, for now nt_prob */
+  /* make generalizations of alphabet probabilities, for now nt_prob */
   gt_assert(gt_alphabet_is_dna(alphabet));
 
-  ScoringFrequency *sf = gt_malloc(sizeof(*sf));
+  ScoringFrequency *sf = gt_malloc(sizeof (*sf));
   gt_assert(sf);
 
   numofchars = gt_alphabet_num_of_chars(alphabet);
@@ -226,23 +226,21 @@ static double gt_karlin_altschul_stat_calculate_ungapped_lambda(
 {
   double x0, x, lambda, tolerance, q, dq;
   GtWord low, high;
-  GtUword kMaxIterations, idx, jdx;
+  GtUword k_max_iterations, idx, jdx;
 
   /* solve phi(lambda) = -1 + sum_{i=l}^{u} sprob(i)*exp(i*lambda) = 0 */
 
   x0 = 0.5; /* x0 in (0,1) */
   tolerance = 1.e-5;
-  kMaxIterations = 20;
+  k_max_iterations = 20;
 
   low = sf->low_align_score;
   high = sf->high_align_score;
 
- /* write phi as phi(lambda) = exp(u*lambda) * q(exp(-lambda)) and solve the
-  * polynomial q by apply newton's method
-  *
-  * q(x) = -x^u + sum_{k=0}^{u-l} sprob(u-k)* x^k
-  */
-  for (idx = 0; idx < kMaxIterations; idx++)
+  /* write phi as phi(lambda) = exp(u*lambda) * q(exp(-lambda)) and solve the
+    polynomial q by apply newton's method
+    q(x) = -x^u + sum_{k=0}^{u-l} sprob(u-k)* x^k */
+  for (idx = 0; idx < k_max_iterations; idx++)
   {
     q = -pow(x0,high);
     for (jdx = 0; jdx <= high-low; jdx++)
@@ -263,7 +261,7 @@ static double gt_karlin_altschul_stat_calculate_ungapped_lambda(
   lambda = -log(x);
 
   /* better solution would be to apply Horner's rule for evaluating a
-     polynomial and its derivative (s. blast), but for the moment it works */
+     polynomial and its derivative (s. BLAST), but for the moment it works */
 
    return lambda;
 }
@@ -343,7 +341,7 @@ static double gt_karlin_altschul_stat_calculate_ungapped_K(
           expnlambda,
           K,
           sumlimit,
-          innerSum;
+          inner_sum;
 
   gt_assert(lambda > 0 && H > 0);
 
@@ -386,21 +384,21 @@ static double gt_karlin_altschul_stat_calculate_ungapped_K(
     sumlimit = K_SUMLIMIT_DEFAULT;
     iterlimit = K_ITER_MAX;
 
-    size = iterlimit*range+1;
+    size = iterlimit * range + 1;
     alignnment_score_probs = gt_calloc(size, sizeof (*alignnment_score_probs));
     gt_assert(alignnment_score_probs);
 
     low_align_score = 0;
     high_align_score = 0;
-    innerSum = 1.0;
+    inner_sum = 1.0;
     alignnment_score_probs[0] = 1.0;
 
-    for (count = 0; count < iterlimit && innerSum > sumlimit; count++)
+    for (count = 0; count < iterlimit && inner_sum > sumlimit; count++)
     {
       if (count > 0)
       {
-        innerSum /= count;
-        sigma += innerSum;
+        inner_sum /= count;
+        sigma += inner_sum;
       }
 
       first = last = range;
@@ -411,9 +409,9 @@ static double gt_karlin_altschul_stat_calculate_ungapped_K(
         firstidx = idx-first;
         lastidx = idx-last;
         secondidx = sf->sprob[low] + first;
-        for (innerSum = 0.; firstidx >= lastidx; )
+        for (inner_sum = 0.; firstidx >= lastidx; )
         {
-          innerSum += alignnment_score_probs[firstidx] *
+          inner_sum += alignnment_score_probs[firstidx] *
                       alignnment_score_probs[secondidx];
           firstidx--;
           secondidx++;
@@ -424,25 +422,25 @@ static double gt_karlin_altschul_stat_calculate_ungapped_K(
         if (idx <= range)
           --last;
 
-        alignnment_score_probs[idx] = innerSum;
+        alignnment_score_probs[idx] = inner_sum;
         if (idx == 0)
           break;
       }
 
-      innerSum = alignnment_score_probs[++idx];
+      inner_sum = alignnment_score_probs[++idx];
       for (jdx = low_align_score + 1; jdx < 0; jdx++)
       {
-        innerSum = alignnment_score_probs[++idx] + innerSum * expnlambda;
+        inner_sum = alignnment_score_probs[++idx] + inner_sum * expnlambda;
       }
-      innerSum *= expnlambda;
+      inner_sum *= expnlambda;
       for (; jdx <= high_align_score; ++jdx)
-        innerSum += alignnment_score_probs[++jdx];
+        inner_sum += alignnment_score_probs[++jdx];
 
       gt_free(alignnment_score_probs);
 
     }
     /* no terms of geometric progression, check to add these terms for
-     * correction in future */
+       correction in future */
 
      K = -exp(-2.0*sigma)/(H/lambda*expnlambda);
   }
