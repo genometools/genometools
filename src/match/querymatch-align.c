@@ -43,9 +43,10 @@ static void eoplist_reverse_order(uint8_t *start,uint8_t *end)
 }
 
 static void converteoplist2alignment(GtAlignment *alignment,
-                                     const GtArrayuint8_t *eoplist)
+                                     const GtEoplist *eoplist)
 {
   uint8_t *ptr;
+  GtUword replacements = 0, insertions = 0, deletions = 0;
 
   for (ptr = eoplist->spaceuint8_t;
        ptr < eoplist->spaceuint8_t + eoplist->nextfreeuint8_t; ptr++)
@@ -53,20 +54,26 @@ static void converteoplist2alignment(GtAlignment *alignment,
     if (*ptr == FT_EOPCODE_DELETION)
     {
       gt_alignment_add_deletion(alignment);
+      deletions++;
     } else
     {
       if (*ptr == FT_EOPCODE_INSERTION)
       {
         gt_alignment_add_insertion(alignment);
+        insertions++;
       } else
       {
         gt_alignment_add_replacement_multi(alignment,(GtUword) ((*ptr) + 1));
+        replacements += (GtUword) ((*ptr) + 1);
       }
     }
   }
+  gt_assert(insertions == eoplist->countinsertions);
+  gt_assert(deletions == eoplist->countdeletions);
+  gt_assert(replacements == eoplist->countmatches + eoplist->countmismatches);
 }
 
-void gt_querymatch_showeoplist(const GtArrayuint8_t *eoplist)
+void gt_querymatch_showeoplist(const GtEoplist *eoplist)
 {
   uint8_t *ptr;
 
@@ -109,7 +116,7 @@ struct GtQuerymatchoutoptions
           alignmentwidth,
           useqbuffer_size,
           vseqbuffer_size;
-  GtArrayuint8_t eoplist;
+  GtEoplist eoplist;
   GtFronttrace *front_trace;
   GtGreedyextendmatchinfo *ggemi;
   GtUchar *useqbuffer, *vseqbuffer, *alignment_show_buffer;
@@ -125,6 +132,15 @@ struct GtQuerymatchoutoptions
        showeoplist;
   Polishing_info *pol_info;
 };
+
+static void gt_eoplist_reset(GtEoplist *eoplist)
+{
+  eoplist->nextfreeuint8_t = 0;
+  eoplist->countmismatches = 0;
+  eoplist->countmatches = 0;
+  eoplist->countinsertions = 0;
+  eoplist->countdeletions = 0;
+}
 
 GtQuerymatchoutoptions *gt_querymatchoutoptions_new(bool generatealignment,
                                                     bool showeoplist,
@@ -144,6 +160,7 @@ GtQuerymatchoutoptions *gt_querymatchoutoptions_new(bool generatealignment,
   querymatchoutoptions->vseqbuffer = NULL;
   querymatchoutoptions->vseqbuffer_size = 0;
   GT_INITARRAY(&querymatchoutoptions->eoplist,uint8_t);
+  gt_eoplist_reset(&querymatchoutoptions->eoplist);
   querymatchoutoptions->totallength = GT_UWORD_MAX; /* not yet known */
   querymatchoutoptions->esr_for_align_show = NULL;
   querymatchoutoptions->characters = NULL;
@@ -285,7 +302,7 @@ static bool seededmatch2eoplist(GtQuerymatchoutoptions *querymatchoutoptions,
   gt_assert(querymatchoutoptions != NULL &&
             querymatchoutoptions->pol_info != NULL);
   pol_size = GT_MULT2(querymatchoutoptions->pol_info->cut_depth);
-  querymatchoutoptions->eoplist.nextfreeuint8_t = 0;
+  gt_eoplist_reset(&querymatchoutoptions->eoplist);
   if (querymatchoutoptions->totallength == GT_UWORD_MAX)
   {
     querymatchoutoptions->totallength = gt_encseq_total_length(encseq);
@@ -369,7 +386,8 @@ static bool seededmatch2eoplist(GtQuerymatchoutoptions *querymatchoutoptions,
       {
         if (querymatchoutoptions->front_trace != NULL)
         {
-          GtUword eoplistlen = querymatchoutoptions->eoplist.nextfreeuint8_t;
+          GtUword previous_eoplistlen
+            = querymatchoutoptions->eoplist.nextfreeuint8_t;
 
           front_trace2eoplist(querymatchoutoptions->always_polished_ends,
                               &querymatchoutoptions->eoplist,
@@ -383,7 +401,7 @@ static bool seededmatch2eoplist(GtQuerymatchoutoptions *querymatchoutoptions,
                               NULL,
                               vlen);
           eoplist_reverse_order(querymatchoutoptions->eoplist.spaceuint8_t +
-                                 eoplistlen,
+                                 previous_eoplistlen,
                                 querymatchoutoptions->eoplist.spaceuint8_t +
                                  querymatchoutoptions->eoplist.nextfreeuint8_t -
                                  1);
@@ -448,7 +466,7 @@ bool frontprune2eoplist(GtQuerymatchoutoptions *querymatchoutoptions,
   gt_assert(querymatchoutoptions != NULL &&
             querymatchoutoptions->pol_info != NULL);
   pol_size = GT_MULT2(querymatchoutoptions->pol_info->cut_depth);
-  querymatchoutoptions->eoplist.nextfreeuint8_t = 0;
+  gt_eoplist_reset(&querymatchoutoptions->eoplist);
   if (querymatchoutoptions->totallength == GT_UWORD_MAX)
   {
     querymatchoutoptions->totallength = gt_encseq_total_length(encseq);

@@ -265,7 +265,7 @@ char show_eopcode(GT_UNUSED uint8_t eopcode)
   }
 }
 
-void eoplist_show(const GtArrayuint8_t *eoplist)
+void eoplist_show(const GtEoplist *eoplist)
 {
   GtUword idx;
 
@@ -320,10 +320,10 @@ void eoplist_show(const GtArrayuint8_t *eoplist)
           GT_STOREINARRAY(EOPLIST,uint8_t,addamount,(uint8_t) (EOP));\
         }
 
-void front_trace_multireplacement(GtArrayuint8_t *eoplist,GtUword repnum)
+void front_trace_multireplacement(GtEoplist *eoplist,GtUword repnum)
 {
-  gt_assert(eoplist != NULL);
-  gt_assert(repnum > 0);
+  gt_assert(eoplist != NULL && repnum > 0);
+  eoplist->countmatches += repnum;
   while (true)
   {
     if (repnum <= FT_EOPCODE_MAXREPLACEMENT)
@@ -352,7 +352,7 @@ static void gt_check_diagonal_run(GT_UNUSED const GtUchar *useq,
   }
 }
 
-static void front_trace2eoplist_directed(GtArrayuint8_t *eoplist,
+static void front_trace2eoplist_directed(GtEoplist *eoplist,
                                          GtFronttrace *front_trace,
                                          const Polished_point *pp,
                                          const GtUchar *useq,
@@ -445,14 +445,17 @@ static void front_trace2eoplist_directed(GtArrayuint8_t *eoplist,
       if (preferred_eop == FT_EOP_DELETION)
       {
         GT_EOPLIST_PUSH(eoplist,FT_EOPCODE_DELETION);
+        eoplist->countdeletions++;
       } else
       {
         if (preferred_eop == FT_EOP_INSERTION)
         {
           GT_EOPLIST_PUSH(eoplist,FT_EOPCODE_INSERTION);
+          eoplist->countinsertions++;
         } else
         {
           GT_EOPLIST_PUSH(eoplist,0); /* R 1 */
+          eoplist->countmismatches++;
         }
       }
     }
@@ -612,7 +615,7 @@ static void gt_front_trace_backtrace_step(GtBacktraceFrontInfo *bti,
   }
 }
 
-static void gt_front_trace_backtracepath2eoplist(GtArrayuint8_t *eoplist,
+static void gt_front_trace_backtracepath2eoplist(GtEoplist *eoplist,
                                                  unsigned int lastlcs,
                                                  const GtBacktraceFrontpath
                                                    *backtracepath,
@@ -632,14 +635,17 @@ static void gt_front_trace_backtracepath2eoplist(GtArrayuint8_t *eoplist,
   {
     if (backtracepath[idx].eopcode == FT_EOPCODE_DELETION)
     {
+      eoplist->countdeletions++;
       deletions++;
     } else
     {
       if (backtracepath[idx].eopcode == FT_EOPCODE_INSERTION)
       {
+        eoplist->countinsertions++;
         insertions++;
       } else
       {
+        eoplist->countmismatches++;
         mismatches++;
       }
     }
@@ -672,7 +678,7 @@ static void gt_front_trace_backtracepath2eoplist(GtArrayuint8_t *eoplist,
   */
 }
 
-static void front_trace2polished_eoplist(GtArrayuint8_t *eoplist,
+static void front_trace2polished_eoplist(GtEoplist *eoplist,
                                          GtFronttrace *front_trace,
                                          const Polished_point *pp,
                                          GtUword pol_size,
@@ -782,7 +788,7 @@ static void front_trace2polished_eoplist(GtArrayuint8_t *eoplist,
 }
 
 void front_trace2eoplist(bool polished,
-                         GtArrayuint8_t *eoplist,
+                         GtEoplist *eoplist,
                          GtFronttrace *front_trace,
                          const Polished_point *pp,
                          GtUword pol_size,

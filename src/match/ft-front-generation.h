@@ -28,6 +28,13 @@ typedef struct
   GtUword alignedlen, row, distance, trimleft;
 } Polished_point;
 
+typedef struct
+{
+  GtUword nextfreeuint8_t, allocateduint8_t, countmismatches, countmatches,
+                                             countdeletions, countinsertions;
+  uint8_t *spaceuint8_t;
+} GtEoplist;
+
 typedef struct GtFronttrace GtFronttrace;
 
 GtFronttrace *front_trace_new(void);
@@ -43,7 +50,7 @@ void front_trace_add_trace(GtFronttrace *front_trace,uint8_t backreference,
                            unsigned int lcs);
 
 void front_trace2eoplist(bool polished,
-                         GtArrayuint8_t *eoplist,
+                         GtEoplist *eoplist,
                          GtFronttrace *front_trace,
                          const Polished_point *pp,
                          GtUword pol_size,
@@ -54,6 +61,6 @@ void front_trace2eoplist(bool polished,
                          const GtUchar *vseq,
                          GtUword vlen);
 
-void front_trace_multireplacement(GtArrayuint8_t *eoplist,GtUword repnum);
+void front_trace_multireplacement(GtEoplist *eoplist,GtUword repnum);
 
 #endif
