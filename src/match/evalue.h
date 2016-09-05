@@ -21,7 +21,6 @@
 #include "core/types_api.h"
 #include "extended/scorehandler.h"
 #include "match/karlin_altschul_stat.h"
-#include "querymatch.h"
 
 /*
   calculates evalue for an alignment
@@ -30,7 +29,6 @@
   <id> = number of indels
  */
 double gt_evalue_calculate(const GtKarlinAltschulStat *ka,
-                           const GtScoreHandler *scorehandler,
                            GtUword ma,
                            GtUword mm,
                            GtUword id,
@@ -51,9 +49,5 @@ GtUword gt_evalue_calculate_searchspace(const GtKarlinAltschulStat *ka,
                                         GtUword num_of_db_seqs,
                                         GtUword query_idx_length);
 
-/* deprecated */
-GtUword gt_evalue_calculate_searchspace_dbencseq(const GtKarlinAltschulStat *ka,
-                                                 const GtEncseq *dbencseq,
-                                                 GtUword query_idx_length);
 int gt_evalue_unit_test(GtError *err);
 #endif

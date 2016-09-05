@@ -25,7 +25,6 @@
 #include "match/karlin_altschul_stat.h"
 #include "extended/scorehandler.h"
 
-#define NUMOF_VALUES 8
 #define K_ITER_MAX 100
 #define K_SUMLIMIT_DEFAULT 0.0001
 
@@ -46,6 +45,7 @@ struct GtKarlinAltschulStat
          H,
          alpha_div_lambda,
          beta;
+  GtWord matchscore, mismatchscore, gapscore;
 };
 
 typedef struct{
@@ -80,45 +80,49 @@ static LetterProb nt_prob[] = {
   5. H,
   6. Alpha,
   7. Beta,
-  8. Theta
  */
-#define gapopidx 0
-#define gapextdidx 1
-#define lambdaidx 2
-#define Kidx 3
-#define Hidx 4
-#define alphaidx 5
-#define betaidx 6
-typedef double GA_Values[NUMOF_VALUES];
+
+typedef enum
+{
+  gapopidx,
+  gapextdidx,
+  lambdaidx,
+  Kidx,
+  Hidx,
+  alphaidx,
+  betaidx
+} GT_ValuesindeX;
+
+typedef double GA_Values[(int) (betaidx+1)];
 
 /* matchscore = 1 && mismatchscore = -4 */
 static const GA_Values ga_matrix_1_4[] = {
-    { 0, -2,  1.26,  0.43, 0.90,  1.4, -1,  91 }
+    { 0, -2,  1.26,  0.43, 0.90,  1.4, -1}
 };
 
 /* matchscore = 2 && mismatchscore = -7 */
 static const GA_Values ga_matrix_2_7[] = {
-    { 0, -4,  0.63, 0.43, 0.90,   0.7, -1,  91 }
+    { 0, -4,  0.63, 0.43, 0.90,   0.7, -1}
 };
 
 /* matchscore = 1 && mismatchscore = -3 */
 static const GA_Values ga_matrix_1_3[] = {
-    { 0, -2,  1.25,  0.42, 0.83,  1.5, -2,  91 }
+    { 0, -2,  1.25,  0.42, 0.83,  1.5, -2}
 };
 
 /* matchscore = 2 && mismatchscore = -5 */
 static const GA_Values ga_matrix_2_5[] = {
-    { 0, -4,  0.62, 0.39, 0.78,  0.8, -2, 91 }
+    { 0, -4,  0.62, 0.39, 0.78,  0.8, -2}
 };
 
 /* matchscore = 1 && mismatchscore = -2 */
 static const GA_Values ga_matrix_1_2[] = {
-    { 0, -2, 1.19, 0.34, 0.66, 1.8, -3, 89 }
+    { 0, -2, 1.19, 0.34, 0.66, 1.8, -3}
 };
 
 /* matchscore = 2 && mismatchscore = -3 */
 static const GA_Values ga_matrix_2_3[] = {
-    { 0, -4,  0.55, 0.21, 0.46,  1.2, -5, 87 }
+    { 0, -4,  0.55, 0.21, 0.46,  1.2, -5}
 };
 
 void gt_karlin_altschul_stat_delete(GtKarlinAltschulStat *ka)
@@ -263,7 +267,7 @@ static double gt_karlin_altschul_stat_calculate_ungapped_lambda(
   /* better solution would be to apply Horner's rule for evaluating a
      polynomial and its derivative (s. BLAST), but for the moment it works */
 
-   return lambda;
+  return lambda;
 }
 
 static double gt_karlin_altschul_stat_calculate_H(const ScoringFrequency *sf,
@@ -279,7 +283,9 @@ static double gt_karlin_altschul_stat_calculate_H(const ScoringFrequency *sf,
   etonlambda = exp(-lambda);
   sum = low * sf->sprob[0];
   for (idx = low + 1; idx <= high; idx++)
+  {
     sum = idx * sf->sprob[idx-low] + etonlambda * sum;
+  }
 
   scale = pow(etonlambda,high);
   if (scale > 0.0)
@@ -287,29 +293,29 @@ static double gt_karlin_altschul_stat_calculate_H(const ScoringFrequency *sf,
   else /* case underflow */
     H = lambda * exp(lambda * high + log(sum));
 
-   return H;
+  return H;
 }
 
 static GtWord gt_karlin_altschul_stat_gcd(const ScoringFrequency *sf)
 {
-  GtUword idx, range, div, val, tmp;
+  GtUword idx, range, div;
 
-  range = sf->high_align_score-sf->low_align_score+1;
+  range = sf->high_align_score - sf->low_align_score+1;
   div = -sf->low_align_score;
   for (idx = 1; idx < range && div > 1; idx++)
   {
     if (sf->sprob[idx] != 0.0)
     {
-      val = abs(idx+sf->low_align_score);
+      GtUword val = abs(idx+sf->low_align_score);
       if (val > div)
       {
-        tmp = div;
+        GtUword tmp = div;
         div = val;
         val = tmp;
       }
       while (val != 0)
       {
-        tmp = div % val;
+        GtUword tmp = div % val;
         div = val;
         val = tmp;
       }
@@ -360,9 +366,9 @@ static double gt_karlin_altschul_stat_calculate_ungapped_K(
 
   if (low == -1 && high == 1)
   {
-      K = (sf->sprob[0] - sf->sprob[sf->high_align_score-sf->low_align_score]) *
-          (sf->sprob[0] - sf->sprob[sf->high_align_score-sf->low_align_score])/
-           sf->sprob[0];
+    K = (sf->sprob[0] - sf->sprob[sf->high_align_score-sf->low_align_score]) *
+        (sf->sprob[0] - sf->sprob[sf->high_align_score-sf->low_align_score])/
+        sf->sprob[0];
   }
   else if (low == -1 || high == 1)
   {
@@ -433,7 +439,7 @@ static double gt_karlin_altschul_stat_calculate_ungapped_K(
         inner_sum = alignnment_score_probs[++idx] + inner_sum * expnlambda;
       }
       inner_sum *= expnlambda;
-      for (; jdx <= high_align_score; ++jdx)
+      for (/*Nothing*/; jdx <= high_align_score; ++jdx)
         inner_sum += alignnment_score_probs[++jdx];
 
       gt_free(alignnment_score_probs);
@@ -442,7 +448,7 @@ static double gt_karlin_altschul_stat_calculate_ungapped_K(
     /* no terms of geometric progression, check to add these terms for
        correction in future */
 
-     K = -exp(-2.0*sigma)/(H/lambda*expnlambda);
+    K = -exp(-2.0*sigma)/(H/lambda*expnlambda);
   }
 
   return K;
@@ -565,12 +571,13 @@ GtKarlinAltschulStat *gt_karlin_altschul_stat_new(bool gapped_alignment,
   ka->logK = 0;
   ka->H = 0;
 
+  gt_assert(gt_scorehandler_get_gap_opening(scorehandler) == 0);
+  /* only implemented for linear */
   if (!gapped_alignment)
   {
     /* New ScoringFrequency */
-    ScoringFrequency *sf =
-                        gt_karlin_altschul_stat_scoring_frequency(alphabet,
-                                                                  scorehandler);
+    ScoringFrequency *sf
+      = gt_karlin_altschul_stat_scoring_frequency(alphabet,scorehandler);
     gt_assert(sf != NULL);
 
     /* karlin altschul parameters for ungapped alignments */
@@ -594,8 +601,25 @@ GtKarlinAltschulStat *gt_karlin_altschul_stat_new(bool gapped_alignment,
       return NULL;
     }
   }
-
+  ka->matchscore = gt_scorehandler_get_matchscore(scorehandler);
+  ka->mismatchscore = gt_scorehandler_get_mismatchscore(scorehandler);
+  ka->gapscore = gt_scorehandler_get_gapscore(scorehandler);
   return ka;
+}
+
+GtWord gt_karlin_altschul_stat_mismatchscore(const GtKarlinAltschulStat *ka)
+{
+  return ka->mismatchscore;
+}
+
+GtWord gt_karlin_altschul_stat_matchscore(const GtKarlinAltschulStat *ka)
+{
+  return ka->matchscore;
+}
+
+GtWord gt_karlin_altschul_stat_gapscore(const GtKarlinAltschulStat *ka)
+{
+  return ka->gapscore;
 }
 
 int gt_karlin_altschul_stat_unit_test(GtError *err)
@@ -629,5 +653,6 @@ int gt_karlin_altschul_stat_unit_test(GtError *err)
   gt_karlin_altschul_stat_delete(ka);
 
   gt_scorehandler_delete(scorehandler);
+  gt_alphabet_delete(alphabet);
   return had_err;
 }

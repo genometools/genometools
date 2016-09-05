@@ -63,11 +63,10 @@ static GtUword gt_evalue_calculate_length_adjustment(GtUword query_length,
                                                      double logK)
 {
   unsigned int idx;
-  const int kMaxIterations = 20;
-  double len_min = 0, len_max, len_next, len, len_bar;
+  const unsigned int kMaxIterations = 20;
+  double len_min = 0, len_max, len_next, len, len_bar, space, nNm;
   GtUword length_adjustment;
   bool converged = false;
-  double space, nNm;
 
   /* l_max is the largest nonnegative solution of
      K * (m - l) * (n - N * l) > MAX(m,n) */
@@ -111,15 +110,18 @@ static GtUword gt_evalue_calculate_length_adjustment(GtUword query_length,
       len_next = (len_min+len_max)/2;
   }
 
-  length_adjustment = (GtUword) len_min; /* floor(fixed point ) */
+  length_adjustment = (GtUword) len_min; /* floor(fixed point) */
   if (converged)
   {
     len = ceil(len_min);
     if (len <= len_max)
     {
       if (alpha_div_lambda * (log(K) + log((query_length-len) *
-                             (db_length-num_of_db_seqs*len))) + beta >= len)
+                                           (db_length-num_of_db_seqs*len)))
+          + beta >= len)
+      {
         length_adjustment = (GtUword) len;
+      }
     }
   }
 
@@ -226,7 +228,6 @@ double gt_evalue_calculate_on_bitscore(const GtKarlinAltschulStat *ka,
 }
 
 double gt_evalue_calculate(const GtKarlinAltschulStat *ka,
-                           const GtScoreHandler *scorehandler,
                            GtUword ma,
                            GtUword mm,
                            GtUword id,
@@ -236,14 +237,11 @@ double gt_evalue_calculate(const GtKarlinAltschulStat *ka,
   GtWord matchscore, mismatchscore, gapscore;
   GtUword raw_score;
 
-  gt_assert(ka && scorehandler);
+  gt_assert(ka);
 
-  gt_assert(gt_scorehandler_get_gap_opening(scorehandler) == 0);
-  /* only implemented for linear */
-
-  matchscore = gt_scorehandler_get_matchscore(scorehandler);
-  mismatchscore = gt_scorehandler_get_mismatchscore(scorehandler);
-  gapscore = gt_scorehandler_get_gapscore(scorehandler);
+  matchscore = gt_karlin_altschul_stat_matchscore(ka);
+  mismatchscore = gt_karlin_altschul_stat_mismatchscore(ka);
+  gapscore = gt_karlin_altschul_stat_gapscore(ka);
 
   raw_score = ma*matchscore + mm*mismatchscore + id*gapscore;
   logK = gt_karlin_altschul_stat_get_logK(ka);
@@ -276,15 +274,13 @@ int gt_evalue_unit_test(GtError *err)
 
   /* checks evalue calculation */
   evalue_variance =
-                  gt_evalue_calculate(ka, scorehandler, 300, 0, 0, searchspace)
+                  gt_evalue_calculate(ka, 300, 0, 0, searchspace)
                    /(6.148125*pow(10,-148));
   gt_ensure(evalue_variance > 0.99 && evalue_variance < 1.01);
-  evalue_variance =
-                  gt_evalue_calculate(ka, scorehandler, 213, 25, 1, searchspace)
+  evalue_variance = gt_evalue_calculate(ka, 213, 25, 1, searchspace)
                    /(4.220782*pow(10,-76));
   gt_ensure(evalue_variance > 0.99 && evalue_variance < 1.01);
-  evalue_variance =
-                  gt_evalue_calculate(ka, scorehandler, 206, 23, 1, searchspace)
+  evalue_variance = gt_evalue_calculate(ka, 206, 23, 1, searchspace)
                    /(1.499078*pow(10,-74));
   gt_ensure(evalue_variance > 0.99 && evalue_variance < 1.01);
 

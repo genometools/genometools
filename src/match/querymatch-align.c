@@ -455,20 +455,20 @@ bool frontprune2eoplist(GtQuerymatchoutoptions *querymatchoutoptions,
   }
   gt_assert(ulen > 0 && vlen > 0);
   if (gt_align_front_prune_edist(rightextension,
-				 &right_best_polished_point,
-				 querymatchoutoptions->front_trace,
-				 encseq,
-				 query,
-				 query_readmode,
-				 query_seqstartpos,
-				 query_totallength,
-				 querymatchoutoptions->ggemi,
-				 greedyextension,
-				 0,
-				 ustart,
-				 ulen,
-				 vstart,
-				 vlen) == ulen + vlen + 1)
+                                 &right_best_polished_point,
+                                 querymatchoutoptions->front_trace,
+                                 encseq,
+                                 query,
+                                 query_readmode,
+                                 query_seqstartpos,
+                                 query_totallength,
+                                 querymatchoutoptions->ggemi,
+                                 greedyextension,
+                                 0,
+                                 ustart,
+                                 ulen,
+                                 vstart,
+                                 vlen) == ulen + vlen + 1)
   {
     alignment_succeeded = false;
   } else
@@ -476,16 +476,16 @@ bool frontprune2eoplist(GtQuerymatchoutoptions *querymatchoutoptions,
     if (querymatchoutoptions->front_trace != NULL)
     {
       front_trace2eoplist(querymatchoutoptions->always_polished_ends,
-			  &querymatchoutoptions->eoplist,
-			  querymatchoutoptions->front_trace,
-			  &right_best_polished_point,
-			  pol_size,
-			  querymatchoutoptions->pol_info->match_score,
-			  querymatchoutoptions->pol_info->difference_score,
-			  NULL,
-			  ulen,
-			  NULL,
-			  vlen);
+                          &querymatchoutoptions->eoplist,
+                          querymatchoutoptions->front_trace,
+                          &right_best_polished_point,
+                          pol_size,
+                          querymatchoutoptions->pol_info->match_score,
+                          querymatchoutoptions->pol_info->difference_score,
+                          NULL,
+                          ulen,
+                          NULL,
+                          vlen);
     }
   }
   if (querymatchoutoptions->front_trace != NULL)
