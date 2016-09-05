@@ -19,14 +19,14 @@
 #define KARLIN_ALTSCHUL_STAT_H
 
 #include <stdbool.h>
-#include "core/alphabet_api.h"
 #include "extended/scorehandler.h"
 #include "core/error_api.h"
 typedef struct GtKarlinAltschulStat GtKarlinAltschulStat;
 
 /*
   determine karlin altschul parameters lambda, H, K, alpha and beta for
-  a given <alphabet> and scorefunction given as <scorehandler>
+  a alphabet of <numchars> many character and scorefunction given
+  as <scorehandler>
 
   If <gapped_alignment> is not set, paraemters are calculated by using scoring
   frequency statistics for ungapped alignments,
@@ -36,8 +36,7 @@ typedef struct GtKarlinAltschulStat GtKarlinAltschulStat;
   returns a GtKarlinAltschulStat object if no error occured, otherwise returns
   NULL and <err> is set
  */
-GtKarlinAltschulStat *gt_karlin_altschul_stat_new(bool gapped_alignment,
-                                             const GtAlphabet *alphabet,
+GtKarlinAltschulStat *gt_karlin_altschul_stat_new(unsigned int numchars,
                                              const GtScoreHandler *scorehandler,
                                              GtError *err);
 

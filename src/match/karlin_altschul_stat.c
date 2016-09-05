@@ -16,7 +16,6 @@
 */
 
 #include <math.h>
-#include "core/alphabet_api.h"
 #include "core/ensure.h"
 #include "core/error.h"
 #include "core/ma.h"
@@ -54,20 +53,6 @@ typedef struct{
   GtWord low_align_score,
          high_align_score;
 } ScoringFrequency;
-
-/* stores letter propabilities */
-typedef struct{
-  char   ch;
-  double p;
-} LetterProb;
-
-/* provisional solution only dna alphabet */
-static LetterProb nt_prob[] = {
-  { 'A', 0.25 },
-  { 'C', 0.25 },
-  { 'G', 0.25 },
-  { 'T', 0.25 }
-};
 
 /*
   precomputed values
@@ -162,22 +147,21 @@ double gt_karlin_altschul_stat_get_beta(const GtKarlinAltschulStat *ka)
 
 /* calculate probabilities of scores */
 static ScoringFrequency *gt_karlin_altschul_stat_scoring_frequency(
-                                             const GtAlphabet *alphabet,
+                                             unsigned int numofchars,
                                              const GtScoreHandler *scorehandler)
 {
-  unsigned int idx, jdx, numofchars;
+  unsigned int idx, jdx;
   GtWord score, obs_min = 0, obs_max = 0, range;
   double score_avg, score_sum;
+  ScoringFrequency *sf;
+  static double nt_prob[] = {
+    0.25,
+    0.25,
+    0.25,
+    0.25
+  };
 
-  gt_assert(alphabet && scorehandler);
-
-  /* make generalizations of alphabet probabilities, for now nt_prob */
-  gt_assert(gt_alphabet_is_dna(alphabet));
-
-  ScoringFrequency *sf = gt_malloc(sizeof (*sf));
-  gt_assert(sf);
-
-  numofchars = gt_alphabet_num_of_chars(alphabet);
+  gt_assert(scorehandler);
   for (idx = 0; idx < numofchars; idx++)
   {
     for (jdx = 0; jdx < numofchars; jdx++)
@@ -190,6 +174,8 @@ static ScoringFrequency *gt_karlin_altschul_stat_scoring_frequency(
 
   /* for theoretically valid scoring systems */
   gt_assert(obs_min <= 0 && obs_max >= 0);
+  sf = gt_malloc(sizeof (*sf));
+  gt_assert(sf);
   sf->low_align_score = obs_min;
   sf->high_align_score = obs_max;
 
@@ -201,27 +187,30 @@ static ScoringFrequency *gt_karlin_altschul_stat_scoring_frequency(
     for (jdx = 0; jdx < numofchars; jdx++)
     {
       score = gt_scorehandler_get_replacement(scorehandler, idx, jdx);
-
-      if (score >= sf->low_align_score)
-        sf->sprob[score-sf->low_align_score] += nt_prob[idx].p * nt_prob[jdx].p;
+      gt_assert(score >= obs_min);
+      if (score >= obs_min)
+      {
+        sf->sprob[score - obs_min] += nt_prob[idx] * nt_prob[jdx];
+      }
     }
   }
 
   score_sum = 0.0;
   for (score = obs_min; score <= obs_max; score++)
   {
-    if (sf->sprob[score-obs_min] > 0)
-      score_sum += sf->sprob[score-obs_min];
+    if (sf->sprob[score - obs_min] > 0)
+    {
+      score_sum += sf->sprob[score - obs_min];
+    }
   }
 
   score_avg = 0.0;
   for (score = obs_min; score <= obs_max; score++)
   {
-    sf->sprob[score-obs_min] /= score_sum;
-    score_avg += score * sf->sprob[score-obs_min];
+    sf->sprob[score - obs_min] /= score_sum;
+    score_avg += score * sf->sprob[score - obs_min];
   }
   sf->score_avg = score_avg;
-
   return sf;
 }
 
@@ -455,10 +444,9 @@ static double gt_karlin_altschul_stat_calculate_ungapped_K(
 }
 
 static int get_values_from_matrix(GtKarlinAltschulStat *ka,
-                                  GA_Values *matrix,
+                                  const GA_Values *matrix,
                                   GtUword length,
                                   GtWord gap_extension,
-                                  GT_UNUSED GtWord gap_open,
                                   GtError *err)
 {
   GtUword idx;
@@ -486,98 +474,96 @@ static int get_values_from_matrix(GtKarlinAltschulStat *ka,
   /* not found */
   gt_error_set(err, "no precomputed values for ungapped alignment parameters "
                     "were found\n");
-  return 1;
+  return -1;
 }
 
 static int gt_karlin_altschul_stat_get_gapped_params(GtKarlinAltschulStat *ka,
-                                                     const GtScoreHandler
-                                                           *scorehandler,
                                                      GtError *err)
 {
-  GtWord gap_open, gap_extension, matchscore, mismatchscore;
-  GA_Values *ga_matrix = NULL;
+  const GA_Values *ga_matrix = NULL;
   GtUword length = 0;
 
-  gt_assert(ka && scorehandler);
-  matchscore = gt_scorehandler_get_matchscore(scorehandler);
-  mismatchscore = gt_scorehandler_get_mismatchscore(scorehandler);
-
-  if (matchscore == 1 && mismatchscore == -4)
+  gt_assert(ka != NULL);
+  if (ka->matchscore == 1 && ka->mismatchscore == -4)
   {
     length = sizeof (ga_matrix_1_4) / sizeof (GA_Values);
-    ga_matrix = (GA_Values*) ga_matrix_1_4;
+    ga_matrix = ga_matrix_1_4;
   }
-  else if (matchscore == 2 && mismatchscore == -7)
+  else if (ka->matchscore == 2 && ka->mismatchscore == -7)
   {
     length = sizeof (ga_matrix_2_7) / sizeof (GA_Values);
-    ga_matrix = (GA_Values*) ga_matrix_2_7;
+    ga_matrix = ga_matrix_2_7;
   }
-  else if (matchscore == 1 && mismatchscore == -3)
+  else if (ka->matchscore == 1 && ka->mismatchscore == -3)
   {
     length = sizeof (ga_matrix_1_3) / sizeof (GA_Values);
-    ga_matrix = (GA_Values*) ga_matrix_1_3;
+    ga_matrix = ga_matrix_1_3;
   }
-  else if (matchscore == 2 && mismatchscore == -5)
+  else if (ka->matchscore == 2 && ka->mismatchscore == -5)
   {
     length = sizeof (ga_matrix_2_5) / sizeof (GA_Values);
-    ga_matrix = (GA_Values*) ga_matrix_2_5;
+    ga_matrix = ga_matrix_2_5;
   }
-  else if (matchscore == 1 && mismatchscore == -2)
+  else if (ka->matchscore == 1 && ka->mismatchscore == -2)
   {
     length = sizeof (ga_matrix_1_2) / sizeof (GA_Values);
-    ga_matrix = (GA_Values*) ga_matrix_1_2;
+    ga_matrix = ga_matrix_1_2;
   }
-  else if (matchscore == 2 && mismatchscore == -3)
+  else if (ka->matchscore == 2 && ka->mismatchscore == -3)
   {
     length = sizeof (ga_matrix_2_3) / sizeof (GA_Values);
-    ga_matrix = (GA_Values*) ga_matrix_2_3;
+    ga_matrix = ga_matrix_2_3;
   }
   else
   {
     gt_error_set(err, "no precomputed values for combination matchscore "
                       GT_WD" and mismatchscore "GT_WD" in evalue calculation "
                       "of gapped alignments\n",
-                      matchscore, mismatchscore);
-    return 1;
+                      ka->matchscore, ka->mismatchscore);
+    return -1;
   }
+  gt_assert(length == 1);
 
-  gap_extension = gt_scorehandler_get_gapscore(scorehandler);
-  gap_open = gt_scorehandler_get_gap_opening(scorehandler);
   if (get_values_from_matrix(ka,
-                         ga_matrix,
-                         length,
-                         gap_extension,
-                         gap_open,
-                         err))
+                             ga_matrix,
+                             length,
+                             ka->gapscore,
+                             err) != 0)
   {
-    return 1;
+    return -1;
   }
-
   return 0;
 }
 
-GtKarlinAltschulStat *gt_karlin_altschul_stat_new(bool gapped_alignment,
-                                                  const GtAlphabet *alphabet,
+GtKarlinAltschulStat *gt_karlin_altschul_stat_new(unsigned int numofchars,
                                                   const GtScoreHandler
                                                         *scorehandler,
                                                   GtError *err)
 {
-  GtKarlinAltschulStat *ka;
-  ka = gt_malloc(sizeof (GtKarlinAltschulStat));
-  gt_assert(ka);
+  GtKarlinAltschulStat *ka = gt_malloc(sizeof *ka);
 
+  gt_assert(ka);
   ka->lambda = 0;
   ka->K = 0;
   ka->logK = 0;
   ka->H = 0;
-
   gt_assert(gt_scorehandler_get_gap_opening(scorehandler) == 0);
-  /* only implemented for linear */
-  if (!gapped_alignment)
+  ka->matchscore = gt_scorehandler_get_matchscore(scorehandler);
+  ka->mismatchscore = gt_scorehandler_get_mismatchscore(scorehandler);
+  ka->gapscore = gt_scorehandler_get_gapscore(scorehandler);
+  /* only implemented for linear scores */
+  if (numofchars == 0)
+  { /* gapped alignment */
+    if (gt_karlin_altschul_stat_get_gapped_params(ka, err) != 0)
+    {
+      gt_karlin_altschul_stat_delete(ka);
+      return NULL;
+    }
+  } else
   {
     /* New ScoringFrequency */
     ScoringFrequency *sf
-      = gt_karlin_altschul_stat_scoring_frequency(alphabet,scorehandler);
+      = gt_karlin_altschul_stat_scoring_frequency(numofchars,scorehandler);
     gt_assert(sf != NULL);
 
     /* karlin altschul parameters for ungapped alignments */
@@ -588,22 +574,9 @@ GtKarlinAltschulStat *gt_karlin_altschul_stat_new(bool gapped_alignment,
     gt_assert(ka->H != 0.0);
     ka->alpha_div_lambda = 1/ka->H;
     ka->beta = 0;
-
     gt_free(sf->sprob);
     gt_free(sf);
-
   }
-  else /* gapped alignments */
-  {
-    if (gt_karlin_altschul_stat_get_gapped_params(ka, scorehandler, err))
-    {
-      gt_karlin_altschul_stat_delete(ka);
-      return NULL;
-    }
-  }
-  ka->matchscore = gt_scorehandler_get_matchscore(scorehandler);
-  ka->mismatchscore = gt_scorehandler_get_mismatchscore(scorehandler);
-  ka->gapscore = gt_scorehandler_get_gapscore(scorehandler);
   return ka;
 }
 
@@ -626,8 +599,8 @@ int gt_karlin_altschul_stat_unit_test(GtError *err)
 {
   GtKarlinAltschulStat *ka;
   GtScoreHandler *scorehandler;
-  GtAlphabet *alphabet;
   double q;
+  unsigned int numofchars = 0;
 
   int had_err = 0;
   gt_error_check(err);
@@ -635,15 +608,15 @@ int gt_karlin_altschul_stat_unit_test(GtError *err)
   scorehandler = gt_scorehandler_new(1,-2,0,-2);
 
   /* check function for gapped alignments */
-  ka = gt_karlin_altschul_stat_new(true, NULL, scorehandler, err);
+  ka = gt_karlin_altschul_stat_new(0, scorehandler, err);
   gt_ensure(ka->lambda == 1.19);
   gt_ensure(ka->H == 0.66);
   gt_ensure(ka->K == 0.34);
   gt_karlin_altschul_stat_delete(ka);
 
   /* check function for ungapped alignments */
-  alphabet = gt_alphabet_new_dna();
-  ka = gt_karlin_altschul_stat_new(false, alphabet, scorehandler, err);
+  numofchars = 4;
+  ka = gt_karlin_altschul_stat_new(numofchars, scorehandler, err);
   q = ka->lambda/1.33; /* lambda = 1.33 */
   gt_ensure(0.99 < q && q < 1.01);
   q = ka->H/1.12; /* H = 1.12 */
@@ -653,6 +626,5 @@ int gt_karlin_altschul_stat_unit_test(GtError *err)
   gt_karlin_altschul_stat_delete(ka);
 
   gt_scorehandler_delete(scorehandler);
-  gt_alphabet_delete(alphabet);
   return had_err;
 }

@@ -257,12 +257,13 @@ int gt_evalue_unit_test(GtError *err)
   GtScoreHandler *scorehandler;
   GtUword searchspace;
   double evalue_variance;
+  const unsigned int numchars = 0; /* means gapped case */
 
   int had_err = 0;
   gt_error_check(err);
 
   scorehandler = gt_scorehandler_new(1,-2,0,-2);
-  ka = gt_karlin_altschul_stat_new(true, NULL, scorehandler, err);
+  ka = gt_karlin_altschul_stat_new(numchars,scorehandler, err);
   gt_error_check(err);
 
   /* checks searchspace calculation */
@@ -273,19 +274,17 @@ int gt_evalue_unit_test(GtError *err)
   searchspace = gt_evalue_calculate_searchspace(ka, 772376, 1952, 300);
 
   /* checks evalue calculation */
-  evalue_variance =
-                  gt_evalue_calculate(ka, 300, 0, 0, searchspace)
-                   /(6.148125*pow(10,-148));
+  evalue_variance = gt_evalue_calculate(ka, 300, 0, 0, searchspace)
+                   /(6.148125 * pow(10,-148));
   gt_ensure(evalue_variance > 0.99 && evalue_variance < 1.01);
   evalue_variance = gt_evalue_calculate(ka, 213, 25, 1, searchspace)
-                   /(4.220782*pow(10,-76));
+                   /(4.220782 * pow(10,-76));
   gt_ensure(evalue_variance > 0.99 && evalue_variance < 1.01);
   evalue_variance = gt_evalue_calculate(ka, 206, 23, 1, searchspace)
-                   /(1.499078*pow(10,-74));
+                   /(1.499078 * pow(10,-74));
   gt_ensure(evalue_variance > 0.99 && evalue_variance < 1.01);
 
   gt_scorehandler_delete(scorehandler);
   gt_karlin_altschul_stat_delete(ka);
-
   return had_err;
 }
