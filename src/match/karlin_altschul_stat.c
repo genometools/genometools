@@ -430,8 +430,6 @@ static double gt_karlin_altschul_stat_calculate_ungapped_K(
       inner_sum *= expnlambda;
       for (/*Nothing*/; jdx <= high_align_score; ++jdx)
         inner_sum += alignnment_score_probs[++jdx];
-
-
     }
     gt_free(alignnment_score_probs);
     /* no terms of geometric progression, check to add these terms for
