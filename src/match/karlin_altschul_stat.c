@@ -107,7 +107,7 @@ static const double ga_vector_1_2[] = {
 
 /* matchscore = 2 && mismatchscore = -3 */
 static const double ga_vector_2_3[] = {
-    0, -4,  0.55, 0.21, 0.46,  1.2, -5
+    -4,  0.55, 0.21, 0.46,  1.2, -5
 };
 
 void gt_karlin_altschul_stat_delete(GtKarlinAltschulStat *ka)
@@ -431,9 +431,9 @@ static double gt_karlin_altschul_stat_calculate_ungapped_K(
       for (/*Nothing*/; jdx <= high_align_score; ++jdx)
         inner_sum += alignnment_score_probs[++jdx];
 
-      gt_free(alignnment_score_probs);
 
     }
+    gt_free(alignnment_score_probs);
     /* no terms of geometric progression, check to add these terms for
        correction in future */
 
