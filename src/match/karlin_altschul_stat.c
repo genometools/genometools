@@ -76,6 +76,10 @@ typedef enum
   betaidx
 } GT_ValuesindeX;
 
+/* the Blast Implementation uses matrices with more than one row, namely
+   a row for each gap extension. If required, this should be adjusted
+   accordingly. */
+
 /* matchscore = 1 && mismatchscore = -4 */
 static const double ga_vector_1_4[] = {
     -2,  1.26,  0.43, 0.90,  1.4, -1
