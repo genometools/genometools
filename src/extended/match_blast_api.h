@@ -38,9 +38,28 @@ GtMatch* gt_match_blast_new(char *seqid1,
                             float bitscore,
                             GtUword ali_l,
                             double similarity,
-                            GtUword mm_num,
-                            GtUword gap_open_num,
                             GtMatchDirection dir);
+
+/* Creates a new <GtMatch> object meant to store results in the BLAST
+   format. That is, it stores double values <evalue> for match E-values,
+   <bitscore>s and the alignment length <ali_l> in addition to the generic
+   match contents <seqid1>, <seqid2>, <start_seq1>, <start_seq2>, <end_seq1>,
+   and <end_seq2>. In addition to <gt_match_blast_new> it also stores
+   the number of mismatches and the number of gap */
+
+GtMatch* gt_match_blast_new_extended(char *seqid1,
+                                     char *seqid2,
+                                     GtUword start_seq1,
+                                     GtUword end_seq1,
+                                     GtUword start_seq2,
+                                     GtUword end_seq2,
+                                     double evalue,
+                                     float bitscore,
+                                     GtUword length,
+                                     double similarity,
+                                     GtUword mm_num,
+                                     GtUword gap_open_num,
+                                     GtMatchDirection dir);
 
 /* Sets <evalue> to be the E-value in <mb>. */
 void gt_match_blast_set_evalue(GtMatchBlast *mb, double evalue);

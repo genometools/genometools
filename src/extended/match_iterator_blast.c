@@ -152,19 +152,20 @@ static GtMatchIteratorStatus gt_match_iterator_blast_next(GtMatchIterator *mi,
       storeinteger[3] = storeinteger[4];
       storeinteger[4] = tmp;
     }
-    *match = gt_match_blast_new(query_seq,
-                                db_seq,
-                                storeinteger[1],
-                                storeinteger[2],
-                                storeinteger[3],
-                                storeinteger[4],
-                                e_value,
-                                bitscore,
-                                storeinteger[0],
-                                identity,
-                                storeinteger[5],
-                                storeinteger[6],
-                                reverse ? GT_MATCH_REVERSE : GT_MATCH_DIRECT);
+    *match = gt_match_blast_new_extended(query_seq,
+                                         db_seq,
+                                         storeinteger[1],
+                                         storeinteger[2],
+                                         storeinteger[3],
+                                         storeinteger[4],
+                                         e_value,
+                                         bitscore,
+                                         storeinteger[0],
+                                         identity,
+                                         storeinteger[5],
+                                         storeinteger[6],
+                                         reverse ? GT_MATCH_REVERSE
+                                                 : GT_MATCH_DIRECT);
     mib->pvt->curpos++;
     return GT_MATCHER_STATUS_OK;
   }

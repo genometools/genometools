@@ -76,9 +76,35 @@ GtMatch* gt_match_blast_new(char *seqid1,
                             float bitscore,
                             GtUword length,
                             double similarity,
-                            GtUword mm_num,
-                            GtUword gap_open_num,
                             GtMatchDirection dir)
+{
+  GtMatch *match;
+  GtMatchBlast *matchb;
+  match = gt_match_create(gt_match_blast_class(), start_seq1, end_seq1,
+                          start_seq2, end_seq2, seqid1, seqid2, dir);
+  matchb = gt_match_blast_cast(match);
+  matchb->evalue = evalue;
+  matchb->bitscore = bitscore;
+  matchb->ali_length = length;
+  matchb->similarity = similarity;
+  matchb->mm_num = 0;
+  matchb->gap_open_num = 0;
+  return match;
+}
+
+GtMatch* gt_match_blast_new_extended(char *seqid1,
+                                     char *seqid2,
+                                     GtUword start_seq1,
+                                     GtUword end_seq1,
+                                     GtUword start_seq2,
+                                     GtUword end_seq2,
+                                     double evalue,
+                                     float bitscore,
+                                     GtUword length,
+                                     double similarity,
+                                     GtUword mm_num,
+                                     GtUword gap_open_num,
+                                     GtMatchDirection dir)
 {
   GtMatch *match;
   GtMatchBlast *matchb;
