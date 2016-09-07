@@ -1,5 +1,7 @@
 cache: apt
 language: c
+os:
+  - linux
 compiler:
   - clang
 env:
@@ -8,45 +10,52 @@ env:
   matrix:
     - default=yes      testrange=1..1150
     - assert=no        testrange=1..1150
-    - amalgamation=yes testrange=1..1150
     - opt=no cairo=no  testrange=1..1150
     - threads=yes      testrange=1..1150
     - default=yes      testrange=1151..1750
     - assert=no        testrange=1151..1750
-    - amalgamation=yes testrange=1151..1750
     - opt=no cairo=no  testrange=1151..1750
     - threads=yes      testrange=1151..1750
     - default=yes      testrange=1751..3000
     - assert=no        testrange=1751..3000
-    - amalgamation=yes testrange=1751..3000
     - opt=no cairo=no  testrange=1751..3000
     - threads=yes      testrange=1751..3000
 matrix:
   include:
-    - compiler: gcc
+    - os: linux
+      compiler: gcc
       env: default=yes
-    - compiler: gcc
+    - os: linux
+      compiler: gcc
       env: GT_BITS=32 cairo=no
-    - compiler: clang
+    - os: linux
+      compiler: clang
       env: GT_BITS=32 cairo=no
-    - compiler: gcc
+    - os: linux
+      compiler: gcc
       env: assert=no
-    - compiler: gcc
+    - os: linux
+      compiler: gcc
       env: amalgamation=yes
-    - compiler: gcc
+    - os: linux
+      compiler: gcc
+      env: opt=no cairo=no
+    - os: osx
+      compiler: gcc
+      env: default=yes
+    - os: osx
+      compiler: gcc
+      env: assert=no
+    - os: osx
+      compiler: gcc
+      env: amalgamation=yes
+    - os: linux
+      compiler: gcc
       env: opt=no cairo=no
     - compiler: i686-w64-mingw32-gcc
       env: SYSTEM=Windows MACHINE=i686 GT_BITS=32 AR=i686-w64-mingw32-ar fpic=no cairo=no sharedlib=no CFLAGS='-Wno-error=attributes -Wno-error=unused-parameter -DSQLITE_MALLOCSIZE=_msize'
     - compiler: x86_64-w64-mingw32-gcc
       env: SYSTEM=Windows MACHINE=i686 GT_BITS=64 AR=x86_64-w64-mingw32-ar fpic=no cairo=no sharedlib=no CFLAGS='-Wno-error=attributes -Wno-error=unused-parameter -DSQLITE_MALLOCSIZE=_msize'
-
 before_install:
-  - sudo apt-get update -q
-  - sudo apt-get install ncbi-blast+ gcc-multilib -y
-  - sudo apt-get install binutils-mingw-w64-i686 gcc-mingw-w64-i686 -y
-  - sudo apt-get install binutils-mingw-w64-x86-64 gcc-mingw-w64-x86-64 -y
-before_script:
-  - blastn -version
-  - blastp -version
-  - makeblastdb -version
+  - sudo ./scripts/travis_installdeps.sh
 script: ./scripts/travis_test.rb
