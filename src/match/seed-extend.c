@@ -385,6 +385,8 @@ struct GtGreedyextendmatchinfo
   Trimstat *trimstat;
   GtEncseqReader *encseq_r_in_u, *encseq_r_in_v;
   GtAllocatedMemory usequence_cache, vsequence_cache, frontspace_reservoir;
+  GtTrimmingStrategy trimstrategy;
+  bool showfrontinfo;
 };
 
 static void gt_greedy_at_gc_count(GtUword *atcount,GtUword *gccount,
@@ -478,6 +480,8 @@ GtGreedyextendmatchinfo *gt_greedy_extend_matchinfo_new(
   ggemi->right_front_trace = NULL;
   ggemi->errorpercentage = errorpercentage;
   ggemi->history = history;
+  ggemi->trimstrategy = GT_OUTSENSE_TRIM_ALWAYS;
+  ggemi->showfrontinfo = false;
   ggemi->userdefinedleastlength = userdefinedleastlength;
   gt_optimal_maxalilendiff_perc_mat_history(&ggemi->maxalignedlendifference,
                                             &ggemi->perc_mat_history,
@@ -683,10 +687,12 @@ GtUword gt_align_front_prune_edist(bool rightextension,
                                          best_polished_point,
                                          front_trace,
                                          ggemi->pol_info,
+                                         ggemi->trimstrategy,
                                          ggemi->history,
                                          ggemi->perc_mat_history - iteration,
                                          ggemi->maxalignedlendifference
                                            + iteration,
+                                         ggemi->showfrontinfo,
                                          seedlength,
                                          &ufsr,
                                          ustart,
@@ -935,10 +941,12 @@ static const GtQuerymatch *gt_extend_sesp(bool forxdrop,
                                        &left_best_polished_point,
                                        greedyextendmatchinfo->left_front_trace,
                                        greedyextendmatchinfo->pol_info,
+                                       greedyextendmatchinfo->trimstrategy,
                                        greedyextendmatchinfo->history,
                                        greedyextendmatchinfo->perc_mat_history,
                                        greedyextendmatchinfo->
                                           maxalignedlendifference,
+                                       greedyextendmatchinfo->showfrontinfo,
                                        sesp->seedlen,
                                        &ufsr,
                                        uoffset,
@@ -1037,10 +1045,12 @@ static const GtQuerymatch *gt_extend_sesp(bool forxdrop,
                                        &right_best_polished_point,
                                        greedyextendmatchinfo->right_front_trace,
                                        greedyextendmatchinfo->pol_info,
+                                       greedyextendmatchinfo->trimstrategy,
                                        greedyextendmatchinfo->history,
                                        greedyextendmatchinfo->perc_mat_history,
                                        greedyextendmatchinfo->
                                           maxalignedlendifference,
+                                       greedyextendmatchinfo->showfrontinfo,
                                        sesp->seedlen,
                                        &ufsr,
                                        sesp->seedpos1 + sesp->seedlen,

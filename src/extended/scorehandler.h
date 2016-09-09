@@ -48,6 +48,10 @@ GtWord          gt_scorehandler_get_gap_opening(const GtScoreHandler
 /* Return gapscore value for the given <scorehandler>. */
 GtWord          gt_scorehandler_get_gapscore(const GtScoreHandler
                                              *scorehandler);
+/* Return matchscore value for the given <scorehandler>. */
+GtWord gt_scorehandler_get_matchscore(const GtScoreHandler *scorehandler);
+/* Return mismatchscore value for the given <scorehandler>. */
+GtWord gt_scorehandler_get_mismatchscore(const GtScoreHandler *scorehandler);
 /* Return replacement score value for the given characters <a> and <b>. */
 GtWord          gt_scorehandler_get_replacement(const GtScoreHandler
                                                 *scorehandler,

@@ -33,8 +33,8 @@
 #include "extended/match_iterator_blast.h"
 #include "extended/match_iterator_rep.h"
 
-#define READNUMS 5
-#define READVALUES 10
+#define GT_BLASTITER_READNUMS 7
+#define GT_BLASTITER_READVALUES 12
 
 #define GT_MATCHER_BLAST_CANNOTPARSECOLUMN(S)\
         gt_error_set(err, "file %s, line " GT_WU ", column " GT_WU ": %s", \
@@ -70,7 +70,7 @@ static GtMatchIteratorStatus gt_match_iterator_blast_next(GtMatchIterator *mi,
 {
   gt_assert(mi);
   GtUword columncount = 0;
-  GtWord storeinteger[READNUMS], tmp;
+  GtWord storeinteger[GT_BLASTITER_READNUMS], tmp;
   double e_value;
   float bitscore, identity;
   bool reverse = false;
@@ -90,14 +90,15 @@ static GtMatchIteratorStatus gt_match_iterator_blast_next(GtMatchIterator *mi,
     if (!mib->pvt->process)
       fseek(mib->pvt->matchfilep, -1, SEEK_CUR);
     readvalues = fscanf(mib->pvt->matchfilep,
-                        "%s %s %f " GT_WD " %*d %*d " GT_WD " " GT_WD " " GT_WD
-                        " " GT_WD " %lg %f\n", query_seq, db_seq, &identity,
-                        &storeinteger[0],
+                        "%s %s %f " GT_WD " " GT_WD " " GT_WD " " GT_WD " "
+                        GT_WD " " GT_WD " " GT_WD " %lg %f\n",
+                        query_seq, db_seq, &identity,
+                        &storeinteger[0], &storeinteger[5], &storeinteger[6],
                         &storeinteger[1], &storeinteger[2], &storeinteger[3],
                         &storeinteger[4], &e_value, &bitscore);
     if (readvalues == EOF)
       return GT_MATCHER_STATUS_END;
-    if (readvalues != READVALUES)
+    if (readvalues != GT_BLASTITER_READVALUES)
     {
       GT_MATCHER_BLAST_CANNOTPARSELINE("invalid format");
       had_err = -1;
@@ -115,19 +116,20 @@ static GtMatchIteratorStatus gt_match_iterator_blast_next(GtMatchIterator *mi,
         i = 0;
       } else break;
     }
-    if ((readvalues = sscanf(buffer, "%s %s %f " GT_WD " %*d %*d " GT_WD " "
-                             GT_WD " " GT_WD " " GT_WD " %lg " "%f\n",
-                             query_seq, db_seq, &identity,
-                             &storeinteger[0],
+    if ((readvalues = sscanf(buffer, "%s %s %f " GT_WD " " GT_WD " " GT_WD " "
+                             GT_WD " " GT_WD " " GT_WD " " GT_WD " %lg " "%f\n",
+                             query_seq, db_seq, &identity, &storeinteger[0],
+                             &storeinteger[5], &storeinteger[6],
                              &storeinteger[1], &storeinteger[2],
                              &storeinteger[3], &storeinteger[4], &e_value,
-                             &bitscore)) != READVALUES) {
+                             &bitscore)) != GT_BLASTITER_READVALUES) {
       GT_MATCHER_BLAST_CANNOTPARSELINE("invalid format");
       had_err = -1;
     }
   }
 
-  for (columncount = 0; !had_err && columncount < (GtUword) (READNUMS);
+  for (columncount = 0; !had_err &&
+                        columncount < (GtUword) (GT_BLASTITER_READNUMS);
        columncount++) {
     if (storeinteger[columncount] < 0) {
          GT_MATCHER_BLAST_CANNOTPARSECOLUMN("non-negative integer expected");
@@ -150,17 +152,20 @@ static GtMatchIteratorStatus gt_match_iterator_blast_next(GtMatchIterator *mi,
       storeinteger[3] = storeinteger[4];
       storeinteger[4] = tmp;
     }
-    *match = gt_match_blast_new(query_seq,
-                                db_seq,
-                                storeinteger[1],
-                                storeinteger[2],
-                                storeinteger[3],
-                                storeinteger[4],
-                                e_value,
-                                bitscore,
-                                storeinteger[0],
-                                identity,
-                                reverse ? GT_MATCH_REVERSE : GT_MATCH_DIRECT);
+    *match = gt_match_blast_new_extended(query_seq,
+                                         db_seq,
+                                         storeinteger[1],
+                                         storeinteger[2],
+                                         storeinteger[3],
+                                         storeinteger[4],
+                                         e_value,
+                                         bitscore,
+                                         storeinteger[0],
+                                         identity,
+                                         storeinteger[5],
+                                         storeinteger[6],
+                                         reverse ? GT_MATCH_REVERSE
+                                                 : GT_MATCH_DIRECT);
     mib->pvt->curpos++;
     return GT_MATCHER_STATUS_OK;
   }

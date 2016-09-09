@@ -90,6 +90,18 @@ GtWord gt_scorehandler_get_gapscore(const GtScoreHandler *scorehandler)
   return scorehandler->gap_extension;
 }
 
+GtWord gt_scorehandler_get_matchscore(const GtScoreHandler *scorehandler)
+{
+  gt_assert(scorehandler != NULL);
+  return scorehandler->matchscore;
+}
+
+GtWord gt_scorehandler_get_mismatchscore(const GtScoreHandler *scorehandler)
+{
+  gt_assert(scorehandler != NULL);
+  return scorehandler->mismatchscore;
+}
+
 GtWord gt_scorehandler_get_replacement(const GtScoreHandler *scorehandler,
                                        GtUchar a, GtUchar b)
 {
