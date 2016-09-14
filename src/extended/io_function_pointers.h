@@ -23,7 +23,7 @@
 
 #include "core/error_api.h"
 
-/* The <GtIOFunctionPointer> module */
+/* GtIOFunctionPointer module */
 
 /* IO function, either reads or writes to file <stream>. Either one of the two
    functions below. Used for defining file types or headers using one

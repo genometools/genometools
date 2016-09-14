@@ -22,7 +22,7 @@
 #include "lua.h"
 #include "lualib.h"
 
-/* The LuaTools module */
+/* GtLuaTools module */
 
 /* Prints the content of <L> to stderr in a human readable format. */
 void gt_lua_stack_dump(lua_State *L);

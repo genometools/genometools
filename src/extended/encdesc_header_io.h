@@ -21,7 +21,7 @@
 #include "core/error_api.h"
 #include "extended/encdesc.h"
 
-/* The <GtEncdescHeaderIO> module */
+/* GtEncdescHeaderIO module */
 
 /* Write header information of <encdesc> to <FILE> <fp>.
    Returns 0 on success, 1 on error, sets <err> accordingly.
