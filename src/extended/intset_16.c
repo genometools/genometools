@@ -469,6 +469,16 @@ const GtIntsetClass* gt_intset_16_class(void)
   return this_c;
 }
 
+#define GT_INTSET_TEST_BINSEARCH(IDX) \
+gt_ensure(gt_intset_16_get_test(is, IDX) == arr[IDX]); \
+gt_ensure(gt_intset_16_get(is, IDX) == arr[IDX]); \
+gt_ensure( \
+  gt_intset_16_get_idx_smallest_geq_test(is, arr[IDX] + 1) == \
+  IDX + 1); \
+gt_ensure( \
+  gt_intset_16_get_idx_smallest_geq(is, arr[IDX] + 1) == \
+  IDX + 1)
+
 int gt_intset_16_unit_test(GtError *err)
 {
   int had_err = 0;
@@ -486,7 +496,7 @@ int gt_intset_16_unit_test(GtError *err)
     arr[idx] = arr[idx - 1] + gt_rand_max(stepsize) + 1;
   }
 
-  is_size =     gt_intset_16_size_of_rep(arr[num_of_elems - 1], num_of_elems);
+  is_size = gt_intset_16_size_of_rep(arr[num_of_elems - 1], num_of_elems);
 
   if (!had_err) {
     if (is_size < (size_t) UINT_MAX) {
@@ -503,23 +513,16 @@ int gt_intset_16_unit_test(GtError *err)
       gt_ensure(gt_intset_16_elems_is_valid(is));
       gt_ensure(gt_intset_16_secstart_is_valid(is));
 
-      for (idx = 0; !had_err && idx < num_of_elems; idx++) {
-        if (arr[idx] != 0 && arr[idx - 1] != (arr[idx] - 1)) {
-          gt_ensure(
-            gt_intset_16_get_idx_smallest_geq_test(is, arr[idx] - 1) ==
-            idx);
-          gt_ensure(
-            gt_intset_16_get_idx_smallest_geq(is, arr[idx] - 1) ==
-            idx);
-        }
-        gt_ensure(gt_intset_16_get_test(is, idx) == arr[idx]);
-        gt_ensure(gt_intset_16_get(is, idx) == arr[idx]);
+      GT_INTSET_TEST_BINSEARCH(0);
+      for (idx = 1; !had_err && idx < num_of_elems; idx++) {
+        GtUword to_find = (arr[idx - 1] == (arr[idx] - 1)) ? idx - 1 : idx;
         gt_ensure(
-          gt_intset_16_get_idx_smallest_geq_test(is, arr[idx] + 1) ==
-          idx + 1);
+          gt_intset_16_get_idx_smallest_geq_test(is, arr[idx] - 1) ==
+          to_find);
         gt_ensure(
-          gt_intset_16_get_idx_smallest_geq(is, arr[idx] + 1) ==
-          idx + 1);
+          gt_intset_16_get_idx_smallest_geq(is, arr[idx] - 1) ==
+          to_find);
+        GT_INTSET_TEST_BINSEARCH(idx);
       }
       if (!had_err)
         had_err = gt_intset_unit_test_notinset(is, 0, arr[0] - 1, err);
