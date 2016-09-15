@@ -443,7 +443,7 @@ static double gt_karlin_altschul_stat_calculate_ungapped_K(
 
 static void get_values_from_vector(GtKarlinAltschulStat *ka,
                                   const double *matrix,
-                                  GtWord gap_extension)
+                                  GT_UNUSED GtWord gap_extension)
 {
   gt_assert(matrix[gapextdidx] == gap_extension);
   ka->lambda = matrix[lambdaidx];
