@@ -469,7 +469,7 @@ const GtIntsetClass* gt_intset_8_class(void)
   return this_c;
 }
 
-#define GT_INTSET_TEST_BINSEARCH(IDX) \
+#define GT_INTSET_TEST_8_BINSEARCH(IDX) \
 gt_ensure(gt_intset_8_get_test(is, IDX) == arr[IDX]); \
 gt_ensure(gt_intset_8_get(is, IDX) == arr[IDX]); \
 gt_ensure( \
@@ -513,7 +513,7 @@ int gt_intset_8_unit_test(GtError *err)
       gt_ensure(gt_intset_8_elems_is_valid(is));
       gt_ensure(gt_intset_8_secstart_is_valid(is));
 
-      GT_INTSET_TEST_BINSEARCH(0);
+      GT_INTSET_TEST_8_BINSEARCH(0);
       for (idx = 1; !had_err && idx < num_of_elems; idx++) {
         GtUword to_find = (arr[idx - 1] == (arr[idx] - 1)) ? idx - 1 : idx;
         gt_ensure(
@@ -522,7 +522,7 @@ int gt_intset_8_unit_test(GtError *err)
         gt_ensure(
           gt_intset_8_get_idx_smallest_geq(is, arr[idx] - 1) ==
           to_find);
-        GT_INTSET_TEST_BINSEARCH(idx);
+        GT_INTSET_TEST_8_BINSEARCH(idx);
       }
       if (!had_err)
         had_err = gt_intset_unit_test_notinset(is, 0, arr[0] - 1, err);
