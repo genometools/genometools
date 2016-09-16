@@ -770,6 +770,12 @@ src/core/checkbitpackstring-int.c: \
 	$(V_ECHO) '[rebuild $@]'
 	$(V_DO)scripts/template2c.pl '-int' $<
 
+src/extended/intset_8.c src/extended/intset_8.h src/extended/intset_16.c \
+src/extended/intset_16.h src/extended/intset_32.c src/extended/intset_32.h: \
+	./scripts/gen-intsets.rb
+	$(V_ECHO) '[rebuild] $@'
+	$(V_DO)$<
+
 # SQLite needs special attention
 obj/$(SQLITE3_DIR)/%.o: $(SQLITE3_DIR)/%.c
 	$(V_ECHO) "[compile $(@F)]"
