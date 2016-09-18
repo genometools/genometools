@@ -58,7 +58,7 @@ GtMultieoplist *gt_multieoplist_new_with_size(GtUword size)
 }
 
 GtMultieoplist *gt_multieoplist_clone(GtMultieoplist *copy,
-                                      GtMultieoplist *source)
+                                      const GtMultieoplist *source)
 {
   GtUword i;
   gt_assert(source != NULL);
@@ -207,7 +207,7 @@ void gt_multieoplist_remove_last(GtMultieoplist *multieops)
   }
 }
 
-GtUword gt_multieoplist_get_repdel_length(GtMultieoplist *multieops)
+GtUword gt_multieoplist_get_repdel_length(const GtMultieoplist *multieops)
 {
   GtUword len = 0, i;
   Eop *space;
@@ -224,7 +224,7 @@ GtUword gt_multieoplist_get_repdel_length(GtMultieoplist *multieops)
   return len;
 }
 
-GtUword gt_multieoplist_get_repins_length(GtMultieoplist *multieops)
+GtUword gt_multieoplist_get_repins_length(const GtMultieoplist *multieops)
 {
   GtUword len = 0, i;
   Eop *space;
@@ -241,7 +241,7 @@ GtUword gt_multieoplist_get_repins_length(GtMultieoplist *multieops)
   return len;
 }
 
-GtUword gt_multieoplist_get_length(GtMultieoplist *multieops)
+GtUword gt_multieoplist_get_length(const GtMultieoplist *multieops)
 {
   GtUword len = 0, i;
   Eop *space;
@@ -253,9 +253,9 @@ GtUword gt_multieoplist_get_length(GtMultieoplist *multieops)
   return len;
 }
 
-GtUword gt_multieoplist_get_num_entries(GtMultieoplist *multieops)
+GtUword gt_multieoplist_get_num_entries(const GtMultieoplist *multieops)
 {
-  return(multieops->meoplist.nextfreeEop);
+  return multieops->meoplist.nextfreeEop;
 }
 
 GtMultieop gt_multieoplist_get_entry(const GtMultieoplist *multieops,
@@ -284,7 +284,7 @@ GtMultieop gt_multieoplist_get_entry(const GtMultieoplist *multieops,
   return eop;
 }
 
-void gt_multieoplist_show(GtMultieoplist *multieops, FILE *fp)
+void gt_multieoplist_show(const GtMultieoplist *multieops, FILE *fp)
 {
   GtUword stepssum,
           num = multieops->meoplist.nextfreeEop;
@@ -397,7 +397,7 @@ static GtMultieoplist *gt_multieoplist_io_fp(GtMultieoplist *multieops,
 }
 
 GtMultieoplist *gt_multieoplist_io(GtMultieoplist *multieops, FILE *fp,
-                               GtError *err)
+                                   GtError *err)
 {
   if (multieops == NULL) {
     multieops = gt_calloc((size_t) 1, sizeof (GtMultieoplist));
