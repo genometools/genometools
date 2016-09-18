@@ -713,7 +713,7 @@ bool gt_querymatchoutoptions_alignment_prepare(GtQuerymatchoutoptions
 void gt_querymatchoutoptions_alignment_show(const GtQuerymatchoutoptions
                                               *querymatchoutoptions,
                                             GtUword distance,
-                                            GT_UNUSED bool verify_alignment,
+                                            bool verify_alignment,
                                             FILE *fp)
 {
   if (querymatchoutoptions != NULL)
