@@ -16,7 +16,6 @@
 */
 
 #include "core/ma_api.h"
-#include "core/unused_api.h"
 #include "core/types_api.h"
 #include "core/minmax.h"
 #include "revcompl.h"
@@ -26,14 +25,13 @@
 
 struct GtQuerymatchoutoptions
 {
-  GtUword totallength,
-          useqbuffer_size,
+  GtUword useqbuffer_size,
           vseqbuffer_size;
+  GtUchar *useqbuffer, *vseqbuffer;
   GtEoplist *eoplist;
   GtEoplistReader *eoplist_reader;
   GtFronttrace *front_trace;
   GtGreedyextendmatchinfo *ggemi;
-  GtUchar *useqbuffer, *vseqbuffer;
   const GtUchar *characters;
   GtEncseqReader *esr_for_align_show;
   GtUchar wildcardshow;
@@ -71,7 +69,6 @@ GtQuerymatchoutoptions *gt_querymatchoutoptions_new(bool generate_eoplist,
   {
     querymatchoutoptions->eoplist_reader = NULL;
   }
-  querymatchoutoptions->totallength = GT_UWORD_MAX; /* not yet known */
   querymatchoutoptions->esr_for_align_show = NULL;
   querymatchoutoptions->characters = NULL;
   querymatchoutoptions->always_polished_ends = true;
@@ -112,7 +109,7 @@ void gt_querymatchoutoptions_extend(
                                        extend_char_access,
                                        sensitivity,
                                        querymatchoutoptions->pol_info);
-    if (querymatchoutoptions->generate_eoplist)
+    if (querymatchoutoptions->eoplist != NULL)
     {
       if (always_polished_ends)
       {
@@ -195,10 +192,6 @@ void seededmatch2eoplist(GtQuerymatchoutoptions *querymatchoutoptions,
             querymatchoutoptions->pol_info != NULL);
   pol_size = GT_MULT2(querymatchoutoptions->pol_info->cut_depth);
   gt_eoplist_reset(querymatchoutoptions->eoplist);
-  if (querymatchoutoptions->totallength == GT_UWORD_MAX)
-  {
-    querymatchoutoptions->totallength = gt_encseq_total_length(encseq);
-  }
   ustart = seedpos1 + seedlen;
   vstart = seedpos2 + seedlen;
   gt_assert(dbstart + dblen >= ustart);
@@ -235,10 +228,6 @@ void seededmatch2eoplist(GtQuerymatchoutoptions *querymatchoutoptions,
                           ulen,
                           NULL,
                           vlen);
-    }
-    if (querymatchoutoptions->front_trace != NULL)
-    {
-      gt_assert(querymatchoutoptions->generate_eoplist);
       front_trace_reset(querymatchoutoptions->front_trace,ulen+vlen);
     }
   }
@@ -302,20 +291,18 @@ void seededmatch2eoplist(GtQuerymatchoutoptions *querymatchoutoptions,
   gt_eoplist_reverse_end(querymatchoutoptions->eoplist,0);
 }
 
-void frontprune2eoplist(GtQuerymatchoutoptions *querymatchoutoptions,
-                        const GtEncseq *encseq,
-                        const GtSeqorEncseq *query,
-                        GtReadmode query_readmode,
-                        GtUword query_seqstartpos,
-                        GtUword query_totallength,
-                        GtUword dbstart,
-                        GT_UNUSED GtUword dblen,
-                        GtUword abs_querystart,
-                        GT_UNUSED GtUword querylen,
-                        GtUword ustart,
-                        GtUword ulen,
-                        GtUword vstart,
-                        GtUword vlen)
+void gt_frontprune2eoplist(GtQuerymatchoutoptions *querymatchoutoptions,
+                           const GtEncseq *encseq,
+                           const GtSeqorEncseq *query,
+                           GtReadmode query_readmode,
+                           GtUword query_seqstartpos,
+                           GtUword query_totallength,
+                           GtUword dbstart,
+                           GtUword abs_querystart,
+                           GtUword ustart,
+                           GtUword ulen,
+                           GtUword vstart,
+                           GtUword vlen)
 {
   Polished_point right_best_polished_point = {0,0,0};
   GtUword pol_size;
@@ -326,10 +313,6 @@ void frontprune2eoplist(GtQuerymatchoutoptions *querymatchoutoptions,
             querymatchoutoptions->pol_info != NULL);
   pol_size = GT_MULT2(querymatchoutoptions->pol_info->cut_depth);
   gt_eoplist_reset(querymatchoutoptions->eoplist);
-  if (querymatchoutoptions->totallength == GT_UWORD_MAX)
-  {
-    querymatchoutoptions->totallength = gt_encseq_total_length(encseq);
-  }
   gt_assert(ulen > 0 && vlen > 0);
   gt_align_front_prune_edist(rightextension,
                              &right_best_polished_point,
@@ -359,10 +342,6 @@ void frontprune2eoplist(GtQuerymatchoutoptions *querymatchoutoptions,
                         ulen,
                         NULL,
                         vlen);
-  }
-  if (querymatchoutoptions->front_trace != NULL)
-  {
-    gt_assert(querymatchoutoptions->generate_eoplist);
     front_trace_reset(querymatchoutoptions->front_trace,ulen+vlen);
   }
   coords = &querymatchoutoptions->correction_info;
