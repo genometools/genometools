@@ -651,21 +651,21 @@ static void gt_greedy_extend_init(FTsequenceResources *ufsr,
   }
 }
 
-GtUword gt_align_front_prune_edist(bool rightextension,
-                                   Polished_point *best_polished_point,
-                                   GtFronttrace *front_trace,
-                                   const GtEncseq *dbencseq,
-                                   const GtSeqorEncseq *query,
-                                   GtReadmode query_readmode,
-                                   GtUword queryseqstartpos,
-                                   GtUword query_totallength,
-                                   GtGreedyextendmatchinfo *ggemi,
-                                   bool greedyextension,
-                                   GtUword seedlength,
-                                   GtUword ustart,
-                                   GtUword ulen,
-                                   GtUword vstart,
-                                   GtUword vlen)
+void gt_align_front_prune_edist(bool rightextension,
+                                Polished_point *best_polished_point,
+                                GtFronttrace *front_trace,
+                                const GtEncseq *dbencseq,
+                                const GtSeqorEncseq *query,
+                                GtReadmode query_readmode,
+                                GtUword queryseqstartpos,
+                                GtUword query_totallength,
+                                GtGreedyextendmatchinfo *ggemi,
+                                bool greedyextension,
+                                GtUword seedlength,
+                                GtUword ustart,
+                                GtUword ulen,
+                                GtUword vstart,
+                                GtUword vlen)
 {
   GtUword distance = 0, iteration, maxiterations;
   FTsequenceResources ufsr, vfsr;
@@ -675,11 +675,19 @@ GtUword gt_align_front_prune_edist(bool rightextension,
                         query_totallength,ggemi);
   maxiterations = greedyextension ? 1 : ggemi->perc_mat_history;
   gt_assert(best_polished_point != NULL);
-  for (iteration = 0; iteration < maxiterations; iteration++)
+  for (iteration = 0; iteration <= maxiterations; iteration++)
   {
+    GtTrimmingStrategy trimstrategy;
 #ifdef SKDEBUG
     printf("%s: iteration " GT_WU "\n",__func__,iteration);
 #endif
+    if (iteration == maxiterations)
+    {
+      trimstrategy = GT_OUTSENSE_TRIM_NEVER;
+    } else
+    {
+      trimstrategy = ggemi->trimstrategy;
+    }
     gt_assert(iteration < ggemi->perc_mat_history);
     distance = front_prune_edist_inplace(rightextension,
                                          &ggemi->frontspace_reservoir,
@@ -687,7 +695,7 @@ GtUword gt_align_front_prune_edist(bool rightextension,
                                          best_polished_point,
                                          front_trace,
                                          ggemi->pol_info,
-                                         ggemi->trimstrategy,
+                                         trimstrategy,
                                          ggemi->history,
                                          ggemi->perc_mat_history - iteration,
                                          ggemi->maxalignedlendifference
@@ -725,8 +733,8 @@ GtUword gt_align_front_prune_edist(bool rightextension,
     best_polished_point->distance = 0;
     best_polished_point->trimleft = 0;
   }
-  gt_assert(distance >= best_polished_point->distance);
-  return distance;
+  gt_assert(distance >= best_polished_point->distance &&
+            distance < ulen + vlen + 1);
 }
 
 GtUword gt_minidentity2errorpercentage(GtUword minidentity)

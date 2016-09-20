@@ -1,4 +1,5 @@
 /*
+  Copyright (c) 2016 Stefan Kurtz <stefan.kurtz@zbh.uni-hamburg.de>
   Copyright (c) 2015 Annika Seidel <annika.seidel@studium.uni-hamburg.de>
   Copyright (c) 2006-2007 Gordon Gremme <gordon@gremme.org>
   Copyright (c) 2006-2015 Center for Bioinformatics, University of Hamburg

@@ -356,21 +356,21 @@ typedef const GtQuerymatch *(*GtExtendQuerymatchRelativeFunc)(void *,
                                                              GtUword,
                                                              GtReadmode);
 
-GtUword gt_align_front_prune_edist(bool rightextension,
-                                   Polished_point *best_polished_point,
-                                   GtFronttrace *front_trace,
-                                   const GtEncseq *encseq,
-                                   const GtSeqorEncseq *query,
-                                   GtReadmode query_readmode,
-                                   GtUword query_seqstartpos,
-                                   GtUword query_totallength,
-                                   GtGreedyextendmatchinfo *ggemi,
-                                   bool greedyextension,
-                                   GtUword seedlength,
-                                   GtUword ustart,
-                                   GtUword ulen,
-                                   GtUword vstart,
-                                   GtUword vlen);
+void gt_align_front_prune_edist(bool rightextension,
+                                Polished_point *best_polished_point,
+                                GtFronttrace *front_trace,
+                                const GtEncseq *encseq,
+                                const GtSeqorEncseq *query,
+                                GtReadmode query_readmode,
+                                GtUword query_seqstartpos,
+                                GtUword query_totallength,
+                                GtGreedyextendmatchinfo *ggemi,
+                                bool greedyextension,
+                                GtUword seedlength,
+                                GtUword ustart,
+                                GtUword ulen,
+                                GtUword vstart,
+                                GtUword vlen);
 
 GtUword gt_minidentity2errorpercentage(GtUword minidentity);
 

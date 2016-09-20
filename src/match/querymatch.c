@@ -656,10 +656,3 @@ GtQuerymatch *gt_querymatch_table_get(const GtArrayGtQuerymatch
   gt_assert(querymatch_table != NULL);
   return querymatch_table->spaceGtQuerymatch + idx;
 }
-
-const GtAlignment *gt_querymatch_alignment_get(const GtQuerymatch *querymatch)
-{
-  gt_assert(querymatch != NULL);
-  return gt_querymatchoutoptions_alignment_get(
-                  querymatch->ref_querymatchoutoptions);
-}

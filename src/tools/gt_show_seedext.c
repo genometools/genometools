@@ -231,8 +231,9 @@ static void gt_show_seed_extend_plain(GtSequencepairbuffer *seqpairbuf,
   gt_assert(edist <= distance);
   if (alignmentwidth > 0)
   {
+    const bool downcase = false;
     gt_alignment_show_generic(alignment_show_buffer,
-                              false,
+                              downcase,
                               alignment,
                               stdout,
                               alignmentwidth,
