@@ -344,10 +344,6 @@ static int gt_show_seedext_runner(GT_UNUSED int argc,
                               100,
                               pol_info);
     }
-    if (pol_info != NULL)
-    {
-      gt_alignment_polished_ends(alignment,pol_info,false);
-    }
     processinfo_and_querymatchspaceptr.processinfo = greedyextendmatchinfo;
     if (arguments->sortmatches)
     {

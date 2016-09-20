@@ -173,13 +173,13 @@ void gt_eoplist_format_generic(FILE *fp,
                                const GtEoplist *eoplist,
                                GtEoplistReader *eoplist_reader,
                                bool distinguish_mismatch_match,
-                               GT_UNUSED const GtUchar *characters,
-                               GT_UNUSED GtUchar wildcardshow);
+                               const GtUchar *characters,
+                               GtUchar wildcardshow);
 
 void gt_eoplist_format_exact(FILE *fp,
                              const GtEoplist *eoplist,
                              GtEoplistReader *eoplist_reader,
-                             GT_UNUSED const GtUchar *characters);
+                             const GtUchar *characters);
 
 GtUword gt_eoplist_num_segments(const GtEoplist *eoplist,GtUword delta);
 

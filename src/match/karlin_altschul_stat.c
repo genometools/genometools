@@ -16,13 +16,14 @@
 */
 
 #include <math.h>
+#include "core/unused_api.h"
 #include "core/ensure.h"
 #include "core/error.h"
 #include "core/ma.h"
 #include "core/minmax.h"
 #include "core/types_api.h"
-#include "match/karlin_altschul_stat.h"
 #include "extended/scorehandler.h"
+#include "match/karlin_altschul_stat.h"
 
 #define K_ITER_MAX 100
 #define K_SUMLIMIT_DEFAULT 0.0001

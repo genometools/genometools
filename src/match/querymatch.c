@@ -307,8 +307,7 @@ bool gt_querymatch_process(GtQuerymatch *querymatchptr,
     if (querymatchptr->ref_querymatchoutoptions != NULL)
     {
       bool seededalignment;
-      GtUword query_seqstartpos;
-      GtUword abs_querystart_fwdstrand, abs_querystart;
+      GtUword query_seqstartpos, abs_querystart_fwdstrand, abs_querystart;
 
       if (query == NULL || query->seq == NULL)
       {

@@ -5,7 +5,7 @@
 #include <math.h>
 #include <ctype.h>
 #include "core/assert_api.h"
-#include "core/unused_api.h"
+#include "core/arraydef.h"
 #include "match/ft-polish.h"
 #include "core/chardef.h"
 #include "core/divmodmul.h"
@@ -33,7 +33,9 @@ char gt_eoplist_pretty_print(GtEopType eoptype,bool distinguish_mismatch_match)
     case GtMatchOp:
       return distinguish_mismatch_match ? MATCH_CHAR : REPLACEMENT_CHAR;
     default:
-      gt_assert(false);
+      fprintf(stderr,"file %s, line %d: illegal eoptype = %d\n",
+              __FILE__,__LINE__,(int) eoptype);
+      exit(GT_EXIT_PROGRAMMING_ERROR);
   }
 }
 
@@ -164,8 +166,9 @@ GtEoplist *gt_eoplist_new_from_cigar(const char *cigarstring,GtUword length)
           }
           break;
         default:
-          fprintf(stderr,"Illegal symbol %c in Cigar string\n",*cptr);
-          exit(EXIT_FAILURE);
+          fprintf(stderr,"file %s, line %d: illegal symbol '%c' "
+                         "in cigar string\n",__FILE__,__LINE__,*cptr);
+          exit(GT_EXIT_PROGRAMMING_ERROR);
       }
       iteration = 0;
     }
@@ -187,6 +190,7 @@ void gt_eoplist_delete(GtEoplist *eoplist)
 #define FT_EOPCODE_DELETION       254
 #define FT_EOPCODE_INSERTION      255
 
+#ifdef OUTSIDE_OF_GT
 #define GT_CHECKARRAYSPACE(A,TYPE,L)\
         do {\
           if ((A)->nextfree##TYPE >= (A)->allocated##TYPE)\
@@ -204,6 +208,7 @@ void gt_eoplist_delete(GtEoplist *eoplist)
           GT_CHECKARRAYSPACE(A,TYPE,L);\
           (A)->space##TYPE[(A)->nextfree##TYPE++] = VAL;\
         } while (false)
+#endif
 
 #define GT_EOPLIST_PUSH(EOPLIST,EOP)\
         gt_assert((EOPLIST) != NULL);\
@@ -684,8 +689,8 @@ void gt_eoplist_format_generic(FILE *fp,
                                const GtEoplist *eoplist,
                                GtEoplistReader *eoplist_reader,
                                bool distinguish_mismatch_match,
-                               GT_UNUSED const GtUchar *characters,
-                               GT_UNUSED GtUchar wildcardshow)
+                               const GtUchar *characters,
+                               GtUchar wildcardshow)
 {
   GtCigarOp co;
   unsigned int pos = 0;
@@ -815,7 +820,9 @@ void gt_eoplist_format_generic(FILE *fp,
         }
         break;
       default:
-        gt_assert(false);
+        fprintf(stderr,"file %s, line %d: illegal eoptype %d\n",
+                       __FILE__,__LINE__,co.eoptype);
+        exit(GT_EXIT_PROGRAMMING_ERROR);
     }
   }
   if (pos > 0)
@@ -876,7 +883,8 @@ void gt_eoplist_format_generic(FILE *fp,
     if (eoplist->withpolcheck)
     {
       fprintf(fp, "\n");
-      gt_assert(startpolished && endpolished);
+      gt_assert(startpolished);
+      gt_assert(endpolished);
     } else
     {
       if (!startpolished)
@@ -896,7 +904,7 @@ void gt_eoplist_format_generic(FILE *fp,
 void gt_eoplist_format_exact(FILE *fp,
                              const GtEoplist *eoplist,
                              GtEoplistReader *eoplist_reader,
-                             GT_UNUSED const GtUchar *characters)
+                             const GtUchar *characters)
 {
   GtUword idx;
   unsigned int pos = 0, width;
@@ -994,19 +1002,19 @@ void gt_eoplist_verify(const GtEoplist *eoplist,GtUword edist,
   {
     fprintf(stderr,"ulen = " GT_WU " != " GT_WU " = sumulen\n",
             eoplist->ulen,sumulen);
-    exit(EXIT_FAILURE);
+    exit(GT_EXIT_PROGRAMMING_ERROR);
   }
   if (eoplist->vlen != sumvlen)
   {
     fprintf(stderr,"vlen = " GT_WU " != " GT_WU " = sumvlen\n",
             eoplist->vlen,sumvlen);
-    exit(EXIT_FAILURE);
+    exit(GT_EXIT_PROGRAMMING_ERROR);
   }
   if (edist != sumdist)
   {
     fprintf(stderr,"edist = " GT_WU " != " GT_WU " = sumdist\n",
             edist,sumdist);
-    exit(EXIT_FAILURE);
+    exit(GT_EXIT_PROGRAMMING_ERROR);
   }
   gt_eoplist_reader_delete(eoplist_reader);
 }
