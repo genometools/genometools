@@ -360,7 +360,7 @@ static GtUword front_next_inplace(Frontvalue *midfront,
     GT_UPDATE_MATCH_HISTORY(&bestfront);
   } else
   {
-    bestfront.backreference = FT_EOP_REPLACEMENT;
+    bestfront.backreference = FT_EOP_MISMATCH;
     if (bestfront.row == replacement_value.row + 1)
     {
       bestfront.backreference |= FT_EOP_DELETION;
@@ -383,13 +383,13 @@ static GtUword front_next_inplace(Frontvalue *midfront,
       if (bestfront.row < replacement_value.row + 1)
       {
         bestfront = replacement_value;
-        bestfront.backreference = FT_EOP_REPLACEMENT;
+        bestfront.backreference = FT_EOP_MISMATCH;
         bestfront.row++;
       } else
       {
         if (bestfront.row == replacement_value.row + 1)
         {
-          bestfront.backreference |= FT_EOP_REPLACEMENT;
+          bestfront.backreference |= FT_EOP_MISMATCH;
         }
       }
     }
@@ -443,7 +443,7 @@ static GtUword front_second_inplace(Frontvalue *midfront,
   maxalignedlen = GT_MULT2(lowfront->row) + FRONT_DIAGONAL(lowfront);
 
   (lowfront+1)->row++;
-  (lowfront+1)->backreference = FT_EOP_REPLACEMENT;
+  (lowfront+1)->backreference = FT_EOP_MISMATCH;
   GT_UPDATE_MATCH_HISTORY(lowfront+1);
   front_prune_add_matches(midfront,lowfront + 1,leftmostbit,max_history,
                           useq,vseq);
@@ -693,7 +693,7 @@ static void showcurrentfront(const Frontvalue *validbasefront,
     {
       printf("I");
     }
-    if (ptr->backreference & FT_EOP_REPLACEMENT)
+    if (ptr->backreference & FT_EOP_MISMATCH)
     {
       printf("R");
     }
