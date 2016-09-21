@@ -443,18 +443,15 @@ static double gt_karlin_altschul_stat_calculate_ungapped_K(
 }
 
 static void get_values_from_vector(GtKarlinAltschulStat *ka,
-                                  const double *matrix,
-                                  GT_UNUSED GtWord gap_extension)
+                                   const double *vector)
 {
-  gt_assert(matrix[gapextdidx] == gap_extension);
-  ka->lambda = matrix[lambdaidx];
-  ka->K = matrix[Kidx];
+  ka->lambda = vector[lambdaidx];
+  ka->K = vector[Kidx];
   ka->logK = log(ka->K);
-  ka->H = matrix[Hidx];
-
+  ka->H = vector[Hidx];
   gt_assert(ka->lambda != 0.0);
-  ka->alpha_div_lambda = matrix[alphaidx]/ka->lambda;
-  ka->beta = matrix[betaidx];
+  ka->alpha_div_lambda = vector[alphaidx]/ka->lambda;
+  ka->beta = vector[betaidx];
 }
 
 static void gt_karlin_altschul_stat_get_gapped_params(GtKarlinAltschulStat *ka)
@@ -493,7 +490,8 @@ static void gt_karlin_altschul_stat_get_gapped_params(GtKarlinAltschulStat *ka)
                    "of gapped alignments",ka->matchscore, ka->mismatchscore);
     exit(GT_EXIT_PROGRAMMING_ERROR);
   }
-  get_values_from_vector(ka, ga_vector, ka->gapscore);
+  gt_assert(ga_vector[gapextdidx] == ka->gapscore);
+  get_values_from_vector(ka, ga_vector);
 }
 
 GtKarlinAltschulStat *gt_karlin_altschul_stat_new(unsigned int numofchars,
