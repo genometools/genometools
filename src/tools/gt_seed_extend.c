@@ -579,8 +579,18 @@ static int gt_seed_extend_compute_parts(GtRange *seqranges,
     gt_error_set(err, "arguments to option -pick must be at least 1");
     had_err = -1;
   } else {
-    seqranges->start = (pick_value - 1) * partsize;
-    seqranges->end = MIN(pick_value * partsize - 1, maxseqnum);
+    if (pick_value > maxseqnum + 1)
+    {
+      gt_error_set(err,"arguments to option -pick must no be larger than "
+                       GT_WU ", which is the number of sequences is the "
+                       "corresponding set",
+                       maxseqnum + 1);
+      had_err = -1;
+    } else
+    {
+      seqranges->start = (pick_value - 1) * partsize;
+      seqranges->end = MIN(pick_value * partsize - 1, maxseqnum);
+    }
     *numseqranges = 1;
   }
   return had_err;

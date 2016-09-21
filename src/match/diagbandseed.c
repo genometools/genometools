@@ -1244,8 +1244,10 @@ static int gt_diagbandseed_algorithm(const GtDiagbandseedInfo *arg,
   }
 
   if (arg->verbose && (arg->anumseqranges > 1 || arg->bnumseqranges > 1)) {
-    fprintf(stream, "# Process part " GT_WU " vs part " GT_WU "\n",
-            partindex.a + 1, partindex.b + 1);
+    fprintf(stream, "# Process part " GT_WU " (sequences " GT_WU "..." GT_WU
+                    ") vs part " GT_WU " (sequences " GT_WU "..." GT_WU ")\n",
+            partindex.a + 1, aseqrange->start,aseqrange->end,
+            partindex.b + 1, bseqrange->start,bseqrange->end);
   }
 
   /* Create k-mer iterator for alist */
