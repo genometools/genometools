@@ -72,7 +72,8 @@ GtDiagbandseedExtendParams *gt_diagbandseed_extend_params_new(
                               bool weakends,
                               bool benchmark,
                               GtUword alignmentwidth,
-                              bool always_polished_ends);
+                              bool always_polished_ends,
+                              bool verify_alignment);
 
 /* The destructors */
 void gt_diagbandseed_info_delete(GtDiagbandseedInfo *info);

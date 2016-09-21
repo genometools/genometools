@@ -162,7 +162,7 @@ static ScoringFrequency *gt_karlin_altschul_stat_scoring_frequency(
     0.25
   };
 
-  gt_assert(scorehandler);
+  gt_assert(scorehandler != NULL);
   for (idx = 0; idx < numofchars; idx++)
   {
     for (jdx = 0; jdx < numofchars; jdx++)
@@ -457,8 +457,7 @@ static void get_values_from_vector(GtKarlinAltschulStat *ka,
   ka->beta = matrix[betaidx];
 }
 
-static int gt_karlin_altschul_stat_get_gapped_params(GtKarlinAltschulStat *ka,
-                                                     GtError *err)
+static void gt_karlin_altschul_stat_get_gapped_params(GtKarlinAltschulStat *ka)
 {
   const double *ga_vector = NULL;
 
@@ -489,21 +488,17 @@ static int gt_karlin_altschul_stat_get_gapped_params(GtKarlinAltschulStat *ka,
   }
   else
   {
-    gt_error_set(err, "no precomputed values for combination matchscore "
-                      GT_WD " and mismatchscore " GT_WD
-                      " in evalue calculation "
-                      "of gapped alignments",
-                      ka->matchscore, ka->mismatchscore);
-    return -1;
+    fprintf(stderr,"no precomputed values for combination matchscore "
+                   GT_WD " and mismatchscore " GT_WD " in evalue calculation "
+                   "of gapped alignments",ka->matchscore, ka->mismatchscore);
+    exit(GT_EXIT_PROGRAMMING_ERROR);
   }
   get_values_from_vector(ka, ga_vector, ka->gapscore);
-  return 0;
 }
 
 GtKarlinAltschulStat *gt_karlin_altschul_stat_new(unsigned int numofchars,
                                                   const GtScoreHandler
-                                                        *scorehandler,
-                                                  GtError *err)
+                                                        *scorehandler)
 {
   GtKarlinAltschulStat *ka = gt_malloc(sizeof *ka);
 
@@ -519,11 +514,7 @@ GtKarlinAltschulStat *gt_karlin_altschul_stat_new(unsigned int numofchars,
   /* only implemented for linear scores */
   if (numofchars == 0)
   { /* gapped alignment */
-    if (gt_karlin_altschul_stat_get_gapped_params(ka, err) != 0)
-    {
-      gt_karlin_altschul_stat_delete(ka);
-      return NULL;
-    }
+    gt_karlin_altschul_stat_get_gapped_params(ka);
   } else
   {
     /* New ScoringFrequency */
@@ -573,7 +564,7 @@ int gt_karlin_altschul_stat_unit_test(GtError *err)
   scorehandler = gt_scorehandler_new(1,-2,0,-2);
 
   /* check function for gapped alignments */
-  ka = gt_karlin_altschul_stat_new(0, scorehandler, err);
+  ka = gt_karlin_altschul_stat_new(0, scorehandler);
   gt_ensure(ka->lambda == 1.19);
   gt_ensure(ka->H == 0.66);
   gt_ensure(ka->K == 0.34);
@@ -581,7 +572,7 @@ int gt_karlin_altschul_stat_unit_test(GtError *err)
 
   /* check function for ungapped alignments */
   numofchars = 4;
-  ka = gt_karlin_altschul_stat_new(numofchars, scorehandler, err);
+  ka = gt_karlin_altschul_stat_new(numofchars, scorehandler);
   q = ka->lambda/1.33; /* lambda = 1.33 */
   gt_ensure(0.99 < q && q < 1.01);
   q = ka->H/1.12; /* H = 1.12 */

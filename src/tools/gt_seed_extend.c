@@ -70,6 +70,7 @@ typedef struct {
   GtStr *char_access_mode;
   bool bias_parameters;
   bool relax_polish;
+  bool verify_alignment;
   /* general options */
   GtOption *se_option_withali;
   GtUword se_alignlength;
@@ -119,7 +120,8 @@ static GtOptionParser* gt_seed_extend_option_parser_new(void *tool_arguments)
   GtOptionParser *op;
   GtOption *option, *op_gre, *op_xdr, *op_cam, *op_his, *op_dif, *op_pmh,
     *op_len, *op_err, *op_xbe, *op_sup, *op_frq, *op_mem, *op_ali, *op_bia,
-    *op_onl, *op_weakends, *op_seed_display, *op_relax_polish, *op_spdist,
+    *op_onl, *op_weakends, *op_seed_display, *op_relax_polish,
+    *op_verify_alignment,*op_spdist,
     *op_norev, *op_nofwd, *op_part, *op_pick, *op_seqlength_display, *op_overl;
 
   static GtRange seedpairdistance_defaults = {1UL, GT_UWORD_MAX};
@@ -367,6 +369,16 @@ static GtOptionParser* gt_seed_extend_option_parser_new(void *tool_arguments)
   gt_option_parser_add_option(op, op_relax_polish);
   gt_option_is_development_option(op_relax_polish);
   gt_option_imply(op_relax_polish, op_ali);
+
+  /* -verify-alignment */
+  op_verify_alignment
+    = gt_option_new_bool("verify-alignment",
+                         "verify alignment directly after its construction "
+                         "(without knowning the sequences) and later (after the"
+                         "sequence is known), in case the alignment is output",
+                                   &arguments->verify_alignment,false);
+  gt_option_parser_add_option(op, op_verify_alignment);
+  gt_option_is_development_option(op_verify_alignment);
 
   /* -seed-display */
   op_seed_display = gt_option_new_bool("seed-display",
@@ -979,7 +991,8 @@ static int gt_seed_extend_runner(int argc,
                                              arguments->weakends,
                                              arguments->benchmark,
                                              arguments->se_alignmentwidth,
-                                             !arguments->relax_polish);
+                                             !arguments->relax_polish,
+                                             arguments->verify_alignment);
 
     info = gt_diagbandseed_info_new(aencseq,
                                     bencseq,

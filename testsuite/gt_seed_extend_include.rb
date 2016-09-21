@@ -43,10 +43,10 @@ Keywords "gt_seed_extend extendgreedy extendxdrop small_poly"
 Test do
   run_test build_encseq("small_poly", "#{$testdata}small_poly.fas")
   run_test "#{$bin}gt seed_extend -extendxdrop 97 " +
-           "-l 10 -ii small_poly"
+           "-l 10 -ii small_poly -verify-alignment"
   run "cmp #{last_stdout} #{$testdata}seedextend3.out"
   run_test "#{$bin}gt seed_extend -extendgreedy 97 " +
-           "-l 10 -ii small_poly"
+           "-l 10 -ii small_poly -verify-alignment"
   run "cmp #{last_stdout} #{$testdata}seedextend3.out"
 end
 
@@ -96,7 +96,7 @@ Test do
       for minidentity in [70, 80, 99] do
         run_test "#{$bin}gt seed_extend -extendgreedy #{sensitivity} " +
                  "-minidentity #{minidentity} -l #{alignlength} -a " +
-                 "-seed-display -ii at1MB", :retval => 0
+                 "-seed-display -ii at1MB -verify-alignment", :retval => 0
       end
     end
   end
@@ -245,14 +245,14 @@ Keywords "gt_seed_extend parts pick"
 Test do
   run_test build_encseq("at1MB", "#{$testdata}at1MB")
   run_test build_encseq("gt_bioseq_succ_3", "#{$testdata}gt_bioseq_succ_3.fas")
-  run_test "#{$bin}gt seed_extend -ii at1MB"
+  run_test "#{$bin}gt seed_extend -ii at1MB -verify-alignment"
   run "sort #{last_stdout}"
   run "mv #{last_stdout} default.out"
-  run_test "#{$bin}gt seed_extend -ii at1MB -parts 4"
+  run_test "#{$bin}gt seed_extend -ii at1MB -parts 4 -verify-alignment"
   run "sort #{last_stdout}"
   run "cmp -s default.out #{last_stdout}"
   run_test "#{$bin}gt seed_extend -ii at1MB -qii gt_bioseq_succ_3 " +
-           "-parts 2 -pick 1,2"
+           "-parts 2 -pick 1,2 -verify-alignment"
   grep last_stdout, /24 209 15 P 26 2 248 35 5 80.00/
   grep last_stdout, /23 418 127 P 24 2 68 35 4 82.98/
 end

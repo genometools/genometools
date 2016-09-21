@@ -17,6 +17,7 @@
 
 #include <float.h>
 #include <math.h>
+#include "core/unused_api.h"
 #include "core/ensure.h"
 #include "core/ma.h"
 #include "core/minmax.h"
@@ -251,20 +252,17 @@ double gt_evalue_calculate(const GtKarlinAltschulStat *ka,
   return evalue;
 }
 
-int gt_evalue_unit_test(GtError *err)
+int gt_evalue_unit_test(GT_UNUSED GtError *err)
 {
   GtKarlinAltschulStat *ka;
   GtScoreHandler *scorehandler;
   GtUword searchspace;
   double evalue_variance;
   const unsigned int numchars = 0; /* means gapped case */
-
   int had_err = 0;
-  gt_error_check(err);
 
   scorehandler = gt_scorehandler_new(1,-2,0,-2);
-  ka = gt_karlin_altschul_stat_new(numchars,scorehandler, err);
-  gt_error_check(err);
+  ka = gt_karlin_altschul_stat_new(numchars,scorehandler);
 
   /* checks searchspace calculation */
   gt_ensure(gt_evalue_calculate_searchspace(ka, 772376, 1952, 450)== 308243802);
