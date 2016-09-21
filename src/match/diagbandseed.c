@@ -112,6 +112,7 @@ struct GtDiagbandseedExtendParams {
   bool benchmark;
   GtUword alignmentwidth;
   bool always_polished_ends;
+  bool verify_alignment;
 };
 
 struct GtDiagbandseedProcKmerInfo {
@@ -193,7 +194,8 @@ GtDiagbandseedExtendParams *gt_diagbandseed_extend_params_new(
                                 bool weakends,
                                 bool benchmark,
                                 GtUword alignmentwidth,
-                                bool always_polished_ends)
+                                bool always_polished_ends,
+                                bool verify_alignment)
 {
   GtDiagbandseedExtendParams *extp = gt_malloc(sizeof *extp);
   extp->errorpercentage = errorpercentage;
@@ -215,6 +217,7 @@ GtDiagbandseedExtendParams *gt_diagbandseed_extend_params_new(
   extp->benchmark = benchmark;
   extp->alignmentwidth = alignmentwidth;
   extp->always_polished_ends = always_polished_ends;
+  extp->verify_alignment = verify_alignment;
   return extp;
 }
 
@@ -1039,6 +1042,10 @@ static void gt_diagbandseed_process_seeds(GtArrayGtDiagbandseedSeedPair *mlist,
   }
 
   info_querymatch.querymatchspaceptr = gt_querymatch_new();
+  if (arg->verify_alignment)
+  {
+    gt_querymatch_verify_alignment_set(info_querymatch.querymatchspaceptr);
+  }
   gt_querymatch_display_set(info_querymatch.querymatchspaceptr,
                             arg->display_flag);
   if (querymoutopt != NULL) {
@@ -1403,7 +1410,8 @@ static int gt_diagbandseed_algorithm(const GtDiagbandseedInfo *arg,
     }
     processinfo = (void *)xdropinfo;
   }
-  if (extp->extendxdrop || extp->alignmentwidth > 0) {
+  if (extp->extendxdrop || extp->alignmentwidth > 0 ||
+      extp->verify_alignment) {
     querymoutopt = gt_querymatchoutoptions_new(true,
                                                false,
                                                extp->alignmentwidth);
@@ -1544,9 +1552,7 @@ static int gt_diagbandseed_algorithm(const GtDiagbandseedInfo *arg,
   } else if (extp->extendxdrop) {
     gt_xdrop_matchinfo_delete((GtXdropmatchinfo *)processinfo);
   }
-  if (extp->extendxdrop || extp->alignmentwidth > 0) {
-    gt_querymatchoutoptions_delete(querymoutopt);
-  }
+  gt_querymatchoutoptions_delete(querymoutopt);
   return had_err;
 }
 

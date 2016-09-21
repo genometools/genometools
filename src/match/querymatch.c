@@ -345,6 +345,8 @@ bool gt_querymatch_process(GtQuerymatch *querymatchptr,
                                                     querymatchptr->seedpos1,
                                                     querymatchptr->seedpos2,
                                                     querymatchptr->seedlen,
+                                                    querymatchptr->
+                                                       verify_alignment,
                                                     greedyextension);
       if (seededalignment && !greedyextension)
       {

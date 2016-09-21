@@ -69,6 +69,7 @@ bool gt_querymatchoutoptions_alignment_prepare(
                                      GtUword seedpos1,
                                      GtUword seedpos2,
                                      GtUword seedlen,
+                                     bool verify_alignment,
                                      bool greedyextension);
 
 void gt_frontprune2eoplist(GtQuerymatchoutoptions *querymatchoutoptions,

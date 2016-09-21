@@ -640,7 +640,7 @@ void gt_eoplist_set_sequences(GtEoplist *eoplist,
                               const GtUchar *vseq,
                               GtUword vlen)
 {
-  gt_assert(eoplist != NULL && useq != NULL && vseq != NULL);
+  gt_assert(eoplist != NULL);
   eoplist->useq = useq;
   eoplist->vseq = vseq;
   eoplist->ulen = ulen;
@@ -949,8 +949,6 @@ void gt_eoplist_verify(const GtEoplist *eoplist,GtUword edist,
   GtUword sumulen = 0, sumvlen = 0, sumdist = 0;
 
   gt_assert(eoplist != NULL);
-  gt_assert(eoplist->useq != NULL);
-  gt_assert(eoplist->vseq != NULL);
   if (distinguish_mismatch_match)
   {
     gt_eoplist_reader_distinguish_mismatch_match(eoplist_reader);
@@ -969,28 +967,34 @@ void gt_eoplist_verify(const GtEoplist *eoplist,GtUword edist,
         sumdist += co.iteration;
       } else
       {
-        GtUword idx;
         if (co.eoptype == GtMismatchOp)
         {
-          gt_assert(eoplist_reader->distinguish_mismatch_match);
           sumdist += co.iteration;
         }
-        for (idx = 0; idx < co.iteration; idx++)
+        if (eoplist->useq == NULL && eoplist->vseq == NULL)
         {
-          GtUchar a = eoplist->useq[sumulen+idx],
-                  b = eoplist->vseq[sumvlen+idx];
-          if (a == b && !ISSPECIAL(a))
+          gt_assert(eoplist_reader->distinguish_mismatch_match);
+        } else
+        {
+          GtUword idx;
+
+          for (idx = 0; idx < co.iteration; idx++)
           {
-            gt_assert(co.eoptype == GtMatchOp);
-          } else
-          {
-            gt_assert(!eoplist_reader->distinguish_mismatch_match ||
-                      co.eoptype == GtMismatchOp);
-          }
-          if (!eoplist_reader->distinguish_mismatch_match &&
-              (a != b || ISSPECIAL(a)))
-          {
-            sumdist++;
+            GtUchar a = eoplist->useq[sumulen+idx],
+                    b = eoplist->vseq[sumvlen+idx];
+            if (a == b && !ISSPECIAL(a))
+            {
+              gt_assert(co.eoptype == GtMatchOp);
+            } else
+            {
+              gt_assert(!eoplist_reader->distinguish_mismatch_match ||
+                        co.eoptype == GtMismatchOp);
+            }
+            if (!eoplist_reader->distinguish_mismatch_match &&
+                (a != b || ISSPECIAL(a)))
+            {
+              sumdist++;
+            }
           }
         }
         sumulen += co.iteration;
@@ -1016,6 +1020,10 @@ void gt_eoplist_verify(const GtEoplist *eoplist,GtUword edist,
             edist,sumdist);
     exit(GT_EXIT_PROGRAMMING_ERROR);
   }
+  gt_assert(eoplist->ulen + eoplist->vlen
+            == 2 * (gt_eoplist_matches_count(eoplist) + edist) -
+               (gt_eoplist_deletions_count(eoplist) +
+                gt_eoplist_insertions_count(eoplist)));
   gt_eoplist_reader_delete(eoplist_reader);
 }
 
