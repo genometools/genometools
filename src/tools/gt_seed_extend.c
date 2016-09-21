@@ -546,6 +546,106 @@ static int gt_seed_extend_arguments_check(int rest_argc, void *tool_arguments,
   return had_err;
 }
 
+static void gt_seed_extend_parts_variance_show(const GtRange *seqranges,
+                                               GtUword numranges,
+                                               const GtEncseq *encseq)
+{
+  GtUword variance_sum = 0, idx, avgpartsize;
+
+  gt_assert(encseq != NULL);
+  avgpartsize = gt_encseq_total_length(encseq)/numranges;
+  for (idx = 0; idx < numranges; idx++)
+  {
+    GtUword segmentstart, segmentend, width;
+
+    segmentstart = gt_encseq_seqstartpos(encseq,seqranges[idx].start);
+    segmentend = gt_encseq_seqstartpos(encseq,seqranges[idx].end) +
+                 gt_encseq_seqlength(encseq,seqranges[idx].end) - 1;
+    gt_assert(segmentstart < segmentend);
+    width = segmentend - segmentstart + 1;
+    if (width > avgpartsize)
+    {
+      GtUword diff = width - avgpartsize;
+      variance_sum += diff * diff;
+    } else
+    {
+      GtUword diff = avgpartsize - width;
+      variance_sum += diff * diff;
+    }
+    printf("# Part " GT_WU ": sequence " GT_WU "..." GT_WU " of total length "
+           GT_WU "\n",idx+1,seqranges[idx].start,seqranges[idx].end,
+                      segmentend - segmentstart + 1);
+  }
+  printf("# Variance of parts is %.2e\n",(double) variance_sum/numranges);
+}
+
+static GtUword gt_encseq_next_larger_width(const GtEncseq *encseq,
+                                           GtUword startseqnum,
+                                           GtUword width)
+{
+  GtUword left, right, found = GT_UWORD_MAX,
+          numofsequences = gt_encseq_num_of_sequences(encseq);
+  GtUword start_segment = gt_encseq_seqstartpos(encseq,startseqnum);
+
+  left = startseqnum;
+  gt_assert(numofsequences > 0);
+  right = numofsequences - 1;
+  while (left <= right)
+  {
+    GtUword mid = left + (right - left + 1)/2, mid_end, this_width;
+
+    gt_assert(mid < numofsequences);
+    mid_end = gt_encseq_seqstartpos(encseq,mid) +
+              gt_encseq_seqlength(encseq,mid) - 1;
+    gt_assert(mid_end > start_segment);
+    this_width = mid_end - start_segment;
+    if (this_width > width)
+    {
+      found = mid;
+      if (right == 0)
+      {
+        break;
+      }
+      right = mid - 1;
+    } else
+    {
+      if (left == numofsequences - 1)
+      {
+        break;
+      }
+      left = mid + 1;
+    }
+  }
+  return found;
+}
+
+static GtUword gt_seed_extend_even_parts(GtRange *seqranges,
+                                         const GtEncseq *encseq,
+                                         GtUword maxseqnum,
+                                         GtUword numparts)
+{
+  GtUword seqnum = 0, idx;
+  const GtUword partwidth = gt_encseq_total_length(encseq)/numparts;
+
+  for (idx = 0; idx < numparts && seqnum <= maxseqnum; idx++)
+  {
+    GtUword seqnum_next_width;
+
+    seqnum_next_width = gt_encseq_next_larger_width(encseq,seqnum,partwidth);
+    seqranges[idx].start = seqnum;
+    if (seqnum_next_width == GT_UWORD_MAX)
+    {
+      seqranges[idx].end = maxseqnum;
+      idx++;
+      break;
+    }
+    seqranges[idx].end = seqnum_next_width;
+    seqnum = seqnum_next_width + 1;
+  }
+  gt_assert(idx > 0 && seqranges[idx-1].end == maxseqnum);
+  return idx;
+}
+
 /* Compute sequence ranges for specified number of parts and pick value. */
 static int gt_seed_extend_compute_parts(GtRange *seqranges,
                                         GtUword *numseqranges,
@@ -553,24 +653,24 @@ static int gt_seed_extend_compute_parts(GtRange *seqranges,
                                         GtUword pick_value,
                                         GtError *err)
 {
-  GtUword seqnum;
   const GtUword numparts = *numseqranges;
   const GtUword maxseqnum = gt_encseq_num_of_sequences(encseq) - 1;
   const GtUword partsize = maxseqnum / numparts + 1;
   int had_err = 0;
-  gt_assert(seqranges && numseqranges);
-  *numseqranges = 0;
 
+  gt_assert(seqranges != NULL && numseqranges != NULL);
+  *numseqranges = 0;
   if (pick_value == GT_UWORD_MAX) { /* not specified: take all sequences */
-    GtRange *new_range;
-    for (seqnum = 0; seqnum <= maxseqnum; seqnum += partsize) {
-      gt_assert(*numseqranges < numparts);
-      new_range = seqranges + *numseqranges;
-      new_range->start = seqnum;
-      new_range->end = MIN(seqnum + partsize - 1, maxseqnum);
-      (*numseqranges)++;
+    if (numparts > gt_encseq_num_of_sequences(encseq))
+    {
+      seqranges[0].start = 0;
+      seqranges[0].end = maxseqnum;
+      *numseqranges = 1;
+    } else
+    {
+      *numseqranges = gt_seed_extend_even_parts(seqranges,encseq,
+                                                maxseqnum,numparts);
     }
-    gt_assert(*numseqranges > 0);
   } else if (pick_value > numparts) {
     gt_error_set(err, "arguments to option -pick must not exceed " GT_WU
                  " (number of parts)", numparts);
@@ -590,8 +690,8 @@ static int gt_seed_extend_compute_parts(GtRange *seqranges,
     {
       seqranges->start = (pick_value - 1) * partsize;
       seqranges->end = MIN(pick_value * partsize - 1, maxseqnum);
+      *numseqranges = 1;
     }
-    *numseqranges = 1;
   }
   return had_err;
 }
@@ -837,12 +937,28 @@ static int gt_seed_extend_runner(int argc,
                                            aencseq,
                                            apick,
                                            err);
+    if (!had_err && anum > 1 && arguments->verbose)
+    {
+      gt_seed_extend_parts_variance_show(aseqranges, anum, aencseq);
+    }
     if (!had_err) {
-      had_err = gt_seed_extend_compute_parts(bseqranges,
-                                             &bnum,
-                                             bencseq,
-                                             bpick,
-                                             err);
+      if (aencseq == bencseq && apick == bpick)
+      {
+        gt_assert(bnum >= anum);
+        memcpy(bseqranges,aseqranges,anum * sizeof *aseqranges);
+        bnum = anum;
+      } else
+      {
+        had_err = gt_seed_extend_compute_parts(bseqranges,
+                                               &bnum,
+                                               bencseq,
+                                               bpick,
+                                               err);
+        if (!had_err && bnum > 1 && arguments->verbose)
+        {
+          gt_seed_extend_parts_variance_show(bseqranges, bnum, bencseq);
+        }
+      }
     }
 
     extp = gt_diagbandseed_extend_params_new(errorpercentage,
