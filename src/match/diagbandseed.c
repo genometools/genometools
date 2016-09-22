@@ -1211,7 +1211,7 @@ static char *gt_diagbandseed_kmer_filename(const GtEncseq *encseq,
   gt_str_append_char(str, forward ? 'f' : 'r');
   gt_str_append_uint(str, numparts);
   gt_str_append_char(str, '-');
-  gt_str_append_uint(str, partindex);
+  gt_str_append_uint(str, partindex + 1);
   gt_str_append_cstr(str, ".kmer");
   filename = gt_cstr_dup(gt_str_get(str));
   gt_str_delete(str);
@@ -1644,9 +1644,12 @@ static int gt_diagbandseed_write_kmers(const GtArrayGtDiagbandseedKmerPos *list,
 int gt_diagbandseed_run(const GtDiagbandseedInfo *arg,
                         const GtRange *aseqranges,
                         const GtRange *bseqranges,
+                        const GtUwordPair *pick,
                         GtError *err)
 {
   const bool self = arg->aencseq == arg->bencseq ? true : false;
+  const bool apick = pick->a != GT_UWORD_MAX ? true : false;
+  const bool bpick = pick->b != GT_UWORD_MAX ? true : false;
   GtArrayGtDiagbandseedKmerPos alist;
   GtUword aidx, bidx;
   int had_err = 0;
@@ -1672,11 +1675,11 @@ int gt_diagbandseed_run(const GtDiagbandseedInfo *arg,
       if (!fwd && arg->norev) continue;
 
       for (bidx = 0; !had_err && bidx < arg->bnumseqranges; bidx++) {
-        char *path = gt_diagbandseed_kmer_filename(arg->bencseq,
-                                                   arg->seedlength,
-                                                   fwd,
-                                                   arg->bnumseqranges,
-                                                   bidx);
+        char *path;
+        if (bpick && pick->b != bidx) continue;
+
+        path = gt_diagbandseed_kmer_filename(arg->bencseq, arg->seedlength, fwd,
+                                             arg->bnumseqranges, bidx);
         if (!gt_file_exists(path)) {
           GtArrayGtDiagbandseedKmerPos blist;
           GtReadmode readmode = fwd ? GT_READMODE_FORWARD : GT_READMODE_COMPL;
@@ -1698,6 +1701,8 @@ int gt_diagbandseed_run(const GtDiagbandseedInfo *arg,
     /* create alist here to prevent redundant calculations */
     char *path = NULL;
     bool use_alist = false;
+    if (apick && pick->a != aidx) continue;
+
     if (arg->use_kmerfile) {
       path = gt_diagbandseed_kmer_filename(arg->aencseq, arg->seedlength, true,
                                            arg->anumseqranges, aidx);
@@ -1727,20 +1732,22 @@ int gt_diagbandseed_run(const GtDiagbandseedInfo *arg,
     if (gt_jobs <= 1) {
 #endif
       while (!had_err && bidx < arg->bnumseqranges) {
-        const GtUwordPair partindex = {aidx, bidx};
-        /* start algorithm with chosen sequence ranges */
-        had_err = gt_diagbandseed_algorithm(arg,
-                                            use_alist ? &alist : NULL,
-                                            stdout,
-                                            aseqranges + aidx,
-                                            bseqranges + bidx,
-                                            partindex,
-                                            err);
+        if (!bpick || pick->b == bidx) {
+          const GtUwordPair partindex = {aidx, bidx};
+          /* start algorithm with chosen sequence ranges */
+          had_err = gt_diagbandseed_algorithm(arg,
+                                              use_alist ? &alist : NULL,
+                                              stdout,
+                                              aseqranges + aidx,
+                                              bseqranges + bidx,
+                                              partindex,
+                                              err);
+        }
         bidx++;
       }
 #ifdef GT_THREADS_ENABLED
     } else if (!arg->use_kmerfile) {
-      const GtUword num_runs = arg->bnumseqranges - bidx;
+      const GtUword num_runs = bpick ? 1 : arg->bnumseqranges - bidx;
       const GtUword num_runs_per_thread = (num_runs - 1) / gt_jobs + 1;
       const GtUword num_threads = (num_runs - 1) / num_runs_per_thread + 1;
       GtArray *combinations = gt_array_new(sizeof (GtUwordPair));
@@ -1748,6 +1755,7 @@ int gt_diagbandseed_run(const GtDiagbandseedInfo *arg,
 
       gt_assert(bidx < arg->bnumseqranges);
       gt_assert(num_threads <= gt_jobs);
+      gt_assert(!bpick || num_threads == 1);
 
       /* start additional threads */
       for (tidx = 1; !had_err && tidx < num_threads; tidx++) {
@@ -1779,11 +1787,14 @@ int gt_diagbandseed_run(const GtDiagbandseedInfo *arg,
 
       /* start main thread */
       if (!had_err) {
-        for (bidx = self ? aidx : 0;
-             bidx < MIN(bidx + num_runs_per_thread, arg->bnumseqranges);
-             bidx++) {
-          GtUwordPair comb = {aidx, bidx};
-          gt_array_add(combinations, comb);
+        bidx = self ? aidx : 0;
+        for (GtUword idx = bidx;
+             idx < MIN(bidx + num_runs_per_thread, arg->bnumseqranges);
+             ++idx) {
+          if (!bpick || pick->b == idx) {
+            GtUwordPair comb = {aidx, idx};
+            gt_array_add(combinations, comb);
+          }
         }
         gt_diagbandseed_thread_info_set(tinfo,
                                         arg,
@@ -1824,9 +1835,12 @@ int gt_diagbandseed_run(const GtDiagbandseedInfo *arg,
       combinations[tidx] = gt_array_new(sizeof (GtUwordPair));
     }
     for (aidx = 0; aidx < arg->anumseqranges; aidx++) {
+      if (apick && pick->a != aidx) continue;
       for (bidx = self ? aidx : 0; bidx < arg->bnumseqranges; bidx++) {
-        GtUwordPair comb = {aidx, bidx};
-        gt_array_add(combinations[counter++ % gt_jobs], comb);
+        if (!bpick || pick->b == bidx) {
+          GtUwordPair comb = {aidx, bidx};
+          gt_array_add(combinations[counter++ % gt_jobs], comb);
+        }
       }
     }
 
