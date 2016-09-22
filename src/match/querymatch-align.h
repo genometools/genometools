@@ -93,7 +93,7 @@ void gt_querymatchoutoptions_alignment_show(const GtQuerymatchoutoptions
 
 typedef struct
 {
-  GtUword uoffset, voffset, ulen, vlen, sumdist;
+  GtUword uoffset, voffset, ulen, vlen, sumdist, sum_max_mismatches;
 } GtSeqpaircoordinates;
 
 const GtSeqpaircoordinates *gt_querymatchoutoptions_correction_get(

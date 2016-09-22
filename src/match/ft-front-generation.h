@@ -11,7 +11,7 @@
 
 typedef struct
 {
-  GtUword alignedlen, row, distance, trimleft;
+  GtUword alignedlen, row, distance, trimleft, max_mismatches;
 } Polished_point;
 
 typedef struct GtFronttrace GtFronttrace;
