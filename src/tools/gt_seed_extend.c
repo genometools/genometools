@@ -663,54 +663,22 @@ static GtUword gt_seed_extend_even_parts(GtRange *seqranges,
   return idx;
 }
 
-/* Compute sequence ranges for specified number of parts and pick value. */
-static int gt_seed_extend_compute_parts(GtRange *seqranges,
-                                        GtUword *numseqranges,
-                                        const GtEncseq *encseq,
-                                        GtUword pick_value,
-                                        GtError *err)
+/* Compute sequence ranges for specified number of parts. */
+static GtUword gt_seed_extend_compute_parts(GtRange *seqranges,
+                                            GtUword numparts,
+                                            const GtEncseq *encseq)
 {
-  const GtUword numparts = *numseqranges;
   const GtUword maxseqnum = gt_encseq_num_of_sequences(encseq) - 1;
-  const GtUword partsize = maxseqnum / numparts + 1;
-  int had_err = 0;
-
-  gt_assert(seqranges != NULL && numseqranges != NULL);
-  *numseqranges = 0;
-  if (pick_value == GT_UWORD_MAX) { /* not specified: take all sequences */
-    if (numparts > gt_encseq_num_of_sequences(encseq))
-    {
-      seqranges[0].start = 0;
-      seqranges[0].end = maxseqnum;
-      *numseqranges = 1;
-    } else
-    {
-      *numseqranges = gt_seed_extend_even_parts(seqranges,encseq,
-                                                maxseqnum,numparts);
+  gt_assert(seqranges != NULL);
+  if (numparts > maxseqnum) { /* assign one seq for each part */
+    for (unsigned idx = 0; idx <= maxseqnum; ++idx) {
+      seqranges[idx].start = idx;
+      seqranges[idx].end = idx;
     }
-  } else if (pick_value > numparts) {
-    gt_error_set(err, "arguments to option -pick must not exceed " GT_WU
-                 " (number of parts)", numparts);
-    had_err = -1;
-  } else if (pick_value < 1) {
-    gt_error_set(err, "arguments to option -pick must be at least 1");
-    had_err = -1;
+    return maxseqnum + 1;
   } else {
-    if (pick_value > maxseqnum + 1)
-    {
-      gt_error_set(err,"arguments to option -pick must no be larger than "
-                       GT_WU ", which is the number of sequences is the "
-                       "corresponding set",
-                       maxseqnum + 1);
-      had_err = -1;
-    } else
-    {
-      seqranges->start = (pick_value - 1) * partsize;
-      seqranges->end = MIN(pick_value * partsize - 1, maxseqnum);
-      *numseqranges = 1;
-    }
+    return gt_seed_extend_even_parts(seqranges, encseq, maxseqnum, numparts);
   }
-  return had_err;
 }
 
 static int gt_seed_extend_runner(int argc,
@@ -728,7 +696,7 @@ static int gt_seed_extend_runner(int argc,
   bool extendxdrop, extendgreedy = true;
   unsigned int display_flag = 0;
   unsigned int maxseedlength = 0, nchars = 0;
-  GtUword apick = GT_UWORD_MAX, bpick = GT_UWORD_MAX;
+  GtUwordPair pick = {GT_UWORD_MAX, GT_UWORD_MAX};
   GtUword maxseqlength = 0;
   int had_err = 0;
 
@@ -899,16 +867,36 @@ static int gt_seed_extend_runner(int argc,
   /* Parse pick option */
   if (!had_err && strcmp(gt_str_get(arguments->dbs_pick_str),
                          "use all combinations successively") != 0) {
+    GtUword apick, bpick;
     char **items = gt_cstr_split(gt_str_get(arguments->dbs_pick_str), ',');
     if (gt_cstr_array_size((const char **)items) != 2 ||
         gt_parse_uword(&apick, items[0]) != 0 ||
         gt_parse_uword(&bpick, items[1]) != 0) {
       gt_error_set(err, "argument to option -pick must satisfy format i,j");
       had_err = -1;
+    } else if (apick > arguments->dbs_parts || bpick > arguments->dbs_parts) {
+      gt_error_set(err, "arguments to option -pick must not exceed " GT_WU
+                   " (number of parts)", arguments->dbs_parts);
+      had_err = -1;
+    } else if (apick < 1 || bpick < 1) {
+      gt_error_set(err, "arguments to option -pick must be at least 1");
+      had_err = -1;
+    } else if (apick > gt_encseq_num_of_sequences(aencseq)) {
+      gt_error_set(err, "first argument to option -pick must not be larger than"
+                   " " GT_WU ", which is the number of sequences in the first "
+                   "set", gt_encseq_num_of_sequences(aencseq));
+      had_err = -1;
+    } else if (bpick > gt_encseq_num_of_sequences(bencseq)) {
+      gt_error_set(err, "second argument to option -pick must not be larger "
+                   "than " GT_WU ", which is the number of sequences in the "
+                   "second set", gt_encseq_num_of_sequences(bencseq));
+      had_err = -1;
     } else if (aencseq == bencseq && apick > bpick) {
-      GtUword tmp = apick;
-      apick = bpick;
-      bpick = tmp;
+      pick.a = bpick - 1;
+      pick.b = apick - 1;
+    } else {
+      pick.a = apick - 1;
+      pick.b = bpick - 1;
     }
     gt_cstr_array_delete(items);
   }
@@ -935,10 +923,9 @@ static int gt_seed_extend_runner(int argc,
     GtDiagbandseedExtendParams *extp = NULL;
     GtDiagbandseedInfo *info = NULL;
     GtUword sensitivity = 0;
-    GtUword anum = arguments->dbs_parts;
-    GtUword bnum = arguments->dbs_parts;
-    GtRange *aseqranges = (GtRange *)gt_malloc(anum * sizeof *aseqranges);
-    GtRange *bseqranges = (GtRange *)gt_malloc(bnum * sizeof *bseqranges);
+    GtUwordPair numparts = {arguments->dbs_parts, arguments->dbs_parts};
+    GtRange *aseqranges = (GtRange *)gt_malloc(numparts.a * sizeof *aseqranges);
+    GtRange *bseqranges = (GtRange *)gt_malloc(numparts.b * sizeof *bseqranges);
 
     if (extendgreedy) {
       sensitivity = arguments->se_extendgreedy;
@@ -950,34 +937,30 @@ static int gt_seed_extend_runner(int argc,
     gt_assert(gt_encseq_num_of_sequences(bencseq) > 0);
 
     /* Get sequence ranges */
-    had_err = gt_seed_extend_compute_parts(aseqranges,
-                                           &anum,
-                                           aencseq,
-                                           apick,
-                                           err);
-    if (!had_err && anum > 1 && arguments->verbose)
+    numparts.a = gt_seed_extend_compute_parts(aseqranges,
+                                              arguments->dbs_parts,
+                                              aencseq);
+    if (numparts.a > 1 && arguments->verbose)
     {
-      gt_seed_extend_parts_variance_show(aseqranges, anum, aencseq);
+      gt_seed_extend_parts_variance_show(aseqranges, numparts.a, aencseq);
     }
-    if (!had_err) {
-      if (aencseq == bencseq && apick == bpick)
+    if (aencseq == bencseq && pick.a == pick.b)
+    {
+      gt_assert(numparts.b >= numparts.a);
+      memcpy(bseqranges, aseqranges, numparts.a * sizeof *aseqranges);
+      numparts.b = numparts.a;
+    } else
+    {
+      numparts.b = gt_seed_extend_compute_parts(bseqranges,
+                                                arguments->dbs_parts,
+                                                bencseq);
+      if (numparts.b > 1 && arguments->verbose)
       {
-        gt_assert(bnum >= anum);
-        memcpy(bseqranges,aseqranges,anum * sizeof *aseqranges);
-        bnum = anum;
-      } else
-      {
-        had_err = gt_seed_extend_compute_parts(bseqranges,
-                                               &bnum,
-                                               bencseq,
-                                               bpick,
-                                               err);
-        if (!had_err && bnum > 1 && arguments->verbose)
-        {
-          gt_seed_extend_parts_variance_show(bseqranges, bnum, bencseq);
-        }
+        gt_seed_extend_parts_variance_show(bseqranges, numparts.b, bencseq);
       }
     }
+    gt_assert(pick.a < numparts.a || pick.a == GT_UWORD_MAX);
+    gt_assert(pick.b < numparts.b || pick.b == GT_UWORD_MAX);
 
     extp = gt_diagbandseed_extend_params_new(errorpercentage,
                                              arguments->se_alignlength,
@@ -1014,16 +997,15 @@ static int gt_seed_extend_runner(int argc,
                                     arguments->dbs_debug_seedpair,
                                     arguments->use_kmerfile,
                                     extp,
-                                    anum,
-                                    bnum);
+                                    numparts.a,
+                                    numparts.b);
 
     /* Start algorithm */
-    if (!had_err) {
-      had_err = gt_diagbandseed_run(info,
-                                    aseqranges,
-                                    bseqranges,
-                                    err);
-    }
+    had_err = gt_diagbandseed_run(info,
+                                  aseqranges,
+                                  bseqranges,
+                                  &pick,
+                                  err);
 
     /* clean up */
     gt_free(aseqranges);

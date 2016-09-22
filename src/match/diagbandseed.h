@@ -32,6 +32,7 @@ typedef struct GtDiagbandseedExtendParams GtDiagbandseedExtendParams;
 int gt_diagbandseed_run(const GtDiagbandseedInfo *arg,
                         const GtRange *aseqranges,
                         const GtRange *bseqranges,
+                        const GtUwordPair *pick,
                         GtError *err);
 
 /* The constructor for GtDiagbandseedInfo*/
