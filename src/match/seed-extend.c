@@ -234,6 +234,7 @@ static const GtQuerymatch *gt_combine_extensions(
          GtUword v_right_ext,
          GtXdropscore total_score,
          GtUword total_distance,
+         GtUword total_mismatches,
          bool silent)
 {
   GtUword dblen, dbseqlen, querylen, total_alignedlen, dbstart, querystart;
@@ -271,6 +272,7 @@ static const GtQuerymatch *gt_combine_extensions(
                              dbseqlen,
                              (GtWord) total_score,
                              total_distance,
+                             total_mismatches,
                              query == NULL ? true : false,
                              (uint64_t) sesp->queryseqnum,
                              querylen,
@@ -1123,6 +1125,8 @@ static const GtQuerymatch *gt_extend_sesp(bool forxdrop,
                  forxdrop ? total_score : 0,
                  forxdrop ? 0 : (left_best_polished_point.distance +
                                  right_best_polished_point.distance),
+                 forxdrop ? 0 : (left_best_polished_point.max_mismatches +
+                                 right_best_polished_point.max_mismatches),
                  forxdrop ? xdropmatchinfo->silent
                           : greedyextendmatchinfo->silent);
 }

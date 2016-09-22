@@ -37,6 +37,7 @@ typedef struct
 {
   bool show_alignment,
        seed_display,
+       evalue_display,
        seqlength_display,
        relax_polish,
        sortmatches,
@@ -97,6 +98,13 @@ static GtOptionParser* gt_show_seedext_option_parser_new(void *tool_arguments)
                               &arguments->seqlength_display,
                               false);
   gt_option_is_development_option(option);
+  gt_option_parser_add_option(op, option);
+
+  /* -evalue-display */
+  option = gt_option_new_bool("evalue-display",
+                              "Display evalues of match",
+                              &arguments->evalue_display,
+                              false);
   gt_option_parser_add_option(op, option);
 
   /* -seed-extend */
@@ -308,7 +316,8 @@ static int gt_show_seedext_runner(GT_UNUSED int argc,
     GtScoreHandler *linspace_scorehandler = gt_scorehandler_new(0,1,0,1);;
     const unsigned int display_flag
       = gt_querymatch_bool2display_flag(arguments->seed_display,
-                                        arguments->seqlength_display);
+                                        arguments->seqlength_display,
+                                        arguments->evalue_display);
 
     if (!arguments->relax_polish)
     {
