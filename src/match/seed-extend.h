@@ -20,7 +20,6 @@
 #include "core/unused_api.h"
 #include "querymatch.h"
 #include "xdrop.h"
-#include "ft-front-prune.h"
 
 /* This header file describes the interface to two different
    methods for extending seeds, namely the xdrop-based method based on

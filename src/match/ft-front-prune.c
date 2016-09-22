@@ -35,7 +35,7 @@
         }\
         (FRONTVAL)->matchhistory_bits <<= 1
 
-typedef unsigned int Rowvaluetype;
+typedef uint32_t Rowvaluetype;
 typedef uint8_t Matchcounttype;
 typedef uint8_t Backreferencetype;
 
@@ -47,6 +47,8 @@ typedef struct
   Matchcounttype matchhistory_count,
                  matchhistory_size;
   Backreferencetype backreference;
+  uint32_t max_mismatches; /* maximum number of mismatches in a path to this
+                              Front-entry.*/
 } Frontvalue;
 
 #ifndef OUTSIDE_OF_GT
@@ -361,9 +363,14 @@ static GtUword front_next_inplace(Frontvalue *midfront,
   } else
   {
     bestfront.backreference = FT_EOP_MISMATCH;
+    bestfront.max_mismatches++;
     if (bestfront.row == replacement_value.row + 1)
     {
       bestfront.backreference |= FT_EOP_DELETION;
+      if (bestfront.max_mismatches < replacement_value.max_mismatches)
+      {
+        bestfront.max_mismatches = replacement_value.max_mismatches;
+      }
     }
   }
   *(lowfront+1) = bestfront;
@@ -384,12 +391,17 @@ static GtUword front_next_inplace(Frontvalue *midfront,
       {
         bestfront = replacement_value;
         bestfront.backreference = FT_EOP_MISMATCH;
+        bestfront.max_mismatches++;
         bestfront.row++;
       } else
       {
         if (bestfront.row == replacement_value.row + 1)
         {
           bestfront.backreference |= FT_EOP_MISMATCH;
+          if (bestfront.max_mismatches < replacement_value.max_mismatches + 1)
+          {
+            bestfront.max_mismatches = replacement_value.max_mismatches + 1;
+          }
         }
       }
     }
@@ -444,6 +456,7 @@ static GtUword front_second_inplace(Frontvalue *midfront,
 
   (lowfront+1)->row++;
   (lowfront+1)->backreference = FT_EOP_MISMATCH;
+  (lowfront+1)->max_mismatches++;
   GT_UPDATE_MATCH_HISTORY(lowfront+1);
   front_prune_add_matches(midfront,lowfront + 1,leftmostbit,max_history,
                           useq,vseq);
@@ -465,7 +478,7 @@ static GtUword front_second_inplace(Frontvalue *midfront,
   return maxalignedlen;
 }
 
-static bool trimthisentry(GT_UNUSED GtUword distance,
+static bool trimthisentry(GtUword distance,
                           Rowvaluetype row,
                           GtWord diagonal,
                           const Frontvalue *fv,
@@ -480,10 +493,12 @@ static bool trimthisentry(GT_UNUSED GtUword distance,
       GtUword alignedlen = GT_MULT2(row) + diagonal;
       double identity = 100.0 * (1.0 - 2.0 * (double) distance/alignedlen);
       printf("aligned=" GT_WU ",diagonal=" GT_WD ", distance=" GT_WU
-             ", row=%u, identity=%.2f, hist_size=%d, matches=%d "
+             ", row=%" PRIu32 ", identity=%.2f, hist_size=%d, matches=%d "
              "< " GT_WU "=minmatches\n",
              alignedlen,
-             diagonal,distance,row,
+             diagonal,
+             distance,
+             row,
              identity,
              (int) fv->matchhistory_size,
              (int) fv->matchhistory_count,
@@ -495,14 +510,15 @@ static bool trimthisentry(GT_UNUSED GtUword distance,
   {
     if (showfrontinfo)
     {
-      printf(GT_WD "&" GT_WU "&%u&2: i'+j'=" GT_WU "<" GT_WU "=i+j-lag\n",
+      printf(GT_WD "&" GT_WU "&%" PRIu32 "&2: i'+j'=" GT_WU "<"
+             GT_WU "=i+j-lag\n",
              diagonal,distance,row,GT_MULT2(row) + diagonal,minlenfrommaxdiff);
     }
     return true;
   }
   if (showfrontinfo)
   {
-    printf(GT_WD "&" GT_WU "&%u\n", diagonal,distance,row);
+    printf(GT_WD "&" GT_WU "&%" PRIu32 "\n", diagonal,distance,row);
   }
   return false;
 }
@@ -641,10 +657,11 @@ static void update_trace_and_polished(Polished_point *best_polished_point,
       best_polished_point->row = frontptr->row;
       best_polished_point->distance = distance;
       best_polished_point->trimleft = trimleft;
+      best_polished_point->max_mismatches = (GtUword) frontptr->max_mismatches;
       if (showfrontinfo)
       {
-        printf("new polished point (alignlen=" GT_WU ",row=%u,distance=" GT_WU
-                                  ")\n",alignedlen,frontptr->row,distance);
+        printf("new polished point (alignlen=" GT_WU ",row=%" PRIu32
+               ",distance=" GT_WU ")\n",alignedlen,frontptr->row,distance);
       }
     }
     if (front_trace != NULL)
@@ -678,8 +695,8 @@ static void showcurrentfront(const Frontvalue *validbasefront,
        ptr < validbasefront + trimleft + valid; ptr++)
   {
     GtUword thisalignedlen = GT_MULT2(ptr->row) + FRONT_DIAGONAL(ptr);
-    printf("front[h=" GT_WD "]=%u,localmatchqual=%.2f,alignedlen=" GT_WU
-           ",back=",
+    printf("front[h=" GT_WD "]=%" PRIu32 ",localmatchqual=%.2f,alignedlen="
+           GT_WU ",back=",
                    FRONT_DIAGONAL(ptr),
                    ptr->row,
                    100.0 *
@@ -791,10 +808,12 @@ GtUword front_prune_edist_inplace(
              ",valid=" GT_WU,distance, GT_MULT2(distance) + 1, trimleft,valid);
       if (best_polished_point != NULL)
       {
-        printf(",best pp=(align=" GT_WU ", row=" GT_WU ", distance=" GT_WU ")",
+        printf(",best pp=(align=" GT_WU ", row=" GT_WU ", distance=" GT_WU
+                 ", max_mismatches=" GT_WU ")",
                   best_polished_point->alignedlen,
                   best_polished_point->row,
-                  best_polished_point->distance);
+                  best_polished_point->distance,
+                  best_polished_point->max_mismatches);
       }
       printf("\n");
     }
@@ -819,6 +838,7 @@ GtUword front_prune_edist_inplace(
       validbasefront->matchhistory_size
         = validbasefront->matchhistory_count = MIN(max_history,seedlength);
       validbasefront->backreference = 0; /* No back reference */
+      validbasefront->max_mismatches = 0;
       front_prune_add_matches(validbasefront + distance,validbasefront,
                               leftmostbit,max_history,&useq,&vseq);
       maxalignedlen = GT_MULT2(validbasefront->row);

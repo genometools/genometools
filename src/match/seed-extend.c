@@ -18,13 +18,13 @@
 #include "core/minmax.h"
 #include "match/querymatch.h"
 #include "match/xdrop.h"
-#include "match/esa-maxpairs.h"
 #include "match/ft-front-prune.h"
 #include "match/ft-trimstat.h"
-#include "match/seed-extend.h"
 #include "match/seq_or_encseq.h"
+#include "match/seed-extend.h"
 
-static GtUword score2distance(GtWord score,GtUword alignedlen)
+static GtUword gt_querymatch_score2distance(GtXdropscore score,
+                                            GtUword alignedlen)
 {
   if (score >= 0)
   {
@@ -232,7 +232,7 @@ static const GtQuerymatch *gt_combine_extensions(
          GtUword v_left_ext,
          GtUword u_right_ext,
          GtUword v_right_ext,
-         GtXdropscore score,
+         GtXdropscore total_score,
          GtUword total_distance,
          bool silent)
 {
@@ -243,10 +243,10 @@ static const GtQuerymatch *gt_combine_extensions(
   total_alignedlen = dblen + querylen;
   if (forxdrop)
   {
-    total_distance = score2distance(score,total_alignedlen);
+    total_distance = gt_querymatch_score2distance(total_score,total_alignedlen);
   } else
   {
-    score = gt_querymatch_distance2score(total_distance,total_alignedlen);
+    total_score = gt_querymatch_distance2score(total_distance,total_alignedlen);
   }
   gt_assert(sesp->seedpos1 >= u_left_ext && sesp->seedpos2 >= v_left_ext);
   dbstart = sesp->seedpos1 - u_left_ext;
@@ -254,8 +254,8 @@ static const GtQuerymatch *gt_combine_extensions(
   gt_assert(querystart >= sesp->queryseqstartpos);
 
 #ifdef SKDEBUG
-  printf("total_distance=" GT_WU ", score=" GT_WD ",total_alignedlen=" GT_WU
-          ", err=%.2f\n",total_distance,score,total_alignedlen,
+  printf("total_distance=" GT_WU ", total_score=" GT_WD ",total_alignedlen="
+         GT_WU ", err=%.2f\n",total_distance,total_score,total_alignedlen,
           gt_querymatch_error_rate(total_distance,total_alignedlen));
 #endif
   if (silent)
@@ -269,7 +269,7 @@ static const GtQuerymatch *gt_combine_extensions(
                              sesp->dbseqnum,
                              dbstart - sesp->dbseqstartpos,
                              dbseqlen,
-                             score,
+                             (GtWord) total_score,
                              total_distance,
                              query == NULL ? true : false,
                              (uint64_t) sesp->queryseqnum,
@@ -299,7 +299,8 @@ static void extensioncoords_show(bool forxdrop,bool rightextension,
           rightextension ? "right" : "left",
           u_ext + v_ext,
           u_ext,
-          forxdrop ? score2distance(score_or_distance,u_ext + v_ext)
+          forxdrop ? gt_querymatch_score2distance(score_or_distance,
+                                                  u_ext + v_ext)
                    : (GtUword) score_or_distance);
 }
 #endif
@@ -720,7 +721,7 @@ void gt_align_front_prune_edist(bool rightextension,
           rightextension ? "right" : "left",
           u_ext + v_ext,
           u_ext,
-          (GtWord) best_polished_point->distance);
+          best_polished_point->distance);
 #endif
       break;
     }
@@ -732,6 +733,7 @@ void gt_align_front_prune_edist(bool rightextension,
     best_polished_point->row = 0;
     best_polished_point->distance = 0;
     best_polished_point->trimleft = 0;
+    best_polished_point->max_mismatches = 0;
   }
   gt_assert(distance >= best_polished_point->distance &&
             distance < ulen + vlen + 1);
@@ -855,10 +857,10 @@ static const GtQuerymatch *gt_extend_sesp(bool forxdrop,
   GtXdropmatchinfo *xdropmatchinfo = NULL;
   GtUword u_left_ext, v_left_ext, u_right_ext, v_right_ext,
           ulen, vlen, urightbound, vrightbound;
-  GtXdropscore score = 0;
+  GtXdropscore total_score = 0;
   FTsequenceResources ufsr, vfsr;
-  Polished_point left_best_polished_point = {0,0,0},
-                 right_best_polished_point = {0,0,0};
+  Polished_point left_best_polished_point = {0,0,0,0,0},
+                 right_best_polished_point = {0,0,0,0,0};
   const bool rightextension = true;
 
   if (query == NULL)
@@ -1086,9 +1088,10 @@ static const GtQuerymatch *gt_extend_sesp(bool forxdrop,
     extensioncoords_show(true,rightextension,u_right_ext,v_right_ext,
                          xdropmatchinfo->best_right.score);
 #endif
-    score = (GtXdropscore) sesp->seedlen * xdropmatchinfo->arbitscores.mat +
-            xdropmatchinfo->best_left.score +
-            xdropmatchinfo->best_right.score;
+    total_score
+      = (GtXdropscore) sesp->seedlen * xdropmatchinfo->arbitscores.mat +
+        xdropmatchinfo->best_left.score +
+        xdropmatchinfo->best_right.score;
   } else
   {
     u_right_ext = right_best_polished_point.row;
@@ -1117,7 +1120,7 @@ static const GtQuerymatch *gt_extend_sesp(bool forxdrop,
                  v_left_ext,
                  u_right_ext,
                  v_right_ext,
-                 forxdrop ? score : 0,
+                 forxdrop ? total_score : 0,
                  forxdrop ? 0 : (left_best_polished_point.distance +
                                  right_best_polished_point.distance),
                  forxdrop ? xdropmatchinfo->silent
