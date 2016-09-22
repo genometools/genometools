@@ -30,7 +30,7 @@ struct GtQuerymatchoutoptions
           vseqbuffer_size;
   GtUchar *useqbuffer, *vseqbuffer;
   GtEoplist *eoplist;
-  GtEoplistReader *eoplist_reader;
+  GtEoplistReader *eoplist_reader, *eoplist_reader_verify;
   GtFronttrace *front_trace;
   GtGreedyextendmatchinfo *ggemi;
   const GtUchar *characters;
@@ -64,6 +64,7 @@ GtQuerymatchoutoptions *gt_querymatchoutoptions_new(bool generate_eoplist,
   querymatchoutoptions->vseqbuffer = NULL;
   querymatchoutoptions->vseqbuffer_size = 0;
   querymatchoutoptions->eoplist = gt_eoplist_new();
+  querymatchoutoptions->eoplist_reader_verify = NULL;
   querymatchoutoptions->karlin_altschul_stat
     = gt_karlin_altschul_stat_new(0 /* for gapped alignment */,scorehandler);
   if (alignmentwidth > 0)
@@ -170,6 +171,7 @@ void gt_querymatchoutoptions_delete(
     }
     gt_eoplist_delete(querymatchoutoptions->eoplist);
     gt_eoplist_reader_delete(querymatchoutoptions->eoplist_reader);
+    gt_eoplist_reader_delete(querymatchoutoptions->eoplist_reader_verify);
     gt_encseq_reader_delete(querymatchoutoptions->esr_for_align_show);
     polishing_info_delete(querymatchoutoptions->pol_info);
     gt_karlin_altschul_stat_delete(querymatchoutoptions->karlin_altschul_stat);
@@ -303,9 +305,17 @@ static void seededmatch2eoplist(GtQuerymatchoutoptions *querymatchoutoptions,
   gt_eoplist_reverse_end(querymatchoutoptions->eoplist,0);
   if (verify_alignment)
   {
+    if (querymatchoutoptions->eoplist_reader_verify == NULL)
+    {
+      querymatchoutoptions->eoplist_reader_verify
+        = gt_eoplist_reader_new(querymatchoutoptions->eoplist);
+    }
     gt_eoplist_set_sequences(querymatchoutoptions->eoplist,NULL,
                              coords->ulen,NULL,coords->vlen);
-    gt_eoplist_verify(querymatchoutoptions->eoplist,coords->sumdist,true);
+    gt_eoplist_verify(querymatchoutoptions->eoplist,
+                      querymatchoutoptions->eoplist_reader_verify,
+                      coords->sumdist,
+                      true);
   }
 }
 
@@ -539,7 +549,10 @@ void gt_querymatchoutoptions_alignment_show(const GtQuerymatchoutoptions
       {
         if (verify_alignment)
         {
-          gt_eoplist_verify(querymatchoutoptions->eoplist,distance,true);
+          gt_assert(querymatchoutoptions->eoplist_reader_verify != NULL);
+          gt_eoplist_verify(querymatchoutoptions->eoplist,
+                            querymatchoutoptions->eoplist_reader_verify,
+                            distance,true);
         }
         gt_eoplist_format_generic(fp,
                                   querymatchoutoptions->eoplist,

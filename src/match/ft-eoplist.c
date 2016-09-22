@@ -325,7 +325,8 @@ struct GtEoplistReader
 void gt_eoplist_reader_reset(GtEoplistReader *eoplist_reader,
                              const GtEoplist *eoplist)
 {
-  gt_assert(eoplist != NULL && eoplist_reader != NULL);
+  gt_assert(eoplist != NULL);
+  gt_assert(eoplist_reader != NULL);
   if (eoplist->spaceuint8_t == NULL || eoplist->nextfreeuint8_t == 0)
   {
     eoplist_reader->currenteop = NULL;
@@ -941,14 +942,16 @@ void gt_eoplist_format_exact(FILE *fp,
   }
 }
 
-void gt_eoplist_verify(const GtEoplist *eoplist,GtUword edist,
+void gt_eoplist_verify(const GtEoplist *eoplist,
+                       GtEoplistReader *eoplist_reader,
+                       GtUword edist,
                        bool distinguish_mismatch_match)
 {
-  GtEoplistReader *eoplist_reader = gt_eoplist_reader_new(eoplist);
   GtCigarOp co;
   GtUword sumulen = 0, sumvlen = 0, sumdist = 0;
 
   gt_assert(eoplist != NULL);
+  gt_eoplist_reader_reset(eoplist_reader,eoplist);
   if (distinguish_mismatch_match)
   {
     gt_eoplist_reader_distinguish_mismatch_match(eoplist_reader);
@@ -1024,7 +1027,6 @@ void gt_eoplist_verify(const GtEoplist *eoplist,GtUword edist,
             == 2 * (gt_eoplist_matches_count(eoplist) + edist) -
                (gt_eoplist_deletions_count(eoplist) +
                 gt_eoplist_insertions_count(eoplist)));
-  gt_eoplist_reader_delete(eoplist_reader);
 }
 
 void gt_eoplist_seed_display_set(GtEoplist *eoplist)

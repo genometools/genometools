@@ -54,20 +54,25 @@ GtUword gt_eoplist_insertions_count(const GtEoplist *eoplist);
    insertions and mismatches */
 GtUword gt_eoplist_unit_cost(const GtEoplist *eoplist);
 
-/* verify that the given eoplist represents an alignment of the sequences
-   useq and vseq of length ulen and vlen */
-
-void gt_eoplist_verify(const GtEoplist *eoplist,GtUword edist,
-                       bool distinguish_mismatch_match);
-
 /* To inspect an edit operation list, one employs the following class */
 
 typedef struct GtEoplistReader GtEoplistReader;
 
+/* verify that the given eoplist represents an alignment of the sequences
+   stored by the eoplist->useq and and eoplist->vseq of length
+   eoplist->ulen and eoplist->vlen. If eoplist->useq and eoplist->vseq
+   have not been set, then checs involing the sequence are not
+   perforemed. */
+
+void gt_eoplist_verify(const GtEoplist *eoplist,
+                       GtEoplistReader *eoplist_reader,
+                       GtUword edist,
+                       bool distinguish_mismatch_match);
+
 /* The constructor for the reader with respect to the given eoplist. */
 GtEoplistReader *gt_eoplist_reader_new(const GtEoplist *eoplist);
 
-/* The eoplist_reader can be used in two modes when enumerating
+/* An eoplist_reader can be used in two modes when enumerating
    cigar symbols. In the default mode,
    a mismatch is not distinguished from a match. After calling the following
    function, the reader will enumerate cigar symbols in which a mismatch
