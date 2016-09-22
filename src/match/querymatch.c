@@ -21,9 +21,11 @@
 #include "core/format64.h"
 #include "querymatch.h"
 #include "querymatch-align.h"
+#include "evalue.h"
 
 #define GT_QUERYMATCH_SEED_DISPLAY_FLAG 1U /* display seeds */
 #define GT_QUERYMATCH_SEQLENGTH_DISPLAY_FLAG (1U << 1) /* display seed length */
+#define GT_QUERYMATCH_EVALUE_DISPLAY_FLAG (1U << 2) /* display evalue */
 
 struct GtQuerymatch
 {
@@ -49,12 +51,18 @@ struct GtQuerymatch
   unsigned int display_flag;
   GtQuerymatchoutoptions *ref_querymatchoutoptions; /* reference to
       resources needed for alignment output */
+  GtKarlinAltschulStat *karlin_altschul_stat;
+  GtUword evalue_searchspace;
+  GtUword db_totallength, db_numofsequences;
+  double evalue;
   FILE *fp;
 };
 
 GtQuerymatch *gt_querymatch_new(void)
 {
   GtQuerymatch *querymatch = gt_malloc(sizeof *querymatch);
+  const unsigned int gapped_alignment = 0;
+  GtScoreHandler *scorehandler = gt_scorehandler_new(1,-2,0,-2);
 
   gt_assert(querymatch != NULL);
   querymatch->ref_querymatchoutoptions = NULL;
@@ -62,6 +70,13 @@ GtQuerymatch *gt_querymatch_new(void)
   querymatch->verify_alignment = false;
   querymatch->query_readmode = GT_READMODE_FORWARD;
   querymatch->fp = stdout;
+  querymatch->evalue_searchspace = 0;
+  querymatch->queryseqnum = UINT64_MAX;
+  querymatch->db_totallength = GT_UWORD_MAX;
+  querymatch->db_numofsequences = GT_UWORD_MAX;
+  querymatch->karlin_altschul_stat
+    = gt_karlin_altschul_stat_new(gapped_alignment,scorehandler);
+  gt_scorehandler_delete(scorehandler);
   return querymatch;
 }
 
@@ -81,6 +96,15 @@ void gt_querymatch_outoptions_set(GtQuerymatch *querymatch,
   querymatch->ref_querymatchoutoptions = querymatchoutoptions;
 }
 
+void gt_querymatch_db_keyvalues_set(GtQuerymatch *querymatch,
+                                    GtUword db_totallength,
+                                    GtUword db_numofsequences)
+{
+  gt_assert(querymatch != NULL);
+  querymatch->db_totallength = db_totallength;
+  querymatch->db_numofsequences = db_numofsequences;
+}
+
 void gt_querymatch_file_set(GtQuerymatch *querymatch, FILE *fp)
 {
   gt_assert(querymatch != NULL);
@@ -95,11 +119,13 @@ void gt_querymatch_display_set(GtQuerymatch *querymatch,
 }
 
 unsigned int gt_querymatch_bool2display_flag(bool seed_display,
-                                             bool seqlength_display)
+                                             bool seqlength_display,
+                                             bool evalue_display)
 {
   return (unsigned int)
          (seed_display ? GT_QUERYMATCH_SEED_DISPLAY_FLAG : 0) |
-         (seqlength_display ? GT_QUERYMATCH_SEQLENGTH_DISPLAY_FLAG : 0);
+         (seqlength_display ? GT_QUERYMATCH_SEQLENGTH_DISPLAY_FLAG : 0) |
+         (evalue_display ? GT_QUERYMATCH_EVALUE_DISPLAY_FLAG : 0);
 }
 
 bool gt_querymatch_seed_display(unsigned int display_flag)
@@ -134,13 +160,27 @@ void gt_querymatch_init(GtQuerymatch *querymatch,
                         GtUword dbseqlen,
                         GtWord score,
                         GtUword distance,
+                        GtUword mismatches,
                         bool selfmatch,
                         uint64_t queryseqnum,
                         GtUword querylen,
                         GtUword querystart,
                         GtUword query_totallength)
 {
+  GtUword matches, indels;
+
   gt_assert(querymatch != NULL);
+  if (querymatch->queryseqnum == GT_UWORD_MAX ||
+      querymatch->queryseqnum != queryseqnum)
+  {
+    gt_assert(querymatch->db_totallength != GT_UWORD_MAX);
+    gt_assert(querymatch->db_numofsequences != GT_UWORD_MAX);
+    querymatch->evalue_searchspace
+      = gt_evalue_calculate_searchspace(querymatch->karlin_altschul_stat,
+                                        querymatch->db_totallength,
+                                        querymatch->db_numofsequences,
+                                        query_totallength);
+  }
   querymatch->dblen = dblen;
   querymatch->score = score;
   querymatch->distance = distance;
@@ -159,12 +199,20 @@ void gt_querymatch_init(GtQuerymatch *querymatch,
                                       querymatch->querystart);
   querymatch->query_totallength = query_totallength;
   querymatch->dbseqlen = dbseqlen;
+  matches = (dblen + querylen - distance - mismatches)/2;
+  indels = distance - mismatches;
+  querymatch->evalue = gt_evalue_calculate(querymatch->karlin_altschul_stat,
+                                           matches,
+                                           mismatches,
+                                           indels,
+                                           querymatch->evalue_searchspace);
 }
 
 void gt_querymatch_delete(GtQuerymatch *querymatch)
 {
   if (querymatch != NULL)
   {
+    gt_karlin_altschul_stat_delete(querymatch->karlin_altschul_stat);
     gt_free(querymatch);
   }
 }
@@ -235,7 +283,11 @@ void gt_querymatch_coordinates_out(const GtQuerymatch *querymatch)
     fprintf(querymatch->fp, " " GT_WU " " GT_WU,
             querymatch->dbseqlen, querymatch->query_totallength);
   }
-  fprintf(querymatch->fp, "\n");
+  if (querymatch->display_flag & GT_QUERYMATCH_EVALUE_DISPLAY_FLAG)
+  {
+    fprintf(querymatch->fp, " %1.0e",querymatch->evalue);
+  }
+  fputc('\n',querymatch->fp);
 }
 
 void gt_querymatch_prettyprint(const GtQuerymatch *querymatch)
@@ -288,6 +340,7 @@ static void gt_querymatch_applycorrection(GtQuerymatch *querymatch)
                      gt_querymatch_distance2score(coords->sumdist,
                                                   coords->ulen + coords->vlen),
                      coords->sumdist,
+                     coords->sum_max_mismatches,
                      querymatch->selfmatch,
                      querymatch->queryseqnum,
                      coords->vlen,
@@ -457,6 +510,7 @@ bool gt_querymatch_complete(GtQuerymatch *querymatchptr,
                             GtUword dbseqlen,
                             GtWord score,
                             GtUword distance,
+                            GtUword mismatches,
                             bool selfmatch,
                             uint64_t queryseqnum,
                             GtUword querylen,
@@ -470,6 +524,12 @@ bool gt_querymatch_complete(GtQuerymatch *querymatchptr,
                             bool greedyextension)
 {
   gt_assert(querymatchptr != NULL);
+  if (querymatchptr->db_totallength == GT_UWORD_MAX)
+  {
+    gt_querymatch_db_keyvalues_set(querymatchptr,
+                                   gt_encseq_total_length(encseq),
+                                   gt_encseq_num_of_sequences(encseq));
+  }
   gt_querymatch_init(querymatchptr,
                      dblen,
                      dbstart,
@@ -478,6 +538,7 @@ bool gt_querymatch_complete(GtQuerymatch *querymatchptr,
                      dbseqlen,
                      score,
                      distance,
+                     mismatches,
                      selfmatch,
                      queryseqnum,
                      querylen,

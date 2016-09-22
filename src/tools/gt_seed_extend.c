@@ -81,6 +81,7 @@ typedef struct {
   bool benchmark;
   bool verbose;
   bool seed_display;
+  bool evalue_display;
   bool seqlength_display;
   bool use_apos;
   bool histogram;
@@ -390,6 +391,10 @@ static GtOptionParser* gt_seed_extend_option_parser_new(void *tool_arguments)
   gt_option_exclude(op_seed_display, op_onl);
   gt_option_is_development_option(op_seed_display);
   gt_option_parser_add_option(op, op_seed_display);
+
+  option = gt_option_new_bool("evalue-display","display evalue of match",
+                              &arguments->evalue_display, false);
+  gt_option_parser_add_option(op, option);
 
   /* -seqlength-display */
   op_seqlength_display = gt_option_new_bool("seqlength-display",
@@ -777,7 +782,8 @@ static int gt_seed_extend_runner(int argc,
 
   /* Set display flag */
   display_flag = gt_querymatch_bool2display_flag(arguments->seed_display,
-                                                 arguments->seqlength_display);
+                                                 arguments->seqlength_display,
+                                                 arguments->evalue_display);
 
   /* Set character access method */
   if (!arguments->onlyseeds || arguments->se_alignmentwidth > 0) {

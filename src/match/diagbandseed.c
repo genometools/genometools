@@ -1042,6 +1042,9 @@ static void gt_diagbandseed_process_seeds(GtArrayGtDiagbandseedSeedPair *mlist,
   }
 
   info_querymatch.querymatchspaceptr = gt_querymatch_new();
+  gt_querymatch_db_keyvalues_set(info_querymatch.querymatchspaceptr,
+                                 gt_encseq_total_length(aencseq),
+                                 gt_encseq_num_of_sequences(aencseq));
   if (arg->verify_alignment)
   {
     gt_querymatch_verify_alignment_set(info_querymatch.querymatchspaceptr);

@@ -59,7 +59,7 @@ typedef struct
                              of columns of alignment per line displayed. */
   bool scanfile, beverbose, forward, reverse, reverse_complement, searchspm,
        check_extend_symmetry, silent, trimstat, seed_display, seqlength_display,
-       noxpolish, verify_alignment;
+       noxpolish, verify_alignment, evalue_display;
   GtStr *indexname, *query_indexname, *cam_string; /* parse this using
                                     gt_greedy_extend_char_access*/
   GtStrArray *query_files;
@@ -88,6 +88,10 @@ static int gt_exact_selfmatch_with_output(void *info,
   encseq = genericencseq->seqptr.encseq;
   if (gt_encseq_has_multiseq_support(encseq))
   {
+    gt_querymatch_db_keyvalues_set(
+        processinfo_and_querymatchspaceptr->querymatchspaceptr,
+        gt_encseq_total_length(encseq),
+        gt_encseq_num_of_sequences(encseq));
     dbseqnum = gt_encseq_seqnum(encseq,pos1);
     dbseqstartpos = gt_encseq_seqstartpos(encseq,dbseqnum);
     dbseqlen = gt_encseq_seqlength(encseq,dbseqnum);
@@ -111,8 +115,9 @@ static int gt_exact_selfmatch_with_output(void *info,
                              dbseqnum,
                              pos1 - dbseqstartpos,
                              dbseqlen,
-                             0,
-                             0,
+                             0, /* score */
+                             0, /* edist */
+                             0, /* mismatches */
                              true,
                              (uint64_t) queryseqnum,
                              len,
@@ -414,6 +419,10 @@ static GtOptionParser *gt_repfind_option_parser_new(void *tool_arguments)
   gt_option_parser_add_option(op, optionseqlength_display);
   gt_option_is_development_option(optionseqlength_display);
 
+  option = gt_option_new_bool("evalue-display","display evalue of match",
+                                          &arguments->evalue_display, false);
+  gt_option_parser_add_option(op, option);
+
   option_query_indexname = gt_option_new_string("qii",
                                                 "Specify name of query index",
                                                 arguments->query_indexname,
@@ -579,6 +588,7 @@ static int gt_callenumquerymatches(bool selfmatch,
   GtQuerysubstringmatchiterator *qsmi = NULL;
   bool haserr = false, query_encseq_own = false;
   GtEncseq *query_encseq = NULL;
+  GtUword totallength = 0;
 
   if (gt_mapsuffixarray(&suffixarray,
                         SARR_ESQTAB | SARR_SUFTAB | SARR_SSPTAB,
@@ -617,7 +627,7 @@ static int gt_callenumquerymatches(bool selfmatch,
   }
   if (!haserr)
   {
-    GtUword totallength = gt_encseq_total_length(suffixarray.encseq);
+    totallength = gt_encseq_total_length(suffixarray.encseq);
     qsmi = gt_querysubstringmatchiterator_new(suffixarray.encseq,
                                               totallength,
                                               suffixarray.suftab,
@@ -639,6 +649,9 @@ static int gt_callenumquerymatches(bool selfmatch,
     GtSeqorEncseq query_seqorencseq;
     GtQuerymatch *exactseed = gt_querymatch_new();
 
+    gt_querymatch_db_keyvalues_set(exactseed,
+                                   totallength,
+                           gt_encseq_num_of_sequences(suffixarray.encseq));
     if (querymatchoutoptions != NULL)
     {
       gt_querymatch_outoptions_set(exactseed,querymatchoutoptions);
@@ -684,6 +697,7 @@ static int gt_callenumquerymatches(bool selfmatch,
                            dbseqlen,
                            0, /* score */
                            0, /* edist */
+                           0, /* mismatches */
                            selfmatch,
                            queryunitnum,
                            matchlength,
@@ -700,6 +714,7 @@ static int gt_callenumquerymatches(bool selfmatch,
                                    dbseqlen,
                                    0, /* score */
                                    0, /* edist */
+                                   0, /* mismatches */
                                    selfmatch,
                                    queryunitnum,
                                    matchlength,
@@ -835,7 +850,8 @@ static int gt_repfind_runner(int argc,
                           arguments->reverse_complement};
     const unsigned int display_flag
       = gt_querymatch_bool2display_flag(arguments->seed_display,
-                                        arguments->seqlength_display);
+                                        arguments->seqlength_display,
+                                        arguments->evalue_display);
 
     processinfo_and_querymatchspaceptr.processinfo = NULL;
     if (arguments->alignmentwidth > 0 ||

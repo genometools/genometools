@@ -466,6 +466,7 @@ void gt_queryuniquematch(bool selfmatch,
                          dbseqlen,
                          0, /* score */
                          0, /* edist */
+                         0, /* mismatches */
                          selfmatch,
                          localqueryunitnum,
                          matchlen,
@@ -552,6 +553,7 @@ static void gt_querysubstringmatch(bool selfmatch,
                            dbseqlen,
                            0, /* score */
                            0, /* edist */
+                           0, /* mismatches */
                            selfmatch,
                            localqueryunitnum,
                            minmatchlength + extend,
@@ -617,6 +619,9 @@ static int gt_constructsarrandrunmmsearch(
     GtQuerymatch *querymatchspaceptr = gt_querymatch_new();
     GtQueryrepresentation queryrep;
 
+    gt_querymatch_db_keyvalues_set(querymatchspaceptr,
+                                   gt_encseq_total_length(dbencseq),
+                                   gt_encseq_num_of_sequences(dbencseq));
     queryrep.sequence = query;
     queryrep.encseq = NULL;
     queryrep.readmode = GT_READMODE_FORWARD;

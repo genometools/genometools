@@ -22,7 +22,6 @@
 #include "seed-extend.h"
 #include "ft-polish.h"
 #include "querymatch-align.h"
-#include "evalue.h"
 
 struct GtQuerymatchoutoptions
 {
@@ -41,9 +40,6 @@ struct GtQuerymatchoutoptions
        generate_eoplist,
        show_eoplist;
   Polishing_info *pol_info;
-  GtKarlinAltschulStat *karlin_altschul_stat;
-  GtUword evalue_searchspace,
-          evalue_previous_query;
 };
 
 GtQuerymatchoutoptions *gt_querymatchoutoptions_new(bool generate_eoplist,
@@ -52,7 +48,6 @@ GtQuerymatchoutoptions *gt_querymatchoutoptions_new(bool generate_eoplist,
 {
   GtQuerymatchoutoptions *querymatchoutoptions
     = gt_malloc(sizeof *querymatchoutoptions);
-  GtScoreHandler *scorehandler = gt_scorehandler_new(1,-2,0,-2);
 
   querymatchoutoptions->generate_eoplist
     = generate_eoplist || alignmentwidth > 0 || show_eoplist;
@@ -65,8 +60,6 @@ GtQuerymatchoutoptions *gt_querymatchoutoptions_new(bool generate_eoplist,
   querymatchoutoptions->vseqbuffer_size = 0;
   querymatchoutoptions->eoplist = gt_eoplist_new();
   querymatchoutoptions->eoplist_reader_verify = NULL;
-  querymatchoutoptions->karlin_altschul_stat
-    = gt_karlin_altschul_stat_new(0 /* for gapped alignment */,scorehandler);
   if (alignmentwidth > 0)
   {
     querymatchoutoptions->eoplist_reader
@@ -80,9 +73,6 @@ GtQuerymatchoutoptions *gt_querymatchoutoptions_new(bool generate_eoplist,
   querymatchoutoptions->esr_for_align_show = NULL;
   querymatchoutoptions->characters = NULL;
   querymatchoutoptions->always_polished_ends = true;
-  querymatchoutoptions->evalue_searchspace = 0;
-  querymatchoutoptions->evalue_previous_query = 0;
-  gt_scorehandler_delete(scorehandler);
   return querymatchoutoptions;
 }
 
@@ -174,7 +164,6 @@ void gt_querymatchoutoptions_delete(
     gt_eoplist_reader_delete(querymatchoutoptions->eoplist_reader_verify);
     gt_encseq_reader_delete(querymatchoutoptions->esr_for_align_show);
     polishing_info_delete(querymatchoutoptions->pol_info);
-    gt_karlin_altschul_stat_delete(querymatchoutoptions->karlin_altschul_stat);
     gt_free(querymatchoutoptions);
   }
 }
@@ -302,6 +291,8 @@ static void seededmatch2eoplist(GtQuerymatchoutoptions *querymatchoutoptions,
   coords->vlen = seedlen + leftcolumn + rightcolumn;
   coords->sumdist = left_best_polished_point.distance +
                     right_best_polished_point.distance;
+  coords->sum_max_mismatches = left_best_polished_point.max_mismatches +
+                               right_best_polished_point.max_mismatches;
   gt_eoplist_reverse_end(querymatchoutoptions->eoplist,0);
   if (verify_alignment)
   {
