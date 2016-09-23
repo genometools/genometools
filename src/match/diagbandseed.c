@@ -1787,8 +1787,9 @@ int gt_diagbandseed_run(const GtDiagbandseedInfo *arg,
 
       /* start main thread */
       if (!had_err) {
+        GtUword idx;
         bidx = self ? aidx : 0;
-        for (GtUword idx = bidx;
+        for (idx = bidx;
              idx < MIN(bidx + num_runs_per_thread, arg->bnumseqranges);
              ++idx) {
           if (!bpick || pick->b == idx) {
