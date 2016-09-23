@@ -18,25 +18,10 @@
 #ifndef EVALUE_H
 #define EVALUE_H
 
+#include "core/unused_api.h"
 #include "core/types_api.h"
 #include "extended/scorehandler.h"
 #include "match/karlin_altschul_stat.h"
-
-/*
-  calculates evalue for an alignment
-  <ma> = number of matches
-  <mm> = number of mismatches
-  <id> = number of indels
- */
-double gt_evalue_calculate(const GtKarlinAltschulStat *ka,
-                           GtUword ma,
-                           GtUword mm,
-                           GtUword id,
-                           GtUword searchspace);
-
-double gt_evalue_calculate_on_bitscore(const GtKarlinAltschulStat *ka,
-                                       double bit_score,
-                                       GtUword searchspace);
 
 /*
   calculates effective searchspace for query sequence of length
@@ -44,10 +29,36 @@ double gt_evalue_calculate_on_bitscore(const GtKarlinAltschulStat *ka,
   <total_length_of_db> is the total number of characters in all db sequences
   including separators and wildcards
  */
-GtUword gt_evalue_calculate_searchspace(const GtKarlinAltschulStat *ka,
-                                        GtUword total_length_of_db,
-                                        GtUword num_of_db_seqs,
-                                        GtUword query_idx_length);
+GtUword gt_evalue_searchspace(const GtKarlinAltschulStat *ka,
+                              GtUword total_length_of_db,
+                              GtUword num_of_db_seqs,
+                              GtUword query_idx_length);
 
-int gt_evalue_unit_test(GtError *err);
+GtWord gt_evalue_raw_score(const GtKarlinAltschulStat *ka,
+                           GtUword matches,
+                           GtUword mismatches,
+                           GtUword indels);
+
+double gt_evalue_raw_score2bit_score(const GtKarlinAltschulStat *ka,
+                                     GtWord raw_score);
+
+GtWord gt_evalue_bit_score2raw_score(const GtKarlinAltschulStat *ka,
+                                     double bit_score);
+
+double gt_evalue_from_raw_score(const GtKarlinAltschulStat *ka,
+                                GtWord raw_score,
+                                GtUword searchspace);
+
+double gt_evalue_from_bitscore(const GtKarlinAltschulStat *ka,
+                               double bit_score,
+                               GtUword searchspace);
+
+double gt_evalue_from_eop_count(const GtKarlinAltschulStat *ka,
+                                GtUword matches,
+                                GtUword mismatches,
+                                GtUword indels,
+                                GtUword searchspace);
+
+int gt_evalue_unit_test(GT_UNUSED GtError *err);
+
 #endif
