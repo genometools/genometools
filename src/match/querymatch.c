@@ -176,10 +176,10 @@ void gt_querymatch_init(GtQuerymatch *querymatch,
     gt_assert(querymatch->db_totallength != GT_UWORD_MAX);
     gt_assert(querymatch->db_numofsequences != GT_UWORD_MAX);
     querymatch->evalue_searchspace
-      = gt_evalue_calculate_searchspace(querymatch->karlin_altschul_stat,
-                                        querymatch->db_totallength,
-                                        querymatch->db_numofsequences,
-                                        query_totallength);
+      = gt_evalue_searchspace(querymatch->karlin_altschul_stat,
+                              querymatch->db_totallength,
+                              querymatch->db_numofsequences,
+                              query_totallength);
   }
   querymatch->dblen = dblen;
   querymatch->score = score;
@@ -201,11 +201,12 @@ void gt_querymatch_init(GtQuerymatch *querymatch,
   querymatch->dbseqlen = dbseqlen;
   matches = (dblen + querylen - distance - mismatches)/2;
   indels = distance - mismatches;
-  querymatch->evalue = gt_evalue_calculate(querymatch->karlin_altschul_stat,
-                                           matches,
-                                           mismatches,
-                                           indels,
-                                           querymatch->evalue_searchspace);
+  querymatch->evalue = gt_evalue_from_eop_count(
+                              querymatch->karlin_altschul_stat,
+                              matches,
+                              mismatches,
+                              indels,
+                              querymatch->evalue_searchspace);
 }
 
 void gt_querymatch_delete(GtQuerymatch *querymatch)
