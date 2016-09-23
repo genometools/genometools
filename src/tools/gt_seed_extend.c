@@ -671,7 +671,8 @@ static GtUword gt_seed_extend_compute_parts(GtRange *seqranges,
   const GtUword maxseqnum = gt_encseq_num_of_sequences(encseq) - 1;
   gt_assert(seqranges != NULL);
   if (numparts > maxseqnum) { /* assign one seq for each part */
-    for (unsigned idx = 0; idx <= maxseqnum; ++idx) {
+    GtUword idx;
+    for (idx = 0; idx <= maxseqnum; ++idx) {
       seqranges[idx].start = idx;
       seqranges[idx].end = idx;
     }
