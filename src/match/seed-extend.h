@@ -76,7 +76,8 @@ typedef struct
 {
   void *processinfo;
   GtQuerymatch *querymatchspaceptr;
-} GtProcessinfo_and_querymatchspaceptr;;
+  GtKarlinAltschulStat *karlin_altschul_stat;
+} GtProcessinfo_and_querymatchspaceptr;
 
 GtXdropmatchinfo *gt_xdrop_matchinfo_new(GtUword userdefinedleastlength,
                                          GtUword errorpercentage,

@@ -225,6 +225,7 @@ void gt_sesp_show(const GtSeedextendSeqpair *sesp)
 static const GtQuerymatch *gt_combine_extensions(
          bool forxdrop,
          GtQuerymatch *querymatchspaceptr,
+         GtKarlinAltschulStat *karlin_altschul_stat,
          const GtEncseq *dbencseq,
          const GtSeqorEncseq *query,
          const GtSeedextendSeqpair *sesp,
@@ -265,6 +266,7 @@ static const GtQuerymatch *gt_combine_extensions(
   }
   dbseqlen = gt_encseq_seqlength(dbencseq,sesp->dbseqnum);
   if (gt_querymatch_complete(querymatchspaceptr,
+                             karlin_altschul_stat,
                              dblen,
                              dbstart,
                              sesp->dbseqnum,
@@ -1115,6 +1117,7 @@ static const GtQuerymatch *gt_extend_sesp(bool forxdrop,
   return gt_combine_extensions(
                  forxdrop,
                  processinfo_and_querymatchspaceptr->querymatchspaceptr,
+                 processinfo_and_querymatchspaceptr->karlin_altschul_stat,
                  dbencseq,
                  query,
                  sesp,

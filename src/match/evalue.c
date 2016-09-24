@@ -43,12 +43,12 @@
  */
 
 static GtUword gt_evalue_length_adjustment(GtUword query_length,
-                                                     GtUword db_length,
-                                                     GtUword num_of_db_seqs,
-                                                     double alpha_div_lambda,
-                                                     double beta,
-                                                     double K,
-                                                     double logK)
+                                           GtUword actual_db_length,
+                                           GtUword num_of_db_seqs,
+                                           double alpha_div_lambda,
+                                           double beta,
+                                           double K,
+                                           double logK)
 {
   unsigned int idx;
   const unsigned int kMaxIterations = 20;
@@ -59,12 +59,12 @@ static GtUword gt_evalue_length_adjustment(GtUword query_length,
   /* l_max is the largest nonnegative solution of
      K * (m - l) * (n - N * l) > MAX(m,n) */
 
-  space = gt_safe_mult_ulong(db_length, query_length)
-                                              - MAX(query_length, db_length)/K;
+  space = gt_safe_mult_ulong(actual_db_length, query_length)
+          - MAX(query_length, actual_db_length)/K;
   if (space < 0)
     return 0; /* length_adjustnment = 0 */
 
-  nNm = query_length * num_of_db_seqs + db_length;
+  nNm = query_length * num_of_db_seqs + actual_db_length;
   /* quadratic formula */
   len_max = 2 * space / (nNm + sqrt(nNm * nNm - 4 * num_of_db_seqs * space));
 
@@ -74,7 +74,8 @@ static GtUword gt_evalue_length_adjustment(GtUword query_length,
   {
     len = len_next;
     len_bar = beta + alpha_div_lambda *
-              (logK + log((query_length-len)*(db_length-num_of_db_seqs*len)));
+              (logK + log((query_length-len)*
+                          (actual_db_length-num_of_db_seqs*len)));
     if (len_bar >= len)
     {
       len_min = len;
@@ -104,8 +105,8 @@ static GtUword gt_evalue_length_adjustment(GtUword query_length,
     len = ceil(len_min);
     if (len <= len_max)
     {
-      if (alpha_div_lambda * (log(K) + log((query_length-len) *
-                                           (db_length-num_of_db_seqs*len)))
+      if (alpha_div_lambda * (log(K) +
+          log((query_length-len) * (actual_db_length-num_of_db_seqs*len)))
           + beta >= len)
       {
         length_adjustment = (GtUword) len;
@@ -117,26 +118,27 @@ static GtUword gt_evalue_length_adjustment(GtUword query_length,
 }
 
 GtUword gt_evalue_searchspace(const GtKarlinAltschulStat *ka,
-                              GtUword total_length_of_db,
-                              GtUword num_of_db_seqs,
                               GtUword query_idx_length)
 {
   GtUword actual_db_length,
+          num_of_db_seqs,
           actual_query_length,
           effective_db_length,
           effective_query_length,
           length_adjustment;
   double alpha_div_lambda, beta, K, logK;
 
-  gt_assert(ka);
+  gt_assert(ka != NULL);
   alpha_div_lambda = gt_karlin_altschul_stat_get_alphadlambda(ka);
 
   beta = gt_karlin_altschul_stat_get_beta(ka);
   K = gt_karlin_altschul_stat_get_K(ka);
   logK = gt_karlin_altschul_stat_get_logK(ka);
 
-  /* db length without seperators */
-  actual_db_length = total_length_of_db - (num_of_db_seqs - 1);
+  num_of_db_seqs = gt_karlin_altschul_get_num_of_db_seqs(ka);
+  gt_assert(num_of_db_seqs > 0);
+  actual_db_length = gt_karlin_altschul_get_total_length_db(ka) -
+                     (num_of_db_seqs - 1);
 
   /* query length */
   actual_query_length = query_idx_length;
@@ -240,13 +242,14 @@ int gt_evalue_unit_test(GT_UNUSED GtError *err)
 
   scorehandler = gt_scorehandler_new(1,-2,0,-2);
   ka = gt_karlin_altschul_stat_new(numchars,scorehandler);
+  gt_karlin_altschul_stat_add_keyvalues(ka,772376, 1952);
 
   /* checks searchspace calculation */
-  gt_ensure(gt_evalue_searchspace(ka, 772376, 1952, 450)== 308243802);
-  gt_ensure(gt_evalue_searchspace(ka, 772376, 1952, 300)== 199707252);
-  gt_ensure(gt_evalue_searchspace(ka, 772376, 1952, 475)== 324731250);
+  gt_ensure(gt_evalue_searchspace(ka, 450)== 308243802);
+  gt_ensure(gt_evalue_searchspace(ka, 300)== 199707252);
+  gt_ensure(gt_evalue_searchspace(ka, 475)== 324731250);
 
-  searchspace = gt_evalue_searchspace(ka, 772376, 1952, 300);
+  searchspace = gt_evalue_searchspace(ka, 300);
 
   /* checks evalue calculation */
   evalue_variance

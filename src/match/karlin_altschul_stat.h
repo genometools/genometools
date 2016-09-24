@@ -38,12 +38,21 @@ typedef struct GtKarlinAltschulStat GtKarlinAltschulStat;
 GtKarlinAltschulStat *gt_karlin_altschul_stat_new(unsigned int numchars,
                                            const GtScoreHandler *scorehandler);
 
+GtKarlinAltschulStat *gt_karlin_altschul_stat_new_gapped(void);
+
+void gt_karlin_altschul_stat_add_keyvalues(
+                             GtKarlinAltschulStat *karlin_altschul_stat,
+                             GtUword db_totallength,
+                             GtUword db_numofsequences);
+
 void gt_karlin_altschul_stat_delete(GtKarlinAltschulStat *ka);
 double gt_karlin_altschul_stat_get_lambda(const GtKarlinAltschulStat *ka);
 double gt_karlin_altschul_stat_get_K(const GtKarlinAltschulStat *ka);
 double gt_karlin_altschul_stat_get_logK(const GtKarlinAltschulStat *ka);
 double gt_karlin_altschul_stat_get_alphadlambda(const GtKarlinAltschulStat *ka);
 double gt_karlin_altschul_stat_get_beta(const GtKarlinAltschulStat *ka);
+GtWord gt_karlin_altschul_get_num_of_db_seqs(const GtKarlinAltschulStat *ka);
+GtWord gt_karlin_altschul_get_total_length_db(const GtKarlinAltschulStat *ka);
 GtWord gt_karlin_altschul_stat_mismatchscore(const GtKarlinAltschulStat *ka);
 GtWord gt_karlin_altschul_stat_matchscore(const GtKarlinAltschulStat *ka);
 GtWord gt_karlin_altschul_stat_gapscore(const GtKarlinAltschulStat *ka);

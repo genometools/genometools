@@ -30,8 +30,6 @@
   including separators and wildcards
  */
 GtUword gt_evalue_searchspace(const GtKarlinAltschulStat *ka,
-                              GtUword total_length_of_db,
-                              GtUword num_of_db_seqs,
                               GtUword query_idx_length);
 
 GtWord gt_evalue_raw_score(const GtKarlinAltschulStat *ka,

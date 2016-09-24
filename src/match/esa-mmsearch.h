@@ -55,6 +55,7 @@ int gt_sarrquerysubstringmatch(const GtUchar *dbseq,
                                GtAlphabet *alpha,
                                GtProcessquerymatch processquerymatch,
                                void *processquerymatchinfo,
+                               GtKarlinAltschulStat *karlin_altschul_stat,
                                GtLogger *logger,
                                GtError *err);
 

@@ -46,6 +46,7 @@ struct GtKarlinAltschulStat
          alpha_div_lambda,
          beta;
   GtWord matchscore, mismatchscore, gapscore;
+  GtUword total_length_db, num_of_db_seqs;
 };
 
 typedef struct{
@@ -505,6 +506,8 @@ GtKarlinAltschulStat *gt_karlin_altschul_stat_new(unsigned int numofchars,
   ka->K = 0;
   ka->logK = 0;
   ka->H = 0;
+  ka->total_length_db = GT_UWORD_MAX;
+  ka->num_of_db_seqs = GT_UWORD_MAX;
   gt_assert(gt_scorehandler_get_gap_opening(scorehandler) == 0);
   ka->matchscore = gt_scorehandler_get_matchscore(scorehandler);
   ka->mismatchscore = gt_scorehandler_get_mismatchscore(scorehandler);
@@ -534,19 +537,57 @@ GtKarlinAltschulStat *gt_karlin_altschul_stat_new(unsigned int numofchars,
   return ka;
 }
 
+GtKarlinAltschulStat *gt_karlin_altschul_stat_new_gapped(void)
+{
+  const unsigned int gapped_alignment_flag = 0;
+  GtScoreHandler *scorehandler = gt_scorehandler_new(1,-2,0,-2);
+  GtKarlinAltschulStat *karlin_alt_schul_stat
+    = gt_karlin_altschul_stat_new(gapped_alignment_flag,scorehandler);
+  gt_scorehandler_delete(scorehandler);
+  return karlin_alt_schul_stat;
+}
+
+void gt_karlin_altschul_stat_add_keyvalues(
+                             GtKarlinAltschulStat *karlin_altschul_stat,
+                             GtUword total_length_db,
+                             GtUword num_of_db_seqs)
+{
+  if (karlin_altschul_stat != NULL)
+  {
+    gt_assert(karlin_altschul_stat->total_length_db == GT_UWORD_MAX);
+    karlin_altschul_stat->total_length_db = total_length_db;
+    karlin_altschul_stat->num_of_db_seqs = num_of_db_seqs;
+  }
+}
+
 GtWord gt_karlin_altschul_stat_mismatchscore(const GtKarlinAltschulStat *ka)
 {
+  gt_assert(ka != NULL);
   return ka->mismatchscore;
 }
 
 GtWord gt_karlin_altschul_stat_matchscore(const GtKarlinAltschulStat *ka)
 {
+  gt_assert(ka != NULL);
   return ka->matchscore;
 }
 
 GtWord gt_karlin_altschul_stat_gapscore(const GtKarlinAltschulStat *ka)
 {
+  gt_assert(ka != NULL);
   return ka->gapscore;
+}
+
+GtWord gt_karlin_altschul_get_total_length_db(const GtKarlinAltschulStat *ka)
+{
+  gt_assert(ka != NULL && ka->total_length_db != GT_UWORD_MAX);
+  return ka->total_length_db;
+}
+
+GtWord gt_karlin_altschul_get_num_of_db_seqs(const GtKarlinAltschulStat *ka)
+{
+  gt_assert(ka != NULL && ka->num_of_db_seqs != GT_UWORD_MAX);
+  return ka->num_of_db_seqs;
 }
 
 int gt_karlin_altschul_stat_unit_test(GtError *err)

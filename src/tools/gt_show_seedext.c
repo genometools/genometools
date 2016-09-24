@@ -259,6 +259,7 @@ static void gt_show_seed_extend_plain(GtSequencepairbuffer *seqpairbuf,
 }
 
 static void gt_show_seed_extend_encseq(GtQuerymatch *querymatchptr,
+                                     GtKarlinAltschulStat *karlin_altschul_stat,
                                        const GtEncseq *aencseq,
                                        const GtEncseq *bencseq)
 {
@@ -267,6 +268,7 @@ static void gt_show_seed_extend_encseq(GtQuerymatch *querymatchptr,
   bseqorencseq.seq = NULL;
   bseqorencseq.encseq = bencseq;
   if (gt_querymatch_process(querymatchptr,
+                            karlin_altschul_stat,
                             aencseq,
                             &bseqorencseq,
                             false) != 0)
@@ -354,6 +356,12 @@ static int gt_show_seedext_runner(GT_UNUSED int argc,
                               pol_info);
     }
     processinfo_and_querymatchspaceptr.processinfo = greedyextendmatchinfo;
+    processinfo_and_querymatchspaceptr.karlin_altschul_stat
+      = gt_karlin_altschul_stat_new_gapped();
+    gt_karlin_altschul_stat_add_keyvalues(
+        processinfo_and_querymatchspaceptr.karlin_altschul_stat,
+                   gt_encseq_total_length(aencseq),
+                   gt_encseq_num_of_sequences(aencseq));
     if (arguments->sortmatches)
     {
       (void) gt_seedextend_match_iterator_all_sorted(semi,true);
@@ -396,7 +404,10 @@ static int gt_show_seedext_runner(GT_UNUSED int argc,
           }
         } else
         {
-          gt_show_seed_extend_encseq(querymatchptr, aencseq, bencseq);
+          gt_show_seed_extend_encseq(querymatchptr,
+                                     processinfo_and_querymatchspaceptr.
+                                       karlin_altschul_stat,
+                                     aencseq, bencseq);
         }
       } else
       {
@@ -422,6 +433,8 @@ static int gt_show_seedext_runner(GT_UNUSED int argc,
     gt_free(seqpairbuf.a_sequence);
     gt_free(seqpairbuf.b_sequence);
     gt_alignment_delete(alignment);
+    gt_karlin_altschul_stat_delete(processinfo_and_querymatchspaceptr.
+                                   karlin_altschul_stat);
   }
   gt_seedextend_match_iterator_delete(semi);
   return had_err;

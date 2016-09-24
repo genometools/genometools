@@ -1009,6 +1009,8 @@ static void gt_diagbandseed_process_seeds(GtArrayGtDiagbandseedSeedPair *mlist,
   GtUword seedcount = 0;
 #endif
 
+  /* select extension method */
+  info_querymatch.processinfo = processinfo;
   gt_assert(mlist != NULL);
   mlen = mlist->nextfreeGtDiagbandseedSeedPair; /* mlist length  */
   lm = mlist->spaceGtDiagbandseedSeedPair;      /* mlist pointer */
@@ -1017,8 +1019,6 @@ static void gt_diagbandseed_process_seeds(GtArrayGtDiagbandseedSeedPair *mlist,
     return;
   }
 
-  /* select extension method */
-  info_querymatch.processinfo = processinfo;
   if (arg->extendgreedy) {
     extend_selfmatch_relative_function = gt_greedy_extend_selfmatch_relative;
     extend_querymatch_relative_function = gt_greedy_extend_querymatch_relative;
@@ -1042,9 +1042,10 @@ static void gt_diagbandseed_process_seeds(GtArrayGtDiagbandseedSeedPair *mlist,
   }
 
   info_querymatch.querymatchspaceptr = gt_querymatch_new();
-  gt_querymatch_db_keyvalues_set(info_querymatch.querymatchspaceptr,
-                                 gt_encseq_total_length(aencseq),
-                                 gt_encseq_num_of_sequences(aencseq));
+  info_querymatch.karlin_altschul_stat = gt_karlin_altschul_stat_new_gapped();
+  gt_karlin_altschul_stat_add_keyvalues(info_querymatch.karlin_altschul_stat,
+                                        gt_encseq_total_length(aencseq),
+                                        gt_encseq_num_of_sequences(aencseq));
   if (arg->verify_alignment)
   {
     gt_querymatch_verify_alignment_set(info_querymatch.querymatchspaceptr);
@@ -1174,6 +1175,7 @@ static void gt_diagbandseed_process_seeds(GtArrayGtDiagbandseedSeedPair *mlist,
 #endif
   }
   gt_querymatch_delete(info_querymatch.querymatchspaceptr);
+  gt_karlin_altschul_stat_delete(info_querymatch.karlin_altschul_stat);
   gt_free(score);
   gt_free(lastp);
 

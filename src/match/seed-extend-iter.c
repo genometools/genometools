@@ -236,9 +236,6 @@ GtSeedextendMatchIterator *gt_seedextend_match_iterator_new(
     {
       had_err = -1;
     }
-    gt_querymatch_db_keyvalues_set(semi->querymatchptr,
-                                   gt_encseq_total_length(semi->aencseq),
-                                   gt_encseq_num_of_sequences(semi->aencseq));
   }
   if (!had_err)
   {
