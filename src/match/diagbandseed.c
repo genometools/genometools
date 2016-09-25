@@ -964,8 +964,10 @@ static GtArrayGtDiagbandseedSeedPair gt_diagbandseed_get_seedpairs(
 
     if (debug_seedpair) {
       const GtDiagbandseedSeedPair *curr_sp;
+#ifndef NDEBUG
       GtUword anumofseq = gt_encseq_num_of_sequences(aencseq);
       GtUword bnumofseq = gt_encseq_num_of_sequences(bencseq);
+#endif
       for (curr_sp = mspace; curr_sp < mspace + mlen; curr_sp++) {
         gt_assert(curr_sp->aseqnum < anumofseq);
         gt_assert(curr_sp->bseqnum < bnumofseq);
