@@ -113,6 +113,25 @@ static bool gt_querymatch_display_on(unsigned int display_flag,
   return (display_flag & (1U << (int) display)) ? true : false;
 }
 
+GtStr *gt_querymatch_column_header(unsigned int display_flag)
+{
+  GtStr *str = gt_str_new();
+
+  if (gt_querymatch_display_on(display_flag,Gt_Seqlength_display))
+  {
+    gt_str_append_cstr(str," aseqlen bseqlen");
+  }
+  if (gt_querymatch_display_on(display_flag,Gt_Evalue_display))
+  {
+    gt_str_append_cstr(str," evalue");
+  }
+  if (gt_querymatch_display_on(display_flag,Gt_Bitscore_display))
+  {
+    gt_str_append_cstr(str," bit-score");
+  }
+  return str;
+}
+
 const char *gt_querymatch_display_help(void)
 {
   return "specify what additional values in matches are displayed\n"

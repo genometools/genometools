@@ -173,4 +173,6 @@ int gt_querymatch_eval_display_args(unsigned int *display_flag,
                                     GtError *err);
 
 const char *gt_querymatch_display_help(void);
+
+GtStr *gt_querymatch_column_header(unsigned int display_flag);
 #endif

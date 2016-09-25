@@ -36,8 +36,8 @@ int gt_diagbandseed_run(const GtDiagbandseedInfo *arg,
                         GtError *err);
 
 /* The constructor for GtDiagbandseedInfo*/
-GtDiagbandseedInfo *gt_diagbandseed_info_new(GtEncseq *aencseq,
-                                             GtEncseq *bencseq,
+GtDiagbandseedInfo *gt_diagbandseed_info_new(const GtEncseq *aencseq,
+                                             const GtEncseq *bencseq,
                                              GtUword maxfreq,
                                              GtUword memlimit,
                                              unsigned int seedlength,
@@ -49,7 +49,8 @@ GtDiagbandseedInfo *gt_diagbandseed_info_new(GtEncseq *aencseq,
                                              bool debug_kmer,
                                              bool debug_seedpair,
                                              bool use_kmerfile,
-                                             GtDiagbandseedExtendParams *extp,
+                                             const GtDiagbandseedExtendParams
+                                               *extp,
                                              GtUword anumseqranges,
                                              GtUword bnumseqranges);
 
