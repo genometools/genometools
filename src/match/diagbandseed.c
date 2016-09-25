@@ -1062,9 +1062,15 @@ static void gt_diagbandseed_process_seeds(GtArrayGtDiagbandseedSeedPair *mlist,
     gt_str_delete(add_column_header);
     gt_timer_start(timer);
   }
-
   info_querymatch.querymatchspaceptr = gt_querymatch_new();
-  info_querymatch.karlin_altschul_stat = gt_karlin_altschul_stat_new_gapped();
+  if (gt_querymatch_evalue_display(arg->display_flag) ||
+      gt_querymatch_bit_score_display(arg->display_flag))
+  {
+    info_querymatch.karlin_altschul_stat = gt_karlin_altschul_stat_new_gapped();
+  } else
+  {
+    info_querymatch.karlin_altschul_stat = NULL;
+  }
   gt_karlin_altschul_stat_add_keyvalues(info_querymatch.karlin_altschul_stat,
                                         gt_encseq_total_length(aencseq),
                                         gt_encseq_num_of_sequences(aencseq));

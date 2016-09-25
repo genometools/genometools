@@ -849,8 +849,15 @@ static int gt_repfind_runner(int argc,
   if (!haserr)
   {
     processinfo_and_querymatchspaceptr.processinfo = NULL;
-    processinfo_and_querymatchspaceptr.karlin_altschul_stat
-      = gt_karlin_altschul_stat_new_gapped();
+    if (gt_querymatch_evalue_display(display_flag) || 
+        gt_querymatch_bit_score_display(display_flag))
+    {
+      processinfo_and_querymatchspaceptr.karlin_altschul_stat
+        = gt_karlin_altschul_stat_new_gapped();
+    } else
+    {
+      processinfo_and_querymatchspaceptr.karlin_altschul_stat = NULL;
+    }
     if (arguments->alignmentwidth > 0 ||
         (gt_option_is_set(arguments->refextendxdropoption) &&
          !arguments->noxpolish))

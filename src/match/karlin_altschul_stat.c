@@ -603,7 +603,7 @@ int gt_karlin_altschul_stat_unit_test(GtError *err)
   scorehandler = gt_scorehandler_new(1,-2,0,-2);
 
   /* check function for gapped alignments */
-  ka = gt_karlin_altschul_stat_new(0, scorehandler);
+  ka = gt_karlin_altschul_stat_new(0, scorehandler); /* unit test */
   gt_ensure(ka->lambda == 1.19);
   gt_ensure(ka->H == 0.66);
   gt_ensure(ka->K == 0.34);
@@ -611,7 +611,7 @@ int gt_karlin_altschul_stat_unit_test(GtError *err)
 
   /* check function for ungapped alignments */
   numofchars = 4;
-  ka = gt_karlin_altschul_stat_new(numofchars, scorehandler);
+  ka = gt_karlin_altschul_stat_new(numofchars, scorehandler); /* unit test */
   q = ka->lambda/1.33; /* lambda = 1.33 */
   gt_ensure(0.99 < q && q < 1.01);
   q = ka->H/1.12; /* H = 1.12 */

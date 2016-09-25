@@ -113,6 +113,21 @@ static bool gt_querymatch_display_on(unsigned int display_flag,
   return (display_flag & (1U << (int) display)) ? true : false;
 }
 
+bool gt_querymatch_seed_display(unsigned int display_flag)
+{
+  return gt_querymatch_display_on(display_flag,Gt_Seed_display);
+}
+
+bool gt_querymatch_evalue_display(unsigned int display_flag)
+{
+  return gt_querymatch_display_on(display_flag,Gt_Evalue_display);
+}
+
+bool gt_querymatch_bit_score_display(unsigned int display_flag)
+{
+  return gt_querymatch_display_on(display_flag,Gt_Bitscore_display);
+}
+
 GtStr *gt_querymatch_column_header(unsigned int display_flag)
 {
   GtStr *str = gt_str_new();
@@ -160,11 +175,6 @@ static bool gt_querymatch_display_flag_set(unsigned int *display_flag,
     }
   }
   return found;
-}
-
-bool gt_querymatch_seed_display(unsigned int display_flag)
-{
-  return gt_querymatch_display_on(display_flag,Gt_Seed_display);
 }
 
 int gt_querymatch_eval_display_args(unsigned int *display_flag,
@@ -306,6 +316,17 @@ static bool gt_querymatch_okay(const GtQuerymatch *querymatch)
   return false;
 }
 
+static double gt_querymatch_similarity(GtUword distance,GtUword alignedlength)
+{
+  if (distance == 0)
+  {
+    return 100.0;
+  } else
+  {
+    return 100.0 - gt_querymatch_error_rate(distance,alignedlength);
+  }
+}
+
 void gt_querymatch_coordinates_out(const GtQuerymatch *querymatch)
 {
   const char *outflag = "FRCP";
@@ -327,19 +348,10 @@ void gt_querymatch_coordinates_out(const GtQuerymatch *querymatch)
           querymatch->querystart_fwdstrand);
   if (querymatch->score > 0)
   {
-    double similarity;
-
-    if (querymatch->distance == 0)
-    {
-      similarity = 100.0;
-    } else
-    {
-      similarity = 100.0 - gt_querymatch_error_rate(querymatch->distance,
-                                                    querymatch->dblen +
-                                                    querymatch->querylen);
-    }
     fprintf(querymatch->fp, " " GT_WD " " GT_WU " %.2f",
-            querymatch->score, querymatch->distance, similarity);
+            querymatch->score, querymatch->distance,
+            gt_querymatch_similarity(querymatch->distance,
+                                     querymatch->dblen + querymatch->querylen));
   }
   if (gt_querymatch_display_on(querymatch->display_flag,Gt_Seqlength_display))
   {

@@ -241,7 +241,7 @@ int gt_evalue_unit_test(GT_UNUSED GtError *err)
   int had_err = 0;
 
   scorehandler = gt_scorehandler_new(1,-2,0,-2);
-  ka = gt_karlin_altschul_stat_new(numchars,scorehandler);
+  ka = gt_karlin_altschul_stat_new(numchars,scorehandler); /* unit test */
   gt_karlin_altschul_stat_add_keyvalues(ka,772376, 1952);
 
   /* checks searchspace calculation */

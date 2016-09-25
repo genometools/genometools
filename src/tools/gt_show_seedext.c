@@ -343,8 +343,15 @@ static int gt_show_seedext_runner(GT_UNUSED int argc,
                               pol_info);
     }
     processinfo_and_querymatchspaceptr.processinfo = greedyextendmatchinfo;
-    processinfo_and_querymatchspaceptr.karlin_altschul_stat
-      = gt_karlin_altschul_stat_new_gapped();
+    if (gt_querymatch_evalue_display(display_flag) ||
+        gt_querymatch_bit_score_display(display_flag))
+    {
+      processinfo_and_querymatchspaceptr.karlin_altschul_stat
+        = gt_karlin_altschul_stat_new_gapped();
+    } else
+    {
+      processinfo_and_querymatchspaceptr.karlin_altschul_stat = NULL;
+    }
     gt_karlin_altschul_stat_add_keyvalues(
         processinfo_and_querymatchspaceptr.karlin_altschul_stat,
                    gt_encseq_total_length(aencseq),
