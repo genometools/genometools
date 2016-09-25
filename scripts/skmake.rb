@@ -31,7 +31,7 @@ def parseargs(argv)
   options.m64 = true
   options.speed = false
   options.prof = false
-  options.jobs = 4
+  options.jobs = 1
   options.fileargs = nil
   options.threads = true
   options.sketch = false

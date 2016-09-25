@@ -96,12 +96,12 @@ Test do
       for minidentity in [70, 80, 99] do
         run_test "#{$bin}gt seed_extend -extendgreedy #{sensitivity} " +
                  "-minidentity #{minidentity} -l #{alignlength} -a " +
-                 "-seed-display -ii at1MB -verify-alignment", :retval => 0
+                 "-display seed -ii at1MB -verify-alignment", :retval => 0
       end
     end
   end
   run_test "#{$bin}gt seed_extend -extendgreedy -bias-parameters -verify " +
-           "-overlappingseeds -a -seed-display -ii at1MB", :retval => 0
+           "-overlappingseeds -a -display seed -ii at1MB", :retval => 0
 end
 
 # Greedy extension options
@@ -119,7 +119,7 @@ Test do
     end
   end
   run_test "#{$bin}gt seed_extend -bias-parameters -seedpairdistance 10 20 " +
-  "-seed-display -ii at1MB", :retval => 0
+  "-display seed -ii at1MB", :retval => 0
 end
 
 # Xdrop extension options
@@ -223,13 +223,13 @@ Test do
     ["xdrop","greedy"].each do |ext|
       run_test "#{$bin}gt seed_extend -extend#{ext} 100 -l #{extendlength-20}" +
                " -minidentity #{minid} -seedlength #{seedlength} -no-reverse " +
-               "-mincoverage #{seedlength} -seed-display -ii all -kmerfile no"
+               "-mincoverage #{seedlength} -display seed -ii all -kmerfile no"
       grep last_stdout, /^\d+ \d+ \d+ . \d+ \d+ \d+ \d+ \d+ \d+/
       run "mv #{last_stdout} combined.out"
       split_output("combined")
       run_test "#{$bin}gt seed_extend -extend#{ext} 100 -l #{extendlength-20}" +
                " -minidentity #{minid} -seedlength #{seedlength} -no-reverse " +
-               "-mincoverage #{seedlength} -seed-display -ii db -qii query " +
+               "-mincoverage #{seedlength} -display seed -ii db -qii query " +
                "-kmerfile no"
       grep last_stdout, /^\d+ \d+ \d+ . \d+ \d+ \d+ \d+ \d+ \d+/
       run "mv #{last_stdout} separated.out"

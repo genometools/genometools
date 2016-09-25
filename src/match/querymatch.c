@@ -24,10 +24,6 @@
 #include "querymatch-align.h"
 #include "evalue.h"
 
-#define GT_QUERYMATCH_SEED_DISPLAY_FLAG 1U /* display seeds */
-#define GT_QUERYMATCH_SEQLENGTH_DISPLAY_FLAG (1U << 1) /* display seed length */
-#define GT_QUERYMATCH_EVALUE_DISPLAY_FLAG (1U << 2) /* display evalue */
-
 struct GtQuerymatch
 {
   GtUword
@@ -53,7 +49,8 @@ struct GtQuerymatch
   GtQuerymatchoutoptions *ref_querymatchoutoptions; /* reference to
       resources needed for alignment output */
   GtUword evalue_searchspace;
-  double evalue;
+  double evalue, bit_score; /* Bit Score according to scoring scheme used for
+                               karlin altschul statistic */
   FILE *fp;
 };
 
@@ -101,19 +98,76 @@ void gt_querymatch_display_set(GtQuerymatch *querymatch,
   querymatch->display_flag = display_flag;
 }
 
-unsigned int gt_querymatch_bool2display_flag(bool seed_display,
-                                             bool seqlength_display,
-                                             bool evalue_display)
+typedef enum
 {
-  return (unsigned int)
-         (seed_display ? GT_QUERYMATCH_SEED_DISPLAY_FLAG : 0) |
-         (seqlength_display ? GT_QUERYMATCH_SEQLENGTH_DISPLAY_FLAG : 0) |
-         (evalue_display ? GT_QUERYMATCH_EVALUE_DISPLAY_FLAG : 0);
+  Gt_Seed_display,
+  Gt_Seqlength_display,
+  Gt_Evalue_display,
+  Gt_Bitscore_display
+} GtSeedExtendDisplay;
+
+static bool gt_querymatch_display_on(unsigned int display_flag,
+                                     GtSeedExtendDisplay display)
+{
+  gt_assert((int) display <= Gt_Bitscore_display);
+  return (display_flag & (1U << (int) display)) ? true : false;
+}
+
+const char *gt_querymatch_display_help(void)
+{
+  return "specify what additional values in matches are displayed\n"
+         "seed:      display the seed of the match\n"
+         "seqlength: display length of sequences in which\n"
+         "           the two match-instances occua\nr"
+         "evalue:    display evalue\n"
+         "bit-score: display bit score";
+}
+
+static bool gt_querymatch_display_flag_set(unsigned int *display_flag,
+                                           const char *arg)
+{
+  const char *display_strings[]
+    = {"seed","seqlength","evalue","bit-score"};
+  size_t ds_idx, numofds = sizeof display_strings/sizeof display_strings[0];
+  bool found = false;
+
+  gt_assert(numofds == (size_t) Gt_Bitscore_display + 1);
+  for (ds_idx = 0; ds_idx < numofds; ds_idx++)
+  {
+    if (strcmp(arg,display_strings[ds_idx]) == 0)
+    {
+      (*display_flag) |= (1U << ds_idx);
+      found = true;
+    }
+  }
+  return found;
 }
 
 bool gt_querymatch_seed_display(unsigned int display_flag)
 {
-  return (display_flag & GT_QUERYMATCH_SEED_DISPLAY_FLAG) ? true : false;
+  return gt_querymatch_display_on(display_flag,Gt_Seed_display);
+}
+
+int gt_querymatch_eval_display_args(unsigned int *display_flag,
+                                    const GtStrArray *display_args,
+                                    GtError *err)
+{
+  GtUword da_idx;
+
+  *display_flag = 0;
+  for (da_idx = 0; da_idx < gt_str_array_size(display_args); da_idx++)
+  {
+    const char *da = gt_str_array_get(display_args,da_idx);
+
+    if (!gt_querymatch_display_flag_set(display_flag,da))
+    {
+      gt_error_set(err,"illegal argument %s to option -display: "
+                       " possible values are "
+                       "seed, seqlength, evalue, or bit-score",da);
+      return -1;
+    }
+  }
+  return 0;
 }
 
 GtUword gt_querymatch_dbseqnum(const GtQuerymatch *querymatch)
@@ -181,16 +235,20 @@ void gt_querymatch_init(GtQuerymatch *querymatch,
   {
     const GtUword matches = (dblen + querylen - distance - mismatches)/2,
                   indels = distance - mismatches;
-
-    querymatch->evalue = gt_evalue_from_eop_count(
-                                karlin_altschul_stat,
-                                matches,
-                                mismatches,
-                                indels,
-                                querymatch->evalue_searchspace);
-    gt_assert(querymatch->evalue != DBL_MAX);
+    GtWord raw_score = gt_evalue_raw_score(karlin_altschul_stat,
+                                           matches,
+                                           mismatches,
+                                           indels);
+    querymatch->evalue
+      = gt_evalue_from_raw_score(karlin_altschul_stat,raw_score,
+                                 querymatch->evalue_searchspace);
+    querymatch->bit_score
+      = gt_evalue_raw_score2bit_score(karlin_altschul_stat,raw_score);
+    gt_assert(querymatch->evalue != DBL_MAX &&
+              querymatch->bit_score != DBL_MAX);
   } else
   {
+    querymatch->bit_score = DBL_MAX;
     querymatch->evalue = DBL_MAX;
   }
 }
@@ -234,7 +292,7 @@ void gt_querymatch_coordinates_out(const GtQuerymatch *querymatch)
   const char *outflag = "FRCP";
 
   gt_assert(querymatch != NULL);
-  if (querymatch->display_flag & GT_QUERYMATCH_SEED_DISPLAY_FLAG)
+  if (gt_querymatch_seed_display(querymatch->display_flag))
   {
     fprintf(querymatch->fp, "# seed:\t" GT_WU "\t" GT_WU "\t" GT_WU "\n",
             querymatch->seedpos1, querymatch->seedpos2, querymatch->seedlen);
@@ -264,15 +322,20 @@ void gt_querymatch_coordinates_out(const GtQuerymatch *querymatch)
     fprintf(querymatch->fp, " " GT_WD " " GT_WU " %.2f",
             querymatch->score, querymatch->distance, similarity);
   }
-  if (querymatch->display_flag & GT_QUERYMATCH_SEQLENGTH_DISPLAY_FLAG)
+  if (gt_querymatch_display_on(querymatch->display_flag,Gt_Seqlength_display))
   {
     fprintf(querymatch->fp, " " GT_WU " " GT_WU,
             querymatch->dbseqlen, querymatch->query_totallength);
   }
-  if (querymatch->display_flag & GT_QUERYMATCH_EVALUE_DISPLAY_FLAG)
+  if (gt_querymatch_display_on(querymatch->display_flag,Gt_Evalue_display))
   {
     gt_assert(querymatch->evalue != DBL_MAX);
     fprintf(querymatch->fp, " %1.0e",querymatch->evalue);
+  }
+  if (gt_querymatch_display_on(querymatch->display_flag,Gt_Bitscore_display))
+  {
+    gt_assert(querymatch->bit_score != DBL_MAX);
+    fprintf(querymatch->fp, " %.1f",querymatch->bit_score);
   }
   fputc('\n',querymatch->fp);
 }

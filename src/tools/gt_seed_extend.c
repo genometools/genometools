@@ -76,16 +76,15 @@ typedef struct {
   GtUword se_alignlength;
   GtUword se_minidentity;
   GtUword se_alignmentwidth;
+  GtStrArray *display_args;
   bool norev;
   bool nofwd;
   bool benchmark;
   bool verbose;
-  bool seed_display;
-  bool evalue_display;
-  bool seqlength_display;
   bool use_apos;
   bool histogram;
   bool use_kmerfile;
+  unsigned int display_flag;
 } GtSeedExtendArguments;
 
 static void* gt_seed_extend_arguments_new(void)
@@ -96,6 +95,8 @@ static void* gt_seed_extend_arguments_new(void)
   arguments->dbs_pick_str = gt_str_new();
   arguments->dbs_memlimit_str = gt_str_new();
   arguments->char_access_mode = gt_str_new();
+  arguments->display_args = gt_str_array_new();
+  arguments->display_flag = 0;
   return arguments;
 }
 
@@ -111,6 +112,7 @@ static void gt_seed_extend_arguments_delete(void *tool_arguments)
     gt_option_delete(arguments->se_option_greedy);
     gt_option_delete(arguments->se_option_xdrop);
     gt_option_delete(arguments->se_option_withali);
+    gt_str_array_delete(arguments->display_args);
     gt_free(arguments);
   }
 }
@@ -121,9 +123,9 @@ static GtOptionParser* gt_seed_extend_option_parser_new(void *tool_arguments)
   GtOptionParser *op;
   GtOption *option, *op_gre, *op_xdr, *op_cam, *op_his, *op_dif, *op_pmh,
     *op_len, *op_err, *op_xbe, *op_sup, *op_frq, *op_mem, *op_ali, *op_bia,
-    *op_onl, *op_weakends, *op_seed_display, *op_relax_polish,
-    *op_verify_alignment,*op_spdist,
-    *op_norev, *op_nofwd, *op_part, *op_pick, *op_seqlength_display, *op_overl;
+    *op_onl, *op_weakends, *op_relax_polish,
+    *op_verify_alignment, *op_spdist, *op_display,
+    *op_norev, *op_nofwd, *op_part, *op_pick, *op_overl;
 
   static GtRange seedpairdistance_defaults = {1UL, GT_UWORD_MAX};
   gt_assert(arguments != NULL);
@@ -381,29 +383,11 @@ static GtOptionParser* gt_seed_extend_option_parser_new(void *tool_arguments)
   gt_option_parser_add_option(op, op_verify_alignment);
   gt_option_is_development_option(op_verify_alignment);
 
-  /* -seed-display */
-  op_seed_display = gt_option_new_bool("seed-display",
-                                       "Display seeds in #-line and by "
-                                       "character + (instead of |) in middle "
-                                       "row of alignment column",
-                                       &arguments->seed_display,
-                                       false);
-  gt_option_exclude(op_seed_display, op_onl);
-  gt_option_is_development_option(op_seed_display);
-  gt_option_parser_add_option(op, op_seed_display);
-
-  option = gt_option_new_bool("evalue-display","display evalue of match",
-                              &arguments->evalue_display, false);
-  gt_option_parser_add_option(op, option);
-
-  /* -seqlength-display */
-  op_seqlength_display = gt_option_new_bool("seqlength-display",
-                                       "Display length of sequences in which "
-                                       "which the two match-instances occur",
-                                       &arguments->seqlength_display,
-                                       false);
-  gt_option_is_development_option(op_seqlength_display);
-  gt_option_parser_add_option(op, op_seqlength_display);
+  /* -display */
+  op_display = gt_option_new_string_array("display",
+                                          gt_querymatch_display_help(),
+                                          arguments->display_args);
+  gt_option_parser_add_option(op, op_display);
 
   /* -no-reverse */
   op_norev = gt_option_new_bool("no-reverse",
@@ -695,12 +679,10 @@ static int gt_seed_extend_runner(int argc,
   GtUword errorpercentage = 0UL;
   double matchscore_bias = GT_DEFAULT_MATCHSCORE_BIAS;
   bool extendxdrop, extendgreedy = true;
-  unsigned int display_flag = 0;
   unsigned int maxseedlength = 0, nchars = 0;
   GtUwordPair pick = {GT_UWORD_MAX, GT_UWORD_MAX};
   GtUword maxseqlength = 0;
   int had_err = 0;
-
   gt_error_check(err);
   gt_assert(arguments != NULL);
   gt_assert(arguments->se_minidentity >= GT_EXTEND_MIN_IDENTITY_PERCENTAGE &&
@@ -749,13 +731,12 @@ static int gt_seed_extend_runner(int argc,
     gt_timer_start(seedextendtimer);
   }
 
-  /* Set display flag */
-  display_flag = gt_querymatch_bool2display_flag(arguments->seed_display,
-                                                 arguments->seqlength_display,
-                                                 arguments->evalue_display);
+  had_err = gt_querymatch_eval_display_args(&arguments->display_flag,
+                                            arguments->display_args,
+                                            err);
 
   /* Set character access method */
-  if (!arguments->onlyseeds || arguments->se_alignmentwidth > 0) {
+  if (!had_err && (!arguments->onlyseeds || arguments->se_alignmentwidth > 0)) {
     cam = gt_greedy_extend_char_access(gt_str_get(arguments->char_access_mode),
                                        err);
     if ((int) cam == -1) {
@@ -967,7 +948,7 @@ static int gt_seed_extend_runner(int argc,
                                              arguments->se_alignlength,
                                              arguments->dbs_logdiagbandwidth,
                                              arguments->dbs_mincoverage,
-                                             display_flag,
+                                             arguments->display_flag,
                                              arguments->use_apos,
                                              arguments->se_xdropbelowscore,
                                              extendgreedy,

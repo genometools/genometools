@@ -59,8 +59,7 @@ typedef struct
           alignmentwidth; /* 0 for no alignment display and otherwidth number
                              of columns of alignment per line displayed. */
   bool scanfile, beverbose, forward, reverse, reverse_complement, searchspm,
-       check_extend_symmetry, silent, trimstat, seed_display, seqlength_display,
-       noxpolish, verify_alignment, evalue_display;
+       check_extend_symmetry, silent, trimstat, noxpolish, verify_alignment;
   GtStr *indexname, *query_indexname, *cam_string; /* parse this using
                                     gt_greedy_extend_char_access*/
   GtStrArray *query_files;
@@ -70,6 +69,7 @@ typedef struct
            *refextendxdropoption,
            *refextendgreedyoption,
            *refalignmentoutoption;
+  GtStrArray *display_args;
 } GtMaxpairsoptions;
 
 static int gt_exact_selfmatch_with_output(void *info,
@@ -189,6 +189,7 @@ static void *gt_repfind_arguments_new(void)
   arguments->query_indexname = gt_str_new();
   arguments->cam_string = gt_str_new();
   arguments->query_files = gt_str_array_new();
+  arguments->display_args = gt_str_array_new();
   return arguments;
 }
 
@@ -204,6 +205,7 @@ static void gt_repfind_arguments_delete(void *tool_arguments)
   gt_str_delete(arguments->query_indexname);
   gt_str_delete(arguments->cam_string);
   gt_str_array_delete(arguments->query_files);
+  gt_str_array_delete(arguments->display_args);
   gt_option_delete(arguments->refforwardoption);
   gt_option_delete(arguments->refseedlengthoption);
   gt_option_delete(arguments->refuserdefinedleastlengthoption);
@@ -224,7 +226,7 @@ static GtOptionParser *gt_repfind_option_parser_new(void *tool_arguments)
            *maxalilendiffoption, *leastlength_option, *char_access_mode_option,
            *check_extend_symmetry_option, *xdropbelowoption, *historyoption,
            *percmathistoryoption, *errorpercentageoption, *optiontrimstat,
-           *withalignmentoption, *optionseed_display, *optionseqlength_display,
+           *withalignmentoption,
            *optionnoxpolish, *verify_alignment_option, *option_query_indexname;
   GtMaxpairsoptions *arguments = tool_arguments;
 
@@ -387,6 +389,12 @@ static GtOptionParser *gt_repfind_option_parser_new(void *tool_arguments)
   gt_option_parser_add_option(op, option);
   gt_option_is_development_option(option);
 
+  /* -display */
+  option = gt_option_new_string_array("display",
+                                      gt_querymatch_display_help(),
+                                      arguments->display_args);
+  gt_option_parser_add_option(op, option);
+
   optionnoxpolish
     = gt_option_new_bool("noxpolish","do not polish X-drop extensions",
                          &arguments->noxpolish, false);
@@ -403,24 +411,6 @@ static GtOptionParser *gt_repfind_option_parser_new(void *tool_arguments)
                                       &arguments->trimstat, false);
   gt_option_parser_add_option(op, optiontrimstat);
   gt_option_is_development_option(optiontrimstat);
-
-  optionseed_display = gt_option_new_bool("seed-display","display seeds in "
-                                          "#-line",
-                                          &arguments->seed_display, false);
-  gt_option_parser_add_option(op, optionseed_display);
-  gt_option_is_development_option(optionseed_display);
-
-  optionseqlength_display = gt_option_new_bool("seqlength-display",
-                                       "Display length of sequences in which "
-                                       "the two match-instances occur",
-                                       &arguments->seqlength_display,
-                                       false);
-  gt_option_parser_add_option(op, optionseqlength_display);
-  gt_option_is_development_option(optionseqlength_display);
-
-  option = gt_option_new_bool("evalue-display","display evalue of match",
-                                          &arguments->evalue_display, false);
-  gt_option_parser_add_option(op, option);
 
   option_query_indexname = gt_option_new_string("qii",
                                                 "Specify name of query index",
@@ -758,6 +748,19 @@ static int gt_repfind_runner(int argc,
   GtTimer *repfindtimer = NULL;
   GtExtendCharAccess extend_char_access = GT_EXTEND_CHAR_ACCESS_ANY;
   Polishing_info *pol_info = NULL;
+  GtQuerymatchoutoptions *querymatchoutoptions;
+  GtProcessinfo_and_querymatchspaceptr processinfo_and_querymatchspaceptr;
+  GtXdrop_extend_querymatch_func eqmf = NULL;
+  GtEncseqMetadata* emd;
+  void *eqmf_data = NULL;
+  int mode;
+  const int modes[] = {GT_READMODE_FORWARD,
+                       GT_READMODE_REVERSE,
+                       GT_READMODE_REVCOMPL};
+  const bool flags[] = {arguments->forward,
+                        arguments->reverse,
+                        arguments->reverse_complement};
+  unsigned int display_flag = 0;
 
   gt_error_check(err);
   logger = gt_logger_new(arguments->beverbose, GT_LOGGER_DEFLT_PREFIX, stdout);
@@ -836,22 +839,15 @@ static int gt_repfind_runner(int argc,
   }
   if (!haserr)
   {
-    GtQuerymatchoutoptions *querymatchoutoptions;
-    GtProcessinfo_and_querymatchspaceptr processinfo_and_querymatchspaceptr;
-    GtXdrop_extend_querymatch_func eqmf = NULL;
-    GtEncseqMetadata* emd;
-    void *eqmf_data = NULL;
-    int mode;
-    const int modes[] = {GT_READMODE_FORWARD,
-                         GT_READMODE_REVERSE,
-                         GT_READMODE_REVCOMPL};
-    const bool flags[] = {arguments->forward,
-                          arguments->reverse,
-                          arguments->reverse_complement};
-    const unsigned int display_flag
-      = gt_querymatch_bool2display_flag(arguments->seed_display,
-                                        arguments->seqlength_display,
-                                        arguments->evalue_display);
+    if (gt_querymatch_eval_display_args(&display_flag,
+                                        arguments->display_args,
+                                        err) != 0)
+    {
+      haserr = true;
+    }
+  }
+  if (!haserr)
+  {
     processinfo_and_querymatchspaceptr.processinfo = NULL;
     processinfo_and_querymatchspaceptr.karlin_altschul_stat
       = gt_karlin_altschul_stat_new_gapped();

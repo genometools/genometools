@@ -42,7 +42,8 @@ void gt_querymatch_display_set(GtQuerymatch *querymatch,
 
 unsigned int gt_querymatch_bool2display_flag(bool seed_display,
                                              bool seqlength_display,
-                                             bool evalue_display);
+                                             bool evalue_display,
+                                             bool bitscore_display);
 
 bool gt_querymatch_seed_display(unsigned int display_flag);
 
@@ -166,4 +167,10 @@ void gt_querymatch_table_sort(GtArrayGtQuerymatch *querymatch_table,
 
 GtQuerymatch *gt_querymatch_table_get(const GtArrayGtQuerymatch
                                         *querymatch_table,GtUword idx);
+
+int gt_querymatch_eval_display_args(unsigned int *display_flag,
+                                    const GtStrArray *display_args,
+                                    GtError *err);
+
+const char *gt_querymatch_display_help(void);
 #endif
