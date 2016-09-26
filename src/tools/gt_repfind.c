@@ -751,7 +751,6 @@ static int gt_repfind_runner(int argc,
   GtQuerymatchoutoptions *querymatchoutoptions;
   GtProcessinfo_and_querymatchspaceptr processinfo_and_querymatchspaceptr;
   GtXdrop_extend_querymatch_func eqmf = NULL;
-  GtEncseqMetadata* emd;
   void *eqmf_data = NULL;
   int mode;
   const int modes[] = {GT_READMODE_FORWARD,
@@ -848,6 +847,7 @@ static int gt_repfind_runner(int argc,
   }
   if (!haserr)
   {
+    GtEncseq *encseq_for_desc = NULL;
     processinfo_and_querymatchspaceptr.processinfo = NULL;
     if (gt_querymatch_evalue_display(display_flag) ||
         gt_querymatch_bit_score_display(display_flag))
@@ -920,19 +920,37 @@ static int gt_repfind_runner(int argc,
         eqmf_data = (void *) &processinfo_and_querymatchspaceptr;
       }
     }
-    emd = gt_encseq_metadata_new(gt_str_get(arguments->indexname),err);
-    if (emd == NULL)
+    if (gt_querymatch_seq_desc_display(display_flag))
     {
-      haserr = true;
-    } else
-    {
-      gt_karlin_altschul_stat_add_keyvalues(
-                processinfo_and_querymatchspaceptr.karlin_altschul_stat,
-                gt_encseq_metadata_total_length(emd),
-                gt_encseq_metadata_num_of_sequences(emd));
-      gt_encseq_metadata_delete(emd);
+      GtEncseqLoader *encseq_loader = gt_encseq_loader_new();
+      gt_encseq_loader_require_des_tab(encseq_loader);
+      gt_encseq_loader_require_sds_tab(encseq_loader);
+      encseq_for_desc = gt_encseq_loader_load(encseq_loader,
+                                              gt_str_get(arguments->indexname),
+                                              err);
+      gt_encseq_loader_delete(encseq_loader);
+      if (encseq_for_desc == NULL)
+      {
+        haserr = true;
+      }
     }
-    if (gt_str_array_size(arguments->query_files) == 0 &&
+    if (!haserr)
+    {
+      GtEncseqMetadata* emd
+        = gt_encseq_metadata_new(gt_str_get(arguments->indexname),err);
+      if (emd == NULL)
+      {
+        haserr = true;
+      } else
+      {
+        gt_karlin_altschul_stat_add_keyvalues(
+                  processinfo_and_querymatchspaceptr.karlin_altschul_stat,
+                  gt_encseq_metadata_total_length(emd),
+                  gt_encseq_metadata_num_of_sequences(emd));
+        gt_encseq_metadata_delete(emd);
+      }
+    }
+    if (!haserr && gt_str_array_size(arguments->query_files) == 0 &&
         gt_str_length(arguments->query_indexname) == 0)
     {
       if (arguments->samples > 0)
@@ -1050,6 +1068,7 @@ static int gt_repfind_runner(int argc,
         }
       }
     }
+    gt_encseq_delete(encseq_for_desc);
     gt_querymatchoutoptions_delete(querymatchoutoptions);
     gt_querymatch_delete(processinfo_and_querymatchspaceptr.querymatchspaceptr);
     gt_karlin_altschul_stat_delete(processinfo_and_querymatchspaceptr.

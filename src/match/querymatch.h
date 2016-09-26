@@ -50,6 +50,8 @@ bool gt_querymatch_evalue_display(unsigned int display_flag);
 
 bool gt_querymatch_bit_score_display(unsigned int display_flag);
 
+bool gt_querymatch_seq_desc_display(unsigned int display_flag);
+
 void gt_querymatch_outoptions_set(GtQuerymatch *querymatch,
                 GtQuerymatchoutoptions *querymatchoutoptions);
 

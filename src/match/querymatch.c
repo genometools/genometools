@@ -103,6 +103,7 @@ typedef enum
   Gt_Seed_display,
   Gt_Seqlength_display,
   Gt_Evalue_display,
+  Gt_Seqdesc_display,
   Gt_Bitscore_display
 } GtSeedExtendDisplay;
 
@@ -126,6 +127,11 @@ bool gt_querymatch_evalue_display(unsigned int display_flag)
 bool gt_querymatch_bit_score_display(unsigned int display_flag)
 {
   return gt_querymatch_display_on(display_flag,Gt_Bitscore_display);
+}
+
+bool gt_querymatch_seq_desc_display(unsigned int display_flag)
+{
+  return gt_querymatch_display_on(display_flag,Gt_Seqdesc_display);
 }
 
 GtStr *gt_querymatch_column_header(unsigned int display_flag)
@@ -152,8 +158,9 @@ const char *gt_querymatch_display_help(void)
   return "specify what additional values in matches are displayed\n"
          "seed:      display the seed of the match\n"
          "seqlength: display length of sequences in which\n"
-         "           the two match-instances occua\nr"
+         "           the two match-instances occur\n"
          "evalue:    display evalue\n"
+         "seq-desc:  display sequence description instead of numbers\n"
          "bit-score: display bit score";
 }
 
@@ -161,7 +168,7 @@ static bool gt_querymatch_display_flag_set(unsigned int *display_flag,
                                            const char *arg)
 {
   const char *display_strings[]
-    = {"seed","seqlength","evalue","bit-score"};
+    = {"seed","seqlength","evalue","des-desc","bit-score"};
   size_t ds_idx, numofds = sizeof display_strings/sizeof display_strings[0];
   bool found = false;
 
@@ -192,7 +199,7 @@ int gt_querymatch_eval_display_args(unsigned int *display_flag,
     {
       gt_error_set(err,"illegal argument %s to option -display: "
                        " possible values are "
-                       "seed, seqlength, evalue, or bit-score",da);
+                       "seed, seqlength, evalue, seq-desc or bit-score",da);
       return -1;
     }
   }
