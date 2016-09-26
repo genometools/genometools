@@ -25,9 +25,6 @@
 #include "extended/scorehandler.h"
 #include "match/karlin_altschul_stat.h"
 
-#define K_ITER_MAX 100
-#define K_SUMLIMIT_DEFAULT 0.0001
-
 /*
   this library implements calculation of karlin-altschul parameter for E-value
   of Alignments analog to NCBI tool BLAST:
@@ -289,30 +286,30 @@ static double gt_karlin_altschul_stat_calculate_H(const ScoringFrequency *sf,
 
 static GtWord gt_karlin_altschul_stat_gcd(const ScoringFrequency *sf)
 {
-  GtWord idx, range, div;
+  GtWord idx, range, divisor;
 
   range = sf->high_align_score - sf->low_align_score+1;
-  div = -sf->low_align_score;
-  for (idx = 1; idx < range && div > 1; idx++)
+  divisor = -sf->low_align_score;
+  for (idx = 1; idx < range && divisor > 1; idx++)
   {
     if (sf->sprob[idx] != 0.0)
     {
       GtWord val = labs(idx+sf->low_align_score);
-      if (val > div)
+      if (val > divisor)
       {
-        GtWord tmp = div;
-        div = val;
+        GtWord tmp = divisor;
+        divisor = val;
         val = tmp;
       }
       while (val != 0)
       {
-        GtWord tmp = div % val;
-        div = val;
+        GtWord tmp = divisor % val;
+        divisor = val;
         val = tmp;
       }
     }
   }
-  return div;
+  return divisor;
 }
 
 static double gt_karlin_altschul_stat_calculate_ungapped_K(
@@ -322,51 +319,31 @@ static double gt_karlin_altschul_stat_calculate_ungapped_K(
 {
   GtWord  low,
           high,
-          div,
-          low_align_score,
-          high_align_score,
-          count, idx, jdx, firstidx, lastidx, secondidx,
-          first, last;
-  GtUword range,
-          iterlimit,
-          size,
-          sigma = 0;
-  double  score_avg,
-          score_avg_div,
-          one_minus_expnlambda,
-          *alignnment_score_probs,
-          expnlambda,
-          K,
-          sumlimit,
-          inner_sum;
+          divisor;
+  double  expnlambda,
+          K;
 
   gt_assert(lambda > 0 && H > 0);
-
-  score_avg = sf->score_avg;
-  gt_assert(score_avg < 0.0);
-
-  /* greatest common divisor */
-  div = gt_karlin_altschul_stat_gcd(sf);
-
-  low = sf->low_align_score/div;
-  high = sf->high_align_score/div;
-  lambda *= div;
-
-  range = high - low;
+  divisor = gt_karlin_altschul_stat_gcd(sf); /* greatest common divisor */
+  low = sf->low_align_score/divisor;
+  high = sf->high_align_score/divisor;
+  lambda *= divisor;
   expnlambda = exp(-lambda);
-
   if (low == -1 && high == 1)
   {
-    K = (sf->sprob[0] - sf->sprob[sf->high_align_score-sf->low_align_score]) *
-        (sf->sprob[0] - sf->sprob[sf->high_align_score-sf->low_align_score])/
+    K = (sf->sprob[0] - sf->sprob[sf->high_align_score - sf->low_align_score]) *
+        (sf->sprob[0] - sf->sprob[sf->high_align_score - sf->low_align_score])/
         sf->sprob[0];
   }
   else if (low == -1 || high == 1)
   {
-    one_minus_expnlambda = 1-exp(-lambda);
+    const double score_avg = sf->score_avg,
+                 one_minus_expnlambda = 1-expnlambda;
+
+    gt_assert(score_avg < 0.0);
     if (high != 1)
     {
-      score_avg_div = score_avg / div;
+      const double score_avg_div = score_avg / divisor;
       K = lambda * one_minus_expnlambda / H *(score_avg_div * score_avg_div);
     }
     else
@@ -376,22 +353,24 @@ static double gt_karlin_altschul_stat_calculate_ungapped_K(
   }
   else
   {
+    const GtUword range = (GtUword) (high - low);
+    const GtUword iterlimit = 100;
+    const double sumlimit = 0.0001;
+    const GtUword size = iterlimit * range + 1;
+    GtWord count;
+    GtUword sigma = 0;
+    GtWord low_align_score = 0, high_align_score = 0;
+    double inner_sum = 1.0,
+           *alignnment_score_probs
+             = gt_calloc(size, sizeof (*alignnment_score_probs));
+
+    gt_assert(low <= high);
     /* K = lambda*exp(-2*sigma)/(H*(1-exp(-lambda)) */
 
-    sumlimit = K_SUMLIMIT_DEFAULT;
-    iterlimit = K_ITER_MAX;
-
-    size = iterlimit * range + 1;
-    alignnment_score_probs = gt_calloc(size, sizeof (*alignnment_score_probs));
-    gt_assert(alignnment_score_probs);
-
-    low_align_score = 0;
-    high_align_score = 0;
-    inner_sum = 1.0;
     alignnment_score_probs[0] = 1.0;
-
     for (count = 0; count < iterlimit && inner_sum > sumlimit; count++)
     {
+      GtWord idx, jdx, first, last;
       if (count > 0)
       {
         inner_sum /= count;
@@ -403,9 +382,9 @@ static double gt_karlin_altschul_stat_calculate_ungapped_K(
       high_align_score += high;
       for (idx = high_align_score-low_align_score; idx >= 0; idx--)
       {
-        firstidx = idx-first;
-        lastidx = idx-last;
-        secondidx = sf->sprob[low] + first;
+        GtWord firstidx = idx-first;
+        GtWord lastidx = idx-last;
+        GtWord secondidx = sf->sprob[low] + first;
         for (inner_sum = 0.; firstidx >= lastidx; )
         {
           inner_sum += alignnment_score_probs[firstidx] *
