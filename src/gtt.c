@@ -87,7 +87,6 @@
 #include "ltr/gt_ltrdigest.h"
 #include "ltr/gt_ltrharvest.h"
 #include "ltr/ltrdigest_pbs_visitor.h"
-#include "match/evalue.h"
 #include "match/karlin_altschul_stat.h"
 #include "match/rdj-spmlist.h"
 #include "match/rdj-strgraph.h"

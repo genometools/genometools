@@ -22,7 +22,7 @@
 #include "core/format64.h"
 #include "querymatch.h"
 #include "querymatch-align.h"
-#include "evalue.h"
+#include "karlin_altschul_stat.h"
 
 struct GtQuerymatch
 {
