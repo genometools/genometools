@@ -29,7 +29,7 @@
 #include "match/karlin_altschul_stat.h"
 
 /*
-  the first part of this file implements calculation of karlin-altschul 
+  the first part of this file implements calculation of karlin-altschul
   parameter for E-value of Alignments in analogy to NCBI tool BLAST:
 
   Altschul S.F., Gish W., Miller W., Myers E.W. and Lipman D.J. (1990)
@@ -117,31 +117,32 @@ void gt_karlin_altschul_stat_delete(GtKarlinAltschulStat *ka)
   gt_free(ka);
 }
 
-double gt_karlin_altschul_stat_get_lambda(const GtKarlinAltschulStat *ka)
+static double gt_karlin_altschul_stat_get_lambda(const GtKarlinAltschulStat *ka)
 {
   gt_assert(ka);
   return ka->lambda;
 }
 
-double gt_karlin_altschul_stat_get_logK(const GtKarlinAltschulStat *ka)
+static double gt_karlin_altschul_stat_get_logK(const GtKarlinAltschulStat *ka)
 {
   gt_assert(ka);
   return ka->logK;
 }
 
-double gt_karlin_altschul_stat_get_K(const GtKarlinAltschulStat *ka)
+static double gt_karlin_altschul_stat_get_K(const GtKarlinAltschulStat *ka)
 {
   gt_assert(ka);
   return ka->K;
 }
 
-double gt_karlin_altschul_stat_get_alphadlambda(const GtKarlinAltschulStat *ka)
+static double gt_karlin_altschul_stat_get_alphadlambda(
+                         const GtKarlinAltschulStat *ka)
 {
   gt_assert(ka);
   return ka->alpha_div_lambda;
 }
 
-double gt_karlin_altschul_stat_get_beta(const GtKarlinAltschulStat *ka)
+static double gt_karlin_altschul_stat_get_beta(const GtKarlinAltschulStat *ka)
 {
   gt_assert(ka);
   return ka->beta;
@@ -542,31 +543,34 @@ void gt_karlin_altschul_stat_add_keyvalues(
   }
 }
 
-GtWord gt_karlin_altschul_stat_mismatchscore(const GtKarlinAltschulStat *ka)
+static GtWord gt_karlin_altschul_stat_mismatchscore(
+                                       const GtKarlinAltschulStat *ka)
 {
   gt_assert(ka != NULL);
   return ka->mismatchscore;
 }
 
-GtWord gt_karlin_altschul_stat_matchscore(const GtKarlinAltschulStat *ka)
+static GtWord gt_karlin_altschul_stat_matchscore(const GtKarlinAltschulStat *ka)
 {
   gt_assert(ka != NULL);
   return ka->matchscore;
 }
 
-GtWord gt_karlin_altschul_stat_gapscore(const GtKarlinAltschulStat *ka)
+static GtWord gt_karlin_altschul_stat_gapscore(const GtKarlinAltschulStat *ka)
 {
   gt_assert(ka != NULL);
   return ka->gapscore;
 }
 
-GtWord gt_karlin_altschul_get_total_length_db(const GtKarlinAltschulStat *ka)
+static GtWord gt_karlin_altschul_get_total_length_db(
+                       const GtKarlinAltschulStat *ka)
 {
   gt_assert(ka != NULL && ka->total_length_db != GT_UWORD_MAX);
   return ka->total_length_db;
 }
 
-GtWord gt_karlin_altschul_get_num_of_db_seqs(const GtKarlinAltschulStat *ka)
+static GtWord gt_karlin_altschul_get_num_of_db_seqs(
+               const GtKarlinAltschulStat *ka)
 {
   gt_assert(ka != NULL && ka->num_of_db_seqs != GT_UWORD_MAX);
   return ka->num_of_db_seqs;
@@ -607,7 +611,7 @@ int gt_karlin_altschul_stat_unit_test(GtError *err)
 }
 
 /*
-  the rest of this file implements function for calculation of E-value of 
+  the rest of this file implements function for calculation of E-value of
   Alignments.
  */
 
