@@ -849,7 +849,7 @@ static int gt_repfind_runner(int argc,
   if (!haserr)
   {
     processinfo_and_querymatchspaceptr.processinfo = NULL;
-    if (gt_querymatch_evalue_display(display_flag) || 
+    if (gt_querymatch_evalue_display(display_flag) ||
         gt_querymatch_bit_score_display(display_flag))
     {
       processinfo_and_querymatchspaceptr.karlin_altschul_stat
