@@ -248,6 +248,7 @@ static void gt_show_seed_extend_encseq(GtQuerymatch *querymatchptr,
 
   bseqorencseq.seq = NULL;
   bseqorencseq.encseq = bencseq;
+  bseqorencseq.desc = NULL;
   if (gt_querymatch_process(querymatchptr,
                             karlin_altschul_stat,
                             aencseq,
@@ -348,14 +349,14 @@ static int gt_show_seedext_runner(GT_UNUSED int argc,
     {
       processinfo_and_querymatchspaceptr.karlin_altschul_stat
         = gt_karlin_altschul_stat_new_gapped();
+      gt_karlin_altschul_stat_add_keyvalues(
+          processinfo_and_querymatchspaceptr.karlin_altschul_stat,
+                     gt_encseq_total_length(aencseq),
+                     gt_encseq_num_of_sequences(aencseq));
     } else
     {
       processinfo_and_querymatchspaceptr.karlin_altschul_stat = NULL;
     }
-    gt_karlin_altschul_stat_add_keyvalues(
-        processinfo_and_querymatchspaceptr.karlin_altschul_stat,
-                   gt_encseq_total_length(aencseq),
-                   gt_encseq_num_of_sequences(aencseq));
     if (arguments->sortmatches)
     {
       (void) gt_seedextend_match_iterator_all_sorted(semi,true);
@@ -422,14 +423,14 @@ static int gt_show_seedext_runner(GT_UNUSED int argc,
     polishing_info_delete(pol_info);
     gt_greedy_extend_matchinfo_delete(greedyextendmatchinfo);
     gt_free(alignment_show_buffer);
-    gt_scorehandler_delete(linspace_scorehandler);
-    gt_linspace_management_delete(linspace_spacemanager);
     gt_free(seqpairbuf.a_sequence);
     gt_free(seqpairbuf.b_sequence);
-    gt_alignment_delete(alignment);
     gt_karlin_altschul_stat_delete(processinfo_and_querymatchspaceptr.
                                    karlin_altschul_stat);
   }
+  gt_alignment_delete(alignment);
+  gt_scorehandler_delete(linspace_scorehandler);
+  gt_linspace_management_delete(linspace_spacemanager);
   gt_seedextend_match_iterator_delete(semi);
   return had_err;
 }

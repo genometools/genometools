@@ -15,6 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#include <ctype.h>
 #include <float.h>
 #include "core/ma_api.h"
 #include "core/types_api.h"
@@ -52,6 +53,7 @@ struct GtQuerymatch
   double evalue, bit_score; /* Bit Score according to scoring scheme used for
                                karlin altschul statistic */
   FILE *fp;
+  const char *db_desc, *query_desc;
 };
 
 GtQuerymatch *gt_querymatch_new(void)
@@ -168,7 +170,7 @@ static bool gt_querymatch_display_flag_set(unsigned int *display_flag,
                                            const char *arg)
 {
   const char *display_strings[]
-    = {"seed","seqlength","evalue","des-desc","bit-score"};
+    = {"seed","seqlength","evalue","seq-desc","bit-score"};
   size_t ds_idx, numofds = sizeof display_strings/sizeof display_strings[0];
   bool found = false;
 
@@ -239,7 +241,9 @@ void gt_querymatch_init(GtQuerymatch *querymatch,
                         uint64_t queryseqnum,
                         GtUword querylen,
                         GtUword querystart,
-                        GtUword query_totallength)
+                        GtUword query_totallength,
+                        const char *db_desc,
+                        const char *query_desc)
 {
   gt_assert(querymatch != NULL);
   if (karlin_altschul_stat != NULL &&
@@ -287,6 +291,8 @@ void gt_querymatch_init(GtQuerymatch *querymatch,
     querymatch->bit_score = DBL_MAX;
     querymatch->evalue = DBL_MAX;
   }
+  querymatch->db_desc = db_desc;
+  querymatch->query_desc = query_desc;
 }
 
 void gt_querymatch_delete(GtQuerymatch *querymatch)
@@ -334,6 +340,18 @@ static double gt_querymatch_similarity(GtUword distance,GtUword alignedlength)
   }
 }
 
+static int gt_non_white_space_prefix_length(const char *s)
+{
+  const char *sptr;
+
+  gt_assert(s != NULL);
+  for (sptr = s; !isspace(*sptr); sptr++)
+  {
+    /* Nothing */ ;
+  }
+  return (int) (sptr - s);
+}
+
 void gt_querymatch_coordinates_out(const GtQuerymatch *querymatch)
 {
   const char *outflag = "FRCP";
@@ -344,15 +362,29 @@ void gt_querymatch_coordinates_out(const GtQuerymatch *querymatch)
     fprintf(querymatch->fp, "# seed:\t" GT_WU "\t" GT_WU "\t" GT_WU "\n",
             querymatch->seedpos1, querymatch->seedpos2, querymatch->seedlen);
   }
-  fprintf(querymatch->fp,
-          GT_WU " " GT_WU " " GT_WU " %c " GT_WU " " Formatuint64_t " " GT_WU,
-          querymatch->dblen,
-          querymatch->dbseqnum,
+  fprintf(querymatch->fp,GT_WU,querymatch->dblen);
+  if (gt_querymatch_seq_desc_display(querymatch->display_flag))
+  {
+    int nwspl = gt_non_white_space_prefix_length(querymatch->db_desc);
+    fprintf(querymatch->fp," %*.*s",nwspl,nwspl,querymatch->db_desc);
+  } else
+  {
+    fprintf(querymatch->fp," " GT_WU,querymatch->dbseqnum);
+  }
+  fprintf(querymatch->fp," " GT_WU " %c " GT_WU,
           querymatch->dbstart_relative,
           outflag[querymatch->query_readmode],
-          querymatch->querylen,
-          PRINTuint64_tcast(querymatch->queryseqnum),
-          querymatch->querystart_fwdstrand);
+          querymatch->querylen);
+  if (gt_querymatch_seq_desc_display(querymatch->display_flag))
+  {
+    int nwspl = gt_non_white_space_prefix_length(querymatch->query_desc);
+    fprintf(querymatch->fp," %*.*s",nwspl,nwspl,querymatch->query_desc);
+  } else
+  {
+    fprintf(querymatch->fp," " Formatuint64_t,
+            PRINTuint64_tcast(querymatch->queryseqnum));
+  }
+  fprintf(querymatch->fp," " GT_WU,querymatch->querystart_fwdstrand);
   if (querymatch->score > 0)
   {
     fprintf(querymatch->fp, " " GT_WD " " GT_WU " %.2f",
@@ -436,7 +468,9 @@ static void gt_querymatch_applycorrection(
                      querymatch->queryseqnum,
                      coords->vlen,
                      querymatch->querystart + coords->voffset,
-                     querymatch->query_totallength);
+                     querymatch->query_totallength,
+                     NULL,
+                     NULL);
 }
 
 bool gt_querymatch_process(GtQuerymatch *querymatchptr,
@@ -594,7 +628,7 @@ bool gt_querymatch_read_line(GtQuerymatch *querymatchptr,
   return false;
 }
 
-bool gt_querymatch_complete(GtQuerymatch *querymatchptr,
+bool gt_querymatch_complete(GtQuerymatch *querymatch,
                             GtKarlinAltschulStat *karlin_altschul_stat,
                             GtUword dblen,
                             GtUword dbstart,
@@ -616,8 +650,29 @@ bool gt_querymatch_complete(GtQuerymatch *querymatchptr,
                             GtUword seedlen,
                             bool greedyextension)
 {
-  gt_assert(querymatchptr != NULL);
-  gt_querymatch_init(querymatchptr,
+  const char *query_desc = NULL, *db_desc = NULL;
+
+  gt_assert(querymatch != NULL);
+  if (gt_querymatch_seq_desc_display(querymatch->display_flag))
+  {
+    GtUword desclen;
+    db_desc = gt_encseq_description(encseq,&desclen,dbseqnum);
+    if (query == NULL)
+    {
+      query_desc = gt_encseq_description(encseq,&desclen,(GtUword) queryseqnum);
+    } else
+    {
+      if (query->encseq != NULL)
+      {
+        query_desc = gt_encseq_description(query->encseq,&desclen,
+                                           (GtUword) queryseqnum);
+      } else
+      {
+        query_desc = query->desc;
+      }
+    }
+  }
+  gt_querymatch_init(querymatch,
                      karlin_altschul_stat,
                      dblen,
                      dbstart,
@@ -631,11 +686,13 @@ bool gt_querymatch_complete(GtQuerymatch *querymatchptr,
                      queryseqnum,
                      querylen,
                      querystart,
-                     query_totallength);
-  querymatchptr->seedpos1 = seedpos1;
-  querymatchptr->seedpos2 = seedpos2;
-  querymatchptr->seedlen = seedlen;
-  return gt_querymatch_process(querymatchptr,
+                     query_totallength,
+                     db_desc,
+                     query_desc);
+  querymatch->seedpos1 = seedpos1;
+  querymatch->seedpos2 = seedpos2;
+  querymatch->seedlen = seedlen;
+  return gt_querymatch_process(querymatch,
                                karlin_altschul_stat,
                                encseq,
                                query,

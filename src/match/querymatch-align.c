@@ -170,19 +170,19 @@ void gt_querymatchoutoptions_delete(
 
 static void seededmatch2eoplist(GtQuerymatchoutoptions *querymatchoutoptions,
                                 const GtEncseq *encseq,
-                         const GtSeqorEncseq *query,
-                         GtReadmode query_readmode,
-                         GtUword query_seqstartpos,
-                         GtUword query_totallength,
-                         GtUword dbstart,
-                         GtUword dblen,
-                         GtUword abs_querystart,
-                         GtUword querylen,
-                         GtUword seedpos1,
-                         GtUword seedpos2,
-                         GtUword seedlen,
-                         bool verify_alignment,
-                         bool greedyextension)
+                                const GtSeqorEncseq *query,
+                                GtReadmode query_readmode,
+                                GtUword query_seqstartpos,
+                                GtUword query_totallength,
+                                GtUword dbstart,
+                                GtUword dblen,
+                                GtUword abs_querystart,
+                                GtUword querylen,
+                                GtUword seedpos1,
+                                GtUword seedpos2,
+                                GtUword seedlen,
+                                bool verify_alignment,
+                                bool greedyextension)
 {
   GtUword ulen, vlen, ustart, vstart;
   Polished_point right_best_polished_point = {0,0,0};

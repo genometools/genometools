@@ -667,10 +667,12 @@ static int gt_callenumquerymatches(bool selfmatch,
       {
         query_seqorencseq.seq = NULL;
         query_seqorencseq.encseq = query_encseq;
+        query_seqorencseq.desc = NULL;
       } else
       {
         query_seqorencseq.seq = gt_querysubstringmatchiterator_query(qsmi);
         query_seqorencseq.encseq = NULL;
+        query_seqorencseq.desc = gt_querysubstringmatchiterator_desc(qsmi);
       }
       querystart = gt_querysubstringmatchiterator_querystart(qsmi);
       queryunitnum = gt_querysubstringmatchiterator_queryunitnum(qsmi);
@@ -690,7 +692,9 @@ static int gt_callenumquerymatches(bool selfmatch,
                            queryunitnum,
                            matchlength,
                            querystart,
-                           query_totallength);
+                           query_totallength,
+                           NULL,
+                           NULL);
         eqmf(eqmf_data,suffixarray.encseq,exactseed,&query_seqorencseq);
       } else
       {

@@ -69,7 +69,9 @@ void gt_querymatch_init(GtQuerymatch *querymatch,
                         uint64_t queryseqnum,
                         GtUword querylen,
                         GtUword querystart,
-                        GtUword query_totallength);
+                        GtUword query_totallength,
+                        const char *db_desc,
+                        const char *query_desc);
 
 bool gt_querymatch_read_line(GtQuerymatch *querymatchptr,
                              bool withseqlength,

@@ -1055,6 +1055,8 @@ static void gt_diagbandseed_process_seeds(const GtDiagbandseedSeedPair *mlist,
     gt_timer_start(timer);
   }
   info_querymatch.querymatchspaceptr = gt_querymatch_new();
+  gt_querymatch_display_set(info_querymatch.querymatchspaceptr,
+                            arg->display_flag);
   if (gt_querymatch_evalue_display(arg->display_flag) ||
       gt_querymatch_bit_score_display(arg->display_flag))
   {
@@ -1070,8 +1072,6 @@ static void gt_diagbandseed_process_seeds(const GtDiagbandseedSeedPair *mlist,
   {
     gt_querymatch_verify_alignment_set(info_querymatch.querymatchspaceptr);
   }
-  gt_querymatch_display_set(info_querymatch.querymatchspaceptr,
-                            arg->display_flag);
   if (querymoutopt != NULL) {
     gt_querymatch_outoptions_set(info_querymatch.querymatchspaceptr,
                                  querymoutopt);

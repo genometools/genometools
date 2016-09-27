@@ -422,19 +422,20 @@ static GtUword gt_mmsearch_extendright(const GtEncseq *dbencseq,
 
 void gt_queryuniquematch(bool selfmatch,
                          GtKarlinAltschulStat *karlin_altschul_stat,
-                        const Suffixarray *suffixarray,
-                        uint64_t queryunitnum,
-                        GtQueryrepresentation *queryrep,
-                        GtUword minmatchlength,
-                        GtProcessquerymatch processquerymatch,
-                        void *processquerymatchinfo,
-                        GtQuerymatch *querymatchspaceptr)
+                         const Suffixarray *suffixarray,
+                         uint64_t queryunitnum,
+                         GtQueryrepresentation *queryrep,
+                         GtUword minmatchlength,
+                         GtProcessquerymatch processquerymatch,
+                         void *processquerymatchinfo,
+                         GtQuerymatch *querymatchspaceptr)
 {
   GtUword offset, totallength = gt_encseq_total_length(suffixarray->encseq),
           localqueryoffset = 0;
   uint64_t localqueryunitnum = queryunitnum;
 
   gt_assert(!selfmatch && queryrep->seqlen >= minmatchlength);
+  /*XXX gt_assert(!gt_querymatch_seq_desc_display(querymatchspaceptr));*/
   for (offset = 0; offset <= queryrep->seqlen - minmatchlength; offset++)
   {
     GtUword matchlen, dbstart;
@@ -473,7 +474,9 @@ void gt_queryuniquematch(bool selfmatch,
                          localqueryunitnum,
                          matchlen,
                          localqueryoffset,
-                         queryrep->seqlen);
+                         queryrep->seqlen,
+                         NULL,
+                         NULL);
       processquerymatch(processquerymatchinfo,querymatchspaceptr);
     }
     if (queryrep->sequence[offset] == (GtUchar) SEPARATOR)
@@ -530,6 +533,7 @@ static void gt_querysubstringmatch(bool selfmatch,
                                     &querysubstring))
       {
         GtUword dbseqnum, dbseqstartpos, dbseqlen, extend;
+        const char *db_desc = NULL, *query_desc = NULL;
 
         extend = gt_mmsearch_extendright(dbencseq,
                                          mmsi->esr,
@@ -562,7 +566,9 @@ static void gt_querysubstringmatch(bool selfmatch,
                            localqueryunitnum,
                            minmatchlength + extend,
                            localqueryoffset,
-                           queryrep->seqlen);
+                           queryrep->seqlen,
+                           db_desc,
+                           query_desc);
         processquerymatch(processquerymatchinfo,querymatchspaceptr);
       }
     }
@@ -840,6 +846,13 @@ const GtUchar *gt_querysubstringmatchiterator_query(
 {
   gt_assert(qsmi != NULL && qsmi->query_for_seqit != NULL);
   return qsmi->query_for_seqit;
+}
+
+const char *gt_querysubstringmatchiterator_desc(
+                      const GtQuerysubstringmatchiterator *qsmi)
+{
+  gt_assert(qsmi != NULL && qsmi->desc != NULL);
+  return qsmi->desc;
 }
 
 int gt_querysubstringmatchiterator_next(GtQuerysubstringmatchiterator *qsmi,

@@ -1219,6 +1219,7 @@ static const GtQuerymatch *gt_extend_selfmatch_relative(bool forxdrop,
   {
     query.seq = NULL;
     query.encseq = encseq;
+    query.desc = NULL;
   }
   return gt_extend_sesp(forxdrop,info, encseq,
                         query_readmode != GT_READMODE_FORWARD ? &query

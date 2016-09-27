@@ -96,4 +96,7 @@ const GtUchar *gt_querysubstringmatchiterator_query(
 int gt_querysubstringmatchiterator_next(GtQuerysubstringmatchiterator *qsmi,
                                         GtError *err);
 
+const char *gt_querysubstringmatchiterator_desc(
+                      const GtQuerysubstringmatchiterator *qsmi);
+
 #endif

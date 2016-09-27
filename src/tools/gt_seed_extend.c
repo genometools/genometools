@@ -747,6 +747,11 @@ static int gt_seed_extend_runner(int argc,
   if (!had_err) {
     GtEncseqLoader *encseq_loader = gt_encseq_loader_new();
     gt_encseq_loader_require_multiseq_support(encseq_loader);
+    if (gt_querymatch_seq_desc_display(arguments->display_flag))
+    {
+      gt_encseq_loader_require_des_tab(encseq_loader);
+      gt_encseq_loader_require_ssp_tab(encseq_loader);
+    }
 
     /* Load encseq A */
     aencseq = gt_encseq_loader_load(encseq_loader,

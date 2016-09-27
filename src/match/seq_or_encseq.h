@@ -5,5 +5,6 @@ typedef struct
 {
   const GtUchar *seq;
   const GtEncseq *encseq;
+  const char *desc; /* only used if seq != NULL and display_seq_desc */
 } GtSeqorEncseq;
 #endif
