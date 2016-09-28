@@ -1267,7 +1267,7 @@ static int gt_diagbandseed_algorithm(const GtDiagbandseedInfo *arg,
   int had_err = 0;
   bool alist_blist_id, both_strands, selfcomp, equalranges, use_blist = false;
   const GtDiagbandseedExtendParams *extp = NULL;
-  Polishing_info *pol_info = NULL;
+  GtFtPolishing_info *pol_info = NULL;
   void *processinfo = NULL;
   GtQuerymatchoutoptions *querymoutopt = NULL;
 

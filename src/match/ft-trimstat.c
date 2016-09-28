@@ -3,7 +3,7 @@
 #include "core/assert_api.h"
 #include "ft-trimstat.h"
 
-struct Trimstat
+struct GtFtTrimstat
 {
   GtUword diedout, dist_nextfree, dist_allocated, allocated_maxvalid,
           *dist_maxvalid, *trimdist, *distarray;
@@ -16,11 +16,11 @@ struct Trimstat
   GtUword max_cache_size;
 };
 
-Trimstat *trimstat_new(double errorpercentage,
-                       GtUword minmatchpercentage,
-                       GtUword maxalignedlendifference)
+GtFtTrimstat *gt_ft_trimstat_new(double errorpercentage,
+                                 GtUword minmatchpercentage,
+                                 GtUword maxalignedlendifference)
 {
-  Trimstat *trimstat = gt_malloc(sizeof *trimstat);
+  GtFtTrimstat *trimstat = gt_malloc(sizeof *trimstat);
 
   gt_assert(trimstat != 0);
   trimstat->trimdist = gt_calloc(101,sizeof *trimstat->trimdist);
@@ -40,12 +40,12 @@ Trimstat *trimstat_new(double errorpercentage,
   return trimstat;
 }
 
-void trimstat_add(Trimstat *trimstat,bool diedout,
-                  GtUword sumvalid,
-                  GtUword maxvalid,
-                  GtUword d,
-                  size_t spaceforfront,
-                  GtUword cache_size)
+void gt_ft_trimstat_add(GtFtTrimstat *trimstat,bool diedout,
+                        GtUword sumvalid,
+                        GtUword maxvalid,
+                        GtUword d,
+                        size_t spaceforfront,
+                        GtUword cache_size)
 {
   if (trimstat == NULL)
   {
@@ -116,7 +116,8 @@ static int compare_ulong(const void *va, const void *vb)
 
 #define MEGABYTES(X) ((double) (X)/(1UL << 20))
 
-void trimstat_delete(Trimstat *trimstat,double total_time,bool verbose)
+void gt_ft_trimstat_delete(GtFtTrimstat *trimstat,double total_time,
+                           bool verbose)
 {
   if (trimstat != NULL)
   {

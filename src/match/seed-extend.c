@@ -377,7 +377,7 @@ void gt_optimal_maxalilendiff_perc_mat_history(
 struct GtGreedyextendmatchinfo
 {
   GtFronttrace *left_front_trace, *right_front_trace;
-  const Polishing_info *pol_info;
+  const GtFtPolishing_info *pol_info;
   GtUword history,
           maxalignedlendifference,
           errorpercentage,
@@ -387,7 +387,7 @@ struct GtGreedyextendmatchinfo
   GtExtendCharAccess extend_char_access;
   bool check_extend_symmetry,
        silent;
-  Trimstat *trimstat;
+  GtFtTrimstat *trimstat;
   GtEncseqReader *encseq_r_in_u, *encseq_r_in_v;
   GtAllocatedMemory usequence_cache, vsequence_cache, frontspace_reservoir;
   GtTrimmingStrategy trimstrategy;
@@ -477,7 +477,7 @@ GtGreedyextendmatchinfo *gt_greedy_extend_matchinfo_new(
                                    GtUword userdefinedleastlength,
                                    GtExtendCharAccess extend_char_access,
                                    GtUword sensitivity,
-                                   const Polishing_info *pol_info)
+                                   const GtFtPolishing_info *pol_info)
 {
   GtGreedyextendmatchinfo *ggemi = gt_malloc(sizeof *ggemi);
 
@@ -529,7 +529,7 @@ void gt_greedy_extend_matchinfo_delete(GtGreedyextendmatchinfo *ggemi)
     gt_free(ggemi->usequence_cache.space);
     gt_free(ggemi->vsequence_cache.space);
     gt_free(ggemi->frontspace_reservoir.space);
-    trimstat_delete(ggemi->trimstat,0.0,true);
+    gt_ft_trimstat_delete(ggemi->trimstat,0.0,true);
     gt_free(ggemi);
   }
 }
@@ -551,9 +551,9 @@ void gt_greedy_extend_matchinfo_trimstat_set(GtGreedyextendmatchinfo *ggemi)
 {
   gt_assert(ggemi != NULL && ggemi->perc_mat_history > 0 &&
             ggemi->maxalignedlendifference > 0 && ggemi->trimstat == NULL);
-  ggemi->trimstat = trimstat_new(ggemi->errorpercentage,
-                                 ggemi->perc_mat_history,
-                                 ggemi->maxalignedlendifference);
+  ggemi->trimstat = gt_ft_trimstat_new(ggemi->errorpercentage,
+                                       ggemi->perc_mat_history,
+                                       ggemi->maxalignedlendifference);
 }
 
 static void gt_FTsequenceResources_init(FTsequenceResources *fsr,
@@ -657,7 +657,7 @@ static void gt_greedy_extend_init(FTsequenceResources *ufsr,
 }
 
 void gt_align_front_prune_edist(bool rightextension,
-                                Polished_point *best_polished_point,
+                                GtFtPolished_point *best_polished_point,
                                 GtFronttrace *front_trace,
                                 const GtEncseq *dbencseq,
                                 const GtSeqorEncseq *query,
@@ -863,8 +863,8 @@ static const GtQuerymatch *gt_extend_sesp(bool forxdrop,
           ulen, vlen, urightbound, vrightbound;
   GtXdropscore total_score = 0;
   FTsequenceResources ufsr, vfsr;
-  Polished_point left_best_polished_point = {0,0,0,0,0},
-                 right_best_polished_point = {0,0,0,0,0};
+  GtFtPolished_point left_best_polished_point = {0,0,0,0,0},
+                     right_best_polished_point = {0,0,0,0,0};
   const bool rightextension = true;
 
   if (query == NULL)

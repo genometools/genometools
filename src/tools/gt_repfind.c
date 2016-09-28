@@ -751,7 +751,7 @@ static int gt_repfind_runner(int argc,
   GtGreedyextendmatchinfo *greedyextendmatchinfo = NULL;
   GtTimer *repfindtimer = NULL;
   GtExtendCharAccess extend_char_access = GT_EXTEND_CHAR_ACCESS_ANY;
-  Polishing_info *pol_info = NULL;
+  GtFtPolishing_info *pol_info = NULL;
   GtQuerymatchoutoptions *querymatchoutoptions;
   GtProcessinfo_and_querymatchspaceptr processinfo_and_querymatchspaceptr;
   GtXdrop_extend_querymatch_func eqmf = NULL;

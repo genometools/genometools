@@ -49,7 +49,7 @@ struct GtEoplist
   bool withpolcheck, seed_display;
   GtUword useedoffset, seedlen;
 #ifndef OUTSIDE_OF_GT
-  const Polishing_info *pol_info;
+  const GtFtPolishing_info *pol_info;
 #endif
 };
 
@@ -325,8 +325,7 @@ struct GtEoplistReader
 void gt_eoplist_reader_reset(GtEoplistReader *eoplist_reader,
                              const GtEoplist *eoplist)
 {
-  gt_assert(eoplist != NULL);
-  gt_assert(eoplist_reader != NULL);
+  gt_assert(eoplist != NULL && eoplist_reader != NULL);
   if (eoplist->spaceuint8_t == NULL || eoplist->nextfreeuint8_t == 0)
   {
     eoplist_reader->currenteop = NULL;
@@ -1045,7 +1044,7 @@ void gt_eoplist_set_seedoffset(GtEoplist *eoplist,
 
 #ifndef OUTSIDE_OF_GT
 void gt_eoplist_polished_ends(GtEoplist *eoplist,
-                              const Polishing_info *pol_info,
+                              const GtFtPolishing_info *pol_info,
                               bool withpolcheck)
 {
   gt_assert(eoplist != NULL);

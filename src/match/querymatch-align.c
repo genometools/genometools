@@ -39,7 +39,7 @@ struct GtQuerymatchoutoptions
   bool always_polished_ends,
        generate_eoplist,
        show_eoplist;
-  Polishing_info *pol_info;
+  GtFtPolishing_info *pol_info;
 };
 
 GtQuerymatchoutoptions *gt_querymatchoutoptions_new(bool generate_eoplist,
@@ -185,8 +185,8 @@ static void seededmatch2eoplist(GtQuerymatchoutoptions *querymatchoutoptions,
                                 bool greedyextension)
 {
   GtUword ulen, vlen, ustart, vstart;
-  Polished_point right_best_polished_point = {0,0,0};
-  Polished_point left_best_polished_point = {0,0,0};
+  GtFtPolished_point right_best_polished_point = {0,0,0},
+                     left_best_polished_point = {0,0,0};
   GtUword pol_size;
   GtSeqpaircoordinates *coords;
   GtUword leftcolumn, rightcolumn;
@@ -323,7 +323,7 @@ void gt_frontprune2eoplist(GtQuerymatchoutoptions *querymatchoutoptions,
                            GtUword vstart,
                            GtUword vlen)
 {
-  Polished_point right_best_polished_point = {0,0,0};
+  GtFtPolished_point right_best_polished_point = {0,0,0};
   GtUword pol_size;
   GtSeqpaircoordinates *coords;
   const bool greedyextension = true, rightextension = true;

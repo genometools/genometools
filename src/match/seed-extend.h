@@ -214,7 +214,7 @@ GtGreedyextendmatchinfo *gt_greedy_extend_matchinfo_new(
                                    GtUword userdefinedleastlength,
                                    GtExtendCharAccess extend_char_access,
                                    GtUword sensitivity,
-                                   const Polishing_info *pol_info);
+                                   const GtFtPolishing_info *pol_info);
 
 /* the destructor-method for the gven object. */
 
@@ -357,7 +357,7 @@ typedef const GtQuerymatch *(*GtExtendQuerymatchRelativeFunc)(void *,
                                                              GtReadmode);
 
 void gt_align_front_prune_edist(bool rightextension,
-                                Polished_point *best_polished_point,
+                                GtFtPolished_point *best_polished_point,
                                 GtFronttrace *front_trace,
                                 const GtEncseq *encseq,
                                 const GtSeqorEncseq *query,

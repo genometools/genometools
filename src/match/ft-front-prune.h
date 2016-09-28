@@ -45,10 +45,10 @@ GtUword front_prune_edist_inplace(
                        bool forward,
                        GtAllocatedMemory *frontspace_reservoir,
 #endif
-                       Trimstat *trimstat,
-                       Polished_point *best_polished_point,
+                       GtFtTrimstat *trimstat,
+                       GtFtPolished_point *best_polished_point,
                        GtFronttrace *fronttrace,
-                       const Polishing_info *pol_info,
+                       const GtFtPolishing_info *pol_info,
                        GtTrimmingStrategy trimstrategy,
                        GtUword history,
                        GtUword minmatchnum,

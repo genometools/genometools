@@ -205,7 +205,7 @@ void gt_eoplist_show_plain(const GtEoplist *eoplist,FILE *fp);
 
 #ifndef OUTSIDE_OF_GT
 void gt_eoplist_polished_ends(GtEoplist *eoplist,
-                              const Polishing_info *pol_info,
+                              const GtFtPolishing_info *pol_info,
                               bool withpolcheck);
 #endif
 #endif

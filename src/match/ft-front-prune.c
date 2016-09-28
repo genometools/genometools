@@ -35,21 +35,21 @@
         }\
         (FRONTVAL)->matchhistory_bits <<= 1
 
-typedef uint32_t Rowvaluetype;
-typedef uint8_t Matchcounttype;
-typedef uint8_t Backreferencetype;
+typedef uint32_t GtFtRowvaluetype;
+typedef uint8_t GtFtMatchcounttype;
+typedef uint8_t GtFtBackreferencetype;
 
 typedef struct
 {
   uint64_t matchhistory_bits;
-  Rowvaluetype row,
-               localmatch_count;
-  Matchcounttype matchhistory_count,
-                 matchhistory_size;
-  Backreferencetype backreference;
+  GtFtRowvaluetype row,
+                   localmatch_count;
+  GtFtMatchcounttype matchhistory_count,
+                     matchhistory_size;
+  GtFtBackreferencetype backreference;
   uint32_t max_mismatches; /* maximum number of mismatches in a path to this
                               Front-entry.*/
-} Frontvalue;
+} GtFtFrontvalue;
 
 #ifndef OUTSIDE_OF_GT
 typedef struct
@@ -68,9 +68,9 @@ typedef struct
           seqstartpos;
   bool read_seq_left2right,
        dir_is_complement;
-} Sequenceobject;
+} GtFtSequenceObject;
 
-static void ft_sequenceobject_init(Sequenceobject *seq,
+static void ft_sequenceobject_init(GtFtSequenceObject *seq,
                                    GtExtendCharAccess extend_char_access_mode,
                                    const GtEncseq *encseq,
                                    bool rightextension,
@@ -154,7 +154,7 @@ static GtUchar gt_twobitencoding_char_at_pos(
           GT_MULT2(GT_UNITSIN2BITENC - 1 - GT_MODBYUNITSIN2BITENC(pos))) & 3;
 }
 
-static GtUchar ft_sequenceobject_get_char(Sequenceobject *seq,GtUword idx)
+static GtUchar ft_sequenceobject_get_char(GtFtSequenceObject *seq,GtUword idx)
 {
   GtUchar cc;
   GtUword accesspos;
@@ -218,7 +218,7 @@ static GtUchar ft_sequenceobject_get_char(Sequenceobject *seq,GtUword idx)
 
 #undef SKDEBUG
 #ifdef SKDEBUG
-static char *gt_ft_sequencebject_get(Sequenceobject *seq)
+static char *gt_ft_sequencebject_get(GtFtSequenceObject *seq)
 {
   GtUword idx;
   char *buffer;
@@ -250,7 +250,8 @@ static char *gt_ft_sequencebject_get(Sequenceobject *seq)
 }
 
 static void gt_greedy_show_context(bool rightextension,
-                                   Sequenceobject *useq,Sequenceobject *vseq)
+                                   GtFtSequenceObject *useq,
+                                   GtFtSequenceObject *vseq)
 {
   char *uptr = gt_ft_sequencebject_get(useq);
   char *vptr = gt_ft_sequencebject_get(vseq);
@@ -266,9 +267,9 @@ typedef struct
 {
   const GtUchar *sequence_ptr;
   GtUword substringlength;
-} Sequenceobject;
+} GtFtSequenceObject;
 
-static void ft_sequenceobject_init(Sequenceobject *seq,
+static void ft_sequenceobject_init(GtFtSequenceObject *seq,
                                    const GtUchar *ptr,
                                    GtUword seqstartpos,
                                    GtUword startpos,
@@ -282,9 +283,9 @@ static void ft_sequenceobject_init(Sequenceobject *seq,
 
 #define FRONT_DIAGONAL(FRONTPTR) (GtWord) ((FRONTPTR) - midfront)
 
-static bool ft_sequenceobject_symbol_match(Sequenceobject *useq,
+static bool ft_sequenceobject_symbol_match(GtFtSequenceObject *useq,
                                            GtUword upos,
-                                           Sequenceobject *vseq,
+                                           GtFtSequenceObject *vseq,
                                            GtUword vpos)
 {
 #ifndef OUTSIDE_OF_GT
@@ -300,12 +301,12 @@ static bool ft_sequenceobject_symbol_match(Sequenceobject *useq,
 #endif
 }
 
-static void inline front_prune_add_matches(Frontvalue *midfront,
-                                           Frontvalue *fv,
+static void inline front_prune_add_matches(GtFtFrontvalue *midfront,
+                                           GtFtFrontvalue *fv,
                                            uint64_t leftmostbit,
                                            GtUword max_history,
-                                           Sequenceobject *useq,
-                                           Sequenceobject *vseq)
+                                           GtFtSequenceObject *useq,
+                                           GtFtSequenceObject *vseq)
 {
   GtUword upos, vpos;
 
@@ -333,16 +334,16 @@ static void inline front_prune_add_matches(Frontvalue *midfront,
   fv->row = upos;
 }
 
-static GtUword front_next_inplace(Frontvalue *midfront,
-                                  Frontvalue *lowfront,
-                                  Frontvalue *highfront,
+static GtUword front_next_inplace(GtFtFrontvalue *midfront,
+                                  GtFtFrontvalue *lowfront,
+                                  GtFtFrontvalue *highfront,
                                   GtUword max_history,
-                                  Sequenceobject *useq,
-                                  Sequenceobject *vseq)
+                                  GtFtSequenceObject *useq,
+                                  GtFtSequenceObject *vseq)
 {
   GtUword alignedlen, maxalignedlen;
   const uint64_t leftmostbit = ((uint64_t) 1) << (max_history-1);
-  Frontvalue bestfront, insertion_value, replacement_value, *frontptr;
+  GtFtFrontvalue bestfront, insertion_value, replacement_value, *frontptr;
 
   insertion_value = *lowfront; /* from previous diag -(d-1) => -d => DELETION */
   bestfront = insertion_value;
@@ -438,11 +439,11 @@ static GtUword front_next_inplace(Frontvalue *midfront,
   return maxalignedlen;
 }
 
-static GtUword front_second_inplace(Frontvalue *midfront,
-                                    Frontvalue *lowfront,
+static GtUword front_second_inplace(GtFtFrontvalue *midfront,
+                                    GtFtFrontvalue *lowfront,
                                     GtUword max_history,
-                                    Sequenceobject *useq,
-                                    Sequenceobject *vseq)
+                                    GtFtSequenceObject *useq,
+                                    GtFtSequenceObject *vseq)
 {
   GtUword alignedlen, maxalignedlen;
   const uint64_t leftmostbit = ((uint64_t) 1) << (max_history-1);
@@ -479,9 +480,9 @@ static GtUword front_second_inplace(Frontvalue *midfront,
 }
 
 static bool trimthisentry(GtUword distance,
-                          Rowvaluetype row,
+                          GtFtRowvaluetype row,
                           GtWord diagonal,
-                          const Frontvalue *fv,
+                          const GtFtFrontvalue *fv,
                           GtUword minmatchpercentage,
                           GtUword minlenfrommaxdiff,
                           bool showfrontinfo)
@@ -530,13 +531,13 @@ static GtUword trim_front(bool upward,
                           GtUword minmatchpercentage,
                           GtUword minlenfrommaxdiff,
                           GtTrimmingStrategy trimstrategy,
-                          const Polished_point *best_polished_point,
-                          const Frontvalue *midfront,
-                          const Frontvalue *from,
-                          const Frontvalue *stop,
+                          const GtFtPolished_point *best_polished_point,
+                          const GtFtFrontvalue *midfront,
+                          const GtFtFrontvalue *from,
+                          const GtFtFrontvalue *stop,
                           bool showfrontinfo)
 {
-  const Frontvalue *frontptr;
+  const GtFtFrontvalue *frontptr;
   GtUword trim = 0;
 
   if (trimstrategy == GT_OUTSENSE_TRIM_NEVER ||
@@ -570,14 +571,14 @@ static GtUword trim_front(bool upward,
   return trim;
 }
 
-static void frontspace_check(GT_UNUSED const Frontvalue *from,
-                             GT_UNUSED const Frontvalue *to,
-                             GT_UNUSED const Frontvalue *ptr)
+static void frontspace_check(GT_UNUSED const GtFtFrontvalue *from,
+                             GT_UNUSED const GtFtFrontvalue *to,
+                             GT_UNUSED const GtFtFrontvalue *ptr)
 {
   gt_assert (ptr >= from && ptr <= to);
 }
 
-static Frontvalue *frontspace_allocate(GtUword minsizeforshift,
+static GtFtFrontvalue *frontspace_allocate(GtUword minsizeforshift,
                                        GtUword trimleft,
                                        GtUword valid,
                                        GtAllocatedMemory *fs)
@@ -587,34 +588,34 @@ static Frontvalue *frontspace_allocate(GtUword minsizeforshift,
     fs->allocated = 255UL + MAX(fs->allocated * 1.2,
                                            trimleft - fs->offset + valid);
     gt_assert(fs->allocated > trimleft - fs->offset + valid);
-    fs->space = gt_realloc(fs->space,sizeof (Frontvalue) * fs->allocated);
+    fs->space = gt_realloc(fs->space,sizeof (GtFtFrontvalue) * fs->allocated);
     gt_assert(fs->space != NULL);
   }
   gt_assert(trimleft >= fs->offset);
   if (trimleft - fs->offset > MAX(valid,minsizeforshift))
   {
-    memcpy(fs->space,((Frontvalue *) fs->space) + trimleft - fs->offset,
-           sizeof (Frontvalue) * valid);
+    memcpy(fs->space,((GtFtFrontvalue *) fs->space) + trimleft - fs->offset,
+           sizeof (GtFtFrontvalue) * valid);
     fs->offset = trimleft;
   }
-  return ((Frontvalue *) fs->space) - fs->offset;
+  return ((GtFtFrontvalue *) fs->space) - fs->offset;
 }
 
-static void update_trace_and_polished(Polished_point *best_polished_point,
+static void update_trace_and_polished(GtFtPolished_point *best_polished_point,
 #ifndef OUTSIDE_OF_GT
                                       GtUword *minrow,
                                       GtUword *mincol,
 #endif
                                       GtFronttrace *front_trace,
-                                      const Polishing_info *pol_info,
+                                      const GtFtPolishing_info *pol_info,
                                       GtUword distance,
                                       GtUword trimleft,
-                                      Frontvalue *midfront,
-                                      Frontvalue *lowfront,
-                                      Frontvalue *highfront,
+                                      GtFtFrontvalue *midfront,
+                                      GtFtFrontvalue *lowfront,
+                                      GtFtFrontvalue *highfront,
                                       bool showfrontinfo)
 {
-  const Frontvalue *frontptr;
+  const GtFtFrontvalue *frontptr;
 
 #ifndef OUTSIDE_OF_GT
   *minrow = GT_UWORD_MAX;
@@ -672,13 +673,13 @@ static void update_trace_and_polished(Polished_point *best_polished_point,
   }
 }
 
-static void showcurrentfront(const Frontvalue *validbasefront,
+static void showcurrentfront(const GtFtFrontvalue *validbasefront,
                              GtUword trimleft,
                              GtUword valid,
                              GtUword distance)
 {
-  const Frontvalue *ptr, *ptr_maxalignedlen = NULL,
-                   *midfront = validbasefront + distance;
+  const GtFtFrontvalue *ptr, *ptr_maxalignedlen = NULL,
+                       *midfront = validbasefront + distance;
   GtUword maxalignedlen = 0;
 
   for (ptr = validbasefront + trimleft;
@@ -727,10 +728,10 @@ GtUword front_prune_edist_inplace(
                          bool rightextension,
                          GtAllocatedMemory *frontspace,
 #endif
-                         Trimstat *trimstat,
-                         Polished_point *best_polished_point,
+                         GtFtTrimstat *trimstat,
+                         GtFtPolished_point *best_polished_point,
                          GtFronttrace *front_trace,
-                         const Polishing_info *pol_info,
+                         const GtFtPolishing_info *pol_info,
                          GtTrimmingStrategy trimstrategy,
                          GtUword max_history,
                          GtUword minmatchpercentage,
@@ -748,13 +749,13 @@ GtUword front_prune_edist_inplace(
   const GtUword sumseqlength = ulen + vlen,
                 minsizeforshift = sumseqlength/1000;
   /* so the space for allocating the fronts is
-     sizeof (Frontvalue) * ((m+n)/1000 + maxvalid), where maxvalid is a small
-     constant. */
+     sizeof (GtFtFrontvalue) * ((m+n)/1000 + maxvalid), where maxvalid is a
+     small constant. */
   GtUword distance, trimleft = 0, valid = 1UL, maxvalid = 0, sumvalid = 0;
   const uint64_t leftmostbit = ((uint64_t) 1) << (max_history-1);
-  Frontvalue *validbasefront;
+  GtFtFrontvalue *validbasefront;
   bool diedout = false;
-  Sequenceobject useq, vseq;
+  GtFtSequenceObject useq, vseq;
 
 #ifdef OUTSIDE_OF_GT
   GtAllocatedMemory *frontspace = gt_malloc(sizeof *frontspace);
@@ -845,12 +846,12 @@ GtUword front_prune_edist_inplace(
     } else
     {
       gt_assert(valid >= 3UL);
-      frontspace_check((const Frontvalue *) frontspace->space,
-                       ((const Frontvalue *) frontspace->space)
+      frontspace_check((const GtFtFrontvalue *) frontspace->space,
+                       ((const GtFtFrontvalue *) frontspace->space)
                         + frontspace->allocated - 1,
                        validbasefront + trimleft);
-      frontspace_check((const Frontvalue *) frontspace->space,
-                       ((const Frontvalue *) frontspace->space)
+      frontspace_check((const GtFtFrontvalue *) frontspace->space,
+                       ((const GtFtFrontvalue *) frontspace->space)
                          + frontspace->allocated - 1,
                        validbasefront + trimleft + valid - 1);
       if (valid == 3UL)
@@ -966,8 +967,8 @@ GtUword front_prune_edist_inplace(
       break;
     }
   }
-  trimstat_add(trimstat,diedout,sumvalid,maxvalid,distance,
-               sizeof (Frontvalue) * frontspace->allocated,
+  gt_ft_trimstat_add(trimstat,diedout,sumvalid,maxvalid,distance,
+                     sizeof (GtFtFrontvalue) * frontspace->allocated,
 #ifndef OUTSIDE_OF_GT
                useq.sequence_cache != NULL &&
                vseq.sequence_cache != NULL ? MAX(useq.sequence_cache->allocated,

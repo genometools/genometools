@@ -272,7 +272,7 @@ static int gt_show_seedext_runner(GT_UNUSED int argc,
   unsigned int display_flag = 0;
   const GtEncseq *aencseq = NULL, *bencseq = NULL;
   GtAlignment *alignment = gt_alignment_new();
-  Polishing_info *pol_info = NULL;
+  GtFtPolishing_info *pol_info = NULL;
   GtSequencepairbuffer seqpairbuf = {NULL,NULL,0,0};
   GtGreedyextendmatchinfo *greedyextendmatchinfo = NULL;
   GtProcessinfo_and_querymatchspaceptr processinfo_and_querymatchspaceptr;
