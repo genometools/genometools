@@ -20,7 +20,6 @@
 #include "core/unused_api.h"
 #include "querymatch.h"
 #include "xdrop.h"
-#include "ft-front-prune.h"
 
 /* This header file describes the interface to two different
    methods for extending seeds, namely the xdrop-based method based on
@@ -77,7 +76,8 @@ typedef struct
 {
   void *processinfo;
   GtQuerymatch *querymatchspaceptr;
-} GtProcessinfo_and_querymatchspaceptr;;
+  GtKarlinAltschulStat *karlin_altschul_stat;
+} GtProcessinfo_and_querymatchspaceptr;
 
 GtXdropmatchinfo *gt_xdrop_matchinfo_new(GtUword userdefinedleastlength,
                                          GtUword errorpercentage,
@@ -356,21 +356,21 @@ typedef const GtQuerymatch *(*GtExtendQuerymatchRelativeFunc)(void *,
                                                              GtUword,
                                                              GtReadmode);
 
-GtUword gt_align_front_prune_edist(bool rightextension,
-                                   Polished_point *best_polished_point,
-                                   GtFronttrace *front_trace,
-                                   const GtEncseq *encseq,
-                                   const GtSeqorEncseq *query,
-                                   GtReadmode query_readmode,
-                                   GtUword query_seqstartpos,
-                                   GtUword query_totallength,
-                                   GtGreedyextendmatchinfo *ggemi,
-                                   bool greedyextension,
-                                   GtUword seedlength,
-                                   GtUword ustart,
-                                   GtUword ulen,
-                                   GtUword vstart,
-                                   GtUword vlen);
+void gt_align_front_prune_edist(bool rightextension,
+                                Polished_point *best_polished_point,
+                                GtFronttrace *front_trace,
+                                const GtEncseq *encseq,
+                                const GtSeqorEncseq *query,
+                                GtReadmode query_readmode,
+                                GtUword query_seqstartpos,
+                                GtUword query_totallength,
+                                GtGreedyextendmatchinfo *ggemi,
+                                bool greedyextension,
+                                GtUword seedlength,
+                                GtUword ustart,
+                                GtUword ulen,
+                                GtUword vstart,
+                                GtUword vlen);
 
 GtUword gt_minidentity2errorpercentage(GtUword minidentity);
 

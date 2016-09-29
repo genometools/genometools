@@ -21,7 +21,6 @@
 #include "core/types_api.h"
 #include "match/ft-front-prune.h"
 #include "match/seq_or_encseq.h"
-#include "extended/alignment.h"
 
 typedef struct GtQuerymatchoutoptions GtQuerymatchoutoptions;
 
@@ -70,22 +69,21 @@ bool gt_querymatchoutoptions_alignment_prepare(
                                      GtUword seedpos1,
                                      GtUword seedpos2,
                                      GtUword seedlen,
-                                     GT_UNUSED bool greedyextension);
+                                     bool verify_alignment,
+                                     bool greedyextension);
 
-bool frontprune2eoplist(GtQuerymatchoutoptions *querymatchoutoptions,
-                        const GtEncseq *encseq,
-                        const GtSeqorEncseq *query,
-                        GtReadmode query_readmode,
-                        GtUword query_seqstartpos,
-                        GtUword query_totallength,
-                        GtUword dbstart,
-                        GtUword dblen,
-                        GtUword abs_querystart,
-                        GtUword querylen,
-                        GtUword ustart,
-                        GtUword ulen,
-                        GtUword vstart,
-                        GtUword vlen);
+void gt_frontprune2eoplist(GtQuerymatchoutoptions *querymatchoutoptions,
+                           const GtEncseq *encseq,
+                           const GtSeqorEncseq *query,
+                           GtReadmode query_readmode,
+                           GtUword query_seqstartpos,
+                           GtUword query_totallength,
+                           GtUword dbstart,
+                           GtUword abs_querystart,
+                           GtUword ustart,
+                           GtUword ulen,
+                           GtUword vstart,
+                           GtUword vlen);
 
 void gt_querymatchoutoptions_alignment_show(const GtQuerymatchoutoptions
                                               *querymatchoutoptions,
@@ -95,13 +93,10 @@ void gt_querymatchoutoptions_alignment_show(const GtQuerymatchoutoptions
 
 typedef struct
 {
-  GtUword uoffset, voffset, ulen, vlen, sumdist;
+  GtUword uoffset, voffset, ulen, vlen, sumdist, sum_max_mismatches;
 } GtSeqpaircoordinates;
 
 const GtSeqpaircoordinates *gt_querymatchoutoptions_correction_get(
-              const GtQuerymatchoutoptions *querymatchoutoptions);
-
-const GtAlignment *gt_querymatchoutoptions_alignment_get(
               const GtQuerymatchoutoptions *querymatchoutoptions);
 
 #endif

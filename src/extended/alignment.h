@@ -1,4 +1,5 @@
 /*
+  Copyright (c) 2016 Stefan Kurtz <stefan.kurtz@zbh.uni-hamburg.de>
   Copyright (c) 2015 Annika Seidel <annika.seidel@studium.uni-hamburg.de>
   Copyright (c) 2006-2007 Gordon Gremme <gordon@gremme.org>
   Copyright (c) 2006-2015 Center for Bioinformatics, University of Hamburg
@@ -24,8 +25,6 @@
 #include "core/types_api.h"
 #include "core/error_api.h"
 #include "core/score_matrix.h"
-#include "core/unused_api.h"
-#include "match/ft-polish.h"
 #include "extended/multieoplist.h"
 
 /* the GtAlignment class (an object has to be constructed backwards) */
@@ -129,16 +128,6 @@ void         gt_alignment_show_multieop_list(const GtAlignment *alignment,
                                              FILE *fp);
 int          gt_alignment_unit_test(GtError *err);
 void         gt_alignment_delete(GtAlignment *alignment);
-
-void gt_alignment_polished_ends(GtAlignment *alignment,
-                                const Polishing_info *pol_info,
-                                bool withpolcheck);
-
-void gt_alignment_set_seedoffset(GtAlignment *alignment,
-                                 GtUword useedoffset,
-                                 GtUword seedlen);
-
-void gt_alignment_seed_display_set(GtAlignment *alignment);
 
 void gt_alignment_clone(const GtAlignment *alignment_from,
                               GtAlignment *alignment_to);

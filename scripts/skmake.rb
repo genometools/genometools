@@ -31,7 +31,7 @@ def parseargs(argv)
   options.m64 = true
   options.speed = false
   options.prof = false
-  options.jobs = 4
+  options.jobs = 1
   options.fileargs = nil
   options.threads = true
   options.sketch = false
@@ -68,11 +68,11 @@ def parseargs(argv)
 end
 
 def makecompilerflags(fp,options)
-  if not ENV.has_key?("systemdef") or ENV["systemdef"] == "Darwin"
-    extracpp = ""
-  else
-    wrapmemcpy="wrapmemcpy=yes"
-    extracpp = "-U_FORTIFY_SOURCE -D_GNU_SOURCE"
+  wrapmemcpy=""
+  extracpp = ""
+  if ENV.has_key?("systemdef") and ENV["systemdef"] != "Darwin"
+    # wrapmemcpy="wrapmemcpy=yes"
+    # extracpp = "CPPFLAGS='-U_FORTIFY_SOURCE -D_GNU_SOURCE -fno-stack-protector'"
   end
   fp.print "all:\n\t\${MAKE} -j #{options.jobs} #{wrapmemcpy} with-sqlite=no"
   # fp.print " CFLAGS+=-fstrict-aliasing"
@@ -96,7 +96,7 @@ def makecompilerflags(fp,options)
   else
     fp.print " cairo=no"
   end
-  fp.print " CPPFLAGS='-fno-stack-protector #{extracpp}' CC='ccache " + ENV["CC"] + "'"
+  fp.print " #{extracpp} CC='ccache " + ENV["CC"] + "'"
   if not options.fileargs.nil?
     filenames=options.fileargs.join(" ")
     fp.puts " #{filenames}"

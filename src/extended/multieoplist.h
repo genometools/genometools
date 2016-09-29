@@ -94,12 +94,12 @@ void            gt_multieoplist_remove_last(GtMultieoplist *multieops);
    object in that case. <source> may not be NULL!
  */
 GtMultieoplist* gt_multieoplist_clone(GtMultieoplist *copy,
-                                      GtMultieoplist *source);
+                                      const GtMultieoplist *source);
 
 /* Returns the number of <GtMultieop> elements in <multieops>, each of which
    can have <steps> >= 1, therefor this represents not the length of the
    alignment. */
-GtUword         gt_multieoplist_get_num_entries(GtMultieoplist *multieops);
+GtUword      gt_multieoplist_get_num_entries(const GtMultieoplist *multieops);
 
 /* Returns <GtMultieop> number <index>. */
 GtMultieop      gt_multieoplist_get_entry(const GtMultieoplist *multieops,
@@ -107,22 +107,22 @@ GtMultieop      gt_multieoplist_get_entry(const GtMultieoplist *multieops,
 
 /* Returns sum of <Replacement>, <Match>, <Mismatch> and <Deletion> including
    their <steps>. This corresponds to the length of the first sequence. */
-GtUword         gt_multieoplist_get_repdel_length(GtMultieoplist *multieops);
+GtUword     gt_multieoplist_get_repdel_length(const GtMultieoplist *multieops);
 
 /* Returns sum of <Replacement>, <Match>, <Mismatch> and <Insertion> including
    their <steps>. This corresponds to the length of the second sequence. */
-GtUword         gt_multieoplist_get_repins_length(GtMultieoplist *multieops);
+GtUword     gt_multieoplist_get_repins_length(const GtMultieoplist *multieops);
 
 /* Returns sum of <Replacement>, <Match>, <Mismatch>, <Deletion> and
    <Insertion> including their <steps>. This corresponds to the length of the
    whole alignment. */
-GtUword         gt_multieoplist_get_length(GtMultieoplist *multieops);
+GtUword         gt_multieoplist_get_length(const GtMultieoplist *multieops);
 
 /* Print a string representation of <multieops> to <fp> ending with a newline.
    For example: [M5,R2,M3,I1,M6] R is equivalent for <Mismatch> and
    <Replacement>.
    Assumes reverse ordered <GtMultieoplist>. */
-void            gt_multieoplist_show(GtMultieoplist *multieops, FILE *fp);
+void            gt_multieoplist_show(const GtMultieoplist *multieops, FILE *fp);
 
 /* Returns the combination of two <GtMultieoplist>s. Adds <multieops_to_add> to
    the end of <multieops> (which is usualy the start of the alignment).

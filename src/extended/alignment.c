@@ -41,13 +41,9 @@ struct GtAlignment {
   const GtUchar  *u,
                  *v;
   GtMultieoplist *eops;
-  const Polishing_info *pol_info;
   GtUword ulen,
           vlen,
-          alilen,
-          useedoffset,
-          seedlen;
-  bool seed_display, withpolcheck;
+          alilen;
 };
 
 #define GAPSYMBOL      '-'
@@ -64,10 +60,7 @@ GtAlignment* gt_alignment_new(void)
   alignment->aligned_range_v.end = 0;
   alignment->eops = gt_multieoplist_new();
   alignment->u = alignment->v = NULL;
-  alignment->pol_info = NULL;
   alignment->alilen = alignment->ulen = alignment->vlen = 0;
-  alignment->useedoffset = alignment->seedlen = 0;
-  alignment->seed_display = alignment->withpolcheck = false;
   return alignment;
 }
 
@@ -174,8 +167,6 @@ void gt_alignment_reset(GtAlignment *alignment)
   gt_assert(alignment != NULL);
   gt_multieoplist_reset(alignment->eops);
   alignment->alilen = 0;
-  alignment->useedoffset = 0;
-  alignment->seedlen = 0;
 }
 
 void gt_alignment_remove_last(GtAlignment *alignment)
@@ -534,34 +525,6 @@ static unsigned int gt_alignment_show_advance(unsigned int pos,
   return 0;
 }
 
-#define GT_UPDATE_POSITIVE_INFO(ISMATCH)\
-        if (alignment->pol_info != NULL)\
-        {\
-          if (prefix_positive < max_history && prefix_positive_sum >= 0)\
-          {\
-            if (ISMATCH)\
-            {\
-              prefix_positive_sum += alignment->pol_info->match_score;\
-            } else\
-            {\
-              prefix_positive_sum -= alignment->pol_info->difference_score;\
-            }\
-            if (prefix_positive_sum >= 0)\
-            {\
-              prefix_positive++;\
-            }\
-          }\
-          if (suffix_bits_used < max_history)\
-          {\
-            suffix_bits_used++;\
-          }\
-          suffix_bits >>= 1;\
-          if (ISMATCH)\
-          {\
-            suffix_bits |= set_mask;\
-          }\
-        }
-
 void gt_alignment_show_generic(GtUchar *buffer,
                                bool downcase,
                                const GtAlignment *alignment,
@@ -571,21 +534,10 @@ void gt_alignment_show_generic(GtUchar *buffer,
                                GtUchar wildcardshow)
 {
   GtMultieop meop;
-  GtUword idx_eop, idx_u = 0, idx_v = 0, meoplen, alignmentlength = 0,
-          suffix_bits_used = 0, prefix_positive = 0, pol_size = 0,
-          firstseedcolumn = GT_UWORD_MAX,
-          lastseedcolumn = GT_UWORD_MAX;
-  const GtUword max_history = 64;
+  GtUword idx_eop, idx_u = 0, idx_v = 0, meoplen;
   unsigned int pos = 0;
   GtUchar *topbuf = buffer, *midbuf = NULL, *lowbuf = NULL;
-  GtWord prefix_positive_sum = 0;
-  uint64_t suffix_bits = 0, set_mask = 0;
 
-  if (alignment->pol_info != NULL)
-  {
-    pol_size = GT_MULT2(alignment->pol_info->cut_depth);
-    set_mask = ((uint64_t) 1) << (max_history - 1);
-  }
   gt_assert(alignment != NULL && (characters == NULL || !downcase));
   topbuf[width] = '\n';
   midbuf = topbuf + width + 1;
@@ -626,32 +578,12 @@ void gt_alignment_show_generic(GtUchar *buffer,
           }
           if (is_match)
           {
-            if (alignment->useedoffset <= idx_u &&
-                idx_u < alignment->useedoffset + alignment->seedlen)
-            {
-              if (alignment->seed_display)
-              {
-                midbuf[pos] = (GtUchar) '+';
-              } else
-              {
-                midbuf[pos] = (GtUchar) MATCHSYMBOL;
-              }
-              if (firstseedcolumn == GT_UWORD_MAX)
-              {
-                firstseedcolumn = alignmentlength;
-              }
-              lastseedcolumn = alignmentlength;
-            } else
-            {
-              midbuf[pos] = (GtUchar) MATCHSYMBOL;
-            }
+            midbuf[pos] = (GtUchar) MATCHSYMBOL;
           } else
           {
             midbuf[pos] = (GtUchar) MISMATCHSYMBOL;
           }
           pos = gt_alignment_show_advance(pos,width,topbuf,fp);
-          GT_UPDATE_POSITIVE_INFO(is_match);
-          alignmentlength++;
           idx_u++;
           idx_v++;
         }
@@ -671,8 +603,6 @@ void gt_alignment_show_generic(GtUchar *buffer,
           midbuf[pos] = (GtUchar) MISMATCHSYMBOL;
           lowbuf[pos] = (GtUchar) GAPSYMBOL;
           pos = gt_alignment_show_advance(pos,width,topbuf,fp);
-          GT_UPDATE_POSITIVE_INFO(false);
-          alignmentlength++;
         }
         break;
       case Insertion:
@@ -690,8 +620,6 @@ void gt_alignment_show_generic(GtUchar *buffer,
             lowbuf[pos] = b;
           }
           pos = gt_alignment_show_advance(pos,width,topbuf,fp);
-          GT_UPDATE_POSITIVE_INFO(false);
-          alignmentlength++;
         }
         break;
     }
@@ -711,69 +639,6 @@ void gt_alignment_show_generic(GtUchar *buffer,
     fwrite(midbuf,sizeof *midbuf,pos+1,fp);
     lowbuf[pos] = '\n';
     fwrite(lowbuf,sizeof *lowbuf,pos+1,fp);
-  }
-  if (alignment->pol_info != NULL)
-  {
-    GtUword suffix_positive;
-    GtWord suffix_positive_sum = 0;
-    bool startpolished = false, endpolished = false;
-
-    for (suffix_positive = 0; suffix_positive < suffix_bits_used;
-         suffix_positive++)
-    {
-      suffix_positive_sum += ((suffix_bits & set_mask)
-                                ? alignment->pol_info->match_score
-                                : -alignment->pol_info->difference_score);
-      if (suffix_positive_sum < 0)
-      {
-        break;
-      }
-      set_mask >>= 1;
-    }
-    gt_assert(prefix_positive <= alignmentlength &&
-              prefix_positive <= alignmentlength);
-    if (prefix_positive >= pol_size || prefix_positive == alignmentlength ||
-        firstseedcolumn < pol_size)
-    {
-      startpolished = true;
-    }
-    if (suffix_positive >= pol_size || suffix_positive == alignmentlength ||
-        (lastseedcolumn != GT_UWORD_MAX &&
-        lastseedcolumn + pol_size > alignmentlength))
-    {
-      endpolished = true;
-    }
-    fprintf(fp, "# polishing(m=" GT_WD ",d=" GT_WD ",p=" GT_WU
-            "): " GT_WU "/" GT_WU,
-            alignment->pol_info->match_score,
-            -alignment->pol_info->difference_score,
-            pol_size,
-            prefix_positive,
-            suffix_positive);
-    if (firstseedcolumn < pol_size)
-    {
-      fprintf(fp, ", seed_on_start");
-    }
-    if (lastseedcolumn + pol_size > alignmentlength)
-    {
-      fprintf(fp, ", seed_on_end");
-    }
-    if (alignment->withpolcheck)
-    {
-      fprintf(fp, "\n");
-      gt_assert(startpolished && endpolished);
-    } else
-    {
-      if (!startpolished)
-      {
-        fprintf(fp, ", start not polished");
-      }
-      if (!endpolished)
-      {
-        fprintf(fp, ", end not polished");
-      }
-      fprintf(fp, "\n");
-    }
   }
 }
 
@@ -945,14 +810,6 @@ void gt_alignment_delete(GtAlignment *alignment)
   gt_free(alignment);
 }
 
-void gt_alignment_set_seedoffset(GtAlignment *alignment,
-                                 GtUword useedoffset,
-                                 GtUword seedlen)
-{
-  alignment->useedoffset = useedoffset;
-  alignment->seedlen = seedlen;
-}
-
 void gt_alignment_clone(const GtAlignment *alignment_from,
                         GtAlignment *alignment_to)
 {
@@ -966,21 +823,6 @@ void gt_alignment_clone(const GtAlignment *alignment_from,
   alignment_to->aligned_range_v = alignment_from->aligned_range_v;
   gt_multieoplist_clone(alignment_to->eops,alignment_from->eops);
   alignment_to->alilen = alignment_from->alilen;
-}
-
-void gt_alignment_polished_ends(GtAlignment *alignment,
-                                const Polishing_info *pol_info,
-                                bool withpolcheck)
-{
-  gt_assert(alignment != NULL);
-  alignment->pol_info = pol_info;
-  alignment->withpolcheck = withpolcheck;
-}
-
-void gt_alignment_seed_display_set(GtAlignment *alignment)
-{
-  gt_assert(alignment != NULL);
-  alignment->seed_display = true;
 }
 
 int gt_alignment_unit_test(GtError *err)

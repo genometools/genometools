@@ -10,7 +10,7 @@ do
   for mode in greedy xdrop
   do
     echo $filename
-    ${GTDIR}/bin/gt -j 4 seed_extend -seqlength-display -parts 2 -extend${mode} -ii sfx -v -maxfreq 20 -seed-display -kmerfile no > sfx.matches
-    ${GTDIR}/bin/gt dev show_seedext -seqlength-display -f sfx.matches -a -sort
+    ${GTDIR}/bin/gt -j 4 seed_extend -display seed seqlength -parts 2 -extend${mode} -ii sfx -v -maxfreq 20 -kmerfile no > sfx.matches
+    ${GTDIR}/bin/gt dev show_seedext -display seqlength -f sfx.matches -a -sort
   done
 done

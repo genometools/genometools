@@ -18,13 +18,13 @@
 #include "core/minmax.h"
 #include "match/querymatch.h"
 #include "match/xdrop.h"
-#include "match/esa-maxpairs.h"
 #include "match/ft-front-prune.h"
 #include "match/ft-trimstat.h"
-#include "match/seed-extend.h"
 #include "match/seq_or_encseq.h"
+#include "match/seed-extend.h"
 
-static GtUword score2distance(GtWord score,GtUword alignedlen)
+static GtUword gt_querymatch_score2distance(GtXdropscore score,
+                                            GtUword alignedlen)
 {
   if (score >= 0)
   {
@@ -225,6 +225,7 @@ void gt_sesp_show(const GtSeedextendSeqpair *sesp)
 static const GtQuerymatch *gt_combine_extensions(
          bool forxdrop,
          GtQuerymatch *querymatchspaceptr,
+         GtKarlinAltschulStat *karlin_altschul_stat,
          const GtEncseq *dbencseq,
          const GtSeqorEncseq *query,
          const GtSeedextendSeqpair *sesp,
@@ -232,8 +233,9 @@ static const GtQuerymatch *gt_combine_extensions(
          GtUword v_left_ext,
          GtUword u_right_ext,
          GtUword v_right_ext,
-         GtXdropscore score,
+         GtXdropscore total_score,
          GtUword total_distance,
+         GtUword total_mismatches,
          bool silent)
 {
   GtUword dblen, dbseqlen, querylen, total_alignedlen, dbstart, querystart;
@@ -243,10 +245,10 @@ static const GtQuerymatch *gt_combine_extensions(
   total_alignedlen = dblen + querylen;
   if (forxdrop)
   {
-    total_distance = score2distance(score,total_alignedlen);
+    total_distance = gt_querymatch_score2distance(total_score,total_alignedlen);
   } else
   {
-    score = gt_querymatch_distance2score(total_distance,total_alignedlen);
+    total_score = gt_querymatch_distance2score(total_distance,total_alignedlen);
   }
   gt_assert(sesp->seedpos1 >= u_left_ext && sesp->seedpos2 >= v_left_ext);
   dbstart = sesp->seedpos1 - u_left_ext;
@@ -254,8 +256,8 @@ static const GtQuerymatch *gt_combine_extensions(
   gt_assert(querystart >= sesp->queryseqstartpos);
 
 #ifdef SKDEBUG
-  printf("total_distance=" GT_WU ", score=" GT_WD ",total_alignedlen=" GT_WU
-          ", err=%.2f\n",total_distance,score,total_alignedlen,
+  printf("total_distance=" GT_WU ", total_score=" GT_WD ",total_alignedlen="
+         GT_WU ", err=%.2f\n",total_distance,total_score,total_alignedlen,
           gt_querymatch_error_rate(total_distance,total_alignedlen));
 #endif
   if (silent)
@@ -264,13 +266,15 @@ static const GtQuerymatch *gt_combine_extensions(
   }
   dbseqlen = gt_encseq_seqlength(dbencseq,sesp->dbseqnum);
   if (gt_querymatch_complete(querymatchspaceptr,
+                             karlin_altschul_stat,
                              dblen,
                              dbstart,
                              sesp->dbseqnum,
                              dbstart - sesp->dbseqstartpos,
                              dbseqlen,
-                             score,
+                             (GtWord) total_score,
                              total_distance,
+                             total_mismatches,
                              query == NULL ? true : false,
                              (uint64_t) sesp->queryseqnum,
                              querylen,
@@ -299,7 +303,8 @@ static void extensioncoords_show(bool forxdrop,bool rightextension,
           rightextension ? "right" : "left",
           u_ext + v_ext,
           u_ext,
-          forxdrop ? score2distance(score_or_distance,u_ext + v_ext)
+          forxdrop ? gt_querymatch_score2distance(score_or_distance,
+                                                  u_ext + v_ext)
                    : (GtUword) score_or_distance);
 }
 #endif
@@ -651,21 +656,21 @@ static void gt_greedy_extend_init(FTsequenceResources *ufsr,
   }
 }
 
-GtUword gt_align_front_prune_edist(bool rightextension,
-                                   Polished_point *best_polished_point,
-                                   GtFronttrace *front_trace,
-                                   const GtEncseq *dbencseq,
-                                   const GtSeqorEncseq *query,
-                                   GtReadmode query_readmode,
-                                   GtUword queryseqstartpos,
-                                   GtUword query_totallength,
-                                   GtGreedyextendmatchinfo *ggemi,
-                                   bool greedyextension,
-                                   GtUword seedlength,
-                                   GtUword ustart,
-                                   GtUword ulen,
-                                   GtUword vstart,
-                                   GtUword vlen)
+void gt_align_front_prune_edist(bool rightextension,
+                                Polished_point *best_polished_point,
+                                GtFronttrace *front_trace,
+                                const GtEncseq *dbencseq,
+                                const GtSeqorEncseq *query,
+                                GtReadmode query_readmode,
+                                GtUword queryseqstartpos,
+                                GtUword query_totallength,
+                                GtGreedyextendmatchinfo *ggemi,
+                                bool greedyextension,
+                                GtUword seedlength,
+                                GtUword ustart,
+                                GtUword ulen,
+                                GtUword vstart,
+                                GtUword vlen)
 {
   GtUword distance = 0, iteration, maxiterations;
   FTsequenceResources ufsr, vfsr;
@@ -675,11 +680,19 @@ GtUword gt_align_front_prune_edist(bool rightextension,
                         query_totallength,ggemi);
   maxiterations = greedyextension ? 1 : ggemi->perc_mat_history;
   gt_assert(best_polished_point != NULL);
-  for (iteration = 0; iteration < maxiterations; iteration++)
+  for (iteration = 0; iteration <= maxiterations; iteration++)
   {
+    GtTrimmingStrategy trimstrategy;
 #ifdef SKDEBUG
     printf("%s: iteration " GT_WU "\n",__func__,iteration);
 #endif
+    if (iteration == maxiterations)
+    {
+      trimstrategy = GT_OUTSENSE_TRIM_NEVER;
+    } else
+    {
+      trimstrategy = ggemi->trimstrategy;
+    }
     gt_assert(iteration < ggemi->perc_mat_history);
     distance = front_prune_edist_inplace(rightextension,
                                          &ggemi->frontspace_reservoir,
@@ -687,7 +700,7 @@ GtUword gt_align_front_prune_edist(bool rightextension,
                                          best_polished_point,
                                          front_trace,
                                          ggemi->pol_info,
-                                         ggemi->trimstrategy,
+                                         trimstrategy,
                                          ggemi->history,
                                          ggemi->perc_mat_history - iteration,
                                          ggemi->maxalignedlendifference
@@ -712,7 +725,7 @@ GtUword gt_align_front_prune_edist(bool rightextension,
           rightextension ? "right" : "left",
           u_ext + v_ext,
           u_ext,
-          (GtWord) best_polished_point->distance);
+          best_polished_point->distance);
 #endif
       break;
     }
@@ -724,9 +737,10 @@ GtUword gt_align_front_prune_edist(bool rightextension,
     best_polished_point->row = 0;
     best_polished_point->distance = 0;
     best_polished_point->trimleft = 0;
+    best_polished_point->max_mismatches = 0;
   }
-  gt_assert(distance >= best_polished_point->distance);
-  return distance;
+  gt_assert(distance >= best_polished_point->distance &&
+            distance < ulen + vlen + 1);
 }
 
 GtUword gt_minidentity2errorpercentage(GtUword minidentity)
@@ -847,10 +861,10 @@ static const GtQuerymatch *gt_extend_sesp(bool forxdrop,
   GtXdropmatchinfo *xdropmatchinfo = NULL;
   GtUword u_left_ext, v_left_ext, u_right_ext, v_right_ext,
           ulen, vlen, urightbound, vrightbound;
-  GtXdropscore score = 0;
+  GtXdropscore total_score = 0;
   FTsequenceResources ufsr, vfsr;
-  Polished_point left_best_polished_point = {0,0,0},
-                 right_best_polished_point = {0,0,0};
+  Polished_point left_best_polished_point = {0,0,0,0,0},
+                 right_best_polished_point = {0,0,0,0,0};
   const bool rightextension = true;
 
   if (query == NULL)
@@ -1078,9 +1092,10 @@ static const GtQuerymatch *gt_extend_sesp(bool forxdrop,
     extensioncoords_show(true,rightextension,u_right_ext,v_right_ext,
                          xdropmatchinfo->best_right.score);
 #endif
-    score = (GtXdropscore) sesp->seedlen * xdropmatchinfo->arbitscores.mat +
-            xdropmatchinfo->best_left.score +
-            xdropmatchinfo->best_right.score;
+    total_score
+      = (GtXdropscore) sesp->seedlen * xdropmatchinfo->arbitscores.mat +
+        xdropmatchinfo->best_left.score +
+        xdropmatchinfo->best_right.score;
   } else
   {
     u_right_ext = right_best_polished_point.row;
@@ -1102,6 +1117,7 @@ static const GtQuerymatch *gt_extend_sesp(bool forxdrop,
   return gt_combine_extensions(
                  forxdrop,
                  processinfo_and_querymatchspaceptr->querymatchspaceptr,
+                 processinfo_and_querymatchspaceptr->karlin_altschul_stat,
                  dbencseq,
                  query,
                  sesp,
@@ -1109,9 +1125,11 @@ static const GtQuerymatch *gt_extend_sesp(bool forxdrop,
                  v_left_ext,
                  u_right_ext,
                  v_right_ext,
-                 forxdrop ? score : 0,
+                 forxdrop ? total_score : 0,
                  forxdrop ? 0 : (left_best_polished_point.distance +
                                  right_best_polished_point.distance),
+                 forxdrop ? 0 : (left_best_polished_point.max_mismatches +
+                                 right_best_polished_point.max_mismatches),
                  forxdrop ? xdropmatchinfo->silent
                           : greedyextendmatchinfo->silent);
 }

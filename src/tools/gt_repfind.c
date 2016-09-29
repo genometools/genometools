@@ -29,6 +29,7 @@
 #include "core/encseq.h"
 #include "core/showtime.h"
 #include "core/timer_api.h"
+#include "core/encseq_metadata.h"
 #include "match/esa-maxpairs.h"
 #include "match/esa-mmsearch.h"
 #include "match/querymatch.h"
@@ -58,8 +59,7 @@ typedef struct
           alignmentwidth; /* 0 for no alignment display and otherwidth number
                              of columns of alignment per line displayed. */
   bool scanfile, beverbose, forward, reverse, reverse_complement, searchspm,
-       check_extend_symmetry, silent, trimstat, seed_display, seqlength_display,
-       noxpolish, verify_alignment;
+       check_extend_symmetry, silent, trimstat, noxpolish, verify_alignment;
   GtStr *indexname, *query_indexname, *cam_string; /* parse this using
                                     gt_greedy_extend_char_access*/
   GtStrArray *query_files;
@@ -69,6 +69,7 @@ typedef struct
            *refextendxdropoption,
            *refextendgreedyoption,
            *refalignmentoutoption;
+  GtStrArray *display_args;
 } GtMaxpairsoptions;
 
 static int gt_exact_selfmatch_with_output(void *info,
@@ -106,13 +107,16 @@ static int gt_exact_selfmatch_with_output(void *info,
   gt_assert(pos2 >= queryseqstartpos);
   if (gt_querymatch_complete(processinfo_and_querymatchspaceptr->
                                   querymatchspaceptr,
+                             processinfo_and_querymatchspaceptr->
+                                  karlin_altschul_stat,
                              len,
                              pos1,
                              dbseqnum,
                              pos1 - dbseqstartpos,
                              dbseqlen,
-                             0,
-                             0,
+                             0, /* score */
+                             0, /* edist */
+                             0, /* mismatches */
                              true,
                              (uint64_t) queryseqnum,
                              len,
@@ -185,6 +189,7 @@ static void *gt_repfind_arguments_new(void)
   arguments->query_indexname = gt_str_new();
   arguments->cam_string = gt_str_new();
   arguments->query_files = gt_str_array_new();
+  arguments->display_args = gt_str_array_new();
   return arguments;
 }
 
@@ -200,6 +205,7 @@ static void gt_repfind_arguments_delete(void *tool_arguments)
   gt_str_delete(arguments->query_indexname);
   gt_str_delete(arguments->cam_string);
   gt_str_array_delete(arguments->query_files);
+  gt_str_array_delete(arguments->display_args);
   gt_option_delete(arguments->refforwardoption);
   gt_option_delete(arguments->refseedlengthoption);
   gt_option_delete(arguments->refuserdefinedleastlengthoption);
@@ -220,7 +226,7 @@ static GtOptionParser *gt_repfind_option_parser_new(void *tool_arguments)
            *maxalilendiffoption, *leastlength_option, *char_access_mode_option,
            *check_extend_symmetry_option, *xdropbelowoption, *historyoption,
            *percmathistoryoption, *errorpercentageoption, *optiontrimstat,
-           *withalignmentoption, *optionseed_display, *optionseqlength_display,
+           *withalignmentoption,
            *optionnoxpolish, *verify_alignment_option, *option_query_indexname;
   GtMaxpairsoptions *arguments = tool_arguments;
 
@@ -383,6 +389,12 @@ static GtOptionParser *gt_repfind_option_parser_new(void *tool_arguments)
   gt_option_parser_add_option(op, option);
   gt_option_is_development_option(option);
 
+  /* -display */
+  option = gt_option_new_string_array("display",
+                                      gt_querymatch_display_help(),
+                                      arguments->display_args);
+  gt_option_parser_add_option(op, option);
+
   optionnoxpolish
     = gt_option_new_bool("noxpolish","do not polish X-drop extensions",
                          &arguments->noxpolish, false);
@@ -399,20 +411,6 @@ static GtOptionParser *gt_repfind_option_parser_new(void *tool_arguments)
                                       &arguments->trimstat, false);
   gt_option_parser_add_option(op, optiontrimstat);
   gt_option_is_development_option(optiontrimstat);
-
-  optionseed_display = gt_option_new_bool("seed-display","display seeds in "
-                                          "#-line",
-                                          &arguments->seed_display, false);
-  gt_option_parser_add_option(op, optionseed_display);
-  gt_option_is_development_option(optionseed_display);
-
-  optionseqlength_display = gt_option_new_bool("seqlength-display",
-                                       "Display length of sequences in which "
-                                       "the two match-instances occur",
-                                       &arguments->seqlength_display,
-                                       false);
-  gt_option_parser_add_option(op, optionseqlength_display);
-  gt_option_is_development_option(optionseqlength_display);
 
   option_query_indexname = gt_option_new_string("qii",
                                                 "Specify name of query index",
@@ -572,6 +570,7 @@ static int gt_callenumquerymatches(bool selfmatch,
                                    GtQuerymatchoutoptions *querymatchoutoptions,
                                    GtXdrop_extend_querymatch_func eqmf,
                                    void *eqmf_data,
+                                   GtKarlinAltschulStat *karlin_altschul_stat,
                                    GtLogger *logger,
                                    GtError *err)
 {
@@ -579,6 +578,7 @@ static int gt_callenumquerymatches(bool selfmatch,
   GtQuerysubstringmatchiterator *qsmi = NULL;
   bool haserr = false, query_encseq_own = false;
   GtEncseq *query_encseq = NULL;
+  GtUword totallength = 0;
 
   if (gt_mapsuffixarray(&suffixarray,
                         SARR_ESQTAB | SARR_SUFTAB | SARR_SSPTAB,
@@ -617,7 +617,7 @@ static int gt_callenumquerymatches(bool selfmatch,
   }
   if (!haserr)
   {
-    GtUword totallength = gt_encseq_total_length(suffixarray.encseq);
+    totallength = gt_encseq_total_length(suffixarray.encseq);
     qsmi = gt_querysubstringmatchiterator_new(suffixarray.encseq,
                                               totallength,
                                               suffixarray.suftab,
@@ -677,6 +677,7 @@ static int gt_callenumquerymatches(bool selfmatch,
       if (eqmf != NULL)
       {
         gt_querymatch_init(exactseed,
+                           karlin_altschul_stat,
                            matchlength,
                            dbstart,
                            dbseqnum,
@@ -684,6 +685,7 @@ static int gt_callenumquerymatches(bool selfmatch,
                            dbseqlen,
                            0, /* score */
                            0, /* edist */
+                           0, /* mismatches */
                            selfmatch,
                            queryunitnum,
                            matchlength,
@@ -693,6 +695,7 @@ static int gt_callenumquerymatches(bool selfmatch,
       } else
       {
         if (gt_querymatch_complete(exactseed,
+                                   karlin_altschul_stat,
                                    matchlength,
                                    dbstart,
                                    dbseqnum,
@@ -700,6 +703,7 @@ static int gt_callenumquerymatches(bool selfmatch,
                                    dbseqlen,
                                    0, /* score */
                                    0, /* edist */
+                                   0, /* mismatches */
                                    selfmatch,
                                    queryunitnum,
                                    matchlength,
@@ -744,6 +748,19 @@ static int gt_repfind_runner(int argc,
   GtTimer *repfindtimer = NULL;
   GtExtendCharAccess extend_char_access = GT_EXTEND_CHAR_ACCESS_ANY;
   Polishing_info *pol_info = NULL;
+  GtQuerymatchoutoptions *querymatchoutoptions;
+  GtProcessinfo_and_querymatchspaceptr processinfo_and_querymatchspaceptr;
+  GtXdrop_extend_querymatch_func eqmf = NULL;
+  GtEncseqMetadata* emd;
+  void *eqmf_data = NULL;
+  int mode;
+  const int modes[] = {GT_READMODE_FORWARD,
+                       GT_READMODE_REVERSE,
+                       GT_READMODE_REVCOMPL};
+  const bool flags[] = {arguments->forward,
+                        arguments->reverse,
+                        arguments->reverse_complement};
+  unsigned int display_flag = 0;
 
   gt_error_check(err);
   logger = gt_logger_new(arguments->beverbose, GT_LOGGER_DEFLT_PREFIX, stdout);
@@ -822,22 +839,18 @@ static int gt_repfind_runner(int argc,
   }
   if (!haserr)
   {
-    GtQuerymatchoutoptions *querymatchoutoptions;
-    GtProcessinfo_and_querymatchspaceptr processinfo_and_querymatchspaceptr;
-    GtXdrop_extend_querymatch_func eqmf = NULL;
-    void *eqmf_data = NULL;
-    int mode;
-    const int modes[] = {GT_READMODE_FORWARD,
-                         GT_READMODE_REVERSE,
-                         GT_READMODE_REVCOMPL};
-    const bool flags[] = {arguments->forward,
-                          arguments->reverse,
-                          arguments->reverse_complement};
-    const unsigned int display_flag
-      = gt_querymatch_bool2display_flag(arguments->seed_display,
-                                        arguments->seqlength_display);
-
+    if (gt_querymatch_eval_display_args(&display_flag,
+                                        arguments->display_args,
+                                        err) != 0)
+    {
+      haserr = true;
+    }
+  }
+  if (!haserr)
+  {
     processinfo_and_querymatchspaceptr.processinfo = NULL;
+    processinfo_and_querymatchspaceptr.karlin_altschul_stat
+      = gt_karlin_altschul_stat_new_gapped();
     if (arguments->alignmentwidth > 0 ||
         (gt_option_is_set(arguments->refextendxdropoption) &&
          !arguments->noxpolish))
@@ -900,6 +913,18 @@ static int gt_repfind_runner(int argc,
         eqmf_data = (void *) &processinfo_and_querymatchspaceptr;
       }
     }
+    emd = gt_encseq_metadata_new(gt_str_get(arguments->indexname),err);
+    if (emd == NULL)
+    {
+      haserr = true;
+    } else
+    {
+      gt_karlin_altschul_stat_add_keyvalues(
+                processinfo_and_querymatchspaceptr.karlin_altschul_stat,
+                gt_encseq_metadata_total_length(emd),
+                gt_encseq_metadata_num_of_sequences(emd));
+      gt_encseq_metadata_delete(emd);
+    }
     if (gt_str_array_size(arguments->query_files) == 0 &&
         gt_str_length(arguments->query_indexname) == 0)
     {
@@ -917,7 +942,7 @@ static int gt_repfind_runner(int argc,
         }
       } else
       {
-        if (arguments->forward)
+        if (!haserr && arguments->forward)
         {
           GtProcessmaxpairs processmaxpairs;
           void *processmaxpairsdata;
@@ -979,6 +1004,8 @@ static int gt_repfind_runner(int argc,
                                           querymatchoutoptions,
                                           eqmf,
                                           eqmf_data,
+                                          processinfo_and_querymatchspaceptr.
+                                            karlin_altschul_stat,
                                           logger,
                                           err) != 0)
               {
@@ -1006,6 +1033,8 @@ static int gt_repfind_runner(int argc,
                                   querymatchoutoptions,
                                   eqmf,
                                   eqmf_data,
+                                  processinfo_and_querymatchspaceptr.
+                                    karlin_altschul_stat,
                                   logger,
                                   err) != 0)
           {
@@ -1016,6 +1045,8 @@ static int gt_repfind_runner(int argc,
     }
     gt_querymatchoutoptions_delete(querymatchoutoptions);
     gt_querymatch_delete(processinfo_and_querymatchspaceptr.querymatchspaceptr);
+    gt_karlin_altschul_stat_delete(processinfo_and_querymatchspaceptr.
+                                   karlin_altschul_stat);
   }
   gt_xdrop_matchinfo_delete(xdropmatchinfo);
   gt_greedy_extend_matchinfo_delete(greedyextendmatchinfo);

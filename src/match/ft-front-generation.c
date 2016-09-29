@@ -3,13 +3,13 @@
 #include <stdio.h>
 #include <stdbool.h>
 #include <limits.h>
+#include "ft-eoplist.h"
 #ifdef WITHDISTRIBUTION
 #include "distribution.h"
 #endif
 #include "core/assert_api.h"
 #include "core/divmodmul.h"
 #include "core/unused_api.h"
-#include "core/arraydef.h"
 #include "core/ma_api.h"
 #include "core/types_api.h"
 #include "ft-front-generation.h"
@@ -28,7 +28,7 @@ typedef struct
 
 typedef struct
 {
-  uint32_t bits:BACKTRACEBITS,     /* combination of FT_EOP_REPLACEMENT
+  uint32_t bits:BACKTRACEBITS,     /* combination of FT_EOP_MISMATCH
                                                      FT_EOP_INSERTION
                                                      FT_EOP_DELETION */
            lcs:(32-BACKTRACEBITS); /* longest common suffix */
@@ -50,8 +50,8 @@ typedef struct
           lcs_sum,
           pathlength;
   unsigned int row, lcs;
-  uint8_t trace;
-  uint8_t eopcode;
+  uint8_t trace,
+          eopcode;
 } GtBacktraceFrontStackelem;
 
 typedef struct
@@ -248,95 +248,6 @@ static GtUword valid_total_fronts(const GtFrontGeneration *gen_table,
   return valid_total;
 }
 
-char show_eopcode(GT_UNUSED uint8_t eopcode)
-{
-  if (eopcode == FT_EOPCODE_DELETION)
-  {
-    return 'D';
-  } else
-  {
-    if (eopcode == FT_EOPCODE_INSERTION)
-    {
-      return 'I';
-    } else
-    {
-      return 'R';
-    }
-  }
-}
-
-void eoplist_show(const GtEoplist *eoplist)
-{
-  GtUword idx;
-
-  gt_assert(eoplist != NULL);
-  printf("[");
-  for (idx = 0; idx < eoplist->nextfreeuint8_t; idx++)
-  {
-    if (eoplist->spaceuint8_t[idx] == FT_EOPCODE_DELETION)
-    {
-      printf("D");
-    } else
-    {
-      if (eoplist->spaceuint8_t[idx] == FT_EOPCODE_INSERTION)
-      {
-        printf("I");
-      } else
-      {
-        GtUword repnum;
-        for (repnum = 0; repnum <= eoplist->spaceuint8_t[idx]; repnum++)
-        {
-          printf("R");
-        }
-      }
-    }
-  }
-  printf("]\n");
-}
-
-#ifdef OUTSIDE_OF_GT
-#define GT_CHECKARRAYSPACE(A,TYPE,L)\
-        do {\
-          if ((A)->nextfree##TYPE >= (A)->allocated##TYPE)\
-          {\
-            (A)->allocated##TYPE += L;\
-            (A)->space##TYPE = (TYPE *) gt_realloc((A)->space##TYPE,\
-                                              sizeof (TYPE) *\
-                                              (A)->allocated##TYPE);\
-          }\
-          gt_assert((A)->space##TYPE != NULL);\
-        } while (false)
-
-#define GT_STOREINARRAY(A,TYPE,L,VAL)\
-        do {\
-          GT_CHECKARRAYSPACE(A,TYPE,L);\
-          (A)->space##TYPE[(A)->nextfree##TYPE++] = VAL;\
-        } while (false)
-#endif
-
-#define GT_EOPLIST_PUSH(EOPLIST,EOP)\
-        {\
-          const GtUword addamount = (EOPLIST)->allocateduint8_t * 0.2 + 128;\
-          GT_STOREINARRAY(EOPLIST,uint8_t,addamount,(uint8_t) (EOP));\
-        }
-
-void front_trace_multireplacement(GtEoplist *eoplist,GtUword repnum)
-{
-  gt_assert(eoplist != NULL && repnum > 0);
-  eoplist->countmatches += repnum;
-  while (true)
-  {
-    if (repnum <= FT_EOPCODE_MAXREPLACEMENT)
-    {
-      gt_assert(repnum > 0);
-      GT_EOPLIST_PUSH(eoplist,(uint8_t) (repnum - 1)); /* R repnum */
-      break;
-    }
-    GT_EOPLIST_PUSH(eoplist,FT_EOPCODE_MAXREPLACEMENT - 1); /* R max */
-    repnum -= FT_EOPCODE_MAXREPLACEMENT;
-  }
-}
-
 static void gt_check_diagonal_run(GT_UNUSED const GtUchar *useq,
                                   GT_UNUSED const GtUchar *vseq,
                                   GT_UNUSED GtWord diagonal,
@@ -364,7 +275,7 @@ static void front_trace2eoplist_directed(GtEoplist *eoplist,
           totalrunlength = 0, trimleft;
   GtWord diagonal;
   unsigned int row, lcs;
-  uint8_t trace, preferred_eop = FT_EOP_REPLACEMENT;
+  uint8_t trace, preferred_eop = FT_EOP_MISMATCH;
 
   gt_assert(front_trace != NULL && front_trace->gen_nextfree > 0 && pp != NULL);
   localoffset = polished_point2offset(front_trace,pp);
@@ -389,7 +300,7 @@ static void front_trace2eoplist_directed(GtEoplist *eoplist,
     {
       if (lcs > 0)
       {
-        front_trace_multireplacement(eoplist,lcs);
+        gt_eoplist_match_add(eoplist,lcs);
       }
     } else
     {
@@ -398,7 +309,7 @@ static void front_trace2eoplist_directed(GtEoplist *eoplist,
     if (trace & preferred_eop)
     {
       totalrunlength++;
-      if (preferred_eop == FT_EOP_REPLACEMENT)
+      if (preferred_eop == FT_EOP_MISMATCH)
       {
         nextrowadd = 1;
       } else
@@ -418,9 +329,9 @@ static void front_trace2eoplist_directed(GtEoplist *eoplist,
       }
     } else
     {
-      if (trace & FT_EOP_REPLACEMENT)
+      if (trace & FT_EOP_MISMATCH)
       {
-        preferred_eop = FT_EOP_REPLACEMENT;
+        preferred_eop = FT_EOP_MISMATCH;
         nextrowadd = 1;
       } else
       {
@@ -444,18 +355,15 @@ static void front_trace2eoplist_directed(GtEoplist *eoplist,
     {
       if (preferred_eop == FT_EOP_DELETION)
       {
-        GT_EOPLIST_PUSH(eoplist,FT_EOPCODE_DELETION);
-        eoplist->countdeletions++;
+        gt_eoplist_deletion_add(eoplist);
       } else
       {
         if (preferred_eop == FT_EOP_INSERTION)
         {
-          GT_EOPLIST_PUSH(eoplist,FT_EOPCODE_INSERTION);
-          eoplist->countinsertions++;
+          gt_eoplist_insertion_add(eoplist);
         } else
         {
-          GT_EOPLIST_PUSH(eoplist,0); /* R 1 */
-          eoplist->countmismatches++;
+          gt_eoplist_mismatch_add(eoplist);
         }
       }
     }
@@ -480,7 +388,7 @@ static void front_trace2eoplist_directed(GtEoplist *eoplist,
   gt_assert(globaloffset + localoffset == 0 && trace == 0);
   if (eoplist != NULL && lcs > 0)
   {
-    front_trace_multireplacement(eoplist,lcs);
+    gt_eoplist_match_add(eoplist,lcs);
   }
 }
 
@@ -504,6 +412,13 @@ static GtBacktraceFrontStackelem *stack_top_ptr_get(
   return stack->space + stack->nextfree++;
 }
 
+typedef enum
+{
+  backtracepath_mismatch,
+  backtracepath_deletion,
+  backtracepath_insertion
+} Backtracepathflag;
+
 static void gt_front_trace_single_push(GtFronttrace *front_trace,
                                        GtUword match_score,
                                        GtWord diagonal,
@@ -513,7 +428,7 @@ static void gt_front_trace_single_push(GtFronttrace *front_trace,
                                        GtUword globaloffset,
                                        GtUword trimleft,
                                        GtUword lcs_sum,
-                                       uint8_t eopcode,
+                                       Backtracepathflag eopcode,
                                        GtUword pathlength)
 {
   GtUword localoffset;
@@ -571,7 +486,7 @@ static void gt_front_trace_backtrace_step(GtBacktraceFrontInfo *bti,
                                globaloffset,
                                trimleft,
                                lcs_sum,
-                               FT_EOPCODE_INSERTION,
+                               backtracepath_insertion,
                                pathlength);
     if (!bti->on_polsize_suffix)
     {
@@ -591,15 +506,15 @@ static void gt_front_trace_backtrace_step(GtBacktraceFrontInfo *bti,
                                globaloffset,
                                trimleft,
                                lcs_sum,
-                               FT_EOPCODE_DELETION,
+                               backtracepath_deletion,
                                pathlength);
     if (!bti->on_polsize_suffix)
     {
       return;
     }
   }
-  if ((trace & FT_EOP_REPLACEMENT) && (!bti->on_polsize_suffix ||
-                                       scoresum >= bti->difference_score))
+  if ((trace & FT_EOP_MISMATCH) && (!bti->on_polsize_suffix ||
+                                    scoresum >= bti->difference_score))
   {
     gt_front_trace_single_push(front_trace,
                                bti->match_score,
@@ -610,7 +525,7 @@ static void gt_front_trace_backtrace_step(GtBacktraceFrontInfo *bti,
                                globaloffset,
                                trimleft,
                                lcs_sum,
-                               0, /* R 1 */
+                               backtracepath_mismatch,
                                pathlength);
   }
 }
@@ -627,32 +542,31 @@ static void gt_front_trace_backtracepath2eoplist(GtEoplist *eoplist,
 
   if (lastlcs > 0)
   {
-    front_trace_multireplacement(eoplist,lastlcs);
+    gt_eoplist_match_add(eoplist,lastlcs);
     matches += lastlcs;
   }
   gt_assert(eoplist != NULL);
   for (idx = 0; idx < elementsinbacktracepath; idx++)
   {
-    if (backtracepath[idx].eopcode == FT_EOPCODE_DELETION)
+    if (backtracepath[idx].eopcode == backtracepath_deletion)
     {
-      eoplist->countdeletions++;
+      gt_eoplist_deletion_add(eoplist);
       deletions++;
     } else
     {
-      if (backtracepath[idx].eopcode == FT_EOPCODE_INSERTION)
+      if (backtracepath[idx].eopcode == backtracepath_insertion)
       {
-        eoplist->countinsertions++;
+        gt_eoplist_insertion_add(eoplist);
         insertions++;
       } else
       {
-        eoplist->countmismatches++;
+        gt_eoplist_mismatch_add(eoplist);
         mismatches++;
       }
     }
-    GT_EOPLIST_PUSH(eoplist,backtracepath[idx].eopcode);
     if (backtracepath[idx].lcs > 0)
     {
-      front_trace_multireplacement(eoplist,backtracepath[idx].lcs);
+      gt_eoplist_match_add(eoplist,backtracepath[idx].lcs);
       matches += backtracepath[idx].lcs;
     }
   }

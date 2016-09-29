@@ -250,11 +250,14 @@ void *gt_linspace_management_get_maxspace(const GtLinspaceManagement
   return NULL;
 }
 
-static inline bool check(const GtLinspaceManagement *spacemanager,
+#ifndef NDEBUG
+static bool gt_linspace_management_check_space(
+                         const GtLinspaceManagement *spacemanager,
                          GtUword ulen, GtUword vlen)
 {
   return ((ulen+1)*(vlen+1)*sizeof(GtUword) <= spacemanager->valueTabsize);
 }
+#endif
 
 GtUword **gt_linspace_management_change_to_square(GtLinspaceManagement
                                                  *spacemanager,
@@ -262,7 +265,7 @@ GtUword **gt_linspace_management_change_to_square(GtLinspaceManagement
 {
   GtUword **E;
   GtUword idx;
-  gt_assert(check(spacemanager, ulen, vlen));
+  gt_assert(gt_linspace_management_check_space(spacemanager, ulen, vlen));
 
   E = gt_linspace_management_get_rTabspace(spacemanager);
   *E = gt_linspace_management_get_valueTabspace(spacemanager);

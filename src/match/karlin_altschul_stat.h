@@ -25,20 +25,25 @@ typedef struct GtKarlinAltschulStat GtKarlinAltschulStat;
 
 /*
   determine karlin altschul parameters lambda, H, K, alpha and beta for
-  a alphabet of <numchars> many character and scorefunction given
-  as <scorehandler>
+  scorefunction given as <scorehandler>
 
-  If <gapped_alignment> is not set, paraemters are calculated by using scoring
+  If <numofchars> is 0, then the precomputation is done for
+  gapped alignments. Otherwise, the precomputation is
+  based on an alphabet of size <numchars> and calculated by using scoring
   frequency statistics for ungapped alignments,
-  Otherwise precomputed values are used for gapped alignment
-  (then alphabet can be NULL)
 
   returns a GtKarlinAltschulStat object if no error occured, otherwise returns
   NULL and <err> is set
  */
 GtKarlinAltschulStat *gt_karlin_altschul_stat_new(unsigned int numchars,
-                                             const GtScoreHandler *scorehandler,
-                                             GtError *err);
+                                           const GtScoreHandler *scorehandler);
+
+GtKarlinAltschulStat *gt_karlin_altschul_stat_new_gapped(void);
+
+void gt_karlin_altschul_stat_add_keyvalues(
+                             GtKarlinAltschulStat *karlin_altschul_stat,
+                             GtUword db_totallength,
+                             GtUword db_numofsequences);
 
 void gt_karlin_altschul_stat_delete(GtKarlinAltschulStat *ka);
 double gt_karlin_altschul_stat_get_lambda(const GtKarlinAltschulStat *ka);
@@ -46,6 +51,8 @@ double gt_karlin_altschul_stat_get_K(const GtKarlinAltschulStat *ka);
 double gt_karlin_altschul_stat_get_logK(const GtKarlinAltschulStat *ka);
 double gt_karlin_altschul_stat_get_alphadlambda(const GtKarlinAltschulStat *ka);
 double gt_karlin_altschul_stat_get_beta(const GtKarlinAltschulStat *ka);
+GtWord gt_karlin_altschul_get_num_of_db_seqs(const GtKarlinAltschulStat *ka);
+GtWord gt_karlin_altschul_get_total_length_db(const GtKarlinAltschulStat *ka);
 GtWord gt_karlin_altschul_stat_mismatchscore(const GtKarlinAltschulStat *ka);
 GtWord gt_karlin_altschul_stat_matchscore(const GtKarlinAltschulStat *ka);
 GtWord gt_karlin_altschul_stat_gapscore(const GtKarlinAltschulStat *ka);

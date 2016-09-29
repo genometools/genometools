@@ -32,11 +32,12 @@ typedef struct GtDiagbandseedExtendParams GtDiagbandseedExtendParams;
 int gt_diagbandseed_run(const GtDiagbandseedInfo *arg,
                         const GtRange *aseqranges,
                         const GtRange *bseqranges,
+                        const GtUwordPair *pick,
                         GtError *err);
 
 /* The constructor for GtDiagbandseedInfo*/
-GtDiagbandseedInfo *gt_diagbandseed_info_new(GtEncseq *aencseq,
-                                             GtEncseq *bencseq,
+GtDiagbandseedInfo *gt_diagbandseed_info_new(const GtEncseq *aencseq,
+                                             const GtEncseq *bencseq,
                                              GtUword maxfreq,
                                              GtUword memlimit,
                                              unsigned int seedlength,
@@ -48,7 +49,8 @@ GtDiagbandseedInfo *gt_diagbandseed_info_new(GtEncseq *aencseq,
                                              bool debug_kmer,
                                              bool debug_seedpair,
                                              bool use_kmerfile,
-                                             GtDiagbandseedExtendParams *extp,
+                                             const GtDiagbandseedExtendParams
+                                               *extp,
                                              GtUword anumseqranges,
                                              GtUword bnumseqranges);
 
@@ -72,7 +74,8 @@ GtDiagbandseedExtendParams *gt_diagbandseed_extend_params_new(
                               bool weakends,
                               bool benchmark,
                               GtUword alignmentwidth,
-                              bool always_polished_ends);
+                              bool always_polished_ends,
+                              bool verify_alignment);
 
 /* The destructors */
 void gt_diagbandseed_info_delete(GtDiagbandseedInfo *info);

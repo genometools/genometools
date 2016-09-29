@@ -3,37 +3,16 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include "core/types_api.h"
-#ifndef OUTSIDE_OF_GT
-#include "core/arraydef.h"
-#else
-typedef struct
-{
-  GtUword nextfreeuint8_t,
-          allocateduint8_t;
-  uint8_t *spaceuint8_t;
-} GtArrayuint8_t;
+#include "ft-eoplist.h"
 
-#endif
-
-#define FT_EOP_REPLACEMENT 1
-#define FT_EOP_INSERTION   (1 << 1)
-#define FT_EOP_DELETION    (1 << 2)
-
-#define FT_EOPCODE_MAXREPLACEMENT 254
-#define FT_EOPCODE_DELETION       254
-#define FT_EOPCODE_INSERTION      255
+#define FT_EOP_MISMATCH  1
+#define FT_EOP_INSERTION (1 << 1)
+#define FT_EOP_DELETION  (1 << 2)
 
 typedef struct
 {
-  GtUword alignedlen, row, distance, trimleft;
+  GtUword alignedlen, row, distance, trimleft, max_mismatches;
 } Polished_point;
-
-typedef struct
-{
-  GtUword nextfreeuint8_t, allocateduint8_t, countmismatches, countmatches,
-                                             countdeletions, countinsertions;
-  uint8_t *spaceuint8_t;
-} GtEoplist;
 
 typedef struct GtFronttrace GtFronttrace;
 
@@ -60,7 +39,5 @@ void front_trace2eoplist(bool polished,
                          GtUword ulen,
                          const GtUchar *vseq,
                          GtUword vlen);
-
-void front_trace_multireplacement(GtEoplist *eoplist,GtUword repnum);
 
 #endif

@@ -70,20 +70,21 @@ typedef struct {
   GtStr *char_access_mode;
   bool bias_parameters;
   bool relax_polish;
+  bool verify_alignment;
   /* general options */
   GtOption *se_option_withali;
   GtUword se_alignlength;
   GtUword se_minidentity;
   GtUword se_alignmentwidth;
+  GtStrArray *display_args;
   bool norev;
   bool nofwd;
   bool benchmark;
   bool verbose;
-  bool seed_display;
-  bool seqlength_display;
   bool use_apos;
   bool histogram;
   bool use_kmerfile;
+  unsigned int display_flag;
 } GtSeedExtendArguments;
 
 static void* gt_seed_extend_arguments_new(void)
@@ -94,6 +95,8 @@ static void* gt_seed_extend_arguments_new(void)
   arguments->dbs_pick_str = gt_str_new();
   arguments->dbs_memlimit_str = gt_str_new();
   arguments->char_access_mode = gt_str_new();
+  arguments->display_args = gt_str_array_new();
+  arguments->display_flag = 0;
   return arguments;
 }
 
@@ -109,6 +112,7 @@ static void gt_seed_extend_arguments_delete(void *tool_arguments)
     gt_option_delete(arguments->se_option_greedy);
     gt_option_delete(arguments->se_option_xdrop);
     gt_option_delete(arguments->se_option_withali);
+    gt_str_array_delete(arguments->display_args);
     gt_free(arguments);
   }
 }
@@ -119,8 +123,9 @@ static GtOptionParser* gt_seed_extend_option_parser_new(void *tool_arguments)
   GtOptionParser *op;
   GtOption *option, *op_gre, *op_xdr, *op_cam, *op_his, *op_dif, *op_pmh,
     *op_len, *op_err, *op_xbe, *op_sup, *op_frq, *op_mem, *op_ali, *op_bia,
-    *op_onl, *op_weakends, *op_seed_display, *op_relax_polish, *op_spdist,
-    *op_norev, *op_nofwd, *op_part, *op_pick, *op_seqlength_display, *op_overl;
+    *op_onl, *op_weakends, *op_relax_polish,
+    *op_verify_alignment, *op_spdist, *op_display,
+    *op_norev, *op_nofwd, *op_part, *op_pick, *op_overl;
 
   static GtRange seedpairdistance_defaults = {1UL, GT_UWORD_MAX};
   gt_assert(arguments != NULL);
@@ -368,25 +373,21 @@ static GtOptionParser* gt_seed_extend_option_parser_new(void *tool_arguments)
   gt_option_is_development_option(op_relax_polish);
   gt_option_imply(op_relax_polish, op_ali);
 
-  /* -seed-display */
-  op_seed_display = gt_option_new_bool("seed-display",
-                                       "Display seeds in #-line and by "
-                                       "character + (instead of |) in middle "
-                                       "row of alignment column",
-                                       &arguments->seed_display,
-                                       false);
-  gt_option_exclude(op_seed_display, op_onl);
-  gt_option_is_development_option(op_seed_display);
-  gt_option_parser_add_option(op, op_seed_display);
+  /* -verify-alignment */
+  op_verify_alignment
+    = gt_option_new_bool("verify-alignment",
+                         "verify alignment directly after its construction "
+                         "(without knowning the sequences) and later (after the"
+                         "sequence is known), in case the alignment is output",
+                                   &arguments->verify_alignment,false);
+  gt_option_parser_add_option(op, op_verify_alignment);
+  gt_option_is_development_option(op_verify_alignment);
 
-  /* -seqlength-display */
-  op_seqlength_display = gt_option_new_bool("seqlength-display",
-                                       "Display length of sequences in which "
-                                       "which the two match-instances occur",
-                                       &arguments->seqlength_display,
-                                       false);
-  gt_option_is_development_option(op_seqlength_display);
-  gt_option_parser_add_option(op, op_seqlength_display);
+  /* -display */
+  op_display = gt_option_new_string_array("display",
+                                          gt_querymatch_display_help(),
+                                          arguments->display_args);
+  gt_option_parser_add_option(op, op_display);
 
   /* -no-reverse */
   op_norev = gt_option_new_bool("no-reverse",
@@ -546,44 +547,123 @@ static int gt_seed_extend_arguments_check(int rest_argc, void *tool_arguments,
   return had_err;
 }
 
-/* Compute sequence ranges for specified number of parts and pick value. */
-static int gt_seed_extend_compute_parts(GtRange *seqranges,
-                                        GtUword *numseqranges,
-                                        const GtEncseq *encseq,
-                                        GtUword pick_value,
-                                        GtError *err)
+static void gt_seed_extend_parts_variance_show(const GtRange *seqranges,
+                                               GtUword numranges,
+                                               const GtEncseq *encseq)
 {
-  GtUword seqnum;
-  const GtUword numparts = *numseqranges;
-  const GtUword maxseqnum = gt_encseq_num_of_sequences(encseq) - 1;
-  const GtUword partsize = maxseqnum / numparts + 1;
-  int had_err = 0;
-  gt_assert(seqranges && numseqranges);
-  *numseqranges = 0;
+  GtUword variance_sum = 0, idx, avgpartsize;
 
-  if (pick_value == GT_UWORD_MAX) { /* not specified: take all sequences */
-    GtRange *new_range;
-    for (seqnum = 0; seqnum <= maxseqnum; seqnum += partsize) {
-      gt_assert(*numseqranges < numparts);
-      new_range = seqranges + *numseqranges;
-      new_range->start = seqnum;
-      new_range->end = MIN(seqnum + partsize - 1, maxseqnum);
-      (*numseqranges)++;
+  gt_assert(encseq != NULL);
+  avgpartsize = gt_encseq_total_length(encseq)/numranges;
+  for (idx = 0; idx < numranges; idx++)
+  {
+    GtUword segmentstart, segmentend, width;
+
+    segmentstart = gt_encseq_seqstartpos(encseq,seqranges[idx].start);
+    segmentend = gt_encseq_seqstartpos(encseq,seqranges[idx].end) +
+                 gt_encseq_seqlength(encseq,seqranges[idx].end) - 1;
+    gt_assert(segmentstart < segmentend);
+    width = segmentend - segmentstart + 1;
+    if (width > avgpartsize)
+    {
+      GtUword diff = width - avgpartsize;
+      variance_sum += diff * diff;
+    } else
+    {
+      GtUword diff = avgpartsize - width;
+      variance_sum += diff * diff;
     }
-    gt_assert(*numseqranges > 0);
-  } else if (pick_value > numparts) {
-    gt_error_set(err, "arguments to option -pick must not exceed " GT_WU
-                 " (number of parts)", numparts);
-    had_err = -1;
-  } else if (pick_value < 1) {
-    gt_error_set(err, "arguments to option -pick must be at least 1");
-    had_err = -1;
-  } else {
-    seqranges->start = (pick_value - 1) * partsize;
-    seqranges->end = MIN(pick_value * partsize - 1, maxseqnum);
-    *numseqranges = 1;
+    printf("# Part " GT_WU ": sequence " GT_WU "..." GT_WU " of total length "
+           GT_WU "\n",idx+1,seqranges[idx].start,seqranges[idx].end,
+                      segmentend - segmentstart + 1);
   }
-  return had_err;
+  printf("# Variance of parts is %.2e\n",(double) variance_sum/numranges);
+}
+
+static GtUword gt_encseq_next_larger_width(const GtEncseq *encseq,
+                                           GtUword startseqnum,
+                                           GtUword width)
+{
+  GtUword left, right, found = GT_UWORD_MAX,
+          numofsequences = gt_encseq_num_of_sequences(encseq);
+  GtUword start_segment = gt_encseq_seqstartpos(encseq,startseqnum);
+
+  left = startseqnum;
+  gt_assert(numofsequences > 0);
+  right = numofsequences - 1;
+  while (left <= right)
+  {
+    GtUword mid = left + (right - left + 1)/2, mid_end, this_width;
+
+    gt_assert(mid < numofsequences);
+    mid_end = gt_encseq_seqstartpos(encseq,mid) +
+              gt_encseq_seqlength(encseq,mid) - 1;
+    gt_assert(mid_end > start_segment);
+    this_width = mid_end - start_segment;
+    if (this_width > width)
+    {
+      found = mid;
+      if (right == 0)
+      {
+        break;
+      }
+      right = mid - 1;
+    } else
+    {
+      if (left == numofsequences - 1)
+      {
+        break;
+      }
+      left = mid + 1;
+    }
+  }
+  return found;
+}
+
+static GtUword gt_seed_extend_even_parts(GtRange *seqranges,
+                                         const GtEncseq *encseq,
+                                         GtUword maxseqnum,
+                                         GtUword numparts)
+{
+  GtUword seqnum = 0, idx;
+  const GtUword partwidth = gt_encseq_total_length(encseq)/numparts;
+
+  for (idx = 0; idx < numparts && seqnum <= maxseqnum; idx++)
+  {
+    GtUword seqnum_next_width;
+
+    seqnum_next_width = gt_encseq_next_larger_width(encseq,seqnum,partwidth);
+    seqranges[idx].start = seqnum;
+    if (seqnum_next_width == GT_UWORD_MAX)
+    {
+      seqranges[idx].end = maxseqnum;
+      idx++;
+      break;
+    }
+    seqranges[idx].end = seqnum_next_width;
+    seqnum = seqnum_next_width + 1;
+  }
+  gt_assert(idx > 0 && seqranges[idx-1].end == maxseqnum);
+  return idx;
+}
+
+/* Compute sequence ranges for specified number of parts. */
+static GtUword gt_seed_extend_compute_parts(GtRange *seqranges,
+                                            GtUword numparts,
+                                            const GtEncseq *encseq)
+{
+  const GtUword maxseqnum = gt_encseq_num_of_sequences(encseq) - 1;
+  gt_assert(seqranges != NULL);
+  if (numparts > maxseqnum) { /* assign one seq for each part */
+    GtUword idx;
+    for (idx = 0; idx <= maxseqnum; ++idx) {
+      seqranges[idx].start = idx;
+      seqranges[idx].end = idx;
+    }
+    return maxseqnum + 1;
+  } else {
+    return gt_seed_extend_even_parts(seqranges, encseq, maxseqnum, numparts);
+  }
 }
 
 static int gt_seed_extend_runner(int argc,
@@ -599,12 +679,10 @@ static int gt_seed_extend_runner(int argc,
   GtUword errorpercentage = 0UL;
   double matchscore_bias = GT_DEFAULT_MATCHSCORE_BIAS;
   bool extendxdrop, extendgreedy = true;
-  unsigned int display_flag = 0;
   unsigned int maxseedlength = 0, nchars = 0;
-  GtUword apick = GT_UWORD_MAX, bpick = GT_UWORD_MAX;
+  GtUwordPair pick = {GT_UWORD_MAX, GT_UWORD_MAX};
   GtUword maxseqlength = 0;
   int had_err = 0;
-
   gt_error_check(err);
   gt_assert(arguments != NULL);
   gt_assert(arguments->se_minidentity >= GT_EXTEND_MIN_IDENTITY_PERCENTAGE &&
@@ -653,12 +731,12 @@ static int gt_seed_extend_runner(int argc,
     gt_timer_start(seedextendtimer);
   }
 
-  /* Set display flag */
-  display_flag = gt_querymatch_bool2display_flag(arguments->seed_display,
-                                                 arguments->seqlength_display);
+  had_err = gt_querymatch_eval_display_args(&arguments->display_flag,
+                                            arguments->display_args,
+                                            err);
 
   /* Set character access method */
-  if (!arguments->onlyseeds || arguments->se_alignmentwidth > 0) {
+  if (!had_err && (!arguments->onlyseeds || arguments->se_alignmentwidth > 0)) {
     cam = gt_greedy_extend_char_access(gt_str_get(arguments->char_access_mode),
                                        err);
     if ((int) cam == -1) {
@@ -771,16 +849,36 @@ static int gt_seed_extend_runner(int argc,
   /* Parse pick option */
   if (!had_err && strcmp(gt_str_get(arguments->dbs_pick_str),
                          "use all combinations successively") != 0) {
+    GtUword apick, bpick;
     char **items = gt_cstr_split(gt_str_get(arguments->dbs_pick_str), ',');
     if (gt_cstr_array_size((const char **)items) != 2 ||
         gt_parse_uword(&apick, items[0]) != 0 ||
         gt_parse_uword(&bpick, items[1]) != 0) {
       gt_error_set(err, "argument to option -pick must satisfy format i,j");
       had_err = -1;
+    } else if (apick > arguments->dbs_parts || bpick > arguments->dbs_parts) {
+      gt_error_set(err, "arguments to option -pick must not exceed " GT_WU
+                   " (number of parts)", arguments->dbs_parts);
+      had_err = -1;
+    } else if (apick < 1 || bpick < 1) {
+      gt_error_set(err, "arguments to option -pick must be at least 1");
+      had_err = -1;
+    } else if (apick > gt_encseq_num_of_sequences(aencseq)) {
+      gt_error_set(err, "first argument to option -pick must not be larger than"
+                   " " GT_WU ", which is the number of sequences in the first "
+                   "set", gt_encseq_num_of_sequences(aencseq));
+      had_err = -1;
+    } else if (bpick > gt_encseq_num_of_sequences(bencseq)) {
+      gt_error_set(err, "second argument to option -pick must not be larger "
+                   "than " GT_WU ", which is the number of sequences in the "
+                   "second set", gt_encseq_num_of_sequences(bencseq));
+      had_err = -1;
     } else if (aencseq == bencseq && apick > bpick) {
-      GtUword tmp = apick;
-      apick = bpick;
-      bpick = tmp;
+      pick.a = bpick - 1;
+      pick.b = apick - 1;
+    } else {
+      pick.a = apick - 1;
+      pick.b = bpick - 1;
     }
     gt_cstr_array_delete(items);
   }
@@ -807,10 +905,9 @@ static int gt_seed_extend_runner(int argc,
     GtDiagbandseedExtendParams *extp = NULL;
     GtDiagbandseedInfo *info = NULL;
     GtUword sensitivity = 0;
-    GtUword anum = arguments->dbs_parts;
-    GtUword bnum = arguments->dbs_parts;
-    GtRange *aseqranges = (GtRange *)gt_malloc(anum * sizeof *aseqranges);
-    GtRange *bseqranges = (GtRange *)gt_malloc(bnum * sizeof *bseqranges);
+    GtUwordPair numparts = {arguments->dbs_parts, arguments->dbs_parts};
+    GtRange *aseqranges = (GtRange *)gt_malloc(numparts.a * sizeof *aseqranges);
+    GtRange *bseqranges = (GtRange *)gt_malloc(numparts.b * sizeof *bseqranges);
 
     if (extendgreedy) {
       sensitivity = arguments->se_extendgreedy;
@@ -822,24 +919,36 @@ static int gt_seed_extend_runner(int argc,
     gt_assert(gt_encseq_num_of_sequences(bencseq) > 0);
 
     /* Get sequence ranges */
-    had_err = gt_seed_extend_compute_parts(aseqranges,
-                                           &anum,
-                                           aencseq,
-                                           apick,
-                                           err);
-    if (!had_err) {
-      had_err = gt_seed_extend_compute_parts(bseqranges,
-                                             &bnum,
-                                             bencseq,
-                                             bpick,
-                                             err);
+    numparts.a = gt_seed_extend_compute_parts(aseqranges,
+                                              arguments->dbs_parts,
+                                              aencseq);
+    if (numparts.a > 1 && arguments->verbose)
+    {
+      gt_seed_extend_parts_variance_show(aseqranges, numparts.a, aencseq);
     }
+    if (aencseq == bencseq && pick.a == pick.b)
+    {
+      gt_assert(numparts.b >= numparts.a);
+      memcpy(bseqranges, aseqranges, numparts.a * sizeof *aseqranges);
+      numparts.b = numparts.a;
+    } else
+    {
+      numparts.b = gt_seed_extend_compute_parts(bseqranges,
+                                                arguments->dbs_parts,
+                                                bencseq);
+      if (numparts.b > 1 && arguments->verbose)
+      {
+        gt_seed_extend_parts_variance_show(bseqranges, numparts.b, bencseq);
+      }
+    }
+    gt_assert(pick.a < numparts.a || pick.a == GT_UWORD_MAX);
+    gt_assert(pick.b < numparts.b || pick.b == GT_UWORD_MAX);
 
     extp = gt_diagbandseed_extend_params_new(errorpercentage,
                                              arguments->se_alignlength,
                                              arguments->dbs_logdiagbandwidth,
                                              arguments->dbs_mincoverage,
-                                             display_flag,
+                                             arguments->display_flag,
                                              arguments->use_apos,
                                              arguments->se_xdropbelowscore,
                                              extendgreedy,
@@ -853,7 +962,8 @@ static int gt_seed_extend_runner(int argc,
                                              arguments->weakends,
                                              arguments->benchmark,
                                              arguments->se_alignmentwidth,
-                                             !arguments->relax_polish);
+                                             !arguments->relax_polish,
+                                             arguments->verify_alignment);
 
     info = gt_diagbandseed_info_new(aencseq,
                                     bencseq,
@@ -869,16 +979,15 @@ static int gt_seed_extend_runner(int argc,
                                     arguments->dbs_debug_seedpair,
                                     arguments->use_kmerfile,
                                     extp,
-                                    anum,
-                                    bnum);
+                                    numparts.a,
+                                    numparts.b);
 
     /* Start algorithm */
-    if (!had_err) {
-      had_err = gt_diagbandseed_run(info,
-                                    aseqranges,
-                                    bseqranges,
-                                    err);
-    }
+    had_err = gt_diagbandseed_run(info,
+                                  aseqranges,
+                                  bseqranges,
+                                  &pick,
+                                  err);
 
     /* clean up */
     gt_free(aseqranges);

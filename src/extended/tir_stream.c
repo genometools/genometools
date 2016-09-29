@@ -437,6 +437,7 @@ static int gt_tir_search_for_TSDs(GtTIRStream *tir_stream, TIRPair *tir_pair,
                                    gt_tir_store_TSDs,
                                    &info,
                                    NULL,
+                                   NULL,
                                    err) != 0) {
        had_err = -1;
     }
