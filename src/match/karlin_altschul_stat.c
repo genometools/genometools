@@ -501,7 +501,7 @@ GtKarlinAltschulStat *gt_karlin_altschul_stat_new(unsigned int numofchars,
 {
   GtKarlinAltschulStat *ka = gt_malloc(sizeof *ka);
 
-  gt_assert(ka);
+  gt_assert(ka != NULL);
   ka->lambda = 0;
   ka->K = 0;
   ka->logK = 0;

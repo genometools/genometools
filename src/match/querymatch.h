@@ -74,6 +74,7 @@ void gt_querymatch_init(GtQuerymatch *querymatch,
                         const char *query_desc);
 
 bool gt_querymatch_read_line(GtQuerymatch *querymatchptr,
+                             GtKarlinAltschulStat *karlin_altschul_stat,
                              bool withseqlength,
                              const char *line_ptr,
                              bool selfmatch,

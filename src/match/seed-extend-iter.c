@@ -39,6 +39,7 @@ struct GtSeedextendMatchIterator
   GtUword currentmatchindex;
   GtQuerymatch *currentmatch, *querymatchptr;
   GtQuerymatchoutoptions *querymatchoutoptions;
+  GtKarlinAltschulStat *karlin_altschul_stat;
   GtArrayGtQuerymatch querymatch_table;
 };
 
@@ -107,6 +108,7 @@ GtSeedextendMatchIterator *gt_seedextend_match_iterator_new(
   semi->currentmatchindex = GT_UWORD_MAX;
   semi->currentmatch = NULL;
   semi->querymatchoutoptions = NULL;
+  semi->karlin_altschul_stat = NULL;
   semi->seedpos1 = semi->seedpos2 = semi->seedlen = GT_UWORD_MAX;
   GT_INITARRAY(&semi->querymatch_table,GtQuerymatch);
   options_line_inputfileptr = fopen(semi->matchfilename, "r");
@@ -323,6 +325,7 @@ GtQuerymatch *gt_seedextend_match_iterator_next(GtSeedextendMatchIterator *semi)
       } else
       {
         if (gt_querymatch_read_line(semi->querymatchptr,
+                                    semi->karlin_altschul_stat,
                                     semi->seqlength_display,
                                     line_ptr,
                                     selfmatch,
@@ -430,6 +433,14 @@ void gt_seedextend_match_iterator_display_set(GtSeedextendMatchIterator *semi,
 {
   gt_assert(semi != NULL);
   gt_querymatch_display_set(semi->querymatchptr,display_flag);
+}
+
+void gt_seedextend_match_iterator_karlin_altschul_stat_set(
+           GtSeedextendMatchIterator *semi,
+           GtKarlinAltschulStat *karlin_altschul_stat)
+{
+  gt_assert(semi != NULL);
+  semi->karlin_altschul_stat = karlin_altschul_stat;
 }
 
 GtUword gt_seedextend_match_iterator_all_sorted(GtSeedextendMatchIterator *semi,
