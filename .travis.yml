@@ -57,5 +57,5 @@ matrix:
     - compiler: x86_64-w64-mingw32-gcc
       env: SYSTEM=Windows MACHINE=i686 GT_BITS=64 AR=x86_64-w64-mingw32-ar fpic=no cairo=no sharedlib=no CFLAGS='-Wno-error=attributes -Wno-error=unused-parameter -DSQLITE_MALLOCSIZE=_msize'
 before_install:
-  - sudo ./scripts/travis_installdeps.sh
+  - ./scripts/travis_installdeps.sh
 script: ./scripts/travis_test.rb
