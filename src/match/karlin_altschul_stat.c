@@ -44,7 +44,8 @@ struct GtKarlinAltschulStat
          logK,
          H,
          alpha_div_lambda,
-         beta;
+         beta,
+         log2;
   GtWord matchscore, mismatchscore, gapscore;
   GtUword total_length_db, num_of_db_seqs;
 };
@@ -81,6 +82,11 @@ typedef enum
 /* the Blast Implementation uses matrices with more than one row, namely
    a row for each gap extension. If required, this should be adjusted
    accordingly. */
+
+/* matchscore = 1 && mismatchscore = -1 */
+static const double ga_vector_1_1[] = {
+   -2, 1.02,  0.21, 0.36, 2.8,  -6
+};
 
 /* matchscore = 1 && mismatchscore = -4 */
 static const double ga_vector_1_4[] = {
@@ -430,12 +436,46 @@ static void get_values_from_vector(GtKarlinAltschulStat *ka,
                                    const double *vector)
 {
   ka->lambda = vector[lambdaidx];
+  gt_assert(ka->lambda != 0.0);
   ka->K = vector[Kidx];
   ka->logK = log(ka->K);
   ka->H = vector[Hidx];
-  gt_assert(ka->lambda != 0.0);
   ka->alpha_div_lambda = vector[alphaidx]/ka->lambda;
   ka->beta = vector[betaidx];
+}
+
+static const double *gt_karlin_altschul_score_vector(GtWord matchscore,
+                                                     GtWord mismatchscore)
+{
+  if (matchscore == 1 && mismatchscore == -1)
+  {
+    return ga_vector_1_1;
+  }
+  if (matchscore == 1 && mismatchscore == -4)
+  {
+    return ga_vector_1_4;
+  }
+  if (matchscore == 2 && mismatchscore == -7)
+  {
+    return ga_vector_2_7;
+  }
+  if (matchscore == 1 && mismatchscore == -3)
+  {
+    return ga_vector_1_3;
+  }
+  if (matchscore == 2 && mismatchscore == -5)
+  {
+    return ga_vector_2_5;
+  }
+  if (matchscore == 1 && mismatchscore == -2)
+  {
+    return ga_vector_1_2;
+  }
+  if (matchscore == 2 && mismatchscore == -3)
+  {
+    return ga_vector_2_3;
+  }
+  return NULL;
 }
 
 static void gt_karlin_altschul_stat_get_gapped_params(GtKarlinAltschulStat *ka)
@@ -443,31 +483,8 @@ static void gt_karlin_altschul_stat_get_gapped_params(GtKarlinAltschulStat *ka)
   const double *ga_vector = NULL;
 
   gt_assert(ka != NULL);
-  if (ka->matchscore == 1 && ka->mismatchscore == -4)
-  {
-    ga_vector = ga_vector_1_4;
-  }
-  else if (ka->matchscore == 2 && ka->mismatchscore == -7)
-  {
-    ga_vector = ga_vector_2_7;
-  }
-  else if (ka->matchscore == 1 && ka->mismatchscore == -3)
-  {
-    ga_vector = ga_vector_1_3;
-  }
-  else if (ka->matchscore == 2 && ka->mismatchscore == -5)
-  {
-    ga_vector = ga_vector_2_5;
-  }
-  else if (ka->matchscore == 1 && ka->mismatchscore == -2)
-  {
-    ga_vector = ga_vector_1_2;
-  }
-  else if (ka->matchscore == 2 && ka->mismatchscore == -3)
-  {
-    ga_vector = ga_vector_2_3;
-  }
-  else
+  ga_vector = gt_karlin_altschul_score_vector(ka->matchscore,ka->mismatchscore);
+  if (ga_vector == NULL)
   {
     fprintf(stderr,"no precomputed values for combination matchscore "
                    GT_WD " and mismatchscore " GT_WD " in evalue calculation "
@@ -489,6 +506,7 @@ GtKarlinAltschulStat *gt_karlin_altschul_stat_new(unsigned int numofchars,
   ka->K = 0;
   ka->logK = 0;
   ka->H = 0;
+  ka->log2 = log(2);
   ka->total_length_db = GT_UWORD_MAX;
   ka->num_of_db_seqs = GT_UWORD_MAX;
   gt_assert(gt_scorehandler_get_gap_opening(scorehandler) == 0);
@@ -655,8 +673,8 @@ static GtUword gt_evalue_length_adjustment(GtUword query_length,
   {
     len = len_next;
     len_bar = beta + alpha_div_lambda *
-              (logK + log((query_length-len)*
-                          (actual_db_length-num_of_db_seqs*len)));
+              (logK + log((double) (query_length - len) *
+                          (double) (actual_db_length - num_of_db_seqs*len)));
     if (len_bar >= len)
     {
       len_min = len;
@@ -686,9 +704,10 @@ static GtUword gt_evalue_length_adjustment(GtUword query_length,
     len = ceil(len_min);
     if (len <= len_max)
     {
-      if (alpha_div_lambda * (log(K) +
-          log((query_length-len) * (actual_db_length-num_of_db_seqs*len)))
-          + beta >= len)
+      if (alpha_div_lambda * (logK +
+                              log((query_length-len) *
+                                  (actual_db_length-num_of_db_seqs*len))) + beta
+          >= len)
       {
         length_adjustment = (GtUword) len;
       }
@@ -763,7 +782,7 @@ double gt_evalue_raw_score2bit_score(const GtKarlinAltschulStat *ka,
   gt_assert(ka);
   lambda = gt_karlin_altschul_stat_get_lambda(ka);
   logK = gt_karlin_altschul_stat_get_logK(ka);
-  return (lambda * (double) raw_score - logK)/log(2);
+  return (lambda * (double) raw_score - logK)/ka->log2;
 }
 
 GtWord gt_evalue_bit_score2raw_score(const GtKarlinAltschulStat *ka,
@@ -775,7 +794,7 @@ GtWord gt_evalue_bit_score2raw_score(const GtKarlinAltschulStat *ka,
   lambda = gt_karlin_altschul_stat_get_lambda(ka);
   logK = gt_karlin_altschul_stat_get_logK(ka);
 
-  raw_score = (bit_score * log(2) + logK)/lambda;
+  raw_score = (bit_score * ka->log2 + logK)/lambda;
   return (GtWord) round(raw_score);
 }
 
