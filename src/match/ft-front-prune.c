@@ -970,12 +970,13 @@ GtUword front_prune_edist_inplace(
   gt_ft_trimstat_add(trimstat,diedout,sumvalid,maxvalid,distance,
                      sizeof (GtFtFrontvalue) * frontspace->allocated,
 #ifndef OUTSIDE_OF_GT
-               useq.sequence_cache != NULL &&
-               vseq.sequence_cache != NULL ? MAX(useq.sequence_cache->allocated,
-                                                 vseq.sequence_cache->allocated)
-                                           : 0
+                     (useq.sequence_cache != NULL &&
+                      vseq.sequence_cache != NULL)
+                       ? MAX(useq.sequence_cache->allocated,
+                             vseq.sequence_cache->allocated)
+                       : 0
 #else
-               0
+                     0
 #endif
               );
 #ifdef OUTSIDE_OF_GT

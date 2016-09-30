@@ -49,6 +49,7 @@ GtDiagbandseedInfo *gt_diagbandseed_info_new(const GtEncseq *aencseq,
                                              bool debug_kmer,
                                              bool debug_seedpair,
                                              bool use_kmerfile,
+                                             bool trimstat_on,
                                              const GtDiagbandseedExtendParams
                                                *extp,
                                              GtUword anumseqranges,

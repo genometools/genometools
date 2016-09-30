@@ -231,7 +231,8 @@ void gt_greedy_extend_matchinfo_silent_set(GtGreedyextendmatchinfo *ggemi);
 
 /* Set the trimstat in the matchinfo object. */
 
-void gt_greedy_extend_matchinfo_trimstat_set(GtGreedyextendmatchinfo *ggemi);
+void gt_greedy_extend_matchinfo_trimstat_set(GtGreedyextendmatchinfo *ggemi,
+                                             GtFtTrimstat *trimstat);
 
 /* If <arg_maxalignedlendifference> and <arg_perc_mat_history> are 0, then
    an optimal value for the maximal alignment length difference and

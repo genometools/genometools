@@ -9,16 +9,10 @@ struct GtFtTrimstat
           *dist_maxvalid, *trimdist, *distarray;
   size_t spaceforfront_total;
   double sum_meanvalid;
-  /* the following are to create the output at successive statements. */
-  double errorpercentage;
-  GtUword minmatchpercentage;
-  GtUword maxalignedlendifference;
   GtUword max_cache_size;
 };
 
-GtFtTrimstat *gt_ft_trimstat_new(double errorpercentage,
-                                 GtUword minmatchpercentage,
-                                 GtUword maxalignedlendifference)
+GtFtTrimstat *gt_ft_trimstat_new(void)
 {
   GtFtTrimstat *trimstat = gt_malloc(sizeof *trimstat);
 
@@ -34,9 +28,6 @@ GtFtTrimstat *gt_ft_trimstat_new(double errorpercentage,
   trimstat->spaceforfront_total = 0;
   trimstat->sum_meanvalid = 0.0;
   trimstat->max_cache_size = 0;
-  trimstat->errorpercentage = errorpercentage;
-  trimstat->minmatchpercentage = minmatchpercentage;
-  trimstat->maxalignedlendifference = maxalignedlendifference;
   return trimstat;
 }
 
@@ -116,28 +107,23 @@ static int compare_ulong(const void *va, const void *vb)
 
 #define MEGABYTES(X) ((double) (X)/(1UL << 20))
 
-void gt_ft_trimstat_delete(GtFtTrimstat *trimstat,double total_time,
-                           bool verbose)
+void gt_ft_trimstat_delete(GtFtTrimstat *trimstat,bool verbose)
 {
   if (trimstat != NULL)
   {
-    printf("erp=%.1f\t",trimstat->errorpercentage);
-    printf("mmp=" GT_WU "\t",trimstat->minmatchpercentage);
-    printf("mad=" GT_WU "\t",trimstat->maxalignedlendifference);
     printf("died_out=" GT_WU "\t",trimstat->diedout);
     if (trimstat->dist_nextfree > 0)
     {
       printf("mean_valid=%.2f\t",
              trimstat->sum_meanvalid/trimstat->dist_nextfree);
-      printf("frontspace=%.2f\t",
+      printf("frontspace=%.2f\n",
              MEGABYTES((double) trimstat->spaceforfront_total/
                        trimstat->dist_nextfree));
     } else
     {
       printf("mean_valid=undef\t");
-      printf("frontspace=undef\t");
+      printf("frontspace=undef\n");
     }
-    printf("time=%.2f\n",total_time);
     if (verbose)
     {
       GtUword idx, count = 1UL;

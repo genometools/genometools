@@ -7,9 +7,7 @@
 
 typedef struct GtFtTrimstat GtFtTrimstat;
 
-GtFtTrimstat *gt_ft_trimstat_new(double errorpercentage,
-                                 GtUword minmatchpercentage,
-                                 GtUword maxalignedlendifference);
+GtFtTrimstat *gt_ft_trimstat_new(void);
 
 void gt_ft_trimstat_add(GtFtTrimstat *trimstat,
                         bool diedout,
@@ -19,7 +17,6 @@ void gt_ft_trimstat_add(GtFtTrimstat *trimstat,
                         size_t spaceforfront,
                         GtUword cache_size);
 
-void gt_ft_trimstat_delete(GtFtTrimstat *trimstat,double total_time,
-                           bool verbose);
+void gt_ft_trimstat_delete(GtFtTrimstat *trimstat,bool verbose);
 
 #endif

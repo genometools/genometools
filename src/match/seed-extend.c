@@ -19,7 +19,6 @@
 #include "match/querymatch.h"
 #include "match/xdrop.h"
 #include "match/ft-front-prune.h"
-#include "match/ft-trimstat.h"
 #include "match/seq_or_encseq.h"
 #include "match/seed-extend.h"
 
@@ -529,7 +528,6 @@ void gt_greedy_extend_matchinfo_delete(GtGreedyextendmatchinfo *ggemi)
     gt_free(ggemi->usequence_cache.space);
     gt_free(ggemi->vsequence_cache.space);
     gt_free(ggemi->frontspace_reservoir.space);
-    gt_ft_trimstat_delete(ggemi->trimstat,0.0,true);
     gt_free(ggemi);
   }
 }
@@ -547,13 +545,11 @@ void gt_greedy_extend_matchinfo_silent_set(GtGreedyextendmatchinfo *ggemi)
   ggemi->silent = true;
 }
 
-void gt_greedy_extend_matchinfo_trimstat_set(GtGreedyextendmatchinfo *ggemi)
+void gt_greedy_extend_matchinfo_trimstat_set(GtGreedyextendmatchinfo *ggemi,
+                                             GtFtTrimstat *trimstat)
 {
-  gt_assert(ggemi != NULL && ggemi->perc_mat_history > 0 &&
-            ggemi->maxalignedlendifference > 0 && ggemi->trimstat == NULL);
-  ggemi->trimstat = gt_ft_trimstat_new(ggemi->errorpercentage,
-                                       ggemi->perc_mat_history,
-                                       ggemi->maxalignedlendifference);
+  gt_assert(ggemi != NULL);
+  ggemi->trimstat = trimstat;
 }
 
 static void gt_FTsequenceResources_init(FTsequenceResources *fsr,

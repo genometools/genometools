@@ -59,7 +59,7 @@ typedef struct
           alignmentwidth; /* 0 for no alignment display and otherwidth number
                              of columns of alignment per line displayed. */
   bool scanfile, beverbose, forward, reverse, reverse_complement, searchspm,
-       check_extend_symmetry, silent, trimstat, noxpolish, verify_alignment;
+       check_extend_symmetry, silent, trimstat_on, noxpolish, verify_alignment;
   GtStr *indexname, *query_indexname, *cam_string; /* parse this using
                                     gt_greedy_extend_char_access*/
   GtStrArray *query_files;
@@ -408,7 +408,7 @@ static GtOptionParser *gt_repfind_option_parser_new(void *tool_arguments)
   gt_option_is_development_option(verify_alignment_option);
 
   optiontrimstat = gt_option_new_bool("trimstat","show trimming statistics",
-                                      &arguments->trimstat, false);
+                                      &arguments->trimstat_on, false);
   gt_option_parser_add_option(op, optiontrimstat);
   gt_option_is_development_option(optiontrimstat);
 
@@ -764,6 +764,7 @@ static int gt_repfind_runner(int argc,
                         arguments->reverse,
                         arguments->reverse_complement};
   unsigned int display_flag = 0;
+  GtFtTrimstat *trimstat = NULL;
 
   gt_error_check(err);
   logger = gt_logger_new(arguments->beverbose, GT_LOGGER_DEFLT_PREFIX, stdout);
@@ -835,9 +836,10 @@ static int gt_repfind_runner(int argc,
     {
       gt_greedy_extend_matchinfo_silent_set(greedyextendmatchinfo);
     }
-    if (arguments->trimstat)
+    if (arguments->trimstat_on)
     {
-      gt_greedy_extend_matchinfo_trimstat_set(greedyextendmatchinfo);
+      trimstat = gt_ft_trimstat_new();
+      gt_greedy_extend_matchinfo_trimstat_set(greedyextendmatchinfo,trimstat);
     }
   }
   if (!haserr)
@@ -1080,6 +1082,7 @@ static int gt_repfind_runner(int argc,
   }
   gt_xdrop_matchinfo_delete(xdropmatchinfo);
   gt_greedy_extend_matchinfo_delete(greedyextendmatchinfo);
+  gt_ft_trimstat_delete(trimstat,arguments->beverbose);
   polishing_info_delete(pol_info);
   gt_logger_delete(logger);
   if (repfindtimer != NULL)

@@ -84,6 +84,7 @@ typedef struct {
   bool use_apos;
   bool histogram;
   bool use_kmerfile;
+  bool trimstat_on;
   unsigned int display_flag;
 } GtSeedExtendArguments;
 
@@ -125,7 +126,7 @@ static GtOptionParser* gt_seed_extend_option_parser_new(void *tool_arguments)
     *op_len, *op_err, *op_xbe, *op_sup, *op_frq, *op_mem, *op_ali, *op_bia,
     *op_onl, *op_weakends, *op_relax_polish,
     *op_verify_alignment, *op_spdist, *op_display,
-    *op_norev, *op_nofwd, *op_part, *op_pick, *op_overl;
+    *op_norev, *op_nofwd, *op_part, *op_pick, *op_overl, *op_trimstat;
 
   static GtRange seedpairdistance_defaults = {1UL, GT_UWORD_MAX};
   gt_assert(arguments != NULL);
@@ -232,8 +233,6 @@ static GtOptionParser* gt_seed_extend_option_parser_new(void *tool_arguments)
   gt_option_is_development_option(option);
   gt_option_parser_add_option(op, option);
 
-  /* SEED EXTENSION OPTIONS */
-
   /* -extendxdrop */
   op_xdr = gt_option_new_uword_min_max("extendxdrop",
                                        "Extend seed to both sides using xdrop "
@@ -332,9 +331,18 @@ static GtOptionParser* gt_seed_extend_option_parser_new(void *tool_arguments)
   gt_option_is_development_option(op_cam);
   gt_option_parser_add_option(op, op_cam);
 
+  op_trimstat = gt_option_new_bool("trimstat","show trimming statistics",
+                                   &arguments->trimstat_on, false);
+  gt_option_is_development_option(op_trimstat);
+  gt_option_parser_add_option(op, op_trimstat);
+  gt_option_exclude(op_trimstat, op_xdr);
+  gt_option_exclude(op_trimstat, op_onl);
+
+  /* SEED EXTENSION OPTIONS */
+
   /* -l */
   op_len = gt_option_new_uword_min("l",
-                                   "Minimum alignment length "
+                                   "Minimum length of aligned sequences "
                                    "(for seed extension)",
                                    &arguments->se_alignlength,
                                    GT_UWORD_MAX, 1UL);
@@ -983,6 +991,7 @@ static int gt_seed_extend_runner(int argc,
                                     arguments->dbs_debug_kmer,
                                     arguments->dbs_debug_seedpair,
                                     arguments->use_kmerfile,
+                                    arguments->trimstat_on,
                                     extp,
                                     numparts.a,
                                     numparts.b);
