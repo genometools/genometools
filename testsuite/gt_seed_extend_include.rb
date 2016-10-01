@@ -21,6 +21,40 @@ seeds = [170039800390891361279027638963673934519,
          54623490901073137545509422160541861122,
          255642063275935424280602245704332672807]
 
+# Threading
+Name "gt seed_extend: threading"
+Keywords "gt_seed_extend thread"
+Test do
+  run_test build_encseq("at1MB", "#{$testdata}at1MB")
+  run_test build_encseq("fastq_long", "#{$testdata}fastq_long.fastq")
+  run_test build_encseq("paired", "#{$testdata}readjoiner/paired_reads_1.fas")
+  run_test build_encseq("U89959_genomic", "#{$testdata}U89959_genomic.fas")
+  for dataset in ["at1MB", "paired", "fastq_long"] do
+    for query in ["", " -qii U89959_genomic"]
+      run_test "#{$bin}gt seed_extend -ii #{dataset}#{query}"
+      run "sort #{last_stdout}"
+      run "mv #{last_stdout} default_run.out"
+      if query == ""
+        run "cmp default_run.out #{$testdata}see-ext-#{dataset}.matches"
+      else
+        run "cmp default_run.out #{$testdata}see-ext-#{dataset}-u8.matches"
+      end
+      run_test "#{$bin}gt -j 4 seed_extend -ii #{dataset}#{query} -parts 4"
+      run "sort #{last_stdout}"
+      run "cmp -s default_run.out #{last_stdout}"
+      run_test "#{$bin}gt -j 2 seed_extend -ii #{dataset}#{query} -parts 5"
+      run "sort #{last_stdout}"
+      run "cmp -s default_run.out #{last_stdout}"
+      run_test "#{$bin}gt -j 8 seed_extend -ii #{dataset}#{query} -parts 2"
+      run "sort #{last_stdout}"
+      run "cmp -s default_run.out #{last_stdout}"
+      run_test "#{$bin}gt -j 3 seed_extend -ii #{dataset}#{query}"
+      run "sort #{last_stdout}"
+      run "cmp -s default_run.out #{last_stdout}"
+    end
+  end
+end
+
 # KmerPos and SeedPair verification
 Name "gt seed_extend: small_poly, no extension, verify lists"
 Keywords "gt_seed_extend only-seeds verify debug-kmer debug-seedpair small_poly"
@@ -257,31 +291,3 @@ Test do
   grep last_stdout, /23 418 127 P 24 2 68 35 4 82.98/
 end
 
-# Threading
-Name "gt seed_extend: threading"
-Keywords "gt_seed_extend thread"
-Test do
-  run_test build_encseq("at1MB", "#{$testdata}at1MB")
-  run_test build_encseq("fastq_long", "#{$testdata}fastq_long.fastq")
-  run_test build_encseq("paired", "#{$testdata}readjoiner/paired_reads_1.fas")
-  run_test build_encseq("U89959_genomic", "#{$testdata}U89959_genomic.fas")
-  for dataset in ["at1MB", "paired", "fastq_long"] do
-    for query in ["", " -qii U89959_genomic"]
-      run_test "#{$bin}gt seed_extend -ii #{dataset}#{query}"
-      run "sort #{last_stdout}"
-      run "mv #{last_stdout} default_run.out"
-      run_test "#{$bin}gt -j 4 seed_extend -ii #{dataset}#{query} -parts 4"
-      run "sort #{last_stdout}"
-      run "cmp -s default_run.out #{last_stdout}"
-      run_test "#{$bin}gt -j 2 seed_extend -ii #{dataset}#{query} -parts 5"
-      run "sort #{last_stdout}"
-      run "cmp -s default_run.out #{last_stdout}"
-      run_test "#{$bin}gt -j 8 seed_extend -ii #{dataset}#{query} -parts 2"
-      run "sort #{last_stdout}"
-      run "cmp -s default_run.out #{last_stdout}"
-      run_test "#{$bin}gt -j 3 seed_extend -ii #{dataset}#{query}"
-      run "sort #{last_stdout}"
-      run "cmp -s default_run.out #{last_stdout}"
-    end
-  end
-end

@@ -990,6 +990,10 @@ static GtArrayGtDiagbandseedSeedPair gt_diagbandseed_get_seedpairs(
 
 /* * * * * SEED EXTENSION * * * * */
 
+#define GT_DIAGBANDSEED_DIAG(SEG)\
+        ((amaxlen + (GtUword) (SEG)->bpos - (GtUword) (SEG)->apos) \
+         >> arg->logdiagbandwidth)
+
 /* start seed extension for seed pairs in mlist */
 static void gt_diagbandseed_process_seeds(const GtDiagbandseedSeedPair *mlist,
                                           GtUword mlistlen,
@@ -1003,8 +1007,8 @@ static void gt_diagbandseed_process_seeds(const GtDiagbandseedSeedPair *mlist,
                                           bool verbose,
                                           FILE *stream)
 {
-  GtDiagbandseedScore *score;
-  GtDiagbandseedPosition *lastp;
+  GtDiagbandseedScore *diagband_score;
+  GtDiagbandseedPosition *diagband_lastpos;
   GtExtendSelfmatchRelativeFunc extend_selfmatch_relative_function = NULL;
   GtExtendQuerymatchRelativeFunc extend_querymatch_relative_function = NULL;
   GtProcessinfo_and_querymatchspaceptr info_querymatch;
@@ -1017,6 +1021,7 @@ static void gt_diagbandseed_process_seeds(const GtDiagbandseedSeedPair *mlist,
   GtUword count_extensions = 0;
   GtReadmode query_readmode;
   GtTimer *timer = NULL;
+  GtUword diagbands_used = 0;
 #ifdef GT_DIAGBANDSEED_SEEDHISTOGRAM
   GtUword *seedhistogram = NULL;
   GtUword seedcount = 0;
@@ -1085,9 +1090,10 @@ static void gt_diagbandseed_process_seeds(const GtDiagbandseedSeedPair *mlist,
                                    query_readmode);
   gt_querymatch_file_set(info_querymatch.querymatchspaceptr, stream);
 
-  /* score[0] and score[ndiags+1] remain zero as boundaries */
-  score = gt_calloc(ndiags + 2, sizeof *score);
-  lastp = gt_calloc(ndiags, sizeof *lastp);
+  /* diagband_score[0] and diagband_score[ndiags+1] remain zero as boundaries */
+  diagband_score = gt_calloc(ndiags + 2, sizeof *diagband_score);
+  diagband_score++; /* so we need not increment the index */
+  diagband_lastpos = gt_calloc(ndiags, sizeof *diagband_lastpos);
   maxsegm = mlist + mlistlen - minsegmentlen;
   nextsegm = mlist;
 
@@ -1115,18 +1121,28 @@ static void gt_diagbandseed_process_seeds(const GtDiagbandseedSeedPair *mlist,
     do {
       GtUword diag;
       gt_assert(nextsegm->bpos <= bmaxlen && nextsegm->apos <= amaxlen);
-      diag = (amaxlen + (GtUword)nextsegm->bpos - (GtUword)nextsegm->apos)
-              >> arg->logdiagbandwidth;
+      diag = GT_DIAGBANDSEED_DIAG(nextsegm);
       gt_assert(diag < ndiags);
-      if (nextsegm->bpos >= seedlength + lastp[diag]) {
+      if (nextsegm->bpos >= diagband_lastpos[diag] + seedlength) {
         /* no overlap: add seedlength */
-        score[diag + 1] += seedlength;
+        if (diagband_score[diag] == 0)
+        {
+          diagbands_used++;
+        }
+        diagband_score[diag] += seedlength;
       } else {
         /* overlap: add difference below overlap */
-        gt_assert(lastp[diag] <= nextsegm->bpos); /* if fail: sort by bpos */
-        score[diag + 1] += nextsegm->bpos - lastp[diag];
+        gt_assert(diagband_lastpos[diag] <= nextsegm->bpos);
+        if (diagband_score[diag] < nextsegm->bpos)
+        {
+          if (diagband_score[diag] == 0)
+          {
+            diagbands_used++;
+          }
+          diagband_score[diag] += nextsegm->bpos - diagband_lastpos[diag];
+        }
       }
-      lastp[diag] = nextsegm->bpos;
+      diagband_lastpos[diag] = nextsegm->bpos;
       nextsegm++;
     } while (nextsegm < mlist + mlistlen &&
              nextsegm->aseqnum == currsegm->aseqnum &&
@@ -1135,12 +1151,9 @@ static void gt_diagbandseed_process_seeds(const GtDiagbandseedSeedPair *mlist,
     /* test for mincoverage and overlap to previous extension */
     firstinrange = true;
     for (seed_pair = currsegm; seed_pair < nextsegm; seed_pair++) {
-      GtUword diag;
-      gt_assert(seed_pair->apos <= amaxlen);
-      gt_assert(seed_pair->bseqnum < gt_encseq_num_of_sequences(bencseq));
-      diag = (amaxlen + (GtUword) seed_pair->bpos - (GtUword) seed_pair->apos)
-             >> arg->logdiagbandwidth;
-      if ((GtUword)MAX(score[diag + 2], score[diag]) + (GtUword)score[diag + 1]
+      GtUword diag = GT_DIAGBANDSEED_DIAG(seed_pair);
+      if ((GtUword) MAX(diagband_score[diag + 1], diagband_score[diag - 1]) +
+          (GtUword) diagband_score[diag]
           >= arg->mincoverage)
       {
         /* relative seed start position in A and B */
@@ -1193,23 +1206,30 @@ static void gt_diagbandseed_process_seeds(const GtDiagbandseedSeedPair *mlist,
     }
 
     /* reset diagonal band scores */
-    for (seed_pair = currsegm; seed_pair < nextsegm; seed_pair++) {
-      GtUword diag
-        = (amaxlen + (GtUword) seed_pair->bpos - (GtUword) seed_pair->apos)
-          >> arg->logdiagbandwidth;
-      score[diag + 1] = 0;
-      lastp[diag] = 0;
+    if (diagbands_used * 3 >= ndiags) /* >= 33% of diagbands are used */
+    {
+      memset(diagband_score,0,sizeof *diagband_score * ndiags);
+      memset(diagband_lastpos,0,sizeof *diagband_lastpos * ndiags);
+    } else
+    {
+      for (seed_pair = currsegm; seed_pair < nextsegm; seed_pair++) {
+        GtUword diag = GT_DIAGBANDSEED_DIAG(seed_pair);
+        diagband_score[diag] = 0;
+        diagband_lastpos[diag] = 0;
+      }
     }
+    diagbands_used = 0;
 
 #ifdef GT_DIAGBANDSEED_SEEDHISTOGRAM
     seedhistogram[MIN(GT_DIAGBANDSEED_SEEDHISTOGRAM - 1, seedcount)]++;
     seedcount = 0;
 #endif
   }
+  diagband_score--; /* need to recover original base adress */
+  gt_free(diagband_score);
+  gt_free(diagband_lastpos);
   gt_querymatch_delete(info_querymatch.querymatchspaceptr);
   gt_karlin_altschul_stat_delete(info_querymatch.karlin_altschul_stat);
-  gt_free(score);
-  gt_free(lastp);
 
 #ifdef GT_DIAGBANDSEED_SEEDHISTOGRAM
   fprintf(stream, "# seed histogram:");
