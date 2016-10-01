@@ -17,6 +17,9 @@ void gt_ft_trimstat_add(GtFtTrimstat *trimstat,
                         size_t spaceforfront,
                         GtUword cache_size);
 
+void gt_ft_trimstat_add_matchlength(GtFtTrimstat *trimstat,
+                                    uint32_t matchlength);
+
 void gt_ft_trimstat_delete(GtFtTrimstat *trimstat,bool verbose);
 
 #endif
