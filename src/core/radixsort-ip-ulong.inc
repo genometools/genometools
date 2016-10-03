@@ -249,7 +249,8 @@ gt_radixsort_ulong_inplace_insertionsort(GtUword *a,
 
       *optr = *(optr-1);
       for (iptr = optr-1;
-           iptr > a && currentElement < *(iptr-1);
+           iptr > a &&
+           currentElement < *(iptr-1);
            iptr--)
       {
         *iptr = *(iptr-1);

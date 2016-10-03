@@ -96,7 +96,7 @@ def compare_smaller(ptr1,ptr2,options)
   if options.typename == :ulong or options.typename == :ulongkeyvaluepair
     return "#{derefptr(ptr1,options)} < #{derefptr(ptr2,options)}"
   else
-    return "gt_radixsort_compare_smaller(#{ptr1},#{ptr2})"
+    return "gt_radixsort_uint64keypair_smaller(#{ptr1},#{ptr2})"
   end
 end
 
@@ -354,7 +354,8 @@ gt_radixsort_#{makekey(options)}_inplace_insertionsort(#{maketype(options)} *a,
 
       *optr = *(optr-1);
       for (iptr = optr-1;
-           iptr > a && #{compare_smaller("&currentElement","(iptr-1)",options)};
+           iptr > a &&
+           #{compare_smaller("&currentElement","(iptr-1)",options)};
            iptr--)
       {
         *iptr = *(iptr-1);

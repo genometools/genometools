@@ -255,13 +255,14 @@ gt_radixsort_uint64keypair_inplace_insertionsort(Gtuint64keyPair *a,
 
   for (optr = a + 1; optr < end; optr++)
   {
-    if (gt_radixsort_compare_smaller(optr,(optr-1)))
+    if (gt_radixsort_uint64keypair_smaller(optr,(optr-1)))
     {
       Gtuint64keyPair currentElement = *optr;
 
       *optr = *(optr-1);
       for (iptr = optr-1;
-           iptr > a && gt_radixsort_compare_smaller(&currentElement,(iptr-1));
+           iptr > a &&
+           gt_radixsort_uint64keypair_smaller(&currentElement,(iptr-1));
            iptr--)
       {
         *iptr = *(iptr-1);
@@ -289,7 +290,7 @@ static void gt_radixsort_uint64keypair_process_bin(
 
       if (width == (GtCountbasetype) 2)
       {
-        if (gt_radixsort_compare_smaller((ptr+1),ptr))
+        if (gt_radixsort_uint64keypair_smaller((ptr+1),ptr))
         {
           Gtuint64keyPair tmp = *ptr;
           *ptr = *(ptr+1);
