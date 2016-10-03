@@ -1575,6 +1575,26 @@ static void gt_diagbandseed_get_seedpairs(GtSeedpairlist *seedpairlist,
   GtUword mlistlen;
 
   if (verbose) {
+    const GtUword anumofseq = gt_encseq_num_of_sequences(aencseq);
+    const GtUword amaxlen = gt_encseq_max_seq_length(aencseq);
+    GtUword bnumofseq, bmaxlen;
+    int bits_seedpair;
+
+    if (aencseq == bencseq)
+    {
+      bnumofseq = anumofseq;
+      bmaxlen = amaxlen;
+    } else
+    {
+      bnumofseq = gt_encseq_num_of_sequences(bencseq);
+      bmaxlen = gt_encseq_max_seq_length(bencseq);
+    }
+    bits_seedpair = (int) ceil(log2(anumofseq)) + (int) ceil(log2(amaxlen)) +
+                    (int) ceil(log2(bnumofseq)) + (int) ceil(log2(bmaxlen));
+    fprintf(stream,"# bits_seedpair=%d, bytes_seedpair = %d\n",
+                    bits_seedpair,
+                    bits_seedpair % CHAR_BIT == 0 ? bits_seedpair/CHAR_BIT
+                                                  : 1 + bits_seedpair/CHAR_BIT);
     timer = gt_timer_new();
     if (known_size > 0) {
       fprintf(stream, "# start collecting " GT_WU " seeds in %.0f MB ...\n",
