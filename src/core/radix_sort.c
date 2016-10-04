@@ -230,13 +230,6 @@ typedef enum
   GtRadixelemtypeGtuint64keyPair
 } GtRadixelemtype;
 
-#define GT_RADIXSORT_UNITSIZE_GET(ET)\
-        (((int) (ET) <= (int) GtRadixelemtypeGtuint64keyPair)\
-           ? 0 : ((int) (ET) - (int) GtRadixelemtypeGtuint64keyPair))
-
-#define GT_RADIXSORT_UNITSIZE_SET(US)\
-        ((int) GtRadixelemtypeGtuint64keyPair + (US))
-
 typedef union
 {
   GtUword *ulongptr;
@@ -416,7 +409,7 @@ struct GtRadixsortinfo
   GtRadixvalues sortspace;
   GtUword maxlen;
   GtRadixelemtype elemtype;
-  size_t size, unitsize;
+  size_t size;
 #ifdef GT_THREADS_ENABLED
   GtUword *lentab, *endindexes;
   GtRadixinplacethreadinfo *threadinfo;
@@ -435,7 +428,6 @@ static GtRadixsortinfo *gt_radixsort_new(GtRadixelemtype elemtype,
   radixsortinfo->size += gt_radixbuffer_size(radixsortinfo->rbuf);
   radixsortinfo->elemtype = elemtype;
   radixsortinfo->maxlen = maxlen;
-  radixsortinfo->unitsize = GT_RADIXSORT_UNITSIZE_GET(elemtype);
   if (maxlen > 0)
   {
     size_t thissize;
