@@ -6,7 +6,7 @@ static Gtuint64keyPair gt_radixsort_uint64keypair_bin_get(
                  (binnum << rbuf->log_bufsize) +
                  (GtUword) rbuf->nextidx[binnum]];
 }
-static void gt_radixsort_uint64keypair_bin_update(
+static inline void gt_radixsort_uint64keypair_bin_update(
                                     Gtuint64keyPair *source,
                                     GtRadixbuffer *rbuf,
                                     GtUword binnum,

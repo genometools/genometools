@@ -62,7 +62,7 @@ static void gt_sortbench_arguments_delete(void *tool_arguments)
 
 static const char *gt_sort_implementation_names[]
     = {"thomas","system","inlinedptr","inlinedarr","direct","dual-pivot",
-       "radixinplace","radixlsb","radixkeypair","flba",NULL};
+       "radixinplace","radixlsb","radixkeypair","radixflba",NULL};
 
 static GtOptionParser* gt_sortbench_option_parser_new(void *tool_arguments)
 {
@@ -79,7 +79,7 @@ static GtOptionParser* gt_sortbench_option_parser_new(void *tool_arguments)
   option = gt_option_new_choice(
                  "impl", "implementation\nchoose from "
                  "thomas|system|inlinedptr|inlinedarr|direct|\n"
-                 "dual-pivot|radixinplace|radixlsb|radixkeypair",
+                 "dual-pivot|radixinplace|radixlsb|radixkeypair|radixflba",
                   arguments->impl,
                   gt_sort_implementation_names[0],
                   gt_sort_implementation_names);
@@ -136,10 +136,10 @@ static int gt_sortbench_arguments_check(GT_UNUSED int rest_argc,
                        "with option -impl radixkeypair");
       had_err = -1;
     }
-    if (strcmp(gt_str_get(arguments->impl),"flba") == 0)
+    if (strcmp(gt_str_get(arguments->impl),"radixflba") == 0)
     {
       gt_error_set(err,"options -aqsort and -permute are both not compatible "
-                       "with option -impl flba");
+                       "with option -impl radixflba");
       had_err = -1;
     }
   }
@@ -595,10 +595,10 @@ static int gt_sortbench_runner(GT_UNUSED int argc, GT_UNUSED const char **argv,
   } else
   {
     bool alloc_array;
-    if (strcmp(gt_str_get(arguments->impl),"flba") == 0)
+    if (strcmp(gt_str_get(arguments->impl),"radixflba") == 0)
     {
-      size_t bits = (size_t) ceil(log2(arguments->maxvalue));
-      flba_unitsize = bits/CHAR_BIT + ((bits % CHAR_BIT == 0) ? 0 : 1);
+      size_t bits = gt_radixsort_bits(arguments->maxvalue);
+      flba_unitsize = gt_radixsort_bits2bytes(bits);
       flba = gt_malloc(sizeof (*flba) * arguments->num_values * flba_unitsize);
       alloc_array = arguments->verify;
     } else

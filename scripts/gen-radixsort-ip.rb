@@ -300,7 +300,7 @@ END_OF_FILE
 end
 
 print <<END_OF_FILE
-static void gt_radixsort_#{makekeyname(options)}_bin_update(
+static inline void gt_radixsort_#{makekeyname(options)}_bin_update(
                                     #{makebasetype(options)} *source,
                                     GtRadixbuffer *rbuf,
                                     GtUword binnum,

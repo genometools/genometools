@@ -134,4 +134,10 @@ GtUword gt_radixsort_max_num_of_entries_flba(size_t memlimit,size_t unitsize);
 
 void gt_radixsort_inplace_flba(uint8_t *source,GtUword len,size_t unitsize);
 
+size_t gt_radixsort_flba_unitsize(GtUword maxvalue);
+
+size_t gt_radixsort_bits(GtUword maxvalue);
+
+size_t gt_radixsort_bits2bytes(size_t bits);
+
 #endif

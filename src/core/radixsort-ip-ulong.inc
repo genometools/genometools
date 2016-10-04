@@ -6,7 +6,7 @@ static GtUword gt_radixsort_ulong_bin_get(
                  (binnum << rbuf->log_bufsize) +
                  (GtUword) rbuf->nextidx[binnum]];
 }
-static void gt_radixsort_ulong_bin_update(
+static inline void gt_radixsort_ulong_bin_update(
                                     GtUword *source,
                                     GtRadixbuffer *rbuf,
                                     GtUword binnum,

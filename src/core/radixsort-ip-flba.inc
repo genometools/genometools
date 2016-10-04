@@ -6,7 +6,7 @@ static uint8_t *gt_radixsort_flba_bin_get(
                  ((binnum << rbuf->log_bufsize) +
                   (GtUword) rbuf->nextidx[binnum]) * rbuf->unitsize;
 }
-static void gt_radixsort_flba_bin_update(
+static inline void gt_radixsort_flba_bin_update(
                                     uint8_t *source,
                                     GtRadixbuffer *rbuf,
                                     GtUword binnum,
