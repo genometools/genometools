@@ -85,7 +85,7 @@ typedef enum
 
 /* matchscore = 1 && mismatchscore = -1 */
 static const double ga_vector_1_1[] = {
-   -2, 1.02,  0.21, 0.36, 2.8,  -6
+   -2, 0.80, 0.064, 0.17, 4.8, -16
 };
 
 /* matchscore = 1 && mismatchscore = -4 */
