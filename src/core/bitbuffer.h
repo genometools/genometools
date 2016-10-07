@@ -28,17 +28,33 @@ typedef struct GtBitbuffer GtBitbuffer;
 
 /* Creates a new <GtBitbuffer> for output to <outfp>.
    <bitsperentry> specifies the number of bits per entry if
-   greater than 0. In this case a header is written in the input file
+   greater than 0. In this case, a header is written in the input file
    consisting of a <uint64_t>-value specifying the number of elements
    written and a <uint8_t> value specifying the number of bits per
    entry. If <bitsperentry> is 0, then no header is written and
    the number of bits for the value to be written has to be specified
    for each call of <gt_bitbuffer_next_value()>. */
-GtBitbuffer* gt_bitbuffer_new(FILE *outfp, unsigned int bitsperentry);
+GtBitbuffer *gt_bitbuffer_FILE_new(FILE *outfp,unsigned int bitsperentry);
+
+/* Creates a new <GtBitbuffer> which does not output the stream of
+   uint64_t values to a FILE pointer, but to a uint8_t-buffer specified
+   with each call of the next_value function */
+
+GtBitbuffer *gt_bitbuffer_new(void);
 
 /* Appends GtUword <value> of <bitsforvalue> bits to <bb>. */
 void         gt_bitbuffer_next_value(GtBitbuffer *bb, GtUword value,
                                      unsigned int bitsforvalue);
+
+/* when the bits need to go to a bytestring rather than a FILE pointer,
+  the following function can be used */
+
+size_t gt_bitbuffer_next_value_generic(GtBitbuffer *bb,
+                                       uint8_t *bytestring,
+                                       size_t bytestring_offset,
+                                       size_t bytestring_length,
+                                       GtUword value,
+                                       unsigned int bitsforvalue);
 
 /* Appends GtUword <value> to <bb>. Requires that <bb> has been created
    with a <bitsperentry> value > 0. */
@@ -56,5 +72,10 @@ void         gt_bitbuffer_next_ulongtab(GtBitbuffer *bb,
 
 /* Deletes <bb> and frees all associated memory. */
 void         gt_bitbuffer_delete(GtBitbuffer *bb);
+
+void gt_bitbuffer_flush(GtBitbuffer *bb,
+                        uint8_t *bytestring,
+                        size_t bytestring_offset,
+                        size_t bytestring_length);
 
 #endif
