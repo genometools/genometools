@@ -338,7 +338,6 @@ GtUword gt_bitbuffer_read_bytestring_bf(GtBitbuffer *bb,
     {
       bb->currentbitbuffer |= (((uint64_t) 1) << shift);
     }
-    gt_free(bb);
   }
   *value = (GtUword) bb->currentbitbuffer;
   bb->currentbitbuffer = 0;
