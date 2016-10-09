@@ -488,11 +488,11 @@ void gt_suffixsortspace_compressed_to_file (const GtSuffixsortspace *sssp,
   gt_assert(sssp != NULL);
   if (sssp->ulongtab != NULL)
   {
-    gt_bitbuffer_next_ulongtab(bb,sssp->ulongtab,numberofsuffixes);
+    gt_bitbuffer_write_ulongtab_FILE(bb,sssp->ulongtab,numberofsuffixes);
   } else
   {
     gt_assert (sssp->uinttab != NULL);
-    gt_bitbuffer_next_uint32tab(bb,sssp->uinttab,numberofsuffixes);
+    gt_bitbuffer_write_uint32tab_FILE(bb,sssp->uinttab,numberofsuffixes);
   }
 }
 
