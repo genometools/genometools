@@ -56,19 +56,19 @@ void gt_bitbuffer_generic_write_FILE(GtBitbuffer *bb,
                                      GtUword value,
                                      GtBitcount_type bitsforvalue);
 
-uint32_t gt_bitbuffer_write_bytestring(GtBitbuffer *bb,
-                                       uint8_t *bytestring,
-                                       uint32_t bytestring_offset,
-                                       uint32_t bytestring_length,
-                                       GtUword value,
-                                       GtBitcount_type bitsforvalue);
+GtUword gt_bitbuffer_write_bytestring(GtBitbuffer *bb,
+                                      uint8_t *bytestring,
+                                      GtUword bytestring_offset,
+                                      GtUword bytestring_length,
+                                      GtUword value,
+                                      GtBitcount_type bitsforvalue);
 
-uint32_t gt_bitbuffer_write_bytestring_bf(GtBitbuffer *bb,
-                                          uint8_t *bytestring,
-                                          uint32_t bytestring_offset,
-                                          uint32_t bytestring_length,
-                                          GtUword value,
-                                          GtBitcount_type bitsforvalue);
+GtUword gt_bitbuffer_write_bytestring_bf(GtBitbuffer *bb,
+                                         uint8_t *bytestring,
+                                         GtUword bytestring_offset,
+                                         GtUword bytestring_length,
+                                         GtUword value,
+                                         GtBitcount_type bitsforvalue);
 
 /* Appends GtUword <value> to <bb>. Requires that <bb> has been created
    with a <bitsperentry> value > 0. */
@@ -85,22 +85,22 @@ void gt_bitbuffer_write_ulongtab_FILE(GtBitbuffer *bb,
                                       const GtUword *tab,
                                       GtUword len);
 
-void gt_bitbuffer_flush(bool new,GtBitbuffer *bb,uint8_t *bytestring);
+void gt_bitbuffer_flush(bool bruteforce,GtBitbuffer *bb,uint8_t *bytestring);
 
 /* Deletes <bb> and frees all associated memory. */
 void         gt_bitbuffer_delete(GtBitbuffer *bb);
 
-uint32_t gt_bitbuffer_read_bytestring(GtBitbuffer *bb,
-                                      GtUword *value,
-                                      const uint8_t *bytestring,
-                                      uint32_t bytestring_offset,
+GtUword gt_bitbuffer_read_bytestring(GtBitbuffer *bb,
+                                     GtUword *value,
+                                     const uint8_t *bytestring,
+                                     GtUword bytestring_offset,
                                       GtBitcount_type bitsforvalue);
 
-uint32_t gt_bitbuffer_read_bytestring_bf(GtBitbuffer *bb,
-                                         GtUword *value,
-                                         const uint8_t *bytestring,
-                                         uint32_t bytestring_offset,
-                                         GtBitcount_type bitsforvalue);
+GtUword gt_bitbuffer_read_bytestring_bf(GtBitbuffer *bb,
+                                        GtUword *value,
+                                        const uint8_t *bytestring,
+                                        GtUword bytestring_offset,
+                                        GtBitcount_type bitsforvalue);
 
 void gt_bitbuffer_reset_for_read(GtBitbuffer *bb);
 

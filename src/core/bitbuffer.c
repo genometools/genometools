@@ -110,10 +110,10 @@ void gt_bitbuffer_generic_write_FILE(GtBitbuffer *bb,
                 bb->remainingbitsinbuffer,bitsforvalue,buffer)*/
 #define SHOWCURRENT /* Nothing */
 
-uint32_t gt_bitbuffer_write_bytestring(GtBitbuffer *bb,
+GtUword gt_bitbuffer_write_bytestring(GtBitbuffer *bb,
                                        uint8_t *bytestring,
-                                       uint32_t bytestring_offset,
-                                       uint32_t bytestring_length,
+                                       GtUword bytestring_offset,
+                                       GtUword bytestring_length,
                                        GtUword value,
                                        GtBitcount_type bitsforvalue)
 {
@@ -130,7 +130,7 @@ uint32_t gt_bitbuffer_write_bytestring(GtBitbuffer *bb,
     {
       bb->remainingbitsinbuffer -= bits2store;
       bb->currentbitbuffer |= (uint64_t)
-           ((value & ((1UL << bits2store) - 1)) << bb->remainingbitsinbuffer);
+        ((value & ((1UL << bits2store) - 1)) << bb->remainingbitsinbuffer);
       SHOWCURRENT;
       break;
     }
@@ -154,10 +154,10 @@ uint32_t gt_bitbuffer_write_bytestring(GtBitbuffer *bb,
   return bytestring_offset;
 }
 
-uint32_t gt_bitbuffer_write_bytestring_bf(GtBitbuffer *bb,
+GtUword gt_bitbuffer_write_bytestring_bf(GtBitbuffer *bb,
                                           uint8_t *bytestring,
-                                          uint32_t bytestring_offset,
-                                          uint32_t bytestring_length,
+                                          GtUword bytestring_offset,
+                                          GtUword bytestring_length,
                                           GtUword value,
                                           GtBitcount_type bitsforvalue)
 {
@@ -220,14 +220,14 @@ void gt_bitbuffer_write_ulongtab_FILE(GtBitbuffer *bb,
   }
 }
 
-void gt_bitbuffer_flush(bool new,GtBitbuffer *bb,uint8_t *bytestring)
+void gt_bitbuffer_flush(bool bruteforce,GtBitbuffer *bb,uint8_t *bytestring)
 {
   gt_assert(bb != NULL);
   if (bb->remainingbitsinbuffer < bb->bitsinbuffer)
   {
     if (bb->fp != NULL)
     {
-      gt_assert(bytestring == NULL);
+      gt_assert(!bruteforce && bytestring == NULL);
       (void) fwrite(&bb->currentbitbuffer,
                     sizeof bb->currentbitbuffer,
                     (size_t) 1,bb->fp);
@@ -239,9 +239,8 @@ void gt_bitbuffer_flush(bool new,GtBitbuffer *bb,uint8_t *bytestring)
       }
     } else
     {
-      if (new)
+      if (bruteforce)
       {
-        gt_assert(bb->fp == NULL);
         *bytestring = bb->currentuint8;
       } else
       {
@@ -273,10 +272,10 @@ void gt_bitbuffer_reset_for_read(GtBitbuffer *bb)
   bb->remainingbitsinbuffer = 0;
 }
 
-uint32_t gt_bitbuffer_read_bytestring(GtBitbuffer *bb,
+GtUword gt_bitbuffer_read_bytestring(GtBitbuffer *bb,
                                       GtUword *value,
                                       const uint8_t *bytestring,
-                                      uint32_t bytestring_offset,
+                                      GtUword bytestring_offset,
                                       GtBitcount_type bitsforvalue)
 {
   unsigned int bits2read = bitsforvalue;
@@ -307,29 +306,21 @@ uint32_t gt_bitbuffer_read_bytestring(GtBitbuffer *bb,
       break;
     } else
     {
-      /*char buffer[100];
-      gt_bitsequence_tostring(buffer,
-        (((uint64_t) bb->readvalue) &
-            ((((uint64_t) 1) << bb->remainingbitsinbuffer) - 1)));
-      printf("readvalue=%d,bits2read=%u,remaining=%u,mask=%s\n",
-              bb->readvalue,bits2read,bb->remainingbitsinbuffer,buffer + 56);*/
       bits2read -= bb->remainingbitsinbuffer;
       bb->currentbitbuffer
         |= ((((uint64_t) bb->readvalue) &
             ((((uint64_t) 1) << bb->remainingbitsinbuffer) - 1))
            << bits2read);
-      /*gt_bitsequence_tostring(buffer,bb->currentbitbuffer);
-      printf("bitbuffer=%s\n",buffer + (64 - bitsforvalue));*/
       bb->remainingbitsinbuffer = 0;
     }
   }
   return bytestring_offset;
 }
 
-uint32_t gt_bitbuffer_read_bytestring_bf(GtBitbuffer *bb,
+GtUword gt_bitbuffer_read_bytestring_bf(GtBitbuffer *bb,
                                          GtUword *value,
                                          const uint8_t *bytestring,
-                                         uint32_t bytestring_offset,
+                                         GtUword bytestring_offset,
                                          GtBitcount_type bitsforvalue)
 {
   int shift;
