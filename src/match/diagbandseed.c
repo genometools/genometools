@@ -1599,7 +1599,7 @@ static void gt_diagbandseed_decode_seedpair(GtBitbuffer *bb,
                                                         bits_tab[idx]);
       if (value != (GtUword) seed_pair_values[idx])
       {
-        char buffer[100];
+        char buffer[GT_INTWORDSIZE+1];
         gt_bitsequence_tostring(buffer,value);
         fprintf(stderr,"line %d: value = " GT_WU
                        "(%s) != %u = seed_pair_value[%d]\n",
@@ -1622,7 +1622,7 @@ const int idx_aseqnum = 0, idx_bseqnum = 1, idx_bpos = 2, idx_apos = 3;
 static void showbytestring(FILE *fp,const uint8_t *bytestring,
                            GtUword bytestring_length)
 {
-  char buffer[100];
+  char buffer[GT_INTWORDSIZE+1];
   GtUword idx;
 
   for (idx = 0; idx < bytestring_length; idx++)
@@ -1795,14 +1795,12 @@ static void gt_diagbandseed_encode_decode(const GtDiagbandseedSeedPair *splist,
     if (debug_seedpair && seedptr > splist)
     {
       uint8_t *tmp;
-      int ret = gt_diagbandseed_seeds_compare(seedptr-1,seedptr);
-      int ret_bytestring
-         = gt_diagbandseed_seeds_compare_bytestring(previous,
-                                                    current,
-                                                    bytestring_length);
-      if (ret != ret_bytestring || ret >= 0)
+      int ret = gt_diagbandseed_seeds_compare_bytestring(previous,
+                                                         current,
+                                                         bytestring_length);
+      if (ret >= 0)
       {
-        printf("ret=%d,ret_bytestring=%d\n",ret,ret_bytestring);
+        printf("ret=%d\n",ret);
         fprintf(stderr,"prev=");
         show_the_seed(seedptr-1);
         showbytestring(stderr,previous,bytestring_length);
@@ -1821,6 +1819,26 @@ static void gt_diagbandseed_encode_decode(const GtDiagbandseedSeedPair *splist,
   gt_bitbuffer_delete(bb_write);
   gt_free(bytestring);
   gt_free(bytestring2);
+}
+
+static void gt_diagbandseed_seedpairs_out(FILE *stream,
+                                          const GtDiagbandseedSeedPair *mspace,
+                                          GtUword mlistlen,
+                                          GT_UNUSED const GtEncseq *aencseq,
+                                          GT_UNUSED const GtEncseq *bencseq)
+{
+  const GtDiagbandseedSeedPair *sp;
+#ifndef NDEBUG
+  GtUword anumofseq = gt_encseq_num_of_sequences(aencseq);
+  GtUword bnumofseq = gt_encseq_num_of_sequences(bencseq);
+#endif
+  for (sp = mspace; sp < mspace + mlistlen; sp++) {
+    gt_assert(sp->aseqnum < anumofseq && sp->bseqnum < bnumofseq);
+    gt_assert(sp ==  mspace || gt_diagbandseed_seeds_compare(sp-1,sp) < 0);
+    fprintf(stream, "# SeedPair (" "%"PRIu32
+                    ",%"PRIu32",%"PRIu32",%"PRIu32")\n",
+            sp->aseqnum, sp->bseqnum, sp->apos, sp->bpos);
+  }
 }
 
 /* Return a sorted list of SeedPairs from given Kmer-Iterators.
@@ -1850,8 +1868,8 @@ static void gt_diagbandseed_get_seedpairs(GtSeedpairlist *seedpairlist,
   bits_tab[idx_bpos] = (GtBitcount_type) gt_radixsort_bits(bmaxlen);
   if (verbose) {
     GtBitcount_type bits_seedpair = gt_diagbandseed_sum_bits(bits_tab);
-    fprintf(stream,"# bits_seedpair=" GT_WU ", bytes_seedpair=%u=",
-                    (GtUword) bits_seedpair,
+    fprintf(stream,"# bits_seedpair=%d, bytes_seedpair=%u=",
+                    (int) bits_seedpair,
                     (unsigned int) gt_radixsort_bits2bytes(bits_seedpair));
     printf("aseqnum=%hu bits,",bits_tab[idx_aseqnum]);
     printf("apos=%hu bits,",bits_tab[idx_apos]);
