@@ -1720,12 +1720,18 @@ typedef struct
   GtArrayGtDiagbandseedSeedPair mlist_struct;
 } GtSeedpairlist;
 
+static GtSeedpairlist *gt_seedpairlist_new(void)
+{
+  GtSeedpairlist *seedpairlist = gt_malloc(sizeof *seedpairlist);
+  GT_INITARRAY(&seedpairlist->mlist_struct, GtDiagbandseedSeedPair);
+  return seedpairlist;
+}
+
 static void gt_seedpairlist_init(GtSeedpairlist *seedpairlist,
                                  GtUword known_size)
 {
-  gt_assert(seedpairlist != NULL);
-  GT_INITARRAY(&seedpairlist->mlist_struct, GtDiagbandseedSeedPair);
   if (known_size > 0) {
+    gt_assert(seedpairlist != NULL);
     GT_CHECKARRAYSPACEMULTI(&seedpairlist->mlist_struct,
                             GtDiagbandseedSeedPair, known_size);
   }
@@ -1734,6 +1740,7 @@ static void gt_seedpairlist_init(GtSeedpairlist *seedpairlist,
 static void gt_seedpairlist_delete(GtSeedpairlist *seedpairlist)
 {
   GT_FREEARRAY(&seedpairlist->mlist_struct, GtDiagbandseedSeedPair);
+  gt_free(seedpairlist);
 }
 
 static GtUword gt_seedpairlist_length(const GtSeedpairlist *seedpairlist)
