@@ -1,5 +1,6 @@
 /*
   Copyright (c) 2015-2016 Joerg Winkler <j.winkler@posteo.de>
+  Copyright (c) 2015-2016 Stefan Kurtz <kurtz@zbh.uni-hamburg.de>
   Copyright (c) 2015-2016 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -700,12 +701,13 @@ static void gt_diagbandseed_encode_seedpair(GtBitbuffer *bb,
                                             uint8_t *bytestring,
                                             GtUword bytestring_length,
                                             const uint32_t *seedpair_values,
-                                            const GtBitcount_type *bits_tab)
+                                            const GtBitcount_type *bits_tab,
+                                            unsigned int components)
 {
   int idx;
   GtUword bytestring_offset = 0;
 
-  for (idx = 0; idx < 4; idx++)
+  for (idx = 0; idx < components; idx++)
   {
     if (bits_tab[idx] > 0)
     {
@@ -724,13 +726,14 @@ static void gt_diagbandseed_encode_seedpair(GtBitbuffer *bb,
 static void gt_diagbandseed_decode_seedpair(GtBitbuffer *bb,
                                             const uint32_t *seedpair_values,
                                             const GtBitcount_type *bits_tab,
-                                            const uint8_t *bytestring)
+                                            const uint8_t *bytestring,
+                                            unsigned int components)
 {
   int idx;
   GtUword bytestring_offset = 0;
 
   gt_bitbuffer_reset_for_read(bb);
-  for (idx = 0; idx < 4; idx++)
+  for (idx = 0; idx < components; idx++)
   {
     if (bits_tab[idx] > 0)
     {
@@ -755,9 +758,17 @@ static void gt_diagbandseed_decode_seedpair(GtBitbuffer *bb,
   }
 }
 
-static GtBitcount_type gt_diagbandseed_sum_bits(const GtBitcount_type *bits_tab)
+static GtBitcount_type gt_diagbandseed_sum_bits(const GtBitcount_type *bits_tab,
+                                                unsigned int components)
 {
-  return bits_tab[0] + bits_tab[1] + bits_tab[2] + bits_tab[3];
+  unsigned int idx;
+  GtBitcount_type sum = 0;
+
+  for (idx = 0; idx < components; idx++)
+  {
+    sum += bits_tab[idx];
+  }
+  return sum;
 }
 
 const int idx_aseqnum = 0, idx_bseqnum = 1, idx_bpos = 2, idx_apos = 3;
@@ -902,6 +913,8 @@ static const GtDiagbandseedSeedPair *gt_seedpairlist_mlist(
 
 static void gt_seedpairlist_add(GtSeedpairlist *seedpairlist,
                                 bool knownsize,
+                                const GtRange *aseqrange,
+                                const GtRange *bseqrange,
                                 GtDiagbandseedSeqnum aseqnum,
                                 GtDiagbandseedSeqnum bseqnum,
                                 GtDiagbandseedPosition bpos,
@@ -925,6 +938,8 @@ static void gt_seedpairlist_add(GtSeedpairlist *seedpairlist,
                           seedpairlist->
                              mlist_struct.allocatedGtDiagbandseedSeedPair);
   }
+  gt_assert(aseqnum >= aseqrange->start && aseqnum <= aseqrange->end);
+  gt_assert(bseqnum >= bseqrange->start && bseqnum <= bseqrange->end);
   seedpair->aseqnum = aseqnum;
   seedpair->bseqnum = bseqnum;
   seedpair->bpos = bpos;
@@ -979,7 +994,7 @@ static void gt_diagbandseed_seedpairlist_encode_decode(
   uint32_t seedpair_values[4], seedpair_values2[4];
   GtBitbuffer *bb_read = gt_bitbuffer_new();
   GtBitbuffer *bb_write = gt_bitbuffer_new();
-  GtBitcount_type bits_seedpair = gt_diagbandseed_sum_bits(bits_tab);
+  GtBitcount_type bits_seedpair = gt_diagbandseed_sum_bits(bits_tab,4);
   GtUword bytestring_length = gt_radixsort_bits2bytes(bits_seedpair);
   uint8_t *bytestring = gt_malloc(sizeof *bytestring * bytestring_length);
   uint8_t *bytestring2 = gt_malloc(sizeof *bytestring2 * bytestring_length);
@@ -1002,11 +1017,13 @@ static void gt_diagbandseed_seedpairlist_encode_decode(
                                     current,
                                     bytestring_length,
                                     seedpair_values,
-                                    bits_tab);
+                                    bits_tab,
+                                    4);
     gt_diagbandseed_decode_seedpair(bb_write,
                                     seedpair_values,
                                     bits_tab,
-                                    current);
+                                    current,
+                                    4);
     if (debug_seedpair && seedpair > mlist)
     {
       uint8_t *tmp;
@@ -1040,7 +1057,9 @@ static void gt_diagbandseed_seedpairlist_encode_decode(
 static GtUword gt_diagbandseed_merge(GtSeedpairlist *seedpairlist,
                                      bool knowthesize,
                                      GtDiagbandseedKmerIterator *aiter,
+                                     const GtRange *aseqrange,
                                      GtDiagbandseedKmerIterator *biter,
+                                     const GtRange *bseqrange,
                                      GtUword maxfreq,
                                      GtUword maxgram,
                                      GtUword memlimit,
@@ -1100,6 +1119,8 @@ static GtUword gt_diagbandseed_merge(GtSeedpairlist *seedpairlist,
                     /* save SeedPair in seedpairlist */
                     gt_seedpairlist_add(seedpairlist,
                                         knowthesize,
+                                        aseqrange,
+                                        bseqrange,
                                         aptr->seqnum,
                                         bptr->seqnum,
                                         bptr->endpos,
@@ -1245,7 +1266,9 @@ static int gt_diagbandseed_get_mlistlen_maxfreq(GtUword *mlistlen,
   *maxfreq = gt_diagbandseed_merge(NULL, /* mlist not needed: just count */
                                    false,
                                    aiter,
+                                   NULL,
                                    biter,
+                                   NULL,
                                    *maxfreq,
                                    maxgram,
                                    memlimit,
@@ -1297,7 +1320,9 @@ static void gt_diagbandseed_get_seedpairs(GtSeedpairlist *seedpairlist,
                                           const GtRange *seedpairdistance,
                                           bool selfcomp,
                                           const GtEncseq *aencseq,
+                                          const GtRange *aseqrange,
                                           const GtEncseq *bencseq,
+                                          const GtRange *bseqrange,
                                           bool debug_seedpair,
                                           bool verbose,
                                           FILE *stream)
@@ -1315,7 +1340,7 @@ static void gt_diagbandseed_get_seedpairs(GtSeedpairlist *seedpairlist,
   bits_tab[idx_bseqnum] = (GtBitcount_type) gt_radixsort_bits(bnumofseq);
   bits_tab[idx_bpos] = (GtBitcount_type) gt_radixsort_bits(bmaxlen);
   if (verbose) {
-    GtBitcount_type bits_seedpair = gt_diagbandseed_sum_bits(bits_tab);
+    GtBitcount_type bits_seedpair = gt_diagbandseed_sum_bits(bits_tab,4);
     fprintf(stream,"# bits_seedpair=%d, bytes_seedpair=%u=",
                     (int) bits_seedpair,
                     (unsigned int) gt_radixsort_bits2bytes(bits_seedpair));
@@ -1340,7 +1365,9 @@ static void gt_diagbandseed_get_seedpairs(GtSeedpairlist *seedpairlist,
   maxfreq = gt_diagbandseed_merge(seedpairlist,
                                   known_size > 0 ? true : false,
                                   aiter,
+                                  aseqrange,
                                   biter,
+                                  bseqrange,
                                   maxfreq,
                                   GT_UWORD_MAX, /* maxgram not needed */
                                   GT_UWORD_MAX, /* memlimit not needed */
@@ -1892,7 +1919,9 @@ static int gt_diagbandseed_algorithm(const GtDiagbandseedInfo *arg,
                                   &seedpairdistance,
                                   selfcomp,
                                   arg->aencseq,
+                                  aseqrange,
                                   arg->bencseq,
+                                  bseqrange,
                                   arg->debug_seedpair,
                                   arg->verbose,
                                   stream);
@@ -2059,7 +2088,9 @@ static int gt_diagbandseed_algorithm(const GtDiagbandseedInfo *arg,
                                     &seedpairdistance,
                                     selfcomp,
                                     arg->aencseq,
+                                    aseqrange,
                                     arg->bencseq,
+                                    bseqrange,
                                     arg->debug_seedpair,
                                     arg->verbose,
                                     stream);
