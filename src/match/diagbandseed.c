@@ -865,12 +865,18 @@ typedef struct
   GtArrayGtDiagbandseedSeedPair mlist_struct;
 } GtSeedpairlist;
 
+static GtSeedpairlist *gt_seedpairlist_new(void)
+{
+  GtSeedpairlist *seedpairlist = gt_malloc(sizeof *seedpairlist);
+  GT_INITARRAY(&seedpairlist->mlist_struct, GtDiagbandseedSeedPair);
+  return seedpairlist;
+}
+
 static void gt_seedpairlist_init(GtSeedpairlist *seedpairlist,
                                  GtUword known_size)
 {
-  gt_assert(seedpairlist != NULL);
-  GT_INITARRAY(&seedpairlist->mlist_struct, GtDiagbandseedSeedPair);
   if (known_size > 0) {
+    gt_assert(seedpairlist != NULL);
     GT_CHECKARRAYSPACEMULTI(&seedpairlist->mlist_struct,
                             GtDiagbandseedSeedPair, known_size);
   }
@@ -879,6 +885,7 @@ static void gt_seedpairlist_init(GtSeedpairlist *seedpairlist,
 static void gt_seedpairlist_delete(GtSeedpairlist *seedpairlist)
 {
   GT_FREEARRAY(&seedpairlist->mlist_struct, GtDiagbandseedSeedPair);
+  gt_free(seedpairlist);
 }
 
 static GtUword gt_seedpairlist_length(const GtSeedpairlist *seedpairlist)
@@ -1290,8 +1297,8 @@ static void gt_diagbandseed_get_seedpairs(GtSeedpairlist *seedpairlist,
                                           GtUword known_size,
                                           const GtRange *seedpairdistance,
                                           bool selfcomp,
-                                          GT_UNUSED const GtEncseq *aencseq,
-                                          GT_UNUSED const GtEncseq *bencseq,
+                                          const GtEncseq *aencseq,
+                                          const GtEncseq *bencseq,
                                           bool debug_seedpair,
                                           bool verbose,
                                           FILE *stream)
@@ -1502,8 +1509,10 @@ static void gt_diagbandseed_process_seeds(const GtSeedpairlist *seedpairlist,
 
     /* if insuffienct number of kmers in segment: skip whole segment */
     if (currsegm_aseqnum != currsegm[minsegmentlen - 1].aseqnum ||
-        currsegm_bseqnum != currsegm[minsegmentlen - 1].bseqnum) {
-      do {
+        currsegm_bseqnum != currsegm[minsegmentlen - 1].bseqnum)
+    {
+      do
+      {
         nextsegm++;
       } while (nextsegm < mlistend &&
                nextsegm->aseqnum == currsegm_aseqnum &&
@@ -1512,28 +1521,27 @@ static void gt_diagbandseed_process_seeds(const GtSeedpairlist *seedpairlist,
     }
 
     /* this segment begining with nextsegm pssible has enout seeds */
-    do {
+    do
+    {
       const GtUword diag = GT_DIAGBANDSEED_DIAG(nextsegm);
+      GtUword addlength = 0;
+
       gt_assert(diag < ndiags);
-      if (nextsegm->bpos >= diagband_lastpos[diag] + seedlength) {
+      if (nextsegm->bpos >= diagband_lastpos[diag] + seedlength)
+      {
         /* no overlap: add seedlength */
-        if (diagband_score[diag] == 0)
-        {
-          diagbands_used++;
-        }
-        diagband_score[diag] += seedlength;
-      } else {
+        addlength = seedlength;
+      } else
+      {
         /* overlap: add difference below overlap */
         gt_assert(diagband_lastpos[diag] <= nextsegm->bpos);
-        if (diagband_score[diag] < nextsegm->bpos)
-        {
-          if (diagband_score[diag] == 0)
-          {
-            diagbands_used++;
-          }
-          diagband_score[diag] += nextsegm->bpos - diagband_lastpos[diag];
-        }
+        addlength = nextsegm->bpos - diagband_lastpos[diag];
       }
+      if (addlength > 0 && diagband_score[diag] == 0)
+      {
+        diagbands_used++;
+      }
+      diagband_score[diag] += addlength;
       diagband_lastpos[diag] = nextsegm->bpos;
       nextsegm++;
     } while (nextsegm < mlistend &&
@@ -1680,7 +1688,8 @@ static int gt_diagbandseed_algorithm(const GtDiagbandseedInfo *arg,
                                      GtError *err)
 {
   GtArrayGtDiagbandseedKmerPos blist;
-  GtSeedpairlist seedpairlist, revseedpairlist;
+  GtSeedpairlist *seedpairlist = gt_seedpairlist_new(),
+                 *revseedpairlist = gt_seedpairlist_new();
   GtDiagbandseedKmerIterator *aiter = NULL, *biter = NULL;
   GtUword alen = 0, blen = 0, mlistlen = 0, maxfreq, len_used;
   GtRange seedpairdistance = *arg->seedpairdistance;
@@ -1794,7 +1803,7 @@ static int gt_diagbandseed_algorithm(const GtDiagbandseedInfo *arg,
   if (!had_err) {
     gt_diagbandseed_kmer_iter_reset(aiter);
     gt_diagbandseed_kmer_iter_reset(biter);
-    gt_diagbandseed_get_seedpairs(&seedpairlist,
+    gt_diagbandseed_get_seedpairs(seedpairlist,
                                   aiter,
                                   biter,
                                   maxfreq,
@@ -1806,9 +1815,9 @@ static int gt_diagbandseed_algorithm(const GtDiagbandseedInfo *arg,
                                   arg->debug_seedpair,
                                   arg->verbose,
                                   stream);
-    mlistlen = gt_seedpairlist_length(&seedpairlist);
+    mlistlen = gt_seedpairlist_length(seedpairlist);
     if (arg->verify && mlistlen > 0) {
-      had_err = gt_diagbandseed_verify(&seedpairlist,
+      had_err = gt_diagbandseed_verify(seedpairlist,
                                        arg->aencseq,
                                        arg->bencseq,
                                        arg->seedlength,
@@ -1817,7 +1826,7 @@ static int gt_diagbandseed_algorithm(const GtDiagbandseedInfo *arg,
                                        stream,
                                        err);
       if (had_err) {
-        gt_seedpairlist_delete(&seedpairlist);
+        gt_seedpairlist_delete(seedpairlist);
       }
     }
   }
@@ -1893,7 +1902,7 @@ static int gt_diagbandseed_algorithm(const GtDiagbandseedInfo *arg,
   }
 
   /* process first mlist */
-  gt_diagbandseed_process_seeds(&seedpairlist,
+  gt_diagbandseed_process_seeds(seedpairlist,
                                 arg->extp,
                                 processinfo,
                                 querymoutopt,
@@ -1903,7 +1912,7 @@ static int gt_diagbandseed_algorithm(const GtDiagbandseedInfo *arg,
                                 arg->nofwd,
                                 arg->verbose,
                                 stream);
-  gt_seedpairlist_delete(&seedpairlist);
+  gt_seedpairlist_delete(seedpairlist);
 
   /* Third (reverse) k-mer list */
   if (both_strands) {
@@ -1961,7 +1970,7 @@ static int gt_diagbandseed_algorithm(const GtDiagbandseedInfo *arg,
     if (!had_err) {
       gt_diagbandseed_kmer_iter_reset(aiter);
       gt_diagbandseed_kmer_iter_reset(biter);
-      gt_diagbandseed_get_seedpairs(&revseedpairlist,
+      gt_diagbandseed_get_seedpairs(revseedpairlist,
                                     aiter,
                                     biter,
                                     maxfreq,
@@ -1973,9 +1982,9 @@ static int gt_diagbandseed_algorithm(const GtDiagbandseedInfo *arg,
                                     arg->debug_seedpair,
                                     arg->verbose,
                                     stream);
-      mrevlen = gt_seedpairlist_length(&revseedpairlist);
+      mrevlen = gt_seedpairlist_length(revseedpairlist);
       if (arg->verify && mrevlen > 0) {
-        had_err = gt_diagbandseed_verify(&revseedpairlist,
+        had_err = gt_diagbandseed_verify(revseedpairlist,
                                          arg->aencseq,
                                          arg->bencseq,
                                          arg->seedlength,
@@ -1984,7 +1993,7 @@ static int gt_diagbandseed_algorithm(const GtDiagbandseedInfo *arg,
                                          stream,
                                          err);
         if (had_err) {
-          gt_seedpairlist_delete(&revseedpairlist);
+          gt_seedpairlist_delete(revseedpairlist);
         }
       }
     }
@@ -1997,7 +2006,7 @@ static int gt_diagbandseed_algorithm(const GtDiagbandseedInfo *arg,
 
   /* Process second (reverse) mlist */
   if (!had_err && both_strands) {
-    gt_diagbandseed_process_seeds(&revseedpairlist,
+    gt_diagbandseed_process_seeds(revseedpairlist,
                                   arg->extp,
                                   processinfo,
                                   querymoutopt,
@@ -2007,7 +2016,7 @@ static int gt_diagbandseed_algorithm(const GtDiagbandseedInfo *arg,
                                   true,
                                   arg->verbose,
                                   stream);
-    gt_seedpairlist_delete(&revseedpairlist);
+    gt_seedpairlist_delete(revseedpairlist);
   }
 
   /* Clean up */
