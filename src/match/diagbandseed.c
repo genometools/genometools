@@ -1003,6 +1003,7 @@ static void gt_diagbandseed_seedpairlist_encode_decode(
   gt_assert(mlist != NULL || mlistlen == 0);
   for (seedpair = mlist; seedpair < mlist + mlistlen; seedpair++)
   {
+    uint8_t *tmp;
     seedpair_values[idx_aseqnum] = seedpair->aseqnum;
     seedpair_values[idx_bseqnum] = seedpair->bseqnum;
     seedpair_values[idx_bpos] = seedpair->bpos;
@@ -1026,7 +1027,6 @@ static void gt_diagbandseed_seedpairlist_encode_decode(
                                     4);
     if (debug_seedpair && seedpair > mlist)
     {
-      uint8_t *tmp;
       int ret = gt_diagbandseed_seeds_compare_bytestring(previous,
                                                          current,
                                                          bytestring_length);
@@ -1042,10 +1042,10 @@ static void gt_diagbandseed_seedpairlist_encode_decode(
         fprintf(stderr,"\n");
         exit(EXIT_FAILURE);
       }
-      tmp = previous;
-      previous = current;
-      current = tmp;
     }
+    tmp = previous;
+    previous = current;
+    current = tmp;
   }
   gt_bitbuffer_delete(bb_read);
   gt_bitbuffer_delete(bb_write);
