@@ -769,6 +769,11 @@ static int gt_seed_extend_runner(int argc,
       had_err = -1;
     } else {
       /* If there is a 2nd read set: Load encseq B */
+      GtUword *ssptab = gt_all_sequence_separators_get(aencseq);
+      if (ssptab != NULL)
+      {
+        gt_free(ssptab);
+      }
       if (strcmp(gt_str_get(arguments->dbs_queryname), "") != 0) {
         bencseq = gt_encseq_loader_load(encseq_loader,
                                         gt_str_get(arguments->dbs_queryname),

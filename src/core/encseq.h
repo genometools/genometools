@@ -518,12 +518,21 @@ GtUword gt_encseq_equallength(const GtEncseq *encseq);
    given <encseq>. */
 GtMD5Tab*  gt_encseq_get_md5_tab(const GtEncseq *encseq, GtError *err);
 
-/* for a given array of at least one separator positions */
+/* for a given array of at least one separator positions, store the
+   ssptab in the file indexname.ssp */
 int gt_encseq_seppos2ssptab(const char *indexname,
                             GtUword totallength,
                             GtUword numofdbsequences,
                             const GtUword *seppostab,
                             GtError *err);
+
+/* for a given <Gtencseq>-object whicht represents sequences not all
+   of the same length, return an array of all separator positions.
+   If all sequences are of the same length, then return <NULL>. This
+   last case holds, for example, if the <GtEncseq>-object holds only
+   one sequence. */
+
+GtUword *gt_all_sequence_separators_get(const GtEncseq *encseq);
 
 /* The following functions are for testing */
 
