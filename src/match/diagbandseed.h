@@ -28,10 +28,16 @@
 typedef struct GtDiagbandseedInfo GtDiagbandseedInfo;
 typedef struct GtDiagbandseedExtendParams GtDiagbandseedExtendParams;
 
+typedef struct
+{
+  GtUword start, end,
+          max_length; /* length of longest sequence in range */
+} GtSequenceRangeWithMaxLength;
+
 /* Run the whole algorithm. */
 int gt_diagbandseed_run(const GtDiagbandseedInfo *arg,
-                        const GtRange *aseqranges,
-                        const GtRange *bseqranges,
+                        const GtSequenceRangeWithMaxLength *aseqranges,
+                        const GtSequenceRangeWithMaxLength *bseqranges,
                         const GtUwordPair *pick,
                         GtError *err);
 
