@@ -216,12 +216,7 @@ void gt_suffixsortspace_nooffsets(GT_UNUSED const GtSuffixsortspace *sssp)
 
 GtUword gt_suffixsortspace_getdirect(const GtSuffixsortspace *sssp,GtUword idx)
 {
-  gt_assert(sssp != NULL);
-  if (idx > sssp->maxindex)
-  {
-    printf("idx = " GT_WU " > " GT_WU " = maxindex\n",idx,sssp->maxindex);
-  }
-  gt_assert(idx <= sssp->maxindex);
+  gt_assert(sssp != NULL && idx <= sssp->maxindex);
   if (sssp->ulongtab != NULL)
   {
     return sssp->ulongtab[idx];

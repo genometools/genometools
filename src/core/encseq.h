@@ -534,6 +534,14 @@ int gt_encseq_seppos2ssptab(const char *indexname,
 
 GtUword *gt_all_sequence_separators_get(const GtEncseq *encseq);
 
+/* for a given <Gtencseq>-object whicht represents sequences not all
+   of the same length, return an array of all sequences lengths.
+   If all sequences are of the same length, then return <NULL>. This
+   last case holds, for example, if the <GtEncseq>-object holds only
+   one sequence. */
+
+GtUword *gt_all_sequence_lengths_get(const GtEncseq *encseq);
+
 /* The following functions are for testing */
 
 #ifndef NDEBUG

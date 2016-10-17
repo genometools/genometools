@@ -3208,6 +3208,30 @@ GtUword *gt_all_sequence_separators_get(const GtEncseq *encseq)
   }
 }
 
+GtUword *gt_all_sequence_lengths_get(const GtEncseq *encseq)
+{
+  GtUword idx, previousstart = 0,
+          *ssptab = gt_all_sequence_separators_get(encseq);
+  const GtUword numofsequences = gt_encseq_num_of_sequences(encseq),
+                totallength = gt_encseq_total_length(encseq);;
+
+  if (ssptab == NULL)
+  {
+    return NULL; /* all sequences are of the same length */
+  }
+  gt_assert(numofsequences > 0);
+  for (idx = 0; idx < numofsequences - 1; idx++)
+  {
+    GtUword nextsep = ssptab[idx];
+    gt_assert(previousstart < nextsep);
+    ssptab[idx] = nextsep - previousstart;
+    previousstart = nextsep + 1;
+  }
+  gt_assert(previousstart < totallength);
+  ssptab[idx] = totallength - previousstart;
+  return ssptab;
+}
+
 static bool containsSWViatables(const GtEncseq *encseq,
                                 GtEncseqReader *esr,
                                 GtUword startpos,

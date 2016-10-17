@@ -285,7 +285,9 @@ static GtUword *GT_APPENDINT(gt_all_ssps_get)(
     return NULL;
   }
   gt_assert(swtable->numofpages > 0 && swtable->endidxinpage != NULL);
-  ssptab = gt_malloc(sizeof *ssptab * swtable->numofpositionstostore);
+  /* allocate one extra byte to allow inplace transformation into sequence
+     length */
+  ssptab = gt_malloc(sizeof *ssptab * (swtable->numofpositionstostore+1));
   arr = ssptab;
   for (pgnum=0; pgnum < swtable->numofpages; pgnum++)
   {
