@@ -16,6 +16,15 @@ Test do
   run "diff #{last_stdout} #{$testdata}gt_seqorder_test_sorthdr.fas"
 end
 
+Name "gt seqorder -sortlength test"
+Keywords "gt_seqorder"
+Test do
+  seq = "gt_seqorder_test.fas"
+  run "#{$bin}gt encseq encode #$testdata#{seq}"
+  run_test "#{$bin}gt seqorder -sortlength #{seq}"
+  run "diff #{last_stdout} #{$testdata}gt_seqorder_test_sortlength.fas"
+end
+
 Name "gt seqorder -sorthdrnum test"
 Keywords "gt_seqorder"
 Test do
