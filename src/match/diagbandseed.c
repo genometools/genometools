@@ -63,66 +63,71 @@ GT_DECLAREARRAYSTRUCT(GtDiagbandseedKmerPos);
 DECLAREBufferedfiletype(GtDiagbandseedKmerPos);
 DECLAREREADFUNCTION(GtDiagbandseedKmerPos);
 
-typedef struct { /* 4 + 4 + 4 + 4 bytes */
-  GtDiagbandseedSeqnum bseqnum; /*  2nd important sort criterion */
-  GtDiagbandseedSeqnum aseqnum; /* most important sort criterion */
-  GtDiagbandseedPosition apos;
-  GtDiagbandseedPosition bpos;  /*  3rd important sort criterion */
+typedef struct
+{ /* 4 + 4 + 4 + 4 bytes */
+  GtDiagbandseedSeqnum bseqnum, /*  2nd important sort criterion */
+                       aseqnum; /* most important sort criterion */
+  GtDiagbandseedPosition apos,
+                         bpos;  /*  3rd important sort criterion */
 } GtDiagbandseedSeedPair;
 
-struct GtDiagbandseedInfo {
+struct GtDiagbandseedInfo
+{
   const GtEncseq *aencseq;
   const GtEncseq *bencseq;
-  GtUword maxfreq;
-  GtUword memlimit;
-  GtRange *seedpairdistance;
   const GtDiagbandseedExtendParams *extp;
-  GtUword anumseqranges;
-  GtUword bnumseqranges;
+  GtRange *seedpairdistance;
+  GtUword maxfreq,
+          memlimit,
+          anumseqranges,
+          bnumseqranges;
   unsigned int seedlength;
-  bool norev;
-  bool nofwd;
-  bool verify;
-  bool verbose;
-  bool debug_kmer;
-  bool debug_seedpair;
-  bool use_kmerfile;
-  bool trimstat_on;
+  GtDiagbandseedPairlisttype seedpairlisttype;
+  bool norev,
+       nofwd,
+       verify,
+       verbose,
+       debug_kmer,
+       debug_seedpair,
+       use_kmerfile,
+       trimstat_on;
 };
 
-struct GtDiagbandseedExtendParams {
-  GtUword errorpercentage;
-  GtUword userdefinedleastlength;
-  GtUword logdiagbandwidth;
-  GtUword mincoverage;
+struct GtDiagbandseedExtendParams
+{
+  GtUword errorpercentage,
+          userdefinedleastlength,
+          logdiagbandwidth,
+          mincoverage,
+          maxalignedlendifference,
+          history_size,
+          perc_mat_history,
+          sensitivity,
+          alignmentwidth;
   GtXdropscore xdropbelowscore;
-  GtUword maxalignedlendifference;
-  GtUword history_size;
-  GtUword perc_mat_history;
-  GtUword sensitivity;
-  GtUword alignmentwidth;
   GtExtendCharAccess extend_char_access;
   unsigned int display_flag;
   double matchscore_bias;
-  bool use_apos;
-  bool extendgreedy;
-  bool extendxdrop;
-  bool weakends;
-  bool benchmark;
-  bool always_polished_ends;
-  bool verify_alignment;
+  bool use_apos,
+       extendgreedy,
+       extendxdrop,
+       weakends,
+       benchmark,
+       always_polished_ends,
+       verify_alignment;
 };
 
-typedef struct {
+typedef struct
+{
   GtArrayGtDiagbandseedKmerPos *list;
   GtDiagbandseedSeqnum seqnum;
   GtDiagbandseedPosition endpos;
   const GtEncseq *encseq;
   GtSpecialrangeiterator *sri;
-  GtUword last_specialpos;
-  GtUword prev_separator;
-  GtUword next_separator;
   GtRange *specialrange;
+  GtUword last_specialpos,
+          prev_separator,
+          next_separator;
   unsigned int seedlength;
   GtReadmode readmode;
 } GtDiagbandseedProcKmerInfo;
@@ -137,6 +142,8 @@ GtDiagbandseedInfo *gt_diagbandseed_info_new(const GtEncseq *aencseq,
                                              bool norev,
                                              bool nofwd,
                                              GtRange *seedpairdistance,
+                                             GtDiagbandseedPairlisttype
+                                               seedpairlisttype,
                                              bool verify,
                                              bool verbose,
                                              bool debug_kmer,
@@ -157,6 +164,7 @@ GtDiagbandseedInfo *gt_diagbandseed_info_new(const GtEncseq *aencseq,
   info->norev = norev;
   info->nofwd = nofwd;
   info->seedpairdistance = seedpairdistance;
+  info->seedpairlisttype = seedpairlisttype;
   info->verify = verify;
   info->verbose = verbose;
   info->debug_kmer = debug_kmer;

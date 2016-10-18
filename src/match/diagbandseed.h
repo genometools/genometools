@@ -34,6 +34,13 @@ typedef struct
           max_length; /* length of longest sequence in range */
 } GtSequenceRangeWithMaxLength;
 
+typedef enum
+{
+  GtDiagBandSeedStruct,
+  GtDiagBandSeedGtUword,
+  GtDiagBandSeedBytestring
+} GtDiagbandseedPairlisttype;
+
 /* Run the whole algorithm. */
 int gt_diagbandseed_run(const GtDiagbandseedInfo *arg,
                         const GtSequenceRangeWithMaxLength *aseqranges,
@@ -50,6 +57,8 @@ GtDiagbandseedInfo *gt_diagbandseed_info_new(const GtEncseq *aencseq,
                                              bool norev,
                                              bool nofwd,
                                              GtRange *seedpairdistance,
+                                             GtDiagbandseedPairlisttype
+                                               seedpairlisttype,
                                              bool verify,
                                              bool verbose,
                                              bool debug_kmer,
