@@ -1000,24 +1000,20 @@ static void gt_seedpairlist_init(GtSeedpairlist *seedpairlist,
 
 static void gt_seedpairlist_delete(GtSeedpairlist *seedpairlist)
 {
-  if (seedpairlist->splt == GT_DIAGBANDSEED_SPLT_STRUCT)
+  if (seedpairlist != NULL)
   {
-    gt_assert(seedpairlist->mlist_struct != NULL);
-    GT_FREEARRAY(seedpairlist->mlist_struct, GtDiagbandseedSeedPair);
-    gt_free(seedpairlist->mlist_struct);
-  } else
-  {
-    if (seedpairlist->splt == GT_DIAGBANDSEED_SPLT_ULONG)
+    if (seedpairlist->mlist_struct != NULL)
     {
-      gt_assert(seedpairlist->mlist_ulong != NULL);
+      GT_FREEARRAY(seedpairlist->mlist_struct, GtDiagbandseedSeedPair);
+      gt_free(seedpairlist->mlist_struct);
+    }
+    if (seedpairlist->mlist_ulong != NULL)
+    {
       GT_FREEARRAY(seedpairlist->mlist_ulong, GtUword);
       gt_free(seedpairlist->mlist_ulong);
-    } else
-    {
-      gt_assert(false);
     }
+    gt_free(seedpairlist);
   }
-  gt_free(seedpairlist);
 }
 
 static GtUword gt_seedpairlist_length(const GtSeedpairlist *seedpairlist)
@@ -2273,10 +2269,7 @@ static int gt_diagbandseed_algorithm(const GtDiagbandseedInfo *arg,
                                      GtError *err)
 {
   GtArrayGtDiagbandseedKmerPos blist;
-  GtSeedpairlist *seedpairlist = gt_seedpairlist_new(arg->splt,aseqrange,
-                                                     bseqrange),
-                 *revseedpairlist = gt_seedpairlist_new(arg->splt,
-                                                        aseqrange,bseqrange);
+  GtSeedpairlist *seedpairlist = NULL, *revseedpairlist = NULL;;
   GtDiagbandseedKmerIterator *aiter = NULL, *biter = NULL;
   GtUword alen = 0, blen = 0, mlistlen = 0, maxfreq, len_used;
   GtRange seedpairdistance = *arg->seedpairdistance;
@@ -2289,10 +2282,6 @@ static int gt_diagbandseed_algorithm(const GtDiagbandseedInfo *arg,
   GtQuerymatchoutoptions *querymoutopt = NULL;
 
   gt_assert(arg != NULL && aseqrange != NULL && bseqrange != NULL);
-  if (arg->verbose)
-  {
-    gt_seedpairlist_show_bits(stream,seedpairlist);
-  }
   maxfreq = arg->maxfreq;
   selfcomp = (arg->bencseq == arg->aencseq &&
               aseqrange->start <= bseqrange->end &&
@@ -2396,6 +2385,11 @@ static int gt_diagbandseed_algorithm(const GtDiagbandseedInfo *arg,
   if (!had_err) {
     gt_diagbandseed_kmer_iter_reset(aiter);
     gt_diagbandseed_kmer_iter_reset(biter);
+    seedpairlist = gt_seedpairlist_new(arg->splt,aseqrange,bseqrange);
+    if (arg->verbose)
+    {
+      gt_seedpairlist_show_bits(stream,seedpairlist);
+    }
     gt_diagbandseed_get_seedpairs(seedpairlist,
                                   aiter,
                                   biter,
@@ -2420,6 +2414,7 @@ static int gt_diagbandseed_algorithm(const GtDiagbandseedInfo *arg,
                                        err);
       if (had_err) {
         gt_seedpairlist_delete(seedpairlist);
+        seedpairlist = NULL;
       }
     }
   }
@@ -2566,6 +2561,7 @@ static int gt_diagbandseed_algorithm(const GtDiagbandseedInfo *arg,
     if (!had_err) {
       gt_diagbandseed_kmer_iter_reset(aiter);
       gt_diagbandseed_kmer_iter_reset(biter);
+      revseedpairlist = gt_seedpairlist_new(arg->splt,aseqrange,bseqrange);
       gt_diagbandseed_get_seedpairs(revseedpairlist,
                                     aiter,
                                     biter,
@@ -2614,8 +2610,8 @@ static int gt_diagbandseed_algorithm(const GtDiagbandseedInfo *arg,
                                   true,
                                   arg->verbose,
                                   stream);
-    gt_seedpairlist_delete(revseedpairlist);
   }
+  gt_seedpairlist_delete(revseedpairlist);
 
   /* Clean up */
   if (extp->extendgreedy) {
