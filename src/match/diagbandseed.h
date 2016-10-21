@@ -36,9 +36,9 @@ typedef struct
 
 typedef enum
 {
-  GtDiagBandSeedStruct,
-  GtDiagBandSeedGtUword,
-  GtDiagBandSeedBytestring
+  GT_DIAGBANDSEED_SPLT_STRUCT,
+  GT_DIAGBANDSEED_SPLT_ULONG,
+  GT_DIAGBANDSEED_SPLT_BYTESTRING
 } GtDiagbandseedPairlisttype;
 
 /* Run the whole algorithm. */
@@ -57,8 +57,7 @@ GtDiagbandseedInfo *gt_diagbandseed_info_new(const GtEncseq *aencseq,
                                              bool norev,
                                              bool nofwd,
                                              GtRange *seedpairdistance,
-                                             GtDiagbandseedPairlisttype
-                                               seedpairlisttype,
+                                             GtDiagbandseedPairlisttype splt,
                                              bool verify,
                                              bool verbose,
                                              bool debug_kmer,
@@ -69,6 +68,11 @@ GtDiagbandseedInfo *gt_diagbandseed_info_new(const GtEncseq *aencseq,
                                                *extp,
                                              GtUword anumseqranges,
                                              GtUword bnumseqranges);
+
+const char *gt_diagbandseed_splt_comment(void);
+
+GtDiagbandseedPairlisttype gt_diagbandseed_splt_get(const char *splt_string,
+                                                    GtError *err);
 
 /* The constructor for GtDiagbandseedExtendParams*/
 GtDiagbandseedExtendParams *gt_diagbandseed_extend_params_new(

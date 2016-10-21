@@ -322,11 +322,16 @@ static void gt_seqorder_handle_cases(const GtEncseq *encseq,
           if (arguments->sorthdrnum)
           {
             seqordercmpfunc = seqorder_str_compare_num;
+          } else
+          {
+            gt_assert(false);
+            seqordercmpfunc = NULL;
           }
         }
       }
       if (data != NULL)
       {
+        gt_assert(seqordercmpfunc != NULL);
         (void) gt_qsort_r(seqnums, numofsequences,sizeof *seqnums,
                           data,seqordercmpfunc);
       }

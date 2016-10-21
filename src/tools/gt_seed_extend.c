@@ -67,7 +67,7 @@ typedef struct {
   GtUword se_historysize;
   GtUword se_maxalilendiff;
   GtUword se_perc_match_hist;
-  GtStr *char_access_mode;
+  GtStr *char_access_mode, *splt_string;
   bool bias_parameters;
   bool relax_polish;
   bool verify_alignment;
@@ -96,6 +96,7 @@ static void* gt_seed_extend_arguments_new(void)
   arguments->dbs_pick_str = gt_str_new();
   arguments->dbs_memlimit_str = gt_str_new();
   arguments->char_access_mode = gt_str_new();
+  arguments->splt_string = gt_str_new();
   arguments->display_args = gt_str_array_new();
   arguments->display_flag = 0;
   return arguments;
@@ -110,6 +111,7 @@ static void gt_seed_extend_arguments_delete(void *tool_arguments)
     gt_str_delete(arguments->dbs_pick_str);
     gt_str_delete(arguments->dbs_memlimit_str);
     gt_str_delete(arguments->char_access_mode);
+    gt_str_delete(arguments->splt_string);
     gt_option_delete(arguments->se_option_greedy);
     gt_option_delete(arguments->se_option_xdrop);
     gt_option_delete(arguments->se_option_withali);
@@ -122,7 +124,8 @@ static GtOptionParser* gt_seed_extend_option_parser_new(void *tool_arguments)
 {
   GtSeedExtendArguments *arguments = tool_arguments;
   GtOptionParser *op;
-  GtOption *option, *op_gre, *op_xdr, *op_cam, *op_his, *op_dif, *op_pmh,
+  GtOption *option, *op_gre, *op_xdr, *op_cam, *op_splt,
+    *op_his, *op_dif, *op_pmh,
     *op_len, *op_err, *op_xbe, *op_sup, *op_frq, *op_mem, *op_ali, *op_bia,
     *op_onl, *op_weakends, *op_relax_polish,
     *op_verify_alignment, *op_spdist, *op_display,
@@ -331,6 +334,15 @@ static GtOptionParser* gt_seed_extend_option_parser_new(void *tool_arguments)
   gt_option_is_development_option(op_cam);
   gt_option_parser_add_option(op, op_cam);
 
+  op_splt = gt_option_new_string("splt",
+                                 gt_diagbandseed_splt_comment(),
+                                 arguments->splt_string,
+                                 "");
+  gt_option_hide_default(op_splt);
+  gt_option_is_development_option(op_splt);
+  gt_option_parser_add_option(op, op_splt);
+
+  /* -trimstat */
   op_trimstat = gt_option_new_bool("trimstat","show trimming statistics",
                                    &arguments->trimstat_on, false);
   gt_option_is_development_option(op_trimstat);
@@ -735,6 +747,7 @@ static int gt_seed_extend_runner(int argc,
   GtEncseq *aencseq = NULL, *bencseq = NULL;
   GtTimer *seedextendtimer = NULL;
   GtExtendCharAccess cam = GT_EXTEND_CHAR_ACCESS_ANY;
+  GtDiagbandseedPairlisttype splt = GT_DIAGBANDSEED_SPLT_STRUCT;
   GtUword errorpercentage = 0UL;
   double matchscore_bias = GT_DEFAULT_MATCHSCORE_BIAS;
   bool extendxdrop, extendgreedy = true;
@@ -800,6 +813,14 @@ static int gt_seed_extend_runner(int argc,
     cam = gt_greedy_extend_char_access(gt_str_get(arguments->char_access_mode),
                                        err);
     if ((int) cam == -1) {
+      had_err = -1;
+    }
+  }
+
+  if (!had_err)
+  {
+    splt = gt_diagbandseed_splt_get(gt_str_get(arguments->splt_string),err);
+    if ((int) splt == -1) {
       had_err = -1;
     }
   }
@@ -1042,7 +1063,7 @@ static int gt_seed_extend_runner(int argc,
                                     arguments->norev,
                                     arguments->nofwd,
                                     &arguments->seedpairdistance,
-                                    GtDiagBandSeedStruct,
+                                    splt,
                                     arguments->dbs_verify,
                                     arguments->verbose,
                                     arguments->dbs_debug_kmer,
