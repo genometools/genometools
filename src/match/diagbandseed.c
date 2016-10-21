@@ -1886,24 +1886,20 @@ static void gt_seedpairlist_init(GtSeedpairlist *seedpairlist,
 
 static void gt_seedpairlist_delete(GtSeedpairlist *seedpairlist)
 {
-  if (seedpairlist->splt == GT_DIAGBANDSEED_SPLT_STRUCT)
+  if (seedpairlist != NULL)
   {
-    gt_assert(seedpairlist->mlist_struct != NULL);
-    GT_FREEARRAY(seedpairlist->mlist_struct, GtDiagbandseedSeedPair);
-    gt_free(seedpairlist->mlist_struct);
-  } else
-  {
-    if (seedpairlist->splt == GT_DIAGBANDSEED_SPLT_ULONG)
+    if (seedpairlist->mlist_struct != NULL)
     {
-      gt_assert(seedpairlist->mlist_ulong != NULL);
+      GT_FREEARRAY(seedpairlist->mlist_struct, GtDiagbandseedSeedPair);
+      gt_free(seedpairlist->mlist_struct);
+    }
+    if (seedpairlist->mlist_ulong != NULL)
+    {
       GT_FREEARRAY(seedpairlist->mlist_ulong, GtUword);
       gt_free(seedpairlist->mlist_ulong);
-    } else
-    {
-      gt_assert(false);
     }
+    gt_free(seedpairlist);
   }
-  gt_free(seedpairlist);
 }
 
 static GtUword gt_seedpairlist_length(const GtSeedpairlist *seedpairlist)
