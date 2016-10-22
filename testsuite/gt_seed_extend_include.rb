@@ -21,6 +21,8 @@ seeds = [170039800390891361279027638963673934519,
          54623490901073137545509422160541861122,
          255642063275935424280602245704332672807]
 
+$SPLT_LIST = ["","-splt ulong","-splt bytestring"]
+
 # Threading
 Name "gt seed_extend: threading"
 Keywords "gt_seed_extend thread"
@@ -31,7 +33,7 @@ Test do
   run_test build_encseq("U89959_genomic", "#{$testdata}U89959_genomic.fas")
   for dataset in ["at1MB", "paired", "fastq_long"] do
     for query in ["", " -qii U89959_genomic"]
-      for splt in ["","-splt ulong"] do
+      for splt in $SPLT_LIST do
         run_test "#{$bin}gt seed_extend -ii #{dataset}#{query} #{splt}"
         run "sort #{last_stdout}"
         run "mv #{last_stdout} default_run.out"
@@ -62,7 +64,7 @@ Name "gt seed_extend: small_poly, no extension, verify lists"
 Keywords "gt_seed_extend only-seeds verify debug-kmer debug-seedpair small_poly"
 Test do
   run_test build_encseq("small_poly", "#{$testdata}small_poly.fas")
-  for splt in ["","-splt ulong"] do
+  for splt in $SPLT_LIST do
     run_test "#{$bin}gt seed_extend -only-seeds -verify -seedlength 10 " +
              "-debug-kmer -debug-seedpair -ii small_poly -kmerfile no #{splt} "
     run "gunzip -c #{$testdata}seedextend1.out.gz | cmp #{last_stdout}"
@@ -80,7 +82,7 @@ Name "gt seed_extend: small_poly, xdrop vs greedy extension"
 Keywords "gt_seed_extend extendgreedy extendxdrop small_poly"
 Test do
   run_test build_encseq("small_poly", "#{$testdata}small_poly.fas")
-  for splt in ["","-splt ulong"] do
+  for splt in $SPLT_LIST do
     run_test "#{$bin}gt seed_extend -extendxdrop 97 " +
              "-l 10 -ii small_poly -verify-alignment #{splt}"
     run "cmp #{last_stdout} #{$testdata}seedextend3.out"
@@ -117,7 +119,7 @@ Test do
   for seedlength in [2, 5, 14, 32] do
     for diagbandwidth in [0, 1, 5, 10] do
       for mincoverage in [1, 10, 50] do
-        for splt in ["","-splt ulong"] do
+        for splt in $SPLT_LIST do
           run_test "#{$bin}gt seed_extend -seedlength #{seedlength} " +
                    "-diagbandwidth #{diagbandwidth} " +
                    "-mincoverage #{mincoverage} " +
@@ -133,7 +135,7 @@ Name "gt seed_extend: greedy sensitivity, l, minidentity"
 Keywords "gt_seed_extend extendgreedy sensitivity alignlength history"
 Test do
   run_test build_encseq("at1MB", "#{$testdata}at1MB")
-  for splt in ["","-splt ulong"] do
+  for splt in $SPLT_LIST do
     for sensitivity in [90, 97, 100] do
       for alignlength in [2, 80] do
         for minidentity in [70, 80, 99] do
@@ -153,7 +155,7 @@ Name "gt seed_extend: history, percmathistory, maxalilendiff"
 Keywords "gt_seed_extend extendgreedy history percmathistory maxalilendiff"
 Test do
   run_test build_encseq("at1MB", "#{$testdata}at1MB")
-  for splt in ["","-splt ulong"] do
+  for splt in $SPLT_LIST do
     for history in [10, 50, 64] do
       for percmathistory in [70, 80, 99] do
         for maxalilendiff in [1, 10, 30] do
@@ -173,7 +175,7 @@ Name "gt seed_extend: extendxdrop, xdropbelow, cam"
 Keywords "gt_seed_extend extendxdrop xdropbelow cam"
 Test do
   run_test build_encseq("at1MB", "#{$testdata}at1MB")
-  for splt in ["","-splt ulong"] do
+  for splt in $SPLT_LIST do
     for sensitivity in [90, 100] do
       for xdbelow in [1, 3, 5] do
         for cam in ["encseq", "encseq_reader"] do
@@ -239,7 +241,7 @@ Test do
       "--seedlength 14 --length 1000 --mode seeded --seed #{seed} " +
       "--seedcoverage 35 --long 10000  --reverse-complement > longseeded.fasta"
       run_test build_encseq("longseeded", "longseeded.fasta")
-      for splt in ["","-splt ulong"] do
+      for splt in $SPLT_LIST do
         run_test "#{$bin}gt seed_extend -extendgreedy -l 900 -kmerfile no " +
                  "-minidentity #{minidentity} -ii longseeded #{splt}"
         # Check whether the correct number of alignments are found.
@@ -271,7 +273,7 @@ Test do
     run_test build_encseq("db", "db.fna")
     run_test build_encseq("all", "db.fna query.fna")
     ["xdrop","greedy"].each do |ext|
-      for splt in ["","-splt ulong"] do
+      for splt in $SPLT_LIST do
         run_test "#{$bin}gt seed_extend -extend#{ext} 100 -l " +
                  "#{extendlength-20} -minidentity #{minid} " +
                  "-seedlength #{seedlength} -no-reverse -kmerfile no " +
@@ -299,7 +301,7 @@ Keywords "gt_seed_extend parts pick"
 Test do
   run_test build_encseq("at1MB", "#{$testdata}at1MB")
   run_test build_encseq("gt_bioseq_succ_3","#{$testdata}gt_bioseq_succ_3.fas")
-  for splt in ["","-splt ulong"] do
+  for splt in $SPLT_LIST do
     run_test "#{$bin}gt seed_extend -ii at1MB -verify-alignment #{splt}"
     run "sort #{last_stdout}"
     run "mv #{last_stdout} default.out"

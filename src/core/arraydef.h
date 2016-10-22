@@ -60,16 +60,19 @@
         *(A) = *(B)
 
 /*
-  GT_CHECKARRAYSPACE checks if the integer nextfree##T
-  points to an index for which the space is not allocated yet. If this is
-  the case, the number of cells allocated is incremented by L. The
-  contents of the previously filled array elements is of course maintained.
+  GT_CHECKARRAYSPACE checks if the next (L) cells in the array have
+  been allocated. If this is not the case, then the number of cells
+  allocated is incremented by ADD, which must not be smaller than (L). The
+  contents of the previously filled array elements is of course.
 */
-#define GT_CHECKARRAYSPACE(A,TYPE,L)\
+
+#define GT_CHECKARRAYSPACE_GENERIC(A,TYPE,L,ADD)\
         do {\
-          if ((A)->nextfree##TYPE >= (A)->allocated##TYPE)\
+          if ((A)->nextfree##TYPE + (L) >= (A)->allocated##TYPE)\
           {\
-            (A)->allocated##TYPE += L;\
+            GtUword add_cells = (ADD);\
+            gt_assert((L) <= add_cells);\
+            (A)->allocated##TYPE += add_cells;\
             (A)->space##TYPE = (TYPE *) gt_realloc_mem((A)->space##TYPE,\
                                               sizeof (TYPE) *\
                                               (A)->allocated##TYPE,\
@@ -79,21 +82,20 @@
         } while (false)
 
 /*
+  GT_CHECKARRAYSPACE checks if the integer nextfree##T
+  points to an index for which the space is not allocated yet. If this is
+  the case, the number of cells allocated is incremented by L. The
+  contents of the previously filled array elements is of course maintained.
+*/
+#define GT_CHECKARRAYSPACE(A,TYPE,L)\
+        GT_CHECKARRAYSPACE_GENERIC(A,TYPE,0,L)
+
+/*
   The next macro is a variation of GT_CHECKARRAYSPACE, which checks if the next
   L cells have been allocated. If not, then this is done.
 */
 #define GT_CHECKARRAYSPACEMULTI(A,TYPE,L)\
-        do {\
-          if ((A)->nextfree##TYPE + (L) >= (A)->allocated##TYPE)\
-          {\
-            (A)->allocated##TYPE += L;\
-            (A)->space##TYPE = (TYPE *) gt_realloc_mem((A)->space##TYPE,\
-                                              sizeof (TYPE) *\
-                                              (A)->allocated##TYPE,\
-                                              __FILE__, __LINE__);\
-          }\
-          gt_assert((A)->space##TYPE != NULL);\
-        } while (false)
+        GT_CHECKARRAYSPACE_GENERIC(A,TYPE,L,L)
 
 /*
   This macro checks the space and delivers a pointer P
