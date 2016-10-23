@@ -3392,7 +3392,7 @@ static void gt_diagbandseed_process_seeds(GtSeedpairlist *seedpairlist,
 
       gt_assert(seedpairlist->splt == GT_DIAGBANDSEED_SPLT_BYTESTRING);
       /* iterate through segments of equal k-mers, segment has length > 0 */
-      gt_diagbandseed_decode_full_seedpair(&nextsegment,seedpairlist,0);
+      gt_diagbandseed_decode_seedpair(&nextsegment,seedpairlist,0);
       while (nextsegment_idx <= last_segment_start)
       {
         GtSeedpairPositions *spp_ptr;
@@ -3402,9 +3402,8 @@ static void gt_diagbandseed_process_seeds(GtSeedpairlist *seedpairlist,
         GtDiagbandseedSeqnum currsegm_aseqnum = nextsegment.aseqnum;
         GtDiagbandseedSeqnum currsegm_bseqnum = nextsegment.bseqnum;
 
-        gt_diagbandseed_decode_full_seedpair(&endminsegment,seedpairlist,
-                                             nextsegment_idx + minsegmentlen
-                                                             - 1);
+        gt_diagbandseed_decode_seedpair(&endminsegment,seedpairlist,
+                                        nextsegment_idx + minsegmentlen - 1);
         if (currsegm_aseqnum != endminsegment.aseqnum ||
             currsegm_bseqnum != endminsegment.bseqnum)
         {
@@ -3416,8 +3415,8 @@ static void gt_diagbandseed_process_seeds(GtSeedpairlist *seedpairlist,
             {
               break;
             }
-            gt_diagbandseed_decode_full_seedpair(&nextsegment,seedpairlist,
-                                                 nextsegment_idx);
+            gt_diagbandseed_decode_seedpair(&nextsegment,seedpairlist,
+                                            nextsegment_idx);
             if (currsegm_aseqnum != nextsegment.aseqnum ||
                 currsegm_bseqnum != nextsegment.bseqnum)
             {
@@ -3454,8 +3453,8 @@ static void gt_diagbandseed_process_seeds(GtSeedpairlist *seedpairlist,
           {
             break;
           }
-          gt_diagbandseed_decode_full_seedpair(&nextsegment,seedpairlist,
-                                               nextsegment_idx);
+          gt_diagbandseed_decode_seedpair(&nextsegment,seedpairlist,
+                                          nextsegment_idx);
           if (currsegm_aseqnum != nextsegment.aseqnum ||
               currsegm_bseqnum != nextsegment.bseqnum)
           {
