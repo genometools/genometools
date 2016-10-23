@@ -1,5 +1,10 @@
 #!/bin/sh
 
+seed_extend()
+{
+  env -i ${GTDIR}/bin/gt seed_extend -display seed seqlength -parts 2 -extend${mode} -ii sfx -maxfreq 20 -kmerfile no $1 > sfx-$2.matches
+}
+
 set -e -x
 # set GTDIR as path of genometools directory
 
@@ -10,8 +15,10 @@ do
   for mode in greedy xdrop
   do
     echo $filename
-    env -i ${GTDIR}/bin/gt -j 4 seed_extend -display seed seqlength -parts 2 -extend${mode} -ii sfx -maxfreq 20 -kmerfile no > sfx-struct.matches
-    env -i ${GTDIR}/bin/gt -j 4 seed_extend -display seed seqlength -parts 2 -extend${mode} -ii sfx -maxfreq 20 -kmerfile no -splt ulong > sfx-ulong.matches
+    seed_extend "" struct
+    seed_extend "-splt ulong" ulong
     cmp -s sfx-ulong.matches sfx-struct.matches
+    seed_extend "-splt bytestring" bytestring
+    cmp -s sfx-ulong.matches sfx-bytestring.matches
   done
 done

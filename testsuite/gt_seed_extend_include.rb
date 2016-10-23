@@ -116,9 +116,10 @@ Name "gt seed_extend: diagbandwidth, mincoverage, seedlength"
 Keywords "gt_seed_extend filter diagbandwidth mincoverage memlimit"
 Test do
   run_test build_encseq("gt_bioseq_succ_3", "#{$testdata}gt_bioseq_succ_3.fas")
-  for seedlength in [2, 5, 14, 32] do
-    for diagbandwidth in [0, 1, 5, 10] do
-      for mincoverage in [1, 10, 50] do
+  for diagbandwidth in [0, 1, 5, 10] do
+    for seedlength in [2, 5, 14, 32] do
+      for factor in [1,2,3] do
+        mincoverage = factor * seedlength
         for splt in $SPLT_LIST do
           run_test "#{$bin}gt seed_extend -seedlength #{seedlength} " +
                    "-diagbandwidth #{diagbandwidth} " +

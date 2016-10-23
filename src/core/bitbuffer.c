@@ -118,7 +118,6 @@ GtUword gt_bitbuffer_write_bytestring(GtBitbuffer *bb,
                                        GtBitcount_type bitsforvalue)
 {
   GtBitcount_type bits2store = bitsforvalue;
-  /*char buffer[100];*/
 
   gt_assert(bb != NULL && bb->fp == NULL);
   bb->numberofallvalues++;

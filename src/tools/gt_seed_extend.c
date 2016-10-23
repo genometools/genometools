@@ -916,8 +916,21 @@ static int gt_seed_extend_runner(int argc,
   }
 
   /* Set mincoverage */
-  if (!had_err && arguments->dbs_mincoverage == GT_UWORD_MAX) {
-    arguments->dbs_mincoverage = (GtUword) (2.5 * arguments->dbs_seedlength);
+  if (!had_err)
+  {
+    if (arguments->dbs_mincoverage == GT_UWORD_MAX)
+    {
+      arguments->dbs_mincoverage = (GtUword) (2.5 * arguments->dbs_seedlength);
+    } else
+    {
+      if (arguments->dbs_mincoverage < arguments->dbs_seedlength)
+      {
+        gt_error_set(err, "argument to option \"-mincoverage\" must be an "
+                          "integer >= %u (seedlength).",
+                          arguments->dbs_seedlength);
+        had_err = -1;
+      }
+    }
   }
 
   /* Set minimum alignment length */
