@@ -1199,6 +1199,7 @@ static void gt_diagbandseed_show_seed(FILE *stream,
                   seedpair.bpos);
 }
 
+#ifndef NDEBUG
 static int gt_diagbandseed_seeds_compare(const GtSeedpairlist *seedpairlist,
                                          const GtUword current)
 {
@@ -1241,6 +1242,7 @@ static int gt_diagbandseed_seeds_compare(const GtSeedpairlist *seedpairlist,
   }
   return 0;
 }
+#endif
 
 static void gt_diagbandseed_seedpairlist_out(FILE *stream,
                                              const GtSeedpairlist *seedpairlist)

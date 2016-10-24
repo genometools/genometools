@@ -21,6 +21,7 @@
 #include <inttypes.h>
 #include <stdio.h>
 #include "core/types_api.h"
+#include "core/unused_api.h"
 
 /* The <GtBitbuffer> class provides means to sequentially write bit-compressed
    integer arrays into a file. */
@@ -59,14 +60,14 @@ void gt_bitbuffer_generic_write_FILE(GtBitbuffer *bb,
 GtUword gt_bitbuffer_write_bytestring(GtBitbuffer *bb,
                                       uint8_t *bytestring,
                                       GtUword bytestring_offset,
-                                      GtUword bytestring_length,
+                                      GT_UNUSED GtUword bytestring_length,
                                       GtUword value,
                                       GtBitcount_type bitsforvalue);
 
 GtUword gt_bitbuffer_write_bytestring_bf(GtBitbuffer *bb,
                                          uint8_t *bytestring,
                                          GtUword bytestring_offset,
-                                         GtUword bytestring_length,
+                                         GT_UNUSED GtUword bytestring_length,
                                          GtUword value,
                                          GtBitcount_type bitsforvalue);
 
