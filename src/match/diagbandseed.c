@@ -1158,6 +1158,7 @@ static GtUword gt_seedpairlist_extract_ulong_at(
                                    GtUword spidx,
                                    int compidx)
 {
+  gt_assert(seedpairlist->splt == GT_DIAGBANDSEED_SPLT_ULONG);
   return gt_seedpairlist_extract_ulong(seedpairlist,
                                        seedpairlist->mlist_ulong->
                                                      spaceGtUword[spidx],
