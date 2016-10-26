@@ -21,7 +21,22 @@ seeds = [170039800390891361279027638963673934519,
          54623490901073137545509422160541861122,
          255642063275935424280602245704332672807]
 
-$SPLT_LIST = ["","-splt ulong","-splt bytestring"]
+$SPLT_LIST = ["-splt struct","-splt ulong"]
+
+
+if $gttestdata
+  Name "gt seed_extend: -splt bytestring for many short and some long seqs"
+  Keywords "gt_seed_extend bytestring"
+  Test do
+    indexname="manyshort-somelong"
+    run("#{$scriptsdir}/manyshort-somelong.sh #{$gttestdata}/DNA-mix/Grumbach.fna 10000")
+    run_test build_encseq(indexname, last_stdout)
+    run_test "#{$bin}gt seed_extend -no-reverse -l 50 -splt bytestring -ii #{indexname}"
+    run "mv #{last_stdout} splt-bytestring.matches"
+    run_test "#{$bin}gt seed_extend -no-reverse -l 50 -splt struct -ii #{indexname}"
+    run "cmp -s #{last_stdout} splt-bytestring.matches"
+  end 
+end
 
 # Threading
 Name "gt seed_extend: threading"
@@ -98,7 +113,7 @@ Keywords "gt_seed_extend at1MB memlimit maxfreq"
 Test do
   run_test build_encseq("at1MB", "#{$testdata}at1MB")
   run_test "#{$bin}gt seed_extend -verify -debug-seedpair -memlimit 10MB " +
-           "-ii at1MB -only-seeds -no-reverse -seedlength 14"
+           "-ii at1MB -only-seeds -no-reverse -seedlength 14 -splt struct"
   grep last_stderr, /Only k-mers occurring <= 3 times will be considered, /
     /due to small memlimit. Expect 50496 seed pairs./
   run "gunzip -c #{$testdata}seedextend2.out.gz | cmp #{last_stdout}"

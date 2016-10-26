@@ -35,10 +35,11 @@ typedef struct
 } GtSequenceRangeWithMaxLength;
 
 typedef enum
-{
+{ /* keep the order consistent with gt_splt_arguments */
   GT_DIAGBANDSEED_SPLT_STRUCT,
   GT_DIAGBANDSEED_SPLT_ULONG,
-  GT_DIAGBANDSEED_SPLT_BYTESTRING
+  GT_DIAGBANDSEED_SPLT_BYTESTRING,
+  GT_DIAGBANDSEED_SPLT_UNDEFINED
 } GtDiagbandseedPairlisttype;
 
 /* Run the whole algorithm. */

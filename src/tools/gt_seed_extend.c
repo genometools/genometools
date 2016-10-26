@@ -747,7 +747,7 @@ static int gt_seed_extend_runner(int argc,
   GtEncseq *aencseq = NULL, *bencseq = NULL;
   GtTimer *seedextendtimer = NULL;
   GtExtendCharAccess cam = GT_EXTEND_CHAR_ACCESS_ANY;
-  GtDiagbandseedPairlisttype splt = GT_DIAGBANDSEED_SPLT_STRUCT;
+  GtDiagbandseedPairlisttype splt = GT_DIAGBANDSEED_SPLT_UNDEFINED;
   GtUword errorpercentage = 0UL;
   double matchscore_bias = GT_DEFAULT_MATCHSCORE_BIAS;
   bool extendxdrop, extendgreedy = true;

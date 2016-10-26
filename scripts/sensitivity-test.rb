@@ -3,7 +3,7 @@
 require 'optparse'
 require 'ostruct'
 require 'set'
-require_relative 'convert2myersformat'
+require_relative 'fasta'
 
 def min(a,b)
   return [a,b].sort.first
