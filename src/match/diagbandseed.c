@@ -1856,7 +1856,9 @@ static void gt_diagbandseed_process_seeds(GtSeedpairlist *seedpairlist,
     /* iterate through segments of equal k-mers */
     while (nextsegm <= last_segment_start)
     {
-      const GtDiagbandseedSeedPair *currsegm = nextsegm, *seedpair;
+      GtUword segment_length;
+      GtSeedpairPositions *spp_ptr;
+      const GtDiagbandseedSeedPair *currsegm = nextsegm;
       const GtDiagbandseedSeqnum currsegm_aseqnum = currsegm->aseqnum;
       const GtDiagbandseedSeqnum currsegm_bseqnum = currsegm->bseqnum;
       bool haspreviousmatch;
@@ -1877,6 +1879,8 @@ static void gt_diagbandseed_process_seeds(GtSeedpairlist *seedpairlist,
 
       /* this segment begining with nextsegm pssibly has enough seeds */
       diagbands_used = 0;
+      spp_ptr = seedpairlist->segment_positions
+              = (GtSeedpairPositions *) currsegm;
       do
       {
         const GtUword diag = GT_DIAGBANDSEED_DIAG(amaxlen,nextsegm->apos,
@@ -1888,6 +1892,9 @@ static void gt_diagbandseed_process_seeds(GtSeedpairlist *seedpairlist,
                                                        diag,
                                                        nextsegm->bpos,
                                                        seedlength);
+        spp_ptr->apos = nextsegm->apos;
+        spp_ptr->bpos = nextsegm->bpos;
+        spp_ptr++;
         nextsegm++;
       } while (nextsegm < mlistend &&
                nextsegm->aseqnum == currsegm_aseqnum &&
@@ -1897,22 +1904,25 @@ static void gt_diagbandseed_process_seeds(GtSeedpairlist *seedpairlist,
          the segment boundaries have been identified.
          second scan: test for mincoverage and overlap to previous extension,
          based on apos and bpos values. */
-      for (seedpair = currsegm, haspreviousmatch = false; seedpair < nextsegm;
-           seedpair++)
+      segment_length = (GtUword) (nextsegm - currsegm);
+      for (spp_ptr = seedpairlist->segment_positions,
+           haspreviousmatch = false;
+           spp_ptr < seedpairlist->segment_positions + segment_length;
+           spp_ptr++)
       {
-        const GtUword diag = GT_DIAGBANDSEED_DIAG(amaxlen,seedpair->apos,
-                                                  seedpair->bpos);
-        if ((GtUword) MAX(diagband_score[diag + 1], diagband_score[diag - 1]) +
-            (GtUword) diagband_score[diag]
+        const GtUword diag = GT_DIAGBANDSEED_DIAG(amaxlen,spp_ptr->apos,
+                                                  spp_ptr->bpos);
+        if ((GtUword) MAX(diagband_score[diag + 1], diagband_score[diag - 1])
+            + (GtUword) diagband_score[diag]
             >= arg->mincoverage)
         {
           int ret = gt_diagbandseed_possibly_extend(
                           haspreviousmatch ? info_querymatch.querymatchspaceptr
                                            : NULL,
                           currsegm_aseqnum,
-                          seedpair->apos,
+                          spp_ptr->apos,
                           currsegm_bseqnum,
-                          seedpair->bpos,
+                          spp_ptr->bpos,
                           arg->use_apos,
                           seedlength,
                           arg->errorpercentage,
@@ -1945,11 +1955,13 @@ static void gt_diagbandseed_process_seeds(GtSeedpairlist *seedpairlist,
       } else
       {
         /* third scan: */
-        for (seedpair = currsegm; seedpair < nextsegm; seedpair++)
+        for (spp_ptr = seedpairlist->segment_positions;
+             spp_ptr < seedpairlist->segment_positions + segment_length;
+             spp_ptr++)
         {
           const GtUword diag = GT_DIAGBANDSEED_DIAG(amaxlen,
-                                                    seedpair->apos,
-                                                    seedpair->bpos);
+                                                    spp_ptr->apos,
+                                                    spp_ptr->bpos);
           diagband_score[diag] = 0;
           diagband_lastpos[diag] = 0;
         }
