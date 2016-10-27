@@ -23,13 +23,12 @@ seeds = [170039800390891361279027638963673934519,
 
 $SPLT_LIST = ["-splt struct","-splt ulong"]
 
-
 if $gttestdata
   Name "gt seed_extend: -splt bytestring for many short and some long seqs"
   Keywords "gt_seed_extend bytestring"
   Test do
     indexname="manyshort-somelong"
-    run("#{$scriptsdir}/manyshort-somelong.sh #{$gttestdata}/DNA-mix/Grumbach.fna 10000")
+    run("#{$scriptsdir}/manyshort-somelong.rb #{$gttestdata}/DNA-mix/Grumbach.fna 10000")
     run_test build_encseq(indexname, last_stdout)
     run_test "#{$bin}gt seed_extend -no-reverse -l 50 -splt bytestring -ii #{indexname}"
     run "mv #{last_stdout} splt-bytestring.matches"
