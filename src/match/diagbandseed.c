@@ -1157,7 +1157,6 @@ static GtUword gt_seedpairlist_extract_ulong_at(
                                    GtUword spidx,
                                    int compidx)
 {
-  gt_assert(seedpairlist->splt == GT_DIAGBANDSEED_SPLT_ULONG);
   return gt_seedpairlist_extract_ulong(seedpairlist,
                                        seedpairlist->mlist_ulong->
                                                      spaceGtUword[spidx],
@@ -3466,6 +3465,8 @@ static void gt_diagbandseed_process_seeds(GtSeedpairlist *seedpairlist,
            the segment boundaries have been identified.
            second scan: test for mincoverage and overlap to previous extension,
            based on apos and bpos values. */
+        currsegm_aseqnum += aseqrange->start;
+        currsegm_bseqnum += bseqrange->start;
         segment_length = nextsegment_idx - startsegment_idx;
         for (spp_ptr = seedpairlist->segment_positions,
              haspreviousmatch = false;
@@ -3482,9 +3483,9 @@ static void gt_diagbandseed_process_seeds(GtSeedpairlist *seedpairlist,
             int ret = gt_diagbandseed_possibly_extend(
                            haspreviousmatch ? info_querymatch.querymatchspaceptr
                                             : NULL,
-                           currsegm_aseqnum + aseqrange->start,
+                           currsegm_aseqnum,
                            spp_ptr->apos,
-                           currsegm_bseqnum + bseqrange->start,
+                           currsegm_bseqnum,
                            spp_ptr->bpos,
                            arg->use_apos,
                            seedlength,
@@ -3504,9 +3505,9 @@ static void gt_diagbandseed_process_seeds(GtSeedpairlist *seedpairlist,
             {
               haspreviousmatch = true;
             }
-  #ifdef GT_DIAGBANDSEED_SEEDHISTOGRAM
+#ifdef GT_DIAGBANDSEED_SEEDHISTOGRAM
             seedcount++;
-  #endif
+#endif
           }
         }
 
@@ -3529,10 +3530,10 @@ static void gt_diagbandseed_process_seeds(GtSeedpairlist *seedpairlist,
             diagband_lastpos[diag] = 0;
           }
         }
-  #ifdef GT_DIAGBANDSEED_SEEDHISTOGRAM
+#ifdef GT_DIAGBANDSEED_SEEDHISTOGRAM
         seedhistogram[MIN(GT_DIAGBANDSEED_SEEDHISTOGRAM - 1, seedcount)]++;
         seedcount = 0;
-  #endif
+#endif
       }
     }
   }
