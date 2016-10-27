@@ -18,7 +18,5 @@ do
     seed_extend "-splt ulong" ulong
     seed_extend "-splt struct" struct
     cmp -s sfx-ulong.matches sfx-struct.matches
-    seed_extend "-splt struct" bytestring
-    cmp -s sfx-ulong.matches sfx-bytestring.matches
   done
 done
