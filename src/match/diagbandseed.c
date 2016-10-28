@@ -3467,8 +3467,7 @@ static void gt_diagbandseed_process_seeds(GtSeedpairlist *seedpairlist,
            based on apos and bpos values. */
         currsegm_aseqnum += aseqrange->start;
         currsegm_bseqnum += bseqrange->start;
-        count_extensions +=
-          gt_diagbandseed_process_segment(arg,
+        gt_diagbandseed_process_segment(arg,
                                           aencseq,
                                           bencseq,
                                           diagband_score,
@@ -3484,8 +3483,13 @@ static void gt_diagbandseed_process_seeds(GtSeedpairlist *seedpairlist,
                                           ndiags,
                                           &info_querymatch,
                                           query_readmode,
+#ifndef _WIN32
+                                          verbose ? &total_extension_time_usec
+                                                  : NULL,
+#endif
                                           extend_selfmatch_relative_function,
-                                           extend_querymatch_relative_function);
+                                          extend_querymatch_relative_function,
+                                          &extension_count);
       }
     }
   }
