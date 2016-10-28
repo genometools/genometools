@@ -1,5 +1,6 @@
 /*
   Copyright (c) 2015-2016 Joerg Winkler <j.winkler@posteo.de>
+  Copyright (c) 2016 Stefan Kurtz  <kurtz@zbh.uni-hamburg.de>
   Copyright (c) 2015-2016 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any

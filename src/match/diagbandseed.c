@@ -76,7 +76,7 @@ struct GtDiagbandseedInfo
   const GtEncseq *aencseq;
   const GtEncseq *bencseq;
   const GtDiagbandseedExtendParams *extp;
-  GtRange *seedpairdistance;
+  const GtRange *seedpairdistance;
   GtUword maxfreq,
           memlimit,
           anumseqranges,
@@ -141,7 +141,7 @@ GtDiagbandseedInfo *gt_diagbandseed_info_new(const GtEncseq *aencseq,
                                              unsigned int seedlength,
                                              bool norev,
                                              bool nofwd,
-                                             GtRange *seedpairdistance,
+                                             const GtRange *seedpairdistance,
                                              GtDiagbandseedPairlisttype splt,
                                              bool verify,
                                              bool verbose,
