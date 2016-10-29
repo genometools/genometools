@@ -152,6 +152,22 @@ void gt_timer_show_formatted(GtTimer *t, const char *fmt, FILE *fp)
 #endif
 }
 
+GtWord gt_timer_elapsed_usec(GtTimer *t)
+{
+#ifndef _WIN32
+  struct timeval elapsed_tv;
+  if (t->state == TIMER_RUNNING)
+    gt_timer_stop(t);
+  gt_assert(t->state == TIMER_STOPPED);
+  timeval_subtract(&elapsed_tv, &t->stop_tv, &t->gstart_tv);
+  return (GtWord) (elapsed_tv.tv_usec + elapsed_tv.tv_sec * 1000000L);
+#else
+  /* XXX */
+  fprintf(stderr, "gt_elapsed_usec() not implemented\n");
+  exit(EXIT_FAILURE);
+#endif
+}
+
 void gt_timer_get_formatted(GtTimer *t, const char *fmt, GtStr *str)
 {
 #ifndef _WIN32

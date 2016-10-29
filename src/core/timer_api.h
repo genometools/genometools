@@ -46,6 +46,9 @@ void     gt_timer_show(GtTimer *timer, FILE *fp);
    with: elapsed seconds, elapsed microseconds, used usertime in seconds, system
    time in seconds. The output is written to <fp>. The timer is then stopped. */
 void     gt_timer_show_formatted(GtTimer *timer, const char *fmt, FILE *fp);
+/* return usec of time from start to stop of giben timer. The timer is then
+   stopped. */
+GtWord gt_timer_elapsed_usec(GtTimer *t);
 /* Like <gt_timer_show_formatted()>, but appends the output to <str>. */
 void     gt_timer_get_formatted(GtTimer *t, const char *fmt, GtStr *str);
 /* Output the current state of <timer> on <fp> since the last call of
