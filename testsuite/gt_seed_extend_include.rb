@@ -114,12 +114,12 @@ Test do
   run_test "#{$bin}gt seed_extend -verify -debug-seedpair -memlimit 10MB " +
            "-ii at1MB -only-seeds -no-reverse -seedlength 14 -splt struct"
   grep last_stderr, /Only k-mers occurring <= 3 times will be considered, /
-    /due to small memlimit. Expect 50496 seed pairs./
+    /due to small memlimit. Expect 50496 seeds./
   run "gunzip -c #{$testdata}seedextend2.out.gz | cmp #{last_stdout}"
   run_test "#{$bin}gt seed_extend -only-seeds -v -maxfreq 5 -ii at1MB"
-  grep last_stdout, /...found 622939 10-mers/
-  grep last_stdout, /...collected 305756 seed pairs/
-  grep last_stdout, /...collected 235705 seed pairs/
+  grep last_stdout, /... found 622939 10-mers/
+  grep last_stdout, /... collected 305756 seeds/
+  grep last_stdout, /... collected 235705 seeds/
   run_test "#{$bin}gt seed_extend -only-seeds -v -maxfreq 11 -memlimit 1GB " +
            "-ii at1MB"
   grep last_stdout, /Set k-mer maximum frequency to 11, expect 460986 seed/
