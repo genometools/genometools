@@ -97,7 +97,8 @@ GtDiagbandseedExtendParams *gt_diagbandseed_extend_params_new(
                               bool benchmark,
                               GtUword alignmentwidth,
                               bool always_polished_ends,
-                              bool verify_alignment);
+                              bool verify_alignment,
+                              bool only_selected_seqpairs);
 
 /* The destructors */
 void gt_diagbandseed_info_delete(GtDiagbandseedInfo *info);

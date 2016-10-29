@@ -72,6 +72,7 @@ typedef struct {
   bool bias_parameters;
   bool relax_polish;
   bool verify_alignment;
+  bool only_selected_seqpairs;
   /* general options */
   GtOption *se_option_withali;
   GtUword se_alignlength;
@@ -129,7 +130,7 @@ static GtOptionParser* gt_seed_extend_option_parser_new(void *tool_arguments)
     *op_his, *op_dif, *op_pmh,
     *op_len, *op_err, *op_xbe, *op_sup, *op_frq, *op_mem, *op_ali, *op_bia,
     *op_onl, *op_weakends, *op_relax_polish,
-    *op_verify_alignment, *op_spdist, *op_display,
+    *op_verify_alignment, *op_only_selected_seqpairs, *op_spdist, *op_display,
     *op_norev, *op_nofwd, *op_part, *op_pick, *op_overl, *op_trimstat;
 
   static GtRange seedpairdistance_defaults = {1UL, GT_UWORD_MAX};
@@ -403,6 +404,15 @@ static GtOptionParser* gt_seed_extend_option_parser_new(void *tool_arguments)
                                    &arguments->verify_alignment,false);
   gt_option_parser_add_option(op, op_verify_alignment);
   gt_option_is_development_option(op_verify_alignment);
+
+  /* -only-selected-seqpairs */
+  op_only_selected_seqpairs
+    = gt_option_new_bool("only-selected-seqpairs",
+                         "output only sequence pair numbers with "
+                         "selected seeds",
+                         &arguments->only_selected_seqpairs,false);
+  gt_option_parser_add_option(op, op_only_selected_seqpairs);
+  gt_option_is_development_option(op_only_selected_seqpairs);
 
   /* -display */
   op_display = gt_option_new_string_array("display",
@@ -1067,7 +1077,8 @@ static int gt_seed_extend_runner(int argc,
                                              arguments->benchmark,
                                              arguments->se_alignmentwidth,
                                              !arguments->relax_polish,
-                                             arguments->verify_alignment);
+                                             arguments->verify_alignment,
+                                             arguments->only_selected_seqpairs);
 
     info = gt_diagbandseed_info_new(aencseq,
                                     bencseq,

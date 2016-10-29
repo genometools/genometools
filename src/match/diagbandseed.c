@@ -115,7 +115,8 @@ struct GtDiagbandseedExtendParams
        weakends,
        benchmark,
        always_polished_ends,
-       verify_alignment;
+       verify_alignment,
+       only_selected_seqpairs;
 };
 
 typedef struct
@@ -204,7 +205,8 @@ GtDiagbandseedExtendParams *gt_diagbandseed_extend_params_new(
                                 bool benchmark,
                                 GtUword alignmentwidth,
                                 bool always_polished_ends,
-                                bool verify_alignment)
+                                bool verify_alignment,
+                                bool only_selected_seqpairs)
 {
   GtDiagbandseedExtendParams *extp = gt_malloc(sizeof *extp);
   extp->errorpercentage = errorpercentage;
@@ -227,6 +229,7 @@ GtDiagbandseedExtendParams *gt_diagbandseed_extend_params_new(
   extp->alignmentwidth = alignmentwidth;
   extp->always_polished_ends = always_polished_ends;
   extp->verify_alignment = verify_alignment;
+  extp->only_selected_seqpairs = only_selected_seqpairs;
   return extp;
 }
 
@@ -1789,7 +1792,16 @@ static void gt_diagbandseed_process_segment(
         + (GtUword) diagband_score[diag]
         >= arg->mincoverage)
     {
-      int ret = gt_diagbandseed_possibly_extend(
+      int ret;
+
+      if (arg->only_selected_seqpairs)
+      {
+        printf("# " GT_WU "%c" GT_WU "\n",aseqnum,
+               query_readmode == GT_READMODE_REVCOMPL ? '-' : '+',
+               bseqnum);
+        break;
+      }
+      ret = gt_diagbandseed_possibly_extend(
                      haspreviousmatch ? info_querymatch->querymatchspaceptr
                                       : NULL,
                      aseqnum,
