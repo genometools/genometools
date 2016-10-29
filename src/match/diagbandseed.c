@@ -3468,28 +3468,23 @@ static void gt_diagbandseed_process_seeds(GtSeedpairlist *seedpairlist,
         currsegm_aseqnum += aseqrange->start;
         currsegm_bseqnum += bseqrange->start;
         gt_diagbandseed_process_segment(arg,
-                                          aencseq,
-                                          bencseq,
-                                          diagband_score,
-                                          diagband_lastpos,
-                                          currsegm_aseqnum,
-                                          currsegm_bseqnum,
-                                          segment_positions,
-                                          (GtUword) (spp_ptr -
-                                                     segment_positions),
-                                          amaxlen,
-                                          seedlength,
-                                          diagbands_used,
-                                          ndiags,
-                                          &info_querymatch,
-                                          query_readmode,
-#ifndef _WIN32
-                                          verbose ? &total_extension_time_usec
-                                                  : NULL,
-#endif
-                                          extend_selfmatch_relative_function,
-                                          extend_querymatch_relative_function,
-                                          &extension_count);
+                                        aencseq,
+                                        bencseq,
+                                        amaxlen,
+                                        seedlength,
+                                        diagbands_used,
+                                        ndiags,
+                                        diagband_score,
+                                        diagband_lastpos,
+                                        currsegm_aseqnum,
+                                        currsegm_bseqnum,
+                                        segment_positions,
+                                        (GtUword) (spp_ptr - segment_positions),
+                                        &info_querymatch,
+                                        query_readmode,
+                                        extend_selfmatch_relative_function,
+                                        extend_querymatch_relative_function,
+                                        &extension_count);
       }
     }
   }
