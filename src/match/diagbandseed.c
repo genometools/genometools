@@ -3484,7 +3484,7 @@ static void gt_diagbandseed_process_seeds(GtSeedpairlist *seedpairlist,
                                         query_readmode,
                                         extend_selfmatch_relative_function,
                                         extend_querymatch_relative_function,
-                                        &extension_count);
+                                        &process_seeds_counts);
       }
     }
   }
