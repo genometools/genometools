@@ -251,6 +251,13 @@ GtStr* gt_str_ref(GtStr *s)
   return s;
 }
 
+/* The body of of the following two functions is identical except for the
+   following:
+   gt_str_read_next_line uses gt_xfgetc while
+   gt_str_read_next_line_generic uses gt_file_xfgetc
+   Also gt_str_read_next_line_generic does not assert <fpin> != NULL
+*/
+
 int gt_str_read_next_line(GtStr *s, FILE *fpin)
 {
   int cc;
