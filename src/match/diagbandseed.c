@@ -32,6 +32,7 @@
 #include "core/minmax.h"
 #include "core/radix_sort.h"
 #include "core/timer_api.h"
+#include "core/spacecalc.h"
 #include "core/warning_api.h"
 #include "core/xansi_api.h"
 #include "match/declare-readfunc.h"
@@ -407,8 +408,10 @@ static GtArrayGtDiagbandseedKmerPos gt_diagbandseed_get_kmers(
   }
   if (verbose) {
     timer = gt_timer_new();
-    fprintf(stream, "# start fetching %u-mers (expect " GT_WU ")...\n",
-            seedlength, listlen);
+    fprintf(stream, "# start fetching %u-mers (expect " GT_WU
+                    ", allocate %.0f MB) ...\n",
+            seedlength, listlen,
+            GT_MEGABYTES(listlen * sizeof (*list.spaceGtDiagbandseedKmerPos)));
     gt_timer_start(timer);
   }
 
@@ -473,9 +476,9 @@ static GtArrayGtDiagbandseedKmerPos gt_diagbandseed_get_kmers(
   listlen = list.nextfreeGtDiagbandseedKmerPos;
 
   /* reduce size of array to number of entries */
-  /* list.allocatedGtDiagbandseedKmerPos = listlen;
+  list.allocatedGtDiagbandseedKmerPos = listlen;
   gt_realloc(list.spaceGtDiagbandseedKmerPos,
-             listlen * sizeof (GtDiagbandseedKmerPos)); */
+             listlen * sizeof (*list.spaceGtDiagbandseedKmerPos));
 
   if (debug_kmer) {
     const GtDiagbandseedKmerPos *idx = list.spaceGtDiagbandseedKmerPos;
@@ -1574,8 +1577,10 @@ static void gt_diagbandseed_get_seedpairs(GtSeedpairlist *seedpairlist,
   if (verbose) {
     timer = gt_timer_new();
     if (known_size > 0) {
-      fprintf(stream, "# start collecting " GT_WU " seeds ...\n",
-                      known_size);
+      fprintf(stream, "# start collecting " GT_WU " seeds in %.0f MB ...\n",
+                      known_size,
+                      GT_MEGABYTES(known_size *
+                                   gt_seedpairlist_sizeofunit(seedpairlist)));
     } else {
       fprintf(stream, "# start collecting seeds ...\n");
     }
@@ -1794,6 +1799,8 @@ static void gt_diagbandseed_process_segment(
     {
       int ret;
 
+      process_seeds_counts->selected_seeds++;
+      found_selected = true;
       if (arg->only_selected_seqpairs)
       {
         printf("# " GT_WU "%c" GT_WU "\n",aseqnum,
@@ -1836,8 +1843,6 @@ static void gt_diagbandseed_process_segment(
       {
         process_seeds_counts->countmatches++;
       }
-      process_seeds_counts->selected_seeds++;
-      found_selected = true;
     }
   }
   if (found_selected)
@@ -1867,16 +1872,17 @@ static void gt_diagbandseed_process_segment(
 
 static void gt_diagbandseed_match_header(FILE *stream,
                                          const GtDiagbandseedExtendParams *arg,
+                                         unsigned int seedlength,
                                          GtUword ndiags,
                                          GtUword minsegmentlen)
 {
   GtStr *add_column_header;
 
   fprintf(stream,"# start processing of seeds ...\n");
-  fprintf(stream,"# parameters for selecting seeds: diagonal bands=" GT_WU
-                 ", minimal segmentsize=" GT_WU ", minimal coverage=" GT_WU
-                 "\n",
-                 ndiags,minsegmentlen,arg->mincoverage);
+  fprintf(stream,"# parameters for selecting seeds: seedlength=%u, "
+                 "diagonal bands=" GT_WU ", minimal segmentsize=" GT_WU
+                 ", minimal coverage=" GT_WU "\n",
+                 seedlength,ndiags,minsegmentlen,arg->mincoverage);
   fprintf(stream,"# columns: alen aseq astartpos strand blen bseq bstartpos "
                  "score editdist identity");
   add_column_header = gt_querymatch_column_header(arg->display_flag);
@@ -2030,7 +2036,7 @@ static void gt_diagbandseed_process_seeds(GtSeedpairlist *seedpairlist,
   }
 
   if (verbose) {
-    gt_diagbandseed_match_header(stream,arg,ndiags,minsegmentlen);
+    gt_diagbandseed_match_header(stream,arg,seedlength,ndiags,minsegmentlen);
     timer = gt_timer_new();
     gt_timer_start(timer);
   }
