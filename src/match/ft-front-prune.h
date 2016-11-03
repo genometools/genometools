@@ -37,7 +37,7 @@ typedef struct
   const GtUchar *bytesequence;
   GtExtendCharAccess extend_char_access;
   GtUword totallength;
-} FTsequenceResources;
+} GtFTsequenceResources;
 #endif
 
 GtUword front_prune_edist_inplace(
@@ -55,11 +55,11 @@ GtUword front_prune_edist_inplace(
                        GtUword maxalignedlendifference,
                        bool showfrontinfo,
                        GtUword seedlength,
-                       FTsequenceResources *ufsr,
+                       GtFTsequenceResources *ufsr,
                        GtUword ustart,
                        GtUword uulen,
                        GtUword vseqstartpos,
-                       FTsequenceResources *vfsr,
+                       GtFTsequenceResources *vfsr,
                        GtUword vstart,
                        GtUword vlen);
 

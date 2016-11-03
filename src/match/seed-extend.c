@@ -552,7 +552,7 @@ void gt_greedy_extend_matchinfo_trimstat_set(GtGreedyextendmatchinfo *ggemi,
   ggemi->trimstat = trimstat;
 }
 
-static void gt_FTsequenceResources_init(FTsequenceResources *fsr,
+static void gt_FTsequenceResources_init(GtFTsequenceResources *fsr,
                                         const GtEncseq *encseq,
                                         GtReadmode readmode,
                                         GtEncseqReader *encseq_r,
@@ -570,8 +570,8 @@ static void gt_FTsequenceResources_init(FTsequenceResources *fsr,
   fsr->extend_char_access = extend_char_access;
 }
 
-static void gt_greedy_extend_init(FTsequenceResources *ufsr,
-                                  FTsequenceResources *vfsr,
+static void gt_greedy_extend_init(GtFTsequenceResources *ufsr,
+                                  GtFTsequenceResources *vfsr,
                                   const GtEncseq *dbencseq,
                                   const GtSeqorEncseq *query,
                                   GtReadmode query_readmode,
@@ -669,7 +669,7 @@ void gt_align_front_prune_edist(bool rightextension,
                                 GtUword vlen)
 {
   GtUword distance = 0, iteration, maxiterations;
-  FTsequenceResources ufsr, vfsr;
+  GtFTsequenceResources ufsr, vfsr;
 
   gt_assert(ggemi != NULL);
   gt_greedy_extend_init(&ufsr,&vfsr,dbencseq,query,query_readmode,
@@ -858,7 +858,7 @@ static const GtQuerymatch *gt_extend_sesp(bool forxdrop,
   GtUword u_left_ext, v_left_ext, u_right_ext, v_right_ext,
           ulen, vlen, urightbound, vrightbound;
   GtXdropscore total_score = 0;
-  FTsequenceResources ufsr, vfsr;
+  GtFTsequenceResources ufsr, vfsr;
   GtFtPolished_point left_best_polished_point = {0,0,0,0,0},
                      right_best_polished_point = {0,0,0,0,0};
   const bool rightextension = true;

@@ -747,11 +747,11 @@ GtUword front_prune_edist_inplace(
                          GtUword maxalignedlendifference,
                          bool showfrontinfo,
                          GtUword seedlength,
-                         FTsequenceResources *ufsr,
+                         GtFTsequenceResources *ufsr,
                          GtUword ustart,
                          GtUword ulen,
                          GtUword vseqstartpos,
-                         FTsequenceResources *vfsr,
+                         GtFTsequenceResources *vfsr,
                          GtUword vstart,
                          GtUword vlen)
 {
