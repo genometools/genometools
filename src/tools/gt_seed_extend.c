@@ -660,8 +660,8 @@ static GtUword gt_seed_extend_even_parts(
                                       GtUword numparts)
 {
   GtUword seqnum, idx, effective_num_parts;
-  const GtUword totallength = gt_encseq_total_length(encseq);
-  const GtUword partwidth = totallength/numparts;
+  const GtUword totallength = gt_encseq_total_length(encseq),
+                partwidth = totallength/numparts;
 
   for (idx = 0, seqnum = 0; idx < numparts && seqnum < numofsequences; idx++)
   {
@@ -681,7 +681,7 @@ static GtUword gt_seed_extend_even_parts(
   effective_num_parts = idx;
   if (effective_num_parts == 1)
   {
-    seqranges[0].max_length = gt_encseq_max_seq_length(encseq);;
+    seqranges[0].max_length = gt_encseq_max_seq_length(encseq);
   } else
   {
     GtUword *ssptab = gt_all_sequence_separators_get(encseq);

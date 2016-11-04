@@ -64,6 +64,9 @@ typedef struct
           totallength,
           min_access_pos, /* no position accessed will be smaller than this */
           cache_num_positions; /* number of positions in cache */
+#ifdef GT_WITH_ACCESSCOUNTS
+  uint16_t *accessed_positions;
+#endif
   GtUword offset,
           seqstartpos;
   bool read_seq_left2right,
@@ -81,6 +84,9 @@ static void ft_sequenceobject_init(GtFtSequenceObject *seq,
                                    GtEncseqReader *encseq_r,
                                    GtAllocatedMemory *sequence_cache,
                                    const GtUchar *bytesequence,
+#ifdef GT_WITH_ACCESSCOUNTS
+                                   uint16_t *accessed_positions,
+#endif
                                    GtUword totallength
                                    )
 {
@@ -91,6 +97,9 @@ static void ft_sequenceobject_init(GtFtSequenceObject *seq,
   seq->cache_ptr = NULL;
   seq->sequence_cache = NULL;
   seq->bytesequenceptr = NULL;
+#ifdef GT_WITH_ACCESSCOUNTS
+  seq->accessed_positions = accessed_positions;
+#endif
   seq->seqstartpos = seqstartpos;
   gt_assert(seqstartpos <= startpos);
   seq->offset = GT_EXTEND_OFFSET(rightextension,
@@ -166,6 +175,15 @@ static GtUchar ft_sequenceobject_get_char(GtFtSequenceObject *seq,GtUword idx)
                                          : seq->offset - idx;
     gt_assert(accesspos < seq->seqstartpos + seq->totallength);
     cc = gt_twobitencoding_char_at_pos(seq->twobitencoding, accesspos);
+#ifdef GT_WITH_ACCESSCOUNTS
+    if (seq->accessed_positions != NULL)
+    {
+      if (seq->accessed_positions[accesspos] < UINT16_MAX)
+      {
+        seq->accessed_positions[accesspos]++;
+      }
+    }
+#endif
     return seq->dir_is_complement ? GT_COMPLEMENTBASE(cc) : cc;
   }
   if (seq->encseqreader != NULL)
@@ -790,6 +808,9 @@ GtUword front_prune_edist_inplace(
                          ufsr->encseq_r,
                          ufsr->sequence_cache,
                          NULL,
+#ifdef GT_WITH_ACCESSCOUNTS
+                         ufsr->accessed_positions,
+#endif
                          ufsr->totallength);
   ft_sequenceobject_init(&vseq,
                          vfsr->extend_char_access,
@@ -802,6 +823,9 @@ GtUword front_prune_edist_inplace(
                          vfsr->encseq_r,
                          vfsr->sequence_cache,
                          vfsr->bytesequence,
+#ifdef GT_WITH_ACCESSCOUNTS
+                         vfsr->accessed_positions,
+#endif
                          vfsr->totallength);
 #ifdef SKDEBUG
   gt_greedy_show_context(rightextension,&useq,&vseq);

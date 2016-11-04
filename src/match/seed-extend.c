@@ -15,6 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#include "core/intbits.h"
 #include "core/minmax.h"
 #include "match/querymatch.h"
 #include "match/xdrop.h"
@@ -390,6 +391,11 @@ struct GtGreedyextendmatchinfo
   GtEncseqReader *encseq_r_in_u, *encseq_r_in_v;
   GtAllocatedMemory usequence_cache, vsequence_cache, frontspace_reservoir;
   GtTrimmingStrategy trimstrategy;
+#ifdef GT_WITH_ACCESSCOUNTS
+  GtUword numbits_in_v;
+  uint16_t *accessed_positions_in_u,
+           *accessed_positions_in_v;
+#endif
   bool showfrontinfo;
 };
 
@@ -482,6 +488,11 @@ GtGreedyextendmatchinfo *gt_greedy_extend_matchinfo_new(
 
   ggemi->left_front_trace = NULL;
   ggemi->right_front_trace = NULL;
+#ifdef GT_WITH_ACCESSCOUNTS
+  ggemi->accessed_positions_in_u = NULL;
+  ggemi->accessed_positions_in_v = NULL;
+  ggemi->numbits_in_v = 0;
+#endif
   ggemi->errorpercentage = errorpercentage;
   ggemi->history = history;
   ggemi->trimstrategy = GT_OUTSENSE_TRIM_ALWAYS;
@@ -511,6 +522,40 @@ GtGreedyextendmatchinfo *gt_greedy_extend_matchinfo_new(
   return ggemi;
 }
 
+#ifdef GT_WITH_ACCESSCOUNTS
+static void gt_show_access_counts(const uint16_t *accessed_positions,
+                                  GtUword numofentries)
+{
+  GtUword idx, count = 0, cummulative = 0, sumdist = 0,
+          *dist = gt_calloc(UINT16_MAX+1,sizeof * dist);
+
+  for (idx = 0; idx < numofentries; idx++)
+  {
+    if (accessed_positions[idx] > 0)
+    {
+      dist[accessed_positions[idx]]++;
+      count++;
+    }
+  }
+  for (idx = 0; idx <= UINT16_MAX; idx++)
+  {
+    if (dist[idx] > 0)
+    {
+      cummulative += dist[idx] * idx;
+      sumdist += dist[idx];
+      printf("# accessed " GT_WU " times: " GT_WU
+             " positions (cumm=" GT_WU ")\n",
+             idx,dist[idx],sumdist);
+    }
+  }
+  printf("# accessed " GT_WU " (%.2f)\n",count,
+                                       100.0 * (double) count/numofentries);
+  printf("# mean number of accesses per position %.2f\n",
+            (double) cummulative/numofentries);
+  gt_free(dist);
+}
+#endif
+
 void gt_greedy_extend_matchinfo_delete(GtGreedyextendmatchinfo *ggemi)
 {
   if (ggemi != NULL)
@@ -525,6 +570,15 @@ void gt_greedy_extend_matchinfo_delete(GtGreedyextendmatchinfo *ggemi)
     printf("vsequence_cache.allocated=" GT_WU "\n",
            ggemi->vsequence_cache.allocated);
     */
+#ifdef GT_WITH_ACCESSCOUNTS
+    gt_show_access_counts(ggemi->accessed_positions_in_u,
+                          ggemi->db_totallength);
+    gt_free(ggemi->accessed_positions_in_u);
+    if (ggemi->accessed_positions_in_v != NULL)
+    {
+      gt_free(ggemi->accessed_positions_in_v);
+    }
+#endif
     gt_free(ggemi->usequence_cache.space);
     gt_free(ggemi->vsequence_cache.space);
     gt_free(ggemi->frontspace_reservoir.space);
@@ -558,6 +612,9 @@ static void gt_FTsequenceResources_init(GtFTsequenceResources *fsr,
                                         GtEncseqReader *encseq_r,
                                         GtAllocatedMemory *sequence_cache,
                                         const GtUchar *bytesequence,
+#ifdef GT_WITH_ACCESSCOUNTS
+                                        uint16_t *accessed_positions,
+#endif
                                         GtUword totallength,
                                         GtExtendCharAccess extend_char_access)
 {
@@ -567,6 +624,9 @@ static void gt_FTsequenceResources_init(GtFTsequenceResources *fsr,
   fsr->encseq_r = encseq_r;
   fsr->sequence_cache = sequence_cache;
   fsr->bytesequence = bytesequence;
+#ifdef GT_WITH_ACCESSCOUNTS
+  fsr->accessed_positions = accessed_positions;
+#endif
   fsr->extend_char_access = extend_char_access;
 }
 
@@ -604,6 +664,13 @@ static void gt_greedy_extend_init(GtFTsequenceResources *ufsr,
   if (ggemi->db_totallength == GT_UWORD_MAX)
   {
     ggemi->db_totallength = gt_encseq_total_length(dbencseq);
+#ifdef GT_WITH_ACCESSCOUNTS
+    gt_assert(ggemi->accessed_positions_in_u == NULL);
+    ggemi->accessed_positions_in_u
+      = gt_calloc(ggemi->db_totallength,sizeof *ggemi->accessed_positions_in_u);
+    printf("allocated " GT_WU " cells of size " GT_WU "\n",
+      ggemi->db_totallength,(GtUword) (sizeof *ggemi->accessed_positions_in_u));
+#endif
   }
   gt_FTsequenceResources_init(ufsr,
                               dbencseq,
@@ -611,6 +678,9 @@ static void gt_greedy_extend_init(GtFTsequenceResources *ufsr,
                               ggemi->encseq_r_in_u,
                               &ggemi->usequence_cache,
                               NULL,
+#ifdef GT_WITH_ACCESSCOUNTS
+                              ggemi->accessed_positions_in_u,
+#endif
                               ggemi->db_totallength,
                               ggemi->extend_char_access);
   gt_assert(query == NULL || (query->seq != NULL && query->encseq == NULL) ||
@@ -623,6 +693,9 @@ static void gt_greedy_extend_init(GtFTsequenceResources *ufsr,
                                 ggemi->encseq_r_in_v,
                                 &ggemi->vsequence_cache,
                                 NULL,
+#ifdef GT_WITH_ACCESSCOUNTS
+                                ggemi->accessed_positions_in_u,
+#endif
                                 ggemi->db_totallength,
                                 ggemi->extend_char_access);
   } else
@@ -635,17 +708,31 @@ static void gt_greedy_extend_init(GtFTsequenceResources *ufsr,
                                   ggemi->encseq_r_in_v,
                                   &ggemi->vsequence_cache,
                                   query->seq,
+#ifdef GT_WITH_ACCESSCOUNTS
+                                  NULL,
+#endif
                                   query_totallength,
                                   GT_EXTEND_CHAR_ACCESS_DIRECT);
     } else
     {
       gt_assert(query->encseq != NULL);
+#ifdef GT_WITH_ACCESSCOUNTS
+      if (ggemi->accessed_positions_in_v == NULL)
+      {
+        ggemi->numbits_in_v = query_totallength;
+        ggemi->accessed_positions_in_v
+          = gt_calloc(query_totallength,sizeof *ggemi->accessed_positions_in_v);
+      }
+#endif
       gt_FTsequenceResources_init(vfsr,
                                   query->encseq,
                                   query_readmode,
                                   ggemi->encseq_r_in_v,
                                   &ggemi->vsequence_cache,
                                   NULL,
+#ifdef GT_WITH_ACCESSCOUNTS
+                                  ggemi->accessed_positions_in_v,
+#endif
                                   query_totallength,
                                   ggemi->extend_char_access);
     }
