@@ -961,7 +961,7 @@ static const GtQuerymatch *gt_extend_sesp(bool forxdrop,
   } else
   {
     if (GT_ISDIRREVERSE(sesp->query_readmode) && sesp->selfmatch &&
-       sesp->seedpos1 + sesp->seedlen >= sesp->seedpos2)
+        sesp->seedpos1 + sesp->seedlen >= sesp->seedpos2)
     {
       return NULL;
     }
@@ -1292,8 +1292,13 @@ static const GtQuerymatch *gt_extend_selfmatch_relative(bool forxdrop,
   const GtUword query_totallength = 0;
   GtSeqorEncseq query;
 
-  gt_sesp_from_relative(&sesp,encseq,dbseqnum,dbstart_relative,
-                        encseq,queryseqnum,querystart_relative,
+  gt_sesp_from_relative(&sesp,
+                        encseq,
+                        dbseqnum,
+                        dbstart_relative,
+                        encseq,
+                        queryseqnum,
+                        querystart_relative,
                         query_totallength,
                         len,
                         true,

@@ -3,16 +3,54 @@
 struct GtSequencePartsInfo
 {
   GtSequenceRangeWithMaxLength *ranges;
-  GtUword numofranges;
+  GtUword *ssptab,
+          same_length,
+          totallength,
+          numofsequences,
+          parts_number;
 };
 
-static GtUword gt_encseq_next_larger_width(const GtEncseq *encseq,
+static GtUword gt_sspbased_seqstartpos(const GtSequencePartsInfo *seqrangeinfo,
+                                       GtUword seqnum)
+{
+  if (seqrangeinfo->ssptab != NULL)
+  {
+    return seqnum > 0 ? (seqrangeinfo->ssptab[seqnum - 1] + 1) : 0;
+  } else
+  {
+    return seqnum * (seqrangeinfo->same_length + 1);
+  }
+}
+
+static GtUword gt_sspbased_seqendpos(const GtSequencePartsInfo *seqrangeinfo,
+                                     GtUword seqnum)
+{
+  if (seqrangeinfo->ssptab != NULL)
+  {
+    return seqnum < seqrangeinfo->numofsequences - 1
+             ? (seqrangeinfo->ssptab[seqnum] - 1)
+             : (seqrangeinfo->totallength - 1);
+  } else
+  {
+    return (seqnum + 1) * (seqrangeinfo->same_length + 1) - 2;
+  }
+}
+
+static GtUword gt_sspbased_seqlength(const GtSequencePartsInfo *seqrangeinfo,
+                                     GtUword seqnum)
+{
+  return gt_sspbased_seqendpos(seqrangeinfo,seqnum) -
+         gt_sspbased_seqstartpos(seqrangeinfo,seqnum) + 1;
+}
+
+static GtUword gt_encseq_next_larger_width(const GtSequencePartsInfo
+                                             *seqrangeinfo,
                                            GtUword startseqnum,
                                            GtUword width,
                                            GtUword numofsequences)
 {
   GtUword left, right, found = GT_UWORD_MAX,
-          start_segment = gt_encseq_seqstartpos(encseq,startseqnum);
+          start_segment = gt_sspbased_seqstartpos(seqrangeinfo,startseqnum);
 
   left = startseqnum;
   gt_assert(numofsequences > 0);
@@ -22,8 +60,7 @@ static GtUword gt_encseq_next_larger_width(const GtEncseq *encseq,
     GtUword mid = left + (right - left + 1)/2, mid_end, this_width;
 
     gt_assert(mid < numofsequences);
-    mid_end = gt_encseq_seqstartpos(encseq,mid) +
-              gt_encseq_seqlength(encseq,mid) - 1;
+    mid_end = gt_sspbased_seqendpos(seqrangeinfo,mid);
     gt_assert(mid_end > start_segment);
     this_width = mid_end - start_segment;
     if (this_width > width)
@@ -52,26 +89,37 @@ GtSequencePartsInfo *gt_seed_extend_parts_new(const GtEncseq *encseq,
 {
   GtSequencePartsInfo *seqrangeinfo = gt_malloc(sizeof *seqrangeinfo);
   seqrangeinfo->ranges = gt_malloc(sizeof *seqrangeinfo->ranges * numparts);
+  seqrangeinfo->ssptab = gt_all_sequence_separators_get(encseq);
+  seqrangeinfo->totallength = gt_encseq_total_length(encseq);
+  seqrangeinfo->numofsequences = gt_encseq_num_of_sequences(encseq);
 
+  if (seqrangeinfo->ssptab == NULL)
+  {
+    seqrangeinfo->same_length = gt_encseq_seqlength(encseq,0);
+  } else
+  {
+    seqrangeinfo->same_length = 0;
+  }
   if (numparts >= numofsequences) { /* assign one seq for each part */
     GtUword idx;
 
     for (idx = 0; idx < numofsequences; ++idx) {
       seqrangeinfo->ranges[idx].start = seqrangeinfo->ranges[idx].end = idx;
-      seqrangeinfo->ranges[idx].max_length = gt_encseq_seqlength(encseq,idx);
+      seqrangeinfo->ranges[idx].max_length
+        = gt_sspbased_seqlength(seqrangeinfo,idx);
       seqrangeinfo->ranges[idx].partnum = idx;
     }
-    seqrangeinfo->numofranges = numofsequences;
+    seqrangeinfo->parts_number = numofsequences;
   } else
   {
     GtUword seqnum, idx, effective_num_parts;
-    const GtUword totallength = gt_encseq_total_length(encseq),
-                  partwidth = totallength/numparts;
+    const GtUword partwidth = seqrangeinfo->totallength/numparts;
 
     for (idx = 0, seqnum = 0; idx < numparts && seqnum < numofsequences; idx++)
     {
       const GtUword seqnum_next_width
-        = gt_encseq_next_larger_width(encseq,seqnum,partwidth,numofsequences);
+        = gt_encseq_next_larger_width(seqrangeinfo,seqnum,partwidth,
+                                      numofsequences);
       seqrangeinfo->ranges[idx].start = seqnum;
       seqrangeinfo->ranges[idx].partnum = idx;
       if (seqnum_next_width == GT_UWORD_MAX)
@@ -91,13 +139,11 @@ GtSequencePartsInfo *gt_seed_extend_parts_new(const GtEncseq *encseq,
       seqrangeinfo->ranges[0].max_length = gt_encseq_max_seq_length(encseq);
     } else
     {
-      GtUword *ssptab = gt_all_sequence_separators_get(encseq);
-      if (ssptab == NULL)
+      if (seqrangeinfo->ssptab == NULL)
       {
-        GtUword samelength = gt_encseq_seqlength(encseq,0);
         for (idx = 0; idx < effective_num_parts; idx++)
         {
-          seqrangeinfo->ranges[idx].max_length = samelength;
+          seqrangeinfo->ranges[idx].max_length = seqrangeinfo->same_length;
         }
       } else
       {
@@ -106,8 +152,8 @@ GtSequencePartsInfo *gt_seed_extend_parts_new(const GtEncseq *encseq,
         gt_assert(numofsequences > 1);
         for (seqnum = 0; seqnum < numofsequences - 1; seqnum++)
         {
-          gt_assert(currentstart < ssptab[seqnum]);
-          currentlength = ssptab[seqnum] - currentstart;
+          gt_assert(currentstart < seqrangeinfo->ssptab[seqnum]);
+          currentlength = seqrangeinfo->ssptab[seqnum] - currentstart;
           if (maxlength < currentlength)
           {
             maxlength = currentlength;
@@ -118,9 +164,9 @@ GtSequencePartsInfo *gt_seed_extend_parts_new(const GtEncseq *encseq,
             idx++;
             maxlength = 0;
           }
-          currentstart = ssptab[seqnum] + 1;
+          currentstart = seqrangeinfo->ssptab[seqnum] + 1;
         }
-        currentlength = totallength - currentstart;
+        currentlength = seqrangeinfo->totallength - currentstart;
         if (maxlength < currentlength)
         {
           maxlength = currentlength;
@@ -128,10 +174,9 @@ GtSequencePartsInfo *gt_seed_extend_parts_new(const GtEncseq *encseq,
         gt_assert(idx + 1 == effective_num_parts &&
                   seqnum == seqrangeinfo->ranges[idx].end);
         seqrangeinfo->ranges[idx].max_length = maxlength;
-        gt_free(ssptab);
       }
     }
-    seqrangeinfo->numofranges = effective_num_parts;
+    seqrangeinfo->parts_number = effective_num_parts;
   }
   return seqrangeinfo;
 }
@@ -141,6 +186,7 @@ void gt_seed_extend_parts_delete(GtSequencePartsInfo *seqrangeinfo)
   if (seqrangeinfo != NULL)
   {
     gt_free(seqrangeinfo->ranges);
+    gt_free(seqrangeinfo->ssptab);
     gt_free(seqrangeinfo);
   }
 }
@@ -148,14 +194,14 @@ void gt_seed_extend_parts_delete(GtSequencePartsInfo *seqrangeinfo)
 GtUword gt_seed_extend_parts_number(const GtSequencePartsInfo *seqrangeinfo)
 {
   gt_assert(seqrangeinfo != NULL);
-  return seqrangeinfo->numofranges;
+  return seqrangeinfo->parts_number;
 }
 
 const GtSequenceRangeWithMaxLength *gt_seed_extend_parts_get(
                         const GtSequencePartsInfo *seqrangeinfo,
                         GtUword idx)
 {
-  gt_assert(seqrangeinfo != NULL && idx < seqrangeinfo->numofranges);
+  gt_assert(seqrangeinfo != NULL && idx < seqrangeinfo->parts_number);
   return seqrangeinfo->ranges + idx;
 }
 
@@ -165,15 +211,15 @@ void gt_seed_extend_parts_variance_show(const GtSequencePartsInfo *seqrangeinfo,
   GtUword variance_sum = 0, idx, avgpartsize;
 
   gt_assert(encseq != NULL);
-  avgpartsize = gt_encseq_total_length(encseq)/seqrangeinfo->numofranges;
-  for (idx = 0; idx < seqrangeinfo->numofranges; idx++)
+  avgpartsize = seqrangeinfo->totallength/seqrangeinfo->parts_number;
+  for (idx = 0; idx < seqrangeinfo->parts_number; idx++)
   {
     GtUword segmentstart, segmentend, width;
 
-    segmentstart = gt_encseq_seqstartpos(encseq,
-                                         seqrangeinfo->ranges[idx].start);
-    segmentend = gt_encseq_seqstartpos(encseq,seqrangeinfo->ranges[idx].end) +
-                 gt_encseq_seqlength(encseq,seqrangeinfo->ranges[idx].end) - 1;
+    segmentstart = gt_sspbased_seqstartpos(seqrangeinfo,
+                                           seqrangeinfo->ranges[idx].start);
+    segmentend = gt_sspbased_seqendpos(seqrangeinfo,
+                                       seqrangeinfo->ranges[idx].end);
     gt_assert(segmentstart < segmentend);
     width = segmentend - segmentstart + 1;
     if (width > avgpartsize)
@@ -192,5 +238,5 @@ void gt_seed_extend_parts_variance_show(const GtSequencePartsInfo *seqrangeinfo,
            seqrangeinfo->ranges[idx].max_length);
   }
   printf("# Variance of parts is %.2e\n",
-           (double) variance_sum/seqrangeinfo->numofranges);
+           (double) variance_sum/seqrangeinfo->parts_number);
 }
