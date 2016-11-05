@@ -24,16 +24,11 @@
 #include "core/range_api.h"
 #include "core/types_api.h"
 #include "match/ft-front-prune.h"
+#include "match/seed_extend_parts.h"
 #include "match/xdrop.h"
 
 typedef struct GtDiagbandseedInfo GtDiagbandseedInfo;
 typedef struct GtDiagbandseedExtendParams GtDiagbandseedExtendParams;
-
-typedef struct
-{
-  GtUword start, end,
-          max_length; /* length of longest sequence in range */
-} GtSequenceRangeWithMaxLength;
 
 typedef enum
 { /* keep the order consistent with gt_splt_arguments */
@@ -45,8 +40,8 @@ typedef enum
 
 /* Run the whole algorithm. */
 int gt_diagbandseed_run(const GtDiagbandseedInfo *arg,
-                        const GtSequenceRangeWithMaxLength *aseqranges,
-                        const GtSequenceRangeWithMaxLength *bseqranges,
+                        const GtSequencePartsInfo *aseqranges,
+                        const GtSequencePartsInfo *bseqranges,
                         const GtUwordPair *pick,
                         GtError *err);
 
@@ -67,9 +62,7 @@ GtDiagbandseedInfo *gt_diagbandseed_info_new(const GtEncseq *aencseq,
                                              bool use_kmerfile,
                                              bool trimstat_on,
                                              const GtDiagbandseedExtendParams
-                                               *extp,
-                                             GtUword anumseqranges,
-                                             GtUword bnumseqranges);
+                                               *extp);
 
 const char *gt_diagbandseed_splt_comment(void);
 
