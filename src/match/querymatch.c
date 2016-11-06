@@ -524,8 +524,7 @@ bool gt_querymatch_process(GtQuerymatch *querymatch,
                                                       ref_querymatchoutoptions,
                                                     encseq,
                                                     queryes,
-                                                    querymatch->
-                                                      query_readmode,
+                                                    querymatch->query_readmode,
                                                     querymatch->selfmatch,
                                                     query_seqstartpos,
                                                     querymatch->

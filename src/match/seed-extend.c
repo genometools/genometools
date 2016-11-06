@@ -117,7 +117,7 @@ typedef struct
           queryseqnum, query_totallength, queryseqstartpos,
           dbstart_relative, querystart_relative;
   GtReadmode query_readmode;
-  bool selfmatch;
+  bool same_encseq;
 } GtSeedextendSeqpair;
 
 static void gt_sesp_from_absolute(GtSeedextendSeqpair *sesp,
@@ -126,9 +126,9 @@ static void gt_sesp_from_absolute(GtSeedextendSeqpair *sesp,
                                   const GtEncseq *queryencseq,
                                   GtUword pos2,
                                   GtUword len,
-                                  bool selfmatch)
+                                  bool same_encseq)
 {
-  sesp->selfmatch = selfmatch;
+  sesp->same_encseq = same_encseq;
   sesp->seedlen = len;
   sesp->dbseqnum = gt_encseq_seqnum(dbencseq,pos1),
   sesp->dbseqstartpos = gt_encseq_seqstartpos(dbencseq,sesp->dbseqnum),
@@ -165,11 +165,11 @@ static void gt_sesp_from_relative(GtSeedextendSeqpair *sesp,
                                   GtUword querystart_relative,
                                   GtUword query_totallength,
                                   GtUword len,
-                                  bool selfmatch,
+                                  bool same_encseq,
                                   GtReadmode query_readmode)
 {
   gt_assert(dbencseq != NULL);
-  sesp->selfmatch = selfmatch;
+  sesp->same_encseq = same_encseq;
   sesp->seedlen = len;
   sesp->dbseqnum = dbseqnum;
   sesp->dbseqstartpos = gt_encseq_seqstartpos(dbencseq,sesp->dbseqnum),
@@ -246,7 +246,8 @@ static const GtQuerymatch *gt_combine_extensions(
          bool silent)
 {
   GtUword dblen, dbseqlen, querylen, total_alignedlen, dbstart, querystart;
-  const bool no_query = GT_NO_QUERY(sesp->query_readmode,sesp->selfmatch);
+  const bool no_query = GT_NO_QUERY(sesp->query_readmode,
+                                    sesp->same_encseq);
 
   dblen = sesp->seedlen + u_left_ext + u_right_ext;
   querylen = sesp->seedlen + v_left_ext + v_right_ext;
@@ -960,11 +961,11 @@ static const GtQuerymatch *gt_extend_sesp(bool forxdrop,
   GtFtPolished_point left_best_polished_point = {0,0,0,0,0},
                      right_best_polished_point = {0,0,0,0,0};
   const bool rightextension = true;
-  const bool no_query = GT_NO_QUERY(sesp->query_readmode,sesp->selfmatch);
+  const bool no_query = GT_NO_QUERY(sesp->query_readmode,sesp->same_encseq);
   const GtUword vseqstartpos
     = (no_query || queryes->seq != NULL) ? 0 : sesp->queryseqstartpos;
 
-  if (sesp->selfmatch && sesp->seedpos1 + sesp->seedlen >= sesp->seedpos2)
+  if (sesp->same_encseq && sesp->seedpos1 + sesp->seedlen >= sesp->seedpos2)
   {
     return NULL;
   }
@@ -975,7 +976,7 @@ static const GtQuerymatch *gt_extend_sesp(bool forxdrop,
   {
     greedyextendmatchinfo = processinfo_and_querymatchspaceptr->processinfo;
     gt_greedy_extend_init(&ufsr,&vfsr,dbencseq, queryes, sesp->query_readmode,
-                          sesp->selfmatch,
+                          sesp->same_encseq,
                           sesp->query_totallength, greedyextendmatchinfo);
   }
   if (sesp->seedpos1 > sesp->dbseqstartpos &&
