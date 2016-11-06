@@ -199,9 +199,8 @@ static void gt_show_seed_extend_plain(GtSequencepairbuffer *seqpairbuf,
                             apos_ab + dblen - 1);
   gt_encseq_extract_encoded(bencseq, seqpairbuf->b_sequence, bpos_ab,
                             bpos_ab + querylen - 1);
-  if (query_readmode != GT_READMODE_FORWARD)
+  if (query_readmode == GT_READMODE_REVCOMPL)
   {
-    gt_assert(query_readmode == GT_READMODE_REVCOMPL);
     gt_inplace_reverse_complement(seqpairbuf->b_sequence,querylen);
   }
   edist = gt_linearalign_compute_generic(linspace_spacemanager,

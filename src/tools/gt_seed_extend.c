@@ -840,7 +840,7 @@ static int gt_seed_extend_runner(int argc,
     arguments->seedpairdistance.end -= gt_encseq_max_seq_length(aencseq);
     if (!arguments->overlappingseeds &&
         arguments->seedpairdistance.start == 1UL) {
-      arguments->seedpairdistance.start = (GtUword)arguments->dbs_seedlength;
+      arguments->seedpairdistance.start = (GtUword) arguments->dbs_seedlength;
     }
   }
 

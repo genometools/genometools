@@ -1340,6 +1340,7 @@ static void gt_diagbandseed_merge(GtSeedpairlist *seedpairlist,
                                   bool selfcomp)
 {
   const GtArrayGtDiagbandseedKmerPos *alist, *blist;
+  const bool count_cartesian = (histogram != NULL && !selfcomp) ? true : false;
 
   gt_assert(aiter != NULL && biter != NULL &&
             ((histogram == NULL && seedpairlist != NULL) ||
@@ -1366,7 +1367,7 @@ static void gt_diagbandseed_merge(GtSeedpairlist *seedpairlist,
           /* add all equal k-mers */
           frequency = MIN(maxgram, frequency);
           gt_assert(frequency > 0);
-          if (histogram != NULL && !selfcomp)
+          if (count_cartesian)
           {
             histogram[frequency - 1] += alen * blen;
           } else
@@ -3629,12 +3630,12 @@ static int gt_diagbandseed_algorithm(const GtDiagbandseedInfo *arg,
     gt_free(blist_file);
     blist_file = NULL;
   } else if (!alist_blist_id) {
-    const GtReadmode readmode = arg->nofwd ? GT_READMODE_COMPL
-                                           : GT_READMODE_FORWARD;
+    const GtReadmode readmode_kmerscan = arg->nofwd ? GT_READMODE_COMPL
+                                                    : GT_READMODE_FORWARD;
     const GtUword known_size = (selfcomp && equalranges) ? alen : 0;
     blist = gt_diagbandseed_get_kmers(arg->bencseq,
                                       arg->seedlength,
-                                      readmode,
+                                      readmode_kmerscan,
                                       bseqrange->start,
                                       bseqrange->end,
                                       arg->debug_kmer,
@@ -3809,9 +3810,10 @@ static int gt_diagbandseed_algorithm(const GtDiagbandseedInfo *arg,
       }
       gt_free(blist_file);
     } else {
+      const GtReadmode readmode_kmerscan = GT_READMODE_COMPL;
       clist = gt_diagbandseed_get_kmers(arg->bencseq,
                                         arg->seedlength,
-                                        GT_READMODE_COMPL,
+                                        readmode_kmerscan,
                                         bseqrange->start,
                                         bseqrange->end,
                                         arg->debug_kmer,
@@ -4028,13 +4030,14 @@ int gt_diagbandseed_run(const GtDiagbandseedInfo *arg,
                                              bnumseqranges, bidx);
         if (!gt_file_exists(path)) {
           GtArrayGtDiagbandseedKmerPos blist;
-          GtReadmode readmode = fwd ? GT_READMODE_FORWARD : GT_READMODE_COMPL;
+          GtReadmode readmode_kmerscan = fwd ? GT_READMODE_FORWARD
+                                             : GT_READMODE_COMPL;
 
           const GtSequenceRangeWithMaxLength *bseqrange
             = gt_seed_extend_parts_get(bseqranges,bidx);
           blist = gt_diagbandseed_get_kmers(arg->bencseq,
                                             arg->seedlength,
-                                            readmode,
+                                            readmode_kmerscan,
                                             bseqrange->start,
                                             bseqrange->end,
                                             arg->debug_kmer,

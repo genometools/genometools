@@ -56,8 +56,9 @@ bool gt_querymatchoutoptions_alignment_prepare(
                                      GtQuerymatchoutoptions
                                        *querymatchoutoptions,
                                      const GtEncseq *encseq,
-                                     const GtSeqorEncseq *query,
+                                     const GtSeqorEncseq *queryes,
                                      GtReadmode query_readmode,
+                                     bool selfmatch,
                                      GtUword query_seqstartpos,
                                      GtUword query_totallength,
                                      GtUword dbstart,
@@ -74,8 +75,9 @@ bool gt_querymatchoutoptions_alignment_prepare(
 
 void gt_frontprune2eoplist(GtQuerymatchoutoptions *querymatchoutoptions,
                            const GtEncseq *encseq,
-                           const GtSeqorEncseq *query,
+                           const GtSeqorEncseq *queryes,
                            GtReadmode query_readmode,
+                           bool selfmatch,
                            GtUword query_seqstartpos,
                            GtUword query_totallength,
                            GtUword dbstart,

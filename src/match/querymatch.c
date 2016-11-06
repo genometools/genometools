@@ -490,7 +490,7 @@ static void gt_querymatch_applycorrection(
 bool gt_querymatch_process(GtQuerymatch *querymatch,
                            GtKarlinAltschulStat *karlin_altschul_stat,
                            const GtEncseq *encseq,
-                           const GtSeqorEncseq *query,
+                           const GtSeqorEncseq *queryes,
                            bool greedyextension)
 {
   if (!querymatch->selfmatch ||
@@ -501,12 +501,13 @@ bool gt_querymatch_process(GtQuerymatch *querymatch,
     {
       bool seededalignment;
       GtUword query_seqstartpos, abs_querystart_fwdstrand, abs_querystart;
+      const bool no_query = GT_NO_QUERY(querymatch->query_readmode,
+                                        querymatch->selfmatch);
 
-      if (query == NULL || query->seq == NULL)
+      if (no_query || queryes->seq == NULL)
       {
-        query_seqstartpos = gt_encseq_seqstartpos(query == NULL
-                                                    ? encseq
-                                                    : query->encseq,
+        query_seqstartpos = gt_encseq_seqstartpos(no_query ? encseq
+                                                           : queryes->encseq,
                                                   querymatch->queryseqnum);
         abs_querystart_fwdstrand
            = query_seqstartpos + querymatch->querystart_fwdstrand;
@@ -514,7 +515,6 @@ bool gt_querymatch_process(GtQuerymatch *querymatch,
            = query_seqstartpos + querymatch->querystart;
       } else
       {
-        gt_assert(query != NULL && query->seq != NULL);
         query_seqstartpos = 0;
         abs_querystart_fwdstrand = querymatch->querystart_fwdstrand;
         abs_querystart = querymatch->querystart;
@@ -523,9 +523,10 @@ bool gt_querymatch_process(GtQuerymatch *querymatch,
         = gt_querymatchoutoptions_alignment_prepare(querymatch->
                                                       ref_querymatchoutoptions,
                                                     encseq,
-                                                    query,
+                                                    queryes,
                                                     querymatch->
                                                       query_readmode,
+                                                    querymatch->selfmatch,
                                                     query_seqstartpos,
                                                     querymatch->
                                                       query_totallength,
@@ -689,7 +690,7 @@ bool gt_querymatch_complete(GtQuerymatch *querymatch,
                             GtUword querylen,
                             GtUword querystart,
                             const GtEncseq *encseq,
-                            const GtSeqorEncseq *query,
+                            const GtSeqorEncseq *queryes,
                             GtUword query_totallength,
                             GtUword seedpos1,
                             GtUword seedpos2,
@@ -702,19 +703,21 @@ bool gt_querymatch_complete(GtQuerymatch *querymatch,
   if (gt_querymatch_seq_desc_display(querymatch->display_flag))
   {
     GtUword desclen;
+    const bool no_query = GT_NO_QUERY(querymatch->query_readmode,selfmatch);
+
     db_desc = gt_encseq_description(encseq,&desclen,dbseqnum);
-    if (query == NULL)
+    if (no_query)
     {
       query_desc = gt_encseq_description(encseq,&desclen,(GtUword) queryseqnum);
     } else
     {
-      if (query->encseq != NULL)
+      if (queryes->encseq != NULL)
       {
-        query_desc = gt_encseq_description(query->encseq,&desclen,
+        query_desc = gt_encseq_description(queryes->encseq,&desclen,
                                            (GtUword) queryseqnum);
       } else
       {
-        query_desc = query->desc;
+        query_desc = queryes->desc;
       }
     }
   }
@@ -741,7 +744,7 @@ bool gt_querymatch_complete(GtQuerymatch *querymatch,
   return gt_querymatch_process(querymatch,
                                karlin_altschul_stat,
                                encseq,
-                               query,
+                               queryes,
                                greedyextension);
 }
 
