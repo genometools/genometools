@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2007-2015 Stefan Kurtz <kurtz@zbh.uni-hamburg.de>
-  Copyright (c) 2007-2015 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2007-2016 Stefan Kurtz <kurtz@zbh.uni-hamburg.de>
+  Copyright (c) 2007-2016 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -429,7 +429,7 @@ bool gt_querymatchoutoptions_alignment_prepare(GtQuerymatchoutoptions
                             querymatchoutoptions->useqbuffer,
                             dbstart,
                             dbstart + dblen - 1);
-  if ((no_query || queryes->seq == NULL ||
+  if ((no_query || queryes->encseq != NULL ||
        query_readmode != GT_READMODE_FORWARD) &&
       querylen > querymatchoutoptions->vseqbuffer_size)
   {
@@ -438,7 +438,7 @@ bool gt_querymatchoutoptions_alignment_prepare(GtQuerymatchoutoptions
                    sizeof *querymatchoutoptions->vseqbuffer * querylen);
     querymatchoutoptions->vseqbuffer_size = querylen;
   }
-  if (no_query || queryes->seq == NULL)
+  if (no_query || queryes->encseq != NULL)
   {
     gt_encseq_extract_encoded_with_reader(
                             querymatchoutoptions->esr_for_align_show,

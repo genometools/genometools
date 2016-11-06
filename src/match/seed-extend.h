@@ -133,22 +133,6 @@ int gt_xdrop_extend_selfmatch_with_output(void *info,
                                           GtUword pos2,
                                           GT_UNUSED GtError *err);
 
-/* The following function is identical to <gt_xdrop_extend_selfmatch>
-   except that the positions of the seeds are defined by the number
-   of the sequence they occur (dbseqnum for the first instance and querysenum
-   for the second instance) and the relative position in that sequence
-   (dbstart_relative for the first instance and querystart_relative
-   for the second instance). */
-
-const GtQuerymatch *gt_xdrop_extend_selfmatch_relative(void *info,
-                                              const GtEncseq *encseq,
-                                              GtUword dbseqnum,
-                                              GtUword dbstart_relative,
-                                              GtUword queryseqnum,
-                                              GtUword querystart_relative,
-                                              GtUword len,
-                                              GtReadmode query_readmode);
-
 /* The following function is used for extending a seed obtained
    in a comparison of the given sequence <queryes>
    against <encseq>. So here a byte sequence is compared against an
@@ -306,24 +290,6 @@ int gt_greedy_extend_selfmatch_with_output(void *info,
    for the second instance) and the relative position in that sequence
    (dbstart_relative for the first instance and querystart_relative
    for the second instance). */
-
-const GtQuerymatch *gt_greedy_extend_selfmatch_relative(void *info,
-                                              const GtEncseq *encseq,
-                                              GtUword dbseqnum,
-                                              GtUword dbstart_relative,
-                                              GtUword queryseqnum,
-                                              GtUword querystart_relative,
-                                              GtUword len,
-                                              GtReadmode query_readmode);
-
-typedef const GtQuerymatch *(*GtExtendSelfmatchRelativeFunc)(void *,
-                                                             const GtEncseq *,
-                                                             GtUword,
-                                                             GtUword,
-                                                             GtUword,
-                                                             GtUword,
-                                                             GtUword,
-                                                     GtReadmode query_readmode);
 
 const GtQuerymatch* gt_xdrop_extend_querymatch_relative(
                                                   void *info,

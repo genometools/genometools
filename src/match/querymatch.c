@@ -504,7 +504,7 @@ bool gt_querymatch_process(GtQuerymatch *querymatch,
       const bool no_query = GT_NO_QUERY(querymatch->query_readmode,
                                         querymatch->selfmatch);
 
-      if (no_query || queryes->seq == NULL)
+      if (no_query || queryes->encseq != NULL)
       {
         query_seqstartpos = gt_encseq_seqstartpos(no_query ? encseq
                                                            : queryes->encseq,
