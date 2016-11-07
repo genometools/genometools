@@ -422,8 +422,7 @@ bool gt_querymatchoutoptions_alignment_prepare(GtQuerymatchoutoptions
                             querymatchoutoptions->useqbuffer,
                             dbstart,
                             dbstart + dblen - 1);
-  if ((queryes->no_query || queryes->encseq != NULL ||
-       query_readmode != GT_READMODE_FORWARD) &&
+  if ((queryes->encseq != NULL || query_readmode != GT_READMODE_FORWARD) &&
       querylen > querymatchoutoptions->vseqbuffer_size)
   {
     querymatchoutoptions->vseqbuffer
@@ -431,25 +430,25 @@ bool gt_querymatchoutoptions_alignment_prepare(GtQuerymatchoutoptions
                    sizeof *querymatchoutoptions->vseqbuffer * querylen);
     querymatchoutoptions->vseqbuffer_size = querylen;
   }
-  if (queryes->no_query || queryes->encseq != NULL)
+  if (queryes->encseq != NULL)
   {
     gt_encseq_extract_encoded_with_reader(
                             querymatchoutoptions->esr_for_align_show,
-                            queryes->no_query ? encseq : queryes->encseq,
+                            queryes->encseq,
                             querymatchoutoptions->vseqbuffer,
                             abs_querystart_fwdstrand,
                             abs_querystart_fwdstrand + querylen - 1);
   } else
   {
-    if (query_readmode == GT_READMODE_FORWARD)
-    {
-      querymatchoutoptions->vseqbuffer
-        = (GtUchar *) (queryes->seq + abs_querystart_fwdstrand);
-    } else
+    if (query_readmode != GT_READMODE_FORWARD)
     {
       memcpy(querymatchoutoptions->vseqbuffer,
              queryes->seq + abs_querystart_fwdstrand,
              querylen * sizeof *querymatchoutoptions->vseqbuffer);
+    } else
+    {
+      querymatchoutoptions->vseqbuffer
+        = (GtUchar *) (queryes->seq + abs_querystart_fwdstrand);
     }
   }
   if (query_readmode == GT_READMODE_REVERSE)

@@ -660,15 +660,10 @@ static void gt_greedy_extend_init(GtFTsequenceResources *ufsr,
                                               GT_READMODE_FORWARD,
                                               0);
   }
-  if ((queryes->no_query || queryes->encseq != NULL) &&
-      ggemi->encseq_r_in_v == NULL)
+  if (queryes->encseq != NULL && ggemi->encseq_r_in_v == NULL)
   {
     ggemi->encseq_r_in_v
-      = gt_encseq_create_reader_with_readmode(queryes->no_query
-                                                     ? dbencseq
-                                                     : queryes->encseq,
-                                              query_readmode,
-                                              0);
+      = gt_encseq_create_reader_with_readmode(queryes->encseq,query_readmode,0);
   }
   if (ggemi->db_totallength == GT_UWORD_MAX)
   {
@@ -692,57 +687,40 @@ static void gt_greedy_extend_init(GtFTsequenceResources *ufsr,
 #endif
                               ggemi->db_totallength,
                               ggemi->extend_char_access);
-  if (queryes->no_query)
+  if (queryes->encseq != NULL)
   {
+#ifdef GT_WITH_ACCESSCOUNTS
+    if (ggemi->accessed_positions_in_v == NULL)
+    {
+      ggemi->numbits_in_v = query_totallength;
+      ggemi->accessed_positions_in_v
+        = gt_calloc(query_totallength,sizeof *ggemi->accessed_positions_in_v);
+    }
+#endif
     gt_FTsequenceResources_init(vfsr,
-                                dbencseq,
+                                queryes->encseq,
                                 query_readmode,
                                 ggemi->encseq_r_in_v,
                                 &ggemi->vsequence_cache,
                                 NULL,
 #ifdef GT_WITH_ACCESSCOUNTS
-                                ggemi->accessed_positions_in_u,
+                                ggemi->accessed_positions_in_v,
 #endif
-                                ggemi->db_totallength,
+                                query_totallength,
                                 ggemi->extend_char_access);
   } else
   {
-    if (queryes->encseq != NULL)
-    {
+    gt_FTsequenceResources_init(vfsr,
+                                NULL,
+                                query_readmode,
+                                ggemi->encseq_r_in_v,
+                                &ggemi->vsequence_cache,
+                                queryes->seq,
 #ifdef GT_WITH_ACCESSCOUNTS
-      if (ggemi->accessed_positions_in_v == NULL)
-      {
-        ggemi->numbits_in_v = query_totallength;
-        ggemi->accessed_positions_in_v
-          = gt_calloc(query_totallength,sizeof *ggemi->accessed_positions_in_v);
-      }
+                                NULL,
 #endif
-      gt_FTsequenceResources_init(vfsr,
-                                  queryes->encseq,
-                                  query_readmode,
-                                  ggemi->encseq_r_in_v,
-                                  &ggemi->vsequence_cache,
-                                  NULL,
-#ifdef GT_WITH_ACCESSCOUNTS
-                                  ggemi->accessed_positions_in_v,
-#endif
-                                  query_totallength,
-                                  ggemi->extend_char_access);
-    } else
-    {
-      gt_assert(queryes->seq != NULL);
-      gt_FTsequenceResources_init(vfsr,
-                                  NULL,
-                                  query_readmode,
-                                  ggemi->encseq_r_in_v,
-                                  &ggemi->vsequence_cache,
-                                  queryes->seq,
-#ifdef GT_WITH_ACCESSCOUNTS
-                                  NULL,
-#endif
-                                  query_totallength,
-                                  GT_EXTEND_CHAR_ACCESS_DIRECT);
-    }
+                                query_totallength,
+                                GT_EXTEND_CHAR_ACCESS_DIRECT);
   }
 }
 
@@ -764,8 +742,7 @@ void gt_align_front_prune_edist(bool rightextension,
 {
   GtUword distance = 0, iteration, maxiterations;
   GtFTsequenceResources ufsr, vfsr;
-  const GtUword vseqstartpos = (queryes->no_query || queryes->encseq == NULL)
-                                   ? 0 : queryseqstartpos;
+  const GtUword vseqstartpos = queryes->encseq != NULL ? queryseqstartpos : 0;
 
   gt_assert(ggemi != NULL);
   gt_greedy_extend_init(&ufsr,&vfsr,dbencseq,queryes,query_readmode,
@@ -917,16 +894,7 @@ static void gt_seqabstract_reinit_generic(bool rightextension,
                                           GtUword queryseqstartpos,
                                           GtUword query_totallength)
 {
-  if (seqorencseq->seq != NULL)
-  {
-    gt_seqabstract_reinit_gtuchar(rightextension,
-                                  query_readmode,
-                                  seqabstract,
-                                  seqorencseq->seq,
-                                  len,
-                                  offset,
-                                  query_totallength);
-  } else
+  if (seqorencseq->encseq != NULL)
   {
     /* it is important to set it before the next call */
     gt_seqabstract_seqstartpos_set(seqabstract,queryseqstartpos);
@@ -937,6 +905,15 @@ static void gt_seqabstract_reinit_generic(bool rightextension,
                                  seqorencseq->encseq,
                                  len,
                                  offset);
+  } else
+  {
+    gt_seqabstract_reinit_gtuchar(rightextension,
+                                  query_readmode,
+                                  seqabstract,
+                                  seqorencseq->seq,
+                                  len,
+                                  offset,
+                                  query_totallength);
   }
 }
 
@@ -957,9 +934,8 @@ static const GtQuerymatch *gt_extend_sesp(bool forxdrop,
   GtFtPolished_point left_best_polished_point = {0,0,0,0,0},
                      right_best_polished_point = {0,0,0,0,0};
   const bool rightextension = true;
-  const GtUword vseqstartpos
-    = (queryes->no_query || queryes->encseq == NULL)
-         ? 0 : sesp->queryseqstartpos;
+  const GtUword vseqstartpos = queryes->encseq != NULL
+                                  ? sesp->queryseqstartpos : 0;
 
   if (sesp->same_encseq && sesp->seedpos1 + sesp->seedlen >= sesp->seedpos2)
   {
@@ -994,6 +970,7 @@ static const GtQuerymatch *gt_extend_sesp(bool forxdrop,
       vlen = sesp->seedpos2 - voffset;
       if (forxdrop)
       {
+        gt_assert(queryes->encseq != NULL && dbencseq == queryes->encseq);
         gt_seqabstract_reinit_encseq(!rightextension,
                                      sesp->query_readmode,
                                      xdropmatchinfo->vseq,
@@ -1113,6 +1090,7 @@ static const GtQuerymatch *gt_extend_sesp(bool forxdrop,
                                    sesp->seedpos1 + sesp->seedlen);
       if (queryes->no_query)
       {
+        gt_assert(queryes->encseq != NULL && dbencseq == queryes->encseq);
         gt_seqabstract_reinit_encseq(rightextension,
                                      sesp->query_readmode,
                                      xdropmatchinfo->vseq,

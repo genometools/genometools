@@ -502,11 +502,9 @@ bool gt_querymatch_process(GtQuerymatch *querymatch,
       bool seededalignment;
       GtUword query_seqstartpos, abs_querystart_fwdstrand, abs_querystart;
 
-      if (queryes->no_query || queryes->encseq != NULL)
+      if (queryes->encseq != NULL)
       {
-        query_seqstartpos = gt_encseq_seqstartpos(queryes->no_query
-                                                           ? encseq
-                                                           : queryes->encseq,
+        query_seqstartpos = gt_encseq_seqstartpos(queryes->encseq,
                                                   querymatch->queryseqnum);
         abs_querystart_fwdstrand
            = query_seqstartpos + querymatch->querystart_fwdstrand;
@@ -702,19 +700,13 @@ bool gt_querymatch_complete(GtQuerymatch *querymatch,
     GtUword desclen;
 
     db_desc = gt_encseq_description(encseq,&desclen,dbseqnum);
-    if (queryes->no_query)
+    if (queryes->encseq != NULL)
     {
-      query_desc = gt_encseq_description(encseq,&desclen,(GtUword) queryseqnum);
+      query_desc = gt_encseq_description(queryes->encseq,&desclen,
+                                         (GtUword) queryseqnum);
     } else
     {
-      if (queryes->encseq != NULL)
-      {
-        query_desc = gt_encseq_description(queryes->encseq,&desclen,
-                                           (GtUword) queryseqnum);
-      } else
-      {
-        query_desc = queryes->desc;
-      }
+      query_desc = queryes->desc;
     }
   }
   gt_querymatch_init(querymatch,
