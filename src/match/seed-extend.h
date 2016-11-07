@@ -126,38 +126,28 @@ const GtQuerymatch *gt_xdrop_extend_selfmatch(void *info,
    The function always returns 0, so the <GtError>-object <err> is not used.
 */
 
-int gt_xdrop_extend_selfmatch_with_output(void *info,
-                                          const GtEncseq *encseq,
-                                          GtUword len,
-                                          GtUword pos1,
-                                          GtUword pos2,
-                                          GT_UNUSED GtError *err);
+int gt_rf_xdrop_extend_selfmatch_with_output(void *info,
+                                             const GtEncseq *encseq,
+                                             GtUword len,
+                                             GtUword pos1,
+                                             GtUword pos2,
+                                             GT_UNUSED GtError *err);
 
 /* The following function is used for extending a seed obtained
    in a comparison of the given sequence <queryes>
-   against <encseq>. So here a byte sequence is compared against an
+   against <encseq>. So here the query which is either represented by an
+   encoded sequence (queryes->encseq != NULL) or a byte sequence
+   (queryes->seq != NULL) is compared against an
    encoded sequence and the seed is specified by <exactseed>.
    A <GtProcessinfo_and_querymatchspaceptr>-object is passed via the
    void pointer <info>.
-   After the extension is performed and satisfies
-   certain criteria, the resulting
-   coordinates are returned as a reference to a <GtQuerymatch>-object. */
+   After the extension is performed and the match is not redundant
+   the resulting are output. */
 
-const GtQuerymatch *gt_xdrop_extend_querymatch(void *info,
+void gt_rf_xdrop_extend_querymatch_with_output(void *info,
                                                const GtEncseq *encseq,
                                                const GtQuerymatch *exactseed,
                                                const GtSeqorEncseq *queryes);
-
-/*
-   The following function performs an xdrop extension (as the previous function)
-   and outputs the formatted match to stdout if
-   the previous function returns a pointer different from NULL.
-*/
-
-void gt_xdrop_extend_querymatch_with_output(void *info,
-                                            const GtEncseq *encseq,
-                                            const GtQuerymatch *exactseed,
-                                            const GtSeqorEncseq *queryes);
 
 /* The following functions are used for the greedy extension. */
 
@@ -277,12 +267,12 @@ const GtQuerymatch *gt_greedy_extend_selfmatch(void *info,
    The function always returns 0, so the <GtError>-object <err> is not used.
 */
 
-int gt_greedy_extend_selfmatch_with_output(void *info,
-                                           const GtEncseq *encseq,
-                                           GtUword len,
-                                           GtUword pos1,
-                                           GtUword pos2,
-                                           GT_UNUSED GtError *err);
+int gt_rf_greedy_extend_selfmatch_with_output(void *info,
+                                              const GtEncseq *encseq,
+                                              GtUword len,
+                                              GtUword pos1,
+                                              GtUword pos2,
+                                              GT_UNUSED GtError *err);
 
 /* The following function is identical to <gt_greedy_extend_selfmatch>
    except that the positions of the seeds are defined by the number
@@ -342,10 +332,10 @@ char *gt_seed_extend_params_keystring(bool use_greedy,
                                       GtUword extendxdrop,
                                       GtUword xdropbelowscore);
 
-void gt_greedy_extend_querymatch_with_output(void *info,
-                                             const GtEncseq *dbencseq,
-                                             const GtQuerymatch *exactseed,
-                                             const GtSeqorEncseq *queryes);
+void gt_rf_greedy_extend_querymatch_with_output(void *info,
+                                                const GtEncseq *dbencseq,
+                                                const GtQuerymatch *exactseed,
+                                                const GtSeqorEncseq *queryes);
 
 double gt_greedy_dna_sequence_bias_get(const GtEncseq *encseq);
 

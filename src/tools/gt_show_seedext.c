@@ -381,7 +381,7 @@ static int gt_show_seedext_runner(GT_UNUSED int argc,
 
             processinfo_and_querymatchspaceptr.querymatchspaceptr
               = querymatchptr;
-            had_err = gt_greedy_extend_selfmatch_with_output(
+            had_err = gt_rf_greedy_extend_selfmatch_with_output(
                                   &processinfo_and_querymatchspaceptr,
                                   aencseq,
                                   seedlen,

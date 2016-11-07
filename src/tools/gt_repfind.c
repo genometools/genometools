@@ -531,12 +531,12 @@ static int gt_generic_extend_selfmatch_xdrop_with_output(
                                            GtError *err)
 {
   gt_assert(genericencseq != NULL && genericencseq->hasencseq);
-  return gt_xdrop_extend_selfmatch_with_output(info,
-                                               genericencseq->seqptr.encseq,
-                                               len,
-                                               pos1,
-                                               pos2,
-                                               err);
+  return gt_rf_xdrop_extend_selfmatch_with_output(info,
+                                                  genericencseq->seqptr.encseq,
+                                                  len,
+                                                  pos1,
+                                                  pos2,
+                                                  err);
 }
 
 static int gt_generic_simplegreedyselfmatchoutput(
@@ -548,12 +548,12 @@ static int gt_generic_simplegreedyselfmatchoutput(
                                            GtError *err)
 {
   gt_assert(genericencseq != NULL && genericencseq->hasencseq);
-  return gt_greedy_extend_selfmatch_with_output(processinfo,
-                                                genericencseq->seqptr.encseq,
-                                                len,
-                                                pos1,
-                                                pos2,
-                                                err);
+  return gt_rf_greedy_extend_selfmatch_with_output(processinfo,
+                                                   genericencseq->seqptr.encseq,
+                                                   len,
+                                                   pos1,
+                                                   pos2,
+                                                   err);
 }
 
 typedef void (*GtXdrop_extend_querymatch_func)(void *,
@@ -911,14 +911,14 @@ static int gt_repfind_runner(int argc,
     }
     if (gt_option_is_set(arguments->refextendxdropoption))
     {
-      eqmf = gt_xdrop_extend_querymatch_with_output;
+      eqmf = gt_rf_xdrop_extend_querymatch_with_output;
       processinfo_and_querymatchspaceptr.processinfo = xdropmatchinfo;
       eqmf_data = (void *) &processinfo_and_querymatchspaceptr;
     } else
     {
       if (gt_option_is_set(arguments->refextendgreedyoption))
       {
-        eqmf = gt_greedy_extend_querymatch_with_output;
+        eqmf = gt_rf_greedy_extend_querymatch_with_output;
         processinfo_and_querymatchspaceptr.processinfo
           = greedyextendmatchinfo;
         eqmf_data = (void *) &processinfo_and_querymatchspaceptr;
