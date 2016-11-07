@@ -2667,14 +2667,14 @@ static int gt_diagbandseed_possibly_extend(const GtQuerymatch *previousmatch,
 #endif
     ret = 1; /* perform extension */
     querymatch = extend_relative_coords_function(info_querymatch,
-                                                     aencseq,
-                                                     aseqnum,
-                                                     astart,
-                                                     bencseq,
-                                                     bseqnum,
-                                                     bstart,
-                                                     seedlength,
-                                                     query_readmode);
+                                                 aencseq,
+                                                 aseqnum,
+                                                 astart,
+                                                 bencseq,
+                                                 bseqnum,
+                                                 bstart,
+                                                 seedlength,
+                                                 query_readmode);
 #ifndef _WIN32
     if (process_seeds_counts != NULL)
     {
