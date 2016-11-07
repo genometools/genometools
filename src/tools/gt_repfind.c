@@ -665,14 +665,14 @@ static int gt_callenumquerymatches(bool selfmatch,
       query_totallength = gt_querysubstringmatchiterator_query_seqlen(qsmi);
       if (query_files == NULL || gt_str_array_size(query_files) == 0)
       {
-        query_seqorencseq.seq = NULL;
-        query_seqorencseq.encseq = query_encseq;
-        query_seqorencseq.desc = NULL;
+        GT_QUERYSEQORENCSEQ_INIT_ENCSEQ(query_seqorencseq,query_encseq,
+                                        query_readmode,selfmatch);
       } else
       {
-        query_seqorencseq.seq = gt_querysubstringmatchiterator_query(qsmi);
-        query_seqorencseq.encseq = NULL;
-        query_seqorencseq.desc = gt_querysubstringmatchiterator_desc(qsmi);
+        GT_QUERYSEQORENCSEQ_INIT_SEQ(query_seqorencseq,
+                                     gt_querysubstringmatchiterator_query(qsmi),
+                                     gt_querysubstringmatchiterator_desc(qsmi),
+                                     query_readmode,selfmatch);
       }
       querystart = gt_querysubstringmatchiterator_querystart(qsmi);
       queryunitnum = gt_querysubstringmatchiterator_queryunitnum(qsmi);

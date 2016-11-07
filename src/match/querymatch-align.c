@@ -172,7 +172,6 @@ static void seededmatch2eoplist(GtQuerymatchoutoptions *querymatchoutoptions,
                                 const GtEncseq *encseq,
                                 const GtSeqorEncseq *queryes,
                                 GtReadmode query_readmode,
-                                bool selfmatch,
                                 GtUword query_seqstartpos,
                                 GtUword query_totallength,
                                 GtUword dbstart,
@@ -210,7 +209,6 @@ static void seededmatch2eoplist(GtQuerymatchoutoptions *querymatchoutoptions,
                                encseq,
                                queryes,
                                query_readmode,
-                               selfmatch,
                                query_seqstartpos,
                                query_totallength,
                                querymatchoutoptions->ggemi,
@@ -250,7 +248,6 @@ static void seededmatch2eoplist(GtQuerymatchoutoptions *querymatchoutoptions,
                                encseq,
                                queryes,
                                query_readmode,
-                               selfmatch,
                                query_seqstartpos,
                                query_totallength,
                                querymatchoutoptions->ggemi,
@@ -317,7 +314,6 @@ void gt_frontprune2eoplist(GtQuerymatchoutoptions *querymatchoutoptions,
                            const GtEncseq *encseq,
                            const GtSeqorEncseq *queryes,
                            GtReadmode query_readmode,
-                           bool selfmatch,
                            GtUword query_seqstartpos,
                            GtUword query_totallength,
                            GtUword dbstart,
@@ -343,7 +339,6 @@ void gt_frontprune2eoplist(GtQuerymatchoutoptions *querymatchoutoptions,
                              encseq,
                              queryes,
                              query_readmode,
-                             selfmatch,
                              query_seqstartpos,
                              query_totallength,
                              querymatchoutoptions->ggemi,
@@ -382,7 +377,6 @@ bool gt_querymatchoutoptions_alignment_prepare(GtQuerymatchoutoptions
                                                const GtEncseq *encseq,
                                                const GtSeqorEncseq *queryes,
                                                GtReadmode query_readmode,
-                                               bool selfmatch,
                                                GtUword query_seqstartpos,
                                                GtUword query_totallength,
                                                GtUword dbstart,
@@ -398,7 +392,6 @@ bool gt_querymatchoutoptions_alignment_prepare(GtQuerymatchoutoptions
                                                bool greedyextension)
 {
   bool seededalignment = false;
-  const bool no_query = GT_NO_QUERY(query_readmode,selfmatch);
 
   gt_assert(querymatchoutoptions != NULL);
   if (querymatchoutoptions->eoplist_reader != NULL &&
@@ -429,7 +422,7 @@ bool gt_querymatchoutoptions_alignment_prepare(GtQuerymatchoutoptions
                             querymatchoutoptions->useqbuffer,
                             dbstart,
                             dbstart + dblen - 1);
-  if ((no_query || queryes->encseq != NULL ||
+  if ((queryes->no_query || queryes->encseq != NULL ||
        query_readmode != GT_READMODE_FORWARD) &&
       querylen > querymatchoutoptions->vseqbuffer_size)
   {
@@ -438,11 +431,11 @@ bool gt_querymatchoutoptions_alignment_prepare(GtQuerymatchoutoptions
                    sizeof *querymatchoutoptions->vseqbuffer * querylen);
     querymatchoutoptions->vseqbuffer_size = querylen;
   }
-  if (no_query || queryes->encseq != NULL)
+  if (queryes->no_query || queryes->encseq != NULL)
   {
     gt_encseq_extract_encoded_with_reader(
                             querymatchoutoptions->esr_for_align_show,
-                            no_query ? encseq : queryes->encseq,
+                            queryes->no_query ? encseq : queryes->encseq,
                             querymatchoutoptions->vseqbuffer,
                             abs_querystart_fwdstrand,
                             abs_querystart_fwdstrand + querylen - 1);
@@ -478,7 +471,6 @@ bool gt_querymatchoutoptions_alignment_prepare(GtQuerymatchoutoptions
                         encseq,
                         queryes,
                         query_readmode,
-                        selfmatch,
                         query_seqstartpos,
                         query_totallength,
                         dbstart,
