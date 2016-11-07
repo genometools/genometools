@@ -23,6 +23,16 @@ at-tttcccaag-gtggtttttttttgt--ttgt
 || |||||  || |||||||||||||||  ||||
 atgtttccttagagtggtttttttttgtggttgt
 # polishing(m=400,d=-600,p=30): 34/34, seed_on_start, seed_on_end
+36 632 154 R 31 632 169 52 5 85.07
+atctctccaggtgtctcttcttcttcttcttcttct
+|| |||||  || | |||||||||||||||||||||
+at-tctcc--gt-t-tcttcttcttcttcttcttct
+# polishing(m=400,d=-600,p=30): 36/36
+36 632 154 R 33 632 167 51 6 82.61
+atctctccaggtgtc-tcttcttcttcttcttcttct
+|| |||||  || || |||||||||||||||||| ||
+at-tctcc--gtttcttcttcttcttcttcttct-ct
+# polishing(m=400,d=-600,p=30): 37/37
 41 634 281 R 42 693 409 59 8 80.72
 tcctctgtgtgtgt-tttttttgttctcttc-a-taattttccc
 |||| | || || | |||||||||||||||| | || |||||||
