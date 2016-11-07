@@ -313,16 +313,6 @@ const GtQuerymatch* gt_greedy_extend_querymatch_relative(
                                                   GtUword len,
                                                   GtReadmode query_readmode);
 
-typedef const GtQuerymatch *(*GtExtendQuerymatchRelativeFunc)(void *,
-                                                             const GtEncseq *,
-                                                             GtUword,
-                                                             GtUword,
-                                                             const GtEncseq *,
-                                                             GtUword,
-                                                             GtUword,
-                                                             GtUword,
-                                                             GtReadmode);
-
 void gt_align_front_prune_edist(bool rightextension,
                                 GtFtPolished_point *best_polished_point,
                                 GtFronttrace *front_trace,
