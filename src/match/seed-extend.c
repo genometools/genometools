@@ -282,7 +282,7 @@ static const GtQuerymatch *gt_combine_extensions(
                              (GtWord) total_score,
                              total_distance,
                              total_mismatches,
-                             queryes->no_query,
+                             queryes->selfmatch,
                              (uint64_t) sesp->queryseqnum,
                              querylen,
                              querystart - sesp->queryseqstartpos,
@@ -1223,7 +1223,7 @@ const GtQuerymatch *gt_extend_selfmatch(bool forxdrop,
   GtSeqorEncseq queryes;
 
   gt_sesp_from_absolute(&sesp,encseq, pos1, encseq, pos2, len,true);
-  GT_QUERYSEQORENCSEQ_INIT_ENCSEQ(queryes,encseq,sesp.query_readmode,true);
+  GT_QUERYSEQORENCSEQ_INIT_ENCSEQ(queryes,encseq,true);
   return gt_extend_sesp (forxdrop,info, encseq, &queryes, &sesp);
 }
 
@@ -1360,7 +1360,7 @@ static const GtQuerymatch* gt_extend_querymatch_relative(bool forxdrop,
                         len,
                         selfmatch,
                         query_readmode);
-  GT_QUERYSEQORENCSEQ_INIT_ENCSEQ(queryes,queryencseq,query_readmode,selfmatch);
+  GT_QUERYSEQORENCSEQ_INIT_ENCSEQ(queryes,queryencseq,selfmatch);
   return gt_extend_sesp(forxdrop, info, dbencseq, &queryes, &sesp);
 }
 
