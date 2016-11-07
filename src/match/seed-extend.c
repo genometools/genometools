@@ -897,8 +897,11 @@ static void gt_seqabstract_reinit_generic(bool rightextension,
   if (seqorencseq->encseq != NULL)
   {
     /* it is important to set it before the next call */
-    gt_seqabstract_seqstartpos_set(seqabstract,queryseqstartpos);
-    gt_seqabstract_totallength_set(seqabstract,query_totallength);
+    if (GT_ISDIRREVERSE(query_readmode))
+    {
+      gt_seqabstract_seqstartpos_set(seqabstract,queryseqstartpos);
+      gt_seqabstract_totallength_set(seqabstract,query_totallength);
+    }
     gt_seqabstract_reinit_encseq(rightextension,
                                  query_readmode,
                                  seqabstract,
@@ -928,7 +931,7 @@ static const GtQuerymatch *gt_extend_sesp(bool forxdrop,
   GtGreedyextendmatchinfo *greedyextendmatchinfo = NULL;
   GtXdropmatchinfo *xdropmatchinfo = NULL;
   GtUword u_left_ext, v_left_ext, u_right_ext, v_right_ext,
-          ulen, vlen, urightbound, vrightbound;
+          urightbound, vrightbound;
   GtXdropscore total_score = 0;
   GtFTsequenceResources ufsr, vfsr;
   GtFtPolished_point left_best_polished_point = {0,0,0,0,0},
@@ -953,55 +956,27 @@ static const GtQuerymatch *gt_extend_sesp(bool forxdrop,
   if (sesp->seedpos1 > sesp->dbseqstartpos &&
       sesp->seedpos2 > sesp->queryseqstartpos)
   { /* there is something to align on the left of the seed */
-    GtUword uoffset, voffset;
-
-    ulen = sesp->seedpos1 - sesp->dbseqstartpos;
-    uoffset = sesp->dbseqstartpos;
+    const GtUword
+      uoffset = sesp->dbseqstartpos,
+      ulen = sesp->seedpos1 - sesp->dbseqstartpos,
+      /* stop extension at left instance of seed or querystart,
+	 whichever is larger */
+      voffset = sesp->same_encseq ? MAX(sesp->seedpos1 + sesp->seedlen,
+                                        sesp->queryseqstartpos)
+                                  : sesp->queryseqstartpos,
+      vlen = sesp->seedpos2 - voffset;
     if (forxdrop)
     {
       gt_seqabstract_reinit_encseq(!rightextension,GT_READMODE_FORWARD,
-                                   xdropmatchinfo->useq, dbencseq,ulen,uoffset);
-    }
-    if (sesp->same_encseq)
-    {
-      voffset = MAX(sesp->seedpos1 + sesp->seedlen, sesp->queryseqstartpos);
-      /* stop extension at left instance of seed or querystart,
-         whichever is larger */
-      vlen = sesp->seedpos2 - voffset;
-      if (forxdrop)
-      {
-        if (GT_ISDIRREVERSE(sesp->query_readmode))
-        {
-          gt_seqabstract_seqstartpos_set(xdropmatchinfo->vseq,
-                                         sesp->queryseqstartpos);
-          gt_seqabstract_totallength_set(xdropmatchinfo->vseq,
-                                         sesp->query_totallength);
-        }
-        gt_seqabstract_reinit_encseq(!rightextension,
-                                     sesp->query_readmode,
-                                     xdropmatchinfo->vseq,
-                                     queryes->encseq,
-                                     vlen,
-                                     voffset);
-      }
-    } else
-    {
-      voffset = sesp->queryseqstartpos;
-      vlen = sesp->seedpos2 - voffset;
-      if (forxdrop)
-      {
-        gt_seqabstract_reinit_generic(!rightextension,
-                                      sesp->query_readmode,
-                                      xdropmatchinfo->vseq,
-                                      queryes,
-                                      vlen,
-                                      voffset,
-                                      sesp->queryseqstartpos,
-                                      sesp->query_totallength);
-      }
-    }
-    if (forxdrop)
-    {
+                                   xdropmatchinfo->useq,dbencseq,ulen,uoffset);
+      gt_seqabstract_reinit_generic(!rightextension,
+                                    sesp->query_readmode,
+                                    xdropmatchinfo->vseq,
+                                    queryes,
+                                    vlen,
+                                    voffset,
+                                    sesp->queryseqstartpos,
+                                    sesp->query_totallength);
 #ifdef SKDEBUG
       gt_xdrop_show_context(!rightextension,xdropmatchinfo);
 #endif
@@ -1084,8 +1059,8 @@ static const GtQuerymatch *gt_extend_sesp(bool forxdrop,
       sesp->seedpos2 + sesp->seedlen < vrightbound)
   { /* there is something to align on the right of the seed */
     /* stop extension at right instance of extended seed */
-    ulen = urightbound - (sesp->seedpos1 + sesp->seedlen);
-    vlen = vrightbound - (sesp->seedpos2 + sesp->seedlen);
+    const GtUword ulen = urightbound - (sesp->seedpos1 + sesp->seedlen);
+    const GtUword vlen = vrightbound - (sesp->seedpos2 + sesp->seedlen);
     if (forxdrop)
     {
       gt_seqabstract_reinit_encseq(rightextension,
@@ -1094,32 +1069,14 @@ static const GtQuerymatch *gt_extend_sesp(bool forxdrop,
                                    dbencseq,
                                    ulen,
                                    sesp->seedpos1 + sesp->seedlen);
-      if (sesp->same_encseq)
-      {
-        if (GT_ISDIRREVERSE(sesp->query_readmode))
-        {
-          gt_seqabstract_seqstartpos_set(xdropmatchinfo->vseq,
-                                         sesp->queryseqstartpos);
-          gt_seqabstract_totallength_set(xdropmatchinfo->vseq,
-                                         sesp->query_totallength);
-        }
-        gt_seqabstract_reinit_encseq(rightextension,
-                                     sesp->query_readmode,
-                                     xdropmatchinfo->vseq,
-                                     queryes->encseq,
-                                     vlen,
-                                     sesp->seedpos2 + sesp->seedlen);
-      } else
-      {
-        gt_seqabstract_reinit_generic(rightextension,
-                                      sesp->query_readmode,
-                                      xdropmatchinfo->vseq,
-                                      queryes,
-                                      vlen,
-                                      sesp->seedpos2 + sesp->seedlen,
-                                      sesp->queryseqstartpos,
-                                      sesp->query_totallength);
-      }
+      gt_seqabstract_reinit_generic(rightextension,
+                                    sesp->query_readmode,
+                                    xdropmatchinfo->vseq,
+                                    queryes,
+                                    vlen,
+                                    sesp->seedpos2 + sesp->seedlen,
+                                    sesp->queryseqstartpos,
+                                    sesp->query_totallength);
 #ifdef SKDEBUG
       gt_xdrop_show_context(rightextension,xdropmatchinfo);
 #endif
