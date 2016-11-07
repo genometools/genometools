@@ -286,22 +286,24 @@ const GtQuerymatch* gt_xdrop_extend_querymatch_relative(
                                                   const GtEncseq *dbencseq,
                                                   GtUword dbseqnum,
                                                   GtUword dbstart_relative,
-                                                  const GtEncseq *queryencseq,
+                                                  const GtSeqorEncseq *queryes,
                                                   GtUword queryseqnum,
                                                   GtUword querystart_relative,
                                                   GtUword len,
-                                                  GtReadmode query_readmode);
+                                                  GtReadmode query_readmode,
+                                                  bool same_encseq);
 
 const GtQuerymatch* gt_greedy_extend_querymatch_relative(
                                                   void *info,
                                                   const GtEncseq *dbencseq,
                                                   GtUword dbseqnum,
                                                   GtUword dbstart_relative,
-                                                  const GtEncseq *queryencseq,
+                                                  const GtSeqorEncseq *queryes,
                                                   GtUword queryseqnum,
                                                   GtUword querystart_relative,
                                                   GtUword len,
-                                                  GtReadmode query_readmode);
+                                                  GtReadmode query_readmode,
+                                                  bool same_encseq);
 
 void gt_align_front_prune_edist(bool rightextension,
                                 GtFtPolished_point *best_polished_point,

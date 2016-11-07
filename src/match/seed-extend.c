@@ -1174,30 +1174,28 @@ static const GtQuerymatch* gt_extend_querymatch_relative(bool forxdrop,
                                                   const GtEncseq *dbencseq,
                                                   GtUword dbseqnum,
                                                   GtUword dbstart_relative,
-                                                  const GtEncseq *queryencseq,
+                                                  const GtSeqorEncseq *queryes,
                                                   GtUword queryseqnum,
                                                   GtUword querystart_relative,
                                                   GtUword len,
-                                                  GtReadmode query_readmode)
+                                                  GtReadmode query_readmode,
+                                                  bool same_encseq)
 {
   GtSeedextendSeqpair sesp;
   const GtUword query_totallength = 0;
-  const bool selfmatch = dbencseq == queryencseq ? true : false;
-  GtSeqorEncseq queryes;
 
   gt_sesp_from_relative(&sesp,
                         dbencseq,
                         dbseqnum,
                         dbstart_relative,
-                        queryencseq,
+                        queryes->encseq,
                         queryseqnum,
                         querystart_relative,
                         query_totallength,
                         len,
-                        selfmatch,
+                        same_encseq,
                         query_readmode);
-  GT_QUERYSEQORENCSEQ_INIT_ENCSEQ(queryes,queryencseq);
-  return gt_extend_sesp(forxdrop, info, dbencseq, &queryes, &sesp);
+  return gt_extend_sesp(forxdrop, info, dbencseq, queryes, &sesp);
 }
 
 const GtQuerymatch* gt_xdrop_extend_querymatch_relative(
@@ -1205,22 +1203,24 @@ const GtQuerymatch* gt_xdrop_extend_querymatch_relative(
                                                   const GtEncseq *dbencseq,
                                                   GtUword dbseqnum,
                                                   GtUword dbstart_relative,
-                                                  const GtEncseq *queryencseq,
+                                                  const GtSeqorEncseq *queryes,
                                                   GtUword queryseqnum,
                                                   GtUword querystart_relative,
                                                   GtUword len,
-                                                  GtReadmode query_readmode)
+                                                  GtReadmode query_readmode,
+                                                  bool same_encseq)
 {
   return gt_extend_querymatch_relative(true,
                                        info,
                                        dbencseq,
                                        dbseqnum,
                                        dbstart_relative,
-                                       queryencseq,
+                                       queryes,
                                        queryseqnum,
                                        querystart_relative,
                                        len,
-                                       query_readmode);
+                                       query_readmode,
+                                       same_encseq);
 }
 
 const GtQuerymatch* gt_greedy_extend_querymatch_relative(
@@ -1228,22 +1228,24 @@ const GtQuerymatch* gt_greedy_extend_querymatch_relative(
                                                   const GtEncseq *dbencseq,
                                                   GtUword dbseqnum,
                                                   GtUword dbstart_relative,
-                                                  const GtEncseq *queryencseq,
+                                                  const GtSeqorEncseq *queryes,
                                                   GtUword queryseqnum,
                                                   GtUword querystart_relative,
                                                   GtUword len,
-                                                  GtReadmode query_readmode)
+                                                  GtReadmode query_readmode,
+                                                  bool same_encseq)
 {
   return gt_extend_querymatch_relative(false,
                                        info,
                                        dbencseq,
                                        dbseqnum,
                                        dbstart_relative,
-                                       queryencseq,
+                                       queryes,
                                        queryseqnum,
                                        querystart_relative,
                                        len,
-                                       query_readmode);
+                                       query_readmode,
+                                       same_encseq);
 }
 
 static const GtQuerymatch *gt_rf_extend_selfmatch(bool forxdrop,

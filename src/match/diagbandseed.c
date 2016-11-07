@@ -2623,11 +2623,12 @@ typedef const GtQuerymatch *(*GtExtendRelativeCoordsFunc)(void *,
                                                           const GtEncseq *,
                                                           GtUword,
                                                           GtUword,
-                                                          const GtEncseq *,
+                                                          const GtSeqorEncseq *,
                                                           GtUword,
                                                           GtUword,
                                                           GtUword,
-                                                          GtReadmode);
+                                                          GtReadmode,
+                                                          bool);
 
 static int gt_diagbandseed_possibly_extend(const GtQuerymatch *previousmatch,
                                            GtUword aseqnum,
@@ -2652,6 +2653,7 @@ static int gt_diagbandseed_possibly_extend(const GtQuerymatch *previousmatch,
   if (previousmatch == NULL ||
       !gt_querymatch_overlap(previousmatch,apos,bpos,use_apos))
   {
+    GtSeqorEncseq bseqorencseq;
     /* extend seed */
     const GtQuerymatch *querymatch;
     /* relative seed start position in A and B */
@@ -2666,15 +2668,18 @@ static int gt_diagbandseed_possibly_extend(const GtQuerymatch *previousmatch,
     }
 #endif
     ret = 1; /* perform extension */
+    GT_QUERYSEQORENCSEQ_INIT_ENCSEQ(bseqorencseq,bencseq);
     querymatch = extend_relative_coords_function(info_querymatch,
                                                  aencseq,
                                                  aseqnum,
                                                  astart,
-                                                 bencseq,
+                                                 &bseqorencseq,
                                                  bseqnum,
                                                  bstart,
                                                  seedlength,
-                                                 query_readmode);
+                                                 query_readmode,
+                                                 aencseq == bencseq
+                                                   ? true : false);
 #ifndef _WIN32
     if (process_seeds_counts != NULL)
     {
