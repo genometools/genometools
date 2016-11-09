@@ -858,27 +858,27 @@ static int gt_seed_extend_runner(int argc,
     }
 
     /* Get sequence ranges */
-    aseqranges = gt_seed_extend_parts_new(aencseq,a_numofsequences,
-                                          arguments->dbs_parts);
-    if (gt_seed_extend_parts_number(aseqranges) > 1 && arguments->verbose)
+    aseqranges = gt_sequence_parts_info_new(aencseq,a_numofsequences,
+                                            arguments->dbs_parts);
+    if (arguments->verbose && gt_sequence_parts_info_number(aseqranges) > 1)
     {
-      gt_seed_extend_parts_variance_show(aseqranges, aencseq);
+      gt_sequence_parts_info_variance_show(aseqranges, aencseq);
     }
-    if (aencseq == bencseq && pick.a == pick.b)
+    if (aencseq == bencseq)
     {
       bseqranges = aseqranges;
     } else
     {
-      bseqranges = gt_seed_extend_parts_new(bencseq,b_numofsequences,
-                                            arguments->dbs_parts);
-      if (gt_seed_extend_parts_number(bseqranges) > 1 && arguments->verbose)
+      bseqranges = gt_sequence_parts_info_new(bencseq,b_numofsequences,
+                                              arguments->dbs_parts);
+      if (arguments->verbose && gt_sequence_parts_info_number(bseqranges) > 1)
       {
-        gt_seed_extend_parts_variance_show(bseqranges, bencseq);
+        gt_sequence_parts_info_variance_show(bseqranges, bencseq);
       }
     }
-    gt_assert(pick.a < gt_seed_extend_parts_number(aseqranges) ||
+    gt_assert(pick.a < gt_sequence_parts_info_number(aseqranges) ||
               pick.a == GT_UWORD_MAX);
-    gt_assert(pick.b < gt_seed_extend_parts_number(bseqranges) ||
+    gt_assert(pick.b < gt_sequence_parts_info_number(bseqranges) ||
               pick.b == GT_UWORD_MAX);
 
     extp = gt_diagbandseed_extend_params_new(errorpercentage,
@@ -928,11 +928,11 @@ static int gt_seed_extend_runner(int argc,
                                   err);
 
     /* clean up */
-    gt_seed_extend_parts_delete(aseqranges);
-    if (!(aencseq == bencseq && pick.a == pick.b))
+    if (bseqranges != aseqranges)
     {
-      gt_seed_extend_parts_delete(bseqranges);
+      gt_sequence_parts_info_delete(bseqranges);
     }
+    gt_sequence_parts_info_delete(aseqranges);
     gt_diagbandseed_extend_params_delete(extp);
     gt_diagbandseed_info_delete(info);
   }
