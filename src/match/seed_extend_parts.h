@@ -64,7 +64,11 @@ GtUword gt_sequence_parts_info_partlength(const GtSequencePartsInfo *spi,
                                           GtUword fromseq,
                                           GtUword toseq);
 
-void gt_sequence_parts_info_variance_show(const GtSequencePartsInfo *spi,
-                                          const GtEncseq *encseq);
+void gt_sequence_parts_info_variance_show(const GtSequencePartsInfo *spi);
+
+GtUchar *gt_sequence_parts_info_seq_extract(const GtSequencePartsInfo *spi,
+                                            GtUword idx);
+
+const GtEncseq *gt_seuence_part_info_encseq_get(const GtSequencePartsInfo *spi);
 
 #endif

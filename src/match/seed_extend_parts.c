@@ -1,3 +1,20 @@
+/*
+  Copyright (c) 2016-2016 Stefan Kurtz <kurtz@zbh.uni-hamburg.de>
+  Copyright (c) 2016-2016 Center for Bioinformatics, University of Hamburg
+
+  Permission to use, copy, modify, and distribute this software for any
+  purpose with or without fee is hereby granted, provided that the above
+  copyright notice and this permission notice appear in all copies.
+
+  THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+  WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+  MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+  ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+  WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+  ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+*/
+
 #include "core/range_api.h"
 #include "match/seed_extend_parts.h"
 
@@ -16,6 +33,7 @@ struct GtSequencePartsInfo
           totallength,
           numofsequences,
           parts_number;
+  const GtEncseq *encseq;
 };
 
 GtUword gt_sequence_parts_info_seqstartpos(const GtSequencePartsInfo *spi,
@@ -99,6 +117,7 @@ GtSequencePartsInfo *gt_sequence_parts_info_new(const GtEncseq *encseq,
   spi->ssptab = gt_all_sequence_separators_get(encseq);
   spi->totallength = gt_encseq_total_length(encseq);
   spi->numofsequences = gt_encseq_num_of_sequences(encseq);
+  spi->encseq = encseq;
 
   if (spi->ssptab == NULL)
   {
@@ -187,20 +206,20 @@ GtSequencePartsInfo *gt_sequence_parts_info_new(const GtEncseq *encseq,
   return spi;
 }
 
-void gt_sequence_parts_info_delete(GtSequencePartsInfo *spi)
-{
-  if (spi != NULL)
-  {
-    gt_free(spi->ranges);
-    gt_free(spi->ssptab);
-    gt_free(spi);
-  }
-}
-
 GtUword gt_sequence_parts_info_number(const GtSequencePartsInfo *spi)
 {
   gt_assert(spi != NULL);
   return spi->parts_number;
+}
+
+void gt_sequence_parts_info_delete(GtSequencePartsInfo *spi)
+{
+  if (spi != NULL)
+  {
+    gt_free(spi->ssptab);
+    gt_free(spi->ranges);
+    gt_free(spi);
+  }
 }
 
 GtUword gt_sequence_parts_info_start_get(const GtSequencePartsInfo *spi,
@@ -221,11 +240,12 @@ GtUword gt_sequence_parts_info_numofsequences_get(
                         const GtSequencePartsInfo *spi,GtUword idx)
 {
   gt_assert(spi != NULL && idx < spi->parts_number);
-  return spi->ranges[idx].end - spi->ranges[idx].start + 1;
+  return gt_sequence_parts_info_end_get(spi,idx) -
+         gt_sequence_parts_info_start_get(spi,idx) + 1;
 }
 
-GtUword gt_sequence_parts_info_max_length_get(
-                        const GtSequencePartsInfo *spi,GtUword idx)
+GtUword gt_sequence_parts_info_max_length_get(const GtSequencePartsInfo *spi,
+                                              GtUword idx)
 {
   gt_assert(spi != NULL && idx < spi->parts_number);
   return spi->ranges[idx].max_length;
@@ -257,18 +277,18 @@ bool gt_sequence_parts_info_equal(const GtSequencePartsInfo *spia,
 
 }
 
-void gt_sequence_parts_info_variance_show(const GtSequencePartsInfo *spi,
-                                          const GtEncseq *encseq)
+void gt_sequence_parts_info_variance_show(const GtSequencePartsInfo *spi)
 {
   GtUword variance_sum = 0, idx, avgpartlength;
 
-  gt_assert(encseq != NULL);
   avgpartlength = spi->totallength/spi->parts_number;
   for (idx = 0; idx < spi->parts_number; idx++)
   {
     const GtUword partlength
-      = gt_sequence_parts_info_partlength(spi,spi->ranges[idx].start,
-                                          spi->ranges[idx].end);
+      = gt_sequence_parts_info_partlength(
+             spi,
+             gt_sequence_parts_info_start_get(spi,idx),
+             gt_sequence_parts_info_end_get(spi,idx));
     if (partlength > avgpartlength)
     {
       GtUword diff = partlength - avgpartlength;
@@ -279,10 +299,34 @@ void gt_sequence_parts_info_variance_show(const GtSequencePartsInfo *spi,
       variance_sum += diff * diff;
     }
     printf("# Part " GT_WU ": sequence " GT_WU "..." GT_WU ", total length="
-           GT_WU ", max_length=" GT_WU "\n",idx+1,spi->ranges[idx].start,
-           spi->ranges[idx].end,partlength,
-           spi->ranges[idx].max_length);
+           GT_WU ", max_length=" GT_WU "\n",idx+1,
+           gt_sequence_parts_info_start_get(spi,idx),
+           gt_sequence_parts_info_end_get(spi,idx),
+           partlength,
+           gt_sequence_parts_info_max_length_get(spi,idx));
   }
   printf("# Variance of parts is %.2e\n",
            (double) variance_sum/spi->parts_number);
+}
+
+GtUchar *gt_sequence_parts_info_seq_extract(const GtSequencePartsInfo *spi,
+                                            GtUword idx)
+{
+  GtUchar *byte_sequence;
+  const GtUword
+    firstseqnum = gt_sequence_parts_info_start_get(spi,idx),
+    lastseqnum = gt_sequence_parts_info_start_get(spi,idx),
+    firstpos = gt_sequence_parts_info_seqstartpos(spi,firstseqnum),
+    lastpos = gt_sequence_parts_info_seqendpos(spi,lastseqnum);
+
+  gt_assert(firstpos <= lastpos);
+  byte_sequence = gt_malloc(sizeof *byte_sequence * (lastpos - firstpos + 1));
+  gt_encseq_extract_encoded(spi->encseq,byte_sequence,firstpos,lastpos);
+  return byte_sequence;
+}
+
+const GtEncseq *gt_seuence_part_info_encseq_get(const GtSequencePartsInfo *spi)
+{
+  gt_assert(spi != NULL);
+  return spi->encseq;
 }

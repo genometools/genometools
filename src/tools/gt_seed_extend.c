@@ -862,7 +862,7 @@ static int gt_seed_extend_runner(int argc,
                                             arguments->dbs_parts);
     if (arguments->verbose && gt_sequence_parts_info_number(aseqranges) > 1)
     {
-      gt_sequence_parts_info_variance_show(aseqranges, aencseq);
+      gt_sequence_parts_info_variance_show(aseqranges);
     }
     if (aencseq == bencseq)
     {
@@ -873,7 +873,7 @@ static int gt_seed_extend_runner(int argc,
                                               arguments->dbs_parts);
       if (arguments->verbose && gt_sequence_parts_info_number(bseqranges) > 1)
       {
-        gt_sequence_parts_info_variance_show(bseqranges, bencseq);
+        gt_sequence_parts_info_variance_show(bseqranges);
       }
     }
     gt_assert(pick.a < gt_sequence_parts_info_number(aseqranges) ||
