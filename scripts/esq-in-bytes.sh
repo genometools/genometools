@@ -2,21 +2,27 @@
 
 seed_extend()
 {
-  env -i ${GTDIR}/bin/gt seed_extend -display seed seqlength -parts 2 -extend${mode} -ii sfx -maxfreq 20 -kmerfile no $1 > sfx-$2.matches
+  env -i ${GTDIR}/bin/gt seed_extend -display seqlength -minidentity 70 -parts 2 -extend${mode} -ii db -qii query -maxfreq 20 -kmerfile no $1 > sfx-$2.matches
 }
 
 set -e -x
 # set GTDIR as path of genometools directory
 
-for filename in `${GTDIR}/scripts/findfasta.rb`
+for dbseq in `${GTDIR}/scripts/findfasta.rb`
 do
-  ${GTDIR}/bin/gt encseq encode -indexname sfx $filename
-  # Now do something with the sequence
-  for mode in greedy xdrop
+  ${GTDIR}/bin/gt encseq encode -indexname db $dbseq
+  for queryseq in `${GTDIR}/scripts/findfasta.rb`
   do
-    echo $filename
-    seed_extend "-splt ulong" ulong
-    seed_extend "-splt struct" struct
-    cmp -s sfx-ulong.matches sfx-struct.matches
+    if test $queryseq != $dbseq
+    then
+      ${GTDIR}/bin/gt encseq encode -indexname query $queryseq
+      for mode in greedy
+      do
+        echo $filename
+        seed_extend "-splt ulong" ulong
+        seed_extend "-splt struct" struct
+        cmp -s sfx-ulong.matches sfx-struct.matches
+      done
+    fi
   done
 done

@@ -670,7 +670,8 @@ static int gt_callenumquerymatches(bool selfmatch,
       {
         GT_QUERYSEQORENCSEQ_INIT_SEQ(query_seqorencseq,
                                      gt_querysubstringmatchiterator_query(qsmi),
-                                     gt_querysubstringmatchiterator_desc(qsmi));
+                                     gt_querysubstringmatchiterator_desc(qsmi),
+                                     query_totallength);
       }
       querystart = gt_querysubstringmatchiterator_querystart(qsmi);
       queryunitnum = gt_querysubstringmatchiterator_queryunitnum(qsmi);

@@ -3095,6 +3095,13 @@ static void gt_diagbandseed_process_seeds(GtSeedpairlist *seedpairlist,
   GtTimer *timer = NULL;
   GtDiagbandseedCounts process_seeds_counts = {0,0,0,0,0};
   const bool same_encseq = aencseq == bencseq ? true : false;
+#ifdef USEBYTESTRING
+  GtUword b_off, seqstartpos, seqendpos;
+  const GtUword
+    b_first_seqnum = gt_sequence_parts_info_start_get(bseqranges,bidx),
+    b_first_seqstartpos = gt_sequence_parts_info_seqstartpos(bseqranges,
+                                                             b_first_seqnum);
+#endif
   GT_QUERYSEQORENCSEQ_INIT_ENCSEQ(queryes,bencseq);
 #ifndef _WIN32
   process_seeds_counts.withtiming = verbose;
@@ -3202,6 +3209,16 @@ static void gt_diagbandseed_process_seeds(GtSeedpairlist *seedpairlist,
          the segment boundaries have been identified.
          second scan: test for mincoverage and overlap to previous extension,
          based on apos and bpos values. */
+#ifdef USEBYTESTRING
+      gt_assert(b_first_seqnum <= currsegm_bseqnum);
+      seqstartpos = gt_sequence_parts_info_seqstartpos(bseqranges,
+                                                       currsegm_bseqnum);
+      seqendpos = gt_sequence_parts_info_seqendpos(bseqranges,currsegm_bseqnum);
+      gt_assert(b_first_seqstartpos <= seqstartpos);
+      b_off = seqstartpos - b_first_seqstartpos;
+      GT_QUERYSEQORENCSEQ_INIT_SEQ(queryes,b_byte_sequence + b_off,"fake",
+                                   seqendpos - seqstartpos + 1);
+#endif
       gt_diagbandseed_process_segment(arg,
                                       aencseq,
                                       &queryes,

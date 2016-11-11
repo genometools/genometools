@@ -315,7 +315,7 @@ GtUchar *gt_sequence_parts_info_seq_extract(const GtSequencePartsInfo *spi,
   GtUchar *byte_sequence;
   const GtUword
     firstseqnum = gt_sequence_parts_info_start_get(spi,idx),
-    lastseqnum = gt_sequence_parts_info_start_get(spi,idx),
+    lastseqnum = gt_sequence_parts_info_end_get(spi,idx),
     firstpos = gt_sequence_parts_info_seqstartpos(spi,firstseqnum),
     lastpos = gt_sequence_parts_info_seqendpos(spi,lastseqnum);
 
