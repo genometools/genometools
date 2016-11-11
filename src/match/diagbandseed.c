@@ -2639,8 +2639,7 @@ typedef const GtQuerymatch *(*GtExtendRelativeCoordsFunc)(void *,
                                                           GtUword,
                                                           GtUword,
                                                           GtUword,
-                                                          GtReadmode,
-                                                          bool);
+                                                          GtReadmode);
 
 static int gt_diagbandseed_possibly_extend(const GtQuerymatch *previousmatch,
                                            GtUword aseqnum,
@@ -2653,7 +2652,6 @@ static int gt_diagbandseed_possibly_extend(const GtQuerymatch *previousmatch,
                                            GtUword userdefinedleastlength,
                                            const GtEncseq *aencseq,
                                            const GtSeqorEncseq *queryes,
-                                           bool same_encseq,
                                            GtProcessinfo_and_querymatchspaceptr
                                              *info_querymatch,
                                            GtReadmode query_readmode,
@@ -2688,8 +2686,7 @@ static int gt_diagbandseed_possibly_extend(const GtQuerymatch *previousmatch,
                                                  bseqnum,
                                                  bstart,
                                                  seedlength,
-                                                 query_readmode,
-                                                 same_encseq);
+                                                 query_readmode);
 #ifndef _WIN32
     if (process_seeds_counts != NULL)
     {
@@ -2846,7 +2843,6 @@ static void gt_diagbandseed_process_segment(
              const GtDiagbandseedExtendParams *arg,
              const GtEncseq *aencseq,
              const GtSeqorEncseq *queryes,
-             bool same_encseq,
              GtUword amaxlen,
              unsigned int seedlength,
              GtUword diagbands_used,
@@ -2900,7 +2896,6 @@ static void gt_diagbandseed_process_segment(
                      arg->userdefinedleastlength,
                      aencseq,
                      queryes,
-                     same_encseq,
                      info_querymatch,
                      query_readmode,
                      extend_relative_coords_function,
@@ -3094,7 +3089,6 @@ static void gt_diagbandseed_process_seeds(GtSeedpairlist *seedpairlist,
   GtUword diagbands_used;
   GtTimer *timer = NULL;
   GtDiagbandseedCounts process_seeds_counts = {0,0,0,0,0};
-  const bool same_encseq = aencseq == bencseq ? true : false;
 #ifdef USEBYTESTRING
   GtUword b_off, seqstartpos, seqendpos;
   const GtUword
@@ -3222,7 +3216,6 @@ static void gt_diagbandseed_process_seeds(GtSeedpairlist *seedpairlist,
       gt_diagbandseed_process_segment(arg,
                                       aencseq,
                                       &queryes,
-                                      same_encseq,
                                       amaxlen,
                                       seedlength,
                                       diagbands_used,
@@ -3314,7 +3307,6 @@ static void gt_diagbandseed_process_seeds(GtSeedpairlist *seedpairlist,
         gt_diagbandseed_process_segment(arg,
                                         aencseq,
                                         &queryes,
-                                        same_encseq,
                                         amaxlen,
                                         seedlength,
                                         diagbands_used,
@@ -3417,7 +3409,6 @@ static void gt_diagbandseed_process_seeds(GtSeedpairlist *seedpairlist,
         gt_diagbandseed_process_segment(arg,
                                         aencseq,
                                         &queryes,
-                                        same_encseq,
                                         amaxlen,
                                         seedlength,
                                         diagbands_used,

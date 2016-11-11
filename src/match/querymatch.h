@@ -124,8 +124,6 @@ uint64_t gt_querymatch_queryseqnum(const GtQuerymatch *querymatch);
 
 const GtUchar *gt_querymatch_querysequence(const GtQuerymatch *querymatch);
 
-GtUword gt_querymatch_query_totallength(const GtQuerymatch *querymatch);
-
 GtUword gt_querymatch_dbseqnum(const GtQuerymatch *querymatch);
 
 GtUword gt_querymatch_dblen(const GtQuerymatch *querymatch);
@@ -152,8 +150,6 @@ void gt_querymatch_query_readmode_set(GtQuerymatch *querymatch,
 void gt_querymatch_verify_alignment_set(GtQuerymatch *querymatch);
 
 GtReadmode gt_querymatch_query_readmode(const GtQuerymatch *querymatch);
-
-bool gt_querymatch_selfmatch(const GtQuerymatch *querymatch);
 
 GtWord gt_querymatch_distance2score(GtUword distance,GtUword alignedlen);
 

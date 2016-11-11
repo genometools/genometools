@@ -772,12 +772,6 @@ uint64_t gt_querymatch_queryseqnum(const GtQuerymatch *querymatch)
   return querymatch->queryseqnum;
 }
 
-GtUword gt_querymatch_query_totallength(const GtQuerymatch *querymatch)
-{
-  gt_assert(querymatch != NULL);
-  return querymatch->query_totallength;
-}
-
 void gt_querymatch_query_readmode_set(GtQuerymatch *querymatch,
                                       GtReadmode query_readmode)
 {
@@ -795,12 +789,6 @@ GtReadmode gt_querymatch_query_readmode(const GtQuerymatch *querymatch)
 {
   gt_assert(querymatch != NULL);
   return querymatch->query_readmode;
-}
-
-bool gt_querymatch_selfmatch(const GtQuerymatch *querymatch)
-{
-  gt_assert(querymatch != NULL);
-  return querymatch->selfmatch;
 }
 
 GtUword gt_querymatch_distance(const GtQuerymatch *querymatch)

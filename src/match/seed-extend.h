@@ -290,8 +290,7 @@ const GtQuerymatch* gt_xdrop_extend_querymatch_relative(
                                                   GtUword queryseqnum,
                                                   GtUword querystart_relative,
                                                   GtUword len,
-                                                  GtReadmode query_readmode,
-                                                  bool same_encseq);
+                                                  GtReadmode query_readmode);
 
 const GtQuerymatch* gt_greedy_extend_querymatch_relative(
                                                   void *info,
@@ -302,8 +301,7 @@ const GtQuerymatch* gt_greedy_extend_querymatch_relative(
                                                   GtUword queryseqnum,
                                                   GtUword querystart_relative,
                                                   GtUword len,
-                                                  GtReadmode query_readmode,
-                                                  bool same_encseq);
+                                                  GtReadmode query_readmode);
 
 void gt_align_front_prune_edist(bool rightextension,
                                 GtFtPolished_point *best_polished_point,
