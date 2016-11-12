@@ -186,19 +186,18 @@ static void gt_sesp_from_relative(GtSeedextendSeqpair *sesp,
   sesp->dbseqstartpos = gt_encseq_seqstartpos(dbencseq,sesp->dbseqnum),
   sesp->dbseqlength = gt_encseq_seqlength(dbencseq,sesp->dbseqnum);
   sesp->queryseqnum = queryseqnum;
-  if (dbencseq == queryencseq && dbseqnum == queryseqnum)
+  if (queryencseq == NULL)
   {
-    sesp->queryseqstartpos = sesp->dbseqstartpos;
-    sesp->query_totallength = sesp->dbseqlength;
+    sesp->queryseqstartpos = 0;
+    sesp->query_totallength = query_totallength;
   } else
   {
-    if (queryencseq == NULL)
+    if (same_encseq && dbseqnum == queryseqnum)
     {
-      sesp->queryseqstartpos = 0;
-      sesp->query_totallength = query_totallength;
+      sesp->queryseqstartpos = sesp->dbseqstartpos;
+      sesp->query_totallength = sesp->dbseqlength;
     } else
     {
-      gt_assert(dbencseq != queryencseq || dbseqnum != queryseqnum);
       /* the following values are constant for a segment and thus
          should be computed only once */
       sesp->queryseqstartpos = gt_encseq_seqstartpos(queryencseq,
@@ -1191,22 +1190,23 @@ static const GtQuerymatch *gt_extend_sesp(bool forxdrop,
                           : greedyextendmatchinfo->silent);
 }
 
-static const GtQuerymatch* gt_extend_querymatch_relative(bool forxdrop,
-                                                  void *info,
-                                                  const GtEncseq *dbencseq,
-                                                  GtUword dbseqnum,
-                                                  GtUword dbstart_relative,
-                                                  const GtSeqorEncseq *queryes,
-                                                  bool same_encseq,
-                                                  GtUword queryseqnum,
-                                                  GtUword querystart_relative,
-                                                  GtUword len,
-                                                  GtReadmode query_readmode)
+static const GtQuerymatch* gt_extend_seed_relative(bool forxdrop,
+                                                   void *info,
+                                                   const GtSeqorEncseq *dbes,
+                                                   GtUword dbseqnum,
+                                                   GtUword dbstart_relative,
+                                                   const GtSeqorEncseq *queryes,
+                                                   bool same_encseq,
+                                                   GtUword queryseqnum,
+                                                   GtUword querystart_relative,
+                                                   GtUword len,
+                                                   GtReadmode query_readmode)
 {
   GtSeedextendSeqpair sesp;
 
+  gt_assert(dbes->encseq != NULL);
   gt_sesp_from_relative(&sesp,
-                        dbencseq,
+                        dbes->encseq,
                         dbseqnum,
                         dbstart_relative,
                         queryes->encseq,
@@ -1216,12 +1216,11 @@ static const GtQuerymatch* gt_extend_querymatch_relative(bool forxdrop,
                         queryes->encseq == NULL ? queryes->seqlength : 0,
                         len,
                         query_readmode);
-  return gt_extend_sesp(forxdrop, info, dbencseq, queryes, &sesp);
+  return gt_extend_sesp(forxdrop, info, dbes->encseq, queryes, &sesp);
 }
 
-const GtQuerymatch* gt_xdrop_extend_querymatch_relative(
-                                                  void *info,
-                                                  const GtEncseq *dbencseq,
+const GtQuerymatch* gt_xdrop_extend_seed_relative(void *info,
+                                                  const GtSeqorEncseq *dbes,
                                                   GtUword dbseqnum,
                                                   GtUword dbstart_relative,
                                                   const GtSeqorEncseq *queryes,
@@ -1231,42 +1230,41 @@ const GtQuerymatch* gt_xdrop_extend_querymatch_relative(
                                                   GtUword len,
                                                   GtReadmode query_readmode)
 {
-  return gt_extend_querymatch_relative(true,
-                                       info,
-                                       dbencseq,
-                                       dbseqnum,
-                                       dbstart_relative,
-                                       queryes,
-                                       same_encseq,
-                                       queryseqnum,
-                                       querystart_relative,
-                                       len,
-                                       query_readmode);
+  return gt_extend_seed_relative(true,
+                                 info,
+                                 dbes,
+                                 dbseqnum,
+                                 dbstart_relative,
+                                 queryes,
+                                 same_encseq,
+                                 queryseqnum,
+                                 querystart_relative,
+                                 len,
+                                 query_readmode);
 }
 
-const GtQuerymatch* gt_greedy_extend_querymatch_relative(
-                                                  void *info,
-                                                  const GtEncseq *dbencseq,
-                                                  GtUword dbseqnum,
-                                                  GtUword dbstart_relative,
-                                                  const GtSeqorEncseq *queryes,
-                                                  bool same_encseq,
-                                                  GtUword queryseqnum,
-                                                  GtUword querystart_relative,
-                                                  GtUword len,
-                                                  GtReadmode query_readmode)
+const GtQuerymatch* gt_greedy_extend_seed_relative(void *info,
+                                                   const GtSeqorEncseq *dbes,
+                                                   GtUword dbseqnum,
+                                                   GtUword dbstart_relative,
+                                                   const GtSeqorEncseq *queryes,
+                                                   bool same_encseq,
+                                                   GtUword queryseqnum,
+                                                   GtUword querystart_relative,
+                                                   GtUword len,
+                                                   GtReadmode query_readmode)
 {
-  return gt_extend_querymatch_relative(false,
-                                       info,
-                                       dbencseq,
-                                       dbseqnum,
-                                       dbstart_relative,
-                                       queryes,
-                                       same_encseq,
-                                       queryseqnum,
-                                       querystart_relative,
-                                       len,
-                                       query_readmode);
+  return gt_extend_seed_relative(false,
+                                 info,
+                                 dbes,
+                                 dbseqnum,
+                                 dbstart_relative,
+                                 queryes,
+                                 same_encseq,
+                                 queryseqnum,
+                                 querystart_relative,
+                                 len,
+                                 query_readmode);
 }
 
 static const GtQuerymatch *gt_rf_extend_selfmatch(bool forxdrop,

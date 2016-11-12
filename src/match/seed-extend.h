@@ -282,9 +282,8 @@ int gt_rf_greedy_extend_selfmatch_with_output(void *info,
    (dbstart_relative for the first instance and querystart_relative
    for the second instance). */
 
-const GtQuerymatch* gt_xdrop_extend_querymatch_relative(
-                                                  void *info,
-                                                  const GtEncseq *dbencseq,
+const GtQuerymatch* gt_xdrop_extend_seed_relative(void *info,
+                                                  const GtSeqorEncseq *dbes,
                                                   GtUword dbseqnum,
                                                   GtUword dbstart_relative,
                                                   const GtSeqorEncseq *queryes,
@@ -294,17 +293,16 @@ const GtQuerymatch* gt_xdrop_extend_querymatch_relative(
                                                   GtUword len,
                                                   GtReadmode query_readmode);
 
-const GtQuerymatch* gt_greedy_extend_querymatch_relative(
-                                                  void *info,
-                                                  const GtEncseq *dbencseq,
-                                                  GtUword dbseqnum,
-                                                  GtUword dbstart_relative,
-                                                  const GtSeqorEncseq *queryes,
-                                                  bool same_encseq,
-                                                  GtUword queryseqnum,
-                                                  GtUword querystart_relative,
-                                                  GtUword len,
-                                                  GtReadmode query_readmode);
+const GtQuerymatch* gt_greedy_extend_seed_relative(void *info,
+                                                   const GtSeqorEncseq *dbes,
+                                                   GtUword dbseqnum,
+                                                   GtUword dbstart_relative,
+                                                   const GtSeqorEncseq *queryes,
+                                                   bool same_encseq,
+                                                   GtUword queryseqnum,
+                                                   GtUword querystart_relative,
+                                                   GtUword len,
+                                                   GtReadmode query_readmode);
 
 void gt_align_front_prune_edist(bool rightextension,
                                 GtFtPolished_point *best_polished_point,
