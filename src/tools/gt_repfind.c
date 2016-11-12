@@ -556,10 +556,11 @@ static int gt_generic_simplegreedyselfmatchoutput(
                                                    err);
 }
 
-typedef void (*GtXdrop_extend_querymatch_func)(void *,
-                                               const GtEncseq *,
-                                               const GtQuerymatch *,
-                                               const GtSeqorEncseq *);
+typedef void (*Gt_extend_querymatch_func)(void *,
+                                          const GtEncseq *,
+                                          const GtQuerymatch *,
+                                          const GtSeqorEncseq *,
+                                          bool);
 
 static int gt_callenumquerymatches(bool selfmatch,
                                    const char *indexname,
@@ -568,7 +569,7 @@ static int gt_callenumquerymatches(bool selfmatch,
                                    GtReadmode query_readmode,
                                    unsigned int userdefinedleastlength,
                                    GtQuerymatchoutoptions *querymatchoutoptions,
-                                   GtXdrop_extend_querymatch_func eqmf,
+                                   Gt_extend_querymatch_func eqmf,
                                    void *eqmf_data,
                                    GtKarlinAltschulStat *karlin_altschul_stat,
                                    GtLogger *logger,
@@ -638,7 +639,15 @@ static int gt_callenumquerymatches(bool selfmatch,
     int retval;
     GtSeqorEncseq query_seqorencseq;
     GtQuerymatch *exactseed = gt_querymatch_new();
+    bool same_encseq;
 
+    if (query_files == NULL || gt_str_array_size(query_files) == 0)
+    {
+      same_encseq = (suffixarray.encseq == query_encseq) ? true : false;
+    } else
+    {
+      same_encseq = false;
+    }
     if (querymatchoutoptions != NULL)
     {
       gt_querymatch_outoptions_set(exactseed,querymatchoutoptions);
@@ -665,15 +674,13 @@ static int gt_callenumquerymatches(bool selfmatch,
       query_totallength = gt_querysubstringmatchiterator_query_seqlen(qsmi);
       if (query_files == NULL || gt_str_array_size(query_files) == 0)
       {
-        GT_QUERYSEQORENCSEQ_INIT_ENCSEQ(query_seqorencseq,query_encseq,
-                                        (suffixarray.encseq == query_encseq)
-                                          ? true : false);
+        GT_SEQORENCSEQ_INIT_ENCSEQ(&query_seqorencseq,query_encseq);
       } else
       {
-        GT_QUERYSEQORENCSEQ_INIT_SEQ(query_seqorencseq,
-                                     gt_querysubstringmatchiterator_query(qsmi),
-                                     gt_querysubstringmatchiterator_desc(qsmi),
-                                     query_totallength,false);
+        GT_SEQORENCSEQ_INIT_SEQ(&query_seqorencseq,
+                                gt_querysubstringmatchiterator_query(qsmi),
+                                gt_querysubstringmatchiterator_desc(qsmi),
+                                query_totallength);
       }
       querystart = gt_querysubstringmatchiterator_querystart(qsmi);
       queryunitnum = gt_querysubstringmatchiterator_queryunitnum(qsmi);
@@ -696,7 +703,8 @@ static int gt_callenumquerymatches(bool selfmatch,
                            query_totallength,
                            NULL,
                            NULL);
-        eqmf(eqmf_data,suffixarray.encseq,exactseed,&query_seqorencseq);
+        eqmf(eqmf_data,suffixarray.encseq,exactseed,&query_seqorencseq,
+             same_encseq);
       } else
       {
         if (gt_querymatch_complete(exactseed,
@@ -755,7 +763,7 @@ static int gt_repfind_runner(int argc,
   GtFtPolishing_info *pol_info = NULL;
   GtQuerymatchoutoptions *querymatchoutoptions;
   GtProcessinfo_and_querymatchspaceptr processinfo_and_querymatchspaceptr;
-  GtXdrop_extend_querymatch_func eqmf = NULL;
+  Gt_extend_querymatch_func eqmf = NULL;
   void *eqmf_data = NULL;
   int mode;
   const int modes[] = {GT_READMODE_FORWARD,

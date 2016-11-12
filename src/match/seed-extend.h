@@ -147,7 +147,8 @@ int gt_rf_xdrop_extend_selfmatch_with_output(void *info,
 void gt_rf_xdrop_extend_querymatch_with_output(void *info,
                                                const GtEncseq *encseq,
                                                const GtQuerymatch *exactseed,
-                                               const GtSeqorEncseq *queryes);
+                                               const GtSeqorEncseq *queryes,
+                                               bool same_encseq);
 
 /* The following functions are used for the greedy extension. */
 
@@ -287,6 +288,7 @@ const GtQuerymatch* gt_xdrop_extend_querymatch_relative(
                                                   GtUword dbseqnum,
                                                   GtUword dbstart_relative,
                                                   const GtSeqorEncseq *queryes,
+                                                  bool same_encseq,
                                                   GtUword queryseqnum,
                                                   GtUword querystart_relative,
                                                   GtUword len,
@@ -298,6 +300,7 @@ const GtQuerymatch* gt_greedy_extend_querymatch_relative(
                                                   GtUword dbseqnum,
                                                   GtUword dbstart_relative,
                                                   const GtSeqorEncseq *queryes,
+                                                  bool same_encseq,
                                                   GtUword queryseqnum,
                                                   GtUword querystart_relative,
                                                   GtUword len,
@@ -335,7 +338,8 @@ char *gt_seed_extend_params_keystring(bool use_greedy,
 void gt_rf_greedy_extend_querymatch_with_output(void *info,
                                                 const GtEncseq *dbencseq,
                                                 const GtQuerymatch *exactseed,
-                                                const GtSeqorEncseq *queryes);
+                                                const GtSeqorEncseq *queryes,
+                                                bool same_encseq);
 
 double gt_greedy_dna_sequence_bias_get(const GtEncseq *encseq);
 

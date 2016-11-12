@@ -2,19 +2,17 @@
 #define SEQ_OR_ENCSEQ_H
 #include "core/encseq_api.h"
 
-#define GT_QUERYSEQORENCSEQ_INIT_ENCSEQ(QUERYES,ENCSEQ,SAME_ENCSEQ)\
-        (QUERYES).encseq = ENCSEQ;\
-        (QUERYES).seq = NULL;\
-        (QUERYES).desc = NULL;\
-        (QUERYES).seqlength = 0;\
-        (QUERYES).same_encseq = SAME_ENCSEQ
+#define GT_SEQORENCSEQ_INIT_ENCSEQ(SORE,ENCSEQ)\
+        (SORE)->encseq = ENCSEQ;\
+        (SORE)->seq = NULL;\
+        (SORE)->desc = NULL;\
+        (SORE)->seqlength = 0
 
-#define GT_QUERYSEQORENCSEQ_INIT_SEQ(QUERYES,SEQ,SEQDESC,SEQLENGTH,SAME_ENCSEQ)\
-        (QUERYES).encseq = NULL;\
-        (QUERYES).seq = SEQ;\
-        (QUERYES).desc = SEQDESC;\
-        (QUERYES).seqlength = SEQLENGTH;\
-        (QUERYES).same_encseq = SAME_ENCSEQ
+#define GT_SEQORENCSEQ_INIT_SEQ(SORE,SEQ,SEQDESC,SEQLENGTH)\
+        (SORE)->encseq = NULL;\
+        (SORE)->seq = SEQ;\
+        (SORE)->desc = SEQDESC;\
+        (SORE)->seqlength = SEQLENGTH
 
 typedef struct
 {
@@ -22,7 +20,6 @@ typedef struct
   const GtEncseq *encseq;
   const char *desc; /* only used if seq != NULL and display_seq_desc */
   GtWord seqlength;
-  bool same_encseq;
 } GtSeqorEncseq;
 
 #endif
