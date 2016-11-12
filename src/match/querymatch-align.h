@@ -28,6 +28,9 @@ GtQuerymatchoutoptions *gt_querymatchoutoptions_new(bool generatealignment,
                                                     bool showeoplist,
                                                     GtUword alignmentwidth);
 
+void gt_querymatchoutoptions_reset(GtQuerymatchoutoptions
+                                     *querymatchoutoptions);
+
 void gt_querymatchoutoptions_extend(
                   GtQuerymatchoutoptions *querymatchoutoptions,
                   GtUword errorpercentage,

@@ -76,6 +76,14 @@ GtQuerymatchoutoptions *gt_querymatchoutoptions_new(bool generate_eoplist,
   return querymatchoutoptions;
 }
 
+void gt_querymatchoutoptions_reset(GtQuerymatchoutoptions *querymatchoutoptions)
+{
+  if (querymatchoutoptions->vseqbuffer_size == 0)
+  {
+    querymatchoutoptions->vseqbuffer = NULL;
+  }
+}
+
 void gt_querymatchoutoptions_extend(
                   GtQuerymatchoutoptions *querymatchoutoptions,
                   GtUword errorpercentage,

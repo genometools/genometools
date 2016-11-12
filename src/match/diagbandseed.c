@@ -3089,6 +3089,7 @@ static void gt_diagbandseed_process_seeds(GtSeedpairlist *seedpairlist,
   GtUword diagbands_used;
   GtTimer *timer = NULL;
   GtDiagbandseedCounts process_seeds_counts = {0,0,0,0,0};
+#define USEBYTESTRING
 #ifdef USEBYTESTRING
   GtUword b_off, seqstartpos, seqendpos;
   const GtUword
@@ -3096,7 +3097,8 @@ static void gt_diagbandseed_process_seeds(GtSeedpairlist *seedpairlist,
     b_first_seqstartpos = gt_sequence_parts_info_seqstartpos(bseqranges,
                                                              b_first_seqnum);
 #endif
-  GT_QUERYSEQORENCSEQ_INIT_ENCSEQ(queryes,bencseq);
+  GT_QUERYSEQORENCSEQ_INIT_ENCSEQ(queryes,bencseq,(aencseq == bencseq) ?
+                                                     true : false);
 #ifndef _WIN32
   process_seeds_counts.withtiming = verbose;
   process_seeds_counts.total_extension_time_usec = 0;
@@ -3211,7 +3213,8 @@ static void gt_diagbandseed_process_seeds(GtSeedpairlist *seedpairlist,
       gt_assert(b_first_seqstartpos <= seqstartpos);
       b_off = seqstartpos - b_first_seqstartpos;
       GT_QUERYSEQORENCSEQ_INIT_SEQ(queryes,b_byte_sequence + b_off,"fake",
-                                   seqendpos - seqstartpos + 1);
+                                   seqendpos - seqstartpos + 1,
+                                   (aencseq == bencseq) ? true : false);
 #endif
       gt_diagbandseed_process_segment(arg,
                                       aencseq,
@@ -3827,6 +3830,10 @@ static int gt_diagbandseed_algorithm(const GtDiagbandseedInfo *arg,
                                 arg->verbose,
                                 stream);
   gt_seedpairlist_reset(seedpairlist);
+  if (querymoutopt != NULL)
+  {
+    gt_querymatchoutoptions_reset(querymoutopt);
+  }
 
   /* Third (reverse) k-mer list */
   if (both_strands) {

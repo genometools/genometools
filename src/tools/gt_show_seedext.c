@@ -245,7 +245,8 @@ static void gt_show_seed_extend_encseq(GtQuerymatch *querymatchptr,
 {
   GtSeqorEncseq bseqorencseq;
 
-  GT_QUERYSEQORENCSEQ_INIT_ENCSEQ(bseqorencseq,bencseq);
+  GT_QUERYSEQORENCSEQ_INIT_ENCSEQ(bseqorencseq,bencseq,
+                                  (aencseq == bencseq) ? true : false);
   if (gt_querymatch_process(querymatchptr,
                             karlin_altschul_stat,
                             aencseq,

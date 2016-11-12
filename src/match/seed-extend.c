@@ -136,9 +136,10 @@ static void gt_sesp_from_absolute(GtSeedextendSeqpair *sesp,
                                   GtUword pos1,
                                   const GtEncseq *queryencseq,
                                   GtUword pos2,
-                                  GtUword len)
+                                  GtUword len,
+                                  bool same_encseq)
 {
-  sesp->same_encseq = (dbencseq == queryencseq) ? true : false;
+  sesp->same_encseq = same_encseq;
   sesp->seedlength = len;
   sesp->dbseqnum = gt_encseq_seqnum(dbencseq,pos1),
   sesp->dbseqstartpos = gt_encseq_seqstartpos(dbencseq,sesp->dbseqnum),
@@ -173,11 +174,14 @@ static void gt_sesp_from_relative(GtSeedextendSeqpair *sesp,
                                   GtUword querystart_relative,
                                   GtUword query_totallength,
                                   GtUword len,
-                                  GtReadmode query_readmode)
+                                  GtReadmode query_readmode,
+                                  bool same_encseq)
 {
-  sesp->same_encseq = (dbencseq == queryencseq) ? true : false;
+  sesp->same_encseq = same_encseq;
   sesp->seedlength = len;
   sesp->dbseqnum = dbseqnum;
+  /* the following values are constant for a segment and thus
+     should be computed only once */
   sesp->dbseqstartpos = gt_encseq_seqstartpos(dbencseq,sesp->dbseqnum),
   sesp->dbseqlength = gt_encseq_seqlength(dbencseq,sesp->dbseqnum);
   sesp->queryseqnum = queryseqnum;
@@ -194,6 +198,8 @@ static void gt_sesp_from_relative(GtSeedextendSeqpair *sesp,
     } else
     {
       gt_assert(dbencseq != queryencseq || dbseqnum != queryseqnum);
+      /* the following values are constant for a segment and thus
+         should be computed only once */
       sesp->queryseqstartpos = gt_encseq_seqstartpos(queryencseq,
                                                      sesp->queryseqnum);
       sesp->query_totallength = gt_encseq_seqlength(queryencseq,
@@ -1206,7 +1212,8 @@ static const GtQuerymatch* gt_extend_querymatch_relative(bool forxdrop,
                         querystart_relative,
                         queryes->encseq == NULL ? queryes->seqlength : 0,
                         len,
-                        query_readmode);
+                        query_readmode,
+                        queryes->same_encseq);
   return gt_extend_sesp(forxdrop, info, dbencseq, queryes, &sesp);
 }
 
@@ -1266,8 +1273,8 @@ static const GtQuerymatch *gt_rf_extend_selfmatch(bool forxdrop,
   GtSeedextendSeqpair sesp;
   GtSeqorEncseq queryes;
 
-  gt_sesp_from_absolute(&sesp,encseq, pos1, encseq, pos2, len);
-  GT_QUERYSEQORENCSEQ_INIT_ENCSEQ(queryes,encseq);
+  gt_sesp_from_absolute(&sesp,encseq, pos1, encseq, pos2, len,true);
+  GT_QUERYSEQORENCSEQ_INIT_ENCSEQ(queryes,encseq,true);
   return gt_extend_sesp (forxdrop,info, encseq, &queryes, &sesp);
 }
 
@@ -1373,7 +1380,8 @@ static const GtQuerymatch* gt_rf_extend_querymatch(bool forxdrop,
                         gt_querymatch_querystart(exactseed),
                         queryes->encseq == NULL ? queryes->seqlength : 0,
                         gt_querymatch_querylen(exactseed),
-                        gt_querymatch_query_readmode(exactseed));
+                        gt_querymatch_query_readmode(exactseed),
+                        queryes->same_encseq);
   return gt_extend_sesp(forxdrop, info, dbencseq, queryes, &sesp);
 }
 

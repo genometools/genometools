@@ -2,10 +2,9 @@
 
 seed_extend()
 {
-  env -i ${GTDIR}/bin/gt seed_extend -display seqlength -minidentity 70 -parts 2 -extend${mode} -ii db -qii query -maxfreq 20 -kmerfile no $1 > sfx-$2.matches
+  env -i ${GTDIR}/bin/gt seed_extend -display seqlength -minidentity 70 -extend${mode} -ii db -qii query -maxfreq 20 -kmerfile no $1 > sfx-$2.matches
 }
 
-set -e -x
 # set GTDIR as path of genometools directory
 
 for dbseq in `${GTDIR}/scripts/findfasta.rb`
@@ -22,6 +21,7 @@ do
         seed_extend "-splt ulong" ulong
         seed_extend "-splt struct" struct
         cmp -s sfx-ulong.matches sfx-struct.matches
+        wc -l sfx-ulong.matches
       done
     fi
   done
