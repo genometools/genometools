@@ -489,7 +489,7 @@ static void gt_querymatch_applycorrection(
 
 bool gt_querymatch_process(GtQuerymatch *querymatch,
                            GtKarlinAltschulStat *karlin_altschul_stat,
-                           const GtEncseq *encseq,
+                           const GtSeqorEncseq *dbes,
                            const GtSeqorEncseq *queryes,
                            bool greedyextension)
 {
@@ -519,7 +519,7 @@ bool gt_querymatch_process(GtQuerymatch *querymatch,
       seededalignment
         = gt_querymatchoutoptions_alignment_prepare(querymatch->
                                                       ref_querymatchoutoptions,
-                                                    encseq,
+                                                    dbes,
                                                     queryes,
                                                     querymatch->query_readmode,
                                                     query_seqstartpos,
@@ -684,7 +684,7 @@ bool gt_querymatch_complete(GtQuerymatch *querymatch,
                             uint64_t queryseqnum,
                             GtUword querylen,
                             GtUword querystart,
-                            const GtEncseq *encseq,
+                            const GtSeqorEncseq *dbes,
                             const GtSeqorEncseq *queryes,
                             GtUword query_totallength,
                             GtUword seedpos1,
@@ -699,7 +699,13 @@ bool gt_querymatch_complete(GtQuerymatch *querymatch,
   {
     GtUword desclen;
 
-    db_desc = gt_encseq_description(encseq,&desclen,dbseqnum);
+    if (dbes->encseq != NULL)
+    {
+      db_desc = gt_encseq_description(dbes->encseq,&desclen,dbseqnum);
+    } else
+    {
+      db_desc = dbes->desc;
+    }
     if (queryes->encseq != NULL)
     {
       query_desc = gt_encseq_description(queryes->encseq,&desclen,
@@ -731,7 +737,7 @@ bool gt_querymatch_complete(GtQuerymatch *querymatch,
   querymatch->seedlen = seedlen;
   return gt_querymatch_process(querymatch,
                                karlin_altschul_stat,
-                               encseq,
+                               dbes,
                                queryes,
                                greedyextension);
 }

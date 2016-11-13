@@ -19,6 +19,7 @@
 #define QUERYMATCH_ALIGN_H
 
 #include "core/types_api.h"
+#include "core/error_api.h"
 #include "match/ft-front-prune.h"
 #include "match/seq_or_encseq.h"
 
@@ -26,7 +27,9 @@ typedef struct GtQuerymatchoutoptions GtQuerymatchoutoptions;
 
 GtQuerymatchoutoptions *gt_querymatchoutoptions_new(bool generatealignment,
                                                     bool showeoplist,
-                                                    GtUword alignmentwidth);
+                                                    GtUword alignmentwidth,
+                                                    const char *indexname,
+                                                    GtError *err);
 
 void gt_querymatchoutoptions_reset(GtQuerymatchoutoptions
                                      *querymatchoutoptions);
@@ -58,7 +61,7 @@ void gt_querymatchoutoptions_delete(
 bool gt_querymatchoutoptions_alignment_prepare(
                                      GtQuerymatchoutoptions
                                        *querymatchoutoptions,
-                                     const GtEncseq *encseq,
+                                     const GtSeqorEncseq *dbes,
                                      const GtSeqorEncseq *queryes,
                                      GtReadmode query_readmode,
                                      GtUword query_seqstartpos,
@@ -76,7 +79,7 @@ bool gt_querymatchoutoptions_alignment_prepare(
                                      bool greedyextension);
 
 void gt_frontprune2eoplist(GtQuerymatchoutoptions *querymatchoutoptions,
-                           const GtEncseq *encseq,
+                           const GtSeqorEncseq *dbes,
                            const GtSeqorEncseq *queryes,
                            GtReadmode query_readmode,
                            GtUword query_seqstartpos,

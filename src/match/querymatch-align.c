@@ -18,6 +18,7 @@
 #include "core/ma_api.h"
 #include "core/types_api.h"
 #include "core/minmax.h"
+#include "core/encseq_metadata.h"
 #include "revcompl.h"
 #include "seed-extend.h"
 #include "ft-polish.h"
@@ -34,6 +35,7 @@ struct GtQuerymatchoutoptions
   GtGreedyextendmatchinfo *ggemi;
   const GtUchar *characters;
   GtEncseqReader *esr_for_align_show;
+  GtEncseqMetadata *emd;
   GtUchar wildcardshow;
   GtSeqpaircoordinates correction_info;
   bool always_polished_ends,
@@ -44,11 +46,33 @@ struct GtQuerymatchoutoptions
 
 GtQuerymatchoutoptions *gt_querymatchoutoptions_new(bool generate_eoplist,
                                                     bool show_eoplist,
-                                                    GtUword alignmentwidth)
+                                                    GtUword alignmentwidth,
+                                                    const char *indexname,
+                                                    GtError *err)
 {
-  GtQuerymatchoutoptions *querymatchoutoptions
-    = gt_malloc(sizeof *querymatchoutoptions);
+  GtQuerymatchoutoptions *querymatchoutoptions;
 
+  if (indexname != NULL)
+  {
+    GtAlphabet *alphabet;
+    GtEncseqMetadata *emd = gt_encseq_metadata_new(indexname,err);
+
+    if (emd == NULL)
+    {
+      return NULL;
+    }
+    alphabet = gt_encseq_metadata_alphabet(emd);
+    querymatchoutoptions = gt_malloc(sizeof *querymatchoutoptions);
+    querymatchoutoptions->emd = emd;
+    querymatchoutoptions->characters = gt_alphabet_characters(alphabet);
+    querymatchoutoptions->wildcardshow = gt_alphabet_wildcard_show(alphabet);
+  } else
+  {
+    querymatchoutoptions = gt_malloc(sizeof *querymatchoutoptions);
+    querymatchoutoptions->emd = NULL;
+    querymatchoutoptions->characters = NULL;
+    querymatchoutoptions->wildcardshow = 0;
+  }
   querymatchoutoptions->generate_eoplist
     = generate_eoplist || alignmentwidth > 0 || show_eoplist;
   querymatchoutoptions->show_eoplist = show_eoplist;
@@ -71,16 +95,22 @@ GtQuerymatchoutoptions *gt_querymatchoutoptions_new(bool generate_eoplist,
     querymatchoutoptions->eoplist_reader = NULL;
   }
   querymatchoutoptions->esr_for_align_show = NULL;
-  querymatchoutoptions->characters = NULL;
   querymatchoutoptions->always_polished_ends = true;
   return querymatchoutoptions;
 }
 
 void gt_querymatchoutoptions_reset(GtQuerymatchoutoptions *querymatchoutoptions)
 {
-  if (querymatchoutoptions->vseqbuffer_size == 0)
+  if (querymatchoutoptions != NULL)
   {
-    querymatchoutoptions->vseqbuffer = NULL;
+    if (querymatchoutoptions->vseqbuffer_size == 0)
+    {
+      querymatchoutoptions->vseqbuffer = NULL;
+    }
+    if (querymatchoutoptions->useqbuffer_size == 0)
+    {
+      querymatchoutoptions->useqbuffer = NULL;
+    }
   }
 }
 
@@ -162,7 +192,10 @@ void gt_querymatchoutoptions_delete(
   {
     front_trace_delete(querymatchoutoptions->front_trace);
     gt_greedy_extend_matchinfo_delete(querymatchoutoptions->ggemi);
-    gt_free(querymatchoutoptions->useqbuffer);
+    if (querymatchoutoptions->useqbuffer_size > 0)
+    {
+      gt_free(querymatchoutoptions->useqbuffer);
+    }
     if (querymatchoutoptions->vseqbuffer_size > 0)
     {
       gt_free(querymatchoutoptions->vseqbuffer);
@@ -172,12 +205,13 @@ void gt_querymatchoutoptions_delete(
     gt_eoplist_reader_delete(querymatchoutoptions->eoplist_reader_verify);
     gt_encseq_reader_delete(querymatchoutoptions->esr_for_align_show);
     polishing_info_delete(querymatchoutoptions->pol_info);
+    gt_encseq_metadata_delete(querymatchoutoptions->emd);
     gt_free(querymatchoutoptions);
   }
 }
 
 static void seededmatch2eoplist(GtQuerymatchoutoptions *querymatchoutoptions,
-                                const GtEncseq *encseq,
+                                const GtSeqorEncseq *dbes,
                                 const GtSeqorEncseq *queryes,
                                 GtReadmode query_readmode,
                                 GtUword query_seqstartpos,
@@ -214,7 +248,7 @@ static void seededmatch2eoplist(GtQuerymatchoutoptions *querymatchoutoptions,
     gt_align_front_prune_edist(true,
                                &right_best_polished_point,
                                querymatchoutoptions->front_trace,
-                               encseq,
+                               dbes,
                                queryes,
                                query_readmode,
                                query_seqstartpos,
@@ -253,7 +287,7 @@ static void seededmatch2eoplist(GtQuerymatchoutoptions *querymatchoutoptions,
     gt_align_front_prune_edist(false,
                                &left_best_polished_point,
                                querymatchoutoptions->front_trace,
-                               encseq,
+                               dbes,
                                queryes,
                                query_readmode,
                                query_seqstartpos,
@@ -319,7 +353,7 @@ static void seededmatch2eoplist(GtQuerymatchoutoptions *querymatchoutoptions,
 }
 
 void gt_frontprune2eoplist(GtQuerymatchoutoptions *querymatchoutoptions,
-                           const GtEncseq *encseq,
+                           const GtSeqorEncseq *dbes,
                            const GtSeqorEncseq *queryes,
                            GtReadmode query_readmode,
                            GtUword query_seqstartpos,
@@ -344,7 +378,7 @@ void gt_frontprune2eoplist(GtQuerymatchoutoptions *querymatchoutoptions,
   gt_align_front_prune_edist(rightextension,
                              &right_best_polished_point,
                              querymatchoutoptions->front_trace,
-                             encseq,
+                             dbes,
                              queryes,
                              query_readmode,
                              query_seqstartpos,
@@ -382,7 +416,7 @@ void gt_frontprune2eoplist(GtQuerymatchoutoptions *querymatchoutoptions,
 
 bool gt_querymatchoutoptions_alignment_prepare(GtQuerymatchoutoptions
                                                 *querymatchoutoptions,
-                                               const GtEncseq *encseq,
+                                               const GtSeqorEncseq *dbes,
                                                const GtSeqorEncseq *queryes,
                                                GtReadmode query_readmode,
                                                GtUword query_seqstartpos,
@@ -405,31 +439,38 @@ bool gt_querymatchoutoptions_alignment_prepare(GtQuerymatchoutoptions
   if (querymatchoutoptions->eoplist_reader != NULL &&
       querymatchoutoptions->characters == NULL)
   {
+    gt_assert(dbes->encseq != NULL);
     querymatchoutoptions->characters
-      = gt_encseq_alphabetcharacters(encseq);
+      = gt_encseq_alphabetcharacters(dbes->encseq);
     querymatchoutoptions->wildcardshow
-      = gt_alphabet_wildcard_show(gt_encseq_alphabet(encseq));
+      = gt_alphabet_wildcard_show(gt_encseq_alphabet(dbes->encseq));
   }
-  if (querymatchoutoptions->esr_for_align_show == NULL)
+  if (dbes->encseq != NULL)
   {
-    querymatchoutoptions->esr_for_align_show
-      = gt_encseq_create_reader_with_readmode(encseq,
-                                              GT_READMODE_FORWARD,
-                                              0);
-  }
-  if (dblen > querymatchoutoptions->useqbuffer_size)
-  {
-    querymatchoutoptions->useqbuffer
-      = gt_realloc(querymatchoutoptions->useqbuffer,
-                   sizeof *querymatchoutoptions->useqbuffer * dblen);
-    querymatchoutoptions->useqbuffer_size = dblen;
-  }
-  gt_encseq_extract_encoded_with_reader(
+    if (querymatchoutoptions->esr_for_align_show == NULL)
+    {
+      querymatchoutoptions->esr_for_align_show
+        = gt_encseq_create_reader_with_readmode(dbes->encseq,
+                                                GT_READMODE_FORWARD,
+                                                0);
+    }
+    if (dblen > querymatchoutoptions->useqbuffer_size)
+    {
+      querymatchoutoptions->useqbuffer
+        = gt_realloc(querymatchoutoptions->useqbuffer,
+                     sizeof *querymatchoutoptions->useqbuffer * dblen);
+      querymatchoutoptions->useqbuffer_size = dblen;
+    }
+    gt_encseq_extract_encoded_with_reader(
                             querymatchoutoptions->esr_for_align_show,
-                            encseq,
+                            dbes->encseq,
                             querymatchoutoptions->useqbuffer,
                             dbstart,
                             dbstart + dblen - 1);
+  } else
+  {
+    querymatchoutoptions->useqbuffer = (GtUchar *) (dbes->seq + dbstart);
+  }
   if ((queryes->encseq != NULL || query_readmode != GT_READMODE_FORWARD) &&
       querylen > querymatchoutoptions->vseqbuffer_size)
   {
@@ -475,7 +516,7 @@ bool gt_querymatchoutoptions_alignment_prepare(GtQuerymatchoutoptions
   if (edist > 0)
   {
     seededmatch2eoplist(querymatchoutoptions,
-                        encseq,
+                        dbes,
                         queryes,
                         query_readmode,
                         query_seqstartpos,

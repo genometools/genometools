@@ -86,7 +86,7 @@ bool gt_querymatch_read_line(GtQuerymatch *querymatchptr,
 
 bool gt_querymatch_process(GtQuerymatch *querymatchptr,
                            GtKarlinAltschulStat *karlin_altschul_stat,
-                           const GtEncseq *encseq,
+                           const GtSeqorEncseq *dbes,
                            const GtSeqorEncseq *queryes,
                            bool greedyextension);
 
@@ -106,7 +106,7 @@ bool gt_querymatch_complete(GtQuerymatch *querymatchptr,
                             uint64_t queryseqnum,
                             GtUword querylen,
                             GtUword querystart,
-                            const GtEncseq *encseq,
+                            const GtSeqorEncseq *dbes,
                             const GtSeqorEncseq *queryes,
                             GtUword query_totallength,
                             GtUword seedpos1,

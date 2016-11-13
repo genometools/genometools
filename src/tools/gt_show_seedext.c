@@ -243,12 +243,13 @@ static void gt_show_seed_extend_encseq(GtQuerymatch *querymatchptr,
                                        const GtEncseq *aencseq,
                                        const GtEncseq *bencseq)
 {
-  GtSeqorEncseq bseqorencseq;
+  GtSeqorEncseq aseqorencseq, bseqorencseq;
 
+  GT_SEQORENCSEQ_INIT_ENCSEQ(&aseqorencseq,aencseq);
   GT_SEQORENCSEQ_INIT_ENCSEQ(&bseqorencseq,bencseq);
   if (gt_querymatch_process(querymatchptr,
                             karlin_altschul_stat,
-                            aencseq,
+                            &aseqorencseq,
                             &bseqorencseq,
                             false) != 0)
   {
@@ -321,13 +322,21 @@ static int gt_show_seedext_runner(GT_UNUSED int argc,
     gt_seedextend_match_iterator_display_set(semi,display_flag);
     if (arguments->show_alignment || arguments->showeoplist)
     {
-      gt_seedextend_match_iterator_querymatchoutoptions_set(semi,
-                                                       true,
-                                                       arguments->showeoplist,
-                                                       alignmentwidth,
-                                                       !arguments->relax_polish,
-                                                       display_flag);
+      if (gt_seedextend_match_iterator_querymatchoutoptions_set(
+                            semi,
+                            true,
+                            arguments->showeoplist,
+                            alignmentwidth,
+                            !arguments->relax_polish,
+                            display_flag,
+                            err) != 0)
+      {
+        had_err = -1;
+      }
     }
+  }
+  if (!had_err)
+  {
     if (arguments->seed_extend)
     {
       greedyextendmatchinfo
@@ -419,14 +428,14 @@ static int gt_show_seedext_runner(GT_UNUSED int argc,
                                   querymatchptr);
       }
     }
-    polishing_info_delete(pol_info);
     gt_greedy_extend_matchinfo_delete(greedyextendmatchinfo);
-    gt_free(alignment_show_buffer);
     gt_free(seqpairbuf.a_sequence);
     gt_free(seqpairbuf.b_sequence);
     gt_karlin_altschul_stat_delete(processinfo_and_querymatchspaceptr.
                                    karlin_altschul_stat);
   }
+  gt_free(alignment_show_buffer);
+  polishing_info_delete(pol_info);
   gt_alignment_delete(alignment);
   gt_scorehandler_delete(linspace_scorehandler);
   gt_linspace_management_delete(linspace_spacemanager);

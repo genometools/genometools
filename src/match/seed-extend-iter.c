@@ -469,18 +469,25 @@ GtQuerymatch *gt_seedextend_match_iterator_get(
   return gt_querymatch_table_get(&semi->querymatch_table,idx);
 }
 
-void gt_seedextend_match_iterator_querymatchoutoptions_set(
+int gt_seedextend_match_iterator_querymatchoutoptions_set(
                     GtSeedextendMatchIterator *semi,
                     bool generatealignment,
                     bool showeoplist,
                     GtUword alignmentwidth,
                     bool always_polished_ends,
-                    unsigned int display_flag)
+                    unsigned int display_flag,
+                    GtError *err)
 {
   double matchscore_bias = GT_DEFAULT_MATCHSCORE_BIAS;
 
   semi->querymatchoutoptions
-    = gt_querymatchoutoptions_new(generatealignment,showeoplist,alignmentwidth);
+    = gt_querymatchoutoptions_new(generatealignment,showeoplist,
+                                  alignmentwidth, gt_str_get(semi->ii), err);
+
+  if (semi->querymatchoutoptions)
+  {
+    return -1;
+  }
   if (gt_seedextend_match_iterator_bias_parameters(semi))
   {
     matchscore_bias = gt_greedy_dna_sequence_bias_get(semi->aencseq);
@@ -492,4 +499,5 @@ void gt_seedextend_match_iterator_querymatchoutoptions_set(
                             always_polished_ends,
                             display_flag);
   gt_querymatch_outoptions_set(semi->querymatchptr,semi->querymatchoutoptions);
+  return 0;
 }

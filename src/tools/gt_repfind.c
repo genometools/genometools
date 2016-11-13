@@ -84,6 +84,7 @@ static int gt_exact_selfmatch_with_output(void *info,
   const GtEncseq *encseq;
   GtProcessinfo_and_querymatchspaceptr *processinfo_and_querymatchspaceptr
     = (GtProcessinfo_and_querymatchspaceptr *) info;
+  GtSeqorEncseq dbes;
 
   gt_assert(pos1 < pos2 && genericencseq != NULL && genericencseq->hasencseq);
   encseq = genericencseq->seqptr.encseq;
@@ -105,6 +106,7 @@ static int gt_exact_selfmatch_with_output(void *info,
     query_totallength = 0;
   }
   gt_assert(pos2 >= queryseqstartpos);
+  GT_SEQORENCSEQ_INIT_ENCSEQ(&dbes,encseq);
   if (gt_querymatch_complete(processinfo_and_querymatchspaceptr->
                                   querymatchspaceptr,
                              processinfo_and_querymatchspaceptr->
@@ -121,7 +123,7 @@ static int gt_exact_selfmatch_with_output(void *info,
                              (uint64_t) queryseqnum,
                              len,
                              pos2 - queryseqstartpos,
-                             encseq,
+                             &dbes,
                              NULL,
                              query_totallength,
                              pos1,
@@ -707,6 +709,9 @@ static int gt_callenumquerymatches(bool selfmatch,
              same_encseq);
       } else
       {
+        GtSeqorEncseq dbes;
+
+        GT_SEQORENCSEQ_INIT_ENCSEQ(&dbes,suffixarray.encseq);
         if (gt_querymatch_complete(exactseed,
                                    karlin_altschul_stat,
                                    matchlength,
@@ -721,7 +726,7 @@ static int gt_callenumquerymatches(bool selfmatch,
                                    queryunitnum,
                                    matchlength,
                                    querystart,
-                                   suffixarray.encseq,
+                                   &dbes,
                                    &query_seqorencseq,
                                    query_totallength,
                                    dbstart,
@@ -878,10 +883,14 @@ static int gt_repfind_runner(int argc,
          !arguments->noxpolish))
     {
       querymatchoutoptions
-        = gt_querymatchoutoptions_new(true, false,arguments->alignmentwidth);
-
-      if (gt_option_is_set(arguments->refextendxdropoption) ||
-          gt_option_is_set(arguments->refextendgreedyoption))
+        = gt_querymatchoutoptions_new(true, false,arguments->alignmentwidth,
+                                      gt_str_get(arguments->indexname),err);
+      if (querymatchoutoptions == NULL)
+      {
+        haserr = true;
+      }
+      if (!haserr && (gt_option_is_set(arguments->refextendxdropoption) ||
+                      gt_option_is_set(arguments->refextendgreedyoption)))
       {
         const GtUword sensitivity
           = gt_option_is_set(arguments->refextendgreedyoption)
@@ -905,48 +914,53 @@ static int gt_repfind_runner(int argc,
     {
       querymatchoutoptions = NULL;
     }
-    processinfo_and_querymatchspaceptr.querymatchspaceptr = gt_querymatch_new();
-    gt_querymatch_display_set(
-              processinfo_and_querymatchspaceptr.querymatchspaceptr,
-              display_flag);
-    if (querymatchoutoptions != NULL)
+    if (!haserr)
     {
-      gt_querymatch_outoptions_set(
-              processinfo_and_querymatchspaceptr.querymatchspaceptr,
-              querymatchoutoptions);
-    }
-    if (arguments->verify_alignment)
-    {
-      gt_querymatch_verify_alignment_set(
-        processinfo_and_querymatchspaceptr.querymatchspaceptr);
-    }
-    if (gt_option_is_set(arguments->refextendxdropoption))
-    {
-      eqmf = gt_rf_xdrop_extend_querymatch_with_output;
-      processinfo_and_querymatchspaceptr.processinfo = xdropmatchinfo;
-      eqmf_data = (void *) &processinfo_and_querymatchspaceptr;
-    } else
-    {
-      if (gt_option_is_set(arguments->refextendgreedyoption))
+      processinfo_and_querymatchspaceptr.querymatchspaceptr
+        = gt_querymatch_new();
+      gt_querymatch_display_set(
+                processinfo_and_querymatchspaceptr.querymatchspaceptr,
+                display_flag);
+      if (querymatchoutoptions != NULL)
       {
-        eqmf = gt_rf_greedy_extend_querymatch_with_output;
-        processinfo_and_querymatchspaceptr.processinfo
-          = greedyextendmatchinfo;
-        eqmf_data = (void *) &processinfo_and_querymatchspaceptr;
+        gt_querymatch_outoptions_set(
+                processinfo_and_querymatchspaceptr.querymatchspaceptr,
+                querymatchoutoptions);
       }
-    }
-    if (gt_querymatch_seq_desc_display(display_flag))
-    {
-      GtEncseqLoader *encseq_loader = gt_encseq_loader_new();
-      gt_encseq_loader_require_des_tab(encseq_loader);
-      gt_encseq_loader_require_sds_tab(encseq_loader);
-      encseq_for_desc = gt_encseq_loader_load(encseq_loader,
-                                              gt_str_get(arguments->indexname),
-                                              err);
-      gt_encseq_loader_delete(encseq_loader);
-      if (encseq_for_desc == NULL)
+      if (arguments->verify_alignment)
       {
-        haserr = true;
+        gt_querymatch_verify_alignment_set(
+          processinfo_and_querymatchspaceptr.querymatchspaceptr);
+      }
+      if (gt_option_is_set(arguments->refextendxdropoption))
+      {
+        eqmf = gt_rf_xdrop_extend_querymatch_with_output;
+        processinfo_and_querymatchspaceptr.processinfo = xdropmatchinfo;
+        eqmf_data = (void *) &processinfo_and_querymatchspaceptr;
+      } else
+      {
+        if (gt_option_is_set(arguments->refextendgreedyoption))
+        {
+          eqmf = gt_rf_greedy_extend_querymatch_with_output;
+          processinfo_and_querymatchspaceptr.processinfo
+            = greedyextendmatchinfo;
+          eqmf_data = (void *) &processinfo_and_querymatchspaceptr;
+        }
+      }
+      if (gt_querymatch_seq_desc_display(display_flag))
+      {
+        GtEncseqLoader *encseq_loader = gt_encseq_loader_new();
+        gt_encseq_loader_require_des_tab(encseq_loader);
+        gt_encseq_loader_require_sds_tab(encseq_loader);
+        encseq_for_desc
+          = gt_encseq_loader_load(encseq_loader,
+                                  gt_str_get(arguments->indexname),
+                                  err);
+        gt_encseq_loader_delete(encseq_loader);
+        if (encseq_for_desc == NULL)
+        {
+          haserr = true;
+        }
       }
     }
     if (!haserr)

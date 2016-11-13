@@ -80,13 +80,14 @@ GtQuerymatch *gt_seedextend_match_iterator_get(
    list is required, then set <generatealignment> to <true>,
    <alignmentwidth> to 0 and the other three boolean parameters to <false>. */
 
-void gt_seedextend_match_iterator_querymatchoutoptions_set(
+int gt_seedextend_match_iterator_querymatchoutoptions_set(
                     GtSeedextendMatchIterator *semi,
                     bool generatealignment,
                     bool showeoplist,
                     GtUword alignmentwidth,
                     bool always_polished_ends,
-                    unsigned int display_flag);
+                    unsigned int display_flag,
+                    GtError *err);
 
 /* The following function return different components of the iterator
    object. */
