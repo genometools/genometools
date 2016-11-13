@@ -439,11 +439,17 @@ bool gt_querymatchoutoptions_alignment_prepare(GtQuerymatchoutoptions
   if (querymatchoutoptions->eoplist_reader != NULL &&
       querymatchoutoptions->characters == NULL)
   {
-    gt_assert(dbes->encseq != NULL);
-    querymatchoutoptions->characters
-      = gt_encseq_alphabetcharacters(dbes->encseq);
-    querymatchoutoptions->wildcardshow
-      = gt_alphabet_wildcard_show(gt_encseq_alphabet(dbes->encseq));
+    if (dbes->encseq != NULL)
+    {
+      querymatchoutoptions->characters
+        = gt_encseq_alphabetcharacters(dbes->encseq);
+      querymatchoutoptions->wildcardshow
+        = gt_alphabet_wildcard_show(gt_encseq_alphabet(dbes->encseq));
+    } else
+    {
+      querymatchoutoptions->characters = dbes->characters;
+      querymatchoutoptions->wildcardshow = dbes->wildcardshow;
+    }
   }
   if (dbes->encseq != NULL)
   {

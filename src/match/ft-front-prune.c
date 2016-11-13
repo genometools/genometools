@@ -310,11 +310,8 @@ static bool ft_sequenceobject_symbol_match(GtFtSequenceObject *useq,
   GtUchar cu = ft_sequenceobject_get_char(useq,upos);
   if (ISSPECIAL(cu))
   {
-    /*printf("u[" GT_WU "]=Special\n",upos);*/
     return false;
   }
-  /*printf("u[" GT_WU "]=%d,v[" GT_WU "]=%d\n",upos,cu,vpos,
-                                 ft_sequenceobject_get_char(vseq,vpos));*/
   return cu == ft_sequenceobject_get_char(vseq,vpos) ? true : false;
 #else
   GtUchar cu = useq->sequence_ptr[upos];
@@ -786,9 +783,7 @@ GtUword front_prune_edist_inplace(
   GtFtFrontvalue *validbasefront;
   bool diedout = false;
   GtFtSequenceObject useq, vseq;
-  /*printf("ustart=" GT_WU ",ulen=" GT_WU ",vstart=" GT_WU ",vlen="
-           GT_WU "\n",ustart,ulen,vstart,vlen);
-  */
+
 #ifdef OUTSIDE_OF_GT
   GtAllocatedMemory *frontspace = gt_malloc(sizeof *frontspace);
   frontspace->space = NULL;
@@ -812,7 +807,7 @@ GtUword front_prune_edist_inplace(
                          ulen,
                          ufsr->encseq_r,
                          ufsr->sequence_cache,
-                         NULL,
+                         ufsr->bytesequence,
 #ifdef GT_WITH_ACCESSCOUNTS
                          ufsr->accessed_positions,
 #endif
@@ -1026,6 +1021,5 @@ GtUword front_prune_edist_inplace(
   gt_free(frontspace->space);
   gt_free(frontspace);
 #endif
-  /*printf("return " GT_WU "\n",diedout ? sumseqlength + 1 : distance);*/
   return diedout ? sumseqlength + 1 : distance;
 }

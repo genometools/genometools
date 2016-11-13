@@ -3066,14 +3066,17 @@ static void gt_diagbandseed_set_sequence(GtSeqorEncseq *seqorencseq,
                                          const GtSequencePartsInfo *seqranges,
                                          const GtUchar *bytesequence,
                                          GtUword first_seqstartpos,
-                                         GtUword seqnum)
+                                         GtUword seqnum,
+                                         const GtUchar *characters,
+                                         GtUchar wildcardshow)
 {
   const GtUword
     seqstartpos = gt_sequence_parts_info_seqstartpos(seqranges,seqnum),
     seqendpos = gt_sequence_parts_info_seqendpos(seqranges,seqnum),
     b_off = seqstartpos - first_seqstartpos;
     GT_SEQORENCSEQ_INIT_SEQ(seqorencseq,bytesequence + b_off,"fake",
-                            seqendpos - seqstartpos + 1);
+                            seqendpos - seqstartpos + 1,characters,
+                            wildcardshow);
 }
 #endif
 
@@ -3100,6 +3103,8 @@ static void gt_diagbandseed_process_seeds(GtSeedpairlist *seedpairlist,
                  *bencseq = gt_seuence_part_info_encseq_get(bseqranges);
   GtUchar *a_byte_sequence, *b_byte_sequence;
   const bool same_encseq = (aencseq == bencseq) ? true : false;
+  const GtUchar *characters = gt_encseq_alphabetcharacters(aencseq);
+  GtUchar wildcardshow = gt_alphabet_wildcard_show(gt_encseq_alphabet(aencseq));
   /* Although the sequences of the parts processed are shorter, we need to
      set amaxlen and bmaxlen to the maximum size of all sequences
      to get the same division into diagonal bands for all parts and thus
@@ -3114,6 +3119,9 @@ static void gt_diagbandseed_process_seeds(GtSeedpairlist *seedpairlist,
   GtDiagbandseedCounts process_seeds_counts = {0,0,0,0,0};
 #ifdef USEBYTESTRING
   const GtUword
+    a_first_seqnum = gt_sequence_parts_info_start_get(aseqranges,aidx),
+    a_first_seqstartpos = gt_sequence_parts_info_seqstartpos(aseqranges,
+                                                             a_first_seqnum),
     b_first_seqnum = gt_sequence_parts_info_start_get(bseqranges,bidx),
     b_first_seqstartpos = gt_sequence_parts_info_seqstartpos(bseqranges,
                                                              b_first_seqnum);
@@ -3227,11 +3235,20 @@ static void gt_diagbandseed_process_seeds(GtSeedpairlist *seedpairlist,
          second scan: test for mincoverage and overlap to previous extension,
          based on apos and bpos values. */
 #ifdef USEBYTESTRING
+      gt_diagbandseed_set_sequence(&aseqorencseq,
+                                   aseqranges,
+                                   a_byte_sequence,
+                                   a_first_seqstartpos,
+                                   currsegm_aseqnum,
+                                   characters,
+                                   wildcardshow);
       gt_diagbandseed_set_sequence(&bseqorencseq,
                                    bseqranges,
                                    b_byte_sequence,
                                    b_first_seqstartpos,
-                                   currsegm_bseqnum);
+                                   currsegm_bseqnum,
+                                   characters,
+                                   wildcardshow);
 #endif
       gt_diagbandseed_process_segment(arg,
                                       &aseqorencseq,
