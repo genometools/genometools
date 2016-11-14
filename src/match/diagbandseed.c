@@ -3060,8 +3060,6 @@ static void gt_diagbandseed_process_seeds_stat(FILE *stream,
           allseqpairs);
 }
 
-#define USEBYTESTRING
-#ifdef USEBYTESTRING
 static void gt_diagbandseed_set_sequence(GtSeqorEncseq *seqorencseq,
                                          const GtSequencePartsInfo *seqranges,
                                          const GtUchar *bytesequence,
@@ -3078,7 +3076,90 @@ static void gt_diagbandseed_set_sequence(GtSeqorEncseq *seqorencseq,
                             seqendpos - seqstartpos + 1,characters,
                             wildcardshow);
 }
-#endif
+
+typedef struct
+{
+  bool activated;
+  const GtUchar *characters;
+  GtUchar wildcardshow;
+  GtSeqorEncseq bseqorencseq, aseqorencseq;
+  GtUchar *a_byte_sequence, *b_byte_sequence;
+  GtUword previous_aseqnum,
+          a_first_seqnum,
+          a_first_seqstartpos,
+          b_first_seqnum,
+          b_first_seqstartpos;
+} GtDiagbandSeedPlainSequence;;
+
+static void gt_diagband_seed_plainsequence_init(GtDiagbandSeedPlainSequence *ps,
+                                          const GtSequencePartsInfo *aseqranges,
+                                          GtUword aidx,
+                                          const GtSequencePartsInfo *bseqranges,
+                                          GtUword bidx)
+{
+  const GtEncseq *aencseq = gt_seuence_part_info_encseq_get(aseqranges),
+                 *bencseq = gt_seuence_part_info_encseq_get(bseqranges);
+
+  ps->activated = false;
+  if (!ps->activated)
+  {
+    return;
+  }
+  ps->characters = gt_encseq_alphabetcharacters(aencseq);
+  ps->wildcardshow = gt_alphabet_wildcard_show(gt_encseq_alphabet(aencseq));
+  ps->previous_aseqnum = GT_UWORD_MAX;
+  ps->a_first_seqnum = gt_sequence_parts_info_start_get(aseqranges,aidx);
+  ps->a_first_seqstartpos
+    = gt_sequence_parts_info_seqstartpos(aseqranges,ps->a_first_seqnum),
+  ps->b_first_seqnum = gt_sequence_parts_info_start_get(bseqranges,bidx);
+  ps->b_first_seqstartpos
+    = gt_sequence_parts_info_seqstartpos(bseqranges,ps->b_first_seqnum);
+  GT_SEQORENCSEQ_INIT_ENCSEQ(&ps->bseqorencseq,bencseq);
+  GT_SEQORENCSEQ_INIT_ENCSEQ(&ps->aseqorencseq,aencseq);
+  ps->a_byte_sequence = gt_sequence_parts_info_seq_extract(aseqranges,aidx);
+  if (aencseq == bencseq && aidx == bidx)
+  {
+    ps->b_byte_sequence = ps->a_byte_sequence;
+  } else
+  {
+    ps->b_byte_sequence = gt_sequence_parts_info_seq_extract(bseqranges,bidx);
+  }
+}
+
+static void gt_diagband_seed_plainsequence_next_segment(
+                         GtDiagbandSeedPlainSequence *ps,
+                         const GtSequencePartsInfo *aseqranges,
+                         GtUword currsegm_aseqnum,
+                         const GtSequencePartsInfo *bseqranges,
+                         GtUword currsegm_bseqnum)
+{
+  if (!ps->activated)
+  {
+    return;
+  }
+  if (ps->previous_aseqnum == GT_UWORD_MAX ||
+      ps->previous_aseqnum < currsegm_aseqnum)
+  {
+    gt_diagbandseed_set_sequence(&ps->aseqorencseq,
+                                 aseqranges,
+                                 ps->a_byte_sequence,
+                                 ps->a_first_seqstartpos,
+                                 currsegm_aseqnum,
+                                 ps->characters,
+                                 ps->wildcardshow);
+    ps->previous_aseqnum = currsegm_aseqnum;
+  } else
+  {
+    gt_assert(ps->previous_aseqnum == currsegm_aseqnum);
+  }
+  gt_diagbandseed_set_sequence(&ps->bseqorencseq,
+                               bseqranges,
+                               ps->b_byte_sequence,
+                               ps->b_first_seqstartpos,
+                               currsegm_bseqnum,
+                               ps->characters,
+                               ps->wildcardshow);
+}
 
 /* start seed extension for seeds in mlist */
 static void gt_diagbandseed_process_seeds(GtSeedpairlist *seedpairlist,
@@ -3098,13 +3179,9 @@ static void gt_diagbandseed_process_seeds(GtSeedpairlist *seedpairlist,
   GtDiagbandseedPosition *diagband_lastpos;
   GtExtendRelativeCoordsFunc extend_relative_coords_function = NULL;
   GtProcessinfo_and_querymatchspaceptr info_querymatch;
-  GtSeqorEncseq bseqorencseq, aseqorencseq;
   const GtEncseq *aencseq = gt_seuence_part_info_encseq_get(aseqranges),
                  *bencseq = gt_seuence_part_info_encseq_get(bseqranges);
-  GtUchar *a_byte_sequence, *b_byte_sequence;
   const bool same_encseq = (aencseq == bencseq) ? true : false;
-  const GtUchar *characters = gt_encseq_alphabetcharacters(aencseq);
-  GtUchar wildcardshow = gt_alphabet_wildcard_show(gt_encseq_alphabet(aencseq));
   /* Although the sequences of the parts processed are shorter, we need to
      set amaxlen and bmaxlen to the maximum size of all sequences
      to get the same division into diagonal bands for all parts and thus
@@ -3117,17 +3194,8 @@ static void gt_diagbandseed_process_seeds(GtSeedpairlist *seedpairlist,
   GtUword diagbands_used;
   GtTimer *timer = NULL;
   GtDiagbandseedCounts process_seeds_counts = {0,0,0,0,0};
-#ifdef USEBYTESTRING
-  const GtUword
-    a_first_seqnum = gt_sequence_parts_info_start_get(aseqranges,aidx),
-    a_first_seqstartpos = gt_sequence_parts_info_seqstartpos(aseqranges,
-                                                             a_first_seqnum),
-    b_first_seqnum = gt_sequence_parts_info_start_get(bseqranges,bidx),
-    b_first_seqstartpos = gt_sequence_parts_info_seqstartpos(bseqranges,
-                                                             b_first_seqnum);
-#endif
-  GT_SEQORENCSEQ_INIT_ENCSEQ(&bseqorencseq,bencseq);
-  GT_SEQORENCSEQ_INIT_ENCSEQ(&aseqorencseq,aencseq);
+  GtDiagbandSeedPlainSequence plainsequence_info;
+
 #ifndef _WIN32
   process_seeds_counts.withtiming = verbose;
   process_seeds_counts.total_extension_time_usec = 0;
@@ -3150,14 +3218,11 @@ static void gt_diagbandseed_process_seeds(GtSeedpairlist *seedpairlist,
     timer = gt_timer_new();
     gt_timer_start(timer);
   }
-  a_byte_sequence = gt_sequence_parts_info_seq_extract(aseqranges,aidx);
-  if (aencseq == bencseq && aidx == bidx)
-  {
-    b_byte_sequence = a_byte_sequence;
-  } else
-  {
-    b_byte_sequence = gt_sequence_parts_info_seq_extract(bseqranges,bidx);
-  }
+  gt_diagband_seed_plainsequence_init(&plainsequence_info,
+                                      aseqranges,
+                                      aidx,
+                                      bseqranges,
+                                      bidx);
   if (verbose)
   {
     fprintf(stream, "# ... extracted sequences ");
@@ -3230,29 +3295,19 @@ static void gt_diagbandseed_process_seeds(GtSeedpairlist *seedpairlist,
                currsegm_aseqnum == nextsegm->aseqnum &&
                currsegm_bseqnum == nextsegm->bseqnum);
 
+      gt_diagband_seed_plainsequence_next_segment(&plainsequence_info,
+                                                  aseqranges,
+                                                  currsegm_aseqnum,
+                                                  bseqranges,
+                                                  currsegm_bseqnum);
+
       /* from here on we only need the apos and bpos values of the segment, as
          the segment boundaries have been identified.
          second scan: test for mincoverage and overlap to previous extension,
          based on apos and bpos values. */
-#ifdef USEBYTESTRING
-      gt_diagbandseed_set_sequence(&aseqorencseq,
-                                   aseqranges,
-                                   a_byte_sequence,
-                                   a_first_seqstartpos,
-                                   currsegm_aseqnum,
-                                   characters,
-                                   wildcardshow);
-      gt_diagbandseed_set_sequence(&bseqorencseq,
-                                   bseqranges,
-                                   b_byte_sequence,
-                                   b_first_seqstartpos,
-                                   currsegm_bseqnum,
-                                   characters,
-                                   wildcardshow);
-#endif
       gt_diagbandseed_process_segment(arg,
-                                      &aseqorencseq,
-                                      &bseqorencseq,
+                                      &plainsequence_info.aseqorencseq,
+                                      &plainsequence_info.bseqorencseq,
                                       same_encseq,
                                       amaxlen,
                                       seedlength,
@@ -3338,13 +3393,19 @@ static void gt_diagbandseed_process_seeds(GtSeedpairlist *seedpairlist,
                  (nextsegm_a_bseqnum =
                  gt_seedpairlist_a_bseqnum_ulong (seedpairlist,*nextsegm)));
 
+        gt_diagband_seed_plainsequence_next_segment(&plainsequence_info,
+                                                    aseqranges,
+                                                    currsegm_aseqnum,
+                                                    bseqranges,
+                                                    currsegm_bseqnum);
+
         /* from here on we only need the apos and bpos values of the segment, as
            the segment boundaries have been identified.
            second scan: test for mincoverage and overlap to previous extension,
            based on apos and bpos values. */
         gt_diagbandseed_process_segment(arg,
-                                        &aseqorencseq,
-                                        &bseqorencseq,
+                                        &plainsequence_info.aseqorencseq,
+                                        &plainsequence_info.bseqorencseq,
                                         same_encseq,
                                         amaxlen,
                                         seedlength,
@@ -3445,9 +3506,14 @@ static void gt_diagbandseed_process_seeds(GtSeedpairlist *seedpairlist,
            based on apos and bpos values. */
         currsegm_aseqnum += seedpairlist->aseqrange_start;
         currsegm_bseqnum += seedpairlist->bseqrange_start;
+        gt_diagband_seed_plainsequence_next_segment(&plainsequence_info,
+                                                    aseqranges,
+                                                    currsegm_aseqnum,
+                                                    bseqranges,
+                                                    currsegm_bseqnum);
         gt_diagbandseed_process_segment(arg,
-                                        &aseqorencseq,
-                                        &bseqorencseq,
+                                        &plainsequence_info.aseqorencseq,
+                                        &plainsequence_info.bseqorencseq,
                                         same_encseq,
                                         amaxlen,
                                         seedlength,
@@ -3576,9 +3642,9 @@ static void gt_diagbandseed_process_seeds(GtSeedpairlist *seedpairlist,
   gt_karlin_altschul_stat_delete(info_querymatch.karlin_altschul_stat);
   if (aencseq != bencseq || aidx != bidx)
   {
-    gt_free(b_byte_sequence);
+    gt_free(plainsequence_info.b_byte_sequence);
   }
-  gt_free(a_byte_sequence);
+  gt_free(plainsequence_info.a_byte_sequence);
   if (verbose)
   {
     const GtUword allseqpairs = (seedpairlist->aseqrange_end -
