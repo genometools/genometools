@@ -34,7 +34,8 @@ struct GtQuerymatchoutoptions
   GtFronttrace *front_trace;
   GtGreedyextendmatchinfo *ggemi;
   const GtUchar *characters;
-  GtEncseqReader *esr_for_align_show;
+  GtEncseqReader *db_esr_for_align_show,
+                 *query_esr_for_align_show;
   GtEncseqMetadata *emd;
   GtUchar wildcardshow;
   GtSeqpaircoordinates correction_info;
@@ -94,7 +95,8 @@ GtQuerymatchoutoptions *gt_querymatchoutoptions_new(bool generate_eoplist,
   {
     querymatchoutoptions->eoplist_reader = NULL;
   }
-  querymatchoutoptions->esr_for_align_show = NULL;
+  querymatchoutoptions->db_esr_for_align_show = NULL;
+  querymatchoutoptions->query_esr_for_align_show = NULL;
   querymatchoutoptions->always_polished_ends = true;
   return querymatchoutoptions;
 }
@@ -120,7 +122,8 @@ void gt_querymatchoutoptions_extend(
                   GtUword maxalignedlendifference,
                   GtUword history_size,
                   GtUword perc_mat_history,
-                  GtExtendCharAccess extend_char_access,
+                  GtExtendCharAccess a_extend_char_access,
+                  GtExtendCharAccess b_extend_char_access,
                   bool weakends,
                   GtUword sensitivity,
                   double matchscore_bias,
@@ -145,7 +148,8 @@ void gt_querymatchoutoptions_extend(
                                        history_size, /* default value */
                                        perc_mat_history,
                                        0,/* userdefinedleastlength not used */
-                                       extend_char_access,
+                                       a_extend_char_access,
+                                       b_extend_char_access,
                                        sensitivity,
                                        querymatchoutoptions->pol_info);
     if (querymatchoutoptions->eoplist != NULL)
@@ -178,6 +182,7 @@ void gt_querymatchoutoptions_for_align_only(
                                  history_size,
                                  GT_MIN_PERC_MAT_HISTORY,
                                  GT_EXTEND_CHAR_ACCESS_ANY,
+                                 GT_EXTEND_CHAR_ACCESS_ANY,
                                  false,
                                  100,
                                  matchscore_bias,
@@ -203,7 +208,8 @@ void gt_querymatchoutoptions_delete(
     gt_eoplist_delete(querymatchoutoptions->eoplist);
     gt_eoplist_reader_delete(querymatchoutoptions->eoplist_reader);
     gt_eoplist_reader_delete(querymatchoutoptions->eoplist_reader_verify);
-    gt_encseq_reader_delete(querymatchoutoptions->esr_for_align_show);
+    gt_encseq_reader_delete(querymatchoutoptions->db_esr_for_align_show);
+    gt_encseq_reader_delete(querymatchoutoptions->query_esr_for_align_show);
     polishing_info_delete(querymatchoutoptions->pol_info);
     gt_encseq_metadata_delete(querymatchoutoptions->emd);
     gt_free(querymatchoutoptions);
@@ -453,9 +459,9 @@ bool gt_querymatchoutoptions_alignment_prepare(GtQuerymatchoutoptions
   }
   if (dbes->encseq != NULL)
   {
-    if (querymatchoutoptions->esr_for_align_show == NULL)
+    if (querymatchoutoptions->db_esr_for_align_show == NULL)
     {
-      querymatchoutoptions->esr_for_align_show
+      querymatchoutoptions->db_esr_for_align_show
         = gt_encseq_create_reader_with_readmode(dbes->encseq,
                                                 GT_READMODE_FORWARD,
                                                 0);
@@ -468,7 +474,7 @@ bool gt_querymatchoutoptions_alignment_prepare(GtQuerymatchoutoptions
       querymatchoutoptions->useqbuffer_size = dblen;
     }
     gt_encseq_extract_encoded_with_reader(
-                            querymatchoutoptions->esr_for_align_show,
+                            querymatchoutoptions->db_esr_for_align_show,
                             dbes->encseq,
                             querymatchoutoptions->useqbuffer,
                             dbstart,
@@ -487,8 +493,15 @@ bool gt_querymatchoutoptions_alignment_prepare(GtQuerymatchoutoptions
   }
   if (queryes->encseq != NULL)
   {
+    if (querymatchoutoptions->query_esr_for_align_show == NULL)
+    {
+      querymatchoutoptions->query_esr_for_align_show
+        = gt_encseq_create_reader_with_readmode(queryes->encseq,
+                                                GT_READMODE_FORWARD,
+                                                0);
+    }
     gt_encseq_extract_encoded_with_reader(
-                            querymatchoutoptions->esr_for_align_show,
+                            querymatchoutoptions->query_esr_for_align_show,
                             queryes->encseq,
                             querymatchoutoptions->vseqbuffer,
                             abs_querystart_fwdstrand,

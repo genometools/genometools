@@ -60,8 +60,7 @@ typedef struct
                              of columns of alignment per line displayed. */
   bool scanfile, beverbose, forward, reverse, reverse_complement, searchspm,
        check_extend_symmetry, silent, trimstat_on, noxpolish, verify_alignment;
-  GtStr *indexname, *query_indexname, *cam_string; /* parse this using
-                                    gt_greedy_extend_char_access*/
+  GtStr *indexname, *query_indexname, *cam_string;
   GtStrArray *query_files;
   GtOption *refforwardoption,
            *refseedlengthoption,
@@ -766,7 +765,8 @@ static int gt_repfind_runner(int argc,
   GtXdropmatchinfo *xdropmatchinfo = NULL;
   GtGreedyextendmatchinfo *greedyextendmatchinfo = NULL;
   GtTimer *repfindtimer = NULL;
-  GtExtendCharAccess extend_char_access = GT_EXTEND_CHAR_ACCESS_ANY;
+  GtExtendCharAccess a_extend_char_access = GT_EXTEND_CHAR_ACCESS_ANY,
+                     b_extend_char_access = GT_EXTEND_CHAR_ACCESS_ANY;
   GtFtPolishing_info *pol_info = NULL;
   GtQuerymatchoutoptions *querymatchoutoptions;
   GtProcessinfo_and_querymatchspaceptr processinfo_and_querymatchspaceptr;
@@ -818,10 +818,10 @@ static int gt_repfind_runner(int argc,
         arguments->alignmentwidth > 0 ||
         gt_option_is_set(arguments->refextendxdropoption))
     {
-      extend_char_access
-        = gt_greedy_extend_char_access(gt_str_get(arguments->cam_string),err);
-
-      if ((int) extend_char_access == -1)
+      if (gt_greedy_extend_char_access(&a_extend_char_access,
+                                       &b_extend_char_access,
+                                       gt_str_get(arguments->cam_string),err)
+         != 0)
       {
         haserr = true;
       }
@@ -840,7 +840,8 @@ static int gt_repfind_runner(int argc,
                                        arguments->history,
                                        arguments->perc_mat_history,
                                        arguments->userdefinedleastlength,
-                                       extend_char_access,
+                                       a_extend_char_access,
+                                       b_extend_char_access,
                                        arguments->extendgreedy,
                                        pol_info);
     if (arguments->check_extend_symmetry)
@@ -898,14 +899,14 @@ static int gt_repfind_runner(int argc,
           = gt_option_is_set(arguments->refextendgreedyoption)
               ? arguments->extendgreedy
               : 100;
-
         gt_querymatchoutoptions_extend(querymatchoutoptions,
                                        gt_minidentity2errorpercentage(
                                                arguments->minidentity),
                                       arguments->maxalignedlendifference,
                                       arguments->history,
                                       arguments->perc_mat_history,
-                                      extend_char_access,
+                                      a_extend_char_access,
+                                      b_extend_char_access,
                                       false,
                                       sensitivity,
                                       GT_DEFAULT_MATCHSCORE_BIAS,

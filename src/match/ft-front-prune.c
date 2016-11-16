@@ -62,11 +62,7 @@ typedef struct
   GtAllocatedMemory *sequence_cache;
   GtUword substringlength,
           totallength,
-          min_access_pos, /* no position accessed will be smaller than this */
           cache_num_positions; /* number of positions in cache */
-#ifdef GT_WITH_ACCESSCOUNTS
-  uint16_t *accessed_positions;
-#endif
   GtUword offset,
           seqstartpos;
   bool read_seq_left2right,
@@ -84,9 +80,6 @@ static void ft_sequenceobject_init(GtFtSequenceObject *seq,
                                    GtEncseqReader *encseq_r,
                                    GtAllocatedMemory *sequence_cache,
                                    const GtUchar *bytesequence,
-#ifdef GT_WITH_ACCESSCOUNTS
-                                   uint16_t *accessed_positions,
-#endif
                                    GtUword totallength
                                    )
 {
@@ -97,9 +90,6 @@ static void ft_sequenceobject_init(GtFtSequenceObject *seq,
   seq->cache_ptr = NULL;
   seq->sequence_cache = NULL;
   seq->bytesequenceptr = NULL;
-#ifdef GT_WITH_ACCESSCOUNTS
-  seq->accessed_positions = accessed_positions;
-#endif
   seq->seqstartpos = seqstartpos;
   gt_assert(seqstartpos <= startpos);
   seq->offset = GT_EXTEND_OFFSET(rightextension,
@@ -132,7 +122,6 @@ static void ft_sequenceobject_init(GtFtSequenceObject *seq,
     gt_assert(seq->encseqreader != NULL && sequence_cache != NULL);
     seq->sequence_cache = sequence_cache;
     seq->cache_ptr = (GtUchar *) sequence_cache->space;
-    seq->min_access_pos = GT_UWORD_MAX; /* undefined */
     seq->cache_num_positions = 0;
   }
   if (encseq != NULL && seq->twobitencoding == NULL &&
@@ -175,15 +164,6 @@ static GtUchar ft_sequenceobject_get_char(GtFtSequenceObject *seq,GtUword idx)
                                          : seq->offset - idx;
     gt_assert(accesspos < seq->seqstartpos + seq->totallength);
     cc = gt_twobitencoding_char_at_pos(seq->twobitencoding, accesspos);
-#ifdef GT_WITH_ACCESSCOUNTS
-    if (seq->accessed_positions != NULL)
-    {
-      if (seq->accessed_positions[accesspos] < UINT16_MAX)
-      {
-        seq->accessed_positions[accesspos]++;
-      }
-    }
-#endif
     return seq->dir_is_complement ? GT_COMPLEMENTBASE(cc) : cc;
   }
   if (seq->encseqreader != NULL)
@@ -191,7 +171,7 @@ static GtUchar ft_sequenceobject_get_char(GtFtSequenceObject *seq,GtUword idx)
     gt_assert(idx < seq->substringlength);
     if (idx >= seq->cache_num_positions)
     {
-      GtUword idx, tostore;
+      GtUword cidx, tostore;
       const GtUword addamount = 256UL;
 
       tostore = MIN(seq->cache_num_positions + addamount,
@@ -204,9 +184,9 @@ static GtUchar ft_sequenceobject_get_char(GtFtSequenceObject *seq,GtUword idx)
                        sizeof (GtUchar) * seq->sequence_cache->allocated);
         seq->cache_ptr = (GtUchar *) seq->sequence_cache->space;
       }
-      for (idx = seq->cache_num_positions; idx < tostore; idx++)
+      for (cidx = seq->cache_num_positions; cidx < tostore; cidx++)
       {
-        seq->cache_ptr[idx]
+        seq->cache_ptr[cidx]
           = gt_encseq_reader_next_encoded_char(seq->encseqreader);
       }
       seq->cache_num_positions = tostore;
@@ -308,11 +288,9 @@ static bool ft_sequenceobject_symbol_match(GtFtSequenceObject *useq,
 {
 #ifndef OUTSIDE_OF_GT
   GtUchar cu = ft_sequenceobject_get_char(useq,upos);
-  if (ISSPECIAL(cu))
-  {
-    return false;
-  }
-  return cu == ft_sequenceobject_get_char(vseq,vpos) ? true : false;
+  return (!ISSPECIAL(cu) && cu == ft_sequenceobject_get_char(vseq,vpos))
+           ? true
+           : false;
 #else
   GtUchar cu = useq->sequence_ptr[upos];
   return cu == vseq->sequence_ptr[vpos] ? true : false;
@@ -350,11 +328,11 @@ static void inline front_prune_add_matches(GtFtTrimstat *trimstat,
     fv->matchhistory_bits = (fv->matchhistory_bits << 1) | (uint64_t) 1;
   }
   fv->localmatch_count = upos - fv->row;
+  fv->row = upos;
   if (trimstat != NULL)
   {
     gt_ft_trimstat_add_matchlength(trimstat,fv->localmatch_count);
   }
-  fv->row = upos;
 }
 
 static GtUword front_next_inplace(GtFtTrimstat *trimstat,
@@ -629,10 +607,6 @@ static GtFtFrontvalue *frontspace_allocate(GtUword minsizeforshift,
 }
 
 static void update_trace_and_polished(GtFtPolished_point *best_polished_point,
-#ifndef OUTSIDE_OF_GT
-                                      GtUword *minrow,
-                                      GtUword *mincol,
-#endif
                                       GtFronttrace *front_trace,
                                       const GtFtPolishing_info *pol_info,
                                       GtUword distance,
@@ -644,29 +618,14 @@ static void update_trace_and_polished(GtFtPolished_point *best_polished_point,
 {
   const GtFtFrontvalue *frontptr;
 
-#ifndef OUTSIDE_OF_GT
-  *minrow = GT_UWORD_MAX;
-  *mincol = GT_UWORD_MAX;
-#endif
   for (frontptr = lowfront; frontptr <= highfront; frontptr++)
   {
     GtUword alignedlen = GT_MULT2(frontptr->row) + FRONT_DIAGONAL(frontptr);
     uint64_t filled_matchhistory_bits;
 
 #ifndef OUTSIDE_OF_GT
-    GtUword currentcol;
-
-    if (*minrow > frontptr->row)
-    {
-      *minrow = frontptr->row;
-    }
     gt_assert(FRONT_DIAGONAL(frontptr) >= 0 ||
               frontptr->row >= -FRONT_DIAGONAL(frontptr));
-    currentcol = frontptr->row + FRONT_DIAGONAL(frontptr);
-    if (*mincol > currentcol)
-    {
-      *mincol = currentcol;
-    }
 #endif
     if (frontptr->matchhistory_size >= GT_MULT2(pol_info->cut_depth))
     {
@@ -792,11 +751,6 @@ GtUword front_prune_edist_inplace(
   ft_sequenceobject_init(&useq,useqptr,0,ustart,ulen);
   ft_sequenceobject_init(&vseq,vseqptr,vseqstartpos,vstart,vlen);
 #else
-  /*
-  printf("%sextension:useq->readmode=%s,vseq->readmode=%s\n",
-          rightextension ? "right" : "left",
-          gt_readmode_show(ufsr->readmode),gt_readmode_show(ufsr->readmode));
-  */
   ft_sequenceobject_init(&useq,
                          ufsr->extend_char_access,
                          ufsr->encseq,
@@ -808,9 +762,6 @@ GtUword front_prune_edist_inplace(
                          ufsr->encseq_r,
                          ufsr->sequence_cache,
                          ufsr->bytesequence,
-#ifdef GT_WITH_ACCESSCOUNTS
-                         ufsr->accessed_positions,
-#endif
                          ufsr->totallength);
   ft_sequenceobject_init(&vseq,
                          vfsr->extend_char_access,
@@ -823,9 +774,6 @@ GtUword front_prune_edist_inplace(
                          vfsr->encseq_r,
                          vfsr->sequence_cache,
                          vfsr->bytesequence,
-#ifdef GT_WITH_ACCESSCOUNTS
-                         vfsr->accessed_positions,
-#endif
                          vfsr->totallength);
 #ifdef SKDEBUG
   gt_greedy_show_context(rightextension,&useq,&vseq);
@@ -975,10 +923,6 @@ GtUword front_prune_edist_inplace(
       front_trace_add_gen(front_trace,trimleft,valid);
     }
     update_trace_and_polished(best_polished_point,
-#ifndef OUTSIDE_OF_GT
-                              &useq.min_access_pos,
-                              &vseq.min_access_pos,
-#endif
                               front_trace,
                               pol_info,
                               distance,

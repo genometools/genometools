@@ -37,9 +37,6 @@ typedef struct
   const GtUchar *bytesequence;
   GtExtendCharAccess extend_char_access;
   GtUword totallength;
-#ifdef GT_WITH_ACCESSCOUNTS
-  uint16_t *accessed_positions;
-#endif
 } GtFTsequenceResources;
 #endif
 

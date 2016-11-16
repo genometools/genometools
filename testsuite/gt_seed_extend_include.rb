@@ -22,6 +22,25 @@ seeds = [170039800390891361279027638963673934519,
          255642063275935424280602245704332672807]
 
 $SPLT_LIST = ["-splt struct","-splt ulong"]
+$CAM_LIST = ["encseq", "encseq_reader","bytes"]
+
+# cam extension options
+Name "gt seed_extend: cam"
+Keywords "gt_seed_extend cam"
+Test do
+  run_test build_encseq("at1MB", "#{$testdata}at1MB")
+  $SPLT_LIST.each do |splt|
+    $CAM_LIST.each do |a_cam|
+      $CAM_LIST.each do |b_cam|
+        run_test "#{$bin}gt seed_extend -extendgreedy " +
+                 "-cam #{a_cam},#{b_cam} -ii at1MB #{splt}", :retval => 0
+        run "sort #{last_stdout}"
+        run "mv #{last_stdout} see-ext-at1MB-#{a_cam}-#{b_cam}.matches"
+        run "cmp see-ext-at1MB-#{a_cam}-#{b_cam}.matches #{$testdata}see-ext-at1MB.matches"
+      end
+    end
+  end
+end
 
 if $gttestdata
   Name "gt seed_extend: -splt bytestring for many short and some long seqs"
@@ -34,7 +53,7 @@ if $gttestdata
     run "mv #{last_stdout} splt-bytestring.matches"
     run_test "#{$bin}gt seed_extend -no-reverse -l 50 -splt struct -ii #{indexname}"
     run "cmp -s #{last_stdout} splt-bytestring.matches"
-  end 
+  end
 end
 
 # Threading
@@ -182,23 +201,6 @@ Test do
     end
     run_test "#{$bin}gt seed_extend -bias-parameters -seedpairdistance 10 20 " +
              "-display seed -ii at1MB #{splt}", :retval => 0
-  end
-end
-
-# Xdrop extension options
-Name "gt seed_extend: extendxdrop, xdropbelow, cam"
-Keywords "gt_seed_extend extendxdrop xdropbelow cam"
-Test do
-  run_test build_encseq("at1MB", "#{$testdata}at1MB")
-  for splt in $SPLT_LIST do
-    for sensitivity in [90, 100] do
-      for xdbelow in [1, 3, 5] do
-        for cam in ["encseq", "encseq_reader"] do
-          run_test "#{$bin}gt seed_extend -extendxdrop #{sensitivity} " +
-                   "-xdropbelow #{xdbelow} -cam #{cam} -ii at1MB #{splt}", :retval => 0
-        end
-      end
-    end
   end
 end
 

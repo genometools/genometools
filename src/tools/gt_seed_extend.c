@@ -519,6 +519,8 @@ static GtOptionParser* gt_seed_extend_option_parser_new(void *tool_arguments)
   /* -v */
   option = gt_option_new_verbose(&arguments->verbose);
   gt_option_parser_add_option(op, option);
+  gt_option_exclude(op_cam, op_xbe);
+  gt_option_exclude(op_cam, op_xdr);
 
   return op;
 }
@@ -588,7 +590,8 @@ static int gt_seed_extend_runner(int argc,
   GtSeedExtendArguments *arguments = tool_arguments;
   GtEncseq *aencseq = NULL, *bencseq = NULL;
   GtTimer *seedextendtimer = NULL;
-  GtExtendCharAccess cam = GT_EXTEND_CHAR_ACCESS_ANY;
+  GtExtendCharAccess cam_a = GT_EXTEND_CHAR_ACCESS_ANY,
+                     cam_b = GT_EXTEND_CHAR_ACCESS_ANY;
   GtDiagbandseedPairlisttype splt = GT_DIAGBANDSEED_SPLT_UNDEFINED;
   GtUword errorpercentage = 0UL;
   double matchscore_bias = GT_DEFAULT_MATCHSCORE_BIAS;
@@ -652,9 +655,10 @@ static int gt_seed_extend_runner(int argc,
 
   /* Set character access method */
   if (!had_err && (!arguments->onlyseeds || arguments->se_alignmentwidth > 0)) {
-    cam = gt_greedy_extend_char_access(gt_str_get(arguments->char_access_mode),
-                                       err);
-    if ((int) cam == -1) {
+    if (gt_greedy_extend_char_access(&cam_a,&cam_b,
+                                     gt_str_get(arguments->char_access_mode),
+                                     err) != 0)
+    {
       had_err = -1;
     }
   }
@@ -893,7 +897,8 @@ static int gt_seed_extend_runner(int argc,
                                              arguments->se_maxalilendiff,
                                              arguments->se_historysize,
                                              arguments->se_perc_match_hist,
-                                             cam,
+                                             cam_a,
+                                             cam_b,
                                              sensitivity,
                                              matchscore_bias,
                                              arguments->weakends,

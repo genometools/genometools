@@ -199,7 +199,7 @@ static void gt_sesp_from_relative(GtSeedextendSeqpair *sesp,
     sesp->query_totallength = query_totallength;
   } else
   {
-    if (same_encseq && dbseqnum == queryseqnum)
+    if (same_encseq && dbencseq != NULL && dbseqnum == queryseqnum)
     {
       sesp->queryseqstartpos = sesp->dbseqstartpos;
       sesp->query_totallength = sesp->dbseqlength;
@@ -332,12 +332,12 @@ static void extensioncoords_show(bool forxdrop,bool rightextension,
 
 const char *gt_cam_extendgreedy_comment(void)
 {
-  return "specify character access mode: possible values: "
-         "encseq, encseq_reader, bytes";
+  return "specify up to two comma-separated character access modes, the first "
+         "of which refers to sequence A and the second of which refers to "
+         "sequence b: possible values: encseq, encseq_reader, bytes";
 }
 
-GtExtendCharAccess gt_greedy_extend_char_access(const char *cam_string,
-                                                GtError *err)
+static int gt_parse_char_access(const char *cam_string,GtError *err)
 {
   if (strcmp(cam_string,"encseq") == 0)
   {
@@ -358,6 +358,44 @@ GtExtendCharAccess gt_greedy_extend_char_access(const char *cam_string,
   gt_error_set(err,"illegal parameter for option -cam: %s",
                     gt_cam_extendgreedy_comment());
   return -1;
+}
+
+int gt_greedy_extend_char_access(GtExtendCharAccess *cam_a,
+                                 GtExtendCharAccess *cam_b,
+                                 const char *full_cam_string,
+                                 GtError *err)
+{
+  const char *comma_ptr = strchr(full_cam_string,(int) ',');
+  int had_err = 0;
+
+  if (comma_ptr != NULL)
+  {
+    char *copy = strdup(full_cam_string);
+    size_t comma_pos = (size_t) (comma_ptr - full_cam_string);
+
+    copy[comma_pos] = '\0';
+    *cam_a = gt_parse_char_access(copy,err);
+    if ((int) *cam_a == -1)
+    {
+      had_err = -1;
+    } else
+    {
+      *cam_b = gt_parse_char_access(comma_ptr + 1,err);
+      if ((int) *cam_b == -1)
+      {
+        had_err = -1;
+      }
+    }
+    free(copy);
+  } else
+  {
+    *cam_b = *cam_a = gt_parse_char_access(full_cam_string,err);
+    if ((int) *cam_b == -1)
+    {
+      had_err = -1;
+    }
+  }
+  return had_err;
 }
 
 void gt_optimal_maxalilendiff_perc_mat_history(
@@ -409,18 +447,14 @@ struct GtGreedyextendmatchinfo
           perc_mat_history,
           db_totallength;
   unsigned int userdefinedleastlength;
-  GtExtendCharAccess extend_char_access;
+  GtExtendCharAccess a_extend_char_access,
+                     b_extend_char_access;
   bool check_extend_symmetry,
        silent;
   GtFtTrimstat *trimstat;
   GtEncseqReader *encseq_r_in_u, *encseq_r_in_v;
   GtAllocatedMemory usequence_cache, vsequence_cache, frontspace_reservoir;
   GtTrimmingStrategy trimstrategy;
-#ifdef GT_WITH_ACCESSCOUNTS
-  GtUword numbits_in_v;
-  uint16_t *accessed_positions_in_u,
-           *accessed_positions_in_v;
-#endif
   bool showfrontinfo;
 };
 
@@ -505,7 +539,8 @@ GtGreedyextendmatchinfo *gt_greedy_extend_matchinfo_new(
                                    GtUword history,
                                    GtUword perc_mat_history,
                                    GtUword userdefinedleastlength,
-                                   GtExtendCharAccess extend_char_access,
+                                   GtExtendCharAccess a_extend_char_access,
+                                   GtExtendCharAccess b_extend_char_access,
                                    GtUword sensitivity,
                                    const GtFtPolishing_info *pol_info)
 {
@@ -513,11 +548,6 @@ GtGreedyextendmatchinfo *gt_greedy_extend_matchinfo_new(
 
   ggemi->left_front_trace = NULL;
   ggemi->right_front_trace = NULL;
-#ifdef GT_WITH_ACCESSCOUNTS
-  ggemi->accessed_positions_in_u = NULL;
-  ggemi->accessed_positions_in_v = NULL;
-  ggemi->numbits_in_v = 0;
-#endif
   ggemi->errorpercentage = errorpercentage;
   ggemi->history = history;
   ggemi->trimstrategy = GT_OUTSENSE_TRIM_ALWAYS;
@@ -540,46 +570,13 @@ GtGreedyextendmatchinfo *gt_greedy_extend_matchinfo_new(
   ggemi->frontspace_reservoir.space = NULL;
   ggemi->frontspace_reservoir.allocated = 0;
   ggemi->frontspace_reservoir.offset = 0;
-  ggemi->extend_char_access = extend_char_access;
+  ggemi->a_extend_char_access = a_extend_char_access;
+  ggemi->b_extend_char_access = b_extend_char_access;
   ggemi->check_extend_symmetry = false;
   ggemi->silent = false;
   ggemi->trimstat = NULL;
   return ggemi;
 }
-
-#ifdef GT_WITH_ACCESSCOUNTS
-static void gt_show_access_counts(const uint16_t *accessed_positions,
-                                  GtUword numofentries)
-{
-  GtUword idx, count = 0, cummulative = 0, sumdist = 0,
-          *dist = gt_calloc(UINT16_MAX+1,sizeof * dist);
-
-  for (idx = 0; idx < numofentries; idx++)
-  {
-    if (accessed_positions[idx] > 0)
-    {
-      dist[accessed_positions[idx]]++;
-      count++;
-    }
-  }
-  for (idx = 0; idx <= UINT16_MAX; idx++)
-  {
-    if (dist[idx] > 0)
-    {
-      cummulative += dist[idx] * idx;
-      sumdist += dist[idx];
-      printf("# accessed " GT_WU " times: " GT_WU
-             " positions (cumm=" GT_WU ")\n",
-             idx,dist[idx],sumdist);
-    }
-  }
-  printf("# accessed " GT_WU " (%.2f)\n",count,
-                                       100.0 * (double) count/numofentries);
-  printf("# mean number of accesses per position %.2f\n",
-            (double) cummulative/numofentries);
-  gt_free(dist);
-}
-#endif
 
 void gt_greedy_extend_matchinfo_delete(GtGreedyextendmatchinfo *ggemi)
 {
@@ -589,21 +586,6 @@ void gt_greedy_extend_matchinfo_delete(GtGreedyextendmatchinfo *ggemi)
     front_trace_delete(ggemi->right_front_trace);
     gt_encseq_reader_delete(ggemi->encseq_r_in_u);
     gt_encseq_reader_delete(ggemi->encseq_r_in_v);
-    /*
-    printf("usequence_cache.allocated=" GT_WU "\n",
-           ggemi->usequence_cache.allocated);
-    printf("vsequence_cache.allocated=" GT_WU "\n",
-           ggemi->vsequence_cache.allocated);
-    */
-#ifdef GT_WITH_ACCESSCOUNTS
-    gt_show_access_counts(ggemi->accessed_positions_in_u,
-                          ggemi->db_totallength);
-    gt_free(ggemi->accessed_positions_in_u);
-    if (ggemi->accessed_positions_in_v != NULL)
-    {
-      gt_free(ggemi->accessed_positions_in_v);
-    }
-#endif
     gt_free(ggemi->usequence_cache.space);
     gt_free(ggemi->vsequence_cache.space);
     gt_free(ggemi->frontspace_reservoir.space);
@@ -637,9 +619,6 @@ static void gt_FTsequenceResources_init(GtFTsequenceResources *fsr,
                                         GtEncseqReader *encseq_r,
                                         GtAllocatedMemory *sequence_cache,
                                         const GtUchar *bytesequence,
-#ifdef GT_WITH_ACCESSCOUNTS
-                                        uint16_t *accessed_positions,
-#endif
                                         GtUword totallength,
                                         GtExtendCharAccess extend_char_access)
 {
@@ -649,9 +628,6 @@ static void gt_FTsequenceResources_init(GtFTsequenceResources *fsr,
   fsr->encseq_r = encseq_r;
   fsr->sequence_cache = sequence_cache;
   fsr->bytesequence = bytesequence;
-#ifdef GT_WITH_ACCESSCOUNTS
-  fsr->accessed_positions = accessed_positions;
-#endif
   fsr->extend_char_access = extend_char_access;
 }
 
@@ -688,14 +664,6 @@ static void gt_greedy_extend_init(GtFTsequenceResources *ufsr,
     if (dbes->encseq != NULL)
     {
       ggemi->db_totallength = gt_encseq_total_length(dbes->encseq);
-#ifdef GT_WITH_ACCESSCOUNTS
-      gt_assert(ggemi->accessed_positions_in_u == NULL);
-      ggemi->accessed_positions_in_u
-        = gt_calloc(ggemi->db_totallength,
-                    sizeof *ggemi->accessed_positions_in_u);
-      printf("allocated " GT_WU " cells of size " GT_WU "\n",
-      ggemi->db_totallength,(GtUword) (sizeof *ggemi->accessed_positions_in_u));
-#endif
     } else
     {
       ggemi->db_totallength = 0;
@@ -709,11 +677,8 @@ static void gt_greedy_extend_init(GtFTsequenceResources *ufsr,
                                 ggemi->encseq_r_in_u,
                                 &ggemi->usequence_cache,
                                 NULL,
-#ifdef GT_WITH_ACCESSCOUNTS
-                                ggemi->accessed_positions_in_u,
-#endif
                                 ggemi->db_totallength,
-                                ggemi->extend_char_access);
+                                ggemi->a_extend_char_access);
   } else
   {
     gt_FTsequenceResources_init(ufsr,
@@ -722,33 +687,19 @@ static void gt_greedy_extend_init(GtFTsequenceResources *ufsr,
                                 ggemi->encseq_r_in_u,
                                 &ggemi->usequence_cache,
                                 dbes->seq,
-#ifdef GT_WITH_ACCESSCOUNTS
-                                NULL,
-#endif
                                 dbes->seqlength,
                                 GT_EXTEND_CHAR_ACCESS_DIRECT);
   }
   if (queryes->encseq != NULL)
   {
-#ifdef GT_WITH_ACCESSCOUNTS
-    if (ggemi->accessed_positions_in_v == NULL)
-    {
-      ggemi->numbits_in_v = query_totallength;
-      ggemi->accessed_positions_in_v
-        = gt_calloc(query_totallength,sizeof *ggemi->accessed_positions_in_v);
-    }
-#endif
     gt_FTsequenceResources_init(vfsr,
                                 queryes->encseq,
                                 query_readmode,
                                 ggemi->encseq_r_in_v,
                                 &ggemi->vsequence_cache,
                                 NULL,
-#ifdef GT_WITH_ACCESSCOUNTS
-                                ggemi->accessed_positions_in_v,
-#endif
                                 query_totallength,
-                                ggemi->extend_char_access);
+                                ggemi->b_extend_char_access);
   } else
   {
     gt_FTsequenceResources_init(vfsr,
@@ -757,9 +708,6 @@ static void gt_greedy_extend_init(GtFTsequenceResources *ufsr,
                                 ggemi->encseq_r_in_v,
                                 &ggemi->vsequence_cache,
                                 queryes->seq,
-#ifdef GT_WITH_ACCESSCOUNTS
-                                NULL,
-#endif
                                 query_totallength,
                                 GT_EXTEND_CHAR_ACCESS_DIRECT);
   }
@@ -1000,8 +948,6 @@ static const GtQuerymatch *gt_extend_sesp(bool forxdrop,
                           sesp->query_totallength,
                           greedyextendmatchinfo);
   }
-  /*printf("dbseqstartpos=" GT_WU ",queryseqstartpos=" GT_WU "\n",
-         sesp->dbseqstartpos,sesp->queryseqstartpos);*/
   if (sesp->dbstart_relative > 0 && sesp->querystart_relative > 0)
   { /* there is something to align on the left of the seed */
     const GtUword uoffset = sesp->dbseqstartpos,
@@ -1012,10 +958,7 @@ static const GtQuerymatch *gt_extend_sesp(bool forxdrop,
                    sesp->dbseqnum == sesp->queryseqnum)
                      ? sesp->dbstart_relative + sesp->seedlength : 0;
     GtUword vlen;
-    /*printf("dbseqnum=" GT_WU ",queryseqnum=" GT_WU "\n",sesp->dbseqnum,
-              sesp->queryseqnum);
-    printf("r_voffset=" GT_WU ",querystart_relative=" GT_WU "\n",
-           r_voffset,sesp->querystart_relative);*/
+
     gt_assert(r_voffset <= sesp->querystart_relative);
     vlen = sesp->querystart_relative - r_voffset;
     if (forxdrop)

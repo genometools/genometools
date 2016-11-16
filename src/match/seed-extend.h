@@ -187,7 +187,8 @@ GtGreedyextendmatchinfo *gt_greedy_extend_matchinfo_new(
                                    GtUword history,
                                    GtUword perc_mat_history,
                                    GtUword userdefinedleastlength,
-                                   GtExtendCharAccess extend_char_access,
+                                   GtExtendCharAccess a_extend_char_access,
+                                   GtExtendCharAccess b_extend_char_access,
                                    GtUword sensitivity,
                                    const GtFtPolishing_info *pol_info);
 
@@ -232,12 +233,15 @@ void gt_optimal_maxalilendiff_perc_mat_history(
                 GtUword sensitivity);
 
 /* This function converts a string given as argument for option -cam
-   and converts it to the given enum type <GtExtendCharAccess>. This
+   and converts it to the given enum types <GtExtendCharAccess>, which
+   are stored at the given addresses. This
    option is used in the tool gt_repfind and gt_seedextend.
-   In case of error, -1 is returned. */
+   In case of error, are value different from 0 is returned. */
 
-GtExtendCharAccess gt_greedy_extend_char_access(const char *cam_string,
-                                                GtError *err);
+int gt_greedy_extend_char_access(GtExtendCharAccess *cam_a,
+                                 GtExtendCharAccess *cam_b,
+                                 const char *full_cam_string,
+                                 GtError *err);
 
 /* The following function returns a string specifying the possible arguments
    for the mentioned option -cam. */

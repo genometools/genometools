@@ -346,6 +346,7 @@ static int gt_show_seedext_runner(GT_UNUSED int argc,
                               GT_MIN_PERC_MAT_HISTORY,
                               0, /* userdefinedleastlength */
                               GT_EXTEND_CHAR_ACCESS_ANY,
+                              GT_EXTEND_CHAR_ACCESS_ANY,
                               100,
                               pol_info);
     }
