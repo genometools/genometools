@@ -1,10 +1,6 @@
 #ifndef FT_POLISH_H
 #define FT_POLISH_H
 #include <stdint.h>
-#ifndef OUTSIDE_OF_GT
-#else
-#include "gt-defs.h"
-#endif
 /* The following values are used when no pruning is performed */
 #define GT_MIN_PERC_MAT_HISTORY 1
 #define GT_MAX_ALI_LEN_DIFF     UINT32_MAX

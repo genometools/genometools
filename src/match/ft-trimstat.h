@@ -3,10 +3,6 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdbool.h>
-#ifndef OUTSIDE_OF_GT
-#else
-#include "gt-defs.h"
-#endif
 
 typedef struct GtFtTrimstat GtFtTrimstat;
 

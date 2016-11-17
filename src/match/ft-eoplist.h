@@ -1,13 +1,9 @@
 #ifndef FT_EOPLIST_H
 #define FT_EOPLIST_H
 #include <stdbool.h>
-#ifndef OUTSIDE_OF_GT
 #include "core/unused_api.h"
 #include "core/chardef.h"
 #include "match/ft-polish.h"
-#else
-#include "gt-defs.h"
-#endif
 
 /* A list of edit operation is representation is represented by the following
    opaque type */
@@ -206,9 +202,7 @@ void gt_eoplist_set_seedoffset(GtEoplist *eoplist,
 
 void gt_eoplist_show_plain(const GtEoplist *eoplist,FILE *fp);
 
-#ifndef OUTSIDE_OF_GT
 void gt_eoplist_polished_ends(GtEoplist *eoplist,
                               const GtFtPolishing_info *pol_info,
                               bool withpolcheck);
-#endif
 #endif

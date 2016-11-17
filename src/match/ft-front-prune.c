@@ -4,7 +4,6 @@
 #include <stdbool.h>
 #include <string.h>
 #include <limits.h>
-#ifndef OUTSIDE_OF_GT
 #include "core/assert_api.h"
 #include "core/unused_api.h"
 #include "core/divmodmul.h"
@@ -18,15 +17,6 @@
 #include "match/ft-trimstat.h"
 #include "match/ft-polish.h"
 #include "match/ft-front-generation.h"
-#else
-#include "gt-alloc.h"
-#include "gt-defs.h"
-#include "minmax.h"
-#include "front-prune.h"
-#include "trimstat.h"
-#include "polish.h"
-#include "front-generation.h"
-#endif
 
 #define GT_UPDATE_MATCH_HISTORY(FRONTVAL)\
         if ((FRONTVAL)->matchhistory_size == max_history)\
@@ -59,7 +49,6 @@ typedef struct
                               Front-entry.*/
 } GtFtFrontvalue;
 
-#ifndef OUTSIDE_OF_GT
 typedef struct
 {
   const GtTwobitencoding *twobitencoding;
@@ -221,24 +210,6 @@ static GtUchar ft_sequenceobject_get_char(GtFtSequenceObject *seq,GtUword idx)
   }
   return cc;
 }
-#else
-typedef struct
-{
-  const GtUchar *sequence_ptr;
-  GtUword substringlength;
-} GtFtSequenceObject;
-
-static void ft_sequenceobject_init(GtFtSequenceObject *seq,
-                                   const GtUchar *ptr,
-                                   GtUword seqstartpos,
-                                   GtUword startpos,
-                                   GtUword len)
-{
-  gt_assert(seq != NULL);
-  seq->sequence_ptr = ptr + seqstartpos + startpos;
-  seq->substringlength = len;
-}
-#endif
 
 #define FRONT_DIAGONAL(FRONTPTR) (GtWord) ((FRONTPTR) - midfront)
 
@@ -247,15 +218,10 @@ static bool ft_sequenceobject_symbol_match(GtFtSequenceObject *useq,
                                            GtFtSequenceObject *vseq,
                                            GtUword vpos)
 {
-#ifndef OUTSIDE_OF_GT
   GtUchar cu = ft_sequenceobject_get_char(useq,upos);
   return (!ISSPECIAL(cu) && cu == ft_sequenceobject_get_char(vseq,vpos))
            ? true
            : false;
-#else
-  GtUchar cu = useq->sequence_ptr[upos];
-  return cu == vseq->sequence_ptr[vpos] ? true : false;
-#endif
 }
 
 static void inline front_prune_add_matches(GtFtFrontvalue *midfront,
@@ -584,10 +550,8 @@ static void update_trace_and_polished(GtFtPolished_point *best_polished_point,
     GtUword alignedlen = GT_MULT2(frontptr->row) + FRONT_DIAGONAL(frontptr);
     uint64_t filled_matchhistory_bits;
 
-#ifndef OUTSIDE_OF_GT
     gt_assert(FRONT_DIAGONAL(frontptr) >= 0 ||
               frontptr->row >= -FRONT_DIAGONAL(frontptr));
-#endif
     if (frontptr->matchhistory_size >= GT_MULT2(pol_info->cut_depth))
     {
       filled_matchhistory_bits = frontptr->matchhistory_bits;
@@ -671,10 +635,8 @@ static void showcurrentfront(const GtFtFrontvalue *validbasefront,
 }
 
 GtUword front_prune_edist_inplace(
-#ifndef OUTSIDE_OF_GT
                          bool rightextension,
                          GtAllocatedMemory *frontspace,
-#endif
                          GtFtTrimstat *trimstat,
                          GtFtPolished_point *best_polished_point,
                          GtFronttrace *front_trace,
@@ -704,7 +666,6 @@ GtUword front_prune_edist_inplace(
   bool diedout = false;
   GtFtSequenceObject useq, vseq;
 
-#ifndef OUTSIDE_OF_GT
   ft_sequenceobject_init(&useq,
                          ufsr->extend_char_access,
                          ufsr->encseq,
@@ -729,14 +690,6 @@ GtUword front_prune_edist_inplace(
                          vfsr->sequence_cache,
                          vfsr->bytesequence,
                          vfsr->totallength);
-#else
-  GtAllocatedMemory *frontspace = gt_malloc(sizeof *frontspace);
-  frontspace->space = NULL;
-  frontspace->allocated = 0;
-  frontspace->offset = 0;
-  ft_sequenceobject_init(&useq,useqptr,0,ustart,ulen);
-  ft_sequenceobject_init(&vseq,vseqptr,vseqstartpos,vstart,vlen);
-#endif
   frontspace->offset = 0;
   for (distance = 0, valid = 1UL; /* Nothing */; distance++, valid += 2)
   {
@@ -908,21 +861,12 @@ GtUword front_prune_edist_inplace(
   {
     gt_ft_trimstat_add(trimstat,diedout,sumvalid,maxvalid,distance,
                        sizeof (GtFtFrontvalue) * frontspace->allocated,
-#ifndef OUTSIDE_OF_GT
                        (useq.sequence_cache != NULL &&
                         vseq.sequence_cache != NULL)
                          ? MAX(useq.sequence_cache->allocated,
                                vseq.sequence_cache->allocated)
                          : 0
-#else
-                       0
-#endif
                       );
   }
-#ifndef OUTSIDE_OF_GT
-#else
-  gt_free(frontspace->space);
-  gt_free(frontspace);
-#endif
   return diedout ? sumseqlength + 1 : distance;
 }

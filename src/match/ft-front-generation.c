@@ -6,19 +6,12 @@
 #ifdef WITHDISTRIBUTION
 #include "distribution.h"
 #endif
-#ifndef OUTSIDE_OF_GT
 #include "core/assert_api.h"
 #include "core/divmodmul.h"
 #include "core/ma_api.h"
 #include "core/unused_api.h"
 #include "match/ft-front-generation.h"
 #include "match/ft-eoplist.h"
-#else
-#include "gt-alloc.h"
-#include "gt-defs.h"
-#include "front-generation.h"
-#include "eoplist.h"
-#endif
 
 #define BACKTRACEBITS 3
 

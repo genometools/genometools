@@ -1,16 +1,9 @@
 #ifndef FT_FRONT_PRUNE_H
 #define FT_FRONT_PRUNE_H
-#ifndef OUTSIDE_OF_GT
 #include "match/ft-trimstat.h"
 #include "match/ft-polish.h"
 #include "match/ft-front-generation.h"
 #include "core/encseq_api.h"
-#else
-#include "gt-defs.h"
-#include "polish.h"
-#include "front-generation.h"
-#include "trimstat.h"
-#endif
 
 typedef struct
 {
@@ -25,7 +18,6 @@ typedef enum
   GT_OUTSENSE_TRIM_NEVER
 } GtTrimmingStrategy;
 
-#ifndef OUTSIDE_OF_GT
 typedef enum
 {
   GT_EXTEND_CHAR_ACCESS_ENCSEQ,
@@ -44,13 +36,10 @@ typedef struct
   GtExtendCharAccess extend_char_access;
   GtUword totallength;
 } GtFTsequenceResources;
-#endif
 
 GtUword front_prune_edist_inplace(
-#ifndef OUTSIDE_OF_GT
                        bool forward,
                        GtAllocatedMemory *frontspace_reservoir,
-#endif
                        GtFtTrimstat *trimstat,
                        GtFtPolished_point *best_polished_point,
                        GtFronttrace *fronttrace,

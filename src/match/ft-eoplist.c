@@ -4,7 +4,6 @@
 #include <stdio.h>
 #include <math.h>
 #include <ctype.h>
-#ifndef OUTSIDE_OF_GT
 #include "core/assert_api.h"
 #include "core/arraydef.h"
 #include "core/minmax.h"
@@ -12,12 +11,6 @@
 #include "core/divmodmul.h"
 #include "match/ft-polish.h"
 #include "match/ft-eoplist.h"
-#else
-#include "minmax.h"
-#include "gt-defs.h"
-#include "gt-alloc.h"
-#include "eoplist.h"
-#endif
 
 #define DELETION_CHAR    'D'
 #define INSERTION_CHAR   'I'
@@ -53,9 +46,7 @@ struct GtEoplist
   GtUword ulen, vlen;
   bool withpolcheck, seed_display;
   GtUword useedoffset, seedlen;
-#ifndef OUTSIDE_OF_GT
   const GtFtPolishing_info *pol_info;
-#endif
 };
 
 void gt_eoplist_reset(GtEoplist *eoplist)
@@ -82,9 +73,7 @@ GtEoplist *gt_eoplist_new(void)
   eoplist->seed_display = false;
   eoplist->withpolcheck = false;
   eoplist->useedoffset = eoplist->seedlen = 0;
-#ifndef OUTSIDE_OF_GT
   eoplist->pol_info = NULL;
-#endif
   gt_eoplist_reset(eoplist);
   return eoplist;
 }
@@ -194,27 +183,6 @@ void gt_eoplist_delete(GtEoplist *eoplist)
 #define FT_EOPCODE_MISMATCH       253
 #define FT_EOPCODE_DELETION       254
 #define FT_EOPCODE_INSERTION      255
-
-#ifndef OUTSIDE_OF_GT
-#else
-#define GT_CHECKARRAYSPACE(A,TYPE,L)\
-        do {\
-          if ((A)->nextfree##TYPE >= (A)->allocated##TYPE)\
-          {\
-            (A)->allocated##TYPE += L;\
-            (A)->space##TYPE = (TYPE *) gt_realloc((A)->space##TYPE,\
-                                                   sizeof (TYPE) *\
-                                                   (A)->allocated##TYPE);\
-          }\
-          gt_assert((A)->space##TYPE != NULL);\
-        } while (false)
-
-#define GT_STOREINARRAY(A,TYPE,L,VAL)\
-        do {\
-          GT_CHECKARRAYSPACE(A,TYPE,L);\
-          (A)->space##TYPE[(A)->nextfree##TYPE++] = VAL;\
-        } while (false)
-#endif
 
 #define GT_EOPLIST_PUSH(EOPLIST,EOP)\
         gt_assert((EOPLIST) != NULL);\
@@ -657,8 +625,6 @@ void gt_eoplist_set_sequences(GtEoplist *eoplist,
 #define EOPLIST_MISMATCHSYMBOL ' '
 #define EOPLIST_GAPSYMBOL      '-'
 
-#ifndef OUTSIDE_OF_GT
-
 #define GT_UPDATE_POSITIVE_INFO(ISMATCH)\
         if (eoplist->pol_info != NULL)\
         {\
@@ -686,10 +652,6 @@ void gt_eoplist_set_sequences(GtEoplist *eoplist,
             suffix_bits |= set_mask;\
           }\
         }
-#else
-#define GT_UPDATE_POSITIVE_INFO(ISMATCH) /* Nothing */
-#define ISSPECIAL(CC) ((CC) >= 254)
-#endif
 
 void gt_eoplist_format_generic(FILE *fp,
                                const GtEoplist *eoplist,
@@ -703,7 +665,6 @@ void gt_eoplist_format_generic(FILE *fp,
   GtUword idx_u = 0, idx_v = 0, alignmentlength = 0,
           firstseedcolumn = GT_UWORD_MAX;
   GtUchar *topbuf = eoplist_reader->outbuffer, *midbuf = NULL, *lowbuf = NULL;
-#ifndef OUTSIDE_OF_GT
   uint64_t suffix_bits = 0, set_mask = 0;
   GtUword suffix_bits_used = 0, prefix_positive = 0, pol_size = 0,
           lastseedcolumn = GT_UWORD_MAX;
@@ -715,7 +676,6 @@ void gt_eoplist_format_generic(FILE *fp,
     pol_size = GT_MULT2(eoplist->pol_info->cut_depth);
     set_mask = ((uint64_t) 1) << (max_history - 1);
   }
-#endif
   gt_assert(eoplist_reader != NULL);
   topbuf[eoplist_reader->width] = '\n';
   midbuf = topbuf + eoplist_reader->width + 1;
@@ -770,9 +730,7 @@ void gt_eoplist_format_generic(FILE *fp,
               {
                 firstseedcolumn = alignmentlength;
               }
-#ifndef OUTSIDE_OF_GT
               lastseedcolumn = alignmentlength;
-#endif
             } else
             {
               midbuf[pos] = (GtUchar) EOPLIST_MATCHSYMBOL;
@@ -840,7 +798,6 @@ void gt_eoplist_format_generic(FILE *fp,
     lowbuf[pos] = '\n';
     fwrite(lowbuf,sizeof *lowbuf,pos+1,fp);
   }
-#ifndef OUTSIDE_OF_GT
   if (eoplist->pol_info != NULL)
   {
     GtUword suffix_positive;
@@ -904,7 +861,6 @@ void gt_eoplist_format_generic(FILE *fp,
       fprintf(fp, "\n");
     }
   }
-#endif
 }
 
 void gt_eoplist_format_exact(FILE *fp,
@@ -1048,7 +1004,6 @@ void gt_eoplist_set_seedoffset(GtEoplist *eoplist,
   eoplist->seedlen = seedlen;
 }
 
-#ifndef OUTSIDE_OF_GT
 void gt_eoplist_polished_ends(GtEoplist *eoplist,
                               const GtFtPolishing_info *pol_info,
                               bool withpolcheck)
@@ -1057,4 +1012,3 @@ void gt_eoplist_polished_ends(GtEoplist *eoplist,
   eoplist->pol_info = pol_info;
   eoplist->withpolcheck = withpolcheck;
 }
-#endif

@@ -1,52 +1,8 @@
-#ifndef OUTSIDE_OF_GT
 #include "core/unused_api.h"
 #include "core/assert_api.h"
 #include "core/arraydef.h"
 #include "core/minmax.h"
 #include "match/ft-trimstat.h"
-#else
-#include "gt-alloc.h"
-#include "gt-defs.h"
-#include "minmax.h"
-#include "trimstat.h"
-#endif
-
-#ifndef OUTSIDE_OF_GT
-#else
-typedef struct
-{
-  GtUword *spaceGtUword, allocatedGtUword, nextfreeGtUword;
-} GtArrayGtUword;
-
-#define GT_INITARRAY(A,TYPE)\
-        do {\
-          (A)->space##TYPE = NULL;\
-          (A)->allocated##TYPE = (A)->nextfree##TYPE = 0;\
-        } while (false)
-
-#define GT_FREEARRAY(A,TYPE)\
-        do {\
-          if ((A)->space##TYPE != NULL)\
-          {\
-            gt_free((A)->space##TYPE);\
-            (A)->allocated##TYPE = 0;\
-            (A)->nextfree##TYPE = 0;\
-            (A)->space##TYPE = NULL;\
-          }\
-        } while (false)
-
-#define GT_CHECKARRAYSPACE(A,TYPE,L)\
-        do {\
-          if ((A)->nextfree##TYPE >= (A)->allocated##TYPE)\
-          {\
-            (A)->allocated##TYPE += L;\
-            (A)->space##TYPE = (TYPE *) gt_realloc((A)->space##TYPE,\
-                                              sizeof (TYPE) *\
-                                              (A)->allocated##TYPE);\
-          }\
-          gt_assert((A)->space##TYPE != NULL);\
-        } while (false)
-#endif
 
 struct GtFtTrimstat
 {
