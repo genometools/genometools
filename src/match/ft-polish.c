@@ -48,6 +48,7 @@ GtFtPolishing_info *polishing_info_new_with_bias(double errorpercentage,
   {
     pol_info->cut_depth = MIN(history_size/2,(GtUword) 15);
   }
+  pol_info->pol_size = 2 * pol_info->cut_depth;
   pol_info->entries = 1UL << pol_info->cut_depth;
   pol_info->mask = pol_info->entries - 1;
   pol_info->values = gt_malloc(sizeof *pol_info->values * pol_info->entries);

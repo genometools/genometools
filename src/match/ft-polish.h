@@ -12,7 +12,7 @@ typedef struct
 
 typedef struct
 {
-  GtUword entries, cut_depth, mask;
+  GtUword entries, cut_depth, pol_size, mask;
   GtWord difference_score, match_score;
   GtFtPolishing_value *values;
 } GtFtPolishing_info;

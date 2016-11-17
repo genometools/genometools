@@ -4462,6 +4462,7 @@ int gt_diagbandseed_run(const GtDiagbandseedInfo *arg,
   gt_free(stream);
 
 #endif
-  gt_ft_trimstat_delete(trimstat,arg->verbose);
+  gt_ft_trimstat_time_out(trimstat);
+  gt_ft_trimstat_delete(trimstat);
   return had_err;
 }

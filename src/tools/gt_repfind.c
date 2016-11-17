@@ -1108,7 +1108,7 @@ static int gt_repfind_runner(int argc,
   }
   gt_xdrop_matchinfo_delete(xdropmatchinfo);
   gt_greedy_extend_matchinfo_delete(greedyextendmatchinfo);
-  gt_ft_trimstat_delete(trimstat,arguments->beverbose);
+  gt_ft_trimstat_delete(trimstat);
   polishing_info_delete(pol_info);
   gt_logger_delete(logger);
   if (repfindtimer != NULL)

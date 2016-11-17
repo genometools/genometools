@@ -234,6 +234,10 @@ static void inline front_prune_add_matches(GtFtFrontvalue *midfront,
 {
   GtUword upos, vpos;
 
+  if (trimstat != NULL)
+  {
+    gt_ft_trimstat_timer_start(trimstat);
+  }
   for (upos = fv->row, vpos = fv->row + FRONT_DIAGONAL(fv);
        upos < useq->substringlength && vpos < vseq->substringlength &&
        ft_sequenceobject_symbol_match(useq,upos,vseq,vpos);
@@ -548,32 +552,32 @@ static void update_trace_and_polished(GtFtPolished_point *best_polished_point,
   for (frontptr = lowfront; frontptr <= highfront; frontptr++)
   {
     GtUword alignedlen = GT_MULT2(frontptr->row) + FRONT_DIAGONAL(frontptr);
-    uint64_t filled_matchhistory_bits;
 
     gt_assert(FRONT_DIAGONAL(frontptr) >= 0 ||
               frontptr->row >= -FRONT_DIAGONAL(frontptr));
-    if (frontptr->matchhistory_size >= GT_MULT2(pol_info->cut_depth))
+    if (alignedlen > best_polished_point->alignedlen)
     {
-      filled_matchhistory_bits = frontptr->matchhistory_bits;
-    } else
-    {
-      int shift = GT_MULT2(pol_info->cut_depth) - frontptr->matchhistory_size;
-      uint64_t fill_bits = ((uint64_t) 1 << shift) - 1;
-      filled_matchhistory_bits = frontptr->matchhistory_bits |
-                                 (fill_bits << frontptr->matchhistory_size);
-    }
-    if (alignedlen > best_polished_point->alignedlen &&
-        GT_HISTORY_IS_POLISHED(pol_info,filled_matchhistory_bits))
-    {
-      best_polished_point->alignedlen = alignedlen;
-      best_polished_point->row = frontptr->row;
-      best_polished_point->distance = distance;
-      best_polished_point->trimleft = trimleft;
-      best_polished_point->max_mismatches = (GtUword) frontptr->max_mismatches;
-      if (showfrontinfo)
+      uint64_t filled_matchhistory_bits = frontptr->matchhistory_bits;
+
+      if (frontptr->matchhistory_size < pol_info->pol_size)
       {
-        printf("new polished point (alignlen=" GT_WU ",row=%" PRIu32
-               ",distance=" GT_WU ")\n",alignedlen,frontptr->row,distance);
+        const int shift = pol_info->pol_size - frontptr->matchhistory_size;
+        const uint64_t fill_bits = ((uint64_t) 1 << shift) - 1;
+        filled_matchhistory_bits |= (fill_bits << frontptr->matchhistory_size);
+      }
+      if  (GT_HISTORY_IS_POLISHED(pol_info,filled_matchhistory_bits))
+      {
+        best_polished_point->alignedlen = alignedlen;
+        best_polished_point->row = frontptr->row;
+        best_polished_point->distance = distance;
+        best_polished_point->trimleft = trimleft;
+        best_polished_point->max_mismatches
+          = (GtUword) frontptr->max_mismatches;
+        if (showfrontinfo)
+        {
+          printf("new polished point (alignlen=" GT_WU ",row=%" PRIu32
+                 ",distance=" GT_WU ")\n",alignedlen,frontptr->row,distance);
+        }
       }
     }
     if (front_trace != NULL)
