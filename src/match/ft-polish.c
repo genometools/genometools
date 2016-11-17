@@ -3,11 +3,18 @@
 #include <stdio.h>
 #include <stdbool.h>
 #include <limits.h>
+#ifndef OUTSIDE_OF_GT
 #include "core/assert_api.h"
-#include "core/ma_api.h"
-#include "core/types_api.h"
 #include "core/minmax.h"
-#include "ft-polish.h"
+#include "core/types_api.h"
+#include "core/ma_api.h"
+#include "match/ft-polish.h"
+#else
+#include "gt-alloc.h"
+#include "gt-defs.h"
+#include "minmax.h"
+#include "polish.h"
+#endif
 
 static void fill_polishing_info(GtFtPolishing_info *pol_info,
                                 GtUword currentdepth,

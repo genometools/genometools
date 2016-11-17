@@ -4,15 +4,20 @@
 #include <stdio.h>
 #include <math.h>
 #include <ctype.h>
+#ifndef OUTSIDE_OF_GT
 #include "core/assert_api.h"
 #include "core/arraydef.h"
-#include "match/ft-polish.h"
+#include "core/minmax.h"
 #include "core/chardef.h"
 #include "core/divmodmul.h"
-#include "core/minmax.h"
-#include "core/types_api.h"
-#include "core/ma_api.h"
-#include "ft-eoplist.h"
+#include "match/ft-polish.h"
+#include "match/ft-eoplist.h"
+#else
+#include "minmax.h"
+#include "gt-defs.h"
+#include "gt-alloc.h"
+#include "eoplist.h"
+#endif
 
 #define DELETION_CHAR    'D'
 #define INSERTION_CHAR   'I'
@@ -190,7 +195,8 @@ void gt_eoplist_delete(GtEoplist *eoplist)
 #define FT_EOPCODE_DELETION       254
 #define FT_EOPCODE_INSERTION      255
 
-#ifdef OUTSIDE_OF_GT
+#ifndef OUTSIDE_OF_GT
+#else
 #define GT_CHECKARRAYSPACE(A,TYPE,L)\
         do {\
           if ((A)->nextfree##TYPE >= (A)->allocated##TYPE)\

@@ -2,8 +2,12 @@
 #define FT_FRONT_GENERATION_H
 #include <stdint.h>
 #include <stdbool.h>
-#include "core/types_api.h"
-#include "ft-eoplist.h"
+#ifndef OUTSIDE_OF_GT
+#include "match/ft-eoplist.h"
+#else
+#include "gt-defs.h"
+#include "eoplist.h"
+#endif
 
 #define FT_EOP_MISMATCH  1
 #define FT_EOP_INSERTION (1 << 1)

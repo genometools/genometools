@@ -1,11 +1,18 @@
-#include "core/ma_api.h"
-#include "core/types_api.h"
+#ifndef OUTSIDE_OF_GT
+#include "core/unused_api.h"
 #include "core/assert_api.h"
 #include "core/arraydef.h"
 #include "core/minmax.h"
-#include "ft-trimstat.h"
+#include "match/ft-trimstat.h"
+#else
+#include "gt-alloc.h"
+#include "gt-defs.h"
+#include "minmax.h"
+#include "trimstat.h"
+#endif
 
-#ifdef OUTSIDE_OF_GT
+#ifndef OUTSIDE_OF_GT
+#else
 typedef struct
 {
   GtUword *spaceGtUword, allocatedGtUword, nextfreeGtUword;
@@ -68,7 +75,9 @@ GtFtTrimstat *gt_ft_trimstat_new(void)
   return trimstat;
 }
 
-void gt_ft_trimstat_add(GtFtTrimstat *trimstat,bool diedout,
+#ifndef NDEBUG
+void gt_ft_trimstat_add(GtFtTrimstat *trimstat,
+                        bool diedout,
                         GtUword sumvalid,
                         GtUword maxvalid,
                         GtUword d,
@@ -120,13 +129,30 @@ void gt_ft_trimstat_add(GtFtTrimstat *trimstat,bool diedout,
     trimstat->max_cache_size = cache_size;
   }
 }
-
 void gt_ft_trimstat_add_matchlength(GtFtTrimstat *trimstat,
                                     uint32_t matchlength)
 {
   gt_assert(trimstat != NULL && trimstat->matchlength_dist != NULL);
   trimstat->matchlength_dist[MIN(100,matchlength)]++;
 }
+#else
+void gt_ft_trimstat_add(GT_UNUSED GtFtTrimstat *trimstat,
+                        GT_UNUSED bool diedout,
+                        GT_UNUSED GtUword sumvalid,
+                        GT_UNUSED GtUword maxvalid,
+                        GT_UNUSED GtUword d,
+                        GT_UNUSED size_t spaceforfront,
+                        GT_UNUSED GtUword cache_size)
+{
+  return;
+}
+
+void gt_ft_trimstat_add_matchlength(GT_UNUSED GtFtTrimstat *trimstat,
+                                    GT_UNUSED uint32_t matchlength)
+{
+  return;
+}
+#endif
 
 static int compare_GtUword(const void *va, const void *vb)
 {
@@ -177,10 +203,12 @@ void gt_ft_trimstat_delete(GtFtTrimstat *trimstat,bool verbose)
         if (trimstat->matchlength_dist[idx] > 0)
         {
           matchlength_cum += trimstat->matchlength_dist[idx];
-          printf("# matchlength%s" GT_WU ": " GT_WU " times (%.2f), "
+          printf("# matchlength%s" GT_WU ": " GT_WU " times, "
+                 "total=" GT_WU " (%.2f), "
                  "cum=%.2f%%\n",
                  idx < 100UL ? "=" : ">=",
                  idx,trimstat->matchlength_dist[idx],
+                 idx * trimstat->matchlength_dist[idx],
                  (double) trimstat->matchlength_dist[idx]/matchlength_sum,
                  100.0 * (double) matchlength_cum/matchlength_sum);
         }

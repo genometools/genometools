@@ -1,10 +1,16 @@
 #ifndef FT_FRONT_PRUNE_H
 #define FT_FRONT_PRUNE_H
-#include "core/types_api.h"
-#include "ft-trimstat.h"
-#include "ft-polish.h"
-#include "ft-front-generation.h"
+#ifndef OUTSIDE_OF_GT
+#include "match/ft-trimstat.h"
+#include "match/ft-polish.h"
+#include "match/ft-front-generation.h"
 #include "core/encseq_api.h"
+#else
+#include "gt-defs.h"
+#include "polish.h"
+#include "front-generation.h"
+#include "trimstat.h"
+#endif
 
 typedef struct
 {

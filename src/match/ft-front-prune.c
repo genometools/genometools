@@ -4,21 +4,29 @@
 #include <stdbool.h>
 #include <string.h>
 #include <limits.h>
+#ifndef OUTSIDE_OF_GT
 #include "core/assert_api.h"
 #include "core/unused_api.h"
 #include "core/divmodmul.h"
 #include "core/chardef.h"
 #include "core/divmodmul.h"
 #include "core/intbits.h"
+#include "core/minmax.h"
 #include "core/encseq.h"
 #include "match/extend-offset.h"
-#include "core/ma_api.h"
-#include "core/types_api.h"
-#include "ft-front-prune.h"
-#include "ft-trimstat.h"
-#include "core/minmax.h"
-#include "ft-polish.h"
-#include "ft-front-generation.h"
+#include "match/ft-front-prune.h"
+#include "match/ft-trimstat.h"
+#include "match/ft-polish.h"
+#include "match/ft-front-generation.h"
+#else
+#include "gt-alloc.h"
+#include "gt-defs.h"
+#include "minmax.h"
+#include "front-prune.h"
+#include "trimstat.h"
+#include "polish.h"
+#include "front-generation.h"
+#endif
 
 #define GT_UPDATE_MATCH_HISTORY(FRONTVAL)\
         if ((FRONTVAL)->matchhistory_size == max_history)\
@@ -213,53 +221,6 @@ static GtUchar ft_sequenceobject_get_char(GtFtSequenceObject *seq,GtUword idx)
   }
   return cc;
 }
-
-#undef SKDEBUG
-#ifdef SKDEBUG
-static char *gt_ft_sequencebject_get(GtFtSequenceObject *seq)
-{
-  GtUword idx;
-  char *buffer;
-  char *map = "acgt";
-
-  gt_assert(seq != NULL);
-  buffer = gt_malloc(sizeof *buffer * (seq->substringlength+1));
-  for (idx = 0; idx < seq->substringlength; idx++)
-  {
-    GtUchar cc = ft_sequenceobject_get_char(seq,idx);
-
-    if (cc == WILDCARD)
-    {
-      buffer[idx] = '#';
-    } else
-    {
-      if (cc == SEPARATOR)
-      {
-        buffer[idx] = '$';
-      } else
-      {
-        gt_assert(cc < 4);
-        buffer[idx] = map[cc];
-      }
-    }
-  }
-  buffer[seq->substringlength] = '\0';
-  return buffer;
-}
-
-static void gt_greedy_show_context(bool rightextension,
-                                   GtFtSequenceObject *useq,
-                                   GtFtSequenceObject *vseq)
-{
-  char *uptr = gt_ft_sequencebject_get(useq);
-  char *vptr = gt_ft_sequencebject_get(vseq);
-  printf(">%sextension:\n>%s\n>%s\n",rightextension ? "right" : "left",
-         uptr,vptr);
-  gt_free(uptr);
-  gt_free(vptr);
-}
-#endif
-
 #else
 typedef struct
 {
@@ -297,13 +258,13 @@ static bool ft_sequenceobject_symbol_match(GtFtSequenceObject *useq,
 #endif
 }
 
-static void inline front_prune_add_matches(GtFtTrimstat *trimstat,
-                                           GtFtFrontvalue *midfront,
+static void inline front_prune_add_matches(GtFtFrontvalue *midfront,
                                            GtFtFrontvalue *fv,
                                            uint64_t leftmostbit,
                                            GtUword max_history,
                                            GtFtSequenceObject *useq,
-                                           GtFtSequenceObject *vseq)
+                                           GtFtSequenceObject *vseq,
+                                           GtFtTrimstat *trimstat)
 {
   GtUword upos, vpos;
 
@@ -353,8 +314,8 @@ static GtUword front_next_inplace(GtFtTrimstat *trimstat,
   GT_UPDATE_MATCH_HISTORY(&bestfront);
   *lowfront = bestfront;
   lowfront->backreference = FT_EOP_DELETION;
-  front_prune_add_matches(trimstat,midfront,lowfront,leftmostbit,max_history,
-                          useq,vseq);
+  front_prune_add_matches(midfront,lowfront,leftmostbit,max_history,
+                          useq,vseq,trimstat);
   maxalignedlen = GT_MULT2(lowfront->row) + FRONT_DIAGONAL(lowfront);
 
   replacement_value = *(lowfront+1);
@@ -378,8 +339,8 @@ static GtUword front_next_inplace(GtFtTrimstat *trimstat,
     }
   }
   *(lowfront+1) = bestfront;
-  front_prune_add_matches(trimstat,midfront,lowfront + 1,leftmostbit,
-                          max_history,useq,vseq);
+  front_prune_add_matches(midfront,lowfront + 1,leftmostbit,
+                          max_history,useq,vseq,trimstat);
   alignedlen = GT_MULT2((lowfront+1)->row) + FRONT_DIAGONAL(lowfront + 1);
   if (maxalignedlen < alignedlen)
   {
@@ -431,8 +392,8 @@ static GtUword front_next_inplace(GtFtTrimstat *trimstat,
       replacement_value = *frontptr;
     }
     *frontptr = bestfront;
-    front_prune_add_matches(trimstat,midfront,frontptr,leftmostbit,max_history,
-                            useq,vseq);
+    front_prune_add_matches(midfront,frontptr,leftmostbit,max_history,
+                            useq,vseq,trimstat);
     alignedlen = GT_MULT2(frontptr->row) + FRONT_DIAGONAL(frontptr);
     if (maxalignedlen < alignedlen)
     {
@@ -456,16 +417,16 @@ static GtUword front_second_inplace(GtFtTrimstat *trimstat,
   lowfront->row++;
   lowfront->backreference = FT_EOP_DELETION;
   GT_UPDATE_MATCH_HISTORY(lowfront);
-  front_prune_add_matches(trimstat,midfront,lowfront,leftmostbit,max_history,
-                          useq,vseq);
+  front_prune_add_matches(midfront,lowfront,leftmostbit,max_history,
+                          useq,vseq,trimstat);
   maxalignedlen = GT_MULT2(lowfront->row) + FRONT_DIAGONAL(lowfront);
 
   (lowfront+1)->row++;
   (lowfront+1)->backreference = FT_EOP_MISMATCH;
   (lowfront+1)->max_mismatches++;
   GT_UPDATE_MATCH_HISTORY(lowfront+1);
-  front_prune_add_matches(trimstat,midfront,lowfront + 1,leftmostbit,
-                          max_history,useq,vseq);
+  front_prune_add_matches(midfront,lowfront + 1,leftmostbit,
+                          max_history,useq,vseq,trimstat);
   alignedlen = GT_MULT2((lowfront+1)->row) + FRONT_DIAGONAL(lowfront + 1);
   if (maxalignedlen < alignedlen)
   {
@@ -474,8 +435,8 @@ static GtUword front_second_inplace(GtFtTrimstat *trimstat,
 
   (lowfront+2)->backreference = FT_EOP_INSERTION;
   GT_UPDATE_MATCH_HISTORY(lowfront+2);
-  front_prune_add_matches(trimstat,midfront,lowfront + 2,leftmostbit,
-                          max_history,useq,vseq);
+  front_prune_add_matches(midfront,lowfront + 2,leftmostbit,
+                          max_history,useq,vseq,trimstat);
   alignedlen = GT_MULT2((lowfront+2)->row) + FRONT_DIAGONAL(lowfront + 2);
   if (maxalignedlen < alignedlen)
   {
@@ -743,14 +704,7 @@ GtUword front_prune_edist_inplace(
   bool diedout = false;
   GtFtSequenceObject useq, vseq;
 
-#ifdef OUTSIDE_OF_GT
-  GtAllocatedMemory *frontspace = gt_malloc(sizeof *frontspace);
-  frontspace->space = NULL;
-  frontspace->allocated = 0;
-  frontspace->offset = 0;
-  ft_sequenceobject_init(&useq,useqptr,0,ustart,ulen);
-  ft_sequenceobject_init(&vseq,vseqptr,vseqstartpos,vstart,vlen);
-#else
+#ifndef OUTSIDE_OF_GT
   ft_sequenceobject_init(&useq,
                          ufsr->extend_char_access,
                          ufsr->encseq,
@@ -775,11 +729,15 @@ GtUword front_prune_edist_inplace(
                          vfsr->sequence_cache,
                          vfsr->bytesequence,
                          vfsr->totallength);
-#ifdef SKDEBUG
-  gt_greedy_show_context(rightextension,&useq,&vseq);
+#else
+  GtAllocatedMemory *frontspace = gt_malloc(sizeof *frontspace);
+  frontspace->space = NULL;
+  frontspace->allocated = 0;
+  frontspace->offset = 0;
+  ft_sequenceobject_init(&useq,useqptr,0,ustart,ulen);
+  ft_sequenceobject_init(&vseq,vseqptr,vseqstartpos,vstart,vlen);
 #endif
   frontspace->offset = 0;
-#endif
   for (distance = 0, valid = 1UL; /* Nothing */; distance++, valid += 2)
   {
     GtUword trim, maxalignedlen, minlenfrommaxdiff;
@@ -821,8 +779,8 @@ GtUword front_prune_edist_inplace(
         = validbasefront->matchhistory_count = MIN(max_history,seedlength);
       validbasefront->backreference = 0; /* No back reference */
       validbasefront->max_mismatches = 0;
-      front_prune_add_matches(trimstat,validbasefront + distance,validbasefront,
-                              leftmostbit,max_history,&useq,&vseq);
+      front_prune_add_matches(validbasefront + distance,validbasefront,
+                              leftmostbit,max_history,&useq,&vseq,trimstat);
       maxalignedlen = GT_MULT2(validbasefront->row);
     } else
     {
@@ -961,7 +919,8 @@ GtUword front_prune_edist_inplace(
 #endif
                       );
   }
-#ifdef OUTSIDE_OF_GT
+#ifndef OUTSIDE_OF_GT
+#else
   gt_free(frontspace->space);
   gt_free(frontspace);
 #endif

@@ -1,10 +1,13 @@
 #ifndef FT_EOPLIST_H
 #define FT_EOPLIST_H
 #include <stdbool.h>
+#ifndef OUTSIDE_OF_GT
 #include "core/unused_api.h"
 #include "core/chardef.h"
 #include "match/ft-polish.h"
-#include "core/types_api.h"
+#else
+#include "gt-defs.h"
+#endif
 
 /* A list of edit operation is representation is represented by the following
    opaque type */
