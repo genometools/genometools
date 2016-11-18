@@ -16,7 +16,6 @@ void gt_ft_trimstat_add(GtFtTrimstat *trimstat,
                         GtUword d,
                         size_t spaceforfront,
                         GtUword cache_size);
-void gt_ft_trimstat_timer_start(GtFtTrimstat *trimstat);
 void gt_ft_trimstat_add_matchlength(GtFtTrimstat *trimstat,
                                     uint32_t matchlength);
 #else
@@ -29,13 +28,10 @@ void gt_ft_trimstat_add(GT_UNUSED GtFtTrimstat *trimstat,
                         GT_UNUSED GtUword cache_size);
 void gt_ft_trimstat_add_matchlength(GT_UNUSED GtFtTrimstat *trimstat,
                                     GT_UNUSED uint32_t matchlength);
-void gt_ft_trimstat_timer_start(GT_UNUSED GtFtTrimstat *trimstat);
 #endif
 
 void gt_ft_trimstat_delete(GtFtTrimstat *trimstat);
 
 void gt_ft_trimstat_out(const GtFtTrimstat *trimstat,bool verbose);
-
-void gt_ft_trimstat_time_out(GT_UNUSED const GtFtTrimstat *trimstat);
 
 #endif

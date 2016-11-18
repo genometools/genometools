@@ -756,6 +756,7 @@ void gt_align_front_prune_edist(bool rightextension,
     distance = front_prune_edist_inplace(rightextension,
                                          &ggemi->frontspace_reservoir,
                                          NULL, /* trimstat */
+                                         NULL, /* total_add_matches_time_usec */
                                          best_polished_point,
                                          front_trace,
                                          ggemi->pol_info,
@@ -916,7 +917,7 @@ static const GtQuerymatch *gt_extend_sesp(bool forxdrop,
                                           const GtSeqorEncseq *queryes,
                                           const GtSeedextendSeqpair *sesp)
 {
-  GtProcessinfo_and_querymatchspaceptr *processinfo_and_querymatchspaceptr
+  GtProcessinfo_and_querymatchspaceptr *info_querymatch
     = (GtProcessinfo_and_querymatchspaceptr *) info;
   GtGreedyextendmatchinfo *greedyextendmatchinfo = NULL;
   GtXdropmatchinfo *xdropmatchinfo = NULL;
@@ -936,10 +937,10 @@ static const GtQuerymatch *gt_extend_sesp(bool forxdrop,
   }
   if (forxdrop)
   {
-    xdropmatchinfo = processinfo_and_querymatchspaceptr->processinfo;
+    xdropmatchinfo = info_querymatch->processinfo;
   } else
   {
-    greedyextendmatchinfo = processinfo_and_querymatchspaceptr->processinfo;
+    greedyextendmatchinfo = info_querymatch->processinfo;
     gt_greedy_extend_init(&ufsr,
                           &vfsr,
                           dbes,
@@ -994,6 +995,10 @@ static const GtQuerymatch *gt_extend_sesp(bool forxdrop,
                                        &greedyextendmatchinfo->
                                           frontspace_reservoir,
                                        greedyextendmatchinfo->trimstat,
+#ifndef _WIN32
+                                       info_querymatch->
+                                          total_add_matches_time_usec_ptr,
+#endif
                                        &left_best_polished_point,
                                        greedyextendmatchinfo->left_front_trace,
                                        greedyextendmatchinfo->pol_info,
@@ -1097,6 +1102,10 @@ static const GtQuerymatch *gt_extend_sesp(bool forxdrop,
                                        &greedyextendmatchinfo->
                                           frontspace_reservoir,
                                        greedyextendmatchinfo->trimstat,
+#ifndef _WIN32
+                                       info_querymatch->
+                                          total_add_matches_time_usec_ptr,
+#endif
                                        &right_best_polished_point,
                                        greedyextendmatchinfo->right_front_trace,
                                        greedyextendmatchinfo->pol_info,
@@ -1158,8 +1167,8 @@ static const GtQuerymatch *gt_extend_sesp(bool forxdrop,
   }
   return gt_combine_extensions(
                  forxdrop,
-                 processinfo_and_querymatchspaceptr->querymatchspaceptr,
-                 processinfo_and_querymatchspaceptr->karlin_altschul_stat,
+                 info_querymatch->querymatchspaceptr,
+                 info_querymatch->karlin_altschul_stat,
                  dbes,
                  queryes,
                  sesp,
@@ -1271,20 +1280,18 @@ static const GtQuerymatch *gt_rf_extend_selfmatch(bool forxdrop,
 static void gt_extend_prettyprint(bool forxdrop,const GtQuerymatch *querymatch,
                                   void *info)
 {
-  GtProcessinfo_and_querymatchspaceptr *processinfo_and_querymatchspaceptr
+  GtProcessinfo_and_querymatchspaceptr *info_querymatch
     = (GtProcessinfo_and_querymatchspaceptr *) info;
   GtUword errorpercentage, userdefinedleastlength;
 
   if (forxdrop)
   {
-    GtXdropmatchinfo *xdropmatchinfo
-      = processinfo_and_querymatchspaceptr->processinfo;
+    GtXdropmatchinfo *xdropmatchinfo = info_querymatch->processinfo;
     errorpercentage = xdropmatchinfo->errorpercentage;
     userdefinedleastlength = xdropmatchinfo->userdefinedleastlength;
   } else
   {
-    GtGreedyextendmatchinfo *ggemi
-      = processinfo_and_querymatchspaceptr->processinfo;
+    GtGreedyextendmatchinfo *ggemi = info_querymatch->processinfo;
     errorpercentage = ggemi->errorpercentage;
     userdefinedleastlength = ggemi->userdefinedleastlength;
   }

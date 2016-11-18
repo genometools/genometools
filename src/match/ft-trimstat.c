@@ -1,4 +1,3 @@
-#include <sys/time.h>
 #include "core/unused_api.h"
 #include "core/assert_api.h"
 #include "core/arraydef.h"
@@ -11,10 +10,6 @@ struct GtFtTrimstat
   GtArrayGtUword distance_dist, maxvalid_dist;
   size_t spaceforfront_total;
   double sum_meanvalid;
-#ifndef _WIN32
-  suseconds_t total_add_matches_time_usec;
-  struct timeval tvalBefore;
-#endif
 };
 
 GtFtTrimstat *gt_ft_trimstat_new(void)
@@ -31,7 +26,6 @@ GtFtTrimstat *gt_ft_trimstat_new(void)
   GT_INITARRAY(&trimstat->distance_dist,GtUword);
   GT_INITARRAY(&trimstat->maxvalid_dist,GtUword);
   trimstat->spaceforfront_total = 0;
-  trimstat->total_add_matches_time_usec = 0;
   trimstat->sum_meanvalid = 0.0;
   trimstat->max_cache_size = 0;
   return trimstat;
@@ -92,22 +86,9 @@ void gt_ft_trimstat_add(GtFtTrimstat *trimstat,
   }
 }
 
-void gt_ft_trimstat_timer_start(GtFtTrimstat *trimstat)
-{
-  gettimeofday (&trimstat->tvalBefore, NULL);
-}
-
 void gt_ft_trimstat_add_matchlength(GtFtTrimstat *trimstat,
                                     uint32_t matchlength)
 {
-#ifndef _WIN32
-  struct timeval tvalAfter;
-
-  gettimeofday (&tvalAfter, NULL);
-  trimstat->total_add_matches_time_usec
-    += (tvalAfter.tv_sec - trimstat->tvalBefore.tv_sec) * 1000000L
-       + tvalAfter.tv_usec - trimstat->tvalBefore.tv_usec;
-#endif
   gt_assert(trimstat != NULL && trimstat->matchlength_dist != NULL);
   trimstat->matchlength_dist[MIN(100,matchlength)]++;
 }
@@ -128,14 +109,9 @@ void gt_ft_trimstat_add_matchlength(GT_UNUSED GtFtTrimstat *trimstat,
 {
   return;
 }
-
-void gt_ft_trimstat_timer_start(GT_UNUSED GtFtTrimstat *trimstat)
-{
-  return;
-}
 #endif
 
-static int compare_GtUword(const void *va, const void *vb)
+static int gt_ft_trimstat_compare_GtUword(const void *va, const void *vb)
 {
   GtUword a = *((const GtUword *) va);
   GtUword b = *((const GtUword *) vb);
@@ -217,7 +193,7 @@ void gt_ft_trimstat_out(const GtFtTrimstat *trimstat,bool verbose)
       qsort(trimstat->distance_dist.spaceGtUword,
             trimstat->distance_dist.nextfreeGtUword,
             sizeof *trimstat->distance_dist.spaceGtUword,
-            compare_GtUword);
+            gt_ft_trimstat_compare_GtUword);
       if (trimstat->distance_dist.nextfreeGtUword > 0)
       {
         GtUword previous = trimstat->distance_dist.spaceGtUword[0];
@@ -245,16 +221,4 @@ void gt_ft_trimstat_out(const GtFtTrimstat *trimstat,bool verbose)
       }
     }
   }
-}
-
-void gt_ft_trimstat_time_out(GT_UNUSED const GtFtTrimstat *trimstat)
-{
-#ifndef _WIN32
-  const time_t total_add_matches_time_sec
-    = (time_t) trimstat->total_add_matches_time_usec/1000000;
-  printf("# added matches in " GT_WD ".%.06ld seconds.\n",
-        (GtWord) total_add_matches_time_sec,
-        (GtWord) (trimstat->total_add_matches_time_usec -
-                  total_add_matches_time_sec * 1000000L));
-#endif
 }

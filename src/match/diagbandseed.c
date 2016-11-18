@@ -2629,9 +2629,8 @@ typedef struct
           failedmatches,
           seqpairs_with_minsegment;
   bool withtiming;
-#ifndef _WIN32
-  suseconds_t total_extension_time_usec;
-#endif
+  GtUword total_extension_time_usec,
+          total_add_matches_time_usec;
 } GtDiagbandseedCounts;
 
 typedef const GtQuerymatch *(*GtExtendRelativeCoordsFunc)(void *,
@@ -3010,6 +3009,46 @@ static void gt_diagbandseed_info_qm_set(
   gt_querymatch_file_set(ifqm->querymatchspaceptr, stream);
 }
 
+#define GT_USEC2SEC(TIME_IN_USEC)\
+         ((GtUword) (TIME_IN_USEC)/1000000)
+
+#define GT_USECREMAIN(TIME_IN_USEC) ((TIME_IN_USEC) -\
+                                     GT_USEC2SEC(TIME_IN_USEC) * 1000000UL)
+
+#ifndef _WIN32
+static void gt_diagbandseed_process_seeds_times(
+                 FILE *stream,
+                 bool extendgreedy,
+                 GtUword mlistlen,
+                 GtUword extended_seeds,
+                 GtUword total_process_seeds_usec,
+                 GtUword total_extension_time_usec,
+                 GtUword total_add_matches_time_usec)
+{
+  gt_assert(total_process_seeds_usec >= total_extension_time_usec &&
+            total_extension_time_usec >= total_add_matches_time_usec);
+  GtUword extension_time_usec = total_extension_time_usec -
+                                total_add_matches_time_usec,
+          process_seeds_usec = total_process_seeds_usec -
+                               total_extension_time_usec;
+
+  fprintf(stream, "# ... added matches as part of seed extension in "
+                  GT_WD ".%06ld seconds.\n",
+                  GT_USEC2SEC(total_add_matches_time_usec),
+                  GT_USECREMAIN(total_add_matches_time_usec));
+  fprintf(stream,"# ... %s extension of " GT_WU " seeds (excluding matches) in "
+                 GT_WD ".%.06ld seconds.\n",
+          extendgreedy ? "greedy" : "xdrop",
+          extended_seeds,
+          GT_USEC2SEC(extension_time_usec),
+          GT_USECREMAIN(extension_time_usec));
+  fprintf(stream, "# ... processed " GT_WU " seeds (excluding extensions) in "
+                  GT_WD ".%06ld seconds.\n",mlistlen,
+          GT_USEC2SEC(process_seeds_usec),
+          GT_USECREMAIN(process_seeds_usec));
+}
+#endif
+
 static void gt_diagbandseed_process_seeds_stat(FILE *stream,
                                                GtTimer *timer,
                                                const GtDiagbandseedCounts
@@ -3018,11 +3057,8 @@ static void gt_diagbandseed_process_seeds_stat(FILE *stream,
                                                GtUword allseqpairs,
                                                bool extendgreedy)
 {
-#ifndef _WIN32
-  const time_t total_extension_time_sec
-    = (time_t) process_seeds_counts->total_extension_time_usec/1000000;
-#endif
-  GtWord process_seeds_usec = gt_timer_elapsed_usec(timer), process_seeds_sec;
+  GtWord total_process_seeds_usec
+    = gt_timer_elapsed_usec(timer);
 
   fprintf(stream,"# total number of seeds: " GT_WU
                  "; " GT_WU ", i.e. %.2f%% of all seeds were selected"
@@ -3032,25 +3068,6 @@ static void gt_diagbandseed_process_seeds_stat(FILE *stream,
           100.0 * (double) process_seeds_counts->selected_seeds/mlistlen,
           process_seeds_counts->extended_seeds,
           100.0 * (double) process_seeds_counts->extended_seeds/mlistlen);
-#ifndef _WIN32
-  fprintf(stream,"# ... %s extension of " GT_WU " seeds in " GT_WD
-                 ".%.06ld seconds.\n",
-          extendgreedy ? "greedy" : "xdrop",
-          process_seeds_counts->extended_seeds,
-          (GtWord) total_extension_time_sec,
-          (GtUword) (process_seeds_counts->total_extension_time_usec -
-                     total_extension_time_sec * 1000000L));
-  gt_assert(process_seeds_usec >=
-            process_seeds_counts->total_extension_time_usec);
-  process_seeds_usec -= process_seeds_counts->total_extension_time_usec;
-  process_seeds_sec = process_seeds_usec/1000000L;
-  fprintf(stream, "# ... processed " GT_WU " seeds (excluding extensions) in "
-                  GT_WD ".%06ld seconds.\n",mlistlen,
-          process_seeds_sec,process_seeds_usec - process_seeds_sec * 1000000L);
-#else
-  fprintf(stream, "# ... processed " GT_WU " seeds ",mlistlen);
-  gt_timer_show_formatted(timer, GT_DIAGBANDSEED_FMT,stream);
-#endif
   fprintf(stream, "# number of matches output: " GT_WU "\n",
           process_seeds_counts->countmatches);
   fprintf(stream, "# number of unsuccessful extensions: " GT_WU "\n",
@@ -3061,6 +3078,19 @@ static void gt_diagbandseed_process_seeds_stat(FILE *stream,
           100.0 * (double)
                   process_seeds_counts->seqpairs_with_minsegment/allseqpairs,
           allseqpairs);
+#ifndef _WIN32
+  gt_diagbandseed_process_seeds_times(
+                 stream,
+                 extendgreedy,
+                 mlistlen,
+                 process_seeds_counts->extended_seeds,
+                 total_process_seeds_usec,
+                 process_seeds_counts->total_extension_time_usec,
+                 process_seeds_counts->total_add_matches_time_usec);
+#else
+  fprintf(stream, "# ... processed " GT_WU " seeds ",mlistlen);
+  gt_timer_show_formatted(timer, GT_DIAGBANDSEED_FMT,stream);
+#endif
 }
 
 static void gt_diagbandseed_set_sequence(GtSeqorEncseq *seqorencseq,
@@ -3228,12 +3258,17 @@ static void gt_diagbandseed_process_seeds(GtSeedpairlist *seedpairlist,
   GtDiagbandseedCounts process_seeds_counts = {0,0,0,0,0};
   GtDiagbandSeedPlainSequence plainsequence_info;
 
-#ifndef _WIN32
   process_seeds_counts.withtiming = verbose;
   process_seeds_counts.total_extension_time_usec = 0;
-#else
-  process_seeds_counts.withtiming = false;
-#endif
+  process_seeds_counts.total_add_matches_time_usec = 0;
+  if (verbose)
+  {
+    info_querymatch.total_add_matches_time_usec_ptr
+      = &process_seeds_counts.total_add_matches_time_usec;
+  } else
+  {
+    info_querymatch.total_add_matches_time_usec_ptr = NULL;
+  }
   gt_assert(extp->mincoverage >= seedlength && minsegmentlen >= 1);
   if (mlistlen == 0 || mlistlen < minsegmentlen) {
     return;
@@ -4462,7 +4497,6 @@ int gt_diagbandseed_run(const GtDiagbandseedInfo *arg,
   gt_free(stream);
 
 #endif
-  gt_ft_trimstat_time_out(trimstat);
   gt_ft_trimstat_delete(trimstat);
   return had_err;
 }
