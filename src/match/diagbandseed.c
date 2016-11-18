@@ -3125,23 +3125,23 @@ typedef struct
 } GtDiagbandSeedPlainSequence;;
 
 static void gt_diagband_seed_plainsequence_init(GtDiagbandSeedPlainSequence *ps,
+                                          const GtEncseq *aencseq,
                                           const GtSequencePartsInfo *aseqranges,
                                           GtUword aidx,
                                           bool with_a_bytestring,
+                                          const GtEncseq *bencseq,
                                           const GtSequencePartsInfo *bseqranges,
                                           GtUword bidx,
                                           bool with_b_bytestring)
 {
-  const GtEncseq *aencseq = gt_seuence_part_info_encseq_get(aseqranges),
-                 *bencseq = gt_seuence_part_info_encseq_get(bseqranges);
-
   ps->previous_aseqnum = GT_UWORD_MAX;
   if (with_a_bytestring)
   {
     ps->a_first_seqnum = gt_sequence_parts_info_start_get(aseqranges,aidx);
     ps->a_first_seqstartpos
       = gt_sequence_parts_info_seqstartpos(aseqranges,ps->a_first_seqnum),
-    ps->a_byte_sequence = gt_sequence_parts_info_seq_extract(aseqranges,aidx);
+    ps->a_byte_sequence = gt_sequence_parts_info_seq_extract(aencseq,aseqranges,
+                                                             aidx);
   } else
   {
     ps->a_byte_sequence = NULL;
@@ -3159,7 +3159,8 @@ static void gt_diagband_seed_plainsequence_init(GtDiagbandSeedPlainSequence *ps,
     } else
     {
       ps->b_differs_from_a = true;
-      ps->b_byte_sequence = gt_sequence_parts_info_seq_extract(bseqranges,bidx);
+      ps->b_byte_sequence = gt_sequence_parts_info_seq_extract(bencseq,
+                                                               bseqranges,bidx);
     }
   } else
   {
@@ -3180,10 +3181,10 @@ static void gt_diagband_seed_plainsequence_next_segment(
                          const GtSequencePartsInfo *bseqranges,
                          GtUword currsegm_bseqnum)
 {
-  if (ps->a_byte_sequence != NULL)
+  if (ps->previous_aseqnum == GT_UWORD_MAX ||
+      ps->previous_aseqnum < currsegm_aseqnum)
   {
-    if (ps->previous_aseqnum == GT_UWORD_MAX ||
-        ps->previous_aseqnum < currsegm_aseqnum)
+    if (ps->a_byte_sequence != NULL)
     {
       gt_diagbandseed_set_sequence(&ps->aseqorencseq,
                                    aseqranges,
@@ -3195,8 +3196,18 @@ static void gt_diagband_seed_plainsequence_next_segment(
       ps->previous_aseqnum = currsegm_aseqnum;
     } else
     {
-      gt_assert(ps->previous_aseqnum == currsegm_aseqnum);
+      GtUword seqstartpos = gt_sequence_parts_info_seqstartpos(aseqranges,
+                                                             currsegm_aseqnum),
+              seqendpos = gt_sequence_parts_info_seqendpos(aseqranges,
+                                                           currsegm_aseqnum);
+
+      GT_SEQORENCSEQ_ADD_SEQ_COORDS(&ps->aseqorencseq,
+                                    seqstartpos,
+                                    seqendpos - seqstartpos + 1);
     }
+  } else
+  {
+    gt_assert(ps->previous_aseqnum == currsegm_aseqnum);
   }
   if (ps->b_byte_sequence != NULL)
   {
@@ -3207,6 +3218,16 @@ static void gt_diagband_seed_plainsequence_next_segment(
                                  currsegm_bseqnum,
                                  ps->characters,
                                  ps->wildcardshow);
+  } else
+  {
+    GtUword seqstartpos = gt_sequence_parts_info_seqstartpos(bseqranges,
+                                                             currsegm_bseqnum),
+            seqendpos = gt_sequence_parts_info_seqendpos(bseqranges,
+                                                         currsegm_bseqnum);
+
+    GT_SEQORENCSEQ_ADD_SEQ_COORDS(&ps->bseqorencseq,
+                                  seqstartpos,
+                                  seqendpos - seqstartpos + 1);
   }
 }
 
@@ -3228,8 +3249,10 @@ static void gt_diagbandseed_process_seeds(GtSeedpairlist *seedpairlist,
                                          const GtDiagbandseedExtendParams *extp,
                                           void *processinfo,
                                           GtQuerymatchoutoptions *querymoutopt,
+                                          const GtEncseq *aencseq,
                                           const GtSequencePartsInfo *aseqranges,
                                           GtUword aidx,
+                                          const GtEncseq *bencseq,
                                           const GtSequencePartsInfo *bseqranges,
                                           GtUword bidx,
                                           unsigned int seedlength,
@@ -3241,8 +3264,6 @@ static void gt_diagbandseed_process_seeds(GtSeedpairlist *seedpairlist,
   GtDiagbandseedPosition *diagband_lastpos;
   GtExtendRelativeCoordsFunc extend_relative_coords_function = NULL;
   GtProcessinfo_and_querymatchspaceptr info_querymatch;
-  const GtEncseq *aencseq = gt_seuence_part_info_encseq_get(aseqranges),
-                 *bencseq = gt_seuence_part_info_encseq_get(bseqranges);
   const bool same_encseq = (aencseq == bencseq) ? true : false;
   /* Although the sequences of the parts processed are shorter, we need to
      set amaxlen and bmaxlen to the maximum size of all sequences
@@ -3286,11 +3307,13 @@ static void gt_diagbandseed_process_seeds(GtSeedpairlist *seedpairlist,
     gt_timer_start(timer);
   }
   gt_diagband_seed_plainsequence_init(&plainsequence_info,
+                                      aencseq,
                                       aseqranges,
                                       aidx,
                                       extp->a_extend_char_access ==
                                         GT_EXTEND_CHAR_ACCESS_DIRECT ? true
                                                                      : false,
+                                      bencseq,
                                       bseqranges,
                                       bidx,
                                       extp->b_extend_char_access ==
@@ -3761,8 +3784,10 @@ static char *gt_diagbandseed_kmer_filename(const GtEncseq *encseq,
 static int gt_diagbandseed_algorithm(const GtDiagbandseedInfo *arg,
                                      const GtArrayGtDiagbandseedKmerPos *alist,
                                      FILE *stream,
+                                     const GtEncseq *aencseq,
                                      const GtSequencePartsInfo *aseqranges,
                                      GtUword aidx,
+                                     const GtEncseq *bencseq,
                                      const GtSequencePartsInfo *bseqranges,
                                      GtUword bidx,
                                      GtFtTrimstat *trimstat,
@@ -4003,8 +4028,8 @@ static int gt_diagbandseed_algorithm(const GtDiagbandseedInfo *arg,
                                 arg->extp,
                                 processinfo,
                                 querymoutopt,
-                                aseqranges,aidx,
-                                bseqranges,bidx,
+                                aencseq,aseqranges,aidx,
+                                bencseq,bseqranges,bidx,
                                 arg->seedlength,
                                 arg->nofwd ? GT_READMODE_REVCOMPL
                                            : GT_READMODE_FORWARD,
@@ -4111,8 +4136,8 @@ static int gt_diagbandseed_algorithm(const GtDiagbandseedInfo *arg,
                                   arg->extp,
                                   processinfo,
                                   querymoutopt,
-                                  aseqranges,aidx,
-                                  bseqranges,bidx,
+                                  aencseq,aseqranges,aidx,
+                                  bencseq,bseqranges,bidx,
                                   arg->seedlength,
                                   GT_READMODE_REVCOMPL,
                                   arg->verbose,
@@ -4141,8 +4166,9 @@ typedef struct{
   const GtDiagbandseedInfo *arg;
   const GtArrayGtDiagbandseedKmerPos *alist;
   FILE *stream;
-  const GtSequencePartsInfo *aseqranges;
-  const GtSequencePartsInfo *bseqranges;
+  const GtEncseq *aencseq, *bencseq;
+  const GtSequencePartsInfo *aseqranges,
+                            *bseqranges;
   GtArray *combinations;
   int had_err;
   GtError *err;
@@ -4152,7 +4178,9 @@ static void gt_diagbandseed_thread_info_set(GtDiagbandseedThreadInfo *ti,
                                      const GtDiagbandseedInfo *arg,
                                      const GtArrayGtDiagbandseedKmerPos *alist,
                                      FILE *stream,
+                                     const GtEncseq *aencseq,
                                      const GtSequencePartsInfo *aseqranges,
+                                     const GtEncseq *bencseq,
                                      const GtSequencePartsInfo *bseqranges,
                                      GtArray *combinations,
                                      GtError *err)
@@ -4161,7 +4189,9 @@ static void gt_diagbandseed_thread_info_set(GtDiagbandseedThreadInfo *ti,
   ti->arg = arg;
   ti->alist = alist;
   ti->stream = stream;
+  ti->aencseq = aencseq;
   ti->aseqranges = aseqranges;
+  ti->bencseq = bencseq;
   ti->bseqranges = bseqranges;
   ti->combinations = gt_array_clone(combinations);
   ti->had_err = 0;
@@ -4180,8 +4210,8 @@ static void *gt_diagbandseed_thread_algorithm(void *thread_info)
                            info->arg,
                            info->alist,
                            info->stream,
-                           info->aseqranges,comb->a,
-                           info->bseqranges,comb->b,
+                           info->aencseq,info->aseqranges,comb->a,
+                           info->bencseq,info->bseqranges,comb->b,
                            NULL,
                            info->err);
       if (info->had_err) break;
@@ -4330,8 +4360,8 @@ int gt_diagbandseed_run(const GtDiagbandseedInfo *arg,
                            arg,
                            use_alist ? &alist : NULL,
                            stdout,
-                           aseqranges,aidx,
-                           bseqranges,bidx,
+                           arg->aencseq,aseqranges,aidx,
+                           arg->bencseq,bseqranges,bidx,
                            trimstat,
                            err);
         }
@@ -4364,7 +4394,9 @@ int gt_diagbandseed_run(const GtDiagbandseedInfo *arg,
                                         arg,
                                         use_alist ? &alist : NULL,
                                         stream[tidx],
+                                        arg->aencseq,
                                         aseqranges,
+                                        arg->bencseq,
                                         bseqranges,
                                         combinations,
                                         err);
@@ -4393,7 +4425,9 @@ int gt_diagbandseed_run(const GtDiagbandseedInfo *arg,
                                         arg,
                                         use_alist ? &alist : NULL,
                                         stream[0],
+                                        arg->aencseq,
                                         aseqranges,
+                                        arg->bencseq,
                                         bseqranges,
                                         combinations,
                                         err);
@@ -4443,7 +4477,9 @@ int gt_diagbandseed_run(const GtDiagbandseedInfo *arg,
                                       arg,
                                       NULL,
                                       stream[tidx],
+                                      arg->aencseq,
                                       aseqranges,
+                                      arg->bencseq,
                                       bseqranges,
                                       combinations[tidx],
                                       err);
@@ -4460,7 +4496,9 @@ int gt_diagbandseed_run(const GtDiagbandseedInfo *arg,
                                       arg,
                                       NULL,
                                       stream[0],
+                                      arg->aencseq,
                                       aseqranges,
+                                      arg->bencseq,
                                       bseqranges,
                                       combinations[0],
                                       err);

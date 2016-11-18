@@ -33,7 +33,6 @@ struct GtSequencePartsInfo
           totallength,
           numofsequences,
           parts_number;
-  const GtEncseq *encseq;
 };
 
 GtUword gt_sequence_parts_info_seqstartpos(const GtSequencePartsInfo *spi,
@@ -117,7 +116,6 @@ GtSequencePartsInfo *gt_sequence_parts_info_new(const GtEncseq *encseq,
   spi->ssptab = gt_all_sequence_separators_get(encseq);
   spi->totallength = gt_encseq_total_length(encseq);
   spi->numofsequences = gt_encseq_num_of_sequences(encseq);
-  spi->encseq = encseq;
 
   if (spi->ssptab == NULL)
   {
@@ -309,7 +307,8 @@ void gt_sequence_parts_info_variance_show(const GtSequencePartsInfo *spi)
            (double) variance_sum/spi->parts_number);
 }
 
-GtUchar *gt_sequence_parts_info_seq_extract(const GtSequencePartsInfo *spi,
+GtUchar *gt_sequence_parts_info_seq_extract(const GtEncseq *encseq,
+                                            const GtSequencePartsInfo *spi,
                                             GtUword idx)
 {
   GtUchar *byte_sequence;
@@ -321,12 +320,6 @@ GtUchar *gt_sequence_parts_info_seq_extract(const GtSequencePartsInfo *spi,
 
   gt_assert(firstpos <= lastpos);
   byte_sequence = gt_malloc(sizeof *byte_sequence * (lastpos - firstpos + 1));
-  gt_encseq_extract_encoded(spi->encseq,byte_sequence,firstpos,lastpos);
+  gt_encseq_extract_encoded(encseq,byte_sequence,firstpos,lastpos);
   return byte_sequence;
-}
-
-const GtEncseq *gt_seuence_part_info_encseq_get(const GtSequencePartsInfo *spi)
-{
-  gt_assert(spi != NULL);
-  return spi->encseq;
 }
