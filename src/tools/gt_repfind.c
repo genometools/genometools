@@ -780,7 +780,6 @@ static int gt_repfind_runner(int argc,
   GtFtTrimstat *trimstat = NULL;
 
   gt_error_check(err);
-  info_querymatch.total_add_matches_time_usec_ptr = NULL;
   logger = gt_logger_new(arguments->beverbose, GT_LOGGER_DEFLT_PREFIX, stdout);
   if (gt_showtime_enabled())
   {

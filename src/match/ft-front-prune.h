@@ -40,8 +40,6 @@ typedef struct
 GtUword front_prune_edist_inplace(
                        bool forward,
                        GtAllocatedMemory *frontspace_reservoir,
-                       GtFtTrimstat *trimstat,
-                       GtUword *total_add_matches_time_usec,
                        GtFtPolished_point *best_polished_point,
                        GtFronttrace *fronttrace,
                        const GtFtPolishing_info *pol_info,
@@ -57,6 +55,7 @@ GtUword front_prune_edist_inplace(
                        GtUword vseqstartpos,
                        GtFTsequenceResources *vfsr,
                        GtUword vstart,
-                       GtUword vlen);
+                       GtUword vlen,
+                       GtFtTrimstat *trimstat);
 
 #endif

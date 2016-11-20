@@ -4,7 +4,6 @@
 #include <stdbool.h>
 #include <string.h>
 #include <limits.h>
-#include <sys/time.h>
 #include "core/assert_api.h"
 #include "core/unused_api.h"
 #include "core/divmodmul.h"
@@ -224,19 +223,9 @@ static void inline front_prune_add_matches(GtFtFrontvalue *midfront,
                                            GtUword max_history,
                                            GtFtSequenceObject *useq,
                                            GtFtSequenceObject *vseq,
-                                           GT_UNUSED GtUword
-                                             *total_add_matches_time_usec,
                                            GtFtTrimstat *trimstat)
 {
   GtUword upos, vpos;
-#ifndef _WIN32
-  struct timeval tval_before;
-
-  if (total_add_matches_time_usec != NULL)
-  {
-    gettimeofday (&tval_before, NULL);
-  }
-#endif
   for (upos = fv->row, vpos = fv->row + GT_FRONT_DIAGONAL(fv);
        upos < useq->substringlength && vpos < vseq->substringlength &&
        ft_sequenceobject_symbol_match(useq,upos,vseq,vpos);
@@ -255,17 +244,6 @@ static void inline front_prune_add_matches(GtFtFrontvalue *midfront,
   {
     gt_ft_trimstat_add_matchlength(trimstat,fv->localmatch_count);
   }
-#ifndef _WIN32
-  if (total_add_matches_time_usec != NULL)
-  {
-    struct timeval tval_after;
-
-    gettimeofday (&tval_after, NULL);
-    *total_add_matches_time_usec
-      += (GtUword) (tval_after.tv_sec - tval_before.tv_sec) * 1000000L
-                   + tval_after.tv_usec - tval_before.tv_usec;
-  }
-#endif
 }
 
 static GtUword front_next_inplace(GtFtFrontvalue *midfront,
@@ -275,7 +253,6 @@ static GtUword front_next_inplace(GtFtFrontvalue *midfront,
                                   uint64_t max_history_mask,
                                   GtFtSequenceObject *useq,
                                   GtFtSequenceObject *vseq,
-                                  GtUword *total_add_matches_time_usec,
                                   GtFtTrimstat *trimstat)
 {
   GtUword alignedlen, maxalignedlen;
@@ -288,7 +265,7 @@ static GtUword front_next_inplace(GtFtFrontvalue *midfront,
   *lowfront = bestfront;
   lowfront->backreference = FT_EOP_DELETION;
   front_prune_add_matches(midfront,lowfront,max_history_mask,
-                          max_history,useq,vseq,total_add_matches_time_usec,
+                          max_history,useq,vseq,
                           trimstat);
   maxalignedlen = GT_MULT2(lowfront->row) + GT_FRONT_DIAGONAL(lowfront);
 
@@ -314,7 +291,7 @@ static GtUword front_next_inplace(GtFtFrontvalue *midfront,
   }
   *(lowfront+1) = bestfront;
   front_prune_add_matches(midfront,lowfront + 1,max_history_mask,
-                          max_history,useq,vseq,total_add_matches_time_usec,
+                          max_history,useq,vseq,
                           trimstat);
   alignedlen = GT_MULT2((lowfront+1)->row) + GT_FRONT_DIAGONAL(lowfront + 1);
   if (maxalignedlen < alignedlen)
@@ -368,7 +345,7 @@ static GtUword front_next_inplace(GtFtFrontvalue *midfront,
     }
     *frontptr = bestfront;
     front_prune_add_matches(midfront,frontptr,max_history_mask,
-                            max_history,useq,vseq,total_add_matches_time_usec,
+                            max_history,useq,vseq,
                             trimstat);
     alignedlen = GT_MULT2(frontptr->row) + GT_FRONT_DIAGONAL(frontptr);
     if (maxalignedlen < alignedlen)
@@ -385,7 +362,6 @@ static GtUword front_second_inplace(GtFtFrontvalue *midfront,
                                     uint64_t max_history_mask,
                                     GtFtSequenceObject *useq,
                                     GtFtSequenceObject *vseq,
-                                    GtUword *total_add_matches_time_usec,
                                     GtFtTrimstat *trimstat)
 {
   GtUword alignedlen, maxalignedlen;
@@ -395,7 +371,7 @@ static GtUword front_second_inplace(GtFtFrontvalue *midfront,
   lowfront->backreference = FT_EOP_DELETION;
   GT_UPDATE_MATCH_HISTORY(lowfront);
   front_prune_add_matches(midfront,lowfront,max_history_mask,
-                          max_history,useq,vseq,total_add_matches_time_usec,
+                          max_history,useq,vseq,
                           trimstat);
   maxalignedlen = GT_MULT2(lowfront->row) + GT_FRONT_DIAGONAL(lowfront);
 
@@ -404,7 +380,7 @@ static GtUword front_second_inplace(GtFtFrontvalue *midfront,
   (lowfront+1)->max_mismatches++;
   GT_UPDATE_MATCH_HISTORY(lowfront+1);
   front_prune_add_matches(midfront,lowfront + 1,max_history_mask,
-                          max_history,useq,vseq,total_add_matches_time_usec,
+                          max_history,useq,vseq,
                           trimstat);
   alignedlen = GT_MULT2((lowfront+1)->row) + GT_FRONT_DIAGONAL(lowfront + 1);
   if (maxalignedlen < alignedlen)
@@ -415,7 +391,7 @@ static GtUword front_second_inplace(GtFtFrontvalue *midfront,
   (lowfront+2)->backreference = FT_EOP_INSERTION;
   GT_UPDATE_MATCH_HISTORY(lowfront+2);
   front_prune_add_matches(midfront,lowfront + 2,max_history_mask,
-                          max_history,useq,vseq,total_add_matches_time_usec,
+                          max_history,useq,vseq,
                           trimstat);
   alignedlen = GT_MULT2((lowfront+2)->row) + GT_FRONT_DIAGONAL(lowfront + 2);
   if (maxalignedlen < alignedlen)
@@ -468,7 +444,7 @@ static GtUword trim_front(bool upward,
                           bool showfrontinfo)
 {
   const GtFtFrontvalue *frontptr;
-  GtUword trim = 0;
+  const int step = upward ? +1 : -1;
 
   if (trimstrategy == GT_OUTSENSE_TRIM_NEVER ||
       (trimstrategy == GT_OUTSENSE_TRIM_ON_NEW_PP &&
@@ -479,27 +455,27 @@ static GtUword trim_front(bool upward,
     return 0;
   }
   gt_assert ((upward && from < stop) || (!upward && stop < from));
-  for (frontptr = from; frontptr != stop; frontptr = upward ? (frontptr + 1)
-                                                            : (frontptr - 1))
+  for (frontptr = from; frontptr != stop; frontptr += step)
   {
-    if (frontptr->row > ulen ||
-        frontptr->row + GT_FRONT_DIAGONAL(frontptr) > vlen ||
-        trimthisentry(frontptr->row,
-                      GT_FRONT_DIAGONAL(frontptr),
-                      frontptr,
-                      minmatchpercentage128,
-                      minlenfrommaxdiff,
-                      max_history_mask,
-                      distance,
-                      showfrontinfo))
-    {
-      trim++;
-    } else
+    if (frontptr->row <= ulen &&
+        frontptr->row + GT_FRONT_DIAGONAL(frontptr) <= vlen &&
+        !trimthisentry(frontptr->row,
+                       GT_FRONT_DIAGONAL(frontptr),
+                       frontptr,
+                       minmatchpercentage128,
+                       minlenfrommaxdiff,
+                       max_history_mask,
+                       distance,
+                       showfrontinfo))
     {
       break;
     }
   }
-  return trim;
+  if (upward)
+  {
+    return (GtUword) (frontptr - from);
+  }
+  return (GtUword) (from - frontptr);
 }
 
 static void frontspace_check(GT_UNUSED const GtFtFrontvalue *from,
@@ -582,8 +558,6 @@ static void ft_update_trace_and_polished(
 GtUword front_prune_edist_inplace(
                          bool rightextension,
                          GtAllocatedMemory *frontspace,
-                         GtFtTrimstat *trimstat,
-                         GtUword *total_add_matches_time_usec,
                          GtFtPolished_point *best_polished_point,
                          GtFronttrace *front_trace,
                          const GtFtPolishing_info *pol_info,
@@ -599,7 +573,8 @@ GtUword front_prune_edist_inplace(
                          GtUword vseqstartpos,
                          GtFTsequenceResources *vfsr,
                          GtUword vstart,
-                         GtUword vlen)
+                         GtUword vlen,
+                         GtFtTrimstat *trimstat)
 {
   const GtUword sumseqlength = ulen + vlen,
                 minsizeforshift = sumseqlength/1000;
@@ -670,7 +645,7 @@ GtUword front_prune_edist_inplace(
       validbasefront->max_mismatches = 0;
       front_prune_add_matches(validbasefront + distance,validbasefront,
                               max_history_mask,max_history,
-                              &useq,&vseq,total_add_matches_time_usec,trimstat);
+                              &useq,&vseq,trimstat);
       maxalignedlen = GT_MULT2(validbasefront->row);
     } else
     {
@@ -691,7 +666,6 @@ GtUword front_prune_edist_inplace(
                                              max_history_mask,
                                              &useq,
                                              &vseq,
-                                             total_add_matches_time_usec,
                                              trimstat);
       } else
       {
@@ -703,7 +677,6 @@ GtUword front_prune_edist_inplace(
                                max_history_mask,
                                &useq,
                                &vseq,
-                               total_add_matches_time_usec,
                                trimstat);
       }
     }

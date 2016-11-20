@@ -721,8 +721,6 @@ void gt_align_front_prune_edist(bool rightextension,
     gt_assert(iteration < ggemi->perc_mat_history);
     distance = front_prune_edist_inplace(rightextension,
                                          &ggemi->frontspace_reservoir,
-                                         NULL, /* trimstat */
-                                         NULL, /* total_add_matches_time_usec */
                                          best_polished_point,
                                          front_trace,
                                          ggemi->pol_info,
@@ -739,7 +737,8 @@ void gt_align_front_prune_edist(bool rightextension,
                                          vseqstartpos,
                                          &vfsr,
                                          vstart,
-                                         vlen);
+                                         vlen,
+                                         NULL); /* trimstat */
     if (distance < ulen + vlen + 1)
     {
 #ifdef SKDEBUG
@@ -960,11 +959,6 @@ static const GtQuerymatch *gt_extend_sesp(bool forxdrop,
       (void) front_prune_edist_inplace(!rightextension,
                                        &greedyextendmatchinfo->
                                           frontspace_reservoir,
-                                       greedyextendmatchinfo->trimstat,
-#ifndef _WIN32
-                                       info_querymatch->
-                                          total_add_matches_time_usec_ptr,
-#endif
                                        &left_best_polished_point,
                                        greedyextendmatchinfo->left_front_trace,
                                        greedyextendmatchinfo->pol_info,
@@ -989,7 +983,8 @@ static const GtQuerymatch *gt_extend_sesp(bool forxdrop,
                                        vseqstartpos,
                                        &vfsr,
                                        sesp->queryseqstartpos + r_voffset,
-                                       vlen);
+                                       vlen,
+                                       greedyextendmatchinfo->trimstat);
     }
   } else
   {
@@ -1067,11 +1062,6 @@ static const GtQuerymatch *gt_extend_sesp(bool forxdrop,
       (void) front_prune_edist_inplace(rightextension,
                                        &greedyextendmatchinfo->
                                           frontspace_reservoir,
-                                       greedyextendmatchinfo->trimstat,
-#ifndef _WIN32
-                                       info_querymatch->
-                                          total_add_matches_time_usec_ptr,
-#endif
                                        &right_best_polished_point,
                                        greedyextendmatchinfo->right_front_trace,
                                        greedyextendmatchinfo->pol_info,
@@ -1090,7 +1080,8 @@ static const GtQuerymatch *gt_extend_sesp(bool forxdrop,
                                        &vfsr,
                                        gt_sesp_seedpos2(sesp) +
                                          sesp->seedlength,
-                                       vlen);
+                                       vlen,
+                                       greedyextendmatchinfo->trimstat);
     }
   } else
   {
