@@ -96,7 +96,7 @@ def makecompilerflags(fp,options)
   else
     fp.print " cairo=no"
   end
-  fp.print " #{extracpp} CC='ccache " + ENV["CC"] + "'"
+  fp.print " #{extracpp} popcnt=yes CC='ccache " + ENV["CC"] + "'"
   if not options.fileargs.nil?
     filenames=options.fileargs.join(" ")
     fp.puts " #{filenames}"

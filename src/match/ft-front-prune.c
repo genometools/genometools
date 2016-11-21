@@ -185,6 +185,7 @@ static GtUchar ft_sequenceobject_get_char(GtFtSequenceObject *seq,GtUword idx)
     cc = seq->cache_ptr[idx];
   } else
   {
+    gt_assert (seq->read_seq_left2right || seq->offset >= idx);
     accesspos = seq->read_seq_left2right ? seq->offset + idx
                                          : seq->offset - idx;
     if (seq->encseq != NULL)
@@ -217,6 +218,21 @@ static bool ft_sequenceobject_symbol_match(GtFtSequenceObject *useq,
 
 #define GT_FRONT_DIAGONAL(FRONTPTR) (GtWord) ((FRONTPTR) - midfront)
 
+static inline GtUword front_prune_longest_common(const GtFtFrontvalue *midfront,
+                                                 const GtFtFrontvalue *fv,
+                                                 GtFtSequenceObject *useq,
+                                                 GtFtSequenceObject *vseq)
+{
+  GtUword upos, vpos;
+
+  for (upos = fv->row, vpos = fv->row + GT_FRONT_DIAGONAL(fv);
+       upos < useq->substringlength && vpos < vseq->substringlength &&
+       ft_sequenceobject_symbol_match(useq,upos,vseq,vpos);
+       upos++, vpos++)
+    /* Nothing */ ;
+  return upos - fv->row;
+}
+
 static void inline front_prune_add_matches(GtFtFrontvalue *midfront,
                                            GtFtFrontvalue *fv,
                                            uint64_t max_history_mask,
@@ -225,17 +241,14 @@ static void inline front_prune_add_matches(GtFtFrontvalue *midfront,
                                            GtFtSequenceObject *vseq,
                                            GtFtTrimstat *trimstat)
 {
-  GtUword upos, vpos;
-  for (upos = fv->row, vpos = fv->row + GT_FRONT_DIAGONAL(fv);
-       upos < useq->substringlength && vpos < vseq->substringlength &&
-       ft_sequenceobject_symbol_match(useq,upos,vseq,vpos);
-       upos++, vpos++)
-    /* Nothing */ ;
-  fv->localmatch_count = upos - fv->row;
-  fv->row = upos;
-  uint64_t match_mask = (fv->localmatch_count >= max_history)
-                          ? max_history_mask
-                          : ((((uint64_t) 1) << fv->localmatch_count) - 1);
+  uint64_t match_mask;
+
+  fv->localmatch_count
+    = (GtFtRowvaluetype) front_prune_longest_common(midfront,fv,useq,vseq);
+  fv->row += fv->localmatch_count;
+  match_mask = (fv->localmatch_count >= max_history)
+                 ? max_history_mask
+                 : ((((uint64_t) 1) << fv->localmatch_count) - 1);
   fv->matchhistory_bits = (fv->matchhistory_bits << fv->localmatch_count) |
                           match_mask;
   fv->matchhistory_size = MIN(fv->matchhistory_size + fv->localmatch_count,
@@ -401,12 +414,20 @@ static GtUword front_second_inplace(GtFtFrontvalue *midfront,
   return maxalignedlen;
 }
 
+#if defined (__GNUC__) && defined (__POPCNT__)
+static inline unsigned
+bitCountUInt64(uint64_t v)
+{
+  return __builtin_popcountl(v);
+}
+#else
 static inline unsigned
 bitCountUInt64(uint64_t v)
 {
   return bitCountUInt32((uint32_t) (v & UINT32_MAX)) +
          bitCountUInt32((uint32_t) (v >> 32));
 }
+#endif
 
 static bool trimthisentry(GtFtRowvaluetype row,
                           GtWord diagonal,
@@ -417,12 +438,12 @@ static bool trimthisentry(GtFtRowvaluetype row,
                           GT_UNUSED GtUword distance,
                           GT_UNUSED bool showfrontinfo)
 {
-  if (bitCountUInt64(fv->matchhistory_bits & max_history_mask)
-      < ((fv->matchhistory_size * minmatchpercentage128) >> 7))
+  if (GT_MULT2(row) + diagonal < minlenfrommaxdiff)
   {
     return true;
   }
-  if (GT_MULT2(row) + diagonal < minlenfrommaxdiff)
+  if (bitCountUInt64(fv->matchhistory_bits & max_history_mask)
+      < ((fv->matchhistory_size * minmatchpercentage128) >> 7))
   {
     return true;
   }

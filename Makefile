@@ -390,6 +390,12 @@ ifneq ($(sharedlib),no)
   SHARED_LIBGENOMETOOLS := lib/libgenometools$(SHARED_OBJ_NAME_EXT)
 endif
 
+ifeq ($(popcnt),yes)
+  ifeq ($(MACHINE),x86_64)
+    GT_CFLAGS += -mpopcnt
+  endif
+endif
+
 LIBGENOMETOOLS_DIRS:= src/core \
                       src/extended \
                       src/gtlua \
