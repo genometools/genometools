@@ -14,8 +14,7 @@ void gt_ft_trimstat_add(GtFtTrimstat *trimstat,
                         GtUword sumvalid,
                         GtUword maxvalid,
                         GtUword d,
-                        size_t spaceforfront,
-                        GtUword cache_size);
+                        size_t spaceforfront);
 void gt_ft_trimstat_add_matchlength(GtFtTrimstat *trimstat,
                                     uint32_t matchlength);
 #else
@@ -24,8 +23,7 @@ void gt_ft_trimstat_add(GT_UNUSED GtFtTrimstat *trimstat,
                         GT_UNUSED GtUword sumvalid,
                         GT_UNUSED GtUword maxvalid,
                         GT_UNUSED GtUword d,
-                        GT_UNUSED size_t spaceforfront,
-                        GT_UNUSED GtUword cache_size);
+                        GT_UNUSED size_t spaceforfront);
 void gt_ft_trimstat_add_matchlength(GT_UNUSED GtFtTrimstat *trimstat,
                                     GT_UNUSED uint32_t matchlength);
 #endif

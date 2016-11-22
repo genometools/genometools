@@ -6,7 +6,7 @@
 
 struct GtFtTrimstat
 {
-  GtUword diedout, max_cache_size, *trim_dist, *matchlength_dist;
+  GtUword diedout, *trim_dist, *matchlength_dist;
   GtArrayGtUword distance_dist, maxvalid_dist;
   size_t spaceforfront_total;
   double sum_meanvalid;
@@ -27,7 +27,6 @@ GtFtTrimstat *gt_ft_trimstat_new(void)
   GT_INITARRAY(&trimstat->maxvalid_dist,GtUword);
   trimstat->spaceforfront_total = 0;
   trimstat->sum_meanvalid = 0.0;
-  trimstat->max_cache_size = 0;
   return trimstat;
 }
 
@@ -37,8 +36,7 @@ void gt_ft_trimstat_add(GtFtTrimstat *trimstat,
                         GtUword sumvalid,
                         GtUword maxvalid,
                         GtUword d,
-                        size_t spaceforfront,
-                        GtUword cache_size)
+                        size_t spaceforfront)
 {
   if (trimstat == NULL)
   {
@@ -80,10 +78,6 @@ void gt_ft_trimstat_add(GtFtTrimstat *trimstat,
                                          distance_dist.nextfreeGtUword++] = d;
     trimstat->spaceforfront_total += spaceforfront;
   }
-  if (trimstat->max_cache_size < cache_size)
-  {
-    trimstat->max_cache_size = cache_size;
-  }
 }
 
 void gt_ft_trimstat_add_matchlength(GtFtTrimstat *trimstat,
@@ -98,8 +92,7 @@ void gt_ft_trimstat_add(GT_UNUSED GtFtTrimstat *trimstat,
                         GT_UNUSED GtUword sumvalid,
                         GT_UNUSED GtUword maxvalid,
                         GT_UNUSED GtUword d,
-                        GT_UNUSED size_t spaceforfront,
-                        GT_UNUSED GtUword cache_size)
+                        GT_UNUSED size_t spaceforfront)
 {
   return;
 }
@@ -162,7 +155,6 @@ void gt_ft_trimstat_out(const GtFtTrimstat *trimstat,bool verbose)
     {
       GtUword idx, count = 1UL, matchlength_sum = 0, matchlength_cum = 0;
 
-      printf("max_cache_size = " GT_WU " bytes\n",trimstat->max_cache_size);
       for (idx = 0; idx <= 100UL; idx++)
       {
         matchlength_sum += trimstat->matchlength_dist[idx];
