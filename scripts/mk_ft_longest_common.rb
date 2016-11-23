@@ -20,6 +20,8 @@ def gen_access_raw(mode,posvar,structvar)
     return "gt_encseq_get_encoded_char(#{structvar}->encseq,\n" +
            " " * 20 + gen_access_expr(posvar,structvar) + ",\n" +
            " " * 20 + "GT_READMODE_FORWARD)"
+  else
+    return "gt_sequenceobject_esr_get(#{structvar},#{posvar})"
   end
 end
 
@@ -47,24 +49,6 @@ def gen_suffix(wildcard)
     return "_wildcard"
   else
     return ""
-  end
-end
-
-def cut_out(s)
-  width = 80
-  line = String.new()
-  puts "code=#{s}"
-  s.scan(/(\S+)/) do |item|
-    puts "found #{item}"
-    if line.length + item[1].length <= width
-      line = line + item[1]
-    else
-      puts line
-      line.clear
-    end
-  end
-  if not line.empty?
-    puts line
   end
 end
 
@@ -100,7 +84,7 @@ end
 
 first = true
 func_list = Array.new()
-modes = ["twobit","encseq","bytes"]
+modes = ["twobit","encseq_reader","encseq","bytes"]
 [false,true].each do |wildcard|
   modes.each do |a_mode|
     modes.each do |b_mode|
@@ -125,4 +109,5 @@ func_list.each_with_index do |func_name,idx|
   print ",\n  /* #{idx+1} */ #{func_name}"
 end
 puts "\n};"
-puts "const int ft_longest_comon_func_first_wildcard = #{firstwildcard};"
+puts "const int ft_longest_common_num_modes = #{modes.length};"
+puts "const int ft_longest_common_func_first_wildcard = #{firstwildcard};"

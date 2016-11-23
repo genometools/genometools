@@ -142,6 +142,34 @@ static GtUchar gt_twobitencoding_char_at_pos(
           GT_MULT2(GT_UNITSIN2BITENC - 1 - GT_MODBYUNITSIN2BITENC(pos))) & 3;
 }
 
+static GtUchar gt_sequenceobject_esr_get(GtFtSequenceObject *seq,GtUword idx)
+{
+  gt_assert(idx < seq->substringlength);
+  if (idx >= seq->cache_num_positions)
+  {
+    const GtUword addamount = 256UL;
+    GtUword cidx, tostore = MIN(seq->cache_num_positions + addamount,
+                                seq->substringlength);
+
+    if (tostore > seq->sequence_cache->allocated)
+    {
+      seq->sequence_cache->allocated += addamount;
+      seq->sequence_cache->space
+        = gt_realloc(seq->sequence_cache->space,
+                     sizeof (GtUchar) * seq->sequence_cache->allocated);
+      seq->cache_ptr = (GtUchar *) seq->sequence_cache->space;
+    }
+    for (cidx = seq->cache_num_positions; cidx < tostore; cidx++)
+    {
+      seq->cache_ptr[cidx]
+        = gt_encseq_reader_next_encoded_char(seq->encseqreader);
+    }
+    seq->cache_num_positions = tostore;
+  }
+  gt_assert(seq->cache_ptr != NULL && idx < seq->cache_num_positions);
+  return seq->cache_ptr[idx];
+}
+
 static GtUchar ft_sequenceobject_get_char(GtFtSequenceObject *seq,GtUword idx)
 {
   GtUchar cc;
@@ -158,31 +186,7 @@ static GtUchar ft_sequenceobject_get_char(GtFtSequenceObject *seq,GtUword idx)
   }
   if (seq->encseqreader != NULL)
   {
-    gt_assert(idx < seq->substringlength);
-    if (idx >= seq->cache_num_positions)
-    {
-      GtUword cidx, tostore;
-      const GtUword addamount = 256UL;
-
-      tostore = MIN(seq->cache_num_positions + addamount,
-                    seq->substringlength);
-      if (tostore > seq->sequence_cache->allocated)
-      {
-        seq->sequence_cache->allocated += addamount;
-        seq->sequence_cache->space
-          = gt_realloc(seq->sequence_cache->space,
-                       sizeof (GtUchar) * seq->sequence_cache->allocated);
-        seq->cache_ptr = (GtUchar *) seq->sequence_cache->space;
-      }
-      for (cidx = seq->cache_num_positions; cidx < tostore; cidx++)
-      {
-        seq->cache_ptr[cidx]
-          = gt_encseq_reader_next_encoded_char(seq->encseqreader);
-      }
-      seq->cache_num_positions = tostore;
-    }
-    gt_assert(seq->cache_ptr != NULL && idx < seq->cache_num_positions);
-    cc = seq->cache_ptr[idx];
+    cc = gt_sequenceobject_esr_get(seq,idx);
   } else
   {
     gt_assert (seq->read_seq_left2right || seq->offset >= idx);
@@ -250,26 +254,26 @@ static int ft_sequenceobject2mode(const GtFtSequenceObject *seq)
   {
     return 0;
   }
-  if (seq->encseq != NULL)
+  if (seq->encseqreader != NULL)
   {
     return 1;
   }
+  if (seq->encseq != NULL)
+  {
+    return 2;
+  }
   gt_assert(seq->bytesequenceptr != NULL);
-  return 2;
+  return 3;
 }
 
 static int gt_sequenceobject_longest_func_index(const GtFtSequenceObject *useq,
                                                 const GtFtSequenceObject *vseq,
                                                 bool haswildcards)
 {
-  if (useq->encseqreader == NULL && vseq->encseqreader == NULL)
-  {
-    const int u_mode = ft_sequenceobject2mode(useq);
-    const int v_mode = ft_sequenceobject2mode(vseq);
-    return 1 + u_mode * 3 + v_mode +
-           (haswildcards ? ft_longest_comon_func_first_wildcard : 0);
-  }
-  return 0;
+  const int u_mode = ft_sequenceobject2mode(useq);
+  const int v_mode = ft_sequenceobject2mode(vseq);
+  return 1 + u_mode * ft_longest_common_num_modes + v_mode +
+         (haswildcards ? ft_longest_common_func_first_wildcard : 0);
 }
 
 #define GT_FRONT_DIAGONAL(FRONTPTR) (GtWord) ((FRONTPTR) - midfront)
