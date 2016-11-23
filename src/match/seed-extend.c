@@ -413,15 +413,15 @@ struct GtGreedyextendmatchinfo
           perc_mat_history,
           db_totallength;
   unsigned int userdefinedleastlength;
-  GtExtendCharAccess a_extend_char_access,
-                     b_extend_char_access;
+  GtExtendCharAccess db_extend_char_access,
+                     query_extend_char_access;
   bool check_extend_symmetry,
-       silent;
+       silent,
+       showfrontinfo;
   GtFtTrimstat *trimstat;
   GtEncseqReader *encseq_r_in_u, *encseq_r_in_v;
   GtAllocatedMemory usequence_cache, vsequence_cache, frontspace_reservoir;
   GtTrimmingStrategy trimstrategy;
-  bool showfrontinfo;
 };
 
 static void gt_greedy_at_gc_count(GtUword *atcount,GtUword *gccount,
@@ -505,8 +505,8 @@ GtGreedyextendmatchinfo *gt_greedy_extend_matchinfo_new(
                                    GtUword history,
                                    GtUword perc_mat_history,
                                    GtUword userdefinedleastlength,
-                                   GtExtendCharAccess a_extend_char_access,
-                                   GtExtendCharAccess b_extend_char_access,
+                                   GtExtendCharAccess db_extend_char_access,
+                                   GtExtendCharAccess query_extend_char_access,
                                    GtUword sensitivity,
                                    const GtFtPolishing_info *pol_info)
 {
@@ -536,8 +536,8 @@ GtGreedyextendmatchinfo *gt_greedy_extend_matchinfo_new(
   ggemi->frontspace_reservoir.space = NULL;
   ggemi->frontspace_reservoir.allocated = 0;
   ggemi->frontspace_reservoir.offset = 0;
-  ggemi->a_extend_char_access = a_extend_char_access;
-  ggemi->b_extend_char_access = b_extend_char_access;
+  ggemi->db_extend_char_access = db_extend_char_access;
+  ggemi->query_extend_char_access = query_extend_char_access;
   ggemi->check_extend_symmetry = false;
   ggemi->silent = false;
   ggemi->trimstat = NULL;
@@ -586,7 +586,9 @@ static void gt_FTsequenceResources_init(GtFTsequenceResources *fsr,
                                         GtAllocatedMemory *sequence_cache,
                                         const GtUchar *bytesequence,
                                         GtUword totallength,
-                                        GtExtendCharAccess extend_char_access)
+                                        GtExtendCharAccess extend_char_access,
+                                        bool twobit_possible,
+                                        bool haswildcards)
 {
   fsr->encseq = encseq;
   fsr->readmode = readmode;
@@ -595,6 +597,8 @@ static void gt_FTsequenceResources_init(GtFTsequenceResources *fsr,
   fsr->sequence_cache = sequence_cache;
   fsr->bytesequence = bytesequence;
   fsr->extend_char_access = extend_char_access;
+  fsr->twobit_possible = twobit_possible;
+  fsr->haswildcards = haswildcards;
 }
 
 static void gt_greedy_extend_init(GtFTsequenceResources *ufsr,
@@ -605,6 +609,9 @@ static void gt_greedy_extend_init(GtFTsequenceResources *ufsr,
                                   const GtUword query_totallength,
                                   GtGreedyextendmatchinfo *ggemi)
 {
+  bool db_twobit_possible, query_twobit_possible,
+       db_haswildcards, query_haswildcards;
+
   if (ggemi->left_front_trace != NULL)
   {
     front_trace_reset(ggemi->left_front_trace,0);
@@ -613,17 +620,64 @@ static void gt_greedy_extend_init(GtFTsequenceResources *ufsr,
   {
     front_trace_reset(ggemi->right_front_trace,0);
   }
-  if (dbes->encseq != NULL && ggemi->encseq_r_in_u == NULL)
+  if (dbes->encseq != NULL)
   {
-    ggemi->encseq_r_in_u
-      = gt_encseq_create_reader_with_readmode(dbes->encseq,
-                                              GT_READMODE_FORWARD,
-                                              0);
+    if (ggemi->encseq_r_in_u == NULL)
+    {
+      ggemi->encseq_r_in_u
+        = gt_encseq_create_reader_with_readmode(dbes->encseq,
+                                                GT_READMODE_FORWARD,
+                                                0);
+    }
+    if (gt_encseq_wildcards(dbes->encseq) > 0)
+    {
+      db_haswildcards = true;
+      db_twobit_possible = false;
+    } else
+    {
+      db_haswildcards = false;
+      if (ggemi->db_extend_char_access == GT_EXTEND_CHAR_ACCESS_ANY &&
+          gt_encseq_has_twobitencoding(dbes->encseq))
+      {
+        db_twobit_possible = true;
+      } else
+      {
+        db_twobit_possible = false;
+      }
+    }
+  } else
+  {
+    db_twobit_possible = false;
+    db_haswildcards = dbes->haswildcards;
   }
-  if (queryes->encseq != NULL && ggemi->encseq_r_in_v == NULL)
+  if (queryes->encseq != NULL)
   {
-    ggemi->encseq_r_in_v
-      = gt_encseq_create_reader_with_readmode(queryes->encseq,query_readmode,0);
+    if (ggemi->encseq_r_in_v == NULL)
+    {
+      ggemi->encseq_r_in_v
+        = gt_encseq_create_reader_with_readmode(queryes->encseq,
+                                                query_readmode,0);
+    }
+    if (gt_encseq_wildcards(queryes->encseq) > 0)
+    {
+      query_haswildcards = true;
+      query_twobit_possible = false;
+    } else
+    {
+      query_haswildcards = false;
+      if (ggemi->query_extend_char_access == GT_EXTEND_CHAR_ACCESS_ANY &&
+          gt_encseq_has_twobitencoding(queryes->encseq))
+      {
+        query_twobit_possible = true;
+      } else
+      {
+        query_twobit_possible = false;
+      }
+    }
+  } else
+  {
+    query_twobit_possible = false;
+    query_haswildcards = queryes->haswildcards;
   }
   if (ggemi->db_totallength == GT_UWORD_MAX)
   {
@@ -644,7 +698,9 @@ static void gt_greedy_extend_init(GtFTsequenceResources *ufsr,
                                 &ggemi->usequence_cache,
                                 NULL,
                                 ggemi->db_totallength,
-                                ggemi->a_extend_char_access);
+                                ggemi->db_extend_char_access,
+                                db_twobit_possible,
+                                db_haswildcards);
   } else
   {
     gt_FTsequenceResources_init(ufsr,
@@ -654,7 +710,9 @@ static void gt_greedy_extend_init(GtFTsequenceResources *ufsr,
                                 &ggemi->usequence_cache,
                                 dbes->seq,
                                 dbes->seqlength,
-                                GT_EXTEND_CHAR_ACCESS_DIRECT);
+                                GT_EXTEND_CHAR_ACCESS_DIRECT,
+                                false,
+                                db_haswildcards);
   }
   if (queryes->encseq != NULL)
   {
@@ -665,7 +723,9 @@ static void gt_greedy_extend_init(GtFTsequenceResources *ufsr,
                                 &ggemi->vsequence_cache,
                                 NULL,
                                 query_totallength,
-                                ggemi->b_extend_char_access);
+                                ggemi->query_extend_char_access,
+                                query_twobit_possible,
+                                query_haswildcards);
   } else
   {
     gt_FTsequenceResources_init(vfsr,
@@ -675,7 +735,9 @@ static void gt_greedy_extend_init(GtFTsequenceResources *ufsr,
                                 &ggemi->vsequence_cache,
                                 queryes->seq,
                                 query_totallength,
-                                GT_EXTEND_CHAR_ACCESS_DIRECT);
+                                GT_EXTEND_CHAR_ACCESS_DIRECT,
+                                false,
+                                query_haswildcards);
   }
 }
 

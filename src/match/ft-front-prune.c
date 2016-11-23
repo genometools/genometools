@@ -61,6 +61,7 @@ typedef struct
 
 static void ft_sequenceobject_init(GtFtSequenceObject *seq,
                                    GtExtendCharAccess extend_char_access_mode,
+                                   bool twobit_possible,
                                    const GtEncseq *encseq,
                                    bool rightextension,
                                    GtReadmode readmode,
@@ -90,8 +91,7 @@ static void ft_sequenceobject_init(GtFtSequenceObject *seq,
                                  len);
   seq->read_seq_left2right = GT_EXTEND_READ_SEQ_LEFT2RIGHT(rightextension,
                                                            readmode);
-  if (encseq != NULL && extend_char_access_mode == GT_EXTEND_CHAR_ACCESS_ANY &&
-      gt_encseq_has_twobitencoding(encseq) && gt_encseq_wildcards(encseq) == 0)
+  if (twobit_possible)
   {
     seq->twobitencoding = gt_encseq_twobitencoding_export(encseq);
   }
@@ -198,7 +198,7 @@ static GtUchar ft_sequenceobject_get_char(GtFtSequenceObject *seq,GtUword idx)
       cc = seq->bytesequenceptr[accesspos];
     }
   }
-  if (seq->dir_is_complement && !ISSPECIAL(cc))
+  if (seq->dir_is_complement && cc != WILDCARD)
   {
     return GT_COMPLEMENTBASE(cc);
   }
@@ -217,7 +217,7 @@ static inline bool ft_sequenceobject_symbol_match(
   } else
   {
     const GtUchar cu = ft_sequenceobject_get_char(useq,upos);
-    return (!ISSPECIAL(cu) && cu == ft_sequenceobject_get_char(vseq,vpos))
+    return (cu != WILDCARD && cu == ft_sequenceobject_get_char(vseq,vpos))
              ? true
              : false;
   }
@@ -228,10 +228,10 @@ typedef GtUword (*GtLongestCommonFunc)(GtFtSequenceObject *useq,
                                        GtFtSequenceObject *vseq,
                                        GtUword vstart);
 
-static inline GtUword ft_longest_common_all(GtFtSequenceObject *useq,
-                                            GtUword ustart,
-                                            GtFtSequenceObject *vseq,
-                                            GtUword vstart)
+static GtUword ft_longest_common_all(GtFtSequenceObject *useq,
+                                     GtUword ustart,
+                                     GtFtSequenceObject *vseq,
+                                     GtUword vstart)
 {
   GtUword upos, vpos;
 
@@ -240,6 +240,36 @@ static inline GtUword ft_longest_common_all(GtFtSequenceObject *useq,
        upos++, vpos++)
     /* Nothing */ ;
   return upos - ustart;
+}
+
+#include "match/ft-longest-common.inc"
+
+static int ft_sequenceobject2mode(const GtFtSequenceObject *seq)
+{
+  if (seq->twobitencoding != NULL)
+  {
+    return 0;
+  }
+  if (seq->encseq != NULL)
+  {
+    return 1;
+  }
+  gt_assert(seq->bytesequenceptr != NULL);
+  return 2;
+}
+
+static int gt_sequenceobject_longest_func_index(const GtFtSequenceObject *useq,
+                                                const GtFtSequenceObject *vseq,
+                                                bool haswildcards)
+{
+  if (useq->encseqreader == NULL && vseq->encseqreader == NULL)
+  {
+    const int u_mode = ft_sequenceobject2mode(useq);
+    const int v_mode = ft_sequenceobject2mode(vseq);
+    return 1 + u_mode * 3 + v_mode +
+           (haswildcards ? ft_longest_comon_func_first_wildcard : 0);
+  }
+  return 0;
 }
 
 #define GT_FRONT_DIAGONAL(FRONTPTR) (GtWord) ((FRONTPTR) - midfront)
@@ -626,10 +656,14 @@ GtUword front_prune_edist_inplace(
   const uint64_t max_history_mask
     = max_history == 64 ? (~((uint64_t) 0))
                         : ((((uint64_t) 1) << max_history) - 1);
-  GtLongestCommonFunc ft_longest_common = ft_longest_common_all;
+  int func_index;
+  const bool haswildcards = (ufsr->haswildcards && vfsr->haswildcards) ? true
+                                                                       : false;
+  GtLongestCommonFunc ft_longest_common;
 
   ft_sequenceobject_init(&useq,
                          ufsr->extend_char_access,
+                         ufsr->twobit_possible,
                          ufsr->encseq,
                          rightextension,
                          ufsr->readmode,
@@ -642,6 +676,7 @@ GtUword front_prune_edist_inplace(
                          ufsr->totallength);
   ft_sequenceobject_init(&vseq,
                          vfsr->extend_char_access,
+                         vfsr->twobit_possible,
                          vfsr->encseq,
                          rightextension,
                          vfsr->readmode,
@@ -652,6 +687,8 @@ GtUword front_prune_edist_inplace(
                          vfsr->sequence_cache,
                          vfsr->bytesequence,
                          vfsr->totallength);
+  func_index = gt_sequenceobject_longest_func_index(&useq,&vseq,haswildcards);
+  ft_longest_common = ft_longest_common_func_tab[func_index];
   frontspace->offset = 0;
   for (distance = 0, valid = 1UL; /* Nothing */; distance++, valid += 2)
   {

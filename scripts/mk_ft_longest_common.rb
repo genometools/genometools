@@ -1,18 +1,5 @@
 #!/usr/bin/env ruby
 
-require "erb"
-
-class ERBContext
-  def initialize(hash)
-    hash.each_pair do |key, value|
-      instance_variable_set('@' + key.to_s, value)
-    end
-  end
-  def get_binding
-    binding
-  end
-end
-
 def gen_access_expr(posvar,structvar)
   return "#{structvar}->read_seq_left2right\n" +
          " " * 45 + "? #{structvar}->offset + #{posvar}\n" +
@@ -47,17 +34,17 @@ def gen_access(mode,isleft)
   end
 end
 
-def gen_special(special)
-  if special 
-    return "!ISSPECIAL(cu) || " 
-  else 
+def gen_wildcard(wildcard)
+  if wildcard
+    return "(cu == WILDCARD) || "
+  else
     return ""
   end
 end
 
-def gen_suffix(special)
-  if special
-    return "_special"
+def gen_suffix(wildcard)
+  if wildcard
+    return "_wildcard"
   else
     return ""
   end
@@ -81,38 +68,40 @@ def cut_out(s)
   end
 end
 
-def longestcommonfunc(a_mode,b_mode,special)
- erb_context = ERBContext.new({:a_mode => a_mode,
-                               :b_mode => b_mode,
-                               :special => special})
- header = ERB.new <<'EOF'
-GtUword ft_longest_common_<%= @a_mode%>_<%= @b_mode%><%= gen_suffix(@special)%>(const GtFtFrontvalue *midfront,
-                                      const GtFtFrontvalue *fv,
+def gen_func_name(a_mode,b_mode,wildcard)
+  return "ft_longest_common_#{a_mode}_#{b_mode}#{gen_suffix(wildcard)}"
+end
+
+def longestcommonfunc(a_mode,b_mode,wildcard)
+ puts <<EOF
+static GtUword #{gen_func_name(a_mode,b_mode,wildcard)}(
                                       GtFtSequenceObject *useq,
-                                      GtFtSequenceObject *vseq)
+                                      GtUword ustart,
+                                      GtFtSequenceObject *vseq,
+                                      const GtUword vstart)
 {
   GtUword upos, vpos;
 
-  for (upos = fv->row, vpos = fv->row + GT_FRONT_DIAGONAL(fv);
+  for (upos = ustart, vpos = vstart;
        upos < useq->substringlength && vpos < vseq->substringlength;
        upos++, vpos++)
   {
-    const GtUchar cu = <%= gen_access(@a_mode,true)%>;
+    const GtUchar cu = #{gen_access(a_mode,true)};
 
-    if (<%= gen_special(@special)%>cu != <%= gen_access(@b_mode,false)%>)
+    if (#{gen_wildcard(wildcard)}cu != #{gen_access(b_mode,false)})
     {
       break;
     }
   }
-  return upos - fv->row;
+  return upos - ustart;
 }
 EOF
-  puts header.result(erb_context.get_binding)
 end
 
 first = true
-modes = ["bytes","twobit","encseq"]
-[true,false].each do |special|
+func_list = Array.new()
+modes = ["twobit","encseq","bytes"]
+[false,true].each do |wildcard|
   modes.each do |a_mode|
     modes.each do |b_mode|
      if first
@@ -120,7 +109,20 @@ modes = ["bytes","twobit","encseq"]
      else
        puts ""
      end
-     longestcommonfunc(a_mode,b_mode,special)
+     longestcommonfunc(a_mode,b_mode,wildcard)
+     func_list.push(gen_func_name(a_mode,b_mode,wildcard))
     end
   end
 end
+
+firstwildcard = nil
+puts "\nGtLongestCommonFunc ft_longest_common_func_tab[] =\n{"
+print "  /* 0 */ ft_longest_common_all"
+func_list.each_with_index do |func_name,idx|
+  if firstwildcard.nil? and func_name.match(/_wildcard/)
+    firstwildcard = idx
+  end
+  print ",\n  /* #{idx+1} */ #{func_name}"
+end
+puts "\n};"
+puts "const int ft_longest_comon_func_first_wildcard = #{firstwildcard};"

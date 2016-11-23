@@ -29,12 +29,13 @@ typedef enum
 typedef struct
 {
   const GtEncseq *encseq;
-  GtReadmode readmode;
   GtAllocatedMemory *sequence_cache;
   GtEncseqReader *encseq_r;
   const GtUchar *bytesequence;
-  GtExtendCharAccess extend_char_access;
   GtUword totallength;
+  GtReadmode readmode;
+  GtExtendCharAccess extend_char_access;
+  bool twobit_possible, haswildcards;
 } GtFTsequenceResources;
 
 GtUword front_prune_edist_inplace(

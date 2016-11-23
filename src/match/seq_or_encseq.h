@@ -11,6 +11,7 @@
         (SORE)->seqstartpos = GT_UWORD_MAX;\
         (SORE)->characters = NULL;\
         (SORE)->wildcardshow = 0;\
+        (SORE)->haswildcards = true
 
 #define GT_SEQORENCSEQ_ADD_SEQ_COORDS(SORE,SEQSTARTPOS,SEQLENGTH)\
         gt_assert((SORE)->encseq != NULL);\
@@ -18,14 +19,15 @@
         (SORE)->seqlength = SEQLENGTH
 
 #define GT_SEQORENCSEQ_INIT_SEQ(SORE,SEQ,SEQDESC,SEQLENGTH,CHARACTERS,\
-                                WILDCARDSHOW)\
+                                WILDCARDSHOW,HASWILDCARDS)\
         (SORE)->encseq = NULL;\
         (SORE)->seq = SEQ;\
         (SORE)->desc = SEQDESC;\
         (SORE)->seqlength = SEQLENGTH;\
         (SORE)->seqstartpos = 0;\
         (SORE)->characters = CHARACTERS;\
-        (SORE)->wildcardshow = WILDCARDSHOW
+        (SORE)->wildcardshow = WILDCARDSHOW;\
+        (SORE)->haswildcards = HASWILDCARDS
 
 typedef struct
 {
@@ -35,6 +37,7 @@ typedef struct
   GtWord seqstartpos, seqlength;
   const GtUchar *characters;
   GtUchar wildcardshow;
+  bool haswildcards;
 } GtSeqorEncseq;
 
 #endif

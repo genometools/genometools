@@ -680,7 +680,8 @@ static int gt_callenumquerymatches(bool selfmatch,
                                 gt_querysubstringmatchiterator_desc(qsmi),
                                 query_totallength,
                                 NULL,
-                                0);
+                                0,
+                                true);
       }
       querystart = gt_querysubstringmatchiterator_querystart(qsmi);
       queryunitnum = gt_querysubstringmatchiterator_queryunitnum(qsmi);
