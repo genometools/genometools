@@ -417,7 +417,11 @@ struct GtGreedyextendmatchinfo
                      query_extend_char_access;
   bool check_extend_symmetry,
        silent,
-       showfrontinfo;
+       showfrontinfo,
+       db_twobit_possible,
+       query_twobit_possible,
+       db_haswildcards,
+       query_haswildcards;
   GtFtTrimstat *trimstat;
   GtEncseqReader *encseq_r_in_u, *encseq_r_in_v;
   GtAllocatedMemory usequence_cache, vsequence_cache, frontspace_reservoir;
@@ -541,6 +545,10 @@ GtGreedyextendmatchinfo *gt_greedy_extend_matchinfo_new(
   ggemi->check_extend_symmetry = false;
   ggemi->silent = false;
   ggemi->trimstat = NULL;
+  ggemi->db_twobit_possible = false;
+  ggemi->query_twobit_possible = false;
+  ggemi->db_haswildcards = true;
+  ggemi->query_haswildcards = true;
   return ggemi;
 }
 
@@ -609,9 +617,6 @@ static void gt_greedy_extend_init(GtFTsequenceResources *ufsr,
                                   const GtUword query_totallength,
                                   GtGreedyextendmatchinfo *ggemi)
 {
-  bool db_twobit_possible, query_twobit_possible,
-       db_haswildcards, query_haswildcards;
-
   if (ggemi->left_front_trace != NULL)
   {
     front_trace_reset(ggemi->left_front_trace,0);
@@ -628,27 +633,27 @@ static void gt_greedy_extend_init(GtFTsequenceResources *ufsr,
         = gt_encseq_create_reader_with_readmode(dbes->encseq,
                                                 GT_READMODE_FORWARD,
                                                 0);
-    }
-    if (gt_encseq_wildcards(dbes->encseq) > 0)
-    {
-      db_haswildcards = true;
-      db_twobit_possible = false;
-    } else
-    {
-      db_haswildcards = false;
-      if (ggemi->db_extend_char_access == GT_EXTEND_CHAR_ACCESS_ANY &&
-          gt_encseq_has_twobitencoding(dbes->encseq))
+      if (gt_encseq_wildcards(dbes->encseq) > 0)
       {
-        db_twobit_possible = true;
+        ggemi->db_haswildcards = true;
+        ggemi->db_twobit_possible = false;
       } else
       {
-        db_twobit_possible = false;
+        ggemi->db_haswildcards = false;
+        if (ggemi->db_extend_char_access == GT_EXTEND_CHAR_ACCESS_ANY &&
+            gt_encseq_has_twobitencoding(dbes->encseq))
+        {
+          ggemi->db_twobit_possible = true;
+        } else
+        {
+          ggemi->db_twobit_possible = false;
+        }
       }
     }
   } else
   {
-    db_twobit_possible = false;
-    db_haswildcards = dbes->haswildcards;
+    ggemi->db_twobit_possible = false;
+    ggemi->db_haswildcards = dbes->haswildcards;
   }
   if (queryes->encseq != NULL)
   {
@@ -657,27 +662,27 @@ static void gt_greedy_extend_init(GtFTsequenceResources *ufsr,
       ggemi->encseq_r_in_v
         = gt_encseq_create_reader_with_readmode(queryes->encseq,
                                                 query_readmode,0);
-    }
-    if (gt_encseq_wildcards(queryes->encseq) > 0)
-    {
-      query_haswildcards = true;
-      query_twobit_possible = false;
-    } else
-    {
-      query_haswildcards = false;
-      if (ggemi->query_extend_char_access == GT_EXTEND_CHAR_ACCESS_ANY &&
-          gt_encseq_has_twobitencoding(queryes->encseq))
+      if (gt_encseq_wildcards(queryes->encseq) > 0)
       {
-        query_twobit_possible = true;
+        ggemi->query_haswildcards = true;
+        ggemi->query_twobit_possible = false;
       } else
       {
-        query_twobit_possible = false;
+        ggemi->query_haswildcards = false;
+        if (ggemi->query_extend_char_access == GT_EXTEND_CHAR_ACCESS_ANY &&
+            gt_encseq_has_twobitencoding(queryes->encseq))
+        {
+          ggemi->query_twobit_possible = true;
+        } else
+        {
+          ggemi->query_twobit_possible = false;
+        }
       }
     }
   } else
   {
-    query_twobit_possible = false;
-    query_haswildcards = queryes->haswildcards;
+    ggemi->query_twobit_possible = false;
+    ggemi->query_haswildcards = queryes->haswildcards;
   }
   if (ggemi->db_totallength == GT_UWORD_MAX)
   {
@@ -699,8 +704,8 @@ static void gt_greedy_extend_init(GtFTsequenceResources *ufsr,
                                 NULL,
                                 ggemi->db_totallength,
                                 ggemi->db_extend_char_access,
-                                db_twobit_possible,
-                                db_haswildcards);
+                                ggemi->db_twobit_possible,
+                                ggemi->db_haswildcards);
   } else
   {
     gt_FTsequenceResources_init(ufsr,
@@ -712,7 +717,7 @@ static void gt_greedy_extend_init(GtFTsequenceResources *ufsr,
                                 dbes->seqlength,
                                 GT_EXTEND_CHAR_ACCESS_DIRECT,
                                 false,
-                                db_haswildcards);
+                                ggemi->db_haswildcards);
   }
   if (queryes->encseq != NULL)
   {
@@ -724,8 +729,8 @@ static void gt_greedy_extend_init(GtFTsequenceResources *ufsr,
                                 NULL,
                                 query_totallength,
                                 ggemi->query_extend_char_access,
-                                query_twobit_possible,
-                                query_haswildcards);
+                                ggemi->query_twobit_possible,
+                                ggemi->query_haswildcards);
   } else
   {
     gt_FTsequenceResources_init(vfsr,
@@ -737,7 +742,7 @@ static void gt_greedy_extend_init(GtFTsequenceResources *ufsr,
                                 query_totallength,
                                 GT_EXTEND_CHAR_ACCESS_DIRECT,
                                 false,
-                                query_haswildcards);
+                                ggemi->query_haswildcards);
   }
 }
 
