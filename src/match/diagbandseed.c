@@ -116,7 +116,8 @@ struct GtDiagbandseedExtendParams
        benchmark,
        always_polished_ends,
        verify_alignment,
-       only_selected_seqpairs;
+       only_selected_seqpairs,
+       cam_generic;
 };
 
 typedef struct
@@ -196,6 +197,7 @@ GtDiagbandseedExtendParams *gt_diagbandseed_extend_params_new(
                                 GtUword perc_mat_history,
                                 GtExtendCharAccess a_extend_char_access,
                                 GtExtendCharAccess b_extend_char_access,
+                                bool cam_generic,
                                 GtUword sensitivity,
                                 double matchscore_bias,
                                 bool weakends,
@@ -220,6 +222,7 @@ GtDiagbandseedExtendParams *gt_diagbandseed_extend_params_new(
   extp->perc_mat_history = perc_mat_history;
   extp->a_extend_char_access = a_extend_char_access;
   extp->b_extend_char_access = b_extend_char_access;
+  extp->cam_generic = cam_generic;
   extp->sensitivity = sensitivity;
   extp->matchscore_bias = matchscore_bias;
   extp->weakends = weakends;
@@ -3966,6 +3969,7 @@ static int gt_diagbandseed_algorithm(const GtDiagbandseedInfo *arg,
                                                extp->userdefinedleastlength,
                                                extp->a_extend_char_access,
                                                extp->b_extend_char_access,
+                                               extp->cam_generic,
                                                extp->sensitivity,
                                                pol_info);
     if (extp->benchmark) {
@@ -4005,6 +4009,7 @@ static int gt_diagbandseed_algorithm(const GtDiagbandseedInfo *arg,
                                      extp->perc_mat_history,
                                      extp->a_extend_char_access,
                                      extp->b_extend_char_access,
+                                     extp->cam_generic,
                                      extp->weakends,
                                      sensitivity,
                                      extp->matchscore_bias,

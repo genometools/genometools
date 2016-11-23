@@ -57,6 +57,7 @@ GtUword front_prune_edist_inplace(
                        GtFTsequenceResources *vfsr,
                        GtUword vstart,
                        GtUword vlen,
+                       bool cam_generic,
                        GtFtTrimstat *trimstat);
 
 #endif

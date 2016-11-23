@@ -840,6 +840,7 @@ static int gt_repfind_runner(int argc,
                                        arguments->userdefinedleastlength,
                                        a_extend_char_access,
                                        b_extend_char_access,
+                                       false,
                                        arguments->extendgreedy,
                                        pol_info);
     if (arguments->check_extend_symmetry)
@@ -893,6 +894,8 @@ static int gt_repfind_runner(int argc,
       if (!haserr && (gt_option_is_set(arguments->refextendxdropoption) ||
                       gt_option_is_set(arguments->refextendgreedyoption)))
       {
+        const bool cam_generic = false;
+        const bool weakends = false;
         const GtUword sensitivity
           = gt_option_is_set(arguments->refextendgreedyoption)
               ? arguments->extendgreedy
@@ -905,7 +908,8 @@ static int gt_repfind_runner(int argc,
                                       arguments->perc_mat_history,
                                       a_extend_char_access,
                                       b_extend_char_access,
-                                      false,
+                                      cam_generic,
+                                      weakends,
                                       sensitivity,
                                       GT_DEFAULT_MATCHSCORE_BIAS,
                                       true,

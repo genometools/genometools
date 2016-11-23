@@ -42,6 +42,7 @@ void gt_querymatchoutoptions_extend(
                   GtUword perc_mat_history,
                   GtExtendCharAccess a_extend_char_access,
                   GtExtendCharAccess b_extend_char_access,
+                  bool cam_generic,
                   bool weakends,
                   GtUword sensitivity,
                   double matchscore_bias,

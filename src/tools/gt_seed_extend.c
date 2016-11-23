@@ -74,6 +74,7 @@ typedef struct {
   bool relax_polish;
   bool verify_alignment;
   bool only_selected_seqpairs;
+  bool cam_generic;
   /* general options */
   GtOption *se_option_withali;
   GtUword se_alignlength;
@@ -132,7 +133,8 @@ static GtOptionParser* gt_seed_extend_option_parser_new(void *tool_arguments)
     *op_len, *op_err, *op_xbe, *op_sup, *op_frq, *op_mem, *op_ali, *op_bia,
     *op_onl, *op_weakends, *op_relax_polish,
     *op_verify_alignment, *op_only_selected_seqpairs, *op_spdist, *op_display,
-    *op_norev, *op_nofwd, *op_part, *op_pick, *op_overl, *op_trimstat;
+    *op_norev, *op_nofwd, *op_part, *op_pick, *op_overl, *op_trimstat,
+    *op_cam_generic;
 
   static GtRange seedpairdistance_defaults = {1UL, GT_UWORD_MAX};
   gt_assert(arguments != NULL);
@@ -337,6 +339,13 @@ static GtOptionParser* gt_seed_extend_option_parser_new(void *tool_arguments)
   gt_option_is_development_option(op_cam);
   gt_option_parser_add_option(op, op_cam);
 
+  op_cam_generic = gt_option_new_bool("cam_generic",
+                                      "use generic function to access sequence",
+                                      &arguments->cam_generic, false);
+  gt_option_is_development_option(op_cam_generic);
+  gt_option_parser_add_option(op, op_cam_generic);
+
+  /* -splt */
   op_splt = gt_option_new_string("splt",
                                  gt_diagbandseed_splt_comment(),
                                  arguments->splt_string,
@@ -521,7 +530,8 @@ static GtOptionParser* gt_seed_extend_option_parser_new(void *tool_arguments)
   gt_option_parser_add_option(op, option);
   gt_option_exclude(op_cam, op_xbe);
   gt_option_exclude(op_cam, op_xdr);
-
+  gt_option_exclude(op_cam_generic, op_xbe);
+  gt_option_exclude(op_cam_generic, op_xdr);
   return op;
 }
 
@@ -899,6 +909,7 @@ static int gt_seed_extend_runner(int argc,
                                              arguments->se_perc_match_hist,
                                              cam_a,
                                              cam_b,
+                                             arguments->cam_generic,
                                              sensitivity,
                                              matchscore_bias,
                                              arguments->weakends,

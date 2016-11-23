@@ -272,7 +272,7 @@ static int gt_sequenceobject_longest_func_index(const GtFtSequenceObject *useq,
 {
   const int u_mode = ft_sequenceobject2mode(useq);
   const int v_mode = ft_sequenceobject2mode(vseq);
-  return 1 + u_mode * ft_longest_common_num_modes + v_mode +
+  return u_mode * ft_longest_common_num_modes + v_mode +
          (haswildcards ? ft_longest_common_func_first_wildcard : 0);
 }
 
@@ -642,6 +642,7 @@ GtUword front_prune_edist_inplace(
                          GtFTsequenceResources *vfsr,
                          GtUword vstart,
                          GtUword vlen,
+                         bool cam_generic,
                          GtFtTrimstat *trimstat)
 {
   const GtUword sumseqlength = ulen + vlen,
@@ -660,9 +661,6 @@ GtUword front_prune_edist_inplace(
   const uint64_t max_history_mask
     = max_history == 64 ? (~((uint64_t) 0))
                         : ((((uint64_t) 1) << max_history) - 1);
-  int func_index;
-  const bool haswildcards = (ufsr->haswildcards && vfsr->haswildcards) ? true
-                                                                       : false;
   GtLongestCommonFunc ft_longest_common;
 
   ft_sequenceobject_init(&useq,
@@ -691,8 +689,17 @@ GtUword front_prune_edist_inplace(
                          vfsr->sequence_cache,
                          vfsr->bytesequence,
                          vfsr->totallength);
-  func_index = gt_sequenceobject_longest_func_index(&useq,&vseq,haswildcards);
-  ft_longest_common = ft_longest_common_func_tab[func_index];
+  if (cam_generic)
+  {
+    ft_longest_common = ft_longest_common_all;
+  } else
+  {
+    const bool haswildcards
+      = (ufsr->haswildcards && vfsr->haswildcards) ? true : false;
+    const int func_index
+      = gt_sequenceobject_longest_func_index(&useq,&vseq,haswildcards);
+    ft_longest_common = ft_longest_common_func_tab[func_index];
+  }
   frontspace->offset = 0;
   for (distance = 0, valid = 1UL; /* Nothing */; distance++, valid += 2)
   {

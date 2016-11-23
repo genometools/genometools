@@ -124,6 +124,7 @@ void gt_querymatchoutoptions_extend(
                   GtUword perc_mat_history,
                   GtExtendCharAccess a_extend_char_access,
                   GtExtendCharAccess b_extend_char_access,
+                  bool cam_generic,
                   bool weakends,
                   GtUword sensitivity,
                   double matchscore_bias,
@@ -150,6 +151,7 @@ void gt_querymatchoutoptions_extend(
                                        0,/* userdefinedleastlength not used */
                                        a_extend_char_access,
                                        b_extend_char_access,
+                                       cam_generic,
                                        sensitivity,
                                        querymatchoutoptions->pol_info);
     if (querymatchoutoptions->eoplist != NULL)
@@ -176,6 +178,9 @@ void gt_querymatchoutoptions_for_align_only(
                   bool always_polished_ends,
                   unsigned int display_flag)
 {
+  const bool weakends = false;
+  const bool cam_generic = false;
+  const GtUword sensitivity = 100;
   gt_querymatchoutoptions_extend(querymatchoutoptions,
                                  errorpercentage,
                                  GT_MAX_ALI_LEN_DIFF,
@@ -183,8 +188,9 @@ void gt_querymatchoutoptions_for_align_only(
                                  GT_MIN_PERC_MAT_HISTORY,
                                  GT_EXTEND_CHAR_ACCESS_ANY,
                                  GT_EXTEND_CHAR_ACCESS_ANY,
-                                 false,
-                                 100,
+                                 cam_generic,
+                                 weakends,
+                                 sensitivity,
                                  matchscore_bias,
                                  always_polished_ends,
                                  display_flag);

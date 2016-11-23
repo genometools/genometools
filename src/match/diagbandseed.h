@@ -85,6 +85,7 @@ GtDiagbandseedExtendParams *gt_diagbandseed_extend_params_new(
                               GtUword perc_mat_history,
                               GtExtendCharAccess a_extend_char_access,
                               GtExtendCharAccess b_extend_char_access,
+                              bool cam_generic,
                               GtUword sensitivity,
                               double matchscore_bias,
                               bool weakends,

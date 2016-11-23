@@ -189,6 +189,7 @@ GtGreedyextendmatchinfo *gt_greedy_extend_matchinfo_new(
                                    GtUword userdefinedleastlength,
                                    GtExtendCharAccess a_extend_char_access,
                                    GtExtendCharAccess b_extend_char_access,
+                                   bool cam_generic,
                                    GtUword sensitivity,
                                    const GtFtPolishing_info *pol_info);
 

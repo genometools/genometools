@@ -100,13 +100,18 @@ modes = ["twobit","encseq_reader","encseq","bytes"]
 end
 
 firstwildcard = nil
+firstfunc = true
 puts "\nGtLongestCommonFunc ft_longest_common_func_tab[] =\n{"
-print "  /* 0 */ ft_longest_common_all"
 func_list.each_with_index do |func_name,idx|
   if firstwildcard.nil? and func_name.match(/_wildcard/)
     firstwildcard = idx
   end
-  print ",\n  /* #{idx+1} */ #{func_name}"
+  if firstfunc
+    firstfunc = false
+  else
+    puts ","
+  end
+  print "  /* #{idx} */ #{func_name}"
 end
 puts "\n};"
 puts "const int ft_longest_common_num_modes = #{modes.length};"

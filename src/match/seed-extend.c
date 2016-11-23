@@ -412,20 +412,21 @@ struct GtGreedyextendmatchinfo
           errorpercentage,
           perc_mat_history,
           db_totallength;
-  unsigned int userdefinedleastlength;
+  GtFtTrimstat *trimstat;
+  GtEncseqReader *encseq_r_in_u, *encseq_r_in_v;
+  GtAllocatedMemory usequence_cache, vsequence_cache, frontspace_reservoir;
+  GtTrimmingStrategy trimstrategy;
   GtExtendCharAccess db_extend_char_access,
                      query_extend_char_access;
+  unsigned int userdefinedleastlength;
   bool check_extend_symmetry,
        silent,
        showfrontinfo,
        db_twobit_possible,
        query_twobit_possible,
        db_haswildcards,
-       query_haswildcards;
-  GtFtTrimstat *trimstat;
-  GtEncseqReader *encseq_r_in_u, *encseq_r_in_v;
-  GtAllocatedMemory usequence_cache, vsequence_cache, frontspace_reservoir;
-  GtTrimmingStrategy trimstrategy;
+       query_haswildcards,
+       cam_generic;
 };
 
 static void gt_greedy_at_gc_count(GtUword *atcount,GtUword *gccount,
@@ -511,6 +512,7 @@ GtGreedyextendmatchinfo *gt_greedy_extend_matchinfo_new(
                                    GtUword userdefinedleastlength,
                                    GtExtendCharAccess db_extend_char_access,
                                    GtExtendCharAccess query_extend_char_access,
+                                   bool cam_generic,
                                    GtUword sensitivity,
                                    const GtFtPolishing_info *pol_info)
 {
@@ -549,6 +551,7 @@ GtGreedyextendmatchinfo *gt_greedy_extend_matchinfo_new(
   ggemi->query_twobit_possible = false;
   ggemi->db_haswildcards = true;
   ggemi->query_haswildcards = true;
+  ggemi->cam_generic = cam_generic;
   return ggemi;
 }
 
@@ -805,6 +808,7 @@ void gt_align_front_prune_edist(bool rightextension,
                                          &vfsr,
                                          vstart,
                                          vlen,
+                                         ggemi->cam_generic,
                                          NULL); /* trimstat */
     if (distance < ulen + vlen + 1)
     {
@@ -1051,6 +1055,7 @@ static const GtQuerymatch *gt_extend_sesp(bool forxdrop,
                                        &vfsr,
                                        sesp->queryseqstartpos + r_voffset,
                                        vlen,
+                                       greedyextendmatchinfo->cam_generic,
                                        greedyextendmatchinfo->trimstat);
     }
   } else
@@ -1148,6 +1153,7 @@ static const GtQuerymatch *gt_extend_sesp(bool forxdrop,
                                        gt_sesp_seedpos2(sesp) +
                                          sesp->seedlength,
                                        vlen,
+                                       greedyextendmatchinfo->cam_generic,
                                        greedyextendmatchinfo->trimstat);
     }
   } else
