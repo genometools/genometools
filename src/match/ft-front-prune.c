@@ -147,7 +147,7 @@ static GtUchar gt_sequenceobject_esr_get(GtFtSequenceObject *seq,GtUword idx)
   gt_assert(idx < seq->substringlength);
   if (idx >= seq->cache_num_positions)
   {
-    const GtUword addamount = 256UL;
+    const GtUword addamount = 16UL;
     GtUword cidx, tostore = MIN(seq->cache_num_positions + addamount,
                                 seq->substringlength);
 

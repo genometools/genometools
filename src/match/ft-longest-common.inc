@@ -4,37 +4,60 @@ static GtUword ft_longest_common_twobit_twobit(
                                       GtFtSequenceObject *vseq,
                                       const GtUword vstart)
 {
-  GtUword upos, vpos;
-
-  for (upos = ustart, vpos = vstart;
-       upos < useq->substringlength && vpos < vseq->substringlength;
-       upos++, vpos++)
+  if (ustart < useq->substringlength && vstart < vseq->substringlength)
   {
-    const GtUchar cu = gt_twobitencoding_char_at_pos(
-                    useq->twobitencoding,
-                    useq->read_seq_left2right
-                                             ? useq->offset + upos
-                                             : useq->offset - upos
-                    );
+    GtUword uptr;int ustep;
+    GtUword vptr;int vstep;
+    GtUword minsubstringlength = useq->substringlength - ustart, matchlength;
 
-    if (cu != (vseq->dir_is_complement
-          ? GT_COMPLEMENTBASE(gt_twobitencoding_char_at_pos(
-                    vseq->twobitencoding,
-                    vseq->read_seq_left2right
-                                             ? vseq->offset + vpos
-                                             : vseq->offset - vpos
-                    ))
-          : gt_twobitencoding_char_at_pos(
-                    vseq->twobitencoding,
-                    vseq->read_seq_left2right
-                                             ? vseq->offset + vpos
-                                             : vseq->offset - vpos
-                    )))
+    if (useq->read_seq_left2right)
     {
-      break;
+      uptr = useq->offset + ustart; ustep = 1;
+    } else
+    {
+      uptr = useq->offset - ustart; ustep = -1;
     }
+    if (vseq->read_seq_left2right)
+    {
+      vptr = vseq->offset + vstart; vstep = 1;
+    } else
+    {
+      vptr = vseq->offset - vstart; vstep = -1;
+    }
+    if (vseq->substringlength - vstart < minsubstringlength)
+    {
+      minsubstringlength = vseq->substringlength - vstart;
+    }
+    if (vseq->dir_is_complement)
+    {
+      for (matchlength = 0; matchlength < minsubstringlength;
+           uptr += ustep, vptr += vstep, matchlength++)
+      {
+        const GtUchar cu = gt_twobitencoding_char_at_pos(
+                              useq->twobitencoding,
+                              uptr);
+        if (cu != GT_COMPLEMENTBASE(gt_twobitencoding_char_at_pos(
+                              vseq->twobitencoding,
+                              vptr)))
+          break;
+      }
+    } else
+    {
+      for (matchlength = 0; matchlength < minsubstringlength;
+           uptr += ustep, vptr += vstep, matchlength++)
+      {
+        const GtUchar cu = gt_twobitencoding_char_at_pos(
+                              useq->twobitencoding,
+                              uptr);
+        if (cu != gt_twobitencoding_char_at_pos(
+                              vseq->twobitencoding,
+                              vptr))
+          break;
+      }
+    }
+    return matchlength;
   }
-  return upos - ustart;
+  return 0;
 }
 
 static GtUword ft_longest_common_twobit_encseq_reader(
@@ -43,27 +66,50 @@ static GtUword ft_longest_common_twobit_encseq_reader(
                                       GtFtSequenceObject *vseq,
                                       const GtUword vstart)
 {
-  GtUword upos, vpos;
-
-  for (upos = ustart, vpos = vstart;
-       upos < useq->substringlength && vpos < vseq->substringlength;
-       upos++, vpos++)
+  if (ustart < useq->substringlength && vstart < vseq->substringlength)
   {
-    const GtUchar cu = gt_twobitencoding_char_at_pos(
-                    useq->twobitencoding,
-                    useq->read_seq_left2right
-                                             ? useq->offset + upos
-                                             : useq->offset - upos
-                    );
+    GtUword uptr;int ustep;
+    GtUword vptr;
+    GtUword minsubstringlength = useq->substringlength - ustart, matchlength;
 
-    if (cu != (vseq->dir_is_complement
-          ? GT_COMPLEMENTBASE(gt_sequenceobject_esr_get(vseq,vpos))
-          : gt_sequenceobject_esr_get(vseq,vpos)))
+    if (useq->read_seq_left2right)
     {
-      break;
+      uptr = useq->offset + ustart; ustep = 1;
+    } else
+    {
+      uptr = useq->offset - ustart; ustep = -1;
     }
+    vptr = vstart;
+    if (vseq->substringlength - vstart < minsubstringlength)
+    {
+      minsubstringlength = vseq->substringlength - vstart;
+    }
+    if (vseq->dir_is_complement)
+    {
+      for (matchlength = 0; matchlength < minsubstringlength;
+           uptr += ustep, vptr++, matchlength++)
+      {
+        const GtUchar cu = gt_twobitencoding_char_at_pos(
+                              useq->twobitencoding,
+                              uptr);
+        if (cu != GT_COMPLEMENTBASE(gt_sequenceobject_esr_get(vseq,vptr)))
+          break;
+      }
+    } else
+    {
+      for (matchlength = 0; matchlength < minsubstringlength;
+           uptr += ustep, vptr++, matchlength++)
+      {
+        const GtUchar cu = gt_twobitencoding_char_at_pos(
+                              useq->twobitencoding,
+                              uptr);
+        if (cu != gt_sequenceobject_esr_get(vseq,vptr))
+          break;
+      }
+    }
+    return matchlength;
   }
-  return upos - ustart;
+  return 0;
 }
 
 static GtUword ft_longest_common_twobit_encseq(
@@ -72,35 +118,60 @@ static GtUword ft_longest_common_twobit_encseq(
                                       GtFtSequenceObject *vseq,
                                       const GtUword vstart)
 {
-  GtUword upos, vpos;
-
-  for (upos = ustart, vpos = vstart;
-       upos < useq->substringlength && vpos < vseq->substringlength;
-       upos++, vpos++)
+  if (ustart < useq->substringlength && vstart < vseq->substringlength)
   {
-    const GtUchar cu = gt_twobitencoding_char_at_pos(
-                    useq->twobitencoding,
-                    useq->read_seq_left2right
-                                             ? useq->offset + upos
-                                             : useq->offset - upos
-                    );
+    GtUword uptr;int ustep;
+    GtUword vptr;int vstep;
+    GtUword minsubstringlength = useq->substringlength - ustart, matchlength;
 
-    if (cu != (vseq->dir_is_complement
-          ? GT_COMPLEMENTBASE(gt_encseq_get_encoded_char(vseq->encseq,
-                    vseq->read_seq_left2right
-                                             ? vseq->offset + vpos
-                                             : vseq->offset - vpos,
-                    GT_READMODE_FORWARD))
-          : gt_encseq_get_encoded_char(vseq->encseq,
-                    vseq->read_seq_left2right
-                                             ? vseq->offset + vpos
-                                             : vseq->offset - vpos,
-                    GT_READMODE_FORWARD)))
+    if (useq->read_seq_left2right)
     {
-      break;
+      uptr = useq->offset + ustart; ustep = 1;
+    } else
+    {
+      uptr = useq->offset - ustart; ustep = -1;
     }
+    if (vseq->read_seq_left2right)
+    {
+      vptr = vseq->offset + vstart; vstep = 1;
+    } else
+    {
+      vptr = vseq->offset - vstart; vstep = -1;
+    }
+    if (vseq->substringlength - vstart < minsubstringlength)
+    {
+      minsubstringlength = vseq->substringlength - vstart;
+    }
+    if (vseq->dir_is_complement)
+    {
+      for (matchlength = 0; matchlength < minsubstringlength;
+           uptr += ustep, vptr += vstep, matchlength++)
+      {
+        const GtUchar cu = gt_twobitencoding_char_at_pos(
+                              useq->twobitencoding,
+                              uptr);
+        if (cu != GT_COMPLEMENTBASE(gt_encseq_get_encoded_char(vseq->encseq,
+                    vptr,
+                    GT_READMODE_FORWARD)))
+          break;
+      }
+    } else
+    {
+      for (matchlength = 0; matchlength < minsubstringlength;
+           uptr += ustep, vptr += vstep, matchlength++)
+      {
+        const GtUchar cu = gt_twobitencoding_char_at_pos(
+                              useq->twobitencoding,
+                              uptr);
+        if (cu != gt_encseq_get_encoded_char(vseq->encseq,
+                    vptr,
+                    GT_READMODE_FORWARD))
+          break;
+      }
+    }
+    return matchlength;
   }
-  return upos - ustart;
+  return 0;
 }
 
 static GtUword ft_longest_common_twobit_bytes(
@@ -109,35 +180,56 @@ static GtUword ft_longest_common_twobit_bytes(
                                       GtFtSequenceObject *vseq,
                                       const GtUword vstart)
 {
-  GtUword upos, vpos;
-
-  for (upos = ustart, vpos = vstart;
-       upos < useq->substringlength && vpos < vseq->substringlength;
-       upos++, vpos++)
+  if (ustart < useq->substringlength && vstart < vseq->substringlength)
   {
-    const GtUchar cu = gt_twobitencoding_char_at_pos(
-                    useq->twobitencoding,
-                    useq->read_seq_left2right
-                                             ? useq->offset + upos
-                                             : useq->offset - upos
-                    );
+    GtUword uptr;int ustep;
+    const GtUchar *vptr;int vstep;
+    GtUword minsubstringlength = useq->substringlength - ustart, matchlength;
 
-    if (cu != (vseq->dir_is_complement
-          ? GT_COMPLEMENTBASE(vseq->bytesequenceptr[
-                    vseq->read_seq_left2right
-                                             ? vseq->offset + vpos
-                                             : vseq->offset - vpos
-                    ])
-          : vseq->bytesequenceptr[
-                    vseq->read_seq_left2right
-                                             ? vseq->offset + vpos
-                                             : vseq->offset - vpos
-                    ]))
+    if (useq->read_seq_left2right)
     {
-      break;
+      uptr = useq->offset + ustart; ustep = 1;
+    } else
+    {
+      uptr = useq->offset - ustart; ustep = -1;
     }
+    if (vseq->read_seq_left2right)
+    {
+      vptr = vseq->bytesequenceptr + vseq->offset + vstart; vstep = 1;
+    } else
+    {
+      vptr = vseq->bytesequenceptr + vseq->offset - vstart; vstep = -1;
+    }
+    if (vseq->substringlength - vstart < minsubstringlength)
+    {
+      minsubstringlength = vseq->substringlength - vstart;
+    }
+    if (vseq->dir_is_complement)
+    {
+      for (matchlength = 0; matchlength < minsubstringlength;
+           uptr += ustep, vptr += vstep, matchlength++)
+      {
+        const GtUchar cu = gt_twobitencoding_char_at_pos(
+                              useq->twobitencoding,
+                              uptr);
+        if (cu != GT_COMPLEMENTBASE(*vptr))
+          break;
+      }
+    } else
+    {
+      for (matchlength = 0; matchlength < minsubstringlength;
+           uptr += ustep, vptr += vstep, matchlength++)
+      {
+        const GtUchar cu = gt_twobitencoding_char_at_pos(
+                              useq->twobitencoding,
+                              uptr);
+        if (cu != *vptr)
+          break;
+      }
+    }
+    return matchlength;
   }
-  return upos - ustart;
+  return 0;
 }
 
 static GtUword ft_longest_common_encseq_reader_twobit(
@@ -146,32 +238,50 @@ static GtUword ft_longest_common_encseq_reader_twobit(
                                       GtFtSequenceObject *vseq,
                                       const GtUword vstart)
 {
-  GtUword upos, vpos;
-
-  for (upos = ustart, vpos = vstart;
-       upos < useq->substringlength && vpos < vseq->substringlength;
-       upos++, vpos++)
+  if (ustart < useq->substringlength && vstart < vseq->substringlength)
   {
-    const GtUchar cu = gt_sequenceobject_esr_get(useq,upos);
+    GtUword uptr;
+    GtUword vptr;int vstep;
+    GtUword minsubstringlength = useq->substringlength - ustart, matchlength;
 
-    if (cu != (vseq->dir_is_complement
-          ? GT_COMPLEMENTBASE(gt_twobitencoding_char_at_pos(
-                    vseq->twobitencoding,
-                    vseq->read_seq_left2right
-                                             ? vseq->offset + vpos
-                                             : vseq->offset - vpos
-                    ))
-          : gt_twobitencoding_char_at_pos(
-                    vseq->twobitencoding,
-                    vseq->read_seq_left2right
-                                             ? vseq->offset + vpos
-                                             : vseq->offset - vpos
-                    )))
+    uptr = ustart;
+    if (vseq->read_seq_left2right)
     {
-      break;
+      vptr = vseq->offset + vstart; vstep = 1;
+    } else
+    {
+      vptr = vseq->offset - vstart; vstep = -1;
     }
+    if (vseq->substringlength - vstart < minsubstringlength)
+    {
+      minsubstringlength = vseq->substringlength - vstart;
+    }
+    if (vseq->dir_is_complement)
+    {
+      for (matchlength = 0; matchlength < minsubstringlength;
+           uptr++, vptr += vstep, matchlength++)
+      {
+        const GtUchar cu = gt_sequenceobject_esr_get(useq,uptr);
+        if (cu != GT_COMPLEMENTBASE(gt_twobitencoding_char_at_pos(
+                              vseq->twobitencoding,
+                              vptr)))
+          break;
+      }
+    } else
+    {
+      for (matchlength = 0; matchlength < minsubstringlength;
+           uptr++, vptr += vstep, matchlength++)
+      {
+        const GtUchar cu = gt_sequenceobject_esr_get(useq,uptr);
+        if (cu != gt_twobitencoding_char_at_pos(
+                              vseq->twobitencoding,
+                              vptr))
+          break;
+      }
+    }
+    return matchlength;
   }
-  return upos - ustart;
+  return 0;
 }
 
 static GtUword ft_longest_common_encseq_reader_encseq_reader(
@@ -180,22 +290,40 @@ static GtUword ft_longest_common_encseq_reader_encseq_reader(
                                       GtFtSequenceObject *vseq,
                                       const GtUword vstart)
 {
-  GtUword upos, vpos;
-
-  for (upos = ustart, vpos = vstart;
-       upos < useq->substringlength && vpos < vseq->substringlength;
-       upos++, vpos++)
+  if (ustart < useq->substringlength && vstart < vseq->substringlength)
   {
-    const GtUchar cu = gt_sequenceobject_esr_get(useq,upos);
+    GtUword uptr;
+    GtUword vptr;
+    GtUword minsubstringlength = useq->substringlength - ustart, matchlength;
 
-    if (cu != (vseq->dir_is_complement
-          ? GT_COMPLEMENTBASE(gt_sequenceobject_esr_get(vseq,vpos))
-          : gt_sequenceobject_esr_get(vseq,vpos)))
+    uptr = ustart;
+    vptr = vstart;
+    if (vseq->substringlength - vstart < minsubstringlength)
     {
-      break;
+      minsubstringlength = vseq->substringlength - vstart;
     }
+    if (vseq->dir_is_complement)
+    {
+      for (matchlength = 0; matchlength < minsubstringlength;
+           uptr++, vptr++, matchlength++)
+      {
+        const GtUchar cu = gt_sequenceobject_esr_get(useq,uptr);
+        if (cu != GT_COMPLEMENTBASE(gt_sequenceobject_esr_get(vseq,vptr)))
+          break;
+      }
+    } else
+    {
+      for (matchlength = 0; matchlength < minsubstringlength;
+           uptr++, vptr++, matchlength++)
+      {
+        const GtUchar cu = gt_sequenceobject_esr_get(useq,uptr);
+        if (cu != gt_sequenceobject_esr_get(vseq,vptr))
+          break;
+      }
+    }
+    return matchlength;
   }
-  return upos - ustart;
+  return 0;
 }
 
 static GtUword ft_longest_common_encseq_reader_encseq(
@@ -204,30 +332,50 @@ static GtUword ft_longest_common_encseq_reader_encseq(
                                       GtFtSequenceObject *vseq,
                                       const GtUword vstart)
 {
-  GtUword upos, vpos;
-
-  for (upos = ustart, vpos = vstart;
-       upos < useq->substringlength && vpos < vseq->substringlength;
-       upos++, vpos++)
+  if (ustart < useq->substringlength && vstart < vseq->substringlength)
   {
-    const GtUchar cu = gt_sequenceobject_esr_get(useq,upos);
+    GtUword uptr;
+    GtUword vptr;int vstep;
+    GtUword minsubstringlength = useq->substringlength - ustart, matchlength;
 
-    if (cu != (vseq->dir_is_complement
-          ? GT_COMPLEMENTBASE(gt_encseq_get_encoded_char(vseq->encseq,
-                    vseq->read_seq_left2right
-                                             ? vseq->offset + vpos
-                                             : vseq->offset - vpos,
-                    GT_READMODE_FORWARD))
-          : gt_encseq_get_encoded_char(vseq->encseq,
-                    vseq->read_seq_left2right
-                                             ? vseq->offset + vpos
-                                             : vseq->offset - vpos,
-                    GT_READMODE_FORWARD)))
+    uptr = ustart;
+    if (vseq->read_seq_left2right)
     {
-      break;
+      vptr = vseq->offset + vstart; vstep = 1;
+    } else
+    {
+      vptr = vseq->offset - vstart; vstep = -1;
     }
+    if (vseq->substringlength - vstart < minsubstringlength)
+    {
+      minsubstringlength = vseq->substringlength - vstart;
+    }
+    if (vseq->dir_is_complement)
+    {
+      for (matchlength = 0; matchlength < minsubstringlength;
+           uptr++, vptr += vstep, matchlength++)
+      {
+        const GtUchar cu = gt_sequenceobject_esr_get(useq,uptr);
+        if (cu != GT_COMPLEMENTBASE(gt_encseq_get_encoded_char(vseq->encseq,
+                    vptr,
+                    GT_READMODE_FORWARD)))
+          break;
+      }
+    } else
+    {
+      for (matchlength = 0; matchlength < minsubstringlength;
+           uptr++, vptr += vstep, matchlength++)
+      {
+        const GtUchar cu = gt_sequenceobject_esr_get(useq,uptr);
+        if (cu != gt_encseq_get_encoded_char(vseq->encseq,
+                    vptr,
+                    GT_READMODE_FORWARD))
+          break;
+      }
+    }
+    return matchlength;
   }
-  return upos - ustart;
+  return 0;
 }
 
 static GtUword ft_longest_common_encseq_reader_bytes(
@@ -236,30 +384,46 @@ static GtUword ft_longest_common_encseq_reader_bytes(
                                       GtFtSequenceObject *vseq,
                                       const GtUword vstart)
 {
-  GtUword upos, vpos;
-
-  for (upos = ustart, vpos = vstart;
-       upos < useq->substringlength && vpos < vseq->substringlength;
-       upos++, vpos++)
+  if (ustart < useq->substringlength && vstart < vseq->substringlength)
   {
-    const GtUchar cu = gt_sequenceobject_esr_get(useq,upos);
+    GtUword uptr;
+    const GtUchar *vptr;int vstep;
+    GtUword minsubstringlength = useq->substringlength - ustart, matchlength;
 
-    if (cu != (vseq->dir_is_complement
-          ? GT_COMPLEMENTBASE(vseq->bytesequenceptr[
-                    vseq->read_seq_left2right
-                                             ? vseq->offset + vpos
-                                             : vseq->offset - vpos
-                    ])
-          : vseq->bytesequenceptr[
-                    vseq->read_seq_left2right
-                                             ? vseq->offset + vpos
-                                             : vseq->offset - vpos
-                    ]))
+    uptr = ustart;
+    if (vseq->read_seq_left2right)
     {
-      break;
+      vptr = vseq->bytesequenceptr + vseq->offset + vstart; vstep = 1;
+    } else
+    {
+      vptr = vseq->bytesequenceptr + vseq->offset - vstart; vstep = -1;
     }
+    if (vseq->substringlength - vstart < minsubstringlength)
+    {
+      minsubstringlength = vseq->substringlength - vstart;
+    }
+    if (vseq->dir_is_complement)
+    {
+      for (matchlength = 0; matchlength < minsubstringlength;
+           uptr++, vptr += vstep, matchlength++)
+      {
+        const GtUchar cu = gt_sequenceobject_esr_get(useq,uptr);
+        if (cu != GT_COMPLEMENTBASE(*vptr))
+          break;
+      }
+    } else
+    {
+      for (matchlength = 0; matchlength < minsubstringlength;
+           uptr++, vptr += vstep, matchlength++)
+      {
+        const GtUchar cu = gt_sequenceobject_esr_get(useq,uptr);
+        if (cu != *vptr)
+          break;
+      }
+    }
+    return matchlength;
   }
-  return upos - ustart;
+  return 0;
 }
 
 static GtUword ft_longest_common_encseq_twobit(
@@ -268,36 +432,60 @@ static GtUword ft_longest_common_encseq_twobit(
                                       GtFtSequenceObject *vseq,
                                       const GtUword vstart)
 {
-  GtUword upos, vpos;
-
-  for (upos = ustart, vpos = vstart;
-       upos < useq->substringlength && vpos < vseq->substringlength;
-       upos++, vpos++)
+  if (ustart < useq->substringlength && vstart < vseq->substringlength)
   {
-    const GtUchar cu = gt_encseq_get_encoded_char(useq->encseq,
-                    useq->read_seq_left2right
-                                             ? useq->offset + upos
-                                             : useq->offset - upos,
-                    GT_READMODE_FORWARD);
+    GtUword uptr;int ustep;
+    GtUword vptr;int vstep;
+    GtUword minsubstringlength = useq->substringlength - ustart, matchlength;
 
-    if (cu != (vseq->dir_is_complement
-          ? GT_COMPLEMENTBASE(gt_twobitencoding_char_at_pos(
-                    vseq->twobitencoding,
-                    vseq->read_seq_left2right
-                                             ? vseq->offset + vpos
-                                             : vseq->offset - vpos
-                    ))
-          : gt_twobitencoding_char_at_pos(
-                    vseq->twobitencoding,
-                    vseq->read_seq_left2right
-                                             ? vseq->offset + vpos
-                                             : vseq->offset - vpos
-                    )))
+    if (useq->read_seq_left2right)
     {
-      break;
+      uptr = useq->offset + ustart; ustep = 1;
+    } else
+    {
+      uptr = useq->offset - ustart; ustep = -1;
     }
+    if (vseq->read_seq_left2right)
+    {
+      vptr = vseq->offset + vstart; vstep = 1;
+    } else
+    {
+      vptr = vseq->offset - vstart; vstep = -1;
+    }
+    if (vseq->substringlength - vstart < minsubstringlength)
+    {
+      minsubstringlength = vseq->substringlength - vstart;
+    }
+    if (vseq->dir_is_complement)
+    {
+      for (matchlength = 0; matchlength < minsubstringlength;
+           uptr += ustep, vptr += vstep, matchlength++)
+      {
+        const GtUchar cu = gt_encseq_get_encoded_char(useq->encseq,
+                    uptr,
+                    GT_READMODE_FORWARD);
+        if (cu != GT_COMPLEMENTBASE(gt_twobitencoding_char_at_pos(
+                              vseq->twobitencoding,
+                              vptr)))
+          break;
+      }
+    } else
+    {
+      for (matchlength = 0; matchlength < minsubstringlength;
+           uptr += ustep, vptr += vstep, matchlength++)
+      {
+        const GtUchar cu = gt_encseq_get_encoded_char(useq->encseq,
+                    uptr,
+                    GT_READMODE_FORWARD);
+        if (cu != gt_twobitencoding_char_at_pos(
+                              vseq->twobitencoding,
+                              vptr))
+          break;
+      }
+    }
+    return matchlength;
   }
-  return upos - ustart;
+  return 0;
 }
 
 static GtUword ft_longest_common_encseq_encseq_reader(
@@ -306,26 +494,50 @@ static GtUword ft_longest_common_encseq_encseq_reader(
                                       GtFtSequenceObject *vseq,
                                       const GtUword vstart)
 {
-  GtUword upos, vpos;
-
-  for (upos = ustart, vpos = vstart;
-       upos < useq->substringlength && vpos < vseq->substringlength;
-       upos++, vpos++)
+  if (ustart < useq->substringlength && vstart < vseq->substringlength)
   {
-    const GtUchar cu = gt_encseq_get_encoded_char(useq->encseq,
-                    useq->read_seq_left2right
-                                             ? useq->offset + upos
-                                             : useq->offset - upos,
-                    GT_READMODE_FORWARD);
+    GtUword uptr;int ustep;
+    GtUword vptr;
+    GtUword minsubstringlength = useq->substringlength - ustart, matchlength;
 
-    if (cu != (vseq->dir_is_complement
-          ? GT_COMPLEMENTBASE(gt_sequenceobject_esr_get(vseq,vpos))
-          : gt_sequenceobject_esr_get(vseq,vpos)))
+    if (useq->read_seq_left2right)
     {
-      break;
+      uptr = useq->offset + ustart; ustep = 1;
+    } else
+    {
+      uptr = useq->offset - ustart; ustep = -1;
     }
+    vptr = vstart;
+    if (vseq->substringlength - vstart < minsubstringlength)
+    {
+      minsubstringlength = vseq->substringlength - vstart;
+    }
+    if (vseq->dir_is_complement)
+    {
+      for (matchlength = 0; matchlength < minsubstringlength;
+           uptr += ustep, vptr++, matchlength++)
+      {
+        const GtUchar cu = gt_encseq_get_encoded_char(useq->encseq,
+                    uptr,
+                    GT_READMODE_FORWARD);
+        if (cu != GT_COMPLEMENTBASE(gt_sequenceobject_esr_get(vseq,vptr)))
+          break;
+      }
+    } else
+    {
+      for (matchlength = 0; matchlength < minsubstringlength;
+           uptr += ustep, vptr++, matchlength++)
+      {
+        const GtUchar cu = gt_encseq_get_encoded_char(useq->encseq,
+                    uptr,
+                    GT_READMODE_FORWARD);
+        if (cu != gt_sequenceobject_esr_get(vseq,vptr))
+          break;
+      }
+    }
+    return matchlength;
   }
-  return upos - ustart;
+  return 0;
 }
 
 static GtUword ft_longest_common_encseq_encseq(
@@ -334,34 +546,60 @@ static GtUword ft_longest_common_encseq_encseq(
                                       GtFtSequenceObject *vseq,
                                       const GtUword vstart)
 {
-  GtUword upos, vpos;
-
-  for (upos = ustart, vpos = vstart;
-       upos < useq->substringlength && vpos < vseq->substringlength;
-       upos++, vpos++)
+  if (ustart < useq->substringlength && vstart < vseq->substringlength)
   {
-    const GtUchar cu = gt_encseq_get_encoded_char(useq->encseq,
-                    useq->read_seq_left2right
-                                             ? useq->offset + upos
-                                             : useq->offset - upos,
-                    GT_READMODE_FORWARD);
+    GtUword uptr;int ustep;
+    GtUword vptr;int vstep;
+    GtUword minsubstringlength = useq->substringlength - ustart, matchlength;
 
-    if (cu != (vseq->dir_is_complement
-          ? GT_COMPLEMENTBASE(gt_encseq_get_encoded_char(vseq->encseq,
-                    vseq->read_seq_left2right
-                                             ? vseq->offset + vpos
-                                             : vseq->offset - vpos,
-                    GT_READMODE_FORWARD))
-          : gt_encseq_get_encoded_char(vseq->encseq,
-                    vseq->read_seq_left2right
-                                             ? vseq->offset + vpos
-                                             : vseq->offset - vpos,
-                    GT_READMODE_FORWARD)))
+    if (useq->read_seq_left2right)
     {
-      break;
+      uptr = useq->offset + ustart; ustep = 1;
+    } else
+    {
+      uptr = useq->offset - ustart; ustep = -1;
     }
+    if (vseq->read_seq_left2right)
+    {
+      vptr = vseq->offset + vstart; vstep = 1;
+    } else
+    {
+      vptr = vseq->offset - vstart; vstep = -1;
+    }
+    if (vseq->substringlength - vstart < minsubstringlength)
+    {
+      minsubstringlength = vseq->substringlength - vstart;
+    }
+    if (vseq->dir_is_complement)
+    {
+      for (matchlength = 0; matchlength < minsubstringlength;
+           uptr += ustep, vptr += vstep, matchlength++)
+      {
+        const GtUchar cu = gt_encseq_get_encoded_char(useq->encseq,
+                    uptr,
+                    GT_READMODE_FORWARD);
+        if (cu != GT_COMPLEMENTBASE(gt_encseq_get_encoded_char(vseq->encseq,
+                    vptr,
+                    GT_READMODE_FORWARD)))
+          break;
+      }
+    } else
+    {
+      for (matchlength = 0; matchlength < minsubstringlength;
+           uptr += ustep, vptr += vstep, matchlength++)
+      {
+        const GtUchar cu = gt_encseq_get_encoded_char(useq->encseq,
+                    uptr,
+                    GT_READMODE_FORWARD);
+        if (cu != gt_encseq_get_encoded_char(vseq->encseq,
+                    vptr,
+                    GT_READMODE_FORWARD))
+          break;
+      }
+    }
+    return matchlength;
   }
-  return upos - ustart;
+  return 0;
 }
 
 static GtUword ft_longest_common_encseq_bytes(
@@ -370,34 +608,56 @@ static GtUword ft_longest_common_encseq_bytes(
                                       GtFtSequenceObject *vseq,
                                       const GtUword vstart)
 {
-  GtUword upos, vpos;
-
-  for (upos = ustart, vpos = vstart;
-       upos < useq->substringlength && vpos < vseq->substringlength;
-       upos++, vpos++)
+  if (ustart < useq->substringlength && vstart < vseq->substringlength)
   {
-    const GtUchar cu = gt_encseq_get_encoded_char(useq->encseq,
-                    useq->read_seq_left2right
-                                             ? useq->offset + upos
-                                             : useq->offset - upos,
-                    GT_READMODE_FORWARD);
+    GtUword uptr;int ustep;
+    const GtUchar *vptr;int vstep;
+    GtUword minsubstringlength = useq->substringlength - ustart, matchlength;
 
-    if (cu != (vseq->dir_is_complement
-          ? GT_COMPLEMENTBASE(vseq->bytesequenceptr[
-                    vseq->read_seq_left2right
-                                             ? vseq->offset + vpos
-                                             : vseq->offset - vpos
-                    ])
-          : vseq->bytesequenceptr[
-                    vseq->read_seq_left2right
-                                             ? vseq->offset + vpos
-                                             : vseq->offset - vpos
-                    ]))
+    if (useq->read_seq_left2right)
     {
-      break;
+      uptr = useq->offset + ustart; ustep = 1;
+    } else
+    {
+      uptr = useq->offset - ustart; ustep = -1;
     }
+    if (vseq->read_seq_left2right)
+    {
+      vptr = vseq->bytesequenceptr + vseq->offset + vstart; vstep = 1;
+    } else
+    {
+      vptr = vseq->bytesequenceptr + vseq->offset - vstart; vstep = -1;
+    }
+    if (vseq->substringlength - vstart < minsubstringlength)
+    {
+      minsubstringlength = vseq->substringlength - vstart;
+    }
+    if (vseq->dir_is_complement)
+    {
+      for (matchlength = 0; matchlength < minsubstringlength;
+           uptr += ustep, vptr += vstep, matchlength++)
+      {
+        const GtUchar cu = gt_encseq_get_encoded_char(useq->encseq,
+                    uptr,
+                    GT_READMODE_FORWARD);
+        if (cu != GT_COMPLEMENTBASE(*vptr))
+          break;
+      }
+    } else
+    {
+      for (matchlength = 0; matchlength < minsubstringlength;
+           uptr += ustep, vptr += vstep, matchlength++)
+      {
+        const GtUchar cu = gt_encseq_get_encoded_char(useq->encseq,
+                    uptr,
+                    GT_READMODE_FORWARD);
+        if (cu != *vptr)
+          break;
+      }
+    }
+    return matchlength;
   }
-  return upos - ustart;
+  return 0;
 }
 
 static GtUword ft_longest_common_bytes_twobit(
@@ -406,36 +666,56 @@ static GtUword ft_longest_common_bytes_twobit(
                                       GtFtSequenceObject *vseq,
                                       const GtUword vstart)
 {
-  GtUword upos, vpos;
-
-  for (upos = ustart, vpos = vstart;
-       upos < useq->substringlength && vpos < vseq->substringlength;
-       upos++, vpos++)
+  if (ustart < useq->substringlength && vstart < vseq->substringlength)
   {
-    const GtUchar cu = useq->bytesequenceptr[
-                    useq->read_seq_left2right
-                                             ? useq->offset + upos
-                                             : useq->offset - upos
-                    ];
+    const GtUchar *uptr;int ustep;
+    GtUword vptr;int vstep;
+    GtUword minsubstringlength = useq->substringlength - ustart, matchlength;
 
-    if (cu != (vseq->dir_is_complement
-          ? GT_COMPLEMENTBASE(gt_twobitencoding_char_at_pos(
-                    vseq->twobitencoding,
-                    vseq->read_seq_left2right
-                                             ? vseq->offset + vpos
-                                             : vseq->offset - vpos
-                    ))
-          : gt_twobitencoding_char_at_pos(
-                    vseq->twobitencoding,
-                    vseq->read_seq_left2right
-                                             ? vseq->offset + vpos
-                                             : vseq->offset - vpos
-                    )))
+    if (useq->read_seq_left2right)
     {
-      break;
+      uptr = useq->bytesequenceptr + useq->offset + ustart; ustep = 1;
+    } else
+    {
+      uptr = useq->bytesequenceptr + useq->offset - ustart; ustep = -1;
     }
+    if (vseq->read_seq_left2right)
+    {
+      vptr = vseq->offset + vstart; vstep = 1;
+    } else
+    {
+      vptr = vseq->offset - vstart; vstep = -1;
+    }
+    if (vseq->substringlength - vstart < minsubstringlength)
+    {
+      minsubstringlength = vseq->substringlength - vstart;
+    }
+    if (vseq->dir_is_complement)
+    {
+      for (matchlength = 0; matchlength < minsubstringlength;
+           uptr += ustep, vptr += vstep, matchlength++)
+      {
+        const GtUchar cu = *uptr;
+        if (cu != GT_COMPLEMENTBASE(gt_twobitencoding_char_at_pos(
+                              vseq->twobitencoding,
+                              vptr)))
+          break;
+      }
+    } else
+    {
+      for (matchlength = 0; matchlength < minsubstringlength;
+           uptr += ustep, vptr += vstep, matchlength++)
+      {
+        const GtUchar cu = *uptr;
+        if (cu != gt_twobitencoding_char_at_pos(
+                              vseq->twobitencoding,
+                              vptr))
+          break;
+      }
+    }
+    return matchlength;
   }
-  return upos - ustart;
+  return 0;
 }
 
 static GtUword ft_longest_common_bytes_encseq_reader(
@@ -444,26 +724,46 @@ static GtUword ft_longest_common_bytes_encseq_reader(
                                       GtFtSequenceObject *vseq,
                                       const GtUword vstart)
 {
-  GtUword upos, vpos;
-
-  for (upos = ustart, vpos = vstart;
-       upos < useq->substringlength && vpos < vseq->substringlength;
-       upos++, vpos++)
+  if (ustart < useq->substringlength && vstart < vseq->substringlength)
   {
-    const GtUchar cu = useq->bytesequenceptr[
-                    useq->read_seq_left2right
-                                             ? useq->offset + upos
-                                             : useq->offset - upos
-                    ];
+    const GtUchar *uptr;int ustep;
+    GtUword vptr;
+    GtUword minsubstringlength = useq->substringlength - ustart, matchlength;
 
-    if (cu != (vseq->dir_is_complement
-          ? GT_COMPLEMENTBASE(gt_sequenceobject_esr_get(vseq,vpos))
-          : gt_sequenceobject_esr_get(vseq,vpos)))
+    if (useq->read_seq_left2right)
     {
-      break;
+      uptr = useq->bytesequenceptr + useq->offset + ustart; ustep = 1;
+    } else
+    {
+      uptr = useq->bytesequenceptr + useq->offset - ustart; ustep = -1;
     }
+    vptr = vstart;
+    if (vseq->substringlength - vstart < minsubstringlength)
+    {
+      minsubstringlength = vseq->substringlength - vstart;
+    }
+    if (vseq->dir_is_complement)
+    {
+      for (matchlength = 0; matchlength < minsubstringlength;
+           uptr += ustep, vptr++, matchlength++)
+      {
+        const GtUchar cu = *uptr;
+        if (cu != GT_COMPLEMENTBASE(gt_sequenceobject_esr_get(vseq,vptr)))
+          break;
+      }
+    } else
+    {
+      for (matchlength = 0; matchlength < minsubstringlength;
+           uptr += ustep, vptr++, matchlength++)
+      {
+        const GtUchar cu = *uptr;
+        if (cu != gt_sequenceobject_esr_get(vseq,vptr))
+          break;
+      }
+    }
+    return matchlength;
   }
-  return upos - ustart;
+  return 0;
 }
 
 static GtUword ft_longest_common_bytes_encseq(
@@ -472,34 +772,56 @@ static GtUword ft_longest_common_bytes_encseq(
                                       GtFtSequenceObject *vseq,
                                       const GtUword vstart)
 {
-  GtUword upos, vpos;
-
-  for (upos = ustart, vpos = vstart;
-       upos < useq->substringlength && vpos < vseq->substringlength;
-       upos++, vpos++)
+  if (ustart < useq->substringlength && vstart < vseq->substringlength)
   {
-    const GtUchar cu = useq->bytesequenceptr[
-                    useq->read_seq_left2right
-                                             ? useq->offset + upos
-                                             : useq->offset - upos
-                    ];
+    const GtUchar *uptr;int ustep;
+    GtUword vptr;int vstep;
+    GtUword minsubstringlength = useq->substringlength - ustart, matchlength;
 
-    if (cu != (vseq->dir_is_complement
-          ? GT_COMPLEMENTBASE(gt_encseq_get_encoded_char(vseq->encseq,
-                    vseq->read_seq_left2right
-                                             ? vseq->offset + vpos
-                                             : vseq->offset - vpos,
-                    GT_READMODE_FORWARD))
-          : gt_encseq_get_encoded_char(vseq->encseq,
-                    vseq->read_seq_left2right
-                                             ? vseq->offset + vpos
-                                             : vseq->offset - vpos,
-                    GT_READMODE_FORWARD)))
+    if (useq->read_seq_left2right)
     {
-      break;
+      uptr = useq->bytesequenceptr + useq->offset + ustart; ustep = 1;
+    } else
+    {
+      uptr = useq->bytesequenceptr + useq->offset - ustart; ustep = -1;
     }
+    if (vseq->read_seq_left2right)
+    {
+      vptr = vseq->offset + vstart; vstep = 1;
+    } else
+    {
+      vptr = vseq->offset - vstart; vstep = -1;
+    }
+    if (vseq->substringlength - vstart < minsubstringlength)
+    {
+      minsubstringlength = vseq->substringlength - vstart;
+    }
+    if (vseq->dir_is_complement)
+    {
+      for (matchlength = 0; matchlength < minsubstringlength;
+           uptr += ustep, vptr += vstep, matchlength++)
+      {
+        const GtUchar cu = *uptr;
+        if (cu != GT_COMPLEMENTBASE(gt_encseq_get_encoded_char(vseq->encseq,
+                    vptr,
+                    GT_READMODE_FORWARD)))
+          break;
+      }
+    } else
+    {
+      for (matchlength = 0; matchlength < minsubstringlength;
+           uptr += ustep, vptr += vstep, matchlength++)
+      {
+        const GtUchar cu = *uptr;
+        if (cu != gt_encseq_get_encoded_char(vseq->encseq,
+                    vptr,
+                    GT_READMODE_FORWARD))
+          break;
+      }
+    }
+    return matchlength;
   }
-  return upos - ustart;
+  return 0;
 }
 
 static GtUword ft_longest_common_bytes_bytes(
@@ -508,34 +830,52 @@ static GtUword ft_longest_common_bytes_bytes(
                                       GtFtSequenceObject *vseq,
                                       const GtUword vstart)
 {
-  GtUword upos, vpos;
-
-  for (upos = ustart, vpos = vstart;
-       upos < useq->substringlength && vpos < vseq->substringlength;
-       upos++, vpos++)
+  if (ustart < useq->substringlength && vstart < vseq->substringlength)
   {
-    const GtUchar cu = useq->bytesequenceptr[
-                    useq->read_seq_left2right
-                                             ? useq->offset + upos
-                                             : useq->offset - upos
-                    ];
+    const GtUchar *uptr;int ustep;
+    const GtUchar *vptr;int vstep;
+    GtUword minsubstringlength = useq->substringlength - ustart, matchlength;
 
-    if (cu != (vseq->dir_is_complement
-          ? GT_COMPLEMENTBASE(vseq->bytesequenceptr[
-                    vseq->read_seq_left2right
-                                             ? vseq->offset + vpos
-                                             : vseq->offset - vpos
-                    ])
-          : vseq->bytesequenceptr[
-                    vseq->read_seq_left2right
-                                             ? vseq->offset + vpos
-                                             : vseq->offset - vpos
-                    ]))
+    if (useq->read_seq_left2right)
     {
-      break;
+      uptr = useq->bytesequenceptr + useq->offset + ustart; ustep = 1;
+    } else
+    {
+      uptr = useq->bytesequenceptr + useq->offset - ustart; ustep = -1;
     }
+    if (vseq->read_seq_left2right)
+    {
+      vptr = vseq->bytesequenceptr + vseq->offset + vstart; vstep = 1;
+    } else
+    {
+      vptr = vseq->bytesequenceptr + vseq->offset - vstart; vstep = -1;
+    }
+    if (vseq->substringlength - vstart < minsubstringlength)
+    {
+      minsubstringlength = vseq->substringlength - vstart;
+    }
+    if (vseq->dir_is_complement)
+    {
+      for (matchlength = 0; matchlength < minsubstringlength;
+           uptr += ustep, vptr += vstep, matchlength++)
+      {
+        const GtUchar cu = *uptr;
+        if (cu != GT_COMPLEMENTBASE(*vptr))
+          break;
+      }
+    } else
+    {
+      for (matchlength = 0; matchlength < minsubstringlength;
+           uptr += ustep, vptr += vstep, matchlength++)
+      {
+        const GtUchar cu = *uptr;
+        if (cu != *vptr)
+          break;
+      }
+    }
+    return matchlength;
   }
-  return upos - ustart;
+  return 0;
 }
 
 static GtUword ft_longest_common_twobit_twobit_wildcard(
@@ -544,37 +884,62 @@ static GtUword ft_longest_common_twobit_twobit_wildcard(
                                       GtFtSequenceObject *vseq,
                                       const GtUword vstart)
 {
-  GtUword upos, vpos;
-
-  for (upos = ustart, vpos = vstart;
-       upos < useq->substringlength && vpos < vseq->substringlength;
-       upos++, vpos++)
+  if (ustart < useq->substringlength && vstart < vseq->substringlength)
   {
-    const GtUchar cu = gt_twobitencoding_char_at_pos(
-                    useq->twobitencoding,
-                    useq->read_seq_left2right
-                                             ? useq->offset + upos
-                                             : useq->offset - upos
-                    );
+    GtUword uptr;int ustep;
+    GtUword vptr;int vstep;
+    GtUword minsubstringlength = useq->substringlength - ustart, matchlength;
 
-    if ((cu == WILDCARD) || cu != (vseq->dir_is_complement
-          ? GT_COMPLEMENTBASE(gt_twobitencoding_char_at_pos(
-                    vseq->twobitencoding,
-                    vseq->read_seq_left2right
-                                             ? vseq->offset + vpos
-                                             : vseq->offset - vpos
-                    ))
-          : gt_twobitencoding_char_at_pos(
-                    vseq->twobitencoding,
-                    vseq->read_seq_left2right
-                                             ? vseq->offset + vpos
-                                             : vseq->offset - vpos
-                    )))
+    if (useq->read_seq_left2right)
     {
-      break;
+      uptr = useq->offset + ustart; ustep = 1;
+    } else
+    {
+      uptr = useq->offset - ustart; ustep = -1;
     }
+    if (vseq->read_seq_left2right)
+    {
+      vptr = vseq->offset + vstart; vstep = 1;
+    } else
+    {
+      vptr = vseq->offset - vstart; vstep = -1;
+    }
+    if (vseq->substringlength - vstart < minsubstringlength)
+    {
+      minsubstringlength = vseq->substringlength - vstart;
+    }
+    if (vseq->dir_is_complement)
+    {
+      for (matchlength = 0; matchlength < minsubstringlength;
+           uptr += ustep, vptr += vstep, matchlength++)
+      {
+        const GtUchar cu = gt_twobitencoding_char_at_pos(
+                              useq->twobitencoding,
+                              uptr);
+        if (cu == WILDCARD ||
+            cu != GT_COMPLEMENTBASE(gt_twobitencoding_char_at_pos(
+                              vseq->twobitencoding,
+                              vptr)))
+          break;
+      }
+    } else
+    {
+      for (matchlength = 0; matchlength < minsubstringlength;
+           uptr += ustep, vptr += vstep, matchlength++)
+      {
+        const GtUchar cu = gt_twobitencoding_char_at_pos(
+                              useq->twobitencoding,
+                              uptr);
+        if (cu == WILDCARD ||
+            cu != gt_twobitencoding_char_at_pos(
+                              vseq->twobitencoding,
+                              vptr))
+          break;
+      }
+    }
+    return matchlength;
   }
-  return upos - ustart;
+  return 0;
 }
 
 static GtUword ft_longest_common_twobit_encseq_reader_wildcard(
@@ -583,27 +948,52 @@ static GtUword ft_longest_common_twobit_encseq_reader_wildcard(
                                       GtFtSequenceObject *vseq,
                                       const GtUword vstart)
 {
-  GtUword upos, vpos;
-
-  for (upos = ustart, vpos = vstart;
-       upos < useq->substringlength && vpos < vseq->substringlength;
-       upos++, vpos++)
+  if (ustart < useq->substringlength && vstart < vseq->substringlength)
   {
-    const GtUchar cu = gt_twobitencoding_char_at_pos(
-                    useq->twobitencoding,
-                    useq->read_seq_left2right
-                                             ? useq->offset + upos
-                                             : useq->offset - upos
-                    );
+    GtUword uptr;int ustep;
+    GtUword vptr;
+    GtUword minsubstringlength = useq->substringlength - ustart, matchlength;
 
-    if ((cu == WILDCARD) || cu != (vseq->dir_is_complement
-          ? GT_COMPLEMENTBASE(gt_sequenceobject_esr_get(vseq,vpos))
-          : gt_sequenceobject_esr_get(vseq,vpos)))
+    if (useq->read_seq_left2right)
     {
-      break;
+      uptr = useq->offset + ustart; ustep = 1;
+    } else
+    {
+      uptr = useq->offset - ustart; ustep = -1;
     }
+    vptr = vstart;
+    if (vseq->substringlength - vstart < minsubstringlength)
+    {
+      minsubstringlength = vseq->substringlength - vstart;
+    }
+    if (vseq->dir_is_complement)
+    {
+      for (matchlength = 0; matchlength < minsubstringlength;
+           uptr += ustep, vptr++, matchlength++)
+      {
+        const GtUchar cu = gt_twobitencoding_char_at_pos(
+                              useq->twobitencoding,
+                              uptr);
+        if (cu == WILDCARD ||
+            cu != GT_COMPLEMENTBASE(gt_sequenceobject_esr_get(vseq,vptr)))
+          break;
+      }
+    } else
+    {
+      for (matchlength = 0; matchlength < minsubstringlength;
+           uptr += ustep, vptr++, matchlength++)
+      {
+        const GtUchar cu = gt_twobitencoding_char_at_pos(
+                              useq->twobitencoding,
+                              uptr);
+        if (cu == WILDCARD ||
+            cu != gt_sequenceobject_esr_get(vseq,vptr))
+          break;
+      }
+    }
+    return matchlength;
   }
-  return upos - ustart;
+  return 0;
 }
 
 static GtUword ft_longest_common_twobit_encseq_wildcard(
@@ -612,35 +1002,62 @@ static GtUword ft_longest_common_twobit_encseq_wildcard(
                                       GtFtSequenceObject *vseq,
                                       const GtUword vstart)
 {
-  GtUword upos, vpos;
-
-  for (upos = ustart, vpos = vstart;
-       upos < useq->substringlength && vpos < vseq->substringlength;
-       upos++, vpos++)
+  if (ustart < useq->substringlength && vstart < vseq->substringlength)
   {
-    const GtUchar cu = gt_twobitencoding_char_at_pos(
-                    useq->twobitencoding,
-                    useq->read_seq_left2right
-                                             ? useq->offset + upos
-                                             : useq->offset - upos
-                    );
+    GtUword uptr;int ustep;
+    GtUword vptr;int vstep;
+    GtUword minsubstringlength = useq->substringlength - ustart, matchlength;
 
-    if ((cu == WILDCARD) || cu != (vseq->dir_is_complement
-          ? GT_COMPLEMENTBASE(gt_encseq_get_encoded_char(vseq->encseq,
-                    vseq->read_seq_left2right
-                                             ? vseq->offset + vpos
-                                             : vseq->offset - vpos,
-                    GT_READMODE_FORWARD))
-          : gt_encseq_get_encoded_char(vseq->encseq,
-                    vseq->read_seq_left2right
-                                             ? vseq->offset + vpos
-                                             : vseq->offset - vpos,
-                    GT_READMODE_FORWARD)))
+    if (useq->read_seq_left2right)
     {
-      break;
+      uptr = useq->offset + ustart; ustep = 1;
+    } else
+    {
+      uptr = useq->offset - ustart; ustep = -1;
     }
+    if (vseq->read_seq_left2right)
+    {
+      vptr = vseq->offset + vstart; vstep = 1;
+    } else
+    {
+      vptr = vseq->offset - vstart; vstep = -1;
+    }
+    if (vseq->substringlength - vstart < minsubstringlength)
+    {
+      minsubstringlength = vseq->substringlength - vstart;
+    }
+    if (vseq->dir_is_complement)
+    {
+      for (matchlength = 0; matchlength < minsubstringlength;
+           uptr += ustep, vptr += vstep, matchlength++)
+      {
+        const GtUchar cu = gt_twobitencoding_char_at_pos(
+                              useq->twobitencoding,
+                              uptr);
+        if (cu == WILDCARD ||
+            cu != GT_COMPLEMENTBASE(gt_encseq_get_encoded_char(vseq->encseq,
+                    vptr,
+                    GT_READMODE_FORWARD)))
+          break;
+      }
+    } else
+    {
+      for (matchlength = 0; matchlength < minsubstringlength;
+           uptr += ustep, vptr += vstep, matchlength++)
+      {
+        const GtUchar cu = gt_twobitencoding_char_at_pos(
+                              useq->twobitencoding,
+                              uptr);
+        if (cu == WILDCARD ||
+            cu != gt_encseq_get_encoded_char(vseq->encseq,
+                    vptr,
+                    GT_READMODE_FORWARD))
+          break;
+      }
+    }
+    return matchlength;
   }
-  return upos - ustart;
+  return 0;
 }
 
 static GtUword ft_longest_common_twobit_bytes_wildcard(
@@ -649,35 +1066,58 @@ static GtUword ft_longest_common_twobit_bytes_wildcard(
                                       GtFtSequenceObject *vseq,
                                       const GtUword vstart)
 {
-  GtUword upos, vpos;
-
-  for (upos = ustart, vpos = vstart;
-       upos < useq->substringlength && vpos < vseq->substringlength;
-       upos++, vpos++)
+  if (ustart < useq->substringlength && vstart < vseq->substringlength)
   {
-    const GtUchar cu = gt_twobitencoding_char_at_pos(
-                    useq->twobitencoding,
-                    useq->read_seq_left2right
-                                             ? useq->offset + upos
-                                             : useq->offset - upos
-                    );
+    GtUword uptr;int ustep;
+    const GtUchar *vptr;int vstep;
+    GtUword minsubstringlength = useq->substringlength - ustart, matchlength;
 
-    if ((cu == WILDCARD) || cu != (vseq->dir_is_complement
-          ? GT_COMPLEMENTBASE(vseq->bytesequenceptr[
-                    vseq->read_seq_left2right
-                                             ? vseq->offset + vpos
-                                             : vseq->offset - vpos
-                    ])
-          : vseq->bytesequenceptr[
-                    vseq->read_seq_left2right
-                                             ? vseq->offset + vpos
-                                             : vseq->offset - vpos
-                    ]))
+    if (useq->read_seq_left2right)
     {
-      break;
+      uptr = useq->offset + ustart; ustep = 1;
+    } else
+    {
+      uptr = useq->offset - ustart; ustep = -1;
     }
+    if (vseq->read_seq_left2right)
+    {
+      vptr = vseq->bytesequenceptr + vseq->offset + vstart; vstep = 1;
+    } else
+    {
+      vptr = vseq->bytesequenceptr + vseq->offset - vstart; vstep = -1;
+    }
+    if (vseq->substringlength - vstart < minsubstringlength)
+    {
+      minsubstringlength = vseq->substringlength - vstart;
+    }
+    if (vseq->dir_is_complement)
+    {
+      for (matchlength = 0; matchlength < minsubstringlength;
+           uptr += ustep, vptr += vstep, matchlength++)
+      {
+        const GtUchar cu = gt_twobitencoding_char_at_pos(
+                              useq->twobitencoding,
+                              uptr);
+        if (cu == WILDCARD ||
+            cu != GT_COMPLEMENTBASE(*vptr))
+          break;
+      }
+    } else
+    {
+      for (matchlength = 0; matchlength < minsubstringlength;
+           uptr += ustep, vptr += vstep, matchlength++)
+      {
+        const GtUchar cu = gt_twobitencoding_char_at_pos(
+                              useq->twobitencoding,
+                              uptr);
+        if (cu == WILDCARD ||
+            cu != *vptr)
+          break;
+      }
+    }
+    return matchlength;
   }
-  return upos - ustart;
+  return 0;
 }
 
 static GtUword ft_longest_common_encseq_reader_twobit_wildcard(
@@ -686,32 +1126,52 @@ static GtUword ft_longest_common_encseq_reader_twobit_wildcard(
                                       GtFtSequenceObject *vseq,
                                       const GtUword vstart)
 {
-  GtUword upos, vpos;
-
-  for (upos = ustart, vpos = vstart;
-       upos < useq->substringlength && vpos < vseq->substringlength;
-       upos++, vpos++)
+  if (ustart < useq->substringlength && vstart < vseq->substringlength)
   {
-    const GtUchar cu = gt_sequenceobject_esr_get(useq,upos);
+    GtUword uptr;
+    GtUword vptr;int vstep;
+    GtUword minsubstringlength = useq->substringlength - ustart, matchlength;
 
-    if ((cu == WILDCARD) || cu != (vseq->dir_is_complement
-          ? GT_COMPLEMENTBASE(gt_twobitencoding_char_at_pos(
-                    vseq->twobitencoding,
-                    vseq->read_seq_left2right
-                                             ? vseq->offset + vpos
-                                             : vseq->offset - vpos
-                    ))
-          : gt_twobitencoding_char_at_pos(
-                    vseq->twobitencoding,
-                    vseq->read_seq_left2right
-                                             ? vseq->offset + vpos
-                                             : vseq->offset - vpos
-                    )))
+    uptr = ustart;
+    if (vseq->read_seq_left2right)
     {
-      break;
+      vptr = vseq->offset + vstart; vstep = 1;
+    } else
+    {
+      vptr = vseq->offset - vstart; vstep = -1;
     }
+    if (vseq->substringlength - vstart < minsubstringlength)
+    {
+      minsubstringlength = vseq->substringlength - vstart;
+    }
+    if (vseq->dir_is_complement)
+    {
+      for (matchlength = 0; matchlength < minsubstringlength;
+           uptr++, vptr += vstep, matchlength++)
+      {
+        const GtUchar cu = gt_sequenceobject_esr_get(useq,uptr);
+        if (cu == WILDCARD ||
+            cu != GT_COMPLEMENTBASE(gt_twobitencoding_char_at_pos(
+                              vseq->twobitencoding,
+                              vptr)))
+          break;
+      }
+    } else
+    {
+      for (matchlength = 0; matchlength < minsubstringlength;
+           uptr++, vptr += vstep, matchlength++)
+      {
+        const GtUchar cu = gt_sequenceobject_esr_get(useq,uptr);
+        if (cu == WILDCARD ||
+            cu != gt_twobitencoding_char_at_pos(
+                              vseq->twobitencoding,
+                              vptr))
+          break;
+      }
+    }
+    return matchlength;
   }
-  return upos - ustart;
+  return 0;
 }
 
 static GtUword ft_longest_common_encseq_reader_encseq_reader_wildcard(
@@ -720,22 +1180,42 @@ static GtUword ft_longest_common_encseq_reader_encseq_reader_wildcard(
                                       GtFtSequenceObject *vseq,
                                       const GtUword vstart)
 {
-  GtUword upos, vpos;
-
-  for (upos = ustart, vpos = vstart;
-       upos < useq->substringlength && vpos < vseq->substringlength;
-       upos++, vpos++)
+  if (ustart < useq->substringlength && vstart < vseq->substringlength)
   {
-    const GtUchar cu = gt_sequenceobject_esr_get(useq,upos);
+    GtUword uptr;
+    GtUword vptr;
+    GtUword minsubstringlength = useq->substringlength - ustart, matchlength;
 
-    if ((cu == WILDCARD) || cu != (vseq->dir_is_complement
-          ? GT_COMPLEMENTBASE(gt_sequenceobject_esr_get(vseq,vpos))
-          : gt_sequenceobject_esr_get(vseq,vpos)))
+    uptr = ustart;
+    vptr = vstart;
+    if (vseq->substringlength - vstart < minsubstringlength)
     {
-      break;
+      minsubstringlength = vseq->substringlength - vstart;
     }
+    if (vseq->dir_is_complement)
+    {
+      for (matchlength = 0; matchlength < minsubstringlength;
+           uptr++, vptr++, matchlength++)
+      {
+        const GtUchar cu = gt_sequenceobject_esr_get(useq,uptr);
+        if (cu == WILDCARD ||
+            cu != GT_COMPLEMENTBASE(gt_sequenceobject_esr_get(vseq,vptr)))
+          break;
+      }
+    } else
+    {
+      for (matchlength = 0; matchlength < minsubstringlength;
+           uptr++, vptr++, matchlength++)
+      {
+        const GtUchar cu = gt_sequenceobject_esr_get(useq,uptr);
+        if (cu == WILDCARD ||
+            cu != gt_sequenceobject_esr_get(vseq,vptr))
+          break;
+      }
+    }
+    return matchlength;
   }
-  return upos - ustart;
+  return 0;
 }
 
 static GtUword ft_longest_common_encseq_reader_encseq_wildcard(
@@ -744,30 +1224,52 @@ static GtUword ft_longest_common_encseq_reader_encseq_wildcard(
                                       GtFtSequenceObject *vseq,
                                       const GtUword vstart)
 {
-  GtUword upos, vpos;
-
-  for (upos = ustart, vpos = vstart;
-       upos < useq->substringlength && vpos < vseq->substringlength;
-       upos++, vpos++)
+  if (ustart < useq->substringlength && vstart < vseq->substringlength)
   {
-    const GtUchar cu = gt_sequenceobject_esr_get(useq,upos);
+    GtUword uptr;
+    GtUword vptr;int vstep;
+    GtUword minsubstringlength = useq->substringlength - ustart, matchlength;
 
-    if ((cu == WILDCARD) || cu != (vseq->dir_is_complement
-          ? GT_COMPLEMENTBASE(gt_encseq_get_encoded_char(vseq->encseq,
-                    vseq->read_seq_left2right
-                                             ? vseq->offset + vpos
-                                             : vseq->offset - vpos,
-                    GT_READMODE_FORWARD))
-          : gt_encseq_get_encoded_char(vseq->encseq,
-                    vseq->read_seq_left2right
-                                             ? vseq->offset + vpos
-                                             : vseq->offset - vpos,
-                    GT_READMODE_FORWARD)))
+    uptr = ustart;
+    if (vseq->read_seq_left2right)
     {
-      break;
+      vptr = vseq->offset + vstart; vstep = 1;
+    } else
+    {
+      vptr = vseq->offset - vstart; vstep = -1;
     }
+    if (vseq->substringlength - vstart < minsubstringlength)
+    {
+      minsubstringlength = vseq->substringlength - vstart;
+    }
+    if (vseq->dir_is_complement)
+    {
+      for (matchlength = 0; matchlength < minsubstringlength;
+           uptr++, vptr += vstep, matchlength++)
+      {
+        const GtUchar cu = gt_sequenceobject_esr_get(useq,uptr);
+        if (cu == WILDCARD ||
+            cu != GT_COMPLEMENTBASE(gt_encseq_get_encoded_char(vseq->encseq,
+                    vptr,
+                    GT_READMODE_FORWARD)))
+          break;
+      }
+    } else
+    {
+      for (matchlength = 0; matchlength < minsubstringlength;
+           uptr++, vptr += vstep, matchlength++)
+      {
+        const GtUchar cu = gt_sequenceobject_esr_get(useq,uptr);
+        if (cu == WILDCARD ||
+            cu != gt_encseq_get_encoded_char(vseq->encseq,
+                    vptr,
+                    GT_READMODE_FORWARD))
+          break;
+      }
+    }
+    return matchlength;
   }
-  return upos - ustart;
+  return 0;
 }
 
 static GtUword ft_longest_common_encseq_reader_bytes_wildcard(
@@ -776,30 +1278,48 @@ static GtUword ft_longest_common_encseq_reader_bytes_wildcard(
                                       GtFtSequenceObject *vseq,
                                       const GtUword vstart)
 {
-  GtUword upos, vpos;
-
-  for (upos = ustart, vpos = vstart;
-       upos < useq->substringlength && vpos < vseq->substringlength;
-       upos++, vpos++)
+  if (ustart < useq->substringlength && vstart < vseq->substringlength)
   {
-    const GtUchar cu = gt_sequenceobject_esr_get(useq,upos);
+    GtUword uptr;
+    const GtUchar *vptr;int vstep;
+    GtUword minsubstringlength = useq->substringlength - ustart, matchlength;
 
-    if ((cu == WILDCARD) || cu != (vseq->dir_is_complement
-          ? GT_COMPLEMENTBASE(vseq->bytesequenceptr[
-                    vseq->read_seq_left2right
-                                             ? vseq->offset + vpos
-                                             : vseq->offset - vpos
-                    ])
-          : vseq->bytesequenceptr[
-                    vseq->read_seq_left2right
-                                             ? vseq->offset + vpos
-                                             : vseq->offset - vpos
-                    ]))
+    uptr = ustart;
+    if (vseq->read_seq_left2right)
     {
-      break;
+      vptr = vseq->bytesequenceptr + vseq->offset + vstart; vstep = 1;
+    } else
+    {
+      vptr = vseq->bytesequenceptr + vseq->offset - vstart; vstep = -1;
     }
+    if (vseq->substringlength - vstart < minsubstringlength)
+    {
+      minsubstringlength = vseq->substringlength - vstart;
+    }
+    if (vseq->dir_is_complement)
+    {
+      for (matchlength = 0; matchlength < minsubstringlength;
+           uptr++, vptr += vstep, matchlength++)
+      {
+        const GtUchar cu = gt_sequenceobject_esr_get(useq,uptr);
+        if (cu == WILDCARD ||
+            cu != GT_COMPLEMENTBASE(*vptr))
+          break;
+      }
+    } else
+    {
+      for (matchlength = 0; matchlength < minsubstringlength;
+           uptr++, vptr += vstep, matchlength++)
+      {
+        const GtUchar cu = gt_sequenceobject_esr_get(useq,uptr);
+        if (cu == WILDCARD ||
+            cu != *vptr)
+          break;
+      }
+    }
+    return matchlength;
   }
-  return upos - ustart;
+  return 0;
 }
 
 static GtUword ft_longest_common_encseq_twobit_wildcard(
@@ -808,36 +1328,62 @@ static GtUword ft_longest_common_encseq_twobit_wildcard(
                                       GtFtSequenceObject *vseq,
                                       const GtUword vstart)
 {
-  GtUword upos, vpos;
-
-  for (upos = ustart, vpos = vstart;
-       upos < useq->substringlength && vpos < vseq->substringlength;
-       upos++, vpos++)
+  if (ustart < useq->substringlength && vstart < vseq->substringlength)
   {
-    const GtUchar cu = gt_encseq_get_encoded_char(useq->encseq,
-                    useq->read_seq_left2right
-                                             ? useq->offset + upos
-                                             : useq->offset - upos,
-                    GT_READMODE_FORWARD);
+    GtUword uptr;int ustep;
+    GtUword vptr;int vstep;
+    GtUword minsubstringlength = useq->substringlength - ustart, matchlength;
 
-    if ((cu == WILDCARD) || cu != (vseq->dir_is_complement
-          ? GT_COMPLEMENTBASE(gt_twobitencoding_char_at_pos(
-                    vseq->twobitencoding,
-                    vseq->read_seq_left2right
-                                             ? vseq->offset + vpos
-                                             : vseq->offset - vpos
-                    ))
-          : gt_twobitencoding_char_at_pos(
-                    vseq->twobitencoding,
-                    vseq->read_seq_left2right
-                                             ? vseq->offset + vpos
-                                             : vseq->offset - vpos
-                    )))
+    if (useq->read_seq_left2right)
     {
-      break;
+      uptr = useq->offset + ustart; ustep = 1;
+    } else
+    {
+      uptr = useq->offset - ustart; ustep = -1;
     }
+    if (vseq->read_seq_left2right)
+    {
+      vptr = vseq->offset + vstart; vstep = 1;
+    } else
+    {
+      vptr = vseq->offset - vstart; vstep = -1;
+    }
+    if (vseq->substringlength - vstart < minsubstringlength)
+    {
+      minsubstringlength = vseq->substringlength - vstart;
+    }
+    if (vseq->dir_is_complement)
+    {
+      for (matchlength = 0; matchlength < minsubstringlength;
+           uptr += ustep, vptr += vstep, matchlength++)
+      {
+        const GtUchar cu = gt_encseq_get_encoded_char(useq->encseq,
+                    uptr,
+                    GT_READMODE_FORWARD);
+        if (cu == WILDCARD ||
+            cu != GT_COMPLEMENTBASE(gt_twobitencoding_char_at_pos(
+                              vseq->twobitencoding,
+                              vptr)))
+          break;
+      }
+    } else
+    {
+      for (matchlength = 0; matchlength < minsubstringlength;
+           uptr += ustep, vptr += vstep, matchlength++)
+      {
+        const GtUchar cu = gt_encseq_get_encoded_char(useq->encseq,
+                    uptr,
+                    GT_READMODE_FORWARD);
+        if (cu == WILDCARD ||
+            cu != gt_twobitencoding_char_at_pos(
+                              vseq->twobitencoding,
+                              vptr))
+          break;
+      }
+    }
+    return matchlength;
   }
-  return upos - ustart;
+  return 0;
 }
 
 static GtUword ft_longest_common_encseq_encseq_reader_wildcard(
@@ -846,26 +1392,52 @@ static GtUword ft_longest_common_encseq_encseq_reader_wildcard(
                                       GtFtSequenceObject *vseq,
                                       const GtUword vstart)
 {
-  GtUword upos, vpos;
-
-  for (upos = ustart, vpos = vstart;
-       upos < useq->substringlength && vpos < vseq->substringlength;
-       upos++, vpos++)
+  if (ustart < useq->substringlength && vstart < vseq->substringlength)
   {
-    const GtUchar cu = gt_encseq_get_encoded_char(useq->encseq,
-                    useq->read_seq_left2right
-                                             ? useq->offset + upos
-                                             : useq->offset - upos,
-                    GT_READMODE_FORWARD);
+    GtUword uptr;int ustep;
+    GtUword vptr;
+    GtUword minsubstringlength = useq->substringlength - ustart, matchlength;
 
-    if ((cu == WILDCARD) || cu != (vseq->dir_is_complement
-          ? GT_COMPLEMENTBASE(gt_sequenceobject_esr_get(vseq,vpos))
-          : gt_sequenceobject_esr_get(vseq,vpos)))
+    if (useq->read_seq_left2right)
     {
-      break;
+      uptr = useq->offset + ustart; ustep = 1;
+    } else
+    {
+      uptr = useq->offset - ustart; ustep = -1;
     }
+    vptr = vstart;
+    if (vseq->substringlength - vstart < minsubstringlength)
+    {
+      minsubstringlength = vseq->substringlength - vstart;
+    }
+    if (vseq->dir_is_complement)
+    {
+      for (matchlength = 0; matchlength < minsubstringlength;
+           uptr += ustep, vptr++, matchlength++)
+      {
+        const GtUchar cu = gt_encseq_get_encoded_char(useq->encseq,
+                    uptr,
+                    GT_READMODE_FORWARD);
+        if (cu == WILDCARD ||
+            cu != GT_COMPLEMENTBASE(gt_sequenceobject_esr_get(vseq,vptr)))
+          break;
+      }
+    } else
+    {
+      for (matchlength = 0; matchlength < minsubstringlength;
+           uptr += ustep, vptr++, matchlength++)
+      {
+        const GtUchar cu = gt_encseq_get_encoded_char(useq->encseq,
+                    uptr,
+                    GT_READMODE_FORWARD);
+        if (cu == WILDCARD ||
+            cu != gt_sequenceobject_esr_get(vseq,vptr))
+          break;
+      }
+    }
+    return matchlength;
   }
-  return upos - ustart;
+  return 0;
 }
 
 static GtUword ft_longest_common_encseq_encseq_wildcard(
@@ -874,34 +1446,62 @@ static GtUword ft_longest_common_encseq_encseq_wildcard(
                                       GtFtSequenceObject *vseq,
                                       const GtUword vstart)
 {
-  GtUword upos, vpos;
-
-  for (upos = ustart, vpos = vstart;
-       upos < useq->substringlength && vpos < vseq->substringlength;
-       upos++, vpos++)
+  if (ustart < useq->substringlength && vstart < vseq->substringlength)
   {
-    const GtUchar cu = gt_encseq_get_encoded_char(useq->encseq,
-                    useq->read_seq_left2right
-                                             ? useq->offset + upos
-                                             : useq->offset - upos,
-                    GT_READMODE_FORWARD);
+    GtUword uptr;int ustep;
+    GtUword vptr;int vstep;
+    GtUword minsubstringlength = useq->substringlength - ustart, matchlength;
 
-    if ((cu == WILDCARD) || cu != (vseq->dir_is_complement
-          ? GT_COMPLEMENTBASE(gt_encseq_get_encoded_char(vseq->encseq,
-                    vseq->read_seq_left2right
-                                             ? vseq->offset + vpos
-                                             : vseq->offset - vpos,
-                    GT_READMODE_FORWARD))
-          : gt_encseq_get_encoded_char(vseq->encseq,
-                    vseq->read_seq_left2right
-                                             ? vseq->offset + vpos
-                                             : vseq->offset - vpos,
-                    GT_READMODE_FORWARD)))
+    if (useq->read_seq_left2right)
     {
-      break;
+      uptr = useq->offset + ustart; ustep = 1;
+    } else
+    {
+      uptr = useq->offset - ustart; ustep = -1;
     }
+    if (vseq->read_seq_left2right)
+    {
+      vptr = vseq->offset + vstart; vstep = 1;
+    } else
+    {
+      vptr = vseq->offset - vstart; vstep = -1;
+    }
+    if (vseq->substringlength - vstart < minsubstringlength)
+    {
+      minsubstringlength = vseq->substringlength - vstart;
+    }
+    if (vseq->dir_is_complement)
+    {
+      for (matchlength = 0; matchlength < minsubstringlength;
+           uptr += ustep, vptr += vstep, matchlength++)
+      {
+        const GtUchar cu = gt_encseq_get_encoded_char(useq->encseq,
+                    uptr,
+                    GT_READMODE_FORWARD);
+        if (cu == WILDCARD ||
+            cu != GT_COMPLEMENTBASE(gt_encseq_get_encoded_char(vseq->encseq,
+                    vptr,
+                    GT_READMODE_FORWARD)))
+          break;
+      }
+    } else
+    {
+      for (matchlength = 0; matchlength < minsubstringlength;
+           uptr += ustep, vptr += vstep, matchlength++)
+      {
+        const GtUchar cu = gt_encseq_get_encoded_char(useq->encseq,
+                    uptr,
+                    GT_READMODE_FORWARD);
+        if (cu == WILDCARD ||
+            cu != gt_encseq_get_encoded_char(vseq->encseq,
+                    vptr,
+                    GT_READMODE_FORWARD))
+          break;
+      }
+    }
+    return matchlength;
   }
-  return upos - ustart;
+  return 0;
 }
 
 static GtUword ft_longest_common_encseq_bytes_wildcard(
@@ -910,34 +1510,58 @@ static GtUword ft_longest_common_encseq_bytes_wildcard(
                                       GtFtSequenceObject *vseq,
                                       const GtUword vstart)
 {
-  GtUword upos, vpos;
-
-  for (upos = ustart, vpos = vstart;
-       upos < useq->substringlength && vpos < vseq->substringlength;
-       upos++, vpos++)
+  if (ustart < useq->substringlength && vstart < vseq->substringlength)
   {
-    const GtUchar cu = gt_encseq_get_encoded_char(useq->encseq,
-                    useq->read_seq_left2right
-                                             ? useq->offset + upos
-                                             : useq->offset - upos,
-                    GT_READMODE_FORWARD);
+    GtUword uptr;int ustep;
+    const GtUchar *vptr;int vstep;
+    GtUword minsubstringlength = useq->substringlength - ustart, matchlength;
 
-    if ((cu == WILDCARD) || cu != (vseq->dir_is_complement
-          ? GT_COMPLEMENTBASE(vseq->bytesequenceptr[
-                    vseq->read_seq_left2right
-                                             ? vseq->offset + vpos
-                                             : vseq->offset - vpos
-                    ])
-          : vseq->bytesequenceptr[
-                    vseq->read_seq_left2right
-                                             ? vseq->offset + vpos
-                                             : vseq->offset - vpos
-                    ]))
+    if (useq->read_seq_left2right)
     {
-      break;
+      uptr = useq->offset + ustart; ustep = 1;
+    } else
+    {
+      uptr = useq->offset - ustart; ustep = -1;
     }
+    if (vseq->read_seq_left2right)
+    {
+      vptr = vseq->bytesequenceptr + vseq->offset + vstart; vstep = 1;
+    } else
+    {
+      vptr = vseq->bytesequenceptr + vseq->offset - vstart; vstep = -1;
+    }
+    if (vseq->substringlength - vstart < minsubstringlength)
+    {
+      minsubstringlength = vseq->substringlength - vstart;
+    }
+    if (vseq->dir_is_complement)
+    {
+      for (matchlength = 0; matchlength < minsubstringlength;
+           uptr += ustep, vptr += vstep, matchlength++)
+      {
+        const GtUchar cu = gt_encseq_get_encoded_char(useq->encseq,
+                    uptr,
+                    GT_READMODE_FORWARD);
+        if (cu == WILDCARD ||
+            cu != GT_COMPLEMENTBASE(*vptr))
+          break;
+      }
+    } else
+    {
+      for (matchlength = 0; matchlength < minsubstringlength;
+           uptr += ustep, vptr += vstep, matchlength++)
+      {
+        const GtUchar cu = gt_encseq_get_encoded_char(useq->encseq,
+                    uptr,
+                    GT_READMODE_FORWARD);
+        if (cu == WILDCARD ||
+            cu != *vptr)
+          break;
+      }
+    }
+    return matchlength;
   }
-  return upos - ustart;
+  return 0;
 }
 
 static GtUword ft_longest_common_bytes_twobit_wildcard(
@@ -946,36 +1570,58 @@ static GtUword ft_longest_common_bytes_twobit_wildcard(
                                       GtFtSequenceObject *vseq,
                                       const GtUword vstart)
 {
-  GtUword upos, vpos;
-
-  for (upos = ustart, vpos = vstart;
-       upos < useq->substringlength && vpos < vseq->substringlength;
-       upos++, vpos++)
+  if (ustart < useq->substringlength && vstart < vseq->substringlength)
   {
-    const GtUchar cu = useq->bytesequenceptr[
-                    useq->read_seq_left2right
-                                             ? useq->offset + upos
-                                             : useq->offset - upos
-                    ];
+    const GtUchar *uptr;int ustep;
+    GtUword vptr;int vstep;
+    GtUword minsubstringlength = useq->substringlength - ustart, matchlength;
 
-    if ((cu == WILDCARD) || cu != (vseq->dir_is_complement
-          ? GT_COMPLEMENTBASE(gt_twobitencoding_char_at_pos(
-                    vseq->twobitencoding,
-                    vseq->read_seq_left2right
-                                             ? vseq->offset + vpos
-                                             : vseq->offset - vpos
-                    ))
-          : gt_twobitencoding_char_at_pos(
-                    vseq->twobitencoding,
-                    vseq->read_seq_left2right
-                                             ? vseq->offset + vpos
-                                             : vseq->offset - vpos
-                    )))
+    if (useq->read_seq_left2right)
     {
-      break;
+      uptr = useq->bytesequenceptr + useq->offset + ustart; ustep = 1;
+    } else
+    {
+      uptr = useq->bytesequenceptr + useq->offset - ustart; ustep = -1;
     }
+    if (vseq->read_seq_left2right)
+    {
+      vptr = vseq->offset + vstart; vstep = 1;
+    } else
+    {
+      vptr = vseq->offset - vstart; vstep = -1;
+    }
+    if (vseq->substringlength - vstart < minsubstringlength)
+    {
+      minsubstringlength = vseq->substringlength - vstart;
+    }
+    if (vseq->dir_is_complement)
+    {
+      for (matchlength = 0; matchlength < minsubstringlength;
+           uptr += ustep, vptr += vstep, matchlength++)
+      {
+        const GtUchar cu = *uptr;
+        if (cu == WILDCARD ||
+            cu != GT_COMPLEMENTBASE(gt_twobitencoding_char_at_pos(
+                              vseq->twobitencoding,
+                              vptr)))
+          break;
+      }
+    } else
+    {
+      for (matchlength = 0; matchlength < minsubstringlength;
+           uptr += ustep, vptr += vstep, matchlength++)
+      {
+        const GtUchar cu = *uptr;
+        if (cu == WILDCARD ||
+            cu != gt_twobitencoding_char_at_pos(
+                              vseq->twobitencoding,
+                              vptr))
+          break;
+      }
+    }
+    return matchlength;
   }
-  return upos - ustart;
+  return 0;
 }
 
 static GtUword ft_longest_common_bytes_encseq_reader_wildcard(
@@ -984,26 +1630,48 @@ static GtUword ft_longest_common_bytes_encseq_reader_wildcard(
                                       GtFtSequenceObject *vseq,
                                       const GtUword vstart)
 {
-  GtUword upos, vpos;
-
-  for (upos = ustart, vpos = vstart;
-       upos < useq->substringlength && vpos < vseq->substringlength;
-       upos++, vpos++)
+  if (ustart < useq->substringlength && vstart < vseq->substringlength)
   {
-    const GtUchar cu = useq->bytesequenceptr[
-                    useq->read_seq_left2right
-                                             ? useq->offset + upos
-                                             : useq->offset - upos
-                    ];
+    const GtUchar *uptr;int ustep;
+    GtUword vptr;
+    GtUword minsubstringlength = useq->substringlength - ustart, matchlength;
 
-    if ((cu == WILDCARD) || cu != (vseq->dir_is_complement
-          ? GT_COMPLEMENTBASE(gt_sequenceobject_esr_get(vseq,vpos))
-          : gt_sequenceobject_esr_get(vseq,vpos)))
+    if (useq->read_seq_left2right)
     {
-      break;
+      uptr = useq->bytesequenceptr + useq->offset + ustart; ustep = 1;
+    } else
+    {
+      uptr = useq->bytesequenceptr + useq->offset - ustart; ustep = -1;
     }
+    vptr = vstart;
+    if (vseq->substringlength - vstart < minsubstringlength)
+    {
+      minsubstringlength = vseq->substringlength - vstart;
+    }
+    if (vseq->dir_is_complement)
+    {
+      for (matchlength = 0; matchlength < minsubstringlength;
+           uptr += ustep, vptr++, matchlength++)
+      {
+        const GtUchar cu = *uptr;
+        if (cu == WILDCARD ||
+            cu != GT_COMPLEMENTBASE(gt_sequenceobject_esr_get(vseq,vptr)))
+          break;
+      }
+    } else
+    {
+      for (matchlength = 0; matchlength < minsubstringlength;
+           uptr += ustep, vptr++, matchlength++)
+      {
+        const GtUchar cu = *uptr;
+        if (cu == WILDCARD ||
+            cu != gt_sequenceobject_esr_get(vseq,vptr))
+          break;
+      }
+    }
+    return matchlength;
   }
-  return upos - ustart;
+  return 0;
 }
 
 static GtUword ft_longest_common_bytes_encseq_wildcard(
@@ -1012,34 +1680,58 @@ static GtUword ft_longest_common_bytes_encseq_wildcard(
                                       GtFtSequenceObject *vseq,
                                       const GtUword vstart)
 {
-  GtUword upos, vpos;
-
-  for (upos = ustart, vpos = vstart;
-       upos < useq->substringlength && vpos < vseq->substringlength;
-       upos++, vpos++)
+  if (ustart < useq->substringlength && vstart < vseq->substringlength)
   {
-    const GtUchar cu = useq->bytesequenceptr[
-                    useq->read_seq_left2right
-                                             ? useq->offset + upos
-                                             : useq->offset - upos
-                    ];
+    const GtUchar *uptr;int ustep;
+    GtUword vptr;int vstep;
+    GtUword minsubstringlength = useq->substringlength - ustart, matchlength;
 
-    if ((cu == WILDCARD) || cu != (vseq->dir_is_complement
-          ? GT_COMPLEMENTBASE(gt_encseq_get_encoded_char(vseq->encseq,
-                    vseq->read_seq_left2right
-                                             ? vseq->offset + vpos
-                                             : vseq->offset - vpos,
-                    GT_READMODE_FORWARD))
-          : gt_encseq_get_encoded_char(vseq->encseq,
-                    vseq->read_seq_left2right
-                                             ? vseq->offset + vpos
-                                             : vseq->offset - vpos,
-                    GT_READMODE_FORWARD)))
+    if (useq->read_seq_left2right)
     {
-      break;
+      uptr = useq->bytesequenceptr + useq->offset + ustart; ustep = 1;
+    } else
+    {
+      uptr = useq->bytesequenceptr + useq->offset - ustart; ustep = -1;
     }
+    if (vseq->read_seq_left2right)
+    {
+      vptr = vseq->offset + vstart; vstep = 1;
+    } else
+    {
+      vptr = vseq->offset - vstart; vstep = -1;
+    }
+    if (vseq->substringlength - vstart < minsubstringlength)
+    {
+      minsubstringlength = vseq->substringlength - vstart;
+    }
+    if (vseq->dir_is_complement)
+    {
+      for (matchlength = 0; matchlength < minsubstringlength;
+           uptr += ustep, vptr += vstep, matchlength++)
+      {
+        const GtUchar cu = *uptr;
+        if (cu == WILDCARD ||
+            cu != GT_COMPLEMENTBASE(gt_encseq_get_encoded_char(vseq->encseq,
+                    vptr,
+                    GT_READMODE_FORWARD)))
+          break;
+      }
+    } else
+    {
+      for (matchlength = 0; matchlength < minsubstringlength;
+           uptr += ustep, vptr += vstep, matchlength++)
+      {
+        const GtUchar cu = *uptr;
+        if (cu == WILDCARD ||
+            cu != gt_encseq_get_encoded_char(vseq->encseq,
+                    vptr,
+                    GT_READMODE_FORWARD))
+          break;
+      }
+    }
+    return matchlength;
   }
-  return upos - ustart;
+  return 0;
 }
 
 static GtUword ft_longest_common_bytes_bytes_wildcard(
@@ -1048,34 +1740,54 @@ static GtUword ft_longest_common_bytes_bytes_wildcard(
                                       GtFtSequenceObject *vseq,
                                       const GtUword vstart)
 {
-  GtUword upos, vpos;
-
-  for (upos = ustart, vpos = vstart;
-       upos < useq->substringlength && vpos < vseq->substringlength;
-       upos++, vpos++)
+  if (ustart < useq->substringlength && vstart < vseq->substringlength)
   {
-    const GtUchar cu = useq->bytesequenceptr[
-                    useq->read_seq_left2right
-                                             ? useq->offset + upos
-                                             : useq->offset - upos
-                    ];
+    const GtUchar *uptr;int ustep;
+    const GtUchar *vptr;int vstep;
+    GtUword minsubstringlength = useq->substringlength - ustart, matchlength;
 
-    if ((cu == WILDCARD) || cu != (vseq->dir_is_complement
-          ? GT_COMPLEMENTBASE(vseq->bytesequenceptr[
-                    vseq->read_seq_left2right
-                                             ? vseq->offset + vpos
-                                             : vseq->offset - vpos
-                    ])
-          : vseq->bytesequenceptr[
-                    vseq->read_seq_left2right
-                                             ? vseq->offset + vpos
-                                             : vseq->offset - vpos
-                    ]))
+    if (useq->read_seq_left2right)
     {
-      break;
+      uptr = useq->bytesequenceptr + useq->offset + ustart; ustep = 1;
+    } else
+    {
+      uptr = useq->bytesequenceptr + useq->offset - ustart; ustep = -1;
     }
+    if (vseq->read_seq_left2right)
+    {
+      vptr = vseq->bytesequenceptr + vseq->offset + vstart; vstep = 1;
+    } else
+    {
+      vptr = vseq->bytesequenceptr + vseq->offset - vstart; vstep = -1;
+    }
+    if (vseq->substringlength - vstart < minsubstringlength)
+    {
+      minsubstringlength = vseq->substringlength - vstart;
+    }
+    if (vseq->dir_is_complement)
+    {
+      for (matchlength = 0; matchlength < minsubstringlength;
+           uptr += ustep, vptr += vstep, matchlength++)
+      {
+        const GtUchar cu = *uptr;
+        if (cu == WILDCARD ||
+            cu != GT_COMPLEMENTBASE(*vptr))
+          break;
+      }
+    } else
+    {
+      for (matchlength = 0; matchlength < minsubstringlength;
+           uptr += ustep, vptr += vstep, matchlength++)
+      {
+        const GtUchar cu = *uptr;
+        if (cu == WILDCARD ||
+            cu != *vptr)
+          break;
+      }
+    }
+    return matchlength;
   }
-  return upos - ustart;
+  return 0;
 }
 
 GtLongestCommonFunc ft_longest_common_func_tab[] =

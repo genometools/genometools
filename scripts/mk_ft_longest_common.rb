@@ -1,47 +1,38 @@
 #!/usr/bin/env ruby
 
-def gen_access_expr(posvar,structvar)
-  return "#{structvar}->read_seq_left2right\n" +
-         " " * 45 + "? #{structvar}->offset + #{posvar}\n" +
-         " " * 45 + ": #{structvar}->offset - #{posvar}"
-end
-
-def gen_access_raw(mode,posvar,structvar)
+def gen_access_raw(mode,structvar,pre)
   if mode == "bytes"
-    return "#{structvar}->bytesequenceptr[\n" +
-           " " * 20 + gen_access_expr(posvar,structvar) + "\n" +
-           " " * 20 + "]"
+    return "*#{pre}ptr"
   elsif mode == "twobit"
     return "gt_twobitencoding_char_at_pos(\n" +
-           " " * 20 + "#{structvar}->twobitencoding,\n" +
-           " " * 20 + gen_access_expr(posvar,structvar) + "\n" +
-           " " * 20 + ")"
+           " " * 30 + "#{structvar}->twobitencoding,\n" +
+           " " * 30 + "#{pre}ptr)"
   elsif mode == "encseq"
     return "gt_encseq_get_encoded_char(#{structvar}->encseq,\n" +
-           " " * 20 + gen_access_expr(posvar,structvar) + ",\n" +
+           " " * 20 + "#{pre}ptr,\n" +
            " " * 20 + "GT_READMODE_FORWARD)"
   else
-    return "gt_sequenceobject_esr_get(#{structvar},#{posvar})"
-  end
-end
-
-def gen_access(mode,isleft)
-  if isleft
-    return gen_access_raw(mode,"upos","useq")
-  else
-    s = gen_access_raw(mode,"vpos","vseq")
-    return "(vseq->dir_is_complement\n" +
-           " " * 10 + "? GT_COMPLEMENTBASE(#{s})\n" +
-           " " * 10 + ": #{s})"
+    return "gt_sequenceobject_esr_get(#{structvar},#{pre}ptr)"
   end
 end
 
 def gen_wildcard(wildcard)
   if wildcard
-    return "(cu == WILDCARD) || "
+    return "cu == WILDCARD ||\n"
   else
     return ""
   end
+end
+
+def gen_compare(a_mode,b_mode,wildcard,complement)
+  return "const GtUchar cu = #{gen_access_raw(a_mode,"useq","u")};\n" +
+         " " * 8 + "if (" + gen_wildcard(wildcard) +
+         (if wildcard then (" " * 12) else "" end) +
+         "cu != " +
+         (if complement then "GT_COMPLEMENTBASE(" else "" end) +
+         "#{gen_access_raw(b_mode,"vseq","v")}" +
+         (if complement then ")" else "" end) + ")\n" +
+         " " * 10 + "break"
 end
 
 def gen_suffix(wildcard)
@@ -56,6 +47,70 @@ def gen_func_name(a_mode,b_mode,wildcard)
   return "ft_longest_common_#{a_mode}_#{b_mode}#{gen_suffix(wildcard)}"
 end
 
+def gen_ptr_assign(mode,pre,left2right)
+  if mode == "bytes"
+    if left2right
+      return "#{pre}seq->bytesequenceptr + #{pre}seq->offset + #{pre}start; " +
+             "#{pre}step = 1"
+    else
+      return "#{pre}seq->bytesequenceptr + #{pre}seq->offset - #{pre}start; " +
+             "#{pre}step = -1"
+    end
+  else
+    if left2right
+      if mode != "encseq_reader"
+        return "#{pre}seq->offset + #{pre}start; #{pre}step = 1"
+      else
+        return "#{pre}start"
+      end
+    else
+      if mode != "encseq_reader"
+        return "#{pre}seq->offset - #{pre}start; #{pre}step = -1"
+      else
+        return "#{pre}start"
+      end
+    end
+  end
+end
+
+def gen_ptr_set(mode,pre)
+  if mode == "encseq_reader"
+    return "#{pre}ptr = #{pre}start;"
+  else
+    return ["if (#{pre}seq->read_seq_left2right)",
+            "{",
+            "  #{pre}ptr = #{gen_ptr_assign(mode,pre,true)};",
+            "} else",
+            "{",
+            "  #{pre}ptr = #{gen_ptr_assign(mode,pre,false)};",
+            "}"].join("\n    ")
+  end
+end
+
+def gen_var_decl(mode,pre)
+  if mode == "bytes"
+    return "const GtUchar *#{pre}ptr"
+  else
+    return "GtUword #{pre}ptr"
+  end
+end
+
+def gen_step_decl(mode,pre)
+  if mode != "encseq_reader"
+    return "int #{pre}step;"
+  else
+    return ""
+  end
+end
+
+def gen_ptr_incr(mode,pre)
+  if mode == "encseq_reader"
+    return "#{pre}ptr++"
+  else
+    return "#{pre}ptr += #{pre}step"
+  end
+end
+
 def longestcommonfunc(a_mode,b_mode,wildcard)
  puts <<EOF
 static GtUword #{gen_func_name(a_mode,b_mode,wildcard)}(
@@ -64,20 +119,36 @@ static GtUword #{gen_func_name(a_mode,b_mode,wildcard)}(
                                       GtFtSequenceObject *vseq,
                                       const GtUword vstart)
 {
-  GtUword upos, vpos;
-
-  for (upos = ustart, vpos = vstart;
-       upos < useq->substringlength && vpos < vseq->substringlength;
-       upos++, vpos++)
+  if (ustart < useq->substringlength && vstart < vseq->substringlength)
   {
-    const GtUchar cu = #{gen_access(a_mode,true)};
+    #{gen_var_decl(a_mode,"u")};#{gen_step_decl(a_mode,"u")}
+    #{gen_var_decl(b_mode,"v")};#{gen_step_decl(b_mode,"v")}
+    GtUword minsubstringlength = useq->substringlength - ustart, matchlength;
 
-    if (#{gen_wildcard(wildcard)}cu != #{gen_access(b_mode,false)})
+    #{gen_ptr_set(a_mode,"u")}
+    #{gen_ptr_set(b_mode,"v")}
+    if (vseq->substringlength - vstart < minsubstringlength)
     {
-      break;
+      minsubstringlength = vseq->substringlength - vstart;
     }
+    if (vseq->dir_is_complement)
+    {
+      for (matchlength = 0; matchlength < minsubstringlength;
+           #{gen_ptr_incr(a_mode,"u")}, #{gen_ptr_incr(b_mode,"v")}, matchlength++)
+      {
+        #{gen_compare(a_mode,b_mode,wildcard,true)};
+      }
+    } else
+    {
+      for (matchlength = 0; matchlength < minsubstringlength;
+           #{gen_ptr_incr(a_mode,"u")}, #{gen_ptr_incr(b_mode,"v")}, matchlength++)
+      {
+        #{gen_compare(a_mode,b_mode,wildcard,false)};
+      }
+    }
+    return matchlength;
   }
-  return upos - ustart;
+  return 0;
 }
 EOF
 end
