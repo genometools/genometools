@@ -3265,7 +3265,7 @@ static void gt_diagbandseed_process_seeds(GtSeedpairlist *seedpairlist,
   GtDiagbandseedScore *diagband_score;
   GtDiagbandseedPosition *diagband_lastpos;
   GtExtendRelativeCoordsFunc extend_relative_coords_function = NULL;
-  GtProcessinfo_and_querymatchspaceptr info_querymatch;
+  GtProcessinfo_and_querymatchspaceptr info_querymatch = {NULL,NULL,NULL};
   const bool same_encseq = (aencseq == bencseq) ? true : false;
   /* Although the sequences of the parts processed are shorter, we need to
      set amaxlen and bmaxlen to the maximum size of all sequences
@@ -4257,11 +4257,11 @@ int gt_diagbandseed_run(const GtDiagbandseedInfo *arg,
   int had_err = 0;
   const GtUword anumseqranges = gt_sequence_parts_info_number(aseqranges),
                 bnumseqranges = gt_sequence_parts_info_number(bseqranges);
+  GtFtTrimstat *trimstat = NULL;
 #ifdef GT_THREADS_ENABLED
   GtDiagbandseedThreadInfo *tinfo = gt_malloc(gt_jobs * sizeof *tinfo);
   FILE **stream;
   unsigned int tidx;
-  GtFtTrimstat *trimstat = NULL;
 
   /* create output streams */
   stream = gt_malloc(gt_jobs * sizeof *stream);
