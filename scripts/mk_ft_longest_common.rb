@@ -16,23 +16,21 @@ def gen_access_raw(mode,structvar,pre)
   end
 end
 
-def gen_wildcard(wildcard)
-  if wildcard
-    return "cu == WILDCARD ||\n"
-  else
-    return ""
-  end
-end
-
 def gen_compare(a_mode,b_mode,wildcard,complement)
-  return "const GtUchar cu = #{gen_access_raw(a_mode,"useq","u")};\n" +
-         " " * 8 + "if (" + gen_wildcard(wildcard) +
-         (if wildcard then (" " * 12) else "" end) +
-         "cu != " +
-         (if complement then "GT_COMPLEMENTBASE(" else "" end) +
-         "#{gen_access_raw(b_mode,"vseq","v")}" +
-         (if complement then ")" else "" end) + ")\n" +
-         " " * 10 + "break"
+  access_v = gen_access_raw(b_mode,"vseq","v")
+  splitter = if access_v.length > 10 then ("\n" + " " * 12) else " " end
+  cmp_expr = (if complement then ("GT_COMPLEMENTBASE(") else "" end) +
+             "#{access_v}" +
+             (if complement then ")" else "" end) + ")\n" +
+             " " * 10 + "break"
+  if wildcard
+    return "const GtUchar cu = #{gen_access_raw(a_mode,"useq","u")};\n" +
+           " " * 8 + "if (cu == WILDCARD ||" + splitter + "cu !=" + splitter +
+           cmp_expr
+  else
+    return "if (#{gen_access_raw(a_mode,"useq","u")} !=" + splitter +
+           cmp_expr
+  end
 end
 
 def gen_suffix(wildcard)
@@ -74,32 +72,82 @@ def gen_ptr_assign(mode,pre,left2right)
 end
 
 def gen_ptr_set(mode,pre)
-  if mode == "encseq_reader"
-    return "#{pre}ptr = #{pre}start;"
-  else
-    return ["if (#{pre}seq->read_seq_left2right)",
-            "{",
-            "  #{pre}ptr = #{gen_ptr_assign(mode,pre,true)};",
-            "} else",
-            "{",
-            "  #{pre}ptr = #{gen_ptr_assign(mode,pre,false)};",
-            "}"].join("\n    ")
-  end
+  return ["\n    if (#{pre}seq->read_seq_left2right)",
+          "{",
+          "  #{pre}ptr = #{gen_ptr_assign(mode,pre,true)};",
+          "} else",
+          "{",
+          "  #{pre}ptr = #{gen_ptr_assign(mode,pre,false)};",
+          "}"].join("\n    ")
 end
 
-def gen_var_decl(mode,pre)
-  if mode == "bytes"
-    return "const GtUchar *#{pre}ptr"
-  else
-    return "GtUword #{pre}ptr"
-  end
+def gen_minsub(pre)
+  other = if pre == "u" then "v" else "u" end
+  return ["\n    GtUword minsubstringlength = #{other}start + #{pre}seq->substringlength - #{pre}start;",
+          "if (#{other}seq->substringlength < minsubstringlength)",
+          "{",
+          "  minsubstringlength = #{other}seq->substringlength;",
+          "}"].join("\n    ")
 end
 
-def gen_step_decl(mode,pre)
-  if mode != "encseq_reader"
-    return "int #{pre}step;"
+def gen_minsubstringlength_decl(a_mode,b_mode)
+  minmatch_decl = ["\n    GtUword minsubstringlength = useq->substringlength - ustart;",
+                     "if (vseq->substringlength < useq->insubstringlength)",
+                     "{",
+                     "  minsubstringlength = vseq->substringlength - vstart;",
+                     "}"].join("\n    ") +
+            gen_ptr_set(a_mode,"u") +
+            gen_ptr_set(b_mode,"v")
+  if a_mode == "encseq_reader"
+    if b_mode == "encseq_reader"
+      return "GtUword uptr = ustart, vptr = vstart;" +
+             gen_minsub("v")
+    elsif b_mode == "bytes"
+      return "GtUword uptr = ustart; const GtUchar *vptr; int vstep;" +
+             gen_minsub("v") +
+             gen_ptr_set(b_mode,"v")
+    else
+      return "GtUword uptr = ustart, vptr; int vstep;" +
+             gen_minsub("v") +
+             gen_ptr_set(b_mode,"v")
+    end
+  elsif b_mode == "encseq_reader"
+    if a_mode == "bytes"
+      return "const GtUchar *uptr; int ustep; GtUword vptr = vstart;" +
+             gen_minsub("u") +
+             gen_ptr_set(a_mode,"u")
+    else
+       return "GtUword uptr; int ustep; GtUword vptr = vstart;" +
+              gen_minsub("u") +
+              gen_ptr_set(a_mode,"u")
+    end
   else
-    return ""
+    minmatch_decl = ["    GtUword minsubstringlength = useq->substringlength - ustart,",
+                     "matchlength = 0;",
+                     "if (vseq->substringlength - vstart < minsubstringlength)",
+                     "{",
+                     "  minsubstringlength = vseq->substringlength - vstart;",
+                     "}"].join("\n    ") +
+            gen_ptr_set(a_mode,"u") +
+            gen_ptr_set(b_mode,"v")
+
+    if a_mode == "bytes"
+      if b_mode == "bytes"
+        return "const GtUchar *uptr, *vptr; int ustep, vstep;\n" +
+               minmatch_decl
+      else
+        return "const GtUchar *uptr; GtUword vptr; int ustep, vstep;\n" +
+               minmatch_decl
+      end
+    else
+      if b_mode == "bytes"
+        return "GtUword uptr; const GtUchar *vptr; int ustep, vstep;\n" +
+               minmatch_decl
+      else
+        return "GtUword uptr, vptr; int ustep, vstep;\n" +
+               minmatch_decl
+      end
+    end
   end
 end
 
@@ -108,6 +156,34 @@ def gen_ptr_incr(mode,pre)
     return "#{pre}ptr++"
   else
     return "#{pre}ptr += #{pre}step"
+  end
+end
+
+def gen_matchlength_inc(a_mode,b_mode)
+  if a_mode == "encseq_reader" or b_mode == "encseq_reader"
+    return ""
+  else
+    return "matchlength++;"
+  end
+end
+
+def gen_smaller(a_mode,b_mode)
+  if a_mode == "encseq_reader"
+    return "uptr"
+  elsif b_mode == "encseq_reader"
+    return "vptr"
+  else
+    return "matchlength"
+  end
+end
+
+def gen_return_matchlength(a_mode,b_mode)
+  if a_mode == "encseq_reader"
+    return "uptr - ustart"
+  elsif b_mode == "encseq_reader"
+    return "vptr - vstart"
+  else
+    return "matchlength"
   end
 end
 
@@ -121,32 +197,25 @@ static GtUword #{gen_func_name(a_mode,b_mode,wildcard)}(
 {
   if (ustart < useq->substringlength && vstart < vseq->substringlength)
   {
-    #{gen_var_decl(a_mode,"u")};#{gen_step_decl(a_mode,"u")}
-    #{gen_var_decl(b_mode,"v")};#{gen_step_decl(b_mode,"v")}
-    GtUword minsubstringlength = useq->substringlength - ustart, matchlength;
-
-    #{gen_ptr_set(a_mode,"u")}
-    #{gen_ptr_set(b_mode,"v")}
-    if (vseq->substringlength - vstart < minsubstringlength)
-    {
-      minsubstringlength = vseq->substringlength - vstart;
-    }
+    #{gen_minsubstringlength_decl(a_mode,b_mode)}
     if (vseq->dir_is_complement)
     {
-      for (matchlength = 0; matchlength < minsubstringlength;
-           #{gen_ptr_incr(a_mode,"u")}, #{gen_ptr_incr(b_mode,"v")}, matchlength++)
+      do
       {
         #{gen_compare(a_mode,b_mode,wildcard,true)};
-      }
+        #{gen_ptr_incr(a_mode,"u")};
+        #{gen_ptr_incr(b_mode,"v")};#{gen_matchlength_inc(a_mode,b_mode)}
+      } while (#{gen_smaller(a_mode,b_mode)} < minsubstringlength);
     } else
     {
-      for (matchlength = 0; matchlength < minsubstringlength;
-           #{gen_ptr_incr(a_mode,"u")}, #{gen_ptr_incr(b_mode,"v")}, matchlength++)
+      do
       {
         #{gen_compare(a_mode,b_mode,wildcard,false)};
-      }
+        #{gen_ptr_incr(a_mode,"u")};
+        #{gen_ptr_incr(b_mode,"v")};#{gen_matchlength_inc(a_mode,b_mode)}
+      } while (#{gen_smaller(a_mode,b_mode)} < minsubstringlength);
     }
-    return matchlength;
+    return #{gen_return_matchlength(a_mode,b_mode)};
   }
   return 0;
 }
