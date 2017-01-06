@@ -74,7 +74,7 @@ size_t    gt_intset_size_of_rep(GtIntset *intset);
 size_t    gt_intset_best_memory_size(GtUword maxelement, GtUword num_of_elems);
 
 /* Write <intset> to file <fp>. Fails with exit on IO-error. Returns NULL if
-   data error occures and writes it to <err>, <intset> will be deleted at that
+   data error occurs and writes it to <err>, <intset> will be deleted at that
    point. */
 GtIntset* gt_intset_write(GtIntset *intset, FILE *fp, GtError *err);
 

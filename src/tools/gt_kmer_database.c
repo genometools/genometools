@@ -126,8 +126,8 @@ static GtOptionParser* gt_kmer_database_option_parser_new(void *tool_arguments)
   gt_option_exclude(option_mean_cutoff, option);
 
   /* -disable_prune */
-  option = gt_option_new_bool("disable_prune", "disables the removel of kmers, "
-                              "which occure more often than the cutoff.",
+  option = gt_option_new_bool("disable_prune", "disables the removal of kmers "
+                              "which occur more often than the cutoff.",
                               &arguments->prune, false);
   gt_option_parser_add_option(op, option);
   gt_option_imply(option, option_use_cutoff);
