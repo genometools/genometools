@@ -17,43 +17,50 @@
 
 #include "core/unused_api.h"
 #include "core/log_api.h"
-#include "match/asqg_writer.h"
+#include "match/gfa_writer.h"
 
-struct GtAsqgWriter
+struct GtGfaWriter
 {
   GtFile *file;
   const GtEncseq *encseq;
 };
 
-GtAsqgWriter* gt_asqg_writer_new(GtFile *file, const GtEncseq *encseq)
+GtGfaWriter* gt_gfa_writer_new(GtFile *file, const GtEncseq *encseq)
 {
-  GtAsqgWriter *aw;
+  GtGfaWriter *aw;
   aw = gt_malloc(sizeof (*aw));
   aw->file = file;
   aw->encseq = encseq;
   return aw;
 }
 
-int gt_asqg_writer_show_header(GtAsqgWriter *aw, float erate,
+int gt_gfa_writer_show_header(GtGfaWriter *aw,
     GtUword minlen, const char *inputfilename, bool has_containments,
     bool has_transitives, GT_UNUSED GtError *err)
 {
   gt_assert(aw != NULL);
   gt_file_xprintf(aw->file,
-      "HT\tVN:i:%d\tER:f:%g\tOL:i:"GT_WU"\tIN:Z:%s\tCN:i:%c\tTE:i:%c\n",
-      GT_ASQG_VERSION, erate, minlen, inputfilename,
-      has_containments ? '1' : '0', has_transitives ? '1' : '0');
+      "H\tVN:Z:"GT_GFA_VERSION"\n"
+      "H\tpn:Z:readjoiner\n"
+      "H\tol:i:"GT_WU"\n"
+      "H\tin:Z:%s\n"
+      "H\tcn:i:%c\n"
+      "H\tte:i:%c\n",
+      minlen,
+      inputfilename,
+      has_containments ? '1' : '0',
+      has_transitives ? '1' : '0');
   return 0;
 }
 
-static inline void gt_asqg_writer_show_vertex_line(GtFile *file,
-    GtUword seqnum, const char *sequence, bool subsequence)
+static inline void gt_gfa_writer_show_vertex_line(GtFile *file,
+    GtUword seqnum, const char *sequence, GT_UNUSED bool subsequence)
 {
-  gt_file_xprintf(file, "VT\t"GT_WU"\t%s\tSS:i:%c\n", seqnum, sequence,
-      subsequence ? '1' : '0');
+  gt_file_xprintf(file, "S\t"GT_WU"\t"GT_WU"\t%s\n", seqnum,
+      strlen(sequence), sequence);
 }
 
-int gt_asqg_writer_show_vertices(GtAsqgWriter *aw, GT_UNUSED GtError *err)
+int gt_gfa_writer_show_vertices(GtGfaWriter *aw, GT_UNUSED GtError *err)
 {
   const GtTwobitencoding *nextencoded;
   GtTwobitencoding code = 0;
@@ -87,7 +94,7 @@ int gt_asqg_writer_show_vertices(GtAsqgWriter *aw, GT_UNUSED GtError *err)
       seqbuffer[pos++] = code2char[code >> ((--charsincode) << 1) & 3];
     }
     seqbuffer[pos] = '\0';
-    gt_asqg_writer_show_vertex_line(aw->file, seqnum, seqbuffer, false);
+    gt_gfa_writer_show_vertex_line(aw->file, seqnum, seqbuffer, false);
     pos = 0;
     /* consume separator */
     i++;
@@ -103,33 +110,40 @@ int gt_asqg_writer_show_vertices(GtAsqgWriter *aw, GT_UNUSED GtError *err)
   return 0;
 }
 
-static inline void gt_asqg_writer_show_edge_line(GtFile *file,
-    GtUword seqnum1, GtUword seqnum2, GtUword start1,
-    GtUword end1, GtUword seqlen1, GtUword start2,
-    GtUword end2, GtUword seqlen2, bool revcompl,
-    GtUword edist)
+static inline void gt_gfa_writer_show_edge_line(GtFile *file,
+    GtUword seqnum1, bool seq1_direct,
+    GtUword seqnum2, bool seq2_direct,
+    GtUword start1, GtUword end1,
+    GtUword start2, GtUword end2,
+    GtUword spmlen)
 {
-  gt_file_xprintf(file, "ED\t"GT_WU" "GT_WU" "GT_WU" "GT_WU" "GT_WU" "GT_WU" "
-                  GT_WU" "GT_WU" %c "GT_WU"\n", seqnum1, seqnum2, start1, end1,
-                  seqlen1, start2, end2, seqlen2, revcompl ? '1' : '0', edist);
+  gt_file_xprintf(file, "E\t*\t"GT_WU"%c\t"GT_WU"%c\t"
+                        GT_WU"\t"GT_WU"\t"GT_WU"\t"GT_WU"\t"
+                        GT_WU"M\n",
+                        seqnum1, seq1_direct ? '+' : '-',
+                        seqnum2, seq2_direct ? '+' : '-',
+                        start1, end1, start2, end2,
+                        spmlen);
 }
 
-void gt_spmproc_show_asqg(GtUword suffix_readnum,
+void gt_spmproc_show_gfa(GtUword suffix_readnum,
     GtUword prefix_readnum, GtUword length,
-    bool suffixseq_direct, bool prefixseq_direct, void *asqg_writer)
+    bool suffixseq_direct, bool prefixseq_direct, void *gfa_writer)
 {
-  GtAsqgWriter *aw = asqg_writer;
+  GtGfaWriter *aw = gfa_writer;
   const GtUword sl1 = gt_encseq_seqlength(aw->encseq, suffix_readnum),
-                      sl2 = gt_encseq_seqlength(aw->encseq, prefix_readnum);
-  gt_asqg_writer_show_edge_line(aw->file, suffix_readnum, prefix_readnum,
+                sl2 = gt_encseq_seqlength(aw->encseq, prefix_readnum);
+  gt_gfa_writer_show_edge_line(aw->file,
+      suffix_readnum, suffixseq_direct,
+      prefix_readnum, prefixseq_direct,
       suffixseq_direct ? sl1 - length : 0,
-      suffixseq_direct ? sl1 - 1UL : length - 1UL, sl1,
+      suffixseq_direct ? sl1 : length,
       prefixseq_direct ? 0 : sl2 - length,
-      prefixseq_direct ? length - 1UL : sl2 - 1UL, sl2,
-      !suffixseq_direct || !prefixseq_direct, 0);
+      prefixseq_direct ? length : sl2,
+      length);
 }
 
-void gt_asqg_writer_delete(GtAsqgWriter *aw)
+void gt_gfa_writer_delete(GtGfaWriter *aw)
 {
   gt_free(aw);
 }

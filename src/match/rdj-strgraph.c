@@ -33,6 +33,7 @@
 #include "core/spacecalc.h"
 #include "extended/assembly_stats_calculator.h"
 #include "match/asqg_writer.h"
+#include "match/gfa_writer.h"
 #include "match/reads_libraries_table.h"
 #include "match/rdj-contigpaths.h"
 #include "match/rdj-contig-info.h"
@@ -2018,7 +2019,7 @@ static void gt_strgraph_asqg_show(const GtStrgraph *strgraph,
           {
             /* other E->B / B->E cases, as well as all B-B
                are not considered to avoid double output */
-            gt_spmproc_show_asgq(sn1, sn2, spm_len, is_e1, is_e2, aw);
+            gt_spmproc_show_asqg(sn1, sn2, spm_len, is_e1, is_e2, aw);
           }
         }
       }
@@ -2030,6 +2031,62 @@ static void gt_strgraph_asqg_show(const GtStrgraph *strgraph,
     exit(EXIT_FAILURE);
   }
   gt_asqg_writer_delete(aw);
+  gt_error_delete(err);
+}
+
+static void gt_strgraph_gfa_show(const GtStrgraph *strgraph,
+    const char *indexname, GtFile *outfp)
+{
+  GtUword sn1, sn2;
+  GtStrgraphVnum i, v2;
+  GtUword sl2, spm_len;
+  GtStrgraphVEdgenum j;
+  bool is_e1, is_e2;
+  GtError *err;
+  int had_err = 0;
+  GtGfaWriter *aw = NULL;
+
+  err = gt_error_new();
+  gt_assert(strgraph->encseq != NULL);
+  aw = gt_gfa_writer_new(outfp, strgraph->encseq);
+  had_err = gt_gfa_writer_show_header(aw, (GtUword)
+      strgraph->minmatchlen, indexname, false, false, err);
+  if (!had_err)
+    had_err = gt_gfa_writer_show_vertices(aw, err);
+  for (i = 0; i < GT_STRGRAPH_NOFVERTICES(strgraph) && !had_err; i++)
+  {
+    if (GT_STRGRAPH_V_OUTDEG(strgraph, i) > 0)
+    {
+      sn1 = GT_STRGRAPH_V_READNUM(i);
+      is_e1 = GT_STRGRAPH_V_IS_E(i);
+      for (j = 0; j < GT_STRGRAPH_V_NOFEDGES(strgraph, i) && !had_err; j++)
+      {
+        if (!GT_STRGRAPH_EDGE_IS_REDUCED(strgraph, i, j))
+        {
+          v2 = GT_STRGRAPH_EDGE_DEST(strgraph, i, j);
+          sn2 = GT_STRGRAPH_V_READNUM(v2);
+          sl2 = (GtUword)GT_STRGRAPH_SEQLEN(strgraph, sn2);
+          spm_len = sl2 - (GtUword)GT_STRGRAPH_EDGE_LEN(strgraph, i, j);
+          is_e2 = GT_STRGRAPH_V_IS_E(v2);
+          if ((is_e1 && is_e2 && (sn1 >= sn2)) ||
+              (!is_e1 && !is_e2 && (sn1 > sn2)) ||
+              (is_e1 && !is_e2 && (sn1 >= sn2)) ||
+              (!is_e1 &&  is_e2 && (sn1 > sn2)))
+          {
+            /* other E->B / B->E cases, as well as all B-B
+               are not considered to avoid double output */
+            gt_spmproc_show_gfa(sn1, sn2, spm_len, is_e1, is_e2, aw);
+          }
+        }
+      }
+    }
+  }
+  if (had_err)
+  {
+    fprintf(stderr, "%s", gt_error_get(err));
+    exit(EXIT_FAILURE);
+  }
+  gt_gfa_writer_delete(aw);
   gt_error_delete(err);
 }
 
@@ -2058,6 +2115,10 @@ void gt_strgraph_show(const GtStrgraph *strgraph, GtStrgraphFormat format,
     case GT_STRGRAPH_ASQG_GZ: /*@ fallthrough @*/
     case GT_STRGRAPH_ASQG:
       gt_strgraph_asqg_show(strgraph, indexname, outfp);
+      break;
+    case GT_STRGRAPH_GFA_GZ: /*@ fallthrough @*/
+    case GT_STRGRAPH_GFA:
+      gt_strgraph_gfa_show(strgraph, indexname, outfp);
       break;
     case GT_STRGRAPH_BIN:
       gt_strgraph_save(strgraph, outfp);

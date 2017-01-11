@@ -15,31 +15,30 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef ASQG_WRITER_H
-#define ASQG_WRITER_H
+#ifndef GFA_WRITER_H
+#define GFA_WRITER_H
 
 #include "core/file.h"
 #include "core/encseq.h"
 #include "core/error.h"
 
-/* The <GtAsqgWriter> class allows one to write string graph information in
-   the ASQG format of SGA (Simpsons and Durbin, 2012). */
-typedef struct GtAsqgWriter GtAsqgWriter;
+/* The <GtGfaWriter> class allows one to write string graph information in
+   the GFA format of SGA (Simpsons and Durbin, 2012). */
+typedef struct GtGfaWriter GtGfaWriter;
 
-/* <GT_ASQG_VERSION> is the supported version of the asqg format. */
-#define GT_ASQG_VERSION 1
+/* <GT_GFA_VERSION> is the supported version of the gfa format. */
+#define GT_GFA_VERSION "2.0"
 
-/* Creates a new <GtAsqgWriter> object, using <file> for output
+/* Creates a new <GtGfaWriter> object, using <file> for output
    and <encseq> as source of information. */
-GtAsqgWriter* gt_asqg_writer_new(GtFile *file, const GtEncseq *encseq);
+GtGfaWriter* gt_gfa_writer_new(GtFile *file, const GtEncseq *encseq);
 
 /* Writes the header using the provided information: <minlen> is the
    minimal match length, <inputfilename> is a string to use as input filename,
-   <erate> the error rate, <has_containments> shall be true, if containments
+   <has_containments> shall be true, if containments
    are present, <has_transitives> shall be true, if transitive edges are
    present. Returns 0 on success, -1 on error and sets <err>. */
-int           gt_asqg_writer_show_header(GtAsqgWriter *aw,
-                                         float erate,
+int           gt_gfa_writer_show_header(GtGfaWriter *aw,
                                          GtUword minlen,
                                          const char *inputfilename,
                                          bool has_containments,
@@ -47,18 +46,18 @@ int           gt_asqg_writer_show_header(GtAsqgWriter *aw,
                                          GtError *err);
 
 /* Writes the vertices. Returns 0 on success, -1 on error and sets <err>. */
-int           gt_asqg_writer_show_vertices(GtAsqgWriter *aw,
+int           gt_gfa_writer_show_vertices(GtGfaWriter *aw,
                                            GtError *err);
 
 /* Writes an edge using Readjoiner SPM information. */
-void          gt_spmproc_show_asqg(GtUword suffix_readnum,
+void          gt_spmproc_show_gfa(GtUword suffix_readnum,
                                    GtUword prefix_readnum,
                                    GtUword length,
                                    bool suffixseq_direct,
                                    bool prefixseq_direct,
-                                   void *asqg_writer);
+                                   void *gfa_writer);
 
-/* Deletes a <GtAsqg> object. */
-void          gt_asqg_writer_delete(GtAsqgWriter *aw);
+/* Deletes a <GtGfa> object. */
+void          gt_gfa_writer_delete(GtGfaWriter *aw);
 
 #endif

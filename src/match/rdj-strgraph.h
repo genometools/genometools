@@ -94,6 +94,8 @@ typedef enum {
   GT_STRGRAPH_BIN,     /* binary format, for gt_strgraph_new_from_file */
   GT_STRGRAPH_ASQG,    /* sga format, plain text */
   GT_STRGRAPH_ASQG_GZ, /* sga format, gzipped */
+  GT_STRGRAPH_GFA,     /* sga format, plain text */
+  GT_STRGRAPH_GFA_GZ , /* sga format, gzipped */
 } GtStrgraphFormat;
 
 void gt_strgraph_show(const GtStrgraph *strgraph, GtStrgraphFormat format,
