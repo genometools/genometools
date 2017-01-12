@@ -38,6 +38,7 @@ typedef struct {
   GtStr  *readset;
   bool gz, sg;
   unsigned int nspmfiles;
+  bool gfa1;
 } GtReadjoinerGfaArguments;
 
 static void* gt_readjoiner_gfa_arguments_new(void)
@@ -95,9 +96,15 @@ static GtOptionParser* gt_readjoiner_gfa_option_parser_new(
 
   /* -sg */
   option = gt_option_new_bool("sg", "first construct a Readjoiner string "
-      "graph, then convert it into SGA format",
+      "graph, then convert it into GFA format",
       &arguments->sg, false);
   gt_option_is_development_option(option);
+  gt_option_parser_add_option(op, option);
+
+  /* -1 */
+  option = gt_option_new_bool("1", "output GFA1 "
+      "(default: output GFA2)", &arguments->gfa1, false);
+  gt_option_hide_default(option);
   gt_option_parser_add_option(op, option);
 
   /* -v */
@@ -213,6 +220,10 @@ static int gt_readjoiner_gfa_runner(GT_UNUSED int argc,
   if (arguments->minmatchlength > 0)
     gt_logger_log(verbose_logger, "SPM length cutoff = %u",
         arguments->minmatchlength);
+  if (arguments->gfa1)
+    gt_logger_log(verbose_logger, "GFA version = 1.0");
+  else
+    gt_logger_log(verbose_logger, "GFA version = 2.0");
 
   el = gt_encseq_loader_new();
   gt_encseq_loader_drop_description_support(el);
@@ -252,7 +263,7 @@ static int gt_readjoiner_gfa_runner(GT_UNUSED int argc,
   {
     GtStr *filename = NULL;
     GtFile *file = NULL;
-    GtGfaWriter *aw = NULL;
+    GtGfaWriter *gw = NULL;
     if (had_err == 0)
     {
       filename = gt_str_clone(arguments->readset);
@@ -265,18 +276,19 @@ static int gt_readjoiner_gfa_runner(GT_UNUSED int argc,
     }
     if (had_err == 0)
     {
-      aw = gt_gfa_writer_new(file, reads);
+      gw = gt_gfa_writer_new(file, reads, arguments->gfa1 ?
+          GT_GFA_VERSION_1_0 : GT_GFA_VERSION_2_0);
       if (gt_showtime_enabled())
         gt_timer_show_progress(timer, GT_READJOINER_GFA_MSG_VERTICES,
             stdout);
       gt_logger_log(default_logger, GT_READJOINER_GFA_MSG_VERTICES);
-      had_err = gt_gfa_writer_show_header(aw,
+      had_err = gt_gfa_writer_show_header(gw,
           (GtUword)arguments->minmatchlength,
           gt_str_get(arguments->readset), false, false, err);
     }
     if (had_err == 0)
     {
-      had_err = gt_gfa_writer_show_vertices(aw, err);
+      had_err = gt_gfa_writer_show_segments(gw, err);
       gt_readjoiner_gfa_show_current_space(GT_READJOINER_GFA_MSG_VERTICES);
     }
     if (had_err == 0)
@@ -285,13 +297,13 @@ static int gt_readjoiner_gfa_runner(GT_UNUSED int argc,
         gt_timer_show_progress(timer, GT_READJOINER_GFA_MSG_EDGES, stdout);
       gt_logger_log(default_logger, GT_READJOINER_GFA_MSG_EDGES);
       had_err = gt_readjoiner_gfa_use_spmfiles(gt_spmproc_show_gfa,
-          aw, readset, arguments->minmatchlength, arguments->nspmfiles,
+          gw, readset, arguments->minmatchlength, arguments->nspmfiles,
           contained, err);
       gt_readjoiner_gfa_show_current_space(GT_READJOINER_GFA_MSG_EDGES);
     }
     gt_str_delete(filename);
     gt_file_delete(file);
-    gt_gfa_writer_delete(aw);
+    gt_gfa_writer_delete(gw);
   }
   else
   {
@@ -326,8 +338,11 @@ static int gt_readjoiner_gfa_runner(GT_UNUSED int argc,
         gt_timer_show_progress(timer, GT_READJOINER_GFA_MSG_OUTPUT, stdout);
       gt_logger_log(default_logger, GT_READJOINER_GFA_MSG_OUTPUT);
       gt_strgraph_set_encseq(strgraph, reads);
-      gt_strgraph_show(strgraph, arguments->gz ? GT_STRGRAPH_GFA_GZ :
-          GT_STRGRAPH_GFA, gt_str_get(arguments->readset),
+      gt_strgraph_show(strgraph,
+          arguments->gfa1 ?
+           (arguments->gz ? GT_STRGRAPH_GFA1_GZ : GT_STRGRAPH_GFA1) :
+           (arguments->gz ? GT_STRGRAPH_GFA2_GZ : GT_STRGRAPH_GFA2),
+          gt_str_get(arguments->readset),
           arguments->gz ? GT_READJOINER_SUFFIX_SG_GFA_GZ :
           GT_READJOINER_SUFFIX_SG_GFA, false);
       gt_readjoiner_gfa_show_current_space(GT_READJOINER_GFA_MSG_OUTPUT);

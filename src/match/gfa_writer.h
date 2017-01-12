@@ -26,12 +26,19 @@
    the GFA format of SGA (Simpsons and Durbin, 2012). */
 typedef struct GtGfaWriter GtGfaWriter;
 
-/* <GT_GFA_VERSION> is the supported version of the gfa format. */
-#define GT_GFA_VERSION "2.0"
+/* Supported versions of the gfa format. */
+typedef enum
+{
+  GT_GFA_VERSION_1_0,
+  GT_GFA_VERSION_2_0
+} GtGfaVersion;
 
 /* Creates a new <GtGfaWriter> object, using <file> for output
-   and <encseq> as source of information. */
-GtGfaWriter* gt_gfa_writer_new(GtFile *file, const GtEncseq *encseq);
+   and <encseq> as source of information.
+   <version> is the GFA version. */
+GtGfaWriter* gt_gfa_writer_new(GtFile *file,
+                               const GtEncseq *encseq,
+                               GtGfaVersion version);
 
 /* Writes the header using the provided information: <minlen> is the
    minimal match length, <inputfilename> is a string to use as input filename,
@@ -39,23 +46,23 @@ GtGfaWriter* gt_gfa_writer_new(GtFile *file, const GtEncseq *encseq);
    are present, <has_transitives> shall be true, if transitive edges are
    present. Returns 0 on success, -1 on error and sets <err>. */
 int           gt_gfa_writer_show_header(GtGfaWriter *aw,
-                                         GtUword minlen,
-                                         const char *inputfilename,
-                                         bool has_containments,
-                                         bool has_transitives,
-                                         GtError *err);
+                                        GtUword minlen,
+                                        const char *inputfilename,
+                                        bool has_containments,
+                                        bool has_transitives,
+                                        GtError *err);
 
 /* Writes the vertices. Returns 0 on success, -1 on error and sets <err>. */
-int           gt_gfa_writer_show_vertices(GtGfaWriter *aw,
-                                           GtError *err);
+int           gt_gfa_writer_show_segments(GtGfaWriter *aw,
+                                          GtError *err);
 
 /* Writes an edge using Readjoiner SPM information. */
 void          gt_spmproc_show_gfa(GtUword suffix_readnum,
-                                   GtUword prefix_readnum,
-                                   GtUword length,
-                                   bool suffixseq_direct,
-                                   bool prefixseq_direct,
-                                   void *gfa_writer);
+                                  GtUword prefix_readnum,
+                                  GtUword length,
+                                  bool suffixseq_direct,
+                                  bool prefixseq_direct,
+                                  void *gfa_writer);
 
 /* Deletes a <GtGfa> object. */
 void          gt_gfa_writer_delete(GtGfaWriter *aw);
