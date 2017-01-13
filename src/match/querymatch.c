@@ -483,8 +483,8 @@ static void gt_querymatch_applycorrection(
                      coords->vlen,
                      querymatch->querystart + coords->voffset,
                      querymatch->query_totallength,
-                     NULL,
-                     NULL);
+                     querymatch->db_desc,
+                     querymatch->query_desc);
 }
 
 bool gt_querymatch_process(GtQuerymatch *querymatch,
