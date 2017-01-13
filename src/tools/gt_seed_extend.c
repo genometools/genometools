@@ -334,7 +334,7 @@ static GtOptionParser* gt_seed_extend_option_parser_new(void *tool_arguments)
   op_cam = gt_option_new_string("cam",
                                 gt_cam_extendgreedy_comment(),
                                 arguments->char_access_mode,
-                                "");
+                                "bytes,bytes");
   gt_option_hide_default(op_cam);
   gt_option_is_development_option(op_cam);
   gt_option_parser_add_option(op, op_cam);

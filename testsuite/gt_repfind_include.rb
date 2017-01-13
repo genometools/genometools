@@ -183,10 +183,10 @@ Test do
      run_test "#{$bin}gt repfind -seedlength #{seedlength} -extendgreedy -ii U8"
      run "mv #{last_stdout} U8-selfcompare.matches"
      run_test "#{$bin}gt repfind -seedlength #{seedlength} -extendgreedy -ii U8 "
-              "-cam encseq"
+              "-cam bytes,bytes"
      run "cmp #{last_stdout} U8-selfcompare.matches"
      run_test "#{$bin}gt repfind -seedlength #{seedlength} -extendgreedy -ii U8 "
-              "-cam encseq_reader"
+              "-cam encseq_reader,bytes"
      run "cmp #{last_stdout} U8-selfcompare.matches"
   end
 end

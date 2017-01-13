@@ -378,7 +378,8 @@ static GtOptionParser *gt_repfind_option_parser_new(void *tool_arguments)
 
   char_access_mode_option = gt_option_new_string("cam",
                                                  gt_cam_extendgreedy_comment(),
-                                                 arguments->cam_string,"");
+                                                 arguments->cam_string,
+                                                 "any,any");
   gt_option_parser_add_option(op, char_access_mode_option);
   gt_option_is_development_option(char_access_mode_option);
 

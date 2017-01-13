@@ -300,7 +300,7 @@ const char *gt_cam_extendgreedy_comment(void)
 {
   return "specify up to two comma-separated character access modes, the first "
          "of which refers to sequence A and the second of which refers to "
-         "sequence b: possible values: encseq, encseq_reader, bytes";
+         "sequence b: possible values: encseq, encseq_reader, bytes, any";
 }
 
 static int gt_parse_char_access(const char *cam_string,GtError *err)
@@ -317,7 +317,7 @@ static int gt_parse_char_access(const char *cam_string,GtError *err)
   {
     return GT_EXTEND_CHAR_ACCESS_DIRECT;
   }
-  if (strcmp(cam_string,"") == 0)
+  if (strcmp(cam_string,"any") == 0)
   {
     return GT_EXTEND_CHAR_ACCESS_ANY;
   }
