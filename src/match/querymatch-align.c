@@ -129,7 +129,7 @@ void gt_querymatchoutoptions_extend(
                   GtUword sensitivity,
                   double matchscore_bias,
                   bool always_polished_ends,
-                  unsigned int display_flag)
+                  const GtSeedExtendDisplayFlag *display_flag)
 {
   if (errorpercentage > 0)
   {
@@ -176,7 +176,7 @@ void gt_querymatchoutoptions_for_align_only(
                   double matchscore_bias,
                   GtUword history_size,
                   bool always_polished_ends,
-                  unsigned int display_flag)
+                  const GtSeedExtendDisplayFlag *display_flag)
 {
   const bool weakends = false;
   const bool cam_generic = false;

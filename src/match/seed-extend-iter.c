@@ -429,7 +429,8 @@ GtUword gt_seedextend_match_iterator_seedpos2(
 }
 
 void gt_seedextend_match_iterator_display_set(GtSeedextendMatchIterator *semi,
-                                              unsigned int display_flag)
+                                              const GtSeedExtendDisplayFlag
+                                                *display_flag)
 {
   gt_assert(semi != NULL);
   gt_querymatch_display_set(semi->querymatchptr,display_flag);
@@ -475,7 +476,7 @@ int gt_seedextend_match_iterator_querymatchoutoptions_set(
                     bool showeoplist,
                     GtUword alignmentwidth,
                     bool always_polished_ends,
-                    unsigned int display_flag,
+                    const GtSeedExtendDisplayFlag *display_flag,
                     GtError *err)
 {
   double matchscore_bias = GT_DEFAULT_MATCHSCORE_BIAS;

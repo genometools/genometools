@@ -102,12 +102,11 @@ struct GtDiagbandseedExtendParams
           maxalignedlendifference,
           history_size,
           perc_mat_history,
-          sensitivity,
-          alignmentwidth;
+          sensitivity;
   GtXdropscore xdropbelowscore;
   GtExtendCharAccess a_extend_char_access,
                      b_extend_char_access;
-  unsigned int display_flag;
+  const GtSeedExtendDisplayFlag *display_flag;
   double matchscore_bias;
   bool use_apos,
        extendgreedy,
@@ -187,7 +186,7 @@ GtDiagbandseedExtendParams *gt_diagbandseed_extend_params_new(
                                 GtUword userdefinedleastlength,
                                 GtUword logdiagbandwidth,
                                 GtUword mincoverage,
-                                unsigned int display_flag,
+                                const GtSeedExtendDisplayFlag *display_flag,
                                 bool use_apos,
                                 GtXdropscore xdropbelowscore,
                                 bool extendgreedy,
@@ -202,7 +201,6 @@ GtDiagbandseedExtendParams *gt_diagbandseed_extend_params_new(
                                 double matchscore_bias,
                                 bool weakends,
                                 bool benchmark,
-                                GtUword alignmentwidth,
                                 bool always_polished_ends,
                                 bool verify_alignment,
                                 bool only_selected_seqpairs)
@@ -227,7 +225,6 @@ GtDiagbandseedExtendParams *gt_diagbandseed_extend_params_new(
   extp->matchscore_bias = matchscore_bias;
   extp->weakends = weakends;
   extp->benchmark = benchmark;
-  extp->alignmentwidth = alignmentwidth;
   extp->always_polished_ends = always_polished_ends;
   extp->verify_alignment = verify_alignment;
   extp->only_selected_seqpairs = only_selected_seqpairs;
@@ -3094,25 +3091,19 @@ static void gt_diagbandseed_set_sequence(GtSeqorEncseq *seqorencseq,
                                          const GtUchar *characters,
                                          GtUchar wildcardshow,
                                          bool haswildcards,
-                                         const GtEncseq *encseq_for_seq_desc,
-                                         char *seqdescspace,
-                                         GT_UNUSED GtUword max_desc_length)
+                                         const GtEncseq *encseq_for_seq_desc)
 {
   const GtUword
     seqstartpos = gt_sequence_parts_info_seqstartpos(seqranges,seqnum),
     seqendpos = gt_sequence_parts_info_seqendpos(seqranges,seqnum),
     b_off = seqstartpos - first_seqstartpos;
-  const char *seqdescptr = NULL;
+  const char *seqdescptr;
   if (encseq_for_seq_desc != NULL)
   {
     GtUword desclen;
     seqdescptr = gt_encseq_description(encseq_for_seq_desc,
                                        &desclen,
                                        seqnum);
-    gt_assert(desclen <= max_desc_length);
-    memcpy(seqdescspace,seqdescptr,desclen);
-    seqdescspace[desclen] = '\0';
-    seqdescptr = seqdescspace;
   } else
   {
     seqdescptr = "Unknown";
@@ -3136,8 +3127,6 @@ typedef struct
           b_first_seqnum,
           b_first_seqstartpos;
   const GtEncseq *a_encseq_for_seq_desc, *b_encseq_for_seq_desc;
-  char *a_seqdescspace, *b_seqdescspace;
-  GtUword a_max_desc_length, b_max_desc_length;
 } GtDiagbandSeedPlainSequence;
 
 static void gt_diagband_seed_plainsequence_init(GtDiagbandSeedPlainSequence *ps,
@@ -3156,27 +3145,17 @@ static void gt_diagband_seed_plainsequence_init(GtDiagbandSeedPlainSequence *ps,
       gt_encseq_has_description_support(aencseq))
   {
     ps->a_encseq_for_seq_desc = aencseq;
-    ps->a_max_desc_length = gt_encseq_max_desc_length(aencseq);
-    ps->a_seqdescspace = gt_malloc(sizeof *ps->a_seqdescspace *
-                                   (ps->a_max_desc_length + 1));
   } else
   {
     ps->a_encseq_for_seq_desc = NULL;
-    ps->a_seqdescspace = NULL;
-    ps->a_max_desc_length = 0;
   }
   if (seq_desc_display && bencseq != NULL &&
       gt_encseq_has_description_support(bencseq))
   {
     ps->b_encseq_for_seq_desc = bencseq;
-    ps->b_max_desc_length = gt_encseq_max_desc_length(bencseq);
-    ps->b_seqdescspace = gt_malloc(sizeof *ps->b_seqdescspace *
-                                   (ps->b_max_desc_length + 1));
   } else
   {
     ps->b_encseq_for_seq_desc = NULL;
-    ps->b_seqdescspace = NULL;
-    ps->b_max_desc_length = 0;
   }
   if (with_a_bytestring)
   {
@@ -3242,9 +3221,7 @@ static void gt_diagband_seed_plainsequence_next_segment(
                                    ps->characters,
                                    ps->wildcardshow,
                                    ps->a_haswildcards,
-                                   ps->a_encseq_for_seq_desc,
-                                   ps->a_seqdescspace,
-                                   ps->a_max_desc_length);
+                                   ps->a_encseq_for_seq_desc);
       ps->previous_aseqnum = currsegm_aseqnum;
     } else
     {
@@ -3271,9 +3248,7 @@ static void gt_diagband_seed_plainsequence_next_segment(
                                  ps->characters,
                                  ps->wildcardshow,
                                  ps->b_haswildcards,
-                                 ps->b_encseq_for_seq_desc,
-                                 ps->b_seqdescspace,
-                                 ps->b_max_desc_length);
+                                 ps->b_encseq_for_seq_desc);
   } else
   {
     GtUword seqstartpos = gt_sequence_parts_info_seqstartpos(bseqranges,
@@ -3293,14 +3268,6 @@ static void gt_diagband_seed_plainsequence_delete(
   if (ps->b_byte_sequence != NULL && ps->b_differs_from_a)
   {
     gt_free(ps->b_byte_sequence);
-  }
-  if (ps->a_seqdescspace != NULL)
-  {
-    gt_free(ps->a_seqdescspace);
-  }
-  if (ps->b_seqdescspace != NULL)
-  {
-    gt_free(ps->b_seqdescspace);
   }
   if (ps->a_byte_sequence != NULL)
   {
@@ -3853,7 +3820,7 @@ static int gt_diagbandseed_algorithm(const GtDiagbandseedInfo *arg,
   GtArrayGtDiagbandseedKmerPos blist;
   GtSeedpairlist *seedpairlist = NULL;
   GtDiagbandseedKmerIterator *aiter = NULL, *biter = NULL;
-  GtUword alen = 0, blen = 0, mlistlen = 0, maxfreq, len_used;
+  GtUword alen = 0, blen = 0, mlistlen = 0, maxfreq, len_used, alignmentwidth;
   GtRange seedpairdistance = *arg->seedpairdistance;
   char *blist_file = NULL;
   int had_err = 0;
@@ -4059,11 +4026,12 @@ static int gt_diagbandseed_algorithm(const GtDiagbandseedInfo *arg,
     }
     processinfo = (void *) xdropinfo;
   }
-  if (extp->extendxdrop || extp->alignmentwidth > 0 || extp->verify_alignment)
+  alignmentwidth = gt_querymatch_display_alignmentwidth(extp->display_flag);
+  if (extp->extendxdrop || alignmentwidth > 0 || extp->verify_alignment)
   {
     querymoutopt = gt_querymatchoutoptions_new(true,
                                                false,
-                                               extp->alignmentwidth,
+                                               alignmentwidth,
                                                NULL,
                                                NULL);
     gt_assert(querymoutopt != NULL);

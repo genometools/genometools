@@ -49,7 +49,8 @@ GtQuerymatch *gt_seedextend_match_iterator_next(
    querymatch-object. */
 
 void gt_seedextend_match_iterator_display_set(GtSeedextendMatchIterator *semi,
-                                              unsigned int display_flag);
+                                              const GtSeedExtendDisplayFlag
+                                                *display_flag);
 
 /* The following function sets the karlin_altschul_stat pointer to
    the second argument */
@@ -86,7 +87,7 @@ int gt_seedextend_match_iterator_querymatchoutoptions_set(
                     bool showeoplist,
                     GtUword alignmentwidth,
                     bool always_polished_ends,
-                    unsigned int display_flag,
+                    const GtSeedExtendDisplayFlag *display_flag,
                     GtError *err);
 
 /* The following function return different components of the iterator

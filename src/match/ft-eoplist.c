@@ -319,12 +319,12 @@ void gt_eoplist_reader_reset_width(GtEoplistReader *eoplist_reader,
 {
   if (eoplist_reader->width < width)
   {
-    eoplist_reader->width = width;
     eoplist_reader->outbuffer = gt_realloc(eoplist_reader->outbuffer,
                                            sizeof *eoplist_reader->outbuffer *
                                            3 * (width+1));
     gt_assert(eoplist_reader->outbuffer != NULL);
   }
+  eoplist_reader->width = width;
 }
 
 GtEoplistReader *gt_eoplist_reader_new(const GtEoplist *eoplist)

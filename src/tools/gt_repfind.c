@@ -778,7 +778,7 @@ static int gt_repfind_runner(int argc,
   const bool flags[] = {arguments->forward,
                         arguments->reverse,
                         arguments->reverse_complement};
-  unsigned int display_flag = 0;
+  GtSeedExtendDisplayFlag *display_flag = gt_querymatch_display_flag_new();
   GtFtTrimstat *trimstat = NULL;
 
   gt_error_check(err);
@@ -861,9 +861,9 @@ static int gt_repfind_runner(int argc,
   }
   if (!haserr)
   {
-    if (gt_querymatch_eval_display_args(&display_flag,
-                                        arguments->display_args,
-                                        err) != 0)
+    if (gt_querymatch_display_flag_args_set(display_flag,
+                                            arguments->display_args,
+                                            err) != 0)
     {
       haserr = true;
     }
@@ -923,6 +923,7 @@ static int gt_repfind_runner(int argc,
     if (!haserr)
     {
       info_querymatch.querymatchspaceptr = gt_querymatch_new();
+      gt_assert(display_flag != NULL);
       gt_querymatch_display_set(info_querymatch.querymatchspaceptr,
                                 display_flag);
       if (querymatchoutoptions != NULL)
@@ -1103,6 +1104,7 @@ static int gt_repfind_runner(int argc,
   gt_ft_trimstat_delete(trimstat);
   polishing_info_delete(pol_info);
   gt_logger_delete(logger);
+  gt_querymatch_display_flag_delete(display_flag);
   if (repfindtimer != NULL)
   {
     char *keystring = gt_seed_extend_params_keystring(

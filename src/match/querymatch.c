@@ -46,7 +46,7 @@ struct GtQuerymatch
   uint64_t queryseqnum; /* ordinal number of match in query */
   GtReadmode query_readmode; /* readmode of query sequence */
   bool selfmatch, verify_alignment;
-  unsigned int display_flag;
+  const GtSeedExtendDisplayFlag *display_flag;
   GtQuerymatchoutoptions *ref_querymatchoutoptions; /* reference to
       resources needed for alignment output */
   GtUword evalue_searchspace;
@@ -62,7 +62,7 @@ GtQuerymatch *gt_querymatch_new(void)
 
   gt_assert(querymatch != NULL);
   querymatch->ref_querymatchoutoptions = NULL;
-  querymatch->display_flag = 0;
+  querymatch->display_flag = NULL;
   querymatch->verify_alignment = false;
   querymatch->query_readmode = GT_READMODE_FORWARD;
   querymatch->fp = stdout;
@@ -94,118 +94,10 @@ void gt_querymatch_file_set(GtQuerymatch *querymatch, FILE *fp)
 }
 
 void gt_querymatch_display_set(GtQuerymatch *querymatch,
-                               unsigned int display_flag)
+                               const GtSeedExtendDisplayFlag *display_flag)
 {
   gt_assert(querymatch != NULL);
   querymatch->display_flag = display_flag;
-}
-
-typedef enum
-{
-  Gt_Seed_display,
-  Gt_Seqlength_display,
-  Gt_Evalue_display,
-  Gt_Seqdesc_display,
-  Gt_Bitscore_display
-} GtSeedExtendDisplay;
-
-static bool gt_querymatch_display_on(unsigned int display_flag,
-                                     GtSeedExtendDisplay display)
-{
-  gt_assert((int) display <= Gt_Bitscore_display);
-  return (display_flag & (1U << (int) display)) ? true : false;
-}
-
-bool gt_querymatch_seed_display(unsigned int display_flag)
-{
-  return gt_querymatch_display_on(display_flag,Gt_Seed_display);
-}
-
-bool gt_querymatch_evalue_display(unsigned int display_flag)
-{
-  return gt_querymatch_display_on(display_flag,Gt_Evalue_display);
-}
-
-bool gt_querymatch_bit_score_display(unsigned int display_flag)
-{
-  return gt_querymatch_display_on(display_flag,Gt_Bitscore_display);
-}
-
-bool gt_querymatch_seq_desc_display(unsigned int display_flag)
-{
-  return gt_querymatch_display_on(display_flag,Gt_Seqdesc_display);
-}
-
-GtStr *gt_querymatch_column_header(unsigned int display_flag)
-{
-  GtStr *str = gt_str_new();
-
-  if (gt_querymatch_display_on(display_flag,Gt_Seqlength_display))
-  {
-    gt_str_append_cstr(str," aseqlen bseqlen");
-  }
-  if (gt_querymatch_display_on(display_flag,Gt_Evalue_display))
-  {
-    gt_str_append_cstr(str," evalue");
-  }
-  if (gt_querymatch_display_on(display_flag,Gt_Bitscore_display))
-  {
-    gt_str_append_cstr(str," bit-score");
-  }
-  return str;
-}
-
-const char *gt_querymatch_display_help(void)
-{
-  return "specify what additional values in matches are displayed\n"
-         "seed:      display the seed of the match\n"
-         "seqlength: display length of sequences in which\n"
-         "           the two match-instances occur\n"
-         "evalue:    display evalue\n"
-         "seq-desc:  display sequence description instead of numbers\n"
-         "bit-score: display bit score";
-}
-
-static bool gt_querymatch_display_flag_set(unsigned int *display_flag,
-                                           const char *arg)
-{
-  const char *display_strings[]
-    = {"seed","seqlength","evalue","seq-desc","bit-score"};
-  size_t ds_idx, numofds = sizeof display_strings/sizeof display_strings[0];
-  bool found = false;
-
-  gt_assert(numofds == (size_t) Gt_Bitscore_display + 1);
-  for (ds_idx = 0; ds_idx < numofds; ds_idx++)
-  {
-    if (strcmp(arg,display_strings[ds_idx]) == 0)
-    {
-      (*display_flag) |= (1U << ds_idx);
-      found = true;
-    }
-  }
-  return found;
-}
-
-int gt_querymatch_eval_display_args(unsigned int *display_flag,
-                                    const GtStrArray *display_args,
-                                    GtError *err)
-{
-  GtUword da_idx;
-
-  *display_flag = 0;
-  for (da_idx = 0; da_idx < gt_str_array_size(display_args); da_idx++)
-  {
-    const char *da = gt_str_array_get(display_args,da_idx);
-
-    if (!gt_querymatch_display_flag_set(display_flag,da))
-    {
-      gt_error_set(err,"illegal argument %s to option -display: "
-                       " possible values are "
-                       "seed, seqlength, evalue, seq-desc or bit-score",da);
-      return -1;
-    }
-  }
-  return 0;
 }
 
 GtUword gt_querymatch_dbseqnum(const GtQuerymatch *querymatch)
@@ -380,7 +272,9 @@ void gt_querymatch_coordinates_out(const GtQuerymatch *querymatch)
   if (gt_querymatch_seq_desc_display(querymatch->display_flag))
   {
     int nwspl = gt_non_white_space_prefix_length(querymatch->db_desc);
-    fprintf(querymatch->fp," %*.*s",nwspl,nwspl,querymatch->db_desc);
+    fputc(' ',querymatch->fp);
+    fwrite(querymatch->db_desc,sizeof *querymatch->db_desc,nwspl,
+           querymatch->fp);
   } else
   {
     fprintf(querymatch->fp," " GT_WU,querymatch->dbseqnum);
@@ -392,7 +286,9 @@ void gt_querymatch_coordinates_out(const GtQuerymatch *querymatch)
   if (gt_querymatch_seq_desc_display(querymatch->display_flag))
   {
     int nwspl = gt_non_white_space_prefix_length(querymatch->query_desc);
-    fprintf(querymatch->fp," %*.*s",nwspl,nwspl,querymatch->query_desc);
+    fputc(' ',querymatch->fp);
+    fwrite(querymatch->query_desc,sizeof *querymatch->query_desc,nwspl,
+           querymatch->fp);
   } else
   {
     fprintf(querymatch->fp," " Formatuint64_t,
@@ -406,17 +302,17 @@ void gt_querymatch_coordinates_out(const GtQuerymatch *querymatch)
             gt_querymatch_similarity(querymatch->distance,
                                      querymatch->dblen + querymatch->querylen));
   }
-  if (gt_querymatch_display_on(querymatch->display_flag,Gt_Seqlength_display))
+  if (gt_querymatch_seqlength_display(querymatch->display_flag))
   {
     fprintf(querymatch->fp, " " GT_WU " " GT_WU,
             querymatch->dbseqlen, querymatch->query_totallength);
   }
-  if (gt_querymatch_display_on(querymatch->display_flag,Gt_Evalue_display))
+  if (gt_querymatch_evalue_display(querymatch->display_flag))
   {
     gt_assert(querymatch->evalue != DBL_MAX);
     fprintf(querymatch->fp, " %1.0e",querymatch->evalue);
   }
-  if (gt_querymatch_display_on(querymatch->display_flag,Gt_Bitscore_display))
+  if (gt_querymatch_bit_score_display(querymatch->display_flag))
   {
     gt_assert(querymatch->bit_score != DBL_MAX);
     fprintf(querymatch->fp, " %.1f",querymatch->bit_score);

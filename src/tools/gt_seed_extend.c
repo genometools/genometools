@@ -89,7 +89,7 @@ typedef struct {
   bool histogram;
   bool use_kmerfile;
   bool trimstat_on;
-  unsigned int display_flag;
+  GtSeedExtendDisplayFlag *display_flag;
 } GtSeedExtendArguments;
 
 static void* gt_seed_extend_arguments_new(void)
@@ -102,7 +102,7 @@ static void* gt_seed_extend_arguments_new(void)
   arguments->char_access_mode = gt_str_new();
   arguments->splt_string = gt_str_new();
   arguments->display_args = gt_str_array_new();
-  arguments->display_flag = 0;
+  arguments->display_flag = gt_querymatch_display_flag_new();
   return arguments;
 }
 
@@ -120,6 +120,7 @@ static void gt_seed_extend_arguments_delete(void *tool_arguments)
     gt_option_delete(arguments->se_option_xdrop);
     gt_option_delete(arguments->se_option_withali);
     gt_str_array_delete(arguments->display_args);
+    gt_querymatch_display_flag_delete(arguments->display_flag);
     gt_free(arguments);
   }
 }
@@ -552,6 +553,8 @@ static int gt_seed_extend_arguments_check(int rest_argc, void *tool_arguments,
   if (!gt_option_is_set(arguments->se_option_withali)) {
     arguments->se_alignmentwidth = 0;
   }
+  gt_querymatch_display_alignmentwidth_set(arguments->display_flag,
+                                           arguments->se_alignmentwidth);
 
   /* parse memlimit argument */
   arguments->dbs_memlimit = GT_UWORD_MAX;
@@ -658,13 +661,14 @@ static int gt_seed_extend_runner(int argc,
     seedextendtimer = gt_timer_new();
     gt_timer_start(seedextendtimer);
   }
-
-  had_err = gt_querymatch_eval_display_args(&arguments->display_flag,
-                                            arguments->display_args,
-                                            err);
-
+  had_err = gt_querymatch_display_flag_args_set(arguments->display_flag,
+                                                arguments->display_args,
+                                                err);
   /* Set character access method */
-  if (!had_err && (!arguments->onlyseeds || arguments->se_alignmentwidth > 0)) {
+  if (!had_err && (!arguments->onlyseeds ||
+                   gt_querymatch_display_alignmentwidth(
+                        arguments->display_flag) > 0))
+  {
     if (gt_greedy_extend_char_access(&cam_a,&cam_b,
                                      gt_str_get(arguments->char_access_mode),
                                      err) != 0)
@@ -914,7 +918,6 @@ static int gt_seed_extend_runner(int argc,
                                              matchscore_bias,
                                              arguments->weakends,
                                              arguments->benchmark,
-                                             arguments->se_alignmentwidth,
                                              !arguments->relax_polish,
                                              arguments->verify_alignment,
                                              arguments->only_selected_seqpairs);

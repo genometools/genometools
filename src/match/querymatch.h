@@ -27,6 +27,7 @@
 #include "core/arraydef.h"
 #include "querymatch-align.h"
 #include "karlin_altschul_stat.h"
+#include "querymatch-display.h"
 #include "seq_or_encseq.h"
 
 typedef struct GtQuerymatch GtQuerymatch;
@@ -37,23 +38,9 @@ GtQuerymatch *gt_querymatch_new(void);
 
 void gt_querymatch_file_set(GtQuerymatch *querymatch, FILE *fp);
 
-void gt_querymatch_display_set(GtQuerymatch *querymatch,
-                               unsigned int display_flag);
-
 void gt_querymatch_db_keyvalues_set(GtQuerymatch *querymatch,
                                     GtUword db_totallength,
                                     GtUword db_numofsequences);
-
-bool gt_querymatch_seed_display(unsigned int display_flag);
-
-bool gt_querymatch_evalue_display(unsigned int display_flag);
-
-bool gt_querymatch_bit_score_display(unsigned int display_flag);
-
-bool gt_querymatch_seq_desc_display(unsigned int display_flag);
-
-void gt_querymatch_outoptions_set(GtQuerymatch *querymatch,
-                GtQuerymatchoutoptions *querymatchoutoptions);
 
 void gt_querymatch_init(GtQuerymatch *querymatch,
                         GtKarlinAltschulStat *karlin_altschul_stat,
@@ -114,6 +101,9 @@ bool gt_querymatch_complete(GtQuerymatch *querymatchptr,
                             GtUword seedlen,
                             bool greedyextension);
 
+void gt_querymatch_outoptions_set(GtQuerymatch *querymatch,
+                GtQuerymatchoutoptions *querymatchoutoptions);
+
 GtUword gt_querymatch_querylen(const GtQuerymatch *querymatch);
 
 GtUword gt_querymatch_dbstart(const GtQuerymatch *querymatch);
@@ -171,11 +161,8 @@ void gt_querymatch_table_sort(GtArrayGtQuerymatch *querymatch_table,
 
 GtQuerymatch *gt_querymatch_table_get(const GtArrayGtQuerymatch
                                         *querymatch_table,GtUword idx);
-int gt_querymatch_eval_display_args(unsigned int *display_flag,
-                                    const GtStrArray *display_args,
-                                    GtError *err);
 
-const char *gt_querymatch_display_help(void);
+void gt_querymatch_display_set(GtQuerymatch *querymatch,
+                               const GtSeedExtendDisplayFlag *display_flag);
 
-GtStr *gt_querymatch_column_header(unsigned int display_flag);
 #endif

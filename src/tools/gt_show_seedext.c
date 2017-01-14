@@ -267,7 +267,7 @@ static int gt_show_seedext_runner(GT_UNUSED int argc,
   GtUword alignmentwidth;
   GtShowSeedextArguments *arguments = tool_arguments;
   GtSeedextendMatchIterator *semi;
-  unsigned int display_flag = 0;
+  GtSeedExtendDisplayFlag *display_flag = gt_querymatch_display_flag_new();
   const GtEncseq *aencseq = NULL, *bencseq = NULL;
   GtAlignment *alignment = gt_alignment_new();
   GtFtPolishing_info *pol_info = NULL;
@@ -302,9 +302,9 @@ static int gt_show_seedext_runner(GT_UNUSED int argc,
     /* the following are used if seed_extend is set */
     characters = gt_encseq_alphabetcharacters(aencseq);
     wildcardshow = gt_encseq_alphabetwildcardshow(aencseq);
-    had_err = gt_querymatch_eval_display_args(&display_flag,
-                                              arguments->display_args,
-                                              err);
+    had_err = gt_querymatch_display_flag_args_set(display_flag,
+                                                  arguments->display_args,
+                                                  err);
   }
   if (!had_err)
   {
@@ -438,6 +438,7 @@ static int gt_show_seedext_runner(GT_UNUSED int argc,
                                    karlin_altschul_stat);
   }
   gt_free(alignment_show_buffer);
+  gt_querymatch_display_flag_delete(display_flag);
   polishing_info_delete(pol_info);
   gt_alignment_delete(alignment);
   gt_scorehandler_delete(linspace_scorehandler);

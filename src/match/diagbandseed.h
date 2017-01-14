@@ -25,6 +25,7 @@
 #include "core/types_api.h"
 #include "match/ft-front-prune.h"
 #include "match/seed_extend_parts.h"
+#include "match/querymatch-display.h"
 #include "match/xdrop.h"
 
 typedef struct GtDiagbandseedInfo GtDiagbandseedInfo;
@@ -75,7 +76,7 @@ GtDiagbandseedExtendParams *gt_diagbandseed_extend_params_new(
                               GtUword userdefinedleastlength,
                               GtUword logdiagbandwidth,
                               GtUword mincoverage,
-                              unsigned int display_flag,
+                              const GtSeedExtendDisplayFlag *display_flag,
                               bool use_apos,
                               GtXdropscore xdropbelowscore,
                               bool extendgreedy,
@@ -90,7 +91,6 @@ GtDiagbandseedExtendParams *gt_diagbandseed_extend_params_new(
                               double matchscore_bias,
                               bool weakends,
                               bool benchmark,
-                              GtUword alignmentwidth,
                               bool always_polished_ends,
                               bool verify_alignment,
                               bool only_selected_seqpairs);

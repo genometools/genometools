@@ -22,6 +22,7 @@
 #include "core/error_api.h"
 #include "match/ft-front-prune.h"
 #include "match/seq_or_encseq.h"
+#include "match/querymatch-display.h"
 
 typedef struct GtQuerymatchoutoptions GtQuerymatchoutoptions;
 
@@ -47,7 +48,7 @@ void gt_querymatchoutoptions_extend(
                   GtUword sensitivity,
                   double matchscore_bias,
                   bool always_polished_ends,
-                  unsigned int display_flag);
+                  const GtSeedExtendDisplayFlag *display_flag);
 
 void gt_querymatchoutoptions_for_align_only(
                   GtQuerymatchoutoptions *querymatchoutoptions,
@@ -55,7 +56,7 @@ void gt_querymatchoutoptions_for_align_only(
                   double matchscore_bias,
                   GtUword history_size,
                   bool always_polished_ends,
-                  unsigned int display_flag);
+                  const GtSeedExtendDisplayFlag *display_flag);
 
 void gt_querymatchoutoptions_delete(
         GtQuerymatchoutoptions *querymatchoutoptions);
