@@ -24,6 +24,9 @@ typedef struct GtSeedExtendDisplayFlag GtSeedExtendDisplayFlag;
 
 bool gt_querymatch_seed_display(const GtSeedExtendDisplayFlag *display_flag);
 
+bool gt_querymatch_seed_in_alignment_display(
+                 const GtSeedExtendDisplayFlag *display_flag);
+
 bool gt_querymatch_evalue_display(const GtSeedExtendDisplayFlag *display_flag);
 
 bool gt_querymatch_bit_score_display(const GtSeedExtendDisplayFlag

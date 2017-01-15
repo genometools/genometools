@@ -166,9 +166,9 @@ void gt_querymatchoutoptions_extend(
         gt_eoplist_polished_ends(querymatchoutoptions->eoplist,
                                  querymatchoutoptions->pol_info,true);
       }
-      if (gt_querymatch_seed_display(display_flag))
+      if (gt_querymatch_seed_in_alignment_display(display_flag))
       {
-        gt_eoplist_seed_display_set(querymatchoutoptions->eoplist);
+        gt_eoplist_display_seed_in_alignment_set(querymatchoutoptions->eoplist);
       }
     }
     querymatchoutoptions->always_polished_ends = always_polished_ends;

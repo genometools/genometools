@@ -255,7 +255,7 @@ static void gt_show_seed_extend_encseq(GtQuerymatch *querymatchptr,
                             karlin_altschul_stat,
                             &aseqorencseq,
                             &bseqorencseq,
-                            false) != 0)
+                            true) != 0)
   {
     gt_querymatch_prettyprint(querymatchptr);
   }

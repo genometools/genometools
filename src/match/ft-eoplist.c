@@ -44,7 +44,7 @@ struct GtEoplist
   uint8_t *spaceuint8_t;
   const GtUchar *useq, *vseq;
   GtUword ulen, vlen;
-  bool withpolcheck, seed_display;
+  bool withpolcheck, display_seed_in_alignment;
   GtUword useedoffset, seedlen;
   const GtFtPolishing_info *pol_info;
 };
@@ -70,7 +70,7 @@ GtEoplist *gt_eoplist_new(void)
   gt_assert(eoplist != NULL);
   eoplist->allocateduint8_t = 0;
   eoplist->spaceuint8_t = NULL;
-  eoplist->seed_display = false;
+  eoplist->display_seed_in_alignment = false;
   eoplist->withpolcheck = false;
   eoplist->useedoffset = eoplist->seedlen = 0;
   eoplist->pol_info = NULL;
@@ -719,7 +719,7 @@ void gt_eoplist_format_generic(FILE *fp,
             if (eoplist->useedoffset <= idx_u &&
                 idx_u < eoplist->useedoffset + eoplist->seedlen)
             {
-              if (eoplist->seed_display)
+              if (eoplist->display_seed_in_alignment)
               {
                 midbuf[pos] = (GtUchar) '+';
               } else
@@ -990,10 +990,10 @@ void gt_eoplist_verify(const GtEoplist *eoplist,
                 gt_eoplist_insertions_count(eoplist)));
 }
 
-void gt_eoplist_seed_display_set(GtEoplist *eoplist)
+void gt_eoplist_display_seed_in_alignment_set(GtEoplist *eoplist)
 {
   gt_assert(eoplist != NULL);
-  eoplist->seed_display = true;
+  eoplist->display_seed_in_alignment = true;
 }
 
 void gt_eoplist_set_seedoffset(GtEoplist *eoplist,

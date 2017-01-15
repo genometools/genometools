@@ -24,6 +24,19 @@ seeds = [170039800390891361279027638963673934519,
 $SPLT_LIST = ["-splt struct","-splt ulong"]
 $CAM_LIST = ["encseq", "encseq_reader","bytes"]
 
+Name "gt dev show_seedext without alignment"
+Keywords "gt_seed_extend"
+Test do
+  run_test build_encseq("at1MB", "#{$testdata}at1MB")
+  run_test "#{$bin}gt seed_extend -v -display seed -ii at1MB"
+  run "mv #{last_stdout} seed_extend.out"
+  run_test "#{$bin}gt dev show_seedext -f seed_extend.out"
+  run "mv #{last_stdout} show_seed_ext.out"
+  run "grep -v '^#' seed_extend.out"
+  run "cmp #{last_stdout} show_seed_ext.out"
+  run_test "#{$bin}gt dev show_seedext -a -f seed_extend.out"
+end
+
 # cam extension options
 Name "gt seed_extend: cam"
 Keywords "gt_seed_extend cam"

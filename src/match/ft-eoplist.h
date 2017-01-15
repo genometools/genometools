@@ -194,7 +194,7 @@ GtEoplist *gt_eoplist_new_from_cigar(const char *cigarstring,GtUword length);
 char *gt_eoplist2cigar_string(const GtEoplist *eoplist,
                               bool distinguish_mismatch_match);
 
-void gt_eoplist_seed_display_set(GtEoplist *eoplist);
+void gt_eoplist_display_seed_in_alignment_set(GtEoplist *eoplist);
 
 void gt_eoplist_set_seedoffset(GtEoplist *eoplist,
                                GtUword useedoffset,
