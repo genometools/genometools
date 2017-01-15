@@ -676,7 +676,10 @@ static int gt_seed_extend_runner(int argc,
       had_err = -1;
     }
   }
-
+  gt_querymatch_display_seedpos_relative_set(
+             arguments->display_flag,
+             cam_a == GT_EXTEND_CHAR_ACCESS_DIRECT ? true : false,
+             cam_b == GT_EXTEND_CHAR_ACCESS_DIRECT ? true : false);
   if (!had_err)
   {
     splt = gt_diagbandseed_splt_get(gt_str_get(arguments->splt_string),err);

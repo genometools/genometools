@@ -30,6 +30,7 @@
 #include "match/seed-extend.h"
 #include "match/seq_or_encseq.h"
 #include "match/seed-extend-iter.h"
+#include "match/stamp.h"
 #include "extended/linearalign.h"
 #include "tools/gt_show_seedext.h"
 
@@ -160,7 +161,8 @@ static void gt_show_seed_extend_plain(GtSequencepairbuffer *seqpairbuf,
                                       GtScoreHandler *linspace_scorehandler,
                                       GtAlignment *alignment,
                                       GtUchar *alignment_show_buffer,
-                                      GtUword alignmentwidth,
+                                      const GtSeedExtendDisplayFlag
+                                        *display_flag,
                                       bool showeoplist,
                                       const GtUchar *characters,
                                       GtUchar wildcardshow,
@@ -175,7 +177,9 @@ static void gt_show_seed_extend_plain(GtSequencepairbuffer *seqpairbuf,
                 queryseqnum = gt_querymatch_queryseqnum(querymatchptr),
                 querystart_fwdstrand
                   = gt_querymatch_querystart_fwdstrand(querymatchptr),
-                querylen = gt_querymatch_querylen(querymatchptr);
+                querylen = gt_querymatch_querylen(querymatchptr),
+                alignmentwidth = gt_querymatch_display_alignmentwidth(
+                                        display_flag);
 
   const GtUword apos_ab = gt_querymatch_dbstart(querymatchptr);
   const GtUword bpos_ab = gt_encseq_seqstartpos(bencseq, queryseqnum) +
@@ -285,6 +289,7 @@ static int gt_show_seedext_runner(GT_UNUSED int argc,
   gt_assert(arguments != NULL);
   /* Parse option string in first line of file specified by filename. */
   alignmentwidth = arguments->show_alignment ? 70 : 0;
+  gt_querymatch_display_alignmentwidth_set(display_flag,alignmentwidth);
   alignment_show_buffer
     = arguments->show_alignment ? gt_alignment_buffer_new(alignmentwidth)
                                 : NULL;
@@ -327,7 +332,6 @@ static int gt_show_seedext_runner(GT_UNUSED int argc,
                             semi,
                             true,
                             arguments->showeoplist,
-                            alignmentwidth,
                             !arguments->relax_polish,
                             display_flag,
                             err) != 0)
@@ -422,7 +426,7 @@ static int gt_show_seedext_runner(GT_UNUSED int argc,
                                   linspace_scorehandler,
                                   alignment,
                                   alignment_show_buffer,
-                                  alignmentwidth,
+                                  display_flag,
                                   arguments->showeoplist,
                                   characters,
                                   wildcardshow,

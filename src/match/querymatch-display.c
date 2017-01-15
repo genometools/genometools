@@ -32,8 +32,20 @@ typedef enum
 struct GtSeedExtendDisplayFlag
 {
   unsigned int flags;
+  bool a_seedpos_relative, b_seedpos_relative;
   GtUword alignmentwidth;
 };
+
+GtSeedExtendDisplayFlag *gt_querymatch_display_flag_new(void)
+{
+  GtSeedExtendDisplayFlag *display_flag = gt_malloc(sizeof *display_flag);
+
+  display_flag->flags = 0;
+  display_flag->alignmentwidth = 0;
+  display_flag->a_seedpos_relative = true; /* as bytes is default access mode */
+  display_flag->b_seedpos_relative = true;
+  return display_flag;
+}
 
 static bool gt_querymatch_display_on(const GtSeedExtendDisplayFlag
                                        *display_flag,
@@ -75,6 +87,37 @@ GtUword gt_querymatch_display_alignmentwidth(const GtSeedExtendDisplayFlag
                                                 *display_flag)
 {
   return (display_flag == NULL) ? 0 : display_flag->alignmentwidth;
+}
+
+bool gt_querymatch_display_alignment(const GtSeedExtendDisplayFlag
+                                     *display_flag)
+{
+  return (display_flag != NULL &&
+          display_flag->alignmentwidth > 0) ? true : false;
+}
+
+void gt_querymatch_display_seedpos_relative_set(GtSeedExtendDisplayFlag
+                                                *display_flag,
+                                                bool a_is_rel,
+                                                bool b_is_rel)
+{
+  gt_assert(display_flag != NULL);
+  display_flag->a_seedpos_relative = a_is_rel;
+  display_flag->b_seedpos_relative = b_is_rel;
+}
+
+bool gt_querymatch_display_seedpos_a_relative(const GtSeedExtendDisplayFlag
+                                                *display_flag)
+{
+  return (display_flag != NULL && display_flag->a_seedpos_relative) ? true
+                                                                    : false;
+}
+
+bool gt_querymatch_display_seedpos_b_relative(const GtSeedExtendDisplayFlag
+                                                *display_flag)
+{
+  return (display_flag != NULL && display_flag->b_seedpos_relative) ? true
+                                                                    : false;
 }
 
 GtStr *gt_querymatch_column_header(const GtSeedExtendDisplayFlag *display_flag)
@@ -135,15 +178,6 @@ void gt_querymatch_display_alignmentwidth_set(GtSeedExtendDisplayFlag
 {
   gt_assert(display_flag != NULL);
   display_flag->alignmentwidth = alignmentwidth;
-}
-
-GtSeedExtendDisplayFlag *gt_querymatch_display_flag_new(void)
-{
-  GtSeedExtendDisplayFlag *display_flag = gt_malloc(sizeof *display_flag);
-
-  display_flag->flags = 0;
-  display_flag->alignmentwidth = 0;
-  return display_flag;
 }
 
 int gt_querymatch_display_flag_args_set(

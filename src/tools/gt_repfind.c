@@ -764,8 +764,8 @@ static int gt_repfind_runner(int argc,
   GtXdropmatchinfo *xdropmatchinfo = NULL;
   GtGreedyextendmatchinfo *greedyextendmatchinfo = NULL;
   GtTimer *repfindtimer = NULL;
-  GtExtendCharAccess a_extend_char_access = GT_EXTEND_CHAR_ACCESS_ANY,
-                     b_extend_char_access = GT_EXTEND_CHAR_ACCESS_ANY;
+  GtExtendCharAccess cam_a = GT_EXTEND_CHAR_ACCESS_ANY,
+                     cam_b = GT_EXTEND_CHAR_ACCESS_ANY;
   GtFtPolishing_info *pol_info = NULL;
   GtQuerymatchoutoptions *querymatchoutoptions;
   GtProcessinfo_and_querymatchspaceptr info_querymatch = {NULL,NULL,NULL};
@@ -797,6 +797,17 @@ static int gt_repfind_runner(int argc,
   {
     arguments->alignmentwidth = 0;
   }
+  if (!haserr)
+  {
+    if (gt_querymatch_display_flag_args_set(display_flag,
+                                            arguments->display_args,
+                                            err) != 0)
+    {
+      haserr = true;
+    }
+  }
+  gt_querymatch_display_alignmentwidth_set(display_flag,
+                                           arguments->alignmentwidth);
   if (!haserr && gt_option_is_set(arguments->refextendxdropoption))
   {
     xdropmatchinfo
@@ -814,11 +825,11 @@ static int gt_repfind_runner(int argc,
   if (!haserr)
   {
     if (gt_option_is_set(arguments->refextendgreedyoption) ||
-        arguments->alignmentwidth > 0 ||
+        gt_querymatch_display_alignment(display_flag) ||
         gt_option_is_set(arguments->refextendxdropoption))
     {
-      if (gt_greedy_extend_char_access(&a_extend_char_access,
-                                       &b_extend_char_access,
+      if (gt_greedy_extend_char_access(&cam_a,
+                                       &cam_b,
                                        gt_str_get(arguments->cam_string),err)
          != 0)
       {
@@ -826,6 +837,11 @@ static int gt_repfind_runner(int argc,
       }
     }
   }
+  gt_querymatch_display_seedpos_relative_set(
+             display_flag,
+             cam_a == GT_EXTEND_CHAR_ACCESS_DIRECT ? true : false,
+             cam_b == GT_EXTEND_CHAR_ACCESS_DIRECT ? true : false);
+
   if (!haserr && gt_option_is_set(arguments->refextendgreedyoption))
   {
     GtUword errorpercentage = gt_minidentity2errorpercentage(
@@ -839,8 +855,8 @@ static int gt_repfind_runner(int argc,
                                        arguments->history,
                                        arguments->perc_mat_history,
                                        arguments->userdefinedleastlength,
-                                       a_extend_char_access,
-                                       b_extend_char_access,
+                                       cam_a,
+                                       cam_b,
                                        false,
                                        arguments->extendgreedy,
                                        pol_info);
@@ -861,15 +877,6 @@ static int gt_repfind_runner(int argc,
   }
   if (!haserr)
   {
-    if (gt_querymatch_display_flag_args_set(display_flag,
-                                            arguments->display_args,
-                                            err) != 0)
-    {
-      haserr = true;
-    }
-  }
-  if (!haserr)
-  {
     GtEncseq *encseq_for_desc = NULL;
     info_querymatch.processinfo = NULL;
     if (gt_querymatch_evalue_display(display_flag) ||
@@ -881,12 +888,12 @@ static int gt_repfind_runner(int argc,
     {
       info_querymatch.karlin_altschul_stat = NULL;
     }
-    if (arguments->alignmentwidth > 0 ||
+    if (gt_querymatch_display_alignment(display_flag) ||
         (gt_option_is_set(arguments->refextendxdropoption) &&
          !arguments->noxpolish))
     {
       querymatchoutoptions
-        = gt_querymatchoutoptions_new(true, false,arguments->alignmentwidth,
+        = gt_querymatchoutoptions_new(true, false,display_flag,
                                       gt_str_get(arguments->indexname),err);
       if (querymatchoutoptions == NULL)
       {
@@ -907,8 +914,8 @@ static int gt_repfind_runner(int argc,
                                       arguments->maxalignedlendifference,
                                       arguments->history,
                                       arguments->perc_mat_history,
-                                      a_extend_char_access,
-                                      b_extend_char_access,
+                                      cam_a,
+                                      cam_b,
                                       cam_generic,
                                       weakends,
                                       sensitivity,

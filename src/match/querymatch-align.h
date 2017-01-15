@@ -28,7 +28,9 @@ typedef struct GtQuerymatchoutoptions GtQuerymatchoutoptions;
 
 GtQuerymatchoutoptions *gt_querymatchoutoptions_new(bool generatealignment,
                                                     bool showeoplist,
-                                                    GtUword alignmentwidth,
+                                                    const
+                                                     GtSeedExtendDisplayFlag
+                                                      *display_flag,
                                                     const char *indexname,
                                                     GtError *err);
 

@@ -4031,7 +4031,7 @@ static int gt_diagbandseed_algorithm(const GtDiagbandseedInfo *arg,
   {
     querymoutopt = gt_querymatchoutoptions_new(true,
                                                false,
-                                               alignmentwidth,
+                                               extp->display_flag,
                                                NULL,
                                                NULL);
     gt_assert(querymoutopt != NULL);

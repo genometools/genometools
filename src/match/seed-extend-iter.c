@@ -474,7 +474,6 @@ int gt_seedextend_match_iterator_querymatchoutoptions_set(
                     GtSeedextendMatchIterator *semi,
                     bool generatealignment,
                     bool showeoplist,
-                    GtUword alignmentwidth,
                     bool always_polished_ends,
                     const GtSeedExtendDisplayFlag *display_flag,
                     GtError *err)
@@ -483,9 +482,9 @@ int gt_seedextend_match_iterator_querymatchoutoptions_set(
 
   semi->querymatchoutoptions
     = gt_querymatchoutoptions_new(generatealignment,showeoplist,
-                                  alignmentwidth, gt_str_get(semi->ii), err);
+                                  display_flag, gt_str_get(semi->ii), err);
 
-  if (semi->querymatchoutoptions)
+  if (semi->querymatchoutoptions == NULL)
   {
     return -1;
   }

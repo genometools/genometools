@@ -39,8 +39,8 @@ struct GtQuerymatch
     querystart_fwdstrand, /* relative start of query on forward strand */
     query_totallength, /* length of single query sequence */
     dbseqlen, /* length of single database sequence */
-    seedpos1,
-    seedpos2,
+    seedpos1, /* absolute or relative depending on char_access_mode */
+    seedpos2, /* absolute or relative depending on char_access_mode */
     seedlen;
   GtWord score; /* 0 for exact match */
   uint64_t queryseqnum; /* ordinal number of match in query */
@@ -511,14 +511,15 @@ bool gt_querymatch_read_line(GtQuerymatch *querymatch,
   if ((withseqlength && parsed_items == 12) ||
       (!withseqlength && parsed_items == 10))
   {
-    GtUword mismatch_estim, lower_bound_indels;
+    GtUword mismatch_estim, lower_bound_indels,
+           dbseqstartpos = gt_encseq_seqstartpos(dbencseq,querymatch->dbseqnum);
+
     querymatch->query_readmode = gt_readmode_character_code_parse(direction);
-    querymatch->dbstart
-      = gt_encseq_seqstartpos(dbencseq,querymatch->dbseqnum) +
-        querymatch->dbstart_relative;
+    querymatch->dbstart = dbseqstartpos + querymatch->dbstart_relative;
     querymatch->selfmatch = selfmatch;
-    querymatch->seedpos1 = seedpos1;
-    querymatch->seedpos2 = seedpos2;
+    querymatch->seedpos1 = seedpos1 + dbseqstartpos;
+    querymatch->seedpos2 = seedpos2 + gt_encseq_seqstartpos(queryencseq,
+                                                            queryseqnum);
     querymatch->seedlen = seedlen;
     if (!withseqlength)
     {
@@ -629,7 +630,28 @@ bool gt_querymatch_complete(GtQuerymatch *querymatch,
                      db_desc,
                      query_desc);
   querymatch->seedpos1 = seedpos1;
+  if (!gt_querymatch_display_seedpos_a_relative(querymatch->display_flag))
+  {
+    gt_assert(dbes->encseq != NULL);
+    if (dbes->seqstartpos != GT_UWORD_MAX)
+    {
+      gt_assert(querymatch->seedpos1 >= dbes->seqstartpos);
+      querymatch->seedpos1 -= dbes->seqstartpos;
+    }
+  } else
+  {
+    gt_assert(dbes->encseq == NULL);
+  }
   querymatch->seedpos2 = seedpos2;
+  if (!gt_querymatch_display_seedpos_b_relative(querymatch->display_flag)
+      && queryes != NULL)
+  {
+    if (queryes->seqstartpos != GT_UWORD_MAX)
+    {
+      gt_assert(querymatch->seedpos2 >= queryes->seqstartpos);
+      querymatch->seedpos2 -= queryes->seqstartpos;
+    }
+  }
   querymatch->seedlen = seedlen;
   return gt_querymatch_process(querymatch,
                                karlin_altschul_stat,

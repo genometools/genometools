@@ -38,6 +38,20 @@ bool gt_querymatch_seqlength_display(const GtSeedExtendDisplayFlag
 GtUword gt_querymatch_display_alignmentwidth(const GtSeedExtendDisplayFlag
                                                 *display_flag);
 
+bool gt_querymatch_display_alignment(const GtSeedExtendDisplayFlag
+                                     *display_flag);
+
+void gt_querymatch_display_seedpos_relative_set(GtSeedExtendDisplayFlag
+                                                *display_flag,
+                                                bool a_is_rel,
+                                                bool b_is_rel);
+
+bool gt_querymatch_display_seedpos_a_relative(const GtSeedExtendDisplayFlag
+                                                *display_flag);
+
+bool gt_querymatch_display_seedpos_b_relative(const GtSeedExtendDisplayFlag
+                                                *display_flag);
+
 GtSeedExtendDisplayFlag *gt_querymatch_display_flag_new(void);
 
 int gt_querymatch_display_flag_args_set(

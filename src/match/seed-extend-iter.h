@@ -85,7 +85,6 @@ int gt_seedextend_match_iterator_querymatchoutoptions_set(
                     GtSeedextendMatchIterator *semi,
                     bool generatealignment,
                     bool showeoplist,
-                    GtUword alignmentwidth,
                     bool always_polished_ends,
                     const GtSeedExtendDisplayFlag *display_flag,
                     GtError *err);
