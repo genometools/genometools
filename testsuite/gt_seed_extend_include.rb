@@ -34,7 +34,7 @@ Test do
   run "mv #{last_stdout} show_seed_ext.out"
   run "grep -v '^#' seed_extend.out"
   run "cmp #{last_stdout} show_seed_ext.out"
-  run_test "#{$bin}gt dev show_seedext -a -f seed_extend.out"
+  run_test "#{$bin}gt dev show_seedext -display alignment -f seed_extend.out"
 end
 
 # cam extension options
@@ -187,13 +187,13 @@ Test do
       for alignlength in [2, 80] do
         for minidentity in [70, 80, 99] do
           run_test "#{$bin}gt seed_extend -extendgreedy #{sensitivity} " +
-                     "-minidentity #{minidentity} -l #{alignlength} -a " +
-                     "-display seed -ii at1MB -verify-alignment #{splt}", :retval => 0
+                     "-minidentity #{minidentity} -l #{alignlength} " +
+                     "-display alignment seed -ii at1MB -verify-alignment #{splt}", :retval => 0
         end
       end
     end
     run_test "#{$bin}gt seed_extend -extendgreedy -bias-parameters -verify " +
-             "-overlappingseeds -a -display seed -ii at1MB #{splt}",:retval => 0
+             "-overlappingseeds -display alignment seed -ii at1MB #{splt}",:retval => 0
   end
 end
 
@@ -207,8 +207,8 @@ Test do
       for percmathistory in [70, 80, 99] do
         for maxalilendiff in [1, 10, 30] do
           run_test "#{$bin}gt seed_extend -maxalilendiff #{maxalilendiff} " +
-          "-history #{history} -percmathistory #{percmathistory} -a " +
-          "-ii at1MB #{splt}", :retval => 0
+          "-history #{history} -percmathistory #{percmathistory} " +
+          "-ii at1MB -display alignment #{splt}", :retval => 0
         end
       end
     end

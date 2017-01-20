@@ -67,7 +67,7 @@ static GtOptionParser* gt_show_seedext_option_parser_new(void *tool_arguments)
 {
   GtShowSeedextArguments *arguments = tool_arguments;
   GtOptionParser *op;
-  GtOption *op_ali, *option_filename, *op_relax_polish,
+  GtOption *option_filename, *op_relax_polish,
            *op_seed_extend, *op_sortmatches, *op_showeoplist, *op_display;
 
   gt_assert(arguments);
@@ -75,13 +75,6 @@ static GtOptionParser* gt_show_seedext_option_parser_new(void *tool_arguments)
   op = gt_option_parser_new("[options] -f <matchfilename>",
                             "Parse output of a seed extension and show/verify "
                             "the alignment.");
-
-  /* -a */
-  op_ali = gt_option_new_bool("a",
-                              "show alignment",
-                              &arguments->show_alignment,
-                              false);
-  gt_option_parser_add_option(op, op_ali);
 
   /* -display */
   op_display = gt_option_new_string_array("display",
@@ -105,7 +98,6 @@ static GtOptionParser* gt_show_seedext_option_parser_new(void *tool_arguments)
                                        &arguments->relax_polish,false);
   gt_option_parser_add_option(op, op_relax_polish);
   gt_option_is_development_option(op_relax_polish);
-  gt_option_imply(op_relax_polish, op_ali);
 
   /* -sort */
   op_sortmatches = gt_option_new_bool("sort","sort matches in ascending order "
@@ -268,12 +260,11 @@ static int gt_show_seedext_runner(GT_UNUSED int argc,
                                   GtError *err)
 {
   int had_err = 0;
-  GtUword alignmentwidth;
   GtShowSeedextArguments *arguments = tool_arguments;
-  GtSeedextendMatchIterator *semi;
-  GtSeedExtendDisplayFlag *display_flag = gt_querymatch_display_flag_new();
+  GtSeedextendMatchIterator *semi = NULL;
   const GtEncseq *aencseq = NULL, *bencseq = NULL;
   GtAlignment *alignment = gt_alignment_new();
+  GtSeedExtendDisplayFlag *display_flag = gt_querymatch_display_flag_new();
   GtFtPolishing_info *pol_info = NULL;
   GtSequencepairbuffer seqpairbuf = {NULL,NULL,0,0};
   GtGreedyextendmatchinfo *greedyextendmatchinfo = NULL;
@@ -281,35 +272,38 @@ static int gt_show_seedext_runner(GT_UNUSED int argc,
     = {NULL,NULL,NULL};
   const GtUchar *characters;
   GtUchar wildcardshow;
-  GtUchar *alignment_show_buffer;
+  GtUchar *alignment_show_buffer = NULL;
   GtLinspaceManagement *linspace_spacemanager = gt_linspace_management_new();
   GtScoreHandler *linspace_scorehandler = gt_scorehandler_new(0,1,0,1);;
 
   gt_error_check(err);
   gt_assert(arguments != NULL);
   /* Parse option string in first line of file specified by filename. */
-  alignmentwidth = arguments->show_alignment ? 70 : 0;
-  gt_querymatch_display_alignmentwidth_set(display_flag,alignmentwidth);
-  alignment_show_buffer
-    = arguments->show_alignment ? gt_alignment_buffer_new(alignmentwidth)
-                                : NULL;
-  semi = gt_seedextend_match_iterator_new(arguments->matchfilename,err);
-  if (semi == NULL)
+  had_err = gt_querymatch_display_flag_args_set(display_flag,
+                                                arguments->display_args,
+                                                err);
+  if (!had_err)
   {
-    had_err = -1;
+    if (gt_querymatch_display_alignment(display_flag))
+    {
+      GtUword alignmentwidth
+        = gt_querymatch_display_alignmentwidth(display_flag);
+      alignment_show_buffer = gt_alignment_buffer_new(alignmentwidth);
+    }
+    semi = gt_seedextend_match_iterator_new(arguments->matchfilename,err);
+    if (semi == NULL)
+    {
+      had_err = -1;
+    }
   }
   /* Parse seed extensions. */
   if (!had_err)
   {
     aencseq = gt_seedextend_match_iterator_aencseq(semi);
     bencseq = gt_seedextend_match_iterator_bencseq(semi);
-
     /* the following are used if seed_extend is set */
     characters = gt_encseq_alphabetcharacters(aencseq);
     wildcardshow = gt_encseq_alphabetwildcardshow(aencseq);
-    had_err = gt_querymatch_display_flag_args_set(display_flag,
-                                                  arguments->display_args,
-                                                  err);
   }
   if (!had_err)
   {

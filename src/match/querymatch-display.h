@@ -62,10 +62,6 @@ int gt_querymatch_display_flag_args_set(
                const GtStrArray *display_args,
                GtError *err);
 
-void gt_querymatch_display_alignmentwidth_set(GtSeedExtendDisplayFlag
-                                                  *display_flag,
-                                              GtUword alignmentwidth);
-
 void gt_querymatch_display_flag_delete(GtSeedExtendDisplayFlag *display_flag);
 
 const char *gt_querymatch_display_help(void);

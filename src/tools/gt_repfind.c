@@ -54,10 +54,8 @@ typedef struct
            reasons, the option -err is used, then the minidentity contains the
            error rate, a value in the range from 1 to 30. */
           maxalignedlendifference, /* maxfrontdist */
-          extendgreedy, /* determines which of the tables in
+          extendgreedy; /* determines which of the tables in
                            seed-extend-params.h is used */
-          alignmentwidth; /* 0 for no alignment display and otherwidth number
-                             of columns of alignment per line displayed. */
   bool scanfile, beverbose, forward, reverse, reverse_complement, searchspm,
        check_extend_symmetry, silent, trimstat_on, noxpolish, verify_alignment;
   GtStr *indexname, *query_indexname, *cam_string;
@@ -66,8 +64,7 @@ typedef struct
            *refseedlengthoption,
            *refuserdefinedleastlengthoption,
            *refextendxdropoption,
-           *refextendgreedyoption,
-           *refalignmentoutoption;
+           *refextendgreedyoption;
   GtStrArray *display_args;
 } GtMaxpairsoptions;
 
@@ -83,7 +80,7 @@ static int gt_exact_selfmatch_with_output(void *info,
   const GtEncseq *encseq;
   GtProcessinfo_and_querymatchspaceptr *info_querymatch
     = (GtProcessinfo_and_querymatchspaceptr *) info;
-  GtSeqorEncseq dbes;
+  GtSeqorEncseq dbes, queryes;
 
   gt_assert(pos1 < pos2 && genericencseq != NULL && genericencseq->hasencseq);
   encseq = genericencseq->seqptr.encseq;
@@ -106,6 +103,7 @@ static int gt_exact_selfmatch_with_output(void *info,
   }
   gt_assert(pos2 >= queryseqstartpos);
   GT_SEQORENCSEQ_INIT_ENCSEQ(&dbes,encseq);
+  GT_SEQORENCSEQ_INIT_ENCSEQ(&queryes,encseq);
   if (gt_querymatch_complete(info_querymatch->querymatchspaceptr,
                              info_querymatch->karlin_altschul_stat,
                              len,
@@ -121,7 +119,7 @@ static int gt_exact_selfmatch_with_output(void *info,
                              len,
                              pos2 - queryseqstartpos,
                              &dbes,
-                             NULL,
+                             &queryes,
                              query_totallength,
                              pos1,
                              pos2,
@@ -209,7 +207,6 @@ static void gt_repfind_arguments_delete(void *tool_arguments)
   gt_option_delete(arguments->refuserdefinedleastlengthoption);
   gt_option_delete(arguments->refextendxdropoption);
   gt_option_delete(arguments->refextendgreedyoption);
-  gt_option_delete(arguments->refalignmentoutoption);
   gt_free(arguments);
 }
 
@@ -224,7 +221,6 @@ static GtOptionParser *gt_repfind_option_parser_new(void *tool_arguments)
            *maxalilendiffoption, *leastlength_option, *char_access_mode_option,
            *check_extend_symmetry_option, *xdropbelowoption, *historyoption,
            *percmathistoryoption, *errorpercentageoption, *optiontrimstat,
-           *withalignmentoption,
            *optionnoxpolish, *verify_alignment_option, *option_query_indexname;
   GtMaxpairsoptions *arguments = tool_arguments;
 
@@ -358,18 +354,6 @@ static GtOptionParser *gt_repfind_option_parser_new(void *tool_arguments)
   gt_option_parser_add_option(op, percmathistoryoption);
   gt_option_is_development_option(percmathistoryoption);
 
-  withalignmentoption
-    = gt_option_new_uword_min("a",
-                              "show alignments/sequences for exact matches "
-                              "(optional argument is number of columns per "
-                              "line)",
-                              &arguments->alignmentwidth,
-                              70,
-                              20);
-  gt_option_argument_is_optional(withalignmentoption);
-  gt_option_parser_add_option(op, withalignmentoption);
-  arguments->refalignmentoutoption = gt_option_ref(withalignmentoption);
-
   option = gt_option_new_string("ii",
                                 "Specify input index",
                                 arguments->indexname, NULL);
@@ -466,15 +450,11 @@ static GtOptionParser *gt_repfind_option_parser_new(void *tool_arguments)
   gt_option_exclude(reverse_complementoption,spmoption);
   gt_option_exclude(extendgreedyoption,extendxdropoption);
   gt_option_exclude(errorpercentageoption,minidentityoption);
-  gt_option_exclude(withalignmentoption,sampleoption);
-  gt_option_exclude(withalignmentoption,spmoption);
-  gt_option_exclude(optionnoxpolish,withalignmentoption);
   gt_option_imply(xdropbelowoption,extendxdropoption);
   gt_option_imply(historyoption,extendgreedyoption);
   gt_option_imply(maxalilendiffoption,extendgreedyoption);
   gt_option_imply(percmathistoryoption,extendgreedyoption);
   gt_option_imply(optiontrimstat,extendgreedyoption);
-  gt_option_imply(verify_alignment_option,withalignmentoption);
   gt_option_imply(optionnoxpolish,extendxdropoption);
   gt_option_imply_either_2(seedlengthoption,extendxdropoption,
                            extendgreedyoption);
@@ -793,10 +773,6 @@ static int gt_repfind_runner(int argc,
     gt_error_set(err,"superfluous arguments: \"%s\"",argv[argc-1]);
     haserr = true;
   }
-  if (!haserr && !gt_option_is_set(arguments->refalignmentoutoption))
-  {
-    arguments->alignmentwidth = 0;
-  }
   if (!haserr)
   {
     if (gt_querymatch_display_flag_args_set(display_flag,
@@ -806,8 +782,6 @@ static int gt_repfind_runner(int argc,
       haserr = true;
     }
   }
-  gt_querymatch_display_alignmentwidth_set(display_flag,
-                                           arguments->alignmentwidth);
   if (!haserr && gt_option_is_set(arguments->refextendxdropoption))
   {
     xdropmatchinfo

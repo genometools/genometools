@@ -22,6 +22,7 @@
 
 typedef enum
 {
+  Gt_Alignment_display,
   Gt_Seed_display,
   Gt_Seed_in_alignment_display,
   Gt_Seqlength_display,
@@ -148,44 +149,79 @@ GtStr *gt_querymatch_column_header(const GtSeedExtendDisplayFlag *display_flag)
 
 const char *gt_querymatch_display_help(void)
 {
-  return "specify what additional values in matches are displayed\n"
+  return "specify what information about the matches to display\n"
+         "alignment:    display alignment (possibly followed by =<number>\n"
+         "              to specify width of alignment columns)\n"
          "seed:         display the seed of the match\n"
          "seed_in_algn: display the seed in alignment\n"
          "seqlength:    display length of sequences in which\n"
          "              the two match-instances occur\n"
          "evalue:       display evalue\n"
          "seq-desc:     display sequence description instead of numbers\n"
-         "bit-score:    display bit score";
+         "bit-score:    display bit score\n";
 }
 
-static bool gt_querymatch_display_flag_set(GtSeedExtendDisplayFlag
-                                             *display_flag,
-                                           const char *arg)
+static int gt_querymatch_display_flag_set(GtWord *parameter,
+                                          GtSeedExtendDisplayFlag *display_flag,
+                                          const char *arg,
+                                          GtError *err)
 {
   const char *display_strings[]
-    = {"seed","seed_in_algn","seqlength","evalue","seq-desc","bit-score"};
+    = {"alignment","seed","seed_in_algn","seqlength","evalue",
+       "seq-desc","bit-score"};
   size_t ds_idx, numofds = sizeof display_strings/sizeof display_strings[0];
-  bool found = false;
+  bool identifier_okay = false, parameter_found = false;
+  const char *ptr;
+  size_t cmplen;
 
   gt_assert(display_flag != NULL &&
             numofds == (size_t) Gt_Bitscore_display + 1);
+  ptr = strchr(arg,'=');
+  if (ptr != NULL)
+  {
+    cmplen = (size_t) (ptr - arg);
+    if (sscanf(ptr+1,GT_WD,parameter) != 1)
+    {
+      gt_error_set(err,"illegal argument \"%s\" to option -display: "
+                       "expect integer following symbol =",arg);
+      return -1;
+    }
+    parameter_found = true;
+  } else
+  {
+    cmplen = 0;
+  }
   for (ds_idx = 0; ds_idx < numofds; ds_idx++)
   {
-    if (strcmp(arg,display_strings[ds_idx]) == 0)
+    int ret = (cmplen > 0) ? strncmp(arg,display_strings[ds_idx],cmplen)
+                           : strcmp(arg,display_strings[ds_idx]);
+    if (ret == 0)
     {
       display_flag->flags |= (1U << ds_idx);
-      found = true;
+      identifier_okay = true;
+      break;
     }
   }
-  return found;
-}
+  if (!identifier_okay)
+  {
+    GtStr *err_msg = gt_str_new();
 
-void gt_querymatch_display_alignmentwidth_set(GtSeedExtendDisplayFlag
-                                                  *display_flag,
-                                              GtUword alignmentwidth)
-{
-  gt_assert(display_flag != NULL);
-  display_flag->alignmentwidth = alignmentwidth;
+    gt_str_append_cstr(err_msg,
+                       "illegal identifier in argument of option display: "
+                       "possible idenfifiers are: ");
+    for (ds_idx = 0; ds_idx < numofds; ds_idx++)
+    {
+      gt_str_append_cstr(err_msg,display_strings[ds_idx]);
+      if (ds_idx < numofds - 1)
+      {
+        gt_str_append_cstr(err_msg,", ");
+      }
+    }
+    gt_error_set(err,gt_str_get(err_msg));
+    gt_str_delete(err_msg);
+    return -1;
+  }
+  return parameter_found ? 1 : 0;
 }
 
 int gt_querymatch_display_flag_args_set(
@@ -199,15 +235,29 @@ int gt_querymatch_display_flag_args_set(
   for (da_idx = 0; da_idx < gt_str_array_size(display_args); da_idx++)
   {
     const char *da = gt_str_array_get(display_args,da_idx);
-
-    if (!gt_querymatch_display_flag_set(display_flag,da))
+    GtWord parameter;
+    int ret = gt_querymatch_display_flag_set(&parameter,display_flag,da,err);
+    switch (ret)
     {
-      gt_error_set(err,"illegal argument %s to option -display: "
-                       " possible values are "
-                       "seed, seqlength, evalue, seq-desc or bit-score",da);
-      gt_free(display_flag);
-      return -1;
+      case 0:
+        break;
+      case 1:
+        gt_assert(da_idx == 0);
+        if (parameter < 0)
+        {
+          gt_error_set(err,"integer following \"alignment=\" must be positive");
+          return -1;
+        }
+        display_flag->alignmentwidth = (GtUword) parameter;
+        break;
+      default:
+        return -1;
     }
+  }
+  if ((display_flag->flags & (1U << Gt_Alignment_display)) &&
+      display_flag->alignmentwidth == 0)
+  {
+    display_flag->alignmentwidth = 70; /* this is the default alignment width */
   }
   return 0;
 }

@@ -76,10 +76,8 @@ typedef struct {
   bool only_selected_seqpairs;
   bool cam_generic;
   /* general options */
-  GtOption *se_option_withali;
   GtUword se_alignlength;
   GtUword se_minidentity;
-  GtUword se_alignmentwidth;
   GtStrArray *display_args;
   bool norev;
   bool nofwd;
@@ -118,7 +116,6 @@ static void gt_seed_extend_arguments_delete(void *tool_arguments)
     gt_str_delete(arguments->splt_string);
     gt_option_delete(arguments->se_option_greedy);
     gt_option_delete(arguments->se_option_xdrop);
-    gt_option_delete(arguments->se_option_withali);
     gt_str_array_delete(arguments->display_args);
     gt_querymatch_display_flag_delete(arguments->display_flag);
     gt_free(arguments);
@@ -131,7 +128,7 @@ static GtOptionParser* gt_seed_extend_option_parser_new(void *tool_arguments)
   GtOptionParser *op;
   GtOption *option, *op_gre, *op_xdr, *op_cam, *op_splt,
     *op_his, *op_dif, *op_pmh,
-    *op_len, *op_err, *op_xbe, *op_sup, *op_frq, *op_mem, *op_ali, *op_bia,
+    *op_len, *op_err, *op_xbe, *op_sup, *op_frq, *op_mem, *op_bia,
     *op_onl, *op_weakends, *op_relax_polish,
     *op_verify_alignment, *op_only_selected_seqpairs, *op_spdist, *op_display,
     *op_norev, *op_nofwd, *op_part, *op_pick, *op_overl, *op_trimstat,
@@ -386,17 +383,6 @@ static GtOptionParser* gt_seed_extend_option_parser_new(void *tool_arguments)
 
   /* OUTPUT OPTIONS */
 
-  /* -a */
-  op_ali = gt_option_new_uword_min("a",
-                                   "show alignments/sequences (optional "
-                                   "argument is number of columns per line)",
-                                   &arguments->se_alignmentwidth,
-                                   70, 20);
-  gt_option_exclude(op_ali, op_onl);
-  gt_option_argument_is_optional(op_ali);
-  gt_option_parser_add_option(op, op_ali);
-  arguments->se_option_withali = gt_option_ref(op_ali);
-
   /* -relax-polish */
   op_relax_polish = gt_option_new_bool("relax-polish",
                                        "do not force alignments to have "
@@ -404,7 +390,6 @@ static GtOptionParser* gt_seed_extend_option_parser_new(void *tool_arguments)
                                    &arguments->relax_polish,false);
   gt_option_parser_add_option(op, op_relax_polish);
   gt_option_is_development_option(op_relax_polish);
-  gt_option_imply(op_relax_polish, op_ali);
 
   /* -verify-alignment */
   op_verify_alignment
@@ -548,13 +533,6 @@ static int gt_seed_extend_arguments_check(int rest_argc, void *tool_arguments,
   if (arguments->dbs_suppress < GT_UWORD_MAX) {
     arguments->dbs_maxfreq = arguments->dbs_suppress - 1;
   }
-
-  /* no alignment output */
-  if (!gt_option_is_set(arguments->se_option_withali)) {
-    arguments->se_alignmentwidth = 0;
-  }
-  gt_querymatch_display_alignmentwidth_set(arguments->display_flag,
-                                           arguments->se_alignmentwidth);
 
   /* parse memlimit argument */
   arguments->dbs_memlimit = GT_UWORD_MAX;
