@@ -89,7 +89,7 @@ GtQuerymatchoutoptions *gt_querymatchoutoptions_new(bool generate_eoplist,
   querymatchoutoptions->vseqbuffer_size = 0;
   querymatchoutoptions->eoplist = gt_eoplist_new();
   querymatchoutoptions->eoplist_reader_verify = NULL;
-  if (display_alignment)
+  if (display_alignment || show_eoplist)
   {
     querymatchoutoptions->eoplist_reader
       = gt_eoplist_reader_new(querymatchoutoptions->eoplist);
@@ -595,41 +595,46 @@ void gt_querymatchoutoptions_alignment_show(const GtQuerymatchoutoptions
                                             bool verify_alignment,
                                             FILE *fp)
 {
-  if (querymatchoutoptions != NULL)
+  if (querymatchoutoptions == NULL)
+  {
+    fputc('\n',fp);
+  } else
   {
     if (querymatchoutoptions->show_eoplist)
     {
-      if (distance > 0)
-      {
-        gt_eoplist_show_plain(querymatchoutoptions->eoplist,fp);
-      } else
-      {
-        fprintf(fp, "[]\n");
-      }
-    }
-    if (querymatchoutoptions->eoplist_reader != NULL)
+      fputc(' ',fp);
+      gt_assert(querymatchoutoptions->eoplist_reader != NULL);
+      gt_eoplist_reader_reset(querymatchoutoptions->eoplist_reader,
+                              querymatchoutoptions->eoplist);
+      gt_eoplist_show_cigar(querymatchoutoptions->eoplist_reader,fp);
+      fputc('\n',fp);
+    } else
     {
-      if (distance > 0)
+      fputc('\n',fp);
+      if (querymatchoutoptions->eoplist_reader != NULL)
       {
-        if (verify_alignment)
+        if (distance > 0)
         {
-          gt_assert(querymatchoutoptions->eoplist_reader_verify != NULL);
-          gt_eoplist_verify(querymatchoutoptions->eoplist,
-                            querymatchoutoptions->eoplist_reader_verify,
-                            distance,true);
-        }
-        gt_eoplist_format_generic(fp,
+          if (verify_alignment)
+          {
+            gt_assert(querymatchoutoptions->eoplist_reader_verify != NULL);
+            gt_eoplist_verify(querymatchoutoptions->eoplist,
+                              querymatchoutoptions->eoplist_reader_verify,
+                              distance,true);
+          }
+          gt_eoplist_format_generic(fp,
+                                    querymatchoutoptions->eoplist,
+                                    querymatchoutoptions->eoplist_reader,
+                                    true,
+                                    querymatchoutoptions->characters,
+                                    querymatchoutoptions->wildcardshow);
+        } else
+        {
+          gt_eoplist_format_exact(fp,
                                   querymatchoutoptions->eoplist,
                                   querymatchoutoptions->eoplist_reader,
-                                  true,
-                                  querymatchoutoptions->characters,
-                                  querymatchoutoptions->wildcardshow);
-      } else
-      {
-        gt_eoplist_format_exact(fp,
-                                querymatchoutoptions->eoplist,
-                                querymatchoutoptions->eoplist_reader,
-                                querymatchoutoptions->characters);
+                                  querymatchoutoptions->characters);
+        }
       }
     }
     if (querymatchoutoptions->eoplist_reader != NULL ||

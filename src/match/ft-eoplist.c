@@ -593,6 +593,17 @@ void gt_eoplist_show_plain(const GtEoplist *eoplist,FILE *fp)
   fputc('\n',fp);
 }
 
+void gt_eoplist_show_cigar(GtEoplistReader *eoplist_reader,FILE *fp)
+{
+  GtCigarOp co;
+
+  while (gt_eoplist_reader_next_cigar(&co,eoplist_reader))
+  {
+    fprintf(fp,"" GT_WU "%c",co.iteration,
+            gt_eoplist_pretty_print(co.eoptype,true));
+  }
+}
+
 static unsigned int gt_eoplist_show_advance(unsigned int pos,
                                             unsigned int width,
                                             const GtUchar *topbuf,

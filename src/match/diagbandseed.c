@@ -3829,6 +3829,7 @@ static int gt_diagbandseed_algorithm(const GtDiagbandseedInfo *arg,
   const GtDiagbandseedExtendParams *extp = NULL;
   GtFtPolishing_info *pol_info = NULL;
   void *processinfo = NULL;
+  bool show_eoplist;
   GtQuerymatchoutoptions *querymoutopt = NULL;
   const GtUword anumseqranges = gt_sequence_parts_info_number(aseqranges),
                 bnumseqranges = gt_sequence_parts_info_number(bseqranges);
@@ -4027,10 +4028,12 @@ static int gt_diagbandseed_algorithm(const GtDiagbandseedInfo *arg,
     processinfo = (void *) xdropinfo;
   }
   alignmentwidth = gt_querymatch_display_alignmentwidth(extp->display_flag);
-  if (extp->extendxdrop || alignmentwidth > 0 || extp->verify_alignment)
+  show_eoplist = gt_querymatch_cigarstring_display(extp->display_flag);
+  if (extp->extendxdrop || alignmentwidth > 0 || extp->verify_alignment ||
+      show_eoplist)
   {
     querymoutopt = gt_querymatchoutoptions_new(true,
-                                               false,
+                                               show_eoplist,
                                                extp->display_flag,
                                                NULL,
                                                NULL);

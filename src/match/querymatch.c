@@ -317,7 +317,6 @@ void gt_querymatch_coordinates_out(const GtQuerymatch *querymatch)
     gt_assert(querymatch->bit_score != DBL_MAX);
     fprintf(querymatch->fp, " %.1f",querymatch->bit_score);
   }
-  fputc('\n',querymatch->fp);
 }
 
 void gt_querymatch_prettyprint(const GtQuerymatch *querymatch)

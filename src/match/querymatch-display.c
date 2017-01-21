@@ -23,6 +23,7 @@
 typedef enum
 {
   Gt_Alignment_display,
+  Gt_Cigarstring_display,
   Gt_Seed_display,
   Gt_Seed_in_alignment_display,
   Gt_Seqlength_display,
@@ -49,18 +50,29 @@ GtSeedExtendDisplayFlag *gt_querymatch_display_flag_new(void)
   return display_flag;
 }
 
+static unsigned int gt_display_mask(int shift)
+{
+  return 1U << shift;
+}
+
 static bool gt_querymatch_display_on(const GtSeedExtendDisplayFlag
                                        *display_flag,
                                      GtSeedExtendDisplay_enum display)
 {
   gt_assert((int) display <= Gt_Bitscore_display);
   return (display_flag != NULL &&
-          (display_flag->flags & (1U << (int) display))) ? true : false;
+          (display_flag->flags & gt_display_mask(display))) ? true : false;
 }
 
 bool gt_querymatch_seed_display(const GtSeedExtendDisplayFlag *display_flag)
 {
   return gt_querymatch_display_on(display_flag,Gt_Seed_display);
+}
+
+bool gt_querymatch_cigarstring_display(const GtSeedExtendDisplayFlag
+                                        *display_flag)
+{
+  return gt_querymatch_display_on(display_flag,Gt_Cigarstring_display);
 }
 
 bool gt_querymatch_seed_in_alignment_display(
@@ -152,6 +164,7 @@ const char *gt_querymatch_display_help(void)
   return "specify what information about the matches to display\n"
          "alignment:    display alignment (possibly followed by =<number>\n"
          "              to specify width of alignment columns)\n"
+         "cigar:        show cigar string representing alignment\n"
          "seed:         display the seed of the match\n"
          "seed_in_algn: display the seed in alignment\n"
          "seqlength:    display length of sequences in which\n"
@@ -167,15 +180,19 @@ static int gt_querymatch_display_flag_set(GtWord *parameter,
                                           GtError *err)
 {
   const char *display_strings[]
-    = {"alignment","seed","seed_in_algn","seqlength","evalue",
+    = {"alignment","cigar","seed","seed_in_algn","seqlength","evalue",
        "seq-desc","bit-score"};
   size_t ds_idx, numofds = sizeof display_strings/sizeof display_strings[0];
+  const GtSeedExtendDisplay_enum exclude_list[] = {Gt_Alignment_display,
+                                                   Gt_Cigarstring_display};
+  size_t ex_idx, numexcl = sizeof exclude_list/sizeof exclude_list[0];
   bool identifier_okay = false, parameter_found = false;
   const char *ptr;
   size_t cmplen;
 
   gt_assert(display_flag != NULL &&
-            numofds == (size_t) Gt_Bitscore_display + 1);
+            numofds == (size_t) Gt_Bitscore_display + 1 &&
+            numexcl % 2 == 0);
   ptr = strchr(arg,'=');
   if (ptr != NULL)
   {
@@ -197,7 +214,7 @@ static int gt_querymatch_display_flag_set(GtWord *parameter,
                            : strcmp(arg,display_strings[ds_idx]);
     if (ret == 0)
     {
-      display_flag->flags |= (1U << ds_idx);
+      display_flag->flags |= gt_display_mask((int) ds_idx);
       identifier_okay = true;
       break;
     }
@@ -220,6 +237,18 @@ static int gt_querymatch_display_flag_set(GtWord *parameter,
     gt_error_set(err,"%s",gt_str_get(err_msg));
     gt_str_delete(err_msg);
     return -1;
+  }
+  for (ex_idx = 0; ex_idx < numexcl; ex_idx+=2)
+  {
+    if ((display_flag->flags & gt_display_mask(exclude_list[ex_idx])) &&
+        (display_flag->flags & gt_display_mask(exclude_list[ex_idx+1])))
+    {
+      gt_error_set(err,"argument \"%s\" and \"%s\" of option -display exclude "
+                       "each other",
+                       display_strings[exclude_list[ex_idx]],
+                       display_strings[exclude_list[ex_idx+1]]);
+      return -1;
+    }
   }
   return parameter_found ? 1 : 0;
 }
@@ -254,7 +283,7 @@ int gt_querymatch_display_flag_args_set(
         return -1;
     }
   }
-  if ((display_flag->flags & (1U << Gt_Alignment_display)) &&
+  if ((display_flag->flags & gt_display_mask(Gt_Alignment_display)) &&
       display_flag->alignmentwidth == 0)
   {
     display_flag->alignmentwidth = 70; /* this is the default alignment width */
