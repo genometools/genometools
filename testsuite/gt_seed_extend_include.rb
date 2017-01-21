@@ -1,5 +1,10 @@
-def build_encseq(indexname, sequencefile)
-  return "#{$bin}gt encseq encode -des no -sds no -md5 no " +
+def build_encseq(indexname, sequencefile, des = false)
+  if des
+    arg = ""
+  else
+    arg = "yes"
+  end
+  return "#{$bin}gt encseq encode -des #{arg} -sds #{arg} -md5 no " +
     "-indexname " + indexname + " " + sequencefile
 end
 
@@ -23,6 +28,17 @@ seeds = [170039800390891361279027638963673934519,
 
 $SPLT_LIST = ["-splt struct","-splt ulong"]
 $CAM_LIST = ["encseq", "encseq_reader","bytes"]
+
+Name "gt seed_extend: display arguments"
+Keywords "gt_seed_extend failure"
+Test do
+  run_test build_encseq("at1MB", "#{$testdata}at1MB", true)
+  run_test build_encseq("Atinsert.fna", "#{$testdata}Atinsert.fna", true)
+  ["alignment","seed","seed_in_algn","seqlength","evalue","seq-desc","bit-score"].each do |arg|
+    run_test "#{$bin}gt seed_extend -ii at1MB -display #{arg}"
+    run_test "#{$bin}gt seed_extend -ii at1MB -qii Atinsert.fna -display #{arg}"
+  end
+end
 
 # Invalid arguments
 Name "gt seed_extend: failure"
