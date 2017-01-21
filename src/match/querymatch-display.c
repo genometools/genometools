@@ -207,7 +207,7 @@ static int gt_querymatch_display_flag_set(GtWord *parameter,
     GtStr *err_msg = gt_str_new();
 
     gt_str_append_cstr(err_msg,
-                       "illegal identifier in argument of option display: "
+                       "illegal identifier as argument of option -display: "
                        "possible idenfifiers are: ");
     for (ds_idx = 0; ds_idx < numofds; ds_idx++)
     {
@@ -217,7 +217,7 @@ static int gt_querymatch_display_flag_set(GtWord *parameter,
         gt_str_append_cstr(err_msg,", ");
       }
     }
-    gt_error_set(err,gt_str_get(err_msg));
+    gt_error_set(err,"%s",gt_str_get(err_msg));
     gt_str_delete(err_msg);
     return -1;
   }

@@ -24,6 +24,54 @@ seeds = [170039800390891361279027638963673934519,
 $SPLT_LIST = ["-splt struct","-splt ulong"]
 $CAM_LIST = ["encseq", "encseq_reader","bytes"]
 
+# Invalid arguments
+Name "gt seed_extend: failure"
+Keywords "gt_seed_extend failure"
+Test do
+  run_test build_encseq("at1MB", "#{$testdata}at1MB")
+  run_test build_encseq("foo", "#{$testdata}foo.fas")
+  run_test "#{$bin}gt seed_extend -seedlength 10 -ii foo", :retval => 1
+  grep last_stderr, /integer <= 8 \(length of longest sequence\)/
+  run_test "#{$bin}gt seed_extend -maxfreq 1 -ii at1MB", :retval => 1
+  grep last_stderr, /option "-maxfreq" must be >= 2 to find matching k-mers/
+  run_test "#{$bin}gt seed_extend -t 2 -ii at1MB", :retval => 1
+  grep last_stderr, /option "-t" must be >= 3 to find matching k-mers/
+  run_test "#{$bin}gt seed_extend -memlimit 0MB -ii at1MB", :retval => 1
+  grep last_stderr, /argument to option "-memlimit" must be at least 1MB/
+  run_test "#{$bin}gt seed_extend -memlimit 1MB -ii at1MB", :retval => 1
+  grep last_stderr, /option -memlimit too strict: need at least 21MB/
+  run_test "#{$bin}gt seed_extend -memlimit 1KB -ii at1MB", :retval => 1
+  grep last_stderr, /integer argument followed by one of the keywords MB and GB/
+  run_test "#{$bin}gt seed_extend -extendgreedy -history 65 -benchmark " +
+           "-ii at1MB", :retval => 1
+  grep last_stderr, /argument to option "-history" must be an integer <= 64/
+  run_test "#{$bin}gt seed_extend -percmathistory 140 -extendgreedy -v " +
+           "-ii at1MB", :retval => 1
+  grep last_stderr, /option "-percmathistory" must be an integer <= 100/
+  run_test "#{$bin}gt seed_extend -extendgreedy -cam invalidlongcamstring " +
+           "-ii at1MB", :retval => 1
+  grep last_stderr, /illegal parameter for option -cam/
+  run_test "#{$bin}gt seed_extend -v -ii at1MB at1MB at1MB", :retval => 1
+  grep last_stderr, /too many arguments/
+  run_test "#{$bin}gt seed_extend -benchmark", :retval => 1
+  grep last_stderr, /option "-ii" is mandatory/
+  run_test "#{$bin}gt seed_extend -no-reverse -no-forward -ii foo", :retval => 1
+  grep last_stderr, /option "-no-reverse" and option "-no-forward" exclude /
+                    /each other/
+  run_test "#{$bin}gt seed_extend -ii at1MB -pick 1,2", :retval => 1
+  grep last_stderr, /option "-pick" requires option "-parts"/
+  run_test "#{$bin}gt seed_extend -ii at1MB -parts 5 -pick 1,6", :retval => 1
+  grep last_stderr, /option -pick must not exceed 5 \(number of parts\)/
+  run_test "#{$bin}gt seed_extend -ii at1MB -parts 5 -pick 3", :retval => 1
+  grep last_stderr, /argument to option -pick must satisfy format i,j/
+  run_test "#{$bin}gt seed_extend -ii not-existing-file", :retval => 1
+  grep last_stderr, /cannot open file 'not-existing-file.esq': No such file/
+  run_test "#{$bin}gt seed_extend -ii at1MB -display xx", :retval => 1
+  grep last_stderr, /illegal identifier in argument of option -display/, :retval => 1
+  run_test "#{$bin}gt seed_extend -ii at1MB -display alignment=n", :retval => 1
+  run_test "#{$bin}gt seed_extend -ii at1MB -display alignment=-1", :retval => 1
+end
+
 Name "gt dev show_seedext without alignment"
 Keywords "gt_seed_extend"
 Test do
@@ -217,49 +265,6 @@ Test do
   end
 end
 
-# Invalid arguments
-Name "gt seed_extend: failure"
-Keywords "gt_seed_extend failure"
-Test do
-  run_test build_encseq("at1MB", "#{$testdata}at1MB")
-  run_test build_encseq("foo", "#{$testdata}foo.fas")
-  run_test "#{$bin}gt seed_extend -seedlength 10 -ii foo", :retval => 1
-  grep last_stderr, /integer <= 8 \(length of longest sequence\)/
-  run_test "#{$bin}gt seed_extend -maxfreq 1 -ii at1MB", :retval => 1
-  grep last_stderr, /option "-maxfreq" must be >= 2 to find matching k-mers/
-  run_test "#{$bin}gt seed_extend -t 2 -ii at1MB", :retval => 1
-  grep last_stderr, /option "-t" must be >= 3 to find matching k-mers/
-  run_test "#{$bin}gt seed_extend -memlimit 0MB -ii at1MB", :retval => 1
-  grep last_stderr, /argument to option "-memlimit" must be at least 1MB/
-  run_test "#{$bin}gt seed_extend -memlimit 1MB -ii at1MB", :retval => 1
-  grep last_stderr, /option -memlimit too strict: need at least 21MB/
-  run_test "#{$bin}gt seed_extend -memlimit 1KB -ii at1MB", :retval => 1
-  grep last_stderr, /integer argument followed by one of the keywords MB and GB/
-  run_test "#{$bin}gt seed_extend -extendgreedy -history 65 -benchmark " +
-           "-ii at1MB", :retval => 1
-  grep last_stderr, /argument to option "-history" must be an integer <= 64/
-  run_test "#{$bin}gt seed_extend -percmathistory 140 -extendgreedy -v " +
-           "-ii at1MB", :retval => 1
-  grep last_stderr, /option "-percmathistory" must be an integer <= 100/
-  run_test "#{$bin}gt seed_extend -extendgreedy -cam invalidlongcamstring " +
-           "-ii at1MB", :retval => 1
-  grep last_stderr, /illegal parameter for option -cam/
-  run_test "#{$bin}gt seed_extend -v -ii at1MB at1MB at1MB", :retval => 1
-  grep last_stderr, /too many arguments/
-  run_test "#{$bin}gt seed_extend -benchmark", :retval => 1
-  grep last_stderr, /option "-ii" is mandatory/
-  run_test "#{$bin}gt seed_extend -no-reverse -no-forward -ii foo", :retval => 1
-  grep last_stderr, /option "-no-reverse" and option "-no-forward" exclude /
-                    /each other/
-  run_test "#{$bin}gt seed_extend -ii at1MB -pick 1,2", :retval => 1
-  grep last_stderr, /option "-pick" requires option "-parts"/
-  run_test "#{$bin}gt seed_extend -ii at1MB -parts 5 -pick 1,6", :retval => 1
-  grep last_stderr, /option -pick must not exceed 5 \(number of parts\)/
-  run_test "#{$bin}gt seed_extend -ii at1MB -parts 5 -pick 3", :retval => 1
-  grep last_stderr, /argument to option -pick must satisfy format i,j/
-  run_test "#{$bin}gt seed_extend -ii not-existing-file", :retval => 1
-  grep last_stderr, /cannot open file 'not-existing-file.esq': No such file/
-end
 
 # Find synthetic alignments
 Name "gt seed_extend: artificial sequences"
