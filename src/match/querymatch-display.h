@@ -41,6 +41,9 @@ bool gt_querymatch_seq_desc_display(const GtSeedExtendDisplayFlag
 bool gt_querymatch_seqlength_display(const GtSeedExtendDisplayFlag
                                        *display_flag);
 
+bool gt_querymatch_pol_info_display(const GtSeedExtendDisplayFlag
+                                      *display_flag);
+
 GtUword gt_querymatch_display_alignmentwidth(const GtSeedExtendDisplayFlag
                                                 *display_flag);
 

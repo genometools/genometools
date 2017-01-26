@@ -164,7 +164,8 @@ void gt_querymatchoutoptions_extend(
       if (always_polished_ends)
       {
         gt_eoplist_polished_ends(querymatchoutoptions->eoplist,
-                                 querymatchoutoptions->pol_info,true);
+                                 querymatchoutoptions->pol_info,true,
+                                 gt_querymatch_pol_info_display(display_flag));
       }
       if (gt_querymatch_seed_in_alignment_display(display_flag))
       {
@@ -361,7 +362,11 @@ static void seededmatch2eoplist(GtQuerymatchoutoptions *querymatchoutoptions,
         = gt_eoplist_reader_new(querymatchoutoptions->eoplist);
     }
     gt_eoplist_set_sequences(querymatchoutoptions->eoplist,NULL,
-                             coords->ulen,NULL,coords->vlen);
+                             dbstart,
+                             coords->ulen,
+                             NULL,
+                             abs_querystart,
+                             coords->vlen);
     gt_eoplist_verify(querymatchoutoptions->eoplist,
                       querymatchoutoptions->eoplist_reader_verify,
                       coords->sumdist,
@@ -435,11 +440,12 @@ bool gt_querymatchoutoptions_alignment_prepare(GtQuerymatchoutoptions
                                                 *querymatchoutoptions,
                                                const GtSeqorEncseq *dbes,
                                                const GtSeqorEncseq *queryes,
+                                               GtUword db_seqstartpos,
+                                               GtUword dbstart,
+                                               GtUword dblen,
                                                GtReadmode query_readmode,
                                                GtUword query_seqstartpos,
                                                GtUword query_totallength,
-                                               GtUword dbstart,
-                                               GtUword dblen,
                                                GtUword abs_querystart,
                                                GtUword abs_querystart_fwdstrand,
                                                GtUword querylen,
@@ -566,12 +572,22 @@ bool gt_querymatchoutoptions_alignment_prepare(GtQuerymatchoutoptions
       gt_eoplist_set_seedoffset(querymatchoutoptions->eoplist,
                                 seedpos1 - dbstart,
                                 seedlen);
+      gt_assert(abs_querystart + querymatchoutoptions->correction_info.voffset
+                >= query_seqstartpos &&
+                dbstart + querymatchoutoptions->correction_info.uoffset
+                >= db_seqstartpos);
       gt_eoplist_set_sequences(querymatchoutoptions->eoplist,
                                querymatchoutoptions->useqbuffer +
                                  querymatchoutoptions->correction_info.uoffset,
+                               dbstart +
+                               querymatchoutoptions->correction_info.uoffset -
+                               db_seqstartpos,
                                querymatchoutoptions->correction_info.ulen,
                                querymatchoutoptions->vseqbuffer +
                                  querymatchoutoptions->correction_info.voffset,
+                               abs_querystart +
+                               querymatchoutoptions->correction_info.voffset -
+                               query_seqstartpos,
                                querymatchoutoptions->correction_info.vlen);
     }
     seededalignment = true;
@@ -579,10 +595,14 @@ bool gt_querymatchoutoptions_alignment_prepare(GtQuerymatchoutoptions
   {
     if (querymatchoutoptions->eoplist_reader != NULL)
     {
+      gt_assert(abs_querystart >= query_seqstartpos &&
+                dbstart >= db_seqstartpos);
       gt_eoplist_set_sequences(querymatchoutoptions->eoplist,
                                querymatchoutoptions->useqbuffer,
+                               dbstart - db_seqstartpos,
                                dblen,
                                querymatchoutoptions->vseqbuffer,
+                               abs_querystart - query_seqstartpos,
                                querylen);
     }
   }

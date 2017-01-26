@@ -395,7 +395,8 @@ bool gt_querymatch_process(GtQuerymatch *querymatch,
     if (querymatch->ref_querymatchoutoptions != NULL)
     {
       bool seededalignment;
-      GtUword query_seqstartpos, abs_querystart_fwdstrand, abs_querystart;
+      GtUword query_seqstartpos, abs_querystart_fwdstrand, abs_querystart,
+              db_seqstartpos;
 
       gt_assert(queryes != NULL);
       if (queryes->encseq != NULL)
@@ -412,17 +413,27 @@ bool gt_querymatch_process(GtQuerymatch *querymatch,
         abs_querystart_fwdstrand = querymatch->querystart_fwdstrand;
         abs_querystart = querymatch->querystart;
       }
+      if (gt_querymatch_display_seedpos_a_relative(querymatch->display_flag))
+      {
+        db_seqstartpos = 0;
+      } else
+      {
+        gt_assert(dbes != NULL && dbes->encseq != NULL);
+        db_seqstartpos = gt_encseq_seqstartpos(dbes->encseq,
+                                               querymatch->dbseqnum);
+      }
       seededalignment
         = gt_querymatchoutoptions_alignment_prepare(querymatch->
                                                       ref_querymatchoutoptions,
                                                     dbes,
                                                     queryes,
+                                                    db_seqstartpos,
+                                                    querymatch->dbstart,
+                                                    querymatch->dblen,
                                                     querymatch->query_readmode,
                                                     query_seqstartpos,
                                                     querymatch->
                                                       query_totallength,
-                                                    querymatch->dbstart,
-                                                    querymatch->dblen,
                                                     abs_querystart,
                                                     abs_querystart_fwdstrand,
                                                     querymatch->querylen,

@@ -169,8 +169,10 @@ void gt_eoplist_reader_reset_width(GtEoplistReader *eoplist_reader,
 
 void gt_eoplist_set_sequences(GtEoplist *eoplist,
                               const GtUchar *useq,
+                              GtUword ustart,
                               GtUword ulen,
                               const GtUchar *vseq,
+                              GtUword vstart,
                               GtUword vlen);
 
 void gt_eoplist_format_generic(FILE *fp,
@@ -206,5 +208,6 @@ void gt_eoplist_show_cigar(GtEoplistReader *eoplist_reader,FILE *fp);
 
 void gt_eoplist_polished_ends(GtEoplist *eoplist,
                               const GtFtPolishing_info *pol_info,
-                              bool withpolcheck);
+                              bool withpolcheck,
+                              bool pol_info_out);
 #endif

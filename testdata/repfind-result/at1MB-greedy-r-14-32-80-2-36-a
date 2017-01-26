@@ -1,160 +1,192 @@
 35 10 286 R 35 10 286 52 6 82.86
-tgtgta-g-tggcggcgtgtgcggcggttggatatgt
-||| || | ||||||||||||||||||| | || |||
-tgtataggttggcggcgtgtgcggcggt-g-atgtgt
+Sbjct  286  tgtgta-g-tggcggcgtgtgcggcggttggatatgt  321
+            ||| || | ||||||||||||||||||| | || |||
+Query  494  tgtataggttggcggcgtgtgcggcggt-g-atgtgt  529
+
 # polishing(m=400,d=-600,p=30): 37/37, seed_on_start, seed_on_end
 33 31 0 R 33 31 0 48 6 81.82
-ctctgtc-tctttcttcttcttctt-cttct-tctc
-|||| || || |||||||||||||| || || ||||
-ctct-tcttc-ttcttcttcttctttct-ctgtctc
+Sbjct  0    ctctgtc-tctttcttcttcttctt-cttct-tctc  33
+            |||| || || |||||||||||||| || || ||||
+Query  250  ctct-tcttc-ttcttcttcttctttct-ctgtctc  283
+
 # polishing(m=400,d=-600,p=30): 36/36, seed_on_start, seed_on_end
 36 38 50 R 38 90 28 59 5 86.49
-tctctc---tctctctctctctttcactcttgtcttgtc
-||||||   | ||||||||||||||||| ||||||||||
-tctctcanatgtctctctctctttcact-ttgtcttgtc
+Sbjct  50   tctctc---tctctctctctctttcactcttgtcttgtc  86
+            ||||||   | ||||||||||||||||| ||||||||||
+Query  143  tctctcanatgtctctctctctttcact-ttgtcttgtc  181
+
 # polishing(m=400,d=-600,p=30): 39/39, seed_on_start, seed_on_end
 36 118 2 R 36 118 2 54 6 83.33
-acatcttctaagaaagaaacaaagaaaga--cttc-aca
-||| ||||  |||||||||||||||||||  |||| |||
-aca-cttc--agaaagaaacaaagaaagaatcttctaca
+Sbjct  2    acatcttctaagaaagaaacaaagaaaga--cttc-aca  38
+            ||| ||||  |||||||||||||||||||  |||| |||
+Query  201  aca-cttc--agaaagaaacaaagaaagaatcttctaca  237
+
 # polishing(m=400,d=-600,p=30): 39/39, seed_on_start, seed_on_end
 32 121 68 R 32 121 68 52 4 87.50
-ctt-cctctctcttccttccttctct-tcccttc
-||| ||| |||||||||||||||||| ||| |||
-cttccct-tctcttccttccttctctctcc-ttc
+Sbjct  68   ctt-cctctctcttccttccttctct-tcccttc  100
+            ||| ||| |||||||||||||||||| ||| |||
+Query  110  cttccct-tctcttccttccttctctctcc-ttc  142
+
 # polishing(m=400,d=-600,p=30): 34/34, seed_on_start, seed_on_end
 33 31 0 R 33 135 79 48 6 81.82
-ctctgtctctt-t-cttcttcttcttcttcttctc
-|||| || ||| | || ||||||||||||||| ||
-ctctttc-cttctcctccttcttcttcttctt-tc
+Sbjct  0   ctctgtctctt-t-cttcttcttcttcttcttctc  33
+           |||| || ||| | || ||||||||||||||| ||
+Query  52  ctctttc-cttctcctccttcttcttcttctt-tc  85
+
 # polishing(m=400,d=-600,p=30): 35/35, seed_on_start, seed_on_end
 30 19 553 R 34 554 328 46 6 81.25
-at-tttcccaag-gtggtttttttttgt--ttgt
-|| |||||  || |||||||||||||||  ||||
-atgtttccttagagtggtttttttttgtggttgt
+Sbjct  553  at-tttcccaag-gtggtttttttttgt--ttgt  583
+            || |||||  || |||||||||||||||  ||||
+Query  3    atgtttccttagagtggtttttttttgtggttgt  37
+
 # polishing(m=400,d=-600,p=30): 34/34, seed_on_start, seed_on_end
 31 457 350 R 33 576 203 46 6 81.25
-taga-tttttgtttttgttttttgtttc-tc-tg
-|||  |||||||||||||||||| || | || ||
-tagtgtttttgtttttgtttttt-ttccatcgtg
+Sbjct  350  taga-tttttgtttttgttttttgtttc-tc-tg  381
+            |||  |||||||||||||||||| || | || ||
+Query  183  tagtgtttttgtttttgtttttt-ttccatcgtg  216
+
 # polishing(m=400,d=-600,p=30): 34/34, seed_on_start, seed_on_end
 33 135 70 R 31 632 167 46 6 81.25
-tctctgtccctttcttcttcttcttcctcctct
-|||| ||  | ||||||||||||||| || |||
-tctccgtttc-ttcttcttcttcttcttc-tct
+Sbjct  70   tctctgtccctttcttcttcttcttcctcctct  103
+            |||| ||  | ||||||||||||||| || |||
+Query  226  tctccgtttc-ttcttcttcttcttcttc-tct  257
+
 # polishing(m=400,d=-600,p=30): 33/33, seed_on_start, seed_on_end
 41 634 281 R 42 693 409 59 8 80.72
-tcctctgtgtgtgt-tttttttgttctcttc-a-taattttccc
-|||| | || || | |||||||||||||||| | || |||||||
-tcctgtatg-gtttctttttttgttctcttccacta-ttttccc
+Sbjct  281  tcctctgtgtgtgt-tttttttgttctcttc-a-taattttccc  322
+            |||| | || || | |||||||||||||||| | || |||||||
+Query  45   tcctgtatg-gtttctttttttgttctcttccacta-ttttccc  87
+
 # polishing(m=400,d=-600,p=30): 44/44, seed_on_start, seed_on_end
 40 466 426 R 40 704 301 56 8 80.00
-taaat-tttaatttcgtaaatgcacagattacaatgt-ctct
-||| | |||||||||||||| | | | |||| ||||| ||||
-taattgtttaatttcgtaaa-gaaaaaatta-aatgttctct
+Sbjct  426  taaat-tttaatttcgtaaatgcacagattacaatgt-ctct  466
+            ||| | |||||||||||||| | | | |||| ||||| ||||
+Query  81   taattgtttaatttcgtaaa-gaaaaaatta-aatgttctct  121
+
 # polishing(m=400,d=-600,p=30): 42/42, seed_on_start, seed_on_end
 45 693 362 R 39 758 186 60 8 80.95
-ctactctttgtgatcttctttgtttgtttgtttggtttttttttt
-|| |||| |||| || |||||  ||| || |||||||||||||||
-ct-ctctctgtg-tc-tctttc-ttg-tt-tttggtttttttttt
+Sbjct  362  ctactctttgtgatcttctttgtttgtttgtttggtttttttttt  407
+            || |||| |||| || |||||  ||| || |||||||||||||||
+Query  83   ct-ctctctgtg-tc-tctttc-ttg-tt-tttggtttttttttt  122
+
 # polishing(m=400,d=-600,p=30): 45/45, seed_on_end
 32 368 268 R 33 913 451 47 6 81.54
-cttcttccaca-tatgtaatcttgtaactttta
-||| ||||  | ||||||||||||||  |||||
-ctttttcctaattatgtaatcttgtagatttta
+Sbjct  268  cttcttccaca-tatgtaatcttgtaactttta  300
+            ||| ||||  | ||||||||||||||  |||||
+Query  2    ctttttcctaattatgtaatcttgtagatttta  35
+
 # polishing(m=400,d=-600,p=30): 33/33, seed_on_start, seed_on_end
 42 693 409 R 41 976 291 59 8 80.72
-ccctttt-atcaccttctcttgtttttttctttg-gtatgtcct
-||||||| || | |||||||||||||||| | || || | ||||
-cccttttaat-a-cttctcttgttttttt-tgtgtgtgtctcct
+Sbjct  409  ccctttt-atcaccttctcttgtttttttctttg-gtatgtcct  451
+            ||||||| || | |||||||||||||||| | || || | ||||
+Query  78   cccttttaat-a-cttctcttgttttttt-tgtgtgtgtctcct  119
+
 # polishing(m=400,d=-600,p=30): 44/44, seed_on_start, seed_on_end
 32 926 328 R 32 989 330 46 6 81.25
-tttgtataggtttc-tttatcgtgtgttgtatt
-||||||||||||||  ||| | | |||||| ||
-tttgtataggtttcgatta-cctttgttgtgtt
+Sbjct  328  tttgtataggtttc-tttatcgtgtgttgtatt  360
+            ||||||||||||||  ||| | | |||||| ||
+Query  44   tttgtataggtttcgatta-cctttgttgtgtt  76
+
 # polishing(m=400,d=-600,p=30): 33/33, seed_on_start, seed_on_end
 32 480 385 R 32 989 330 46 6 81.25
-tttgtataggtttc-tttatcgtgtgttgtatt
-||||||||||||||  ||| | | |||||| ||
-tttgtataggtttcgatta-cctttgttgtgtt
+Sbjct  385  tttgtataggtttc-tttatcgtgtgttgtatt  417
+            ||||||||||||||  ||| | | |||||| ||
+Query  44   tttgtataggtttcgatta-cctttgttgtgtt  76
+
 # polishing(m=400,d=-600,p=30): 33/33, seed_on_start, seed_on_end
 34 632 164 R 36 997 219 49 7 80.00
-gtgtctcttcttctt-cttcttctt-ctttgcct-ct
-||||||||||||||| || || |||  ||| ||| ||
-gtgtctcttcttcttact-ctccttagtttacctact
+Sbjct  164  gtgtctcttcttctt-cttcttctt-ctttgcct-ct  198
+            ||||||||||||||| || || |||  ||| ||| ||
+Query  235  gtgtctcttcttcttact-ctccttagtttacctact  271
+
 # polishing(m=400,d=-600,p=30): 37/37, seed_on_start, seed_on_end
 35 771 340 R 30 1057 430 47 6 81.54
-tcatttttgagtgatctgctctctttctcttttgt
-|| |||||||||||||| || | | || |||||||
-tc-tttttgagtgatct-ct-t-tgtc-cttttgt
+Sbjct  340  tcatttttgagtgatctgctctctttctcttttgt  375
+            || |||||||||||||| || | | || |||||||
+Query  29   tc-tttttgagtgatct-ct-t-tgtc-cttttgt  59
+
 # polishing(m=400,d=-600,p=30): 35/35, seed_on_start, seed_on_end
 31 509 337 R 35 1066 356 48 6 81.82
-tta-ata-caattgatcgtttctactctg--agaa
-||| ||  |||||| ||||||||||||||  ||||
-ttatatctcaattgttcgtttctactctgttagaa
+Sbjct  337  tta-ata-caattgatcgtttctactctg--agaa  368
+            ||| ||  |||||| ||||||||||||||  ||||
+Query  29   ttatatctcaattgttcgtttctactctgttagaa  64
+
 # polishing(m=400,d=-600,p=30): 35/35, seed_on_start, seed_on_end
 32 632 173 R 33 1132 164 50 5 84.62
-cttcttcttcttcttctttg-cctcttagctgt
-|| ||||||||||||||||| ||||  | ||||
-ctncttcttcttcttctttggcctcaaacctgt
+Sbjct  173  cttcttcttcttcttctttg-cctcttagctgt  205
+            || ||||||||||||||||| ||||  | ||||
+Query  192  ctncttcttcttcttctttggcctcaaacctgt  225
+
 # polishing(m=400,d=-600,p=30): 33/33, seed_on_start, seed_on_end
 32 632 173 R 33 1140 72 47 6 81.54
-cttcttcttcttcttctttg-cctcttagctgt
-|| |||||||||||||| || ||||  | ||||
-ctncttcttcttcttctctggcctcaaacctgt
+Sbjct  173  cttcttcttcttcttctttg-cctcttagctgt  205
+            || |||||||||||||| || ||||  | ||||
+Query  194  ctncttcttcttcttctctggcctcaaacctgt  227
+
 # polishing(m=400,d=-600,p=30): 33/33, seed_on_start, seed_on_end
 33 619 454 R 34 1161 198 49 6 82.09
-gtttctttttttctttctttctac-ttt-tc-ttta
-|||| |||||||||||||| || | ||| || ||||
-gttt-tttttttctttctt-cttcgtttatcattta
+Sbjct  454  gtttctttttttctttctttctac-ttt-tc-ttta  487
+            |||| |||||||||||||| || | ||| || ||||
+Query  138  gttt-tttttttctttctt-cttcgtttatcattta  172
+
 # polishing(m=400,d=-600,p=30): 36/36, seed_on_start, seed_on_end
 32 138 47 R 35 1243 232 49 6 82.09
-tctctctctctctc-tctatcat-ctctttt-ctt
-|||||||||||||| | | | || ||||||| |||
-tctctctctctctcctttttgatactcttttgctt
+Sbjct  47   tctctctctctctc-tctatcat-ctctttt-ctt  79
+            |||||||||||||| | | | || ||||||| |||
+Query  123  tctctctctctctcctttttgatactcttttgctt  158
+
 # polishing(m=400,d=-600,p=30): 35/35, seed_on_start, seed_on_end
 36 31 1 R 37 1298 266 52 7 80.82
-tctgtctctttcttcttcttcttcttcttctca-tta
-||| ||| |||| |  |||||||||||||| || |||
-tctatctatttcgttatcttcttcttcttcgcactta
+Sbjct  1    tctgtctctttcttcttcttcttcttcttctca-tta  37
+            ||| ||| |||| |  |||||||||||||| || |||
+Query  82   tctatctatttcgttatcttcttcttcttcgcactta  119
+
 # polishing(m=400,d=-600,p=30): 37/37, seed_on_start, seed_on_end
 32 926 328 R 32 1350 272 46 6 81.25
-tttgtataggtttc-tttatcgtgtgttgtatt
-||||||||||||||  ||| | | |||||| ||
-tttgtataggtttcgatta-cctttgttgtgtt
+Sbjct  328  tttgtataggtttc-tttatcgtgtgttgtatt  360
+            ||||||||||||||  ||| | | |||||| ||
+Query  95   tttgtataggtttcgatta-cctttgttgtgtt  127
+
 # polishing(m=400,d=-600,p=30): 33/33, seed_on_start, seed_on_end
 32 480 385 R 32 1350 272 46 6 81.25
-tttgtataggtttc-tttatcgtgtgttgtatt
-||||||||||||||  ||| | | |||||| ||
-tttgtataggtttcgatta-cctttgttgtgtt
+Sbjct  385  tttgtataggtttc-tttatcgtgtgttgtatt  417
+            ||||||||||||||  ||| | | |||||| ||
+Query  95   tttgtataggtttcgatta-cctttgttgtgtt  127
+
 # polishing(m=400,d=-600,p=30): 33/33, seed_on_start, seed_on_end
 31 291 307 R 33 1400 150 46 6 81.25
-gaatact-agttttttt-tttgtgaattgaatt
-||| | | | |||| || |||||||||||||||
-gaagagtcatttttcttgtttgtgaattgaatt
+Sbjct  307  gaatact-agttttttt-tttgtgaattgaatt  338
+            ||| | | | |||| || |||||||||||||||
+Query  101  gaagagtcatttttcttgtttgtgaattgaatt  134
+
 # polishing(m=400,d=-600,p=30): 33/33, seed_on_start, seed_on_end
 32 314 158 R 33 1403 172 47 6 81.54
-gagagagagagagaga-aagc-agaagaagaagt
-|||||||||||||||| || | |||| || | ||
-gagagagagagagagagaaactagaa-aaaacgt
+Sbjct  158  gagagagagagagaga-aagc-agaagaagaagt  190
+            |||||||||||||||| || | |||| || | ||
+Query  106  gagagagagagagagagaaactagaa-aaaacgt  139
+
 # polishing(m=400,d=-600,p=30): 34/34, seed_on_start, seed_on_end
 39 138 39 R 34 1584 4 52 7 80.82
-ccacaccttctctctctctctctctatcatctcttttct
-||| | | |||| ||||||||||||||| ||| | ||||
-cca-a-c-tctccctctctctctctatc-tct-tcttct
+Sbjct  39   ccacaccttctctctctctctctctatcatctcttttct  78
+            ||| | | |||| ||||||||||||||| ||| | ||||
+Query  147  cca-a-c-tctccctctctctctctatc-tct-tcttct  181
+
 # polishing(m=400,d=-600,p=30): 39/39, seed_on_start, seed_on_end
 41 1695 59 R 41 1695 59 58 8 80.49
-acaactatggt-t-caacaacaacaacaacctctgg-ctcaaca
-||||||  ||| | |||||||||||||||| | |||  ||||||
-acaactc-ggtctccaacaacaacaacaac-t-tggtatcaaca
+Sbjct  59   acaactatggt-t-caacaacaacaacaacctctgg-ctcaaca  100
+            ||||||  ||| | |||||||||||||||| | |||  ||||||
+Query  287  acaactc-ggtctccaacaacaacaacaac-t-tggtatcaaca  328
+
 # polishing(m=400,d=-600,p=30): 44/44, seed_on_start, seed_on_end
 33 1524 237 R 32 1701 304 47 6 81.54
-atatatatatatatatatatagtctttatataa
-|| ||| |||||||||||||| | ||| || ||
-atntatntatatatatatata-tatttctaaaa
+Sbjct  237  atatatatatatatatatatagtctttatataa  270
+            || ||| |||||||||||||| | ||| || ||
+Query  80   atntatntatatatatatata-tatttctaaaa  112
+
 # polishing(m=400,d=-600,p=30): 33/33, seed_on_start, seed_on_end
 36 1214 206 R 35 1701 298 50 7 80.28
-tatatatatatatatatatatatatatatatatatg
-||| ||||||||||||||||| | || | | || ||
-tatntatatatatatatatatttctaaaaagat-tg
+Sbjct  206  tatatatatatatatatatatatatatatatatatg  242
+            ||| ||||||||||||||||| | || | | || ||
+Query  83   tatntatatatatatatatatttctaaaaagat-tg  118
+
 # polishing(m=400,d=-600,p=30): 36/36, seed_on_start, seed_on_end

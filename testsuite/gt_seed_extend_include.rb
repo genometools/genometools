@@ -43,6 +43,8 @@ Test do
       run_test "#{$bin}gt dev show_seedext -f tmp.matches -display #{arg}"
     end
   end
+  run "#{$bin}gt seed_extend -ii at1MB -l 500 -display alignment=70"
+  run "cmp #{last_stdout} #{$testdata}/see-ext-at1MB-500-al.matches"
 end
 
 # Invalid arguments
@@ -104,7 +106,6 @@ Test do
   run "mv #{last_stdout} show_seed_ext.out"
   run "grep -v '^#' seed_extend.out"
   run "cmp #{last_stdout} show_seed_ext.out"
-  run_test "#{$bin}gt dev show_seedext -display alignment -f seed_extend.out"
 end
 
 # cam extension options
@@ -258,12 +259,12 @@ Test do
         for minidentity in [70, 80, 99] do
           run_test "#{$bin}gt seed_extend -extendgreedy #{sensitivity} " +
                      "-minidentity #{minidentity} -l #{alignlength} " +
-                     "-display alignment seed -ii at1MB -verify-alignment #{splt}", :retval => 0
+                     "-display alignment=70 seed -ii at1MB -verify-alignment #{splt}", :retval => 0
         end
       end
     end
     run_test "#{$bin}gt seed_extend -extendgreedy -bias-parameters -verify " +
-             "-overlappingseeds -display alignment seed -ii at1MB #{splt}",:retval => 0
+             "-overlappingseeds -display alignment=70 seed -ii at1MB #{splt}",:retval => 0
   end
 end
 
@@ -278,7 +279,7 @@ Test do
         for maxalilendiff in [1, 10, 30] do
           run_test "#{$bin}gt seed_extend -maxalilendiff #{maxalilendiff} " +
           "-history #{history} -percmathistory #{percmathistory} " +
-          "-ii at1MB -display alignment #{splt}", :retval => 0
+          "-ii at1MB -display alignment=70 #{splt}", :retval => 0
         end
       end
     end

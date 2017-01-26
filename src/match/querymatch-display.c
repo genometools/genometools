@@ -24,6 +24,7 @@ typedef enum
 {
   Gt_Alignment_display,
   Gt_Cigarstring_display,
+  Gt_Polishinginfo_display,
   Gt_Seed_display,
   Gt_Seed_in_alignment_display,
   Gt_Seqlength_display,
@@ -103,6 +104,11 @@ bool gt_querymatch_seqlength_display(const GtSeedExtendDisplayFlag
   return gt_querymatch_display_on(display_flag,Gt_Seqlength_display);
 }
 
+bool gt_querymatch_pol_info_display(const GtSeedExtendDisplayFlag *display_flag)
+{
+  return gt_querymatch_display_on(display_flag,Gt_Polishinginfo_display);
+}
+
 GtUword gt_querymatch_display_alignmentwidth(const GtSeedExtendDisplayFlag
                                                 *display_flag)
 {
@@ -165,6 +171,7 @@ const char *gt_querymatch_display_help(void)
          "alignment:    display alignment (possibly followed by =<number>\n"
          "              to specify width of alignment columns)\n"
          "cigar:        show cigar string representing alignment\n"
+         "polinfo:      display polishing information for displayed alignment\n"
          "seed:         display the seed of the match\n"
          "seed_in_algn: display the seed in alignment\n"
          "seqlength:    display length of sequences in which\n"
@@ -180,7 +187,7 @@ static int gt_querymatch_display_flag_set(GtWord *parameter,
                                           GtError *err)
 {
   const char *display_strings[]
-    = {"alignment","cigar","seed","seed_in_algn","seqlength","evalue",
+    = {"alignment","cigar","polinfo","seed","seed_in_algn","seqlength","evalue",
        "seq-desc","bit-score"};
   size_t ds_idx, numofds = sizeof display_strings/sizeof display_strings[0];
   const GtSeedExtendDisplay_enum exclude_list[] = {Gt_Alignment_display,
@@ -271,12 +278,14 @@ int gt_querymatch_display_flag_args_set(
       case 0:
         break;
       case 1:
-        gt_assert(da_idx == 0);
+        /* the only flag with a parameter is Gt_Alignment_display */
         if (parameter < 0)
         {
           gt_error_set(err,"integer following \"alignment=\" must be positive");
           return -1;
         }
+        gt_assert((display_flag->flags) &
+                  gt_display_mask(Gt_Alignment_display));
         display_flag->alignmentwidth = (GtUword) parameter;
         break;
       default:
@@ -286,7 +295,7 @@ int gt_querymatch_display_flag_args_set(
   if ((display_flag->flags & gt_display_mask(Gt_Alignment_display)) &&
       display_flag->alignmentwidth == 0)
   {
-    display_flag->alignmentwidth = 70; /* this is the default alignment width */
+    display_flag->alignmentwidth = 60; /* this is the default alignment width */
   }
   return 0;
 }

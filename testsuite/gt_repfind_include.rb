@@ -121,29 +121,29 @@ Test do
            "-extendgreedy -ii at1MB -qii Atinsert"
   run "cmp #{last_stdout} #{rdir}/at1MB-Atinsert-greedy-15-700-70-4-43"
   run_test "#{$bin}gt repfind -extendxdrop -ii at1MB -seedlength 70 -l 500 " +
-           "-minidentity 90 -display alignment -verify-alignment"
+           "-minidentity 90 -display alignment=70 polinfo -verify-alignment"
   run "cmp #{last_stdout} #{rdir}/at1MB-xdrop-70-500-90-1-39-a"
   run_test "#{$bin}gt repfind -minidentity 75 -l 700 -seedlength 20 " +
            "-extendgreedy -ii at1MB -q #{$testdata}Atinsert.fna " +
-           "-display alignment -verify-alignment"
+           "-display alignment=70 polinfo -verify-alignment"
   run "cmp #{last_stdout} #{rdir}/at1MB-Atinsert-greedy-20-700-75-3-39-a"
   run_test "#{$bin}gt repfind -minidentity 75 -l 700 -seedlength 20 " +
-           "-extendgreedy -ii at1MB -qii Atinsert -display alignment " +
-           "-verify-alignment"
+           "-extendgreedy -ii at1MB -qii Atinsert " +
+           "-display alignment=70 polinfo -verify-alignment"
   run "cmp #{last_stdout} #{rdir}/at1MB-Atinsert-greedy-20-700-75-3-39-a"
   run_test "#{$bin}gt repfind -extendgreedy -ii at1MB -seedlength 14 " +
-           "-display alignment -verify-alignment"
+           "-display alignment=70 polinfo -verify-alignment"
   run_test "#{$bin}gt repfind -extendxdrop -ii at1MB -seedlength 14 " +
-           "-display alignment -verify-alignment"
+           "-display alignment=70 polinfo -verify-alignment"
   run_test "#{$bin}gt repfind -extendgreedy -ii at1MB -seedlength 70 -l 500 " +
-           "-minidentity 90 -display alignment -verify-alignment"
+           "-minidentity 90 -display alignment=70 polinfo -verify-alignment"
   run "cmp #{last_stdout} #{rdir}/at1MB-greedy-70-500-90-1-39-a"
   run_test "#{$bin}gt repfind -minidentity 80 -l 20 -extendxdrop -ii at1MB " +
            "-q #{$testdata}U89959_genomic.fas " +
-           "-display alignment -verify-alignment"
+           "-display alignment=70 polinfo -verify-alignment"
   run "cmp #{last_stdout} #{rdir}/at1MB-U8-xdrop-20-20-80-6-a"
   run_test "#{$bin}gt repfind -minidentity 80 -l 20 -extendxdrop -ii at1MB " +
-           "-qii U8 -display alignment -verify-alignment"
+           "-qii U8 -display alignment=70 polinfo -verify-alignment"
   run "cmp #{last_stdout} #{rdir}/at1MB-U8-xdrop-20-20-80-6-a"
   ["xdrop","greedy"].each do |ext|
     if ext == "xdrop"
@@ -154,14 +154,15 @@ Test do
     run_test "#{$bin}gt repfind -minidentity 80 -l 30 -seedlength 12 " +
              "-extend#{ext} -ii at1MB " +
              "-q #{$testdata}U89959_genomic.fas -r " +
-             "-display alignment -verify-alignment"
+             "-display alignment=70 polinfo -verify-alignment"
     run "cmp #{last_stdout} #{rdir}/at1MB-U8-#{ext}-r-12-30-80-#{params}-a"
     run_test "#{$bin}gt repfind -minidentity 80 -l 30 -seedlength 12 " +
              "-extend#{ext} -ii at1MB " +
-             "-qii U8 -r -display alignment -verify-alignment"
+             "-qii U8 -r -display alignment=70 polinfo -verify-alignment"
     run "cmp #{last_stdout} #{rdir}/at1MB-U8-#{ext}-r-12-30-80-#{params}-a"
     run_test "#{$bin}gt repfind -seedlength 14 -l 32 -r " +
-             "-display alignment -verify-alignment -extend#{ext} -ii at1MB"
+             "-display alignment=70 polinfo -verify-alignment " +
+             "-extend#{ext} -ii at1MB"
     run "cmp #{last_stdout} #{$testdata}repfind-result/at1MB-#{ext}-r-14-32-80-#{params}-a"
   end
   minlen=24
@@ -208,7 +209,7 @@ Test do
     run "#{$bin}gt suffixerator -indexname db-index -db db.fna #{opts}"
     ["xdrop","greedy"].each do |ext|
       common = "#{$bin}gt repfind -minidentity #{minid} -extend#{ext} " +
-               "-l #{seedlength} -display alignment -verify-alignment"
+               "-l #{seedlength} -display alignment=70 polinfo -verify-alignment"
       crosstest(common,"-ii db-query-index","#{ext}-db-query-index")
       crosstest(common,"-ii db-index -q query.fna","#{ext}-db-index-q")
       crosstest(common,"-ii db-query-r-index -r","#{ext}-db-query-r-index")
