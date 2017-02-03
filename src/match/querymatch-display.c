@@ -25,6 +25,7 @@ typedef enum
   Gt_Alignment_display,
   Gt_Cigarstring_display,
   Gt_Polishinginfo_display,
+  Gt_Fstperquery_display,
   Gt_Seed_display,
   Gt_Seed_in_alignment_display,
   Gt_Seqlength_display,
@@ -87,13 +88,13 @@ bool gt_querymatch_evalue_display(const GtSeedExtendDisplayFlag *display_flag)
   return gt_querymatch_display_on(display_flag,Gt_Evalue_display);
 }
 
-bool gt_querymatch_bit_score_display(const GtSeedExtendDisplayFlag
+bool gt_querymatch_bitscore_display(const GtSeedExtendDisplayFlag
                                        *display_flag)
 {
   return gt_querymatch_display_on(display_flag,Gt_Bitscore_display);
 }
 
-bool gt_querymatch_seq_desc_display(const GtSeedExtendDisplayFlag *display_flag)
+bool gt_querymatch_seqdesc_display(const GtSeedExtendDisplayFlag *display_flag)
 {
   return gt_querymatch_display_on(display_flag,Gt_Seqdesc_display);
 }
@@ -104,9 +105,15 @@ bool gt_querymatch_seqlength_display(const GtSeedExtendDisplayFlag
   return gt_querymatch_display_on(display_flag,Gt_Seqlength_display);
 }
 
-bool gt_querymatch_pol_info_display(const GtSeedExtendDisplayFlag *display_flag)
+bool gt_querymatch_polinfo_display(const GtSeedExtendDisplayFlag *display_flag)
 {
   return gt_querymatch_display_on(display_flag,Gt_Polishinginfo_display);
+}
+
+bool gt_querymatch_fstperquery_display(const GtSeedExtendDisplayFlag
+                                            *display_flag)
+{
+  return gt_querymatch_display_on(display_flag,Gt_Fstperquery_display);
 }
 
 GtUword gt_querymatch_display_alignmentwidth(const GtSeedExtendDisplayFlag
@@ -158,7 +165,7 @@ GtStr *gt_querymatch_column_header(const GtSeedExtendDisplayFlag *display_flag)
   {
     gt_str_append_cstr(str," evalue");
   }
-  if (gt_querymatch_bit_score_display(display_flag))
+  if (gt_querymatch_bitscore_display(display_flag))
   {
     gt_str_append_cstr(str," bit-score");
   }
@@ -173,13 +180,14 @@ const char *gt_querymatch_display_help(void)
          "cigar:        show cigar string representing alignment\n"
          "polinfo:      display polishing information for displayed\n"
          "              alignment\n"
+         "fstperquery:  output only the first found match per query\n"
          "seed:         display the seed of the match\n"
          "seed_in_algn: display the seed in alignment\n"
          "seqlength:    display length of sequences in which\n"
          "              the two match-instances occur\n"
          "evalue:       display evalue\n"
-         "seq-desc:     display sequence description instead of numbers\n"
-         "bit-score:    display bit score\n";
+         "seqdesc:      display sequence description instead of numbers\n"
+         "bitscore:     display bit score\n";
 }
 
 static int gt_querymatch_display_flag_set(GtWord *parameter,
@@ -188,8 +196,8 @@ static int gt_querymatch_display_flag_set(GtWord *parameter,
                                           GtError *err)
 {
   const char *display_strings[]
-    = {"alignment","cigar","polinfo","seed","seed_in_algn","seqlength","evalue",
-       "seq-desc","bit-score"};
+    = {"alignment","cigar","polinfo","fstperquery","seed",
+       "seed_in_algn","seqlength","evalue", "seqdesc","bitscore"};
   size_t ds_idx, numofds = sizeof display_strings/sizeof display_strings[0];
   const GtSeedExtendDisplay_enum exclude_list[] = {Gt_Alignment_display,
                                                    Gt_Cigarstring_display};

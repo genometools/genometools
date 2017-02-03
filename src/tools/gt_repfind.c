@@ -854,7 +854,7 @@ static int gt_repfind_runner(int argc,
     GtEncseq *encseq_for_desc = NULL;
     info_querymatch.processinfo = NULL;
     if (gt_querymatch_evalue_display(display_flag) ||
-        gt_querymatch_bit_score_display(display_flag))
+        gt_querymatch_bitscore_display(display_flag))
     {
       info_querymatch.karlin_altschul_stat
         = gt_karlin_altschul_stat_new_gapped();
@@ -930,7 +930,7 @@ static int gt_repfind_runner(int argc,
           eqmf_data = (void *) &info_querymatch;
         }
       }
-      if (gt_querymatch_seq_desc_display(display_flag))
+      if (gt_querymatch_seqdesc_display(display_flag))
       {
         GtEncseqLoader *encseq_loader = gt_encseq_loader_new();
         gt_encseq_loader_require_des_tab(encseq_loader);

@@ -352,7 +352,7 @@ static int gt_show_seedext_runner(GT_UNUSED int argc,
     }
     processinfo_and_querymatchspaceptr.processinfo = greedyextendmatchinfo;
     if (gt_querymatch_evalue_display(display_flag) ||
-        gt_querymatch_bit_score_display(display_flag))
+        gt_querymatch_bitscore_display(display_flag))
     {
       processinfo_and_querymatchspaceptr.karlin_altschul_stat
         = gt_karlin_altschul_stat_new_gapped();

@@ -32,17 +32,20 @@ bool gt_querymatch_seed_in_alignment_display(
 
 bool gt_querymatch_evalue_display(const GtSeedExtendDisplayFlag *display_flag);
 
-bool gt_querymatch_bit_score_display(const GtSeedExtendDisplayFlag
+bool gt_querymatch_bitscore_display(const GtSeedExtendDisplayFlag
                                        *display_flag);
 
-bool gt_querymatch_seq_desc_display(const GtSeedExtendDisplayFlag
+bool gt_querymatch_seqdesc_display(const GtSeedExtendDisplayFlag
                                       *display_flag);
 
 bool gt_querymatch_seqlength_display(const GtSeedExtendDisplayFlag
                                        *display_flag);
 
-bool gt_querymatch_pol_info_display(const GtSeedExtendDisplayFlag
+bool gt_querymatch_polinfo_display(const GtSeedExtendDisplayFlag
                                       *display_flag);
+
+bool gt_querymatch_fstperquery_display(const GtSeedExtendDisplayFlag
+                                            *display_flag);
 
 GtUword gt_querymatch_display_alignmentwidth(const GtSeedExtendDisplayFlag
                                                 *display_flag);

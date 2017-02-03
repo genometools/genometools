@@ -36,10 +36,10 @@ Test do
   run_test build_encseq("Atinsert.fna", "#{$testdata}Atinsert.fna", true)
   run_test "#{$bin}gt seed_extend -v -ii at1MB -display seed"
   run "mv #{last_stdout} tmp.matches"
-  ["alignment","cigar","polinfo","seed","seed_in_algn","seqlength","evalue","seq-desc","bit-score"].each do |arg|
+  ["alignment","cigar","polinfo","seed","seed_in_algn","seqlength","evalue","seqdesc","bitscore"].each do |arg|
     run_test "#{$bin}gt seed_extend -ii at1MB -display #{arg}"
     run_test "#{$bin}gt seed_extend -ii at1MB -qii Atinsert.fna -display #{arg}"
-    if arg != "seq-desc"
+    if arg != "seqdesc"
       run_test "#{$bin}gt dev show_seedext -f tmp.matches -display #{arg}"
     end
   end

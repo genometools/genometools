@@ -269,7 +269,7 @@ void gt_querymatch_coordinates_out(const GtQuerymatch *querymatch)
             querymatch->seedpos1, querymatch->seedpos2, querymatch->seedlen);
   }
   fprintf(querymatch->fp,GT_WU,querymatch->dblen);
-  if (gt_querymatch_seq_desc_display(querymatch->display_flag))
+  if (gt_querymatch_seqdesc_display(querymatch->display_flag))
   {
     int nwspl = gt_non_white_space_prefix_length(querymatch->db_desc);
     fputc(' ',querymatch->fp);
@@ -283,7 +283,7 @@ void gt_querymatch_coordinates_out(const GtQuerymatch *querymatch)
           querymatch->dbstart_relative,
           outflag[querymatch->query_readmode],
           querymatch->querylen);
-  if (gt_querymatch_seq_desc_display(querymatch->display_flag))
+  if (gt_querymatch_seqdesc_display(querymatch->display_flag))
   {
     int nwspl = gt_non_white_space_prefix_length(querymatch->query_desc);
     fputc(' ',querymatch->fp);
@@ -312,7 +312,7 @@ void gt_querymatch_coordinates_out(const GtQuerymatch *querymatch)
     gt_assert(querymatch->evalue != DBL_MAX);
     fprintf(querymatch->fp, " %1.0e",querymatch->evalue);
   }
-  if (gt_querymatch_bit_score_display(querymatch->display_flag))
+  if (gt_querymatch_bitscore_display(querymatch->display_flag))
   {
     gt_assert(querymatch->bit_score != DBL_MAX);
     fprintf(querymatch->fp, " %.1f",querymatch->bit_score);
@@ -603,7 +603,7 @@ bool gt_querymatch_complete(GtQuerymatch *querymatch,
   const char *query_desc = NULL, *db_desc = NULL;
 
   gt_assert(querymatch != NULL);
-  if (gt_querymatch_seq_desc_display(querymatch->display_flag))
+  if (gt_querymatch_seqdesc_display(querymatch->display_flag))
   {
     GtUword desclen;
 

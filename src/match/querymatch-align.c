@@ -165,7 +165,7 @@ void gt_querymatchoutoptions_extend(
       {
         gt_eoplist_polished_ends(querymatchoutoptions->eoplist,
                                  querymatchoutoptions->pol_info,true,
-                                 gt_querymatch_pol_info_display(display_flag));
+                                 gt_querymatch_polinfo_display(display_flag));
       }
       if (gt_querymatch_seed_in_alignment_display(display_flag))
       {
