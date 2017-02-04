@@ -29,6 +29,23 @@ seeds = [170039800390891361279027638963673934519,
 $SPLT_LIST = ["-splt struct","-splt ulong"]
 $CAM_LIST = ["encseq", "encseq_reader","bytes"]
 
+Name "gt seed_extend: fstperquery"
+Keywords "gt_seed_extend display fstperquery"
+Test do
+  run_test build_encseq("gt_bioseq_succ_3", "#{$testdata}gt_bioseq_succ_3.fas")
+  run_test build_encseq("at1MB", "#{$testdata}at1MB")
+  run_test "#{$bin}gt seed_extend -ii at1MB -qii gt_bioseq_succ_3 -bias-parameters -display fstperquery"
+  run "mv #{last_stdout} fstperquery.matches"
+  run_test "#{$bin}gt seed_extend -ii at1MB -qii gt_bioseq_succ_3 -bias-parameters"
+  run "mv #{last_stdout} all.matches"
+  run "#{$scriptsdir}/check-fstperquery.rb fstperquery.matches all.matches"
+  run_test "#{$bin}gt seed_extend -ii at1MB -bias-parameters -display fstperquery"
+  run "mv #{last_stdout} fstperquery.matches"
+  run_test "#{$bin}gt seed_extend -ii at1MB -bias-parameters"
+  run "mv #{last_stdout} all.matches"
+  run "#{$scriptsdir}/check-fstperquery.rb fstperquery.matches all.matches"
+end
+
 Name "gt seed_extend: display arguments"
 Keywords "gt_seed_extend failure"
 Test do
@@ -36,7 +53,7 @@ Test do
   run_test build_encseq("Atinsert.fna", "#{$testdata}Atinsert.fna", true)
   run_test "#{$bin}gt seed_extend -v -ii at1MB -display seed"
   run "mv #{last_stdout} tmp.matches"
-  ["alignment","cigar","polinfo","seed","seed_in_algn","seqlength","evalue","seqdesc","bitscore"].each do |arg|
+  ["alignment","cigar","polinfo","fstperquery","seed","seed_in_algn","seqlength","evalue","seqdesc","bitscore"].each do |arg|
     run_test "#{$bin}gt seed_extend -ii at1MB -display #{arg}"
     run_test "#{$bin}gt seed_extend -ii at1MB -qii Atinsert.fna -display #{arg}"
     if arg != "seqdesc"
