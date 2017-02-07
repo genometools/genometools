@@ -43,7 +43,7 @@ void gt_querymatch_db_keyvalues_set(GtQuerymatch *querymatch,
                                     GtUword db_numofsequences);
 
 void gt_querymatch_init(GtQuerymatch *querymatch,
-                        GtKarlinAltschulStat *karlin_altschul_stat,
+                        const GtKarlinAltschulStat *karlin_altschul_stat,
                         GtUword dblen,
                         GtUword dbstart,
                         GtUword dbseqnum,
@@ -61,7 +61,7 @@ void gt_querymatch_init(GtQuerymatch *querymatch,
                         const char *query_desc);
 
 bool gt_querymatch_read_line(GtQuerymatch *querymatchptr,
-                             GtKarlinAltschulStat *karlin_altschul_stat,
+                             const GtKarlinAltschulStat *karlin_altschul_stat,
                              bool withseqlength,
                              const char *line_ptr,
                              bool selfmatch,
@@ -72,7 +72,7 @@ bool gt_querymatch_read_line(GtQuerymatch *querymatchptr,
                              const GtEncseq *queryencseq);
 
 bool gt_querymatch_process(GtQuerymatch *querymatchptr,
-                           GtKarlinAltschulStat *karlin_altschul_stat,
+                           const GtKarlinAltschulStat *karlin_altschul_stat,
                            const GtSeqorEncseq *dbes,
                            const GtSeqorEncseq *queryes,
                            bool greedyextension);
@@ -80,7 +80,7 @@ bool gt_querymatch_process(GtQuerymatch *querymatchptr,
 void gt_querymatch_delete(GtQuerymatch *querymatch);
 
 bool gt_querymatch_complete(GtQuerymatch *querymatchptr,
-                            GtKarlinAltschulStat *karlin_altschul_stat,
+                            const GtKarlinAltschulStat *karlin_altschul_stat,
                             GtUword dblen,
                             GtUword dbstart,
                             GtUword dbseqnum,
@@ -148,6 +148,14 @@ bool gt_querymatch_overlap(const GtQuerymatch *querymatch,
                            GtUword nextseed_db_end_relative,
                            GtUword nextseed_query_end_relative,
                            bool use_db_pos);
+
+bool gt_querymatch_previousmatches_overlap(GtQuerymatch *querymatch,
+                            GtUword nextseed_db_end_relative,
+                            GtUword nextseed_query_end_relative);
+
+void gt_querymatch_previousmatches_add(GtQuerymatch *querymatch);
+
+void gt_querymatch_previousmatches_clear(GtQuerymatch *querymatch);
 
 bool gt_querymatch_has_seed(const GtQuerymatch *querymatch);
 

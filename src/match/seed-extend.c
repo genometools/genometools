@@ -437,10 +437,12 @@ static void gt_greedy_at_gc_count(GtUword *atcount,GtUword *gccount,
   gt_assert(gt_encseq_total_length(encseq) > 0);
   if (gt_alphabet_is_dna(alpha))
   {
-    *atcount = gt_encseq_charcount(encseq, gt_alphabet_encode(alpha, 'a'));
-    *atcount += gt_encseq_charcount(encseq, gt_alphabet_encode(alpha, 't'));
-    *gccount = gt_encseq_charcount(encseq, gt_alphabet_encode(alpha, 'c'));
-    *gccount += gt_encseq_charcount(encseq, gt_alphabet_encode(alpha, 'g'));
+    /* I now know that the characters ACGT are mapped in this order
+       in either lower case or upper case */
+    *atcount = gt_encseq_charcount(encseq, 0);
+    *atcount += gt_encseq_charcount(encseq, 3);
+    *gccount = gt_encseq_charcount(encseq, 1);
+    *gccount += gt_encseq_charcount(encseq, 2);
   } else
   {
     *atcount = *gccount = 0;

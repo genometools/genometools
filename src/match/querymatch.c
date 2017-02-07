@@ -25,6 +25,13 @@
 #include "querymatch-align.h"
 #include "karlin_altschul_stat.h"
 
+typedef struct
+{
+  uint32_t db_start, db_end, query_start, query_end;
+} GtQuerymatchCoordinates;
+
+GT_DECLAREARRAYSTRUCT(GtQuerymatchCoordinates);
+
 struct GtQuerymatch
 {
   GtUword
@@ -54,6 +61,7 @@ struct GtQuerymatch
                                karlin altschul statistic */
   FILE *fp;
   const char *db_desc, *query_desc;
+  GtArrayGtQuerymatchCoordinates previousmatches;
 };
 
 GtQuerymatch *gt_querymatch_new(void)
@@ -68,6 +76,7 @@ GtQuerymatch *gt_querymatch_new(void)
   querymatch->fp = stdout;
   querymatch->evalue_searchspace = 0;
   querymatch->queryseqnum = UINT64_MAX;
+  GT_INITARRAY(&querymatch->previousmatches,GtQuerymatchCoordinates);
   return querymatch;
 }
 
@@ -120,7 +129,7 @@ static GtUword gt_querymatch_querystart_derive(GtReadmode query_readmode,
 }
 
 static void gt_querymatch_evalue_bit_score(GtQuerymatch *querymatch,
-                                           GtKarlinAltschulStat
+                                           const GtKarlinAltschulStat
                                              *karlin_altschul_stat,
                                            GtUword alignedlength,
                                            GtUword distance,
@@ -149,7 +158,7 @@ static void gt_querymatch_evalue_bit_score(GtQuerymatch *querymatch,
 }
 
 void gt_querymatch_init(GtQuerymatch *querymatch,
-                        GtKarlinAltschulStat *karlin_altschul_stat,
+                        const GtKarlinAltschulStat *karlin_altschul_stat,
                         GtUword dblen,
                         GtUword dbstart,
                         GtUword dbseqnum,
@@ -205,6 +214,7 @@ void gt_querymatch_delete(GtQuerymatch *querymatch)
 {
   if (querymatch != NULL)
   {
+    GT_FREEARRAY(&querymatch->previousmatches,GtQuerymatchCoordinates);
     gt_free(querymatch);
   }
 }
@@ -353,7 +363,7 @@ bool gt_querymatch_check_final(const GtQuerymatch *querymatch,
 }
 
 static void gt_querymatch_applycorrection(
-                           GtKarlinAltschulStat *karlin_altschul_stat,
+                           const GtKarlinAltschulStat *karlin_altschul_stat,
                                           GtQuerymatch *querymatch)
 {
   const GtSeqpaircoordinates *coords;
@@ -383,7 +393,7 @@ static void gt_querymatch_applycorrection(
 }
 
 bool gt_querymatch_process(GtQuerymatch *querymatch,
-                           GtKarlinAltschulStat *karlin_altschul_stat,
+                           const GtKarlinAltschulStat *karlin_altschul_stat,
                            const GtSeqorEncseq *dbes,
                            const GtSeqorEncseq *queryes,
                            bool greedyextension)
@@ -469,7 +479,7 @@ static GtReadmode gt_readmode_character_code_parse(char direction)
 }
 
 bool gt_querymatch_read_line(GtQuerymatch *querymatch,
-                             GtKarlinAltschulStat *karlin_altschul_stat,
+                             const GtKarlinAltschulStat *karlin_altschul_stat,
                              bool withseqlength,
                              const char *line_ptr,
                              bool selfmatch,
@@ -579,7 +589,7 @@ bool gt_querymatch_read_line(GtQuerymatch *querymatch,
 }
 
 bool gt_querymatch_complete(GtQuerymatch *querymatch,
-                            GtKarlinAltschulStat *karlin_altschul_stat,
+                            const GtKarlinAltschulStat *karlin_altschul_stat,
                             GtUword dblen,
                             GtUword dbstart,
                             GtUword dbseqnum,
@@ -750,14 +760,56 @@ double gt_querymatch_error_rate(GtUword distance,GtUword alignedlen)
   return 200.0 * (double) distance/alignedlen;
 }
 
+void gt_querymatch_previousmatches_clear(GtQuerymatch *querymatch)
+{
+  gt_assert(querymatch != NULL);
+  querymatch->previousmatches.nextfreeGtQuerymatchCoordinates = 0;
+}
+
+void gt_querymatch_previousmatches_add(GtQuerymatch *querymatch)
+{
+  GtQuerymatchCoordinates *ptr;
+  gt_assert(querymatch->dbstart_relative + querymatch->dblen - 1 <=
+                (GtUword) UINT32_MAX &&
+            querymatch->querystart_fwdstrand + querymatch->querylen - 1 <=
+                (GtUword) UINT32_MAX);
+#define OVERLAP_DEBUG
+#ifdef OVERLAP_DEBUG
+  printf("%s: db=(" GT_WU "," GT_WU "), q=" GT_WU "," GT_WU "\n",__func__,
+                            querymatch->dbstart_relative,
+                            querymatch->dbstart_relative +
+                            querymatch->dblen - 1,
+                           querymatch->querystart_fwdstrand,
+                           querymatch->querystart_fwdstrand +
+                               querymatch->querylen - 1);
+  /*if (querymatch->previousmatches.nextfreeGtQuerymatchCoordinates > 0)
+  {
+    gt_assert(querymatch->previousmatches.spaceGtQuerymatchCoordinates[
+          querymatch->previousmatches.nextfreeGtQuerymatchCoordinates-1].
+          query_start <= querymatch->querystart_fwdstrand);
+  }*/
+#endif
+  GT_GETNEXTFREEINARRAY(ptr,
+            &querymatch->previousmatches,
+            GtQuerymatchCoordinates,
+            32UL +
+            querymatch->previousmatches.allocatedGtQuerymatchCoordinates * 0.2);
+  ptr->db_start = (uint32_t) querymatch->dbstart_relative;
+  ptr->db_end = (uint32_t) (querymatch->dbstart_relative +
+                            querymatch->dblen - 1);
+  ptr->query_start = (uint32_t) querymatch->querystart_fwdstrand;
+  ptr->query_end = (uint32_t) (querymatch->querystart_fwdstrand +
+                               querymatch->querylen - 1);
+}
+
 bool gt_querymatch_overlap(const GtQuerymatch *querymatch,
                            GtUword nextseed_db_end_relative,
                            GtUword nextseed_query_end_relative,
                            bool use_db_pos)
 {
   bool queryoverlap, dboverlap, dboverlap_at_end, dboverlap_at_start;
-  gt_assert(querymatch != NULL);
 
+  gt_assert(querymatch != NULL);
   queryoverlap = (querymatch->querystart + querymatch->querylen >
                   nextseed_query_end_relative ? true : false);
   dboverlap_at_end = (querymatch->dbstart_relative + querymatch->dblen >
@@ -767,6 +819,47 @@ bool gt_querymatch_overlap(const GtQuerymatch *querymatch,
   dboverlap = !use_db_pos || (dboverlap_at_end && dboverlap_at_start);
 
   return queryoverlap && dboverlap ? true : false;
+}
+
+bool gt_querymatch_previousmatches_overlap(
+                            GtQuerymatch *querymatch,
+                            GtUword nextseed_db_end_relative,
+                            GtUword nextseed_query_end_relative)
+{
+  GtQuerymatchCoordinates *ptr;
+
+#ifdef OVERLAP_DEBUG
+  printf("%s(apos=" GT_WU ",bpos=" GT_WU ")\n",__func__,
+                                   nextseed_db_end_relative,
+                                   nextseed_query_end_relative);
+#endif
+  for (ptr = querymatch->previousmatches.spaceGtQuerymatchCoordinates;
+       ptr < querymatch->previousmatches.spaceGtQuerymatchCoordinates +
+               querymatch->previousmatches.nextfreeGtQuerymatchCoordinates;
+       ptr++)
+  {
+#ifdef OVERLAP_DEBUG
+    printf("compare to db=(%u,%u),q=(%u,%u): ",
+               ptr->db_start,ptr->db_end,
+               ptr->query_start,ptr->query_end);
+#endif
+    if (nextseed_db_end_relative <= (GtUword) ptr->db_end &&
+        (GtUword) ptr->db_start <= nextseed_db_end_relative &&
+        nextseed_query_end_relative <= (GtUword) ptr->query_end &&
+        (GtUword) ptr->query_start <= nextseed_query_end_relative)
+    {
+#ifdef OVERLAP_DEBUG
+      printf("overlap=true\n");
+#endif
+      return true;
+    } else
+    {
+#ifdef OVERLAP_DEBUG
+      printf("overlap=false\n");
+#endif
+    }
+  }
+  return false;
 }
 
 static int gt_querymatch_compare_ascending(const void *va,const void *vb)

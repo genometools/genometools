@@ -78,6 +78,7 @@ typedef struct {
   /* general options */
   GtUword se_alignlength;
   GtUword se_minidentity;
+  double se_maxevalue;
   GtStrArray *display_args;
   bool norev;
   bool nofwd;
@@ -128,7 +129,7 @@ static GtOptionParser* gt_seed_extend_option_parser_new(void *tool_arguments)
   GtOptionParser *op;
   GtOption *option, *op_gre, *op_xdr, *op_cam, *op_splt,
     *op_his, *op_dif, *op_pmh,
-    *op_len, *op_err, *op_xbe, *op_sup, *op_frq, *op_mem, *op_bia,
+    *op_len, *op_minid, *op_evalue, *op_xbe, *op_sup, *op_frq, *op_mem, *op_bia,
     *op_onl, *op_weakends, *op_relax_polish,
     *op_verify_alignment, *op_only_selected_seqpairs, *op_spdist, *op_display,
     *op_norev, *op_nofwd, *op_part, *op_pick, *op_overl, *op_trimstat,
@@ -372,14 +373,22 @@ static GtOptionParser* gt_seed_extend_option_parser_new(void *tool_arguments)
   gt_option_parser_add_option(op, op_len);
 
   /* -minidentity */
-  op_err = gt_option_new_uword_min_max("minidentity",
+  op_minid = gt_option_new_uword_min_max("minidentity",
                                        "Minimum identity of matches "
                                        "(for seed extension)",
                                        &arguments->se_minidentity,
                                        80UL, GT_EXTEND_MIN_IDENTITY_PERCENTAGE,
                                        99UL);
-  gt_option_exclude(op_err, op_onl);
-  gt_option_parser_add_option(op, op_err);
+  gt_option_exclude(op_minid, op_onl);
+  gt_option_parser_add_option(op, op_minid);
+
+  /* -evalue */
+  op_evalue = gt_option_new_double("evalue","Maximum evalue of matches "
+                                            "(for seed extension)",
+                                   &arguments->se_maxevalue,
+                                   10.0);
+  gt_option_exclude(op_evalue, op_onl);
+  gt_option_parser_add_option(op, op_evalue);
 
   /* OUTPUT OPTIONS */
 
