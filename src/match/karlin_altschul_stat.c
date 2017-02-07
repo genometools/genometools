@@ -25,7 +25,6 @@
 #include "core/types_api.h"
 #include "extended/scorehandler.h"
 #include "match/karlin_altschul_stat.h"
-#include "core/safearith.h"
 #include "match/karlin_altschul_stat.h"
 
 /*
@@ -47,7 +46,7 @@ struct GtKarlinAltschulStat
          beta,
          log2;
   GtWord matchscore, mismatchscore, gapscore;
-  GtUword total_length_db, num_of_db_seqs;
+  GtUword actual_length_db, num_of_db_seqs;
 };
 
 typedef struct{
@@ -228,13 +227,12 @@ static double gt_karlin_altschul_stat_calculate_ungapped_lambda(
 {
   double x0, x, lambda, tolerance, q, dq;
   GtWord low, high;
-  GtUword k_max_iterations, idx, jdx;
+  GtUword k_max_iterations = 20, idx, jdx;
 
   /* solve phi(lambda) = -1 + sum_{i=l}^{u} sprob(i)*exp(i*lambda) = 0 */
 
   x0 = 0.5; /* x0 in (0,1) */
   tolerance = 1.e-5;
-  k_max_iterations = 20;
 
   low = sf->low_align_score;
   high = sf->high_align_score;
@@ -248,7 +246,7 @@ static double gt_karlin_altschul_stat_calculate_ungapped_lambda(
     for (jdx = 0; jdx <= high-low; jdx++)
       q += sf->sprob[high-low-jdx] * pow(x0,jdx);
 
-    dq = -high*pow(x0,(high-1));
+    dq = -high*pow(x0,high-1);
     for (jdx = 1; jdx <= high-low; jdx++)
       dq += sf->sprob[high-low-jdx] * jdx * pow(x0,jdx-1);
 
@@ -507,7 +505,7 @@ GtKarlinAltschulStat *gt_karlin_altschul_stat_new(unsigned int numofchars,
   ka->logK = 0;
   ka->H = 0;
   ka->log2 = log(2);
-  ka->total_length_db = GT_UWORD_MAX;
+  ka->actual_length_db = GT_UWORD_MAX;
   ka->num_of_db_seqs = GT_UWORD_MAX;
   gt_assert(gt_scorehandler_get_gap_opening(scorehandler) == 0);
   ka->matchscore = gt_scorehandler_get_matchscore(scorehandler);
@@ -555,8 +553,10 @@ void gt_karlin_altschul_stat_add_keyvalues(
 {
   if (karlin_altschul_stat != NULL)
   {
-    gt_assert(karlin_altschul_stat->total_length_db == GT_UWORD_MAX);
-    karlin_altschul_stat->total_length_db = total_length_db;
+    gt_assert(num_of_db_seqs > 0 &&
+              karlin_altschul_stat->actual_length_db == GT_UWORD_MAX);
+    karlin_altschul_stat->actual_length_db = total_length_db -
+                                             (num_of_db_seqs - 1);
     karlin_altschul_stat->num_of_db_seqs = num_of_db_seqs;
   }
 }
@@ -580,11 +580,11 @@ static GtWord gt_karlin_altschul_stat_gapscore(const GtKarlinAltschulStat *ka)
   return ka->gapscore;
 }
 
-static GtWord gt_karlin_altschul_get_total_length_db(
+static GtWord gt_karlin_altschul_get_actual_length_db(
                        const GtKarlinAltschulStat *ka)
 {
-  gt_assert(ka != NULL && ka->total_length_db != GT_UWORD_MAX);
-  return ka->total_length_db;
+  gt_assert(ka != NULL && ka->actual_length_db != GT_UWORD_MAX);
+  return ka->actual_length_db;
 }
 
 static GtWord gt_karlin_altschul_get_num_of_db_seqs(
@@ -658,7 +658,7 @@ static GtUword gt_evalue_length_adjustment(GtUword query_length,
   /* l_max is the largest nonnegative solution of
      K * (m - l) * (n - N * l) > MAX(m,n) */
 
-  space = gt_safe_mult_ulong(actual_db_length, query_length)
+  space = actual_db_length * query_length
           - MAX(query_length, actual_db_length)/K;
   if (space < 0)
     return 0; /* length_adjustnment = 0 */
@@ -722,7 +722,6 @@ GtUword gt_evalue_searchspace(const GtKarlinAltschulStat *ka,
 {
   GtUword actual_db_length,
           num_of_db_seqs,
-          actual_query_length,
           effective_db_length,
           effective_query_length,
           length_adjustment;
@@ -736,14 +735,8 @@ GtUword gt_evalue_searchspace(const GtKarlinAltschulStat *ka,
   logK = gt_karlin_altschul_stat_get_logK(ka);
 
   num_of_db_seqs = gt_karlin_altschul_get_num_of_db_seqs(ka);
-  gt_assert(num_of_db_seqs > 0);
-  actual_db_length = gt_karlin_altschul_get_total_length_db(ka) -
-                     (num_of_db_seqs - 1);
-
-  /* query length */
-  actual_query_length = query_idx_length;
-
-  length_adjustment = gt_evalue_length_adjustment(actual_query_length,
+  actual_db_length = gt_karlin_altschul_get_actual_length_db(ka);
+  length_adjustment = gt_evalue_length_adjustment(query_idx_length,
                                                   actual_db_length,
                                                   num_of_db_seqs,
                                                   alpha_div_lambda,
@@ -751,11 +744,11 @@ GtUword gt_evalue_searchspace(const GtKarlinAltschulStat *ka,
                                                   K,
                                                   logK);
 
-  effective_query_length = actual_query_length - length_adjustment;
+  effective_query_length = query_idx_length - length_adjustment;
   effective_db_length
     = actual_db_length - (num_of_db_seqs * length_adjustment);
 
-  return gt_safe_mult_ulong(effective_query_length, effective_db_length);
+  return effective_query_length * effective_db_length;
 }
 
 GtWord gt_evalue_raw_score(const GtKarlinAltschulStat *ka,
@@ -770,7 +763,8 @@ GtWord gt_evalue_raw_score(const GtKarlinAltschulStat *ka,
   mismatchscore = gt_karlin_altschul_stat_mismatchscore(ka);
   gapscore = gt_karlin_altschul_stat_gapscore(ka);
   gt_assert(matchscore > 0 && mismatchscore < 0 && gapscore < 0);
-  return (GtWord) matches * matchscore + (GtWord) mismatches * mismatchscore +
+  return (GtWord) matches * matchscore +
+         (GtWord) mismatches * mismatchscore +
          (GtWord) indels * gapscore;
 }
 
