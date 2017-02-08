@@ -62,6 +62,18 @@ Test do
   end
   run "#{$bin}gt seed_extend -ii at1MB -l 500 -display alignment=70"
   run "cmp #{last_stdout} #{$testdata}/see-ext-at1MB-500-al.matches"
+  run "#{$bin}gt seed_extend -ii at1MB -l 400 -display evalue bitscore"
+  run "cmp #{last_stdout} #{$testdata}/see-ext-at1MB-400-evalue-bitscore.matches"
+  run "#{$bin}gt seed_extend -ii at1MB -l 400 -display seqdesc"
+  run "cmp #{last_stdout} #{$testdata}/see-ext-at1MB-400-seqdesc.matches"
+  run "#{$bin}gt seed_extend -ii at1MB -l 400 -display cigar"
+  run "cmp #{last_stdout} #{$testdata}/see-ext-at1MB-400-cigar.matches"
+  run "#{$bin}gt seed_extend -ii at1MB -l 700 -display alignment=60 seed_in_algn"
+  run "cmp #{last_stdout} #{$testdata}/see-ext-at1MB-500-alignment-seed_in_algn.matches"
+  run "#{$bin}gt seed_extend -ii at1MB -l 400 -display seqlength"
+  run "cmp #{last_stdout} #{$testdata}/see-ext-at1MB-400-seqlength.matches"
+  run "#{$bin}gt seed_extend -ii at1MB -qii Atinsert.fna -l 100 -display bitscore evalue seqlength cigar"
+  run "cmp #{last_stdout} #{$testdata}/see-ext-at1MB-Atinsert100-evalue-bitscore-cigar-seqlength.matches"
 end
 
 # Invalid arguments
