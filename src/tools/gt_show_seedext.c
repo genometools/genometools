@@ -76,8 +76,8 @@ static GtOptionParser* gt_show_seedext_option_parser_new(void *tool_arguments)
                             "Parse output of a seed extension and show/verify "
                             "the alignment.");
 
-  /* -display */
-  op_display = gt_option_new_string_array("display",
+  /* -outfmt */
+  op_display = gt_option_new_string_array("outfmt",
                                           gt_querymatch_display_help(),
                                           arguments->display_args);
   gt_option_parser_add_option(op, op_display);

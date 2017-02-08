@@ -196,7 +196,7 @@ GtSeedextendMatchIterator *gt_seedextend_match_iterator_new(
         {
           semi->bias_parameters = true;
         }
-        if (strcmp(tok, "-seqlength-display") == 0)
+        if (strcmp(tok, "-outfmt seqlength") == 0)
         {
           semi->seqlength_display = true;
         }
@@ -302,7 +302,7 @@ GtQuerymatch *gt_seedextend_match_iterator_next(GtSeedextendMatchIterator *semi)
       break;
     }
     line_ptr = gt_str_get(semi->line_buffer);
-    /* ignore comment lines; but print seeds if -display seed is set */
+    /* ignore comment lines; but print seeds if -outfmt seed is set */
     gt_assert(line_ptr != NULL);
     if (line_ptr[0] != '\n')
     {

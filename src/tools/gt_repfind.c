@@ -372,8 +372,8 @@ static GtOptionParser *gt_repfind_option_parser_new(void *tool_arguments)
   gt_option_parser_add_option(op, option);
   gt_option_is_development_option(option);
 
-  /* -display */
-  option = gt_option_new_string_array("display",
+  /* -outfmt */
+  option = gt_option_new_string_array("outfmt",
                                       gt_querymatch_display_help(),
                                       arguments->display_args);
   gt_option_parser_add_option(op, option);

@@ -34,12 +34,12 @@ Keywords "gt_seed_extend display fstperquery"
 Test do
   run_test build_encseq("gt_bioseq_succ_3", "#{$testdata}gt_bioseq_succ_3.fas")
   run_test build_encseq("at1MB", "#{$testdata}at1MB")
-  run_test "#{$bin}gt seed_extend -ii at1MB -qii gt_bioseq_succ_3 -bias-parameters -display fstperquery"
+  run_test "#{$bin}gt seed_extend -ii at1MB -qii gt_bioseq_succ_3 -bias-parameters -outfmt fstperquery"
   run "mv #{last_stdout} fstperquery.matches"
   run_test "#{$bin}gt seed_extend -ii at1MB -qii gt_bioseq_succ_3 -bias-parameters"
   run "mv #{last_stdout} all.matches"
   run "#{$scriptsdir}/check-fstperquery.rb fstperquery.matches all.matches"
-  run_test "#{$bin}gt seed_extend -ii at1MB -bias-parameters -display fstperquery"
+  run_test "#{$bin}gt seed_extend -ii at1MB -bias-parameters -outfmt fstperquery"
   run "mv #{last_stdout} fstperquery.matches"
   run_test "#{$bin}gt seed_extend -ii at1MB -bias-parameters"
   run "mv #{last_stdout} all.matches"
@@ -51,28 +51,28 @@ Keywords "gt_seed_extend failure"
 Test do
   run_test build_encseq("at1MB", "#{$testdata}at1MB", true)
   run_test build_encseq("Atinsert.fna", "#{$testdata}Atinsert.fna", true)
-  run_test "#{$bin}gt seed_extend -v -ii at1MB -display seed"
+  run_test "#{$bin}gt seed_extend -v -ii at1MB -outfmt seed"
   run "mv #{last_stdout} tmp.matches"
   ["alignment","cigar","polinfo","fstperquery","seed","seed_in_algn","seqlength","evalue","seqdesc","bitscore"].each do |arg|
-    run_test "#{$bin}gt seed_extend -ii at1MB -display #{arg}"
-    run_test "#{$bin}gt seed_extend -ii at1MB -qii Atinsert.fna -display #{arg}"
+    run_test "#{$bin}gt seed_extend -ii at1MB -outfmt #{arg}"
+    run_test "#{$bin}gt seed_extend -ii at1MB -qii Atinsert.fna -outfmt #{arg}"
     if arg != "seqdesc"
-      run_test "#{$bin}gt dev show_seedext -f tmp.matches -display #{arg}"
+      run_test "#{$bin}gt dev show_seedext -f tmp.matches -outfmt #{arg}"
     end
   end
-  run "#{$bin}gt seed_extend -ii at1MB -l 500 -display alignment=70"
+  run "#{$bin}gt seed_extend -ii at1MB -l 500 -outfmt alignment=70"
   run "cmp #{last_stdout} #{$testdata}/see-ext-at1MB-500-al.matches"
-  run "#{$bin}gt seed_extend -ii at1MB -l 400 -display evalue bitscore"
+  run "#{$bin}gt seed_extend -ii at1MB -l 400 -outfmt evalue bitscore"
   run "cmp #{last_stdout} #{$testdata}/see-ext-at1MB-400-evalue-bitscore.matches"
-  run "#{$bin}gt seed_extend -ii at1MB -l 400 -display seqdesc"
+  run "#{$bin}gt seed_extend -ii at1MB -l 400 -outfmt seqdesc"
   run "cmp #{last_stdout} #{$testdata}/see-ext-at1MB-400-seqdesc.matches"
-  run "#{$bin}gt seed_extend -ii at1MB -l 400 -display cigar"
+  run "#{$bin}gt seed_extend -ii at1MB -l 400 -outfmt cigar"
   run "cmp #{last_stdout} #{$testdata}/see-ext-at1MB-400-cigar.matches"
-  run "#{$bin}gt seed_extend -ii at1MB -l 700 -display alignment=60 seed_in_algn"
+  run "#{$bin}gt seed_extend -ii at1MB -l 700 -outfmt alignment=60 seed_in_algn"
   run "cmp #{last_stdout} #{$testdata}/see-ext-at1MB-500-alignment-seed_in_algn.matches"
-  run "#{$bin}gt seed_extend -ii at1MB -l 400 -display seqlength"
+  run "#{$bin}gt seed_extend -ii at1MB -l 400 -outfmt seqlength"
   run "cmp #{last_stdout} #{$testdata}/see-ext-at1MB-400-seqlength.matches"
-  run "#{$bin}gt seed_extend -ii at1MB -qii Atinsert.fna -l 100 -display bitscore evalue seqlength cigar"
+  run "#{$bin}gt seed_extend -ii at1MB -qii Atinsert.fna -l 100 -outfmt bitscore evalue seqlength cigar"
   run "cmp #{last_stdout} #{$testdata}/see-ext-at1MB-Atinsert100-evalue-bitscore-cigar-seqlength.matches"
 end
 
@@ -118,18 +118,18 @@ Test do
   grep last_stderr, /argument to option -pick must satisfy format i,j/
   run_test "#{$bin}gt seed_extend -ii not-existing-file", :retval => 1
   grep last_stderr, /cannot open file 'not-existing-file.esq': No such file/
-  run_test "#{$bin}gt seed_extend -ii at1MB -display xx", :retval => 1
-  grep last_stderr, /illegal identifier in argument of option -display/, :retval => 1
-  run_test "#{$bin}gt seed_extend -ii at1MB -display alignment=n", :retval => 1
-  run_test "#{$bin}gt seed_extend -ii at1MB -display alignment=-1", :retval => 1
-  run_test "#{$bin}gt seed_extend -ii at1MB -display alignment cigar", :retval => 1
+  run_test "#{$bin}gt seed_extend -ii at1MB -outfmt xx", :retval => 1
+  grep last_stderr, /illegal identifier in argument of option -outfmt/, :retval => 1
+  run_test "#{$bin}gt seed_extend -ii at1MB -outfmt alignment=n", :retval => 1
+  run_test "#{$bin}gt seed_extend -ii at1MB -outfmt alignment=-1", :retval => 1
+  run_test "#{$bin}gt seed_extend -ii at1MB -outfmt alignment cigar", :retval => 1
 end
 
 Name "gt dev show_seedext without alignment"
 Keywords "gt_seed_extend"
 Test do
   run_test build_encseq("at1MB", "#{$testdata}at1MB")
-  run_test "#{$bin}gt seed_extend -v -display seed -ii at1MB"
+  run_test "#{$bin}gt seed_extend -v -outfmt seed -ii at1MB"
   run "mv #{last_stdout} seed_extend.out"
   run_test "#{$bin}gt dev show_seedext -f seed_extend.out"
   run "mv #{last_stdout} show_seed_ext.out"
@@ -288,12 +288,12 @@ Test do
         for minidentity in [70, 80, 99] do
           run_test "#{$bin}gt seed_extend -extendgreedy #{sensitivity} " +
                      "-minidentity #{minidentity} -l #{alignlength} " +
-                     "-display alignment=70 seed -ii at1MB -verify-alignment #{splt}", :retval => 0
+                     "-outfmt alignment=70 seed -ii at1MB -verify-alignment #{splt}", :retval => 0
         end
       end
     end
     run_test "#{$bin}gt seed_extend -extendgreedy -bias-parameters -verify " +
-             "-overlappingseeds -display alignment=70 seed -ii at1MB #{splt}",:retval => 0
+             "-overlappingseeds -outfmt alignment=70 seed -ii at1MB #{splt}",:retval => 0
   end
 end
 
@@ -308,12 +308,12 @@ Test do
         for maxalilendiff in [1, 10, 30] do
           run_test "#{$bin}gt seed_extend -maxalilendiff #{maxalilendiff} " +
           "-history #{history} -percmathistory #{percmathistory} " +
-          "-ii at1MB -display alignment=70 #{splt}", :retval => 0
+          "-ii at1MB -outfmt alignment=70 #{splt}", :retval => 0
         end
       end
     end
     run_test "#{$bin}gt seed_extend -bias-parameters -seedpairdistance 10 20 " +
-             "-display seed -ii at1MB #{splt}", :retval => 0
+             "-outfmt seed -ii at1MB #{splt}", :retval => 0
   end
 end
 
@@ -364,14 +364,14 @@ Test do
         run_test "#{$bin}gt seed_extend -extend#{ext} 100 -l " +
                  "#{extendlength-20} -minidentity #{minid} " +
                  "-seedlength #{seedlength} -no-reverse -kmerfile no " +
-                 "-mincoverage #{seedlength} -display seed -ii all #{splt}"
+                 "-mincoverage #{seedlength} -outfmt seed -ii all #{splt}"
         grep last_stdout, /^\d+ \d+ \d+ . \d+ \d+ \d+ \d+ \d+ \d+/
         run "mv #{last_stdout} combined.out"
         split_output("combined")
         run_test "#{$bin}gt seed_extend -extend#{ext} 100 " +
                  "-l #{extendlength-20} -kmerfile no " +
                  "-minidentity #{minid} -seedlength #{seedlength} " +
-                 "-no-reverse -mincoverage #{seedlength} -display seed " +
+                 "-no-reverse -mincoverage #{seedlength} -outfmt seed " +
                  "-ii db -qii query #{splt}"
         grep last_stdout, /^\d+ \d+ \d+ . \d+ \d+ \d+ \d+ \d+ \d+/
         run "mv #{last_stdout} separated.out"

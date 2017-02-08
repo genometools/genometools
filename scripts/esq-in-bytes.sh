@@ -2,7 +2,7 @@
 
 seed_extend()
 {
-  env -i ${GTDIR}/bin/gt seed_extend -display seqlength -minidentity 70 -extend${mode} -ii db -qii query -maxfreq 20 -kmerfile no $1 > sfx-$2.matches
+  env -i ${GTDIR}/bin/gt seed_extend -outfmt seqlength -minidentity 70 -extend${mode} -ii db -qii query -maxfreq 20 -kmerfile no $1 > sfx-$2.matches
 }
 
 # set GTDIR as path of genometools directory

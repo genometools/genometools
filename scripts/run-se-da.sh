@@ -70,7 +70,7 @@ else
 fi
 
 bin/gt seed_extend -ii ${reference} ${qiioption} -t ${maxfreq} -l ${minlen} \
-                    -seedlength 14 -minidentity ${minidentity} -display seed \
+                    -seedlength 14 -minidentity ${minidentity} -outfmt seed \
                     -v -overlappingseeds -bias-parameters -no-reverse \
                     -history 60 > ${outputprefix}-se.matches
 rm -f ${query}.ssp ${query}.fasta ${query}.esq

@@ -215,7 +215,7 @@ static int gt_querymatch_display_flag_set(GtWord *parameter,
     cmplen = (size_t) (ptr - arg);
     if (sscanf(ptr+1,GT_WD,parameter) != 1)
     {
-      gt_error_set(err,"illegal argument \"%s\" to option -display: "
+      gt_error_set(err,"illegal argument \"%s\" to option -outfmt: "
                        "expect integer following symbol =",arg);
       return -1;
     }
@@ -240,7 +240,7 @@ static int gt_querymatch_display_flag_set(GtWord *parameter,
     GtStr *err_msg = gt_str_new();
 
     gt_str_append_cstr(err_msg,
-                       "illegal identifier as argument of option -display: "
+                       "illegal identifier as argument of option -outfmt: "
                        "possible idenfifiers are: ");
     for (ds_idx = 0; ds_idx < numofds; ds_idx++)
     {
@@ -259,7 +259,7 @@ static int gt_querymatch_display_flag_set(GtWord *parameter,
     if ((display_flag->flags & gt_display_mask(exclude_list[ex_idx])) &&
         (display_flag->flags & gt_display_mask(exclude_list[ex_idx+1])))
     {
-      gt_error_set(err,"argument \"%s\" and \"%s\" of option -display exclude "
+      gt_error_set(err,"argument \"%s\" and \"%s\" of option -outfmt exclude "
                        "each other",
                        display_strings[exclude_list[ex_idx]],
                        display_strings[exclude_list[ex_idx+1]]);

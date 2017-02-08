@@ -419,8 +419,8 @@ static GtOptionParser* gt_seed_extend_option_parser_new(void *tool_arguments)
   gt_option_parser_add_option(op, op_only_selected_seqpairs);
   gt_option_is_development_option(op_only_selected_seqpairs);
 
-  /* -display */
-  op_display = gt_option_new_string_array("display",
+  /* -outfmt */
+  op_display = gt_option_new_string_array("outfmt",
                                           gt_querymatch_display_help(),
                                           arguments->display_args);
   gt_option_parser_add_option(op, op_display);
