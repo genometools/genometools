@@ -131,8 +131,9 @@ void gt_querymatch_prettyprint(const GtQuerymatch *querymatch);
 void gt_querymatch_coordinates_out(const GtQuerymatch *querymatch);
 
 bool gt_querymatch_check_final(const GtQuerymatch *querymatch,
+                               GtUword userdefinedleastlength,
                                GtUword errorpercentage,
-                               GtUword userdefinedleastlength);
+                               double evalue_threshold);
 
 void gt_querymatch_query_readmode_set(GtQuerymatch *querymatch,
                                       GtReadmode query_readmode);

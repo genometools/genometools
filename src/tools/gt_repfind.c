@@ -782,6 +782,30 @@ static int gt_repfind_runner(int argc,
       haserr = true;
     }
   }
+  if (!haserr)
+  {
+    if (gt_querymatch_evalue_display(display_flag) ||
+        gt_querymatch_bitscore_display(display_flag))
+    {
+      GtEncseqMetadata *emd
+        = gt_encseq_metadata_new(gt_str_get(arguments->indexname),err);
+      if (emd == NULL)
+      {
+        info_querymatch.karlin_altschul_stat = NULL;
+        haserr = true;
+      } else
+      {
+        info_querymatch.karlin_altschul_stat
+          = gt_karlin_altschul_stat_new_gapped(
+                  gt_encseq_metadata_total_length(emd),
+                  gt_encseq_metadata_num_of_sequences(emd));
+        gt_encseq_metadata_delete(emd);
+      }
+    } else
+    {
+      info_querymatch.karlin_altschul_stat = NULL;
+    }
+  }
   if (!haserr && gt_option_is_set(arguments->refextendxdropoption))
   {
     xdropmatchinfo
@@ -853,15 +877,6 @@ static int gt_repfind_runner(int argc,
   {
     GtEncseq *encseq_for_desc = NULL;
     info_querymatch.processinfo = NULL;
-    if (gt_querymatch_evalue_display(display_flag) ||
-        gt_querymatch_bitscore_display(display_flag))
-    {
-      info_querymatch.karlin_altschul_stat
-        = gt_karlin_altschul_stat_new_gapped();
-    } else
-    {
-      info_querymatch.karlin_altschul_stat = NULL;
-    }
     if (gt_querymatch_display_alignment(display_flag) ||
         (gt_option_is_set(arguments->refextendxdropoption) &&
          !arguments->noxpolish))
@@ -944,22 +959,6 @@ static int gt_repfind_runner(int argc,
         {
           haserr = true;
         }
-      }
-    }
-    if (!haserr)
-    {
-      GtEncseqMetadata* emd
-        = gt_encseq_metadata_new(gt_str_get(arguments->indexname),err);
-      if (emd == NULL)
-      {
-        haserr = true;
-      } else
-      {
-        gt_karlin_altschul_stat_add_keyvalues(
-                  info_querymatch.karlin_altschul_stat,
-                  gt_encseq_metadata_total_length(emd),
-                  gt_encseq_metadata_num_of_sequences(emd));
-        gt_encseq_metadata_delete(emd);
       }
     }
     if (!haserr && gt_str_array_size(arguments->query_files) == 0 &&

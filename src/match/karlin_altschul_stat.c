@@ -536,29 +536,22 @@ GtKarlinAltschulStat *gt_karlin_altschul_stat_new(unsigned int numofchars,
   return ka;
 }
 
-GtKarlinAltschulStat *gt_karlin_altschul_stat_new_gapped(void)
-{
-  const unsigned int gapped_alignment_flag = 0;
-  GtScoreHandler *scorehandler = gt_scorehandler_new(1,-2,0,-2);
-  GtKarlinAltschulStat *karlin_alt_schul_stat
-    = gt_karlin_altschul_stat_new(gapped_alignment_flag,scorehandler);
-  gt_scorehandler_delete(scorehandler);
-  return karlin_alt_schul_stat;
-}
-
-void gt_karlin_altschul_stat_add_keyvalues(
-                             GtKarlinAltschulStat *karlin_altschul_stat,
+GtKarlinAltschulStat *gt_karlin_altschul_stat_new_gapped(
                              GtUword total_length_db,
                              GtUword num_of_db_seqs)
 {
-  if (karlin_altschul_stat != NULL)
-  {
-    gt_assert(num_of_db_seqs > 0 &&
-              karlin_altschul_stat->actual_length_db == GT_UWORD_MAX);
-    karlin_altschul_stat->actual_length_db = total_length_db -
-                                             (num_of_db_seqs - 1);
-    karlin_altschul_stat->num_of_db_seqs = num_of_db_seqs;
-  }
+  const unsigned int gapped_alignment_flag = 0;
+  GtScoreHandler *scorehandler = gt_scorehandler_new(1,-2,0,-2);
+  GtKarlinAltschulStat *karlin_altschul_stat
+    = gt_karlin_altschul_stat_new(gapped_alignment_flag,scorehandler);
+
+  gt_scorehandler_delete(scorehandler);
+  gt_assert(num_of_db_seqs > 0 &&
+            karlin_altschul_stat->actual_length_db == GT_UWORD_MAX);
+  karlin_altschul_stat->actual_length_db = total_length_db -
+                                           (num_of_db_seqs - 1);
+  karlin_altschul_stat->num_of_db_seqs = num_of_db_seqs;
+  return karlin_altschul_stat;
 }
 
 static GtWord gt_karlin_altschul_stat_mismatchscore(
@@ -836,7 +829,8 @@ int gt_evalue_unit_test(GT_UNUSED GtError *err)
 
   scorehandler = gt_scorehandler_new(1,-2,0,-2);
   ka = gt_karlin_altschul_stat_new(numchars,scorehandler); /* unit test */
-  gt_karlin_altschul_stat_add_keyvalues(ka,772376, 1952);
+  ka->actual_length_db = 772376 - (1952 - 1);
+  ka->num_of_db_seqs = 1952;
 
   /* checks searchspace calculation */
   gt_ensure(gt_evalue_searchspace(ka, 450)== 308243802);

@@ -15,6 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#include <float.h>
 #include "core/minmax.h"
 #include "match/querymatch.h"
 #include "match/xdrop.h"
@@ -214,7 +215,7 @@ void gt_sesp_show(const GtSeedextendSeqpair *sesp)
 static const GtQuerymatch *gt_combine_extensions(
          bool forxdrop,
          GtQuerymatch *querymatchspaceptr,
-         GtKarlinAltschulStat *karlin_altschul_stat,
+         const GtKarlinAltschulStat *karlin_altschul_stat,
          const GtSeqorEncseq *dbes,
          const GtSeqorEncseq *queryes,
          const GtSeedextendSeqpair *sesp,
@@ -1327,8 +1328,10 @@ static void gt_extend_prettyprint(bool forxdrop,const GtQuerymatch *querymatch,
     errorpercentage = ggemi->errorpercentage;
     userdefinedleastlength = ggemi->userdefinedleastlength;
   }
-  if (gt_querymatch_check_final(querymatch,errorpercentage,
-                                userdefinedleastlength))
+  if (gt_querymatch_check_final(querymatch,
+                                userdefinedleastlength,
+                                errorpercentage,
+                                DBL_MAX))
   {
     gt_querymatch_prettyprint(querymatch);
   }

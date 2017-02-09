@@ -40,6 +40,7 @@ struct GtQuerymatch
     dbstart, /* absolute start position of match in database seq */
     querystart, /* start of match in query, relative to start of query */
     distance, /* 0 for exact match, upper bound on optimal distance */
+    mismatches,
     dbseqnum, /* sequence number of dbstart */
     dbstart_relative, /* start position of match in dbsequence
                          relative to start of sequence */
@@ -59,6 +60,7 @@ struct GtQuerymatch
   GtUword evalue_searchspace;
   double evalue, bit_score; /* Bit Score according to scoring scheme used for
                                karlin altschul statistic */
+  const GtKarlinAltschulStat *karlin_altschul_stat;
   FILE *fp;
   const char *db_desc, *query_desc;
   GtArrayGtQuerymatchCoordinates previousmatches;
@@ -128,17 +130,19 @@ static GtUword gt_querymatch_querystart_derive(GtReadmode query_readmode,
   return querystart;
 }
 
-static void gt_querymatch_evalue_bit_score(GtQuerymatch *querymatch,
+static void gt_querymatch_evalue_bit_score(double *evalue,
+                                           double *bit_score,
                                            const GtKarlinAltschulStat
                                              *karlin_altschul_stat,
+                                           GtUword evalue_searchspace,
                                            GtUword alignedlength,
                                            GtUword distance,
                                            GtUword mismatches)
 {
   if (karlin_altschul_stat == NULL)
   {
-    querymatch->bit_score = DBL_MAX;
-    querymatch->evalue = DBL_MAX;
+    *bit_score = DBL_MAX;
+    *evalue = DBL_MAX;
   } else
   {
     const GtUword matches = (alignedlength - distance - mismatches)/2,
@@ -147,13 +151,10 @@ static void gt_querymatch_evalue_bit_score(GtQuerymatch *querymatch,
                                            matches,
                                            mismatches,
                                            indels);
-    querymatch->evalue
-      = gt_evalue_from_raw_score(karlin_altschul_stat,raw_score,
-                                 querymatch->evalue_searchspace);
-    querymatch->bit_score
-      = gt_evalue_raw_score2bit_score(karlin_altschul_stat,raw_score);
-    gt_assert(querymatch->evalue != DBL_MAX &&
-              querymatch->bit_score != DBL_MAX);
+    *evalue = gt_evalue_from_raw_score(karlin_altschul_stat,raw_score,
+                                       evalue_searchspace);
+    *bit_score = gt_evalue_raw_score2bit_score(karlin_altschul_stat,raw_score);
+    gt_assert(*evalue != DBL_MAX && *bit_score != DBL_MAX);
   }
 }
 
@@ -190,6 +191,7 @@ void gt_querymatch_init(GtQuerymatch *querymatch,
   querymatch->querylen = querylen;
   querymatch->querystart = querystart;
   querymatch->dbseqnum = dbseqnum;
+  querymatch->karlin_altschul_stat = karlin_altschul_stat;
   querymatch->dbstart_relative = dbstart_relative;
   gt_assert((int) querymatch->query_readmode < 4);
   querymatch->dbstart = dbstart;
@@ -201,8 +203,10 @@ void gt_querymatch_init(GtQuerymatch *querymatch,
                                       querymatch->querystart);
   querymatch->query_totallength = query_totallength;
   querymatch->dbseqlen = dbseqlen;
-  gt_querymatch_evalue_bit_score(querymatch,
+  gt_querymatch_evalue_bit_score(&querymatch->evalue,
+                                 &querymatch->bit_score,
                                  karlin_altschul_stat,
+                                 querymatch->evalue_searchspace,
                                  dblen + querylen,
                                  distance,
                                  mismatches);
@@ -331,19 +335,17 @@ void gt_querymatch_coordinates_out(const GtQuerymatch *querymatch)
 
 void gt_querymatch_prettyprint(const GtQuerymatch *querymatch)
 {
-  if (gt_querymatch_okay(querymatch))
-  {
-    gt_querymatch_coordinates_out(querymatch);
-    gt_querymatchoutoptions_alignment_show(querymatch->ref_querymatchoutoptions,
-                                           querymatch->distance,
-                                           querymatch->verify_alignment,
-                                           querymatch->fp);
-  }
+  gt_querymatch_coordinates_out(querymatch);
+  gt_querymatchoutoptions_alignment_show(querymatch->ref_querymatchoutoptions,
+                                         querymatch->distance,
+                                         querymatch->verify_alignment,
+                                         querymatch->fp);
 }
 
 bool gt_querymatch_check_final(const GtQuerymatch *querymatch,
+                               GtUword userdefinedleastlength,
                                GtUword errorpercentage,
-                               GtUword userdefinedleastlength)
+                               GT_UNUSED double evalue_threshold)
 {
   GtUword total_alignedlen;
 
@@ -357,9 +359,20 @@ bool gt_querymatch_check_final(const GtQuerymatch *querymatch,
          " = 2 * userdefinedleastlen\n",
          total_alignedlen, 2 * userdefinedleastlength);
 #endif
-  return (gt_querymatch_error_rate(querymatch->distance,total_alignedlen)
-          <= (double) errorpercentage &&
-         total_alignedlen >= 2 * userdefinedleastlength) ? true : false;
+  if (gt_querymatch_error_rate(querymatch->distance,total_alignedlen) >
+      (double) errorpercentage)
+  {
+    return false;
+  }
+  if (total_alignedlen < 2 * userdefinedleastlength)
+  {
+    return false;
+  }
+  if (!gt_querymatch_okay(querymatch))
+  {
+    return false;
+  }
+  return true;
 }
 
 static void gt_querymatch_applycorrection(
@@ -578,8 +591,10 @@ bool gt_querymatch_read_line(GtQuerymatch *querymatch,
     }
     gt_assert(querymatch->distance >= lower_bound_indels);
     mismatch_estim = (querymatch->distance - lower_bound_indels) * 0.7;
-    gt_querymatch_evalue_bit_score(querymatch,
+    gt_querymatch_evalue_bit_score(&querymatch->evalue,
+                                   &querymatch->bit_score,
                                    karlin_altschul_stat,
+                                   querymatch->evalue_searchspace,
                                    querymatch->dblen + querymatch->querylen,
                                    querymatch->distance,
                                    mismatch_estim);
@@ -676,11 +691,16 @@ bool gt_querymatch_complete(GtQuerymatch *querymatch,
     }
   }
   querymatch->seedlen = seedlen;
-  return gt_querymatch_process(querymatch,
-                               karlin_altschul_stat,
-                               dbes,
-                               queryes,
-                               greedyextension);
+  if (gt_querymatch_process(querymatch,
+                            karlin_altschul_stat,
+                            dbes,
+                            queryes,
+                            greedyextension) &&
+      gt_querymatch_okay(querymatch))
+  {
+    return true;
+  }
+  return false;
 }
 
 GtUword gt_querymatch_querylen(const GtQuerymatch *querymatch)

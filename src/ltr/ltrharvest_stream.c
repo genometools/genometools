@@ -798,7 +798,6 @@ static int searchforTSDandorMotifoutside(const GtLTRharvestStream *lo,
                                    gt_subsimpleexactselfmatchstore,
                                    &subrepeatinfo,
                                    NULL,
-                                   NULL,
                                    err) != 0)
     {
        haserr = true;

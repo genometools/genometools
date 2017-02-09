@@ -21,6 +21,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <sys/time.h>
+#include <float.h>
 #include "core/arraydef.h"
 #include "core/codetype.h"
 #include "core/complement.h"
@@ -2773,8 +2774,10 @@ static int gt_diagbandseed_possibly_extend(const GtQuerymatch *previousmatch,
       gt_querymatch_previousmatches_add((GtQuerymatch *) querymatch);
 #endif
       /* show extension results */
-      if (gt_querymatch_check_final(querymatch, errorpercentage,
-                                    userdefinedleastlength))
+      if (gt_querymatch_check_final(querymatch,
+                                    userdefinedleastlength,
+                                    errorpercentage,
+                                    DBL_MAX))
       {
         gt_querymatch_prettyprint(querymatch);
         ret = 3; /* output match */
@@ -3064,6 +3067,7 @@ static void gt_diagbandseed_info_qm_set(
                                    const GtDiagbandseedExtendParams *extp,
                                    const GtEncseq *aencseq,
                                    GtQuerymatchoutoptions *querymoutopt,
+
                                    GtReadmode query_readmode,
                                    FILE *stream,
                                    void *processinfo)
@@ -3072,8 +3076,7 @@ static void gt_diagbandseed_info_qm_set(
   if (gt_querymatch_evalue_display(extp->display_flag) ||
       gt_querymatch_bitscore_display(extp->display_flag))
   {
-    ifqm->karlin_altschul_stat = gt_karlin_altschul_stat_new_gapped();
-    gt_karlin_altschul_stat_add_keyvalues(ifqm->karlin_altschul_stat,
+    ifqm->karlin_altschul_stat = gt_karlin_altschul_stat_new_gapped(
                                           gt_encseq_total_length(aencseq),
                                           gt_encseq_num_of_sequences(aencseq));
   } else

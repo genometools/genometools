@@ -337,7 +337,6 @@ int gt_testmaxpairs(const char *indexname,
                                    alphabet,
                                    gt_storemaxmatchquery,
                                    tabmaxquerymatches,
-                                   NULL,
                                    logger,
                                    err) != 0)
     {

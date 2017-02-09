@@ -421,7 +421,6 @@ static GtUword gt_mmsearch_extendright(const GtEncseq *dbencseq,
 }
 
 void gt_queryuniquematch(bool selfmatch,
-                         GtKarlinAltschulStat *karlin_altschul_stat,
                          const Suffixarray *suffixarray,
                          uint64_t queryunitnum,
                          GtQueryrepresentation *queryrep,
@@ -461,7 +460,7 @@ void gt_queryuniquematch(bool selfmatch,
               dbseqlen = gt_encseq_seqlength(suffixarray->encseq,dbseqnum);
 
       gt_querymatch_init(querymatchspaceptr,
-                         karlin_altschul_stat,
+                         NULL,
                          matchlen,
                          dbstart,
                          dbseqnum,
@@ -500,8 +499,7 @@ static void gt_querysubstringmatch(bool selfmatch,
                                    GtUword minmatchlength,
                                    GtProcessquerymatch processquerymatch,
                                    void *processquerymatchinfo,
-                                   GtQuerymatch *querymatchspaceptr,
-                                   GtKarlinAltschulStat *karlin_altschul_stat)
+                                   GtQuerymatch *querymatchspaceptr)
 {
   GtMMsearchiterator *mmsi;
   GtUword totallength, localqueryoffset = 0;
@@ -553,7 +551,7 @@ static void gt_querysubstringmatch(bool selfmatch,
           dbseqnum = dbseqstartpos = dbseqlen = 0;
         }
         gt_querymatch_init(querymatchspaceptr,
-                           karlin_altschul_stat,
+                           NULL,
                            minmatchlength + extend,
                            dbstart,
                            dbseqnum,
@@ -599,7 +597,6 @@ static int gt_constructsarrandrunmmsearch(
                  void *processquerymatchinfo,
                  GtTimer *sfxprogress,
                  bool withprogressbar,
-                 GtKarlinAltschulStat *karlin_altschul_stat,
                  GtLogger *logger,
                  GtError *err)
 {
@@ -630,9 +627,6 @@ static int gt_constructsarrandrunmmsearch(
     GtQuerymatch *querymatchspaceptr = gt_querymatch_new();
     GtQueryrepresentation queryrep;
 
-    gt_karlin_altschul_stat_add_keyvalues(karlin_altschul_stat,
-                                          gt_encseq_total_length(dbencseq),
-                                          gt_encseq_num_of_sequences(dbencseq));
     queryrep.sequence = query;
     queryrep.encseq = NULL;
     queryrep.readmode = GT_READMODE_FORWARD;
@@ -656,8 +650,7 @@ static int gt_constructsarrandrunmmsearch(
                              (GtUword) minlength,
                              processquerymatch,
                              processquerymatchinfo,
-                             querymatchspaceptr,
-                             karlin_altschul_stat);
+                             querymatchspaceptr);
     }
     gt_querymatch_delete(querymatchspaceptr);
   }
@@ -676,7 +669,6 @@ int gt_sarrquerysubstringmatch(const GtUchar *dbseq,
                                GtAlphabet *alpha,
                                GtProcessquerymatch processquerymatch,
                                void *processquerymatchinfo,
-                               GtKarlinAltschulStat *karlin_altschul_stat,
                                GtLogger *logger,
                                GtError *err)
 {
@@ -710,7 +702,6 @@ int gt_sarrquerysubstringmatch(const GtUchar *dbseq,
                                      processquerymatchinfo,
                                      NULL,
                                      false,
-                                     karlin_altschul_stat,
                                      logger,
                                      err) != 0)
   {

@@ -39,12 +39,9 @@ typedef struct GtKarlinAltschulStat GtKarlinAltschulStat;
 GtKarlinAltschulStat *gt_karlin_altschul_stat_new(unsigned int numchars,
                                            const GtScoreHandler *scorehandler);
 
-GtKarlinAltschulStat *gt_karlin_altschul_stat_new_gapped(void);
-
-void gt_karlin_altschul_stat_add_keyvalues(
-                             GtKarlinAltschulStat *karlin_altschul_stat,
-                             GtUword db_totallength,
-                             GtUword db_numofsequences);
+GtKarlinAltschulStat *gt_karlin_altschul_stat_new_gapped(
+                             GtUword total_length_db,
+                             GtUword num_of_db_seqs);
 
 void gt_karlin_altschul_stat_delete(GtKarlinAltschulStat *ka);
 
