@@ -550,7 +550,8 @@ static int gt_callenumquerymatches(bool selfmatch,
                                    GtQuerymatchoutoptions *querymatchoutoptions,
                                    Gt_extend_querymatch_func eqmf,
                                    void *eqmf_data,
-                                   GtKarlinAltschulStat *karlin_altschul_stat,
+                                   const GtKarlinAltschulStat
+                                      *karlin_altschul_stat,
                                    GtLogger *logger,
                                    GtError *err)
 {
@@ -748,7 +749,7 @@ static int gt_repfind_runner(int argc,
                      cam_b = GT_EXTEND_CHAR_ACCESS_ANY;
   GtFtPolishing_info *pol_info = NULL;
   GtQuerymatchoutoptions *querymatchoutoptions;
-  GtProcessinfo_and_querymatchspaceptr info_querymatch = {NULL,NULL,NULL};
+  GtKarlinAltschulStat *karlin_altschul_stat = NULL;
   Gt_extend_querymatch_func eqmf = NULL;
   void *eqmf_data = NULL;
   int mode;
@@ -791,19 +792,14 @@ static int gt_repfind_runner(int argc,
         = gt_encseq_metadata_new(gt_str_get(arguments->indexname),err);
       if (emd == NULL)
       {
-        info_querymatch.karlin_altschul_stat = NULL;
         haserr = true;
       } else
       {
-        info_querymatch.karlin_altschul_stat
-          = gt_karlin_altschul_stat_new_gapped(
-                  gt_encseq_metadata_total_length(emd),
-                  gt_encseq_metadata_num_of_sequences(emd));
+        karlin_altschul_stat = gt_karlin_altschul_stat_new_gapped(
+                                     gt_encseq_metadata_total_length(emd),
+                                     gt_encseq_metadata_num_of_sequences(emd));
         gt_encseq_metadata_delete(emd);
       }
-    } else
-    {
-      info_querymatch.karlin_altschul_stat = NULL;
     }
   }
   if (!haserr && gt_option_is_set(arguments->refextendxdropoption))
@@ -876,7 +872,8 @@ static int gt_repfind_runner(int argc,
   if (!haserr)
   {
     GtEncseq *encseq_for_desc = NULL;
-    info_querymatch.processinfo = NULL;
+    GtProcessinfo_and_querymatchspaceptr info_querymatch = {NULL,NULL,NULL};
+    info_querymatch.karlin_altschul_stat = karlin_altschul_stat;
     if (gt_querymatch_display_alignment(display_flag) ||
         (gt_option_is_set(arguments->refextendxdropoption) &&
          !arguments->noxpolish))
@@ -1077,8 +1074,8 @@ static int gt_repfind_runner(int argc,
     gt_encseq_delete(encseq_for_desc);
     gt_querymatchoutoptions_delete(querymatchoutoptions);
     gt_querymatch_delete(info_querymatch.querymatchspaceptr);
-    gt_karlin_altschul_stat_delete(info_querymatch.karlin_altschul_stat);
   }
+  gt_karlin_altschul_stat_delete(karlin_altschul_stat);
   gt_xdrop_matchinfo_delete(xdropmatchinfo);
   gt_greedy_extend_matchinfo_delete(greedyextendmatchinfo);
   gt_ft_trimstat_delete(trimstat);

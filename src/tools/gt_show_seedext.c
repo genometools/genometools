@@ -235,7 +235,8 @@ static void gt_show_seed_extend_plain(GtSequencepairbuffer *seqpairbuf,
 }
 
 static void gt_show_seed_extend_encseq(GtQuerymatch *querymatchptr,
-                                     GtKarlinAltschulStat *karlin_altschul_stat,
+                                       const GtKarlinAltschulStat
+                                          *karlin_altschul_stat,
                                        const GtEncseq *aencseq,
                                        const GtEncseq *bencseq)
 {
@@ -336,6 +337,7 @@ static int gt_show_seedext_runner(GT_UNUSED int argc,
   }
   if (!had_err)
   {
+    GtKarlinAltschulStat *karlin_altschul_stat = NULL;
     if (arguments->seed_extend)
     {
       greedyextendmatchinfo
@@ -354,16 +356,14 @@ static int gt_show_seedext_runner(GT_UNUSED int argc,
     if (gt_querymatch_evalue_display(display_flag) ||
         gt_querymatch_bitscore_display(display_flag))
     {
-      processinfo_and_querymatchspaceptr.karlin_altschul_stat
-        = gt_karlin_altschul_stat_new_gapped(
-                     gt_encseq_total_length(aencseq),
-                     gt_encseq_num_of_sequences(aencseq));
+      karlin_altschul_stat = gt_karlin_altschul_stat_new_gapped(
+                                       gt_encseq_total_length(aencseq),
+                                       gt_encseq_num_of_sequences(aencseq));
       gt_seedextend_match_iterator_karlin_altschul_stat_set(semi,
-         processinfo_and_querymatchspaceptr.karlin_altschul_stat);
-    } else
-    {
-      processinfo_and_querymatchspaceptr.karlin_altschul_stat = NULL;
+         karlin_altschul_stat);
     }
+    processinfo_and_querymatchspaceptr.karlin_altschul_stat
+      = karlin_altschul_stat;
     if (arguments->sortmatches)
     {
       (void) gt_seedextend_match_iterator_all_sorted(semi,true);
@@ -430,8 +430,7 @@ static int gt_show_seedext_runner(GT_UNUSED int argc,
     gt_greedy_extend_matchinfo_delete(greedyextendmatchinfo);
     gt_free(seqpairbuf.a_sequence);
     gt_free(seqpairbuf.b_sequence);
-    gt_karlin_altschul_stat_delete(processinfo_and_querymatchspaceptr.
-                                   karlin_altschul_stat);
+    gt_karlin_altschul_stat_delete(karlin_altschul_stat);
   }
   gt_free(alignment_show_buffer);
   gt_querymatch_display_flag_delete(display_flag);
