@@ -566,8 +566,9 @@ bool gt_querymatch_read_line(GtQuerymatch *querymatch,
   if ((withseqlength && parsed_items == 12) ||
       (!withseqlength && parsed_items == 10))
   {
-    GtUword mismatch_estim, lower_bound_indels,
-           dbseqstartpos = gt_encseq_seqstartpos(dbencseq,querymatch->dbseqnum);
+    GT_UNUSED GtUword mismatch_estim, lower_bound_indels;
+    GtUword dbseqstartpos
+              = gt_encseq_seqstartpos(dbencseq,querymatch->dbseqnum);
 
     querymatch->query_readmode = gt_readmode_character_code_parse(direction);
     querymatch->dbstart = dbseqstartpos + querymatch->dbstart_relative;

@@ -4484,7 +4484,8 @@ int gt_diagbandseed_run(const GtDiagbandseedInfo *arg,
       gt_querymatch_bitscore_display(arg->extp->display_flag) ||
      arg->extp->evalue_threshold != DBL_MAX)
   {
-    GtTimer *timer;
+    GtTimer *timer = NULL;
+
     if (arg->verbose)
     {
       timer = gt_timer_new();
