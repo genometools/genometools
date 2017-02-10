@@ -81,6 +81,7 @@ typedef struct
 
 GtXdropmatchinfo *gt_xdrop_matchinfo_new(GtUword userdefinedleastlength,
                                          GtUword errorpercentage,
+                                         double evalue_threshold,
                                          GtXdropscore xdropbelowscore,
                                          GtUword sensitivity);
 
@@ -182,11 +183,12 @@ typedef struct GtGreedyextendmatchinfo GtGreedyextendmatchinfo;
    */
 
 GtGreedyextendmatchinfo *gt_greedy_extend_matchinfo_new(
-                                   GtUword errorpercentage,
                                    GtUword maxalignedlendifference,
                                    GtUword history,
                                    GtUword perc_mat_history,
                                    GtUword userdefinedleastlength,
+                                   GtUword errorpercentage,
+                                   double evalue_threshold,
                                    GtExtendCharAccess a_extend_char_access,
                                    GtExtendCharAccess b_extend_char_access,
                                    bool cam_generic,
@@ -330,7 +332,7 @@ GtUword gt_minidentity2errorpercentage(GtUword minidentity);
 char *gt_seed_extend_params_keystring(bool use_greedy,
                                       bool forxdrop,
                                       unsigned int seedlength,
-                                      unsigned int userdefinedleastlength,
+                                      GtUword userdefinedleastlength,
                                       GtUword minidentity,
                                       GtUword maxalignedlendifference,
                                       GtUword perc_mat_history,

@@ -15,6 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#include <float.h>
 #include "core/ma_api.h"
 #include "core/types_api.h"
 #include "core/minmax.h"
@@ -124,6 +125,7 @@ void gt_querymatchoutoptions_reset(GtQuerymatchoutoptions *querymatchoutoptions)
 void gt_querymatchoutoptions_extend(
                   GtQuerymatchoutoptions *querymatchoutoptions,
                   GtUword errorpercentage,
+                  double evalue_threshold,
                   GtUword maxalignedlendifference,
                   GtUword history_size,
                   GtUword perc_mat_history,
@@ -149,11 +151,12 @@ void gt_querymatchoutoptions_extend(
                                      matchscore_bias,
                                      history_size);
     querymatchoutoptions->ggemi
-      = gt_greedy_extend_matchinfo_new(errorpercentage,
-                                       maxalignedlendifference,
+      = gt_greedy_extend_matchinfo_new(maxalignedlendifference,
                                        history_size, /* default value */
                                        perc_mat_history,
                                        0,/* userdefinedleastlength not used */
+                                       errorpercentage,
+                                       evalue_threshold,
                                        a_extend_char_access,
                                        b_extend_char_access,
                                        cam_generic,
@@ -187,8 +190,11 @@ void gt_querymatchoutoptions_for_align_only(
   const bool weakends = false;
   const bool cam_generic = false;
   const GtUword sensitivity = 100;
+  const double evalue_threshold = DBL_MAX;
+
   gt_querymatchoutoptions_extend(querymatchoutoptions,
                                  errorpercentage,
+                                 evalue_threshold,
                                  GT_MAX_ALI_LEN_DIFF,
                                  history_size,
                                  GT_MIN_PERC_MAT_HISTORY,

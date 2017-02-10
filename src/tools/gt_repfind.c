@@ -15,6 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#include <float.h>
 #include "core/error_api.h"
 #include "core/format64.h"
 #include "core/log_api.h"
@@ -64,8 +65,10 @@ typedef struct
            *refseedlengthoption,
            *refuserdefinedleastlengthoption,
            *refextendxdropoption,
-           *refextendgreedyoption;
+           *refextendgreedyoption,
+           *ref_op_evalue;
   GtStrArray *display_args;
+  double evalue_threshold;
 } GtMaxpairsoptions;
 
 static int gt_exact_selfmatch_with_output(void *info,
@@ -207,6 +210,7 @@ static void gt_repfind_arguments_delete(void *tool_arguments)
   gt_option_delete(arguments->refuserdefinedleastlengthoption);
   gt_option_delete(arguments->refextendxdropoption);
   gt_option_delete(arguments->refextendgreedyoption);
+  gt_option_delete(arguments->ref_op_evalue);
   gt_free(arguments);
 }
 
@@ -221,7 +225,8 @@ static GtOptionParser *gt_repfind_option_parser_new(void *tool_arguments)
            *maxalilendiffoption, *leastlength_option, *char_access_mode_option,
            *check_extend_symmetry_option, *xdropbelowoption, *historyoption,
            *percmathistoryoption, *errorpercentageoption, *optiontrimstat,
-           *optionnoxpolish, *verify_alignment_option, *option_query_indexname;
+           *optionnoxpolish, *verify_alignment_option, *option_query_indexname,
+           *op_evalue;
   GtMaxpairsoptions *arguments = tool_arguments;
 
   op = gt_option_parser_new("[options] -ii indexname",
@@ -378,6 +383,16 @@ static GtOptionParser *gt_repfind_option_parser_new(void *tool_arguments)
                                       arguments->display_args);
   gt_option_parser_add_option(op, option);
 
+  /* -evalue */
+  op_evalue = gt_option_new_double("evalue","switch on evalue filtering of "
+                                            "matches (optional argument "
+                                            "specifies evalue threshold)",
+                                   &arguments->evalue_threshold,
+                                   10.0);
+  gt_option_parser_add_option(op, op_evalue);
+  gt_option_argument_is_optional(op_evalue);
+  arguments->ref_op_evalue = gt_option_ref(op_evalue);
+
   optionnoxpolish
     = gt_option_new_bool("noxpolish","do not polish X-drop extensions",
                          &arguments->noxpolish, false);
@@ -497,6 +512,10 @@ static int gt_repfind_arguments_check(GT_UNUSED int rest_argc,
         arguments->seedlength = arguments->userdefinedleastlength;
       }
     }
+  }
+  if (!gt_option_is_set(arguments->ref_op_evalue))
+  {
+    arguments->evalue_threshold = DBL_MAX;
   }
   return 0;
 }
@@ -786,7 +805,8 @@ static int gt_repfind_runner(int argc,
   if (!haserr)
   {
     if (gt_querymatch_evalue_display(display_flag) ||
-        gt_querymatch_bitscore_display(display_flag))
+        gt_querymatch_bitscore_display(display_flag) ||
+        arguments->evalue_threshold != DBL_MAX)
     {
       GtEncseqMetadata *emd
         = gt_encseq_metadata_new(gt_str_get(arguments->indexname),err);
@@ -809,6 +829,7 @@ static int gt_repfind_runner(int argc,
       = gt_xdrop_matchinfo_new(arguments->userdefinedleastlength,
                                gt_minidentity2errorpercentage(
                                             arguments->minidentity),
+                               arguments->evalue_threshold,
                                arguments->xdropbelowscore,
                                arguments->extendxdrop);
     gt_assert(xdropmatchinfo != NULL);
@@ -845,11 +866,12 @@ static int gt_repfind_runner(int argc,
                                             GT_DEFAULT_MATCHSCORE_BIAS,
                                             arguments->history);
     greedyextendmatchinfo
-      = gt_greedy_extend_matchinfo_new(errorpercentage,
-                                       arguments->maxalignedlendifference,
+      = gt_greedy_extend_matchinfo_new(arguments->maxalignedlendifference,
                                        arguments->history,
                                        arguments->perc_mat_history,
                                        arguments->userdefinedleastlength,
+                                       errorpercentage,
+                                       arguments->evalue_threshold,
                                        cam_a,
                                        cam_b,
                                        false,
@@ -898,6 +920,7 @@ static int gt_repfind_runner(int argc,
         gt_querymatchoutoptions_extend(querymatchoutoptions,
                                        gt_minidentity2errorpercentage(
                                                arguments->minidentity),
+                                      arguments->evalue_threshold,
                                       arguments->maxalignedlendifference,
                                       arguments->history,
                                       arguments->perc_mat_history,

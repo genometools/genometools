@@ -60,20 +60,24 @@ Test do
       run_test "#{$bin}gt dev show_seedext -f tmp.matches -outfmt #{arg}"
     end
   end
-  run "#{$bin}gt seed_extend -ii at1MB -l 500 -outfmt alignment=70"
+  run_test "#{$bin}gt seed_extend -ii at1MB -l 500 -outfmt alignment=70"
   run "cmp #{last_stdout} #{$testdata}/see-ext-at1MB-500-al.matches"
-  run "#{$bin}gt seed_extend -ii at1MB -l 400 -outfmt evalue bitscore"
+  run_test "#{$bin}gt seed_extend -ii at1MB -l 400 -outfmt evalue bitscore"
   run "cmp #{last_stdout} #{$testdata}/see-ext-at1MB-400-evalue-bitscore.matches"
-  run "#{$bin}gt seed_extend -ii at1MB -l 400 -outfmt seqdesc"
+  run_test "#{$bin}gt seed_extend -ii at1MB -l 400 -outfmt seqdesc"
   run "cmp #{last_stdout} #{$testdata}/see-ext-at1MB-400-seqdesc.matches"
-  run "#{$bin}gt seed_extend -ii at1MB -l 400 -outfmt cigar"
+  run_test "#{$bin}gt seed_extend -ii at1MB -l 400 -outfmt cigar"
   run "cmp #{last_stdout} #{$testdata}/see-ext-at1MB-400-cigar.matches"
-  run "#{$bin}gt seed_extend -ii at1MB -l 700 -outfmt alignment=60 seed_in_algn"
+  run_test "#{$bin}gt seed_extend -ii at1MB -l 700 -outfmt alignment=60 seed_in_algn"
   run "cmp #{last_stdout} #{$testdata}/see-ext-at1MB-500-alignment-seed_in_algn.matches"
-  run "#{$bin}gt seed_extend -ii at1MB -l 400 -outfmt seqlength"
+  run_test "#{$bin}gt seed_extend -ii at1MB -l 400 -outfmt seqlength"
   run "cmp #{last_stdout} #{$testdata}/see-ext-at1MB-400-seqlength.matches"
-  run "#{$bin}gt seed_extend -ii at1MB -qii Atinsert.fna -l 100 -outfmt bitscore evalue seqlength cigar"
+  run_test "#{$bin}gt seed_extend -ii at1MB -qii Atinsert.fna -l 100 -outfmt bitscore evalue seqlength cigar"
   run "cmp #{last_stdout} #{$testdata}/see-ext-at1MB-Atinsert100-evalue-bitscore-cigar-seqlength.matches"
+  evalue_filter = 10e-30
+  run_test "#{$bin}gt seed_extend -ii at1MB -evalue #{evalue_filter} -outfmt evalue"
+  run "mv #{last_stdout} strong.matches"
+  run "#{$scriptsdir}/evalue-filter.rb #{evalue_filter} strong.matches"
 end
 
 # Invalid arguments

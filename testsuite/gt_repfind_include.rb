@@ -165,6 +165,10 @@ Test do
              "-extend#{ext} -ii at1MB"
     run "cmp #{last_stdout} #{$testdata}repfind-result/at1MB-#{ext}-r-14-32-80-#{params}-a"
   end
+  run_test "#{$bin}gt repfind -extendgreedy -outfmt evalue -evalue 10e-150 -ii at1MB"
+  evalue_filter = 10e-150
+  run "mv #{last_stdout} strong.matches"
+  run "#{$scriptsdir}/evalue-filter.rb #{evalue_filter} strong.matches"
   minlen=24
   ["xdrop","greedy"].each do |ext|
     run_test "#{$bin}gt repfind -minidentity 80 -l #{minlen} -extend#{ext} " +

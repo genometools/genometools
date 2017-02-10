@@ -40,6 +40,7 @@ void gt_querymatchoutoptions_reset(GtQuerymatchoutoptions
 void gt_querymatchoutoptions_extend(
                   GtQuerymatchoutoptions *querymatchoutoptions,
                   GtUword errorpercentage,
+                  double evalue_threshold,
                   GtUword maxalignedlendifference,
                   GtUword history,
                   GtUword perc_mat_history,

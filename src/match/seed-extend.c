@@ -44,9 +44,10 @@ struct GtXdropmatchinfo
               best_right;
   GtXdropscore belowscore;
   GtSeqabstract *useq, *vseq;
-  GtWord errorpercentage;
+  GtUword userdefinedleastlength,
+          errorpercentage;
+  double evalue_threshold;
   bool silent;
-  unsigned int userdefinedleastlength;
 };
 
 #include "match/seed-extend-params.h"
@@ -60,6 +61,7 @@ GtWord gt_optimalxdropbelowscore(GtUword errorpercentage,GtUword sensitivity)
 
 GtXdropmatchinfo *gt_xdrop_matchinfo_new(GtUword userdefinedleastlength,
                                          GtUword errorpercentage,
+                                         double evalue_threshold,
                                          GtXdropscore xdropbelowscore,
                                          GtUword sensitivity)
 {
@@ -74,6 +76,7 @@ GtXdropmatchinfo *gt_xdrop_matchinfo_new(GtUword userdefinedleastlength,
   xdropmatchinfo->res = gt_xdrop_resources_new(&xdropmatchinfo->arbitscores);
   xdropmatchinfo->userdefinedleastlength = userdefinedleastlength;
   xdropmatchinfo->errorpercentage = errorpercentage;
+  xdropmatchinfo->evalue_threshold = evalue_threshold;
   if (xdropbelowscore == 0)
   {
     xdropmatchinfo->belowscore = gt_optimalxdropbelowscore(errorpercentage,
@@ -410,16 +413,17 @@ struct GtGreedyextendmatchinfo
   const GtFtPolishing_info *pol_info;
   GtUword history,
           maxalignedlendifference,
-          errorpercentage,
           perc_mat_history,
-          db_totallength;
+          db_totallength,
+          userdefinedleastlength,
+          errorpercentage;
+  double evalue_threshold;
   GtFtTrimstat *trimstat;
   GtEncseqReader *encseq_r_in_u, *encseq_r_in_v;
   GtAllocatedMemory usequence_cache, vsequence_cache, frontspace_reservoir;
   GtTrimmingStrategy trimstrategy;
   GtExtendCharAccess db_extend_char_access,
                      query_extend_char_access;
-  unsigned int userdefinedleastlength;
   bool check_extend_symmetry,
        silent,
        showfrontinfo,
@@ -508,11 +512,12 @@ void gt_greedy_show_matchscore_table(void)
 }
 
 GtGreedyextendmatchinfo *gt_greedy_extend_matchinfo_new(
-                                   GtUword errorpercentage,
                                    GtUword maxalignedlendifference,
                                    GtUword history,
                                    GtUword perc_mat_history,
                                    GtUword userdefinedleastlength,
+                                   GtUword errorpercentage,
+                                   double evalue_threshold,
                                    GtExtendCharAccess db_extend_char_access,
                                    GtExtendCharAccess query_extend_char_access,
                                    bool cam_generic,
@@ -523,11 +528,12 @@ GtGreedyextendmatchinfo *gt_greedy_extend_matchinfo_new(
 
   ggemi->left_front_trace = NULL;
   ggemi->right_front_trace = NULL;
-  ggemi->errorpercentage = errorpercentage;
   ggemi->history = history;
   ggemi->trimstrategy = GT_OUTSENSE_TRIM_ALWAYS;
   ggemi->showfrontinfo = false;
   ggemi->userdefinedleastlength = userdefinedleastlength;
+  ggemi->errorpercentage = errorpercentage;
+  ggemi->evalue_threshold = evalue_threshold;
   gt_optimal_maxalilendiff_perc_mat_history(&ggemi->maxalignedlendifference,
                                             &ggemi->perc_mat_history,
                                             maxalignedlendifference,
@@ -861,7 +867,7 @@ GtUword gt_minidentity2errorpercentage(GtUword minidentity)
 char *gt_seed_extend_params_keystring(bool use_greedy,
                                       bool forxdrop,
                                       unsigned int seedlength,
-                                      unsigned int userdefinedleastlength,
+                                      GtUword userdefinedleastlength,
                                       GtUword minidentity,
                                       GtUword maxalignedlendifference,
                                       GtUword perc_mat_history,
@@ -877,7 +883,7 @@ char *gt_seed_extend_params_keystring(bool use_greedy,
     GT_SEED_EXTEND_PARAMS_APPEND("%s",use_greedy ? "greedy-" : "xdrop-");
   }
   GT_SEED_EXTEND_PARAMS_APPEND("%u",seedlength);
-  GT_SEED_EXTEND_PARAMS_APPEND("-%u",userdefinedleastlength);
+  GT_SEED_EXTEND_PARAMS_APPEND("-" GT_WU,userdefinedleastlength);
   if (use_greedy || forxdrop)
   {
     GT_SEED_EXTEND_PARAMS_APPEND("-" GT_WU,100 -
@@ -1316,26 +1322,28 @@ static void gt_seed_extend_prettyprint(bool forxdrop,
 {
   GtProcessinfo_and_querymatchspaceptr *info_querymatch
     = (GtProcessinfo_and_querymatchspaceptr *) info;
-  GtUword errorpercentage, userdefinedleastlength;
-  double evalue, bit_score;
+  GtUword userdefinedleastlength, errorpercentage;
+  double evalue, bit_score, evalue_threshold;
 
   if (forxdrop)
   {
     GtXdropmatchinfo *xdropmatchinfo = info_querymatch->processinfo;
-    errorpercentage = xdropmatchinfo->errorpercentage;
     userdefinedleastlength = xdropmatchinfo->userdefinedleastlength;
+    errorpercentage = xdropmatchinfo->errorpercentage;
+    evalue_threshold = xdropmatchinfo->evalue_threshold;
   } else
   {
     GtGreedyextendmatchinfo *ggemi = info_querymatch->processinfo;
-    errorpercentage = ggemi->errorpercentage;
     userdefinedleastlength = ggemi->userdefinedleastlength;
+    errorpercentage = ggemi->errorpercentage;
+    evalue_threshold = ggemi->evalue_threshold;
   }
   if (gt_querymatch_check_final(&evalue,
                                 &bit_score,
                                 querymatch,
                                 userdefinedleastlength,
                                 errorpercentage,
-                                DBL_MAX))
+                                evalue_threshold))
   {
     gt_querymatch_enhanced_prettyprint(evalue,bit_score,querymatch);
   }

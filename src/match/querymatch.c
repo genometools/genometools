@@ -154,9 +154,9 @@ static void gt_querymatch_evalue_bit_score(double *evalue,
   }
 }
 
-void gt_querymatch_evalue_bitscore(double *evalue_ptr,
-                                   double *bit_score_ptr,
-                                   const GtQuerymatch *querymatch)
+static void gt_querymatch_evalue_bitscore(double *evalue_ptr,
+                                          double *bit_score_ptr,
+                                          const GtQuerymatch *querymatch)
 {
   if (querymatch->karlin_altschul_stat != NULL)
   {
@@ -359,7 +359,7 @@ bool gt_querymatch_check_final(double *evalue_ptr,
                                const GtQuerymatch *querymatch,
                                GtUword userdefinedleastlength,
                                GtUword errorpercentage,
-                               GT_UNUSED double evalue_threshold)
+                               double evalue_threshold)
 {
   GtUword total_alignedlen;
 
@@ -389,6 +389,10 @@ bool gt_querymatch_check_final(double *evalue_ptr,
   if (querymatch->karlin_altschul_stat != NULL)
   {
     gt_querymatch_evalue_bitscore(evalue_ptr,bit_score_ptr,querymatch);
+    if (*evalue_ptr > evalue_threshold)
+    {
+      return false;
+    }
   }
   return true;
 }

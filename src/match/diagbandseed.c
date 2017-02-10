@@ -97,14 +97,15 @@ struct GtDiagbandseedInfo
 
 struct GtDiagbandseedExtendParams
 {
-  GtUword errorpercentage,
-          userdefinedleastlength,
-          logdiagbandwidth,
+  GtUword logdiagbandwidth,
           mincoverage,
           maxalignedlendifference,
           history_size,
           perc_mat_history,
-          sensitivity;
+          sensitivity,
+          userdefinedleastlength,
+          errorpercentage;
+  double evalue_threshold;
   GtXdropscore xdropbelowscore;
   GtExtendCharAccess a_extend_char_access,
                      b_extend_char_access;
@@ -240,8 +241,9 @@ void gt_diagbandseed_info_delete(GtDiagbandseedInfo *info)
 }
 
 GtDiagbandseedExtendParams *gt_diagbandseed_extend_params_new(
-                                GtUword errorpercentage,
                                 GtUword userdefinedleastlength,
+                                GtUword errorpercentage,
+                                double evalue_threshold,
                                 GtUword logdiagbandwidth,
                                 GtUword mincoverage,
                                 const GtSeedExtendDisplayFlag *display_flag,
@@ -264,8 +266,9 @@ GtDiagbandseedExtendParams *gt_diagbandseed_extend_params_new(
                                 bool only_selected_seqpairs)
 {
   GtDiagbandseedExtendParams *extp = gt_malloc(sizeof *extp);
-  extp->errorpercentage = errorpercentage;
   extp->userdefinedleastlength = userdefinedleastlength;
+  extp->errorpercentage = errorpercentage;
+  extp->evalue_threshold = evalue_threshold;
   extp->logdiagbandwidth = logdiagbandwidth;
   extp->mincoverage = mincoverage;
   extp->display_flag = display_flag;
@@ -2712,8 +2715,9 @@ static int gt_diagbandseed_possibly_extend(const GtQuerymatch *previousmatch,
                                            GtUword bpos,
                                            GT_UNUSED bool use_apos,
                                            unsigned int seedlength,
-                                           GtUword errorpercentage,
                                            GtUword userdefinedleastlength,
+                                           GtUword errorpercentage,
+                                           double evalue_threshold,
                                            const GtSeqorEncseq *aseqorencseq,
                                            const GtSeqorEncseq *bseqorencseq,
                                            bool same_encseq,
@@ -2780,7 +2784,7 @@ static int gt_diagbandseed_possibly_extend(const GtQuerymatch *previousmatch,
                                     querymatch,
                                     userdefinedleastlength,
                                     errorpercentage,
-                                    DBL_MAX))
+                                    evalue_threshold))
       {
         gt_querymatch_enhanced_prettyprint(evalue,bit_score,querymatch);
         ret = 3; /* output match */
@@ -2982,8 +2986,9 @@ static void gt_diagbandseed_process_segment(
                        spp_ptr->bpos,
                        extp->use_apos,
                        seedlength,
-                       extp->errorpercentage,
                        extp->userdefinedleastlength,
+                       extp->errorpercentage,
+                       extp->evalue_threshold,
                        aseqorencseq,
                        bseqorencseq,
                        same_encseq,
@@ -4098,11 +4103,12 @@ static int gt_diagbandseed_algorithm(const GtDiagbandseedInfo *arg,
     pol_info = polishing_info_new_with_bias(weak_errorperc,
                                             extp->matchscore_bias,
                                             extp->history_size);
-    grextinfo = gt_greedy_extend_matchinfo_new(extp->errorpercentage,
-                                               extp->maxalignedlendifference,
+    grextinfo = gt_greedy_extend_matchinfo_new(extp->maxalignedlendifference,
                                                extp->history_size,
                                                extp->perc_mat_history,
                                                extp->userdefinedleastlength,
+                                               extp->errorpercentage,
+                                               extp->evalue_threshold,
                                                extp->a_extend_char_access,
                                                extp->b_extend_char_access,
                                                extp->cam_generic,
@@ -4121,6 +4127,7 @@ static int gt_diagbandseed_algorithm(const GtDiagbandseedInfo *arg,
     gt_assert(extp->extendgreedy == false);
     xdropinfo = gt_xdrop_matchinfo_new(extp->userdefinedleastlength,
                                        extp->errorpercentage,
+                                       extp->evalue_threshold,
                                        extp->xdropbelowscore,
                                        extp->sensitivity);
     if (extp->benchmark) {
@@ -4143,6 +4150,7 @@ static int gt_diagbandseed_algorithm(const GtDiagbandseedInfo *arg,
       const GtUword sensitivity = extp->extendxdrop ? 100UL : extp->sensitivity;
       gt_querymatchoutoptions_extend(querymoutopt,
                                      extp->errorpercentage,
+                                     extp->evalue_threshold,
                                      extp->maxalignedlendifference,
                                      extp->history_size,
                                      extp->perc_mat_history,
@@ -4473,7 +4481,8 @@ int gt_diagbandseed_run(const GtDiagbandseedInfo *arg,
     trimstat = gt_ft_trimstat_new();
   }
   if (gt_querymatch_evalue_display(arg->extp->display_flag) ||
-      gt_querymatch_bitscore_display(arg->extp->display_flag))
+      gt_querymatch_bitscore_display(arg->extp->display_flag) ||
+     arg->extp->evalue_threshold != DBL_MAX)
   {
     GtTimer *timer;
     if (arg->verbose)

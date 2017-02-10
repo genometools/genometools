@@ -19,6 +19,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <float.h>
 #include "core/ma_api.h"
 #include "core/minmax.h"
 #include "core/str_api.h"
@@ -341,11 +342,12 @@ static int gt_show_seedext_runner(GT_UNUSED int argc,
     if (arguments->seed_extend)
     {
       greedyextendmatchinfo
-        = gt_greedy_extend_matchinfo_new(70,
-                              GT_MAX_ALI_LEN_DIFF,
+        = gt_greedy_extend_matchinfo_new(GT_MAX_ALI_LEN_DIFF,
                               gt_seedextend_match_iterator_history_size(semi),
                               GT_MIN_PERC_MAT_HISTORY,
                               0, /* userdefinedleastlength */
+                              70, /* errorpercentage */
+                              DBL_MAX,
                               GT_EXTEND_CHAR_ACCESS_ANY,
                               GT_EXTEND_CHAR_ACCESS_ANY,
                               false,

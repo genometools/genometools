@@ -17,6 +17,7 @@
 */
 
 #include <limits.h>
+#include <float.h>
 #include "core/alphabet_api.h"
 #include "core/arraydef.h"
 #include "core/cstr_api.h"
@@ -60,11 +61,11 @@ typedef struct {
   bool onlyseeds;
   bool overlappingseeds;
   /* xdrop extension options */
-  GtOption *se_option_xdrop;
   GtUword se_extendxdrop;
   GtXdropscore se_xdropbelowscore;
+  GtOption *se_ref_op_xdr;
   /* greedy extension options */
-  GtOption *se_option_greedy;
+  GtOption *se_ref_op_gre;
   GtUword se_extendgreedy;
   GtUword se_historysize;
   GtUword se_maxalilendiff;
@@ -78,7 +79,7 @@ typedef struct {
   /* general options */
   GtUword se_alignlength;
   GtUword se_minidentity;
-  double se_maxevalue;
+  double se_evalue_threshold;
   GtStrArray *display_args;
   bool norev;
   bool nofwd;
@@ -89,6 +90,7 @@ typedef struct {
   bool use_kmerfile;
   bool trimstat_on;
   GtSeedExtendDisplayFlag *display_flag;
+  GtOption *se_ref_op_evalue;
 } GtSeedExtendArguments;
 
 static void* gt_seed_extend_arguments_new(void)
@@ -115,8 +117,9 @@ static void gt_seed_extend_arguments_delete(void *tool_arguments)
     gt_str_delete(arguments->dbs_memlimit_str);
     gt_str_delete(arguments->char_access_mode);
     gt_str_delete(arguments->splt_string);
-    gt_option_delete(arguments->se_option_greedy);
-    gt_option_delete(arguments->se_option_xdrop);
+    gt_option_delete(arguments->se_ref_op_gre);
+    gt_option_delete(arguments->se_ref_op_xdr);
+    gt_option_delete(arguments->se_ref_op_evalue);
     gt_str_array_delete(arguments->display_args);
     gt_querymatch_display_flag_delete(arguments->display_flag);
     gt_free(arguments);
@@ -249,7 +252,7 @@ static GtOptionParser* gt_seed_extend_option_parser_new(void *tool_arguments)
                                        97UL, 90UL, 100UL);
   gt_option_argument_is_optional(op_xdr);
   gt_option_parser_add_option(op, op_xdr);
-  arguments->se_option_xdrop = gt_option_ref(op_xdr);
+  arguments->se_ref_op_xdr = gt_option_ref(op_xdr);
 
   /* -xdropbelow */
   op_xbe = gt_option_new_word("xdropbelow",
@@ -270,7 +273,7 @@ static GtOptionParser* gt_seed_extend_option_parser_new(void *tool_arguments)
   gt_option_argument_is_optional(op_gre);
   gt_option_exclude(op_gre, op_xdr);
   gt_option_parser_add_option(op, op_gre);
-  arguments->se_option_greedy = gt_option_ref(op_gre);
+  arguments->se_ref_op_gre = gt_option_ref(op_gre);
 
   /* -only-seeds */
   op_onl = gt_option_new_bool("only-seeds",
@@ -383,12 +386,15 @@ static GtOptionParser* gt_seed_extend_option_parser_new(void *tool_arguments)
   gt_option_parser_add_option(op, op_minid);
 
   /* -evalue */
-  op_evalue = gt_option_new_double("evalue","Maximum evalue of matches "
-                                            "(for seed extension)",
-                                   &arguments->se_maxevalue,
+  op_evalue = gt_option_new_double("evalue","switch on evalue filtering of "
+                                            "matches (optional argument "
+                                            "specifies evalue threshold)",
+                                   &arguments->se_evalue_threshold,
                                    10.0);
   gt_option_exclude(op_evalue, op_onl);
   gt_option_parser_add_option(op, op_evalue);
+  gt_option_argument_is_optional(op_evalue);
+  arguments->se_ref_op_evalue = gt_option_ref(op_evalue);
 
   /* OUTPUT OPTIONS */
 
@@ -573,6 +579,10 @@ static int gt_seed_extend_arguments_check(int rest_argc, void *tool_arguments,
     had_err = -1;
   }
 
+  if (!gt_option_is_set(arguments->se_ref_op_evalue))
+  {
+    arguments->se_evalue_threshold = DBL_MAX;
+  }
   /* no extra arguments */
   if (!had_err && rest_argc > 0) {
     gt_error_set(err, "too many arguments (-help shows correct usage)");
@@ -607,7 +617,7 @@ static int gt_seed_extend_runner(int argc,
             arguments->se_minidentity <= 100UL);
 
   /* Define, whether greedy extension will be performed */
-  extendxdrop = gt_option_is_set(arguments->se_option_xdrop);
+  extendxdrop = gt_option_is_set(arguments->se_ref_op_xdr);
   if (arguments->onlyseeds || extendxdrop) {
     extendgreedy = false;
   }
@@ -889,8 +899,9 @@ static int gt_seed_extend_runner(int argc,
     gt_assert(pick.b < gt_sequence_parts_info_number(bseqranges) ||
               pick.b == GT_UWORD_MAX);
 
-    extp = gt_diagbandseed_extend_params_new(errorpercentage,
-                                             arguments->se_alignlength,
+    extp = gt_diagbandseed_extend_params_new(arguments->se_alignlength,
+                                             errorpercentage,
+                                             arguments->se_evalue_threshold,
                                              arguments->dbs_logdiagbandwidth,
                                              arguments->dbs_mincoverage,
                                              arguments->display_flag,
