@@ -358,7 +358,8 @@ static int gt_show_seedext_runner(GT_UNUSED int argc,
     {
       karlin_altschul_stat = gt_karlin_altschul_stat_new_gapped(
                                        gt_encseq_total_length(aencseq),
-                                       gt_encseq_num_of_sequences(aencseq));
+                                       gt_encseq_num_of_sequences(aencseq),
+                                       bencseq);
       gt_seedextend_match_iterator_karlin_altschul_stat_set(semi,
          karlin_altschul_stat);
     }

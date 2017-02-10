@@ -21,6 +21,7 @@
 #include <stdbool.h>
 #include "extended/scorehandler.h"
 #include "core/error_api.h"
+#include "core/encseq_api.h"
 
 typedef struct GtKarlinAltschulStat GtKarlinAltschulStat;
 
@@ -41,7 +42,8 @@ GtKarlinAltschulStat *gt_karlin_altschul_stat_new(unsigned int numchars,
 
 GtKarlinAltschulStat *gt_karlin_altschul_stat_new_gapped(
                              GtUword total_length_db,
-                             GtUword num_of_db_seqs);
+                             GtUword num_of_db_seqs,
+                             const GtEncseq *query_encseq);
 
 void gt_karlin_altschul_stat_delete(GtKarlinAltschulStat *ka);
 

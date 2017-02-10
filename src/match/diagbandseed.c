@@ -4472,9 +4472,23 @@ int gt_diagbandseed_run(const GtDiagbandseedInfo *arg,
   if (gt_querymatch_evalue_display(arg->extp->display_flag) ||
       gt_querymatch_bitscore_display(arg->extp->display_flag))
   {
+    GtTimer *timer;
+    if (arg->verbose)
+    {
+      timer = gt_timer_new();
+      gt_timer_start(timer);
+    }
     karlin_altschul_stat = gt_karlin_altschul_stat_new_gapped(
                                       gt_encseq_total_length(arg->aencseq),
-                                      gt_encseq_num_of_sequences(arg->aencseq));
+                                      gt_encseq_num_of_sequences(arg->aencseq),
+                                      arg->bencseq);
+    if (arg->verbose)
+    {
+      gt_timer_show_formatted(timer,
+                              "# ... computed lookup table for E-values "
+                              GT_DIAGBANDSEED_FMT,stdout);
+      gt_timer_delete(timer);
+    }
   }
   for (aidx = 0; !had_err && aidx < anumseqranges; aidx++) {
     /* create alist here to prevent redundant calculations */

@@ -797,7 +797,8 @@ static int gt_repfind_runner(int argc,
       {
         karlin_altschul_stat = gt_karlin_altschul_stat_new_gapped(
                                      gt_encseq_metadata_total_length(emd),
-                                     gt_encseq_metadata_num_of_sequences(emd));
+                                     gt_encseq_metadata_num_of_sequences(emd),
+                                     NULL);
         gt_encseq_metadata_delete(emd);
       }
     }
