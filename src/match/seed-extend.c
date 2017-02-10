@@ -1310,12 +1310,14 @@ static const GtQuerymatch *gt_rf_extend_selfmatch(bool forxdrop,
   return gt_extend_sesp (forxdrop,info, &queryes, &queryes, &sesp);
 }
 
-static void gt_extend_prettyprint(bool forxdrop,const GtQuerymatch *querymatch,
-                                  void *info)
+static void gt_seed_extend_prettyprint(bool forxdrop,
+                                       const GtQuerymatch *querymatch,
+                                       void *info)
 {
   GtProcessinfo_and_querymatchspaceptr *info_querymatch
     = (GtProcessinfo_and_querymatchspaceptr *) info;
   GtUword errorpercentage, userdefinedleastlength;
+  double evalue, bit_score;
 
   if (forxdrop)
   {
@@ -1328,12 +1330,14 @@ static void gt_extend_prettyprint(bool forxdrop,const GtQuerymatch *querymatch,
     errorpercentage = ggemi->errorpercentage;
     userdefinedleastlength = ggemi->userdefinedleastlength;
   }
-  if (gt_querymatch_check_final(querymatch,
+  if (gt_querymatch_check_final(&evalue,
+                                &bit_score,
+                                querymatch,
                                 userdefinedleastlength,
                                 errorpercentage,
                                 DBL_MAX))
   {
-    gt_querymatch_prettyprint(querymatch);
+    gt_querymatch_enhanced_prettyprint(evalue,bit_score,querymatch);
   }
 }
 
@@ -1353,7 +1357,7 @@ static int gt_rf_extend_selfmatch_with_output(bool forxdrop,
                                                           pos2);
   if (querymatch != NULL)
   {
-    gt_extend_prettyprint(forxdrop,querymatch,info);
+    gt_seed_extend_prettyprint(forxdrop,querymatch,info);
   }
   return 0;
 }
@@ -1443,7 +1447,7 @@ static void gt_rf_extend_querymatch_with_output(bool forxdrop,
                               same_encseq);
   if (querymatch != NULL)
   {
-    gt_extend_prettyprint(forxdrop,querymatch,info);
+    gt_seed_extend_prettyprint(forxdrop,querymatch,info);
   }
 }
 

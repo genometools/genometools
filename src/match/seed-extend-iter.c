@@ -325,7 +325,6 @@ GtQuerymatch *gt_seedextend_match_iterator_next(GtSeedextendMatchIterator *semi)
       } else
       {
         if (gt_querymatch_read_line(semi->querymatchptr,
-                                    semi->karlin_altschul_stat,
                                     semi->seqlength_display,
                                     line_ptr,
                                     selfmatch,

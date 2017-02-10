@@ -2770,16 +2770,19 @@ static int gt_diagbandseed_possibly_extend(const GtQuerymatch *previousmatch,
 #endif
     if (querymatch != NULL)
     {
+      double evalue, bit_score;
 #ifdef CONSIDER_PREVIOUS_MATCHES
       gt_querymatch_previousmatches_add((GtQuerymatch *) querymatch);
 #endif
       /* show extension results */
-      if (gt_querymatch_check_final(querymatch,
+      if (gt_querymatch_check_final(&evalue,
+                                    &bit_score,
+                                    querymatch,
                                     userdefinedleastlength,
                                     errorpercentage,
                                     DBL_MAX))
       {
-        gt_querymatch_prettyprint(querymatch);
+        gt_querymatch_enhanced_prettyprint(evalue,bit_score,querymatch);
         ret = 3; /* output match */
       } else
       {

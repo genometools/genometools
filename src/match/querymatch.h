@@ -61,7 +61,6 @@ void gt_querymatch_init(GtQuerymatch *querymatch,
                         const char *query_desc);
 
 bool gt_querymatch_read_line(GtQuerymatch *querymatchptr,
-                             const GtKarlinAltschulStat *karlin_altschul_stat,
                              bool withseqlength,
                              const char *line_ptr,
                              bool selfmatch,
@@ -128,9 +127,14 @@ GtWord gt_querymatch_score(const GtQuerymatch *querymatch);
 
 void gt_querymatch_prettyprint(const GtQuerymatch *querymatch);
 
+void gt_querymatch_enhanced_prettyprint(double evalue,double bit_score,
+                                        const GtQuerymatch *querymatch);
+
 void gt_querymatch_coordinates_out(const GtQuerymatch *querymatch);
 
-bool gt_querymatch_check_final(const GtQuerymatch *querymatch,
+bool gt_querymatch_check_final(double *evalue_ptr,
+                               double *bit_score_ptr,
+                               const GtQuerymatch *querymatch,
                                GtUword userdefinedleastlength,
                                GtUword errorpercentage,
                                double evalue_threshold);
