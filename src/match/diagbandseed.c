@@ -4409,6 +4409,23 @@ static int gt_diagbandseed_write_kmers(const GtArrayGtDiagbandseedKmerPos *list,
   }
 }
 
+static bool gt_create_or_update_file(const char *path,const GtEncseq *encseq)
+{
+  if (gt_file_exists(path))
+  {
+    GtStr *esqfile = gt_str_new_cstr(gt_encseq_indexname(encseq));
+
+    gt_str_append_cstr(esqfile, ".esq");
+    if (gt_file_is_newer(path,gt_str_get(esqfile)))
+    {
+      gt_str_delete(esqfile);
+      return false;
+    }
+    gt_str_delete(esqfile);
+  }
+  return true;
+}
+
 /* Run the algorithm by iterating over all combinations of sequence ranges. */
 int gt_diagbandseed_run(const GtDiagbandseedInfo *arg,
                         const GtSequencePartsInfo *aseqranges,
@@ -4453,7 +4470,8 @@ int gt_diagbandseed_run(const GtDiagbandseedInfo *arg,
 
         path = gt_diagbandseed_kmer_filename(arg->bencseq, arg->seedlength, fwd,
                                              bnumseqranges, bidx);
-        if (!gt_file_exists(path)) {
+        if (gt_create_or_update_file(path,arg->bencseq))
+        {
           GtArrayGtDiagbandseedKmerPos blist;
           GtReadmode readmode_kmerscan = fwd ? GT_READMODE_FORWARD
                                              : GT_READMODE_COMPL;
@@ -4514,7 +4532,8 @@ int gt_diagbandseed_run(const GtDiagbandseedInfo *arg,
                                            anumseqranges, aidx);
     }
 
-    if (!arg->use_kmerfile || !gt_file_exists(path)) {
+    if (!arg->use_kmerfile || gt_create_or_update_file(path,arg->aencseq))
+    {
       use_alist = true;
       alist = gt_diagbandseed_get_kmers(
                               arg->aencseq,
