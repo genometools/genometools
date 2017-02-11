@@ -154,14 +154,6 @@ bool gt_querymatch_overlap(const GtQuerymatch *querymatch,
                            GtUword nextseed_query_end_relative,
                            bool use_db_pos);
 
-bool gt_querymatch_previousmatches_overlap(GtQuerymatch *querymatch,
-                            GtUword nextseed_db_end_relative,
-                            GtUword nextseed_query_end_relative);
-
-void gt_querymatch_previousmatches_add(GtQuerymatch *querymatch);
-
-void gt_querymatch_previousmatches_clear(GtQuerymatch *querymatch);
-
 bool gt_querymatch_has_seed(const GtQuerymatch *querymatch);
 
 GtUword gt_querymatch_querystart_fwdstrand(const GtQuerymatch *querymatch);

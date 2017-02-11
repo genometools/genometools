@@ -2704,16 +2704,12 @@ typedef const GtQuerymatch *(*GtExtendRelativeCoordsFunc)(void *,
                                                           GtUword,
                                                           GtReadmode);
 
-#ifdef CONSIDER_PREVIOUS_MATCHES
-static int gt_diagbandseed_possibly_extend(GtQuerymatch *previousmatch,
-#else
 static int gt_diagbandseed_possibly_extend(const GtQuerymatch *previousmatch,
-#endif
                                            GtUword aseqnum,
                                            GtUword apos,
                                            GtUword bseqnum,
                                            GtUword bpos,
-                                           GT_UNUSED bool use_apos,
+                                           bool use_apos,
                                            unsigned int seedlength,
                                            GtUword userdefinedleastlength,
                                            GtUword errorpercentage,
@@ -2731,12 +2727,7 @@ static int gt_diagbandseed_possibly_extend(const GtQuerymatch *previousmatch,
 {
   int ret = 0;
   if (previousmatch == NULL ||
-#ifdef CONSIDER_PREVIOUS_MATCHES
-      !gt_querymatch_previousmatches_overlap(previousmatch,apos,bpos)
-#else
-      !gt_querymatch_overlap(previousmatch,apos,bpos,use_apos)
-#endif
-  )
+      !gt_querymatch_overlap(previousmatch,apos,bpos,use_apos))
   {
     /* extend seed */
     const GtQuerymatch *querymatch;
@@ -2775,9 +2766,7 @@ static int gt_diagbandseed_possibly_extend(const GtQuerymatch *previousmatch,
     if (querymatch != NULL)
     {
       double evalue, bit_score;
-#ifdef CONSIDER_PREVIOUS_MATCHES
-      gt_querymatch_previousmatches_add((GtQuerymatch *) querymatch);
-#endif
+
       /* show extension results */
       if (gt_querymatch_check_final(&evalue,
                                     &bit_score,
@@ -2952,9 +2941,6 @@ static void gt_diagbandseed_process_segment(
   {
     bool haspreviousmatch = false;
 
-#ifdef CONSIDER_PREVIOUS_MATCHES
-    gt_querymatch_previousmatches_clear(info_querymatch->querymatchspaceptr);
-#endif
     for (spp_ptr = segment_positions;
          spp_ptr < segment_positions + segment_length;
          spp_ptr++)
