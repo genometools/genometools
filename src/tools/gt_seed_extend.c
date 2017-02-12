@@ -1,7 +1,7 @@
 /*
   Copyright (c) 2015-2016 Joerg Winkler <j.winkler@posteo.de>
-  Copyright (c) 2016 Stefan Kurtz  <kurtz@zbh.uni-hamburg.de>
-  Copyright (c) 2015-2016 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2016-2017 Stefan Kurtz  <kurtz@zbh.uni-hamburg.de>
+  Copyright (c) 2015-2017 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -89,6 +89,7 @@ typedef struct {
   bool histogram;
   bool use_kmerfile;
   bool trimstat_on;
+  bool maxmat;
   GtSeedExtendDisplayFlag *display_flag;
   GtOption *se_ref_op_evalue;
 } GtSeedExtendArguments;
@@ -132,11 +133,13 @@ static GtOptionParser* gt_seed_extend_option_parser_new(void *tool_arguments)
   GtOptionParser *op;
   GtOption *option, *op_gre, *op_xdr, *op_cam, *op_splt,
     *op_his, *op_dif, *op_pmh,
-    *op_len, *op_minid, *op_evalue, *op_xbe, *op_sup, *op_frq, *op_mem, *op_bia,
-    *op_onl, *op_weakends, *op_relax_polish,
+    *op_seedlength, *op_minlen, *op_minid, *op_evalue, *op_xbe,
+    *op_sup, *op_frq,
+    *op_mem, *op_bia, *op_onlyseeds, *op_weakends, *op_relax_polish,
     *op_verify_alignment, *op_only_selected_seqpairs, *op_spdist, *op_display,
     *op_norev, *op_nofwd, *op_part, *op_pick, *op_overl, *op_trimstat,
-    *op_cam_generic;
+    *op_cam_generic, *op_diagbandwidth, *op_mincoverage, *op_maxmat,
+    *op_use_apos;
 
   static GtRange seedpairdistance_defaults = {1UL, GT_UWORD_MAX};
   gt_assert(arguments != NULL);
@@ -166,31 +169,31 @@ static GtOptionParser* gt_seed_extend_option_parser_new(void *tool_arguments)
   gt_option_parser_add_option(op, option);
 
   /* -seedlength */
-  op_len = gt_option_new_uint_min_max("seedlength",
+  op_seedlength = gt_option_new_uint_min_max("seedlength",
                                       "Minimum length of a seed\n"
                                       "default: logarithm of input length "
                                       "to the basis alphabet size",
                                       &arguments->dbs_seedlength,
                                       UINT_MAX, 1UL, 32UL);
-  gt_option_hide_default(op_len);
-  gt_option_parser_add_option(op, op_len);
+  gt_option_hide_default(op_seedlength);
+  gt_option_parser_add_option(op, op_seedlength);
 
   /* -diagbandwidth */
-  option = gt_option_new_uword("diagbandwidth",
+  op_diagbandwidth = gt_option_new_uword("diagbandwidth",
                                "Logarithm of diagonal band width (for filter)",
                                &arguments->dbs_logdiagbandwidth,
                                6UL);
-  gt_option_parser_add_option(op, option);
+  gt_option_parser_add_option(op, op_diagbandwidth);
 
   /* -mincoverage */
-  option = gt_option_new_uword_min("mincoverage",
+  op_mincoverage = gt_option_new_uword_min("mincoverage",
                                    "Minimum coverage in two neighbouring "
                                    "diagonal bands (for filter)\n"
                                    "default: 2.5 x seedlength",
                                    &arguments->dbs_mincoverage,
                                    GT_UWORD_MAX, 1UL);
-  gt_option_hide_default(option);
-  gt_option_parser_add_option(op, option);
+  gt_option_hide_default(op_mincoverage);
+  gt_option_parser_add_option(op, op_mincoverage);
 
   /* -maxfreq */
   op_frq = gt_option_new_uword_min("maxfreq",
@@ -276,14 +279,14 @@ static GtOptionParser* gt_seed_extend_option_parser_new(void *tool_arguments)
   arguments->se_ref_op_gre = gt_option_ref(op_gre);
 
   /* -only-seeds */
-  op_onl = gt_option_new_bool("only-seeds",
+  op_onlyseeds = gt_option_new_bool("only-seeds",
                               "Calculate seeds and do not extend",
                               &arguments->onlyseeds,
                               false);
-  gt_option_exclude(op_onl, op_xdr);
-  gt_option_exclude(op_onl, op_gre);
-  gt_option_is_development_option(op_onl);
-  gt_option_parser_add_option(op, op_onl);
+  gt_option_exclude(op_onlyseeds, op_xdr);
+  gt_option_exclude(op_onlyseeds, op_gre);
+  gt_option_is_development_option(op_onlyseeds);
+  gt_option_parser_add_option(op, op_onlyseeds);
 
   /* -history */
   op_his = gt_option_new_uword_min_max("history",
@@ -291,7 +294,7 @@ static GtOptionParser* gt_seed_extend_option_parser_new(void *tool_arguments)
                                        "..64]\n(trimming for greedy extension)",
                                        &arguments->se_historysize,
                                        60UL, 1UL, 64UL);
-  gt_option_exclude(op_his, op_onl);
+  gt_option_exclude(op_his, op_onlyseeds);
   gt_option_exclude(op_his, op_xdr);
   gt_option_is_development_option(op_his);
   gt_option_parser_add_option(op, op_his);
@@ -301,7 +304,7 @@ static GtOptionParser* gt_seed_extend_option_parser_new(void *tool_arguments)
                                "Maximum difference of alignment length\n"
                                "(trimming for greedy extension)",
                                &arguments->se_maxalilendiff, 0UL);
-  gt_option_exclude(op_dif, op_onl);
+  gt_option_exclude(op_dif, op_onlyseeds);
   gt_option_exclude(op_dif, op_xdr);
   gt_option_hide_default(op_dif);
   gt_option_is_development_option(op_dif);
@@ -313,7 +316,7 @@ static GtOptionParser* gt_seed_extend_option_parser_new(void *tool_arguments)
                                        "history \n(for greedy extension)",
                                        &arguments->se_perc_match_hist,
                                        0UL, 1UL, 100UL);
-  gt_option_exclude(op_pmh, op_onl);
+  gt_option_exclude(op_pmh, op_onlyseeds);
   gt_option_exclude(op_pmh, op_xdr);
   gt_option_hide_default(op_pmh);
   gt_option_is_development_option(op_pmh);
@@ -325,7 +328,7 @@ static GtOptionParser* gt_seed_extend_option_parser_new(void *tool_arguments)
                               "depend on minidentiy and DNA base distribution",
                               &arguments->bias_parameters,
                               false);
-  gt_option_exclude(op_bia, op_onl);
+  gt_option_exclude(op_bia, op_onlyseeds);
   gt_option_exclude(op_bia, op_xdr);
   gt_option_exclude(op_bia, op_pmh);
   gt_option_exclude(op_bia, op_dif);
@@ -362,18 +365,37 @@ static GtOptionParser* gt_seed_extend_option_parser_new(void *tool_arguments)
   gt_option_is_development_option(op_trimstat);
   gt_option_parser_add_option(op, op_trimstat);
   gt_option_exclude(op_trimstat, op_xdr);
-  gt_option_exclude(op_trimstat, op_onl);
+  gt_option_exclude(op_trimstat, op_onlyseeds);
+
+  /* -maxmat */
+  op_maxmat = gt_option_new_bool("maxmat",
+                                 "compute maximal matches of minimum length "
+                                 "specified by option -l",
+                                 &arguments->maxmat,
+                                 false);
+  gt_option_exclude(op_maxmat, op_diagbandwidth);
+  gt_option_exclude(op_maxmat, op_mincoverage);
+  gt_option_exclude(op_maxmat, op_xdr);
+  gt_option_exclude(op_maxmat, op_xbe);
+  gt_option_exclude(op_maxmat, op_gre);
+  gt_option_exclude(op_maxmat, op_his);
+  gt_option_exclude(op_maxmat, op_dif);
+  gt_option_exclude(op_maxmat, op_pmh);
+  gt_option_exclude(op_maxmat, op_bia);
+  gt_option_exclude(op_maxmat, op_cam);
+  gt_option_exclude(op_maxmat, op_trimstat);
+  gt_option_parser_add_option(op, op_maxmat);
 
   /* SEED EXTENSION OPTIONS */
 
   /* -l */
-  op_len = gt_option_new_uword_min("l",
-                                   "Minimum length of aligned sequences "
-                                   "(for seed extension)",
+  op_minlen = gt_option_new_uword_min("l",
+                                   "Minimum length of aligned sequences ",
                                    &arguments->se_alignlength,
                                    GT_UWORD_MAX, 1UL);
-  gt_option_exclude(op_len, op_onl);
-  gt_option_parser_add_option(op, op_len);
+  gt_option_exclude(op_minlen, op_onlyseeds);
+  gt_option_parser_add_option(op, op_minlen);
+  gt_option_imply(op_maxmat, op_minlen);
 
   /* -minidentity */
   op_minid = gt_option_new_uword_min_max("minidentity",
@@ -382,7 +404,8 @@ static GtOptionParser* gt_seed_extend_option_parser_new(void *tool_arguments)
                                        &arguments->se_minidentity,
                                        80UL, GT_EXTEND_MIN_IDENTITY_PERCENTAGE,
                                        99UL);
-  gt_option_exclude(op_minid, op_onl);
+  gt_option_exclude(op_minid, op_onlyseeds);
+  gt_option_exclude(op_maxmat, op_minid);
   gt_option_parser_add_option(op, op_minid);
 
   /* -evalue */
@@ -391,9 +414,10 @@ static GtOptionParser* gt_seed_extend_option_parser_new(void *tool_arguments)
                                             "specifies evalue threshold)",
                                    &arguments->se_evalue_threshold,
                                    10.0);
-  gt_option_exclude(op_evalue, op_onl);
+  gt_option_exclude(op_evalue, op_onlyseeds);
   gt_option_parser_add_option(op, op_evalue);
   gt_option_argument_is_optional(op_evalue);
+  gt_option_exclude(op_maxmat, op_evalue);
   arguments->se_ref_op_evalue = gt_option_ref(op_evalue);
 
   /* OUTPUT OPTIONS */
@@ -404,6 +428,7 @@ static GtOptionParser* gt_seed_extend_option_parser_new(void *tool_arguments)
                                        "polished ends",
                                    &arguments->relax_polish,false);
   gt_option_parser_add_option(op, op_relax_polish);
+  gt_option_exclude(op_maxmat, op_relax_polish);
   gt_option_is_development_option(op_relax_polish);
 
   /* -verify-alignment */
@@ -414,6 +439,7 @@ static GtOptionParser* gt_seed_extend_option_parser_new(void *tool_arguments)
                          "sequence is known), in case the alignment is output",
                                    &arguments->verify_alignment,false);
   gt_option_parser_add_option(op, op_verify_alignment);
+  gt_option_exclude(op_maxmat, op_verify_alignment);
   gt_option_is_development_option(op_verify_alignment);
 
   /* -only-selected-seqpairs */
@@ -480,18 +506,20 @@ static GtOptionParser* gt_seed_extend_option_parser_new(void *tool_arguments)
                                    "alignments",
                                    &arguments->weakends,
                                    false);
-  gt_option_exclude(op_weakends, op_onl);
+  gt_option_exclude(op_weakends, op_onlyseeds);
   gt_option_is_development_option(op_weakends);
+  gt_option_exclude(op_maxmat, op_weakends);
   gt_option_parser_add_option(op, op_weakends);
 
   /* -use-apos */
-  option = gt_option_new_bool("use-apos",
+  op_use_apos = gt_option_new_bool("use-apos",
                               "Discard a seed only if both apos and bpos "
                               "overlap with previous alignment",
                               &arguments->use_apos,
                               false);
-  gt_option_is_development_option(option);
-  gt_option_parser_add_option(op, option);
+  gt_option_is_development_option(op_use_apos);
+  gt_option_exclude(op_maxmat, op_use_apos);
+  gt_option_parser_add_option(op, op_use_apos);
 
   /* -parts */
   op_part = gt_option_new_uword_min("parts",
@@ -938,6 +966,7 @@ static int gt_seed_extend_runner(int argc,
                                     arguments->dbs_debug_seedpair,
                                     arguments->use_kmerfile,
                                     arguments->trimstat_on,
+                                    arguments->maxmat,
                                     extp);
 
     /* Start algorithm */
