@@ -41,11 +41,13 @@ Test do
   filelist.each do |f1|
     filelist.each do |f2|
       if f1 != f2
-        run_test "#{$bin}gt dev linspace_align -ff #{$testdata}/nGASP/#{f1} #{$testdata}nGASP/#{f2} "\
-                 "-protein -global -l #{$testdata}BLOSUM62 \" -1\" -showonlyscore"
+        run_test "#{$bin}gt dev linspace_align -ff #{$testdata}nGASP/#{f1} #{$testdata}nGASP/#{f2} "\
+                 "-protein -global -l #{$testdata}BLOSUM62 \" -1\" -showonlyscore",\
+                 :maxtime => 180
         temp = last_stdout
-        run_test "#{$bin}gt dev linspace_align -ff #{$testdata}/nGASP/#{f1} #{$testdata}nGASP/#{f2} "\
-                 "-protein -global -l #{$testdata}BLOSUM62 \" -1\" -d -showonlyscore"
+        run_test "#{$bin}gt dev linspace_align -ff #{$testdata}nGASP/#{f1} #{$testdata}nGASP/#{f2} "\
+                 "-protein -global -l #{$testdata}BLOSUM62 \" -1\" -d -showonlyscore",\
+                 :maxtime => 180
         run "diff #{last_stdout} #{temp}"
       end
     end
@@ -169,11 +171,11 @@ if $gttestdata then
   Test do
     run_test "#{$bin}gt dev linspace_align -ff #{$gttestdata}DNA-mix/Grumbach.fna/humdystrop.fna"\
              " #{$gttestdata}DNA-mix/Grumbach.fna/humhdabcd.fna "\
-             "-dna -global -l 0 1 1 -showonlyscore", :maxtime =>120
+             "-dna -global -l 0 1 1 -showonlyscore", :maxtime => 1200
     temp = last_stdout
     run_test "#{$bin}gt dev linspace_align -ff #{$gttestdata}DNA-mix/Grumbach.fna/humdystrop.fna "\
              "#{$gttestdata}DNA-mix/Grumbach.fna/humhdabcd.fna "\
-             "-dna -global -l 0 1 1 -d -showonlyscore", :maxtime =>120
+             "-dna -global -l 0 1 1 -d -showonlyscore", :maxtime => 1500
     run "diff #{last_stdout} #{temp}"
   end
 
@@ -182,11 +184,13 @@ if $gttestdata then
   Test do
     run_test "#{$bin}gt dev linspace_align -ff #{$gttestdata}swissprot/swiss10K "\
              "#{$gttestdata}swissprot/swiss10K " \
-             "-protein -global -l #{$testdata}BLOSUM62 \" -1\" -showonlyscore"
+             "-protein -global -l #{$testdata}BLOSUM62 \" -1\" -showonlyscore",\
+             :maxtime => 120
     temp = last_stdout
     run_test "#{$bin}gt dev linspace_align -ff #{$gttestdata}swissprot/swiss10K "\
              "#{$gttestdata}swissprot/swiss10K "\
-             "-protein -global -l #{$testdata}BLOSUM62 \" -1\" -d -showonlyscore"
+             "-protein -global -l #{$testdata}BLOSUM62 \" -1\" -d -showonlyscore",\
+             :maxtime => 120
     run "diff #{last_stdout} #{temp}"
   end
 end
