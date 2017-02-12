@@ -2929,7 +2929,6 @@ static void gt_diagbandseed_seedhistogram_out(FILE *stream,
         (VAR)->bpos = tmpb
 
 #define GT_DIAGBANDSEED_SHOWMAXMAT(EXT)\
-        EXT = extension_table.spaceuint32_t[previdx];\
         if (seedlength + (EXT) >= userdefinedleastlength)\
         {\
           printf("%8" GT_WUS "  %8" PRIu32 "  %8" PRIu32 "\n",\
@@ -2951,11 +2950,10 @@ static void gt_diagbandseed_segment2maxmatches(
 #ifndef NDEBUG
   GtSeedpairPositions *previous = segment_positions;
 #endif
-  uint32_t tmpa, tmpb, ext;
+  uint32_t tmpa, tmpb, prevext = 0;
   GtUword idx,
           previdx = 0,
           *uword_segment_positions = (GtUword *) segment_positions;
-  GtArrayuint32_t extension_table;
 
   gt_assert(sizeof *segment_positions == sizeof *uword_segment_positions);
   for (idx = 0; idx < segment_length; idx++)
@@ -2992,27 +2990,18 @@ static void gt_diagbandseed_segment2maxmatches(
               (segment_positions[idx-1].apos == segment_positions[idx].apos &&
                segment_positions[idx-1].bpos <= segment_positions[idx].bpos));
   }
-  GT_INITARRAY(&extension_table,uint32_t);
-  GT_CHECKARRAYSPACE(&extension_table,uint32_t,
-                     extension_table.allocateduint32_t * 0.2 + 256);
-  extension_table.spaceuint32_t[previdx] = 0;
-  extension_table.nextfreeuint32_t++;
   for (idx = 1; idx < segment_length; idx++)
   {
-    gt_assert(previdx + 1 == extension_table.nextfreeuint32_t);
     if (segment_positions[previdx].apos == segment_positions[idx].apos &&
         segment_positions[previdx].bpos + 1 == segment_positions[idx].bpos)
     {
-      extension_table.spaceuint32_t[previdx]++;
+      prevext++;
       segment_positions[previdx].bpos++;
     } else
     {
-      GT_DIAGBANDSEED_SHOWMAXMAT(ext);
-      GT_CHECKARRAYSPACE(&extension_table,uint32_t,
-                         extension_table.allocateduint32_t * 0.2 + 256);
-      extension_table.nextfreeuint32_t++;
+      GT_DIAGBANDSEED_SHOWMAXMAT(prevext);
       previdx++;
-      extension_table.spaceuint32_t[previdx] = 0;
+      prevext = 0;
       if (previdx < idx)
       {
         segment_positions[previdx] = segment_positions[idx];
@@ -3021,9 +3010,8 @@ static void gt_diagbandseed_segment2maxmatches(
   }
   if (segment_length > 0)
   {
-    GT_DIAGBANDSEED_SHOWMAXMAT(ext);
+    GT_DIAGBANDSEED_SHOWMAXMAT(prevext);
   }
-  GT_FREEARRAY(&extension_table,uint32_t);
 }
 
 static void gt_diagbandseed_process_segment(
