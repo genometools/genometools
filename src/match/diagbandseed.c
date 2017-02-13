@@ -767,8 +767,8 @@ const int idx_aseqnum = 0, idx_bseqnum = 1, idx_bpos = 2, idx_apos = 3;
 
 typedef struct
 {
-  GtDiagbandseedPosition bpos, /* secondary key */
-                         apos; /* primary key */
+  GtDiagbandseedPosition apos, /* secondary key */
+                         bpos; /* primary key */
 } GtSeedpairPositions;
 
 const int idx_aseqnum = 0, idx_bseqnum = 1, idx_bpos = 2, idx_apos = 3;
@@ -2920,19 +2920,19 @@ static void gt_diagbandseed_seedhistogram_out(FILE *stream,
         ((AMAXLEN) + (GtUword) (BPOS) - (GtUword) (APOS))
 #define GT_DIAGBANDSEED_DIAGONALBAND(AMAXLEN,APOS,BPOS)\
         (GT_DIAGBANDSEED_DIAGONAL(AMAXLEN,APOS,BPOS) >> extp->logdiagbandwidth)
-#define GT_DIAGBANDSEED_DIAGONAL2APOS(AMAXLEN,BPOS,DIAG)\
-        ((AMAXLEN) + (GtUword) (BPOS) - (GtUword) (DIAG))
+#define GT_DIAGBANDSEED_DIAGONAL2BPOS(AMAXLEN,APOS,DIAG)\
+        ((DIAG) + (APOS) - (AMAXLEN))
 
-#define GT_DIAGBANDSEED_SHOWMAXMAT(EXT,MINLENGTH)\
-        if ((EXT) >= (MINLENGTH))\
+#define GT_DIAGBANDSEED_SHOWMAXMAT(MATCHLENGTH,MINLENGTH)\
+        if ((MATCHLENGTH) >= (MINLENGTH))\
         {\
           fprintf(fpout,"%8" GT_WUS "  %8" GT_WUS "  %8" GT_WUS "\n",\
-                  GT_DIAGBANDSEED_DIAGONAL2APOS(amaxlen,\
-                                               previous.bpos,\
-                                               previous.apos)\
-                                                 - (EXT) + 2,\
-                  previous.bpos - (EXT) + 2,\
-                  EXT);\
+                  previous.apos - (MATCHLENGTH) + 2,\
+                  GT_DIAGBANDSEED_DIAGONAL2BPOS(amaxlen,\
+                                                previous.apos,\
+                                                previous.bpos) \
+                  - (MATCHLENGTH) + 2,\
+                  MATCHLENGTH);\
         }
 
 static void gt_diagbandseed_segment2maxmatches(
@@ -2943,10 +2943,9 @@ static void gt_diagbandseed_segment2maxmatches(
              GtUword segment_length,
              FILE *fpout)
 {
-  GtUword idx,
-          previousmatch = seedlength,
+  GtUword idx, previousmatch = seedlength,
           *uword_segment_positions = (GtUword *) segment_positions;
-  GtSeedpairPositions previous;
+  GtSeedpairPositions previous, *current;
 
   if (segment_length == 0)
   {
@@ -2954,19 +2953,21 @@ static void gt_diagbandseed_segment2maxmatches(
   }
   gt_assert(sizeof *segment_positions == sizeof *uword_segment_positions &&
             seedlength <= userdefinedleastlength);
+#ifndef NDEBUG
   for (idx = 1; idx < segment_length; idx++)
   {
     gt_assert(segment_positions[idx-1].bpos < segment_positions[idx].bpos ||
               (segment_positions[idx-1].bpos == segment_positions[idx].bpos &&
                segment_positions[idx-1].apos <= segment_positions[idx].apos));
   }
+#endif
   for (idx = 0; idx < segment_length; idx++)
   {
     const GtUword diag = GT_DIAGBANDSEED_DIAGONAL(amaxlen,
                                                   segment_positions[idx].apos,
                                                   segment_positions[idx].bpos);
     gt_assert(diag <= UINT32_MAX);
-    segment_positions[idx].apos = (GtDiagbandseedPosition) diag;
+    segment_positions[idx].bpos = (GtDiagbandseedPosition) diag;
   }
   if (segment_length >= 128)
   {
@@ -2976,18 +2977,18 @@ static void gt_diagbandseed_segment2maxmatches(
     gt_direct_qsort_ulong (6UL, false,uword_segment_positions,segment_length);
   }
   previous = segment_positions[0];
-  for (idx = 1; idx < segment_length; idx++)
+  for (current = segment_positions + 1;
+       current < segment_positions + segment_length; current++)
   {
-    if (previous.apos == segment_positions[idx].apos &&
-        previous.bpos + 1 == segment_positions[idx].bpos)
+    if (previous.bpos == current->bpos && previous.apos + 1 == current->apos)
     {
       previousmatch++;
-      previous.bpos++;
+      previous.apos++;
     } else
     {
       GT_DIAGBANDSEED_SHOWMAXMAT(previousmatch,userdefinedleastlength);
       previousmatch = seedlength;
-      previous = segment_positions[idx];
+      previous = *current;
     }
   }
   if (segment_length > 0)
