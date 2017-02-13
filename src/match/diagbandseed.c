@@ -767,7 +767,8 @@ const int idx_aseqnum = 0, idx_bseqnum = 1, idx_bpos = 2, idx_apos = 3;
 
 typedef struct
 {
-  GtDiagbandseedPosition apos, bpos;
+  GtDiagbandseedPosition bpos, /* secondary key */
+                         apos; /* primary key */
 } GtSeedpairPositions;
 
 const int idx_aseqnum = 0, idx_bseqnum = 1, idx_bpos = 2, idx_apos = 3;
@@ -2922,22 +2923,16 @@ static void gt_diagbandseed_seedhistogram_out(FILE *stream,
 #define GT_DIAGBANDSEED_DIAGONAL2APOS(AMAXLEN,BPOS,DIAG)\
         ((AMAXLEN) + (GtUword) (BPOS) - (GtUword) (DIAG))
 
-#define GT_DIAGBANDSEED_EXTRACTAPOSBPOS(VAR,FROM)\
-        tmpa = (GtDiagbandseedPosition) ((FROM) >> 32);\
-        tmpb = (GtDiagbandseedPosition) ((FROM) & ((((GtUword) 1) << 32) - 1));\
-        (VAR)->apos = tmpa;\
-        (VAR)->bpos = tmpb
-
-#define GT_DIAGBANDSEED_SHOWMAXMAT(EXT)\
-        if (seedlength + (EXT) >= userdefinedleastlength)\
+#define GT_DIAGBANDSEED_SHOWMAXMAT(EXT,MINLENGTH)\
+        if ((EXT) >= (MINLENGTH))\
         {\
-          printf("%8" GT_WUS "  %8" PRIu32 "  %8" PRIu32 "\n",\
-                 GT_DIAGBANDSEED_DIAGONAL2APOS(amaxlen,\
-                                               segment_positions[previdx].bpos,\
-                                               segment_positions[previdx].apos)\
-                                                 - (seedlength - 2 + (EXT)),\
-                 segment_positions[previdx].bpos - (seedlength - 2 + (EXT)),\
-                 seedlength + (EXT));\
+          fprintf(fpout,"%8" GT_WUS "  %8" GT_WUS "  %8" GT_WUS "\n",\
+                  GT_DIAGBANDSEED_DIAGONAL2APOS(amaxlen,\
+                                               previous.bpos,\
+                                               previous.apos)\
+                                                 - (EXT) + 2,\
+                  previous.bpos - (EXT) + 2,\
+                  EXT);\
         }
 
 static void gt_diagbandseed_segment2maxmatches(
@@ -2945,25 +2940,33 @@ static void gt_diagbandseed_segment2maxmatches(
              GtUword userdefinedleastlength,
              GtUword amaxlen,
              GtSeedpairPositions *segment_positions,
-             GtUword segment_length)
+             GtUword segment_length,
+             FILE *fpout)
 {
-#ifndef NDEBUG
-  GtSeedpairPositions *previous = segment_positions;
-#endif
-  uint32_t tmpa, tmpb, prevext = 0;
   GtUword idx,
-          previdx = 0,
+          previousmatch = seedlength,
           *uword_segment_positions = (GtUword *) segment_positions;
+  GtSeedpairPositions previous;
 
-  gt_assert(sizeof *segment_positions == sizeof *uword_segment_positions);
+  if (segment_length == 0)
+  {
+    return;
+  }
+  gt_assert(sizeof *segment_positions == sizeof *uword_segment_positions &&
+            seedlength <= userdefinedleastlength);
+  for (idx = 1; idx < segment_length; idx++)
+  {
+    gt_assert(segment_positions[idx-1].bpos < segment_positions[idx].bpos ||
+              (segment_positions[idx-1].bpos == segment_positions[idx].bpos &&
+               segment_positions[idx-1].apos <= segment_positions[idx].apos));
+  }
   for (idx = 0; idx < segment_length; idx++)
   {
     const GtUword diag = GT_DIAGBANDSEED_DIAGONAL(amaxlen,
                                                   segment_positions[idx].apos,
                                                   segment_positions[idx].bpos);
     gt_assert(diag <= UINT32_MAX);
-    uword_segment_positions[idx]
-      = (diag << 32) | (GtUword) segment_positions[idx].bpos;
+    segment_positions[idx].apos = (GtDiagbandseedPosition) diag;
   }
   if (segment_length >= 128)
   {
@@ -2972,45 +2975,24 @@ static void gt_diagbandseed_segment2maxmatches(
   {
     gt_direct_qsort_ulong (6UL, false,uword_segment_positions,segment_length);
   }
-  GT_DIAGBANDSEED_EXTRACTAPOSBPOS(previous,uword_segment_positions[0]);
-#ifndef NDEBUG
+  previous = segment_positions[0];
   for (idx = 1; idx < segment_length; idx++)
   {
-    GtSeedpairPositions *current = segment_positions + idx;
-    GT_DIAGBANDSEED_EXTRACTAPOSBPOS(current,uword_segment_positions[idx]);
-    gt_assert(previous->apos < current->apos ||
-              (previous->apos == current->apos &&
-               previous->bpos <= previous->bpos));
-    previous = current;
-  }
-#endif
-  for (idx = 1; idx < segment_length; idx++)
-  {
-    gt_assert(segment_positions[idx-1].apos < segment_positions[idx].apos ||
-              (segment_positions[idx-1].apos == segment_positions[idx].apos &&
-               segment_positions[idx-1].bpos <= segment_positions[idx].bpos));
-  }
-  for (idx = 1; idx < segment_length; idx++)
-  {
-    if (segment_positions[previdx].apos == segment_positions[idx].apos &&
-        segment_positions[previdx].bpos + 1 == segment_positions[idx].bpos)
+    if (previous.apos == segment_positions[idx].apos &&
+        previous.bpos + 1 == segment_positions[idx].bpos)
     {
-      prevext++;
-      segment_positions[previdx].bpos++;
+      previousmatch++;
+      previous.bpos++;
     } else
     {
-      GT_DIAGBANDSEED_SHOWMAXMAT(prevext);
-      previdx++;
-      prevext = 0;
-      if (previdx < idx)
-      {
-        segment_positions[previdx] = segment_positions[idx];
-      }
+      GT_DIAGBANDSEED_SHOWMAXMAT(previousmatch,userdefinedleastlength);
+      previousmatch = seedlength;
+      previous = segment_positions[idx];
     }
   }
   if (segment_length > 0)
   {
-    GT_DIAGBANDSEED_SHOWMAXMAT(prevext);
+    GT_DIAGBANDSEED_SHOWMAXMAT(previousmatch,userdefinedleastlength);
   }
 }
 
@@ -3044,7 +3026,7 @@ static void gt_diagbandseed_process_segment(
   {
     gt_diagbandseed_segment2maxmatches(seedlength,extp->userdefinedleastlength,
                                        amaxlen,segment_positions,
-                                       segment_length);
+                                       segment_length,stdout);
     return;
   }
   if (segment_reject_func == NULL ||
