@@ -77,11 +77,27 @@ typedef struct
                          bpos;  /*  3rd important sort criterion */
 } GtDiagbandseedSeedPair;
 
-#define GT_DIAGBANDSEED_SETPOS(SP,APOS,BPOS)  (SP)->bpos = BPOS;\
-                                              (SP)->apos = APOS
+#define GT_DIAGBANDSEED_DIAGONAL(AMAXLEN,APOS,BPOS)\
+        ((AMAXLEN) + (GtUword) (BPOS) - (GtUword) (APOS))
+
+#define GT_DIAGBANDSEED_SETPOS(SP,APOS,BPOS)\
+        (SP)->bpos = BPOS;\
+        (SP)->apos = APOS
 
 #define GT_DIAGBANDSEED_GETPOS_A(SP) (SP)->apos
 #define GT_DIAGBANDSEED_GETPOS_B(SP) (SP)->bpos
+
+#define GT_DIAGBANDSEED_DIAGONAL2BPOS(AMAXLEN,APOS,DIAG)\
+        ((GtUword) (DIAG) + (GtUword) (APOS) - (AMAXLEN))
+
+#define GT_DIAGBANDSEED_CONV_B(APOS,BPOS)\
+        (seedpairlist->maxmat \
+          ? GT_DIAGBANDSEED_DIAGONAL2BPOS(seedpairlist->amaxlen,APOS,BPOS)\
+          : (BPOS))
+
+/* called when !maxmat */
+#define GT_DIAGBANDSEED_DIAGONALBAND(AMAXLEN,APOS,BPOS,LOGDIAGBANDWIDTH)\
+        (GT_DIAGBANDSEED_DIAGONAL(AMAXLEN,APOS,BPOS) >> (LOGDIAGBANDWIDTH))
 
 struct GtDiagbandseedInfo
 {
@@ -548,10 +564,12 @@ static GtArrayGtDiagbandseedKmerPos gt_diagbandseed_get_kmers(
 
   /* reduce size of array to number of entries */
   list.allocatedGtDiagbandseedKmerPos = listlen;
-  list.spaceGtDiagbandseedKmerPos
-    = gt_realloc(list.spaceGtDiagbandseedKmerPos,
-                 listlen * sizeof (*list.spaceGtDiagbandseedKmerPos));
-
+  if (listlen > 0)
+  {
+    list.spaceGtDiagbandseedKmerPos
+      = gt_realloc(list.spaceGtDiagbandseedKmerPos,
+                   listlen * sizeof (*list.spaceGtDiagbandseedKmerPos));
+  }
   if (debug_kmer) {
     const GtDiagbandseedKmerPos *idx = list.spaceGtDiagbandseedKmerPos;
     const GtDiagbandseedKmerPos *end = idx + listlen;
@@ -805,6 +823,8 @@ typedef struct
   int shift_tab[4],
       transfer_shift,
       bits_unused_in2GtUwords;
+  bool maxmat;
+  GtUword amaxlen;
 } GtSeedpairlist;
 
 #define GT_DIAGBANDSEED_ENCODE_SEQNUMS(ASEQNUM,BSEQNUM)\
@@ -823,25 +843,41 @@ static GtSeedpairlist *gt_seedpairlist_new(GtDiagbandseedPairlisttype splt,
                         const GtSequencePartsInfo *aseqranges,
                         GtUword aidx,
                         const GtSequencePartsInfo *bseqranges,
-                        GtUword bidx)
+                        GtUword bidx,
+                        bool maxmat,
+                        GtUword amaxlen)
 {
   GtSeedpairlist *seedpairlist = gt_malloc(sizeof *seedpairlist);
   int idx;
   const int allbits = sizeof (GtWord) * CHAR_BIT;
-  const GtUword anumofseq
-    = gt_sequence_parts_info_numofsequences_get(aseqranges,aidx),
+  const GtUword
+    anumofseq = gt_sequence_parts_info_numofsequences_get(aseqranges,aidx),
     bnumofseq = gt_sequence_parts_info_numofsequences_get(bseqranges,bidx);
 
+  seedpairlist->maxmat = maxmat;
+  seedpairlist->amaxlen = amaxlen;
+  seedpairlist->aseqrange_max_length
+    = gt_sequence_parts_info_max_length_get(aseqranges,aidx);
+  seedpairlist->bseqrange_max_length
+    = gt_sequence_parts_info_max_length_get(bseqranges,bidx);
   seedpairlist->bits_values[idx_aseqnum]
     = (GtBitcount_type) gt_radixsort_bits(anumofseq);
   seedpairlist->bits_values[idx_bseqnum]
     = (GtBitcount_type) gt_radixsort_bits(bnumofseq);
-  seedpairlist->bits_values[idx_bpos]
-    = (GtBitcount_type)
-      gt_radixsort_bits(gt_sequence_parts_info_max_length_get(bseqranges,bidx));
+  if (maxmat)
+  {
+    seedpairlist->bits_values[idx_bpos]
+      = (GtBitcount_type) gt_radixsort_bits(
+                             seedpairlist->aseqrange_max_length +
+                             seedpairlist->bseqrange_max_length + 1);
+  } else
+  {
+    seedpairlist->bits_values[idx_bpos]
+      = (GtBitcount_type) gt_radixsort_bits(
+                                         seedpairlist->bseqrange_max_length);
+  }
   seedpairlist->bits_values[idx_apos]
-    = (GtBitcount_type)
-      gt_radixsort_bits(gt_sequence_parts_info_max_length_get(aseqranges,aidx));
+    = (GtBitcount_type) gt_radixsort_bits(seedpairlist->aseqrange_max_length);
   seedpairlist->bits_units[0] = seedpairlist->bits_values[idx_aseqnum] +
                                 seedpairlist->bits_values[idx_bseqnum];
   seedpairlist->bits_units[1] = seedpairlist->bits_values[idx_apos] +
@@ -887,10 +923,6 @@ static GtSeedpairlist *gt_seedpairlist_new(GtDiagbandseedPairlisttype splt,
     = gt_sequence_parts_info_end_get(aseqranges,aidx);
   seedpairlist->bseqrange_end
     = gt_sequence_parts_info_end_get(bseqranges,bidx);
-  seedpairlist->aseqrange_max_length
-    = gt_sequence_parts_info_max_length_get(aseqranges,aidx);
-  seedpairlist->bseqrange_max_length
-    = gt_sequence_parts_info_max_length_get(bseqranges,bidx);
   seedpairlist->mlist_struct = NULL;
   seedpairlist->mlist_ulong = NULL;
   seedpairlist->mlist_bytestring = NULL;
@@ -1137,6 +1169,10 @@ static void gt_seedpairlist_add(GtSeedpairlist *seedpairlist,
             bseqnum <= seedpairlist->bseqrange_end &&
             apos < seedpairlist->aseqrange_max_length &&
             bpos < seedpairlist->bseqrange_max_length);
+  if (seedpairlist->maxmat)
+  {
+    bpos = GT_DIAGBANDSEED_DIAGONAL(seedpairlist->amaxlen,apos,bpos);
+  }
   if (seedpairlist->splt == GT_DIAGBANDSEED_SPLT_STRUCT)
   {
     GtDiagbandseedSeedPair *seedpair = NULL;
@@ -1302,7 +1338,7 @@ static void gt_diagbandseed_decode_seedpair(GtDiagbandseedSeedPair *seedpair,
                        ((value_seqnums >>
                          seedpairlist->bits_left_adjust[idx_bseqnum]) &
                          seedpairlist->mask_tab[idx_bseqnum]);
-  transfer = (value_seqnums & seedpairlist->transfer_mask);
+  transfer = value_seqnums & seedpairlist->transfer_mask;
   value_positions
     = gt_diagbandseed_bytestring2GtUword(bytestring + sizeof (GtUword),
                                          seedpairlist->bytes_seedpair -
@@ -2677,14 +2713,20 @@ static void gt_diagbandseed_get_seedpairs(GtSeedpairlist *seedpairlist,
   }
 }
 
-static int gt_diagbandseed_update_dband(GtDiagbandseedScore *diagband_score,
+static int gt_diagbandseed_update_dband(GtUword ndiags,
+                                        GtUword amaxlen,
+                                        GtUword logdiagbandwidth,
+                                       GtDiagbandseedScore *diagband_score,
                                        GtDiagbandseedPosition *diagband_lastpos,
-                                       GtUword diag,
+                                       GtUword apos,
                                        GtUword bpos,
                                        unsigned int seedlength)
 {
   GtUword addlength;
+  const GtUword diag = GT_DIAGBANDSEED_DIAGONALBAND(amaxlen, apos, bpos,
+                                                    logdiagbandwidth);
 
+  gt_assert(diag < ndiags);
   if (bpos >= diagband_lastpos[diag] + seedlength)
   {
     /* no overlap */
@@ -2943,11 +2985,11 @@ static void gt_diagbandseed_seedhistogram_out(FILE *stream,
         if ((MATCHLENGTH) >= (MINLENGTH))\
         {\
           fprintf(fpout,"%8" GT_WUS "  %8" GT_WUS "  %8" GT_WUS "\n",\
-                  previous.apos - (MATCHLENGTH) + 2,\
+                  previous.apos + 2 - (MATCHLENGTH),\
                   GT_DIAGBANDSEED_DIAGONAL2BPOS(amaxlen,\
                                                 previous.apos,\
                                                 previous.bpos) \
-                  - (MATCHLENGTH) + 2,\
+                                                + 2 - (MATCHLENGTH),\
                   MATCHLENGTH);\
         }
 
@@ -2955,13 +2997,14 @@ static void gt_diagbandseed_segment2maxmatches(
              unsigned int seedlength,
              GtUword userdefinedleastlength,
              GtUword amaxlen,
-             GtSeedpairPositions *segment_positions,
+             const GtSeedpairPositions *segment_positions,
              GtUword segment_length,
              FILE *fpout)
 {
   GtUword idx, previousmatch = seedlength,
           *uword_segment_positions = (GtUword *) segment_positions;
-  GtSeedpairPositions previous, *current;
+  const GtSeedpairPositions *current;
+  GtSeedpairPositions previous;
 
   if (segment_length == 0)
   {
@@ -2977,21 +3020,6 @@ static void gt_diagbandseed_segment2maxmatches(
                segment_positions[idx-1].apos <= segment_positions[idx].apos));
   }
 #endif
-  for (idx = 0; idx < segment_length; idx++)
-  {
-    const GtUword diag = GT_DIAGBANDSEED_DIAGONAL(amaxlen,
-                                                  segment_positions[idx].apos,
-                                                  segment_positions[idx].bpos);
-    gt_assert(diag <= UINT32_MAX);
-    segment_positions[idx].bpos = (GtDiagbandseedPosition) diag;
-  }
-  if (segment_length >= 128)
-  {
-    gt_radixsort_inplace_ulong(uword_segment_positions,segment_length);
-  } else
-  {
-    gt_direct_qsort_ulong (6UL, false,uword_segment_positions,segment_length);
-  }
   previous = segment_positions[0];
   for (current = segment_positions + 1;
        current < segment_positions + segment_length; current++)
@@ -3013,6 +3041,8 @@ static void gt_diagbandseed_segment2maxmatches(
   }
 }
 
+/* * * * * SEED EXTENSION * * * * */
+
 static void gt_diagbandseed_process_segment(
              const GtDiagbandseedExtendParams *extp,
              bool maxmat,
@@ -3027,7 +3057,7 @@ static void gt_diagbandseed_process_segment(
              GtDiagbandseedPosition *diagband_lastpos,
              GtUword aseqnum,
              GtUword bseqnum,
-             GtSeedpairPositions *segment_positions,
+             const GtSeedpairPositions *segment_positions,
              GtUword segment_length,
              GtProcessinfo_and_querymatchspaceptr *info_querymatch,
              GtReadmode query_readmode,
@@ -3041,9 +3071,9 @@ static void gt_diagbandseed_process_segment(
 
   if (maxmat)
   {
-    gt_diagbandseed_segment2maxmatches(seedlength,extp->userdefinedleastlength,
-                                       amaxlen,segment_positions,
-                                       segment_length,stdout);
+    gt_diagbandseed_segment2maxmatches(seedlength,
+                                       extp->userdefinedleastlength,amaxlen,
+                                       segment_positions,segment_length,stdout);
     return;
   }
   if (segment_reject_func == NULL ||
@@ -3056,7 +3086,8 @@ static void gt_diagbandseed_process_segment(
          spp_ptr++)
     {
       const GtUword diag = GT_DIAGBANDSEED_DIAGONALBAND(amaxlen, spp_ptr->apos,
-                                                        spp_ptr->bpos);
+                                                        spp_ptr->bpos,
+                                                        extp->logdiagbandwidth);
 
       if ((GtUword) MAX(diagband_score[diag + 1], diagband_score[diag - 1])
           + (GtUword) diagband_score[diag]
@@ -3135,7 +3166,8 @@ static void gt_diagbandseed_process_segment(
     {
       const GtUword diag = GT_DIAGBANDSEED_DIAGONALBAND(amaxlen,
                                                         spp_ptr->apos,
-                                                        spp_ptr->bpos);
+                                                        spp_ptr->bpos,
+                                                        extp->logdiagbandwidth);
       diagband_score[diag] = 0;
       diagband_lastpos[diag] = 0;
     }
@@ -3470,7 +3502,6 @@ static void gt_diagbandseed_process_seeds(GtSeedpairlist *seedpairlist,
                                             *karlin_altschul_stat,
                                           unsigned int seedlength,
                                           GtReadmode query_readmode,
-                                          bool maxmat,
                                           bool verbose,
                                           FILE *stream,
                                           GtSegmentRejectFunc
@@ -3487,10 +3518,10 @@ static void gt_diagbandseed_process_seeds(GtSeedpairlist *seedpairlist,
      set amaxlen and bmaxlen to the maximum size of all sequences
      to get the same division into diagonal bands for all parts and thus
      obtain results independent of the number of parts chosen. */
-  const GtUword amaxlen = gt_encseq_max_seq_length(aencseq),
-                bmaxlen = gt_encseq_max_seq_length(bencseq),
+  const GtUword bmaxlen = gt_encseq_max_seq_length(bencseq),
                 mlistlen = gt_seedpairlist_length(seedpairlist),
-                ndiags = 1 + ((amaxlen + bmaxlen) >> extp->logdiagbandwidth),
+                ndiags = 1 + ((seedpairlist->amaxlen + bmaxlen)
+                             >> extp->logdiagbandwidth),
                 minsegmentlen = (extp->mincoverage - 1) / seedlength + 1;
   GtUword diagbands_used;
   GtTimer *timer = NULL;
@@ -3590,17 +3621,15 @@ static void gt_diagbandseed_process_seeds(GtSeedpairlist *seedpairlist,
       spp_ptr = segment_positions = (GtSeedpairPositions *) currsegm;
       do
       {
-        const GtUword diag = GT_DIAGBANDSEED_DIAGONALBAND(amaxlen,
-                                        GT_DIAGBANDSEED_GETPOS_A(nextsegm),
-                                        GT_DIAGBANDSEED_GETPOS_B(nextsegm));
-
-        gt_assert(diag < ndiags);
-        if (!maxmat)
+        if (!seedpairlist->maxmat)
         {
           diagbands_used += gt_diagbandseed_update_dband(
+                                        ndiags,
+                                        seedpairlist->amaxlen,
+                                        extp->logdiagbandwidth,
                                         diagband_score,
                                         diagband_lastpos,
-                                        diag,
+                                        GT_DIAGBANDSEED_GETPOS_A(nextsegm),
                                         GT_DIAGBANDSEED_GETPOS_B(nextsegm),
                                         seedlength);
         }
@@ -3623,11 +3652,11 @@ static void gt_diagbandseed_process_seeds(GtSeedpairlist *seedpairlist,
          second scan: test for mincoverage and overlap to previous extension,
          based on apos and bpos values. */
       gt_diagbandseed_process_segment(extp,
-                                      maxmat,
+                                      seedpairlist->maxmat,
                                       &plainsequence_info.aseqorencseq,
                                       &plainsequence_info.bseqorencseq,
                                       same_encseq,
-                                      amaxlen,
+                                      seedpairlist->amaxlen,
                                       seedlength,
                                       diagbands_used,
                                       ndiags,
@@ -3692,23 +3721,22 @@ static void gt_diagbandseed_process_seeds(GtSeedpairlist *seedpairlist,
         do
         {
           GtUword apos = gt_seedpairlist_extract_ulong(seedpairlist,*nextsegm,
-                                                       idx_apos),
-                  diag;
+                                                       idx_apos);
 
           spp_ptr->bpos
             = gt_seedpairlist_extract_ulong(seedpairlist,*nextsegm,idx_bpos);
           spp_ptr->apos = apos;
-          if (!maxmat)
+          if (!seedpairlist->maxmat)
           {
-            diag = GT_DIAGBANDSEED_DIAGONALBAND(amaxlen, spp_ptr->apos,
-                                                spp_ptr->bpos);
-
-            gt_assert(diag < ndiags);
-            diagbands_used += gt_diagbandseed_update_dband(diagband_score,
-                                                           diagband_lastpos,
-                                                           diag,
-                                                           spp_ptr->bpos,
-                                                           seedlength);
+            diagbands_used
+              += gt_diagbandseed_update_dband(ndiags,
+                                              seedpairlist->amaxlen,
+                                              extp->logdiagbandwidth,
+                                              diagband_score,
+                                              diagband_lastpos,
+                                              spp_ptr->apos,
+                                              spp_ptr->bpos,
+                                              seedlength);
           }
           spp_ptr++;
           nextsegm++;
@@ -3728,11 +3756,11 @@ static void gt_diagbandseed_process_seeds(GtSeedpairlist *seedpairlist,
            second scan: test for mincoverage and overlap to previous extension,
            based on apos and bpos values. */
         gt_diagbandseed_process_segment(extp,
-                                        maxmat,
+                                        seedpairlist->maxmat,
                                         &plainsequence_info.aseqorencseq,
                                         &plainsequence_info.bseqorencseq,
                                         same_encseq,
-                                        amaxlen,
+                                        seedpairlist->amaxlen,
                                         seedlength,
                                         diagbands_used,
                                         ndiags,
@@ -3801,17 +3829,16 @@ static void gt_diagbandseed_process_seeds(GtSeedpairlist *seedpairlist,
                    nextsegment_offset);
         while (true)
         {
-          if (!maxmat)
+          if (!seedpairlist->maxmat)
           {
-            const GtUword diag
-              = GT_DIAGBANDSEED_DIAGONALBAND(amaxlen,
-                                      GT_DIAGBANDSEED_GETPOS_A(&nextsegment),
-                                      GT_DIAGBANDSEED_GETPOS_B(&nextsegment));
-
-            gt_assert(diag < ndiags);
-            diagbands_used += gt_diagbandseed_update_dband(diagband_score,
-                                                           diagband_lastpos,
-                                                           diag,
+            diagbands_used
+              += gt_diagbandseed_update_dband(
+                                         ndiags,
+                                         seedpairlist->amaxlen,
+                                         extp->logdiagbandwidth,
+                                         diagband_score,
+                                         diagband_lastpos,
+                                         GT_DIAGBANDSEED_GETPOS_A(&nextsegment),
                                          GT_DIAGBANDSEED_GETPOS_B(&nextsegment),
                                          seedlength);
           }
@@ -3844,11 +3871,11 @@ static void gt_diagbandseed_process_seeds(GtSeedpairlist *seedpairlist,
                                                     bseqranges,
                                                     currsegm_bseqnum);
         gt_diagbandseed_process_segment(extp,
-                                        maxmat,
+                                        seedpairlist->maxmat,
                                         &plainsequence_info.aseqorencseq,
                                         &plainsequence_info.bseqorencseq,
                                         same_encseq,
-                                        amaxlen,
+                                        seedpairlist->amaxlen,
                                         seedlength,
                                         diagbands_used,
                                         ndiags,
@@ -4045,7 +4072,8 @@ static int gt_diagbandseed_algorithm(const GtDiagbandseedInfo *arg,
   GtSegmentRejectInfo *segment_reject_info = NULL;
   GtSegmentRejectFunc segment_reject_func = NULL;
   const GtUword anumseqranges = gt_sequence_parts_info_number(aseqranges),
-                bnumseqranges = gt_sequence_parts_info_number(bseqranges);
+                bnumseqranges = gt_sequence_parts_info_number(bseqranges),
+                amaxlen = gt_encseq_max_seq_length(aencseq);
 
   gt_assert(arg != NULL);
   maxfreq = arg->maxfreq;
@@ -4145,7 +4173,8 @@ static int gt_diagbandseed_algorithm(const GtDiagbandseedInfo *arg,
   if (!selfcomp || !arg->norev) {
     len_used += blen;
   }
-  seedpairlist = gt_seedpairlist_new(arg->splt,aseqranges,aidx,bseqranges,bidx);
+  seedpairlist = gt_seedpairlist_new(arg->splt,aseqranges,aidx,bseqranges,bidx,
+                                     arg->maxmat,amaxlen);
   sizeofunit = gt_seedpairlist_sizeofunit(seedpairlist);
   had_err = gt_diagbandseed_get_mlistlen_maxfreq(&mlistlen,
                                                  &maxfreq,
@@ -4290,7 +4319,6 @@ static int gt_diagbandseed_algorithm(const GtDiagbandseedInfo *arg,
                                 arg->seedlength,
                                 arg->nofwd ? GT_READMODE_REVCOMPL
                                            : GT_READMODE_FORWARD,
-                                arg->maxmat,
                                 arg->verbose,
                                 stream,
                                 segment_reject_func,
@@ -4401,7 +4429,6 @@ static int gt_diagbandseed_algorithm(const GtDiagbandseedInfo *arg,
                                   karlin_altschul_stat,
                                   arg->seedlength,
                                   GT_READMODE_REVCOMPL,
-                                  arg->maxmat,
                                   arg->verbose,
                                   stream,
                                   segment_reject_func,
