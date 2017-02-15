@@ -89,7 +89,7 @@ typedef struct {
   bool histogram;
   bool use_kmerfile;
   bool trimstat_on;
-  bool maxmat;
+  int maxmat;
   GtSeedExtendDisplayFlag *display_flag;
   GtOption *se_ref_op_evalue;
 } GtSeedExtendArguments;
@@ -368,11 +368,11 @@ static GtOptionParser* gt_seed_extend_option_parser_new(void *tool_arguments)
   gt_option_exclude(op_trimstat, op_onlyseeds);
 
   /* -maxmat */
-  op_maxmat = gt_option_new_bool("maxmat",
+  op_maxmat = gt_option_new_int("maxmat",
                                  "compute maximal matches of minimum length "
                                  "specified by option -l",
                                  &arguments->maxmat,
-                                 false);
+                                 0);
   gt_option_exclude(op_maxmat, op_diagbandwidth);
   gt_option_exclude(op_maxmat, op_mincoverage);
   gt_option_exclude(op_maxmat, op_xdr);
@@ -663,7 +663,7 @@ static int gt_seed_extend_runner(int argc,
       }
       printf(" %s", argv[idx]);
     }
-    if (!arguments->maxmat)
+    if (arguments->maxmat == 0)
     {
       if (!minid_out)
       {
@@ -787,11 +787,9 @@ static int gt_seed_extend_runner(int argc,
   maxseqlength = MIN(gt_encseq_max_seq_length(aencseq),
                      gt_encseq_max_seq_length(bencseq));
 
-  if (arguments->dbs_seedlength == UINT_MAX) {
-    if (arguments->maxmat)
-    {
-      arguments->dbs_seedlength = MIN(maxseedlength, arguments->se_alignlength);
-    } else
+  if (arguments->dbs_seedlength == UINT_MAX)
+  {
+    if (arguments->maxmat == 0)
     {
       unsigned int seedlength;
       double totallength = 0.5 * (gt_encseq_total_length(aencseq) +
@@ -801,6 +799,9 @@ static int gt_seed_extend_runner(int argc,
                                                               (double)nchars));
       seedlength = (unsigned int)MIN3(seedlength, maxseqlength, maxseedlength);
       arguments->dbs_seedlength = MAX(seedlength, 2);
+    } else
+    {
+      arguments->dbs_seedlength = MIN(maxseedlength, arguments->se_alignlength);
     }
   }
   if (arguments->dbs_seedlength > MIN(maxseedlength, maxseqlength)) {
