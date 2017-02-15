@@ -3290,8 +3290,10 @@ static void gt_diagbandseed_process_seeds_stat(FILE *stream,
                     process_seeds_counts->seqpairs_with_minsegment/allseqpairs,
             allseqpairs);
   }
-  fprintf(stream, "# number of matches output: " GT_WU "\n",
-          process_seeds_counts->countmatches);
+  fprintf(stream, "# number of matches output: " GT_WU " (%.4f per seed)\n",
+          process_seeds_counts->countmatches,
+          (double) process_seeds_counts->countmatches/
+                   mlistlen);
 #ifndef _WIN32
   gt_diagbandseed_process_seeds_times(
                  stream,

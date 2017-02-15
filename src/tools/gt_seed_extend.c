@@ -640,9 +640,7 @@ static int gt_seed_extend_runner(int argc,
   int had_err = 0;
 
   gt_error_check(err);
-  gt_assert(arguments != NULL &&
-            arguments->se_minidentity >= GT_EXTEND_MIN_IDENTITY_PERCENTAGE &&
-            arguments->se_minidentity <= 100UL);
+  gt_assert(arguments != NULL);
 
   /* Define, whether greedy extension will be performed */
   extendxdrop = gt_option_is_set(arguments->se_ref_op_xdr);
@@ -665,16 +663,23 @@ static int gt_seed_extend_runner(int argc,
       }
       printf(" %s", argv[idx]);
     }
-    if (!minid_out) {
-      printf(" -minidentity " GT_WU,arguments->se_minidentity);
-    }
-    if (!history_out) {
-      printf(" -history " GT_WU,arguments->se_historysize);
+    if (!arguments->maxmat)
+    {
+      if (!minid_out)
+      {
+        printf(" -minidentity " GT_WU,arguments->se_minidentity);
+      }
+      if (!history_out)
+      {
+        printf(" -history " GT_WU,arguments->se_historysize);
+      }
     }
     printf("\n");
   }
 
   /* Calculate error percentage from minidentity */
+  gt_assert(arguments->se_minidentity >= GT_EXTEND_MIN_IDENTITY_PERCENTAGE &&
+            arguments->se_minidentity <= 100UL);
   errorpercentage = 100UL - arguments->se_minidentity;
 
   /* Measure whole running time */
