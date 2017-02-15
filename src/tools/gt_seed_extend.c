@@ -783,14 +783,20 @@ static int gt_seed_extend_runner(int argc,
                      gt_encseq_max_seq_length(bencseq));
 
   if (arguments->dbs_seedlength == UINT_MAX) {
-    unsigned int seedlength;
-    double totallength = 0.5 * (gt_encseq_total_length(aencseq) +
-                                gt_encseq_total_length(bencseq));
-    gt_assert(nchars > 0);
-    seedlength = (unsigned int)gt_round_to_long(gt_log_base(totallength,
-                                                            (double)nchars));
-    seedlength = (unsigned int)MIN3(seedlength, maxseqlength, maxseedlength);
-    arguments->dbs_seedlength = MAX(seedlength, 2);
+    if (arguments->maxmat)
+    {
+      arguments->dbs_seedlength = MIN(maxseedlength, arguments->se_alignlength);
+    } else
+    {
+      unsigned int seedlength;
+      double totallength = 0.5 * (gt_encseq_total_length(aencseq) +
+                                  gt_encseq_total_length(bencseq));
+      gt_assert(nchars > 0);
+      seedlength = (unsigned int)gt_round_to_long(gt_log_base(totallength,
+                                                              (double)nchars));
+      seedlength = (unsigned int)MIN3(seedlength, maxseqlength, maxseedlength);
+      arguments->dbs_seedlength = MAX(seedlength, 2);
+    }
   }
   if (arguments->dbs_seedlength > MIN(maxseedlength, maxseqlength)) {
     if (maxseedlength <= maxseqlength) {
