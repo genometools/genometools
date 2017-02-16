@@ -671,7 +671,7 @@ static int gt_seed_extend_runner(int argc,
       }
       printf(" %s", argv[idx]);
     }
-    if (arguments->maxmat == 0)
+    if (arguments->maxmat != 1)
     {
       if (!minid_out)
       {
@@ -797,7 +797,10 @@ static int gt_seed_extend_runner(int argc,
 
   if (arguments->dbs_seedlength == UINT_MAX)
   {
-    if (arguments->maxmat == 0)
+    if (arguments->maxmat == 1)
+    {
+      arguments->dbs_seedlength = MIN(maxseedlength, arguments->se_alignlength);
+    } else
     {
       unsigned int seedlength;
       double totallength = 0.5 * (gt_encseq_total_length(aencseq) +
@@ -807,9 +810,6 @@ static int gt_seed_extend_runner(int argc,
                                                               (double)nchars));
       seedlength = (unsigned int)MIN3(seedlength, maxseqlength, maxseedlength);
       arguments->dbs_seedlength = MAX(seedlength, 2);
-    } else
-    {
-      arguments->dbs_seedlength = MIN(maxseedlength, arguments->se_alignlength);
     }
   }
   if (arguments->dbs_seedlength > MIN(maxseedlength, maxseqlength)) {
