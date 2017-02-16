@@ -384,7 +384,7 @@ static GtOptionParser* gt_seed_extend_option_parser_new(void *tool_arguments)
   gt_option_exclude(op_maxmat, op_his);
   gt_option_exclude(op_maxmat, op_dif);
   gt_option_exclude(op_maxmat, op_pmh);
-  gt_option_exclude(op_maxmat, op_bia);
+  /* will later be included again: gt_option_exclude(op_maxmat, op_bia); */
   gt_option_exclude(op_maxmat, op_cam);
   gt_option_exclude(op_maxmat, op_trimstat);
   gt_option_argument_is_optional(op_maxmat);
@@ -409,7 +409,7 @@ static GtOptionParser* gt_seed_extend_option_parser_new(void *tool_arguments)
                                        80UL, GT_EXTEND_MIN_IDENTITY_PERCENTAGE,
                                        99UL);
   gt_option_exclude(op_minid, op_onlyseeds);
-  gt_option_exclude(op_maxmat, op_minid);
+  /* will later be included again: gt_option_exclude(op_maxmat, op_minid); */
   gt_option_parser_add_option(op, op_minid);
 
   /* -evalue */

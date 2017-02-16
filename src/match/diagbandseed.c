@@ -1251,6 +1251,8 @@ static void gt_seedpairlist_add(GtSeedpairlist *seedpairlist,
                     seedpairlist->mlist_bytestring->nextfreeuint8_t;
        seedpairlist->mlist_bytestring->nextfreeuint8_t
          += seedpairlist->bytes_seedpair;
+       gt_assert(aseqnum >= seedpairlist->aseqrange_start);
+       gt_assert(bseqnum >= seedpairlist->bseqrange_start);
        gt_diagbandseed_encode_seedpair(bytestring,
                                        seedpairlist,
                                        aseqnum - seedpairlist->aseqrange_start,
@@ -1343,13 +1345,25 @@ static void gt_diagbandseed_decode_seedpair(GtDiagbandseedSeedPair *seedpair,
 
   value_seqnums
     = gt_diagbandseed_bytestring2GtUword(bytestring,sizeof (GtUword));
-  seedpair->aseqnum = (GtDiagbandseedSeqnum)
-                      (value_seqnums >>
-                       seedpairlist->bits_left_adjust[idx_aseqnum]);
-  seedpair->bseqnum = (GtDiagbandseedSeqnum)
-                       ((value_seqnums >>
-                         seedpairlist->bits_left_adjust[idx_bseqnum]) &
-                         seedpairlist->mask_tab[idx_bseqnum]);
+  if (seedpairlist->bits_values[idx_aseqnum] > 0)
+  {
+    seedpair->aseqnum = (GtDiagbandseedSeqnum)
+                        (value_seqnums >>
+                         seedpairlist->bits_left_adjust[idx_aseqnum]);
+  } else
+  {
+    seedpair->aseqnum = 0;
+  }
+  if (seedpairlist->bits_values[idx_bseqnum] > 0)
+  {
+    seedpair->bseqnum = (GtDiagbandseedSeqnum)
+                         ((value_seqnums >>
+                           seedpairlist->bits_left_adjust[idx_bseqnum]) &
+                           seedpairlist->mask_tab[idx_bseqnum]);
+  } else
+  {
+    seedpair->bseqnum = 0;
+  }
   transfer = value_seqnums & seedpairlist->transfer_mask;
   value_positions
     = gt_diagbandseed_bytestring2GtUword(bytestring + sizeof (GtUword),
