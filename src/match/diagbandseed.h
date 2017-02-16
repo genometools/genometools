@@ -62,7 +62,7 @@ GtDiagbandseedInfo *gt_diagbandseed_info_new(const GtEncseq *aencseq,
                                              bool debug_seedpair,
                                              bool use_kmerfile,
                                              bool trimstat_on,
-                                             int maxmat,
+                                             GtUword maxmat,
                                              const GtDiagbandseedExtendParams
                                                *extp);
 

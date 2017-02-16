@@ -89,9 +89,10 @@ typedef struct {
   bool histogram;
   bool use_kmerfile;
   bool trimstat_on;
-  int maxmat;
+  GtUword maxmat;
   GtSeedExtendDisplayFlag *display_flag;
-  GtOption *se_ref_op_evalue;
+  GtOption *se_ref_op_evalue,
+           *se_ref_op_maxmat;
 } GtSeedExtendArguments;
 
 static void* gt_seed_extend_arguments_new(void)
@@ -121,6 +122,7 @@ static void gt_seed_extend_arguments_delete(void *tool_arguments)
     gt_option_delete(arguments->se_ref_op_gre);
     gt_option_delete(arguments->se_ref_op_xdr);
     gt_option_delete(arguments->se_ref_op_evalue);
+    gt_option_delete(arguments->se_ref_op_maxmat);
     gt_str_array_delete(arguments->display_args);
     gt_querymatch_display_flag_delete(arguments->display_flag);
     gt_free(arguments);
@@ -368,11 +370,12 @@ static GtOptionParser* gt_seed_extend_option_parser_new(void *tool_arguments)
   gt_option_exclude(op_trimstat, op_onlyseeds);
 
   /* -maxmat */
-  op_maxmat = gt_option_new_int("maxmat",
+  op_maxmat = gt_option_new_ulong("maxmat",
                                  "compute maximal matches of minimum length "
                                  "specified by option -l",
                                  &arguments->maxmat,
-                                 0);
+                                 1);
+  arguments->se_ref_op_maxmat = gt_option_ref(op_maxmat);
   gt_option_exclude(op_maxmat, op_diagbandwidth);
   gt_option_exclude(op_maxmat, op_mincoverage);
   gt_option_exclude(op_maxmat, op_xdr);
@@ -384,6 +387,7 @@ static GtOptionParser* gt_seed_extend_option_parser_new(void *tool_arguments)
   gt_option_exclude(op_maxmat, op_bia);
   gt_option_exclude(op_maxmat, op_cam);
   gt_option_exclude(op_maxmat, op_trimstat);
+  gt_option_argument_is_optional(op_maxmat);
   gt_option_parser_add_option(op, op_maxmat);
 
   /* SEED EXTENSION OPTIONS */
@@ -610,6 +614,10 @@ static int gt_seed_extend_arguments_check(int rest_argc, void *tool_arguments,
   if (!gt_option_is_set(arguments->se_ref_op_evalue))
   {
     arguments->se_evalue_threshold = DBL_MAX;
+  }
+  if (!gt_option_is_set(arguments->se_ref_op_maxmat))
+  {
+    arguments->maxmat = 0;
   }
   /* no extra arguments */
   if (!had_err && rest_argc > 0) {
