@@ -2754,13 +2754,19 @@ static int gt_diagbandseed_update_dband(GtUword ndiags,
   {
     /* no overlap */
     addlength = matchlength;
+    diagband_lastpos[diagband] = bpos;
   } else
   {
     /* overlap: add positions after last counted position */
-    gt_assert(diagband_lastpos[diagband] <= bpos);
-    addlength = bpos - diagband_lastpos[diagband];
+    if (diagband_lastpos[diagband] < bpos)
+    {
+      addlength = bpos - diagband_lastpos[diagband];
+      diagband_lastpos[diagband] = bpos;
+    } else
+    {
+      addlength = 0;
+    }
   }
-  diagband_lastpos[diagband] = bpos;
   if (addlength > 0)
   {
     diagband_score[diagband] += addlength;
@@ -2817,6 +2823,12 @@ static int gt_diagbandseed_possibly_extend(const GtQuerymatch *previousmatch,
                                              *process_seeds_counts)
 {
   int ret = 0;
+
+#ifdef ELEMENT2CHAINOUT
+  printf(GT_WU " " GT_WU " " GT_WU " " GT_WU "\n",apos+1-matchlength,apos,
+                                                  bpos+1-matchlength,bpos,
+                                                  matchlength);
+#endif
   if (previousmatch == NULL ||
       !gt_querymatch_overlap(previousmatch,apos,bpos,use_apos))
   {

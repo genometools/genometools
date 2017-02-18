@@ -14,11 +14,25 @@ def sumcosts(cigarstring)
   return costs
 end
 
+def posdifference(reference_begin,posset)
+  diff = nil
+  posset.each do |line|
+    m = line.split(/\s/)
+    pos = m[2].to_i
+    currentdiff = (pos - reference_begin).abs
+    if diff.nil? or diff > currentdiff
+      diff = currentdiff
+    end
+  end
+  return diff
+end
+
 def analyze_header(header,polishing)
   costs = nil
   dblen = nil
-  prefix_pos = nil
-  suffix_pos = nil
+  prefix_positive = nil
+  suffix_positive = nil
+  begin_pos = nil
   a = header.split(/\s/)
   1.upto(a.length-1).each do |idx|
     m = a[idx].match(/([A-Z_]*)=(.*)/)
@@ -30,13 +44,15 @@ def analyze_header(header,polishing)
     value = m[2]
     if key == "CIGAR"
       costs = sumcosts(value)
-      prefix_pos = polishing.prefix_positive?(value)
-      suffix_pos = polishing.suffix_positive?(value)
+      prefix_positive = polishing.prefix_positive?(value)
+      suffix_positive = polishing.suffix_positive?(value)
     elsif key == "SAMPLE_SEQUENCE"
       dblen = value.length
+    elsif key == "BEGIN_POS"
+      begin_pos = value.to_i
     end
   end
-  return dblen, costs, prefix_pos, suffix_pos
+  return dblen, costs, prefix_positive, suffix_positive, begin_pos
 end
 
 def error_rate(costs,alignedlen)
@@ -49,9 +65,14 @@ if ARGV.length < 2
 end
 
 queryfile = ARGV[0]
-queryseqnums = Set.new()
+queryseqnum_map = Hash.new()
 minidentity = nil
 history = nil
+
+querycollection = Array.new()
+Fasta.read_multi_file(queryfile) do |seqentry|
+  querycollection.push(seqentry)
+end
 
 ARGV.shift
 ARGV.each do |filename|
@@ -66,15 +87,14 @@ ARGV.each do |filename|
     else
       m = line.split(/\s/)
       queryseqnum = m[5].to_i
-      queryseqnums.add(queryseqnum)
+      if not queryseqnum_map.has_key?(queryseqnum)
+        queryseqnum_map[queryseqnum] = Array.new()
+      end
+      queryseqnum_map[queryseqnum].push(line.chomp)
     end
   end
 end
 
-querycollection = Array.new()
-Fasta.read_multi_file(queryfile) do |seqentry|
-  querycollection.push(seqentry)
-end
 numreads = querycollection.length
 belowminid = 0
 not_prefix_pos = 0
@@ -82,11 +102,13 @@ not_suffix_pos = 0
 all = Set.new(Range.new(0,numreads-1))
 errorpercentage = 100.0 - minidentity
 polishing = Polishing.new(errorpercentage,history)
-fpout = File.new("nomatch.fasta","w")
-all.difference(queryseqnums).each do |querysenum|
-  query = querycollection[querysenum]
+nomatchout = File.new("nomatch.fasta","w")
+falsematchout = File.new("falsematch.fasta","w")
+successes = 0
+all.each do |queryseqnum|
+  query = querycollection[queryseqnum]
   header = query.get_header()
-  dblen, costs, prefix_pos, suffix_pos = analyze_header(header,polishing)
+  dblen, costs, prefix_positive, suffix_positive, begin_pos = analyze_header(header,polishing)
   queryseq = query.get_sequence()
   querylen = queryseq.length
   if costs == 0
@@ -95,18 +117,32 @@ all.difference(queryseqnums).each do |querysenum|
     similarity = 100.0 - error_rate(costs,dblen + querylen)
   end
   if similarity < minidentity
-    STDERR.printf("#{$0}: similarity = %.2f < %.2f\n",similarity,minidentity)
+    STDERR.printf("# #{$0}: similarity = %.2f < %.2f\n",similarity,minidentity)
     belowminid += 1
-  elsif not prefix_pos
+  elsif not prefix_positive
     not_prefix_pos += 1
-  elsif not suffix_pos
+  elsif not suffix_positive
     not_suffix_pos += 1
+  elsif queryseqnum_map.has_key?(queryseqnum)
+    mindiff = posdifference(begin_pos,queryseqnum_map[queryseqnum])
+    if mindiff == 0
+      successes += 1
+    else
+      falsematchout.printf(">%s %d %.2f\n#",query.get_header(),costs,similarity)
+      falsematchout.puts queryseqnum_map[queryseqnum].join("\n#") +
+                         ", mindiff=#{mindiff}"
+      falsematchout.puts queryseq
+    end
   else
-    fpout.printf(">%s %d %.2f\n",query.get_header(),costs,similarity)
-    fpout.puts queryseq
+    nomatchout.printf(">%s %d %.2f\n",query.get_header(),costs,similarity)
+    nomatchout.puts queryseq
   end
 end
+nomatchout.close_write
 goodreads = numreads - (belowminid + not_prefix_pos + not_suffix_pos)
-puts "belowminid=#{belowminid},!prefix_pos=#{not_prefix_pos},!suffix_pos=#{not_suffix_pos}"
-puts "numreads=#{numreads},successes=#{queryseqnums.length}"
-printf("%.2f\n",100.0 * queryseqnums.length.to_f/goodreads.to_f)
+puts "# belowminid=#{belowminid},!prefix_positive=#{not_prefix_pos}," +
+     "!suffix_positive=#{not_suffix_pos}"
+puts "# numreads=#{numreads},successes=#{successes}"
+printf("%.2f\n",100.0 * successes.to_f/goodreads.to_f)
+printf("# sensitivity=%.2f (for all #{numreads} reads)\n",
+        100.0 * successes.to_f/numreads.to_f)

@@ -30,7 +30,6 @@ class Polishing
     @pol_size = 2 * @cut_depth;
     @match_score = 20.0 * errorpercentage;
     @difference_score = 1000.0 - @match_score;
-    puts "match=#{@match_score},difference=-#{@difference_score}"
     @history_size = history_size
   end
   def prefix_positive?(cigarstring)

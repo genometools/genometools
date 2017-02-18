@@ -432,7 +432,7 @@ static GtOptionParser* gt_seed_extend_option_parser_new(void *tool_arguments)
                                        "polished ends",
                                    &arguments->relax_polish,false);
   gt_option_parser_add_option(op, op_relax_polish);
-  gt_option_exclude(op_maxmat, op_relax_polish);
+  /*gt_option_exclude(op_maxmat, op_relax_polish);*/
   gt_option_is_development_option(op_relax_polish);
 
   /* -verify-alignment */
@@ -512,7 +512,7 @@ static GtOptionParser* gt_seed_extend_option_parser_new(void *tool_arguments)
                                    false);
   gt_option_exclude(op_weakends, op_onlyseeds);
   gt_option_is_development_option(op_weakends);
-  gt_option_exclude(op_maxmat, op_weakends);
+  /*gt_option_exclude(op_maxmat, op_weakends);*/
   gt_option_parser_add_option(op, op_weakends);
 
   /* -use-apos */
