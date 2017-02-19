@@ -52,8 +52,9 @@ typedef struct {
   GtUword dbs_memlimit;
   GtUword dbs_parts;
   GtRange seedpairdistance;
-  GtStr *dbs_pick_str;
-  GtStr *dbs_memlimit_str;
+  GtStr *dbs_pick_str,
+        *chainarguments,
+        *dbs_memlimit_str;
   bool dbs_debug_kmer;
   bool dbs_debug_seedpair;
   bool dbs_verify;
@@ -101,6 +102,7 @@ static void* gt_seed_extend_arguments_new(void)
   arguments->dbs_indexname = gt_str_new();
   arguments->dbs_queryname = gt_str_new();
   arguments->dbs_pick_str = gt_str_new();
+  arguments->chainarguments = gt_str_new();
   arguments->dbs_memlimit_str = gt_str_new();
   arguments->char_access_mode = gt_str_new();
   arguments->splt_string = gt_str_new();
@@ -116,6 +118,7 @@ static void gt_seed_extend_arguments_delete(void *tool_arguments)
     gt_str_delete(arguments->dbs_indexname);
     gt_str_delete(arguments->dbs_queryname);
     gt_str_delete(arguments->dbs_pick_str);
+    gt_str_delete(arguments->chainarguments);
     gt_str_delete(arguments->dbs_memlimit_str);
     gt_str_delete(arguments->char_access_mode);
     gt_str_delete(arguments->splt_string);
@@ -141,7 +144,7 @@ static GtOptionParser* gt_seed_extend_option_parser_new(void *tool_arguments)
     *op_verify_alignment, *op_only_selected_seqpairs, *op_spdist, *op_display,
     *op_norev, *op_nofwd, *op_part, *op_pick, *op_overl, *op_trimstat,
     *op_cam_generic, *op_diagbandwidth, *op_mincoverage, *op_maxmat,
-    *op_use_apos;
+    *op_use_apos, *op_chain;
 
   static GtRange seedpairdistance_defaults = {1UL, GT_UWORD_MAX};
   gt_assert(arguments != NULL);
@@ -390,6 +393,13 @@ static GtOptionParser* gt_seed_extend_option_parser_new(void *tool_arguments)
   gt_option_argument_is_optional(op_maxmat);
   gt_option_parser_add_option(op, op_maxmat);
 
+  op_chain = gt_option_new_string("chain",
+                                  "apply local chaining to maximal matches "
+                                  "derived from k-mer seeds",
+                                  arguments->chainarguments,"");
+  gt_option_argument_is_optional(op_chain);
+  gt_option_parser_add_option(op, op_chain);
+
   /* SEED EXTENSION OPTIONS */
 
   /* -l */
@@ -522,7 +532,7 @@ static GtOptionParser* gt_seed_extend_option_parser_new(void *tool_arguments)
                               &arguments->use_apos,
                               false);
   gt_option_is_development_option(op_use_apos);
-  gt_option_exclude(op_maxmat, op_use_apos);
+  /*gt_option_exclude(op_maxmat, op_use_apos);*/
   gt_option_parser_add_option(op, op_use_apos);
 
   /* -parts */
@@ -987,6 +997,7 @@ static int gt_seed_extend_runner(int argc,
                                     arguments->use_kmerfile,
                                     arguments->trimstat_on,
                                     arguments->maxmat,
+                                    arguments->chainarguments,
                                     extp);
 
     /* Start algorithm */

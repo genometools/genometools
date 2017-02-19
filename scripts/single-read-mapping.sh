@@ -27,5 +27,5 @@ minlength=`expr ${minlength} \/ 100`
 common="-l ${minlength} -v -ii reference-idx -qii query-idx -minidentity ${minidentity} -seedlength ${seedlength}"
 env -i bin/gt seed_extend ${common} > tmp.matches
 scripts/collect-mappings.rb ${readset} tmp.matches
-env -i bin/gt seed_extend ${common} -maxmat 2 > tmp-maxmat.matches
+env -i bin/gt seed_extend ${common} -maxmat 2 -use-apos > tmp-maxmat.matches
 scripts/collect-mappings.rb ${readset} tmp-maxmat.matches

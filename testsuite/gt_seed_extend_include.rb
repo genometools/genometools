@@ -127,6 +127,7 @@ Test do
   run_test "#{$bin}gt seed_extend -ii at1MB -outfmt alignment=n", :retval => 1
   run_test "#{$bin}gt seed_extend -ii at1MB -outfmt alignment=-1", :retval => 1
   run_test "#{$bin}gt seed_extend -ii at1MB -outfmt alignment cigar", :retval => 1
+  run_test "#{$bin}gt seed_extend -ii at1MB -maxmat 2 -l 100 -chain xx", :retval => 1
 end
 
 Name "gt dev show_seedext without alignment"

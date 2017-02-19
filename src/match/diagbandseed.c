@@ -39,6 +39,7 @@
 #include "core/intbits.h"
 #include "core/qsort-ulong.h"
 #include "core/radix_sort.h"
+#include "match/chain2dim.h"
 #include "match/declare-readfunc.h"
 #include "match/kmercodes.h"
 #include "match/querymatch.h"
@@ -110,6 +111,7 @@ struct GtDiagbandseedInfo
   unsigned int seedlength;
   GtDiagbandseedPairlisttype splt;
   GtUword maxmat;
+  const GtStr *chainarguments;
   bool norev,
        nofwd,
        verify,
@@ -236,6 +238,7 @@ GtDiagbandseedInfo *gt_diagbandseed_info_new(const GtEncseq *aencseq,
                                              bool use_kmerfile,
                                              bool trimstat_on,
                                              GtUword maxmat,
+                                             const GtStr *chainarguments,
                                              const GtDiagbandseedExtendParams
                                                *extp)
 {
@@ -256,6 +259,7 @@ GtDiagbandseedInfo *gt_diagbandseed_info_new(const GtEncseq *aencseq,
   info->use_kmerfile = use_kmerfile;
   info->trimstat_on = trimstat_on;
   info->maxmat = maxmat;
+  info->chainarguments = chainarguments;
   info->extp = extp;
   return info;
 }
@@ -2886,6 +2890,8 @@ static int gt_diagbandseed_possibly_extend(const GtQuerymatch *previousmatch,
                     constraints */
       }
     }
+    /* else reference and query are the same sequence and overlap so that
+       no extension was performed */
   }
   return ret;
 }
@@ -3032,6 +3038,8 @@ static void gt_diagbandseed_seedhistogram_out(FILE *stream,
 
 static void gt_diagbandseed_segment2maxmatches(
              GtArrayGtDiagbandseedMaximalmatch *memstore,
+             GtUword aseqnum,
+             GtUword bseqnum,
              unsigned int seedlength,
              GtUword userdefinedleastlength,
              GtUword amaxlen,
@@ -3044,12 +3052,9 @@ static void gt_diagbandseed_segment2maxmatches(
           *uword_segment_positions = (GtUword *) segment_positions;
   const GtSeedpairPositions *current;
   GtSeedpairPositions previous;
+  GtDiagbandseedSequencePair sequencepair = {aseqnum,bseqnum};
 
   gt_assert(segment_length > 0);
-  if (segment_length == 0)
-  {
-    return;
-  }
   gt_assert(sizeof *segment_positions == sizeof *uword_segment_positions &&
             seedlength <= userdefinedleastlength);
 #ifndef NDEBUG
@@ -3097,12 +3102,56 @@ static void gt_diagbandseed_segment2maxmatches(
   {
     process_seeds_counts->maxmatchespersegment = localmatchcount;
   }
-  if (memstore != NULL && memstore->nextfreeGtDiagbandseedMaximalmatch >= 2)
+  if (memstore != NULL)
   {
-    qsort(memstore->spaceGtDiagbandseedMaximalmatch,
-          memstore->nextfreeGtDiagbandseedMaximalmatch,
-          sizeof *memstore->spaceGtDiagbandseedMaximalmatch,
-          gt_diagbandseed_bstart_ldesc_compare_mems);
+    if (memstore->nextfreeGtDiagbandseedMaximalmatch >= 2)
+    {
+      qsort(memstore->spaceGtDiagbandseedMaximalmatch,
+            memstore->nextfreeGtDiagbandseedMaximalmatch,
+            sizeof *memstore->spaceGtDiagbandseedMaximalmatch,
+            gt_diagbandseed_bstart_ldesc_compare_mems);
+    }
+    if (memstore->chainmode != NULL)
+    {
+      const GtUword presortdim = 1;
+#ifndef NDEBUG
+      GtUword previous_start_b = GT_UWORD_MAX;
+#endif
+      GtChain2Dimmatchvalues inmatch;
+      GtChain2Dim *localchain = gt_chain_chain_new();
+      GtDiagbandseedMaximalmatch *mmptr;
+      GtChain2Dimmatchtable *chainmatchtable
+        = gt_chain_matchtable_new(memstore->nextfreeGtDiagbandseedMaximalmatch);
+
+      for (mmptr = memstore->spaceGtDiagbandseedMaximalmatch;
+           mmptr < memstore->spaceGtDiagbandseedMaximalmatch +
+                   memstore->nextfreeGtDiagbandseedMaximalmatch;
+           mmptr++)
+      {
+        inmatch.startpos[0] = mmptr->apos + 1 - mmptr->len;
+        inmatch.endpos[0] = mmptr->apos;
+        inmatch.startpos[1] = mmptr->bpos + 1 - mmptr->len;
+        inmatch.endpos[1] = mmptr->bpos;
+        gt_assert(previous_start_b == GT_UWORD_MAX ||
+                  previous_start_b <= inmatch.startpos[1]);
+        inmatch.weight = mmptr->len;
+        gt_chain_matchtable_add(chainmatchtable,&inmatch);
+#ifndef NDEBUG
+        previous_start_b = inmatch.startpos[1];
+#endif
+      }
+      gt_chain_fastchaining(memstore->chainmode,
+                            localchain,
+                            chainmatchtable,
+                            false,
+                            presortdim,
+                            true,
+                            gt_diagbandseed_chain_out,
+                            &sequencepair,
+                            NULL);
+      gt_chain_matchtable_delete(chainmatchtable);
+      gt_chain_chain_delete(localchain);
+    }
   }
 }
 
@@ -3216,10 +3265,16 @@ static void gt_diagbandseed_process_segment(
 
     if (maxmat_compute)
     {
-      gt_diagbandseed_segment2maxmatches(memstore,seedlength,
-                                         extp->userdefinedleastlength,amaxlen,
-                                         segment_positions,segment_length,
-                                         process_seeds_counts,stdout);
+      gt_diagbandseed_segment2maxmatches(memstore,
+                                         aseqnum,
+                                         bseqnum,
+                                         seedlength,
+                                         extp->userdefinedleastlength,
+                                         amaxlen,
+                                         segment_positions,
+                                         segment_length,
+                                         process_seeds_counts,
+                                         stdout);
       if (memstore == NULL)
       {
         return;
@@ -4373,13 +4428,30 @@ static int gt_diagbandseed_algorithm(const GtDiagbandseedInfo *arg,
   }
   seedpairlist = gt_seedpairlist_new(arg->splt,aseqranges,aidx,bseqranges,bidx,
                                      arg->maxmat,amaxlen);
+  sizeofunit = gt_seedpairlist_sizeofunit(seedpairlist);
   if (seedpairlist->maxmat_compute && !seedpairlist->maxmat_show)
   {
     memstore = gt_malloc(sizeof *memstore);
     GT_INITARRAY(memstore,GtDiagbandseedMaximalmatch);
+    if (gt_str_length(arg->chainarguments) == 0)
+    {
+      memstore->chainmode = NULL;
+    } else
+    {
+      memstore->chainmode
+        = gt_chain_chainmode_new(GT_UWORD_MAX,
+                                 false,
+                                 NULL,
+                                 true,
+                                 gt_str_get(arg->chainarguments),
+                                 err);
+      if (memstore->chainmode == NULL)
+      {
+        had_err = -1;
+      }
+    }
   }
-  sizeofunit = gt_seedpairlist_sizeofunit(seedpairlist);
-  if (!seedpairlist->maxmat_show && arg->memlimit < GT_UWORD_MAX)
+  if (!had_err && !seedpairlist->maxmat_show && arg->memlimit < GT_UWORD_MAX)
   {
     had_err = gt_diagbandseed_get_mlistlen_maxfreq(&mlistlen,
                                                    &maxfreq,
@@ -4437,129 +4509,130 @@ static int gt_diagbandseed_algorithm(const GtDiagbandseedInfo *arg,
   }
   use_blist = false;
   gt_diagbandseed_kmer_iter_delete(biter);
-  if (had_err) {
-    gt_diagbandseed_kmer_iter_delete(aiter);
-    return had_err;
-  }
+  biter = NULL;
 
   /* Create extension info objects */
-  if (extp->extendgreedy) {
-    GtGreedyextendmatchinfo *grextinfo = NULL;
-    const double weak_errorperc = (double)(extp->weakends
-                                           ? MAX(extp->errorpercentage, 20)
-                                           : extp->errorpercentage);
+  if (!had_err)
+  {
+    if (extp->extendgreedy) {
+      GtGreedyextendmatchinfo *grextinfo = NULL;
+      const double weak_errorperc = (double)(extp->weakends
+                                             ? MAX(extp->errorpercentage, 20)
+                                             : extp->errorpercentage);
 
-    pol_info = polishing_info_new_with_bias(weak_errorperc,
-                                            extp->matchscore_bias,
-                                            extp->history_size);
-    grextinfo = gt_greedy_extend_matchinfo_new(extp->maxalignedlendifference,
-                                               extp->history_size,
-                                               extp->perc_mat_history,
-                                               extp->userdefinedleastlength,
-                                               extp->errorpercentage,
-                                               extp->evalue_threshold,
-                                               extp->a_extend_char_access,
-                                               extp->b_extend_char_access,
-                                               extp->cam_generic,
-                                               extp->sensitivity,
-                                               pol_info);
-    if (extp->benchmark) {
-      gt_greedy_extend_matchinfo_silent_set(grextinfo);
+      pol_info = polishing_info_new_with_bias(weak_errorperc,
+                                              extp->matchscore_bias,
+                                              extp->history_size);
+      grextinfo = gt_greedy_extend_matchinfo_new(extp->maxalignedlendifference,
+                                                 extp->history_size,
+                                                 extp->perc_mat_history,
+                                                 extp->userdefinedleastlength,
+                                                 extp->errorpercentage,
+                                                 extp->evalue_threshold,
+                                                 extp->a_extend_char_access,
+                                                 extp->b_extend_char_access,
+                                                 extp->cam_generic,
+                                                 extp->sensitivity,
+                                                 pol_info);
+      if (extp->benchmark) {
+        gt_greedy_extend_matchinfo_silent_set(grextinfo);
+      }
+      if (trimstat != NULL)
+      {
+        gt_greedy_extend_matchinfo_trimstat_set(grextinfo,trimstat);
+      }
+      processinfo = (void *) grextinfo;
+    } else if (extp->extendxdrop) {
+      GtXdropmatchinfo *xdropinfo = NULL;
+      gt_assert(extp->extendgreedy == false);
+      xdropinfo = gt_xdrop_matchinfo_new(extp->userdefinedleastlength,
+                                         extp->errorpercentage,
+                                         extp->evalue_threshold,
+                                         extp->xdropbelowscore,
+                                         extp->sensitivity);
+      if (extp->benchmark) {
+        gt_xdrop_matchinfo_silent_set(xdropinfo);
+      }
+      processinfo = (void *) xdropinfo;
     }
-    if (trimstat != NULL)
+    alignmentwidth = gt_querymatch_display_alignmentwidth(extp->display_flag);
+    show_eoplist = gt_querymatch_cigarstring_display(extp->display_flag);
+    if (extp->extendxdrop || alignmentwidth > 0 || extp->verify_alignment ||
+        show_eoplist)
     {
-      gt_greedy_extend_matchinfo_trimstat_set(grextinfo,trimstat);
-    }
-    processinfo = (void *) grextinfo;
-  } else if (extp->extendxdrop) {
-    GtXdropmatchinfo *xdropinfo = NULL;
-    gt_assert(extp->extendgreedy == false);
-    xdropinfo = gt_xdrop_matchinfo_new(extp->userdefinedleastlength,
+      querymoutopt = gt_querymatchoutoptions_new(true,
+                                                 show_eoplist,
+                                                 extp->display_flag,
+                                                 NULL,
+                                                 NULL);
+      gt_assert(querymoutopt != NULL);
+      if (extp->extendxdrop || extp->extendgreedy) {
+        const GtUword sensitivity = extp->extendxdrop ? 100UL
+                                                      : extp->sensitivity;
+        gt_querymatchoutoptions_extend(querymoutopt,
                                        extp->errorpercentage,
                                        extp->evalue_threshold,
-                                       extp->xdropbelowscore,
-                                       extp->sensitivity);
-    if (extp->benchmark) {
-      gt_xdrop_matchinfo_silent_set(xdropinfo);
+                                       extp->maxalignedlendifference,
+                                       extp->history_size,
+                                       extp->perc_mat_history,
+                                       extp->a_extend_char_access,
+                                       extp->b_extend_char_access,
+                                       extp->cam_generic,
+                                       extp->weakends,
+                                       sensitivity,
+                                       extp->matchscore_bias,
+                                       extp->always_polished_ends,
+                                       extp->display_flag);
+      }
     }
-    processinfo = (void *) xdropinfo;
-  }
-  alignmentwidth = gt_querymatch_display_alignmentwidth(extp->display_flag);
-  show_eoplist = gt_querymatch_cigarstring_display(extp->display_flag);
-  if (extp->extendxdrop || alignmentwidth > 0 || extp->verify_alignment ||
-      show_eoplist)
-  {
-    querymoutopt = gt_querymatchoutoptions_new(true,
-                                               show_eoplist,
-                                               extp->display_flag,
-                                               NULL,
-                                               NULL);
-    gt_assert(querymoutopt != NULL);
-    if (extp->extendxdrop || extp->extendgreedy) {
-      const GtUword sensitivity = extp->extendxdrop ? 100UL : extp->sensitivity;
-      gt_querymatchoutoptions_extend(querymoutopt,
-                                     extp->errorpercentage,
-                                     extp->evalue_threshold,
-                                     extp->maxalignedlendifference,
-                                     extp->history_size,
-                                     extp->perc_mat_history,
-                                     extp->a_extend_char_access,
-                                     extp->b_extend_char_access,
-                                     extp->cam_generic,
-                                     extp->weakends,
-                                     sensitivity,
-                                     extp->matchscore_bias,
-                                     extp->always_polished_ends,
-                                     extp->display_flag);
-    }
-  }
-  /* process first mlist */
-  gt_assert(seedpairlist != NULL);
-  gt_diagbandseed_process_seeds(seedpairlist,
-                                arg->extp,
-                                processinfo,
-                                querymoutopt,
-                                aencseq,aseqranges,aidx,
-                                bencseq,bseqranges,bidx,
-                                karlin_altschul_stat,
-                                memstore,
-                                arg->seedlength,
-                                arg->nofwd ? GT_READMODE_REVCOMPL
-                                           : GT_READMODE_FORWARD,
-                                arg->verbose,
-                                stream,
-                                segment_reject_func,
-                                segment_reject_info);
-  gt_seedpairlist_reset(seedpairlist);
-  gt_querymatchoutoptions_reset(querymoutopt);
+    /* process first mlist */
+    gt_assert(seedpairlist != NULL);
+    gt_diagbandseed_process_seeds(seedpairlist,
+                                  arg->extp,
+                                  processinfo,
+                                  querymoutopt,
+                                  aencseq,aseqranges,aidx,
+                                  bencseq,bseqranges,bidx,
+                                  karlin_altschul_stat,
+                                  memstore,
+                                  arg->seedlength,
+                                  arg->nofwd ? GT_READMODE_REVCOMPL
+                                             : GT_READMODE_FORWARD,
+                                  arg->verbose,
+                                  stream,
+                                  segment_reject_func,
+                                  segment_reject_info);
+    gt_seedpairlist_reset(seedpairlist);
+    gt_querymatchoutoptions_reset(querymoutopt);
 
-  /* Third (reverse) k-mer list */
-  if (both_strands) {
-    GtUword mrevlen = 0;
-    GtArrayGtDiagbandseedKmerPos clist;
+    /* Third (reverse) k-mer list */
+    if (both_strands) {
+      GtUword mrevlen = 0;
+      GtArrayGtDiagbandseedKmerPos clist;
 
-    gt_assert(blist_file == NULL && !use_blist);
-    seedpairdistance.start = 0UL;
-    if (arg->use_kmerfile) {
-      blist_file = gt_diagbandseed_kmer_filename(arg->bencseq, arg->seedlength,
-                                                 false, bnumseqranges,
-                                                 bidx);
-      if (!gt_file_exists(blist_file)) {
+      gt_assert(blist_file == NULL && !use_blist);
+      seedpairdistance.start = 0UL;
+      if (arg->use_kmerfile) {
+        blist_file = gt_diagbandseed_kmer_filename(arg->bencseq,
+                                                   arg->seedlength,
+                                                   false, bnumseqranges,
+                                                   bidx);
+        if (!gt_file_exists(blist_file)) {
+          gt_free(blist_file);
+          blist_file = NULL;
+        }
+      }
+      if (blist_file != NULL) {
+        FILE *blist_fp = gt_fa_fopen(blist_file, "rb", err);
+        if (blist_fp == NULL) {
+          had_err = -1;
+        } else {
+          biter = gt_diagbandseed_kmer_iter_new_file(blist_fp);
+        }
         gt_free(blist_file);
-        blist_file = NULL;
-      }
-    }
-    if (blist_file != NULL) {
-      FILE *blist_fp = gt_fa_fopen(blist_file, "rb", err);
-      if (blist_fp == NULL) {
-        had_err = -1;
       } else {
-        biter = gt_diagbandseed_kmer_iter_new_file(blist_fp);
-      }
-      gt_free(blist_file);
-    } else {
-      const GtReadmode readmode_kmerscan = GT_READMODE_COMPL;
-      clist = gt_diagbandseed_get_kmers(
+        const GtReadmode readmode_kmerscan = GT_READMODE_COMPL;
+        clist = gt_diagbandseed_get_kmers(
                               arg->bencseq,
                               arg->seedlength,
                               readmode_kmerscan,
@@ -4569,62 +4642,63 @@ static int gt_diagbandseed_algorithm(const GtDiagbandseedInfo *arg,
                               arg->verbose,
                               blen,
                               stream);
-      biter = gt_diagbandseed_kmer_iter_new_list(&clist);
-      use_blist = true;
-    }
-
-    if (!had_err) {
-      gt_diagbandseed_kmer_iter_reset(aiter);
-      if (!seedpairlist->maxmat_show && arg->memlimit < GT_UWORD_MAX)
-      {
-        had_err = gt_diagbandseed_get_mlistlen_maxfreq(&mrevlen,
-                                                       &maxfreq,
-                                                       aiter,
-                                                       biter,
-                                                       arg->memlimit,
-                                                       sizeofunit,
-                                                       &seedpairdistance,
-                                                       len_used,
-                                                       selfcomp,
-                                                       alist_blist_id,
-                                                       arg->verbose,
-                                                       stream,
-                                                       err);
+        biter = gt_diagbandseed_kmer_iter_new_list(&clist);
+        use_blist = true;
       }
-    }
 
-    if (!had_err) {
-      gt_diagbandseed_kmer_iter_reset(aiter);
-      gt_diagbandseed_kmer_iter_reset(biter);
-      gt_diagbandseed_get_seedpairs(seedpairlist,
-                                    aiter,
-                                    biter,
-                                    maxfreq,
-                                    mrevlen,
-                                    &seedpairdistance,
-                                    selfcomp,
-                                    arg->debug_seedpair,
-                                    arg->verbose,
-                                    stream);
-      mrevlen = gt_seedpairlist_length(seedpairlist);
-      if (arg->verify && mrevlen > 0) {
-        had_err = gt_diagbandseed_verify(seedpairlist,
-                                         arg->aencseq,
-                                         arg->bencseq,
-                                         arg->seedlength,
-                                         true,
-                                         arg->verbose,
-                                         stream,
-                                         err);
-        if (had_err) {
-          gt_seedpairlist_delete(seedpairlist);
+      if (!had_err) {
+        gt_diagbandseed_kmer_iter_reset(aiter);
+        if (!seedpairlist->maxmat_show && arg->memlimit < GT_UWORD_MAX)
+        {
+          had_err = gt_diagbandseed_get_mlistlen_maxfreq(&mrevlen,
+                                                         &maxfreq,
+                                                         aiter,
+                                                         biter,
+                                                         arg->memlimit,
+                                                         sizeofunit,
+                                                         &seedpairdistance,
+                                                         len_used,
+                                                         selfcomp,
+                                                         alist_blist_id,
+                                                         arg->verbose,
+                                                         stream,
+                                                         err);
         }
       }
+
+      if (!had_err) {
+        gt_diagbandseed_kmer_iter_reset(aiter);
+        gt_diagbandseed_kmer_iter_reset(biter);
+        gt_diagbandseed_get_seedpairs(seedpairlist,
+                                      aiter,
+                                      biter,
+                                      maxfreq,
+                                      mrevlen,
+                                      &seedpairdistance,
+                                      selfcomp,
+                                      arg->debug_seedpair,
+                                      arg->verbose,
+                                      stream);
+        mrevlen = gt_seedpairlist_length(seedpairlist);
+        if (arg->verify && mrevlen > 0) {
+          had_err = gt_diagbandseed_verify(seedpairlist,
+                                           arg->aencseq,
+                                           arg->bencseq,
+                                           arg->seedlength,
+                                           true,
+                                           arg->verbose,
+                                           stream,
+                                           err);
+          if (had_err) {
+            gt_seedpairlist_delete(seedpairlist);
+          }
+        }
+      }
+      if (use_blist) {
+        GT_FREEARRAY(&clist, GtDiagbandseedKmerPos);
+      }
+      gt_diagbandseed_kmer_iter_delete(biter);
     }
-    if (use_blist) {
-      GT_FREEARRAY(&clist, GtDiagbandseedKmerPos);
-    }
-    gt_diagbandseed_kmer_iter_delete(biter);
   }
   gt_diagbandseed_kmer_iter_delete(aiter);
 
@@ -4650,6 +4724,10 @@ static int gt_diagbandseed_algorithm(const GtDiagbandseedInfo *arg,
   if (memstore != NULL)
   {
     GT_FREEARRAY(memstore,GtDiagbandseedMaximalmatch);
+    if (memstore->chainmode != NULL)
+    {
+      gt_chain_chainmode_delete(memstore->chainmode);
+    }
     gt_free(memstore);
   }
   if (extp->extendgreedy)
