@@ -355,34 +355,66 @@ bool gt_querymatch_check_final(double *evalue_ptr,
 
   gt_assert(querymatch != NULL);
   total_alignedlen = querymatch->dblen + querymatch->querylen;
+#undef SKDEBUG
 #ifdef SKDEBUG
-  fprintf(querymatch->fp, "errorrate = %.2f <=? " GT_WU " = errorpercentage\n",
+  fprintf(querymatch->fp, "# errorrate = %.2f <=? " GT_WU " = errorpercentage ",
           gt_querymatch_error_rate(querymatch->distance,total_alignedlen),
           errorpercentage);
-  fprintf(querymatch->fp, "total_alignedlen = " GT_WU " >=? " GT_WU
-         " = 2 * userdefinedleastlen\n",
-         total_alignedlen, 2 * userdefinedleastlength);
 #endif
   if (gt_querymatch_error_rate(querymatch->distance,total_alignedlen) >
       (double) errorpercentage)
   {
+#ifdef SKDEBUG
+    fprintf(querymatch->fp, "false => reject\n");
+#endif
     return false;
   }
+#ifdef SKDEBUG
+  else
+  {
+    fprintf(querymatch->fp, "true => accept\n");
+  }
+  fprintf(querymatch->fp, "# total_alignedlen = " GT_WU " >=? " GT_WU
+         " = 2 * userdefinedleastlen ",
+         total_alignedlen, 2 * userdefinedleastlength);
+#endif
   if (total_alignedlen < 2 * userdefinedleastlength)
   {
+#ifdef SKDEBUG
+    fprintf(querymatch->fp, "false => reject\n");
+#endif
     return false;
   }
+#ifdef SKDEBUG
+  fprintf(querymatch->fp, "true => accept\n");
+#endif
   if (!gt_querymatch_okay(querymatch))
   {
+#ifdef SKDEBUG
+    fprintf(querymatch->fp, "# !gt_querymatch_okay => reject\n");
+#endif
     return false;
   }
   if (querymatch->karlin_altschul_stat != NULL)
   {
     gt_querymatch_evalue_bitscore(evalue_ptr,bit_score_ptr,querymatch);
+#ifdef SKDEBUG
+    fprintf(querymatch->fp, "# evalue_ptr = %.2e <=? %.2e = evalue_threshold ",
+                             *evalue_ptr,evalue_threshold);
+#endif
     if (*evalue_ptr > evalue_threshold)
     {
+#ifdef SKDEBUG
+      fprintf(querymatch->fp, "false => reject\n");
+#endif
       return false;
     }
+#ifdef SKDEBUG
+    else
+    {
+      fprintf(querymatch->fp, "true => accept\n");
+    }
+#endif
   }
   return true;
 }

@@ -23,13 +23,13 @@
 #include "core/unused_api.h"
 #include "core/yarandom.h"
 #include "extended/ranked_list.h"
-#include "extended/rbtree.h"
+/*#include "extended/rbtree.h"*/
 
 struct GtRankedList
 {
   GtUword currentsize,
                 maxsize;
-  GtRBTree *root;
+  /*GtRBTree *root;*/
   GtCompareWithData comparefunction;
   GtFree free_func;
   void *worstelement,

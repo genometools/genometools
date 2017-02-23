@@ -81,7 +81,7 @@ struct GtRBTree
 
 struct GtRBTreeIter
 {
-  GtRBTree *tree;
+  const GtRBTree *tree;
   GtRBTreeNode *it;
   GtRBTreeNode *path[HEIGHT_LIMIT];
   size_t top;
@@ -172,7 +172,7 @@ void gt_rbtree_clear(GtRBTree *tree)
   }
 }
 
-static inline void *gt_rbtree_find_with_cmp_g(GtRBTree *tree, void *key,
+static inline void *gt_rbtree_find_with_cmp_g(const GtRBTree *tree, void *key,
                                               GtCompareWithData cmpfunc,
                                               void *info)
 {
@@ -190,7 +190,7 @@ static inline void *gt_rbtree_find_with_cmp_g(GtRBTree *tree, void *key,
   return it == NULL ? NULL : it->key;
 }
 
-void *gt_rbtree_find_with_cmp(GtRBTree *tree, void *key,
+void *gt_rbtree_find_with_cmp(const GtRBTree *tree, void *key,
                               GtCompareWithData cmpfunc, void *info)
 {
   gt_assert(tree);
@@ -199,7 +199,7 @@ void *gt_rbtree_find_with_cmp(GtRBTree *tree, void *key,
   return gt_rbtree_find_with_cmp_g(tree, key, cmpfunc, info);
 }
 
-void *gt_rbtree_find(GtRBTree *tree, void *key)
+void *gt_rbtree_find(const GtRBTree *tree, void *key)
 {
   gt_assert(tree);
   gt_assert(key);
@@ -411,13 +411,13 @@ int gt_rbtree_erase(GtRBTree *tree, void *key)
   return rv;
 }
 
-size_t gt_rbtree_size(GtRBTree *tree)
+size_t gt_rbtree_size(const GtRBTree *tree)
 {
   gt_assert(tree);
   return tree->size;
 }
 
-static int gt_rbtree_recurse(GtRBTreeNode *root, GtRBTreeAction action,
+static int gt_rbtree_recurse(const GtRBTreeNode *root, GtRBTreeAction action,
                              GtUword level, void *actinfo)
 {
   if (root->link[0] == NULL && root->link[1] == NULL) {
@@ -453,7 +453,8 @@ static int gt_rbtree_recurse(GtRBTreeNode *root, GtRBTreeAction action,
           return retcode;\
         }
 
-static int gt_rbtree_recursewithstop(GtRBTreeNode *root, GtRBTreeAction action,
+static int gt_rbtree_recursewithstop(const GtRBTreeNode *root,
+                                     GtRBTreeAction action,
                                      GtUword level, void *actinfo)
 {
   int retcode;
@@ -482,7 +483,7 @@ static int gt_rbtree_recursewithstop(GtRBTreeNode *root, GtRBTreeAction action,
   return 0;
 }
 
-static int gt_rbtree_recursereverseorder(GtRBTreeNode *root,
+static int gt_rbtree_recursereverseorder(const GtRBTreeNode *root,
                                          GtRBTreeAction action,
                                          GtUword level, void *actinfo)
 {
@@ -517,7 +518,7 @@ static int gt_rbtree_recursereverseorder(GtRBTreeNode *root,
   return 0;
 }
 
-int gt_rbtree_walk(GtRBTree *tree, GtRBTreeAction action, void *actinfo)
+int gt_rbtree_walk(const GtRBTree *tree, GtRBTreeAction action, void *actinfo)
 {
   gt_assert(tree);
   gt_assert(action);
@@ -529,7 +530,8 @@ int gt_rbtree_walk(GtRBTree *tree, GtRBTreeAction action, void *actinfo)
   return 0;
 }
 
-int gt_rbtree_walk_stop(GtRBTree *tree, GtRBTreeAction action, void *actinfo)
+int gt_rbtree_walk_stop(const GtRBTree *tree, GtRBTreeAction action,
+                        void *actinfo)
 {
   gt_assert(tree);
   gt_assert(action);
@@ -540,7 +542,8 @@ int gt_rbtree_walk_stop(GtRBTree *tree, GtRBTreeAction action, void *actinfo)
   return 0;
 }
 
-int gt_rbtree_walk_reverse(GtRBTree *tree, GtRBTreeAction action, void *actinfo)
+int gt_rbtree_walk_reverse(const GtRBTree *tree, GtRBTreeAction action,
+                           void *actinfo)
 {
   gt_assert(tree);
   gt_assert(action);
@@ -552,7 +555,7 @@ int gt_rbtree_walk_reverse(GtRBTree *tree, GtRBTreeAction action, void *actinfo)
   return 0;
 }
 
-static inline void* gt_rbtree_minimum_key_for_node(GtRBTreeNode *root)
+static inline void* gt_rbtree_minimum_key_for_node(const GtRBTreeNode *root)
 {
   if (root == NULL) {
     return NULL;
@@ -563,7 +566,7 @@ static inline void* gt_rbtree_minimum_key_for_node(GtRBTreeNode *root)
   return root->key;
 }
 
-static inline void* gt_rbtree_maximum_key_for_node(GtRBTreeNode *root)
+static inline void* gt_rbtree_maximum_key_for_node(const GtRBTreeNode *root)
 {
   if (root == NULL) {
     return NULL;
@@ -574,19 +577,19 @@ static inline void* gt_rbtree_maximum_key_for_node(GtRBTreeNode *root)
   return root->key;
 }
 
-void* gt_rbtree_minimum_key(GtRBTree *tree)
+void* gt_rbtree_minimum_key(const GtRBTree *tree)
 {
   gt_assert(tree);
   return gt_rbtree_minimum_key_for_node(tree->root);
 }
 
-void* gt_rbtree_maximum_key(GtRBTree *tree)
+void* gt_rbtree_maximum_key(const GtRBTree *tree)
 {
   gt_assert(tree);
   return gt_rbtree_maximum_key_for_node(tree->root);
 }
 
-void* gt_rbtree_root_key(GtRBTree *tree)
+void* gt_rbtree_root_key(const GtRBTree *tree)
 {
   gt_assert(tree);
   if (tree->size == 0 || tree->root == NULL)
@@ -595,7 +598,7 @@ void* gt_rbtree_root_key(GtRBTree *tree)
     return tree->root->key;
 }
 
-void* gt_rbtree_previous_key(GtRBTree *tree, void *key,
+void* gt_rbtree_previous_key(const GtRBTree *tree, void *key,
                              GtCompareWithData cmpfun, void *cmpinfo)
 {
   int cmp;
@@ -631,7 +634,7 @@ void* gt_rbtree_previous_key(GtRBTree *tree, void *key,
   return found->key;
 }
 
-void* gt_rbtree_previous_equal_key(GtRBTree *tree, void *key,
+void* gt_rbtree_previous_equal_key(const GtRBTree *tree, void *key,
                                    GtCompareWithData cmpfun, void *cmpinfo)
 {
   int cmp;
@@ -661,8 +664,8 @@ void* gt_rbtree_previous_equal_key(GtRBTree *tree, void *key,
   return found->key;
 }
 
-void* gt_rbtree_next_key(GtRBTree *tree, void *key, GtCompareWithData cmpfun,
-                         void *cmpinfo)
+void* gt_rbtree_next_key(const GtRBTree *tree, void *key,
+                         GtCompareWithData cmpfun, void *cmpinfo)
 {
   int cmp;
   const GtRBTreeNode *current,
@@ -697,7 +700,7 @@ void* gt_rbtree_next_key(GtRBTree *tree, void *key, GtCompareWithData cmpfun,
   return found->key;
 }
 
-void* gt_rbtree_next_equal_key(GtRBTree *tree, void *key,
+void* gt_rbtree_next_equal_key(const GtRBTree *tree, void *key,
                                GtCompareWithData cmpfun, void *cmpinfo)
 {
   int cmp;
@@ -727,7 +730,7 @@ void* gt_rbtree_next_equal_key(GtRBTree *tree, void *key,
   return found->key;
 }
 
-static inline void *start(GtRBTreeIter *trav, GtRBTree *tree, int dir)
+static inline void *start(GtRBTreeIter *trav, const GtRBTree *tree, int dir)
 {
   trav->tree = tree;
   trav->it = tree->root;
@@ -775,7 +778,7 @@ static inline void *move(GtRBTreeIter *trav, int dir, GT_UNUSED bool strict)
   return trav->it == NULL ? NULL : trav->it->key;
 }
 
-GtRBTreeIter* gt_rbtree_iter_new_from_first(GtRBTree *tree)
+GtRBTreeIter* gt_rbtree_iter_new_from_first(const GtRBTree *tree)
 {
   GtRBTreeIter *trav = gt_malloc(sizeof (GtRBTreeIter));
   gt_assert(tree);
@@ -783,7 +786,7 @@ GtRBTreeIter* gt_rbtree_iter_new_from_first(GtRBTree *tree)
   return trav;
 }
 
-GtRBTreeIter* gt_rbtree_iter_new_from_last(GtRBTree *tree)
+GtRBTreeIter* gt_rbtree_iter_new_from_last(const GtRBTree *tree)
 {
   GtRBTreeIter *trav = gt_malloc(sizeof (GtRBTreeIter));
   gt_assert(tree);

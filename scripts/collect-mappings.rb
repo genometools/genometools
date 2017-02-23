@@ -128,8 +128,8 @@ all.each do |queryseqnum|
     if mindiff == 0
       successes += 1
     else
-      falsematchout.printf(">%s %d %.2f\n#",query.get_header(),costs,similarity)
-      falsematchout.puts queryseqnum_map[queryseqnum].join("\n#") +
+      falsematchout.printf(">%s %d %.2f #",query.get_header(),costs,similarity)
+      falsematchout.puts queryseqnum_map[queryseqnum].join(" #") +
                          ", mindiff=#{mindiff}"
       falsematchout.puts queryseq
     end
