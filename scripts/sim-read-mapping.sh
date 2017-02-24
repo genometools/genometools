@@ -46,7 +46,8 @@ do
                 --illumina-read-length ${readlength} --embed-read-info \
                 --illumina-prob-mismatch $misma \
                 --illumina-prob-deletion $indel \
-                --illumina-prob-insert $indel
+                --illumina-prob-insert $indel \
+                --seq-strands forward
   $gt_bin/gt encseq encode -indexname query -sds no -md5 no -des no ${readset}
   #$gt_bin/../scripts/convert2myersformat.rb $readset > query.fasta
   #$da_bin/DAZZ_DB/fasta2DB query.db query.fasta
