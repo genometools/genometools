@@ -59,11 +59,6 @@ def error_rate(costs,alignedlen)
   return 200.0 * costs.to_f/alignedlen.to_f
 end
 
-if ARGV.length < 2
-  STDERR.puts "Usage: #{$0} <readfile> <matchfile1> [matchfile2 ...]"
-  exit 1
-end
-
 def analyze_input(readfile,matchfiles)
   querycollection = Array.new()
   Fasta.read_multi_file(readfile) do |seqentry|
@@ -160,7 +155,11 @@ def se_sensitivity(readfile,matchfiles,withfalsematches)
   return sense
 end
 
-if $0 == "#{__FILE__}"
+if $0 == __FILE__
+  if ARGV.length < 2
+    STDERR.puts "Usage: #{$0} <readfile> <matchfile1> [matchfile2 ...]"
+    exit 1
+  end
   readfile = ARGV[0]
   ARGV.shift
   querycollection, queryseqnum_map, history, 

@@ -2,13 +2,6 @@
 
 require "scripts/collect-mappings.rb"
 
-def mysystem(cmd)
-  if not system(cmd)
-    STDERR.puts "FAILURE: #{cmd}"
-    exit 1
-  end
-end
-
 if ARGV.length != 2
   STDERR.puts "Usage: #{$0} <numreads> <inputfile>"
   exit 1
