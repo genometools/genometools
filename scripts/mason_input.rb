@@ -27,10 +27,6 @@ def evaluate_cigarstring(cigarstring)
   return costs, dblen, querylen
 end
 
-def error_rate(costs,alignedlen)
-  return 200.0 * costs.to_f/alignedlen.to_f
-end
-
 SampledSeqKeyvalues = Struct.new("SampledSeqKeyvalues",
                                  :costs, 
                                  :dblen, 
@@ -39,7 +35,7 @@ SampledSeqKeyvalues = Struct.new("SampledSeqKeyvalues",
                                  :suffix_positive, 
                                  :begin_pos,
                                  :strand,
-                                 :similarity)
+                                 :identity)
 
 def analyze_mason_header(header,polishing)
   dblen2 = nil
@@ -65,30 +61,33 @@ def analyze_mason_header(header,polishing)
       sskv.strand = value
     end
   end
-  if dblen2 != sskv.dblen
-    STDERR.puts "dblen2 = #{dblen2} != #{sskv.dblen} = dblen"
-    exit 1
-  end
-  if sskv.costs == 0
-    sskv.similarity = 100.0
-  else
-    sskv.similarity = 100.0 - error_rate(sskv.costs,sskv.dblen + sskv.querylen)
+  if not sskv.costs.nil?
+    if sskv.costs == 0
+      sskv.identity = 100.0
+    else
+      sskv.identity = 100.0 - 
+                      200.0 * sskv.costs.to_f/(sskv.dblen + sskv.querylen).to_f
+    end
   end
   return sskv
 end
 
-def enumerate_valid_samples(error_percentage,readfile)
+def enumerate_valid_samples(readfile,minidentity)
   history = 60
-  minsimilarity = 100 - error_percentage
-  polishing = Polishing.new(error_percentage,history)
+  if minidentity.nil?
+    error_rate = 1
+  else
+    error_rate = 100 - minidentity
+  end
+  polishing = Polishing.new(error_rate,history)
   Fasta.read_multi_file(readfile) do |seqentry|
     header = seqentry.get_header()
     sskv = analyze_mason_header(header,polishing)
     if sskv.prefix_positive and sskv.suffix_positive and 
-       sskv.similarity >= minsimilarity
+       (minidentity.nil? or sskv.identity >= minidentity.to_f)
       newheader = "BEGIN_POS=#{sskv.begin_pos} " +
                   "STRAND=#{sskv.strand} " +
-                  sprintf("SIMILARITY=%.2f",sskv.similarity)
+                  sprintf("IDENTITY=%.2f",sskv.identity)
       seqentry.set_header(newheader)
       yield seqentry
     end

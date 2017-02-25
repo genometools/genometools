@@ -14,11 +14,8 @@ seedlength=$4
 readlength=150
 maxfreq=14
 minidentity=95
-readset=reads.fa
-#probabilities='--illumina-prob-mismatch 0.028 --illumina-prob-deletion 0.001 --illumina-prob-insert 0.001'
-mason_simulator -ir $inputfile -n $numreads -o ${readset} --seq-strands forward \
-                --illumina-read-length ${readlength} --embed-read-info \
-                ${probabilities}
+readset=reads-${numreads}-ill-def.fa
+scripts/simulate-reads.rb -n $numreads -l ${readlength} -i ${inputfile}
 
 env -i bin/gt encseq encode -indexname query-idx ${readset}
 env -i bin/gt encseq encode -indexname reference-idx ${inputfile}

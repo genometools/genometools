@@ -15,6 +15,7 @@ end
 # for derivation of rates, see GSA/fromerr2mima-indel.tex
 
 def error_rate_split(error_rate,alpha)
+  STDERR.puts "error_rate=#{error_rate}"
   mi_rate = error_rate.to_f/(2 * alpha + 1).to_f
   id_rate = alpha * mi_rate
   return mi_rate, id_rate
@@ -35,27 +36,33 @@ def mysystem(cmd)
   end
 end
 
-SRoptions = Struct.new("SRoptions",:error_percentage,
+SRoptions = Struct.new("SRoptions",:minidentity,
                                    :readlength,
                                    :numreads,
                                    :inputfile)
 
 def parseargs(argv)
-  max_error = 30
-  options = SRoptions.new(20,150,1000,nil)
+  identity_range = [70,100]
+  options = SRoptions.new(80,150,1000,nil)
+  default_illumina = false
+  percentage_set = false
   opts = OptionParser.new
   opts.banner = "#{$0} [options] <inputfile>"
-  opts.on("-e","--error-percentage NUMBER",
-          "specify error percentage (default #{options.error_percentage})") do |x|
-    if x.to_i < 1 or x.to_i > max_error
-      STDERR.puts "#{$0}: argument of option -e must be integer in range " +
-                  "0 ... #{max_error}"
+  opts.on("-m","--minid NUMBER",
+          "specify minimum percent identity (default #{options.minidentity})") do |x|
+    if x.to_i < identity_range[0] or x.to_i > identity_range[1]
+      STDERR.puts "#{$0}: argument of option -m must be integer in range " +
+                  "#{identity_range[0]} ... #{identity_range[1]}"
     end
-    options.error_percentage = x.to_i
+    percentage_set = true
+    options.minidentity = x.to_i
+  end
+  opts.on("-i","--default-illumina-scores","use mason's default illumina scores") do
+    default_illumina = true
   end
   opts.on("-l","--read-length NUMBER","specify length of reads "+
                                       "(default #{options.readlength})") do |x|
-    options.read_length = x._to
+    options.readlength = x.to_i
   end
   opts.on("-n","--num-reads NUMBER","specify number of reads " +
                                     "(default #{options.numreads})") do |x|
@@ -71,15 +78,31 @@ def parseargs(argv)
   else
     options.inputfile = rest[0]
   end
+  if default_illumina
+    if percentage_set
+      STDERR.puts "#{$0} options -i and -m exclude each other"
+      exit 1
+    end
+    options.minidentity = nil
+  end
   return options
 end
 
 options = parseargs(ARGV)
-error_rate = options.error_percentage.to_f/100.0
-ALPHA = 0.00005/0.004
-mi_rate, id_rate = error_rate_split(error_rate,ALPHA)
+if options.minidentity.nil?
+  error_rate_option = ""
+  readset = sprintf("reads-%d-ill-def.fa",options.numreads)
+else
+  error_rate = (100.0 - options.minidentity.to_f)/100.0
+  ALPHA = 0.00005/0.004
+  mi_rate, id_rate = error_rate_split(error_rate,ALPHA)
+  STDERR.puts "mi_rate=#{mi_rate},id_rate=#{id_rate}"
+  error_rate_option = "--illumina-prob-mismatch #{mi_rate} " +
+                      "--illumina-prob-deletion #{id_rate} " + 
+                      "--illumina-prob-insert #{id_rate}"
+  readset = sprintf("reads-%d-%02d.fa",options.numreads,options.minidentity)
+end
 
-readset = sprintf("reads%02d.fa",options.error_percentage)
 # make the seed small enough so that mason accepts its
 valid_sequences = Array.new()
 readnum = 0
@@ -92,9 +115,8 @@ while valid_sequences.length < options.numreads
            "-seed #{rnum} " +
            "-ir #{options.inputfile} -n #{options.numreads} -o #{readset} " +
            "--illumina-read-length #{options.readlength} " +
-           "--illumina-prob-mismatch #{mi_rate} " +
-           "--illumina-prob-insert #{id_rate}")
-  enumerate_valid_samples(options.error_percentage,readset) do |seqentry|
+           error_rate_option)
+  enumerate_valid_samples(readset,options.minidentity) do |seqentry|
     seqentry.set_header("mason.#{readnum} #{seqentry.get_header()}")
     valid_sequences.push(seqentry)
     readnum += 1
