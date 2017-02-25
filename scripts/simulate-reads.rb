@@ -1,6 +1,16 @@
 #!/usr/bin/env ruby
 
 require 'optparse'
+require "scripts/mason_input.rb"
+
+def print_sequence(outfp,seq)
+  idx = 0
+  width = 60
+  while idx < seq.length
+    outfp.puts seq[idx,width]
+    idx += width
+  end
+end
 
 # for derivation of rates, see GSA/fromerr2mima-indel.tex
 
@@ -70,8 +80,38 @@ ALPHA = 0.00005/0.004
 mi_rate, id_rate = error_rate_split(error_rate,ALPHA)
 
 readset = sprintf("reads%02d.fa",options.error_percentage)
-mysystem("mason_simulator --embed-read-info --seq-strands forward " +
-         "-ir #{options.inputfile} -n #{options.numreads} -o #{readset} " +
-         "--illumina-read-length #{options.readlength} " +
-         "--illumina-prob-mismatch #{mi_rate} " +
-         "--illumina-prob-insert #{id_rate}")
+# make the seed small enough so that mason accepts its
+valid_sequences = Array.new()
+readnum = 0
+seed = 222121342970118932892139536060809809872
+rgen = Random.new(seed)
+while valid_sequences.length < options.numreads
+  rnum = rgen.rand(100000000)
+  STDERR.puts "run mason for seed #{rnum}"
+  mysystem("mason_simulator --embed-read-info --seq-strands forward " +
+           "-seed #{rnum} " +
+           "-ir #{options.inputfile} -n #{options.numreads} -o #{readset} " +
+           "--illumina-read-length #{options.readlength} " +
+           "--illumina-prob-mismatch #{mi_rate} " +
+           "--illumina-prob-insert #{id_rate}")
+  enumerate_valid_samples(options.error_percentage,readset) do |seqentry|
+    seqentry.set_header("mason.#{readnum} #{seqentry.get_header()}")
+    valid_sequences.push(seqentry)
+    readnum += 1
+    if valid_sequences.length >= options.numreads
+      break
+    end
+  end
+end
+
+begin
+  outfp = File.new(readset,"w")
+rescue => err
+  STDERR.puts "#{$0}: cannot open #{readset} for writing"
+  exit 1
+end
+
+valid_sequences.each do |seqentry|
+  outfp.puts ">#{seqentry.get_header()}" 
+  print_sequence(outfp,seqentry.get_sequence())
+end

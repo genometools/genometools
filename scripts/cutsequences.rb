@@ -10,21 +10,13 @@ def print_sequence(seq, linelength, fp=STDOUT)
   end
 end
 
-def print_header(header)
-  if header[0] == '>'
-    puts "#{header}"
-  else
-    puts ">#{header}"
-  end
-end
-
 def cutsinglesequence(sequence,header,maxnumber,minlength,
                       maxlength,linelength)
   pos = 0
   count = 0
   remaininglength = sequence.length
   while pos < sequence.length and remaininglength >= minlength do
-    print_header header
+    puts ">#{header}"
     print_sequence(sequence[pos..pos+maxlength-1],linelength)
     pos += maxlength
     remaininglength -= maxlength
@@ -49,7 +41,7 @@ def cutsequences(inputfile,maxnumber,minlength,maxlength)
         count += cutsinglesequence(sequence,header,maxnumber,minlength,
                                    maxlength,linelength)
       else
-        print_header(header)
+        puts ">#{header}"
         print_sequence(sequence,linelength)
       end
       if count >= maxnumber

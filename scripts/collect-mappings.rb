@@ -1,18 +1,8 @@
 #!/usr/bin/env ruby
 
 require "set"
-require "fasta"
-require "scripts/polishing.rb"
-
-def sumcosts(cigarstring)
-  costs = 0
-  cigarstring.cigar_each do |multiplier,op|
-    if op != "M"
-      costs += multiplier
-    end
-  end
-  return costs
-end
+require_relative "fasta.rb"
+require_relative "mason_input.rb"
 
 def posdifference(reference_begin,posset)
   diff = nil
@@ -25,38 +15,6 @@ def posdifference(reference_begin,posset)
     end
   end
   return diff
-end
-
-def analyze_header(header,polishing)
-  costs = nil
-  dblen = nil
-  prefix_positive = nil
-  suffix_positive = nil
-  begin_pos = nil
-  a = header.split(/\s/)
-  1.upto(a.length-1).each do |idx|
-    m = a[idx].match(/([A-Z_]*)=(.*)/)
-    if not m
-      STDERR.puts "#{$0}: cannot analyze #{header}"
-      exit 1
-    end
-    key = m[1]
-    value = m[2]
-    if key == "CIGAR"
-      costs = sumcosts(value)
-      prefix_positive = polishing.prefix_positive?(value)
-      suffix_positive = polishing.suffix_positive?(value)
-    elsif key == "SAMPLE_SEQUENCE"
-      dblen = value.length
-    elsif key == "BEGIN_POS"
-      begin_pos = value.to_i
-    end
-  end
-  return dblen, costs, prefix_positive, suffix_positive, begin_pos
-end
-
-def error_rate(costs,alignedlen)
-  return 200.0 * costs.to_f/alignedlen.to_f
 end
 
 def analyze_input(readfile,matchfiles)
@@ -103,26 +61,25 @@ def analyze_matches(querycollection, queryseqnum_map, history, minidentity,
   successes = 0
   all.each do |queryseqnum|
     query = querycollection[queryseqnum]
-    header = query.get_header()
-    dblen, costs, prefix_positive, suffix_positive, 
-                  begin_pos = analyze_header(header,polishing)
     queryseq = query.get_sequence()
     querylen = queryseq.length
-    if costs == 0
-      similarity = 100.0
-    else
-      similarity = 100.0 - error_rate(costs,dblen + querylen)
+    header = query.get_header()
+    sskv = analyze_mason_header(header,polishing)
+    if sskv.querylen != querylen
+      STDERR.puts "sskv.querylen = #{sskv.querylen} != #{querylen} = querylen"
+      exit 1
     end
-    if similarity < minidentity
-      STDERR.printf("# #{$0}: similarity= %.2f < %.2f\n",similarity,minidentity)
+    if sskv.similarity < minidentity
+      STDERR.printf("# #{$0}: similarity= %.2f < %.2f\n",sskv.similarity,
+                    minidentity)
       belowminid += 1
-    elsif not prefix_positive
+    elsif not sskv.prefix_positive
       not_prefix_pos += 1
-    elsif not suffix_positive
+    elsif not sskv.suffix_positive
       not_suffix_pos += 1
     elsif queryseqnum_map.has_key?(queryseqnum)
       if withfalsematches
-        mindiff = posdifference(begin_pos,queryseqnum_map[queryseqnum])
+        mindiff = posdifference(sskv.begin_pos,queryseqnum_map[queryseqnum])
         if mindiff == 0
           successes += 1
         else
@@ -136,7 +93,8 @@ def analyze_matches(querycollection, queryseqnum_map, history, minidentity,
         successes += 1
       end
     else
-      nomatchout.printf(">%s %d %.2f\n",query.get_header(),costs,similarity)
+      nomatchout.printf(">%s %d %.2f\n",query.get_header(),sskv.costs,
+                        sskv.similarity)
       nomatchout.puts queryseq
     end
   end
