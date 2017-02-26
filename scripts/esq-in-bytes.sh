@@ -1,8 +1,10 @@
 #!/bin/sh
 
+set -e -x
+
 seed_extend()
 {
-  env -i ${GTDIR}/bin/gt seed_extend -outfmt seqlength -minidentity 70 -extend${mode} -ii db -qii query -maxfreq 20 -kmerfile no $1 > sfx-$2.matches
+  env -i ${GTDIR}/bin/gt seed_extend -l 40 -outfmt alignment=50  -minidentity 70  -ii db -qii query -maxfreq 20 -kmerfile no $1
 }
 
 # set GTDIR as path of genometools directory
@@ -18,10 +20,7 @@ do
       for mode in greedy
       do
         echo $filename
-        seed_extend "-splt ulong" ulong
-        seed_extend "-splt struct" struct
-        cmp -s sfx-ulong.matches sfx-struct.matches
-        wc -l sfx-ulong.matches
+        seed_extend "-no-reverse -maxmat 2 -use-apos"
       done
     fi
   done

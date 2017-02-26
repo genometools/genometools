@@ -3163,8 +3163,6 @@ static void gt_diagbandseed_segment2maxmatches(
       previous.apos++;
     } else
     {
-      gt_assert (previous.bpos != current->bpos ||
-                 previous.apos + seedlength - 1 < current->apos);
       localmatchcount += gt_diagbandseed_process_mem(memstore,
                                                      fpout,
                                                      amaxlen,
@@ -3447,7 +3445,7 @@ static void gt_diagbandseed_process_segment(
         if (ret >= 2)
         {
           haspreviousmatch = true;
-          if (extp->use_apos)
+          if (ret == 3 && extp->use_apos) /* only add successful matches */
           {
             GtDiagbandseedRectangle newrectangle;
 
