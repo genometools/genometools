@@ -80,7 +80,7 @@ GtDiagbandseedExtendParams *gt_diagbandseed_extend_params_new(
                                 GtUword logdiagbandwidth,
                                 GtUword mincoverage,
                                 const GtSeedExtendDisplayFlag *display_flag,
-                                bool use_apos,
+                                GtUword use_apos,
                                 GtXdropscore xdropbelowscore,
                                 bool extendgreedy,
                                 bool extendxdrop,

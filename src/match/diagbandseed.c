@@ -140,8 +140,8 @@ struct GtDiagbandseedExtendParams
                      b_extend_char_access;
   const GtSeedExtendDisplayFlag *display_flag;
   double matchscore_bias;
-  bool use_apos,
-       extendgreedy,
+  GtUword use_apos;
+  bool extendgreedy,
        extendxdrop,
        weakends,
        benchmark,
@@ -280,7 +280,7 @@ GtDiagbandseedExtendParams *gt_diagbandseed_extend_params_new(
                                 GtUword logdiagbandwidth,
                                 GtUword mincoverage,
                                 const GtSeedExtendDisplayFlag *display_flag,
-                                bool use_apos,
+                                GtUword use_apos,
                                 GtXdropscore xdropbelowscore,
                                 bool extendgreedy,
                                 bool extendxdrop,
@@ -2814,7 +2814,7 @@ static bool gt_diagbandseed_has_overlap_with_previous_match(
      GtUword apos,
      GtUword bpos,
      GtUword matchlength,
-     bool use_apos,
+     GtUword use_apos,
      bool debug)
 {
   if (debug)
@@ -2829,7 +2829,7 @@ static bool gt_diagbandseed_has_overlap_with_previous_match(
            gt_querymatch_querystart_fwdstrand(previousmatch) +
            gt_querymatch_querylen(previousmatch) - 1);
   }
-  if (use_apos)
+  if (use_apos > 0)
   {
     GtDiagbandseedRectangle maxmatch;
 
@@ -2880,7 +2880,7 @@ static bool gt_diagbandseed_has_overlap_with_previous_match(
 static int gt_diagbandseed_possibly_extend(const GtArrayGtDiagbandseedRectangle
                                              *previous_extensions,
                                            const GtQuerymatch *previousmatch,
-                                           bool use_apos,
+                                           GtUword use_apos,
                                            GtUword aseqnum,
                                            GtUword apos,
                                            GtUword bseqnum,
@@ -2903,11 +2903,6 @@ static int gt_diagbandseed_possibly_extend(const GtArrayGtDiagbandseedRectangle
 {
   int ret = 0;
 
-#ifdef ELEMENT2CHAINOUT
-  printf(GT_WU " " GT_WU " " GT_WU " " GT_WU "\n",apos+1-matchlength,apos,
-                                                  bpos+1-matchlength,bpos,
-                                                  matchlength);
-#endif
   if (debug)
   {
     printf("# %s with previousmatch%sNULL\n",__func__,
@@ -3373,7 +3368,7 @@ static void gt_diagbandseed_process_segment(
                                             memstore);
       segment_length = memstore->nextfreeGtDiagbandseedMaximalmatch;
     }
-    if (extp->use_apos)
+    if (extp->use_apos > 0)
     {
       previous_extensions = gt_rectangle_store_new();
     }
@@ -3445,7 +3440,8 @@ static void gt_diagbandseed_process_segment(
         if (ret >= 2)
         {
           haspreviousmatch = true;
-          if (ret == 3 && extp->use_apos) /* only add successful matches */
+          if (extp->use_apos == 2 || /* add all previous matches */
+              (ret == 3 && extp->use_apos == 1)) /* only add successful match */
           {
             GtDiagbandseedRectangle newrectangle;
 
@@ -3501,7 +3497,7 @@ static void gt_diagbandseed_process_segment(
         }
       }
     }
-    if (extp->use_apos)
+    if (extp->use_apos > 0)
     {
       gt_rectangle_store_delete(previous_extensions);
     }

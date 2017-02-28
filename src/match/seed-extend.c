@@ -976,7 +976,8 @@ static const GtQuerymatch *gt_extend_sesp(bool forxdrop,
                                   ? sesp->queryseqstartpos : 0;
 
   if (sesp->same_encseq && sesp->dbseqnum == sesp->queryseqnum &&
-      sesp->dbstart_relative + sesp->seedlength >= sesp->querystart_relative)
+      sesp->dbstart_relative + sesp->seedlength - 1 >=
+      sesp->querystart_relative)
   {
     return NULL;
   }
@@ -1007,6 +1008,8 @@ static const GtQuerymatch *gt_extend_sesp(bool forxdrop,
 
     gt_assert(r_voffset <= sesp->querystart_relative);
     vlen = sesp->querystart_relative - r_voffset;
+    if (ulen > 0 && vlen > 0)
+    {
     if (forxdrop)
     {
       gt_seqabstract_reinit_generic(!rightextension,
@@ -1066,6 +1069,7 @@ static const GtQuerymatch *gt_extend_sesp(bool forxdrop,
                                        vlen,
                                        greedyextendmatchinfo->cam_generic,
                                        greedyextendmatchinfo->trimstat);
+    }
     }
   } else
   {
