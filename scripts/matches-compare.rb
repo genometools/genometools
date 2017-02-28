@@ -54,14 +54,38 @@ def match_proper_contained_in(m0,m1)
   return false
 end
 
-def coords_overlap(start0,end0,start1,end1)
-  if end0 < start1 or end1 < start0
-    return false
+def coords_overlap_size(start0,end0,start1,end1)
+  if start0 > start1
+    STDERR.puts "start0=#{start0} > #{start1} = start1 not expected"
+    exit 1
+  end
+  if end0 < start1
+    return 0
+  elsif end0 < end1
+    return end0 - start1 + 1
+  else
+    return end1 - start1 + 1
   end
 end
 
+def matchlength(m)
+  return (m.dbend - m.dbstart + 1 + m.queryend - m.querystart + 1)/2
+end
+
 def matches_overlap(m0,m1)
-  return true
+  ovl = 0
+  if m0.dbstart <= m1.dbstart
+    ovl += coords_overlap_size(m0.dbstart,m0.dbend,m1.dbstart,m1.dbend)
+  else
+    ovl += coords_overlap_size(m1.dbstart,m1.dbend,m0.dbstart,m0.dbend)
+  end
+  if m0.querystart <= m1.querystart
+    ovl += coords_overlap_size(m0.querystart,m0.queryend,m1.querystart,m1.queryend)
+  else
+    ovl += coords_overlap_size(m1.querystart,m1.queryend,m0.querystart,m0.queryend)
+  end
+  len = matchlength(m0) + matchlength(m1)
+  return (ovl.to_f/len.to_f).round
 end
 
 def add_single_match(matchset,m)
@@ -88,8 +112,8 @@ def add_single_match(matchset,m)
   end
   max_score = 0
   matchset.each do |elem|
-    if max_score < elem.score 
-      max_score = elem.score 
+    if max_score < elem.score
+      max_score = elem.score
     end
   end
   return max_score
@@ -317,7 +341,7 @@ if options.pairwise
   end
 else
   contained = Array.new(numfiles) {0}
-  bestscore = Array.new(numfiles) {0}
+  bestscore = Array.new(numfiles) {Array.new(12) {0}}
   totalsetsize = 0
   numsets = 0
   mh_set_combined = Set.new()
@@ -328,18 +352,22 @@ else
         max_score = add_single_match(mh_set_combined,m)
       end
     end
-    mh_sets.each_with_index do |mh_set,idx|
+    mh_sets.each_with_index do |mh_set,midx|
       inse = mh_set_combined.intersection(mh_set)
-      contained[idx] += inse.size
-      if score_hash_tab[idx][key] > max_score
-        STDERR.puts "idx #{idx}: score_hash[#{key}]=#{score_hash_tab[idx][key]} > #{max_score}=max_score"
+      contained[midx] += inse.size
+      if score_hash_tab[midx][key] > max_score
+        STDERR.puts "midx #{midx}: score_hash[#{key}]=" +
+                    "#{score_hash_tab[midx][key]} > #{max_score}=max_score"
         exit(1)
       end
-      if score_hash_tab[idx][key] * 11/10 >= max_score
-        bestscore[idx] += 1
+      diff = (100 * (max_score - score_hash_tab[midx][key]).to_f/max_score.to_f).round
+      if diff <= 10
+        bestscore[midx][diff] += 1
+      else
+        bestscore[midx][11] += 1
       end
-      numsets += 1
     end
+    numsets += 1
     totalsetsize += mh_set_combined.size
     mh_set_combined.clear()
   end
@@ -348,7 +376,18 @@ else
     result.push([contained[idx],idx])
   end
   result.sort.each do |cont,idx|
-    printf("%s\t%.2f\t",options.matchfiles[idx],100.0 * cont.to_f/totalsetsize.to_f)
-    printf("%.2f\n",100.0 * bestscore[idx].to_f/numsets)
+    printf("%s\t%.2f",options.matchfiles[idx],
+                        100.0 * cont.to_f/totalsetsize.to_f)
+    maxdiff = 0
+    Range.new(0,11).to_a.reverse.each do |diff|
+      if bestscore[idx][diff] > 0
+        maxdiff = diff
+        break
+      end
+    end
+    0.upto(maxdiff).each do |diff|
+      printf("\t%.2f",100.0 * bestscore[idx][diff].to_f/numsets.to_f)
+    end
+    puts ""
   end
 end
