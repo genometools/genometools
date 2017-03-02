@@ -785,6 +785,7 @@ static GtUword gt_searchspace_store_find(const GtUwordPair *arr,
   }
   fprintf(stderr,"%s: cannot find entry for " GT_WU "\n",__func__,key);
   gt_assert(false);
+  return GT_UWORD_MAX;
 }
 
 GtUword gt_evalue_searchspace(const GtKarlinAltschulStat *ka,

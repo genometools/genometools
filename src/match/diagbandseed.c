@@ -2742,7 +2742,7 @@ static void gt_diagbandseed_get_seedpairs(GtSeedpairlist *seedpairlist,
   }
 }
 
-static int gt_diagbandseed_update_dband(GtUword ndiags,
+static int gt_diagbandseed_update_dband(GT_UNUSED GtUword ndiags,
                                         GtUword amaxlen,
                                         GtUword logdiagbandwidth,
                                        GtDiagbandseedScore *diagband_score,
@@ -3127,15 +3127,15 @@ static void gt_diagbandseed_segment2maxmatches(
              GtDiagbandseedCounts *process_seeds_counts,
              FILE *fpout)
 {
-  GtUword idx, previous_matchlength = seedlength, localmatchcount = 0,
-          *uword_segment_positions = (GtUword *) segment_positions;
+  GtUword previous_matchlength = seedlength, localmatchcount = 0;
   const GtSeedpairPositions *current;
   GtSeedpairPositions previous;
   GtDiagbandseedSequencePair sequencepair = {aseqnum,bseqnum};
+#ifndef NDEBUG
+  GtUword idx;
+#endif
 
-  gt_assert(segment_length > 0);
-  gt_assert(sizeof *segment_positions == sizeof *uword_segment_positions &&
-            seedlength <= userdefinedleastlength);
+  gt_assert(segment_length > 0 && seedlength <= userdefinedleastlength);
 #ifndef NDEBUG
   for (idx = 1; idx < segment_length; idx++)
   {

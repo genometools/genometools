@@ -382,7 +382,8 @@ static GtOptionParser* gt_seed_extend_option_parser_new(void *tool_arguments)
                                  &arguments->maxmat,
                                  1);
   arguments->se_ref_op_maxmat = gt_option_ref(op_maxmat);
-  gt_option_exclude(op_maxmat, op_diagbandwidth);
+  /* will later be included again: gt_option_exclude(op_maxmat, op_bia); */
+  /*gt_option_exclude(op_maxmat, op_diagbandwidth);
   gt_option_exclude(op_maxmat, op_mincoverage);
   gt_option_exclude(op_maxmat, op_xdr);
   gt_option_exclude(op_maxmat, op_xbe);
@@ -390,9 +391,8 @@ static GtOptionParser* gt_seed_extend_option_parser_new(void *tool_arguments)
   gt_option_exclude(op_maxmat, op_his);
   gt_option_exclude(op_maxmat, op_dif);
   gt_option_exclude(op_maxmat, op_pmh);
-  /* will later be included again: gt_option_exclude(op_maxmat, op_bia); */
   gt_option_exclude(op_maxmat, op_cam);
-  gt_option_exclude(op_maxmat, op_trimstat);
+  gt_option_exclude(op_maxmat, op_trimstat);*/
   gt_option_argument_is_optional(op_maxmat);
   gt_option_parser_add_option(op, op_maxmat);
 

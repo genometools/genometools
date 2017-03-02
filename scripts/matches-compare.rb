@@ -5,7 +5,7 @@ require "optparse"
 
 SEmatch = Struct.new("SEmatch",:dbseqnum,
                                :dbstart,
-                                :dbend,
+                               :dbend,
                                :queryseqnum,
                                :querystart,
                                :queryend,
@@ -364,7 +364,7 @@ else
       if diff <= 10
         bestscore[midx][diff] += 1
       else
-        bestscore[midx][11] += 1
+        bestscore[midx][11] += 1 # more than 10% difference to max
       end
     end
     numsets += 1
@@ -373,19 +373,12 @@ else
   end
   result = Array.new()
   0.upto(numfiles-1).each do |idx|
-    result.push([contained[idx],idx])
+    result.push([bestscore[idx][0],idx])
   end
   result.sort.each do |cont,idx|
     printf("%s\t%.2f",options.matchfiles[idx],
                         100.0 * cont.to_f/totalsetsize.to_f)
-    maxdiff = 0
-    Range.new(0,11).to_a.reverse.each do |diff|
-      if bestscore[idx][diff] > 0
-        maxdiff = diff
-        break
-      end
-    end
-    0.upto(maxdiff).each do |diff|
+    0.upto(11).each do |diff|
       printf("\t%.2f",100.0 * bestscore[idx][diff].to_f/numsets.to_f)
     end
     puts ""
