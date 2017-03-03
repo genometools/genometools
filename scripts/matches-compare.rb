@@ -310,17 +310,17 @@ if options.pairwise
       counters = hash_difference(match_hash_tab[idx0],score_hash_tab[idx0],
 				 match_hash_tab[idx1],score_hash_tab[idx1])
       all_seqpairs = counters.identical_seqpairs + counters.different_seqpairs
-      printf("sequence pairs with identical matches %d (%.2f%%)\n",
+      printf("sequence pairs with identical matches %d (%5.2f%%)\n",
 	    counters.identical_seqpairs,
 	    100.0 * counters.identical_seqpairs.to_f/all_seqpairs.to_f)
-      printf("sequence pairs with different matches %d (%.2f%%)\n",
+      printf("sequence pairs with different matches %d (%5.2f%%)\n",
 	      counters.different_seqpairs,
 	      100.0 * counters.different_seqpairs.to_f/all_seqpairs.to_f)
       all_matches = counters.identical_matches + counters.different_matches
-      printf("identical matches %d (%.2f%%)\n",
+      printf("identical matches %d (%5.2f%%)\n",
 	      counters.identical_matches,
 	      100.0 * counters.identical_matches.to_f/all_matches.to_f)
-      printf("different matches %d (%.2f%%)\n",
+      printf("different matches %d (%5.2f%%)\n",
 	      counters.different_matches,
 	      100.0 * counters.different_matches.to_f/all_matches.to_f)
 
@@ -341,7 +341,8 @@ if options.pairwise
   end
 else
   contained = Array.new(numfiles) {0}
-  bestscore = Array.new(numfiles) {Array.new(12) {0}}
+  step = 10
+  bestscore = Array.new(numfiles) {Array.new(100/step+1) {0}}
   totalsetsize = 0
   numsets = 0
   mh_set_combined = Set.new()
@@ -360,11 +361,11 @@ else
                     "#{score_hash_tab[midx][key]} > #{max_score}=max_score"
         exit(1)
       end
-      diff = (100 * (max_score - score_hash_tab[midx][key]).to_f/max_score.to_f).round
-      if diff <= 10
-        bestscore[midx][diff] += 1
+      if score_hash_tab[midx][key] > 0
+        diff = (100 * (max_score - score_hash_tab[midx][key]).to_f/max_score.to_f).round
+        bestscore[midx][diff/step] += 1
       else
-        bestscore[midx][11] += 1 # more than 10% difference to max
+        bestscore[midx][100/step] += 1
       end
     end
     numsets += 1
@@ -372,15 +373,25 @@ else
     mh_set_combined.clear()
   end
   result = Array.new()
+  length_of_longest = 0
   0.upto(numfiles-1).each do |idx|
     result.push([bestscore[idx][0],idx])
-  end
-  result.sort.each do |cont,idx|
-    printf("%s\t%.2f",options.matchfiles[idx],
-                        100.0 * cont.to_f/totalsetsize.to_f)
-    0.upto(11).each do |diff|
-      printf("\t%.2f",100.0 * bestscore[idx][diff].to_f/numsets.to_f)
+    if length_of_longest < options.matchfiles[idx].length
+      length_of_longest = options.matchfiles[idx].length
     end
+  end
+  column_header = Range.new(step,100).step(step).to_a.map {|x| if x < 100 then " lt#{x}" else "lt#{x}" end}
+  printf("%*s\t%5s\t%s\t  nil\n",length_of_longest,"options","cont",column_header.join("\t"))
+  result.sort.each do |cont,idx|
+    printf("%*s\t%5.2f",length_of_longest,options.matchfiles[idx],
+                        100.0 * cont.to_f/totalsetsize.to_f)
+    sumpercentage = 0.0
+    0.upto(100/step-1).each do |diff|
+      bestpercentage = 100.0 * bestscore[idx][diff].to_f/numsets.to_f
+      sumpercentage += bestpercentage
+      printf("\t%5.2f",sumpercentage)
+    end
+    printf("\t%5.2f",100.0 * bestscore[idx][100/step].to_f/numsets.to_f)
     puts ""
   end
 end
