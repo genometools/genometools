@@ -71,7 +71,7 @@ typedef struct {
   GtUword se_historysize;
   GtUword se_maxalilendiff;
   GtUword se_perc_match_hist;
-  GtStr *char_access_mode, *splt_string, *use_apos_string;
+  GtStr *char_access_mode, *splt_string;
   bool bias_parameters;
   bool relax_polish;
   bool verify_alignment;
@@ -89,11 +89,11 @@ typedef struct {
   bool histogram;
   bool use_kmerfile;
   bool trimstat_on;
-  GtUword maxmat, use_apos;
+  bool use_apos, use_apos_track_all;
+  GtUword maxmat;
   GtSeedExtendDisplayFlag *display_flag;
   GtOption *se_ref_op_evalue,
-           *se_ref_op_maxmat,
-           *se_ref_op_use_apos;
+           *se_ref_op_maxmat;
 } GtSeedExtendArguments;
 
 static void* gt_seed_extend_arguments_new(void)
@@ -106,7 +106,6 @@ static void* gt_seed_extend_arguments_new(void)
   arguments->dbs_memlimit_str = gt_str_new();
   arguments->char_access_mode = gt_str_new();
   arguments->splt_string = gt_str_new();
-  arguments->use_apos_string = gt_str_new();
   arguments->display_args = gt_str_array_new();
   arguments->display_flag = gt_querymatch_display_flag_new();
   return arguments;
@@ -123,12 +122,10 @@ static void gt_seed_extend_arguments_delete(void *tool_arguments)
     gt_str_delete(arguments->dbs_memlimit_str);
     gt_str_delete(arguments->char_access_mode);
     gt_str_delete(arguments->splt_string);
-    gt_str_delete(arguments->use_apos_string);
     gt_option_delete(arguments->se_ref_op_gre);
     gt_option_delete(arguments->se_ref_op_xdr);
     gt_option_delete(arguments->se_ref_op_evalue);
     gt_option_delete(arguments->se_ref_op_maxmat);
-    gt_option_delete(arguments->se_ref_op_use_apos);
     gt_str_array_delete(arguments->display_args);
     gt_querymatch_display_flag_delete(arguments->display_flag);
     gt_free(arguments);
@@ -147,7 +144,7 @@ static GtOptionParser* gt_seed_extend_option_parser_new(void *tool_arguments)
     *op_verify_alignment, *op_only_selected_seqpairs, *op_spdist, *op_display,
     *op_norev, *op_nofwd, *op_part, *op_pick, *op_overl, *op_trimstat,
     *op_cam_generic, *op_diagbandwidth, *op_mincoverage, *op_maxmat,
-    *op_use_apos, *op_chain;
+    *op_use_apos, *op_use_apos_track_all, *op_chain;
 
   static GtRange seedpairdistance_defaults = {1UL, GT_UWORD_MAX};
   gt_assert(arguments != NULL);
@@ -529,19 +526,20 @@ static GtOptionParser* gt_seed_extend_option_parser_new(void *tool_arguments)
   gt_option_parser_add_option(op, op_weakends);
 
   /* -use-apos */
-  op_use_apos = gt_option_new_string("use-apos",
+  op_use_apos = gt_option_new_bool("use-apos",
                 "Discard a seed only if both apos and bpos overlap with a "
-                "previous alignment\nin the default case all previous "
-                "successful alignments are considered (which maximizes "
-                "sensitivity but is slower); the optional parameter "
-                "\"trackall\" means to consider all previous alignments, not "
-                "only those that are successful",
-                arguments->use_apos_string,
-                "");
-  /*gt_option_exclude(op_maxmat, op_use_apos);*/
-  gt_option_argument_is_optional(op_use_apos);
-  arguments->se_ref_op_use_apos = gt_option_ref(op_use_apos);
+                "previous successful alignment",
+                &arguments->use_apos,false);
   gt_option_parser_add_option(op, op_use_apos);
+
+  /* -use-apos-track-all */
+  op_use_apos_track_all = gt_option_new_bool("use-apos-track-all",
+                "Discard a seed only if both apos and bpos overlap with a "
+                "previous alignment",
+                &arguments->use_apos_track_all,false);
+  gt_option_parser_add_option(op, op_use_apos_track_all);
+  gt_option_is_development_option(op_use_apos_track_all);
+  gt_option_exclude(op_use_apos, op_use_apos_track_all);
 
   /* -parts */
   op_part = gt_option_new_uword_min("parts",
@@ -636,25 +634,6 @@ static int gt_seed_extend_arguments_check(int rest_argc, void *tool_arguments,
   if (!gt_option_is_set(arguments->se_ref_op_maxmat))
   {
     arguments->maxmat = 0;
-  }
-  arguments->use_apos = 0;
-  if (gt_option_is_set(arguments->se_ref_op_use_apos))
-  {
-    if (gt_str_length(arguments->use_apos_string) == 0)
-    {
-      arguments->use_apos = 1;
-    } else
-    {
-      if (strcmp(gt_str_get(arguments->use_apos_string),"trackall") == 0)
-      {
-        arguments->use_apos = 2;
-      } else
-      {
-        gt_error_set(err, "optional argument to option -use_apos must be "
-                          "\"trackall\"");
-        had_err = -1;
-      }
-    }
   }
   /* no extra arguments */
   if (!had_err && rest_argc > 0) {
@@ -953,6 +932,7 @@ static int gt_seed_extend_runner(int argc,
     GtDiagbandseedInfo *info = NULL;
     GtUword sensitivity = 0;
     GtSequencePartsInfo *aseqranges, *bseqranges;
+    GtUword use_apos_local = 0;
 
     if (extendgreedy) {
       sensitivity = arguments->se_extendgreedy;
@@ -984,13 +964,24 @@ static int gt_seed_extend_runner(int argc,
     gt_assert(pick.b < gt_sequence_parts_info_number(bseqranges) ||
               pick.b == GT_UWORD_MAX);
 
+    if (arguments->use_apos)
+    {
+      gt_assert(!arguments->use_apos_track_all);
+      use_apos_local = 1;
+    } else
+    {
+      if (arguments->use_apos_track_all)
+      {
+        use_apos_local = 2;
+      }
+    }
     extp = gt_diagbandseed_extend_params_new(arguments->se_alignlength,
                                              errorpercentage,
                                              arguments->se_evalue_threshold,
                                              arguments->dbs_logdiagbandwidth,
                                              arguments->dbs_mincoverage,
                                              arguments->display_flag,
-                                             arguments->use_apos,
+                                             use_apos_local,
                                              arguments->se_xdropbelowscore,
                                              extendgreedy,
                                              extendxdrop,

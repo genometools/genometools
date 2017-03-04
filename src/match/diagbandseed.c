@@ -3521,6 +3521,7 @@ static void gt_diagbandseed_process_segment(
 
 static void gt_diagbandseed_match_header(FILE *stream,
                                          const GtDiagbandseedExtendParams *extp,
+                                         const void *processinfo,
                                          unsigned int seedlength,
                                          GtUword ndiags,
                                          GtUword minsegmentlen)
@@ -3532,6 +3533,24 @@ static void gt_diagbandseed_match_header(FILE *stream,
                  "diagonal bands=" GT_WU ", minimal segmentsize=" GT_WU
                  ", minimal coverage=" GT_WU "\n",
                  seedlength,ndiags,minsegmentlen,extp->mincoverage);
+  if (extp->extendgreedy)
+  {
+    const GtGreedyextendmatchinfo *ggemi
+      = (GtGreedyextendmatchinfo *) processinfo;
+
+    fprintf(stream,"# parameters for greedy extension of seeds: history=" GT_WU
+                   ", max_aligned_length_difference=" GT_WU
+                   ", percent_match_history=" GT_WU "\n",
+                    extp->history_size,
+                    gt_greedy_extend_maxalignedlendifference(ggemi),
+                    gt_greedy_extend_perc_mat_history(ggemi));
+  } else
+  {
+    const GtXdropmatchinfo *xdropmatchinfo = (GtXdropmatchinfo *) processinfo;
+    fprintf(stream,"# parameters for xdrop extension of seeds: "
+                   "xdrop_below_score=" GT_WU "\n",
+                   gt_xdrop_extend_belowscore(xdropmatchinfo));
+  }
   fprintf(stream,"# columns: alen aseq astartpos strand blen bseq bstartpos "
                  "score editdist identity");
   add_column_header = gt_querymatch_column_header(extp->display_flag);
@@ -3948,7 +3967,8 @@ static void gt_diagbandseed_process_seeds(GtSeedpairlist *seedpairlist,
         gt_timer_show_formatted(timer, GT_DIAGBANDSEED_FMT, stream);
         gt_timer_start(timer);
       }
-      gt_diagbandseed_match_header(stream,extp,seedlength,ndiags,minsegmentlen);
+      gt_diagbandseed_match_header(stream,extp,processinfo,
+                                   seedlength,ndiags,minsegmentlen);
     }
   }
   gt_diagbandseed_info_qm_set(&info_querymatch,

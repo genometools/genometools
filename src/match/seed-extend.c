@@ -300,6 +300,12 @@ static void extensioncoords_show(bool forxdrop,bool rightextension,
 }
 #endif
 
+GtUword gt_xdrop_extend_belowscore(const GtXdropmatchinfo *xdropmatchinfo)
+{
+  gt_assert(xdropmatchinfo != NULL);
+  return xdropmatchinfo->belowscore;
+}
+
 const char *gt_cam_extendgreedy_comment(void)
 {
   return "specify up to two comma-separated character access modes, the first "
@@ -1489,4 +1495,17 @@ void gt_rf_greedy_extend_querymatch_with_output(void *info,
                                       exactseed,
                                       queryes,
                                       same_encseq);
+}
+
+GtUword gt_greedy_extend_perc_mat_history(const GtGreedyextendmatchinfo *ggemi)
+{
+  gt_assert(ggemi != NULL);
+  return ggemi->perc_mat_history;
+}
+
+GtUword gt_greedy_extend_maxalignedlendifference(
+                                     const GtGreedyextendmatchinfo *ggemi)
+{
+  gt_assert(ggemi != NULL);
+  return ggemi->maxalignedlendifference;
 }

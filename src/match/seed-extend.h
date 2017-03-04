@@ -151,6 +151,8 @@ void gt_rf_xdrop_extend_querymatch_with_output(void *info,
                                                const GtSeqorEncseq *queryes,
                                                bool same_encseq);
 
+GtUword gt_xdrop_extend_belowscore(const GtXdropmatchinfo *xdropmatchinfo);
+
 /* The following functions are used for the greedy extension. */
 
 /* This is the type storing the relevant information for
@@ -347,5 +349,13 @@ void gt_rf_greedy_extend_querymatch_with_output(void *info,
                                                 bool same_encseq);
 
 double gt_greedy_dna_sequence_bias_get(const GtEncseq *encseq);
+
+GtUword gt_greedy_extend_maxalignedlendifference(
+                                     const GtGreedyextendmatchinfo *ggemi);
+
+GtUword gt_greedy_extend_maxalignedlendifference(
+                                     const GtGreedyextendmatchinfo *ggemi);
+
+GtUword gt_greedy_extend_perc_mat_history(const GtGreedyextendmatchinfo *ggemi);
 
 #endif
