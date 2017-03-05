@@ -123,8 +123,17 @@ def convertmatchfile2hash(matchfile)
   match_hash = Hash.new()
   score_hash = Hash.new() {0}
   fp = openfile(matchfile)
+  runtime = nil
+  spacepeak = nil
   fp.each_line do |line|
-    if not line.match(/^#/)
+    if line.match(/^#/)
+      m = line.match(/^# TIME.*\s(\S+)$/)
+      if m
+        runtime = m[1].to_f
+      elsif m = line.match(/^# combined space peak in megabytes:\s(\S+)$/)
+        spacepeak = m[1].to_f
+      end
+    else
       a = line.split(/\s/)
       m = SEmatch.new(a[1].to_i,
                       a[2].to_i,
@@ -142,7 +151,7 @@ def convertmatchfile2hash(matchfile)
       score_hash[key] = add_single_match(match_hash[key],m)
     end
   end
-  return match_hash, score_hash
+  return match_hash, score_hash, runtime, spacepeak
 end
 
 def merge_sets(mh0,mh1)
@@ -296,9 +305,11 @@ options = parseargs(ARGV)
 numfiles = options.matchfiles.length
 match_hash_tab = Array.new(numfiles)
 score_hash_tab = Array.new(numfiles)
+runtime_tab = Array.new(numfiles)
+spacepeak_tab = Array.new(numfiles)
 0.upto(numfiles-1).each do |idx|
-  match_hash_tab[idx], score_hash_tab[idx] =
-    convertmatchfile2hash(options.matchfiles[idx])
+  match_hash_tab[idx], score_hash_tab[idx], runtime_tab[idx],
+  spacepeak_tab[idx] = convertmatchfile2hash(options.matchfiles[idx])
 end
 
 if options.pairwise
@@ -381,7 +392,7 @@ else
     end
   end
   column_header = Range.new(step,100).step(step).to_a.map {|x| if x < 100 then " lt#{x}" else "lt#{x}" end}
-  printf("%*s\t%5s\t%s\t  nil\n",length_of_longest,"options","cont",column_header.join("\t"))
+  printf("%*s\t%5s\t%s\t  nil\t time\tspace\n",length_of_longest,"options","cont",column_header.join("\t"))
   result.sort.each do |cont,idx|
     printf("%*s\t%5.2f",length_of_longest,options.matchfiles[idx],
                         100.0 * cont.to_f/totalsetsize.to_f)
@@ -391,7 +402,9 @@ else
       sumpercentage += bestpercentage
       printf("\t%5.2f",sumpercentage)
     end
-    printf("\t%5.2f",100.0 * bestscore[idx][100/step].to_f/numsets.to_f)
+    printf("\t%5.2f\t%.2f\t%.2f",
+                100.0 * bestscore[idx][100/step].to_f/numsets.to_f,
+                runtime_tab[idx],spacepeak_tab[idx])
     puts ""
   end
 end
