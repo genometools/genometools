@@ -4,7 +4,7 @@ set -e -x
 
 seed_extend()
 {
-  env -i ${GTDIR}/bin/gt seed_extend -l 40 -outfmt alignment=50  -minidentity 70  -ii db -qii query -maxfreq 20 -kmerfile no $1
+  env -i ${GTDIR}/bin/gt seed_extend -l 17 -maxmat -ii db -qii query -maxfreq 20 -kmerfile no $1
 }
 
 # set GTDIR as path of genometools directory

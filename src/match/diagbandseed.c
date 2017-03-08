@@ -3131,6 +3131,7 @@ static void gt_diagbandseed_segment2maxmatches(
   const GtSeedpairPositions *current;
   GtSeedpairPositions previous;
   GtDiagbandseedSequencePair sequencepair = {aseqnum,bseqnum};
+  const bool anchor_pairs = false;
 #ifndef NDEBUG
   GtUword idx;
 #endif
@@ -3158,22 +3159,53 @@ static void gt_diagbandseed_segment2maxmatches(
       previous.apos++;
     } else
     {
-      localmatchcount += gt_diagbandseed_process_mem(memstore,
-                                                     fpout,
-                                                     amaxlen,
-                                                     &previous,
-                                                     previous_matchlength,
-                                                     userdefinedleastlength);
-      previous_matchlength = seedlength;
-      previous = *current;
+      if (previous.bpos == current->bpos &&
+          previous.apos + seedlength - 1 >= current->apos)
+      {
+        /* This case can only happen if maxfreq exclude some intermediate
+           matches */
+        gt_assert(previous.apos <= current->apos);
+        previous_matchlength += (current->apos - previous.apos + 1);
+        previous.apos = current->apos;
+      } else
+      {
+        /*
+        printf("previous.diag = %u, current.diag=%u\n",previous.bpos,
+                current->bpos);
+        printf("previous.apos=%u,current.apos=%u,seedlength=%u\n",
+                previous.apos,current->apos,seedlength);
+        gt_assert (previous.bpos != current->bpos ||
+                   previous.apos + seedlength - 1 < current->apos);*/
+        if (anchor_pairs)
+        {
+          if (previous.bpos == current->bpos &&
+              previous.apos + seedlength - 1 < current->apos)
+          {
+            printf("A %u\n",previous.apos+1);
+          }
+        } else
+        {
+          localmatchcount += gt_diagbandseed_process_mem(memstore,
+                                                         fpout,
+                                                         amaxlen,
+                                                         &previous,
+                                                         previous_matchlength,
+                                                       userdefinedleastlength);
+        }
+        previous_matchlength = seedlength;
+        previous = *current;
+      }
     }
   }
-  localmatchcount += gt_diagbandseed_process_mem(memstore,
-                                                 fpout,
-                                                 amaxlen,
-                                                 &previous,
-                                                 previous_matchlength,
-                                                 userdefinedleastlength);
+  if (!anchor_pairs)
+  {
+    localmatchcount += gt_diagbandseed_process_mem(memstore,
+                                                   fpout,
+                                                   amaxlen,
+                                                   &previous,
+                                                   previous_matchlength,
+                                                   userdefinedleastlength);
+  }
   process_seeds_counts->countmatches += localmatchcount;
   if (process_seeds_counts->maxmatchespersegment < localmatchcount)
   {
