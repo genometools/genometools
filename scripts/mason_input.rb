@@ -1,5 +1,5 @@
-require "scripts/fasta.rb"
-require "scripts/polishing.rb"
+require_relative "fasta.rb"
+require_relative "polishing.rb"
 
 def evaluate_cigarstring(cigarstring)
   costs = 0

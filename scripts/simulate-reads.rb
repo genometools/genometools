@@ -1,16 +1,8 @@
 #!/usr/bin/env ruby
 
 require 'optparse'
-require "scripts/mason_input.rb"
-
-def print_sequence(outfp,seq)
-  idx = 0
-  width = 60
-  while idx < seq.length
-    outfp.puts seq[idx,width]
-    idx += width
-  end
-end
+require_relative "mason_input.rb"
+require_relative "print_sequence.rb"
 
 # for derivation of rates, see GSA/fromerr2mima-indel.tex
 
@@ -135,5 +127,5 @@ end
 
 valid_sequences.each do |seqentry|
   outfp.puts ">#{seqentry.get_header()}" 
-  print_sequence(outfp,seqentry.get_sequence())
+  print_sequence(seqentry.get_sequence(),70,outfp)
 end

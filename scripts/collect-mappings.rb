@@ -2,6 +2,7 @@
 
 require "set"
 require_relative "fasta.rb"
+require_relative "print_sequence.rb"
 require_relative "mason_input.rb"
 
 def posdifference(reference_begin,posset)
@@ -71,14 +72,14 @@ def analyze_matches(querycollection, queryseqnum_map, history, minidentity,
                                                costs,identity)
           falsematchout.puts queryseqnum_map[queryseqnum].join(" #") +
                              ", mindiff=#{mindiff}"
-          falsematchout.puts queryseq
+          print_sequence(queryseq,70,falsematchout)
         end
       else
         successes += 1
       end
     else
-      nomatchout.puts query.get_header()
-      nomatchout.puts queryseq
+      nomatchout.puts ">#{query.get_header()}"
+      print_sequence(queryseq,70,nomatchout)
     end
   end
   nomatchout.close_write

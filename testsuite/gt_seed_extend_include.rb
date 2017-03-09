@@ -29,6 +29,27 @@ seeds = [170039800390891361279027638963673934519,
 $SPLT_LIST = ["-splt struct","-splt ulong"]
 $CAM_LIST = ["encseq", "encseq_reader","bytes"]
 
+Name "gt seed_extend: symmetry of maxmat/use-apos"
+Keywords "gt_seed_extend symmetry"
+Test do
+  run_test build_encseq("u8", "#{$testdata}U89959_genomic.fas")
+  run "#{$scriptsdir}/reverse-complement.rb #{$testdata}U89959_genomic.fas"
+  run "mv #{last_stdout} u8-rev.fas"
+  run_test build_encseq("u8-rev", "u8-rev.fas")
+  run_test build_encseq("at1MB", "#{$testdata}at1MB")
+  options = "-ii at1MB -minidentity 70 -l 30 -maxmat 2 -use-apos "
+  run "#{$bin}gt seed_extend #{options} -qii u8 -no-reverse"
+  run "mv #{last_stdout} u8.matches"
+  run "#{$bin}gt seed_extend #{options} -qii u8-rev -no-forward"
+  run "mv #{last_stdout} u8-rev.matches"
+  run "#{$scriptsdir}/matches-compare.rb -i u8.matches u8-rev.matches"
+  run "#{$bin}gt seed_extend #{options} -qii u8 -no-forward"
+  run "mv #{last_stdout} u8.matches"
+  run "#{$bin}gt seed_extend #{options} -qii u8-rev -no-reverse"
+  run "mv #{last_stdout} u8-rev.matches"
+  run "#{$scriptsdir}/matches-compare.rb -i u8.matches u8-rev.matches"
+end
+
 Name "gt seed_extend: fstperquery"
 Keywords "gt_seed_extend display fstperquery"
 Test do

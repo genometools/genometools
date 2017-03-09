@@ -88,24 +88,26 @@ def matches_overlap(m0,m1)
   return (ovl.to_f/len.to_f).round
 end
 
-def add_single_match(matchset,m)
+def add_single_match(matchset,m,always_add = false)
   add_m = true
-  to_delete = Array.new()
-  matchset.each do |previous|
-    if match_proper_contained_in(m,previous)
-      if previous.score > m.score
+  if not always_add
+    to_delete = Array.new()
+    matchset.each do |previous|
+      if match_proper_contained_in(m,previous)
+        if previous.score > m.score
+          add_m = false
+        end
+      elsif match_proper_contained_in(previous,m)
+        if previous.score < m.score
+          to_delete.push(previous)
+        end
+      elsif match_is_identical(previous,m) and previous.score > m.score
         add_m = false
       end
-    elsif match_proper_contained_in(previous,m)
-      if previous.score < m.score
-        to_delete.push(previous)
-      end
-    elsif match_is_identical(previous,m) and previous.score > m.score
-      add_m = false
     end
-  end
-  to_delete.each do |elem|
-    matchset.delete(elem)
+    to_delete.each do |elem|
+      matchset.delete(elem)
+    end
   end
   if add_m
     matchset.add(m)
@@ -119,7 +121,7 @@ def add_single_match(matchset,m)
   return max_score
 end
 
-def convertmatchfile2hash(matchfile)
+def convertmatchfile2hash(matchfile,always_add)
   match_hash = Hash.new()
   score_hash = Hash.new() {0}
   fp = openfile(matchfile)
@@ -148,7 +150,7 @@ def convertmatchfile2hash(matchfile)
       if not match_hash.has_key?(key)
         match_hash[key] = Set.new()
       end
-      score_hash[key] = add_single_match(match_hash[key],m)
+      score_hash[key] = add_single_match(match_hash[key],m,always_add)
     end
   end
   return match_hash, score_hash, runtime, spacepeak
@@ -281,14 +283,36 @@ def hash_difference(mh0,sh0,mh1,sh1)
   return counters
 end
 
-MCoptions = Struct.new("MCoptions",:pairwise,:matchfiles)
+def identical_upto_query(s,t)
+  if s.size != t.size
+    STDERR.puts "#{$0} are of different sizes #{s.size} and #{t.size}"
+    exit 1
+  end
+  s.zip(t).each do |ms,mt|
+    vals = [ms.dbseqnum,ms.dbstart,ms.dbend,ms.queryend-ms.querystart,ms.score,
+            ms.forward]
+    valt = [mt.dbseqnum,mt.dbstart,mt.dbend,mt.queryend-mt.querystart,mt.score,
+            if mt.forward then false else true end]
+    if vals != valt
+      STDERR.puts "#{$0}: vals = #{vals} != #{valt}"
+      exit 1
+    end
+  end
+end
+
+MCoptions = Struct.new("MCoptions",:pairwise,:ignore_query,:matchfiles)
 
 def parseargs(argv)
-  options = MCoptions.new(false,nil)
+  options = MCoptions.new(false,false,nil)
   opts = OptionParser.new
   opts.banner = "#{$0} [options] <inputfile>"
   opts.on("-p","--pairwise","perform pairwise comparison") do |x|
     options.pairwise = true
+  end
+  opts.on("-i","--ignore-query-positions","comparison, ignoring sequence " +
+                                          "number and start position " +
+                                          "on query") do |x|
+    options.ignore_query = true
   end
   rest = opts.parse(argv)
   if rest.length < 2
@@ -296,6 +320,10 @@ def parseargs(argv)
     exit 1
   else
     options.matchfiles = rest
+  end
+  if options.pairwise and options.ignore_query
+    STDERR.puts "#{$0}: options -p and -i exclude each other"
+    exit 1
   end
   return options
 end
@@ -307,9 +335,10 @@ match_hash_tab = Array.new(numfiles)
 score_hash_tab = Array.new(numfiles)
 runtime_tab = Array.new(numfiles)
 spacepeak_tab = Array.new(numfiles)
+always_add = if options.ignore_query then true else false end
 0.upto(numfiles-1).each do |idx|
   match_hash_tab[idx], score_hash_tab[idx], runtime_tab[idx],
-  spacepeak_tab[idx] = convertmatchfile2hash(options.matchfiles[idx])
+  spacepeak_tab[idx] = convertmatchfile2hash(options.matchfiles[idx],always_add)
 end
 
 if options.pairwise
@@ -348,6 +377,16 @@ if options.pairwise
       puts "sequence pairs with different match sets for which #{argv1} have a larger score than #{argv0}: #{counters.mh1_largerscore}"
       puts "sequence pairs with different match sets for which #{argv0} have a larger score than #{argv1}: #{counters.mh0_largerscore}"
       puts "sequence pairs for which #{argv0} have same score as #{argv1}: #{counters.samescore}"
+    end
+  end
+elsif options.ignore_query
+  multi_merge_sets(match_hash_tab) do |key,mh_sets|
+    mh_sets.each_with_index do |s,sidx|
+      mh_sets.each_with_index do |t,tidx|
+        if sidx < tidx
+          identical_upto_query(s,t)
+        end
+      end
     end
   end
 else

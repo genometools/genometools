@@ -3484,9 +3484,7 @@ static void gt_diagbandseed_process_segment(
                                  gt_querymatch_dblen(info_querymatch->
                                                      querymatchspaceptr) - 1;
             newrectangle.b_start
-            /* XXX: think about whether is correct to work on forward coords. */
-              = gt_querymatch_querystart_fwdstrand(info_querymatch->
-                                                   querymatchspaceptr);
+              = gt_querymatch_querystart(info_querymatch->querymatchspaceptr);
             newrectangle.b_end = newrectangle.b_start +
                                  gt_querymatch_querylen(info_querymatch->
                                                         querymatchspaceptr) - 1;

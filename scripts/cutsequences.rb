@@ -1,14 +1,7 @@
 #!/usr/bin/env ruby
 
 require_relative "fasta"
-
-def print_sequence(seq, linelength, fp=STDOUT)
-  pos = 0
-  while pos < seq.length do
-    fp.puts seq[pos..pos+linelength-1]
-    pos += linelength
-  end
-end
+require_relative "print_sequence"
 
 def cutsinglesequence(sequence,header,maxnumber,minlength,
                       maxlength,linelength)
