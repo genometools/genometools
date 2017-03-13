@@ -27,6 +27,9 @@ bool gt_querymatch_cigarstring_display(const GtSeedExtendDisplayFlag
 
 bool gt_querymatch_seed_display(const GtSeedExtendDisplayFlag *display_flag);
 
+bool gt_querymatch_failed_seed_display(const GtSeedExtendDisplayFlag
+                                         *display_flag);
+
 bool gt_querymatch_seed_in_alignment_display(
                  const GtSeedExtendDisplayFlag *display_flag);
 

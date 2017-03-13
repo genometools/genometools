@@ -127,6 +127,8 @@ GtWord gt_querymatch_score(const GtQuerymatch *querymatch);
 
 void gt_querymatch_prettyprint(const GtQuerymatch *querymatch);
 
+void gt_querymatch_show_failed_seed(const GtQuerymatch *querymatch);
+
 void gt_querymatch_enhanced_prettyprint(double evalue,double bit_score,
                                         const GtQuerymatch *querymatch);
 

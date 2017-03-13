@@ -27,6 +27,7 @@ typedef enum
   Gt_Polishinginfo_display,
   Gt_Fstperquery_display,
   Gt_Seed_display,
+  Gt_Failed_Seed_display,
   Gt_Seed_in_alignment_display,
   Gt_Seqlength_display,
   Gt_Evalue_display,
@@ -69,6 +70,12 @@ static bool gt_querymatch_display_on(const GtSeedExtendDisplayFlag
 bool gt_querymatch_seed_display(const GtSeedExtendDisplayFlag *display_flag)
 {
   return gt_querymatch_display_on(display_flag,Gt_Seed_display);
+}
+
+bool gt_querymatch_failed_seed_display(const GtSeedExtendDisplayFlag
+                                         *display_flag)
+{
+  return gt_querymatch_display_on(display_flag,Gt_Failed_Seed_display);
 }
 
 bool gt_querymatch_cigarstring_display(const GtSeedExtendDisplayFlag
@@ -182,6 +189,8 @@ const char *gt_querymatch_display_help(void)
          "              alignment\n"
          "fstperquery:  output only the first found match per query\n"
          "seed:         display the seed of the match\n"
+         "failed_seed:  display the seed of the match that was extended,\n"
+         "              but failed (after extension) the filter conditions\n"
          "seed_in_algn: display the seed in alignment\n"
          "seqlength:    display length of sequences in which\n"
          "              the two match-instances occur\n"
@@ -196,7 +205,7 @@ static int gt_querymatch_display_flag_set(GtWord *parameter,
                                           GtError *err)
 {
   const char *display_strings[]
-    = {"alignment","cigar","polinfo","fstperquery","seed",
+    = {"alignment","cigar","polinfo","fstperquery","seed","failed_seed",
        "seed_in_algn","seqlength","evalue", "seqdesc","bitscore"};
   size_t ds_idx, numofds = sizeof display_strings/sizeof display_strings[0];
   const GtSeedExtendDisplay_enum exclude_list[] = {Gt_Alignment_display,

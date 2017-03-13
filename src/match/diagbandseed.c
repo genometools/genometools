@@ -2965,6 +2965,7 @@ static int gt_diagbandseed_possibly_extend(const GtArrayGtDiagbandseedRectangle
         ret = 3; /* output match */
       } else
       {
+        gt_querymatch_show_failed_seed(querymatch);
         ret = 2; /* found match, which does not satisfy length or similarity
                     constraints */
       }
