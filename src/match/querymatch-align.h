@@ -112,4 +112,7 @@ typedef struct
 const GtSeqpaircoordinates *gt_querymatchoutoptions_correction_get(
               const GtQuerymatchoutoptions *querymatchoutoptions);
 
+void gt_querymatch_column_header_output(const GtSeedExtendDisplayFlag
+                                         *display_flag,FILE *stream);
+
 #endif

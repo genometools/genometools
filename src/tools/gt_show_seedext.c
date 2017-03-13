@@ -211,12 +211,17 @@ static void gt_show_seed_extend_plain(GtSequencepairbuffer *seqpairbuf,
                                          querylen);
   if (edist < distance)
   {
-    printf("# edist=" GT_WU " (smaller by " GT_WU ")\n",edist,distance - edist);
+    printf("\n# edist=" GT_WU " (smaller by " GT_WU ")\n",
+           edist,distance - edist);
+  } else
+  {
+    fputc('\n',stdout);
   }
   gt_assert(edist <= distance);
   if (alignmentwidth > 0)
   {
     const bool downcase = false;
+
     gt_alignment_show_generic(alignment_show_buffer,
                               downcase,
                               alignment,

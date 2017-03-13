@@ -269,14 +269,6 @@ static const char *gt_seed_extend_outflag = "FRCP";
 void gt_querymatch_coordinates_out(const GtQuerymatch *querymatch)
 {
   gt_assert(querymatch != NULL);
-  if (gt_querymatch_seed_display(querymatch->display_flag))
-  {
-    fprintf(querymatch->fp, "# seed:\t" GT_WU "\t" GT_WU "\t"  GT_WU "\t%c\t"
-                              Formatuint64_t "\t" GT_WU "\n",
-            querymatch->seedlen, querymatch->dbseqnum, querymatch->seedpos1,
-            gt_seed_extend_outflag[querymatch->query_readmode],
-            querymatch->queryseqnum, querymatch->seedpos2);
-  }
   fprintf(querymatch->fp,GT_WU,querymatch->dblen);
   if (gt_querymatch_seqdesc_display(querymatch->display_flag))
   {
@@ -315,6 +307,11 @@ void gt_querymatch_coordinates_out(const GtQuerymatch *querymatch)
   {
     fprintf(querymatch->fp, " " GT_WU " " GT_WU,
             querymatch->dbseqlen, querymatch->query_totallength);
+  }
+  if (gt_querymatch_seed_display(querymatch->display_flag))
+  {
+    fprintf(querymatch->fp," " GT_WU " " GT_WU " "  GT_WU,
+            querymatch->seedlen, querymatch->seedpos1, querymatch->seedpos2);
   }
 }
 

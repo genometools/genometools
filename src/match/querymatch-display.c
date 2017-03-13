@@ -164,6 +164,10 @@ GtStr *gt_querymatch_column_header(const GtSeedExtendDisplayFlag *display_flag)
 {
   GtStr *str = gt_str_new();
 
+  if (gt_querymatch_seed_display(display_flag))
+  {
+    gt_str_append_cstr(str," seedlen aseedstartpos bseedstartpos");
+  }
   if (gt_querymatch_seqlength_display(display_flag))
   {
     gt_str_append_cstr(str," aseqlen bseqlen");
@@ -176,7 +180,27 @@ GtStr *gt_querymatch_column_header(const GtSeedExtendDisplayFlag *display_flag)
   {
     gt_str_append_cstr(str," bit-score");
   }
+  if (gt_querymatch_cigarstring_display(display_flag))
+  {
+    gt_str_append_cstr(str," cigarstring");
+  }
   return str;
+}
+
+void gt_querymatch_column_header_output(const GtSeedExtendDisplayFlag
+                                         *display_flag,FILE *stream)
+{
+  GtStr *add_column_header;
+
+  fprintf(stream,"# columns: alen aseq astartpos strand blen bseq bstartpos "
+                 "score editdist identity");
+  add_column_header = gt_querymatch_column_header(display_flag);
+  if (gt_str_length(add_column_header) > 0)
+  {
+    fputs(gt_str_get(add_column_header),stream);
+  }
+  fputc('\n',stream);
+  gt_str_delete(add_column_header);
 }
 
 const char *gt_querymatch_display_help(void)
@@ -188,7 +212,8 @@ const char *gt_querymatch_display_help(void)
          "polinfo:      display polishing information for displayed\n"
          "              alignment\n"
          "fstperquery:  output only the first found match per query\n"
-         "seed:         display the seed of the match\n"
+         "seed:         display the seed of the match, i.e. the length and\n"
+         "              the start position of the seed in both instances\n"
          "failed_seed:  display the seed of the match that was extended,\n"
          "              but failed (after extension) the filter conditions\n"
          "seed_in_algn: display the seed in alignment\n"

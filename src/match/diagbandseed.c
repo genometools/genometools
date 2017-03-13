@@ -3557,8 +3557,6 @@ static void gt_diagbandseed_match_header(FILE *stream,
                                          GtUword ndiags,
                                          GtUword minsegmentlen)
 {
-  GtStr *add_column_header;
-
   fprintf(stream,"# start processing of seeds ...\n");
   fprintf(stream,"# parameters for selecting seeds: seedlength=%u, "
                  "diagonal bands=" GT_WU ", minimal segmentsize=" GT_WU
@@ -3582,15 +3580,6 @@ static void gt_diagbandseed_match_header(FILE *stream,
                    "xdrop_below_score=" GT_WU "\n",
                    gt_xdrop_extend_belowscore(xdropmatchinfo));
   }
-  fprintf(stream,"# columns: alen aseq astartpos strand blen bseq bstartpos "
-                 "score editdist identity");
-  add_column_header = gt_querymatch_column_header(extp->display_flag);
-  if (gt_str_length(add_column_header) > 0)
-  {
-    fputs(gt_str_get(add_column_header),stream);
-  }
-  fputc('\n',stream);
-  gt_str_delete(add_column_header);
 }
 
 static void gt_diagbandseed_info_qm_set(
@@ -4000,6 +3989,7 @@ static void gt_diagbandseed_process_seeds(GtSeedpairlist *seedpairlist,
       }
       gt_diagbandseed_match_header(stream,extp,processinfo,
                                    seedlength,ndiags,minsegmentlen);
+      gt_querymatch_column_header_output(extp->display_flag,stream);
     }
   }
   gt_diagbandseed_info_qm_set(&info_querymatch,

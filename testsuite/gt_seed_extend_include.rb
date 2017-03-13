@@ -155,11 +155,16 @@ Name "gt dev show_seedext without alignment"
 Keywords "gt_seed_extend"
 Test do
   run_test build_encseq("at1MB", "#{$testdata}at1MB")
-  run_test "#{$bin}gt seed_extend -v -outfmt seed -ii at1MB"
+  run_test "#{$bin}gt seed_extend -v -ii at1MB"
   run "mv #{last_stdout} seed_extend.out"
   run_test "#{$bin}gt dev show_seedext -f seed_extend.out"
+  run "grep -v '^#' #{last_stdout}"
   run "mv #{last_stdout} show_seed_ext.out"
   run "grep -v '^#' seed_extend.out"
+  run "cmp #{last_stdout} show_seed_ext.out"
+  run_test "#{$bin}gt seed_extend -v -outfmt seed -ii at1MB"
+  run "#{$scriptsdir}/extract-seed.rb #{last_stdout}"
+  run_test "#{$bin}gt dev show_seedext -f #{last_stdout}"
   run "cmp #{last_stdout} show_seed_ext.out"
 end
 
