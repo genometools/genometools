@@ -2,16 +2,7 @@
 
 require "set"
 require "optparse"
-
-SEmatch = Struct.new("SEmatch",:dbseqnum,
-                               :dbstart,
-                               :dbend,
-                               :queryseqnum,
-                               :querystart,
-                               :queryend,
-                               :forward,
-                               :score,
-                               :origline)
+require_relative "SEmatch"
 
 def openfile(filename)
 begin
@@ -22,86 +13,20 @@ end
   return fp
 end
 
-def coords_contained_in(start0,end0,start1,end1)
-  if start1 <= start0 and end0 <= end1
-    return true
-  end
-  return false
-end
-
-def match_is_identical(m0,m1)
-  if m0.dbseqnum != m1.dbseqnum or m0.queryseqnum != m1.queryseqnum
-    STDERR.puts "expect same sequence numbers"
-    exit 1
-  end
-  if [m0.dbstart,m0.dbend,m0.querystart,m0.queryend] ==
-     [m1.dbstart,m1.dbend,m1.querystart,m1.queryend]
-    return true
-  end
-  return false
-end
-
-def match_proper_contained_in(m0,m1)
-  if m0.dbseqnum != m1.dbseqnum or m0.queryseqnum != m1.queryseqnum
-    STDERR.puts "expect same sequence numbers"
-    exit 1
-  end
-  if coords_contained_in(m0.dbstart,m0.dbend,m1.dbstart,m1.dbend) and
-     coords_contained_in(m0.querystart,m0.queryend,m1.querystart,m1.queryend) and
-     not match_is_identical(m0,m1)
-    return true
-  end
-  return false
-end
-
-def coords_overlap_size(start0,end0,start1,end1)
-  if start0 > start1
-    STDERR.puts "start0=#{start0} > #{start1} = start1 not expected"
-    exit 1
-  end
-  if end0 < start1
-    return 0
-  elsif end0 < end1
-    return end0 - start1 + 1
-  else
-    return end1 - start1 + 1
-  end
-end
-
-def matchlength(m)
-  return (m.dbend - m.dbstart + 1 + m.queryend - m.querystart + 1)/2
-end
-
-def matches_overlap(m0,m1)
-  ovl = 0
-  if m0.dbstart <= m1.dbstart
-    ovl += coords_overlap_size(m0.dbstart,m0.dbend,m1.dbstart,m1.dbend)
-  else
-    ovl += coords_overlap_size(m1.dbstart,m1.dbend,m0.dbstart,m0.dbend)
-  end
-  if m0.querystart <= m1.querystart
-    ovl += coords_overlap_size(m0.querystart,m0.queryend,m1.querystart,m1.queryend)
-  else
-    ovl += coords_overlap_size(m1.querystart,m1.queryend,m0.querystart,m0.queryend)
-  end
-  len = matchlength(m0) + matchlength(m1)
-  return (ovl.to_f/len.to_f).round
-end
-
 def add_single_match(matchset,m,always_add = false)
   add_m = true
   if not always_add
     to_delete = Array.new()
     matchset.each do |previous|
       if match_proper_contained_in(m,previous)
-        if previous.score > m.score
+        if previous[:score] > m[:score]
           add_m = false
         end
       elsif match_proper_contained_in(previous,m)
-        if previous.score < m.score
+        if previous[:score] < m[:score]
           to_delete.push(previous)
         end
-      elsif match_is_identical(previous,m) and previous.score > m.score
+      elsif match_is_identical(previous,m) and previous[:score] > m[:score]
         add_m = false
       end
     end
@@ -114,8 +39,8 @@ def add_single_match(matchset,m,always_add = false)
   end
   max_score = 0
   matchset.each do |elem|
-    if max_score < elem.score
-      max_score = elem.score
+    if max_score < elem[:score]
+      max_score = elem[:score]
     end
   end
   return max_score
@@ -124,36 +49,15 @@ end
 def convertmatchfile2hash(matchfile,always_add)
   match_hash = Hash.new()
   score_hash = Hash.new() {0}
-  fp = openfile(matchfile)
-  runtime = nil
-  spacepeak = nil
-  fp.each_line do |line|
-    if line.match(/^#/)
-      m = line.match(/^# TIME.*\s(\S+)$/)
-      if m
-        runtime = m[1].to_f
-      elsif m = line.match(/^# combined space peak in megabytes:\s(\S+)$/)
-        spacepeak = m[1].to_f
-      end
-    else
-      a = line.split(/\s/)
-      m = SEmatch.new(a[1].to_i,
-                      a[2].to_i,
-                      a[2].to_i + a[0].to_i - 1,
-                      a[5].to_i,
-                      a[6].to_i,
-                      a[6].to_i + a[4].to_i - 1,
-                      if a[3] == "F" then true else false end,
-                      a[7].to_i,
-                      line.chomp)
-      key = [m.dbseqnum,m.queryseqnum]
-      if not match_hash.has_key?(key)
-        match_hash[key] = Set.new()
-      end
-      score_hash[key] = add_single_match(match_hash[key],m,always_add)
+  sematch = SEmatch.new(matchfile)
+  sematch.each do |m|
+    key = [m[:s_seqnum],m[:q_seqnum]]
+    if not match_hash.has_key?(key)
+      match_hash[key] = Set.new()
     end
+    score_hash[key] = add_single_match(match_hash[key],m,always_add)
   end
-  return match_hash, score_hash, runtime, spacepeak
+  return match_hash, score_hash, sematch.runtime_get(), sematch.spacepeak_get()
 end
 
 def merge_sets(mh0,mh1)
@@ -201,9 +105,8 @@ def overlap_in_one_instance(mh0_set,mh1_set)
   mh0_set.each do |m0|
     overlaps = false
     mh1_set.each do |m1|
-      if coords_contained_in(m0.dbstart,m0.dbend,m1.dbstart,m1.dbend) or
-         coords_contained_in(m0.querystart,m0.queryend,
-                             m1.querystart,m1.queryend)
+      if coords_contained_in(m0[:s_start],m0[:s_end],m1[:s_start],m1[:s_end]) or
+         coords_contained_in(m0[:q_start],m0[:q_end],m1[:q_start],m1[:q_end])
         overlaps = true
         break
       end
@@ -220,7 +123,7 @@ def set_show(key,s)
     puts "# #{key} is empty"
   else
     s.each do |elem|
-      puts "# #{key}: #{elem.origline}"
+      puts "# #{key}: #{elem[:origline]}"
     end
   end
 end
@@ -289,12 +192,12 @@ def identical_upto_query(s,t)
     exit 1
   end
   s.zip(t).each do |ms,mt|
-    vals = [ms.dbseqnum,ms.dbstart,ms.dbend,ms.queryend-ms.querystart,ms.score,
-            ms.forward]
-    valt = [mt.dbseqnum,mt.dbstart,mt.dbend,mt.queryend-mt.querystart,mt.score,
-            if mt.forward then false else true end]
+    vals = [ms[:s_seqnum],ms[:s_start],ms[:s_end],ms[:q_len],ms[:score],
+            ms[:strand]]
+    valt = [mt[:s_seqnum],mt[:s_start],mt[:s_end],mt[:q_len],mt[:score],
+            if mt[:strand] == "F" then "P" else "F" end]
     if vals != valt
-      STDERR.puts "#{$0}: vals = #{vals} != #{valt}"
+      STDERR.puts "#{$0}: vals = #{vals} != #{valt} = valst"
       exit 1
     end
   end

@@ -166,23 +166,23 @@ GtStr *gt_querymatch_column_header(const GtSeedExtendDisplayFlag *display_flag)
 
   if (gt_querymatch_seed_display(display_flag))
   {
-    gt_str_append_cstr(str," seedlen aseedstartpos bseedstartpos");
+    gt_str_append_cstr(str,", seedlen, s.seedstart, q.seedstart");
   }
   if (gt_querymatch_seqlength_display(display_flag))
   {
-    gt_str_append_cstr(str," aseqlen bseqlen");
+    gt_str_append_cstr(str,", s.seqlen, q.seqlen");
   }
   if (gt_querymatch_evalue_display(display_flag))
   {
-    gt_str_append_cstr(str," evalue");
+    gt_str_append_cstr(str,", evalue");
   }
   if (gt_querymatch_bitscore_display(display_flag))
   {
-    gt_str_append_cstr(str," bit-score");
+    gt_str_append_cstr(str,", bit score");
   }
   if (gt_querymatch_cigarstring_display(display_flag))
   {
-    gt_str_append_cstr(str," cigarstring");
+    gt_str_append_cstr(str,", cigarstring");
   }
   return str;
 }
@@ -192,8 +192,8 @@ void gt_querymatch_column_header_output(const GtSeedExtendDisplayFlag
 {
   GtStr *add_column_header;
 
-  fprintf(stream,"# columns: alen aseq astartpos strand blen bseq bstartpos "
-                 "score editdist identity");
+  fprintf(stream,"# Fields: s.len, s.seqnum, s.start, strand, q.len, q.seqnum, "
+                 "q.start, score, editdist, identity");
   add_column_header = gt_querymatch_column_header(display_flag);
   if (gt_str_length(add_column_header) > 0)
   {

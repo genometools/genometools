@@ -650,7 +650,7 @@ static void gt_seed_extend_Options_out(int argc,const char **argv,
   int idx;
   bool minid_out = false, history_out = false;
 
-  printf("# options:");
+  printf("# Options:");
   for (idx = 1; idx < argc; idx++) {
     if (strcmp(argv[idx],"-minidentity") == 0) {
       minid_out = true;
