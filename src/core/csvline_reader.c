@@ -151,16 +151,15 @@ GtCsvcolumn gt_csvline_reader_column(const GtCsvlineReader *csvline_reader,
     col.content = csvline_reader->line.spacechar +
                   csvline_reader->columnoffset.spaceGtUword[colnum-1];
   }
-  if (colnum == csvline_reader->columnoffset.nextfreeGtUword)
+  if (colnum == 0)
   {
-    gt_assert(colnum > 0);
-    col.width = csvline_reader->line.nextfreechar -
-                csvline_reader->columnoffset.spaceGtUword[colnum-1] - 1;
+    col.width = csvline_reader->columnoffset.spaceGtUword[colnum] - 1;
   } else
   {
-    if (colnum == 0)
+    if (colnum == csvline_reader->columnoffset.nextfreeGtUword)
     {
-      col.width = csvline_reader->columnoffset.spaceGtUword[colnum] - 1;
+      col.width = csvline_reader->line.nextfreechar -
+                  csvline_reader->columnoffset.spaceGtUword[colnum-1] - 1;
     } else
     {
       col.width = csvline_reader->columnoffset.spaceGtUword[colnum] -

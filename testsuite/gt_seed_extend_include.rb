@@ -33,7 +33,7 @@ Name "gt seed_extend: symmetry of maxmat/use-apos"
 Keywords "gt_seed_extend symmetry"
 Test do
   run_test build_encseq("u8", "#{$testdata}U89959_genomic.fas")
-  run "#{$scriptsdir}/reverse-complement.rb #{$testdata}U89959_genomic.fas"
+  run "#{$scriptsdir}reverse-complement.rb #{$testdata}U89959_genomic.fas"
   run "mv #{last_stdout} u8-rev.fas"
   run_test build_encseq("u8-rev", "u8-rev.fas")
   run_test build_encseq("at1MB", "#{$testdata}at1MB")
@@ -42,12 +42,12 @@ Test do
   run "mv #{last_stdout} u8.matches"
   run "#{$bin}gt seed_extend #{options} -qii u8-rev -no-forward"
   run "mv #{last_stdout} u8-rev.matches"
-  run "#{$scriptsdir}/matches-compare.rb -i u8.matches u8-rev.matches"
+  run "#{$scriptsdir}matches-compare.rb -i u8.matches u8-rev.matches"
   run "#{$bin}gt seed_extend #{options} -qii u8 -no-forward"
   run "mv #{last_stdout} u8.matches"
   run "#{$bin}gt seed_extend #{options} -qii u8-rev -no-reverse"
   run "mv #{last_stdout} u8-rev.matches"
-  run "#{$scriptsdir}/matches-compare.rb -i u8.matches u8-rev.matches"
+  run "#{$scriptsdir}matches-compare.rb -i u8.matches u8-rev.matches"
 end
 
 Name "gt seed_extend: fstperquery"
@@ -59,16 +59,16 @@ Test do
   run "mv #{last_stdout} fstperquery.matches"
   run_test "#{$bin}gt seed_extend -ii at1MB -qii gt_bioseq_succ_3 -bias-parameters"
   run "mv #{last_stdout} all.matches"
-  run "#{$scriptsdir}/check-fstperquery.rb fstperquery.matches all.matches"
+  run "#{$scriptsdir}check-fstperquery.rb fstperquery.matches all.matches"
   run_test "#{$bin}gt seed_extend -ii at1MB -bias-parameters -outfmt fstperquery"
   run "mv #{last_stdout} fstperquery.matches"
   run_test "#{$bin}gt seed_extend -ii at1MB -bias-parameters"
   run "mv #{last_stdout} all.matches"
-  run "#{$scriptsdir}/check-fstperquery.rb fstperquery.matches all.matches"
+  run "#{$scriptsdir}check-fstperquery.rb fstperquery.matches all.matches"
 end
 
 Name "gt seed_extend: display arguments"
-Keywords "gt_seed_extend failure"
+Keywords "gt_seed_extend display"
 Test do
   run_test build_encseq("at1MB", "#{$testdata}at1MB", true)
   run_test build_encseq("Atinsert.fna", "#{$testdata}Atinsert.fna", true)
@@ -82,23 +82,23 @@ Test do
     end
   end
   run_test "#{$bin}gt seed_extend -ii at1MB -l 500 -outfmt alignment=70"
-  run "cmp #{last_stdout} #{$testdata}/see-ext-at1MB-500-al.matches"
+  run "diff -I '^#' #{last_stdout} #{$testdata}see-ext-at1MB-500-al.matches"
   run_test "#{$bin}gt seed_extend -ii at1MB -l 400 -outfmt evalue bitscore"
-  run "cmp #{last_stdout} #{$testdata}/see-ext-at1MB-400-evalue-bitscore.matches"
+  run "diff -I '^#' #{last_stdout} #{$testdata}see-ext-at1MB-400-evalue-bitscore.matches"
   run_test "#{$bin}gt seed_extend -ii at1MB -l 400 -outfmt seqdesc"
-  run "cmp #{last_stdout} #{$testdata}/see-ext-at1MB-400-seqdesc.matches"
+  run "diff -I '^#' #{last_stdout} #{$testdata}see-ext-at1MB-400-seqdesc.matches"
   run_test "#{$bin}gt seed_extend -ii at1MB -l 400 -outfmt cigar"
-  run "cmp #{last_stdout} #{$testdata}/see-ext-at1MB-400-cigar.matches"
+  run "diff -I '^#' #{last_stdout} #{$testdata}see-ext-at1MB-400-cigar.matches"
   run_test "#{$bin}gt seed_extend -ii at1MB -l 700 -outfmt alignment=60 seed_in_algn"
-  run "cmp #{last_stdout} #{$testdata}/see-ext-at1MB-500-alignment-seed_in_algn.matches"
+  run "diff -I '^#' #{last_stdout} #{$testdata}see-ext-at1MB-500-alignment-seed_in_algn.matches"
   run_test "#{$bin}gt seed_extend -ii at1MB -l 400 -outfmt seqlength"
-  run "cmp #{last_stdout} #{$testdata}/see-ext-at1MB-400-seqlength.matches"
+  run "diff -I '^#' #{last_stdout} #{$testdata}see-ext-at1MB-400-seqlength.matches"
   run_test "#{$bin}gt seed_extend -ii at1MB -qii Atinsert.fna -l 100 -outfmt bitscore evalue seqlength cigar"
-  run "cmp #{last_stdout} #{$testdata}/see-ext-at1MB-Atinsert100-evalue-bitscore-cigar-seqlength.matches"
+  run "diff -I '^#' #{last_stdout} #{$testdata}see-ext-at1MB-Atinsert100-evalue-bitscore-cigar-seqlength.matches"
   evalue_filter = 10e-30
   run_test "#{$bin}gt seed_extend -ii at1MB -evalue #{evalue_filter} -outfmt evalue"
   run "mv #{last_stdout} strong.matches"
-  run "#{$scriptsdir}/evalue-filter.rb #{evalue_filter} strong.matches"
+  run "#{$scriptsdir}evalue-filter.rb #{evalue_filter} strong.matches"
 end
 
 # Invalid arguments
@@ -158,14 +158,12 @@ Test do
   run_test "#{$bin}gt seed_extend -v -ii at1MB"
   run "mv #{last_stdout} seed_extend.out"
   run_test "#{$bin}gt dev show_seedext -f seed_extend.out"
-  run "grep -v '^#' #{last_stdout}"
   run "mv #{last_stdout} show_seed_ext.out"
-  run "grep -v '^#' seed_extend.out"
-  run "cmp #{last_stdout} show_seed_ext.out"
+  run "diff -I '^#' seed_extend.out show_seed_ext.out"
   run_test "#{$bin}gt seed_extend -v -outfmt seed -ii at1MB"
-  run "#{$scriptsdir}/extract-seed.rb #{last_stdout}"
+  run "#{$scriptsdir}extract-seed.rb #{last_stdout}"
   run_test "#{$bin}gt dev show_seedext -f #{last_stdout}"
-  run "cmp #{last_stdout} show_seed_ext.out"
+  run "diff -I '^#' #{last_stdout} show_seed_ext.out"
 end
 
 # cam extension options
@@ -178,9 +176,10 @@ Test do
       $CAM_LIST.each do |b_cam|
         run_test "#{$bin}gt seed_extend -extendgreedy " +
                  "-cam #{a_cam},#{b_cam} -ii at1MB #{splt}", :retval => 0
+        run "grep -v '^#' #{last_stdout}"
         run "sort #{last_stdout}"
         run "mv #{last_stdout} see-ext-at1MB-#{a_cam}-#{b_cam}.matches"
-        run "cmp see-ext-at1MB-#{a_cam}-#{b_cam}.matches #{$testdata}see-ext-at1MB.matches"
+        run "diff -I '^#' see-ext-at1MB-#{a_cam}-#{b_cam}.matches #{$testdata}see-ext-at1MB.matches"
       end
     end
   end
@@ -191,12 +190,13 @@ if $gttestdata
   Keywords "gt_seed_extend bytestring"
   Test do
     indexname="manyshort-somelong"
-    run("#{$scriptsdir}/manyshort-somelong.rb #{$gttestdata}/DNA-mix/Grumbach.fna 10000")
+    run("#{$scriptsdir}manyshort-somelong.rb #{$gttestdata}DNA-mix/Grumbach.fna 10000")
     run_test build_encseq(indexname, last_stdout)
     run_test "#{$bin}gt seed_extend -no-reverse -l 50 -splt bytestring -ii #{indexname}"
+    run "grep -v '^#' #{last_stdout}"
     run "mv #{last_stdout} splt-bytestring.matches"
     run_test "#{$bin}gt seed_extend -no-reverse -l 50 -splt struct -ii #{indexname}"
-    run "cmp -s #{last_stdout} splt-bytestring.matches"
+    run "diff -I '^#' #{last_stdout} splt-bytestring.matches"
   end
 end
 
@@ -215,22 +215,22 @@ Test do
         run "sort #{last_stdout}"
         run "mv #{last_stdout} default_run.out"
         if query == ""
-          run "cmp default_run.out #{$testdata}see-ext-#{dataset}.matches"
+          run "diff -I '^#' default_run.out #{$testdata}see-ext-#{dataset}.matches"
         else
-          run "cmp default_run.out #{$testdata}see-ext-#{dataset}-u8.matches"
+          run "diff -I '^#' default_run.out #{$testdata}see-ext-#{dataset}-u8.matches"
         end
         run_test "#{$bin}gt -j 4 seed_extend -ii #{dataset}#{query} -parts 4"
         run "sort #{last_stdout}"
-        run "cmp -s default_run.out #{last_stdout}"
+        run "diff -I '^#' default_run.out #{last_stdout}"
         run_test "#{$bin}gt -j 2 seed_extend -ii #{dataset}#{query} -parts 5"
         run "sort #{last_stdout}"
-        run "cmp -s default_run.out #{last_stdout}"
+        run "diff -I '^#' default_run.out #{last_stdout}"
         run_test "#{$bin}gt -j 8 seed_extend -ii #{dataset}#{query} -parts 2"
         run "sort #{last_stdout}"
-        run "cmp -s default_run.out #{last_stdout}"
+        run "diff -I '^#' default_run.out #{last_stdout}"
         run_test "#{$bin}gt -j 3 seed_extend -ii #{dataset}#{query}"
         run "sort #{last_stdout}"
-        run "cmp -s default_run.out #{last_stdout}"
+        run "diff -I '^#' default_run.out #{last_stdout}"
       end
     end
   end
@@ -244,9 +244,11 @@ Test do
   for splt in $SPLT_LIST do
     run_test "#{$bin}gt seed_extend -only-seeds -verify -seedlength 10 " +
              "-debug-kmer -debug-seedpair -ii small_poly -kmerfile no #{splt} "
-    run "gunzip -c #{$testdata}seedextend1.out.gz | cmp #{last_stdout}"
+    run "gunzip -c #{$testdata}seedextend1.out.gz | diff -I '^#' - #{last_stdout}"
     run_test "#{$bin}gt seed_extend -only-seeds -verify -kmerfile no " +
-             "-debug-kmer -debug-seedpair -ii small_poly #{splt} | wc -l | grep 792"
+             "-debug-kmer -debug-seedpair -ii small_poly #{splt}"
+    run "cat #{last_stdout} | wc -l"
+    run "grep 793 #{last_stdout}"
     run_test "#{$bin}gt seed_extend -only-seeds -verify -seedlength 13 " +
              "-debug-seedpair -ii small_poly #{splt}"
     grep last_stdout, /\# SeedPair \(0,2,12,12\)/
@@ -262,10 +264,10 @@ Test do
   for splt in $SPLT_LIST do
     run_test "#{$bin}gt seed_extend -extendxdrop 97 " +
              "-l 10 -ii small_poly -verify-alignment #{splt}"
-    run "cmp #{last_stdout} #{$testdata}seedextend3.out"
+    run "diff -I '^#' #{last_stdout} #{$testdata}seedextend3.out"
     run_test "#{$bin}gt seed_extend -extendgreedy 97 " +
              "-l 10 -ii small_poly -verify-alignment #{splt}"
-    run "cmp #{last_stdout} #{$testdata}seedextend3.out"
+    run "diff -I '^#' #{last_stdout} #{$testdata}seedextend3.out"
   end
 end
 
@@ -278,7 +280,7 @@ Test do
            "-ii at1MB -only-seeds -no-reverse -seedlength 14 -splt struct"
   grep last_stderr, /only k-mers occurring <= 3 times will be considered, /
     /due to small memlimit. Expect 50496 seeds./
-  run "gunzip -c #{$testdata}seedextend2.out.gz | cmp #{last_stdout}"
+  run "gunzip -c #{$testdata}seedextend2.out.gz | diff -I '^#' - #{last_stdout}"
   run_test "#{$bin}gt seed_extend -only-seeds -v -maxfreq 5 -ii at1MB"
   grep last_stdout, /... collected 622939 10-mers/
   grep last_stdout, /... collected 305756 seeds/
@@ -425,7 +427,7 @@ Test do
     run "mv #{last_stdout} default.out"
     run_test "#{$bin}gt seed_extend -ii at1MB -parts 4 -verify-alignment #{splt}"
     run "sort #{last_stdout}"
-    run "cmp -s default.out #{last_stdout}"
+    run "diff -I '^#'  default.out #{last_stdout}"
     run_test "#{$bin}gt seed_extend -ii at1MB -qii gt_bioseq_succ_3 " +
              "-parts 2 -pick 1,2 -verify-alignment #{splt}"
     grep last_stdout, /24 209 15 P 26 2 248 35 5 80.00/

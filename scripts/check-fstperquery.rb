@@ -11,17 +11,21 @@ fstperquery_matches = Set.new()
 fstperquery_seqnum = Set.new()
 
 File.new(ARGV[0],"r").each_line do |line|
-  fstperquery_matches.add(line.chomp)
-  a = line.split(/\s/)
-  fstperquery_seqnum.add(a[5].to_i)
+  if not line.match(/^#/)
+    fstperquery_matches.add(line.chomp)
+    a = line.split(/\s/)
+    fstperquery_seqnum.add(a[5].to_i)
+  end
 end
 
 all_matches = Set.new()
 all_seqnum = Set.new()
 File.new(ARGV[1],"r").each_line do |line|
-  all_matches.add(line.chomp)
-  a = line.split(/\s/)
-  all_seqnum.add(a[5].to_i)
+  if not line.match(/^#/)
+    all_matches.add(line.chomp)
+    a = line.split(/\s/)
+    all_seqnum.add(a[5].to_i)
+  end
 end
 
 if not fstperquery_matches.subset?(all_matches)

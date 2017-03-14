@@ -3989,8 +3989,8 @@ static void gt_diagbandseed_process_seeds(GtSeedpairlist *seedpairlist,
       }
       gt_diagbandseed_match_header(stream,extp,processinfo,
                                    seedlength,ndiags,minsegmentlen);
-      gt_querymatch_column_header_output(extp->display_flag,stream);
     }
+    gt_querymatch_column_header_output(extp->display_flag,stream);
   }
   gt_diagbandseed_info_qm_set(&info_querymatch,
                               extp,

@@ -18,10 +18,12 @@ evalue_filter = ARGV[0].to_f
 fpstrong = openthefile(ARGV[1])
 
 fpstrong.each_line do |line|
-  a = line.split(/\s/)
-  evalue = a[a.length - 1].to_f
-  if evalue > evalue_filter
-    STDERR.puts "#{$0}: unexpected line: #{line.chomp}"
-    exit 1
+  if not line.match(/^#/)
+    a = line.split(/\s/)
+    evalue = a[a.length - 1].to_f
+    if evalue > evalue_filter
+      STDERR.puts "#{$0}: unexpected line: #{line.chomp}"
+      exit 1
+    end
   end
 end

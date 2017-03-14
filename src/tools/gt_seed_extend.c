@@ -643,6 +643,37 @@ static int gt_seed_extend_arguments_check(int rest_argc, void *tool_arguments,
   return had_err;
 }
 
+/* Print verbose option string */
+static void gt_seed_extend_Options_out(int argc,const char **argv,
+                                       const GtSeedExtendArguments *arguments)
+{
+  int idx;
+  bool minid_out = false, history_out = false;
+
+  printf("# options:");
+  for (idx = 1; idx < argc; idx++) {
+    if (strcmp(argv[idx],"-minidentity") == 0) {
+      minid_out = true;
+    }
+    if (strcmp(argv[idx],"-history") == 0) {
+      history_out = true;
+    }
+    printf(" %s", argv[idx]);
+  }
+  if (arguments->maxmat != 1)
+  {
+    if (!minid_out)
+    {
+      printf(" -minidentity " GT_WU,arguments->se_minidentity);
+    }
+    if (!history_out)
+    {
+      printf(" -history " GT_WU,arguments->se_historysize);
+    }
+  }
+  printf("\n");
+}
+
 static int gt_seed_extend_runner(int argc,
                                  const char **argv,
                                  GT_UNUSED int parsed_args,
@@ -672,35 +703,7 @@ static int gt_seed_extend_runner(int argc,
     extendgreedy = false;
   }
 
-  /* Print verbose option string */
-  if (arguments->verbose) {
-    int idx;
-    bool minid_out = false, history_out = false;
-
-    printf("# Options:");
-    for (idx = 1; idx < argc; idx++) {
-      if (strcmp(argv[idx],"-minidentity") == 0) {
-        minid_out = true;
-      }
-      if (strcmp(argv[idx],"-history") == 0) {
-        history_out = true;
-      }
-      printf(" %s", argv[idx]);
-    }
-    if (arguments->maxmat != 1)
-    {
-      if (!minid_out)
-      {
-        printf(" -minidentity " GT_WU,arguments->se_minidentity);
-      }
-      if (!history_out)
-      {
-        printf(" -history " GT_WU,arguments->se_historysize);
-      }
-    }
-    printf("\n");
-  }
-
+  gt_seed_extend_Options_out(argc,argv,arguments);
   /* Calculate error percentage from minidentity */
   gt_assert(arguments->se_minidentity >= GT_EXTEND_MIN_IDENTITY_PERCENTAGE &&
             arguments->se_minidentity <= 100UL);
