@@ -1,0 +1,22 @@
+# Options: -ii at1MB -outfmt seed failed_seed evalue -l 100 -seedlength 20 -qii U89959_genomic -minidentity 80 -history 60
+# Fields: s.len, s.seqnum, s.start, strand, q.len, q.seqnum, q.start, score, editdist, identity, seedlen, s.seedstart, q.seedstart, evalue
+# failed_seed:	20	859	7	F	0	72595
+135 859 84 F 135 0 72651 258 4 97.04 20 88 72655 7e-54
+167 859 84 F 155 0 72651 271 17 89.44 20 220 72775 3e-50
+# failed_seed:	20	859	208	F	0	77815
+# failed_seed:	20	859	208	F	0	77819
+# failed_seed:	20	1214	205	F	0	77815
+333 1265 0 F 330 0 72423 612 17 94.87 20 118 72538 1e-136
+222 1361 148 F 222 0 105629 435 3 98.65 20 148 105629 2e-100
+# Fields: s.len, s.seqnum, s.start, strand, q.len, q.seqnum, q.start, score, editdist, identity, seedlen, s.seedstart, q.seedstart, evalue
+# failed_seed:	20	31	11	P	0	101872
+# failed_seed:	20	31	10	P	0	101874
+# failed_seed:	20	31	10	P	0	101877
+# failed_seed:	20	31	10	P	0	101880
+# failed_seed:	20	31	10	P	0	101883
+# failed_seed:	20	859	207	P	0	29121
+# failed_seed:	20	859	208	P	0	29126
+# failed_seed:	20	859	208	P	0	29130
+# failed_seed:	20	859	208	P	0	29134
+# failed_seed:	20	859	208	P	0	29138
+# failed_seed:	20	1214	204	P	0	29121

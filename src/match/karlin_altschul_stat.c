@@ -570,9 +570,10 @@ GtKarlinAltschulStat *gt_karlin_altschul_stat_new_gapped(
     if (seq_length_tab == NULL) /* all are of the same length */
     {
       store_under_construction = gt_malloc(sizeof *ka->searchspace_store * 1);
-      ka->searchspace_store[0].a = gt_encseq_seqlength(query_encseq,0);
-      ka->searchspace_store[0].b
-        = gt_evalue_searchspace(ka,ka->searchspace_store[0].a);
+      store_under_construction[0].a = gt_encseq_seqlength(query_encseq,0);
+      store_under_construction[0].b
+        = gt_evalue_searchspace(ka,store_under_construction[0].a);
+      ka->different_lengths = 1;
     } else
     {
       GtUword ridx, widx;
@@ -764,7 +765,6 @@ static GtUword gt_searchspace_store_find(const GtUwordPair *arr,
 {
   const GtUwordPair *left = arr, *right = arr + len - 1;
 
-  gt_assert(len > 0);
   while (left <= right)
   {
     const GtUwordPair *mid = left + GT_DIV2(right - left);

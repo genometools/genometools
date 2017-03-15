@@ -72,6 +72,7 @@ Keywords "gt_seed_extend display"
 Test do
   run_test build_encseq("at1MB", "#{$testdata}at1MB", true)
   run_test build_encseq("Atinsert.fna", "#{$testdata}Atinsert.fna", true)
+  run_test build_encseq("U89959_genomic", "#{$testdata}U89959_genomic.fas")
   run_test "#{$bin}gt seed_extend -v -ii at1MB -outfmt seed"
   run "mv #{last_stdout} tmp.matches"
   ["alignment","cigar","polinfo","fstperquery","seed","seed_in_algn","seqlength","evalue","seqdesc","bitscore"].each do |arg|
@@ -95,6 +96,12 @@ Test do
   run "diff -I '^#' #{last_stdout} #{$testdata}see-ext-at1MB-400-seqlength.matches"
   run_test "#{$bin}gt seed_extend -ii at1MB -qii Atinsert.fna -l 100 -outfmt bitscore evalue seqlength cigar"
   run "diff -I '^#' #{last_stdout} #{$testdata}see-ext-at1MB-Atinsert100-evalue-bitscore-cigar-seqlength.matches"
+  run_test "#{$bin}gt seed_extend -ii U89959_genomic -l 50 -outfmt evalue bitscore"
+  run "diff -I '^#' #{last_stdout} #{$testdata}see-ext-U8-evalue-bitscore.matches"
+  run_test "#{$bin}gt seed_extend -ii at1MB -outfmt seed failed_seed -l 600 -seedlength 20"
+  run "diff -I '^#' #{last_stdout} #{$testdata}see-ext-at1MB-500-failed_seed.matches"
+  run_test "#{$bin}gt seed_extend -ii at1MB -outfmt seed failed_seed evalue -l 100 -seedlength 20 -qii U89959_genomic"
+  run "diff #{last_stdout} #{$testdata}see-ext-at1MB-u8-failed_seed-evalue.matches"
   evalue_filter = 10e-30
   run_test "#{$bin}gt seed_extend -ii at1MB -evalue #{evalue_filter} -outfmt evalue"
   run "mv #{last_stdout} strong.matches"
