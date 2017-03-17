@@ -59,6 +59,7 @@
 #define GT_DIAGBANDSEED_FMT          "in " GT_WD ".%06ld seconds.\n"
 
 typedef uint32_t GtDiagbandseedSeqnum;
+typedef uint32_t GtDiagbandseedPosition;
 
 typedef struct { /* 8 + 4 + 4 bytes */
   GtCodetype code;              /* only sort criterion */
@@ -111,7 +112,8 @@ struct GtDiagbandseedInfo
   unsigned int seedlength;
   GtDiagbandseedPairlisttype splt;
   GtUword maxmat;
-  const GtStr *chainarguments;
+  const GtStr *chainarguments,
+              *diagband_distance;
   bool norev,
        nofwd,
        verify,
@@ -239,6 +241,7 @@ GtDiagbandseedInfo *gt_diagbandseed_info_new(const GtEncseq *aencseq,
                                              bool trimstat_on,
                                              GtUword maxmat,
                                              const GtStr *chainarguments,
+                                             const GtStr *diagband_distance,
                                              const GtDiagbandseedExtendParams
                                                *extp)
 {
@@ -260,6 +263,7 @@ GtDiagbandseedInfo *gt_diagbandseed_info_new(const GtEncseq *aencseq,
   info->trimstat_on = trimstat_on;
   info->maxmat = maxmat;
   info->chainarguments = chainarguments;
+  info->diagband_distance = diagband_distance;
   info->extp = extp;
   return info;
 }
@@ -2740,6 +2744,8 @@ static void gt_diagbandseed_get_seedpairs(GtSeedpairlist *seedpairlist,
   }
 }
 
+typedef uint32_t GtDiagbandseedScore;
+
 static int gt_diagbandseed_update_dband(GT_UNUSED GtUword ndiags,
                                         GtUword amaxlen,
                                         GtUword logdiagbandwidth,
@@ -3358,14 +3364,14 @@ static void gt_diagbandseed_segment2matches(
              void *v_process_segment_info,
              GtUword amaxlen,
              unsigned int seedlength,
-             GtUword diagbands_used,
+             GtUword *diagbands_used,
              GtUword ndiags,
              GtDiagbandseedScore *diagband_score,
              GtDiagbandseedPosition *diagband_lastpos,
              GtUword aseqnum,
              GtUword bseqnum,
              const GtSeedpairPositions *segment_positions,
-             GtUword segment_length)
+             GtUword *segment_length)
 {
   GtDiagbandseedProcessSegmentInfo *psi
     = (GtDiagbandseedProcessSegmentInfo *) v_process_segment_info;
@@ -3387,28 +3393,28 @@ static void gt_diagbandseed_segment2matches(
                                          psi->extp->userdefinedleastlength,
                                          amaxlen,
                                          segment_positions,
-                                         segment_length,
+                                         *segment_length,
                                          psi->process_seeds_counts,
                                          stdout);
       if (psi->memstore == NULL)
       {
         return;
       }
-      gt_assert(diagbands_used == 0);
-      diagbands_used
+      gt_assert(*diagbands_used == 0);
+      *diagbands_used
         = gt_diagbandseed_update_all_dbands(ndiags,
                                             amaxlen,
                                             psi->extp->logdiagbandwidth,
                                             diagband_score,
                                             diagband_lastpos,
                                             psi->memstore);
-      segment_length = psi->memstore->nextfreeGtDiagbandseedMaximalmatch;
+      *segment_length = psi->memstore->nextfreeGtDiagbandseedMaximalmatch;
     }
     if (psi->extp->use_apos > 0)
     {
       previous_extensions = gt_rectangle_store_new();
     }
-    for (idx = 0; idx < segment_length; idx++)
+    for (idx = 0; idx < *segment_length; idx++)
     {
       GtDiagbandseedPosition apos, bpos;
       GtUword diagband;
@@ -3431,6 +3437,9 @@ static void gt_diagbandseed_segment2matches(
       diagband = GT_DIAGBANDSEED_DIAGONALBAND(amaxlen, apos, bpos,
                                               psi->extp->logdiagbandwidth);
 
+      /* The filter sums the score of the current diagonalband
+         as well as the maximum of the score of the previous and next
+         diagonal band */
       if ((GtUword) MAX(diagband_score[diagband + 1],
                         diagband_score[diagband - 1])
           + (GtUword) diagband_score[diagband]
@@ -3532,34 +3541,37 @@ static void gt_diagbandseed_segment2matches(
   {
     psi->process_seeds_counts->seqpairs_with_minsegment++;
   }
-  gt_diagbandseed_reset_counters(amaxlen,
-                                         diagbands_used,
-                                         ndiags,
-                                         diagband_score,
-                                         diagband_lastpos,
-                                         psi->extp->logdiagbandwidth,
-                                         psi->memstore == NULL
-                                           ? segment_positions
-                                           : NULL,
-                                         psi->memstore == NULL
-                                           ? NULL
-                                           : psi->memstore->
-                                             spaceGtDiagbandseedMaximalmatch,
-                                         segment_length);
 }
 
 #define GT_DIAGBANDSEED_PROCESS_SEGMENT\
         segment_proc_func(&psi,\
                           seedpairlist->amaxlen,\
                           seedlength,\
-                          diagbands_used,\
+                          &diagbands_used,\
                           ndiags,\
                           diagband_score,\
                           diagband_lastpos,\
                           currsegm_aseqnum,\
                           currsegm_bseqnum,\
                           segment_positions,\
-                          segment_length)
+                          &segment_length);\
+        if (diagbands_used > 0)\
+        {\
+          gt_diagbandseed_reset_counters(seedpairlist->amaxlen,\
+                                         diagbands_used,\
+                                         ndiags,\
+                                         diagband_score,\
+                                         diagband_lastpos,\
+                                         psi.extp->logdiagbandwidth,\
+                                         psi.memstore == NULL\
+                                           ? segment_positions\
+                                           : NULL,\
+                                         psi.memstore == NULL\
+                                           ? NULL\
+                                           : psi.memstore->\
+                                             spaceGtDiagbandseedMaximalmatch,\
+                                         segment_length);\
+        }
 
 static void gt_diagbandseed_match_header(FILE *stream,
                                          const GtDiagbandseedExtendParams *extp,
@@ -3910,14 +3922,14 @@ typedef void (*GtDiagbandseedProcessSegmentFunc)(
                         void *v_process_segment_info,
                         GtUword amaxlen,
                         unsigned int seedlength,
-                        GtUword diagbands_used,
+                        GtUword *diagbands_used,
                         GtUword ndiags,
                         GtDiagbandseedScore *diagband_score,
                         GtDiagbandseedPosition *diagband_lastpos,
                         GtUword aseqnum,
                         GtUword bseqnum,
                         const GtSeedpairPositions *segment_positions,
-                        GtUword segment_length);
+                        GtUword *segment_length);
 
 /* start seed extension for seeds in mlist */
 static void gt_diagbandseed_process_seeds(GtSeedpairlist *seedpairlist,

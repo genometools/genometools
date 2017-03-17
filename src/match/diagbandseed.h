@@ -64,6 +64,7 @@ GtDiagbandseedInfo *gt_diagbandseed_info_new(const GtEncseq *aencseq,
                                              bool trimstat_on,
                                              GtUword maxmat,
                                              const GtStr *chainarguments,
+                                             const GtStr *diagband_distance,
                                              const GtDiagbandseedExtendParams
                                                *extp);
 
@@ -102,14 +103,5 @@ GtDiagbandseedExtendParams *gt_diagbandseed_extend_params_new(
 void gt_diagbandseed_info_delete(GtDiagbandseedInfo *info);
 
 void gt_diagbandseed_extend_params_delete(GtDiagbandseedExtendParams *extp);
-
-typedef uint32_t GtDiagbandseedPosition;
-typedef uint32_t GtDiagbandseedScore;
-
-typedef struct
-{
-  GtDiagbandseedPosition apos, /* secondary key */
-                         bpos; /* primary key */
-} GtSeedpairPositions;
 
 #endif
