@@ -29,6 +29,19 @@ seeds = [170039800390891361279027638963673934519,
 $SPLT_LIST = ["-splt struct","-splt ulong"]
 $CAM_LIST = ["encseq", "encseq_reader","bytes"]
 
+Name "gt seed_extend: maxmat"
+Keywords "gt_seed_extend maxmat"
+Test do
+  run_test build_encseq("at1MB", "#{$testdata}at1MB")
+  run_test build_encseq("U89959_genomic", "#{$testdata}U89959_genomic.fas")
+  run_test "#{$bin}gt seed_extend -ii at1MB -qii U89959_genomic -l 30 -maxmat"
+  run "diff -I '^#' #{last_stdout} #{$testdata}see-ext-at1MB-u8-maxmat30.matches"
+  run_test "#{$bin}gt seed_extend -ii at1MB -l 250 -maxmat"
+  run "diff -I '^#' #{last_stdout} #{$testdata}see-ext-at1MB-maxmat250.matches"
+  run_test "#{$bin}gt seed_extend -ii at1MB -l 250 -maxmat -outfmt fstperquery"
+  run "#{$scriptsdir}check-fstperquery.rb #{last_stdout} #{$testdata}see-ext-at1MB-maxmat250.matches"
+end
+
 Name "gt seed_extend: symmetry of maxmat/use-apos"
 Keywords "gt_seed_extend symmetry"
 Test do

@@ -1,7 +1,9 @@
 #!/usr/bin/env ruby
 
+require_relative "SEmatch.rb"
+
 if ARGV.length != 2
-  STDERR.puts "Usage: #{$0} <file with at most match per query>  <file with all matches>"
+  STDERR.puts "Usage: #{$0} <file with at most one match per query>  <file with all matches>"
   exit 1
 end
 
@@ -10,22 +12,24 @@ require "set"
 fstperquery_matches = Set.new()
 fstperquery_seqnum = Set.new()
 
-File.new(ARGV[0],"r").each_line do |line|
-  if not line.match(/^#/)
-    fstperquery_matches.add(line.chomp)
-    a = line.split(/\s/)
-    fstperquery_seqnum.add(a[5].to_i)
+miter = SEmatch.new(ARGV[0])
+miter.each do |m|
+  fstperquery_matches.add(m)
+  qseqnum = m[:q_seqnum]
+  if fstperquery_seqnum.member?(qseqnum)
+    STDERR.puts "#{$0}: match for query #{qseqnum} already in #{ARGV[0]}"
+    exit 1
+  else
+    fstperquery_seqnum.add(qseqnum)
   end
 end
 
 all_matches = Set.new()
 all_seqnum = Set.new()
-File.new(ARGV[1],"r").each_line do |line|
-  if not line.match(/^#/)
-    all_matches.add(line.chomp)
-    a = line.split(/\s/)
-    all_seqnum.add(a[5].to_i)
-  end
+miter = SEmatch.new(ARGV[1])
+miter.each do |m|
+  all_matches.add(m)
+  all_seqnum.add(m[:q_seqnum])
 end
 
 if not fstperquery_matches.subset?(all_matches)
@@ -37,6 +41,6 @@ if not fstperquery_matches.subset?(all_matches)
 end
 
 if all_seqnum != fstperquery_seqnum
-  STDERR.puts "#{$0}: all_seqnum != fstperquery_seqnum"
+  STDERR.puts "#{$0}: #{ARGV[0]}.q_seqnum != #{ARGV[1]}.q_seqnum"
   exit 1
 end

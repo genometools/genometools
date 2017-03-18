@@ -1,0 +1,27 @@
+# Options: -ii at1MB -l 30 -qii U89959_genomic.fas -maxmat
+# Fields: s.len, s.seqnum, s.start, strand, q.seqnum, q.start
+      31       859       221  F         0     72776
+      98       859        89  F         0     72656
+      30      1214       212  F         0     77816
+      32      1214       210  F         0     77816
+      34      1214       208  F         0     77816
+      38      1214       206  F         0     77816
+      34      1214       206  F         0     77818
+      32      1214       206  F         0     77820
+      30      1214       206  F         0     77822
+     215      1265       119  F         0     72539
+      42      1361        70  F         0    105387
+      32      1361       171  F         0    105652
+     145      1361       226  F         0    105707
+# Fields: s.len, s.seqnum, s.start, strand, q.seqnum, q.start
+      30      1214       212  P         0     29123
+      32      1214       210  P         0     29123
+      34      1214       208  P         0     29123
+      37      1214       205  P         0     29122
+      34      1214       206  P         0     29125
+      32      1214       206  P         0     29127
+      30      1214       206  P         0     29129
+# TIME seedextend-greedy-30-30-80-5-64 overall 0.012799
+# space peak in megabytes: 0.42 (in 1065 events)
+# mmap space peak in megabytes: 0.55
+# combined space peak in megabytes: 0.97

@@ -32,16 +32,16 @@ class SEmatch
           exit 1
         end
         value_hash = Hash.new()
-        line.split(/\s/).each_with_index do |value,idx| 
-          if value.match(/^\d+\.\d+$/) 
-            value_hash[@fields[idx].to_sym] = value.to_f 
-          elsif value.match(/^\d+$/) 
-            value_hash[@fields[idx].to_sym] = value.to_i 
+        line.gsub(/^\s+/,"").split(/\s+/).each_with_index do |value,idx|
+          if value.match(/^\d+\.\d+$/)
+            value_hash[@fields[idx].to_sym] = value.to_f
+          elsif value.match(/^\d+$/)
+            value_hash[@fields[idx].to_sym] = value.to_i
           else
             value_hash[@fields[idx].to_sym] = value
           end
         end
-        if value_hash.has_key?(:s_start) 
+        if value_hash.has_key?(:s_start)
           if value_hash.has_key?(:s_len)
             value_hash[:s_end] = value_hash[:s_start] + value_hash[:s_len] - 1
           elsif value_hash.has_key?(:s_end)
@@ -55,15 +55,13 @@ class SEmatch
           STDERR.puts "#{$0}: start of match on subject must be given"
           exit 1
         end
-        if value_hash.has_key?(:q_start) 
+        if value_hash.has_key?(:q_start)
           if value_hash.has_key?(:q_len)
             value_hash[:q_end] = value_hash[:q_start] + value_hash[:q_len] - 1
           elsif value_hash.has_key?(:q_end)
             value_hash[:q_len] = value_hash[:q_end] - value_hash[:q_start] + 1
           else
-            STDERR.puts "#{$0}: either length of match on query or end " +
-                        "position must be given"
-            exit 1
+            value_hash[:q_len] = value_hash[:s_len]
           end
         else
           STDERR.puts "#{$0}: start of match on query must be given"

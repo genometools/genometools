@@ -187,7 +187,7 @@ GtStr *gt_querymatch_column_header(const GtSeedExtendDisplayFlag *display_flag)
   return str;
 }
 
-void gt_querymatch_column_header_output(const GtSeedExtendDisplayFlag
+void gt_querymatch_fields_approx_output(const GtSeedExtendDisplayFlag
                                          *display_flag,FILE *stream)
 {
   GtStr *add_column_header;
@@ -201,6 +201,12 @@ void gt_querymatch_column_header_output(const GtSeedExtendDisplayFlag
   }
   fputc('\n',stream);
   gt_str_delete(add_column_header);
+}
+
+void gt_querymatch_fields_exact_output(FILE *stream)
+{
+  fprintf(stream,"# Fields: s.len, s.seqnum, s.start, strand, q.seqnum, "
+                 "q.start\n");
 }
 
 const char *gt_querymatch_display_help(void)

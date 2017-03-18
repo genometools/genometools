@@ -78,6 +78,9 @@ void gt_querymatch_display_flag_delete(GtSeedExtendDisplayFlag *display_flag);
 
 const char *gt_querymatch_display_help(void);
 
-GtStr *gt_querymatch_column_header(const GtSeedExtendDisplayFlag *display_flag);
+void gt_querymatch_fields_approx_output(const GtSeedExtendDisplayFlag
+                                         *display_flag,FILE *stream);
+
+void gt_querymatch_fields_exact_output(FILE *stream);
 
 #endif
