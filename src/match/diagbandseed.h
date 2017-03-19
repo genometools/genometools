@@ -64,7 +64,8 @@ GtDiagbandseedInfo *gt_diagbandseed_info_new(const GtEncseq *aencseq,
                                              bool trimstat_on,
                                              GtUword maxmat,
                                              const GtStr *chainarguments,
-                                             const GtStr *diagband_distance,
+                                             const GtStr
+                                               *diagband_statistics_arg,
                                              const GtDiagbandseedExtendParams
                                                *extp);
 

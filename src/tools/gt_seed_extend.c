@@ -53,7 +53,7 @@ typedef struct {
   GtUword dbs_parts;
   GtRange seedpairdistance;
   GtStr *dbs_pick_str,
-        *dbs_diagband_distance,
+        *diagband_statistics_arg,
         *chainarguments,
         *dbs_memlimit_str;
   bool dbs_debug_kmer;
@@ -104,7 +104,7 @@ static void* gt_seed_extend_arguments_new(void)
   arguments->dbs_queryname = gt_str_new();
   arguments->dbs_pick_str = gt_str_new();
   arguments->chainarguments = gt_str_new();
-  arguments->dbs_diagband_distance = gt_str_new();
+  arguments->diagband_statistics_arg = gt_str_new();
   arguments->dbs_memlimit_str = gt_str_new();
   arguments->char_access_mode = gt_str_new();
   arguments->splt_string = gt_str_new();
@@ -121,7 +121,7 @@ static void gt_seed_extend_arguments_delete(void *tool_arguments)
     gt_str_delete(arguments->dbs_queryname);
     gt_str_delete(arguments->dbs_pick_str);
     gt_str_delete(arguments->chainarguments);
-    gt_str_delete(arguments->dbs_diagband_distance);
+    gt_str_delete(arguments->diagband_statistics_arg);
     gt_str_delete(arguments->dbs_memlimit_str);
     gt_str_delete(arguments->char_access_mode);
     gt_str_delete(arguments->splt_string);
@@ -147,7 +147,7 @@ static GtOptionParser* gt_seed_extend_option_parser_new(void *tool_arguments)
     *op_verify_alignment, *op_only_selected_seqpairs, *op_spdist, *op_display,
     *op_norev, *op_nofwd, *op_part, *op_pick, *op_overl, *op_trimstat,
     *op_cam_generic, *op_diagbandwidth, *op_mincoverage, *op_maxmat,
-    *op_use_apos, *op_use_apos_track_all, *op_chain, *op_diagband_distance;
+    *op_use_apos, *op_use_apos_track_all, *op_chain, *op_diagband_statistics;
 
   static GtRange seedpairdistance_defaults = {1UL, GT_UWORD_MAX};
   gt_assert(arguments != NULL);
@@ -203,15 +203,15 @@ static GtOptionParser* gt_seed_extend_option_parser_new(void *tool_arguments)
   gt_option_hide_default(op_mincoverage);
   gt_option_parser_add_option(op, op_mincoverage);
 
-  op_diagband_distance = gt_option_new_string("diagband-distance",
-                                   "compute distance measure from diagonal "
+  op_diagband_statistics = gt_option_new_string("diagband-stat",
+                                   "compute statistics from diagonal "
                                    "band scores; optional parameter specifies "
                                    "mode yet to be defined",
-                                   arguments->dbs_diagband_distance,
+                                   arguments->diagband_statistics_arg,
                                    "");
-  gt_option_argument_is_optional(op_diagband_distance);
-  gt_option_hide_default(op_diagband_distance);
-  gt_option_parser_add_option(op, op_diagband_distance);
+  gt_option_argument_is_optional(op_diagband_statistics);
+  gt_option_hide_default(op_diagband_statistics);
+  gt_option_parser_add_option(op, op_diagband_statistics);
 
   /* -maxfreq */
   op_frq = gt_option_new_uword_min("maxfreq",
@@ -1032,7 +1032,7 @@ static int gt_seed_extend_runner(int argc,
                                     arguments->trimstat_on,
                                     arguments->maxmat,
                                     arguments->chainarguments,
-                                    arguments->dbs_diagband_distance,
+                                    arguments->diagband_statistics_arg,
                                     extp);
 
     /* Start algorithm */

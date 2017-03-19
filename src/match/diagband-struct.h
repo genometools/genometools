@@ -68,9 +68,31 @@ typedef struct
                          bpos; /* primary key */
 } GtSeedpairPositions;
 
+void gt_diagband_struct_statistics(const GtDiagbandStruct *diagband_struct,
+                                   FILE *stream);
+
 void gt_diagband_struct_reset(GtDiagbandStruct *diagband_struct,
                               const GtSeedpairPositions *seedstore,
                               const GtDiagbandseedMaximalmatch *memstore,
                               GtUword segment_length);
+
+typedef struct GtDiagbandStatistics GtDiagbandStatistics;
+
+GtDiagbandStatistics *gt_diagband_statistics_new(GT_UNUSED const GtStr
+                                                   *diagband_statistics_arg);
+
+void gt_diagband_statistics_delete(GtDiagbandStatistics *diagband_statistics);
+
+void gt_diagband_statistics_display(const GtDiagbandStatistics
+                                      *diagband_statistics);
+
+void gt_diagband_statistics_add(void *v_diagband_statistics,
+                                GtUword aseqnum,
+                                GtUword bseqnum,
+                                GtDiagbandStruct *diagband_struct,
+                                const GtDiagbandseedMaximalmatch *memstore,
+                                unsigned int seedlength,
+                                const GtSeedpairPositions *seedstore,
+                                GtUword segment_length);
 
 #endif
