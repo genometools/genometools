@@ -65,9 +65,7 @@ typedef struct {
   /* xdrop extension options */
   GtUword se_extendxdrop;
   GtXdropscore se_xdropbelowscore;
-  GtOption *se_ref_op_xdr;
   /* greedy extension options */
-  GtOption *se_ref_op_gre;
   GtUword se_extendgreedy;
   GtUword se_historysize;
   GtUword se_maxalilendiff;
@@ -94,7 +92,10 @@ typedef struct {
   GtUword maxmat;
   GtSeedExtendDisplayFlag *display_flag;
   GtOption *se_ref_op_evalue,
-           *se_ref_op_maxmat;
+           *se_ref_op_maxmat,
+           *ref_diagband_statistics,
+           *se_ref_op_gre,
+           *se_ref_op_xdr;
 } GtSeedExtendArguments;
 
 static void* gt_seed_extend_arguments_new(void)
@@ -129,6 +130,7 @@ static void gt_seed_extend_arguments_delete(void *tool_arguments)
     gt_option_delete(arguments->se_ref_op_xdr);
     gt_option_delete(arguments->se_ref_op_evalue);
     gt_option_delete(arguments->se_ref_op_maxmat);
+    gt_option_delete(arguments->ref_diagband_statistics);
     gt_str_array_delete(arguments->display_args);
     gt_querymatch_display_flag_delete(arguments->display_flag);
     gt_free(arguments);
@@ -150,6 +152,9 @@ static GtOptionParser* gt_seed_extend_option_parser_new(void *tool_arguments)
     *op_use_apos, *op_use_apos_track_all, *op_chain, *op_diagband_statistics;
 
   static GtRange seedpairdistance_defaults = {1UL, GT_UWORD_MAX};
+  /* When extending the following array, do not forget to update
+     the help message accordingly. */
+  static const char *diagband_statistics_choices[] = {"sum", NULL};
   gt_assert(arguments != NULL);
 
   /* init */
@@ -187,10 +192,13 @@ static GtOptionParser* gt_seed_extend_option_parser_new(void *tool_arguments)
   gt_option_parser_add_option(op, op_seedlength);
 
   /* -diagbandwidth */
-  op_diagbandwidth = gt_option_new_uword("diagbandwidth",
-                               "Logarithm of diagonal band width (for filter)",
+  op_diagbandwidth = gt_option_new_uword_min_max("diagbandwidth",
+                               "Logarithm of diagonal band width in the "
+                               "range\nfrom 0 to 10 (for filter)",
                                &arguments->dbs_logdiagbandwidth,
-                               6UL);
+                               6UL,
+                               0,
+                               10);
   gt_option_parser_add_option(op, op_diagbandwidth);
 
   /* -mincoverage */
@@ -203,15 +211,17 @@ static GtOptionParser* gt_seed_extend_option_parser_new(void *tool_arguments)
   gt_option_hide_default(op_mincoverage);
   gt_option_parser_add_option(op, op_mincoverage);
 
-  op_diagband_statistics = gt_option_new_string("diagband-stat",
-                                   "compute statistics from diagonal "
-                                   "band scores; optional parameter specifies "
-                                   "mode yet to be defined",
+  /* -diagband-stat */
+  op_diagband_statistics = gt_option_new_choice("diagband-stat",
+                                   "Compute statistics from diagonal "
+                                   "band scores; parameter specifies "
+                                   "kind of statistics, possible choices are\n"
+                                   "sum",
                                    arguments->diagband_statistics_arg,
-                                   "");
-  gt_option_argument_is_optional(op_diagband_statistics);
-  gt_option_hide_default(op_diagband_statistics);
+                                   diagband_statistics_choices[0],
+                                   diagband_statistics_choices);
   gt_option_parser_add_option(op, op_diagband_statistics);
+  arguments->ref_diagband_statistics = gt_option_ref(op_diagband_statistics);
 
   /* -maxfreq */
   op_frq = gt_option_new_uword_min("maxfreq",
@@ -411,6 +421,7 @@ static GtOptionParser* gt_seed_extend_option_parser_new(void *tool_arguments)
                                   "derived from k-mer seeds",
                                   arguments->chainarguments,"");
   gt_option_argument_is_optional(op_chain);
+  gt_option_is_development_option(op_chain);
   gt_option_parser_add_option(op, op_chain);
 
   /* SEED EXTENSION OPTIONS */
@@ -590,6 +601,20 @@ static GtOptionParser* gt_seed_extend_option_parser_new(void *tool_arguments)
   /* -v */
   option = gt_option_new_verbose(&arguments->verbose);
   gt_option_parser_add_option(op, option);
+
+  gt_option_exclude(op_diagband_statistics, op_mincoverage);
+  gt_option_exclude(op_diagband_statistics, op_xdr);
+  gt_option_exclude(op_diagband_statistics, op_xbe);
+  gt_option_exclude(op_diagband_statistics, op_gre);
+  gt_option_exclude(op_diagband_statistics, op_his);
+  gt_option_exclude(op_diagband_statistics, op_dif);
+  gt_option_exclude(op_diagband_statistics, op_pmh);
+  gt_option_exclude(op_diagband_statistics, op_cam);
+  gt_option_exclude(op_diagband_statistics, op_trimstat);
+  gt_option_exclude(op_diagband_statistics, op_maxmat);
+  gt_option_exclude(op_diagband_statistics, op_use_apos);
+  gt_option_exclude(op_diagband_statistics, op_use_apos_track_all);
+  gt_option_exclude(op_diagband_statistics, op_minlen);
   gt_option_exclude(op_cam, op_xbe);
   gt_option_exclude(op_cam, op_xdr);
   gt_option_exclude(op_cam_generic, op_xbe);
@@ -648,6 +673,11 @@ static int gt_seed_extend_arguments_check(int rest_argc, void *tool_arguments,
   {
     arguments->maxmat = 0;
   }
+  if (!gt_option_is_set(arguments->ref_diagband_statistics))
+  {
+    gt_str_set(arguments->diagband_statistics_arg,"");
+  }
+
   /* no extra arguments */
   if (!had_err && rest_argc > 0) {
     gt_error_set(err, "too many arguments (-help shows correct usage)");
@@ -673,7 +703,8 @@ static void gt_seed_extend_Options_out(int argc,const char **argv,
     }
     printf(" %s", argv[idx]);
   }
-  if (arguments->maxmat != 1)
+  if (arguments->maxmat != 1 &&
+      gt_str_length(arguments->diagband_statistics_arg) == 0)
   {
     if (!minid_out)
     {

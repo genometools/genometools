@@ -21,6 +21,7 @@
 #include "core/unused_api.h"
 #include "core/str_api.h"
 #include "core/minmax.h"
+#include "core/intbits.h"
 #include "match/diagband-struct.h"
 
 /* called with real bpos */
@@ -72,21 +73,21 @@ GtDiagbandStruct *gt_diagband_struct_new(GtUword amaxlen,GtUword bmaxlen,
   return diagband_struct;
 }
 
-void gt_diagband_struct_statistics(const GtDiagbandStruct *diagband_struct,
-                                   FILE *stream)
+void gt_diagband_struct_reset_counts(const GtDiagbandStruct *diagband_struct,
+                                     FILE *stream)
 {
-  fprintf(stream,"# a reset of diagonal bands was performed " GT_WU " times",
+  fprintf(stream,"# number of resets of all used diagonal bands: " GT_WU,
           diagband_struct->reset_with_memset +
           diagband_struct->reset_from_matches);
   if (diagband_struct->reset_with_memset > 0)
   {
-    fprintf(stream,"; " GT_WU " simple resets",
+    fprintf(stream,"; simple resets: " GT_WU,
             diagband_struct->reset_with_memset);
   }
   if (diagband_struct->reset_from_matches > 0)
   {
-    fprintf(stream,"; " GT_WU " resets from matches",
-          diagband_struct->reset_from_matches);
+    fprintf(stream,"; resets from matches: " GT_WU,
+            diagband_struct->reset_from_matches);
   }
   fprintf(stream,"\n");
 }
@@ -103,9 +104,9 @@ void gt_diagband_struct_delete(GtDiagbandStruct *diagband_struct)
 }
 
 void gt_diagband_struct_single_update(GtDiagbandStruct *diagband_struct,
-                                      GtUword apos,
-                                      GtUword bpos,
-                                      GtUword matchlength)
+                                      GtDiagbandseedPosition apos,
+                                      GtDiagbandseedPosition bpos,
+                                      GtDiagbandseedPosition matchlength)
 {
   GtUword diagband_idx;
 
@@ -141,6 +142,16 @@ void gt_diagband_struct_single_update(GtDiagbandStruct *diagband_struct,
   }
 }
 
+static GtUword gt_diagband_struct_dband_coverage(
+                                    const GtDiagbandStruct *diagband_struct,
+                                    GtUword diagband_idx)
+{
+  gt_assert(diagband_struct != NULL);
+  return (GtUword) MAX(diagband_struct->score[diagband_idx + 1],
+                       diagband_struct->score[diagband_idx - 1])
+         + (GtUword) diagband_struct->score[diagband_idx];
+}
+
 GtUword gt_diagband_struct_coverage(const GtDiagbandStruct *diagband_struct,
                                     GtDiagbandseedPosition apos,
                                     GtDiagbandseedPosition bpos)
@@ -151,27 +162,22 @@ GtUword gt_diagband_struct_coverage(const GtDiagbandStruct *diagband_struct,
   diagband_idx = GT_DIAGBANDSEED_DIAGONALBAND(diagband_struct->amaxlen,
                                               diagband_struct->logdiagbandwidth,
                                               apos, bpos);
-  return (GtUword) MAX(diagband_struct->score[diagband_idx + 1],
-                       diagband_struct->score[diagband_idx - 1])
-         + (GtUword) diagband_struct->score[diagband_idx];
+  return gt_diagband_struct_dband_coverage(diagband_struct,diagband_idx);
 }
 
-void gt_diagband_struct_multi_update(
-                         GtDiagbandStruct *diagband_struct,
-                         const GtArrayGtDiagbandseedMaximalmatch *memstore)
+void gt_diagband_struct_multi_update(GtDiagbandStruct *diagband_struct,
+                                     const GtDiagbandseedMaximalmatch *memstore,
+                                     GtUword numofmatches)
 {
-  const GtDiagbandseedMaximalmatch *memstore_ptr;
+  GtUword idx;
 
   gt_assert(memstore != NULL);
-  for (memstore_ptr = memstore->spaceGtDiagbandseedMaximalmatch;
-       memstore_ptr < memstore->spaceGtDiagbandseedMaximalmatch +
-                      memstore->nextfreeGtDiagbandseedMaximalmatch;
-       memstore_ptr++)
+  for (idx = 0; idx < numofmatches; idx++)
   {
     gt_diagband_struct_single_update(diagband_struct,
-                                     memstore_ptr->apos,
-                                     memstore_ptr->bpos,
-                                     memstore_ptr->len);
+                                     memstore[idx].apos,
+                                     memstore[idx].bpos,
+                                     memstore[idx].len);
   }
 }
 
@@ -225,16 +231,31 @@ void gt_diagband_struct_reset(GtDiagbandStruct *diagband_struct,
 
 struct GtDiagbandStatistics
 {
+  bool compute_sum;
+  bool forward;
   GtUword sumscore;
+  GtBitsequence *track;
 };
 
-GtDiagbandStatistics *gt_diagband_statistics_new(GT_UNUSED const GtStr
-                                                        *diagband_distance_arg)
+GtDiagbandStatistics *gt_diagband_statistics_new(const GtStr
+                                                   *diagband_distance_arg,
+                                                 bool forward)
 {
+  const char *arg = gt_str_get(diagband_distance_arg);
   GtDiagbandStatistics *diagband_statistics
     = gt_malloc(sizeof *diagband_statistics);
 
+  diagband_statistics->forward = forward;
+  diagband_statistics->compute_sum = false;
+  if (strcmp(arg,"sum") == 0)
+  {
+    diagband_statistics->compute_sum = true;
+  } else
+  {
+    gt_assert(false);
+  }
   diagband_statistics->sumscore = 0;
+  diagband_statistics->track = NULL;
   return diagband_statistics;
 }
 
@@ -242,6 +263,7 @@ void gt_diagband_statistics_delete(GtDiagbandStatistics *diagband_statistics)
 {
   if (diagband_statistics != NULL)
   {
+    gt_free(diagband_statistics->track);
     gt_free(diagband_statistics);
   }
 }
@@ -249,13 +271,34 @@ void gt_diagband_statistics_delete(GtDiagbandStatistics *diagband_statistics)
 void gt_diagband_statistics_display(const GtDiagbandStatistics
                                            *diagband_statistics)
 {
-  printf("sum_diagband_score=" GT_WU "\n",diagband_statistics->sumscore);
+  gt_assert(diagband_statistics != NULL);
+  if (diagband_statistics->compute_sum)
+  {
+    printf("# forward=%s, sum_diagband_score=" GT_WU "\n",
+            diagband_statistics->forward ? "true" : "false",
+            diagband_statistics->sumscore);
+  } else
+  {
+    gt_assert(false);
+  }
+}
+
+static void gt_diagband_statistics_score_add(
+                                      GtDiagbandStatistics *diagband_statistics,
+                                      const GtDiagbandStruct *diagband_struct,
+                                      GtUword diagband_idx)
+{
+  if (!GT_ISIBITSET(diagband_statistics->track,diagband_idx))
+  {
+    diagband_statistics->sumscore += diagband_struct->score[diagband_idx];
+    GT_SETIBIT(diagband_statistics->track,diagband_idx);
+  }
 }
 
 void gt_diagband_statistics_add(void *v_diagband_statistics,
                                 GT_UNUSED GtUword aseqnum,
                                 GT_UNUSED GtUword bseqnum,
-                                GtDiagbandStruct *diagband_struct,
+                                const GtDiagbandStruct *diagband_struct,
                                 const GtDiagbandseedMaximalmatch *memstore,
                                 GT_UNUSED unsigned int seedlength,
                                 const GtSeedpairPositions *seedstore,
@@ -265,6 +308,13 @@ void gt_diagband_statistics_add(void *v_diagband_statistics,
   GtDiagbandStatistics *diagband_statistics
     = (GtDiagbandStatistics *) v_diagband_statistics;
 
+  if (diagband_statistics->track == NULL)
+  {
+    GT_INITBITTAB(diagband_statistics->track,diagband_struct->num_diagbands);
+  } else
+  {
+    GT_CLEARBITTAB(diagband_statistics->track,diagband_struct->num_diagbands);
+  }
   if (seedstore != NULL)
   {
     for (idx = 0; idx < segment_length; idx++)
@@ -274,11 +324,8 @@ void gt_diagband_statistics_add(void *v_diagband_statistics,
                                        diagband_struct->logdiagbandwidth,
                                        seedstore[idx].apos,
                                        seedstore[idx].bpos);
-      if (diagband_struct->lastpos[diagband_idx] > 0)
-      {
-        diagband_statistics->sumscore += diagband_struct->score[diagband_idx];
-        diagband_struct->lastpos[diagband_idx] = 0;
-      }
+      gt_diagband_statistics_score_add(diagband_statistics,diagband_struct,
+                                       diagband_idx);
     }
   } else
   {
@@ -290,12 +337,8 @@ void gt_diagband_statistics_add(void *v_diagband_statistics,
                                        diagband_struct->logdiagbandwidth,
                                        memstore[idx].apos,
                                        memstore[idx].bpos);
-      if (diagband_struct->lastpos[diagband_idx] > 0)
-      {
-        diagband_statistics->sumscore += diagband_struct->score[diagband_idx];
-        diagband_struct->lastpos[diagband_idx] = 0;
-      }
+      gt_diagband_statistics_score_add(diagband_statistics,diagband_struct,
+                                       diagband_idx);
     }
   }
-  diagband_struct->used_diagbands = 0;
 }
