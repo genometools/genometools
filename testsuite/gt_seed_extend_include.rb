@@ -88,10 +88,10 @@ Test do
   run_test build_encseq("U89959_genomic", "#{$testdata}U89959_genomic.fas")
   run_test "#{$bin}gt seed_extend -v -ii at1MB -outfmt seed"
   run "mv #{last_stdout} tmp.matches"
-  ["alignment","cigar","polinfo","fstperquery","seed","seed_in_algn","seqlength","evalue","seqdesc","bitscore"].each do |arg|
+  ["alignment","cigar","polinfo","fstperquery","seed","seed_in_algn","seqlength","evalue","s.seqdesc","q.seqdesc","bitscore"].each do |arg|
     run_test "#{$bin}gt seed_extend -ii at1MB -outfmt #{arg}"
     run_test "#{$bin}gt seed_extend -ii at1MB -qii Atinsert.fna -outfmt #{arg}"
-    if arg != "seqdesc"
+    if not ["s.seqdesc","q.seqdesc"].member?(arg)
       run_test "#{$bin}gt dev show_seedext -f tmp.matches -outfmt #{arg}"
     end
   end
@@ -99,7 +99,7 @@ Test do
   run "diff -I '^#' #{last_stdout} #{$testdata}see-ext-at1MB-500-al.matches"
   run_test "#{$bin}gt seed_extend -ii at1MB -l 400 -outfmt evalue bitscore"
   run "diff -I '^#' #{last_stdout} #{$testdata}see-ext-at1MB-400-evalue-bitscore.matches"
-  run_test "#{$bin}gt seed_extend -ii at1MB -l 400 -outfmt seqdesc"
+  run_test "#{$bin}gt seed_extend -ii at1MB -l 400 -outfmt s.seqdesc q.seqdesc"
   run "diff -I '^#' #{last_stdout} #{$testdata}see-ext-at1MB-400-seqdesc.matches"
   run_test "#{$bin}gt seed_extend -ii at1MB -l 400 -outfmt cigar"
   run "diff -I '^#' #{last_stdout} #{$testdata}see-ext-at1MB-400-cigar.matches"

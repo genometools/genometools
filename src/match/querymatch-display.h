@@ -38,7 +38,10 @@ bool gt_querymatch_evalue_display(const GtSeedExtendDisplayFlag *display_flag);
 bool gt_querymatch_bitscore_display(const GtSeedExtendDisplayFlag
                                        *display_flag);
 
-bool gt_querymatch_seqdesc_display(const GtSeedExtendDisplayFlag
+bool gt_querymatch_s_seqdesc_display(const GtSeedExtendDisplayFlag
+                                      *display_flag);
+
+bool gt_querymatch_q_seqdesc_display(const GtSeedExtendDisplayFlag
                                       *display_flag);
 
 bool gt_querymatch_seqlength_display(const GtSeedExtendDisplayFlag

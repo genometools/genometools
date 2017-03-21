@@ -279,7 +279,7 @@ void gt_querymatch_coordinates_out(const GtQuerymatch *querymatch)
   gt_assert(querymatch != NULL);
 
   fprintf(querymatch->fp,GT_WU,querymatch->dblen);
-  if (gt_querymatch_seqdesc_display(querymatch->display_flag))
+  if (gt_querymatch_s_seqdesc_display(querymatch->display_flag))
   {
     gt_querymatch_description_out(querymatch->fp,querymatch->db_desc);
   } else
@@ -290,7 +290,7 @@ void gt_querymatch_coordinates_out(const GtQuerymatch *querymatch)
   fprintf(querymatch->fp," %c",
           gt_seed_extend_outflag[querymatch->query_readmode]);
   fprintf(querymatch->fp," " GT_WU,querymatch->querylen);
-  if (gt_querymatch_seqdesc_display(querymatch->display_flag))
+  if (gt_querymatch_q_seqdesc_display(querymatch->display_flag))
   {
     gt_querymatch_description_out(querymatch->fp,querymatch->query_desc);
   } else
@@ -672,11 +672,11 @@ bool gt_querymatch_complete(GtQuerymatch *querymatch,
                             bool greedyextension)
 {
   const char *query_desc = NULL, *db_desc = NULL;
+  GtUword desclen;
 
   gt_assert(querymatch != NULL);
-  if (gt_querymatch_seqdesc_display(querymatch->display_flag))
+  if (gt_querymatch_s_seqdesc_display(querymatch->display_flag))
   {
-    GtUword desclen;
 
     gt_assert(dbes != NULL);
     if (dbes->encseq != NULL)
@@ -686,6 +686,9 @@ bool gt_querymatch_complete(GtQuerymatch *querymatch,
     {
       db_desc = dbes->desc;
     }
+  }
+  if (gt_querymatch_q_seqdesc_display(querymatch->display_flag))
+  {
     gt_assert (queryes != NULL);
     if (queryes->encseq != NULL)
     {

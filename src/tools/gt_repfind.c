@@ -966,7 +966,7 @@ static int gt_repfind_runner(int argc,
           eqmf_data = (void *) &info_querymatch;
         }
       }
-      if (gt_querymatch_seqdesc_display(display_flag))
+      if (gt_querymatch_s_seqdesc_display(display_flag))
       {
         GtEncseqLoader *encseq_loader = gt_encseq_loader_new();
         gt_encseq_loader_require_des_tab(encseq_loader);

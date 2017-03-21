@@ -793,7 +793,7 @@ static int gt_seed_extend_runner(int argc,
     GtEncseqLoader *encseq_loader = gt_encseq_loader_new();
     gt_encseq_loader_require_multiseq_support(encseq_loader);
     gt_encseq_loader_require_ssp_tab(encseq_loader);
-    if (gt_querymatch_seqdesc_display(arguments->display_flag))
+    if (gt_querymatch_s_seqdesc_display(arguments->display_flag))
     {
       gt_encseq_loader_require_des_tab(encseq_loader);
       gt_encseq_loader_require_sds_tab(encseq_loader);
@@ -805,21 +805,37 @@ static int gt_seed_extend_runner(int argc,
                                     err);
     if (aencseq == NULL) {
       had_err = -1;
-    } else {
-      /* If there is a 2nd read set: Load encseq B */
-      if (strcmp(gt_str_get(arguments->dbs_queryname), "") != 0) {
-        bencseq = gt_encseq_loader_load(encseq_loader,
-                                        gt_str_get(arguments->dbs_queryname),
-                                        err);
-      } else {
-        bencseq = gt_encseq_ref(aencseq);
-      }
-      if (bencseq == NULL) {
-        had_err = -1;
-        gt_encseq_delete(aencseq);
-      }
     }
     gt_encseq_loader_delete(encseq_loader);
+  }
+  if (!had_err)
+  {
+    /* If there is a 2nd read set: Load encseq B */
+    if (strcmp(gt_str_get(arguments->dbs_queryname), "") == 0) {
+      bencseq = gt_encseq_ref(aencseq);
+    } else
+    {
+      GtEncseqLoader *encseq_loader = gt_encseq_loader_new();
+      gt_encseq_loader_require_multiseq_support(encseq_loader);
+      gt_encseq_loader_require_ssp_tab(encseq_loader);
+      if (gt_querymatch_q_seqdesc_display(arguments->display_flag))
+      {
+        gt_encseq_loader_require_des_tab(encseq_loader);
+        gt_encseq_loader_require_sds_tab(encseq_loader);
+      }
+      bencseq = gt_encseq_loader_load(encseq_loader,
+                                      gt_str_get(arguments->dbs_queryname),
+                                      err);
+      if (bencseq == NULL)
+      {
+        had_err = -1;
+      }
+      gt_encseq_loader_delete(encseq_loader);
+    }
+    if (bencseq == NULL) {
+      had_err = -1;
+      gt_encseq_delete(aencseq);
+    }
   }
 
   /* Check alphabet sizes */
