@@ -3846,21 +3846,20 @@ static GtDiagbandseedExtendSegmentInfo *gt_diagbandseed_extendSI_new(
                                             ? gt_greedy_extend_seed_relative
                                             : gt_xdrop_extend_seed_relative;
   gt_diagbandseed_plainsequence_init(&esi->plainsequence_info,
-                                       gt_querymatch_seqdesc_display(
+                                     gt_querymatch_seqdesc_display(
                                              extp->display_flag),
-                                       aencseq,
-                                       aseqranges,
-                                       aidx,
-                                       extp->a_extend_char_access ==
+                                     aencseq,
+                                     aseqranges,
+                                     aidx,
+                                     extp->a_extend_char_access ==
                                          GT_EXTEND_CHAR_ACCESS_DIRECT ? true
                                                                       : false,
-                                       bencseq,
-                                       bseqranges,
-                                       bidx,
-                                       extp->b_extend_char_access ==
+                                     bencseq,
+                                     bseqranges,
+                                     bidx,
+                                     extp->b_extend_char_access ==
                                         GT_EXTEND_CHAR_ACCESS_DIRECT ? true
-                                                                     : false
-                                      );
+                                                                     : false);
   gt_diagbandseed_info_qm_set(&esi->info_querymatch,
                               extp,
                               querymoutopt,

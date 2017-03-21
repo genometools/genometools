@@ -266,30 +266,33 @@ static int gt_non_white_space_prefix_length(const char *s)
 
 static const char *gt_seed_extend_outflag = "FRCP";
 
+static void gt_querymatch_description_out(FILE *fp,const char *description)
+{
+  const int nwspl = gt_non_white_space_prefix_length(description);
+
+  fputc(' ',fp);
+  fwrite(description,sizeof *description,nwspl,fp);
+}
+
 void gt_querymatch_coordinates_out(const GtQuerymatch *querymatch)
 {
   gt_assert(querymatch != NULL);
+
   fprintf(querymatch->fp,GT_WU,querymatch->dblen);
   if (gt_querymatch_seqdesc_display(querymatch->display_flag))
   {
-    int nwspl = gt_non_white_space_prefix_length(querymatch->db_desc);
-    fputc(' ',querymatch->fp);
-    fwrite(querymatch->db_desc,sizeof *querymatch->db_desc,nwspl,
-           querymatch->fp);
+    gt_querymatch_description_out(querymatch->fp,querymatch->db_desc);
   } else
   {
     fprintf(querymatch->fp," " GT_WU,querymatch->dbseqnum);
   }
-  fprintf(querymatch->fp," " GT_WU " %c " GT_WU,
-          querymatch->dbstart_relative,
-          gt_seed_extend_outflag[querymatch->query_readmode],
-          querymatch->querylen);
+  fprintf(querymatch->fp," " GT_WU,querymatch->dbstart_relative);
+  fprintf(querymatch->fp," %c",
+          gt_seed_extend_outflag[querymatch->query_readmode]);
+  fprintf(querymatch->fp," " GT_WU,querymatch->querylen);
   if (gt_querymatch_seqdesc_display(querymatch->display_flag))
   {
-    int nwspl = gt_non_white_space_prefix_length(querymatch->query_desc);
-    fputc(' ',querymatch->fp);
-    fwrite(querymatch->query_desc,sizeof *querymatch->query_desc,nwspl,
-           querymatch->fp);
+    gt_querymatch_description_out(querymatch->fp,querymatch->query_desc);
   } else
   {
     fprintf(querymatch->fp," " Formatuint64_t,
@@ -298,20 +301,22 @@ void gt_querymatch_coordinates_out(const GtQuerymatch *querymatch)
   fprintf(querymatch->fp," " GT_WU,querymatch->querystart_fwdstrand);
   if (querymatch->score > 0)
   {
-    fprintf(querymatch->fp, " " GT_WD " " GT_WU " %.2f",
-            querymatch->score, querymatch->distance,
+    fprintf(querymatch->fp," " GT_WD,querymatch->score);
+    fprintf(querymatch->fp," " GT_WU,querymatch->distance);
+    fprintf(querymatch->fp," " "%.2f",
             gt_querymatch_similarity(querymatch->distance,
                                      querymatch->dblen + querymatch->querylen));
   }
   if (gt_querymatch_seqlength_display(querymatch->display_flag))
   {
-    fprintf(querymatch->fp, " " GT_WU " " GT_WU,
-            querymatch->dbseqlen, querymatch->query_totallength);
+    fprintf(querymatch->fp, " " GT_WU,querymatch->dbseqlen);
+    fprintf(querymatch->fp, " " GT_WU,querymatch->query_totallength);
   }
   if (gt_querymatch_seed_display(querymatch->display_flag))
   {
-    fprintf(querymatch->fp," " GT_WU " " GT_WU " "  GT_WU,
-            querymatch->seedlen, querymatch->seedpos1, querymatch->seedpos2);
+    fprintf(querymatch->fp," " GT_WU,querymatch->seedlen);
+    fprintf(querymatch->fp," " GT_WU,querymatch->seedpos1);
+    fprintf(querymatch->fp," " GT_WU,querymatch->seedpos2);
   }
 }
 
