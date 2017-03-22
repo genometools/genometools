@@ -116,7 +116,9 @@ void gt_diagband_struct_single_update(GtDiagbandStruct *diagband_struct,
                                               apos,
                                               bpos);
   gt_assert(diagband_idx < diagband_struct->num_diagbands);
-  if (bpos >= diagband_struct->lastpos[diagband_idx] + matchlength)
+  if (diagband_struct->lastpos[diagband_idx] == 0 /* first matches */||
+      /* match with end position bpos begins strictly after previous match */
+      diagband_struct->lastpos[diagband_idx] + matchlength <= bpos)
   {
     /* no overlap */
     diagband_struct->lastpos[diagband_idx] = bpos;
