@@ -170,7 +170,7 @@ void gt_querymatchoutoptions_extend(
                                  querymatchoutoptions->pol_info,true,
                                  gt_querymatch_polinfo_display(display_flag));
       }
-      if (gt_querymatch_seed_in_alignment_display(display_flag))
+      if (gt_querymatch_seed_in_algn_display(display_flag))
       {
         gt_eoplist_display_seed_in_alignment_set(querymatchoutoptions->eoplist);
       }
