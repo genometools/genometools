@@ -5,6 +5,13 @@ typedef struct
   bool incolumn;
 } GtSEdisplayStruct;
 
+struct GtSeedExtendDisplayFlag
+{
+  unsigned int flags;
+  bool a_seedpos_relative, b_seedpos_relative;
+  GtUword alignmentwidth;
+};
+
 static GtSEdisplayStruct gt_display_arguments_table[] =
 {
   {"alignment", 0, false},
@@ -23,19 +30,21 @@ static GtSEdisplayStruct gt_display_arguments_table[] =
 
 typedef enum
 {
-  Gt_Alignment_display,
-  Gt_Cigar_display,
-  Gt_Polinfo_display,
-  Gt_Fstperquery_display,
-  Gt_Seed_display,
-  Gt_Failed_seed_display,
-  Gt_Seed_in_algn_display,
-  Gt_Seqlength_display,
-  Gt_Evalue_display,
-  Gt_S_seqdesc_display,
-  Gt_Q_seqdesc_display,
-  Gt_Bitscore_display
+ Gt_Alignment_display,
+ Gt_Cigar_display,
+ Gt_Polinfo_display,
+ Gt_Fstperquery_display,
+ Gt_Seed_display,
+ Gt_Failed_seed_display,
+ Gt_Seed_in_algn_display,
+ Gt_Seqlength_display,
+ Gt_Evalue_display,
+ Gt_S_seqdesc_display,
+ Gt_Q_seqdesc_display,
+ Gt_Bitscore_display
 } GtSeedExtendDisplay_enum;
+
+#define GT_DISPLAY_LARGEST_FLAG 11
 
 const char *gt_querymatch_display_help(void)
 {
@@ -57,4 +66,91 @@ const char *gt_querymatch_display_help(void)
          "s.seqdesc:    display sequence description of subject sequence\n"
          "q.seqdesc:    display sequence description of query sequence\n"
          "bitscore:     display bit score\n"
-;}
+;
+}
+
+static unsigned int gt_display_mask(int shift)
+{
+  return 1U << shift;
+}
+
+static bool gt_querymatch_display_on(const GtSeedExtendDisplayFlag
+                                       *display_flag,
+                                     GtSeedExtendDisplay_enum display)
+{
+  gt_assert((int) display <= GT_DISPLAY_LARGEST_FLAG);
+  return (display_flag != NULL &&
+          (display_flag->flags & gt_display_mask(display))) ? true : false;
+}
+
+bool gt_querymatch_alignment_display(const GtSeedExtendDisplayFlag
+                                        *display_flag)
+{
+  return gt_querymatch_display_on(display_flag,Gt_Alignment_display);
+}
+
+bool gt_querymatch_cigar_display(const GtSeedExtendDisplayFlag
+                                        *display_flag)
+{
+  return gt_querymatch_display_on(display_flag,Gt_Cigar_display);
+}
+
+bool gt_querymatch_polinfo_display(const GtSeedExtendDisplayFlag
+                                        *display_flag)
+{
+  return gt_querymatch_display_on(display_flag,Gt_Polinfo_display);
+}
+
+bool gt_querymatch_fstperquery_display(const GtSeedExtendDisplayFlag
+                                        *display_flag)
+{
+  return gt_querymatch_display_on(display_flag,Gt_Fstperquery_display);
+}
+
+bool gt_querymatch_seed_display(const GtSeedExtendDisplayFlag
+                                        *display_flag)
+{
+  return gt_querymatch_display_on(display_flag,Gt_Seed_display);
+}
+
+bool gt_querymatch_failed_seed_display(const GtSeedExtendDisplayFlag
+                                        *display_flag)
+{
+  return gt_querymatch_display_on(display_flag,Gt_Failed_seed_display);
+}
+
+bool gt_querymatch_seed_in_algn_display(const GtSeedExtendDisplayFlag
+                                        *display_flag)
+{
+  return gt_querymatch_display_on(display_flag,Gt_Seed_in_algn_display);
+}
+
+bool gt_querymatch_seqlength_display(const GtSeedExtendDisplayFlag
+                                        *display_flag)
+{
+  return gt_querymatch_display_on(display_flag,Gt_Seqlength_display);
+}
+
+bool gt_querymatch_evalue_display(const GtSeedExtendDisplayFlag
+                                        *display_flag)
+{
+  return gt_querymatch_display_on(display_flag,Gt_Evalue_display);
+}
+
+bool gt_querymatch_s_seqdesc_display(const GtSeedExtendDisplayFlag
+                                        *display_flag)
+{
+  return gt_querymatch_display_on(display_flag,Gt_S_seqdesc_display);
+}
+
+bool gt_querymatch_q_seqdesc_display(const GtSeedExtendDisplayFlag
+                                        *display_flag)
+{
+  return gt_querymatch_display_on(display_flag,Gt_Q_seqdesc_display);
+}
+
+bool gt_querymatch_bitscore_display(const GtSeedExtendDisplayFlag
+                                        *display_flag)
+{
+  return gt_querymatch_display_on(display_flag,Gt_Bitscore_display);
+}

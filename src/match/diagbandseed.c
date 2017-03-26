@@ -4677,7 +4677,7 @@ static int gt_diagbandseed_algorithm(const GtDiagbandseedInfo *arg,
       processinfo = (void *) xdropinfo;
     }
     alignmentwidth = gt_querymatch_display_alignmentwidth(extp->display_flag);
-    show_eoplist = gt_querymatch_cigarstring_display(extp->display_flag);
+    show_eoplist = gt_querymatch_cigar_display(extp->display_flag);
     if (extp->extendxdrop || alignmentwidth > 0 || extp->verify_alignment ||
         show_eoplist)
     {

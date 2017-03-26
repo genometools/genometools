@@ -51,13 +51,6 @@ const GtSEdisplayStruct *gt_display_arg_get(const char *str)
   return NULL;
 }
 
-struct GtSeedExtendDisplayFlag
-{
-  unsigned int flags;
-  bool a_seedpos_relative, b_seedpos_relative;
-  GtUword alignmentwidth;
-};
-
 GtSeedExtendDisplayFlag *gt_querymatch_display_flag_new(void)
 {
   GtSeedExtendDisplayFlag *display_flag = gt_malloc(sizeof *display_flag);
@@ -67,83 +60,6 @@ GtSeedExtendDisplayFlag *gt_querymatch_display_flag_new(void)
   display_flag->a_seedpos_relative = true; /* as bytes is default access mode */
   display_flag->b_seedpos_relative = true;
   return display_flag;
-}
-
-static unsigned int gt_display_mask(int shift)
-{
-  return 1U << shift;
-}
-
-static bool gt_querymatch_display_on(const GtSeedExtendDisplayFlag
-                                       *display_flag,
-                                     GtSeedExtendDisplay_enum display)
-{
-  gt_assert((int) display <= Gt_Bitscore_display);
-  return (display_flag != NULL &&
-          (display_flag->flags & gt_display_mask(display))) ? true : false;
-}
-
-bool gt_querymatch_seed_display(const GtSeedExtendDisplayFlag *display_flag)
-{
-  return gt_querymatch_display_on(display_flag,Gt_Seed_display);
-}
-
-bool gt_querymatch_failed_seed_display(const GtSeedExtendDisplayFlag
-                                         *display_flag)
-{
-  return gt_querymatch_display_on(display_flag,Gt_Failed_seed_display);
-}
-
-bool gt_querymatch_cigarstring_display(const GtSeedExtendDisplayFlag
-                                        *display_flag)
-{
-  return gt_querymatch_display_on(display_flag,Gt_Cigar_display);
-}
-
-bool gt_querymatch_seed_in_algn_display(
-                 const GtSeedExtendDisplayFlag *display_flag)
-{
-  return gt_querymatch_display_on(display_flag,Gt_Seed_in_algn_display);
-}
-
-bool gt_querymatch_evalue_display(const GtSeedExtendDisplayFlag *display_flag)
-{
-  return gt_querymatch_display_on(display_flag,Gt_Evalue_display);
-}
-
-bool gt_querymatch_bitscore_display(const GtSeedExtendDisplayFlag
-                                       *display_flag)
-{
-  return gt_querymatch_display_on(display_flag,Gt_Bitscore_display);
-}
-
-bool gt_querymatch_s_seqdesc_display(const GtSeedExtendDisplayFlag
-                                      *display_flag)
-{
-  return gt_querymatch_display_on(display_flag,Gt_S_seqdesc_display);
-}
-
-bool gt_querymatch_q_seqdesc_display(const GtSeedExtendDisplayFlag
-                                      *display_flag)
-{
-  return gt_querymatch_display_on(display_flag,Gt_Q_seqdesc_display);
-}
-
-bool gt_querymatch_seqlength_display(const GtSeedExtendDisplayFlag
-                                       *display_flag)
-{
-  return gt_querymatch_display_on(display_flag,Gt_Seqlength_display);
-}
-
-bool gt_querymatch_polinfo_display(const GtSeedExtendDisplayFlag *display_flag)
-{
-  return gt_querymatch_display_on(display_flag,Gt_Polinfo_display);
-}
-
-bool gt_querymatch_fstperquery_display(const GtSeedExtendDisplayFlag
-                                            *display_flag)
-{
-  return gt_querymatch_display_on(display_flag,Gt_Fstperquery_display);
 }
 
 GtUword gt_querymatch_display_alignmentwidth(const GtSeedExtendDisplayFlag
@@ -203,7 +119,7 @@ GtStr *gt_querymatch_column_header(const GtSeedExtendDisplayFlag *display_flag)
   {
     gt_str_append_cstr(str,", bit score");
   }
-  if (gt_querymatch_cigarstring_display(display_flag))
+  if (gt_querymatch_cigar_display(display_flag))
   {
     gt_str_append_cstr(str,", cigarstring");
   }

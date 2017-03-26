@@ -12,6 +12,34 @@ def keywords(display_options)
   return kws
 end
 
+def indent(longest,arg)
+  return " " * (longest - arg.length + 1)
+end
+
+def format(longest,helpline)
+  len = longest + 3
+  out = Array.new()
+  helpline.split(/\s/).each do |w|
+    if len + w.length <= 58
+      out.push(w)
+      len += w.length
+    else
+      out.push("\\n\"\n" + " " * 9 + "\"" + " " * (longest+2) + w)
+      len = longest + 1 + w.length
+    end
+  end
+  return out.join(" ")
+end
+
+class String
+  def dot2us
+    return self.gsub(/\./,"_")
+  end
+  def format_enum_value
+    return "Gt_" + self.dot2us.capitalize + "_display"
+  end
+end
+
 # The following help line defines which keywords can be used as arguments
 #  to option -outfmt. Each keyword follows a newline and ends with a :. This
 #  is exploited by generating the list of possible keyword for
@@ -37,13 +65,15 @@ display_options = [
   ["q.seqdesc",   "display sequence description of query sequence"],
   ["bitscore",    "display bit score"]]
 
-class String
-  def dot2us
-    return self.gsub(/\./,"_").capitalize
-  end
+outfilename = "src/match/se-display.inc"
+begin
+  fpout = File.new(outfilename,"w")
+rescue => err
+  STDERR.puts "#{$0}: cannot create file #{outfilename}"
+  exit 1
 end
 
-puts <<'EOF'
+fpout.puts <<'EOF'
 typedef struct
 {
   const char *name;
@@ -51,26 +81,35 @@ typedef struct
   bool incolumn;
 } GtSEdisplayStruct;
 
+struct GtSeedExtendDisplayFlag
+{
+  unsigned int flags;
+  bool a_seedpos_relative, b_seedpos_relative;
+  GtUword alignmentwidth;
+};
+
 static GtSEdisplayStruct gt_display_arguments_table[] =
 {
 EOF
 
 kws = keywords(display_options)
 
-puts kws.sort {|a,b| a[0] <=> b[0]}.
+fpout.puts kws.sort {|a,b| a[0] <=> b[0]}.
          map{|s,idx,f| "  {\"#{s}\", #{idx}, #{f}}"}.join(",\n")
 
-puts <<'EOF'
+fpout.puts <<'EOF'
 };
 
 typedef enum
 {
 EOF
 
-puts kws.map{|s,idx,f| "  Gt_#{s.dot2us}_display"}.join(",\n")
+fpout.puts kws.map{|s,idx,f| " #{s.format_enum_value}"}.join(",\n")
 
-puts <<EOF
+fpout.puts <<EOF
 } GtSeedExtendDisplay_enum;
+
+#define GT_DISPLAY_LARGEST_FLAG #{kws.length-1}
 
 const char *gt_querymatch_display_help(void)
 {
@@ -84,27 +123,37 @@ display_options.each do |arg,helpline|
   end
 end
 
-def indent(longest,arg)
-  return " " * (longest - arg.length + 1)
+display_options.each do |arg,helpline|
+  fpout.puts " " * 9 + "\"#{arg}:#{indent(longest,arg)}" +
+       "#{format(longest,helpline)}\\n\""
 end
 
-def format(longest,helpline)
-  len = longest + 3
-  out = Array.new()
-  helpline.split(/\s/).each do |w|
-    if len + w.length <= 58
-      out.push(w)
-      len += w.length
-    else
-      out.push("\\n\"\n" + " " * 9 + "\"" + " " * (longest+2) + w)
-      len = longest + 1 + w.length
-    end
-  end
-  return out.join(" ")
-end
+fpout.puts <<'EOF'
+;
+}
+
+static unsigned int gt_display_mask(int shift)
+{
+  return 1U << shift;
+}
+
+static bool gt_querymatch_display_on(const GtSeedExtendDisplayFlag
+                                       *display_flag,
+                                     GtSeedExtendDisplay_enum display)
+{
+  gt_assert((int) display <= GT_DISPLAY_LARGEST_FLAG);
+  return (display_flag != NULL &&
+          (display_flag->flags & gt_display_mask(display))) ? true : false;
+}
+EOF
 
 display_options.each do |arg,helpline|
-  puts " " * 9 + "\"#{arg}:#{indent(longest,arg)}#{format(longest,helpline)}\\n\""
-end
+  fpout.puts <<EOF
 
-puts ";}"
+bool gt_querymatch_#{arg.dot2us}_display(const GtSeedExtendDisplayFlag
+                                        *display_flag)
+{
+  return gt_querymatch_display_on(display_flag,#{arg.format_enum_value});
+}
+EOF
+end
