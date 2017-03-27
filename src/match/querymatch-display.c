@@ -54,11 +54,27 @@ const GtSEdisplayStruct *gt_display_arg_get(const char *str)
 GtSeedExtendDisplayFlag *gt_querymatch_display_flag_new(void)
 {
   GtSeedExtendDisplayFlag *display_flag = gt_malloc(sizeof *display_flag);
+  GtStrArray *default_display_args = gt_str_array_new();
+  int ret;
 
   display_flag->flags = 0;
   display_flag->alignmentwidth = 0;
   display_flag->a_seedpos_relative = true; /* as bytes is default access mode */
   display_flag->b_seedpos_relative = true;
+  gt_str_array_add_cstr(default_display_args,"s.len");
+  gt_str_array_add_cstr(default_display_args,"s.seqnum");
+  gt_str_array_add_cstr(default_display_args,"s.start");
+  gt_str_array_add_cstr(default_display_args,"strand");
+  gt_str_array_add_cstr(default_display_args,"q.len");
+  gt_str_array_add_cstr(default_display_args,"q.seqnum");
+  gt_str_array_add_cstr(default_display_args,"q.start");
+  gt_str_array_add_cstr(default_display_args,"score");
+  gt_str_array_add_cstr(default_display_args,"editdist");
+  gt_str_array_add_cstr(default_display_args,"identity");
+  ret = gt_querymatch_display_flag_args_set(display_flag,default_display_args,
+                                            NULL);
+  gt_assert(ret == 0);
+  gt_str_array_delete(default_display_args);
   return display_flag;
 }
 
@@ -99,57 +115,15 @@ bool gt_querymatch_display_seedpos_b_relative(const GtSeedExtendDisplayFlag
                                                                     : false;
 }
 
-GtStr *gt_querymatch_column_header(const GtSeedExtendDisplayFlag *display_flag)
-{
-  GtStr *str = gt_str_new();
-
-  if (gt_querymatch_seed_len_display(display_flag))
-  {
-    gt_str_append_cstr(str,", seed.len");
-  }
-  if (gt_querymatch_seed_s_start_display(display_flag))
-  {
-    gt_str_append_cstr(str,", seed.s.start");
-  }
-  if (gt_querymatch_seed_q_start_display(display_flag))
-  {
-    gt_str_append_cstr(str,", seed.q.start");
-  }
-  if (gt_querymatch_s_seqlen_display(display_flag))
-  {
-    gt_str_append_cstr(str,", s.seqlen");
-  }
-  if (gt_querymatch_q_seqlen_display(display_flag))
-  {
-    gt_str_append_cstr(str,", q.seqlen");
-  }
-  if (gt_querymatch_evalue_display(display_flag))
-  {
-    gt_str_append_cstr(str,", evalue");
-  }
-  if (gt_querymatch_bitscore_display(display_flag))
-  {
-    gt_str_append_cstr(str,", bit score");
-  }
-  if (gt_querymatch_cigar_display(display_flag))
-  {
-    gt_str_append_cstr(str,", cigarstring");
-  }
-  return str;
-}
-
 void gt_querymatch_fields_approx_output(const GtSeedExtendDisplayFlag
                                          *display_flag,FILE *stream)
 {
   GtStr *add_column_header;
 
-  fprintf(stream,"# Fields: s.len, s.seqnum, s.start, strand, q.len, q.seqnum, "
-                 "q.start, score, editdist, identity");
+  fprintf(stream,"# Fields: ");
   add_column_header = gt_querymatch_column_header(display_flag);
-  if (gt_str_length(add_column_header) > 0)
-  {
-    fputs(gt_str_get(add_column_header),stream);
-  }
+  gt_assert(gt_str_length(add_column_header) > 0);
+  fputs(gt_str_get(add_column_header),stream);
   fputc('\n',stream);
   gt_str_delete(add_column_header);
 }

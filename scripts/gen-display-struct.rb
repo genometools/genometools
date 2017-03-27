@@ -1,11 +1,10 @@
 #!/usr/bin/env ruby
 
 def keywords(display_options)
-  extra = ["alignment","polinfo","fstperquery","failed_seed","seed_in_algn"]
   kws = Array.new()
   idx = 0
   display_options.each do |arg,helpline|
-    incolumn = if extra.member?(arg) then "false" else "true" end
+    incolumn = if helpline.match(/^display /) then "true" else "false" end
     kws.push([arg,idx,incolumn])
     idx += 1
   end
@@ -48,23 +47,41 @@ end
 #  to the type above.
 
 display_options = [
-  ["alignment",   "display alignment (possibly followed by =<number> to " +
+  ["alignment",   "show alignment (possibly followed by =<number> to " +
                   "specify width of alignment columns)"],
-  ["seed_in_algn","display the seed in alignment"],
-  ["polinfo",     "display polishing information for displayed alignment"],
-  ["failed_seed", "display the seed of the match that was extended, " +
-                  "but failed (after extension) the filter conditions"],
+  ["seed_in_algn","mark the seed in alignment"],
+  ["polinfo",     "add polishing information for shown alignment"],
+  ["failed_seed", "show the coordinates of a seed extension, which does not " +
+                  "satisfy the filter conditions"],
   ["fstperquery", "output only the first found match per query"],
-  ["cigar",       "show cigar string representing alignment"],
+  ["cigar",       "display cigar string representing alignment"],
+  ["s.len",       "display length of match on subject sequence"],
+  ["s.seqnum",    "display sequence number of subject sequence"],
   ["s.desc",      "display sequence description of subject sequence"],
+  ["s.start",     "display start position of match on subject sequence"],
+  ["strand",      "display strand of match"],
+  ["q.len",       "display length of match on query sequence"],
+  ["q.seqnum",    "display sequence number of query sequence"],
   ["q.desc",      "display sequence description of query sequence"],
+  ["q.start",     "display start position of match on query sequence"],
+  ["score",       "display score of match"],
+  ["editdist",    "display unit edit distance"],
+  ["identity",    "display percent identity of match"],
   ["seed.len",    "display length seed of the match"],
   ["seed.s.start","display start position of seed in subject"],
   ["seed.q.start","display start position of seed in query"],
   ["s.seqlen",    "display length of subject sequence in which match occurs"],
   ["q.seqlen",    "display length of query sequence in which match occurs"],
   ["evalue",      "display evalue"],
-  ["bitscore",    "display bit score"]]
+  ["bitscore",    "display bit score"]
+]
+
+display_options.each do |value|
+  if value.length != 2 or value[0].match(/\s/)
+    STDERR.puts "#{$0}: #{value} is incorrect"
+    exit 1
+  end
+end
 
 outfilename = "src/match/se-display.inc"
 begin
@@ -153,6 +170,36 @@ bool gt_querymatch_#{arg.dot2us}_display(const GtSeedExtendDisplayFlag
 }
 EOF
 end
+
+fpout.puts <<'EOF'
+GtStr *gt_querymatch_column_header(const GtSeedExtendDisplayFlag *display_flag)
+{
+  GtStr *str = gt_str_new();
+  bool firstelem = true;
+EOF
+
+display_options.each do |arg,helpline|
+  if not helpline.match(/^display /)
+    next
+  end
+fpout.puts <<EOF
+  if (gt_querymatch_#{arg.dot2us}_display(display_flag))
+  {
+    if (!firstelem)
+    {
+      gt_str_append_cstr(str,", #{arg}");
+    } else
+    {
+      gt_str_append_cstr(str,"#{arg}");
+      firstelem = false;
+    }
+  }
+EOF
+end
+
+fpout.puts "  return str;"
+fpout.puts "}"
+
 fpout.close_write
 
 outfilename = "src/match/se-display-fwd.inc"

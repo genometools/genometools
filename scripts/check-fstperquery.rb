@@ -29,6 +29,7 @@ all_seqnum = Set.new()
 miter = SEmatch.new(ARGV[1])
 miter.each do |m|
   all_matches.add(m)
+  puts "add #{m} with seqnum #{m[:q_seqnum]}"
   all_seqnum.add(m[:q_seqnum])
 end
 
@@ -42,5 +43,13 @@ end
 
 if all_seqnum != fstperquery_seqnum
   STDERR.puts "#{$0}: #{ARGV[0]}.q_seqnum != #{ARGV[1]}.q_seqnum"
+  STDERR.puts "#{ARGV[0]}_seqnum="
+  fstperquery_seqnum.each do |elem|
+    STDERR.puts elem
+  end
+  STDERR.puts "#{ARGV[1]}.q_seqnum"
+  all_seqnum.each do |elem|
+    STDERR.puts elem
+  end
   exit 1
 end

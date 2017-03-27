@@ -7,8 +7,18 @@ typedef enum
  Gt_Failed_seed_display,
  Gt_Fstperquery_display,
  Gt_Cigar_display,
+ Gt_S_len_display,
+ Gt_S_seqnum_display,
  Gt_S_desc_display,
+ Gt_S_start_display,
+ Gt_Strand_display,
+ Gt_Q_len_display,
+ Gt_Q_seqnum_display,
  Gt_Q_desc_display,
+ Gt_Q_start_display,
+ Gt_Score_display,
+ Gt_Editdist_display,
+ Gt_Identity_display,
  Gt_Seed_len_display,
  Gt_Seed_s_start_display,
  Gt_Seed_q_start_display,
@@ -27,9 +37,29 @@ bool gt_querymatch_fstperquery_display(const GtSeedExtendDisplayFlag
                                           *display_flag);
 bool gt_querymatch_cigar_display(const GtSeedExtendDisplayFlag
                                           *display_flag);
+bool gt_querymatch_s_len_display(const GtSeedExtendDisplayFlag
+                                          *display_flag);
+bool gt_querymatch_s_seqnum_display(const GtSeedExtendDisplayFlag
+                                          *display_flag);
 bool gt_querymatch_s_desc_display(const GtSeedExtendDisplayFlag
                                           *display_flag);
+bool gt_querymatch_s_start_display(const GtSeedExtendDisplayFlag
+                                          *display_flag);
+bool gt_querymatch_strand_display(const GtSeedExtendDisplayFlag
+                                          *display_flag);
+bool gt_querymatch_q_len_display(const GtSeedExtendDisplayFlag
+                                          *display_flag);
+bool gt_querymatch_q_seqnum_display(const GtSeedExtendDisplayFlag
+                                          *display_flag);
 bool gt_querymatch_q_desc_display(const GtSeedExtendDisplayFlag
+                                          *display_flag);
+bool gt_querymatch_q_start_display(const GtSeedExtendDisplayFlag
+                                          *display_flag);
+bool gt_querymatch_score_display(const GtSeedExtendDisplayFlag
+                                          *display_flag);
+bool gt_querymatch_editdist_display(const GtSeedExtendDisplayFlag
+                                          *display_flag);
+bool gt_querymatch_identity_display(const GtSeedExtendDisplayFlag
                                           *display_flag);
 bool gt_querymatch_seed_len_display(const GtSeedExtendDisplayFlag
                                           *display_flag);

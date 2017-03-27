@@ -81,7 +81,7 @@ Test do
 end
 
 Name "gt seed_extend: display arguments"
-Keywords "gt_seed_extend display"
+Keywords "gt_seed_extend_display"
 Test do
   run_test build_encseq("at1MB", "#{$testdata}at1MB", true)
   run_test build_encseq("Atinsert.fna", "#{$testdata}Atinsert.fna", true)

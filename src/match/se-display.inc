@@ -16,38 +16,58 @@ struct GtSeedExtendDisplayFlag
 static GtSEdisplayStruct gt_display_arguments_table[] =
 {
   {"alignment", 0, false},
-  {"bitscore", 14, true},
+  {"bitscore", 24, true},
   {"cigar", 5, true},
-  {"evalue", 13, true},
+  {"editdist", 16, true},
+  {"evalue", 23, true},
   {"failed_seed", 3, false},
   {"fstperquery", 4, false},
+  {"identity", 17, true},
   {"polinfo", 2, false},
-  {"q.desc", 7, true},
-  {"q.seqlen", 12, true},
-  {"s.desc", 6, true},
-  {"s.seqlen", 11, true},
-  {"seed.len", 8, true},
-  {"seed.q.start", 10, true},
-  {"seed.s.start", 9, true},
-  {"seed_in_algn", 1, false}
+  {"q.desc", 13, true},
+  {"q.len", 11, true},
+  {"q.seqlen", 22, true},
+  {"q.seqnum", 12, true},
+  {"q.start", 14, true},
+  {"s.desc", 8, true},
+  {"s.len", 6, true},
+  {"s.seqlen", 21, true},
+  {"s.seqnum", 7, true},
+  {"s.start", 9, true},
+  {"score", 15, true},
+  {"seed.len", 18, true},
+  {"seed.q.start", 20, true},
+  {"seed.s.start", 19, true},
+  {"seed_in_algn", 1, false},
+  {"strand", 10, true}
 };
 
-#define GT_DISPLAY_LARGEST_FLAG 14
+#define GT_DISPLAY_LARGEST_FLAG 24
 
 const char *gt_querymatch_display_help(void)
 {
   return "specify what information about the matches to display\n"
-         "alignment:    display alignment (possibly followed by \n"
-         "              =<number> to specify width of alignment columns)\n"
-         "seed_in_algn: display the seed in alignment\n"
-         "polinfo:      display polishing information for displayed \n"
-         "              alignment\n"
-         "failed_seed:  display the seed of the match that was extended, but \n"
-         "              failed (after extension) the filter conditions\n"
+         "alignment:    show alignment (possibly followed by =<number> to \n"
+         "              specify width of alignment columns)\n"
+         "seed_in_algn: mark the seed in alignment\n"
+         "polinfo:      add polishing information for shown alignment\n"
+         "failed_seed:  show the coordinates of a seed extension, which \n"
+         "              does not satisfy the filter conditions\n"
          "fstperquery:  output only the first found match per query\n"
-         "cigar:        show cigar string representing alignment\n"
+         "cigar:        display cigar string representing alignment\n"
+         "s.len:        display length of match on subject sequence\n"
+         "s.seqnum:     display sequence number of subject sequence\n"
          "s.desc:       display sequence description of subject sequence\n"
+         "s.start:      display start position of match on subject \n"
+         "              sequence\n"
+         "strand:       display strand of match\n"
+         "q.len:        display length of match on query sequence\n"
+         "q.seqnum:     display sequence number of query sequence\n"
          "q.desc:       display sequence description of query sequence\n"
+         "q.start:      display start position of match on query sequence\n"
+         "score:        display score of match\n"
+         "editdist:     display unit edit distance\n"
+         "identity:     display percent identity of match\n"
          "seed.len:     display length seed of the match\n"
          "seed.s.start: display start position of seed in subject\n"
          "seed.q.start: display start position of seed in query\n"
@@ -104,16 +124,76 @@ bool gt_querymatch_cigar_display(const GtSeedExtendDisplayFlag
   return gt_querymatch_display_on(display_flag,Gt_Cigar_display);
 }
 
+bool gt_querymatch_s_len_display(const GtSeedExtendDisplayFlag
+                                        *display_flag)
+{
+  return gt_querymatch_display_on(display_flag,Gt_S_len_display);
+}
+
+bool gt_querymatch_s_seqnum_display(const GtSeedExtendDisplayFlag
+                                        *display_flag)
+{
+  return gt_querymatch_display_on(display_flag,Gt_S_seqnum_display);
+}
+
 bool gt_querymatch_s_desc_display(const GtSeedExtendDisplayFlag
                                         *display_flag)
 {
   return gt_querymatch_display_on(display_flag,Gt_S_desc_display);
 }
 
+bool gt_querymatch_s_start_display(const GtSeedExtendDisplayFlag
+                                        *display_flag)
+{
+  return gt_querymatch_display_on(display_flag,Gt_S_start_display);
+}
+
+bool gt_querymatch_strand_display(const GtSeedExtendDisplayFlag
+                                        *display_flag)
+{
+  return gt_querymatch_display_on(display_flag,Gt_Strand_display);
+}
+
+bool gt_querymatch_q_len_display(const GtSeedExtendDisplayFlag
+                                        *display_flag)
+{
+  return gt_querymatch_display_on(display_flag,Gt_Q_len_display);
+}
+
+bool gt_querymatch_q_seqnum_display(const GtSeedExtendDisplayFlag
+                                        *display_flag)
+{
+  return gt_querymatch_display_on(display_flag,Gt_Q_seqnum_display);
+}
+
 bool gt_querymatch_q_desc_display(const GtSeedExtendDisplayFlag
                                         *display_flag)
 {
   return gt_querymatch_display_on(display_flag,Gt_Q_desc_display);
+}
+
+bool gt_querymatch_q_start_display(const GtSeedExtendDisplayFlag
+                                        *display_flag)
+{
+  return gt_querymatch_display_on(display_flag,Gt_Q_start_display);
+}
+
+bool gt_querymatch_score_display(const GtSeedExtendDisplayFlag
+                                        *display_flag)
+{
+  return gt_querymatch_display_on(display_flag,Gt_Score_display);
+}
+
+bool gt_querymatch_editdist_display(const GtSeedExtendDisplayFlag
+                                        *display_flag)
+{
+  return gt_querymatch_display_on(display_flag,Gt_Editdist_display);
+}
+
+bool gt_querymatch_identity_display(const GtSeedExtendDisplayFlag
+                                        *display_flag)
+{
+  return gt_querymatch_display_on(display_flag,Gt_Identity_display);
 }
 
 bool gt_querymatch_seed_len_display(const GtSeedExtendDisplayFlag
@@ -156,4 +236,230 @@ bool gt_querymatch_bitscore_display(const GtSeedExtendDisplayFlag
                                         *display_flag)
 {
   return gt_querymatch_display_on(display_flag,Gt_Bitscore_display);
+}
+GtStr *gt_querymatch_column_header(const GtSeedExtendDisplayFlag *display_flag)
+{
+  GtStr *str = gt_str_new();
+  bool firstelem = true;
+  if (gt_querymatch_cigar_display(display_flag))
+  {
+    if (!firstelem)
+    {
+      gt_str_append_cstr(str,", cigar");
+    } else
+    {
+      gt_str_append_cstr(str,"cigar");
+      firstelem = false;
+    }
+  }
+  if (gt_querymatch_s_len_display(display_flag))
+  {
+    if (!firstelem)
+    {
+      gt_str_append_cstr(str,", s.len");
+    } else
+    {
+      gt_str_append_cstr(str,"s.len");
+      firstelem = false;
+    }
+  }
+  if (gt_querymatch_s_seqnum_display(display_flag))
+  {
+    if (!firstelem)
+    {
+      gt_str_append_cstr(str,", s.seqnum");
+    } else
+    {
+      gt_str_append_cstr(str,"s.seqnum");
+      firstelem = false;
+    }
+  }
+  if (gt_querymatch_s_desc_display(display_flag))
+  {
+    if (!firstelem)
+    {
+      gt_str_append_cstr(str,", s.desc");
+    } else
+    {
+      gt_str_append_cstr(str,"s.desc");
+      firstelem = false;
+    }
+  }
+  if (gt_querymatch_s_start_display(display_flag))
+  {
+    if (!firstelem)
+    {
+      gt_str_append_cstr(str,", s.start");
+    } else
+    {
+      gt_str_append_cstr(str,"s.start");
+      firstelem = false;
+    }
+  }
+  if (gt_querymatch_strand_display(display_flag))
+  {
+    if (!firstelem)
+    {
+      gt_str_append_cstr(str,", strand");
+    } else
+    {
+      gt_str_append_cstr(str,"strand");
+      firstelem = false;
+    }
+  }
+  if (gt_querymatch_q_len_display(display_flag))
+  {
+    if (!firstelem)
+    {
+      gt_str_append_cstr(str,", q.len");
+    } else
+    {
+      gt_str_append_cstr(str,"q.len");
+      firstelem = false;
+    }
+  }
+  if (gt_querymatch_q_seqnum_display(display_flag))
+  {
+    if (!firstelem)
+    {
+      gt_str_append_cstr(str,", q.seqnum");
+    } else
+    {
+      gt_str_append_cstr(str,"q.seqnum");
+      firstelem = false;
+    }
+  }
+  if (gt_querymatch_q_desc_display(display_flag))
+  {
+    if (!firstelem)
+    {
+      gt_str_append_cstr(str,", q.desc");
+    } else
+    {
+      gt_str_append_cstr(str,"q.desc");
+      firstelem = false;
+    }
+  }
+  if (gt_querymatch_q_start_display(display_flag))
+  {
+    if (!firstelem)
+    {
+      gt_str_append_cstr(str,", q.start");
+    } else
+    {
+      gt_str_append_cstr(str,"q.start");
+      firstelem = false;
+    }
+  }
+  if (gt_querymatch_score_display(display_flag))
+  {
+    if (!firstelem)
+    {
+      gt_str_append_cstr(str,", score");
+    } else
+    {
+      gt_str_append_cstr(str,"score");
+      firstelem = false;
+    }
+  }
+  if (gt_querymatch_editdist_display(display_flag))
+  {
+    if (!firstelem)
+    {
+      gt_str_append_cstr(str,", editdist");
+    } else
+    {
+      gt_str_append_cstr(str,"editdist");
+      firstelem = false;
+    }
+  }
+  if (gt_querymatch_identity_display(display_flag))
+  {
+    if (!firstelem)
+    {
+      gt_str_append_cstr(str,", identity");
+    } else
+    {
+      gt_str_append_cstr(str,"identity");
+      firstelem = false;
+    }
+  }
+  if (gt_querymatch_seed_len_display(display_flag))
+  {
+    if (!firstelem)
+    {
+      gt_str_append_cstr(str,", seed.len");
+    } else
+    {
+      gt_str_append_cstr(str,"seed.len");
+      firstelem = false;
+    }
+  }
+  if (gt_querymatch_seed_s_start_display(display_flag))
+  {
+    if (!firstelem)
+    {
+      gt_str_append_cstr(str,", seed.s.start");
+    } else
+    {
+      gt_str_append_cstr(str,"seed.s.start");
+      firstelem = false;
+    }
+  }
+  if (gt_querymatch_seed_q_start_display(display_flag))
+  {
+    if (!firstelem)
+    {
+      gt_str_append_cstr(str,", seed.q.start");
+    } else
+    {
+      gt_str_append_cstr(str,"seed.q.start");
+      firstelem = false;
+    }
+  }
+  if (gt_querymatch_s_seqlen_display(display_flag))
+  {
+    if (!firstelem)
+    {
+      gt_str_append_cstr(str,", s.seqlen");
+    } else
+    {
+      gt_str_append_cstr(str,"s.seqlen");
+      firstelem = false;
+    }
+  }
+  if (gt_querymatch_q_seqlen_display(display_flag))
+  {
+    if (!firstelem)
+    {
+      gt_str_append_cstr(str,", q.seqlen");
+    } else
+    {
+      gt_str_append_cstr(str,"q.seqlen");
+      firstelem = false;
+    }
+  }
+  if (gt_querymatch_evalue_display(display_flag))
+  {
+    if (!firstelem)
+    {
+      gt_str_append_cstr(str,", evalue");
+    } else
+    {
+      gt_str_append_cstr(str,"evalue");
+      firstelem = false;
+    }
+  }
+  if (gt_querymatch_bitscore_display(display_flag))
+  {
+    if (!firstelem)
+    {
+      gt_str_append_cstr(str,", bitscore");
+    } else
+    {
+      gt_str_append_cstr(str,"bitscore");
+      firstelem = false;
+    }
+  }
+  return str;
 }
