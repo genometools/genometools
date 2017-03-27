@@ -107,9 +107,13 @@ GtStr *gt_querymatch_column_header(const GtSeedExtendDisplayFlag *display_flag)
   {
     gt_str_append_cstr(str,", seedlen, s.seedstart, q.seedstart");
   }
-  if (gt_querymatch_seqlength_display(display_flag))
+  if (gt_querymatch_s_seqlen_display(display_flag))
   {
-    gt_str_append_cstr(str,", s.seqlen, q.seqlen");
+    gt_str_append_cstr(str,", s.seqlen");
+  }
+  if (gt_querymatch_q_seqlen_display(display_flag))
+  {
+    gt_str_append_cstr(str,", q.seqlen");
   }
   if (gt_querymatch_evalue_display(display_flag))
   {

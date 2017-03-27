@@ -88,7 +88,7 @@ Test do
   run_test build_encseq("U89959_genomic", "#{$testdata}U89959_genomic.fas")
   run_test "#{$bin}gt seed_extend -v -ii at1MB -outfmt seed"
   run "mv #{last_stdout} tmp.matches"
-  ["alignment","cigar","polinfo","fstperquery","seed","seed_in_algn","seqlength","evalue","s.seqdesc","q.seqdesc","bitscore"].each do |arg|
+  ["alignment","cigar","polinfo","fstperquery","seed","seed_in_algn","s.seqlen","q.seqlen","evalue","s.seqdesc","q.seqdesc","bitscore"].each do |arg|
     run_test "#{$bin}gt seed_extend -ii at1MB -outfmt #{arg}"
     run_test "#{$bin}gt seed_extend -ii at1MB -qii Atinsert.fna -outfmt #{arg}"
     if not ["s.seqdesc","q.seqdesc"].member?(arg)
@@ -105,9 +105,9 @@ Test do
   run "diff -I '^#' #{last_stdout} #{$testdata}see-ext-at1MB-400-cigar.matches"
   run_test "#{$bin}gt seed_extend -ii at1MB -l 700 -outfmt alignment=60 seed_in_algn"
   run "diff -I '^#' #{last_stdout} #{$testdata}see-ext-at1MB-500-alignment-seed_in_algn.matches"
-  run_test "#{$bin}gt seed_extend -ii at1MB -l 400 -outfmt seqlength"
+  run_test "#{$bin}gt seed_extend -ii at1MB -l 400 -outfmt s.seqlen q.seqlen"
   run "diff -I '^#' #{last_stdout} #{$testdata}see-ext-at1MB-400-seqlength.matches"
-  run_test "#{$bin}gt seed_extend -ii at1MB -qii Atinsert.fna -l 100 -outfmt bitscore evalue seqlength cigar"
+  run_test "#{$bin}gt seed_extend -ii at1MB -qii Atinsert.fna -l 100 -outfmt bitscore evalue s.seqlen q.seqlen cigar"
   run "diff -I '^#' #{last_stdout} #{$testdata}see-ext-at1MB-Atinsert100-evalue-bitscore-cigar-seqlength.matches"
   run_test "#{$bin}gt seed_extend -ii U89959_genomic -l 50 -outfmt evalue bitscore"
   run "diff -I '^#' #{last_stdout} #{$testdata}see-ext-U8-evalue-bitscore.matches"

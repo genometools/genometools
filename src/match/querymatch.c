@@ -307,9 +307,12 @@ void gt_querymatch_coordinates_out(const GtQuerymatch *querymatch)
             gt_querymatch_similarity(querymatch->distance,
                                      querymatch->dblen + querymatch->querylen));
   }
-  if (gt_querymatch_seqlength_display(querymatch->display_flag))
+  if (gt_querymatch_s_seqlen_display(querymatch->display_flag))
   {
     fprintf(querymatch->fp, " " GT_WU,querymatch->dbseqlen);
+  }
+  if (gt_querymatch_q_seqlen_display(querymatch->display_flag))
+  {
     fprintf(querymatch->fp, " " GT_WU,querymatch->query_totallength);
   }
   if (gt_querymatch_seed_display(querymatch->display_flag))

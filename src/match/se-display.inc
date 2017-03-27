@@ -16,20 +16,21 @@ struct GtSeedExtendDisplayFlag
 static GtSEdisplayStruct gt_display_arguments_table[] =
 {
   {"alignment", 0, false},
-  {"bitscore", 11, true},
+  {"bitscore", 12, true},
   {"cigar", 1, true},
-  {"evalue", 8, true},
+  {"evalue", 9, true},
   {"failed_seed", 5, false},
   {"fstperquery", 3, false},
   {"polinfo", 2, false},
-  {"q.seqdesc", 10, true},
-  {"s.seqdesc", 9, true},
+  {"q.seqdesc", 11, true},
+  {"q.seqlen", 8, true},
+  {"s.seqdesc", 10, true},
+  {"s.seqlen", 7, true},
   {"seed", 4, true},
-  {"seed_in_algn", 6, true},
-  {"seqlength", 7, true}
+  {"seed_in_algn", 6, true}
 };
 
-#define GT_DISPLAY_LARGEST_FLAG 11
+#define GT_DISPLAY_LARGEST_FLAG 12
 
 const char *gt_querymatch_display_help(void)
 {
@@ -45,8 +46,10 @@ const char *gt_querymatch_display_help(void)
          "failed_seed:  display the seed of the match that was extended, but \n"
          "              failed (after extension) the filter conditions\n"
          "seed_in_algn: display the seed in alignment\n"
-         "seqlength:    display length of sequences in which the two \n"
-         "              match-instances occur\n"
+         "s.seqlen:     display length of subject sequence in which match \n"
+         "              occurs\n"
+         "q.seqlen:     display length of query sequence in which match \n"
+         "              occurs\n"
          "evalue:       display evalue\n"
          "s.seqdesc:    display sequence description of subject sequence\n"
          "q.seqdesc:    display sequence description of query sequence\n"
@@ -104,10 +107,16 @@ bool gt_querymatch_seed_in_algn_display(const GtSeedExtendDisplayFlag
   return gt_querymatch_display_on(display_flag,Gt_Seed_in_algn_display);
 }
 
-bool gt_querymatch_seqlength_display(const GtSeedExtendDisplayFlag
+bool gt_querymatch_s_seqlen_display(const GtSeedExtendDisplayFlag
                                         *display_flag)
 {
-  return gt_querymatch_display_on(display_flag,Gt_Seqlength_display);
+  return gt_querymatch_display_on(display_flag,Gt_S_seqlen_display);
+}
+
+bool gt_querymatch_q_seqlen_display(const GtSeedExtendDisplayFlag
+                                        *display_flag)
+{
+  return gt_querymatch_display_on(display_flag,Gt_Q_seqlen_display);
 }
 
 bool gt_querymatch_evalue_display(const GtSeedExtendDisplayFlag

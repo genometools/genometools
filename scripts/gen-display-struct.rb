@@ -58,8 +58,8 @@ display_options = [
   ["failed_seed", "display the seed of the match that was extended, " +
                   "but failed (after extension) the filter conditions"],
   ["seed_in_algn","display the seed in alignment"],
-  ["seqlength",   "display length of sequences in which " +
-                  "the two match-instances occur"],
+  ["s.seqlen",   "display length of subject sequence in which match occurs"],
+  ["q.seqlen",   "display length of query sequence in which match occurs"],
   ["evalue",      "display evalue"],
   ["s.seqdesc",   "display sequence description of subject sequence"],
   ["q.seqdesc",   "display sequence description of query sequence"],

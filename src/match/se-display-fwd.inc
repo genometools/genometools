@@ -8,7 +8,8 @@ typedef enum
  Gt_Seed_display,
  Gt_Failed_seed_display,
  Gt_Seed_in_algn_display,
- Gt_Seqlength_display,
+ Gt_S_seqlen_display,
+ Gt_Q_seqlen_display,
  Gt_Evalue_display,
  Gt_S_seqdesc_display,
  Gt_Q_seqdesc_display,
@@ -26,7 +27,9 @@ bool gt_querymatch_failed_seed_display(const GtSeedExtendDisplayFlag
                                           *display_flag);
 bool gt_querymatch_seed_in_algn_display(const GtSeedExtendDisplayFlag
                                           *display_flag);
-bool gt_querymatch_seqlength_display(const GtSeedExtendDisplayFlag
+bool gt_querymatch_s_seqlen_display(const GtSeedExtendDisplayFlag
+                                          *display_flag);
+bool gt_querymatch_q_seqlen_display(const GtSeedExtendDisplayFlag
                                           *display_flag);
 bool gt_querymatch_evalue_display(const GtSeedExtendDisplayFlag
                                           *display_flag);
