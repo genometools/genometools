@@ -78,7 +78,7 @@ GtQuerymatchoutoptions *gt_querymatchoutoptions_new(bool generate_eoplist,
     querymatchoutoptions->characters = NULL;
     querymatchoutoptions->wildcardshow = 0;
   }
-  display_alignment = gt_querymatch_display_alignment(display_flag);
+  display_alignment = gt_querymatch_alignment_display(display_flag);
   querymatchoutoptions->generate_eoplist
     = generate_eoplist || display_alignment || show_eoplist;
   querymatchoutoptions->show_eoplist = show_eoplist;

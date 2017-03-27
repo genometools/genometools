@@ -22,42 +22,8 @@
 
 typedef struct GtSeedExtendDisplayFlag GtSeedExtendDisplayFlag;
 
-bool gt_querymatch_cigar_display(const GtSeedExtendDisplayFlag
-                                          *display_flag);
-
-bool gt_querymatch_seed_display(const GtSeedExtendDisplayFlag *display_flag);
-
-bool gt_querymatch_failed_seed_display(const GtSeedExtendDisplayFlag
-                                         *display_flag);
-
-bool gt_querymatch_seed_in_algn_display(
-                 const GtSeedExtendDisplayFlag *display_flag);
-
-bool gt_querymatch_evalue_display(const GtSeedExtendDisplayFlag *display_flag);
-
-bool gt_querymatch_bitscore_display(const GtSeedExtendDisplayFlag
-                                       *display_flag);
-
-bool gt_querymatch_s_seqdesc_display(const GtSeedExtendDisplayFlag
-                                      *display_flag);
-
-bool gt_querymatch_q_seqdesc_display(const GtSeedExtendDisplayFlag
-                                      *display_flag);
-
-bool gt_querymatch_seqlength_display(const GtSeedExtendDisplayFlag
-                                       *display_flag);
-
-bool gt_querymatch_polinfo_display(const GtSeedExtendDisplayFlag
-                                      *display_flag);
-
-bool gt_querymatch_fstperquery_display(const GtSeedExtendDisplayFlag
-                                            *display_flag);
-
 GtUword gt_querymatch_display_alignmentwidth(const GtSeedExtendDisplayFlag
                                                 *display_flag);
-
-bool gt_querymatch_display_alignment(const GtSeedExtendDisplayFlag
-                                     *display_flag);
 
 void gt_querymatch_display_seedpos_relative_set(GtSeedExtendDisplayFlag
                                                 *display_flag,
@@ -85,5 +51,10 @@ void gt_querymatch_fields_approx_output(const GtSeedExtendDisplayFlag
                                          *display_flag,FILE *stream);
 
 void gt_querymatch_fields_exact_output(FILE *stream);
+
+bool gt_querymatch_alignment_display(const GtSeedExtendDisplayFlag
+                                     *display_flag);
+
+#include "match/se-display-fwd.inc"
 
 #endif

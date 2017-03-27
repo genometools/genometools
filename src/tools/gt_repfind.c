@@ -841,7 +841,7 @@ static int gt_repfind_runner(int argc,
   if (!haserr)
   {
     if (gt_option_is_set(arguments->refextendgreedyoption) ||
-        gt_querymatch_display_alignment(display_flag) ||
+        gt_querymatch_alignment_display(display_flag) ||
         gt_option_is_set(arguments->refextendxdropoption))
     {
       if (gt_greedy_extend_char_access(&cam_a,
@@ -897,7 +897,7 @@ static int gt_repfind_runner(int argc,
     GtEncseq *encseq_for_desc = NULL;
     GtProcessinfo_and_querymatchspaceptr info_querymatch = {NULL,NULL,NULL};
     info_querymatch.karlin_altschul_stat = karlin_altschul_stat;
-    if (gt_querymatch_display_alignment(display_flag) ||
+    if (gt_querymatch_alignment_display(display_flag) ||
         (gt_option_is_set(arguments->refextendxdropoption) &&
          !arguments->noxpolish))
     {

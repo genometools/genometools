@@ -291,7 +291,7 @@ static int gt_show_seedext_runner(GT_UNUSED int argc,
                                                 err);
   if (!had_err)
   {
-    if (gt_querymatch_display_alignment(display_flag))
+    if (gt_querymatch_alignment_display(display_flag))
     {
       GtUword alignmentwidth
         = gt_querymatch_display_alignmentwidth(display_flag);

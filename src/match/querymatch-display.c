@@ -68,7 +68,7 @@ GtUword gt_querymatch_display_alignmentwidth(const GtSeedExtendDisplayFlag
   return (display_flag == NULL) ? 0 : display_flag->alignmentwidth;
 }
 
-bool gt_querymatch_display_alignment(const GtSeedExtendDisplayFlag
+bool gt_querymatch_alignment_display(const GtSeedExtendDisplayFlag
                                      *display_flag)
 {
   return (display_flag != NULL &&
