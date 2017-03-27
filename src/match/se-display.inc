@@ -16,43 +16,46 @@ struct GtSeedExtendDisplayFlag
 static GtSEdisplayStruct gt_display_arguments_table[] =
 {
   {"alignment", 0, false},
-  {"bitscore", 12, true},
-  {"cigar", 1, true},
-  {"evalue", 9, true},
-  {"failed_seed", 5, false},
-  {"fstperquery", 3, false},
+  {"bitscore", 14, true},
+  {"cigar", 5, true},
+  {"evalue", 13, true},
+  {"failed_seed", 3, false},
+  {"fstperquery", 4, false},
   {"polinfo", 2, false},
-  {"q.seqdesc", 11, true},
-  {"q.seqlen", 8, true},
-  {"s.seqdesc", 10, true},
-  {"s.seqlen", 7, true},
-  {"seed", 4, true},
-  {"seed_in_algn", 6, true}
+  {"q.desc", 7, true},
+  {"q.seqlen", 12, true},
+  {"s.desc", 6, true},
+  {"s.seqlen", 11, true},
+  {"seed.len", 8, true},
+  {"seed.q.start", 10, true},
+  {"seed.s.start", 9, true},
+  {"seed_in_algn", 1, false}
 };
 
-#define GT_DISPLAY_LARGEST_FLAG 12
+#define GT_DISPLAY_LARGEST_FLAG 14
 
 const char *gt_querymatch_display_help(void)
 {
   return "specify what information about the matches to display\n"
          "alignment:    display alignment (possibly followed by \n"
          "              =<number> to specify width of alignment columns)\n"
-         "cigar:        show cigar string representing alignment\n"
+         "seed_in_algn: display the seed in alignment\n"
          "polinfo:      display polishing information for displayed \n"
          "              alignment\n"
-         "fstperquery:  output only the first found match per query\n"
-         "seed:         display the seed of the match, i.e. the length and \n"
-         "              the start position of the seed in both instances\n"
          "failed_seed:  display the seed of the match that was extended, but \n"
          "              failed (after extension) the filter conditions\n"
-         "seed_in_algn: display the seed in alignment\n"
+         "fstperquery:  output only the first found match per query\n"
+         "cigar:        show cigar string representing alignment\n"
+         "s.desc:       display sequence description of subject sequence\n"
+         "q.desc:       display sequence description of query sequence\n"
+         "seed.len:     display length seed of the match\n"
+         "seed.s.start: display start position of seed in subject\n"
+         "seed.q.start: display start position of seed in query\n"
          "s.seqlen:     display length of subject sequence in which match \n"
          "              occurs\n"
          "q.seqlen:     display length of query sequence in which match \n"
          "              occurs\n"
          "evalue:       display evalue\n"
-         "s.seqdesc:    display sequence description of subject sequence\n"
-         "q.seqdesc:    display sequence description of query sequence\n"
          "bitscore:     display bit score\n"
 ;
 }
@@ -71,10 +74,10 @@ static bool gt_querymatch_display_on(const GtSeedExtendDisplayFlag
           (display_flag->flags & gt_display_mask(display))) ? true : false;
 }
 
-bool gt_querymatch_cigar_display(const GtSeedExtendDisplayFlag
+bool gt_querymatch_seed_in_algn_display(const GtSeedExtendDisplayFlag
                                         *display_flag)
 {
-  return gt_querymatch_display_on(display_flag,Gt_Cigar_display);
+  return gt_querymatch_display_on(display_flag,Gt_Seed_in_algn_display);
 }
 
 bool gt_querymatch_polinfo_display(const GtSeedExtendDisplayFlag
@@ -83,28 +86,52 @@ bool gt_querymatch_polinfo_display(const GtSeedExtendDisplayFlag
   return gt_querymatch_display_on(display_flag,Gt_Polinfo_display);
 }
 
-bool gt_querymatch_fstperquery_display(const GtSeedExtendDisplayFlag
-                                        *display_flag)
-{
-  return gt_querymatch_display_on(display_flag,Gt_Fstperquery_display);
-}
-
-bool gt_querymatch_seed_display(const GtSeedExtendDisplayFlag
-                                        *display_flag)
-{
-  return gt_querymatch_display_on(display_flag,Gt_Seed_display);
-}
-
 bool gt_querymatch_failed_seed_display(const GtSeedExtendDisplayFlag
                                         *display_flag)
 {
   return gt_querymatch_display_on(display_flag,Gt_Failed_seed_display);
 }
 
-bool gt_querymatch_seed_in_algn_display(const GtSeedExtendDisplayFlag
+bool gt_querymatch_fstperquery_display(const GtSeedExtendDisplayFlag
                                         *display_flag)
 {
-  return gt_querymatch_display_on(display_flag,Gt_Seed_in_algn_display);
+  return gt_querymatch_display_on(display_flag,Gt_Fstperquery_display);
+}
+
+bool gt_querymatch_cigar_display(const GtSeedExtendDisplayFlag
+                                        *display_flag)
+{
+  return gt_querymatch_display_on(display_flag,Gt_Cigar_display);
+}
+
+bool gt_querymatch_s_desc_display(const GtSeedExtendDisplayFlag
+                                        *display_flag)
+{
+  return gt_querymatch_display_on(display_flag,Gt_S_desc_display);
+}
+
+bool gt_querymatch_q_desc_display(const GtSeedExtendDisplayFlag
+                                        *display_flag)
+{
+  return gt_querymatch_display_on(display_flag,Gt_Q_desc_display);
+}
+
+bool gt_querymatch_seed_len_display(const GtSeedExtendDisplayFlag
+                                        *display_flag)
+{
+  return gt_querymatch_display_on(display_flag,Gt_Seed_len_display);
+}
+
+bool gt_querymatch_seed_s_start_display(const GtSeedExtendDisplayFlag
+                                        *display_flag)
+{
+  return gt_querymatch_display_on(display_flag,Gt_Seed_s_start_display);
+}
+
+bool gt_querymatch_seed_q_start_display(const GtSeedExtendDisplayFlag
+                                        *display_flag)
+{
+  return gt_querymatch_display_on(display_flag,Gt_Seed_q_start_display);
 }
 
 bool gt_querymatch_s_seqlen_display(const GtSeedExtendDisplayFlag
@@ -123,18 +150,6 @@ bool gt_querymatch_evalue_display(const GtSeedExtendDisplayFlag
                                         *display_flag)
 {
   return gt_querymatch_display_on(display_flag,Gt_Evalue_display);
-}
-
-bool gt_querymatch_s_seqdesc_display(const GtSeedExtendDisplayFlag
-                                        *display_flag)
-{
-  return gt_querymatch_display_on(display_flag,Gt_S_seqdesc_display);
-}
-
-bool gt_querymatch_q_seqdesc_display(const GtSeedExtendDisplayFlag
-                                        *display_flag)
-{
-  return gt_querymatch_display_on(display_flag,Gt_Q_seqdesc_display);
 }
 
 bool gt_querymatch_bitscore_display(const GtSeedExtendDisplayFlag

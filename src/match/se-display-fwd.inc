@@ -2,40 +2,46 @@
 typedef enum
 {
  Gt_Alignment_display,
- Gt_Cigar_display,
- Gt_Polinfo_display,
- Gt_Fstperquery_display,
- Gt_Seed_display,
- Gt_Failed_seed_display,
  Gt_Seed_in_algn_display,
+ Gt_Polinfo_display,
+ Gt_Failed_seed_display,
+ Gt_Fstperquery_display,
+ Gt_Cigar_display,
+ Gt_S_desc_display,
+ Gt_Q_desc_display,
+ Gt_Seed_len_display,
+ Gt_Seed_s_start_display,
+ Gt_Seed_q_start_display,
  Gt_S_seqlen_display,
  Gt_Q_seqlen_display,
  Gt_Evalue_display,
- Gt_S_seqdesc_display,
- Gt_Q_seqdesc_display,
  Gt_Bitscore_display
 } GtSeedExtendDisplay_enum;
-bool gt_querymatch_cigar_display(const GtSeedExtendDisplayFlag
+bool gt_querymatch_seed_in_algn_display(const GtSeedExtendDisplayFlag
                                           *display_flag);
 bool gt_querymatch_polinfo_display(const GtSeedExtendDisplayFlag
                                           *display_flag);
-bool gt_querymatch_fstperquery_display(const GtSeedExtendDisplayFlag
-                                          *display_flag);
-bool gt_querymatch_seed_display(const GtSeedExtendDisplayFlag
-                                          *display_flag);
 bool gt_querymatch_failed_seed_display(const GtSeedExtendDisplayFlag
                                           *display_flag);
-bool gt_querymatch_seed_in_algn_display(const GtSeedExtendDisplayFlag
+bool gt_querymatch_fstperquery_display(const GtSeedExtendDisplayFlag
+                                          *display_flag);
+bool gt_querymatch_cigar_display(const GtSeedExtendDisplayFlag
+                                          *display_flag);
+bool gt_querymatch_s_desc_display(const GtSeedExtendDisplayFlag
+                                          *display_flag);
+bool gt_querymatch_q_desc_display(const GtSeedExtendDisplayFlag
+                                          *display_flag);
+bool gt_querymatch_seed_len_display(const GtSeedExtendDisplayFlag
+                                          *display_flag);
+bool gt_querymatch_seed_s_start_display(const GtSeedExtendDisplayFlag
+                                          *display_flag);
+bool gt_querymatch_seed_q_start_display(const GtSeedExtendDisplayFlag
                                           *display_flag);
 bool gt_querymatch_s_seqlen_display(const GtSeedExtendDisplayFlag
                                           *display_flag);
 bool gt_querymatch_q_seqlen_display(const GtSeedExtendDisplayFlag
                                           *display_flag);
 bool gt_querymatch_evalue_display(const GtSeedExtendDisplayFlag
-                                          *display_flag);
-bool gt_querymatch_s_seqdesc_display(const GtSeedExtendDisplayFlag
-                                          *display_flag);
-bool gt_querymatch_q_seqdesc_display(const GtSeedExtendDisplayFlag
                                           *display_flag);
 bool gt_querymatch_bitscore_display(const GtSeedExtendDisplayFlag
                                           *display_flag);

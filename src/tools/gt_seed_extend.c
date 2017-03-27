@@ -793,7 +793,7 @@ static int gt_seed_extend_runner(int argc,
     GtEncseqLoader *encseq_loader = gt_encseq_loader_new();
     gt_encseq_loader_require_multiseq_support(encseq_loader);
     gt_encseq_loader_require_ssp_tab(encseq_loader);
-    if (gt_querymatch_s_seqdesc_display(arguments->display_flag))
+    if (gt_querymatch_s_desc_display(arguments->display_flag))
     {
       gt_encseq_loader_require_des_tab(encseq_loader);
       gt_encseq_loader_require_sds_tab(encseq_loader);
@@ -818,7 +818,7 @@ static int gt_seed_extend_runner(int argc,
       GtEncseqLoader *encseq_loader = gt_encseq_loader_new();
       gt_encseq_loader_require_multiseq_support(encseq_loader);
       gt_encseq_loader_require_ssp_tab(encseq_loader);
-      if (gt_querymatch_q_seqdesc_display(arguments->display_flag))
+      if (gt_querymatch_q_desc_display(arguments->display_flag))
       {
         gt_encseq_loader_require_des_tab(encseq_loader);
         gt_encseq_loader_require_sds_tab(encseq_loader);

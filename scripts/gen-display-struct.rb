@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 
 def keywords(display_options)
-  extra = ["alignment","polinfo","fstperquery","failed_seed","seed_in_align"]
+  extra = ["alignment","polinfo","fstperquery","failed_seed","seed_in_algn"]
   kws = Array.new()
   idx = 0
   display_options.each do |arg,helpline|
@@ -50,19 +50,20 @@ end
 display_options = [
   ["alignment",   "display alignment (possibly followed by =<number> to " +
                   "specify width of alignment columns)"],
-  ["cigar",       "show cigar string representing alignment"],
+  ["seed_in_algn","display the seed in alignment"],
   ["polinfo",     "display polishing information for displayed alignment"],
-  ["fstperquery", "output only the first found match per query"],
-  ["seed",        "display the seed of the match, i.e. the length and " +
-                  "the start position of the seed in both instances"],
   ["failed_seed", "display the seed of the match that was extended, " +
                   "but failed (after extension) the filter conditions"],
-  ["seed_in_algn","display the seed in alignment"],
-  ["s.seqlen",   "display length of subject sequence in which match occurs"],
-  ["q.seqlen",   "display length of query sequence in which match occurs"],
+  ["fstperquery", "output only the first found match per query"],
+  ["cigar",       "show cigar string representing alignment"],
+  ["s.desc",      "display sequence description of subject sequence"],
+  ["q.desc",      "display sequence description of query sequence"],
+  ["seed.len",    "display length seed of the match"],
+  ["seed.s.start","display start position of seed in subject"],
+  ["seed.q.start","display start position of seed in query"],
+  ["s.seqlen",    "display length of subject sequence in which match occurs"],
+  ["q.seqlen",    "display length of query sequence in which match occurs"],
   ["evalue",      "display evalue"],
-  ["s.seqdesc",   "display sequence description of subject sequence"],
-  ["q.seqdesc",   "display sequence description of query sequence"],
   ["bitscore",    "display bit score"]]
 
 outfilename = "src/match/se-display.inc"

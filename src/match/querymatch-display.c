@@ -103,9 +103,17 @@ GtStr *gt_querymatch_column_header(const GtSeedExtendDisplayFlag *display_flag)
 {
   GtStr *str = gt_str_new();
 
-  if (gt_querymatch_seed_display(display_flag))
+  if (gt_querymatch_seed_len_display(display_flag))
   {
-    gt_str_append_cstr(str,", seedlen, s.seedstart, q.seedstart");
+    gt_str_append_cstr(str,", seed.len");
+  }
+  if (gt_querymatch_seed_s_start_display(display_flag))
+  {
+    gt_str_append_cstr(str,", seed.s.start");
+  }
+  if (gt_querymatch_seed_q_start_display(display_flag))
+  {
+    gt_str_append_cstr(str,", seed.q.start");
   }
   if (gt_querymatch_s_seqlen_display(display_flag))
   {
@@ -230,22 +238,24 @@ static int gt_querymatch_display_flag_set(GtWord *parameter,
   }
   if (!identifier_okay)
   {
-    GtStr *err_msg = gt_str_new();
+    GtStr *possible_args = gt_str_new();
 
-    gt_str_append_cstr(err_msg,
-                       "illegal identifier as argument of option -outfmt: "
+    gt_str_append_cstr(possible_args,
+                       "illegal identifier %s as argument of option -outfmt: "
                        "possible idenfifiers are: ");
     for (ds_idx = 0; ds_idx < numofds; ds_idx++)
     {
       const char *dstring = gt_str_array_get(display_strings,ds_idx);
-      gt_str_append_cstr(err_msg,dstring);
+      gt_str_append_cstr(possible_args,dstring);
       if (ds_idx < numofds - 1)
       {
-        gt_str_append_cstr(err_msg,", ");
+        gt_str_append_cstr(possible_args,", ");
       }
     }
-    gt_error_set(err,"%s",gt_str_get(err_msg));
-    gt_str_delete(err_msg);
+    gt_error_set(err,"illegal identifier %s as argument of options -outfmt,"
+                     "possible identifiers are %s",arg,
+                     gt_str_get(possible_args));
+    gt_str_delete(possible_args);
     return -1;
   }
   for (ex_idx = 0; ex_idx < numexcl; ex_idx+=2)
