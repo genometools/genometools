@@ -86,30 +86,15 @@ static const GtSEdisplayStruct *gt_display_arg_get(const char *str,
 static void gt_querymatch_display_flag_add(GtSeedExtendDisplayFlag
                                             *display_flag,unsigned int flag)
 {
-  display_flag->flags |= gt_display_mask(flag);
-  display_flag->order[display_flag->nextfree++] = flag;
-}
+  const unsigned int mask = gt_display_mask(flag);
 
-GtSeedExtendDisplayFlag *gt_querymatch_display_flag_new(void)
-{
-  GtSeedExtendDisplayFlag *display_flag = gt_malloc(sizeof *display_flag);
-
-  display_flag->alignmentwidth = 0;
-  display_flag->a_seedpos_relative = true; /* as bytes is default access mode */
-  display_flag->b_seedpos_relative = true;
-  display_flag->nextfree = 0;
-  display_flag->flags = 0;
-  gt_querymatch_display_flag_add(display_flag,Gt_S_len_display);
-  gt_querymatch_display_flag_add(display_flag,Gt_S_seqnum_display);
-  gt_querymatch_display_flag_add(display_flag,Gt_S_start_display);
-  gt_querymatch_display_flag_add(display_flag,Gt_Strand_display);
-  gt_querymatch_display_flag_add(display_flag,Gt_Q_len_display);
-  gt_querymatch_display_flag_add(display_flag,Gt_Q_seqnum_display);
-  gt_querymatch_display_flag_add(display_flag,Gt_Q_start_display);
-  gt_querymatch_display_flag_add(display_flag,Gt_Score_display);
-  gt_querymatch_display_flag_add(display_flag,Gt_Editdist_display);
-  gt_querymatch_display_flag_add(display_flag,Gt_Identity_display);
-  return display_flag;
+  gt_assert(display_flag != NULL);
+  if (!(display_flag->flags & mask))
+  {
+    display_flag->flags |= mask;
+    gt_assert(display_flag->nextfree <= GT_DISPLAY_LARGEST_FLAG);
+    display_flag->order[display_flag->nextfree++] = flag;
+  }
 }
 
 GtUword gt_querymatch_display_alignmentwidth(const GtSeedExtendDisplayFlag
@@ -199,7 +184,7 @@ static int gt_querymatch_display_flag_set(GtWord *parameter,
                      GT_SE_POSSIBLE_DISPLAY_ARGS);
     return -1;
   }
-  display_flag->flags |= gt_display_mask((int) dstruct->rank);
+  gt_querymatch_display_flag_add(display_flag,dstruct->rank);
   for (ex_idx = 0; ex_idx < numexcl; ex_idx+=2)
   {
     const GtSEdisplayStruct
@@ -219,19 +204,43 @@ static int gt_querymatch_display_flag_set(GtWord *parameter,
   return cmplen > 0 ? 1 : 0;
 }
 
-int gt_querymatch_display_flag_args_set(GtSeedExtendDisplayFlag *display_flag,
-                                        const GtStrArray *display_args,
-                                        GtError *err)
+void gt_querymatch_display_flag_delete(GtSeedExtendDisplayFlag *display_flag)
 {
+  if (display_flag != NULL)
+  {
+    gt_free(display_flag);
+  }
+}
+
+GtSeedExtendDisplayFlag *gt_querymatch_display_flag_new(const GtStrArray
+                                                          *display_args,
+                                                        GtError *err)
+{
+  GtSeedExtendDisplayFlag *display_flag = gt_malloc(sizeof *display_flag);
   bool haserr = false;
   GtUword da_idx;
 
-  gt_assert(display_flag != NULL);
+  display_flag->alignmentwidth = 0;
+  display_flag->a_seedpos_relative = true; /* as bytes is default access mode */
+  display_flag->b_seedpos_relative = true;
+  display_flag->nextfree = 0;
+  display_flag->flags = 0;
+  gt_querymatch_display_flag_add(display_flag,Gt_S_len_display);
+  gt_querymatch_display_flag_add(display_flag,Gt_S_seqnum_display);
+  gt_querymatch_display_flag_add(display_flag,Gt_S_start_display);
+  gt_querymatch_display_flag_add(display_flag,Gt_Strand_display);
+  gt_querymatch_display_flag_add(display_flag,Gt_Q_len_display);
+  gt_querymatch_display_flag_add(display_flag,Gt_Q_seqnum_display);
+  gt_querymatch_display_flag_add(display_flag,Gt_Q_start_display);
+  gt_querymatch_display_flag_add(display_flag,Gt_Score_display);
+  gt_querymatch_display_flag_add(display_flag,Gt_Editdist_display);
+  gt_querymatch_display_flag_add(display_flag,Gt_Identity_display);
   for (da_idx = 0; da_idx < gt_str_array_size(display_args); da_idx++)
   {
     const char *da = gt_str_array_get(display_args,da_idx);
     GtWord parameter;
     int ret = gt_querymatch_display_flag_set(&parameter,display_flag,da,err);
+
     switch (ret)
     {
       case 0:
@@ -259,13 +268,10 @@ int gt_querymatch_display_flag_args_set(GtSeedExtendDisplayFlag *display_flag,
   {
     display_flag->alignmentwidth = 60; /* this is the default alignment width */
   }
-  return haserr ? -1 : 0;
-}
-
-void gt_querymatch_display_flag_delete(GtSeedExtendDisplayFlag *display_flag)
-{
-  if (display_flag != NULL)
+  if (haserr)
   {
-    gt_free(display_flag);
+    gt_querymatch_display_flag_delete(display_flag);
+    return NULL;
   }
+  return display_flag;
 }

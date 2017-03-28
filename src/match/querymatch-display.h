@@ -36,12 +36,9 @@ bool gt_querymatch_display_seedpos_a_relative(const GtSeedExtendDisplayFlag
 bool gt_querymatch_display_seedpos_b_relative(const GtSeedExtendDisplayFlag
                                                 *display_flag);
 
-GtSeedExtendDisplayFlag *gt_querymatch_display_flag_new(void);
-
-int gt_querymatch_display_flag_args_set(
-               GtSeedExtendDisplayFlag *display_flag,
-               const GtStrArray *display_args,
-               GtError *err);
+GtSeedExtendDisplayFlag *gt_querymatch_display_flag_new(const GtStrArray
+                                                          *display_args,
+                                                        GtError *err);
 
 void gt_querymatch_display_flag_delete(GtSeedExtendDisplayFlag *display_flag);
 

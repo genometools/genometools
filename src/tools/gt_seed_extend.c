@@ -90,7 +90,6 @@ typedef struct {
   bool trimstat_on;
   bool use_apos, use_apos_track_all;
   GtUword maxmat;
-  GtSeedExtendDisplayFlag *display_flag;
   GtOption *se_ref_op_evalue,
            *se_ref_op_maxmat,
            *ref_diagband_statistics,
@@ -110,7 +109,6 @@ static void* gt_seed_extend_arguments_new(void)
   arguments->char_access_mode = gt_str_new();
   arguments->splt_string = gt_str_new();
   arguments->display_args = gt_str_array_new();
-  arguments->display_flag = gt_querymatch_display_flag_new();
   return arguments;
 }
 
@@ -132,7 +130,6 @@ static void gt_seed_extend_arguments_delete(void *tool_arguments)
     gt_option_delete(arguments->se_ref_op_maxmat);
     gt_option_delete(arguments->ref_diagband_statistics);
     gt_str_array_delete(arguments->display_args);
-    gt_querymatch_display_flag_delete(arguments->display_flag);
     gt_free(arguments);
   }
 }
@@ -736,6 +733,7 @@ static int gt_seed_extend_runner(int argc,
   unsigned int maxseedlength = 0, nchars = 0;
   GtUwordPair pick = {GT_UWORD_MAX, GT_UWORD_MAX};
   GtUword maxseqlength = 0, a_numofsequences, b_numofsequences;
+  GtSeedExtendDisplayFlag *display_flag = NULL;
   int had_err = 0;
 
   gt_error_check(err);
@@ -762,13 +760,14 @@ static int gt_seed_extend_runner(int argc,
     seedextendtimer = gt_timer_new();
     gt_timer_start(seedextendtimer);
   }
-  had_err = gt_querymatch_display_flag_args_set(arguments->display_flag,
-                                                arguments->display_args,
-                                                err);
+  display_flag = gt_querymatch_display_flag_new(arguments->display_args,err);
+  if (display_flag == NULL)
+  {
+    had_err = -1;
+  }
   /* Set character access method */
   if (!had_err && (!arguments->onlyseeds ||
-                   gt_querymatch_display_alignmentwidth(
-                        arguments->display_flag) > 0))
+                   gt_querymatch_display_alignmentwidth(display_flag) > 0))
   {
     if (gt_greedy_extend_char_access(&cam_a,&cam_b,
                                      gt_str_get(arguments->char_access_mode),
@@ -777,12 +776,12 @@ static int gt_seed_extend_runner(int argc,
       had_err = -1;
     }
   }
-  gt_querymatch_display_seedpos_relative_set(
-             arguments->display_flag,
-             cam_a == GT_EXTEND_CHAR_ACCESS_DIRECT ? true : false,
-             cam_b == GT_EXTEND_CHAR_ACCESS_DIRECT ? true : false);
   if (!had_err)
   {
+    gt_querymatch_display_seedpos_relative_set(
+             display_flag,
+             cam_a == GT_EXTEND_CHAR_ACCESS_DIRECT ? true : false,
+             cam_b == GT_EXTEND_CHAR_ACCESS_DIRECT ? true : false);
     splt = gt_diagbandseed_splt_get(gt_str_get(arguments->splt_string),err);
     if ((int) splt == -1) {
       had_err = -1;
@@ -793,7 +792,7 @@ static int gt_seed_extend_runner(int argc,
     GtEncseqLoader *encseq_loader = gt_encseq_loader_new();
     gt_encseq_loader_require_multiseq_support(encseq_loader);
     gt_encseq_loader_require_ssp_tab(encseq_loader);
-    if (gt_querymatch_s_desc_display(arguments->display_flag))
+    if (gt_querymatch_s_desc_display(display_flag))
     {
       gt_encseq_loader_require_des_tab(encseq_loader);
       gt_encseq_loader_require_sds_tab(encseq_loader);
@@ -818,7 +817,7 @@ static int gt_seed_extend_runner(int argc,
       GtEncseqLoader *encseq_loader = gt_encseq_loader_new();
       gt_encseq_loader_require_multiseq_support(encseq_loader);
       gt_encseq_loader_require_ssp_tab(encseq_loader);
-      if (gt_querymatch_q_desc_display(arguments->display_flag))
+      if (gt_querymatch_q_desc_display(display_flag))
       {
         gt_encseq_loader_require_des_tab(encseq_loader);
         gt_encseq_loader_require_sds_tab(encseq_loader);
@@ -856,6 +855,7 @@ static int gt_seed_extend_runner(int argc,
     if (gt_showtime_enabled()) {
       gt_timer_delete(seedextendtimer);
     }
+    gt_querymatch_display_flag_delete(display_flag);
     return had_err;
   }
 
@@ -1043,7 +1043,7 @@ static int gt_seed_extend_runner(int argc,
                                              arguments->se_evalue_threshold,
                                              arguments->dbs_logdiagbandwidth,
                                              arguments->dbs_mincoverage,
-                                             arguments->display_flag,
+                                             display_flag,
                                              use_apos_local,
                                              arguments->se_xdropbelowscore,
                                              extendgreedy,
@@ -1121,6 +1121,7 @@ static int gt_seed_extend_runner(int argc,
   if (gt_showtime_enabled()) {
     gt_timer_delete(seedextendtimer);
   }
+  gt_querymatch_display_flag_delete(display_flag);
   return had_err;
 }
 

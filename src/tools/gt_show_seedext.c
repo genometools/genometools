@@ -271,7 +271,7 @@ static int gt_show_seedext_runner(GT_UNUSED int argc,
   GtSeedextendMatchIterator *semi = NULL;
   const GtEncseq *aencseq = NULL, *bencseq = NULL;
   GtAlignment *alignment = gt_alignment_new();
-  GtSeedExtendDisplayFlag *display_flag = gt_querymatch_display_flag_new();
+  GtSeedExtendDisplayFlag *display_flag = NULL;
   GtFtPolishing_info *pol_info = NULL;
   GtSequencepairbuffer seqpairbuf = {NULL,NULL,0,0};
   GtGreedyextendmatchinfo *greedyextendmatchinfo = NULL;
@@ -286,9 +286,11 @@ static int gt_show_seedext_runner(GT_UNUSED int argc,
   gt_error_check(err);
   gt_assert(arguments != NULL);
   /* Parse option string in first line of file specified by filename. */
-  had_err = gt_querymatch_display_flag_args_set(display_flag,
-                                                arguments->display_args,
-                                                err);
+  display_flag = gt_querymatch_display_flag_new(arguments->display_args,err);
+  if (display_flag == NULL)
+  {
+    had_err = true;
+  }
   if (!had_err)
   {
     if (gt_querymatch_alignment_display(display_flag))

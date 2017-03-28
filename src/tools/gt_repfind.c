@@ -778,7 +778,7 @@ static int gt_repfind_runner(int argc,
   const bool flags[] = {arguments->forward,
                         arguments->reverse,
                         arguments->reverse_complement};
-  GtSeedExtendDisplayFlag *display_flag = gt_querymatch_display_flag_new();
+  GtSeedExtendDisplayFlag *display_flag = NULL;
   GtFtTrimstat *trimstat = NULL;
 
   gt_error_check(err);
@@ -795,9 +795,8 @@ static int gt_repfind_runner(int argc,
   }
   if (!haserr)
   {
-    if (gt_querymatch_display_flag_args_set(display_flag,
-                                            arguments->display_args,
-                                            err) != 0)
+    display_flag = gt_querymatch_display_flag_new(arguments->display_args,err);
+    if (display_flag == NULL)
     {
       haserr = true;
     }
