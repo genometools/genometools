@@ -20,9 +20,40 @@
 #include "core/assert_api.h"
 #include "match/querymatch-display.h"
 
+typedef struct
+{
+  const char *name;
+  int rank;
+  bool incolumn;
+} GtSEdisplayStruct;
+
+struct GtSeedExtendDisplayFlag
+{
+  unsigned int flags,
+               nextfree,
+               order[GT_DISPLAY_LARGEST_FLAG+1];
+  bool a_seedpos_relative, b_seedpos_relative;
+  GtUword alignmentwidth;
+};
+
+static unsigned int gt_display_mask(int shift)
+{
+  gt_assert(shift <= GT_DISPLAY_LARGEST_FLAG);
+  return 1U << shift;
+}
+
+static bool gt_querymatch_display_on(const GtSeedExtendDisplayFlag
+                                       *display_flag,
+                                     GtSeedExtendDisplay_enum display)
+{
+  return (display_flag != NULL &&
+          (display_flag->flags & gt_display_mask(display))) ? true : false;
+}
+
 #include "match/se-display.inc"
 
-const GtSEdisplayStruct *gt_display_arg_get(const char *str)
+static const GtSEdisplayStruct *gt_display_arg_get(const char *str,
+                                                   size_t cmplen)
 {
   const GtSEdisplayStruct *left = gt_display_arguments_table,
                           *right = gt_display_arguments_table +
@@ -32,7 +63,8 @@ const GtSEdisplayStruct *gt_display_arg_get(const char *str)
   while (left <= right)
   {
     const GtSEdisplayStruct *mid = left + (right - left + 1)/2;
-    int cmp = strcmp(str,mid->name);
+    int cmp = cmplen == 0 ? strcmp(str,mid->name)
+                          : strncmp(str,mid->name,cmplen);
 
     if (cmp < 0)
     {
@@ -51,30 +83,32 @@ const GtSEdisplayStruct *gt_display_arg_get(const char *str)
   return NULL;
 }
 
+static void gt_querymatch_display_flag_add(GtSeedExtendDisplayFlag
+                                            *display_flag,unsigned int flag)
+{
+  display_flag->flags |= gt_display_mask(flag);
+  display_flag->order[display_flag->nextfree++] = flag;
+}
+
 GtSeedExtendDisplayFlag *gt_querymatch_display_flag_new(void)
 {
   GtSeedExtendDisplayFlag *display_flag = gt_malloc(sizeof *display_flag);
-  GtStrArray *default_display_args = gt_str_array_new();
-  int ret;
 
-  display_flag->flags = 0;
   display_flag->alignmentwidth = 0;
   display_flag->a_seedpos_relative = true; /* as bytes is default access mode */
   display_flag->b_seedpos_relative = true;
-  gt_str_array_add_cstr(default_display_args,"s.len");
-  gt_str_array_add_cstr(default_display_args,"s.seqnum");
-  gt_str_array_add_cstr(default_display_args,"s.start");
-  gt_str_array_add_cstr(default_display_args,"strand");
-  gt_str_array_add_cstr(default_display_args,"q.len");
-  gt_str_array_add_cstr(default_display_args,"q.seqnum");
-  gt_str_array_add_cstr(default_display_args,"q.start");
-  gt_str_array_add_cstr(default_display_args,"score");
-  gt_str_array_add_cstr(default_display_args,"editdist");
-  gt_str_array_add_cstr(default_display_args,"identity");
-  ret = gt_querymatch_display_flag_args_set(display_flag,default_display_args,
-                                            NULL);
-  gt_assert(ret == 0);
-  gt_str_array_delete(default_display_args);
+  display_flag->nextfree = 0;
+  display_flag->flags = 0;
+  gt_querymatch_display_flag_add(display_flag,Gt_S_len_display);
+  gt_querymatch_display_flag_add(display_flag,Gt_S_seqnum_display);
+  gt_querymatch_display_flag_add(display_flag,Gt_S_start_display);
+  gt_querymatch_display_flag_add(display_flag,Gt_Strand_display);
+  gt_querymatch_display_flag_add(display_flag,Gt_Q_len_display);
+  gt_querymatch_display_flag_add(display_flag,Gt_Q_seqnum_display);
+  gt_querymatch_display_flag_add(display_flag,Gt_Q_start_display);
+  gt_querymatch_display_flag_add(display_flag,Gt_Score_display);
+  gt_querymatch_display_flag_add(display_flag,Gt_Editdist_display);
+  gt_querymatch_display_flag_add(display_flag,Gt_Identity_display);
   return display_flag;
 }
 
@@ -134,55 +168,18 @@ void gt_querymatch_fields_exact_output(FILE *stream)
                  "q.start\n");
 }
 
-static GtStrArray *gt_se_help2display_strings(const char *helpline)
-{
-  const char *ptr = helpline, *laststart = NULL;
-  char findchar = '\n';
-  GtStrArray *display_args = gt_str_array_new();
-
-  while (true)
-  {
-    ptr = strchr(ptr,findchar);
-    gt_assert(ptr != NULL);
-    if (findchar == '\n')
-    {
-      if (*(ptr+1) == '\0')
-      {
-        break;
-      }
-      ptr++;
-      if (*ptr != ' ')
-      {
-        laststart = ptr;
-        findchar = ':';
-      }
-    } else
-    {
-      GtUword len = (GtUword) (ptr - laststart);
-      gt_str_array_add_cstr_nt(display_args,laststart,len);
-      findchar = '\n';
-    }
-  }
-  return display_args;
-}
-
 static int gt_querymatch_display_flag_set(GtWord *parameter,
-                                          const GtStrArray *display_strings,
                                           GtSeedExtendDisplayFlag *display_flag,
                                           const char *arg,
                                           GtError *err)
 {
-  GtUword ds_idx, numofds = gt_str_array_size(display_strings);
-  const GtSeedExtendDisplay_enum exclude_list[] = {Gt_Alignment_display,
-                                                   Gt_Cigar_display};
+  const char *exclude_list[] = {"alignment","cigar"};
   size_t ex_idx, numexcl = sizeof exclude_list/sizeof exclude_list[0];
-  bool identifier_okay = false, parameter_found = false;
+  const GtSEdisplayStruct *dstruct;
   const char *ptr;
-  size_t cmplen;
+  size_t cmplen = 0;
 
-  gt_assert(display_flag != NULL &&
-            numofds == (size_t) Gt_Bitscore_display + 1 &&
-            numexcl % 2 == 0);
+  gt_assert(display_flag != NULL && numexcl % 2 == 0);
   ptr = strchr(arg,'=');
   if (ptr != NULL)
   {
@@ -193,58 +190,33 @@ static int gt_querymatch_display_flag_set(GtWord *parameter,
                        "expect integer following symbol =",arg);
       return -1;
     }
-    parameter_found = true;
-  } else
-  {
-    cmplen = 0;
   }
-  for (ds_idx = 0; ds_idx < numofds; ds_idx++)
+  dstruct = gt_display_arg_get(arg,cmplen);
+  if (dstruct == NULL)
   {
-    const char *dstring = gt_str_array_get(display_strings,ds_idx);
-    int ret = (cmplen > 0) ? strncmp(arg,dstring,cmplen)
-                           : strcmp(arg,dstring);
-    if (ret == 0)
-    {
-      display_flag->flags |= gt_display_mask((int) ds_idx);
-      identifier_okay = true;
-      break;
-    }
-  }
-  if (!identifier_okay)
-  {
-    GtStr *possible_args = gt_str_new();
-
-    gt_str_append_cstr(possible_args,
-                       "illegal identifier %s as argument of option -outfmt: "
-                       "possible idenfifiers are: ");
-    for (ds_idx = 0; ds_idx < numofds; ds_idx++)
-    {
-      const char *dstring = gt_str_array_get(display_strings,ds_idx);
-      gt_str_append_cstr(possible_args,dstring);
-      if (ds_idx < numofds - 1)
-      {
-        gt_str_append_cstr(possible_args,", ");
-      }
-    }
-    gt_error_set(err,"illegal identifier %s as argument of options -outfmt,"
-                     "possible identifiers are %s",arg,
-                     gt_str_get(possible_args));
-    gt_str_delete(possible_args);
+    gt_error_set(err,"illegal identifier \"%s\" as argument of options "
+                     "-outfmt, possible identifiers are: %s",arg,
+                     GT_SE_POSSIBLE_DISPLAY_ARGS);
     return -1;
   }
+  display_flag->flags |= gt_display_mask((int) dstruct->rank);
   for (ex_idx = 0; ex_idx < numexcl; ex_idx+=2)
   {
-    if ((display_flag->flags & gt_display_mask(exclude_list[ex_idx])) &&
-        (display_flag->flags & gt_display_mask(exclude_list[ex_idx+1])))
+    const GtSEdisplayStruct
+      *dstruct0 = gt_display_arg_get(exclude_list[ex_idx],0),
+      *dstruct1 = gt_display_arg_get(exclude_list[ex_idx+1],0);
+
+    gt_assert(dstruct0 != NULL && dstruct1 != NULL);
+    if ((display_flag->flags & gt_display_mask(dstruct0->rank)) &&
+        (display_flag->flags & gt_display_mask(dstruct1->rank)))
     {
-      const char *d1 = gt_str_array_get(display_strings,exclude_list[ex_idx]);
-      const char *d2 = gt_str_array_get(display_strings,exclude_list[ex_idx+1]);
       gt_error_set(err,"argument \"%s\" and \"%s\" of option -outfmt exclude "
-                       "each other",d1,d2);
+                       "each other",exclude_list[ex_idx],
+                                    exclude_list[ex_idx+1]);
       return -1;
     }
   }
-  return parameter_found ? 1 : 0;
+  return cmplen > 0 ? 1 : 0;
 }
 
 int gt_querymatch_display_flag_args_set(GtSeedExtendDisplayFlag *display_flag,
@@ -253,16 +225,13 @@ int gt_querymatch_display_flag_args_set(GtSeedExtendDisplayFlag *display_flag,
 {
   bool haserr = false;
   GtUword da_idx;
-  GtStrArray *display_strings
-    = gt_se_help2display_strings(gt_querymatch_display_help());
 
   gt_assert(display_flag != NULL);
   for (da_idx = 0; da_idx < gt_str_array_size(display_args); da_idx++)
   {
     const char *da = gt_str_array_get(display_args,da_idx);
     GtWord parameter;
-    int ret = gt_querymatch_display_flag_set(&parameter,display_strings,
-                                             display_flag,da,err);
+    int ret = gt_querymatch_display_flag_set(&parameter,display_flag,da,err);
     switch (ret)
     {
       case 0:
@@ -290,7 +259,6 @@ int gt_querymatch_display_flag_args_set(GtSeedExtendDisplayFlag *display_flag,
   {
     display_flag->alignmentwidth = 60; /* this is the default alignment width */
   }
-  gt_str_array_delete(display_strings);
   return haserr ? -1 : 0;
 }
 
