@@ -28,6 +28,34 @@ static GtSEdisplayStruct gt_display_arguments_table[] =
   {"strand", 10, true}
 };
 
+static unsigned int gt_display_rank2index[] = {
+   0,
+   23,
+   8,
+   5,
+   6,
+   2,
+   15,
+   17,
+   14,
+   18,
+   24,
+   10,
+   12,
+   9,
+   13,
+   19,
+   3,
+   7,
+   20,
+   22,
+   21,
+   16,
+   11,
+   4,
+   1
+};
+
 const char *gt_querymatch_display_help(void)
 {
   return "specify what information about the matches to display\n"

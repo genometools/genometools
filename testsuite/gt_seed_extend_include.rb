@@ -28,6 +28,9 @@ seeds = [170039800390891361279027638963673934519,
 
 $SPLT_LIST = ["-splt struct","-splt ulong"]
 $CAM_LIST = ["encseq", "encseq_reader","bytes"]
+$OUTFMT_ARGS = ["alignment","cigar","polinfo","fstperquery","seed.len",
+                "seed.s.start","seed.q.start","seed_in_algn","s.seqlen",
+                "q.seqlen","evalue","s.desc","q.desc","bitscore"]
 
 Name "gt seed_extend: maxmat"
 Keywords "gt_seed_extend maxmat"
@@ -86,20 +89,13 @@ Test do
   run_test build_encseq("at1MB", "#{$testdata}at1MB", true)
   run_test build_encseq("Atinsert.fna", "#{$testdata}Atinsert.fna", true)
   run_test build_encseq("U89959_genomic", "#{$testdata}U89959_genomic.fas")
-  run_test "#{$bin}gt seed_extend -v -ii at1MB -outfmt seed.len seed.s.start seed.q.start "
-  run "mv #{last_stdout} tmp.matches"
-  ["alignment","cigar","polinfo","fstperquery","seed.len","seed.s.start",
-   "seed.q.start","seed_in_algn","s.seqlen","q.seqlen","evalue","s.desc",
-   "q.desc","bitscore"].each do |arg|
+  $OUTFMT_ARGS.each do |arg|
     run_test "#{$bin}gt seed_extend -ii at1MB -outfmt #{arg}"
     run_test "#{$bin}gt seed_extend -ii at1MB -qii Atinsert.fna -outfmt #{arg}"
-    if not ["s.desc","q.desc"].member?(arg)
-      run_test "#{$bin}gt dev show_seedext -f tmp.matches -outfmt #{arg}"
-    end
   end
   run_test "#{$bin}gt seed_extend -ii at1MB -l 500 -outfmt alignment=70"
   run "diff -I '^#' #{last_stdout} #{$testdata}see-ext-at1MB-500-al.matches"
-  run_test "#{$bin}gt seed_extend -ii at1MB -l 400 -outfmt evalue bitscore"
+  run_test "#{$bin}gt seed_extend -ii at1MB -l 400 -outfmt bitscore evalue"
   run "diff -I '^#' #{last_stdout} #{$testdata}see-ext-at1MB-400-evalue-bitscore.matches"
   run_test "#{$bin}gt seed_extend -ii at1MB -l 400 -outfmt s.desc q.desc"
   run "diff -I '^#' #{last_stdout} #{$testdata}see-ext-at1MB-400-seqdesc.matches"
@@ -111,11 +107,11 @@ Test do
   run "diff -I '^#' #{last_stdout} #{$testdata}see-ext-at1MB-400-seqlength.matches"
   run_test "#{$bin}gt seed_extend -ii at1MB -qii Atinsert.fna -l 100 -outfmt bitscore evalue s.seqlen q.seqlen cigar"
   run "diff -I '^#' #{last_stdout} #{$testdata}see-ext-at1MB-Atinsert100-evalue-bitscore-cigar-seqlength.matches"
-  run_test "#{$bin}gt seed_extend -ii U89959_genomic -l 50 -outfmt evalue bitscore"
+  run_test "#{$bin}gt seed_extend -ii U89959_genomic -l 50 -outfmt bitscore evalue"
   run "diff -I '^#' #{last_stdout} #{$testdata}see-ext-U8-evalue-bitscore.matches"
-  run_test "#{$bin}gt seed_extend -ii at1MB -outfmt seed.len seed.s.start seed.q.start  failed_seed -l 600 -seedlength 20"
+  run_test "#{$bin}gt seed_extend -ii at1MB -outfmt seed.len seed.s.start seed.q.start failed_seed -l 600 -seedlength 20"
   run "diff -I '^#' #{last_stdout} #{$testdata}see-ext-at1MB-500-failed_seed.matches"
-  run_test "#{$bin}gt seed_extend -ii at1MB -outfmt seed.len seed.s.start seed.q.start  failed_seed evalue -l 100 -seedlength 20 -qii U89959_genomic"
+  run_test "#{$bin}gt seed_extend -ii at1MB -outfmt seed.len seed.s.start seed.q.start failed_seed evalue -l 100 -seedlength 20 -qii U89959_genomic"
   run "diff #{last_stdout} #{$testdata}see-ext-at1MB-u8-failed_seed-evalue.matches"
   evalue_filter = 10e-30
   run_test "#{$bin}gt seed_extend -ii at1MB -evalue #{evalue_filter} -outfmt evalue"
@@ -174,18 +170,32 @@ Test do
 end
 
 Name "gt dev show_seedext without alignment"
-Keywords "gt_seed_extend"
+Keywords "gt_seed_XXX_extend show" # excluded until seed can be parsed
 Test do
   run_test build_encseq("at1MB", "#{$testdata}at1MB")
-  run_test "#{$bin}gt seed_extend -v -ii at1MB"
+  run_test "#{$bin}gt seed_extend -v -ii at1MB " + 
+           "-outfmt seed.len seed.s.start seed.q.start"
   run "mv #{last_stdout} seed_extend.out"
   run_test "#{$bin}gt dev show_seedext -f seed_extend.out"
   run "mv #{last_stdout} show_seed_ext.out"
+  run "grep '^#' seed_extend.out"
+  run "mv #{last_stdout} seed_extend.header"
+  run "cut -f 1-10 -d ' ' seed_extend.out"
+  run "mv #{last_stdout} seed_extend.matches"
+  run "cat seed_extend.header seed_extend.matches"
+  run "mv #{last_stdout} seed_extend.out"
   run "diff -I '^#' seed_extend.out show_seed_ext.out"
-  run_test "#{$bin}gt seed_extend -v -outfmt seed.len seed.s.start seed.q.start  -ii at1MB"
-  run "#{$scriptsdir}extract-seed.rb #{last_stdout}"
+  run "#{$scriptsdir}extract-seed.rb seed_extend.out"
   run_test "#{$bin}gt dev show_seedext -f #{last_stdout}"
   run "diff -I '^#' #{last_stdout} show_seed_ext.out"
+  run_test "#{$bin}gt seed_extend -v -ii at1MB " +
+           "-outfmt seed.len seed.s.start seed.q.start"
+  run "mv #{last_stdout} tmp.matches"
+  $OUTFMT_ARGS.each do |arg|
+    if not ["s.desc","q.desc"].member?(arg)
+      run_test "#{$bin}gt dev show_seedext -f tmp.matches -outfmt #{arg}"
+    end
+  end
 end
 
 # cam extension options
@@ -368,7 +378,7 @@ Test do
       end
     end
     run_test "#{$bin}gt seed_extend -bias-parameters -seedpairdistance 10 20 " +
-             "-outfmt seed.len seed.s.start seed.q.start  -ii at1MB #{splt}", :retval => 0
+             "-outfmt seed.len seed.s.start seed.q.start -ii at1MB #{splt}", :retval => 0
   end
 end
 
@@ -419,14 +429,15 @@ Test do
         run_test "#{$bin}gt seed_extend -extend#{ext} 100 -l " +
                  "#{extendlength-20} -minidentity #{minid} " +
                  "-seedlength #{seedlength} -no-reverse -kmerfile no " +
-                 "-mincoverage #{seedlength} -outfmt seed.len seed.s.start seed.q.start  -ii all #{splt}"
+                 "-mincoverage #{seedlength} -outfmt seed.len seed.s.start seed.q.start -ii all #{splt}"
         grep last_stdout, /^\d+ \d+ \d+ . \d+ \d+ \d+ \d+ \d+ \d+/
         run "mv #{last_stdout} combined.out"
         split_output("combined")
         run_test "#{$bin}gt seed_extend -extend#{ext} 100 " +
                  "-l #{extendlength-20} -kmerfile no " +
                  "-minidentity #{minid} -seedlength #{seedlength} " +
-                 "-no-reverse -mincoverage #{seedlength} -outfmt seed.len seed.s.start seed.q.start  " +
+                 "-no-reverse -mincoverage #{seedlength} " +
+                 "-outfmt seed.len seed.s.start seed.q.start " +
                  "-ii db -qii query #{splt}"
         grep last_stdout, /^\d+ \d+ \d+ . \d+ \d+ \d+ \d+ \d+ \d+/
         run "mv #{last_stdout} separated.out"

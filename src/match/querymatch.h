@@ -125,14 +125,10 @@ GtUword gt_querymatch_distance(const GtQuerymatch *querymatch);
 
 GtWord gt_querymatch_score(const GtQuerymatch *querymatch);
 
-void gt_querymatch_prettyprint(const GtQuerymatch *querymatch);
+void gt_querymatch_prettyprint(double evalue,double bit_score,
+                               const GtQuerymatch *querymatch);
 
 void gt_querymatch_show_failed_seed(const GtQuerymatch *querymatch);
-
-void gt_querymatch_enhanced_prettyprint(double evalue,double bit_score,
-                                        const GtQuerymatch *querymatch);
-
-void gt_querymatch_coordinates_out(const GtQuerymatch *querymatch);
 
 bool gt_querymatch_check_final(double *evalue_ptr,
                                double *bit_score_ptr,

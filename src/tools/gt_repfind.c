@@ -129,7 +129,9 @@ static int gt_exact_selfmatch_with_output(void *info,
                              len,
                              false))
   {
-    gt_querymatch_prettyprint(info_querymatch->querymatchspaceptr);
+    /* for exact matches we do not output evalues and bitscores */
+    gt_querymatch_prettyprint(DBL_MAX,DBL_MAX,
+                              info_querymatch->querymatchspaceptr);
   }
   return 0;
 }
@@ -734,7 +736,8 @@ static int gt_callenumquerymatches(bool selfmatch,
                                    matchlength,
                                    false))
         {
-          gt_querymatch_prettyprint(exactseed);
+          /* for exact matches we do not output evalues and bitscores */
+          gt_querymatch_prettyprint(DBL_MAX,DBL_MAX,exactseed);
         }
       }
     }

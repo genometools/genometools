@@ -52,6 +52,10 @@ void gt_querymatch_fields_exact_output(FILE *stream);
 bool gt_querymatch_alignment_display(const GtSeedExtendDisplayFlag
                                      *display_flag);
 
+const unsigned int *gt_querymatch_display_order(unsigned int *numcolumns,
+                                                const GtSeedExtendDisplayFlag
+                                                   *display_flag);
+
 #include "match/se-display-fwd.inc"
 
 #endif

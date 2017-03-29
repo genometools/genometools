@@ -76,12 +76,19 @@ display_options = [
   ["bitscore",    "display bit score"]
 ]
 
+if display_options.length > 32
+  STDERR.puts "#{$0}: maximumu number of display options is 32"
+  exit 1
+end
+
 display_options.each do |value|
   if value.length != 2 or value[0].match(/\s/)
     STDERR.puts "#{$0}: #{value} is incorrect"
     exit 1
   end
 end
+
+kws = keywords(display_options)
 
 outfilename = "src/match/se-display.inc"
 begin
@@ -97,10 +104,21 @@ static GtSEdisplayStruct gt_display_arguments_table[] =
 {
 EOF
 
-kws = keywords(display_options)
+kws_sorted = kws.sort {|a,b| a[0] <=> b[0]}
+rank2index = Array.new(kws_sorted.length)
+kws_sorted.each_with_index do |value,idx|
+  rank2index[value[1]] = idx
+end
 
-fpout.puts kws.sort {|a,b| a[0] <=> b[0]}.
-         map{|s,idx,f| "  {\"#{s}\", #{idx}, #{f}}"}.join(",\n")
+fpout.puts kws_sorted.map{|s,idx,f| "  {\"#{s}\", #{idx}, #{f}}"}.join(",\n")
+
+fpout.puts <<EOF
+};
+
+static unsigned int gt_display_rank2index[] = {
+EOF
+
+fpout.puts "   " +  rank2index.join(",\n   ")
 
 fpout.puts <<EOF
 };

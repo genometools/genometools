@@ -1326,9 +1326,9 @@ static const GtQuerymatch *gt_rf_extend_selfmatch(bool forxdrop,
   return gt_extend_sesp (forxdrop,info, &queryes, &queryes, &sesp);
 }
 
-static void gt_seed_extend_prettyprint(bool forxdrop,
-                                       const GtQuerymatch *querymatch,
-                                       void *info)
+static void gt_rf_seed_extend_prettyprint(bool forxdrop,
+                                          const GtQuerymatch *querymatch,
+                                          void *info)
 {
   GtProcessinfo_and_querymatchspaceptr *info_querymatch
     = (GtProcessinfo_and_querymatchspaceptr *) info;
@@ -1355,7 +1355,7 @@ static void gt_seed_extend_prettyprint(bool forxdrop,
                                 errorpercentage,
                                 evalue_threshold))
   {
-    gt_querymatch_enhanced_prettyprint(evalue,bit_score,querymatch);
+    gt_querymatch_prettyprint(evalue,bit_score,querymatch);
   }
 }
 
@@ -1375,7 +1375,7 @@ static int gt_rf_extend_selfmatch_with_output(bool forxdrop,
                                                           pos2);
   if (querymatch != NULL)
   {
-    gt_seed_extend_prettyprint(forxdrop,querymatch,info);
+    gt_rf_seed_extend_prettyprint(forxdrop,querymatch,info);
   }
   return 0;
 }
@@ -1465,7 +1465,7 @@ static void gt_rf_extend_querymatch_with_output(bool forxdrop,
                               same_encseq);
   if (querymatch != NULL)
   {
-    gt_seed_extend_prettyprint(forxdrop,querymatch,info);
+    gt_rf_seed_extend_prettyprint(forxdrop,querymatch,info);
   }
 }
 

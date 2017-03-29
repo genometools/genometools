@@ -3129,7 +3129,7 @@ static int gt_diagbandseed_possibly_extend(const GtArrayGtDiagbandseedRectangle
                                     esi->errorpercentage,
                                     esi->evalue_threshold))
       {
-        gt_querymatch_enhanced_prettyprint(evalue,bit_score,querymatch);
+        gt_querymatch_prettyprint(evalue,bit_score,querymatch);
         ret = 3; /* output match */
       } else
       {

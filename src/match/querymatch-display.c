@@ -83,6 +83,15 @@ static const GtSEdisplayStruct *gt_display_arg_get(const char *str,
   return NULL;
 }
 
+const unsigned int *gt_querymatch_display_order(unsigned int *numcolumns,
+                                                const GtSeedExtendDisplayFlag
+                                                   *display_flag)
+{
+  gt_assert(display_flag != NULL);
+  *numcolumns = display_flag->nextfree;
+  return &display_flag->order[0];
+}
+
 static void gt_querymatch_display_flag_add(GtSeedExtendDisplayFlag
                                             *display_flag,unsigned int flag)
 {
@@ -92,8 +101,13 @@ static void gt_querymatch_display_flag_add(GtSeedExtendDisplayFlag
   if (!(display_flag->flags & mask))
   {
     display_flag->flags |= mask;
-    gt_assert(display_flag->nextfree <= GT_DISPLAY_LARGEST_FLAG);
-    display_flag->order[display_flag->nextfree++] = flag;
+    gt_assert(flag < sizeof gt_display_arguments_table/
+                     sizeof gt_display_arguments_table[0]);
+    if (gt_display_arguments_table[gt_display_rank2index[flag]].incolumn)
+    {
+      gt_assert(display_flag->nextfree <= GT_DISPLAY_LARGEST_FLAG);
+      display_flag->order[display_flag->nextfree++] = flag;
+    }
   }
 }
 
