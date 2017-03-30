@@ -337,9 +337,8 @@ void gt_querymatch_prettyprint(double evalue,double bit_score,
   const unsigned int *column_order;
   unsigned int numcolumns, idx;
 
-  gt_assert(querymatch != NULL);
-  gt_assert(querymatch->fp != NULL);
-  gt_assert(querymatch->display_flag != NULL);
+  gt_assert(querymatch != NULL && querymatch->fp != NULL &&
+            querymatch->display_flag != NULL);
   column_order = gt_querymatch_display_order(&numcolumns,
                                              querymatch->display_flag);
   gt_assert(numcolumns > 0);
