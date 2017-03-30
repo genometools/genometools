@@ -162,35 +162,6 @@ bool gt_querymatch_#{arg.dot2us}_display(const GtSeedExtendDisplayFlag
 EOF
 end
 
-fpout.puts <<'EOF'
-GtStr *gt_querymatch_column_header(const GtSeedExtendDisplayFlag *display_flag)
-{
-  GtStr *str = gt_str_new();
-  bool firstelem = true;
-EOF
-
-display_options.each do |arg,helpline|
-  if not helpline.match(/^display /)
-    next
-  end
-fpout.puts <<EOF
-  if (gt_querymatch_#{arg.dot2us}_display(display_flag))
-  {
-    if (!firstelem)
-    {
-      gt_str_append_cstr(str,", #{arg}");
-    } else
-    {
-      gt_str_append_cstr(str,"#{arg}");
-      firstelem = false;
-    }
-  }
-EOF
-end
-
-fpout.puts "  return str;"
-fpout.puts "}"
-
 fpout.close_write
 
 outfilename = "src/match/se-display-fwd.inc"

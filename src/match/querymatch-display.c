@@ -148,25 +148,6 @@ bool gt_querymatch_display_seedpos_b_relative(const GtSeedExtendDisplayFlag
                                                                     : false;
 }
 
-void gt_querymatch_fields_approx_output(const GtSeedExtendDisplayFlag
-                                         *display_flag,FILE *stream)
-{
-  GtStr *add_column_header;
-
-  fprintf(stream,"# Fields: ");
-  add_column_header = gt_querymatch_column_header(display_flag);
-  gt_assert(gt_str_length(add_column_header) > 0);
-  fputs(gt_str_get(add_column_header),stream);
-  fputc('\n',stream);
-  gt_str_delete(add_column_header);
-}
-
-void gt_querymatch_fields_exact_output(FILE *stream)
-{
-  fprintf(stream,"# Fields: s.len, s.seqnum, s.start, strand, q.seqnum, "
-                 "q.start\n");
-}
-
 static int gt_querymatch_display_flag_set(GtWord *parameter,
                                           GtSeedExtendDisplayFlag *display_flag,
                                           const char *arg,
@@ -288,4 +269,29 @@ GtSeedExtendDisplayFlag *gt_querymatch_display_flag_new(const GtStrArray
     return NULL;
   }
   return display_flag;
+}
+
+void gt_querymatch_fields_approx_output(const GtSeedExtendDisplayFlag
+                                         *display_flag,FILE *stream)
+{
+  const unsigned int *column_order;
+  unsigned int numcolumns, idx;
+
+  gt_assert(display_flag != NULL);
+  column_order = gt_querymatch_display_order(&numcolumns,
+                                             display_flag);
+  gt_assert(numcolumns > 0);
+  fprintf(stream,"# Fields: ");
+  gt_assert(numcolumns <= GT_DISPLAY_LARGEST_FLAG);
+  for (idx = 0; idx < numcolumns; idx++)
+  {
+    unsigned int argnum, flag = column_order[idx];
+    gt_assert(flag < sizeof gt_display_rank2index/
+                     sizeof gt_display_rank2index[0]);
+    argnum = gt_display_rank2index[flag];
+    gt_assert(argnum < sizeof gt_display_arguments_table/
+                       sizeof gt_display_arguments_table[0]);
+    fprintf(stream,"%s%s",gt_display_arguments_table[argnum].name,
+                        idx < numcolumns - 1 ? ", " : "\n");
+  }
 }

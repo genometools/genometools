@@ -3962,7 +3962,8 @@ static void gt_diagbandseed_process_seeds(GtSeedpairlist *seedpairlist,
   }
   if (seedpairlist->maxmat_show)
   {
-    gt_querymatch_fields_exact_output(stream);
+    fprintf(stream,"# Fields: s.len, s.seqnum, s.start, strand, q.seqnum, "
+                   "q.start\n");
   } else
   {
     const GtUword bmaxlen = gt_encseq_max_seq_length(bencseq);
