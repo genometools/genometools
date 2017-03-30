@@ -298,6 +298,9 @@ static void gt_diagband_statistics_score_add(
 }
 
 void gt_diagband_statistics_add(void *v_diagband_statistics,
+                                /* remove GT_UNUSED once arguments are used */
+                                GT_UNUSED const GtEncseq *aencseq,
+                                GT_UNUSED const GtEncseq *bencseq,
                                 GT_UNUSED GtUword aseqnum,
                                 GT_UNUSED GtUword bseqnum,
                                 const GtDiagbandStruct *diagband_struct,

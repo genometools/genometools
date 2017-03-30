@@ -337,14 +337,23 @@ void gt_querymatch_prettyprint(double evalue,double bit_score,
   const unsigned int *column_order;
   unsigned int numcolumns, idx;
 
-  gt_assert(querymatch != NULL && querymatch->display_flag != NULL &&
-            querymatch->fp != NULL);
+  gt_assert(querymatch != NULL);
+  gt_assert(querymatch->fp != NULL);
+  gt_assert(querymatch->display_flag != NULL);
   column_order = gt_querymatch_display_order(&numcolumns,
                                              querymatch->display_flag);
   gt_assert(numcolumns > 0);
   for (idx = 0; idx < numcolumns; idx++)
   {
-    switch (column_order[idx])
+    const unsigned int co = column_order[idx];
+
+    if (idx > 0 && (querymatch->score > 0 ||
+                   (co != Gt_Score_display && co != Gt_Editdist_display &&
+                    co != Gt_Identity_display)))
+    {
+      fputc(' ',querymatch->fp);
+    }
+    switch (co)
     {
       case Gt_Cigar_display:
         gt_querymatchoutoptions_cigar_show(querymatch->ref_querymatchoutoptions,
@@ -392,10 +401,13 @@ void gt_querymatch_prettyprint(double evalue,double bit_score,
         }
         break;
       case Gt_Identity_display:
-        fprintf(querymatch->fp,"%.2f",
-                gt_querymatch_similarity(querymatch->distance,
-                                         querymatch->dblen +
-                                         querymatch->querylen));
+        if (querymatch->score > 0)
+        {
+          fprintf(querymatch->fp,"%.2f",
+                  gt_querymatch_similarity(querymatch->distance,
+                                           querymatch->dblen +
+                                           querymatch->querylen));
+        }
         break;
       case Gt_Seed_len_display:
         fprintf(querymatch->fp,GT_WU,querymatch->seedlen);
@@ -424,10 +436,6 @@ void gt_querymatch_prettyprint(double evalue,double bit_score,
                                "illegal column %u\n",__func__,__FILE__,
                                __LINE__,column_order[idx]);
                exit(GT_EXIT_PROGRAMMING_ERROR);
-    }
-    if (idx < numcolumns - 1)
-    {
-      fputc(' ',querymatch->fp);
     }
   }
   fputc('\n',querymatch->fp);

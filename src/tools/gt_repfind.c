@@ -573,6 +573,7 @@ static int gt_callenumquerymatches(bool selfmatch,
                                    void *eqmf_data,
                                    const GtKarlinAltschulStat
                                       *karlin_altschul_stat,
+                                   const GtSeedExtendDisplayFlag *display_flag,
                                    GtLogger *logger,
                                    GtError *err)
 {
@@ -649,6 +650,7 @@ static int gt_callenumquerymatches(bool selfmatch,
     {
       same_encseq = false;
     }
+    gt_querymatch_display_set(exactseed,display_flag);
     if (querymatchoutoptions != NULL)
     {
       gt_querymatch_outoptions_set(exactseed,querymatchoutoptions);
@@ -1062,6 +1064,7 @@ static int gt_repfind_runner(int argc,
                                           eqmf,
                                           eqmf_data,
                                           info_querymatch.karlin_altschul_stat,
+                                          display_flag,
                                           logger,
                                           err) != 0)
               {
@@ -1089,6 +1092,7 @@ static int gt_repfind_runner(int argc,
                                   eqmf,
                                   eqmf_data,
                                   info_querymatch.karlin_altschul_stat,
+                                  display_flag,
                                   logger,
                                   err) != 0)
           {

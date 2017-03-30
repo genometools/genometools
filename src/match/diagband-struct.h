@@ -19,6 +19,7 @@
 #define DIAGBAND_STRUCT_H
 #include <inttypes.h>
 #include "core/types_api.h"
+#include "core/encseq_api.h"
 
 /* This module implements all methods related to diagonal bands including
    statistics derived from them. The latter is currently under development. */
@@ -149,6 +150,8 @@ void gt_diagband_statistics_delete(GtDiagbandStatistics *diagband_statistics);
 */
 
 void gt_diagband_statistics_add(void *v_diagband_statistics,
+                                const GtEncseq *aencseq,
+                                const GtEncseq *bencseq,
                                 GtUword aseqnum,
                                 GtUword bseqnum,
                                 const GtDiagbandStruct *diagband_struct,
