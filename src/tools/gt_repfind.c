@@ -804,6 +804,9 @@ static int gt_repfind_runner(int argc,
     if (display_flag == NULL)
     {
       haserr = true;
+    } else
+    {
+      gt_querymatch_fields_approx_output(display_flag,stdout);
     }
   }
   if (!haserr)
