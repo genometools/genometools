@@ -98,7 +98,8 @@ Counters = Struct.new("Counters",:different_seqpairs,
                                  :mh1_not_all_overlap,
                                  :mh0_largerscore,
                                  :mh1_largerscore,
-                                 :samescore)
+                                 :samescore,
+                                 :scorediffdist)
 
 def overlap_in_one_instance(mh0_set,mh1_set)
   count_overlaps = 0
@@ -128,8 +129,8 @@ def set_show(key,s)
   end
 end
 
-def hash_difference(mh0,sh0,mh1,sh1)
-  counters = Counters.new(0,0,0,0,0,0,0,0,0,0,0,0,0,0)
+def hash_difference(argv0,mh0,sh0,argv1,mh1,sh1,maxpercentdiff)
+  counters = Counters.new(0,0,0,0,0,0,0,0,0,0,0,0,0,0,Hash.new() {0})
   multi_merge_sets([mh0,mh1]) do |key, mh_sets|
     mh0_set = mh_sets[0]
     mh1_set = mh_sets[1]
@@ -143,10 +144,6 @@ def hash_difference(mh0,sh0,mh1,sh1)
       mh0_set_alone = mh0_set.difference(common)
       mh1_set_alone = mh1_set.difference(common)
       counters.different_matches += mh0_set_alone.size + mh1_set_alone.size
-      set_show("common ",common)
-      set_show("mh0_set minus common",mh0_set_alone)
-      set_show("mh1_set minus common",mh1_set_alone)
-      puts ""
       if mh0_set.size > mh1_set.size
         counters.mh0larger += 1
       elsif mh0_set.size < mh1_set.size
@@ -166,21 +163,32 @@ def hash_difference(mh0,sh0,mh1,sh1)
       else
         counters.mh0_not_all_overlap += 1
       end
+      multiplier = (100.0+maxpercentdiff)/100.0
+      percentdiff = nil
       if sh0[key] > sh1[key]
-        if sh0[key] > sh1[key] * 11/10
+        if sh0[key] > sh1[key] * multiplier
           counters.mh0_largerscore += 1
         else
           counters.samescore += 1
         end
+        percentdiff = (100.0 * (sh0[key] - sh1[key]).to_f/sh0[key].to_f).round
       elsif sh0[key] < sh1[key]
-        if sh0[key] * 11/10 < sh1[key]
+        if sh0[key] * multiplier < sh1[key]
           counters.mh1_largerscore += 1
+          mh1_larger = true
         else
           counters.samescore += 1
         end
+        percentdiff = (-100.0 * (sh1[key] - sh0[key]).to_f/sh1[key].to_f).round
       else
-        counters.samescore += 1
+        percentdiff = 0
       end
+      set_show("common ",common)
+      set_show("#{argv0} minus common",mh0_set_alone)
+      set_show("#{argv1} minus common",mh1_set_alone)
+      printf("score within %.0f percent difference\n",percentdiff)
+      counters.scorediffdist[percentdiff] += 1
+      puts ""
     end
   end
   return counters
@@ -203,10 +211,41 @@ def identical_upto_query(s,t)
   end
 end
 
-MCoptions = Struct.new("MCoptions",:pairwise,:ignore_query,:matchfiles)
+def dist_cummulate(dist)
+  minval = maxval = nil
+  dist.each_pair do |k,v|
+    if minval.nil? or minval > k
+      minval = k
+    end
+    if maxval.nil? or maxval < k
+      maxval = k
+    end
+  end
+  cumdist = Hash.new() {0}
+  sum = 0
+  puts "minval=#{minval},maxval=#{maxval}"
+  (-1).downto(minval).each do |k|
+    if dist.has_key?(k)
+      sum += dist[k]
+      cumdist[k] = sum
+    end
+  end
+  sum = 0
+  1.upto(maxval).each do |k|
+    if dist.has_key?(k)
+      sum += dist[k]
+      cumdist[k] = sum
+    end
+  end
+  cumdist[0] = dist[0]
+  return cumdist
+end
+
+MCoptions = Struct.new("MCoptions",:pairwise,:ignore_query,:matchfiles,
+                                   :maxpercentdiff)
 
 def parseargs(argv)
-  options = MCoptions.new(false,false,nil)
+  options = MCoptions.new(false,false,nil,10.0)
   opts = OptionParser.new
   opts.banner = "#{$0} [options] <inputfile>"
   opts.on("-p","--pairwise","perform pairwise comparison") do |x|
@@ -216,6 +255,11 @@ def parseargs(argv)
                                           "number and start position " +
                                           "on query") do |x|
     options.ignore_query = true
+  end
+  opts.on("-m","--maxpercent-difference NUMBER",
+               "specify maximum percent of score difference accepted when " +
+               "comparing matches") do |x|
+    options.maxpercentdiff = x.to_f
   end
   rest = opts.parse(argv)
   if rest.length < 2
@@ -250,8 +294,11 @@ if options.pairwise
     (idx0+1).upto(numfiles-1).each do |idx1|
       argv1 = options.matchfiles[idx1]
       puts "# #{argv0} vs #{argv1}"
-      counters = hash_difference(match_hash_tab[idx0],score_hash_tab[idx0],
-				 match_hash_tab[idx1],score_hash_tab[idx1])
+      counters = hash_difference(argv0,match_hash_tab[idx0],
+                                       score_hash_tab[idx0],
+				 argv1,match_hash_tab[idx1],
+                                       score_hash_tab[idx1],
+                                 options.maxpercentdiff)
       all_seqpairs = counters.identical_seqpairs + counters.different_seqpairs
       printf("sequence pairs with identical matches %d (%5.2f%%)\n",
 	    counters.identical_seqpairs,
@@ -267,9 +314,9 @@ if options.pairwise
 	      counters.different_matches,
 	      100.0 * counters.different_matches.to_f/all_matches.to_f)
 
-      puts "sequence pairs for which #{argv0} > #{argv1}: #{counters.mh0larger}"
-      puts "sequence pairs for which #{argv1} > #{argv0}: #{counters.mh1larger}"
-      puts "sequence pairs for which #{argv1} = #{argv0}: #{counters.samesize}"
+      puts "sequence pairs for which |#{argv0}| > |#{argv1}|: #{counters.mh0larger}"
+      puts "sequence pairs for which |#{argv1}| > |#{argv0}|: #{counters.mh1larger}"
+      puts "sequence pairs for which |#{argv1}| = |#{argv0}|: #{counters.samesize}"
 
       puts "sequence pairs with different match sets for which all of #{argv0} overlaps with #{argv1}: #{counters.mh0_all_overlap}"
       puts "sequence pairs with different match sets for which some of #{argv0} do not overlap with #{argv1}: #{counters.mh0_not_all_overlap}"
@@ -280,6 +327,12 @@ if options.pairwise
       puts "sequence pairs with different match sets for which #{argv1} have a larger score than #{argv0}: #{counters.mh1_largerscore}"
       puts "sequence pairs with different match sets for which #{argv0} have a larger score than #{argv1}: #{counters.mh0_largerscore}"
       puts "sequence pairs for which #{argv0} have same score as #{argv1}: #{counters.samescore}"
+      puts "same means within #{options.maxpercentdiff} percent difference"
+      cumdist = dist_cummulate(counters.scorediffdist)
+      puts "# cummulative distribution"
+      cumdist.sort.each do |k,v|
+        puts "#{k}\t#{v}"
+      end
     end
   end
 elsif options.ignore_query
