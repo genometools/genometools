@@ -1,5 +1,14 @@
 #!/usr/bin/env ruby
 
+class String
+  def dot2us
+    return self.gsub(/\./,"_")
+  end
+  def format_enum_value
+    return "Gt_" + self.dot2us.capitalize + "_display"
+  end
+end
+
 def keywords(display_options)
   kws = Array.new()
   idx = 0
@@ -28,15 +37,6 @@ def format(longest,helpline)
     end
   end
   return out.join(" ")
-end
-
-class String
-  def dot2us
-    return self.gsub(/\./,"_")
-  end
-  def format_enum_value
-    return "Gt_" + self.dot2us.capitalize + "_display"
-  end
 end
 
 # The following array defines the keywords which can be used as arguments
@@ -101,20 +101,21 @@ static GtSEdisplayStruct gt_display_arguments_table[] =
 EOF
 
 kws_sorted = kws.sort {|a,b| a[0] <=> b[0]}
-rank2index = Array.new(kws_sorted.length)
+flag2index = Array.new(kws_sorted.length)
 kws_sorted.each_with_index do |value,idx|
-  rank2index[value[1]] = idx
+  flag2index[value[1]] = idx
 end
 
-fpout.puts kws_sorted.map{|s,idx,f| "  {\"#{s}\", #{idx}, #{f}}"}.join(",\n")
+fpout.puts kws_sorted.
+           map {|s,idx,incolumn| "  {\"#{s}\", #{s.format_enum_value}, #{incolumn}}"}.join(",\n")
 
 fpout.puts <<EOF
 };
 
-static unsigned int gt_display_rank2index[] = {
+static unsigned int gt_display_flag2index[] = {
 EOF
 
-fpout.puts "   " +  rank2index.join(",\n   ")
+fpout.puts "   " +  flag2index.join(",\n   ")
 
 fpout.puts <<EOF
 };
@@ -174,7 +175,7 @@ fpout.puts "#define GT_DISPLAY_LARGEST_FLAG #{kws.length-1}"
 
 fpout.puts "typedef enum\n{"
 
-fpout.puts kws.map{|s,idx,f| " #{s.format_enum_value}"}.join(",\n")
+fpout.puts kws.map{|s,idx,incolumn| " #{s.format_enum_value}"}.join(",\n")
 
 fpout.puts "} GtSeedExtendDisplay_enum;"
 
