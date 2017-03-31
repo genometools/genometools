@@ -990,6 +990,12 @@ static const GtQuerymatch *gt_extend_sesp(bool forxdrop,
   if (forxdrop)
   {
     xdropmatchinfo = info_querymatch->processinfo;
+    xdropmatchinfo->best_left.ivalue = 0;
+    xdropmatchinfo->best_left.jvalue = 0;
+    xdropmatchinfo->best_left.score = 0;
+    xdropmatchinfo->best_right.ivalue = 0;
+    xdropmatchinfo->best_right.jvalue = 0;
+    xdropmatchinfo->best_right.score = 0;
   } else
   {
     greedyextendmatchinfo = info_querymatch->processinfo;
@@ -1016,74 +1022,68 @@ static const GtQuerymatch *gt_extend_sesp(bool forxdrop,
     vlen = sesp->querystart_relative - r_voffset;
     if (ulen > 0 && vlen > 0)
     {
-    if (forxdrop)
-    {
-      gt_seqabstract_reinit_generic(!rightextension,
-                                    GT_READMODE_FORWARD,
-                                    xdropmatchinfo->useq,
-                                    dbes,
-                                    ulen,
-                                    uoffset,
-                                    sesp->dbseqstartpos,
-                                    sesp->dbseqlength);
-      gt_seqabstract_reinit_generic(!rightextension,
-                                    sesp->query_readmode,
-                                    xdropmatchinfo->vseq,
-                                    queryes,
-                                    vlen,
-                                    sesp->queryseqstartpos + r_voffset,
-                                    sesp->queryseqstartpos,
-                                    sesp->query_totallength);
-#ifdef SKDEBUG
-      gt_xdrop_show_context(!rightextension,xdropmatchinfo);
-#endif
-      gt_evalxdroparbitscoresextend(!rightextension,
-                                    &xdropmatchinfo->best_left,
-                                    xdropmatchinfo->res,
-                                    xdropmatchinfo->useq,
-                                    xdropmatchinfo->vseq,
-                                    xdropmatchinfo->belowscore);
-    } else
-    {
-      (void) front_prune_edist_inplace(!rightextension,
-                                       &greedyextendmatchinfo->
-                                          frontspace_reservoir,
-                                       &left_best_polished_point,
-                                       greedyextendmatchinfo->left_front_trace,
-                                       greedyextendmatchinfo->pol_info,
-                                       greedyextendmatchinfo->trimstrategy,
-                                       greedyextendmatchinfo->history,
-                                       greedyextendmatchinfo->perc_mat_history,
-                                       greedyextendmatchinfo->
-                                          maxalignedlendifference,
-                                       greedyextendmatchinfo->showfrontinfo,
-                                       sesp->seedlength,
-                                       &ufsr,
-                                       uoffset,
-                                       ulen,
-                                       /* as the readmode for the
-                                          sequence u is always forward,
-                                          we do not need the start position
-                                          of the sequence for u. As the
-                                          readmode for v can be reversed,
-                                          we need the start of the sequence
-                                          to correctly obtain the offset
-                                          when using the reverse mode */
-                                       vseqstartpos,
-                                       &vfsr,
-                                       sesp->queryseqstartpos + r_voffset,
-                                       vlen,
-                                       greedyextendmatchinfo->cam_generic,
-                                       greedyextendmatchinfo->trimstat);
-    }
-    }
-  } else
-  {
-    if (forxdrop)
-    {
-      xdropmatchinfo->best_left.ivalue = 0;
-      xdropmatchinfo->best_left.jvalue = 0;
-      xdropmatchinfo->best_left.score = 0;
+      if (forxdrop)
+      {
+        gt_seqabstract_reinit_generic(!rightextension,
+                                      GT_READMODE_FORWARD,
+                                      xdropmatchinfo->useq,
+                                      dbes,
+                                      ulen,
+                                      uoffset,
+                                      sesp->dbseqstartpos,
+                                      sesp->dbseqlength);
+        gt_seqabstract_reinit_generic(!rightextension,
+                                      sesp->query_readmode,
+                                      xdropmatchinfo->vseq,
+                                      queryes,
+                                      vlen,
+                                      sesp->queryseqstartpos + r_voffset,
+                                      sesp->queryseqstartpos,
+                                      sesp->query_totallength);
+  #ifdef SKDEBUG
+        gt_xdrop_show_context(!rightextension,xdropmatchinfo);
+  #endif
+        gt_evalxdroparbitscoresextend(!rightextension,
+                                      &xdropmatchinfo->best_left,
+                                      xdropmatchinfo->res,
+                                      xdropmatchinfo->useq,
+                                      xdropmatchinfo->vseq,
+                                      xdropmatchinfo->belowscore);
+      } else
+      {
+        (void) front_prune_edist_inplace(!rightextension,
+                                         &greedyextendmatchinfo->
+                                            frontspace_reservoir,
+                                         &left_best_polished_point,
+                                         greedyextendmatchinfo->
+                                             left_front_trace,
+                                         greedyextendmatchinfo->pol_info,
+                                         greedyextendmatchinfo->trimstrategy,
+                                         greedyextendmatchinfo->history,
+                                         greedyextendmatchinfo->
+                                             perc_mat_history,
+                                         greedyextendmatchinfo->
+                                            maxalignedlendifference,
+                                         greedyextendmatchinfo->showfrontinfo,
+                                         sesp->seedlength,
+                                         &ufsr,
+                                         uoffset,
+                                         ulen,
+                                         /* as the readmode for the
+                                            sequence u is always forward,
+                                            we do not need the start position
+                                            of the sequence for u. As the
+                                            readmode for v can be reversed,
+                                            we need the start of the sequence
+                                            to correctly obtain the offset
+                                            when using the reverse mode */
+                                         vseqstartpos,
+                                         &vfsr,
+                                         sesp->queryseqstartpos + r_voffset,
+                                         vlen,
+                                         greedyextendmatchinfo->cam_generic,
+                                         greedyextendmatchinfo->trimstat);
+      }
     }
   }
   if (forxdrop)
@@ -1174,14 +1174,6 @@ static const GtQuerymatch *gt_extend_sesp(bool forxdrop,
                                        vlen,
                                        greedyextendmatchinfo->cam_generic,
                                        greedyextendmatchinfo->trimstat);
-    }
-  } else
-  {
-    if (forxdrop)
-    {
-      xdropmatchinfo->best_right.ivalue = 0;
-      xdropmatchinfo->best_right.jvalue = 0;
-      xdropmatchinfo->best_right.score = 0;
     }
   }
   if (forxdrop)
