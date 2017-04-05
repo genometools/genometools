@@ -80,7 +80,7 @@ static inline void gt_gfa_writer_show_gfa2_segment(GtFile *file,
     GtUword seqnum, const char *sequence)
 {
   gt_file_xprintf(file, "S\t"GT_WU"\t"GT_WU"\t%s\n", seqnum,
-      strlen(sequence), sequence);
+      (GtUword)strlen(sequence), sequence);
 }
 
 static inline void gt_gfa_writer_show_segment(GtGfaVersion version,
