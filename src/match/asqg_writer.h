@@ -51,7 +51,7 @@ int           gt_asqg_writer_show_vertices(GtAsqgWriter *aw,
                                            GtError *err);
 
 /* Writes an edge using Readjoiner SPM information. */
-void          gt_spmproc_show_asgq(GtUword suffix_readnum,
+void          gt_spmproc_show_asqg(GtUword suffix_readnum,
                                    GtUword prefix_readnum,
                                    GtUword length,
                                    bool suffixseq_direct,

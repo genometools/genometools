@@ -1,6 +1,7 @@
 rdjO = "#{$bin}gt readjoiner overlap"
 rdjA = "#{$bin}gt readjoiner assembly"
 spmtest = "#{$bin}gt readjoiner spmtest"
+gfatest = "#{$bin}gt readjoiner gfa"
 cnttest = "#{$bin}gt readjoiner cnttest"
 
 def run_correct(input, k, c)
@@ -1092,6 +1093,21 @@ Test do
   run "diff reads.contigs.fas #$testdata/readjoiner/3_varlen_seq.contigs.fas"
 end
 
+# gfa
+[1, 2].each do |gfa_version|
+  %w{30x_long_varlen contained_varlen 30x_800nt 70x_100nt}.each do |fasta|
+    Name "gt readjoiner gfa#{gfa_version}: #{fasta}"
+    Keywords "gt_readjoiner gt_readjoiner_gfa"
+    Test do
+      run_prefilter("#$testdata/readjoiner/#{fasta}.fas")
+      run_overlap(32)
+      run_test "#{gfatest} -readset reads #{' -1' if gfa_version == 1}",
+        :retval => 0
+      run "diff reads.gfa #$testdata/readjoiner/#{fasta}.gfa#{gfa_version}"
+    end
+  end
+end
+
 # spmtest
 [true, false].each do |mirrored|
   %w{contained_eqlen contained_varlen 30x_800nt 70x_100nt}.each do |fasta|
@@ -1129,7 +1145,6 @@ end
 end
 
 # cnttest
-
 [true, false].each do |mirrored|
   %w{contained_eqlen contained_varlen}.each do |fasta|
     Name "gt readjoiner cnttest#{' singlestrand' if !mirrored}: #{fasta}"

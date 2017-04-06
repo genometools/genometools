@@ -43,6 +43,8 @@
 #define GT_READJOINER_SUFFIX_SG_ELEN_DISTRI     ".el.dsr"
 #define GT_READJOINER_SUFFIX_SG_ASQG            ".asqg"
 #define GT_READJOINER_SUFFIX_SG_ASQG_GZ         ".asqg.gz"
+#define GT_READJOINER_SUFFIX_SG_GFA             ".gfa"
+#define GT_READJOINER_SUFFIX_SG_GFA_GZ          ".gfa.gz"
 
 /* contig graph */
 #define GT_READJOINER_SUFFIX_JUNCTIONS          ".jnc"

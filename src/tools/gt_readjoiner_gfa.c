@@ -23,14 +23,14 @@
 #include "core/unused_api.h"
 #include "core/showtime.h"
 #include "core/spacecalc.h"
-#include "match/asqg_writer.h"
+#include "match/gfa_writer.h"
 #include "match/rdj-contigpaths.h"
 #include "match/rdj-cntlist.h"
 #include "match/rdj-spmlist.h"
 #include "match/rdj-strgraph.h"
 #include "match/rdj-filesuf-def.h"
 #include "match/rdj-version.h"
-#include "tools/gt_readjoiner_asqg.h"
+#include "tools/gt_readjoiner_gfa.h"
 
 typedef struct {
   bool verbose, quiet;
@@ -38,36 +38,37 @@ typedef struct {
   GtStr  *readset;
   bool gz, sg;
   unsigned int nspmfiles;
-} GtReadjoinerAsqgArguments;
+  bool gfa1;
+} GtReadjoinerGfaArguments;
 
-static void* gt_readjoiner_asqg_arguments_new(void)
+static void* gt_readjoiner_gfa_arguments_new(void)
 {
-  GtReadjoinerAsqgArguments *arguments = gt_calloc((size_t)1,
+  GtReadjoinerGfaArguments *arguments = gt_calloc((size_t)1,
       sizeof *arguments);
   arguments->readset = gt_str_new();
   return arguments;
 }
 
-static void gt_readjoiner_asqg_arguments_delete(void *tool_arguments)
+static void gt_readjoiner_gfa_arguments_delete(void *tool_arguments)
 {
-  GtReadjoinerAsqgArguments *arguments = tool_arguments;
+  GtReadjoinerGfaArguments *arguments = tool_arguments;
   if (!arguments)
     return;
   gt_str_delete(arguments->readset);
   gt_free(arguments);
 }
 
-static GtOptionParser* gt_readjoiner_asqg_option_parser_new(
+static GtOptionParser* gt_readjoiner_gfa_option_parser_new(
     void *tool_arguments)
 {
-  GtReadjoinerAsqgArguments *arguments = tool_arguments;
+  GtReadjoinerGfaArguments *arguments = tool_arguments;
   GtOptionParser *op;
   GtOption *option, *v_option;
   gt_assert(arguments != NULL);
 
   /* init */
   op = gt_option_parser_new("[option ...]",
-      "Output string graph in SGA asqg format.");
+      "Output string graph in SGA gfa format.");
 
   /* -readset */
   option = gt_option_new_string("readset", "specify the readset name",
@@ -95,9 +96,15 @@ static GtOptionParser* gt_readjoiner_asqg_option_parser_new(
 
   /* -sg */
   option = gt_option_new_bool("sg", "first construct a Readjoiner string "
-      "graph, then convert it into SGA format",
+      "graph, then convert it into GFA format",
       &arguments->sg, false);
   gt_option_is_development_option(option);
+  gt_option_parser_add_option(op, option);
+
+  /* -1 */
+  option = gt_option_new_bool("1", "output GFA1 "
+      "(default: output GFA2)", &arguments->gfa1, false);
+  gt_option_hide_default(option);
   gt_option_parser_add_option(op, option);
 
   /* -v */
@@ -116,26 +123,26 @@ static GtOptionParser* gt_readjoiner_asqg_option_parser_new(
   return op;
 }
 
-#define GT_READJOINER_ASQG_MSG_INIT \
+#define GT_READJOINER_GFA_MSG_INIT \
   "initialization"
-#define GT_READJOINER_ASQG_MSG_CNT \
+#define GT_READJOINER_GFA_MSG_CNT \
   "parse lists of contained reads"
 
-/* encseq + spm -> asqg */
-#define GT_READJOINER_ASQG_MSG_VERTICES \
-  "output vertices in asqg format"
-#define GT_READJOINER_ASQG_MSG_EDGES \
-  "output edges in asqg format"
+/* encseq + spm -> gfa */
+#define GT_READJOINER_GFA_MSG_VERTICES \
+  "output vertices in gfa format"
+#define GT_READJOINER_GFA_MSG_EDGES \
+  "output edges in gfa format"
 
-/* encseq + sg -> asqg */
-#define GT_READJOINER_ASQG_MSG_COUNT \
+/* encseq + sg -> gfa */
+#define GT_READJOINER_GFA_MSG_COUNT \
   "build string graph (counting phase)"
-#define GT_READJOINER_ASQG_MSG_INSERT \
+#define GT_READJOINER_GFA_MSG_INSERT \
   "build string graph (insertion phase)"
-#define GT_READJOINER_ASQG_MSG_OUTPUT \
-  "output string graph in asqg format"
+#define GT_READJOINER_GFA_MSG_OUTPUT \
+  "output string graph in gfa format"
 
-static int gt_readjoiner_asqg_use_spmfiles(GtSpmproc proc, void *procdata,
+static int gt_readjoiner_gfa_use_spmfiles(GtSpmproc proc, void *procdata,
     const char *readset, unsigned int minmatchlength, unsigned int nspmfiles,
     GtBitsequence *contained, GtError *err)
 {
@@ -165,7 +172,7 @@ static int gt_readjoiner_asqg_use_spmfiles(GtSpmproc proc, void *procdata,
   return had_err;
 }
 
-static inline void gt_readjoiner_asqg_show_current_space(const char *label)
+static inline void gt_readjoiner_gfa_show_current_space(const char *label)
 {
   GtUword m, f;
   if (gt_ma_bookkeeping_enabled())
@@ -178,11 +185,11 @@ static inline void gt_readjoiner_asqg_show_current_space(const char *label)
   }
 }
 
-static int gt_readjoiner_asqg_runner(GT_UNUSED int argc,
+static int gt_readjoiner_gfa_runner(GT_UNUSED int argc,
     GT_UNUSED const char **argv, GT_UNUSED int parsed_args,
     void *tool_arguments, GtError *err)
 {
-  GtReadjoinerAsqgArguments *arguments = tool_arguments;
+  GtReadjoinerGfaArguments *arguments = tool_arguments;
   GtLogger *verbose_logger, *default_logger;
   GtEncseqLoader *el;
   GtEncseq *reads;
@@ -197,7 +204,7 @@ static int gt_readjoiner_asqg_runner(GT_UNUSED int argc,
   if (gt_showtime_enabled())
   {
     timer = gt_timer_new_with_progress_description(
-        GT_READJOINER_ASQG_MSG_INIT);
+        GT_READJOINER_GFA_MSG_INIT);
     gt_timer_start(timer);
     gt_timer_show_cpu_time_by_progress(timer);
   }
@@ -205,7 +212,7 @@ static int gt_readjoiner_asqg_runner(GT_UNUSED int argc,
   gt_error_check(err);
   default_logger = gt_logger_new(!arguments->quiet, GT_LOGGER_DEFLT_PREFIX,
       stdout);
-  gt_logger_log(default_logger, "gt readjoiner asqg");
+  gt_logger_log(default_logger, "gt readjoiner gfa");
   verbose_logger = gt_logger_new(arguments->verbose, GT_LOGGER_DEFLT_PREFIX,
       stdout);
   gt_logger_log(verbose_logger, "verbose output activated");
@@ -213,6 +220,10 @@ static int gt_readjoiner_asqg_runner(GT_UNUSED int argc,
   if (arguments->minmatchlength > 0)
     gt_logger_log(verbose_logger, "SPM length cutoff = %u",
         arguments->minmatchlength);
+  if (arguments->gfa1)
+    gt_logger_log(verbose_logger, "GFA version = 1.0");
+  else
+    gt_logger_log(verbose_logger, "GFA version = 2.0");
 
   el = gt_encseq_loader_new();
   gt_encseq_loader_drop_description_support(el);
@@ -221,15 +232,15 @@ static int gt_readjoiner_asqg_runner(GT_UNUSED int argc,
   nreads = gt_encseq_num_of_sequences(reads);
   gt_assert(reads != NULL);
   eqlen = gt_encseq_accesstype_get(reads) == GT_ACCESS_TYPE_EQUALLENGTH;
-  gt_readjoiner_asqg_show_current_space(GT_READJOINER_ASQG_MSG_INIT);
+  gt_readjoiner_gfa_show_current_space(GT_READJOINER_GFA_MSG_INIT);
   if (!eqlen)
   {
     unsigned int i;
     GtUword nofreads;
     GtStr *filename = gt_str_clone(arguments->readset);
     if (gt_showtime_enabled())
-      gt_timer_show_progress(timer, GT_READJOINER_ASQG_MSG_CNT, stdout);
-    gt_logger_log(default_logger, GT_READJOINER_ASQG_MSG_CNT);
+      gt_timer_show_progress(timer, GT_READJOINER_GFA_MSG_CNT, stdout);
+    gt_logger_log(default_logger, GT_READJOINER_GFA_MSG_CNT);
     gt_str_append_cstr(filename, ".0" GT_READJOINER_SUFFIX_CNTLIST);
     had_err = gt_cntlist_parse(gt_str_get(filename), true, &contained,
         &nofreads, err);
@@ -246,18 +257,18 @@ static int gt_readjoiner_asqg_runner(GT_UNUSED int argc,
       gt_assert(nofreads == nofreads_i);
     }
     gt_str_delete(filename);
-    gt_readjoiner_asqg_show_current_space(GT_READJOINER_ASQG_MSG_CNT);
+    gt_readjoiner_gfa_show_current_space(GT_READJOINER_GFA_MSG_CNT);
   }
   if (!arguments->sg)
   {
     GtStr *filename = NULL;
     GtFile *file = NULL;
-    GtAsqgWriter *aw = NULL;
+    GtGfaWriter *gw = NULL;
     if (had_err == 0)
     {
       filename = gt_str_clone(arguments->readset);
       gt_str_append_cstr(filename, arguments->gz ?
-          GT_READJOINER_SUFFIX_SG_ASQG_GZ : GT_READJOINER_SUFFIX_SG_ASQG);
+          GT_READJOINER_SUFFIX_SG_GFA_GZ : GT_READJOINER_SUFFIX_SG_GFA);
       file = gt_file_open(arguments->gz ? GT_FILE_MODE_GZIP :
           GT_FILE_MODE_UNCOMPRESSED, gt_str_get(filename), "w", err);
       if (file == NULL)
@@ -265,52 +276,53 @@ static int gt_readjoiner_asqg_runner(GT_UNUSED int argc,
     }
     if (had_err == 0)
     {
-      aw = gt_asqg_writer_new(file, reads);
+      gw = gt_gfa_writer_new(file, reads, arguments->gfa1 ?
+          GT_GFA_VERSION_1_0 : GT_GFA_VERSION_2_0);
       if (gt_showtime_enabled())
-        gt_timer_show_progress(timer, GT_READJOINER_ASQG_MSG_VERTICES,
+        gt_timer_show_progress(timer, GT_READJOINER_GFA_MSG_VERTICES,
             stdout);
-      gt_logger_log(default_logger, GT_READJOINER_ASQG_MSG_VERTICES);
-      had_err = gt_asqg_writer_show_header(aw, 0.0,
+      gt_logger_log(default_logger, GT_READJOINER_GFA_MSG_VERTICES);
+      had_err = gt_gfa_writer_show_header(gw,
           (GtUword)arguments->minmatchlength,
           gt_str_get(arguments->readset), false, false, err);
     }
     if (had_err == 0)
     {
-      had_err = gt_asqg_writer_show_vertices(aw, err);
-      gt_readjoiner_asqg_show_current_space(GT_READJOINER_ASQG_MSG_VERTICES);
+      had_err = gt_gfa_writer_show_segments(gw, err);
+      gt_readjoiner_gfa_show_current_space(GT_READJOINER_GFA_MSG_VERTICES);
     }
     if (had_err == 0)
     {
       if (gt_showtime_enabled())
-        gt_timer_show_progress(timer, GT_READJOINER_ASQG_MSG_EDGES, stdout);
-      gt_logger_log(default_logger, GT_READJOINER_ASQG_MSG_EDGES);
-      had_err = gt_readjoiner_asqg_use_spmfiles(gt_spmproc_show_asqg,
-          aw, readset, arguments->minmatchlength, arguments->nspmfiles,
+        gt_timer_show_progress(timer, GT_READJOINER_GFA_MSG_EDGES, stdout);
+      gt_logger_log(default_logger, GT_READJOINER_GFA_MSG_EDGES);
+      had_err = gt_readjoiner_gfa_use_spmfiles(gt_spmproc_show_gfa,
+          gw, readset, arguments->minmatchlength, arguments->nspmfiles,
           contained, err);
-      gt_readjoiner_asqg_show_current_space(GT_READJOINER_ASQG_MSG_EDGES);
+      gt_readjoiner_gfa_show_current_space(GT_READJOINER_GFA_MSG_EDGES);
     }
     gt_str_delete(filename);
     gt_file_delete(file);
-    gt_asqg_writer_delete(aw);
+    gt_gfa_writer_delete(gw);
   }
   else
   {
     if (had_err == 0)
     {
       if (gt_showtime_enabled())
-        gt_timer_show_progress(timer, GT_READJOINER_ASQG_MSG_COUNT, stdout);
-      gt_logger_log(default_logger, GT_READJOINER_ASQG_MSG_COUNT);
+        gt_timer_show_progress(timer, GT_READJOINER_GFA_MSG_COUNT, stdout);
+      gt_logger_log(default_logger, GT_READJOINER_GFA_MSG_COUNT);
       strgraph = gt_strgraph_new(nreads);
-      had_err = gt_readjoiner_asqg_use_spmfiles(gt_spmproc_strgraph_count,
+      had_err = gt_readjoiner_gfa_use_spmfiles(gt_spmproc_strgraph_count,
           strgraph, readset, arguments->minmatchlength, arguments->nspmfiles,
           contained, err);
-      gt_readjoiner_asqg_show_current_space(GT_READJOINER_ASQG_MSG_COUNT);
+      gt_readjoiner_gfa_show_current_space(GT_READJOINER_GFA_MSG_COUNT);
     }
     if (had_err == 0)
     {
       if (gt_showtime_enabled())
-        gt_timer_show_progress(timer, GT_READJOINER_ASQG_MSG_INSERT, stdout);
-      gt_logger_log(default_logger, GT_READJOINER_ASQG_MSG_INSERT);
+        gt_timer_show_progress(timer, GT_READJOINER_GFA_MSG_INSERT, stdout);
+      gt_logger_log(default_logger, GT_READJOINER_GFA_MSG_INSERT);
       gt_strgraph_allocate_graph(strgraph,
           eqlen ? gt_encseq_seqlength(reads, 0) : 0,
           eqlen ? NULL : reads);
@@ -318,19 +330,22 @@ static int gt_readjoiner_asqg_runner(GT_UNUSED int argc,
           (GtUword)arguments->minmatchlength, false,
           contained, readset, arguments->nspmfiles,
           GT_READJOINER_SUFFIX_SPMLIST, err);
-      gt_readjoiner_asqg_show_current_space(GT_READJOINER_ASQG_MSG_INSERT);
+      gt_readjoiner_gfa_show_current_space(GT_READJOINER_GFA_MSG_INSERT);
     }
     if (had_err == 0)
     {
       if (gt_showtime_enabled())
-        gt_timer_show_progress(timer, GT_READJOINER_ASQG_MSG_OUTPUT, stdout);
-      gt_logger_log(default_logger, GT_READJOINER_ASQG_MSG_OUTPUT);
+        gt_timer_show_progress(timer, GT_READJOINER_GFA_MSG_OUTPUT, stdout);
+      gt_logger_log(default_logger, GT_READJOINER_GFA_MSG_OUTPUT);
       gt_strgraph_set_encseq(strgraph, reads);
-      gt_strgraph_show(strgraph, arguments->gz ? GT_STRGRAPH_ASQG_GZ :
-          GT_STRGRAPH_ASQG, gt_str_get(arguments->readset),
-          arguments->gz ? GT_READJOINER_SUFFIX_SG_ASQG_GZ :
-          GT_READJOINER_SUFFIX_SG_ASQG, false);
-      gt_readjoiner_asqg_show_current_space(GT_READJOINER_ASQG_MSG_OUTPUT);
+      gt_strgraph_show(strgraph,
+          arguments->gfa1 ?
+           (arguments->gz ? GT_STRGRAPH_GFA1_GZ : GT_STRGRAPH_GFA1) :
+           (arguments->gz ? GT_STRGRAPH_GFA2_GZ : GT_STRGRAPH_GFA2),
+          gt_str_get(arguments->readset),
+          arguments->gz ? GT_READJOINER_SUFFIX_SG_GFA_GZ :
+          GT_READJOINER_SUFFIX_SG_GFA, false);
+      gt_readjoiner_gfa_show_current_space(GT_READJOINER_GFA_MSG_OUTPUT);
     }
   }
   if (gt_showtime_enabled())
@@ -347,10 +362,10 @@ static int gt_readjoiner_asqg_runner(GT_UNUSED int argc,
   return had_err;
 }
 
-GtTool* gt_readjoiner_asqg(void)
+GtTool* gt_readjoiner_gfa(void)
 {
-  return gt_tool_new(gt_readjoiner_asqg_arguments_new,
-                  gt_readjoiner_asqg_arguments_delete,
-                  gt_readjoiner_asqg_option_parser_new,
-                  NULL, gt_readjoiner_asqg_runner);
+  return gt_tool_new(gt_readjoiner_gfa_arguments_new,
+                  gt_readjoiner_gfa_arguments_delete,
+                  gt_readjoiner_gfa_option_parser_new,
+                  NULL, gt_readjoiner_gfa_runner);
 }
