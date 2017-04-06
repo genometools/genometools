@@ -22,7 +22,7 @@
 struct GtGfaWriter
 {
   GtFile *file;
-  const GtEncseq *encseq;
+  GtEncseq *encseq;
   GtGfaVersion version;
 };
 
@@ -32,8 +32,8 @@ GtGfaWriter* gt_gfa_writer_new(GtFile *file,
 {
   GtGfaWriter *gw;
   gw = gt_malloc(sizeof (*gw));
-  gw->file = file;
-  gw->encseq = encseq;
+  gw->file = gt_file_ref(file);
+  gw->encseq = gt_encseq_ref((GtEncseq*)encseq);
   gw->version = version;
   return gw;
 }
@@ -220,5 +220,7 @@ void gt_spmproc_show_gfa(GtUword suffix_readnum,
 
 void gt_gfa_writer_delete(GtGfaWriter *gw)
 {
+  gt_file_delete(gw->file);
+  gt_encseq_delete(gw->encseq);
   gt_free(gw);
 }
