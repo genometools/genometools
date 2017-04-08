@@ -37,8 +37,7 @@
 
 typedef struct
 {
-  bool show_alignment,
-       relax_polish,
+  bool relax_polish,
        sortmatches,
        showeoplist,
        seed_extend;
@@ -156,7 +155,7 @@ static void gt_show_seed_extend_plain(GtSequencepairbuffer *seqpairbuf,
                                       GtAlignment *alignment,
                                       GtUchar *alignment_show_buffer,
                                       const GtSeedExtendDisplayFlag
-                                        *display_flag,
+                                        *out_display_flag,
                                       bool showeoplist,
                                       const GtUchar *characters,
                                       GtUchar wildcardshow,
@@ -173,7 +172,7 @@ static void gt_show_seed_extend_plain(GtSequencepairbuffer *seqpairbuf,
                   = gt_querymatch_querystart_fwdstrand(querymatchptr),
                 querylen = gt_querymatch_querylen(querymatchptr),
                 alignmentwidth = gt_querymatch_display_alignmentwidth(
-                                        display_flag);
+                                        out_display_flag);
 
   const GtUword apos_ab = gt_querymatch_dbstart(querymatchptr);
   const GtUword bpos_ab = gt_encseq_seqstartpos(bencseq, queryseqnum) +
@@ -273,7 +272,7 @@ static int gt_show_seedext_runner(GT_UNUSED int argc,
   GtSeedextendMatchIterator *semi = NULL;
   const GtEncseq *aencseq = NULL, *bencseq = NULL;
   GtAlignment *alignment = gt_alignment_new();
-  GtSeedExtendDisplayFlag *display_flag = NULL;
+  GtSeedExtendDisplayFlag *out_display_flag = NULL;
   GtFtPolishing_info *pol_info = NULL;
   GtSequencepairbuffer seqpairbuf = {NULL,NULL,0,0};
   GtGreedyextendmatchinfo *greedyextendmatchinfo = NULL;
@@ -282,6 +281,8 @@ static int gt_show_seedext_runner(GT_UNUSED int argc,
   GtUchar *alignment_show_buffer = NULL;
   GtLinspaceManagement *linspace_spacemanager = gt_linspace_management_new();
   GtScoreHandler *linspace_scorehandler = gt_scorehandler_new(0,1,0,1);;
+  const GtExtendCharAccess a_extend_char_access = GT_EXTEND_CHAR_ACCESS_ANY;
+  const GtExtendCharAccess b_extend_char_access = GT_EXTEND_CHAR_ACCESS_ANY;
 #ifdef REALIGNMATCHINGSEQUENCES
   const GtUchar *characters;
   GtUchar wildcardshow;
@@ -290,17 +291,22 @@ static int gt_show_seedext_runner(GT_UNUSED int argc,
   gt_error_check(err);
   gt_assert(arguments != NULL);
   /* Parse option string in first line of file specified by filename. */
-  display_flag = gt_querymatch_display_flag_new(arguments->display_args,err);
-  if (display_flag == NULL)
+  out_display_flag
+    = gt_querymatch_display_flag_new(arguments->display_args,err);
+  if (out_display_flag == NULL)
   {
     had_err = true;
   }
   if (!had_err)
   {
-    if (gt_querymatch_alignment_display(display_flag))
+    gt_querymatch_display_seedpos_relative_set(
+           out_display_flag,
+           a_extend_char_access == GT_EXTEND_CHAR_ACCESS_DIRECT ? true : false,
+           b_extend_char_access == GT_EXTEND_CHAR_ACCESS_DIRECT ? true : false);
+    if (gt_querymatch_alignment_display(out_display_flag))
     {
       GtUword alignmentwidth
-        = gt_querymatch_display_alignmentwidth(display_flag);
+        = gt_querymatch_display_alignmentwidth(out_display_flag);
       alignment_show_buffer = gt_alignment_buffer_new(alignmentwidth);
     }
     semi = gt_seedextend_match_iterator_new(arguments->matchfilename,err);
@@ -319,9 +325,8 @@ static int gt_show_seedext_runner(GT_UNUSED int argc,
     characters = gt_encseq_alphabetcharacters(aencseq);
     wildcardshow = gt_encseq_alphabetwildcardshow(aencseq);
 #endif
-  }
-  if (!had_err)
-  {
+    printf("%s\n",gt_seedextend_match_iterator_Options_line(semi));
+    gt_querymatch_fields_approx_output(out_display_flag,stdout);
     if (!arguments->relax_polish)
     {
       double matchscore_bias = GT_DEFAULT_MATCHSCORE_BIAS;
@@ -334,15 +339,18 @@ static int gt_show_seedext_runner(GT_UNUSED int argc,
                           matchscore_bias,
                           gt_seedextend_match_iterator_history_size(semi));
     }
-    gt_seedextend_match_iterator_display_set(semi,display_flag);
-    if (arguments->show_alignment || arguments->showeoplist)
+    gt_seedextend_match_iterator_display_set(semi,out_display_flag);
+    if (gt_querymatch_alignment_display(out_display_flag) ||
+        gt_querymatch_cigar_display(out_display_flag) ||
+        arguments->showeoplist)
     {
       if (gt_seedextend_match_iterator_querymatchoutoptions_set(
                             semi,
-                            true,
                             arguments->showeoplist,
                             !arguments->relax_polish,
-                            display_flag,
+                            a_extend_char_access,
+                            b_extend_char_access,
+                            out_display_flag,
                             err) != 0)
       {
         had_err = -1;
@@ -355,21 +363,22 @@ static int gt_show_seedext_runner(GT_UNUSED int argc,
     if (arguments->seed_extend)
     {
       greedyextendmatchinfo
-        = gt_greedy_extend_matchinfo_new(GT_MAX_ALI_LEN_DIFF,
+        = gt_greedy_extend_matchinfo_new(
+                              GT_MAX_ALI_LEN_DIFF,
                               gt_seedextend_match_iterator_history_size(semi),
                               GT_MIN_PERC_MAT_HISTORY,
                               0, /* userdefinedleastlength */
                               70, /* errorpercentage */
                               DBL_MAX,
-                              GT_EXTEND_CHAR_ACCESS_ANY,
-                              GT_EXTEND_CHAR_ACCESS_ANY,
+                              GT_EXTEND_CHAR_ACCESS_DIRECT,
+                              GT_EXTEND_CHAR_ACCESS_DIRECT,
                               false,
                               100,
                               pol_info);
     }
     processinfo_and_querymatchspaceptr.processinfo = greedyextendmatchinfo;
-    if (gt_querymatch_evalue_display(display_flag) ||
-        gt_querymatch_bitscore_display(display_flag))
+    if (gt_querymatch_evalue_display(out_display_flag) ||
+        gt_querymatch_bitscore_display(out_display_flag))
     {
       karlin_altschul_stat = gt_karlin_altschul_stat_new_gapped(
                                        gt_encseq_total_length(aencseq),
@@ -398,19 +407,14 @@ static int gt_show_seedext_runner(GT_UNUSED int argc,
         {
           if (aencseq == bencseq)
           {
-            const GtUword
-              seedlen = gt_seedextend_match_iterator_seedlen(semi),
-              seedpos1 = gt_seedextend_match_iterator_seedpos1(semi),
-              seedpos2 = gt_seedextend_match_iterator_seedpos2(semi);
-
             processinfo_and_querymatchspaceptr.querymatchspaceptr
               = querymatchptr;
             had_err = gt_rf_greedy_extend_selfmatch_with_output(
                                   &processinfo_and_querymatchspaceptr,
                                   aencseq,
-                                  seedlen,
-                                  seedpos1,
-                                  seedpos2,
+                                  gt_querymatch_seedlen(querymatchptr),
+                                  gt_querymatch_seedpos1(querymatchptr),
+                                  gt_querymatch_seedpos2(querymatchptr),
                                   err);
             if (had_err)
             {
@@ -435,7 +439,7 @@ static int gt_show_seedext_runner(GT_UNUSED int argc,
                                   linspace_scorehandler,
                                   alignment,
                                   alignment_show_buffer,
-                                  display_flag,
+                                  out_display_flag,
                                   arguments->showeoplist,
                                   characters,
                                   wildcardshow,
@@ -453,7 +457,7 @@ static int gt_show_seedext_runner(GT_UNUSED int argc,
     gt_karlin_altschul_stat_delete(karlin_altschul_stat);
   }
   gt_free(alignment_show_buffer);
-  gt_querymatch_display_flag_delete(display_flag);
+  gt_querymatch_display_flag_delete(out_display_flag);
   polishing_info_delete(pol_info);
   gt_alignment_delete(alignment);
   gt_scorehandler_delete(linspace_scorehandler);

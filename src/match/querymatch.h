@@ -70,6 +70,15 @@ bool gt_querymatch_read_line(GtQuerymatch *querymatchptr,
                              const GtEncseq *dbencseq,
                              const GtEncseq *queryencseq);
 
+void gt_querymatch_read_line2(GtQuerymatch *querymatch,
+                              double *evalue_ptr,
+                              double *bitscore_ptr,
+                              const char *line_ptr,
+                              const GtSeedExtendDisplayFlag *display_flag,
+                              bool selfmatch,
+                              const GtEncseq *dbencseq,
+                              const GtEncseq *queryencseq);
+
 bool gt_querymatch_process(GtQuerymatch *querymatchptr,
                            const GtKarlinAltschulStat *karlin_altschul_stat,
                            const GtSeqorEncseq *dbes,
@@ -114,6 +123,12 @@ uint64_t gt_querymatch_queryseqnum(const GtQuerymatch *querymatch);
 const GtUchar *gt_querymatch_querysequence(const GtQuerymatch *querymatch);
 
 GtUword gt_querymatch_dbseqnum(const GtQuerymatch *querymatch);
+
+GtUword gt_querymatch_seedlen(const GtQuerymatch *querymatch);
+
+GtUword gt_querymatch_seedpos1(const GtQuerymatch *querymatch);
+
+GtUword gt_querymatch_seedpos2(const GtQuerymatch *querymatch);
 
 GtUword gt_querymatch_dblen(const GtQuerymatch *querymatch);
 

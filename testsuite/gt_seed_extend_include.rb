@@ -173,23 +173,13 @@ Name "gt dev show_seedext without alignment"
 Keywords "gt_seed_XXX_extend show" # excluded until seed can be parsed
 Test do
   run_test build_encseq("at1MB", "#{$testdata}at1MB")
-  run_test "#{$bin}gt seed_extend -v -ii at1MB " + 
-           "-outfmt seed.len seed.s.start seed.q.start"
+  outfmt_seed = "-outfmt seed.len seed.s.start seed.q.start"
+  run_test "#{$bin}gt seed_extend -v -ii at1MB " + outfmt_seed
   run "mv #{last_stdout} seed_extend.out"
-  run_test "#{$bin}gt dev show_seedext -f seed_extend.out"
+  run_test "#{$bin}gt dev show_seedext -f seed_extend.out " + outfmt_seed
   run "mv #{last_stdout} show_seed_ext.out"
-  run "grep '^#' seed_extend.out"
-  run "mv #{last_stdout} seed_extend.header"
-  run "cut -f 1-10 -d ' ' seed_extend.out"
-  run "mv #{last_stdout} seed_extend.matches"
-  run "cat seed_extend.header seed_extend.matches"
-  run "mv #{last_stdout} seed_extend.out"
   run "diff -I '^#' seed_extend.out show_seed_ext.out"
-  run "#{$scriptsdir}extract-seed.rb seed_extend.out"
-  run_test "#{$bin}gt dev show_seedext -f #{last_stdout}"
-  run "diff -I '^#' #{last_stdout} show_seed_ext.out"
-  run_test "#{$bin}gt seed_extend -v -ii at1MB " +
-           "-outfmt seed.len seed.s.start seed.q.start"
+  run_test "#{$bin}gt seed_extend -v -ii at1MB " + outfmt_seed
   run "mv #{last_stdout} tmp.matches"
   $OUTFMT_ARGS.each do |arg|
     if not ["s.desc","q.desc"].member?(arg)

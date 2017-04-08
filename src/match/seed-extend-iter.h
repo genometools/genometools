@@ -50,7 +50,7 @@ GtQuerymatch *gt_seedextend_match_iterator_next(
 
 void gt_seedextend_match_iterator_display_set(GtSeedextendMatchIterator *semi,
                                               const GtSeedExtendDisplayFlag
-                                                *display_flag);
+                                                *out_display_flag);
 
 /* The following function sets the karlin_altschul_stat pointer to
    the second argument */
@@ -83,10 +83,11 @@ GtQuerymatch *gt_seedextend_match_iterator_get(
 
 int gt_seedextend_match_iterator_querymatchoutoptions_set(
                     GtSeedextendMatchIterator *semi,
-                    bool generatealignment,
                     bool showeoplist,
                     bool always_polished_ends,
-                    const GtSeedExtendDisplayFlag *display_flag,
+                    GtExtendCharAccess a_extend_char_access,
+                    GtExtendCharAccess b_extend_char_access,
+                    const GtSeedExtendDisplayFlag *out_display_flag,
                     GtError *err);
 
 /* The following function return different components of the iterator
@@ -107,19 +108,10 @@ GtUword gt_seedextend_match_iterator_errorpercentage(
 bool gt_seedextend_match_iterator_bias_parameters(
                         const GtSeedextendMatchIterator *semi);
 
-bool gt_seedextend_match_iterator_seqlength_display(
-                        const GtSeedextendMatchIterator *semi);
-
 bool gt_seedextend_match_iterator_has_seedline(
                         const GtSeedextendMatchIterator *semi);
 
-GtUword gt_seedextend_match_iterator_seedlen(
-                             const GtSeedextendMatchIterator *semi);
-
-GtUword gt_seedextend_match_iterator_seedpos1(
-                             const GtSeedextendMatchIterator *semi);
-
-GtUword gt_seedextend_match_iterator_seedpos2(
-                            const GtSeedextendMatchIterator *semi);
+const char *gt_seedextend_match_iterator_Options_line(
+                    const GtSeedextendMatchIterator *semi);
 
 #endif

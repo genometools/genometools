@@ -30,10 +30,9 @@ typedef struct
 struct GtSeedExtendDisplayFlag
 {
   unsigned int flags,
-               nextfree,
                order[GT_DISPLAY_LARGEST_FLAG+1];
   bool a_seedpos_relative, b_seedpos_relative;
-  GtUword alignmentwidth;
+  GtUword alignmentwidth, nextfree;
 };
 
 static unsigned int gt_display_mask(GtSeedExtendDisplay_enum flag)
@@ -51,6 +50,13 @@ static bool gt_querymatch_display_on(const GtSeedExtendDisplayFlag
 }
 
 #include "match/se-display.inc"
+
+bool gt_querymatch_seed_display(const GtSeedExtendDisplayFlag *display_flag)
+{
+  return gt_querymatch_seed_s_start_display(display_flag) &&
+         gt_querymatch_seed_q_start_display(display_flag) &&
+         gt_querymatch_seed_len_display(display_flag);
+}
 
 static const GtSEdisplayStruct *gt_display_arg_get(const char *str,
                                                    size_t cmplen)
@@ -83,7 +89,7 @@ static const GtSEdisplayStruct *gt_display_arg_get(const char *str,
   return NULL;
 }
 
-const unsigned int *gt_querymatch_display_order(unsigned int *numcolumns,
+const unsigned int *gt_querymatch_display_order(GtUword *numcolumns,
                                                 const GtSeedExtendDisplayFlag
                                                    *display_flag)
 {
@@ -294,11 +300,10 @@ void gt_querymatch_fields_approx_output(const GtSeedExtendDisplayFlag
                                          *display_flag,FILE *stream)
 {
   const unsigned int *column_order;
-  unsigned int numcolumns, idx;
+  GtUword numcolumns, idx;
 
   gt_assert(display_flag != NULL);
-  column_order = gt_querymatch_display_order(&numcolumns,
-                                             display_flag);
+  column_order = gt_querymatch_display_order(&numcolumns,display_flag);
   gt_assert(numcolumns > 0);
   fprintf(stream,"# Fields: ");
   gt_assert(numcolumns <= GT_DISPLAY_LARGEST_FLAG);
@@ -313,4 +318,32 @@ void gt_querymatch_fields_approx_output(const GtSeedExtendDisplayFlag
     fprintf(stream,"%s%s",gt_display_arguments_table[argnum].name,
                         idx < numcolumns - 1 ? ", " : "\n");
   }
+}
+
+GtStrArray *gt_querymatch_read_Fields_line(const char *line_ptr)
+{
+  const char *header = "# Fields:", *ptr, *last_start;
+  const size_t header_len = strlen(header);
+  GtStrArray *fields;
+
+  if (strncmp(header,line_ptr,header_len) != 0)
+  {
+    return NULL;
+  }
+  fields = gt_str_array_new();
+  for (last_start = ptr = line_ptr + header_len + 1; /* Nothing */; ptr++)
+  {
+    if (*ptr == ',' || *ptr == '\0')
+    {
+      GtUword len_arg = (size_t) (ptr - last_start);
+
+      gt_str_array_add_cstr_nt(fields, last_start, len_arg);
+      last_start = ptr + 2;
+    }
+    if (*ptr == '\0')
+    {
+      break;
+    }
+  }
+  return fields;
 }

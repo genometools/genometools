@@ -59,6 +59,8 @@ void gt_querymatchoutoptions_for_align_only(
                   double matchscore_bias,
                   GtUword history_size,
                   bool always_polished_ends,
+                  GtExtendCharAccess a_extend_char_access,
+                  GtExtendCharAccess b_extend_char_access,
                   const GtSeedExtendDisplayFlag *display_flag);
 
 void gt_querymatchoutoptions_delete(

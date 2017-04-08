@@ -43,7 +43,7 @@ void gt_querymatch_display_flag_delete(GtSeedExtendDisplayFlag *display_flag);
 void gt_querymatch_fields_approx_output(const GtSeedExtendDisplayFlag
                                          *display_flag,FILE *stream);
 
-const unsigned int *gt_querymatch_display_order(unsigned int *numcolumns,
+const unsigned int *gt_querymatch_display_order(GtUword *numcolumns,
                                                 const GtSeedExtendDisplayFlag
                                                    *display_flag);
 
@@ -56,5 +56,9 @@ GtUword gt_querymatch_display_alignmentwidth(const GtSeedExtendDisplayFlag
                                                 *display_flag);
 
 #include "match/se-display-fwd.inc"
+
+bool gt_querymatch_seed_display(const GtSeedExtendDisplayFlag *display_flag);
+
+GtStrArray *gt_querymatch_read_Fields_line(const char *line_ptr);
 
 #endif

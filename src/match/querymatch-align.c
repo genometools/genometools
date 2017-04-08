@@ -90,7 +90,8 @@ GtQuerymatchoutoptions *gt_querymatchoutoptions_new(bool generate_eoplist,
   querymatchoutoptions->vseqbuffer_size = 0;
   querymatchoutoptions->eoplist = gt_eoplist_new();
   querymatchoutoptions->eoplist_reader_verify = NULL;
-  if (display_alignment || show_eoplist)
+  if (display_alignment || gt_querymatch_cigar_display(display_flag) ||
+      show_eoplist)
   {
     querymatchoutoptions->eoplist_reader
       = gt_eoplist_reader_new(querymatchoutoptions->eoplist);
@@ -185,6 +186,8 @@ void gt_querymatchoutoptions_for_align_only(
                   double matchscore_bias,
                   GtUword history_size,
                   bool always_polished_ends,
+                  GtExtendCharAccess a_extend_char_access,
+                  GtExtendCharAccess b_extend_char_access,
                   const GtSeedExtendDisplayFlag *display_flag)
 {
   const bool weakends = false;
@@ -198,8 +201,8 @@ void gt_querymatchoutoptions_for_align_only(
                                  GT_MAX_ALI_LEN_DIFF,
                                  history_size,
                                  GT_MIN_PERC_MAT_HISTORY,
-                                 GT_EXTEND_CHAR_ACCESS_ANY,
-                                 GT_EXTEND_CHAR_ACCESS_ANY,
+                                 a_extend_char_access,
+                                 b_extend_char_access,
                                  cam_generic,
                                  weakends,
                                  sensitivity,
