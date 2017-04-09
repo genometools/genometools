@@ -31,16 +31,13 @@
 #include "match/seed-extend.h"
 #include "match/seq_or_encseq.h"
 #include "match/seed-extend-iter.h"
-#include "match/stamp.h"
 #include "extended/linearalign.h"
 #include "tools/gt_show_seedext.h"
 
 typedef struct
 {
   bool relax_polish,
-       sortmatches,
-       showeoplist,
-       seed_extend;
+       sortmatches;
   GtStr *matchfilename;
   GtStrArray *display_args;
 } GtShowSeedextArguments;
@@ -67,8 +64,7 @@ static GtOptionParser* gt_show_seedext_option_parser_new(void *tool_arguments)
 {
   GtShowSeedextArguments *arguments = tool_arguments;
   GtOptionParser *op;
-  GtOption *option_filename, *op_relax_polish,
-           *op_seed_extend, *op_sortmatches, *op_showeoplist, *op_display;
+  GtOption *option_filename, *op_relax_polish, *op_sortmatches, *op_display;
 
   gt_assert(arguments);
   /* init */
@@ -81,15 +77,6 @@ static GtOptionParser* gt_show_seedext_option_parser_new(void *tool_arguments)
                                           gt_querymatch_display_help(),
                                           arguments->display_args);
   gt_option_parser_add_option(op, op_display);
-
-  /* -seed-extend */
-  op_seed_extend = gt_option_new_bool("seed-extend",
-                              "read the seeds from the # seed: -lines and "
-                              "extend them; match lines are ignored; "
-                              "match coordindates are displayed",
-                              &arguments->seed_extend,
-                              false);
-  gt_option_parser_add_option(op, op_seed_extend);
 
   /* -relax-polish */
   op_relax_polish = gt_option_new_bool("relax-polish",
@@ -106,11 +93,6 @@ static GtOptionParser* gt_show_seedext_option_parser_new(void *tool_arguments)
                                       &arguments->sortmatches,false);
   gt_option_parser_add_option(op, op_sortmatches);
 
-  /* -e */
-  op_showeoplist = gt_option_new_bool("e","show list of edit operations",
-                                      &arguments->showeoplist,false);
-  gt_option_parser_add_option(op, op_showeoplist);
-
   /* -f */
   option_filename = gt_option_new_filename("f",
                                           "path to file with match coordinates",
@@ -118,8 +100,6 @@ static GtOptionParser* gt_show_seedext_option_parser_new(void *tool_arguments)
   gt_option_is_mandatory(option_filename);
   gt_option_parser_add_option(op, option_filename);
 
-  gt_option_exclude(op_seed_extend, op_sortmatches);
-  gt_option_exclude(op_relax_polish, op_seed_extend);
   return op;
 }
 
@@ -156,7 +136,6 @@ static void gt_show_seed_extend_plain(GtSequencepairbuffer *seqpairbuf,
                                       GtUchar *alignment_show_buffer,
                                       const GtSeedExtendDisplayFlag
                                         *out_display_flag,
-                                      bool showeoplist,
                                       const GtUchar *characters,
                                       GtUchar wildcardshow,
                                       const GtEncseq *aencseq,
@@ -229,13 +208,6 @@ static void gt_show_seed_extend_plain(GtSequencepairbuffer *seqpairbuf,
                               alignmentwidth,
                               characters,
                               wildcardshow);
-  }
-  if (showeoplist && distance > 0)
-  {
-    gt_alignment_show_multieop_list(alignment, stdout);
-  }
-  if (alignmentwidth > 0 || showeoplist)
-  {
     gt_alignment_reset(alignment);
   }
 }
@@ -341,12 +313,10 @@ static int gt_show_seedext_runner(GT_UNUSED int argc,
     }
     gt_seedextend_match_iterator_display_set(semi,out_display_flag);
     if (gt_querymatch_alignment_display(out_display_flag) ||
-        gt_querymatch_cigar_display(out_display_flag) ||
-        arguments->showeoplist)
+        gt_querymatch_cigar_display(out_display_flag))
     {
       if (gt_seedextend_match_iterator_querymatchoutoptions_set(
                             semi,
-                            arguments->showeoplist,
                             !arguments->relax_polish,
                             a_extend_char_access,
                             b_extend_char_access,
@@ -360,22 +330,6 @@ static int gt_show_seedext_runner(GT_UNUSED int argc,
   if (!had_err)
   {
     GtKarlinAltschulStat *karlin_altschul_stat = NULL;
-    if (arguments->seed_extend)
-    {
-      greedyextendmatchinfo
-        = gt_greedy_extend_matchinfo_new(
-                              GT_MAX_ALI_LEN_DIFF,
-                              gt_seedextend_match_iterator_history_size(semi),
-                              GT_MIN_PERC_MAT_HISTORY,
-                              0, /* userdefinedleastlength */
-                              70, /* errorpercentage */
-                              DBL_MAX,
-                              GT_EXTEND_CHAR_ACCESS_DIRECT,
-                              GT_EXTEND_CHAR_ACCESS_DIRECT,
-                              false,
-                              100,
-                              pol_info);
-    }
     processinfo_and_querymatchspaceptr.processinfo = greedyextendmatchinfo;
     if (gt_querymatch_evalue_display(out_display_flag) ||
         gt_querymatch_bitscore_display(out_display_flag))
@@ -403,34 +357,10 @@ static int gt_show_seedext_runner(GT_UNUSED int argc,
       }
       if (gt_seedextend_match_iterator_has_seedline(semi))
       {
-        if (arguments->seed_extend)
-        {
-          if (aencseq == bencseq)
-          {
-            processinfo_and_querymatchspaceptr.querymatchspaceptr
-              = querymatchptr;
-            had_err = gt_rf_greedy_extend_selfmatch_with_output(
-                                  &processinfo_and_querymatchspaceptr,
-                                  aencseq,
-                                  gt_querymatch_seedlen(querymatchptr),
-                                  gt_querymatch_seedpos1(querymatchptr),
-                                  gt_querymatch_seedpos2(querymatchptr),
-                                  err);
-            if (had_err)
-            {
-              break;
-            }
-          } else
-          {
-            gt_assert(false);
-          }
-        } else
-        {
-          gt_show_seed_extend_encseq(querymatchptr,
-                                     processinfo_and_querymatchspaceptr.
-                                       karlin_altschul_stat,
-                                     aencseq, bencseq);
-        }
+        gt_show_seed_extend_encseq(querymatchptr,
+                                   processinfo_and_querymatchspaceptr.
+                                     karlin_altschul_stat,
+                                   aencseq, bencseq);
       } else
       {
 #ifdef REALIGNMATCHINGSEQUENCES
@@ -440,7 +370,6 @@ static int gt_show_seedext_runner(GT_UNUSED int argc,
                                   alignment,
                                   alignment_show_buffer,
                                   out_display_flag,
-                                  arguments->showeoplist,
                                   characters,
                                   wildcardshow,
                                   aencseq,

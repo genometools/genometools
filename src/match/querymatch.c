@@ -104,24 +104,6 @@ GtUword gt_querymatch_dbseqnum(const GtQuerymatch *querymatch)
   return querymatch->dbseqnum;
 }
 
-GtUword gt_querymatch_seedlen(const GtQuerymatch *querymatch)
-{
-  gt_assert(querymatch != NULL);
-  return querymatch->seedlen;
-}
-
-GtUword gt_querymatch_seedpos1(const GtQuerymatch *querymatch)
-{
-  gt_assert(querymatch != NULL);
-  return querymatch->seedpos1;
-}
-
-GtUword gt_querymatch_seedpos2(const GtQuerymatch *querymatch)
-{
-  gt_assert(querymatch != NULL);
-  return querymatch->seedpos2;
-}
-
 static GtUword gt_querymatch_querystart_derive(GtReadmode query_readmode,
                                                GtUword querylen,
                                                GtUword query_totallength,
@@ -288,7 +270,6 @@ static void gt_querymatch_description_out(FILE *fp,const char *description)
 {
   const int nwspl = gt_non_white_space_prefix_length(description);
 
-  fputc(' ',fp);
   fwrite(description,sizeof *description,nwspl,fp);
 }
 
@@ -682,6 +663,8 @@ void gt_querymatch_read_line2(GtQuerymatch *querymatch,
   GtUword column, numcolumns, dbseqstartpos;
   const unsigned int *column_order = gt_querymatch_display_order(&numcolumns,
                                                                  display_flag);
+  querymatch->seedpos1 = GT_UWORD_MAX;
+  querymatch->seedpos2 = GT_UWORD_MAX;
   for (column = 0; column < numcolumns; column++)
   {
     int ret = 1;
@@ -786,9 +769,6 @@ void gt_querymatch_read_line2(GtQuerymatch *querymatch,
     {
       querymatch->seedpos1 += dbseqstartpos;
     }
-  } else
-  {
-    querymatch->seedpos1 = GT_UWORD_MAX;
   }
   if (gt_querymatch_seed_q_start_display(display_flag))
   {
@@ -797,9 +777,6 @@ void gt_querymatch_read_line2(GtQuerymatch *querymatch,
       querymatch->seedpos2 += gt_encseq_seqstartpos(queryencseq,
                                                     querymatch->queryseqnum);
     }
-  } else
-  {
-    querymatch->seedpos2 = GT_UWORD_MAX;
   }
 }
 

@@ -83,7 +83,6 @@ GtQuerymatch *gt_seedextend_match_iterator_get(
 
 int gt_seedextend_match_iterator_querymatchoutoptions_set(
                     GtSeedextendMatchIterator *semi,
-                    bool showeoplist,
                     bool always_polished_ends,
                     GtExtendCharAccess a_extend_char_access,
                     GtExtendCharAccess b_extend_char_access,

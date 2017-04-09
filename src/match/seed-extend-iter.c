@@ -438,7 +438,6 @@ GtQuerymatch *gt_seedextend_match_iterator_get(
 
 int gt_seedextend_match_iterator_querymatchoutoptions_set(
                     GtSeedextendMatchIterator *semi,
-                    bool showeoplist,
                     bool always_polished_ends,
                     GtExtendCharAccess a_extend_char_access,
                     GtExtendCharAccess b_extend_char_access,
@@ -446,12 +445,9 @@ int gt_seedextend_match_iterator_querymatchoutoptions_set(
                     GtError *err)
 {
   double matchscore_bias = GT_DEFAULT_MATCHSCORE_BIAS;
-  const bool generatealignment = true;
 
   semi->querymatchoutoptions
-    = gt_querymatchoutoptions_new(generatealignment,showeoplist,
-                                  out_display_flag, gt_str_get(semi->ii), err);
-
+    = gt_querymatchoutoptions_new(out_display_flag,gt_str_get(semi->ii),err);
   if (semi->querymatchoutoptions == NULL)
   {
     return -1;

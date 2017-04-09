@@ -26,9 +26,7 @@
 
 typedef struct GtQuerymatchoutoptions GtQuerymatchoutoptions;
 
-GtQuerymatchoutoptions *gt_querymatchoutoptions_new(bool generatealignment,
-                                                    bool showeoplist,
-                                                    const
+GtQuerymatchoutoptions *gt_querymatchoutoptions_new(const
                                                      GtSeedExtendDisplayFlag
                                                       *display_flag,
                                                     const char *indexname,

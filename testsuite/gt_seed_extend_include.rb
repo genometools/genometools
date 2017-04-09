@@ -84,7 +84,7 @@ Test do
 end
 
 Name "gt seed_extend: display arguments"
-Keywords "gt_seed_extend_display"
+Keywords "gt_seed_extend display"
 Test do
   run_test build_encseq("at1MB", "#{$testdata}at1MB", true)
   run_test build_encseq("Atinsert.fna", "#{$testdata}Atinsert.fna", true)
@@ -95,10 +95,10 @@ Test do
   end
   run_test "#{$bin}gt seed_extend -ii at1MB -l 500 -outfmt alignment=70"
   run "diff -I '^#' #{last_stdout} #{$testdata}see-ext-at1MB-500-al.matches"
-  run_test "#{$bin}gt seed_extend -ii at1MB -l 400 -outfmt bitscore evalue"
+  run_test "#{$bin}gt seed_extend -ii at1MB -l 400 -outfmt evalue bitscore"
   run "diff -I '^#' #{last_stdout} #{$testdata}see-ext-at1MB-400-evalue-bitscore.matches"
   run_test "#{$bin}gt seed_extend -ii at1MB -l 400 -outfmt s.desc q.desc"
-  run "diff -I '^#' #{last_stdout} #{$testdata}see-ext-at1MB-400-seqdesc.matches"
+  run "#{$scriptsdir}se-permutation.rb #{last_stdout} #{$testdata}see-ext-at1MB-400-seqdesc.matches"
   run_test "#{$bin}gt seed_extend -ii at1MB -l 400 -outfmt cigar"
   run "diff -I '^#' #{last_stdout} #{$testdata}see-ext-at1MB-400-cigar.matches"
   run_test "#{$bin}gt seed_extend -ii at1MB -l 700 -outfmt alignment=60 seed_in_algn"

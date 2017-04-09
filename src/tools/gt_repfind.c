@@ -905,11 +905,12 @@ static int gt_repfind_runner(int argc,
     GtProcessinfo_and_querymatchspaceptr info_querymatch = {NULL,NULL,NULL};
     info_querymatch.karlin_altschul_stat = karlin_altschul_stat;
     if (gt_querymatch_alignment_display(display_flag) ||
+        gt_querymatch_cigar_display(display_flag) ||
         (gt_option_is_set(arguments->refextendxdropoption) &&
          !arguments->noxpolish))
     {
       querymatchoutoptions
-        = gt_querymatchoutoptions_new(true, false,display_flag,
+        = gt_querymatchoutoptions_new(display_flag,
                                       gt_str_get(arguments->indexname),err);
       if (querymatchoutoptions == NULL)
       {

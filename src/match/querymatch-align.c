@@ -40,22 +40,17 @@ struct GtQuerymatchoutoptions
   GtEncseqMetadata *emd;
   GtUchar wildcardshow;
   GtSeqpaircoordinates correction_info;
-  bool always_polished_ends,
-       generate_eoplist,
-       show_eoplist;
+  bool always_polished_ends;
   GtFtPolishing_info *pol_info;
 };
 
-GtQuerymatchoutoptions *gt_querymatchoutoptions_new(bool generate_eoplist,
-                                                    bool show_eoplist,
-                                                    const
+GtQuerymatchoutoptions *gt_querymatchoutoptions_new(const
                                                      GtSeedExtendDisplayFlag
                                                       *display_flag,
                                                     const char *indexname,
                                                     GtError *err)
 {
   GtQuerymatchoutoptions *querymatchoutoptions;
-  bool display_alignment;
 
   if (indexname != NULL)
   {
@@ -78,10 +73,6 @@ GtQuerymatchoutoptions *gt_querymatchoutoptions_new(bool generate_eoplist,
     querymatchoutoptions->characters = NULL;
     querymatchoutoptions->wildcardshow = 0;
   }
-  display_alignment = gt_querymatch_alignment_display(display_flag);
-  querymatchoutoptions->generate_eoplist
-    = generate_eoplist || display_alignment || show_eoplist;
-  querymatchoutoptions->show_eoplist = show_eoplist;
   querymatchoutoptions->front_trace = NULL;
   querymatchoutoptions->ggemi = NULL;
   querymatchoutoptions->useqbuffer = NULL;
@@ -90,17 +81,13 @@ GtQuerymatchoutoptions *gt_querymatchoutoptions_new(bool generate_eoplist,
   querymatchoutoptions->vseqbuffer_size = 0;
   querymatchoutoptions->eoplist = gt_eoplist_new();
   querymatchoutoptions->eoplist_reader_verify = NULL;
-  if (display_alignment || gt_querymatch_cigar_display(display_flag) ||
-      show_eoplist)
+  querymatchoutoptions->eoplist_reader
+    = gt_eoplist_reader_new(querymatchoutoptions->eoplist);
+  if (gt_querymatch_display_alignmentwidth(display_flag) > 0)
   {
-    querymatchoutoptions->eoplist_reader
-      = gt_eoplist_reader_new(querymatchoutoptions->eoplist);
     gt_eoplist_reader_reset_width(querymatchoutoptions->eoplist_reader,
                                   gt_querymatch_display_alignmentwidth(
                                        display_flag));
-  } else
-  {
-    querymatchoutoptions->eoplist_reader = NULL;
   }
   querymatchoutoptions->db_esr_for_align_show = NULL;
   querymatchoutoptions->query_esr_for_align_show = NULL;
@@ -142,10 +129,7 @@ void gt_querymatchoutoptions_extend(
   if (errorpercentage > 0)
   {
     gt_assert(querymatchoutoptions != NULL);
-    if (querymatchoutoptions->generate_eoplist)
-    {
-      querymatchoutoptions->front_trace = front_trace_new();
-    }
+    querymatchoutoptions->front_trace = front_trace_new();
     querymatchoutoptions->pol_info
       = polishing_info_new_with_bias(weakends ? MAX(errorpercentage,20)
                                               : errorpercentage,
@@ -303,10 +287,7 @@ static void seededmatch2eoplist(GtQuerymatchoutoptions *querymatchoutoptions,
       front_trace_reset(querymatchoutoptions->front_trace,ulen+vlen);
     }
   }
-  if (querymatchoutoptions->generate_eoplist)
-  {
-    gt_eoplist_match_add(querymatchoutoptions->eoplist,seedlen);
-  }
+  gt_eoplist_match_add(querymatchoutoptions->eoplist,seedlen);
   if (seedpos1 > dbstart && seedpos2 > abs_querystart)
   {
     ulen = seedpos1 - dbstart;
@@ -661,8 +642,7 @@ void gt_querymatchoutoptions_alignment_show(const GtQuerymatchoutoptions
                               querymatchoutoptions->characters);
     }
   }
-  if (querymatchoutoptions->eoplist_reader != NULL ||
-      querymatchoutoptions->show_eoplist)
+  if (querymatchoutoptions->eoplist_reader != NULL)
   {
     gt_eoplist_reset(querymatchoutoptions->eoplist);
   }

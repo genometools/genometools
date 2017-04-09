@@ -4,15 +4,6 @@ require "set"
 require "optparse"
 require_relative "SEmatch"
 
-def openfile(filename)
-begin
-  fp = File.new(filename,"r")
-rescue => err
-  STDERR.puts "#{$0}: cannot open #{filename}: #{err}"
-end
-  return fp
-end
-
 def add_single_match(matchset,m,always_add = false)
   add_m = true
   if not always_add

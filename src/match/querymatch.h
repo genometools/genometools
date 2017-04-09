@@ -124,12 +124,6 @@ const GtUchar *gt_querymatch_querysequence(const GtQuerymatch *querymatch);
 
 GtUword gt_querymatch_dbseqnum(const GtQuerymatch *querymatch);
 
-GtUword gt_querymatch_seedlen(const GtQuerymatch *querymatch);
-
-GtUword gt_querymatch_seedpos1(const GtQuerymatch *querymatch);
-
-GtUword gt_querymatch_seedpos2(const GtQuerymatch *querymatch);
-
 GtUword gt_querymatch_dblen(const GtQuerymatch *querymatch);
 
 bool gt_querymatch_queryreverse(const GtQuerymatch *querymatch);
