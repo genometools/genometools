@@ -177,4 +177,15 @@ GtQuerymatch *gt_querymatch_table_get(const GtArrayGtQuerymatch
 void gt_querymatch_display_set(GtQuerymatch *querymatch,
                                const GtSeedExtendDisplayFlag *display_flag);
 
+void gt_querymatch_seedpos_adjust(GtQuerymatch *querymatch,
+                                  const GtSeqorEncseq *dbes,
+                                  const GtSeqorEncseq *queryes);
+
+void gt_querymatch_evalue_bit_score(double *evalue_ptr,
+                                    double *bit_score_ptr,
+                                    const GtQuerymatch *querymatch);
+
+void gt_querymatch_karlin_altschul_stat_set(GtQuerymatch *querymatch,
+                        const GtKarlinAltschulStat *karlin_altschul_stat);
+
 #endif

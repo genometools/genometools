@@ -214,6 +214,8 @@ static void gt_show_seed_extend_plain(GtSequencepairbuffer *seqpairbuf,
 #endif
 
 static void gt_show_seed_extend_encseq(GtQuerymatch *querymatchptr,
+                                       double evalue,
+                                       double bitscore,
                                        const GtKarlinAltschulStat
                                           *karlin_altschul_stat,
                                        const GtEncseq *aencseq,
@@ -229,7 +231,21 @@ static void gt_show_seed_extend_encseq(GtQuerymatch *querymatchptr,
                             &bseqorencseq,
                             true) != 0)
   {
-    gt_querymatch_prettyprint(DBL_MAX,DBL_MAX,querymatchptr);
+    GtUword seqnum, seqstartpos, seqlength;
+    seqnum = gt_querymatch_dbseqnum(querymatchptr);
+    seqstartpos = gt_encseq_seqstartpos(aencseq,seqnum);
+    seqlength = gt_encseq_seqlength(aencseq,seqnum);
+    GT_SEQORENCSEQ_ADD_SEQ_COORDS(&aseqorencseq,seqstartpos,seqlength);
+    seqnum = gt_querymatch_queryseqnum(querymatchptr);
+    seqstartpos = gt_encseq_seqstartpos(bencseq,seqnum);
+    seqlength = gt_encseq_seqlength(bencseq,seqnum);
+    GT_SEQORENCSEQ_ADD_SEQ_COORDS(&bseqorencseq,seqstartpos,seqlength);
+    gt_querymatch_seedpos_adjust(querymatchptr,&aseqorencseq,&bseqorencseq);
+    if (evalue == DBL_MAX || bitscore == DBL_MAX)
+    {
+      gt_querymatch_evalue_bit_score(&evalue, &bitscore, querymatchptr);
+    }
+    gt_querymatch_prettyprint(evalue,bitscore,querymatchptr);
   }
 }
 
@@ -355,9 +371,11 @@ static int gt_show_seedext_runner(GT_UNUSED int argc,
       {
         break;
       }
-      if (gt_seedextend_match_iterator_has_seedline(semi))
+      if (gt_seedextend_match_iterator_has_seed(semi))
       {
         gt_show_seed_extend_encseq(querymatchptr,
+                                   gt_seedextend_match_iterator_evalue(semi),
+                                   gt_seedextend_match_iterator_bitscore(semi),
                                    processinfo_and_querymatchspaceptr.
                                      karlin_altschul_stat,
                                    aencseq, bencseq);

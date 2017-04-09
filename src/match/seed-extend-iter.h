@@ -107,8 +107,14 @@ GtUword gt_seedextend_match_iterator_errorpercentage(
 bool gt_seedextend_match_iterator_bias_parameters(
                         const GtSeedextendMatchIterator *semi);
 
-bool gt_seedextend_match_iterator_has_seedline(
+bool gt_seedextend_match_iterator_has_seed(
                         const GtSeedextendMatchIterator *semi);
+
+double gt_seedextend_match_iterator_evalue(const GtSeedextendMatchIterator
+                                             *semi);
+
+double gt_seedextend_match_iterator_bitscore(
+                      const GtSeedextendMatchIterator *semi);
 
 const char *gt_seedextend_match_iterator_Options_line(
                     const GtSeedextendMatchIterator *semi);

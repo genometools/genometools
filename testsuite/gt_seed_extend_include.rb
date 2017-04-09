@@ -170,7 +170,7 @@ Test do
 end
 
 Name "gt dev show_seedext without alignment"
-Keywords "gt_seed_XXX_extend show" # excluded until seed can be parsed
+Keywords "gt_seed_extend_show" # excluded until seed can be parsed
 Test do
   run_test build_encseq("at1MB", "#{$testdata}at1MB")
   outfmt_seed = "-outfmt seed.len seed.s.start seed.q.start"
@@ -182,8 +182,11 @@ Test do
   run_test "#{$bin}gt seed_extend -v -ii at1MB " + outfmt_seed
   run "mv #{last_stdout} tmp.matches"
   $OUTFMT_ARGS.each do |arg|
-    if not ["s.desc","q.desc"].member?(arg)
-      run_test "#{$bin}gt dev show_seedext -f tmp.matches -outfmt #{arg}"
+    if arg != "s.desc" and arg != "q.desc" and not arg.match(/^seed/)
+      run_test "#{$bin}gt dev show_seedext -f tmp.matches #{outfmt_seed} #{arg}"
+      if arg != "alignment"
+        run "#{$scriptsdir}se-permutation.rb #{last_stdout} tmp.matches"
+      end
     end
   end
 end

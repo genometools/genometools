@@ -15,6 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#include <float.h>
 #include "core/ma_api.h"
 #include "core/str_api.h"
 #include "core/encseq.h"
@@ -32,10 +33,10 @@ struct GtSeedextendMatchIterator
   GtStr *line_buffer;
   uint64_t linenum;
   FILE *inputfileptr;
+  double  evalue, bitscore;
   GtUword currentmatchindex;
   GtQuerymatch *currentmatch, *querymatchptr;
   GtQuerymatchoutoptions *querymatchoutoptions;
-  GtKarlinAltschulStat *karlin_altschul_stat;
   GtArrayGtQuerymatch querymatch_table;
   GtSeedExtendDisplayFlag *in_display_flag;
   GtStr *saved_options_line;
@@ -104,9 +105,10 @@ GtSeedextendMatchIterator *gt_seedextend_match_iterator_new(
   semi->inputfileptr = NULL;
   semi->querymatchptr = gt_querymatch_new();
   semi->currentmatchindex = GT_UWORD_MAX;
+  semi->evalue = DBL_MAX;
+  semi->bitscore = DBL_MAX;
   semi->currentmatch = NULL;
   semi->querymatchoutoptions = NULL;
-  semi->karlin_altschul_stat = NULL;
   semi->in_display_flag = NULL;
   semi->saved_options_line = NULL;
   GT_INITARRAY(&semi->querymatch_table,GtQuerymatch);
@@ -328,10 +330,9 @@ GtQuerymatch *gt_seedextend_match_iterator_next(GtSeedextendMatchIterator *semi)
     gt_assert(line_ptr != NULL);
     if (line_ptr[0] != '\n' && line_ptr[0] != '#')
     {
-      double evalue, bitscore;
       gt_querymatch_read_line2(semi->querymatchptr,
-                               &evalue,
-                               &bitscore,
+                               &semi->evalue,
+                               &semi->bitscore,
                                line_ptr,
                                semi->in_display_flag,
                                selfmatch,
@@ -380,7 +381,7 @@ bool gt_seedextend_match_iterator_bias_parameters(
   return semi->bias_parameters;
 }
 
-bool gt_seedextend_match_iterator_has_seedline(
+bool gt_seedextend_match_iterator_has_seed(
                         const GtSeedextendMatchIterator *semi)
 {
   gt_assert(semi != NULL);
@@ -392,6 +393,20 @@ GtQuerymatch *gt_seedextend_match_iterator_querymatch_ptr(
 {
   gt_assert(semi != NULL);
   return semi->querymatchptr;
+}
+
+double gt_seedextend_match_iterator_evalue(const GtSeedextendMatchIterator
+                                              *semi)
+{
+  gt_assert(semi != NULL);
+  return semi->evalue;
+}
+
+double gt_seedextend_match_iterator_bitscore(
+                  const GtSeedextendMatchIterator *semi)
+{
+  gt_assert(semi != NULL);
+  return semi->bitscore;
 }
 
 void gt_seedextend_match_iterator_display_set(GtSeedextendMatchIterator *semi,
@@ -407,7 +422,8 @@ void gt_seedextend_match_iterator_karlin_altschul_stat_set(
            GtKarlinAltschulStat *karlin_altschul_stat)
 {
   gt_assert(semi != NULL);
-  semi->karlin_altschul_stat = karlin_altschul_stat;
+  gt_querymatch_karlin_altschul_stat_set(semi->querymatchptr,
+                                         karlin_altschul_stat);
 }
 
 GtUword gt_seedextend_match_iterator_all_sorted(GtSeedextendMatchIterator *semi,
