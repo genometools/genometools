@@ -460,7 +460,6 @@ void gt_queryuniquematch(bool selfmatch,
               dbseqlen = gt_encseq_seqlength(suffixarray->encseq,dbseqnum);
 
       gt_querymatch_init(querymatchspaceptr,
-                         NULL,
                          matchlen,
                          dbstart,
                          dbseqnum,
@@ -551,7 +550,6 @@ static void gt_querysubstringmatch(bool selfmatch,
           dbseqnum = dbseqstartpos = dbseqlen = 0;
         }
         gt_querymatch_init(querymatchspaceptr,
-                           NULL,
                            minmatchlength + extend,
                            dbstart,
                            dbseqnum,

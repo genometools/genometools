@@ -216,17 +216,15 @@ static void gt_show_seed_extend_plain(GtSequencepairbuffer *seqpairbuf,
 static void gt_show_seed_extend_encseq(GtQuerymatch *querymatchptr,
                                        double evalue,
                                        double bitscore,
-                                       const GtKarlinAltschulStat
-                                          *karlin_altschul_stat,
                                        const GtEncseq *aencseq,
-                                       const GtEncseq *bencseq)
+                                       const GtEncseq *bencseq,
+                                       bool adjust)
 {
   GtSeqorEncseq aseqorencseq, bseqorencseq;
 
   GT_SEQORENCSEQ_INIT_ENCSEQ(&aseqorencseq,aencseq);
   GT_SEQORENCSEQ_INIT_ENCSEQ(&bseqorencseq,bencseq);
   if (gt_querymatch_process(querymatchptr,
-                            karlin_altschul_stat,
                             &aseqorencseq,
                             &bseqorencseq,
                             true) != 0)
@@ -240,7 +238,10 @@ static void gt_show_seed_extend_encseq(GtQuerymatch *querymatchptr,
     seqstartpos = gt_encseq_seqstartpos(bencseq,seqnum);
     seqlength = gt_encseq_seqlength(bencseq,seqnum);
     GT_SEQORENCSEQ_ADD_SEQ_COORDS(&bseqorencseq,seqstartpos,seqlength);
-    gt_querymatch_seedpos_adjust(querymatchptr,&aseqorencseq,&bseqorencseq);
+    if (adjust)
+    {
+      gt_querymatch_seedpos_adjust(querymatchptr,&aseqorencseq,&bseqorencseq);
+    }
     if (evalue == DBL_MAX || bitscore == DBL_MAX)
     {
       gt_querymatch_evalue_bit_score(&evalue, &bitscore, querymatchptr);
@@ -346,6 +347,11 @@ static int gt_show_seedext_runner(GT_UNUSED int argc,
   if (!had_err)
   {
     GtKarlinAltschulStat *karlin_altschul_stat = NULL;
+    const bool matches_have_seeds = gt_seedextend_match_iterator_has_seed(semi),
+               adjust = (gt_querymatch_seed_s_start_display(out_display_flag) ||
+                         gt_querymatch_seed_q_start_display(out_display_flag))
+                            ? true : false;
+
     processinfo_and_querymatchspaceptr.processinfo = greedyextendmatchinfo;
     if (gt_querymatch_evalue_display(out_display_flag) ||
         gt_querymatch_bitscore_display(out_display_flag))
@@ -371,14 +377,13 @@ static int gt_show_seedext_runner(GT_UNUSED int argc,
       {
         break;
       }
-      if (gt_seedextend_match_iterator_has_seed(semi))
+      if (matches_have_seeds)
       {
         gt_show_seed_extend_encseq(querymatchptr,
                                    gt_seedextend_match_iterator_evalue(semi),
                                    gt_seedextend_match_iterator_bitscore(semi),
-                                   processinfo_and_querymatchspaceptr.
-                                     karlin_altschul_stat,
-                                   aencseq, bencseq);
+                                   aencseq, bencseq,
+                                   adjust);
       } else
       {
 #ifdef REALIGNMATCHINGSEQUENCES

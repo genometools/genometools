@@ -330,14 +330,14 @@ GtQuerymatch *gt_seedextend_match_iterator_next(GtSeedextendMatchIterator *semi)
     gt_assert(line_ptr != NULL);
     if (line_ptr[0] != '\n' && line_ptr[0] != '#')
     {
-      gt_querymatch_read_line2(semi->querymatchptr,
-                               &semi->evalue,
-                               &semi->bitscore,
-                               line_ptr,
-                               semi->in_display_flag,
-                               selfmatch,
-                               semi->aencseq,
-                               semi->bencseq);
+      gt_querymatch_read_line(semi->querymatchptr,
+                              &semi->evalue,
+                              &semi->bitscore,
+                              line_ptr,
+                              semi->in_display_flag,
+                              selfmatch,
+                              semi->aencseq,
+                              semi->bencseq);
       gt_str_reset(semi->line_buffer);
       return semi->querymatchptr;
     }

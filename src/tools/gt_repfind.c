@@ -693,7 +693,6 @@ static int gt_callenumquerymatches(bool selfmatch,
       if (eqmf != NULL)
       {
         gt_querymatch_init(exactseed,
-                           karlin_altschul_stat,
                            matchlength,
                            dbstart,
                            dbseqnum,
@@ -709,6 +708,7 @@ static int gt_callenumquerymatches(bool selfmatch,
                            query_totallength,
                            NULL,
                            NULL);
+        gt_querymatch_karlin_altschul_stat_set(exactseed,karlin_altschul_stat);
         eqmf(eqmf_data,suffixarray.encseq,exactseed,&query_seqorencseq,
              same_encseq);
       } else
