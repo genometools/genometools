@@ -50,7 +50,6 @@ struct GtQuerymatch
   const GtSeedExtendDisplayFlag *display_flag;
   GtQuerymatchoutoptions *ref_querymatchoutoptions; /* reference to
       resources needed for alignment output */
-  const GtKarlinAltschulStat *karlin_altschul_stat;
   FILE *fp;
   const char *db_desc, *query_desc;
 };
@@ -66,7 +65,6 @@ GtQuerymatch *gt_querymatch_new(void)
   querymatch->query_readmode = GT_READMODE_FORWARD;
   querymatch->fp = stdout;
   querymatch->queryseqnum = UINT64_MAX;
-  querymatch->karlin_altschul_stat = NULL;
   return querymatch;
 }
 
@@ -120,36 +118,30 @@ static GtUword gt_querymatch_querystart_derive(GtReadmode query_readmode,
 
 void gt_querymatch_evalue_bit_score(double *evalue_ptr,
                                     double *bit_score_ptr,
+                                    const GtKarlinAltschulStat
+                                      *karlin_altschul_stat,
                                     const GtQuerymatch *querymatch)
 {
-  if (querymatch->karlin_altschul_stat != NULL)
+  if (karlin_altschul_stat != NULL)
   {
     GtUword evalue_searchspace
-      = gt_evalue_searchspace(querymatch->karlin_altschul_stat,
+      = gt_evalue_searchspace(karlin_altschul_stat,
                               querymatch->query_totallength);
     const GtUword alignedlength = querymatch->dblen + querymatch->querylen,
                   matches = (alignedlength - querymatch->distance -
                                              querymatch->mismatches)/2,
                   indels = querymatch->distance - querymatch->mismatches;
-    GtWord raw_score = gt_evalue_raw_score(querymatch->karlin_altschul_stat,
+    GtWord raw_score = gt_evalue_raw_score(karlin_altschul_stat,
                                            matches,
                                            querymatch->mismatches,
                                            indels);
-    *evalue_ptr = gt_evalue_from_raw_score(querymatch->karlin_altschul_stat,
+    *evalue_ptr = gt_evalue_from_raw_score(karlin_altschul_stat,
                                            raw_score,
                                            evalue_searchspace);
-    *bit_score_ptr = gt_evalue_raw_score2bit_score(
-                                               querymatch->karlin_altschul_stat,
-                                               raw_score);
+    *bit_score_ptr = gt_evalue_raw_score2bit_score(karlin_altschul_stat,
+                                                   raw_score);
     gt_assert(*evalue_ptr != DBL_MAX && *bit_score_ptr != DBL_MAX);
   }
-}
-
-void gt_querymatch_karlin_altschul_stat_set(GtQuerymatch *querymatch,
-                        const GtKarlinAltschulStat *karlin_altschul_stat)
-{
-  gt_assert(querymatch != NULL);
-  querymatch->karlin_altschul_stat = karlin_altschul_stat;
 }
 
 void gt_querymatch_init(GtQuerymatch *querymatch,
@@ -446,6 +438,7 @@ void gt_querymatch_show_failed_seed(const GtQuerymatch *querymatch)
 
 bool gt_querymatch_check_final(double *evalue_ptr,
                                double *bit_score_ptr,
+                               const GtKarlinAltschulStat *karlin_altschul_stat,
                                const GtQuerymatch *querymatch,
                                GtUword userdefinedleastlength,
                                GtUword errorpercentage,
@@ -495,9 +488,10 @@ bool gt_querymatch_check_final(double *evalue_ptr,
 #endif
     return false;
   }
-  if (querymatch->karlin_altschul_stat != NULL)
+  if (karlin_altschul_stat != NULL)
   {
-    gt_querymatch_evalue_bit_score(evalue_ptr,bit_score_ptr,querymatch);
+    gt_querymatch_evalue_bit_score(evalue_ptr,bit_score_ptr,
+                                   karlin_altschul_stat,querymatch);
 #ifdef SKDEBUG
     fprintf(querymatch->fp, "# evalue_ptr = %.2e <=? %.2e = evalue_threshold ",
                              *evalue_ptr,evalue_threshold);
@@ -791,7 +785,6 @@ void gt_querymatch_seedpos_adjust(GtQuerymatch *querymatch,
 }
 
 bool gt_querymatch_complete(GtQuerymatch *querymatch,
-                            const GtKarlinAltschulStat *karlin_altschul_stat,
                             GtUword dblen,
                             GtUword dbstart,
                             GtUword dbseqnum,
@@ -855,7 +848,6 @@ bool gt_querymatch_complete(GtQuerymatch *querymatch,
                      query_totallength,
                      db_desc,
                      query_desc);
-  gt_querymatch_karlin_altschul_stat_set(querymatch,karlin_altschul_stat);
   querymatch->seedpos1 = seedpos1;
   querymatch->seedpos2 = seedpos2;
   querymatch->seedlen = seedlen;

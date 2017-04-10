@@ -218,7 +218,6 @@ void gt_sesp_show(const GtSeedextendSeqpair *sesp)
 static const GtQuerymatch *gt_combine_extensions(
          bool forxdrop,
          GtQuerymatch *querymatchspaceptr,
-         const GtKarlinAltschulStat *karlin_altschul_stat,
          const GtSeqorEncseq *dbes,
          const GtSeqorEncseq *queryes,
          const GtSeedextendSeqpair *sesp,
@@ -257,7 +256,6 @@ static const GtQuerymatch *gt_combine_extensions(
     return NULL;
   }
   if (gt_querymatch_complete(querymatchspaceptr,
-                             karlin_altschul_stat,
                              dblen,
                              sesp->dbseqstartpos + dbstart_relative,
                              sesp->dbseqnum,
@@ -1209,7 +1207,6 @@ static const GtQuerymatch *gt_extend_sesp(bool forxdrop,
   return gt_combine_extensions(
                  forxdrop,
                  info_querymatch->querymatchspaceptr,
-                 info_querymatch->karlin_altschul_stat,
                  dbes,
                  queryes,
                  sesp,
@@ -1342,6 +1339,7 @@ static void gt_rf_seed_extend_prettyprint(bool forxdrop,
   }
   if (gt_querymatch_check_final(&evalue,
                                 &bit_score,
+                                info_querymatch->karlin_altschul_stat,
                                 querymatch,
                                 userdefinedleastlength,
                                 errorpercentage,

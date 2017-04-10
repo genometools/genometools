@@ -417,15 +417,6 @@ void gt_seedextend_match_iterator_display_set(GtSeedextendMatchIterator *semi,
   gt_querymatch_display_set(semi->querymatchptr,out_display_flag);
 }
 
-void gt_seedextend_match_iterator_karlin_altschul_stat_set(
-           GtSeedextendMatchIterator *semi,
-           GtKarlinAltschulStat *karlin_altschul_stat)
-{
-  gt_assert(semi != NULL);
-  gt_querymatch_karlin_altschul_stat_set(semi->querymatchptr,
-                                         karlin_altschul_stat);
-}
-
 GtUword gt_seedextend_match_iterator_all_sorted(GtSeedextendMatchIterator *semi,
                                                 bool ascending)
 

@@ -170,7 +170,7 @@ Test do
 end
 
 Name "gt dev show_seedext without alignment"
-Keywords "gt_seed_extend_show" # excluded until seed can be parsed
+Keywords "gt_seed_extend show" # excluded until seed can be parsed
 Test do
   run_test build_encseq("at1MB", "#{$testdata}at1MB")
   outfmt_seed = "-outfmt seed.len seed.s.start seed.q.start"

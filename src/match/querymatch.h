@@ -76,7 +76,6 @@ bool gt_querymatch_process(GtQuerymatch *querymatchptr,
 void gt_querymatch_delete(GtQuerymatch *querymatch);
 
 bool gt_querymatch_complete(GtQuerymatch *querymatchptr,
-                            const GtKarlinAltschulStat *karlin_altschul_stat,
                             GtUword dblen,
                             GtUword dbstart,
                             GtUword dbseqnum,
@@ -123,6 +122,7 @@ void gt_querymatch_show_failed_seed(const GtQuerymatch *querymatch);
 
 bool gt_querymatch_check_final(double *evalue_ptr,
                                double *bit_score_ptr,
+                               const GtKarlinAltschulStat *karlin_altschul_stat,
                                const GtQuerymatch *querymatch,
                                GtUword userdefinedleastlength,
                                GtUword errorpercentage,
@@ -163,9 +163,8 @@ void gt_querymatch_seedpos_adjust(GtQuerymatch *querymatch,
 
 void gt_querymatch_evalue_bit_score(double *evalue_ptr,
                                     double *bit_score_ptr,
+                                    const GtKarlinAltschulStat
+                                      *karlin_altschul_stat,
                                     const GtQuerymatch *querymatch);
-
-void gt_querymatch_karlin_altschul_stat_set(GtQuerymatch *querymatch,
-                        const GtKarlinAltschulStat *karlin_altschul_stat);
 
 #endif

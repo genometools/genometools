@@ -3054,6 +3054,7 @@ typedef struct
   GtDiagbandseedCounts process_seeds_counts;
   GtSegmentRejectFunc segment_reject_func;
   GtSegmentRejectInfo *segment_reject_info;
+  const GtKarlinAltschulStat *karlin_altschul_stat;
 } GtDiagbandseedExtendSegmentInfo;
 
 static int gt_diagbandseed_possibly_extend(const GtArrayGtDiagbandseedRectangle
@@ -3124,6 +3125,7 @@ static int gt_diagbandseed_possibly_extend(const GtArrayGtDiagbandseedRectangle
       /* show extension results */
       if (gt_querymatch_check_final(&evalue,
                                     &bit_score,
+                                    esi->karlin_altschul_stat,
                                     querymatch,
                                     esi->userdefinedleastlength,
                                     esi->errorpercentage,
@@ -3887,6 +3889,7 @@ static GtDiagbandseedExtendSegmentInfo *gt_diagbandseed_extendSI_new(
   esi->debug = gt_log_enabled() ? true : false;
   esi->segment_reject_func = segment_reject_func;
   esi->segment_reject_info = segment_reject_info;
+  esi->karlin_altschul_stat = karlin_altschul_stat;
   return esi;
 }
 

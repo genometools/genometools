@@ -218,6 +218,8 @@ static void gt_show_seed_extend_encseq(GtQuerymatch *querymatchptr,
                                        double bitscore,
                                        const GtEncseq *aencseq,
                                        const GtEncseq *bencseq,
+                                       const GtKarlinAltschulStat
+                                         *karlin_altschul_stat,
                                        bool adjust)
 {
   GtSeqorEncseq aseqorencseq, bseqorencseq;
@@ -244,7 +246,8 @@ static void gt_show_seed_extend_encseq(GtQuerymatch *querymatchptr,
     }
     if (evalue == DBL_MAX || bitscore == DBL_MAX)
     {
-      gt_querymatch_evalue_bit_score(&evalue, &bitscore, querymatchptr);
+      gt_querymatch_evalue_bit_score(&evalue, &bitscore, karlin_altschul_stat,
+                                     querymatchptr);
     }
     gt_querymatch_prettyprint(evalue,bitscore,querymatchptr);
   }
@@ -360,8 +363,6 @@ static int gt_show_seedext_runner(GT_UNUSED int argc,
                                        gt_encseq_total_length(aencseq),
                                        gt_encseq_num_of_sequences(aencseq),
                                        bencseq);
-      gt_seedextend_match_iterator_karlin_altschul_stat_set(semi,
-         karlin_altschul_stat);
     }
     processinfo_and_querymatchspaceptr.karlin_altschul_stat
       = karlin_altschul_stat;
@@ -383,6 +384,7 @@ static int gt_show_seedext_runner(GT_UNUSED int argc,
                                    gt_seedextend_match_iterator_evalue(semi),
                                    gt_seedextend_match_iterator_bitscore(semi),
                                    aencseq, bencseq,
+                                   karlin_altschul_stat,
                                    adjust);
       } else
       {

@@ -108,7 +108,6 @@ static int gt_exact_selfmatch_with_output(void *info,
   GT_SEQORENCSEQ_INIT_ENCSEQ(&dbes,encseq);
   GT_SEQORENCSEQ_INIT_ENCSEQ(&queryes,encseq);
   if (gt_querymatch_complete(info_querymatch->querymatchspaceptr,
-                             info_querymatch->karlin_altschul_stat,
                              len,
                              pos1,
                              dbseqnum,
@@ -571,8 +570,6 @@ static int gt_callenumquerymatches(bool selfmatch,
                                    GtQuerymatchoutoptions *querymatchoutoptions,
                                    Gt_extend_querymatch_func eqmf,
                                    void *eqmf_data,
-                                   const GtKarlinAltschulStat
-                                      *karlin_altschul_stat,
                                    const GtSeedExtendDisplayFlag *display_flag,
                                    GtLogger *logger,
                                    GtError *err)
@@ -708,7 +705,6 @@ static int gt_callenumquerymatches(bool selfmatch,
                            query_totallength,
                            NULL,
                            NULL);
-        gt_querymatch_karlin_altschul_stat_set(exactseed,karlin_altschul_stat);
         eqmf(eqmf_data,suffixarray.encseq,exactseed,&query_seqorencseq,
              same_encseq);
       } else
@@ -717,7 +713,6 @@ static int gt_callenumquerymatches(bool selfmatch,
 
         GT_SEQORENCSEQ_INIT_ENCSEQ(&dbes,suffixarray.encseq);
         if (gt_querymatch_complete(exactseed,
-                                   karlin_altschul_stat,
                                    matchlength,
                                    dbstart,
                                    dbseqnum,
@@ -1067,7 +1062,6 @@ static int gt_repfind_runner(int argc,
                                           querymatchoutoptions,
                                           eqmf,
                                           eqmf_data,
-                                          info_querymatch.karlin_altschul_stat,
                                           display_flag,
                                           logger,
                                           err) != 0)
@@ -1095,7 +1089,6 @@ static int gt_repfind_runner(int argc,
                                   querymatchoutoptions,
                                   eqmf,
                                   eqmf_data,
-                                  info_querymatch.karlin_altschul_stat,
                                   display_flag,
                                   logger,
                                   err) != 0)
