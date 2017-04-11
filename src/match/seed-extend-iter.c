@@ -388,13 +388,6 @@ bool gt_seedextend_match_iterator_has_seed(
   return gt_querymatch_seed_display(semi->in_display_flag);
 }
 
-GtQuerymatch *gt_seedextend_match_iterator_querymatch_ptr(
-                        GtSeedextendMatchIterator *semi)
-{
-  gt_assert(semi != NULL);
-  return semi->querymatchptr;
-}
-
 double gt_seedextend_match_iterator_evalue(const GtSeedextendMatchIterator
                                               *semi)
 {

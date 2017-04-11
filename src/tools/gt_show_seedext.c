@@ -220,7 +220,9 @@ static void gt_show_seed_extend_encseq(GtQuerymatch *querymatchptr,
                                        const GtEncseq *bencseq,
                                        const GtKarlinAltschulStat
                                          *karlin_altschul_stat,
-                                       bool adjust)
+                                       bool adjust,
+                                       bool evalue_display,
+                                       bool bitscore_display)
 {
   GtSeqorEncseq aseqorencseq, bseqorencseq;
 
@@ -244,7 +246,8 @@ static void gt_show_seed_extend_encseq(GtQuerymatch *querymatchptr,
     {
       gt_querymatch_seedpos_adjust(querymatchptr,&aseqorencseq,&bseqorencseq);
     }
-    if (evalue == DBL_MAX || bitscore == DBL_MAX)
+    if ((evalue_display || bitscore_display) &&
+        (evalue == DBL_MAX || bitscore == DBL_MAX))
     {
       gt_querymatch_evalue_bit_score(&evalue, &bitscore, karlin_altschul_stat,
                                      querymatchptr);
@@ -350,7 +353,10 @@ static int gt_show_seedext_runner(GT_UNUSED int argc,
   if (!had_err)
   {
     GtKarlinAltschulStat *karlin_altschul_stat = NULL;
-    const bool matches_have_seeds = gt_seedextend_match_iterator_has_seed(semi),
+    const bool evalue_display = gt_querymatch_evalue_display(out_display_flag),
+               bitscore_display
+                 = gt_querymatch_bitscore_display(out_display_flag),
+               matches_have_seeds = gt_seedextend_match_iterator_has_seed(semi),
                adjust = (gt_querymatch_seed_s_start_display(out_display_flag) ||
                          gt_querymatch_seed_q_start_display(out_display_flag))
                             ? true : false;
@@ -385,7 +391,9 @@ static int gt_show_seedext_runner(GT_UNUSED int argc,
                                    gt_seedextend_match_iterator_bitscore(semi),
                                    aencseq, bencseq,
                                    karlin_altschul_stat,
-                                   adjust);
+                                   adjust,
+                                   evalue_display,
+                                   bitscore_display);
       } else
       {
 #ifdef REALIGNMATCHINGSEQUENCES
