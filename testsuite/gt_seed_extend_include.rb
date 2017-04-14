@@ -170,29 +170,38 @@ Test do
 end
 
 Name "gt dev show_seedext without alignment"
-Keywords "gt_seed_extend show"
+Keywords "gt_seed_extend_show"
 Test do
   run_test build_encseq("at1MB", "#{$testdata}at1MB")
+  run_test build_encseq("U89959_genomic", "#{$testdata}U89959_genomic.fas")
   outfmt_seed = "-outfmt seed.len seed.s.start seed.q.start"
-  run_test "#{$bin}gt seed_extend -v -ii at1MB " + outfmt_seed
-  run "mv #{last_stdout} seed_extend.out"
-  run_test "#{$bin}gt dev show_seedext -f seed_extend.out " + outfmt_seed
-  run "mv #{last_stdout} show_seed_ext.out"
-  run "diff -I '^#' seed_extend.out show_seed_ext.out"
-  run_test "#{$bin}gt seed_extend -v -ii at1MB " + outfmt_seed
-  run "mv #{last_stdout} tmp.matches"
-  run_test "#{$bin}gt dev show_seedext -f tmp.matches -optimal -outfmt alignment"
-  $OUTFMT_ARGS.each do |arg|
-    if arg != "s.desc" and arg != "q.desc" and not arg.match(/^seed/)
-      run_test "#{$bin}gt dev show_seedext -f tmp.matches #{outfmt_seed} #{arg}"
-      if arg != "alignment"
-        run "#{$scriptsdir}se-permutation.rb #{last_stdout} tmp.matches"
+  [" "," -qii U89959_genomic "].each do |qidx|
+    run_test "#{$bin}gt seed_extend -v -ii at1MB#{qidx}" + outfmt_seed
+    run "mv #{last_stdout} seed_extend.out"
+    run_test "#{$bin}gt dev show_seedext -f seed_extend.out " + outfmt_seed
+    run "mv #{last_stdout} show_seed_ext.out"
+    run "diff -I '^#' seed_extend.out show_seed_ext.out"
+    run_test "#{$bin}gt dev show_seedext -f seed_extend.out -optimal -outfmt alignment"
+    $OUTFMT_ARGS.each do |arg|
+      if arg != "s.desc" and arg != "q.desc" and not arg.match(/^seed/)
+        run_test "#{$bin}gt dev show_seedext -f seed_extend.out #{outfmt_seed} #{arg}"
+        if arg != "alignment"
+          run "#{$scriptsdir}se-permutation.rb #{last_stdout} seed_extend.out"
+        end
       end
     end
+    run_test "#{$bin}gt seed_extend -v -ii at1MB#{qidx}"
+    run "mv #{last_stdout} tmp.matches"
+    run_test "#{$bin}gt dev show_seedext -f tmp.matches -optimal -outfmt alignment"
   end
-  run_test "#{$bin}gt seed_extend -v -ii at1MB"
-  run "mv #{last_stdout} tmp.matches"
-  run_test "#{$bin}gt dev show_seedext -f tmp.matches -optimal -outfmt alignment"
+  ["",outfmt_seed].each do |seed|
+    run_test "#{$bin}gt seed_extend -v -ii at1MB -l 783 " + seed
+    run "mv #{last_stdout} tmp.matches"
+    run_test "#{$bin}gt seed_extend -v -ii at1MB -l 783 -outfmt alignment"
+    run "mv #{last_stdout} se.align"
+    run_test "#{$bin}gt dev show_seedext -f tmp.matches -outfmt alignment"
+    run "diff -I '^#' #{last_stdout} se.align"
+  end
 end
 
 # cam extension options
