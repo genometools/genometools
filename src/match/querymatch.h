@@ -68,11 +68,6 @@ void gt_querymatch_read_line(GtQuerymatch *querymatch,
                              const GtEncseq *dbencseq,
                              const GtEncseq *queryencseq);
 
-bool gt_querymatch_process(GtQuerymatch *querymatchptr,
-                           const GtSeqorEncseq *dbes,
-                           const GtSeqorEncseq *queryes,
-                           bool greedyextension);
-
 void gt_querymatch_delete(GtQuerymatch *querymatch);
 
 bool gt_querymatch_complete(GtQuerymatch *querymatchptr,
@@ -157,16 +152,6 @@ GtQuerymatch *gt_querymatch_table_get(const GtArrayGtQuerymatch
 void gt_querymatch_display_set(GtQuerymatch *querymatch,
                                const GtSeedExtendDisplayFlag *display_flag);
 
-void gt_querymatch_seedpos_adjust(GtQuerymatch *querymatch,
-                                  const GtSeqorEncseq *dbes,
-                                  const GtSeqorEncseq *queryes);
-
-void gt_querymatch_evalue_bit_score(double *evalue_ptr,
-                                    double *bit_score_ptr,
-                                    const GtKarlinAltschulStat
-                                      *karlin_altschul_stat,
-                                    const GtQuerymatch *querymatch);
-
 typedef struct
 {
   GtUchar *a_sequence, *b_sequence;
@@ -178,13 +163,25 @@ void gt_querymatch_extract_sequence_pair(GtSequencepairbuffer *seqpairbuf,
                                          const GtEncseq *bencseq,
                                          const GtQuerymatch *querymatch);
 
-void gt_querymatch_full_align(const GtQuerymatch *querymatch,
-                              const GtEncseq *aencseq,
-                              const GtEncseq *bencseq,
-                              bool evalue_display,
-                              bool bitscore_display,
-                              const GtKarlinAltschulStat *karlin_altschul_stat,
-                              double evalue,
-                              double bitscore);
+void gt_querymatch_seed_alignment(GtQuerymatch *querymatchptr,
+                                  const GtEncseq *aencseq,
+                                  const GtEncseq *bencseq,
+                                  bool evalue_display,
+                                  bool bitscore_display,
+                                  const GtKarlinAltschulStat
+                                    *karlin_altschul_stat,
+                                  double evalue,
+                                  double bitscore,
+                                  bool adjust);
+
+void gt_querymatch_full_alignment(const GtQuerymatch *querymatch,
+                                  const GtEncseq *aencseq,
+                                  const GtEncseq *bencseq,
+                                  bool evalue_display,
+                                  bool bitscore_display,
+                                  const GtKarlinAltschulStat
+                                     *karlin_altschul_stat,
+                                  double evalue,
+                                  double bitscore);
 
 #endif

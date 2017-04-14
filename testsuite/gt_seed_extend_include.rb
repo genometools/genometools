@@ -181,6 +181,7 @@ Test do
   run "diff -I '^#' seed_extend.out show_seed_ext.out"
   run_test "#{$bin}gt seed_extend -v -ii at1MB " + outfmt_seed
   run "mv #{last_stdout} tmp.matches"
+  run_test "#{$bin}gt dev show_seedext -f tmp.matches -optimal -outfmt alignment"
   $OUTFMT_ARGS.each do |arg|
     if arg != "s.desc" and arg != "q.desc" and not arg.match(/^seed/)
       run_test "#{$bin}gt dev show_seedext -f tmp.matches #{outfmt_seed} #{arg}"
@@ -191,7 +192,7 @@ Test do
   end
   run_test "#{$bin}gt seed_extend -v -ii at1MB"
   run "mv #{last_stdout} tmp.matches"
-  run_test "#{$bin}gt dev show_seedext -f tmp.matches -outfmt alignment"
+  run_test "#{$bin}gt dev show_seedext -f tmp.matches -optimal -outfmt alignment"
 end
 
 # cam extension options
