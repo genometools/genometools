@@ -167,4 +167,24 @@ void gt_querymatch_evalue_bit_score(double *evalue_ptr,
                                       *karlin_altschul_stat,
                                     const GtQuerymatch *querymatch);
 
+typedef struct
+{
+  GtUchar *a_sequence, *b_sequence;
+  GtUword a_allocated, b_allocated, a_len, b_len;
+} GtSequencepairbuffer;
+
+void gt_querymatch_extract_sequence_pair(GtSequencepairbuffer *seqpairbuf,
+                                         const GtEncseq *aencseq,
+                                         const GtEncseq *bencseq,
+                                         const GtQuerymatch *querymatch);
+
+void gt_querymatch_full_align(const GtQuerymatch *querymatch,
+                              const GtEncseq *aencseq,
+                              const GtEncseq *bencseq,
+                              bool evalue_display,
+                              bool bitscore_display,
+                              const GtKarlinAltschulStat *karlin_altschul_stat,
+                              double evalue,
+                              double bitscore);
+
 #endif

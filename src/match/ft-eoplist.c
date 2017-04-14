@@ -343,7 +343,7 @@ GtEoplistReader *gt_eoplist_reader_new(const GtEoplist *eoplist)
   eoplist_reader->width = 0;
   eoplist_reader->outbuffer = NULL;
   eoplist_reader->distinguish_mismatch_match = false;
-  eoplist_reader->width = 60;
+  eoplist_reader->width = 70;
   eoplist_reader->outbuffer
     = gt_realloc(eoplist_reader->outbuffer,
                  sizeof *eoplist_reader->outbuffer *
@@ -1044,6 +1044,14 @@ void gt_eoplist_verify(const GtEoplist *eoplist,
   {
     gt_eoplist_reader_distinguish_mismatch_match(eoplist_reader);
   }
+  if (eoplist->useq == NULL)
+  {
+    gt_assert(eoplist->vseq == NULL &&
+              eoplist_reader->distinguish_mismatch_match);
+  } else
+  {
+    gt_assert(eoplist->vseq != NULL);
+  }
   while (gt_eoplist_reader_next_cigar(&co,eoplist_reader))
   {
     if (co.eoptype == GtDeletionOp)
@@ -1062,17 +1070,14 @@ void gt_eoplist_verify(const GtEoplist *eoplist,
         {
           sumdist += co.iteration;
         }
-        if (eoplist->useq == NULL && eoplist->vseq == NULL)
-        {
-          gt_assert(eoplist_reader->distinguish_mismatch_match);
-        } else
+        if (eoplist->useq != NULL)
         {
           GtUword idx;
 
           for (idx = 0; idx < co.iteration; idx++)
           {
-            GtUchar a = eoplist->useq[sumulen+idx],
-                    b = eoplist->vseq[sumvlen+idx];
+            const GtUchar a = eoplist->useq[sumulen+idx],
+                          b = eoplist->vseq[sumvlen+idx];
             if (a == b && !ISSPECIAL(a))
             {
               gt_assert(co.eoptype == GtMatchOp);

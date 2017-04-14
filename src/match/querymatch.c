@@ -24,6 +24,7 @@
 #include "querymatch.h"
 #include "querymatch-align.h"
 #include "karlin_altschul_stat.h"
+#include "revcompl.h"
 
 struct GtQuerymatch
 {
@@ -418,7 +419,8 @@ void gt_querymatch_prettyprint(double evalue,double bit_score,
   if (gt_querymatch_alignment_display(querymatch->display_flag))
   {
     gt_querymatchoutoptions_alignment_show(querymatch->ref_querymatchoutoptions,
-                                           querymatch->distance,
+                                           querymatch->distance == 0
+                                             ? true : false,
                                            querymatch->verify_alignment,
                                            querymatch->fp);
   }
@@ -1003,4 +1005,105 @@ GtQuerymatch *gt_querymatch_table_get(const GtArrayGtQuerymatch
 {
   gt_assert(querymatch_table != NULL);
   return querymatch_table->spaceGtQuerymatch + idx;
+}
+
+void gt_querymatch_extract_sequence_pair(GtSequencepairbuffer *seqpairbuf,
+                                         const GtEncseq *aencseq,
+                                         const GtEncseq *bencseq,
+                                         const GtQuerymatch *querymatch)
+{
+  GtReadmode query_readmode = gt_querymatch_query_readmode(querymatch);
+  const GtUword dblen = gt_querymatch_dblen(querymatch),
+                queryseqnum = gt_querymatch_queryseqnum(querymatch),
+                querystart_fwdstrand
+                  = gt_querymatch_querystart_fwdstrand(querymatch),
+                querylen = gt_querymatch_querylen(querymatch);
+
+  const GtUword apos_ab = gt_querymatch_dbstart(querymatch);
+  const GtUword bpos_ab = gt_encseq_seqstartpos(bencseq, queryseqnum) +
+                          querystart_fwdstrand;
+
+  if (dblen >= seqpairbuf->a_allocated)
+  {
+    seqpairbuf->a_sequence = gt_realloc(seqpairbuf->a_sequence,
+                                        sizeof *seqpairbuf->a_sequence * dblen);
+    seqpairbuf->a_allocated = dblen;
+  }
+  if (querylen >= seqpairbuf->b_allocated)
+  {
+    seqpairbuf->b_sequence = gt_realloc(seqpairbuf->b_sequence,
+                                        sizeof *seqpairbuf->b_sequence *
+                                        querylen);
+    seqpairbuf->b_allocated = querylen;
+  }
+  gt_encseq_extract_encoded(aencseq, seqpairbuf->a_sequence, apos_ab,
+                            apos_ab + dblen - 1);
+  gt_encseq_extract_encoded(bencseq, seqpairbuf->b_sequence, bpos_ab,
+                            bpos_ab + querylen - 1);
+  if (query_readmode == GT_READMODE_REVCOMPL)
+  {
+    gt_inplace_reverse_complement(seqpairbuf->b_sequence,querylen);
+  }
+  seqpairbuf->a_len = dblen;
+  seqpairbuf->b_len = querylen;
+}
+
+void gt_querymatch_full_align(const GtQuerymatch *querymatch,
+                              const GtEncseq *aencseq,
+                              const GtEncseq *bencseq,
+                              bool evalue_display,
+                              bool bitscore_display,
+                              const GtKarlinAltschulStat *karlin_altschul_stat,
+                              double evalue,
+                              double bitscore)
+{
+  if (gt_querymatch_cigar_display(querymatch->display_flag) ||
+      gt_querymatch_alignment_display(querymatch->display_flag) ||
+      querymatch->verify_alignment)
+  {
+    GtSeqorEncseq dbes, queryes;
+    const uint64_t queryseqnum = gt_querymatch_queryseqnum(querymatch);
+    GtReadmode query_readmode = gt_querymatch_query_readmode(querymatch);
+    const GtUword
+      dbseqnum = gt_querymatch_dbseqnum(querymatch),
+      db_seqstartpos = gt_encseq_seqstartpos(aencseq,dbseqnum),
+      query_seqstartpos = gt_encseq_seqstartpos(bencseq,queryseqnum),
+      abs_querystart = query_seqstartpos + gt_querymatch_querystart(querymatch);
+
+    GT_SEQORENCSEQ_INIT_ENCSEQ(&dbes,aencseq);
+    GT_SEQORENCSEQ_INIT_ENCSEQ(&queryes,bencseq);
+    gt_frontprune2eoplist(querymatch->ref_querymatchoutoptions,
+                          &dbes,
+                          &queryes,
+                          query_readmode,
+                          query_seqstartpos,
+                          querymatch->query_totallength,
+                          gt_querymatch_dbstart(querymatch),
+                          gt_querymatch_dblen(querymatch),
+                          abs_querystart,
+                          gt_querymatch_querylen(querymatch),
+                          querymatch->verify_alignment);
+    gt_querymatchoutoptions_extract_seq(querymatch->ref_querymatchoutoptions,
+                                        &dbes,
+                                        &queryes,
+                                        gt_querymatch_dbstart(querymatch),
+                                        gt_querymatch_dblen(querymatch),
+                                        query_readmode,
+                                        query_seqstartpos +
+                                           querymatch->querystart_fwdstrand,
+                                        gt_querymatch_querylen(querymatch));
+    gt_querymatchoutoptions_set_sequences(
+                 querymatch->ref_querymatchoutoptions,
+                 gt_querymatch_dbstart(querymatch),
+                 db_seqstartpos,
+                 abs_querystart,
+                 query_seqstartpos);
+  }
+  if ((evalue_display || bitscore_display) &&
+      (evalue == DBL_MAX || bitscore == DBL_MAX))
+  {
+    gt_querymatch_evalue_bit_score(&evalue, &bitscore, karlin_altschul_stat,
+                                   querymatch);
+  }
+  gt_querymatch_prettyprint(evalue,bitscore,querymatch);
 }

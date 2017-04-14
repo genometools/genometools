@@ -119,4 +119,7 @@ double gt_seedextend_match_iterator_bitscore(
 const char *gt_seedextend_match_iterator_Options_line(
                     const GtSeedextendMatchIterator *semi);
 
+void gt_seedextend_match_iterator_verify_alignment_set(
+                                  GtSeedextendMatchIterator *semi);
+
 #endif

@@ -40,6 +40,7 @@ struct GtSeedextendMatchIterator
   GtArrayGtQuerymatch querymatch_table;
   GtSeedExtendDisplayFlag *in_display_flag;
   GtStr *saved_options_line;
+  bool missing_fields_line;
 };
 
 void gt_seedextend_match_iterator_delete(GtSeedextendMatchIterator *semi)
@@ -241,10 +242,6 @@ GtSeedextendMatchIterator *gt_seedextend_match_iterator_new(
         had_err = -1;
       }
       gt_str_array_delete(fields);
-    } else
-    {
-      gt_error_set(err,"missing line beginning with # Fields:");
-      had_err = -1;
     }
   }
   if (defline_infp != NULL)
@@ -303,6 +300,7 @@ GtQuerymatch *gt_seedextend_match_iterator_next(GtSeedextendMatchIterator *semi)
 {
   bool selfmatch;
 
+  gt_assert(semi != NULL);
   if (semi->currentmatchindex < GT_UWORD_MAX)
   {
     if (semi->currentmatchindex == semi->querymatch_table.nextfreeGtQuerymatch)
@@ -326,10 +324,13 @@ GtQuerymatch *gt_seedextend_match_iterator_next(GtSeedextendMatchIterator *semi)
       break;
     }
     line_ptr = gt_str_get(semi->line_buffer);
-    /* ignore comment lines; but print seeds if -outfmt seed is set */
     gt_assert(line_ptr != NULL);
     if (line_ptr[0] != '\n' && line_ptr[0] != '#')
     {
+      if (semi->in_display_flag == NULL)
+      {
+        return NULL;
+      }
       gt_querymatch_read_line(semi->querymatchptr,
                               &semi->evalue,
                               &semi->bitscore,
@@ -408,6 +409,12 @@ void gt_seedextend_match_iterator_display_set(GtSeedextendMatchIterator *semi,
 {
   gt_assert(semi != NULL);
   gt_querymatch_display_set(semi->querymatchptr,out_display_flag);
+}
+
+void gt_seedextend_match_iterator_verify_alignment_set(
+                                  GtSeedextendMatchIterator *semi)
+{
+  gt_querymatch_verify_alignment_set(semi->querymatchptr);
 }
 
 GtUword gt_seedextend_match_iterator_all_sorted(GtSeedextendMatchIterator *semi,

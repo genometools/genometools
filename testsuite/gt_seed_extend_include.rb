@@ -170,7 +170,7 @@ Test do
 end
 
 Name "gt dev show_seedext without alignment"
-Keywords "gt_seed_extend show" # excluded until seed can be parsed
+Keywords "gt_seed_extend show"
 Test do
   run_test build_encseq("at1MB", "#{$testdata}at1MB")
   outfmt_seed = "-outfmt seed.len seed.s.start seed.q.start"
@@ -189,6 +189,9 @@ Test do
       end
     end
   end
+  run_test "#{$bin}gt seed_extend -v -ii at1MB"
+  run "mv #{last_stdout} tmp.matches"
+  run_test "#{$bin}gt dev show_seedext -f tmp.matches -outfmt alignment"
 end
 
 # cam extension options
