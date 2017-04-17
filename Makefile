@@ -114,7 +114,7 @@ BUILDSTAMP:=$(shell date +'"%Y-%m-%d %H:%M:%S"')
 
 # try to set RANLIB automatically
 SYSTEM?=$(shell uname -s)
-MACHINE:=$(shell uname -m)
+MACHINE?=$(shell uname -m)
 ifeq ($(SYSTEM),Darwin)
   RANLIB:=ranlib
   NO_STATIC_LINKING:=defined
