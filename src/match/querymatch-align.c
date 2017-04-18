@@ -450,29 +450,21 @@ void gt_frontprune2eoplist(GtQuerymatchoutoptions *querymatchoutoptions,
 
 void gt_querymatchoutoptions_set_sequences(GtQuerymatchoutoptions
                                              *querymatchoutoptions,
-                                           GtUword dbstart,
-                                           GtUword db_seqstartpos,
-                                           GtUword abs_querystart,
-                                           GtUword query_seqstartpos)
+                                           GtUword dbstart_rel,
+                                           GtUword querystart)
 {
   if (querymatchoutoptions->eoplist_reader != NULL)
   {
-    gt_assert(abs_querystart + querymatchoutoptions->correction_info.voffset
-              >= query_seqstartpos &&
-              dbstart + querymatchoutoptions->correction_info.uoffset
-              >= db_seqstartpos);
     gt_eoplist_set_sequences(querymatchoutoptions->eoplist,
                              querymatchoutoptions->useqbuffer +
                                querymatchoutoptions->correction_info.uoffset,
-                             dbstart +
-                             querymatchoutoptions->correction_info.uoffset -
-                             db_seqstartpos,
+                             dbstart_rel +
+                             querymatchoutoptions->correction_info.uoffset,
                              querymatchoutoptions->correction_info.ulen,
                              querymatchoutoptions->vseqbuffer +
                                querymatchoutoptions->correction_info.voffset,
-                             abs_querystart +
-                             querymatchoutoptions->correction_info.voffset -
-                             query_seqstartpos,
+                             querystart +
+                             querymatchoutoptions->correction_info.voffset,
                              querymatchoutoptions->correction_info.vlen);
   }
 }
@@ -631,11 +623,11 @@ bool gt_querymatchoutoptions_alignment_prepare(GtQuerymatchoutoptions
       gt_eoplist_set_seedoffset(querymatchoutoptions->eoplist,
                                 seedpos1 - dbstart,
                                 seedlen);
+      gt_assert(dbstart >= db_seqstartpos &&
+                abs_querystart >= query_seqstartpos);
       gt_querymatchoutoptions_set_sequences(querymatchoutoptions,
-                                            dbstart,
-                                            db_seqstartpos,
-                                            abs_querystart,
-                                            query_seqstartpos);
+                                            dbstart - db_seqstartpos,
+                                            abs_querystart - query_seqstartpos);
     }
     return true;
   }

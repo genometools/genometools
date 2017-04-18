@@ -23,7 +23,6 @@
 #include "core/error_api.h"
 #include "core/readmode.h"
 #include "core/encseq.h"
-#include "core/unused_api.h"
 #include "core/arraydef.h"
 #include "querymatch-align.h"
 #include "karlin_altschul_stat.h"
@@ -31,8 +30,6 @@
 #include "seq_or_encseq.h"
 
 typedef struct GtQuerymatch GtQuerymatch;
-
-GT_DECLAREARRAYSTRUCT(GtQuerymatch);
 
 GtQuerymatch *gt_querymatch_new(void);
 
@@ -140,6 +137,8 @@ bool gt_querymatch_overlap(const GtQuerymatch *querymatch,
 
 GtUword gt_querymatch_querystart_fwdstrand(const GtQuerymatch *querymatch);
 
+GT_DECLAREARRAYSTRUCT(GtQuerymatch);
+
 void gt_querymatch_table_add(GtArrayGtQuerymatch *querymatch_table,
                              const GtQuerymatch *querymatch);
 
@@ -159,13 +158,13 @@ typedef struct
 } GtSequencepairbuffer;
 
 void gt_querymatch_extract_sequence_pair(GtSequencepairbuffer *seqpairbuf,
-                                         const GtEncseq *aencseq,
-                                         const GtEncseq *bencseq,
+                                         const GtEncseq *db_encseq,
+                                         const GtEncseq *query_encseq,
                                          const GtQuerymatch *querymatch);
 
 void gt_querymatch_seed_alignment(GtQuerymatch *querymatchptr,
-                                  const GtEncseq *aencseq,
-                                  const GtEncseq *bencseq,
+                                  const GtEncseq *db_encseq,
+                                  const GtEncseq *query_encseq,
                                   bool evalue_display,
                                   bool bitscore_display,
                                   const GtKarlinAltschulStat
@@ -175,8 +174,8 @@ void gt_querymatch_seed_alignment(GtQuerymatch *querymatchptr,
                                   bool adjust);
 
 void gt_querymatch_full_alignment(const GtQuerymatch *querymatch,
-                                  const GtEncseq *aencseq,
-                                  const GtEncseq *bencseq,
+                                  const GtEncseq *db_encseq,
+                                  const GtEncseq *query_encseq,
                                   bool evalue_display,
                                   bool bitscore_display,
                                   const GtKarlinAltschulStat

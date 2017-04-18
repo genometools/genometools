@@ -146,7 +146,9 @@ static void gt_sesp_from_absolute(GtSeedextendSeqpair *sesp,
   sesp->same_encseq = same_encseq;
   sesp->seedlength = len;
   sesp->dbseqnum = gt_encseq_seqnum(dbencseq,pos1),
+                          /* XXX: replace by lookup */
   sesp->dbseqstartpos = gt_encseq_seqstartpos(dbencseq,sesp->dbseqnum),
+                          /* XXX: replace by lookup */
   sesp->dbseqlength = gt_encseq_seqlength(dbencseq,sesp->dbseqnum);
   if (dbencseq == queryencseq && pos2 < sesp->dbseqstartpos + sesp->dbseqlength)
   { /* second match in same sequence */
@@ -157,8 +159,10 @@ static void gt_sesp_from_absolute(GtSeedextendSeqpair *sesp,
   {
     sesp->queryseqnum = gt_encseq_seqnum(queryencseq,pos2);
     gt_assert(dbencseq != queryencseq || sesp->dbseqnum < sesp->queryseqnum);
+                          /* XXX: replace by lookup */
     sesp->queryseqstartpos = gt_encseq_seqstartpos(queryencseq,
                                                    sesp->queryseqnum);
+                          /* XXX: replace by lookup */
     sesp->query_totallength = gt_encseq_seqlength(queryencseq,
                                                   sesp->queryseqnum);
   }
@@ -1412,6 +1416,7 @@ static const GtQuerymatch* gt_rf_extend_querymatch(bool forxdrop,
 {
   GtUword dbseqnum = gt_querymatch_dbseqnum(exactseed),
           dbstart = gt_querymatch_dbstart(exactseed),
+                          /* XXX: replace by lookup */
           dbseqstartpos = gt_encseq_seqstartpos(dbencseq,dbseqnum);
   GtSeedextendSeqpair sesp = {0,0,0,0,0,0,0,0,0,GT_READMODE_FORWARD,false};
   GtSeqorEncseq dbes;
@@ -1419,12 +1424,15 @@ static const GtQuerymatch* gt_rf_extend_querymatch(bool forxdrop,
 
   gt_assert(queryes != NULL && dbencseq != NULL);
   sesp.dbseqstartpos = dbseqstartpos;
+                     /* XXX: replace by lookup */
   sesp.dbseqlength = gt_encseq_seqlength(dbencseq,dbseqnum);
   if (queryes->encseq != NULL)
   {
     sesp.queryseqstartpos
+                          /* XXX: replace by lookup */
       = gt_encseq_seqstartpos(queryes->encseq,(GtUword) query_seqnum);
     sesp.query_totallength
+                          /* XXX: replace by lookup */
       = gt_encseq_seqlength(queryes->encseq,(GtUword) query_seqnum);
   } else
   {

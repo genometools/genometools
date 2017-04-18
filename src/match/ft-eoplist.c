@@ -121,13 +121,21 @@ char *gt_eoplist2cigar_string(const GtEoplist *eoplist,
   return sbuf.space;
 }
 
-GtEoplist *gt_eoplist_new_from_cigar(const char *cigarstring,GtUword length)
+GtEoplist *gt_eoplist_new_from_cigar(GtEoplist *eoplist,
+                                     const char *cigarstring,char sep)
 {
   const char *cptr;
   GtUword iteration = 0;
-  GtEoplist *eoplist = gt_eoplist_new();
 
-  for (cptr = cigarstring; cptr < cigarstring + length; cptr++)
+  if (eoplist == NULL)
+  {
+    eoplist = gt_eoplist_new();
+  } else
+  {
+    gt_eoplist_reset(eoplist);
+  }
+  for (cptr = cigarstring; *cptr != '\0' && *cptr != sep && *cptr != '\n';
+       cptr++)
   {
     if (isdigit(*cptr))
     {

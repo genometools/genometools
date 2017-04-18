@@ -129,9 +129,7 @@ void gt_querymatchoutoptions_extract_seq(GtQuerymatchoutoptions
 
 void gt_querymatchoutoptions_set_sequences(GtQuerymatchoutoptions
                                              *querymatchoutoptions,
-                                           GtUword dbstart,
-                                           GtUword db_seqstartpos,
-                                           GtUword abs_querystart,
-                                           GtUword query_seqstartpos);
+                                           GtUword dbstart_rel,
+                                           GtUword querystart);
 
 #endif
