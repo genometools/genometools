@@ -1,5 +1,6 @@
 /*
   Copyright (c) 2007-2008 Gordon Gremme <gordon@gremme.org>
+  Copyright (c) 2016 Daniel Standage <daniel.standage@gmail.com>
   Copyright (c) 2007-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -122,6 +123,10 @@
 
    -- Returns <true> if <feature_node> has a child node of type <type>.
    function feature_node:has_child_of_type(type)
+
+   -- Returns the number of children of type <type> associated with
+   -- <feature_node>.
+   function feature_node:count_children_of_type(type)
 
    -- Adds <child> as a child node of <feature_node>.
    function feature_node:add_child(child)

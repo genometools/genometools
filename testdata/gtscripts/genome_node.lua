@@ -1,6 +1,7 @@
 --[[
   Copyright (c) 2007-2008 Gordon Gremme <gordon@gremme.org>
   Copyright (c) 2014      Sascha Steinbiss <sascha@steinbiss.name>
+  Copyright (c) 2016      Daniel Standage <daniel.standage@gmail.com>
   Copyright (c) 2007-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -276,6 +277,23 @@ assert(not parent:has_child_of_type("gene"))
 assert(not parent:has_child_of_type("intron"))
 assert(not child:has_child_of_type("gene"))
 assert(not child:has_child_of_type("exon"))
+
+-- testing count_children_of_type
+range = gt.range_new(1000, 2000)
+parent = gt.feature_node_new("seqid", "mRNA", 1000, 2000, "-")
+child  = gt.feature_node_new("seqid", "exon", 1000, 1200, "-")
+parent:add_child(child)
+child  = gt.feature_node_new("seqid", "exon", 1350, 1800, "-")
+parent:add_child(child)
+child  = gt.feature_node_new("seqid", "exon", 1980, 1200, "-")
+parent:add_child(child)
+child  = gt.feature_node_new("seqid", "intron", 1201, 1349, "-")
+parent:add_child(child)
+child  = gt.feature_node_new("seqid", "intron", 1801, 1979, "-")
+parent:add_child(child)
+assert(parent:count_children_of_type("exon") == 3)
+assert(parent:count_children_of_type("intron") == 2)
+assert(parent:count_children_of_type("b0gu$") == 0)
 
 -- testing change_seqid
 node = gt.feature_node_new("seqid", "gene", range:get_start(), range:get_end(), "+")
