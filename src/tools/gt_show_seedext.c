@@ -273,6 +273,7 @@ static int gt_show_seedext_runner(GT_UNUSED int argc,
     }
     if (gt_querymatch_alignment_display(out_display_flag) ||
         gt_querymatch_cigar_display(out_display_flag) ||
+        gt_querymatch_cigarX_display(out_display_flag) ||
         arguments->verify_alignment)
     {
       if (gt_seedextend_match_iterator_querymatchoutoptions_set(

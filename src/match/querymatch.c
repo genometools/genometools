@@ -346,6 +346,7 @@ void gt_querymatch_prettyprint(double evalue,double bit_score,
     switch (co)
     {
       case Gt_Cigar_display:
+      case Gt_Cigarx_display:
         gt_querymatchoutoptions_cigar_show(querymatch->ref_querymatchoutoptions,
                                            querymatch->fp);
         break;
@@ -667,6 +668,7 @@ void gt_querymatch_read_line(GtQuerymatch *querymatch,
     switch (column_order[column])
     {
       case Gt_Cigar_display:
+      case Gt_Cigarx_display:
         querymatch->eoplist_from_file
           = gt_eoplist_new_from_cigar(querymatch->eoplist_from_file,ptr,
                                       separator);
@@ -1148,6 +1150,7 @@ void gt_querymatch_full_alignment(const GtQuerymatch *querymatch,
                                   double bitscore)
 {
   if (gt_querymatch_cigar_display(querymatch->display_flag) ||
+      gt_querymatch_cigarX_display(querymatch->display_flag) ||
       gt_querymatch_alignment_display(querymatch->display_flag) ||
       querymatch->verify_alignment)
   {

@@ -83,6 +83,11 @@ GtQuerymatchoutoptions *gt_querymatchoutoptions_new(const
   querymatchoutoptions->eoplist_reader_verify = NULL;
   querymatchoutoptions->eoplist_reader
     = gt_eoplist_reader_new(querymatchoutoptions->eoplist);
+  if (gt_querymatch_cigarX_display(display_flag))
+  {
+    gt_eoplist_reader_distinguish_mismatch_match(
+        querymatchoutoptions->eoplist_reader);
+  }
   if (gt_querymatch_display_alignmentwidth(display_flag) > 0)
   {
     gt_eoplist_reader_reset_width(querymatchoutoptions->eoplist_reader,

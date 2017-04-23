@@ -4,6 +4,7 @@ static GtSEdisplayStruct gt_display_arguments_table[] =
   {"alignment", Gt_Alignment_display, false},
   {"bitscore", Gt_Bitscore_display, true},
   {"cigar", Gt_Cigar_display, true},
+  {"cigarX", Gt_Cigarx_display, true},
   {"editdist", Gt_Editdist_display, true},
   {"evalue", Gt_Evalue_display, true},
   {"failed_seed", Gt_Failed_seed_display, false},
@@ -30,29 +31,30 @@ static GtSEdisplayStruct gt_display_arguments_table[] =
 
 static unsigned int gt_display_flag2index[] = {
    0,
-   23,
-   8,
-   5,
-   6,
-   2,
-   15,
-   17,
-   14,
-   18,
    24,
-   10,
-   12,
    9,
-   13,
-   19,
-   3,
+   6,
    7,
-   20,
-   22,
-   21,
+   2,
+   3,
    16,
+   18,
+   15,
+   19,
+   25,
    11,
+   13,
+   10,
+   14,
+   20,
    4,
+   8,
+   21,
+   23,
+   22,
+   17,
+   12,
+   5,
    1
 };
 
@@ -66,7 +68,10 @@ const char *gt_querymatch_display_help(void)
          "failed_seed:  show the coordinates of a seed extension, which \n"
          "              does not satisfy the filter conditions\n"
          "fstperquery:  output only the first found match per query\n"
-         "cigar:        display cigar string representing alignment\n"
+         "cigar:        display cigar string representing alignment (no \n"
+         "              distinction between match and mismatch)\n"
+         "cigarX:       display cigar string representing alignment \n"
+         "              (distinction between match (=) and mismatch (X))\n"
          "s.len:        display length of match on subject sequence\n"
          "s.seqnum:     display sequence number of subject sequence\n"
          "s.desc:       display sequence description of subject sequence\n"
@@ -97,6 +102,7 @@ const char *gt_querymatch_display_help(void)
         ", failed_seed"\
         ", fstperquery"\
         ", cigar"\
+        ", cigarX"\
         ", s.len"\
         ", s.seqnum"\
         ", s.desc"\
@@ -145,6 +151,12 @@ bool gt_querymatch_cigar_display(const GtSeedExtendDisplayFlag
                                         *display_flag)
 {
   return gt_querymatch_display_on(display_flag,Gt_Cigar_display);
+}
+
+bool gt_querymatch_cigarX_display(const GtSeedExtendDisplayFlag
+                                        *display_flag)
+{
+  return gt_querymatch_display_on(display_flag,Gt_Cigarx_display);
 }
 
 bool gt_querymatch_s_len_display(const GtSeedExtendDisplayFlag

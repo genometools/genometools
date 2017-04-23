@@ -50,7 +50,10 @@ display_options = [
   ["failed_seed", "show the coordinates of a seed extension, which does not " +
                   "satisfy the filter conditions"],
   ["fstperquery", "output only the first found match per query"],
-  ["cigar",       "display cigar string representing alignment"],
+  ["cigar",       "display cigar string representing alignment " +
+                  "(no distinction between match and mismatch)"],
+  ["cigarX",      "display cigar string representing alignment " +
+                  "(distinction between match (=) and mismatch (X))"],
   ["s.len",       "display length of match on subject sequence"],
   ["s.seqnum",    "display sequence number of subject sequence"],
   ["s.desc",      "display sequence description of subject sequence"],

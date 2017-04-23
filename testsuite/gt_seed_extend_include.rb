@@ -28,7 +28,7 @@ seeds = [170039800390891361279027638963673934519,
 
 $SPLT_LIST = ["-splt struct","-splt ulong"]
 $CAM_LIST = ["encseq", "encseq_reader","bytes"]
-$OUTFMT_ARGS = ["alignment","cigar","polinfo","fstperquery","seed.len",
+$OUTFMT_ARGS = ["alignment","cigar","cigarX","polinfo","fstperquery","seed.len",
                 "seed.s.start","seed.q.start","seed_in_algn","s.seqlen",
                 "q.seqlen","evalue","s.desc","q.desc","bitscore"]
 
@@ -84,7 +84,7 @@ Test do
 end
 
 Name "gt seed_extend: display arguments"
-Keywords "gt_seed_extend display"
+Keywords "gt_seed_extend_display"
 Test do
   run_test build_encseq("at1MB", "#{$testdata}at1MB", true)
   run_test build_encseq("Atinsert.fna", "#{$testdata}Atinsert.fna", true)
@@ -101,12 +101,16 @@ Test do
   run "#{$scriptsdir}se-permutation.rb #{last_stdout} #{$testdata}see-ext-at1MB-400-seqdesc.matches"
   run_test "#{$bin}gt seed_extend -ii at1MB -l 400 -outfmt cigar"
   run "diff -I '^#' #{last_stdout} #{$testdata}see-ext-at1MB-400-cigar.matches"
+  run_test "#{$bin}gt seed_extend -ii at1MB -l 400 -outfmt cigarX"
+  run "diff -I '^#' #{last_stdout} #{$testdata}see-ext-at1MB-400-cigarX.matches"
   run_test "#{$bin}gt seed_extend -ii at1MB -l 700 -outfmt alignment=60 seed_in_algn"
   run "diff -I '^#' #{last_stdout} #{$testdata}see-ext-at1MB-500-alignment-seed_in_algn.matches"
   run_test "#{$bin}gt seed_extend -ii at1MB -l 400 -outfmt s.seqlen q.seqlen"
   run "diff -I '^#' #{last_stdout} #{$testdata}see-ext-at1MB-400-seqlength.matches"
   run_test "#{$bin}gt seed_extend -ii at1MB -qii Atinsert.fna -l 100 -outfmt bitscore evalue s.seqlen q.seqlen cigar"
   run "diff -I '^#' #{last_stdout} #{$testdata}see-ext-at1MB-Atinsert100-evalue-bitscore-cigar-seqlength.matches"
+  run_test "#{$bin}gt seed_extend -ii at1MB -qii Atinsert.fna -l 100 -outfmt bitscore evalue s.seqlen q.seqlen cigarX"
+  run "diff -I '^#' #{last_stdout} #{$testdata}see-ext-at1MB-Atinsert100-evalue-bitscore-cigarX-seqlength.matches"
   run_test "#{$bin}gt seed_extend -ii U89959_genomic -l 50 -outfmt bitscore evalue"
   run "diff -I '^#' #{last_stdout} #{$testdata}see-ext-U8-evalue-bitscore.matches"
   run_test "#{$bin}gt seed_extend -ii at1MB -outfmt seed.len seed.s.start seed.q.start failed_seed -l 600 -seedlength 20"

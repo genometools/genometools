@@ -4687,7 +4687,8 @@ static int gt_diagbandseed_algorithm(const GtDiagbandseedInfo *arg,
     }
     alignmentwidth = gt_querymatch_display_alignmentwidth(extp->display_flag);
     if (extp->extendxdrop || alignmentwidth > 0 || extp->verify_alignment ||
-        gt_querymatch_cigar_display(extp->display_flag))
+        gt_querymatch_cigar_display(extp->display_flag) ||
+        gt_querymatch_cigarX_display(extp->display_flag))
     {
       querymoutopt = gt_querymatchoutoptions_new(extp->display_flag,
                                                  NULL,
