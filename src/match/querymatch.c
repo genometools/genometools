@@ -265,63 +265,6 @@ static void gt_querymatch_description_out(FILE *fp,const char *description)
   fwrite(description,sizeof *description,nwspl,fp);
 }
 
-#ifdef GT_QUERYMATCH_COORDINATES_OUt
-static void gt_querymatch_coordinates_out(const GtQuerymatch *querymatch)
-{
-  gt_assert(querymatch != NULL);
-
-  fprintf(querymatch->fp,GT_WU,querymatch->dblen);
-  if (gt_querymatch_s_desc_display(querymatch->display_flag))
-  {
-    gt_querymatch_description_out(querymatch->fp,querymatch->db_desc);
-  } else
-  {
-    fprintf(querymatch->fp," " GT_WU,querymatch->dbseqnum);
-  }
-  fprintf(querymatch->fp," " GT_WU,querymatch->dbstart_relative);
-  fprintf(querymatch->fp," %c",
-          gt_seed_extend_outflag[querymatch->query_readmode]);
-  fprintf(querymatch->fp," " GT_WU,querymatch->querylen);
-  if (gt_querymatch_q_desc_display(querymatch->display_flag))
-  {
-    gt_querymatch_description_out(querymatch->fp,querymatch->query_desc);
-  } else
-  {
-    fprintf(querymatch->fp," " Formatuint64_t,
-            PRINTuint64_tcast(querymatch->queryseqnum));
-  }
-  fprintf(querymatch->fp," " GT_WU,querymatch->querystart_fwdstrand);
-  if (querymatch->score > 0)
-  {
-    fprintf(querymatch->fp," " GT_WD,querymatch->score);
-    fprintf(querymatch->fp," " GT_WU,querymatch->distance);
-    fprintf(querymatch->fp," " "%.2f",
-            gt_querymatch_similarity(querymatch->distance,
-                                     querymatch->dblen + querymatch->querylen));
-  }
-  if (gt_querymatch_s_seqlen_display(querymatch->display_flag))
-  {
-    fprintf(querymatch->fp, " " GT_WU,querymatch->db_seqlen);
-  }
-  if (gt_querymatch_q_seqlen_display(querymatch->display_flag))
-  {
-    fprintf(querymatch->fp, " " GT_WU,querymatch->query_totallength);
-  }
-  if (gt_querymatch_seed_len_display(querymatch->display_flag))
-  {
-    fprintf(querymatch->fp," " GT_WU,querymatch->seedlen);
-  }
-  if (gt_querymatch_seed_s_start_display(querymatch->display_flag))
-  {
-    fprintf(querymatch->fp," " GT_WU,querymatch->seedpos1);
-  }
-  if (gt_querymatch_seed_q_start_display(querymatch->display_flag))
-  {
-    fprintf(querymatch->fp," " GT_WU,querymatch->seedpos2);
-  }
-}
-#endif
-
 void gt_querymatch_prettyprint(double evalue,double bit_score,
                                const GtQuerymatch *querymatch)
 {
