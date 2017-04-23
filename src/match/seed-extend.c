@@ -115,8 +115,8 @@ void gt_xdrop_matchinfo_silent_set(GtXdropmatchinfo *xdropmatchinfo)
 
 typedef struct
 {
-  GtUword dbseqnum, dbseqlength, dbseqstartpos, dbstart_relative,
-          queryseqnum, query_totallength, queryseqstartpos, querystart_relative,
+  GtUword dbseqnum, dbseqlength, db_seqstart, dbstart_relative,
+          queryseqnum, query_totallength, query_seqstart, querystart_relative,
           seedlength;
   GtReadmode query_readmode;
   bool same_encseq;
@@ -125,13 +125,13 @@ typedef struct
 static GtUword gt_sesp_seedpos1(const GtSeedextendSeqpair *sesp)
 {
   gt_assert(sesp != NULL);
-  return sesp->dbseqstartpos + sesp->dbstart_relative;
+  return sesp->db_seqstart + sesp->dbstart_relative;
 }
 
 static GtUword gt_sesp_seedpos2(const GtSeedextendSeqpair *sesp)
 {
   gt_assert(sesp != NULL);
-  return sesp->queryseqstartpos + sesp->querystart_relative;
+  return sesp->query_seqstart + sesp->querystart_relative;
 }
 
 static void gt_sesp_from_absolute(GtSeedextendSeqpair *sesp,
@@ -146,30 +146,25 @@ static void gt_sesp_from_absolute(GtSeedextendSeqpair *sesp,
   sesp->same_encseq = same_encseq;
   sesp->seedlength = len;
   sesp->dbseqnum = gt_encseq_seqnum(dbencseq,pos1),
-                          /* XXX: replace by lookup */
-  sesp->dbseqstartpos = gt_encseq_seqstartpos(dbencseq,sesp->dbseqnum),
-                          /* XXX: replace by lookup */
+  sesp->db_seqstart = gt_encseq_seqstartpos(dbencseq,sesp->dbseqnum),
   sesp->dbseqlength = gt_encseq_seqlength(dbencseq,sesp->dbseqnum);
-  if (dbencseq == queryencseq && pos2 < sesp->dbseqstartpos + sesp->dbseqlength)
+  if (dbencseq == queryencseq && pos2 < sesp->db_seqstart + sesp->dbseqlength)
   { /* second match in same sequence */
     sesp->queryseqnum = sesp->dbseqnum;
-    sesp->queryseqstartpos = sesp->dbseqstartpos;
+    sesp->query_seqstart = sesp->db_seqstart;
     sesp->query_totallength = sesp->dbseqlength;
   } else
   {
     sesp->queryseqnum = gt_encseq_seqnum(queryencseq,pos2);
     gt_assert(dbencseq != queryencseq || sesp->dbseqnum < sesp->queryseqnum);
-                          /* XXX: replace by lookup */
-    sesp->queryseqstartpos = gt_encseq_seqstartpos(queryencseq,
-                                                   sesp->queryseqnum);
-                          /* XXX: replace by lookup */
+    sesp->query_seqstart = gt_encseq_seqstartpos(queryencseq,sesp->queryseqnum);
     sesp->query_totallength = gt_encseq_seqlength(queryencseq,
                                                   sesp->queryseqnum);
   }
-  gt_assert(sesp->dbseqstartpos <= pos1);
-  sesp->dbstart_relative = pos1 - sesp->dbseqstartpos;
-  gt_assert(sesp->queryseqstartpos <= pos2);
-  sesp->querystart_relative = pos2 - sesp->queryseqstartpos;
+  gt_assert(sesp->db_seqstart <= pos1);
+  sesp->dbstart_relative = pos1 - sesp->db_seqstart;
+  gt_assert(sesp->query_seqstart <= pos2);
+  sesp->querystart_relative = pos2 - sesp->query_seqstart;
   sesp->query_readmode = GT_READMODE_FORWARD;
 }
 
@@ -179,11 +174,11 @@ static void gt_sesp_from_relative(GtSeedextendSeqpair *sesp,
                                   bool same_encseq,
                                   GtUword queryseqnum,
                                   GtUword querystart_relative,
-                                  GtUword len,
+                                  GtUword seedlength,
                                   GtReadmode query_readmode)
 {
   sesp->same_encseq = same_encseq;
-  sesp->seedlength = len;
+  sesp->seedlength = seedlength;
   sesp->dbseqnum = dbseqnum;
   sesp->queryseqnum = queryseqnum;
   sesp->dbstart_relative = dbstart_relative;
@@ -209,13 +204,13 @@ void gt_sesp_show(const GtSeedextendSeqpair *sesp)
 {
   printf("seedpos1=" GT_WU ",seedpos2=" GT_WU ",seedlength=" GT_WU "\n",
            gt_sesp_seedpos1(sesp),gt_sesp_seedpos2(sesp),sesp->seedlength);
-  printf("dbseqnum=" GT_WU ",dbseqstartpos=" GT_WU ",dpseqlength="
+  printf("dbseqnum=" GT_WU ",db_seqstart=" GT_WU ",dpseqlength="
                  GT_WU "\n",
                    sesp->dbseqnum,
-                   sesp->dbseqstartpos,
+                   sesp->db_seqstart,
                    sesp->dbseqlength);
-  printf("queryseqnum=" GT_WU ",queryseqstartpos=" GT_WU ",query_totallength="
-         GT_WU "\n",sesp->queryseqnum,sesp->queryseqstartpos,
+  printf("queryseqnum=" GT_WU ",query_seqstart=" GT_WU ",query_totallength="
+         GT_WU "\n",sesp->queryseqnum,sesp->query_seqstart,
                     sesp->query_totallength);
 }
 
@@ -261,9 +256,10 @@ static const GtQuerymatch *gt_combine_extensions(
   }
   if (gt_querymatch_complete(querymatchspaceptr,
                              dblen,
-                             sesp->dbseqstartpos + dbstart_relative,
+                             sesp->db_seqstart + dbstart_relative,
                              sesp->dbseqnum,
                              dbstart_relative,
+                             sesp->db_seqstart,
                              sesp->dbseqlength,
                              (GtWord) total_score,
                              total_distance,
@@ -274,6 +270,7 @@ static const GtQuerymatch *gt_combine_extensions(
                              sesp->querystart_relative - v_left_ext,
                              dbes,
                              queryes,
+                             sesp->query_seqstart,
                              sesp->query_totallength,
                              gt_sesp_seedpos1(sesp),
                              gt_sesp_seedpos2(sesp),
@@ -772,7 +769,7 @@ void gt_align_front_prune_edist(bool rightextension,
                                 const GtSeqorEncseq *dbes,
                                 const GtSeqorEncseq *queryes,
                                 GtReadmode query_readmode,
-                                GtUword queryseqstartpos,
+                                GtUword query_seqstart,
                                 GtUword query_totallength,
                                 GtGreedyextendmatchinfo *ggemi,
                                 bool greedyextension,
@@ -784,7 +781,7 @@ void gt_align_front_prune_edist(bool rightextension,
 {
   GtUword distance = 0, iteration, maxiterations;
   GtFTsequenceResources ufsr, vfsr;
-  const GtUword vseqstartpos = queryes->encseq != NULL ? queryseqstartpos : 0;
+  const GtUword vseqstartpos = queryes->encseq != NULL ? query_seqstart : 0;
 
   gt_assert(ggemi != NULL);
   gt_greedy_extend_init(&ufsr,&vfsr,
@@ -981,7 +978,7 @@ static const GtQuerymatch *gt_extend_sesp(bool forxdrop,
                      right_best_polished_point = {0,0,0,0,0};
   const bool rightextension = true;
   const GtUword vseqstartpos = queryes->encseq != NULL
-                                  ? sesp->queryseqstartpos : 0;
+                                  ? sesp->query_seqstart : 0;
 
   if (sesp->same_encseq && sesp->dbseqnum == sesp->queryseqnum &&
       sesp->dbstart_relative + sesp->seedlength - 1 >=
@@ -1011,7 +1008,7 @@ static const GtQuerymatch *gt_extend_sesp(bool forxdrop,
   }
   if (sesp->dbstart_relative > 0 && sesp->querystart_relative > 0)
   { /* there is something to align on the left of the seed */
-    const GtUword uoffset = sesp->dbseqstartpos,
+    const GtUword uoffset = sesp->db_seqstart,
                   ulen = sesp->dbstart_relative,
       /* stop extension at left instance of seed or querystart,
          whichever is larger */
@@ -1032,15 +1029,15 @@ static const GtQuerymatch *gt_extend_sesp(bool forxdrop,
                                       dbes,
                                       ulen,
                                       uoffset,
-                                      sesp->dbseqstartpos,
+                                      sesp->db_seqstart,
                                       sesp->dbseqlength);
         gt_seqabstract_reinit_generic(!rightextension,
                                       sesp->query_readmode,
                                       xdropmatchinfo->vseq,
                                       queryes,
                                       vlen,
-                                      sesp->queryseqstartpos + r_voffset,
-                                      sesp->queryseqstartpos,
+                                      sesp->query_seqstart + r_voffset,
+                                      sesp->query_seqstart,
                                       sesp->query_totallength);
   #ifdef SKDEBUG
         gt_xdrop_show_context(!rightextension,xdropmatchinfo);
@@ -1081,7 +1078,7 @@ static const GtQuerymatch *gt_extend_sesp(bool forxdrop,
                                             when using the reverse mode */
                                          vseqstartpos,
                                          &vfsr,
-                                         sesp->queryseqstartpos + r_voffset,
+                                         sesp->query_seqstart + r_voffset,
                                          vlen,
                                          greedyextendmatchinfo->cam_generic,
                                          greedyextendmatchinfo->trimstat);
@@ -1131,7 +1128,7 @@ static const GtQuerymatch *gt_extend_sesp(bool forxdrop,
                                     dbes,
                                     ulen,
                                     gt_sesp_seedpos1(sesp) + sesp->seedlength,
-                                    sesp->dbseqstartpos,
+                                    sesp->db_seqstart,
                                     sesp->dbseqlength);
       gt_seqabstract_reinit_generic(rightextension,
                                     sesp->query_readmode,
@@ -1139,7 +1136,7 @@ static const GtQuerymatch *gt_extend_sesp(bool forxdrop,
                                     queryes,
                                     vlen,
                                     gt_sesp_seedpos2(sesp) + sesp->seedlength,
-                                    sesp->queryseqstartpos,
+                                    sesp->query_seqstart,
                                     sesp->query_totallength);
 #ifdef SKDEBUG
       gt_xdrop_show_context(rightextension,xdropmatchinfo);
@@ -1241,9 +1238,9 @@ static const GtQuerymatch* gt_extend_seed_relative(bool forxdrop,
 {
   GtSeedextendSeqpair sesp;
 
-  sesp.dbseqstartpos = (dbes->encseq != NULL) ?  dbes->seqstartpos : 0;
+  sesp.db_seqstart = (dbes->encseq != NULL) ?  dbes->seqstartpos : 0;
   sesp.dbseqlength = dbes->seqlength;
-  sesp.queryseqstartpos = (queryes->encseq != NULL) ? queryes->seqstartpos : 0;
+  sesp.query_seqstart = (queryes->encseq != NULL) ? queryes->seqstartpos : 0;
   sesp.query_totallength = queryes->seqlength;
   gt_sesp_from_relative(&sesp,
                         dbseqnum,
@@ -1414,36 +1411,28 @@ static const GtQuerymatch* gt_rf_extend_querymatch(bool forxdrop,
                                                    const GtSeqorEncseq *queryes,
                                                    bool same_encseq)
 {
-  GtUword dbseqnum = gt_querymatch_dbseqnum(exactseed),
-          dbstart = gt_querymatch_dbstart(exactseed),
-                          /* XXX: replace by lookup */
-          dbseqstartpos = gt_encseq_seqstartpos(dbencseq,dbseqnum);
   GtSeedextendSeqpair sesp = {0,0,0,0,0,0,0,0,0,GT_READMODE_FORWARD,false};
   GtSeqorEncseq dbes;
-  uint64_t query_seqnum = gt_querymatch_queryseqnum(exactseed);
 
   gt_assert(queryes != NULL && dbencseq != NULL);
-  sesp.dbseqstartpos = dbseqstartpos;
-                     /* XXX: replace by lookup */
-  sesp.dbseqlength = gt_encseq_seqlength(dbencseq,dbseqnum);
+  sesp.dbseqnum = gt_querymatch_dbseqnum(exactseed);
+  sesp.dbseqlength = gt_querymatch_db_seqlen(exactseed);
+  sesp.db_seqstart = gt_querymatch_db_seqstart(exactseed);
+  sesp.queryseqnum = gt_querymatch_queryseqnum(exactseed);
   if (queryes->encseq != NULL)
   {
-    sesp.queryseqstartpos
-                          /* XXX: replace by lookup */
-      = gt_encseq_seqstartpos(queryes->encseq,(GtUword) query_seqnum);
-    sesp.query_totallength
-                          /* XXX: replace by lookup */
-      = gt_encseq_seqlength(queryes->encseq,(GtUword) query_seqnum);
+    sesp.query_seqstart = gt_querymatch_query_seqstart(exactseed);
+    sesp.query_totallength = gt_querymatch_query_totallength(exactseed);
   } else
   {
-    sesp.queryseqstartpos = 0;
+    sesp.query_seqstart = 0;
     sesp.query_totallength = queryes->seqlength;
   }
   gt_sesp_from_relative(&sesp,
-                        dbseqnum,
-                        dbstart - dbseqstartpos,
+                        sesp.dbseqnum,
+                        gt_querymatch_dbstart(exactseed) - sesp.db_seqstart,
                         same_encseq,
-                        gt_querymatch_queryseqnum(exactseed),
+                        sesp.queryseqnum,
                         gt_querymatch_querystart(exactseed),
                         gt_querymatch_querylen(exactseed),
                         gt_querymatch_query_readmode(exactseed));

@@ -78,8 +78,8 @@ static int gt_exact_selfmatch_with_output(void *info,
                                           GtUword pos2,
                                           GT_UNUSED GtError *err)
 {
-  GtUword queryseqnum, queryseqstartpos, query_totallength, dbseqnum,
-          dbseqstartpos, dbseqlen;
+  GtUword queryseqnum, query_seqstart, query_totallength, dbseqnum,
+          db_seqstart, dbseqlen;
   const GtEncseq *encseq;
   GtProcessinfo_and_querymatchspaceptr *info_querymatch
     = (GtProcessinfo_and_querymatchspaceptr *) info;
@@ -90,28 +90,29 @@ static int gt_exact_selfmatch_with_output(void *info,
   if (gt_encseq_has_multiseq_support(encseq))
   {
     dbseqnum = gt_encseq_seqnum(encseq,pos1);
-    dbseqstartpos = gt_encseq_seqstartpos(encseq,dbseqnum);
+    db_seqstart = gt_encseq_seqstartpos(encseq,dbseqnum);
     dbseqlen = gt_encseq_seqlength(encseq,dbseqnum);
     queryseqnum = gt_encseq_seqnum(encseq,pos2);
-    queryseqstartpos = gt_encseq_seqstartpos(encseq,queryseqnum);
+    query_seqstart = gt_encseq_seqstartpos(encseq,queryseqnum);
     query_totallength = gt_encseq_seqlength(encseq,queryseqnum);
   } else
   {
     dbseqnum = 0;
-    dbseqstartpos = 0;
+    db_seqstart = 0;
     dbseqlen = 0;
     queryseqnum = 0;
-    queryseqstartpos = 0;
+    query_seqstart = 0;
     query_totallength = 0;
   }
-  gt_assert(pos2 >= queryseqstartpos);
+  gt_assert(pos2 >= query_seqstart);
   GT_SEQORENCSEQ_INIT_ENCSEQ(&dbes,encseq);
   GT_SEQORENCSEQ_INIT_ENCSEQ(&queryes,encseq);
   if (gt_querymatch_complete(info_querymatch->querymatchspaceptr,
                              len,
                              pos1,
                              dbseqnum,
-                             pos1 - dbseqstartpos,
+                             pos1 - db_seqstart,
+                             db_seqstart,
                              dbseqlen,
                              0, /* score */
                              0, /* edist */
@@ -119,9 +120,10 @@ static int gt_exact_selfmatch_with_output(void *info,
                              true,
                              (uint64_t) queryseqnum,
                              len,
-                             pos2 - queryseqstartpos,
+                             pos2 - query_seqstart,
                              &dbes,
                              &queryes,
+                             query_seqstart,
                              query_totallength,
                              pos1,
                              pos2,
@@ -656,25 +658,27 @@ static int gt_callenumquerymatches(bool selfmatch,
     while (!haserr &&
            (retval = gt_querysubstringmatchiterator_next(qsmi, err)) == 0)
     {
-      GtUword dbstart, dbseqnum, dbseqstartpos, dbseqlen, matchlength,
-              query_totallength, querystart;
+      GtUword dbstart, dbseqnum, db_seqstart, dbseqlen,
+              matchlength, query_totallength, querystart, query_seqstart;
       uint64_t queryunitnum;
 
       dbstart = gt_querysubstringmatchiterator_dbstart(qsmi);
       if (gt_encseq_has_multiseq_support(suffixarray.encseq))
       {
         dbseqnum = gt_encseq_seqnum(suffixarray.encseq,dbstart);
-        dbseqstartpos = gt_encseq_seqstartpos(suffixarray.encseq, dbseqnum);
         dbseqlen = gt_encseq_seqlength(suffixarray.encseq, dbseqnum);
+        db_seqstart = gt_encseq_seqstartpos(suffixarray.encseq, dbseqnum);
       } else
       {
-        dbseqnum = dbseqstartpos = dbseqlen = 0;
+        dbseqnum = dbseqlen = db_seqstart = 0;
       }
       matchlength = gt_querysubstringmatchiterator_matchlength(qsmi);
       query_totallength = gt_querysubstringmatchiterator_query_seqlen(qsmi);
+      queryunitnum = gt_querysubstringmatchiterator_queryunitnum(qsmi);
       if (query_files == NULL || gt_str_array_size(query_files) == 0)
       {
         GT_SEQORENCSEQ_INIT_ENCSEQ(&query_seqorencseq,query_encseq);
+        query_seqstart = gt_encseq_seqstartpos(query_encseq,queryunitnum);
       } else
       {
         GT_SEQORENCSEQ_INIT_SEQ(&query_seqorencseq,
@@ -684,16 +688,17 @@ static int gt_callenumquerymatches(bool selfmatch,
                                 NULL,
                                 0,
                                 true);
+        query_seqstart = 0;
       }
       querystart = gt_querysubstringmatchiterator_querystart(qsmi);
-      queryunitnum = gt_querysubstringmatchiterator_queryunitnum(qsmi);
       if (eqmf != NULL)
       {
         gt_querymatch_init(exactseed,
                            matchlength,
                            dbstart,
                            dbseqnum,
-                           dbstart - dbseqstartpos,
+                           dbstart - db_seqstart,
+                           db_seqstart,
                            dbseqlen,
                            0, /* score */
                            0, /* edist */
@@ -702,6 +707,7 @@ static int gt_callenumquerymatches(bool selfmatch,
                            queryunitnum,
                            matchlength,
                            querystart,
+                           query_seqstart,
                            query_totallength,
                            NULL,
                            NULL);
@@ -716,7 +722,8 @@ static int gt_callenumquerymatches(bool selfmatch,
                                    matchlength,
                                    dbstart,
                                    dbseqnum,
-                                   dbstart - dbseqstartpos,
+                                   dbstart - db_seqstart,
+                                   db_seqstart,
                                    dbseqlen,
                                    0, /* score */
                                    0, /* edist */
@@ -727,6 +734,7 @@ static int gt_callenumquerymatches(bool selfmatch,
                                    querystart,
                                    &dbes,
                                    &query_seqorencseq,
+                                   query_seqstart,
                                    query_totallength,
                                    dbstart,
                                    querystart,

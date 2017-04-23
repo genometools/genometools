@@ -44,6 +44,7 @@ void gt_querymatch_init(GtQuerymatch *querymatch,
                         GtUword dbstart,
                         GtUword dbseqnum,
                         GtUword dbstart_relative,
+                        GtUword db_seqstart,
                         GtUword dbseqlen,
                         GtWord score,
                         GtUword distance,
@@ -52,6 +53,7 @@ void gt_querymatch_init(GtQuerymatch *querymatch,
                         uint64_t queryseqnum,
                         GtUword querylen,
                         GtUword querystart,
+                        GtUword query_seqstart,
                         GtUword query_totallength,
                         const char *db_desc,
                         const char *query_desc);
@@ -72,6 +74,7 @@ bool gt_querymatch_complete(GtQuerymatch *querymatchptr,
                             GtUword dbstart,
                             GtUword dbseqnum,
                             GtUword dbstart_relative,
+                            GtUword db_seqstart,
                             GtUword dbseqlen,
                             GtWord score,
                             GtUword distance,
@@ -82,6 +85,7 @@ bool gt_querymatch_complete(GtQuerymatch *querymatchptr,
                             GtUword querystart,
                             const GtSeqorEncseq *dbes,
                             const GtSeqorEncseq *queryes,
+                            GtUword query_seqstart,
                             GtUword query_totallength,
                             GtUword seedpos1,
                             GtUword seedpos2,
@@ -93,6 +97,8 @@ void gt_querymatch_outoptions_set(GtQuerymatch *querymatch,
 
 GtUword gt_querymatch_querylen(const GtQuerymatch *querymatch);
 
+GtUword gt_querymatch_query_totallength(const GtQuerymatch *querymatch);
+
 GtUword gt_querymatch_dbstart(const GtQuerymatch *querymatch);
 
 GtUword gt_querymatch_querystart(const GtQuerymatch *querymatch);
@@ -102,6 +108,12 @@ uint64_t gt_querymatch_queryseqnum(const GtQuerymatch *querymatch);
 GtUword gt_querymatch_dbseqnum(const GtQuerymatch *querymatch);
 
 GtUword gt_querymatch_dblen(const GtQuerymatch *querymatch);
+
+GtUword gt_querymatch_db_seqstart(const GtQuerymatch *querymatch);
+
+GtUword gt_querymatch_db_seqlen(const GtQuerymatch *querymatch);
+
+GtUword gt_querymatch_query_seqstart(const GtQuerymatch *querymatch);
 
 double gt_querymatch_error_rate(GtUword distance,GtUword alignedlen);
 

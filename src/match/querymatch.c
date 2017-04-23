@@ -41,7 +41,10 @@ struct GtQuerymatch
                          relative to start of sequence */
     querystart_fwdstrand, /* relative start of query on forward strand */
     query_totallength, /* length of single query sequence */
-    dbseqlen, /* length of single database sequence */
+    db_seqlen, /* length of single database sequence */
+    db_seqstart, /* start of database sequence */
+    query_seqstart, /* start of query sequence,
+                       0 if sequence is byte sequence */
     seedpos1, /* absolute or relative depending on char_access_mode */
     seedpos2, /* absolute or relative depending on char_access_mode */
     seedlen;
@@ -155,7 +158,8 @@ void gt_querymatch_init(GtQuerymatch *querymatch,
                         GtUword dbstart,
                         GtUword dbseqnum,
                         GtUword dbstart_relative,
-                        GtUword dbseqlen,
+                        GtUword db_seqstart,
+                        GtUword db_seqlen,
                         GtWord score,
                         GtUword distance,
                         GtUword mismatches,
@@ -163,6 +167,7 @@ void gt_querymatch_init(GtQuerymatch *querymatch,
                         uint64_t queryseqnum,
                         GtUword querylen,
                         GtUword querystart,
+                        GtUword query_seqstart,
                         GtUword query_totallength,
                         const char *db_desc,
                         const char *query_desc)
@@ -185,8 +190,10 @@ void gt_querymatch_init(GtQuerymatch *querymatch,
                                       querylen,
                                       query_totallength,
                                       querymatch->querystart);
+  querymatch->query_seqstart = query_seqstart;
   querymatch->query_totallength = query_totallength;
-  querymatch->dbseqlen = dbseqlen;
+  querymatch->db_seqstart = db_seqstart;
+  querymatch->db_seqlen = db_seqlen;
   querymatch->db_desc = db_desc;
   querymatch->query_desc = query_desc;
 }
@@ -294,7 +301,7 @@ static void gt_querymatch_coordinates_out(const GtQuerymatch *querymatch)
   }
   if (gt_querymatch_s_seqlen_display(querymatch->display_flag))
   {
-    fprintf(querymatch->fp, " " GT_WU,querymatch->dbseqlen);
+    fprintf(querymatch->fp, " " GT_WU,querymatch->db_seqlen);
   }
   if (gt_querymatch_q_seqlen_display(querymatch->display_flag))
   {
@@ -402,7 +409,7 @@ void gt_querymatch_prettyprint(double evalue,double bit_score,
         fprintf(querymatch->fp,GT_WU,querymatch->seedpos2);
         break;
       case Gt_S_seqlen_display:
-        fprintf(querymatch->fp,GT_WU,querymatch->dbseqlen);
+        fprintf(querymatch->fp,GT_WU,querymatch->db_seqlen);
         break;
       case Gt_Q_seqlen_display:
         fprintf(querymatch->fp,GT_WU,querymatch->query_totallength);
@@ -534,7 +541,8 @@ static void gt_querymatch_applycorrection(GtQuerymatch *querymatch)
                      querymatch->dbstart + coords->uoffset,
                      querymatch->dbseqnum,
                      querymatch->dbstart_relative + coords->uoffset,
-                     querymatch->dbseqlen,
+                     querymatch->db_seqstart,
+                     querymatch->db_seqlen,
                      gt_querymatch_distance2score(coords->sumdist,
                                                   coords->ulen + coords->vlen),
                      coords->sumdist,
@@ -543,6 +551,7 @@ static void gt_querymatch_applycorrection(GtQuerymatch *querymatch)
                      querymatch->queryseqnum,
                      coords->vlen,
                      querymatch->querystart + coords->voffset,
+                     querymatch->query_seqstart,
                      querymatch->query_totallength,
                      querymatch->db_desc,
                      querymatch->query_desc);
@@ -560,45 +569,40 @@ static bool gt_querymatch_process(GtQuerymatch *querymatch,
     if (querymatch->ref_querymatchoutoptions != NULL)
     {
       bool seededalignment;
-      GtUword query_seqstartpos, abs_querystart_fwdstrand, abs_querystart,
-              db_seqstartpos;
+      GtUword query_seqstart, abs_querystart_fwdstrand, abs_querystart,
+              db_seqstart;
 
       gt_assert(queryes != NULL);
       if (queryes->encseq != NULL)
       {
-        /* XXX: replace by lookup */
-        query_seqstartpos = gt_encseq_seqstartpos(queryes->encseq,
-                                                  querymatch->queryseqnum);
-        abs_querystart_fwdstrand
-           = query_seqstartpos + querymatch->querystart_fwdstrand;
-        abs_querystart
-           = query_seqstartpos + querymatch->querystart;
+        query_seqstart = gt_querymatch_query_seqstart(querymatch);
+        abs_querystart_fwdstrand = query_seqstart +
+                                   querymatch->querystart_fwdstrand;
+        abs_querystart = query_seqstart + querymatch->querystart;
       } else
       {
-        query_seqstartpos = 0;
+        query_seqstart = 0;
         abs_querystart_fwdstrand = querymatch->querystart_fwdstrand;
         abs_querystart = querymatch->querystart;
       }
       if (gt_querymatch_display_seedpos_a_relative(querymatch->display_flag))
       {
-        db_seqstartpos = 0;
+        db_seqstart = 0;
       } else
       {
         gt_assert(dbes != NULL && dbes->encseq != NULL);
-        /* XXX: replace by lookup */
-        db_seqstartpos = gt_encseq_seqstartpos(dbes->encseq,
-                                               querymatch->dbseqnum);
+        db_seqstart = gt_querymatch_db_seqstart(querymatch);
       }
       seededalignment
         = gt_querymatchoutoptions_alignment_prepare(querymatch->
                                                       ref_querymatchoutoptions,
                                                     dbes,
                                                     queryes,
-                                                    db_seqstartpos,
+                                                    db_seqstart,
                                                     querymatch->dbstart,
                                                     querymatch->dblen,
                                                     querymatch->query_readmode,
-                                                    query_seqstartpos,
+                                                    query_seqstart,
                                                     querymatch->
                                                       query_totallength,
                                                     abs_querystart,
@@ -646,7 +650,7 @@ void gt_querymatch_read_line(GtQuerymatch *querymatch,
 {
   const char separator = ' ';
   const char *ptr = line_ptr;
-  GtUword column, numcolumns, dbseqstartpos;
+  GtUword column, numcolumns;
   const unsigned int *column_order = gt_querymatch_display_order(&numcolumns,
                                                                  display_flag);
   querymatch->seedpos1 = GT_UWORD_MAX;
@@ -712,7 +716,7 @@ void gt_querymatch_read_line(GtQuerymatch *querymatch,
         ret = sscanf(ptr,GT_WU,&querymatch->seedpos2);
         break;
       case Gt_S_seqlen_display:
-        ret = sscanf(ptr,GT_WU,&querymatch->dbseqlen);
+        ret = sscanf(ptr,GT_WU,&querymatch->db_seqlen);
         break;
       case Gt_Q_seqlen_display:
         ret = sscanf(ptr,GT_WU,&querymatch->query_totallength);
@@ -737,33 +741,43 @@ void gt_querymatch_read_line(GtQuerymatch *querymatch,
             gt_querymatch_q_seqnum_display(display_flag));
   if (!gt_querymatch_s_seqlen_display(display_flag))
   {
-    querymatch->dbseqlen = gt_encseq_seqlength(dbencseq,querymatch->dbseqnum);
+    querymatch->db_seqlen = gt_encseq_seqlength(dbencseq,querymatch->dbseqnum);
   }
   if (!gt_querymatch_q_seqlen_display(display_flag))
   {
     querymatch->query_totallength
       = gt_encseq_seqlength(queryencseq,querymatch->queryseqnum);
   }
-  /* XXX: store value here */
-  dbseqstartpos = gt_encseq_seqstartpos(dbencseq,querymatch->dbseqnum);
-  querymatch->dbstart = dbseqstartpos + querymatch->dbstart_relative;
+  if (gt_querymatch_display_seedpos_a_relative(querymatch->display_flag))
+  {
+    querymatch->db_seqstart = 0;
+  } else
+  {
+    querymatch->db_seqstart
+      = gt_encseq_seqstartpos(dbencseq,querymatch->dbseqnum);
+  }
+  querymatch->dbstart = querymatch->db_seqstart + querymatch->dbstart_relative;
   querymatch->selfmatch = selfmatch;
   querymatch->querystart
     = gt_querymatch_querystart_derive(querymatch->query_readmode,
                                       querymatch->querylen,
                                       querymatch->query_totallength,
                                       querymatch->querystart_fwdstrand);
-  if (gt_querymatch_seed_s_start_display(display_flag) &&
-      !gt_querymatch_display_seedpos_a_relative(querymatch->display_flag))
+  if (gt_querymatch_seed_s_start_display(display_flag))
   {
-    querymatch->seedpos1 += dbseqstartpos;
+    querymatch->seedpos1 += querymatch->db_seqstart;
   }
-  if (gt_querymatch_seed_q_start_display(display_flag) &&
-      !gt_querymatch_display_seedpos_b_relative(querymatch->display_flag))
+  if (gt_querymatch_display_seedpos_b_relative(querymatch->display_flag))
   {
-    /* XXX: store value here */
-    querymatch->seedpos2 += gt_encseq_seqstartpos(queryencseq,
-                                                  querymatch->queryseqnum);
+    querymatch->query_seqstart = 0;
+  } else
+  {
+    querymatch->query_seqstart = gt_encseq_seqstartpos(queryencseq,
+                                                       querymatch->queryseqnum);
+  }
+  if (gt_querymatch_seed_q_start_display(display_flag))
+  {
+    querymatch->seedpos2 += querymatch->query_seqstart;
   }
 }
 
@@ -799,7 +813,8 @@ bool gt_querymatch_complete(GtQuerymatch *querymatch,
                             GtUword dbstart,
                             GtUword dbseqnum,
                             GtUword dbstart_relative,
-                            GtUword dbseqlen,
+                            GtUword db_seqstart,
+                            GtUword db_seqlen,
                             GtWord score,
                             GtUword distance,
                             GtUword mismatches,
@@ -809,6 +824,7 @@ bool gt_querymatch_complete(GtQuerymatch *querymatch,
                             GtUword querystart,
                             const GtSeqorEncseq *dbes,
                             const GtSeqorEncseq *queryes,
+                            GtUword query_seqstart,
                             GtUword query_totallength,
                             GtUword seedpos1,
                             GtUword seedpos2,
@@ -847,7 +863,8 @@ bool gt_querymatch_complete(GtQuerymatch *querymatch,
                      dbstart,
                      dbseqnum,
                      dbstart_relative,
-                     dbseqlen,
+                     db_seqstart,
+                     db_seqlen,
                      score,
                      distance,
                      mismatches,
@@ -855,6 +872,7 @@ bool gt_querymatch_complete(GtQuerymatch *querymatch,
                      queryseqnum,
                      querylen,
                      querystart,
+                     query_seqstart,
                      query_totallength,
                      db_desc,
                      query_desc);
@@ -879,6 +897,12 @@ GtUword gt_querymatch_querylen(const GtQuerymatch *querymatch)
   return querymatch->querylen;
 }
 
+GtUword gt_querymatch_query_totallength(const GtQuerymatch *querymatch)
+{
+  gt_assert(querymatch != NULL);
+  return querymatch->query_totallength;
+}
+
 GtUword gt_querymatch_dbstart(const GtQuerymatch *querymatch)
 {
   gt_assert(querymatch != NULL);
@@ -889,6 +913,18 @@ GtUword gt_querymatch_dblen(const GtQuerymatch *querymatch)
 {
   gt_assert(querymatch != NULL);
   return querymatch->dblen;
+}
+
+GtUword gt_querymatch_db_seqlen(const GtQuerymatch *querymatch)
+{
+  gt_assert(querymatch != NULL);
+  return querymatch->db_seqlen;
+}
+
+GtUword gt_querymatch_db_seqstart(const GtQuerymatch *querymatch)
+{
+  gt_assert(querymatch != NULL);
+  return querymatch->db_seqstart;
 }
 
 GtUword gt_querymatch_querystart(const GtQuerymatch *querymatch)
@@ -907,6 +943,12 @@ uint64_t gt_querymatch_queryseqnum(const GtQuerymatch *querymatch)
 {
   gt_assert(querymatch != NULL);
   return querymatch->queryseqnum;
+}
+
+GtUword gt_querymatch_query_seqstart(const GtQuerymatch *querymatch)
+{
+  gt_assert(querymatch != NULL);
+  return querymatch->query_seqstart;
 }
 
 void gt_querymatch_query_readmode_set(GtQuerymatch *querymatch,
@@ -1022,14 +1064,12 @@ void gt_querymatch_extract_sequence_pair(GtSequencepairbuffer *seqpairbuf,
 {
   GtReadmode query_readmode = gt_querymatch_query_readmode(querymatch);
   const GtUword dblen = gt_querymatch_dblen(querymatch),
-                queryseqnum = gt_querymatch_queryseqnum(querymatch),
                 querystart_fwdstrand
                   = gt_querymatch_querystart_fwdstrand(querymatch),
                 querylen = gt_querymatch_querylen(querymatch);
 
   const GtUword apos_ab = gt_querymatch_dbstart(querymatch);
-                          /* XXX: replace by lookup */
-  const GtUword bpos_ab = gt_encseq_seqstartpos(query_encseq, queryseqnum) +
+  const GtUword bpos_ab = gt_querymatch_query_seqstart(querymatch) +
                           querystart_fwdstrand;
 
   if (dblen >= seqpairbuf->a_allocated)
@@ -1057,7 +1097,7 @@ void gt_querymatch_extract_sequence_pair(GtSequencepairbuffer *seqpairbuf,
   seqpairbuf->b_len = querylen;
 }
 
-void gt_querymatch_seed_alignment(GtQuerymatch *querymatchptr,
+void gt_querymatch_seed_alignment(GtQuerymatch *querymatch,
                                   const GtEncseq *db_encseq,
                                   const GtEncseq *query_encseq,
                                   bool evalue_display,
@@ -1072,33 +1112,28 @@ void gt_querymatch_seed_alignment(GtQuerymatch *querymatchptr,
 
   GT_SEQORENCSEQ_INIT_ENCSEQ(&aseqorencseq,db_encseq);
   GT_SEQORENCSEQ_INIT_ENCSEQ(&bseqorencseq,query_encseq);
-  if (gt_querymatch_process(querymatchptr,
+  if (gt_querymatch_process(querymatch,
                             &aseqorencseq,
                             &bseqorencseq,
                             true) != 0)
   {
-    GtUword seqnum, seqstartpos;
-    seqnum = gt_querymatch_dbseqnum(querymatchptr);
-                          /* XXX: replace by lookup */
-    seqstartpos = gt_encseq_seqstartpos(db_encseq,seqnum);
-    GT_SEQORENCSEQ_ADD_SEQ_COORDS(&aseqorencseq,seqstartpos,
-                                  querymatchptr->dbseqlen);
-    seqnum = gt_querymatch_queryseqnum(querymatchptr);
-                          /* XXX: replace by lookup */
-    seqstartpos = gt_encseq_seqstartpos(query_encseq,seqnum);
-    GT_SEQORENCSEQ_ADD_SEQ_COORDS(&bseqorencseq,seqstartpos,
-                                  querymatchptr->query_totallength);
+    GT_SEQORENCSEQ_ADD_SEQ_COORDS(&aseqorencseq,
+                                  gt_querymatch_db_seqstart(querymatch),
+                                  querymatch->db_seqlen);
+    GT_SEQORENCSEQ_ADD_SEQ_COORDS(&bseqorencseq,
+                                  gt_querymatch_query_seqstart(querymatch),
+                                  querymatch->query_totallength);
     if (adjust)
     {
-      gt_querymatch_seedpos_adjust(querymatchptr,&aseqorencseq,&bseqorencseq);
+      gt_querymatch_seedpos_adjust(querymatch,&aseqorencseq,&bseqorencseq);
     }
     if ((evalue_display || bitscore_display) &&
         (evalue == DBL_MAX || bitscore == DBL_MAX))
     {
       gt_querymatch_evalue_bit_score(&evalue, &bitscore, karlin_altschul_stat,
-                                     querymatchptr);
+                                     querymatch);
     }
-    gt_querymatch_prettyprint(evalue,bitscore,querymatchptr);
+    gt_querymatch_prettyprint(evalue,bitscore,querymatch);
   }
 }
 
@@ -1117,15 +1152,10 @@ void gt_querymatch_full_alignment(const GtQuerymatch *querymatch,
       querymatch->verify_alignment)
   {
     GtSeqorEncseq dbes, queryes;
-    const uint64_t queryseqnum = gt_querymatch_queryseqnum(querymatch);
     GtReadmode query_readmode = gt_querymatch_query_readmode(querymatch);
     const GtUword
-      dbseqnum = gt_querymatch_dbseqnum(querymatch),
-                       /* XXX: replace by lookup */
-      db_seqstartpos = gt_encseq_seqstartpos(db_encseq,dbseqnum),
-                       /* XXX: replace by lookup */
-      query_seqstartpos = gt_encseq_seqstartpos(query_encseq,queryseqnum),
-      abs_querystart = query_seqstartpos + gt_querymatch_querystart(querymatch);
+      query_seqstart = gt_querymatch_query_seqstart(querymatch),
+      abs_querystart = query_seqstart + gt_querymatch_querystart(querymatch);
 
     GT_SEQORENCSEQ_INIT_ENCSEQ(&dbes,db_encseq);
     GT_SEQORENCSEQ_INIT_ENCSEQ(&queryes,query_encseq);
@@ -1133,7 +1163,7 @@ void gt_querymatch_full_alignment(const GtQuerymatch *querymatch,
                           &dbes,
                           &queryes,
                           query_readmode,
-                          query_seqstartpos,
+                          query_seqstart,
                           querymatch->query_totallength,
                           gt_querymatch_dbstart(querymatch),
                           gt_querymatch_dblen(querymatch),
@@ -1146,12 +1176,13 @@ void gt_querymatch_full_alignment(const GtQuerymatch *querymatch,
                                         gt_querymatch_dbstart(querymatch),
                                         gt_querymatch_dblen(querymatch),
                                         query_readmode,
-                                        query_seqstartpos +
+                                        query_seqstart +
                                            querymatch->querystart_fwdstrand,
                                         gt_querymatch_querylen(querymatch));
     gt_querymatchoutoptions_set_sequences(
                  querymatch->ref_querymatchoutoptions,
-                 gt_querymatch_dbstart(querymatch) - db_seqstartpos,
+                 gt_querymatch_dbstart(querymatch) -
+                   gt_querymatch_db_seqstart(querymatch),
                  gt_querymatch_querystart(querymatch));
   }
   if ((evalue_display || bitscore_display) &&
