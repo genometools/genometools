@@ -2793,8 +2793,8 @@ static bool gt_diagbandseed_has_overlap_with_previous_match(
            gt_querymatch_dbstart_relative(previousmatch),
            gt_querymatch_dbstart_relative(previousmatch) +
            gt_querymatch_dblen(previousmatch) - 1,
-           gt_querymatch_querystart_fwdstrand(previousmatch),
-           gt_querymatch_querystart_fwdstrand(previousmatch) +
+           gt_querymatch_querystart(previousmatch),
+           gt_querymatch_querystart(previousmatch) +
            gt_querymatch_querylen(previousmatch) - 1);
   }
   if (use_apos > 0)

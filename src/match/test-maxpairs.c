@@ -103,18 +103,20 @@ typedef struct
   GtUword len,
           dbstart,
           querystart;
-  uint64_t queryseqnum;
+  GtUword queryseqnum;
 } Substringmatch;
 
 static void gt_storemaxmatchquery(void *info, const GtQuerymatch *querymatch)
 {
   GtArray *tab = (GtArray *) info;
   Substringmatch subm;
+  GtUword query_seqlen, query_seqstart;
 
   subm.len = gt_querymatch_querylen(querymatch);
   subm.dbstart = gt_querymatch_dbstart(querymatch);
   subm.querystart = gt_querymatch_querystart(querymatch);
-  subm.queryseqnum = gt_querymatch_queryseqnum(querymatch);
+  gt_querymatch_query_coordinates(&subm.queryseqnum,&query_seqstart,
+                                  &query_seqlen, querymatch);
   gt_array_add(tab,subm);
 }
 
@@ -175,7 +177,7 @@ static int gt_storemaxmatchself(void *info,
         subm.querystart = pos -
                           (maxmatchselfinfo->querymarkpos[queryseqnum-1] + 1);
       }
-      subm.queryseqnum = (uint64_t) queryseqnum;
+      subm.queryseqnum = queryseqnum;
     }
     gt_array_add(maxmatchselfinfo->results,subm);
   }
@@ -227,11 +229,11 @@ static int gt_showSubstringmatch(void *a, GT_UNUSED void *info,
 {
   Substringmatch *m = (Substringmatch *) a;
 
-  printf(""GT_WU" "GT_WU" " Formatuint64_t " "GT_WU"\n",
-           m->len,
-           m->dbstart,
-           PRINTuint64_tcast(m->queryseqnum),
-           m->querystart);
+  printf(GT_WU " " GT_WU " " GT_WU " " GT_WU "\n",
+         m->len,
+         m->dbstart,
+         m->queryseqnum,
+         m->querystart);
   return 0;
 }
 

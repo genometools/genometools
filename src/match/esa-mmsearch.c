@@ -455,15 +455,13 @@ void gt_queryuniquematch(bool selfmatch,
                              queryrep->sequence))
     {
       GtUword dbseqnum = gt_encseq_seqnum(suffixarray->encseq,dbstart),
-              dbseqstartpos = gt_encseq_seqstartpos(suffixarray->encseq,
-                                                    dbseqnum),
               dbseqlen = gt_encseq_seqlength(suffixarray->encseq,dbseqnum),
               db_seqstart = gt_encseq_seqstartpos(suffixarray->encseq,dbseqnum);
 
       gt_querymatch_init(querymatchspaceptr,
                          matchlen,
                          dbseqnum,
-                         dbstart - dbseqstartpos,
+                         dbstart - db_seqstart,
                          db_seqstart,
                          dbseqlen,
                          0, /* score */
@@ -531,7 +529,7 @@ static void gt_querysubstringmatch(bool selfmatch,
                                     dbstart,
                                     &querysubstring))
       {
-        GtUword dbseqnum, dbseqstartpos, dbseqlen, db_seqstart, extend;
+        GtUword dbseqnum, dbseqlen, db_seqstart, extend;
         const char *db_desc = NULL, *query_desc = NULL;
 
         extend = gt_mmsearch_extendright(dbencseq,
@@ -545,17 +543,16 @@ static void gt_querysubstringmatch(bool selfmatch,
         if (gt_encseq_has_multiseq_support(dbencseq))
         {
           dbseqnum = gt_encseq_seqnum(dbencseq,dbstart);
-          dbseqstartpos = gt_encseq_seqstartpos(dbencseq,dbseqnum);
           dbseqlen = gt_encseq_seqlength(dbencseq,dbseqnum);
           db_seqstart = gt_encseq_seqstartpos(dbencseq,dbseqnum);
         } else
         {
-          dbseqnum = dbseqstartpos = dbseqlen = db_seqstart = 0;
+          dbseqnum = dbseqlen = db_seqstart = 0;
         }
         gt_querymatch_init(querymatchspaceptr,
                            minmatchlength + extend,
                            dbseqnum,
-                           dbstart - dbseqstartpos,
+                           dbstart - db_seqstart,
                            db_seqstart,
                            dbseqlen,
                            0, /* score */
