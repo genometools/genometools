@@ -41,7 +41,6 @@ void gt_querymatch_db_keyvalues_set(GtQuerymatch *querymatch,
 
 void gt_querymatch_init(GtQuerymatch *querymatch,
                         GtUword dblen,
-                        GtUword dbstart,
                         GtUword dbseqnum,
                         GtUword dbstart_relative,
                         GtUword db_seqstart,
@@ -71,7 +70,6 @@ void gt_querymatch_delete(GtQuerymatch *querymatch);
 
 bool gt_querymatch_complete(GtQuerymatch *querymatchptr,
                             GtUword dblen,
-                            GtUword dbstart,
                             GtUword dbseqnum,
                             GtUword dbstart_relative,
                             GtUword db_seqstart,
@@ -100,6 +98,8 @@ GtUword gt_querymatch_querylen(const GtQuerymatch *querymatch);
 GtUword gt_querymatch_query_totallength(const GtQuerymatch *querymatch);
 
 GtUword gt_querymatch_dbstart(const GtQuerymatch *querymatch);
+
+GtUword gt_querymatch_dbstart_relative(const GtQuerymatch *querymatch);
 
 GtUword gt_querymatch_querystart(const GtQuerymatch *querymatch);
 

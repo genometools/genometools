@@ -266,8 +266,8 @@ static void seededmatch2eoplist(GtQuerymatchoutoptions *querymatchoutoptions,
                                 bool greedyextension)
 {
   GtUword ulen, vlen, ustart, vstart;
-  GtFtPolished_point right_best_polished_point = {0,0,0},
-                     left_best_polished_point = {0,0,0};
+  GtFtPolished_point right_best_polished_point = {0,0,0,0,0},
+                     left_best_polished_point = {0,0,0,0,0};
   GtUword pol_size;
   GtSeqpaircoordinates *coords;
   GtUword leftcolumn, rightcolumn;

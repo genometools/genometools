@@ -2790,8 +2790,8 @@ static bool gt_diagbandseed_has_overlap_with_previous_match(
     printf("# overlap of " GT_WU " " GT_WU " " GT_WU " " GT_WU " "
                            GT_WU " " GT_WU " " GT_WU " " GT_WU "?\n",
            apos + 1 - matchlength,apos,bpos + 1 - matchlength,bpos,
-           gt_querymatch_dbstart(previousmatch),
-           gt_querymatch_dbstart(previousmatch) +
+           gt_querymatch_dbstart_relative(previousmatch),
+           gt_querymatch_dbstart_relative(previousmatch) +
            gt_querymatch_dblen(previousmatch) - 1,
            gt_querymatch_querystart_fwdstrand(previousmatch),
            gt_querymatch_querystart_fwdstrand(previousmatch) +
@@ -3555,7 +3555,8 @@ static void gt_diagbandseed_segment2matches(
 
           gt_assert(esi->info_querymatch.querymatchspaceptr != NULL);
           newrectangle.a_start
-            = gt_querymatch_dbstart(esi->info_querymatch.querymatchspaceptr);
+            = gt_querymatch_dbstart_relative(esi->info_querymatch.
+                                             querymatchspaceptr);
           newrectangle.a_end = newrectangle.a_start +
                                gt_querymatch_dblen(esi->info_querymatch.
                                                    querymatchspaceptr) - 1;

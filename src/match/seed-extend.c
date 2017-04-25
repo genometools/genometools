@@ -256,7 +256,6 @@ static const GtQuerymatch *gt_combine_extensions(
   }
   if (gt_querymatch_complete(querymatchspaceptr,
                              dblen,
-                             sesp->db_seqstart + dbstart_relative,
                              sesp->dbseqnum,
                              dbstart_relative,
                              sesp->db_seqstart,
@@ -1430,7 +1429,7 @@ static const GtQuerymatch* gt_rf_extend_querymatch(bool forxdrop,
   }
   gt_sesp_from_relative(&sesp,
                         sesp.dbseqnum,
-                        gt_querymatch_dbstart(exactseed) - sesp.db_seqstart,
+                        gt_querymatch_dbstart_relative(exactseed),
                         same_encseq,
                         sesp.queryseqnum,
                         gt_querymatch_querystart(exactseed),
