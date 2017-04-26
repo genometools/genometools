@@ -579,20 +579,12 @@ static bool gt_querymatch_process(GtQuerymatch *querymatch,
     if (querymatch->ref_querymatchoutoptions != NULL)
     {
       bool seededalignment;
-      GtUword query_seqstart, abs_querystart_fwdstrand, abs_querystart;
+      GtUword abs_querystart_fwdstrand, abs_querystart;
 
       gt_assert(queryes != NULL);
-      if (queryes->encseq != NULL)
-      {
-        query_seqstart = querymatch->query_seqstart;
-      } else
-      {
-        gt_assert(querymatch->query_seqstart == 0);
-        query_seqstart = 0;
-      }
-      abs_querystart_fwdstrand = query_seqstart +
+      abs_querystart_fwdstrand = querymatch->query_seqstart +
                                  querymatch->querystart_fwdstrand;
-      abs_querystart = query_seqstart + querymatch->querystart;
+      abs_querystart = querymatch->query_seqstart + querymatch->querystart;
       seededalignment
         = gt_querymatchoutoptions_alignment_prepare(
                              querymatch->ref_querymatchoutoptions,
@@ -602,7 +594,7 @@ static bool gt_querymatch_process(GtQuerymatch *querymatch,
                              gt_querymatch_dbstart(querymatch),
                              gt_querymatch_dblen(querymatch),
                              querymatch->query_readmode,
-                             query_seqstart,
+                             querymatch->query_seqstart,
                              querymatch->query_seqlen,
                              abs_querystart,
                              abs_querystart_fwdstrand,
@@ -1081,7 +1073,10 @@ void gt_querymatch_full_alignment(const GtQuerymatch *querymatch,
     gt_querymatchoutoptions_set_sequences(
                  querymatch->ref_querymatchoutoptions,
                  gt_querymatch_dbstart(querymatch) - querymatch->db_seqstart,
-                 querymatch->querystart);
+                 querymatch->dblen,
+                 querymatch->querystart,
+                 querymatch->querylen,
+                 true);
   }
   if ((evalue_display || bitscore_display) &&
       (evalue == DBL_MAX || bitscore == DBL_MAX))
