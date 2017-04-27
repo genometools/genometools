@@ -64,27 +64,6 @@ void gt_querymatchoutoptions_for_align_only(
 void gt_querymatchoutoptions_delete(
         GtQuerymatchoutoptions *querymatchoutoptions);
 
-bool gt_querymatchoutoptions_alignment_prepare(
-                                     GtQuerymatchoutoptions
-                                       *querymatchoutoptions,
-                                     const GtSeqorEncseq *dbes,
-                                     const GtSeqorEncseq *queryes,
-                                     GtUword db_seqstart,
-                                     GtUword dbstart,
-                                     GtUword dblen,
-                                     GtReadmode query_readmode,
-                                     GtUword query_seqstart,
-                                     GtUword query_seqlen,
-                                     GtUword querystart,
-                                     GtUword querystart_fwdstrand,
-                                     GtUword querylen,
-                                     GtUword distance,
-                                     GtUword seedpos1,
-                                     GtUword seedpos2,
-                                     GtUword seedlen,
-                                     bool verify_alignment,
-                                     bool greedyextension);
-
 void gt_frontprune2eoplist(GtQuerymatchoutoptions *querymatchoutoptions,
                            const GtSeqorEncseq *dbes,
                            const GtSeqorEncseq *queryes,
@@ -120,10 +99,10 @@ void gt_querymatch_column_header_output(const GtSeedExtendDisplayFlag
 void gt_querymatchoutoptions_extract_seq(GtQuerymatchoutoptions
                                            *querymatchoutoptions,
                                          const GtSeqorEncseq *dbes,
-                                         const GtSeqorEncseq *queryes,
                                          GtUword dbstart,
                                          GtUword dblen,
                                          GtReadmode query_readmode,
+                                         const GtSeqorEncseq *queryes,
                                          GtUword abs_querystart_fwdstrand,
                                          GtUword querylen);
 
@@ -134,5 +113,22 @@ void gt_querymatchoutoptions_set_sequences(GtQuerymatchoutoptions
                                            GtUword querystart,
                                            GtUword querylen,
                                            bool withcorrection);
+
+void gt_querymatchoutoptions_seededmatch2eoplist(
+                                GtQuerymatchoutoptions *querymatchoutoptions,
+                                const GtSeqorEncseq *dbes,
+                                GtUword dbstart,
+                                GtUword dblen,
+                                GtReadmode query_readmode,
+                                const GtSeqorEncseq *queryes,
+                                GtUword query_seqstart,
+                                GtUword query_seqlen,
+                                GtUword abs_querystart,
+                                GtUword querylen,
+                                GtUword seedpos1,
+                                GtUword seedpos2,
+                                GtUword seedlen,
+                                bool verify_alignment,
+                                bool greedyextension);
 
 #endif

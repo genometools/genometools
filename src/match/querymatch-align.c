@@ -248,15 +248,15 @@ static void gt_querymtch_alignment_verification(
                     true);
 }
 
-static void gt_querymatchoutoptions_seededmatch2eoplist(
+void gt_querymatchoutoptions_seededmatch2eoplist(
                                 GtQuerymatchoutoptions *querymatchoutoptions,
                                 const GtSeqorEncseq *dbes,
-                                const GtSeqorEncseq *queryes,
-                                GtReadmode query_readmode,
-                                GtUword query_seqstart,
-                                GtUword query_seqlen,
                                 GtUword dbstart,
                                 GtUword dblen,
+                                GtReadmode query_readmode,
+                                const GtSeqorEncseq *queryes,
+                                GtUword query_seqstart,
+                                GtUword query_seqlen,
                                 GtUword abs_querystart,
                                 GtUword querylen,
                                 GtUword seedpos1,
@@ -495,10 +495,10 @@ void gt_querymatchoutoptions_set_sequences(GtQuerymatchoutoptions
 void gt_querymatchoutoptions_extract_seq(GtQuerymatchoutoptions
                                            *querymatchoutoptions,
                                          const GtSeqorEncseq *dbes,
-                                         const GtSeqorEncseq *queryes,
                                          GtUword dbstart,
                                          GtUword dblen,
                                          GtReadmode query_readmode,
+                                         const GtSeqorEncseq *queryes,
                                          GtUword abs_querystart_fwdstrand,
                                          GtUword querylen)
 {
@@ -592,69 +592,6 @@ void gt_querymatchoutoptions_extract_seq(GtQuerymatchoutoptions
       gt_assert(query_readmode == GT_READMODE_FORWARD);
     }
   }
-}
-
-bool gt_querymatchoutoptions_alignment_prepare(GtQuerymatchoutoptions
-                                                 *querymatchoutoptions,
-                                               const GtSeqorEncseq *dbes,
-                                               const GtSeqorEncseq *queryes,
-                                               GtUword db_seqstart,
-                                               GtUword dbstart,
-                                               GtUword dblen,
-                                               GtReadmode query_readmode,
-                                               GtUword query_seqstart,
-                                               GtUword query_seqlen,
-                                               GtUword abs_querystart,
-                                               GtUword abs_querystart_fwdstrand,
-                                               GtUword querylen,
-                                               GtUword distance,
-                                               GtUword seedpos1,
-                                               GtUword seedpos2,
-                                               GtUword seedlen,
-                                               bool verify_alignment,
-                                               bool greedyextension)
-{
-  bool seeded_alignment;
-
-  gt_querymatchoutoptions_extract_seq(querymatchoutoptions,
-                                      dbes,
-                                      queryes,
-                                      dbstart,
-                                      dblen,
-                                      query_readmode,
-                                      abs_querystart_fwdstrand,
-                                      querylen);
-  if (distance > 0)
-  {
-    gt_querymatchoutoptions_seededmatch2eoplist(
-                        querymatchoutoptions,
-                        dbes,
-                        queryes,
-                        query_readmode,
-                        query_seqstart,
-                        query_seqlen,
-                        dbstart,
-                        dblen,
-                        abs_querystart,
-                        querylen,
-                        seedpos1,
-                        seedpos2,
-                        seedlen,
-                        verify_alignment,
-                        greedyextension);
-    seeded_alignment = true;
-  } else
-  {
-    seeded_alignment = false;
-  }
-  gt_assert(abs_querystart >= query_seqstart && dbstart >= db_seqstart);
-  gt_querymatchoutoptions_set_sequences(querymatchoutoptions,
-                                        dbstart - db_seqstart,
-                                        dblen,
-                                        abs_querystart - query_seqstart,
-                                        querylen,
-                                        seeded_alignment);
-  return seeded_alignment;
 }
 
 void gt_querymatchoutoptions_cigar_show(const GtQuerymatchoutoptions

@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2007-2015 Stefan Kurtz <kurtz@zbh.uni-hamburg.de>
-  Copyright (c) 2007-2015 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2007-2017 Stefan Kurtz <kurtz@zbh.uni-hamburg.de>
+  Copyright (c) 2007-2017 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -567,6 +567,60 @@ static void gt_querymatch_applycorrection(GtQuerymatch *querymatch)
                      querymatch->query_desc);
 }
 
+static void gt_querymatch_alignment_prepare(GtQuerymatch *querymatch,
+                                            const GtSeqorEncseq *dbes,
+                                            const GtSeqorEncseq *queryes,
+                                            bool greedyextension)
+{
+  bool seeded_alignment;
+  const GtUword abs_querystart_fwdstrand = querymatch->query_seqstart +
+                                           querymatch->querystart_fwdstrand;
+
+  gt_querymatchoutoptions_extract_seq(querymatch->ref_querymatchoutoptions,
+                                      dbes,
+                                      gt_querymatch_dbstart(querymatch),
+                                      gt_querymatch_dblen(querymatch),
+                                      querymatch->query_readmode,
+                                      queryes,
+                                      abs_querystart_fwdstrand,
+                                      querymatch->querylen);
+  if (querymatch->distance > 0)
+  {
+    const GtUword abs_querystart = querymatch->query_seqstart +
+                                   querymatch->querystart;
+    gt_querymatchoutoptions_seededmatch2eoplist(
+                        querymatch->ref_querymatchoutoptions,
+                        dbes,
+                        gt_querymatch_dbstart(querymatch),
+                        gt_querymatch_dblen(querymatch),
+                        querymatch->query_readmode,
+                        queryes,
+                        querymatch->query_seqstart,
+                        querymatch->query_seqlen,
+                        abs_querystart,
+                        querymatch->querylen,
+                        querymatch->seedpos1,
+                        querymatch->seedpos2,
+                        querymatch->seedlen,
+                        querymatch->verify_alignment,
+                        greedyextension);
+    seeded_alignment = true;
+  } else
+  {
+    seeded_alignment = false;
+  }
+  gt_querymatchoutoptions_set_sequences(querymatch->ref_querymatchoutoptions,
+                                        querymatch->dbstart_relative,
+                                        gt_querymatch_dblen(querymatch),
+                                        querymatch->querystart,
+                                        querymatch->querylen,
+                                        seeded_alignment);
+  if (seeded_alignment && !greedyextension)
+  {
+    gt_querymatch_applycorrection(querymatch);
+  }
+}
+
 static bool gt_querymatch_process(GtQuerymatch *querymatch,
                                   const GtSeqorEncseq *dbes,
                                   const GtSeqorEncseq *queryes,
@@ -578,37 +632,8 @@ static bool gt_querymatch_process(GtQuerymatch *querymatch,
   {
     if (querymatch->ref_querymatchoutoptions != NULL)
     {
-      bool seededalignment;
-      GtUword abs_querystart_fwdstrand, abs_querystart;
-
       gt_assert(queryes != NULL);
-      abs_querystart_fwdstrand = querymatch->query_seqstart +
-                                 querymatch->querystart_fwdstrand;
-      abs_querystart = querymatch->query_seqstart + querymatch->querystart;
-      seededalignment
-        = gt_querymatchoutoptions_alignment_prepare(
-                             querymatch->ref_querymatchoutoptions,
-                             dbes,
-                             queryes,
-                             querymatch->db_seqstart,
-                             gt_querymatch_dbstart(querymatch),
-                             gt_querymatch_dblen(querymatch),
-                             querymatch->query_readmode,
-                             querymatch->query_seqstart,
-                             querymatch->query_seqlen,
-                             abs_querystart,
-                             abs_querystart_fwdstrand,
-                             gt_querymatch_querylen(querymatch),
-                             querymatch->distance,
-                             querymatch->seedpos1,
-                             querymatch->seedpos2,
-                             querymatch->seedlen,
-                             querymatch->verify_alignment,
-                             greedyextension);
-      if (seededalignment && !greedyextension)
-      {
-        gt_querymatch_applycorrection(querymatch);
-      }
+      gt_querymatch_alignment_prepare(querymatch,dbes,queryes,greedyextension);
     }
     return true;
   }
@@ -1045,8 +1070,8 @@ void gt_querymatch_full_alignment(const GtQuerymatch *querymatch,
   {
     GtSeqorEncseq dbes, queryes;
     GtReadmode query_readmode = gt_querymatch_query_readmode(querymatch);
-    const GtUword query_seqstart = querymatch->query_seqstart,
-      abs_querystart = query_seqstart + querymatch->querystart;
+    const GtUword abs_querystart = querymatch->query_seqstart +
+                                   querymatch->querystart;
 
     GT_SEQORENCSEQ_INIT_ENCSEQ(&dbes,db_encseq);
     GT_SEQORENCSEQ_INIT_ENCSEQ(&queryes,query_encseq);
@@ -1054,7 +1079,7 @@ void gt_querymatch_full_alignment(const GtQuerymatch *querymatch,
                           &dbes,
                           &queryes,
                           query_readmode,
-                          query_seqstart,
+                          querymatch->query_seqstart,
                           querymatch->query_seqlen,
                           gt_querymatch_dbstart(querymatch),
                           gt_querymatch_dblen(querymatch),
@@ -1063,16 +1088,16 @@ void gt_querymatch_full_alignment(const GtQuerymatch *querymatch,
                           querymatch->verify_alignment);
     gt_querymatchoutoptions_extract_seq(querymatch->ref_querymatchoutoptions,
                                         &dbes,
-                                        &queryes,
                                         gt_querymatch_dbstart(querymatch),
                                         gt_querymatch_dblen(querymatch),
                                         query_readmode,
-                                        query_seqstart +
+                                        &queryes,
+                                        querymatch->query_seqstart +
                                         querymatch->querystart_fwdstrand,
                                         gt_querymatch_querylen(querymatch));
     gt_querymatchoutoptions_set_sequences(
                  querymatch->ref_querymatchoutoptions,
-                 gt_querymatch_dbstart(querymatch) - querymatch->db_seqstart,
+                 querymatch->dbstart_relative,
                  querymatch->dblen,
                  querymatch->querystart,
                  querymatch->querylen,
