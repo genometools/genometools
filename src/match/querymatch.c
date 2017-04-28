@@ -577,14 +577,6 @@ static void gt_querymatch_alignment_prepare(GtQuerymatch *querymatch,
                                            querymatch->querystart_fwdstrand;
 
   gt_assert(queryes != NULL);
-  gt_querymatchoutoptions_extract_seq(querymatch->ref_querymatchoutoptions,
-                                      dbes,
-                                      gt_querymatch_dbstart(querymatch),
-                                      gt_querymatch_dblen(querymatch),
-                                      querymatch->query_readmode,
-                                      queryes,
-                                      abs_querystart_fwdstrand,
-                                      querymatch->querylen);
   if (querymatch->distance > 0)
   {
     const GtUword abs_querystart = querymatch->query_seqstart +
@@ -610,12 +602,17 @@ static void gt_querymatch_alignment_prepare(GtQuerymatch *querymatch,
   {
     seeded_alignment = false;
   }
-  gt_querymatchoutoptions_set_sequences(querymatch->ref_querymatchoutoptions,
-                                        querymatch->dbstart_relative,
-                                        gt_querymatch_dblen(querymatch),
-                                        querymatch->querystart,
-                                        querymatch->querylen,
-                                        seeded_alignment);
+  gt_querymatchoutoptions_extract_seq(querymatch->ref_querymatchoutoptions,
+                                      dbes,
+                                      querymatch->dbstart_relative,
+                                      gt_querymatch_dbstart(querymatch),
+                                      gt_querymatch_dblen(querymatch),
+                                      querymatch->query_readmode,
+                                      queryes,
+                                      querymatch->querystart,
+                                      abs_querystart_fwdstrand,
+                                      querymatch->querylen,
+                                      seeded_alignment);
   if (seeded_alignment && !greedyextension)
   {
     gt_querymatch_applycorrection(querymatch);
@@ -1057,20 +1054,16 @@ static void gt_querymatch_full_alignment(const GtQuerymatch *querymatch,
                           querymatch->verify_alignment);
     gt_querymatchoutoptions_extract_seq(querymatch->ref_querymatchoutoptions,
                                         db_seqorencseq,
+                                        querymatch->dbstart_relative,
                                         gt_querymatch_dbstart(querymatch),
                                         gt_querymatch_dblen(querymatch),
                                         query_readmode,
                                         query_seqorencseq,
+                                        querymatch->querystart,
                                         querymatch->query_seqstart +
-                                        querymatch->querystart_fwdstrand,
-                                        gt_querymatch_querylen(querymatch));
-    gt_querymatchoutoptions_set_sequences(
-                 querymatch->ref_querymatchoutoptions,
-                 querymatch->dbstart_relative,
-                 querymatch->dblen,
-                 querymatch->querystart,
-                 querymatch->querylen,
-                 true);
+                                          querymatch->querystart_fwdstrand,
+                                        gt_querymatch_querylen(querymatch),
+                                        true);
   }
 }
 
@@ -1091,7 +1084,10 @@ void gt_querymatch_recompute_alignment(GtQuerymatch *querymatch,
   GT_SEQORENCSEQ_INIT_ENCSEQ(&query_seqorencseq,query_encseq);
   if (matches_have_cigar)
   {
-    gt_assert(false);
+    if (querymatch->ref_querymatchoutoptions != NULL)
+    {
+      gt_assert(false);
+    }
   } else
   {
     if (matches_have_seeds)

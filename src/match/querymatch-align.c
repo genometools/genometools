@@ -457,7 +457,7 @@ void gt_frontprune2eoplist(GtQuerymatchoutoptions *querymatchoutoptions,
   }
 }
 
-void gt_querymatchoutoptions_set_sequences(GtQuerymatchoutoptions
+static void gt_querymatchoutoptions_set_sequences(GtQuerymatchoutoptions
                                              *querymatchoutoptions,
                                            GtUword dbstart_relative,
                                            GtUword dblen,
@@ -495,12 +495,15 @@ void gt_querymatchoutoptions_set_sequences(GtQuerymatchoutoptions
 void gt_querymatchoutoptions_extract_seq(GtQuerymatchoutoptions
                                            *querymatchoutoptions,
                                          const GtSeqorEncseq *dbes,
+                                         GtUword dbstart_relative,
                                          GtUword dbstart,
                                          GtUword dblen,
                                          GtReadmode query_readmode,
                                          const GtSeqorEncseq *queryes,
+                                         GtUword querystart,
                                          GtUword abs_querystart_fwdstrand,
-                                         GtUword querylen)
+                                         GtUword querylen,
+                                         bool withcorrection)
 {
   gt_assert(querymatchoutoptions != NULL);
   if (querymatchoutoptions->characters == NULL)
@@ -592,6 +595,12 @@ void gt_querymatchoutoptions_extract_seq(GtQuerymatchoutoptions
       gt_assert(query_readmode == GT_READMODE_FORWARD);
     }
   }
+  gt_querymatchoutoptions_set_sequences(querymatchoutoptions,
+                                        dbstart_relative,
+                                        dblen,
+                                        querystart,
+                                        querylen,
+                                        withcorrection);
 }
 
 void gt_querymatchoutoptions_cigar_show(const GtQuerymatchoutoptions
