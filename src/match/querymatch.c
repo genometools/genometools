@@ -576,6 +576,7 @@ static void gt_querymatch_alignment_prepare(GtQuerymatch *querymatch,
   const GtUword abs_querystart_fwdstrand = querymatch->query_seqstart +
                                            querymatch->querystart_fwdstrand;
 
+  gt_assert(queryes != NULL);
   gt_querymatchoutoptions_extract_seq(querymatch->ref_querymatchoutoptions,
                                       dbes,
                                       gt_querymatch_dbstart(querymatch),
@@ -622,8 +623,8 @@ static void gt_querymatch_alignment_prepare(GtQuerymatch *querymatch,
 }
 
 static bool gt_querymatch_process(GtQuerymatch *querymatch,
-                                  const GtSeqorEncseq *dbes,
-                                  const GtSeqorEncseq *queryes,
+                                  const GtSeqorEncseq *db_seqorencseq,
+                                  const GtSeqorEncseq *query_seqorencseq,
                                   bool greedyextension)
 {
   if (!querymatch->selfmatch ||
@@ -632,8 +633,8 @@ static bool gt_querymatch_process(GtQuerymatch *querymatch,
   {
     if (querymatch->ref_querymatchoutoptions != NULL)
     {
-      gt_assert(queryes != NULL);
-      gt_querymatch_alignment_prepare(querymatch,dbes,queryes,greedyextension);
+      gt_querymatch_alignment_prepare(querymatch,db_seqorencseq,
+                                      query_seqorencseq,greedyextension);
     }
     return true;
   }
@@ -1013,71 +1014,39 @@ void gt_querymatch_extract_sequence_pair(GtSequencepairbuffer *seqpairbuf,
   seqpairbuf->b_len = querylen;
 }
 
-void gt_querymatch_seed_alignment(GtQuerymatch *querymatch,
-                                  const GtEncseq *db_encseq,
-                                  const GtEncseq *query_encseq,
-                                  bool evalue_display,
-                                  bool bitscore_display,
-                                  const GtKarlinAltschulStat
-                                    *karlin_altschul_stat,
-                                  double evalue,
-                                  double bitscore,
-                                  bool adjust)
+static void gt_querymatch_seed_alignment(GtQuerymatch *querymatch,
+                                         GtSeqorEncseq *db_seqorencseq,
+                                         GtSeqorEncseq *query_seqorencseq,
+                                         bool adjust)
 {
-  GtSeqorEncseq aseqorencseq, bseqorencseq;
-
-  GT_SEQORENCSEQ_INIT_ENCSEQ(&aseqorencseq,db_encseq);
-  GT_SEQORENCSEQ_INIT_ENCSEQ(&bseqorencseq,query_encseq);
-  if (gt_querymatch_process(querymatch,
-                            &aseqorencseq,
-                            &bseqorencseq,
-                            true) != 0)
+  if (querymatch->ref_querymatchoutoptions != NULL)
   {
-    GT_SEQORENCSEQ_ADD_SEQ_COORDS(&aseqorencseq,
-                                  querymatch->db_seqstart,
-                                  querymatch->db_seqlen);
-    GT_SEQORENCSEQ_ADD_SEQ_COORDS(&bseqorencseq,
-                                  querymatch->query_seqstart,
-                                  querymatch->query_seqlen);
-    if (adjust)
-    {
-      gt_querymatch_seedpos_adjust(querymatch,&aseqorencseq,&bseqorencseq);
-    }
-    if ((evalue_display || bitscore_display) &&
-        (evalue == DBL_MAX || bitscore == DBL_MAX))
-    {
-      gt_querymatch_evalue_bit_score(&evalue, &bitscore, karlin_altschul_stat,
-                                     querymatch);
-    }
-    gt_querymatch_prettyprint(evalue,bitscore,querymatch);
+    gt_querymatch_alignment_prepare(querymatch,db_seqorencseq,
+                                    query_seqorencseq,true);
+  }
+  GT_SEQORENCSEQ_ADD_SEQ_COORDS(db_seqorencseq,querymatch->db_seqstart,
+                                querymatch->db_seqlen);
+  GT_SEQORENCSEQ_ADD_SEQ_COORDS(query_seqorencseq,querymatch->query_seqstart,
+                                querymatch->query_seqlen);
+  if (adjust)
+  {
+    gt_querymatch_seedpos_adjust(querymatch,db_seqorencseq,query_seqorencseq);
   }
 }
 
-void gt_querymatch_full_alignment(const GtQuerymatch *querymatch,
-                                  const GtEncseq *db_encseq,
-                                  const GtEncseq *query_encseq,
-                                  bool evalue_display,
-                                  bool bitscore_display,
-                                  const GtKarlinAltschulStat
-                                    *karlin_altschul_stat,
-                                  double evalue,
-                                  double bitscore)
+static void gt_querymatch_full_alignment(const GtQuerymatch *querymatch,
+                                         GtSeqorEncseq *db_seqorencseq,
+                                         GtSeqorEncseq *query_seqorencseq)
 {
-  if (gt_querymatch_cigar_display(querymatch->display_flag) ||
-      gt_querymatch_cigarX_display(querymatch->display_flag) ||
-      gt_querymatch_alignment_display(querymatch->display_flag) ||
-      querymatch->verify_alignment)
+  if (querymatch->ref_querymatchoutoptions != NULL)
   {
-    GtSeqorEncseq dbes, queryes;
     GtReadmode query_readmode = gt_querymatch_query_readmode(querymatch);
     const GtUword abs_querystart = querymatch->query_seqstart +
                                    querymatch->querystart;
 
-    GT_SEQORENCSEQ_INIT_ENCSEQ(&dbes,db_encseq);
-    GT_SEQORENCSEQ_INIT_ENCSEQ(&queryes,query_encseq);
     gt_frontprune2eoplist(querymatch->ref_querymatchoutoptions,
-                          &dbes,
-                          &queryes,
+                          db_seqorencseq,
+                          query_seqorencseq,
                           query_readmode,
                           querymatch->query_seqstart,
                           querymatch->query_seqlen,
@@ -1087,11 +1056,11 @@ void gt_querymatch_full_alignment(const GtQuerymatch *querymatch,
                           gt_querymatch_querylen(querymatch),
                           querymatch->verify_alignment);
     gt_querymatchoutoptions_extract_seq(querymatch->ref_querymatchoutoptions,
-                                        &dbes,
+                                        db_seqorencseq,
                                         gt_querymatch_dbstart(querymatch),
                                         gt_querymatch_dblen(querymatch),
                                         query_readmode,
-                                        &queryes,
+                                        query_seqorencseq,
                                         querymatch->query_seqstart +
                                         querymatch->querystart_fwdstrand,
                                         gt_querymatch_querylen(querymatch));
@@ -1103,8 +1072,44 @@ void gt_querymatch_full_alignment(const GtQuerymatch *querymatch,
                  querymatch->querylen,
                  true);
   }
-  if ((evalue_display || bitscore_display) &&
-      (evalue == DBL_MAX || bitscore == DBL_MAX))
+}
+
+void gt_querymatch_recompute_alignment(GtQuerymatch *querymatch,
+                                       bool matches_have_seeds,
+                                       bool matches_have_cigar,
+                                       const GtEncseq *db_encseq,
+                                       const GtEncseq *query_encseq,
+                                       const GtKarlinAltschulStat
+                                         *karlin_altschul_stat,
+                                       double evalue,
+                                       double bitscore,
+                                       bool adjust)
+{
+  GtSeqorEncseq db_seqorencseq, query_seqorencseq;
+
+  GT_SEQORENCSEQ_INIT_ENCSEQ(&db_seqorencseq,db_encseq);
+  GT_SEQORENCSEQ_INIT_ENCSEQ(&query_seqorencseq,query_encseq);
+  if (matches_have_cigar)
+  {
+    gt_assert(false);
+  } else
+  {
+    if (matches_have_seeds)
+    {
+      gt_querymatch_seed_alignment(querymatch,
+                                   &db_seqorencseq,
+                                   &query_seqorencseq,
+                                   adjust);
+    } else
+    {
+      gt_querymatch_full_alignment(querymatch,
+                                   &db_seqorencseq,
+                                   &query_seqorencseq);
+    }
+  }
+  if ((evalue == DBL_MAX || bitscore == DBL_MAX) &&
+      (gt_querymatch_evalue_display(querymatch->display_flag) ||
+       gt_querymatch_bitscore_display(querymatch->display_flag)))
   {
     gt_querymatch_evalue_bit_score(&evalue, &bitscore, karlin_altschul_stat,
                                    querymatch);

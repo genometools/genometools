@@ -169,25 +169,15 @@ void gt_querymatch_extract_sequence_pair(GtSequencepairbuffer *seqpairbuf,
                                          const GtEncseq *query_encseq,
                                          const GtQuerymatch *querymatch);
 
-void gt_querymatch_seed_alignment(GtQuerymatch *querymatchptr,
-                                  const GtEncseq *db_encseq,
-                                  const GtEncseq *query_encseq,
-                                  bool evalue_display,
-                                  bool bitscore_display,
-                                  const GtKarlinAltschulStat
-                                    *karlin_altschul_stat,
-                                  double evalue,
-                                  double bitscore,
-                                  bool adjust);
-
-void gt_querymatch_full_alignment(const GtQuerymatch *querymatch,
-                                  const GtEncseq *db_encseq,
-                                  const GtEncseq *query_encseq,
-                                  bool evalue_display,
-                                  bool bitscore_display,
-                                  const GtKarlinAltschulStat
-                                     *karlin_altschul_stat,
-                                  double evalue,
-                                  double bitscore);
+void gt_querymatch_recompute_alignment(GtQuerymatch *querymatch,
+                                       bool matches_have_seeds,
+                                       bool matches_have_cigar,
+                                       const GtEncseq *db_encseq,
+                                       const GtEncseq *query_encseq,
+                                       const GtKarlinAltschulStat
+                                         *karlin_altschul_stat,
+                                       double evalue,
+                                       double bitscore,
+                                       bool adjust);
 
 #endif

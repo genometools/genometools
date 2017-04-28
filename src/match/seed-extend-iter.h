@@ -110,6 +110,9 @@ bool gt_seedextend_match_iterator_bias_parameters(
 bool gt_seedextend_match_iterator_has_seed(
                         const GtSeedextendMatchIterator *semi);
 
+bool gt_seedextend_match_iterator_has_cigar(
+                        const GtSeedextendMatchIterator *semi);
+
 double gt_seedextend_match_iterator_evalue(const GtSeedextendMatchIterator
                                              *semi);
 

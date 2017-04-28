@@ -84,7 +84,7 @@ Test do
 end
 
 Name "gt seed_extend: display arguments"
-Keywords "gt_seed_extend_display"
+Keywords "gt_seed_extend display"
 Test do
   run_test build_encseq("at1MB", "#{$testdata}at1MB", true)
   run_test build_encseq("Atinsert.fna", "#{$testdata}Atinsert.fna", true)
@@ -174,7 +174,7 @@ Test do
 end
 
 Name "gt dev show_seedext without alignment"
-Keywords "gt_seed_extend_show"
+Keywords "gt_seed_extend show"
 Test do
   run_test build_encseq("at1MB", "#{$testdata}at1MB")
   run_test build_encseq("U89959_genomic", "#{$testdata}U89959_genomic.fas")

@@ -291,10 +291,8 @@ static int gt_show_seedext_runner(GT_UNUSED int argc,
   if (!had_err)
   {
     GtKarlinAltschulStat *karlin_altschul_stat = NULL;
-    const bool evalue_display = gt_querymatch_evalue_display(out_display_flag),
-               bitscore_display
-                 = gt_querymatch_bitscore_display(out_display_flag),
-               matches_have_seeds = gt_seedextend_match_iterator_has_seed(semi),
+    const bool match_has_seed = gt_seedextend_match_iterator_has_seed(semi),
+               match_has_cigar = gt_seedextend_match_iterator_has_cigar(semi),
                adjust = (gt_querymatch_seed_s_start_display(out_display_flag) ||
                          gt_querymatch_seed_q_start_display(out_display_flag))
                             ? true : false;
@@ -321,28 +319,15 @@ static int gt_show_seedext_runner(GT_UNUSED int argc,
       {
         break;
       }
-      if (matches_have_seeds)
-      {
-        gt_querymatch_seed_alignment(querymatchptr,
-                                     aencseq,
-                                     bencseq,
-                                     evalue_display,
-                                     bitscore_display,
-                                     karlin_altschul_stat,
-                                     evalue,
-                                     bitscore,
-                                     adjust);
-      } else
-      {
-        gt_querymatch_full_alignment(querymatchptr,
-                                     aencseq,
-                                     bencseq,
-                                     evalue_display,
-                                     bitscore_display,
-                                     karlin_altschul_stat,
-                                     evalue,
-                                     bitscore);
-      }
+      gt_querymatch_recompute_alignment(querymatchptr,
+                                        match_has_seed,
+                                        match_has_cigar,
+                                        aencseq,
+                                        bencseq,
+                                        karlin_altschul_stat,
+                                        evalue,
+                                        bitscore,
+                                        adjust);
       if (arguments->optimal_alignment)
       {
         gt_querymatch_extract_sequence_pair(&seqpairbuf,

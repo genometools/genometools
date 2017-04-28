@@ -389,6 +389,14 @@ bool gt_seedextend_match_iterator_has_seed(
   return gt_querymatch_seed_display(semi->in_display_flag);
 }
 
+bool gt_seedextend_match_iterator_has_cigar(
+                        const GtSeedextendMatchIterator *semi)
+{
+  gt_assert(semi != NULL);
+  return gt_querymatch_cigar_display(semi->in_display_flag) ||
+         gt_querymatch_cigarX_display(semi->in_display_flag);
+}
+
 double gt_seedextend_match_iterator_evalue(const GtSeedextendMatchIterator
                                               *semi)
 {
