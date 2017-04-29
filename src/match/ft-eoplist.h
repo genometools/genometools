@@ -191,8 +191,7 @@ GtUword gt_eoplist_num_segments(const GtEoplist *eoplist,GtUword delta);
 
 double gt_eoplist_segments_entropy(const GtEoplist *eoplist,GtUword delta);
 
-GtEoplist *gt_eoplist_new_from_cigar(GtEoplist *eoplist,
-                                     const char *cigarstring,char sep);
+void gt_eoplist_from_cigar(GtEoplist *eoplist,const char *cigarstring,char sep);
 
 char *gt_eoplist2cigar_string(const GtEoplist *eoplist,
                               bool distinguish_mismatch_match);

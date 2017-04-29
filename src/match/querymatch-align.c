@@ -654,3 +654,13 @@ const GtSeqpaircoordinates *gt_querymatchoutoptions_correction_get(
   gt_assert(querymatchoutoptions != NULL);
   return &querymatchoutoptions->correction_info;
 }
+
+GtEoplist *gt_querymatchoutoptions_eoplist(const GtQuerymatchoutoptions
+                                             *querymatchoutoptions)
+{
+  if (querymatchoutoptions != NULL)
+  {
+    return querymatchoutoptions->eoplist;
+  }
+  return NULL;
+}

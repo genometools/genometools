@@ -84,7 +84,7 @@ Test do
 end
 
 Name "gt seed_extend: display arguments"
-Keywords "gt_seed_extend display"
+Keywords "gt_seed_extend_display"
 Test do
   run_test build_encseq("at1MB", "#{$testdata}at1MB", true)
   run_test build_encseq("Atinsert.fna", "#{$testdata}Atinsert.fna", true)
@@ -121,6 +121,18 @@ Test do
   run_test "#{$bin}gt seed_extend -ii at1MB -evalue #{evalue_filter} -outfmt evalue"
   run "mv #{last_stdout} strong.matches"
   run "#{$scriptsdir}evalue-filter.rb #{evalue_filter} strong.matches"
+  ["cigar","cigarX"].each do |ci|
+    run_test "#{$bin}gt dev show_seedext -f #{$testdata}see-ext-at1MB-400-#{ci}.matches -outfmt alignment"
+    run "mv #{last_stdout} alignment-from-#{ci}.txt"
+    run_test "#{$bin}gt seed_extend -ii at1MB -l 400 -outfmt alignment"
+    run "diff -I '^#' #{last_stdout} alignment-from-#{ci}.txt"
+  end
+  ["cigar","cigarX"].each do |ci|
+    run_test "#{$bin}gt dev show_seedext -f #{$testdata}see-ext-at1MB-Atinsert100-evalue-bitscore-#{ci}-seqlength.matches -outfmt alignment"
+    run "mv #{last_stdout} alignment-from-#{ci}.txt"
+    run_test "#{$bin}gt seed_extend -ii at1MB -qii Atinsert.fna -l 100 -outfmt alignment"
+    run "diff -I '^#' #{last_stdout} alignment-from-#{ci}.txt"
+  end
 end
 
 # Invalid arguments

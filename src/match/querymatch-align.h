@@ -126,4 +126,7 @@ void gt_querymatchoutoptions_seededmatch2eoplist(
                                 bool verify_alignment,
                                 bool greedyextension);
 
+GtEoplist *gt_querymatchoutoptions_eoplist(const GtQuerymatchoutoptions
+                                             *querymatchoutoptions);
+
 #endif

@@ -56,7 +56,7 @@ struct GtQuerymatch
       resources needed for alignment output */
   FILE *fp;
   const char *db_desc, *query_desc;
-  GtEoplist *eoplist_from_file;
+  GtEoplist *ref_eoplist;
 };
 
 GtQuerymatch *gt_querymatch_new(void)
@@ -72,7 +72,6 @@ GtQuerymatch *gt_querymatch_new(void)
   querymatch->queryseqnum = UINT64_MAX;
   querymatch->db_desc = NULL;
   querymatch->query_desc = NULL;
-  querymatch->eoplist_from_file = NULL;
   return querymatch;
 }
 
@@ -269,7 +268,6 @@ void gt_querymatch_delete(GtQuerymatch *querymatch)
 {
   if (querymatch != NULL)
   {
-    gt_eoplist_delete(querymatch->eoplist_from_file);
     gt_free(querymatch);
   }
 }
@@ -668,6 +666,8 @@ void gt_querymatch_read_line(GtQuerymatch *querymatch,
                                                                  display_flag);
   querymatch->seedpos1 = GT_UWORD_MAX;
   querymatch->seedpos2 = GT_UWORD_MAX;
+  querymatch->ref_eoplist = gt_querymatchoutoptions_eoplist(
+                                  querymatch->ref_querymatchoutoptions);
   for (column = 0; column < numcolumns; column++)
   {
     int ret = 1;
@@ -681,9 +681,11 @@ void gt_querymatch_read_line(GtQuerymatch *querymatch,
     {
       case Gt_Cigar_display:
       case Gt_Cigarx_display:
-        querymatch->eoplist_from_file
-          = gt_eoplist_new_from_cigar(querymatch->eoplist_from_file,ptr,
-                                      separator);
+        if (querymatch->ref_eoplist != NULL)
+        {
+          gt_eoplist_reset(querymatch->ref_eoplist);
+          gt_eoplist_from_cigar(querymatch->ref_eoplist,ptr,separator);
+        }
         break;
       case Gt_S_len_display:
         ret = sscanf(ptr,GT_WU,&querymatch->dblen);
@@ -1084,9 +1086,21 @@ void gt_querymatch_recompute_alignment(GtQuerymatch *querymatch,
   GT_SEQORENCSEQ_INIT_ENCSEQ(&query_seqorencseq,query_encseq);
   if (matches_have_cigar)
   {
-    if (querymatch->ref_querymatchoutoptions != NULL)
+    if (querymatch->ref_querymatchoutoptions != NULL &&
+        gt_querymatch_alignment_display(querymatch->display_flag))
     {
-      gt_assert(false);
+      gt_querymatchoutoptions_extract_seq(querymatch->ref_querymatchoutoptions,
+                                          &db_seqorencseq,
+                                          querymatch->dbstart_relative,
+                                          gt_querymatch_dbstart(querymatch),
+                                          gt_querymatch_dblen(querymatch),
+                                          querymatch->query_readmode,
+                                          &query_seqorencseq,
+                                          querymatch->querystart,
+                                          querymatch->query_seqstart +
+                                            querymatch->querystart_fwdstrand,
+                                          gt_querymatch_querylen(querymatch),
+                                          false);
     }
   } else
   {
