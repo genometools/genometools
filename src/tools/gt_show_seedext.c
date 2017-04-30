@@ -207,12 +207,13 @@ static int gt_show_seedext_runner(GT_UNUSED int argc,
   GtScoreHandler *linspace_scorehandler = NULL;
   const GtUchar *characters = NULL;
   GtUchar wildcardshow = (GtUchar) 'N';
+  const bool add2standard = true;
 
   gt_error_check(err);
   gt_assert(arguments != NULL);
   /* Parse option string in first line of file specified by filename. */
   out_display_flag
-    = gt_querymatch_display_flag_new(arguments->display_args,err);
+    = gt_querymatch_display_flag_new(arguments->display_args,add2standard,err);
   if (out_display_flag == NULL)
   {
     had_err = true;

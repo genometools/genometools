@@ -800,7 +800,9 @@ static int gt_repfind_runner(int argc,
   }
   if (!haserr)
   {
-    display_flag = gt_querymatch_display_flag_new(arguments->display_args,err);
+    const bool add2standard = true;
+    display_flag = gt_querymatch_display_flag_new(arguments->display_args,
+                                                  add2standard,err);
     if (display_flag == NULL)
     {
       haserr = true;

@@ -29,16 +29,16 @@ typedef struct
 
 struct GtSeedExtendDisplayFlag
 {
-  unsigned int flags,
-               order[GT_DISPLAY_LARGEST_FLAG+1];
+  uint64_t flags;
+  unsigned int order[GT_DISPLAY_LARGEST_FLAG+1];
   bool a_seedpos_relative, b_seedpos_relative;
   GtUword alignmentwidth, nextfree;
 };
 
-static unsigned int gt_display_mask(GtSeedExtendDisplay_enum flag)
+static uint64_t gt_display_mask(GtSeedExtendDisplay_enum flag)
 {
   gt_assert(flag <= GT_DISPLAY_LARGEST_FLAG);
-  return 1U << flag;
+  return ((uint64_t) 1)  << flag;
 }
 
 static bool gt_querymatch_display_on(const GtSeedExtendDisplayFlag
@@ -58,20 +58,33 @@ bool gt_querymatch_seed_display(const GtSeedExtendDisplayFlag *display_flag)
          gt_querymatch_seed_len_display(display_flag);
 }
 
-static const GtSEdisplayStruct *gt_display_arg_get(const char *str,
+static const GtSEdisplayStruct *gt_display_arg_get(char *copyspace,
+                                                   const char *str,
                                                    size_t cmplen)
 {
+  char *copy = NULL;
   const GtSEdisplayStruct *left = gt_display_arguments_table,
                           *right = gt_display_arguments_table +
                                    sizeof gt_display_arguments_table/
                                    sizeof gt_display_arguments_table[0] - 1;
 
+  if (cmplen > 0)
+  {
+    copy = copyspace;
+    memcpy(copy,str,sizeof *copy * cmplen);
+    copy[cmplen] = '\0';
+  }
   while (left <= right)
   {
     const GtSEdisplayStruct *mid = left + (right - left + 1)/2;
-    int cmp = cmplen == 0 ? strcmp(str,mid->name)
-                          : strncmp(str,mid->name,cmplen);
-
+    int cmp;
+    if (copy == NULL)
+    {
+      cmp = strcmp(str,mid->name);
+    } else
+    {
+      cmp = strcmp(copy,mid->name);
+    }
     if (cmp < 0)
     {
       right = mid - 1;
@@ -102,14 +115,13 @@ static void gt_querymatch_display_flag_add(GtSeedExtendDisplayFlag
                                             *display_flag,
                                            GtSeedExtendDisplay_enum flag)
 {
-  const unsigned int mask = gt_display_mask(flag);
+  const uint64_t mask = gt_display_mask(flag);
 
   gt_assert(display_flag != NULL);
-  if (!(display_flag->flags & mask))
+  if ((display_flag->flags & mask) == 0)
   {
     display_flag->flags |= mask;
-    gt_assert(flag < sizeof gt_display_arguments_table/
-                     sizeof gt_display_arguments_table[0]);
+    gt_assert(flag <= GT_DISPLAY_LARGEST_FLAG);
     if (gt_display_arguments_table[gt_display_flag2index[flag]].incolumn)
     {
       gt_assert(display_flag->nextfree <= GT_DISPLAY_LARGEST_FLAG);
@@ -155,7 +167,8 @@ bool gt_querymatch_display_seedpos_b_relative(const GtSeedExtendDisplayFlag
                                                                     : false;
 }
 
-static int gt_querymatch_display_flag_set(GtWord *parameter,
+static int gt_querymatch_display_flag_set(char *copyspace,
+                                          GtWord *parameter,
                                           GtSeedExtendDisplayFlag *display_flag,
                                           const char *arg,
                                           GtError *err)
@@ -178,7 +191,7 @@ static int gt_querymatch_display_flag_set(GtWord *parameter,
       return -1;
     }
   }
-  dstruct = gt_display_arg_get(arg,cmplen);
+  dstruct = gt_display_arg_get(copyspace,arg,cmplen);
   if (dstruct == NULL)
   {
     gt_error_set(err,"illegal identifier \"%s\" as argument of options "
@@ -190,8 +203,8 @@ static int gt_querymatch_display_flag_set(GtWord *parameter,
   for (ex_idx = 0; ex_idx < numexcl; ex_idx+=2)
   {
     const GtSEdisplayStruct
-      *dstruct0 = gt_display_arg_get(exclude_list[ex_idx],0),
-      *dstruct1 = gt_display_arg_get(exclude_list[ex_idx+1],0);
+      *dstruct0 = gt_display_arg_get(NULL,exclude_list[ex_idx],0),
+      *dstruct1 = gt_display_arg_get(NULL,exclude_list[ex_idx+1],0);
 
     gt_assert(dstruct0 != NULL && dstruct1 != NULL);
     if ((display_flag->flags & gt_display_mask(dstruct0->flag)) &&
@@ -216,50 +229,101 @@ void gt_querymatch_display_flag_delete(GtSeedExtendDisplayFlag *display_flag)
 
 static void gt_querymatch_display_multi_flag_add(
                                   GtSeedExtendDisplayFlag *display_flag,
-                                  const GtSeedExtendDisplay_enum *flags,
+                                  const GtSeedExtendDisplay_enum *flag_enum,
                                   size_t numflags)
 {
   size_t fidx;
 
   for (fidx = 0; fidx < numflags; fidx++)
   {
-    gt_querymatch_display_flag_add(display_flag,flags[fidx]);
+    gt_querymatch_display_flag_add(display_flag,flag_enum[fidx]);
   }
+}
+
+static bool gt_querymatch_display_args_contain(const GtStrArray *display_args,
+                                               const char *keyword)
+{
+  GtUword idx;
+
+  for (idx = 0; idx < gt_str_array_size(display_args); idx++)
+  {
+    if (strcmp(gt_str_array_get(display_args,idx),keyword) == 0)
+    {
+      return true;
+    }
+  }
+  return false;
 }
 
 GtSeedExtendDisplayFlag *gt_querymatch_display_flag_new(const GtStrArray
                                                           *display_args,
+                                                        bool add2standard,
                                                         GtError *err)
 {
   GtSeedExtendDisplayFlag *display_flag = gt_malloc(sizeof *display_flag);
+  char copyspace[GT_MAX_DISPLAY_FLAG_LENGTH+1];
   bool haserr = false;
   GtUword da_idx;
-  GtSeedExtendDisplay_enum standard_flags[] =
-  {
-    Gt_S_len_display,
-    Gt_S_seqnum_display,
-    Gt_S_start_display,
-    Gt_Strand_display,
-    Gt_Q_len_display,
-    Gt_Q_seqnum_display,
-    Gt_Q_start_display,
-    Gt_Score_display,
-    Gt_Editdist_display,
-    Gt_Identity_display
-  };
+  /* required implications:
+      mandatory: S_seqnum, Q_seqnum, S_start, Q_start
+                 either editdist or score
+      either S_len or S_end must be set
+      either Q_len or Q_end must be set
+      if Strand is not set, then order of Q_start and Q_end gives strand
+  */
   display_flag->alignmentwidth = 0;
   display_flag->a_seedpos_relative = true; /* as bytes is default access mode */
   display_flag->b_seedpos_relative = true;
   display_flag->nextfree = 0;
   display_flag->flags = 0;
-  gt_querymatch_display_multi_flag_add(display_flag,standard_flags,
-                                       sizeof standard_flags/
-                                       sizeof standard_flags[0]);
+  if (add2standard)
+  {
+    if (gt_querymatch_display_args_contain(display_args,"blast"))
+    {
+      GtSeedExtendDisplay_enum blast_flags[] =
+      {
+        Gt_Q_desc_display,
+        Gt_S_desc_display,
+        Gt_Identity_display,
+        Gt_Alignment_length_display,
+        Gt_Mismatches_display,
+        Gt_Indels_display,
+        Gt_Q_start_display,
+        Gt_Q_end_display,
+        Gt_S_start_display,
+        Gt_S_end_display,
+        Gt_Evalue_display,
+        Gt_Bitscore_display
+      };
+      gt_querymatch_display_multi_flag_add(display_flag,blast_flags,
+                                           sizeof blast_flags/
+                                           sizeof blast_flags[0]);
+    } else
+    {
+      GtSeedExtendDisplay_enum standard_flags[] =
+      {
+        Gt_S_len_display,
+        Gt_S_seqnum_display,
+        Gt_S_start_display,
+        Gt_Strand_display,
+        Gt_Q_len_display,
+        Gt_Q_seqnum_display,
+        Gt_Q_start_display,
+        Gt_Score_display,
+        Gt_Editdist_display,
+        Gt_Identity_display
+      };
+      gt_querymatch_display_multi_flag_add(display_flag,standard_flags,
+                                           sizeof standard_flags/
+                                           sizeof standard_flags[0]);
+    }
+  }
   for (da_idx = 0; da_idx < gt_str_array_size(display_args); da_idx++)
   {
     const char *da = gt_str_array_get(display_args,da_idx);
     GtWord parameter;
-    int ret = gt_querymatch_display_flag_set(&parameter,display_flag,da,err);
+    int ret = gt_querymatch_display_flag_set(copyspace,&parameter,
+                                             display_flag,da,err);
 
     switch (ret)
     {
@@ -318,6 +382,12 @@ void gt_querymatch_fields_approx_output(const GtSeedExtendDisplayFlag
     fprintf(stream,"%s%s",gt_display_arguments_table[argnum].name,
                         idx < numcolumns - 1 ? ", " : "\n");
   }
+}
+
+const char *gt_querymatch_flag2name(GtSeedExtendDisplay_enum flag)
+{
+  gt_assert(flag <= GT_DISPLAY_LARGEST_FLAG);
+  return gt_display_arguments_table[gt_display_flag2index[flag]].name;
 }
 
 GtStrArray *gt_querymatch_read_Fields_line(const char *line_ptr)

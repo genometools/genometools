@@ -2,7 +2,9 @@
 static GtSEdisplayStruct gt_display_arguments_table[] =
 {
   {"alignment", Gt_Alignment_display, false},
+  {"alignment.length", Gt_Alignment_length_display, true},
   {"bitscore", Gt_Bitscore_display, true},
+  {"blast", Gt_Blast_display, false},
   {"cigar", Gt_Cigar_display, true},
   {"cigarX", Gt_Cigarx_display, true},
   {"editdist", Gt_Editdist_display, true},
@@ -10,13 +12,17 @@ static GtSEdisplayStruct gt_display_arguments_table[] =
   {"failed_seed", Gt_Failed_seed_display, false},
   {"fstperquery", Gt_Fstperquery_display, false},
   {"identity", Gt_Identity_display, true},
+  {"indels", Gt_Indels_display, true},
+  {"mismatches", Gt_Mismatches_display, true},
   {"polinfo", Gt_Polinfo_display, false},
   {"q.desc", Gt_Q_desc_display, true},
+  {"q.end", Gt_Q_end_display, true},
   {"q.len", Gt_Q_len_display, true},
   {"q.seqlen", Gt_Q_seqlen_display, true},
   {"q.seqnum", Gt_Q_seqnum_display, true},
   {"q.start", Gt_Q_start_display, true},
   {"s.desc", Gt_S_desc_display, true},
+  {"s.end", Gt_S_end_display, true},
   {"s.len", Gt_S_len_display, true},
   {"s.seqlen", Gt_S_seqlen_display, true},
   {"s.seqnum", Gt_S_seqnum_display, true},
@@ -31,69 +37,92 @@ static GtSEdisplayStruct gt_display_arguments_table[] =
 
 static unsigned int gt_display_flag2index[] = {
    0,
-   24,
+   30,
+   13,
+   8,
    9,
-   6,
-   7,
-   2,
    3,
+   4,
+   5,
+   22,
+   24,
+   20,
+   25,
+   21,
+   31,
    16,
    18,
-   15,
-   19,
-   25,
-   11,
-   13,
-   10,
    14,
-   20,
-   4,
-   8,
-   21,
-   23,
-   22,
-   17,
+   19,
+   15,
+   1,
    12,
-   5,
-   1
+   11,
+   26,
+   6,
+   10,
+   27,
+   29,
+   28,
+   23,
+   17,
+   7,
+   2
 };
 
 const char *gt_querymatch_display_help(void)
 {
   return "specify what information about the matches to display\n"
-         "alignment:    show alignment (possibly followed by =<number> to \n"
-         "              specify width of alignment columns)\n"
-         "seed_in_algn: mark the seed in alignment\n"
-         "polinfo:      add polishing information for shown alignment\n"
-         "failed_seed:  show the coordinates of a seed extension, which \n"
-         "              does not satisfy the filter conditions\n"
-         "fstperquery:  output only the first found match per query\n"
-         "cigar:        display cigar string representing alignment (no \n"
-         "              distinction between match and mismatch)\n"
-         "cigarX:       display cigar string representing alignment \n"
-         "              (distinction between match (=) and mismatch (X))\n"
-         "s.len:        display length of match on subject sequence\n"
-         "s.seqnum:     display sequence number of subject sequence\n"
-         "s.desc:       display sequence description of subject sequence\n"
-         "s.start:      display start position of match on subject \n"
-         "              sequence\n"
-         "strand:       display strand of match\n"
-         "q.len:        display length of match on query sequence\n"
-         "q.seqnum:     display sequence number of query sequence\n"
-         "q.desc:       display sequence description of query sequence\n"
-         "q.start:      display start position of match on query sequence\n"
-         "score:        display score of match\n"
-         "editdist:     display unit edit distance\n"
-         "identity:     display percent identity of match\n"
-         "seed.len:     display length seed of the match\n"
-         "seed.s.start: display start position of seed in subject\n"
-         "seed.q.start: display start position of seed in query\n"
-         "s.seqlen:     display length of subject sequence in which match \n"
-         "              occurs\n"
-         "q.seqlen:     display length of query sequence in which match \n"
-         "              occurs\n"
-         "evalue:       display evalue\n"
-         "bitscore:     display bit score\n"
+         "alignment:        show alignment (possibly followed by \n"
+         "                  =<number> to specify width of alignment \n"
+         "                  columns)\n"
+         "seed_in_algn:     mark the seed in alignment\n"
+         "polinfo:          add polishing information for shown \n"
+         "                  alignment\n"
+         "failed_seed:      show the coordinates of a seed extension, \n"
+         "                  which does not satisfy the filter conditions\n"
+         "fstperquery:      output only the first found match per query\n"
+         "blast:            output matches in blast format 7 (tabular with \n"
+         "                  comment lines, instead of gap opens indels are \n"
+         "                  displayed)\n"
+         "cigar:            display cigar string representing alignment \n"
+         "                  (no distinction between match and mismatch)\n"
+         "cigarX:           display cigar string representing alignment \n"
+         "                  (distinction between match (=) and mismatch \n"
+         "                  (X))\n"
+         "s.len:            display length of match on subject sequence\n"
+         "s.seqnum:         display sequence number of subject sequence\n"
+         "s.desc:           display sequence description of subject \n"
+         "                  sequence\n"
+         "s.start:          display start position of match on subject \n"
+         "                  sequence\n"
+         "s.end:            display end position of match on subject \n"
+         "                  sequence\n"
+         "strand:           display strand of match using symbols F \n"
+         "                  (forward) and P (reverse complement)\n"
+         "q.len:            display length of match on query sequence\n"
+         "q.seqnum:         display sequence number of query sequence\n"
+         "q.desc:           display sequence description of query \n"
+         "                  sequence\n"
+         "q.start:          display start position of match on query \n"
+         "                  sequence\n"
+         "q.end:            display end position of match on query \n"
+         "                  sequence\n"
+         "alignment.length: display length of alignment\n"
+         "mismatches:       display number of mismatches in alignment\n"
+         "indels:           display number of indels in alignment\n"
+         "score:            display score of match\n"
+         "editdist:         display unit edit distance\n"
+         "identity:         display percent identity of match\n"
+         "seed.len:         display length seed of the match\n"
+         "seed.s.start:     display start position of seed in subject\n"
+         "seed.q.start:     display start position of seed in query\n"
+         "s.seqlen:         display length of subject sequence in which \n"
+         "                  match occurs\n"
+         "q.seqlen:         display length of query sequence in which \n"
+         "                  match occurs\n"
+         "evalue:           display evalue\n"
+         "bitscore:         display bit score\n"
 ;
 }
 #define GT_SE_POSSIBLE_DISPLAY_ARGS "alignment"\
@@ -101,17 +130,23 @@ const char *gt_querymatch_display_help(void)
         ", polinfo"\
         ", failed_seed"\
         ", fstperquery"\
+        ", blast"\
         ", cigar"\
         ", cigarX"\
         ", s.len"\
         ", s.seqnum"\
         ", s.desc"\
         ", s.start"\
+        ", s.end"\
         ", strand"\
         ", q.len"\
         ", q.seqnum"\
         ", q.desc"\
         ", q.start"\
+        ", q.end"\
+        ", alignment.length"\
+        ", mismatches"\
+        ", indels"\
         ", score"\
         ", editdist"\
         ", identity"\
@@ -145,6 +180,12 @@ bool gt_querymatch_fstperquery_display(const GtSeedExtendDisplayFlag
                                         *display_flag)
 {
   return gt_querymatch_display_on(display_flag,Gt_Fstperquery_display);
+}
+
+bool gt_querymatch_blast_display(const GtSeedExtendDisplayFlag
+                                        *display_flag)
+{
+  return gt_querymatch_display_on(display_flag,Gt_Blast_display);
 }
 
 bool gt_querymatch_cigar_display(const GtSeedExtendDisplayFlag
@@ -183,6 +224,12 @@ bool gt_querymatch_s_start_display(const GtSeedExtendDisplayFlag
   return gt_querymatch_display_on(display_flag,Gt_S_start_display);
 }
 
+bool gt_querymatch_s_end_display(const GtSeedExtendDisplayFlag
+                                        *display_flag)
+{
+  return gt_querymatch_display_on(display_flag,Gt_S_end_display);
+}
+
 bool gt_querymatch_strand_display(const GtSeedExtendDisplayFlag
                                         *display_flag)
 {
@@ -211,6 +258,30 @@ bool gt_querymatch_q_start_display(const GtSeedExtendDisplayFlag
                                         *display_flag)
 {
   return gt_querymatch_display_on(display_flag,Gt_Q_start_display);
+}
+
+bool gt_querymatch_q_end_display(const GtSeedExtendDisplayFlag
+                                        *display_flag)
+{
+  return gt_querymatch_display_on(display_flag,Gt_Q_end_display);
+}
+
+bool gt_querymatch_alignment_length_display(const GtSeedExtendDisplayFlag
+                                        *display_flag)
+{
+  return gt_querymatch_display_on(display_flag,Gt_Alignment_length_display);
+}
+
+bool gt_querymatch_mismatches_display(const GtSeedExtendDisplayFlag
+                                        *display_flag)
+{
+  return gt_querymatch_display_on(display_flag,Gt_Mismatches_display);
+}
+
+bool gt_querymatch_indels_display(const GtSeedExtendDisplayFlag
+                                        *display_flag)
+{
+  return gt_querymatch_display_on(display_flag,Gt_Indels_display);
 }
 
 bool gt_querymatch_score_display(const GtSeedExtendDisplayFlag

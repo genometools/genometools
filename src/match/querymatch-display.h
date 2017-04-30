@@ -36,6 +36,7 @@ bool gt_querymatch_display_seedpos_b_relative(const GtSeedExtendDisplayFlag
 
 GtSeedExtendDisplayFlag *gt_querymatch_display_flag_new(const GtStrArray
                                                           *display_args,
+                                                        bool add2standard,
                                                         GtError *err);
 
 void gt_querymatch_display_flag_delete(GtSeedExtendDisplayFlag *display_flag);
@@ -56,6 +57,8 @@ GtUword gt_querymatch_display_alignmentwidth(const GtSeedExtendDisplayFlag
                                                 *display_flag);
 
 #include "match/se-display-fwd.inc"
+
+const char *gt_querymatch_flag2name(GtSeedExtendDisplay_enum flag);
 
 bool gt_querymatch_seed_display(const GtSeedExtendDisplayFlag *display_flag);
 

@@ -735,6 +735,7 @@ static int gt_seed_extend_runner(int argc,
   GtUword maxseqlength = 0, a_numofsequences, b_numofsequences;
   GtSeedExtendDisplayFlag *display_flag = NULL;
   int had_err = 0;
+  const bool add2standard = true;
 
   gt_error_check(err);
   gt_assert(arguments != NULL);
@@ -760,7 +761,8 @@ static int gt_seed_extend_runner(int argc,
     seedextendtimer = gt_timer_new();
     gt_timer_start(seedextendtimer);
   }
-  display_flag = gt_querymatch_display_flag_new(arguments->display_args,err);
+  display_flag = gt_querymatch_display_flag_new(arguments->display_args,
+                                                add2standard,err);
   if (display_flag == NULL)
   {
     had_err = -1;
