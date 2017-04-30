@@ -3854,9 +3854,9 @@ static GtDiagbandseedExtendSegmentInfo *gt_diagbandseed_extendSI_new(
                                             ? gt_greedy_extend_seed_relative
                                             : gt_xdrop_extend_seed_relative;
   gt_diagbandseed_plainsequence_init(&esi->plainsequence_info,
-                                     gt_querymatch_s_desc_display(
+                                     gt_querymatch_subjectid_display(
                                              extp->display_flag),
-                                     gt_querymatch_q_desc_display(
+                                     gt_querymatch_queryid_display(
                                              extp->display_flag),
                                      aencseq,
                                      aseqranges,

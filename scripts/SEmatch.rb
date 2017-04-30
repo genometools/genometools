@@ -19,7 +19,7 @@ class SEmatch
           @options = m[1]
         elsif m = line.match(/^# Fields:\s(.*)$/)
           @fields = m[1].gsub(/\./,"_").split(/, /)
-          @fields.map!{|f| f.gsub(/\s/,"_")}
+          @fields.map!{|f| f.gsub(/\s/,"_").gsub(/__/,"_")}
         end
         if m = line.match(/^# TIME.*\s(\S+)$/)
           @runtime = m[1].to_f

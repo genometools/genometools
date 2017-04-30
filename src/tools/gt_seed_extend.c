@@ -735,11 +735,11 @@ static int gt_seed_extend_runner(int argc,
   GtUword maxseqlength = 0, a_numofsequences, b_numofsequences;
   GtSeedExtendDisplayFlag *display_flag = NULL;
   int had_err = 0;
-  const bool add2standard = true;
+  const GtSeedExtendDisplaySetMode setmode
+    = GT_SEED_EXTEND_DISPLAY_SET_STANDARD;
 
   gt_error_check(err);
   gt_assert(arguments != NULL);
-
   /* Define, whether greedy extension will be performed */
   extendxdrop = gt_option_is_set(arguments->se_ref_op_xdr);
   if (arguments->onlyseeds || extendxdrop) {
@@ -762,7 +762,7 @@ static int gt_seed_extend_runner(int argc,
     gt_timer_start(seedextendtimer);
   }
   display_flag = gt_querymatch_display_flag_new(arguments->display_args,
-                                                add2standard,err);
+                                                setmode,err);
   if (display_flag == NULL)
   {
     had_err = -1;
@@ -794,7 +794,7 @@ static int gt_seed_extend_runner(int argc,
     GtEncseqLoader *encseq_loader = gt_encseq_loader_new();
     gt_encseq_loader_require_multiseq_support(encseq_loader);
     gt_encseq_loader_require_ssp_tab(encseq_loader);
-    if (gt_querymatch_s_desc_display(display_flag))
+    if (gt_querymatch_subjectid_display(display_flag))
     {
       gt_encseq_loader_require_des_tab(encseq_loader);
       gt_encseq_loader_require_sds_tab(encseq_loader);
@@ -819,7 +819,7 @@ static int gt_seed_extend_runner(int argc,
       GtEncseqLoader *encseq_loader = gt_encseq_loader_new();
       gt_encseq_loader_require_multiseq_support(encseq_loader);
       gt_encseq_loader_require_ssp_tab(encseq_loader);
-      if (gt_querymatch_q_desc_display(display_flag))
+      if (gt_querymatch_queryid_display(display_flag))
       {
         gt_encseq_loader_require_des_tab(encseq_loader);
         gt_encseq_loader_require_sds_tab(encseq_loader);

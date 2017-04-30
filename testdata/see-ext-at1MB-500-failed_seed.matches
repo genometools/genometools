@@ -1,5 +1,5 @@
 # Options: -ii at1MB -outfmt seed failed_seed -l 600 -seedlength 20 -minidentity 80 -history 60
-# Fields: s.len, s.seqnum, s.start, strand, q.len, q.seqnum, q.start, score, editdist, identity, seedlen, s.seedstart, q.seedstart
+# Fields: s. len, s. seqnum, s. start, strand, q. len, q. seqnum, q. start, score, editdist, % identity, seedlen, s. seedstart, q. seedstart
 # failed_seed:	20	1	383	F	2	5
 # failed_seed:	20	1	45	F	4	52
 # failed_seed:	20	1	294	F	16	0
@@ -1459,7 +1459,7 @@
 # failed_seed:	20	1912	46	F	1913	46
 # failed_seed:	20	1939	0	F	1940	10
 # failed_seed:	20	1941	0	F	1942	31
-# Fields: s.len, s.seqnum, s.start, strand, q.len, q.seqnum, q.start, score, editdist, identity, seedlen, s.seedstart, q.seedstart
+# Fields: s. len, s. seqnum, s. start, strand, q. len, q. seqnum, q. start, score, editdist, % identity, seedlen, s. seedstart, q. seedstart
 # failed_seed:	20	95	0	P	1624	174
 # failed_seed:	20	95	0	P	1624	234
 # failed_seed:	20	218	90	P	296	21

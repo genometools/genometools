@@ -13,24 +13,24 @@ typedef enum
   Gt_Cigarx_display /* 7 */,
   Gt_S_len_display /* 8 */,
   Gt_S_seqnum_display /* 9 */,
-  Gt_S_desc_display /* 10 */,
+  Gt_Subjectid_display /* 10 */,
   Gt_S_start_display /* 11 */,
   Gt_S_end_display /* 12 */,
   Gt_Strand_display /* 13 */,
   Gt_Q_len_display /* 14 */,
   Gt_Q_seqnum_display /* 15 */,
-  Gt_Q_desc_display /* 16 */,
+  Gt_Queryid_display /* 16 */,
   Gt_Q_start_display /* 17 */,
   Gt_Q_end_display /* 18 */,
-  Gt_Alignment_length_display /* 19 */,
+  Gt_Alignmentlength_display /* 19 */,
   Gt_Mismatches_display /* 20 */,
   Gt_Indels_display /* 21 */,
   Gt_Score_display /* 22 */,
   Gt_Editdist_display /* 23 */,
   Gt_Identity_display /* 24 */,
   Gt_Seed_len_display /* 25 */,
-  Gt_Seed_s_start_display /* 26 */,
-  Gt_Seed_q_start_display /* 27 */,
+  Gt_Seed_s_display /* 26 */,
+  Gt_Seed_q_display /* 27 */,
   Gt_S_seqlen_display /* 28 */,
   Gt_Q_seqlen_display /* 29 */,
   Gt_Evalue_display /* 30 */,
@@ -45,24 +45,24 @@ bool gt_querymatch_cigar_display(const GtSeedExtendDisplayFlag *);
 bool gt_querymatch_cigarX_display(const GtSeedExtendDisplayFlag *);
 bool gt_querymatch_s_len_display(const GtSeedExtendDisplayFlag *);
 bool gt_querymatch_s_seqnum_display(const GtSeedExtendDisplayFlag *);
-bool gt_querymatch_s_desc_display(const GtSeedExtendDisplayFlag *);
+bool gt_querymatch_subjectid_display(const GtSeedExtendDisplayFlag *);
 bool gt_querymatch_s_start_display(const GtSeedExtendDisplayFlag *);
 bool gt_querymatch_s_end_display(const GtSeedExtendDisplayFlag *);
 bool gt_querymatch_strand_display(const GtSeedExtendDisplayFlag *);
 bool gt_querymatch_q_len_display(const GtSeedExtendDisplayFlag *);
 bool gt_querymatch_q_seqnum_display(const GtSeedExtendDisplayFlag *);
-bool gt_querymatch_q_desc_display(const GtSeedExtendDisplayFlag *);
+bool gt_querymatch_queryid_display(const GtSeedExtendDisplayFlag *);
 bool gt_querymatch_q_start_display(const GtSeedExtendDisplayFlag *);
 bool gt_querymatch_q_end_display(const GtSeedExtendDisplayFlag *);
-bool gt_querymatch_alignment_length_display(const GtSeedExtendDisplayFlag *);
+bool gt_querymatch_alignmentlength_display(const GtSeedExtendDisplayFlag *);
 bool gt_querymatch_mismatches_display(const GtSeedExtendDisplayFlag *);
 bool gt_querymatch_indels_display(const GtSeedExtendDisplayFlag *);
 bool gt_querymatch_score_display(const GtSeedExtendDisplayFlag *);
 bool gt_querymatch_editdist_display(const GtSeedExtendDisplayFlag *);
 bool gt_querymatch_identity_display(const GtSeedExtendDisplayFlag *);
 bool gt_querymatch_seed_len_display(const GtSeedExtendDisplayFlag *);
-bool gt_querymatch_seed_s_start_display(const GtSeedExtendDisplayFlag *);
-bool gt_querymatch_seed_q_start_display(const GtSeedExtendDisplayFlag *);
+bool gt_querymatch_seed_s_display(const GtSeedExtendDisplayFlag *);
+bool gt_querymatch_seed_q_display(const GtSeedExtendDisplayFlag *);
 bool gt_querymatch_s_seqlen_display(const GtSeedExtendDisplayFlag *);
 bool gt_querymatch_q_seqlen_display(const GtSeedExtendDisplayFlag *);
 bool gt_querymatch_evalue_display(const GtSeedExtendDisplayFlag *);

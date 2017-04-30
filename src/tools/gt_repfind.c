@@ -800,9 +800,18 @@ static int gt_repfind_runner(int argc,
   }
   if (!haserr)
   {
-    const bool add2standard = true;
+    GtSeedExtendDisplaySetMode setmode;
+
+    if (gt_option_is_set(arguments->refextendxdropoption) ||
+        gt_option_is_set(arguments->refextendgreedyoption))
+    {
+      setmode = GT_SEED_EXTEND_DISPLAY_SET_STANDARD;
+    } else
+    {
+      setmode = GT_SEED_EXTEND_DISPLAY_SET_EXACT;
+    }
     display_flag = gt_querymatch_display_flag_new(arguments->display_args,
-                                                  add2standard,err);
+                                                  setmode,err);
     if (display_flag == NULL)
     {
       haserr = true;
@@ -977,7 +986,7 @@ static int gt_repfind_runner(int argc,
           eqmf_data = (void *) &info_querymatch;
         }
       }
-      if (gt_querymatch_s_desc_display(display_flag))
+      if (gt_querymatch_subjectid_display(display_flag))
       {
         GtEncseqLoader *encseq_loader = gt_encseq_loader_new();
         gt_encseq_loader_require_des_tab(encseq_loader);

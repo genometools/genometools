@@ -207,13 +207,14 @@ static int gt_show_seedext_runner(GT_UNUSED int argc,
   GtScoreHandler *linspace_scorehandler = NULL;
   const GtUchar *characters = NULL;
   GtUchar wildcardshow = (GtUchar) 'N';
-  const bool add2standard = true;
+  const GtSeedExtendDisplaySetMode setmode
+    = GT_SEED_EXTEND_DISPLAY_SET_STANDARD;
 
   gt_error_check(err);
   gt_assert(arguments != NULL);
   /* Parse option string in first line of file specified by filename. */
   out_display_flag
-    = gt_querymatch_display_flag_new(arguments->display_args,add2standard,err);
+    = gt_querymatch_display_flag_new(arguments->display_args,setmode,err);
   if (out_display_flag == NULL)
   {
     had_err = true;
@@ -294,8 +295,8 @@ static int gt_show_seedext_runner(GT_UNUSED int argc,
     GtKarlinAltschulStat *karlin_altschul_stat = NULL;
     const bool match_has_seed = gt_seedextend_match_iterator_has_seed(semi),
                match_has_cigar = gt_seedextend_match_iterator_has_cigar(semi),
-               adjust = (gt_querymatch_seed_s_start_display(out_display_flag) ||
-                         gt_querymatch_seed_q_start_display(out_display_flag))
+               adjust = (gt_querymatch_seed_s_display(out_display_flag) ||
+                         gt_querymatch_seed_q_display(out_display_flag))
                             ? true : false;
 
     if (gt_querymatch_evalue_display(out_display_flag) ||

@@ -29,8 +29,8 @@ seeds = [170039800390891361279027638963673934519,
 $SPLT_LIST = ["-splt struct","-splt ulong"]
 $CAM_LIST = ["encseq", "encseq_reader","bytes"]
 $OUTFMT_ARGS = ["alignment","cigar","cigarX","polinfo","fstperquery","seed.len",
-                "seed.s.start","seed.q.start","seed_in_algn","s.seqlen",
-                "q.seqlen","evalue","s.desc","q.desc","bitscore"]
+                "seed.s","seed.q","seed_in_algn","s.seqlen",
+                "q.seqlen","evalue","subjectid","queryid","bitscore"]
 
 Name "gt seed_extend: maxmat"
 Keywords "gt_seed_extend maxmat"
@@ -97,7 +97,7 @@ Test do
   run "diff -I '^#' #{last_stdout} #{$testdata}see-ext-at1MB-500-al.matches"
   run_test "#{$bin}gt seed_extend -ii at1MB -l 400 -outfmt evalue bitscore"
   run "diff -I '^#' #{last_stdout} #{$testdata}see-ext-at1MB-400-evalue-bitscore.matches"
-  run_test "#{$bin}gt seed_extend -ii at1MB -l 400 -outfmt s.desc q.desc"
+  run_test "#{$bin}gt seed_extend -ii at1MB -l 400 -outfmt subjectid queryid"
   run "#{$scriptsdir}se-permutation.rb #{last_stdout} #{$testdata}see-ext-at1MB-400-seqdesc.matches"
   run_test "#{$bin}gt seed_extend -ii at1MB -l 400 -outfmt cigar"
   run "diff -I '^#' #{last_stdout} #{$testdata}see-ext-at1MB-400-cigar.matches"
@@ -113,9 +113,9 @@ Test do
   run "diff -I '^#' #{last_stdout} #{$testdata}see-ext-at1MB-Atinsert100-evalue-bitscore-cigarX-seqlength.matches"
   run_test "#{$bin}gt seed_extend -ii U89959_genomic -l 50 -outfmt bitscore evalue"
   run "diff -I '^#' #{last_stdout} #{$testdata}see-ext-U8-evalue-bitscore.matches"
-  run_test "#{$bin}gt seed_extend -ii at1MB -outfmt seed.len seed.s.start seed.q.start failed_seed -l 600 -seedlength 20"
+  run_test "#{$bin}gt seed_extend -ii at1MB -outfmt seed.len seed.s seed.q failed_seed -l 600 -seedlength 20"
   run "diff -I '^#' #{last_stdout} #{$testdata}see-ext-at1MB-500-failed_seed.matches"
-  run_test "#{$bin}gt seed_extend -ii at1MB -outfmt seed.len seed.s.start seed.q.start failed_seed evalue -l 100 -seedlength 20 -qii U89959_genomic"
+  run_test "#{$bin}gt seed_extend -ii at1MB -outfmt seed.len seed.s seed.q failed_seed evalue -l 100 -seedlength 20 -qii U89959_genomic"
   run "diff #{last_stdout} #{$testdata}see-ext-at1MB-u8-failed_seed-evalue.matches"
   evalue_filter = 10e-30
   run_test "#{$bin}gt seed_extend -ii at1MB -evalue #{evalue_filter} -outfmt evalue"
@@ -190,7 +190,7 @@ Keywords "gt_seed_extend show"
 Test do
   run_test build_encseq("at1MB", "#{$testdata}at1MB")
   run_test build_encseq("U89959_genomic", "#{$testdata}U89959_genomic.fas")
-  outfmt_seed = "-outfmt seed.len seed.s.start seed.q.start"
+  outfmt_seed = "-outfmt seed.len seed.s seed.q"
   [" "," -qii U89959_genomic "].each do |qidx|
     run_test "#{$bin}gt seed_extend -v -ii at1MB#{qidx}" + outfmt_seed
     run "mv #{last_stdout} seed_extend.out"
@@ -199,7 +199,7 @@ Test do
     run "diff -I '^#' seed_extend.out show_seed_ext.out"
     run_test "#{$bin}gt dev show_seedext -f seed_extend.out -optimal -outfmt alignment"
     $OUTFMT_ARGS.each do |arg|
-      if arg != "s.desc" and arg != "q.desc" and not arg.match(/^seed/)
+      if arg != "subjectid" and arg != "queryid" and not arg.match(/^seed/)
         run_test "#{$bin}gt dev show_seedext -f seed_extend.out #{outfmt_seed} #{arg}"
         if arg != "alignment"
           run "#{$scriptsdir}se-permutation.rb #{last_stdout} seed_extend.out"
@@ -375,12 +375,12 @@ Test do
         for minidentity in [70, 80, 99] do
           run_test "#{$bin}gt seed_extend -extendgreedy #{sensitivity} " +
                      "-minidentity #{minidentity} -l #{alignlength} " +
-                     "-outfmt alignment=70 seed.len seed.s.start seed.q.start  -ii at1MB -verify-alignment #{splt}", :retval => 0
+                     "-outfmt alignment=70 seed.len seed.s seed.q  -ii at1MB -verify-alignment #{splt}", :retval => 0
         end
       end
     end
     run_test "#{$bin}gt seed_extend -extendgreedy -bias-parameters -verify " +
-             "-overlappingseeds -outfmt alignment=70 seed.len seed.s.start seed.q.start  -ii at1MB #{splt}",:retval => 0
+             "-overlappingseeds -outfmt alignment=70 seed.len seed.s seed.q  -ii at1MB #{splt}",:retval => 0
   end
 end
 
@@ -400,7 +400,7 @@ Test do
       end
     end
     run_test "#{$bin}gt seed_extend -bias-parameters -seedpairdistance 10 20 " +
-             "-outfmt seed.len seed.s.start seed.q.start -ii at1MB #{splt}", :retval => 0
+             "-outfmt seed.len seed.s seed.q -ii at1MB #{splt}", :retval => 0
   end
 end
 
@@ -451,7 +451,7 @@ Test do
         run_test "#{$bin}gt seed_extend -extend#{ext} 100 -l " +
                  "#{extendlength-20} -minidentity #{minid} " +
                  "-seedlength #{seedlength} -no-reverse -kmerfile no " +
-                 "-mincoverage #{seedlength} -outfmt seed.len seed.s.start seed.q.start -ii all #{splt}"
+                 "-mincoverage #{seedlength} -outfmt seed.len seed.s seed.q -ii all #{splt}"
         grep last_stdout, /^\d+ \d+ \d+ . \d+ \d+ \d+ \d+ \d+ \d+/
         run "mv #{last_stdout} combined.out"
         split_output("combined")
@@ -459,7 +459,7 @@ Test do
                  "-l #{extendlength-20} -kmerfile no " +
                  "-minidentity #{minid} -seedlength #{seedlength} " +
                  "-no-reverse -mincoverage #{seedlength} " +
-                 "-outfmt seed.len seed.s.start seed.q.start " +
+                 "-outfmt seed.len seed.s seed.q " +
                  "-ii db -qii query #{splt}"
         grep last_stdout, /^\d+ \d+ \d+ . \d+ \d+ \d+ \d+ \d+ \d+/
         run "mv #{last_stdout} separated.out"

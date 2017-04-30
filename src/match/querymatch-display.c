@@ -16,6 +16,7 @@
 */
 #include <stdbool.h>
 #include <string.h>
+#include <ctype.h>
 #include "core/ma_api.h"
 #include "core/assert_api.h"
 #include "match/querymatch-display.h"
@@ -53,9 +54,43 @@ static bool gt_querymatch_display_on(const GtSeedExtendDisplayFlag
 
 bool gt_querymatch_seed_display(const GtSeedExtendDisplayFlag *display_flag)
 {
-  return gt_querymatch_seed_s_start_display(display_flag) &&
-         gt_querymatch_seed_q_start_display(display_flag) &&
+  return gt_querymatch_seed_s_display(display_flag) &&
+         gt_querymatch_seed_q_display(display_flag) &&
          gt_querymatch_seed_len_display(display_flag);
+}
+
+static int strcmp_ignore_ws(const char *s,const char *t)
+{
+  const char *sptr = s, *tptr = t;
+  while (true)
+  {
+    if (isspace(*sptr))
+    {
+      sptr++;
+    } else
+    {
+      if (isspace(*tptr))
+      {
+        tptr++;
+      } else
+      {
+        if (*sptr < *tptr)
+        {
+          return -1;
+        }
+        if (*sptr > *tptr)
+        {
+          return 1;
+        }
+        if (*sptr == '\0')
+        {
+          return 0;
+        }
+        sptr++;
+        tptr++;
+      }
+    }
+  }
 }
 
 static const GtSEdisplayStruct *gt_display_arg_get(char *copyspace,
@@ -77,14 +112,8 @@ static const GtSEdisplayStruct *gt_display_arg_get(char *copyspace,
   while (left <= right)
   {
     const GtSEdisplayStruct *mid = left + (right - left + 1)/2;
-    int cmp;
-    if (copy == NULL)
-    {
-      cmp = strcmp(str,mid->name);
-    } else
-    {
-      cmp = strcmp(copy,mid->name);
-    }
+    const int cmp = strcmp_ignore_ws(copy == NULL ? str : copy,mid->name);
+
     if (cmp < 0)
     {
       right = mid - 1;
@@ -247,7 +276,7 @@ static bool gt_querymatch_display_args_contain(const GtStrArray *display_args,
 
   for (idx = 0; idx < gt_str_array_size(display_args); idx++)
   {
-    if (strcmp(gt_str_array_get(display_args,idx),keyword) == 0)
+    if (strcmp_ignore_ws(gt_str_array_get(display_args,idx),keyword) == 0)
     {
       return true;
     }
@@ -255,10 +284,10 @@ static bool gt_querymatch_display_args_contain(const GtStrArray *display_args,
   return false;
 }
 
-GtSeedExtendDisplayFlag *gt_querymatch_display_flag_new(const GtStrArray
-                                                          *display_args,
-                                                        bool add2standard,
-                                                        GtError *err)
+GtSeedExtendDisplayFlag *gt_querymatch_display_flag_new(
+                           const GtStrArray *display_args,
+                           GtSeedExtendDisplaySetMode setmode,
+                           GtError *err)
 {
   GtSeedExtendDisplayFlag *display_flag = gt_malloc(sizeof *display_flag);
   char copyspace[GT_MAX_DISPLAY_FLAG_LENGTH+1];
@@ -276,16 +305,16 @@ GtSeedExtendDisplayFlag *gt_querymatch_display_flag_new(const GtStrArray
   display_flag->b_seedpos_relative = true;
   display_flag->nextfree = 0;
   display_flag->flags = 0;
-  if (add2standard)
+  if (setmode != GT_SEED_EXTEND_DISPLAY_SET_NO)
   {
     if (gt_querymatch_display_args_contain(display_args,"blast"))
     {
       GtSeedExtendDisplay_enum blast_flags[] =
       {
-        Gt_Q_desc_display,
-        Gt_S_desc_display,
+        Gt_Queryid_display,
+        Gt_Subjectid_display,
         Gt_Identity_display,
-        Gt_Alignment_length_display,
+        Gt_Alignmentlength_display,
         Gt_Mismatches_display,
         Gt_Indels_display,
         Gt_Q_start_display,
@@ -300,22 +329,41 @@ GtSeedExtendDisplayFlag *gt_querymatch_display_flag_new(const GtStrArray
                                            sizeof blast_flags[0]);
     } else
     {
-      GtSeedExtendDisplay_enum standard_flags[] =
+      if (setmode == GT_SEED_EXTEND_DISPLAY_SET_STANDARD)
       {
-        Gt_S_len_display,
-        Gt_S_seqnum_display,
-        Gt_S_start_display,
-        Gt_Strand_display,
-        Gt_Q_len_display,
-        Gt_Q_seqnum_display,
-        Gt_Q_start_display,
-        Gt_Score_display,
-        Gt_Editdist_display,
-        Gt_Identity_display
-      };
-      gt_querymatch_display_multi_flag_add(display_flag,standard_flags,
-                                           sizeof standard_flags/
-                                           sizeof standard_flags[0]);
+        GtSeedExtendDisplay_enum standard_flags[] =
+        {
+          Gt_S_len_display,
+          Gt_S_seqnum_display,
+          Gt_S_start_display,
+          Gt_Strand_display,
+          Gt_Q_len_display,
+          Gt_Q_seqnum_display,
+          Gt_Q_start_display,
+          Gt_Score_display,
+          Gt_Editdist_display,
+          Gt_Identity_display
+        };
+        gt_querymatch_display_multi_flag_add(display_flag,standard_flags,
+                                             sizeof standard_flags/
+                                             sizeof standard_flags[0]);
+      } else
+      {
+        gt_assert(setmode == GT_SEED_EXTEND_DISPLAY_SET_EXACT);
+        GtSeedExtendDisplay_enum exact_flags[] =
+        {
+          Gt_S_len_display,
+          Gt_S_seqnum_display,
+          Gt_S_start_display,
+          Gt_Strand_display,
+          Gt_Q_len_display,
+          Gt_Q_seqnum_display,
+          Gt_Q_start_display
+        };
+        gt_querymatch_display_multi_flag_add(display_flag,exact_flags,
+                                             sizeof exact_flags/
+                                             sizeof exact_flags[0]);
+      }
     }
   }
   for (da_idx = 0; da_idx < gt_str_array_size(display_args); da_idx++)
@@ -360,6 +408,22 @@ GtSeedExtendDisplayFlag *gt_querymatch_display_flag_new(const GtStrArray
   return display_flag;
 }
 
+static void gt_querymatch_display_keyword_out(FILE *stream,const char *s)
+{
+  const char *sptr;
+
+  for (sptr = s; *sptr != '\0'; sptr++)
+  {
+    if (*sptr == '.')
+    {
+      fprintf(stream,". ");
+    } else
+    {
+      fputc(*sptr,stream);
+    }
+  }
+}
+
 void gt_querymatch_fields_approx_output(const GtSeedExtendDisplayFlag
                                          *display_flag,FILE *stream)
 {
@@ -379,8 +443,16 @@ void gt_querymatch_fields_approx_output(const GtSeedExtendDisplayFlag
     argnum = gt_display_flag2index[flag];
     gt_assert(argnum < sizeof gt_display_arguments_table/
                        sizeof gt_display_arguments_table[0]);
-    fprintf(stream,"%s%s",gt_display_arguments_table[argnum].name,
-                        idx < numcolumns - 1 ? ", " : "\n");
+    if (flag == Gt_Identity_display)
+    {
+      fprintf(stream,"%% %s",gt_display_arguments_table[argnum].name);
+    } else
+    {
+      gt_querymatch_display_keyword_out(stream,
+                                        gt_display_arguments_table[argnum].
+                                          name);
+    }
+    fprintf(stream,"%s",idx < numcolumns - 1 ? ", " : "\n");
   }
 }
 
@@ -405,8 +477,13 @@ GtStrArray *gt_querymatch_read_Fields_line(const char *line_ptr)
   {
     if (*ptr == ',' || *ptr == '\0')
     {
-      GtUword len_arg = (size_t) (ptr - last_start);
+      GtUword len_arg;
 
+      if (*last_start == '%')
+      {
+        last_start += 2;
+      }
+      len_arg = (size_t) (ptr - last_start);
       gt_str_array_add_cstr_nt(fields, last_start, len_arg);
       last_start = ptr + 2;
     }

@@ -236,9 +236,10 @@ GtSeedextendMatchIterator *gt_seedextend_match_iterator_new(
     gt_str_delete(fieldsline_buffer);
     if (fields != NULL)
     {
-      const bool add2standard = false;
-      semi->in_display_flag = gt_querymatch_display_flag_new(fields,
-                                                             add2standard,err);
+      const GtSeedExtendDisplaySetMode setmode = GT_SEED_EXTEND_DISPLAY_SET_NO;
+
+      semi->in_display_flag = gt_querymatch_display_flag_new(fields,setmode,
+                                                             err);
       if (semi->in_display_flag == NULL)
       {
         had_err = -1;

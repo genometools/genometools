@@ -2,7 +2,7 @@
 
 class String
   def dot2us
-    return self.gsub(/\./,"_")
+    return self.gsub(/\./,"_").gsub(/\s/,"")
   end
   def format_enum_value
     return "Gt_" + self.dot2us.capitalize + "_display"
@@ -62,29 +62,29 @@ display_options = [
                   "(distinction between match (=) and mismatch (X))"],
   ["s.len",       "display length of match on subject sequence"],
   ["s.seqnum",    "display sequence number of subject sequence"],
-  ["s.desc",      "display sequence description of subject sequence"],
+  ["subject id",  "display sequence description of subject sequence"],
   ["s.start",     "display start position of match on subject sequence"],
   ["s.end",       "display end position of match on subject sequence"],
   ["strand",      "display strand of match using symbols F (forward) and " +
                   "P (reverse complement)"],
   ["q.len",       "display length of match on query sequence"],
   ["q.seqnum",    "display sequence number of query sequence"],
-  ["q.desc",      "display sequence description of query sequence"],
+  ["query id",    "display sequence description of query sequence"],
   ["q.start",     "display start position of match on query sequence"],
   ["q.end",       "display end position of match on query sequence"],
-  ["alignment.length",    "display length of alignment"],
+  ["alignment length",    "display length of alignment"],
   ["mismatches",  "display number of mismatches in alignment"],
   ["indels",      "display number of indels in alignment"],
   ["score",       "display score of match"],
   ["editdist",    "display unit edit distance"],
   ["identity",    "display percent identity of match"],
   ["seed.len",    "display length seed of the match"],
-  ["seed.s.start","display start position of seed in subject"],
-  ["seed.q.start","display start position of seed in query"],
+  ["seed.s",      "display start position of seed in subject"],
+  ["seed.q",      "display start position of seed in query"],
   ["s.seqlen",    "display length of subject sequence in which match occurs"],
   ["q.seqlen",    "display length of query sequence in which match occurs"],
   ["evalue",      "display evalue"],
-  ["bitscore",    "display bit score"]
+  ["bit score",   "display bit score"]
 ]
 
 if display_options.length > 32
@@ -93,7 +93,7 @@ if display_options.length > 32
 end
 
 display_options.each do |value|
-  if value.length != 2 or value[0].match(/\s/)
+  if value.length != 2
     STDERR.puts "#{$0}: #{value} is incorrect"
     exit 1
   end

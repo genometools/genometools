@@ -1,5 +1,5 @@
-# Fields: s.len, s.seqnum, s.start, strand, q.len, q.seqnum, q.start, score, editdist, identity
-# Fields: s.len, s.seqnum, s.start, strand, q.len, q.seqnum, q.start, score, editdist, identity
+# Fields: s. len, s. seqnum, s. start, strand, q. len, q. seqnum, q. start, score, editdist, % identity
+# Fields: s. len, s. seqnum, s. start, strand, q. len, q. seqnum, q. start, score, editdist, % identity
 # Options: -ii fastq_long -splt struct -minidentity 80 -history 60
 17 246 0 P 17 339 0 34 0 100.00
 17 66 7 F 17 138 8 28 2 88.24

@@ -1,5 +1,5 @@
-# Options: -ii at1MB -l 400 -outfmt s.desc q.desc -minidentity 80 -history 60
-# Fields: s.len, s.desc, s.start, strand, q.len, q.desc, q.start, score, editdist, identity
+# Options: -ii at1MB -l 400 -outfmt subjectid queryid -minidentity 80 -history 60
+# Fields: s. len, subject id, s. start, strand, q. len, query id, q. start, score, editdist, % identity
 597 gi|4714049|dbj|C99932.1|C99932 0 F 592 gi|4714046|dbj|C99929.1|C99929 7 898 97 83.68
 538 gi|4714049|dbj|C99932.1|C99932 9 F 523 gi|4714003|dbj|C99879.1|C99879 0 779 94 82.28
 577 gi|4714048|dbj|C99931.1|C99931 72 F 606 gi|4714047|dbj|C99930.1|C99930 0 916 89 84.95

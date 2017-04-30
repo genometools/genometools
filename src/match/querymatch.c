@@ -416,7 +416,7 @@ void gt_querymatch_prettyprint(double evalue,double bit_score,
       case Gt_S_seqnum_display:
         fprintf(querymatch->fp,GT_WU,querymatch->dbseqnum);
         break;
-      case Gt_S_desc_display:
+      case Gt_Subjectid_display:
         gt_querymatch_description_out(querymatch->fp,querymatch->db_desc);
         break;
       case Gt_S_start_display:
@@ -455,7 +455,7 @@ void gt_querymatch_prettyprint(double evalue,double bit_score,
       case Gt_Q_seqnum_display:
         fprintf(querymatch->fp,GT_WU,querymatch->queryseqnum);
         break;
-      case Gt_Q_desc_display:
+      case Gt_Queryid_display:
         gt_querymatch_description_out(querymatch->fp,querymatch->query_desc);
         break;
       case Gt_Q_start_display:
@@ -473,7 +473,7 @@ void gt_querymatch_prettyprint(double evalue,double bit_score,
                   querymatch->querystart_fwdstrand + querymatch->querylen - 1);
         }
         break;
-      case Gt_Alignment_length_display:
+      case Gt_Alignmentlength_display:
         fprintf(querymatch->fp,GT_WU,
                 gt_querymatch_alignment_length(querymatch));
         break;
@@ -507,10 +507,10 @@ void gt_querymatch_prettyprint(double evalue,double bit_score,
       case Gt_Seed_len_display:
         fprintf(querymatch->fp,GT_WU,querymatch->seedlen);
         break;
-      case Gt_Seed_s_start_display:
+      case Gt_Seed_s_display:
         fprintf(querymatch->fp,GT_WU,querymatch->seedpos1);
         break;
-      case Gt_Seed_q_start_display:
+      case Gt_Seed_q_display:
         fprintf(querymatch->fp,GT_WU,querymatch->seedpos2);
         break;
       case Gt_S_seqlen_display:
@@ -794,7 +794,7 @@ void gt_querymatch_read_line(GtQuerymatch *querymatch,
       case Gt_S_seqnum_display:
         ret = sscanf(ptr,GT_WU,&querymatch->dbseqnum);
         break;
-      case Gt_S_desc_display:
+      case Gt_Subjectid_display:
         querymatch->db_desc = ptr;
         break;
       case Gt_S_start_display:
@@ -815,7 +815,7 @@ void gt_querymatch_read_line(GtQuerymatch *querymatch,
       case Gt_Q_seqnum_display:
         ret = sscanf(ptr,GT_WU,&querymatch->queryseqnum);
         break;
-      case Gt_Q_desc_display:
+      case Gt_Queryid_display:
         querymatch->query_desc = ptr;
         break;
       case Gt_Q_start_display:
@@ -832,10 +832,10 @@ void gt_querymatch_read_line(GtQuerymatch *querymatch,
       case Gt_Seed_len_display:
         ret = sscanf(ptr,GT_WU,&querymatch->seedlen);
         break;
-      case Gt_Seed_s_start_display:
+      case Gt_Seed_s_display:
         ret = sscanf(ptr,GT_WU,&querymatch->seedpos1);
         break;
-      case Gt_Seed_q_start_display:
+      case Gt_Seed_q_display:
         ret = sscanf(ptr,GT_WU,&querymatch->seedpos2);
         break;
       case Gt_S_seqlen_display:
@@ -887,7 +887,7 @@ void gt_querymatch_read_line(GtQuerymatch *querymatch,
                                      gt_querymatch_querylen(querymatch),
                                      querymatch->query_seqlen,
                                      querymatch->querystart_fwdstrand);
-  if (gt_querymatch_seed_s_start_display(in_display_flag))
+  if (gt_querymatch_seed_s_display(in_display_flag))
   {
     querymatch->seedpos1 += querymatch->db_seqstart;
   }
@@ -899,7 +899,7 @@ void gt_querymatch_read_line(GtQuerymatch *querymatch,
     querymatch->query_seqstart = gt_encseq_seqstartpos(queryencseq,
                                                        querymatch->queryseqnum);
   }
-  if (gt_querymatch_seed_q_start_display(in_display_flag))
+  if (gt_querymatch_seed_q_display(in_display_flag))
   {
     querymatch->seedpos2 += querymatch->query_seqstart;
   }
@@ -977,7 +977,7 @@ bool gt_querymatch_complete(GtQuerymatch *querymatch,
   GtUword desclen;
 
   gt_assert(querymatch != NULL);
-  if (gt_querymatch_s_desc_display(querymatch->display_flag))
+  if (gt_querymatch_subjectid_display(querymatch->display_flag))
   {
     gt_assert(dbes != NULL);
     if (dbes->encseq != NULL)
@@ -988,7 +988,7 @@ bool gt_querymatch_complete(GtQuerymatch *querymatch,
       db_desc = dbes->desc;
     }
   }
-  if (gt_querymatch_q_desc_display(querymatch->display_flag))
+  if (gt_querymatch_queryid_display(querymatch->display_flag))
   {
     gt_assert (queryes != NULL);
     if (queryes->encseq != NULL)

@@ -2,8 +2,8 @@
 static GtSEdisplayStruct gt_display_arguments_table[] =
 {
   {"alignment", Gt_Alignment_display, false},
-  {"alignment.length", Gt_Alignment_length_display, true},
-  {"bitscore", Gt_Bitscore_display, true},
+  {"alignment length", Gt_Alignmentlength_display, true},
+  {"bit score", Gt_Bitscore_display, true},
   {"blast", Gt_Blast_display, false},
   {"cigar", Gt_Cigar_display, true},
   {"cigarX", Gt_Cigarx_display, true},
@@ -15,13 +15,12 @@ static GtSEdisplayStruct gt_display_arguments_table[] =
   {"indels", Gt_Indels_display, true},
   {"mismatches", Gt_Mismatches_display, true},
   {"polinfo", Gt_Polinfo_display, false},
-  {"q.desc", Gt_Q_desc_display, true},
   {"q.end", Gt_Q_end_display, true},
   {"q.len", Gt_Q_len_display, true},
   {"q.seqlen", Gt_Q_seqlen_display, true},
   {"q.seqnum", Gt_Q_seqnum_display, true},
   {"q.start", Gt_Q_start_display, true},
-  {"s.desc", Gt_S_desc_display, true},
+  {"query id", Gt_Queryid_display, true},
   {"s.end", Gt_S_end_display, true},
   {"s.len", Gt_S_len_display, true},
   {"s.seqlen", Gt_S_seqlen_display, true},
@@ -29,43 +28,44 @@ static GtSEdisplayStruct gt_display_arguments_table[] =
   {"s.start", Gt_S_start_display, true},
   {"score", Gt_Score_display, true},
   {"seed.len", Gt_Seed_len_display, true},
-  {"seed.q.start", Gt_Seed_q_start_display, true},
-  {"seed.s.start", Gt_Seed_s_start_display, true},
+  {"seed.q", Gt_Seed_q_display, true},
+  {"seed.s", Gt_Seed_s_display, true},
   {"seed_in_algn", Gt_Seed_in_algn_display, false},
-  {"strand", Gt_Strand_display, true}
+  {"strand", Gt_Strand_display, true},
+  {"subject id", Gt_Subjectid_display, true}
 };
 
 static unsigned int gt_display_flag2index[] = {
    0,
-   30,
+   29,
    13,
    8,
    9,
    3,
    4,
    5,
-   22,
+   21,
+   23,
+   31,
    24,
    20,
-   25,
-   21,
-   31,
-   16,
+   30,
+   15,
+   17,
+   19,
    18,
    14,
-   19,
-   15,
    1,
    12,
    11,
-   26,
+   25,
    6,
    10,
-   27,
-   29,
+   26,
    28,
-   23,
-   17,
+   27,
+   22,
+   16,
    7,
    2
 };
@@ -92,7 +92,7 @@ const char *gt_querymatch_display_help(void)
          "                  (X))\n"
          "s.len:            display length of match on subject sequence\n"
          "s.seqnum:         display sequence number of subject sequence\n"
-         "s.desc:           display sequence description of subject \n"
+         "subject id:       display sequence description of subject \n"
          "                  sequence\n"
          "s.start:          display start position of match on subject \n"
          "                  sequence\n"
@@ -102,27 +102,27 @@ const char *gt_querymatch_display_help(void)
          "                  (forward) and P (reverse complement)\n"
          "q.len:            display length of match on query sequence\n"
          "q.seqnum:         display sequence number of query sequence\n"
-         "q.desc:           display sequence description of query \n"
+         "query id:         display sequence description of query \n"
          "                  sequence\n"
          "q.start:          display start position of match on query \n"
          "                  sequence\n"
          "q.end:            display end position of match on query \n"
          "                  sequence\n"
-         "alignment.length: display length of alignment\n"
+         "alignment length: display length of alignment\n"
          "mismatches:       display number of mismatches in alignment\n"
          "indels:           display number of indels in alignment\n"
          "score:            display score of match\n"
          "editdist:         display unit edit distance\n"
          "identity:         display percent identity of match\n"
          "seed.len:         display length seed of the match\n"
-         "seed.s.start:     display start position of seed in subject\n"
-         "seed.q.start:     display start position of seed in query\n"
+         "seed.s:           display start position of seed in subject\n"
+         "seed.q:           display start position of seed in query\n"
          "s.seqlen:         display length of subject sequence in which \n"
          "                  match occurs\n"
          "q.seqlen:         display length of query sequence in which \n"
          "                  match occurs\n"
          "evalue:           display evalue\n"
-         "bitscore:         display bit score\n"
+         "bit score:        display bit score\n"
 ;
 }
 #define GT_SE_POSSIBLE_DISPLAY_ARGS "alignment"\
@@ -135,28 +135,28 @@ const char *gt_querymatch_display_help(void)
         ", cigarX"\
         ", s.len"\
         ", s.seqnum"\
-        ", s.desc"\
+        ", subject id"\
         ", s.start"\
         ", s.end"\
         ", strand"\
         ", q.len"\
         ", q.seqnum"\
-        ", q.desc"\
+        ", query id"\
         ", q.start"\
         ", q.end"\
-        ", alignment.length"\
+        ", alignment length"\
         ", mismatches"\
         ", indels"\
         ", score"\
         ", editdist"\
         ", identity"\
         ", seed.len"\
-        ", seed.s.start"\
-        ", seed.q.start"\
+        ", seed.s"\
+        ", seed.q"\
         ", s.seqlen"\
         ", q.seqlen"\
         ", evalue"\
-        ", bitscore"
+        ", bit score"
 
 bool gt_querymatch_seed_in_algn_display(const GtSeedExtendDisplayFlag
                                         *display_flag)
@@ -212,10 +212,10 @@ bool gt_querymatch_s_seqnum_display(const GtSeedExtendDisplayFlag
   return gt_querymatch_display_on(display_flag,Gt_S_seqnum_display);
 }
 
-bool gt_querymatch_s_desc_display(const GtSeedExtendDisplayFlag
+bool gt_querymatch_subjectid_display(const GtSeedExtendDisplayFlag
                                         *display_flag)
 {
-  return gt_querymatch_display_on(display_flag,Gt_S_desc_display);
+  return gt_querymatch_display_on(display_flag,Gt_Subjectid_display);
 }
 
 bool gt_querymatch_s_start_display(const GtSeedExtendDisplayFlag
@@ -248,10 +248,10 @@ bool gt_querymatch_q_seqnum_display(const GtSeedExtendDisplayFlag
   return gt_querymatch_display_on(display_flag,Gt_Q_seqnum_display);
 }
 
-bool gt_querymatch_q_desc_display(const GtSeedExtendDisplayFlag
+bool gt_querymatch_queryid_display(const GtSeedExtendDisplayFlag
                                         *display_flag)
 {
-  return gt_querymatch_display_on(display_flag,Gt_Q_desc_display);
+  return gt_querymatch_display_on(display_flag,Gt_Queryid_display);
 }
 
 bool gt_querymatch_q_start_display(const GtSeedExtendDisplayFlag
@@ -266,10 +266,10 @@ bool gt_querymatch_q_end_display(const GtSeedExtendDisplayFlag
   return gt_querymatch_display_on(display_flag,Gt_Q_end_display);
 }
 
-bool gt_querymatch_alignment_length_display(const GtSeedExtendDisplayFlag
+bool gt_querymatch_alignmentlength_display(const GtSeedExtendDisplayFlag
                                         *display_flag)
 {
-  return gt_querymatch_display_on(display_flag,Gt_Alignment_length_display);
+  return gt_querymatch_display_on(display_flag,Gt_Alignmentlength_display);
 }
 
 bool gt_querymatch_mismatches_display(const GtSeedExtendDisplayFlag
@@ -308,16 +308,16 @@ bool gt_querymatch_seed_len_display(const GtSeedExtendDisplayFlag
   return gt_querymatch_display_on(display_flag,Gt_Seed_len_display);
 }
 
-bool gt_querymatch_seed_s_start_display(const GtSeedExtendDisplayFlag
+bool gt_querymatch_seed_s_display(const GtSeedExtendDisplayFlag
                                         *display_flag)
 {
-  return gt_querymatch_display_on(display_flag,Gt_Seed_s_start_display);
+  return gt_querymatch_display_on(display_flag,Gt_Seed_s_display);
 }
 
-bool gt_querymatch_seed_q_start_display(const GtSeedExtendDisplayFlag
+bool gt_querymatch_seed_q_display(const GtSeedExtendDisplayFlag
                                         *display_flag)
 {
-  return gt_querymatch_display_on(display_flag,Gt_Seed_q_start_display);
+  return gt_querymatch_display_on(display_flag,Gt_Seed_q_display);
 }
 
 bool gt_querymatch_s_seqlen_display(const GtSeedExtendDisplayFlag
