@@ -47,7 +47,7 @@ typedef struct
   GtUword samples,
           extendxdrop,
           maxfreq,
-          history,        /* number of bits used for history of alignments */
+          historysize,   /* number of bits used for history of alignments */
           perc_mat_history, /* percent of matches in history */
           minidentity, /* We prefer to specify the minidentity. The use of the
            notion of error percentage may be misleading, as in Myers paper it
@@ -344,7 +344,7 @@ static GtOptionParser *gt_repfind_option_parser_new(void *tool_arguments)
     = gt_option_new_uword_min_max("history",
                                   "Specify size of history in range [1..64] "
                                   "(trimming for greedy extension)",
-                                  &arguments->history,
+                                  &arguments->historysize,
                                   60,
                                   0,
                                   64);
@@ -758,9 +758,7 @@ static int gt_callenumquerymatches(bool selfmatch,
   return haserr ? -1 : 0;
 }
 
-static int gt_repfind_runner(int argc,
-                             GT_UNUSED const char **argv,
-                             int parsed_args,
+static int gt_repfind_runner(int argc,const char **argv, int parsed_args,
                              void *tool_arguments, GtError *err)
 {
   bool haserr = false;
@@ -817,7 +815,9 @@ static int gt_repfind_runner(int argc,
       haserr = true;
     } else
     {
-      gt_querymatch_fields_approx_output(display_flag,stdout);
+      gt_querymatch_Options_output(stdout,argc,argv,true,arguments->minidentity,
+                                   arguments->historysize);
+      gt_querymatch_Fields_output(stdout,display_flag);
     }
   }
   if (!haserr)
@@ -882,10 +882,10 @@ static int gt_repfind_runner(int argc,
                                            arguments->minidentity);
     pol_info = polishing_info_new_with_bias(errorpercentage,
                                             GT_DEFAULT_MATCHSCORE_BIAS,
-                                            arguments->history);
+                                            arguments->historysize);
     greedyextendmatchinfo
       = gt_greedy_extend_matchinfo_new(arguments->maxalignedlendifference,
-                                       arguments->history,
+                                       arguments->historysize,
                                        arguments->perc_mat_history,
                                        arguments->userdefinedleastlength,
                                        errorpercentage,
@@ -942,7 +942,7 @@ static int gt_repfind_runner(int argc,
                                                arguments->minidentity),
                                       arguments->evalue_threshold,
                                       arguments->maxalignedlendifference,
-                                      arguments->history,
+                                      arguments->historysize,
                                       arguments->perc_mat_history,
                                       cam_a,
                                       cam_b,

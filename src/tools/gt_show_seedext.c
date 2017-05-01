@@ -255,7 +255,7 @@ static int gt_show_seedext_runner(GT_UNUSED int argc,
       characters = gt_encseq_alphabetcharacters(aencseq);
       wildcardshow = gt_encseq_alphabetwildcardshow(aencseq);
     }
-    gt_querymatch_fields_approx_output(out_display_flag,stdout);
+    gt_querymatch_Fields_output(stdout,out_display_flag);
     if (!arguments->relax_polish)
     {
       double matchscore_bias = GT_DEFAULT_MATCHSCORE_BIAS;

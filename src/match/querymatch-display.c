@@ -408,6 +408,37 @@ GtSeedExtendDisplayFlag *gt_querymatch_display_flag_new(
   return display_flag;
 }
 
+void gt_querymatch_Options_output(FILE *stream,int argc,const char **argv,
+                                  bool idhistout,GtUword minidentity,
+                                  GtUword historysize)
+{
+  int idx;
+  bool minid_out = false, history_out = false;
+
+  fprintf(stream,"# Options:");
+  for (idx = 1; idx < argc; idx++) {
+    if (strcmp(argv[idx],"-minidentity") == 0) {
+      minid_out = true;
+    }
+    if (strcmp(argv[idx],"-history") == 0) {
+      history_out = true;
+    }
+    fprintf(stream," %s", argv[idx]);
+  }
+  if (idhistout)
+  {
+    if (!minid_out)
+    {
+      fprintf(stream," -minidentity " GT_WU,minidentity);
+    }
+    if (!history_out)
+    {
+      fprintf(stream," -history " GT_WU,historysize);
+    }
+  }
+  fputc('\n',stream);
+}
+
 static void gt_querymatch_display_keyword_out(FILE *stream,const char *s)
 {
   const char *sptr;
@@ -424,8 +455,8 @@ static void gt_querymatch_display_keyword_out(FILE *stream,const char *s)
   }
 }
 
-void gt_querymatch_fields_approx_output(const GtSeedExtendDisplayFlag
-                                         *display_flag,FILE *stream)
+void gt_querymatch_Fields_output(FILE *stream,
+                                 const GtSeedExtendDisplayFlag *display_flag)
 {
   const unsigned int *column_order;
   GtUword numcolumns, idx;

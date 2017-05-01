@@ -48,8 +48,12 @@ GtSeedExtendDisplayFlag *gt_querymatch_display_flag_new(
 
 void gt_querymatch_display_flag_delete(GtSeedExtendDisplayFlag *display_flag);
 
-void gt_querymatch_fields_approx_output(const GtSeedExtendDisplayFlag
-                                         *display_flag,FILE *stream);
+void gt_querymatch_Fields_output(FILE *stream,
+                                 const GtSeedExtendDisplayFlag *display_flag);
+
+void gt_querymatch_Options_output(FILE *stream,int argc,const char **argv,
+                                  bool idhistout,GtUword minidentity,
+                                  GtUword historysize);
 
 const unsigned int *gt_querymatch_display_order(GtUword *numcolumns,
                                                 const GtSeedExtendDisplayFlag

@@ -87,8 +87,10 @@ void gt_querymatch_table_add(GtArrayGtQuerymatch *querymatch_table,
 void gt_querymatch_outoptions_set(GtQuerymatch *querymatch,
                 GtQuerymatchoutoptions *querymatchoutoptions)
 {
-  gt_assert(querymatch != NULL);
+  gt_assert(querymatch != NULL && querymatchoutoptions != NULL);
   querymatch->ref_querymatchoutoptions = querymatchoutoptions;
+  querymatch->ref_eoplist
+    = gt_querymatchoutoptions_eoplist(querymatchoutoptions);
 }
 
 void gt_querymatch_file_set(GtQuerymatch *querymatch, FILE *fp)
@@ -760,8 +762,6 @@ void gt_querymatch_read_line(GtQuerymatch *querymatch,
     = gt_querymatch_display_order(&numcolumns,in_display_flag);
   querymatch->seedpos1 = GT_UWORD_MAX;
   querymatch->seedpos2 = GT_UWORD_MAX;
-  querymatch->ref_eoplist = gt_querymatchoutoptions_eoplist(
-                                  querymatch->ref_querymatchoutoptions);
   if (gt_querymatch_blast_display(in_display_flag))
   {
     separator = '\t';
@@ -800,9 +800,6 @@ void gt_querymatch_read_line(GtQuerymatch *querymatch,
       case Gt_S_start_display:
         ret = sscanf(ptr,GT_WU,&querymatch->dbstart_relative);
         break;
-      case Gt_S_end_display:
-        ret = sscanf(ptr,GT_WU,&dbend_relative);
-        break;
       case Gt_Strand_display:
         querymatch->query_readmode = gt_readmode_character_code_parse(*ptr);
         break;
@@ -827,8 +824,6 @@ void gt_querymatch_read_line(GtQuerymatch *querymatch,
       case Gt_Editdist_display:
         ret = sscanf(ptr,GT_WU,&querymatch->distance);
         break;
-      case Gt_Identity_display:
-        break;
       case Gt_Seed_len_display:
         ret = sscanf(ptr,GT_WU,&querymatch->seedlen);
         break;
@@ -849,6 +844,16 @@ void gt_querymatch_read_line(GtQuerymatch *querymatch,
         break;
       case Gt_Bitscore_display:
         ret = sscanf(ptr,"%le",bit_score_ptr);
+        break;
+      case Gt_Mismatches_display:
+        ret = sscanf(ptr,GT_WU,&querymatch->mismatches);
+        break;
+      case Gt_S_end_display:
+        ret = sscanf(ptr,GT_WU,&dbend_relative);
+        break;
+      case Gt_Alignmentlength_display:
+      case Gt_Identity_display:
+      case Gt_Indels_display:
         break;
       default: gt_assert(false);
     }

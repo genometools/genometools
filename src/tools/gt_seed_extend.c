@@ -683,38 +683,6 @@ static int gt_seed_extend_arguments_check(int rest_argc, void *tool_arguments,
   return had_err;
 }
 
-/* Print verbose option string */
-static void gt_seed_extend_Options_out(int argc,const char **argv,
-                                       const GtSeedExtendArguments *arguments)
-{
-  int idx;
-  bool minid_out = false, history_out = false;
-
-  printf("# Options:");
-  for (idx = 1; idx < argc; idx++) {
-    if (strcmp(argv[idx],"-minidentity") == 0) {
-      minid_out = true;
-    }
-    if (strcmp(argv[idx],"-history") == 0) {
-      history_out = true;
-    }
-    printf(" %s", argv[idx]);
-  }
-  if (arguments->maxmat != 1 &&
-      gt_str_length(arguments->diagband_statistics_arg) == 0)
-  {
-    if (!minid_out)
-    {
-      printf(" -minidentity " GT_WU,arguments->se_minidentity);
-    }
-    if (!history_out)
-    {
-      printf(" -history " GT_WU,arguments->se_historysize);
-    }
-  }
-  printf("\n");
-}
-
 static int gt_seed_extend_runner(int argc,
                                  const char **argv,
                                  GT_UNUSED int parsed_args,
@@ -734,6 +702,7 @@ static int gt_seed_extend_runner(int argc,
   GtUwordPair pick = {GT_UWORD_MAX, GT_UWORD_MAX};
   GtUword maxseqlength = 0, a_numofsequences, b_numofsequences;
   GtSeedExtendDisplayFlag *display_flag = NULL;
+  bool idhistout;
   int had_err = 0;
   const GtSeedExtendDisplaySetMode setmode
     = GT_SEED_EXTEND_DISPLAY_SET_STANDARD;
@@ -746,14 +715,20 @@ static int gt_seed_extend_runner(int argc,
     extendgreedy = false;
   }
 
-  gt_seed_extend_Options_out(argc,argv,arguments);
+  idhistout = (arguments->maxmat != 1 &&
+               gt_str_length(arguments->diagband_statistics_arg) == 0) ? true
+                                                                       : false;
+  gt_querymatch_Options_output(stdout,argc,argv,idhistout,
+                               arguments->se_minidentity,
+                               arguments->se_historysize);
   /* Calculate error percentage from minidentity */
   gt_assert(arguments->se_minidentity >= GT_EXTEND_MIN_IDENTITY_PERCENTAGE &&
             arguments->se_minidentity <= 100UL);
   errorpercentage = 100UL - arguments->se_minidentity;
 
   /* Measure whole running time */
-  if (arguments->benchmark || arguments->verbose) {
+  if (arguments->benchmark || arguments->verbose)
+  {
     gt_showtime_enable();
   }
   if (gt_showtime_enabled())
