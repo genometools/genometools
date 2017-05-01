@@ -85,8 +85,8 @@ bool gt_querymatch_complete(GtQuerymatch *querymatchptr,
                             const GtSeqorEncseq *queryes,
                             GtUword query_seqstart,
                             GtUword query_seqlen,
-                            GtUword seedpos1,
-                            GtUword seedpos2,
+                            GtUword db_seedpos,
+                            GtUword query_seedpos,
                             GtUword seedlen,
                             bool greedyextension);
 

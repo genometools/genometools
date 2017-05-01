@@ -120,8 +120,8 @@ void gt_querymatchoutoptions_seededmatch2eoplist(
                                 GtUword query_seqlen,
                                 GtUword abs_querystart,
                                 GtUword querylen,
-                                GtUword seedpos1,
-                                GtUword seedpos2,
+                                GtUword db_seedpos,
+                                GtUword query_seedpos,
                                 GtUword seedlen,
                                 bool verify_alignment,
                                 bool greedyextension);

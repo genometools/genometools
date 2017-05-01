@@ -259,8 +259,8 @@ void gt_querymatchoutoptions_seededmatch2eoplist(
                                 GtUword query_seqlen,
                                 GtUword abs_querystart,
                                 GtUword querylen,
-                                GtUword seedpos1,
-                                GtUword seedpos2,
+                                GtUword db_seedpos,
+                                GtUword query_seedpos,
                                 GtUword seedlen,
                                 bool verify_alignment,
                                 bool greedyextension)
@@ -276,8 +276,8 @@ void gt_querymatchoutoptions_seededmatch2eoplist(
             querymatchoutoptions->pol_info != NULL);
   pol_size = GT_MULT2(querymatchoutoptions->pol_info->cut_depth);
   gt_eoplist_reset(querymatchoutoptions->eoplist);
-  ustart = seedpos1 + seedlen;
-  vstart = seedpos2 + seedlen;
+  ustart = db_seedpos + seedlen;
+  vstart = query_seedpos + seedlen;
   gt_assert(dbstart + dblen >= ustart);
   ulen = dbstart + dblen - ustart;
   gt_assert(abs_querystart + querylen >= vstart);
@@ -316,10 +316,10 @@ void gt_querymatchoutoptions_seededmatch2eoplist(
     }
   }
   gt_eoplist_match_add(querymatchoutoptions->eoplist,seedlen);
-  if (seedpos1 > dbstart && seedpos2 > abs_querystart)
+  if (db_seedpos > dbstart && query_seedpos > abs_querystart)
   {
-    ulen = seedpos1 - dbstart;
-    vlen = seedpos2 - abs_querystart;
+    ulen = db_seedpos - dbstart;
+    vlen = query_seedpos - abs_querystart;
     gt_align_front_prune_edist(false,
                                &left_best_polished_point,
                                querymatchoutoptions->front_trace,
@@ -355,17 +355,17 @@ void gt_querymatchoutoptions_seededmatch2eoplist(
     }
   }
   coords = &querymatchoutoptions->correction_info;
-  gt_assert(dbstart <= seedpos1 - left_best_polished_point.row);
-  coords->uoffset = seedpos1 - left_best_polished_point.row - dbstart;
+  gt_assert(dbstart <= db_seedpos - left_best_polished_point.row);
+  coords->uoffset = db_seedpos - left_best_polished_point.row - dbstart;
   coords->ulen = seedlen + left_best_polished_point.row +
                  right_best_polished_point.row;
   leftcolumn = left_best_polished_point.alignedlen -
                left_best_polished_point.row;
   rightcolumn = right_best_polished_point.alignedlen -
                 right_best_polished_point.row;
-  gt_assert(seedpos2 >= leftcolumn &&
-            abs_querystart <= seedpos2 - leftcolumn);
-  coords->voffset = seedpos2 - leftcolumn - abs_querystart;
+  gt_assert(query_seedpos >= leftcolumn &&
+            abs_querystart <= query_seedpos - leftcolumn);
+  coords->voffset = query_seedpos - leftcolumn - abs_querystart;
   coords->vlen = seedlen + leftcolumn + rightcolumn;
   coords->sumdist = left_best_polished_point.distance +
                     right_best_polished_point.distance;
@@ -381,9 +381,9 @@ void gt_querymatchoutoptions_seededmatch2eoplist(
                                         coords->vlen,
                                         coords->sumdist);
   }
-  gt_assert(dbstart <= seedpos1);
+  gt_assert(dbstart <= db_seedpos);
   gt_eoplist_set_seedoffset(querymatchoutoptions->eoplist,
-                            seedpos1 - dbstart,
+                            db_seedpos - dbstart,
                             seedlen);
 }
 

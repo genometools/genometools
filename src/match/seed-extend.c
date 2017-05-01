@@ -122,16 +122,16 @@ typedef struct
   bool same_encseq;
 } GtSeedextendSeqpair;
 
-static GtUword gt_sesp_seedpos1(const GtSeedextendSeqpair *sesp)
+static GtUword gt_sesp_db_seedpos(const GtSeedextendSeqpair *sesp)
 {
   gt_assert(sesp != NULL);
-  return sesp->db_seqstart + sesp->dbstart_relative;
+  return sesp->dbstart_relative;
 }
 
-static GtUword gt_sesp_seedpos2(const GtSeedextendSeqpair *sesp)
+static GtUword gt_sesp_query_seedpos(const GtSeedextendSeqpair *sesp)
 {
   gt_assert(sesp != NULL);
-  return sesp->query_seqstart + sesp->querystart_relative;
+  return sesp->querystart_relative;
 }
 
 static void gt_sesp_from_absolute(GtSeedextendSeqpair *sesp,
@@ -201,8 +201,10 @@ static void gt_xdrop_show_context(bool rightextension,
 
 void gt_sesp_show(const GtSeedextendSeqpair *sesp)
 {
-  printf("seedpos1=" GT_WU ",seedpos2=" GT_WU ",seedlength=" GT_WU "\n",
-           gt_sesp_seedpos1(sesp),gt_sesp_seedpos2(sesp),sesp->seedlength);
+  printf("db_seedpos=" GT_WU ",query_seedpos=" GT_WU ",seedlength=" GT_WU "\n",
+           gt_sesp_db_seedpos(sesp),
+           gt_sesp_query_seedpos(sesp),
+           sesp->seedlength);
   printf("dbseqnum=" GT_WU ",db_seqstart=" GT_WU ",dpseqlength="
                  GT_WU "\n",
                    sesp->dbseqnum,
@@ -269,8 +271,8 @@ static const GtQuerymatch *gt_combine_extensions(
                              queryes,
                              sesp->query_seqstart,
                              sesp->query_seqlen,
-                             gt_sesp_seedpos1(sesp),
-                             gt_sesp_seedpos2(sesp),
+                             sesp->db_seqstart + gt_sesp_db_seedpos(sesp),
+                             sesp->query_seqstart + gt_sesp_query_seedpos(sesp),
                              sesp->seedlength,
                              false))
                              /*forxdrop ? false : true*/
@@ -1124,7 +1126,9 @@ static const GtQuerymatch *gt_extend_sesp(bool forxdrop,
                                     xdropmatchinfo->useq,
                                     dbes,
                                     ulen,
-                                    gt_sesp_seedpos1(sesp) + sesp->seedlength,
+                                    sesp->db_seqstart +
+                                         gt_sesp_db_seedpos(sesp) +
+                                         sesp->seedlength,
                                     sesp->db_seqstart,
                                     sesp->dbseqlength);
       gt_seqabstract_reinit_generic(rightextension,
@@ -1132,7 +1136,9 @@ static const GtQuerymatch *gt_extend_sesp(bool forxdrop,
                                     xdropmatchinfo->vseq,
                                     queryes,
                                     vlen,
-                                    gt_sesp_seedpos2(sesp) + sesp->seedlength,
+                                    sesp->query_seqstart +
+                                      gt_sesp_query_seedpos(sesp) +
+                                      sesp->seedlength,
                                     sesp->query_seqstart,
                                     sesp->query_seqlen);
 #ifdef SKDEBUG
@@ -1160,12 +1166,14 @@ static const GtQuerymatch *gt_extend_sesp(bool forxdrop,
                                        greedyextendmatchinfo->showfrontinfo,
                                        sesp->seedlength,
                                        &ufsr,
-                                       gt_sesp_seedpos1(sesp) +
+                                       sesp->db_seqstart +
+                                         gt_sesp_db_seedpos(sesp) +
                                          sesp->seedlength,
                                        ulen,
                                        vseqstartpos,
                                        &vfsr,
-                                       gt_sesp_seedpos2(sesp) +
+                                       sesp->query_seqstart +
+                                         gt_sesp_query_seedpos(sesp) +
                                          sesp->seedlength,
                                        vlen,
                                        greedyextendmatchinfo->cam_generic,
