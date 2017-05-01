@@ -124,8 +124,8 @@ static int gt_exact_selfmatch_with_output(void *info,
                              &queryes,
                              query_seqstart,
                              query_seqlen,
-                             pos1,
-                             pos2,
+                             pos1 - db_seqstart,
+                             pos2 - query_seqstart,
                              len,
                              false))
   {
@@ -733,8 +733,8 @@ static int gt_callenumquerymatches(bool selfmatch,
                                    &query_seqorencseq,
                                    query_seqstart,
                                    query_seqlen,
-                                   dbstart,
-                                   querystart,
+                                   dbstart - db_seqstart,
+                                   querystart - query_seqstart,
                                    matchlength,
                                    false))
         {
@@ -871,11 +871,6 @@ static int gt_repfind_runner(int argc,const char **argv, int parsed_args,
       }
     }
   }
-  gt_querymatch_display_seedpos_relative_set(
-             display_flag,
-             cam_a == GT_EXTEND_CHAR_ACCESS_DIRECT ? true : false,
-             cam_b == GT_EXTEND_CHAR_ACCESS_DIRECT ? true : false);
-
   if (!haserr && gt_option_is_set(arguments->refextendgreedyoption))
   {
     GtUword errorpercentage = gt_minidentity2errorpercentage(

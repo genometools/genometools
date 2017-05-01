@@ -85,7 +85,7 @@ bool gt_querymatch_complete(GtQuerymatch *querymatchptr,
                             const GtSeqorEncseq *queryes,
                             GtUword query_seqstart,
                             GtUword query_seqlen,
-                            GtUword db_seedpos,
+                            GtUword db_seedpos_rel,
                             GtUword query_seedpos,
                             GtUword seedlen,
                             bool greedyextension);
@@ -177,7 +177,6 @@ void gt_querymatch_recompute_alignment(GtQuerymatch *querymatch,
                                        const GtKarlinAltschulStat
                                          *karlin_altschul_stat,
                                        double evalue,
-                                       double bitscore,
-                                       bool adjust);
+                                       double bitscore);
 
 #endif

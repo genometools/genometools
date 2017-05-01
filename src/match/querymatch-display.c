@@ -32,7 +32,6 @@ struct GtSeedExtendDisplayFlag
 {
   uint64_t flags;
   unsigned int order[GT_DISPLAY_LARGEST_FLAG+1];
-  bool a_seedpos_relative, b_seedpos_relative;
   GtUword alignmentwidth, nextfree;
 };
 
@@ -172,30 +171,6 @@ bool gt_querymatch_alignment_display(const GtSeedExtendDisplayFlag
           display_flag->alignmentwidth > 0) ? true : false;
 }
 
-void gt_querymatch_display_seedpos_relative_set(GtSeedExtendDisplayFlag
-                                                *display_flag,
-                                                bool a_is_rel,
-                                                bool b_is_rel)
-{
-  gt_assert(display_flag != NULL);
-  display_flag->a_seedpos_relative = a_is_rel;
-  display_flag->b_seedpos_relative = b_is_rel;
-}
-
-bool gt_querymatch_display_seedpos_a_relative(const GtSeedExtendDisplayFlag
-                                                *display_flag)
-{
-  return (display_flag != NULL && display_flag->a_seedpos_relative) ? true
-                                                                    : false;
-}
-
-bool gt_querymatch_display_seedpos_b_relative(const GtSeedExtendDisplayFlag
-                                                *display_flag)
-{
-  return (display_flag != NULL && display_flag->b_seedpos_relative) ? true
-                                                                    : false;
-}
-
 static int gt_querymatch_display_flag_set(char *copyspace,
                                           GtWord *parameter,
                                           GtSeedExtendDisplayFlag *display_flag,
@@ -301,8 +276,6 @@ GtSeedExtendDisplayFlag *gt_querymatch_display_flag_new(
       if Strand is not set, then order of Q_start and Q_end gives strand
   */
   display_flag->alignmentwidth = 0;
-  display_flag->a_seedpos_relative = true; /* as bytes is default access mode */
-  display_flag->b_seedpos_relative = true;
   display_flag->nextfree = 0;
   display_flag->flags = 0;
   if (setmode != GT_SEED_EXTEND_DISPLAY_SET_NO)

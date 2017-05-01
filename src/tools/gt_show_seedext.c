@@ -221,10 +221,6 @@ static int gt_show_seedext_runner(GT_UNUSED int argc,
   }
   if (!had_err)
   {
-    gt_querymatch_display_seedpos_relative_set(
-           out_display_flag,
-           a_extend_char_access == GT_EXTEND_CHAR_ACCESS_DIRECT ? true : false,
-           b_extend_char_access == GT_EXTEND_CHAR_ACCESS_DIRECT ? true : false);
     if (arguments->optimal_alignment)
     {
       if (gt_querymatch_alignment_display(out_display_flag))
@@ -294,10 +290,7 @@ static int gt_show_seedext_runner(GT_UNUSED int argc,
   {
     GtKarlinAltschulStat *karlin_altschul_stat = NULL;
     const bool match_has_seed = gt_seedextend_match_iterator_has_seed(semi),
-               match_has_cigar = gt_seedextend_match_iterator_has_cigar(semi),
-               adjust = (gt_querymatch_seed_s_display(out_display_flag) ||
-                         gt_querymatch_seed_q_display(out_display_flag))
-                            ? true : false;
+               match_has_cigar = gt_seedextend_match_iterator_has_cigar(semi);
 
     if (gt_querymatch_evalue_display(out_display_flag) ||
         gt_querymatch_bitscore_display(out_display_flag))
@@ -328,8 +321,7 @@ static int gt_show_seedext_runner(GT_UNUSED int argc,
                                         bencseq,
                                         karlin_altschul_stat,
                                         evalue,
-                                        bitscore,
-                                        adjust);
+                                        bitscore);
       if (arguments->optimal_alignment)
       {
         gt_querymatch_extract_sequence_pair(&seqpairbuf,

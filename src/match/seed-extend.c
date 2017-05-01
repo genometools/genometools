@@ -229,7 +229,7 @@ static const GtQuerymatch *gt_combine_extensions(
          GtUword total_mismatches,
          bool silent)
 {
-  GtUword dblen, querylen, total_alignedlen, dbstart_relative;
+  GtUword dblen, querylen, total_alignedlen;
 
   dblen = sesp->seedlength + u_left_ext + u_right_ext;
   querylen = sesp->seedlength + v_left_ext + v_right_ext;
@@ -243,7 +243,6 @@ static const GtQuerymatch *gt_combine_extensions(
   }
   gt_assert(sesp->dbstart_relative >= u_left_ext &&
             sesp->querystart_relative >= v_left_ext);
-  dbstart_relative = sesp->dbstart_relative - u_left_ext;
 
 #ifdef SKDEBUG
   printf("total_distance=" GT_WU ", total_score=" GT_WD ",total_alignedlen="
@@ -257,7 +256,7 @@ static const GtQuerymatch *gt_combine_extensions(
   if (gt_querymatch_complete(querymatchspaceptr,
                              dblen,
                              sesp->dbseqnum,
-                             dbstart_relative,
+                             sesp->dbstart_relative - u_left_ext,
                              sesp->db_seqstart,
                              sesp->dbseqlength,
                              (GtWord) total_score,
@@ -271,8 +270,8 @@ static const GtQuerymatch *gt_combine_extensions(
                              queryes,
                              sesp->query_seqstart,
                              sesp->query_seqlen,
-                             sesp->db_seqstart + gt_sesp_db_seedpos(sesp),
-                             sesp->query_seqstart + gt_sesp_query_seedpos(sesp),
+                             gt_sesp_db_seedpos(sesp),
+                             gt_sesp_query_seedpos(sesp),
                              sesp->seedlength,
                              false))
                              /*forxdrop ? false : true*/

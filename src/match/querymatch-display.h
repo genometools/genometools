@@ -23,17 +23,6 @@
 
 typedef struct GtSeedExtendDisplayFlag GtSeedExtendDisplayFlag;
 
-void gt_querymatch_display_seedpos_relative_set(GtSeedExtendDisplayFlag
-                                                *display_flag,
-                                                bool a_is_rel,
-                                                bool b_is_rel);
-
-bool gt_querymatch_display_seedpos_a_relative(const GtSeedExtendDisplayFlag
-                                                *display_flag);
-
-bool gt_querymatch_display_seedpos_b_relative(const GtSeedExtendDisplayFlag
-                                                *display_flag);
-
 typedef enum
 {
   GT_SEED_EXTEND_DISPLAY_SET_NO,
