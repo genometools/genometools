@@ -17,6 +17,7 @@
 #include <stdbool.h>
 #include <string.h>
 #include <ctype.h>
+#include <inttypes.h>
 #include "core/ma_api.h"
 #include "core/assert_api.h"
 #include "match/querymatch-display.h"
