@@ -389,14 +389,14 @@ void gt_querymatchoutoptions_seededmatch2eoplist(
 
 void gt_frontprune2eoplist(GtQuerymatchoutoptions *querymatchoutoptions,
                            const GtSeqorEncseq *dbes,
+                           GtUword dbstart,
+                           GtUword dblen,
                            const GtSeqorEncseq *queryes,
                            GtReadmode query_readmode,
                            GtUword query_seqstart,
                            GtUword query_seqlen,
-                           GtUword ustart,
-                           GtUword ulen,
-                           GtUword vstart,
-                           GtUword vlen,
+                           GtUword querystart,
+                           GtUword querylen,
                            bool verify_alignment)
 {
   GtFtPolished_point right_best_polished_point = {0,0,0,0,0};
@@ -408,7 +408,7 @@ void gt_frontprune2eoplist(GtQuerymatchoutoptions *querymatchoutoptions,
             querymatchoutoptions->pol_info != NULL);
   pol_size = GT_MULT2(querymatchoutoptions->pol_info->cut_depth);
   gt_eoplist_reset(querymatchoutoptions->eoplist);
-  gt_assert(ulen > 0 && vlen > 0);
+  gt_assert(dblen > 0 && querylen > 0);
   gt_align_front_prune_edist(rightextension,
                              &right_best_polished_point,
                              querymatchoutoptions->front_trace,
@@ -420,10 +420,10 @@ void gt_frontprune2eoplist(GtQuerymatchoutoptions *querymatchoutoptions,
                              querymatchoutoptions->ggemi,
                              greedyextension,
                              0,
-                             ustart,
-                             ulen,
-                             vstart,
-                             vlen);
+                             dbstart,
+                             dblen,
+                             query_seqstart + querystart,
+                             querylen);
   gt_assert(querymatchoutoptions->front_trace != NULL);
   front_trace2eoplist(querymatchoutoptions->always_polished_ends,
                       querymatchoutoptions->eoplist,
@@ -433,11 +433,11 @@ void gt_frontprune2eoplist(GtQuerymatchoutoptions *querymatchoutoptions,
                       querymatchoutoptions->pol_info->match_score,
                       querymatchoutoptions->pol_info->difference_score,
                       NULL,
-                      ulen,
+                      dblen,
                       NULL,
-                      vlen);
+                      querylen);
   gt_eoplist_reverse_end(querymatchoutoptions->eoplist,0);
-  front_trace_reset(querymatchoutoptions->front_trace,ulen+vlen);
+  front_trace_reset(querymatchoutoptions->front_trace,dblen+querylen);
   coords = &querymatchoutoptions->correction_info;
   coords->uoffset = 0;
   coords->ulen = right_best_polished_point.row;
@@ -449,9 +449,9 @@ void gt_frontprune2eoplist(GtQuerymatchoutoptions *querymatchoutoptions,
   if (verify_alignment)
   {
     gt_querymtch_alignment_verification(querymatchoutoptions,
-                                        ustart,
+                                        dbstart,
                                         coords->ulen,
-                                        vstart,
+                                        query_seqstart + querystart,
                                         coords->vlen,
                                         coords->sumdist);
   }

@@ -1119,19 +1119,17 @@ static void gt_querymatch_full_alignment(const GtQuerymatch *querymatch,
 {
   if (querymatch->ref_querymatchoutoptions != NULL)
   {
-    GtReadmode query_readmode = gt_querymatch_query_readmode(querymatch);
-    const GtUword abs_querystart = querymatch->query_seqstart +
-                                   querymatch->querystart;
+    const GtReadmode query_readmode = gt_querymatch_query_readmode(querymatch);
 
     gt_frontprune2eoplist(querymatch->ref_querymatchoutoptions,
                           db_seqorencseq,
+                          gt_querymatch_dbstart(querymatch),
+                          gt_querymatch_dblen(querymatch),
                           query_seqorencseq,
                           query_readmode,
                           querymatch->query_seqstart,
                           querymatch->query_seqlen,
-                          gt_querymatch_dbstart(querymatch),
-                          gt_querymatch_dblen(querymatch),
-                          abs_querystart,
+                          querymatch->querystart,
                           gt_querymatch_querylen(querymatch),
                           querymatch->verify_alignment);
     gt_querymatchoutoptions_extract_seq(querymatch->ref_querymatchoutoptions,

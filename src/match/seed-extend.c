@@ -609,6 +609,7 @@ static void gt_FTsequenceResources_init(GtFTsequenceResources *fsr,
                                         GtAllocatedMemory *sequence_cache,
                                         const GtUchar *bytesequence,
                                         GtUword totallength,
+                                        GtUword full_totallength,
                                         GtExtendCharAccess extend_char_access,
                                         bool twobit_possible,
                                         bool haswildcards)
@@ -616,6 +617,7 @@ static void gt_FTsequenceResources_init(GtFTsequenceResources *fsr,
   fsr->encseq = encseq;
   fsr->readmode = readmode;
   fsr->totallength = totallength;
+  fsr->full_totallength = full_totallength;
   fsr->encseq_r = encseq_r;
   fsr->sequence_cache = sequence_cache;
   fsr->bytesequence = bytesequence;
@@ -718,6 +720,7 @@ static void gt_greedy_extend_init(GtFTsequenceResources *ufsr,
                                 &ggemi->usequence_cache,
                                 NULL,
                                 ggemi->db_totallength,
+                                ggemi->db_totallength,
                                 ggemi->db_extend_char_access,
                                 ggemi->db_twobit_possible,
                                 ggemi->db_haswildcards);
@@ -730,6 +733,7 @@ static void gt_greedy_extend_init(GtFTsequenceResources *ufsr,
                                 &ggemi->usequence_cache,
                                 dbes->seq,
                                 dbes->seqlength,
+                                0,
                                 GT_EXTEND_CHAR_ACCESS_DIRECT,
                                 false,
                                 ggemi->db_haswildcards);
@@ -743,6 +747,7 @@ static void gt_greedy_extend_init(GtFTsequenceResources *ufsr,
                                 &ggemi->vsequence_cache,
                                 NULL,
                                 query_seqlen,
+                                gt_encseq_total_length(queryes->encseq),
                                 ggemi->query_extend_char_access,
                                 ggemi->query_twobit_possible,
                                 ggemi->query_haswildcards);
@@ -755,6 +760,7 @@ static void gt_greedy_extend_init(GtFTsequenceResources *ufsr,
                                 &ggemi->vsequence_cache,
                                 queryes->seq,
                                 query_seqlen,
+                                0,
                                 GT_EXTEND_CHAR_ACCESS_DIRECT,
                                 false,
                                 ggemi->query_haswildcards);

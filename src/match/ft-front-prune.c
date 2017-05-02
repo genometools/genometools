@@ -71,7 +71,8 @@ static void ft_sequenceobject_init(GtFtSequenceObject *seq,
                                    GtEncseqReader *encseq_r,
                                    GtAllocatedMemory *sequence_cache,
                                    const GtUchar *bytesequence,
-                                   GtUword totallength
+                                   GtUword totallength,
+                                   GtUword full_totallength
                                    )
 {
   gt_assert(seq != NULL);
@@ -99,7 +100,6 @@ static void ft_sequenceobject_init(GtFtSequenceObject *seq,
       (extend_char_access_mode == GT_EXTEND_CHAR_ACCESS_ANY ||
        extend_char_access_mode == GT_EXTEND_CHAR_ACCESS_ENCSEQ_READER))
   {
-    GtUword full_totallength = gt_encseq_total_length(encseq);
     gt_encseq_reader_reinit_with_readmode(encseq_r, encseq,
                                           seq->read_seq_left2right
                                             ? GT_READMODE_FORWARD
@@ -675,7 +675,8 @@ GtUword front_prune_edist_inplace(
                          ufsr->encseq_r,
                          ufsr->sequence_cache,
                          ufsr->bytesequence,
-                         ufsr->totallength);
+                         ufsr->totallength,
+                         ufsr->full_totallength);
   ft_sequenceobject_init(&vseq,
                          vfsr->extend_char_access,
                          vfsr->twobit_possible,
@@ -688,7 +689,8 @@ GtUword front_prune_edist_inplace(
                          vfsr->encseq_r,
                          vfsr->sequence_cache,
                          vfsr->bytesequence,
-                         vfsr->totallength);
+                         vfsr->totallength,
+                         vfsr->full_totallength);
   if (cam_generic)
   {
     ft_longest_common = ft_longest_common_all;

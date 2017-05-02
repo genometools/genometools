@@ -66,14 +66,14 @@ void gt_querymatchoutoptions_delete(
 
 void gt_frontprune2eoplist(GtQuerymatchoutoptions *querymatchoutoptions,
                            const GtSeqorEncseq *dbes,
+                           GtUword dbstart,
+                           GtUword dblen,
                            const GtSeqorEncseq *queryes,
                            GtReadmode query_readmode,
                            GtUword query_seqstart,
                            GtUword query_seqlen,
-                           GtUword ustart,
-                           GtUword ulen,
-                           GtUword vstart,
-                           GtUword vlen,
+                           GtUword querystart,
+                           GtUword querylen,
                            bool verify_alignment);
 
 void gt_querymatchoutoptions_cigar_show(const GtQuerymatchoutoptions

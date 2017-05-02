@@ -32,7 +32,8 @@ typedef struct
   GtAllocatedMemory *sequence_cache;
   GtEncseqReader *encseq_r;
   const GtUchar *bytesequence;
-  GtUword totallength;
+  GtUword totallength,
+          full_totallength;
   GtReadmode readmode;
   GtExtendCharAccess extend_char_access;
   bool twobit_possible, haswildcards;
