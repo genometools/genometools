@@ -46,7 +46,7 @@ struct GtQuerymatchoutoptions
 
 GtQuerymatchoutoptions *gt_querymatchoutoptions_new(const
                                                      GtSeedExtendDisplayFlag
-                                                      *display_flag,
+                                                      *out_display_flag,
                                                     const char *indexname,
                                                     GtError *err)
 {
@@ -83,16 +83,16 @@ GtQuerymatchoutoptions *gt_querymatchoutoptions_new(const
   querymatchoutoptions->eoplist_reader
     = gt_eoplist_reader_new(querymatchoutoptions->eoplist);
   querymatchoutoptions->eoplist_reader_verify = NULL;
-  if (gt_querymatch_cigarX_display(display_flag))
+  if (gt_querymatch_cigarX_display(out_display_flag))
   {
     gt_eoplist_reader_distinguish_mismatch_match(
         querymatchoutoptions->eoplist_reader);
   }
-  if (gt_querymatch_display_alignmentwidth(display_flag) > 0)
+  if (gt_querymatch_display_alignmentwidth(out_display_flag) > 0)
   {
     gt_eoplist_reader_reset_width(querymatchoutoptions->eoplist_reader,
                                   gt_querymatch_display_alignmentwidth(
-                                       display_flag));
+                                       out_display_flag));
   }
   querymatchoutoptions->db_esr_for_align_show = NULL;
   querymatchoutoptions->query_esr_for_align_show = NULL;
@@ -129,7 +129,7 @@ void gt_querymatchoutoptions_extend(
                   GtUword sensitivity,
                   double matchscore_bias,
                   bool always_polished_ends,
-                  const GtSeedExtendDisplayFlag *display_flag)
+                  const GtSeedExtendDisplayFlag *out_display_flag)
 {
   if (errorpercentage > 0)
   {
@@ -156,9 +156,9 @@ void gt_querymatchoutoptions_extend(
     {
       gt_eoplist_polished_ends(querymatchoutoptions->eoplist,
                                querymatchoutoptions->pol_info,true,
-                               gt_querymatch_polinfo_display(display_flag));
+                               gt_querymatch_polinfo_display(out_display_flag));
     }
-    if (gt_querymatch_seed_in_algn_display(display_flag))
+    if (gt_querymatch_seed_in_algn_display(out_display_flag))
     {
       gt_eoplist_display_seed_in_alignment_set(querymatchoutoptions->eoplist);
     }
@@ -174,7 +174,7 @@ void gt_querymatchoutoptions_for_align_only(
                   bool always_polished_ends,
                   GtExtendCharAccess a_extend_char_access,
                   GtExtendCharAccess b_extend_char_access,
-                  const GtSeedExtendDisplayFlag *display_flag)
+                  const GtSeedExtendDisplayFlag *out_display_flag)
 {
   const bool weakends = false;
   const bool cam_generic = false;
@@ -194,7 +194,7 @@ void gt_querymatchoutoptions_for_align_only(
                                  sensitivity,
                                  matchscore_bias,
                                  always_polished_ends,
-                                 display_flag);
+                                 out_display_flag);
 }
 
 void gt_querymatchoutoptions_delete(

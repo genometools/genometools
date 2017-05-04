@@ -701,7 +701,7 @@ static int gt_seed_extend_runner(int argc,
   unsigned int maxseedlength = 0, nchars = 0;
   GtUwordPair pick = {GT_UWORD_MAX, GT_UWORD_MAX};
   GtUword maxseqlength = 0, a_numofsequences, b_numofsequences;
-  GtSeedExtendDisplayFlag *display_flag = NULL;
+  GtSeedExtendDisplayFlag *out_display_flag = NULL;
   bool idhistout;
   int had_err = 0;
   const GtSeedExtendDisplaySetMode setmode
@@ -736,15 +736,15 @@ static int gt_seed_extend_runner(int argc,
     seedextendtimer = gt_timer_new();
     gt_timer_start(seedextendtimer);
   }
-  display_flag = gt_querymatch_display_flag_new(arguments->display_args,
-                                                setmode,err);
-  if (display_flag == NULL)
+  out_display_flag = gt_querymatch_display_flag_new(arguments->display_args,
+                                                    setmode,err);
+  if (out_display_flag == NULL)
   {
     had_err = -1;
   }
   /* Set character access method */
   if (!had_err && (!arguments->onlyseeds ||
-                   gt_querymatch_display_alignmentwidth(display_flag) > 0))
+                   gt_querymatch_display_alignmentwidth(out_display_flag) > 0))
   {
     if (gt_greedy_extend_char_access(&cam_a,&cam_b,
                                      gt_str_get(arguments->char_access_mode),
@@ -765,7 +765,7 @@ static int gt_seed_extend_runner(int argc,
     GtEncseqLoader *encseq_loader = gt_encseq_loader_new();
     gt_encseq_loader_require_multiseq_support(encseq_loader);
     gt_encseq_loader_require_ssp_tab(encseq_loader);
-    if (gt_querymatch_subjectid_display(display_flag))
+    if (gt_querymatch_subjectid_display(out_display_flag))
     {
       gt_encseq_loader_require_des_tab(encseq_loader);
       gt_encseq_loader_require_sds_tab(encseq_loader);
@@ -790,7 +790,7 @@ static int gt_seed_extend_runner(int argc,
       GtEncseqLoader *encseq_loader = gt_encseq_loader_new();
       gt_encseq_loader_require_multiseq_support(encseq_loader);
       gt_encseq_loader_require_ssp_tab(encseq_loader);
-      if (gt_querymatch_queryid_display(display_flag))
+      if (gt_querymatch_queryid_display(out_display_flag))
       {
         gt_encseq_loader_require_des_tab(encseq_loader);
         gt_encseq_loader_require_sds_tab(encseq_loader);
@@ -828,7 +828,7 @@ static int gt_seed_extend_runner(int argc,
     if (gt_showtime_enabled()) {
       gt_timer_delete(seedextendtimer);
     }
-    gt_querymatch_display_flag_delete(display_flag);
+    gt_querymatch_display_flag_delete(out_display_flag);
     return had_err;
   }
 
@@ -1016,7 +1016,7 @@ static int gt_seed_extend_runner(int argc,
                                              arguments->se_evalue_threshold,
                                              arguments->dbs_logdiagbandwidth,
                                              arguments->dbs_mincoverage,
-                                             display_flag,
+                                             out_display_flag,
                                              use_apos_local,
                                              arguments->se_xdropbelowscore,
                                              extendgreedy,
@@ -1094,7 +1094,7 @@ static int gt_seed_extend_runner(int argc,
   if (gt_showtime_enabled()) {
     gt_timer_delete(seedextendtimer);
   }
-  gt_querymatch_display_flag_delete(display_flag);
+  gt_querymatch_display_flag_delete(out_display_flag);
   return had_err;
 }
 

@@ -217,6 +217,7 @@ void gt_sesp_show(const GtSeedextendSeqpair *sesp)
 static const GtQuerymatch *gt_combine_extensions(
          bool forxdrop,
          GtQuerymatch *querymatchspaceptr,
+         const GtSeedExtendDisplayFlag *out_display_flag,
          const GtSeqorEncseq *dbes,
          const GtSeqorEncseq *queryes,
          const GtSeedextendSeqpair *sesp,
@@ -254,6 +255,7 @@ static const GtQuerymatch *gt_combine_extensions(
     return NULL;
   }
   if (gt_querymatch_complete(querymatchspaceptr,
+                             out_display_flag,
                              dblen,
                              sesp->dbseqnum,
                              sesp->dbstart_relative - u_left_ext,
@@ -1218,6 +1220,7 @@ static const GtQuerymatch *gt_extend_sesp(bool forxdrop,
   return gt_combine_extensions(
                  forxdrop,
                  info_querymatch->querymatchspaceptr,
+                 info_querymatch->out_display_flag,
                  dbes,
                  queryes,
                  sesp,
@@ -1356,7 +1359,9 @@ static void gt_rf_seed_extend_prettyprint(bool forxdrop,
                                 errorpercentage,
                                 evalue_threshold))
   {
-    gt_querymatch_prettyprint(evalue,bit_score,querymatch);
+    gt_querymatch_prettyprint(evalue,bit_score,
+                              info_querymatch->out_display_flag,
+                              querymatch);
   }
 }
 

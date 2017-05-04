@@ -414,14 +414,6 @@ double gt_seedextend_match_iterator_bitscore(
   return semi->bitscore;
 }
 
-void gt_seedextend_match_iterator_display_set(GtSeedextendMatchIterator *semi,
-                                              const GtSeedExtendDisplayFlag
-                                                *out_display_flag)
-{
-  gt_assert(semi != NULL);
-  gt_querymatch_display_set(semi->querymatchptr,out_display_flag);
-}
-
 void gt_seedextend_match_iterator_verify_alignment_set(
                                   GtSeedextendMatchIterator *semi)
 {

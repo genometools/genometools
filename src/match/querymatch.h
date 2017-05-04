@@ -61,14 +61,15 @@ void gt_querymatch_read_line(GtQuerymatch *querymatch,
                              double *evalue_ptr,
                              double *bitscore_ptr,
                              const char *line_ptr,
-                             const GtSeedExtendDisplayFlag *display_flag,
+                             const GtSeedExtendDisplayFlag *in_display_flag,
                              bool selfmatch,
                              const GtEncseq *dbencseq,
                              const GtEncseq *queryencseq);
 
 void gt_querymatch_delete(GtQuerymatch *querymatch);
 
-bool gt_querymatch_complete(GtQuerymatch *querymatchptr,
+bool gt_querymatch_complete(GtQuerymatch *querymatch,
+                            const GtSeedExtendDisplayFlag *out_display_flag,
                             GtUword dblen,
                             GtUword dbseqnum,
                             GtUword dbstart_relative,
@@ -117,9 +118,12 @@ double gt_querymatch_error_rate(GtUword distance,GtUword alignedlen);
 GtUword gt_querymatch_distance(const GtQuerymatch *querymatch);
 
 void gt_querymatch_prettyprint(double evalue,double bit_score,
+                               const GtSeedExtendDisplayFlag *out_display_flag,
                                const GtQuerymatch *querymatch);
 
-void gt_querymatch_show_failed_seed(const GtQuerymatch *querymatch);
+void gt_querymatch_show_failed_seed(const GtSeedExtendDisplayFlag
+                                       *out_display_flag,
+                                    const GtQuerymatch *querymatch);
 
 bool gt_querymatch_check_final(double *evalue_ptr,
                                double *bit_score_ptr,
@@ -155,9 +159,6 @@ void gt_querymatch_table_sort(GtArrayGtQuerymatch *querymatch_table,
 GtQuerymatch *gt_querymatch_table_get(const GtArrayGtQuerymatch
                                         *querymatch_table,GtUword idx);
 
-void gt_querymatch_display_set(GtQuerymatch *querymatch,
-                               const GtSeedExtendDisplayFlag *display_flag);
-
 typedef struct
 {
   GtUchar *a_sequence, *b_sequence;
@@ -170,6 +171,8 @@ void gt_querymatch_extract_sequence_pair(GtSequencepairbuffer *seqpairbuf,
                                          const GtQuerymatch *querymatch);
 
 void gt_querymatch_recompute_alignment(GtQuerymatch *querymatch,
+                                       const GtSeedExtendDisplayFlag
+                                         *out_display_flag,
                                        bool matches_have_seeds,
                                        bool matches_have_cigar,
                                        const GtEncseq *db_encseq,

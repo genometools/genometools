@@ -81,7 +81,7 @@ GtDiagbandseedExtendParams *gt_diagbandseed_extend_params_new(
                                 double evalue_threshold,
                                 GtUword logdiagbandwidth,
                                 GtUword mincoverage,
-                                const GtSeedExtendDisplayFlag *display_flag,
+                                const GtSeedExtendDisplayFlag *out_display_flag,
                                 GtUword use_apos,
                                 GtXdropscore xdropbelowscore,
                                 bool extendgreedy,

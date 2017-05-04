@@ -131,7 +131,7 @@ struct GtDiagbandseedExtendParams
   GtXdropscore xdropbelowscore;
   GtExtendCharAccess a_extend_char_access,
                      b_extend_char_access;
-  const GtSeedExtendDisplayFlag *display_flag;
+  const GtSeedExtendDisplayFlag *out_display_flag;
   double matchscore_bias;
   GtUword use_apos;
   bool extendgreedy,
@@ -275,7 +275,7 @@ GtDiagbandseedExtendParams *gt_diagbandseed_extend_params_new(
                                 double evalue_threshold,
                                 GtUword logdiagbandwidth,
                                 GtUword mincoverage,
-                                const GtSeedExtendDisplayFlag *display_flag,
+                                const GtSeedExtendDisplayFlag *out_display_flag,
                                 GtUword use_apos,
                                 GtXdropscore xdropbelowscore,
                                 bool extendgreedy,
@@ -300,7 +300,7 @@ GtDiagbandseedExtendParams *gt_diagbandseed_extend_params_new(
   extp->evalue_threshold = evalue_threshold;
   extp->logdiagbandwidth = logdiagbandwidth;
   extp->mincoverage = mincoverage;
-  extp->display_flag = display_flag;
+  extp->out_display_flag = out_display_flag;
   extp->use_apos = use_apos;
   extp->xdropbelowscore = xdropbelowscore;
   extp->extendgreedy = extendgreedy;
@@ -3055,6 +3055,7 @@ typedef struct
   GtSegmentRejectFunc segment_reject_func;
   GtSegmentRejectInfo *segment_reject_info;
   const GtKarlinAltschulStat *karlin_altschul_stat;
+  const GtSeedExtendDisplayFlag *out_display_flag;
 } GtDiagbandseedExtendSegmentInfo;
 
 static int gt_diagbandseed_possibly_extend(const GtArrayGtDiagbandseedRectangle
@@ -3131,11 +3132,12 @@ static int gt_diagbandseed_possibly_extend(const GtArrayGtDiagbandseedRectangle
                                     esi->errorpercentage,
                                     esi->evalue_threshold))
       {
-        gt_querymatch_prettyprint(evalue,bit_score,querymatch);
+        gt_querymatch_prettyprint(evalue,bit_score,esi->out_display_flag,
+                                  querymatch);
         ret = 3; /* output match */
       } else
       {
-        gt_querymatch_show_failed_seed(querymatch);
+        gt_querymatch_show_failed_seed(esi->out_display_flag,querymatch);
         ret = 2; /* found match, which does not satisfy length or similarity
                     constraints */
       }
@@ -3716,7 +3718,6 @@ static void gt_diagbandseed_info_qm_set(
 {
   ifqm->processinfo = processinfo;
   ifqm->querymatchspaceptr = gt_querymatch_new();
-  gt_querymatch_display_set(ifqm->querymatchspaceptr,extp->display_flag);
   if (extp->verify_alignment)
   {
     gt_querymatch_verify_alignment_set(ifqm->querymatchspaceptr);
@@ -3727,6 +3728,7 @@ static void gt_diagbandseed_info_qm_set(
   gt_querymatch_query_readmode_set(ifqm->querymatchspaceptr,query_readmode);
   gt_querymatch_file_set(ifqm->querymatchspaceptr, stream);
   ifqm->karlin_altschul_stat = karlin_altschul_stat;
+  ifqm->out_display_flag = extp->out_display_flag;;
 }
 
 #define GT_USEC2SEC(TIME_IN_USEC)\
@@ -3855,9 +3857,9 @@ static GtDiagbandseedExtendSegmentInfo *gt_diagbandseed_extendSI_new(
                                             : gt_xdrop_extend_seed_relative;
   gt_diagbandseed_plainsequence_init(&esi->plainsequence_info,
                                      gt_querymatch_subjectid_display(
-                                             extp->display_flag),
+                                             extp->out_display_flag),
                                      gt_querymatch_queryid_display(
-                                             extp->display_flag),
+                                             extp->out_display_flag),
                                      aencseq,
                                      aseqranges,
                                      aidx,
@@ -3891,6 +3893,7 @@ static GtDiagbandseedExtendSegmentInfo *gt_diagbandseed_extendSI_new(
   esi->segment_reject_func = segment_reject_func;
   esi->segment_reject_info = segment_reject_info;
   esi->karlin_altschul_stat = karlin_altschul_stat;
+  esi->out_display_flag = extp->out_display_flag;
   return esi;
 }
 
@@ -3990,7 +3993,7 @@ static void gt_diagbandseed_process_seeds(GtSeedpairlist *seedpairlist,
                                              extp->logdiagbandwidth);
     if (gt_str_length(diagband_statistics_arg) == 0)
     {
-      gt_querymatch_Fields_output(stream,extp->display_flag);
+      gt_querymatch_Fields_output(stream,extp->out_display_flag);
       esi = gt_diagbandseed_extendSI_new(extp,
                                          processinfo,
                                          querymoutopt,
@@ -4486,7 +4489,7 @@ static int gt_diagbandseed_algorithm(const GtDiagbandseedInfo *arg,
             gt_sequence_parts_info_end_get(bseqranges,bidx));
   }
   extp = arg->extp;
-  if (gt_querymatch_fstperquery_display(extp->display_flag))
+  if (gt_querymatch_fstperquery_display(extp->out_display_flag))
   {
     segment_reject_func = gt_segment_reject_check;
     segment_reject_info
@@ -4686,12 +4689,13 @@ static int gt_diagbandseed_algorithm(const GtDiagbandseedInfo *arg,
       }
       processinfo = (void *) xdropinfo;
     }
-    alignmentwidth = gt_querymatch_display_alignmentwidth(extp->display_flag);
+    alignmentwidth
+      = gt_querymatch_display_alignmentwidth(extp->out_display_flag);
     if (extp->extendxdrop || alignmentwidth > 0 || extp->verify_alignment ||
-        gt_querymatch_cigar_display(extp->display_flag) ||
-        gt_querymatch_cigarX_display(extp->display_flag))
+        gt_querymatch_cigar_display(extp->out_display_flag) ||
+        gt_querymatch_cigarX_display(extp->out_display_flag))
     {
-      querymoutopt = gt_querymatchoutoptions_new(extp->display_flag,
+      querymoutopt = gt_querymatchoutoptions_new(extp->out_display_flag,
                                                  NULL,
                                                  NULL);
       gt_assert(querymoutopt != NULL);
@@ -4711,7 +4715,7 @@ static int gt_diagbandseed_algorithm(const GtDiagbandseedInfo *arg,
                                        sensitivity,
                                        extp->matchscore_bias,
                                        extp->always_polished_ends,
-                                       extp->display_flag);
+                                       extp->out_display_flag);
       }
     }
     /* process first mlist */
@@ -5067,8 +5071,8 @@ int gt_diagbandseed_run(const GtDiagbandseedInfo *arg,
   {
     trimstat = gt_ft_trimstat_new();
   }
-  if (gt_querymatch_evalue_display(arg->extp->display_flag) ||
-      gt_querymatch_bitscore_display(arg->extp->display_flag) ||
+  if (gt_querymatch_evalue_display(arg->extp->out_display_flag) ||
+      gt_querymatch_bitscore_display(arg->extp->out_display_flag) ||
      arg->extp->evalue_threshold != DBL_MAX)
   {
     GtTimer *timer = NULL;

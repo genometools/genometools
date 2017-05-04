@@ -28,7 +28,7 @@ typedef struct GtQuerymatchoutoptions GtQuerymatchoutoptions;
 
 GtQuerymatchoutoptions *gt_querymatchoutoptions_new(const
                                                      GtSeedExtendDisplayFlag
-                                                      *display_flag,
+                                                      *out_display_flag,
                                                     const char *indexname,
                                                     GtError *err);
 
@@ -49,7 +49,7 @@ void gt_querymatchoutoptions_extend(
                   GtUword sensitivity,
                   double matchscore_bias,
                   bool always_polished_ends,
-                  const GtSeedExtendDisplayFlag *display_flag);
+                  const GtSeedExtendDisplayFlag *out_display_flag);
 
 void gt_querymatchoutoptions_for_align_only(
                   GtQuerymatchoutoptions *querymatchoutoptions,
@@ -59,7 +59,7 @@ void gt_querymatchoutoptions_for_align_only(
                   bool always_polished_ends,
                   GtExtendCharAccess a_extend_char_access,
                   GtExtendCharAccess b_extend_char_access,
-                  const GtSeedExtendDisplayFlag *display_flag);
+                  const GtSeedExtendDisplayFlag *out_display_flag);
 
 void gt_querymatchoutoptions_delete(
         GtQuerymatchoutoptions *querymatchoutoptions);
@@ -94,7 +94,7 @@ const GtSeqpaircoordinates *gt_querymatchoutoptions_correction_get(
               const GtQuerymatchoutoptions *querymatchoutoptions);
 
 void gt_querymatch_column_header_output(const GtSeedExtendDisplayFlag
-                                         *display_flag,FILE *stream);
+                                         *out_display_flag,FILE *stream);
 
 void gt_querymatchoutoptions_extract_seq(GtQuerymatchoutoptions
                                            *querymatchoutoptions,

@@ -108,6 +108,7 @@ static int gt_exact_selfmatch_with_output(void *info,
   GT_SEQORENCSEQ_INIT_ENCSEQ(&dbes,encseq);
   GT_SEQORENCSEQ_INIT_ENCSEQ(&queryes,encseq);
   if (gt_querymatch_complete(info_querymatch->querymatchspaceptr,
+                             info_querymatch->out_display_flag,
                              len,
                              dbseqnum,
                              pos1 - db_seqstart,
@@ -131,6 +132,7 @@ static int gt_exact_selfmatch_with_output(void *info,
   {
     /* for exact matches we do not output evalues and bitscores */
     gt_querymatch_prettyprint(DBL_MAX,DBL_MAX,
+                              info_querymatch->out_display_flag,
                               info_querymatch->querymatchspaceptr);
   }
   return 0;
@@ -571,7 +573,8 @@ static int gt_callenumquerymatches(bool selfmatch,
                                    GtQuerymatchoutoptions *querymatchoutoptions,
                                    Gt_extend_querymatch_func eqmf,
                                    void *eqmf_data,
-                                   const GtSeedExtendDisplayFlag *display_flag,
+                                   const GtSeedExtendDisplayFlag
+                                      *out_display_flag,
                                    GtLogger *logger,
                                    GtError *err)
 {
@@ -648,7 +651,6 @@ static int gt_callenumquerymatches(bool selfmatch,
     {
       same_encseq = false;
     }
-    gt_querymatch_display_set(exactseed,display_flag);
     if (querymatchoutoptions != NULL)
     {
       gt_querymatch_outoptions_set(exactseed,querymatchoutoptions);
@@ -717,6 +719,7 @@ static int gt_callenumquerymatches(bool selfmatch,
 
         GT_SEQORENCSEQ_INIT_ENCSEQ(&dbes,suffixarray.encseq);
         if (gt_querymatch_complete(exactseed,
+                                   out_display_flag,
                                    matchlength,
                                    dbseqnum,
                                    dbstart - db_seqstart,
@@ -739,7 +742,7 @@ static int gt_callenumquerymatches(bool selfmatch,
                                    false))
         {
           /* for exact matches we do not output evalues and bitscores */
-          gt_querymatch_prettyprint(DBL_MAX,DBL_MAX,exactseed);
+          gt_querymatch_prettyprint(DBL_MAX,DBL_MAX,out_display_flag,exactseed);
         }
       }
     }
@@ -781,7 +784,7 @@ static int gt_repfind_runner(int argc,const char **argv, int parsed_args,
   const bool flags[] = {arguments->forward,
                         arguments->reverse,
                         arguments->reverse_complement};
-  GtSeedExtendDisplayFlag *display_flag = NULL;
+  GtSeedExtendDisplayFlag *out_display_flag = NULL;
   GtFtTrimstat *trimstat = NULL;
 
   gt_error_check(err);
@@ -808,22 +811,22 @@ static int gt_repfind_runner(int argc,const char **argv, int parsed_args,
     {
       setmode = GT_SEED_EXTEND_DISPLAY_SET_EXACT;
     }
-    display_flag = gt_querymatch_display_flag_new(arguments->display_args,
-                                                  setmode,err);
-    if (display_flag == NULL)
+    out_display_flag = gt_querymatch_display_flag_new(arguments->display_args,
+                                                      setmode,err);
+    if (out_display_flag == NULL)
     {
       haserr = true;
     } else
     {
       gt_querymatch_Options_output(stdout,argc,argv,true,arguments->minidentity,
                                    arguments->historysize);
-      gt_querymatch_Fields_output(stdout,display_flag);
+      gt_querymatch_Fields_output(stdout,out_display_flag);
     }
   }
   if (!haserr)
   {
-    if (gt_querymatch_evalue_display(display_flag) ||
-        gt_querymatch_bitscore_display(display_flag) ||
+    if (gt_querymatch_evalue_display(out_display_flag) ||
+        gt_querymatch_bitscore_display(out_display_flag) ||
         arguments->evalue_threshold != DBL_MAX)
     {
       GtEncseqMetadata *emd
@@ -859,7 +862,7 @@ static int gt_repfind_runner(int argc,const char **argv, int parsed_args,
   if (!haserr)
   {
     if (gt_option_is_set(arguments->refextendgreedyoption) ||
-        gt_querymatch_alignment_display(display_flag) ||
+        gt_querymatch_alignment_display(out_display_flag) ||
         gt_option_is_set(arguments->refextendxdropoption))
     {
       if (gt_greedy_extend_char_access(&cam_a,
@@ -908,16 +911,18 @@ static int gt_repfind_runner(int argc,const char **argv, int parsed_args,
   if (!haserr)
   {
     GtEncseq *encseq_for_desc = NULL;
-    GtProcessinfo_and_querymatchspaceptr info_querymatch = {NULL,NULL,NULL};
+    GtProcessinfo_and_querymatchspaceptr info_querymatch
+      = {NULL,NULL,NULL,NULL};
     info_querymatch.karlin_altschul_stat = karlin_altschul_stat;
-    if (gt_querymatch_alignment_display(display_flag) ||
-        gt_querymatch_cigar_display(display_flag) ||
-        gt_querymatch_cigarX_display(display_flag) ||
+    info_querymatch.out_display_flag = out_display_flag;
+    if (gt_querymatch_alignment_display(out_display_flag) ||
+        gt_querymatch_cigar_display(out_display_flag) ||
+        gt_querymatch_cigarX_display(out_display_flag) ||
         (gt_option_is_set(arguments->refextendxdropoption) &&
          !arguments->noxpolish))
     {
       querymatchoutoptions
-        = gt_querymatchoutoptions_new(display_flag,
+        = gt_querymatchoutoptions_new(out_display_flag,
                                       gt_str_get(arguments->indexname),err);
       if (querymatchoutoptions == NULL)
       {
@@ -946,7 +951,7 @@ static int gt_repfind_runner(int argc,const char **argv, int parsed_args,
                                       sensitivity,
                                       GT_DEFAULT_MATCHSCORE_BIAS,
                                       true,
-                                      display_flag);
+                                      out_display_flag);
       }
     } else
     {
@@ -955,9 +960,6 @@ static int gt_repfind_runner(int argc,const char **argv, int parsed_args,
     if (!haserr)
     {
       info_querymatch.querymatchspaceptr = gt_querymatch_new();
-      gt_assert(display_flag != NULL);
-      gt_querymatch_display_set(info_querymatch.querymatchspaceptr,
-                                display_flag);
       if (querymatchoutoptions != NULL)
       {
         gt_querymatch_outoptions_set(info_querymatch.querymatchspaceptr,
@@ -981,7 +983,7 @@ static int gt_repfind_runner(int argc,const char **argv, int parsed_args,
           eqmf_data = (void *) &info_querymatch;
         }
       }
-      if (gt_querymatch_subjectid_display(display_flag))
+      if (gt_querymatch_subjectid_display(out_display_flag))
       {
         GtEncseqLoader *encseq_loader = gt_encseq_loader_new();
         gt_encseq_loader_require_des_tab(encseq_loader);
@@ -1074,7 +1076,7 @@ static int gt_repfind_runner(int argc,const char **argv, int parsed_args,
                                           querymatchoutoptions,
                                           eqmf,
                                           eqmf_data,
-                                          display_flag,
+                                          out_display_flag,
                                           logger,
                                           err) != 0)
               {
@@ -1101,7 +1103,7 @@ static int gt_repfind_runner(int argc,const char **argv, int parsed_args,
                                   querymatchoutoptions,
                                   eqmf,
                                   eqmf_data,
-                                  display_flag,
+                                  out_display_flag,
                                   logger,
                                   err) != 0)
           {
@@ -1120,7 +1122,7 @@ static int gt_repfind_runner(int argc,const char **argv, int parsed_args,
   gt_ft_trimstat_delete(trimstat);
   polishing_info_delete(pol_info);
   gt_logger_delete(logger);
-  gt_querymatch_display_flag_delete(display_flag);
+  gt_querymatch_display_flag_delete(out_display_flag);
   if (repfindtimer != NULL)
   {
     char *keystring = gt_seed_extend_params_keystring(

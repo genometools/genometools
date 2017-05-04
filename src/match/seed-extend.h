@@ -77,6 +77,7 @@ typedef struct
   void *processinfo;
   GtQuerymatch *querymatchspaceptr;
   const GtKarlinAltschulStat *karlin_altschul_stat;
+  const GtSeedExtendDisplayFlag *out_display_flag;
 } GtProcessinfo_and_querymatchspaceptr;
 
 GtXdropmatchinfo *gt_xdrop_matchinfo_new(GtUword userdefinedleastlength,

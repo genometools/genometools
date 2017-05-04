@@ -264,7 +264,6 @@ static int gt_show_seedext_runner(GT_UNUSED int argc,
                           matchscore_bias,
                           gt_seedextend_match_iterator_history_size(semi));
     }
-    gt_seedextend_match_iterator_display_set(semi,out_display_flag);
     if (arguments->verify_alignment)
     {
       gt_seedextend_match_iterator_verify_alignment_set(semi);
@@ -315,6 +314,7 @@ static int gt_show_seedext_runner(GT_UNUSED int argc,
         break;
       }
       gt_querymatch_recompute_alignment(querymatchptr,
+                                        out_display_flag,
                                         match_has_seed,
                                         match_has_cigar,
                                         aencseq,
