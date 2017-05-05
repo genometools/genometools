@@ -23,6 +23,8 @@
 #include "core/str_api.h"
 #include "extended/condenseq.h"
 
+/* The <GtCondenseqSearchArguments> class represents some general options used
+   by all implemented search tools that search on GtCondenseq. */
 typedef struct GtCondenseqSearchArguments GtCondenseqSearchArguments;
 
 /* Returns a new <GtCondenseqSearchArguments> object */

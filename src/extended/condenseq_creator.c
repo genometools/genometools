@@ -407,11 +407,11 @@ static void ces_c_sparse_diags_mark(CesCSparseDiags *diags,
                                     GtUword d)
 {
   if (diags != NULL) {
-    /* move to end of block (last diagonal that was valid for this j or
+    /* move to end of block (last diagonal that was valid for this i or
        smaller) only a few steps? Do not cross current d! */
     CesCDiag *d_ptr = ces_c_diags_bs_lseq(diags, d_min);
 
-    /* mark all within same i-range after block as deleted */
+    /* mark all within same j-range after block as deleted */
     /* do not cross current d! */
     while (d_ptr >= diags->space &&
            d_ptr->d > d &&

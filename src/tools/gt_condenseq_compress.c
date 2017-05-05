@@ -306,6 +306,10 @@ static int gt_condenseq_compress_runner(GT_UNUSED int argc, const char **argv,
     gt_encseq_loader_delete(es_l);
   }
 
+/* TODO DW: this should be adjusted to reflect the parameter tests done. it
+   could get fairly complicated heuristic, or we leave it as is.
+   setting hard defaults for dna or protein would work, too.
+  carefull: adjusting these might break test cases. */
   if (!had_err) {
     if (arguments->minalignlength == GT_UNDEF_UWORD)
       arguments->minalignlength = arguments->initsize != GT_UNDEF_UWORD ?

@@ -33,6 +33,8 @@ GtCstrIterator*            gt_sam_query_name_iterator_new(
                                                      GtSamfileIterator *s_iter,
                                                      GtError *err);
 
+/* Tests if <GSI> is a <GtSamQueryNameIterator> and returns the meta class
+   object or <NULL> if the class is not a <GtSamQueryNameIterator>. */
 #define                    gt_sam_query_name_iterator_cast(GSI) \
   gt_cstr_iterator_cast(gt_sam_query_name_iterator_class(), GSI)
 #endif

@@ -21,6 +21,8 @@
 #include "core/error_api.h"
 #include "extended/encdesc.h"
 
+/* GtEncdescHeaderIO module */
+
 /* Write header information of <encdesc> to <FILE> <fp>.
    Returns 0 on success, 1 on error, sets <err> accordingly.
    TODO DW this function does more than that, it sets some bool within the

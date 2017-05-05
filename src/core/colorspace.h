@@ -21,8 +21,10 @@
 #include "core/error_api.h"
 #include "core/str_api.h"
 
-/*decode a color space coded <color_string> and writes the decoded
-  plain text string to <result> */
+/* Colorspace module */
+
+/* Decode a color space coded <color_string> and writes the decoded
+   plain text string to <result> */
 int gt_colorspace_decode_string(GtStr *color_string,
                                 GtStr *result,
                                 GtError *err);

@@ -195,7 +195,8 @@ static inline void editscript_space_add_length(GtEditscript *es,
         tmp <<= 1;
       }
     }
-    /* either add remaining bits or one zero element to seperated */
+    /* tmp contains either the remaining bits or one zero element to seperated
+     */
     editscript_space_add_next(es, fillpos, tmp);
 
     /* store actual value */

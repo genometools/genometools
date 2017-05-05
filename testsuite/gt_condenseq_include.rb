@@ -239,10 +239,10 @@ Test do
     ["-full_diags yes -indexname foo -brute_force #{basename}",
      /not compatible/],
     ["-indexname foo -kmersize 8 -windowsize 8 -cutoff 0 -disable_prune " \
-     "#{basename}", 
+     "#{basename}",
      "'-cutoff 0' disables cutoffs, so '-disable_prune' should not be set"],
     ["-indexname foo -kmersize 8 -windowsize 8 -cutoff 0 -fraction 3 " \
-     "#{basename}", 
+     "#{basename}",
      "option \"-cutoff\" and option \"-fraction\" exclude each other"]
   ]
   compress_option_fails.each do |call, errmsg|

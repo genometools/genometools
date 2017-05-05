@@ -25,12 +25,12 @@
 #include "match/shu_unitfile.h"
 
 typedef struct ShuNode {
-  bool process;
-  unsigned parentOffset;
+  bool      process;
+  unsigned  parentOffset;
   GtUword **countTermSubtree;
-  GtUword depth,
-                lower,
-                upper;
+  GtUword   depth,
+            lower,
+            upper;
 } ShuNode;
 
 GT_STACK_DECLARESTRUCT(ShuNode, 256UL);
