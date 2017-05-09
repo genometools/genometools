@@ -48,6 +48,7 @@ static inline const char *gt_gfa_writer_versionstr(GtGfaVersion version)
     default:
       gt_assert(false);
   }
+  return "UNKNOWN";
 }
 
 int gt_gfa_writer_show_header(GtGfaWriter *gw,

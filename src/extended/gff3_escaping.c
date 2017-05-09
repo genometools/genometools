@@ -178,23 +178,23 @@ int gt_gff3_escaping_unit_test(GtError *err)
 
   /* test allowed chars, need not be escaped but should be unescaped */
   for (i = ' '; !had_err && i < 0x7F; i++) {
-    char code[4];
-    snprintf(code, 4, "%%%02X", i);
+    char code[10];
+    snprintf(code, 10, "%%%02X", i);
     had_err = test_single_escaping((char) i, code, false, true, err);
   }
 
   /* control characters, must be escaped and unescaped */
   for (i = 1; !had_err && i < ' '; i++) {
-    char code[4];
-    snprintf(code, 4, "%%%02X", i);
+    char code[10];
+    snprintf(code, 10, "%%%02X", i);
     had_err = test_single_escaping((char) i, code, true, true, err);
   }
 
   /* non-hex codes (e.g. '%ZS') should be ignored altogether */
   for (i = 0x7F; !had_err && i <= 0xFF; i++) {
-    char code[10];
-    snprintf(code, 10, "foo%%%Xbar", i);
-    had_err = gt_gff3_unescape(unescaped, code, 10, err);
+    char code[16];
+    snprintf(code, 16, "foo%%%Xbar", i);
+    had_err = gt_gff3_unescape(unescaped, code, 16, err);
     gt_ensure(!strcmp(gt_str_get(unescaped), code));
     gt_str_reset(unescaped);
   }
