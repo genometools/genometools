@@ -55,7 +55,7 @@ int                 gt_condenseq_creator_create(
                                           GtLogger *kdb_logger,
                                           GtError *err);
 /* This option turns of optimized seed extension. Every seed is used for xdrop
-   without filtering. And no cutoff is used for number of considered kmer
+   without filtering. And no cutoff is used for number of considered k-mer
    positions.
    Consider this to be a development option for benchmarking purpose.
    Disables diagonals and filtered extension. */
@@ -83,25 +83,25 @@ void                gt_condenseq_creator_enable_full_diagonals(
    effect as gt_condenseq_creator_enable_opt(). */
 void                gt_condenseq_creator_disable_full_diagonals(
                                          GtCondenseqCreator *condenseq_creator);
-/* If a kmer appears more often than <cutoff_value> in the unique data it won't
+/* If a k-mer appears more often than <cutoff_value> in the unique data it won't
    be used to find new alignments, because it likely has a low chance to find
    new alignments. */
 void                gt_condenseq_creator_set_cutoff(
                                           GtCondenseqCreator *condenseq_creator,
                                           GtUword cutoff_value);
-/* If this option is used every kmer in the unique data will be used to find new
+/* If this option is used every k-mer in the unique data will be used to find new
    alignments. */
 void                gt_condenseq_creator_disable_cutoff(
                                          GtCondenseqCreator *condenseq_creator);
 /* If this option is set the <cutoff_value> will be deduced by the current mean
-   value of kmers in the unique data. */
+   value of k-mers in the unique data. */
 void                gt_condenseq_creator_use_mean_cutoff(
                                          GtCondenseqCreator *condenseq_creator);
-/* If this option is set only <cutoff_value> many kmers will be saved to find
+/* If this option is set only <cutoff_value> many k-mers will be saved to find
    alignments. Only works when a cutoff is set. */
 void                gt_condenseq_creator_disable_prune(
                                          GtCondenseqCreator *condenseq_creator);
-/* This option specifies which fraction of the mean value of each kmer in the
+/* This option specifies which fraction of the mean value of each k-mer in the
    unique data is used to calculate a current <cutoff_value> (mean/<fraction>.*/
 void                gt_condenseq_creator_set_mean_fraction(
                                           GtCondenseqCreator *condenseq_creator,

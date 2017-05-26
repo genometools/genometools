@@ -95,57 +95,57 @@ uint32_t        gt_sam_alignment_flag(GtSamAlignment *sam_alignment);
 
 /* Checks the flag and returns true if corresponding bit is set in flag of
    <sam_alignment>.
-   See sam/bam fileformat documentation for explanation of meaning of bits. */
+   See sam/bam file format documentation for explanation of meaning of bits. */
 bool            gt_sam_alignment_is_paired(GtSamAlignment *sam_alignment);
 
 /* Checks the flag and returns true if corresponding bit is set in flag of
    <sam_alignment>.
-   See sam/bam fileformat documentation for explanation of meaning of bits. */
+   See sam/bam file format documentation for explanation of meaning of bits. */
 bool            gt_sam_alignment_is_proper_paired(
                                                  GtSamAlignment *sam_alignment);
 /* Checks the flag and returns true if corresponding bit is set in flag of
    <sam_alignment>.
-   See sam/bam fileformat documentation for explanation of meaning of bits. */
+   See sam/bam file format documentation for explanation of meaning of bits. */
 bool            gt_sam_alignment_is_unmapped(GtSamAlignment *sam_alignment);
 
 /* Checks the flag and returns true if corresponding bit is set in flag of
    <sam_alignment>.
-   See sam/bam fileformat documentation for explanation of meaning of bits. */
+   See sam/bam file format documentation for explanation of meaning of bits. */
 bool            gt_sam_alignment_mate_is_unmapped(
                                                  GtSamAlignment *sam_alignment);
 /* Checks the flag and returns true if corresponding bit is set in flag of
    <sam_alignment>.
-   See sam/bam fileformat documentation for explanation of meaning of bits. */
+   See sam/bam file format documentation for explanation of meaning of bits. */
 bool            gt_sam_alignment_is_reverse(GtSamAlignment *sam_alignment);
 
 /* Checks the flag and returns true if corresponding bit is set in flag of
    <sam_alignment>.
-   See sam/bam fileformat documentation for explanation of meaning of bits. */
+   See sam/bam file format documentation for explanation of meaning of bits. */
 bool            gt_sam_alignment_mate_is_reverse(GtSamAlignment *sam_alignment);
 
 /* Checks the flag and returns true if corresponding bit is set in flag of
    <sam_alignment>.
-   See sam/bam fileformat documentation for explanation of meaning of bits. */
+   See sam/bam file format documentation for explanation of meaning of bits. */
 bool            gt_sam_alignment_is_read1(GtSamAlignment *sam_alignment);
 
 /* Checks the flag and returns true if corresponding bit is set in flag of
    <sam_alignment>.
-   See sam/bam fileformat documentation for explanation of meaning of bits. */
+   See sam/bam file format documentation for explanation of meaning of bits. */
 bool            gt_sam_alignment_is_read2(GtSamAlignment *sam_alignment);
 
 /* Checks the flag and returns true if corresponding bit is set in flag of
    <sam_alignment>.
-   See sam/bam fileformat documentation for explanation of meaning of bits. */
+   See sam/bam file format documentation for explanation of meaning of bits. */
 bool            gt_sam_alignment_is_secondary(GtSamAlignment *sam_alignment);
 
 /* Checks the flag and returns true if corresponding bit is set in flag of
    <sam_alignment>.
-   See sam/bam fileformat documentation for explanation of meaning of bits. */
+   See sam/bam file format documentation for explanation of meaning of bits. */
 bool            gt_sam_alignment_has_qc_failure(GtSamAlignment *sam_alignment);
 
 /* Checks the flag and returns true if corresponding bit is set in flag of
    <sam_alignment>.
-   See sam/bam fileformat documentation for explanation of meaning of bits. */
+   See sam/bam file format documentation for explanation of meaning of bits. */
 bool            gt_sam_alignment_is_optical_pcr_duplicate(
                                                  GtSamAlignment *sam_alignment);
 /* Free all memory of <sam_alignment>. */

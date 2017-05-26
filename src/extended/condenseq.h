@@ -37,10 +37,10 @@ typedef struct GtCondenseq GtCondenseq;
 
 /* Return new <GtCondenseq> object filled with data read from file with basename
    <indexname>.
-   Returns <NULL> on error, or fails if read/file access failes. */
+   Returns <NULL> on error, or fails if read/file access fails. */
 GtCondenseq*       gt_condenseq_new_from_file(const char *indexname,
                                               GtLogger *logger, GtError *err);
-/* Write <condenseq> to File <fp>, fails hard on io-error, returns error value
+/* Write <condenseq> to File <fp>, fails hard on IO-error, returns error value
    and sets <err> accordingly on data errors. */
 int                gt_condenseq_write(GtCondenseq *condenseq, FILE* fp,
                                       GtError *err);
@@ -75,7 +75,7 @@ GtUword            gt_condenseq_seqstartpos(const GtCondenseq *condenseq,
 const char*        gt_condenseq_description(const GtCondenseq *condenseq,
                                             GtUword *desclen,
                                             GtUword seqnum);
-/* Returns the lenght of sequence <seqnum> from <condenseq> */
+/* Returns the length of sequence <seqnum> from <condenseq> */
 GtUword            gt_condenseq_seqlength(const GtCondenseq *condenseq,
                                           GtUword seqnum);
 /* Returns the encoded representation of the <id>s sequence of
@@ -159,7 +159,7 @@ GtUword             gt_condenseq_count_relevant_uniques(
                                                    const GtCondenseq *condenseq,
                                                    unsigned int min_align_len);
 /* return size in bytes of the <condenseq>, other parameters will be set to the
-   sise in bytes of the various elements. where <links> does not contain the
+   size in bytes of the various elements. Where <links> does not contain the
    size of the included editscript, but only the pointer to it. */
 GtUword             gt_condenseq_size(const GtCondenseq *condenseq,
                                       GtUword *uniques,
@@ -171,13 +171,13 @@ GtUword             gt_condenseq_size(const GtCondenseq *condenseq,
    link ranges as experimental_features */
 int                 gt_condenseq_output_to_gff3(const GtCondenseq *condenseq,
                                                 GtError *err);
-/* Returns a distripution of the lengths of the unique elements. */
+/* Returns a distribution of the lengths of the unique elements. */
 GtDiscDistri*       gt_condenseq_unique_length_dist(
                                                   const GtCondenseq *condenseq);
-/* Returns a distripution of the lengths of the link elements. */
+/* Returns a distribution of the lengths of the link elements. */
 GtDiscDistri*       gt_condenseq_link_length_dist(const GtCondenseq *condenseq);
 
-/* Returns a distripution of the compression ratios of all editscripts. */
+/* Returns a distribution of the compression ratios of all editscripts. */
 GtDiscDistri*       gt_condenseq_link_comp_dist(const GtCondenseq *condenseq);
 
 /* Returns the original seqnum from which the unique with <uid> derives, changes

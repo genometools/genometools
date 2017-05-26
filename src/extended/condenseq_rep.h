@@ -85,7 +85,7 @@ struct GtCondenseq {
 GtCondenseq* gt_condenseq_new(const GtEncseq *orig_es, GtLogger *logger);
 
 /* Returns index of the unique element with the biggest orig_startpos smaller
-   than <position>. if smallest is larger: return first. */
+   than <position>. If smallest is larger: return first. */
 GtUword      gt_condenseq_uniques_position_binsearch(
                                                    const GtCondenseq *condenseq,
                                                    GtUword position);
