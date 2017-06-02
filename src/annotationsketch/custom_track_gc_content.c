@@ -125,13 +125,13 @@ int gt_custom_track_gc_content_sketch(GtCustomTrack *ct, GtGraphics *graphics,
                           gt_graphics_get_xmargins(graphics)+ 5,
                           start_ypos
                             + gt_graphics_get_text_height(graphics)/2 - 1,
-                          "100\%");
+                          "100%%");
     gt_graphics_draw_text(graphics,
                           gt_graphics_get_xmargins(graphics)+ 5,
                           start_ypos
                             + ctgc->height
                             + gt_graphics_get_text_height(graphics)/2 - 1,
-                          "0\%");
+                          "0%%");
   }
   gt_graphics_draw_horizontal_line(graphics,
                                    gt_graphics_get_xmargins(graphics),
