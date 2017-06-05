@@ -55,7 +55,7 @@ display_options = [
                   "satisfy the filter conditions"],
   ["fstperquery", "output only the first found match per query"],
   ["blast",       "output matches in blast format 7 (tabular with comment " +
-                  "lines, instead of gap opens indels are displayed)"],
+                  "lines; instead of gap opens, indels are displayed)"],
   ["cigar",       "display cigar string representing alignment " +
                   "(no distinction between match and mismatch)"],
   ["cigarX",      "display cigar string representing alignment " +

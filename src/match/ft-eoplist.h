@@ -180,11 +180,13 @@ void gt_eoplist_format_generic(FILE *fp,
                                GtEoplistReader *eoplist_reader,
                                bool distinguish_mismatch_match,
                                const GtUchar *characters,
+                               bool subject_first,
                                GtUchar wildcardshow);
 
 void gt_eoplist_format_exact(FILE *fp,
                              const GtEoplist *eoplist,
                              GtEoplistReader *eoplist_reader,
+                             bool subject_first,
                              const GtUchar *characters);
 
 GtUword gt_eoplist_num_segments(const GtEoplist *eoplist,GtUword delta);

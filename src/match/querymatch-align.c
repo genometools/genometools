@@ -617,6 +617,7 @@ void gt_querymatchoutoptions_alignment_show(const GtQuerymatchoutoptions
                                               *querymatchoutoptions,
                                             bool exact_match,
                                             bool verify_alignment,
+                                            bool subject_first,
                                             FILE *fp)
 {
   gt_assert(querymatchoutoptions != NULL);
@@ -637,12 +638,14 @@ void gt_querymatchoutoptions_alignment_show(const GtQuerymatchoutoptions
                               querymatchoutoptions->eoplist_reader,
                               true,
                               querymatchoutoptions->characters,
+                              subject_first,
                               querymatchoutoptions->wildcardshow);
   } else
   {
     gt_eoplist_format_exact(fp,
                             querymatchoutoptions->eoplist,
                             querymatchoutoptions->eoplist_reader,
+                            subject_first,
                             querymatchoutoptions->characters);
   }
   gt_eoplist_reset(querymatchoutoptions->eoplist);

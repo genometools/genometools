@@ -322,13 +322,7 @@ static bool gt_querymatch_ordered(const GtQuerymatch *querymatch)
 
 static double gt_querymatch_similarity(GtUword distance,GtUword aligned_len)
 {
-  if (distance == 0)
-  {
-    return 100.0;
-  } else
-  {
-    return 100.0 - gt_querymatch_error_rate(distance,aligned_len);
-  }
+  return 100.0 - gt_querymatch_error_rate(distance,aligned_len);
 }
 
 static int gt_non_white_space_prefix_length(const char *s)
@@ -514,10 +508,13 @@ void gt_querymatch_prettyprint(double evalue,double bit_score,
   fputc('\n',querymatch->fp);
   if (gt_querymatch_alignment_display(out_display_flag))
   {
+    const bool subject_first = gt_querymatch_blast_display(out_display_flag)
+                                ? false : true;
     gt_querymatchoutoptions_alignment_show(querymatch->ref_querymatchoutoptions,
                                            querymatch->distance == 0
                                              ? true : false,
                                            querymatch->verify_alignment,
+                                           subject_first,
                                            querymatch->fp);
   }
 }

@@ -610,30 +610,62 @@ void gt_eoplist_show_cigar(GtEoplistReader *eoplist_reader,FILE *fp)
   }
 }
 
-static void gt_eoplist_write_lines(int numwidth,
+static void gt_eoplist_single_line(const char *tag,
+                                   int numwidth,
                                    unsigned int width,
-                                   const GtUchar *topbuf,
-                                   GtUword top_start_pos,
-                                   GtUword top_end_pos,
+                                   const GtUchar *buf,
+                                   GtUword start_pos,
+                                   GtUword end_pos,
+                                   FILE *fp)
+{
+  fprintf(fp,"%s  %-*" GT_WUS "  ",tag,numwidth,start_pos);
+  fwrite(buf,sizeof *buf,width,fp);
+  fprintf(fp,"  " GT_WU "\n",end_pos);
+}
+
+static void gt_eoplist_middle_line(int numwidth,unsigned int width,
                                    const GtUchar *midbuf,
-                                   const GtUchar *lowbuf,
-                                   GtUword low_start_pos,
-                                   GtUword low_end_pos,
+                                   FILE *fp)
+{
+  /* 5 is the length of the strings Sbjct and Query */
+  fprintf(fp,"%*s",(int) (numwidth + 5 + 4),"");
+  fwrite(midbuf,sizeof *midbuf,width,fp);
+  fputc('\n',fp);
+}
+
+static void gt_eoplist_write_lines(bool subject_first,
+                                   int numwidth,
+                                   unsigned int width,
+                                   const GtUchar *subject_buf,
+                                   GtUword subject_start_pos,
+                                   GtUword subject_end_pos,
+                                   const GtUchar *midbuf,
+                                   const GtUchar *query_buf,
+                                   GtUword query_start_pos,
+                                   GtUword query_end_pos,
                                    FILE *fp)
 {
   gt_assert(numwidth > 0);
-  fprintf(fp,"Sbjct  %-*" GT_WUS "  ",numwidth,top_start_pos);
-  fwrite(topbuf,sizeof *topbuf,width,fp);
-  fprintf(fp,"  " GT_WU "\n%*s",top_end_pos,
-                                 (int) (numwidth + sizeof ("Sbjct") + 3),
-                                 "");
-  fwrite(midbuf,sizeof *midbuf,width,fp);
-  fprintf(fp,"\nQuery  %-*" GT_WUS "  ",numwidth,low_start_pos);
-  fwrite(lowbuf,sizeof *lowbuf,width,fp);
-  fprintf(fp,"  " GT_WU "\n\n",low_end_pos);
+  if (subject_first)
+  {
+    gt_eoplist_single_line("Sbjct",numwidth,width,subject_buf,
+                           subject_start_pos,subject_end_pos,fp);
+    gt_eoplist_middle_line(numwidth,width,midbuf,fp);
+    gt_eoplist_single_line("Query",numwidth,width,query_buf,
+                           query_start_pos,query_end_pos,fp);
+  } else
+  {
+    gt_eoplist_single_line("Query",numwidth,width,query_buf,
+                           query_start_pos,query_end_pos,fp);
+    gt_eoplist_middle_line(numwidth,width,midbuf,fp);
+    gt_eoplist_single_line("Sbjct",numwidth,width,subject_buf,
+                           subject_start_pos,subject_end_pos,fp);
+  }
+  fputc('\n',fp);
 }
 
-static unsigned int gt_eoplist_show_advance(int numwidth,
+static unsigned int gt_eoplist_show_advance(bool subject_first,
+                                            int numwidth,
                                             unsigned int pos,
                                             unsigned int width,
                                             const GtUchar *topbuf,
@@ -651,7 +683,8 @@ static unsigned int gt_eoplist_show_advance(int numwidth,
     return pos + 1;
   }
   gt_assert(pos == width - 1);
-  gt_eoplist_write_lines(numwidth, width, topbuf, top_start_pos, top_end_pos,
+  gt_eoplist_write_lines(subject_first,
+                         numwidth, width, topbuf, top_start_pos, top_end_pos,
                          midbuf, lowbuf, low_start_pos, low_end_pos, fp);
   return 0;
 }
@@ -717,6 +750,7 @@ void gt_eoplist_format_generic(FILE *fp,
                                GtEoplistReader *eoplist_reader,
                                bool distinguish_mismatch_match,
                                const GtUchar *characters,
+                               bool subject_first,
                                GtUchar wildcardshow)
 {
   GtCigarOp co;
@@ -798,7 +832,8 @@ void gt_eoplist_format_generic(FILE *fp,
           {
             midbuf[pos] = (GtUchar) EOPLIST_MISMATCHSYMBOL;
           }
-          pos = gt_eoplist_show_advance(numwidth,
+          pos = gt_eoplist_show_advance(subject_first,
+                                        numwidth,
                                         pos,
                                         eoplist_reader->width,
                                         topbuf,
@@ -833,7 +868,8 @@ void gt_eoplist_format_generic(FILE *fp,
           }
           midbuf[pos] = EOPLIST_MISMATCHSYMBOL;
           lowbuf[pos] = EOPLIST_GAPSYMBOL;
-          pos = gt_eoplist_show_advance(numwidth,
+          pos = gt_eoplist_show_advance(subject_first,
+                                        numwidth,
                                         pos,
                                         eoplist_reader->width,
                                         topbuf,
@@ -867,7 +903,8 @@ void gt_eoplist_format_generic(FILE *fp,
           {
             lowbuf[pos] = cc_b;
           }
-          pos = gt_eoplist_show_advance(numwidth,
+          pos = gt_eoplist_show_advance(subject_first,
+                                        numwidth,
                                         pos,
                                         eoplist_reader->width,
                                         topbuf,
@@ -895,7 +932,8 @@ void gt_eoplist_format_generic(FILE *fp,
   }
   if (pos > 0)
   {
-    gt_eoplist_write_lines(numwidth,
+    gt_eoplist_write_lines(subject_first,
+                           numwidth,
                            pos,
                            topbuf,
                            top_start_pos,
@@ -974,6 +1012,7 @@ void gt_eoplist_format_generic(FILE *fp,
 void gt_eoplist_format_exact(FILE *fp,
                              const GtEoplist *eoplist,
                              GtEoplistReader *eoplist_reader,
+                             bool subject_first,
                              const GtUchar *characters)
 {
   GtUword idx;
@@ -998,7 +1037,8 @@ void gt_eoplist_format_exact(FILE *fp,
       cc_a = characters[cc_a];
     }
     lowbuf[pos] = topbuf[pos] = cc_a;
-    pos = gt_eoplist_show_advance(numwidth,
+    pos = gt_eoplist_show_advance(subject_first,
+                                  numwidth,
                                   pos,
                                   width,
                                   topbuf,
@@ -1016,7 +1056,8 @@ void gt_eoplist_format_exact(FILE *fp,
   }
   if (pos > 0)
   {
-    gt_eoplist_write_lines(numwidth,
+    gt_eoplist_write_lines(subject_first,
+                           numwidth,
                            pos,
                            topbuf,
                            top_start_pos,
