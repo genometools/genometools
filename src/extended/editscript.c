@@ -178,22 +178,23 @@ static inline void editscript_space_add_length(GtEditscript *es,
     editscript_space_add_next(es, fillpos, tmp);
   }
   else {
+    /* count the number elements needed */
     while (tmp != 0) {
       num_elems++;
       tmp >>= es->entry_size;
     }
-    /* number of one bits corresponds to num of elements needed */
-    tmp = (GtBitsequence) (1 << num_elems) - 1;
-    while ((tmp & GT_EDITSCRIPT_FIRSTMASK(es)) != 0) {
-      /* add ~0 (full) elements */
+
+    /* write number of entries in unary */
+    tmp = num_elems;
+    /* write full 1-entries */
+    while (tmp >= es->entry_size) {
       editscript_space_add_next(es, fillpos, GT_EDITSCRIPT_FULLMASK(es));
-      tmp >>= es->entry_size;
+      tmp -= es->entry_size;
     }
     if (tmp != 0) {
-      /* move bits to front */
-      while ((tmp & GT_EDITSCRIPT_FIRSTMASK(es)) == 0) {
-        tmp <<= 1;
-      }
+      /* write tmp 1 bits at most siginficant */
+      tmp = (GT_EDITSCRIPT_FULLMASK(es) << (es->entry_size - tmp)) &
+        GT_EDITSCRIPT_FULLMASK(es);
     }
     /* tmp contains either the remaining bits or one zero element to seperated
      */
@@ -217,31 +218,37 @@ editscript_space_get_length(const GtEditscript *es,
 {
   GtBitsequence ret = 0,
                 elem = 0,
+                part_elem = 0,
                 num_elems = 0;
 
-  num_elems = elem = editscript_space_get_next(es, pos);
+  elem = editscript_space_get_next(es, pos);
   (*elems_used)++;
   /* first bit not set, the value itself. */
   if ((elem & GT_EDITSCRIPT_FIRSTMASK(es)) == 0) {
     return elem;
   }
+  /* first bit is set, cosecutive 1-bits represent number of elements to read */
   while (elem == GT_EDITSCRIPT_FULLMASK(es)) {
+    num_elems += es->entry_size;
     elem = editscript_space_get_next(es, pos);
     (*elems_used)++;
-    if (elem != 0) {
-      num_elems <<= es->entry_size;
-      num_elems |= elem;
-    }
   }
-  /* move bits to right, max entry_size steps. */
-  while ((num_elems & 1) == 0) {
-    num_elems >>= 1;
-  }
-  while (num_elems != 0) {
-    num_elems >>= 1;
+  /* elem is not full with 1 bits, but some most significant bits are set equal
+     to number of elements to read */
+  while ((elem & GT_EDITSCRIPT_FIRSTMASK(es)) != 0) {
+    elem <<= 1;
+    part_elem = editscript_space_get_next(es, pos);
+    (*elems_used)++;
     ret <<= es->entry_size;
+    ret |= part_elem;
+  }
+  /* more elements to read as has been indicated by full 1-bit elems from above
+     */
+  while (num_elems != 0) {
+    num_elems--;
     elem = editscript_space_get_next(es, pos);
     (*elems_used)++;
+    ret <<= es->entry_size;
     ret |= elem;
   }
   return ret;
