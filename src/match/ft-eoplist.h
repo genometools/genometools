@@ -3,6 +3,7 @@
 #include <stdbool.h>
 #include "core/unused_api.h"
 #include "core/chardef.h"
+#include "core/readmode.h"
 #include "match/ft-polish.h"
 
 /* A list of edit operation is representation is represented by the following
@@ -68,8 +69,8 @@ void gt_eoplist_verify(const GtEoplist *eoplist,
                        GtUword edist,
                        bool distinguish_mismatch_match);
 
-/* The constructor for the reader with respect to the given eoplist. */
-GtEoplistReader *gt_eoplist_reader_new(const GtEoplist *eoplist);
+/* The constructor for the reader, initially set to be empty. */
+GtEoplistReader *gt_eoplist_reader_new(void);
 
 /* An eoplist_reader can be used in two modes when enumerating
    cigar symbols. In the default mode,
@@ -162,7 +163,8 @@ bool gt_eoplist_reader_next_segment(GtEoplistSegment *segment,
 */
 
 void gt_eoplist_reader_reset(GtEoplistReader *eoplist_reader,
-                             const GtEoplist *eoplist);
+                             const GtEoplist *eoplist,
+                             bool forward);
 
 void gt_eoplist_reader_reset_width(GtEoplistReader *eoplist_reader,
                                    unsigned int width);
@@ -180,13 +182,21 @@ void gt_eoplist_format_generic(FILE *fp,
                                GtEoplistReader *eoplist_reader,
                                bool distinguish_mismatch_match,
                                const GtUchar *characters,
+                               GtUword top_seqlength,
+                               GtUword low_reference,
                                bool subject_first,
+                               bool alignment_show_forward,
+                               bool show_complement_characters,
                                GtUchar wildcardshow);
 
 void gt_eoplist_format_exact(FILE *fp,
                              const GtEoplist *eoplist,
                              GtEoplistReader *eoplist_reader,
+                             GtUword top_seqlength,
+                             GtUword low_reference,
                              bool subject_first,
+                             bool alignment_show_forward,
+                             bool show_complement_characters,
                              const GtUchar *characters);
 
 GtUword gt_eoplist_num_segments(const GtEoplist *eoplist,GtUword delta);

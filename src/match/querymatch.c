@@ -434,15 +434,15 @@ void gt_querymatch_prettyprint(double evalue,double bit_score,
         fprintf(querymatch->fp,GT_WU,querymatch->querystart_fwdstrand);
         break;
       case Gt_Q_end_display:
-        if (!GT_ISDIRREVERSE(querymatch->query_readmode) ||
-            !gt_querymatch_blast_display(out_display_flag))
-        {
-          fprintf(querymatch->fp,GT_WU,
-                  gt_querymatch_queryend_relative(querymatch));
-        } else
+        if (GT_ISDIRREVERSE(querymatch->query_readmode) &&
+            gt_querymatch_blast_display(out_display_flag))
         {
           fprintf(querymatch->fp,GT_WU,
                   querymatch->querystart_fwdstrand + querymatch->querylen - 1);
+        } else
+        {
+          fprintf(querymatch->fp,GT_WU,
+                  gt_querymatch_queryend_relative(querymatch));
         }
         break;
       case Gt_Alignmentlength_display:
@@ -508,13 +508,38 @@ void gt_querymatch_prettyprint(double evalue,double bit_score,
   fputc('\n',querymatch->fp);
   if (gt_querymatch_alignment_display(out_display_flag))
   {
-    const bool subject_first = gt_querymatch_blast_display(out_display_flag)
-                                ? false : true;
+    bool subject_first = true,
+         alignment_show_forward = true,
+         show_complement_characters = false;
+    GtUword subject_seqlength = 0, query_reference = 0;
+
+    if (gt_querymatch_blast_display(out_display_flag))
+    {
+      subject_first = false;
+      if (GT_ISDIRREVERSE(querymatch->query_readmode))
+      {
+        alignment_show_forward = false;
+        if (GT_ISDIRCOMPLEMENT(querymatch->query_readmode))
+        {
+          subject_seqlength = querymatch->db_seqlen;
+          gt_assert(querymatch->query_seqlen >= querymatch->querylen);
+          query_reference = querymatch->query_seqlen - querymatch->querylen;
+        }
+      }
+      if (GT_ISDIRCOMPLEMENT(querymatch->query_readmode))
+      {
+        show_complement_characters = true;
+      }
+    }
     gt_querymatchoutoptions_alignment_show(querymatch->ref_querymatchoutoptions,
+                                           subject_seqlength,
+                                           query_reference,
                                            querymatch->distance == 0
                                              ? true : false,
                                            querymatch->verify_alignment,
                                            subject_first,
+                                           alignment_show_forward,
+                                           show_complement_characters,
                                            querymatch->fp);
   }
 }

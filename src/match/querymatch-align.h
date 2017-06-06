@@ -81,9 +81,13 @@ void gt_querymatchoutoptions_cigar_show(const GtQuerymatchoutoptions
 
 void gt_querymatchoutoptions_alignment_show(const GtQuerymatchoutoptions
                                               *querymatchoutoptions,
+                                            GtUword subject_seqlength,
+                                            GtUword query_reference,
                                             bool exact_match,
                                             bool verify_alignment,
                                             bool subject_first,
+                                            bool alignment_show_forward,
+                                            bool show_complement_characters,
                                             FILE *fp);
 
 typedef struct

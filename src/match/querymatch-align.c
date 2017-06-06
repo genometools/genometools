@@ -80,9 +80,8 @@ GtQuerymatchoutoptions *gt_querymatchoutoptions_new(const
   querymatchoutoptions->vseqbuffer = NULL;
   querymatchoutoptions->vseqbuffer_size = 0;
   querymatchoutoptions->eoplist = gt_eoplist_new();
-  querymatchoutoptions->eoplist_reader
-    = gt_eoplist_reader_new(querymatchoutoptions->eoplist);
   querymatchoutoptions->eoplist_reader_verify = NULL;
+  querymatchoutoptions->eoplist_reader = gt_eoplist_reader_new();
   if (gt_querymatch_cigarX_display(out_display_flag))
   {
     gt_eoplist_reader_distinguish_mismatch_match(
@@ -233,8 +232,7 @@ static void gt_querymtch_alignment_verification(
 {
   if (querymatchoutoptions->eoplist_reader_verify == NULL)
   {
-    querymatchoutoptions->eoplist_reader_verify
-      = gt_eoplist_reader_new(querymatchoutoptions->eoplist);
+    querymatchoutoptions->eoplist_reader_verify = gt_eoplist_reader_new();
   }
   gt_eoplist_set_sequences(querymatchoutoptions->eoplist,NULL,
                            dbstart,
@@ -608,16 +606,20 @@ void gt_querymatchoutoptions_cigar_show(const GtQuerymatchoutoptions
 {
   gt_assert(querymatchoutoptions != NULL);
   gt_eoplist_reader_reset(querymatchoutoptions->eoplist_reader,
-                          querymatchoutoptions->eoplist);
+                          querymatchoutoptions->eoplist,true);
   gt_eoplist_show_cigar(querymatchoutoptions->eoplist_reader,fp);
   gt_eoplist_reset(querymatchoutoptions->eoplist);
 }
 
 void gt_querymatchoutoptions_alignment_show(const GtQuerymatchoutoptions
                                               *querymatchoutoptions,
+                                            GtUword subject_seqlength,
+                                            GtUword query_reference,
                                             bool exact_match,
                                             bool verify_alignment,
                                             bool subject_first,
+                                            bool alignment_show_forward,
+                                            bool show_complement_characters,
                                             FILE *fp)
 {
   gt_assert(querymatchoutoptions != NULL);
@@ -638,14 +640,22 @@ void gt_querymatchoutoptions_alignment_show(const GtQuerymatchoutoptions
                               querymatchoutoptions->eoplist_reader,
                               true,
                               querymatchoutoptions->characters,
+                              subject_seqlength,
+                              query_reference,
                               subject_first,
+                              alignment_show_forward,
+                              show_complement_characters,
                               querymatchoutoptions->wildcardshow);
   } else
   {
     gt_eoplist_format_exact(fp,
                             querymatchoutoptions->eoplist,
                             querymatchoutoptions->eoplist_reader,
+                            subject_seqlength,
+                            query_reference,
                             subject_first,
+                            alignment_show_forward,
+                            show_complement_characters,
                             querymatchoutoptions->characters);
   }
   gt_eoplist_reset(querymatchoutoptions->eoplist);
