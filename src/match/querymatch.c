@@ -351,7 +351,7 @@ void gt_querymatch_prettyprint(double evalue,double bit_score,
                                const GtQuerymatch *querymatch)
 {
   const unsigned int *column_order;
-  GtUword numcolumns, idx;
+  GtUword numcolumns, idx, one_off;
   char separator;
 
   gt_assert(querymatch != NULL && querymatch->fp != NULL &&
@@ -361,9 +361,11 @@ void gt_querymatch_prettyprint(double evalue,double bit_score,
   if (gt_querymatch_blast_display(out_display_flag))
   {
     separator = '\t';
+    one_off = 1;
   } else
   {
     separator = ' ';
+    one_off = 0;
   }
   for (idx = 0; idx < numcolumns; idx++)
   {
@@ -395,11 +397,11 @@ void gt_querymatch_prettyprint(double evalue,double bit_score,
         if (!GT_ISDIRREVERSE(querymatch->query_readmode) ||
             !gt_querymatch_blast_display(out_display_flag))
         {
-          fprintf(querymatch->fp,GT_WU,querymatch->dbstart_relative);
+          fprintf(querymatch->fp,GT_WU,querymatch->dbstart_relative + one_off);
         } else
         {
           fprintf(querymatch->fp,GT_WU,querymatch->db_seqlen - 1 -
-                                       querymatch->dbstart_relative);
+                                       querymatch->dbstart_relative + one_off);
         }
         break;
       case Gt_S_end_display:
@@ -407,14 +409,14 @@ void gt_querymatch_prettyprint(double evalue,double bit_score,
             !gt_querymatch_blast_display(out_display_flag))
         {
           fprintf(querymatch->fp,GT_WU,
-                  gt_querymatch_dbend_relative(querymatch));
+                  gt_querymatch_dbend_relative(querymatch) + one_off);
         } else
         {
           gt_assert(querymatch->db_seqlen >= querymatch->dbstart_relative +
                                              querymatch->dblen);
           fprintf(querymatch->fp,GT_WU,querymatch->db_seqlen -
                                        querymatch->dbstart_relative -
-                                       querymatch->dblen);
+                                       querymatch->dblen + one_off);
         }
         break;
       case Gt_Strand_display:
@@ -431,18 +433,20 @@ void gt_querymatch_prettyprint(double evalue,double bit_score,
         gt_querymatch_description_out(querymatch->fp,querymatch->query_desc);
         break;
       case Gt_Q_start_display:
-        fprintf(querymatch->fp,GT_WU,querymatch->querystart_fwdstrand);
+        fprintf(querymatch->fp,GT_WU,querymatch->querystart_fwdstrand
+                                     + one_off);
         break;
       case Gt_Q_end_display:
-        if (GT_ISDIRREVERSE(querymatch->query_readmode) &&
-            gt_querymatch_blast_display(out_display_flag))
+        if (!GT_ISDIRREVERSE(querymatch->query_readmode) ||
+            !gt_querymatch_blast_display(out_display_flag))
         {
           fprintf(querymatch->fp,GT_WU,
-                  querymatch->querystart_fwdstrand + querymatch->querylen - 1);
+                  gt_querymatch_queryend_relative(querymatch) + one_off);
         } else
         {
           fprintf(querymatch->fp,GT_WU,
-                  gt_querymatch_queryend_relative(querymatch));
+                  querymatch->querystart_fwdstrand + querymatch->querylen - 1
+                                                   + one_off);
         }
         break;
       case Gt_Alignmentlength_display:
@@ -480,10 +484,10 @@ void gt_querymatch_prettyprint(double evalue,double bit_score,
         fprintf(querymatch->fp,GT_WU,querymatch->seedlen);
         break;
       case Gt_Seed_s_display:
-        fprintf(querymatch->fp,GT_WU,querymatch->db_seedpos_rel);
+        fprintf(querymatch->fp,GT_WU,querymatch->db_seedpos_rel + one_off);
         break;
       case Gt_Seed_q_display:
-        fprintf(querymatch->fp,GT_WU,querymatch->query_seedpos_rel);
+        fprintf(querymatch->fp,GT_WU,querymatch->query_seedpos_rel + one_off);
         break;
       case Gt_S_seqlen_display:
         fprintf(querymatch->fp,GT_WU,querymatch->db_seqlen);
@@ -534,6 +538,7 @@ void gt_querymatch_prettyprint(double evalue,double bit_score,
     gt_querymatchoutoptions_alignment_show(querymatch->ref_querymatchoutoptions,
                                            subject_seqlength,
                                            query_reference,
+                                           one_off,
                                            querymatch->distance == 0
                                              ? true : false,
                                            querymatch->verify_alignment,

@@ -83,6 +83,7 @@ void gt_querymatchoutoptions_alignment_show(const GtQuerymatchoutoptions
                                               *querymatchoutoptions,
                                             GtUword subject_seqlength,
                                             GtUword query_reference,
+                                            GtUword one_off,
                                             bool exact_match,
                                             bool verify_alignment,
                                             bool subject_first,

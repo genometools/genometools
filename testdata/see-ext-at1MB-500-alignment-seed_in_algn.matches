@@ -1,3 +1,5 @@
+# Options: -ii at1MB -l 700 -outfmt alignment=60 seed_in_algn -minidentity 80 -history 60
+# Fields: s. len, s. seqnum, s. start, strand, q. len, q. seqnum, q. start, score, editdist, % identity
 706 2 0 F 749 16 84 1269 62 91.48
 Sbjct  0    gtgantgttgatctcaaactctttgtccataatgggaagctacacaaatatttgactgtt  59
             |||| ++++++++++|||||||||||||||||||||||||||||||||||||||||||||
@@ -47,9 +49,9 @@ Sbjct  637  -tc-tctcc-ctnaa-t-tct-c-cttcttn-tcn-cna-ca-tcn-cnttnat-aa-aa  682
              || ||||| || || | ||| | ||||||  ||  | | || ||  | || || || ||
 Query  744  atcgtctccgcttaaatatctgcncttctttgtctacnancaatccacctt-atgaataa  802
 
-Sbjct  683  aa---ttt-a-tt-gat-aattttttanaa  706
+Sbjct  683  aa---ttt-a-tt-gat-aattttttanaa  705
             ||   ||| | || ||| ||||| ||| ||
-Query  803  aaaaattttaatttgatgaatttgttataa  833
+Query  803  aaaaattttaatttgatgaatttgttataa  832
 
 704 5 52 F 700 6 14 1056 116 83.48
 Sbjct  52   cgatgcaaaaaaagagtggggattcacacaattgatttctcttccaacattctacaacgc  111
@@ -96,9 +98,9 @@ Sbjct  647  gc-acttctttgtctacgatcaatcaaccttatgaataaagagata-tttgatgagtttg  704
              | |||||||| || || | ||| |  | ||| |||||||| |  | |||||||||||| 
 Query  611  -ctacttctttttcaacaa-caa-c--c-ttacgaataaagtgg-actttgatgagttt-  663
 
-Sbjct  705  taataagaaa-acgttaatgtt-t-g-tgaattgtgaagttattacttctgtt-ct  756
+Sbjct  705  taataagaaa-acgttaatgtt-t-g-tgaattgtgaagttattacttctgtt-ct  755
              |||  |  | |||  || ||| | | ||  |||||| || ||  | | |||| ||
-Query  664  -aatttgttatacgacaacgttgttgatg-cttgtgatgtaat--cgt-tgtttct  714
+Query  664  -aatttgttatacgacaacgttgttgatg-cttgtgatgtaat--cgt-tgtttct  713
 
 742 5 0 F 746 16 118 1323 55 92.61
 Sbjct  0    ggaagttaaagaaatatttgtctgttacagatggaacagtgaagcgatacaacgatgcaa  59
@@ -149,9 +151,9 @@ Sbjct  659  ctacgatcaatcaaccttatgaataaagagatatttgat--ga-g--tttgtaataagaa  713
             |||| | ||||| |||||||||||||| | || ||| ||  || |  ||||| |||| ||
 Query  777  ctacnancaatccaccttatgaataaaaaaat-tttaatttgatgaatttgttataanaa  835
 
-Sbjct  714  aacgttaatgtttgtgaattgtgaagtt  742
+Sbjct  714  aacgttaatgtttgtgaattgtgaagtt  741
             ||| ||||||||||| || |||||| ||
-Query  836  aactttaatgtttgttaaatgtgaaatt  864
+Query  836  aactttaatgtttgttaaatgtgaaatt  863
 
 756 5 0 F 750 39 34 1275 77 89.77
 Sbjct  0    ggaagttaaagaaatatttgtctgttacagatggaacagtgaagcgatacaacgatgcaa  59
@@ -202,9 +204,9 @@ Sbjct  657  gtctacgatcaatcaaccttatgaataaagagata-tttgatgagtttgtaataagaaa-  715
              || || | ||| |  | ||| |||||||| |  | ||||||||||||  |||  |  | 
 Query  691  ttcaacaa-caa-c--c-ttacgaataaagtgg-actttgatgagttt--aatttgttat  742
 
-Sbjct  716  acgttaatgtt-t-g-tgaattgtgaagttattacttctgtt-ct  756
+Sbjct  716  acgttaatgtt-t-g-tgaattgtgaagttattacttctgtt-ct  755
             |||  || ||| | | ||  |||||| || ||  | | |||| ||
-Query  743  acgacaacgttgttgatg-cttgtgatgtnat--cgt-tgtttct  784
+Query  743  acgacaacgttgttgatg-cttgtgatgtnat--cgt-tgtttct  783
 
 783 6 14 F 788 39 86 1400 57 92.74
 Sbjct  14   cgatgnnnaaaannantgnggattnncannatngatntctcttcnnnnattctnnnncgc  73
@@ -259,9 +261,9 @@ Sbjct  734  actttttttttcatgttttgctatc-aatgaaa-taaa-ggtataaaactctc-tt-ggt  788
             ||||||||||||||||||||||||| ||||||| |||| ||| |||||||||| || |||
 Query  804  actttttttttcatgttttgctatccaatgaaaataaaaggtttaaaactctcctttggt  863
 
-Sbjct  789  ttt-aaa-gt  797
+Sbjct  789  ttt-aaa-gt  796
             ||| ||| ||
-Query  864  ttttaaaagt  874
+Query  864  ttttaaaagt  873
 
 767 16 84 F 766 39 0 1248 95 87.61
 Sbjct  84   gtgaatgttgatctcaaactctttgtccataatgggaagctacacaaatatttgactgtt  143
@@ -312,7 +314,8 @@ Sbjct  741  aacatcgtctccgcttaaatatctgcn-cttctttgtctacnancaatccaccttatgaa  799
             ||||| ||||||| |||||||||  |  ||||||| || || | ||| ||   ||| |||
 Query  657  aacatagtctccgtttaaatatca-ctacttctttttcaacaa-caa-cc---ttacgaa  710
 
-Sbjct  800  taaaaaa-attttaatttgatgaatttgttataanaaaac-tt-t-aatgtttgt  851
+Sbjct  800  taaaaaa-attttaatttgatgaatttgttataanaaaac-tt-t-aatgtttgt  850
             ||||    | ||| ||  | | |||||||||||  | ||| || |  ||| ||||
-Query  711  taaagtggactttgatgagtttaatttgttatacgacaacgttgttgatgcttgt  766
+Query  711  taaagtggactttgatgagtttaatttgttatacgacaacgttgttgatgcttgt  765
 
+# Fields: s. len, s. seqnum, s. start, strand, q. len, q. seqnum, q. start, score, editdist, % identity

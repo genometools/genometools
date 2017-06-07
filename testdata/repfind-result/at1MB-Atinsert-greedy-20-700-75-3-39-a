@@ -1,3 +1,5 @@
+# Options: -minidentity 75 -l 700 -seedlength 20 -extendgreedy -ii at1MB -q /local/kurtz/genometools/testsuite/../testdata/Atinsert.fna -outfmt alignment=70 polinfo -verify-alignment -history 60
+# Fields: s. len, s. seqnum, s. start, strand, q. len, q. seqnum, q. start, score, editdist, % identity
 852 1 0 F 852 1 0 1095 203 76.17
 Sbjct  0    atgnanantcaaaaatggagtntaggtttcatatctctcgcttttctcttcatcacttcctcttcagctg  69
             ||  | | ||||||||  | | ||  ||||||||||||| |||||||||||||||||||||||||| || 
@@ -47,9 +49,9 @@ Sbjct  770  cttaggaattttaacccccnaaagggggaatggaangaaagaaaaaacccctttgcccnttcccaatc
             ||||  ||||||||||||| |||     |||  ||  ||| ||||||||||||| ||| |||||||||||
 Query  770  cttannaattttaacccccnaaannnnnaatnnaannaaanaaaaaacccctttncccnttcccaatcct  839
 
-Sbjct  840  tccctantttgc  852
+Sbjct  840  tccctantttgc  851
             |||||| ||| |
-Query  840  tccctantttnc  852
+Query  840  tccctantttnc  851
 
 # polishing(m=500,d=-500,p=30): 64/64
 718 2 1 F 718 2 1 995 147 79.53
@@ -93,9 +95,9 @@ Sbjct  631  taccactctctccctnaattctccttcttntcncnacatcncnttnataaaaaatttattgataattt
             ||||||||||||||| ||||||||||||| || | ||||| | || |||||||||||||| |||||||||
 Query  631  taccactctctccctnaattctccttcttntcncnacatcncnttnataaaaaatttattnataattttt  700
 
-Sbjct  701  tanaaacttatttttnta  719
+Sbjct  701  tanaaacttatttttnta  718
             || |||||||||||| ||
-Query  701  tanaaacttatttttnta  719
+Query  701  tanaaacttatttttnta  718
 
 # polishing(m=500,d=-500,p=30): 64/64
 718 2 1 F 718 2 1 995 147 79.53
@@ -139,9 +141,9 @@ Sbjct  631  taccactctctccctnaattctccttcttntcncnacatcncnttnataaaaaatttattgataattt
             ||||||||||||||| ||||||||||||| || | ||||| | || |||||||||||||| |||||||||
 Query  631  taccactctctccctnaattctccttcttntcncnacatcncnttnataaaaaatttattnataattttt  700
 
-Sbjct  701  tanaaacttatttttnta  719
+Sbjct  701  tanaaacttatttttnta  718
             || |||||||||||| ||
-Query  701  tanaaacttatttttnta  719
+Query  701  tanaaacttatttttnta  718
 
 # polishing(m=500,d=-500,p=30): 64/64
 745 3 1 F 745 3 1 1049 147 80.27
@@ -185,9 +187,9 @@ Sbjct  631  ccgnaataaccttacaaagaaaaattgatgatttaatttgttatacnacactttattnatgcctgtga
             ||  |||||||||||||| ||||||| || ||||||||| |||||| |||||||||| || ||| | |  
 Query  631  ccnnaataaccttacaaanaaaaattnatnatttaatttnttatacnacactttattnatncctntnann  700
 
-Sbjct  701  taaccttgtttccgctccccnaatttccttttttttcctgttttt  746
+Sbjct  701  taaccttgtttccgctccccnaatttccttttttttcctgttttt  745
             ||||||| ||||| |||||| |||||||||||||||||| |||||
-Query  701  taaccttntttccnctccccnaatttccttttttttcctnttttt  746
+Query  701  taaccttntttccnctccccnaatttccttttttttcctnttttt  745
 
 # polishing(m=500,d=-500,p=30): 64/64
 745 3 1 F 745 3 1 1049 147 80.27
@@ -231,9 +233,9 @@ Sbjct  631  ccgnaataaccttacaaagaaaaattgatgatttaatttgttatacnacactttattnatgcctgtga
             ||  |||||||||||||| ||||||| || ||||||||| |||||| |||||||||| || ||| | |  
 Query  631  ccnnaataaccttacaaanaaaaattnatnatttaatttnttatacnacactttattnatncctntnann  700
 
-Sbjct  701  taaccttgtttccgctccccnaatttccttttttttcctgttttt  746
+Sbjct  701  taaccttgtttccgctccccnaatttccttttttttcctgttttt  745
             ||||||| ||||| |||||| |||||||||||||||||| |||||
-Query  701  taaccttntttccnctccccnaatttccttttttttcctnttttt  746
+Query  701  taaccttntttccnctccccnaatttccttttttttcctnttttt  745
 
 # polishing(m=500,d=-500,p=30): 64/64
 745 3 1 F 745 3 1 1049 147 80.27
@@ -277,9 +279,9 @@ Sbjct  631  ccgnaataaccttacaaagaaaaattgatgatttaatttgttatacnacactttattnatgcctgtga
             ||  |||||||||||||| ||||||| || ||||||||| |||||| |||||||||| || ||| | |  
 Query  631  ccnnaataaccttacaaanaaaaattnatnatttaatttnttatacnacactttattnatncctntnann  700
 
-Sbjct  701  taaccttgtttccgctccccnaatttccttttttttcctgttttt  746
+Sbjct  701  taaccttgtttccgctccccnaatttccttttttttcctgttttt  745
             ||||||| ||||| |||||| |||||||||||||||||| |||||
-Query  701  taaccttntttccnctccccnaatttccttttttttcctnttttt  746
+Query  701  taaccttntttccnctccccnaatttccttttttttcctnttttt  745
 
 # polishing(m=500,d=-500,p=30): 64/64
 745 3 1 F 745 3 1 1049 147 80.27
@@ -323,9 +325,9 @@ Sbjct  631  ccgnaataaccttacaaagaaaaattgatgatttaatttgttatacnacactttattnatgcctgtga
             ||  |||||||||||||| ||||||| || ||||||||| |||||| |||||||||| || ||| | |  
 Query  631  ccnnaataaccttacaaanaaaaattnatnatttaatttnttatacnacactttattnatncctntnann  700
 
-Sbjct  701  taaccttgtttccgctccccnaatttccttttttttcctgttttt  746
+Sbjct  701  taaccttgtttccgctccccnaatttccttttttttcctgttttt  745
             ||||||| ||||| |||||| |||||||||||||||||| |||||
-Query  701  taaccttntttccnctccccnaatttccttttttttcctnttttt  746
+Query  701  taaccttntttccnctccccnaatttccttttttttcctnttttt  745
 
 # polishing(m=500,d=-500,p=30): 64/64
 745 3 1 F 745 3 1 1049 147 80.27
@@ -369,9 +371,9 @@ Sbjct  631  ccgnaataaccttacaaagaaaaattgatgatttaatttgttatacnacactttattnatgcctgtga
             ||  |||||||||||||| ||||||| || ||||||||| |||||| |||||||||| || ||| | |  
 Query  631  ccnnaataaccttacaaanaaaaattnatnatttaatttnttatacnacactttattnatncctntnann  700
 
-Sbjct  701  taaccttgtttccgctccccnaatttccttttttttcctgttttt  746
+Sbjct  701  taaccttgtttccgctccccnaatttccttttttttcctgttttt  745
             ||||||| ||||| |||||| |||||||||||||||||| |||||
-Query  701  taaccttntttccnctccccnaatttccttttttttcctnttttt  746
+Query  701  taaccttntttccnctccccnaatttccttttttttcctnttttt  745
 
 # polishing(m=500,d=-500,p=30): 64/64
 798 5 2 F 798 5 2 1116 160 79.95
@@ -419,9 +421,9 @@ Sbjct  702  ttgtaataagaaaacgttaatgtttgtgaattgtgaagttattacttctgttcttctgagttttttta
             || |||||| ||||| ||||| ||| | |||| | || ||||||||||| ||||||| | ||||||||||
 Query  702  ttntaataanaaaacnttaatntttntnaattntnaanttattacttctnttcttctnantttttttatt  771
 
-Sbjct  772  tcaatgaaaataaaactcttaccggttt  800
+Sbjct  772  tcaatgaaaataaaactcttaccggttt  799
             ||||| |||||||||||||||||  |||
-Query  772  tcaatnaaaataaaactcttaccnnttt  800
+Query  772  tcaatnaaaataaaactcttaccnnttt  799
 
 # polishing(m=500,d=-500,p=30): 64/64
 798 5 2 F 798 5 2 1116 160 79.95
@@ -469,9 +471,9 @@ Sbjct  702  ttgtaataagaaaacgttaatgtttgtgaattgtgaagttattacttctgttcttctgagttttttta
             || |||||| ||||| ||||| ||| | |||| | || ||||||||||| ||||||| | ||||||||||
 Query  702  ttntaataanaaaacnttaatntttntnaattntnaanttattacttctnttcttctnantttttttatt  771
 
-Sbjct  772  tcaatgaaaataaaactcttaccggttt  800
+Sbjct  772  tcaatgaaaataaaactcttaccggttt  799
             ||||| |||||||||||||||||  |||
-Query  772  tcaatnaaaataaaactcttaccnnttt  800
+Query  772  tcaatnaaaataaaactcttaccnnttt  799
 
 # polishing(m=500,d=-500,p=30): 64/64
 798 5 2 F 798 5 2 1116 160 79.95
@@ -519,9 +521,9 @@ Sbjct  702  ttgtaataagaaaacgttaatgtttgtgaattgtgaagttattacttctgttcttctgagttttttta
             || |||||| ||||| ||||| ||| | |||| | || ||||||||||| ||||||| | ||||||||||
 Query  702  ttntaataanaaaacnttaatntttntnaattntnaanttattacttctnttcttctnantttttttatt  771
 
-Sbjct  772  tcaatgaaaataaaactcttaccggttt  800
+Sbjct  772  tcaatgaaaataaaactcttaccggttt  799
             ||||| |||||||||||||||||  |||
-Query  772  tcaatnaaaataaaactcttaccnnttt  800
+Query  772  tcaatnaaaataaaactcttaccnnttt  799
 
 # polishing(m=500,d=-500,p=30): 64/64
 764 39 107 F 760 6 35 960 188 75.33
@@ -565,9 +567,9 @@ Sbjct  735  tttgttatacgacaacgttgttgatgcttgtgatgtnatcgttgtttctgctctccgagttttcgttt
             ||| |||||| ||||| || || || ||| | || | ||| || ||||| |||||| | ||||| |||||
 Query  665  tttnttatacnacaacnttnttnatncttntnatntaatcnttntttctnctctccnanttttcntttta  734
 
-Sbjct  805  ctttttttttcatgttttgctatccaatgaaaataaaaggtttaaaactctcctttggtttttaaa  871
+Sbjct  805  ctttttttttcatgttttgctatccaatgaaaataaaaggtttaaaactctcctttggtttttaaa  870
             ||||||||||||| |||| ||||| ||| ||| ||||   | |||||||||| ||   |||| |||
-Query  735  ctttttttttcatnttttnctatc-aatnaaa-taaa-nntataaaactctc-tt-nntttt-aaa  795
+Query  735  ctttttttttcatnttttnctatc-aatnaaa-taaa-nntataaaactctc-tt-nntttt-aaa  794
 
 # polishing(m=500,d=-500,p=30): 64/64
 762 6 35 F 762 6 35 993 177 76.77
@@ -611,9 +613,9 @@ Sbjct  665  tttgttatacgacaacgttgttgatgcttgtgatgtaatcgttgtttctgctctccgagttttcgttt
             ||| |||||| ||||| || || || ||| | || ||||| || ||||| |||||| | ||||| |||||
 Query  665  tttnttatacnacaacnttnttnatncttntnatntaatcnttntttctnctctccnanttttcntttta  734
 
-Sbjct  735  ctttttttttcatgttttgctatcaatgaaataaaggtataaaactctcttggttttaaagt  797
+Sbjct  735  ctttttttttcatgttttgctatcaatgaaataaaggtataaaactctcttggttttaaagt  796
             ||||||||||||| |||| |||||||| |||||||  ||||||||||||||  ||||||| |
-Query  735  ctttttttttcatnttttnctatcaatnaaataaanntataaaactctcttnnttttaaant  797
+Query  735  ctttttttttcatnttttnctatcaatnaaataaanntataaaactctcttnnttttaaant  796
 
 # polishing(m=500,d=-500,p=30): 64/64
 764 39 107 F 760 6 35 960 188 75.33
@@ -657,9 +659,9 @@ Sbjct  735  tttgttatacgacaacgttgttgatgcttgtgatgtnatcgttgtttctgctctccgagttttcgttt
             ||| |||||| ||||| || || || ||| | || | ||| || ||||| |||||| | ||||| |||||
 Query  665  tttnttatacnacaacnttnttnatncttntnatntaatcnttntttctnctctccnanttttcntttta  734
 
-Sbjct  805  ctttttttttcatgttttgctatccaatgaaaataaaaggtttaaaactctcctttggtttttaaa  871
+Sbjct  805  ctttttttttcatgttttgctatccaatgaaaataaaaggtttaaaactctcctttggtttttaaa  870
             ||||||||||||| |||| ||||| ||| ||| ||||   | |||||||||| ||   |||| |||
-Query  735  ctttttttttcatnttttnctatc-aatnaaa-taaa-nntataaaactctc-tt-nntttt-aaa  795
+Query  735  ctttttttttcatnttttnctatc-aatnaaa-taaa-nntataaaactctc-tt-nntttt-aaa  794
 
 # polishing(m=500,d=-500,p=30): 64/64
 762 6 35 F 762 6 35 993 177 76.77
@@ -703,9 +705,9 @@ Sbjct  665  tttgttatacgacaacgttgttgatgcttgtgatgtaatcgttgtttctgctctccgagttttcgttt
             ||| |||||| ||||| || || || ||| | || ||||| || ||||| |||||| | ||||| |||||
 Query  665  tttnttatacnacaacnttnttnatncttntnatntaatcnttntttctnctctccnanttttcntttta  734
 
-Sbjct  735  ctttttttttcatgttttgctatcaatgaaataaaggtataaaactctcttggttttaaagt  797
+Sbjct  735  ctttttttttcatgttttgctatcaatgaaataaaggtataaaactctcttggttttaaagt  796
             ||||||||||||| |||| |||||||| |||||||  ||||||||||||||  ||||||| |
-Query  735  ctttttttttcatnttttnctatcaatnaaataaanntataaaactctcttnnttttaaant  797
+Query  735  ctttttttttcatnttttnctatcaatnaaataaanntataaaactctcttnnttttaaant  796
 
 # polishing(m=500,d=-500,p=30): 64/64
 762 6 35 F 762 6 35 993 177 76.77
@@ -749,9 +751,9 @@ Sbjct  665  tttgttatacgacaacgttgttgatgcttgtgatgtaatcgttgtttctgctctccgagttttcgttt
             ||| |||||| ||||| || || || ||| | || ||||| || ||||| |||||| | ||||| |||||
 Query  665  tttnttatacnacaacnttnttnatncttntnatntaatcnttntttctnctctccnanttttcntttta  734
 
-Sbjct  735  ctttttttttcatgttttgctatcaatgaaataaaggtataaaactctcttggttttaaagt  797
+Sbjct  735  ctttttttttcatgttttgctatcaatgaaataaaggtataaaactctcttggttttaaagt  796
             ||||||||||||| |||| |||||||| |||||||  ||||||||||||||  ||||||| |
-Query  735  ctttttttttcatnttttnctatcaatnaaataaanntataaaactctcttnnttttaaant  797
+Query  735  ctttttttttcatnttttnctatcaatnaaataaanntataaaactctcttnnttttaaant  796
 
 # polishing(m=500,d=-500,p=30): 64/64
 764 39 107 F 760 6 35 960 188 75.33
@@ -795,9 +797,9 @@ Sbjct  735  tttgttatacgacaacgttgttgatgcttgtgatgtnatcgttgtttctgctctccgagttttcgttt
             ||| |||||| ||||| || || || ||| | || | ||| || ||||| |||||| | ||||| |||||
 Query  665  tttnttatacnacaacnttnttnatncttntnatntaatcnttntttctnctctccnanttttcntttta  734
 
-Sbjct  805  ctttttttttcatgttttgctatccaatgaaaataaaaggtttaaaactctcctttggtttttaaa  871
+Sbjct  805  ctttttttttcatgttttgctatccaatgaaaataaaaggtttaaaactctcctttggtttttaaa  870
             ||||||||||||| |||| ||||| ||| ||| ||||   | |||||||||| ||   |||| |||
-Query  735  ctttttttttcatnttttnctatc-aatnaaa-taaa-nntataaaactctc-tt-nntttt-aaa  795
+Query  735  ctttttttttcatnttttnctatc-aatnaaa-taaa-nntataaaactctc-tt-nntttt-aaa  794
 
 # polishing(m=500,d=-500,p=30): 64/64
 863 16 2 F 863 16 2 1204 174 79.84
@@ -849,9 +851,9 @@ Sbjct  772  tttgtctacnancaatccaccttatgaataaaaaaattttaatttgatgaatttgttataanaaaact
             ||| ||||| | ||||||||||||| ||||||||||||||||||| || ||||| |||||| ||||||||
 Query  772  tttntctacnancaatccaccttatnaataaaaaaattttaatttnatnaatttnttataanaaaacttt  841
 
-Sbjct  842  aatgtttgttaaatgtgaaattt  865
+Sbjct  842  aatgtttgttaaatgtgaaattt  864
             ||| ||| |||||| | ||||||
-Query  842  aatntttnttaaatntnaaattt  865
+Query  842  aatntttnttaaatntnaaattt  864
 
 # polishing(m=500,d=-500,p=30): 64/64
 863 16 2 F 863 16 2 1204 174 79.84
@@ -903,8 +905,8 @@ Sbjct  772  tttgtctacnancaatccaccttatgaataaaaaaattttaatttgatgaatttgttataanaaaact
             ||| ||||| | ||||||||||||| ||||||||||||||||||| || ||||| |||||| ||||||||
 Query  772  tttntctacnancaatccaccttatnaataaaaaaattttaatttnatnaatttnttataanaaaacttt  841
 
-Sbjct  842  aatgtttgttaaatgtgaaattt  865
+Sbjct  842  aatgtttgttaaatgtgaaattt  864
             ||| ||| |||||| | ||||||
-Query  842  aatntttnttaaatntnaaattt  865
+Query  842  aatntttnttaaatntnaaattt  864
 
 # polishing(m=500,d=-500,p=30): 64/64

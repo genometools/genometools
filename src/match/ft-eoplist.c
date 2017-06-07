@@ -645,7 +645,8 @@ static void gt_eoplist_middle_line(int numwidth,unsigned int width,
   fputc('\n',fp);
 }
 
-static void gt_eoplist_write_lines(bool subject_first,
+static void gt_eoplist_write_lines(GtUword one_off,
+                                   bool subject_first,
                                    int numwidth,
                                    unsigned int width,
                                    const GtUchar *subject_buf,
@@ -662,35 +663,42 @@ static void gt_eoplist_write_lines(bool subject_first,
   if (subject_first)
   {
     gt_eoplist_single_line("Sbjct",numwidth,width,subject_buf,
-                           subject_start_pos,subject_end_pos,fp);
+                           subject_start_pos + one_off,
+                           subject_end_pos + one_off,fp);
     gt_eoplist_middle_line(numwidth,width,midbuf,fp);
     gt_eoplist_single_line("Query",numwidth,width,query_buf,
-                           query_start_pos,query_end_pos,fp);
+                           query_start_pos + one_off,
+                           query_end_pos + one_off,fp);
   } else
   {
     gt_eoplist_single_line("Query",numwidth,width,query_buf,
-                             query_start_pos,query_end_pos,fp);
+                           query_start_pos + one_off,
+                           query_end_pos + one_off,fp);
     gt_eoplist_middle_line(numwidth,width,midbuf,fp);
     if (subject_seqlength == 0)
     {
       gt_eoplist_single_line("Sbjct",numwidth,width,subject_buf,
-                             subject_start_pos,subject_end_pos,fp);
+                             subject_start_pos + one_off,
+                             subject_end_pos + one_off,fp);
     } else
     {
       gt_assert(subject_seqlength > subject_start_pos &&
                 subject_seqlength >= subject_end_pos);
       gt_eoplist_single_line("Sbjct",numwidth,width,subject_buf,
-                             subject_seqlength - 1 - subject_start_pos,
-                             subject_seqlength > subject_end_pos
+                             subject_seqlength - 1 - subject_start_pos
+                               + one_off,
+                             one_off +
+                             (subject_seqlength > subject_end_pos
                                ? subject_seqlength - 1 - subject_end_pos
-                               : 0,
+                               : 0),
                              fp);
     }
   }
   fputc('\n',fp);
 }
 
-static unsigned int gt_eoplist_show_advance(bool subject_first,
+static unsigned int gt_eoplist_show_advance(GtUword one_off,
+                                            bool subject_first,
                                             int numwidth,
                                             unsigned int pos,
                                             unsigned int width,
@@ -710,7 +718,7 @@ static unsigned int gt_eoplist_show_advance(bool subject_first,
     return pos + 1;
   }
   gt_assert(pos == width - 1);
-  gt_eoplist_write_lines(subject_first,
+  gt_eoplist_write_lines(one_off,subject_first,
                          numwidth, width, topbuf,
                          top_seqlength, top_start_pos, top_end_pos,
                          midbuf, lowbuf, low_start_pos, low_end_pos, fp);
@@ -780,6 +788,7 @@ void gt_eoplist_format_generic(FILE *fp,
                                const GtUchar *characters,
                                GtUword top_seqlength,
                                GtUword low_reference,
+                               GtUword one_off,
                                bool subject_first,
                                bool alignment_show_forward,
                                bool show_complement_characters,
@@ -900,7 +909,8 @@ void gt_eoplist_format_generic(FILE *fp,
           {
             midbuf[pos] = (GtUchar) EOPLIST_MISMATCHSYMBOL;
           }
-          pos = gt_eoplist_show_advance(subject_first,
+          pos = gt_eoplist_show_advance(one_off,
+                                        subject_first,
                                         numwidth,
                                         pos,
                                         eoplist_reader->width,
@@ -949,7 +959,8 @@ void gt_eoplist_format_generic(FILE *fp,
           }
           midbuf[pos] = EOPLIST_MISMATCHSYMBOL;
           lowbuf[pos] = EOPLIST_GAPSYMBOL;
-          pos = gt_eoplist_show_advance(subject_first,
+          pos = gt_eoplist_show_advance(one_off,
+                                        subject_first,
                                         numwidth,
                                         pos,
                                         eoplist_reader->width,
@@ -997,7 +1008,8 @@ void gt_eoplist_format_generic(FILE *fp,
           {
             lowbuf[pos] = cc_b;
           }
-          pos = gt_eoplist_show_advance(subject_first,
+          pos = gt_eoplist_show_advance(one_off,
+                                        subject_first,
                                         numwidth,
                                         pos,
                                         eoplist_reader->width,
@@ -1028,17 +1040,18 @@ void gt_eoplist_format_generic(FILE *fp,
   }
   if (pos > 0)
   {
-    gt_eoplist_write_lines(subject_first,
+    gt_eoplist_write_lines(one_off,
+                           subject_first,
                            numwidth,
                            pos,
                            topbuf,
                            top_seqlength,
                            top_start_pos,
-                           eoplist->ustart + idx_u,
+                           eoplist->ustart + MIN(idx_u,eoplist->ulen - 1),
                            midbuf,
                            lowbuf,
                            low_start_pos,
-                           low_start_base + idx_v,
+                           low_start_base + MIN(idx_v,eoplist->vlen - 1),
                            fp);
   }
   if (eoplist->pol_info != NULL && eoplist->pol_info_out)
@@ -1111,6 +1124,7 @@ void gt_eoplist_format_exact(FILE *fp,
                              GtEoplistReader *eoplist_reader,
                              GtUword top_seqlength,
                              GtUword low_reference,
+                             GtUword one_off,
                              bool subject_first,
                              bool alignment_show_forward,
                              bool show_complement_characters,
@@ -1146,7 +1160,8 @@ void gt_eoplist_format_exact(FILE *fp,
       cc_a = characters[cc_a];
     }
     lowbuf[pos] = topbuf[pos] = cc_a;
-    pos = gt_eoplist_show_advance(subject_first,
+    pos = gt_eoplist_show_advance(one_off,
+                                  subject_first,
                                   numwidth,
                                   pos,
                                   width,
@@ -1166,17 +1181,18 @@ void gt_eoplist_format_exact(FILE *fp,
   }
   if (pos > 0)
   {
-    gt_eoplist_write_lines(subject_first,
+    gt_eoplist_write_lines(one_off,
+                           subject_first,
                            numwidth,
                            pos,
                            topbuf,
                            top_seqlength,
                            top_start_pos,
-                           eoplist->ustart + idx,
+                           eoplist->ustart + MIN(idx,eoplist->ulen - 1),
                            midbuf,
                            lowbuf,
                            low_start_pos,
-                           eoplist->vstart + idx,
+                           eoplist->vstart + MIN(idx,eoplist->vlen - 1),
                            fp);
   }
 }

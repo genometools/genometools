@@ -1,3 +1,5 @@
+# Options: -ii at1MB -l 500 -outfmt alignment=70 -minidentity 80 -history 60
+# Fields: s. len, s. seqnum, s. start, strand, q. len, q. seqnum, q. start, score, editdist, % identity
 597 1 0 F 592 4 7 898 97 83.68
 Sbjct  0    atgnanantcaaaaatggagtntaggtttcatatct-ctcgcttttctcttcatcacttcctcttcagct  68
             ||| | | ||| ||||||||| ||||||||| || | || ||||| |||||||||||||||||||| |||
@@ -31,9 +33,9 @@ Sbjct  481  tggggtttcggacaattgattcctcnatc-aacattctacaacgcgaacgaagg-ttacctt-tgacc
             ||||| |||  |||||||||| |||  || |||||||||||||||||||||||| || |||| || ||| 
 Query  490  tggggattcncacaattgatttctct-tccaacattctacaacgcgaacgaagggtt-ccttgtg-cca-  556
 
-Sbjct  548  ggacactggttccttttgggtggcnggaaaancctttattgtttaaacc  597
+Sbjct  548  ggacactggttccttttgggtggcnggaaaancctttattgtttaaacc  596
             ||||||   ||||||| ||||| | | | || | || || ||| || ||
-Query  557  ggacacancttccttt-gggtg-ctg-anaa-c-ttcatcgtt-aaccc  599
+Query  557  ggacacancttccttt-gggtg-ctg-anaa-c-ttcatcgtt-aaccc  598
 
 538 1 9 F 523 47 0 779 94 82.28
 Sbjct  9    caaaaatggagtntaggtttcatatctctcgcttttctcttcatcacttcctcttcagctgagttcatca  78
@@ -64,9 +66,9 @@ Sbjct  420  acacaaatatttgactgttacagatgg-cttanttgaagcgatataacaatgcnaaaaaagaatgggg
             | | || |||| | ||||||||||||| |  | | ||| ||||  | | |||| |||||||| ||||| |
 Query  413  aaagaa-tatt-gtctgttacagatggac--a-t-gaancgatcca-cnatgcnaaaaaaga-tggggat  474
 
-Sbjct  488  tcggacaattgattcctcnatcaacattctacaacgcgaacgaaggttacctt-tgacca  547
+Sbjct  488  tcggacaattgattcctcnatcaacattctacaacgcgaacgaaggttacctt-tgacca  546
              |  ||| ||||||| ||  || |||| || || | |||| |||||| || ||  |||||
-Query  475  cc--aca-ttgattc-tc--tccacat-ct-ca-c-cgaa-gaaggt-actttcagacca  523
+Query  475  cc--aca-ttgattc-tc--tccacat-ct-ca-c-cgaa-gaaggt-actttcagacca  522
 
 577 2 72 F 606 3 0 916 89 84.95
 Sbjct  72   gtgaagcgatataacaatgcgaaaaaagaatggggtttcggacaattgattcctcgatc-aacattctac  140
@@ -101,9 +103,9 @@ Sbjct  554  tatc-tactgttg-ctgat--taac-ga-gcatccaaaggattt-tggtga-tga-gccnt-atctt-
             |||| || || || | ||   |||  || ||||| ||||| | | |||||| ||| ||| | |||||  |
 Query  489  tatcatattgatgtcagaagctaaaagatgcatcnaaagggtatatggtgaatgatgccattatcttttg  558
 
-Sbjct  611  aa-ctgaa-tggttaag-nc-ctat-acca-c-t-ctctcc-ctnaa  649
+Sbjct  611  aa-ctgaa-tggttaag-nc-ctat-acca-c-t-ctctcc-ctnaa  648
             || ||||| ||||||||  | || | | || | |  ||||| || ||
-Query  559  aaactgaaatggttaaggtctctgtgaacaacatantctccncttaa  606
+Query  559  aaactgaaatggttaaggtctctgtgaacaacatantctccncttaa  605
 
 626 2 34 F 656 5 0 1063 73 88.61
 Sbjct  34   ggaagctacacaaatatttgactgttacagatggcttagtgaagcgatataacaatgcgaaaaaagaatg  103
@@ -142,9 +144,9 @@ Sbjct  581  caaaggat-tttggtga-tga-gccnt-atctt-gaa-ctgaa-tggttaagn-c-ctata-cca-c-
              ||||||| |||||||| ||| ||| | ||||| ||| ||||| ||||||||  | ||||| ||| | ||
 Query  559  aaaaggatatttggtgaatgatgccattatctttgaagctgaaatggttaaggtctctataaccaacatc  628
 
-Sbjct  639  -tctcc-ctnaa-t-tct-c-cttctt  660
+Sbjct  639  -tctcc-ctnaa-t-tct-c-cttctt  659
              ||||| || || | ||| | ||||||
-Query  629  gtctccgcttaaatatctgcacttctt  656
+Query  629  gtctccgcttaaatatctgcacttctt  655
 
 706 2 0 F 749 16 84 1269 62 91.48
 Sbjct  0    gtgantgttgatctcaaactctttgtccataatgggaagctacacaaatatttgactgttacagatggct  69
@@ -187,9 +189,9 @@ Sbjct  613  -ctgaa-tggttaagn-c-ctata-cca-c-tc-tctcc-ctnaa-t-tct-c-cttcttn-tcn-cn
              ||||| ||||||||  | ||||| ||| | || ||||| || || | ||| | ||||||  ||  | | 
 Query  714  gctgaaatggttaaggtctctataaccaacatcgtctccgcttaaatatctgcncttctttgtctacnan  783
 
-Sbjct  668  ca-tcn-cnttnat-aa-aaaa---ttt-a-tt-gat-aattttttanaa  706
+Sbjct  668  ca-tcn-cnttnat-aa-aaaa---ttt-a-tt-gat-aattttttanaa  705
             || ||  | || || || ||||   ||| | || ||| ||||| ||| ||
-Query  784  caatccacctt-atgaataaaaaaattttaatttgatgaatttgttataa  833
+Query  784  caatccacctt-atgaataaaaaaattttaatttgatgaatttgttataa  832
 
 660 2 0 F 687 39 0 1065 94 86.04
 Sbjct  0    gtgantgttgatctcaaactctttgtccataatgggaagctacacaaatatttgactgttacagatggct  69
@@ -228,9 +230,9 @@ Sbjct  553  -tatc-tactgttg-ctgat-taac-ga-gcatccaaaggattt-tggtga-tga-gccnt-atctt-
              |||  || || || | ||  |||  || ||||| ||||| | | |||||| ||| ||| | ||||| ||
 Query  559  atataatattgatgtcagagctaaaagatgcatcaaaagggtatatggtgaatgatgccattatctttga  628
 
-Sbjct  612  a-ctgaa-tggttaagn-c-ctat-acca-c-t-ctctccct-naattctc-cttctt  660
+Sbjct  612  a-ctgaa-tggttaagn-c-ctat-acca-c-t-ctctccct-naattctc-cttctt  659
             | ||||| ||||||||  | || | || | | |  ||||| |  || | || || |||
-Query  629  agctgaaatggttaaggtctctgtgacaaacatagtctccgtttaaatatcactactt  687
+Query  629  agctgaaatggttaaggtctctgtgacaaacatagtctccgtttaaatatcactactt  686
 
 668 3 0 F 660 5 38 1139 63 90.51
 Sbjct  0    gtgaagcgatacaacgatgcaaaaaaagagtggggattcacacaattgatttctcttccaacattctaca  69
@@ -269,9 +271,9 @@ Sbjct  557  tgaaactgaaatggttaaggtctctgtgaac-aacatantctccncttaaatatatntcactacttct
              ||| |||||||||||||||||||| | ||| |||||  ||||| ||||||||| |  |||| ||| | |
 Query  593  -gaagctgaaatggttaaggtctctat-aaccaacatcgtctccgcttaaatatctg-cacttctt-tgt  658
 
-Sbjct  626  atcccc-cgnaat-aaccttacaaagaaaaattgatgatttaat  668
+Sbjct  626  atcccc-cgnaat-aaccttacaaagaaaaattgatgatttaat  667
              | |   |  ||| |||||||  || ||| |  ||| |||| ||
-Query  659  ctacgatc--aatcaaccttatgaataaaga--gat-atttgat  698
+Query  659  ctacgatc--aatcaaccttatgaataaaga--gat-atttgat  697
 
 639 3 14 F 631 6 14 1063 69 89.13
 Sbjct  14   cgatgcaaaaaaagagtggggattcacacaattgatttctcttccaacattctacaacgcgaacgaaggg  83
@@ -310,9 +312,9 @@ Sbjct  572  taaggtctctgtgaacaa-catantctccncttaaatatatntcactacttctttatcccccgnaata
             |||||||||||||| ||| |||| |||||  ||||||||    |||||||||||| ||  |   || |||
 Query  571  taaggtctctgtga-caaacatagtctccgtttaaatat----cactacttctttttcaac---aacaac  632
 
-Sbjct  641  cttacaaagaaa  653
+Sbjct  641  cttacaaagaaa  652
             ||||| || |||
-Query  633  cttacgaataaa  645
+Query  633  cttacgaataaa  644
 
 655 3 0 F 650 16 156 1047 86 86.82
 Sbjct  0    gtgaagcgatacaacgatgcaaaaaaagagtggggattcacacaattgatttctct-tccaacattctac  68
@@ -351,9 +353,9 @@ Sbjct  557  tgaaactgaaatggttaaggtctctgtgaac-aacatantctccncttaaatatatntcactacttct
              ||| |||||||||||||||||||| | ||| |||||  ||||| ||||||||| |  | || ||| | |
 Query  711  -gaagctgaaatggttaaggtctctat-aaccaacatcgtctccgcttaaatatctg-cncttctt-tgt  776
 
-Sbjct  626  atcccccgnaat-aaccttacaaagaaaaa  655
+Sbjct  626  atcccccgnaat-aaccttacaaagaaaaa  654
              | |     |||  ||||||  || |||||
-Query  777  ctac-nancaatccaccttatgaataaaaa  806
+Query  777  ctac-nancaatccaccttatgaataaaaa  805
 
 653 3 0 F 643 39 72 1203 31 95.22
 Sbjct  0    gtgaagcgatacaacgatgcaaaaaaagagtggggattcacacaattgatttctcttccaacattctaca  69
@@ -392,9 +394,9 @@ Sbjct  560  aactgaaatggttaaggtctctgtgaacaa-catantctccncttaaatatatntcactacttcttta
             | |||||||||||||||||||||||| ||| |||| |||||  ||||||||    |||||||||||| ||
 Query  629  agctgaaatggttaaggtctctgtga-caaacatagtctccgtttaaatat----cactacttctttttc  693
 
-Sbjct  629  ccccgnaataaccttacaaagaaa  653
+Sbjct  629  ccccgnaataaccttacaaagaaa  652
               |   || |||||||| || |||
-Query  694  aac---aacaaccttacgaataaa  715
+Query  694  aac---aacaaccttacgaataaa  714
 
 613 4 16 F 571 47 0 1022 54 90.88
 Sbjct  16   cacaaatggagtctaggtttcacattacttgctttcctcttcatcacttcctcttccgctgagctcatca  85
@@ -429,9 +431,9 @@ Sbjct  506  tgatttctcttccaacattctacaacgcgaacgaagggttccttgtgccaggacacancttcctttgg
             ||||| |||| ||| ||| || || | |||| ||||| | | || | | || || || || | ||||| |
 Query  481  tgatt-ctct-cca-cat-ct-ca-c-cgaa-gaagg-tac-tt-t-c-ag-ac-ca-ct-c-tttgg-t  531
 
-Sbjct  576  gctganaacttcatcgttaacccgaccgaaaaaccagaaaaaatccctttctt  629
+Sbjct  576  gctganaacttcatcgttaacccgaccgaaaaaccagaaaaaatccctttctt  628
             ||||| | || | || ||| || ||| ||||  | |||||   ||| || |||
-Query  532  gctgana-ct-c-tcntta-cc-gac-gaaa--c-agaaa---tcc-tt-ctt  571
+Query  532  gctgana-ct-c-tcntta-cc-gac-gaaa--c-agaaa---tcc-tt-ctt  570
 
 704 5 52 F 700 6 14 1056 116 83.48
 Sbjct  52   cgatgcaaaaaaagagtggggattcacacaattgatttctcttccaacattctacaacgcgaacgaaggg  121
@@ -474,9 +476,9 @@ Sbjct  676  tatgaataaagagata-tttgatgagtttgtaataagaaa-acgttaatgtt-t-g-tgaattgtgaa
             || |||||||| |  | ||||||||||||  |||  |  | |||  || ||| | | ||  |||||| ||
 Query  635  tacgaataaagtgg-actttgatgagttt--aatttgttatacgacaacgttgttgatg-cttgtgatgt  700
 
-Sbjct  741  tattacttctgtt-ct  756
+Sbjct  741  tattacttctgtt-ct  755
              ||  | | |||| ||
-Query  701  aat--cgt-tgtttct  714
+Query  701  aat--cgt-tgtttct  713
 
 742 5 0 F 746 16 118 1323 55 92.61
 Sbjct  0    ggaagttaaagaaatatttgtctgttacagatggaacagtgaagcgatacaacgatgcaaaaaaagagtg  69
@@ -519,9 +521,9 @@ Sbjct  629  gtctccgcttaaatatctgcacttctttgtctacgatcaatcaaccttatgaataaagagatatttga
             |||||||||||||||||||| ||||||||||||| | ||||| |||||||||||||| | || ||| || 
 Query  747  gtctccgcttaaatatctgcncttctttgtctacnancaatccaccttatgaataaaaaaat-tttaatt  815
 
-Sbjct  699  -ga-g--tttgtaataagaaaacgttaatgtttgtgaattgtgaagtt  742
+Sbjct  699  -ga-g--tttgtaataagaaaacgttaatgtttgtgaattgtgaagtt  741
              || |  ||||| |||| ||||| ||||||||||| || |||||| ||
-Query  816  tgatgaatttgttataanaaaactttaatgtttgttaaatgtgaaatt  864
+Query  816  tgatgaatttgttataanaaaactttaatgtttgttaaatgtgaaatt  863
 
 756 5 0 F 750 39 34 1275 77 89.77
 Sbjct  0    ggaagttaaagaaatatttgtctgttacagatggaacagtgaagcgatacaacgatgcaaaaaaagagtg  69
@@ -564,9 +566,9 @@ Sbjct  628  cgtctccgcttaaatatctgc-acttctttgtctacgatcaatcaaccttatgaataaagagata-tt
              ||||||| |||||||||  | |||||||| || || | ||| |  | ||| |||||||| |  | ||||
 Query  662  agtctccgtttaaatatca-ctacttctttttcaacaa-caa-c--c-ttacgaataaagtgg-actttg  724
 
-Sbjct  696  atgagtttgtaataagaaa-acgttaatgtt-t-g-tgaattgtgaagttattacttctgtt-ct  756
+Sbjct  696  atgagtttgtaataagaaa-acgttaatgtt-t-g-tgaattgtgaagttattacttctgtt-ct  755
             ||||||||  |||  |  | |||  || ||| | | ||  |||||| || ||  | | |||| ||
-Query  725  atgagttt--aatttgttatacgacaacgttgttgatg-cttgtgatgtnat--cgt-tgtttct  784
+Query  725  atgagttt--aatttgttatacgacaacgttgttgatg-cttgtgatgtnat--cgt-tgtttct  783
 
 599 6 104 F 601 16 260 915 95 84.17
 Sbjct  104  ttctttnggtgctganatcttcatgcgntancccgacagaa-anacnnnananagtcncattcatatcnn  172
@@ -601,9 +603,9 @@ Sbjct  591  tagtctccgtttaaatatca-ctacttctttttcaacaa-caa-cc---ttacgaataaagtggactt
             | ||||||| |||||||||  |  ||||||| || || | ||| ||   ||| |||||||    | ||| 
 Query  745  tcgtctccgcttaaatatctgcn-cttctttgtctacnancaatccaccttatgaataaaaaa-atttta  812
 
-Sbjct  655  atgagtttaatttgttatacgacaacgttgttgatgcttgtga--tgt-aa  703
+Sbjct  655  atgagtttaatttgttatacgacaacgttgttgatgcttgtga--tgt-aa  702
             ||  | | |||||||||||  | ||| || |  ||| |||| |  ||| ||
-Query  813  atttgatgaatttgttataanaaaac-tt-t-aatgtttgttaaatgtgaa  861
+Query  813  atttgatgaatttgttataanaaaac-tt-t-aatgtttgttaaatgtgaa  860
 
 783 6 14 F 788 39 86 1400 57 92.74
 Sbjct  14   cgatgnnnaaaannantgnggattnncannatngatntctcttcnnnnattctnnnncgcgaangaaggg  83
@@ -650,9 +652,9 @@ Sbjct  714  gctctccgagttttcgttttactttttttttcatgttttgctatc-aatgaaa-taaa-ggtataaaa
             ||||||||||||||||||||||||||||||||||||||||||||| ||||||| |||| ||| |||||||
 Query  784  gctctccgagttttcgttttactttttttttcatgttttgctatccaatgaaaataaaaggtttaaaact  853
 
-Sbjct  781  ctc-tt-ggtttt-aaa-gt  797
+Sbjct  781  ctc-tt-ggtttt-aaa-gt  796
             ||| || |||||| ||| ||
-Query  854  ctcctttggtttttaaaagt  874
+Query  854  ctcctttggtttttaaaagt  873
 
 767 16 84 F 766 39 0 1248 95 87.61
 Sbjct  84   gtgaatgttgatctcaaactctttgtccataatgggaagctacacaaatatttgactgttacagatggct  153
@@ -699,9 +701,9 @@ Sbjct  780  cnancaatccaccttatgaataaaaaa-attttaatttgatgaatttgttataanaaaac-tt-t-aa
             | | ||| ||   ||| |||||||    | ||| ||  | | |||||||||||  | ||| || |  |||
 Query  696  caa-caa-cc---ttacgaataaagtggactttgatgagtttaatttgttatacgacaacgttgttgatg  760
 
-Sbjct  846  tttgt  851
+Sbjct  846  tttgt  850
              ||||
-Query  761  cttgt  766
+Query  761  cttgt  765
 
 517 64 0 F 517 65 0 1034 0 100.00
 Sbjct  0    cacgaaagtcttacgcgtctccttgaagatgcgaaatctattattgagaaatattggaaactcagatgga  69
@@ -732,9 +734,9 @@ Sbjct  420  cttcttccccacaatgattgaaaaactcttcttgttatgaataaagatggatgcccatttataagggc
             ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 Query  420  cttcttccccacaatgattgaaaaactcttcttgttatgaataaagatggatgcccatttataagggcca  489
 
-Sbjct  490  tcatctaagcccatcatctagattttt  517
+Sbjct  490  tcatctaagcccatcatctagattttt  516
             |||||||||||||||||||||||||||
-Query  490  tcatctaagcccatcatctagattttt  517
+Query  490  tcatctaagcccatcatctagattttt  516
 
 542 78 223 F 540 1488 8 995 29 94.64
 Sbjct  223  cctat-cttatatgtttata-gtttatacaagtg-ttttta-tgtttgttggatttgaagcgaagcttaa  288
@@ -765,9 +767,9 @@ Sbjct  636  cacgtttgtttgggaatgaaactaatgataaactttcttcaagttgaagcaatatattgtgtgggcct
             ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 Query  419  cacgtttgtttgggaatgaaactaatgataaactttcttcaagttgaagcaatatattgtgtgggccttt  488
 
-Sbjct  706  atgggctgtaatctgttttgtaacccatgttgttatgaataaaatcctaatcttgcgag  765
+Sbjct  706  atgggctgtaatctgttttgtaacccatgttgttatgaataaaatcctaatcttgcgag  764
             |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-Query  489  atgggctgtaatctgttttgtaacccatgttgttatgaataaaatcctaatcttgcgag  548
+Query  489  atgggctgtaatctgttttgtaacccatgttgttatgaataaaatcctaatcttgcgag  547
 
 568 79 56 F 568 1495 0 1022 38 93.31
 Sbjct  56   ttggccggatttggtttgtatccaacgttgttttgtttttctttcaataatctcatagatcttatg-ttg  124
@@ -802,9 +804,9 @@ Sbjct  539  tcttgtaatctcagtgtatgttgggcttttggttttttagcccatgtatggttggttaacgttaataa
             ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 Query  483  tcttgtaatctcagtgtatgttgggcttttggttttttagcccatgtatggttggttaacgttaataaga  552
 
-Sbjct  609  ttttccacttatgag  624
+Sbjct  609  ttttccacttatgag  623
             |||||||||||||||
-Query  553  ttttccacttatgag  568
+Query  553  ttttccacttatgag  567
 
 540 474 0 F 522 658 80 975 29 94.54
 Sbjct  0    tgaaggttgcccccaatcggaagagaagttgngcnctttcttcctccctgccnttagtgccgttgaattg  69
@@ -835,9 +837,9 @@ Sbjct  419  ctatgtggtcaatgcaaatttaagaaattatttgccgacttaaaagttgaggaactattgtttgaaag
             ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 Query  481  ctatgtggtcaatgcaaatttaagaaattatttgccgacttaaaagttgaggaactattgtttgaaagtg  550
 
-Sbjct  489  aaaatgttattcctatcagtttctctataattatagttatcatttcatttc  540
+Sbjct  489  aaaatgttattcctatcagtttctctataattatagttatcatttcatttc  539
             |||||||||||||||||||||||||||||||||||||||||||||||||||
-Query  551  aaaatgttattcctatcagtttctctataattatagttatcatttcatttc  602
+Query  551  aaaatgttattcctatcagtttctctataattatagttatcatttcatttc  601
 
 510 736 0 F 525 846 91 915 40 92.27
 Sbjct  0    ca-cac-ggg-a-attncct-catg-a-g-gt-gcc-ccaatgg-a-agaagatttg-g-ct-tttcttn  54
@@ -868,9 +870,9 @@ Sbjct  401  tatgaattatctctgctcatttcatttcctattgtctgtgttctttttctctttatgagacaatttct
             ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 Query  507  tatgaattatctctgctcatttcatttcctattgtctgtgttctttttctctttatgagacaatttctat  576
 
-Sbjct  471  cggattgtcaaatgtctgatttatgaatatgtaatttat  510
+Sbjct  471  cggattgtcaaatgtctgatttatgaatatgtaatttat  509
             |||||||||||||||||||||||||||||||||||||||
-Query  577  cggattgtcaaatgtctgatttatgaatatgtaatttat  616
+Query  577  cggattgtcaaatgtctgatttatgaatatgtaatttat  615
 
 503 846 115 F 511 1230 2 879 45 91.12
 Sbjct  115  gaaggtgtngccaccattgg-aag-agaagtntgagactctatcttacctccct-gac-ttagtgacgtc  180
@@ -901,9 +903,9 @@ Sbjct  522  ctcatttcatttcctattgtctgtgttctttttctctttatgagacaatttctatcggattgtcaaat
             ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 Query  417  ctcatttcatttcctattgtctgtgttctttttctctttatgagacaatttctatcggattgtcaaatgt  486
 
-Sbjct  592  ctgatttatgaatatgtaatttatat  618
+Sbjct  592  ctgatttatgaatatgtaatttatat  617
             ||||||||||||||||||||||||||
-Query  487  ctgatttatgaatatgtaatttatat  513
+Query  487  ctgatttatgaatatgtaatttatat  512
 
 557 866 17 F 561 1212 0 884 78 86.05
 Sbjct  17   cgtttcttgtgacaactcccatcc-gacgtcaagaatgctaggatctgngatccgttccccatcaaccac  85
@@ -938,7 +940,8 @@ Sbjct  488  atgtttatgctatatttgggcctaaaattacatgttataattcatatatgtattgattagctatgtat
             ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 Query  475  atgtttatgctatatttgggcctaaaattacatgttataattcatatatgtattgattagctatgtattt  544
 
-Sbjct  558  tcatatgttatgatct  574
+Sbjct  558  tcatatgttatgatct  573
             ||||||||||||||||
-Query  545  tcatatgttatgatct  561
+Query  545  tcatatgttatgatct  560
 
+# Fields: s. len, s. seqnum, s. start, strand, q. len, q. seqnum, q. start, score, editdist, % identity
