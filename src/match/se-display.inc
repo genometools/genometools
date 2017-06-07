@@ -11,6 +11,7 @@ static GtSEdisplayStruct gt_display_arguments_table[] =
   {"evalue", Gt_Evalue_display, true},
   {"failed_seed", Gt_Failed_seed_display, false},
   {"fstperquery", Gt_Fstperquery_display, false},
+  {"gap opens", Gt_Gapopens_display, true},
   {"identity", Gt_Identity_display, true},
   {"indels", Gt_Indels_display, true},
   {"mismatches", Gt_Mismatches_display, true},
@@ -37,35 +38,36 @@ static GtSEdisplayStruct gt_display_arguments_table[] =
 
 static unsigned int gt_display_flag2index[] = {
    0,
-   29,
-   13,
+   30,
+   14,
    8,
    9,
    3,
    4,
    5,
-   21,
-   23,
-   31,
+   22,
    24,
-   20,
-   30,
-   15,
-   17,
-   19,
-   18,
-   14,
-   1,
-   12,
-   11,
+   32,
    25,
-   6,
+   21,
+   31,
+   16,
+   18,
+   20,
+   19,
+   15,
+   1,
+   13,
+   12,
    10,
    26,
-   28,
+   6,
+   11,
    27,
-   22,
-   16,
+   29,
+   28,
+   23,
+   17,
    7,
    2
 };
@@ -83,7 +85,7 @@ const char *gt_querymatch_display_help(void)
          "                  which does not satisfy the filter conditions\n"
          "fstperquery:      output only the first found match per query\n"
          "blast:            output matches in blast format 7 (tabular with \n"
-         "                  comment lines, instead of gap opens indels are \n"
+         "                  comment lines; instead of gap opens, indels are \n"
          "                  displayed)\n"
          "cigar:            display cigar string representing alignment \n"
          "                  (no distinction between match and mismatch)\n"
@@ -111,6 +113,7 @@ const char *gt_querymatch_display_help(void)
          "alignment length: display length of alignment\n"
          "mismatches:       display number of mismatches in alignment\n"
          "indels:           display number of indels in alignment\n"
+         "gap opens:        display number of indels in alignment\n"
          "score:            display score of match\n"
          "editdist:         display unit edit distance\n"
          "identity:         display percent identity of match\n"
@@ -147,6 +150,7 @@ const char *gt_querymatch_display_help(void)
         ", alignment length"\
         ", mismatches"\
         ", indels"\
+        ", gap opens"\
         ", score"\
         ", editdist"\
         ", identity"\
@@ -282,6 +286,12 @@ bool gt_querymatch_indels_display(const GtSeedExtendDisplayFlag
                                         *display_flag)
 {
   return gt_querymatch_display_on(display_flag,Gt_Indels_display);
+}
+
+bool gt_querymatch_gapopens_display(const GtSeedExtendDisplayFlag
+                                        *display_flag)
+{
+  return gt_querymatch_display_on(display_flag,Gt_Gapopens_display);
 }
 
 bool gt_querymatch_score_display(const GtSeedExtendDisplayFlag

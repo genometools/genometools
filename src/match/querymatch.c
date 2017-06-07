@@ -457,6 +457,7 @@ void gt_querymatch_prettyprint(double evalue,double bit_score,
         fprintf(querymatch->fp,GT_WU,querymatch->mismatches);
         break;
       case Gt_Indels_display:
+      case Gt_Gapopens_display:
         fprintf(querymatch->fp,GT_WU,gt_querymatch_indels(querymatch));
         break;
       case Gt_Score_display:
@@ -846,6 +847,7 @@ void gt_querymatch_read_line(GtQuerymatch *querymatch,
       case Gt_Alignmentlength_display:
       case Gt_Identity_display:
       case Gt_Indels_display:
+      case Gt_Gapopens_display:
         break;
       default: gt_assert(false);
     }

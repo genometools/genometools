@@ -290,7 +290,7 @@ GtSeedExtendDisplayFlag *gt_querymatch_display_flag_new(
         Gt_Identity_display,
         Gt_Alignmentlength_display,
         Gt_Mismatches_display,
-        Gt_Indels_display,
+        Gt_Gapopens_display,
         Gt_Q_start_display,
         Gt_Q_end_display,
         Gt_S_start_display,

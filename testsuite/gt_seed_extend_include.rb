@@ -32,6 +32,19 @@ $OUTFMT_ARGS = ["alignment","cigar","cigarX","polinfo","fstperquery","seed.len",
                 "seed.s","seed.q","seed_in_algn","s.seqlen",
                 "q.seqlen","evalue","subjectid","queryid","bitscore"]
 
+Name "gt seed_extend: blast like output"
+Keywords "gt_seed_extend_blast_format"
+Test do
+  run_test build_encseq("subject", "#{$testdata}at-C99930.fna")
+  run_test build_encseq("query-fwd", "#{$testdata}at-C99887-fwd.fna")
+  run_test build_encseq("query-rev", "#{$testdata}at-C99887-rev.fna")
+  options = "-ii subject -evalue 0.01 -outfmt alignment blast -seedlength 12 -minidentity 75"
+  ["fwd","rev"].each do |direction|
+    run_test "#{$bin}/gt seed_extend #{options} -qii query-#{direction}"
+    run "diff -I '^#' #{last_stdout} #{$testdata}/query-#{direction}.match"
+  end
+end
+
 Name "gt seed_extend: maxmat"
 Keywords "gt_seed_extend maxmat"
 Test do

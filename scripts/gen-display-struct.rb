@@ -75,6 +75,7 @@ display_options = [
   ["alignment length",    "display length of alignment"],
   ["mismatches",  "display number of mismatches in alignment"],
   ["indels",      "display number of indels in alignment"],
+  ["gap opens",   "display number of indels in alignment"],
   ["score",       "display score of match"],
   ["editdist",    "display unit edit distance"],
   ["identity",    "display percent identity of match"],
@@ -87,8 +88,8 @@ display_options = [
   ["bit score",   "display bit score"]
 ]
 
-if display_options.length > 32
-  STDERR.puts "#{$0}: maximumu number of display options is 32"
+if display_options.length > 64
+  STDERR.puts "#{$0}: maximum number of display options is 64"
   exit 1
 end
 

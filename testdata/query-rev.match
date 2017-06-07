@@ -1,0 +1,55 @@
+# Options: -ii subject -qii query -evalue 0.01 -outfmt alignment blast -seedlength 12 -minidentity 75 -history 60
+# Fields: query id, subject id, % identity, alignment length, mismatches, gap opens, q. start, q. end, s. start, s. end, evalue, bit score
+gi|4714011|dbj|C99887.1|C99887	gi|4714047|dbj|C99930.1|C99930	90.91	733	38	30	53	802	746	1	3e-284	961.3
+Query  53   aaacatgaaaaaaaaagtaaaacgaaaactcggagagcagaaacaacgataacatcacaa  112
+            ||| |  | |  ||||  |||| | ||| | || |||| ||||||| | | || ||||| 
+Sbjct  746  aaa-a--acaggaaaa--aaaagg-aaatttggggagcggaaacaa-ggttacttcacag  694
+
+Query  113  gcatcaacaacgttgtcgtataacaaattaaact-catcaaagtcca-ctttattcgtaa  170
+            |||| || || | |||||  | |  ||  ||| |  |||  | || |  ||| || ||||
+Sbjct  693  gcataaataaag-tgtcg--t-a-taa-caaattaaatc--a-tcaatttttctttgtaa  643
+
+Query  171  ggtt-gtt--gttgaaaaagaagtagtg----atatttaaacggagactatgtttg-tca  222
+            ||||  ||  |  || ||||||||||||    ||||||||  |||||||||| ||| |||
+Sbjct  642  ggttatttcgggggataaagaagtagtgacatatatttaaggggagactatg-ttgttca  584
+
+Query  223  cagagaccttaaccatttcagcttc-aaagataatggcatcattcaccatataccctttt  281
+            ||||||||||||||||||||| ||| ||||||||||||||||||||||||||||||||| 
+Sbjct  583  cagagaccttaaccatttcagtttcaaaagataatggcatcattcaccatataccctttg  524
+
+Query  282  gatgcatcttttagc-tctgacatcaatattatattgttcactcccacaccataatcgct  340
+            ||||||||||||||| |||||||||||||| |||||||||||||||||||||||||||||
+Sbjct  523  gatgcatcttttagcttctgacatcaatatgatattgttcactcccacaccataatcgct  464
+
+Query  341  tcgaatc-gggtaccaagctgcagaatataattgtttgtggttggagcttcgttgattct  399
+            ||||||| ||||||||||||||||||||||||||||||||||||||||||||||||||||
+Sbjct  463  tcgaatcggggtaccaagctgcagaatataattgtttgtggttggagcttcgttgattct  404
+
+Query  400  ttaaccgcagattaaccgctccccaagtgtttgtaacaactgcgtttgccttatggcctt  459
+            ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+Sbjct  403  ttaaccgcagattaaccgctccccaagtgtttgtaacaactgcgtttgccttatggcctt  344
+
+Query  460  gagcatataggaagattggaagtgcatgtggtcttcctccaccagatcctttcgggttaa  519
+            |||||||||||||||||||||||||||||||||| |||||||||||||||||||||||||
+Sbjct  343  gagcatataggaagattggaagtgcatgtggtctccctccaccagatcctttcgggttaa  284
+
+Query  520  atcctagtctccagtatcggtctccaacgagaaaatcatcagagtaatagaatttatctt  579
+            |||||| |||||||||||||||| ||||||||||||||||||||||||||||||||||||
+Sbjct  283  atcctaatctccagtatcggtcttcaacgagaaaatcatcagagtaatagaatttatctt  224
+
+Query  580  ccaaggtagagaaacgaagtatcttccaagtgaaaacattgtttggagggtttgatatga  639
+            ||||||||||||||||||||||||||||||||||||||||||| ||||||||||||||||
+Sbjct  223  ccaaggtagagaaacgaagtatcttccaagtgaaaacattgttcggagggtttgatatga  164
+
+Query  640  atgtgactttctcttgtttttctgtcgggttaacgatgaagatctcagcaccaaaagaag  699
+            ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+Sbjct  163  atgtgactttctcttgtttttctgtcgggttaacgatgaagatctcagcaccaaaagaag  104
+
+Query  700  ctgtgtcctgcacaaggtacccttcgttcgcgttgtagaatgttggaagagaaatcaatt  759
+            ||||||||||||||| ||||||||||||||||||||||||||||||||||||||||||||
+Sbjct  103  ctgtgtcctgcacaatgtacccttcgttcgcgttgtagaatgttggaagagaaatcaatt  44
+
+Query  760  gtgtgaatccccactcttttttggcatcgttgtatcgcttcac  802
+            |||||||||||||||||||||| ||||||||||||||||||||
+Sbjct  43   gtgtgaatccccactctttttttgcatcgttgtatcgcttcac  1
+
