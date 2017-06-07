@@ -71,27 +71,6 @@ GtUword gt_bitbuffer_write_bytestring_bf(GtBitbuffer *bb,
                                          GtUword value,
                                          GtBitcount_type bitsforvalue);
 
-/* when the bits need to go to a bytestring rather than a FILE pointer,
-  the following function can be used */
-
-void gt_bitbuffer_generic_write_FILE(GtBitbuffer *bb,
-                                     GtUword value,
-                                     GtBitcount_type bitsforvalue);
-
-uint32_t gt_bitbuffer_write_bytestring(GtBitbuffer *bb,
-                                       uint8_t *bytestring,
-                                       uint32_t bytestring_offset,
-                                       uint32_t bytestring_length,
-                                       GtUword value,
-                                       GtBitcount_type bitsforvalue);
-
-uint32_t gt_bitbuffer_write_bytestring_bf(GtBitbuffer *bb,
-                                          uint8_t *bytestring,
-                                          uint32_t bytestring_offset,
-                                          uint32_t bytestring_length,
-                                          GtUword value,
-                                          GtBitcount_type bitsforvalue);
-
 /* Appends GtUword <value> to <bb>. Requires that <bb> has been created
    with a <bitsperentry> value > 0. */
 void gt_bitbuffer_write_fixed_bits_FILE(GtBitbuffer *bb,
