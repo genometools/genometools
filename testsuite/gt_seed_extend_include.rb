@@ -33,7 +33,7 @@ $OUTFMT_ARGS = ["alignment","cigar","cigarX","polinfo","fstperquery","seed.len",
                 "q.seqlen","evalue","subjectid","queryid","bitscore"]
 
 Name "gt seed_extend: blast like output"
-Keywords "gt_seed_extend_blast_format"
+Keywords "gt_seed_extend blast_format"
 Test do
   run_test build_encseq("subject", "#{$testdata}at-C99930.fna")
   run_test build_encseq("query-fwd", "#{$testdata}at-C99887-fwd.fna")
