@@ -60,7 +60,7 @@ GtUword gt_querymatch_display_alignmentwidth(const GtSeedExtendDisplayFlag
 
 const char *gt_querymatch_flag2name(GtSeedExtendDisplay_enum flag);
 
-bool gt_querymatch_seed_display(const GtSeedExtendDisplayFlag *display_flag);
+bool gt_querymatch_has_seed(const GtSeedExtendDisplayFlag *display_flag);
 
 GtStrArray *gt_querymatch_read_Fields_line(const char *line_ptr);
 

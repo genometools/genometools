@@ -28,6 +28,7 @@ static GtSEdisplayStruct gt_display_arguments_table[] =
   {"s.seqnum", Gt_S_seqnum_display, true},
   {"s.start", Gt_S_start_display, true},
   {"score", Gt_Score_display, true},
+  {"seed", Gt_Seed_display, false},
   {"seed.len", Gt_Seed_len_display, true},
   {"seed.q", Gt_Seed_q_display, true},
   {"seed.s", Gt_Seed_s_display, true},
@@ -38,8 +39,9 @@ static GtSEdisplayStruct gt_display_arguments_table[] =
 
 static unsigned int gt_display_flag2index[] = {
    0,
-   30,
+   31,
    14,
+   27,
    8,
    9,
    3,
@@ -47,10 +49,10 @@ static unsigned int gt_display_flag2index[] = {
    5,
    22,
    24,
-   32,
+   33,
    25,
    21,
-   31,
+   32,
    16,
    18,
    20,
@@ -63,9 +65,9 @@ static unsigned int gt_display_flag2index[] = {
    26,
    6,
    11,
-   27,
-   29,
    28,
+   30,
+   29,
    23,
    17,
    7,
@@ -75,40 +77,41 @@ static unsigned int gt_display_flag2index[] = {
 const char *gt_querymatch_display_help(void)
 {
   return "specify what information about the matches to display\n"
-         "alignment:        show alignment (possibly followed by \n"
-         "                  =<number> to specify width of alignment \n"
+         "alignment:        show alignment (possibly followed by\n"
+         "                  =<number> to specify width of alignment\n"
          "                  columns)\n"
          "seed_in_algn:     mark the seed in alignment\n"
-         "polinfo:          add polishing information for shown \n"
+         "polinfo:          add polishing information for shown\n"
          "                  alignment\n"
-         "failed_seed:      show the coordinates of a seed extension, \n"
+         "seed:             abbreviation for seed.len seed.s seed.q\n"
+         "failed_seed:      show the coordinates of a seed extension,\n"
          "                  which does not satisfy the filter conditions\n"
          "fstperquery:      output only the first found match per query\n"
-         "blast:            output matches in blast format 7 (tabular with \n"
-         "                  comment lines; instead of gap opens, indels are \n"
+         "blast:            output matches in blast format 7 (tabular with\n"
+         "                  comment lines; instead of gap opens, indels are\n"
          "                  displayed)\n"
-         "cigar:            display cigar string representing alignment \n"
+         "cigar:            display cigar string representing alignment\n"
          "                  (no distinction between match and mismatch)\n"
-         "cigarX:           display cigar string representing alignment \n"
-         "                  (distinction between match (=) and mismatch \n"
+         "cigarX:           display cigar string representing alignment\n"
+         "                  (distinction between match (=) and mismatch\n"
          "                  (X))\n"
          "s.len:            display length of match on subject sequence\n"
          "s.seqnum:         display sequence number of subject sequence\n"
-         "subject id:       display sequence description of subject \n"
+         "subject id:       display sequence description of subject\n"
          "                  sequence\n"
-         "s.start:          display start position of match on subject \n"
+         "s.start:          display start position of match on subject\n"
          "                  sequence\n"
-         "s.end:            display end position of match on subject \n"
+         "s.end:            display end position of match on subject\n"
          "                  sequence\n"
-         "strand:           display strand of match using symbols F \n"
+         "strand:           display strand of match using symbols F\n"
          "                  (forward) and P (reverse complement)\n"
          "q.len:            display length of match on query sequence\n"
          "q.seqnum:         display sequence number of query sequence\n"
-         "query id:         display sequence description of query \n"
+         "query id:         display sequence description of query\n"
          "                  sequence\n"
-         "q.start:          display start position of match on query \n"
+         "q.start:          display start position of match on query\n"
          "                  sequence\n"
-         "q.end:            display end position of match on query \n"
+         "q.end:            display end position of match on query\n"
          "                  sequence\n"
          "alignment length: display length of alignment\n"
          "mismatches:       display number of mismatches in alignment\n"
@@ -120,9 +123,9 @@ const char *gt_querymatch_display_help(void)
          "seed.len:         display length seed of the match\n"
          "seed.s:           display start position of seed in subject\n"
          "seed.q:           display start position of seed in query\n"
-         "s.seqlen:         display length of subject sequence in which \n"
+         "s.seqlen:         display length of subject sequence in which\n"
          "                  match occurs\n"
-         "q.seqlen:         display length of query sequence in which \n"
+         "q.seqlen:         display length of query sequence in which\n"
          "                  match occurs\n"
          "evalue:           display evalue\n"
          "bit score:        display bit score\n"
@@ -131,6 +134,7 @@ const char *gt_querymatch_display_help(void)
 #define GT_SE_POSSIBLE_DISPLAY_ARGS "alignment"\
         ", seed_in_algn"\
         ", polinfo"\
+        ", seed"\
         ", failed_seed"\
         ", fstperquery"\
         ", blast"\
@@ -172,6 +176,12 @@ bool gt_querymatch_polinfo_display(const GtSeedExtendDisplayFlag
                                         *display_flag)
 {
   return gt_querymatch_display_on(display_flag,Gt_Polinfo_display);
+}
+
+bool gt_querymatch_seed_display(const GtSeedExtendDisplayFlag
+                                        *display_flag)
+{
+  return gt_querymatch_display_on(display_flag,Gt_Seed_display);
 }
 
 bool gt_querymatch_failed_seed_display(const GtSeedExtendDisplayFlag

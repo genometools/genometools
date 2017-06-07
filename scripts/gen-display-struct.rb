@@ -40,7 +40,7 @@ def format(longest,helpline)
       len = longest + 1 + w.length
     end
   end
-  return out.join(" ")
+  return out.join(" ").gsub(/ \\n/,"\\n")
 end
 
 # The following array defines the keywords which can be used as arguments
@@ -51,6 +51,7 @@ display_options = [
                   "specify width of alignment columns)"],
   ["seed_in_algn","mark the seed in alignment"],
   ["polinfo",     "add polishing information for shown alignment"],
+  ["seed",        "abbreviation for seed.len seed.s seed.q"],
   ["failed_seed", "show the coordinates of a seed extension, which does not " +
                   "satisfy the filter conditions"],
   ["fstperquery", "output only the first found match per query"],

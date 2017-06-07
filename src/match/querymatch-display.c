@@ -52,7 +52,7 @@ static bool gt_querymatch_display_on(const GtSeedExtendDisplayFlag
 
 #include "match/se-display.inc"
 
-bool gt_querymatch_seed_display(const GtSeedExtendDisplayFlag *display_flag)
+bool gt_querymatch_has_seed(const GtSeedExtendDisplayFlag *display_flag)
 {
   return gt_querymatch_seed_s_display(display_flag) &&
          gt_querymatch_seed_q_display(display_flag) &&
@@ -178,7 +178,9 @@ static int gt_querymatch_display_flag_set(char *copyspace,
                                           const char *arg,
                                           GtError *err)
 {
-  const char *exclude_list[] = {"alignment","cigar"};
+  const char *exclude_list[] = {"alignment","cigar",
+                                "alignment","cigarX",
+                                "cigar","cigarX"};
   size_t ex_idx, numexcl = sizeof exclude_list/sizeof exclude_list[0];
   const GtSEdisplayStruct *dstruct;
   const char *ptr;
@@ -205,6 +207,12 @@ static int gt_querymatch_display_flag_set(char *copyspace,
     return -1;
   }
   gt_querymatch_display_flag_add(display_flag,dstruct->flag);
+  if (dstruct->flag == Gt_Seed_display)
+  {
+    gt_querymatch_display_flag_add(display_flag,Gt_Seed_len_display);
+    gt_querymatch_display_flag_add(display_flag,Gt_Seed_s_display);
+    gt_querymatch_display_flag_add(display_flag,Gt_Seed_q_display);
+  }
   for (ex_idx = 0; ex_idx < numexcl; ex_idx+=2)
   {
     const GtSEdisplayStruct

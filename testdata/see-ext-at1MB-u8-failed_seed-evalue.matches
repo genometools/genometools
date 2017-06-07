@@ -1,4 +1,4 @@
-# Options: -ii at1MB -outfmt seed.len seed.s seed.q failed_seed evalue -l 100 -seedlength 20 -qii U89959_genomic -minidentity 80 -history 60
+# Options: -ii at1MB -outfmt seed failed_seed evalue -l 100 -seedlength 20 -qii U89959_genomic -minidentity 80 -history 60
 # Fields: s. len, s. seqnum, s. start, strand, q. len, q. seqnum, q. start, score, editdist, % identity, seed. len, seed. s, seed. q, evalue
 # failed_seed:	20	859	7	F	0	72595
 135 859 84 F 135 0 72651 258 4 97.04 20 88 72655 7e-54

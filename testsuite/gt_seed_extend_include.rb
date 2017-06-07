@@ -126,9 +126,9 @@ Test do
   run "diff -I '^#' #{last_stdout} #{$testdata}see-ext-at1MB-Atinsert100-evalue-bitscore-cigarX-seqlength.matches"
   run_test "#{$bin}gt seed_extend -ii U89959_genomic -l 50 -outfmt bitscore evalue"
   run "diff -I '^#' #{last_stdout} #{$testdata}see-ext-U8-evalue-bitscore.matches"
-  run_test "#{$bin}gt seed_extend -ii at1MB -outfmt seed.len seed.s seed.q failed_seed -l 600 -seedlength 20"
+  run_test "#{$bin}gt seed_extend -ii at1MB -outfmt seed failed_seed -l 600 -seedlength 20"
   run "diff -I '^#' #{last_stdout} #{$testdata}see-ext-at1MB-500-failed_seed.matches"
-  run_test "#{$bin}gt seed_extend -ii at1MB -outfmt seed.len seed.s seed.q failed_seed evalue -l 100 -seedlength 20 -qii U89959_genomic"
+  run_test "#{$bin}gt seed_extend -ii at1MB -outfmt seed failed_seed evalue -l 100 -seedlength 20 -qii U89959_genomic"
   run "diff #{last_stdout} #{$testdata}see-ext-at1MB-u8-failed_seed-evalue.matches"
   evalue_filter = 10e-30
   run_test "#{$bin}gt seed_extend -ii at1MB -evalue #{evalue_filter} -outfmt evalue"
@@ -203,7 +203,7 @@ Keywords "gt_seed_extend show"
 Test do
   run_test build_encseq("at1MB", "#{$testdata}at1MB")
   run_test build_encseq("U89959_genomic", "#{$testdata}U89959_genomic.fas")
-  outfmt_seed = "-outfmt seed.len seed.s seed.q"
+  outfmt_seed = "-outfmt seed"
   [" "," -qii U89959_genomic "].each do |qidx|
     run_test "#{$bin}gt seed_extend -v -ii at1MB#{qidx}" + outfmt_seed
     run "mv #{last_stdout} seed_extend.out"
@@ -393,7 +393,7 @@ Test do
       end
     end
     run_test "#{$bin}gt seed_extend -extendgreedy -bias-parameters -verify " +
-             "-overlappingseeds -outfmt alignment=70 seed.len seed.s seed.q  -ii at1MB #{splt}",:retval => 0
+             "-overlappingseeds -outfmt alignment=70 seed -ii at1MB #{splt}",:retval => 0
   end
 end
 
@@ -413,7 +413,7 @@ Test do
       end
     end
     run_test "#{$bin}gt seed_extend -bias-parameters -seedpairdistance 10 20 " +
-             "-outfmt seed.len seed.s seed.q -ii at1MB #{splt}", :retval => 0
+             "-outfmt seed -ii at1MB #{splt}", :retval => 0
   end
 end
 
@@ -472,7 +472,7 @@ Test do
                  "-l #{extendlength-20} -kmerfile no " +
                  "-minidentity #{minid} -seedlength #{seedlength} " +
                  "-no-reverse -mincoverage #{seedlength} " +
-                 "-outfmt seed.len seed.s seed.q " +
+                 "-outfmt seed " +
                  "-ii db -qii query #{splt}"
         grep last_stdout, /^\d+ \d+ \d+ . \d+ \d+ \d+ \d+ \d+ \d+/
         run "mv #{last_stdout} separated.out"
