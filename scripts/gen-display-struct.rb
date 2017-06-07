@@ -57,6 +57,8 @@ display_options = [
   ["fstperquery", "output only the first found match per query"],
   ["blast",       "output matches in blast format 7 (tabular with comment " +
                   "lines; instead of gap opens, indels are displayed)"],
+  ["custom",      "output matches in custom format, i.e. no columns are " +
+                  "pre-defined; all columns have to be specified by the user"],
   ["cigar",       "display cigar string representing alignment " +
                   "(no distinction between match and mismatch)"],
   ["cigarX",      "display cigar string representing alignment " +

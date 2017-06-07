@@ -180,7 +180,8 @@ static int gt_querymatch_display_flag_set(char *copyspace,
 {
   const char *exclude_list[] = {"alignment","cigar",
                                 "alignment","cigarX",
-                                "cigar","cigarX"};
+                                "cigar","cigarX",
+                                "blast","custom"};
   size_t ex_idx, numexcl = sizeof exclude_list/sizeof exclude_list[0];
   const GtSEdisplayStruct *dstruct;
   const char *ptr;
@@ -311,40 +312,43 @@ GtSeedExtendDisplayFlag *gt_querymatch_display_flag_new(
                                            sizeof blast_flags[0]);
     } else
     {
-      if (setmode == GT_SEED_EXTEND_DISPLAY_SET_STANDARD)
+      if (!gt_querymatch_display_args_contain(display_args,"custom"))
       {
-        GtSeedExtendDisplay_enum standard_flags[] =
+        if (setmode == GT_SEED_EXTEND_DISPLAY_SET_STANDARD)
         {
-          Gt_S_len_display,
-          Gt_S_seqnum_display,
-          Gt_S_start_display,
-          Gt_Strand_display,
-          Gt_Q_len_display,
-          Gt_Q_seqnum_display,
-          Gt_Q_start_display,
-          Gt_Score_display,
-          Gt_Editdist_display,
-          Gt_Identity_display
-        };
-        gt_querymatch_display_multi_flag_add(display_flag,standard_flags,
-                                             sizeof standard_flags/
-                                             sizeof standard_flags[0]);
-      } else
-      {
-        gt_assert(setmode == GT_SEED_EXTEND_DISPLAY_SET_EXACT);
-        GtSeedExtendDisplay_enum exact_flags[] =
+          GtSeedExtendDisplay_enum standard_flags[] =
+          {
+            Gt_S_len_display,
+            Gt_S_seqnum_display,
+            Gt_S_start_display,
+            Gt_Strand_display,
+            Gt_Q_len_display,
+            Gt_Q_seqnum_display,
+            Gt_Q_start_display,
+            Gt_Score_display,
+            Gt_Editdist_display,
+            Gt_Identity_display
+          };
+          gt_querymatch_display_multi_flag_add(display_flag,standard_flags,
+                                               sizeof standard_flags/
+                                               sizeof standard_flags[0]);
+        } else
         {
-          Gt_S_len_display,
-          Gt_S_seqnum_display,
-          Gt_S_start_display,
-          Gt_Strand_display,
-          Gt_Q_len_display,
-          Gt_Q_seqnum_display,
-          Gt_Q_start_display
-        };
-        gt_querymatch_display_multi_flag_add(display_flag,exact_flags,
-                                             sizeof exact_flags/
-                                             sizeof exact_flags[0]);
+          gt_assert(setmode == GT_SEED_EXTEND_DISPLAY_SET_EXACT);
+          GtSeedExtendDisplay_enum exact_flags[] =
+          {
+            Gt_S_len_display,
+            Gt_S_seqnum_display,
+            Gt_S_start_display,
+            Gt_Strand_display,
+            Gt_Q_len_display,
+            Gt_Q_seqnum_display,
+            Gt_Q_start_display
+          };
+          gt_querymatch_display_multi_flag_add(display_flag,exact_flags,
+                                               sizeof exact_flags/
+                                               sizeof exact_flags[0]);
+        }
       }
     }
   }

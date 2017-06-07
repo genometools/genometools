@@ -7,6 +7,7 @@ static GtSEdisplayStruct gt_display_arguments_table[] =
   {"blast", Gt_Blast_display, false},
   {"cigar", Gt_Cigar_display, true},
   {"cigarX", Gt_Cigarx_display, true},
+  {"custom", Gt_Custom_display, false},
   {"editdist", Gt_Editdist_display, true},
   {"evalue", Gt_Evalue_display, true},
   {"failed_seed", Gt_Failed_seed_display, false},
@@ -39,38 +40,39 @@ static GtSEdisplayStruct gt_display_arguments_table[] =
 
 static unsigned int gt_display_flag2index[] = {
    0,
-   31,
-   14,
-   27,
-   8,
+   32,
+   15,
+   28,
    9,
+   10,
    3,
+   6,
    4,
    5,
-   22,
-   24,
-   33,
-   25,
-   21,
-   32,
-   16,
-   18,
-   20,
-   19,
-   15,
-   1,
-   13,
-   12,
-   10,
-   26,
-   6,
-   11,
-   28,
-   30,
-   29,
    23,
+   25,
+   34,
+   26,
+   22,
+   33,
    17,
+   19,
+   21,
+   20,
+   16,
+   1,
+   14,
+   13,
+   11,
+   27,
    7,
+   12,
+   29,
+   31,
+   30,
+   24,
+   18,
+   8,
    2
 };
 
@@ -90,6 +92,9 @@ const char *gt_querymatch_display_help(void)
          "blast:            output matches in blast format 7 (tabular with\n"
          "                  comment lines; instead of gap opens, indels are\n"
          "                  displayed)\n"
+         "custom:           output matches in custom format, i.e. no\n"
+         "                  columns are pre-defined; all columns have to be\n"
+         "                  specified by the user\n"
          "cigar:            display cigar string representing alignment\n"
          "                  (no distinction between match and mismatch)\n"
          "cigarX:           display cigar string representing alignment\n"
@@ -138,6 +143,7 @@ const char *gt_querymatch_display_help(void)
         ", failed_seed"\
         ", fstperquery"\
         ", blast"\
+        ", custom"\
         ", cigar"\
         ", cigarX"\
         ", s.len"\
@@ -200,6 +206,12 @@ bool gt_querymatch_blast_display(const GtSeedExtendDisplayFlag
                                         *display_flag)
 {
   return gt_querymatch_display_on(display_flag,Gt_Blast_display);
+}
+
+bool gt_querymatch_custom_display(const GtSeedExtendDisplayFlag
+                                        *display_flag)
+{
+  return gt_querymatch_display_on(display_flag,Gt_Custom_display);
 }
 
 bool gt_querymatch_cigar_display(const GtSeedExtendDisplayFlag
