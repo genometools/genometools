@@ -55,6 +55,7 @@ display_options = [
   ["failed_seed", "show the coordinates of a seed extension, which does not " +
                   "satisfy the filter conditions"],
   ["fstperquery", "output only the first found match per query"],
+  ["tabsep",      "separate columns by tabulator, instead of space as default"],
   ["blast",       "output matches in blast format 7 (tabular with comment " +
                   "lines; instead of gap opens, indels are displayed)"],
   ["custom",      "output matches in custom format, i.e. no columns are " +

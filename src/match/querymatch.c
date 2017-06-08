@@ -358,15 +358,9 @@ void gt_querymatch_prettyprint(double evalue,double bit_score,
             out_display_flag != NULL);
   column_order = gt_querymatch_display_order(&numcolumns,out_display_flag);
   gt_assert(numcolumns > 0);
-  if (gt_querymatch_blast_display(out_display_flag))
-  {
-    separator = '\t';
-    one_off = 1;
-  } else
-  {
-    separator = ' ';
-    one_off = 0;
-  }
+  one_off = gt_querymatch_blast_display(out_display_flag) ? 1 : 0;
+  separator = gt_querymatch_blast_display(out_display_flag) ||
+              gt_querymatch_tabsep_display(out_display_flag) ? '\t' : ' ';
   for (idx = 0; idx < numcolumns; idx++)
   {
     const unsigned int co = column_order[idx];
@@ -556,12 +550,23 @@ void gt_querymatch_show_failed_seed(const GtSeedExtendDisplayFlag
 {
   if (gt_querymatch_failed_seed_display(out_display_flag))
   {
-    fprintf(querymatch->fp, "# failed_seed:\t" GT_WU "\t" GT_WU "\t"  GT_WU
-                                   "\t%c\t" GT_WU "\t" GT_WU "\n",
-            querymatch->seedlen, querymatch->dbseqnum,
+    const char separator
+      = (gt_querymatch_blast_display(out_display_flag) ||
+         gt_querymatch_tabsep_display(out_display_flag)) ? '\t' : ' ';
+    fprintf(querymatch->fp, "# failed_seed:%c" GT_WU "%c" GT_WU "%c"  GT_WU
+                                   "%c%c%c" GT_WU "%c" GT_WU "\n",
+            separator,
+            querymatch->seedlen,
+            separator,
+            querymatch->dbseqnum,
+            separator,
             querymatch->db_seedpos_rel,
+            separator,
             gt_seed_extend_outflag[querymatch->query_readmode],
-            querymatch->queryseqnum, querymatch->query_seedpos_rel);
+            separator,
+            querymatch->queryseqnum,
+            separator,
+            querymatch->query_seedpos_rel);
   }
 }
 
@@ -753,15 +758,11 @@ void gt_querymatch_read_line(GtQuerymatch *querymatch,
           queryend_relative = GT_UWORD_MAX;
   const unsigned int *column_order
     = gt_querymatch_display_order(&numcolumns,in_display_flag);
+
   querymatch->db_seedpos_rel = GT_UWORD_MAX;
   querymatch->query_seedpos_rel = GT_UWORD_MAX;
-  if (gt_querymatch_blast_display(in_display_flag))
-  {
-    separator = '\t';
-  } else
-  {
-    separator = ' ';
-  }
+  separator = gt_querymatch_blast_display(in_display_flag) ||
+              gt_querymatch_tabsep_display(in_display_flag) ? '\t' : ' ';
   for (column = 0; column < numcolumns; column++)
   {
     int ret = 1;

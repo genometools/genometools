@@ -35,7 +35,8 @@ static GtSEdisplayStruct gt_display_arguments_table[] =
   {"seed.s", Gt_Seed_s_display, true},
   {"seed_in_algn", Gt_Seed_in_algn_display, false},
   {"strand", Gt_Strand_display, true},
-  {"subject id", Gt_Subjectid_display, true}
+  {"subject id", Gt_Subjectid_display, true},
+  {"tabsep", Gt_Tabsep_display, false}
 };
 
 static unsigned int gt_display_flag2index[] = {
@@ -45,6 +46,7 @@ static unsigned int gt_display_flag2index[] = {
    28,
    9,
    10,
+   35,
    3,
    6,
    4,
@@ -89,6 +91,8 @@ const char *gt_querymatch_display_help(void)
          "failed_seed:      show the coordinates of a seed extension,\n"
          "                  which does not satisfy the filter conditions\n"
          "fstperquery:      output only the first found match per query\n"
+         "tabsep:           separate columns by tabulator, instead of\n"
+         "                  space as default\n"
          "blast:            output matches in blast format 7 (tabular with\n"
          "                  comment lines; instead of gap opens, indels are\n"
          "                  displayed)\n"
@@ -142,6 +146,7 @@ const char *gt_querymatch_display_help(void)
         ", seed"\
         ", failed_seed"\
         ", fstperquery"\
+        ", tabsep"\
         ", blast"\
         ", custom"\
         ", cigar"\
@@ -200,6 +205,12 @@ bool gt_querymatch_fstperquery_display(const GtSeedExtendDisplayFlag
                                         *display_flag)
 {
   return gt_querymatch_display_on(display_flag,Gt_Fstperquery_display);
+}
+
+bool gt_querymatch_tabsep_display(const GtSeedExtendDisplayFlag
+                                        *display_flag)
+{
+  return gt_querymatch_display_on(display_flag,Gt_Tabsep_display);
 }
 
 bool gt_querymatch_blast_display(const GtSeedExtendDisplayFlag

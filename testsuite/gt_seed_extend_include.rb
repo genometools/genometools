@@ -43,6 +43,10 @@ Test do
     run_test "#{$bin}/gt seed_extend #{options} -qii query-#{direction}"
     run "diff -I '^#' #{last_stdout} #{$testdata}/query-#{direction}.match"
   end
+  run_test build_encseq("at1MB", "#{$testdata}at1MB")
+  run_test "#{$bin}/gt seed_extend -seedlength 12 -mincoverage 350 -diagbandwidth 3 -outfmt blast -ii at1MB"
+  run_test "#{$bin}/gt matchtool -type BLASTOUT -matchfile #{last_stdout}"
+  run "diff -I '^#' #{last_stdout} #{$testdata}/matchtool_see-ext.match"
 end
 
 Name "gt seed_extend: maxmat"
@@ -146,6 +150,8 @@ Test do
     run_test "#{$bin}gt seed_extend -ii at1MB -qii Atinsert.fna -l 100 -outfmt alignment"
     run "diff -I '^#' #{last_stdout} alignment-from-#{ci}.txt"
   end
+  run "#{$bin}/gt seed_extend -ii at1MB -mincoverage 200 -outfmt tabsep custom s.seqnum s.start s.len strand q.seqnum q.start q.len editdist"
+  run "cmp -s #{last_stdout} #{$testdata}/see-ext-at1MB-mincoverage200-tabsep.matches"
 end
 
 # Invalid arguments

@@ -2837,7 +2837,7 @@ static void gt_diagbandseed_process_seeds_stat(FILE *stream,
   if (!maxmat_show)
   {
     fprintf(stream,"; " GT_WU ", i.e. %.2f%% of all seeds were filtered by "
-                   " diagonal score"
+                   "diagonal score"
                    "; " GT_WU ", i.e. %.2f%% of all seeds were selected"
                    "; " GT_WU ", i.e. %.2f%% of all seeds were extended)\n",
             process_seeds_counts->filteredbydiagonalscore,
