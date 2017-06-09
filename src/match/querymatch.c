@@ -982,26 +982,6 @@ bool gt_querymatch_complete(GtQuerymatch *querymatch,
   return false;
 }
 
-bool gt_querymatch_overlap(const GtQuerymatch *querymatch,
-                           GtUword nextseed_db_end_relative,
-                           GtUword nextseed_query_end_relative,
-                           bool use_db_pos)
-{
-  bool queryoverlap, dboverlap, dboverlap_at_end, dboverlap_at_start;
-
-  gt_assert(querymatch != NULL);
-  queryoverlap = (querymatch->querystart + gt_querymatch_querylen(querymatch) >
-                  nextseed_query_end_relative ? true : false);
-  dboverlap_at_end = querymatch->dbstart_relative +
-                     gt_querymatch_dblen(querymatch) >
-                      nextseed_db_end_relative ? true : false;
-  dboverlap_at_start = querymatch->dbstart_relative + querymatch->seedlen <=
-                        nextseed_db_end_relative ? true : false;
-  dboverlap = !use_db_pos || (dboverlap_at_end && dboverlap_at_start);
-
-  return queryoverlap && dboverlap ? true : false;
-}
-
 static int gt_querymatch_compare_ascending(const void *va,const void *vb)
 {
   const GtQuerymatch *a = (const GtQuerymatch *) va;

@@ -1826,70 +1826,51 @@ typedef const GtQuerymatch *(*GtExtendRelativeCoordsFunc)(void *,
 
 static bool gt_diagbandseed_has_overlap_with_previous_match(
      const GtArrayGtDiagbandseedRectangle *previous_extensions,
-     const GtQuerymatch *previousmatch,
+     GtUword previous_match_a_start,
+     GtUword previous_match_a_end,
+     GtUword previous_match_b_start,
+     GtUword previous_match_b_end,
      GtUword apos,
      GtUword bpos,
      GtUword matchlength,
-     GtUword use_apos,
      bool debug)
 {
+  GtDiagbandseedRectangle maxmatch;
+
   if (debug)
   {
     printf("# overlap of " GT_WU " " GT_WU " " GT_WU " " GT_WU " "
                            GT_WU " " GT_WU " " GT_WU " " GT_WU "?\n",
            apos + 1 - matchlength,apos,bpos + 1 - matchlength,bpos,
-           gt_querymatch_dbstart_relative(previousmatch),
-           gt_querymatch_dbstart_relative(previousmatch) +
-           gt_querymatch_dblen(previousmatch) - 1,
-           gt_querymatch_querystart(previousmatch),
-           gt_querymatch_querystart(previousmatch) +
-           gt_querymatch_querylen(previousmatch) - 1);
+           previous_match_a_start,
+           previous_match_a_end,
+           previous_match_b_start,
+           previous_match_b_end);
   }
-  if (use_apos > 0)
+
+  maxmatch.a_start = apos + 1 - matchlength;
+  maxmatch.a_end = apos;
+  maxmatch.b_start = bpos + 1 - matchlength;
+  maxmatch.b_end = bpos;
+
+  if (debug)
   {
-    GtDiagbandseedRectangle maxmatch;
-
-    maxmatch.a_start = apos + 1 - matchlength;
-    maxmatch.a_end = apos;
-    maxmatch.b_start = bpos + 1 - matchlength;
-    maxmatch.b_end = bpos;
-
+    gt_rectangle_store_show(previous_extensions);
+  }
+  if (gt_rectangle_overlap(previous_extensions,&maxmatch))
+  {
     if (debug)
     {
-      gt_rectangle_store_show(previous_extensions);
+      printf("# overlap with previous_ext (both dim) => return true\n");
     }
-    if (gt_rectangle_overlap(previous_extensions,&maxmatch))
-    {
-      if (debug)
-      {
-        printf("# overlap with previous_ext (both dim) => return true\n");
-      }
-      return true;
-    } else
-    {
-      if (debug)
-      {
-        printf("# not overlap with previous_ext (both dim) => return false\n");
-      }
-      return false;
-    }
+    return true;
   } else
   {
-    if (gt_querymatch_overlap(previousmatch,apos,bpos,false))
+    if (debug)
     {
-      if (debug)
-      {
-        printf("# overlap with previous (bpos) => return true\n");
-      }
-      return true;
-    } else
-    {
-      if (debug)
-      {
-        printf("# not overlap with previous (bpos) => return false\n");
-      }
-      return false;
+      printf("# not overlap with previous_ext (both dim) => return false\n");
     }
+    return false;
   }
 }
 
@@ -2104,11 +2085,12 @@ typedef struct
   GtSegmentRejectInfo *segment_reject_info;
   const GtKarlinAltschulStat *karlin_altschul_stat;
   const GtSeedExtendDisplayFlag *out_display_flag;
+  bool benchmark;
 } GtDiagbandseedExtendSegmentInfo;
 
 static int gt_diagbandseed_possibly_extend(const GtArrayGtDiagbandseedRectangle
                                              *previous_extensions,
-                                           const GtQuerymatch *previousmatch,
+                                           bool haspreviousmatch,
                                            GtUword use_apos,
                                            GtUword aseqnum,
                                            GtUword apos,
@@ -2121,15 +2103,22 @@ static int gt_diagbandseed_possibly_extend(const GtArrayGtDiagbandseedRectangle
 
   if (esi->debug)
   {
-    printf("# %s with previousmatch%sNULL\n",__func__,
-            previousmatch == NULL ? "==" : "!=");
+    printf("# %s haspreviousmatch=%s\n",__func__,
+           haspreviousmatch ? "true" : "false");
   }
-  if (previousmatch == NULL ||
-      !gt_diagbandseed_has_overlap_with_previous_match(previous_extensions,
-                                                       previousmatch,apos,bpos,
-                                                       matchlength,
-                                                       use_apos,
-                                                       esi->debug))
+  if (!haspreviousmatch ||
+      (use_apos == 0 &&
+       esi->info_querymatch.previous_match_b_end < bpos) || /* no overlap */
+      (use_apos > 0 && !gt_diagbandseed_has_overlap_with_previous_match(
+                             previous_extensions,
+                             esi->info_querymatch.previous_match_a_start,
+                             esi->info_querymatch.previous_match_a_end,
+                             esi->info_querymatch.previous_match_b_start,
+                             esi->info_querymatch.previous_match_b_end,
+                             apos,
+                             bpos,
+                             matchlength,
+                             use_apos)))
   {
     /* extend seed */
     const GtQuerymatch *querymatch;
@@ -2145,6 +2134,9 @@ static int gt_diagbandseed_possibly_extend(const GtArrayGtDiagbandseedRectangle
     }
 #endif
     ret = 1; /* perform extension */
+    /* the following function called is either
+         gt_greedy_extend_seed_relative or
+         gt_xdrop_extend_seed_relative */
     querymatch = esi->extend_relative_coords_function(&esi->info_querymatch,
                                                       &esi->plainsequence_info.
                                                             aseqorencseq,
@@ -2180,12 +2172,16 @@ static int gt_diagbandseed_possibly_extend(const GtArrayGtDiagbandseedRectangle
                                     esi->errorpercentage,
                                     esi->evalue_threshold))
       {
-        gt_querymatch_prettyprint(evalue,bit_score,esi->out_display_flag,
-                                  querymatch);
+        if (!esi->benchmark) {
+          gt_querymatch_prettyprint(evalue,bit_score,esi->out_display_flag,
+                                    querymatch);
+        }
         ret = 3; /* output match */
       } else
       {
-        gt_querymatch_show_failed_seed(esi->out_display_flag,querymatch);
+        if (!esi->benchmark) {
+          gt_querymatch_show_failed_seed(esi->out_display_flag,querymatch);
+        }
         ret = 2; /* found match, which does not satisfy length or similarity
                     constraints */
       }
@@ -2585,9 +2581,7 @@ static void gt_diagbandseed_segment2matches(
       }
       ret = gt_diagbandseed_possibly_extend(
                      previous_extensions,
-                     haspreviousmatch
-                       ? esi->info_querymatch.querymatchspaceptr
-                       : NULL,
+                     haspreviousmatch,
                      esi->use_apos,
                      aseqnum,
                      apos,
@@ -2603,23 +2597,18 @@ static void gt_diagbandseed_segment2matches(
       {
         haspreviousmatch = true;
         if (esi->use_apos == 2 || /* add all previous matches */
-            (ret == 3 &&
-             esi->use_apos == 1)) /* only add successful match */
+            (esi->use_apos == 1 /* only add successful match */
+             && ret == 3))
         {
           GtDiagbandseedRectangle newrectangle;
 
-          gt_assert(esi->info_querymatch.querymatchspaceptr != NULL);
           newrectangle.a_start
-            = gt_querymatch_dbstart_relative(esi->info_querymatch.
-                                             querymatchspaceptr);
-          newrectangle.a_end = newrectangle.a_start +
-                               gt_querymatch_dblen(esi->info_querymatch.
-                                                   querymatchspaceptr) - 1;
+            = esi->info_querymatch.previous_match_a_start;
+          newrectangle.a_end = esi->info_querymatch.previous_match_a_end;
           newrectangle.b_start
-            = gt_querymatch_querystart(esi->info_querymatch.querymatchspaceptr);
-          newrectangle.b_end = newrectangle.b_start +
-                               gt_querymatch_querylen(esi->info_querymatch.
-                                                      querymatchspaceptr) - 1;
+            = esi->info_querymatch.previous_match_b_start;
+          newrectangle.b_end
+            = esi->info_querymatch.previous_match_b_end;
           if (esi->debug)
           {
             printf("# add rectangle (%u,%u) (%u,%u) from seed (%u,%u,"
@@ -2782,6 +2771,10 @@ static void gt_diagbandseed_info_qm_set(
   gt_querymatch_file_set(ifqm->querymatchspaceptr, stream);
   ifqm->karlin_altschul_stat = karlin_altschul_stat;
   ifqm->out_display_flag = extp->out_display_flag;;
+  ifqm->previous_match_a_start = 0;
+  ifqm->previous_match_a_end = 0;
+  ifqm->previous_match_b_start = 0;
+  ifqm->previous_match_b_end = 0;
 }
 
 #define GT_USEC2SEC(TIME_IN_USEC)\
@@ -2947,6 +2940,7 @@ static GtDiagbandseedExtendSegmentInfo *gt_diagbandseed_extendSI_new(
   esi->segment_reject_info = segment_reject_info;
   esi->karlin_altschul_stat = karlin_altschul_stat;
   esi->out_display_flag = extp->out_display_flag;
+  esi->benchmark = extp->benchmark;
   return esi;
 }
 
@@ -3618,9 +3612,6 @@ static int gt_diagbandseed_algorithm(const GtDiagbandseedInfo *arg,
                                                  extp->cam_generic,
                                                  extp->sensitivity,
                                                  pol_info);
-      if (extp->benchmark) {
-        gt_greedy_extend_matchinfo_silent_set(grextinfo);
-      }
       if (trimstat != NULL)
       {
         gt_greedy_extend_matchinfo_trimstat_set(grextinfo,trimstat);
@@ -3634,9 +3625,6 @@ static int gt_diagbandseed_algorithm(const GtDiagbandseedInfo *arg,
                                          extp->evalue_threshold,
                                          extp->xdropbelowscore,
                                          extp->sensitivity);
-      if (extp->benchmark) {
-        gt_xdrop_matchinfo_silent_set(xdropinfo);
-      }
       processinfo = (void *) xdropinfo;
     }
     alignmentwidth

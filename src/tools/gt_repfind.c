@@ -58,7 +58,7 @@ typedef struct
           extendgreedy; /* determines which of the tables in
                            seed-extend-params.h is used */
   bool scanfile, beverbose, forward, reverse, reverse_complement, searchspm,
-       check_extend_symmetry, silent, trimstat_on, noxpolish, verify_alignment;
+       check_extend_symmetry, trimstat_on, noxpolish, verify_alignment;
   GtStr *indexname, *query_indexname, *cam_string;
   GtStrArray *query_files;
   GtOption *refforwardoption,
@@ -375,11 +375,6 @@ static GtOptionParser *gt_repfind_option_parser_new(void *tool_arguments)
                                                  "any,any");
   gt_option_parser_add_option(op, char_access_mode_option);
   gt_option_is_development_option(char_access_mode_option);
-
-  option = gt_option_new_bool("silent","do not report matches",
-                               &arguments->silent, false);
-  gt_option_parser_add_option(op, option);
-  gt_option_is_development_option(option);
 
   /* -outfmt */
   option = gt_option_new_string_array("outfmt",
@@ -854,10 +849,6 @@ static int gt_repfind_runner(int argc,const char **argv, int parsed_args,
                                arguments->xdropbelowscore,
                                arguments->extendxdrop);
     gt_assert(xdropmatchinfo != NULL);
-    if (arguments->silent)
-    {
-      gt_xdrop_matchinfo_silent_set(xdropmatchinfo);
-    }
   }
   if (!haserr)
   {
@@ -898,10 +889,6 @@ static int gt_repfind_runner(int argc,const char **argv, int parsed_args,
       gt_greedy_extend_matchinfo_check_extend_symmetry_set(
                                                 greedyextendmatchinfo);
     }
-    if (arguments->silent)
-    {
-      gt_greedy_extend_matchinfo_silent_set(greedyextendmatchinfo);
-    }
     if (arguments->trimstat_on)
     {
       trimstat = gt_ft_trimstat_new();
@@ -912,7 +899,7 @@ static int gt_repfind_runner(int argc,const char **argv, int parsed_args,
   {
     GtEncseq *encseq_for_desc = NULL;
     GtProcessinfo_and_querymatchspaceptr info_querymatch
-      = {NULL,NULL,NULL,NULL};
+      = Initializer_GtProcessinfo_and_querymatchspaceptr;
     info_querymatch.karlin_altschul_stat = karlin_altschul_stat;
     info_querymatch.out_display_flag = out_display_flag;
     if (gt_querymatch_alignment_display(out_display_flag) ||

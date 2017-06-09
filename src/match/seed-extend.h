@@ -78,7 +78,14 @@ typedef struct
   GtQuerymatch *querymatchspaceptr;
   const GtKarlinAltschulStat *karlin_altschul_stat;
   const GtSeedExtendDisplayFlag *out_display_flag;
+  GtUword previous_match_a_start,
+          previous_match_a_end,
+          previous_match_b_start,
+          previous_match_b_end;
 } GtProcessinfo_and_querymatchspaceptr;
+
+#define Initializer_GtProcessinfo_and_querymatchspaceptr\
+        {NULL,NULL,NULL,NULL,0,0,0,0}
 
 GtXdropmatchinfo *gt_xdrop_matchinfo_new(GtUword userdefinedleastlength,
                                          GtUword errorpercentage,
@@ -98,10 +105,6 @@ void gt_xdrop_matchinfo_delete(GtXdropmatchinfo *xdropmatchinfo);
    on the error percentage. */
 
 GtWord gt_optimalxdropbelowscore(GtUword errorpercentage,GtUword sensitivity);
-
-/* Set the silent flag in the matchinfo object. */
-
-void gt_xdrop_matchinfo_silent_set(GtXdropmatchinfo *xdropmatchinfo);
 
 /* The following function is used for extending a seed obtained
    in a self comparison of the given <encseq>. The extension is performed
@@ -206,10 +209,6 @@ void gt_greedy_extend_matchinfo_delete(GtGreedyextendmatchinfo *ggemi);
 
 void gt_greedy_extend_matchinfo_check_extend_symmetry_set(
                         GtGreedyextendmatchinfo *ggemi);
-
-/* Set the silent flag in the matchinfo object. */
-
-void gt_greedy_extend_matchinfo_silent_set(GtGreedyextendmatchinfo *ggemi);
 
 /* Set the trimstat in the matchinfo object. */
 

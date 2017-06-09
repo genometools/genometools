@@ -142,12 +142,6 @@ GtReadmode gt_querymatch_query_readmode(const GtQuerymatch *querymatch);
 
 GtWord gt_querymatch_distance2score(GtUword distance,GtUword alignedlen);
 
-/* Returns true, iff the given seed start position is below the querymatch. */
-bool gt_querymatch_overlap(const GtQuerymatch *querymatch,
-                           GtUword nextseed_db_end_relative,
-                           GtUword nextseed_query_end_relative,
-                           bool use_db_pos);
-
 GT_DECLAREARRAYSTRUCT(GtQuerymatch);
 
 void gt_querymatch_table_add(GtArrayGtQuerymatch *querymatch_table,

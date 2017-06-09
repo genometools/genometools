@@ -47,7 +47,6 @@ struct GtXdropmatchinfo
   GtUword userdefinedleastlength,
           errorpercentage;
   double evalue_threshold;
-  bool silent;
 };
 
 #include "match/seed-extend-params.h"
@@ -85,7 +84,6 @@ GtXdropmatchinfo *gt_xdrop_matchinfo_new(GtUword userdefinedleastlength,
   {
     xdropmatchinfo->belowscore = xdropbelowscore;
   }
-  xdropmatchinfo->silent = false;
   return xdropmatchinfo;
 }
 
@@ -106,11 +104,6 @@ void gt_xdrop_matchinfo_delete(GtXdropmatchinfo *xdropmatchinfo)
     gt_xdrop_resources_delete(xdropmatchinfo->res);
     gt_free(xdropmatchinfo);
   }
-}
-
-void gt_xdrop_matchinfo_silent_set(GtXdropmatchinfo *xdropmatchinfo)
-{
-  xdropmatchinfo->silent = true;
 }
 
 typedef struct
@@ -216,8 +209,7 @@ void gt_sesp_show(const GtSeedextendSeqpair *sesp)
 
 static const GtQuerymatch *gt_combine_extensions(
          bool forxdrop,
-         GtQuerymatch *querymatchspaceptr,
-         const GtSeedExtendDisplayFlag *out_display_flag,
+         GtProcessinfo_and_querymatchspaceptr *info_querymatch,
          const GtSeqorEncseq *dbes,
          const GtSeqorEncseq *queryes,
          const GtSeedextendSeqpair *sesp,
@@ -227,8 +219,7 @@ static const GtQuerymatch *gt_combine_extensions(
          GtUword v_right_ext,
          GtXdropscore total_score,
          GtUword total_distance,
-         GtUword total_mismatches,
-         bool silent)
+         GtUword total_mismatches)
 {
   GtUword dblen, querylen, total_alignedlen;
 
@@ -250,24 +241,28 @@ static const GtQuerymatch *gt_combine_extensions(
          GT_WU ", err=%.2f\n",total_distance,total_score,total_alignedlen,
           gt_querymatch_error_rate(total_distance,total_alignedlen));
 #endif
-  if (silent)
-  {
-    return NULL;
-  }
-  if (gt_querymatch_complete(querymatchspaceptr,
-                             out_display_flag,
+  info_querymatch->previous_match_a_start
+    = sesp->dbstart_relative - u_left_ext;
+  info_querymatch->previous_match_a_end
+    = info_querymatch->previous_match_a_start + dblen - 1;
+  info_querymatch->previous_match_b_start
+    = sesp->querystart_relative - v_left_ext;
+  info_querymatch->previous_match_b_end
+    = info_querymatch->previous_match_b_start + querylen - 1;
+  if (gt_querymatch_complete(info_querymatch->querymatchspaceptr,
+                             info_querymatch->out_display_flag,
                              dblen,
                              sesp->dbseqnum,
-                             sesp->dbstart_relative - u_left_ext,
+                             info_querymatch->previous_match_a_start,
                              sesp->db_seqstart,
                              sesp->dbseqlength,
                              (GtWord) total_score,
                              total_distance,
                              total_mismatches,
                              sesp->same_encseq,
-                             (uint64_t) sesp->queryseqnum,
+                             sesp->queryseqnum,
                              querylen,
-                             sesp->querystart_relative - v_left_ext,
+                             info_querymatch->previous_match_b_start,
                              dbes,
                              queryes,
                              sesp->query_seqstart,
@@ -275,10 +270,10 @@ static const GtQuerymatch *gt_combine_extensions(
                              gt_sesp_db_seedpos(sesp),
                              gt_sesp_query_seedpos(sesp),
                              sesp->seedlength,
-                             false))
+                             false)) /* greedyextension */
                              /*forxdrop ? false : true*/
   {
-    return querymatchspaceptr;
+    return info_querymatch->querymatchspaceptr;
   }
   return NULL;
 }
@@ -430,7 +425,6 @@ struct GtGreedyextendmatchinfo
   GtExtendCharAccess db_extend_char_access,
                      query_extend_char_access;
   bool check_extend_symmetry,
-       silent,
        showfrontinfo,
        db_twobit_possible,
        query_twobit_possible,
@@ -559,7 +553,6 @@ GtGreedyextendmatchinfo *gt_greedy_extend_matchinfo_new(
   ggemi->db_extend_char_access = db_extend_char_access;
   ggemi->query_extend_char_access = query_extend_char_access;
   ggemi->check_extend_symmetry = false;
-  ggemi->silent = false;
   ggemi->trimstat = NULL;
   ggemi->db_twobit_possible = false;
   ggemi->query_twobit_possible = false;
@@ -589,12 +582,6 @@ void gt_greedy_extend_matchinfo_check_extend_symmetry_set(
 {
   gt_assert(ggemi != NULL);
   ggemi->check_extend_symmetry = true;
-}
-
-void gt_greedy_extend_matchinfo_silent_set(GtGreedyextendmatchinfo *ggemi)
-{
-  gt_assert(ggemi != NULL);
-  ggemi->silent = true;
 }
 
 void gt_greedy_extend_matchinfo_trimstat_set(GtGreedyextendmatchinfo *ggemi,
@@ -1219,8 +1206,7 @@ static const GtQuerymatch *gt_extend_sesp(bool forxdrop,
   }
   return gt_combine_extensions(
                  forxdrop,
-                 info_querymatch->querymatchspaceptr,
-                 info_querymatch->out_display_flag,
+                 info_querymatch,
                  dbes,
                  queryes,
                  sesp,
@@ -1232,9 +1218,7 @@ static const GtQuerymatch *gt_extend_sesp(bool forxdrop,
                  forxdrop ? 0 : (left_best_polished_point.distance +
                                  right_best_polished_point.distance),
                  forxdrop ? 0 : (left_best_polished_point.max_mismatches +
-                                 right_best_polished_point.max_mismatches),
-                 forxdrop ? xdropmatchinfo->silent
-                          : greedyextendmatchinfo->silent);
+                                 right_best_polished_point.max_mismatches));
 }
 
 static const GtQuerymatch* gt_extend_seed_relative(bool forxdrop,
