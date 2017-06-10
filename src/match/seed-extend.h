@@ -81,11 +81,13 @@ typedef struct
   GtUword previous_match_a_start,
           previous_match_a_end,
           previous_match_b_start,
-          previous_match_b_end;
+          previous_match_b_end,
+          previous_match_distance,
+          previous_match_mismatches;
 } GtProcessinfo_and_querymatchspaceptr;
 
 #define Initializer_GtProcessinfo_and_querymatchspaceptr\
-        {NULL,NULL,NULL,NULL,0,0,0,0}
+        {NULL,NULL,NULL,NULL,0,0,0,0,0,0}
 
 GtXdropmatchinfo *gt_xdrop_matchinfo_new(GtUword userdefinedleastlength,
                                          GtUword errorpercentage,
@@ -117,11 +119,11 @@ GtWord gt_optimalxdropbelowscore(GtUword errorpercentage,GtUword sensitivity);
    in the <GtXdropmatchinfo>-object, passed as part of the
    <GtProcessinfo_and_querymatchspaceptr>-object. */
 
-const GtQuerymatch *gt_xdrop_extend_selfmatch(void *info,
-                                              const GtEncseq *encseq,
-                                              GtUword len,
-                                              GtUword pos1,
-                                              GtUword pos2);
+bool gt_xdrop_extend_selfmatch(void *info,
+                               const GtEncseq *encseq,
+                               GtUword len,
+                               GtUword pos1,
+                               GtUword pos2);
 
 /*
    The following function performs an xdrop extension (using
@@ -265,11 +267,11 @@ const char *gt_cam_extendgreedy_comment(void);
    the cooordinates are delivered as a <GtQuerymatch>-object.
 */
 
-const GtQuerymatch *gt_greedy_extend_selfmatch(void *info,
-                                               const GtEncseq *encseq,
-                                               GtUword len,
-                                               GtUword pos1,
-                                               GtUword pos2);
+bool gt_greedy_extend_selfmatch(void *info,
+                                const GtEncseq *encseq,
+                                GtUword len,
+                                GtUword pos1,
+                                GtUword pos2);
 
 /*
    The following function performs a greedy extension (as the previous function)
@@ -291,27 +293,27 @@ int gt_rf_greedy_extend_selfmatch_with_output(void *info,
    (dbstart_relative for the first instance and querystart_relative
    for the second instance). */
 
-const GtQuerymatch* gt_xdrop_extend_seed_relative(void *info,
-                                                  const GtSeqorEncseq *dbes,
-                                                  GtUword dbseqnum,
-                                                  GtUword dbstart_relative,
-                                                  const GtSeqorEncseq *queryes,
-                                                  bool same_encseq,
-                                                  GtUword queryseqnum,
-                                                  GtUword querystart_relative,
-                                                  GtUword len,
-                                                  GtReadmode query_readmode);
+bool gt_xdrop_extend_seed_relative(void *info,
+                                   const GtSeqorEncseq *dbes,
+                                   GtUword dbseqnum,
+                                   GtUword dbstart_relative,
+                                   const GtSeqorEncseq *queryes,
+                                   bool same_encseq,
+                                   GtUword queryseqnum,
+                                   GtUword querystart_relative,
+                                   GtUword len,
+                                   GtReadmode query_readmode);
 
-const GtQuerymatch* gt_greedy_extend_seed_relative(void *info,
-                                                   const GtSeqorEncseq *dbes,
-                                                   GtUword dbseqnum,
-                                                   GtUword dbstart_relative,
-                                                   const GtSeqorEncseq *queryes,
-                                                   bool same_encseq,
-                                                   GtUword queryseqnum,
-                                                   GtUword querystart_relative,
-                                                   GtUword len,
-                                                   GtReadmode query_readmode);
+bool gt_greedy_extend_seed_relative(void *info,
+                                    const GtSeqorEncseq *dbes,
+                                    GtUword dbseqnum,
+                                    GtUword dbstart_relative,
+                                    const GtSeqorEncseq *queryes,
+                                    bool same_encseq,
+                                    GtUword queryseqnum,
+                                    GtUword querystart_relative,
+                                    GtUword len,
+                                    GtReadmode query_readmode);
 
 void gt_align_front_prune_edist(bool rightextension,
                                 GtFtPolished_point *best_polished_point,

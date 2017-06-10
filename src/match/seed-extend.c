@@ -207,7 +207,7 @@ void gt_sesp_show(const GtSeedextendSeqpair *sesp)
          GT_WU "\n",sesp->queryseqnum,sesp->query_seqstart,sesp->query_seqlen);
 }
 
-static const GtQuerymatch *gt_combine_extensions(
+static bool gt_combine_extensions(
          bool forxdrop,
          GtProcessinfo_and_querymatchspaceptr *info_querymatch,
          const GtSeqorEncseq *dbes,
@@ -249,7 +249,10 @@ static const GtQuerymatch *gt_combine_extensions(
     = sesp->querystart_relative - v_left_ext;
   info_querymatch->previous_match_b_end
     = info_querymatch->previous_match_b_start + querylen - 1;
-  if (gt_querymatch_complete(info_querymatch->querymatchspaceptr,
+  info_querymatch->previous_match_distance = total_distance;
+  info_querymatch->previous_match_mismatches = total_mismatches;
+  if (info_querymatch->querymatchspaceptr == NULL ||
+      gt_querymatch_complete(info_querymatch->querymatchspaceptr,
                              info_querymatch->out_display_flag,
                              dblen,
                              sesp->dbseqnum,
@@ -273,9 +276,9 @@ static const GtQuerymatch *gt_combine_extensions(
                              false)) /* greedyextension */
                              /*forxdrop ? false : true*/
   {
-    return info_querymatch->querymatchspaceptr;
+    return true;
   }
-  return NULL;
+  return false;
 }
 
 #ifdef SKDEBUG
@@ -954,11 +957,11 @@ static void gt_seqabstract_reinit_generic(bool rightextension,
   }
 }
 
-static const GtQuerymatch *gt_extend_sesp(bool forxdrop,
-                                          void *info,
-                                          const GtSeqorEncseq *dbes,
-                                          const GtSeqorEncseq *queryes,
-                                          const GtSeedextendSeqpair *sesp)
+static bool gt_extend_sesp(bool forxdrop,
+                           void *info,
+                           const GtSeqorEncseq *dbes,
+                           const GtSeqorEncseq *queryes,
+                           const GtSeedextendSeqpair *sesp)
 {
   GtProcessinfo_and_querymatchspaceptr *info_querymatch
     = (GtProcessinfo_and_querymatchspaceptr *) info;
@@ -1221,17 +1224,17 @@ static const GtQuerymatch *gt_extend_sesp(bool forxdrop,
                                  right_best_polished_point.max_mismatches));
 }
 
-static const GtQuerymatch* gt_extend_seed_relative(bool forxdrop,
-                                                   void *info,
-                                                   const GtSeqorEncseq *dbes,
-                                                   GtUword dbseqnum,
-                                                   GtUword dbstart_relative,
-                                                   const GtSeqorEncseq *queryes,
-                                                   bool same_encseq,
-                                                   GtUword queryseqnum,
-                                                   GtUword querystart_relative,
-                                                   GtUword len,
-                                                   GtReadmode query_readmode)
+static bool gt_extend_seed_relative(bool forxdrop,
+                                    void *info,
+                                    const GtSeqorEncseq *dbes,
+                                    GtUword dbseqnum,
+                                    GtUword dbstart_relative,
+                                    const GtSeqorEncseq *queryes,
+                                    bool same_encseq,
+                                    GtUword queryseqnum,
+                                    GtUword querystart_relative,
+                                    GtUword len,
+                                    GtReadmode query_readmode)
 {
   GtSeedextendSeqpair sesp;
 
@@ -1250,16 +1253,16 @@ static const GtQuerymatch* gt_extend_seed_relative(bool forxdrop,
   return gt_extend_sesp(forxdrop, info, dbes, queryes, &sesp);
 }
 
-const GtQuerymatch* gt_xdrop_extend_seed_relative(void *info,
-                                                  const GtSeqorEncseq *dbes,
-                                                  GtUword dbseqnum,
-                                                  GtUword dbstart_relative,
-                                                  const GtSeqorEncseq *queryes,
-                                                  bool same_encseq,
-                                                  GtUword queryseqnum,
-                                                  GtUword querystart_relative,
-                                                  GtUword len,
-                                                  GtReadmode query_readmode)
+bool gt_xdrop_extend_seed_relative(void *info,
+                                   const GtSeqorEncseq *dbes,
+                                   GtUword dbseqnum,
+                                   GtUword dbstart_relative,
+                                   const GtSeqorEncseq *queryes,
+                                   bool same_encseq,
+                                   GtUword queryseqnum,
+                                   GtUword querystart_relative,
+                                   GtUword len,
+                                   GtReadmode query_readmode)
 {
   return gt_extend_seed_relative(true,
                                  info,
@@ -1274,16 +1277,16 @@ const GtQuerymatch* gt_xdrop_extend_seed_relative(void *info,
                                  query_readmode);
 }
 
-const GtQuerymatch* gt_greedy_extend_seed_relative(void *info,
-                                                   const GtSeqorEncseq *dbes,
-                                                   GtUword dbseqnum,
-                                                   GtUword dbstart_relative,
-                                                   const GtSeqorEncseq *queryes,
-                                                   bool same_encseq,
-                                                   GtUword queryseqnum,
-                                                   GtUword querystart_relative,
-                                                   GtUword len,
-                                                   GtReadmode query_readmode)
+bool gt_greedy_extend_seed_relative(void *info,
+                                    const GtSeqorEncseq *dbes,
+                                    GtUword dbseqnum,
+                                    GtUword dbstart_relative,
+                                    const GtSeqorEncseq *queryes,
+                                    bool same_encseq,
+                                    GtUword queryseqnum,
+                                    GtUword querystart_relative,
+                                    GtUword len,
+                                    GtReadmode query_readmode)
 {
   return gt_extend_seed_relative(false,
                                  info,
@@ -1298,12 +1301,12 @@ const GtQuerymatch* gt_greedy_extend_seed_relative(void *info,
                                  query_readmode);
 }
 
-static const GtQuerymatch *gt_rf_extend_selfmatch(bool forxdrop,
-                                                   void *info,
-                                                   const GtEncseq *encseq,
-                                                   GtUword len,
-                                                   GtUword pos1,
-                                                   GtUword pos2)
+static bool gt_rf_extend_selfmatch(bool forxdrop,
+                                   void *info,
+                                   const GtEncseq *encseq,
+                                   GtUword len,
+                                   GtUword pos1,
+                                   GtUword pos2)
 {
   GtSeedextendSeqpair sesp;
   GtSeqorEncseq queryes;
@@ -1313,15 +1316,14 @@ static const GtQuerymatch *gt_rf_extend_selfmatch(bool forxdrop,
   return gt_extend_sesp (forxdrop,info, &queryes, &queryes, &sesp);
 }
 
-static void gt_rf_seed_extend_prettyprint(bool forxdrop,
-                                          const GtQuerymatch *querymatch,
-                                          void *info)
+static void gt_rf_seed_extend_prettyprint(bool forxdrop,void *info)
 {
   GtProcessinfo_and_querymatchspaceptr *info_querymatch
     = (GtProcessinfo_and_querymatchspaceptr *) info;
   GtUword userdefinedleastlength, errorpercentage;
   double evalue, bit_score, evalue_threshold;
 
+  gt_assert(info_querymatch != NULL);
   if (forxdrop)
   {
     GtXdropmatchinfo *xdropmatchinfo = info_querymatch->processinfo;
@@ -1338,14 +1340,14 @@ static void gt_rf_seed_extend_prettyprint(bool forxdrop,
   if (gt_querymatch_check_final(&evalue,
                                 &bit_score,
                                 info_querymatch->karlin_altschul_stat,
-                                querymatch,
+                                info_querymatch->querymatchspaceptr,
                                 userdefinedleastlength,
                                 errorpercentage,
                                 evalue_threshold))
   {
     gt_querymatch_prettyprint(evalue,bit_score,
                               info_querymatch->out_display_flag,
-                              querymatch);
+                              info_querymatch->querymatchspaceptr);
   }
 }
 
@@ -1357,15 +1359,14 @@ static int gt_rf_extend_selfmatch_with_output(bool forxdrop,
                                               GtUword pos2,
                                               GT_UNUSED GtError *err)
 {
-  const GtQuerymatch *querymatch = gt_rf_extend_selfmatch(forxdrop,
-                                                          info,
-                                                          encseq,
-                                                          len,
-                                                          pos1,
-                                                          pos2);
-  if (querymatch != NULL)
+  if (gt_rf_extend_selfmatch(forxdrop,
+                             info,
+                             encseq,
+                             len,
+                             pos1,
+                             pos2))
   {
-    gt_rf_seed_extend_prettyprint(forxdrop,querymatch,info);
+    gt_rf_seed_extend_prettyprint(forxdrop,info);
   }
   return 0;
 }
@@ -1375,7 +1376,7 @@ int gt_rf_xdrop_extend_selfmatch_with_output(void *info,
                                              GtUword len,
                                              GtUword pos1,
                                              GtUword pos2,
-                                             GT_UNUSED GtError *err)
+                                             GtError *err)
 {
   return gt_rf_extend_selfmatch_with_output(true,
                                             info,
@@ -1391,7 +1392,7 @@ int gt_rf_greedy_extend_selfmatch_with_output(void *info,
                                               GtUword len,
                                               GtUword pos1,
                                               GtUword pos2,
-                                              GT_UNUSED GtError *err)
+                                              GtError *err)
 {
   return gt_rf_extend_selfmatch_with_output(false,
                                             info,
@@ -1402,13 +1403,12 @@ int gt_rf_greedy_extend_selfmatch_with_output(void *info,
                                             err);
 }
 
-static const GtQuerymatch* gt_rf_extend_querymatch(bool forxdrop,
-                                                   void *info,
-                                                   const GtEncseq *dbencseq,
-                                                   const GtQuerymatch
-                                                    *exactseed,
-                                                   const GtSeqorEncseq *queryes,
-                                                   bool same_encseq)
+static bool gt_rf_extend_querymatch(bool forxdrop,
+                                    void *info,
+                                    const GtEncseq *dbencseq,
+                                    const GtQuerymatch *exactseed,
+                                    const GtSeqorEncseq *queryes,
+                                    bool same_encseq)
 {
   GtSeedextendSeqpair sesp = {0,0,0,0,0,0,0,0,0,GT_READMODE_FORWARD,false};
   GtSeqorEncseq dbes;
@@ -1442,12 +1442,10 @@ static void gt_rf_extend_querymatch_with_output(bool forxdrop,
                                                 const GtSeqorEncseq *queryes,
                                                 bool same_encseq)
 {
-  const GtQuerymatch *querymatch
-    = gt_rf_extend_querymatch(forxdrop,info, dbencseq, exactseed, queryes,
-                              same_encseq);
-  if (querymatch != NULL)
+  if (gt_rf_extend_querymatch(forxdrop,info, dbencseq, exactseed, queryes,
+                              same_encseq))
   {
-    gt_rf_seed_extend_prettyprint(forxdrop,querymatch,info);
+    gt_rf_seed_extend_prettyprint(forxdrop,info);
   }
 }
 

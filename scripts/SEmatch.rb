@@ -19,7 +19,7 @@ class SEmatch
           @options = m[1]
         elsif m = line.match(/^# Fields:\s(.*)$/)
           @fields = m[1].gsub(/\./,"_").split(/, /)
-          @fields.map!{|f| f.gsub(/\s/,"_").gsub(/__/,"_")}
+          @fields.map!{|f| f.gsub(/\s/,"_").gsub(/__/,"_").gsub(/%_/,"")}
         end
         if m = line.match(/^# TIME.*\s(\S+)$/)
           @runtime = m[1].to_f
@@ -45,7 +45,11 @@ class SEmatch
           if value_hash.has_key?(:s_len)
             value_hash[:s_end] = value_hash[:s_start] + value_hash[:s_len] - 1
           elsif value_hash.has_key?(:s_end)
-            value_hash[:s_len] = value_hash[:s_end] - value_hash[:s_start] + 1
+            if value_hash[:s_start] < value_hash[:s_end]
+              value_hash[:s_len] = value_hash[:s_end] - value_hash[:s_start] + 1
+            else
+              value_hash[:s_len] = value_hash[:s_start] - value_hash[:s_end] + 1
+            end
           else
             STDERR.puts "#{$0}: either length of match on subject or end " +
                         "position must be given"
@@ -59,7 +63,11 @@ class SEmatch
           if value_hash.has_key?(:q_len)
             value_hash[:q_end] = value_hash[:q_start] + value_hash[:q_len] - 1
           elsif value_hash.has_key?(:q_end)
-            value_hash[:q_len] = value_hash[:q_end] - value_hash[:q_start] + 1
+            if value_hash[:q_start] < value_hash[:q_end]
+              value_hash[:q_len] = value_hash[:q_end] - value_hash[:q_start] + 1
+            else
+              value_hash[:q_len] = value_hash[:q_start] - value_hash[:q_end] + 1
+            end
           else
             value_hash[:q_len] = value_hash[:s_len]
           end

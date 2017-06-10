@@ -200,18 +200,32 @@ static GtUword gt_querymatch_position_convert(GtReadmode query_readmode,
   return position;
 }
 
+static GtUword gt_querymatch_matches_generic(GtUword aligned_len,
+                                             GtUword distance,
+                                             GtUword mismatches)
+{
+  gt_assert(aligned_len >= distance + mismatches);
+  return (aligned_len - distance - mismatches)/2;
+}
+
 static GtUword gt_querymatch_matches(const GtQuerymatch *querymatch)
 {
   const GtUword aligned_len = gt_querymatch_aligned_len(querymatch);
+  return gt_querymatch_matches_generic(aligned_len,
+                                       querymatch->distance,
+                                       querymatch->mismatches);
+}
 
-  gt_assert(aligned_len >= querymatch->distance + querymatch->mismatches);
-  return (aligned_len - querymatch->distance - querymatch->mismatches)/2;
+static GtUword gt_querymatch_indels_generic(GtUword distance,GtUword mismatches)
+{
+  gt_assert(distance >= mismatches);
+  return distance - mismatches;
 }
 
 static GtUword gt_querymatch_indels(const GtQuerymatch *querymatch)
 {
-  gt_assert(querymatch->distance >= querymatch->mismatches);
-  return querymatch->distance - querymatch->mismatches;
+  return gt_querymatch_indels_generic(querymatch->distance,
+                                      querymatch->mismatches);
 }
 
 /*
@@ -234,21 +248,23 @@ static GtUword gt_querymatch_alignment_length(const GtQuerymatch *querymatch)
           gt_querymatch_indels(querymatch))/2;
 }
 
-static void gt_querymatch_evalue_bit_score(double *evalue_ptr,
-                                           double *bit_score_ptr,
-                                           const GtKarlinAltschulStat
-                                             *karlin_altschul_stat,
-                                           const GtQuerymatch *querymatch)
+static void gt_querymatch_evalue_bit_score_generic(double *evalue_ptr,
+                                                   double *bit_score_ptr,
+                                                   const GtKarlinAltschulStat
+                                                     *karlin_altschul_stat,
+                                                   GtUword query_seqlen,
+                                                   GtUword matches,
+                                                   GtUword mismatches,
+                                                   GtUword indels)
 {
   if (karlin_altschul_stat != NULL)
   {
     GtUword evalue_searchspace
-      = gt_evalue_searchspace(karlin_altschul_stat,
-                              querymatch->query_seqlen);
+      = gt_evalue_searchspace(karlin_altschul_stat,query_seqlen);
     GtWord raw_score = gt_evalue_raw_score(karlin_altschul_stat,
-                                           gt_querymatch_matches(querymatch),
-                                           querymatch->mismatches,
-                                           gt_querymatch_indels(querymatch));
+                                           matches,
+                                           mismatches,
+                                           indels);
     *evalue_ptr = gt_evalue_from_raw_score(karlin_altschul_stat,
                                            raw_score,
                                            evalue_searchspace);
@@ -256,6 +272,23 @@ static void gt_querymatch_evalue_bit_score(double *evalue_ptr,
                                                    raw_score);
     gt_assert(*evalue_ptr != DBL_MAX && *bit_score_ptr != DBL_MAX);
   }
+}
+
+static void gt_querymatch_evalue_bit_score(double *evalue_ptr,
+                                           double *bit_score_ptr,
+                                           const GtKarlinAltschulStat
+                                             *karlin_altschul_stat,
+                                           const GtQuerymatch *querymatch)
+{
+  return gt_querymatch_evalue_bit_score_generic(evalue_ptr,
+                                                bit_score_ptr,
+                                                karlin_altschul_stat,
+                                                querymatch->query_seqlen,
+                                                gt_querymatch_matches(
+                                                  querymatch),
+                                                querymatch->mismatches,
+                                                gt_querymatch_indels(
+                                                  querymatch));
 }
 
 void gt_querymatch_init(GtQuerymatch *querymatch,
@@ -570,6 +603,85 @@ void gt_querymatch_show_failed_seed(const GtSeedExtendDisplayFlag
   }
 }
 
+bool gt_querymatch_check_final_generic(
+                               double *evalue_ptr,
+                               double *bit_score_ptr,
+                               const GtKarlinAltschulStat *karlin_altschul_stat,
+                               GtUword query_seqlen,
+                               GtUword aligned_len,
+                               GtUword distance,
+                               GtUword mismatches,
+                               GtUword userdefinedleastlength,
+                               GtUword errorpercentage,
+                               double evalue_threshold,
+                               GT_UNUSED FILE *fp)
+{
+#undef SKDEBUG
+#ifdef SKDEBUG
+  fprintf(fp, "# errorrate = %.2f <=? " GT_WU " = errorpercentage ",
+          gt_querymatch_error_rate(distance,aligned_len),
+          errorpercentage);
+#endif
+  if (gt_querymatch_error_rate(distance,aligned_len) > (double) errorpercentage)
+  {
+#ifdef SKDEBUG
+    fprintf(fp, "false => reject\n");
+#endif
+    return false;
+  }
+#ifdef SKDEBUG
+  else
+  {
+    fprintf(fp, "true => accept\n");
+  }
+  fprintf(fp, "# aligned_len = " GT_WU " >=? " GT_WU
+         " = 2 * userdefinedleastlen ",
+         aligned_len, 2 * userdefinedleastlength);
+#endif
+  if (aligned_len < 2 * userdefinedleastlength)
+  {
+#ifdef SKDEBUG
+    fprintf(fp, "false => reject\n");
+#endif
+    return false;
+  }
+#ifdef SKDEBUG
+  fprintf(fp, "true => accept\n");
+#endif
+  if (karlin_altschul_stat != NULL)
+  {
+    const GtUword matches = gt_querymatch_matches_generic(aligned_len,
+                                                          distance,
+                                                          mismatches);
+    const GtUword indels = gt_querymatch_indels_generic(distance,mismatches);
+
+    gt_querymatch_evalue_bit_score_generic(evalue_ptr,bit_score_ptr,
+                                           karlin_altschul_stat,
+                                           query_seqlen,
+                                           matches,
+                                           mismatches,
+                                           indels);
+#ifdef SKDEBUG
+    fprintf(querymatch->fp, "# evalue_ptr = %.2e <=? %.2e = evalue_threshold ",
+                             *evalue_ptr,evalue_threshold);
+#endif
+    if (*evalue_ptr > evalue_threshold)
+    {
+#ifdef SKDEBUG
+      fprintf(fp, "false => reject\n");
+#endif
+      return false;
+    }
+#ifdef SKDEBUG
+    else
+    {
+      fprintf(fp, "true => accept\n");
+    }
+#endif
+  }
+  return true;
+}
+
 bool gt_querymatch_check_final(double *evalue_ptr,
                                double *bit_score_ptr,
                                const GtKarlinAltschulStat *karlin_altschul_stat,
@@ -578,40 +690,8 @@ bool gt_querymatch_check_final(double *evalue_ptr,
                                GtUword errorpercentage,
                                double evalue_threshold)
 {
-  const GtUword aligned_len = gt_querymatch_aligned_len(querymatch);
-#undef SKDEBUG
-#ifdef SKDEBUG
-  fprintf(querymatch->fp, "# errorrate = %.2f <=? " GT_WU " = errorpercentage ",
-          gt_querymatch_error_rate(querymatch->distance,aligned_len),
-          errorpercentage);
-#endif
-  if (gt_querymatch_error_rate(querymatch->distance,aligned_len) >
-      (double) errorpercentage)
-  {
-#ifdef SKDEBUG
-    fprintf(querymatch->fp, "false => reject\n");
-#endif
-    return false;
-  }
-#ifdef SKDEBUG
-  else
-  {
-    fprintf(querymatch->fp, "true => accept\n");
-  }
-  fprintf(querymatch->fp, "# aligned_len = " GT_WU " >=? " GT_WU
-         " = 2 * userdefinedleastlen ",
-         aligned_len, 2 * userdefinedleastlength);
-#endif
-  if (aligned_len < 2 * userdefinedleastlength)
-  {
-#ifdef SKDEBUG
-    fprintf(querymatch->fp, "false => reject\n");
-#endif
-    return false;
-  }
-#ifdef SKDEBUG
-  fprintf(querymatch->fp, "true => accept\n");
-#endif
+  GtUword aligned_len;
+
   if (!gt_querymatch_ordered(querymatch))
   {
 #ifdef SKDEBUG
@@ -619,29 +699,19 @@ bool gt_querymatch_check_final(double *evalue_ptr,
 #endif
     return false;
   }
-  if (karlin_altschul_stat != NULL)
-  {
-    gt_querymatch_evalue_bit_score(evalue_ptr,bit_score_ptr,
-                                   karlin_altschul_stat,querymatch);
-#ifdef SKDEBUG
-    fprintf(querymatch->fp, "# evalue_ptr = %.2e <=? %.2e = evalue_threshold ",
-                             *evalue_ptr,evalue_threshold);
-#endif
-    if (*evalue_ptr > evalue_threshold)
-    {
-#ifdef SKDEBUG
-      fprintf(querymatch->fp, "false => reject\n");
-#endif
-      return false;
-    }
-#ifdef SKDEBUG
-    else
-    {
-      fprintf(querymatch->fp, "true => accept\n");
-    }
-#endif
-  }
-  return true;
+  aligned_len = gt_querymatch_aligned_len(querymatch);
+  return gt_querymatch_check_final_generic(
+                               evalue_ptr,
+                               bit_score_ptr,
+                               karlin_altschul_stat,
+                               querymatch->query_seqlen,
+                               aligned_len,
+                               querymatch->distance,
+                               querymatch->mismatches,
+                               userdefinedleastlength,
+                               errorpercentage,
+                               evalue_threshold,
+                               querymatch->fp);
 }
 
 static void gt_querymatch_applycorrection(GtQuerymatch *querymatch)

@@ -32,6 +32,15 @@ $OUTFMT_ARGS = ["alignment","cigar","cigarX","polinfo","fstperquery","seed.len",
                 "seed.s","seed.q","seed_in_algn","s.seqlen",
                 "q.seqlen","evalue","subjectid","queryid","bitscore"]
 
+Name "gt seed_extend: ANI computation"
+Keywords "gt_seed_extend ANI"
+Test do
+  run_test build_encseq("at1MB", "#{$testdata}at1MB")
+  run_test build_encseq("U89959_genomic", "#{$testdata}U89959_genomic.fas")
+  run_test "#{$bin}/gt seed_extend -ii at1MB -qii U89959_genomic -ani"
+  run "diff -I '^#' #{last_stdout} #{$testdata}/see-ext-ani-at1MB-U8.txt"
+end
+
 Name "gt seed_extend: blast like output"
 Keywords "gt_seed_extend blast_format"
 Test do

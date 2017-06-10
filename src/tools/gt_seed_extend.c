@@ -88,7 +88,8 @@ typedef struct {
   bool histogram;
   bool use_kmerfile;
   bool trimstat_on;
-  bool use_apos, use_apos_track_all;
+  bool use_apos, use_apos_track_all, compute_ani;
+  GtAniAccumulate ani_accumulate;
   GtUword maxmat;
   GtOption *se_ref_op_evalue,
            *se_ref_op_maxmat,
@@ -109,6 +110,8 @@ static void* gt_seed_extend_arguments_new(void)
   arguments->char_access_mode = gt_str_new();
   arguments->splt_string = gt_str_new();
   arguments->display_args = gt_str_array_new();
+  arguments->ani_accumulate.sum_of_aligned_len = 0;
+  arguments->ani_accumulate.sum_of_distance = 0;
   return arguments;
 }
 
@@ -143,10 +146,11 @@ static GtOptionParser* gt_seed_extend_option_parser_new(void *tool_arguments)
     *op_seedlength, *op_minlen, *op_minid, *op_evalue, *op_xbe,
     *op_sup, *op_frq,
     *op_mem, *op_bia, *op_onlyseeds, *op_weakends, *op_relax_polish,
-    *op_verify_alignment, *op_only_selected_seqpairs, *op_spdist, *op_display,
+    *op_verify_alignment, *op_only_selected_seqpairs, *op_spdist, *op_outfmt,
     *op_norev, *op_nofwd, *op_part, *op_pick, *op_overl, *op_trimstat,
     *op_cam_generic, *op_diagbandwidth, *op_mincoverage, *op_maxmat,
-    *op_use_apos, *op_use_apos_track_all, *op_chain, *op_diagband_statistics;
+    *op_use_apos, *op_use_apos_track_all, *op_chain, *op_diagband_statistics,
+    *op_ani, *op_benchmark;
 
   static GtRange seedpairdistance_defaults = {1UL, GT_UWORD_MAX};
   /* When extending the following array, do not forget to update
@@ -487,10 +491,19 @@ static GtOptionParser* gt_seed_extend_option_parser_new(void *tool_arguments)
   gt_option_is_development_option(op_only_selected_seqpairs);
 
   /* -outfmt */
-  op_display = gt_option_new_string_array("outfmt",
+  op_outfmt = gt_option_new_string_array("outfmt",
                                           gt_querymatch_display_help(),
                                           arguments->display_args);
-  gt_option_parser_add_option(op, op_display);
+  gt_option_parser_add_option(op, op_outfmt);
+
+  /* -ani */
+  op_ani = gt_option_new_bool("ani",
+                              "output average nucleotide identity determined "
+                              "from the computed matches "
+                              "(which are not output)",
+                              &arguments->compute_ani,
+                              false);
+  gt_option_parser_add_option(op, op_ani);
 
   /* -no-reverse */
   op_norev = gt_option_new_bool("no-reverse",
@@ -528,12 +541,12 @@ static GtOptionParser* gt_seed_extend_option_parser_new(void *tool_arguments)
   gt_option_parser_add_option(op, op_spdist);
 
   /* -benchmark */
-  option = gt_option_new_bool("benchmark",
-                              "Measure total running time and be silent",
-                              &arguments->benchmark,
-                              false);
-  gt_option_is_development_option(option);
-  gt_option_parser_add_option(op, option);
+  op_benchmark = gt_option_new_bool("benchmark",
+                                    "Measure total running time and be silent",
+                                    &arguments->benchmark,
+                                    false);
+  gt_option_is_development_option(op_benchmark);
+  gt_option_parser_add_option(op, op_benchmark);
 
   /* -weakends */
   op_weakends = gt_option_new_bool("weakends",
@@ -612,10 +625,17 @@ static GtOptionParser* gt_seed_extend_option_parser_new(void *tool_arguments)
   gt_option_exclude(op_diagband_statistics, op_use_apos);
   gt_option_exclude(op_diagband_statistics, op_use_apos_track_all);
   gt_option_exclude(op_diagband_statistics, op_minlen);
+  gt_option_exclude(op_diagband_statistics, op_ani);
+  gt_option_exclude(op_ani, op_outfmt);
+  gt_option_exclude(op_ani, op_onlyseeds);
+  gt_option_exclude(op_ani, op_verify_alignment);
+  gt_option_exclude(op_ani, op_only_selected_seqpairs);
+  gt_option_exclude(op_ani, op_benchmark);
   gt_option_exclude(op_cam, op_xbe);
   gt_option_exclude(op_cam, op_xdr);
   gt_option_exclude(op_cam_generic, op_xbe);
   gt_option_exclude(op_cam_generic, op_xdr);
+
   return op;
 }
 
@@ -674,7 +694,6 @@ static int gt_seed_extend_arguments_check(int rest_argc, void *tool_arguments,
   {
     gt_str_set(arguments->diagband_statistics_arg,"");
   }
-
   /* no extra arguments */
   if (!had_err && rest_argc > 0) {
     gt_error_set(err, "too many arguments (-help shows correct usage)");
@@ -1033,7 +1052,10 @@ static int gt_seed_extend_runner(int argc,
                                              arguments->benchmark,
                                              !arguments->relax_polish,
                                              arguments->verify_alignment,
-                                             arguments->only_selected_seqpairs);
+                                             arguments->only_selected_seqpairs,
+                                             arguments->compute_ani
+                                               ? &arguments->ani_accumulate
+                                               : NULL);
 
     info = gt_diagbandseed_info_new(aencseq,
                                     bencseq,
@@ -1095,6 +1117,17 @@ static int gt_seed_extend_runner(int argc,
     gt_timer_delete(seedextendtimer);
   }
   gt_querymatch_display_flag_delete(out_display_flag);
+  if (arguments->compute_ani)
+  {
+    printf("ANI %s %s %.4f\n",
+           gt_str_get(arguments->dbs_indexname),
+           gt_str_get(arguments->dbs_queryname),
+           arguments->ani_accumulate.sum_of_aligned_len > 0
+             ? 100.0 * (1.0 - (double)
+                              (2 * arguments->ani_accumulate.sum_of_distance)/
+                              arguments->ani_accumulate.sum_of_aligned_len)
+             : 0.0);
+  }
   return had_err;
 }
 

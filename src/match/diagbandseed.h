@@ -74,6 +74,12 @@ const char *gt_diagbandseed_splt_comment(void);
 GtDiagbandseedPairlisttype gt_diagbandseed_splt_get(const char *splt_string,
                                                     GtError *err);
 
+typedef struct
+{
+  GtUword sum_of_distance,
+          sum_of_aligned_len;
+} GtAniAccumulate;
+
 /* The constructor for GtDiagbandseedExtendParams*/
 GtDiagbandseedExtendParams *gt_diagbandseed_extend_params_new(
                                 GtUword userdefinedleastlength,
@@ -98,7 +104,8 @@ GtDiagbandseedExtendParams *gt_diagbandseed_extend_params_new(
                                 bool benchmark,
                                 bool always_polished_ends,
                                 bool verify_alignment,
-                                bool only_selected_seqpairs);
+                                bool only_selected_seqpairs,
+                                GtAniAccumulate *ani_accumulate);
 
 /* The destructors */
 void gt_diagbandseed_info_delete(GtDiagbandseedInfo *info);

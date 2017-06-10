@@ -133,6 +133,19 @@ bool gt_querymatch_check_final(double *evalue_ptr,
                                GtUword errorpercentage,
                                double evalue_threshold);
 
+bool gt_querymatch_check_final_generic(
+                               double *evalue_ptr,
+                               double *bit_score_ptr,
+                               const GtKarlinAltschulStat *karlin_altschul_stat,
+                               GtUword query_seqlen,
+                               GtUword aligned_len,
+                               GtUword distance,
+                               GtUword mismatches,
+                               GtUword userdefinedleastlength,
+                               GtUword errorpercentage,
+                               double evalue_threshold,
+                               GT_UNUSED FILE *fp);
+
 void gt_querymatch_query_readmode_set(GtQuerymatch *querymatch,
                                       GtReadmode query_readmode);
 
