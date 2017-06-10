@@ -2870,7 +2870,8 @@ static void gt_diagbandseed_process_seeds_stat(FILE *stream,
                                                  *process_seeds_counts,
                                                GtUword mlistlen,
                                                GtUword allseqpairs,
-                                               bool extendgreedy,
+                                               GT_WIN32_UNUSED
+                                                 bool extendgreedy,
                                                bool maxmat_show)
 {
 #ifndef _WIN32

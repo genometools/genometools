@@ -67,7 +67,7 @@ GtQuerymatch *gt_querymatch_new(void)
   querymatch->verify_alignment = false;
   querymatch->query_readmode = GT_READMODE_FORWARD;
   querymatch->fp = stdout;
-  querymatch->queryseqnum = UINT64_MAX;
+  querymatch->queryseqnum = GT_UWORD_MAX;
   querymatch->db_desc = NULL;
   querymatch->query_desc = NULL;
   return querymatch;
