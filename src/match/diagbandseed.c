@@ -2873,8 +2873,10 @@ static void gt_diagbandseed_process_seeds_stat(FILE *stream,
                                                bool extendgreedy,
                                                bool maxmat_show)
 {
+#ifndef _WIN32
   GtWord total_process_seeds_usec
     = gt_timer_elapsed_usec(timer);
+#endif
 
   fprintf(stream,"# total number of seeds: " GT_WU,mlistlen);
   if (!maxmat_show)

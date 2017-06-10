@@ -65,7 +65,7 @@ GtTimer* gt_timer_new_with_progress_description(const char* desc)
   return t;
 }
 
-void gt_timer_start(GtTimer *t)
+void gt_timer_start(GT_WIN32_UNUSED GtTimer *t)
 {
 #ifndef _WIN32
   gt_assert(t);
@@ -81,7 +81,7 @@ void gt_timer_start(GtTimer *t)
 #endif
 }
 
-void gt_timer_stop(GtTimer *t)
+void gt_timer_stop(GT_WIN32_UNUSED GtTimer *t)
 {
   gt_assert(t);
 #ifndef _WIN32
@@ -132,7 +132,9 @@ static int timeval_add(struct timeval *result,
 }
 #endif
 
-void gt_timer_show_formatted(GtTimer *t, const char *fmt, FILE *fp)
+void gt_timer_show_formatted(GT_WIN32_UNUSED GtTimer *t,
+                             GT_WIN32_UNUSED const char *fmt,
+                             GT_WIN32_UNUSED FILE *fp)
 {
 #ifndef _WIN32
   struct timeval elapsed_tv;
@@ -152,7 +154,7 @@ void gt_timer_show_formatted(GtTimer *t, const char *fmt, FILE *fp)
 #endif
 }
 
-GtWord gt_timer_elapsed_usec(GtTimer *t)
+GtWord gt_timer_elapsed_usec(GT_WIN32_UNUSED GtTimer *t)
 {
 #ifndef _WIN32
   struct timeval elapsed_tv;
@@ -168,7 +170,9 @@ GtWord gt_timer_elapsed_usec(GtTimer *t)
 #endif
 }
 
-void gt_timer_get_formatted(GtTimer *t, const char *fmt, GtStr *str)
+void gt_timer_get_formatted(GT_WIN32_UNUSED GtTimer *t,
+                            GT_WIN32_UNUSED const char *fmt,
+                            GT_WIN32_UNUSED GtStr *str)
 {
 #ifndef _WIN32
   struct timeval elapsed_tv;
@@ -218,7 +222,9 @@ static void gt_timer_print_progress_report(GtTimer *t,
 }
 #endif
 
-void gt_timer_show_progress(GtTimer *t, const char *desc, FILE *fp)
+void gt_timer_show_progress(GT_WIN32_UNUSED GtTimer *t,
+                            GT_WIN32_UNUSED const char *desc,
+                            GT_WIN32_UNUSED FILE *fp)
 {
 #ifndef _WIN32
   gt_timer_show_progress_formatted(t, fp, "%s", desc);
@@ -229,8 +235,10 @@ void gt_timer_show_progress(GtTimer *t, const char *desc, FILE *fp)
 #endif
 }
 
-void gt_timer_show_progress_formatted(GtTimer *t, FILE *fp, const char *desc,
-                                      ...)
+void gt_timer_show_progress_formatted(GT_WIN32_UNUSED GtTimer *t,
+                                      GT_WIN32_UNUSED FILE *fp,
+                                      GT_WIN32_UNUSED const char *desc,
+                                      GT_WIN32_UNUSED ...)
 {
 #ifndef _WIN32
   va_list ap;
@@ -245,8 +253,10 @@ void gt_timer_show_progress_formatted(GtTimer *t, FILE *fp, const char *desc,
 #endif
 }
 
-void gt_timer_show_progress_va(GtTimer *t, FILE *fp, const char *desc,
-                               va_list ap)
+void gt_timer_show_progress_va(GT_WIN32_UNUSED GtTimer *t,
+                               GT_WIN32_UNUSED FILE *fp,
+                               GT_WIN32_UNUSED const char *desc,
+                               GT_WIN32_UNUSED va_list ap)
 {
 #ifndef _WIN32
   char buf[BUFSIZ];
@@ -275,7 +285,8 @@ void gt_timer_show_progress_va(GtTimer *t, FILE *fp, const char *desc,
 #endif
 }
 
-void gt_timer_show_progress_final(GtTimer *t, FILE *fp)
+void gt_timer_show_progress_final(GT_WIN32_UNUSED GtTimer *t,
+                                  GT_WIN32_UNUSED FILE *fp)
 {
 #ifndef _WIN32
   struct timeval elapsed_tv, elapsed_user_tv, elapsed_sys_tv;

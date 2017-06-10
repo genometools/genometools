@@ -22,6 +22,7 @@
 #include <sys/wait.h>
 #endif
 #include "core/ma_api.h"
+#include "core/unused_api.h"
 #include "extended/safe_popen.h"
 
 #ifndef _WIN32
@@ -50,9 +51,9 @@ static pid_t safe_fork(void) {
 }
 #endif
 
-GtSafePipe *gt_safe_popen(const char *path,
-                          char *const argv[],
-                          char *const envp[],
+GtSafePipe *gt_safe_popen(GT_WIN32_UNUSED const char *path,
+                          GT_WIN32_UNUSED char *const argv[],
+                          GT_WIN32_UNUSED char *const envp[],
                           GtError *err) {
 #ifndef _WIN32
   int stdin_pipe[2], stdout_pipe[2], had_err = 0;
@@ -136,7 +137,7 @@ GtSafePipe *gt_safe_popen(const char *path,
 #endif
 }
 
-int gt_safe_pclose(GtSafePipe *p) {
+int gt_safe_pclose(GT_WIN32_UNUSED GtSafePipe *p) {
 #ifndef _WIN32
   int   status;
   pid_t pid = (pid_t) -1;

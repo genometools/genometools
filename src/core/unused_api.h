@@ -25,4 +25,10 @@
 #define GT_UNUSED \
         __attribute__ ((unused)) /*@unused@*/
 
+#ifndef _WIN32
+#define GT_WIN32_UNUSED /* Nothing */
+#else
+#define GT_WIN32_UNUSED GT_UNUSED
+#endif
+
 #endif
