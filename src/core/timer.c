@@ -238,7 +238,7 @@ void gt_timer_show_progress(GT_WIN32_UNUSED GtTimer *t,
 void gt_timer_show_progress_formatted(GT_WIN32_UNUSED GtTimer *t,
                                       GT_WIN32_UNUSED FILE *fp,
                                       GT_WIN32_UNUSED const char *desc,
-                                      GT_WIN32_UNUSED ...)
+                                      ...)
 {
 #ifndef _WIN32
   va_list ap;
