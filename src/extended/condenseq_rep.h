@@ -71,13 +71,13 @@ struct GtCondenseq {
   GtUword buffsize,
           id_len, /* GT_UNDEF_UWORD if sdstab != NULL */
           ids_total_len,
-          ldb_allocated,
-          ldb_nelems,
+          lds_allocated,
+          lds_nelems,
           orig_len,
           orig_num_seq,
           ubuffsize,
-          udb_allocated,
-          udb_nelems;
+          uds_allocated,
+          uds_nelems;
 };
 
 /* Returns a new GtCondenseq object, which is empty and can be filled by

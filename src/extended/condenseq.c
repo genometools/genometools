@@ -224,13 +224,13 @@ static GtCondenseq *condenseq_new_empty(const GtAlphabet *alph)
   condenseq->alphabet = gt_alphabet_ref((GtAlphabet *) alph);
 
   condenseq->buffsize =
-    condenseq->ldb_allocated =
-    condenseq->ldb_nelems =
+    condenseq->lds_allocated =
+    condenseq->lds_nelems =
     condenseq->orig_len =
     condenseq->orig_num_seq =
     condenseq->ubuffsize =
-    condenseq->udb_allocated =
-    condenseq->udb_nelems = 0;
+    condenseq->uds_allocated =
+    condenseq->uds_nelems = 0;
 
   condenseq->id_len = GT_UNDEF_UWORD;
 
@@ -263,12 +263,12 @@ GtCondenseq *gt_condenseq_new(const GtEncseq *orig_es, GtLogger *logger)
 
 GtUword gt_condenseq_num_links(const GtCondenseq *condenseq)
 {
-  return condenseq->ldb_nelems;
+  return condenseq->lds_nelems;
 }
 
 GtUword gt_condenseq_num_uniques(const GtCondenseq *condenseq)
 {
-  return condenseq->udb_nelems;
+  return condenseq->uds_nelems;
 }
 
 GtUword gt_condenseq_total_link_len(const GtCondenseq *condenseq)
@@ -276,7 +276,7 @@ GtUword gt_condenseq_total_link_len(const GtCondenseq *condenseq)
   GtUword total = 0,
           i;
 
-  for (i = 0; i < condenseq->ldb_nelems; i++) {
+  for (i = 0; i < condenseq->lds_nelems; i++) {
     total += condenseq->links[i].len;
   }
 
@@ -309,24 +309,24 @@ GtUword gt_condenseq_array_size_increase(GtUword allocated)
   return allocated;
 }
 
-static inline void condenseq_udb_resize(GtCondenseq *condenseq)
+static inline void condenseq_uds_resize(GtCondenseq *condenseq)
 {
-  if (condenseq->udb_nelems == condenseq->udb_allocated) {
-    condenseq->udb_allocated =
-      gt_condenseq_array_size_increase(condenseq->udb_allocated);
+  if (condenseq->uds_nelems == condenseq->uds_allocated) {
+    condenseq->uds_allocated =
+      gt_condenseq_array_size_increase(condenseq->uds_allocated);
     condenseq->uniques = gt_realloc(condenseq->uniques,
-                              (size_t) condenseq->udb_allocated *
+                              (size_t) condenseq->uds_allocated *
                               sizeof (*condenseq->uniques));
   }
 }
 
-static inline void condenseq_ldb_resize(GtCondenseq *condenseq)
+static inline void condenseq_lds_resize(GtCondenseq *condenseq)
 {
-  if (condenseq->ldb_nelems == condenseq->ldb_allocated) {
-    condenseq->ldb_allocated =
-      gt_condenseq_array_size_increase(condenseq->ldb_allocated);
+  if (condenseq->lds_nelems == condenseq->lds_allocated) {
+    condenseq->lds_allocated =
+      gt_condenseq_array_size_increase(condenseq->lds_allocated);
     condenseq->links = gt_realloc(condenseq->links,
-                            (size_t) condenseq->ldb_allocated *
+                            (size_t) condenseq->lds_allocated *
                             sizeof (*condenseq->links));
   }
 }
@@ -337,52 +337,52 @@ void gt_condenseq_add_unique_to_db(GtCondenseq *condenseq,
 {
   gt_assert(len != 0);
   /* if previous unique and this one are not consecutive, add the new one */
-  if (condenseq->udb_nelems == 0 ||
-      condenseq->uniques[condenseq->udb_nelems - 1].orig_startpos +
-      condenseq->uniques[condenseq->udb_nelems - 1].len != orig_startpos) {
-    gt_assert(condenseq->udb_nelems == 0 ||
-              condenseq->uniques[condenseq->udb_nelems - 1].orig_startpos +
-              condenseq->uniques[condenseq->udb_nelems - 1].len <
+  if (condenseq->uds_nelems == 0 ||
+      condenseq->uniques[condenseq->uds_nelems - 1].orig_startpos +
+      condenseq->uniques[condenseq->uds_nelems - 1].len != orig_startpos) {
+    gt_assert(condenseq->uds_nelems == 0 ||
+              condenseq->uniques[condenseq->uds_nelems - 1].orig_startpos +
+              condenseq->uniques[condenseq->uds_nelems - 1].len <
               orig_startpos);
-    gt_assert(condenseq->ldb_nelems == 0 ||
-              condenseq->links[condenseq->ldb_nelems - 1].orig_startpos +
-              condenseq->links[condenseq->ldb_nelems - 1].len <=
+    gt_assert(condenseq->lds_nelems == 0 ||
+              condenseq->links[condenseq->lds_nelems - 1].orig_startpos +
+              condenseq->links[condenseq->lds_nelems - 1].len <=
               orig_startpos);
-    condenseq_udb_resize(condenseq);
-    condenseq->uniques[condenseq->udb_nelems].orig_startpos = orig_startpos;
-    condenseq->uniques[condenseq->udb_nelems].len = len;
-    condenseq->uniques[condenseq->udb_nelems].links.spaceuint32_t = NULL;
-    condenseq->udb_nelems++;
+    condenseq_uds_resize(condenseq);
+    condenseq->uniques[condenseq->uds_nelems].orig_startpos = orig_startpos;
+    condenseq->uniques[condenseq->uds_nelems].len = len;
+    condenseq->uniques[condenseq->uds_nelems].links.spaceuint32_t = NULL;
+    condenseq->uds_nelems++;
   }
   else {
-    condenseq->uniques[condenseq->udb_nelems - 1].len += len;
+    condenseq->uniques[condenseq->uds_nelems - 1].len += len;
   }
 }
 
 void gt_condenseq_add_link_to_db(GtCondenseq *condenseq, GtCondenseqLink link)
 {
-  condenseq_ldb_resize(condenseq);
+  condenseq_lds_resize(condenseq);
   gt_assert(condenseq->links != NULL);
-  gt_assert(condenseq->ldb_nelems == 0 ||
-            condenseq->links[condenseq->ldb_nelems - 1].orig_startpos +
-            condenseq->links[condenseq->ldb_nelems - 1].len <=
+  gt_assert(condenseq->lds_nelems == 0 ||
+            condenseq->links[condenseq->lds_nelems - 1].orig_startpos +
+            condenseq->links[condenseq->lds_nelems - 1].len <=
             link.orig_startpos);
-  gt_assert(condenseq->udb_nelems == 0 ||
-            condenseq->uniques[condenseq->udb_nelems - 1].orig_startpos +
-            condenseq->uniques[condenseq->udb_nelems - 1].len <=
+  gt_assert(condenseq->uds_nelems == 0 ||
+            condenseq->uniques[condenseq->uds_nelems - 1].orig_startpos +
+            condenseq->uniques[condenseq->uds_nelems - 1].len <=
             link.orig_startpos);
-  condenseq->links[condenseq->ldb_nelems] = link;
-  condenseq->ldb_nelems++;
+  condenseq->links[condenseq->lds_nelems] = link;
+  condenseq->lds_nelems++;
 }
 
 void gt_condenseq_delete(GtCondenseq *condenseq)
 {
   if (condenseq != NULL) {
     GtUword i;
-    for (i = 0; i < condenseq->ldb_nelems; i++) {
+    for (i = 0; i < condenseq->lds_nelems; i++) {
       gt_editscript_delete(condenseq->links[i].editscript);
     }
-    for (i = 0; i < condenseq->udb_nelems; i++) {
+    for (i = 0; i < condenseq->uds_nelems; i++) {
       GT_FREEARRAY(&(condenseq->uniques[i].links), uint32_t);
     }
     gt_alphabet_delete(condenseq->alphabet);
@@ -461,37 +461,37 @@ static int condenseq_io(GtCondenseq *condenseq,
   if (!had_err)
     had_err = gt_condenseq_io_one(condenseq->orig_num_seq);
   if (!had_err)
-    had_err = gt_condenseq_io_one(condenseq->ldb_nelems);
+    had_err = gt_condenseq_io_one(condenseq->lds_nelems);
   if (!had_err) {
-    if (condenseq->ldb_nelems == 0) {
+    if (condenseq->lds_nelems == 0) {
       gt_warning("compression of condenseq did not succeed in finding any "
                  "compressable similarities, maybe the input is to small or "
                  "the chosen parameters should be reconsidered.");
     }
     if (condenseq->links == NULL) {
-      condenseq->links = gt_calloc((size_t) condenseq->ldb_nelems,
+      condenseq->links = gt_calloc((size_t) condenseq->lds_nelems,
                                    sizeof (*condenseq->links));
-      condenseq->ldb_allocated = condenseq->ldb_nelems;
+      condenseq->lds_allocated = condenseq->lds_nelems;
     }
 
-    had_err = gt_condenseq_io_one(condenseq->udb_nelems);
+    had_err = gt_condenseq_io_one(condenseq->uds_nelems);
   }
 
   if (!had_err) {
-    gt_assert(condenseq->udb_nelems > 0);
+    gt_assert(condenseq->uds_nelems > 0);
 
     if (condenseq->uniques == NULL) {
       condenseq->uniques = gt_malloc(sizeof (*condenseq->uniques) *
-                                     condenseq->udb_nelems );
-      condenseq->udb_allocated = condenseq->udb_nelems;
+                                     condenseq->uds_nelems );
+      condenseq->uds_allocated = condenseq->uds_nelems;
     }
   }
 
-  for (idx = 0; !had_err && idx < condenseq->ldb_nelems; idx++) {
+  for (idx = 0; !had_err && idx < condenseq->lds_nelems; idx++) {
     had_err = condenseq_linkentry_io(&condenseq->links[idx], fp, io_func, err);
   }
 
-  for (idx = 0; !had_err && idx < condenseq->udb_nelems; idx++) {
+  for (idx = 0; !had_err && idx < condenseq->uds_nelems; idx++) {
     had_err = condenseq_uniqueentry_io(&condenseq->uniques[idx], fp, io_func,
                                        err);
   }
@@ -561,19 +561,19 @@ GtCondenseq *gt_condenseq_new_from_file(const char *indexname,
         gt_assert(condenseq->links);
         gt_fa_fclose(fp);
         /*create link array for each unique entry*/
-        for (i = 0; i < condenseq->udb_nelems; i++) {
+        for (i = 0; i < condenseq->uds_nelems; i++) {
           GT_INITARRAY(&(condenseq->uniques[i].links),uint32_t);
         }
         /* check for overflows */
-        if (condenseq->ldb_nelems > (GtUword) ((uint32_t) 0 - (uint32_t) 1)) {
+        if (condenseq->lds_nelems > (GtUword) ((uint32_t) 0 - (uint32_t) 1)) {
           gt_error_set(err, "Overflow, to many link-elements. Can't be stored");
           had_err = -1;
         }
         /* iterate through link entrys and store ids in corresponding unique
           entry array */
-        for (i = 0; !had_err && (GtUword) i < condenseq->ldb_nelems; i++) {
+        for (i = 0; !had_err && (GtUword) i < condenseq->lds_nelems; i++) {
           GtUword uid = condenseq->links[i].unique_id;
-          gt_assert(uid < condenseq->udb_nelems);
+          gt_assert(uid < condenseq->uds_nelems);
           GT_STOREINARRAY(&(condenseq->uniques[uid].links),
                           uint32_t,
                           10,
@@ -626,9 +626,9 @@ static GtUword condenseq_links_position_binsearch(const GtCondenseq *condenseq,
                                                   GtUword position)
 {
   GtWord idx, low, high;
-  gt_assert(condenseq && condenseq->ldb_nelems > 0);
+  gt_assert(condenseq && condenseq->lds_nelems > 0);
   low = (GtWord) -1;
-  gt_safe_assign(high, condenseq->ldb_nelems);
+  gt_safe_assign(high, condenseq->lds_nelems);
   idx = GT_DIV2(low + high);
   while (high - low > (GtWord) 1) {
     if (position < condenseq->links[idx].orig_startpos) {
@@ -641,16 +641,16 @@ static GtUword condenseq_links_position_binsearch(const GtCondenseq *condenseq,
   }
   if (low > (GtWord) -1 && condenseq->links[idx].orig_startpos <= position)
     return (GtUword) idx;
-  return condenseq->ldb_nelems;
+  return condenseq->lds_nelems;
 }
 
 GtUword gt_condenseq_uniques_position_binsearch(const GtCondenseq *condenseq,
                                                 GtUword position)
 {
   GtWord idx, low, high;
-  gt_assert(condenseq && condenseq->udb_nelems > 0);
+  gt_assert(condenseq && condenseq->uds_nelems > 0);
   low = (GtWord) -1;
-  gt_safe_assign(high, condenseq->udb_nelems);
+  gt_safe_assign(high, condenseq->uds_nelems);
   idx = GT_DIV2(low + high);
   while (high - low > (GtWord) 1) {
     if (position < condenseq->uniques[idx].orig_startpos) {
@@ -663,7 +663,7 @@ GtUword gt_condenseq_uniques_position_binsearch(const GtCondenseq *condenseq,
   }
   if (low > (GtWord) -1 && condenseq->uniques[idx].orig_startpos <= position)
     return (GtUword) idx;
-  return condenseq->udb_nelems;
+  return condenseq->uds_nelems;
 }
 
 static GtUword condenseq_unique_extract_encoded(const GtCondenseq *cs,
@@ -738,7 +738,7 @@ const GtUchar *gt_condenseq_extract_encoded_range(GtCondenseq *condenseq,
   GtCondenseqLink *link = NULL;
   GtCondenseqUnique *unique = NULL;
 
-  gt_assert(condenseq && condenseq->udb_nelems != 0);
+  gt_assert(condenseq && condenseq->uds_nelems != 0);
   gt_assert(condenseq->uniques[0].orig_startpos == 0);
   gt_assert(range.start <= range.end);
   gt_assert(range.end < condenseq->orig_len);
@@ -763,7 +763,7 @@ const GtUchar *gt_condenseq_extract_encoded_range(GtCondenseq *condenseq,
 
   if (unique->orig_startpos + unique->len <= range.start) {
     uniqueid++;
-    if (uniqueid == condenseq->udb_nelems)
+    if (uniqueid == condenseq->uds_nelems)
       unique = NULL;
     else {
       unique = &condenseq->uniques[uniqueid];
@@ -771,16 +771,16 @@ const GtUchar *gt_condenseq_extract_encoded_range(GtCondenseq *condenseq,
     }
   }
 
-  if (condenseq->ldb_nelems != 0) {
+  if (condenseq->lds_nelems != 0) {
       linkid = condenseq_links_position_binsearch(condenseq, range.start);
-    if (linkid == condenseq->ldb_nelems)
+    if (linkid == condenseq->lds_nelems)
       linkid = 0;
     link = &condenseq->links[linkid];
   }
   if (link != NULL &&
       link->orig_startpos + link->len <= range.start) {
     linkid++;
-    if (linkid == condenseq->ldb_nelems)
+    if (linkid == condenseq->lds_nelems)
       link = NULL;
     else {
       link = &condenseq->links[linkid];
@@ -802,7 +802,7 @@ const GtUchar *gt_condenseq_extract_encoded_range(GtCondenseq *condenseq,
                                                      buf + buffoffset,
                                                      range.start + buffoffset,
                                                      range.end);
-      if (++uniqueid == condenseq->udb_nelems)
+      if (++uniqueid == condenseq->uds_nelems)
         unique = NULL;
       else {
         unique = &condenseq->uniques[uniqueid];
@@ -815,7 +815,7 @@ const GtUchar *gt_condenseq_extract_encoded_range(GtCondenseq *condenseq,
                                                    buf + buffoffset,
                                                    range.start + buffoffset,
                                                    range.end);
-      if (++linkid == condenseq->ldb_nelems)
+      if (++linkid == condenseq->lds_nelems)
         link = NULL;
       else {
         link = &condenseq->links[linkid];
@@ -892,7 +892,7 @@ gt_condenseq_convert_unique_range_to_global(const GtCondenseq *condenseq,
   GtRange ret;
   GtCondenseqUnique *unique;
   gt_assert(condenseq != NULL);
-  gt_assert(unique_id < condenseq->udb_nelems);
+  gt_assert(unique_id < condenseq->uds_nelems);
   unique = &condenseq->uniques[unique_id];
   ret.start = unique->orig_startpos + range.start;
   ret.end = unique->orig_startpos + range.end;
@@ -949,7 +949,7 @@ GtUword gt_condenseq_each_redundant_range(
   GtRange extract;
 
   gt_assert(condenseq != NULL);
-  gt_assert(uid < condenseq->udb_nelems);
+  gt_assert(uid < condenseq->uds_nelems);
   gt_assert(urange.start <= urange.end);
 
   unique = &condenseq->uniques[uid];
@@ -1062,7 +1062,7 @@ int gt_condenseq_output_to_gff3(const GtCondenseq *condenseq,
                              (GtUword) 1, GT_STRAND_BOTH);
   fnode = (GtFeatureNode*) node;
   gt_feature_node_set_source(fnode, source);
-  for (idx = 0; !had_err && idx < condenseq->udb_nelems; ++idx) {
+  for (idx = 0; !had_err && idx < condenseq->uds_nelems; ++idx) {
     GtCondenseqUnique uq = condenseq->uniques[idx];
     if (seqend <= uq.orig_startpos) {
       const char *desc;
@@ -1096,7 +1096,7 @@ int gt_condenseq_output_to_gff3(const GtCondenseq *condenseq,
   gt_str_append_cstr(id, "L");
   name_len = gt_str_length(name);
   seqend = 0;
-  for (idx = 0; !had_err && idx < condenseq->ldb_nelems; ++idx) {
+  for (idx = 0; !had_err && idx < condenseq->lds_nelems; ++idx) {
     GtCondenseqLink link = condenseq->links[idx];
     if (seqend <= link.orig_startpos) {
       const char *desc;
@@ -1145,7 +1145,7 @@ GtDiscDistri *gt_condenseq_unique_length_dist(const GtCondenseq *condenseq)
   GtUword idx;
   GtDiscDistri *res = gt_disc_distri_new();
 
-  for (idx = 0; idx < condenseq->udb_nelems; idx++) {
+  for (idx = 0; idx < condenseq->uds_nelems; idx++) {
     gt_disc_distri_add(res, condenseq->uniques[idx].len);
   }
   return res;
@@ -1156,7 +1156,7 @@ GtDiscDistri *gt_condenseq_link_length_dist(const GtCondenseq *condenseq)
   GtUword idx;
   GtDiscDistri *res = gt_disc_distri_new();
 
-  for (idx = 0; idx < condenseq->ldb_nelems; idx++) {
+  for (idx = 0; idx < condenseq->lds_nelems; idx++) {
     gt_disc_distri_add(res, condenseq->links[idx].len);
   }
   return res;
@@ -1167,7 +1167,7 @@ GtDiscDistri *gt_condenseq_link_comp_dist(const GtCondenseq *condenseq)
   GtUword idx;
   GtDiscDistri *res = gt_disc_distri_new();
 
-  for (idx = 0; idx < condenseq->ldb_nelems; idx++) {
+  for (idx = 0; idx < condenseq->lds_nelems; idx++) {
     GtEditscript *es = condenseq->links[idx].editscript;
     GtUword vlen;
     size_t size;
@@ -1186,7 +1186,7 @@ GtUword gt_condenseq_unique_range_to_seqrange(const GtCondenseq *condenseq,
   GtCondenseqUnique uq;
 
   gt_assert(condenseq != NULL);
-  gt_assert(uid < condenseq->udb_nelems);
+  gt_assert(uid < condenseq->uds_nelems);
 
   uq = condenseq->uniques[uid];
   seqnum = gt_condenseq_pos2seqnum(condenseq, uq.orig_startpos);
@@ -1204,7 +1204,7 @@ GtUword gt_condenseq_unique_range_to_seqrange(const GtCondenseq *condenseq,
   GtCondenseqLink lk;
 
   gt_assert(condenseq != NULL);
-  gt_assert(lid < condenseq->ldb_nelems);
+  gt_assert(lid < condenseq->lds_nelems);
 
   lk = condenseq->links[lid];
   seqnum = gt_condenseq_pos2seqnum(condenseq, lk.orig_startpos);
@@ -1217,7 +1217,7 @@ GtUword gt_condenseq_unique_range_to_seqrange(const GtCondenseq *condenseq,
 const GtEditscript *gt_condenseq_link_editscript(const GtCondenseq *condenseq,
                                                  GtUword lid)
 {
-  gt_assert(lid < condenseq->ldb_nelems);
+  gt_assert(lid < condenseq->lds_nelems);
   return condenseq->links[lid].editscript;
 }
 
@@ -1230,7 +1230,7 @@ GtUword gt_condenseq_count_relevant_uniques(const GtCondenseq *condenseq,
                                             unsigned int min_align_len)
 {
   GtUword idx, count = 0;
-  for (idx = 0; idx < condenseq->udb_nelems; idx++) {
+  for (idx = 0; idx < condenseq->uds_nelems; idx++) {
     if (condenseq->uniques[idx].len >= min_align_len)
       count++;
   }
@@ -1244,14 +1244,14 @@ GtUword gt_condenseq_size(const GtCondenseq *condenseq,
                           GtUword *descriptions,
                           GtUword *separators) {
   GtUword idx;
-  *uniques = condenseq->udb_nelems * sizeof (*condenseq->uniques);
-  for (idx = 0; idx < condenseq->udb_nelems; idx++) {
+  *uniques = condenseq->uds_nelems * sizeof (*condenseq->uniques);
+  for (idx = 0; idx < condenseq->uds_nelems; idx++) {
     *uniques += condenseq->uniques[idx].links.allocateduint32_t *
       sizeof (*condenseq->uniques[idx].links.spaceuint32_t);
   }
-  *links = condenseq->ldb_nelems * sizeof (*condenseq->links);
+  *links = condenseq->lds_nelems * sizeof (*condenseq->links);
   *editscripts = 0;
-  for (idx = 0; idx < condenseq->ldb_nelems; idx++)
+  for (idx = 0; idx < condenseq->lds_nelems; idx++)
     *editscripts += gt_editscript_size(condenseq->links[idx].editscript);
   *descriptions = condenseq->ids_total_len;
   *descriptions += gt_intset_size_of_struct(condenseq->sdstab);
