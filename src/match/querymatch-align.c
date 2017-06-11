@@ -622,7 +622,8 @@ void gt_querymatchoutoptions_trace_show(const GtQuerymatchoutoptions
   GtEoplistSegment segment;
   bool first = true;
 
-  gt_assert(querymatchoutoptions != NULL);
+  gt_assert(querymatchoutoptions != NULL &&
+            gt_eoplist_unit_cost(querymatchoutoptions->eoplist) > 0);
   gt_eoplist_reader_reset(querymatchoutoptions->eoplist_reader,
                           querymatchoutoptions->eoplist,true);
   while (gt_eoplist_reader_next_segment(&segment,

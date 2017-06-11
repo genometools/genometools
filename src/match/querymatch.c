@@ -379,6 +379,32 @@ static void gt_querymatch_description_out(FILE *fp,const char *description)
   fwrite(description,sizeof *description,nwspl,fp);
 }
 
+static void gt_querymatch_exact_match_trace_show(FILE *fp,GtUword remaining,
+                                                 GtUword trace_delta)
+{
+  bool first = true;
+
+  while (true)
+  {
+    if (!first)
+    {
+      fputc(',',fp);
+    } else
+    {
+      first = false;
+    }
+    if (remaining > trace_delta)
+    {
+      fprintf(fp,GT_WU,trace_delta);
+      remaining -= trace_delta;
+    } else
+    {
+      fprintf(fp,GT_WU,remaining);
+      break;
+    }
+  }
+}
+
 void gt_querymatch_prettyprint(double evalue,double bit_score,
                                const GtSeedExtendDisplayFlag *out_display_flag,
                                const GtQuerymatch *querymatch)
@@ -420,8 +446,18 @@ void gt_querymatch_prettyprint(double evalue,double bit_score,
         }
         break;
       case Gt_Trace_display:
-        gt_querymatchoutoptions_trace_show(querymatch->ref_querymatchoutoptions,
-                                           querymatch->fp);
+        if (querymatch->distance > 0)
+        {
+          gt_querymatchoutoptions_trace_show(
+                                querymatch->ref_querymatchoutoptions,
+                                querymatch->fp);
+        } else
+        {
+          gt_querymatch_exact_match_trace_show(querymatch->fp,
+                                               gt_querymatch_dblen(querymatch),
+                                               gt_querymatch_trace_delta_display
+                                                  (out_display_flag));
+        }
         break;
       case Gt_S_len_display:
         fprintf(querymatch->fp,GT_WU,gt_querymatch_dblen(querymatch));
@@ -863,6 +899,9 @@ void gt_querymatch_read_line(GtQuerymatch *querymatch,
           gt_eoplist_reset(querymatch->ref_eoplist);
           gt_eoplist_from_cigar(querymatch->ref_eoplist,ptr,separator);
         }
+        break;
+      case Gt_Trace_display:
+        gt_assert(false);
         break;
       case Gt_S_len_display:
         ret = sscanf(ptr,GT_WU,&querymatch->dblen);
