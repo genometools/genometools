@@ -28,6 +28,7 @@
 #include "core/timer_api.h"
 #include "core/radix_sort.h"
 #include "core/unused_api.h"
+#include "core/yarandom.h"
 #include "core/qsort-ulong.h"
 #include "tools/gt_sortbench.h"
 #ifdef GT_THREADS_ENABLED
@@ -638,15 +639,12 @@ static int gt_sortbench_runner(GT_UNUSED int argc, GT_UNUSED const char **argv,
       {
         printf("# using simple array of random numbers\n");
       }
-      /* use seed initialization to make array deterministic */
-#ifndef _WIN32
-      srand48(366292341);
       if (arraykeypair != NULL)
       {
         for (idx = 0; idx < arguments->num_values; idx++)
         {
-          arraykeypair[idx].uint64_a = drand48() * arguments->maxvalue;
-          arraykeypair[idx].uint64_b = drand48() * arguments->maxvalue;
+          arraykeypair[idx].uint64_a = random() % (arguments->maxvalue+1);
+          arraykeypair[idx].uint64_b = random() % (arguments->maxvalue+1);
         }
       } else
       {
@@ -656,7 +654,7 @@ static int gt_sortbench_runner(GT_UNUSED int argc, GT_UNUSED const char **argv,
           gt_assert(!arguments->verify || array != NULL);
           for (idx = 0; idx < arguments->num_values; idx++)
           {
-            GtUword value = (GtUword) (drand48() * arguments->maxvalue);
+            GtUword value = (GtUword) (random() % (arguments->maxvalue+1));
             gt_uword2flba(flba_buffer,value,flba_unitsize);
             memcpy(flba + idx * flba_unitsize,flba_buffer,flba_unitsize);
             if (arguments->verify)
@@ -670,15 +668,10 @@ static int gt_sortbench_runner(GT_UNUSED int argc, GT_UNUSED const char **argv,
           gt_assert(array != NULL);
           for (idx = 0; idx < arguments->num_values; idx++)
           {
-            array[idx] = drand48() * arguments->maxvalue;
+            array[idx] = random() % (arguments->maxvalue+1);
           }
         }
       }
-#else
-      /* XXX: use random instead of drand48() above */
-      fprintf(stderr, "drand48() not implemented\n");
-      exit(EXIT_FAILURE);
-#endif
     }
   }
   if (arguments->verify)
