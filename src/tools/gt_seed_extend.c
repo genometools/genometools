@@ -782,7 +782,6 @@ static int gt_seed_extend_runner(int argc,
       had_err = -1;
     }
   }
-
   if (!had_err) {
     GtEncseqLoader *encseq_loader = gt_encseq_loader_new();
     gt_encseq_loader_require_multiseq_support(encseq_loader);
@@ -806,7 +805,7 @@ static int gt_seed_extend_runner(int argc,
   if (!had_err)
   {
     /* If there is a 2nd read set: Load encseq B */
-    if (strcmp(gt_str_get(arguments->dbs_queryname), "") == 0) {
+    if (gt_str_length(arguments->dbs_queryname) == 0) {
       bencseq = gt_encseq_ref(aencseq);
     } else
     {

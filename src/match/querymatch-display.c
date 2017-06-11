@@ -33,7 +33,7 @@ struct GtSeedExtendDisplayFlag
 {
   uint64_t flags;
   unsigned int order[GT_DISPLAY_LARGEST_FLAG+1];
-  GtUword alignmentwidth, nextfree;
+  GtUword alignmentwidth, trace_delta, nextfree;
 };
 
 static uint64_t gt_display_mask(GtSeedExtendDisplay_enum flag)
@@ -165,6 +165,12 @@ GtUword gt_querymatch_display_alignmentwidth(const GtSeedExtendDisplayFlag
   return (display_flag == NULL) ? 0 : display_flag->alignmentwidth;
 }
 
+GtUword gt_querymatch_trace_delta_display(const GtSeedExtendDisplayFlag
+                                                *display_flag)
+{
+  return (display_flag == NULL) ? 0 : display_flag->trace_delta;
+}
+
 bool gt_querymatch_alignment_display(const GtSeedExtendDisplayFlag
                                      *display_flag)
 {
@@ -181,7 +187,10 @@ static int gt_querymatch_display_flag_set(char *copyspace,
   const char *exclude_list[] = {"alignment","cigar",
                                 "alignment","cigarX",
                                 "cigar","cigarX",
-                                "blast","custom"};
+                                "blast","custom",
+                                "trace","alignment",
+                                "trace","cigar",
+                                "trace","cigarX"};
   size_t ex_idx, numexcl = sizeof exclude_list/sizeof exclude_list[0];
   const GtSEdisplayStruct *dstruct;
   const char *ptr;
@@ -286,6 +295,7 @@ GtSeedExtendDisplayFlag *gt_querymatch_display_flag_new(
       if Strand is not set, then order of Q_start and Q_end gives strand
   */
   display_flag->alignmentwidth = 0;
+  display_flag->trace_delta = 0;
   display_flag->nextfree = 0;
   display_flag->flags = 0;
   if (setmode != GT_SEED_EXTEND_DISPLAY_SET_NO)
@@ -359,32 +369,42 @@ GtSeedExtendDisplayFlag *gt_querymatch_display_flag_new(
     int ret = gt_querymatch_display_flag_set(copyspace,&parameter,
                                              display_flag,da,err);
 
-    switch (ret)
+    if (ret == -1)
     {
-      case 0:
-        break;
-      case 1:
-        /* the only flag with a parameter is Gt_Alignment_display */
-        if (parameter < 0)
-        {
-          gt_error_set(err,"integer following \"alignment=\" must be positive");
-          haserr = true;
-        } else
-        {
-          gt_assert(display_flag->flags &
-                    gt_display_mask(Gt_Alignment_display));
-          display_flag->alignmentwidth = (GtUword) parameter;
-        }
-        break;
-      default:
+      haserr = true;
+      break;
+    }
+    if (ret == 1)
+    {
+      /* the only flag with a parameter is Gt_Alignment_display */
+      if (parameter < 0)
+      {
+        gt_error_set(err,"integer following \"alignment=\" must be positive");
         haserr = true;
+        break;
+      }
+      if (display_flag->flags & gt_display_mask(Gt_Alignment_display))
+      {
+        display_flag->alignmentwidth = (GtUword) parameter;
+      } else
+      {
+        gt_assert (display_flag->flags & gt_display_mask(Gt_Trace_display));
+        display_flag->trace_delta = (GtUword) parameter;
+      }
     }
   }
-  if (!haserr &&
-      (display_flag->flags & gt_display_mask(Gt_Alignment_display)) &&
-      display_flag->alignmentwidth == 0)
+  if (!haserr)
   {
-    display_flag->alignmentwidth = 60; /* this is the default alignment width */
+    if ((display_flag->flags & gt_display_mask(Gt_Alignment_display)) &&
+         display_flag->alignmentwidth == 0)
+    {
+      display_flag->alignmentwidth = GT_SEED_EXTEND_DEFAULT_ALIGNMENT_WIDTH;
+    }
+    if ((display_flag->flags & gt_display_mask(Gt_Trace_display)) &&
+         display_flag->trace_delta == 0)
+    {
+      display_flag->trace_delta = GT_SEED_EXTEND_DEFAULT_TRACE_DELTA;
+    }
   }
   if (haserr)
   {

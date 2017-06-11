@@ -399,7 +399,8 @@ void gt_querymatch_prettyprint(double evalue,double bit_score,
     const unsigned int co = column_order[idx];
 
     if (idx > 0 && (querymatch->score > 0 ||
-                   (co != Gt_Score_display && co != Gt_Editdist_display &&
+                   (co != Gt_Score_display &&
+                    co != Gt_Editdist_display &&
                     co != Gt_Identity_display)))
     {
       fputc(separator,querymatch->fp);
@@ -409,6 +410,10 @@ void gt_querymatch_prettyprint(double evalue,double bit_score,
       case Gt_Cigar_display:
       case Gt_Cigarx_display:
         gt_querymatchoutoptions_cigar_show(querymatch->ref_querymatchoutoptions,
+                                           querymatch->fp);
+        break;
+      case Gt_Trace_display:
+        gt_querymatchoutoptions_trace_show(querymatch->ref_querymatchoutoptions,
                                            querymatch->fp);
         break;
       case Gt_S_len_display:

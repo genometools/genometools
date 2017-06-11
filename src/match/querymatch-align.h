@@ -79,6 +79,10 @@ void gt_frontprune2eoplist(GtQuerymatchoutoptions *querymatchoutoptions,
 void gt_querymatchoutoptions_cigar_show(const GtQuerymatchoutoptions
                                               *querymatchoutoptions,FILE *fp);
 
+void gt_querymatchoutoptions_trace_show(const GtQuerymatchoutoptions
+                                              *querymatchoutoptions,
+                                        FILE *fp);
+
 void gt_querymatchoutoptions_alignment_show(const GtQuerymatchoutoptions
                                               *querymatchoutoptions,
                                             GtUword subject_seqlength,

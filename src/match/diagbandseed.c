@@ -3449,7 +3449,7 @@ static int gt_diagbandseed_algorithm(const GtDiagbandseedInfo *arg,
   GtArrayGtDiagbandseedKmerPos blist;
   GtSeedpairlist *seedpairlist = NULL;
   GtDiagbandseedKmerIterator *aiter = NULL, *biter = NULL;
-  GtUword alen = 0, blen = 0, mlistlen = 0, maxfreq, len_used, alignmentwidth;
+  GtUword alen = 0, blen = 0, mlistlen = 0, maxfreq, len_used;
   GtRange seedpairdistance = *arg->seedpairdistance;
   char *blist_file = NULL;
   int had_err = 0;
@@ -3684,9 +3684,9 @@ static int gt_diagbandseed_algorithm(const GtDiagbandseedInfo *arg,
                                          extp->sensitivity);
       processinfo = (void *) xdropinfo;
     }
-    alignmentwidth
-      = gt_querymatch_display_alignmentwidth(extp->out_display_flag);
-    if (extp->extendxdrop || alignmentwidth > 0 || extp->verify_alignment ||
+    if (extp->extendxdrop || extp->verify_alignment ||
+        gt_querymatch_alignment_display(extp->out_display_flag) ||
+        gt_querymatch_trace_display(extp->out_display_flag) ||
         gt_querymatch_cigar_display(extp->out_display_flag) ||
         gt_querymatch_cigarX_display(extp->out_display_flag))
     {

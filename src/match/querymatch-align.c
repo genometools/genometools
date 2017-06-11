@@ -28,7 +28,8 @@
 struct GtQuerymatchoutoptions
 {
   GtUword useqbuffer_size,
-          vseqbuffer_size;
+          vseqbuffer_size,
+          trace_delta;
   GtUchar *useqbuffer, *vseqbuffer;
   GtEoplist *eoplist;
   GtEoplistReader *eoplist_reader, *eoplist_reader_verify;
@@ -81,13 +82,15 @@ GtQuerymatchoutoptions *gt_querymatchoutoptions_new(const
   querymatchoutoptions->vseqbuffer_size = 0;
   querymatchoutoptions->eoplist = gt_eoplist_new();
   querymatchoutoptions->eoplist_reader_verify = NULL;
+  querymatchoutoptions->trace_delta
+    = gt_querymatch_trace_delta_display(out_display_flag);
   querymatchoutoptions->eoplist_reader = gt_eoplist_reader_new();
   if (gt_querymatch_cigarX_display(out_display_flag))
   {
     gt_eoplist_reader_distinguish_mismatch_match(
         querymatchoutoptions->eoplist_reader);
   }
-  if (gt_querymatch_display_alignmentwidth(out_display_flag) > 0)
+  if (gt_querymatch_alignment_display(out_display_flag))
   {
     gt_eoplist_reader_reset_width(querymatchoutoptions->eoplist_reader,
                                   gt_querymatch_display_alignmentwidth(
@@ -608,6 +611,32 @@ void gt_querymatchoutoptions_cigar_show(const GtQuerymatchoutoptions
   gt_eoplist_reader_reset(querymatchoutoptions->eoplist_reader,
                           querymatchoutoptions->eoplist,true);
   gt_eoplist_show_cigar(querymatchoutoptions->eoplist_reader,fp);
+  gt_eoplist_reset(querymatchoutoptions->eoplist);
+}
+
+void gt_querymatchoutoptions_trace_show(const GtQuerymatchoutoptions
+                                              *querymatchoutoptions,
+                                        FILE *fp)
+{
+  GtEoplistSegment segment;
+  bool first = true;
+
+  gt_assert(querymatchoutoptions != NULL);
+  gt_eoplist_reader_reset(querymatchoutoptions->eoplist_reader,
+                          querymatchoutoptions->eoplist,true);
+  while (gt_eoplist_reader_next_segment(&segment,
+                                        querymatchoutoptions->eoplist_reader,
+                                        querymatchoutoptions->trace_delta))
+  {
+    if (!first)
+    {
+      fputc(',',fp);
+    } else
+    {
+      first = false;
+    }
+    fprintf(fp,GT_WU,segment.aligned_v);
+  }
   gt_eoplist_reset(querymatchoutoptions->eoplist);
 }
 
