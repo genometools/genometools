@@ -409,8 +409,15 @@ void gt_querymatch_prettyprint(double evalue,double bit_score,
     {
       case Gt_Cigar_display:
       case Gt_Cigarx_display:
-        gt_querymatchoutoptions_cigar_show(querymatch->ref_querymatchoutoptions,
-                                           querymatch->fp);
+        if (querymatch->distance > 0)
+        {
+          gt_querymatchoutoptions_cigar_show(
+                                     querymatch->ref_querymatchoutoptions,
+                                     querymatch->fp);
+        } else
+        {
+          fprintf(querymatch->fp,GT_WU "=",gt_querymatch_dblen(querymatch));
+        }
         break;
       case Gt_Trace_display:
         gt_querymatchoutoptions_trace_show(querymatch->ref_querymatchoutoptions,

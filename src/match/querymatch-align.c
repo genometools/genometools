@@ -607,7 +607,8 @@ void gt_querymatchoutoptions_extract_seq(GtQuerymatchoutoptions
 void gt_querymatchoutoptions_cigar_show(const GtQuerymatchoutoptions
                                               *querymatchoutoptions,FILE *fp)
 {
-  gt_assert(querymatchoutoptions != NULL);
+  gt_assert(querymatchoutoptions != NULL &&
+            gt_eoplist_unit_cost(querymatchoutoptions->eoplist) > 0);
   gt_eoplist_reader_reset(querymatchoutoptions->eoplist_reader,
                           querymatchoutoptions->eoplist,true);
   gt_eoplist_show_cigar(querymatchoutoptions->eoplist_reader,fp);
