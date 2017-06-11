@@ -495,6 +495,7 @@ static GtOptionParser* gt_seed_extend_option_parser_new(void *tool_arguments)
                                           gt_querymatch_display_help(),
                                           arguments->display_args);
   gt_option_parser_add_option(op, op_outfmt);
+  gt_option_exclude(op_outfmt,op_onlyseeds);
 
   /* -ani */
   op_ani = gt_option_new_bool("ani",
@@ -755,15 +756,17 @@ static int gt_seed_extend_runner(int argc,
     seedextendtimer = gt_timer_new();
     gt_timer_start(seedextendtimer);
   }
-  out_display_flag = gt_querymatch_display_flag_new(arguments->display_args,
-                                                    setmode,err);
-  if (out_display_flag == NULL)
+  if (!arguments->compute_ani)
   {
-    had_err = -1;
+    out_display_flag = gt_querymatch_display_flag_new(arguments->display_args,
+                                                      setmode,err);
+    if (out_display_flag == NULL)
+    {
+      had_err = -1;
+    }
   }
   /* Set character access method */
-  if (!had_err && (!arguments->onlyseeds ||
-                   gt_querymatch_display_alignmentwidth(out_display_flag) > 0))
+  if (!had_err && !arguments->onlyseeds)
   {
     if (gt_greedy_extend_char_access(&cam_a,&cam_b,
                                      gt_str_get(arguments->char_access_mode),
@@ -784,7 +787,8 @@ static int gt_seed_extend_runner(int argc,
     GtEncseqLoader *encseq_loader = gt_encseq_loader_new();
     gt_encseq_loader_require_multiseq_support(encseq_loader);
     gt_encseq_loader_require_ssp_tab(encseq_loader);
-    if (gt_querymatch_subjectid_display(out_display_flag))
+    if (out_display_flag != NULL &&
+        gt_querymatch_subjectid_display(out_display_flag))
     {
       gt_encseq_loader_require_des_tab(encseq_loader);
       gt_encseq_loader_require_sds_tab(encseq_loader);
@@ -809,7 +813,8 @@ static int gt_seed_extend_runner(int argc,
       GtEncseqLoader *encseq_loader = gt_encseq_loader_new();
       gt_encseq_loader_require_multiseq_support(encseq_loader);
       gt_encseq_loader_require_ssp_tab(encseq_loader);
-      if (gt_querymatch_queryid_display(out_display_flag))
+      if (out_display_flag != NULL &&
+          gt_querymatch_queryid_display(out_display_flag))
       {
         gt_encseq_loader_require_des_tab(encseq_loader);
         gt_encseq_loader_require_sds_tab(encseq_loader);
@@ -1121,7 +1126,9 @@ static int gt_seed_extend_runner(int argc,
   {
     printf("ANI %s %s %.4f\n",
            gt_str_get(arguments->dbs_indexname),
-           gt_str_get(arguments->dbs_queryname),
+           gt_str_length(arguments->dbs_queryname) > 0
+             ? gt_str_get(arguments->dbs_queryname)
+             : gt_str_get(arguments->dbs_indexname),
            arguments->ani_accumulate.sum_of_aligned_len > 0
              ? 100.0 * (1.0 - (double)
                               (2 * arguments->ani_accumulate.sum_of_distance)/

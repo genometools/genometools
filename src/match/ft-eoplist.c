@@ -530,7 +530,7 @@ bool gt_eoplist_reader_next_segment(GtEoplistSegment *segment,
     }
     if (eoplist_reader->aligned_u == delta)
     {
-      segment->aligned_u = eoplist_reader->aligned_u;
+      segment->aligned_u = delta;
       segment->aligned_v = eoplist_reader->aligned_v;
       eoplist_reader->aligned_u = eoplist_reader->aligned_v = 0;
       return true;
@@ -543,8 +543,7 @@ bool gt_eoplist_reader_next_segment(GtEoplistSegment *segment,
     segment->aligned_v = eoplist_reader->aligned_v;
     eoplist_reader->aligned_v = 0;
     eoplist_reader->aligned_u = 0;
-    gt_assert(eoplist_reader->repcount == 0 &&
-              eoplist_reader->currenteop == eoplist_reader->endeoplist);
+    gt_assert(eoplist_reader->currenteop == eoplist_reader->endeoplist);
     return true;
   }
   return false;
