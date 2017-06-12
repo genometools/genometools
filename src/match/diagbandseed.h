@@ -1,5 +1,6 @@
 /*
   Copyright (c) 2015-2016 Joerg Winkler <j.winkler@posteo.de>
+  Copyright (c) 2016 Stefan Kurtz  <kurtz@zbh.uni-hamburg.de>
   Copyright (c) 2015-2016 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -23,15 +24,25 @@
 #include "core/range_api.h"
 #include "core/types_api.h"
 #include "match/ft-front-prune.h"
+#include "match/seed_extend_parts.h"
+#include "match/querymatch-display.h"
 #include "match/xdrop.h"
 
 typedef struct GtDiagbandseedInfo GtDiagbandseedInfo;
 typedef struct GtDiagbandseedExtendParams GtDiagbandseedExtendParams;
 
+typedef enum
+{ /* keep the order consistent with gt_splt_arguments */
+  GT_DIAGBANDSEED_SPLT_STRUCT,
+  GT_DIAGBANDSEED_SPLT_ULONG,
+  GT_DIAGBANDSEED_SPLT_BYTESTRING,
+  GT_DIAGBANDSEED_SPLT_UNDEFINED
+} GtDiagbandseedPairlisttype;
+
 /* Run the whole algorithm. */
 int gt_diagbandseed_run(const GtDiagbandseedInfo *arg,
-                        const GtRange *aseqranges,
-                        const GtRange *bseqranges,
+                        const GtSequencePartsInfo *aseqranges,
+                        const GtSequencePartsInfo *bseqranges,
                         const GtUwordPair *pick,
                         GtError *err);
 
@@ -43,42 +54,62 @@ GtDiagbandseedInfo *gt_diagbandseed_info_new(const GtEncseq *aencseq,
                                              unsigned int seedlength,
                                              bool norev,
                                              bool nofwd,
-                                             GtRange *seedpairdistance,
+                                             const GtRange *seedpairdistance,
+                                             GtDiagbandseedPairlisttype splt,
                                              bool verify,
                                              bool verbose,
                                              bool debug_kmer,
                                              bool debug_seedpair,
                                              bool use_kmerfile,
+                                             bool trimstat_on,
+                                             GtUword maxmat,
+                                             const GtStr *chainarguments,
+                                             const GtStr
+                                               *diagband_statistics_arg,
                                              const GtDiagbandseedExtendParams
-                                               *extp,
-                                             GtUword anumseqranges,
-                                             GtUword bnumseqranges);
+                                               *extp);
+
+const char *gt_diagbandseed_splt_comment(void);
+
+GtDiagbandseedPairlisttype gt_diagbandseed_splt_get(const char *splt_string,
+                                                    GtError *err);
+
+typedef struct
+{
+  GtUword sum_of_distance,
+          sum_of_aligned_len;
+} GtAniAccumulate;
 
 /* The constructor for GtDiagbandseedExtendParams*/
 GtDiagbandseedExtendParams *gt_diagbandseed_extend_params_new(
-                              GtUword errorpercentage,
-                              GtUword userdefinedleastlength,
-                              GtUword logdiagbandwidth,
-                              GtUword mincoverage,
-                              unsigned int display_flag,
-                              bool use_apos,
-                              GtXdropscore xdropbelowscore,
-                              bool extendgreedy,
-                              bool extendxdrop,
-                              GtUword maxalignedlendifference,
-                              GtUword history_size,
-                              GtUword perc_mat_history,
-                              GtExtendCharAccess extend_char_access,
-                              GtUword sensitivity,
-                              double matchscore_bias,
-                              bool weakends,
-                              bool benchmark,
-                              GtUword alignmentwidth,
-                              bool always_polished_ends,
-                              bool verify_alignment);
+                                GtUword userdefinedleastlength,
+                                GtUword errorpercentage,
+                                double evalue_threshold,
+                                GtUword logdiagbandwidth,
+                                GtUword mincoverage,
+                                const GtSeedExtendDisplayFlag *out_display_flag,
+                                GtUword use_apos,
+                                GtXdropscore xdropbelowscore,
+                                bool extendgreedy,
+                                bool extendxdrop,
+                                GtUword maxalignedlendifference,
+                                GtUword history_size,
+                                GtUword perc_mat_history,
+                                GtExtendCharAccess a_extend_char_access,
+                                GtExtendCharAccess b_extend_char_access,
+                                bool cam_generic,
+                                GtUword sensitivity,
+                                double matchscore_bias,
+                                bool weakends,
+                                bool benchmark,
+                                bool always_polished_ends,
+                                bool verify_alignment,
+                                bool only_selected_seqpairs,
+                                GtAniAccumulate *ani_accumulate);
 
 /* The destructors */
 void gt_diagbandseed_info_delete(GtDiagbandseedInfo *info);
 
 void gt_diagbandseed_extend_params_delete(GtDiagbandseedExtendParams *extp);
+
 #endif

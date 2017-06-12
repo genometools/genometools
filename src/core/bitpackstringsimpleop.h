@@ -397,6 +397,15 @@ gt_bsGetBit(constBitString str, BitOffset pos)
   return (*p & 1 << (bitElemBits - bitTop - 1))?1:0;
 }
 
+/* we use the buildin_popcount if a GNU compatible compiler is used
+   and the compiler option -mpopcnt is on. */
+#if defined (__GNUC__) && defined (__POPCNT__)
+static inline unsigned
+bitCountUInt32(uint32_t v)
+{
+  return __builtin_popcount(v);
+}
+#else
 /*
  * the following helper function counts the bits set in a 32 bit int
  * see http://graphics.stanford.edu/~seander/bithacks.html#CountBitsSetParallel
@@ -411,5 +420,5 @@ bitCountUInt32(uint32_t v)
   return (((v + (v >> 4)) & (uint32_t)0xF0F0F0FUL) *
          (uint32_t)0x1010101UL) >> 24;           /* count */
 }
-
+#endif
 #endif

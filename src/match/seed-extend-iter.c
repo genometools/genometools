@@ -15,6 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#include <float.h>
 #include "core/ma_api.h"
 #include "core/str_api.h"
 #include "core/encseq.h"
@@ -25,21 +26,21 @@
 struct GtSeedextendMatchIterator
 {
   GtStr *ii, *qii;
-  bool mirror, bias_parameters, seqlength_display;
+  bool mirror, bias_parameters;
   GtEncseq *aencseq, *bencseq;
   GtUword errorpercentage, history_size;
   const char *matchfilename;
   GtStr *line_buffer;
   uint64_t linenum;
-  bool has_seedline;
-  GtUword seedpos1,
-          seedpos2,
-          seedlen;
   FILE *inputfileptr;
+  double  evalue, bitscore;
   GtUword currentmatchindex;
   GtQuerymatch *currentmatch, *querymatchptr;
   GtQuerymatchoutoptions *querymatchoutoptions;
   GtArrayGtQuerymatch querymatch_table;
+  GtSeedExtendDisplayFlag *in_display_flag;
+  GtStr *saved_options_line;
+  bool missing_fields_line;
 };
 
 void gt_seedextend_match_iterator_delete(GtSeedextendMatchIterator *semi)
@@ -60,6 +61,8 @@ void gt_seedextend_match_iterator_delete(GtSeedextendMatchIterator *semi)
   {
     fclose(semi->inputfileptr);
   }
+  gt_querymatch_display_flag_delete(semi->in_display_flag);
+  gt_str_delete(semi->saved_options_line);
   gt_free(semi);
 }
 
@@ -86,7 +89,7 @@ GtSeedextendMatchIterator *gt_seedextend_match_iterator_new(
                                             const GtStr *matchfilename,
                                             GtError *err)
 {
-  FILE *options_line_inputfileptr;
+  FILE *defline_infp;
   int had_err = 0;
   GtSeedextendMatchIterator *semi = gt_malloc(sizeof *semi);
   GtEncseqLoader *encseq_loader = NULL;
@@ -95,22 +98,23 @@ GtSeedextendMatchIterator *gt_seedextend_match_iterator_new(
   semi->qii = gt_str_new();
   semi->mirror = false;
   semi->bias_parameters = false;
-  semi->seqlength_display = false;
   semi->aencseq = semi->bencseq = NULL;
   semi->errorpercentage = 0;
   semi->history_size = 0;
   semi->matchfilename = gt_str_get(matchfilename);
-  semi->has_seedline = false;
   semi->line_buffer = NULL;
   semi->inputfileptr = NULL;
   semi->querymatchptr = gt_querymatch_new();
   semi->currentmatchindex = GT_UWORD_MAX;
+  semi->evalue = DBL_MAX;
+  semi->bitscore = DBL_MAX;
   semi->currentmatch = NULL;
   semi->querymatchoutoptions = NULL;
-  semi->seedpos1 = semi->seedpos2 = semi->seedlen = GT_UWORD_MAX;
+  semi->in_display_flag = NULL;
+  semi->saved_options_line = NULL;
   GT_INITARRAY(&semi->querymatch_table,GtQuerymatch);
-  options_line_inputfileptr = fopen(semi->matchfilename, "r");
-  if (options_line_inputfileptr == NULL)
+  defline_infp = fopen(semi->matchfilename, "r");
+  if (defline_infp == NULL)
   {
     gt_error_set(err, "file %s does not exist", semi->matchfilename);
     had_err = -1;
@@ -119,14 +123,14 @@ GtSeedextendMatchIterator *gt_seedextend_match_iterator_new(
   {
     GtStr *options_line_buffer = gt_str_new();
     /* read first line and evaluate tokens */
-    if (gt_str_read_next_line(options_line_buffer,
-                              options_line_inputfileptr) != EOF)
+    if (gt_str_read_next_line(options_line_buffer,defline_infp) != EOF)
     {
-      char *tok, *lineptr = gt_str_get(options_line_buffer);
+      char *tok, *line_ptr = gt_str_get(options_line_buffer);
       bool parse_ii = false, parse_qii = false, parse_minid = false,
            parse_history = false;;
 
-      while (!had_err && (tok = strsep(&lineptr," ")) != NULL)
+      semi->saved_options_line = gt_str_clone(options_line_buffer);
+      while (!had_err && (tok = strsep(&line_ptr," ")) != NULL)
       {
         if (parse_minid || parse_history)
         {
@@ -194,17 +198,12 @@ GtSeedextendMatchIterator *gt_seedextend_match_iterator_new(
         {
           semi->bias_parameters = true;
         }
-        if (strcmp(tok, "-seqlength-display") == 0)
-        {
-          semi->seqlength_display = true;
-        }
       }
       if (!had_err)
       {
         if (gt_str_length(semi->ii) == 0UL)
         {
-          gt_error_set(err, "need output of option string "
-                            "(run gt seed_extend with -v or -verify)");
+          gt_error_set(err, "missing option string");
           had_err = -1;
         }
         if (semi->errorpercentage == 0)
@@ -218,12 +217,39 @@ GtSeedextendMatchIterator *gt_seedextend_match_iterator_new(
     {
       gt_error_set(err, "file %s is empty", semi->matchfilename);
       had_err = -1;
-    }
+    };
     gt_str_delete(options_line_buffer);
   }
-  if (options_line_inputfileptr != NULL)
+  if (!had_err)
   {
-    fclose(options_line_inputfileptr);
+    GtStr *fieldsline_buffer = gt_str_new();
+    GtStrArray *fields = NULL;
+
+    while (gt_str_read_next_line(fieldsline_buffer,defline_infp) != EOF &&
+           fields == NULL)
+    {
+      char *line_ptr = gt_str_get(fieldsline_buffer);
+      fields = gt_querymatch_read_Fields_line(line_ptr);
+
+      gt_str_reset(fieldsline_buffer);
+    }
+    gt_str_delete(fieldsline_buffer);
+    if (fields != NULL)
+    {
+      const GtSeedExtendDisplaySetMode setmode = GT_SEED_EXTEND_DISPLAY_SET_NO;
+
+      semi->in_display_flag = gt_querymatch_display_flag_new(fields,setmode,
+                                                             err);
+      if (semi->in_display_flag == NULL)
+      {
+        had_err = -1;
+      }
+      gt_str_array_delete(fields);
+    }
+  }
+  if (defline_infp != NULL)
+  {
+    fclose(defline_infp);
   }
   /* Load encseqs */
   if (!had_err)
@@ -277,6 +303,7 @@ GtQuerymatch *gt_seedextend_match_iterator_next(GtSeedextendMatchIterator *semi)
 {
   bool selfmatch;
 
+  gt_assert(semi != NULL);
   if (semi->currentmatchindex < GT_UWORD_MAX)
   {
     if (semi->currentmatchindex == semi->querymatch_table.nextfreeGtQuerymatch)
@@ -300,44 +327,23 @@ GtQuerymatch *gt_seedextend_match_iterator_next(GtSeedextendMatchIterator *semi)
       break;
     }
     line_ptr = gt_str_get(semi->line_buffer);
-    /* ignore comment lines; but print seeds if -display seed is set */
     gt_assert(line_ptr != NULL);
-    if (line_ptr[0] != '\n')
+    if (line_ptr[0] != '\n' && line_ptr[0] != '#')
     {
-      if (line_ptr[0] == '#')
+      if (semi->in_display_flag == NULL)
       {
-        const char *seedwordptr = strstr(line_ptr, "seed:");
-
-        if (seedwordptr != NULL)
-        {
-          int num = sscanf(seedwordptr + sizeof ("seed:"),
-                           GT_WU " " GT_WU " " GT_WU,
-                           &semi->seedpos1,&semi->seedpos2,
-                           &semi->seedlen);
-          semi->has_seedline = num == 3 ? true : false;
-        } else
-        {
-          semi->has_seedline = false;
-          semi->seedpos1 = semi->seedpos2 = semi->seedlen = GT_UWORD_MAX;
-        }
-      } else
-      {
-        if (gt_querymatch_read_line(semi->querymatchptr,
-                                    semi->seqlength_display,
-                                    line_ptr,
-                                    selfmatch,
-                                    semi->seedpos1,
-                                    semi->seedpos2,
-                                    semi->seedlen,
-                                    semi->aencseq,
-                                    semi->bencseq))
-        {
-          gt_str_reset(semi->line_buffer);
-          semi->seedpos1 = semi->seedpos2 = semi->seedlen = GT_UWORD_MAX;
-          return semi->querymatchptr;
-        }
+        return NULL;
       }
+      gt_querymatch_read_line(semi->querymatchptr,
+                              &semi->evalue,
+                              &semi->bitscore,
+                              line_ptr,
+                              semi->in_display_flag,
+                              selfmatch,
+                              semi->aencseq,
+                              semi->bencseq);
       gt_str_reset(semi->line_buffer);
+      return semi->querymatchptr;
     }
     gt_str_reset(semi->line_buffer);
   }
@@ -379,57 +385,39 @@ bool gt_seedextend_match_iterator_bias_parameters(
   return semi->bias_parameters;
 }
 
-bool gt_seedextend_match_iterator_seqlength_display(
+bool gt_seedextend_match_iterator_has_seed(
                         const GtSeedextendMatchIterator *semi)
 {
   gt_assert(semi != NULL);
-  return semi->seqlength_display;
+  return gt_querymatch_has_seed(semi->in_display_flag);
 }
 
-bool gt_seedextend_match_iterator_has_seedline(
+bool gt_seedextend_match_iterator_has_cigar(
                         const GtSeedextendMatchIterator *semi)
 {
   gt_assert(semi != NULL);
-  if (semi->currentmatch != NULL)
-  {
-    return gt_querymatch_has_seed(semi->currentmatch);
-  }
-  return semi->has_seedline;
+  return gt_querymatch_cigar_display(semi->in_display_flag) ||
+         gt_querymatch_cigarX_display(semi->in_display_flag);
 }
 
-GtQuerymatch *gt_seedextend_match_iterator_querymatch_ptr(
-                        GtSeedextendMatchIterator *semi)
+double gt_seedextend_match_iterator_evalue(const GtSeedextendMatchIterator
+                                              *semi)
 {
   gt_assert(semi != NULL);
-  return semi->querymatchptr;
+  return semi->evalue;
 }
 
-GtUword gt_seedextend_match_iterator_seedlen(
-                          const GtSeedextendMatchIterator *semi)
-{
-  gt_assert(semi != NULL && semi->has_seedline);
-  return semi->seedlen;
-}
-
-GtUword gt_seedextend_match_iterator_seedpos1(
-                         const GtSeedextendMatchIterator *semi)
-{
-  gt_assert(semi != NULL && semi->has_seedline);
-  return semi->seedpos1;
-}
-
-GtUword gt_seedextend_match_iterator_seedpos2(
-                        const GtSeedextendMatchIterator *semi)
-{
-  gt_assert(semi != NULL && semi->has_seedline);
-  return semi->seedpos2;
-}
-
-void gt_seedextend_match_iterator_display_set(GtSeedextendMatchIterator *semi,
-                                              unsigned int display_flag)
+double gt_seedextend_match_iterator_bitscore(
+                  const GtSeedextendMatchIterator *semi)
 {
   gt_assert(semi != NULL);
-  gt_querymatch_display_set(semi->querymatchptr,display_flag);
+  return semi->bitscore;
+}
+
+void gt_seedextend_match_iterator_verify_alignment_set(
+                                  GtSeedextendMatchIterator *semi)
+{
+  gt_querymatch_verify_alignment_set(semi->querymatchptr);
 }
 
 GtUword gt_seedextend_match_iterator_all_sorted(GtSeedextendMatchIterator *semi,
@@ -458,18 +446,22 @@ GtQuerymatch *gt_seedextend_match_iterator_get(
   return gt_querymatch_table_get(&semi->querymatch_table,idx);
 }
 
-void gt_seedextend_match_iterator_querymatchoutoptions_set(
+int gt_seedextend_match_iterator_querymatchoutoptions_set(
                     GtSeedextendMatchIterator *semi,
-                    bool generatealignment,
-                    bool showeoplist,
-                    GtUword alignmentwidth,
                     bool always_polished_ends,
-                    unsigned int display_flag)
+                    GtExtendCharAccess a_extend_char_access,
+                    GtExtendCharAccess b_extend_char_access,
+                    const GtSeedExtendDisplayFlag *out_display_flag,
+                    GtError *err)
 {
   double matchscore_bias = GT_DEFAULT_MATCHSCORE_BIAS;
 
   semi->querymatchoutoptions
-    = gt_querymatchoutoptions_new(generatealignment,showeoplist,alignmentwidth);
+    = gt_querymatchoutoptions_new(out_display_flag,gt_str_get(semi->ii),err);
+  if (semi->querymatchoutoptions == NULL)
+  {
+    return -1;
+  }
   if (gt_seedextend_match_iterator_bias_parameters(semi))
   {
     matchscore_bias = gt_greedy_dna_sequence_bias_get(semi->aencseq);
@@ -479,6 +471,16 @@ void gt_seedextend_match_iterator_querymatchoutoptions_set(
                             matchscore_bias,
                             gt_seedextend_match_iterator_history_size(semi),
                             always_polished_ends,
-                            display_flag);
+                            a_extend_char_access,
+                            b_extend_char_access,
+                            out_display_flag);
   gt_querymatch_outoptions_set(semi->querymatchptr,semi->querymatchoutoptions);
+  return 0;
+}
+
+const char *gt_seedextend_match_iterator_Options_line(
+                    const GtSeedextendMatchIterator *semi)
+{
+  gt_assert(semi != NULL && semi->saved_options_line != NULL);
+  return gt_str_get(semi->saved_options_line);
 }

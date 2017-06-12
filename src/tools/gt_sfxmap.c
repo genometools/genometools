@@ -1005,19 +1005,19 @@ static int gt_sfxmap_compresslcp(const char *indexname,
        haserr = true;
     } else
     {
-      bitbuffer = gt_bitbuffer_new(fpcompressedlcp,bitsperentry);
+      bitbuffer = gt_bitbuffer_FILE_new(fpcompressedlcp,bitsperentry);
     }
     if (bitsperentry > 0)
     {
       if (!haserr)
       {
-        gt_bitbuffer_next_fixed_bits_value (bitbuffer,0UL);
+        gt_bitbuffer_write_fixed_bits_FILE(bitbuffer,0UL);
         while (true)
         {
           GtUword currentlcp;
 
           SSAR_NEXTSEQUENTIALLCPTABVALUE(currentlcp,ssar);
-          gt_bitbuffer_next_fixed_bits_value (bitbuffer,currentlcp);
+          gt_bitbuffer_write_fixed_bits_FILE (bitbuffer,currentlcp);
           elems++;
         }
       }

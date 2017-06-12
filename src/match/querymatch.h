@@ -23,119 +23,128 @@
 #include "core/error_api.h"
 #include "core/readmode.h"
 #include "core/encseq.h"
-#include "core/unused_api.h"
 #include "core/arraydef.h"
 #include "querymatch-align.h"
 #include "karlin_altschul_stat.h"
+#include "querymatch-display.h"
 #include "seq_or_encseq.h"
 
 typedef struct GtQuerymatch GtQuerymatch;
-
-GT_DECLAREARRAYSTRUCT(GtQuerymatch);
 
 GtQuerymatch *gt_querymatch_new(void);
 
 void gt_querymatch_file_set(GtQuerymatch *querymatch, FILE *fp);
 
-void gt_querymatch_display_set(GtQuerymatch *querymatch,
-                               unsigned int display_flag);
-
 void gt_querymatch_db_keyvalues_set(GtQuerymatch *querymatch,
                                     GtUword db_totallength,
                                     GtUword db_numofsequences);
 
-bool gt_querymatch_seed_display(unsigned int display_flag);
-
-void gt_querymatch_outoptions_set(GtQuerymatch *querymatch,
-                GtQuerymatchoutoptions *querymatchoutoptions);
-
 void gt_querymatch_init(GtQuerymatch *querymatch,
-                        GtKarlinAltschulStat *karlin_altschul_stat,
                         GtUword dblen,
-                        GtUword dbstart,
                         GtUword dbseqnum,
                         GtUword dbstart_relative,
+                        GtUword db_seqstart,
                         GtUword dbseqlen,
                         GtWord score,
                         GtUword distance,
                         GtUword mismatches,
                         bool selfmatch,
-                        uint64_t queryseqnum,
+                        GtUword queryseqnum,
                         GtUword querylen,
                         GtUword querystart,
-                        GtUword query_totallength);
+                        GtUword query_seqstart,
+                        GtUword query_seqlen,
+                        const char *db_desc,
+                        const char *query_desc);
 
-bool gt_querymatch_read_line(GtQuerymatch *querymatchptr,
-                             bool withseqlength,
+void gt_querymatch_read_line(GtQuerymatch *querymatch,
+                             double *evalue_ptr,
+                             double *bitscore_ptr,
                              const char *line_ptr,
+                             const GtSeedExtendDisplayFlag *in_display_flag,
                              bool selfmatch,
-                             GtUword seedpos1,
-                             GtUword seedpos2,
-                             GtUword seedlen,
                              const GtEncseq *dbencseq,
                              const GtEncseq *queryencseq);
 
-bool gt_querymatch_process(GtQuerymatch *querymatchptr,
-                           GtKarlinAltschulStat *karlin_altschul_stat,
-                           const GtEncseq *encseq,
-                           const GtSeqorEncseq *query,
-                           bool greedyextension);
-
 void gt_querymatch_delete(GtQuerymatch *querymatch);
 
-bool gt_querymatch_complete(GtQuerymatch *querymatchptr,
-                            GtKarlinAltschulStat *karlin_altschul_stat,
+bool gt_querymatch_complete(GtQuerymatch *querymatch,
+                            const GtSeedExtendDisplayFlag *out_display_flag,
                             GtUword dblen,
-                            GtUword dbstart,
                             GtUword dbseqnum,
                             GtUword dbstart_relative,
+                            GtUword db_seqstart,
                             GtUword dbseqlen,
                             GtWord score,
                             GtUword distance,
                             GtUword mismatches,
                             bool selfmatch,
-                            uint64_t queryseqnum,
+                            GtUword queryseqnum,
                             GtUword querylen,
                             GtUword querystart,
-                            const GtEncseq *encseq,
-                            const GtSeqorEncseq *query,
-                            GtUword query_totallength,
-                            GtUword seedpos1,
-                            GtUword seedpos2,
+                            const GtSeqorEncseq *dbes,
+                            const GtSeqorEncseq *queryes,
+                            GtUword query_seqstart,
+                            GtUword query_seqlen,
+                            GtUword db_seedpos_rel,
+                            GtUword query_seedpos,
                             GtUword seedlen,
                             bool greedyextension);
+
+void gt_querymatch_outoptions_set(GtQuerymatch *querymatch,
+                GtQuerymatchoutoptions *querymatchoutoptions);
+
+GtUword gt_querymatch_dblen(const GtQuerymatch *querymatch);
 
 GtUword gt_querymatch_querylen(const GtQuerymatch *querymatch);
 
 GtUword gt_querymatch_dbstart(const GtQuerymatch *querymatch);
 
+GtUword gt_querymatch_dbstart_relative(const GtQuerymatch *querymatch);
+
 GtUword gt_querymatch_querystart(const GtQuerymatch *querymatch);
 
-uint64_t gt_querymatch_queryseqnum(const GtQuerymatch *querymatch);
+void gt_querymatch_db_coordinates(GtUword *db_seqnum,GtUword *db_seqstart,
+                                  GtUword *db_seqlen,
+                                  const GtQuerymatch *querymatch);
 
-const GtUchar *gt_querymatch_querysequence(const GtQuerymatch *querymatch);
-
-GtUword gt_querymatch_query_totallength(const GtQuerymatch *querymatch);
-
-GtUword gt_querymatch_dbseqnum(const GtQuerymatch *querymatch);
-
-GtUword gt_querymatch_dblen(const GtQuerymatch *querymatch);
-
-bool gt_querymatch_queryreverse(const GtQuerymatch *querymatch);
+void gt_querymatch_query_coordinates(GtUword *query_seqnum,
+                                     GtUword *query_seqstart,
+                                     GtUword *query_seqlen,
+                                     const GtQuerymatch *querymatch);
 
 double gt_querymatch_error_rate(GtUword distance,GtUword alignedlen);
 
 GtUword gt_querymatch_distance(const GtQuerymatch *querymatch);
 
-GtWord gt_querymatch_score(const GtQuerymatch *querymatch);
+void gt_querymatch_prettyprint(double evalue,double bit_score,
+                               const GtSeedExtendDisplayFlag *out_display_flag,
+                               const GtQuerymatch *querymatch);
 
-void gt_querymatch_prettyprint(const GtQuerymatch *querymatch);
+void gt_querymatch_show_failed_seed(const GtSeedExtendDisplayFlag
+                                       *out_display_flag,
+                                    const GtQuerymatch *querymatch);
 
-void gt_querymatch_coordinates_out(const GtQuerymatch *querymatch);
-
-bool gt_querymatch_check_final(const GtQuerymatch *querymatch,
+bool gt_querymatch_check_final(double *evalue_ptr,
+                               double *bit_score_ptr,
+                               const GtKarlinAltschulStat *karlin_altschul_stat,
+                               const GtQuerymatch *querymatch,
+                               GtUword userdefinedleastlength,
                                GtUword errorpercentage,
-                               GtUword userdefinedleastlength);
+                               double evalue_threshold);
+
+bool gt_querymatch_check_final_generic(
+                               double *evalue_ptr,
+                               double *bit_score_ptr,
+                               const GtKarlinAltschulStat *karlin_altschul_stat,
+                               GtUword query_seqlen,
+                               GtUword aligned_len,
+                               GtUword distance,
+                               GtUword mismatches,
+                               GtUword userdefinedleastlength,
+                               GtUword errorpercentage,
+                               double evalue_threshold,
+                               GT_UNUSED FILE *fp);
 
 void gt_querymatch_query_readmode_set(GtQuerymatch *querymatch,
                                       GtReadmode query_readmode);
@@ -144,19 +153,9 @@ void gt_querymatch_verify_alignment_set(GtQuerymatch *querymatch);
 
 GtReadmode gt_querymatch_query_readmode(const GtQuerymatch *querymatch);
 
-bool gt_querymatch_selfmatch(const GtQuerymatch *querymatch);
-
 GtWord gt_querymatch_distance2score(GtUword distance,GtUword alignedlen);
 
-/* Returns true, iff the given seed start position is below the querymatch. */
-bool gt_querymatch_overlap(const GtQuerymatch *querymatch,
-                           GtUword nextseed_db_end_relative,
-                           GtUword nextseed_query_end_relative,
-                           bool use_db_pos);
-
-bool gt_querymatch_has_seed(const GtQuerymatch *querymatch);
-
-GtUword gt_querymatch_querystart_fwdstrand(const GtQuerymatch *querymatch);
+GT_DECLAREARRAYSTRUCT(GtQuerymatch);
 
 void gt_querymatch_table_add(GtArrayGtQuerymatch *querymatch_table,
                              const GtQuerymatch *querymatch);
@@ -166,11 +165,28 @@ void gt_querymatch_table_sort(GtArrayGtQuerymatch *querymatch_table,
 
 GtQuerymatch *gt_querymatch_table_get(const GtArrayGtQuerymatch
                                         *querymatch_table,GtUword idx);
-int gt_querymatch_eval_display_args(unsigned int *display_flag,
-                                    const GtStrArray *display_args,
-                                    GtError *err);
 
-const char *gt_querymatch_display_help(void);
+typedef struct
+{
+  GtUchar *a_sequence, *b_sequence;
+  GtUword a_allocated, b_allocated, a_len, b_len;
+} GtSequencepairbuffer;
 
-GtStr *gt_querymatch_column_header(unsigned int display_flag);
+void gt_querymatch_extract_sequence_pair(GtSequencepairbuffer *seqpairbuf,
+                                         const GtEncseq *db_encseq,
+                                         const GtEncseq *query_encseq,
+                                         const GtQuerymatch *querymatch);
+
+void gt_querymatch_recompute_alignment(GtQuerymatch *querymatch,
+                                       const GtSeedExtendDisplayFlag
+                                         *out_display_flag,
+                                       bool matches_have_seeds,
+                                       bool matches_have_cigar,
+                                       const GtEncseq *db_encseq,
+                                       const GtEncseq *query_encseq,
+                                       const GtKarlinAltschulStat
+                                         *karlin_altschul_stat,
+                                       double evalue,
+                                       double bitscore);
+
 #endif

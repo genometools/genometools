@@ -3,7 +3,7 @@
 require 'optparse'
 require 'ostruct'
 require 'set'
-require_relative 'convert2myersformat'
+require_relative 'fasta'
 
 def min(a,b)
   return [a,b].sort.first
@@ -208,7 +208,7 @@ def callseedextend(mincoverage,indexname,inputfile,destfile,minidentity,length,
   end
   makesystemcall("#{gtcall()} seed_extend -t 21 -no-reverse " +
 		 "-seedlength #{seedlength} -minidentity #{minidentity} " +
-		 "-display seed -extendgreedy -overlappingseeds -ii #{indexname}" +
+		 "-outfmt seed -extendgreedy -overlappingseeds -ii #{indexname}" +
                  (if bias then " -bias-parameters" else "" end) +
                  (if withalignment then " -a" else "" end) +
                  (if weakends then " -weakends" else "" end) +

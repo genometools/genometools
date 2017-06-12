@@ -55,7 +55,6 @@ int gt_sarrquerysubstringmatch(const GtUchar *dbseq,
                                GtAlphabet *alpha,
                                GtProcessquerymatch processquerymatch,
                                void *processquerymatchinfo,
-                               GtKarlinAltschulStat *karlin_altschul_stat,
                                GtLogger *logger,
                                GtError *err);
 
@@ -95,5 +94,8 @@ const GtUchar *gt_querysubstringmatchiterator_query(
 
 int gt_querysubstringmatchiterator_next(GtQuerysubstringmatchiterator *qsmi,
                                         GtError *err);
+
+const char *gt_querysubstringmatchiterator_desc(
+                      const GtQuerysubstringmatchiterator *qsmi);
 
 #endif

@@ -1,6 +1,6 @@
 methods = ["radixinplace","radixlsb",
            "thomas","system","inlinedptr","inlinedarr","direct","dual-pivot",
-           "radixkeypair"]
+           "radixkeypair","radixflba"]
 
 lenlist=[10,20,30,1000,2000,4000,1000000,2000000]
 
@@ -17,6 +17,7 @@ methods.each do |met|
       else
         run "#{$bin}gt dev sortbench -verify -impl #{met} -size #{len}"
         run "#{$bin}gt dev sortbench -verify -impl #{met} -size #{len} -maxval 10000"
+        run "#{$bin}gt dev sortbench -verify -impl #{met} -size #{len} -maxval 512"
       end
     end
   end

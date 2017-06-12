@@ -20,7 +20,8 @@ def conv_to_i(v)
 end
 
 def convertfileinput(lines)
-  return lines.map! {|l| l.split(/\s/).map {|v| conv_to_i(v)}}
+  return lines.select{|line| not line.match(/^#/)}.
+               map! {|l| l.split(/\s/).map {|v| conv_to_i(v)}}
 end
 
 def extract(val,idxlist)
@@ -48,7 +49,6 @@ end
 
 lines0 = convertfileinput(openfile(filename0).readlines.uniq)
 lines1 = convertfileinput(openfile(filename1).readlines.uniq)
-
 
 lines0.sort! {|a,b| extract(a,[1,2,5,6,9]) <=> extract(b,[1,2,5,6,9])}
 lines1.sort! {|a,b| extract(a,[5,6,1,2,9]) <=> extract(b,[5,6,1,2,9])}

@@ -31,6 +31,8 @@ void          gt_str_clip_suffix(GtStr *s, char c);
    is returned, otherwise 0. <str> should be empty, or the next line will be
    concatenated to its content. */
 int           gt_str_read_next_line(GtStr *str, FILE *fpin);
+/* Read the next line via a <GtFile>-object, but otherwise behave as
+   the previous function. */
 int           gt_str_read_next_line_generic(GtStr*, GtFile*);
 int           gt_str_unit_test(GtError*);
 

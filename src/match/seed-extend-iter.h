@@ -45,12 +45,6 @@ void gt_seedextend_match_iterator_delete(GtSeedextendMatchIterator *semi);
 GtQuerymatch *gt_seedextend_match_iterator_next(
                              GtSeedextendMatchIterator *semi);
 
-/* The following functions set the display flag of the iterators
-   querymatch-object. */
-
-void gt_seedextend_match_iterator_display_set(GtSeedextendMatchIterator *semi,
-                                              unsigned int display_flag);
-
 /* The following function reads all matches into an arrays and sorts the,. If
    <ascending is true, then all matches are sorted in ascending order of
    the query position they occur at. Otherwise, all matches are sorted in
@@ -73,13 +67,13 @@ GtQuerymatch *gt_seedextend_match_iterator_get(
    list is required, then set <generatealignment> to <true>,
    <alignmentwidth> to 0 and the other three boolean parameters to <false>. */
 
-void gt_seedextend_match_iterator_querymatchoutoptions_set(
+int gt_seedextend_match_iterator_querymatchoutoptions_set(
                     GtSeedextendMatchIterator *semi,
-                    bool generatealignment,
-                    bool showeoplist,
-                    GtUword alignmentwidth,
                     bool always_polished_ends,
-                    unsigned int display_flag);
+                    GtExtendCharAccess a_extend_char_access,
+                    GtExtendCharAccess b_extend_char_access,
+                    const GtSeedExtendDisplayFlag *out_display_flag,
+                    GtError *err);
 
 /* The following function return different components of the iterator
    object. */
@@ -99,19 +93,22 @@ GtUword gt_seedextend_match_iterator_errorpercentage(
 bool gt_seedextend_match_iterator_bias_parameters(
                         const GtSeedextendMatchIterator *semi);
 
-bool gt_seedextend_match_iterator_seqlength_display(
+bool gt_seedextend_match_iterator_has_seed(
                         const GtSeedextendMatchIterator *semi);
 
-bool gt_seedextend_match_iterator_has_seedline(
+bool gt_seedextend_match_iterator_has_cigar(
                         const GtSeedextendMatchIterator *semi);
 
-GtUword gt_seedextend_match_iterator_seedlen(
-                             const GtSeedextendMatchIterator *semi);
+double gt_seedextend_match_iterator_evalue(const GtSeedextendMatchIterator
+                                             *semi);
 
-GtUword gt_seedextend_match_iterator_seedpos1(
-                             const GtSeedextendMatchIterator *semi);
+double gt_seedextend_match_iterator_bitscore(
+                      const GtSeedextendMatchIterator *semi);
 
-GtUword gt_seedextend_match_iterator_seedpos2(
-                            const GtSeedextendMatchIterator *semi);
+const char *gt_seedextend_match_iterator_Options_line(
+                    const GtSeedextendMatchIterator *semi);
+
+void gt_seedextend_match_iterator_verify_alignment_set(
+                                  GtSeedextendMatchIterator *semi);
 
 #endif

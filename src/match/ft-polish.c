@@ -4,12 +4,12 @@
 #include <stdbool.h>
 #include <limits.h>
 #include "core/assert_api.h"
-#include "core/ma_api.h"
-#include "core/types_api.h"
 #include "core/minmax.h"
-#include "ft-polish.h"
+#include "core/types_api.h"
+#include "core/ma_api.h"
+#include "match/ft-polish.h"
 
-static void fill_polishing_info(Polishing_info *pol_info,
+static void fill_polishing_info(GtFtPolishing_info *pol_info,
                                 GtUword currentdepth,
                                 GtUword prefix, GtWord score, GtWord maxscore)
 {
@@ -34,11 +34,11 @@ static void fill_polishing_info(Polishing_info *pol_info,
   }
 }
 
-Polishing_info *polishing_info_new_with_bias(double errorpercentage,
-                                             double matchscore_bias,
-                                             GtUword history_size)
+GtFtPolishing_info *polishing_info_new_with_bias(double errorpercentage,
+                                                 double matchscore_bias,
+                                                 GtUword history_size)
 {
-  Polishing_info *pol_info = gt_malloc(sizeof *pol_info);
+  GtFtPolishing_info *pol_info = gt_malloc(sizeof *pol_info);
 
   gt_assert(pol_info != NULL);
   if (history_size == 0)
@@ -48,6 +48,7 @@ Polishing_info *polishing_info_new_with_bias(double errorpercentage,
   {
     pol_info->cut_depth = MIN(history_size/2,(GtUword) 15);
   }
+  pol_info->pol_size = 2 * pol_info->cut_depth;
   pol_info->entries = 1UL << pol_info->cut_depth;
   pol_info->mask = pol_info->entries - 1;
   pol_info->values = gt_malloc(sizeof *pol_info->values * pol_info->entries);
@@ -59,13 +60,13 @@ Polishing_info *polishing_info_new_with_bias(double errorpercentage,
   return pol_info;
 }
 
-Polishing_info *polishing_info_new(double errorpercentage,
+GtFtPolishing_info *polishing_info_new(double errorpercentage,
                                    GtUword history_size)
 {
   return polishing_info_new_with_bias(errorpercentage,1.0,history_size);
 }
 
-uint64_t polishing_info_maxvalue(const Polishing_info *pol_info)
+uint64_t polishing_info_maxvalue(const GtFtPolishing_info *pol_info)
 {
   return (((uint64_t) 1) << (2 * pol_info->cut_depth)) - 1;
 }
@@ -86,7 +87,7 @@ static char *polish_intbits2string(GtUword bits,GtUword bs)
   return cs;
 }
 
-void polishing_info_show(const Polishing_info *pol_info)
+void polishing_info_show(const GtFtPolishing_info *pol_info)
 {
   GtUword idx;
 
@@ -104,7 +105,7 @@ void polishing_info_show(const Polishing_info *pol_info)
   }
 }
 
-void polishing_info_delete(Polishing_info *pol_info)
+void polishing_info_delete(GtFtPolishing_info *pol_info)
 {
   if (pol_info != NULL)
   {
@@ -113,7 +114,7 @@ void polishing_info_delete(Polishing_info *pol_info)
   }
 }
 
-bool history_is_polished_brute_force(const Polishing_info *pol_info,
+bool history_is_polished_brute_force(const GtFtPolishing_info *pol_info,
                                      uint64_t matchhistory,
                                      bool withoutput)
 {

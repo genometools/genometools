@@ -10,7 +10,7 @@ do
   for query in `${GTDIR}/scripts/findfasta.rb -n -e ${excludelist}`
   do
     bin/gt encseq encode -indexname query-index ${query}
-    for mode in "" "-display seed"
+    for mode in "" "-outfmt seed"
     do
       bin/gt seed_extend $mode -v -kmerfile no -ii ref-index -maxfreq 20 -qii query-index > tmp.matches
       bin/gt dev show_seedext -a -f tmp.matches

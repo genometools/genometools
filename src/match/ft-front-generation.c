@@ -3,16 +3,15 @@
 #include <stdio.h>
 #include <stdbool.h>
 #include <limits.h>
-#include "ft-eoplist.h"
 #ifdef WITHDISTRIBUTION
 #include "distribution.h"
 #endif
 #include "core/assert_api.h"
 #include "core/divmodmul.h"
-#include "core/unused_api.h"
 #include "core/ma_api.h"
-#include "core/types_api.h"
-#include "ft-front-generation.h"
+#include "core/unused_api.h"
+#include "match/ft-front-generation.h"
+#include "match/ft-eoplist.h"
 
 #define BACKTRACEBITS 3
 
@@ -221,7 +220,7 @@ void front_trace_add_trace(GtFronttrace *front_trace,uint8_t backreference,
 /* the following function also works for any point in a front */
 
 static GtUword polished_point2offset(GT_UNUSED const GtFronttrace *front_trace,
-                                     const Polished_point *pp)
+                                     const GtFtPolished_point *pp)
 {
   GtWord base_diagonal, pp_diagonal;
 
@@ -265,7 +264,7 @@ static void gt_check_diagonal_run(GT_UNUSED const GtUchar *useq,
 
 static void front_trace2eoplist_directed(GtEoplist *eoplist,
                                          GtFronttrace *front_trace,
-                                         const Polished_point *pp,
+                                         const GtFtPolished_point *pp,
                                          const GtUchar *useq,
                                          GT_UNUSED GtUword ulen,
                                          const GtUchar *vseq,
@@ -594,7 +593,7 @@ static void gt_front_trace_backtracepath2eoplist(GtEoplist *eoplist,
 
 static void front_trace2polished_eoplist(GtEoplist *eoplist,
                                          GtFronttrace *front_trace,
-                                         const Polished_point *pp,
+                                         const GtFtPolished_point *pp,
                                          GtUword pol_size,
                                          GtWord match_score,
                                          GtWord difference_score,
@@ -704,7 +703,7 @@ static void front_trace2polished_eoplist(GtEoplist *eoplist,
 void front_trace2eoplist(bool polished,
                          GtEoplist *eoplist,
                          GtFronttrace *front_trace,
-                         const Polished_point *pp,
+                         const GtFtPolished_point *pp,
                          GtUword pol_size,
                          GtWord match_score,
                          GtWord difference_score,

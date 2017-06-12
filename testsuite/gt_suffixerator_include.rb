@@ -112,7 +112,7 @@ Test do
   run_test "#{$bin}/gt encseq2spm -parts 3 -l #{minlen} -spm show " + \
            "-ii #{indexname}", :maxtime => 1000
   run "mv #{last_stdout} result.firstcodes"
-  run "cmp result.repfind result.firstcodes"
+  run "diff -I '^#' result.repfind result.firstcodes"
 end
 
 allfiles = []

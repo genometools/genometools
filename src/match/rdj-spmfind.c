@@ -18,6 +18,7 @@
 #include "core/arraydef.h"
 #include "core/disc_distri_api.h"
 #include "core/fa.h"
+#include "core/ma.h"
 #include "core/intbits.h"
 #include "core/log_api.h"
 #include "core/spacecalc.h"

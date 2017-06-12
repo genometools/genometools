@@ -1,72 +1,65 @@
-#include "core/ma_api.h"
-#include "core/types_api.h"
+#include "core/unused_api.h"
 #include "core/assert_api.h"
-#include "ft-trimstat.h"
+#include "core/arraydef.h"
+#include "core/minmax.h"
+#include "match/ft-trimstat.h"
 
-struct Trimstat
+struct GtFtTrimstat
 {
-  GtUword diedout, dist_nextfree, dist_allocated, allocated_maxvalid,
-          *dist_maxvalid, *trimdist, *distarray;
+  GtUword diedout, *trim_dist, *matchlength_dist;
+  GtArrayGtUword distance_dist, maxvalid_dist;
   size_t spaceforfront_total;
   double sum_meanvalid;
-  /* the following are to create the output at successive statements. */
-  double errorpercentage;
-  GtUword minmatchpercentage;
-  GtUword maxalignedlendifference;
-  GtUword max_cache_size;
 };
 
-Trimstat *trimstat_new(double errorpercentage,
-                       GtUword minmatchpercentage,
-                       GtUword maxalignedlendifference)
+GtFtTrimstat *gt_ft_trimstat_new(void)
 {
-  Trimstat *trimstat = gt_malloc(sizeof *trimstat);
+  GtFtTrimstat *trimstat = gt_malloc(sizeof *trimstat);
 
   gt_assert(trimstat != 0);
-  trimstat->trimdist = gt_calloc(101,sizeof *trimstat->trimdist);
-  gt_assert(trimstat->trimdist != NULL);
+  trimstat->trim_dist = gt_calloc(101,sizeof *trimstat->trim_dist);
+  gt_assert(trimstat->trim_dist != NULL);
+  trimstat->matchlength_dist = gt_calloc(101,
+                                         sizeof *trimstat->matchlength_dist);
+  gt_assert(trimstat->matchlength_dist != NULL);
   trimstat->diedout = 0;
-  trimstat->distarray = NULL;
-  trimstat->dist_nextfree = 0;
-  trimstat->dist_allocated = 0;
-  trimstat->allocated_maxvalid = 0;
-  trimstat->dist_maxvalid = NULL;
+  GT_INITARRAY(&trimstat->distance_dist,GtUword);
+  GT_INITARRAY(&trimstat->maxvalid_dist,GtUword);
   trimstat->spaceforfront_total = 0;
   trimstat->sum_meanvalid = 0.0;
-  trimstat->max_cache_size = 0;
-  trimstat->errorpercentage = errorpercentage;
-  trimstat->minmatchpercentage = minmatchpercentage;
-  trimstat->maxalignedlendifference = maxalignedlendifference;
   return trimstat;
 }
 
-void trimstat_add(Trimstat *trimstat,bool diedout,
-                  GtUword sumvalid,
-                  GtUword maxvalid,
-                  GtUword d,
-                  size_t spaceforfront,
-                  GtUword cache_size)
+#ifndef NDEBUG
+void gt_ft_trimstat_add(GtFtTrimstat *trimstat,
+                        bool diedout,
+                        GtUword sumvalid,
+                        GtUword maxvalid,
+                        GtUword d,
+                        size_t spaceforfront)
 {
   if (trimstat == NULL)
   {
     return;
   }
-  while (maxvalid >= trimstat->allocated_maxvalid)
+  while (maxvalid >= trimstat->maxvalid_dist.allocatedGtUword)
   {
     GtUword idx;
-    const GtUword allocated = trimstat->allocated_maxvalid;
+    const GtUword allocated = trimstat->maxvalid_dist.allocatedGtUword;
 
-    trimstat->allocated_maxvalid = trimstat->allocated_maxvalid * 1.2 + 128UL;
-    trimstat->dist_maxvalid = gt_realloc(trimstat->dist_maxvalid,
-                                         sizeof *trimstat->dist_maxvalid *
-                                         trimstat->allocated_maxvalid);
-    for (idx = allocated; idx < trimstat->allocated_maxvalid; idx++)
+    trimstat->maxvalid_dist.allocatedGtUword
+      = trimstat->maxvalid_dist.allocatedGtUword * 1.2 + 128UL;
+    trimstat->maxvalid_dist.spaceGtUword
+      = gt_realloc(trimstat->maxvalid_dist.spaceGtUword,
+                   sizeof *trimstat->maxvalid_dist.spaceGtUword *
+                   trimstat->maxvalid_dist.allocatedGtUword);
+    for (idx = allocated; idx < trimstat->maxvalid_dist.allocatedGtUword; idx++)
     {
-      trimstat->dist_maxvalid[idx] = 0;
+      trimstat->maxvalid_dist.spaceGtUword[idx] = 0;
     }
   }
-  gt_assert(maxvalid < trimstat->allocated_maxvalid);
-  trimstat->dist_maxvalid[maxvalid]++;
+  gt_assert(maxvalid < trimstat->maxvalid_dist.allocatedGtUword);
+  trimstat->maxvalid_dist.spaceGtUword[maxvalid]++;
   if (diedout)
   {
     trimstat->diedout++;
@@ -79,26 +72,39 @@ void trimstat_add(Trimstat *trimstat,bool diedout,
       = (GtUword) (100.0 * (double) (fullfronts - sumvalid)/fullfronts);
     gt_assert(percentage <= 100UL);
     trimstat->sum_meanvalid += (double) sumvalid/(d+1);
-    trimstat->trimdist[percentage]++;
-    if (trimstat->dist_nextfree >= trimstat->dist_allocated)
-    {
-      trimstat->dist_allocated = trimstat->dist_allocated +
-                                 trimstat->dist_allocated/5 + 1024;
-      trimstat->distarray
-        = gt_realloc(trimstat->distarray,
-                     sizeof *trimstat->distarray * trimstat->dist_allocated);
-      gt_assert(trimstat->distarray != NULL);
-    }
-    trimstat->distarray[trimstat->dist_nextfree++] = d;
+    trimstat->trim_dist[percentage]++;
+    GT_CHECKARRAYSPACE(&trimstat->distance_dist,GtUword,32);
+    trimstat->distance_dist.spaceGtUword[trimstat->
+                                         distance_dist.nextfreeGtUword++] = d;
     trimstat->spaceforfront_total += spaceforfront;
-  }
-  if (trimstat->max_cache_size < cache_size)
-  {
-    trimstat->max_cache_size = cache_size;
   }
 }
 
-static int compare_ulong(const void *va, const void *vb)
+void gt_ft_trimstat_add_matchlength(GtFtTrimstat *trimstat,
+                                    uint32_t matchlength)
+{
+  gt_assert(trimstat != NULL && trimstat->matchlength_dist != NULL);
+  trimstat->matchlength_dist[MIN(100,matchlength)]++;
+}
+#else
+void gt_ft_trimstat_add(GT_UNUSED GtFtTrimstat *trimstat,
+                        GT_UNUSED bool diedout,
+                        GT_UNUSED GtUword sumvalid,
+                        GT_UNUSED GtUword maxvalid,
+                        GT_UNUSED GtUword d,
+                        GT_UNUSED size_t spaceforfront)
+{
+  return;
+}
+
+void gt_ft_trimstat_add_matchlength(GT_UNUSED GtFtTrimstat *trimstat,
+                                    GT_UNUSED uint32_t matchlength)
+{
+  return;
+}
+#endif
+
+static int gt_ft_trimstat_compare_GtUword(const void *va, const void *vb)
 {
   GtUword a = *((const GtUword *) va);
   GtUword b = *((const GtUword *) vb);
@@ -116,72 +122,95 @@ static int compare_ulong(const void *va, const void *vb)
 
 #define MEGABYTES(X) ((double) (X)/(1UL << 20))
 
-void trimstat_delete(Trimstat *trimstat,double total_time,bool verbose)
+void gt_ft_trimstat_delete(GtFtTrimstat *trimstat)
 {
   if (trimstat != NULL)
   {
-    printf("erp=%.1f\t",trimstat->errorpercentage);
-    printf("mmp=" GT_WU "\t",trimstat->minmatchpercentage);
-    printf("mad=" GT_WU "\t",trimstat->maxalignedlendifference);
+    gt_free(trimstat->trim_dist);
+    GT_FREEARRAY(&trimstat->distance_dist,GtUword);
+    GT_FREEARRAY(&trimstat->maxvalid_dist,GtUword);
+    gt_free(trimstat->matchlength_dist);
+    gt_free(trimstat);
+  }
+}
+
+void gt_ft_trimstat_out(const GtFtTrimstat *trimstat,bool verbose)
+{
+  if (trimstat != NULL)
+  {
     printf("died_out=" GT_WU "\t",trimstat->diedout);
-    if (trimstat->dist_nextfree > 0)
+    if (trimstat->distance_dist.nextfreeGtUword > 0)
     {
       printf("mean_valid=%.2f\t",
-             trimstat->sum_meanvalid/trimstat->dist_nextfree);
-      printf("frontspace=%.2f\t",
+             trimstat->sum_meanvalid/trimstat->distance_dist.nextfreeGtUword);
+      printf("frontspace=%.2f\n",
              MEGABYTES((double) trimstat->spaceforfront_total/
-                       trimstat->dist_nextfree));
+                       trimstat->distance_dist.nextfreeGtUword));
     } else
     {
       printf("mean_valid=undef\t");
-      printf("frontspace=undef\t");
+      printf("frontspace=undef\n");
     }
-    printf("time=%.2f\n",total_time);
     if (verbose)
     {
-      GtUword idx, count = 1UL;
+      GtUword idx, count = 1UL, matchlength_sum = 0, matchlength_cum = 0;
 
-      printf("max_cache_size = " GT_WU " bytes\n",trimstat->max_cache_size);
       for (idx = 0; idx <= 100UL; idx++)
       {
-        if (trimstat->trimdist[idx] > 0)
+        matchlength_sum += trimstat->matchlength_dist[idx];
+      }
+      for (idx = 0; idx <= 100UL; idx++)
+      {
+        if (trimstat->matchlength_dist[idx] > 0)
         {
-          printf("# trim by " GT_WU "%%: " GT_WU " times\n",
-                 idx,trimstat->trimdist[idx]);
+          matchlength_cum += trimstat->matchlength_dist[idx];
+          printf("# matchlength%s" GT_WU ": " GT_WU " times, "
+                 "total=" GT_WU " (%.2f), "
+                 "cum=%.2f%%\n",
+                 idx < 100UL ? "=" : ">=",
+                 idx,trimstat->matchlength_dist[idx],
+                 idx * trimstat->matchlength_dist[idx],
+                 (double) trimstat->matchlength_dist[idx]/matchlength_sum,
+                 100.0 * (double) matchlength_cum/matchlength_sum);
         }
       }
-      qsort(trimstat->distarray,trimstat->dist_nextfree,
-            sizeof *trimstat->distarray,
-            compare_ulong);
-      if (trimstat->dist_nextfree > 0)
+      for (idx = 0; idx <= 100UL; idx++)
       {
-        GtUword previous = trimstat->distarray[0];
-        for (idx = 1UL; idx < trimstat->dist_nextfree; idx++)
+        if (trimstat->trim_dist[idx] > 0)
         {
-          if (previous == trimstat->distarray[idx])
+          printf("# trim by " GT_WU "%%: " GT_WU " times\n",
+                 idx,trimstat->trim_dist[idx]);
+        }
+      }
+      qsort(trimstat->distance_dist.spaceGtUword,
+            trimstat->distance_dist.nextfreeGtUword,
+            sizeof *trimstat->distance_dist.spaceGtUword,
+            gt_ft_trimstat_compare_GtUword);
+      if (trimstat->distance_dist.nextfreeGtUword > 0)
+      {
+        GtUword previous = trimstat->distance_dist.spaceGtUword[0];
+        for (idx = 1UL; idx < trimstat->distance_dist.nextfreeGtUword; idx++)
+        {
+          if (previous == trimstat->distance_dist.spaceGtUword[idx])
           {
             count++;
           } else
           {
             printf("distance " GT_WU ": " GT_WU " times\n",previous,count);
             count = 1UL;
-            previous = trimstat->distarray[idx];
+            previous = trimstat->distance_dist.spaceGtUword[idx];
           }
         }
         printf("distance " GT_WU ": " GT_WU " times\n",previous,count);
       }
-      for (idx = 0; idx < trimstat->allocated_maxvalid; idx++)
+      for (idx = 0; idx < trimstat->maxvalid_dist.allocatedGtUword; idx++)
       {
-        if (trimstat->dist_maxvalid[idx] > 0)
+        if (trimstat->maxvalid_dist.spaceGtUword[idx] > 0)
         {
           printf("maxvalid=" GT_WU ": " GT_WU " times\n",idx,
-                 trimstat->dist_maxvalid[idx]);
+                 trimstat->maxvalid_dist.spaceGtUword[idx]);
         }
       }
     }
-    gt_free(trimstat->trimdist);
-    gt_free(trimstat->distarray);
-    gt_free(trimstat->dist_maxvalid);
-    gt_free(trimstat);
   }
 }

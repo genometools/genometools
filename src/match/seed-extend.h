@@ -76,11 +76,22 @@ typedef struct
 {
   void *processinfo;
   GtQuerymatch *querymatchspaceptr;
-  GtKarlinAltschulStat *karlin_altschul_stat;
+  const GtKarlinAltschulStat *karlin_altschul_stat;
+  const GtSeedExtendDisplayFlag *out_display_flag;
+  GtUword previous_match_a_start,
+          previous_match_a_end,
+          previous_match_b_start,
+          previous_match_b_end,
+          previous_match_distance,
+          previous_match_mismatches;
 } GtProcessinfo_and_querymatchspaceptr;
+
+#define Initializer_GtProcessinfo_and_querymatchspaceptr\
+        {NULL,NULL,NULL,NULL,0,0,0,0,0,0}
 
 GtXdropmatchinfo *gt_xdrop_matchinfo_new(GtUword userdefinedleastlength,
                                          GtUword errorpercentage,
+                                         double evalue_threshold,
                                          GtXdropscore xdropbelowscore,
                                          GtUword sensitivity);
 
@@ -97,10 +108,6 @@ void gt_xdrop_matchinfo_delete(GtXdropmatchinfo *xdropmatchinfo);
 
 GtWord gt_optimalxdropbelowscore(GtUword errorpercentage,GtUword sensitivity);
 
-/* Set the silent flag in the matchinfo object. */
-
-void gt_xdrop_matchinfo_silent_set(GtXdropmatchinfo *xdropmatchinfo);
-
 /* The following function is used for extending a seed obtained
    in a self comparison of the given <encseq>. The extension is performed
    using the xdrop strategy. The seed is specified
@@ -112,11 +119,11 @@ void gt_xdrop_matchinfo_silent_set(GtXdropmatchinfo *xdropmatchinfo);
    in the <GtXdropmatchinfo>-object, passed as part of the
    <GtProcessinfo_and_querymatchspaceptr>-object. */
 
-const GtQuerymatch *gt_xdrop_extend_selfmatch(void *info,
-                                              const GtEncseq *encseq,
-                                              GtUword len,
-                                              GtUword pos1,
-                                              GtUword pos2);
+bool gt_xdrop_extend_selfmatch(void *info,
+                               const GtEncseq *encseq,
+                               GtUword len,
+                               GtUword pos1,
+                               GtUword pos2);
 
 /*
    The following function performs an xdrop extension (using
@@ -126,54 +133,31 @@ const GtQuerymatch *gt_xdrop_extend_selfmatch(void *info,
    The function always returns 0, so the <GtError>-object <err> is not used.
 */
 
-int gt_xdrop_extend_selfmatch_with_output(void *info,
-                                          const GtEncseq *encseq,
-                                          GtUword len,
-                                          GtUword pos1,
-                                          GtUword pos2,
-                                          GT_UNUSED GtError *err);
-
-/* The following function is identical to <gt_xdrop_extend_selfmatch>
-   except that the positions of the seeds are defined by the number
-   of the sequence they occur (dbseqnum for the first instance and querysenum
-   for the second instance) and the relative position in that sequence
-   (dbstart_relative for the first instance and querystart_relative
-   for the second instance). */
-
-const GtQuerymatch *gt_xdrop_extend_selfmatch_relative(void *info,
-                                              const GtEncseq *encseq,
-                                              GtUword dbseqnum,
-                                              GtUword dbstart_relative,
-                                              GtUword queryseqnum,
-                                              GtUword querystart_relative,
-                                              GtUword len,
-                                              GtReadmode query_readmode);
+int gt_rf_xdrop_extend_selfmatch_with_output(void *info,
+                                             const GtEncseq *encseq,
+                                             GtUword len,
+                                             GtUword pos1,
+                                             GtUword pos2,
+                                             GT_UNUSED GtError *err);
 
 /* The following function is used for extending a seed obtained
-   in a comparison of the given sequence <query>
-   against <encseq>. So here a byte sequence is compared against an
+   in a comparison of the given sequence <queryes>
+   against <encseq>. So here the query which is either represented by an
+   encoded sequence (queryes->encseq != NULL) or a byte sequence
+   (queryes->seq != NULL) is compared against an
    encoded sequence and the seed is specified by <exactseed>.
    A <GtProcessinfo_and_querymatchspaceptr>-object is passed via the
    void pointer <info>.
-   After the extension is performed and satisfies
-   certain criteria, the resulting
-   coordinates are returned as a reference to a <GtQuerymatch>-object. */
+   After the extension is performed and the match is not redundant
+   the resulting are output. */
 
-const GtQuerymatch *gt_xdrop_extend_querymatch(void *info,
+void gt_rf_xdrop_extend_querymatch_with_output(void *info,
                                                const GtEncseq *encseq,
                                                const GtQuerymatch *exactseed,
-                                               const GtSeqorEncseq *query);
+                                               const GtSeqorEncseq *queryes,
+                                               bool same_encseq);
 
-/*
-   The following function performs an xdrop extension (as the previous function)
-   and outputs the formatted match to stdout if
-   the previous function returns a pointer different from NULL.
-*/
-
-void gt_xdrop_extend_querymatch_with_output(void *info,
-                                            const GtEncseq *encseq,
-                                            const GtQuerymatch *exactseed,
-                                            const GtSeqorEncseq *query);
+GtUword gt_xdrop_extend_belowscore(const GtXdropmatchinfo *xdropmatchinfo);
 
 /* The following functions are used for the greedy extension. */
 
@@ -207,14 +191,17 @@ typedef struct GtGreedyextendmatchinfo GtGreedyextendmatchinfo;
    */
 
 GtGreedyextendmatchinfo *gt_greedy_extend_matchinfo_new(
-                                   GtUword errorpercentage,
                                    GtUword maxalignedlendifference,
                                    GtUword history,
                                    GtUword perc_mat_history,
                                    GtUword userdefinedleastlength,
-                                   GtExtendCharAccess extend_char_access,
+                                   GtUword errorpercentage,
+                                   double evalue_threshold,
+                                   GtExtendCharAccess a_extend_char_access,
+                                   GtExtendCharAccess b_extend_char_access,
+                                   bool cam_generic,
                                    GtUword sensitivity,
-                                   const Polishing_info *pol_info);
+                                   const GtFtPolishing_info *pol_info);
 
 /* the destructor-method for the gven object. */
 
@@ -225,13 +212,10 @@ void gt_greedy_extend_matchinfo_delete(GtGreedyextendmatchinfo *ggemi);
 void gt_greedy_extend_matchinfo_check_extend_symmetry_set(
                         GtGreedyextendmatchinfo *ggemi);
 
-/* Set the silent flag in the matchinfo object. */
-
-void gt_greedy_extend_matchinfo_silent_set(GtGreedyextendmatchinfo *ggemi);
-
 /* Set the trimstat in the matchinfo object. */
 
-void gt_greedy_extend_matchinfo_trimstat_set(GtGreedyextendmatchinfo *ggemi);
+void gt_greedy_extend_matchinfo_trimstat_set(GtGreedyextendmatchinfo *ggemi,
+                                             GtFtTrimstat *trimstat);
 
 /* If <arg_maxalignedlendifference> and <arg_perc_mat_history> are 0, then
    an optimal value for the maximal alignment length difference and
@@ -256,12 +240,15 @@ void gt_optimal_maxalilendiff_perc_mat_history(
                 GtUword sensitivity);
 
 /* This function converts a string given as argument for option -cam
-   and converts it to the given enum type <GtExtendCharAccess>. This
+   and converts it to the given enum types <GtExtendCharAccess>, which
+   are stored at the given addresses. This
    option is used in the tool gt_repfind and gt_seedextend.
-   In case of error, -1 is returned. */
+   In case of error, are value different from 0 is returned. */
 
-GtExtendCharAccess gt_greedy_extend_char_access(const char *cam_string,
-                                                GtError *err);
+int gt_greedy_extend_char_access(GtExtendCharAccess *cam_a,
+                                 GtExtendCharAccess *cam_b,
+                                 const char *full_cam_string,
+                                 GtError *err);
 
 /* The following function returns a string specifying the possible arguments
    for the mentioned option -cam. */
@@ -280,11 +267,11 @@ const char *gt_cam_extendgreedy_comment(void);
    the cooordinates are delivered as a <GtQuerymatch>-object.
 */
 
-const GtQuerymatch *gt_greedy_extend_selfmatch(void *info,
-                                               const GtEncseq *encseq,
-                                               GtUword len,
-                                               GtUword pos1,
-                                               GtUword pos2);
+bool gt_greedy_extend_selfmatch(void *info,
+                                const GtEncseq *encseq,
+                                GtUword len,
+                                GtUword pos1,
+                                GtUword pos2);
 
 /*
    The following function performs a greedy extension (as the previous function)
@@ -292,12 +279,12 @@ const GtQuerymatch *gt_greedy_extend_selfmatch(void *info,
    The function always returns 0, so the <GtError>-object <err> is not used.
 */
 
-int gt_greedy_extend_selfmatch_with_output(void *info,
-                                           const GtEncseq *encseq,
-                                           GtUword len,
-                                           GtUword pos1,
-                                           GtUword pos2,
-                                           GT_UNUSED GtError *err);
+int gt_rf_greedy_extend_selfmatch_with_output(void *info,
+                                              const GtEncseq *encseq,
+                                              GtUword len,
+                                              GtUword pos1,
+                                              GtUword pos2,
+                                              GT_UNUSED GtError *err);
 
 /* The following function is identical to <gt_greedy_extend_selfmatch>
    except that the positions of the seeds are defined by the number
@@ -306,64 +293,36 @@ int gt_greedy_extend_selfmatch_with_output(void *info,
    (dbstart_relative for the first instance and querystart_relative
    for the second instance). */
 
-const GtQuerymatch *gt_greedy_extend_selfmatch_relative(void *info,
-                                              const GtEncseq *encseq,
-                                              GtUword dbseqnum,
-                                              GtUword dbstart_relative,
-                                              GtUword queryseqnum,
-                                              GtUword querystart_relative,
-                                              GtUword len,
-                                              GtReadmode query_readmode);
+bool gt_xdrop_extend_seed_relative(void *info,
+                                   const GtSeqorEncseq *dbes,
+                                   GtUword dbseqnum,
+                                   GtUword dbstart_relative,
+                                   const GtSeqorEncseq *queryes,
+                                   bool same_encseq,
+                                   GtUword queryseqnum,
+                                   GtUword querystart_relative,
+                                   GtUword len,
+                                   GtReadmode query_readmode);
 
-typedef const GtQuerymatch *(*GtExtendSelfmatchRelativeFunc)(void *,
-                                                             const GtEncseq *,
-                                                             GtUword,
-                                                             GtUword,
-                                                             GtUword,
-                                                             GtUword,
-                                                             GtUword,
-                                                     GtReadmode query_readmode);
-
-const GtQuerymatch* gt_xdrop_extend_querymatch_relative(
-                                                  void *info,
-                                                  const GtEncseq *dbencseq,
-                                                  GtUword dbseqnum,
-                                                  GtUword dbstart_relative,
-                                                  const GtEncseq *queryencseq,
-                                                  GtUword queryseqnum,
-                                                  GtUword querystart_relative,
-                                                  GtUword len,
-                                                  GtReadmode query_readmode);
-
-const GtQuerymatch* gt_greedy_extend_querymatch_relative(
-                                                  void *info,
-                                                  const GtEncseq *dbencseq,
-                                                  GtUword dbseqnum,
-                                                  GtUword dbstart_relative,
-                                                  const GtEncseq *queryencseq,
-                                                  GtUword queryseqnum,
-                                                  GtUword querystart_relative,
-                                                  GtUword len,
-                                                  GtReadmode query_readmode);
-
-typedef const GtQuerymatch *(*GtExtendQuerymatchRelativeFunc)(void *,
-                                                             const GtEncseq *,
-                                                             GtUword,
-                                                             GtUword,
-                                                             const GtEncseq *,
-                                                             GtUword,
-                                                             GtUword,
-                                                             GtUword,
-                                                             GtReadmode);
+bool gt_greedy_extend_seed_relative(void *info,
+                                    const GtSeqorEncseq *dbes,
+                                    GtUword dbseqnum,
+                                    GtUword dbstart_relative,
+                                    const GtSeqorEncseq *queryes,
+                                    bool same_encseq,
+                                    GtUword queryseqnum,
+                                    GtUword querystart_relative,
+                                    GtUword len,
+                                    GtReadmode query_readmode);
 
 void gt_align_front_prune_edist(bool rightextension,
-                                Polished_point *best_polished_point,
+                                GtFtPolished_point *best_polished_point,
                                 GtFronttrace *front_trace,
-                                const GtEncseq *encseq,
-                                const GtSeqorEncseq *query,
+                                const GtSeqorEncseq *dbes,
+                                const GtSeqorEncseq *queryes,
                                 GtReadmode query_readmode,
-                                GtUword query_seqstartpos,
-                                GtUword query_totallength,
+                                GtUword query_seqstart,
+                                GtUword query_seqlen,
                                 GtGreedyextendmatchinfo *ggemi,
                                 bool greedyextension,
                                 GtUword seedlength,
@@ -377,7 +336,7 @@ GtUword gt_minidentity2errorpercentage(GtUword minidentity);
 char *gt_seed_extend_params_keystring(bool use_greedy,
                                       bool forxdrop,
                                       unsigned int seedlength,
-                                      unsigned int userdefinedleastlength,
+                                      GtUword userdefinedleastlength,
                                       GtUword minidentity,
                                       GtUword maxalignedlendifference,
                                       GtUword perc_mat_history,
@@ -385,11 +344,20 @@ char *gt_seed_extend_params_keystring(bool use_greedy,
                                       GtUword extendxdrop,
                                       GtUword xdropbelowscore);
 
-void gt_greedy_extend_querymatch_with_output(void *info,
-                                             const GtEncseq *dbencseq,
-                                             const GtQuerymatch *exactseed,
-                                             const GtSeqorEncseq *query);
+void gt_rf_greedy_extend_querymatch_with_output(void *info,
+                                                const GtEncseq *dbencseq,
+                                                const GtQuerymatch *exactseed,
+                                                const GtSeqorEncseq *queryes,
+                                                bool same_encseq);
 
 double gt_greedy_dna_sequence_bias_get(const GtEncseq *encseq);
+
+GtUword gt_greedy_extend_maxalignedlendifference(
+                                     const GtGreedyextendmatchinfo *ggemi);
+
+GtUword gt_greedy_extend_maxalignedlendifference(
+                                     const GtGreedyextendmatchinfo *ggemi);
+
+GtUword gt_greedy_extend_perc_mat_history(const GtGreedyextendmatchinfo *ggemi);
 
 #endif

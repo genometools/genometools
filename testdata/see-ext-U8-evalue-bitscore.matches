@@ -1,0 +1,11 @@
+# Options: -ii U89959_genomic -l 50 -outfmt bitscore evalue -minidentity 80 -history 60
+# Fields: s. len, s. seqnum, s. start, strand, q. len, q. seqnum, q. start, score, editdist, % identity, bit score, evalue
+149 0 66233 F 149 0 70166 235 21 85.91 152.6 1e-36
+190 0 73505 F 188 0 73696 288 30 84.13 178.4 2e-44
+343 0 73448 F 350 0 74209 528 55 84.13 329.5 8e-90
+225 0 73774 F 228 0 74560 342 37 83.66 207.6 4e-53
+208 0 79213 F 207 0 85486 307 36 82.65 178.4 2e-44
+374 0 79690 F 369 0 85882 539 68 81.70 308.9 1e-83
+121 0 79313 F 122 0 88347 234 3 97.53 195.6 2e-49
+452 0 103938 F 451 0 106522 750 51 88.70 523.5 3e-148
+# Fields: s. len, s. seqnum, s. start, strand, q. len, q. seqnum, q. start, score, editdist, % identity, bit score, evalue

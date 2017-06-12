@@ -260,6 +260,56 @@ static int GT_APPENDINT(fillSWtable)(GtEncseq *encseq,
   return 0;
 }
 
+static void GT_APPENDINT(gt_ssps_in_page_append)
+                            (GtUword *arr,
+                             const GT_APPENDINT(GtSWtable) *swtable,
+                             GtUword offset,
+                             GtUword first,
+                             GtUword last)
+{
+  GtUword idx, *ptr;
+
+  for (idx = first, ptr = arr; idx <= last; idx++, ptr++)
+  {
+    *ptr = offset + (GtUword) swtable->positions[idx];
+  }
+}
+
+static GtUword *GT_APPENDINT(gt_all_ssps_get)(
+                            const GT_APPENDINT(GtSWtable) *swtable)
+{
+  GtUword endpos0, endpos1, pgnum, offset = 0, *ssptab, *arr;
+
+  if (swtable->numofpositionstostore == 0)
+  {
+    return NULL;
+  }
+  gt_assert(swtable->numofpages > 0 && swtable->endidxinpage != NULL);
+  /* allocate one extra byte to allow inplace transformation into sequence
+     length */
+  ssptab = gt_malloc(sizeof *ssptab * (swtable->numofpositionstostore+1));
+  arr = ssptab;
+  for (pgnum=0; pgnum < swtable->numofpages; pgnum++)
+  {
+    if (pgnum == 0)
+    {
+      endpos0 = 0;
+    } else
+    {
+      endpos0 = swtable->endidxinpage[pgnum-1];
+    }
+    endpos1 = swtable->endidxinpage[pgnum];
+    if (endpos0 < endpos1)
+    {
+      GT_APPENDINT(gt_ssps_in_page_append)(arr,swtable,offset,endpos0,
+                                           endpos1-1);
+      arr += endpos1 - endpos0;
+    }
+    offset += 1UL + swtable->maxrangevalue;
+  }
+  return ssptab;
+}
+
 #ifdef GT_RANGEDEBUG
 
 static void GT_APPENDINT(showSWtablewithpages)

@@ -44,7 +44,6 @@
 #include "extended/encdesc_header_io.h"
 #include "extended/encdesc_rep.h"
 #include "extended/huffcode.h"
-#include "extended/rbtree.h"
 #include "extended/sampling.h"
 
 #define GT_ENCDESC_ARRAY_RESIZE 50

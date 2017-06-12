@@ -37,3 +37,4 @@ rm -f *.sti
 rm -f *.sti1 
 rm -f *.suf
 rm -f *.tis 
+rm -f *.kmer 

@@ -252,7 +252,7 @@ static int suffixeratorwithoutput(Outfileinfo *outfileinfo,
       GtUword totallength = gt_encseq_total_length(encseq);
       unsigned int bitsperentry = gt_determinebitspervalue(totallength);
 
-      bitbuffer = gt_bitbuffer_new(outfileinfo->outfpsuftab,bitsperentry);
+      bitbuffer = gt_bitbuffer_FILE_new(outfileinfo->outfpsuftab,bitsperentry);
     }
     while (true)
     {

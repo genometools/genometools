@@ -3,21 +3,33 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdbool.h>
-#include "core/types_api.h"
 
-typedef struct Trimstat Trimstat;
+typedef struct GtFtTrimstat GtFtTrimstat;
 
-Trimstat *trimstat_new(double errorpercentage,
-                       GtUword minmatchpercentage,
-                       GtUword maxalignedlendifference);
+GtFtTrimstat *gt_ft_trimstat_new(void);
 
-void trimstat_add(Trimstat *trimstat,bool diedout,
-                  GtUword sumvalid,
-                  GtUword maxvalid,
-                  GtUword d,
-                  size_t spaceforfront,
-                  GtUword cache_size);
+#ifndef NDEBUG
+void gt_ft_trimstat_add(GtFtTrimstat *trimstat,
+                        bool diedout,
+                        GtUword sumvalid,
+                        GtUword maxvalid,
+                        GtUword d,
+                        size_t spaceforfront);
+void gt_ft_trimstat_add_matchlength(GtFtTrimstat *trimstat,
+                                    uint32_t matchlength);
+#else
+void gt_ft_trimstat_add(GT_UNUSED GtFtTrimstat *trimstat,
+                        GT_UNUSED bool diedout,
+                        GT_UNUSED GtUword sumvalid,
+                        GT_UNUSED GtUword maxvalid,
+                        GT_UNUSED GtUword d,
+                        GT_UNUSED size_t spaceforfront);
+void gt_ft_trimstat_add_matchlength(GT_UNUSED GtFtTrimstat *trimstat,
+                                    GT_UNUSED uint32_t matchlength);
+#endif
 
-void trimstat_delete(Trimstat *trimstat,double total_time,bool verbose);
+void gt_ft_trimstat_delete(GtFtTrimstat *trimstat);
+
+void gt_ft_trimstat_out(const GtFtTrimstat *trimstat,bool verbose);
 
 #endif

@@ -216,12 +216,7 @@ void gt_suffixsortspace_nooffsets(GT_UNUSED const GtSuffixsortspace *sssp)
 
 GtUword gt_suffixsortspace_getdirect(const GtSuffixsortspace *sssp,GtUword idx)
 {
-  gt_assert(sssp != NULL);
-  if (idx > sssp->maxindex)
-  {
-    printf("idx = " GT_WU " > " GT_WU " = maxindex\n",idx,sssp->maxindex);
-  }
-  gt_assert(idx <= sssp->maxindex);
+  gt_assert(sssp != NULL && idx <= sssp->maxindex);
   if (sssp->ulongtab != NULL)
   {
     return sssp->ulongtab[idx];
@@ -488,11 +483,11 @@ void gt_suffixsortspace_compressed_to_file (const GtSuffixsortspace *sssp,
   gt_assert(sssp != NULL);
   if (sssp->ulongtab != NULL)
   {
-    gt_bitbuffer_next_ulongtab(bb,sssp->ulongtab,numberofsuffixes);
+    gt_bitbuffer_write_ulongtab_FILE(bb,sssp->ulongtab,numberofsuffixes);
   } else
   {
     gt_assert (sssp->uinttab != NULL);
-    gt_bitbuffer_next_uint32tab(bb,sssp->uinttab,numberofsuffixes);
+    gt_bitbuffer_write_uint32tab_FILE(bb,sssp->uinttab,numberofsuffixes);
   }
 }
 

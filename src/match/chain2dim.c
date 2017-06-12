@@ -1533,7 +1533,11 @@ void gt_chain_fastchaining(const GtChain2Dimmode *chainmode,
   } else
   {
     gt_chain2dim_chainingboundarycases(chainmode, chain, matchtable);
-    chainprocessor(cpinfo,matchtable,chain);
+    if (chainmode->chainkind != LOCALCHAININGTHRESHOLD ||
+        matchtable->matches[0].weight >= chainmode->minimumscore)
+    {
+      chainprocessor(cpinfo,matchtable,chain);
+    }
     retval = 0;
   }
   /* retval is not reported. */
@@ -1785,11 +1789,10 @@ void gt_chain_extractchainelem(GtChain2Dimmatchvalues *value,
 
 void gt_chain_printchainelem(FILE *outfp,const GtChain2Dimmatchvalues *value)
 {
-  fprintf(outfp,
-          ""GT_WU" "GT_WU" "GT_WU" "GT_WU""
-          " "GT_WD"\n",value->startpos[0],
-                   value->endpos[0],
-                   value->startpos[1],
-                   value->endpos[1],
-                   value->weight);
+  fprintf(outfp,GT_WU " " GT_WU " " GT_WU " " GT_WU " " GT_WD "\n",
+          value->startpos[0],
+          value->endpos[0],
+          value->startpos[1],
+          value->endpos[1],
+          value->weight);
 }

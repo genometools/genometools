@@ -3,8 +3,8 @@
 #include <stdbool.h>
 #include "core/unused_api.h"
 #include "core/chardef.h"
+#include "core/readmode.h"
 #include "match/ft-polish.h"
-#include "core/types_api.h"
 
 /* A list of edit operation is representation is represented by the following
    opaque type */
@@ -69,8 +69,8 @@ void gt_eoplist_verify(const GtEoplist *eoplist,
                        GtUword edist,
                        bool distinguish_mismatch_match);
 
-/* The constructor for the reader with respect to the given eoplist. */
-GtEoplistReader *gt_eoplist_reader_new(const GtEoplist *eoplist);
+/* The constructor for the reader, initially set to be empty. */
+GtEoplistReader *gt_eoplist_reader_new(void);
 
 /* An eoplist_reader can be used in two modes when enumerating
    cigar symbols. In the default mode,
@@ -163,15 +163,18 @@ bool gt_eoplist_reader_next_segment(GtEoplistSegment *segment,
 */
 
 void gt_eoplist_reader_reset(GtEoplistReader *eoplist_reader,
-                             const GtEoplist *eoplist);
+                             const GtEoplist *eoplist,
+                             bool forward);
 
 void gt_eoplist_reader_reset_width(GtEoplistReader *eoplist_reader,
                                    unsigned int width);
 
 void gt_eoplist_set_sequences(GtEoplist *eoplist,
                               const GtUchar *useq,
+                              GtUword ustart,
                               GtUword ulen,
                               const GtUchar *vseq,
+                              GtUword vstart,
                               GtUword vlen);
 
 void gt_eoplist_format_generic(FILE *fp,
@@ -179,23 +182,35 @@ void gt_eoplist_format_generic(FILE *fp,
                                GtEoplistReader *eoplist_reader,
                                bool distinguish_mismatch_match,
                                const GtUchar *characters,
+                               GtUword top_seqlength,
+                               GtUword low_reference,
+                               GtUword one_off,
+                               bool subject_first,
+                               bool alignment_show_forward,
+                               bool show_complement_characters,
                                GtUchar wildcardshow);
 
 void gt_eoplist_format_exact(FILE *fp,
                              const GtEoplist *eoplist,
                              GtEoplistReader *eoplist_reader,
+                             GtUword top_seqlength,
+                             GtUword low_reference,
+                             GtUword one_off,
+                             bool subject_first,
+                             bool alignment_show_forward,
+                             bool show_complement_characters,
                              const GtUchar *characters);
 
 GtUword gt_eoplist_num_segments(const GtEoplist *eoplist,GtUword delta);
 
 double gt_eoplist_segments_entropy(const GtEoplist *eoplist,GtUword delta);
 
-GtEoplist *gt_eoplist_new_from_cigar(const char *cigarstring,GtUword length);
+void gt_eoplist_from_cigar(GtEoplist *eoplist,const char *cigarstring,char sep);
 
 char *gt_eoplist2cigar_string(const GtEoplist *eoplist,
                               bool distinguish_mismatch_match);
 
-void gt_eoplist_seed_display_set(GtEoplist *eoplist);
+void gt_eoplist_display_seed_in_alignment_set(GtEoplist *eoplist);
 
 void gt_eoplist_set_seedoffset(GtEoplist *eoplist,
                                GtUword useedoffset,
@@ -203,9 +218,10 @@ void gt_eoplist_set_seedoffset(GtEoplist *eoplist,
 
 void gt_eoplist_show_plain(const GtEoplist *eoplist,FILE *fp);
 
-#ifndef OUTSIDE_OF_GT
+void gt_eoplist_show_cigar(GtEoplistReader *eoplist_reader,FILE *fp);
+
 void gt_eoplist_polished_ends(GtEoplist *eoplist,
-                              const Polishing_info *pol_info,
-                              bool withpolcheck);
-#endif
+                              const GtFtPolishing_info *pol_info,
+                              bool withpolcheck,
+                              bool pol_info_out);
 #endif

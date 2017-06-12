@@ -50,6 +50,7 @@
 #include <stdint.h>
 #include <string.h>
 #include <limits.h>
+#include "core/unused_api.h"
 #include "core/array2dim_api.h"
 #include "core/assert_api.h"
 #include "core/divmodmul.h"
@@ -234,6 +235,7 @@ typedef union
   GtUword *ulongptr;
   GtUwordPair *ulongpairptr;
   Gtuint64keyPair *uint64keypairptr;
+  uint8_t *flbaptr; /* fixed length byte array */
 } GtRadixvalues;
 
 typedef struct
@@ -254,80 +256,106 @@ typedef struct
   int log_bufsize;
   GtRadixelemtype elemtype;
   GtRadixvalues values;
-  size_t size;
+  size_t size, unitsize;
+  uint8_t *tmpvalue_ptr, *tmpswap_ptr;
 } GtRadixbuffer;
 
 static GtRadixbuffer *gt_radixbuffer_new(GtRadixelemtype elemtype)
 {
-  GtRadixbuffer *buf;
+  GtRadixbuffer *rbuf;
+  size_t thissize;
 
-  buf = gt_malloc(sizeof *buf);
-  buf->size = sizeof *buf;
-  buf->log_bufsize = 5;
-  buf->buf_size = 1UL << buf->log_bufsize;
-  gt_assert(buf->buf_size <= UINT8_MAX);
-  buf->cachesize = (UINT8_MAX+1) << buf->log_bufsize;
-  buf->elemtype = elemtype;
+  rbuf = gt_malloc(sizeof *rbuf);
+  rbuf->size = sizeof *rbuf;
+  rbuf->log_bufsize = 5;
+  rbuf->buf_size = 1UL << rbuf->log_bufsize;
+  gt_assert(rbuf->buf_size <= UINT8_MAX);
+  rbuf->cachesize = (UINT8_MAX+1) << rbuf->log_bufsize;
+  rbuf->elemtype = elemtype;
+  if (elemtype <= GtRadixelemtypeGtuint64keyPair)
+  {
+    rbuf->unitsize = 0;
+  } else
+  {
+    rbuf->unitsize = (size_t) elemtype -
+                     (size_t) GtRadixelemtypeGtuint64keyPair;
+  }
+  rbuf->tmpvalue_ptr = rbuf->tmpswap_ptr = NULL;
   if (elemtype == GtRadixelemtypeGtUwordPair)
   {
-    buf->values.ulongpairptr = gt_malloc(sizeof *buf->values.ulongpairptr *
-                                         buf->cachesize);
-    buf->size += sizeof (*buf->values.ulongpairptr) * buf->cachesize;
+    thissize = sizeof (*rbuf->values.ulongpairptr) * rbuf->cachesize;
+    rbuf->values.ulongpairptr = gt_malloc(thissize);
   } else
   {
     if (elemtype == GtRadixelemtypeGtUword)
     {
-      buf->values.ulongptr = gt_malloc(sizeof *buf->values.ulongptr *
-                                       buf->cachesize);
-      buf->size += sizeof *buf->values.ulongptr * buf->cachesize;
+      thissize = sizeof *rbuf->values.ulongptr * rbuf->cachesize;
+      rbuf->values.ulongptr = gt_malloc(thissize);
     } else
     {
-      buf->values.uint64keypairptr
-        = gt_malloc(sizeof *buf->values.uint64keypairptr *
-                                          buf->cachesize);
-      buf->size += sizeof *buf->values.uint64keypairptr *
-                   buf->cachesize;
+      if (elemtype == GtRadixelemtypeGtuint64keyPair)
+      {
+        thissize = sizeof *rbuf->values.uint64keypairptr * rbuf->cachesize;
+        rbuf->values.uint64keypairptr = gt_malloc(thissize);
+      } else
+      {
+        rbuf->tmpvalue_ptr = gt_malloc(rbuf->unitsize);
+        rbuf->tmpswap_ptr = gt_malloc(rbuf->unitsize);
+        thissize = sizeof *rbuf->values.flbaptr * rbuf->unitsize *
+                   rbuf->cachesize;
+        rbuf->values.flbaptr = gt_malloc(thissize);
+        thissize += 2 * rbuf->unitsize;
+      }
     }
   }
-  buf->startofbin = gt_malloc(sizeof *buf->startofbin * (UINT8_MAX + 2));
-  buf->size += sizeof *buf->startofbin * (UINT8_MAX + 2);
-  buf->endofbin = gt_malloc(sizeof *buf->endofbin * (UINT8_MAX + 1));
-  buf->size += sizeof *buf->endofbin * (UINT8_MAX + 1);
-  buf->nextidx = gt_malloc(sizeof *buf->nextidx * (UINT8_MAX + 1));
-  buf->size += sizeof *buf->nextidx * (UINT8_MAX + 1);
-  buf->countcached = buf->countuncached = buf->countinsertionsort = 0;
-  return buf;
+  rbuf->size += thissize;
+  rbuf->startofbin = gt_malloc(sizeof *rbuf->startofbin * (UINT8_MAX + 2));
+  rbuf->size += sizeof *rbuf->startofbin * (UINT8_MAX + 2);
+  rbuf->endofbin = gt_malloc(sizeof *rbuf->endofbin * (UINT8_MAX + 1));
+  rbuf->size += sizeof *rbuf->endofbin * (UINT8_MAX + 1);
+  rbuf->nextidx = gt_malloc(sizeof *rbuf->nextidx * (UINT8_MAX + 1));
+  rbuf->size += sizeof *rbuf->nextidx * (UINT8_MAX + 1);
+  rbuf->countcached = rbuf->countuncached = rbuf->countinsertionsort = 0;
+  return rbuf;
 }
 
-static size_t gt_radixbuffer_size(const GtRadixbuffer *buf)
+static size_t gt_radixbuffer_size(const GtRadixbuffer *rbuf)
 {
-  return buf->size;
+  return rbuf->size;
 }
 
-static void gt_radixbuffer_delete(GtRadixbuffer *buf)
+static void gt_radixbuffer_delete(GtRadixbuffer *rbuf)
 {
-  gt_assert(buf != NULL);
-  if (buf->elemtype == GtRadixelemtypeGtUwordPair)
+  gt_assert(rbuf != NULL);
+  if (rbuf->elemtype == GtRadixelemtypeGtUwordPair)
   {
-    gt_free(buf->values.ulongpairptr);
+    gt_free(rbuf->values.ulongpairptr);
   } else
   {
-    if (buf->elemtype == GtRadixelemtypeGtUword)
+    if (rbuf->elemtype == GtRadixelemtypeGtUword)
     {
-      gt_free(buf->values.ulongptr);
+      gt_free(rbuf->values.ulongptr);
     } else
     {
-      gt_free(buf->values.uint64keypairptr);
+      if (rbuf->elemtype == GtRadixelemtypeGtuint64keyPair)
+      {
+        gt_free(rbuf->values.uint64keypairptr);
+      } else
+      {
+        gt_free(rbuf->tmpvalue_ptr);
+        gt_free(rbuf->tmpswap_ptr);
+        gt_free(rbuf->values.flbaptr);
+      }
     }
   }
-  gt_free(buf->nextidx);
-  gt_free(buf->startofbin);
-  gt_free(buf->endofbin);
-  gt_free(buf);
+  gt_free(rbuf->nextidx);
+  gt_free(rbuf->startofbin);
+  gt_free(rbuf->endofbin);
+  gt_free(rbuf);
 }
 
-static bool gt_radixsort_compare_smaller(const Gtuint64keyPair *ptr1,
-                                         const Gtuint64keyPair *ptr2)
+static bool gt_radixsort_uint64keypair_smaller(const Gtuint64keyPair *ptr1,
+                                               const Gtuint64keyPair *ptr2)
 {
   return (ptr1->uint64_a < ptr2->uint64_a ||
          (ptr1->uint64_a == ptr2->uint64_a && ptr1->uint64_b < ptr2->uint64_b))
@@ -337,6 +365,7 @@ static bool gt_radixsort_compare_smaller(const Gtuint64keyPair *ptr1,
 #include "core/radixsort-ip-ulong.inc"
 #include "core/radixsort-ip-ulongpair.inc"
 #include "core/radixsort-ip-uint64keypair.inc"
+#include "core/radixsort-ip-flba.inc"
 
 #ifdef GT_THREADS_ENABLED
 typedef struct
@@ -359,8 +388,14 @@ static void *gt_radixsort_thread_caller(void *data)
       gt_radixsort_ulong_sub_inplace(threadinfo->rbuf,&threadinfo->stack);
     } else
     {
-      gt_radixsort_uint64keypair_sub_inplace(threadinfo->rbuf,
-                                             &threadinfo->stack);
+      if (threadinfo->rbuf->elemtype == GtRadixelemtypeGtuint64keyPair)
+      {
+        gt_radixsort_uint64keypair_sub_inplace(threadinfo->rbuf,
+                                               &threadinfo->stack);
+      } else
+      {
+        gt_radixsort_flba_sub_inplace(threadinfo->rbuf,&threadinfo->stack);
+      }
     }
   }
   return NULL;
@@ -395,29 +430,33 @@ static GtRadixsortinfo *gt_radixsort_new(GtRadixelemtype elemtype,
   radixsortinfo->maxlen = maxlen;
   if (maxlen > 0)
   {
+    size_t thissize;
+
     if (elemtype == GtRadixelemtypeGtUwordPair)
     {
-      radixsortinfo->sortspace.ulongpairptr
-        = gt_malloc(sizeof *radixsortinfo->sortspace.ulongpairptr * maxlen);
-     radixsortinfo->size += sizeof *radixsortinfo->sortspace.ulongpairptr
-                            * maxlen;
+      thissize = sizeof *radixsortinfo->sortspace.ulongpairptr * maxlen;
+      radixsortinfo->sortspace.ulongpairptr = gt_malloc(thissize);
     } else
     {
       if (elemtype == GtRadixelemtypeGtUword)
       {
-        radixsortinfo->sortspace.ulongptr
-          = gt_malloc(sizeof *radixsortinfo->sortspace.ulongptr * maxlen);
-        radixsortinfo->size += sizeof *radixsortinfo->sortspace.ulongptr
-                               * maxlen;
+        thissize = sizeof *radixsortinfo->sortspace.ulongptr * maxlen;
+        radixsortinfo->sortspace.ulongptr = gt_malloc(thissize);
       } else
       {
-        radixsortinfo->sortspace.uint64keypairptr
-          = gt_malloc(sizeof *radixsortinfo->sortspace.uint64keypairptr
-                      * maxlen);
-        radixsortinfo->size
-          += sizeof *radixsortinfo->sortspace.uint64keypairptr * maxlen;
+        if (elemtype == GtRadixelemtypeGtuint64keyPair)
+        {
+          thissize = sizeof *radixsortinfo->sortspace.uint64keypairptr * maxlen;
+          radixsortinfo->sortspace.uint64keypairptr = gt_malloc(thissize);
+        } else
+        {
+          thissize = sizeof *radixsortinfo->sortspace.flbaptr *
+                     radixsortinfo->rbuf->unitsize * maxlen;
+          radixsortinfo->sortspace.flbaptr = gt_malloc(thissize);
+        }
       }
     }
+    radixsortinfo->size += thissize;
   }
   GT_STACK_INIT(&radixsortinfo->stack,32UL);
   radixsortinfo->size += sizeof radixsortinfo->stack;
@@ -466,6 +505,12 @@ GtRadixsortinfo *gt_radixsort_new_uint64keypair(GtUword maxlen)
   return gt_radixsort_new(GtRadixelemtypeGtuint64keyPair,maxlen);
 }
 
+GtRadixsortinfo *gt_radixsort_new_flba(GtUword maxlen,size_t unitsize)
+{
+  gt_assert(unitsize > 0);
+  return gt_radixsort_new(GtRadixelemtypeGtuint64keyPair + unitsize,maxlen);
+}
+
 size_t gt_radixsort_size(const GtRadixsortinfo *radixsortinfo)
 {
   return radixsortinfo->size;
@@ -503,7 +548,13 @@ void gt_radixsort_delete(GtRadixsortinfo *radixsortinfo)
           gt_free(radixsortinfo->sortspace.ulongptr);
         } else
         {
-          gt_free(radixsortinfo->sortspace.uint64keypairptr);
+          if (radixsortinfo->elemtype == GtRadixelemtypeGtuint64keyPair)
+          {
+            gt_free(radixsortinfo->sortspace.uint64keypairptr);
+          } else
+          {
+            gt_free(radixsortinfo->sortspace.flbaptr);
+          }
         }
       }
     }
@@ -528,12 +579,19 @@ GtUword gt_radixsort_max_num_of_entries_uint64keypair(size_t memlimit)
   return (GtUword) memlimit/sizeof(Gtuint64keyPair);
 }
 
+GtUword gt_radixsort_max_num_of_entries_flba(size_t memlimit,size_t unitsize)
+{
+  gt_assert(unitsize > 0);
+  return (GtUword) memlimit/(sizeof(uint8_t) * unitsize);
+}
+
 static void gt_radixsort_inplace(GtRadixsortinfo *radixsortinfo,
                                  GtRadixvalues *radixvalues,
                                  GtUword len)
 {
   const size_t shift = (sizeof (GtUword) - 1) * CHAR_BIT;
   const size_t doubleshift = (2 * sizeof (GtUword) - 1) * CHAR_BIT;
+  const size_t flba_index = 0;
 #ifdef GT_THREADS_ENABLED
   const unsigned int threads = GT_THREADS_JOBS;
 #else
@@ -561,9 +619,17 @@ static void gt_radixsort_inplace(GtRadixsortinfo *radixsortinfo,
                                  (GtCountbasetype) len,shift);
     } else
     {
-      gt_radixsort_uint64keypair_shuffle(radixsortinfo->rbuf,
-                                    radixvalues->uint64keypairptr,
-                                    (GtCountbasetype) len,doubleshift);
+      if (radixsortinfo->elemtype == GtRadixelemtypeGtuint64keyPair)
+      {
+        gt_radixsort_uint64keypair_shuffle(radixsortinfo->rbuf,
+                                           radixvalues->uint64keypairptr,
+                                           (GtCountbasetype) len,doubleshift);
+      } else
+      {
+        gt_radixsort_flba_shuffle(radixsortinfo->rbuf,
+                                  radixvalues->flbaptr,
+                                  (GtCountbasetype) len,flba_index);
+      }
     }
   }
   GT_STACK_MAKEEMPTY(&radixsortinfo->stack);
@@ -582,10 +648,19 @@ static void gt_radixsort_inplace(GtRadixsortinfo *radixsortinfo,
                                      radixvalues->ulongptr,shift);
     } else
     {
-      gt_radixsort_uint64keypair_process_bin(&radixsortinfo->stack,
-                                        radixsortinfo->rbuf,
-                                        radixvalues->uint64keypairptr,
-                                        doubleshift);
+      if (radixsortinfo->elemtype == GtRadixelemtypeGtuint64keyPair)
+      {
+        gt_radixsort_uint64keypair_process_bin(&radixsortinfo->stack,
+                                               radixsortinfo->rbuf,
+                                               radixvalues->uint64keypairptr,
+                                               doubleshift);
+      } else
+      {
+        gt_radixsort_flba_process_bin(&radixsortinfo->stack,
+                                      radixsortinfo->rbuf,
+                                      radixvalues->flbaptr,
+                                      flba_index);
+      }
     }
   }
   if (threads == 1U || radixsortinfo->stack.nextfree < (GtUword) threads)
@@ -602,8 +677,15 @@ static void gt_radixsort_inplace(GtRadixsortinfo *radixsortinfo,
                                        &radixsortinfo->stack);
       } else
       {
-        gt_radixsort_uint64keypair_sub_inplace(radixsortinfo->rbuf,
-                                          &radixsortinfo->stack);
+        if (radixsortinfo->elemtype == GtRadixelemtypeGtuint64keyPair)
+        {
+          gt_radixsort_uint64keypair_sub_inplace(radixsortinfo->rbuf,
+                                                 &radixsortinfo->stack);
+        } else
+        {
+          gt_radixsort_flba_sub_inplace(radixsortinfo->rbuf,
+                                        &radixsortinfo->stack);
+        }
       }
     }
   } else
@@ -676,6 +758,17 @@ void gt_radixsort_inplace_Gtuint64keyPair(Gtuint64keyPair *source,GtUword len)
   gt_radixsort_delete(radixsortinfo);
 }
 
+void gt_radixsort_inplace_flba(uint8_t *source,GtUword len,size_t unitsize)
+{
+  GtRadixvalues radixvalues;
+  GtRadixsortinfo *radixsortinfo;
+
+  radixsortinfo = gt_radixsort_new_flba(0,unitsize);
+  radixvalues.flbaptr = source;
+  gt_radixsort_inplace(radixsortinfo,&radixvalues,len);
+  gt_radixsort_delete(radixsortinfo);
+}
+
 void gt_radixsort_inplace_sort(GtRadixsortinfo *radixsortinfo,GtUword len)
 {
   gt_radixsort_inplace(radixsortinfo,&radixsortinfo->sortspace,len);
@@ -698,4 +791,14 @@ Gtuint64keyPair *gt_radixsort_space_uint64keypair(
 {
   gt_assert(radixsortinfo->elemtype == GtRadixelemtypeGtUwordPair);
   return radixsortinfo->sortspace.uint64keypairptr;
+}
+
+size_t gt_radixsort_bits(GtUword maxvalue)
+{
+  return (size_t) ceil(log2((double) maxvalue));
+}
+
+size_t gt_radixsort_bits2bytes(size_t bits)
+{
+  return bits/CHAR_BIT + ((bits % CHAR_BIT == 0) ? 0 : 1);
 }

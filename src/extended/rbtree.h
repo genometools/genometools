@@ -48,8 +48,8 @@ void           gt_rbtree_delete(GtRBTree *tree);
 void           gt_rbtree_clear(GtRBTree *tree);
 
 /* Returns <key> if element was found in <tree> and NULL if not */
-void*          gt_rbtree_find(GtRBTree *tree, void *key);
-void*          gt_rbtree_find_with_cmp(GtRBTree *tree, void *key,
+void*          gt_rbtree_find(const GtRBTree *tree, void *key);
+void*          gt_rbtree_find_with_cmp(const GtRBTree *tree, void *key,
                                        GtCompareWithData cmpfunc, void *info);
 /* inserts <key> into <tree>. If <key> is already present in <tree>, it will not
    be changed. */
@@ -66,32 +66,33 @@ void*          gt_rbtree_search_with_cmp(GtRBTree *tree, void *key,
 /* Remove <key> from <tree>, returns -1 if no such key exists and 0 on success
 */
 int            gt_rbtree_erase(GtRBTree *tree, void *key);
-size_t         gt_rbtree_size(GtRBTree *tree);
-int            gt_rbtree_walk(GtRBTree *tree, GtRBTreeAction action,
+size_t         gt_rbtree_size(const GtRBTree *tree);
+int            gt_rbtree_walk(const GtRBTree *tree, GtRBTreeAction action,
                               void *actinfo);
-int            gt_rbtree_walk_stop(GtRBTree *tree, GtRBTreeAction action,
+int            gt_rbtree_walk_stop(const GtRBTree *tree, GtRBTreeAction action,
                                    void *actinfo);
-int            gt_rbtree_walk_reverse(GtRBTree *tree, GtRBTreeAction action,
-                                    void *actinfo);
-void*          gt_rbtree_minimum_key(GtRBTree *tree);
-void*          gt_rbtree_maximum_key(GtRBTree *tree);
-void*          gt_rbtree_root_key(GtRBTree *tree);
-void*          gt_rbtree_next_key(GtRBTree *tree, void *key,
+int            gt_rbtree_walk_reverse(const GtRBTree *tree,
+                                      GtRBTreeAction action,
+                                      void *actinfo);
+void*          gt_rbtree_minimum_key(const GtRBTree *tree);
+void*          gt_rbtree_maximum_key(const GtRBTree *tree);
+void*          gt_rbtree_root_key(const GtRBTree *tree);
+void*          gt_rbtree_next_key(const GtRBTree *tree, void *key,
                                   GtCompareWithData cmpfun,
                                   void *cmpinfo);
-void*          gt_rbtree_next_equal_key(GtRBTree *tree, void *key,
+void*          gt_rbtree_next_equal_key(const GtRBTree *tree, void *key,
                                         GtCompareWithData cmpfun,
                                         void *cmpinfo);
-void*          gt_rbtree_previous_key(GtRBTree *tree, void *key,
+void*          gt_rbtree_previous_key(const GtRBTree *tree, void *key,
                                       GtCompareWithData cmpfun,
                                       void *cmpinfo);
-void*          gt_rbtree_previous_equal_key(GtRBTree *tree, void *key,
+void*          gt_rbtree_previous_equal_key(const GtRBTree *tree, void *key,
                                             GtCompareWithData cmpfun,
                                             void *cmpinfo);
 int            gt_rbtree_unit_test(GtError *err);
 
-GtRBTreeIter*  gt_rbtree_iter_new_from_first(GtRBTree *tree);
-GtRBTreeIter*  gt_rbtree_iter_new_from_last(GtRBTree *tree);
+GtRBTreeIter*  gt_rbtree_iter_new_from_first(const GtRBTree *tree);
+GtRBTreeIter*  gt_rbtree_iter_new_from_last(const GtRBTree *tree);
 /* Resets the iterator to the first (smallest) element */
 void           gt_rbtree_iter_reset_from_first(GtRBTreeIter *trav);
 /* Resets the iterator to the last (largest) element */
