@@ -192,19 +192,23 @@ GtMatchIterator* gt_match_iterator_blast_file_new(const char *matchfile,
       mpb->pvt->gtmatchfilep = NULL;
       if (!mpb->pvt->matchfilep) {
         gt_error_set(err, "could not open %s", matchfile);
+        gt_match_iterator_delete(mp);
         return NULL;
       }
     } else {
       mpb->pvt->gtmatchfilep = gt_file_open(mode, matchfile, "r", err);
       mpb->pvt->matchfilep = NULL;
-      if (!mpb->pvt->gtmatchfilep)
+      if (!mpb->pvt->gtmatchfilep) {
+        gt_match_iterator_delete(mp);
         return NULL;
+      }
     }
     mpb->pvt->matchfile = matchfile;
     mpb->pvt->process = false;
     return mp;
   } else {
     gt_error_set(err, "no such file or directory %s", matchfile);
+    gt_match_iterator_delete(mp);
     return NULL;
   }
 }
