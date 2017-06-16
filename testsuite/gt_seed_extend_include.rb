@@ -163,6 +163,9 @@ Test do
   end
   run "#{$bin}/gt seed_extend -ii at1MB -mincoverage 200 -outfmt tabsep custom s.seqnum s.start s.len strand q.seqnum q.start q.len editdist"
   run "cmp -s #{last_stdout} #{$testdata}/see-ext-at1MB-mincoverage200-tabsep.matches"
+  run_test "#{$bin}gt seed_extend -ii at1MB -l 400 -outfmt trace"
+  run_test "#{$bin}gt dev show_seedext -f #{last_stdout} -outfmt alignment"
+  run "diff -I '^#' #{last_stdout} #{$testdata}/see-ext-at1MB-400-al-from-trace.matches"
 end
 
 # Invalid arguments
