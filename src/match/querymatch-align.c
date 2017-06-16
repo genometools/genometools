@@ -33,7 +33,7 @@ struct GtQuerymatchoutoptions
   GtUchar *useqbuffer, *vseqbuffer;
   GtEoplist *eoplist;
   GtEoplistReader *eoplist_reader, *eoplist_reader_verify;
-  GtFronttrace *front_trace;
+  GtFrontTrace *front_trace;
   GtGreedyextendmatchinfo *ggemi;
   const GtUchar *characters;
   GtEncseqReader *db_esr_for_align_show,

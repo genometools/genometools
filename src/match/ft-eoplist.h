@@ -207,6 +207,12 @@ double gt_eoplist_segments_entropy(const GtEoplist *eoplist,GtUword delta);
 
 void gt_eoplist_from_cigar(GtEoplist *eoplist,const char *cigarstring,char sep);
 
+void gt_eoplist_read_trace(GtEoplist *eoplist,
+                           const char *trace,
+                           char separator);
+
+void gt_eoplist_trace2cigar(GtEoplist *eoplist,GtUword trace_delta);
+
 char *gt_eoplist2cigar_string(const GtEoplist *eoplist,
                               bool distinguish_mismatch_match);
 

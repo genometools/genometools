@@ -901,7 +901,11 @@ void gt_querymatch_read_line(GtQuerymatch *querymatch,
         }
         break;
       case Gt_Trace_display:
-        gt_assert(false);
+        if (querymatch->ref_eoplist != NULL)
+        {
+          gt_eoplist_reset(querymatch->ref_eoplist);
+          gt_eoplist_read_trace(querymatch->ref_eoplist,ptr,separator);
+        }
         break;
       case Gt_S_len_display:
         ret = sscanf(ptr,GT_WU,&querymatch->dblen);
@@ -1241,8 +1245,9 @@ static void gt_querymatch_full_alignment(const GtQuerymatch *querymatch,
 void gt_querymatch_recompute_alignment(GtQuerymatch *querymatch,
                                        const GtSeedExtendDisplayFlag
                                          *out_display_flag,
-                                       bool matches_have_seeds,
-                                       bool matches_have_cigar,
+                                       bool match_has_cigar,
+                                       GtUword trace_delta,
+                                       bool match_has_seed,
                                        const GtEncseq *db_encseq,
                                        const GtEncseq *query_encseq,
                                        const GtKarlinAltschulStat
@@ -1254,7 +1259,7 @@ void gt_querymatch_recompute_alignment(GtQuerymatch *querymatch,
 
   GT_SEQORENCSEQ_INIT_ENCSEQ(&db_seqorencseq,db_encseq);
   GT_SEQORENCSEQ_INIT_ENCSEQ(&query_seqorencseq,query_encseq);
-  if (matches_have_cigar)
+  if (match_has_cigar || trace_delta > 0)
   {
     if (querymatch->ref_querymatchoutoptions != NULL &&
         gt_querymatch_alignment_display(out_display_flag))
@@ -1272,17 +1277,19 @@ void gt_querymatch_recompute_alignment(GtQuerymatch *querymatch,
                                           gt_querymatch_querylen(querymatch),
                                           false);
     }
+    if (querymatch->ref_eoplist != NULL && trace_delta > 0)
+    {
+      gt_eoplist_trace2cigar(querymatch->ref_eoplist,trace_delta);
+    }
   } else
   {
-    if (matches_have_seeds)
+    if (match_has_seed)
     {
-      gt_querymatch_seed_alignment(querymatch,
-                                   &db_seqorencseq,
+      gt_querymatch_seed_alignment(querymatch,&db_seqorencseq,
                                    &query_seqorencseq);
     } else
     {
-      gt_querymatch_full_alignment(querymatch,
-                                   &db_seqorencseq,
+      gt_querymatch_full_alignment(querymatch,&db_seqorencseq,
                                    &query_seqorencseq);
     }
   }

@@ -180,8 +180,9 @@ void gt_querymatch_extract_sequence_pair(GtSequencepairbuffer *seqpairbuf,
 void gt_querymatch_recompute_alignment(GtQuerymatch *querymatch,
                                        const GtSeedExtendDisplayFlag
                                          *out_display_flag,
-                                       bool matches_have_seeds,
-                                       bool matches_have_cigar,
+                                       bool match_has_cigar,
+                                       GtUword trace_delta,
+                                       bool match_has_seed,
                                        const GtEncseq *db_encseq,
                                        const GtEncseq *query_encseq,
                                        const GtKarlinAltschulStat

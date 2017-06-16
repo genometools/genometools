@@ -317,7 +317,7 @@ bool gt_greedy_extend_seed_relative(void *info,
 
 void gt_align_front_prune_edist(bool rightextension,
                                 GtFtPolished_point *best_polished_point,
-                                GtFronttrace *front_trace,
+                                GtFrontTrace *front_trace,
                                 const GtSeqorEncseq *dbes,
                                 const GtSeqorEncseq *queryes,
                                 GtReadmode query_readmode,

@@ -400,6 +400,13 @@ bool gt_seedextend_match_iterator_has_cigar(
          gt_querymatch_cigarX_display(semi->in_display_flag);
 }
 
+GtUword gt_seedextend_match_iterator_trace_delta(
+                        const GtSeedextendMatchIterator *semi)
+{
+  gt_assert(semi != NULL);
+  return gt_querymatch_trace_delta_display(semi->in_display_flag);
+}
+
 double gt_seedextend_match_iterator_evalue(const GtSeedextendMatchIterator
                                               *semi)
 {
