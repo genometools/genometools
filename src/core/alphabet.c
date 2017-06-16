@@ -36,7 +36,30 @@
 #include "core/xansi_api.h"
 
 #define ALPHABET_GUESS_MAX_LENGTH       5000
-#define ALPHABET_GUESS_PROTEIN_CHARS    "LIFEQPlifeqpXZ*-"
+/* To guess if a sequence is a protein sequence we check if it contains
+   symbols specific for amino acids. Specific means that the symbols
+   do not denote a nucleotide, or a set of nucleotides according to the
+   IUPAC definition. So we have the following symbols denoting
+   amino acids:
+
+   LVIFKREDAGSTNQYWPHMCXUBZ
+
+   where the last four denote a wildcard.
+
+   We have the following symbols to denote a nucleotide or a set of
+   nucleotides:
+
+   ACGTUNSYWRKVBDHM
+
+   If we subtract the latter from the former we get
+
+   LIFEQPXZ
+
+   Adding the stop symbols * and -, and allowing lower case notation,
+   we get the list of characters specific for amino acids.
+*/
+
+#define ALPHABET_GUESS_PROTEIN_CHARS    "LIFEQPlifeqpXZxz*-"
 
 struct GtAlphabet {
   unsigned int domainsize,           /* size of domain of symbolmap */
