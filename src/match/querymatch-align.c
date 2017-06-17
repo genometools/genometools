@@ -637,7 +637,8 @@ void gt_querymatchoutoptions_trace_show(const GtQuerymatchoutoptions
     {
       first = false;
     }
-    fprintf(fp,GT_WU,segment.aligned_v);
+    fprintf(fp,"%d",(int) querymatchoutoptions->trace_delta -
+                    (int) segment.aligned_v);
   }
   gt_eoplist_reset(querymatchoutoptions->eoplist);
 }

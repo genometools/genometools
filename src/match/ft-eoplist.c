@@ -48,7 +48,7 @@ struct GtEoplist
   GtUword ustart, ulen, vstart, vlen;
   bool withpolcheck, pol_info_out, display_seed_in_alignment;
   GtUword useedoffset, seedlen;
-  GtArrayGtUword trace;
+  GtArrayint trace;
   const GtFtPolishing_info *pol_info;
   GtFullFrontEdistTrace *fet_segment;
 };
@@ -79,7 +79,7 @@ GtEoplist *gt_eoplist_new(void)
   eoplist->pol_info_out = false;
   eoplist->useedoffset = eoplist->seedlen = 0;
   eoplist->pol_info = NULL;
-  GT_INITARRAY(&eoplist->trace,GtUword);
+  GT_INITARRAY(&eoplist->trace,int);
   eoplist->fet_segment = gt_full_front_edist_trace_new();
   gt_eoplist_reset(eoplist);
   return eoplist;
@@ -181,7 +181,7 @@ void gt_eoplist_delete(GtEoplist *eoplist)
 {
   if (eoplist != NULL)
   {
-    GT_FREEARRAY(&eoplist->trace,GtUword);
+    GT_FREEARRAY(&eoplist->trace,int);
     gt_full_front_edist_trace_delete(eoplist->fet_segment);
     gt_free(eoplist->spaceuint8_t);
     gt_free(eoplist);
@@ -592,22 +592,22 @@ void gt_eoplist_read_trace(GtEoplist *eoplist,
 {
   if (eoplist != NULL)
   {
-    eoplist->trace.nextfreeGtUword = 0;
+    eoplist->trace.nextfreeint = 0;
   }
   while (true)
   {
-    GtUword aligned_v;
+    int value;
     const char *ptr;
 
-    if (sscanf(trace,GT_WU,&aligned_v) != 1)
+    if (sscanf(trace,"%d",&value) != 1)
     {
       fprintf(stderr,"cannot read number from trace %s\n",trace);
       exit(GT_EXIT_PROGRAMMING_ERROR);
     }
     if (eoplist != NULL)
     {
-      GT_STOREINARRAY(&eoplist->trace,GtUword,
-                      256 + eoplist->trace.allocatedGtUword * 0.2,aligned_v);
+      GT_STOREINARRAY(&eoplist->trace,int,
+                      256 + eoplist->trace.allocatedint * 0.2,value);
     }
     for (ptr = trace; *ptr != '\0' && *ptr != separator && *ptr != ','; ptr++)
       /* Nothing */;
@@ -624,13 +624,14 @@ void gt_eoplist_trace2cigar(GtEoplist *eoplist,GtUword trace_delta)
   GtUword idx, offset_u = 0, offset_v = 0;
 
   gt_assert(eoplist != NULL &&
-            eoplist->trace.nextfreeGtUword > 0);
-  for (idx = 0; idx < eoplist->trace.nextfreeGtUword; idx++)
+            eoplist->trace.nextfreeint > 0);
+  for (idx = 0; idx < eoplist->trace.nextfreeint; idx++)
   {
-    GtUword this_distance, aligned_u,
-            aligned_v = eoplist->trace.spaceGtUword[idx];
+    GtUword this_distance, aligned_u, aligned_v;
+    int value = -(eoplist->trace.spaceint[idx] - trace_delta);
 
-    gt_assert(offset_u < eoplist->ulen);
+    gt_assert(value >= 0 && offset_u < eoplist->ulen);
+    aligned_v = (GtUword) value;
     aligned_u = MIN(trace_delta,eoplist->ulen - offset_u);
     this_distance = gt_full_front_edist_trace_distance(eoplist->fet_segment,
                                                        eoplist->useq + offset_u,

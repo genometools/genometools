@@ -395,11 +395,11 @@ static void gt_querymatch_exact_match_trace_show(FILE *fp,GtUword remaining,
     }
     if (remaining > trace_delta)
     {
-      fprintf(fp,GT_WU,trace_delta);
+      fprintf(fp,"0");
       remaining -= trace_delta;
     } else
     {
-      fprintf(fp,GT_WU,remaining);
+      fprintf(fp,"%d",(int) remaining - (int) trace_delta);
       break;
     }
   }
