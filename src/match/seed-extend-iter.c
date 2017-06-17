@@ -40,6 +40,7 @@ struct GtSeedextendMatchIterator
   GtArrayGtQuerymatch querymatch_table;
   GtSeedExtendDisplayFlag *in_display_flag;
   GtStr *saved_options_line;
+  GtUword trace_delta;
   bool missing_fields_line;
 };
 
@@ -111,6 +112,7 @@ GtSeedextendMatchIterator *gt_seedextend_match_iterator_new(
   semi->currentmatch = NULL;
   semi->querymatchoutoptions = NULL;
   semi->in_display_flag = NULL;
+  semi->trace_delta = GT_SEED_EXTEND_DEFAULT_TRACE_DELTA;
   semi->saved_options_line = NULL;
   GT_INITARRAY(&semi->querymatch_table,GtQuerymatch);
   defline_infp = fopen(semi->matchfilename, "r");
@@ -127,7 +129,7 @@ GtSeedextendMatchIterator *gt_seedextend_match_iterator_new(
     {
       char *tok, *line_ptr = gt_str_get(options_line_buffer);
       bool parse_ii = false, parse_qii = false, parse_minid = false,
-           parse_history = false;;
+           parse_history = false, parse_outfmt = false;
 
       semi->saved_options_line = gt_str_clone(options_line_buffer);
       while (!had_err && (tok = strsep(&line_ptr," ")) != NULL)
@@ -158,6 +160,19 @@ GtSeedextendMatchIterator *gt_seedextend_match_iterator_new(
           }
           continue;
         }
+        if (parse_outfmt)
+        {
+          long this_trace_delta;
+          if (sscanf(tok,"trace=" GT_WD,&this_trace_delta) == 1)
+          {
+            if (this_trace_delta < 0)
+            {
+              gt_error_set(err,"value of trace= cannot be negative");
+              had_err = -1;
+            }
+            semi->trace_delta = (GtUword) this_trace_delta;
+          }
+        }
         if (parse_ii)
         {
           gt_str_set(semi->ii, tok);
@@ -173,30 +188,40 @@ GtSeedextendMatchIterator *gt_seedextend_match_iterator_new(
         if (strcmp(tok, "-ii") == 0)
         {
           parse_ii = true;
+          parse_outfmt = false;
           continue;
         }
         if (strcmp(tok, "-qii") == 0)
         {
           parse_qii = true;
+          parse_outfmt = false;
           continue;
         }
         if (strcmp(tok, "-minidentity") == 0)
         {
           parse_minid = true;
+          parse_outfmt = false;
           continue;
         }
         if (strcmp(tok, "-history") == 0)
         {
           parse_history = true;
+          parse_outfmt = false;
           continue;
         }
         if (strcmp(tok, "-mirror") == 0)
         {
+          parse_outfmt = false;
           semi->mirror = true; /* found -mirror option */
         }
         if (strcmp(tok, "-bias-parameters") == 0)
         {
+          parse_outfmt = false;
           semi->bias_parameters = true;
+        }
+        if (strcmp(tok, "-outfmt") == 0)
+        {
+          parse_outfmt = true;
         }
       }
       if (!had_err)
@@ -404,7 +429,8 @@ GtUword gt_seedextend_match_iterator_trace_delta(
                         const GtSeedextendMatchIterator *semi)
 {
   gt_assert(semi != NULL);
-  return gt_querymatch_trace_delta_display(semi->in_display_flag);
+  return gt_querymatch_trace_display(semi->in_display_flag) ? semi->trace_delta
+                                                            : 0;
 }
 
 double gt_seedextend_match_iterator_evalue(const GtSeedextendMatchIterator

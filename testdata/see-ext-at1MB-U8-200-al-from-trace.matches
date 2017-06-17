@@ -1,0 +1,47 @@
+# Options: -ii at1MB -qii U89959_genomic.fas -outfmt trace=20 -l 200 -seedlength 13 -minidentity 80 -history 60
+# Fields: s. len, s. seqnum, s. start, strand, q. len, q. seqnum, q. start, score, editdist, % identity
+333 1265 0 F 330 0 72423 612 17 94.87
+Sbjct  0      ccttagangg-tgggaaattgcatgagtttggcacatcccttnttctnncggatttngga  58
+              ||||||| || |||||||| |||||||| ||||||||||||| ||||  ||||||| |||
+Query  72423  ccttagaaggatgggaaat-gcatgagtgtggcacatcccttcttctctcggattt-gga  72480
+
+Sbjct  59     tcnnagtatgggaagccctgtctcagcctnngcttccagcntctcctccttccacatcnt  118
+               |  ||||||||||||| ||||||||||   ||||||||| ||||||||||||||||| |
+Query  72481  cca-agtatgggaagcc-tgtctcagccacggcttccagcctctcctccttccacatcat  72538
+
+Sbjct  119    taaaactccaaccttggaagattttaggagaatgagagcgacacgctctgtgcttctttt  178
+              ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+Query  72539  taaaactccaaccttggaagattttaggagaatgagagcgacacgctctgtgcttctttt  72598
+
+Sbjct  179    ccttatgatccagctcttccacgcacaaatgaactatgaaacatatataaagcgcacaca  238
+              ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+Query  72599  ccttatgatccagctcttccacgcacaaatgaactatgaaacatatataaagcgcacaca  72658
+
+Sbjct  239    tatatttatgcatatcaagcttttggtgattatggtattgatagagtcaaattaagctcg  298
+              ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+Query  72659  tatatttatgcatatcaagcttttggtgattatggtattgatagagtcaaattaagctcg  72718
+
+Sbjct  299    gtgactatggtattaataagagtactatttcctt  332
+              ||||||||||||||||||||||||||||||||||
+Query  72719  gtgactatggtattaataagagtactatttcctt  72752
+
+222 1361 148 F 222 0 105629 435 3 98.65
+Sbjct  148     gatggttacttcaagatcaggngaggaacgaacgaatgtggcattgaacagagtnttgta  207
+               ||||||||||||||||||||| |||||||||||||||||||||||||||||||| |||||
+Query  105629  gatggttacttcaagatcaggagaggaacgaacgaatgtggcattgaacagagtgttgta  105688
+
+Sbjct  208     gctggtttaccttcagngaagaacgtatttaaaggtattaccacttcagatgatcttctg  267
+               |||||||||||||||| |||||||||||||||||||||||||||||||||||||||||||
+Query  105689  gctggtttaccttcagagaagaacgtatttaaaggtattaccacttcagatgatcttctg  105748
+
+Sbjct  268     gtttcctcagtctaaacaagacgatgtgtccctacttctgtaatatatcatttgcaactg  327
+               ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+Query  105749  gtttcctcagtctaaacaagacgatgtgtccctacttctgtaatatatcatttgcaactg  105808
+
+Sbjct  328     tgttgtaagtttaatataccattgaaagaatcaccttcaatc  369
+               ||||||||||||||||||||||||||||||||||||||||||
+Query  105809  tgttgtaagtttaatataccattgaaagaatcaccttcaatc  105850
+
+# space peak in megabytes: 0.31 (in 802 events)
+# mmap space peak in megabytes: 0.55
+# combined space peak in megabytes: 0.86

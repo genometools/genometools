@@ -166,6 +166,9 @@ Test do
   run_test "#{$bin}gt seed_extend -ii at1MB -l 400 -outfmt trace"
   run_test "#{$bin}gt dev show_seedext -f #{last_stdout} -outfmt alignment"
   run "diff -I '^#' #{last_stdout} #{$testdata}/see-ext-at1MB-400-al-from-trace.matches"
+  run_test "#{$bin}gt seed_extend -ii at1MB -qii U89959_genomic -l 200 -outfmt trace=20"
+  run_test "#{$bin}gt dev show_seedext -f #{last_stdout} -outfmt alignment"
+  run "diff -I '^#' #{last_stdout} #{$testdata}/see-ext-at1MB-U8-200-al-from-trace.matches"
 end
 
 # Invalid arguments

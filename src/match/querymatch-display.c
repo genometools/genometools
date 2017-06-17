@@ -379,7 +379,10 @@ GtSeedExtendDisplayFlag *gt_querymatch_display_flag_new(
       /* the only flag with a parameter is Gt_Alignment_display */
       if (parameter < 0)
       {
-        gt_error_set(err,"integer following \"alignment=\" must be positive");
+        gt_error_set(err,"integer following \"%s=\" must be positive",
+                  (display_flag->flags & gt_display_mask(Gt_Alignment_display))
+                     ? "alignment"
+                     : "trace");
         haserr = true;
         break;
       }
