@@ -2130,7 +2130,7 @@ static int gt_diagbandseed_possibly_extend(const GtArrayGtDiagbandseedRectangle
     const GtUword bstart = bpos + 1 - matchlength;
     const GtUword astart = apos + 1 - matchlength;
 #ifndef _WIN32
-    struct timeval tvalBefore;
+    struct timeval tvalBefore = {0};
 
     if (esi->process_seeds_counts.withtiming)
     {
