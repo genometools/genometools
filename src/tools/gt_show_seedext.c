@@ -365,7 +365,7 @@ static int gt_show_seedext_runner(GT_UNUSED int argc,
   {
     printf("# TIME show_seedext %s alignment ",
            gt_querymatch_alignment_display(out_display_flag)
-           ? "with" : "without",stdout);
+           ? "with" : "without");
     gt_timer_show_formatted(timer,GT_WD ".%06ld\n",stdout);
   }
   gt_querymatch_display_flag_delete(out_display_flag);
