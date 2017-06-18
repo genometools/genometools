@@ -169,6 +169,8 @@ static inline void editscript_space_add_length(GtEditscript *es,
   /* scheme: [1111][x][x][x][x] first store consecutive ones for each element
      needed, (like elias gamma) then store the value split up to chunks of
      element size */
+  /* Idea: this could be made faster with lookup-tables for the filling of most
+     significant bits. */
   uint32_t num_elems = 0,
            shift;
   GtBitsequence tmp = value;
@@ -192,7 +194,10 @@ static inline void editscript_space_add_length(GtEditscript *es,
       tmp -= es->entry_size;
     }
     if (tmp != 0) {
-      /* write tmp 1 bits at most siginficant */
+      /* write tmp 1 bits at most siginficant positions, e.g. entry_size=4,
+         tmp=3: [1110]
+         left shift by number of zeros, mask with entry_size 1bits.
+      */
       tmp = (GT_EDITSCRIPT_FULLMASK(es) << (es->entry_size - tmp)) &
         GT_EDITSCRIPT_FULLMASK(es);
     }
@@ -234,7 +239,8 @@ editscript_space_get_length(const GtEditscript *es,
     (*elems_used)++;
   }
   /* elem is not full with 1 bits, but some most significant bits are set equal
-     to number of elements to read */
+     to number of elements to read, iterate over 1 bits, read elements of number
+     while we do so. */
   while ((elem & GT_EDITSCRIPT_FIRSTMASK(es)) != 0) {
     elem <<= 1;
     part_elem = editscript_space_get_next(es, pos);
