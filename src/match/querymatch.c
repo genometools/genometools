@@ -898,6 +898,13 @@ void gt_querymatch_read_line(GtQuerymatch *querymatch,
         {
           gt_eoplist_reset(querymatch->ref_eoplist);
           gt_eoplist_from_cigar(querymatch->ref_eoplist,ptr,separator);
+        } else
+        {
+          if (column < numcolumns - 1)
+          {
+            ptr = strchr(ptr,separator);
+            gt_assert(ptr != NULL);
+          }
         }
         break;
       case Gt_Trace_display:
@@ -905,6 +912,13 @@ void gt_querymatch_read_line(GtQuerymatch *querymatch,
         {
           gt_eoplist_reset(querymatch->ref_eoplist);
           gt_eoplist_read_trace(querymatch->ref_eoplist,ptr,separator);
+        } else
+        {
+          if (column < numcolumns - 1)
+          {
+            ptr = strchr(ptr,separator);
+            gt_assert(ptr != NULL);
+          }
         }
         break;
       case Gt_S_len_display:

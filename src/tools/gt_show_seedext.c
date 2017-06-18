@@ -26,6 +26,8 @@
 #include "core/types_api.h"
 #include "core/unused_api.h"
 #include "core/encseq.h"
+#include "core/showtime.h"
+#include "core/timer_api.h"
 #include "match/ft-polish.h"
 #include "match/seed-extend.h"
 #include "match/seq_or_encseq.h"
@@ -207,9 +209,15 @@ static int gt_show_seedext_runner(GT_UNUSED int argc,
   GtScoreHandler *linspace_scorehandler = NULL;
   const GtUchar *characters = NULL;
   GtUchar wildcardshow = (GtUchar) 'N';
+  GtTimer *timer = NULL;
   const GtSeedExtendDisplaySetMode setmode
     = GT_SEED_EXTEND_DISPLAY_SET_STANDARD;
 
+  if (gt_showtime_enabled())
+  {
+    timer = gt_timer_new();
+    gt_timer_start(timer);
+  }
   gt_error_check(err);
   gt_assert(arguments != NULL);
   /* Parse option string in first line of file specified by filename. */
@@ -348,12 +356,23 @@ static int gt_show_seedext_runner(GT_UNUSED int argc,
     gt_karlin_altschul_stat_delete(karlin_altschul_stat);
   }
   gt_free(alignment_show_buffer);
-  gt_querymatch_display_flag_delete(out_display_flag);
   polishing_info_delete(pol_info);
   gt_alignment_delete(alignment);
   gt_scorehandler_delete(linspace_scorehandler);
   gt_linspace_management_delete(linspace_spacemanager);
   gt_seedextend_match_iterator_delete(semi);
+  if (!had_err && gt_showtime_enabled())
+  {
+    printf("# TIME show_seedext %s alignment ",
+           gt_querymatch_alignment_display(out_display_flag)
+           ? "with" : "without",stdout);
+    gt_timer_show_formatted(timer,GT_WD ".%06ld\n",stdout);
+  }
+  gt_querymatch_display_flag_delete(out_display_flag);
+  if (gt_showtime_enabled())
+  {
+    gt_timer_delete(timer);
+  }
   return had_err;
 }
 
