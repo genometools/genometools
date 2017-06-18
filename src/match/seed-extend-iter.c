@@ -162,7 +162,8 @@ GtSeedextendMatchIterator *gt_seedextend_match_iterator_new(
         }
         if (parse_outfmt)
         {
-          long this_trace_delta;
+          GtWord this_trace_delta;
+
           if (sscanf(tok,"trace=" GT_WD,&this_trace_delta) == 1)
           {
             if (this_trace_delta < 0)
