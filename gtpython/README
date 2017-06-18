@@ -16,7 +16,7 @@ python setup.py install
 
 to install the 'gt' package on this system (must be root).
 
-Furthermore, you have to make sure that the GenomeTools shared libraries can be
+Furthermore, you have to make sure that the GenomeTools shared libraries can
 be found by the dlopen(3) system call. For example, by adding the lib/
 subdirectory of GenomeTools to your LD_LIBRARY_PATH environment variable.
 Alternatively, use "make install" in the genometools directory for a
