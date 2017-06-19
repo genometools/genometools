@@ -379,6 +379,32 @@ static void gt_querymatch_description_out(FILE *fp,const char *description)
   fwrite(description,sizeof *description,nwspl,fp);
 }
 
+static void gt_querymatch_exact_match_trace_show(FILE *fp,GtUword remaining,
+                                                 GtUword trace_delta)
+{
+  bool first = true;
+
+  while (true)
+  {
+    if (!first)
+    {
+      fputc(',',fp);
+    } else
+    {
+      first = false;
+    }
+    if (remaining > trace_delta)
+    {
+      fprintf(fp,"0");
+      remaining -= trace_delta;
+    } else
+    {
+      fprintf(fp,"%d",(int) remaining - (int) trace_delta);
+      break;
+    }
+  }
+}
+
 void gt_querymatch_prettyprint(double evalue,double bit_score,
                                const GtSeedExtendDisplayFlag *out_display_flag,
                                const GtQuerymatch *querymatch)
@@ -399,7 +425,8 @@ void gt_querymatch_prettyprint(double evalue,double bit_score,
     const unsigned int co = column_order[idx];
 
     if (idx > 0 && (querymatch->score > 0 ||
-                   (co != Gt_Score_display && co != Gt_Editdist_display &&
+                   (co != Gt_Score_display &&
+                    co != Gt_Editdist_display &&
                     co != Gt_Identity_display)))
     {
       fputc(separator,querymatch->fp);
@@ -408,8 +435,29 @@ void gt_querymatch_prettyprint(double evalue,double bit_score,
     {
       case Gt_Cigar_display:
       case Gt_Cigarx_display:
-        gt_querymatchoutoptions_cigar_show(querymatch->ref_querymatchoutoptions,
-                                           querymatch->fp);
+        if (querymatch->distance > 0)
+        {
+          gt_querymatchoutoptions_cigar_show(
+                                     querymatch->ref_querymatchoutoptions,
+                                     querymatch->fp);
+        } else
+        {
+          fprintf(querymatch->fp,GT_WU "=",gt_querymatch_dblen(querymatch));
+        }
+        break;
+      case Gt_Trace_display:
+        if (querymatch->distance > 0)
+        {
+          gt_querymatchoutoptions_trace_show(
+                                querymatch->ref_querymatchoutoptions,
+                                querymatch->fp);
+        } else
+        {
+          gt_querymatch_exact_match_trace_show(querymatch->fp,
+                                               gt_querymatch_dblen(querymatch),
+                                               gt_querymatch_trace_delta_display
+                                                  (out_display_flag));
+        }
         break;
       case Gt_S_len_display:
         fprintf(querymatch->fp,GT_WU,gt_querymatch_dblen(querymatch));
@@ -852,6 +900,13 @@ void gt_querymatch_read_line(GtQuerymatch *querymatch,
           gt_eoplist_from_cigar(querymatch->ref_eoplist,ptr,separator);
         }
         break;
+      case Gt_Trace_display:
+        if (querymatch->ref_eoplist != NULL)
+        {
+          gt_eoplist_reset(querymatch->ref_eoplist);
+          gt_eoplist_read_trace(querymatch->ref_eoplist,ptr,separator);
+        }
+        break;
       case Gt_S_len_display:
         ret = sscanf(ptr,GT_WU,&querymatch->dblen);
         break;
@@ -1190,8 +1245,9 @@ static void gt_querymatch_full_alignment(const GtQuerymatch *querymatch,
 void gt_querymatch_recompute_alignment(GtQuerymatch *querymatch,
                                        const GtSeedExtendDisplayFlag
                                          *out_display_flag,
-                                       bool matches_have_seeds,
-                                       bool matches_have_cigar,
+                                       bool match_has_cigar,
+                                       GtUword trace_delta,
+                                       bool match_has_seed,
                                        const GtEncseq *db_encseq,
                                        const GtEncseq *query_encseq,
                                        const GtKarlinAltschulStat
@@ -1203,7 +1259,7 @@ void gt_querymatch_recompute_alignment(GtQuerymatch *querymatch,
 
   GT_SEQORENCSEQ_INIT_ENCSEQ(&db_seqorencseq,db_encseq);
   GT_SEQORENCSEQ_INIT_ENCSEQ(&query_seqorencseq,query_encseq);
-  if (matches_have_cigar)
+  if (match_has_cigar || trace_delta > 0)
   {
     if (querymatch->ref_querymatchoutoptions != NULL &&
         gt_querymatch_alignment_display(out_display_flag))
@@ -1221,17 +1277,19 @@ void gt_querymatch_recompute_alignment(GtQuerymatch *querymatch,
                                           gt_querymatch_querylen(querymatch),
                                           false);
     }
+    if (querymatch->ref_eoplist != NULL && trace_delta > 0)
+    {
+      gt_eoplist_trace2cigar(querymatch->ref_eoplist,trace_delta);
+    }
   } else
   {
-    if (matches_have_seeds)
+    if (match_has_seed)
     {
-      gt_querymatch_seed_alignment(querymatch,
-                                   &db_seqorencseq,
+      gt_querymatch_seed_alignment(querymatch,&db_seqorencseq,
                                    &query_seqorencseq);
     } else
     {
-      gt_querymatch_full_alignment(querymatch,
-                                   &db_seqorencseq,
+      gt_querymatch_full_alignment(querymatch,&db_seqorencseq,
                                    &query_seqorencseq);
     }
   }

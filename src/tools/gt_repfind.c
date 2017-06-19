@@ -903,6 +903,7 @@ static int gt_repfind_runner(int argc,const char **argv, int parsed_args,
     info_querymatch.karlin_altschul_stat = karlin_altschul_stat;
     info_querymatch.out_display_flag = out_display_flag;
     if (gt_querymatch_alignment_display(out_display_flag) ||
+        gt_querymatch_trace_display(out_display_flag) ||
         gt_querymatch_cigar_display(out_display_flag) ||
         gt_querymatch_cigarX_display(out_display_flag) ||
         (gt_option_is_set(arguments->refextendxdropoption) &&

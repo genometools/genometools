@@ -50,11 +50,11 @@ const unsigned int *gt_querymatch_display_order(GtUword *numcolumns,
 
 const char *gt_querymatch_display_help(void);
 
-bool gt_querymatch_alignment_display(const GtSeedExtendDisplayFlag
-                                       *display_flag);
+bool gt_querymatch_alignment_display(const GtSeedExtendDisplayFlag *);
 
-GtUword gt_querymatch_display_alignmentwidth(const GtSeedExtendDisplayFlag
-                                                *display_flag);
+GtUword gt_querymatch_display_alignmentwidth(const GtSeedExtendDisplayFlag *);
+
+GtUword gt_querymatch_trace_delta_display(const GtSeedExtendDisplayFlag *);
 
 #include "match/se-display-fwd.inc"
 

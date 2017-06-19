@@ -23,8 +23,15 @@ def listdirectory(directory)
   end
 end
 
-def listselected(dirname,excludelist)
-  suffixes = ["fastq","fasta","fna","fa","fsa.gz","fsa","FASTA.gz","FASTA"]
+def listselected(dirname,excludelist,includefastq,includegzip)
+  suffixes = ["fasta","fna","fa","fsa","FASTA"]
+  if includefastq
+    suffixes.push("fastq")
+  end
+  if includegzip
+    suffixes.push("fsa.gz")
+    suffixes.push("FASTA.gz")
+  end
   listdirectory(dirname) do |filename|
     suffixes.each do |suffix|
       if filename.match(/\.#{suffix}$/) and
@@ -39,6 +46,8 @@ def parseargs(argv)
   options = OpenStruct.new
   options.withgttestdata = true
   options.excludelist = Array.new()
+  options.includefastq = true
+  options.includegzip = true
   opts = OptionParser.new()
   opts.on("-n","--no-gttestdata","exclude gttestdata") do |x|
     options.withgttestdata = false
@@ -49,8 +58,17 @@ def parseargs(argv)
       options.excludelist.push(ef)
     end
   end
+  opts.on("-q","--no-fastq",
+          "exclude files ending with .fastq") do
+    options.includefastq = false
+  end
+  opts.on("-g","--no-gzip",
+          "exclude files ending with .gz") do
+    options.includegzip = false
+  end
   opts.on( '-h', '--help', 'Display this screen' ) do
     puts "Usage: #{$0} [options]"
+    puts opts
     exit 0
   end
   rest = opts.parse(argv)
@@ -77,7 +95,8 @@ testdata_exclude = ["solid_color_reads.fastq",
 
 if ENV.has_key?("GTDIR")
   testdata_dir = "#{ENV["GTDIR"]}/testdata"
-  listselected(testdata_dir,testdata_exclude) do |filename|
+  listselected(testdata_dir,testdata_exclude,options.includefastq,
+               options.includegzip) do |filename|
     puts filename
   end
 end
@@ -85,7 +104,8 @@ end
 if options.withgttestdata
   if ENV.has_key?("GTTESTDATA")
     gttestdata_exclude = ["trembl-section.fsa.gz"]
-    listselected(ENV["GTTESTDATA"],gttestdata_exclude) do |filename|
+    listselected(ENV["GTTESTDATA"],gttestdata_exclude,options.includefastq,
+                 options.includegzip) do |filename|
       puts filename
     end
   end

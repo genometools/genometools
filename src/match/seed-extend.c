@@ -412,7 +412,7 @@ void gt_optimal_maxalilendiff_perc_mat_history(
 
 struct GtGreedyextendmatchinfo
 {
-  GtFronttrace *left_front_trace, *right_front_trace;
+  GtFrontTrace *left_front_trace, *right_front_trace;
   const GtFtPolishing_info *pol_info;
   GtUword history,
           maxalignedlendifference,
@@ -761,7 +761,7 @@ static void gt_greedy_extend_init(GtFTsequenceResources *ufsr,
 
 void gt_align_front_prune_edist(bool rightextension,
                                 GtFtPolished_point *best_polished_point,
-                                GtFronttrace *front_trace,
+                                GtFrontTrace *front_trace,
                                 const GtSeqorEncseq *dbes,
                                 const GtSeqorEncseq *queryes,
                                 GtReadmode query_readmode,

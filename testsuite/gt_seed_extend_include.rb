@@ -129,6 +129,8 @@ Test do
   run "diff -I '^#' #{last_stdout} #{$testdata}see-ext-at1MB-400-cigar.matches"
   run_test "#{$bin}gt seed_extend -ii at1MB -l 400 -outfmt cigarX"
   run "diff -I '^#' #{last_stdout} #{$testdata}see-ext-at1MB-400-cigarX.matches"
+  run_test "#{$bin}gt seed_extend -ii at1MB -l 400 -outfmt trace=50"
+  run "diff -I '^#' #{last_stdout} #{$testdata}see-ext-at1MB-400-trace.matches"
   run_test "#{$bin}gt seed_extend -ii at1MB -l 700 -outfmt alignment=60 seed_in_algn"
   run "diff -I '^#' #{last_stdout} #{$testdata}see-ext-at1MB-500-alignment-seed_in_algn.matches"
   run_test "#{$bin}gt seed_extend -ii at1MB -l 400 -outfmt s.seqlen q.seqlen"
@@ -161,6 +163,12 @@ Test do
   end
   run "#{$bin}/gt seed_extend -ii at1MB -mincoverage 200 -outfmt tabsep custom s.seqnum s.start s.len strand q.seqnum q.start q.len editdist"
   run "cmp -s #{last_stdout} #{$testdata}/see-ext-at1MB-mincoverage200-tabsep.matches"
+  run_test "#{$bin}gt seed_extend -ii at1MB -l 400 -outfmt trace"
+  run_test "#{$bin}gt dev show_seedext -f #{last_stdout} -outfmt alignment"
+  run "diff -I '^#' #{last_stdout} #{$testdata}/see-ext-at1MB-400-al-from-trace.matches"
+  run_test "#{$bin}gt seed_extend -ii at1MB -qii U89959_genomic -l 200 -outfmt trace=20"
+  run_test "#{$bin}gt dev show_seedext -f #{last_stdout} -outfmt alignment"
+  run "diff -I '^#' #{last_stdout} #{$testdata}/see-ext-at1MB-U8-200-al-from-trace.matches"
 end
 
 # Invalid arguments

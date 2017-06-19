@@ -269,6 +269,7 @@ static int gt_show_seedext_runner(GT_UNUSED int argc,
       gt_seedextend_match_iterator_verify_alignment_set(semi);
     }
     if (gt_querymatch_alignment_display(out_display_flag) ||
+        gt_querymatch_trace_display(out_display_flag) ||
         gt_querymatch_cigar_display(out_display_flag) ||
         gt_querymatch_cigarX_display(out_display_flag) ||
         arguments->verify_alignment)
@@ -288,8 +289,9 @@ static int gt_show_seedext_runner(GT_UNUSED int argc,
   if (!had_err)
   {
     GtKarlinAltschulStat *karlin_altschul_stat = NULL;
-    const bool match_has_seed = gt_seedextend_match_iterator_has_seed(semi),
-               match_has_cigar = gt_seedextend_match_iterator_has_cigar(semi);
+    const bool match_has_cigar = gt_seedextend_match_iterator_has_cigar(semi),
+               match_has_seed = gt_seedextend_match_iterator_has_seed(semi);
+    const GtUword trace_delta = gt_seedextend_match_iterator_trace_delta(semi);
 
     if (gt_querymatch_evalue_display(out_display_flag) ||
         gt_querymatch_bitscore_display(out_display_flag))
@@ -315,8 +317,9 @@ static int gt_show_seedext_runner(GT_UNUSED int argc,
       }
       gt_querymatch_recompute_alignment(querymatchptr,
                                         out_display_flag,
-                                        match_has_seed,
                                         match_has_cigar,
+                                        trace_delta,
+                                        match_has_seed,
                                         aencseq,
                                         bencseq,
                                         karlin_altschul_stat,

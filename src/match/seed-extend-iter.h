@@ -99,6 +99,9 @@ bool gt_seedextend_match_iterator_has_seed(
 bool gt_seedextend_match_iterator_has_cigar(
                         const GtSeedextendMatchIterator *semi);
 
+GtUword gt_seedextend_match_iterator_trace_delta(
+                        const GtSeedextendMatchIterator *semi);
+
 double gt_seedextend_match_iterator_evalue(const GtSeedextendMatchIterator
                                              *semi);
 

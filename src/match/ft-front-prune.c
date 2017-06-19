@@ -578,7 +578,7 @@ static GtFtFrontvalue *frontspace_allocate(GtUword minsizeforshift,
 
 static void ft_update_trace_and_polished(
                                       GtFtPolished_point *best_polished_point,
-                                      GtFronttrace *front_trace,
+                                      GtFrontTrace *front_trace,
                                       const GtFtPolishing_info *pol_info,
                                       GtUword distance,
                                       GtUword trimleft,
@@ -627,7 +627,7 @@ GtUword front_prune_edist_inplace(
                          bool rightextension,
                          GtAllocatedMemory *frontspace,
                          GtFtPolished_point *best_polished_point,
-                         GtFronttrace *front_trace,
+                         GtFrontTrace *front_trace,
                          const GtFtPolishing_info *pol_info,
                          GtTrimmingStrategy trimstrategy,
                          GtUword max_history,
@@ -848,4 +848,221 @@ GtUword front_prune_edist_inplace(
                        sizeof (GtFtFrontvalue) * frontspace->allocated);
   }
   return diedout ? sumseqlength + 1 : distance;
+}
+static void inline gt_full_front_prune_add_matches(GtFtFrontvalue *midfront,
+                                                   GtFtFrontvalue *fv,
+                                                   const GtUchar *useq,
+                                                   GtUword ulen,
+                                                   const GtUchar *vseq,
+                                                   GtUword vlen)
+{
+  GtUword upos, vpos;
+
+  for (upos = fv->row, vpos = fv->row + GT_FRONT_DIAGONAL(fv);
+       upos < ulen && vpos < vlen &&
+       useq[upos] == vseq[vpos]
+       && ISNOTSPECIAL(useq[upos])
+       ;
+       upos++, vpos++)
+       /* Nothing */;
+  fv->localmatch_count = upos - fv->row;
+  fv->row = upos;
+}
+
+static void gt_full_front_next_inplace(GtFtFrontvalue *midfront,
+                                       GtFtFrontvalue *lowfront,
+                                       GtFtFrontvalue *highfront,
+                                       const GtUchar *useq,
+                                       GtUword ulen,
+                                       const GtUchar *vseq,
+                                       GtUword vlen)
+{
+  GtFtFrontvalue bestfront, insertion_value, replacement_value, *frontptr;
+
+  insertion_value = *lowfront; /* from previous diag -(d-1) => -d => DELETION */
+  bestfront = insertion_value;
+  bestfront.row++;
+  *lowfront = bestfront;
+  lowfront->backreference = FT_EOP_DELETION;
+  gt_full_front_prune_add_matches(midfront,lowfront,useq,ulen,vseq,vlen);
+
+  replacement_value = *(lowfront+1);
+  if (bestfront.row < replacement_value.row + 1)
+  {
+    bestfront = replacement_value;
+    bestfront.backreference = FT_EOP_DELETION;
+    bestfront.row++;
+  } else
+  {
+    bestfront.backreference = FT_EOP_MISMATCH;
+    if (bestfront.row == replacement_value.row + 1)
+    {
+      bestfront.backreference |= FT_EOP_DELETION;
+    }
+  }
+  *(lowfront+1) = bestfront;
+  gt_full_front_prune_add_matches(midfront,lowfront + 1,useq,ulen,vseq,vlen);
+  for (frontptr = lowfront+2; frontptr <= highfront; frontptr++)
+  {
+    bestfront = insertion_value;
+    bestfront.backreference = FT_EOP_INSERTION;
+    if (frontptr <= highfront - 1)
+    {
+      if (bestfront.row < replacement_value.row + 1)
+      {
+        bestfront = replacement_value;
+        bestfront.backreference = FT_EOP_MISMATCH;
+        bestfront.row++;
+      } else
+      {
+        if (bestfront.row == replacement_value.row + 1)
+        {
+          bestfront.backreference |= FT_EOP_MISMATCH;
+        }
+      }
+    }
+    if (frontptr <= highfront - 2)
+    {
+      if (bestfront.row < frontptr->row + 1)
+      {
+        bestfront = *frontptr;
+        bestfront.backreference = FT_EOP_DELETION;
+        bestfront.row++;
+      } else
+      {
+        if (bestfront.row == frontptr->row + 1)
+        {
+          bestfront.backreference |= FT_EOP_DELETION;
+        }
+      }
+    }
+    if (frontptr < highfront)
+    {
+      insertion_value = replacement_value;
+      replacement_value = *frontptr;
+    }
+    *frontptr = bestfront;
+    gt_full_front_prune_add_matches(midfront,frontptr,useq,ulen,vseq,vlen);
+  }
+}
+
+static void gt_full_front_second_inplace(GtFtFrontvalue *midfront,
+                                         GtFtFrontvalue *lowfront,
+                                         const GtUchar *useq,
+                                         GtUword ulen,
+                                         const GtUchar *vseq,
+                                         GtUword vlen)
+{
+  *(lowfront+1) = *(lowfront+2) = *lowfront;
+  lowfront->row++;
+  lowfront->backreference = FT_EOP_DELETION;
+  gt_full_front_prune_add_matches(midfront,lowfront,useq,ulen,vseq,vlen);
+
+  (lowfront+1)->row++;
+  (lowfront+1)->backreference = FT_EOP_MISMATCH;
+  gt_full_front_prune_add_matches(midfront,lowfront + 1,useq,ulen,vseq,vlen);
+
+  (lowfront+2)->backreference = FT_EOP_INSERTION;
+  gt_full_front_prune_add_matches(midfront,lowfront + 2,useq,ulen,vseq,vlen);
+}
+
+struct GtFullFrontEdistTrace
+{
+  GtFtFrontvalue *spaceGtFtFrontvalue;
+  GtUword allocatedGtFtFrontvalue;
+  GtFrontTrace *front_trace;
+};
+
+GtFullFrontEdistTrace *gt_full_front_edist_trace_new(void)
+{
+  GtFullFrontEdistTrace *fet = gt_malloc(sizeof *fet);
+
+  gt_assert(fet != NULL);
+  fet->spaceGtFtFrontvalue = NULL;
+  fet->allocatedGtFtFrontvalue = 0;
+  fet->front_trace = front_trace_new();
+  return fet;
+}
+
+void gt_full_front_edist_trace_delete(GtFullFrontEdistTrace *fet)
+{
+  if (fet != NULL)
+  {
+    gt_free(fet->spaceGtFtFrontvalue);
+    front_trace_delete(fet->front_trace);
+    gt_free(fet);
+  }
+}
+
+GtFrontTrace *gt_full_front_trace_get(GtFullFrontEdistTrace *fet)
+{
+  gt_assert(fet != NULL);
+  return fet->front_trace;
+}
+
+static void gt_full_front_trace_add_gen(GtFrontTrace *front_trace,
+                                        const GtFtFrontvalue *lowfront,
+                                        const GtFtFrontvalue *highfront)
+{
+  const GtFtFrontvalue *fv;
+
+  for (fv = lowfront; fv <= highfront; fv++)
+  {
+    front_trace_add_trace(front_trace,fv->backreference,fv->localmatch_count);
+  }
+}
+
+GtUword gt_full_front_edist_trace_distance(GtFullFrontEdistTrace *fet,
+                                           const GtUchar *useq,
+                                           GtUword ulen,
+                                           const GtUchar *vseq,
+                                           GtUword vlen)
+{
+  const GtUword sumseqlength = ulen + vlen;
+  GtUword distance;
+
+  front_trace_reset(fet->front_trace,ulen+vlen);
+  for (distance = 0; distance <= sumseqlength; distance++)
+  {
+    GtFtFrontvalue *basefront;
+    if (2 * distance >= fet->allocatedGtFtFrontvalue)
+    {
+      fet->allocatedGtFtFrontvalue = fet->allocatedGtFtFrontvalue * 1.2 + 32;
+      fet->spaceGtFtFrontvalue = gt_realloc(fet->spaceGtFtFrontvalue,
+                                            sizeof *fet->spaceGtFtFrontvalue *
+                                            fet->allocatedGtFtFrontvalue);
+      gt_assert(fet->spaceGtFtFrontvalue != NULL);
+    }
+    basefront = fet->spaceGtFtFrontvalue;
+    if (distance == 0)
+    {
+      basefront->row = 0;
+      basefront->backreference = 0; /* No back reference */
+      gt_full_front_prune_add_matches(basefront,basefront,useq,ulen,vseq,vlen);
+    } else
+    {
+      if (distance == 1)
+      {
+        gt_full_front_second_inplace(basefront + distance,basefront,
+                                     useq,ulen,vseq,vlen);
+      } else
+      {
+        gt_full_front_next_inplace(basefront + distance,basefront,
+                                   basefront + 2 * distance,
+                                   useq,ulen,vseq,vlen);
+      }
+    }
+    gt_full_front_trace_add_gen(fet->front_trace,basefront,
+                                basefront + 2 * distance);
+    if ((vlen > ulen && vlen - ulen <= distance) ||
+        (vlen <= ulen && ulen - vlen <= distance))
+    {
+      if (basefront[distance + vlen - ulen].row == ulen)
+      {
+        break;
+      }
+    }
+  }
+  gt_assert(distance <= sumseqlength);
+  return distance;
 }

@@ -43,7 +43,7 @@ GtUword front_prune_edist_inplace(
                        bool forward,
                        GtAllocatedMemory *frontspace_reservoir,
                        GtFtPolished_point *best_polished_point,
-                       GtFronttrace *fronttrace,
+                       GtFrontTrace *fronttrace,
                        const GtFtPolishing_info *pol_info,
                        GtTrimmingStrategy trimstrategy,
                        GtUword history,
@@ -60,5 +60,19 @@ GtUword front_prune_edist_inplace(
                        GtUword vlen,
                        bool cam_generic,
                        GtFtTrimstat *trimstat);
+
+typedef struct GtFullFrontEdistTrace GtFullFrontEdistTrace;
+
+GtFullFrontEdistTrace *gt_full_front_edist_trace_new(void);
+
+void gt_full_front_edist_trace_delete(GtFullFrontEdistTrace *fet);
+
+GtFrontTrace *gt_full_front_trace_get(GtFullFrontEdistTrace *fet);
+
+GtUword gt_full_front_edist_trace_distance(GtFullFrontEdistTrace *fet,
+                                           const GtUchar *useq,
+                                           GtUword ulen,
+                                           const GtUchar *vseq,
+                                           GtUword vlen);
 
 #endif
