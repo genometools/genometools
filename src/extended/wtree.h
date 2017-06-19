@@ -40,7 +40,7 @@ GtWtree*      gt_wtree_ref(GtWtree *wtree);
 GtWtreeSymbol gt_wtree_access(GtWtree *wtree,
                               GtUword pos);
 
-/* Returns the number of symbols <symbol> in the prefix of <wtree> upto position
+/* Returns the number of symbols <symbol> in the prefix of <wtree> up to position
    <pos>. Note that <pos> < length of <wtree>.
    Returns ULONG_MAX if function is not implemented. */
 GtUword       gt_wtree_rank(GtWtree *wtree,

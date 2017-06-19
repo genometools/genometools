@@ -45,13 +45,13 @@ int                      gt_compressed_bitsequence_access(
                                                    GtCompressedBitsequence *cbs,
                                                    GtUword position);
 
-/* Returns the number of 1 bits in <cbs> upto and including <position>. Note
+/* Returns the number of 1 bits in <cbs> up to and including <position>. Note
    that <position> has to be smaller than the length of <cbs>. */
 GtUword                  gt_compressed_bitsequence_rank_1(
                                                    GtCompressedBitsequence *cbs,
                                                    GtUword position);
 
-/* Returns the number of 0 bits in <cbs> upto and including <position>. Note
+/* Returns the number of 0 bits in <cbs> up to and including <position>. Note
    that <position> has to be smaller than the length of <cbs>. */
 GtUword                  gt_compressed_bitsequence_rank_0(
                                                    GtCompressedBitsequence *cbs,

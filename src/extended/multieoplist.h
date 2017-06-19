@@ -97,7 +97,7 @@ GtMultieoplist* gt_multieoplist_clone(GtMultieoplist *copy,
                                       const GtMultieoplist *source);
 
 /* Returns the number of <GtMultieop> elements in <multieops>, each of which
-   can have <steps> >= 1, therefor this represents not the length of the
+   can have <steps> >= 1, therefore this represents not the length of the
    alignment. */
 GtUword      gt_multieoplist_get_num_entries(const GtMultieoplist *multieops);
 
@@ -125,13 +125,13 @@ GtUword         gt_multieoplist_get_length(const GtMultieoplist *multieops);
 void            gt_multieoplist_show(const GtMultieoplist *multieops, FILE *fp);
 
 /* Returns the combination of two <GtMultieoplist>s. Adds <multieops_to_add> to
-   the end of <multieops> (which is usualy the start of the alignment).
+   the end of <multieops> (which is usually the start of the alignment).
    <forward> defines if <multieops_to_add> should be read in forward or reverse
-   direction. If <multieops_to_add> and <multieops> are from consequtive
+   direction. If <multieops_to_add> and <multieops> are from consecutive
    alignments:
    [...<-...][...<-...] or [...->...][...->...]
    use true.
-   If they ar from alignments with the same startpoint:
+   If they are from alignments with the same start point:
    [...->...][...<-...]
    use false.
    If the layout is like this:

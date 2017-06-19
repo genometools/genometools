@@ -27,23 +27,23 @@ typedef struct GtBlastProcessCall GtBlastProcessCall;
 
 /* Returns new <GtBlastProcessCall> object calling blastall for nucleotide
    sequences.
-   blastall has to be installed in PATH or GT_BLAST_PATH has to be set to the
+   Blastall has to be installed in PATH or GT_BLAST_PATH has to be set to the
    correct path. */
 GtBlastProcessCall* gt_blast_process_call_new_all_nucl(void);
 
 /* Returns new <GtBlastProcessCall> object calling blastn.
-   blastn has to be installed in PATH or GT_BLAST_PATH has to be set to the
+   Blastn has to be installed in PATH or GT_BLAST_PATH has to be set to the
    correct path. */
 GtBlastProcessCall* gt_blast_process_call_new_nucl(void);
 
 /* Returns new <GtBlastProcessCall> object calling blastall for protein
    sequences.
-   blastall has to be installed in PATH or GT_BLAST_PATH has to be set to the
+   Blastall has to be installed in PATH or GT_BLAST_PATH has to be set to the
    correct path. */
 GtBlastProcessCall* gt_blast_process_call_new_all_prot(void);
 
 /* Returns new <GtBlastProcessCall> object calling blastp.
-   blastp has to be installed in PATH or GT_BLAST_PATH has to be set to the
+   Blastp has to be installed in PATH or GT_BLAST_PATH has to be set to the
    correct path. */
 GtBlastProcessCall* gt_blast_process_call_new_prot(void);
 

@@ -31,7 +31,7 @@ GtSamfileIterator* gt_samfile_iterator_new_bam(const char *filename,
                                                GtAlphabet *alphabet,
                                                GtError *err);
 
-/* Returns new <GtSamfileIterator> fo a SAM-file. Parameter <auxfilename> can be
+/* Returns new <GtSamfileIterator> of a SAM-file. Parameter <auxfilename> can be
    NULL, but then the samfile has to contain header information. Otherwise it
    should be the name of a file containing the list of references as produced by
    'samtools faidx ref.fa'. Holds a new reference to <alphabet>. */

@@ -23,7 +23,7 @@
 #include "extended/samfile_iterator.h"
 
 /* implements <GtCstrIterator> */
-/* iterates over the identifiers of all mapped alignments in a sam/bam file */
+/* Iterates over the identifiers of all mapped alignments in a sam/bam file */
 typedef struct GtSamQueryNameIterator GtSamQueryNameIterator;
 
 const GtCstrIteratorClass* gt_sam_query_name_iterator_class(void);

@@ -1946,7 +1946,7 @@ void gt_encseq_delete(GtEncseq *encseq)
   if (encseq->mappedptr != NULL) {
     if (encseq->bitpackarray != NULL) {
       /* store points to some subarea of the region mapped by mappedptr:
-         therefor we have to set it to NULL to prevent that it is freed */
+         therefore we have to set it to NULL to prevent that it is freed */
       BITPACKARRAYSTOREVAR(encseq->bitpackarray) = NULL;
       bitpackarray_delete(encseq->bitpackarray);
       encseq->bitpackarray = NULL;

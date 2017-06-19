@@ -647,7 +647,7 @@ static int ces_c_extend_seeds_window(GtCondenseqCreator *ces_c,
             new_uid = match_positions.unique_ids[idx_cur];
     /* end == subjectpos should not be possible as this would be a separator */
     if (subject_bounds.end <= subjectpos || subject_bounds.end == 0) {
-      gt_assert(new_uid != ces_c->ces->udb_nelems);
+      gt_assert(new_uid != ces_c->ces->uds_nelems);
       subject_bounds.start = ces_c->ces->uniques[new_uid].orig_startpos;
       subject_bounds.end = subject_bounds.start +
         ces_c->ces->uniques[new_uid].len;
@@ -766,7 +766,7 @@ static int ces_c_extend_seeds_brute_force(GtCondenseqCreator *ces_c,
     GtUword subjectpos = match_positions.startpos[idx_cur],
             new_id = match_positions.unique_ids[idx_cur];
     if (subject_bounds.end < subjectpos || subject_bounds.end == 0) {
-      gt_assert(new_id != ces_c->ces->udb_nelems);
+      gt_assert(new_id != ces_c->ces->uds_nelems);
       subject_bounds.start = ces_c->ces->uniques[new_id].orig_startpos;
       subject_bounds.end = subject_bounds.start +
         ces_c->ces->uniques[new_id].len;
@@ -854,7 +854,7 @@ static int ces_c_extend_seeds_diags(GtCondenseqCreator *ces_c,
                                 querypos - subject_bounds.end,
                                 d);
       }
-      gt_assert(new_id != ces_c->ces->udb_nelems);
+      gt_assert(new_id != ces_c->ces->uds_nelems);
       subject_bounds.start = ces_c->ces->uniques[new_id].orig_startpos;
       subject_bounds.end = subject_bounds.start +
         ces_c->ces->uniques[new_id].len;
@@ -1244,7 +1244,7 @@ static void ces_c_add_kmers(GtCondenseqCreator *ces_c,
   gt_assert(start < end);
   if (start + ces_c->min_align_len <= end)
     gt_kmer_database_add_interval(ces_c->kmer_db, start, end - 1,
-                                  ces_c->ces->udb_nelems - 1);
+                                  ces_c->ces->uds_nelems - 1);
 }
 
 static CesCState ces_c_handle_seqend(GtCondenseqCreator *ces_c,
@@ -1582,8 +1582,8 @@ static int ces_c_analyse(GtCondenseqCreator *ces_c, GtTimer *timer,
           gt_log_log(GT_WU " kmer positions in unique (kmer_db)",
                      gt_kmer_database_get_kmer_count(ces_c->kmer_db));
           gt_log_log(GT_WU " times xdrop was called", ces_c_xdrops);
-          gt_log_log(GT_WU " uniques", ces_c->ces->udb_nelems);
-          gt_log_log(GT_WU " links", ces_c->ces->ldb_nelems);
+          gt_log_log(GT_WU " uniques", ces_c->ces->uds_nelems);
+          gt_log_log(GT_WU " links", ces_c->ces->lds_nelems);
           if (gt_showtime_enabled()) {
             if (percentile + 1 <= 100)
               gt_timer_show_progress_formatted(timer, stderr,
@@ -1615,7 +1615,7 @@ static void ces_c_write_unique_fasta(GtCondenseqCreator *ces_c, FILE *fp)
   char *buffer = NULL;
   unsigned int buffsize = 0;
   GtCondenseqUnique current;
-  for (idx = 0; idx < ces_c->ces->udb_nelems; ++idx) {
+  for (idx = 0; idx < ces_c->ces->uds_nelems; ++idx) {
     current = ces_c->ces->uniques[idx];
     gt_assert(current.len != 0);
     if (gt_log_enabled()) {
@@ -1734,8 +1734,8 @@ int gt_condenseq_creator_create(GtCondenseqCreator *condenseq_creator,
     gt_log_log(GT_WU " kmer positions in final kmer_db",
                gt_kmer_database_get_kmer_count(condenseq_creator->kmer_db));
     gt_log_log(GT_WU " xdrop calls.", ces_c_xdrops);
-    gt_log_log(GT_WU " uniques", condenseq_creator->ces->udb_nelems);
-    gt_log_log(GT_WU " links", condenseq_creator->ces->ldb_nelems);
+    gt_log_log(GT_WU " uniques", condenseq_creator->ces->uds_nelems);
+    gt_log_log(GT_WU " links", condenseq_creator->ces->lds_nelems);
     gt_log_log(GT_WU " bytes in final kmer_db",
                gt_kmer_database_get_used_size(condenseq_creator->kmer_db));
     gt_log_log(GT_WU " bytes allocated for kmer_db",

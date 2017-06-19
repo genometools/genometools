@@ -124,7 +124,7 @@ typedef int (*GtHuffmanDecoderGetMemFunc) (GtBitsequence **bitsequence,
    part of mmaped space. <mem_func> will be called initially to get the first
    chunk of data.
    This type of encoder is helpful if the encoded data is sampled or read in
-   chunks from mmapped files. */
+   chunks from mmaped files. */
 GtHuffmanDecoder* gt_huffman_decoder_new_from_memory(
                                             GtHuffman *huffman,
                                             GtHuffmanDecoderGetMemFunc mem_func,
