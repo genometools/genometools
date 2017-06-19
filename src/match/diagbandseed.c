@@ -2090,6 +2090,7 @@ typedef struct
   const GtSeedExtendDisplayFlag *out_display_flag;
   bool benchmark;
   GtAniAccumulate *ani_accumulate;
+  GtUword current_gfa2_edge_num;
 } GtDiagbandseedExtendSegmentInfo;
 
 static int gt_diagbandseed_possibly_extend(const GtArrayGtDiagbandseedRectangle
@@ -2214,6 +2215,11 @@ static int gt_diagbandseed_possibly_extend(const GtArrayGtDiagbandseedRectangle
                                       esi->evalue_threshold))
         {
           if (!esi->benchmark) {
+            if (gt_querymatch_gfa2_display(esi->out_display_flag))
+            {
+              gt_querymatch_gfa2_edge(querymatch,esi->current_gfa2_edge_num);
+              esi->current_gfa2_edge_num++;
+            }
             gt_querymatch_prettyprint(evalue,bit_score,esi->out_display_flag,
                                       querymatch);
           }
@@ -2995,6 +3001,7 @@ static GtDiagbandseedExtendSegmentInfo *gt_diagbandseed_extendSI_new(
   esi->out_display_flag = extp->out_display_flag;
   esi->benchmark = extp->benchmark;
   esi->ani_accumulate = extp->ani_accumulate;
+  esi->current_gfa2_edge_num = 0;
   return esi;
 }
 

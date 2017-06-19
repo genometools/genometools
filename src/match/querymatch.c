@@ -405,6 +405,11 @@ static void gt_querymatch_exact_match_trace_show(FILE *fp,GtUword remaining,
   }
 }
 
+void gt_querymatch_gfa2_edge(const GtQuerymatch *querymatch,GtUword edgenum)
+{
+  fprintf(querymatch->fp,"E\t" GT_WU "\t",edgenum);
+}
+
 void gt_querymatch_prettyprint(double evalue,double bit_score,
                                const GtSeedExtendDisplayFlag *out_display_flag,
                                const GtQuerymatch *querymatch)
@@ -418,8 +423,9 @@ void gt_querymatch_prettyprint(double evalue,double bit_score,
   column_order = gt_querymatch_display_order(&numcolumns,out_display_flag);
   gt_assert(numcolumns > 0);
   one_off = gt_querymatch_blast_display(out_display_flag) ? 1 : 0;
-  separator = gt_querymatch_blast_display(out_display_flag) ||
-              gt_querymatch_tabsep_display(out_display_flag) ? '\t' : ' ';
+  separator = (gt_querymatch_blast_display(out_display_flag) ||
+               gt_querymatch_tabsep_display(out_display_flag) ||
+               gt_querymatch_gfa2_display(out_display_flag)) ? '\t' : ' ';
   for (idx = 0; idx < numcolumns; idx++)
   {
     const unsigned int co = column_order[idx];

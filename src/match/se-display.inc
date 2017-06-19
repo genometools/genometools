@@ -15,6 +15,7 @@ static GtSEdisplayStruct gt_display_arguments_table[] =
   {"failed_seed", Gt_Failed_seed_display, false},
   {"fstperquery", Gt_Fstperquery_display, false},
   {"gap opens", Gt_Gapopens_display, true},
+  {"gfa2", Gt_Gfa2_display, false},
   {"identity", Gt_Identity_display, true},
   {"indels", Gt_Indels_display, true},
   {"mismatches", Gt_Mismatches_display, true},
@@ -44,40 +45,41 @@ static GtSEdisplayStruct gt_display_arguments_table[] =
 
 static unsigned int gt_display_flag2index[] = {
    0,
-   32,
-   15,
-   28,
+   33,
+   16,
+   29,
    9,
    10,
-   35,
+   36,
    3,
+   12,
    6,
    4,
    5,
-   36,
-   23,
-   25,
-   34,
-   26,
-   22,
-   33,
-   17,
-   19,
-   21,
-   20,
-   16,
-   1,
-   14,
-   13,
-   11,
-   27,
-   7,
-   12,
-   29,
-   31,
-   30,
+   37,
    24,
+   26,
+   35,
+   27,
+   23,
+   34,
    18,
+   20,
+   22,
+   21,
+   17,
+   1,
+   15,
+   14,
+   11,
+   28,
+   7,
+   13,
+   30,
+   32,
+   31,
+   25,
+   19,
    8,
    2
 };
@@ -100,6 +102,7 @@ const char *gt_querymatch_display_help(void)
          "blast:            output matches in blast format 7 (tabular with\n"
          "                  comment lines; instead of gap opens, indels are\n"
          "                  displayed)\n"
+         "gfa2:             output matches in gfa2 format\n"
          "custom:           output matches in custom format, i.e. no\n"
          "                  columns are pre-defined; all columns have to be\n"
          "                  specified by the user\n"
@@ -155,6 +158,7 @@ const char *gt_querymatch_display_help(void)
         ", fstperquery"\
         ", tabsep"\
         ", blast"\
+        ", gfa2"\
         ", custom"\
         ", cigar"\
         ", cigarX"\
@@ -225,6 +229,12 @@ bool gt_querymatch_blast_display(const GtSeedExtendDisplayFlag
                                         *display_flag)
 {
   return gt_querymatch_display_on(display_flag,Gt_Blast_display);
+}
+
+bool gt_querymatch_gfa2_display(const GtSeedExtendDisplayFlag
+                                        *display_flag)
+{
+  return gt_querymatch_display_on(display_flag,Gt_Gfa2_display);
 }
 
 bool gt_querymatch_custom_display(const GtSeedExtendDisplayFlag

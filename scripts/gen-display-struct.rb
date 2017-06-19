@@ -62,6 +62,7 @@ display_options = [
   ["tabsep",      "separate columns by tabulator, instead of space as default"],
   ["blast",       "output matches in blast format 7 (tabular with comment " +
                   "lines; instead of gap opens, indels are displayed)"],
+  ["gfa2",        "output matches in gfa2 format"],
   ["custom",      "output matches in custom format, i.e. no columns are " +
                   "pre-defined; all columns have to be specified by the user"],
   ["cigar",       "display cigar string representing alignment " +
