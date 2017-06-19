@@ -431,7 +431,6 @@ void gt_querymatch_prettyprint(double evalue,double bit_score,
   separator = (gt_querymatch_blast_display(out_display_flag) ||
                gt_querymatch_tabsep_display(out_display_flag) ||
                gfa2_display) ? '\t' : ' ';
-
   for (idx = 0; idx < numcolumns; idx++)
   {
     const unsigned int co = column_order[idx];
