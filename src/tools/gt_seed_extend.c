@@ -722,7 +722,6 @@ static int gt_seed_extend_runner(int argc,
   GtUwordPair pick = {GT_UWORD_MAX, GT_UWORD_MAX};
   GtUword maxseqlength = 0, a_numofsequences, b_numofsequences;
   GtSeedExtendDisplayFlag *out_display_flag = NULL;
-  bool idhistout;
   int had_err = 0;
   const GtSeedExtendDisplaySetMode setmode
     = GT_SEED_EXTEND_DISPLAY_SET_STANDARD;
@@ -735,12 +734,6 @@ static int gt_seed_extend_runner(int argc,
     extendgreedy = false;
   }
 
-  idhistout = (arguments->maxmat != 1 &&
-               gt_str_length(arguments->diagband_statistics_arg) == 0) ? true
-                                                                       : false;
-  gt_querymatch_Options_output(stdout,argc,argv,idhistout,
-                               arguments->se_minidentity,
-                               arguments->se_historysize);
   /* Calculate error percentage from minidentity */
   gt_assert(arguments->se_minidentity >= GT_EXTEND_MIN_IDENTITY_PERCENTAGE &&
             arguments->se_minidentity <= 100UL);
@@ -763,6 +756,32 @@ static int gt_seed_extend_runner(int argc,
     if (out_display_flag == NULL)
     {
       had_err = -1;
+    }
+  }
+
+  if (!had_err)
+  {
+    if (!gt_querymatch_gfa2_display(out_display_flag))
+    {
+      const bool idhistout
+        = (arguments->maxmat != 1 &&
+           gt_str_length(arguments->diagband_statistics_arg) == 0)
+          ? true : false;
+      gt_querymatch_Options_output(stdout,argc,argv,idhistout,
+                                   arguments->se_minidentity,
+                                   arguments->se_historysize);
+      if (!arguments->compute_ani  && !arguments->onlyseeds)
+      {
+        gt_querymatch_Fields_output(stdout,out_display_flag);
+      }
+    } else
+    {
+      printf("H\tVN:Z:2.0");
+      if (gt_querymatch_trace_display(out_display_flag))
+      {
+        printf("\tTS:i:" GT_WU "\n",
+               gt_querymatch_trace_delta_display(out_display_flag));
+      }
     }
   }
   /* Set character access method */

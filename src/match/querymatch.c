@@ -508,6 +508,12 @@ void gt_querymatch_prettyprint(double evalue,double bit_score,
         fprintf(querymatch->fp,GT_WU,gt_querymatch_querylen(querymatch));
         break;
       case Gt_Q_seqnum_display:
+        if (GT_ISDIRREVERSE(querymatch->query_readmode) &&
+            gt_querymatch_gfa2_display(out_display_flag))
+        {
+          fputc('-',querymatch->fp); /* add minus signed before seqnum for
+                                        - strand */
+        }
         fprintf(querymatch->fp,GT_WU,querymatch->queryseqnum);
         break;
       case Gt_Queryid_display:

@@ -3101,10 +3101,6 @@ static void gt_diagbandseed_process_seeds(GtSeedpairlist *seedpairlist,
                                              extp->logdiagbandwidth);
     if (gt_str_length(diagband_statistics_arg) == 0)
     {
-      if (extp->ani_accumulate == NULL)
-      {
-        gt_querymatch_Fields_output(stream,extp->out_display_flag);
-      }
       esi = gt_diagbandseed_extendSI_new(extp,
                                          processinfo,
                                          querymoutopt,
