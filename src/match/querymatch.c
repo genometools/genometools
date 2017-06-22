@@ -417,15 +417,18 @@ void gt_querymatch_prettyprint(double evalue,double bit_score,
   const unsigned int *column_order;
   GtUword numcolumns, idx, one_off;
   char separator;
+  bool gfa2_display;
 
   gt_assert(querymatch != NULL && querymatch->fp != NULL &&
             out_display_flag != NULL);
+  gfa2_display = gt_querymatch_gfa2_display(out_display_flag);
   column_order = gt_querymatch_display_order(&numcolumns,out_display_flag);
   gt_assert(numcolumns > 0);
   one_off = gt_querymatch_blast_display(out_display_flag) ? 1 : 0;
   separator = (gt_querymatch_blast_display(out_display_flag) ||
                gt_querymatch_tabsep_display(out_display_flag) ||
-               gt_querymatch_gfa2_display(out_display_flag)) ? '\t' : ' ';
+               gfa2_display) ? '\t' : ' ';
+
   for (idx = 0; idx < numcolumns; idx++)
   {
     const unsigned int co = column_order[idx];
@@ -469,6 +472,10 @@ void gt_querymatch_prettyprint(double evalue,double bit_score,
         fprintf(querymatch->fp,GT_WU,gt_querymatch_dblen(querymatch));
         break;
       case Gt_S_seqnum_display:
+        if (gfa2_display)
+        {
+          fputc('S',querymatch->fp);
+        }
         fprintf(querymatch->fp,GT_WU,querymatch->dbseqnum);
         break;
       case Gt_Subjectid_display:
@@ -508,11 +515,14 @@ void gt_querymatch_prettyprint(double evalue,double bit_score,
         fprintf(querymatch->fp,GT_WU,gt_querymatch_querylen(querymatch));
         break;
       case Gt_Q_seqnum_display:
-        if (GT_ISDIRREVERSE(querymatch->query_readmode) &&
-            gt_querymatch_gfa2_display(out_display_flag))
+        if (gfa2_display)
         {
-          fputc('-',querymatch->fp); /* add minus signed before seqnum for
-                                        - strand */
+          if (GT_ISDIRREVERSE(querymatch->query_readmode))
+          {
+            fputc('-',querymatch->fp); /* add minus signed before seqnum for
+                                          - strand */
+          }
+          fputc(querymatch->selfmatch ? 'S' : 'Q',querymatch->fp);
         }
         fprintf(querymatch->fp,GT_WU,querymatch->queryseqnum);
         break;
@@ -541,10 +551,18 @@ void gt_querymatch_prettyprint(double evalue,double bit_score,
                 gt_querymatch_alignment_length(querymatch));
         break;
       case Gt_Mismatches_display:
+        if (gfa2_display)
+        {
+          fprintf(querymatch->fp,"MM:i:");
+        }
         fprintf(querymatch->fp,GT_WU,querymatch->mismatches);
         break;
       case Gt_Indels_display:
       case Gt_Gapopens_display:
+        if (gfa2_display)
+        {
+          fprintf(querymatch->fp,"IN:i:");
+        }
         fprintf(querymatch->fp,GT_WU,gt_querymatch_indels(querymatch));
         break;
       case Gt_Score_display:
@@ -554,6 +572,10 @@ void gt_querymatch_prettyprint(double evalue,double bit_score,
         }
         break;
       case Gt_Editdist_display:
+        if (gfa2_display)
+        {
+          fprintf(querymatch->fp,"ED:i:");
+        }
         if (querymatch->score > 0)
         {
           fprintf(querymatch->fp,GT_WU,querymatch->distance);
@@ -562,6 +584,10 @@ void gt_querymatch_prettyprint(double evalue,double bit_score,
       case Gt_Identity_display:
         if (querymatch->score > 0)
         {
+          if (gfa2_display)
+          {
+            fprintf(querymatch->fp,"ID:f:");
+          }
           fprintf(querymatch->fp,"%.2f",
                   gt_querymatch_similarity(
                        querymatch->distance,

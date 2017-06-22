@@ -294,7 +294,7 @@ static bool gt_querymatch_display_args_contain(const GtStrArray *display_args,
 
 static int gt_querymatch_options_order_check(
                  const GtSeedExtendDisplayFlag *display_flag,
-                 size_t num_default_columns,
+                 size_t num_gfa2_default_flags,
                  GtError *err)
 {
   GtUword idx, num_columns;
@@ -305,12 +305,12 @@ static int gt_querymatch_options_order_check(
   if (!gt_querymatch_trace_display(display_flag) &&
       !gt_querymatch_cigar_display(display_flag))
   {
-    gt_error_set(err,"gfa2 output requires that -outfmt contains the keywords "
-                     "trace or cigar");
+    gt_error_set(err,"for gfa2 output specify either trace or cigar as "
+                     "argument of option -outfmt");
     return -1;
   }
-  gt_assert((GtUword) num_default_columns < num_columns);
-  for (idx = num_default_columns; idx < num_columns; idx++)
+  gt_assert((GtUword) num_gfa2_default_flags < num_columns);
+  for (idx = num_gfa2_default_flags; idx < num_columns; idx++)
   {
     if (order[idx] == Gt_Trace_display || order[idx] == Gt_Cigar_display)
     {
@@ -319,10 +319,11 @@ static int gt_querymatch_options_order_check(
     {
       if (!trace_or_cigar_found)
       {
-        unsigned int display_arg_num = gt_display_flag2index[order[idx]];
+        const unsigned int display_arg_num = gt_display_flag2index[order[idx]];
 
-        gt_error_set(err,"for gfa2 output the keyword \"%s\" must come after "
-                         "trace or cigar",
+        gt_error_set(err,"for gfa2 output in the list of argument to option "
+                         "-outfmt the keyword \"%s\" must come after trace "
+                         "or cigar",
                          gt_display_arguments_table[display_arg_num].name);
         return -1;
       }
