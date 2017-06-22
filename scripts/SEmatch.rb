@@ -6,7 +6,7 @@ class SEmatch
     begin
       @fp = File.new(@matchfile)
     rescue => err
-      STDERR.puts "#{$0}: cannot open #{matchfile}"
+      STDERR.puts "#{$0}: cannot open #{@matchfile}"
       exit 1
     end
     @options = nil
@@ -90,7 +90,7 @@ end
 
 def match_is_identical(m0,m1)
   if m0[:s_seqnum] != m1[:s_seqnum] or m0[:q_seqnum] != m1[:q_seqnum]
-    STDERR.puts "expect same sequence numbers"
+    STDERR.puts "#{$0}: expect same sequence numbers"
     exit 1
   end
   if [m0[:s_start],m0[:s_end],m0[:q_start],m0[:q_end]] ==
@@ -109,7 +109,7 @@ end
 
 def match_proper_contained_in(m0,m1)
   if m0[:s_seqnum] != m1[:s_seqnum] or m0[:q_seqnum] != m1[:q_seqnum]
-    STDERR.puts "expect same sequence numbers"
+    STDERR.puts "#{$0}: expect same sequence numbers"
     exit 1
   end
   if coords_contained_in(m0[:s_start],m0[:s_end],m1[:s_start],m1[:s_end]) and
@@ -122,7 +122,7 @@ end
 
 def coords_overlap_size(start0,end0,start1,end1)
   if start0 > start1
-    STDERR.puts "start0=#{start0} > #{start1}=start1 not expected"
+    STDERR.puts "#{$0}: start0=#{start0} > #{start1}=start1 not expected"
     exit 1
   end
   if end0 < start1
