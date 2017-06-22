@@ -830,6 +830,11 @@ typedef struct
         (GT_DIAGBANDSEED_ENCODE_SEQNUMS(ASEQNUM,BSEQNUM) | \
          GT_DIAGBANDSEED_ENCODE_POSITIONS(BPOS,APOS))
 
+static bool gt_diagbandseed_derive_maxmat_show(GtUword maxmat)
+{
+  return maxmat == 1 ? true : false;
+}
+
 static GtSeedpairlist *gt_seedpairlist_new(GtDiagbandseedPairlisttype splt,
                         const GtSequencePartsInfo *aseqranges,
                         GtUword aidx,
@@ -845,15 +850,9 @@ static GtSeedpairlist *gt_seedpairlist_new(GtDiagbandseedPairlisttype splt,
     anumofseq = gt_sequence_parts_info_numofsequences_get(aseqranges,aidx),
     bnumofseq = gt_sequence_parts_info_numofsequences_get(bseqranges,bidx);
 
-  if (maxmat == 0)
-  {
-    seedpairlist->maxmat_compute = seedpairlist->maxmat_show = false;
-  } else
-  {
-    gt_assert(maxmat <= 2);
-    seedpairlist->maxmat_compute = true;
-    seedpairlist->maxmat_show = (maxmat == 1) ? true : false;
-  }
+  gt_assert(maxmat <= 2);
+  seedpairlist->maxmat_show = gt_diagbandseed_derive_maxmat_show(maxmat);
+  seedpairlist->maxmat_compute = maxmat > 0 ? true : false;
   seedpairlist->amaxlen = amaxlen;
   seedpairlist->aseqrange_max_length
     = gt_sequence_parts_info_max_length_get(aseqranges,aidx);
@@ -1791,29 +1790,75 @@ static void gt_diagbandseed_get_seedpairs(GtSeedpairlist *seedpairlist,
 
 typedef struct
 {
-  GtUword extended_seeds,
+  GtUword totalseeds,
+          totalseqpairs,
+          extended_seeds,
           selected_seeds,
           countmatches,
           failedmatches,
           seqpairs_with_minsegment,
           maxmatchespersegment,
           total_extension_time_usec,
+          total_process_seeds_usec,
           filteredbydiagonalscore;
   bool withtiming;
 } GtDiagbandseedCounts;
 
-static void gt_diagband_seeds_counts_init(GtDiagbandseedCounts *counts,
-                                          bool verbose)
+static GtDiagbandseedCounts *gt_diagbandseed_counts_new(bool verbose)
 {
-  counts->extended_seeds = 0;
-  counts->selected_seeds = 0;
-  counts->countmatches = 0;
-  counts->failedmatches = 0;
-  counts->seqpairs_with_minsegment = 0;
-  counts->maxmatchespersegment = 0;
-  counts->total_extension_time_usec = 0;
-  counts->filteredbydiagonalscore = 0;
+  GtDiagbandseedCounts *counts = gt_calloc(1,sizeof *counts);
   counts->withtiming = verbose;
+  return counts;
+}
+
+static void gt_diagbandseed_counts_update(GtDiagbandseedCounts *counts,
+                                          GtUword mlistlen,
+                                          GtUword numseqpairs)
+{
+  counts->totalseeds += mlistlen;
+  counts->totalseqpairs += numseqpairs;
+}
+
+static void gt_diagbandseed_counts_out(const GtDiagbandseedCounts
+                                         *process_seeds_counts,
+                                       bool maxmat_show)
+{
+  printf("# total number of seeds: " GT_WU,
+          process_seeds_counts->totalseeds);
+  if (!maxmat_show)
+  {
+    printf("; " GT_WU ", i.e. %.2f%% of all seeds were filtered by "
+                   "diagonal score"
+                   "; " GT_WU ", i.e. %.2f%% of all seeds were selected"
+                   "; " GT_WU ", i.e. %.2f%% of all seeds were extended\n",
+            process_seeds_counts->filteredbydiagonalscore,
+            100.0 * (double) process_seeds_counts->filteredbydiagonalscore/
+                             process_seeds_counts->totalseeds,
+            process_seeds_counts->selected_seeds,
+            100.0 * (double) process_seeds_counts->selected_seeds/
+                             process_seeds_counts->totalseeds,
+            process_seeds_counts->extended_seeds,
+            100.0 * (double) process_seeds_counts->extended_seeds/
+                             process_seeds_counts->totalseeds);
+    printf( "# number of unsuccessful extensions: " GT_WU "\n",
+            process_seeds_counts->failedmatches);
+    printf( "# sequence pairs with selected seeds: " GT_WU
+                    " (%.2f%% of all " GT_WU ")\n",
+            process_seeds_counts->seqpairs_with_minsegment,
+            100.0 * (double)
+                    process_seeds_counts->seqpairs_with_minsegment/
+                    process_seeds_counts->seqpairs_with_minsegment/
+                    process_seeds_counts->totalseqpairs,
+            process_seeds_counts->totalseqpairs);
+  } else
+  {
+    printf("\n# maximum number of MEMs per segment: " GT_WU "\n",
+            process_seeds_counts->maxmatchespersegment);
+  }
+  printf("# number of matches output: " GT_WU " (%.4f per seed)\n",
+          process_seeds_counts->countmatches,
+          (double) process_seeds_counts->countmatches/
+                   process_seeds_counts->totalseeds);
 }
 
 typedef bool (*GtExtendRelativeCoordsFunc)(void *,
@@ -2083,7 +2128,6 @@ typedef struct
   bool same_encseq, debug;
   GtProcessinfo_and_querymatchspaceptr info_querymatch;
   GtExtendRelativeCoordsFunc extend_relative_coords_function;
-  GtDiagbandseedCounts process_seeds_counts;
   GtSegmentRejectFunc segment_reject_func;
   GtSegmentRejectInfo *segment_reject_info;
   const GtKarlinAltschulStat *karlin_altschul_stat;
@@ -2091,6 +2135,7 @@ typedef struct
   bool benchmark;
   GtAniAccumulate *ani_accumulate;
   GtUword current_gfa2_edge_num;
+  GtDiagbandseedCounts *process_seeds_counts;
 } GtDiagbandseedExtendSegmentInfo;
 
 static int gt_diagbandseed_possibly_extend(const GtArrayGtDiagbandseedRectangle
@@ -2133,7 +2178,8 @@ static int gt_diagbandseed_possibly_extend(const GtArrayGtDiagbandseedRectangle
 #ifndef _WIN32
     struct timeval tvalBefore = {0};
 
-    if (esi->process_seeds_counts.withtiming)
+    if (esi->process_seeds_counts != NULL &&
+        esi->process_seeds_counts->withtiming)
     {
       gettimeofday (&tvalBefore, NULL);
     }
@@ -2155,11 +2201,12 @@ static int gt_diagbandseed_possibly_extend(const GtArrayGtDiagbandseedRectangle
                                                    matchlength,
                                                    esi->query_readmode);
 #ifndef _WIN32
-    if (esi->process_seeds_counts.withtiming)
+    if (esi->process_seeds_counts != NULL &&
+        esi->process_seeds_counts->withtiming)
     {
       struct timeval tvalAfter;
       gettimeofday (&tvalAfter, NULL);
-      esi->process_seeds_counts.total_extension_time_usec
+      esi->process_seeds_counts->total_extension_time_usec
         += (tvalAfter.tv_sec - tvalBefore.tv_sec) * 1000000L
             + tvalAfter.tv_usec - tvalBefore.tv_usec;
     }
@@ -2502,10 +2549,13 @@ static void gt_diagbandseed_segment2maxmatches(
       }
     }
   }
-  process_seeds_counts->countmatches += localmatchcount;
-  if (process_seeds_counts->maxmatchespersegment < localmatchcount)
+  if (process_seeds_counts != NULL)
   {
-    process_seeds_counts->maxmatchespersegment = localmatchcount;
+    process_seeds_counts->countmatches += localmatchcount;
+    if (process_seeds_counts->maxmatchespersegment < localmatchcount)
+    {
+      process_seeds_counts->maxmatchespersegment = localmatchcount;
+    }
   }
   if (memstore != NULL)
   {
@@ -2614,10 +2664,16 @@ static void gt_diagbandseed_segment2matches(
     {
       int ret;
 
-      esi->process_seeds_counts.selected_seeds++;
+      if (esi->process_seeds_counts != NULL)
+      {
+        esi->process_seeds_counts->selected_seeds++;
+      }
       if (!found_selected)
       {
-        esi->process_seeds_counts.seqpairs_with_minsegment++;
+        if (esi->process_seeds_counts != NULL)
+        {
+          esi->process_seeds_counts->seqpairs_with_minsegment++;
+        }
         found_selected = true;
       }
       if (esi->only_selected_seqpairs)
@@ -2637,9 +2693,9 @@ static void gt_diagbandseed_segment2matches(
                      bpos,
                      matchlength,
                      esi);
-      if (ret >= 1)
+      if (ret >= 1 && esi->process_seeds_counts != NULL)
       {
-        esi->process_seeds_counts.extended_seeds++;
+        esi->process_seeds_counts->extended_seeds++;
       }
       if (ret >= 2)
       {
@@ -2669,14 +2725,17 @@ static void gt_diagbandseed_segment2matches(
           }
           gt_rectangle_store_add(previous_extensions,&newrectangle);
         }
-        if (ret == 2)
+        if (ret == 2 && esi->process_seeds_counts != NULL)
         {
-          esi->process_seeds_counts.failedmatches++;
+          esi->process_seeds_counts->failedmatches++;
         }
       }
       if (ret == 3)
       {
-        esi->process_seeds_counts.countmatches++;
+        if (esi->process_seeds_counts != NULL)
+        {
+          esi->process_seeds_counts->countmatches++;
+        }
         if (esi->segment_reject_func != NULL)
         {
           gt_segment_reject_register_match(esi->segment_reject_info,bseqnum);
@@ -2685,7 +2744,10 @@ static void gt_diagbandseed_segment2matches(
       }
     } else
     {
-      esi->process_seeds_counts.filteredbydiagonalscore++;
+      if (esi->process_seeds_counts != NULL)
+      {
+        esi->process_seeds_counts->filteredbydiagonalscore++;
+      }
       if (esi->debug)
       {
         printf("# filtered as diagonal score " GT_WU " < " GT_WU "\n",
@@ -2715,7 +2777,7 @@ static void gt_diagbandseed_segment2matches(
                                                seedpairlist->amaxlen,\
                                                segment_positions,\
                                                segment_length,\
-                                               &maxmat_process_seeds_counts,\
+                                               process_seeds_counts,\
                                                segment_reject_func,\
                                                segment_reject_info,\
                                                chainmode,\
@@ -2841,7 +2903,6 @@ static void gt_diagbandseed_info_qm_set(
 
 #ifndef _WIN32
 static void gt_diagbandseed_process_seeds_times(
-                 FILE *stream,
                  bool extendgreedy,
                  bool maxmat_show,
                  GtUword mlistlen,
@@ -2855,85 +2916,20 @@ static void gt_diagbandseed_process_seeds_times(
   process_seeds_usec = total_process_seeds_usec - total_extension_time_usec;
   if (!maxmat_show)
   {
-    fprintf(stream,"# ... %s extension of " GT_WU " seeds in "
+    printf("# ... %s extension of " GT_WU " seeds in "
                    GT_WD ".%.06ld seconds.\n",
             extendgreedy ? "greedy" : "xdrop",
             extended_seeds,
             GT_USEC2SEC(total_extension_time_usec),
             GT_USECREMAIN(total_extension_time_usec));
   }
-  fprintf(stream, "# ... processed " GT_WU " seeds %sin "
+  printf( "# ... processed " GT_WU " seeds %sin "
                   GT_WD ".%06ld seconds.\n",mlistlen,
           maxmat_show ? "" : "(excluding extensions) ",
           GT_USEC2SEC(process_seeds_usec),
           GT_USECREMAIN(process_seeds_usec));
 }
 #endif
-
-static void gt_diagbandseed_process_seeds_stat(FILE *stream,
-                                               GtTimer *timer,
-                                               const GtDiagbandseedCounts
-                                                 *process_seeds_counts,
-                                               GtUword mlistlen,
-                                               GtUword allseqpairs,
-                                               GT_WIN32_UNUSED
-                                                 bool extendgreedy,
-                                               bool maxmat_show)
-{
-#ifndef _WIN32
-  GtWord total_process_seeds_usec
-    = gt_timer_elapsed_usec(timer);
-#endif
-
-  fprintf(stream,"# total number of seeds: " GT_WU,mlistlen);
-  if (!maxmat_show)
-  {
-    fprintf(stream,"; " GT_WU ", i.e. %.2f%% of all seeds were filtered by "
-                   "diagonal score"
-                   "; " GT_WU ", i.e. %.2f%% of all seeds were selected"
-                   "; " GT_WU ", i.e. %.2f%% of all seeds were extended)\n",
-            process_seeds_counts->filteredbydiagonalscore,
-            100.0 * (double) process_seeds_counts->filteredbydiagonalscore/
-                             mlistlen,
-            process_seeds_counts->selected_seeds,
-            100.0 * (double) process_seeds_counts->selected_seeds/mlistlen,
-            process_seeds_counts->extended_seeds,
-            100.0 * (double) process_seeds_counts->extended_seeds/mlistlen);
-    fprintf(stream, "# number of unsuccessful extensions: " GT_WU "\n",
-            process_seeds_counts->failedmatches);
-    fprintf(stream, "# sequence pairs with selected seeds: " GT_WU
-                    " (%.2f%% of all " GT_WU ")\n",
-            process_seeds_counts->seqpairs_with_minsegment,
-            100.0 * (double)
-                    process_seeds_counts->seqpairs_with_minsegment/allseqpairs,
-            allseqpairs);
-  } else
-  {
-    fprintf(stream,"\n");
-  }
-  if (maxmat_show)
-  {
-    fprintf(stream, "# maximum number of MEMs per segment: " GT_WU "\n",
-            process_seeds_counts->maxmatchespersegment);
-  }
-#ifndef _WIN32
-  gt_diagbandseed_process_seeds_times(
-                 stream,
-                 extendgreedy,
-                 maxmat_show,
-                 mlistlen,
-                 process_seeds_counts->extended_seeds,
-                 total_process_seeds_usec,
-                 process_seeds_counts->total_extension_time_usec);
-#else
-  fprintf(stream, "# ... processed " GT_WU " seeds ",mlistlen);
-  gt_timer_show_formatted(timer, GT_DIAGBANDSEED_FMT,stream);
-#endif
-  fprintf(stream, "# number of matches output: " GT_WU " (%.4f per seed)\n",
-          process_seeds_counts->countmatches,
-          (double) process_seeds_counts->countmatches/
-                   mlistlen);
-}
 
 static GtDiagbandseedExtendSegmentInfo *gt_diagbandseed_extendSI_new(
                                          const GtDiagbandseedExtendParams *extp,
@@ -2948,8 +2944,9 @@ static GtDiagbandseedExtendSegmentInfo *gt_diagbandseed_extendSI_new(
                                          const GtKarlinAltschulStat
                                            *karlin_altschul_stat,
                                          GtReadmode query_readmode,
-                                         bool verbose,
                                          FILE *stream,
+                                         GtDiagbandseedCounts
+                                           *process_seeds_counts,
                                          GtSegmentRejectFunc
                                            segment_reject_func,
                                          GtSegmentRejectInfo
@@ -2984,7 +2981,7 @@ static GtDiagbandseedExtendSegmentInfo *gt_diagbandseed_extendSI_new(
                               stream,
                               karlin_altschul_stat,
                               processinfo);
-  gt_diagband_seeds_counts_init(&esi->process_seeds_counts,verbose);
+  esi->process_seeds_counts = process_seeds_counts;
   /* the following are constant and depends only on the given parameters */
   esi->userdefinedleastlength = extp->userdefinedleastlength;
   esi->errorpercentage = extp->errorpercentage;
@@ -3049,6 +3046,8 @@ static void gt_diagbandseed_process_seeds(GtSeedpairlist *seedpairlist,
                                           bool verbose,
                                           FILE *stream,
                                           const GtStr *diagband_statistics_arg,
+                                          GtDiagbandseedCounts
+                                            *process_seeds_counts,
                                           GtSegmentRejectFunc
                                             segment_reject_func,
                                           GtSegmentRejectInfo
@@ -3065,11 +3064,9 @@ static void gt_diagbandseed_process_seeds(GtSeedpairlist *seedpairlist,
   GtDiagbandStruct *diagband_struct = NULL;
   GtDiagbandseedExtendSegmentInfo *esi = NULL;
   GtDiagbandStatistics *diagband_statistics = NULL;
-  GtDiagbandseedCounts maxmat_process_seeds_counts = {0,0,0,0,0,0,0,0};
   GtDiagbandseedProcessSegmentFunc segment_proc_func = NULL;
   void *segment_proc_info = NULL;
 
-  maxmat_process_seeds_counts.withtiming = verbose;
   gt_assert(extp->mincoverage >= seedlength && minsegmentlen >= 1);
   if (mlistlen == 0 || mlistlen < minsegmentlen ||
       (!extp->extendgreedy && !extp->extendxdrop))
@@ -3112,8 +3109,8 @@ static void gt_diagbandseed_process_seeds(GtSeedpairlist *seedpairlist,
                                          bidx,
                                          karlin_altschul_stat,
                                          query_readmode,
-                                         verbose,
                                          stream,
+                                         process_seeds_counts,
                                          segment_reject_func,
                                          segment_reject_info);
       if (verbose)
@@ -3386,21 +3383,17 @@ static void gt_diagbandseed_process_seeds(GtSeedpairlist *seedpairlist,
   }
   if (verbose)
   {
-    if (esi != NULL || seedpairlist->maxmat_show)
+    if (process_seeds_counts != NULL)
     {
-      const GtUword allseqpairs = (seedpairlist->aseqrange_end -
+      const GtUword numseqpairs = (seedpairlist->aseqrange_end -
                                    seedpairlist->aseqrange_start + 1) *
                                   (seedpairlist->bseqrange_end -
                                    seedpairlist->bseqrange_start + 1);
-      gt_diagbandseed_process_seeds_stat(stream,
-                                         timer,
-                                         esi != NULL
-                                           ? &esi->process_seeds_counts
-                                           : &maxmat_process_seeds_counts,
-                                         mlistlen,
-                                         allseqpairs,
-                                         extp->extendgreedy,
-                                         seedpairlist->maxmat_show);
+      gt_diagbandseed_counts_update(process_seeds_counts,mlistlen,numseqpairs);
+#ifndef _WIN32
+      process_seeds_counts->total_process_seeds_usec
+        += gt_timer_elapsed_usec(timer);
+#endif
     }
     gt_timer_delete(timer);
   }
@@ -3446,6 +3439,8 @@ static int gt_diagbandseed_algorithm(const GtDiagbandseedInfo *arg,
                                      GtUword bidx,
                                      const GtKarlinAltschulStat
                                        *karlin_altschul_stat,
+                                     GtDiagbandseedCounts
+                                       *process_seeds_counts,
                                      GtFtTrimstat *trimstat,
                                      GtError *err)
 {
@@ -3733,6 +3728,7 @@ static int gt_diagbandseed_algorithm(const GtDiagbandseedInfo *arg,
                                   arg->verbose,
                                   stream,
                                   arg->diagband_statistics_arg,
+                                  process_seeds_counts,
                                   segment_reject_func,
                                   segment_reject_info);
     gt_seedpairlist_reset(seedpairlist);
@@ -3851,6 +3847,7 @@ static int gt_diagbandseed_algorithm(const GtDiagbandseedInfo *arg,
                                   arg->verbose,
                                   stream,
                                   arg->diagband_statistics_arg,
+                                  process_seeds_counts,
                                   segment_reject_func,
                                   segment_reject_info);
   }
@@ -3946,6 +3943,7 @@ static void *gt_diagbandseed_thread_algorithm(void *thread_info)
                            comb->b,
                            info->karlin_altschul_stat,
                            NULL,
+                           NULL,
                            info->err);
       if (info->had_err) break;
     }
@@ -4014,18 +4012,24 @@ int gt_diagbandseed_run(const GtDiagbandseedInfo *arg,
                 bnumseqranges = gt_sequence_parts_info_number(bseqranges);
   GtFtTrimstat *trimstat = NULL;
   GtKarlinAltschulStat *karlin_altschul_stat = NULL;
+  GtDiagbandseedCounts *process_seeds_counts = NULL;
 #ifdef GT_THREADS_ENABLED
   GtDiagbandseedThreadInfo *tinfo = gt_malloc(gt_jobs * sizeof *tinfo);
-  FILE **stream;
+  FILE **stream_tab;
   unsigned int tidx;
 
   /* create output streams */
-  stream = gt_malloc(gt_jobs * sizeof *stream);
-  stream[0] = stdout;
+  stream_tab = gt_malloc(gt_jobs * sizeof *stream_tab);
+  stream_tab[0] = stdout;
   for (tidx = 1; !had_err && tidx < gt_jobs; tidx++) {
-    stream[tidx] = gt_xtmpfp_generic(NULL, TMPFP_OPENBINARY | TMPFP_AUTOREMOVE);
+    stream_tab[tidx]
+      = gt_xtmpfp_generic(NULL, TMPFP_OPENBINARY | TMPFP_AUTOREMOVE);
   }
 #endif
+  if (arg->verbose)
+  {
+    process_seeds_counts = gt_diagbandseed_counts_new(arg->verbose);
+  }
 
   /* create all missing k-mer lists for bencseq */
   if (arg->use_kmerfile) {
@@ -4139,6 +4143,7 @@ int gt_diagbandseed_run(const GtDiagbandseedInfo *arg,
                            arg->aencseq,aseqranges,aidx,
                            arg->bencseq,bseqranges,bidx,
                            karlin_altschul_stat,
+                           process_seeds_counts,
                            trimstat,
                            err);
         }
@@ -4170,7 +4175,7 @@ int gt_diagbandseed_run(const GtDiagbandseedInfo *arg,
         gt_diagbandseed_thread_info_set(tinfo + tidx,
                                         arg,
                                         use_alist ? &alist : NULL,
-                                        stream[tidx],
+                                        stream_tab[tidx],
                                         arg->aencseq,
                                         aseqranges,
                                         arg->bencseq,
@@ -4202,7 +4207,7 @@ int gt_diagbandseed_run(const GtDiagbandseedInfo *arg,
         gt_diagbandseed_thread_info_set(tinfo,
                                         arg,
                                         use_alist ? &alist : NULL,
-                                        stream[0],
+                                        stream_tab[0],
                                         arg->aencseq,
                                         aseqranges,
                                         arg->bencseq,
@@ -4255,7 +4260,7 @@ int gt_diagbandseed_run(const GtDiagbandseedInfo *arg,
       gt_diagbandseed_thread_info_set(tinfo + tidx,
                                       arg,
                                       NULL,
-                                      stream[tidx],
+                                      stream_tab[tidx],
                                       arg->aencseq,
                                       aseqranges,
                                       arg->bencseq,
@@ -4275,7 +4280,7 @@ int gt_diagbandseed_run(const GtDiagbandseedInfo *arg,
       gt_diagbandseed_thread_info_set(tinfo,
                                       arg,
                                       NULL,
-                                      stream[0],
+                                      stream_tab[0],
                                       arg->aencseq,
                                       aseqranges,
                                       arg->bencseq,
@@ -4307,15 +4312,32 @@ int gt_diagbandseed_run(const GtDiagbandseedInfo *arg,
   /* print the threads' output to stdout */
   for (tidx = 1; tidx < gt_jobs; tidx++) {
     int cc;
-    rewind(stream[tidx]);
-    while ((cc = fgetc(stream[tidx])) != EOF) {
+    rewind(stream_tab[tidx]);
+    while ((cc = fgetc(stream_tab[tidx])) != EOF) {
       putchar(cc);
     }
-    gt_fa_xfclose(stream[tidx]);
+    gt_fa_xfclose(stream_tab[tidx]);
   }
-  gt_free(stream);
+  gt_free(stream_tab);
 
 #endif
+  if (arg->verbose)
+  {
+    const bool maxmat_show = gt_diagbandseed_derive_maxmat_show(arg->maxmat);
+
+    gt_assert(process_seeds_counts != NULL);
+    gt_diagbandseed_counts_out(process_seeds_counts,maxmat_show);
+#ifndef _WIN32
+    gt_diagbandseed_process_seeds_times(
+                 arg->extp->extendgreedy,
+                 maxmat_show,
+                 process_seeds_counts->totalseeds,
+                 process_seeds_counts->extended_seeds,
+                 process_seeds_counts->total_process_seeds_usec,
+                 process_seeds_counts->total_extension_time_usec);
+#endif
+  }
+  gt_free(process_seeds_counts);
   gt_karlin_altschul_stat_delete(karlin_altschul_stat);
   gt_ft_trimstat_delete(trimstat);
   return had_err;
