@@ -40,6 +40,7 @@
 #include "core/qsort-ulong.h"
 #include "core/radix_sort.h"
 #include "core/log_api.h"
+#include "core/bittab_api.h"
 #include "match/chain2dim.h"
 #include "match/declare-readfunc.h"
 #include "match/kmercodes.h"
@@ -1802,13 +1803,42 @@ typedef struct
           total_process_seeds_usec,
           filteredbydiagonalscore;
   bool withtiming;
+  GtBittab *used_a_sequences,
+           *used_b_sequences;
 } GtDiagbandseedCounts;
 
-static GtDiagbandseedCounts *gt_diagbandseed_counts_new(bool verbose)
+static GtDiagbandseedCounts *gt_diagbandseed_counts_new(bool verbose,
+                                                        GtUword a_num_sequences,
+                                                        GtUword b_num_sequences)
 {
   GtDiagbandseedCounts *counts = gt_calloc(1,sizeof *counts);
   counts->withtiming = verbose;
+  if (a_num_sequences > 0)
+  {
+    counts->used_a_sequences = gt_bittab_new(a_num_sequences);
+  } else
+  {
+    counts->used_a_sequences = NULL;
+  }
+  if (b_num_sequences > 0)
+  {
+    gt_assert(a_num_sequences > 0);
+    counts->used_b_sequences = gt_bittab_new(b_num_sequences);
+  } else
+  {
+    counts->used_b_sequences = NULL;
+  }
   return counts;
+}
+
+static void gt_diagbandseed_counts_delete(GtDiagbandseedCounts *counts)
+{
+  if (counts != NULL)
+  {
+    gt_bittab_delete(counts->used_a_sequences);
+    gt_bittab_delete(counts->used_b_sequences);
+    gt_free(counts);
+  }
 }
 
 static void gt_diagbandseed_counts_update(GtDiagbandseedCounts *counts,
@@ -1819,46 +1849,42 @@ static void gt_diagbandseed_counts_update(GtDiagbandseedCounts *counts,
   counts->totalseqpairs += numseqpairs;
 }
 
-static void gt_diagbandseed_counts_out(const GtDiagbandseedCounts
-                                         *process_seeds_counts,
+static void gt_diagbandseed_counts_out(const GtDiagbandseedCounts *counts,
                                        bool maxmat_show)
 {
-  printf("# total number of seeds: " GT_WU,
-          process_seeds_counts->totalseeds);
+  printf("# total number of seeds: " GT_WU,counts->totalseeds);
   if (!maxmat_show)
   {
     printf("; " GT_WU ", i.e. %.2f%% of all seeds were filtered by "
                    "diagonal score"
                    "; " GT_WU ", i.e. %.2f%% of all seeds were selected"
                    "; " GT_WU ", i.e. %.2f%% of all seeds were extended\n",
-            process_seeds_counts->filteredbydiagonalscore,
-            100.0 * (double) process_seeds_counts->filteredbydiagonalscore/
-                             process_seeds_counts->totalseeds,
-            process_seeds_counts->selected_seeds,
-            100.0 * (double) process_seeds_counts->selected_seeds/
-                             process_seeds_counts->totalseeds,
-            process_seeds_counts->extended_seeds,
-            100.0 * (double) process_seeds_counts->extended_seeds/
-                             process_seeds_counts->totalseeds);
+            counts->filteredbydiagonalscore,
+            100.0 * (double) counts->filteredbydiagonalscore/
+                             counts->totalseeds,
+            counts->selected_seeds,
+            100.0 * (double) counts->selected_seeds/
+                             counts->totalseeds,
+            counts->extended_seeds,
+            100.0 * (double) counts->extended_seeds/
+                             counts->totalseeds);
     printf( "# number of unsuccessful extensions: " GT_WU "\n",
-            process_seeds_counts->failedmatches);
+            counts->failedmatches);
     printf( "# sequence pairs with selected seeds: " GT_WU
                     " (%.2f%% of all " GT_WU ")\n",
-            process_seeds_counts->seqpairs_with_minsegment,
-            100.0 * (double)
-                    process_seeds_counts->seqpairs_with_minsegment/
-                    process_seeds_counts->seqpairs_with_minsegment/
-                    process_seeds_counts->totalseqpairs,
-            process_seeds_counts->totalseqpairs);
+            counts->seqpairs_with_minsegment,
+            100.0 * (double) counts->seqpairs_with_minsegment/
+                             counts->totalseqpairs,
+            counts->totalseqpairs);
   } else
   {
     printf("\n# maximum number of MEMs per segment: " GT_WU "\n",
-            process_seeds_counts->maxmatchespersegment);
+            counts->maxmatchespersegment);
   }
   printf("# number of matches output: " GT_WU " (%.4f per seed)\n",
-          process_seeds_counts->countmatches,
-          (double) process_seeds_counts->countmatches/
-                   process_seeds_counts->totalseeds);
+          counts->countmatches,
+          (double) counts->countmatches/
+                   counts->totalseeds);
 }
 
 typedef bool (*GtExtendRelativeCoordsFunc)(void *,
@@ -2266,6 +2292,13 @@ static int gt_diagbandseed_possibly_extend(const GtArrayGtDiagbandseedRectangle
             {
               gt_querymatch_gfa2_edge(querymatch,esi->current_gfa2_edge_num);
               esi->current_gfa2_edge_num++;
+              gt_bittab_set_bit(esi->process_seeds_counts->used_a_sequences,
+                                aseqnum);
+              gt_bittab_set_bit(
+                 esi->process_seeds_counts->used_b_sequences != NULL
+                   ? esi->process_seeds_counts->used_b_sequences
+                   : esi->process_seeds_counts->used_a_sequences,
+                   bseqnum);
             }
             gt_querymatch_prettyprint(evalue,bit_score,esi->out_display_flag,
                                       querymatch);
@@ -4007,6 +4040,23 @@ static bool gt_create_or_update_file(const char *path,const GtEncseq *encseq)
   return true;
 }
 
+static void gt_diagbandseed_out_sequences_with_matches(
+                char seqtype,
+                GT_UNUSED const GtEncseq *encseq,
+                const GtBittab *used_sequences)
+{
+  GtUword seqnum, idx, numbits;
+
+  gt_assert(encseq != NULL && used_sequences != NULL);
+  numbits = gt_bittab_count_set_bits(used_sequences);
+  for (idx = 0, seqnum = gt_bittab_get_first_bitnum(used_sequences);
+       idx < numbits;
+       idx++, seqnum = gt_bittab_get_next_bitnum(used_sequences,seqnum))
+  {
+    printf("S\t%c" GT_WU "\n",seqtype,seqnum);
+  }
+}
+
 /* Run the algorithm by iterating over all combinations of sequence ranges. */
 int gt_diagbandseed_run(const GtDiagbandseedInfo *arg,
                         const GtSequencePartsInfo *aseqranges,
@@ -4038,9 +4088,20 @@ int gt_diagbandseed_run(const GtDiagbandseedInfo *arg,
       = gt_xtmpfp_generic(NULL, TMPFP_OPENBINARY | TMPFP_AUTOREMOVE);
   }
 #endif
-  if (arg->verbose)
+  if (arg->verbose || gt_querymatch_gfa2_display(arg->extp->out_display_flag))
   {
-    process_seeds_counts = gt_diagbandseed_counts_new(arg->verbose);
+    GtUword a_num_sequences = 0, b_num_sequences = 0;
+    if (gt_querymatch_gfa2_display(arg->extp->out_display_flag))
+    {
+      a_num_sequences = gt_encseq_num_of_sequences(arg->aencseq);
+      if (!self)
+      {
+        b_num_sequences = gt_encseq_num_of_sequences(arg->bencseq);
+      }
+    }
+    process_seeds_counts = gt_diagbandseed_counts_new(arg->verbose,
+                                                      a_num_sequences,
+                                                      b_num_sequences);
   }
 
   /* create all missing k-mer lists for bencseq */
@@ -4349,7 +4410,20 @@ int gt_diagbandseed_run(const GtDiagbandseedInfo *arg,
                  process_seeds_counts->total_extension_time_usec);
 #endif
   }
-  gt_free(process_seeds_counts);
+  if (process_seeds_counts != NULL)
+  {
+    if (process_seeds_counts->used_a_sequences != NULL)
+    {
+      gt_diagbandseed_out_sequences_with_matches('S',arg->aencseq,
+                  process_seeds_counts->used_a_sequences);
+    }
+    if (process_seeds_counts->used_b_sequences != NULL)
+    {
+      gt_diagbandseed_out_sequences_with_matches('Q',arg->bencseq,
+                  process_seeds_counts->used_b_sequences);
+    }
+  }
+  gt_diagbandseed_counts_delete(process_seeds_counts);
   gt_karlin_altschul_stat_delete(karlin_altschul_stat);
   gt_ft_trimstat_delete(trimstat);
   return had_err;
