@@ -4042,19 +4042,29 @@ static bool gt_create_or_update_file(const char *path,const GtEncseq *encseq)
 
 static void gt_diagbandseed_out_sequences_with_matches(
                 char seqtype,
-                GT_UNUSED const GtEncseq *encseq,
+                const GtEncseq *encseq,
                 const GtBittab *used_sequences)
 {
-  GtUword seqnum, idx, numbits;
+  GtUword seqnum, idx, numbits, max_seq_length;
+  char *buffer;
 
   gt_assert(encseq != NULL && used_sequences != NULL);
   numbits = gt_bittab_count_set_bits(used_sequences);
+  max_seq_length = gt_encseq_max_seq_length(encseq);
+  buffer = gt_malloc(sizeof *buffer * max_seq_length);
   for (idx = 0, seqnum = gt_bittab_get_first_bitnum(used_sequences);
        idx < numbits;
        idx++, seqnum = gt_bittab_get_next_bitnum(used_sequences,seqnum))
   {
-    printf("S\t%c" GT_WU "\n",seqtype,seqnum);
+    const GtUword seqstartpos = gt_encseq_seqstartpos(encseq,seqnum),
+                  seqlength = gt_encseq_seqlength(encseq,seqnum);
+    gt_encseq_extract_decoded(encseq,buffer,seqstartpos,
+                              seqstartpos + seqlength - 1);
+    printf("S\t%c" GT_WU "\t" GT_WU "\t",seqtype,seqnum,seqlength);
+    fwrite(buffer,sizeof *buffer,seqlength,stdout);
+    fputc('\n',stdout);
   }
+  gt_free(buffer);
 }
 
 /* Run the algorithm by iterating over all combinations of sequence ranges. */
