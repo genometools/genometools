@@ -39,6 +39,9 @@
 #include "match/initbasepower.h"
 #include "match/seed_extend_parts.h"
 #include "tools/gt_seed_extend.h"
+#ifdef GT_THREADS_ENABLED
+#include "core/thread_api.h"
+#endif
 
 typedef struct {
   /* diagbandseed options */
@@ -666,6 +669,13 @@ static int gt_seed_extend_arguments_check(int rest_argc, void *tool_arguments,
       had_err = -1;
     }
   }
+#ifdef GT_THREADS_ENABLED
+  if (!had_err && arguments->compute_ani && gt_jobs > 1)
+  {
+    gt_error_set(err,"option -ani does not work with multiple threads");
+    had_err = -1;
+  }
+#endif
 
   /* minimum maxfreq value for 1 input file */
   if (!had_err && arguments->dbs_maxfreq == 1 &&
