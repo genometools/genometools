@@ -2997,8 +2997,20 @@ static GtDiagbandseedExtendSegmentInfo *gt_diagbandseed_extendSI_new(
   esi->karlin_altschul_stat = karlin_altschul_stat;
   esi->out_display_flag = extp->out_display_flag;
   esi->benchmark = extp->benchmark;
-  esi->ani_accumulate = extp->ani_accumulate;
   esi->current_gfa2_edge_num = 0;
+  if (extp->ani_accumulate != NULL)
+  {
+    if (GT_ISDIRREVERSE(query_readmode))
+    {
+      esi->ani_accumulate = extp->ani_accumulate + 1;
+    } else
+    {
+      esi->ani_accumulate = extp->ani_accumulate;
+    }
+  } else
+  {
+    esi->ani_accumulate = NULL;
+  }
   return esi;
 }
 

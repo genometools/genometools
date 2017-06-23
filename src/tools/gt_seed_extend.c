@@ -89,7 +89,6 @@ typedef struct {
   bool use_kmerfile;
   bool trimstat_on;
   bool use_apos, use_apos_track_all, compute_ani;
-  GtAniAccumulate ani_accumulate;
   GtUword maxmat;
   GtOption *se_ref_op_evalue,
            *se_ref_op_maxmat,
@@ -110,8 +109,6 @@ static void* gt_seed_extend_arguments_new(void)
   arguments->char_access_mode = gt_str_new();
   arguments->splt_string = gt_str_new();
   arguments->display_args = gt_str_array_new();
-  arguments->ani_accumulate.sum_of_aligned_len = 0;
-  arguments->ani_accumulate.sum_of_distance = 0;
   return arguments;
 }
 
@@ -703,6 +700,15 @@ static int gt_seed_extend_arguments_check(int rest_argc, void *tool_arguments,
   return had_err;
 }
 
+static double gt_seed_extend_ani_evaluate(GtUword sum_of_aligned_len,
+                                          GtUword sum_of_distance)
+{
+  return sum_of_aligned_len > 0
+             ? (100.0 * (1.0 - (double)
+                               (2 * sum_of_distance)/sum_of_aligned_len))
+             : 0.0;
+}
+
 static int gt_seed_extend_runner(int argc,
                                  const char **argv,
                                  GT_UNUSED int parsed_args,
@@ -725,6 +731,7 @@ static int gt_seed_extend_runner(int argc,
   int had_err = 0;
   const GtSeedExtendDisplaySetMode setmode
     = GT_SEED_EXTEND_DISPLAY_SET_STANDARD;
+  GtAniAccumulate ani_accumulate[2];
 
   gt_error_check(err);
   gt_assert(arguments != NULL);
@@ -1053,6 +1060,10 @@ static int gt_seed_extend_runner(int argc,
         use_apos_local = 2;
       }
     }
+    ani_accumulate[0].sum_of_aligned_len = 0;
+    ani_accumulate[0].sum_of_distance = 0;
+    ani_accumulate[1].sum_of_aligned_len = 0;
+    ani_accumulate[1].sum_of_distance = 0;
     extp = gt_diagbandseed_extend_params_new(arguments->se_alignlength,
                                              errorpercentage,
                                              arguments->se_evalue_threshold,
@@ -1077,7 +1088,7 @@ static int gt_seed_extend_runner(int argc,
                                              arguments->verify_alignment,
                                              arguments->only_selected_seqpairs,
                                              arguments->compute_ani
-                                               ? &arguments->ani_accumulate
+                                               ? &ani_accumulate[0]
                                                : NULL);
 
     info = gt_diagbandseed_info_new(aencseq,
@@ -1142,16 +1153,19 @@ static int gt_seed_extend_runner(int argc,
   gt_querymatch_display_flag_delete(out_display_flag);
   if (arguments->compute_ani)
   {
-    printf("ANI %s %s %.4f\n",
-           gt_str_get(arguments->dbs_indexname),
-           gt_str_length(arguments->dbs_queryname) > 0
-             ? gt_str_get(arguments->dbs_queryname)
-             : gt_str_get(arguments->dbs_indexname),
-           arguments->ani_accumulate.sum_of_aligned_len > 0
-             ? 100.0 * (1.0 - (double)
-                              (2 * arguments->ani_accumulate.sum_of_distance)/
-                              arguments->ani_accumulate.sum_of_aligned_len)
-             : 0.0);
+    int idx;
+
+    printf("ANI %s %s",gt_str_get(arguments->dbs_indexname),
+                       gt_str_length(arguments->dbs_queryname) > 0
+                         ? gt_str_get(arguments->dbs_queryname)
+                         : gt_str_get(arguments->dbs_indexname));
+    for (idx = 0; idx < 2; idx++)
+    {
+      printf(" %.4f",gt_seed_extend_ani_evaluate(
+                          ani_accumulate[idx].sum_of_aligned_len,
+                          ani_accumulate[idx].sum_of_distance));
+    }
+    printf("\n");
   }
   return had_err;
 }
