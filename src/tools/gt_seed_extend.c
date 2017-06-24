@@ -798,6 +798,9 @@ static int gt_seed_extend_runner(int argc,
       {
         printf("\tTS:i:" GT_WU "\n",
                gt_querymatch_trace_delta_display(out_display_flag));
+      } else
+      {
+        fputc('\n',stdout);
       }
     }
   }

@@ -534,8 +534,9 @@ void gt_querymatch_prettyprint(double evalue,double bit_score,
                                      + one_off);
         break;
       case Gt_Q_end_display:
-        if (!GT_ISDIRREVERSE(querymatch->query_readmode) ||
-            !gt_querymatch_blast_display(out_display_flag))
+        if (!gt_querymatch_gfa2_display(out_display_flag) &&
+            (!GT_ISDIRREVERSE(querymatch->query_readmode) ||
+             !gt_querymatch_blast_display(out_display_flag)))
         {
           fprintf(querymatch->fp,GT_WU,
                   gt_querymatch_queryend_relative(querymatch) + one_off);

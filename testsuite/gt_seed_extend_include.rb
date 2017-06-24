@@ -171,6 +171,10 @@ Test do
   run_test "#{$bin}gt dev show_seedext -f tmp-with-trace.matches -outfmt alignment"
   run "diff -I '^#' #{last_stdout} #{$testdata}/see-ext-at1MB-U8-200-al-from-trace.matches"
   run_test "#{$bin}gt dev show_seedext -f tmp-with-trace.matches -outfmt s.seqlen"
+  run_test "#{$bin}gt seed_extend -ii at1MB -l 100 -outfmt gfa2 trace"
+  run "#{$scriptsdir}gfa2lint.rb #{last_stdout}"
+  run_test "#{$bin}gt seed_extend -ii at1MB -qii Atinsert.fna -outfmt gfa2 cigar"
+  run "#{$scriptsdir}gfa2lint.rb #{last_stdout}"
 end
 
 # Invalid arguments
