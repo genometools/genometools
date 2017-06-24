@@ -399,7 +399,7 @@ static void gt_querymatch_exact_match_trace_show(FILE *fp,GtUword remaining,
       remaining -= trace_delta;
     } else
     {
-      fprintf(fp,"%d",(int) remaining - (int) trace_delta);
+      fprintf(fp,"%d",(int) trace_delta - (int) remaining);
       break;
     }
   }

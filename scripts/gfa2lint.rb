@@ -9,6 +9,24 @@ def show_difference(tag,set1,set2)
   end
 end
 
+def lint_trace(trace_delta,ulen,vlen,trace_string)
+  usum = 0
+  vsum = 0
+  trace_string.split(/,/).each do |vspec|
+    vsum += -(vspec.to_i - trace_delta)
+    usum += trace_delta
+  end
+  if vsum != vlen
+    STDERR.puts "#{$0}: #{__method__}: vsum = #{vsum} != #{vlen} = vlen"
+    exit 1
+  end
+  usum -= trace_delta
+  if usum > ulen
+    STDERR.puts "#{$0}: #{__method__}: usum = #{usum} > #{ulen} = ulen"
+    exit 1
+  end
+end
+
 set_E_lines = Set.new()
 set_S_lines = Set.new()
 segment_hash = Hash.new()
@@ -19,6 +37,7 @@ if ARGV.length != 1
 end
 
 inputfile = ARGV[0]
+trace_delta = nil
 File.new(inputfile,"r").each_line do |line|
   if line.match(/^E/)
     e_elems = line.split(/\t/)
@@ -47,12 +66,14 @@ File.new(inputfile,"r").each_line do |line|
     end
     segment_hash[key] = len
     set_S_lines.add(key)
+  elsif line.match(/^H/)
+    if m = line.match(/TS:i:(\d+)/)
+      trace_delta = m[1].to_i
+    end
   end
 end
 
-if set_S_lines == set_E_lines
-  puts "sets of size #{set_E_lines.length} are identical"
-else
+if set_S_lines != set_E_lines
   show_difference("elems in E but not in S",set_E_lines,set_S_lines)
   show_difference("elems in S but not in E",set_S_lines,set_E_lines)
   exit 1
@@ -97,6 +118,10 @@ File.new(inputfile,"r").each_line do |line|
     if rend >= len_rseg
       STDERR.print "#{$0}: file #{inputfile}, line #{linenum}: "
       STDERR.puts "rend=#{rend} >= #{len_rseg} = len_rseg"
+    end
+    if not trace_delta.nil?
+      lint_trace(trace_delta,lend - lstart + 1,rend - rstart + 1,
+                 e_elems[8].chomp)
     end
   end
   linenum += 1
