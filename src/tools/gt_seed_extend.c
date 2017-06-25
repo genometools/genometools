@@ -47,7 +47,9 @@ typedef struct {
   /* diagbandseed options */
   GtStr *dbs_indexname;
   GtStr *dbs_queryname;
+  unsigned int dbs_spacedseedweight;
   unsigned int dbs_seedlength;
+  bool spacedseed;
   GtUword dbs_logdiagbandwidth;
   GtUword dbs_mincoverage;
   GtUword dbs_maxfreq;
@@ -143,7 +145,7 @@ static GtOptionParser* gt_seed_extend_option_parser_new(void *tool_arguments)
   GtOptionParser *op;
   GtOption *option, *op_gre, *op_xdr, *op_cam, *op_splt,
     *op_his, *op_dif, *op_pmh,
-    *op_seedlength, *op_minlen, *op_minid, *op_evalue, *op_xbe,
+    *op_seedlength, *op_spacedseed, *op_minlen, *op_minid, *op_evalue, *op_xbe,
     *op_sup, *op_frq,
     *op_mem, *op_bia, *op_onlyseeds, *op_weakends, *op_relax_polish,
     *op_verify_alignment, *op_only_selected_seqpairs, *op_spdist, *op_outfmt,
@@ -186,11 +188,19 @@ static GtOptionParser* gt_seed_extend_option_parser_new(void *tool_arguments)
   op_seedlength = gt_option_new_uint_min_max("seedlength",
                                       "Minimum length of a seed\n"
                                       "default: logarithm of input length "
-                                      "to the basis alphabet size",
+                                      "with alphabet size as log-base",
                                       &arguments->dbs_seedlength,
                                       UINT_MAX, 1UL, 32UL);
   gt_option_hide_default(op_seedlength);
   gt_option_parser_add_option(op, op_seedlength);
+
+  /* -spacedseed */
+  op_spacedseed = gt_option_new_bool("spacedseed",
+                                     "use spaced seed of length specified by "
+                                     "option -seedlength",
+                                     &arguments->spacedseed,
+                                     false);
+  gt_option_parser_add_option(op, op_spacedseed);
 
   /* -diagbandwidth */
   op_diagbandwidth = gt_option_new_uword_min_max("diagbandwidth",
@@ -636,6 +646,7 @@ static GtOptionParser* gt_seed_extend_option_parser_new(void *tool_arguments)
   gt_option_exclude(op_cam, op_xdr);
   gt_option_exclude(op_cam_generic, op_xbe);
   gt_option_exclude(op_cam_generic, op_xdr);
+  gt_option_exclude(op_maxmat, op_spacedseed);
 
   return op;
 }
@@ -741,6 +752,7 @@ static int gt_seed_extend_runner(int argc,
   int had_err = 0;
   const GtSeedExtendDisplaySetMode setmode
     = GT_SEED_EXTEND_DISPLAY_SET_STANDARD;
+  const unsigned int spacedseedweight = 22, spacedseedlength = 31;
   GtAniAccumulate ani_accumulate[2];
 
   gt_error_check(err);
@@ -909,6 +921,7 @@ static int gt_seed_extend_runner(int argc,
   maxseqlength = MIN(gt_encseq_max_seq_length(aencseq),
                      gt_encseq_max_seq_length(bencseq));
 
+  arguments->dbs_spacedseedweight = 0;
   if (arguments->dbs_seedlength == UINT_MAX)
   {
     if (arguments->maxmat == 1)
@@ -916,17 +929,28 @@ static int gt_seed_extend_runner(int argc,
       arguments->dbs_seedlength = MIN(maxseedlength, arguments->se_alignlength);
     } else
     {
-      unsigned int seedlength;
-      double totallength = 0.5 * (gt_encseq_total_length(aencseq) +
-                                  gt_encseq_total_length(bencseq));
-      gt_assert(nchars > 0);
-      seedlength = (unsigned int)gt_round_to_long(gt_log_base(totallength,
-                                                              (double)nchars));
-      seedlength = (unsigned int)MIN3(seedlength, maxseqlength, maxseedlength);
-      arguments->dbs_seedlength = MAX(seedlength, 2);
+      if (arguments->spacedseed)
+      {
+        arguments->dbs_seedlength = spacedseedlength;
+        arguments->dbs_spacedseedweight = spacedseedweight;
+      } else
+      {
+        unsigned int local_seedlength, log_avg_totallength;
+        double avg_totallength = 0.5 * (gt_encseq_total_length(aencseq) +
+                                        gt_encseq_total_length(bencseq));
+        gt_assert(nchars > 0);
+        log_avg_totallength
+          = (unsigned int) gt_round_to_long(gt_log_base(avg_totallength,
+                                                        (double) nchars));
+        local_seedlength = (unsigned int) MIN3(log_avg_totallength,
+                                               maxseqlength,maxseedlength);
+        arguments->dbs_seedlength = MAX(local_seedlength, 2);
+      }
     }
   }
-  if (arguments->dbs_seedlength > MIN(maxseedlength, maxseqlength)) {
+  if (!had_err && !arguments->spacedseed &&
+      arguments->dbs_seedlength > MIN(maxseedlength, maxseqlength))
+  {
     if (maxseedlength <= maxseqlength) {
       gt_error_set(err, "maximum seedlength for alphabet of size %u is %u",
                    nchars, maxseedlength);
@@ -935,6 +959,19 @@ static int gt_seed_extend_runner(int argc,
                    "<= " GT_WU " (length of longest sequence).", maxseqlength);
     }
     had_err = -1;
+  }
+  if (!had_err)
+  {
+    if (arguments->spacedseed)
+    {
+      arguments->dbs_spacedseedweight = spacedseedweight;
+      if (arguments->dbs_seedlength != spacedseedlength)
+      {
+        gt_error_set(err, "only spaced seeds of length %u supported",
+                     spacedseedlength);
+        had_err = -1;
+      }
+    }
   }
 
   /* Set mincoverage */
@@ -1108,6 +1145,7 @@ static int gt_seed_extend_runner(int argc,
                                     bencseq,
                                     arguments->dbs_maxfreq,
                                     arguments->dbs_memlimit,
+                                    arguments->dbs_spacedseedweight,
                                     arguments->dbs_seedlength,
                                     arguments->norev,
                                     arguments->nofwd,

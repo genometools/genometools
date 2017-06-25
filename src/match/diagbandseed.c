@@ -106,7 +106,8 @@ struct GtDiagbandseedInfo
   GtUword maxfreq,
           memlimit,
           maxmat;
-  unsigned int seedlength;
+  unsigned int seedweight,
+               seedlength;
   GtDiagbandseedPairlisttype splt;
   bool norev,
        nofwd,
@@ -157,7 +158,8 @@ typedef struct
   GtUword last_specialpos,
           prev_separator,
           next_separator;
-  unsigned int seedlength;
+  unsigned int seedweight,
+               seedlength;
   GtReadmode readmode;
 } GtDiagbandseedProcKmerInfo;
 
@@ -223,6 +225,7 @@ GtDiagbandseedInfo *gt_diagbandseed_info_new(const GtEncseq *aencseq,
                                              const GtEncseq *bencseq,
                                              GtUword maxfreq,
                                              GtUword memlimit,
+                                             unsigned int spacedseedweight,
                                              unsigned int seedlength,
                                              bool norev,
                                              bool nofwd,
@@ -246,6 +249,15 @@ GtDiagbandseedInfo *gt_diagbandseed_info_new(const GtEncseq *aencseq,
   info->bencseq = bencseq;
   info->maxfreq = maxfreq;
   info->memlimit = memlimit;
+  if (spacedseedweight > 0)
+  {
+    info->seedweight = spacedseedweight;
+    printf("spacedseedweight=%u,seedlength=%u\n",spacedseedweight,seedlength);
+    exit(EXIT_FAILURE);
+  } else
+  {
+    info->seedweight = seedlength;
+  }
   info->seedlength = seedlength;
   info->norev = norev;
   info->nofwd = nofwd;
@@ -423,7 +435,8 @@ static void gt_diagbandseed_processkmercode(void *prockmerinfo,
 
   /* save k-mer code */
   kmerposptr->code = (pkinfo->readmode == GT_READMODE_FORWARD
-                      ? code : gt_kmercode_reverse(code, pkinfo->seedlength));
+                       ? code
+                       : gt_kmercode_reverse(code, pkinfo->seedweight));
   /* save endpos and seqnum */
   gt_assert(pkinfo->endpos != UINT32_MAX);
   kmerposptr->endpos = pkinfo->endpos;
@@ -473,6 +486,7 @@ static void gt_diagbandseed_get_kmers_kciter(GtDiagbandseedProcKmerInfo *pkinfo)
  * The caller is responsible for freeing the result. */
 static GtArrayGtDiagbandseedKmerPos gt_diagbandseed_get_kmers(
                                    const GtEncseq *encseq,
+                                   unsigned int seedweight,
                                    unsigned int seedlength,
                                    GtReadmode readmode,
                                    GtUword seqrange_start,
@@ -515,6 +529,7 @@ static GtArrayGtDiagbandseedKmerPos gt_diagbandseed_get_kmers(
   pkinfo.seqnum = seqrange_start;
   pkinfo.endpos = 0;
   pkinfo.encseq = encseq;
+  pkinfo.seedweight = seedweight;
   pkinfo.seedlength = seedlength;
   pkinfo.readmode = readmode;
   if (seqrange_end + 1 == gt_encseq_num_of_sequences(encseq)) {
@@ -3452,6 +3467,7 @@ static void gt_diagbandseed_process_seeds(GtSeedpairlist *seedpairlist,
 /* * * * * ALGORITHM STEPS * * * * */
 
 static char *gt_diagbandseed_kmer_filename(const GtEncseq *encseq,
+                                           unsigned int seedweight,
                                            unsigned int seedlength,
                                            bool forward,
                                            unsigned int numparts,
@@ -3459,6 +3475,11 @@ static char *gt_diagbandseed_kmer_filename(const GtEncseq *encseq,
 {
   char *filename;
   GtStr *str = gt_str_new_cstr(gt_encseq_indexname(encseq));
+  if (seedweight < seedlength)
+  {
+    gt_str_append_char(str, '.');
+    gt_str_append_uint(str, seedweight);
+  }
   gt_str_append_char(str, '.');
   gt_str_append_uint(str, seedlength);
   gt_str_append_char(str, forward ? 'f' : 'r');
@@ -3544,7 +3565,8 @@ static int gt_diagbandseed_algorithm(const GtDiagbandseedInfo *arg,
   /* Create k-mer iterator for alist */
   if (alist == NULL) {
     char *alist_file;
-    alist_file = gt_diagbandseed_kmer_filename(arg->aencseq, arg->seedlength,
+    alist_file = gt_diagbandseed_kmer_filename(arg->aencseq, arg->seedweight,
+                                               arg->seedlength,
                                                true, anumseqranges,aidx);
     FILE *alist_fp = gt_fa_fopen(alist_file, "rb", err);
     if (alist_fp == NULL) {
@@ -3565,7 +3587,8 @@ static int gt_diagbandseed_algorithm(const GtDiagbandseedInfo *arg,
     biter = gt_diagbandseed_kmer_iter_new_list(alist);
     blen = alen;
   } else if (arg->use_kmerfile) {
-    blist_file = gt_diagbandseed_kmer_filename(arg->bencseq, arg->seedlength,
+    blist_file = gt_diagbandseed_kmer_filename(arg->bencseq, arg->seedweight,
+                                               arg->seedlength,
                                                !arg->nofwd, bnumseqranges,bidx);
     if (!gt_file_exists(blist_file)) {
       gt_free(blist_file);
@@ -3590,6 +3613,7 @@ static int gt_diagbandseed_algorithm(const GtDiagbandseedInfo *arg,
     const GtUword known_size = (selfcomp && equalranges) ? alen : 0;
     blist = gt_diagbandseed_get_kmers(
                               arg->bencseq,
+                              arg->seedweight,
                               arg->seedlength,
                               readmode_kmerscan,
                               gt_sequence_parts_info_start_get(bseqranges,bidx),
@@ -3787,6 +3811,7 @@ static int gt_diagbandseed_algorithm(const GtDiagbandseedInfo *arg,
       seedpairdistance.start = 0UL;
       if (arg->use_kmerfile) {
         blist_file = gt_diagbandseed_kmer_filename(arg->bencseq,
+                                                   arg->seedweight,
                                                    arg->seedlength,
                                                    false, bnumseqranges,
                                                    bidx);
@@ -3807,6 +3832,7 @@ static int gt_diagbandseed_algorithm(const GtDiagbandseedInfo *arg,
         const GtReadmode readmode_kmerscan = GT_READMODE_COMPL;
         clist = gt_diagbandseed_get_kmers(
                               arg->bencseq,
+                              arg->seedweight,
                               arg->seedlength,
                               readmode_kmerscan,
                               gt_sequence_parts_info_start_get(bseqranges,bidx),
@@ -3999,6 +4025,7 @@ static void *gt_diagbandseed_thread_algorithm(void *thread_info)
 
 static int gt_diagbandseed_write_kmers(const GtArrayGtDiagbandseedKmerPos *list,
                                        const char *path,
+                                       unsigned int seedweight,
                                        unsigned int seedlength,
                                        bool verbose,
                                        GtError *err)
@@ -4006,8 +4033,13 @@ static int gt_diagbandseed_write_kmers(const GtArrayGtDiagbandseedKmerPos *list,
   FILE *stream;
 
   if (verbose) {
-    printf("# write " GT_WU " %u-mers to file %s\n",
-           list->nextfreeGtDiagbandseedKmerPos, seedlength, path);
+    printf("# write " GT_WU " %u-mers ",
+           list->nextfreeGtDiagbandseedKmerPos, seedlength);
+    if (seedweight < seedlength)
+    {
+      printf("with weight %u ",seedweight);
+    }
+    printf("to file %s\n",path);
   }
 
   stream = gt_fa_fopen(path, "wb", err);
@@ -4125,7 +4157,8 @@ int gt_diagbandseed_run(const GtDiagbandseedInfo *arg,
         char *path;
         if (bpick && pick->b != bidx) continue;
 
-        path = gt_diagbandseed_kmer_filename(arg->bencseq, arg->seedlength, fwd,
+        path = gt_diagbandseed_kmer_filename(arg->bencseq, arg->seedweight,
+                                             arg->seedlength, fwd,
                                              bnumseqranges, bidx);
         if (gt_create_or_update_file(path,arg->bencseq))
         {
@@ -4135,6 +4168,7 @@ int gt_diagbandseed_run(const GtDiagbandseedInfo *arg,
 
           blist = gt_diagbandseed_get_kmers(
                               arg->bencseq,
+                              arg->seedweight,
                               arg->seedlength,
                               readmode_kmerscan,
                               gt_sequence_parts_info_start_get(bseqranges,bidx),
@@ -4143,7 +4177,8 @@ int gt_diagbandseed_run(const GtDiagbandseedInfo *arg,
                               arg->verbose,
                               0,
                               stdout);
-          had_err = gt_diagbandseed_write_kmers(&blist, path, arg->seedlength,
+          had_err = gt_diagbandseed_write_kmers(&blist, path, arg->seedweight,
+                                                arg->seedlength,
                                                 arg->verbose, err);
           GT_FREEARRAY(&blist, GtDiagbandseedKmerPos);
         }
@@ -4185,7 +4220,8 @@ int gt_diagbandseed_run(const GtDiagbandseedInfo *arg,
     if (apick && pick->a != aidx) continue;
 
     if (arg->use_kmerfile) {
-      path = gt_diagbandseed_kmer_filename(arg->aencseq, arg->seedlength, true,
+      path = gt_diagbandseed_kmer_filename(arg->aencseq, arg->seedweight,
+                                           arg->seedlength, true,
                                            anumseqranges, aidx);
     }
 
@@ -4194,6 +4230,7 @@ int gt_diagbandseed_run(const GtDiagbandseedInfo *arg,
       use_alist = true;
       alist = gt_diagbandseed_get_kmers(
                               arg->aencseq,
+                              arg->seedweight,
                               arg->seedlength,
                               GT_READMODE_FORWARD,
                               gt_sequence_parts_info_start_get(aseqranges,aidx),
@@ -4203,7 +4240,8 @@ int gt_diagbandseed_run(const GtDiagbandseedInfo *arg,
                               0,
                               stdout);
       if (arg->use_kmerfile) {
-        had_err = gt_diagbandseed_write_kmers(&alist, path, arg->seedlength,
+        had_err = gt_diagbandseed_write_kmers(&alist, path, arg->seedweight,
+                                              arg->seedlength,
                                               arg->verbose, err);
       }
     }
