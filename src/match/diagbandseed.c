@@ -252,8 +252,6 @@ GtDiagbandseedInfo *gt_diagbandseed_info_new(const GtEncseq *aencseq,
   if (spacedseedweight > 0)
   {
     info->seedweight = spacedseedweight;
-    printf("spacedseedweight=%u,seedlength=%u\n",spacedseedweight,seedlength);
-    exit(EXIT_FAILURE);
   } else
   {
     info->seedweight = seedlength;
@@ -390,6 +388,20 @@ static GtUword gt_diagbandseed_update_separatorpos(GtRange *specialrange,
   return totallength;
 }
 
+static GtCodetype gt_extract_spaced_seed_rasb_se2(GtCodetype kmer)
+{
+  gt_assert(kmer < 1152921504606846976);
+  /* 111110101101011100111011001111, weight 21, length 30 */
+  return ((kmer & ((GtCodetype) 1151795604700004352)) >> 18) |
+         ((kmer & ((GtCodetype) 211106232532992)) >> 16) |
+         ((kmer & ((GtCodetype) 16492674416640)) >> 14) |
+         ((kmer & ((GtCodetype) 206158430208)) >> 12) |
+         ((kmer & ((GtCodetype) 16911433728)) >> 10) |
+         ((kmer & ((GtCodetype) 16515072)) >> 6) |
+         ((kmer & ((GtCodetype) 61440)) >> 4) |
+         (kmer & ((GtCodetype) 255));
+}
+
 /* Add given code and its seqnum and position to a kmer list. */
 static void gt_diagbandseed_processkmercode(void *prockmerinfo,
                                             bool firstinrange,
@@ -434,9 +446,13 @@ static void gt_diagbandseed_processkmercode(void *prockmerinfo,
   }
 
   /* save k-mer code */
-  kmerposptr->code = (pkinfo->readmode == GT_READMODE_FORWARD
+  kmerposptr->code = pkinfo->readmode == GT_READMODE_FORWARD
                        ? code
-                       : gt_kmercode_reverse(code, pkinfo->seedweight));
+                       : gt_kmercode_reverse(code, pkinfo->seedlength);
+  if (pkinfo->seedweight < pkinfo->seedlength)
+  {
+    kmerposptr->code = gt_extract_spaced_seed_rasb_se2(kmerposptr->code);
+  }
   /* save endpos and seqnum */
   gt_assert(pkinfo->endpos != UINT32_MAX);
   kmerposptr->endpos = pkinfo->endpos;

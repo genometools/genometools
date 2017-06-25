@@ -752,7 +752,7 @@ static int gt_seed_extend_runner(int argc,
   int had_err = 0;
   const GtSeedExtendDisplaySetMode setmode
     = GT_SEED_EXTEND_DISPLAY_SET_STANDARD;
-  const unsigned int spacedseedweight = 22, spacedseedlength = 31;
+  const unsigned int spacedseedweight = 21, spacedseedlength = 30;
   GtAniAccumulate ani_accumulate[2];
 
   gt_error_check(err);
@@ -967,9 +967,17 @@ static int gt_seed_extend_runner(int argc,
       arguments->dbs_spacedseedweight = spacedseedweight;
       if (arguments->dbs_seedlength != spacedseedlength)
       {
-        gt_error_set(err, "only spaced seeds of length %u supported",
+        gt_error_set(err,"only spaced seeds of length %u supported",
                      spacedseedlength);
         had_err = -1;
+      } else
+      {
+        if (nchars != 4)
+        {
+          gt_error_set(err,"spaced seeds only work for sequences over an "
+                           "alphabet of size 4");
+          had_err = -1;
+        }
       }
     }
   }
