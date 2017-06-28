@@ -27,6 +27,12 @@ def lint_trace(trace_delta,ulen,vlen,trace_string)
   end
 end
 
+class String
+  def segment_name
+    return self.gsub(/[-+]$/,"")
+  end
+end
+
 set_E_lines = Set.new()
 set_S_lines = Set.new()
 segment_hash = Hash.new()
@@ -45,8 +51,8 @@ File.new(inputfile,"r").each_line do |line|
       STDERR.puts "#{$0}: expect 9 columns in E-lines"
       exit 1
     end
-    set_E_lines.add(e_elems[2])
-    set_E_lines.add(e_elems[3].gsub(/^-/,""))
+    set_E_lines.add(e_elems[2].segment_name)
+    set_E_lines.add(e_elems[3].segment_name)
   elsif line.match(/^S/)
     s_elems = line.split(/\t/)
     if s_elems.length != 4
@@ -83,7 +89,7 @@ linenum = 1
 File.new(inputfile,"r").each_line do |line|
   if line.match(/^E/)
     e_elems = line.split(/\t/)
-    lseg = e_elems[2]
+    lseg = e_elems[2].segment_name
     lstart = e_elems[4].to_i
     lend = e_elems[5].to_i
     if lstart > lend
@@ -101,7 +107,7 @@ File.new(inputfile,"r").each_line do |line|
       STDERR.print "#{$0}: file #{inputfile}, line #{linenum}: "
       STDERR.puts "lend=#{lend} >= #{len_lseg} = len_lseg"
     end
-    rseg = e_elems[3].gsub(/^-/,"")
+    rseg = e_elems[3].segment_name
     rstart = e_elems[6].to_i
     rend = e_elems[7].to_i
     if rstart > rend

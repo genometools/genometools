@@ -477,6 +477,10 @@ void gt_querymatch_prettyprint(double evalue,double bit_score,
           fputc('S',querymatch->fp);
         }
         fprintf(querymatch->fp,GT_WU,querymatch->dbseqnum);
+        if (gfa2_display)
+        {
+          fputc('+',querymatch->fp);
+        }
         break;
       case Gt_Subjectid_display:
         gt_querymatch_description_out(querymatch->fp,querymatch->db_desc);
@@ -517,14 +521,13 @@ void gt_querymatch_prettyprint(double evalue,double bit_score,
       case Gt_Q_seqnum_display:
         if (gfa2_display)
         {
-          if (GT_ISDIRREVERSE(querymatch->query_readmode))
-          {
-            fputc('-',querymatch->fp); /* add minus signed before seqnum for
-                                          - strand */
-          }
           fputc(querymatch->selfmatch ? 'S' : 'Q',querymatch->fp);
         }
         fprintf(querymatch->fp,GT_WU,querymatch->queryseqnum);
+        if (gfa2_display)
+        {
+          fputc(GT_ISDIRREVERSE(querymatch->query_readmode) ? '-' : '+',querymatch->fp);
+        }
         break;
       case Gt_Queryid_display:
         gt_querymatch_description_out(querymatch->fp,querymatch->query_desc);
