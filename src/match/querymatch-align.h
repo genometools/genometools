@@ -77,7 +77,9 @@ void gt_frontprune2eoplist(GtQuerymatchoutoptions *querymatchoutoptions,
                            bool verify_alignment);
 
 void gt_querymatchoutoptions_cigar_show(const GtQuerymatchoutoptions
-                                              *querymatchoutoptions,FILE *fp);
+                                              *querymatchoutoptions,
+                                        bool distinguish_mismatch_match,
+                                        FILE *fp);
 
 void gt_querymatchoutoptions_trace_show(const GtQuerymatchoutoptions
                                               *querymatchoutoptions,
@@ -88,7 +90,8 @@ void gt_querymatchoutoptions_alignment_show(const GtQuerymatchoutoptions
                                             GtUword subject_seqlength,
                                             GtUword query_reference,
                                             GtUword one_off,
-                                            bool exact_match,
+                                            GtUword distance,
+                                            bool distinguish_mismatch_match,
                                             bool verify_alignment,
                                             bool subject_first,
                                             bool alignment_show_forward,

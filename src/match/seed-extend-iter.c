@@ -496,6 +496,14 @@ int gt_seedextend_match_iterator_querymatchoutoptions_set(
   {
     return -1;
   }
+  gt_assert(semi->in_display_flag != NULL && out_display_flag != NULL);
+  if (gt_querymatch_cigar_display(semi->in_display_flag) &&
+      gt_querymatch_cigarX_display(out_display_flag))
+  {
+    gt_error_set(err,"match file with alignments in cigar format cannot be "
+                     "converted to cigarX format");
+    return -1;
+  }
   if (gt_seedextend_match_iterator_bias_parameters(semi))
   {
     matchscore_bias = gt_greedy_dna_sequence_bias_get(semi->aencseq);

@@ -448,10 +448,12 @@ void gt_querymatch_prettyprint(double evalue,double bit_score,
         {
           gt_querymatchoutoptions_cigar_show(
                                      querymatch->ref_querymatchoutoptions,
+                                     co == Gt_Cigar_display ? false : true,
                                      querymatch->fp);
         } else
         {
-          fprintf(querymatch->fp,GT_WU "=",gt_querymatch_dblen(querymatch));
+          fprintf(querymatch->fp,GT_WU "%c",gt_querymatch_dblen(querymatch),
+                                            co == Gt_Cigar_display ? 'M' : '=');
         }
         break;
       case Gt_Trace_display:
@@ -526,7 +528,8 @@ void gt_querymatch_prettyprint(double evalue,double bit_score,
         fprintf(querymatch->fp,GT_WU,querymatch->queryseqnum);
         if (gfa2_display)
         {
-          fputc(GT_ISDIRREVERSE(querymatch->query_readmode) ? '-' : '+',querymatch->fp);
+          fputc(GT_ISDIRREVERSE(querymatch->query_readmode) ? '-' : '+',
+                querymatch->fp);
         }
         break;
       case Gt_Queryid_display:
@@ -632,7 +635,8 @@ void gt_querymatch_prettyprint(double evalue,double bit_score,
   {
     bool subject_first = true,
          alignment_show_forward = true,
-         show_complement_characters = false;
+         show_complement_characters = false,
+         distinguish_mismatch_match = true;
     GtUword subject_seqlength = 0, query_reference = 0;
 
     if (gt_querymatch_blast_display(out_display_flag))
@@ -657,8 +661,8 @@ void gt_querymatch_prettyprint(double evalue,double bit_score,
                                            subject_seqlength,
                                            query_reference,
                                            one_off,
-                                           querymatch->distance == 0
-                                             ? true : false,
+                                           querymatch->distance,
+                                           distinguish_mismatch_match,
                                            querymatch->verify_alignment,
                                            subject_first,
                                            alignment_show_forward,
