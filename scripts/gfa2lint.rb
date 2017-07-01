@@ -35,6 +35,8 @@ end
 
 set_E_lines = Set.new()
 set_S_lines = Set.new()
+set_S_ids = Set.new()
+set_E_ids = Set.new()
 segment_hash = Hash.new()
 
 if ARGV.length != 1
@@ -51,6 +53,12 @@ File.new(inputfile,"r").each_line do |line|
       STDERR.puts "#{$0}: expect 9 columns in E-lines"
       exit 1
     end
+    id = e_elems[1]
+    if set_E_ids.include?(id)
+      STDERR.puts "#{$0}: edge identifier #{id} is not unique"
+      exit 1
+    end
+    set_E_ids.add(id)
     set_E_lines.add(e_elems[2].segment_name)
     set_E_lines.add(e_elems[3].segment_name)
   elsif line.match(/^S/)
@@ -72,6 +80,12 @@ File.new(inputfile,"r").each_line do |line|
     end
     segment_hash[key] = len
     set_S_lines.add(key)
+    id = s_elems[1]
+    if set_S_ids.include?(id)
+      STDERR.puts "#{$0}: segment identifier #{id} is not unique"
+      exit 1
+    end
+    set_S_ids.add(id)
   elsif line.match(/^H/)
     if m = line.match(/TS:i:(\d+)/)
       trace_delta = m[1].to_i
