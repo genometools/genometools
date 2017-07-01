@@ -2320,6 +2320,7 @@ static int gt_diagbandseed_possibly_extend(const GtArrayGtDiagbandseedRectangle
           if (!esi->benchmark) {
             if (gt_querymatch_gfa2_display(esi->out_display_flag))
             {
+              gt_assert(esi->dbs_state != NULL);
               gt_querymatch_gfa2_edge(querymatch,
                                       esi->dbs_state->
                                            current_gfa2_edge_num);

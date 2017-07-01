@@ -757,6 +757,10 @@ static int gt_seed_extend_runner(int argc,
 
   gt_error_check(err);
   gt_assert(arguments != NULL);
+  ani_accumulate[0].sum_of_aligned_len = 0;
+  ani_accumulate[0].sum_of_distance = 0;
+  ani_accumulate[1].sum_of_aligned_len = 0;
+  ani_accumulate[1].sum_of_distance = 0;
   /* Define, whether greedy extension will be performed */
   extendxdrop = gt_option_is_set(arguments->se_ref_op_xdr);
   if (arguments->onlyseeds || extendxdrop) {
@@ -1118,10 +1122,6 @@ static int gt_seed_extend_runner(int argc,
         use_apos_local = 2;
       }
     }
-    ani_accumulate[0].sum_of_aligned_len = 0;
-    ani_accumulate[0].sum_of_distance = 0;
-    ani_accumulate[1].sum_of_aligned_len = 0;
-    ani_accumulate[1].sum_of_distance = 0;
     extp = gt_diagbandseed_extend_params_new(arguments->se_alignlength,
                                              errorpercentage,
                                              arguments->se_evalue_threshold,
