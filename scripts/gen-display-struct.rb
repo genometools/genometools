@@ -72,6 +72,10 @@ display_options = [
   ["trace",       "display trace, i.e. compact representation of alignment " +
                   "(possibly followed by =<delta> to specify the delta-value, "+
                   "default is #{TRACE_DELTA})"],
+  ["dtrace",      "display trace with difference, like trace, but instead " +
+                  "of a absolute value x, report #{TRACE_DELTA} - x, which " +
+                  "leads to smaller numbers and thus a more compact " +
+                  "representation"],
   ["s.len",       "display length of match on subject sequence"],
   ["s.seqnum",    "display sequence number of subject sequence"],
   ["subject id",  "display sequence description of subject sequence"],

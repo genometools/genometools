@@ -614,6 +614,7 @@ void gt_querymatchoutoptions_cigar_show(const GtQuerymatchoutoptions
 
 void gt_querymatchoutoptions_trace_show(const GtQuerymatchoutoptions
                                               *querymatchoutoptions,
+                                        bool dtrace,
                                         FILE *fp)
 {
   GtEoplistSegment segment;
@@ -633,8 +634,9 @@ void gt_querymatchoutoptions_trace_show(const GtQuerymatchoutoptions
     {
       first = false;
     }
-    fprintf(fp,"%d",(int) querymatchoutoptions->trace_delta -
-                    (int) segment.aligned_v);
+    fprintf(fp,"%d",dtrace ? ((int) querymatchoutoptions->trace_delta -
+                              (int) segment.aligned_v)
+                           : (int) segment.aligned_v);
   }
 }
 

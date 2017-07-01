@@ -13,8 +13,8 @@ def lint_trace(trace_delta,ulen,vlen,trace_string)
   usum = 0
   vsum = 0
   trace_string.split(/,/).each do |vspec|
-    vsum += -(vspec.to_i - trace_delta)
     usum += trace_delta
+    vsum += vspec.to_i
   end
   if vsum != vlen
     STDERR.puts "#{$0}: #{__method__}: vsum = #{vsum} != #{vlen} = vlen"

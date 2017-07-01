@@ -129,8 +129,8 @@ Test do
   run "diff -I '^#' #{last_stdout} #{$testdata}see-ext-at1MB-400-cigar.matches"
   run_test "#{$bin}gt seed_extend -ii at1MB -l 400 -outfmt cigarX"
   run "diff -I '^#' #{last_stdout} #{$testdata}see-ext-at1MB-400-cigarX.matches"
-  run_test "#{$bin}gt seed_extend -ii at1MB -l 400 -outfmt trace=50"
-  run "diff -I '^#' #{last_stdout} #{$testdata}see-ext-at1MB-400-trace.matches"
+  run_test "#{$bin}gt seed_extend -ii at1MB -l 400 -outfmt dtrace=50"
+  run "diff -I '^#' #{last_stdout} #{$testdata}see-ext-at1MB-400-dtrace.matches"
   run_test "#{$bin}gt seed_extend -ii at1MB -l 700 -outfmt alignment=60 seed_in_algn"
   run "diff -I '^#' #{last_stdout} #{$testdata}see-ext-at1MB-500-alignment-seed_in_algn.matches"
   run_test "#{$bin}gt seed_extend -ii at1MB -l 400 -outfmt s.seqlen q.seqlen"
@@ -170,14 +170,14 @@ Test do
   run "diff -I '^#' #{last_stdout} #{$testdata}see-ext-at1MB-Atinsert100-evalue-bitscore-cigar-seqlength.matches"
   run "#{$bin}/gt seed_extend -ii at1MB -mincoverage 200 -outfmt tabsep custom s.seqnum s.start s.len strand q.seqnum q.start q.len editdist"
   run "cmp -s #{last_stdout} #{$testdata}/see-ext-at1MB-mincoverage200-tabsep.matches"
-  run_test "#{$bin}gt seed_extend -ii at1MB -l 400 -outfmt trace"
+  run_test "#{$bin}gt seed_extend -ii at1MB -l 400 -outfmt dtrace"
   run_test "#{$bin}gt dev show_seedext -f #{last_stdout} -outfmt alignment"
-  run "diff -I '^#' #{last_stdout} #{$testdata}/see-ext-at1MB-400-al-from-trace.matches"
-  run_test "#{$bin}gt seed_extend -ii at1MB -qii U89959_genomic -l 200 -outfmt trace=20 s.seqlen q.seqlen"
-  run "mv #{last_stdout} tmp-with-trace.matches"
-  run_test "#{$bin}gt dev show_seedext -f tmp-with-trace.matches -outfmt alignment"
-  run "diff -I '^#' #{last_stdout} #{$testdata}/see-ext-at1MB-U8-200-al-from-trace.matches"
-  run_test "#{$bin}gt dev show_seedext -f tmp-with-trace.matches -outfmt s.seqlen"
+  run "diff -I '^#' #{last_stdout} #{$testdata}/see-ext-at1MB-400-al-from-dtrace.matches"
+  run_test "#{$bin}gt seed_extend -ii at1MB -qii U89959_genomic -l 200 -outfmt dtrace=20 s.seqlen q.seqlen"
+  run "mv #{last_stdout} tmp-with-dtrace.matches"
+  run_test "#{$bin}gt dev show_seedext -f tmp-with-dtrace.matches -outfmt alignment"
+  run "diff -I '^#' #{last_stdout} #{$testdata}/see-ext-at1MB-U8-200-al-from-dtrace.matches"
+  run_test "#{$bin}gt dev show_seedext -f tmp-with-dtrace.matches -outfmt s.seqlen"
   run_test "#{$bin}gt seed_extend -ii at1MB -l 100 -outfmt gfa2 trace"
   run "#{$scriptsdir}gfa2lint.rb #{last_stdout}"
   run_test "#{$bin}gt seed_extend -ii at1MB -qii Atinsert.fna -outfmt gfa2 cigar"
@@ -233,7 +233,7 @@ Test do
   run_test "#{$bin}gt seed_extend -ii at1MB -outfmt alignment cigar", :retval => 1
   run_test "#{$bin}gt seed_extend -ii at1MB -maxmat 2 -l 100 -chain xx", :retval => 1
   run_test "#{$bin}gt seed_extend -ii at1MB -outfmt gfa2", :retval => 1
-  run_test "#{$bin}gt seed_extend -ii at1MB -outfmt gfa2 identity trace", :retval => 1
+  run_test "#{$bin}gt seed_extend -ii at1MB -outfmt gfa2 identity dtrace", :retval => 1
   run_test "#{$bin}gt seed_extend -ii at1MB -outfmt cigar"
   run_test "#{$bin}gt dev show_seedext -f #{last_stdout} -outfmt cigarX",:retval => 1
 end

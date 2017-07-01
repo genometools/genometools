@@ -586,19 +586,25 @@ void gt_eoplist_read_trace(GtEoplist *eoplist,
   }
 }
 
-void gt_eoplist_trace2cigar(GtEoplist *eoplist,GtUword trace_delta)
+void gt_eoplist_trace2cigar(GtEoplist *eoplist,bool dtrace,GtUword trace_delta)
 {
   GtUword idx, offset_u = 0, offset_v = 0;
 
-  gt_assert(eoplist != NULL &&
-            eoplist->trace.nextfreeint > 0);
+  gt_assert(eoplist != NULL && eoplist->trace.nextfreeint > 0);
   for (idx = 0; idx < eoplist->trace.nextfreeint; idx++)
   {
     GtUword this_distance, aligned_u, aligned_v;
-    int value = -(eoplist->trace.spaceint[idx] - trace_delta);
 
-    gt_assert(value >= 0 && offset_u < eoplist->ulen);
-    aligned_v = (GtUword) value;
+    if (dtrace)
+    {
+      const int value = -(eoplist->trace.spaceint[idx] - trace_delta);
+      gt_assert(value >= 0);
+      aligned_v = (GtUword) value;
+    } else
+    {
+      aligned_v = (GtUword) eoplist->trace.spaceint[idx];
+    }
+    gt_assert(offset_u < eoplist->ulen);
     aligned_u = MIN(trace_delta,eoplist->ulen - offset_u);
     this_distance = gt_full_front_edist_trace_distance(eoplist->fet_segment,
                                                        eoplist->useq + offset_u,

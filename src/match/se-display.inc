@@ -10,6 +10,7 @@ static GtSEdisplayStruct gt_display_arguments_table[] =
   {"cigar", Gt_Cigar_display, true},
   {"cigarX", Gt_Cigarx_display, true},
   {"custom", Gt_Custom_display, false},
+  {"dtrace", Gt_Dtrace_display, true},
   {"editdist", Gt_Editdist_display, true},
   {"evalue", Gt_Evalue_display, true},
   {"failed_seed", Gt_Failed_seed_display, false},
@@ -45,42 +46,43 @@ static GtSEdisplayStruct gt_display_arguments_table[] =
 
 static unsigned int gt_display_flag2index[] = {
    0,
-   33,
-   16,
-   29,
-   9,
+   34,
+   17,
+   30,
    10,
-   36,
+   11,
+   37,
    3,
-   12,
+   13,
    6,
    4,
    5,
-   37,
-   24,
-   26,
-   35,
-   27,
-   23,
-   34,
-   18,
-   20,
-   22,
-   21,
-   17,
-   1,
-   15,
-   14,
-   11,
-   28,
+   38,
    7,
-   13,
-   30,
-   32,
-   31,
    25,
+   27,
+   36,
+   28,
+   24,
+   35,
    19,
+   21,
+   23,
+   22,
+   18,
+   1,
+   16,
+   15,
+   12,
+   29,
    8,
+   14,
+   31,
+   33,
+   32,
+   26,
+   20,
+   9,
    2
 };
 
@@ -114,6 +116,10 @@ const char *gt_querymatch_display_help(void)
          "trace:            display trace, i.e. compact representation\n"
          "                  of alignment (possibly followed by =<delta> to\n"
          "                  specify the delta-value, default is 50)\n"
+         "dtrace:           display trace with difference, like trace,\n"
+         "                  but instead of a absolute value x, report 50 - x,\n"
+         "                  which leads to smaller numbers and thus a more\n"
+         "                  compact representation\n"
          "s.len:            display length of match on subject sequence\n"
          "s.seqnum:         display sequence number of subject sequence\n"
          "subject id:       display sequence description of subject\n"
@@ -163,6 +169,7 @@ const char *gt_querymatch_display_help(void)
         ", cigar"\
         ", cigarX"\
         ", trace"\
+        ", dtrace"\
         ", s.len"\
         ", s.seqnum"\
         ", subject id"\
@@ -259,6 +266,12 @@ bool gt_querymatch_trace_display(const GtSeedExtendDisplayFlag
                                         *display_flag)
 {
   return gt_querymatch_display_on(display_flag,Gt_Trace_display);
+}
+
+bool gt_querymatch_dtrace_display(const GtSeedExtendDisplayFlag
+                                        *display_flag)
+{
+  return gt_querymatch_display_on(display_flag,Gt_Dtrace_display);
 }
 
 bool gt_querymatch_s_len_display(const GtSeedExtendDisplayFlag

@@ -379,7 +379,9 @@ static void gt_querymatch_description_out(FILE *fp,const char *description)
   fwrite(description,sizeof *description,nwspl,fp);
 }
 
-static void gt_querymatch_exact_match_trace_show(FILE *fp,GtUword remaining,
+static void gt_querymatch_exact_match_trace_show(FILE *fp,
+                                                 bool dtrace,
+                                                 GtUword remaining,
                                                  GtUword trace_delta)
 {
   bool first = true;
@@ -395,11 +397,12 @@ static void gt_querymatch_exact_match_trace_show(FILE *fp,GtUword remaining,
     }
     if (remaining > trace_delta)
     {
-      fprintf(fp,"0");
+      fprintf(fp,GT_WU,dtrace ? 0 : trace_delta);
       remaining -= trace_delta;
     } else
     {
-      fprintf(fp,"%d",(int) trace_delta - (int) remaining);
+      fprintf(fp,"%d",dtrace ? ((int) trace_delta - (int) remaining)
+                             : (int) remaining);
       break;
     }
   }
@@ -432,6 +435,7 @@ void gt_querymatch_prettyprint(double evalue,double bit_score,
   for (idx = 0; idx < numcolumns; idx++)
   {
     const unsigned int co = column_order[idx];
+    bool dtrace;
 
     if (idx > 0 && (querymatch->score > 0 ||
                    (co != Gt_Score_display &&
@@ -457,14 +461,18 @@ void gt_querymatch_prettyprint(double evalue,double bit_score,
         }
         break;
       case Gt_Trace_display:
+      case Gt_Dtrace_display:
+        dtrace = co == Gt_Dtrace_display ? true : false;
         if (querymatch->distance > 0)
         {
           gt_querymatchoutoptions_trace_show(
                                 querymatch->ref_querymatchoutoptions,
+                                dtrace,
                                 querymatch->fp);
         } else
         {
           gt_querymatch_exact_match_trace_show(querymatch->fp,
+                                               dtrace,
                                                gt_querymatch_dblen(querymatch),
                                                gt_querymatch_trace_delta_display
                                                   (out_display_flag));
@@ -954,6 +962,7 @@ void gt_querymatch_read_line(GtQuerymatch *querymatch,
         }
         break;
       case Gt_Trace_display:
+      case Gt_Dtrace_display:
         if (querymatch->ref_eoplist != NULL)
         {
           gt_eoplist_reset(querymatch->ref_eoplist);
@@ -1306,6 +1315,7 @@ void gt_querymatch_recompute_alignment(GtQuerymatch *querymatch,
                                        const GtSeedExtendDisplayFlag
                                          *out_display_flag,
                                        bool match_has_cigar,
+                                       bool dtrace,
                                        GtUword trace_delta,
                                        bool match_has_seed,
                                        const GtEncseq *db_encseq,
@@ -1339,7 +1349,7 @@ void gt_querymatch_recompute_alignment(GtQuerymatch *querymatch,
     }
     if (querymatch->ref_eoplist != NULL && trace_delta > 0)
     {
-      gt_eoplist_trace2cigar(querymatch->ref_eoplist,trace_delta);
+      gt_eoplist_trace2cigar(querymatch->ref_eoplist,dtrace,trace_delta);
     }
   } else
   {

@@ -164,7 +164,8 @@ GtSeedextendMatchIterator *gt_seedextend_match_iterator_new(
         {
           GtWord this_trace_delta;
 
-          if (sscanf(tok,"trace=" GT_WD,&this_trace_delta) == 1)
+          if (sscanf(tok,"trace=" GT_WD,&this_trace_delta) == 1 ||
+              sscanf(tok,"dtrace=" GT_WD,&this_trace_delta) == 1)
           {
             if (this_trace_delta < 0)
             {
@@ -430,8 +431,14 @@ GtUword gt_seedextend_match_iterator_trace_delta(
                         const GtSeedextendMatchIterator *semi)
 {
   gt_assert(semi != NULL);
-  return gt_querymatch_trace_display(semi->in_display_flag) ? semi->trace_delta
-                                                            : 0;
+  return (gt_querymatch_trace_display(semi->in_display_flag) ||
+          gt_querymatch_dtrace_display(semi->in_display_flag))
+           ? semi->trace_delta : 0;
+}
+
+bool gt_seedextend_match_iterator_dtrace(const GtSeedextendMatchIterator *semi)
+{
+  return gt_querymatch_dtrace_display(semi->in_display_flag) ? true : false;
 }
 
 double gt_seedextend_match_iterator_evalue(const GtSeedextendMatchIterator

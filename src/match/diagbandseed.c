@@ -3769,6 +3769,7 @@ static int gt_diagbandseed_algorithm(const GtDiagbandseedInfo *arg,
     if (extp->extendxdrop || extp->verify_alignment ||
         gt_querymatch_alignment_display(extp->out_display_flag) ||
         gt_querymatch_trace_display(extp->out_display_flag) ||
+        gt_querymatch_dtrace_display(extp->out_display_flag) ||
         gt_querymatch_cigar_display(extp->out_display_flag) ||
         gt_querymatch_cigarX_display(extp->out_display_flag))
     {

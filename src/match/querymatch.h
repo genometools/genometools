@@ -183,6 +183,7 @@ void gt_querymatch_recompute_alignment(GtQuerymatch *querymatch,
                                        const GtSeedExtendDisplayFlag
                                          *out_display_flag,
                                        bool match_has_cigar,
+                                       bool dtrace,
                                        GtUword trace_delta,
                                        bool match_has_seed,
                                        const GtEncseq *db_encseq,

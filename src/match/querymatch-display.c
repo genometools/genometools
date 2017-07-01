@@ -199,6 +199,10 @@ static int gt_querymatch_display_flag_set(char *copyspace,
                                 "trace","alignment",
                                 "trace","cigar",
                                 "trace","cigarX",
+                                "dtrace","alignment",
+                                "dtrace","cigar",
+                                "dtrace","cigarX",
+                                "dtrace","trace",
                                 "gfa2","blast",
                                 "gfa2","alignment",
                                 "gfa2","custom",
@@ -342,6 +346,8 @@ GtSeedExtendDisplayFlag *gt_querymatch_display_flag_new(
   bool haserr = false;
   size_t num_gfa2_default_flags = 0;
   GtUword da_idx;
+  const uint64_t trace_mask = gt_display_mask(Gt_Trace_display) |
+                              gt_display_mask(Gt_Dtrace_display);
   /* required implications:
       mandatory: S_seqnum, Q_seqnum, S_start, Q_start
                  either editdist or score
@@ -453,10 +459,23 @@ GtSeedExtendDisplayFlag *gt_querymatch_display_flag_new(
       /* the only flag with a parameter is Gt_Alignment_display */
       if (parameter < 0)
       {
-        gt_error_set(err,"integer following \"%s=\" must be positive",
-                  (display_flag->flags & gt_display_mask(Gt_Alignment_display))
-                     ? "alignment"
-                     : "trace");
+        const char *key;
+
+        if (display_flag->flags & gt_display_mask(Gt_Alignment_display))
+        {
+          key = "alignment";
+        } else
+        {
+          if (display_flag->flags & gt_display_mask(Gt_Trace_display))
+          {
+            key = "trace";
+          } else
+          {
+            gt_assert(display_flag->flags & gt_display_mask(Gt_Dtrace_display));
+            key = "dtrace";
+          }
+        }
+        gt_error_set(err,"integer following \"%s=\" must be positive",key);
         haserr = true;
         break;
       }
@@ -465,7 +484,7 @@ GtSeedExtendDisplayFlag *gt_querymatch_display_flag_new(
         display_flag->alignmentwidth = (GtUword) parameter;
       } else
       {
-        gt_assert (display_flag->flags & gt_display_mask(Gt_Trace_display));
+        gt_assert (display_flag->flags & trace_mask);
         display_flag->trace_delta = (GtUword) parameter;
       }
     }
@@ -477,8 +496,7 @@ GtSeedExtendDisplayFlag *gt_querymatch_display_flag_new(
     {
       display_flag->alignmentwidth = GT_SEED_EXTEND_DEFAULT_ALIGNMENT_WIDTH;
     }
-    if ((display_flag->flags & gt_display_mask(Gt_Trace_display)) &&
-         display_flag->trace_delta == 0)
+    if ((display_flag->flags & trace_mask) && display_flag->trace_delta == 0)
     {
       display_flag->trace_delta = GT_SEED_EXTEND_DEFAULT_TRACE_DELTA;
     }
