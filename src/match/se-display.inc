@@ -10,11 +10,13 @@ static GtSEdisplayStruct gt_display_arguments_table[] =
   {"cigar", Gt_Cigar_display, true},
   {"cigarX", Gt_Cigarx_display, true},
   {"custom", Gt_Custom_display, false},
+  {"dtrace", Gt_Dtrace_display, true},
   {"editdist", Gt_Editdist_display, true},
   {"evalue", Gt_Evalue_display, true},
   {"failed_seed", Gt_Failed_seed_display, false},
   {"fstperquery", Gt_Fstperquery_display, false},
   {"gap opens", Gt_Gapopens_display, true},
+  {"gfa2", Gt_Gfa2_display, false},
   {"identity", Gt_Identity_display, true},
   {"indels", Gt_Indels_display, true},
   {"mismatches", Gt_Mismatches_display, true},
@@ -44,41 +46,43 @@ static GtSEdisplayStruct gt_display_arguments_table[] =
 
 static unsigned int gt_display_flag2index[] = {
    0,
-   32,
-   15,
-   28,
-   9,
+   34,
+   17,
+   30,
    10,
-   35,
+   11,
+   37,
    3,
+   13,
    6,
    4,
    5,
-   36,
-   23,
+   38,
+   7,
    25,
-   34,
-   26,
-   22,
-   33,
-   17,
+   27,
+   36,
+   28,
+   24,
+   35,
    19,
    21,
-   20,
-   16,
+   23,
+   22,
+   18,
    1,
-   14,
-   13,
-   11,
-   27,
-   7,
+   16,
+   15,
    12,
    29,
-   31,
-   30,
-   24,
-   18,
    8,
+   14,
+   31,
+   33,
+   32,
+   26,
+   20,
+   9,
    2
 };
 
@@ -100,6 +104,7 @@ const char *gt_querymatch_display_help(void)
          "blast:            output matches in blast format 7 (tabular with\n"
          "                  comment lines; instead of gap opens, indels are\n"
          "                  displayed)\n"
+         "gfa2:             output matches in gfa2 format\n"
          "custom:           output matches in custom format, i.e. no\n"
          "                  columns are pre-defined; all columns have to be\n"
          "                  specified by the user\n"
@@ -108,9 +113,14 @@ const char *gt_querymatch_display_help(void)
          "cigarX:           display cigar string representing alignment\n"
          "                  (distinction between match (=) and mismatch\n"
          "                  (X))\n"
-         "trace:            display trace, i.e. compact representation\n"
-         "                  of alignment (possibly followed by =<delta> to\n"
-         "                  specify the delta-value, default is 50)\n"
+         "trace:            display trace, i.e. a compact representation\n"
+         "                  of an alignment (possibly followed by =<delta>)\n"
+         "                  to specify the delta-value; default value of\n"
+         "                  delta is 50\n"
+         "dtrace:           display trace as differences; like trace, but\n"
+         "                  instead of an absolute value x, report the\n"
+         "                  difference delta-x. This leads to smaller\n"
+         "                  numbers and thus a more compact representation\n"
          "s.len:            display length of match on subject sequence\n"
          "s.seqnum:         display sequence number of subject sequence\n"
          "subject id:       display sequence description of subject\n"
@@ -155,10 +165,12 @@ const char *gt_querymatch_display_help(void)
         ", fstperquery"\
         ", tabsep"\
         ", blast"\
+        ", gfa2"\
         ", custom"\
         ", cigar"\
         ", cigarX"\
         ", trace"\
+        ", dtrace"\
         ", s.len"\
         ", s.seqnum"\
         ", subject id"\
@@ -227,6 +239,12 @@ bool gt_querymatch_blast_display(const GtSeedExtendDisplayFlag
   return gt_querymatch_display_on(display_flag,Gt_Blast_display);
 }
 
+bool gt_querymatch_gfa2_display(const GtSeedExtendDisplayFlag
+                                        *display_flag)
+{
+  return gt_querymatch_display_on(display_flag,Gt_Gfa2_display);
+}
+
 bool gt_querymatch_custom_display(const GtSeedExtendDisplayFlag
                                         *display_flag)
 {
@@ -249,6 +267,12 @@ bool gt_querymatch_trace_display(const GtSeedExtendDisplayFlag
                                         *display_flag)
 {
   return gt_querymatch_display_on(display_flag,Gt_Trace_display);
+}
+
+bool gt_querymatch_dtrace_display(const GtSeedExtendDisplayFlag
+                                        *display_flag)
+{
+  return gt_querymatch_display_on(display_flag,Gt_Dtrace_display);
 }
 
 bool gt_querymatch_s_len_display(const GtSeedExtendDisplayFlag

@@ -89,8 +89,8 @@ void                gt_condenseq_creator_disable_full_diagonals(
 void                gt_condenseq_creator_set_cutoff(
                                           GtCondenseqCreator *condenseq_creator,
                                           GtUword cutoff_value);
-/* If this option is used every k-mer in the unique data will be used to find new
-   alignments. */
+/* If this option is used every k-mer in the unique data will be used
+   to find new alignments. */
 void                gt_condenseq_creator_disable_cutoff(
                                          GtCondenseqCreator *condenseq_creator);
 /* If this option is set the <cutoff_value> will be deduced by the current mean

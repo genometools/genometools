@@ -178,6 +178,14 @@ bool gt_querymatch_alignment_display(const GtSeedExtendDisplayFlag
           display_flag->alignmentwidth > 0) ? true : false;
 }
 
+#define GT_SE_ASSERT_DISPLAY_ID(PTR,ID)\
+        if ((PTR) == NULL)\
+        {\
+          fprintf(stderr,"%s, %d: illegal identifier %s\n",\
+                  __FILE__,__LINE__,ID);\
+          exit(GT_EXIT_PROGRAMMING_ERROR);\
+        }
+
 static int gt_querymatch_display_flag_set(char *copyspace,
                                           GtWord *parameter,
                                           GtSeedExtendDisplayFlag *display_flag,
@@ -190,7 +198,16 @@ static int gt_querymatch_display_flag_set(char *copyspace,
                                 "blast","custom",
                                 "trace","alignment",
                                 "trace","cigar",
-                                "trace","cigarX"};
+                                "trace","cigarX",
+                                "dtrace","alignment",
+                                "dtrace","cigar",
+                                "dtrace","cigarX",
+                                "dtrace","trace",
+                                "gfa2","blast",
+                                "gfa2","alignment",
+                                "gfa2","custom",
+                                "gfa2","failed_seed",
+                                "gfa2","seed_in_algn"};
   size_t ex_idx, numexcl = sizeof exclude_list/sizeof exclude_list[0];
   const GtSEdisplayStruct *dstruct;
   const char *ptr;
@@ -229,7 +246,8 @@ static int gt_querymatch_display_flag_set(char *copyspace,
       *dstruct0 = gt_display_arg_get(NULL,exclude_list[ex_idx],0),
       *dstruct1 = gt_display_arg_get(NULL,exclude_list[ex_idx+1],0);
 
-    gt_assert(dstruct0 != NULL && dstruct1 != NULL);
+    GT_SE_ASSERT_DISPLAY_ID(dstruct0,exclude_list[ex_idx]);
+    GT_SE_ASSERT_DISPLAY_ID(dstruct1,exclude_list[ex_idx+1]);
     if ((display_flag->flags & gt_display_mask(dstruct0->flag)) &&
         (display_flag->flags & gt_display_mask(dstruct1->flag)))
     {
@@ -278,6 +296,46 @@ static bool gt_querymatch_display_args_contain(const GtStrArray *display_args,
   return false;
 }
 
+static int gt_querymatch_options_order_check(
+                 const GtSeedExtendDisplayFlag *display_flag,
+                 size_t num_gfa2_default_flags,
+                 GtError *err)
+{
+  GtUword idx, num_columns;
+  bool trace_or_cigar_found = false;
+  const unsigned int *order = gt_querymatch_display_order(&num_columns,
+                                                          display_flag);
+
+  if (!gt_querymatch_trace_display(display_flag) &&
+      !gt_querymatch_cigar_display(display_flag))
+  {
+    gt_error_set(err,"for gfa2 output specify either trace or cigar as "
+                     "argument of option -outfmt");
+    return -1;
+  }
+  gt_assert((GtUword) num_gfa2_default_flags < num_columns);
+  for (idx = num_gfa2_default_flags; idx < num_columns; idx++)
+  {
+    if (order[idx] == Gt_Trace_display || order[idx] == Gt_Cigar_display)
+    {
+      trace_or_cigar_found = true;
+    } else
+    {
+      if (!trace_or_cigar_found)
+      {
+        const unsigned int display_arg_num = gt_display_flag2index[order[idx]];
+
+        gt_error_set(err,"for gfa2 output in the list of argument to option "
+                         "-outfmt the keyword \"%s\" must come after trace "
+                         "or cigar",
+                         gt_display_arguments_table[display_arg_num].name);
+        return -1;
+      }
+    }
+  }
+  return 0;
+}
+
 GtSeedExtendDisplayFlag *gt_querymatch_display_flag_new(
                            const GtStrArray *display_args,
                            GtSeedExtendDisplaySetMode setmode,
@@ -286,7 +344,10 @@ GtSeedExtendDisplayFlag *gt_querymatch_display_flag_new(
   GtSeedExtendDisplayFlag *display_flag = gt_malloc(sizeof *display_flag);
   char copyspace[GT_MAX_DISPLAY_FLAG_LENGTH+1];
   bool haserr = false;
+  size_t num_gfa2_default_flags = 0;
   GtUword da_idx;
+  const uint64_t trace_mask = gt_display_mask(Gt_Trace_display) |
+                              gt_display_mask(Gt_Dtrace_display);
   /* required implications:
       mandatory: S_seqnum, Q_seqnum, S_start, Q_start
                  either editdist or score
@@ -322,42 +383,61 @@ GtSeedExtendDisplayFlag *gt_querymatch_display_flag_new(
                                            sizeof blast_flags[0]);
     } else
     {
-      if (!gt_querymatch_display_args_contain(display_args,"custom"))
+      if (gt_querymatch_display_args_contain(display_args,"gfa2"))
       {
-        if (setmode == GT_SEED_EXTEND_DISPLAY_SET_STANDARD)
+        GtSeedExtendDisplay_enum gfa2_flags[] =
         {
-          GtSeedExtendDisplay_enum standard_flags[] =
-          {
-            Gt_S_len_display,
-            Gt_S_seqnum_display,
-            Gt_S_start_display,
-            Gt_Strand_display,
-            Gt_Q_len_display,
-            Gt_Q_seqnum_display,
-            Gt_Q_start_display,
-            Gt_Score_display,
-            Gt_Editdist_display,
-            Gt_Identity_display
-          };
-          gt_querymatch_display_multi_flag_add(display_flag,standard_flags,
-                                               sizeof standard_flags/
-                                               sizeof standard_flags[0]);
-        } else
+          Gt_S_seqnum_display,
+          Gt_Q_seqnum_display,
+          Gt_S_start_display,
+          Gt_S_end_display,
+          Gt_Q_start_display,
+          Gt_Q_end_display
+        };
+        gt_querymatch_display_multi_flag_add(display_flag,gfa2_flags,
+                                             sizeof gfa2_flags/
+                                             sizeof gfa2_flags[0]);
+        num_gfa2_default_flags = sizeof gfa2_flags/sizeof gfa2_flags[0];
+      } else
+      {
+        if (!gt_querymatch_display_args_contain(display_args,"custom"))
         {
-          gt_assert(setmode == GT_SEED_EXTEND_DISPLAY_SET_EXACT);
-          GtSeedExtendDisplay_enum exact_flags[] =
+          if (setmode == GT_SEED_EXTEND_DISPLAY_SET_STANDARD)
           {
-            Gt_S_len_display,
-            Gt_S_seqnum_display,
-            Gt_S_start_display,
-            Gt_Strand_display,
-            Gt_Q_len_display,
-            Gt_Q_seqnum_display,
-            Gt_Q_start_display
-          };
-          gt_querymatch_display_multi_flag_add(display_flag,exact_flags,
-                                               sizeof exact_flags/
-                                               sizeof exact_flags[0]);
+            GtSeedExtendDisplay_enum standard_flags[] =
+            {
+              Gt_S_len_display,
+              Gt_S_seqnum_display,
+              Gt_S_start_display,
+              Gt_Strand_display,
+              Gt_Q_len_display,
+              Gt_Q_seqnum_display,
+              Gt_Q_start_display,
+              Gt_Score_display,
+              Gt_Editdist_display,
+              Gt_Identity_display
+            };
+            gt_querymatch_display_multi_flag_add(display_flag,standard_flags,
+                                                 sizeof standard_flags/
+                                                 sizeof standard_flags[0]);
+          } else
+          {
+
+            gt_assert(setmode == GT_SEED_EXTEND_DISPLAY_SET_EXACT);
+            GtSeedExtendDisplay_enum exact_flags[] =
+            {
+              Gt_S_len_display,
+              Gt_S_seqnum_display,
+              Gt_S_start_display,
+              Gt_Strand_display,
+              Gt_Q_len_display,
+              Gt_Q_seqnum_display,
+              Gt_Q_start_display
+            };
+            gt_querymatch_display_multi_flag_add(display_flag,exact_flags,
+                                                 sizeof exact_flags/
+                                                 sizeof exact_flags[0]);
+          }
         }
       }
     }
@@ -379,10 +459,23 @@ GtSeedExtendDisplayFlag *gt_querymatch_display_flag_new(
       /* the only flag with a parameter is Gt_Alignment_display */
       if (parameter < 0)
       {
-        gt_error_set(err,"integer following \"%s=\" must be positive",
-                  (display_flag->flags & gt_display_mask(Gt_Alignment_display))
-                     ? "alignment"
-                     : "trace");
+        const char *key;
+
+        if (display_flag->flags & gt_display_mask(Gt_Alignment_display))
+        {
+          key = "alignment";
+        } else
+        {
+          if (display_flag->flags & gt_display_mask(Gt_Trace_display))
+          {
+            key = "trace";
+          } else
+          {
+            gt_assert(display_flag->flags & gt_display_mask(Gt_Dtrace_display));
+            key = "dtrace";
+          }
+        }
+        gt_error_set(err,"integer following \"%s=\" must be positive",key);
         haserr = true;
         break;
       }
@@ -391,7 +484,7 @@ GtSeedExtendDisplayFlag *gt_querymatch_display_flag_new(
         display_flag->alignmentwidth = (GtUword) parameter;
       } else
       {
-        gt_assert (display_flag->flags & gt_display_mask(Gt_Trace_display));
+        gt_assert (display_flag->flags & trace_mask);
         display_flag->trace_delta = (GtUword) parameter;
       }
     }
@@ -403,10 +496,17 @@ GtSeedExtendDisplayFlag *gt_querymatch_display_flag_new(
     {
       display_flag->alignmentwidth = GT_SEED_EXTEND_DEFAULT_ALIGNMENT_WIDTH;
     }
-    if ((display_flag->flags & gt_display_mask(Gt_Trace_display)) &&
-         display_flag->trace_delta == 0)
+    if ((display_flag->flags & trace_mask) && display_flag->trace_delta == 0)
     {
       display_flag->trace_delta = GT_SEED_EXTEND_DEFAULT_TRACE_DELTA;
+    }
+  }
+  if (!haserr && num_gfa2_default_flags > 0)
+  {
+    if (gt_querymatch_options_order_check(display_flag,
+                                          num_gfa2_default_flags,err) != 0)
+    {
+      haserr = true;
     }
   }
   if (haserr)

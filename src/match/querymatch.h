@@ -117,6 +117,8 @@ double gt_querymatch_error_rate(GtUword distance,GtUword alignedlen);
 
 GtUword gt_querymatch_distance(const GtQuerymatch *querymatch);
 
+void gt_querymatch_gfa2_edge(const GtQuerymatch *querymatch,GtUword edgenum);
+
 void gt_querymatch_prettyprint(double evalue,double bit_score,
                                const GtSeedExtendDisplayFlag *out_display_flag,
                                const GtQuerymatch *querymatch);
@@ -181,6 +183,7 @@ void gt_querymatch_recompute_alignment(GtQuerymatch *querymatch,
                                        const GtSeedExtendDisplayFlag
                                          *out_display_flag,
                                        bool match_has_cigar,
+                                       bool dtrace,
                                        GtUword trace_delta,
                                        bool match_has_seed,
                                        const GtEncseq *db_encseq,

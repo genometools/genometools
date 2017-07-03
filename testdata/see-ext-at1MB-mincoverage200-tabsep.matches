@@ -744,7 +744,6 @@
 1910	0	336	F	1926	25	328	25
 1912	0	362	F	1913	0	358	24
 1939	0	330	F	1940	10	330	23
-# Fields: s. seqnum, s. start, s. len, strand, q. seqnum, q. start, q. len, editdist
 218	71	350	P	296	0	354	9
 252	74	327	P	285	41	327	14
 284	0	285	P	476	2	291	13

@@ -50,10 +50,6 @@ GtUword gt_eoplist_deletions_count(const GtEoplist *eoplist);
 /* return number of insertions in eoplist */
 GtUword gt_eoplist_insertions_count(const GtEoplist *eoplist);
 
-/* return unit cost of eoplist, which is sum of the number of deletions,
-   insertions and mismatches */
-GtUword gt_eoplist_unit_cost(const GtEoplist *eoplist);
-
 /* To inspect an edit operation list, one employs the following class */
 
 typedef struct GtEoplistReader GtEoplistReader;
@@ -66,19 +62,10 @@ typedef struct GtEoplistReader GtEoplistReader;
 
 void gt_eoplist_verify(const GtEoplist *eoplist,
                        GtEoplistReader *eoplist_reader,
-                       GtUword edist,
-                       bool distinguish_mismatch_match);
+                       GtUword edist);
 
 /* The constructor for the reader, initially set to be empty. */
 GtEoplistReader *gt_eoplist_reader_new(void);
-
-/* An eoplist_reader can be used in two modes when enumerating
-   cigar symbols. In the default mode,
-   a mismatch is not distinguished from a match. After calling the following
-   function, the reader will enumerate cigar symbols in which a mismatch
-   has is distinguished from a match. */
-void gt_eoplist_reader_distinguish_mismatch_match(
-      GtEoplistReader *eoplist_reader);
 
 /* The destructor */
 void gt_eoplist_reader_delete(GtEoplistReader *eoplist_reader);
@@ -118,7 +105,8 @@ typedef struct
    in the memory location pointed to by cigar_op. */
 
 bool gt_eoplist_reader_next_cigar(GtCigarOp *cigar_op,
-                                  GtEoplistReader *eoplist_reader);
+                                  GtEoplistReader *eoplist_reader,
+                                  bool distinguish_mismatch_match);
 
 /* The second way of accessing an eoplist is to enumerate the corresponding
    sequence of segments dividing the aligned sequences into non-overlapping
@@ -150,10 +138,12 @@ bool gt_eoplist_reader_next_segment(GtEoplistSegment *segment,
 /* for example, the following code snipped outputs the cigarstring
    in a single line to stdout
 
-  GtEoplistReader *eoplist_reader = gt_eoplist_reader_new(eoplist);
+  bool distinguish_mismatch_match = true;
+  GtEoplistReader *eoplist_reader = gt_eoplist_reader_new();
   GtCigarOp co;
 
-  while (gt_eoplist_reader_next_cigar(&co,eoplist_reader))
+  while (gt_eoplist_reader_next_cigar(&co,eoplist_reader,
+                                      distinguish_mismatch_match))
   {
     printf("" GT_WU "%c",co.iteration,
                    gt_eoplist_pretty_print(co.eoptype,
@@ -180,11 +170,11 @@ void gt_eoplist_set_sequences(GtEoplist *eoplist,
 void gt_eoplist_format_generic(FILE *fp,
                                const GtEoplist *eoplist,
                                GtEoplistReader *eoplist_reader,
-                               bool distinguish_mismatch_match,
                                const GtUchar *characters,
                                GtUword top_seqlength,
                                GtUword low_reference,
                                GtUword one_off,
+                               bool distinguish_mismatch_match,
                                bool subject_first,
                                bool alignment_show_forward,
                                bool show_complement_characters,
@@ -201,8 +191,6 @@ void gt_eoplist_format_exact(FILE *fp,
                              bool show_complement_characters,
                              const GtUchar *characters);
 
-GtUword gt_eoplist_num_segments(const GtEoplist *eoplist,GtUword delta);
-
 double gt_eoplist_segments_entropy(const GtEoplist *eoplist,GtUword delta);
 
 void gt_eoplist_from_cigar(GtEoplist *eoplist,const char *cigarstring,char sep);
@@ -211,7 +199,7 @@ void gt_eoplist_read_trace(GtEoplist *eoplist,
                            const char *trace,
                            char separator);
 
-void gt_eoplist_trace2cigar(GtEoplist *eoplist,GtUword trace_delta);
+void gt_eoplist_trace2cigar(GtEoplist *eoplist,bool dtrace,GtUword trace_delta);
 
 char *gt_eoplist2cigar_string(const GtEoplist *eoplist,
                               bool distinguish_mismatch_match);
@@ -224,7 +212,8 @@ void gt_eoplist_set_seedoffset(GtEoplist *eoplist,
 
 void gt_eoplist_show_plain(const GtEoplist *eoplist,FILE *fp);
 
-void gt_eoplist_show_cigar(GtEoplistReader *eoplist_reader,FILE *fp);
+void gt_eoplist_show_cigar(GtEoplistReader *eoplist_reader,
+                           bool distinguish_mismatch_match,FILE *fp);
 
 void gt_eoplist_polished_ends(GtEoplist *eoplist,
                               const GtFtPolishing_info *pol_info,

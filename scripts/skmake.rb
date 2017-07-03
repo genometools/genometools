@@ -122,4 +122,5 @@ if File.exists?('LocalMakefile.previous') and
   exit 1
 end
 
+sleep(1)
 system("make -f LocalMakefile")

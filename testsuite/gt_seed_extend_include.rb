@@ -110,7 +110,7 @@ Test do
 end
 
 Name "gt seed_extend: display arguments"
-Keywords "gt_seed_extend display"
+Keywords "gt_seed_extend gt_seed_extend_display"
 Test do
   run_test build_encseq("at1MB", "#{$testdata}at1MB", true)
   run_test build_encseq("Atinsert.fna", "#{$testdata}Atinsert.fna", true)
@@ -129,8 +129,6 @@ Test do
   run "diff -I '^#' #{last_stdout} #{$testdata}see-ext-at1MB-400-cigar.matches"
   run_test "#{$bin}gt seed_extend -ii at1MB -l 400 -outfmt cigarX"
   run "diff -I '^#' #{last_stdout} #{$testdata}see-ext-at1MB-400-cigarX.matches"
-  run_test "#{$bin}gt seed_extend -ii at1MB -l 400 -outfmt trace=50"
-  run "diff -I '^#' #{last_stdout} #{$testdata}see-ext-at1MB-400-trace.matches"
   run_test "#{$bin}gt seed_extend -ii at1MB -l 700 -outfmt alignment=60 seed_in_algn"
   run "diff -I '^#' #{last_stdout} #{$testdata}see-ext-at1MB-500-alignment-seed_in_algn.matches"
   run_test "#{$bin}gt seed_extend -ii at1MB -l 400 -outfmt s.seqlen q.seqlen"
@@ -150,30 +148,47 @@ Test do
   run "mv #{last_stdout} strong.matches"
   run "#{$scriptsdir}evalue-filter.rb #{evalue_filter} strong.matches"
   ["cigar","cigarX"].each do |ci|
+    other_ci = if ci == "cigar" then "cigarX" else "cigar" end
     run_test "#{$bin}gt dev show_seedext -f #{$testdata}see-ext-at1MB-400-#{ci}.matches -outfmt alignment"
     run "mv #{last_stdout} alignment-from-#{ci}.txt"
     run_test "#{$bin}gt seed_extend -ii at1MB -l 400 -outfmt alignment"
     run "diff -I '^#' #{last_stdout} alignment-from-#{ci}.txt"
+    run_test "#{$bin}gt dev show_seedext -f #{$testdata}see-ext-at1MB-400-#{ci}.matches -outfmt #{ci}"
+    run "diff -I '^#' #{last_stdout} #{$testdata}see-ext-at1MB-400-#{ci}.matches"
   end
+  run_test "#{$bin}gt dev show_seedext -f #{$testdata}see-ext-at1MB-400-cigarX.matches -outfmt cigar"
+  run "diff -I '^#' #{last_stdout} #{$testdata}see-ext-at1MB-400-cigar.matches"
   ["cigar","cigarX"].each do |ci|
     run_test "#{$bin}gt dev show_seedext -f #{$testdata}see-ext-at1MB-Atinsert100-evalue-bitscore-#{ci}-seqlength.matches -outfmt alignment"
     run "mv #{last_stdout} alignment-from-#{ci}.txt"
     run_test "#{$bin}gt seed_extend -ii at1MB -qii Atinsert.fna -l 100 -outfmt alignment"
     run "diff -I '^#' #{last_stdout} alignment-from-#{ci}.txt"
   end
+  run_test "#{$bin}gt dev show_seedext -f #{$testdata}see-ext-at1MB-Atinsert100-evalue-bitscore-cigarX-seqlength.matches -outfmt bitscore evalue s.seqlen q.seqlen cigar"
+  run "diff -I '^#' #{last_stdout} #{$testdata}see-ext-at1MB-Atinsert100-evalue-bitscore-cigar-seqlength.matches"
   run "#{$bin}/gt seed_extend -ii at1MB -mincoverage 200 -outfmt tabsep custom s.seqnum s.start s.len strand q.seqnum q.start q.len editdist"
   run "cmp -s #{last_stdout} #{$testdata}/see-ext-at1MB-mincoverage200-tabsep.matches"
-  run_test "#{$bin}gt seed_extend -ii at1MB -l 400 -outfmt trace"
-  run_test "#{$bin}gt dev show_seedext -f #{last_stdout} -outfmt alignment"
-  run "diff -I '^#' #{last_stdout} #{$testdata}/see-ext-at1MB-400-al-from-trace.matches"
-  run_test "#{$bin}gt seed_extend -ii at1MB -qii U89959_genomic -l 200 -outfmt trace=20"
-  run_test "#{$bin}gt dev show_seedext -f #{last_stdout} -outfmt alignment"
-  run "diff -I '^#' #{last_stdout} #{$testdata}/see-ext-at1MB-U8-200-al-from-trace.matches"
+  ["trace","dtrace"].each do |t|
+    run_test "#{$bin}gt seed_extend -ii at1MB -l 400 -outfmt #{t}=50"
+    run "diff -I '^#' #{last_stdout} #{$testdata}see-ext-at1MB-400-#{t}.matches"
+    run_test "#{$bin}gt seed_extend -ii at1MB -l 400 -outfmt #{t}"
+    run_test "#{$bin}gt dev show_seedext -f #{last_stdout} -outfmt alignment"
+    run "diff -I '^#' #{last_stdout} #{$testdata}/see-ext-at1MB-400-al-from-dtrace.matches"
+    run_test "#{$bin}gt seed_extend -ii at1MB -qii U89959_genomic -l 200 -outfmt #{t}=20 s.seqlen q.seqlen"
+    run "mv #{last_stdout} tmp-with-#{t}.matches"
+    run_test "#{$bin}gt dev show_seedext -f tmp-with-#{t}.matches -outfmt alignment"
+    run "diff -I '^#' #{last_stdout} #{$testdata}/see-ext-at1MB-U8-200-al-from-dtrace.matches"
+    run_test "#{$bin}gt dev show_seedext -f tmp-with-#{t}.matches -outfmt s.seqlen"
+  end
+  run_test "#{$bin}gt seed_extend -ii at1MB -l 100 -outfmt gfa2 trace"
+  run "#{$scriptsdir}gfa2lint.rb #{last_stdout}"
+  run_test "#{$bin}gt seed_extend -ii at1MB -qii Atinsert.fna -outfmt gfa2 cigar"
+  run "#{$scriptsdir}gfa2lint.rb #{last_stdout}"
 end
 
 # Invalid arguments
 Name "gt seed_extend: failure"
-Keywords "gt_seed_extend failure"
+Keywords "gt_seed_extend gt_seed_extend_failure"
 Test do
   run_test build_encseq("at1MB", "#{$testdata}at1MB")
   run_test build_encseq("foo", "#{$testdata}foo.fas")
@@ -219,6 +234,10 @@ Test do
   run_test "#{$bin}gt seed_extend -ii at1MB -outfmt alignment=-1", :retval => 1
   run_test "#{$bin}gt seed_extend -ii at1MB -outfmt alignment cigar", :retval => 1
   run_test "#{$bin}gt seed_extend -ii at1MB -maxmat 2 -l 100 -chain xx", :retval => 1
+  run_test "#{$bin}gt seed_extend -ii at1MB -outfmt gfa2", :retval => 1
+  run_test "#{$bin}gt seed_extend -ii at1MB -outfmt gfa2 identity dtrace", :retval => 1
+  run_test "#{$bin}gt seed_extend -ii at1MB -outfmt cigar"
+  run_test "#{$bin}gt dev show_seedext -f #{last_stdout} -outfmt cigarX",:retval => 1
 end
 
 Name "gt dev show_seedext without alignment"

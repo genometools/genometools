@@ -164,7 +164,8 @@ GtSeedextendMatchIterator *gt_seedextend_match_iterator_new(
         {
           GtWord this_trace_delta;
 
-          if (sscanf(tok,"trace=" GT_WD,&this_trace_delta) == 1)
+          if (sscanf(tok,"trace=" GT_WD,&this_trace_delta) == 1 ||
+              sscanf(tok,"dtrace=" GT_WD,&this_trace_delta) == 1)
           {
             if (this_trace_delta < 0)
             {
@@ -430,8 +431,14 @@ GtUword gt_seedextend_match_iterator_trace_delta(
                         const GtSeedextendMatchIterator *semi)
 {
   gt_assert(semi != NULL);
-  return gt_querymatch_trace_display(semi->in_display_flag) ? semi->trace_delta
-                                                            : 0;
+  return (gt_querymatch_trace_display(semi->in_display_flag) ||
+          gt_querymatch_dtrace_display(semi->in_display_flag))
+           ? semi->trace_delta : 0;
+}
+
+bool gt_seedextend_match_iterator_dtrace(const GtSeedextendMatchIterator *semi)
+{
+  return gt_querymatch_dtrace_display(semi->in_display_flag) ? true : false;
 }
 
 double gt_seedextend_match_iterator_evalue(const GtSeedextendMatchIterator
@@ -494,6 +501,14 @@ int gt_seedextend_match_iterator_querymatchoutoptions_set(
     = gt_querymatchoutoptions_new(out_display_flag,gt_str_get(semi->ii),err);
   if (semi->querymatchoutoptions == NULL)
   {
+    return -1;
+  }
+  gt_assert(semi->in_display_flag != NULL && out_display_flag != NULL);
+  if (gt_querymatch_cigar_display(semi->in_display_flag) &&
+      gt_querymatch_cigarX_display(out_display_flag))
+  {
+    gt_error_set(err,"match file with alignments in cigar format cannot be "
+                     "converted to cigarX format");
     return -1;
   }
   if (gt_seedextend_match_iterator_bias_parameters(semi))

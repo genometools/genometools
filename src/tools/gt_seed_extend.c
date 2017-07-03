@@ -39,12 +39,17 @@
 #include "match/initbasepower.h"
 #include "match/seed_extend_parts.h"
 #include "tools/gt_seed_extend.h"
+#ifdef GT_THREADS_ENABLED
+#include "core/thread_api.h"
+#endif
 
 typedef struct {
   /* diagbandseed options */
   GtStr *dbs_indexname;
   GtStr *dbs_queryname;
+  unsigned int dbs_spacedseedweight;
   unsigned int dbs_seedlength;
+  bool spacedseed;
   GtUword dbs_logdiagbandwidth;
   GtUword dbs_mincoverage;
   GtUword dbs_maxfreq;
@@ -89,7 +94,6 @@ typedef struct {
   bool use_kmerfile;
   bool trimstat_on;
   bool use_apos, use_apos_track_all, compute_ani;
-  GtAniAccumulate ani_accumulate;
   GtUword maxmat;
   GtOption *se_ref_op_evalue,
            *se_ref_op_maxmat,
@@ -110,8 +114,6 @@ static void* gt_seed_extend_arguments_new(void)
   arguments->char_access_mode = gt_str_new();
   arguments->splt_string = gt_str_new();
   arguments->display_args = gt_str_array_new();
-  arguments->ani_accumulate.sum_of_aligned_len = 0;
-  arguments->ani_accumulate.sum_of_distance = 0;
   return arguments;
 }
 
@@ -143,7 +145,7 @@ static GtOptionParser* gt_seed_extend_option_parser_new(void *tool_arguments)
   GtOptionParser *op;
   GtOption *option, *op_gre, *op_xdr, *op_cam, *op_splt,
     *op_his, *op_dif, *op_pmh,
-    *op_seedlength, *op_minlen, *op_minid, *op_evalue, *op_xbe,
+    *op_seedlength, *op_spacedseed, *op_minlen, *op_minid, *op_evalue, *op_xbe,
     *op_sup, *op_frq,
     *op_mem, *op_bia, *op_onlyseeds, *op_weakends, *op_relax_polish,
     *op_verify_alignment, *op_only_selected_seqpairs, *op_spdist, *op_outfmt,
@@ -186,11 +188,19 @@ static GtOptionParser* gt_seed_extend_option_parser_new(void *tool_arguments)
   op_seedlength = gt_option_new_uint_min_max("seedlength",
                                       "Minimum length of a seed\n"
                                       "default: logarithm of input length "
-                                      "to the basis alphabet size",
+                                      "with alphabet size as log-base",
                                       &arguments->dbs_seedlength,
                                       UINT_MAX, 1UL, 32UL);
   gt_option_hide_default(op_seedlength);
   gt_option_parser_add_option(op, op_seedlength);
+
+  /* -spacedseed */
+  op_spacedseed = gt_option_new_bool("spacedseed",
+                                     "use spaced seed of length specified by "
+                                     "option -seedlength",
+                                     &arguments->spacedseed,
+                                     false);
+  gt_option_parser_add_option(op, op_spacedseed);
 
   /* -diagbandwidth */
   op_diagbandwidth = gt_option_new_uword_min_max("diagbandwidth",
@@ -636,6 +646,7 @@ static GtOptionParser* gt_seed_extend_option_parser_new(void *tool_arguments)
   gt_option_exclude(op_cam, op_xdr);
   gt_option_exclude(op_cam_generic, op_xbe);
   gt_option_exclude(op_cam_generic, op_xdr);
+  gt_option_exclude(op_maxmat, op_spacedseed);
 
   return op;
 }
@@ -669,6 +680,13 @@ static int gt_seed_extend_arguments_check(int rest_argc, void *tool_arguments,
       had_err = -1;
     }
   }
+#ifdef GT_THREADS_ENABLED
+  if (!had_err && arguments->compute_ani && gt_jobs > 1)
+  {
+    gt_error_set(err,"option -ani does not work with multiple threads");
+    had_err = -1;
+  }
+#endif
 
   /* minimum maxfreq value for 1 input file */
   if (!had_err && arguments->dbs_maxfreq == 1 &&
@@ -703,6 +721,15 @@ static int gt_seed_extend_arguments_check(int rest_argc, void *tool_arguments,
   return had_err;
 }
 
+static double gt_seed_extend_ani_evaluate(GtUword sum_of_aligned_len,
+                                          GtUword sum_of_distance)
+{
+  return sum_of_aligned_len > 0
+             ? (100.0 * (1.0 - (double)
+                               (2 * sum_of_distance)/sum_of_aligned_len))
+             : 0.0;
+}
+
 static int gt_seed_extend_runner(int argc,
                                  const char **argv,
                                  GT_UNUSED int parsed_args,
@@ -722,25 +749,24 @@ static int gt_seed_extend_runner(int argc,
   GtUwordPair pick = {GT_UWORD_MAX, GT_UWORD_MAX};
   GtUword maxseqlength = 0, a_numofsequences, b_numofsequences;
   GtSeedExtendDisplayFlag *out_display_flag = NULL;
-  bool idhistout;
   int had_err = 0;
   const GtSeedExtendDisplaySetMode setmode
     = GT_SEED_EXTEND_DISPLAY_SET_STANDARD;
+  const unsigned int spacedseedweight = 21, spacedseedlength = 30;
+  GtAniAccumulate ani_accumulate[2];
 
   gt_error_check(err);
   gt_assert(arguments != NULL);
+  ani_accumulate[0].sum_of_aligned_len = 0;
+  ani_accumulate[0].sum_of_distance = 0;
+  ani_accumulate[1].sum_of_aligned_len = 0;
+  ani_accumulate[1].sum_of_distance = 0;
   /* Define, whether greedy extension will be performed */
   extendxdrop = gt_option_is_set(arguments->se_ref_op_xdr);
   if (arguments->onlyseeds || extendxdrop) {
     extendgreedy = false;
   }
 
-  idhistout = (arguments->maxmat != 1 &&
-               gt_str_length(arguments->diagband_statistics_arg) == 0) ? true
-                                                                       : false;
-  gt_querymatch_Options_output(stdout,argc,argv,idhistout,
-                               arguments->se_minidentity,
-                               arguments->se_historysize);
   /* Calculate error percentage from minidentity */
   gt_assert(arguments->se_minidentity >= GT_EXTEND_MIN_IDENTITY_PERCENTAGE &&
             arguments->se_minidentity <= 100UL);
@@ -763,6 +789,35 @@ static int gt_seed_extend_runner(int argc,
     if (out_display_flag == NULL)
     {
       had_err = -1;
+    }
+  }
+
+  if (!had_err)
+  {
+    if (!gt_querymatch_gfa2_display(out_display_flag))
+    {
+      const bool idhistout
+        = (arguments->maxmat != 1 &&
+           gt_str_length(arguments->diagband_statistics_arg) == 0)
+          ? true : false;
+      gt_querymatch_Options_output(stdout,argc,argv,idhistout,
+                                   arguments->se_minidentity,
+                                   arguments->se_historysize);
+      if (!arguments->compute_ani  && !arguments->onlyseeds)
+      {
+        gt_querymatch_Fields_output(stdout,out_display_flag);
+      }
+    } else
+    {
+      printf("H\tVN:Z:2.0");
+      if (gt_querymatch_trace_display(out_display_flag))
+      {
+        printf("\tTS:i:" GT_WU "\n",
+               gt_querymatch_trace_delta_display(out_display_flag));
+      } else
+      {
+        fputc('\n',stdout);
+      }
     }
   }
   /* Set character access method */
@@ -870,6 +925,7 @@ static int gt_seed_extend_runner(int argc,
   maxseqlength = MIN(gt_encseq_max_seq_length(aencseq),
                      gt_encseq_max_seq_length(bencseq));
 
+  arguments->dbs_spacedseedweight = 0;
   if (arguments->dbs_seedlength == UINT_MAX)
   {
     if (arguments->maxmat == 1)
@@ -877,17 +933,28 @@ static int gt_seed_extend_runner(int argc,
       arguments->dbs_seedlength = MIN(maxseedlength, arguments->se_alignlength);
     } else
     {
-      unsigned int seedlength;
-      double totallength = 0.5 * (gt_encseq_total_length(aencseq) +
-                                  gt_encseq_total_length(bencseq));
-      gt_assert(nchars > 0);
-      seedlength = (unsigned int)gt_round_to_long(gt_log_base(totallength,
-                                                              (double)nchars));
-      seedlength = (unsigned int)MIN3(seedlength, maxseqlength, maxseedlength);
-      arguments->dbs_seedlength = MAX(seedlength, 2);
+      if (arguments->spacedseed)
+      {
+        arguments->dbs_seedlength = spacedseedlength;
+        arguments->dbs_spacedseedweight = spacedseedweight;
+      } else
+      {
+        unsigned int local_seedlength, log_avg_totallength;
+        double avg_totallength = 0.5 * (gt_encseq_total_length(aencseq) +
+                                        gt_encseq_total_length(bencseq));
+        gt_assert(nchars > 0);
+        log_avg_totallength
+          = (unsigned int) gt_round_to_long(gt_log_base(avg_totallength,
+                                                        (double) nchars));
+        local_seedlength = (unsigned int) MIN3(log_avg_totallength,
+                                               maxseqlength,maxseedlength);
+        arguments->dbs_seedlength = MAX(local_seedlength, 2);
+      }
     }
   }
-  if (arguments->dbs_seedlength > MIN(maxseedlength, maxseqlength)) {
+  if (!had_err && !arguments->spacedseed &&
+      arguments->dbs_seedlength > MIN(maxseedlength, maxseqlength))
+  {
     if (maxseedlength <= maxseqlength) {
       gt_error_set(err, "maximum seedlength for alphabet of size %u is %u",
                    nchars, maxseedlength);
@@ -896,6 +963,27 @@ static int gt_seed_extend_runner(int argc,
                    "<= " GT_WU " (length of longest sequence).", maxseqlength);
     }
     had_err = -1;
+  }
+  if (!had_err)
+  {
+    if (arguments->spacedseed)
+    {
+      arguments->dbs_spacedseedweight = spacedseedweight;
+      if (arguments->dbs_seedlength != spacedseedlength)
+      {
+        gt_error_set(err,"only spaced seeds of length %u supported",
+                     spacedseedlength);
+        had_err = -1;
+      } else
+      {
+        if (nchars != 4)
+        {
+          gt_error_set(err,"spaced seeds only work for sequences over an "
+                           "alphabet of size 4");
+          had_err = -1;
+        }
+      }
+    }
   }
 
   /* Set mincoverage */
@@ -1058,13 +1146,14 @@ static int gt_seed_extend_runner(int argc,
                                              arguments->verify_alignment,
                                              arguments->only_selected_seqpairs,
                                              arguments->compute_ani
-                                               ? &arguments->ani_accumulate
+                                               ? &ani_accumulate[0]
                                                : NULL);
 
     info = gt_diagbandseed_info_new(aencseq,
                                     bencseq,
                                     arguments->dbs_maxfreq,
                                     arguments->dbs_memlimit,
+                                    arguments->dbs_spacedseedweight,
                                     arguments->dbs_seedlength,
                                     arguments->norev,
                                     arguments->nofwd,
@@ -1123,16 +1212,19 @@ static int gt_seed_extend_runner(int argc,
   gt_querymatch_display_flag_delete(out_display_flag);
   if (arguments->compute_ani)
   {
-    printf("ANI %s %s %.4f\n",
-           gt_str_get(arguments->dbs_indexname),
-           gt_str_length(arguments->dbs_queryname) > 0
-             ? gt_str_get(arguments->dbs_queryname)
-             : gt_str_get(arguments->dbs_indexname),
-           arguments->ani_accumulate.sum_of_aligned_len > 0
-             ? 100.0 * (1.0 - (double)
-                              (2 * arguments->ani_accumulate.sum_of_distance)/
-                              arguments->ani_accumulate.sum_of_aligned_len)
-             : 0.0);
+    int idx;
+
+    printf("ANI %s %s",gt_str_get(arguments->dbs_indexname),
+                       gt_str_length(arguments->dbs_queryname) > 0
+                         ? gt_str_get(arguments->dbs_queryname)
+                         : gt_str_get(arguments->dbs_indexname));
+    for (idx = 0; idx < 2; idx++)
+    {
+      printf(" %.4f",gt_seed_extend_ani_evaluate(
+                          ani_accumulate[idx].sum_of_aligned_len,
+                          ani_accumulate[idx].sum_of_distance));
+    }
+    printf("\n");
   }
   return had_err;
 }

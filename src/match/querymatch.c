@@ -379,7 +379,9 @@ static void gt_querymatch_description_out(FILE *fp,const char *description)
   fwrite(description,sizeof *description,nwspl,fp);
 }
 
-static void gt_querymatch_exact_match_trace_show(FILE *fp,GtUword remaining,
+static void gt_querymatch_exact_match_trace_show(FILE *fp,
+                                                 bool dtrace,
+                                                 GtUword remaining,
                                                  GtUword trace_delta)
 {
   bool first = true;
@@ -395,14 +397,20 @@ static void gt_querymatch_exact_match_trace_show(FILE *fp,GtUword remaining,
     }
     if (remaining > trace_delta)
     {
-      fprintf(fp,"0");
+      fprintf(fp,GT_WU,dtrace ? 0 : trace_delta);
       remaining -= trace_delta;
     } else
     {
-      fprintf(fp,"%d",(int) remaining - (int) trace_delta);
+      fprintf(fp,"%d",dtrace ? ((int) trace_delta - (int) remaining)
+                             : (int) remaining);
       break;
     }
   }
+}
+
+void gt_querymatch_gfa2_edge(const GtQuerymatch *querymatch,GtUword edgenum)
+{
+  fprintf(querymatch->fp,"E\t" GT_WU "\t",edgenum);
 }
 
 void gt_querymatch_prettyprint(double evalue,double bit_score,
@@ -412,17 +420,21 @@ void gt_querymatch_prettyprint(double evalue,double bit_score,
   const unsigned int *column_order;
   GtUword numcolumns, idx, one_off;
   char separator;
+  bool gfa2_display;
 
   gt_assert(querymatch != NULL && querymatch->fp != NULL &&
             out_display_flag != NULL);
+  gfa2_display = gt_querymatch_gfa2_display(out_display_flag);
   column_order = gt_querymatch_display_order(&numcolumns,out_display_flag);
   gt_assert(numcolumns > 0);
   one_off = gt_querymatch_blast_display(out_display_flag) ? 1 : 0;
-  separator = gt_querymatch_blast_display(out_display_flag) ||
-              gt_querymatch_tabsep_display(out_display_flag) ? '\t' : ' ';
+  separator = (gt_querymatch_blast_display(out_display_flag) ||
+               gt_querymatch_tabsep_display(out_display_flag) ||
+               gfa2_display) ? '\t' : ' ';
   for (idx = 0; idx < numcolumns; idx++)
   {
     const unsigned int co = column_order[idx];
+    bool dtrace;
 
     if (idx > 0 && (querymatch->score > 0 ||
                    (co != Gt_Score_display &&
@@ -439,21 +451,27 @@ void gt_querymatch_prettyprint(double evalue,double bit_score,
         {
           gt_querymatchoutoptions_cigar_show(
                                      querymatch->ref_querymatchoutoptions,
+                                     co == Gt_Cigar_display ? false : true,
                                      querymatch->fp);
         } else
         {
-          fprintf(querymatch->fp,GT_WU "=",gt_querymatch_dblen(querymatch));
+          fprintf(querymatch->fp,GT_WU "%c",gt_querymatch_dblen(querymatch),
+                                            co == Gt_Cigar_display ? 'M' : '=');
         }
         break;
       case Gt_Trace_display:
+      case Gt_Dtrace_display:
+        dtrace = co == Gt_Dtrace_display ? true : false;
         if (querymatch->distance > 0)
         {
           gt_querymatchoutoptions_trace_show(
                                 querymatch->ref_querymatchoutoptions,
+                                dtrace,
                                 querymatch->fp);
         } else
         {
           gt_querymatch_exact_match_trace_show(querymatch->fp,
+                                               dtrace,
                                                gt_querymatch_dblen(querymatch),
                                                gt_querymatch_trace_delta_display
                                                   (out_display_flag));
@@ -463,7 +481,15 @@ void gt_querymatch_prettyprint(double evalue,double bit_score,
         fprintf(querymatch->fp,GT_WU,gt_querymatch_dblen(querymatch));
         break;
       case Gt_S_seqnum_display:
+        if (gfa2_display)
+        {
+          fputc('S',querymatch->fp);
+        }
         fprintf(querymatch->fp,GT_WU,querymatch->dbseqnum);
+        if (gfa2_display)
+        {
+          fputc('+',querymatch->fp);
+        }
         break;
       case Gt_Subjectid_display:
         gt_querymatch_description_out(querymatch->fp,querymatch->db_desc);
@@ -502,7 +528,16 @@ void gt_querymatch_prettyprint(double evalue,double bit_score,
         fprintf(querymatch->fp,GT_WU,gt_querymatch_querylen(querymatch));
         break;
       case Gt_Q_seqnum_display:
+        if (gfa2_display)
+        {
+          fputc(querymatch->selfmatch ? 'S' : 'Q',querymatch->fp);
+        }
         fprintf(querymatch->fp,GT_WU,querymatch->queryseqnum);
+        if (gfa2_display)
+        {
+          fputc(GT_ISDIRREVERSE(querymatch->query_readmode) ? '-' : '+',
+                querymatch->fp);
+        }
         break;
       case Gt_Queryid_display:
         gt_querymatch_description_out(querymatch->fp,querymatch->query_desc);
@@ -512,8 +547,9 @@ void gt_querymatch_prettyprint(double evalue,double bit_score,
                                      + one_off);
         break;
       case Gt_Q_end_display:
-        if (!GT_ISDIRREVERSE(querymatch->query_readmode) ||
-            !gt_querymatch_blast_display(out_display_flag))
+        if (!gt_querymatch_gfa2_display(out_display_flag) &&
+            (!GT_ISDIRREVERSE(querymatch->query_readmode) ||
+             !gt_querymatch_blast_display(out_display_flag)))
         {
           fprintf(querymatch->fp,GT_WU,
                   gt_querymatch_queryend_relative(querymatch) + one_off);
@@ -529,10 +565,18 @@ void gt_querymatch_prettyprint(double evalue,double bit_score,
                 gt_querymatch_alignment_length(querymatch));
         break;
       case Gt_Mismatches_display:
+        if (gfa2_display)
+        {
+          fprintf(querymatch->fp,"MM:i:");
+        }
         fprintf(querymatch->fp,GT_WU,querymatch->mismatches);
         break;
       case Gt_Indels_display:
       case Gt_Gapopens_display:
+        if (gfa2_display)
+        {
+          fprintf(querymatch->fp,"IN:i:");
+        }
         fprintf(querymatch->fp,GT_WU,gt_querymatch_indels(querymatch));
         break;
       case Gt_Score_display:
@@ -542,6 +586,10 @@ void gt_querymatch_prettyprint(double evalue,double bit_score,
         }
         break;
       case Gt_Editdist_display:
+        if (gfa2_display)
+        {
+          fprintf(querymatch->fp,"ED:i:");
+        }
         if (querymatch->score > 0)
         {
           fprintf(querymatch->fp,GT_WU,querymatch->distance);
@@ -550,6 +598,10 @@ void gt_querymatch_prettyprint(double evalue,double bit_score,
       case Gt_Identity_display:
         if (querymatch->score > 0)
         {
+          if (gfa2_display)
+          {
+            fprintf(querymatch->fp,"ID:f:");
+          }
           fprintf(querymatch->fp,"%.2f",
                   gt_querymatch_similarity(
                        querymatch->distance,
@@ -590,7 +642,8 @@ void gt_querymatch_prettyprint(double evalue,double bit_score,
   {
     bool subject_first = true,
          alignment_show_forward = true,
-         show_complement_characters = false;
+         show_complement_characters = false,
+         distinguish_mismatch_match = true;
     GtUword subject_seqlength = 0, query_reference = 0;
 
     if (gt_querymatch_blast_display(out_display_flag))
@@ -615,8 +668,8 @@ void gt_querymatch_prettyprint(double evalue,double bit_score,
                                            subject_seqlength,
                                            query_reference,
                                            one_off,
-                                           querymatch->distance == 0
-                                             ? true : false,
+                                           querymatch->distance,
+                                           distinguish_mismatch_match,
                                            querymatch->verify_alignment,
                                            subject_first,
                                            alignment_show_forward,
@@ -898,13 +951,28 @@ void gt_querymatch_read_line(GtQuerymatch *querymatch,
         {
           gt_eoplist_reset(querymatch->ref_eoplist);
           gt_eoplist_from_cigar(querymatch->ref_eoplist,ptr,separator);
+        } else
+        {
+          if (column < numcolumns - 1)
+          {
+            ptr = strchr(ptr,separator);
+            gt_assert(ptr != NULL);
+          }
         }
         break;
       case Gt_Trace_display:
+      case Gt_Dtrace_display:
         if (querymatch->ref_eoplist != NULL)
         {
           gt_eoplist_reset(querymatch->ref_eoplist);
           gt_eoplist_read_trace(querymatch->ref_eoplist,ptr,separator);
+        } else
+        {
+          if (column < numcolumns - 1)
+          {
+            ptr = strchr(ptr,separator);
+            gt_assert(ptr != NULL);
+          }
         }
         break;
       case Gt_S_len_display:
@@ -1246,6 +1314,7 @@ void gt_querymatch_recompute_alignment(GtQuerymatch *querymatch,
                                        const GtSeedExtendDisplayFlag
                                          *out_display_flag,
                                        bool match_has_cigar,
+                                       bool dtrace,
                                        GtUword trace_delta,
                                        bool match_has_seed,
                                        const GtEncseq *db_encseq,
@@ -1279,7 +1348,7 @@ void gt_querymatch_recompute_alignment(GtQuerymatch *querymatch,
     }
     if (querymatch->ref_eoplist != NULL && trace_delta > 0)
     {
-      gt_eoplist_trace2cigar(querymatch->ref_eoplist,trace_delta);
+      gt_eoplist_trace2cigar(querymatch->ref_eoplist,dtrace,trace_delta);
     }
   } else
   {
