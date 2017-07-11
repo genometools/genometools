@@ -60,16 +60,17 @@ GtStr* gt_get_gtdata_path(const char *prog, GtError *err)
       if (gt_file_exists_and_is_dir(gt_str_get(path)))
         return path;
     }
+    for (spath = GTDATA_RELATIVE_SEARCH_PATHS; *spath; spath++) {
+      had_err = gt_file_find_exec_in_path(path, prog, err);
+      if (!had_err) {
+        gt_str_append_cstr(path, *spath);
+        if (gt_file_exists_and_is_dir(gt_str_get(path)))
+          return path;
+      }
+    }
     for (defaultpath = GTDATA_DEFAULT_PATHS; *defaultpath; defaultpath++) {
       gt_str_reset(path);
       gt_str_append_cstr(path, *defaultpath);
-      if (gt_file_exists_and_is_dir(gt_str_get(path)))
-        return path;
-    }
-    for (spath = GTDATA_RELATIVE_SEARCH_PATHS; *spath; spath++) {
-      had_err = gt_file_find_exec_in_path(path, prog, err);
-      if (had_err) break;
-      gt_str_append_cstr(path, *spath);
       if (gt_file_exists_and_is_dir(gt_str_get(path)))
         return path;
     }
