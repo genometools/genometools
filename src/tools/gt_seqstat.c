@@ -29,10 +29,13 @@
 #include "core/versionfunc.h"
 #include "core/seq_iterator_sequence_buffer_api.h"
 #include "core/seq_iterator_fastq_api.h"
+#include "core/str_array_api.h"
 #include "core/unused_api.h"
+#include "core/undef_api.h"
 #include "core/versionfunc.h"
 #include "core/xansi_api.h"
 #include "core/progressbar.h"
+#include "core/parseutils.h"
 #include "core/format64.h"
 #include "core/unused_api.h"
 #include "core/types_api.h"
@@ -55,17 +58,22 @@ typedef struct
        showestimsize;
   unsigned int bucketsize;
   GtUword genome_length;
+  GtStrArray *nstats;
 } SeqstatArguments;
 
 static void* gt_seqstat_arguments_new(void)
 {
-  return gt_calloc((size_t) 1, sizeof (SeqstatArguments));
+  SeqstatArguments *arguments =  gt_calloc((size_t) 1,
+                                           sizeof (SeqstatArguments));
+  arguments->nstats = gt_str_array_new();
+  return arguments;
 }
 
 static void gt_seqstat_arguments_delete(void *tool_arguments)
 {
   SeqstatArguments *arguments = tool_arguments;
   if (!arguments) return;
+  gt_str_array_delete(arguments->nstats);
   gt_free(arguments);
 }
 
@@ -75,7 +83,7 @@ static GtOptionParser* gt_seqstat_option_parser_new(void *tool_arguments)
   GtOptionParser *op;
   GtOption *optionverbose, *optiondistlen, *optionbucketsize,
            *optioncontigs, *optionastretch, *optionestimsize,
-           *optionbinarydistlen, *optiongenome;
+           *optionbinarydistlen, *optiongenome, *optionnstats;
 
   gt_assert(arguments);
 
@@ -111,6 +119,13 @@ static GtOptionParser* gt_seqstat_option_parser_new(void *tool_arguments)
                                    "summary of contigs set statistics",
                                    &arguments->docstats,true);
   gt_option_parser_add_option(op, optioncontigs);
+
+  optionnstats = gt_option_new_string_array("nstats",
+                                   "list of N-values to calculate statistics "
+                                   "for, terminated by '--'; if none given, "
+                                   "N50 and N80 will be calculated",
+                                   arguments->nstats);
+  gt_option_parser_add_option(op, optionnstats);
 
   optionastretch = gt_option_new_bool("astretch",
                                    "show distribution of A-substrings",
@@ -395,8 +410,28 @@ static int gt_seqstat_runner(int argc, const char **argv, int parsed_args,
   }
   if (!had_err && arguments->docstats)
   {
+    GtUword i;
     asc_logger = gt_logger_new(true, GT_LOGGER_DEFLT_PREFIX, stdout);
-    gt_assembly_stats_calculator_show(asc, asc_logger);
+    if (gt_str_array_size(arguments->nstats) == 0) {
+      had_err = gt_assembly_stats_calculator_register_nstat(asc, 50, err);
+      gt_assert(!had_err); /* 50 and 80 are sane */
+      had_err = gt_assembly_stats_calculator_register_nstat(asc, 80, err);
+      gt_assert(!had_err); /* 50 and 80 are sane */
+    }
+    for (i = 0; !had_err && i < gt_str_array_size(arguments->nstats); i++) {
+      GtUword val = GT_UNDEF_UWORD;
+      if (gt_parse_uword(&val, gt_str_array_get(arguments->nstats, i)) != 0) {
+        gt_error_set(err, "could not parse nstat value '%s'",
+                     gt_str_array_get(arguments->nstats, i));
+        had_err = -1;
+        break;
+      }
+      gt_assert(val != GT_UNDEF_UWORD);
+      had_err = gt_assembly_stats_calculator_register_nstat(asc, val, err);
+      if (had_err) break;
+    }
+    if (!had_err)
+      gt_assembly_stats_calculator_show(asc, asc_logger);
     gt_logger_delete(asc_logger);
   }
   if (asc != NULL)
