@@ -206,7 +206,8 @@ int gt_assembly_stats_calculator_register_nstat(GtAssemblyStatsCalculator *asc,
   return 0;
 }
 
-int gt_assembly_stats_calculator_cmp_nstat(const void *v1, const void *v2) {
+static int gt_assembly_stats_calculator_cmp_nstat(const void *v1,
+                                                  const void *v2) {
   GtUword u1 = *(GtUword*) v1;
   GtUword u2 = *(GtUword*) v2;
   if (u1 < u2)
