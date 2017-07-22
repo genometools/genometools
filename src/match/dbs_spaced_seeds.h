@@ -19,6 +19,8 @@
 #define DBS_SPACED_SEEDS_H
 #include "core/codetype.h"
 
+#define GT_SPACED_SEED_FIRST_SPAN 15
+
 int gt_spaced_seed_span(GtCodetype spaced_seed);
 
 int gt_spaced_seed_weight(GtCodetype spaced_seed);

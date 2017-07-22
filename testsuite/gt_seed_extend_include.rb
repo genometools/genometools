@@ -238,6 +238,27 @@ Test do
   run_test "#{$bin}gt seed_extend -ii at1MB -outfmt gfa2 identity dtrace", :retval => 1
   run_test "#{$bin}gt seed_extend -ii at1MB -outfmt cigar"
   run_test "#{$bin}gt dev show_seedext -f #{last_stdout} -outfmt cigarX",:retval => 1
+  run_test "#{$bin}gt seed_extend -spacedseed 16 -seedlength 30 -ii at1MB", :retval => 1
+  grep last_stderr, /illegal weight 16: for spaced seeds of span 30 the weight must be in the range from 18 to 28/
+  run_test build_encseq("sw100K1", "#{$testdata}sw100K1.fsa")
+  run_test "#{$bin}gt seed_extend -spacedseed 7 -seedlength 10 -ii sw100K1", :retval => 1
+  grep last_stderr, /spaced seeds only work for sequences over an alphabet of size 4/
+  run_test "#{$bin}gt seed_extend -spacedseed -seedlength 14 -ii at1MB", :retval => 1
+  grep last_stderr, /illegal seedlength 14: for this set of sequences can only handle spaced seeds of span between 15 and 30/
+  run_test "#{$bin}gt seed_extend -spacedseed 13 -seedlength 28 -ii at1MB", :retval => 1
+  grep last_stderr, /illegal weight 13: for spaced seeds of span 28 the weight must be in the range from 14 to 27/
+end
+
+Name "gt seedext spaced seeds"
+Keywords "gt_seed_extend gt_seed_extend_spaced_seeds"
+Test do
+  run_test build_encseq("at1MB", "#{$testdata}at1MB")
+  run_test build_encseq("U89959_genomic", "#{$testdata}U89959_genomic.fas")
+  [" "," -qii U89959_genomic "].each do |qidx|
+    run_test "#{$bin}gt seed_extend -spacedseed 22 -seedlength 30 -ii at1MB#{qidx}"
+    run_test "#{$bin}gt seed_extend -spacedseed -seedlength 30 -ii at1MB#{qidx}"
+    run_test "#{$bin}gt seed_extend -spacedseed -ii at1MB#{qidx}"
+  end
 end
 
 Name "gt dev show_seedext without alignment"

@@ -253,8 +253,6 @@ static int gt_spaced_seed_first_weight_tab[] = {
   7, 8, 8, 9, 9, 10, 10, 11, 11, 12, 12, 13, 13, 14, 17, 18, 18, 22
 };
 
-#define GT_SPACED_SEED_FIRST_SPAN 15
-
 void gt_spaced_seed_weight_range(int *min_weight,int *max_weight, int span)
 {
   const int size_table = sizeof gt_spaced_seed_spec_tab/
