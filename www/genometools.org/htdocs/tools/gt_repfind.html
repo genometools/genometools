@@ -127,19 +127,93 @@ as integer in the range from 70 to 99 (for xdrop and greedy extension) (default:
 </p>
 </dd>
 <dt class="hdlist1">
-<strong>-a</strong> [<em>value</em>]
-</dt>
-<dd>
-<p>
-show alignments/sequences for exact matches (optional argument is number of columns per line) (default: 70)
-</p>
-</dd>
-<dt class="hdlist1">
 <strong>-ii</strong> [<em>string</em>]
 </dt>
 <dd>
 <p>
 Specify input index (default: undefined)
+</p>
+</dd>
+<dt class="hdlist1">
+<strong>-outfmt</strong> 
+</dt>
+<dd>
+<p>
+specify what information about the matches to display
+alignment:        show alignment (possibly followed by
+                  =&lt;number&gt; to specify width of alignment
+                  columns, default is )
+seed_in_algn:     mark the seed in alignment
+polinfo:          add polishing information for shown
+                  alignment
+seed:             abbreviation for seed.len seed.s seed.q
+failed_seed:      show the coordinates of a seed extension,
+                  which does not satisfy the filter conditions
+fstperquery:      output only the first found match per query
+tabsep:           separate columns by tabulator, instead of
+                  space as default
+blast:            output matches in blast format 7 (tabular with
+                  comment lines; instead of gap opens, indels are
+                  displayed)
+gfa2:             output matches in gfa2 format
+custom:           output matches in custom format, i.e. no
+                  columns are pre-defined; all columns have to be
+                  specified by the user
+cigar:            display cigar string representing alignment
+                  (no distinction between match and mismatch)
+cigarX:           display cigar string representing alignment
+                  (distinction between match (=) and mismatch
+                  (X))
+trace:            display trace, i.e. a compact representation
+                  of an alignment (possibly followed by =&lt;delta&gt;)
+                  to specify the delta-value; default value of
+                  delta is 50
+dtrace:           display trace as differences; like trace, but
+                  instead of an absolute value x, report the
+                  difference delta-x. This leads to smaller
+                  numbers and thus a more compact representation
+s.len:            display length of match on subject sequence
+s.seqnum:         display sequence number of subject sequence
+subject id:       display sequence description of subject
+                  sequence
+s.start:          display start position of match on subject
+                  sequence
+s.end:            display end position of match on subject
+                  sequence
+strand:           display strand of match using symbols F
+                  (forward) and P (reverse complement)
+q.len:            display length of match on query sequence
+q.seqnum:         display sequence number of query sequence
+query id:         display sequence description of query
+                  sequence
+q.start:          display start position of match on query
+                  sequence
+q.end:            display end position of match on query
+                  sequence
+alignment length: display length of alignment
+mismatches:       display number of mismatches in alignment
+indels:           display number of indels in alignment
+gap opens:        display number of indels in alignment
+score:            display score of match
+editdist:         display unit edit distance
+identity:         display percent identity of match
+seed.len:         display length seed of the match
+seed.s:           display start position of seed in subject
+seed.q:           display start position of seed in query
+s.seqlen:         display length of subject sequence in which
+                  match occurs
+q.seqlen:         display length of query sequence in which
+                  match occurs
+evalue:           display evalue
+bit score:        display bit score
+</p>
+</dd>
+<dt class="hdlist1">
+<strong>-evalue</strong> [<em>value</em>]
+</dt>
+<dd>
+<p>
+switch on evalue filtering of matches (optional argument specifies evalue threshold) (default: 10.000000)
 </p>
 </dd>
 <dt class="hdlist1">
