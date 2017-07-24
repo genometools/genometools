@@ -20,6 +20,7 @@
 #include "core/compat.h"
 #include "core/fileutils.h"
 #include "core/gtdatapath.h"
+#include "core/log_api.h"
 
 #ifndef _WIN32
 #define GTDATADIR "/gtdata"
@@ -35,10 +36,14 @@ static const char* GTDATA_DEFAULT_PATHS[]
       "/usr/local/share/genometools" GTDATADIR,
       NULL };
 
+static const char* GTDATA_RELATIVE_SEARCH_PATHS[]
+  = { UPDIR "/share/genometools" GTDATADIR,
+      NULL };
+
 GtStr* gt_get_gtdata_path(const char *prog, GtError *err)
 {
   GtStr *path;
-  const char **defaultpath;
+  const char **defaultpath, **spath;
   int had_err = 0;
   gt_error_check(err);
   gt_assert(prog);
@@ -54,6 +59,14 @@ GtStr* gt_get_gtdata_path(const char *prog, GtError *err)
       gt_str_append_cstr(path, GTDATADIR);
       if (gt_file_exists_and_is_dir(gt_str_get(path)))
         return path;
+    }
+    for (spath = GTDATA_RELATIVE_SEARCH_PATHS; *spath; spath++) {
+      had_err = gt_file_find_exec_in_path(path, prog, err);
+      if (!had_err) {
+        gt_str_append_cstr(path, *spath);
+        if (gt_file_exists_and_is_dir(gt_str_get(path)))
+          return path;
+      }
     }
     for (defaultpath = GTDATA_DEFAULT_PATHS; *defaultpath; defaultpath++) {
       gt_str_reset(path);

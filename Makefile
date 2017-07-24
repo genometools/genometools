@@ -975,7 +975,8 @@ else
 	cp bin/gt $(prefix)/bin
 	$(STRIP) $(prefix)/bin/gt
 endif
-	cp -r gtdata $(prefix)/bin
+	mkdir -p $(prefix)/share/genometools
+	cp -a gtdata $(prefix)/share/genometools/
 	test -d $(prefix)/include/genometools/core \
 	  || mkdir -p $(prefix)/include/genometools/core
 	cp src/core/*_api.h $(prefix)/include/genometools/core
