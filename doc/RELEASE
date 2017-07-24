@@ -40,7 +40,3 @@ Steps for preparing a new GenomeTools release
    Increase version number in VERSION file. Also, create a new CHANGELOG
    entry with the new version number and commit the change with the
    message 'version bump'.
-
-6. write email to gt-users mailing list (gt-users@genometools.org)
-
-   There is a template in the doc/ subdirectory.
