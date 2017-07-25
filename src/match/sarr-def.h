@@ -45,19 +45,19 @@
                      SARR_DESTAB |\
                      SARR_SSPTAB)
 
-DECLAREBufferedfiletype(GtUword);
-DECLAREREADFUNCTION(GtUword);
+GT_DECLAREBufferedfiletype(GtUword);
+GT_DECLAREREADFUNCTION(GtUword);
 
 #if defined (_LP64) || defined (_WIN64)
-DECLAREBufferedfiletype(uint32_t);
-DECLAREREADFUNCTION(uint32_t);
+GT_DECLAREBufferedfiletype(uint32_t);
+GT_DECLAREREADFUNCTION(uint32_t);
 #endif
 
-DECLAREBufferedfiletype(GtUchar);
-DECLAREREADFUNCTION(GtUchar);
+GT_DECLAREBufferedfiletype(GtUchar);
+GT_DECLAREREADFUNCTION(GtUchar);
 
-DECLAREBufferedfiletype(Largelcpvalue);
-DECLAREREADFUNCTION(Largelcpvalue);
+GT_DECLAREBufferedfiletype(Largelcpvalue);
+GT_DECLAREREADFUNCTION(Largelcpvalue);
 
 typedef GtUword ESASuffixptr;
 

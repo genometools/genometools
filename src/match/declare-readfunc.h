@@ -22,9 +22,9 @@
 #include <stdio.h>
 #include "core/unused_api.h"
 
-#define FILEBUFFERSIZE 4096
+#define GT_FILEBUFFERSIZE 4096
 
-#define DECLAREBufferedfiletype(TYPE)\
+#define GT_DECLAREBufferedfiletype(TYPE)\
         typedef struct\
         {\
           unsigned int nextfree,\
@@ -33,7 +33,7 @@
           FILE *fp;\
         } GtBufferedfile_ ## TYPE
 
-#define DECLAREREADFUNCTION(TYPE)\
+#define GT_DECLAREREADFUNCTION(TYPE)\
         GT_UNUSED static int gt_readnextfromstream_ ## TYPE (TYPE *val,\
                                                   GtBufferedfile_ ## TYPE *buf)\
         {\
@@ -41,7 +41,7 @@
           {\
             buf->nextfree = (unsigned int) fread(buf->bufferedfilespace,\
                                                  sizeof (TYPE),\
-                                                 (size_t) FILEBUFFERSIZE,\
+                                                 (size_t) GT_FILEBUFFERSIZE,\
                                                  buf->fp);\
             if (ferror(buf->fp))\
             {\

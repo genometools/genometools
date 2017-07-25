@@ -48,7 +48,7 @@
           (STREAM)->nextfree = 0;\
           (STREAM)->bufferedfilespace\
             = gt_malloc(sizeof *((STREAM)->bufferedfilespace)\
-                        * (FILEBUFFERSIZE));\
+                        * (GT_FILEBUFFERSIZE));\
         }
 
 static int scanprjfileuintkeysviafileptr(Suffixarray *suffixarray,
