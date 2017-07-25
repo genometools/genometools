@@ -18,6 +18,6 @@
 #ifndef MAIL_ADDRESS_H
 #define MAIL_ADDRESS_H
 
-#define GT_MAIL_ADDRESS "<gt-users@genometools.org>"
+#define GT_MAIL_ADDRESS "https://github.com/genometools/genometools/issues"
 
 #endif
