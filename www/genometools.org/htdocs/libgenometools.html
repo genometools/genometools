@@ -11,7 +11,6 @@
 <li><a href="index.html">Overview</a></li>
 <li><a href="pub/">Download</a></li>
 <li><a href="https://github.com/genometools/genometools">Browse source</a></li>
-<li><a href="mailman/listinfo/gt-users">Mailing list</a></li>
 <li><a href="http://github.com/genometools/genometools/issues/">Issue tracker</a></li>
 <li><a href="documentation.html">Documentation</a></li>
   <ul class="submenu">
@@ -371,15 +370,6 @@ Duplicate internal feature nodes of type <code>source_type</code> as features wi
    <code>dest_type</code>. The duplicated features does not inherit the children.
 </p>
 <hr>
-<a name="GtTrackSelectorFunc"></a>
-
-<code>void  GtTrackSelectorFunc(GtBlock*, GtStr*, void*)</code>
-<p>
-A <code>GtTrackSelectorFunc</code> is a callback function which sets a <code>GtStr</code> to a
-   string to be used as a track identifier for assignment of a <code>GtBlock</code>
-   to a given track.
-</p>
-<hr>
 <a name="GtTrackOrderingFunc"></a>
 
 <code>int  GtTrackOrderingFunc(const char *s1, const char *s2, void *data)</code>
@@ -389,6 +379,15 @@ A function describing the order of tracks based on their track identifier
    should appear before the track with ID <code>s2</code> and a positive value if <code>s1</code>
    should appear after <code>s2</code>. Returning a value of 0 will result in an undefined
    ordering of <code>s1</code> and <code>s2</code>.
+</p>
+<hr>
+<a name="GtTrackSelectorFunc"></a>
+
+<code>void  GtTrackSelectorFunc(GtBlock*, GtStr*, void*)</code>
+<p>
+A <code>GtTrackSelectorFunc</code> is a callback function which sets a <code>GtStr</code> to a
+   string to be used as a track identifier for assignment of a <code>GtBlock</code>
+   to a given track.
 </p>
 <hr>
 <a name="GtAddIntronsStream"></a>
@@ -5488,6 +5487,30 @@ Creates a new <code>GtMatch</code> object meant to store results in the BLAST
    and <code>end_seq2</code>.
 </p>
 <hr>
+<a name="gt_match_blast_new_extended"></a>
+
+<code>GtMatch*  gt_match_blast_new_extended(char *seqid1,
+                                     char *seqid2,
+                                     GtUword start_seq1,
+                                     GtUword end_seq1,
+                                     GtUword start_seq2,
+                                     GtUword end_seq2,
+                                     double evalue,
+                                     float bitscore,
+                                     GtUword length,
+                                     double similarity,
+                                     GtUword mm_num,
+                                     GtUword gap_open_num,
+                                     GtMatchDirection dir)</code>
+<p>
+Creates a new <code>GtMatch</code> object meant to store results in the BLAST
+   format. That is, it stores double values <code>evalue</code> for match E-values,
+   <code>bitscore</code>s and the alignment length <code>ali_l</code> in addition to the generic
+   match contents <code>seqid1</code>, <code>seqid2</code>, <code>start_seq1</code>, <code>start_seq2</code>, <code>end_seq1</code>,
+   and <code>end_seq2</code>. In addition to <code>gt_match_blast_new</code> it also stores
+   the number of mismatches and the number of gap
+</p>
+<hr>
 <a name="gt_match_blast_set_evalue"></a>
 
 <code>void  gt_match_blast_set_evalue(GtMatchBlast *mb, double evalue)</code>
@@ -5516,6 +5539,20 @@ Sets <code>length</code> to be the alignment length in <code>mb</code>.
 Sets <code>similarity</code> to be the match similarity in <code>mb</code>.
 </p>
 <hr>
+<a name="gt_match_blast_set_mismatches"></a>
+
+<code>void  gt_match_blast_set_mismatches(GtMatchBlast *mb, GtUword mm_num)</code>
+<p>
+Sets <code>num to be the number of mismatches in <mb</code>.
+</p>
+<hr>
+<a name="gt_match_blast_set_gapopen"></a>
+
+<code>void  gt_match_blast_set_gapopen(GtMatchBlast *mb, GtUword gap_open_num)</code>
+<p>
+Sets <code>num</code> to be the number of gap openings in <code>mb</code>.
+</p>
+<hr>
 <a name="gt_match_blast_get_evalue"></a>
 
 <code>double  gt_match_blast_get_evalue(GtMatchBlast *mb)</code>
@@ -5542,6 +5579,20 @@ Returns the alignment length stored in <code>mb</code>.
 <code>double  gt_match_blast_get_similarity(GtMatchBlast *mb)</code>
 <p>
 Returns the alignment similarity stored in <code>mb</code>.
+</p>
+<hr>
+<a name="gt_match_blast_get_mismatches"></a>
+
+<code>GtUword  gt_match_blast_get_mismatches(GtMatchBlast *mb)</code>
+<p>
+Returns the number of mismatches stored in <code>mb</code>.
+</p>
+<hr>
+<a name="gt_match_blast_get_gapopen"></a>
+
+<code>GtUword  gt_match_blast_get_gapopen(GtMatchBlast *mb)</code>
+<p>
+Returns the number of gap openings stored in <code>mb</code>.
 </p>
 <hr>
 <a name="GtMatchIterator"></a>
@@ -8500,6 +8551,14 @@ Output the current state of <code>timer</code> in a user-defined format given by
    time in seconds. The output is written to <code>fp</code>. The timer is then stopped.
 </p>
 <hr>
+<a name="gt_timer_elapsed_usec"></a>
+
+<code>GtWord  gt_timer_elapsed_usec(GtTimer *t)</code>
+<p>
+return usec of time from start to stop of giben timer. The timer is then
+   stopped.
+</p>
+<hr>
 <a name="gt_timer_get_formatted"></a>
 
 <code>void      gt_timer_get_formatted(GtTimer *t, const char *fmt, GtStr *str)</code>
@@ -11295,15 +11354,25 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
 
   <a href="#gt_match_blast_get_evalue"><code>gt_match_blast_get_evalue</code></a><br>
 
+  <a href="#gt_match_blast_get_gapopen"><code>gt_match_blast_get_gapopen</code></a><br>
+
+  <a href="#gt_match_blast_get_mismatches"><code>gt_match_blast_get_mismatches</code></a><br>
+
   <a href="#gt_match_blast_get_similarity"><code>gt_match_blast_get_similarity</code></a><br>
 
   <a href="#gt_match_blast_new"><code>gt_match_blast_new</code></a><br>
+
+  <a href="#gt_match_blast_new_extended"><code>gt_match_blast_new_extended</code></a><br>
 
   <a href="#gt_match_blast_set_align_length"><code>gt_match_blast_set_align_length</code></a><br>
 
   <a href="#gt_match_blast_set_bitscore"><code>gt_match_blast_set_bitscore</code></a><br>
 
   <a href="#gt_match_blast_set_evalue"><code>gt_match_blast_set_evalue</code></a><br>
+
+  <a href="#gt_match_blast_set_gapopen"><code>gt_match_blast_set_gapopen</code></a><br>
+
+  <a href="#gt_match_blast_set_mismatches"><code>gt_match_blast_set_mismatches</code></a><br>
 
   <a href="#gt_match_blast_set_similarity"><code>gt_match_blast_set_similarity</code></a><br>
 
@@ -11915,6 +11984,8 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
 
   <a href="#gt_timer_delete"><code>gt_timer_delete</code></a><br>
 
+  <a href="#gt_timer_elapsed_usec"><code>gt_timer_elapsed_usec</code></a><br>
+
   <a href="#gt_timer_get_formatted"><code>gt_timer_get_formatted</code></a><br>
 
   <a href="#gt_timer_new"><code>gt_timer_new</code></a><br>
@@ -12076,7 +12147,7 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
 <div id="footer">
 Copyright &copy; 2008-2016
 The <i>GenomeTools</i> authors.
-Last update: 2016-07-21
+Last update: 2017-07-24
 </div>
 </div>
 <!-- Piwik -->

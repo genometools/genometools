@@ -12,7 +12,6 @@
 <li><a href="../index.html">Overview</a></li>
 <li><a href="../pub/">Download</a></li>
 <li><a href="https://github.com/genometools/genometools">Browse source</a></li>
-<li><a href="../mailman/listinfo/gt-users">Mailing list</a></li>
 <li><a href="http://github.com/genometools/genometools/issues/">Issue tracker</a></li>
 <li><a href="../documentation.html">Documentation</a></li>
   <ul class="submenu">
@@ -67,7 +66,15 @@ Query input index (encseq)
 <dd>
 <p>
 Minimum length of a seed
-default: logarithm of input length to the basis alphabet size
+default: logarithm of input length with alphabet size as log-base
+</p>
+</dd>
+<dt class="hdlist1">
+<strong>-spacedseed</strong> [<em>yes|no</em>]
+</dt>
+<dd>
+<p>
+use spaced seed of length specified by option -seedlength (default: no)
 </p>
 </dd>
 <dt class="hdlist1">
@@ -75,7 +82,8 @@ default: logarithm of input length to the basis alphabet size
 </dt>
 <dd>
 <p>
-Logarithm of diagonal band width (for filter) (default: 6)
+Logarithm of diagonal band width in the range
+from 0 to 10 (for filter) (default: 6)
 </p>
 </dd>
 <dt class="hdlist1">
@@ -85,6 +93,15 @@ Logarithm of diagonal band width (for filter) (default: 6)
 <p>
 Minimum coverage in two neighbouring diagonal bands (for filter)
 default: 2.5 x seedlength
+</p>
+</dd>
+<dt class="hdlist1">
+<strong>-diagband-stat</strong> [<em>&#8230;</em>]
+</dt>
+<dd>
+<p>
+Compute statistics from diagonal band scores; parameter specifies kind of statistics, possible choices are
+sum (default: sum)
 </p>
 </dd>
 <dt class="hdlist1">
@@ -108,7 +125,8 @@ Maximum memory usage to determine the maximum frequency of a k-mer (for filter) 
 </dt>
 <dd>
 <p>
-Extend seed to both sides using xdrop algorithm, /noptional parameter specifies sensitivity (default: 97)
+Extend seed to both sides using xdrop algorithm,
+optional parameter specifies sensitivity (default: 97)
 </p>
 </dd>
 <dt class="hdlist1">
@@ -129,11 +147,19 @@ optional parameter specifies sensitivity (default: 97)
 </p>
 </dd>
 <dt class="hdlist1">
+<strong>-maxmat</strong> [<em>value</em>]
+</dt>
+<dd>
+<p>
+compute maximal matches of minimum length specified by option -l (default: 1)
+</p>
+</dd>
+<dt class="hdlist1">
 <strong>-l</strong> [<em>value</em>]
 </dt>
 <dd>
 <p>
-Minimum alignment length (for seed extension) (default: undefined)
+Minimum length of aligned sequences  (default: undefined)
 </p>
 </dd>
 <dt class="hdlist1">
@@ -145,11 +171,93 @@ Minimum identity of matches (for seed extension) (default: 80)
 </p>
 </dd>
 <dt class="hdlist1">
-<strong>-a</strong> [<em>value</em>]
+<strong>-evalue</strong> [<em>value</em>]
 </dt>
 <dd>
 <p>
-show alignments/sequences (optional argument is number of columns per line) (default: 70)
+switch on evalue filtering of matches (optional argument specifies evalue threshold) (default: 10.000000)
+</p>
+</dd>
+<dt class="hdlist1">
+<strong>-outfmt</strong> 
+</dt>
+<dd>
+<p>
+specify what information about the matches to display
+alignment:        show alignment (possibly followed by
+                  =&lt;number&gt; to specify width of alignment
+                  columns, default is )
+seed_in_algn:     mark the seed in alignment
+polinfo:          add polishing information for shown
+                  alignment
+seed:             abbreviation for seed.len seed.s seed.q
+failed_seed:      show the coordinates of a seed extension,
+                  which does not satisfy the filter conditions
+fstperquery:      output only the first found match per query
+tabsep:           separate columns by tabulator, instead of
+                  space as default
+blast:            output matches in blast format 7 (tabular with
+                  comment lines; instead of gap opens, indels are
+                  displayed)
+gfa2:             output matches in gfa2 format
+custom:           output matches in custom format, i.e. no
+                  columns are pre-defined; all columns have to be
+                  specified by the user
+cigar:            display cigar string representing alignment
+                  (no distinction between match and mismatch)
+cigarX:           display cigar string representing alignment
+                  (distinction between match (=) and mismatch
+                  (X))
+trace:            display trace, i.e. a compact representation
+                  of an alignment (possibly followed by =&lt;delta&gt;)
+                  to specify the delta-value; default value of
+                  delta is 50
+dtrace:           display trace as differences; like trace, but
+                  instead of an absolute value x, report the
+                  difference delta-x. This leads to smaller
+                  numbers and thus a more compact representation
+s.len:            display length of match on subject sequence
+s.seqnum:         display sequence number of subject sequence
+subject id:       display sequence description of subject
+                  sequence
+s.start:          display start position of match on subject
+                  sequence
+s.end:            display end position of match on subject
+                  sequence
+strand:           display strand of match using symbols F
+                  (forward) and P (reverse complement)
+q.len:            display length of match on query sequence
+q.seqnum:         display sequence number of query sequence
+query id:         display sequence description of query
+                  sequence
+q.start:          display start position of match on query
+                  sequence
+q.end:            display end position of match on query
+                  sequence
+alignment length: display length of alignment
+mismatches:       display number of mismatches in alignment
+indels:           display number of indels in alignment
+gap opens:        display number of indels in alignment
+score:            display score of match
+editdist:         display unit edit distance
+identity:         display percent identity of match
+seed.len:         display length seed of the match
+seed.s:           display start position of seed in subject
+seed.q:           display start position of seed in query
+s.seqlen:         display length of subject sequence in which
+                  match occurs
+q.seqlen:         display length of query sequence in which
+                  match occurs
+evalue:           display evalue
+bit score:        display bit score
+</p>
+</dd>
+<dt class="hdlist1">
+<strong>-ani</strong> [<em>yes|no</em>]
+</dt>
+<dd>
+<p>
+output average nucleotide identity determined from the computed matches (which are not output) (default: no)
 </p>
 </dd>
 <dt class="hdlist1">
@@ -166,6 +274,14 @@ do not compute matches on reverse complemented strand (default: no)
 <dd>
 <p>
 do not compute matches on forward strand (default: no)
+</p>
+</dd>
+<dt class="hdlist1">
+<strong>-use-apos</strong> [<em>yes|no</em>]
+</dt>
+<dd>
+<p>
+Discard a seed only if both apos and bpos overlap with a previous successful alignment (default: no)
 </p>
 </dd>
 <dt class="hdlist1">
