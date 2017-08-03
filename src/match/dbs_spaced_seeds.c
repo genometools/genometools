@@ -15,6 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#include <inttypes.h>
 #include "core/ma_api.h"
 #include "core/assert_api.h"
 #include "core/codetype.h"
